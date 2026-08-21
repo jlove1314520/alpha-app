@@ -269,21 +269,7 @@
 
     <div class="card">
       <h3>大盤速覽</h3>
-      <div class="row" style="cursor:default">
-        <div class="nm"><b>加權指數</b><span>TWSE</span></div>
-        <svg class="spark" viewBox="0 0 64 26"><polyline points="0,20 8,18 16,19 24,14 32,15 40,10 48,11 56,7 64,5" fill="none" stroke="var(--up)" stroke-width="2"/></svg>
-        <div class="px"><b>28,412</b><span class="pos">+0.86%</span></div>
-      </div>
-      <div class="row" style="cursor:default">
-        <div class="nm"><b>台指期近月</b><span>TAIFEX · 價差 +12</span></div>
-        <svg class="spark" viewBox="0 0 64 26"><polyline points="0,18 8,19 16,15 24,16 32,12 40,13 48,9 56,10 64,6" fill="none" stroke="var(--up)" stroke-width="2"/></svg>
-        <div class="px"><b>28,424</b><span class="pos">+0.92%</span></div>
-      </div>
-      <div class="row" style="cursor:default">
-        <div class="nm"><b>NASDAQ</b><span>昨收</span></div>
-        <svg class="spark" viewBox="0 0 64 26"><polyline points="0,16 8,14 16,17 24,12 32,13 40,9 48,10 56,6 64,7" fill="none" stroke="var(--up)" stroke-width="2"/></svg>
-        <div class="px"><b>24,891</b><span class="pos">+1.34%</span></div>
-      </div>
+      <div id="home-idx-rows"><div class="note">載入中…</div></div>
     </div>
 
     <div class="card">
@@ -661,6 +647,7 @@
   let WL=(()=>{try{return JSON.parse(localStorage.getItem('alpha_wl'))||["2330","2454","2317","1513","3231"]}catch(e){return ["2330","2454","2317","1513","3231"]}})();
   let currentCode="2330";
   const _cache={};
+  const FM_TTL=3*60*1000; // localStorage 快取有效期：3 分鐘，過期後才重新打 FinMind
   const _d=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
   const nf=n=>n==null||isNaN(n)?'—':Number(n).toLocaleString();
   const zhang=n=>n==null||isNaN(n)?'—':(n>=0?'+':'−')+Math.round(Math.abs(n)/1000).toLocaleString();
@@ -668,8 +655,35 @@
   function setChip(id,v){const el=document.getElementById(id);if(!el)return;el.textContent=zhang(v)+' 張';el.className=v>=0?'pos':'neg'}
   const isUS=code=>/^[A-Za-z]/.test(code);
   const nameOf=code=>STOCKNAME[code]||STOCKNAME_US[code]||code;
-  async function fm(ds,id,start){const k=ds+id+start;if(_cache[k])return _cache[k];
-    try{const r=await fetch(`${FM}?dataset=${ds}&data_id=${id}&start_date=${start}`);const j=await r.json();const d=(j&&j.data)||[];_cache[k]=d;return d}catch(e){return []}}
+  function fmCacheRead(k){
+    if(_cache[k])return _cache[k];
+    try{
+      const raw=localStorage.getItem('fmc_'+k);if(!raw)return null;
+      const o=JSON.parse(raw);if(Date.now()-o.t>FM_TTL)return null;
+      _cache[k]=o.d;return o.d;
+    }catch(e){return null}
+  }
+  function fmCacheWrite(k,d){
+    _cache[k]=d;
+    try{localStorage.setItem('fmc_'+k,JSON.stringify({t:Date.now(),d}))}catch(e){} // 存滿了就算了，不影響功能
+  }
+  function fmCacheStale(k){ // 過期也沒關係，抓失敗時拿舊資料墊著，總比顯示「查無資料」誤導人好
+    try{const raw=localStorage.getItem('fmc_'+k);return raw?JSON.parse(raw).d:null}catch(e){return null}
+  }
+  async function fm(ds,id,start){
+    const k=ds+id+start;
+    const cached=fmCacheRead(k);if(cached)return cached;
+    try{
+      const r=await fetch(`${FM}?dataset=${ds}&data_id=${id}&start_date=${start}`);
+      const j=await r.json();
+      const d=(j&&Array.isArray(j.data))?j.data:[];
+      fmCacheWrite(k,d);
+      return d;
+    }catch(e){
+      console.warn('[Alpha] FinMind 抓取失敗，改用舊快取：',ds,id,e);
+      return fmCacheStale(k)||[];
+    }
+  }
   function spark(cl){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
     return `<svg class="spark" viewBox="0 0 64 26"><polyline points="${pts}" fill="none" stroke="var(--${cl[cl.length-1]>=cl[0]?'up':'down'})" stroke-width="2"/></svg>`}
@@ -677,6 +691,7 @@
   async function hydrateHome(){
     const el=document.getElementById('wl-list');if(!el)return;
     loadStockInfo();
+    loadHomeIndex();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
     for(const code of WL){
@@ -704,17 +719,38 @@
   }
 
   // ══════ 市場頁（大盤指數 / 類股 / 三大法人 / 期貨籌碼）══════
-  async function idxRow(id,label,srcLabel){
-    const px=await fm('TaiwanStockPrice',id,_d(16));
+  async function idxRow(id,label,srcLabel,ds='TaiwanStockPrice'){
+    const px=await fm(ds,id,_d(16));
     if(!px.length)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
-    const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
-    const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close))}<div class="px"><b>${nf(last.close)}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
+    const us=ds==='USStockPrice';const c=x=>us?x.Close:x.close;
+    const last=px[px.length-1];const prev=px.length>1?c(px[px.length-2]):(us?last.Close:last.close-last.spread);
+    const chg=us?last.Close-prev:(last.spread!=null?last.spread:last.close-prev);
+    const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
+    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(c))}<div class="px"><b>${nf(c(last))}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
   }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
     const [taiex,tpex]=await Promise.all([idxRow('TAIEX','加權指數','TWSE'),idxRow('TPEx','櫃買指數','TPEx')]);
     el.innerHTML=taiex+tpex;
+  }
+  async function futNearRow(){
+    const raw=await fm('TaiwanFuturesDaily','TX',_d(10));
+    const fallback=`<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
+    if(!raw.length)return fallback;
+    const lastDate=raw.map(r=>r.date).sort().slice(-1)[0];
+    const todays=raw.filter(r=>r.date===lastDate&&r.trading_session==='position'&&/^\d{6}$/.test(r.contract_date));
+    if(!todays.length)return fallback;
+    todays.sort((a,b)=>a.contract_date.localeCompare(b.contract_date));
+    const near=todays[0];const cls=near.spread>=0?'pos':'neg';
+    return `<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX · ${near.contract_date.slice(2)} 合約 · ${near.date}</span></div><div class="px"><b>${nf(near.close)}</b><span class="${cls}">${near.spread>=0?'+':''}${(near.spread_per||0).toFixed(2)}%</span></div></div>`;
+  }
+  async function loadHomeIndex(){
+    const el=document.getElementById('home-idx-rows');if(!el)return;
+    const [taiex,fut,nasdaq]=await Promise.all([
+      idxRow('TAIEX','加權指數','TWSE'),futNearRow(),
+      idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice'),
+    ]);
+    el.innerHTML=taiex+fut+nasdaq;
   }
 
   const HEAT_CATS=[
