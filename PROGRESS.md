@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-08-22 00:41 — 修好 git push 卡住的問題（改用 PAT）
+
+**改了什麼：**
+本機執行 `git push` 時會用 Git Credential Manager 的瀏覽器 OAuth 登入，但該登入視窗會開在 Bash 工具背後的隱藏主控台，使用者完全看不到、指令永遠卡住逾時。改用 GitHub Fine-grained Personal Access Token（範圍限定 `jlove1314520/alpha-app`，Contents 權限 Read/write），透過 `git credential approve` 直接存進 Windows 的 Git Credential Manager，跳過互動登入流程。
+
+**為什麼：**
+之前的 PROGRESS.md 初版 commit 因為這個問題卡住 push 超過 2 分鐘，逾時失敗。改用 PAT 後 push 立即成功、無需任何互動。
+
+**影響到哪些檔案：**
+無程式碼變動，只有這台機器本機的 Git 憑證設定（Windows Credential Manager，host=github.com）。之後這台機器上任何 github.com 的 repo push 都會直接用這組憑證，不會再跳窗。
+
+**下一步：**
+無（此問題已解決）。若之後 PAT 過期或被撤銷、push 又開始卡住，直接跟使用者要新的 PAT，重複 `git credential approve` 設定，不要再嘗試瀏覽器登入流程。
+
+**卡住的問題：**
+無。
+
+---
+
 ## 2026-08-22 00:33 — 交接、建立開發環境、寫專案說明文件
 
 **改了什麼：**
