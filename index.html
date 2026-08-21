@@ -402,26 +402,18 @@
     <div class="subscreen" id="sub-fin">
       <div class="card">
         <h3>季度獲利（EPS · 元）</h3>
-        <div class="bars">
-          <div class="b"><span class="v">12.6</span><i style="height:48%"></i><em>24Q4</em></div>
-          <div class="b"><span class="v">13.9</span><i style="height:54%"></i><em>25Q1</em></div>
-          <div class="b"><span class="v">15.4</span><i style="height:60%"></i><em>25Q2</em></div>
-          <div class="b"><span class="v">17.4</span><i style="height:68%"></i><em>25Q3</em></div>
-          <div class="b"><span class="v">18.9</span><i style="height:74%"></i><em>25Q4</em></div>
-          <div class="b"><span class="v">19.6</span><i style="height:77%"></i><em>26Q1</em></div>
-          <div class="b"><span class="v">20.8</span><i style="height:82%"></i><em>26Q2</em></div>
-        </div>
+        <div class="bars" id="eps-bars"><div class="note">載入中…</div></div>
         <div class="baseline"></div>
       </div>
       <div class="card">
         <h3>利潤率</h3>
         <div class="facts">
-          <div class="f"><span>毛利率</span><b>58.9%</b></div>
-          <div class="f"><span>營益率</span><b>48.1%</b></div>
-          <div class="f"><span>ROE（近四季）</span><b>31.4%</b></div>
-          <div class="f"><span>自由現金流</span><b class="pos">+ NT$ 412B</b></div>
+          <div class="f"><span>毛利率</span><b id="fin-gross">—</b></div>
+          <div class="f"><span>營益率</span><b id="fin-op">—</b></div>
+          <div class="f"><span>ROE（近四季）</span><b id="fin-roe">—</b></div>
+          <div class="f"><span>自由現金流（最新季）</span><b id="fin-fcf">—</b></div>
         </div>
-        <div class="note">來源：MOPS XBRL 財報解析 · 26Q2</div>
+        <div class="note" id="fin-note">來源：FinMind 財報 XBRL 解析</div>
       </div>
     </div>
 
@@ -882,6 +874,52 @@
     return{date:last,foreign:f,trust:t,dealer:d,total:f+t+d,series};
   }
 
+  function pivotByDate(raw){
+    const byDate={};
+    raw.forEach(r=>{(byDate[r.date]=byDate[r.date]||{})[r.type]=r.value});
+    return Object.keys(byDate).sort().map(d=>({date:d,...byDate[d]}));
+  }
+  function fyq(dateStr){ // "2026-06-30" -> "26Q2"
+    const [y,m]=dateStr.split('-');const q=Math.ceil(Number(m)/3);
+    return y.slice(2)+'Q'+q;
+  }
+  async function loadFinancials(code){
+    const [finRaw,bsRaw,cfRaw]=await Promise.all([
+      fm('TaiwanStockFinancialStatements',code,_d(760)),
+      fm('TaiwanStockBalanceSheet',code,_d(760)),
+      fm('TaiwanStockCashFlowsStatement',code,_d(760)),
+    ]);
+    if(currentCode!==code)return; // 使用者已切到別檔股票，這份資料作廢
+    const fin=pivotByDate(finRaw),bs=pivotByDate(bsRaw),cf=pivotByDate(cfRaw);
+    const epsQ=fin.filter(q=>q.EPS!=null).slice(-8);
+    if(epsQ.length){
+      const vals=epsQ.map(q=>q.EPS);const mx=Math.max(...vals.map(Math.abs))||1;
+      document.getElementById('eps-bars').innerHTML=epsQ.map((q,i)=>{const isl=i===epsQ.length-1;
+        return `<div class="b"><span class="v">${q.EPS.toFixed(1)}</span><i style="height:${Math.max(8,Math.abs(q.EPS)/mx*100).toFixed(0)}%${isl?';background:var(--accent-deep);outline:2px solid var(--accent);outline-offset:-2px':''}"></i><em>${fyq(q.date)}</em></div>`}).join('');
+    }else{document.getElementById('eps-bars').innerHTML='<div class="note">查無財報 EPS</div>'}
+    const last=fin.length?fin[fin.length-1]:null;
+    if(last&&last.Revenue){
+      const gm=last.GrossProfit!=null?last.GrossProfit/last.Revenue*100:null;
+      const om=last.OperatingIncome!=null?last.OperatingIncome/last.Revenue*100:null;
+      setTxt('fin-gross',gm!=null?gm.toFixed(1)+'%':'—');
+      setTxt('fin-op',om!=null?om.toFixed(1)+'%':'—');
+    }else{setTxt('fin-gross','—');setTxt('fin-op','—')}
+    const last4=fin.filter(q=>q.EquityAttributableToOwnersOfParent!=null).slice(-4);
+    const lastBS=bs.length?bs[bs.length-1]:null;
+    if(last4.length===4&&lastBS&&lastBS.EquityAttributableToOwnersOfParent){
+      const ttmNI=last4.reduce((s,q)=>s+q.EquityAttributableToOwnersOfParent,0);
+      const roe=ttmNI/lastBS.EquityAttributableToOwnersOfParent*100;
+      const re=document.getElementById('fin-roe');re.textContent=(roe>=0?'+':'')+roe.toFixed(1)+'%';re.className=roe>=0?'pos':'neg';
+    }else{setTxt('fin-roe','—')}
+    const lastCF=cf.length?cf[cf.length-1]:null;
+    if(lastCF&&lastCF.CashFlowsFromOperatingActivities!=null){
+      const capex=lastCF.PropertyAndPlantAndEquipment||0; // 已是負值（現金流出）
+      const fcf=lastCF.CashFlowsFromOperatingActivities+capex;
+      const fe=document.getElementById('fin-fcf');fe.textContent=(fcf>=0?'+ ':'− ')+'NT$ '+nf(Math.round(Math.abs(fcf)/1e8))+' 億';fe.className=fcf>=0?'pos':'neg';
+    }else{setTxt('fin-fcf','—')}
+    if(last)setTxt('fin-note',`來源：FinMind 財報 XBRL 解析 · ${fyq(last.date)}（注意：僅為期末日資料，非公告日，可能早於實際公告時間）`);
+  }
+
   async function openStock(code){
     if(typeof code!=='string')code=currentCode;
     currentCode=code;
@@ -906,11 +944,16 @@
       ['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
       setTxt('chip-note','美股暫無三大法人資料（僅適用台股）');
       document.getElementById('chip-bars').innerHTML='<div class="note">美股暫無此資料</div>';
+      document.getElementById('eps-bars').innerHTML='<div class="note">美股尚未支援財報解析（僅適用台股）</div>';
+      ['fin-gross','fin-op','fin-roe','fin-fcf'].forEach(id=>setTxt(id,'—'));
+      setTxt('fin-note','美股暫無此資料');
       return;
     }
+    document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
     const [px,per,rev,inst]=await Promise.all([
       fm('TaiwanStockPrice',code,_d(16)),fm('TaiwanStockPER',code,_d(16)),
       fm('TaiwanStockMonthRevenue',code,_d(430)),instNet(code)]);
+    loadFinancials(code);
     if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;

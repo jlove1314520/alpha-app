@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-08-22 02:30 — 個股「財報」分頁接真實 EPS/毛利率/ROE/自由現金流
+
+**改了什麼：**
+清單第 3 項。驗證過 `TaiwanStockFinancialStatements`（免費，直接有 `EPS`/`Revenue`/`GrossProfit`/`OperatingIncome` 等欄位，不用自己算）、`TaiwanStockBalanceSheet`（免費，有 `EquityAttributableToOwnersOfParent` 給 ROE 分母）、`TaiwanStockCashFlowsStatement`（免費，有 `CashFlowsFromOperatingActivities` 和資本支出 `PropertyAndPlantAndEquipment` 可算自由現金流）都可用後接上個股頁「財報」分頁：
+- 季度獲利 EPS 長條圖：近 8 季真實 EPS（用 `fyq()` 把日期轉成「26Q2」這種台股慣用格式）。
+- 毛利率／營益率：最新一季 `GrossProfit/Revenue`、`OperatingIncome/Revenue`。
+- ROE（近四季）：近 4 季歸屬母公司淨利加總 ÷ 最新一期歸屬母公司權益。
+- 自由現金流（最新季）：營業現金流 + 資本支出（原始資料本來就是負值）。
+- 卡片底下的來源說明**主動標註**「僅為期末日資料，非公告日，可能早於實際公告時間」——這是直接把里程碑 1（`research/DATA.md`）發現的 point-in-time 缺陷回饋進 App 本身，對使用者誠實揭露資料限制，不是只寫在內部研究文件裡。
+
+**為什麼：**
+使用者要求財報分頁如果 FinMind 有真實資料就換掉示範數字，一樣要求先驗證。
+
+**影響到哪些檔案：**
+只改 `alpha-app/index.html`。新增 `pivotByDate()`（把 FinMind 那種「一列一個科目」的長表轉成「一列一季」的寬表）、`fyq()`、`loadFinancials()`；`openStock()` 的 TW 分支呼叫它（不放進原本的 `Promise.all` 裡，讓財報分頁自己非同步載入、不拖慢總覽/營收的顯示速度），US 分支則把財報相關欄位設成「美股尚未支援」。
+
+**測試方式：**
+本機伺服器 + Chrome，開台積電財報分頁確認 EPS 長條圖（12.6 → 27.3，8 季）、毛利率 67.7%、營益率 60.3%、ROE +34.8%、自由現金流 +NT$6,356億，數字量級都合理（台積電高毛利/高ROE體質）。開 AAPL 財報分頁確認美股分支正確顯示「尚未支援」。Console 無錯誤。
+
+**下一步：**
+清單第 4 項——小幅體驗優化（載入中/錯誤狀態、FinMind 快取、修掉殘留假數字）。目前「今日」頁的大盤速覽（加權指數/台指期近月/NASDAQ）、市場頁 AI 卡、交易/日誌頁都還是原型示範資料，可以列入這項的候選。
+
+**卡住的問題：**
+無。
+
+---
+
 ## 2026-08-22 02:10 — 新增 `research/` 資料夾：Phase 2 交易引擎的研究憲法與里程碑 1
 
 **改了什麼：**
