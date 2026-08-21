@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-08-22 01:45 — 美股支援：自選股與個股頁可混台股＋美股
+
+**改了什麼：**
+清單第 2 項。驗證過 FinMind `USStockPrice`（欄位大寫：`Close`/`Open`/`High`/`Low`/`Volume`，沒有 `spread` 欄位，跟台股資料集欄位命名風格不同）與 `USStockInfo`（19,339 檔，欄位 `Country`/`IPOYear`/`MarketCap`/`Subsector`/`stock_name`，同一代號有重複列要取最新日期那筆）都可免費使用後，接進 App：
+- 新增 `isUS(code)` 判斷式（代號開頭是字母＝美股，數字＝台股），不用改自選股 localStorage 既有格式，向後相容舊資料。
+- `loadStockInfo()` 同時抓 TaiwanStockInfo + USStockInfo，本地快取分開存（`alpha_info` / `alpha_info_us`）。
+- 搜尋視窗合併台股＋美股結果，用「· 美股／· 台股」標示。搜尋 AAPL 出來的結果第一批常常是槓桿/反向 ETF（如 GraniteShares 2x Long AAPL），不是 Apple 本人——這是 FinMind 資料庫的自然結果、不是 bug，使用者要自己認代號。
+- 自選股列表、個股頁「總覽」分頁美股都能顯示即時價格與漲跌%（美股用 `$` 字首）。
+- 個股頁「營收／財報／籌碼」三分頁對美股顯示「美股尚未支援…（僅適用台股）」，不是硬擠假資料或直接報錯。
+
+**為什麼：**
+使用者要求自選股與個股頁能處理美股，一樣要求先驗證資料集結構再動手。
+
+**影響到哪些檔案：**
+只改 `alpha-app/index.html`。新增 `isUS()`／`nameOf()` 共用函式；`hydrateHome()`、`loadStockInfo()`、`doSearch()`、`pickStock()`、`confirmDelete()`、`openStock()` 都加了美股分支，台股原本邏輯完全沒動（用 `if(us){...return}` 提前返回的方式隔離，降低改壞台股功能的風險）。
+
+**測試方式：**
+本機伺服器 + Chrome：搜尋 AAPL → 加入 Apple Inc. → 確認自選股列表混合顯示台股/美股（顏色、$ 字首、市場標籤都對）→ 開 AAPL 個股頁確認總覽顯示真實股價、營收/籌碼分頁正確顯示「暫無資料」提示 → 回頭開台積電（2330）個股頁確認 PER/殖利率/YoY/PBR 都還是正常真實資料（沒有因為這次改動壞掉）。Console 無錯誤。
+
+**下一步：**
+清單第 3 項——個股「財報」分頁接 `TaiwanStockFinancialStatements`（真實 EPS/毛利率），一樣要先 fetch 驗證欄位與是否免費。
+
+**卡住的問題：**
+無。
+
+---
+
 ## 2026-08-22 01:15 — 市場頁接真實資料（大盤指數／類股／三大法人／期貨籌碼）
 
 **改了什麼：**

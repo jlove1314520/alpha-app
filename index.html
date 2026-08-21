@@ -674,6 +674,8 @@
   const zhang=n=>n==null||isNaN(n)?'—':(n>=0?'+':'−')+Math.round(Math.abs(n)/1000).toLocaleString();
   function setTxt(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
   function setChip(id,v){const el=document.getElementById(id);if(!el)return;el.textContent=zhang(v)+' 張';el.className=v>=0?'pos':'neg'}
+  const isUS=code=>/^[A-Za-z]/.test(code);
+  const nameOf=code=>STOCKNAME[code]||STOCKNAME_US[code]||code;
   async function fm(ds,id,start){const k=ds+id+start;if(_cache[k])return _cache[k];
     try{const r=await fetch(`${FM}?dataset=${ds}&data_id=${id}&start_date=${start}`);const j=await r.json();const d=(j&&j.data)||[];_cache[k]=d;return d}catch(e){return []}}
   function spark(cl){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
@@ -686,13 +688,21 @@
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
     for(const code of WL){
-      const nm=STOCKNAME[code]||code;
+      const nm=nameOf(code);const us=isUS(code);
       const wrap=document.createElement('div');wrap.className='swipe-wrap';
       wrap.innerHTML=`<button class="swipe-del" data-code="${code}"><span>✕</span>刪除</button><div class="swipe-row"><div class="nm"><b>${nm}</b><span>${code} · 載入中…</span></div></div>`;
       el.appendChild(wrap);
       const rowEl=wrap.querySelector('.swipe-row');
       attachSwipe(rowEl,code);
       wrap.querySelector('.swipe-del').onclick=()=>confirmDelete(code);
+      if(us){
+        const px=await fm('USStockPrice',code,_d(16));
+        if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
+          const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'u':'d';
+          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.Close))}<div class="px"><b>$${nf(last.Close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+        }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · 無報價</span></div>`}
+        continue;
+      }
       const px=await fm('TaiwanStockPrice',code,_d(16));
       if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
         const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'u':'d';
@@ -797,7 +807,7 @@
   // ── 刪除確認視窗 ──
   let cfAction=null;
   function confirmDelete(code){
-    const nm=STOCKNAME[code]||code;
+    const nm=nameOf(code);
     document.getElementById('cf-msg').innerHTML=`確定要從自選股移除<br><b style="font-size:16px">${nm}（${code}）</b>嗎？`;
     cfAction=()=>{WL=WL.filter(x=>x!==code);localStorage.setItem('alpha_wl',JSON.stringify(WL));hydrateHome()};
     document.getElementById('confirm').classList.add('open');
@@ -806,19 +816,32 @@
   function cfYes(){if(cfAction)cfAction();cfAction=null;cfNo()}
   function cfNo(){document.getElementById('confirm').classList.remove('open');document.getElementById('cmask').classList.remove('open')}
 
-  // ── 搜尋股票 ──
-  let STOCKNAME={},STOCKLIST=[],infoLoading=false,infoLoaded=false;
+  // ── 搜尋股票（台股 + 美股）──
+  let STOCKNAME={},STOCKLIST=[],STOCKNAME_US={},STOCKLIST_US=[],infoLoading=false,infoLoaded=false;
   async function loadStockInfo(){
     if(infoLoaded||infoLoading)return;infoLoading=true;
-    try{const c=localStorage.getItem('alpha_info');if(c){const o=JSON.parse(c);STOCKNAME=o.map;STOCKLIST=o.list;infoLoaded=true;infoLoading=false;return}}catch(e){}
     try{
-      const r=await fetch(`${FM}?dataset=TaiwanStockInfo`);const j=await r.json();const d=(j&&j.data)||[];
+      const c=localStorage.getItem('alpha_info'),cu=localStorage.getItem('alpha_info_us');
+      if(c&&cu){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
+    }catch(e){}
+    try{
+      const [rTW,rUS]=await Promise.all([fetch(`${FM}?dataset=TaiwanStockInfo`),fetch(`${FM}?dataset=USStockInfo`)]);
+      const jTW=await rTW.json(),jUS=await rUS.json();
+      const dTW=(jTW&&jTW.data)||[],dUS=(jUS&&jUS.data)||[];
       const seen={};STOCKLIST=[];STOCKNAME={};
-      for(const s of d){const id=s.stock_id;if(!id||seen[id])continue;
+      for(const s of dTW){const id=s.stock_id;if(!id||seen[id])continue;
         if(id.length<4||id.length>6)continue;if(id.length===6&&/^\d+$/.test(id))continue; // 濾掉權證
-        seen[id]=1;STOCKNAME[id]=s.stock_name;STOCKLIST.push({id,name:s.stock_name||'',ind:s.industry_category||''})}
+        seen[id]=1;STOCKNAME[id]=s.stock_name;STOCKLIST.push({id,name:s.stock_name||'',ind:s.industry_category||'',mkt:'TW'})}
+      const seenUS={};STOCKNAME_US={};
+      for(const s of dUS){const id=s.stock_id;if(!id)continue;
+        const nm=(s.stock_name||'').replace(/\s*Common Stock\s*$/i,'');
+        STOCKNAME_US[id]=nm;seenUS[id]={id,name:nm,ind:s.Subsector||'',mkt:'US'}}
+      STOCKLIST_US=Object.values(seenUS);
       infoLoaded=true;
-      try{localStorage.setItem('alpha_info',JSON.stringify({map:STOCKNAME,list:STOCKLIST}))}catch(e){}
+      try{
+        localStorage.setItem('alpha_info',JSON.stringify({map:STOCKNAME,list:STOCKLIST}));
+        localStorage.setItem('alpha_info_us',JSON.stringify({map:STOCKNAME_US,list:STOCKLIST_US}));
+      }catch(e){}
     }catch(e){}
     infoLoading=false;
   }
@@ -835,13 +858,16 @@
   function doSearch(){
     const q=document.getElementById('search-input').value.trim();
     const box=document.getElementById('search-results');
-    if(!q){box.innerHTML='<div class="note" style="padding:16px">輸入代號或公司名開始搜尋</div>';return}
-    const res=STOCKLIST.filter(s=>s.id.startsWith(q)||s.name.includes(q)).slice(0,30);
+    if(!q){box.innerHTML='<div class="note" style="padding:16px">輸入代號或公司名開始搜尋（台股用代號，美股用代號如 AAPL）</div>';return}
+    const qU=q.toUpperCase();
+    const resTW=STOCKLIST.filter(s=>s.id.startsWith(q)||s.name.includes(q));
+    const resUS=STOCKLIST_US.filter(s=>s.id.startsWith(qU)||s.name.toUpperCase().includes(qU));
+    const res=[...resTW,...resUS].slice(0,30);
     if(!res.length){box.innerHTML='<div class="note" style="padding:16px">查無「'+q+'」</div>';return}
-    box.innerHTML=res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${s.name}</b> <span class="sub">${s.id}</span><div class="sub">${s.ind}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('');
+    box.innerHTML=res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${s.name}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${s.ind}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('');
   }
   function pickStock(code){
-    if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));toast('已加入 '+(STOCKNAME[code]||code))}
+    if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));toast('已加入 '+nameOf(code))}
     else{toast('已在自選股中')}
     doSearch();hydrateHome();
   }
@@ -859,13 +885,29 @@
   async function openStock(code){
     if(typeof code!=='string')code=currentCode;
     currentCode=code;
+    const us=isUS(code);
     go('stock');
     document.querySelectorAll('#stock-tabs button').forEach((x,i)=>x.classList.toggle('on',i===0));
     document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
     document.getElementById('sub-ov').classList.add('active');
-    setTxt('sh-name',code);setTxt('sh-sub',code+' · 台股');setTxt('sh-price','…');setTxt('sh-chg','載入中');
+    setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
     document.getElementById('rev-bars').innerHTML='<div class="note">載入中…</div>';
+    if(us){
+      const px=await fm('USStockPrice',code,_d(16));
+      if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
+        const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
+        const pe=document.getElementById('sh-price');pe.textContent='$'+nf(last.Close);pe.className=cls;
+        const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(2)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
+      }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號')}
+      ['kn-per','kn-pbr','kn-yield','kn-yoy'].forEach(id=>setTxt(id,'—'));
+      document.getElementById('rev-bars').innerHTML='<div class="note">美股尚未支援月營收（FinMind 此指標僅提供台股）</div>';
+      document.getElementById('rev-note').textContent='美股暫無此資料';
+      ['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
+      setTxt('chip-note','美股暫無三大法人資料（僅適用台股）');
+      document.getElementById('chip-bars').innerHTML='<div class="note">美股暫無此資料</div>';
+      return;
+    }
     const [px,per,rev,inst]=await Promise.all([
       fm('TaiwanStockPrice',code,_d(16)),fm('TaiwanStockPER',code,_d(16)),
       fm('TaiwanStockMonthRevenue',code,_d(430)),instNet(code)]);
