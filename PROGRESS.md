@@ -4,6 +4,38 @@
 
 ---
 
+## 2026-08-22 01:15 — 市場頁接真實資料（大盤指數／類股／三大法人／期貨籌碼）
+
+**改了什麼：**
+把「市場」分頁（`scr-market`）4 張卡片的示範資料全部換成 FinMind 真實資料：
+1. 新增「大盤指數」卡：加權指數（`TaiwanStockPrice` data_id=`TAIEX`）、櫃買指數（data_id=`TPEx`，注意大小寫）。
+2. 「類股表現」熱力圖：改用 8 個 FinMind 官方產業類股指數（`Semiconductor`／`Electronic`／`CommunicationsInternet`／`Optoelectronic`／`FinancialInsurance`／`ElectricMachinery`／`ShippingTransportation`／`Tourism`，都是 `TaiwanStockPrice` 的 data_id），顏色依漲跌幅（±3% 封頂）動態插值紅／綠。原本「AI 伺服器／光通訊」這種非官方分類名稱拿掉了，因為 FinMind 沒有對應資料集，換成 FinMind 官方 27 類產業指數中的真實類別，避免掛羊頭賣狗肉。
+3. 「三大法人買賣超（近5日）」：改用 `TaiwanStockTotalInstitutionalInvestors`（不用帶 data_id，市場總表），取每日 `name=='total'` 那筆的 `buy-sell` 當作全市場三大法人合計淨額。
+4. 「期貨籌碼」卡整張重做：原本「大額交易人前十」「P/C Ratio」「現股當沖佔比」這三個數字查證後發現要付費（FinMind 回傳 `Your level is free. Please update your user level`），免費方案生不出來，用了會變成新的假資料，所以拿掉。改成 `TaiwanFuturesInstitutionalInvestors`（要帶 `data_id=TX` 才能免費用，不帶會被當付費資料集擋掉——這是這次踩到的新坑，見下方）算出的外資／投信／自營商／三大法人合計「台指期未沖銷淨部位（口）」，全部可免費取得。
+
+**為什麼：**
+使用者要求把市場頁能換真的就換真的，並且規定「用任何新資料集前要先實際 fetch 驗證欄位結構與是否免 token」。這次照規則全部用 curl 先驗證過（見下方新踩的坑），沒有用猜的。
+
+**影響到哪些檔案：**
+只改了 `alpha-app/index.html`（HTML 結構 + `<script>` 內新增 `hydrateMarket()`、`loadMarketIndex()`、`loadHeatmap()`、`loadInstTotal()`、`loadFutInst()` 等函式；`go()` 加一行在切到市場頁時呼叫 `hydrateMarket()`）。沒有動到 `alpha-data` 任何東西。
+
+**新踩到的坑（給以後接手的人）：**
+- FinMind 有些資料集（例如 `TaiwanFuturesInstitutionalInvestors`、`TaiwanFuturesDaily`、`TaiwanOptionDaily`）**不帶 `data_id` 查詢會被誤判成付費限制**（回傳 `status:400, "Your level is free..."`），但**帶對 `data_id`（如 `TX`）就能免費正常回傳**。所以看到這個錯誤訊息不能直接認定「這個資料集要收費」，要先試著帶對的 data_id 再下結論。
+- 確認**真的要收費、免費方案拿不到**的資料集（試過帶 data_id 依然 400）：`TaiwanFuturesOpenInterestLargeTraders`（大額交易人）、`TaiwanStockDayTrading`（當沖）、`TaiwanStockMarginPurchaseShortSale`。這幾個之後不用再試了。
+- 櫃買指數的 data_id 是 `TPEx`（大寫 T P E 小寫 x），大小寫打錯會查不到資料但不會報錯（回傳空陣列），要注意。
+- FinMind 官方完整資料集清單，可以故意送一個不存在的 dataset 名稱，它的 400 錯誤訊息會列出全部合法值，比翻文件快：`curl "https://api.finmindtrade.com/api/v4/data?dataset=INVALID"`。
+
+**測試方式：**
+用 `python -m http.server` 在本機起一個靜態伺服器，Chrome 開 `localhost` 測試（`file://` 直接開會被瀏覽器工具擋，且部分瀏覽器對 file:// 的 fetch 有限制，起本機伺服器比較保險）。四張卡都截圖確認數字有出來、顏色邏輯正確（三大法人合計 = 外資+投信+自營商 驗算過），也重新走了一次「今日」頁自選股、個股頁三分頁，確認沒有壞掉（回歸測試）。Console 沒有錯誤。
+
+**下一步：**
+繼續清單第 2 項——美股支援（FinMind `USStockPrice`／`USStockInfo`，一樣要先 fetch 驗證）。
+
+**卡住的問題：**
+無。
+
+---
+
 ## 2026-08-22 00:41 — 修好 git push 卡住的問題（改用 PAT）
 
 **改了什麼：**

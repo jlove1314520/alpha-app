@@ -302,55 +302,48 @@
   <!-- ════════ 2. 市場 ════════ -->
   <section class="screen" id="scr-market">
     <div class="card">
-      <h3>類股熱力圖（漲跌幅）</h3>
-      <div class="heat">
-        <div class="tile" style="background:#8f2f2f"><b>半導體</b><span>+2.4%</span></div>
-        <div class="tile" style="background:#7a3030"><b>重電</b><span>+1.9%</span></div>
-        <div class="tile" style="background:#5d3030"><b>AI 伺服器</b><span>+1.2%</span></div>
-        <div class="tile" style="background:#463232"><b>光通訊</b><span>+0.7%</span></div>
-        <div class="tile" style="background:#383835"><b>金融</b><span>+0.1%</span></div>
-        <div class="tile" style="background:#2f3d38"><b>塑化</b><span>−0.4%</span></div>
-        <div class="tile" style="background:#2b473e"><b>航運</b><span>−0.9%</span></div>
-        <div class="tile" style="background:#265244"><b>觀光</b><span>−1.6%</span></div>
-      </div>
+      <h3>大盤指數</h3>
+      <div id="idx-rows"><div class="note">載入中…</div></div>
+      <div class="note">來源：FinMind TaiwanStockPrice（TAIEX / TPEx）</div>
+    </div>
+
+    <div class="card">
+      <h3>類股表現（今日漲跌幅）</h3>
+      <div class="heat" id="heat-grid"><div class="note">載入中…</div></div>
       <div class="legend">
         <div class="li"><span class="sw" style="background:#8f2f2f"></span>漲</div>
         <div class="li"><span class="sw" style="background:#383835"></span>平</div>
         <div class="li"><span class="sw" style="background:#265244"></span>跌</div>
       </div>
+      <div class="note">來源：FinMind 各類股指數（TaiwanStockPrice）</div>
     </div>
 
     <div class="card">
       <h3>三大法人買賣超（近 5 日 · 億元）</h3>
-      <div class="div-bars" id="inst-bars">
-        <div class="db"><i class="u" style="height:34%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">8/14</em></div>
-        <div class="db"><i class="u" style="height:20%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">8/15</em></div>
-        <div class="db"><i class="dn" style="height:12%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">8/18</em></div>
-        <div class="db"><i class="u" style="height:42%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">8/19</em></div>
-        <div class="db"><i class="u" style="height:52%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">8/20</em></div>
-      </div>
+      <div class="div-bars" id="inst-bars"><div class="note">載入中…</div></div>
       <div class="legend">
         <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
         <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
-        <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b style="color:var(--up)">+182 億</b></div>
+        <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
       </div>
-      <div class="note">來源：TWSE OpenAPI · 每日 15:00 更新</div>
+      <div class="note">來源：FinMind 三大法人買賣金額總表（TaiwanStockTotalInstitutionalInvestors）</div>
     </div>
 
     <div class="card">
-      <h3>期貨籌碼</h3>
+      <h3>台指期三大法人淨部位（未沖銷 · 口）</h3>
       <div class="facts">
-        <div class="f"><span>外資台指期淨部位</span><b class="pos">+21,340 口</b></div>
-        <div class="f"><span>大額交易人前十</span><b class="neg">−3,120 口</b></div>
-        <div class="f"><span>P/C Ratio</span><b>1.18</b></div>
-        <div class="f"><span>現股當沖佔比</span><b>38.2%</b></div>
+        <div class="f"><span>外資</span><b id="fut-foreign">—</b></div>
+        <div class="f"><span>投信</span><b id="fut-trust">—</b></div>
+        <div class="f"><span>自營商</span><b id="fut-dealer">—</b></div>
+        <div class="f"><span>三大法人合計</span><b id="fut-total">—</b></div>
       </div>
-      <div class="note">來源：TAIFEX OpenAPI</div>
+      <div class="note" id="fut-note">來源：FinMind 期貨三大法人（TaiwanFuturesInstitutionalInvestors · TX）</div>
     </div>
 
     <div class="card ai-card">
       <div class="ai-tag">✦ AI 盤勢解讀</div>
-      <p>外資期現貨同步偏多、重電族群量增價漲；但 P/C 偏高＋今晚 CPI，短線追高風險升溫。與你的持股重疊度最高的強勢族群：<b>半導體（2 檔）</b>。</p>
+      <p>外資期現貨同步偏多、重電族群量增價漲；但今晚 CPI 前，短線追高風險升溫。與你的持股重疊度最高的強勢族群：<b>半導體（2 檔）</b>。</p>
+      <div class="note">原型示意 · 尚未接真實新聞與訊號分析</div>
     </div>
   </section>
 
@@ -667,6 +660,7 @@
     document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.classList.toggle('on', b.dataset.scr===name));
     document.getElementById('main').scrollTo(0,0);
     if(name==='home')hydrateHome();
+    if(name==='market')hydrateMarket();
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
 
@@ -705,6 +699,83 @@
         rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close))}<div class="px"><b>${nf(last.close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 無報價</span></div>`}
     }
+  }
+
+  // ══════ 市場頁（大盤指數 / 類股 / 三大法人 / 期貨籌碼）══════
+  async function idxRow(id,label,srcLabel){
+    const px=await fm('TaiwanStockPrice',id,_d(16));
+    if(!px.length)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
+    const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
+    const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
+    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close))}<div class="px"><b>${nf(last.close)}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
+  }
+  async function loadMarketIndex(){
+    const el=document.getElementById('idx-rows');if(!el)return;
+    const [taiex,tpex]=await Promise.all([idxRow('TAIEX','加權指數','TWSE'),idxRow('TPEx','櫃買指數','TPEx')]);
+    el.innerHTML=taiex+tpex;
+  }
+
+  const HEAT_CATS=[
+    {id:'Semiconductor',label:'半導體'},{id:'Electronic',label:'電子'},
+    {id:'CommunicationsInternet',label:'通信網路'},{id:'Optoelectronic',label:'光電'},
+    {id:'FinancialInsurance',label:'金融保險'},{id:'ElectricMachinery',label:'電機'},
+    {id:'ShippingTransportation',label:'航運'},{id:'Tourism',label:'觀光'},
+  ];
+  function hexMix(c1,c2,t){
+    const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+    const [r1,g1,b1]=p(c1),[r2,g2,b2]=p(c2);
+    const r=Math.round(r1+(r2-r1)*t),g=Math.round(g1+(g2-g1)*t),b=Math.round(b1+(b2-b1)*t);
+    return `#${[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('')}`;
+  }
+  function heatColor(pct){
+    const t=Math.max(-3,Math.min(3,pct))/3;
+    return t>=0?hexMix('#383835','#8f2f2f',t):hexMix('#383835','#265244',-t);
+  }
+  async function loadHeatmap(){
+    const el=document.getElementById('heat-grid');if(!el)return;
+    const results=await Promise.all(HEAT_CATS.map(async c=>{
+      const px=await fm('TaiwanStockPrice',c.id,_d(10));
+      if(!px.length)return{...c,pct:null};
+      const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
+      const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;
+      return{...c,pct};
+    }));
+    el.innerHTML=results.map(r=>r.pct==null
+      ?`<div class="tile" style="background:#383835"><b>${r.label}</b><span>—</span></div>`
+      :`<div class="tile" style="background:${heatColor(r.pct)}"><b>${r.label}</b><span>${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</span></div>`
+    ).join('');
+  }
+
+  async function loadInstTotal(){
+    const el=document.getElementById('inst-bars');if(!el)return;
+    const raw=await fm('TaiwanStockTotalInstitutionalInvestors','',_d(16));
+    const totals=raw.filter(r=>r.name==='total');
+    if(!totals.length){el.innerHTML='<div class="note">查無資料</div>';return}
+    const last5=totals.slice(-5);
+    const nets=last5.map(r=>({date:r.date,net:(r.buy-r.sell)/1e8}));
+    const mx=Math.max(...nets.map(n=>Math.abs(n.net)))||1;
+    el.innerHTML=nets.map(n=>`<div class="db"><i class="${n.net>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(n.net)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${n.date.slice(5)}</em></div>`).join('');
+    const todayNet=nets[nets.length-1].net;
+    const te=document.getElementById('inst-today');
+    te.textContent=(todayNet>=0?'+':'')+Math.round(todayNet)+' 億';te.style.color=todayNet>=0?'var(--up)':'var(--down)';
+  }
+
+  async function loadFutInst(){
+    const raw=await fm('TaiwanFuturesInstitutionalInvestors','TX',_d(10));
+    if(!raw.length){['fut-foreign','fut-trust','fut-dealer','fut-total'].forEach(id=>setTxt(id,'—'));return}
+    const last=raw[raw.length-1].date;
+    let f=0,t=0,d=0;
+    raw.filter(r=>r.date===last).forEach(r=>{
+      const net=(r.long_open_interest_balance_volume||0)-(r.short_open_interest_balance_volume||0);
+      if(r.institutional_investors==='外資')f=net;else if(r.institutional_investors==='投信')t=net;else if(r.institutional_investors==='自營商')d=net;
+    });
+    const setFut=(id,v)=>{const el=document.getElementById(id);if(!el)return;el.textContent=(v>=0?'+':'')+nf(v)+' 口';el.className=v>=0?'pos':'neg'};
+    setFut('fut-foreign',f);setFut('fut-trust',t);setFut('fut-dealer',d);setFut('fut-total',f+t+d);
+    setTxt('fut-note',`最新 ${last} · FinMind 期貨三大法人（TX）`);
+  }
+
+  async function hydrateMarket(){
+    loadMarketIndex();loadHeatmap();loadInstTotal();loadFutInst();
   }
 
   // ── 左滑刪除 ──
