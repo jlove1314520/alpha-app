@@ -10,7 +10,7 @@
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-22T13:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-22T14:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -30,9 +30,43 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/validation/costs.py` | 台股成本/摩擦模型（手續費/證交稅/滑價/漲跌停鎖死偵測） | 程式碼 |
 | `research/validation/control_group.py` | 隨機控制組（策略無關，`evaluate_fn` seam） | 程式碼 |
 | `research/validation/criteria.py` | 事前綁定通過標準（雜湊鎖定，防止事後移動門柱） | 程式碼 |
-| `research/data/` | parquet 快取、`data/ledger/trades.csv`、回測結果 | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
+| `research/backtest/__init__.py` | `backtest` package 標記 | 程式碼 |
+| `research/backtest/engine.py` | **里程碑 4 新增**：通用回測引擎骨架。走日曆逐日模擬，訊號 T 日收盤產生、T+1 收盤成交（零 look-ahead），三層風控（MA出場/部位上限/硬停損），成本走 `validation/costs.py`，資料進場前用 `assert_no_holdout_leakage()` 檢查 | 程式碼 |
+| `research/strategies/__init__.py` | `strategies` package 標記 | 程式碼 |
+| `research/strategies/weinstein_stage2.py` | **里程碑 4 新增**：Weinstein 第二階段訊號函式（150日均線上揚+站上、60日動量排名）+ 大盤200日均線總體閘門，插進 `backtest/engine.py` 用 | 程式碼 |
+| `research/strategies/run_weinstein_pilot.py` | **里程碑 4 新增**：第一個候選的完整跑法（試點宇宙 30 檔、train/val/成本敏感度/隨機控制組），結果見 `LEADS.md` | 程式碼 |
+| `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
-| `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（還沒有策略候選） |
+| `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
+
+---
+
+## 2026-08-22 — 里程碑 4 開工：回測引擎骨架 + 第一個 baseline（Weinstein 第二階段），結果 FAIL
+
+驗證框架通過 Cowork 逐行稽核後，進入里程碑 4：建可重用的回測引擎骨架，插入第一個策略訊號（Weinstein 第二階段掃描），跑完整穩健性關卡。**結果誠實記錄：這個候選沒有通過**（隨機控制組沒打贏），細節如下，不做美化。
+
+**引擎骨架**（`backtest/engine.py`）：日曆逐日走，訊號 T 日收盤產生、T+1 收盤才成交（結構上不可能同根 K 用到未來），三層風控（150日均線出場／最大持倉數／硬停損），成本一律呼叫 `validation/costs.py`（不自訂數字），資料進來前一律先過 `assert_no_holdout_leakage()`。策略訊號跟引擎分離（`strategies/weinstein_stage2.py` 插入 `backtest/engine.py`），之後其他策略可以重用同一顆引擎。
+
+**Weinstein 第二階段訊號**：股票層——收盤價 > 上揚的150日均線（日線近似30週線）；大盤層——加權指數 > 200日均線當總體閘門，關閉時不開新倉；動量——通過篩選的股票用60日報酬排名，週頻（週五）換股取前10名。價格用 `adjust.py` 還原價。
+
+**試點宇宙的坦白：這輪不是全市場掃描。** 全市場（`universe.py` 的 3,196 檔）要抓的歷史資料量，用 FinMind 免費額度會撞到流量上限、也會花好幾個小時，這輪先用手選的 30 檔知名台股大型權值股驗證引擎本身對不對，**不是**真的「全市場」——這個限縮條件直接影響了下面隨機控制組沒打贏的解讀（見下段），沒有藏起來。
+
+**結果（完整穩健性關卡，一次跑完，`LEADS.md` 有更完整版本）：**
+- Train（2015–2020，324 筆交易）：+168.4% vs 買進持有 +58.9%，贏。
+- Validation（2021–2024，160 筆交易）：+135.8% vs 買進持有 +54.6%，贏。
+- 成本敏感度 1x/2x/3x：+135.8% → +129.7% → +123.6%，穩健，沒有翻負。
+- **隨機控制組（validation 期）：沒打贏。** 策略期末權益在 200 次隨機抽樣（同宇宙、同部位數 10 檔、靜態買進持有）對照組裡只排第 24.5 百分位——中位數隨機組合反而比策略賺得多。
+
+**為什麼會這樣（誠實的解讀，不是找藉口）：** 30 檔試點宇宙是手選的知名大型權值股，剛好是 2021–2024 台股 AI/半導體超級多頭的主要受惠者，這個宇宙本身已經帶著後見之明式的贏家集中——隨機抽 10 檔靜態持有就能吃到大部分漲幅。策略的週頻換股＋均線停損＋動能排名在這種單邊噴出格局裡，反而會因為停損出場、換股交易成本，錯過部分持續噴出的段落，輸給什麼都不做的靜態持有。用 `audit_ledgers.py` 對兩批真實跑出來的交易紀錄（train 324 筆、validation 160 筆）都跑過稽核，全部 PASS，帳本邏輯自洽——**這不是引擎的 bug，是策略在這個試點條件下真的沒有訊號優勢**。
+
+**已知簡化，都是刻意的、寫清楚的，不是漏做：**
+1. 隨機控制組比的是「靜態隨機買進持有」，不是「動態週頻隨機重抽」——後者才是跟策略機制完全對應的對照組，這輪先用比較好實作的靜態版本，正確性方向沒問題但嚴謹度打了折扣。
+2. `criteria.py` 的事前鎖定標準這輪沒有用——那個機制的設計初衷是給 holdout 那種一次性、高風險評估用的，train/val 這層的通過標準本來就已經寫死在 `CONSTITUTION.md`（打贏控制組、通過成本敏感度、交易數≥100、贏買進持有），不需要再另外鎖一份雜湊檔。
+3. 30 檔試點宇宙 ≠ 全市場，見上段。
+
+**絕對沒有碰 holdout。** `research/HOLDOUT_LOCK.json` 依然不存在，`unlock_holdout_once()` 一次都沒被呼叫過。
+
+**下一步：** 這個候選（`weinstein_stage2_pilot_v1`）判定 `FAIL`，不會直接拿去 holdout 測試。可能的後續方向（都還沒做，等使用者指示）：(a) 換一個沒有後見之明偏誤的宇宙建構方式（例如用 `universe.py` 全市場、或用某個歷史時點的市值排名而非「現在知名」來選股）重跑同一顆引擎；(b) 把隨機控制組升級成真正的動態週頻重抽版本；(c) 嘗試不同的訊號參數當一個全新候選（要走一輪全新的 `LEADS.md` 記錄，不能直接改這條）。詳細技術記錄見 `REPORT.md` 對應條目。
 
 ---
 

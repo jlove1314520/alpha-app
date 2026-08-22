@@ -70,3 +70,41 @@
 - 回歸測試 `adjust.py`／`pit.py`／`universe.py` 三個模組全部重新跑過：`adjust.py` 的除權息事件跟價格序列都正確截斷在 `2024-12-31`（且最後一列 `adj_close==close` 這個既有性質在截斷後依然成立）；`pit.py` 的季報跟月營收都正確截斷；`universe.py` 維持原本的 3,196 檔（2,974 現存 + 222 下市），沒有被誤傷。
 
 **下一步：** 把這次修正推上去。里程碑 2 剩下的「把四個 validation 模組串成能跑的骨架」這件事，之後要串接時，記得資料進口一律走 `load_dev()`，不要圖方便直接叫 `_fetch()`。
+
+---
+
+## 2026-08-22T14:00:00+08:00 — 里程碑 4：回測引擎骨架 + Weinstein 第二階段第一次跑通（結果 FAIL）
+
+**做了什麼：**
+
+1. **`backtest/engine.py`**（新增）：通用回測引擎。核心函式 `run_backtest(signal_fn, price_data, market_df, config)`：
+   - 逐日走 `market_df` 的交易日曆（不是逐週跳，這樣停損檢查可以每天做，不只在換股日）。
+   - 每天先處理「今天該成交的排程」（`pending` 清單）：檢查 `validation/costs.limit_status()`，買單遇漲停鎖死、賣單遇跌停鎖死就順延到下一交易日重試，不強制成交。
+   - 再做每天的三層風控檢查：Tier 1（收盤價跌破自身 150 日均線 `ma150` 就排程賣出）、Tier 3（跌破進場價 `stop_loss_pct`，預設 15%，就排程賣出）；Tier 2（部位上限）是在換股日決定新倉數量時直接限制，不是每天檢查的項目。
+   - `config.rebalance_weekday`（預設週五）當天才呼叫 `signal_fn`，決定要不要換股。
+   - 訊號用 T 日資料算出，成交排到 T+1（`EXECUTION_LAG_DAYS=1`），結構上不可能同一天訊號跟成交，不用另外提醒自己小心。
+   - 成本：買方只收手續費+滑價，賣方收手續費+證交稅+滑價，數字全部從 `validation/costs.py` 的常數算，沒有自己另外編數字。
+   - 資料進場前對每個 `price_data[sid]` 跟 `market_df` 都跑一次 `validation.holdout.assert_no_holdout_leakage()`。
+
+2. **`strategies/weinstein_stage2.py`**（新增）：`prepare_price_data()` 用 `.rolling()`/`.shift()` 預先算好 `ma150`／`ma150_prev`（10 天前的均線值，用來判斷均線有沒有上揚）／`momentum`（60日報酬）三個欄位——這些 pandas rolling 運算本質上就是「只看當下與更早的資料」，用來查詢當天的值不會有 look-ahead 疑慮。`prepare_market_data()` 對加權指數算 `ma200`／`gate`（收盤>200日均線）。`stage2_signal()` 是插進引擎的 `signal_fn`：大盤 `gate` 關閉直接回傳空字典（不開新倉）；否則回傳通過篩選（收盤>ma150 且 ma150>ma150_prev）的股票，分數是 `momentum`，引擎自己排序取前 N 名。
+
+3. **`strategies/run_weinstein_pilot.py`**（新增）：串起來的跑法。**試點宇宙 30 檔**（手選知名台股大型權值股，如 2330/2317/2454/2308/2412 等，橫跨半導體/電子/金融/傳產/航運/電信），起始資料日 `2010-01-01`（給均線暖機時間）。分別跑 train（2015-01-01～`TRAIN_END`）跟 validation（2021-01-01～`VAL_END`）兩段，各自算報酬率、最大回撤、交易數、跟加權指數買進持有比較；再對 validation 期做成本 1x/2x/3x 敏感度；再用 `validation/control_group.run_control_group()` 做隨機控制組（200 次抽樣，每次靜態等權買進持有 10 檔隨機試點宇宙成分股，比較策略跟隨機分布的百分位）。
+
+**驗證結果：**
+- 小規模驗證（3 檔股票、6 個月）先通過再跑大的，確認引擎本身沒有明顯 bug（有成交、有記錄、equity 曲線正確累積）。
+- 全量跑（30 檔，`2015-01-01`～`2024-12-31`）：
+  - Train：**324 筆交易**，report +168.42%，買進持有 +58.86%，贏；最大回撤 -13.66%。
+  - Validation：**160 筆交易**，report +135.77%，買進持有 +54.58%，贏；最大回撤 -34.83%。
+  - 成本敏感度（validation）：1x +135.77% → 2x +129.68% → 3x +123.58%，單調遞減但沒有翻負或崩潰，成本穩健。
+  - **隨機控制組（validation）：策略期末權益 2,357,682，落在 200 次隨機抽樣（靜態等權買進持有 10 檔）分布的第 24.5 百分位，中位數 2,820,901 反而贏過策略——沒打贏。**
+- **對真實跑出來的交易紀錄做二次驗證**：把 train（324 筆）跟 validation（160 筆）的交易 DataFrame 直接餵給 `audit_ledgers.run()`，兩批都 **ALL PASS**（每個平倉都有對應進場記錄、無 NaN 價格/股數、無 holdout 洩漏）——證明引擎自己的帳本邏輯是自洽的，validation 沒打贏控制組不是帳本算錯，是策略在這個試點宇宙條件下真的沒有相對隨機的優勢（解讀見 `STRATEGY_LOG.md` 對應條目——試點宇宙本身是後見之明式的贏家集中池，這是這輪方法論上最大的已知弱點）。
+- 交易/權益曲線存成 CSV：`data/backtests/weinstein_stage2_pilot_{train,validation}_{trades,equity}.csv`（`.gitignore` 排除，本機保留供之後複查）。
+
+**LEADS.md 記錄：** `weinstein_stage2_pilot_v1`，判定 **FAIL**（隨機控制組不過）。**完全沒有呼叫 `unlock_holdout_once()`**——`HOLDOUT_LOCK.json` 依然不存在，可用 `python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` 隨時複查（應該印 `False`）。
+
+**已知簡化（誠實列出）：**
+1. 隨機控制組用「靜態買進持有」對照，不是「動態週頻重抽」——後者才是嚴格對應策略機制的對照組，這輪先用較簡單可實作的版本。`control_group.py` 的通用 API 是為「靜態候選名單」設計的，跟本策略「每週動態重選」的機制不完全對應，這個落差是刻意的簡化，寫進了程式碼註解跟這裡。
+2. 試點宇宙 30 檔是手選、非全市場——`universe.py` 的全市場掃描沒有在這輪執行（API 呼叫量/時間成本考量）。
+3. `criteria.py` 沒有在這輪鎖定標準檔——train/val 層的通過標準已經是 `CONSTITUTION.md` 寫死的固定關卡，這個機制留給之後 holdout 評估用。
+
+**下一步：** 等使用者決定後續方向（換宇宙建構方式重跑 / 升級隨機控制組成動態版本 / 全新參數當新候選）。無論哪個方向，都要走一輪新的 `LEADS.md` 記錄，不能直接改這條的判定。
