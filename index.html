@@ -343,6 +343,26 @@
     </div>
   </section>
 
+  <!-- ════════ 2b. 選股 ════════ -->
+  <section class="screen" id="scr-picks">
+    <div class="card ai-card">
+      <div class="ai-tag">✦ AI 選股引擎 · Phase A</div>
+      <p>綜合分結合<b>通過統計檢定的因子</b>（EPS成長/意外家族、營收意外、低波動），在<b>同產業</b>內做相對強弱排名，避免拿半導體股跟航運股比 EPS 成長率。<b>研究/教育用途，非投資建議；歷史回測不代表未來績效，樣本非全市場逐檔掃描。</b></p>
+      <div class="note" id="picks-asof">載入中…</div>
+    </div>
+
+    <div class="card">
+      <h3>綜合分排行<span class="more" id="picks-refresh" onclick="hydratePicks(true)">重新整理</span></h3>
+      <div id="picks-list"><div class="note">載入中…</div></div>
+      <div class="note">來源：research/score.py（本機/排程產生，非即時報價） · 樣本 80 檔（100 檔抽樣，見 FACTORS.md）</div>
+    </div>
+
+    <div class="card" id="picks-detail-card" style="display:none">
+      <h3>因子拆解 <span class="more" id="picks-detail-name"></span></h3>
+      <div id="picks-detail"></div>
+    </div>
+  </section>
+
   <!-- ════════ 3. 個股頁 ════════ -->
   <section class="screen" id="scr-stock">
     <button class="back" onclick="go('home')">‹ 返回</button>
@@ -658,6 +678,9 @@
     <button data-scr="market">
       <svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 16l4-5 3 3 6-8"/></svg>市場
     </button>
+    <button data-scr="picks">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>選股
+    </button>
     <button data-scr="trade">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>交易
     </button>
@@ -710,7 +733,7 @@
 
 <script>
   // ── 導覽 ──
-  const scrs = {home:'scr-home',market:'scr-market',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
+  const scrs = {home:'scr-home',market:'scr-market',picks:'scr-picks',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
   function go(name){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(scrs[name]).classList.add('active');
@@ -718,6 +741,7 @@
     document.getElementById('main').scrollTo(0,0);
     if(name==='home')hydrateHome();
     if(name==='market')hydrateMarket();
+    if(name==='picks')hydratePicks();
     if(name==='settings')hydrateSettings();
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
@@ -1202,6 +1226,51 @@
     const tw=document.getElementById('set-broker-tw').value.trim();
     const us=document.getElementById('set-broker-us').value.trim();
     localStorage.setItem('alpha_broker',JSON.stringify({tw,us}));
+  }
+
+  // ══════ 選股頁（research/score.py 產生的 scores.json，非即時，需本機/排程重新產生）══════
+  let PICKS_CACHE=null;
+  const PICKS_COMPONENT_LABEL={eps_family:'EPS成長/意外家族',revenue_surprise:'營收意外',low_vol:'低波動'};
+  async function hydratePicks(forceReload){
+    if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);return}
+    const listEl=document.getElementById('picks-list');
+    listEl.innerHTML='<div class="note">載入中…</div>';
+    try{
+      const res=await fetch('scores.json?_='+Date.now());
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const json=await res.json();
+      PICKS_CACHE=json;
+      renderPicks(json);
+    }catch(e){
+      listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/score.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
+      document.getElementById('picks-asof').textContent='—';
+    }
+  }
+  function renderPicks(json){
+    const meta=json._meta||{};
+    document.getElementById('picks-asof').textContent='資料基準日 '+(meta.as_of||'—')+'（'+(meta.disclaimer||'')+'）';
+    const rows=json.scores||[];
+    const listEl=document.getElementById('picks-list');
+    if(!rows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
+    listEl.innerHTML=rows.map(r=>`
+      <div class="row" onclick="showPickDetail('${r.stock_id}')">
+        <div class="nm"><b>#${r.rank} ${r.stock_id}</b><span>${r.industry||'—'}</span></div>
+        <div class="px"><b>${(r.composite>=0?'+':'')+r.composite.toFixed(2)}</b><span>綜合分</span></div>
+      </div>`).join('');
+  }
+  function showPickDetail(stockId){
+    if(!PICKS_CACHE)return;
+    const row=(PICKS_CACHE.scores||[]).find(r=>r.stock_id===stockId);
+    const card=document.getElementById('picks-detail-card');
+    if(!row){card.style.display='none';return}
+    document.getElementById('picks-detail-name').textContent=stockId;
+    const comps=(PICKS_CACHE._meta&&PICKS_CACHE._meta.score_components)||['eps_family','revenue_surprise','low_vol'];
+    document.getElementById('picks-detail').innerHTML=comps.map(c=>{
+      const v=row[c];
+      const has=typeof v==='number'&&!isNaN(v);
+      return `<div class="dl"><span class="sw" style="background:var(--accent)"></span>${PICKS_COMPONENT_LABEL[c]||c}<b>${has?(v>=0?'+':'')+v.toFixed(2):'—（資料不足）'}</b></div>`;
+    }).join('')+`<div class="note" style="margin-top:8px">產業內相對強弱 z-score（非原始因子數值），peer group 過小時退回全樣本 z-score。${row.n_components<3?'注意：本檔僅 '+row.n_components+'/3 個成分有效資料，排名可信度較低。':''}</div>`;
+    card.style.display='';
   }
 
   function hydrateSettings(){

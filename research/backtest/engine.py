@@ -43,6 +43,10 @@ class BacktestConfig:
     slippage_bps: float = 5.0
     commission_discount: float = 1.0
     cost_multiplier: float = 1.0  # for 1x/2x/3x cost-sensitivity testing
+    book_name: str = "weinstein_stage2_pilot"  # 2026-08-23: parameterized -- this was hardcoded into
+    # the two trade-row dicts below, which mislabeled every trade's audit book as "weinstein_stage2_pilot"
+    # even when run_backtest() is reused for an unrelated strategy (e.g. score.py's top-N portfolio).
+    # Default preserves the exact old behavior for existing callers that don't set it.
 
 
 @dataclass
@@ -227,7 +231,7 @@ def run_backtest(
                     "entry_trade_id": tid, "entry_notional": notional, "entry_fee": fee + slip,
                 }
                 trades.append({
-                    "trade_id": tid, "book": "weinstein_stage2_pilot", "stock_id": sid, "side": "buy",
+                    "trade_id": tid, "book": config.book_name, "stock_id": sid, "side": "buy",
                     "date": day, "price": fill_price, "shares": shares, "fees": fee, "tax": 0.0,
                     "realized_pnl": 0.0, "entry_trade_id": "", "note": p["reason"],
                 })
@@ -244,7 +248,7 @@ def run_backtest(
                 cash += proceeds
                 realized_pnl = proceeds - (pos["entry_notional"] + pos["entry_fee"])
                 trades.append({
-                    "trade_id": tid, "book": "weinstein_stage2_pilot", "stock_id": sid, "side": "sell",
+                    "trade_id": tid, "book": config.book_name, "stock_id": sid, "side": "sell",
                     "date": day, "price": fill_price, "shares": shares, "fees": fee, "tax": tax,
                     "realized_pnl": realized_pnl, "entry_trade_id": pos["entry_trade_id"], "note": p["reason"],
                 })

@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-23T00:30:00+08:00**
+**最後更新：2026-08-23T01:30:00+08:00**
 
-**⏸ 目前停在：AI 選股引擎 Phase A 步驟 1／2 做完＋Cowork 五點覆核也做完，依使用者指示在此暫停等審。** 步驟 3（`score.py` 計分）跟步驟 4（App 選股頁）**不會自己開始**，要等 Cowork／使用者審完（`FACTORS.md`）才繼續。
+**▶ 目前狀態：AI 選股引擎 Phase A（步驟 1–4）全部完成，Part 1 已 push。正在設 Part 2（30分鐘挖礦馬拉松，三軌獨立）。**
+
+**Part 1 收尾摘要（2026-08-23）：** 因子相關性去重（`f_eps_growth`/`f_eps_surprise` 同家族合併，4 因子→3 獨立成分）；`score.py` 綜合分引擎（同產業 peer z-score，ETF 覆蓋率不足過濾）；`run_score_backtest.py` 扣成本+換手組合回測（train/val 隨機控制組皆 100.0 百分位，但絕對報酬輸給零成本買進持有——判讀方式見 `LEADS.md`/`FACTORS.md`，`score_topn_v1` 判定 `EXPERIMENTAL`）；App「選股」頁上線（`scores.json`，瀏覽器實測過）。**意外發現 FinMind 流量限制已解除**——`f_value_pb`/`f_value_pe`/`f_quality_roe_stability` 現在可以重測 IC 了，這輪沒做，排進馬拉松 TW 軌道。**留下未解決的架構問題**：`scores.json` 目前用 `VAL_END` 當基準日（非即時），步驟5「每日排程」需要的即時資料路徑要不要獨立於 holdout 機制之外，待使用者決定。詳見 `FACTORS.md`/`STRATEGY_LOG.md`/`REPORT.md` 2026-08-23 條目。
 
 **Cowork 五點覆核結果摘要（2026-08-23）：** (1) `f_eps_growth` 的 PIT 正確性二次確認為真，不需重算；(2) 加 Bonferroni 校正（門檻 90→98.3 百分位）後 `f_eps_growth` 依然通過，5 個原 FAIL 不變；(3) 全市場/400檔擴大重驗被 FinMind 流量限制擋下（未完成），但用已快取樣本延長橫截面歷史（121→184個，2008–2024）驗證仍過；(4) 擴充 6 個新因子候選——3 個成功測試且全部通過（`f_eps_surprise`/`f_revenue_surprise`/`f_low_vol`），2 個（PB/PE、ROE穩定度）因流量限制完全未測，1 個（分點集中度）確認無免費資料源；(5) 目前累積 **4 個** 通過的因子，但因子間相關性未查、3 個新因子未測，依然不進 `score.py`。詳見 `FACTORS.md`／`REPORT.md` 2026-08-23 條目。
 
@@ -50,7 +52,7 @@
 
 ## AI 選股引擎 Phase A（新工作流，跟里程碑 1–5 平行，不是同一條線）
 
-依使用者設計書分 5 步：因子庫→因子IC檢定→計分→App選股頁→每日排程。**目前狀態：步驟 1、2 完成，因子結果已產出，在此暫停等 Cowork／使用者審，步驟 3、4、5 都還沒開始，不會自己往下做。**
+依使用者設計書分 5 步：因子庫→因子IC檢定→計分→App選股頁→每日排程。**目前狀態：步驟 1–4 全部完成。步驟 5（每日排程）留有一個未解決的架構問題（即時資料 vs holdout 邊界，見上方摘要與 `FACTORS.md`），需要使用者決定後才會動工，不會自己繞過去做。**
 
 - ✅ `factors.py`：6 個因子全部實作，全部透過 `load_dev()`／`pit.py` 取資料，基本面因子用 `merge_asof(direction='backward')` 鍵在 `pit_date` 做 point-in-time 對齊，用真實資料逐日驗證過對齊時間點完全正確（不早於揭露日）。(d) 因子的「市值」用流動性正規化代替（`TaiwanStockMarketValue` 付費，已驗證確認），有明確揭露。
 - ✅ `factor_ic.py`：跟 `weinstein_stage2_unbiased` 同一套無偏抽樣（100 檔種子`20260822`，80 檔可用）、121 個不重疊 20 日橫截面、train/val 分開、200 次隨機打散對照組。
@@ -63,23 +65,29 @@
 - ✅ 3 個新因子成功測試且全過（`f_eps_surprise` val+0.073、`f_revenue_surprise` val+0.050、`f_low_vol` val+0.118，門檻98.3）；2 個（PB/PE/ROE穩定度）因流量限制完全未測；分點集中度確認無免費端點。
 - **目前累積 4 個通過因子**：`f_eps_growth`、`f_eps_surprise`、`f_revenue_surprise`、`f_low_vol`。詳見 `FACTORS.md`。
 
+**2026-08-23 Part 1 收尾追加：**
+- ✅ `factor_correlation.py`（新增）：4 因子相關性矩陣，`f_eps_growth`/`f_eps_surprise` 同家族（+0.831）去重，其餘獨立。4 因子→3 獨立計分成分。
+- ✅ `score.py`（新增）：綜合分引擎，同產業 peer z-score，ETF 覆蓋率不足過濾（`MIN_COMPONENTS_FOR_RANKING`）。
+- ✅ `run_score_backtest.py`（新增）：`score_topn_v1` 扣成本+換手回測，train/val 隨機控制組皆 100.0 百分位，判定 `EXPERIMENTAL`（詳見 `LEADS.md`）。
+- ✅ `scores.json` + App「選股」頁：已上線，瀏覽器實測通過。
+- **意外發現**：FinMind 流量限制已解除（`f_value_pb`/`f_value_pe`/`f_quality_roe_stability` 現在可測），排進馬拉松 TW 軌道，這輪沒有補測。
+
 ## 下一步（優先序，僅供接手者參考，實際順序看使用者當下指示）
 
-1. **當下最優先**：等 Cowork／使用者審 `FACTORS.md` 這批（含五點覆核）結果，決定要不要進 AI 選股引擎步驟 3（`score.py`）。**不要自己跳過這個審核往下做。**
-2. `weinstein_stage2_unbiased` 要不要做一次性 holdout 測試（跟上面是平行的兩條線，互不阻塞）——需要明確授權，這裡不會自己決定。
+1. **當下最優先**：設 Part 2——30 分鐘挖礦馬拉松（Windows 工作排程器，TW/US/期貨三軌獨立），見下方「挖礦馬拉松」章節。
+2. `weinstein_stage2_unbiased` 要不要做一次性 holdout 測試（平行線，互不阻塞）——需要明確授權，這裡不會自己決定。
+3. `scores.json` 即時資料路徑的架構問題（見上方摘要）——需要使用者決定。
 
-背景待辦（優先度較低，不阻塞上面兩項）：
+背景待辦（優先度較低，不阻塞上面）：
 1. 美股成本模型補到 `costs.py`。
-2. FinMind 流量限制解除後：(a) `f_value_pb`/`f_value_pe`/`f_quality_roe_stability` 的 IC 測試（目前完全未測）；(b) 真的擴大到全市場逐檔掃描或 400 檔新樣本（目前只到 83 檔）。
-3. 4 個已通過因子之間的相關性/共線性檢查（`score.py` 動工前建議先做，避免因子高度相關卻各自計入權重）。
-4. 紙上前測影子帳本（里程碑 3 剩下的部分）。
+2. 紙上前測影子帳本（里程碑 3 剩下的部分）。
 
 ## 目前沒有在等待使用者回覆的事（下面兩項例外，**是**在等）
 
-- AI 選股引擎步驟 3/4/5 要不要繼續——**是**在等 Cowork／使用者審完步驟 2 的因子結果，明確要求「先停下」。
 - `weinstein_stage2_unbiased` 是否進 holdout——**是**在等使用者，因為 holdout 一次性、不可逆。
+- `scores.json` 即時資料路徑要不要獨立於 holdout 機制之外——**是**在等使用者決定。
 
-其餘背景待辦不阻塞，可以先做。
+其餘背景待辦（含挖礦馬拉松的三軌探索）不阻塞，可以先做。
 
 ---
 
@@ -91,15 +99,18 @@
 | `DATA.md` | 資料誠實度盤點結果（里程碑 1） | 進 git |
 | `STRATEGY_LOG.md` | 里程碑等級敘事日誌 + FILE MANIFEST | 進 git |
 | `REPORT.md` | 顆粒度細的 append-only 執行記錄 | 進 git |
-| `LEADS.md` | 策略候選登記簿（2 列：`weinstein_stage2_pilot_v1` FAIL、`weinstein_stage2_unbiased` EXPERIMENTAL） | 進 git |
-| `FACTORS.md` | 因子登記簿（6 列，1 個 PASS：`f_eps_growth`） | 進 git |
+| `LEADS.md` | 策略候選登記簿（3 列：`weinstein_stage2_pilot_v1` FAIL、`weinstein_stage2_unbiased` EXPERIMENTAL、`score_topn_v1` EXPERIMENTAL） | 進 git |
+| `FACTORS.md` | 因子登記簿（4 個 PASS，去重後 3 個獨立成分） | 進 git |
 | `MARATHON_STATE.md` | 本檔案，斷點狀態快照 | 進 git |
 | `HOLDOUT_LOCK.json` / `HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git（尚未產生） |
 | `criteria/*.json` | 鎖定的事前通過標準 | 進 git（尚未產生） |
 | `finmind_client.py` / `adjust.py` / `universe.py` / `pit.py` | 資料層 | 進 git |
 | `validation/*.py` | 驗證框架 | 進 git |
-| `backtest/*.py` | 回測引擎骨架（里程碑 4 新增） | 進 git |
+| `backtest/*.py` | 回測引擎骨架（里程碑 4 新增，2026-08-23 加 `book_name` 欄位） | 進 git |
 | `strategies/*.py` | 策略訊號 + 跑法（里程碑 4 新增） | 進 git |
-| `factors.py` / `factor_ic.py` | AI 選股引擎 Phase A 步驟 1/2（因子庫 + IC 檢定） | 進 git |
+| `factors.py` / `factor_ic.py` / `factor_ic_eps_expanded.py` / `factor_correlation.py` | AI 選股引擎 Phase A 步驟 1/2 + 去重前置 | 進 git |
+| `score.py` / `run_score_backtest.py` | AI 選股引擎 Phase A 步驟 3（綜合分 + 扣成本回測） | 進 git |
 | `audit_ledgers.py` | 唯讀稽核腳本 | 進 git |
-| `data/` | parquet 快取、`data/backtests/`、`data/factor_ic_results.csv`、`data/ledger/trades.csv`、回測結果 | **不進 git**（`.gitignore`） |
+| `data/` | parquet 快取、`data/backtests/`、`data/factor_ic_results.csv`、`data/score_backtest_results.csv`、`data/ledger/trades.csv`、回測結果 | **不進 git**（`.gitignore`） |
+| （repo 根目錄）`scores.json` | App「選股」頁資料，`score.py` 產生 | 進 git（跟 `research/data/` 不同層級） |
+| （repo 根目錄）`index.html` | App 本體，2026-08-23 新增「選股」分頁 | 進 git |

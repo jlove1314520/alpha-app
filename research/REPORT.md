@@ -211,3 +211,39 @@ Cowork 針對唯一通過的 `f_eps_growth` 提出 5 點要求：(1) 確認真�
 **Holdout 複查：** `is_holdout_consumed()` 再次確認為 `False`，這輪五點覆核全程沒有呼叫任何跟 holdout 相關的函式。
 
 **任務在此停下**，等 Cowork／使用者審完這批結果，依然不會自己往下做 `score.py` 或 App 選股頁。
+
+---
+
+## 2026-08-23T01:00:00+08:00 — Part 1「先收尾 AI 選股引擎」：因子去重 + score.py + 組合回測 + App 選股頁
+
+使用者授權往下做（前一輪的「停下等審」解除），指示做完 push 才能設 Part 2 的排程。
+
+**1. `factor_correlation.py`（新增）**：對 4 個通過 IC 檢定的因子算相關性矩陣，見 `FACTORS.md` 的完整表格跟判定。`f_eps_growth`／`f_eps_surprise` 相關 +0.831（同家族），其餘 5 對都 ≤0.27（獨立）。用跟 `factor_ic.py` 完全相同的樣本/快取，零額外 API 呼叫。第一次執行時意外撞上一個自製的 bug：`timeout 170 python factor_correlation.py` 這個 shell 包法本身有 170 秒硬上限，跟工具的背景化機制是兩回事，`timeout` 提前把還在跑的程式殺掉（誤判為「太慢」），改成不包 `timeout`、直接背景執行後正常跑完。
+
+**2. `score.py`（新增）**：綜合分引擎。`load_industry_map()` 用 `_fetch()`（不透過 `load_dev()`，跟 `universe.py` 同樣理由：這是分類 metadata 不是價量時間序列）抓 `TaiwanStockInfo` 的 `industry_category`。`_zscore_within_group()` 做同產業 peer normalization，peer group <5 檔退回全樣本 z-score。`compute_scores_at_date()` 把 `f_eps_growth`／`f_eps_surprise` 各自算 peer z 後平均成 `eps_family`，`f_revenue_surprise`／`f_low_vol` 各自保留獨立 z，綜合分 = 3 個成分等權平均（用 `skipna=True`，缺某個成分不會被當 0 分懲罰，只用有的成分算）。加了 `MIN_COMPONENTS_FOR_RANKING=2` 過濾：實測發現 ETF（00844B/00923）因為沒有真實 EPS/營收資料，只用低波動一個成分就能排到前段班——ETF 結構性地比個股平滑，這是資料覆蓋率造成的假象不是選股訊號，加這道過濾後這兩檔正確被排除在排行榜外。
+
+**流量限制解除的意外發現**：寫 `score.py` 測試過程中，`prepare_factors()` 對 100 檔樣本重新呼叫 `TaiwanStockPER`／`TaiwanStockBalanceSheet` 時，發現這兩個資料集**現在都正常回傳真實資料**（不再是 8/22 那批持續一整天的 402）。這代表 8/22 記錄為「完全未測」的 `f_value_pb`／`f_value_pe`／`f_quality_roe_stability` 現在其實可以重跑 IC 測試了——**這輪沒有補做**（不在使用者這輪指示範圍內），已記入 `FACTORS.md`／`MARATHON_STATE.md`，排進後續馬拉松軌道。
+
+**3. `backtest/engine.py` 的一個真正 bug 修正（順手發現，不是刻意找）**：`run_backtest()` 原本把交易紀錄的 `book` 欄位寫死成 `"weinstein_stage2_pilot"`（兩處），這在只有 Weinstein 策略用這顆引擎時沒差，但這次要拿同一顆引擎重跑 `score.py` 的 top-N 策略時，帳本會錯誤標成 Weinstein 的書——`audit_ledgers.py` 之類的稽核工具會被誤導。修法：`BacktestConfig` 新增 `book_name: str = "weinstein_stage2_pilot"` 欄位（預設值保留舊行為，不影響既有呼叫端 `run_weinstein_pilot.py`／`run_weinstein_unbiased.py`，兩處都沒有明確設定這個欄位，驗證過不受影響），兩處寫死改成讀 `config.book_name`。
+
+**4. `run_score_backtest.py`（新增）**：對 `score.py` 綜合分前 10 名做完整「扣成本+換手」組合回測。**發現 `backtest/engine.py` 的 `run_backtest()` 原生機制剛好完全符合需求，不用重寫一顆新引擎**——`signal_fn(price_data, as_of, market_df) -> {stock_id: score}` 這個介面，只要 signal_fn 回傳「已經篩到剩前 N 名」的字典，引擎既有的週頻檢查/T+1成交/只換真正進出榜名字（不強制全部重新等權）/成本扣除機制就完全可以重用，把 `score.compute_scores_at_date()`+`eligible_for_ranking()`+`.head(N)` 包成一個 `signal_fn` 傳進去即可。
+
+隨機控制組（`make_random_signal_fn`）：跟 `weinstein_stage2_unbiased` 的配對式方法同精神——同樣的換股時點/檔數/成本模型，只把「挑哪些股票」隨機化，而不是像舊版靜態控制組那樣連換股頻率都不對應。**第一次嘗試（200 次重抽，照搬 Weinstein 前例的抽樣數）跑到明顯太慢被手動中止**：每次重抽都要重跑一次完整多年逐日回測，不是像 `control_group.py` 靜態版那樣只是抽樣算個百分位而已，200 次的計算量在合理時間內跑不完。優化：(a) 加一個 `_eligible_pool_cache`，同一個 `as_of` 日期的合格股票池只算一次、200 次抽樣共用（原本每次重抽都重新算一次完整的 z-score cross-section，浪費）；(b) 把抽樣數從 200 降到 60，誠實記錄這是比 Weinstein 前例更小的統計預算，因為計算成本結構不同（不是刻意壓低）。優化後在合理時間內跑完。
+
+**組合回測結果（完整數字見 `LEADS.md` 的 `score_topn_v1` 列）**：
+- Train（2015–2020，872 筆交易）：+131.65%，配對式隨機對照組 **100.0 百分位**（60 次重抽中位數期末權益僅 704,681，較起始 1,000,000 **倒賠約 30%**；真實策略達 2,316,487）。
+- Validation（2021–2024，628 筆交易）：+97.58%，配對式隨機對照組 **100.0 百分位**（60 次重抽中位數 1,017,076，幾乎打平；真實策略達 1,975,796）。
+- 成本 1x/2x/3x 全部維持正報酬、單調遞減、沒有翻負（val +97.58%→+75.63%→+53.77%）。
+- **誠實記錄反直覺的一面**：兩期絕對報酬都輸給「零成本全樣本80檔買進持有、不換股」（val +269.53%、train +278.91%）。**這不是判定策略沒用的理由**——正確的判讀方式是看配對式隨機對照組（100.0 百分位，完勝），不是看跟零成本被動基準的差距。真正發生的事是：週頻檢查換股這個機制本身摩擦成本很高（隨機挑股票、同樣換股頻率，中位數表現在 train 期甚至倒賠），能把「這個機制下大概率會虧錢」扭轉成「顯著跑贏所有隨機對照組」的，正是綜合分真實的選股能力。這個教訓跟 `weinstein_stage2` 系列一模一樣，再一次證實「拿零成本被動基準當唯一比較對象」是會誤判的方法論陷阱。
+
+**5. `scores.json`（新增，`alpha-app/` repo 根目錄，非 `research/data/`，進 git）**：`export_scores_json(VAL_END, ...)` 產生，前 30 名。**開發過程抓到一個真的 bug**：Python `json.dump()` 對 `float('nan')` 預設會輸出裸的 `NaN` token（Python 讀得回來，但不是合法 JSON，瀏覽器 `JSON.parse()` 正確拒絕）——第一次產生的檔案送進瀏覽器測試時，選股頁直接顯示「載入失敗：Unexpected token 'N' ... is not valid JSON」。修法：`DataFrame.where(cond, None)` 對 float64 欄位無效（pandas 會把指定的 `None` 自動轉回 `NaN`，這是 float64 dtype 的限制，不是程式碼邏輯錯），要在 `.to_dict(orient='records')` 轉成純 Python dict**之後**才能把 NaN 換成 None（純 Python 的 `dict`/`float` 沒有 pandas 那個 dtype 限制）。同時加 `allow_nan=False` 當第二道防線，之後如果又有 NaN 漏網會直接在產生階段噴出 `ValueError`，不會再悄悄寫出壞掉的 JSON 交給前端才發現。
+
+**6. `index.html`（App 前端，新增「選股」分頁）**：新增第 3 個底部導覽項目（今日/市場/**選股**/交易/日誌/設定），`scr-picks` 畫面：AI 選股引擎說明卡（含研究/教育用途聲明）、綜合分排行榜（`fetch('scores.json')`，點列可展開因子拆解）、因子拆解卡（顯示 `eps_family`／`revenue_surprise`／`low_vol` 三個成分的 peer z-score，成分不足 3/3 時標註可信度較低）。完全複用既有的 `.card`／`.row`／`.dl` CSS 元件，沒有引入新的視覺語言，維持既有風格。
+
+**瀏覽器實測（不是只看程式碼推論，真的開瀏覽器點過）**：起本機 `python -m http.server` 服務 `alpha-app/` 目錄（模擬 GitHub Pages 靜態託管，不是 `file://` 直接開檔案，避免 `fetch()` 的 CORS 假象），用 Claude in Chrome 工具導覽/點擊/截圖驗證：首頁正常載入真實 FinMind 資料（回歸測試，確認新分頁沒有弄壞既有功能）；點擊「選股」分頁正確顯示 30 檔排行榜（含產業別、綜合分）；點擊任一列正確展開因子拆解卡，數字跟 `scores.json` 原始內容逐位元對得上。過程中中途撞到兩次 CDP screenshot timeout（環境層面的暫時性問題，重試後正常，不是程式碼問題）跟一次因為 nav bar 在頁面未捲動時位於視窗外（`#app{height:100dvh}` 但工具截圖視窗高度小於實際 viewport 高度）導致誤點到自選股列表項目——都排除後正常運作。
+
+**Holdout 複查：** `is_holdout_consumed()` 再次確認為 `False`，這輪全程沒有呼叫任何跟 holdout 相關的函式（`scores.json` 用 `VAL_END` 當基準日，不是 holdout 期間資料）。
+
+**留下但誠實標註未解決的架構問題**：使用者原始設計書步驟 5（每日排程更新 `scores.json`）需要抓 `VAL_END` 之後到「今天」的資料，這段目前定義上算 holdout；用已驗證好的既有方法論去跑新資料（不調整任何權重/邏輯）產生每日選股，跟拿 holdout 資料去決定/調整策略設計是兩件不同的事，前者不會污染任何驗證結論。要不要開一條獨立於 `unlock_holdout_once()` 之外的「即時資料」路徑，留給使用者明確決定，這裡沒有自己決定或繞過去做。詳見 `FACTORS.md` 對應段落。
+
+**下一步：** commit + push 完 Part 1，接著設 Part 2（30分鐘挖礦馬拉松，Windows 工作排程器）。
