@@ -73,13 +73,41 @@ class BacktestResult:
         dd = (eq - running_max) / running_max
         return float(dd.min() * 100)
 
+    @property
+    def sortino_ratio(self) -> float:
+        """Annualized Sortino ratio from the daily equity curve. MAR (minimum
+        acceptable return) is 0 -- a simplification disclosed here rather than
+        silently assumed: this treats "any daily loss" as downside, not "any
+        return below the risk-free rate". Revisit if a risk-free benchmark
+        becomes relevant to a specific comparison.
+        """
+        eq = self.equity_curve["equity"]
+        if len(eq) < 2:
+            return float("nan")
+        daily_returns = eq.pct_change().dropna()
+        if daily_returns.empty:
+            return float("nan")
+        downside = daily_returns[daily_returns < 0]
+        downside_dev = float(np.sqrt((downside**2).mean())) if len(downside) else 0.0
+        if downside_dev == 0:
+            return float("nan")
+        return float(daily_returns.mean() / downside_dev * np.sqrt(252))
 
-def _buy_leg_rate(config: BacktestConfig) -> float:
+
+def buy_leg_rate(config: BacktestConfig) -> float:
+    """Single source of truth for the buy-leg cost fraction -- also imported
+    by validation.control_group.run_matched_control_group() so a random
+    control draw can never silently use a different cost assumption than
+    the real backtest it's being compared against.
+    """
     return costmod.COMMISSION_RATE * config.commission_discount * config.cost_multiplier + \
         (config.slippage_bps / 10_000) * config.cost_multiplier
 
 
-def _sell_leg_rate(config: BacktestConfig) -> float:
+def sell_leg_rate(config: BacktestConfig) -> float:
+    """Single source of truth for the sell-leg cost fraction (commission +
+    tax + slippage). See buy_leg_rate()'s docstring.
+    """
     return (costmod.COMMISSION_RATE * config.commission_discount + costmod.SECURITIES_TX_TAX_NORMAL) \
         * config.cost_multiplier + (config.slippage_bps / 10_000) * config.cost_multiplier
 
@@ -172,10 +200,19 @@ def run_backtest(
                 continue
 
             fill_price = float(row["adj_close"])
+            if fill_price <= 0 or pd.isna(fill_price):
+                # Bug fixed 2026-08-22 (found via a 100-stock random-universe run): a bad/zero
+                # price row (thinly-traded or delisted-adjacent name) reached the division below
+                # and raised ZeroDivisionError. Skip this fill; retry next day rather than crash
+                # the whole backtest over one stock's one bad row.
+                nd = next_trading_day(day)
+                if nd:
+                    still_pending.append({**p, "execute_date": nd})
+                continue
             trade_counter += 1
             tid = f"T{trade_counter:06d}"
             if p["side"] == "buy":
-                shares = int(slot_allocation // (fill_price * (1 + _buy_leg_rate(config))))
+                shares = int(slot_allocation // (fill_price * (1 + buy_leg_rate(config))))
                 if shares <= 0 or sid in positions:
                     continue
                 notional = shares * fill_price

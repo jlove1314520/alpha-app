@@ -108,3 +108,41 @@
 3. `criteria.py` 沒有在這輪鎖定標準檔——train/val 層的通過標準已經是 `CONSTITUTION.md` 寫死的固定關卡，這個機制留給之後 holdout 評估用。
 
 **下一步：** 等使用者決定後續方向（換宇宙建構方式重跑 / 升級隨機控制組成動態版本 / 全新參數當新候選）。無論哪個方向，都要走一輪新的 `LEADS.md` 記錄，不能直接改這條的判定。
+
+---
+
+## 2026-08-22T15:00:00+08:00 — Cowork 修正兩個方法論缺陷後重跑：無偏宇宙抽樣 + 配對式控制組，過程中抓到 3 個真 bug
+
+**做了什麼：**
+
+1. **`validation/control_group.py` 新增 `run_matched_control_group()` + `extract_trade_schedule()`**：`extract_trade_schedule(trades)` 從真實回測的 `trades` DataFrame 拉出每筆平倉對應的 `{entry_date, exit_date}`（用 `entry_trade_id` 配對買賣）。`run_matched_control_group()` 拿這個時間表，200 次隨機重抽：**每筆交易保留一模一樣的進場日／出場日，只把股票代號換成隨機抽的一檔**（限定當天有價格資料的候選），用完全相同的部位大小公式（`slot_allocation`）跟成本公式（`cost_rates` 參數直接從呼叫端傳入，不在這裡重新定義，確保跟真實回測用的是同一套費率）算出這筆交易的損益，累加得到這次重抽的期末權益。這樣重抽出來的 200 條軌跡，換股頻率、部位數隨時間的變化、持有天數分布，跟真實策略完全一樣，只有「選哪支股票」被隨機化——這正是 Cowork 要求的「同樣動作、隨機挑對象」。
+
+   `buy_leg_rate()`／`sell_leg_rate()` 兩個原本是 `backtest/engine.py` 內底線開頭的私有函式，這次拿掉底線變成公開函式（給 `control_group.py` 呼叫端算 `cost_rates` 用），確保成本費率只有一個計算來源，不會兩邊各自維護一份公式、之後改了一邊忘記改另一邊。
+
+   用合成資料驗證：3 支假股票（一支穩定上漲、一支持平、一支下跌）、2 筆交易排程，跑 500 次重抽，結果分布中位數落在接近打平（扣成本後略負），候選（120,000，相當於吃到上漲那支）落在第 89.4 百分位——分布形狀符合直覺，函式邏輯正確。
+
+2. **`backtest/engine.py` 新增 `sortino_ratio` 屬性**：年化 Sortino ratio，MAR（最低可接受報酬）設為 0（明確標註是簡化假設，不是用無風險利率），下檔標準差只用負報酬的日子算。
+
+3. **`strategies/run_weinstein_unbiased.py`（新增）**：`universe.py` 的 `universe()` 全市場（3,196 檔，post-2003+含下市股）用固定種子（`20260822`）隨機抽 100 檔，不再手選。跑 train/val/成本敏感度，控制組改用 `run_matched_control_group()`。
+
+**跑的過程中，第一次全量執行就崩潰／出現大量資料錯誤，逐一排查抓到 3 個真的程式碼 bug（不是資料本身的問題）：**
+
+- **`adjust.py` `adjustment_events()`**：`events` 列表為空時，`pd.DataFrame(events).sort_values("ex_date")` 對一個 0 欄位的空 DataFrame 呼叫 `.sort_values()`，丟出 `KeyError('ex_date')`。修法：`events` 為空時直接回傳跟 `div.empty` 分支一樣、欄位齊全的空 DataFrame，不要讓程式碼跑到 `.sort_values()` 那行。
+- **`adjust.py` `adjusted_price_series()`**：原本寫成 `load_dev(...).sort_values("date").reset_index(drop=True)` 一路鏈式呼叫，如果 `load_dev()` 回傳空 DataFrame（0 欄位），`.sort_values("date")` 一樣丟 `KeyError('date')`——要先接住回傳值判斷 `.empty`，再決定要不要排序。
+- **`backtest/engine.py` 執行成交那段**：`shares = int(slot_allocation // (fill_price * (1 + buy_leg_rate(config))))`，如果當天 `fill_price` 是 0（少數冷門/瀕臨資料邊界的股票偶爾會有異常列），分母變 0，`ZeroDivisionError` 直接讓整個回測崩潰。修法：在算 `shares`之前先檢查 `fill_price<=0` 或 `NaN`，是的話這筆成交順延到下一交易日重試，不強制成交也不崩潰。
+
+三個 bug 都用先前會出錯的股票代號（`7822`／`2381`／`3499`／`8999`／`1606`／`1107`／`7418`／`7893`／`6958A`／`6232`／`00776`／`7912`）逐一重跑 `adjusted_price_series()` 驗證過，全部不再報錯（真的沒資料的正確回傳 0 列，不是假裝有資料）。
+
+**這三個 bug 為什麼在手選 30 檔試點宇宙時沒被抓到：** 手選的都是知名大型權值股，資料完整、流動性好，不會踩到「近期上市資料太少」「除權息事件表剛好是空的」「個別交易日價格是 0」這種資料邊界情況。改成無偏隨機抽樣後，馬上就抽到好幾檔冷門/邊緣案例，逼出這些之前沒測到的路徑——這是全市場（或至少無偏抽樣）測試比手選清單更有價值的具體證據，不只是「避免選擇偏差」這個抽象理由。
+
+**驗證結果（修好 bug 之後的完整跑法）：**
+- 100 檔隨機抽樣（種子 `20260822`），82 檔有足夠資料（≥200 列）可用；其餘因資料太少或完全查無資料被過濾掉（過濾邏輯本身沒問題，見上段）。
+- **Validation（2021–2024，276 筆交易）**：+145.39%，MDD −22.41%，Sortino 0.702，勝買進持有 +54.58%。
+- **Train（2015–2020，514 筆交易）**：+99.46%，MDD −29.11%，Sortino 0.444，勝買進持有 +58.86%。
+- 成本敏感度（validation）：1x +145.39% → 2x +136.36% → 3x +127.38%，單調遞減、沒有翻負，穩健。
+- **配對式隨機控制組（validation，133 組進出場日期，200 次重抽）：策略期末權益 2,453,879，勝過 200 次重抽分布的第 99.5 百分位**（中位數 1,376,454），50/90/95/99 四個門檻全部達標。
+- 交易紀錄二次稽核：train（514 筆）、validation（276 筆）都餵給 `audit_ledgers.run()`，全部 PASS（含新的 holdout 洩漏檢查）。買賣筆數對得上（143 買／133 賣，10 筆是期末仍持有未平倉，`extract_trade_schedule()` 正確只抽取已平倉的 133 組，數字互相印證沒有算錯）。
+
+**LEADS.md 記錄：** 新增一列 `weinstein_stage2_unbiased`。判定 **`EXPERIMENTAL`**（不是 `PASS`）——雖然四項關卡（買進持有/成本敏感度/交易數/隨機控制組）全部通過，但 `LEADS.md` 自己訂的規則講明白 `PASS` 一定要包含 holdout 驗證，這輪完全沒有觸碰 holdout。`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` 複查為 `False`。是否要花掉這個專案唯一一次的 holdout 測試機會，不是這裡能自己決定的事。
+
+**下一步：** 等使用者決定要不要對 `weinstein_stage2_unbiased` 做一次性 holdout 測試（需要明確授權，且測過即焚），或是先擴大抽樣規模／真的逐檔掃全市場來提高嚴謹度，或是先去處理其他背景待辦（美股成本模型、紙上前測影子帳本）。

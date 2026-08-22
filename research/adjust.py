@@ -90,15 +90,24 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
             "cash": cash, "stock_ratio": stock_ratio,
         })
 
+    if not events:
+        # Bug fixed 2026-08-22 (found via a 100-stock random-universe run): pd.DataFrame([])
+        # has zero columns, so .sort_values("ex_date") on it raises KeyError('ex_date') --
+        # must return the properly-columned empty frame directly instead of falling through.
+        return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
     return pd.DataFrame(events).sort_values("ex_date").reset_index(drop=True)
 
 
 def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
     """Raw TaiwanStockPrice rows (capped at VAL_END, see module docstring) with
     an added `adj_close` column (back-adjusted)."""
-    raw = load_dev("TaiwanStockPrice", stock_id, start_date).sort_values("date").reset_index(drop=True)
+    raw = load_dev("TaiwanStockPrice", stock_id, start_date)
     if raw.empty:
+        # Bug fixed 2026-08-22: this used to call .sort_values("date") before checking
+        # emptiness -- an empty DataFrame has zero columns, so that raised KeyError('date')
+        # instead of just returning the (correctly empty) result.
         return raw
+    raw = raw.sort_values("date").reset_index(drop=True)
     events = adjustment_events(stock_id, start_date)
 
     adj = raw["close"].astype(float).copy()

@@ -6,11 +6,34 @@
 
 ---
 
+## 2026-08-22 — Cowork 修正兩個方法論缺陷後重跑：無偏宇宙 + 配對式控制組，結果 EXPERIMENTAL（train/val 全過，未碰 holdout）
+
+Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對的（「贏不過隨機對照＝賺的是 beta 不是 alpha」），但指出測試方法有兩個問題，修好才有效：靜態買進持有對照組不是策略機制的公平對照；手選大型股宇宙本身帶存活者/選擇偏差。這輪把兩個都修了，重跑同一套 Weinstein 第二階段訊號。
+
+**控制組修正**（`validation/control_group.py` 新增 `run_matched_control_group()`）：不再用「隨機抽 N 檔靜態持有」，改成「拿策略真實跑出來的進出場日期表（同樣的再平衡頻率、同樣的部位數、同樣的持有天數分布），200 次隨機重抽只換掉每筆交易的股票代號，其他（進場日、出場日、部位大小、成本公式）完全比照真實策略」。這是機制上真正對應的隨機對照。
+
+**宇宙修正**：不再手選知名股，改用 `universe.py` 的全市場名單（post-2003 + 含下市股，3,196 檔）做固定種子隨機抽樣。**仍是抽樣（100 檔，82 檔有效資料），不是逐檔全市場掃描**——全市場的資料量在 FinMind 免費額度下會花太久，這輪先驗證「無偏抽樣」跟「偏差手選」的差異有多大，均勻隨機抽樣跟全市場逐檔掃描在統計性質上是不同層次的嚴謹度，但已經是很不一樣、也重要得多的修正，比繼續用手選清單好得多。
+
+**跑的過程中意外抓到 3 個真的程式碼 bug**（不是資料問題），全部是「檢查空值前就先呼叫 `.sort_values()`」這個模式：`adjust.py` 的 `adjustment_events()` 在 `events` 列表為空時、`adjusted_price_series()` 在 `raw` 為空時，都會在檢查 `.empty` 之前就先鏈式呼叫 `.sort_values(...)`，導致對 0 欄位的空 DataFrame 呼叫時丟出 `KeyError`；另外 `backtest/engine.py` 在 `fill_price` 為 0（少數冷門/瀕臨下市個股的資料異常）時會除以零崩潰。三個都修好、也重新對修好前會出錯的股票代號逐一驗證過確實不再出錯。這是無偏隨機抽樣的價值之一——手選的知名大型股不會踩到這些冷門股票才有的資料邊界情況，全市場抽樣才會。
+
+**結果（誠實記錄，這次是正面結果，但仍要照規矩標記）：**
+- Validation（2021–2024，276 筆交易）：+145.4%，MDD −22.41%，Sortino 0.702，贏買進持有（+54.6%）。
+- Train（2015–2020，514 筆交易）：+99.5%，MDD −29.11%，Sortino 0.444，贏買進持有（+58.9%）。
+- 成本 1x/2x/3x 敏感度穩健：+145.4%→+136.4%→+127.4%，沒有翻負。
+- **配對式隨機控制組：策略打贏 200 次重抽的第 99.5 百分位**，50/90/95/99 四個門檻全部達標。
+- 用 `audit_ledgers.py` 對兩批真實交易紀錄（train 514、validation 276 筆）稽核，全部 PASS。
+
+**這是目前唯一四項關卡全部通過的候選。但依 `LEADS.md` 既有規則，`PASS` 判定必須包含 holdout 驗證，這輪完全沒有碰 holdout（`is_holdout_consumed()` 複查為 `False`），所以正確的判定是 `EXPERIMENTAL`，不是 `PASS`。** 即使 train/val 表現很好，也不能因為結果好看就放寬自己訂的規則——這正是 `CONSTITUTION.md`「事前綁定標準,絕不事後移動門柱」要防的事。是否要進入一次性 holdout 測試（測過即焚），是需要使用者明確授權的決定，這裡不會自己決定。
+
+完整技術細節、bug 修復過程、驗證步驟見 `REPORT.md` 對應條目；候選記錄見 `LEADS.md`。
+
+---
+
 ## FILE MANIFEST（給稽核用，逐檔核對）
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-22T14:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-22T15:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -18,7 +41,7 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/DATA.md` | 里程碑 1：FinMind 資料誠實度盤點結果（還原股價/存活者偏差/PIT 財報三顆地雷） | 文件 |
 | `research/STRATEGY_LOG.md` | 本檔案。里程碑等級敘事日誌 + 本 FILE MANIFEST | 文件 |
 | `research/REPORT.md` | append-only 細顆粒執行記錄 | 文件 |
-| `research/LEADS.md` | 策略候選登記簿（目前空） | 文件 |
+| `research/LEADS.md` | 策略候選登記簿（2 列：`weinstein_stage2_pilot_v1` FAIL、`weinstein_stage2_unbiased` EXPERIMENTAL） | 文件 |
 | `research/MARATHON_STATE.md` | 斷點狀態快照（覆寫式，換 session 先讀這個） | 文件 |
 | `research/finmind_client.py` | FinMind 抓取+快取層。`load_dev()` 是策略/分析程式碼**唯一**該用的入口（自動截斷在 `VAL_END`）；`load_full_history()` 是唯一合法的無截斷路徑（只能餵給 `unlock_holdout_once()`）；`_fetch()` 是底層 internal 函式，不該被外部直接呼叫 | 程式碼 |
 | `research/adjust.py` | 台股還原股價（用 `TaiwanStockDividend` 自組，因為 `TaiwanStockPriceAdj` 要付費），透過 `load_dev()` 抓資料，自動截斷 | 程式碼 |
@@ -28,13 +51,14 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/validation/__init__.py` | `validation` package 標記 | 程式碼 |
 | `research/validation/holdout.py` | train/val/holdout 物理隔離、一次性解鎖機制、`assert_no_holdout_leakage()` 硬性斷言 | 程式碼 |
 | `research/validation/costs.py` | 台股成本/摩擦模型（手續費/證交稅/滑價/漲跌停鎖死偵測） | 程式碼 |
-| `research/validation/control_group.py` | 隨機控制組（策略無關，`evaluate_fn` seam） | 程式碼 |
+| `research/validation/control_group.py` | 隨機控制組。`run_control_group()` 是原本的靜態版本（仍保留給其他簡單場景）；**2026-08-22 新增 `run_matched_control_group()`**——依 Cowork 要求，用策略真實進出場日期表只換股不換時間，才是機制上對應的隨機對照 | 程式碼 |
 | `research/validation/criteria.py` | 事前綁定通過標準（雜湊鎖定，防止事後移動門柱） | 程式碼 |
 | `research/backtest/__init__.py` | `backtest` package 標記 | 程式碼 |
-| `research/backtest/engine.py` | **里程碑 4 新增**：通用回測引擎骨架。走日曆逐日模擬，訊號 T 日收盤產生、T+1 收盤成交（零 look-ahead），三層風控（MA出場/部位上限/硬停損），成本走 `validation/costs.py`，資料進場前用 `assert_no_holdout_leakage()` 檢查 | 程式碼 |
+| `research/backtest/engine.py` | 通用回測引擎骨架。走日曆逐日模擬，訊號 T 日收盤產生、T+1 收盤成交（零 look-ahead），三層風控（MA出場/部位上限/硬停損），成本走 `validation/costs.py`（`buy_leg_rate()`/`sell_leg_rate()` 是給 `control_group.py` 重用的單一事實來源），資料進場前用 `assert_no_holdout_leakage()` 檢查。`BacktestResult` 有 `max_drawdown_pct`／`sortino_ratio` 屬性（**2026-08-22 追加 Sortino**） | 程式碼 |
 | `research/strategies/__init__.py` | `strategies` package 標記 | 程式碼 |
-| `research/strategies/weinstein_stage2.py` | **里程碑 4 新增**：Weinstein 第二階段訊號函式（150日均線上揚+站上、60日動量排名）+ 大盤200日均線總體閘門，插進 `backtest/engine.py` 用 | 程式碼 |
-| `research/strategies/run_weinstein_pilot.py` | **里程碑 4 新增**：第一個候選的完整跑法（試點宇宙 30 檔、train/val/成本敏感度/隨機控制組），結果見 `LEADS.md` | 程式碼 |
+| `research/strategies/weinstein_stage2.py` | Weinstein 第二階段訊號函式（150日均線上揚+站上、60日動量排名）+ 大盤200日均線總體閘門，插進 `backtest/engine.py` 用 | 程式碼 |
+| `research/strategies/run_weinstein_pilot.py` | 第一輪跑法（手選 30 檔試點宇宙、靜態控制組）——**方法論已知有缺陷**（見 `weinstein_stage2_pilot_v1` 在 `LEADS.md` 的紀錄），保留是為了留下完整歷史，不是推薦用法 | 程式碼 |
+| `research/strategies/run_weinstein_unbiased.py` | **2026-08-22 新增**：修正版跑法（`universe.py` 全市場隨機抽樣 100 檔 + `run_matched_control_group()`），結果見 `LEADS.md` 的 `weinstein_stage2_unbiased` 列 | 程式碼 |
 | `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
