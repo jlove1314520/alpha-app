@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-22T16:00:00+08:00**
+**最後更新：2026-08-23T00:30:00+08:00**
 
-**⏸ 目前停在：AI 選股引擎 Phase A 步驟 1／2 做完，依使用者指示在此暫停等審。** 步驟 3（`score.py` 計分）跟步驟 4（App 選股頁）**不會自己開始**，要等 Cowork／使用者審完步驟 2 的因子結果（`FACTORS.md`）才繼續。
+**⏸ 目前停在：AI 選股引擎 Phase A 步驟 1／2 做完＋Cowork 五點覆核也做完，依使用者指示在此暫停等審。** 步驟 3（`score.py` 計分）跟步驟 4（App 選股頁）**不會自己開始**，要等 Cowork／使用者審完（`FACTORS.md`）才繼續。
+
+**Cowork 五點覆核結果摘要（2026-08-23）：** (1) `f_eps_growth` 的 PIT 正確性二次確認為真，不需重算；(2) 加 Bonferroni 校正（門檻 90→98.3 百分位）後 `f_eps_growth` 依然通過，5 個原 FAIL 不變；(3) 全市場/400檔擴大重驗被 FinMind 流量限制擋下（未完成），但用已快取樣本延長橫截面歷史（121→184個，2008–2024）驗證仍過；(4) 擴充 6 個新因子候選——3 個成功測試且全部通過（`f_eps_surprise`/`f_revenue_surprise`/`f_low_vol`），2 個（PB/PE、ROE穩定度）因流量限制完全未測，1 個（分點集中度）確認無免費資料源；(5) 目前累積 **4 個** 通過的因子，但因子間相關性未查、3 個新因子未測，依然不進 `score.py`。詳見 `FACTORS.md`／`REPORT.md` 2026-08-23 條目。
 
 **GitHub 稽核狀態：✅ 通過**（12:00 的 `.py` 檔案存在性問題是 Cowork 端舊快照；13:00 的 holdout 截斷漏洞是真的，已修復）。**如果又收到類似回報，先照 STRATEGY_LOG.md 的 FILE MANIFEST 重新走一次驗證，不要預設是自己這邊漏推，也不要預設對方一定錯。**
 
@@ -52,17 +54,25 @@
 
 - ✅ `factors.py`：6 個因子全部實作，全部透過 `load_dev()`／`pit.py` 取資料，基本面因子用 `merge_asof(direction='backward')` 鍵在 `pit_date` 做 point-in-time 對齊，用真實資料逐日驗證過對齊時間點完全正確（不早於揭露日）。(d) 因子的「市值」用流動性正規化代替（`TaiwanStockMarketValue` 付費，已驗證確認），有明確揭露。
 - ✅ `factor_ic.py`：跟 `weinstein_stage2_unbiased` 同一套無偏抽樣（100 檔種子`20260822`，80 檔可用）、121 個不重疊 20 日橫截面、train/val 分開、200 次隨機打散對照組。
-- ✅ `FACTORS.md`：6 個因子的完整結果登記，**只有 `f_eps_growth` 通過**（val IC +0.073，打散對照 100 百分位），其餘 5 個因子（月營收YoY加速度/外資連續買超/三大法人淨買/相對強度/站上季線量能）都沒過，原因逐一記錄（其中 2 個是 train/val 正負號相反，1 個差一點點沒到門檻）。
+- ✅ `FACTORS.md`：6 個因子的完整結果登記，原本 **只有 `f_eps_growth` 通過**（val IC +0.073，打散對照 100 百分位），其餘 5 個因子（月營收YoY加速度/外資連續買超/三大法人淨買/相對強度/站上季線量能）都沒過，原因逐一記錄（其中 2 個是 train/val 正負號相反，1 個差一點點沒到門檻）。
+
+**2026-08-23 Cowork 五點覆核後追加：**
+- ✅ `factor_ic.py`：新增 Bonferroni 校正（`required_percentile`/`bonferroni_n`），`N_SHUFFLES` 200→1000。原始 6 因子用當前程式碼重跑確認：5 FAIL 不變，`f_eps_growth` 校正後（門檻98.3）仍 PASS。
+- ✅ `factor_ic_eps_expanded.py`（新增）：`f_eps_growth` 擴大樣本重驗，受流量限制只到 83/400 檔，但橫截面延長到 184 個（2008–2024），val IC +0.0742，PASS。
+- ✅ `pit.py` 新增 `balance_sheet_pit()`；`factors.py` 擴充 6 個新因子候選（PB/PE、ROE穩定度、低波動、EPS/營收意外SUE、分點集中度）。
+- ✅ 3 個新因子成功測試且全過（`f_eps_surprise` val+0.073、`f_revenue_surprise` val+0.050、`f_low_vol` val+0.118，門檻98.3）；2 個（PB/PE/ROE穩定度）因流量限制完全未測；分點集中度確認無免費端點。
+- **目前累積 4 個通過因子**：`f_eps_growth`、`f_eps_surprise`、`f_revenue_surprise`、`f_low_vol`。詳見 `FACTORS.md`。
 
 ## 下一步（優先序，僅供接手者參考，實際順序看使用者當下指示）
 
-1. **當下最優先**：等 Cowork／使用者審 `FACTORS.md` 的因子結果，決定要不要進 AI 選股引擎步驟 3（`score.py`）。**不要自己跳過這個審核往下做。**
+1. **當下最優先**：等 Cowork／使用者審 `FACTORS.md` 這批（含五點覆核）結果，決定要不要進 AI 選股引擎步驟 3（`score.py`）。**不要自己跳過這個審核往下做。**
 2. `weinstein_stage2_unbiased` 要不要做一次性 holdout 測試（跟上面是平行的兩條線，互不阻塞）——需要明確授權，這裡不會自己決定。
 
 背景待辦（優先度較低，不阻塞上面兩項）：
 1. 美股成本模型補到 `costs.py`。
-2. 擴大抽樣規模，或真的逐檔掃全市場。
-3. 紙上前測影子帳本（里程碑 3 剩下的部分）。
+2. FinMind 流量限制解除後：(a) `f_value_pb`/`f_value_pe`/`f_quality_roe_stability` 的 IC 測試（目前完全未測）；(b) 真的擴大到全市場逐檔掃描或 400 檔新樣本（目前只到 83 檔）。
+3. 4 個已通過因子之間的相關性/共線性檢查（`score.py` 動工前建議先做，避免因子高度相關卻各自計入權重）。
+4. 紙上前測影子帳本（里程碑 3 剩下的部分）。
 
 ## 目前沒有在等待使用者回覆的事（下面兩項例外，**是**在等）
 

@@ -1,22 +1,30 @@
 """AI 選股引擎 Phase A -- factor library.
 
-Six factors computed from free FinMind data. Every daily/volume-based
-input is naturally point-in-time (a trading day's OHLCV is known at that
-day's close). Every fundamentals-based input (monthly revenue, quarterly
-EPS) is joined onto the daily price series via `pandas.merge_asof(...,
-direction="backward")` keyed on `pit.py`'s `pit_date` column, NOT the
-fiscal period date -- this is what makes "the revenue-acceleration factor
-value on trading day T" mean "the most recently DISCLOSED figure as of T",
-never a figure that wouldn't actually have been public yet. See pit.py's
-own docstring for what `pit_date` means and its `assumed` vs `real`
-distinction; any factor built on `pit_source='assumed'` rows inherits that
-same experimental status.
+Originally six factors computed from free FinMind data; **expanded
+2026-08-22** (Cowork review) with six more candidates: value (PB/PE),
+quality (ROE stability), low volatility, and two SUE-style "surprise"
+factors (EPS surprise / revenue surprise) that are deliberately DIFFERENT
+hypotheses from the original growth/acceleration factors -- see each
+function's docstring for exactly how they differ.
+
+Every daily/volume-based input is naturally point-in-time (a trading day's
+OHLCV is known at that day's close). Every fundamentals-based input
+(monthly revenue, quarterly EPS, quarterly balance sheet) is joined onto
+the daily price series via `pandas.merge_asof(..., direction="backward")`
+keyed on `pit.py`'s `pit_date` column, NOT the fiscal period date -- this
+is what makes "the revenue-acceleration factor value on trading day T"
+mean "the most recently DISCLOSED figure as of T", never a figure that
+wouldn't actually have been public yet. Verified against real 2330 data
+(see REPORT.md 2026-08-22 entries) that the daily factor value only changes
+on/after the real pit_date. See pit.py's own docstring for what `pit_date`
+means and its `assumed` vs `real` distinction; any factor built on
+`pit_source='assumed'` rows inherits that same experimental status.
 
 A factor being defined here is not a claim that it works. factor_ic.py is
-what decides which of these six actually carry predictive information;
-CONSTITUTION.md's honesty rule applies here just as much as to a full
-strategy -- a factor that fails IC testing gets weight 0 in score.py, not
-quietly dropped from the record.
+what decides which actually carry predictive information; CONSTITUTION.md's
+honesty rule applies here just as much as to a full strategy -- a factor
+that fails IC testing gets weight 0 in score.py, not quietly dropped from
+the record.
 
 **Known substitution, disclosed (not hidden):** factor (d) is described in
 the project design doc as "三大法人淨買/市值" (institutional net buy / market
@@ -27,6 +35,25 @@ instead -- a liquidity-normalized proxy, not literally market cap. Still a
 reasonable normalization (big, liquid stocks have both bigger market caps
 and bigger trading values, so the two are correlated), but not the same
 number the design doc names.
+
+**Value factors' PIT status is UNVERIFIED, disclosed:** `f_value_pb` /
+`f_value_pe` read `TaiwanStockPER`'s daily PBR/PER directly, which FinMind
+computes itself from that day's price and *some* trailing EPS/book-value
+figure. Whether FinMind updates that trailing figure the moment a fiscal
+quarter ENDS (a hidden lookahead bias baked into FinMind's own data, not
+introduced by this codebase) or only once the quarter is actually
+DISCLOSED has not been checked -- the FinMind rate limit was hit (see
+FACTORS.md/REPORT.md 2026-08-22) before this could be tested with real
+data. Do not trust these two factors' IC results (once run) as PIT-clean
+until this is explicitly verified the same way f_rev_accel/f_eps_growth
+were.
+
+**分點集中度 (broker-branch concentration) was investigated and dropped, not
+silently skipped**: the plausible free-tier dataset (`TaiwanStockTradingDailyReport`)
+returned a confirmed paid-tier rejection on a live request (2026-08-22);
+`TaiwanSecuritiesTraderInfo` only gives broker metadata (name/address), not
+per-stock branch trading volume. No FinMind free-tier path exists for this
+factor as far as this investigation found.
 """
 from __future__ import annotations
 
@@ -34,7 +61,7 @@ import numpy as np
 import pandas as pd
 
 from finmind_client import load_dev
-from pit import month_revenue_pit, quarterly_pit
+from pit import balance_sheet_pit, month_revenue_pit, quarterly_pit
 
 FOREIGN_STREAK_VOL_WINDOW = 20
 INST_FLOW_WINDOW = 20
@@ -42,6 +69,10 @@ REL_STRENGTH_WINDOW = 60
 MA_WINDOW = 60
 VOL_SHORT_WINDOW = 20
 VOL_LONG_WINDOW = 60
+LOW_VOL_WINDOW = 60
+SUE_TRAILING_QUARTERS = 8
+REVENUE_SUE_TRAILING_MONTHS = 12
+ROE_STABILITY_TRAILING_QUARTERS = 8
 
 
 def _institutional_daily_net(stock_id: str, start_date: str) -> pd.DataFrame:
@@ -149,18 +180,99 @@ def _revenue_yoy_acceleration(stock_id: str, start_date: str) -> pd.DataFrame:
     return rev[["pit_date", "yoy_accel"]]
 
 
+def _quarterly_eps(stock_id: str, start_date: str) -> pd.DataFrame:
+    """Shared base for (b) and the EPS-surprise factor: quarterly EPS sorted
+    by fiscal period, with pit_date attached. Returns pit_date, EPS.
+    """
+    q = quarterly_pit(stock_id, start_date)
+    if q.empty or "EPS" not in q.columns:
+        return pd.DataFrame(columns=["pit_date", "fiscal_period_end", "EPS"])
+    return q.sort_values("fiscal_period_end").reset_index(drop=True)[["pit_date", "fiscal_period_end", "EPS"]]
+
+
 def _eps_yoy_growth(stock_id: str, start_date: str) -> pd.DataFrame:
     """(b) EPS 成長: this quarter's EPS vs the same quarter one year prior
     (shift(4), assuming no gaps in the quarterly series -- reasonable for
     an ongoing listed company; a stock with reporting gaps would just get
     NaN for those quarters, not a wrong number). Returns pit_date, eps_yoy.
     """
-    q = quarterly_pit(stock_id, start_date)
-    if q.empty or "EPS" not in q.columns:
+    q = _quarterly_eps(stock_id, start_date)
+    if q.empty:
         return pd.DataFrame(columns=["pit_date", "eps_yoy"])
-    q = q.sort_values("fiscal_period_end").reset_index(drop=True)
     q["eps_yoy"] = (q["EPS"] - q["EPS"].shift(4)) / q["EPS"].shift(4).abs()
     return q[["pit_date", "eps_yoy"]]
+
+
+def _eps_surprise_sue(stock_id: str, start_date: str) -> pd.DataFrame:
+    """(g) PEAD / 財報意外 -- Standardized Unexpected Earnings (SUE), the
+    academic-literature proxy used when no analyst-estimate consensus is
+    available (Bernard & Thomas methodology): seasonally-differenced EPS
+    change, standardized by the trailing volatility of that same seasonal
+    difference. **Deliberately different hypothesis from (b) f_eps_growth**:
+    (b) is a raw growth RATE; this is the seasonal CHANGE standardized by
+    its own historical variability -- a company with huge, choppy EPS swings
+    needs a much bigger change to register as a real "surprise" than a
+    stable one does, which plain YoY growth doesn't distinguish.
+    """
+    q = _quarterly_eps(stock_id, start_date)
+    if q.empty:
+        return pd.DataFrame(columns=["pit_date", "eps_sue"])
+    q["eps_diff"] = q["EPS"] - q["EPS"].shift(4)
+    q["eps_diff_std"] = q["eps_diff"].rolling(SUE_TRAILING_QUARTERS, min_periods=SUE_TRAILING_QUARTERS).std()
+    q["eps_sue"] = q["eps_diff"] / q["eps_diff_std"]
+    return q[["pit_date", "eps_sue"]]
+
+
+def _revenue_surprise_sue(stock_id: str, start_date: str) -> pd.DataFrame:
+    """(h) 營收意外 -- same SUE standardization idea applied to monthly
+    revenue YoY instead of quarterly EPS. **Deliberately different
+    hypothesis from (a) f_rev_accel**: (a) asks "is YoY growth speeding up
+    month over month"; this asks "is this month's YoY growth unusually
+    large relative to how volatile this stock's YoY growth normally is".
+    """
+    rev = month_revenue_pit(stock_id, start_date)
+    if rev.empty:
+        return pd.DataFrame(columns=["pit_date", "revenue_sue"])
+    rev = rev.sort_values(["revenue_year", "revenue_month"]).reset_index(drop=True)
+    prior = rev[["revenue_year", "revenue_month", "revenue"]].copy()
+    prior["revenue_year"] += 1
+    prior = prior.rename(columns={"revenue": "revenue_prior_year"})
+    rev = rev.merge(prior, on=["revenue_year", "revenue_month"], how="left")
+    rev["yoy"] = (rev["revenue"] - rev["revenue_prior_year"]) / rev["revenue_prior_year"].abs()
+    rev["yoy_std"] = rev["yoy"].rolling(REVENUE_SUE_TRAILING_MONTHS, min_periods=REVENUE_SUE_TRAILING_MONTHS).std()
+    rev["revenue_sue"] = rev["yoy"] / rev["yoy_std"]
+    return rev[["pit_date", "revenue_sue"]]
+
+
+def _roe_stability(stock_id: str, start_date: str) -> pd.DataFrame:
+    """(j) 品質 ROE穩定度: quarterly ROE = this quarter's net income
+    attributable to parent (quarterly_pit's `EquityAttributableToOwnersOfParent`,
+    an income-statement line despite the name -- see App's index.html for
+    the same field reused the same way) divided by that quarter's ending
+    equity (balance_sheet_pit's `EquityAttributableToOwnersOfParent`, the
+    balance-sheet line). Stability score = negative rolling std of the
+    trailing 8 quarterly ROE values (lower volatility = higher "quality"
+    score, hence the negation). Merged on fiscal_period_end -- both PIT
+    functions use the same +45-day lag assumption so this doesn't introduce
+    a new lookahead path, just combines two already-lagged series.
+    """
+    inc = quarterly_pit(stock_id, start_date)
+    bs = balance_sheet_pit(stock_id, start_date)
+    if inc.empty or bs.empty or "EquityAttributableToOwnersOfParent" not in inc.columns \
+            or "EquityAttributableToOwnersOfParent" not in bs.columns:
+        return pd.DataFrame(columns=["pit_date", "roe_stability"])
+    inc = inc[["fiscal_period_end", "pit_date", "EquityAttributableToOwnersOfParent"]].rename(
+        columns={"EquityAttributableToOwnersOfParent": "net_income"})
+    bs = bs[["fiscal_period_end", "EquityAttributableToOwnersOfParent"]].rename(
+        columns={"EquityAttributableToOwnersOfParent": "equity"})
+    merged = inc.merge(bs, on="fiscal_period_end", how="inner").sort_values("fiscal_period_end").reset_index(drop=True)
+    if merged.empty:
+        return pd.DataFrame(columns=["pit_date", "roe_stability"])
+    merged["roe"] = merged["net_income"] / merged["equity"]
+    merged["roe_stability"] = -merged["roe"].rolling(
+        ROE_STABILITY_TRAILING_QUARTERS, min_periods=ROE_STABILITY_TRAILING_QUARTERS
+    ).std()
+    return merged[["pit_date", "roe_stability"]]
 
 
 def prepare_factors(
@@ -210,6 +322,48 @@ def prepare_factors(
     eps_pit = _eps_yoy_growth(stock_id, start_date)
     d = _asof_join(d, eps_pit, "eps_yoy", "f_eps_growth")
 
+    # (g) PEAD/財報意外 (SUE) -- point-in-time via pit_date
+    sue_pit = _eps_surprise_sue(stock_id, start_date)
+    d = _asof_join(d, sue_pit, "eps_sue", "f_eps_surprise")
+
+    # (h) 營收意外 (SUE) -- point-in-time via pit_date
+    rev_sue_pit = _revenue_surprise_sue(stock_id, start_date)
+    d = _asof_join(d, rev_sue_pit, "revenue_sue", "f_revenue_surprise")
+
+    # (i) 低波動: 60 日日報酬標準差取負號（波動越低分數越高），純價格資料，天然 point-in-time
+    daily_ret = d["adj_close"].pct_change()
+    d["f_low_vol"] = -daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).std()
+
+    # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
+    # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓
+    # 整檔股票的其他 11 個因子也一起報廢（2026-08-22 遇到 FinMind 流量限制時發現這個問題）。
+    try:
+        roe_pit = _roe_stability(stock_id, start_date)
+        d = _asof_join(d, roe_pit, "roe_stability", "f_quality_roe_stability")
+    except RuntimeError as e:
+        print(f"    [factors] f_quality_roe_stability skipped for {stock_id}: {e}")
+        d["f_quality_roe_stability"] = np.nan
+
+    # (k)/(l) 價值 PB/PE -- 直接讀 FinMind 算好的 PER/PBR。
+    # **PIT 安全性未驗證，見檔案最上面的揭露**：FinMind 用來算這兩個數字的 EPS/淨值，
+    # 更新時點是不是也有提早看到還沒公告財報的問題，還沒有像 f_rev_accel/f_eps_growth
+    # 那樣用真實資料逐日核對過（流量限制擋住了驗證，見 FACTORS.md）。同樣捕捉例外。
+    try:
+        per_raw = load_dev("TaiwanStockPER", stock_id, start_date)
+        if not per_raw.empty and "PBR" in per_raw.columns and "PER" in per_raw.columns:
+            per_raw = per_raw[["date", "PBR", "PER"]].copy()
+            d = d.merge(per_raw, on="date", how="left")
+            d["f_value_pb"] = np.where(d["PBR"] > 0, -d["PBR"], np.nan)
+            d["f_value_pe"] = np.where(d["PER"] > 0, -d["PER"], np.nan)  # 排除虧損公司的負/零 PER
+            d = d.drop(columns=["PBR", "PER"])
+        else:
+            d["f_value_pb"] = np.nan
+            d["f_value_pe"] = np.nan
+    except RuntimeError as e:
+        print(f"    [factors] f_value_pb/f_value_pe skipped for {stock_id}: {e}")
+        d["f_value_pb"] = np.nan
+        d["f_value_pe"] = np.nan
+
     return d
 
 
@@ -217,3 +371,13 @@ FACTOR_COLUMNS = [
     "f_rev_accel", "f_eps_growth", "f_foreign_streak",
     "f_inst_flow", "f_rel_strength", "f_ma_breakout",
 ]
+
+# 2026-08-22 新增（Cowork 要求擴充因子庫）。PIT 對齊方式跟原本六個因子完全一致；
+# f_value_pb/f_value_pe 的 PIT 安全性尚未驗證，見檔案最上面的揭露，IC 結果出來前不要
+# 假設它們是乾淨的。
+NEW_FACTOR_COLUMNS = [
+    "f_eps_surprise", "f_revenue_surprise", "f_low_vol",
+    "f_quality_roe_stability", "f_value_pb", "f_value_pe",
+]
+
+ALL_FACTOR_COLUMNS = FACTOR_COLUMNS + NEW_FACTOR_COLUMNS

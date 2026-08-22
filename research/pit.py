@@ -76,6 +76,27 @@ def month_revenue_pit(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
     return out
 
 
+def balance_sheet_pit(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
+    """TaiwanStockBalanceSheet pivoted to one row per quarter, with the same
+    `pit_date`/`pit_source='assumed'` treatment as quarterly_pit() (period
+    end + 45 days) -- balance sheets are disclosed alongside the income
+    statement in the same quarterly filing, so the same lag assumption
+    applies. Added 2026-08-22 for factors.py's quality/value factors (ROE
+    stability needs equity; PB needs it too if book value per share isn't
+    available directly).
+    """
+    raw = load_dev("TaiwanStockBalanceSheet", stock_id, start_date)
+    if raw.empty:
+        return pd.DataFrame()
+    wide = raw.pivot_table(index="date", columns="type", values="value", aggfunc="first").reset_index()
+    wide = wide.rename(columns={"date": "fiscal_period_end"})
+    wide["pit_date"] = (
+        pd.to_datetime(wide["fiscal_period_end"]) + pd.Timedelta(days=QUARTERLY_DISCLOSURE_LAG_DAYS)
+    ).dt.strftime("%Y-%m-%d")
+    wide["pit_source"] = "assumed"
+    return wide
+
+
 def any_assumed(df: pd.DataFrame) -> bool:
     """True if any row relies on an assumed (not real) disclosure date.
     A backtest that touches any assumed-PIT data must be reported as

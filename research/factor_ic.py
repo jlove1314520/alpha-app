@@ -43,8 +43,15 @@ SAMPLE_SEED = 20260822
 SAMPLE_SIZE = 100
 START_DATE = "2010-01-01"
 SNAPSHOT_START = "2015-01-01"
-N_SHUFFLES = 200
+N_SHUFFLES = 1000  # raised from 200 (2026-08-22 Cowork review) so a Bonferroni-corrected
+# threshold near the 98-99th percentile is actually measurable -- 200 draws only resolves
+# to 0.5% steps, too coarse once the family-wise-corrected bar sits above ~98%.
 SHUFFLE_SEED = 20260822
+BASE_ALPHA = 0.10  # the single-test significance level implied by the original 90th-percentile
+# bar (percentile >= 90 <=> roughly a one-sided p < 0.10). Multiple-comparison correction below
+# divides this by how many factors are being tested together in one pass, per Cowork's review
+# (2026-08-22): testing 6 factors at once with an uncorrected single-test bar inflates the
+# chance that at least one passes by luck alone.
 
 
 @dataclass
@@ -58,6 +65,7 @@ class FactorICResult:
     n_dates_train: int
     n_dates_val: int
     null_percentile: float  # where |val_mean_ic| sits vs the shuffled null distribution, 0-100
+    required_percentile: float  # the Bonferroni-corrected bar this run needed to clear
     same_sign: bool
     passes: bool
     reasons: list[str] = field(default_factory=list)
@@ -119,8 +127,16 @@ def _cross_section(
 
 
 def evaluate_factor(
-    factor_col: str, data: dict[str, pd.DataFrame], snapshots: list[tuple[str, str]]
+    factor_col: str, data: dict[str, pd.DataFrame], snapshots: list[tuple[str, str]],
+    bonferroni_n: int = 1,
 ) -> FactorICResult:
+    """bonferroni_n: how many factors are being tested together in this pass
+    (the "family" for multiple-comparison correction). required_percentile
+    is set to 100*(1 - BASE_ALPHA/bonferroni_n) -- e.g. testing 6 factors at
+    once with BASE_ALPHA=0.10 requires clearing the 98.3rd percentile, not
+    just the 90th. Pass bonferroni_n=1 (the default) only for a genuinely
+    standalone single-factor test; any batch run should pass the real count.
+    """
     train_ics, val_ics = [], []
     cross_sections = []  # (snapshot_index, factor_vals, returns) for the shuffle test, val period only
     for as_of, fwd in snapshots:
@@ -167,6 +183,8 @@ def evaluate_factor(
     same_sign = (not np.isnan(train_mean) and not np.isnan(val_mean)
                  and np.sign(train_mean) == np.sign(val_mean) and train_mean != 0)
 
+    required_percentile = 100.0 * (1 - BASE_ALPHA / max(bonferroni_n, 1))
+
     reasons = []
     passes = True
     if np.isnan(val_mean) or abs(val_mean) < 0.02:
@@ -175,23 +193,46 @@ def evaluate_factor(
     if not same_sign:
         passes = False
         reasons.append(f"train/val sign mismatch (train={train_mean:.4f}, val={val_mean:.4f})")
-    if np.isnan(null_percentile) or null_percentile < 90:
+    if np.isnan(null_percentile) or null_percentile < required_percentile:
         passes = False
-        reasons.append(f"not distinguishable from random-shuffle null (percentile={null_percentile:.1f})")
+        reasons.append(
+            f"not distinguishable from random-shuffle null at the Bonferroni-corrected bar "
+            f"(percentile={null_percentile:.1f}, required>={required_percentile:.1f} for n={bonferroni_n})"
+        )
 
     return FactorICResult(
         factor=factor_col, train_mean_ic=train_mean, train_ic_ir=train_ir,
         val_mean_ic=val_mean, val_ic_ir=val_ir, val_hit_rate=val_hit_rate,
         n_dates_train=len(train_ics), n_dates_val=len(val_ics),
-        null_percentile=null_percentile, same_sign=same_sign, passes=passes, reasons=reasons,
+        null_percentile=null_percentile, required_percentile=required_percentile,
+        same_sign=same_sign, passes=passes, reasons=reasons,
     )
 
 
-def main():
-    print(f"Sampling {SAMPLE_SIZE} names (seed={SAMPLE_SEED}) from universe.py...")
+def sample_universe_ids(sample_size: int, seed: int = SAMPLE_SEED) -> list[str]:
     u = build_universe()
-    rng = random.Random(SAMPLE_SEED)
-    sample_ids = rng.sample(list(u["stock_id"]), SAMPLE_SIZE)
+    rng = random.Random(seed)
+    return rng.sample(list(u["stock_id"]), sample_size)
+
+
+def run_ic_test(
+    factor_columns: list[str],
+    sample_ids: list[str],
+    label: str,
+    snapshot_start: str = SNAPSHOT_START,
+    bonferroni_n: int | None = None,
+) -> list[FactorICResult]:
+    """Reusable driver: fetch+prepare the given sample, build snapshots from
+    `snapshot_start` to VAL_END, evaluate every column in `factor_columns`
+    with Bonferroni correction sized to `bonferroni_n` (defaults to
+    len(factor_columns) -- i.e. correct for exactly the family being tested
+    in this call, which is the right default for a from-scratch batch test).
+    """
+    if bonferroni_n is None:
+        bonferroni_n = len(factor_columns)
+    print(f"\n=== {label} ===")
+    print(f"Sample: {len(sample_ids)} names, snapshot_start={snapshot_start}, "
+          f"bonferroni_n={bonferroni_n} (required percentile >= {100*(1-BASE_ALPHA/bonferroni_n):.1f})")
 
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     holdout.assert_no_holdout_leakage(market_raw, context="market_raw in factor_ic")
@@ -199,27 +240,33 @@ def main():
 
     print("Loading sample + computing factors (cached after first run)...")
     data = load_sample_with_factors(sample_ids, market_df)
-    print(f"  {len(data)}/{SAMPLE_SIZE} usable names")
+    print(f"  {len(data)}/{len(sample_ids)} usable names")
 
     calendar = sorted(market_df["date"].tolist())
-    snapshots = build_snapshots(calendar, SNAPSHOT_START, holdout.VAL_END)
+    snapshots = build_snapshots(calendar, snapshot_start, holdout.VAL_END)
     print(f"  {len(snapshots)} non-overlapping {FORWARD_HORIZON}-trading-day snapshots, "
-          f"{SNAPSHOT_START}..{holdout.VAL_END}")
+          f"{snapshot_start}..{holdout.VAL_END}")
 
     results = []
-    for col in FACTOR_COLUMNS:
+    for col in factor_columns:
         print(f"\nEvaluating {col}...")
-        r = evaluate_factor(col, data, snapshots)
+        r = evaluate_factor(col, data, snapshots, bonferroni_n=bonferroni_n)
         results.append(r)
         print(f"  train: mean_ic={r.train_mean_ic:+.4f} IR={r.train_ic_ir:+.3f} (n={r.n_dates_train} dates)")
         print(f"  val:   mean_ic={r.val_mean_ic:+.4f} IR={r.val_ic_ir:+.3f} hit_rate={r.val_hit_rate:.2f} (n={r.n_dates_val} dates)")
-        print(f"  null percentile: {r.null_percentile:.1f}  same_sign: {r.same_sign}")
+        print(f"  null percentile: {r.null_percentile:.1f} (need >={r.required_percentile:.1f})  same_sign: {r.same_sign}")
         print(f"  PASSES: {r.passes}" + (f"  reasons: {r.reasons}" if not r.passes else ""))
 
-    print("\n=== SUMMARY ===")
+    print(f"\n=== {label} SUMMARY ===")
     for r in results:
-        print(f"  {r.factor}: {'PASS' if r.passes else 'FAIL'}  val_ic={r.val_mean_ic:+.4f}")
+        print(f"  {r.factor}: {'PASS' if r.passes else 'FAIL'}  val_ic={r.val_mean_ic:+.4f}  "
+              f"percentile={r.null_percentile:.1f}/{r.required_percentile:.1f}")
+    return results
 
+
+def main():
+    sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
+    results = run_ic_test(FACTOR_COLUMNS, sample_ids, "original 6-factor batch (Bonferroni n=6)")
     return results
 
 

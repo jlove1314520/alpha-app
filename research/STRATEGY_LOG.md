@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-08-23 — Cowork 五點覆核回應：因子候選從 1 個增加到 4 個（PIT二次確認、Bonferroni校正、擴大重驗、擴充因子庫）
+
+Cowork 針對上一輪唯一通過的 `f_eps_growth` 提出 5 點要求，逐一誠實回應：
+
+**1. PIT 正確性二次確認：** 逐日比對 2330 的 `f_eps_growth` 因子值變動日跟 `pit.py` 算出的揭露日，包含一筆春節連假案例（`pit_date=2024-02-14` 卡假期，因子值到下個交易日 `02-15` 才變）驗證無誤。**確認本來就是對的，不需要重算**——這跟「抓到 bug 修好」是不同種類的結論，這裡明確區分開來。
+
+**2. 多重比較校正：** 6 個因子同批測，Bonferroni 校正把通過門檻從 90 百分位拉到 98.3 百分位（`factor_ic.py` 新增 `bonferroni_n` 參數，`N_SHUFFLES` 也從 200 提高到 1000 以撐住這個精確度）。用當前程式碼重新完整跑一次：5 個原 FAIL 因子結論不變，**`f_eps_growth` 校正後依然通過**——不是壓線擦邊的 1/6，是拉高門檻後仍站得住腳的結果。
+
+**3. 全市場/更長橫斷面重驗：** 誠實限制——FinMind 免費額度流量上限被真實觸發（HTTP 402），完整擴大到全市場 3,196 檔或穩定拿到 400 檔新樣本都沒有達成。在限制內做了能做的部分：橫截面歷史從 121 個（2015起）延長到 184 個（2008起，多涵蓋一段完整景氣循環，樣本雖只到 83/400 檔），`f_eps_growth` val IC +0.0742，打散對照 100 百分位，依然 PASS。**擴大樣本數這個目標沒有達成，明確記錄，不是藏起來。**
+
+**4. 擴充因子庫：** 新增 6 個候選——分點集中度調查後確認 FinMind 免費層無可用端點，直接排除不測；PB/PE、ROE穩定度因流量限制完全無法測試（100 檔樣本每一檔都被擋），誠實標記「未測試」而非「FAIL」；EPS意外/營收意外(SUE 方法論)、低波動三個成功測試，**全部通過**（`f_eps_surprise` val+0.073、`f_revenue_surprise` val+0.050、`f_low_vol` val+0.118，都在校正後的 98.3 高門檻下過關，`f_low_vol` 是目前 val IC 最強、也是唯一零 PIT 風險的因子）。過程中意外發現並修好一個真實脆弱點：`prepare_factors()` 原本一個新資料集被 402 擋下就會讓整檔股票（連同其他 9 個已算好的因子）一起被丟棄，改成 try/except 隔離後才不會互相拖累。
+
+**5. 累積現況：** 通過因子從 1 個增加到 **4 個**（`f_eps_growth`、`f_eps_surprise`、`f_revenue_surprise`、`f_low_vol`），橫跨基本面成長/意外跟純價格波動度兩類不同資料，不是同一訊號的變形版本。**依然不會自己進 `score.py`**：3 個新因子完全未測（等流量解除）、4 個已通過因子彼此的相關性/共線性也還沒查（可能高度相關、實質是同一訊號被算了三次），這些都要先確認才能談計分權重。
+
+完整逐因子數字、判定表格、已知限制見 `FACTORS.md`（已大幅更新）；技術細節、驗證過程見 `REPORT.md` 對應條目。`is_holdout_consumed()` 複查為 `False`。**任務在此停下，等 Cowork／使用者審完再決定要不要進步驟 3。**
+
+---
+
 ## 2026-08-22 — Cowork 修正兩個方法論缺陷後重跑：無偏宇宙 + 配對式控制組，結果 EXPERIMENTAL（train/val 全過，未碰 holdout）
 
 Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對的（「贏不過隨機對照＝賺的是 beta 不是 alpha」），但指出測試方法有兩個問題，修好才有效：靜態買進持有對照組不是策略機制的公平對照；手選大型股宇宙本身帶存活者/選擇偏差。這輪把兩個都修了，重跑同一套 Weinstein 第二階段訊號。
@@ -33,7 +51,7 @@ Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-22T16:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-23T00:30:00+08:00**（承接 8/22 16:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -42,12 +60,12 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/STRATEGY_LOG.md` | 本檔案。里程碑等級敘事日誌 + 本 FILE MANIFEST | 文件 |
 | `research/REPORT.md` | append-only 細顆粒執行記錄 | 文件 |
 | `research/LEADS.md` | 策略候選登記簿（2 列：`weinstein_stage2_pilot_v1` FAIL、`weinstein_stage2_unbiased` EXPERIMENTAL） | 文件 |
-| `research/FACTORS.md` | **2026-08-22 新增**：因子登記簿（AI 選股引擎 Phase A 步驟 1/2）。6 個因子的 IC 檢定結果，1 個通過（`f_eps_growth`） | 文件 |
+| `research/FACTORS.md` | **2026-08-22 新增，2026-08-23 大幅更新**：因子登記簿（AI 選股引擎 Phase A 步驟 1/2）。原始 6 個因子 + Cowork 覆核新增的 6 個候選，累計 4 個通過（`f_eps_growth`/`f_eps_surprise`/`f_revenue_surprise`/`f_low_vol`） | 文件 |
 | `research/MARATHON_STATE.md` | 斷點狀態快照（覆寫式，換 session 先讀這個） | 文件 |
 | `research/finmind_client.py` | FinMind 抓取+快取層。`load_dev()` 是策略/分析程式碼**唯一**該用的入口（自動截斷在 `VAL_END`）；`load_full_history()` 是唯一合法的無截斷路徑（只能餵給 `unlock_holdout_once()`）；`_fetch()` 是底層 internal 函式，不該被外部直接呼叫 | 程式碼 |
 | `research/adjust.py` | 台股還原股價（用 `TaiwanStockDividend` 自組，因為 `TaiwanStockPriceAdj` 要付費），透過 `load_dev()` 抓資料，自動截斷 | 程式碼 |
 | `research/universe.py` | TW 回測宇宙建構（2003 年後 + 納入下市股，處理存活者偏差），刻意用 `_fetch()` 不截斷（會員名單非價量資料，理由見檔案內 docstring） | 程式碼 |
-| `research/pit.py` | 財報/月營收 point-in-time 保守發布延遲假設，透過 `load_dev()` 抓資料，自動截斷 | 程式碼 |
+| `research/pit.py` | 財報/月營收/資產負債表 point-in-time 保守發布延遲假設，透過 `load_dev()` 抓資料，自動截斷（**2026-08-23 新增 `balance_sheet_pit()`**，同 `quarterly_pit()` 邏輯，供 ROE 穩定度因子用） | 程式碼 |
 | `research/audit_ledgers.py` | 唯讀稽核腳本，對 `trades.csv` 跑 3 條恆等式檢查（含 holdout 洩漏偵測） | 程式碼 |
 | `research/validation/__init__.py` | `validation` package 標記 | 程式碼 |
 | `research/validation/holdout.py` | train/val/holdout 物理隔離、一次性解鎖機制、`assert_no_holdout_leakage()` 硬性斷言 | 程式碼 |
@@ -60,8 +78,9 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/strategies/weinstein_stage2.py` | Weinstein 第二階段訊號函式（150日均線上揚+站上、60日動量排名）+ 大盤200日均線總體閘門，插進 `backtest/engine.py` 用 | 程式碼 |
 | `research/strategies/run_weinstein_pilot.py` | 第一輪跑法（手選 30 檔試點宇宙、靜態控制組）——**方法論已知有缺陷**（見 `weinstein_stage2_pilot_v1` 在 `LEADS.md` 的紀錄），保留是為了留下完整歷史，不是推薦用法 | 程式碼 |
 | `research/strategies/run_weinstein_unbiased.py` | 修正版跑法（`universe.py` 全市場隨機抽樣 100 檔 + `run_matched_control_group()`），結果見 `LEADS.md` 的 `weinstein_stage2_unbiased` 列 | 程式碼 |
-| `research/factors.py` | **2026-08-22 新增**：AI 選股引擎 Phase A 步驟 1。6 個因子的計算邏輯，全部透過 `load_dev()`／`pit.py` 的 `pit_date` 做 point-in-time 對齊（`merge_asof(direction='backward')`） | 程式碼 |
-| `research/factor_ic.py` | **2026-08-22 新增**：Phase A 步驟 2。因子 IC 檢定（Spearman 等級相關 vs 未來20日報酬，train/val 分開、隨機打散對照組），結果見 `FACTORS.md` | 程式碼 |
+| `research/factors.py` | **2026-08-22 新增，2026-08-23 擴充**：AI 選股引擎 Phase A 步驟 1。原始 6 個 + 新增 6 個候選因子（價值PB/PE、品質ROE穩定度、低波動、EPS/營收意外SUE、分點集中度已調查確認不可行），全部透過 `load_dev()`／`pit.py` 的 `pit_date` 做 point-in-time 對齊（`merge_asof(direction='backward')`），`prepare_factors()` 對新資料集的呼叫包 try/except 避免單一資料集被擋時連累其他因子 | 程式碼 |
+| `research/factor_ic.py` | **2026-08-22 新增，2026-08-23 加 Bonferroni 校正**：Phase A 步驟 2。因子 IC 檢定（Spearman 等級相關 vs 未來20日報酬，train/val 分開、隨機打散對照組，`required_percentile`/`bonferroni_n` 支援多重比較校正），結果見 `FACTORS.md` | 程式碼 |
+| `research/factor_ic_eps_expanded.py` | **2026-08-23 新增**：Cowork 覆核第3點，`f_eps_growth` 擴大樣本/延長橫斷面重驗（受流量限制未達成 400 檔目標，見 `FACTORS.md`） | 程式碼 |
 | `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/factor_ic_results.csv`（因子IC原始數字）、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
