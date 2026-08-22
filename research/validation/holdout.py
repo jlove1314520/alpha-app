@@ -1,0 +1,110 @@
+"""Train / validation / holdout split with physical isolation.
+
+CONSTITUTION.md's single most expensive lesson from the Cybex project:
+holdout contamination isn't a discipline problem, it's an availability
+problem. A human WILL eventually look at holdout data if the code makes it
+easy to -- Cybex's "post-2024 real out-of-sample" check was run over a
+hundred times before anyone noticed its date boundary fully overlapped the
+actual holdout. The fix is not "write a comment saying don't look" -- it's
+"the data loader physically cannot return holdout rows unless you go
+through one specific, logged, one-time-use function".
+
+Split boundaries below are a first cut (not yet reviewed against how much
+history an actual strategy will need) -- deliberately hardcoded rather than
+a function parameter, so changing them means editing this file directly,
+which is itself a small amount of intentional friction against casually
+redefining "holdout" mid-project.
+"""
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+TRAIN_END = "2020-12-31"   # inclusive. TRAIN = [universe start, TRAIN_END]
+VAL_END = "2024-12-31"     # inclusive. VAL = (TRAIN_END, VAL_END]
+# HOLDOUT = (VAL_END, today]. Not given a fixed end date -- it grows every day
+# that passes, which is the point: it should always be "the real, not-yet-seen future"
+# relative to whenever a strategy's train/val work was actually done.
+
+_RESEARCH_DIR = Path(__file__).parent.parent
+HOLDOUT_LOCK = _RESEARCH_DIR / "HOLDOUT_LOCK.json"   # committed to git -- the lock must survive
+HOLDOUT_LOG = _RESEARCH_DIR / "HOLDOUT_LOG.md"       # committed to git -- permanent audit trail
+
+
+def cap_to_dev(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
+    """Train+validation only (<= VAL_END). This is what ordinary research
+    code should call -- holdout rows are simply absent from what's
+    returned, not just "you're not supposed to look at them".
+    """
+    return df[df[date_col] <= VAL_END].copy()
+
+
+def cap_to_train(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
+    return df[df[date_col] <= TRAIN_END].copy()
+
+
+def validation_slice(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
+    return df[(df[date_col] > TRAIN_END) & (df[date_col] <= VAL_END)].copy()
+
+
+def is_holdout_consumed() -> bool:
+    return HOLDOUT_LOCK.exists()
+
+
+def unlock_holdout_once(df: pd.DataFrame, reason: str, approved_by: str, date_col: str = "date") -> pd.DataFrame:
+    """The ONLY way to get holdout-period rows. Can succeed exactly once,
+    ever -- enforced by a lock file that is committed to git, so it survives
+    a fresh clone, a new machine, a new session. After the first successful
+    call this always raises, in any future process.
+
+    Both a success and a blocked attempt are appended to HOLDOUT_LOG.md, so
+    there's a permanent record even of attempts that got refused.
+    """
+    if not reason or not reason.strip():
+        raise ValueError("reason is required -- write down WHY you're unlocking holdout, before you see it")
+    if not approved_by or not approved_by.strip():
+        raise ValueError("approved_by is required -- this must be a recorded human decision")
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    if is_holdout_consumed():
+        prior = json.loads(HOLDOUT_LOCK.read_text(encoding="utf-8"))
+        _append_log(ts, reason, approved_by, blocked=True, prior=prior)
+        raise RuntimeError(
+            f"Holdout was already consumed on {prior['timestamp']} "
+            f"(reason: {prior['reason']!r}, approved_by: {prior['approved_by']!r}). It is burned. "
+            "Do not delete HOLDOUT_LOCK.json to get around this. If a new out-of-sample test is "
+            "genuinely needed, that means deliberately defining a NEW holdout window (e.g. rolling "
+            "VAL_END/TRAIN_END forward) and updating this module on purpose, not reusing the one "
+            "that has already been looked at."
+        )
+
+    lock = {"timestamp": ts, "reason": reason, "approved_by": approved_by,
+            "train_end": TRAIN_END, "val_end": VAL_END}
+    HOLDOUT_LOCK.write_text(json.dumps(lock, indent=2, ensure_ascii=False), encoding="utf-8")
+    _append_log(ts, reason, approved_by, blocked=False)
+
+    end = datetime.now().strftime("%Y-%m-%d")
+    return df[(df[date_col] > VAL_END) & (df[date_col] <= end)].copy()
+
+
+def _append_log(ts: str, reason: str, approved_by: str, blocked: bool, prior: dict | None = None) -> None:
+    header_needed = not HOLDOUT_LOG.exists()
+    with HOLDOUT_LOG.open("a", encoding="utf-8") as f:
+        if header_needed:
+            f.write(
+                "# Holdout access log\n\n"
+                "Every call to `unlock_holdout_once()`, successful or blocked, appended here. "
+                "Append-only by convention -- do not edit past entries.\n\n"
+            )
+        if blocked:
+            f.write(
+                f"- **{ts}** — BLOCKED (already consumed {prior['timestamp']} "
+                f"by {prior['approved_by']!r}, reason {prior['reason']!r}). "
+                f"Attempted reason this time: {reason!r}, by {approved_by!r}\n"
+            )
+        else:
+            f.write(f"- **{ts}** — CONSUMED. reason={reason!r} approved_by={approved_by!r}\n")
