@@ -2,7 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）。
 
-**最後更新：2026-08-22T11:00:00+08:00**
+**最後更新：2026-08-22T12:00:00+08:00**
+
+**GitHub 稽核狀態：✅ 2026-08-22T12:00:00+08:00 通過。** Cowork 回報過 `.py` 在 GitHub 上 404，逐項排查後（本機 git、raw content、GitHub API 目錄列表、GitHub API commit SHA 四種方式交叉核對）確認當時就已經都在 GitHub 上，判斷 Cowork 查的是舊快照。詳細排查過程見 `REPORT.md` 對應條目；逐檔清單見 `STRATEGY_LOG.md` 的 FILE MANIFEST。**如果又收到類似回報，先照 FILE MANIFEST 重新走一次驗證，不要預設是自己這邊漏推。**
 
 ---
 

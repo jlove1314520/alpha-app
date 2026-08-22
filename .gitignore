@@ -1,4 +1,11 @@
-# Phase 2 research pipeline — code and docs are versioned, cached data is not.
+# Phase 2 research pipeline — code (.py) and docs (.md) are always versioned.
+# Only large/regenerable/secret files are excluded below. Never add a bare
+# "*.py" or "research/" pattern here -- that would silently hide code from
+# Cowork's audit, which is exactly the failure this comment exists to prevent.
 research/data/
+*.parquet
+*.db
+fred_key.txt
+.env
 __pycache__/
 *.pyc

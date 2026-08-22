@@ -6,6 +6,36 @@
 
 ---
 
+## FILE MANIFEST（給稽核用，逐檔核對）
+
+repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
+
+最後逐檔驗證時間：**2026-08-22T12:00:00+08:00**，驗證方式：`git ls-tree origin/main` + 對每個檔案直接 curl `raw.githubusercontent.com` 確認 HTTP 200 + GitHub API `contents` 端點交叉核對，三種方式結果一致。當時 `main` 分支 HEAD＝`a237bcb59270a8f4baab6e27b4be0828ba11809a`（用 GitHub API `/commits/main` 直接核對過，跟本機 `git rev-parse HEAD` 完全一致）。
+
+| 路徑（repo 相對） | 用途 | 型態 |
+|---|---|---|
+| `research/CONSTITUTION.md` | Phase 2 最高原則（驗證紀律鐵律 + 股票 vs 加密貨幣本質差異） | 文件 |
+| `research/DATA.md` | 里程碑 1：FinMind 資料誠實度盤點結果（還原股價/存活者偏差/PIT 財報三顆地雷） | 文件 |
+| `research/STRATEGY_LOG.md` | 本檔案。里程碑等級敘事日誌 + 本 FILE MANIFEST | 文件 |
+| `research/REPORT.md` | append-only 細顆粒執行記錄 | 文件 |
+| `research/LEADS.md` | 策略候選登記簿（目前空） | 文件 |
+| `research/MARATHON_STATE.md` | 斷點狀態快照（覆寫式，換 session 先讀這個） | 文件 |
+| `research/finmind_client.py` | 共用 FinMind 抓取層，所有資料集呼叫都經過這裡，自動快取到 parquet | 程式碼 |
+| `research/adjust.py` | 台股還原股價（用 `TaiwanStockDividend` 自組，因為 `TaiwanStockPriceAdj` 要付費） | 程式碼 |
+| `research/universe.py` | TW 回測宇宙建構（2003 年後 + 納入下市股，處理存活者偏差） | 程式碼 |
+| `research/pit.py` | 財報/月營收 point-in-time 保守發布延遲假設 | 程式碼 |
+| `research/audit_ledgers.py` | 唯讀稽核腳本，對 `trades.csv` 跑恆等式檢查 | 程式碼 |
+| `research/validation/__init__.py` | `validation` package 標記 | 程式碼 |
+| `research/validation/holdout.py` | train/val/holdout 物理隔離，一次性解鎖機制 | 程式碼 |
+| `research/validation/costs.py` | 台股成本/摩擦模型（手續費/證交稅/滑價/漲跌停鎖死偵測） | 程式碼 |
+| `research/validation/control_group.py` | 隨機控制組（策略無關，`evaluate_fn` seam） | 程式碼 |
+| `research/validation/criteria.py` | 事前綁定通過標準（雜湊鎖定，防止事後移動門柱） | 程式碼 |
+| `research/data/` | parquet 快取、`data/ledger/trades.csv`、回測結果 | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
+| `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
+| `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（還沒有策略候選） |
+
+---
+
 ## 2026-08-22 — 里程碑 2 開工（驗證框架，第一批模組）+ 優先序調整為背景
 
 **做了什麼：** 開始建驗證框架，四個模組都寫完並實測驗證過：
