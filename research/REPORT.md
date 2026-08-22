@@ -44,3 +44,29 @@
 - `.gitignore` 加了防禦性規則（`*.parquet`／`*.db`／`fred_key.txt`／`.env`）並附註解釋「不要加裸的 `*.py` 或 `research/`」，避免以後有人誤改成把整個資料夾擋掉。
 
 **下一步：** 把這次稽核結果推上去，讓 Cowork 用同樣的驗證方式（GitHub API 或 raw content）重新確認一次。若 Cowork 之後還是看到 404，優先懷疑是它自己那端的 clone/快取沒更新，而不是 push 又漏了——但還是要重新走一次上面 7 步驟確認，不能假設。
+
+---
+
+## 2026-08-22T13:00:00+08:00 — 修真正的漏洞：holdout 資料在 fetch 層沒有預設截斷
+
+**做了什麼：** Cowork 這次抓到一個真的架構漏洞（跟上一條的「查舊快照」誤會不同，這條是真的）：`finmind_client.fetch()` 預設回傳含 holdout 的完整歷史，`validation.holdout.cap_to_dev()` 只是選配——任何研究程式碼呼叫 `fetch()` 後忘記手動 cap，就會靜默拿到 holdout 資料，違反 `CONSTITUTION.md`「資料載入預設就截斷在 holdout 邊界前」。修法：
+
+1. `finmind_client.py`：原本唯一的 `fetch()` 拆成三個：
+   - `_fetch()`（原本的 `fetch()` 改名，加底線標記 internal，策略/分析程式碼不該直接呼叫）
+   - `load_dev(dataset, data_id, start_date, end_date=None, date_col='date')`：**唯一正式入口**，內部呼叫 `_fetch()` 時把 `end_date` 強制夾在 `VAL_END`（`2024-12-31`）或更早，就算呼叫者傳更晚的 `end_date` 也會被夾住；拿到資料後再用 `date_col` 過濾一次（雙重保險，防萬一 FinMind API 哪天不理會 `end_date` 參數）；如果資料集根本沒有指定的 `date_col`，直接 `raise ValueError`，不會悄悄放行不截斷。
+   - `load_full_history(dataset, data_id, start_date)`：唯一合法的無截斷路徑，明確標註「只能用來餵給 `unlock_holdout_once()`，不要拿來做一般分析」。
+2. `validation/holdout.py` 新增 `assert_no_holdout_leakage(df, date_col, context)`：資料載入時的硬性斷言，`is_holdout_consumed()==False` 時若 `df` 裡有任何一列日期 `> VAL_END` 就立刻 `raise AssertionError`；holdout 已解鎖後這個檢查自動變 no-op（此時看到晚期日期是預期行為）。
+3. `audit_ledgers.py` 新增第三條恆等式 `check_no_holdout_leakage(trades)`：檢查 `trades.csv` 本身有沒有日期晚於 `VAL_END` 但 holdout 沒解鎖的列，跟第 2 點的 `assert_no_holdout_leakage()` 是兩道獨立防線（一個在資料載入點、一個在帳本層，防止有交易繞過資料載入器直接寫進帳本的情況）。已加進 `CHECKS` 清單，自動跑。
+4. 掃過全部 `research/*.py` 的 `fetch()` 呼叫點（用 grep 逐一列出，不是憑印象）：
+   - `adjust.py`（`TaiwanStockDividend`、`TaiwanStockPrice` 兩處）、`pit.py`（`TaiwanStockFinancialStatements`、`TaiwanStockMonthRevenue` 兩處）→ 全部改用 `load_dev()`，因為這些都是餵給回測分析用的價量/財報時間序列。
+   - `universe.py`（`TaiwanStockDelisting`、`TaiwanStockInfo` 兩處）→ **刻意保留** `_fetch()` 不改，因為這兩個是會員名單/參考資料，`date` 欄位是快照記錄日（幾乎都是「今天」），不是價量時間序列；已用測試證實如果誤改成 `load_dev()`，`TaiwanStockInfo` 會被 `VAL_END` 濾到全空，直接弄壞整個宇宙建構——這不是漏改，是刻意排除並在 `universe.py` docstring 裡寫清楚原因。
+
+**驗證結果：**
+- `load_dev('TaiwanStockPrice','2330','2024-01-01')`：回傳最大日期 `2024-12-31`（等於 `VAL_END`），正確截斷。
+- `load_full_history('TaiwanStockPrice','2330','2026-08-01')`：回傳最大日期 `2026-08-21`，真實近期資料，確認無截斷路徑正常運作。
+- `load_dev()` 對沒有 `date` 欄位的資料集（用 monkeypatch `_fetch()` 模擬）正確 `raise ValueError`，不會悄悄放行。
+- `assert_no_holdout_leakage()` 三種情境都測過：乾淨資料不 raise；含未來日期資料在未解鎖時正確 raise；`unlock_holdout_once()` 解鎖後同一份資料不再 raise。
+- `audit_ledgers.py` 新檢查：對空 ledger PASS；合成一筆日期 `2025-03-01`（晚於 `VAL_END`）且未解鎖 holdout 的交易，正確 FAIL 並精確指出是哪個 `trade_id`。
+- 回歸測試 `adjust.py`／`pit.py`／`universe.py` 三個模組全部重新跑過：`adjust.py` 的除權息事件跟價格序列都正確截斷在 `2024-12-31`（且最後一列 `adj_close==close` 這個既有性質在截斷後依然成立）；`pit.py` 的季報跟月營收都正確截斷；`universe.py` 維持原本的 3,196 檔（2,974 現存 + 222 下市），沒有被誤傷。
+
+**下一步：** 把這次修正推上去。里程碑 2 剩下的「把四個 validation 模組串成能跑的骨架」這件事，之後要串接時，記得資料進口一律走 `load_dev()`，不要圖方便直接叫 `_fetch()`。

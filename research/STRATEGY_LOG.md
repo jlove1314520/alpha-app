@@ -10,7 +10,7 @@
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-22T12:00:00+08:00**，驗證方式：`git ls-tree origin/main` + 對每個檔案直接 curl `raw.githubusercontent.com` 確認 HTTP 200 + GitHub API `contents` 端點交叉核對，三種方式結果一致。當時 `main` 分支 HEAD＝`a237bcb59270a8f4baab6e27b4be0828ba11809a`（用 GitHub API `/commits/main` 直接核對過，跟本機 `git rev-parse HEAD` 完全一致）。
+最後逐檔驗證時間：**2026-08-22T13:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -20,19 +20,29 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/REPORT.md` | append-only 細顆粒執行記錄 | 文件 |
 | `research/LEADS.md` | 策略候選登記簿（目前空） | 文件 |
 | `research/MARATHON_STATE.md` | 斷點狀態快照（覆寫式，換 session 先讀這個） | 文件 |
-| `research/finmind_client.py` | 共用 FinMind 抓取層，所有資料集呼叫都經過這裡，自動快取到 parquet | 程式碼 |
-| `research/adjust.py` | 台股還原股價（用 `TaiwanStockDividend` 自組，因為 `TaiwanStockPriceAdj` 要付費） | 程式碼 |
-| `research/universe.py` | TW 回測宇宙建構（2003 年後 + 納入下市股，處理存活者偏差） | 程式碼 |
-| `research/pit.py` | 財報/月營收 point-in-time 保守發布延遲假設 | 程式碼 |
-| `research/audit_ledgers.py` | 唯讀稽核腳本，對 `trades.csv` 跑恆等式檢查 | 程式碼 |
+| `research/finmind_client.py` | FinMind 抓取+快取層。`load_dev()` 是策略/分析程式碼**唯一**該用的入口（自動截斷在 `VAL_END`）；`load_full_history()` 是唯一合法的無截斷路徑（只能餵給 `unlock_holdout_once()`）；`_fetch()` 是底層 internal 函式，不該被外部直接呼叫 | 程式碼 |
+| `research/adjust.py` | 台股還原股價（用 `TaiwanStockDividend` 自組，因為 `TaiwanStockPriceAdj` 要付費），透過 `load_dev()` 抓資料，自動截斷 | 程式碼 |
+| `research/universe.py` | TW 回測宇宙建構（2003 年後 + 納入下市股，處理存活者偏差），刻意用 `_fetch()` 不截斷（會員名單非價量資料，理由見檔案內 docstring） | 程式碼 |
+| `research/pit.py` | 財報/月營收 point-in-time 保守發布延遲假設，透過 `load_dev()` 抓資料，自動截斷 | 程式碼 |
+| `research/audit_ledgers.py` | 唯讀稽核腳本，對 `trades.csv` 跑 3 條恆等式檢查（含 holdout 洩漏偵測） | 程式碼 |
 | `research/validation/__init__.py` | `validation` package 標記 | 程式碼 |
-| `research/validation/holdout.py` | train/val/holdout 物理隔離，一次性解鎖機制 | 程式碼 |
+| `research/validation/holdout.py` | train/val/holdout 物理隔離、一次性解鎖機制、`assert_no_holdout_leakage()` 硬性斷言 | 程式碼 |
 | `research/validation/costs.py` | 台股成本/摩擦模型（手續費/證交稅/滑價/漲跌停鎖死偵測） | 程式碼 |
 | `research/validation/control_group.py` | 隨機控制組（策略無關，`evaluate_fn` seam） | 程式碼 |
 | `research/validation/criteria.py` | 事前綁定通過標準（雜湊鎖定，防止事後移動門柱） | 程式碼 |
 | `research/data/` | parquet 快取、`data/ledger/trades.csv`、回測結果 | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（還沒有策略候選） |
+
+---
+
+## 2026-08-22 — 修補 holdout 物理隔離的真正漏洞：fetch 層預設無截斷
+
+Cowork 稽核抓到一個真的架構問題，跟同一天稍早那次「查到舊快照」的誤會不同——這次是真的漏洞：`holdout.py` 的一次性解鎖閘門設計沒問題，但 `finmind_client.fetch()` 這個所有資料集呼叫的共用入口，預設回傳完整歷史（含 holdout 期間），`cap_to_dev()` 只是選配、要呼叫者自己記得用。等於「資料載入預設就截斷在 holdout 邊界前」這條鐵律在實作上沒有真的落地，只是看起來落地了。
+
+**修法核心：把截斷從「呼叫者自己記得做」改成「架構上不可能忘記」。** `fetch()` 改名 `_fetch()`（internal），新增 `load_dev()` 當唯一正式入口（自動夾在 `VAL_END`），`load_full_history()` 是唯一合法的無截斷路徑（明確標註只能餵給 `unlock_holdout_once()`）。另外在資料載入點跟帳本層各加一道獨立的稽核防線（`assert_no_holdout_leakage()`／`audit_ledgers.py` 新恆等式）。掃過全部既有呼叫點：`adjust.py`／`pit.py` 的價量/財報時間序列改走 `load_dev()`；`universe.py` 的會員名單資料**刻意**維持 `_fetch()` 不截斷（有明確理由，寫在該檔案 docstring 裡，也在下面 REPORT.md 條目驗證過誤改的後果）。
+
+完整修改內容、驗證過程、每一項測試結果都記在 [`REPORT.md`](./REPORT.md) 2026-08-22T13:00 那條，不在這裡重複。FILE MANIFEST（上方）的用途說明已同步更新。
 
 ---
 

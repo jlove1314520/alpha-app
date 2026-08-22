@@ -1,7 +1,20 @@
 """Shared FinMind fetch + local parquet cache layer for the research pipeline.
 
-Every dataset pull in this project should go through fetch() here, for two
-reasons:
+**Strategy/analysis code must never call _fetch() directly.** The one sanctioned
+entry point is load_dev() below, which always caps at VAL_END -- per
+CONSTITUTION.md, "資料載入預設就截斷在 holdout 邊界前". _fetch() is the raw,
+uncapped primitive; it exists only so load_dev() and load_full_history() (the
+one legitimate path to holdout data, used exclusively to feed
+validation.holdout.unlock_holdout_once()) have something to build on.
+
+This split exists because a Cowork audit (2026-08-22) found that the original
+single fetch() function had no cap at all -- validation.holdout.cap_to_dev()
+was opt-in, so any research code that fetched data and forgot to filter it
+would silently get holdout rows mixed into what looked like ordinary data.
+See STRATEGY_LOG.md's 2026-08-22 entry on this for the full incident writeup.
+
+Caching, independent of the above: every dataset pull should go through one
+of the functions in this module, for two reasons:
   1. FinMind's free tier has a rate limit (see DATA.md) -- re-fetching the
      same range on every script run burns quota for nothing.
   2. The cached parquet file under research/data/raw/ IS the audit trail:
@@ -37,7 +50,7 @@ def _cache_path(dataset: str, data_id: str, start_date: str, end_date: str | Non
     return DATA_DIR / f"{safe(dataset)}__{safe(id_part)}__{safe(start_date)}__{safe(end_part)}.parquet"
 
 
-def fetch(
+def _fetch(
     dataset: str,
     data_id: str = "",
     start_date: str = "2000-01-01",
@@ -46,7 +59,12 @@ def fetch(
     max_retries: int = 3,
     timeout: float = 15.0,
 ) -> pd.DataFrame:
-    """Fetch one FinMind dataset, cached to parquet. Returns a DataFrame.
+    """Raw, uncapped fetch of one FinMind dataset, cached to parquet.
+
+    INTERNAL. Do not call this from strategy/analysis code -- use load_dev()
+    instead. This has no holdout protection whatsoever; it will happily
+    return rows past VAL_END if you ask it to (start_date/end_date exactly as
+    given, no clamping).
 
     Raises RuntimeError if every retry fails -- callers should not silently
     treat a fetch failure as "no data" (that was the App's old bug pattern;
@@ -97,6 +115,66 @@ def fetch(
     df = pd.DataFrame(data)
     df.to_parquet(path, index=False)
     return df
+
+
+def load_dev(
+    dataset: str,
+    data_id: str = "",
+    start_date: str = "2000-01-01",
+    end_date: str | None = None,
+    date_col: str = "date",
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """THE sanctioned entry point for strategy/analysis code. Always returns
+    data capped at VAL_END or earlier -- no row with `date_col` > VAL_END can
+    ever come back from this function, full stop.
+
+    `end_date`, if given, further narrows the window (e.g. for a walk-forward
+    test that wants dev data only up to some earlier date) but can never
+    widen past VAL_END -- passing an end_date after VAL_END is silently
+    clamped down to VAL_END, not honored.
+
+    If the underlying dataset has no `date_col` column (e.g. a dataset that
+    isn't time-series shaped), this raises rather than skip the check --
+    silently trusting an uncapped fetch because "this one probably doesn't
+    need it" is exactly the class of assumption that caused the original
+    leak. Pass a correct date_col, or use _fetch() directly with a code
+    comment explaining why this dataset is exempt.
+    """
+    from validation.holdout import VAL_END  # local import: avoids a hard import-order
+
+    # requirement between finmind_client and validation at module-load time
+    effective_end = end_date if (end_date and end_date <= VAL_END) else VAL_END
+    df = _fetch(dataset, data_id, start_date, effective_end, force_refresh=force_refresh)
+    if df.empty:
+        return df
+    if date_col not in df.columns:
+        raise ValueError(
+            f"load_dev(dataset={dataset!r}): no {date_col!r} column to enforce the holdout cap on. "
+            "Either pass the correct date_col, or this dataset genuinely isn't a capped time series "
+            "and should be fetched with _fetch() directly (with a comment explaining why)."
+        )
+    # _fetch already asked FinMind for <= effective_end, but re-filter defensively in case the
+    # API ever ignores end_date for some dataset -- belt and suspenders, per the whole point of this fix.
+    return df[df[date_col] <= effective_end].reset_index(drop=True)
+
+
+def load_full_history(
+    dataset: str,
+    data_id: str = "",
+    start_date: str = "2000-01-01",
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Uncapped fetch, through today. The ONLY legitimate use is to build the
+    DataFrame handed to validation.holdout.unlock_holdout_once() during a
+    real, one-time holdout evaluation -- that function does its own
+    logging/locking and will refuse a second unlock.
+
+    Do not call this to "just get the latest data" for ordinary analysis.
+    If you find yourself reaching for this function outside of an actual
+    holdout unlock, you almost certainly want load_dev() instead.
+    """
+    return _fetch(dataset, data_id, start_date, end_date=None, force_refresh=force_refresh)
 
 
 def clear_cache(pattern: str = "*") -> int:

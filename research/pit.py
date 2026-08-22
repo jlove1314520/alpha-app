@@ -22,12 +22,16 @@ be reported as experimental, not a clean/trustworthy result, until real
 disclosure dates replace the assumption. Pure price-based strategies
 (Weinstein stage 2, momentum, ...) never call this module and are not
 subject to this restriction.
+
+Both fetches below go through finmind_client.load_dev(), so everything this
+module returns is also capped at VAL_END by construction (see adjust.py's
+module docstring for the same note, in more detail).
 """
 from __future__ import annotations
 
 import pandas as pd
 
-from finmind_client import fetch
+from finmind_client import load_dev
 
 QUARTERLY_DISCLOSURE_LAG_DAYS = 45
 MONTH_REVENUE_DISCLOSURE_DAY = 10  # TW rule: month revenue must be disclosed by the 10th of next month
@@ -44,7 +48,7 @@ def quarterly_pit(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame
     without lookahead bias. `pit_source` is always 'assumed' for this
     dataset -- FinMind has no real disclosure date to fall back to yet.
     """
-    raw = fetch("TaiwanStockFinancialStatements", stock_id, start_date)
+    raw = load_dev("TaiwanStockFinancialStatements", stock_id, start_date)
     if raw.empty:
         return pd.DataFrame()
     wide = raw.pivot_table(index="date", columns="type", values="value", aggfunc="first").reset_index()
@@ -61,7 +65,7 @@ def month_revenue_pit(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
     real `create_time` when FinMind populated it, else assume the 10th of
     the month after the revenue month (the TW disclosure-deadline rule).
     """
-    raw = fetch("TaiwanStockMonthRevenue", stock_id, start_date)
+    raw = load_dev("TaiwanStockMonthRevenue", stock_id, start_date)
     if raw.empty:
         return raw
     out = raw.copy()

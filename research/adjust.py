@@ -18,9 +18,20 @@ into a single multiplicative factor:
 
 Applied in reverse chronological order (most recent event first) to every
 raw price strictly BEFORE that event's ex-date. This keeps the most recent
-price equal to the raw price (the usual convention -- "today" is never
-adjusted) while making day-over-day returns correct across every ex-date in
-the history.
+price in the series equal to the raw price (the usual convention -- the
+final day is never adjusted) while making day-over-day returns correct
+across every ex-date in the history.
+
+**Data source note (2026-08-22):** both fetches below go through
+finmind_client.load_dev(), which caps everything at VAL_END
+(validation.holdout) -- so "the most recent price" here means the most
+recent price *within the dev window*, not literally today. That is
+intentional: this module feeds backtests, and per CONSTITUTION.md no
+backtest-facing data may see past the holdout boundary by default. Callers
+doing an actual one-time holdout evaluation should use
+finmind_client.load_full_history() directly and route the result through
+validation.holdout.unlock_holdout_once() themselves, rather than expecting
+this module to do it for them.
 
 Known gap (documented, not silently ignored): capital reductions (減資) are
 NOT handled here. TaiwanStockCapitalReductionReferencePrice hasn't been
@@ -31,16 +42,16 @@ from __future__ import annotations
 
 import pandas as pd
 
-from finmind_client import fetch
+from finmind_client import load_dev
 
 
 def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
     """One row per ex-date with the multiplicative back-adjustment factor."""
-    div = fetch("TaiwanStockDividend", stock_id, start_date)
+    div = load_dev("TaiwanStockDividend", stock_id, start_date)
     if div.empty:
         return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
 
-    raw = fetch("TaiwanStockPrice", stock_id, start_date)
+    raw = load_dev("TaiwanStockPrice", stock_id, start_date)
     if raw.empty:
         raise ValueError(f"no raw price data for {stock_id}, cannot compute adjustment factors")
     raw = raw.sort_values("date").reset_index(drop=True)
@@ -83,8 +94,9 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
 
 
 def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
-    """Raw TaiwanStockPrice rows with an added `adj_close` column (back-adjusted)."""
-    raw = fetch("TaiwanStockPrice", stock_id, start_date).sort_values("date").reset_index(drop=True)
+    """Raw TaiwanStockPrice rows (capped at VAL_END, see module docstring) with
+    an added `adj_close` column (back-adjusted)."""
+    raw = load_dev("TaiwanStockPrice", stock_id, start_date).sort_values("date").reset_index(drop=True)
     if raw.empty:
         return raw
     events = adjustment_events(stock_id, start_date)

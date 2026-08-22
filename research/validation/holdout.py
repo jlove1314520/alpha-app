@@ -35,9 +35,12 @@ HOLDOUT_LOG = _RESEARCH_DIR / "HOLDOUT_LOG.md"       # committed to git -- perma
 
 
 def cap_to_dev(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
-    """Train+validation only (<= VAL_END). This is what ordinary research
-    code should call -- holdout rows are simply absent from what's
-    returned, not just "you're not supposed to look at them".
+    """Train+validation only (<= VAL_END). Use this to cap a DataFrame you
+    already have in hand (e.g. from finmind_client.load_full_history(), or
+    from any non-FinMind source). If you're fetching FROM FinMind, prefer
+    finmind_client.load_dev() instead -- it caps at the fetch/cache layer
+    itself so an uncapped copy never even gets pulled or cached, which is a
+    stronger guarantee than filtering after the fact.
     """
     return df[df[date_col] <= VAL_END].copy()
 
@@ -52,6 +55,39 @@ def validation_slice(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
 
 def is_holdout_consumed() -> bool:
     return HOLDOUT_LOCK.exists()
+
+
+def assert_no_holdout_leakage(df: pd.DataFrame, date_col: str = "date", context: str = "") -> None:
+    """Permanent audit identity (added 2026-08-22, after a Cowork audit found
+    finmind_client's original fetch() had no cap at all -- load_dev() fixes
+    the fetch-time gap, this is the second, independent line of defense at
+    the point data is actually about to be used).
+
+    Call this at every point where data is about to be fed into a backtest/
+    analysis computation -- ideally right at the top of a backtest runner's
+    main loop, on whatever DataFrame it's about to consume. Raises
+    AssertionError immediately on violation: this must be a hard stop a
+    caller cannot accidentally ignore, not a warning that scrolls by in a
+    log. Also wired into audit_ledgers.py's check list against the trade
+    ledger itself, as a second layer independent of where the data came from.
+
+    If holdout has been legitimately unlocked (is_holdout_consumed() is
+    True), this check is a no-op -- at that point later dates are expected
+    and allowed, since the whole point of unlocking was to look at them.
+    """
+    if is_holdout_consumed():
+        return
+    if df.empty or date_col not in df.columns:
+        return
+    max_date = df[date_col].max()
+    if max_date > VAL_END:
+        raise AssertionError(
+            f"HOLDOUT LEAKAGE{f' ({context})' if context else ''}: data contains rows up to "
+            f"{max_date!r}, which is after VAL_END ({VAL_END}), but holdout has not been unlocked "
+            "(is_holdout_consumed() is False). This should be impossible if finmind_client.load_dev() "
+            "was used correctly -- check for a direct _fetch()/load_full_history() call, or a non-"
+            "FinMind data source, that bypassed the cap."
+        )
 
 
 def unlock_holdout_once(df: pd.DataFrame, reason: str, approved_by: str, date_col: str = "date") -> pd.DataFrame:

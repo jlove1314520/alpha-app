@@ -2,14 +2,16 @@
 
 CONSTITUTION.md: "每修一類 bug,就加一條永久稽核恆等式" -- every category of bug found and
 fixed earns a permanent check here, so that class of error gets caught automatically
-forever, not just remembered by whoever fixed it once. Two checks are seeded now, straight
-from Cybex's own postmortems (see CONSTITUTION.md section 3):
+forever, not just remembered by whoever fixed it once. Three checks are seeded now:
 
   1. Every close/sell trade must reference a real, existing entry trade. Cybex once had a
      global `last_run_date` filter silently swallow 7000+ trades with no traceable entry
      before anyone noticed -- this check exists specifically to catch that class of bug.
   2. No NaN price or share count on any row. Cybex had unclosed daily bars leak into a
      ledger and create phantom exits -- this check exists specifically to catch that.
+  3. No trade dated after VAL_END unless holdout has been unlocked. Added 2026-08-22 after
+     a Cowork audit found finmind_client's original fetch() had no holdout cap at all --
+     see STRATEGY_LOG.md's 2026-08-22 entry for the full incident writeup.
 
 This script is READ-ONLY: it never writes to trades.csv or any ledger file. Run it after
 every paper-trading update (or on a schedule once that infra exists) and treat a non-zero
@@ -72,6 +74,25 @@ def check_no_nan_prices(trades: pd.DataFrame) -> list[str]:
     return [f"trade_id={r['trade_id']}: NaN price or shares" for _, r in bad.iterrows()]
 
 
+def check_no_holdout_leakage(trades: pd.DataFrame) -> list[str]:
+    """No trade in the ledger may be dated after VAL_END unless holdout has
+    been legitimately unlocked (added 2026-08-22, after a Cowork audit found
+    finmind_client's original fetch() had no holdout cap at all -- see
+    STRATEGY_LOG.md's 2026-08-22 entry). This is the ledger-level line of
+    defense; validation.holdout.assert_no_holdout_leakage() is the
+    independent data-loading-time line of defense for the same failure
+    mode. Having both is deliberate, not redundant -- a leak could enter the
+    ledger through a path that never went through the data loader at all
+    (e.g. a manually-entered paper trade).
+    """
+    from validation.holdout import VAL_END, is_holdout_consumed
+    if trades.empty or is_holdout_consumed():
+        return []
+    leaked = trades[trades["date"] > VAL_END]
+    return [f"trade_id={r['trade_id']}: date={r['date']} is after VAL_END ({VAL_END}) but holdout not unlocked"
+            for _, r in leaked.iterrows()]
+
+
 def check_equity_identity(cash: float, realized: float, unrealized: float, reported_equity: float,
                             tolerance: float = 0.01) -> list[str]:
     """權益 = 現金 + 已實現損益 + 未實現損益.
@@ -91,6 +112,7 @@ def check_equity_identity(cash: float, realized: float, unrealized: float, repor
 CHECKS: list[tuple[str, "callable"]] = [
     ("每個平倉都有對應進場記錄", check_every_close_has_entry),
     ("沒有 NaN 價格/股數", check_no_nan_prices),
+    ("沒有未經 holdout 解鎖就出現的未來日期交易", check_no_holdout_leakage),
 ]
 
 
