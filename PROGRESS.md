@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-08-22 12:00 — 回應 Cowork 稽核回報：research/*.py 404 問題排查
+
+**發生什麼事：** Cowork 回報 `research/` 底下只有 `.md` 讀得到，`holdout.py`／`costs.py` 等 `.py` 在 GitHub 上是 404，沒辦法稽核。
+
+**排查結果：** 用四種獨立方式交叉核對（本機 `git log`/`git status`、`git fetch` 後比對 `origin/main`、對每個 `.py` 檔直接 curl `raw.githubusercontent.com` 確認 HTTP 200、GitHub API `contents`/`commits` 端點直接核對目錄內容跟 commit SHA）——**這次稽核當下，全部 `.py` 檔案確實都在 GitHub 上、讀得到**，跟本機 `git rev-parse HEAD` 逐字元一致。判斷 Cowork 回報的當下是抓到舊快照（可能查在某次 push 完成之前，或它那邊的 clone 沒 pull 到最新），不是這邊 push 流程真的漏了東西。
+
+**已補強（即使這次沒查到真的問題，還是照使用者要求做了三件事，降低以後再發生類似誤會或真的漏推的機率）：**
+1. `research/STRATEGY_LOG.md` 最上面加了 **FILE MANIFEST** 區塊：逐檔列出 repo 相對路徑＋一句用途＋型態，附上這次的驗證方式跟時間戳（含驗證用的 commit SHA），讓任何人以後都能照同一套方法重新核對，不用每次重新摸索。
+2. `.gitignore` 追加防禦性規則（`*.parquet`／`*.db`／`fred_key.txt`／`.env`，目前 repo 裡都還沒有這些檔案，純粹預防），並加註解明確警告「不要加裸的 `*.py` 或 `research/` 規則」——避免以後有人為了「乾淨一點」誤改成把整個資料夾擋掉，重演這次的問題（這次不是這個原因，但這是最容易導致這種問題的錯誤，先防起來）。
+3. 用 `git check-ignore` 對全部已追蹤的 `.py` 檔跑過一輪，確認新加的規則沒有誤擋任何一個。
+
+**影響到哪些檔案：** `.gitignore`、`research/STRATEGY_LOG.md`（新增 FILE MANIFEST）、`research/REPORT.md`（append 一條完整排查記錄）、`research/MARATHON_STATE.md`（狀態快照加註稽核通過時間）。沒有動到任何 App 程式碼。
+
+**下一步：** 等 Cowork 用同樣方式（GitHub API 或 raw content）重新確認一次。如果之後又回報類似問題，先照 `STRATEGY_LOG.md` 的 FILE MANIFEST 走一次驗證流程再下結論，不要預設是自己這邊漏推、也不要預設對方一定錯。
+
+**卡住的問題：** 無。
+
+---
+
 ## 2026-08-22 03:40 — 真正的設定頁、個股走勢圖接真資料、修一個台指期夜盤 bug
 
 **改了什麼：**
