@@ -133,6 +133,16 @@
   .facts .f span{font-size:10.5px;color:var(--ink-3);display:block}
   .facts .f b{font-size:14px;font-variant-numeric:tabular-nums}
 
+  /* ===== 設定頁 ===== */
+  .setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--hairline)}
+  .setting-row:last-of-type{border-bottom:none}
+  .setting-row span{font-size:13px;color:var(--ink-2)}
+  .setting-input{display:flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:9px;padding:6px 10px}
+  .setting-input span{font-size:12px;color:var(--ink-3)}
+  .setting-input input{width:64px;background:none;border:0;color:var(--ink);font-size:14px;font-family:inherit;text-align:right;font-variant-numeric:tabular-nums}
+  .setting-input input:focus{outline:none}
+  .setting-input input::-webkit-outer-spin-button,.setting-input input::-webkit-inner-spin-button{margin:0}
+
   .buy-cta{position:sticky;bottom:0;display:flex;gap:10px;padding:10px 0 4px;background:linear-gradient(transparent,var(--page) 30%)}
   .btn{flex:1;border:0;border-radius:12px;padding:13px 0;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
   .btn.buy{background:var(--up-deep);color:#fff}
@@ -351,15 +361,9 @@
 
     <div class="subscreen active" id="sub-ov">
       <div class="card">
-        <h3>走勢（日 K 區）</h3>
-        <svg viewBox="0 0 320 110" style="width:100%">
-          <line x1="0" y1="100" x2="320" y2="100" stroke="#383835" stroke-width="1"/>
-          <line x1="0" y1="55" x2="320" y2="55" stroke="#2c2c2a" stroke-width="1"/>
-          <polyline points="0,88 24,80 48,84 72,70 96,74 120,60 144,64 168,52 192,55 216,44 240,48 264,36 288,30 320,22" fill="none" stroke="var(--up)" stroke-width="2"/>
-          <circle cx="320" cy="22" r="3.5" fill="var(--up)"/>
-          <text x="318" y="14" text-anchor="end" font-size="10" fill="var(--ink-2)">1,485</text>
-        </svg>
-        <div class="note">原型示意 · 正式版接 Shioaji / IBKR 即時行情</div>
+        <h3>走勢（近月日收盤）</h3>
+        <div id="trend-chart"><div class="note">載入中…</div></div>
+        <div class="note" id="trend-note">來源：FinMind 日收盤價</div>
       </div>
       <div class="card">
         <h3>關鍵數字（即時）</h3>
@@ -569,6 +573,81 @@
     </div>
   </section>
 
+  <!-- ════════ 6. 設定 ════════ -->
+  <section class="screen" id="scr-settings">
+    <div class="card">
+      <h3>券商帳戶</h3>
+      <div class="setting-row">
+        <span>台股</span>
+        <div class="setting-input"><input id="set-broker-tw" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></div>
+      </div>
+      <div class="setting-row">
+        <span>美股</span>
+        <div class="setting-input"><input id="set-broker-us" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></div>
+      </div>
+      <div class="note">目前僅供顯示備註，尚未串接真實券商 API（規劃：台股 Shioaji、美股 IBKR，見 research/CONSTITUTION.md）</div>
+    </div>
+
+    <div class="card">
+      <h3>風控參數</h3>
+      <div class="setting-row">
+        <span>每日虧損上限</span>
+        <div class="setting-input"><span>NT$</span><input id="rc-daily-loss" type="number" inputmode="numeric"></div>
+      </div>
+      <div class="setting-row">
+        <span>單筆部位上限</span>
+        <div class="setting-input"><input id="rc-max-position" type="number" inputmode="numeric"><span>%</span></div>
+      </div>
+      <div class="setting-row">
+        <span>最大持倉檔數</span>
+        <div class="setting-input"><input id="rc-max-holdings" type="number" inputmode="numeric"></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:12px;background:var(--accent-deep);color:#fff" onclick="saveRiskControl()">儲存</button>
+      <div class="note" id="rc-saved-note" style="text-align:center;margin-top:6px">尚未儲存過</div>
+    </div>
+
+    <div class="card">
+      <h3>通知偏好</h3>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>盤前 AI 日報</b><span>每日開盤前推播</span></div>
+        <div class="switch" id="notif-daily" onclick="toggleNotif(this,'daily')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>重大事件提醒</b><span>財報／CPI 等日曆事件</span></div>
+        <div class="switch" id="notif-event" onclick="toggleNotif(this,'event')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>自選股價格警示</b><span>大幅漲跌通知</span></div>
+        <div class="switch" id="notif-price" onclick="toggleNotif(this,'price')"></div>
+      </div>
+      <div class="note" style="margin-top:8px">原型階段，尚未實作真實推播，開關狀態會存起來</div>
+    </div>
+
+    <div class="card">
+      <h3>自選股</h3>
+      <div class="note" style="margin-bottom:10px">目前 <b id="set-wl-count" style="color:var(--ink)">—</b> 檔（可混台股／美股）</div>
+      <button class="btn ghost" style="width:100%" onclick="editWL()">管理自選股 →</button>
+    </div>
+
+    <div class="card">
+      <h3>資料來源狀態</h3>
+      <div class="facts">
+        <div class="f"><span>報價來源</span><b>FinMind API v4</b></div>
+        <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
+      </div>
+      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗時會退回上次成功的快取</div>
+    </div>
+
+    <div class="card">
+      <h3>關於</h3>
+      <div class="facts">
+        <div class="f"><span>版本</span><b>Prototype 0.1</b></div>
+        <div class="f"><span>資料源</span><b>FinMind</b></div>
+      </div>
+      <div class="note">Alpha 台美股 AI 交易 · 原型階段，尚未串接真實下單</div>
+    </div>
+  </section>
+
   </main>
 
   <!-- ════════ 底部導覽 ════════ -->
@@ -585,7 +664,7 @@
     <button data-scr="journal">
       <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>日誌
     </button>
-    <button onclick="toast('設定：券商帳戶 · 風控參數 · 通知（原型未實作）')">
+    <button data-scr="settings">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>設定
     </button>
   </nav>
@@ -631,7 +710,7 @@
 
 <script>
   // ── 導覽 ──
-  const scrs = {home:'scr-home',market:'scr-market',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock'};
+  const scrs = {home:'scr-home',market:'scr-market',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
   function go(name){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(scrs[name]).classList.add('active');
@@ -639,6 +718,7 @@
     document.getElementById('main').scrollTo(0,0);
     if(name==='home')hydrateHome();
     if(name==='market')hydrateMarket();
+    if(name==='settings')hydrateSettings();
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
 
@@ -687,6 +767,22 @@
   function spark(cl){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
     return `<svg class="spark" viewBox="0 0 64 26"><polyline points="${pts}" fill="none" stroke="var(--${cl[cl.length-1]>=cl[0]?'up':'down'})" stroke-width="2"/></svg>`}
+  function trendChart(cl,fmtLabel){
+    if(cl.length<2)return '<div class="note">近月資料不足</div>';
+    const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
+    const up=cl[cl.length-1]>=cl[0];const col=`var(--${up?'up':'down'})`;
+    const x=i=>(i/(cl.length-1)*320).toFixed(1);
+    const y=c=>(96-(c-mn)/rg*80).toFixed(1);
+    const pts=cl.map((c,i)=>`${x(i)},${y(c)}`).join(' ');
+    const lastX=x(cl.length-1),lastY=y(cl[cl.length-1]);
+    return `<svg viewBox="0 0 320 110" style="width:100%">
+      <line x1="0" y1="96" x2="320" y2="96" stroke="#383835" stroke-width="1"/>
+      <line x1="0" y1="56" x2="320" y2="56" stroke="#2c2c2a" stroke-width="1"/>
+      <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2"/>
+      <circle cx="${lastX}" cy="${lastY}" r="3.5" fill="${col}"/>
+      <text x="${Math.min(318,Math.max(2,+lastX))}" y="${Math.max(12,+lastY-8)}" text-anchor="${+lastX>280?'end':'middle'}" font-size="10" fill="var(--ink-2)">${fmtLabel(cl[cl.length-1])}</text>
+    </svg>`;
+  }
 
   async function hydrateHome(){
     const el=document.getElementById('wl-list');if(!el)return;
@@ -737,7 +833,11 @@
     const raw=await fm('TaiwanFuturesDaily','TX',_d(10));
     const fallback=`<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
     if(!raw.length)return fallback;
-    const lastDate=raw.map(r=>r.date).sort().slice(-1)[0];
+    // 注意：TAIFEX 夜盤（after_market）掛在「下一個」交易日日期上，當天日盤（position）還沒開盤時
+    // 資料裡最新的日期反而只有夜盤、沒有日盤——要挑「有 position 場次」的最新日期，不能直接挑最大日期
+    const positionDates=[...new Set(raw.filter(r=>r.trading_session==='position').map(r=>r.date))].sort();
+    if(!positionDates.length)return fallback;
+    const lastDate=positionDates[positionDates.length-1];
     const todays=raw.filter(r=>r.date===lastDate&&r.trading_session==='position'&&/^\d{6}$/.test(r.contract_date));
     if(!todays.length)return fallback;
     todays.sort((a,b)=>a.contract_date.localeCompare(b.contract_date));
@@ -967,13 +1067,16 @@
     setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
     document.getElementById('rev-bars').innerHTML='<div class="note">載入中…</div>';
+    document.getElementById('trend-chart').innerHTML='<div class="note">載入中…</div>';
     if(us){
-      const px=await fm('USStockPrice',code,_d(16));
+      const px=await fm('USStockPrice',code,_d(35));
       if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
         const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(last.Close);pe.className=cls;
         const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(2)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
-      }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號')}
+        document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
+        setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤`);
+      }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
       ['kn-per','kn-pbr','kn-yield','kn-yoy'].forEach(id=>setTxt(id,'—'));
       document.getElementById('rev-bars').innerHTML='<div class="note">美股尚未支援月營收（FinMind 此指標僅提供台股）</div>';
       document.getElementById('rev-note').textContent='美股暫無此資料';
@@ -987,14 +1090,16 @@
     }
     document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
     const [px,per,rev,inst]=await Promise.all([
-      fm('TaiwanStockPrice',code,_d(16)),fm('TaiwanStockPER',code,_d(16)),
+      fm('TaiwanStockPrice',code,_d(35)),fm('TaiwanStockPER',code,_d(16)),
       fm('TaiwanStockMonthRevenue',code,_d(430)),instNet(code)]);
     loadFinancials(code);
     if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;
       const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
-    }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號')}
+      document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.close),v=>nf(v));
+      setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（原始未還原股價）`);
+    }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
     const p=per.length?per[per.length-1]:{};
     setTxt('kn-per',p.PER??'—');setTxt('kn-pbr',p.PBR??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
     if(rev.length){
@@ -1054,6 +1159,56 @@
     const t=document.getElementById('toast');
     t.textContent=msg; t.classList.add('show');
     clearTimeout(tmr); tmr=setTimeout(()=>t.classList.remove('show'),2400);
+  }
+
+  // ══════ 設定頁：券商備註／風控參數／通知偏好都存 localStorage ══════
+  const RC_DEFAULT={dailyLoss:35000,maxPosition:20,maxHoldings:5};
+  function readRC(){try{const s=localStorage.getItem('alpha_rc');return s?{...RC_DEFAULT,...JSON.parse(s)}:{...RC_DEFAULT}}catch(e){return{...RC_DEFAULT}}}
+  function loadRiskControl(){
+    const rc=readRC();
+    const dl=document.getElementById('rc-daily-loss'),mp=document.getElementById('rc-max-position'),mh=document.getElementById('rc-max-holdings');
+    if(dl)dl.value=rc.dailyLoss;if(mp)mp.value=rc.maxPosition;if(mh)mh.value=rc.maxHoldings;
+  }
+  function saveRiskControl(){
+    const rc={
+      dailyLoss:Number(document.getElementById('rc-daily-loss').value)||0,
+      maxPosition:Number(document.getElementById('rc-max-position').value)||0,
+      maxHoldings:Number(document.getElementById('rc-max-holdings').value)||0,
+    };
+    localStorage.setItem('alpha_rc',JSON.stringify(rc));
+    setTxt('rc-saved-note','已儲存 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+    toast('風控參數已儲存');
+  }
+
+  const NOTIF_DEFAULT={daily:true,event:true,price:false};
+  function readNotif(){try{const s=localStorage.getItem('alpha_notif');return s?{...NOTIF_DEFAULT,...JSON.parse(s)}:{...NOTIF_DEFAULT}}catch(e){return{...NOTIF_DEFAULT}}}
+  function loadNotif(){
+    const n=readNotif();
+    Object.keys(n).forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!n[k])});
+  }
+  function toggleNotif(el,key){
+    el.classList.toggle('on');
+    const n=readNotif();n[key]=el.classList.contains('on');
+    localStorage.setItem('alpha_notif',JSON.stringify(n));
+  }
+
+  function readBroker(){try{const s=localStorage.getItem('alpha_broker');return s?JSON.parse(s):{tw:'',us:''}}catch(e){return{tw:'',us:''}}}
+  function loadBroker(){
+    const b=readBroker();
+    const tw=document.getElementById('set-broker-tw'),us=document.getElementById('set-broker-us');
+    if(tw)tw.value=b.tw||'';if(us)us.value=b.us||'';
+  }
+  function saveBroker(){
+    const tw=document.getElementById('set-broker-tw').value.trim();
+    const us=document.getElementById('set-broker-us').value.trim();
+    localStorage.setItem('alpha_broker',JSON.stringify({tw,us}));
+  }
+
+  function hydrateSettings(){
+    loadRiskControl();loadNotif();loadBroker();
+    setTxt('set-wl-count',WL.length);
+    const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
+    setTxt('set-cache-count',cacheCount+' 筆快取');
   }
 
   // ── 啟動：載入真實自選股報價 + 註冊 PWA ──
