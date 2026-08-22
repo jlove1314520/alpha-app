@@ -55,6 +55,13 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
+| `research/MARATHON_PROTOCOL.md` | **2026-08-23 新增**：30分鐘挖礦馬拉松操作規則。每個無人值守的 headless 執行個體開工前必讀，是它唯一的記憶來源 | 文件 |
+| `research/MARATHON_CONTINUATION_PROMPT.txt` | **2026-08-23 新增**：Windows 工作排程器每輪傳給 `claude -p` 的實際 prompt 文字（極簡，指向 `MARATHON_PROTOCOL.md`） | 文件 |
+| `research/TRIALS_LEDGER.md` | **2026-08-23 新增**：跨三軌累積試驗總帳，多重比較校正的 `bonferroni_n` 從這裡讀（seed 12 筆歷史試驗） | 文件 |
+| `research/TW_LEADS.md` / `research/US_LEADS.md` / `research/FUT_LEADS.md` | **2026-08-23 新增**：三軌各自的因子/策略候選登記簿（馬拉松開始後新增的候選，不重複馬拉松前的 `FACTORS.md`/`LEADS.md`） | 文件 |
+| `research/TW_MARATHON_STATE.md` / `research/US_MARATHON_STATE.md` / `research/FUT_MARATHON_STATE.md` | **2026-08-23 新增**：三軌各自的斷點狀態快照（覆寫式） | 文件 |
+| `research/TW_LOG.md` / `research/US_LOG.md` / `research/FUT_LOG.md` | **2026-08-23 新增**：三軌各自的 append-only 執行記錄 | 文件 |
+| `research/marathon_lock.py` | **2026-08-23 新增**：防止兩輪馬拉松並行執行的檔案鎖（`.marathon.lock`，gitignore，含 25 分鐘陳舊鎖自動恢復） | 程式碼 |
 | `research/CONSTITUTION.md` | Phase 2 最高原則（驗證紀律鐵律 + 股票 vs 加密貨幣本質差異） | 文件 |
 | `research/DATA.md` | 里程碑 1：FinMind 資料誠實度盤點結果（還原股價/存活者偏差/PIT 財報三顆地雷） | 文件 |
 | `research/STRATEGY_LOG.md` | 本檔案。里程碑等級敘事日誌 + 本 FILE MANIFEST | 文件 |

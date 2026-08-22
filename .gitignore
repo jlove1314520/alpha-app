@@ -3,6 +3,7 @@
 # "*.py" or "research/" pattern here -- that would silently hide code from
 # Cowork's audit, which is exactly the failure this comment exists to prevent.
 research/data/
+research/.marathon.lock
 *.parquet
 *.db
 fred_key.txt
