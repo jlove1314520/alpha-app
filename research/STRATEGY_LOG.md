@@ -2,7 +2,7 @@
 
 依 `CONSTITUTION.md`「地基先行」原則的執行紀錄，記里程碑等級的敘事與決策脈絡。最新在最上面。誠實記錄，包含負面/未完成結果——不做的、還沒做的都要寫，不能只記做成的部分。
 
-**2026-08-22 起**：顆粒度更細的單一動作記錄（一個函式寫完測完、一個 bug 修好）改記到 [`REPORT.md`](./REPORT.md)（append-only）。現在整體卡在哪、下一步是什麼，看 [`MARATHON_STATE.md`](./MARATHON_STATE.md)。策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)。這份 `STRATEGY_LOG.md` 繼續當里程碑級的主線敘事，不會被取代。
+**2026-08-22 起**：顆粒度更細的單一動作記錄（一個函式寫完測完、一個 bug 修好）改記到 [`REPORT.md`](./REPORT.md)（append-only）。現在整體卡在哪、下一步是什麼，看 [`MARATHON_STATE.md`](./MARATHON_STATE.md)。策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)；**因子**的 IC 檢定判定記在 [`FACTORS.md`](./FACTORS.md)（策略跟因子是兩種不同單位，分開記）。這份 `STRATEGY_LOG.md` 繼續當里程碑級的主線敘事，不會被取代。
 
 ---
 
@@ -33,7 +33,7 @@ Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-22T15:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-22T16:00:00+08:00**（承接 12:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -42,6 +42,7 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/STRATEGY_LOG.md` | 本檔案。里程碑等級敘事日誌 + 本 FILE MANIFEST | 文件 |
 | `research/REPORT.md` | append-only 細顆粒執行記錄 | 文件 |
 | `research/LEADS.md` | 策略候選登記簿（2 列：`weinstein_stage2_pilot_v1` FAIL、`weinstein_stage2_unbiased` EXPERIMENTAL） | 文件 |
+| `research/FACTORS.md` | **2026-08-22 新增**：因子登記簿（AI 選股引擎 Phase A 步驟 1/2）。6 個因子的 IC 檢定結果，1 個通過（`f_eps_growth`） | 文件 |
 | `research/MARATHON_STATE.md` | 斷點狀態快照（覆寫式，換 session 先讀這個） | 文件 |
 | `research/finmind_client.py` | FinMind 抓取+快取層。`load_dev()` 是策略/分析程式碼**唯一**該用的入口（自動截斷在 `VAL_END`）；`load_full_history()` 是唯一合法的無截斷路徑（只能餵給 `unlock_holdout_once()`）；`_fetch()` 是底層 internal 函式，不該被外部直接呼叫 | 程式碼 |
 | `research/adjust.py` | 台股還原股價（用 `TaiwanStockDividend` 自組，因為 `TaiwanStockPriceAdj` 要付費），透過 `load_dev()` 抓資料，自動截斷 | 程式碼 |
@@ -58,10 +59,41 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/strategies/__init__.py` | `strategies` package 標記 | 程式碼 |
 | `research/strategies/weinstein_stage2.py` | Weinstein 第二階段訊號函式（150日均線上揚+站上、60日動量排名）+ 大盤200日均線總體閘門，插進 `backtest/engine.py` 用 | 程式碼 |
 | `research/strategies/run_weinstein_pilot.py` | 第一輪跑法（手選 30 檔試點宇宙、靜態控制組）——**方法論已知有缺陷**（見 `weinstein_stage2_pilot_v1` 在 `LEADS.md` 的紀錄），保留是為了留下完整歷史，不是推薦用法 | 程式碼 |
-| `research/strategies/run_weinstein_unbiased.py` | **2026-08-22 新增**：修正版跑法（`universe.py` 全市場隨機抽樣 100 檔 + `run_matched_control_group()`），結果見 `LEADS.md` 的 `weinstein_stage2_unbiased` 列 | 程式碼 |
-| `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
+| `research/strategies/run_weinstein_unbiased.py` | 修正版跑法（`universe.py` 全市場隨機抽樣 100 檔 + `run_matched_control_group()`），結果見 `LEADS.md` 的 `weinstein_stage2_unbiased` 列 | 程式碼 |
+| `research/factors.py` | **2026-08-22 新增**：AI 選股引擎 Phase A 步驟 1。6 個因子的計算邏輯，全部透過 `load_dev()`／`pit.py` 的 `pit_date` 做 point-in-time 對齊（`merge_asof(direction='backward')`） | 程式碼 |
+| `research/factor_ic.py` | **2026-08-22 新增**：Phase A 步驟 2。因子 IC 檢定（Spearman 等級相關 vs 未來20日報酬，train/val 分開、隨機打散對照組），結果見 `FACTORS.md` | 程式碼 |
+| `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/factor_ic_results.csv`（因子IC原始數字）、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
+
+---
+
+## 2026-08-22 — AI 選股引擎 Phase A 步驟 1／2：因子庫 + IC 檢定，6 個因子只有 1 個過關
+
+新任務啟動：AI 選股引擎（重運算在 Python 端、App 只當 viewer）。依使用者指示，這輪只做步驟 1（因子庫 `factors.py`）跟步驟 2（因子 IC 檢定 `factor_ic.py`），做完 push 後停下來等 Cowork／使用者審，**不會自己往下做步驟 3（計分 `score.py`）或步驟 4（App 選股頁）**。
+
+**六個因子全部實作並跑出結果**（定義、point-in-time 處理方式見 `factors.py` docstring 跟下方 `FACTORS.md` 摘要）：(a) 月營收YoY加速度、(b) EPS成長、(c) 外資連續買超強度、(d) 三大法人淨買/流動性（**市值資料 `TaiwanStockMarketValue` 付費，用流動性正規化替代，見下方**）、(e) 相對強度(vs大盤60日)、(f) 站上季線+量能放大。全部資料透過 `load_dev()` 或 `pit.py` 取得，完全沒有呼叫 `_fetch()`。
+
+**基本面/技術面資料的 point-in-time 對齊，用 `pandas.merge_asof(direction='backward')` 鍵在 `pit.py` 的 `pit_date`（不是財報所屬期間日）**——這是這次跟 `weinstein_stage2` 系列策略不同的新技術，因為因子需要「逐日」查詢「當時已知的最新財報數字」，不是策略那種「整批抓進來就好」。用真實資料驗證過這個對齊完全正確：把 2330 的月營收 YoY 加速度因子逐日攤開，因子值變動的那幾天，精確對應到 `pit.py` 算出來的揭露日（或揭露日是假日時，對應到之後第一個交易日），沒有提早一天。
+
+**IC 檢定方法**（`factor_ic.py`）：跟 `weinstein_stage2_unbiased` 同一套無偏抽樣（`universe.py` 全市場、固定種子 `20260822`、100 檔抽樣、80 檔可用），121 個不重疊的 20 交易日橫截面（2015–2024），train/val 分開算 Spearman IC，並且對驗證期做「打散因子與股票對應關係」的隨機對照組（200 次），這是因子檢定版的隨機控制組——因子必須贏過至少 90% 的打散結果才算有訊號，不能只看 IC 數字本身好不好看。
+
+**結果（誠實記錄，完整表格在 `FACTORS.md`）：**
+
+| 因子 | Val IC | 打散對照百分位 | 判定 |
+|---|---|---|---|
+| (a) 月營收YoY加速度 | +0.0249 | 84.5 | FAIL（差一點，沒到90%門檻） |
+| (b) EPS成長 | +0.0730 | **100.0** | **PASS** |
+| (c) 外資連續買超強度 | −0.0220 | 76.0 | FAIL（train/val正負號相反） |
+| (d) 三大法人淨買/流動性 | −0.0198 | 76.5 | FAIL |
+| (e) 相對強度(vs大盤60日) | +0.0094 | 38.5 | FAIL（train/val正負號相反） |
+| (f) 站上季線+量能放大 | −0.0033 | 15.0 | FAIL |
+
+**6 個因子只有 1 個（EPS成長）通過。** 這不是實作失敗，是誠實測出的結果：這批以技術面/籌碼面為主的因子在無偏抽樣的台股樣本裡，大多數沒有穩定站得住腳的訊號，基本面因子（EPS 年增率）目前唯一撐得住。特別值得注意的是 (c) 跟 (e) 兩個因子 train 期跟 val 期正負號相反——如果只看 train 期會誤以為它們有效，這正是為什麼一定要拆開 train/val 分別看、不能只看合併後的單一 IC 數字。
+
+**已知限制（誠實列出，`FACTORS.md` 有更完整版本）：** 樣本 80 檔非全市場逐檔掃描；驗證期只有 47 個不重疊橫截面，樣本數不算大；因子 (d) 用流動性代替市值（付費資料的已知替代）；只測了單一 20 日報酬窗口，沒有測其他持有期。
+
+完整技術細節、point-in-time 驗證過程見 `REPORT.md` 對應條目；逐因子完整數字見 `FACTORS.md`。**任務在此停下，等 Cowork／使用者審完再決定要不要進步驟 3。**
 
 ---
 

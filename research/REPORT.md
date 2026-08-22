@@ -146,3 +146,36 @@
 **LEADS.md 記錄：** 新增一列 `weinstein_stage2_unbiased`。判定 **`EXPERIMENTAL`**（不是 `PASS`）——雖然四項關卡（買進持有/成本敏感度/交易數/隨機控制組）全部通過，但 `LEADS.md` 自己訂的規則講明白 `PASS` 一定要包含 holdout 驗證，這輪完全沒有觸碰 holdout。`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` 複查為 `False`。是否要花掉這個專案唯一一次的 holdout 測試機會，不是這裡能自己決定的事。
 
 **下一步：** 等使用者決定要不要對 `weinstein_stage2_unbiased` 做一次性 holdout 測試（需要明確授權，且測過即焚），或是先擴大抽樣規模／真的逐檔掃全市場來提高嚴謹度，或是先去處理其他背景待辦（美股成本模型、紙上前測影子帳本）。
+
+---
+
+## 2026-08-22T16:00:00+08:00 — AI 選股引擎 Phase A 步驟 1／2：factors.py + factor_ic.py
+
+**做了什麼：**
+
+1. **`factors.py`（新增）**：六個因子的計算函式。
+   - `_institutional_daily_net()`：把 `TaiwanStockInstitutionalInvestorsBuySell` 的長表（每列一個法人類別）轉成寬表（每列一天，`foreign_net`/`trust_net`/`dealer_net`/`total_net` 四欄），驗證過欄位對應：`Foreign_Investor`→外資、`Investment_Trust`→投信、`Dealer_self`+`Dealer_Hedging`→自營商（合併算一欄，因為策略層面通常不細分自營商自行買賣跟避險），`Foreign_Dealer_Self` 抽樣觀察一直是 0，排除不算。
+   - `_foreign_streak_strength()`：(c) 因子，逐日算「當前連續買超天數的累積買超量 / 20日均量」，本質是序列相依的計算（今天算不算連續，要看昨天），沒辦法用 pandas rolling 向量化，寫成明確的迴圈，逐列只依賴當列以前的資料，不會有 look-ahead。
+   - `_asof_join()`：核心的 point-in-time 對齊機制，`pandas.merge_asof(direction='backward')` 鍵在 `pit_date`。**踩到一個 pandas 版本限制**：`merge_asof` 的 join key 不接受純字串欄位（就算兩邊型別一樣也不行，錯誤訊息是 `Incompatible merge dtype ... both sides must have numeric dtype`），要先轉成 `datetime64` 才能 join，join 完再把輔助欄位丟掉、保留原本字串格式的 `date` 欄位（因為 `validation/holdout.py` 的字串比較邏輯依賴這個慣例，不能把整個 pipeline 換成 datetime64）。
+   - `_revenue_yoy_acceleration()` (a)、`_eps_yoy_growth()` (b)：分別用 `pit.month_revenue_pit()`／`pit.quarterly_pit()` 的輸出算 YoY，再算 YoY 的變化量（加速度）／直接用 YoY（EPS 成長）。
+   - (d) 因子：`TaiwanStockMarketValue`（市值）確認過是付費資料集（回傳 `Your level is free...`），改用「20日三大法人淨買金額 / 20日均成交金額」當流動性正規化的替代版本，`factors.py` docstring 跟 `FACTORS.md` 都寫清楚這是替代不是原版。
+
+   **Point-in-time 正確性驗證（不是空口保證）**：把 2330 的 (a) 因子逐日攤開，找出因子值變動的那幾天，逐一比對 `pit.month_revenue_pit()` 算出的 `pit_date`：`pit_date=2024-08-10`（週六）→ 因子值在下一個交易日 `2024-08-12` 才變；`pit_date=2024-10-10`（國慶日）→ 因子值在 `2024-10-11` 才變；`pit_date=2024-09-10`／`2024-12-10`（剛好是交易日）→ 因子值當天就變。全部符合「揭露日或之後第一個交易日才看得到，不會提早」的預期，沒有例外。
+
+2. **`factor_ic.py`（新增）**：`build_snapshots()` 用交易日曆切出不重疊的 20 日窗口；`_cross_section()` 對每個 snapshot 收集有效的（因子值, 未來報酬）配對；`evaluate_factor()` 算 train/val 平均 IC、IC_IR、hit_rate，並用 200 次「打散因子值-股票對應（報酬不動）」重算 IC 當隨機對照組，算真實 val IC 的絕對值贏過幾 % 的打散結果。三個通過條件（val IC 絕對值 ≥0.02、train/val 同號、打散對照百分位 ≥90）任一沒過就是沒過。
+
+**驗證結果：**
+- 小規模冒煙測試（8 檔股票）：確認橫截面組裝機制、Spearman 計算本身正確（用同一組 8 檔資料手動跑 `scipy.stats.spearmanr` 得到一致數字）；8 檔小於 `n<10` 的門檻，`evaluate_factor()` 正確把這個 snapshot 排除，不是 bug。
+- 全量跑（100 檔抽樣、80 檔可用，121 個 snapshot，2015–2024）：
+  - `f_rev_accel`：train IC +0.0086、val IC +0.0249（同號），打散對照 84.5 百分位——**FAIL**（沒到 90 門檻，但很接近）。
+  - `f_eps_growth`：train IC +0.0490、val IC +0.0730（同號、val 比 train 還強），打散對照 **100.0** 百分位——**PASS**。
+  - `f_foreign_streak`：train IC +0.0568、val IC −0.0220（**正負號相反**），打散對照 76.0——**FAIL**。
+  - `f_inst_flow`：train IC −0.0013、val IC −0.0198（太小），打散對照 76.5——**FAIL**。
+  - `f_rel_strength`：train IC −0.0128、val IC +0.0094（**正負號相反**、太小），打散對照 38.5（比一半的隨機結果還差）——**FAIL**。
+  - `f_ma_breakout`：train IC −0.0597、val IC −0.0033（太小），打散對照 15.0（隨機打散常常贏過真實訊號）——**FAIL**。
+  - 重跑一次驗證數字可重現（固定種子 `20260822`/`20260822`，兩次執行結果逐位元一致）。
+- 結果存到 `data/factor_ic_results.csv`（`.gitignore` 排除）跟 `FACTORS.md`（git 追蹤，人類可讀版本）。
+
+**FACTORS.md 記錄：** 6 個因子，1 個 PASS（`f_eps_growth`）、5 個 FAIL，每個都寫清楚沒過的具體原因（不是籠統的「沒過」）。
+
+**任務在此停下**，依使用者指示，步驟 3（`score.py` 計分）跟步驟 4（App 選股頁）要等 Cowork／使用者審完這批因子結果才會開始。
