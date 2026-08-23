@@ -128,3 +128,22 @@
 **沒做的**：只測了3檔股票、2個concept；沒有查證每家公司確切的XBRL強制標記生效日期（只用「~2009年中」概略時間點做形狀比對，這是SEC對大型加速申報者的分階段生效時間，沒有逐公司查證）；沒有實際測試「排除pre-XBRL期間+排除pre-IPO期間後gap是否全部落在合理範圍」（這是驗證上述假說的直接方法，留給下一輪）；沒有驗證更多公司樣本確認這兩種模式是否普遍成立。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～十輪地基工作的先例一致。
 
 `is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。取鎖時第0節第2步偵測結果：`LOCK_ACQUIRED`（乾淨取得，非陳舊鎖檔，上一輪正常結束）。
+
+---
+
+## 第35輪（2026-08-24T06:02:00+08:00）：中小型股/近期IPO股 USStockPrice 深度抽測 — 一開始就撞 FinMind 402 額度牆，優雅收工
+
+**工作單位**：接續「下一輪建議工作單位」第4項——`us_probe_milestone1.py`（2026-08-23）只測了 AAPL/MSFT 兩檔巨型股，`US_MARATHON_STATE.md` 明確警告「不能假設全市場都一樣深」。
+
+**做了什麼**：
+1. 讀取已快取的 `USStockInfo` 最新快照（2026-08-22，12429列），用 `MarketCap`／`IPOYear` 欄位篩選出兩組候選（只挑純字母代號，排除 W/WS/U/R 這類權證/單位後綴，避免混進不同金融工具類別）：
+   - 中小型股組（MarketCap 3億～20億美元）：`XPER`、`SWIM`、`IMOS`、`ABR`、`OCSL`（seed=3 隨機抽樣）。
+   - 近期IPO組（2021–2023年上市，MarketCap>1億美元）：`FINW`、`LAW`、`NRGV`、`GPCR`、`CAVA`（同抽樣方法）。
+2. 新寫 `us_probe_price_depth_smallmid.py`（跟 `us_probe_milestone1.py` 同款結構，透過 `load_dev()` 抓 `USStockPrice`，只印結果不改其他檔案）。
+3. **執行時，第一檔（`XPER`）就打到 HTTP 402**（`{"msg":"Requests reach the upper limit."...}`）——本機快取（`data/raw/`）裡完全沒有這 10 檔的價格資料（跟第 34 輪台股回補撞到的限流是同一個全域額度池，前幾輪台股回補批次已經先把這小時的額度用光），連第一次呼叫都直接被拒絕，不是跑到一半才斷。
+
+**判定**：依 `MARATHON_PROTOCOL.md` 第4節「任何一次 FinMind 呼叫回傳 402...優雅結束這一輪...不要為了硬跑而狂重試」——立刻停手，不重試。腳本本身已經寫好、邏輯正確（候選篩選方法有記錄在 docstring 裡可重現），只是這輪沒有額度可以執行。**下一輪（或額度明顯恢復後的任何一輪）如果要接美股軌，直接跑 `python us_probe_price_depth_smallmid.py` 即可，不需要重新設計。**
+
+**沒做的**：中小型股/近期IPO價格深度完全沒有實測到任何數字（0/10檔）；「下一輪建議工作單位」清單裡第1、2、3、5項也都沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列。
+
+`is_holdout_consumed()` 確認為 `False`（唯一一次外部呼叫是被 FinMind 402 拒絕，沒有任何資料真的進來，更沒有碰 holdout）。取鎖時第0節第2步偵測結果：`LOCK_ACQUIRED`（乾淨取得，非陳舊鎖檔，上一輪正常結束）。
