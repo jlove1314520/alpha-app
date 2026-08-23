@@ -78,3 +78,26 @@
 **Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
 
 **下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1（`institutional_investors` 亂碼根因調查）。
+
+---
+
+## 2026-08-24T09:10:00+08:00 — 馬拉松第六輪期貨軌執行：`institutional_investors` 亂碼根因調查（已解決，不是編碼問題）
+
+**工作單位**：上一輪列的優先項目 1——查清楚 `TaiwanFuturesInstitutionalInvestors` 的 `institutional_investors` 分類欄位亂碼問題根因。
+
+**做了什麼**：
+1. 寫了 `fut_probe_institutional_encoding.py`，直接用 `requests.get` 呼叫 FinMind API（同一個已探測過的窗口 2024-06-03～06-07，在 VAL_END=2024-12-31 之前，繞過 `finmind_client.py` 的 parquet 快取，因為快取裡已經是「解碼後」的值，要查根因得看最原始的 response bytes/headers）。
+2. 檢查 `resp.headers['Content-Type']`（`'application/json'`，無 charset）、`resp.encoding`（requests 猜為 `'utf-8'`）、`resp.apparent_encoding`（chardet 猜為 `'ascii'`，這個線索很關鍵：如果原始 bytes 裡真的有 replacement character 那 chardet 應該猜不出 ascii）。
+3. 直接印出原始 bytes 在 `institutional_investors` 欄位附近的內容，發現是 `"institutional_investors":"自營商"`——**這是標準 JSON `\uXXXX` escape，本身就是 ASCII-safe 純文字，跟任何多位元編碼（UTF-8/Big5/GB2312）猜測完全無關**，`自營商` 解出來就是「自營商」三個字。
+4. 用 `resp.json()`（`requests` 內建，也是 `finmind_client._fetch()` 目前用的方法）解析，再把結果寫進**明確指定 `encoding='utf-8'` 的檔案**（不是印到終端機）再讀回來檢查——三個值正確顯示為 `外資`／`投信`／`自營商`，跟三大法人分類完全吻合，不再是間接推斷。
+5. 也用 `finmind_client.load_dev()`（走 parquet 快取的正式路徑）重複同一個檢查，確認快取寫入/讀出的過程也沒有引入任何損壞。
+
+**結論**：`institutional_investors` 從頭到尾都沒有壞——FinMind 回傳的資料是對的，`requests.json()` 解析是對的，`finmind_client.py` 現有寫法也是對的，**完全不需要改任何程式碼**。之前看到的 `�~��`／`��H`／`�����` 亂碼，根因是 `fut_probe_milestone1.py` 用 `print(df.head())` 把記憶體裡完全正確的 Unicode 字串直接印到 Windows 終端機，而終端機的 codepage 不是 UTF-8，才在**顯示層**把正確字元換成 `�`——資料本身從來沒有被污染過。這是一個顯示層陷阱，不是資料層問題，已經把這個排查方法（寫入明確 UTF-8 檔案再讀）記進 `DATA.md` 第 6 節，供以後遇到類似「疑似亂碼」欄位時優先排除顯示假象。
+
+**地基狀態更新**：`TaiwanFuturesDaily`（`settlement_price`/`open_interest`）跟 `TaiwanFuturesInstitutionalInvestors`（`institutional_investors` 分類）兩個資料集的欄位品質疑慮都已解除，期貨軌地基推進到「只剩轉倉時點規則未驗證」的階段。
+
+**沒做的事**：轉倉時點規則 H1（結算日）vs H2（成交量交叉）驗證、連續合約建構程式碼——這兩項本來就排在 `institutional_investors` 解決之後，本輪一個工作單位只處理一項，已達成本輪目標。`TRIALS_LEDGER.md` 沒有新增列——這是資料欄位品質調查（顯示層 bug 排查），不是完成一次可統計檢定的假說測試，理由同前幾輪的地基調查記錄。
+
+**Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
+
+**下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1（轉倉時點規則 H1 vs H2 驗證，需要近月/次近月真實成交量互相比較）。

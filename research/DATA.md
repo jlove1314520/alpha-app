@@ -234,12 +234,12 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 
 - ✅ **資料集名稱確認可以呼叫成功、有資料回傳**。
 - 欄位：`futures_id, date, institutional_investors, long_deal_volume, long_deal_amount, short_deal_volume, short_deal_amount, long_open_interest_balance_volume, long_open_interest_balance_amount, short_open_interest_balance_volume, short_open_interest_balance_amount`——結構看起來合理（分買賣方交易量/金額跟未平倉餘額量/金額）。
-- **⚠️ `institutional_investors` 欄位（應該是「自營商」/「投信」/「外資」這種分類標籤）目前顯示為亂碼**（例如 `�����`、`��H`、`�~��`），推測是編碼問題（可能來源是 Big5 但被當 UTF-8 解碼，或反過來），**這欄還不能直接拿來用來區分是哪個法人類別**——下一輪要查 `finmind_client.py` 的解碼邏輯或改用其他方式取得正確的分類標籤（例如看每個 `date` 內固定出現幾種不重複值，配合官方文件或已知的三大法人分類順序去對應，不能用肉眼猜亂碼字元）。
-- 這次抽樣（2024-06-03～06-07，5 個交易日）每天固定出現 3 種不重複的 `institutional_investors` 值，跟「自營商/投信/外資」三大類別的數量吻合，但這只是**間接佐證**，還不是確認。
+- **✅ `institutional_investors` 亂碼問題已解決（2026-08-24 馬拉松期貨軌，`fut_probe_institutional_encoding.py`）：根本不是編碼問題，資料本身完全正確，之前看到亂碼是終端機/console 顯示層的假象。** 直接檢查 FinMind API 回傳的原始 bytes，欄位值是標準 JSON `\uXXXX` escape（例如 `"institutional_investors":"自營商"`，ASCII-safe，不涉及任何多位元編碼猜測），`requests` 的 `resp.json()` 用內建 `json` 模組解析這種 escape 完全正確、不會出錯。把值寫到明確指定 `encoding="utf-8"` 的檔案再讀出來，三種值分別正確顯示為 `外資`／`投信`／`自營商`——跟「外資/投信/自營商」三大法人分類完全吻合，不是間接推斷，是直接確認。**`finmind_client.py` 完全不需要修改**，`_fetch()`/`load_dev()` 目前的寫法（直接用 `resp.json()`）本來就是對的。之前 `fut_probe_milestone1.py` 用 `print(df.head())` 直接印到 Windows 終端機，終端機的 codepage 不是 UTF-8，才把記憶體裡完全正確的字串顯示成 `�` 亂碼——**這是一個純粹的顯示層陷阱，不是資料層問題，下次遇到疑似「亂碼」的欄位，先用「寫入明確 `encoding='utf-8'` 的檔案再讀」這個方法排除顯示假象，不要急著懷疑資料源或改解碼邏輯**。
+- 三種值（外資／投信／自營商）在抽樣視窗（2024-06-03～06-07）內每天固定各出現一次，樣本沒有意外的第四種值。
 
 ### 給下一步的提醒
 
-`settlement_price`/`open_interest` 全零疑慮已在馬拉松第四輪解除（見上，篩 `trading_session == "position"` 即可正常使用）。**`institutional_investors` 亂碼問題仍未解決**，在這個解決之前，**不要開始寫連續合約建構程式碼或用 `TaiwanFuturesInstitutionalInvestors` 測任何跟三大法人期貨部位有關的因子/策略假說**——地基的這部分欄位品質還沒驗證乾淨，貿然往上蓋容易做白工。這點適合當下一輪期貨軌的工作單位（`TaiwanFuturesDaily`／`settlement_price`／`open_interest` 已經可以正常使用，不受此限）。
+`settlement_price`/`open_interest` 全零疑慮已在馬拉松第四輪解除（見上，篩 `trading_session == "position"` 即可正常使用）。**`institutional_investors` 亂碼問題已在馬拉松第六輪解除**（見上，資料本身一直是對的，純粹是顯示假象）——`TaiwanFuturesInstitutionalInvestors` 現在可以正常拿來區分自營商/投信/外資，**地基的這兩個資料集品質都已釐清可用**。下一輪可以開始驗證轉倉時點規則（H1 結算日轉倉 vs H2 成交量交叉轉倉），需要近月/次近月成交量互相比較——這是連續合約建構前最後一個尚待驗證的地基項目。
 
 ---
 
