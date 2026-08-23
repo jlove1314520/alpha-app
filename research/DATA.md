@@ -160,6 +160,22 @@ NVDA 在 2024-06-10 盤後執行 10:1 股票分割。抓回來的資料裡，**�
 
 </details>
 
+### 美股 PIT 資料源調查（續）：XBRL company facts API 實測，發現「比較期重複揭露」陷阱（2026-08-24 馬拉松第十輪實測）
+
+**性質：已實測驗證，且發現一個第三輪 submissions API 調查沒有踩到的重要方法論陷阱。** 用 `research/sec_edgar_xbrl_facts_probe.py` 對第三輪已驗證的三個 CIK（AAPL/MSFT/PLTR）打了 `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`，全部 200 OK。
+
+**表面上看起來能用**：每個 XBRL concept（例如 `EarningsPerShareDiluted`）底下每筆資料點確實同時有 `end`（財報期間結束日）跟 `filed`（申報日）欄位，文件轉述屬實。AAPL 的 `EarningsPerShareDiluted` 有 338 筆資料點，回溯到 `end=2007-09-29`。
+
+**但天真地用 `filed - end` 算 PIT gap 會算錯**：AAPL 這個 concept 算出來的 gap 是 min=25／max=772／avg=282.3 天——772 天完全不合理（超過兩年）。追查發現原因：**company facts API 是「每個資料點」層級，不是「每次申報」層級**。同一個財報期間（`end` 日期）的數字，會在後續申報裡以「比較期（comparative period）」的形式被重複揭露——例如 2023 年的 Q1 數字，不只出現在 2023 年申報的那份 10-Q 裡，隔年 2024 年的 10-Q 為了年比年對照，也會把去年同期數字再報一次，company facts API 把這兩次都算成獨立資料點。實測驗證：AAPL 74 個不同 `end` 日期裡，**71 個（96%）被超過一次申報引用**，抽樣三筆都是這個模式（例如 `end=2008-09-27` 被 2009-10-27 的 10-K 跟 2010-10-27 的另一份 10-K 各報一次）。
+
+**這代表**：如果要用 company facts API 做 PIT 對齊，不能直接拿 `filed` 欄位當「這個數字第一次公開的日期」，必須先對每個 `end` 分組、取**最小**的 `filed`（第一次揭露），才是正確的 PIT 時間點；否則會把「比較期重複揭露」的較晚 `filed` 日期誤當成原始揭露日，導致 PIT gap 被嚴重高估（本次實測 max 772/1034 天的離群值就是這樣來的）。**這個陷阱是 submissions API（第三輪）沒有的**——submissions API 是「每次申報」一筆記錄，`filingDate`/`reportDate` 本來就是申報層級的一對一關係，沒有比較期重複的問題；company facts API 換了一個更細的粒度（每個數值點），代價是引入了這個新陷阱。
+
+**另一個發現（XBRL taxonomy concept 名稱不穩定）**：`Revenues` 這個 concept 在 AAPL 只有 11 筆資料點、最早 `end=2016-09-24`；但 `EarningsPerShareDiluted` 同一家公司卻回溯到 2007 年。推測原因是 AAPL 早期用不同的 concept 名稱（例如 `SalesRevenueNet`）申報營收，2016 年前後才改用 `Revenues` 這個標籤——**如果要用 company facts API 抓長期營收歷史，不能只查單一 concept 名稱，需要先調查同一語意在不同年代對應哪些 concept 名稱，這輪沒有進一步查證，留給下一輪或之後真正要寫美股版 `factors.py` 時處理。** PLTR 的 `Revenues` concept 甚至完全不存在（`NOT PRESENT`），另一個提醒：不同公司/不同時期用的 concept 名稱不能假設一致。
+
+**還沒驗證的部分**：只測了 3 檔股票、2 個 concept（EPS、Revenues），沒有系統化列出「哪些 concept 名稱在哪些年代適用」；`filed` 欄位取最小值分組後的 gap 分布沒有重新算過（這輪只確認了陷阱存在，沒有算出「修正後」的正確 gap 統計，因為那需要先決定分組/取最小值的實作方式，屬於下一步工作）。
+
+**結論**：XBRL company facts API 可用，但**不能直接照抄 submissions API 的簡單邏輯**——如果之後要選它當美股版 `pit.py` 的資料源，必須實作「同一 `end` 取最小 `filed`」的去重邏輯，且要處理 concept 名稱隨時間變化的問題。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～九輪地基工作的先例一致。
+
 ---
 
 ## 2. 存活者偏差（下市／下櫃股票）

@@ -38,6 +38,16 @@
 
 **沒做的**：XBRL company facts API（據稱有更細的 `filed` 欄位）完全沒測；`filings.files[]` 分頁檔案內容沒抓；美股存活者偏差、成本模型都還沒碰；`sec_edgar_probe.py` 目前只是探測腳本，還沒包裝成可重用的 fetch 函式。這不是一次統計檢定（沒有因子/策略假說被測試），所以 `TRIALS_LEDGER.md` 不需要加列，跟 `MARATHON_PROTOCOL.md` 第1c節「地基工作」的精神一致。
 
+## 2026-08-24T22:05:00+08:00 — 馬拉松第十輪：XBRL company facts API 實測，發現比較期重複揭露陷阱
+
+做了 `US_MARATHON_STATE.md` 建議工作單位第 3 項（獨立於 FRC/SBNY CIK 未解問題）：實測 `data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`，用第三輪已驗證的三個 CIK（AAPL/MSFT/PLTR）。新寫 `research/sec_edgar_xbrl_facts_probe.py`。
+
+**結果：端點可用，但發現一個重要陷阱。** 每個資料點確實有 `end`/`filed` 欄位，結構跟文件轉述一致。但天真算 `filed - end` 的 PIT gap 出現不合理離群值（AAPL max=772天）——追查發現這是「每個資料點」層級（不是「每次申報」層級）的設計：同一財報期間會在後續申報裡以比較期形式重複出現。實測驗證：AAPL 74個不同 `end` 日期裡 71個（96%）被超過一次申報引用。**結論：要用這個 API 做 PIT 必須先按 `end` 分組取最小 `filed`，不能直接用原始欄位值**，跟 submissions API（每次申報一筆、沒有這個問題）不一樣。另外發現 XBRL concept 名稱不穩定（`Revenues` 只回溯到2016，`EarningsPerShareDiluted` 回溯到2007，PLTR 甚至沒有 `Revenues` concept），推測是不同年代/公司用不同 concept 名稱申報同一語意。完整細節寫進 `DATA.md`「美股 PIT 資料源調查（續）」小節。
+
+**沒做的**：修正後（取最小filed分組）的 gap 統計沒有重新算；concept 名稱隨時間變化的完整對照表沒有系統化列出；`filings.files[]` 分頁檔案內容仍未抓；FRC/SBNY CIK 問題、美股存活者偏差、成本模型都還沒碰，這輪刻意獨立於這些未解問題之外。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列。
+
+`is_holdout_consumed()` 確認為 `False`（本輪只打 SEC EDGAR 公開 API，沒有碰 FinMind 或 alpha.db）。
+
 `is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。
 
 ## 2026-08-23T15:35:00+08:00 — 馬拉松第四輪：美股存活者偏差實測（負面結果）
