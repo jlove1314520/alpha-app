@@ -23,13 +23,22 @@
     --violet:#9085e9; --yellow:#c98500;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%}
+  html,body{height:100%;overflow:hidden}
+  /* 2026-08-24 修正：測試發現捲動日誌頁時，整個網頁文件（html）會被捲動
+     （即使 body 已設 overflow:hidden），導致 #app 被往上推、藏在裡面用
+     transform 移出畫面外的下單/搜尋抽屜跟著露出來，fixed 導覽列也跟著看
+     起來消失。原因是只靠 body 的 overflow:hidden「傳導」給 viewport 不夠
+     可靠。改成 body 本身直接用 position:fixed 釘死在視窗（inset:0），文件
+     整個就不可能被捲動，捲動只會發生在 main 內部（main 自己有
+     overflow-y:auto）。 */
   body{
     background:var(--page); color:var(--ink);
     font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;
     font-size:14px; line-height:1.45; overflow:hidden;
+    position:fixed; inset:0; width:100%;
   }
   #app{max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:var(--page);position:relative}
+  :root{--nav-h:64px}
 
   /* ===== 頂部 ===== */
   header.top{
@@ -44,7 +53,7 @@
   .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:1px}
 
   /* ===== 畫面容器 ===== */
-  main{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px 96px;scrollbar-width:none}
+  main{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);scrollbar-width:none}
   main::-webkit-scrollbar{display:none}
   .screen{display:none}
   .screen.active{display:block;animation:fade .18s ease}
@@ -192,8 +201,18 @@
   .imp{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
 
   /* ===== 底部導覽 ===== */
+  /* 2026-08-24 修正：原本 position:absolute 是相對 #app 定位，#app 若因為
+     100dvh 計算誤差或內容撐高而超出視窗，導覽列會被往下推、被內容捲動蓋掉。
+     改用 position:fixed 直接釘在「視窗」底部，不受 #app 內部狀態影響；
+     用 left:50%+transform 置中並限制 max-width 跟 #app 一致，避免桌面寬螢幕
+     上變成貼齊左右滿版的長條。z-index 明確設在一般內容之上、但低於
+     .sheet-mask(40)/.sheet(41)，讓下單抽屜/搜尋視窗打開時仍蓋住導覽列
+     （這是原本、也是預期的行為，沒有改變）。 */
   nav{
-    position:absolute;left:0;right:0;bottom:0;background:rgba(13,13,13,.92);backdrop-filter:blur(14px);
+    position:fixed;left:50%;bottom:0;transform:translateX(-50%);
+    width:100%;max-width:430px;box-sizing:border-box;min-height:var(--nav-h);
+    z-index:30;
+    background:rgba(13,13,13,.92);backdrop-filter:blur(14px);
     border-top:1px solid var(--hairline);display:flex;
     padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
   }
@@ -866,7 +885,13 @@
     if(!todays.length)return fallback;
     todays.sort((a,b)=>a.contract_date.localeCompare(b.contract_date));
     const near=todays[0];const cls=near.spread>=0?'pos':'neg';
-    return `<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX · ${near.contract_date.slice(2)} 合約 · ${near.date}</span></div><div class="px"><b>${nf(near.close)}</b><span class="${cls}">${near.spread>=0?'+':''}${(near.spread_per||0).toFixed(2)}%</span></div></div>`;
+    // 2026-08-24 修正：contract_date 是 FinMind 回傳的 YYYYMM 合約月份（例如"202609"代表2026年9月），
+    // 原本用 .slice(2) 只取後4碼顯示成裸數字"2609"，剛好跟陽明(2609)的股票代號撞在一起，容易誤認成
+    // 抓錯資料源；資料源本身沒有問題（futures_id 確實是 TX），只是顯示格式不清楚，改成明確的
+    // "TXF YYYY/MM" 月份標示，不再輸出容易被誤解的裸數字。
+    const cd=near.contract_date;
+    const contractLabel=/^\d{6}$/.test(cd)?`TXF ${cd.slice(0,4)}/${cd.slice(4,6)}`:cd;
+    return `<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX · ${contractLabel} 近月合約 · ${near.date}</span></div><div class="px"><b>${nf(near.close)}</b><span class="${cls}">${near.spread>=0?'+':''}${(near.spread_per||0).toFixed(2)}%</span></div></div>`;
   }
   async function loadHomeIndex(){
     const el=document.getElementById('home-idx-rows');if(!el)return;
@@ -1246,6 +1271,11 @@
       document.getElementById('picks-asof').textContent='—';
     }
   }
+  // 2026-08-24 新增：scores.json 每列可能帶 stock_name（研究端 load_name_map() 產生），
+  // 沒有名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
+  function pickLabel(r){
+    return r.stock_name?`${r.stock_name} ${r.stock_id}`:r.stock_id;
+  }
   function renderPicks(json){
     const meta=json._meta||{};
     document.getElementById('picks-asof').textContent='資料基準日 '+(meta.as_of||'—')+'（'+(meta.disclaimer||'')+'）';
@@ -1254,7 +1284,7 @@
     if(!rows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
     listEl.innerHTML=rows.map(r=>`
       <div class="row" onclick="showPickDetail('${r.stock_id}')">
-        <div class="nm"><b>#${r.rank} ${r.stock_id}</b><span>${r.industry||'—'}</span></div>
+        <div class="nm"><b>#${r.rank} ${pickLabel(r)}</b><span>${r.industry||'—'}</span></div>
         <div class="px"><b>${(r.composite>=0?'+':'')+r.composite.toFixed(2)}</b><span>綜合分</span></div>
       </div>`).join('');
   }
@@ -1263,7 +1293,7 @@
     const row=(PICKS_CACHE.scores||[]).find(r=>r.stock_id===stockId);
     const card=document.getElementById('picks-detail-card');
     if(!row){card.style.display='none';return}
-    document.getElementById('picks-detail-name').textContent=stockId;
+    document.getElementById('picks-detail-name').textContent=pickLabel(row);
     const comps=(PICKS_CACHE._meta&&PICKS_CACHE._meta.score_components)||['eps_family','revenue_surprise','low_vol'];
     document.getElementById('picks-detail').innerHTML=comps.map(c=>{
       const v=row[c];

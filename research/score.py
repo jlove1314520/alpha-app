@@ -83,6 +83,17 @@ MIN_COMPONENTS_FOR_RANKING = 2  # a composite built from just 1 of 3 components 
 # but excluded from anything that acts on the ranking (top-N export, backtest selection) via eligible_for_ranking().
 
 
+def _stock_info() -> pd.DataFrame:
+    """共用：抓一次 TaiwanStockInfo，去重成每檔一列。`load_industry_map()`／
+    `load_name_map()` 都從這裡取，避免對同一個資料集重複呼叫 `_fetch()`
+    （有 parquet 快取，重複呼叫不會浪費真正的 API 額度，只是沒必要）。
+    """
+    raw = _fetch("TaiwanStockInfo", "", "2000-01-01")
+    if raw.empty:
+        return raw
+    return raw.drop_duplicates(subset=["stock_id"], keep="first")
+
+
 def load_industry_map() -> dict[str, str]:
     """stock_id -> industry_category, static snapshot (see module docstring
     for the point-in-time caveat). Uses _fetch() directly, not load_dev(),
@@ -90,11 +101,21 @@ def load_industry_map() -> dict[str, str]:
     metadata, not a price/volume time series -- there is nothing here that
     could leak future price information.
     """
-    raw = _fetch("TaiwanStockInfo", "", "2000-01-01")
-    if raw.empty:
+    dedup = _stock_info()
+    if dedup.empty:
         return {}
-    dedup = raw.drop_duplicates(subset=["stock_id"], keep="first")
     return dict(zip(dedup["stock_id"], dedup["industry_category"]))
+
+
+def load_name_map() -> dict[str, str]:
+    """stock_id -> stock_name（公司名稱），2026-08-24 新增，給 App 選股頁
+    「公司名（代號）」顯示用（原本 scores.json 只有代號，使用者要求補上名稱）。
+    跟 `load_industry_map()` 共用同一份 `TaiwanStockInfo` 快照，理由同上。
+    """
+    dedup = _stock_info()
+    if dedup.empty:
+        return {}
+    return dict(zip(dedup["stock_id"], dedup["stock_name"]))
 
 
 def _zscore_within_group(values: pd.Series, groups: pd.Series) -> pd.Series:
@@ -169,7 +190,7 @@ def eligible_for_ranking(cs: pd.DataFrame) -> pd.DataFrame:
 
 def export_scores_json(
     as_of: str, data: dict[str, pd.DataFrame], industry_map: dict[str, str],
-    out_path: str, top_n: int | None = None,
+    out_path: str, top_n: int | None = None, name_map: dict[str, str] | None = None,
 ) -> pd.DataFrame:
     """Writes the viewer-facing scores.json the App's 選股 tab reads.
     Schema documented inline in the written file's own "_meta" block so the
@@ -177,10 +198,17 @@ def export_scores_json(
     eligible_for_ranking() rows are exported -- the viewer is a ranked pick
     list, not a raw data dump, so thin-coverage rows that can't be trusted
     for ranking don't belong in it.
+
+    `name_map`（2026-08-24 新增，`load_name_map()` 的輸出）：stock_id -> 公司
+    名稱，寫進每一列的 `stock_name` 欄位，讓 App 選股頁可以顯示「公司名（代
+    號）」而不是只有代號。缺傳這個參數，或某檔股票查不到名稱，`stock_name`
+    就是 `None`（寫進 JSON 是 `null`）——前端負責在 null 時退回只顯示代號，
+    這裡不用假名稱填充，誠實反映「沒有這筆資料」。
     """
     cs = eligible_for_ranking(compute_scores_at_date(as_of, data, industry_map))
     if top_n:
         cs = cs.head(top_n)
+    cs["stock_name"] = cs["stock_id"].map(name_map) if name_map else None
 
     # json.dump() happily emits the bare (non-standard) token NaN for float('nan') -- Python's json module
     # accepts it on read but it is NOT valid JSON per spec, and JS's JSON.parse() correctly rejects it.
