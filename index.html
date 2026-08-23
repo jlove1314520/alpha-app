@@ -268,8 +268,8 @@
   <header class="top">
     <div class="brand">Alpha<span>◆</span> <span style="font-size:11px;color:var(--ink-3);font-weight:400">台美股 AI 交易</span></div>
     <div class="mkt-state">
-      <span class="pill"><span class="dot" style="background:var(--good)"></span>台股 <b>盤中</b></span>
-      <span class="pill"><span class="dot" style="background:var(--ink-3)"></span>美股 21:30</span>
+      <span class="pill" id="mkt-tw"><span class="dot"></span>台股 <b>—</b> <span class="tm">--:--:--</span></span>
+      <span class="pill" id="mkt-us"><span class="dot"></span>美股 <b>—</b> <span class="tm">--:--:--</span></span>
     </div>
   </header>
 
@@ -277,6 +277,10 @@
 
   <!-- ════════ 1. 今日 ════════ -->
   <section class="screen active" id="scr-home">
+    <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span>最後更新：<b id="home-updated-tm">--:--</b></span>
+      <span class="more" onclick="fmClearCache();hydrateHome()">重新整理</span>
+    </div>
     <div class="kpi-row">
       <div class="kpi">
         <div class="lbl">總資產（台＋美）</div>
@@ -316,6 +320,10 @@
 
   <!-- ════════ 2. 市場 ════════ -->
   <section class="screen" id="scr-market">
+    <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span>最後更新：<b id="market-updated-tm">--:--</b></span>
+      <span class="more" onclick="fmClearCache();hydrateMarket()">重新整理</span>
+    </div>
     <div class="card">
       <h3>大盤指數</h3>
       <div id="idx-rows"><div class="note">載入中…</div></div>
@@ -368,10 +376,11 @@
       <div class="ai-tag">✦ AI 選股引擎 · Phase A</div>
       <p>綜合分結合<b>通過統計檢定的因子</b>（EPS成長/意外家族、營收意外、低波動），在<b>同產業</b>內做相對強弱排名，避免拿半導體股跟航運股比 EPS 成長率。<b>研究/教育用途，非投資建議；歷史回測不代表未來績效，樣本非全市場逐檔掃描。</b></p>
       <div class="note" id="picks-asof">載入中…</div>
+      <div class="note">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
     </div>
 
     <div class="card">
-      <h3>綜合分排行<span class="more" id="picks-refresh" onclick="hydratePicks(true)">重新整理</span></h3>
+      <h3>綜合分排行<span class="more" id="picks-refresh" onclick="fmClearCache();hydratePicks(true)">重新整理</span></h3>
       <div id="picks-list"><div class="note">載入中…</div></div>
       <div class="note">來源：research/score.py（本機/排程產生，非即時報價） · 樣本 80 檔（100 檔抽樣，見 FACTORS.md）</div>
     </div>
@@ -765,6 +774,31 @@
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
 
+  // ══════ 右上角台美股即時時鐘（2026-08-24 新增）══════
+  // 用 Intl.DateTimeFormat 的 timeZone 選項取得指定時區的當地時間，
+  // 美東時間的夏令/冬令切換由瀏覽器內建時區資料庫自動處理，不用自己算 DST 規則。
+  function zonedNow(tz){
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit',weekday:'short'}).formatToParts(new Date());
+    const m={};parts.forEach(p=>m[p.type]=p.value);
+    const wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[m.weekday];
+    const h=+m.hour,mi=+m.minute,s=+m.second;
+    return {h,mi,s,wd,hhmmss:`${m.hour}:${m.minute}:${m.second}`};
+  }
+  function mktPill(elId,tz,openMin,closeMin){
+    const el=document.getElementById(elId);if(!el)return;
+    const z=zonedNow(tz);
+    const mins=z.h*60+z.mi;
+    const open=z.wd>=1&&z.wd<=5&&mins>=openMin&&mins<closeMin;
+    el.querySelector('.dot').style.background=open?'var(--good)':'var(--ink-3)';
+    el.querySelector('b').textContent=open?'盤中':'已收盤';
+    el.querySelector('.tm').textContent=z.hhmmss.slice(0,5); // 只顯示 HH:MM，秒數只用來判斷開盤狀態、不佔版面
+  }
+  function updateClocks(){
+    mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30);
+    mktPill('mkt-us','America/New_York',9*60+30,16*60);
+  }
+  updateClocks();setInterval(updateClocks,1000);
+
   // ══════ 真實資料層（FinMind，瀏覽器直抓，免後端）══════
   const FM="https://api.finmindtrade.com/api/v4/data";
   let WL=(()=>{try{return JSON.parse(localStorage.getItem('alpha_wl'))||["2330","2454","2317","1513","3231"]}catch(e){return ["2330","2454","2317","1513","3231"]}})();
@@ -792,6 +826,19 @@
   }
   function fmCacheStale(k){ // 過期也沒關係，抓失敗時拿舊資料墊著，總比顯示「查無資料」誤導人好
     try{const raw=localStorage.getItem('fmc_'+k);return raw?JSON.parse(raw).d:null}catch(e){return null}
+  }
+  // 2026-08-24 新增：手動「重新整理」按鈕用——清掉全部 FinMind 快取（記憶體＋localStorage），
+  // 讓接下來的 hydrateXxx() 重新真的打一次 API，不要停在 3 分鐘內的舊快取。
+  function fmClearCache(){
+    Object.keys(_cache).forEach(k=>delete _cache[k]);
+    try{Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).forEach(k=>localStorage.removeItem(k))}catch(e){}
+  }
+  // 2026-08-24 新增：畫面上「最後更新：HH:MM」的共用函式，標的是「瀏覽器這次實際刷新畫面的時間」，
+  // 不是資料本身的交易日（那個各卡片自己的 date 欄位已經有顯示）。
+  function stampUpdated(scr){
+    const el=document.getElementById(scr+'-updated-tm');if(!el)return;
+    const t=new Date();
+    el.textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
   }
   async function fm(ds,id,start){
     const k=ds+id+start;
@@ -855,6 +902,7 @@
         rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close))}<div class="px"><b>${nf(last.close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 無報價</span></div>`}
     }
+    stampUpdated('home');
   }
 
   // ══════ 市場頁（大盤指數 / 類股 / 三大法人 / 期貨籌碼）══════
@@ -962,7 +1010,8 @@
   }
 
   async function hydrateMarket(){
-    loadMarketIndex();loadHeatmap();loadInstTotal();loadFutInst();
+    await Promise.all([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst()]);
+    stampUpdated('market');
   }
 
   // ── 左滑刪除 ──
@@ -1257,7 +1306,7 @@
   let PICKS_CACHE=null;
   const PICKS_COMPONENT_LABEL={eps_family:'EPS成長/意外家族',revenue_surprise:'營收意外',low_vol:'低波動'};
   async function hydratePicks(forceReload){
-    if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);return}
+    if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML='<div class="note">載入中…</div>';
     try{
@@ -1266,6 +1315,7 @@
       const json=await res.json();
       PICKS_CACHE=json;
       renderPicks(json);
+      stampUpdated('picks');
     }catch(e){
       listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/score.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
       document.getElementById('picks-asof').textContent='—';
