@@ -212,7 +212,8 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 - 欄位：`date, futures_id, contract_date, open, max, min, close, spread, spread_per, volume, settlement_price, open_interest, trading_session`。
 - **`contract_date` 混雜單一月份合約（如 `202406`）跟價差合約（如 `202406/202407`）在同一個資料表裡**——用這個資料集建連續合約前，必須先過濾成單一月份合約（例如用正規表示式排除含 `/` 的值），不能整批直接用。
 - 抽樣視窗（2024-06-03～06-07）裡 `trading_session` 只出現 `after_market` 跟 `position` 兩種值，**沒有看到預期中的「日盤」（例如 `regular`/`day`）**——不確定是這個資料集本身就沒有拆日盤/夜盤（可能已經是全時段合併），還是這個特定視窗剛好沒有日盤資料，**需要下一輪再查更多天/查欄位說明才能確定**，先不要假設。
-- **抽樣視窗裡 `settlement_price` 跟 `open_interest` 兩欄全部是 0**（15 列全部如此）——這很可疑，可能是：(a) `after_market`/`position` 這兩種 session 本來就不含這兩個欄位的資料（要另外查有沒有其他 session 值才有非零數字）；(b) 這個資料集這兩欄本身資料品質有問題；(c) 抽樣視窗剛好都是 0。**下一輪深挖前必須先查清楚這點**，不能假設可以直接拿來用。
+- ✅ **`settlement_price`／`open_interest` 全零疑慮已解除（2026-08-23 馬拉松第四輪期貨軌，`fut_probe_settlement_oi.py`）**：把窗口從一週擴大到一整月（2024-06-01～06-30，過濾掉 `contract_date` 含 `/` 的價差列，只留單一月份合約，227 列），依 `trading_session` 分組後發現：**`after_market`（113 列）恆為 0，`position`（114 列）幾乎全部非零**（113/114 `settlement_price` 非零、114/114 `open_interest` 非零）。結論：**不是資料品質問題，是這兩個欄位只在 `position`（推測是「盤後結算/未平倉揭露」時點的快照）才有值，`after_market`（推測是盤後交易本身的成交列）本來就不含這兩欄**——之前抽樣的一週視窗剛好兩種 session 都有出現、但沒有分組看，才誤以為「全部是 0」。**下一輪如果要用 `settlement_price`/`open_interest`，一定要先篩 `trading_session == "position"`，不能整批直接用**（原始探測腳本 `fut_probe_milestone1.py` 沒有分組，這個誤判是分組粒度不夠細造成的，不是資料源本身的問題）。
+- ⚠️ **`trading_session` 目前只觀察到 `after_market`／`position` 兩種值，即使窗口拉到一整月也一樣，沒有出現預期中的「日盤」（`regular`/`day`）標籤**——這點在窄視窗跟寬視窗都一致，**還是需要另外查欄位文件或問官方來確認這個資料集本身是否本來就沒有拆日盤，而不是抽樣運氣問題**（跟上面已解決的全零疑慮不同，這點目前證據比較一致指向「這個資料集本來就只有這兩種 session」，但還沒達到可以下定論的程度，先繼續標未確認）。
 - 歷史深度確認：**2000-01-04 ～ 2024-12-31，共 64,936 列**（含所有合約月份/價差列，不是單一連續序列的列數）。深度足夠，可以往回測到 2000 年。
 
 ### `TaiwanFuturesInstitutionalInvestors`（三大法人期貨部位，data_id=`TX`）
@@ -224,7 +225,7 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 
 ### 給下一步的提醒
 
-在上面兩個「⚠️」問題（`settlement_price`/`open_interest` 疑似全零、`institutional_investors` 亂碼）解決之前，**不要開始寫連續合約建構程式碼或用這兩個資料集測任何期貨因子/策略假說**——地基的欄位品質還沒驗證乾淨，貿然往上蓋容易做白工。這兩點都適合當下一輪期貨軌的工作單位。
+`settlement_price`/`open_interest` 全零疑慮已在馬拉松第四輪解除（見上，篩 `trading_session == "position"` 即可正常使用）。**`institutional_investors` 亂碼問題仍未解決**，在這個解決之前，**不要開始寫連續合約建構程式碼或用 `TaiwanFuturesInstitutionalInvestors` 測任何跟三大法人期貨部位有關的因子/策略假說**——地基的這部分欄位品質還沒驗證乾淨，貿然往上蓋容易做白工。這點適合當下一輪期貨軌的工作單位（`TaiwanFuturesDaily`／`settlement_price`／`open_interest` 已經可以正常使用，不受此限）。
 
 ---
 

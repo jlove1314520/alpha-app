@@ -61,3 +61,20 @@
 **Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
 
 **下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1（查清楚 `settlement_price`/`open_interest` 是否恆為 0）。
+
+---
+
+## 2026-08-23T15:38:00+08:00 — 馬拉松第四輪期貨軌執行：`settlement_price`/`open_interest` 全零疑慮解除
+
+**選軌理由**：`marathon_lock.py acquire` 成功後比對 `TW_MARATHON_STATE.md`（15:05）／`US_MARATHON_STATE.md`（15:35）／`FUT_MARATHON_STATE.md`（14:31，最舊）三個最後更新時間戳，選最久沒被碰的期貨軌。
+
+**做了什麼**：
+1. 依上一輪優先項目 1，寫了新探測腳本 `fut_probe_settlement_oi.py`（不改動 `fut_probe_milestone1.py`），把窗口從一週擴大到一整月（`TaiwanFuturesDaily`，data_id=TX，2024-06-01～06-30），過濾掉 `contract_date` 含 `/` 的價差列（只留單一月份合約，227 列），依 `trading_session` 分組統計 `settlement_price`/`open_interest` 的零值/非零值列數。
+2. **結果**：`after_market`（113 列）兩欄恆為 0；`position`（114 列）幾乎全部非零（113/114 `settlement_price` 非零、114/114 `open_interest` 非零）。**結論：不是資料品質問題，是這兩欄語意上只在 `position` session（推測是盤後結算/未平倉揭露快照）才有值，`after_market` 本身就不含這兩欄的資料**——上一輪窄視窗誤判「全部是 0」是因為沒有按 `trading_session` 分組看。
+3. 把結論寫進 `DATA.md` 第 6 節（含「下一輪使用這兩欄前務必先篩 `position` session」的提醒）跟 `FUT_MARATHON_STATE.md`。同時誠實記錄一個附帶觀察：即使窗口拉到一整月，`trading_session` 仍然只出現 `after_market`/`position` 兩種值，沒有看到「日盤」標籤——這個附帶問題**沒有下定論**（證據比之前更一致但還不到能確認的程度），標為低優先、不擋路的待查項目，跟已解決的全零疑慮分開處理，不能混為一談。
+
+**沒做的事**：`institutional_investors` 亂碼問題（下一輪優先項目 1，本輪一個工作單位只處理一項，已達成本輪目標）、轉倉時點規則 H1/H2 驗證、連續合約建構程式碼。`TRIALS_LEDGER.md` 沒有新增列——這是資料欄位品質調查，不是完成一次可統計檢定的假說測試，理由同前三輪。
+
+**Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
+
+**下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1（`institutional_investors` 亂碼根因調查）。
