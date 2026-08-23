@@ -36,17 +36,23 @@ reasonable normalization (big, liquid stocks have both bigger market caps
 and bigger trading values, so the two are correlated), but not the same
 number the design doc names.
 
-**Value factors' PIT status is UNVERIFIED, disclosed:** `f_value_pb` /
-`f_value_pe` read `TaiwanStockPER`'s daily PBR/PER directly, which FinMind
-computes itself from that day's price and *some* trailing EPS/book-value
-figure. Whether FinMind updates that trailing figure the moment a fiscal
-quarter ENDS (a hidden lookahead bias baked into FinMind's own data, not
-introduced by this codebase) or only once the quarter is actually
-DISCLOSED has not been checked -- the FinMind rate limit was hit (see
-FACTORS.md/REPORT.md 2026-08-22) before this could be tested with real
-data. Do not trust these two factors' IC results (once run) as PIT-clean
-until this is explicitly verified the same way f_rev_accel/f_eps_growth
-were.
+**Value factors' PIT status, spot-checked (2026-08-23 marathon round 4),
+not fully verified:** `f_value_pb` / `f_value_pe` read `TaiwanStockPER`'s
+daily PBR/PER directly, which FinMind computes itself from that day's price
+and *some* trailing EPS/book-value figure. `verify_pit_value_pb.py` ran a
+jump-detection check on a single stock (2330, 2015-2024, 40/42 quarters):
+the implied book-value-per-share (`close / PBR`) only steps on specific
+dates, and those step dates land 32-62 days (median 45, matching this
+project's own assumed quarterly disclosure lag AND Taiwan's regulatory
+45-day quarterly filing deadline) after each fiscal period end -- never
+near 0 days, which is what a severe lookahead bias would look like. See
+`TRIALS_LEDGER.md`'s "investigated but not counted as a trial" table and
+`TW_LOG.md` for the full numbers. **This is one stock with an indirect
+detection method, not an official FinMind confirmation of their update
+logic** -- treat as "no severe lookahead bias found on a spot check", not
+"PIT-clean, fully verified". `f_value_pe` shares the same data source and
+this finding is assumed to extend to it, but was not independently
+re-tested.
 
 **分點集中度 (broker-branch concentration) was investigated and dropped, not
 silently skipped**: the plausible free-tier dataset (`TaiwanStockTradingDailyReport`)
@@ -345,9 +351,11 @@ def prepare_factors(
         d["f_quality_roe_stability"] = np.nan
 
     # (k)/(l) 價值 PB/PE -- 直接讀 FinMind 算好的 PER/PBR。
-    # **PIT 安全性未驗證，見檔案最上面的揭露**：FinMind 用來算這兩個數字的 EPS/淨值，
-    # 更新時點是不是也有提早看到還沒公告財報的問題，還沒有像 f_rev_accel/f_eps_growth
-    # 那樣用真實資料逐日核對過（流量限制擋住了驗證，見 FACTORS.md）。同樣捕捉例外。
+    # **PIT 狀態（2026-08-23 馬拉松第四輪更新）**：2330 單檔跳變偵測（`verify_pit_value_pb.py`，
+    # 40/42 季度）顯示 implied_bvps 跳變日距季末天數 min=32/median=45/max=62，從未貼近 0 天，
+    # 無明顯前瞻偏誤；已從「完全未驗證」升級為「單檔抽測無嚴重前瞻偏誤」（不是完全驗證，只測
+    # 1 檔+間接偵測法，見 `TRIALS_LEDGER.md`「已調查但不計入試驗數」表、`TW_LOG.md`）。f_value_pe
+    # 沿用同一資料源，結論延伸適用但未單獨驗證。同樣捕捉例外。
     try:
         per_raw = load_dev("TaiwanStockPER", stock_id, start_date)
         if not per_raw.empty and "PBR" in per_raw.columns and "PER" in per_raw.columns:
