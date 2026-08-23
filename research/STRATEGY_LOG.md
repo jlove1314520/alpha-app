@@ -51,7 +51,7 @@ Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-24T13:45:00+08:00**（承接 8/23 01:30 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-24T16:35:00+08:00**（承接 8/24 13:45 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -91,12 +91,34 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/factor_correlation.py` | **2026-08-23 新增**：AI 選股引擎 Phase A 步驟 3 前置作業。4 個通過因子的相關性矩陣＋去重判定，結果見 `FACTORS.md` | 程式碼 |
 | `research/score.py` | **2026-08-23 新增**：Phase A 步驟 3。綜合分引擎（同產業 peer z-score、去重後 3 個獨立成分等權平均、`export_scores_json()` 產生 App 用的 `scores.json`） | 程式碼 |
 | `research/run_score_backtest.py` | **2026-08-23 新增**：對 `score.py` 綜合分前 N 名做扣成本+換手組合回測（重用 `backtest/engine.py`），含配對式隨機控制組，結果見 `LEADS.md` 的 `score_topn_v1` 列（**2026-08-24 Cowork 稽核後，此框架的結論已被 `long_short_backtest.py` 的多空中性評估取代，檔案保留供歷史對照**） | 程式碼 |
-| `research/long_short_backtest.py` | **2026-08-24 新增**：Cowork 稽核回應。`score.py` 綜合分的多空市場中性評估（買前decile/空後decile、實測 beta、配對隨機控制組、週頻/月頻對照），結果見 `LEADS.md` 的 `score_longshort_v1` 兩列跟 `REPORT.md` 完整解讀 | 程式碼 |
+| `research/long_short_backtest.py` | **2026-08-24 新增**：Cowork 稽核回應。`score.py` 綜合分的多空市場中性評估（買前decile/空後decile、實測 beta、配對隨機控制組、週頻/月頻對照），結果見 `LEADS.md` 的 `score_longshort_v1` 兩列跟 `REPORT.md` 完整解讀。**2026-08-24 二次覆核後判定降級為「樣本不足、暫不採信」** | 程式碼 |
+| `research/backfill_universe.py` | **2026-08-24 新增**：Cowork 二次覆核第1點。可斷點續傳的全市場歷史資料回補，進度存 `research/data/backfill_state.json`（不進git），已整合進 `MARATHON_PROTOCOL.md` 5b 節成為 TW 軌最高優先序背景任務 | 程式碼 |
+| `research/diagnose_monthly_inconsistency.py` | **2026-08-24 新增**：Cowork 二次覆核第2點。月頻多空 train/val 不一致的逐月拆解診斷，結果見 `REPORT.md` 對應條目 | 程式碼 |
+| `research/long_only_vs_market.py` | **2026-08-24 新增**：Cowork 二次覆核第3點。放空可行性查驗（`TaiwanStockMarginPurchaseShortSale`）+ 純多前decile相對大盤的可執行對照版本，結果見 `LEADS.md` 的 `score_longonly_v1` 列 | 程式碼 |
+| `research/run_shortability_and_longonly.py` | **2026-08-24 新增**：上述兩支模組的驅動腳本 | 程式碼 |
 | `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/factor_ic_results.csv`（因子IC原始數字）、`data/score_backtest_results.csv`、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
 | `scores.json`（repo 根目錄，非 `research/` 底下） | **2026-08-23 新增**：App「選股」頁讀取的靜態排行榜資料，`research/score.py` 產生，基準日 `VAL_END`（2024-12-31，非即時，見下方架構問題備註） | 進 git（App 資料檔，跟 `research/data/` 不同層級） |
 | `index.html`（repo 根目錄） | App 本體。**2026-08-23**：新增「選股」分頁（nav 第 3 項、`scr-picks` 畫面、`hydratePicks()`/`renderPicks()`/`showPickDetail()`） | 進 git |
+
+---
+
+## 2026-08-24（下午）— Cowork 二次覆核：宇宙回補、跨期不一致查根源、放空可行性、純多對照版本
+
+Cowork 對上一輪多空中性結果的評語：近零 beta + 贏隨機對照 + 年化雙位數報酬，是這個專案第一個看起來像真 alpha 的結果，值得續查——但指出三關沒過：(1) 宇宙覆蓋率太小（170/3,196）；(2) 月頻 train −9.66% vs val +66.5% 違反跨週期一致關卡；(3) 空頭腳的放空可行性沒查過。**同時，使用者從這輪起要求所有產出一律用繁體中文（文件、commit訊息、程式必要註解、終端說明），這輪起全面遵守。**
+
+**第1點：新增 `backfill_universe.py`**，可斷點續傳的全市場回補腳本，已整合進 `MARATHON_PROTOCOL.md`（新增5b節），列為 TW 軌最高優先序背景任務，直到覆蓋率達 80% 前優先於測新因子。**這是橫跨多輪、多天的背景任務，這次 session 沒有也不可能一次做完**——這輪跑了第一批，撞到限流牆停在 198 檔新完成，本機累積可用樣本到 223 檔（≈7.0%）。**依指示：宇宙覆蓋率明顯改善之前，多空/decile類回測結論一律標記「樣本不足、暫不採信」**（`LEADS.md` 新增這個判定類別）。
+
+**第2點：新增 `diagnose_monthly_inconsistency.py`** 逐月拆解月頻多空的價差報酬。發現 train 期逐月平均/中位數其實是正的（45/72月正報酬，平均+1.35%），複利負報酬被少數幾個極端壞月份（2019-12/2018-03/2017-08等，合計貢獻−38.5pp）主導，換股名單相鄰重疊率僅約50-56%（train期僅70次月度決策點）——**跨週期一致關卡目前無法通過，根源是宇宙太小＋放空腳高變異的疊加，不是程式bug**，多空框架維持降級標記。
+
+**第3點：新增 `long_only_vs_market.py`**。放空規則現況查證（網路搜尋）：「平盤下不得放空」不是常態全面規則，是2025年4月市場劇烈波動的臨時限空令（已於2025-05-26撤除），常態限制是融資融券資格清單+融券限額。**融券資格實測查驗（`TaiwanStockMarginPurchaseShortSale`）撞到限流，174檔全部查詢失敗，這個結果不可信（無法區分「真的不可融券」跟「查詢失敗」），是明確待辦，不是這輪結論。**
+
+**這輪最重要的發現：純多前decile相對大盤的可執行版本，四期（train/val×週/月頻）全部一致強勁**——年化+23.77%~+33.67%，遠優於同期TAIEX、對大盤超額+72.83pp~+193.31pp、beta合理落在+0.6~+0.7（做多本該有的暴露，沒有偽裝市場中性）、alpha仍顯著為正、贏過配對隨機對照組100百分位，**沒有多空版本的跨期不一致問題**——強烈暗示不一致的根源在放空腳，不是選股邏輯本身。這個版本不需要放空、沒有融券/借券疑慮，是目前唯一「馬上可以真的執行」的雛形，但一樣受宇宙覆蓋率不足限制，同樣標記「樣本不足、暫不採信」。
+
+**Holdout 複查：** `is_holdout_consumed()` 再次確認為 `False`。
+
+**下一步：** commit + push 這輪。等挖礦馬拉松持續回補宇宙、放空可行性重新查驗過，才能對多空/純多版本做更有信心的最終判定。
 
 ---
 
