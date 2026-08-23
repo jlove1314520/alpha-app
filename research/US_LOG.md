@@ -147,3 +147,19 @@
 **沒做的**：中小型股/近期IPO價格深度完全沒有實測到任何數字（0/10檔）；「下一輪建議工作單位」清單裡第1、2、3、5項也都沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列。
 
 `is_holdout_consumed()` 確認為 `False`（唯一一次外部呼叫是被 FinMind 402 拒絕，沒有任何資料真的進來，更沒有碰 holdout）。取鎖時第0節第2步偵測結果：`LOCK_ACQUIRED`（乾淨取得，非陳舊鎖檔，上一輪正常結束）。
+
+## 2026-08-24T07:31:16+08:00 — 馬拉松第38輪（US軌）：完成第5項待辦（`sec_edgar_probe.py` 邏輯包裝成可重用模組 `sec_edgar_client.py`）
+
+**取鎖/選軌**：取鎖乾淨成功（`LOCK_ACQUIRED`，非陳舊鎖檔，上一輪正常結束）。三軌「最後更新」時間戳比對：US（06:02:00）早於FUT（06:32:00）跟TW（07:06:36），輪替規則指向US。
+
+**先試了什麼、為什麼換方向**：本來想直接接「下一輪建議工作單位」第4項（中小型股/近期IPO價格深度抽測，`us_probe_price_depth_smallmid.py` 已就緒），但實際執行第一檔（`XPER`）就立刻撞 FinMind `HTTP 402`（「Requests reach the upper limit」）——推測是TW軌第37輪（07:06，同一小時內）的全市場宇宙回補剛用掉大量額度，25分鐘不足以恢復。依`MARATHON_PROTOCOL.md`第4節「不要為了硬跑而狂重試」，立刻停手（未修改`us_probe_price_depth_smallmid.py`本身，腳本原樣保留待下次額度恢復再跑），改做清單裡不需要FinMind額度的第5項。
+
+**做了什麼**：新增 `research/sec_edgar_client.py`——把 `sec_edgar_probe.py`（第三輪，2026-08-23）驗證過的 ticker→CIK 查詢跟 `filings.recent` 的 filingDate/reportDate（PIT訊號）抽取邏輯，包裝成四個可被其他程式呼叫的函式：`get_cik_map()`、`get_cik(ticker, cik_map=None)`、`get_submissions(cik)`、`get_filing_dates(cik, forms=("10-K","10-Q"))`（回傳含`gap_days`的list of dict）。快取機制仿照`finmind_client.py`的精神（笨拙但可信的exact-key快取），存在`research/data/raw/SEC_*.json`（gitignored），24小時內同一份不重打SEC，避免違反SEC公平使用政策。**刻意不包**XBRL company facts（`sec_edgar_xbrl_facts_*_probe.py`）跟下市/Form 25核實邏輯（`sec_edgar_delisting_probe.py`／`sec_edgar_frc_cik_probe.py`）——這兩類仍是探測階段、有未解問題，不該提前固化進可重用模組，維持「一輪只做一件事」的範圍。
+
+**驗證**：跑了模組自帶的 smoke test（`if __name__ == "__main__"`區塊，對AAPL/MSFT/PLTR做跟第三輪探測腳本一樣的查詢），結果**跟第三輪`US_MARATHON_STATE.md`記錄的數字完全一致**（AAPL n=45, min=25, max=37, avg=33.1；MSFT n=25, min=24, max=30, avg=27.5；PLTR n=24, min=34, max=57, avg=41.5），證明包裝後的函式行為跟原本探測腳本一致，沒有在重構過程中悄悄改變邏輯。
+
+**判定**：這是基礎建設工作單位（第1c類），不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列。
+
+**下一步**：`US_MARATHON_STATE.md`「下一輪建議工作單位」清單第5項已完成，其餘1/2/3/4項還在。**額度恢復後優先選第4項**（腳本已就緒）；額度緊張時選第1/2項（不需要FinMind額度，找FRC正確CIK或SBNY下市日）。之後如果要幫US軌搭`pit.py`類似邏輯，可以直接`from sec_edgar_client import get_filing_dates`，不用重新寫SEC API呼叫。
+
+`is_holdout_consumed()` 確認為 `False`（本輪完全沒有呼叫任何FinMind函式，唯一一次外部呼叫是SEC EDGAR被402前的`us_probe_price_depth_smallmid.py`嘗試，跟後面的`sec_edgar_client.py`smoke test，都不碰holdout）。
