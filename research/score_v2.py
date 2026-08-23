@@ -70,7 +70,10 @@ def _revenue_yoy_latest(stock_id: str, start_date: str) -> float | None:
     prior = prior.rename(columns={"revenue": "revenue_prior_year"})
     rev = rev.merge(prior, on=["revenue_year", "revenue_month"], how="left")
     rev["yoy"] = (rev["revenue"] - rev["revenue_prior_year"]) / rev["revenue_prior_year"].abs()
-    last = rev.dropna(subset=["yoy"])
+    # 前一年同月營收是 0（或缺值）時，(x-0)/0 會產生 inf/-inf/nan，不是合法的成長率——
+    # 用 np.isfinite() 一併篩掉 inf 和 nan，不要只篩 nan（json 不接受 inf，之前在較大樣本
+    # 裡撞到真的有 0 元月營收的股票才發現這個漏洞）。
+    last = rev[np.isfinite(rev["yoy"])]
     return float(last.iloc[-1]["yoy"]) if not last.empty else None
 
 
@@ -104,8 +107,9 @@ def _pct_score(raw: pd.Series, higher_better: bool) -> tuple[pd.Series, pd.Serie
 
 
 def _r(x):
-    """NaN-safe round，寫進 raw dict 用（None 代表沒有這個數字，不是 0）。"""
-    if x is None or (isinstance(x, float) and math.isnan(x)):
+    """NaN/inf-safe round，寫進 raw dict 用（None 代表沒有這個數字，不是 0）。
+    inf 也要擋：json.dump(allow_nan=False) 連 inf 都不接受，跟 NaN 一樣要當成缺值處理。"""
+    if x is None or (isinstance(x, float) and not math.isfinite(x)):
         return None
     return round(float(x), 4)
 
@@ -127,6 +131,8 @@ def compute_scores_v2(
         eps_yoy = r.get("f_eps_growth", np.nan)
         pe = -r["f_value_pe"] if pd.notna(r.get("f_value_pe")) else np.nan
         peg = pe / (eps_yoy * 100) if pd.notna(pe) and pd.notna(eps_yoy) and eps_yoy > 0 else np.nan
+        if not np.isfinite(peg):
+            peg = np.nan
         rows.append({
             "stock_id": sid,
             "industry": industry_map.get(sid, "UNKNOWN"),

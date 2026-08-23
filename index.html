@@ -103,8 +103,8 @@
   .pos{color:var(--up)} .neg{color:var(--down)}
 
   /* ===== AI 卡 ===== */
-  .ai-card{background:linear-gradient(160deg,#16233a 0%,#1a1a19 70%);border:1px solid rgba(57,135,229,.35)}
-  .ai-tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:#9ec5f4;background:rgba(57,135,229,.16);border-radius:999px;padding:2px 8px;margin-bottom:8px;font-weight:600}
+  .ai-card{background:linear-gradient(155deg, rgba(216,176,112,.14), rgba(216,176,112,.03) 55%, rgba(20,19,15,.6));border:1px solid rgba(216,176,112,.28)}
+  .ai-tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--gold);background:rgba(216,176,112,.16);border-radius:999px;padding:2px 8px;margin-bottom:8px;font-weight:600}
   .ai-card p{font-size:13px;color:var(--ink-2)}
   .ai-card p b{color:var(--ink)}
   .src{font-size:10.5px;color:var(--ink-3);margin-top:8px}
@@ -170,6 +170,11 @@
   .facts .f{background:var(--surface-2);border-radius:10px;padding:9px 11px}
   .facts .f span{font-size:10.5px;color:var(--ink-3);display:block}
   .facts .f b{font-size:14px;font-variant-numeric:tabular-nums}
+
+  /* ===== 台股/美股/期貨 三選切換（2026-08-24 新增，市場/選股/交易共用）===== */
+  .mkt-toggle{display:flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:999px;padding:3px;flex-shrink:0}
+  .mkt-toggle .mtg-opt{font-size:12px;color:#9c9488;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .mkt-toggle .mtg-opt.on{font-weight:600;color:#1a1005;background:var(--gold-grad)}
 
   /* ===== 個股研究報告頁：評分拆解列（2026-08-24 新增）===== */
   .factor-row{padding:10px 0;border-bottom:1px solid var(--hairline)}
@@ -366,69 +371,129 @@
 
   <!-- ════════ 2. 市場 ════════ -->
   <section class="screen" id="scr-market">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px">
+      <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">市場</div>
+      <div class="mkt-toggle" id="market-toggle"></div>
+    </div>
     <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span>最後更新：<b id="market-updated-tm">--:--</b></span>
       <span class="more" onclick="fmClearCache();hydrateMarket()">重新整理</span>
     </div>
-    <div class="card">
-      <h3>大盤指數</h3>
-      <div id="idx-rows"><div class="note">載入中…</div></div>
-      <div class="note">來源：FinMind TaiwanStockPrice（TAIEX / TPEx）</div>
-    </div>
 
-    <div class="card">
-      <h3>類股表現（今日漲跌幅）</h3>
-      <div class="heat" id="heat-grid"><div class="note">載入中…</div></div>
-      <div class="legend">
-        <div class="li"><span class="sw" style="background:#8f2f2f"></span>漲</div>
-        <div class="li"><span class="sw" style="background:#383835"></span>平</div>
-        <div class="li"><span class="sw" style="background:#265244"></span>跌</div>
+    <!-- 台股 -->
+    <div id="market-tw-panel">
+      <div class="card">
+        <h3>大盤指數</h3>
+        <div id="idx-rows"><div class="note">載入中…</div></div>
+        <div class="note">來源：FinMind TaiwanStockPrice（TAIEX / TPEx）</div>
       </div>
-      <div class="note">來源：FinMind 各類股指數（TaiwanStockPrice）</div>
-    </div>
 
-    <div class="card">
-      <h3>三大法人買賣超（近 5 日 · 億元）</h3>
-      <div class="div-bars" id="inst-bars"><div class="note">載入中…</div></div>
-      <div class="legend">
-        <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
-        <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
-        <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
+      <div class="card">
+        <h3>類股表現（今日漲跌幅）</h3>
+        <div class="heat" id="heat-grid"><div class="note">載入中…</div></div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:#8f2f2f"></span>漲</div>
+          <div class="li"><span class="sw" style="background:#383835"></span>平</div>
+          <div class="li"><span class="sw" style="background:#265244"></span>跌</div>
+        </div>
+        <div class="note">來源：FinMind 各類股指數（TaiwanStockPrice）</div>
       </div>
-      <div class="note">來源：FinMind 三大法人買賣金額總表（TaiwanStockTotalInstitutionalInvestors）</div>
-    </div>
 
-    <div class="card">
-      <h3>台指期三大法人淨部位（未沖銷 · 口）</h3>
-      <div class="facts">
-        <div class="f"><span>外資</span><b id="fut-foreign">—</b></div>
-        <div class="f"><span>投信</span><b id="fut-trust">—</b></div>
-        <div class="f"><span>自營商</span><b id="fut-dealer">—</b></div>
-        <div class="f"><span>三大法人合計</span><b id="fut-total">—</b></div>
+      <div class="card">
+        <h3>三大法人買賣超（近 5 日 · 億元）</h3>
+        <div class="div-bars" id="inst-bars"><div class="note">載入中…</div></div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
+          <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
+          <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
+        </div>
+        <div class="note">來源：FinMind 三大法人買賣金額總表（TaiwanStockTotalInstitutionalInvestors）</div>
       </div>
-      <div class="note" id="fut-note">來源：FinMind 期貨三大法人（TaiwanFuturesInstitutionalInvestors · TX）</div>
+
+      <div class="card ai-card">
+        <div class="ai-tag">✦ AI 盤勢解讀</div>
+        <p>外資期現貨同步偏多、重電族群量增價漲；但今晚 CPI 前，短線追高風險升溫。與你的持股重疊度最高的強勢族群：<b>半導體（2 檔）</b>。</p>
+        <div class="note">原型示意 · 尚未接真實新聞與訊號分析</div>
+      </div>
     </div>
 
-    <div class="card ai-card">
-      <div class="ai-tag">✦ AI 盤勢解讀</div>
-      <p>外資期現貨同步偏多、重電族群量增價漲；但今晚 CPI 前，短線追高風險升溫。與你的持股重疊度最高的強勢族群：<b>半導體（2 檔）</b>。</p>
-      <div class="note">原型示意 · 尚未接真實新聞與訊號分析</div>
+    <!-- 美股 -->
+    <div id="market-us-panel" style="display:none">
+      <div class="card">
+        <h3>美股指數</h3>
+        <div id="us-idx-rows"><div class="note">載入中…</div></div>
+        <div class="note">來源：FinMind USStockPrice</div>
+      </div>
+      <div class="card">
+        <h3>美股類股 / ADR</h3>
+        <div class="note">尚未實作——需要美股類股分類與 ADR 溢價資料源，這輪只做了台股/期貨兩軌，下一輪再補。</div>
+      </div>
+    </div>
+
+    <!-- 期貨 -->
+    <div id="market-fut-panel" style="display:none">
+      <div class="card">
+        <h3>期貨報價（近月）</h3>
+        <div id="fut-quote-rows"><div class="note">載入中…</div></div>
+        <div class="note">來源：FinMind TaiwanFuturesDaily</div>
+      </div>
+      <div class="card">
+        <h3>正逆價差（近月期貨－現貨）</h3>
+        <div class="facts">
+          <div class="f"><span>加權指數（現貨）</span><b id="basis-spot" class="num">—</b></div>
+          <div class="f"><span>台指期近月</span><b id="basis-fut" class="num">—</b></div>
+        </div>
+        <div class="note" id="basis-note" style="margin-top:8px">—</div>
+      </div>
+      <div class="card">
+        <h3>台指期三大法人淨部位（未沖銷 · 口）</h3>
+        <div class="facts">
+          <div class="f"><span>外資</span><b id="fut-foreign">—</b></div>
+          <div class="f"><span>投信</span><b id="fut-trust">—</b></div>
+          <div class="f"><span>自營商</span><b id="fut-dealer">—</b></div>
+          <div class="f"><span>三大法人合計</span><b id="fut-total">—</b></div>
+        </div>
+        <div class="note" id="fut-note">來源：FinMind 期貨三大法人（TaiwanFuturesInstitutionalInvestors · TX）</div>
+      </div>
     </div>
   </section>
 
   <!-- ════════ 2b. 選股（十分制評分，scoring-v2）════════ -->
   <section class="screen" id="scr-picks">
-    <div class="card ai-card">
-      <div class="ai-tag">✦ AI 選股引擎 · 十分制評分</div>
-      <p>總分 10 分，由 8 大類別（財報成長/營收動能/成長性/籌碼/技術型態/估值/機構觀點/題材事件）依權重加權平均；沒有資料的類別不計 0 分，改用重新分配權重處理（見報告頁「資料完整度」）。<b>研究/教育用途，非投資建議；歷史資料不代表未來績效，樣本非全市場逐檔掃描。</b></p>
-      <div class="note" id="picks-asof">載入中…</div>
-      <div class="note">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px">
+      <div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
+        <div class="note num" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
+      </div>
+      <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
 
-    <div class="card">
+    <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
+    <div class="press" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a857b" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="picks-search-input" type="text" placeholder="搜尋股票代號或公司名稱…" oninput="onPicksSearchInput(this.value)" style="flex:1;background:none;border:0;outline:0;color:var(--ink);font-size:13.5px;font-family:inherit">
+      <span style="font-size:10px;color:#c9a35a;background:rgba(216,176,112,.1);padding:3px 8px;border-radius:6px;flex-shrink:0">查評分</span>
+    </div>
+    <div id="picks-search-result"></div>
+
+    <!-- 產業篩選 chips -->
+    <div id="picks-chips" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px"></div>
+
+    <div class="card" id="picks-list-card" style="margin-top:10px">
       <h3>綜合評分排行<span class="more" id="picks-refresh" onclick="fmClearCache();hydratePicks(true)">重新整理</span></h3>
+      <div class="note" style="margin-bottom:8px">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
       <div id="picks-list"><div class="note">載入中…</div></div>
-      <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價，資料時間見上方「資料基準日」） · 點列可看完整評分報告</div>
+      <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價） · 點列可看完整評分報告</div>
+    </div>
+
+    <!-- 美股/期貨：這輪尚未實作，見 PROGRESS.md -->
+    <div class="card" id="picks-us-panel" style="display:none">
+      <h3>美股評分</h3>
+      <div class="note">尚未實作——目前評分引擎（research/score_v2.py）只做了台股資料源，美股評分需要另外的因子計算管線，下一輪視需求評估。</div>
+    </div>
+    <div class="card" id="picks-fut-panel" style="display:none">
+      <h3>期貨策略訊號</h3>
+      <div class="note">期貨沒有「選股排行榜」概念（只有少數幾個指數期貨合約可交易），這裡改成「策略訊號」畫面較合理，但目前尚未實作——需要先設計期貨專用的訊號邏輯，下一輪評估。</div>
     </div>
   </section>
 
@@ -609,6 +674,11 @@
 
   <!-- ════════ 4. 交易/機器人 ════════ -->
   <section class="screen" id="scr-trade">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px">
+      <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">交易</div>
+      <div class="mkt-toggle" id="trade-toggle"></div>
+    </div>
+    <div class="note" id="trade-unit-note" style="margin-bottom:10px">單位：張數（台股現股/當沖以張為單位）</div>
     <div class="kpi-row">
       <div class="kpi">
         <div class="lbl">今日自動交易損益</div>
@@ -623,7 +693,7 @@
       </div>
     </div>
 
-    <div class="card bot">
+    <div class="card bot" data-mkt="TW">
       <div class="bot-top">
         <div class="nm"><b>當沖策略 A · 開盤動能</b><span>台股 · Shioaji · 9:00–10:30 進場</span></div>
         <div class="switch on" onclick="flipBot(this,'A')"></div>
@@ -636,7 +706,7 @@
       </div>
     </div>
 
-    <div class="card bot">
+    <div class="card bot" data-mkt="FUT">
       <div class="bot-top">
         <div class="nm"><b>期貨策略 B · 台指期波段</b><span>TAIFEX · 小台 2 口上限</span></div>
         <div class="switch on" onclick="flipBot(this,'B')"></div>
@@ -649,7 +719,7 @@
       </div>
     </div>
 
-    <div class="card bot paused">
+    <div class="card bot paused" data-mkt="US">
       <div class="bot-top">
         <div class="nm"><b>美股策略 C · 財報動能</b><span>IBKR · 通知模式（驗證中 42/90 天）</span></div>
         <div class="switch" onclick="toast('驗證期未滿，僅能通知模式')"></div>
@@ -664,15 +734,15 @@
 
     <div class="card">
       <h3>今日委託 / 成交</h3>
-      <div class="trade">
+      <div class="trade" data-mkt="TW">
         <div class="t1"><b>2330 台積電 · 現股當沖</b><span class="badge auto">自動</span></div>
         <div class="meta">09:04 買 1,470 → 09:52 賣 1,483　<b class="pos">+8,780</b>（含成本）</div>
       </div>
-      <div class="trade">
+      <div class="trade" data-mkt="TW">
         <div class="t1"><b>1513 中興電 · 現股當沖</b><span class="badge auto">自動</span></div>
         <div class="meta">09:18 買 232.0 → 10:02 停損 229.5　<b class="neg">−2,730</b></div>
       </div>
-      <div class="trade">
+      <div class="trade" data-mkt="FUT">
         <div class="t1"><b>MXF 小台 · 多單</b><span class="badge man">手動</span></div>
         <div class="meta">10:31 買 28,390 · 持倉中　浮動 <b class="pos">+1,700</b></div>
       </div>
@@ -705,26 +775,34 @@
       <p><b>建議規則：</b>連虧 2 筆後強制 30 分鐘冷卻＋部位上限鎖回 1x——要我把它加進風控閘門嗎？</p>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn ghost" style="padding:9px 0;font-size:13px" onclick="toast('已忽略本次建議')">先不要</button>
-        <button class="btn" style="padding:9px 0;font-size:13px;background:var(--accent-deep);color:#fff" onclick="toast('✓ 冷卻規則已加入風控閘門')">加入風控</button>
+        <button class="btn" style="padding:9px 0;font-size:13px;background:var(--gold-grad);color:#1a1005" onclick="toast('✓ 冷卻規則已加入風控閘門')">加入風控</button>
       </div>
     </div>
 
     <div class="card">
       <h3>交易紀錄（含 AI 情境快照）</h3>
-      <div class="trade">
-        <div class="t1"><b>2330 · 當沖 <span class="pos">+8,780</span></b><span class="badge auto">自動</span></div>
-        <div class="why">進場理由：開盤量能 > 20 日均量 2.3x＋外資連買＋族群同步走強（策略 A 條件 3/3）</div>
-        <div class="meta">當下情境：大盤 +0.6% · 費半昨 +2.1% · 無負面新聞 ｜ 8/20 09:04–09:52</div>
-      </div>
-      <div class="trade">
-        <div class="t1"><b>1513 · 當沖 <span class="neg">−2,730</span></b><span class="badge auto">自動</span></div>
-        <div class="why">停損出場：跌破進場 K 低點（紀律執行 ✓）。AI 註記：重電族群 10:00 後轉弱，非個股因素。</div>
-        <div class="meta">8/20 09:18–10:02</div>
-      </div>
-      <div class="trade">
-        <div class="t1"><b>NVDA · 加碼 <span class="pos">持倉中</span></b><span class="badge man">手動</span></div>
-        <div class="why">你的註記：「財報前布局，控制在 5% 部位」 · 心情：平靜 · 紀律自評 5/5</div>
-        <div class="meta">8/19 22:41 · 212.40 × 20 股</div>
+      <div id="journal-chips" style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto"></div>
+      <div id="journal-trades">
+        <div class="trade" data-mkt="TW">
+          <div class="t1"><b>2330 · 當沖 <span class="pos">+8,780</span></b><span class="badge auto">自動</span></div>
+          <div class="why">進場理由：開盤量能 > 20 日均量 2.3x＋外資連買＋族群同步走強（策略 A 條件 3/3）</div>
+          <div class="meta">當下情境：大盤 +0.6% · 費半昨 +2.1% · 無負面新聞 ｜ 8/20 09:04–09:52</div>
+        </div>
+        <div class="trade" data-mkt="TW">
+          <div class="t1"><b>1513 · 當沖 <span class="neg">−2,730</span></b><span class="badge auto">自動</span></div>
+          <div class="why">停損出場：跌破進場 K 低點（紀律執行 ✓）。AI 註記：重電族群 10:00 後轉弱，非個股因素。</div>
+          <div class="meta">8/20 09:18–10:02</div>
+        </div>
+        <div class="trade" data-mkt="US">
+          <div class="t1"><b>NVDA · 加碼 <span class="pos">持倉中</span></b><span class="badge man">手動</span></div>
+          <div class="why">你的註記：「財報前布局，控制在 5% 部位」 · 心情：平靜 · 紀律自評 5/5</div>
+          <div class="meta">8/19 22:41 · 212.40 × 20 股</div>
+        </div>
+        <div class="trade" data-mkt="FUT">
+          <div class="t1"><b>MTX 小台 · 波段多單 <span class="pos">+2,340</span></b><span class="badge auto">自動</span></div>
+          <div class="why">期貨策略 B：站上 20 日均線＋三大法人淨多轉強，波段持有</div>
+          <div class="meta">8/20 09:30 進場 ｜ 持倉中</div>
+        </div>
       </div>
     </div>
   </section>
@@ -758,7 +836,7 @@
         <span>最大持倉檔數</span>
         <div class="setting-input"><input id="rc-max-holdings" type="number" inputmode="numeric"></div>
       </div>
-      <button class="btn" style="width:100%;margin-top:12px;background:var(--accent-deep);color:#fff" onclick="saveRiskControl()">儲存</button>
+      <button class="btn" style="width:100%;margin-top:12px;background:var(--gold-grad);color:#1a1005" onclick="saveRiskControl()">儲存</button>
       <div class="note" id="rc-saved-note" style="text-align:center;margin-top:6px">尚未儲存過</div>
     </div>
 
@@ -788,17 +866,44 @@
     <div class="card">
       <h3>資料來源狀態</h3>
       <div class="facts">
-        <div class="f"><span>報價來源</span><b>FinMind API v4</b></div>
+        <div class="f"><span>台美股報價/財務</span><b>FinMind API v4</b></div>
+        <div class="f"><span>美股財報原始文件</span><b>SEC EDGAR</b></div>
+        <div class="f"><span>期貨報價/籌碼</span><b>TAIFEX（經 FinMind）</b></div>
         <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
       </div>
-      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗時會退回上次成功的快取</div>
+      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗時會退回上次成功的快取。所有資料為盤後/延遲資料，非即時報價。</div>
+    </div>
+
+    <div class="card">
+      <h3>API 金鑰</h3>
+      <div class="setting-row">
+        <span>FinMind Token</span>
+        <div class="setting-input"><input id="set-finmind-token" type="password" placeholder="免費層無需填寫" style="width:150px;text-align:right" onblur="toast('已記在本機，未串接付費額度')"></div>
+      </div>
+      <div class="note">目前免費層不需要金鑰即可使用；若之後升級 FinMind 付費方案，可在這裡填入 Token（僅存在你的裝置本機，不會上傳）。</div>
+    </div>
+
+    <div class="card">
+      <h3>顯示偏好</h3>
+      <div class="setting-row">
+        <span>漲跌顏色</span>
+        <div class="mkt-toggle" id="color-scheme-toggle" style="padding:2px"></div>
+      </div>
+      <div class="note">預設「台股慣例」：紅漲綠跌；也提供「國際慣例」：綠漲紅跌，依個人習慣切換，整站即時套用。</div>
+    </div>
+
+    <div class="card">
+      <h3>免責聲明</h3>
+      <div class="note" style="line-height:1.7">
+        Alpha 是研究/教育用途的原型 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。App 內「產生下單計畫」按鈕僅顯示計畫內容，<b style="color:var(--ink-2)">未串接、也不會串接任何真實券商下單 API</b>。投資有風險，盈虧請自負。
+      </div>
     </div>
 
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
         <div class="f"><span>版本</span><b>Prototype 0.1</b></div>
-        <div class="f"><span>資料源</span><b>FinMind</b></div>
+        <div class="f"><span>資料源</span><b>FinMind / SEC EDGAR</b></div>
       </div>
       <div class="note">Alpha 台美股 AI 交易 · 原型階段，尚未串接真實下單</div>
     </div>
@@ -878,6 +983,8 @@
     if(name==='home')hydrateHome();
     if(name==='market')hydrateMarket();
     if(name==='picks')hydratePicks();
+    if(name==='trade')onTradeInit();
+    if(name==='journal')renderJournalChips();
     if(name==='report')renderReport();
     if(name==='settings')hydrateSettings();
   }
@@ -1029,9 +1136,13 @@
     const [taiex,tpex]=await Promise.all([idxRow('TAIEX','加權指數','TWSE'),idxRow('TPEx','櫃買指數','TPEx')]);
     el.innerHTML=taiex+tpex;
   }
-  async function futNearRow(){
-    const raw=await fm('TaiwanFuturesDaily','TX',_d(10));
-    const fallback=`<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
+  // 2026-08-24 改版：原本寫死只抓台指期（TX），改成可傳入合約代碼＋名稱，
+  // 讓市場頁「期貨」分頁可以同時列台指期/小台/電子期/金融期，共用同一套
+  // 抓取與夜盤日期修正邏輯，不用複製四份。回傳 {html, near} 讓呼叫端在需要
+  // 算正逆價差（近月期貨－現貨）時可以直接拿 near.close 用，不用重新解析字串。
+  async function futNearRow(dataId='TX',label='台指期近月'){
+    const raw=await fm('TaiwanFuturesDaily',dataId,_d(10));
+    const fallback={html:`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`,near:null};
     if(!raw.length)return fallback;
     // 注意：TAIFEX 夜盤（after_market）掛在「下一個」交易日日期上，當天日盤（position）還沒開盤時
     // 資料裡最新的日期反而只有夜盤、沒有日盤——要挑「有 position 場次」的最新日期，不能直接挑最大日期
@@ -1042,21 +1153,21 @@
     if(!todays.length)return fallback;
     todays.sort((a,b)=>a.contract_date.localeCompare(b.contract_date));
     const near=todays[0];const cls=near.spread>=0?'pos':'neg';
-    // 2026-08-24 修正：contract_date 是 FinMind 回傳的 YYYYMM 合約月份（例如"202609"代表2026年9月），
+    // contract_date 是 FinMind 回傳的 YYYYMM 合約月份（例如"202609"代表2026年9月），
     // 原本用 .slice(2) 只取後4碼顯示成裸數字"2609"，剛好跟陽明(2609)的股票代號撞在一起，容易誤認成
-    // 抓錯資料源；資料源本身沒有問題（futures_id 確實是 TX），只是顯示格式不清楚，改成明確的
-    // "TXF YYYY/MM" 月份標示，不再輸出容易被誤解的裸數字。
+    // 抓錯資料源；資料源本身沒有問題，只是顯示格式不清楚，改成明確的 "XXF YYYY/MM" 月份標示。
     const cd=near.contract_date;
-    const contractLabel=/^\d{6}$/.test(cd)?`TXF ${cd.slice(0,4)}/${cd.slice(4,6)}`:cd;
-    return `<div class="row" style="cursor:default"><div class="nm"><b>台指期近月</b><span>TAIFEX · ${contractLabel} 近月合約 · ${near.date}</span></div><div class="px"><b>${nf(near.close)}</b><span class="${cls}">${near.spread>=0?'+':''}${(near.spread_per||0).toFixed(2)}%</span></div></div>`;
+    const contractLabel=/^\d{6}$/.test(cd)?`${dataId}F ${cd.slice(0,4)}/${cd.slice(4,6)}`:cd;
+    const html=`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX · ${contractLabel} 近月合約 · ${near.date}</span></div><div class="px"><b class="num">${nf(near.close)}</b><span class="num ${cls}">${near.spread>=0?'+':''}${(near.spread_per||0).toFixed(2)}%</span></div></div>`;
+    return {html,near};
   }
   async function loadHomeIndex(){
     const el=document.getElementById('home-idx-rows');if(!el)return;
     const [taiex,fut,nasdaq]=await Promise.all([
-      idxRow('TAIEX','加權指數','TWSE'),futNearRow(),
+      idxRow('TAIEX','加權指數','TWSE'),futNearRow('TX','台指期近月'),
       idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice'),
     ]);
-    el.innerHTML=taiex+fut+nasdaq;
+    el.innerHTML=taiex+fut.html+nasdaq;
   }
 
   const HEAT_CATS=[
@@ -1118,8 +1229,83 @@
     setTxt('fut-note',`最新 ${last} · FinMind 期貨三大法人（TX）`);
   }
 
+  // 2026-08-24 新增：台股/美股/期貨三選切換，市場/選股/交易三頁共用同一套邏輯。
+  // MKT_STATE 記每頁目前選哪個市場（不共用同一個值——選股頁選美股，市場頁不會跟著跳）。
+  const MKT_STATE={market:'TW',picks:'TW',trade:'TW'};
+  const MKT_LABEL={TW:'台股',US:'美股',FUT:'期貨'};
+  function renderMktToggle(page){
+    const el=document.getElementById(page+'-toggle');if(!el)return;
+    el.innerHTML=['TW','US','FUT'].map(m=>
+      `<span class="press mtg-opt${MKT_STATE[page]===m?' on':''}" onclick="setMarketToggle('${page}','${m}')">${MKT_LABEL[m]}</span>`
+    ).join('');
+  }
+  function setMarketToggle(page,mkt){
+    MKT_STATE[page]=mkt;
+    renderMktToggle(page);
+    if(page==='market')onMarketToggleChange();
+    if(page==='picks')onPicksToggleChange();
+    if(page==='trade')onTradeToggleChange();
+  }
+  function onMarketToggleChange(){
+    const mkt=MKT_STATE.market;
+    document.getElementById('market-tw-panel').style.display=mkt==='TW'?'':'none';
+    document.getElementById('market-us-panel').style.display=mkt==='US'?'':'none';
+    document.getElementById('market-fut-panel').style.display=mkt==='FUT'?'':'none';
+    if(mkt==='US')loadMarketUS();
+    if(mkt==='FUT')loadMarketFUT();
+  }
+  // 日誌頁篩選：全部/台/美/期（用 filter chips，不是三選切換——日誌是回顧型清單，
+  // 使用者可能同時想看混合結果，跟市場/選股/交易那種「當下只在一個市場」不同）。
+  let JOURNAL_FILTER='ALL';
+  const JOURNAL_CHIP_LABEL={ALL:'全部',TW:'台',US:'美',FUT:'期'};
+  function renderJournalChips(){
+    const el=document.getElementById('journal-chips');
+    el.innerHTML=['ALL','TW','US','FUT'].map(k=>
+      `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${JOURNAL_FILTER===k?600:400};color:${JOURNAL_FILTER===k?'#1a1005':'var(--ink-2)'};background:${JOURNAL_FILTER===k?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${JOURNAL_FILTER===k?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="setJournalFilter('${k}')">${JOURNAL_CHIP_LABEL[k]}</span>`
+    ).join('');
+    document.querySelectorAll('#journal-trades [data-mkt]').forEach(el=>{
+      el.style.display=(JOURNAL_FILTER==='ALL'||el.dataset.mkt===JOURNAL_FILTER)?'':'none';
+    });
+  }
+  function setJournalFilter(k){JOURNAL_FILTER=k;renderJournalChips()}
+  const TRADE_UNIT_NOTE={TW:'單位：張數（台股現股/當沖以張為單位）',US:'單位：股數（美股以股為單位，無「張」概念）',FUT:'單位：口數；另顯示保證金水位與轉倉提醒'};
+  function onTradeInit(){renderMktToggle('trade');onTradeToggleChange()}
+  function onTradeToggleChange(){
+    const mkt=MKT_STATE.trade;
+    setTxt('trade-unit-note',TRADE_UNIT_NOTE[mkt]);
+    document.querySelectorAll('#scr-trade [data-mkt]').forEach(el=>{
+      el.style.display=el.dataset.mkt===mkt?'':'none';
+    });
+  }
+  async function loadMarketUS(){
+    const el=document.getElementById('us-idx-rows');if(!el)return;
+    el.innerHTML=await idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice');
+  }
+  const FUT_CONTRACTS=[{id:'TX',label:'台指期近月'},{id:'MTX',label:'小型台指期近月'},{id:'TE',label:'電子期近月'},{id:'TF',label:'金融期近月'}];
+  async function loadMarketFUT(){
+    const el=document.getElementById('fut-quote-rows');if(!el)return;
+    const results=await Promise.all(FUT_CONTRACTS.map(c=>futNearRow(c.id,c.label)));
+    el.innerHTML=results.map(r=>r.html).join('');
+    // 正逆價差：近月台指期收盤 － 加權指數（現貨）收盤，同一天比較
+    const spotPx=await fm('TaiwanStockPrice','TAIEX',_d(10));
+    const txNear=results[0].near;
+    if(spotPx.length&&txNear){
+      const spot=spotPx[spotPx.length-1];
+      setTxt('basis-spot',nf(spot.close));
+      setTxt('basis-fut',nf(txNear.close));
+      const basis=txNear.close-spot.close;
+      const bEl=document.getElementById('basis-note');
+      bEl.innerHTML=`${basis>=0?'正價差':'逆價差'} <b class="num ${basis>=0?'pos':'neg'}">${basis>=0?'+':''}${nf(basis.toFixed(0))}</b>（期貨－現貨，${spot.date} vs ${txNear.date}；正價差通常反映市場偏多氣氛，逆價差反映偏空，僅供參考）`;
+    }else{
+      setTxt('basis-spot','—');setTxt('basis-fut','—');
+      document.getElementById('basis-note').textContent='資料不足，無法計算。';
+    }
+  }
   async function hydrateMarket(){
+    renderMktToggle('market');
     await Promise.all([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst()]);
+    if(MKT_STATE.market==='US')loadMarketUS();
+    if(MKT_STATE.market==='FUT')loadMarketFUT();
     stampUpdated('market');
   }
 
@@ -1436,7 +1622,10 @@
   function barFill(coverage){
     return (coverage!=null&&coverage<0.5)?'rgba(216,176,112,.5)':'var(--gold-grad)';
   }
+  const PICKS_TOP_N=30; // 排行榜預設只顯示前 30 名，樣本其餘檔數靠搜尋查（見 generate_scores_v2.py 說明）
+  let PICKS_INDUSTRY=null; // null = 全部產業
   async function hydratePicks(forceReload){
+    renderMktToggle('picks');onPicksToggleChange();
     if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML='<div class="note">載入中…</div>';
@@ -1449,35 +1638,74 @@
       stampUpdated('picks');
     }catch(e){
       listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
-      document.getElementById('picks-asof').textContent='—';
+      document.getElementById('picks-asof-line').textContent='—';
     }
   }
   // 沒有公司名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
   function pickLabel(r){
     return r.name?`${r.name} ${r.code}`:r.code;
   }
+  function renderPicksChips(allRows){
+    const industries=[...new Set(allRows.map(r=>r.industry).filter(Boolean))].sort();
+    const chipsEl=document.getElementById('picks-chips');
+    const chip=(label,active,onclick)=>`<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="${onclick}">${label}</span>`;
+    chipsEl.innerHTML=chip('全部',PICKS_INDUSTRY===null,'filterPicksByIndustry(null)')
+      +industries.map(ind=>chip(ind,PICKS_INDUSTRY===ind,`filterPicksByIndustry('${ind}')`)).join('');
+  }
+  function filterPicksByIndustry(ind){
+    PICKS_INDUSTRY=ind;
+    if(PICKS_CACHE)renderPicks(PICKS_CACHE);
+  }
+  function pickRowHtml(r){
+    const lowCov=r.coverage<0.5;
+    const topPick=r.rank===1;
+    return `
+    <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px" onclick="showReport('${r.code}')">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="num" style="width:24px;text-align:center;font-size:15px;font-weight:700;color:${topPick?'var(--gold)':'var(--ink-3)'}">${r.rank}</div>
+        <div class="nm" style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料不足 · 僅供參考</span>':''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
+      </div>
+      <div class="meter" style="height:5px;margin-top:0"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${barFill(r.coverage)}"></i></div>
+    </div>`;
+  }
   function renderPicks(json){
     const meta=json.meta||{};
-    document.getElementById('picks-asof').textContent='資料基準日 '+(meta.data_asof||'—')+'（'+(meta.disclaimer||'')+'）';
-    const rows=json.stocks||[];
+    document.getElementById('picks-asof-line').textContent='資料基準日 '+(meta.data_asof||'—')+' · 樣本 '+(json.stocks||[]).length+' 檔';
+    const allRows=json.stocks||[];
+    renderPicksChips(allRows);
     const listEl=document.getElementById('picks-list');
-    if(!rows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
-    listEl.innerHTML=rows.map(r=>{
-      const lowCov=r.coverage<0.5;
-      const topPick=r.rank===1;
-      return `
-      <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px" onclick="showReport('${r.code}')">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="num" style="width:24px;text-align:center;font-size:15px;font-weight:700;color:${topPick?'var(--gold)':'var(--ink-3)'}">${r.rank}</div>
-          <div class="nm" style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
-            <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料不足 · 僅供參考</span>':''}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
-        </div>
-        <div class="meter" style="height:5px;margin-top:0"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${barFill(r.coverage)}"></i></div>
-      </div>`;
-    }).join('');
+    if(!allRows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
+    const filtered=(PICKS_INDUSTRY?allRows.filter(r=>r.industry===PICKS_INDUSTRY):allRows).slice(0,PICKS_TOP_N);
+    listEl.innerHTML=filtered.map(pickRowHtml).join('');
+  }
+  function onPicksToggleChange(){
+    const mkt=MKT_STATE.picks;
+    document.getElementById('picks-list-card').style.display=mkt==='TW'?'':'none';
+    document.getElementById('picks-chips').style.display=mkt==='TW'?'':'none';
+    document.getElementById('picks-us-panel').style.display=mkt==='US'?'':'none';
+    document.getElementById('picks-fut-panel').style.display=mkt==='FUT'?'':'none';
+  }
+  // 搜尋任一檔（樣本內即使不在排行榜前段也查得到，樣本外誠實顯示查無資料——見
+  // generate_scores_v2.py 的說明：目前架構沒有後端可以現算一支新股票的橫斷面百分位）。
+  function onPicksSearchInput(q){
+    const resEl=document.getElementById('picks-search-result');
+    const listCard=document.getElementById('picks-list-card');
+    const chipsEl=document.getElementById('picks-chips');
+    q=q.trim();
+    if(!q){resEl.innerHTML='';listCard.style.display='';chipsEl.style.display='';return}
+    listCard.style.display='none';chipsEl.style.display='none';
+    const rows=(PICKS_CACHE&&PICKS_CACHE.stocks)||[];
+    const ql=q.toLowerCase();
+    const hits=rows.filter(r=>r.code.toLowerCase().includes(ql)||(r.name&&r.name.includes(q)));
+    if(!hits.length){
+      resEl.innerHTML=`<div class="note" style="padding:14px 2px">查無「${q}」的評分資料——可能不在這輪抽樣樣本內，或資料完整度不足（&lt;50%）沒有計算。樣本涵蓋 ${rows.length} 檔，非全市場逐檔掃描。</div>`;
+      return;
+    }
+    resEl.innerHTML=`<div class="card" style="margin-top:2px"><h3>搜尋結果</h3>${hits.map(pickRowHtml).join('')}</div>`;
   }
 
   // ── 個股研究報告頁 ──
@@ -1606,9 +1834,34 @@
     setTxt('set-wl-count',WL.length);
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
     setTxt('set-cache-count',cacheCount+' 筆快取');
+    renderColorSchemeToggle();
   }
 
+  // ── 漲跌顏色偏好（2026-08-24 新增）：預設台股慣例紅漲綠跌，可切成國際慣例綠漲紅跌。
+  // 透過覆寫 --up/--down 系列 CSS 變數即時套用到整站（因為既有元件都是吃這組變數，
+  // 不用一一改元件），存 localStorage，下次開 App 記得上次選擇。
+  const COLOR_SCHEMES={
+    TW:{up:'#ff5257',upDeep:'#e6383f',down:'#24c98a',downDeep:'#1aa876',label:'台股慣例（紅漲綠跌）'},
+    INTL:{up:'#24c98a',upDeep:'#1aa876',down:'#ff5257',downDeep:'#e6383f',label:'國際慣例（綠漲紅跌）'},
+  };
+  function applyColorScheme(key){
+    const s=COLOR_SCHEMES[key]||COLOR_SCHEMES.TW;
+    const root=document.documentElement.style;
+    root.setProperty('--up',s.up);root.setProperty('--up-deep',s.upDeep);
+    root.setProperty('--down',s.down);root.setProperty('--down-deep',s.downDeep);
+    localStorage.setItem('alpha_color_scheme',key);
+  }
+  function renderColorSchemeToggle(){
+    const cur=localStorage.getItem('alpha_color_scheme')||'TW';
+    const el=document.getElementById('color-scheme-toggle');if(!el)return;
+    el.innerHTML=['TW','INTL'].map(k=>
+      `<span class="press mtg-opt${cur===k?' on':''}" onclick="setColorScheme('${k}')">${k==='TW'?'台股':'國際'}</span>`
+    ).join('');
+  }
+  function setColorScheme(key){applyColorScheme(key);renderColorSchemeToggle();toast('已切換：'+COLOR_SCHEMES[key].label)}
+
   // ── 啟動：載入真實自選股報價 + 註冊 PWA ──
+  applyColorScheme(localStorage.getItem('alpha_color_scheme')||'TW');
   hydrateHome();
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>

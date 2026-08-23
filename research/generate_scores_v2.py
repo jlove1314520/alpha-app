@@ -25,7 +25,13 @@ from universe import universe
 from validation.holdout import VAL_END
 
 
-def main(top_n: int = 30, out_path: str = "../scores.json"):
+def main(top_n: int | None = None, out_path: str = "../scores.json"):
+    # 2026-08-24 改版：top_n 預設改 None（匯出全部 coverage>=0.5 的樣本，不是只有前 30）。
+    # 使用者要求選股頁搜尋框「即使不在排行榜前段也要能單獨算出該檔評分」——受限於
+    # 目前架構（App 端是純前端，沒有後端可以現算一支新股票的橫斷面百分位），能做到
+    # 的誠實版本是：把「這次抽樣、算出來的全部樣本」都匯出（不是只匯出前 30 名），
+    # 前端排行榜清單只顯示前 30 名，但搜尋框可以查到樣本內任何一檔已經算出分數的股票；
+    # 樣本外的股票（沒被抽到樣本、或 coverage<0.5）誠實顯示「查無評分資料」，不是假裝算得出來。
     sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     market_df = prepare_market_data(market_raw)
