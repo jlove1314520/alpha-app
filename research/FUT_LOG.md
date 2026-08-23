@@ -26,3 +26,20 @@
 **Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
 
 **下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1（FinMind 額度恢復後的資料探測）。
+
+---
+
+## 2026-08-23T13:02:00+08:00 — 馬拉松第二輪期貨軌執行：仍被 FinMind 封鎖，第二次撞牆
+
+**選軌理由**：`marathon_lock.py acquire` 成功後比對 `TW_MARATHON_STATE.md`（12:08）／`US_MARATHON_STATE.md`（12:32）／`FUT_MARATHON_STATE.md`（11:52，最舊）三個最後更新時間戳，選最久沒被碰的期貨軌。
+
+**做了什麼**：
+1. 距離上一輪記錄的 403（2026-08-23T11:47:30+08:00，`retry_after=1782`≈30分鐘，理論解封時間約 12:17）已經過了超過 40 分鐘，判斷應該已解封，寫了 `fut_probe_milestone1.py`（比照 `us_probe_milestone1.py` 的結構：一支只印結果、不改其他檔案的探測腳本），對 `TaiwanFuturesDaily`（data_id=`TX`）用一週窄視窗（2024-06-03~06-07）跑 `load_dev()`。
+2. 實際執行結果：**仍然是 403**，`{"msg":"ip banned","status":403,"retry_after":828}`（2026-08-23T13:01:40+08:00）。只呼叫了這一次，沒有重試（`MARATHON_PROTOCOL.md` 第 4 節規則）。
+3. 這代表封鎖視窗比預期的更持久或會重新計時——不是「等滿 30 分鐘就一定解封」這麼單純。已把這個發現寫進 `FUT_MARATHON_STATE.md`，提醒下一輪心理準備。
+
+**沒做的事**：`TaiwanFuturesInstitutionalInvestors` 探測、轉倉規則驗證（H1/H2）、連續合約程式碼——全部因為第一步 `TaiwanFuturesDaily` 就被拒絕而擋在前面，沒有機會執行到。`TRIALS_LEDGER.md` 沒有新增列，理由同第一輪：這是資料源可用性調查途中撞到額度牆，不是完成一次可統計檢定的假說測試。
+
+**Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
+
+**下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1——`fut_probe_milestone1.py` 已經寫好可直接執行，等過了本輪記錄的 `retry_after`（約 2026-08-23T13:15:28+08:00 之後）再試。
