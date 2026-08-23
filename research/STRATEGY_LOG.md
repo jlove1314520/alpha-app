@@ -51,7 +51,7 @@ Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-23T01:30:00+08:00**（承接 8/22 16:00 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-24T13:45:00+08:00**（承接 8/23 01:30 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -76,7 +76,7 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/audit_ledgers.py` | 唯讀稽核腳本，對 `trades.csv` 跑 3 條恆等式檢查（含 holdout 洩漏偵測） | 程式碼 |
 | `research/validation/__init__.py` | `validation` package 標記 | 程式碼 |
 | `research/validation/holdout.py` | train/val/holdout 物理隔離、一次性解鎖機制、`assert_no_holdout_leakage()` 硬性斷言 | 程式碼 |
-| `research/validation/costs.py` | 台股成本/摩擦模型（手續費/證交稅/滑價/漲跌停鎖死偵測） | 程式碼 |
+| `research/validation/costs.py` | 台股成本/摩擦模型（手續費/證交稅/滑價/漲跌停鎖死偵測）。**2026-08-24 新增 `short_round_trip_cost_pct()`**：放空腳成本（賣出開空+買進回補+借券費，`BORROW_FEE_ANNUAL_PCT` 未校準占位假設） | 程式碼 |
 | `research/validation/control_group.py` | 隨機控制組。`run_control_group()` 是原本的靜態版本（仍保留給其他簡單場景）；**2026-08-22 新增 `run_matched_control_group()`**——依 Cowork 要求，用策略真實進出場日期表只換股不換時間，才是機制上對應的隨機對照 | 程式碼 |
 | `research/validation/criteria.py` | 事前綁定通過標準（雜湊鎖定，防止事後移動門柱） | 程式碼 |
 | `research/backtest/__init__.py` | `backtest` package 標記 | 程式碼 |
@@ -85,17 +85,34 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/strategies/weinstein_stage2.py` | Weinstein 第二階段訊號函式（150日均線上揚+站上、60日動量排名）+ 大盤200日均線總體閘門，插進 `backtest/engine.py` 用 | 程式碼 |
 | `research/strategies/run_weinstein_pilot.py` | 第一輪跑法（手選 30 檔試點宇宙、靜態控制組）——**方法論已知有缺陷**（見 `weinstein_stage2_pilot_v1` 在 `LEADS.md` 的紀錄），保留是為了留下完整歷史，不是推薦用法 | 程式碼 |
 | `research/strategies/run_weinstein_unbiased.py` | 修正版跑法（`universe.py` 全市場隨機抽樣 100 檔 + `run_matched_control_group()`），結果見 `LEADS.md` 的 `weinstein_stage2_unbiased` 列 | 程式碼 |
-| `research/factors.py` | **2026-08-22 新增，2026-08-23 擴充**：AI 選股引擎 Phase A 步驟 1。原始 6 個 + 新增 6 個候選因子（價值PB/PE、品質ROE穩定度、低波動、EPS/營收意外SUE、分點集中度已調查確認不可行），全部透過 `load_dev()`／`pit.py` 的 `pit_date` 做 point-in-time 對齊（`merge_asof(direction='backward')`），`prepare_factors()` 對新資料集的呼叫包 try/except 避免單一資料集被擋時連累其他因子 | 程式碼 |
+| `research/factors.py` | **2026-08-22 新增，2026-08-23 擴充**：AI 選股引擎 Phase A 步驟 1。原始 6 個 + 新增 6 個候選因子（價值PB/PE、品質ROE穩定度、低波動、EPS/營收意外SUE、分點集中度已調查確認不可行），全部透過 `load_dev()`／`pit.py` 的 `pit_date` 做 point-in-time 對齊（`merge_asof(direction='backward')`），`prepare_factors()` 對新資料集的呼叫包 try/except 避免單一資料集被擋時連累其他因子。**2026-08-24 新增 `prepare_score_factors()`**：精簡版，只算 `score.py` 實際會用到的 4 欄，避免全市場規模掃描時浪費 API 額度在用不到的資料集上 | 程式碼 |
 | `research/factor_ic.py` | **2026-08-22 新增，2026-08-23 加 Bonferroni 校正**：Phase A 步驟 2。因子 IC 檢定（Spearman 等級相關 vs 未來20日報酬，train/val 分開、隨機打散對照組，`required_percentile`/`bonferroni_n` 支援多重比較校正），結果見 `FACTORS.md` | 程式碼 |
 | `research/factor_ic_eps_expanded.py` | **2026-08-23 新增**：Cowork 覆核第3點，`f_eps_growth` 擴大樣本/延長橫斷面重驗（受流量限制未達成 400 檔目標，見 `FACTORS.md`） | 程式碼 |
 | `research/factor_correlation.py` | **2026-08-23 新增**：AI 選股引擎 Phase A 步驟 3 前置作業。4 個通過因子的相關性矩陣＋去重判定，結果見 `FACTORS.md` | 程式碼 |
 | `research/score.py` | **2026-08-23 新增**：Phase A 步驟 3。綜合分引擎（同產業 peer z-score、去重後 3 個獨立成分等權平均、`export_scores_json()` 產生 App 用的 `scores.json`） | 程式碼 |
-| `research/run_score_backtest.py` | **2026-08-23 新增**：對 `score.py` 綜合分前 N 名做扣成本+換手組合回測（重用 `backtest/engine.py`），含配對式隨機控制組，結果見 `LEADS.md` 的 `score_topn_v1` 列 | 程式碼 |
+| `research/run_score_backtest.py` | **2026-08-23 新增**：對 `score.py` 綜合分前 N 名做扣成本+換手組合回測（重用 `backtest/engine.py`），含配對式隨機控制組，結果見 `LEADS.md` 的 `score_topn_v1` 列（**2026-08-24 Cowork 稽核後，此框架的結論已被 `long_short_backtest.py` 的多空中性評估取代，檔案保留供歷史對照**） | 程式碼 |
+| `research/long_short_backtest.py` | **2026-08-24 新增**：Cowork 稽核回應。`score.py` 綜合分的多空市場中性評估（買前decile/空後decile、實測 beta、配對隨機控制組、週頻/月頻對照），結果見 `LEADS.md` 的 `score_longshort_v1` 兩列跟 `REPORT.md` 完整解讀 | 程式碼 |
 | `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/factor_ic_results.csv`（因子IC原始數字）、`data/score_backtest_results.csv`、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
 | `scores.json`（repo 根目錄，非 `research/` 底下） | **2026-08-23 新增**：App「選股」頁讀取的靜態排行榜資料，`research/score.py` 產生，基準日 `VAL_END`（2024-12-31，非即時，見下方架構問題備註） | 進 git（App 資料檔，跟 `research/data/` 不同層級） |
 | `index.html`（repo 根目錄） | App 本體。**2026-08-23**：新增「選股」分頁（nav 第 3 項、`scr-picks` 畫面、`hydratePicks()`/`renderPicks()`/`showPickDetail()`） | 進 git |
+
+---
+
+## 2026-08-24 — Cowork 稽核回應：多空市場中性評估取代長多前N名框架
+
+`score_topn_v1`（週頻長多前10名）雖然打贏配對隨機對照組（證明因子有真訊號），但 Cowork 指出絕對報酬輸給零成本買進持有代表「這個實作形式」本身沒有實用價值，且買進持有基準本身帶著 80 檔抽樣的選股偏差。**這是對的批評，正面處理，不是用「贏隨機就夠」帶過。**
+
+**改用多空市場中性設計**（新增 `long_short_backtest.py`）：買前 decile、空後 decile，兩腳等權，價差報酬結構上把因子的橫截面預測力跟大盤方向隔開。**新增放空成本模型**（`validation/costs.py` 的 `short_round_trip_cost_pct()`，含未校準的借券費占位假設，誠實揭露）。**全部改用 universe.py 全市場隨機抽樣**（種子 `20260824`，非原本偏差的 80/100 樣本），但誠實記錄：連續撞到 FinMind 兩層流量限制（先是 30 分鐘 IP 封鎖，跟同時間背景執行的挖礦馬拉松期貨軌獨立撞到同一道牆，證實是共用 IP 額度；解除後又撞到較軟的額度上限，被手動測試+馬拉松並行消耗榨乾），**最終覆蓋率 170/3,196 檔（≈5.3%），不是真正全市場逐檔掃描**，這個落差沒有藏起來。
+
+**過程中抓到並修好 4 個真的問題**（3 個程式碼 bug + 1 個效能問題，跟之前每次都會踩到新坑一樣，如實記錄）：`market_df` 用錯欄位名（`adj_close`→`close`，TAIEX 是指數沒有還原價格）；小樣本（8檔/腳）被單一股票的減資資料異常放大成 +561,885% 的荒謬數字，加了 `MAX_PLAUSIBLE_DAILY_RETURN` 過濾；beta/alpha/Sortino 原本算在未扣成本的報酬欄位上，跟真正淨值對不上，改成從扣成本後的 equity 曲線算；40 次隨機重抽每次都重新算一次完整橫截面分數，卡了 20 分鐘一個週期——這正是 `run_score_backtest.py` 已經修過的同一個效能坑，寫新檔案時忘記帶過來，補上快取後正常跑完。
+
+**結果（完整數字見 `LEADS.md` 的 `score_longshort_v1` 兩列、`REPORT.md` 完整解讀）：四期（train/val × 週頻/月頻）beta 全部接近零（−0.048 到 −0.105，實測不是假設），配對隨機控制組全部 100.0 百分位（完勝全部 40 次重抽，四期一致）——證實因子的橫截面排序能力是真的。** 誠實揭露弱點：Train(月頻) 絕對報酬跟 Sortino 都是負的，不會因為其他三期數字好看就淡化這個結果；週頻整體比月頻穩定，但月頻在 Validation 期數字最亮眼——沒有一個頻率全面勝出，兩種都如實記錄。
+
+**Holdout 複查：** `is_holdout_consumed()` 再次確認為 `False`。
+
+**下一步：** commit + push 這輪修正。全市場覆蓋率的落差留給使用者決定是否要繼續補（例如排進挖礦馬拉松背景待辦）。
 
 ---
 

@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-23T01:30:00+08:00**
+**最後更新：2026-08-24T13:50:00+08:00**
 
-**▶ 目前狀態：AI 選股引擎 Phase A（步驟 1–4）全部完成，Part 1 已 push。正在設 Part 2（30分鐘挖礦馬拉松，三軌獨立）。**
+**▶ 目前狀態：AI 選股引擎 Phase A（步驟 1–4）全部完成並 push；Part 2 挖礦馬拉松已上線自動執行；Cowork 稽核 `score_topn_v1` 後改用多空市場中性評估，也已完成並 push。**
+
+**2026-08-24 Cowork 稽核回應摘要：** `score_topn_v1`（長多前10名）雖贏配對隨機對照組，但絕對報酬輸買進持有、且買進持有基準本身有偏差——Cowork 指出這代表「這個實作形式」沒有實用價值。改用多空市場中性設計（`long_short_backtest.py`：買前decile/空後decile，實測 beta 而非假設，新增放空成本模型）+ 全市場隨機抽樣（非原本偏差樣本，但受 FinMind 流量限制只達 170/3,196 檔≈5.3%覆蓋率，誠實揭露）。**結果：四期（train/val×週/月頻）beta 全部接近零、配對隨機控制組全部 100.0 百分位——證實因子橫截面排序能力是真的**；誠實揭露 Train(月頻) 絕對報酬跟 Sortino 為負，沒有淡化。過程中修好 3 個真 bug（欄位名、小樣本異常值放大、beta/alpha 扣成本前後不一致）+ 1 個效能問題（忘記帶過之前已修過的快取優化）。完整數字見 `LEADS.md`/`REPORT.md` 2026-08-24 條目。**全市場覆蓋率的落差留給使用者決定是否要繼續補。**
 
 **Part 1 收尾摘要（2026-08-23）：** 因子相關性去重（`f_eps_growth`/`f_eps_surprise` 同家族合併，4 因子→3 獨立成分）；`score.py` 綜合分引擎（同產業 peer z-score，ETF 覆蓋率不足過濾）；`run_score_backtest.py` 扣成本+換手組合回測（train/val 隨機控制組皆 100.0 百分位，但絕對報酬輸給零成本買進持有——判讀方式見 `LEADS.md`/`FACTORS.md`，`score_topn_v1` 判定 `EXPERIMENTAL`）；App「選股」頁上線（`scores.json`，瀏覽器實測過）。**留下未解決的架構問題**：`scores.json` 目前用 `VAL_END` 當基準日（非即時），步驟5「每日排程」需要的即時資料路徑要不要獨立於 holdout 機制之外，待使用者決定。詳見 `FACTORS.md`/`STRATEGY_LOG.md`/`REPORT.md` 2026-08-23 條目。
 

@@ -112,8 +112,25 @@ def load_universe_with_factors(
     return out
 
 
+_scored_cache: dict[int, dict[str, pd.DataFrame]] = {}  # id(data) -> {as_of: eligible-ranked DataFrame}.
+# Real bug found 2026-08-24 running this at scale (170 names, 40 random draws x 4 periods): without this,
+# _random_legs() recalled compute_scores_at_date() -- the full industry peer-z-score cross-section -- from
+# scratch on every single one of the 40 draws at every rebalance date, discarding and redoing identical
+# work 40x over. Exactly the same inefficiency already found and fixed once in run_score_backtest.py's
+# _eligible_pool_cache; missed carrying the fix over when this file was written. Keyed by id(data) (not a
+# global constant) so caches from different `data` dicts (e.g. a smoke test vs the full run) never collide.
+
+
+def _get_scored(as_of: str, data: dict[str, pd.DataFrame], industry_map: dict) -> pd.DataFrame:
+    key = id(data)
+    per_data_cache = _scored_cache.setdefault(key, {})
+    if as_of not in per_data_cache:
+        per_data_cache[as_of] = eligible_for_ranking(compute_scores_at_date(as_of, data, industry_map))
+    return per_data_cache[as_of]
+
+
 def _decile_legs(as_of: str, data: dict[str, pd.DataFrame], industry_map: dict) -> tuple[list[str], list[str]]:
-    cs = eligible_for_ranking(compute_scores_at_date(as_of, data, industry_map))
+    cs = _get_scored(as_of, data, industry_map)
     n = len(cs)
     if n < 10:
         return [], []
@@ -124,7 +141,7 @@ def _decile_legs(as_of: str, data: dict[str, pd.DataFrame], industry_map: dict) 
 
 
 def _random_legs(as_of: str, data: dict[str, pd.DataFrame], industry_map: dict, rng: random.Random) -> tuple[list[str], list[str]]:
-    cs = eligible_for_ranking(compute_scores_at_date(as_of, data, industry_map))
+    cs = _get_scored(as_of, data, industry_map)
     pool = cs["stock_id"].tolist()
     n = len(pool)
     if n < 10:
