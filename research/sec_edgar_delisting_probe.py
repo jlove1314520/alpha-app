@@ -17,13 +17,24 @@ Two-step approach per ticker:
 1. Try to resolve CIK via company_tickers.json (same map used in sec_edgar_probe.py).
    If not found, that's itself a finding: the *current* ticker->CIK map excludes it.
 2. If a CIK is known (either from step 1, or hardcoded as a fallback for tickers that
-   dropped off the current map -- CIKs are permanent identifiers assigned at initial
-   registration, unlike tickers which can be reused, so a hardcoded CIK is not the same
-   kind of "trust human memory" risk as a hardcoded delisting *date* was in round 4),
-   pull the full submissions JSON and scan filings.recent (and, if needed, the older
-   filings.files[] archive pages) for form types starting with "25" (25, 25-NSE, 15-12B,
-   15-12G -- Section 12(g) deregistration is another delisting-adjacent signal worth
-   capturing even though Form 25 is the primary one).
+   dropped off the current map), pull the full submissions JSON and scan filings.recent
+   (and, if needed, the older filings.files[] archive pages) for form types starting
+   with "25" (25, 25-NSE, 15-12B, 15-12G -- Section 12(g) deregistration is another
+   delisting-adjacent signal worth capturing even though Form 25 is the primary one).
+
+   CORRECTION (round 6, 2026-08-24): round 4's original docstring here claimed a
+   hardcoded CIK fallback carries less "trust human memory" risk than a hardcoded date,
+   reasoning that CIKs are permanent identifiers. Round 5 falsified this for SBNY --
+   the hardcoded fallback (1288776) resolved to GOOGLE INC., not Signature Bank. A
+   hand-typed, unverified identifier is a hand-typed, unverified identifier regardless
+   of whether it happens to be a CIK or a date; neither is safe without checking the
+   submissions API response's company name against what you expect. Round 6 tried to
+   find the correct SBNY CIK via www.sec.gov/cgi-bin/browse-edgar company-name search
+   and efts.sec.gov full-text-search entity aggregation (including an exhaustive scan
+   of all Form 25-NSE filings in the 2023-03-01..2023-06-30 window, which correctly
+   surfaced SVB FINANCIAL GROUP but never any entity containing "Signature") and did
+   NOT find it -- the correct CIK for SBNY remains unknown. Do not add a new hardcoded
+   guess without independently confirming the company name in the submissions response.
 
 Hardcoded CIK fallback values below are copied from the same company_tickers.json
 lookup style, but since round 4 already showed the *current* ticker map may not
@@ -44,15 +55,26 @@ import requests
 HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
 
 # Fallback CIKs, used only if the live company_tickers.json lookup misses the ticker.
-# These are well-known permanent SEC identifiers (not delisting dates -- CIKs don't
-# change when a ticker is reused or a company delists), included so the probe can
-# still check EDGAR's filing record even for names that have fallen off the current
-# ticker map. If a fallback is wrong, the submissions API will simply 404 or return
-# an unrelated company (visible in the printed company name), not silently succeed.
+# Verified correct (submissions API company name matches, per round 5/6): TWTR, SIVB,
+# FRC, BBBY. If a fallback is wrong, the submissions API will simply 404 or return an
+# unrelated company (visible in the printed company name), not silently succeed -- this
+# is exactly what happened for SBNY (see below), which is why "CIK fallback = safe"
+# is NOT a blanket assumption; each value here still needs independent verification.
+#
+# SBNY: KNOWN WRONG, unresolved as of round 6 (2026-08-24). 1288776 resolves to
+# GOOGLE INC., not Signature Bank (round 5 finding). Round 6 tried browse-edgar
+# company-name search and efts.sec.gov full-text-search entity aggregation (including
+# an exhaustive scan of every Form 25-NSE filer in 2023-03-01..2023-06-30) and could
+# NOT find the correct CIK -- no entity containing "Signature" appears anywhere in
+# that search. Do not replace this with a new guess without verifying the company
+# name in the actual submissions API response first. See DATA.md "美股存活者偏差調查
+# （再續）" (round 6) for the full negative-result writeup, including a new hypothesis
+# that FDIC-receivership delistings (SBNY, and FRC from round 5) may not go through a
+# standard Form 25 at all, unlike voluntary/acquisition delistings (TWTR, SIVB).
 FALLBACK_CIK = {
     "TWTR": 1418091,
     "SIVB": 719739,
-    "SBNY": 1288776,
+    "SBNY": None,  # unresolved, see comment above -- do not guess
     "FRC": 1132979,
     "BBBY": 886158,
 }

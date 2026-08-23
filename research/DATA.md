@@ -106,6 +106,19 @@ NVDA 在 2024-06-10 盤後執行 10:1 股票分割。抓回來的資料裡，**�
 
 **這輪沒做的**：`SBNY` 需要重新查證正確 CIK（不能再猜，建議下一輪用全文搜尋或公開新聞查證後才寫入腳本）；`FRC` 需要抓 `filings.files[]` 分頁檔案內容才能確定 Form 25 是否存在於更早的申報記錄；`sec_edgar_delisting_probe.py` docstring 裡「CIK 比日期安全」的錯誤假設需要修正（下一輪處理，這輪只發現問題不動腳本本身，維持一輪一個工作單位的精神）。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～四輪地基工作的先例一致。
 
+### 美股存活者偏差調查（再續）：`SBNY` 正確 CIK 查證失敗，找到一個新的負面發現（2026-08-24 馬拉松第六輪）
+
+**動機**：接續第五輪失敗的待辦——`sec_edgar_delisting_probe.py` 手寫的備援 CIK（1288776）查到的是 GOOGLE INC.，需要用可信管道重新查證 Signature Bank 正確的 CIK，不能再手寫猜測值。這輪**沒有修改腳本本身**（維持一輪一個工作單位），純粹用互動式查詢多種 SEC EDGAR 公開端點嘗試定位正確 CIK。
+
+**結果——CIK 仍未查到，但排除了兩個錯誤候選，且發現一個重要的新負面線索**：
+
+1. **`www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=signature+bank`（公司名稱搜尋）不可靠**：不管有沒有加 `type=25` 過濾，這個端點在沒有唯一精確符合的公司名時，會**自動跳去字母順序最接近的單一公司**，而不是回傳一份候選清單。搜尋「signature bank」（無 type 過濾）跳到 CIK 1288784「Signature Bank Corp」（Greeley, CO 的小型銀行控股公司，SIC=州立商業銀行）——**這不是紐約那家倒閉的 Signature Bank（ticker SBNY）**，只是名字類似的另一家公司。搜尋「signature」+`type=25`更離譜，直接跳到不相干的「Elah Holdings, Inc.」（因為它是字母排序上「signature」附近唯一有 Form 25 記錄的公司）。**方法論教訓：`browse-edgar` 的公司名稱搜尋不能用來做「這個名字底下有哪些公司」的探索式查詢，只適合已經知道精確全稱時的直接跳轉，這輪之前假設它會像一般搜尋引擎那樣列出多個候選，這個假設是錯的。**
+2. **`efts.sec.gov` 全文檢索（entity 聚合）也查不到**：用 `q="Signature Bank"` 或 `q="SBNY"` 各種表單/時間範圍組合（10-K、8-K、25-NSE、15-12B、15-12G，涵蓋 2022–2024）反覆查 `entity_filter` 聚合結果，**從未出現任何名稱含「Signature」的申報實體**——出現的都是「提到 Signature Bank 是自己存款銀行」的第三方公司（NYCB、Terawulf 等）。特別針對「Form 25-NSE，2023-03-01～2023-06-30」（Signature Bank 2023-03-12 被 NY DFS 接管、FDIC 託管的時間窗口）**逐頁抓完全部 200 筆命中的申報實體名單**（見 `research/sec_edgar_delisting_probe.py` 同精神的臨時查詢，未落成正式腳本），200 家裡**沒有一家名稱含「Signature」**——同一次查詢裡能正確找到 `SVB FINANCIAL GROUP`（也就是 SIVB，第五輪已確認），證明查詢方法本身有效，不是查詢語法錯誤。
+3. **新的負面發現，值得記錄**：Signature Bank 在這個窗口內**似乎沒有透過標準 Form 25/25-NSE 申報下市**，這跟第五輪 `FRC`（同樣是 FDIC 接管案例，同樣查不到 Form 25）呈現同一個模式——**銀行被監管機關強制接管清算（FDIC receivership）走的下市/註銷流程，可能系統性地不同於一般公司自願下市或被併購下市的流程（後者 TWTR／SIVB 都乾淨地查到了 Form 25-NSE）**。這是一個假設，這輪沒有進一步查證（例如去查 FDIC 自己的公開資料庫，或查 Nasdaq 官方停牌公告），但**兩個獨立案例（SBNY、FRC）出現同款「查不到 Form 25」的結果，不太像是巧合，值得下一輪或未來標記為「銀行接管型下市」的特殊類別**，而不是繼續當成一般查證失敗。
+4. **`SBNY` 的正確 CIK 仍然未知，不能再猜測任何數字**——這輪排除了 1288776（Google）與 1288784（無關的 CO 小型銀行）兩個候選，**沒有找到替代候選**。`sec_edgar_delisting_probe.py` 的 `FALLBACK_CIK["SBNY"]` 目前的值（1288776）已知是錯的，下一輪修腳本時要把它標記為「已知錯誤，待查」而不是留著看起來像是可信值。
+
+**這輪沒做的**：`sec_edgar_delisting_probe.py` docstring 裡「CIK 比日期安全」的錯誤假設仍未修正（連續第二輪待辦，下一輪應該真的動手改，或明確記錄為「暫緩，優先序較低」）；沒有嘗試 FDIC BankFind Suite 或 Nasdaq 官方停牌公告這類 SEC EDGAR 以外的資料源（如果要繼續追 `SBNY`／`FRC` 的正確下市記錄，可能要跳出 SEC EDGAR 本身）；`FRC` 的 `filings.files[]` 分頁檔案仍未抓取。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～五輪地基工作的先例一致。
+
 ### 美股 PIT 資料源調查：SEC EDGAR 公開 JSON API（2026-08-23 馬拉松第二輪文件調查 → 第三輪實測）
 
 **性質：已實測驗證。** 第二輪只查了第三方文件（見下方保留的第二輪記錄），**第三輪（`research/sec_edgar_probe.py`）對 `data.sec.gov`/`www.sec.gov` 打了真實 HTTP 請求**，三檔股票（AAPL、MSFT、PLTR，刻意混大型股+一檔較晚近IPO的中型股避免只測巨型股的偏差）全部驗證通過。

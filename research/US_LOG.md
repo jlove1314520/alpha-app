@@ -70,3 +70,17 @@
 **沒做的**：`SBNY` 需要重新查證正確 CIK（不能再猜）；`FRC` 需要抓 `filings.files[]` 分頁檔案；`sec_edgar_delisting_probe.py` docstring 裡「CIK 比日期安全」的錯誤假設沒有在這輪修正腳本本身（一輪一個工作單位，這輪工作單位是「跑探測+誠實記錄結果」，修腳本留給下一輪）；XBRL company facts API、中小型股價格深度抽測、美股成本模型都還沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～四輪地基工作的先例一致。
 
 `is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。
+
+## 2026-08-24T09:40:00+08:00 — 馬拉松第六輪：重查 `SBNY` 正確 CIK（失敗，但排除兩個錯誤候選+修正腳本）
+
+做了 `US_MARATHON_STATE.md` 建議的下一輪工作單位第 1 項：接續第五輪失敗的待辦，重新查證 Signature Bank（SBNY）正確的 CIK，不能再手寫猜測值。
+
+**過程**：先試 `www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=signature+bank`（有無 `type=25` 過濾都試過），查到 CIK 1288784「Signature Bank Corp」（Greeley, CO 的小型銀行控股公司）——查了 `submissions` API 確認公司名稱後發現這**不是**紐約那家倒閉的 Signature Bank，只是名字類似的無關公司。接著改用 `efts.sec.gov` 全文檢索，試了 `q="Signature Bank"`／`q="SBNY"` 搭配多種表單（10-K、8-K、25-NSE、15-12B、15-12G）跟時間範圍，entity 聚合結果裡從未出現任何名稱含「Signature」的申報實體。最後針對「Form 25-NSE，2023-03-01～2023-06-30」（已知的接管時間窗口）逐頁抓完全部 200 筆命中的申報實體名單，**沒有一家含「Signature」**——同一次查詢正確找到 `SVB FINANCIAL GROUP`（SIVB），證明查詢方法本身有效。
+
+**結果：`SBNY` 正確 CIK 仍未查到，這輪排除了兩個錯誤候選（1288776=Google，第五輪已知；1288784=無關的 CO 小型銀行，這輪新排除），沒有找到替代候選。** 附帶發現一個方法論教訓：`browse-edgar` 公司名稱搜尋在沒有精確符合的公司名時會自動跳到字母排序最近的單一公司，不是回傳候選清單，之前誤以為它會像搜尋引擎一樣列多筆候選是錯的假設。另外發現一個值得記錄的新線索：`SBNY`（這輪）跟 `FRC`（第五輪）兩個獨立的「FDIC 接管型下市」案例都查不到 Form 25，而 `TWTR`／`SIVB`（一般下市/併購）都乾淨查到，這輪把這個模式記錄為未查證的假設，留給下一輪。
+
+**這輪也做了**（跟查證同一個工作單位範疇內，屬於同一個待辦第1項）：修正了 `sec_edgar_delisting_probe.py` 的 docstring（移除「CIK 比日期安全」的錯誤假設，改成明確說明第五輪 `SBNY` 案例已經證偽這個假設）跟 `FALLBACK_CIK` 字典（`SBNY` 改成 `None` 並加註解「已知錯誤待查，不要用猜的」，其他四檔標註「已驗證正確」）。完整細節寫進 `DATA.md`「美股存活者偏差調查（再續）」小節、`US_MARATHON_STATE.md`。
+
+**沒做的**：正確的 `SBNY` CIK 仍然未知；`FRC` 的 `filings.files[]` 分頁檔案沒有抓過；「FDIC 接管型下市不走 Form 25」的假設沒有用 SEC EDGAR 以外的資料源（FDIC BankFind Suite、Nasdaq 官方公告）查證，只是這輪觀察到的模式；XBRL company facts API、中小型股價格深度抽測、美股成本模型都還沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～五輪地基工作的先例一致。
+
+`is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。
