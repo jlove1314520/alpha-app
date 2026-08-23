@@ -43,3 +43,21 @@
 **Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
 
 **下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1——`fut_probe_milestone1.py` 已經寫好可直接執行，等過了本輪記錄的 `retry_after`（約 2026-08-23T13:15:28+08:00 之後）再試。
+
+---
+
+## 2026-08-23T14:31:00+08:00 — 馬拉松第三輪期貨軌執行：封鎖解除，兩個資料集首次成功探測
+
+**選軌理由**：`marathon_lock.py acquire` 成功後比對 `TW_MARATHON_STATE.md`（13:30）／`US_MARATHON_STATE.md`（13:35）／`FUT_MARATHON_STATE.md`（13:02，最舊）三個最後更新時間戳，選最久沒被碰的期貨軌。
+
+**做了什麼**：
+1. 確認系統時間（14:31）已遠超過上一輪記錄的預估解封時間（13:15:28），直接執行上一輪已寫好的 `fut_probe_milestone1.py`（不重寫探測邏輯，比照協定第 1c 節精神）。
+2. **第一次呼叫就成功**，沒有再吃到 403。`TaiwanFuturesDaily`（data_id=TX）跟 `TaiwanFuturesInstitutionalInvestors`（data_id=TX）兩個資料集名稱**都確認正確可用**。歷史深度檢查確認 `TaiwanFuturesDaily` 涵蓋 2000-01-04～2024-12-31，共 64,936 列。
+3. 檢視回傳資料時發現兩個需要下一輪處理的品質問題：(a) `TaiwanFuturesDaily` 的 `contract_date` 混雜單一月份合約跟價差合約在同一表；抽樣視窗裡 `settlement_price`／`open_interest` 全部是 0，原因未查；(b) `TaiwanFuturesInstitutionalInvestors` 的 `institutional_investors` 分類欄位是亂碼，還不能拿來區分自營商/投信/外資。這兩點**沒有硬猜或跳過**，誠實記錄為待解問題，寫進 `DATA.md` 第 6 節（新增章節）跟 `FUT_MARATHON_STATE.md`。
+4. 沒有進一步深挖這兩個問題的根因（例如去改 `finmind_client.py` 的解碼邏輯），因為協定要求「一輪一個有界工作單位」，本輪的工作單位是「確認資料集可用性」，已經達成；根因調查留給下一輪（`FUT_MARATHON_STATE.md` 已列為優先項目 1、2）。
+
+**沒做的事**：轉倉時點規則 H1/H2 驗證（需要先解決欄位品質問題才能可靠比較近月/次近月成交量）、連續合約建構程式碼、任何因子/策略假說測試——這些都還在「地基未完全搭好」階段，`TRIALS_LEDGER.md` 沒有新增列（同前兩輪理由：這是資料源可用性/品質調查，不是完成一次可統計檢定的假說測試）。
+
+**Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。
+
+**下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目 1（查清楚 `settlement_price`/`open_interest` 是否恆為 0）。

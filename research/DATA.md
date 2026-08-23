@@ -173,7 +173,33 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 - 存活者偏差宇宙的 222 檔下市股，只確認「名單存在」，還沒逐一驗證每一檔的歷史價格覆蓋率（見上面地雷 2 段落的殘餘偏差說明）。
 - 有沒有其他免費資料源（如公開資訊觀測站 MOPS 直接爬蟲）能補上財報**真實**公告日缺口（取代目前 +45 天的保守假設），還沒研究。
 - 美股是否也有存活者偏差問題（下市美股名單、歷史價格），完全還沒測試（`USStockInfo` 目前只驗證了存在的公司，沒去查已下市/被併購美股）。
-- 台股期貨/選擇權的還原、歷史深度、存活者偏差，都還沒測。
+- 台股期貨/選擇權的還原、歷史深度、存活者偏差，都還沒測。台指期日線／三大法人期貨部位兩個資料集名稱已確認可用（見下方第 6 節），但欄位細節（`settlement_price`/`open_interest` 疑似恆為 0、`institutional_investors` 欄位亂碼）還沒解決，連續合約銜接程式碼也還沒寫。
+
+---
+
+## 6. 期貨資料源初探（`TaiwanFuturesDaily` / `TaiwanFuturesInstitutionalInvestors`，2026-08-23 馬拉松第三輪期貨軌，`fut_probe_milestone1.py`）
+
+前兩輪連續撞到 FinMind IP 封鎖（403 ip banned），完全沒能呼叫成功。本輪距離上次記錄的 `retry_after` 已經過了一個多小時，第一次呼叫就成功，沒有再吃到 403。
+
+### `TaiwanFuturesDaily`（台指期日線，data_id=`TX`）
+
+- ✅ **資料集名稱、`data_id="TX"` 確認正確**。
+- 欄位：`date, futures_id, contract_date, open, max, min, close, spread, spread_per, volume, settlement_price, open_interest, trading_session`。
+- **`contract_date` 混雜單一月份合約（如 `202406`）跟價差合約（如 `202406/202407`）在同一個資料表裡**——用這個資料集建連續合約前，必須先過濾成單一月份合約（例如用正規表示式排除含 `/` 的值），不能整批直接用。
+- 抽樣視窗（2024-06-03～06-07）裡 `trading_session` 只出現 `after_market` 跟 `position` 兩種值，**沒有看到預期中的「日盤」（例如 `regular`/`day`）**——不確定是這個資料集本身就沒有拆日盤/夜盤（可能已經是全時段合併），還是這個特定視窗剛好沒有日盤資料，**需要下一輪再查更多天/查欄位說明才能確定**，先不要假設。
+- **抽樣視窗裡 `settlement_price` 跟 `open_interest` 兩欄全部是 0**（15 列全部如此）——這很可疑，可能是：(a) `after_market`/`position` 這兩種 session 本來就不含這兩個欄位的資料（要另外查有沒有其他 session 值才有非零數字）；(b) 這個資料集這兩欄本身資料品質有問題；(c) 抽樣視窗剛好都是 0。**下一輪深挖前必須先查清楚這點**，不能假設可以直接拿來用。
+- 歷史深度確認：**2000-01-04 ～ 2024-12-31，共 64,936 列**（含所有合約月份/價差列，不是單一連續序列的列數）。深度足夠，可以往回測到 2000 年。
+
+### `TaiwanFuturesInstitutionalInvestors`（三大法人期貨部位，data_id=`TX`）
+
+- ✅ **資料集名稱確認可以呼叫成功、有資料回傳**。
+- 欄位：`futures_id, date, institutional_investors, long_deal_volume, long_deal_amount, short_deal_volume, short_deal_amount, long_open_interest_balance_volume, long_open_interest_balance_amount, short_open_interest_balance_volume, short_open_interest_balance_amount`——結構看起來合理（分買賣方交易量/金額跟未平倉餘額量/金額）。
+- **⚠️ `institutional_investors` 欄位（應該是「自營商」/「投信」/「外資」這種分類標籤）目前顯示為亂碼**（例如 `�����`、`��H`、`�~��`），推測是編碼問題（可能來源是 Big5 但被當 UTF-8 解碼，或反過來），**這欄還不能直接拿來用來區分是哪個法人類別**——下一輪要查 `finmind_client.py` 的解碼邏輯或改用其他方式取得正確的分類標籤（例如看每個 `date` 內固定出現幾種不重複值，配合官方文件或已知的三大法人分類順序去對應，不能用肉眼猜亂碼字元）。
+- 這次抽樣（2024-06-03～06-07，5 個交易日）每天固定出現 3 種不重複的 `institutional_investors` 值，跟「自營商/投信/外資」三大類別的數量吻合，但這只是**間接佐證**，還不是確認。
+
+### 給下一步的提醒
+
+在上面兩個「⚠️」問題（`settlement_price`/`open_interest` 疑似全零、`institutional_investors` 亂碼）解決之前，**不要開始寫連續合約建構程式碼或用這兩個資料集測任何期貨因子/策略假說**——地基的欄位品質還沒驗證乾淨，貿然往上蓋容易做白工。這兩點都適合當下一輪期貨軌的工作單位。
 
 ---
 
