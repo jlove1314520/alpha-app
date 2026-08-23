@@ -12,6 +12,6 @@
 
 ## 目前狀態
 
-**地基未搭建，尚未有任何因子/策略候選。** 已知的既有基礎（`DATA.md` 記錄過）：`USStockPrice` 免費且**已經是還原股價**（跟台股 `TaiwanStockPrice` 不對稱，美股這邊反而比較好處理），這是好消息，可以直接當價格資料源用，不需要像台股那樣自己組還原邏輯。
+**地基仍未搭好，尚未有任何因子/策略候選可以進這張表。** 已知的既有基礎（`DATA.md` 記錄過）：`USStockPrice` 免費且**已經是還原股價**（跟台股 `TaiwanStockPrice` 不對稱，美股這邊反而比較好處理），這是好消息，可以直接當價格資料源用，不需要像台股那樣自己組還原邏輯。2026-08-23 馬拉松第一輪已驗證 `USStockPrice` 歷史深度（AAPL/MSFT 回溯到 1990、逐日更新無漏交易日）跟 `USStockInfo` 涵蓋範圍（18396 檔 distinct stock_id，含 5470 檔 ETF），細節見 `DATA.md`「美股里程碑1」、`US_MARATHON_STATE.md`。
 
-**第一輪工作單位建議**（`MARATHON_PROTOCOL.md` 第 5 節）：確認 `USStockPrice` 的歷史深度/涵蓋範圍、美股存活者偏差資料源（下市股名單）、美股 point-in-time 財報資料源（`CLAUDE.md` 提過 SEC EDGAR 是既有資料源之一，去看能不能借用同樣的資料源邏輯，**不能動 `alpha-data/fetch.py` 本身**，那是凍結區，只能參考公開的 SEC EDGAR API 文件重新寫）。
+**下一輪工作單位建議**（`MARATHON_PROTOCOL.md` 第 5 節）：美股存活者偏差資料源（下市股名單）、美股 point-in-time 財報資料源（`CLAUDE.md` 提過 SEC EDGAR 是既有資料源之一，去看能不能借用同樣的資料源邏輯，**不能動 `alpha-data/fetch.py` 本身**，那是凍結區，只能參考公開的 SEC EDGAR API 文件重新寫）。
