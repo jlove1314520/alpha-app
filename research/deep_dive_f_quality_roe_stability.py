@@ -64,8 +64,11 @@ TARGET_FACTOR = "f_quality_roe_stability"
 START_DATE = "2010-01-01"
 DECILE_FRACTION = 0.10
 REBALANCE_DAYS = 20  # matches factor_ic.py's FORWARD_HORIZON snapshot cadence, for comparability
-N_RANDOM_DRAWS = 20  # smaller than long_short_backtest.py's 40 -- this sample (80 names) is much
-# smaller than a full-universe run, disclosed reduction not a hidden shortcut
+N_RANDOM_DRAWS = 100  # raised from 20 (marathon round 3, per TW_LEADS.md #3 next-step (a)) for finer
+# percentile resolution (1% steps instead of 5%) against the cumulative Bonferroni threshold; still
+# below long_short_backtest.py's 40-per-config-times-more-configs full-universe budget since this
+# sample (80 names) is much smaller -- disclosed reduction not a hidden shortcut. Seed sequence is
+# additive (RANDOM_CONTROL_SEED + i), so draws 0-19 are identical to the round-2 run, draws 20-99 are new.
 RANDOM_CONTROL_SEED = 20260823
 COST_MULTIPLIERS = [1, 2, 3]  # x DEFAULT_SLIPPAGE_BPS, per CONSTITUTION.md's cost-sensitivity requirement
 
