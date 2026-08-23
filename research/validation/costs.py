@@ -19,6 +19,17 @@ SECURITIES_TX_TAX_DAYTRADE = 0.0015   # 0.15%, sell leg only, 現股當沖 (halv
 DEFAULT_SLIPPAGE_BPS = 5.0            # 0.05% per leg -- a placeholder assumption, NOT empirically
                                         # calibrated against real fill data yet. Treat any backtest
                                         # result as sensitive to this number until it is.
+BORROW_FEE_ANNUAL_PCT = 2.0            # 2%/year placeholder for stock-loan (借券) fee, NOT calibrated
+                                        # against any real lender's rate card -- TW borrow fees vary widely
+                                        # by name (liquid large caps often <1%/yr, hard-to-borrow names can
+                                        # be 5-10%+/yr) and by broker/SBL program. Same status as
+                                        # DEFAULT_SLIPPAGE_BPS: treat any short-leg result as sensitive to
+                                        # this number until it's been checked against a real quote. Also
+                                        # NOT modeled here: hard-to-borrow/recall risk (a short position can
+                                        # be forcibly closed if the lender recalls shares), which real TW
+                                        # margin shorting is subject to -- this cost model assumes every
+                                        # short is borrowable and stays borrowable for the full holding
+                                        # period, an optimistic simplification disclosed here, not hidden.
 
 
 def round_trip_cost_pct(
@@ -39,6 +50,33 @@ def round_trip_cost_pct(
     commission = COMMISSION_RATE * commission_discount * 2  # both legs
     slippage = (slippage_bps / 10_000) * 2                  # both legs
     return commission + tax + slippage
+
+
+def short_round_trip_cost_pct(
+    holding_days: float,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
+    commission_discount: float = 1.0,
+    borrow_fee_annual_pct: float = BORROW_FEE_ANNUAL_PCT,
+) -> float:
+    """Total round-trip cost of a short position (sell-to-open + hold + buy-
+    to-cover) as a fraction of notional. Added 2026-08-24 (Cowork audit --
+    market-neutral long-short evaluation needs a real short-side cost, not
+    just reusing the long-side model).
+
+    Sell-to-open: commission + securities transaction tax (same NORMAL rate
+    as an ordinary sale -- TW margin short sales are taxed the same as
+    regular sales, not the day-trade halved rate, unless the position is
+    itself opened and closed same-day, which this project doesn't model).
+    Buy-to-cover: commission only (no tax on a buy leg, same as the long
+    side). Both legs also pay slippage. On top of both legs, the position
+    accrues a stock-loan (借券) fee for every day it's held, prorated from
+    `borrow_fee_annual_pct` -- see that constant's docstring for what's
+    NOT modeled (real per-name rate variance, recall risk).
+    """
+    sell_to_open = COMMISSION_RATE * commission_discount + SECURITIES_TX_TAX_NORMAL + (slippage_bps / 10_000)
+    buy_to_cover = COMMISSION_RATE * commission_discount + (slippage_bps / 10_000)
+    borrow_fee = (borrow_fee_annual_pct / 100.0) * (holding_days / 365.0)
+    return sell_to_open + buy_to_cover + borrow_fee
 
 
 @dataclass

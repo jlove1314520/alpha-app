@@ -367,6 +367,42 @@ def prepare_factors(
     return d
 
 
+def prepare_score_factors(
+    stock_id: str, price_df: pd.DataFrame, start_date: str = "2010-01-01",
+) -> pd.DataFrame:
+    """Lean variant of prepare_factors(): only the 4 raw columns score.py's
+    composite actually reads (f_eps_growth, f_eps_surprise,
+    f_revenue_surprise, f_low_vol), reusing the exact same PIT helper
+    functions -- correctness is identical to prepare_factors()'s versions
+    of these same 4 columns, just without also fetching the 5 datasets
+    (institutional buy/sell, balance sheet, PER) that feed the OTHER 8
+    factors score.py never uses.
+
+    Added 2026-08-24 for long_short_backtest.py's full-universe run: a
+    real, measured problem, not a hypothetical optimization -- scanning
+    universe.py's full ~3200-name market through prepare_factors() burns
+    through FinMind's free-tier rate limit largely on TaiwanStockBalanceSheet/
+    TaiwanStockPER calls whose results are silently discarded downstream
+    (score.py never reads f_value_pb/f_value_pe/f_quality_roe_stability).
+    No market_df/institutional data needed either, unlike prepare_factors().
+    """
+    d = price_df.sort_values("date").reset_index(drop=True).copy()
+
+    eps_pit = _eps_yoy_growth(stock_id, start_date)
+    d = _asof_join(d, eps_pit, "eps_yoy", "f_eps_growth")
+
+    sue_pit = _eps_surprise_sue(stock_id, start_date)
+    d = _asof_join(d, sue_pit, "eps_sue", "f_eps_surprise")
+
+    rev_sue_pit = _revenue_surprise_sue(stock_id, start_date)
+    d = _asof_join(d, rev_sue_pit, "revenue_sue", "f_revenue_surprise")
+
+    daily_ret = d["adj_close"].pct_change()
+    d["f_low_vol"] = -daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).std()
+
+    return d
+
+
 FACTOR_COLUMNS = [
     "f_rev_accel", "f_eps_growth", "f_foreign_streak",
     "f_inst_flow", "f_rel_strength", "f_ma_breakout",
