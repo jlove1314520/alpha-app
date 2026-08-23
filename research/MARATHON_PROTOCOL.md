@@ -12,7 +12,7 @@
 2. **嘗試取得鎖檔**：`cd C:\alpha\alpha-app\research && python marathon_lock.py acquire`。
    - 回傳 exit code 0（印出 `LOCK_ACQUIRED`）→ 繼續下面的步驟。
    - 回傳非 0（印出 `LOCK_HELD by <pid> since <timestamp>`）→ **上一輪還在跑或卡住了，不要並行執行**。什麼都不做，直接結束這一輪（這是正常、健康的行為，不是錯誤，不需要記錄到任何 log）。
-   - 鎖檔會自動判斷「陳舊」（>25 分鐘沒更新，代表上一輪很可能卡死或崩潰）並允許接手，細節見 `marathon_lock.py` 本身的 docstring。
+   - 鎖檔會自動判斷「陳舊」（>25 分鐘沒更新，代表上一輪很可能卡死或崩潰）並允許接手，細節見 `marathon_lock.py` 本身的 docstring。**如果這次 `acquire()` 的輸出是 `LOCK_STALE`（不是乾淨的 `LOCK_ACQUIRED`）：記下這件事，這輪結束時寫心跳（見第 6 節）要順便註明「上一輪疑似失敗（陳舊鎖檔被回收）」——這是唯一能讓「上一輪悄悄死掉、什麼都沒留下」這種情況被後人看見的機會，不要略過。**
 3. **決定這輪要做哪一軌**：讀 `TW_MARATHON_STATE.md`／`US_MARATHON_STATE.md`／`FUT_MARATHON_STATE.md` 的「最後更新」時間戳，挑**最久沒被碰**的那一軌（簡單輪替，確保三軌都有進度，不會有一軌被無限期忽略）。除非某一軌的 state 檔案裡明確寫著「這裡卡住了，下一輪換別軌」，那就照著跳過。
 
 **做完這一輪所有事之後，無論成功或失敗，最後一定要**：`python marathon_lock.py release`。**用 try/finally 的精神做這件事**——如果中途任何一步出錯，還是要想辦法釋放鎖，不要讓一次失敗的執行卡死接下來所有輪次。
@@ -137,10 +137,11 @@
 1. `is_holdout_consumed()` 是 `False`。
 2. 這一輪做的事已經寫進對應軌的 log（append-only，仿照 `REPORT.md` 的精神）跟 state 檔案（覆寫式，只描述「現在」）。
 3. 如果有新的候選判定（無論 PASS/FAIL/EXPERIMENTAL/CHEAP_PASS），`TRIALS_LEDGER.md` 跟對應軌 `_LEADS.md` 都要更新。
-4. `git status` 確認要 commit 的檔案清單合理（不要不小心帶到 `research/data/` 底下的東西，那是 gitignore 的）。
-5. `git add`（限定檔案）→ `git commit`（訊息簡短說明這輪做了什麼）→ `git push`。push 失敗時參考第 4 節的重試規則。
-6. `python marathon_lock.py release`。
-7. 結束。**不要在這一輪結束後又開始下一個工作單位**——下一輪 30 分鐘後自然會被喚醒。
+4. **寫心跳（2026-08-23 新增，使用者要求，硬性步驟，不能省略）：** 讀 `MARATHON_STATE.md` 最上面「馬拉松全局輪次計數器」那行目前的數字 N，在 `research/REPORT.md` 最上面「心跳記錄」區塊（第一筆歷史條目的正上方，`---` 分隔線下面）插入一筆新的 `## 第 N+1 輪 · <這輪實際的日期時間，用系統時間，不要憑印象> · <TW/US/FUT> · <這輪做了什麼，一句話> · <結果/判定，一句話>`，然後把 `MARATHON_STATE.md` 那行的數字改成 N+1。**不管這輪做了什麼（就算只是回補了幾檔宇宙資料、或第 0 節判定要換軌但沒做出實質進展），都要留這一筆**——這是唯一能讓使用者不用逐一比對 `git log`/`marathon_cycle.log` 就一眼看出「馬拉松最近有沒有在跑」的機制。如果第 0 節第 2 步偵測到 `LOCK_STALE`，這筆心跳的「結果/判定」欄要順便寫「（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）」。
+5. `git status` 確認要 commit 的檔案清單合理（不要不小心帶到 `research/data/` 底下的東西，那是 gitignore 的；`REPORT.md`／`MARATHON_STATE.md` 這兩個心跳相關的檔案一定要在這次 commit 裡）。
+6. `git add`（限定檔案）→ `git commit`（訊息簡短說明這輪做了什麼）→ `git push`。push 失敗時參考第 4 節的重試規則。
+7. `python marathon_lock.py release`。
+8. 結束。**不要在這一輪結束後又開始下一個工作單位**——下一輪 30 分鐘後自然會被喚醒。
 
 ---
 
