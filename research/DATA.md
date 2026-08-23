@@ -252,7 +252,7 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 
 ### 給下一步的提醒
 
-`settlement_price`/`open_interest` 全零疑慮已在馬拉松第四輪解除（見上，篩 `trading_session == "position"` 即可正常使用）。**`institutional_investors` 亂碼問題已在馬拉松第六輪解除**（見上，資料本身一直是對的，純粹是顯示假象）——`TaiwanFuturesInstitutionalInvestors` 現在可以正常拿來區分自營商/投信/外資，**地基的這兩個資料集品質都已釐清可用**。下一輪可以開始驗證轉倉時點規則（H1 結算日轉倉 vs H2 成交量交叉轉倉），需要近月/次近月成交量互相比較——這是連續合約建構前最後一個尚待驗證的地基項目。
+`settlement_price`/`open_interest` 全零疑慮已在馬拉松第四輪解除（見上，篩 `trading_session == "position"` 即可正常使用）。**`institutional_investors` 亂碼問題已在馬拉松第六輪解除**（見上，資料本身一直是對的，純粹是顯示假象）——`TaiwanFuturesInstitutionalInvestors` 現在可以正常拿來區分自營商/投信/外資，**地基的這兩個資料集品質都已釐清可用**。**轉倉時點規則已在 2026-08-24 馬拉松期貨軌驗證，採用 H1（結算日轉倉），詳見 `FUT_CONTINUOUS_CONTRACT_DESIGN.md`「轉倉時點規則：✅ 已驗證」章節。** 同一輪也順帶發現 `after_market` session 資料起始日（2017-05-16）跟 TAIFEX 夜盤上線日（2017-05-15）幾乎完全吻合，高信心推論 `after_market`＝夜盤、`position`＝日盤（或日盤結算快照）——**這仍是間接推論，不是官方文件確認**，上面「`trading_session` 只觀察到兩種值」那條疑慮的性質從「完全未知」降級為「高信心但未經官方文件驗證」，還不能完全劃掉。下一輪可以開始寫連續合約建構程式碼（比價法回溯調整），並實測多次轉倉後的累積漂移幅度。
 
 ---
 
