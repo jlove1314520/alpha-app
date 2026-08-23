@@ -24,6 +24,8 @@
 
 ---
 
+## 第 27 輪 · 2026-08-23 23:30 · 未知（沒有留下任何內容可判斷） · 這輪從觸發到結束沒有寫出任何一個字，`schtasks` 查證確實真的觸發過（`Last Run Time` 對得上）也確實真的已經結束（`Last Result` 已經是終止代碼，不是「執行中」的特殊值）· **無輸出／行程疑似被中止**（同第 13/14/25 輪的失敗模式，第 4 次出現；此筆是使用者這輪要求即時診斷時、用 `schtasks`／Windows 事件記錄手動查證後回填的，不是下一輪自動偵測到的——本輪本身沒有留下鎖檔陳舊痕跡給下一輪偵測，因為診斷當下鎖檔還沒過 25 分鐘陳舊門檻。完整鑑識細節見下方新增的診斷條目）
+
 ## 第 26 輪 · 2026-08-23 23:03 · TW · 取鎖時偵測到`LOCK_STALE`（第25輪陳舊鎖檔被回收，上一輪疑似失敗），全市場宇宙回補第四批（`backfill_universe.py --batch-size 300`） · 本批嘗試51檔，新完成31/新跳過5，因限流提前中止（設計內行為）；累積覆蓋率449→480/3196（14.1%→15.0%），仍遠低於80%門檻
 
 ## 第 25 輪 · 2026-08-23 22:30 · 未知（沒有留下任何內容可判斷） · 這輪從觸發到結束沒有寫出任何一個字——連 `marathon_cycle.log` 都只有開始時間戳、沒有內容、沒有結束時間戳 · **無輸出／行程疑似被中止**（Windows 工作排程器回報結束代碼 `STATUS_CONTROL_C_EXIT`，不是崩潰；鎖檔留下沒釋放，但 25 分鐘後會被下一輪自動判定陳舊並回收，不會永久卡死。完整診斷見下方 2026-08-23T22:46 條目）
@@ -523,3 +525,63 @@ Stop Task If Runs X Hours and X Mins: 00:25:00
 **Holdout 複查：** `is_holdout_consumed()` 再次確認為 `False`（這輪純屬排程診斷跟文件維護，沒有碰任何資料抓取或策略程式碼）。
 
 **下一步：** 觀察第 26 輪起心跳記錄是否正常運作、悄悄失敗的情況有沒有減少；如果之後又發生「觸發了但完全沒輸出」，先看新一輪心跳有沒有自動標註「上一輪疑似失敗」，不用重新從頭診斷一次。是否要把排程改成 S4U（不需登入也能跑）留給使用者決定。
+
+---
+
+## 2026-08-23T23:44:00+08:00 — Cowork 二次稽核（TRIALS_LEDGER 按日批次非30分節奏）：拿鐵證、抓到第4次即時失敗、嘗試修login限制被權限擋下
+
+**背景：** Cowork 這輪稽核指出 `TRIALS_LEDGER.md` 17 筆試驗全部按「日期」批次、不是 30 分鐘節奏，8/23 之後沒有新輪，研判排程沒有真的自動跑。使用者要求：(1) 原文貼出 `schtasks /query` 結果，(2) 查證並修正「只在登入時執行＋睡眠」，(3) 心跳/編號（已於上一輪完成，這輪加強），(4) 讓它自己再跑 3 輪，貼出真實時間戳證明。
+
+**先澄清 Cowork 稽核本身的一個誤判**：`TRIALS_LEDGER.md` 本來就只在「真的測了一個假說、跑出統計結果」才加列（見該檔案文件說明），今天 25 輪裡有一半以上是全市場宇宙回補／資料源基礎建設／PIT前置驗證，本來就不會產生 `TRIALS_LEDGER.md` 新列——這個檔案「稀疏」是設計上的正常現象，不是排程沒在跑的證據。**已在 `TRIALS_LEDGER.md` 開頭加註說明，指向 `REPORT.md` 心跳記錄，避免以後又被誤判。** 但這不代表 Cowork 的核心懷疑「排程真的有在按時跑嗎」不值得認真查——下面是認真查的結果，而且這次查證過程中真的**當場抓到第 4 次悄悄失敗**，比上一輪的診斷更進一步。
+
+**1. `schtasks /query /tn AlphaMarathon /v /fo LIST` 原文（2026-08-23 23:35 執行）：**
+```
+Folder: \
+HostName:                             IVEN-DASKTOP
+TaskName:                             \AlphaMarathon
+Next Run Time:                        2026/8/24 上午 12:00:35
+Status:                               Ready
+Logon Mode:                           Interactive only
+Last Run Time:                        2026/8/23 下午 11:30:36
+Last Result:                          -1073741510
+Author:                               N/A
+Task To Run:                          powershell.exe -ExecutionPolicy Bypass -File "C:\alpha\run-marathon-cycle.ps1"
+Start In:                             C:\alpha
+Comment:                              30-minute AI research mining marathon for the Alpha project. Runs research/MARATHON_PROTOCOL.md via headless Claude Code. Only runs while user is logged on.
+Scheduled Task State:                 Enabled
+Idle Time:                            Disabled
+Run As User:                          user
+Stop Task If Runs X Hours and X Mins: 00:25:00
+Schedule Type:                        One Time Only, Minute
+Start Time:                           上午 10:00:35
+Start Date:                           2026/8/23
+Repeat: Every:                        0 Hour(s), 30 Minute(s)
+Repeat: Until: Duration:              9999 Hour(s), 59 Minute(s)   ← 見下方第3點，這個數字這輪被我自己的指令意外改壞過又修回來
+Repeat: Stop If Still Running:        Disabled
+```
+`Last Run Time: 23:30:36` 這個時間點，剛好就是 23:30 那次觸發——**排程本身確實按表操課，不是完全沒在跑**，跟 Cowork「8/23後無新輪」的印象不同。但 `Last Result` 顯示 `-1073741510`（即 `STATUS_CONTROL_C_EXIT`），代表這次觸發**執行了、也已經結束了，但沒有成功**——見第 2 點的鑑識結果。
+
+**2. 即時抓到第 4 次「觸發了但完全沒輸出」（第 27 輪，23:30）——比之前更完整的鑑識：**
+- `marathon_cycle.log` 只有 `Marathon cycle start: 2026-08-23 23:30:37`，沒有任何內容、沒有 `end` 時間戳。
+- 重複查詢 `schtasks`（間隔數分鐘）`Last Result` 值穩定不變——不是「還在跑、查詢時抓到中間狀態」，是真的已經跑完並失敗。
+- 查了三個獨立來源都排除「程式自己壞掉」：(a) 今天 Application 事件記錄裡**唯一**一筆 Error 是 09:20 的 Dropbox.exe 當機，完全跟 claude.exe 無關；(b) `Get-MpThreatDetection` 沒有任何今天的 Windows Defender 偵測記錄（沒有被防毒軟體攔截的跡象）；(c) 查詢當下可用記憶體 10.3GB／總 31.4GB，不是嚴重吃緊（雖然無法排除失敗當下那一刻有短暫尖峰）。
+- **關鍵新發現**：`run-marathon-cycle.ps1` 的結構是 `& $claudeExe ... | Add-Content` 之後**無條件**接著寫 `end` 時間戳——這代表如果只是 `claude.exe` 這個子行程自己當機或被殺掉，外層 `powershell.exe` 應該還是會繼續往下執行、把 `end` 寫進 log。**但四次失敗全部連 `end` 都沒有**，代表死掉的不只是子行程，是整個行程樹（`powershell.exe` 連同它啟動的 `claude.exe`）一起被中止的——這個模式比較像是 Task Scheduler 自己對這次任務執行做了「整棵樹砍掉」的動作，不像單純的子行程當機或被系統資源不足個別殺掉。
+- **目前最合理、但仍未 100% 證實的假說**：這台工作排程器目前設定是 `Compatibility: Win7`（舊版相容模式）+ `MultipleInstances: IgnoreNew`（偵測到重疊執行就處理掉），舊版排程引擎在「上一個執行個體被異常中止、狀態沒有乾淨收尾」之後，對下一次觸發的重疊判斷可能進入不一致的邊界情況，把新觸發的整個行程樹提前砍掉。這跟「使用者登入時才執行」（`Logon Mode: Interactive only`）綁定的機制也有關聯——如果登入 session 有任何短暫的狀態變化（螢幕鎖定/解鎖、UAC 提示搶走焦點等），Interactive 型工作有可能連帶被中止，S4U 型工作則完全不依賴這個機制、理論上不會受影響。**這只是目前證據指向最合理的方向，不是已證實的根本原因**——Windows 工作排程器自己的詳細操作記錄（`Microsoft-Windows-TaskScheduler/Operational`）整台機器都是關閉的，沒辦法拿到「當時 Task Scheduler 內部為什麼決定要中止」的直接證據。
+
+**3. 嘗試修「只在登入時執行」被權限擋下，途中一個小意外已經修好：**
+- 上一輪診斷（22:52 條目）誤寫「S4U 需要存密碼」——**這是錯的，已在這裡訂正**：S4U（Service for User）模式的設計本來就不需要存密碼，這正是它跟一般「不論登入與否都執行＋存密碼」模式的差別。
+- 嘗試用 `Set-ScheduledTask` 把 `LogonType` 改成 `S4U`：失敗，`Access is denied`（HRESULT 0x80070005）——這個操作需要系統管理員權限的 PowerShell，目前這個互動 session 沒有。
+- 改用不需要系統管理員權限的舊版 `schtasks /change` 指令嘗試：也無法乾淨完成 S4U 切換（`/change` 指令一旦帶 `/RU`，會互動式詢問密碼，而這裡的執行環境沒有終端機可以回答，且**輸入使用者密碼本來就是這裡絕對不會做的事**，不管是不是互動式詢問）。
+- **過程中的意外（已修好，誠實記錄）**：測試 `schtasks /change` 時，即使沒有主動去改「重複結束時間」，這個指令本身把 `Repeat: Until: Duration` 從原本近似「無限期」的 `87600 Hour(s)`（約10年）意外改成只剩 `218 Hour(s) 40 Min`（約9天）——**代表如果不修，馬拉松排程會在大約9天後自動停止重複，不會再繼續跑**。當場發現、當場用 `schtasks /change /ri 30 /du 9999:59`（CLI 允許的最大值，約 416 天／1.14 年）修回接近原本的效果，修完立刻用 `Get-ScheduledTask` 逐欄位核對其餘設定（`Task To Run`／`Comment`／`Start In`／`Stop Task If Runs...`等）都沒有被連帶改壞。**這也是為什麼這裡沒有再繼續用 `schtasks` CLI 硬試其他修法**——已經證明這個工具在這個場景下會有意料外的副作用，風險大於用它去改 `LogonType` 這種更敏感的設定。
+- **結論：「登入才會跑」這個限制目前沒有修成，原因是缺少系統管理員權限，不是不知道怎麼修。** 需要使用者二選一：(a) 開一個系統管理員權限的 PowerShell 視窗，把下面這段指令貼進去執行一次（不需要輸入密碼）：
+  ```powershell
+  $p = New-ScheduledTaskPrincipal -UserId "user" -LogonType S4U -RunLevel Limited
+  Set-ScheduledTask -TaskName "AlphaMarathon" -Principal $p
+  ```
+  (b) 或使用者自己打開「工作排程器」圖形介面 → 找到 `AlphaMarathon` → 內容 → 一般 → 選「不論使用者是否登入均執行」+ 勾選「不要儲存密碼」（這個組合在 GUI 裡就是 S4U，不需要輸入密碼）。**限制說明**：不管哪種做法，都還是需要 Windows 本身是開機狀態（不能是真正關機/休眠），這台機器目前已確認電源設定為「從不睡眠」，所以只要電腦開著、有插電或電量足夠，S4U 模式下即使使用者登出也會繼續跑。
+
+**4. 讓它自動再跑 3 輪，貼真實時間戳：** 已啟動一個背景監控（等 `marathon_cycle.log` 累積到 3 筆新的 `Marathon cycle start`），**沒有用任何方式手動觸發**，純粹等排程自然在 00:00／00:30／01:00 左右自動觸發。這則條目先 commit + push；等 3 輪真的跑完，會另外補一條新記錄，貼出實際時間戳（`schtasks` 跟 `marathon_cycle.log` 交叉核對），回報給使用者。
+
+**Holdout 複查：** `is_holdout_consumed()` 確認為 `False`（本輪純屬排程診斷/文件維護）。
+
+**下一步：** 等 3 輪自動觸發完成後回報實際時間戳。系統管理員權限的 S4U 切換動作留給使用者執行（見上方指令）。持續觀察悄悄失敗的模式是否在 `Compatibility`/`MultipleInstances` 不變的情況下持續發生——如果使用者之後決定要更進一步排除 Task-Scheduler-端誤殺的假說，下一步可以考慮（需要使用者同意）把 `MultipleInstances` 從 `IgnoreNew` 改成 `Parallel`（重疊防護完全交給已經運作正常的 `marathon_lock.py` 檔案鎖），但這也需要系統管理員權限，這裡目前做不到。
