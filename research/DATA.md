@@ -67,22 +67,33 @@ NVDA 在 2024-06-10 盤後執行 10:1 股票分割。抓回來的資料裡，**�
 - **代號涵蓋範圍**：`USStockInfo`（`_fetch()` 直接呼叫，跟 `universe.py` 對 `TaiwanStockInfo` 的用法同一個理由——這是成員名單快照，不是要封頂的價格時間序列，見 `universe.py` 的 docstring）回傳 19341 列、**289 個不同的 `date` 快照**、`date` 範圍 2019-01-01～2026-08-22。**這個 `date` 欄位是 FinMind 抓取/更新這份名單的時間戳，不是股票的上市日**（跟 `universe.py` 對 `TaiwanStockInfo` 的既有認知一致，那邊的 docstring 已經點出這個地雷，美股這邊確認同款）。distinct `stock_id` 共 18396 檔，其中 `Subsector=='ETF'` 的有 5470 檔（同一個 `stock_id` 不保證每個快照都標同一個 `Subsector`／`Country`，未去重跨快照比對）。最新快照（`date=2026-08-22`）單一日期就有 12429 列，應該是目前最完整的一份全量快照，可以當作「現存股票+ETF」的基準（但這是 2026-08-22 的「現在」快照，不是 point-in-time 的「某個歷史時點市場上有哪些股票」，用來做無偏差宇宙建構之前要先解決這一點）。
 - **尚未回答（留給下一輪或之後的地基工作單位）**：美股存活者偏差（下市/下市股票的名單跟歷史價格）完全沒測，`USStockInfo` 目前看起來只是「現在還在的」名單快照，看不出下市股歷史；289 個快照之間股票增減的差異也許可以拿來反推「上市/下市」的粗略時間窗，但這是推測，還沒驗證，下一輪處理美股存活者偏差時要專門測。
 
-### 美股 PIT 資料源調查：SEC EDGAR 公開 JSON API（2026-08-23 馬拉松第二輪，US 軌）
+### 美股 PIT 資料源調查：SEC EDGAR 公開 JSON API（2026-08-23 馬拉松第二輪文件調查 → 第三輪實測）
 
-**性質：文件調查，非實測。** 這輪只查證 SEC EDGAR 公開 API 的存在跟欄位結構是否符合美股版 `pit.py` 的需求，**沒有實際打過 `data.sec.gov` 的任何請求**，也沒有寫程式碼；下一輪如果要繼續，應該是對單一股票（例如 AAPL）做一次真實 API 呼叫來驗證下面查到的欄位結構跟文件說的一致。查證來源：`sec-edgar-api.readthedocs.io`（第三方 wrapper 文件，整理自 SEC 官方文件；`www.sec.gov` 本身的網頁對本環境的自動化 fetch 工具回傳 403，可能是 User-Agent 或反機器人限制，還沒查出根本原因，只能先參考轉述來源）。**這只是「值得測」的靈感/文件依據，不是已驗證的事實，等真的打過 API 才能升級成已驗證。**
+**性質：已實測驗證。** 第二輪只查了第三方文件（見下方保留的第二輪記錄），**第三輪（`research/sec_edgar_probe.py`）對 `data.sec.gov`/`www.sec.gov` 打了真實 HTTP 請求**，三檔股票（AAPL、MSFT、PLTR，刻意混大型股+一檔較晚近IPO的中型股避免只測巨型股的偏差）全部驗證通過。
 
-查到的關鍵結構（如果屬實，對美股版 `pit.py` 是好消息）：
-- **Submissions API**：`https://data.sec.gov/submissions/CIK{10位數字，補0}.json` — 回傳一家公司近期所有申報文件列表，每筆申報記錄同時有 `filingDate`（申報日，文件真正送到 SEC 的日期）跟 `reportDate`（財報所屬期間結束日）兩個獨立欄位。**這正是美股版 PIT 需要的東西**——如果屬實，美股可以用真實申報日期做 PIT 對齊，不需要像台股那樣用「保守假設 +45 天」去估。
-- **XBRL company facts API**：`https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json` — 依財務科目（concept/tag）組織的結構化數字，每個數值點本身據稱也帶 `filed`（申報日）欄位，理論上比對申報列表更細緻（可以精確到「這個具體數字是哪天才對外揭露的」）。
-- **代號→CIK 對照**：查到 `https://www.sec.gov/files/company_tickers.json` 是官方公開、免登入的 ticker→CIK 對照表（這次沒有實際 fetch 到，只是文件裡提過存在，下一輪要用時得先驗證這個 URL 現在還有效、格式沒變）。
-- **存取限制**：文件說需要在 request header 帶一個能辨識身份的 `User-Agent`（格式建議「公司名 聯絡email」），並建議 request rate 控制在每秒 10 次以內（這是 SEC 官方的公平使用政策，不是這個 wrapper 自己訂的限制）。**沒有登入或付費需求**，符合 `MARATHON_PROTOCOL.md` 第 3 節「只用公開可讀、不違反服務條款」的規定——但沒有另外去讀 `sec.gov/robots.txt` 逐條確認，這點還沒做，下一輪如果要實際打 API 應該先看一眼。
+**實測結果**：
+- **`www.sec.gov/files/company_tickers.json`（ticker→CIK 對照）**：200 OK，10403 筆，AAPL/MSFT/PLTR 都查得到（CIK分別320193/789019/1321655）。免登入、免付費，跟文件說的一致。
+- **`data.sec.gov/submissions/CIK{10碼補0}.json`（申報列表）**：三檔都 200 OK，`filings.recent` 底下確認存在 `filingDate`／`reportDate`（連同 `accessionNumber`／`form`／`primaryDocument` 等共15個欄位）。**這個結構是真的，不是文件誤傳。**
+- **`filingDate` − `reportDate` 天數差（10-K/10-Q，越小代表 PIT 越精確）**：AAPL 45筆平均33.1天（25–37天範圍）；MSFT 25筆平均27.5天（24–30天）；PLTR 24筆平均41.5天（34–57天，範圍明顯比兩檔大型股寬）。**這是新發現，第二輪的文件調查沒提到這點**：不同公司申報速度差異不小，如果要設計「找不到精確 filingDate 時的保守預設值」，PLTR 這種案例顯示不能直接套用台股的 +45天，也不能假設所有美股都跟蘋果一樣快（+37天上限打底比較安全，但樣本只有3檔，還不足以下定論，要在真正寫美股版 `pit.py` 時用更大樣本重新估這個保守預設值）。
+- **歷史回溯深度**：`filings.recent` 本身只涵蓋最近約1000筆申報，更早的透過 `filings.files[]` 指向額外的 JSON 檔（例如 AAPL 有 `CIK0000320193-submissions-001.json`，涵蓋 1994-01-26 到 2015-06-02）——**這個分頁機制第二輪完全沒提到，是這輪才發現的**，回溯到 EDGAR 系統早期（1994年）的申報記錄理論上都拿得到，但這輪只確認了「有這個分頁指標存在」，沒有實際去抓那些分頁檔案內容，這部分嚴格說仍是「已知存在但未實測內容」。
+- **存取限制**：沒有用到登入或 API key，這輪的 User-Agent 用專案識別字串（非真人 email，避免把使用者個人信箱送到第三方服務），總共約7次請求（3次CIK查詢共用一次 ticker map fetch + 3次 submissions + 1次 robots.txt 檢查），遠低於官方建議的每秒10次上限，沒有遇到 429 或任何限流回應。`data.sec.gov/robots.txt` 回 404（沒有這個檔案，等於沒有額外的爬取限制）；`www.sec.gov/robots.txt` 存在但沒有 disallow `/files/` 或跟 `data.sec.gov` 子網域相關的規則。**符合 `MARATHON_PROTOCOL.md` 第3節的公開可讀規定。**
 
-**還沒查/還沒驗證的部分（誠實列出）**：
-- 沒有對任何真實股票（CIK）打過這兩支 API，欄位是否真的長這樣、`filingDate` 是否真的可靠對應到市場能看到這份財報的時間點（理論上申報當天就公開，但延遲揭露、盤中/盤後申報的時間細節沒查）都還是假設。
-- Rate limit、User-Agent 格式的具體規則只查到轉述，沒看到 SEC 官方文件原文（`sec.gov` 對本環境的 fetch 工具回傳 403，原因未查明，可能只是這個特定網頁的反爬蟲設定，不代表 `data.sec.gov` 的 API 端點也會擋，下一輪要實測才知道）。
-- 沒有查過歷史資料回溯深度——`filingDate` 這種申報紀錄理論上可以回溯到 EDGAR 系統啟用的年代（1990年代中期），但實際涵蓋範圍、早期資料完整度沒驗證。
+**還沒驗證的部分（誠實列出，下一輪如果要繼續深挖美股PIT可以挑）**：
+- XBRL company facts API（`data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`）完全沒測，第二輪查到的「`filed` 欄位」說法還是文件轉述，沒有一手驗證。
+- `filings.files[]` 分頁檔案（更早期申報記錄）沒有實際抓過內容，只確認端點存在。
+- `filingDate` 是否等於「市場實際能看到這份財報的時間點」（理論上申報當天生效，但盤中/盤後申報的時間細節、跟 8-K 揭露重大訊息的時間差異）沒有進一步查。
+- 只測了3檔股票的 filingDate/reportDate gap，樣本太小，不足以訂出正式的保守預設值——真的要寫美股版 `pit.py` 前應該擴大樣本（例如30–50檔覆蓋不同市值級距）重估這個分布。
 
-**結論／下一步**：這個方向看起來可行且比台股的 PIT 假設更精確，值得排進下一輪繼續深挖——**下一輪工作單位建議是對 1–2 檔美股（例如 AAPL）實際打一次 submissions API，確認欄位結構、User-Agent 需求、資料能不能正常解析**，驗證過才能把這段從「文件調查」升級成「已驗證」。
+**結論**：SEC EDGAR submissions API 可以拿來做美股版 PIT 對齊的核心資料源，**已從「文件調查」升級為「已驗證」**。下一步是把這個端點包成一個 fetch 函式（放在 `research/`，不是凍結區），供之後寫美股版 `pit.py`/`factors.py` 用。
+
+<details>
+<summary>第二輪原始文件調查記錄（保留作對照，內容已被上方實測結果取代/確認）</summary>
+
+**性質：文件調查，非實測。** 這輪只查證 SEC EDGAR 公開 API 的存在跟欄位結構是否符合美股版 `pit.py` 的需求，**沒有實際打過 `data.sec.gov` 的任何請求**，也沒有寫程式碼。查證來源：`sec-edgar-api.readthedocs.io`（第三方 wrapper 文件，整理自 SEC 官方文件；`www.sec.gov` 本身的網頁對本環境的自動化 fetch 工具回傳 403，可能是 User-Agent 或反機器人限制，還沒查出根本原因，只能先參考轉述來源）。
+
+查到的關鍵結構：Submissions API 有 `filingDate`/`reportDate`；XBRL company facts API 據稱每個數值點也帶 `filed` 欄位；`company_tickers.json` 是官方 ticker→CIK 對照表；存取需要識別性 User-Agent，建議 rate ≤10次/秒。
+
+</details>
 
 ---
 
