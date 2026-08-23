@@ -10,13 +10,15 @@
 | 2 | 2026-08-24 | `fut_donchian_breakout_20`（20日Donchian channel突破） | `MARATHON_PROTOCOL.md`第3節期貨候選清單 | 策略 | 配對式隨機排列控制組200次，percentile=61.0（門檻90.0） | 未進深挖 | **FAIL** | （便宜關卡未過，不需要經濟解釋） | 見`TRIALS_LEDGER.md`#19，同批次同腳本。兩個最常見的入門技術訊號都沒過，暗示台指期日頻、無成本考量下的單一訊號動能/突破可能訊噪比不足，下一輪可以考慮波動regime過濾或均線系統，而非重測同類訊號 |
 | 3 | 2026-08-24 | `fut_ma_crossover_20_60`（20/60日SMA均線交叉） | `MARATHON_PROTOCOL.md`第3節期貨候選清單（均線系統） | 策略 | 配對式隨機排列控制組200次，percentile=75.5（門檻90.0） | 未進深挖 | **FAIL** | （便宜關卡未過，不需要經濟解釋） | 見`TRIALS_LEDGER.md`#20、`fut_cheap_gate.py`本輪新增。方向正確（真實策略贏隨機中位數）但強度不夠，第三個技術訊號家族沒過 |
 | 4 | 2026-08-24 | `fut_vol_regime_trend`（`fut_trend_multi_tf`加20日已實現波動度regime過濾，只在低波動regime進場） | `MARATHON_PROTOCOL.md`第3節期貨候選清單（波動regime過濾），對#1做的結構性變體 | 策略 | 配對式隨機排列控制組200次，percentile=82.5（門檻90.0） | 未進深挖 | **FAIL** | （便宜關卡未過，不需要經濟解釋） | 見`TRIALS_LEDGER.md`#21，同批次同腳本。percentile跟未過濾版本(#1的82.5)幾乎打平，波動regime過濾對這個訊號家族沒有帶來可辨識的改善，不再對`fut_trend_multi_tf`本身做進一步結構變體 |
+| 5 | 2026-08-24 | `fut_oi_price_confirm_5d`（1日價格方向，經5日未平倉量變化過濾，OI上升才進場否則空手） | `MARATHON_PROTOCOL.md`第3節期貨候選清單（未平倉量變化，籌碼面），第一次換家族（非技術面訊號） | 策略 | 配對式隨機排列控制組200次，percentile=62.0（門檻90.0） | 未進深挖 | **FAIL** | （便宜關卡未過，不需要經濟解釋） | 見`TRIALS_LEDGER.md`#22、`fut_cheap_gate.py`本輪新增。`open_interest`欄位已存在於`build_continuous_series()`輸出，無需新資料源。方向正確（真實策略+11.9% vs 隨機中位數−13.1%）但強度不夠跨過門檻 |
+| 6 | 2026-08-24 | `fut_weekday_effect`（週一放空、週二～週五做多，固定規則，來源French 1980週末效應文獻，非樣本內配適） | `MARATHON_PROTOCOL.md`第3節期貨候選清單（星期效應/季節性），公開文獻當假說來源（協定第3節允許） | 策略 | 配對式隨機排列控制組200次，percentile=13.5（門檻90.0，方向不對） | 未進深挖 | **FAIL** | （便宜關卡未過，不需要經濟解釋） | 見`TRIALS_LEDGER.md`#23、`fut_cheap_gate.py`本輪新增。真實策略+19.7% vs 隨機中位數+308.1%，隨機排列大幅贏過真實策略——因為部位陣列多數為+1（僅週一為−1），隨機打散反而常常表現更好，暗示台指期樣本內週一報酬並未系統性偏低（跟美股文獻方向不一致），沒有證據支持這個固定規則 |
 
 ---
 
 ## 目前狀態
 
-**地基已完成（見`FUT_MARATHON_STATE.md`），已測4個策略假說，全部FAIL。**
+**地基已完成（見`FUT_MARATHON_STATE.md`），已測6個策略假說，全部FAIL。**
 
-已排除：`fut_trend_multi_tf`、`fut_donchian_breakout_20`、`fut_ma_crossover_20_60`、`fut_vol_regime_trend`（見上表#1–#4，不要重測相同設定或對`fut_trend_multi_tf`再做regime過濾類變體——已證實對這個訊號家族沒用）。
+已排除：`fut_trend_multi_tf`、`fut_donchian_breakout_20`、`fut_ma_crossover_20_60`、`fut_vol_regime_trend`、`fut_oi_price_confirm_5d`、`fut_weekday_effect`（見上表#1–#6，不要重測相同設定或對`fut_trend_multi_tf`再做regime過濾類變體——已證實對這個訊號家族沒用）。
 
-**下一輪建議**：三個主流技術訊號家族（動能多數決、通道突破、均線交叉）跟一個regime過濾變體都沒過，暗示單一訊號、日頻、無成本框架下訊噪比普遍不足。可以考慮換方向而非同家族繼續變體：(a) 日內均值回歸（跟趨勢類方向相反的假說家族，值得優先試）、(b) 期現價差（basis）、(c) 三大法人期貨部位或未平倉量變化（籌碼面，不是技術面，訊噪比可能不同）、(d) 星期效應/盤別效應（季節性，機制跟趨勢/突破完全不同）。見`MARATHON_PROTOCOL.md`第3節期貨候選清單。
+**下一輪建議**：四個技術面家族（動能多數決、通道突破、均線交叉、regime過濾）加一個籌碼面（OI確認）加一個季節性（週一效應）全部FAIL，六個獨立機制家族都沒過90百分位門檻。剩餘還沒測的候選（見`MARATHON_PROTOCOL.md`第3節）：(a) 日內均值回歸（跟趨勢類方向相反的假說家族，日頻資料下「日內」可能要改用隔夜vs當日的報酬拆解，需要先確認資料是否支援）、(b) 期現價差（basis，近月期貨vs現貨指數，需要另外確認台股加權指數現貨資料源，這是新增資料依賴）、(c) 三大法人期貨部位（不同於本輪測的OI，是有方向性的法人多空未平倉，`CLAUDE.md`提過TAIFEX端點但這軌還沒接過這筆資料，可能又是另一個小型地基工作）、(d) 盤別效應（日盤vs夜盤，`FUT_MARATHON_STATE.md`背景待辦提過`after_market` session還沒納入連續合約建構，這項要先做地基）。**六連敗後可以考慮：這批便宜關卡本身（200次排列、90百分位門檻）對於這個市場/頻率組合是否系統性偏嚴格，值得留意但不是本輪判斷，需要更多資料點才能下結論。**

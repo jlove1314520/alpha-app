@@ -39,6 +39,38 @@ the same two failed signals):
     act, not the signal's internal parameters, and tests the distinct
     "波動regime過濾" hypothesis family from MARATHON_PROTOCOL.md 第3節.
 
+Third round (marathon round 36, following FUT_MARATHON_STATE.md's explicit
+post-mortem after four straight FAILs: "不要再對 fut_trend_multi_tf 類趨勢
+訊號做regime過濾類變體...改試日內均值回歸...期現價差...三大法人期貨部位/
+未平倉量變化...或星期效應/盤別效應"). Two hypotheses from genuinely
+different mechanism families, not further variants of price-only trend:
+  - fut_oi_price_confirm: chip-based (未平倉量變化), not price-only. Uses
+    open_interest (already present in build_continuous_series() output --
+    no new data source needed). Classic OI-price relationship reading: a
+    price move confirmed by rising open interest (net new capital
+    committing to that direction) is read as more informationally credible
+    than the same move on falling OI (which looks like short-covering /
+    long-liquidation, i.e. existing positions closing rather than new
+    conviction entering). Signal: take yesterday's 1-day price direction
+    only when today's 5-day open-interest change is positive; flat
+    otherwise. This is a *filter on OI*, not a price-momentum signal in
+    disguise -- the raw direction input is the noisiest possible one
+    (1-day sign, no smoothing), deliberately so the OI filter is doing all
+    the discriminating work being tested, not multi-day trend estimation
+    which four prior FAILs already ruled unhelpful for this direction
+    input.
+  - fut_weekday_effect: calendar-based (星期效應), not price/OI-based at
+    all. Fixed rule sourced from the classic "weekend effect" literature
+    (French 1980: US equity Monday returns average significantly below
+    other weekdays, commonly attributed to negative weekend news
+    accumulating and being priced in at Monday's open) -- short Monday,
+    long Tuesday-Friday. This is a literature-sourced *fixed* rule, not
+    fit to this sample (MARATHON_PROTOCOL.md 第3節: 查到的方法一定要重新
+    走驗證關卡，不可照抄，但可以當假說來源) -- so there is no in-sample
+    day-of-week average computed from this data and used to pick the
+    rule; the rule is asserted a priori from outside literature, exactly
+    as intended by that protocol clause.
+
 Both use adj_close from continuous_contract.build_continuous_series(),
 which FUT_MARATHON_STATE.md (2026-08-24, drift probe finding) confirms is
 safe for these short/medium lookback windows (10-60 days is well within the
@@ -175,6 +207,22 @@ def hyp_vol_regime_trend(series: pd.DataFrame, vol_window: int = 20) -> CheapGat
     return _permutation_test("fut_vol_regime_trend", position, ret)
 
 
+def hyp_oi_price_confirm(series: pd.DataFrame, oi_window: int = 5) -> CheapGateResult:
+    close = series["adj_close"]
+    raw_direction = np.sign(close.diff(1))  # noisiest possible price input (1-day),
+    # deliberate: the OI filter below is what's being tested, not multi-day trend
+    # estimation (four prior FAILs already covered that family)
+    oi_rising = series["open_interest"].diff(oi_window) > 0
+    position = raw_direction.where(oi_rising, 0.0)
+    return _permutation_test(f"fut_oi_price_confirm_{oi_window}d", position, series["ret"])
+
+
+def hyp_weekday_effect(series: pd.DataFrame) -> CheapGateResult:
+    weekday = pd.to_datetime(series["date"]).dt.dayofweek  # Monday=0
+    position = pd.Series(np.where(weekday == 0, -1.0, 1.0), index=series.index)
+    return _permutation_test("fut_weekday_effect", position, series["ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -183,8 +231,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_ma_crossover(series, fast=20, slow=60),
-        hyp_vol_regime_trend(series, vol_window=20),
+        hyp_oi_price_confirm(series, oi_window=5),
+        hyp_weekday_effect(series),
     ]
 
     for r in results:
