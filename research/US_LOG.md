@@ -110,3 +110,21 @@
 **沒做的**：正確的 FRC CIK（2010-2023年那個真正掛牌的實體）仍未找到，下一輪如果要繼續可以試 FDIC BankFind Suite 或 Nasdaq 官方停牌公告（跳出SEC EDGAR，需先確認公開可讀）；`SBNY` 仍未查到任何候選；XBRL company facts API、中小型股價格深度抽測、美股成本模型都還沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～六輪地基工作的先例一致。
 
 `is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。
+
+---
+
+## 第十一輪（2026-08-24T04:05:00+08:00）：XBRL company facts 修正後 gap 統計重算，發現兩類殘留離群值成因
+
+**工作單位**：接續第十輪明確留下的下一步——「同一 `end` 分組取最小 `filed`」的去重邏輯只被驗證過陷阱存在，沒有實際算過修正後的數字。這輪把它算出來。
+
+**做了什麼**：新寫 `research/sec_edgar_xbrl_facts_dedup_probe.py`（第十輪的 `sec_edgar_xbrl_facts_probe.py` 保留不動，維持探測腳本本身的歷史記錄）。對 AAPL/MSFT/PLTR 三檔（沿用第三輪已驗證的 CIK）、`EarningsPerShareDiluted`／`Revenues` 兩個 concept，同一 `end` 只保留最小 `filed`（10-K/10-Q），重算 gap 統計，並跟第十輪的未去重原始數字並列輸出。
+
+**結果**：
+- 中位數大幅改善：AAPL EPS median=32天、MSFT=28天、PLTR=40天——**貼近第三輪 submissions API 測到的水準**（AAPL平均33.1天/MSFT平均27.5天），代表去重邏輯本身抓對了方向，大多數資料點的離群值確實是「比較期重複揭露」造成的假象。
+- 但 `max` 幾乎沒變（AAPL 759天、MSFT 1034天，Revenues更明顯，去重後平均反而更高因為樣本數太少被離群值拖走）——去重是必要但不充分的修正。
+- 追查殘留離群值：抽樣核對 MSFT 最大離群值（`end=2007-09-30`, `filed=2010-07-30`）的原始資料列，發現 `fy=2010`／`form=10-K`——是2010年10-K的「五年精選財務數據」表格重新揭露2007年數字，不是原始申報。統計全部離群值的`end`日期分布：AAPL/MSFT離群值全部落在2007–2009年（推測是這兩家公司XBRL強制標記生效前的期間，原始申報未被XBRL標記，company facts API裡完全沒有這筆原始紀錄）；PLTR離群值全部落在2020年9月IPO之前（上市前無公開申報義務，這是真實結構性事實，不是資料陷阱）。
+- 詳細數字跟解讀已寫進 `DATA.md`「美股 PIT 資料源調查（再續）」小節，`US_MARATHON_STATE.md` 已同步更新。
+
+**沒做的**：只測了3檔股票、2個concept；沒有查證每家公司確切的XBRL強制標記生效日期（只用「~2009年中」概略時間點做形狀比對，這是SEC對大型加速申報者的分階段生效時間，沒有逐公司查證）；沒有實際測試「排除pre-XBRL期間+排除pre-IPO期間後gap是否全部落在合理範圍」（這是驗證上述假說的直接方法，留給下一輪）；沒有驗證更多公司樣本確認這兩種模式是否普遍成立。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～十輪地基工作的先例一致。
+
+`is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。取鎖時第0節第2步偵測結果：`LOCK_ACQUIRED`（乾淨取得，非陳舊鎖檔，上一輪正常結束）。
