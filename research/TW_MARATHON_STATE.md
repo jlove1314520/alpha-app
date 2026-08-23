@@ -2,11 +2,11 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-24T03:36:08+08:00**（馬拉松第31輪執行後，取鎖乾淨成功，第30輪正常結束）
+**最後更新：2026-08-24T05:35:57+08:00**（馬拉松第34輪執行後，取鎖乾淨成功，第33輪正常結束）
 
 **地基狀態：✅ 完整可用，不需要額外搭建。** `universe.py`（全市場宇宙）、`adjust.py`（還原股價）、`pit.py`（point-in-time）、`factors.py`（因子計算框架）、`factor_ic.py`（IC 檢定引擎，含 Bonferroni 校正）、`score.py`（綜合分引擎）、`long_short_backtest.py`（十分位多空回測引擎，含配對式隨機控制組/CAPM beta/成本模型）全部可以直接重用。
 
-**⚠️ 目前最高優先序：全市場宇宙回補未達門檻，優先於測新因子/深挖候選**（見 `MARATHON_PROTOCOL.md` 第5b節）。累積覆蓋率：**696/3196（21.8%）**，門檻80%。下一輪若輪到TW軌，先跑 `python backfill_universe.py --batch-size 300`（除非一開始就立刻被限流，那種情況改做深挖或系統化掃因子家族）。
+**⚠️ 目前最高優先序：全市場宇宙回補未達門檻，優先於測新因子/深挖候選**（見 `MARATHON_PROTOCOL.md` 第5b節）。累積覆蓋率：**771/3196（24.1%）**，門檻80%。下一輪若輪到TW軌，先跑 `python backfill_universe.py --batch-size 300`（除非一開始就立刻被限流，那種情況改做深挖或系統化掃因子家族）。
 
 **已知的立即可做工作（優先序）：**
 1. ~~`f_value_pb`／`f_value_pe`／`f_quality_roe_stability` 重測~~ ✅ 第一輪（2026-08-23上午）已完成，見 `TW_LOG.md`／`TW_LEADS.md`／`TRIALS_LEDGER.md` #13–#15。
@@ -20,8 +20,9 @@
 9. ~~全市場宇宙回補第五批~~ ✅ 第28輪（2026-08-24T00:34，取鎖時偵測到`LOCK_STALE`，上一輪pid 103272持有鎖滿60分鐘後被回收，中間某一輪疑似完全沒跑完就異常中止，未留下任何log）已完成，`backfill_universe.py --batch-size 300`（自動接續）。開始前state檔案為509 done/109 skip（比第26輪記錄的480略高，推測中止的那輪有部分進度先落地）。本批嘗試101檔（新完成60/新跳過13），撞限流牆提前停止（設計內行為）。累積覆蓋率509→569/3196（15.9%→17.8%）。完整見 `TW_LOG.md` 本輪記錄。
 10. ~~全市場宇宙回補第六批~~ ✅ 第29輪（2026-08-24T02:35，取鎖時偵測到`LOCK_STALE`，上一輪pid 114240持有鎖滿90分鐘後被回收，第28輪之後某一輪疑似完全沒跑完就異常中止，未留下任何log）已完成，`backfill_universe.py --batch-size 300`（自動接續）。開始前state檔案為569 done/122 skip，跟state記錄一致（無落差，代表第28輪本身乾淨結束）。本批嘗試78檔（15檔為重複資料，實際新處理63檔），新完成57/新跳過6，撞限流牆提前停止（設計內行為）。累積覆蓋率569→626/3196（17.8%→19.6%）。完整見 `TW_LOG.md` 本輪記錄。
 11. ~~全市場宇宙回補第七批~~ ✅ 第31輪（2026-08-24T03:36，取鎖乾淨成功，第30輪正常結束）已完成，`backfill_universe.py --batch-size 300`（自動接續）。開始前state檔案為626 done/128 skip，跟state記錄一致（無落差，代表第29輪本身乾淨結束）。本批嘗試104檔，新完成70/新跳過19，撞限流牆提前停止（設計內行為）。累積覆蓋率626→696/3196（19.6%→21.8%）。完整見 `TW_LOG.md` 本輪記錄。
-12. **下一輪優先**：覆蓋率仍遠低於80%門檻 → 繼續跑 `backfill_universe.py --batch-size 300`（除非一開始就被限流，改做下列其一）。覆蓋率達門檻前的候補工作單位：(a) 深挖 `f_value_pb`（十分位多空組合，方法比照`deep_dive_f_quality_roe_stability.py`的精神，PIT前置驗證已完成可以直接開始，結果要註明PIT驗證範圍僅限單檔）——**repo 裡有一個未提交的 `deep_dive_f_value_pb.py`（183行，疑似第25輪`STATUS_CONTROL_C_EXIT`異常中止前寫到一半留下的，看起來完整但截至第31輪仍沒有任何一輪執行驗證過），下一輪接這項工作單位時先讀這支腳本、實際跑一次驗證輸出合理再決定沿用或重寫，不要假設它是對的直接commit**；(b) 拆解`f_quality_roe_stability`TRAIN期絕對報酬為負是否為週轉成本drag。
-11. 覆蓋率達80%門檻、且上面候選都處理完之後，照 `MARATHON_PROTOCOL.md` 第 3 節清單系統化掃過還沒碰過的因子家族：短期反轉、BAB/特異波動率、Amihud流動性、季節性、資產成長異常、Piotroski F-score、accruals盈餘品質。
+12. ~~全市場宇宙回補第八批~~ ✅ 第34輪（2026-08-24T05:35，取鎖乾淨成功，第33輪正常結束）已完成，`backfill_universe.py --batch-size 300`（自動接續）。開始前state檔案為696 done，跟state記錄一致（無落差，代表第31輪本身乾淨結束）。本批嘗試120檔，新完成75/新跳過21，撞限流牆提前停止（設計內行為）。累積覆蓋率696→771/3196（21.8%→24.1%），累積永久跳過147→168。完整見 `TW_LOG.md` 本輪記錄。
+13. **下一輪優先**：覆蓋率仍遠低於80%門檻 → 繼續跑 `backfill_universe.py --batch-size 300`（除非一開始就被限流，改做下列其一）。覆蓋率達門檻前的候補工作單位：(a) 深挖 `f_value_pb`（十分位多空組合，方法比照`deep_dive_f_quality_roe_stability.py`的精神，PIT前置驗證已完成可以直接開始，結果要註明PIT驗證範圍僅限單檔）——**repo 裡有一個未提交的 `deep_dive_f_value_pb.py`（183行，疑似第25輪`STATUS_CONTROL_C_EXIT`異常中止前寫到一半留下的，看起來完整但截至第31輪仍沒有任何一輪執行驗證過），下一輪接這項工作單位時先讀這支腳本、實際跑一次驗證輸出合理再決定沿用或重寫，不要假設它是對的直接commit**；(b) 拆解`f_quality_roe_stability`TRAIN期絕對報酬為負是否為週轉成本drag。
+14. 覆蓋率達80%門檻、且上面候選都處理完之後，照 `MARATHON_PROTOCOL.md` 第 3 節清單系統化掃過還沒碰過的因子家族：短期反轉、BAB/特異波動率、Amihud流動性、季節性、資產成長異常、Piotroski F-score、accruals盈餘品質。
 
 **FinMind 資料集使用現況（避免重複調查已知資訊）：**
 - 已驗證可用：`TaiwanStockPrice`／`TaiwanStockPER`／`TaiwanStockMonthRevenue`／`TaiwanStockFinancialStatements`／`TaiwanStockBalanceSheet`／`TaiwanStockInstitutionalInvestorsBuySell`／`TaiwanStockInfo`／`TaiwanStockDelisting`／`TaiwanStockDividend`。
