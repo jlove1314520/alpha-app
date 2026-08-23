@@ -72,3 +72,15 @@
 **下一步**：`f_value_pb`深挖的PIT前置條件已滿足，可以在下一輪開始十分位多空深挖（方法比照`deep_dive_f_quality_roe_stability.py`的精神，不是照抄檔案），深挖結果要註明PIT驗證的單檔限定範圍。`f_quality_roe_stability`拆解TRAIN期負報酬的工作單位仍待進行。
 
 **Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪未觸碰，`VAL_END=2024-12-31`跟`load_dev()`的自動截斷機制正常運作——2024-12-31那季因為預期揭露日2025-02-14超過VAL_END而在資料裡看不到後續價格，導致該季正確地被跳過偵測，不是異常）。
+
+## 2026-08-24 — 馬拉松第五輪：全市場宇宙回補（`backfill_universe.py --batch-size 300`）
+
+**做了什麼**：照 `MARATHON_PROTOCOL.md` 第5b節，取鎖時發現上一把鎖是陳舊鎖（held by pid 110416, 30.0分鐘前, `marathon_lock.py acquire` 自動判定陳舊並接手）。TW軌是三軌中最久未更新的一軌（15:05 vs US 15:35 vs FUT 15:38），輪替規則指向TW；且回補覆蓋率（跑之前）僅199/3196＝6.2%，遠低於80%門檻，依協定本輪工作單位是跑回補而非測新因子。呼叫時額度顯然已恢復（沒有立刻被限流），跑了`python backfill_universe.py --batch-size 300`（背景執行，約93檔嘗試後撞到連續15次限流自動停止，符合設計，非異常）。
+
+**結果**：本批嘗試93檔，新完成63檔，新跳過15檔（永久跳過，非限流失敗），因限流提前中止（`hit_rate_limit_wall=True`，符合`MAX_CONSECUTIVE_RATE_LIMITS=15`設計，不是bug）。**累積覆蓋率：199→262/3196（6.2%→8.2%）**，累積永久跳過：42→57檔。
+
+**判定**：這是基礎建設/資料落地工作單位，不是假說檢定，不計入`TRIALS_LEDGER.md`。
+
+**下一步**：覆蓋率仍遠低於80%門檻，下一輪若輪到TW軌且額度已恢復，應繼續跑`backfill_universe.py --batch-size 300`（腳本本身會自動接續未完成的部分，不需要手動指定起點）。若下一次呼叫一開始就立刻被限流（距上次批次結束時間太短），該輪應改做其他不需要新資料的工作單位（深挖已有候選、系統化掃過因子家族清單），並誠實記錄跳過原因。
+
+**Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫`adjusted_price_series()`/`load_dev()`，未觸碰holdout解鎖函式）。
