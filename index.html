@@ -5,25 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0d0d0d">
+<meta name="theme-color" content="#0b0a09">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon192.png">
 <link rel="apple-touch-icon" href="icon192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Alpha 台美股 AI 交易</title>
 <style>
+  /* 2026-08-24 改版：私人銀行風格（暗色＋香檳金）。設計 Token 整組換掉，
+     其餘元件（.card/.pill/.row/.btn...）本來就吃 CSS 變數，改這裡大部分
+     視覺就會跟著換，不用逐一改每條規則——只有少數地方（強調色需要漸層、
+     按鈕文字對比）另外處理，見下面對應註解。 */
   :root{
     color-scheme: dark;
-    --page:#0d0d0d; --surface:#1a1a19; --surface-2:#232322; --surface-3:#2c2c2a;
-    --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
-    --hairline:rgba(255,255,255,.10); --grid:#2c2c2a;
-    --accent:#3987e5; --accent-deep:#1c5cab;
-    --up:#e66767; --up-deep:#d03b3b;      /* 台股慣例：紅=漲 */
-    --down:#199e70; --down-deep:#0f7a55;  /* 綠=跌 */
+    --page:#0b0a09;
+    --card-grad:linear-gradient(160deg,#17150f,#121110);
+    --surface:var(--card-grad); --surface-2:#17150f; --surface-3:#221c15;
+    --ink:#f5f3ee; --ink-2:#c9c4ba; --ink-3:#8a857b; --ink-4:#7d766a;
+    --hairline:rgba(255,255,255,.07); --grid:#2c2c2a;
+    --gold:#e9c98f; --gold-deep:#c9974a; --gold-line:#d8b070;
+    --gold-grad:linear-gradient(135deg,#e9c98f,#c9974a);
+    --accent:#d8b070; --accent-deep:#c9974a;
+    --up:#ff5257; --up-deep:#e6383f;      /* 台股慣例：紅=漲 */
+    --down:#24c98a; --down-deep:#1aa876;  /* 綠=跌 */
     --warn:#fab219; --good:#0ca30c; --serious:#ec835a; --critical:#d03b3b;
     --violet:#9085e9; --yellow:#c98500;
+    --nav-h:64px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden}
+  .num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .rise{animation:rise .5s cubic-bezier(.22,.9,.3,1) both}
+  .press{transition:transform .12s ease,background .2s ease,border-color .2s ease}
+  .press:active{transform:scale(.97)}
   /* 2026-08-24 修正：測試發現捲動日誌頁時，整個網頁文件（html）會被捲動
      （即使 body 已設 overflow:hidden），導致 #app 被往上推、藏在裡面用
      transform 移出畫面外的下單/搜尋抽屜跟著露出來，fixed 導覽列也跟著看
@@ -33,24 +50,36 @@
      overflow-y:auto）。 */
   body{
     background:var(--page); color:var(--ink);
-    font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;
+    /* Sora 沒有中文字形，瀏覽器找不到字就自動退到後面的系統中文字體——
+       剛好符合「標題/數字用 Sora、中文內文用系統字體」，不用逐一標記。 */
+    font-family:'Sora',system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;
     font-size:14px; line-height:1.45; overflow:hidden;
     position:fixed; inset:0; width:100%;
   }
-  #app{max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:var(--page);position:relative}
-  :root{--nav-h:64px}
+  #app{
+    max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;
+    background:radial-gradient(120% 55% at 50% -8%, rgba(216,176,112,.07), transparent 60%), var(--page);
+    position:relative;
+    padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);
+  }
 
   /* ===== 頂部 ===== */
   header.top{
-    padding:calc(env(safe-area-inset-top) + 10px) 16px 8px;
-    display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;
+    padding:calc(env(safe-area-inset-top) + 16px) 20px 10px;
+    display:flex;align-items:flex-start;justify-content:space-between;flex:0 0 auto;gap:12px;
   }
-  .brand{font-weight:700;font-size:17px;letter-spacing:.3px}
-  .brand span{color:var(--accent)}
-  .mkt-state{display:flex;gap:6px}
-  .pill{font-size:11px;color:var(--ink-2);background:var(--surface);border:1px solid var(--hairline);border-radius:999px;padding:3px 9px}
+  .brand-row{display:flex;align-items:center;gap:9px;padding-top:2px}
+  .brand-icon{width:26px;height:26px;border-radius:8px;background:var(--gold-grad);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .brand-txt{display:flex;flex-direction:column;line-height:1}
+  .brand{font-weight:700;font-size:19px;letter-spacing:-.01em}
+  .brand-sub{font-size:10px;font-weight:500;color:var(--ink-3);letter-spacing:.06em;margin-top:4px}
+  /* 2026-08-24 改版：市場狀態改「直向堆疊」的兩顆小膠囊（原本橫向並排會把
+     左邊的 Alpha 標題擠到換行，這是使用者這輪明確要求要修的 bug）。 */
+  .mkt-state{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
+  .pill{font-size:11px;color:var(--ink-2);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:5px 9px;white-space:nowrap;display:flex;align-items:center;gap:6px}
   .pill b{color:var(--ink);font-weight:600}
-  .dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:1px}
+  .pill .tm{color:var(--ink-4)}
+  .dot{display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
   /* ===== 畫面容器 ===== */
   main{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);scrollbar-width:none}
@@ -106,7 +135,7 @@
   .chart-wrap{position:relative}
   .bars{display:flex;align-items:flex-end;gap:5px;height:96px;padding-top:4px}
   .bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%}
-  .bars .b i{width:100%;max-width:20px;border-radius:4px 4px 0 0;background:var(--accent);display:block}
+  .bars .b i{width:100%;max-width:20px;border-radius:4px 4px 0 0;background:var(--gold-grad);display:block}
   .bars .b em{font-size:9px;color:var(--ink-3);font-style:normal}
   .bars .b .v{font-size:9px;color:var(--ink-2);font-variant-numeric:tabular-nums}
   .baseline{border-top:1px solid #383835;margin-top:0}
@@ -149,6 +178,8 @@
   .factor-row .fr-name{font-size:13px;font-weight:600}
   .factor-row .fr-score{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
   .factor-row .fr-reason{font-size:12px;color:var(--ink-2);margin-top:5px;line-height:1.5}
+  @keyframes grow{from{width:0}}
+  .bar-fill{animation:grow 1s cubic-bezier(.22,.9,.3,1) both}
 
   /* ===== 設定頁 ===== */
   .setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--hairline)}
@@ -220,13 +251,17 @@
     position:fixed;left:50%;bottom:0;transform:translateX(-50%);
     width:100%;max-width:430px;box-sizing:border-box;min-height:var(--nav-h);
     z-index:30;
-    background:rgba(13,13,13,.92);backdrop-filter:blur(14px);
+    background:rgba(12,11,10,.92);backdrop-filter:blur(16px);
     border-top:1px solid var(--hairline);display:flex;
     padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
+    padding-left:calc(6px + env(safe-area-inset-left));padding-right:calc(6px + env(safe-area-inset-right));
   }
-  nav button{flex:1;background:none;border:0;color:var(--ink-3);font-size:10px;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
-  nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  nav button.on{color:var(--accent)}
+  nav button{flex:1;background:none;border:0;color:var(--ink-4);font-size:10px;font-family:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    min-height:44px;padding:6px 0;transition:color .2s ease,transform .2s ease}
+  nav button:active{transform:translateY(1px)}
+  nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  nav button.on{color:var(--gold);font-weight:600}
 
   /* ===== 下單抽屜 ===== */
   .sheet-mask{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.25s;z-index:40}
@@ -274,10 +309,13 @@
 <div id="app">
 
   <header class="top">
-    <div class="brand">Alpha<span>◆</span> <span style="font-size:11px;color:var(--ink-3);font-weight:400">台美股 AI 交易</span></div>
+    <div class="brand-row">
+      <div class="brand-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z" fill="#1a1005"/></svg></div>
+      <div class="brand-txt"><span class="brand">Alpha</span><span class="brand-sub">台美股 AI 交易</span></div>
+    </div>
     <div class="mkt-state">
-      <span class="pill" id="mkt-tw"><span class="dot"></span>台股 <b>—</b> <span class="tm">--:--:--</span></span>
-      <span class="pill" id="mkt-us"><span class="dot"></span>美股 <b>—</b> <span class="tm">--:--:--</span></span>
+      <span class="pill num" id="mkt-tw"><span class="dot"></span>台股 <b>—</b> <span class="tm">--:--</span></span>
+      <span class="pill num" id="mkt-us"><span class="dot"></span>美股 <b>—</b> <span class="tm">--:--</span></span>
     </div>
   </header>
 
@@ -396,25 +434,39 @@
 
   <!-- ════════ 2c. 個股研究報告頁（scoring-v2，2026-08-24 新增）════════ -->
   <section class="screen" id="scr-report">
-    <button class="back" onclick="go('picks')">‹ 返回選股</button>
-    <div class="note" id="report-asof" style="margin:6px 0 10px">資料時間：— ｜ ⚠️ 非投資建議</div>
-
-    <div class="stock-head">
-      <div class="l"><b id="report-name">—</b><span id="report-industry">—</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 10px">
+      <button class="press" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center" onclick="go('picks')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f5f3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="press" id="report-watch-btn" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center" onclick="toggleReportWatch()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d8b070" stroke-width="1.8" stroke-linejoin="round"><path d="M12 4v16M4 12h16"/></svg>
+      </button>
     </div>
+    <div class="note" id="report-asof" style="margin-bottom:10px">資料時間：— ｜ ⚠️ 非投資建議</div>
 
-    <div class="card">
-      <h3>綜合評分</h3>
-      <div style="display:flex;align-items:baseline;gap:6px">
-        <b id="report-total-score" style="font-size:34px">--</b><span style="color:var(--ink-3);font-size:15px">/ 10</span>
+    <!-- 評分讀條（環形） -->
+    <div class="rise" style="display:flex;gap:14px;align-items:center;background:var(--card-grad);border:1px solid rgba(216,176,112,.22);border-radius:20px;padding:18px;margin-bottom:14px">
+      <div style="flex:1;min-width:0">
+        <div id="report-name" class="num" style="font-size:19px;font-weight:700">—</div>
+        <div id="report-industry" style="font-size:12px;color:var(--ink-3);margin-top:4px">—</div>
+        <p id="report-summary" style="margin-top:10px;color:var(--ink-2);font-size:12.5px;line-height:1.6"></p>
       </div>
-      <div class="meter" style="height:14px;margin-top:8px"><i id="report-score-bar" style="width:0%;background:var(--accent);transition:width .8s ease"></i></div>
-      <div class="note" id="report-coverage" style="margin-top:8px"></div>
-      <p id="report-summary" style="margin-top:8px;color:var(--ink-2);font-size:13px"></p>
+      <div style="position:relative;width:92px;height:92px;flex-shrink:0">
+        <svg width="92" height="92" viewBox="0 0 92 92">
+          <circle cx="46" cy="46" r="40" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="7"/>
+          <circle id="report-ring" cx="46" cy="46" r="40" fill="none" stroke="url(#ggrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" transform="rotate(-90 46 46)" style="transition:stroke-dashoffset 1s cubic-bezier(.22,.9,.3,1)"/>
+          <defs><linearGradient id="ggrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9974a"/><stop offset="1" stop-color="#e9c98f"/></linearGradient></defs>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span id="report-total-score" class="num" style="font-size:23px;font-weight:700;color:var(--gold);line-height:1">--</span>
+          <span style="font-size:9px;color:var(--ink-4);margin-top:3px">綜合分 /10</span>
+        </div>
+      </div>
     </div>
+    <div class="note" id="report-coverage" style="margin:-6px 0 14px"></div>
 
     <div class="card">
-      <h3>各項評分拆解</h3>
+      <h3>為什麼是這個分數</h3>
       <div id="report-factors"></div>
     </div>
 
@@ -430,17 +482,21 @@
 
     <div class="card">
       <h3>目標價 / 建議進場價 / 分批買入計畫</h3>
-      <div class="note" style="margin-bottom:8px">目標價：需要估值模型或機構目標價資料源，本輪尚未實作。</div>
+      <div class="note" style="margin-bottom:10px">目標價：需要估值模型或機構目標價資料源，本輪尚未實作。</div>
       <div id="report-entry-plan"><div class="note">載入中…</div></div>
     </div>
 
-    <div class="card">
+    <div class="card" style="background:linear-gradient(155deg, rgba(216,176,112,.12), rgba(20,19,15,.6));border-color:rgba(216,176,112,.25)">
       <h3>自動交易策略</h3>
       <div id="report-strategy" class="note"></div>
-      <button class="btn buy" style="width:100%;margin-top:10px" onclick="generateOrderPlan()">產生下單計畫</button>
-      <div class="note" style="margin-top:6px">⚠️ 本按鈕只會產生並顯示下單計畫，<b>不會實際下單</b>；未串接任何真實券商 API；非投資建議。</div>
+      <button class="press" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold-grad);color:#1a1005;font-size:14px;font-weight:700;padding:14px;border-radius:14px;border:0" onclick="generateOrderPlan()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1a1005" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        產生下單計畫
+      </button>
+      <div class="note" style="margin-top:8px;text-align:center">⚠️ 本按鈕只會產生並顯示下單計畫，<b>不會實際下單</b>；未串接任何真實券商 API；非投資建議。</div>
       <div id="report-order-plan"></div>
     </div>
+    <div style="text-align:center;font-size:10px;color:#5f5a52;padding:6px 0 4px">分數與報告僅為資料整理，非投資建議。投資有風險。</div>
   </section>
 
   <!-- ════════ 3. 個股頁 ════════ -->
@@ -753,22 +809,22 @@
   <!-- ════════ 底部導覽 ════════ -->
   <nav id="nav">
     <button class="on" data-scr="home">
-      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>今日
+      <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg><span>今日</span>
     </button>
     <button data-scr="market">
-      <svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 16l4-5 3 3 6-8"/></svg>市場
+      <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M3 17l5-5 4 3 6-8"/><path d="M17 4h4v4"/></svg><span>市場</span>
     </button>
     <button data-scr="picks">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>選股
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg><span>選股</span>
     </button>
     <button data-scr="trade">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>交易
+      <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>交易</span>
     </button>
     <button data-scr="journal">
-      <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>日誌
+      <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>日誌</span>
     </button>
     <button data-scr="settings">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>設定
+      <svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2.2"/><circle cx="8" cy="16" r="2.2"/></svg><span>設定</span>
     </button>
   </nav>
 
@@ -1370,11 +1426,15 @@
     analyst:'機構觀點', catalyst:'題材/事件',
   };
   const FACTOR_ORDER=['earnings_growth','revenue_momentum','growth_quality','chips','technical','valuation_adj','analyst','catalyst'];
+  // 2026-08-24 改版：分數文字用金/白/暗三階（不再用紅黃綠號誌色，跟金色主題
+  // 衝突），讀條一律金色漸層（資料完整度低才用調暗的扁平金色，見 barFill()）。
   function scoreColor(v){
-    if(v>=8)return 'var(--good)';
-    if(v>=6)return 'var(--accent)';
-    if(v>=4)return 'var(--warn)';
-    return 'var(--critical)';
+    if(v>=8)return 'var(--gold)';
+    if(v>=5)return 'var(--ink)';
+    return 'var(--ink-3)';
+  }
+  function barFill(coverage){
+    return (coverage!=null&&coverage<0.5)?'rgba(216,176,112,.5)':'var(--gold-grad)';
   }
   async function hydratePicks(forceReload){
     if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
@@ -1402,14 +1462,22 @@
     const rows=json.stocks||[];
     const listEl=document.getElementById('picks-list');
     if(!rows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
-    listEl.innerHTML=rows.map(r=>`
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:5px;cursor:pointer" onclick="showReport('${r.code}')">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="nm"><b>#${r.rank} ${pickLabel(r)}</b><span>${r.industry||'—'}${r.coverage<0.7?' · 資料完整度 '+Math.round(r.coverage*100)+'%':''}</span></div>
-          <div class="px"><b style="color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</b><span>/ 10</span></div>
+    listEl.innerHTML=rows.map(r=>{
+      const lowCov=r.coverage<0.5;
+      const topPick=r.rank===1;
+      return `
+      <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px" onclick="showReport('${r.code}')">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="num" style="width:24px;text-align:center;font-size:15px;font-weight:700;color:${topPick?'var(--gold)':'var(--ink-3)'}">${r.rank}</div>
+          <div class="nm" style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料不足 · 僅供參考</span>':''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
         </div>
-        <div class="meter" style="height:5px"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${scoreColor(r.total_score)}"></i></div>
-      </div>`).join('');
+        <div class="meter" style="height:5px;margin-top:0"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${barFill(r.coverage)}"></i></div>
+      </div>`;
+    }).join('');
   }
 
   // ── 個股研究報告頁 ──
@@ -1421,11 +1489,21 @@
     go('report');
   }
   function factorRowHtml(key){
+    const weights=(PICKS_CACHE&&PICKS_CACHE.weights)||{};
+    const weightPct=Math.round((weights[key]||0)*100);
     const f=REPORT_CACHE.factors&&REPORT_CACHE.factors[key];
-    if(!f)return '';
+    if(!f){
+      // 這輪缺資料的類別（analyst/catalyst，見 score_v2.py 說明）：誠實列出來，
+      // 不要悄悄省略——讓使用者看得出「總分不是滿權重算出來的」。
+      return `<div class="factor-row">
+        <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${FACTOR_LABELS[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span>
+          <span style="font-size:9px;color:#c9a35a;background:rgba(216,176,112,.08);padding:2px 6px;border-radius:5px">尚無資料 · 不計入</span></div>
+        <div class="fr-reason" style="color:var(--ink-4)">${key==='analyst'?'台股暫無免費機構目標價資料源。':'需要新聞/供應鏈連動分析，下一輪實作。'}</div>
+      </div>`;
+    }
     return `<div class="factor-row">
-      <div class="fr-top"><span class="fr-name">${FACTOR_LABELS[key]}</span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}/10</span></div>
-      <div class="meter" style="height:6px"><i style="width:${(f.score*10).toFixed(0)}%;background:${scoreColor(f.score)}"></i></div>
+      <div class="fr-top"><span class="fr-name">${FACTOR_LABELS[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
+      <div class="meter" style="height:5px"><i class="bar-fill" style="width:${(f.score*10).toFixed(0)}%;background:var(--gold-grad)"></i></div>
       <div class="fr-reason">${f.reason||''}</div>
     </div>`;
   }
@@ -1440,9 +1518,13 @@
     const covPct=Math.round(row.coverage*100);
     document.getElementById('report-coverage').textContent=`資料完整度 ${covPct}%${row.coverage<0.7?'（部分因子本次缺資料，總分依「重新分配權重」規則計算，僅供參考）':''}`;
     document.getElementById('report-summary').textContent=row.summary||'';
-    const bar=document.getElementById('report-score-bar');
-    bar.style.width='0%';bar.style.background=scoreColor(row.total_score);
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.width=(row.total_score*10)+'%'}));
+    // 環形讀條：滿圈周長 251.2（r=40），offset 從滿圈（0分）動畫到對應總分的角度
+    const ring=document.getElementById('report-ring');
+    ring.style.strokeDashoffset='251.2';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      ring.style.strokeDashoffset=(251.2*(1-row.total_score/10)).toFixed(1);
+    }));
+    updateReportWatchBtn(row.code);
 
     const factorsHtml=FACTOR_ORDER.map(factorRowHtml).join('');
     document.getElementById('report-factors').innerHTML=factorsHtml||'<div class="note">無評分資料</div>';
@@ -1475,24 +1557,45 @@
       const low20=Math.min(...closes.slice(-20));
       const low60=Math.min(...closes.slice(-60));
       const tranches=[
-        {label:'第一批（現價）',price:last},
-        {label:'第二批（現價 −4%）',price:last*0.96},
-        {label:'第三批（現價 −8%）',price:last*0.92},
+        {label:'現價進場',price:last,pct:40},
+        {label:'回檔加碼（−4%）',price:last*0.96,pct:30},
+        {label:'靠近季線（−8%）',price:last*0.92,pct:30},
       ];
       ENTRY_PLAN_CACHE={code:row.code,name:row.name,tranches};
       planEl.innerHTML=
-        `<div class="note" style="margin-bottom:8px">⚠️ 機械式資金分批規則（依現價等距分批，非估值預測、非投資建議，僅為進場資金分配參考）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}。</div>`+
-        tranches.map(t=>`<div class="frow"><span>${t.label}</span><b>${nf(t.price.toFixed(2))}</b></div>`).join('');
+        `<div class="note" style="margin-bottom:12px">⚠️ 機械式資金分批規則（依現價等距分批，非估值預測、非投資建議，僅為進場資金分配參考）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}。</div>`+
+        `<div style="display:flex;flex-direction:column;gap:10px">`+
+        tranches.map((t,i)=>`<div style="display:flex;align-items:center;gap:12px">
+          <span class="num" style="width:22px;height:22px;border-radius:50%;background:rgba(216,176,112,.15);color:var(--gold);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
+          <span style="flex:1;font-size:12.5px;color:var(--ink-2)">${t.label}</span>
+          <span class="num" style="font-size:13px;font-weight:600">${nf(t.price.toFixed(2))}</span>
+          <span class="num" style="font-size:10px;color:var(--ink-4);width:34px;text-align:right">${t.pct}%</span>
+        </div>`).join('')+`</div>`;
     }catch(e){
       planEl.innerHTML='<div class="note">分批進場價位計算失敗（'+e.message+'）。</div>';
     }
+  }
+  function updateReportWatchBtn(code){
+    const btn=document.getElementById('report-watch-btn');if(!btn)return;
+    const inWL=WL.includes(code);
+    btn.querySelector('svg').innerHTML=inWL
+      ?'<path d="M20 6L9 17l-5-5"/>'
+      :'<path d="M12 4v16M4 12h16"/>';
+    btn.style.borderColor=inWL?'rgba(216,176,112,.4)':'rgba(255,255,255,.08)';
+  }
+  function toggleReportWatch(){
+    const row=REPORT_CACHE;if(!row)return;
+    if(WL.includes(row.code)){WL=WL.filter(x=>x!==row.code);toast('已從觀察清單移除')}
+    else{WL.push(row.code);toast('已加入觀察清單')}
+    localStorage.setItem('alpha_wl',JSON.stringify(WL));
+    updateReportWatchBtn(row.code);
   }
   function generateOrderPlan(){
     if(!ENTRY_PLAN_CACHE){toast('分批進場計畫尚未載入完成');return}
     const {tranches}=ENTRY_PLAN_CACHE;
     document.getElementById('report-order-plan').innerHTML=`<div class="gate" style="margin-top:10px">
       <div style="font-weight:700;margin-bottom:8px">📋 下單計畫（僅顯示，不會送出）</div>
-      ${tranches.map((t,i)=>`<div class="g">批次 ${i+1}：${nf(t.price.toFixed(2))} 元 · 數量請自行決定張數</div>`).join('')}
+      ${tranches.map((t,i)=>`<div class="g">批次 ${i+1}：${nf(t.price.toFixed(2))} 元 · 資金配置 ${t.pct}% · 張數請自行決定</div>`).join('')}
       <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本計畫非投資建議、不構成買賣訊號；未串接任何真實券商 API，不會實際下單。</div>
     </div>`;
     toast('已產生下單計畫（僅顯示，未送出）');
