@@ -172,3 +172,36 @@
 **Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。本輪完全沒有呼叫任何網路請求——`fut_drift_probe.py` 透過 `build_continuous_series()` 的預設鍵值全程命中本機 parquet 快取。
 
 **下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目改為開始系統化測期貨因子（`MARATHON_PROTOCOL.md` 第3節清單），建議從「多時間框架趨勢」或「突破 Donchian channel」開始，一輪最多測2–3個假說，用便宜關卡先篩。
+
+## 2026-08-24T04:34:00+08:00 — 馬拉松第33輪期貨軌執行：第一批策略假說便宜關卡（兩個都FAIL）
+
+**這是地基完成後第一輪實際策略測試。** 上一輪（第30輪）確認地基🟢完整可用並量測了累積漂移幅度，本輪接手開始測`MARATHON_PROTOCOL.md`第3節候選清單。
+
+**新寫`fut_cheap_gate.py`**：期貨版的便宜關卡腳本，仿照`factor_ic.py`的打散對照精神，但改成適合單一時間序列策略的版本——把真實策略的每日部位陣列做200次隨機排列（permutation，不是重新生成隨機部位，這樣可以保留真實策略的活躍度/多空比例分布，只打亂訊號的時序精準度），跟原始報酬序列重新配對，比較真實策略終值落在200次隨機排列終值分布的第幾百分位。單測門檻90.0百分位（跟`factor_ic.py`的90th percentile起點一致），這是便宜關卡不是最終判定，尚未套用累積多重比較校正。
+
+**測了兩個假說**（`FUT_MARATHON_STATE.md`建議的起手候選）：
+1. `fut_trend_multi_tf`：10/20/60日動能方向多數決（3個窗口各自sign，加總再取sign當部位），日頻換倉。真實策略終值+174.6%累積（2000-2024全樣本6184天，無成本），隨機排列中位數+2.4%，percentile=**82.5**，未過90.0門檻。**FAIL**。
+2. `fut_donchian_breakout_20`：20日Donchian channel突破，有狀態持有（突破上緣做多、突破下緣做空，區間內持有前一部位不動）。真實策略終值+24.1%累積，隨機排列中位數-1.4%，percentile=**61.0**，未過門檻，比#1更弱。**FAIL**。
+
+**判定依協定不調參數硬救**——兩個都是最基本、最常見的技術訊號起手式，都沒過，誠實記錄FAIL，換方向。已更新`TRIALS_LEDGER.md`#18/#19、`FUT_LEADS.md`#1/#2。
+
+**下一輪建議**：`fut_trend_multi_tf`雖然FAIL但方向正確（真實策略明顯贏隨機中位數，只是強度不夠精準跨過90百分位門檻），暗示台指期可能真的有動能訊號但訊噪比不夠——下一輪可以嘗試波動regime過濾（`MARATHON_PROTOCOL.md`第3節期貨候選之一，邏輯是「只在某些波動狀態下交易，濾掉雜訊期」）或均線系統（不同於純動能sign的訊號構造），而不是重測同一類單一動能/突破訊號。**兩個訊號都用了adj_close（10-60日回看窗口），落在上一輪漂移量測確認「短中期回看窗口安全」的範圍內，PIT/漂移方面沒有新的未驗證假設。**
+
+Holdout確認：`is_holdout_consumed()` → `False`（本輪結束前再次確認）。本輪只讀本機parquet快取（`continuous_contract.py`的`load_dev`走既有快取key），無新網路請求。
+
+---
+
+## 2026-08-24T05:03:32+08:00 — 馬拉松第33輪期貨軌執行（續接）：偵測到上一輪陳舊鎖檔並接手，第二批策略假說便宜關卡（兩個都FAIL）
+
+**開場即偵測到`LOCK_STALE`**（pid 104836，鎖檔已存在30.0分鐘，超過25分鐘陳舊門檻，自動回收）。檢查後確認：**上一輪（即上方04:34那筆條目的執行個體）並非完全沒做事——它已經完成`fut_cheap_gate.py`的撰寫跟前兩個假說(`fut_trend_multi_tf`/`fut_donchian_breakout_20`)的便宜關卡測試，並且已經把結果寫進`FUT_LOG.md`（上方那筆條目）、`TRIALS_LEDGER.md`(#18/#19)、`FUT_LEADS.md`(#1/#2)——但它在完成`FUT_MARATHON_STATE.md`更新、心跳寫入`REPORT.md`、`MARATHON_STATE.md`輪號遞增、`git commit`+`push`、釋放鎖檔之前就中止了**（`git status`確認這三份檔案的修改跟新建的`fut_cheap_gate.py`都還是uncommitted狀態，證實協定第6節步驟5–7全部沒跑完）。這是繼第13/14/25/27輪之後，`LOCK_STALE`偵測機制又一次成功攔截住的部分完成、未收尾的執行個體——跟第27輪那種「完全沒留下任何內容」不同，這次是**寫到一半、卡在收尾步驟**，屬於更輕微但一樣需要記錄的失敗模式。
+
+**接手方式**：不重跑`fut_trend_multi_tf`/`fut_donchian_breakout_20`（已經有乾淨結果，重跑只是浪費），直接在上一輪已建立的`fut_cheap_gate.py`基礎上繼續本輪自己的工作單位——照`FUT_MARATHON_STATE.md`「下一輪建議」新增兩個結構上不同的假說：
+
+3. `fut_ma_crossover_20_60`：20日/60日SMA均線交叉（`sign(SMA20-SMA60)`當部位），跟動能多數決/通道突破都不同的訊號構造（均線平滑帶來的落後 vs 原始價格的即時反應，是不同的bias/variance取捨）。真實策略終值+127.7%累積（2000-2024，無成本），隨機排列中位數+14.1%，percentile=**75.5**，未過90.0門檻。**FAIL**。
+4. `fut_vol_regime_trend`：對已FAIL的`fut_trend_multi_tf`訊號加上20日已實現波動度regime過濾（只在波動度低於自身展開中位數的「平靜期」進場，其餘部位歸零）——這是`MARATHON_PROTOCOL.md`明確建議的結構性變體（改變「何時允許進場」，不是調整訊號本身參數），測試「波動regime過濾」這個獨立候選家族。真實策略終值+195.3%累積，隨機排列中位數+31.6%，percentile=**82.5**，未過門檻，**跟未過濾版本(#18的82.5)幾乎打平**——顯示這個regime過濾對`fut_trend_multi_tf`沒有帶來統計上可辨識的改善。**FAIL**。
+
+**判定依協定不調參數硬救**——四個技術訊號家族（動能多數決、通道突破、均線交叉）加一個regime過濾變體全部FAIL，已更新`TRIALS_LEDGER.md`#20/#21、`FUT_LEADS.md`#3/#4。**下一輪建議換方向**：不要再對`fut_trend_multi_tf`類趨勢訊號做regime過濾類變體（已證實無效），改試日內均值回歸（跟趨勢方向相反的假說家族）、期現價差、三大法人期貨部位/未平倉量變化（籌碼面，跟純技術面訊噪比可能不同）、或星期效應/盤別效應（季節性，機制完全不同）。
+
+Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束前都確認過）。本輪只讀本機parquet快取（`continuous_contract.py`的`load_dev`走既有快取key），無新網路請求。
+
+---
