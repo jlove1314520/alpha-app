@@ -142,6 +142,14 @@
   .facts .f span{font-size:10.5px;color:var(--ink-3);display:block}
   .facts .f b{font-size:14px;font-variant-numeric:tabular-nums}
 
+  /* ===== 個股研究報告頁：評分拆解列（2026-08-24 新增）===== */
+  .factor-row{padding:10px 0;border-bottom:1px solid var(--hairline)}
+  .factor-row:last-child{border-bottom:none}
+  .factor-row .fr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .factor-row .fr-name{font-size:13px;font-weight:600}
+  .factor-row .fr-score{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+  .factor-row .fr-reason{font-size:12px;color:var(--ink-2);margin-top:5px;line-height:1.5}
+
   /* ===== 設定頁 ===== */
   .setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--hairline)}
   .setting-row:last-of-type{border-bottom:none}
@@ -370,24 +378,68 @@
     </div>
   </section>
 
-  <!-- ════════ 2b. 選股 ════════ -->
+  <!-- ════════ 2b. 選股（十分制評分，scoring-v2）════════ -->
   <section class="screen" id="scr-picks">
     <div class="card ai-card">
-      <div class="ai-tag">✦ AI 選股引擎 · Phase A</div>
-      <p>綜合分結合<b>通過統計檢定的因子</b>（EPS成長/意外家族、營收意外、低波動），在<b>同產業</b>內做相對強弱排名，避免拿半導體股跟航運股比 EPS 成長率。<b>研究/教育用途，非投資建議；歷史回測不代表未來績效，樣本非全市場逐檔掃描。</b></p>
+      <div class="ai-tag">✦ AI 選股引擎 · 十分制評分</div>
+      <p>總分 10 分，由 8 大類別（財報成長/營收動能/成長性/籌碼/技術型態/估值/機構觀點/題材事件）依權重加權平均；沒有資料的類別不計 0 分，改用重新分配權重處理（見報告頁「資料完整度」）。<b>研究/教育用途，非投資建議；歷史資料不代表未來績效，樣本非全市場逐檔掃描。</b></p>
       <div class="note" id="picks-asof">載入中…</div>
       <div class="note">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
     </div>
 
     <div class="card">
-      <h3>綜合分排行<span class="more" id="picks-refresh" onclick="fmClearCache();hydratePicks(true)">重新整理</span></h3>
+      <h3>綜合評分排行<span class="more" id="picks-refresh" onclick="fmClearCache();hydratePicks(true)">重新整理</span></h3>
       <div id="picks-list"><div class="note">載入中…</div></div>
-      <div class="note">來源：research/score.py（本機/排程產生，非即時報價） · 樣本 80 檔（100 檔抽樣，見 FACTORS.md）</div>
+      <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價，資料時間見上方「資料基準日」） · 點列可看完整評分報告</div>
+    </div>
+  </section>
+
+  <!-- ════════ 2c. 個股研究報告頁（scoring-v2，2026-08-24 新增）════════ -->
+  <section class="screen" id="scr-report">
+    <button class="back" onclick="go('picks')">‹ 返回選股</button>
+    <div class="note" id="report-asof" style="margin:6px 0 10px">資料時間：— ｜ ⚠️ 非投資建議</div>
+
+    <div class="stock-head">
+      <div class="l"><b id="report-name">—</b><span id="report-industry">—</span></div>
     </div>
 
-    <div class="card" id="picks-detail-card" style="display:none">
-      <h3>因子拆解 <span class="more" id="picks-detail-name"></span></h3>
-      <div id="picks-detail"></div>
+    <div class="card">
+      <h3>綜合評分</h3>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <b id="report-total-score" style="font-size:34px">--</b><span style="color:var(--ink-3);font-size:15px">/ 10</span>
+      </div>
+      <div class="meter" style="height:14px;margin-top:8px"><i id="report-score-bar" style="width:0%;background:var(--accent);transition:width .8s ease"></i></div>
+      <div class="note" id="report-coverage" style="margin-top:8px"></div>
+      <p id="report-summary" style="margin-top:8px;color:var(--ink-2);font-size:13px"></p>
+    </div>
+
+    <div class="card">
+      <h3>各項評分拆解</h3>
+      <div id="report-factors"></div>
+    </div>
+
+    <div class="card">
+      <h3>產業分析 / 財報數據 / 技術型態</h3>
+      <div id="report-industry-tech"></div>
+    </div>
+
+    <div class="card">
+      <h3>題材判斷（缺貨潮 / 瓶頸 / 缺料）</h3>
+      <div class="note">需要產業新聞與供應鏈連動分析，本輪尚未實作（下一輪接新聞/供應鏈資料源後補），目前沒有這項資料。</div>
+    </div>
+
+    <div class="card">
+      <h3>目標價 / 建議進場價 / 分批買入計畫</h3>
+      <div class="note" style="margin-bottom:8px">目標價：需要估值模型或機構目標價資料源，本輪尚未實作。</div>
+      <div id="report-entry-plan"><div class="note">載入中…</div></div>
+    </div>
+
+    <div class="card">
+      <h3>自動交易策略</h3>
+      <div id="report-strategy" class="note"></div>
+      <button class="btn buy" style="width:100%;margin-top:10px" onclick="generateOrderPlan()">產生下單計畫</button>
+      <div class="note" style="margin-top:6px">⚠️ 本按鈕只會產生並顯示下單計畫，<b>不會實際下單</b>；未串接任何真實券商 API；非投資建議。</div>
+      <div id="report-order-plan"></div>
     </div>
   </section>
 
@@ -761,7 +813,7 @@
 
 <script>
   // ── 導覽 ──
-  const scrs = {home:'scr-home',market:'scr-market',picks:'scr-picks',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
+  const scrs = {home:'scr-home',market:'scr-market',picks:'scr-picks',report:'scr-report',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
   function go(name){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(scrs[name]).classList.add('active');
@@ -770,6 +822,7 @@
     if(name==='home')hydrateHome();
     if(name==='market')hydrateMarket();
     if(name==='picks')hydratePicks();
+    if(name==='report')renderReport();
     if(name==='settings')hydrateSettings();
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
@@ -1303,8 +1356,26 @@
   }
 
   // ══════ 選股頁（research/score.py 產生的 scores.json，非即時，需本機/排程重新產生）══════
+  // ══════ 選股頁 + 個股研究報告頁（scoring-v2，2026-08-24 改版）══════
+  // scores.json 格式改版依據 docs/Alpha_評分引擎_10分制設計小抄.md 第五節：
+  // json.stocks（不是舊版的 json.scores）、每檔 code/name/industry/rank/total_score(0~10)/
+  // coverage/summary/factors{score,percentile,raw,reason}。舊版 composite/_meta/stock_id
+  // 欄位已經不存在，這裡整段跟著改，不是選擇性相容兩種格式。
   let PICKS_CACHE=null;
-  const PICKS_COMPONENT_LABEL={eps_family:'EPS成長/意外家族',revenue_surprise:'營收意外',low_vol:'低波動'};
+  let REPORT_CACHE=null;
+  let ENTRY_PLAN_CACHE=null;
+  const FACTOR_LABELS={
+    earnings_growth:'財報成長', revenue_momentum:'營收動能', growth_quality:'成長性/未來性',
+    chips:'籌碼', technical:'技術型態', valuation_adj:'估值(成長調整)',
+    analyst:'機構觀點', catalyst:'題材/事件',
+  };
+  const FACTOR_ORDER=['earnings_growth','revenue_momentum','growth_quality','chips','technical','valuation_adj','analyst','catalyst'];
+  function scoreColor(v){
+    if(v>=8)return 'var(--good)';
+    if(v>=6)return 'var(--accent)';
+    if(v>=4)return 'var(--warn)';
+    return 'var(--critical)';
+  }
   async function hydratePicks(forceReload){
     if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
@@ -1317,40 +1388,114 @@
       renderPicks(json);
       stampUpdated('picks');
     }catch(e){
-      listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/score.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
+      listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
       document.getElementById('picks-asof').textContent='—';
     }
   }
-  // 2026-08-24 新增：scores.json 每列可能帶 stock_name（研究端 load_name_map() 產生），
-  // 沒有名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
+  // 沒有公司名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
   function pickLabel(r){
-    return r.stock_name?`${r.stock_name} ${r.stock_id}`:r.stock_id;
+    return r.name?`${r.name} ${r.code}`:r.code;
   }
   function renderPicks(json){
-    const meta=json._meta||{};
-    document.getElementById('picks-asof').textContent='資料基準日 '+(meta.as_of||'—')+'（'+(meta.disclaimer||'')+'）';
-    const rows=json.scores||[];
+    const meta=json.meta||{};
+    document.getElementById('picks-asof').textContent='資料基準日 '+(meta.data_asof||'—')+'（'+(meta.disclaimer||'')+'）';
+    const rows=json.stocks||[];
     const listEl=document.getElementById('picks-list');
     if(!rows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
     listEl.innerHTML=rows.map(r=>`
-      <div class="row" onclick="showPickDetail('${r.stock_id}')">
-        <div class="nm"><b>#${r.rank} ${pickLabel(r)}</b><span>${r.industry||'—'}</span></div>
-        <div class="px"><b>${(r.composite>=0?'+':'')+r.composite.toFixed(2)}</b><span>綜合分</span></div>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:5px;cursor:pointer" onclick="showReport('${r.code}')">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="nm"><b>#${r.rank} ${pickLabel(r)}</b><span>${r.industry||'—'}${r.coverage<0.7?' · 資料完整度 '+Math.round(r.coverage*100)+'%':''}</span></div>
+          <div class="px"><b style="color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</b><span>/ 10</span></div>
+        </div>
+        <div class="meter" style="height:5px"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${scoreColor(r.total_score)}"></i></div>
       </div>`).join('');
   }
-  function showPickDetail(stockId){
-    if(!PICKS_CACHE)return;
-    const row=(PICKS_CACHE.scores||[]).find(r=>r.stock_id===stockId);
-    const card=document.getElementById('picks-detail-card');
-    if(!row){card.style.display='none';return}
-    document.getElementById('picks-detail-name').textContent=pickLabel(row);
-    const comps=(PICKS_CACHE._meta&&PICKS_CACHE._meta.score_components)||['eps_family','revenue_surprise','low_vol'];
-    document.getElementById('picks-detail').innerHTML=comps.map(c=>{
-      const v=row[c];
-      const has=typeof v==='number'&&!isNaN(v);
-      return `<div class="dl"><span class="sw" style="background:var(--accent)"></span>${PICKS_COMPONENT_LABEL[c]||c}<b>${has?(v>=0?'+':'')+v.toFixed(2):'—（資料不足）'}</b></div>`;
-    }).join('')+`<div class="note" style="margin-top:8px">產業內相對強弱 z-score（非原始因子數值），peer group 過小時退回全樣本 z-score。${row.n_components<3?'注意：本檔僅 '+row.n_components+'/3 個成分有效資料，排名可信度較低。':''}</div>`;
-    card.style.display='';
+
+  // ── 個股研究報告頁 ──
+  function showReport(code){
+    const row=(PICKS_CACHE&&PICKS_CACHE.stocks||[]).find(r=>r.code===code);
+    if(!row){toast('查無這檔的評分資料');return}
+    REPORT_CACHE=row;
+    ENTRY_PLAN_CACHE=null;
+    go('report');
+  }
+  function factorRowHtml(key){
+    const f=REPORT_CACHE.factors&&REPORT_CACHE.factors[key];
+    if(!f)return '';
+    return `<div class="factor-row">
+      <div class="fr-top"><span class="fr-name">${FACTOR_LABELS[key]}</span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}/10</span></div>
+      <div class="meter" style="height:6px"><i style="width:${(f.score*10).toFixed(0)}%;background:${scoreColor(f.score)}"></i></div>
+      <div class="fr-reason">${f.reason||''}</div>
+    </div>`;
+  }
+  async function renderReport(){
+    const row=REPORT_CACHE;
+    if(!row)return;
+    document.getElementById('report-asof').textContent=`資料時間：${row.data_asof}（盤後/延遲資料） ｜ ⚠️ 非投資建議`;
+    document.getElementById('report-name').textContent=pickLabel(row);
+    document.getElementById('report-industry').textContent=row.industry||'—';
+    document.getElementById('report-total-score').textContent=row.total_score.toFixed(1);
+    document.getElementById('report-total-score').style.color=scoreColor(row.total_score);
+    const covPct=Math.round(row.coverage*100);
+    document.getElementById('report-coverage').textContent=`資料完整度 ${covPct}%${row.coverage<0.7?'（部分因子本次缺資料，總分依「重新分配權重」規則計算，僅供參考）':''}`;
+    document.getElementById('report-summary').textContent=row.summary||'';
+    const bar=document.getElementById('report-score-bar');
+    bar.style.width='0%';bar.style.background=scoreColor(row.total_score);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{bar.style.width=(row.total_score*10)+'%'}));
+
+    const factorsHtml=FACTOR_ORDER.map(factorRowHtml).join('');
+    document.getElementById('report-factors').innerHTML=factorsHtml||'<div class="note">無評分資料</div>';
+
+    // 產業分析/財報數據/技術型態：直接引用已算好的 raw 數據，不編造敘述
+    const f=row.factors||{};
+    let itHtml='<div class="facts">';
+    itHtml+=`<div class="f"><span>所屬產業</span><b>${row.industry||'—'}</b></div>`;
+    if(f.earnings_growth)itHtml+=`<div class="f"><span>EPS 年增</span><b>${(f.earnings_growth.raw.eps_yoy*100).toFixed(1)}%</b></div>`;
+    if(f.revenue_momentum)itHtml+=`<div class="f"><span>月營收年增</span><b>${(f.revenue_momentum.raw.rev_yoy*100).toFixed(1)}%</b></div>`;
+    if(f.growth_quality)itHtml+=`<div class="f"><span>近12月營收年增</span><b>${(f.growth_quality.raw.rev_growth_12m_yoy*100).toFixed(1)}%</b></div>`;
+    if(f.valuation_adj)itHtml+=`<div class="f"><span>本益比 PE</span><b>${f.valuation_adj.raw.pe.toFixed(1)}</b></div>`;
+    if(f.valuation_adj)itHtml+=`<div class="f"><span>PEG</span><b>${f.valuation_adj.raw.peg.toFixed(2)}</b></div>`;
+    if(f.chips)itHtml+=`<div class="f"><span>三大法人近20日買超</span><b>${(f.chips.raw.inst_net_pct_of_20d_trading_value*100).toFixed(1)}%</b></div>`;
+    if(f.technical)itHtml+=`<div class="f"><span>技術型態指標</span><b>${f.technical.raw.ma60_breakout_x_volume_index.toFixed(3)}</b></div>`;
+    itHtml+='</div>';
+    document.getElementById('report-industry-tech').innerHTML=itHtml;
+
+    document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，尚未串接特定進出場策略引擎；下方按鈕只依分批進場計畫產生下單計畫，不代表任何策略訊號。';
+
+    // 分批進場計畫：機械式資金分配規則（現價/-4%/-8%），不是估值預測，不是投資建議
+    const planEl=document.getElementById('report-entry-plan');
+    planEl.innerHTML='<div class="note">載入中…</div>';
+    try{
+      const usCode=isUS(row.code);
+      const px=await fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70));
+      if(!px.length){planEl.innerHTML='<div class="note">查無報價資料，無法計算分批進場價位。</div>';return}
+      const closes=px.map(x=>usCode?x.Close:x.close).filter(x=>x!=null);
+      const last=closes[closes.length-1];
+      const low20=Math.min(...closes.slice(-20));
+      const low60=Math.min(...closes.slice(-60));
+      const tranches=[
+        {label:'第一批（現價）',price:last},
+        {label:'第二批（現價 −4%）',price:last*0.96},
+        {label:'第三批（現價 −8%）',price:last*0.92},
+      ];
+      ENTRY_PLAN_CACHE={code:row.code,name:row.name,tranches};
+      planEl.innerHTML=
+        `<div class="note" style="margin-bottom:8px">⚠️ 機械式資金分批規則（依現價等距分批，非估值預測、非投資建議，僅為進場資金分配參考）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}。</div>`+
+        tranches.map(t=>`<div class="frow"><span>${t.label}</span><b>${nf(t.price.toFixed(2))}</b></div>`).join('');
+    }catch(e){
+      planEl.innerHTML='<div class="note">分批進場價位計算失敗（'+e.message+'）。</div>';
+    }
+  }
+  function generateOrderPlan(){
+    if(!ENTRY_PLAN_CACHE){toast('分批進場計畫尚未載入完成');return}
+    const {tranches}=ENTRY_PLAN_CACHE;
+    document.getElementById('report-order-plan').innerHTML=`<div class="gate" style="margin-top:10px">
+      <div style="font-weight:700;margin-bottom:8px">📋 下單計畫（僅顯示，不會送出）</div>
+      ${tranches.map((t,i)=>`<div class="g">批次 ${i+1}：${nf(t.price.toFixed(2))} 元 · 數量請自行決定張數</div>`).join('')}
+      <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本計畫非投資建議、不構成買賣訊號；未串接任何真實券商 API，不會實際下單。</div>
+    </div>`;
+    toast('已產生下單計畫（僅顯示，未送出）');
   }
 
   function hydrateSettings(){

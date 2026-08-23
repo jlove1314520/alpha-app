@@ -1,467 +1,1760 @@
 {
-  "_meta": {
-    "as_of": "2024-12-31",
-    "generated_by": "research/score.py",
-    "score_components": [
-      "eps_family",
-      "revenue_surprise",
-      "low_vol"
-    ],
-    "eps_family_note": "avg peer-z of f_eps_growth + f_eps_surprise (correlated +0.831, collapsed to avoid double-counting -- see FACTORS.md 2026-08-23)",
-    "peer_group": "industry_category (TaiwanStockInfo), static classification, min group size 5 else whole-sample fallback",
-    "min_components_for_ranking": 2,
-    "disclaimer": "研究/教育用途，非投資建議。歷史回測不代表未來績效。樣本非全市場逐檔掃描（見 FACTORS.md/STRATEGY_LOG.md 已知限制）。"
+  "meta": {
+    "engine_version": "scoring-v2",
+    "generated_at": "2026-08-24T00:31:25.415662+08:00",
+    "data_asof": "2024-12-31",
+    "market": "TW",
+    "universe_size": 3196,
+    "disclaimer": "非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。analyst（機構觀點）台股暫無免費目標價資料源、catalyst（題材/事件）本輪尚未實作（下一輪接新聞/供應鏈），這兩項對全部股票都缺資料，已依 coverage 規則重新分配權重，不會把沒資料當成 0 分。coverage < 0.5 的股票不進本清單（僅供參考名單）。"
   },
-  "scores": [
+  "weights": {
+    "earnings_growth": 0.18,
+    "revenue_momentum": 0.18,
+    "growth_quality": 0.12,
+    "chips": 0.14,
+    "technical": 0.1,
+    "valuation_adj": 0.12,
+    "analyst": 0.08,
+    "catalyst": 0.08
+  },
+  "stocks": [
     {
-      "stock_id": "8908",
-      "industry": "油電燃氣業",
-      "f_eps_growth": 0.15789473684210525,
-      "f_eps_surprise": 0.9520897122350823,
-      "f_revenue_surprise": 2.0077634884963937,
-      "f_low_vol": -0.012791466489876783,
-      "eps_family": 0.9409650206258733,
-      "revenue_surprise": 1.6604994102230919,
-      "low_vol": 0.7433866116359135,
-      "composite": 1.1149503474949596,
-      "n_components": 3,
+      "code": "6442",
+      "name": "光聖",
+      "industry": "電子工業",
       "rank": 1,
-      "stock_name": "欣雄"
+      "total_score": 9.1,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（9.9/10），成長性/未來性也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.6,
+          "percentile": 0.96,
+          "raw": {
+            "eps_yoy": 2.3627
+          },
+          "reason": "最新一季 EPS 年增 +236%，居全市場前 4%。"
+        },
+        "revenue_momentum": {
+          "score": 9.9,
+          "percentile": 0.99,
+          "raw": {
+            "rev_yoy": 2.5552
+          },
+          "reason": "最新月營收年增 +255.5%，居全市場前 1%。"
+        },
+        "growth_quality": {
+          "score": 9.8,
+          "percentile": 0.98,
+          "raw": {
+            "rev_growth_12m_yoy": 1.0467
+          },
+          "reason": "近 12 個月營收合計年增 +104.7%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 2%。"
+        },
+        "chips": {
+          "score": 9.3,
+          "percentile": 0.93,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0783
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +7.8%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 7%。"
+        },
+        "technical": {
+          "score": 9.3,
+          "percentile": 0.93,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.16
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.160（正值代表站上均線且量能放大），居全市場前 7%。"
+        },
+        "valuation_adj": {
+          "score": 6.2,
+          "percentile": 0.62,
+          "raw": {
+            "pe": 75.41,
+            "eps_yoy": 2.3627,
+            "peg": 0.3192
+          },
+          "reason": "本益比 75.4 倍，近一季 EPS 年增 236%，PEG（本益比÷盈餘成長率）= 0.32（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 38%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "2753",
-      "industry": "觀光事業",
-      "f_eps_growth": -0.02678571428571431,
-      "f_eps_surprise": -0.18381844202888867,
-      "f_revenue_surprise": 2.965554967342004,
-      "f_low_vol": -0.01321224164589084,
-      "eps_family": -0.2827977000366829,
-      "revenue_surprise": 2.5138971050078167,
-      "low_vol": 0.7033434814985795,
-      "composite": 0.9781476288232378,
-      "n_components": 3,
+      "code": "3019",
+      "name": "亞光",
+      "industry": "光電業",
       "rank": 2,
-      "stock_name": "八方雲集"
+      "total_score": 9.0,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "技術型態表現較突出（10.0/10），財報成長也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.9,
+          "percentile": 0.99,
+          "raw": {
+            "eps_yoy": 2.7846
+          },
+          "reason": "最新一季 EPS 年增 +278%，居全市場前 1%。"
+        },
+        "revenue_momentum": {
+          "score": 8.1,
+          "percentile": 0.81,
+          "raw": {
+            "rev_yoy": 0.2394
+          },
+          "reason": "最新月營收年增 +23.9%，居全市場前 19%。"
+        },
+        "growth_quality": {
+          "score": 8.6,
+          "percentile": 0.86,
+          "raw": {
+            "rev_growth_12m_yoy": 0.2687
+          },
+          "reason": "近 12 個月營收合計年增 +26.9%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 14%。"
+        },
+        "chips": {
+          "score": 9.2,
+          "percentile": 0.92,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0762
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +7.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 8%。"
+        },
+        "technical": {
+          "score": 10.0,
+          "percentile": 1.0,
+          "raw": {
+            "ma60_breakout_x_volume_index": 1.1552
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +1.155（正值代表站上均線且量能放大），居全市場前 1%。"
+        },
+        "valuation_adj": {
+          "score": 8.6,
+          "percentile": 0.86,
+          "raw": {
+            "pe": 34.65,
+            "eps_yoy": 2.7846,
+            "peg": 0.1244
+          },
+          "reason": "本益比 34.6 倍，近一季 EPS 年增 278%，PEG（本益比÷盈餘成長率）= 0.12（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 14%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "1231",
-      "industry": "食品工業",
-      "f_eps_growth": 0.26865671641791034,
-      "f_eps_surprise": 0.46838530502569786,
-      "f_revenue_surprise": 2.166185852461418,
-      "f_low_vol": -0.01518445507917192,
-      "eps_family": 0.4198494540714792,
-      "revenue_surprise": 1.801654644108704,
-      "low_vol": 0.5156574975741053,
-      "composite": 0.912387198584763,
-      "n_components": 3,
+      "code": "4991",
+      "name": "環宇-KY",
+      "industry": "半導體業",
       "rank": 3,
-      "stock_name": "聯華食"
+      "total_score": 8.4,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "技術型態表現較突出（9.9/10），財報成長也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.3,
+          "percentile": 0.93,
+          "raw": {
+            "eps_yoy": 1.6667
+          },
+          "reason": "最新一季 EPS 年增 +167%，居全市場前 7%。"
+        },
+        "revenue_momentum": {
+          "score": 7.2,
+          "percentile": 0.72,
+          "raw": {
+            "rev_yoy": 0.1345
+          },
+          "reason": "最新月營收年增 +13.5%，居全市場前 28%。"
+        },
+        "growth_quality": {
+          "score": 8.3,
+          "percentile": 0.83,
+          "raw": {
+            "rev_growth_12m_yoy": 0.241
+          },
+          "reason": "近 12 個月營收合計年增 +24.1%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 17%。"
+        },
+        "chips": {
+          "score": 7.6,
+          "percentile": 0.76,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0177
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +1.8%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 24%。"
+        },
+        "technical": {
+          "score": 9.9,
+          "percentile": 0.99,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.8754
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.875（正值代表站上均線且量能放大），居全市場前 1%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "3019",
-      "industry": "光電業",
-      "f_eps_growth": 2.7846153846153845,
-      "f_eps_surprise": 1.903007168647758,
-      "f_revenue_surprise": 1.3366593897119963,
-      "f_low_vol": -0.03519042985099068,
-      "eps_family": 1.577309690992922,
-      "revenue_surprise": 1.4003344329458893,
-      "low_vol": -0.5197661730159502,
-      "composite": 0.8192926503076204,
-      "n_components": 3,
-      "rank": 4,
-      "stock_name": "亞光"
-    },
-    {
-      "stock_id": "6442",
-      "industry": "電子工業",
-      "f_eps_growth": 2.3627450980392157,
-      "f_eps_surprise": 1.6496853588591702,
-      "f_revenue_surprise": 3.5018712858695555,
-      "f_low_vol": -0.04507875691979539,
-      "eps_family": 1.6925148208720135,
-      "revenue_surprise": 2.991758017341763,
-      "low_vol": -2.3292381714297843,
-      "composite": 0.7850115555946641,
-      "n_components": 3,
+      "code": "1231",
+      "name": "聯華食",
+      "industry": "食品工業",
       "rank": 5,
-      "stock_name": "光聖"
+      "total_score": 7.6,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "籌碼表現較突出（9.7/10），技術型態也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 7.4,
+          "percentile": 0.74,
+          "raw": {
+            "eps_yoy": 0.2687
+          },
+          "reason": "最新一季 EPS 年增 +27%，居全市場前 26%。"
+        },
+        "revenue_momentum": {
+          "score": 7.9,
+          "percentile": 0.79,
+          "raw": {
+            "rev_yoy": 0.2288
+          },
+          "reason": "最新月營收年增 +22.9%，居全市場前 21%。"
+        },
+        "growth_quality": {
+          "score": 6.2,
+          "percentile": 0.62,
+          "raw": {
+            "rev_growth_12m_yoy": 0.0914
+          },
+          "reason": "近 12 個月營收合計年增 +9.1%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 38%。"
+        },
+        "chips": {
+          "score": 9.7,
+          "percentile": 0.97,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.1796
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +18.0%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 3%。"
+        },
+        "technical": {
+          "score": 9.5,
+          "percentile": 0.95,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.2072
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.207（正值代表站上均線且量能放大），居全市場前 5%。"
+        },
+        "valuation_adj": {
+          "score": 4.8,
+          "percentile": 0.48,
+          "raw": {
+            "pe": 31.05,
+            "eps_yoy": 0.2687,
+            "peg": 1.1558
+          },
+          "reason": "本益比 31.1 倍，近一季 EPS 年增 27%，PEG（本益比÷盈餘成長率）= 1.16（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 52%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "2009",
-      "industry": "鋼鐵工業",
-      "f_eps_growth": 1.8571428571428572,
-      "f_eps_surprise": 1.6847960335134378,
-      "f_revenue_surprise": 0.29570291946819377,
-      "f_low_vol": -0.017515322090285217,
-      "eps_family": 1.7303410611168029,
-      "revenue_surprise": 0.13504363492066315,
-      "low_vol": 0.29384019271471334,
-      "composite": 0.7197416295840598,
-      "n_components": 3,
-      "rank": 6,
-      "stock_name": "第一銅"
+      "code": "6951",
+      "name": "青新",
+      "industry": "綠能環保",
+      "rank": 5,
+      "total_score": 7.6,
+      "coverage": 0.54,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（9.1/10），估值(成長調整)也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.1,
+          "percentile": 0.91,
+          "raw": {
+            "eps_yoy": 1.5873
+          },
+          "reason": "最新一季 EPS 年增 +159%，居全市場前 9%。"
+        },
+        "chips": {
+          "score": 4.7,
+          "percentile": 0.47,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0011
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -0.1%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 53%。"
+        },
+        "technical": {
+          "score": 7.2,
+          "percentile": 0.72,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.0347
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.035（正值代表站上均線且量能放大），居全市場前 28%。"
+        },
+        "valuation_adj": {
+          "score": 9.0,
+          "percentile": 0.9,
+          "raw": {
+            "pe": 18.25,
+            "eps_yoy": 1.5873,
+            "peg": 0.115
+          },
+          "reason": "本益比 18.2 倍，近一季 EPS 年增 159%，PEG（本益比÷盈餘成長率）= 0.11（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 10%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "6482",
-      "industry": "文化創意業",
-      "f_eps_growth": 0.9411764705882353,
-      "f_eps_surprise": 1.2879898750082799,
-      "f_revenue_surprise": 0.2188298441551986,
-      "f_low_vol": null,
-      "eps_family": 1.302844716200977,
-      "revenue_surprise": 0.0665492844152778,
-      "low_vol": null,
-      "composite": 0.6846970003081274,
-      "n_components": 2,
-      "rank": 7,
-      "stock_name": "弘煜科"
-    },
-    {
-      "stock_id": "6462",
-      "industry": "半導體業",
-      "f_eps_growth": 0.15335463258785942,
-      "f_eps_surprise": 0.2892849752080311,
-      "f_revenue_surprise": 2.513131525224828,
-      "f_low_vol": -0.024466768585626728,
-      "eps_family": -0.04461707997856613,
-      "revenue_surprise": 1.1380028561759754,
-      "low_vol": 0.9577307876915415,
-      "composite": 0.683705521296317,
-      "n_components": 3,
+      "code": "4541",
+      "name": "晟田",
+      "industry": "其他",
       "rank": 8,
-      "stock_name": "神盾"
+      "total_score": 7.4,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（10.0/10），技術型態也不弱，估值(成長調整)偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 10.0,
+          "percentile": 1.0,
+          "raw": {
+            "eps_yoy": 15.25
+          },
+          "reason": "最新一季 EPS 年增 +1525%，居全市場前 1%。"
+        },
+        "revenue_momentum": {
+          "score": 9.0,
+          "percentile": 0.9,
+          "raw": {
+            "rev_yoy": 0.4943
+          },
+          "reason": "最新月營收年增 +49.4%，居全市場前 10%。"
+        },
+        "growth_quality": {
+          "score": 6.8,
+          "percentile": 0.68,
+          "raw": {
+            "rev_growth_12m_yoy": 0.1478
+          },
+          "reason": "近 12 個月營收合計年增 +14.8%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 32%。"
+        },
+        "chips": {
+          "score": 6.3,
+          "percentile": 0.63,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.004
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.4%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 37%。"
+        },
+        "technical": {
+          "score": 9.1,
+          "percentile": 0.91,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.14
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.140（正值代表站上均線且量能放大），居全市場前 9%。"
+        },
+        "valuation_adj": {
+          "score": 1.9,
+          "percentile": 0.19,
+          "raw": {
+            "pe": 3460.0,
+            "eps_yoy": 15.25,
+            "peg": 2.2689
+          },
+          "reason": "本益比 3460.0 倍，近一季 EPS 年增 1525%，PEG（本益比÷盈餘成長率）= 2.27（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 81%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "5228",
-      "industry": "電子零組件業",
-      "f_eps_growth": 0.4225352112676056,
-      "f_eps_surprise": 0.6403093746582701,
-      "f_revenue_surprise": 0.47687893007498533,
-      "f_low_vol": null,
-      "eps_family": 1.6449398743116053,
-      "revenue_surprise": -0.3734427800707386,
-      "low_vol": null,
-      "composite": 0.6357485471204334,
-      "n_components": 2,
-      "rank": 9,
-      "stock_name": "鈺鎧"
+      "code": "5522",
+      "name": "遠雄",
+      "industry": "建材營造",
+      "rank": 8,
+      "total_score": 7.4,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "成長性/未來性表現較突出（9.5/10），財報成長也不弱，營收動能偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 8.8,
+          "percentile": 0.88,
+          "raw": {
+            "eps_yoy": 0.987
+          },
+          "reason": "最新一季 EPS 年增 +99%，居全市場前 12%。"
+        },
+        "revenue_momentum": {
+          "score": 2.4,
+          "percentile": 0.24,
+          "raw": {
+            "rev_yoy": -0.0645
+          },
+          "reason": "最新月營收年增 -6.5%，居全市場前 76%。"
+        },
+        "growth_quality": {
+          "score": 9.5,
+          "percentile": 0.95,
+          "raw": {
+            "rev_growth_12m_yoy": 0.6007
+          },
+          "reason": "近 12 個月營收合計年增 +60.1%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 5%。"
+        },
+        "chips": {
+          "score": 8.8,
+          "percentile": 0.88,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0632
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +6.3%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 12%。"
+        },
+        "technical": {
+          "score": 8.5,
+          "percentile": 0.85,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.1075
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.107（正值代表站上均線且量能放大），居全市場前 15%。"
+        },
+        "valuation_adj": {
+          "score": 8.1,
+          "percentile": 0.81,
+          "raw": {
+            "pe": 12.36,
+            "eps_yoy": 0.987,
+            "peg": 0.1252
+          },
+          "reason": "本益比 12.4 倍，近一季 EPS 年增 99%，PEG（本益比÷盈餘成長率）= 0.13（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 19%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "4438",
-      "industry": "紡織纖維",
-      "f_eps_growth": -0.3990461049284579,
-      "f_eps_surprise": -2.499453136017513,
-      "f_revenue_surprise": 2.042372756856132,
-      "f_low_vol": -0.011008025058148815,
-      "eps_family": -0.38101100000951443,
-      "revenue_surprise": 1.3041033375513489,
-      "low_vol": 0.9008575536533493,
-      "composite": 0.6079832970650613,
-      "n_components": 3,
+      "code": "6482",
+      "name": "弘煜科",
+      "industry": "文化創意業",
       "rank": 10,
-      "stock_name": "廣越"
+      "total_score": 7.3,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "成長性/未來性表現較突出（8.9/10），財報成長也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 8.7,
+          "percentile": 0.87,
+          "raw": {
+            "eps_yoy": 0.9412
+          },
+          "reason": "最新一季 EPS 年增 +94%，居全市場前 13%。"
+        },
+        "revenue_momentum": {
+          "score": 6.3,
+          "percentile": 0.63,
+          "raw": {
+            "rev_yoy": 0.0963
+          },
+          "reason": "最新月營收年增 +9.6%，居全市場前 37%。"
+        },
+        "growth_quality": {
+          "score": 8.9,
+          "percentile": 0.89,
+          "raw": {
+            "rev_growth_12m_yoy": 0.2972
+          },
+          "reason": "近 12 個月營收合計年增 +29.7%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 11%。"
+        },
+        "chips": {
+          "score": 5.5,
+          "percentile": 0.55,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.0%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 45%。"
+        },
+        "technical": {
+          "score": 7.6,
+          "percentile": 0.76,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.0425
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.043（正值代表站上均線且量能放大），居全市場前 24%。"
+        },
+        "valuation_adj": {
+          "score": 7.1,
+          "percentile": 0.71,
+          "raw": {
+            "pe": 23.96,
+            "eps_yoy": 0.9412,
+            "peg": 0.2546
+          },
+          "reason": "本益比 24.0 倍，近一季 EPS 年增 94%，PEG（本益比÷盈餘成長率）= 0.25（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 29%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "4541",
-      "industry": "其他",
-      "f_eps_growth": 15.25,
-      "f_eps_surprise": 1.0463722122324794,
-      "f_revenue_surprise": 2.117324752850169,
-      "f_low_vol": -0.02831504525045381,
-      "eps_family": 1.5628952524749624,
-      "revenue_surprise": 1.2156061679110517,
-      "low_vol": -1.0916033761126747,
-      "composite": 0.5622993480911133,
-      "n_components": 3,
-      "rank": 11,
-      "stock_name": "晟田"
-    },
-    {
-      "stock_id": "8383",
-      "industry": "其他電子類",
-      "f_eps_growth": -0.0789473684210527,
-      "f_eps_surprise": -0.09789850738255593,
-      "f_revenue_surprise": 2.2708071009283404,
-      "f_low_vol": -0.01621473157008432,
-      "eps_family": 0.15402984391258925,
-      "revenue_surprise": 0.7817332368130868,
-      "low_vol": 0.4985793626408348,
-      "composite": 0.47811414778883693,
-      "n_components": 3,
-      "rank": 12,
-      "stock_name": "千附"
-    },
-    {
-      "stock_id": "2497",
-      "industry": "汽車工業",
-      "f_eps_growth": 0.06329113924050624,
-      "f_eps_surprise": 0.2140362546967385,
-      "f_revenue_surprise": 1.3700816513856564,
-      "f_low_vol": -0.01977925947041623,
-      "eps_family": 0.14582828021152727,
-      "revenue_surprise": 1.0923212401141966,
-      "low_vol": 0.07839225611568928,
-      "composite": 0.4388472588138044,
-      "n_components": 3,
-      "rank": 13,
-      "stock_name": "怡利電"
-    },
-    {
-      "stock_id": "2424",
+      "code": "2424",
+      "name": "隴華",
       "industry": "電腦及週邊設備業",
-      "f_eps_growth": 0.3140495867768595,
-      "f_eps_surprise": 0.8623804883485804,
-      "f_revenue_surprise": 0.12123044237778424,
-      "f_low_vol": null,
-      "eps_family": 0.8443174144970068,
-      "revenue_surprise": -0.020412341709858763,
-      "low_vol": null,
-      "composite": 0.41195253639357404,
-      "n_components": 2,
-      "rank": 14,
-      "stock_name": "隴華"
+      "rank": 11,
+      "total_score": 7.1,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "成長性/未來性表現較突出（9.1/10），籌碼也不弱，技術型態偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 7.5,
+          "percentile": 0.75,
+          "raw": {
+            "eps_yoy": 0.314
+          },
+          "reason": "最新一季 EPS 年增 +31%，居全市場前 25%。"
+        },
+        "revenue_momentum": {
+          "score": 6.2,
+          "percentile": 0.62,
+          "raw": {
+            "rev_yoy": 0.0935
+          },
+          "reason": "最新月營收年增 +9.3%，居全市場前 38%。"
+        },
+        "growth_quality": {
+          "score": 9.1,
+          "percentile": 0.91,
+          "raw": {
+            "rev_growth_12m_yoy": 0.3259
+          },
+          "reason": "近 12 個月營收合計年增 +32.6%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 9%。"
+        },
+        "chips": {
+          "score": 8.5,
+          "percentile": 0.85,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0519
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +5.2%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 15%。"
+        },
+        "technical": {
+          "score": 3.3,
+          "percentile": 0.33,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0435
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.044（正值代表站上均線且量能放大），居全市場前 67%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "6840",
-      "industry": "其他電子類",
-      "f_eps_growth": 0.7826086956521738,
-      "f_eps_surprise": 0.2364804440023443,
-      "f_revenue_surprise": 0.3226382797463089,
-      "f_low_vol": null,
-      "eps_family": 1.1134295916948156,
-      "revenue_surprise": -0.36920035375327176,
-      "low_vol": null,
-      "composite": 0.3721146189707719,
-      "n_components": 2,
-      "rank": 15,
-      "stock_name": "東研信超"
-    },
-    {
-      "stock_id": "8416",
-      "industry": "資訊服務業",
-      "f_eps_growth": 0.26573426573426584,
-      "f_eps_surprise": 0.9688690731115854,
-      "f_revenue_surprise": -0.19224727716640516,
-      "f_low_vol": null,
-      "eps_family": 0.9590421479359714,
-      "revenue_surprise": -0.29972278571988153,
-      "low_vol": null,
-      "composite": 0.32965968110804494,
-      "n_components": 2,
-      "rank": 16,
-      "stock_name": "實威"
-    },
-    {
-      "stock_id": "2637",
-      "industry": "航運業",
-      "f_eps_growth": 2.603448275862069,
-      "f_eps_surprise": 0.6227558704119418,
-      "f_revenue_surprise": -0.021233098974365722,
-      "f_low_vol": -0.016810875175200544,
-      "eps_family": 0.5861595050893769,
-      "revenue_surprise": -0.14734817322020644,
-      "low_vol": 0.36087898788216516,
-      "composite": 0.2665634399171119,
-      "n_components": 3,
-      "rank": 17,
-      "stock_name": "慧洋-KY"
-    },
-    {
-      "stock_id": "1525",
-      "industry": "汽車工業",
-      "f_eps_growth": -0.018018018018018032,
-      "f_eps_surprise": -0.019008021762568134,
-      "f_revenue_surprise": 0.06944821582120347,
-      "f_low_vol": -0.011239833233488797,
-      "eps_family": -0.10524034424030776,
-      "revenue_surprise": -0.0665506022292235,
-      "low_vol": 0.8910480206400222,
-      "composite": 0.2397523580568303,
-      "n_components": 3,
-      "rank": 18,
-      "stock_name": "江申"
-    },
-    {
-      "stock_id": "2702",
-      "industry": "觀光事業",
-      "f_eps_growth": -1.3518518518518516,
-      "f_eps_surprise": -0.13187568351406462,
-      "f_revenue_surprise": -0.18979048761734008,
-      "f_low_vol": -0.008113527097864608,
-      "eps_family": -0.2268375317429642,
-      "revenue_surprise": -0.297533772156856,
-      "low_vol": 1.1885634077741494,
-      "composite": 0.22139736795810971,
-      "n_components": 3,
-      "rank": 19,
-      "stock_name": "華園"
-    },
-    {
-      "stock_id": "1443",
-      "industry": "紡織纖維",
-      "f_eps_growth": -0.4878048780487805,
-      "f_eps_surprise": -0.7818911124897078,
-      "f_revenue_surprise": 0.4666602156742307,
-      "f_low_vol": -0.013016220842667948,
-      "eps_family": 0.38329459654786346,
-      "revenue_surprise": 0.06606442041376791,
-      "low_vol": 0.175144361198991,
-      "composite": 0.20816779272020747,
-      "n_components": 3,
-      "rank": 20,
-      "stock_name": "立益"
-    },
-    {
-      "stock_id": "5880",
-      "industry": "金融保險",
-      "f_eps_growth": 0.11764705882352934,
-      "f_eps_surprise": 0.46431876475453365,
-      "f_revenue_surprise": -1.1112107486762566,
-      "f_low_vol": -0.006735171389590485,
-      "eps_family": 0.41546839529727897,
-      "revenue_surprise": -1.1185245035249844,
-      "low_vol": 1.3197348332090528,
-      "composite": 0.20555957499378244,
-      "n_components": 3,
-      "rank": 21,
-      "stock_name": "合庫金"
-    },
-    {
-      "stock_id": "6226",
-      "industry": "電子工業",
-      "f_eps_growth": 0.43999999999999995,
-      "f_eps_surprise": 0.5338476098334607,
-      "f_revenue_surprise": -0.5688393822174183,
-      "f_low_vol": -0.013168218514543544,
-      "eps_family": 0.49037481118919274,
-      "revenue_surprise": -0.6352685087952341,
-      "low_vol": 0.7075329493233715,
-      "composite": 0.18754641723911006,
-      "n_components": 3,
-      "rank": 22,
-      "stock_name": "光鼎"
-    },
-    {
-      "stock_id": "4724",
+      "code": "4724",
+      "name": "宣捷幹細胞",
       "industry": "生技醫療業",
-      "f_eps_growth": 0.1851851851851852,
-      "f_eps_surprise": 0.4760148920943951,
-      "f_revenue_surprise": null,
-      "f_low_vol": -0.02253693584874231,
-      "eps_family": 0.4280691364407556,
-      "revenue_surprise": null,
-      "low_vol": -0.18404242548484193,
-      "composite": 0.12201335547795684,
-      "n_components": 2,
-      "rank": 23,
-      "stock_name": "宣捷幹細胞"
+      "rank": 12,
+      "total_score": 6.9,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（9.4/10），成長性/未來性也不弱，技術型態偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 7.0,
+          "percentile": 0.7,
+          "raw": {
+            "eps_yoy": 0.1852
+          },
+          "reason": "最新一季 EPS 年增 +19%，居全市場前 30%。"
+        },
+        "revenue_momentum": {
+          "score": 9.4,
+          "percentile": 0.94,
+          "raw": {
+            "rev_yoy": 0.6508
+          },
+          "reason": "最新月營收年增 +65.1%，居全市場前 6%。"
+        },
+        "growth_quality": {
+          "score": 9.4,
+          "percentile": 0.94,
+          "raw": {
+            "rev_growth_12m_yoy": 0.4142
+          },
+          "reason": "近 12 個月營收合計年增 +41.4%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 6%。"
+        },
+        "chips": {
+          "score": 5.5,
+          "percentile": 0.55,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.0%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 45%。"
+        },
+        "technical": {
+          "score": 0.9,
+          "percentile": 0.09,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.1619
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.162（正值代表站上均線且量能放大），居全市場前 91%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "4991",
-      "industry": "半導體業",
-      "f_eps_growth": 1.6666666666666667,
-      "f_eps_surprise": 1.6981748797300065,
-      "f_revenue_surprise": 0.21433277929641015,
-      "f_low_vol": -0.0529912477422678,
-      "eps_family": 1.557048593227202,
-      "revenue_surprise": -0.39955490407084604,
-      "low_vol": -0.8289296210840906,
-      "composite": 0.10952135602408848,
-      "n_components": 3,
-      "rank": 24,
-      "stock_name": "環宇-KY"
+      "code": "3499",
+      "name": "環天科",
+      "industry": "通信網路業",
+      "rank": 13,
+      "total_score": 6.7,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "成長性/未來性表現較突出（9.2/10），營收動能也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 5.1,
+          "percentile": 0.51,
+          "raw": {
+            "eps_yoy": -0.0588
+          },
+          "reason": "最新一季 EPS 年增 -6%，居全市場前 49%。"
+        },
+        "revenue_momentum": {
+          "score": 7.6,
+          "percentile": 0.76,
+          "raw": {
+            "rev_yoy": 0.1548
+          },
+          "reason": "最新月營收年增 +15.5%，居全市場前 24%。"
+        },
+        "growth_quality": {
+          "score": 9.2,
+          "percentile": 0.92,
+          "raw": {
+            "rev_growth_12m_yoy": 0.3334
+          },
+          "reason": "近 12 個月營收合計年增 +33.3%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 8%。"
+        },
+        "chips": {
+          "score": 6.8,
+          "percentile": 0.68,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.008
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.8%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 32%。"
+        },
+        "technical": {
+          "score": 4.5,
+          "percentile": 0.45,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0264
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.026（正值代表站上均線且量能放大），居全市場前 55%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "5262",
-      "industry": "半導體業",
-      "f_eps_growth": -0.2868217054263566,
-      "f_eps_surprise": -0.2941488215161183,
-      "f_revenue_surprise": null,
-      "f_low_vol": -0.027488432642231306,
-      "eps_family": -0.5994962426863026,
-      "revenue_surprise": null,
-      "low_vol": 0.7684657178927526,
-      "composite": 0.084484737603225,
-      "n_components": 2,
-      "rank": 25,
-      "stock_name": "立達"
+      "code": "2719",
+      "name": "燦星旅",
+      "industry": "觀光事業",
+      "rank": 14,
+      "total_score": 6.6,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "成長性/未來性表現較突出（10.0/10），營收動能也不弱，財報成長偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 3.0,
+          "percentile": 0.3,
+          "raw": {
+            "eps_yoy": -0.7391
+          },
+          "reason": "最新一季 EPS 年增 -74%，居全市場前 70%。"
+        },
+        "revenue_momentum": {
+          "score": 9.1,
+          "percentile": 0.91,
+          "raw": {
+            "rev_yoy": 0.5305
+          },
+          "reason": "最新月營收年增 +53.0%，居全市場前 9%。"
+        },
+        "growth_quality": {
+          "score": 10.0,
+          "percentile": 1.0,
+          "raw": {
+            "rev_growth_12m_yoy": 1.2649
+          },
+          "reason": "近 12 個月營收合計年增 +126.5%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 1%。"
+        },
+        "chips": {
+          "score": 3.5,
+          "percentile": 0.35,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0189
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -1.9%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 65%。"
+        },
+        "technical": {
+          "score": 8.7,
+          "percentile": 0.87,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.1154
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.115（正值代表站上均線且量能放大），居全市場前 13%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "4104",
-      "industry": "化學生技醫療",
-      "f_eps_growth": -0.1016949152542372,
-      "f_eps_surprise": -0.6403823105469988,
-      "f_revenue_surprise": -0.5951571325230299,
-      "f_low_vol": -0.002986229189277141,
-      "eps_family": -0.7746735966895941,
-      "revenue_surprise": -0.6587177750904392,
-      "low_vol": 1.6765034737974127,
-      "composite": 0.08103736733912648,
-      "n_components": 3,
-      "rank": 26,
-      "stock_name": "佳醫"
-    },
-    {
-      "stock_id": "6729",
-      "industry": "光電業",
-      "f_eps_growth": -0.5,
-      "f_eps_surprise": -0.5868151951287903,
-      "f_revenue_surprise": null,
-      "f_low_vol": -0.024114291986530683,
-      "eps_family": -0.2173628203011787,
-      "revenue_surprise": null,
-      "low_vol": 0.3716986500511461,
-      "composite": 0.0771679148749837,
-      "n_components": 2,
-      "rank": 27,
-      "stock_name": "機光科技"
-    },
-    {
-      "stock_id": "2365",
-      "industry": "電子工業",
-      "f_eps_growth": 0.5714285714285713,
-      "f_eps_surprise": 1.307952543788146,
-      "f_revenue_surprise": 0.10643563738888662,
-      "f_low_vol": -0.03225721630713396,
-      "eps_family": 1.3243513580593271,
-      "revenue_surprise": -0.033594597713568715,
-      "low_vol": -1.109074357155631,
-      "composite": 0.0605608010633758,
-      "n_components": 3,
-      "rank": 28,
-      "stock_name": "昆盈"
-    },
-    {
-      "stock_id": "8401",
+      "code": "8401",
+      "name": "白紗科",
       "industry": "其他",
-      "f_eps_growth": 0.26,
-      "f_eps_surprise": 0.41051007115358146,
-      "f_revenue_surprise": 0.18525100845283796,
-      "f_low_vol": -0.009808029903996141,
-      "eps_family": -0.19729804909271526,
-      "revenue_surprise": -0.7260003736829264,
-      "low_vol": 1.00391362082724,
-      "composite": 0.026871732683866112,
-      "n_components": 3,
-      "rank": 29,
-      "stock_name": "白紗科"
+      "rank": 15,
+      "total_score": 6.5,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "技術型態表現較突出（8.9/10），籌碼也不弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 7.1,
+          "percentile": 0.71,
+          "raw": {
+            "eps_yoy": 0.26
+          },
+          "reason": "最新一季 EPS 年增 +26%，居全市場前 29%。"
+        },
+        "revenue_momentum": {
+          "score": 5.4,
+          "percentile": 0.54,
+          "raw": {
+            "rev_yoy": 0.0403
+          },
+          "reason": "最新月營收年增 +4.0%，居全市場前 46%。"
+        },
+        "growth_quality": {
+          "score": 5.0,
+          "percentile": 0.5,
+          "raw": {
+            "rev_growth_12m_yoy": 0.049
+          },
+          "reason": "近 12 個月營收合計年增 +4.9%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 50%。"
+        },
+        "chips": {
+          "score": 7.5,
+          "percentile": 0.75,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0162
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +1.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 25%。"
+        },
+        "technical": {
+          "score": 8.9,
+          "percentile": 0.89,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.1344
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.134（正值代表站上均線且量能放大），居全市場前 11%。"
+        },
+        "valuation_adj": {
+          "score": 5.7,
+          "percentile": 0.57,
+          "raw": {
+            "pe": 11.81,
+            "eps_yoy": 0.26,
+            "peg": 0.4542
+          },
+          "reason": "本益比 11.8 倍，近一季 EPS 年增 26%，PEG（本益比÷盈餘成長率）= 0.45（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 43%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     },
     {
-      "stock_id": "3236",
+      "code": "2365",
+      "name": "昆盈",
+      "industry": "電子工業",
+      "rank": 16,
+      "total_score": 6.3,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "成長性/未來性表現較突出（8.5/10），財報成長也不弱，籌碼偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 8.4,
+          "percentile": 0.84,
+          "raw": {
+            "eps_yoy": 0.5714
+          },
+          "reason": "最新一季 EPS 年增 +57%，居全市場前 16%。"
+        },
+        "revenue_momentum": {
+          "score": 5.1,
+          "percentile": 0.51,
+          "raw": {
+            "rev_yoy": 0.0275
+          },
+          "reason": "最新月營收年增 +2.7%，居全市場前 49%。"
+        },
+        "growth_quality": {
+          "score": 8.5,
+          "percentile": 0.85,
+          "raw": {
+            "rev_growth_12m_yoy": 0.2478
+          },
+          "reason": "近 12 個月營收合計年增 +24.8%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 15%。"
+        },
+        "chips": {
+          "score": 3.7,
+          "percentile": 0.37,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0164
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -1.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 63%。"
+        },
+        "technical": {
+          "score": 8.0,
+          "percentile": 0.8,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.0784
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.078（正值代表站上均線且量能放大），居全市場前 20%。"
+        },
+        "valuation_adj": {
+          "score": 4.3,
+          "percentile": 0.43,
+          "raw": {
+            "pe": 90.0,
+            "eps_yoy": 0.5714,
+            "peg": 1.575
+          },
+          "reason": "本益比 90.0 倍，近一季 EPS 年增 57%，PEG（本益比÷盈餘成長率）= 1.58（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 57%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "6840",
+      "name": "東研信超",
+      "industry": "其他電子類",
+      "rank": 16,
+      "total_score": 6.3,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（8.6/10），成長性/未來性也不弱，籌碼偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 8.6,
+          "percentile": 0.86,
+          "raw": {
+            "eps_yoy": 0.7826
+          },
+          "reason": "最新一季 EPS 年增 +78%，居全市場前 14%。"
+        },
+        "revenue_momentum": {
+          "score": 5.7,
+          "percentile": 0.57,
+          "raw": {
+            "rev_yoy": 0.0728
+          },
+          "reason": "最新月營收年增 +7.3%，居全市場前 43%。"
+        },
+        "growth_quality": {
+          "score": 7.4,
+          "percentile": 0.74,
+          "raw": {
+            "rev_growth_12m_yoy": 0.1873
+          },
+          "reason": "近 12 個月營收合計年增 +18.7%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 26%。"
+        },
+        "chips": {
+          "score": 3.1,
+          "percentile": 0.31,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0243
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -2.4%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 69%。"
+        },
+        "technical": {
+          "score": 6.1,
+          "percentile": 0.61,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.0016
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.002（正值代表站上均線且量能放大），居全市場前 39%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "6462",
+      "name": "神盾",
+      "industry": "半導體業",
+      "rank": 18,
+      "total_score": 6.0,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（9.3/10），成長性/未來性也不弱，技術型態偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 6.5,
+          "percentile": 0.65,
+          "raw": {
+            "eps_yoy": 0.1534
+          },
+          "reason": "最新一季 EPS 年增 +15%，居全市場前 35%。"
+        },
+        "revenue_momentum": {
+          "score": 9.3,
+          "percentile": 0.93,
+          "raw": {
+            "rev_yoy": 0.6331
+          },
+          "reason": "最新月營收年增 +63.3%，居全市場前 7%。"
+        },
+        "growth_quality": {
+          "score": 8.8,
+          "percentile": 0.88,
+          "raw": {
+            "rev_growth_12m_yoy": 0.2903
+          },
+          "reason": "近 12 個月營收合計年增 +29.0%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 12%。"
+        },
+        "chips": {
+          "score": 2.1,
+          "percentile": 0.21,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.044
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -4.4%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 79%。"
+        },
+        "technical": {
+          "score": 1.2,
+          "percentile": 0.12,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.1173
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.117（正值代表站上均線且量能放大），居全市場前 88%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "7530",
+      "name": "鋒魁科技",
+      "industry": "半導體業",
+      "rank": 18,
+      "total_score": 6.0,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（8.4/10），技術型態也不弱，成長性/未來性偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 5.8,
+          "percentile": 0.58,
+          "raw": {
+            "eps_yoy": 0.0519
+          },
+          "reason": "最新一季 EPS 年增 +5%，居全市場前 42%。"
+        },
+        "revenue_momentum": {
+          "score": 8.4,
+          "percentile": 0.84,
+          "raw": {
+            "rev_yoy": 0.325
+          },
+          "reason": "最新月營收年增 +32.5%，居全市場前 16%。"
+        },
+        "growth_quality": {
+          "score": 0.6,
+          "percentile": 0.06,
+          "raw": {
+            "rev_growth_12m_yoy": -0.2117
+          },
+          "reason": "近 12 個月營收合計年增 -21.2%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 94%。"
+        },
+        "chips": {
+          "score": 6.1,
+          "percentile": 0.61,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0007
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.1%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 39%。"
+        },
+        "technical": {
+          "score": 8.4,
+          "percentile": 0.84,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.1035
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.103（正值代表站上均線且量能放大），居全市場前 16%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "8383",
+      "name": "千附",
+      "industry": "其他電子類",
+      "rank": 20,
+      "total_score": 5.9,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（9.6/10），技術型態也不弱，籌碼偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 4.9,
+          "percentile": 0.49,
+          "raw": {
+            "eps_yoy": -0.0789
+          },
+          "reason": "最新一季 EPS 年增 -8%，居全市場前 51%。"
+        },
+        "revenue_momentum": {
+          "score": 9.6,
+          "percentile": 0.96,
+          "raw": {
+            "rev_yoy": 0.8269
+          },
+          "reason": "最新月營收年增 +82.7%，居全市場前 4%。"
+        },
+        "growth_quality": {
+          "score": 4.5,
+          "percentile": 0.45,
+          "raw": {
+            "rev_growth_12m_yoy": 0.0305
+          },
+          "reason": "近 12 個月營收合計年增 +3.1%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 55%。"
+        },
+        "chips": {
+          "score": 2.8,
+          "percentile": 0.28,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0323
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -3.2%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 72%。"
+        },
+        "technical": {
+          "score": 7.3,
+          "percentile": 0.73,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.036
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.036（正值代表站上均線且量能放大），居全市場前 27%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "2009",
+      "name": "第一銅",
+      "industry": "鋼鐵工業",
+      "rank": 20,
+      "total_score": 5.9,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（9.4/10），成長性/未來性也不弱，籌碼偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.4,
+          "percentile": 0.94,
+          "raw": {
+            "eps_yoy": 1.8571
+          },
+          "reason": "最新一季 EPS 年增 +186%，居全市場前 6%。"
+        },
+        "revenue_momentum": {
+          "score": 5.6,
+          "percentile": 0.56,
+          "raw": {
+            "rev_yoy": 0.0667
+          },
+          "reason": "最新月營收年增 +6.7%，居全市場前 44%。"
+        },
+        "growth_quality": {
+          "score": 7.6,
+          "percentile": 0.76,
+          "raw": {
+            "rev_growth_12m_yoy": 0.1937
+          },
+          "reason": "近 12 個月營收合計年增 +19.4%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 24%。"
+        },
+        "chips": {
+          "score": 1.5,
+          "percentile": 0.15,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0708
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -7.1%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 85%。"
+        },
+        "technical": {
+          "score": 3.1,
+          "percentile": 0.31,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0444
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.044（正值代表站上均線且量能放大），居全市場前 69%。"
+        },
+        "valuation_adj": {
+          "score": 6.7,
+          "percentile": 0.67,
+          "raw": {
+            "pe": 55.45,
+            "eps_yoy": 1.8571,
+            "peg": 0.2986
+          },
+          "reason": "本益比 55.5 倍，近一季 EPS 年增 186%，PEG（本益比÷盈餘成長率）= 0.30（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 33%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "6127",
+      "name": "九豪",
       "industry": "電子零組件業",
-      "f_eps_growth": -1.5,
-      "f_eps_surprise": -0.4738981646784188,
-      "f_revenue_surprise": 0.8661851218626241,
-      "f_low_vol": -0.017660420044416633,
-      "eps_family": -0.47432565270660204,
-      "revenue_surprise": 0.048053760357771584,
-      "low_vol": 0.49791782792803974,
-      "composite": 0.023881978526403096,
-      "n_components": 3,
-      "rank": 30,
-      "stock_name": "千如"
+      "rank": 20,
+      "total_score": 5.9,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（8.2/10），成長性/未來性也不弱，財報成長偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 1.9,
+          "percentile": 0.19,
+          "raw": {
+            "eps_yoy": -0.9792
+          },
+          "reason": "最新一季 EPS 年增 -98%，居全市場前 81%。"
+        },
+        "revenue_momentum": {
+          "score": 8.2,
+          "percentile": 0.82,
+          "raw": {
+            "rev_yoy": 0.2738
+          },
+          "reason": "最新月營收年增 +27.4%，居全市場前 18%。"
+        },
+        "growth_quality": {
+          "score": 8.2,
+          "percentile": 0.82,
+          "raw": {
+            "rev_growth_12m_yoy": 0.2374
+          },
+          "reason": "近 12 個月營收合計年增 +23.7%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 18%。"
+        },
+        "chips": {
+          "score": 7.1,
+          "percentile": 0.71,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0089
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.9%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 29%。"
+        },
+        "technical": {
+          "score": 4.4,
+          "percentile": 0.44,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0274
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.027（正值代表站上均線且量能放大），居全市場前 56%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "2637",
+      "name": "慧洋-KY",
+      "industry": "航運業",
+      "rank": 24,
+      "total_score": 5.8,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（9.7/10），估值(成長調整)也不弱，籌碼偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.7,
+          "percentile": 0.97,
+          "raw": {
+            "eps_yoy": 2.6034
+          },
+          "reason": "最新一季 EPS 年增 +260%，居全市場前 3%。"
+        },
+        "revenue_momentum": {
+          "score": 4.1,
+          "percentile": 0.41,
+          "raw": {
+            "rev_yoy": -0.0036
+          },
+          "reason": "最新月營收年增 -0.4%，居全市場前 59%。"
+        },
+        "growth_quality": {
+          "score": 8.0,
+          "percentile": 0.8,
+          "raw": {
+            "rev_growth_12m_yoy": 0.2366
+          },
+          "reason": "近 12 個月營收合計年增 +23.7%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 20%。"
+        },
+        "chips": {
+          "score": 1.1,
+          "percentile": 0.11,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0962
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -9.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 89%。"
+        },
+        "technical": {
+          "score": 1.3,
+          "percentile": 0.13,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.1081
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.108（正值代表站上均線且量能放大），居全市場前 87%。"
+        },
+        "valuation_adj": {
+          "score": 9.5,
+          "percentile": 0.95,
+          "raw": {
+            "pe": 8.13,
+            "eps_yoy": 2.6034,
+            "peg": 0.0312
+          },
+          "reason": "本益比 8.1 倍，近一季 EPS 年增 260%，PEG（本益比÷盈餘成長率）= 0.03（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 5%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "2313",
+      "name": "華通",
+      "industry": "電子工業",
+      "rank": 24,
+      "total_score": 5.8,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "籌碼表現較突出（9.1/10），技術型態也不弱，估值(成長調整)偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 6.2,
+          "percentile": 0.62,
+          "raw": {
+            "eps_yoy": 0.0709
+          },
+          "reason": "最新一季 EPS 年增 +7%，居全市場前 38%。"
+        },
+        "revenue_momentum": {
+          "score": 3.5,
+          "percentile": 0.35,
+          "raw": {
+            "rev_yoy": -0.0291
+          },
+          "reason": "最新月營收年增 -2.9%，居全市場前 65%。"
+        },
+        "growth_quality": {
+          "score": 5.6,
+          "percentile": 0.56,
+          "raw": {
+            "rev_growth_12m_yoy": 0.0699
+          },
+          "reason": "近 12 個月營收合計年增 +7.0%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 44%。"
+        },
+        "chips": {
+          "score": 9.1,
+          "percentile": 0.91,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0744
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +7.4%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 9%。"
+        },
+        "technical": {
+          "score": 8.8,
+          "percentile": 0.88,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.1321
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.132（正值代表站上均線且量能放大），居全市場前 12%。"
+        },
+        "valuation_adj": {
+          "score": 2.4,
+          "percentile": 0.24,
+          "raw": {
+            "pe": 15.27,
+            "eps_yoy": 0.0709,
+            "peg": 2.1531
+          },
+          "reason": "本益比 15.3 倍，近一季 EPS 年增 7%，PEG（本益比÷盈餘成長率）= 2.15（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 76%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "9105",
+      "name": "泰金寶-DR",
+      "industry": "存託憑證",
+      "rank": 24,
+      "total_score": 5.8,
+      "coverage": 0.54,
+      "data_asof": "2024-12-31",
+      "summary": "技術型態表現較突出（9.7/10），籌碼也不弱，成長性/未來性偏弱。",
+      "factors": {
+        "revenue_momentum": {
+          "score": 4.0,
+          "percentile": 0.4,
+          "raw": {
+            "rev_yoy": -0.0079
+          },
+          "reason": "最新月營收年增 -0.8%，居全市場前 60%。"
+        },
+        "growth_quality": {
+          "score": 3.8,
+          "percentile": 0.38,
+          "raw": {
+            "rev_growth_12m_yoy": -0.0254
+          },
+          "reason": "近 12 個月營收合計年增 -2.5%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 62%。"
+        },
+        "chips": {
+          "score": 6.9,
+          "percentile": 0.69,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0081
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.8%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 31%。"
+        },
+        "technical": {
+          "score": 9.7,
+          "percentile": 0.97,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.3647
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.365（正值代表站上均線且量能放大），居全市場前 3%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "9911",
+      "name": "櫻花",
+      "industry": "其他",
+      "rank": 27,
+      "total_score": 5.7,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "籌碼表現較突出（9.6/10），成長性/未來性也不弱，估值(成長調整)偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 5.9,
+          "percentile": 0.59,
+          "raw": {
+            "eps_yoy": 0.0552
+          },
+          "reason": "最新一季 EPS 年增 +6%，居全市場前 41%。"
+        },
+        "revenue_momentum": {
+          "score": 4.3,
+          "percentile": 0.43,
+          "raw": {
+            "rev_yoy": 0.0006
+          },
+          "reason": "最新月營收年增 +0.1%，居全市場前 57%。"
+        },
+        "growth_quality": {
+          "score": 7.1,
+          "percentile": 0.71,
+          "raw": {
+            "rev_growth_12m_yoy": 0.1616
+          },
+          "reason": "近 12 個月營收合計年增 +16.2%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 29%。"
+        },
+        "chips": {
+          "score": 9.6,
+          "percentile": 0.96,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.1333
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +13.3%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 4%。"
+        },
+        "technical": {
+          "score": 5.6,
+          "percentile": 0.56,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0072
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.007（正值代表站上均線且量能放大），居全市場前 44%。"
+        },
+        "valuation_adj": {
+          "score": 1.4,
+          "percentile": 0.14,
+          "raw": {
+            "pe": 13.66,
+            "eps_yoy": 0.0552,
+            "peg": 2.4759
+          },
+          "reason": "本益比 13.7 倍，近一季 EPS 年增 6%，PEG（本益比÷盈餘成長率）= 2.48（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 86%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "2477",
+      "name": "美隆電",
+      "industry": "其他電子業",
+      "rank": 27,
+      "total_score": 5.7,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（9.0/10），估值(成長調整)也不弱，籌碼偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 9.0,
+          "percentile": 0.9,
+          "raw": {
+            "eps_yoy": 1.2812
+          },
+          "reason": "最新一季 EPS 年增 +128%，居全市場前 10%。"
+        },
+        "revenue_momentum": {
+          "score": 3.7,
+          "percentile": 0.37,
+          "raw": {
+            "rev_yoy": -0.0281
+          },
+          "reason": "最新月營收年增 -2.8%，居全市場前 63%。"
+        },
+        "growth_quality": {
+          "score": 6.4,
+          "percentile": 0.64,
+          "raw": {
+            "rev_growth_12m_yoy": 0.1044
+          },
+          "reason": "近 12 個月營收合計年增 +10.4%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 36%。"
+        },
+        "chips": {
+          "score": 2.5,
+          "percentile": 0.25,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0374
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -3.7%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 75%。"
+        },
+        "technical": {
+          "score": 4.7,
+          "percentile": 0.47,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0203
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.020（正值代表站上均線且量能放大），居全市場前 53%。"
+        },
+        "valuation_adj": {
+          "score": 7.6,
+          "percentile": 0.76,
+          "raw": {
+            "pe": 18.27,
+            "eps_yoy": 1.2812,
+            "peg": 0.1426
+          },
+          "reason": "本益比 18.3 倍，近一季 EPS 年增 128%，PEG（本益比÷盈餘成長率）= 0.14（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 24%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "8908",
+      "name": "欣雄",
+      "industry": "油電燃氣業",
+      "rank": 29,
+      "total_score": 5.6,
+      "coverage": 0.84,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（8.5/10），財報成長也不弱，技術型態偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 6.7,
+          "percentile": 0.67,
+          "raw": {
+            "eps_yoy": 0.1579
+          },
+          "reason": "最新一季 EPS 年增 +16%，居全市場前 33%。"
+        },
+        "revenue_momentum": {
+          "score": 8.5,
+          "percentile": 0.85,
+          "raw": {
+            "rev_yoy": 0.3674
+          },
+          "reason": "最新月營收年增 +36.7%，居全市場前 15%。"
+        },
+        "growth_quality": {
+          "score": 6.1,
+          "percentile": 0.61,
+          "raw": {
+            "rev_growth_12m_yoy": 0.0884
+          },
+          "reason": "近 12 個月營收合計年增 +8.8%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 39%。"
+        },
+        "chips": {
+          "score": 3.9,
+          "percentile": 0.39,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0157
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -1.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 61%。"
+        },
+        "technical": {
+          "score": 2.4,
+          "percentile": 0.24,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0574
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.057（正值代表站上均線且量能放大），居全市場前 76%。"
+        },
+        "valuation_adj": {
+          "score": 3.8,
+          "percentile": 0.38,
+          "raw": {
+            "pe": 26.34,
+            "eps_yoy": 0.1579,
+            "peg": 1.6682
+          },
+          "reason": "本益比 26.3 倍，近一季 EPS 年增 16%，PEG（本益比÷盈餘成長率）= 1.67（PEG<1通常視為便宜、>2偏貴，用成長調整後的估值，避免高成長股被純本益比殺錯），估值居全市場前 62%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "4406",
+      "name": "新昕纖",
+      "industry": "紡織纖維",
+      "rank": 29,
+      "total_score": 5.6,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（8.7/10），籌碼也不弱，財報成長偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 0.4,
+          "percentile": 0.04,
+          "raw": {
+            "eps_yoy": -4.2222
+          },
+          "reason": "最新一季 EPS 年增 -422%，居全市場前 96%。"
+        },
+        "revenue_momentum": {
+          "score": 8.7,
+          "percentile": 0.87,
+          "raw": {
+            "rev_yoy": 0.4234
+          },
+          "reason": "最新月營收年增 +42.3%，居全市場前 13%。"
+        },
+        "growth_quality": {
+          "score": 5.8,
+          "percentile": 0.58,
+          "raw": {
+            "rev_growth_12m_yoy": 0.0756
+          },
+          "reason": "近 12 個月營收合計年增 +7.6%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 42%。"
+        },
+        "chips": {
+          "score": 7.2,
+          "percentile": 0.72,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0131
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +1.3%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 28%。"
+        },
+        "technical": {
+          "score": 6.8,
+          "percentile": 0.68,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.0195
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.020（正值代表站上均線且量能放大），居全市場前 32%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "5228",
+      "name": "鈺鎧",
+      "industry": "電子零組件業",
+      "rank": 31,
+      "total_score": 5.5,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "財報成長表現較突出（7.8/10），營收動能也不弱，成長性/未來性偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 7.8,
+          "percentile": 0.78,
+          "raw": {
+            "eps_yoy": 0.4225
+          },
+          "reason": "最新一季 EPS 年增 +42%，居全市場前 22%。"
+        },
+        "revenue_momentum": {
+          "score": 7.4,
+          "percentile": 0.74,
+          "raw": {
+            "rev_yoy": 0.1421
+          },
+          "reason": "最新月營收年增 +14.2%，居全市場前 26%。"
+        },
+        "growth_quality": {
+          "score": 2.3,
+          "percentile": 0.23,
+          "raw": {
+            "rev_growth_12m_yoy": -0.1017
+          },
+          "reason": "近 12 個月營收合計年增 -10.2%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 77%。"
+        },
+        "chips": {
+          "score": 4.0,
+          "percentile": 0.4,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": -0.0155
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 -1.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 60%。"
+        },
+        "technical": {
+          "score": 3.9,
+          "percentile": 0.39,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.0394
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.039（正值代表站上均線且量能放大），居全市場前 61%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "6984",
+      "name": "ACpay",
+      "industry": "數位雲端",
+      "rank": 32,
+      "total_score": 5.4,
+      "coverage": 0.6,
+      "data_asof": "2024-12-31",
+      "summary": "營收動能表現較突出（9.7/10），財報成長偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 1.7,
+          "percentile": 0.17,
+          "raw": {
+            "eps_yoy": -1.0172
+          },
+          "reason": "最新一季 EPS 年增 -102%，居全市場前 83%。"
+        },
+        "revenue_momentum": {
+          "score": 9.7,
+          "percentile": 0.97,
+          "raw": {
+            "rev_yoy": 1.0143
+          },
+          "reason": "最新月營收年增 +101.4%，居全市場前 3%。"
+        },
+        "chips": {
+          "score": 5.5,
+          "percentile": 0.55,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.0%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 45%。"
+        },
+        "technical": {
+          "score": 4.1,
+          "percentile": 0.41,
+          "raw": {
+            "ma60_breakout_x_volume_index": -0.035
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 -0.035（正值代表站上均線且量能放大），居全市場前 59%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
+    },
+    {
+      "code": "3373",
+      "name": "熱映",
+      "industry": "其他電子類",
+      "rank": 33,
+      "total_score": 5.3,
+      "coverage": 0.72,
+      "data_asof": "2024-12-31",
+      "summary": "技術型態表現較突出（8.1/10），財報成長也不弱，營收動能偏弱。",
+      "factors": {
+        "earnings_growth": {
+          "score": 6.8,
+          "percentile": 0.68,
+          "raw": {
+            "eps_yoy": 0.1739
+          },
+          "reason": "最新一季 EPS 年增 +17%，居全市場前 32%。"
+        },
+        "revenue_momentum": {
+          "score": 2.9,
+          "percentile": 0.29,
+          "raw": {
+            "rev_yoy": -0.0444
+          },
+          "reason": "最新月營收年增 -4.4%，居全市場前 71%。"
+        },
+        "growth_quality": {
+          "score": 3.2,
+          "percentile": 0.32,
+          "raw": {
+            "rev_growth_12m_yoy": -0.0505
+          },
+          "reason": "近 12 個月營收合計年增 -5.0%（簡化版成長性代理指標，用滾動 12 個月平滑單月雜訊；未含毛利率趨勢，非嚴格多年 CAGR），居全市場前 68%。"
+        },
+        "chips": {
+          "score": 6.4,
+          "percentile": 0.64,
+          "raw": {
+            "inst_net_pct_of_20d_trading_value": 0.0056
+          },
+          "reason": "三大法人近 20 日買超金額約當 20 日均成交值的 +0.6%（以成交值取代股本/市值作分母，市值資料為 FinMind 付費層，見 factors.py 揭露），居全市場前 36%。"
+        },
+        "technical": {
+          "score": 8.1,
+          "percentile": 0.81,
+          "raw": {
+            "ma60_breakout_x_volume_index": 0.0799
+          },
+          "reason": "價格相對 60 日均線乖離 × 近 20/60 日均量比綜合指標為 +0.080（正值代表站上均線且量能放大），居全市場前 19%。"
+        }
+      },
+      "flags": [],
+      "news_warning": null
     }
   ]
 }
