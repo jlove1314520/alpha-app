@@ -51,7 +51,7 @@ Cowork 確認上一輪 `weinstein_stage2_pilot_v1` 的 `FAIL` 判定本身是對
 
 repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `research/` 底下的檔案，這張表要跟著更新**——這張表本身如果跟 repo 實際內容對不上，就是一種未被記錄的漏洞，發現對不上要立刻修這張表，不能放著。
 
-最後逐檔驗證時間：**2026-08-24T16:35:00+08:00**（承接 8/24 13:45 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
+最後逐檔驗證時間：**2026-08-24T17:00:00+08:00**（承接 8/24 16:35 那次的驗證方式：`git ls-tree origin/main` + `raw.githubusercontent.com` HTTP 200 + GitHub API `contents`/`commits` 交叉核對）。
 
 | 路徑（repo 相對） | 用途 | 型態 |
 |---|---|---|
@@ -94,13 +94,32 @@ repo：`jlove1314520/alpha-app`，分支 `main`。**每次新增/刪除 `researc
 | `research/long_short_backtest.py` | **2026-08-24 新增**：Cowork 稽核回應。`score.py` 綜合分的多空市場中性評估（買前decile/空後decile、實測 beta、配對隨機控制組、週頻/月頻對照），結果見 `LEADS.md` 的 `score_longshort_v1` 兩列跟 `REPORT.md` 完整解讀。**2026-08-24 二次覆核後判定降級為「樣本不足、暫不採信」** | 程式碼 |
 | `research/backfill_universe.py` | **2026-08-24 新增**：Cowork 二次覆核第1點。可斷點續傳的全市場歷史資料回補，進度存 `research/data/backfill_state.json`（不進git），已整合進 `MARATHON_PROTOCOL.md` 5b 節成為 TW 軌最高優先序背景任務 | 程式碼 |
 | `research/diagnose_monthly_inconsistency.py` | **2026-08-24 新增**：Cowork 二次覆核第2點。月頻多空 train/val 不一致的逐月拆解診斷，結果見 `REPORT.md` 對應條目 | 程式碼 |
-| `research/long_only_vs_market.py` | **2026-08-24 新增**：Cowork 二次覆核第3點。放空可行性查驗（`TaiwanStockMarginPurchaseShortSale`）+ 純多前decile相對大盤的可執行對照版本，結果見 `LEADS.md` 的 `score_longonly_v1` 列 | 程式碼 |
+| `research/long_only_vs_market.py` | **2026-08-24 新增**：Cowork 二次覆核第3點。放空可行性查驗（`TaiwanStockMarginPurchaseShortSale`）+ 純多前decile相對大盤的可執行對照版本，結果見 `LEADS.md` 的 `score_longonly_v1` 列。**2026-08-24 三次覆核追加**：`decompose_alpha_beta()`（alpha/beta拆解，含MDD）+ `run_cost_sensitivity_with_alpha()`（1x/2x/3x成本敏感度） | 程式碼 |
 | `research/run_shortability_and_longonly.py` | **2026-08-24 新增**：上述兩支模組的驅動腳本 | 程式碼 |
+| `research/run_alpha_decomposition.py` | **2026-08-24 新增**：Cowork 三次覆核第2點。純多前decile的 alpha/beta 拆解 + 成本敏感度驅動腳本，結果見 `LEADS.md`/`REPORT.md` | 程式碼 |
 | `research/data/` | parquet 快取、`data/backtests/`（回測交易/權益曲線 CSV）、`data/factor_ic_results.csv`（因子IC原始數字）、`data/score_backtest_results.csv`、`data/ledger/trades.csv`（未來紙上帳本） | **不進 git**（`.gitignore`），內容只存在本機，Cowork 讀不到屬正常 |
 | `research/HOLDOUT_LOCK.json` / `research/HOLDOUT_LOG.md` | holdout 一次性鎖 + 稽核軌跡 | 進 git，**尚未產生**（還沒用過 holdout） |
 | `research/criteria/*.json` | 鎖定的事前通過標準檔 | 進 git，**尚未產生**（第一個候選這輪沒有鎖定標準檔，見 `LEADS.md` 備註） |
 | `scores.json`（repo 根目錄，非 `research/` 底下） | **2026-08-23 新增**：App「選股」頁讀取的靜態排行榜資料，`research/score.py` 產生，基準日 `VAL_END`（2024-12-31，非即時，見下方架構問題備註） | 進 git（App 資料檔，跟 `research/data/` 不同層級） |
 | `index.html`（repo 根目錄） | App 本體。**2026-08-23**：新增「選股」分頁（nav 第 3 項、`scr-picks` 畫面、`hydratePicks()`/`renderPicks()`/`showPickDetail()`） | 進 git |
+
+---
+
+## 2026-08-24（傍晚）— Cowork 三次覆核：付費方案調查、alpha/beta拆解確認選股能力、多空擱置
+
+Cowork 明確定調：「純多前decile 是更穩健且可實際執行的方向，多空的放空腿在台股不穩又借不到券，先擱置為研究備選」，要求依序處理四件事。
+
+**第1點：解瓶頸。** 查了 FinMind 完整定價（官網實測，非猜測）：Free($0,300-600次/hr) / Backer($699/月,1600次/hr,含官方還原股價資料表) / Sponsor($999/月,6000次/hr) / Sponsor Pro($3330/月,20000次/hr,商業授權)。用實測速率換算：全市場回補（≈12,784次呼叫）Free層要好幾天、Backer約8小時、Sponsor約2.1小時可以一次做完。**這是金流決策，回報資訊給使用者，不會自己執行付款。** 同時實測評估 yfinance 免費備援：台股價格資料可用（含還原股價），但**完全不支援已下市股票**（會重新引入存活者偏差）、**財報歷史只有約7季**（遠不夠PIT因子計算），結論是只能局部緩解不是完整解方。這次 session 額度中途恢復過一次，補跑一批很快又撞牆，累積 199/3,196（6.2%），維持「樣本不足、不可採信」標記不放寬。
+
+**第2點：alpha/beta拆解，確認贏隨機是選股能力不只是beta。** 新增 `decompose_alpha_beta()`：對每日淨值序列做CAPM迴歸拿到實測beta，逐日算「純alpha報酬」=策略報酬−beta×大盤報酬，複利成獨立淨值曲線後算年化/Sortino/MDD。**四期純alpha年化+15.22%~+24.31%，Sortino多數>1.0，MDD約−11%~−13%**——確認選股能力是真的。成本敏感度誠實記錄：四期在3x成本下alpha全部維持正值，但Validation(週頻)已相當薄弱（+6.17%，Sortino僅0.180），月頻的alpha對成本比週頻更有韌性。
+
+**第3點：待宇宙達80%+後才能做，這輪還不能開始，如實記錄。**
+
+**第4點：** `score_longshort_v1`（多空版本）判定從「樣本不足、暫不採信」改為 `PENDING`（放空可行性＋券源確認後再議），反映多空版本先擱置為研究備選的定調，`score_longonly_v1`（純多版本）成為主力發展方向。
+
+**Holdout 複查：** `is_holdout_consumed()` 再次確認為 `False`。
+
+**下一步：** commit + push 這輪。等宇宙回補達門檻、放空可行性重新查驗過，才能做更有信心的最終判定；付費方案要不要用，留給使用者決定。
 
 ---
 

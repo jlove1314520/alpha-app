@@ -101,7 +101,7 @@ def _random_longonly_legs(as_of, data, industry_map, rng):
     return rng.sample(pool, k)
 
 
-def run_long_only(data, market_df, start, end, rebalance_days, industry_map, leg_fn):
+def run_long_only(data, market_df, start, end, rebalance_days, industry_map, leg_fn, cost_multiplier=1.0):
     idx = {sid: d.set_index("date") for sid, d in data.items()}
     calendar = sorted(d for d in market_df["date"] if start <= d <= end)
     if not calendar:
@@ -115,7 +115,7 @@ def run_long_only(data, market_df, start, end, rebalance_days, industry_map, leg
             new_longs = leg_fn(day, data, industry_map)
             if new_longs:
                 turnover = 1.0 if not longs else len(set(new_longs) ^ set(longs)) / (2 * len(new_longs))
-                cost = turnover * costmod.round_trip_cost_pct(slippage_bps=costmod.DEFAULT_SLIPPAGE_BPS)
+                cost = turnover * costmod.round_trip_cost_pct(slippage_bps=costmod.DEFAULT_SLIPPAGE_BPS) * cost_multiplier
                 equity *= (1 - cost)
                 longs = new_longs
         if i == 0:
@@ -207,3 +207,80 @@ def run_period(label, data, market_df, industry_map, start, end, cadence_name, r
         "market_total_return_pct": mkt_total_ret, "excess_vs_market_pp": total_ret_pct - mkt_total_ret,
         "random_control_percentile": pct,
     }
+
+
+def max_drawdown_pct(equity: pd.Series) -> float:
+    running_max = equity.cummax()
+    dd = (equity - running_max) / running_max
+    return float(dd.min() * 100)
+
+
+def decompose_alpha_beta(result: pd.DataFrame, market_df: pd.DataFrame) -> dict:
+    """Cowork 稽核第2點：把「總報酬」拆成「beta×大盤貢獻」跟「alpha（扣掉beta後
+    剩下的純選股能力）貢獻」兩塊，而不是只回報一個綜合的 alpha_annualized 數字。
+
+    做法：先用 `capm_beta_vs_market()` 對日報酬序列做 CAPM 迴歸拿到實測 beta；
+    再逐日算「純 alpha 報酬」= 策略當日報酬 − beta×大盤當日報酬（把系統性的
+    大盤暴露部分扣掉，剩下的才是真正跟選股能力有關的部分，不是運氣好搭上一段
+    大盤上漲）；把這個純 alpha 報酬序列複利起來，得到一條「假設沒有大盤暴露、
+    只留選股能力」的淨值曲線，在這條曲線上算年化報酬、Sortino、MDD——這些數字
+    才是回答「贏隨機是選股alpha、不只是beta」的直接證據，不是靠回歸截距的
+    年化換算值（那個雖然方向正確，但沒有給出完整的alpha報酬序列本身的風險
+    特性，例如MDD）。
+    """
+    mkt = market_df.set_index("date")["close"].sort_index()
+    mkt_ret = mkt.pct_change()
+    net_ret = result.set_index("date")["equity"].pct_change().rename("net_return")
+    merged = pd.concat([net_ret, mkt_ret.rename("mkt_return")], axis=1, join="inner").dropna()
+    if len(merged) < 30:
+        return {"beta": float("nan"), "alpha_ann_pct": float("nan"), "alpha_sortino": float("nan"),
+                "alpha_mdd_pct": float("nan"), "beta_contribution_pct": float("nan"),
+                "total_return_pct": float("nan")}
+
+    x = merged["mkt_return"].values
+    y = merged["net_return"].values
+    beta, alpha_daily = np.polyfit(x, y, 1)
+
+    # 純 alpha 報酬序列：每日總報酬扣掉 beta×當日大盤報酬
+    alpha_daily_series = merged["net_return"] - beta * merged["mkt_return"]
+    alpha_equity = (1 + alpha_daily_series).cumprod()
+    alpha_equity = pd.concat([pd.Series([1.0]), alpha_equity]).reset_index(drop=True)  # 補回起始點=1.0
+
+    alpha_total_ret_pct = (alpha_equity.iloc[-1] / alpha_equity.iloc[0] - 1) * 100
+    years = len(merged) / 252.0
+    alpha_ann_pct = (((1 + alpha_total_ret_pct / 100) ** (1 / years)) - 1) * 100 if years > 0 else float("nan")
+
+    downside = alpha_daily_series[alpha_daily_series < 0]
+    downside_dev = float(np.sqrt((downside**2).mean())) if len(downside) else 0.0
+    alpha_sortino = float(alpha_daily_series.mean() / downside_dev * np.sqrt(252)) if downside_dev > 0 else float("nan")
+    alpha_mdd = max_drawdown_pct(alpha_equity)
+
+    total_return_pct = (result["equity"].iloc[-1] / result["equity"].iloc[0] - 1) * 100
+    # beta 貢獻 = 總報酬 − alpha 部分報酬（用複利意義上的近似分解，不是簡單線性相減，
+    # 但兩者差距不大時可以用來直觀理解「這段報酬大概多少比例是搭大盤順風車」）
+    beta_contribution_pct = total_return_pct - alpha_total_ret_pct
+
+    return {
+        "beta": float(beta), "alpha_total_return_pct": float(alpha_total_ret_pct),
+        "alpha_ann_pct": float(alpha_ann_pct), "alpha_sortino": alpha_sortino,
+        "alpha_mdd_pct": alpha_mdd, "beta_contribution_pct": float(beta_contribution_pct),
+        "total_return_pct": float(total_return_pct),
+    }
+
+
+def run_cost_sensitivity_with_alpha(data, market_df, industry_map, start, end, rebalance_days, cost_multipliers=(1, 2, 3)):
+    """對同一期間、同一換股頻率，跑 1x/2x/3x 三種成本倍數，每個都做一次
+    alpha/beta拆解，回報「alpha 是否在更高成本假設下依然顯著為正」。
+    """
+    rows = []
+    for mult in cost_multipliers:
+        result = run_long_only(data, market_df, start, end, rebalance_days, industry_map,
+                                _longonly_legs, cost_multiplier=mult)
+        decomp = decompose_alpha_beta(result, market_df)
+        decomp["cost_multiplier"] = mult
+        rows.append(decomp)
+        print(f"    成本{mult}x：總報酬={decomp['total_return_pct']:+.2f}%  "
+              f"beta貢獻={decomp['beta_contribution_pct']:+.2f}%  "
+              f"純alpha報酬={decomp['alpha_total_return_pct']:+.2f}%（年化{decomp['alpha_ann_pct']:+.2f}%）  "
+              f"alpha_Sortino={decomp['alpha_sortino']:.3f}  alpha_MDD={decomp['alpha_mdd_pct']:.2f}%")
+    return rows
