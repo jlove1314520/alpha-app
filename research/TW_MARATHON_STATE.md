@@ -2,11 +2,11 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-24T05:35:57+08:00**（馬拉松第34輪執行後，取鎖乾淨成功，第33輪正常結束）
+**最後更新：2026-08-24T07:06:36+08:00**（馬拉松第37輪執行後，取鎖乾淨成功，第34輪正常結束）
 
 **地基狀態：✅ 完整可用，不需要額外搭建。** `universe.py`（全市場宇宙）、`adjust.py`（還原股價）、`pit.py`（point-in-time）、`factors.py`（因子計算框架）、`factor_ic.py`（IC 檢定引擎，含 Bonferroni 校正）、`score.py`（綜合分引擎）、`long_short_backtest.py`（十分位多空回測引擎，含配對式隨機控制組/CAPM beta/成本模型）全部可以直接重用。
 
-**⚠️ 目前最高優先序：全市場宇宙回補未達門檻，優先於測新因子/深挖候選**（見 `MARATHON_PROTOCOL.md` 第5b節）。累積覆蓋率：**771/3196（24.1%）**，門檻80%。下一輪若輪到TW軌，先跑 `python backfill_universe.py --batch-size 300`（除非一開始就立刻被限流，那種情況改做深挖或系統化掃因子家族）。
+**⚠️ 目前最高優先序：全市場宇宙回補未達門檻，優先於測新因子/深挖候選**（見 `MARATHON_PROTOCOL.md` 第5b節）。累積覆蓋率：**846/3196（26.5%）**，門檻80%。下一輪若輪到TW軌，先跑 `python backfill_universe.py --batch-size 300`（除非一開始就立刻被限流，那種情況改做深挖或系統化掃因子家族）。
 
 **已知的立即可做工作（優先序）：**
 1. ~~`f_value_pb`／`f_value_pe`／`f_quality_roe_stability` 重測~~ ✅ 第一輪（2026-08-23上午）已完成，見 `TW_LOG.md`／`TW_LEADS.md`／`TRIALS_LEDGER.md` #13–#15。
