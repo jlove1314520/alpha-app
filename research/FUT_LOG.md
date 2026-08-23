@@ -125,3 +125,23 @@
 **Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。全程只用 `load_dev()`，本輪唯一一次網路請求（窄窗口那次）也是 402 失敗未取得任何資料，之後全部改讀本機快取，沒有任何管道能碰到 holdout。
 
 **下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目改為寫連續合約建構程式碼（比價法回溯調整，套用本輪確定的 H1 轉倉規則），並實測累積漂移幅度。
+
+---
+
+## 2026-08-24T21:35:00+08:00 — 馬拉松第九輪期貨軌執行：連續合約建構程式碼首版完成（`continuous_contract.py`）
+
+**選軌理由**：`marathon_lock.py acquire` 成功後比對 `TW_MARATHON_STATE.md`（21:05）／`US_MARATHON_STATE.md`（20:35）／`FUT_MARATHON_STATE.md`（20:05，最舊）三個最後更新時間戳，選最久沒被碰的期貨軌。
+
+**這一輪工作單位**：`FUT_MARATHON_STATE.md`「下一輪建議工作單位」優先項目 1——開始寫連續合約建構程式碼（比價法回溯調整，套用上一輪確定的 H1 轉倉規則）。依協定第 1c/5b 節精神，只做「第一輪把單一合約序列銜接寫出來、用少數幾次轉倉手動驗證正確性」，不追求一次做完全部功能（累積漂移實測留到下一輪）。
+
+**做了什麼**：
+1. 用零額外 API 呼叫的既有全歷史快取（`TaiwanFuturesDaily__TX__2000-01-01__2024-12-31.parquet`）先做了一次資料探索：直接查 2024-06-17～06-21 這個真實區間，肉眼確認 `contract_date=202406`（近月合約）在 2024-06-19（June 2024 結算日，第三個星期三）當天仍有正常成交量的報價，隔天（06-20）完全從資料表消失、次近月 `202407` 自然接手成為量能最大的合約。這證實了一個重要簡化：**「當天有資料的合約中 `contract_date` 最小者」這個定義，本身就自動等於 H1（結算日轉倉）——不需要另外寫「今天是不是結算日」的判斷邏輯**，因為到期合約本來就會在結算日隔天直接從資料源消失。
+2. 寫了 `continuous_contract.py`（精神上比照 `adjust.py` 對股票的做法：`load_position_session()` 只篩 `trading_session=="position"`、排除含 `/` 的價差合約列；`front_month_series()` 實作上述「當天最小 `contract_date`」規則；`rollover_events()` 在每次前月合約 ID 切換時，用**切換前一天**（新舊合約當天都還有報價的最後一天）的新舊合約收盤價算比價法調整比例；`build_continuous_series()` 把比例用跟 `adjust.py` 完全相同的「由近到遠倒序套用、mask = date < roll_date」邏輯疊乘進 `open/max/min/close` 四欄，產生 `adj_*` 系列，原始欄位完全不覆寫）。
+3. **執行結果與交叉驗證**：全樣本（2000-2024）跑出 **300 次轉倉事件、0 次因資料缺口而跳過**——這個 300 剛好精確對應上一輪 `fut_probe_rollover_h1_h2.py` 測試的「300 個月結算週期（2000-2024）」，兩支獨立腳本用不同邏輯（一支專門偵測量能超車、一支偵測合約 ID 消失）算出同一個數字，是一個很強的交叉確認訊號，不是巧合。
+4. **手動驗證正確性**（協定要求的「少數幾次轉倉」）：針對 2024-06 這次轉倉手算數學關係——切換前一天（06-19）新合約（202407）收盤 23129、舊合約（202406）收盤 23225，比例 = 23129/23225 = 0.995866。理論上調整後序列在這個交界點的報酬率應該等於「假設新合約序列從沒中斷過」的真實報酬率，即 `adj_close(06-19)/adj_close(06-20)` 應該等於 `raw_close(06-19,舊合約)*比例/raw_close(06-20,新合約)` = `23129/23378` = 0.989349。實際程式輸出 `23548.338839/23801.853318 = 0.989349...`，**完全吻合**，數學上證實調整邏輯正確。另外印出的前 5 次轉倉窗口（2000年1～5月）也做了肉眼檢查，`contract_date` 切換點跟報酬連續性型態一致，沒有看到異常跳空。
+
+**沒做的事**：多次轉倉後的累積漂移幅度實測（`FUT_CONTINUOUS_CONTRACT_DESIGN.md`「尚待驗證 #2」，需要拿調整後價格 vs 真實現價比較，這是下一輪的工作單位）、`after_market`（夜盤）session 的連續合約（目前只做 `position` session，這是刻意的範圍限縮，寫在模組 docstring 裡）、任何期貨因子/策略假說測試——這些都排在連續合約地基完全就緒之後，本輪一個工作單位只處理「單一合約序列銜接程式碼＋手動驗證」，已達成本輪目標。`TRIALS_LEDGER.md` 沒有新增列——這是連續合約建構的地基工作（延續 `institutional_investors` 排查、H1/H2 驗證兩次先例的判斷），不是可統計檢定的因子/策略假說測試。
+
+**Holdout 檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。本輪完全沒有呼叫任何網路請求——`continuous_contract.py` 預設的 `FULL_HISTORY_START`/`FULL_HISTORY_END` 就是既有快取的鍵值，`load_dev()` 全程命中本機 parquet 快取。
+
+**下一輪**：見 `FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目改為實測比價法累積漂移幅度（`FUT_CONTINUOUS_CONTRACT_DESIGN.md`「尚待驗證 #2」）。
