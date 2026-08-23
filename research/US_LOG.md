@@ -84,3 +84,19 @@
 **沒做的**：正確的 `SBNY` CIK 仍然未知；`FRC` 的 `filings.files[]` 分頁檔案沒有抓過；「FDIC 接管型下市不走 Form 25」的假設沒有用 SEC EDGAR 以外的資料源（FDIC BankFind Suite、Nasdaq 官方公告）查證，只是這輪觀察到的模式；XBRL company facts API、中小型股價格深度抽測、美股成本模型都還沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～五輪地基工作的先例一致。
 
 `is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。
+
+## 2026-08-24T20:35:00+08:00 — 馬拉松第七輪：查 `FRC` 的 `filings.files[]` 分頁（意外發現 CIK 本身可能查錯實體）
+
+做了 `US_MARATHON_STATE.md` 建議的下一輪工作單位第 2 項：查證第五輪「`FRC` 查不到 Form 25」是不是因為 `filings.recent` 視窗覆蓋不到、需要抓 `filings.files[]` 分頁檔案。新寫 `sec_edgar_frc_cik_probe.py`。
+
+**過程與結果**：
+1. **先解決原本要查的問題**：CIK 1132979（第五輪的 FRC 備援 CIK）的 `filings.files[]` 是空陣列——代表 `filings.recent`（43筆，2004-01-05～2024-02-09）本身就是完整記錄，不是被截斷的近期視窗。**視窗覆蓋不到這個可能性可以排除。**
+2. **但過程中發現更根本的問題**：這個 CIK 的 43 筆申報**全部是 `SC 13G`／`SC 13G/A`（受益所有權揭露）＋1 筆 `40-6B/A`，完全沒有任何 10-K／10-Q／8-K**——一家 NYSE 掛牌十幾年、資產規模破 2000 億美元的銀行控股公司不可能是這種申報型態。**第五輪只核對「公司名稱是 FIRST REPUBLIC BANK」就判定「已驗證」，沒有核對申報型態是否合理，這是一個方法論漏洞**——這個 CIK 很可能是 FRC 旗下信託/財富管理部門以機構投資人身分申報的 CIK，不是 FRC 本身對 SEC 申報年報用的公司 CIK。
+3. **嘗試找正確 CIK，三管齊下都失敗**：`browse-edgar` 公司名稱搜尋跳到 CIK 770975「FIRST REPUBLIC BANCORP INC」，但那是**另一家舊公司**（申報止於2008，還有一筆真的 Form 25 是2005年下市/私有化——第三個踩到「同名不同實體」陷阱的案例，前兩個是 BBBY／SBNY）；`efts.sec.gov` 全文檢索限定 Form 25-NSE＋2023-04-01～2023-08-31（FRC接管日窗口）搜「republic」只找到1筆不相干結果；`entityName=First Republic Bank`＋Form 10-K 只找到2筆不相干的抵押貸款證券化信託。**2010-2023年那個真正在NYSE掛牌的FRC的正確CIK，這輪沒有找到，仍是開放問題。**
+4. **對第六輪「FDIC接管型下市不走Form 25」假設的影響：這個假設變弱了**。第六輪把 `SBNY`＋`FRC` 當成兩個獨立支持證據，但這輪發現 `FRC` 案例從一開始查的就是錯誤實體，「FRC真的查不到Form 25」這個結論從來沒有被真正驗證過。這個假設應該從「兩個獨立案例支持」降級為「一個未解案例（SBNY）＋一個查錯實體的無效案例（FRC）」。
+
+完整數字寫進 `DATA.md`「美股存活者偏差調查（再再續）」小節、`US_MARATHON_STATE.md`。也同步更新了 `sec_edgar_delisting_probe.py` 的 `FALLBACK_CIK["FRC"]`（從 1132979 改成 `None`）跟對應註解，標記為「已知很可能是錯誤實體，不要用猜的」，跟現有 `SBNY` 的標註方式一致。
+
+**沒做的**：正確的 FRC CIK（2010-2023年那個真正掛牌的實體）仍未找到，下一輪如果要繼續可以試 FDIC BankFind Suite 或 Nasdaq 官方停牌公告（跳出SEC EDGAR，需先確認公開可讀）；`SBNY` 仍未查到任何候選；XBRL company facts API、中小型股價格深度抽測、美股成本模型都還沒碰。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～六輪地基工作的先例一致。
+
+`is_holdout_consumed()` 確認為 `False`（本輪只打了 SEC EDGAR 公開 API，完全沒有觸碰任何 FinMind 或 alpha.db 資料）。

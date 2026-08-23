@@ -55,11 +55,15 @@ import requests
 HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-project.example"}
 
 # Fallback CIKs, used only if the live company_tickers.json lookup misses the ticker.
-# Verified correct (submissions API company name matches, per round 5/6): TWTR, SIVB,
-# FRC, BBBY. If a fallback is wrong, the submissions API will simply 404 or return an
-# unrelated company (visible in the printed company name), not silently succeed -- this
-# is exactly what happened for SBNY (see below), which is why "CIK fallback = safe"
-# is NOT a blanket assumption; each value here still needs independent verification.
+# Verified correct (submissions API company name matches AND filing-type profile is
+# plausible for the real company, per round 5/6/7): TWTR, SIVB, BBBY. If a fallback is
+# wrong, the submissions API may 404, return an unrelated company (visible in the printed
+# company name), OR -- as round 7 discovered for FRC -- return a company with the RIGHT
+# NAME but an implausible filing-type profile (a same-name entity that isn't actually the
+# SEC filer for the company in question). "CIK fallback = safe" is NOT a blanket
+# assumption; each value here still needs independent verification of BOTH the company
+# name AND that its filing types make sense (e.g. a NYSE-listed bank holding company
+# should have 10-Ks/10-Qs/8-Ks, not just SC 13G ownership filings).
 #
 # SBNY: KNOWN WRONG, unresolved as of round 6 (2026-08-24). 1288776 resolves to
 # GOOGLE INC., not Signature Bank (round 5 finding). Round 6 tried browse-edgar
@@ -68,14 +72,33 @@ HEADERS = {"User-Agent": "AlphaResearchMarathon-USTrack contact@alpha-research-p
 # NOT find the correct CIK -- no entity containing "Signature" appears anywhere in
 # that search. Do not replace this with a new guess without verifying the company
 # name in the actual submissions API response first. See DATA.md "美股存活者偏差調查
-# （再續）" (round 6) for the full negative-result writeup, including a new hypothesis
-# that FDIC-receivership delistings (SBNY, and FRC from round 5) may not go through a
-# standard Form 25 at all, unlike voluntary/acquisition delistings (TWTR, SIVB).
+# （再續）" (round 6) for the full negative-result writeup.
+#
+# FRC: KNOWN LIKELY WRONG, unresolved as of round 7 (2026-08-24). 1132979's `name` field
+# does say "FIRST REPUBLIC BANK", but its ENTIRE filing history (43 filings, 2004-2024,
+# confirmed via `filings.files[]` being empty -- i.e. this IS the complete record, not a
+# truncated window) is exclusively SC 13G / SC 13G/A ownership-disclosure filings plus one
+# 40-6B/A. Zero 10-K, zero 10-Q, zero 8-K -- implausible for a NYSE-listed bank holding
+# company the size of the real First Republic Bank. Most likely this CIK belongs to a
+# different filing role for the bank (e.g. its trust/wealth-management arm disclosing
+# beneficial ownership of OTHER companies' shares), not the corporate SEC filer for the
+# entity that traded as NYSE:FRC. Round 7 tried browse-edgar company-name search (found
+# CIK 770975 "FIRST REPUBLIC BANCORP INC" -- but that is a DIFFERENT older entity whose
+# filings end in 2008 and which has its own genuine Form 25 from 2005, i.e. a company that
+# delisted/went private in 2005, predating the 2010 IPO of the bank that collapsed in
+# 2023), efts.sec.gov full-text search for Form 25-NSE near the 2023-05-01 FDIC seizure
+# date (no FRC-related entity found), and efts.sec.gov entityName=First Republic Bank
+# filtered to 10-K (only 2 hits, both unrelated mortgage-backed-securities trusts). The
+# correct CIK for the 2010-2023 NYSE:FRC entity was NOT found. See DATA.md "美股存活者
+# 偏差調查（再再續）" (round 7) for the full writeup and `sec_edgar_frc_cik_probe.py` for
+# the reproducible probe. Round 6's "FDIC receivership doesn't file Form 25" hypothesis
+# should be treated as weaker after this finding -- FRC was never actually confirmed to
+# lack a Form 25, only a same-named-but-wrong entity was.
 FALLBACK_CIK = {
     "TWTR": 1418091,
     "SIVB": 719739,
     "SBNY": None,  # unresolved, see comment above -- do not guess
-    "FRC": 1132979,
+    "FRC": None,  # likely wrong entity, unresolved as of round 7 -- see comment above, do not guess
     "BBBY": 886158,
 }
 
