@@ -222,3 +222,27 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **Holdout檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（本輪開始前跟結束前都確認過）。本輪只讀本機parquet快取（`continuous_contract.py`的`load_dev`走既有快取key），無新網路請求。
 
 ---
+
+## 2026-08-24T21:19:00+08:00 — 馬拉松第39輪期貨軌執行：三大法人期貨部位地基探測（`fut_probe_institutional_positions.py`）
+
+**選軌理由**：取鎖乾淨成功（`LOCK_ACQUIRED`，非陳舊回收）。比對三軌state檔案「最後更新」時間戳：FUT 06:32:00最舊，TW 07:06:36次之，US 07:31:16最新，選最久沒被碰的期貨軌。
+
+**這一輪工作單位**：接上一輪（第36輪）「下一輪建議工作單位」候選(c)——三大法人期貨部位（有方向性的法人多空未平倉部位，不同於已測過的無方向性`open_interest`），該候選明確標註「需要先做小型地基工作（確認端點、欄位格式）才能測」。`DATA.md`第6節先前只在窄視窗（2024-06-03～06-07）驗證過`TaiwanFuturesInstitutionalInvestors`的欄位結構跟編碼問題，本輪把地基補齊到跟`continuous_contract.py`同樣的全歷史範圍（2000-01-01～2024-12-31）。
+
+**做了什麼**：新寫`fut_probe_institutional_positions.py`，透過`finmind_client.load_dev()`抓`TaiwanFuturesInstitutionalInvestors`TX全歷史範圍（單次網路請求，未撞限流），驗證：類別標籤（寫入UTF-8檔案避免終端機顯示假象，沿用第六輪的教訓）、日期覆蓋率（跟已快取的`TaiwanFuturesDaily`比對）、每日列數、數值欄位NaN/負值/零值健檢、跟`continuous_contract`聚合OI的交叉核對。
+
+**結果（誠實記錄，包含一個重要的負面發現）**：
+1. **實際抓到4815列，日期範圍`2018-06-05`～`2024-12-31`（1605個不同交易日）——不是預期的2000-01-01起算。** 跟`TaiwanFuturesDaily`同範圍的6191個交易日相比，**4586天（74%）完全沒有這個資料集的資料**，早期歷史（2000–2018年中）整段缺失。**這是本輪最重要的發現：這個資料集的實際可用樣本只有全歷史的約26%，遠比先前地基（連續合約、漂移量測）建立時假設的「地基已完整可用」樂觀**——如果之後要拿這個資料集當因子輸入，樣本規模天花板就是1605天，不是既有策略測試用的6185天。
+2. 類別標籤確認3種（外資/投信/自營商），每個涵蓋日期都恰好3列（無缺類別），無日期落在institutional-investors但不在TaiwanFuturesDaily的異常情況。
+3. 數值欄位（成交量/金額/未平倉餘額量/金額共8欄）全部NaN=0、負值=0；`long_deal_volume`/`long_deal_amount`各55/4815零值、`short_deal_volume`/`short_deal_amount`各69/4815零值（低量但非零發生率，合理範圍內，未進一步排查是否集中在特定早期日期）；未平倉餘額四欄0個零值。
+4. **交叉核對一開始出現看似異常的結果（3類多單OI總和/continuous_contract聚合OI比值，313/1605天>1.0，最高5.316），但追查後確認是本輪自己交叉核對設計的方法論落差，不是資料源真的有問題**：`continuous_contract`的`open_interest`欄位只取**近月合約單一欄位**（`front_month_series()`的定義），而三大法人資料集回報的是**所有月份合約加總**的部位。改用`load_position_session()`重算「所有月份合約OI加總」後重新比對，比值全部落在0.499–0.904之間、**0天超過1.0**——證實三大法人資料集本身沒有真正的異常，先前的>1.0現象完全是聚合層級不一致造成的假警報。**這是一個值得記錄的方法論教訓：拿任何期貨衍生資料跟`continuous_contract`聚合欄位做交叉核對前，先確認對方的OI/成交量統計口徑是近月合約還是全合約月份，不能預設一致。**
+
+**判讀**：地基工作完成，但結論比預期保守——資料集本身乾淨可用（無NaN/負值、類別完整、交叉核對後無異常），**但2000–2018年中完全空白的樣本缺口是這個候選因子/策略天生的限制，不是可以修的資料品質問題**。下一輪如果要接手測`f`ut_institutional_net_position`類假說，樣本只能用2018-06-05以後的區間（1605天），設計便宜關卡時要注意這比先前6個FAIL假說用的全樣本小很多，統計檢定力會偏低，判定時要把這個限制寫進假說紀錄，不能跟全樣本假說用同一套心理預期比較。
+
+**沒做的事**：沒有本輪同時建構訊號/跑`fut_cheap_gate.py`（依協定1c「地基」跟「假說測試」是分開的工作單位，且本輪發現的樣本缺口是重要到值得先讓下一輪知道再決定要不要接手測試，不要在還沒讓紀錄可見前就急著往下做）。`TRIALS_LEDGER.md`沒有新增列（跟第30輪漂移探測、第4/9輪PIT驗證同精神，這是地基驗證不是可統計檢定的假說測試）。已同步更新`DATA.md`第6節。
+
+**Holdout檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（本輪開始前跟結束前都確認過）。本輪對`TaiwanFuturesInstitutionalInvestors`發出1次網路請求（先前只快取過窄視窗，這次是全歷史範圍的新請求，未撞限流；`TaiwanFuturesDaily`部分全程命中既有快取，零額外請求）。
+
+**下一輪建議**：見`FUT_MARATHON_STATE.md`「下一輪建議工作單位」——(a) 用這1605天的樣本測`fut_institutional_net_position`類假說（例如外資多空淨部位變化方向、連續N日淨部位增減）——**要在假說紀錄裡明確標註樣本受限於2018-06-05起，不是全歷史**；(b) 或維持`FUT_MARATHON_STATE.md`先前列出的其他候選（日內均值回歸資料形狀確認、期現價差新資料源、盤別效應session infra）。
+
+---
