@@ -197,3 +197,21 @@
 **這輪沒做的**：沒有反查FRC在FDIC BankFind的CERT（下一輪如果要接，方法完全一樣，`NAME:"First Republic Bank"`＋比對城市/州/倒閉日期即可，預期能找到，因為FRC倒閉是2023-05-01的公開事件，FDIC一定有記錄）；沒有把這個FDIC查詢邏輯包裝成可重用函式（目前只是探測性WebFetch呼叫，沒有寫進`sec_edgar_client.py`或新模組，如果之後要正式用於`universe.py`需要另外寫程式碼呼叫`api.fdic.gov`REST API並處理分頁/錯誤）；沒有回頭重跑`us_probe_price_depth_smallmid.py`（額度狀況未變，留給下一輪視情況判斷）。
 
 `is_holdout_consumed()` 確認為 `False`（本輪對FinMind只有一次失敗呼叫立刻中止未重試，其餘全部是FDIC公開API的WebFetch呼叫，不碰holdout）。
+
+## 2026-08-25T06:04:00+08:00 — 馬拉松第47輪（US軌）：FDIC查詢邏輯包裝成可重用模組，順帶解出FRC的FDIC CERT
+
+**做了什麼**：取鎖乾淨成功（`LOCK_ACQUIRED`，非陳舊）。比對三軌「最後更新」時間戳，US（04:31）早於FUT（05:02）跟TW（05:37），輪替規則指向US。讀`US_MARATHON_STATE.md`「下一輪建議工作單位」：第4項（中小型股價格深度抽測）需要FinMind額度，TW第46輪（05:37）才剛用到撞限流牆提前中止，距今僅約27分鐘，額度顯然還沒恢復，跳過（不重蹈第35/38/44輪連續三次同一堵牆的覆轍，不重新嘗試）。第2項殘留任務（FDIC查詢邏輯包裝成可重用函式、FRC的FDIC CERT反查）不需要FinMind額度，且第44輪已明確留下這兩件待辦，本輪接手。
+
+**方法**：新寫`fdic_client.py`，風格仿照`sec_edgar_client.py`（同款on-disk JSON快取、`if __name__=="__main__"`smoke test）。提供`search_institutions(name, fields, limit)`（`institutions`端點，NAME精確片語搜尋，回傳原始候選列表不自動消歧義）跟`get_failure(cert, fields)`（`failures`端點，依CERT查倒閉細節，查不到回傳`None`）。**過程中踩到一個新坑**：先用WebFetch工具查探API回應格式，WebFetch回傳的「摘要後」JSON把每列的巢狀結構`{"data": {...實際欄位...}, "score": ...}`拉平成看起來像是欄位直接在頂層——照著這個（錯的）形狀寫的第一版`search_institutions`/`get_failure`跑smoke test時`CERT`全部是`None`，完全查不到預期的CERT。用`requests`直接呼叫API驗證真實原始回應，才發現WebFetch的摘要把巢狀結構「幫忙」拉平了，跟真實API形狀不符。**教訓：WebFetch工具的回應是經過模型摘要過的，不能當作驗證API精確資料形狀（例如巢狀結構、欄位型別）的可靠依據，寫程式碼解析API回應前，應該用`requests`直接打一次確認原始JSON結構，不能只信WebFetch的摘要文字。** 改正後（`row["data"]`解開巢狀層）重新smoke test，SBNY（CERT=57053）跟FRC的部分都能正確解析。
+
+**結果**：
+1. `fdic_client.py`smoke test對SBNY（CERT=57053）跟第44輪的手動查詢結果完全一致（New York, NY，設立04/12/2001，`ENDEFYMD`03/12/2023，`FAILURE/PA`，資產$110,363,650千）——**驗證重構沒有改變邏輯**，跟`sec_edgar_client.py`第38輪的驗證精神一致。
+2. **順帶解出第44輪明確留下的開放問題「FRC本身的FDIC CERT還沒反查」**：`search_institutions("First Republic Bank")`回傳3筆同名機構（跟SBNY一樣是常見銀行名稱碰撞），用`ESTYMD`（成立日）跟`ENDEFYMD`（結束日）交叉比對鎖定`CERT=59017`（San Francisco, CA，成立2010-07-01，結束2023-05-01）——**成立年份2010跟`US_MARATHON_STATE.md`第七輪推論「2010-2023年那個真正掛牌NYSE的FRC」的時間窗吻合**，這是目前為止第一次有具體證據支持第七輪那個推論指向的實體，儘管仍然不是SEC EDGAR CIK（FRC走FDIC申報路徑，本來就不會有對應的SEC CIK，這點第41輪已經推論過，本輪只是補上FDIC側的具體號碼）。`get_failure(59017)`確認：`FAILDATE=5/1/2023`、`RESTYPE=FAILURE`、`RESTYPE1=PA`、資產約$212,638,872千（約2126億美元）——跟公開報導「美國史上第二大銀行倒閉案，摩根大通收購」的規模量級吻合。
+
+**判定**：這是基礎建設/資料源調查工作單位，不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列。
+
+**對後續工作的意義**：未來美股版`universe.py`要處理FDIC-insured銀行類下市股時，`fdic_client.py`的`search_institutions()`+`get_failure()`可以直接呼叫，不需要重新手動WebFetch。**但`search_institutions()`的名稱碰撞消歧義仍然是人工判斷（用城市/州/日期交叉比對），沒有自動化邏輯**，這是有意的設計（同名碰撞的正確答案需要脈絡判斷，自動選第一筆或用其他啟發式規則風險太高，寧可留給呼叫者手動核對）。
+
+**這輪沒做的**：沒有把`fdic_client.py`整合進任何實際的`universe.py`下市偵測邏輯（那個模組本身還不存在，見`US_MARATHON_STATE.md`「地基狀態」）；沒有嘗試`us_probe_price_depth_smallmid.py`（額度狀況判斷同上，跳過）；沒有處理`search_institutions()`的分頁（目前觀察到的碰撞筆數都是個位數，用不到分頁，如果未來查到碰撞筆數破百再處理）。
+
+`is_holdout_consumed()`確認為`False`（本輪完全沒有呼叫FinMind，只有FDIC公開API的`requests`呼叫跟一次WebFetch探測性呼叫，不碰holdout）。
