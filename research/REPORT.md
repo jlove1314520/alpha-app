@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 44 輪 · 2026-08-25 04:31 · US · 原計畫接第4項（中小型股價格深度抽測）第一檔（XPER）又撞402（TW第43輪回補後4.5小時額度仍未恢復），優雅換方向接第2項 · 用FDIC BankFind Suite公開REST API（`api.fdic.gov`）獨立確認SBNY=Signature Bank（CERT 57053，2023-03-12倒閉，`RESTYPE=FAILURE`），跟第41輪SEC EDGAR側「第12(i)條銀行不歸SEC管」推論互相印證，原規劃的`efr.fdic.gov`逆向工程待辦可放棄
+
 ## 第 43 輪 · 2026-08-25 00:00 · TW · 取鎖時偵測到`LOCK_STALE`（上一輪pid 100692持有鎖滿300.1分鐘後被回收，疑似異常中止），全市場宇宙回補第十二批（`backfill_universe.py --batch-size 300`） · 本批嘗試109檔，新完成74/新跳過20，撞限流牆提前停止；累積覆蓋率918→992/3196（28.7%→31.0%），仍低於80%門檻（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）
 
 ## 第 42 輪 · 2026-08-24 23:03 · FUT · 三大法人期貨部位第一批假說測試（外資水位/動能各1個，沿用第39輪地基）· `fut_inst_foreign_net_position_sign` FAIL（percentile 57.5）；`fut_inst_foreign_net_position_change_5d` 批次過（97.0）但累積校正後不確定，不排入深挖（**此筆為第43輪回溯補寫**：本輪確有實質進度且已寫入`FUT_MARATHON_STATE.md`/`FUT_LOG.md`/`FUT_LEADS.md`/`TRIALS_LEDGER.md`，但當時未留下心跳記錄即中止，直到第43輪取鎖時發現陳舊鎖檔才回填，內容來源為`FUT_MARATHON_STATE.md`第42輪段落）

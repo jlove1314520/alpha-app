@@ -148,6 +148,21 @@ First Republic Bank 是加州州立特許銀行，且（**這點是本輪依一�
 
 **這輪沒做的**：沒有逆向工程 `efr.fdic.gov` 的搜尋 API（下一輪如果要接，這是明確定義好的下一步）；沒有查證 SBNY 是否真的是非聯準會會員銀行（假設，未驗證）；沒有查證 FRC 本身是否真的沒有獨立控股公司（假設，未驗證，但跟其 10-K 完全不在 SEC EDGAR 這個直接觀察一致）。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列。完整探測過程見 `sec_edgar_frc_root_cause_probe.py`（純打 SEC EDGAR + FDIC.gov 公開頁面，不碰 FinMind／alpha.db，holdout 規則不適用）。
 
+### 美股存活者偏差調查（獨立資料源證實）：`SBNY` 用 FDIC BankFind Suite 公開 API 確認為 CERT 57053，2023-03-12 倒閉（2026-08-25 馬拉松第44輪）
+
+**動機**：第41輪推論「FRC/SBNY 查不到 SEC EDGAR CIK 是因為第12(i)條規定州立非聯準會會員銀行直接向 FDIC 申報」，但當時只用 SEC EDGAR 側的「查不到」當間接證據，沒有用 FDIC 側的資料直接證實這些銀行真的存在、真的倒閉。本輪補上這一塊，且原本規劃走 `efr.fdic.gov`（JS SPA，需要逆向工程搜尋 API），改用更簡單的公開替代方案。
+
+**方法**：FDIC 有另一個獨立、無需認證、純 REST JSON 的公開 API——`api.fdic.gov/banks/...`（`banks.data.fdic.gov/api/...` 會 301 導到這裡），跟 `efr.fdic.gov` 是不同系統（`efr` 是證券申報系統，`api.fdic.gov` 是機構結構/財務/歷史資料庫，即「BankFind Suite」）。查了兩個端點：
+1. `institutions?filters=NAME:"Signature Bank"` → 8 筆同名機構（美國有很多小型社區銀行都叫這個名字，是預期中的名稱碰撞，跟 SEC EDGAR 側踩過的坑同一種）。
+2. 用 `CITY`/`STALP`/`ESTYMD`/`ENDEFYMD` 交叉比對，鎖定 `CERT=57053`：New York, NY，設立 2001-04-12，`ACTIVE=0`，`ENDEFYMD=2023-03-12`——日期、城市、狀態三項都跟已知的 2023 年 Signature Bank 倒閉事件吻合。
+3. `failures?filters=CERT:57053` → `FAILDATE="3/12/2023"`、`RESTYPE="FAILURE"`、`RESTYPE1="PA"`（Purchase and Assumption，收購式清算）、`SAVR="DIF"`、`QBFDEP=88,612,911`（千美元，約886億美元存款）、`QBFASSET=110,363,650`（約1,104億美元資產）——資產規模量級跟公開報導吻合。
+
+**結果**：**SBNY 獨立確認為真實的 FDIC-insured 銀行倒閉事件，不是 SEC EDGAR 那邊的資料缺失或代號重用假象。** 這證實（不只是推論）了第41輪的方向：SBNY 查不到 SEC CIK，是因為它本來就走 FDIC 申報路徑，不是查詢方法有問題。`efr.fdic.gov` 逆向工程這個待辦可以放棄——`api.fdic.gov` 的 BankFind Suite REST API 更簡單，已經達到目的。
+
+**對美股版 `universe.py` 存活者偏差機制的啟示**：FDIC-insured 銀行類下市股，應該用 FDIC `failures` 端點的 `FAILDATE` 當地面真相日期，不能只靠 SEC EDGAR 的 Form 25（這類銀行的 Form 25 本來就不會存在）。目前只驗證了 SBNY 一檔，這個查詢邏輯還沒有包裝成可重用函式（目前只是探測性 WebFetch 呼叫），FRC 本身的 FDIC CERT 也還沒反查（下一輪如果要接，方法完全一樣）。
+
+**這輪沒做的**：沒有反查 FRC 的 FDIC CERT；沒有把查詢邏輯包裝成程式碼模組；沒有驗證 SBNY 是否真的是非聯準會會員銀行（第41輪的假設，本輪沒有另外查證，但已不影響「SBNY 是真實 FDIC 倒閉事件」這個結論本身）。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列。完整過程見 `US_LOG.md` 2026-08-25 第44輪記錄（純 WebFetch 打 FDIC 公開 REST API，不碰 FinMind／alpha.db，holdout 規則不適用）。
+
 ### 美股 PIT 資料源調查：SEC EDGAR 公開 JSON API（2026-08-23 馬拉松第二輪文件調查 → 第三輪實測）
 
 **性質：已實測驗證。** 第二輪只查了第三方文件（見下方保留的第二輪記錄），**第三輪（`research/sec_edgar_probe.py`）對 `data.sec.gov`/`www.sec.gov` 打了真實 HTTP 請求**，三檔股票（AAPL、MSFT、PLTR，刻意混大型股+一檔較晚近IPO的中型股避免只測巨型股的偏差）全部驗證通過。

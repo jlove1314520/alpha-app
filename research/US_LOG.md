@@ -179,3 +179,21 @@
 **這輪沒做的**：沒有逆向工程 `efr.fdic.gov` 搜尋API（下一輪如果要接，這是明確定義好的下一步，但值不值得投入要先評估——這類銀行在美股全市場宇宙裡占比應該很小，優先序可能不如先把美股地基其他部分（宇宙建構、`pit.py`）搭起來）；沒有查證SBNY是否真的是非聯準會會員銀行（假設未驗證）；沒有查證FRC本身是否真的沒有獨立控股公司（假設未驗證，但跟「10-K完全不在SEC EDGAR」這個直接觀察一致）。
 
 `is_holdout_consumed()` 確認為 `False`（本輪完全沒有呼叫任何FinMind函式，只打SEC EDGAR公開JSON API跟FDIC.gov/eCFR公開網頁，不碰holdout）。
+
+## 2026-08-25T04:31:00+08:00 — 馬拉松第44輪（US軌）：SBNY確認為FDIC-insured銀行（用FDIC BankFind Suite公開API，繞過SEC EDGAR死路）
+
+**做了什麼**：取鎖時乾淨成功（`LOCK_ACQUIRED`，非陳舊）。比對三軌「最後更新」時間戳，US（22:37）早於FUT（23:03）跟TW（00:00），輪替規則指向US。原本嘗試接第4項工作單位（`us_probe_price_depth_smallmid.py`，中小型股/近期IPO價格深度抽測），第一檔`XPER`立刻撞FinMind 402（`{"msg":"Requests reach the upper limit."...}`）——這是這支腳本第三次嘗試、第三次在第一檔就被限流，累積證據顯示TW軌回補（第43輪，本輪開始前約4.5小時，109次嘗試）用掉的額度到本輪時間點還沒恢復。依`MARATHON_PROTOCOL.md`第4節「優雅結束這一輪，不要為了硬跑而狂重試」，立刻換方向，改接第2項（US_MARATHON_STATE.md「下一輪建議工作單位」第2項：SBNY的FDIC路徑調查，不需要FinMind額度）。
+
+**方法**：第41輪已推論「FRC/SBNY查不到SEC EDGAR CIK是因為第12(i)條規定州立非聯準會會員銀行直接向FDIC申報，不歸SEC管」，但這個推論當時沒有獨立資料源驗證。本輪改用FDIC自己的公開REST API（`api.fdic.gov/banks/...`，`banks.data.fdic.gov/api/...`會301導到這裡，無需認證/無需token，遵守MARATHON_PROTOCOL.md第3節「只用公開可讀來源」規則），不是原本計畫的`efr.fdic.gov`（JS驅動SPA，搜尋API未探測，成本較高）：
+1. `institutions`端點查`NAME:"Signature Bank"`：回傳8筆同名機構（美國有很多小型銀行都叫這個名字，這是預期中的名稱碰撞，跟第六輪查SEC EDGAR時踩到的同名陷阱同一種坑）。用`CITY`/`STALP`/`ESTYMD`交叉比對，`CERT=57053`（New York, NY，設立日2001-04-12，`ACTIVE=0`，`ENDEFYMD=2023-03-12`）明確對應到2023年倒閉的那家NYSE掛牌Signature Bank——日期、城市、狀態三項都吻合已知的公開歷史事實。
+2. `failures`端點查`CERT:57053`確認細節：`FAILDATE="3/12/2023"`、`RESTYPE="FAILURE"`、`RESTYPE1="PA"`（Purchase and Assumption，被收購式清算）、`SAVR="DIF"`（存款保險基金）、`QBFDEP=88,612,911`（千美元，約886億美元存款）、`QBFASSET=110,363,650`（約1,104億美元資產）——資產規模跟公開報導的「美國史上第三大銀行倒閉案之一」量級吻合。
+
+**結果**：**SBNY（Signature Bank）獨立確認為FDIC-insured銀行，CERT=57053，2023-03-12倒閉，是真實的存款保險機構失敗（FAILURE/PA），不是資料缺失或代號重用假象。** 這跟第41輪的FRC推論（12(i)條銀行不歸SEC管）方向一致、互相印證，但這次是用完全獨立的資料源（FDIC自己的官方資料庫，不是SEC EDGAR的旁證）直接證實，比第41輪「推論但未驗證」更進一步。
+
+**判定**：這是基礎建設/資料源調查工作單位，不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列。原本規劃「逆向工程`efr.fdic.gov`」的工作被更簡單的公開REST API取代，不需要再做那件事了——`api.fdic.gov`才是正確、更便宜的路徑，`efr.fdic.gov`可以從待辦清單移除。
+
+**對美股存活者偏差方法論的意義**：`FALLBACK_CIK`機制（`sec_edgar_client.py`目前只處理SEC EDGAR CIK）如果未來要正式擴充成美股版`universe.py`的下市股名單，**FDIC-insured銀行類下市股應該走FDIC `failures`端點當地面真相，不能只靠SEC EDGAR的Form 25**——這是本輪新確認的具體結論，不是重複第41輪的推論。目前只驗證了SBNY一檔，FRC本身仍然沒有找到FDIC CERT（FRC=First Republic Bank，本輪沒有花時間去查，因為第4節的優先序判斷是「不強制接這項」，本輪只針對SBNY把懸而未決的問題收尾）。
+
+**這輪沒做的**：沒有反查FRC在FDIC BankFind的CERT（下一輪如果要接，方法完全一樣，`NAME:"First Republic Bank"`＋比對城市/州/倒閉日期即可，預期能找到，因為FRC倒閉是2023-05-01的公開事件，FDIC一定有記錄）；沒有把這個FDIC查詢邏輯包裝成可重用函式（目前只是探測性WebFetch呼叫，沒有寫進`sec_edgar_client.py`或新模組，如果之後要正式用於`universe.py`需要另外寫程式碼呼叫`api.fdic.gov`REST API並處理分頁/錯誤）；沒有回頭重跑`us_probe_price_depth_smallmid.py`（額度狀況未變，留給下一輪視情況判斷）。
+
+`is_holdout_consumed()` 確認為 `False`（本輪對FinMind只有一次失敗呼叫立刻中止未重試，其餘全部是FDIC公開API的WebFetch呼叫，不碰holdout）。
