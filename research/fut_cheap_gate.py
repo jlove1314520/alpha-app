@@ -148,6 +148,24 @@ prior precedent rather than quadrupling it by doing 投信+自營商 together.
     information), which is exactly why this counts as testing a distinct
     mechanism, not a parameter retune of the 外資 pair.
 
+Sixth round (marathon round 48, following FUT_MARATHON_STATE.md's "下一輪
+建議工作單位" #1: "三大法人期貨部位家族最後一個類別沒測（自營商）"):
+自營商 (proprietary dealers, i.e. brokerage firms' own trading desks)
+tested, completing all three categories (外資/投信/自營商) of this
+signal family.
+  - fut_inst_dealer_net_position_sign / _change_5d: same construction and
+    same level-vs-momentum distinction as the two prior category pairs
+    (_load_institutional_net_position(category="自營商")). Economic framing
+    differs from both prior categories: 自營商 book activity in Taiwan is
+    widely understood to be dominated by hedging flow against options/
+    warrant issuance (market-making desks delta-hedging their derivatives
+    book, not directional conviction bets), so if this category's net
+    positioning has any forecasting power at all, the a priori story would
+    most likely be "mechanical hedging flow happens to correlate with
+    market stress/direction" rather than either 外資's informed-trading
+    story or 投信's herding story -- a third, structurally distinct
+    mechanism, not a parameter retune of the other two category pairs.
+
 This is a CHEAP gate only: in-sample, no walk-forward, no cost sensitivity,
 no economic-explanation writeup required yet (MARATHON_PROTOCOL.md 1a vs
 1b). A CHEAP_PASS here just queues the hypothesis for deep-dive.
@@ -356,6 +374,20 @@ def hyp_inst_trust_net_position_change_5d(series: pd.DataFrame, window: int = 5)
     )
 
 
+def hyp_inst_dealer_net_position_sign(series: pd.DataFrame) -> CheapGateResult:
+    merged = _load_institutional_net_position(series, category="自營商")
+    position = np.sign(merged["net_position"])
+    return _permutation_test("fut_inst_dealer_net_position_sign", position, merged["ret"])
+
+
+def hyp_inst_dealer_net_position_change_5d(series: pd.DataFrame, window: int = 5) -> CheapGateResult:
+    merged = _load_institutional_net_position(series, category="自營商")
+    position = np.sign(merged["net_position"].diff(window))
+    return _permutation_test(
+        f"fut_inst_dealer_net_position_change_{window}d", position, merged["ret"]
+    )
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -364,8 +396,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_inst_trust_net_position_sign(series),
-        hyp_inst_trust_net_position_change_5d(series, window=5),
+        hyp_inst_dealer_net_position_sign(series),
+        hyp_inst_dealer_net_position_change_5d(series, window=5),
     ]
 
     for r in results:

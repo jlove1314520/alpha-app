@@ -296,3 +296,27 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：見`FUT_MARATHON_STATE.md`「下一輪建議工作單位」——(a) 用這1605天的樣本測`fut_institutional_net_position`類假說（例如外資多空淨部位變化方向、連續N日淨部位增減）——**要在假說紀錄裡明確標註樣本受限於2018-06-05起，不是全歷史**；(b) 或維持`FUT_MARATHON_STATE.md`先前列出的其他候選（日內均值回歸資料形狀確認、期現價差新資料源、盤別效應session infra）。
 
 ---
+
+## 2026-08-25T06:35:00+08:00 — 馬拉松第48輪：三大法人期貨部位第三批（自營商），完成整個家族
+
+**取鎖**：`LOCK_ACQUIRED`，乾淨成功，無陳舊鎖檔（上一輪第47輪US軌正常結束）。
+
+**選軌依據**：讀三軌state「最後更新」時間戳——TW 2026-08-25T05:37、US 2026-08-25T06:04、FUT 2026-08-25T05:02，FUT最久沒被碰，本輪選FUT軌。
+
+**做的事**：沿用第42/45輪已寫好的`_load_institutional_net_position()`（inner join限制樣本1605天，2018-06-05起），換`category="自營商"`，不需要重寫地基。在`fut_cheap_gate.py`新增`hyp_inst_dealer_net_position_sign`／`hyp_inst_dealer_net_position_change_5d`兩個假說函式（同`hyp_inst_foreign_*`/`hyp_inst_trust_*`的構造，只換category），並在檔案開頭docstring補上第六輪的方法論說明（自營商book主要是選擇權/權證造市避險流，不是方向性押注，經濟解釋框架跟外資「知情交易」、投信「從眾」都不同——第三種結構性不同的機制假說）。
+
+**結果**：
+- `fut_inst_dealer_net_position_sign`：percentile=42.5（門檻90.0），**FAIL**。真實策略終值-2.2% vs 隨機控制組中位數+5.3%。
+- `fut_inst_dealer_net_position_change_5d`：percentile=25.0（門檻90.0，方向也不對），**FAIL**。真實策略終值-34.7% vs 隨機控制組中位數-7.3%。**跟外資（#8, percentile=97.0）、投信（#10, percentile=96.5）不同——自營商動能版連批次都沒過，是這個家族第一個動能版直接FAIL的案例，不是又一個「批次過但累積校正未過」。**
+
+三大法人期貨部位家族（水位×動能×3類別=6個假說）至此全部測完，兩輪前（第42輪）就已規劃好的順序全部走完：0 PASS、4 FAIL（外資水位#7/`TRIALS_LEDGER.md`#24、投信水位#9/#26、自營商水位#11/#28、自營商動能#12/#29）、2 CHEAP_PASS但累積校正後降級為不確定（外資動能#8/#25、投信動能#10/#27）。**這個訊號家族目前沒有任何一個假說進入深挖清單。**
+
+**過程**：全程零額外API呼叫（沿用第39/7輪的全歷史parquet快取，`_load_institutional_net_position()`內部呼叫`finmind_client.load_dev()`但走既有快取，不撞流量限制）。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。全程只讀本機快取，沒有任何觸及holdout的操作。
+
+**已更新**：`fut_cheap_gate.py`（新增兩個假說函式+docstring第六輪說明，`main()`改為執行自營商兩個假說）、`TRIALS_LEDGER.md`（#28/#29，累積27→29）、`FUT_LEADS.md`（#11/#12，「目前狀態」跟「下一輪建議」段落同步更新）、`FUT_MARATHON_STATE.md`（下方另行覆寫）。
+
+**下一輪建議**：三大法人期貨部位家族已全覆蓋，優先序改回`MARATHON_PROTOCOL.md`第3節清單其他候選家族——(a) 若優先序判斷值得，把`N_SHUFFLES`從200加密（例如→1000+）一次重新檢驗`fut_inst_foreign_net_position_change_5d`（#8）跟`fut_inst_trust_net_position_change_5d`（#10）是否能跨過累積校正門檻（先評估30分鐘時間預算，1605天樣本+更高N_SHUFFLES執行時間未知）；(b) 日內均值回歸（需先確認日頻資料形狀是否支援拆解，可能改用隔夜vs當日拆解代替）；(c) 期現價差basis（需新增台股加權指數現貨資料源，小型地基工作）；(d) 盤別效應（需把`after_market` session納入連續合約建構，小型地基工作）。
+
+---
