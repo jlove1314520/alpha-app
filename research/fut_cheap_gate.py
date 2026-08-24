@@ -71,6 +71,55 @@ different mechanism families, not further variants of price-only trend:
     rule; the rule is asserted a priori from outside literature, exactly
     as intended by that protocol clause.
 
+Fourth round (marathon round 42, following FUT_MARATHON_STATE.md's "下一輪
+建議工作單位" #1 after round 39's infra work confirmed
+TaiwanFuturesInstitutionalInvestors is usable): directional institutional
+net futures positioning (三大法人期貨部位), distinct from the
+non-directional `open_interest` column already tested in
+fut_oi_price_confirm (#5, FAILed) -- this dataset carries LONG vs SHORT
+balance separately per category (外資/投信/自營商), so a net-long-minus-
+net-short signed quantity can be built, which open_interest alone cannot
+express. Only 外資 (foreign institutional investors) tested this round --
+they carry by far the largest and most liquid TX futures book of the three
+categories and are the category most commonly cited in Taiwan retail
+trading folklore as the "smart money" whose net positioning is worth
+following ("跟著外資期貨部位") -- 投信/自營商 variants are explicitly left
+for a later round rather than tested all three at once (MARATHON_PROTOCOL.md
+1a: max 2-3 hypotheses per round, and testing one category cleanly first
+avoids conflating "does institutional positioning have signal" with "which
+category" in a single round).
+
+**Known sample-size caveat (carried over from FUT_MARATHON_STATE.md, do not
+re-derive): TaiwanFuturesInstitutionalInvestors only has data from
+2018-06-05 onward (confirmed by fut_probe_institutional_positions.py, round
+39), not the full 2000-2024 history the price-only hypotheses above used.
+The merge in _load_institutional_net_position() is an inner join so this
+restriction happens automatically -- these two hypotheses run on ~1605 days,
+not ~6185. This is a materially smaller sample than the six prior FAILs, so
+the same 90th-percentile bar carries less statistical power here; a FAIL on
+this smaller sample is weaker evidence of "no effect" than a FAIL on the
+full-history sample, and a PASS should be read with that caveat too.**
+
+  - fut_inst_foreign_net_position_sign: position[t] = sign(foreign
+    investors' net open-interest balance on day t), i.e. go long TX when
+    foreign investors are net long futures, short when net short. This is
+    the *level* (contemporaneous positioning), not a change -- the classic
+    "smart money" reading: foreign institutional investors are presumed to
+    have superior information/capital relative to retail, so their
+    directional book itself (not just its recent change) may forecast
+    subsequent price direction (informed-trading hypothesis).
+  - fut_inst_foreign_net_position_change_5d: position[t] = sign(5-day
+    change in foreign investors' net open-interest balance), i.e. trade in
+    the direction institutional positioning has been *moving* over the
+    trailing week, regardless of its absolute level. Tests a distinct
+    "positioning momentum" mechanism from the level-based hypothesis above
+    -- a foreign book that is heavily net-short but *reducing* that short
+    (moving toward neutral) is bullish here even though the level-based
+    signal above would still read bearish; separates "which sign is
+    correct" (level) from "which direction of change is informative"
+    (momentum in positioning) as two independently falsifiable readings of
+    the same underlying data.
+
 Both use adj_close from continuous_contract.build_continuous_series(),
 which FUT_MARATHON_STATE.md (2026-08-24, drift probe finding) confirms is
 safe for these short/medium lookback windows (10-60 days is well within the
@@ -92,7 +141,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 import numpy as np
 import pandas as pd
 
-from continuous_contract import build_continuous_series
+import finmind_client
+from continuous_contract import FULL_HISTORY_START, FULL_HISTORY_END, build_continuous_series
 from validation import holdout
 
 N_SHUFFLES = 200  # cheap-gate resolution (0.5% steps); factor_ic.py uses 1000 for its
@@ -223,6 +273,53 @@ def hyp_weekday_effect(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test("fut_weekday_effect", position, series["ret"])
 
 
+def _load_institutional_net_position(series: pd.DataFrame, category: str = "外資") -> pd.DataFrame:
+    """Inner-join `series` (from build_continuous_series()) with the signed net
+    futures position of a single TaiwanFuturesInstitutionalInvestors category.
+
+    net_position = long_open_interest_balance_volume - short_open_interest_balance_volume,
+    positive = net long, negative = net short. This is the directional quantity
+    that open_interest alone (used in fut_oi_price_confirm, #22, FAIL) cannot
+    express -- OI is unsigned, it counts total contracts outstanding regardless
+    of which side, whereas the institutional-investors dataset separately
+    reports each category's long and short balances.
+
+    Inner join is deliberate, not an oversight: TaiwanFuturesInstitutionalInvestors
+    only has data from 2018-06-05 onward (fut_probe_institutional_positions.py,
+    round 39), so this naturally restricts the merged sample to ~1605 days --
+    the caller must not assume the full 2000-2024 history is available here.
+    """
+    inst = finmind_client.load_dev(
+        dataset="TaiwanFuturesInstitutionalInvestors",
+        data_id="TX",
+        start_date=FULL_HISTORY_START,
+        end_date=FULL_HISTORY_END,
+    )
+    cat = inst[inst["institutional_investors"] == category].copy()
+    cat["date"] = pd.to_datetime(cat["date"])
+    cat["net_position"] = (
+        cat["long_open_interest_balance_volume"] - cat["short_open_interest_balance_volume"]
+    )
+    cat = cat[["date", "net_position"]].sort_values("date").reset_index(drop=True)
+
+    merged = series.merge(cat, on="date", how="inner").sort_values("date").reset_index(drop=True)
+    return merged
+
+
+def hyp_inst_foreign_net_position_sign(series: pd.DataFrame) -> CheapGateResult:
+    merged = _load_institutional_net_position(series, category="外資")
+    position = np.sign(merged["net_position"])
+    return _permutation_test("fut_inst_foreign_net_position_sign", position, merged["ret"])
+
+
+def hyp_inst_foreign_net_position_change_5d(series: pd.DataFrame, window: int = 5) -> CheapGateResult:
+    merged = _load_institutional_net_position(series, category="外資")
+    position = np.sign(merged["net_position"].diff(window))
+    return _permutation_test(
+        f"fut_inst_foreign_net_position_change_{window}d", position, merged["ret"]
+    )
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -231,8 +328,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_oi_price_confirm(series, oi_window=5),
-        hyp_weekday_effect(series),
+        hyp_inst_foreign_net_position_sign(series),
+        hyp_inst_foreign_net_position_change_5d(series, window=5),
     ]
 
     for r in results:

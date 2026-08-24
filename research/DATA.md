@@ -132,6 +132,22 @@ NVDA 在 2024-06-10 盤後執行 10:1 股票分割。抓回來的資料裡，**�
 
 **這輪沒做的**：正確的 FRC CIK（2010–2023 年那個真正掛牌的實體）仍未找到，下一輪如果要繼續可以試 FDIC BankFind Suite 或 Nasdaq 官方停牌公告（跳出 SEC EDGAR 本身，需先確認公開可讀不需登入）；`sec_edgar_delisting_probe.py` 的 `FALLBACK_CIK["FRC"]`（1132979）需要標記為「已知很可能是錯誤實體」（本輪已在腳本裡處理，見下方）；`SBNY` 仍未查到任何候選。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～六輪地基工作的先例一致。
 
+### 美股存活者偏差調查（根本原因）：`FRC`／`SBNY` 查不到 SEC CIK 的真正原因不是查錯，是它們本來就不屬於 SEC EDGAR 管轄（2026-08-24 馬拉松第41輪，`sec_edgar_frc_root_cause_probe.py`）
+
+**動機**：接續第七輪留下的開放問題（正確 FRC CIK 仍未找到）。這輪先把 `browse-edgar` 名稱搜尋的方法窮盡（加測 `type=10-K` 限制的 prefix 搜尋、無 type 限制的 exact-name 搜尋），發現一個新候選 CIK 1097256「FIRST REPUBLIC BANK /MSD」，但查其申報記錄只有 1 筆 2008 年的 `MSDW`（Morgan Stanley Dean Witter）表單——推測是 MSDW 某個結構型商品/信託把 First Republic Bank 當參照實體提及，不是銀行本身的申報人 CIK，排除。至此，`browse-edgar` 名稱搜尋（prefix + exact-name + 有無 `type=10-K` 限制）已經窮盡，沒有任何候選命中一家真正申報過 10-K 的「First Republic Bank」。
+
+**關鍵新發現：把 `efts.sec.gov` 全文檢索從第七輪的窄範圍（`entityName` 過濾）改成完全不限定 entityName、只限定一個正常年份（2019，尚未出事）＋`forms=10-K`，結果 FRC 自己的年報完全不在索引裡**——不限 form 查「First Republic Bank」整年有 7,802 筆命中，但前 20 個 entity bucket 全部是持有 FRC 股票的基金/ETF（Fannie Mae、ProFunds、SPDR 等），不是 FRC 本身；限定只查 10-K 表單，74 筆命中裡也沒有 FRC，全部是不相干的 Sequoia 房貸信託（因為文件裡把 First Republic Bank 列為貸款服務機構而被文字比對命中）跟零星其他銀行。**一家公司自己的年報，在同一年份裡有 7,802 筆「別人提到它」的命中卻完全查不到「它自己申報的文件」，這不是索引缺口，代表這份 10-K 從一開始就沒有進 SEC EDGAR。**
+
+**根本原因（用公開、免登入的 .gov 來源查證，非憑印象）**：《證券交易法》（Securities Exchange Act of 1934）第 12(i) 條規定，**FDIC 承保的「州立、非聯準會會員銀行」（state nonmember banks）如果有依 12(b)/12(g) 條註冊的證券，其定期揭露申報（10-K/10-Q/8-K 等同文件）要直接向 FDIC 申報，依 12 CFR Part 335，不是向 SEC 申報**——因為對這類銀行而言，FDIC（不是 SEC）才是主管證券揭露的機關。（國家銀行向 OCC 申報；州立聯準會會員銀行/銀行控股公司向 Fed 或 SEC 申報。）來源：
+  - [FDIC「Bank Securities」頁面](https://www.fdic.gov/accounting/bank-securities)
+  - [eCFR 12 CFR Part 335](https://www.ecfr.gov/current/title-12/chapter-III/subchapter-B/part-335)
+
+First Republic Bank 是加州州立特許銀行，且（**這點是本輪依一般公開常識推論、沒有另外逐一查證，標記為假設**）本身沒有另外設立一家獨立的 SEC 掛牌銀行控股公司（跟多數大型 NYSE 上市銀行的慣例——用控股公司當 SEC 申報人、銀行本身不直接申報——不一樣），若同時也不是聯準會會員銀行，就完全符合「FDIC 才是主管機關」的條件。**這一個結構性原因，一次解釋了第4–7輪累積的所有異常**：SEC EDGAR 裡找不到任何「First Republic Bank」名下的 10-K/10-Q/8-K（本輪步驟1–2）、2023年下市查不到 Form 25（第5–7輪，Form 25 是 SEC 表單，本來就不是這類銀行的申報主管機關會用的表單）。**第六輪「FDIC 接管型下市不走標準 Form 25」這個假設應該直接退役、不是繼續降級**——它的前提（假設這些是正常會跟 SEC EDGAR 申報的實體，只是接管後不知為何不交 Form 25）本身就錯了；真正的原因是結構性的、早於 2023 年接管事件就存在，跟有沒有被接管清算無關。`SBNY`（Signature Bank，紐約州立特許銀行）很可能是同款情況，但本輪沒有另外查證 SBNY 是不是聯準會會員銀行，這點仍是假設，留給下一輪。
+
+**確認公開替代資料源存在且可連線**：`https://efr.fdic.gov/fcxweb/efr/index.html`（FDIC「Securities Exchange Act Filings System」，`fdic.gov/accounting/bank-securities` 頁面裡列出）回應 200 OK，**但是個 JavaScript 驅動的單頁應用（載入 `index.jsp` + jQuery/Bootstrap），本輪只確認連得到，沒有逆向工程它的搜尋 API**——這是留給下一輪的獨立工作單位，如果要判斷值不值得繼續投入。
+
+**這輪沒做的**：沒有逆向工程 `efr.fdic.gov` 的搜尋 API（下一輪如果要接，這是明確定義好的下一步）；沒有查證 SBNY 是否真的是非聯準會會員銀行（假設，未驗證）；沒有查證 FRC 本身是否真的沒有獨立控股公司（假設，未驗證，但跟其 10-K 完全不在 SEC EDGAR 這個直接觀察一致）。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列。完整探測過程見 `sec_edgar_frc_root_cause_probe.py`（純打 SEC EDGAR + FDIC.gov 公開頁面，不碰 FinMind／alpha.db，holdout 規則不適用）。
+
 ### 美股 PIT 資料源調查：SEC EDGAR 公開 JSON API（2026-08-23 馬拉松第二輪文件調查 → 第三輪實測）
 
 **性質：已實測驗證。** 第二輪只查了第三方文件（見下方保留的第二輪記錄），**第三輪（`research/sec_edgar_probe.py`）對 `data.sec.gov`/`www.sec.gov` 打了真實 HTTP 請求**，三檔股票（AAPL、MSFT、PLTR，刻意混大型股+一檔較晚近IPO的中型股避免只測巨型股的偏差）全部驗證通過。

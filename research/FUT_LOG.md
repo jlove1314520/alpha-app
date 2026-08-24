@@ -118,6 +118,31 @@
 
 **結論：採用 H1**——「結算日前 1～2 天量能超車」的型態正好符合 H1（結算日附近自然轉倉）本身就會產生的現象，不是 commodity CTA 文獻描述的那種提前數天/數週的獨立 H2 現象。已寫進 `FUT_CONTINUOUS_CONTRACT_DESIGN.md`「轉倉時點規則」章節，該文件原本列的「尚待驗證 #1」標記為已解決。
 
+---
+
+## 2026-08-24T23:03+08:00（馬拉松第42輪期貨軌，`fut_cheap_gate.py`新增兩個假說）
+
+**選軌理由**：`marathon_lock.py acquire` 回傳 `LOCK_STALE`（上一輪pid 120808持有鎖滿30分鐘後被回收，疑似上一輪異常中止未留下正常結束的log；比對三軌state檔案時間戳，`TW_MARATHON_STATE.md`22:01／`US_MARATHON_STATE.md`22:37／`FUT_MARATHON_STATE.md`21:19，期貨軌最舊，選期貨軌）。
+
+**這一輪工作單位**：依`FUT_MARATHON_STATE.md`「下一輪建議工作單位」優先項目1，接手第39輪剛補齊地基的三大法人期貨部位資料，測`fut_institutional_net_position`類假說。第一批只測外資（三大法人期貨部位中最具流動性、台股散戶文化裡最常被當「聰明錢」追蹤的類別），投信/自營商留給之後的輪次，避免一輪把「三大法人期貨部位有沒有訊號」跟「哪個類別」混在一起測。
+
+**做了什麼**：
+1. 在`fut_cheap_gate.py`新增`_load_institutional_net_position()`（inner join `build_continuous_series()`輸出跟`TaiwanFuturesInstitutionalInvestors`外資類別的`long_open_interest_balance_volume - short_open_interest_balance_volume`淨部位，inner join天然把樣本限制在1605天，2018-06-05起，跟已知的資料源起始限制一致）跟兩個假說函式：
+   - `fut_inst_foreign_net_position_sign`（水位假說：淨部位方向本身當訊號）
+   - `fut_inst_foreign_net_position_change_5d`（動能假說：淨部位5日變化方向當訊號，跟水位假說互相獨立可證偽）
+2. 全歷史快取（`TaiwanFuturesInstitutionalInvestors__TX__2000-01-01__2024-12-31.parquet`）跟`TaiwanFuturesDaily`全歷史快取在第39/7輪已經存在，本輪呼叫`load_dev()`用完全相同的鍵值，**零額外API呼叫**，全程只讀本機parquet快取。
+3. 執行結果：
+   - `fut_inst_foreign_net_position_sign`：n_days=1605，真實策略終值+17.7%累積，隨機控制組中位數+6.4%，percentile=57.5（門檻90.0）→ **FAIL**。
+   - `fut_inst_foreign_net_position_change_5d`：n_days=1600（5日diff少5筆），真實策略終值+110.9%累積，隨機控制組中位數-15.1%，percentile=97.0（單測門檻90.0過；本批n=2校正門檻95.0過）→ **CHEAP_PASS（批次）**。
+4. **累積多重比較校正（`MARATHON_PROTOCOL.md`第2節，本輪新增2列後`TRIALS_LEDGER.md`總數21→25，bonferroni_n=25，門檻99.6）**：`fut_inst_foreign_net_position_change_5d`的97.0百分位遠不及99.6，判定降級為「CHEAP_PASS（批次），累積校正後降級為不確定，不排入深挖清單」——跟`TRIALS_LEDGER.md`#14（`f_value_pe`）同款「原本通過，累積校正後不再確定」情形，沒有悄悄跳過這個降級。這是本輪唯一新增的候選，暫不進深挖清單；若要重新檢驗需要先把`N_SHUFFLES`從200加密（例如→1000+）才能判斷是否真的能跨過門檻，因為200次排列的解析度只到0.5%，最接近99.6的可達成值只有99.5/100.0。
+5. `TRIALS_LEDGER.md`新增#24/#25、`FUT_LEADS.md`新增#7/#8、`FUT_MARATHON_STATE.md`更新。
+
+**沒做的事**：投信/自營商兩個類別的水位/動能假說（下一輪可以直接沿用`_load_institutional_net_position()`換`category`參數，不用重寫）；`N_SHUFFLES`加密重測`fut_inst_foreign_net_position_change_5d`（留待下一輪視優先序決定，需要先評估時間預算）。
+
+**Holdout 檢查**：開始前跟結束前都跑`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。全程只讀本機parquet快取，沒有任何網路請求。
+
+**下一輪**：見`FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目1（投信/自營商類別的水位/動能假說）。
+
 **附帶發現**：`after_market` session 資料起始日（2017-05-16）跟 TAIFEX 夜盤上線日（2017-05-15）幾乎完全吻合，高信心推論 `after_market`＝夜盤、`position`＝日盤（或日盤結算快照）。**這是間接推論（起始日期吻合），不是官方文件確認**，已同步更新 `DATA.md` 第 6 節，把「`trading_session` 只有兩種值」的疑慮從「完全未知」降級為「高信心推論、未經官方文件驗證」。
 
 **沒做的事**：連續合約建構程式碼本身（比價法回溯調整實作）、多次轉倉後的累積漂移幅度實測——這兩項排在轉倉規則確定之後，本輪一個工作單位只處理規則驗證本身，符合本輪目標。`TRIALS_LEDGER.md` 沒有新增列——這是連續合約設計的地基驗證（規則選擇），不是可統計檢定的因子/策略假說測試，理由同前幾輪的地基調查記錄（`institutional_investors` 亂碼排查那次的先例）。

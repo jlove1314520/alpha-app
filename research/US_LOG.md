@@ -163,3 +163,19 @@
 **下一步**：`US_MARATHON_STATE.md`「下一輪建議工作單位」清單第5項已完成，其餘1/2/3/4項還在。**額度恢復後優先選第4項**（腳本已就緒）；額度緊張時選第1/2項（不需要FinMind額度，找FRC正確CIK或SBNY下市日）。之後如果要幫US軌搭`pit.py`類似邏輯，可以直接`from sec_edgar_client import get_filing_dates`，不用重新寫SEC API呼叫。
 
 `is_holdout_consumed()` 確認為 `False`（本輪完全沒有呼叫任何FinMind函式，唯一一次外部呼叫是SEC EDGAR被402前的`us_probe_price_depth_smallmid.py`嘗試，跟後面的`sec_edgar_client.py`smoke test，都不碰holdout）。
+
+## 2026-08-24T22:37:00+08:00 — 馬拉松第41輪（US軌）：找到 FRC/SBNY 查不到 SEC CIK 的根本原因（第12(i)條銀行申報主管機關規則），不是查錯而是本來就不歸 SEC EDGAR 管
+
+**取鎖/選軌**：取鎖乾淨成功（`LOCK_ACQUIRED`，非陳舊鎖檔，上一輪正常結束）。三軌「最後更新」時間戳比對：US（07:31:16）明顯早於FUT（21:19:00）跟TW（22:01:00），輪替規則指向US。TW軌剛在22:01完成一批全市場宇宙回補（很可能剛用掉FinMind額度），為避免撞同一堵限流牆，本輪選「下一輪建議工作單位」第1項（找FRC正確CIK，不需要FinMind額度，只打SEC EDGAR/FDIC.gov）。
+
+**做了什麼**：
+1. 把第七輪的 `browse-edgar` 名稱搜尋窮盡——加測 `company=first+republic&type=10-K`（HTML output，發現 atom output 在這個查詢形狀下 `<company-info name>` 屬性會壞掉印出 `ARRAY(0x...)`，這是個值得記錄的小地雷）跟不限 type 的 exact-name 搜尋，找到一個新候選 CIK 1097256「FIRST REPUBLIC BANK /MSD」，查其申報記錄只有 1 筆 2008 年 `MSDW`（Morgan Stanley Dean Witter）表單，排除。
+2. 把 `efts.sec.gov` 全文檢索從第七輪的窄 `entityName` 過濾改成完全不限定，只限定一個正常年份（2019）＋`forms=10-K`：74筆命中裡完全沒有FRC自己的年報，全部是不相干的Sequoia房貸信託跟其他銀行（因為文字裡剛好提到FRC是貸款服務機構）。同年不限form查同一詞組有7,802筆命中（前20桶全是持有FRC股票的基金），對照之下「FRC自己完全不在10-K索引裡」是個決定性異常，不是索引缺口。
+3. 用 `WebSearch`＋`WebFetch` 查證（只用公開免登入的.gov來源，`fdic.gov/accounting/bank-securities`跟`ecfr.gov` 12 CFR Part 335）：《證券交易法》第12(i)條規定，FDIC承保的「州立、非聯準會會員銀行」若有註冊證券，定期申報要直接向FDIC申報（依12 CFR Part 335），不是向SEC申報。FRC是加州州立銀行，本輪推論（未逐一查證，標記為假設）它沒有獨立的SEC掛牌控股公司、可能也不是聯準會會員，因此符合這個規則。**這一個結構性原因一次解釋了第4–7輪的所有異常**：查不到10-K/10-Q/8-K、下市查不到Form 25——不是因為2023年被FDIC接管才不交Form 25，而是這類銀行本來就從未是SEC EDGAR的申報人。第六輪的「FDIC接管型下市不走Form 25」假設應該**直接退役**，不是繼續降級——前提本身就錯了。
+4. 確認FDIC自己的公開申報系統存在且可連線：`efr.fdic.gov/fcxweb/efr/`（200 OK），但是JS驅動的單頁應用，本輪只確認連得到，沒有逆向工程搜尋API。
+
+**判定**：這是基礎建設/資料源調查工作單位，不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列。完整探測過程新寫 `sec_edgar_frc_root_cause_probe.py`（純打SEC EDGAR公開API，不碰FinMind／alpha.db，holdout規則不適用），跑過驗證輸出穩定可重現。詳見 `DATA.md`「美股存活者偏差調查（根本原因）」小節。
+
+**這輪沒做的**：沒有逆向工程 `efr.fdic.gov` 搜尋API（下一輪如果要接，這是明確定義好的下一步，但值不值得投入要先評估——這類銀行在美股全市場宇宙裡占比應該很小，優先序可能不如先把美股地基其他部分（宇宙建構、`pit.py`）搭起來）；沒有查證SBNY是否真的是非聯準會會員銀行（假設未驗證）；沒有查證FRC本身是否真的沒有獨立控股公司（假設未驗證，但跟「10-K完全不在SEC EDGAR」這個直接觀察一致）。
+
+`is_holdout_consumed()` 確認為 `False`（本輪完全沒有呼叫任何FinMind函式，只打SEC EDGAR公開JSON API跟FDIC.gov/eCFR公開網頁，不碰holdout）。
