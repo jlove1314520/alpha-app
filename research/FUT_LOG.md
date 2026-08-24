@@ -153,6 +153,31 @@
 
 ---
 
+## 2026-08-25T05:02+08:00（馬拉松第45輪期貨軌，`fut_cheap_gate.py`新增兩個假說）
+
+**選軌理由**：`marathon_lock.py acquire` 乾淨回傳`LOCK_ACQUIRED`（無陳舊鎖檔）。比對三軌state檔案時間戳：`TW_MARATHON_STATE.md`2026-08-25T00:00、`US_MARATHON_STATE.md`2026-08-25T04:31、`FUT_MARATHON_STATE.md`2026-08-24T23:03，期貨軌最舊，選期貨軌。
+
+**這一輪工作單位**：依`FUT_MARATHON_STATE.md`「下一輪建議工作單位」優先項目1，接手三大法人期貨部位家族第二個類別——投信（第42輪只測了外資，投信/自營商留給後續輪次）。只測投信，自營商留給下一輪，維持`MARATHON_PROTOCOL.md`1a每輪2-3個假說上限，也跟第42輪先例（一輪只測一個新類別）保持一致，避免一輪把「這個類別有沒有訊號」跟「另一個類別」混在一起測。
+
+**做了什麼**：
+1. 在`fut_cheap_gate.py`新增兩個假說函式，沿用第42輪已寫好的`_load_institutional_net_position()`，只換`category="投信"`參數，不需要重寫地基：
+   - `fut_inst_trust_net_position_sign`（水位假說：淨部位方向本身當訊號）
+   - `fut_inst_trust_net_position_change_5d`（動能假說：淨部位5日變化方向當訊號）
+2. 沿用第39輪已快取的`TaiwanFuturesInstitutionalInvestors`全歷史parquet（`load_dev()`用完全相同的鍵值），**零額外API呼叫**，全程只讀本機快取。
+3. 執行結果：
+   - `fut_inst_trust_net_position_sign`：n_days=1605，真實策略終值-49.7%累積，隨機控制組中位數-53.7%，percentile=41.5（門檻90.0）→ **FAIL**（方向不對，真實值雖也是負的但沒比隨機打散好）。
+   - `fut_inst_trust_net_position_change_5d`：n_days=1600（5日diff少5筆），真實策略終值+150.2%累積，隨機控制組中位數+0.7%，percentile=96.5（單測門檻90.0過；本批n=2校正門檻95.0過）→ **CHEAP_PASS（批次）**。
+4. **累積多重比較校正（`MARATHON_PROTOCOL.md`第2節，本輪新增2列後`TRIALS_LEDGER.md`總數25→27，bonferroni_n=27，門檻99.63）**：`fut_inst_trust_net_position_change_5d`的96.5百分位不及99.63，判定降級為「CHEAP_PASS（批次），累積校正後降級為不確定，不排入深挖清單」——跟`TRIALS_LEDGER.md`#25（外資動能假說）同款情形，沒有悄悄跳過這個降級。**值得記錄的觀察（不是結論）：外資（#25）跟投信（本輪#27）連續兩個類別的「淨部位5日動能」假說都出現同一種模式（單測/批次過、累積校正未過），可能暗示這個訊號家族本身邊際特性一致，也可能只是巧合，需要更多證據（例如自營商類別的結果，或N_SHUFFLES加密後的結果）才能判斷，不要在這輪就下結論。**
+5. `TRIALS_LEDGER.md`新增#26/#27、`FUT_LEADS.md`新增#9/#10、`FUT_MARATHON_STATE.md`本輪更新。
+
+**沒做的事**：自營商類別的水位/動能假說（下一輪可以直接沿用`_load_institutional_net_position()`換`category="自營商"`，三大法人期貨部位家族就三類別全覆蓋）；`N_SHUFFLES`加密重測兩個動能假說（留待下一輪視優先序決定，需要先評估時間預算）。
+
+**Holdout 檢查**：開始前跟結束前都跑`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（未被使用）。全程只讀本機parquet快取，沒有任何網路請求。
+
+**下一輪**：見`FUT_MARATHON_STATE.md`「下一輪建議工作單位」，優先項目1剩餘部分（自營商類別的水位/動能假說）。
+
+---
+
 ## 2026-08-24T21:35:00+08:00 — 馬拉松第九輪期貨軌執行：連續合約建構程式碼首版完成（`continuous_contract.py`）
 
 **選軌理由**：`marathon_lock.py acquire` 成功後比對 `TW_MARATHON_STATE.md`（21:05）／`US_MARATHON_STATE.md`（20:35）／`FUT_MARATHON_STATE.md`（20:05，最舊）三個最後更新時間戳，選最久沒被碰的期貨軌。

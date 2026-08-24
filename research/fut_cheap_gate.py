@@ -126,6 +126,28 @@ safe for these short/medium lookback windows (10-60 days is well within the
 "short/medium lookback" the drift finding cleared -- nowhere near the
 "跨十幾次以上轉倉" long-lookback danger zone flagged for future caution).
 
+Fifth round (marathon round 44, following FUT_MARATHON_STATE.md's "下一輪
+建議工作單位" #1: "三大法人期貨部位家族還有兩個類別沒測（投信、自營商）"):
+only 投信 (securities investment trust) tested this round, not both --
+MARATHON_PROTOCOL.md 1a caps a round at 2-3 hypotheses, and testing one
+new category cleanly (sign + change_5d, same two-hypothesis pattern as
+round 42's 外資 batch) keeps this round's batch size consistent with the
+prior precedent rather than quadrupling it by doing 投信+自營商 together.
+自營商 (proprietary dealers) is left for a later round.
+  - fut_inst_trust_net_position_sign / _change_5d: same construction as
+    the 外資 pair above (_load_institutional_net_position(category="投信")),
+    same level-vs-momentum distinction. Economic framing differs from
+    外資: 投信 (mutual-fund managers) are a much smaller book than 外資 and
+    are sometimes described in Taiwan market commentary as more prone to
+    herding/momentum-chasing behavior (following recent price trends into
+    their positioning) rather than acting on independent information --
+    this is an *alternative*, not confirmatory, hypothesis to 外資's
+    "informed trading" framing, i.e. if 投信 positioning has any
+    forecasting power at all, the a priori economic story for *why* would
+    likely be different (trend-following/crowd behavior vs proprietary
+    information), which is exactly why this counts as testing a distinct
+    mechanism, not a parameter retune of the 外資 pair.
+
 This is a CHEAP gate only: in-sample, no walk-forward, no cost sensitivity,
 no economic-explanation writeup required yet (MARATHON_PROTOCOL.md 1a vs
 1b). A CHEAP_PASS here just queues the hypothesis for deep-dive.
@@ -320,6 +342,20 @@ def hyp_inst_foreign_net_position_change_5d(series: pd.DataFrame, window: int = 
     )
 
 
+def hyp_inst_trust_net_position_sign(series: pd.DataFrame) -> CheapGateResult:
+    merged = _load_institutional_net_position(series, category="投信")
+    position = np.sign(merged["net_position"])
+    return _permutation_test("fut_inst_trust_net_position_sign", position, merged["ret"])
+
+
+def hyp_inst_trust_net_position_change_5d(series: pd.DataFrame, window: int = 5) -> CheapGateResult:
+    merged = _load_institutional_net_position(series, category="投信")
+    position = np.sign(merged["net_position"].diff(window))
+    return _permutation_test(
+        f"fut_inst_trust_net_position_change_{window}d", position, merged["ret"]
+    )
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -328,8 +364,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_inst_foreign_net_position_sign(series),
-        hyp_inst_foreign_net_position_change_5d(series, window=5),
+        hyp_inst_trust_net_position_sign(series),
+        hyp_inst_trust_net_position_change_5d(series, window=5),
     ]
 
     for r in results:
