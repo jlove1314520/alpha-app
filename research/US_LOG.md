@@ -28,6 +28,18 @@
 
 **沒做的**：完全沒有實際呼叫任何 SEC EDGAR API，欄位結構是否真的如文件所述、能不能順利解析，都還是假設——下一輪建議直接對 AAPL（CIK=0000320193）打一次 submissions API 驗證。美股存活者偏差、成本模型也還沒碰。
 
+## 2026-08-26T01:03:39+08:00 — 馬拉松第79輪：新寫 `us_factors.py`（第一版因子庫，僅一個純價格因子）
+
+依使用者2026-08-26裁示「美股軌可以開始建因子管線」（見 `US_MARATHON_STATE.md`），這輪補齊地基最後一塊缺口：`universe.py`／`pit.py`／`validation/us_costs.py` 都已有第一版，只差 `factors.py` 完全不存在，`US_MARATHON_STATE.md`「下一步」明確點名這是候選工作單位之一。**這輪工作單位屬於協定第1c節（地基建設），不是1a（假說便宜關卡）**——第一個因子刻意選純價格、不需要PIT對齊，目的是先確認因子計算管線本身能端到端跑通，不要一次連因子邏輯跟PIT正確性兩個未知數一起賭。
+
+新增 `us_factors.py`：`us_price_series(stock_id, start_date)` 包一層 `load_dev("USStockPrice", ...)`，欄位改名成專案慣用的小寫（`adj_close`/`close`/`high`/`low`/`open`/`volume`），跟`adjust.py`輸出介面一致；`prepare_us_factors(price_df)` 目前只加一個因子欄位：`f_us_low_vol`（60日日報酬標準差取負號），**刻意跟TW版`f_low_vol`用完全相同的定義跟窗口（`LOW_VOL_WINDOW=60`）**，理由寫在docstring——之後如果要比較「低波動異常在兩個市場是否表現一致」，不能讓定義差異混淆結論。
+
+**取鎖後第一次嘗試就撞FinMind 402（額度用盡，顯然是TW軌前幾輪回補剛用光）**：改用已有的快取檔（`data/raw/USStockPrice__AAPL__1990-01-01__2024-12-31.parquet`／`MSFT`同款，第一輪里程碑1探測留下的），把smoke test的`start_date`從原本規劃的`2015-01-01`改成`1990-01-01`（跟快取key完全對齊），零新增API呼叫完成驗證，符合協定第4節「額度用盡優雅結束/不狂重試」的精神，同時沒有浪費這一輪。
+
+Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都是60列NaN warm-up（`pct_change()`1列NaN+`rolling(min_periods=60)`還差59列湊滿60，數學上剛好60列，不是59列——第一版寫成`LOW_VOL_WINDOW - 1`assert失敗才發現這個off-by-one，已修正assert本身，不是改因子邏輯，跟TW版`factors.py`用的完全同一套`pct_change→rolling(min_periods=W)`寫法，這個warm-up長度是預期行為不是bug），有效值範圍AAPL約[-0.0825, -0.0066]、MSFT約[-0.0518, -0.0057]，數量級合理（年化約略等於日std×√252，AAPL約10%~131%波動帶，MSFT約9%~82%，涵蓋了COVID等真實高波動期間，沒有出現爆炸/全NaN這類明顯bug徵兆）。`python us_factors.py`跑通並印出`OK`。
+
+**沒做的（誠實揭露，下一輪候選）**：只有1個因子，不是完整因子庫；沒有跑`factor_ic.py`風格的便宜關卡IC測試（那是下一輪的1a工作，這輪只確認欄位算得出來）；沒有處理美股宇宙的PIT基本面因子（那些需要`us_pit.py`已知的`era_reliability()`限制、近期IPO股不可信的問題，比純價格因子複雜很多，刻意留到之後）。`is_holdout_consumed()`確認`False`（全程只用`load_dev()`封頂資料+已快取檔案，零新API呼叫）。
+
 `is_holdout_consumed()` 確認為 `False`（本輪完全沒有觸碰任何 FinMind 或 alpha.db 資料，純網路文件查證）。
 
 ## 2026-08-23T13:35:00+08:00 — 馬拉松第三輪：SEC EDGAR API 實測驗證
