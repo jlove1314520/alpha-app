@@ -447,6 +447,19 @@
         <div class="note">來源：FinMind 三大法人買賣金額總表（TaiwanStockTotalInstitutionalInvestors）</div>
       </div>
 
+      <div class="card">
+        <h3>大盤融資維持率</h3>
+        <div id="margin-summary"><div class="note">載入中…</div></div>
+        <div id="margin-chart"></div>
+        <div class="legend">
+          <div class="li"><span class="sw" style="background:var(--warn)"></span>&lt;160% 注意</div>
+          <div class="li"><span class="sw" style="background:var(--serious)"></span>&lt;150% 危險</div>
+          <div class="li"><span class="sw" style="background:var(--critical)"></span>&lt;130% 斷頭區</div>
+        </div>
+        <div class="note">跌破 150% 為市場公認警戒；跌破整戶維持率(通常130%)交易人會被要求補繳保證金或遭券商斷頭砍倉</div>
+        <div class="note" id="margin-note">來源：TWSE 全市場融資餘額逐股×收盤價加總（本機 Python 每日計算）÷ FinMind 全市場融資金額</div>
+      </div>
+
       <div class="card ai-card">
         <div class="ai-tag">✦ AI 盤勢解讀</div>
         <p>外資期現貨同步偏多、重電族群量增價漲；但今晚 CPI 前，短線追高風險升溫。與你的持股重疊度最高的強勢族群：<b>半導體（2 檔）</b>。</p>
@@ -689,6 +702,18 @@
           <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
           <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
         </div>
+      </div>
+      <div class="card">
+        <h3>融資融券</h3>
+        <div class="facts">
+          <div class="f"><span>融資餘額</span><b id="mg-balance">—</b></div>
+          <div class="f"><span>融資餘額變化</span><b id="mg-balance-chg">—</b></div>
+          <div class="f"><span>融券餘額</span><b id="mg-short">—</b></div>
+          <div class="f"><span>資券比</span><b id="mg-ratio">—</b></div>
+        </div>
+        <div class="note" id="mg-short-ratio">券資比：—</div>
+        <div class="note" id="mg-note">來源：FinMind 個股融資融券</div>
+        <div class="note" id="mg-maint" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">估算融資維持率：—</div>
       </div>
     </div>
 
@@ -1308,6 +1333,58 @@
     setDataTime('inst-datatime',nets[nets.length-1].date);
   }
 
+  // 2026-08-25 新增：大盤（全市場）融資維持率。這個數字沒辦法在瀏覽器端直接算——
+  // 需要「每一檔股票融資餘額(張)×現價」逐檔加總才是真正的擔保品市值，TWSE openapi
+  // 雖然免費但不支援瀏覽器CORS，所以改成 alpha-data 這邊用 Python 每天算好、寫成一個
+  // 小 JSON 檔（data/margin_maintenance.json，跟這個網站同網域，沒有 CORS 問題），
+  // 這裡單純 fetch 那個檔案顯示，不是打 FinMind／TWSE。見
+  // alpha-data/compute_margin_maintenance.py 的完整說明。
+  function marginLevel(pct){
+    if(pct==null)return null;
+    if(pct<130)return{l:'斷頭區',c:'var(--critical)'};
+    if(pct<150)return{l:'危險',c:'var(--serious)'};
+    if(pct<160)return{l:'注意',c:'var(--warn)'};
+    return{l:'正常',c:'var(--good)'};
+  }
+  function marginChart(history){
+    const pts=history.filter(h=>h.ratio_pct!=null);
+    if(!pts.length)return '<div class="note">查無可畫的維持率數字</div>';
+    const vals=pts.map(h=>h.ratio_pct);
+    const ymin=Math.min(100,Math.floor(Math.min(...vals)/10)*10-10);
+    const ymax=Math.max(220,Math.ceil(Math.max(...vals)/10)*10+10);
+    const W=320,H=110,pad=4,n=pts.length;
+    const y=v=>(H-pad)-(v-ymin)/(ymax-ymin)*(H-2*pad);
+    const x=i=>n<=1?W/2:(i/(n-1))*(W-2*pad)+pad;
+    const band=(v,color)=>v<ymin||v>ymax?'':`<line x1="0" y1="${y(v).toFixed(1)}" x2="${W}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="1" stroke-dasharray="3,3" opacity=".65"/>`;
+    const lineEls=n>=2
+      ?`<polyline points="${pts.map((h,i)=>`${x(i).toFixed(1)},${y(h.ratio_pct).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2"/>`
+      :`<circle cx="${W/2}" cy="${y(pts[0].ratio_pct).toFixed(1)}" r="4" fill="var(--accent)"/>`;
+    const lastX=x(n-1).toFixed(1),lastY=y(pts[n-1].ratio_pct).toFixed(1);
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%">
+      ${band(160,'var(--warn)')}${band(150,'var(--serious)')}${band(130,'var(--critical)')}
+      ${lineEls}<circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--accent)"/>
+    </svg>${n===1?'<div class="note" style="margin-top:2px">目前只有一天資料，趨勢線會隨每日累積增加</div>':''}`;
+  }
+  async function loadMarginMaintenance(){
+    const sumEl=document.getElementById('margin-summary'),chartEl=document.getElementById('margin-chart'),noteEl=document.getElementById('margin-note');
+    if(!sumEl)return;
+    let history=[];
+    try{
+      const r=await fetch('data/margin_maintenance.json?t='+Date.now());
+      if(r.ok)history=await r.json();
+    }catch(e){}
+    if(!Array.isArray(history)||!history.length){
+      sumEl.innerHTML='<div class="note">查無資料（本機每日計算尚未產生歷史）</div>';
+      if(chartEl)chartEl.innerHTML='';
+      return;
+    }
+    const last=history[history.length-1];
+    const lv=marginLevel(last.ratio_pct);
+    sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}${last.date}</div></div>`;
+    if(chartEl)chartEl.innerHTML=marginChart(history);
+    if(noteEl)noteEl.textContent=`來源：TWSE 全市場融資餘額逐股×收盤價加總（本機 Python 每日計算，累積 ${history.length} 天）÷ FinMind 全市場融資金額（${last.finmind_margin_money_date}）`;
+  }
+
   async function loadFutInst(){
     const raw=await fm('TaiwanFuturesInstitutionalInvestors','TX',_d(10));
     if(!raw.length){['fut-foreign','fut-trust','fut-dealer','fut-total'].forEach(id=>setTxt(id,'—'));return}
@@ -1399,7 +1476,7 @@
   }
   async function hydrateMarket(){
     renderMktToggle('market');
-    await Promise.all([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst()]);
+    await Promise.all([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance()]);
     if(MKT_STATE.market==='US')loadMarketUS();
     if(MKT_STATE.market==='FUT')loadMarketFUT();
     stampUpdated('market');
@@ -1497,6 +1574,42 @@
     const dates=[...new Set(raw.map(r=>r.date))].slice(-5);
     const series=dates.map(dd=>{let s=0;raw.filter(r=>r.date===dd&&(r.name||'').includes('Foreign')).forEach(r=>s+=(r.buy||0)-(r.sell||0));return{date:dd,v:s}});
     return{date:last,foreign:f,trust:t,dealer:d,total:f+t+d,series};
+  }
+
+  // 2026-08-25 新增：個股融資融券（籌碼分頁）。融資餘額變化/融券餘額/資券比/券資比是
+  // FinMind 直接給的準確資料；「估算融資維持率」是自己算的，公式：融資餘額(張)×現價÷
+  // 估計融資金額，估計融資金額用「近20日均價×融資成數60%」概估原始成本（不知道真正
+  // 每筆融資的實際進場價，只能用近期均價概估），畫面上明確標「估算值」，跟上面幾個
+  // 準確資料分開，符合使用者要求「準確資料權重要高於估算值」。
+  async function loadMarginChip(code,px){
+    const raw=await fm('TaiwanStockMarginPurchaseShortSale',code,_d(16));
+    if(!raw.length){
+      ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
+      setTxt('mg-short-ratio','券資比：—');setTxt('mg-note',fmEmptyMsg('查無融資融券資料'));
+      setTxt('mg-maint','估算融資維持率：—');
+      return;
+    }
+    const last=raw[raw.length-1];
+    const marginBal=last.MarginPurchaseTodayBalance,marginPrev=last.MarginPurchaseYesterdayBalance;
+    const shortBal=last.ShortSaleTodayBalance;
+    const chg=marginBal-marginPrev;
+    setTxt('mg-balance',nf(marginBal)+' 張');
+    const ce=document.getElementById('mg-balance-chg');ce.textContent=(chg>=0?'+':'')+nf(chg)+' 張';ce.className=chg>=0?'pos':'neg';
+    setTxt('mg-short',nf(shortBal)+' 張');
+    setTxt('mg-ratio',shortBal>0?(marginBal/shortBal).toFixed(1)+' 倍':'—（融券餘額為0）');
+    setTxt('mg-short-ratio',`券資比：${marginBal>0?(shortBal/marginBal*100).toFixed(2)+'%':'—'}`);
+    setTxt('mg-note',`最新 ${last.date} · FinMind 個股融資融券`);
+    if(px&&px.length&&marginBal>0){
+      const last20=px.slice(-20).map(x=>x.close);
+      const avg20=last20.reduce((a,b)=>a+b,0)/last20.length;
+      const curPx=px[px.length-1].close;
+      const estMaintenance=avg20>0?(curPx/avg20)/0.6*100:null;
+      const me=document.getElementById('mg-maint');
+      if(estMaintenance!=null){
+        const lv=marginLevel(estMaintenance);
+        me.innerHTML=`估算融資維持率：<b style="color:${lv?lv.c:'inherit'}">${estMaintenance.toFixed(1)}%</b>（估算值，非券商實際維持率——以近20日均價概估原始融資成本、假設融資成數60%，非個股真實逐筆成本）`;
+      }else{me.textContent='估算融資維持率：—'}
+    }else{setTxt('mg-maint','估算融資維持率：—（融資餘額為0或無足夠股價資料）')}
   }
 
   function pivotByDate(raw){
@@ -1660,6 +1773,8 @@
       ['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
       setTxt('chip-note','美股暫無三大法人資料（僅適用台股）');
       document.getElementById('chip-bars').innerHTML='<div class="note">美股暫無此資料</div>';
+      ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
+      setTxt('mg-short-ratio','券資比：—');setTxt('mg-note','美股暫無融資融券資料（僅適用台股）');setTxt('mg-maint','估算融資維持率：—');
       document.getElementById('eps-bars').innerHTML='<div class="note">美股尚未支援財報解析（僅適用台股）</div>';
       ['fin-gross','fin-op','fin-roe','fin-fcf'].forEach(id=>setTxt(id,'—'));
       setTxt('fin-note','美股暫無此資料');
@@ -1677,6 +1792,7 @@
       document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.close),v=>nf(v));
       setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（原始未還原股價）`);
     }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
+    loadMarginChip(code,px);
     const p=per.length?per[per.length-1]:{};
     setTxt('kn-per',p.PER??'—');setTxt('kn-pbr',p.PBR??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
     loadRevenueChart(code,rev);
