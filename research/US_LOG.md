@@ -227,3 +227,21 @@
 **這輪沒做的**：沒有開始寫任何美股版 `universe.py`/`pit.py`/成本模型的正式程式碼（探測完成不等於地基搭好，下一輪才是真正開始寫可重用模組的時候）；沒有把這次的10檔擴大成更大樣本的窮舉驗證（10檔已經是有意義的多樣性抽測，邊際報酬遞減，下一輪應該轉向寫程式碼而非繼續抽測）。
 
 `is_holdout_consumed()`確認為`False`（本輪只呼叫 `load_dev()`，封頂在 `VAL_END`，未觸碰holdout解鎖函式）。
+
+## 2026-08-25T09:33:32+08:00 — 馬拉松第53輪（US軌）：發現並修復孤兒檔案`us_delisting_client.py`的分類邏輯bug，正式納入版本控制
+
+**背景**：本輪一開始例行`ls`檢查目錄時，發現`research/us_delisting_client.py`是`git status`顯示的未追蹤檔案（`?? research/us_delisting_client.py`），`US_LOG.md`／`US_MARATHON_STATE.md`都完全沒有提到這個檔案，`git log`對這個檔案也是空的。檔案本身的docstring自稱是「Marathon round 50」的產物，但已記錄的第50輪心跳明確是做`us_probe_price_depth_smallmid.py`（項目4），不是這個檔案。合理推論：這是某一輪（很可能是第50輪心跳記錄提到的「上一輪pid 57480疑似失敗」那個陳舊鎖檔對應的輪次）已經寫完程式碼、但在寫log/commit之前就異常中止的殘留產物——`MARATHON_PROTOCOL.md`第0節提到的「上一輪悄悄死掉、什麼都沒留下」情境的具體案例，只是這次不是「什麼都沒留下」，是留下了未完成記錄的實體檔案。
+
+**這個檔案是什麼**：`get_delisting_status(ticker, cik_override, fdic_cert, expected_name_fragment)`，把之前探測階段（第5、7、41、44、47輪）分散在`sec_edgar_client.py`／`fdic_client.py`／各`*_probe.py`裡的下市判定邏輯，第一次包裝成一個「給已驗證身分的股票代號，回答是否下市/何時下市」的可重用函式。是`US_MARATHON_STATE.md`「下一輪建議工作單位」第6項（寫`universe.py`本體）的必要前置積木，不是這輪的目標本身（第6項本身還沒開始）。
+
+**驗證過程發現的bug**：先跑了檔案自帶的`if __name__ == "__main__"` smoke test（5檔已知下市股：TWTR/SIVB/BBBY走SEC EDGAR、SBNY/FRC走FDIC），結果TWTR跟BBBY都被分類成`confirmed_sec_form25_multiple_events_ambiguous`（多重事件、無法判定日期）——但`US_MARATHON_STATE.md`已經用手動調查明確記錄這兩檔是乾淨的單一下市事件（TWTR: 25-NSE 2022-10-28；BBBY: 25-NSE 2023-07-10）。追查原因：原始版本的判定邏輯把Form 25家族（交易所下市申報）跟Form 15家族（SEC註銷登記申報，`DELISTING_FORM_PREFIXES=("25","15-12")`兩者都算進同一個「distinct filingDate」集合）混在一起算「有幾個不同日期」——但**正常的下市流程本來就是先申報Form 25、隔一段時間後才申報Form 15，兩者日期本來就不同，這是每一次下市事件的常態，不是「多重事件」的訊號**。原始邏輯會把每一檔正常下市都誤判成「模糊、無法判定」，只有SIVB（真的有兩個不相關事件：2017-2018一組跟2023真正的下市）才是原設計者想抓的情境。
+
+**修復**：改成只用Form 25家族（`ANCHOR_FORM_PREFIX="25"`）的filingDate來判定「有幾個獨立事件」，Form 15家族只當輔助資訊（放在`all_hits`裡但不影響event計數）。理由：Form 15是同一次下市事件必然的後續行政程序，只是間隔天數變異很大（TWTR 10天、BBBY 81天、SIVB真正那次2023-05-02到2025-01-24將近630天——查證後排除了用固定時間窗合併25+15的方案，因為630天遠超過任何合理窗口，但10天又太短不能設高門檻）；反之，兩筆不同日期的Form 25家族申報，才是真正代表兩個不同的下市事件（不同證券類別，或像SIVB真的有一次無關的2017-2018事件）。修復後重跑smoke test：TWTR/BBBY正確變回`confirmed_sec_form25`（單一事件，日期正確），SIVB維持`confirmed_sec_form25_multiple_events_ambiguous`（正確，這是原設計意圖要抓的真實情境），SBNY/FRC的FDIC路徑不受影響、結果不變。同時新增一個先前完全沒覆蓋到的分支（`confirmed_sec_form15_only_no_form25_anchor`）：如果只找到Form 15、完全沒有Form 25家族申報（例如公司從未在交易所掛牌、只是單純SEC註銷登記），明確標註信心較低，不是靜默套用跟Form25同款的`confirmed_sec_form25`狀態——這個分支5檔已知案例都沒觸發，未來若遇到才會第一次被實測驗證，先誠實記錄「理論設計、未實測」。
+
+**這輪沒有新打任何外部API**——`sec_edgar_client.py`／`fdic_client.py`的快取（`research/data/raw/`底下）已經在之前輪次建立，這輪的修復跟smoke test重跑完全命中快取，零額度消耗，也因此完全不受FinMind額度限制影響（跟這輪一開始選US軌純粹是因為時間戳最舊、不是刻意挑不耗額度的工作無關，是巧合）。
+
+**判定**：這是地基建設工作單位（見`MARATHON_PROTOCOL.md`第1c節），不是假說檢定，不計入`TRIALS_LEDGER.md`。修復後的`us_delisting_client.py`正式`git add`納入版本控制（先前是孤兒未追蹤檔案，現在有完整commit記錄跟log對照）。
+
+**這輪沒做的**：沒有開始寫`universe.py`本體（這個模組只是`universe.py`未來會呼叫的其中一個積木，`universe.py`要做的「累積{ticker: 已驗證身分}對照表」這件事，docstring裡明確寫這輪範圍之外）；沒有測試`confirmed_sec_form15_only_no_form25_anchor`分支（沒有已知的真實案例可驗證，留待未來遇到時驗證）；沒有查證是否還有其他孤兒未追蹤檔案（這輪只是在例行`ls`時偶然發現這一個，沒有系統性掃描整個research目錄比對git狀態，如果之後想徹底排查，`git status --short research/`可以列出所有未追蹤/未commit的異動，值得未來某一輪專門做一次）。
+
+`is_holdout_consumed()`確認為`False`（本輪完全沒有呼叫任何FinMind相關函式，只讀SEC EDGAR/FDIC的既有本地快取）。
