@@ -277,3 +277,20 @@
 **沒做的**：`filings.files[]`分頁擴充（把視窗往更早年份延伸）仍然完全沒碰；美股成本模型（第8項）沒動；`universe.py`還沒接上`us_pit.py`做實際回測。這輪只接第7項一項，符合協定「一輪一件事」。
 
 這輪沒有打任何新的FinMind API（純SEC EDGAR，且全部命中既有快取），跟`MARATHON_PROTOCOL.md`第4節「holdout只限制FinMind/alpha.db」的範圍一致，`is_holdout_consumed()`確認為`False`。
+
+## 2026-08-25T14:02:23+08:00 — 馬拉松第62輪：`sec_edgar_client.py` 加`filings.files[]`分頁擴充（第10項）
+
+做了`US_MARATHON_STATE.md`「下一輪建議工作單位」第10項：`get_filing_dates()`新增`full_history: bool = False`參數，`True`時額外遍歷`get_submissions(cik)["filings"]["files"]`列出的每個archive pointer（用新函式`get_archive_filings(cik, file_name)`逐一抓取，per-file快取），把結果跟`filings.recent`合併回傳，解決第59輪發現的「`filings.recent`視窗深度對長年掛牌股比理論上限淺很多」問題。
+
+**動手前先直接用`requests`探測archive檔案的真實JSON形狀**（遵守第47輪留下的方法論教訓，不能只信WebFetch摘要）：抓了AAPL的`CIK0000320193-submissions-001.json`（已快取在`data/raw/SEC_submissions_0000320193.json`裡的`filings.files[]`列出這個檔名），確認是**扁平字典**，跟`filings.recent`同款「並列陣列」形狀（`form`/`filingDate`/`reportDate`等欄位直接在頂層，不是巢狀在`filings`鍵底下）——這是新函式`_filings_to_records()`能同時處理`filings.recent`跟archive檔案兩種來源的依據，已在函式docstring記錄這個共用假設的驗證來源。
+
+**smoke test（`python sec_edgar_client.py`）結果，`full_history=True` vs `False`對照**：
+- AAPL：recent-only 45筆（最早2015-07-22）→ full_history 128筆（最早**1994-01-26**，貼齊理論上限）。
+- MSFT：recent-only 25筆（最早2020-07-30）→ full_history 131筆（最早**1994-02-14**）。
+- PLTR：recent-only 24筆 → full_history 24筆**不變**（2020年IPO，本來就沒有archive pointer可分頁，`filings.files[]`是空陣列，結構性保證，不是bug）。
+
+**新發現（這輪smoke test才第一次量化出來，非理論推測）**：`gap_days`（filingDate−reportDate）的max在納入歷史資料後明顯變寬——AAPL max_gap從37天（recent-only）變成**181天**（full_history），MSFT從30天變成**91天**。推測跟SEC加速申報人（accelerated filer）規定的沿革有關（早年10-K/10-Q法定申報期限比現在寬鬆，2000年代初才逐步收緊），但這輪**沒有查證這個推測**，只記錄現象。**這對之後設計美股版PIT reliability機制有實務意義**：如果`filing_pit()`要延伸到1990年代資料，不能沿用近年（~30天）的gap_days當作「正常範圍」的預期值去做離群值偵測，早年本來就會有數倍寬的合法gap，需要按時期分段看待，不是全歷史套同一個門檻。
+
+**沒做的**：`us_pit.py`的`filing_pit()`/`coverage_probe()`還沒接上這個新的`full_history`參數（目前還是只用`filings.recent`），這是下一輪的候選工作單位，不在這輪範圍內。美股成本模型（第8項）也沒動。這輪只接第10項一項，符合協定「一輪一件事」。
+
+這輪沒有打任何FinMind API，`data.sec.gov`請求也全部走`_cached_get`（AAPL/MSFT各多一個archive檔案的快取寫入，PLTR零額外請求因為`filings.files[]`是空的），`is_holdout_consumed()`確認為`False`。

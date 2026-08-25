@@ -7,10 +7,12 @@ one-off probe meant to be read by hand; this module is the callable version
 so later work (a future `pit.py` analog, `universe.py` analog, etc.) doesn't
 have to re-copy the same requests calls.
 
-Scope, deliberately narrow (see US_MARATHON_STATE.md 下一輪建議工作單位 item 5):
-this module only covers what `sec_edgar_probe.py` covered -- the
-`submissions/CIK{cik}.json` endpoint's `filings.recent` block. It does NOT
-wrap the XBRL company-facts endpoint (`sec_edgar_xbrl_facts_probe.py` /
+Scope, deliberately narrow (see US_MARATHON_STATE.md 下一輪建議工作單位 item 5,
+extended item 10 in round 61): this module covers the
+`submissions/CIK{cik}.json` endpoint's `filings.recent` block, plus optional
+pagination into its `filings.files[]` archive pointers (`full_history=True`
+on `get_filing_dates()`) for filers whose recent window doesn't reach back
+far enough. It does NOT wrap the XBRL company-facts endpoint (`sec_edgar_xbrl_facts_probe.py` /
 `sec_edgar_xbrl_facts_dedup_probe.py`) or the delisting/Form-25 probes
 (`sec_edgar_delisting_probe.py`, `sec_edgar_frc_cik_probe.py`) -- those are
 separate, still-probe-only concerns with their own open questions (see
@@ -18,10 +20,6 @@ US_MARATHON_STATE.md) and shouldn't be bolted onto this module speculatively.
 
 Known limitations carried over from the probe scripts (see
 US_MARATHON_STATE.md for full detail -- not re-litigated here):
-- `filings.recent` is a rolling window; older filings live in
-  `filings.files[]` archive pointers, which this module does NOT yet fetch
-  (get_submissions() returns the raw archive pointer list so a caller can,
-  but there's no helper to paginate through them yet).
 - Ticker->CIK is many-to-one over time (ticker reuse is real and dangerous,
   see US_MARATHON_STATE.md "美股存活者偏差" notes) -- get_cik() resolves the
   *current* mapping only. It is not a substitute for the entity-identity
@@ -103,32 +101,75 @@ def get_submissions(cik: int) -> dict:
     return _cached_get(url, f"submissions_{cik_padded}")
 
 
-def get_filing_dates(
-    cik: int, forms: tuple[str, ...] = ("10-K", "10-Q")
+def _filings_to_records(
+    filings_block: dict, forms: tuple[str, ...]
 ) -> list[dict]:
-    """Return the PIT signal: one dict per matching filing in the
-    `filings.recent` rolling window, each with form/filingDate/reportDate/
-    gap_days (filingDate - reportDate, in calendar days).
-
-    Does NOT paginate into `filings.files[]` archive pointers -- this only
-    covers whatever's in the 'recent' window (see module docstring).
-    Silently skips filings missing either date field (observed in practice
-    for some non-10-K/10-Q form types, not expected for 10-K/10-Q but kept
-    defensive since this is unverified across the full filer population).
-    """
-    data = get_submissions(cik)
-    recent = data.get("filings", {}).get("recent", {})
-    n = len(recent.get("form", []))
+    """Shared parsing for one filings-shaped block (either `filings.recent`
+    from the submissions payload, or a `filings.files[]` archive file's
+    top-level payload -- both have the same array-of-parallel-fields shape,
+    confirmed by direct probe 2026-08-25 marathon round 61 against
+    CIK0000320193-submissions-001.json)."""
+    n = len(filings_block.get("form", []))
     out = []
     for i in range(n):
-        form = recent["form"][i]
+        form = filings_block["form"][i]
         if form not in forms:
             continue
-        fd, rd = recent["filingDate"][i], recent["reportDate"][i]
+        fd, rd = filings_block["filingDate"][i], filings_block["reportDate"][i]
         if not fd or not rd:
             continue
         gap_days = (date.fromisoformat(fd) - date.fromisoformat(rd)).days
         out.append({"form": form, "filingDate": fd, "reportDate": rd, "gap_days": gap_days})
+    return out
+
+
+def get_archive_filings(cik: int, file_name: str) -> dict:
+    """Fetch one `filings.files[]` archive pointer's JSON payload.
+
+    `file_name` comes from `get_submissions(cik)["filings"]["files"]`, e.g.
+    "CIK0000320193-submissions-001.json". Cached per-file (the file name
+    itself is the cache key, since archive files are immutable once SEC
+    publishes them -- unlike the 'recent' window they never change, so the
+    24h cache-max-age in `_cached_get` is conservative but harmless here).
+    """
+    url = f"https://data.sec.gov/submissions/{file_name}"
+    cache_key = file_name.replace(".json", "")
+    return _cached_get(url, f"archive_{cache_key}")
+
+
+def get_filing_dates(
+    cik: int,
+    forms: tuple[str, ...] = ("10-K", "10-Q"),
+    full_history: bool = False,
+) -> list[dict]:
+    """Return the PIT signal: one dict per matching filing, each with
+    form/filingDate/reportDate/gap_days (filingDate - reportDate, in
+    calendar days).
+
+    By default (`full_history=False`) only covers the `filings.recent`
+    rolling window -- for long-tenured large filers this can be as shallow
+    as ~5-10 years (observed for AAPL/MSFT, see US_MARATHON_STATE.md
+    round 59). Set `full_history=True` to also paginate through every
+    `filings.files[]` archive pointer, extending coverage back to the
+    filer's earliest EDGAR filing (AAPL: 1994, confirmed by direct probe
+    round 61). This costs one extra HTTP request per archive file (cached
+    thereafter) -- for filers with few archive files this is cheap, but is
+    unverified for filers with many (e.g. very frequent Section 16 filers).
+
+    Silently skips filings missing either date field (observed in practice
+    for some non-10-K/10-Q form types, not expected for 10-K/10-Q but kept
+    defensive since this is unverified across the full filer population).
+    Does not attempt to de-duplicate across recent/archive boundaries --
+    unverified whether SEC guarantees no overlap, but the two are described
+    as covering disjoint date ranges (`filingFrom`/`filingTo` per archive
+    file) so overlap is not expected in practice.
+    """
+    data = get_submissions(cik)
+    out = _filings_to_records(data.get("filings", {}).get("recent", {}), forms)
+    if full_history:
+        for archive in data.get("filings", {}).get("files", []):
+            archive_data = get_archive_filings(cik, archive["name"])
+            out.extend(_filings_to_records(archive_data, forms))
     return out
 
 
@@ -147,8 +188,18 @@ if __name__ == "__main__":
         gaps = [f["gap_days"] for f in filings]
         if gaps:
             print(
-                f"  10-K/10-Q gap(days): n={len(gaps)}, "
-                f"min={min(gaps)}, max={max(gaps)}, avg={sum(gaps) / len(gaps):.1f}"
+                f"  recent-only: n={len(gaps)}, earliest={min(f['filingDate'] for f in filings)}, "
+                f"min_gap={min(gaps)}, max_gap={max(gaps)}, avg_gap={sum(gaps) / len(gaps):.1f}"
             )
         else:
             print("  no 10-K/10-Q filings in recent window")
+
+        filings_full = get_filing_dates(cik, full_history=True)
+        gaps_full = [f["gap_days"] for f in filings_full]
+        if gaps_full:
+            print(
+                f"  full_history: n={len(gaps_full)}, earliest={min(f['filingDate'] for f in filings_full)}, "
+                f"min_gap={min(gaps_full)}, max_gap={max(gaps_full)}, avg_gap={sum(gaps_full) / len(gaps_full):.1f}"
+            )
+        else:
+            print("  full_history: no 10-K/10-Q filings found")

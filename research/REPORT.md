@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 62 輪 · 2026-08-25 14:02 · US · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對US最舊；`sec_edgar_client.py`的`get_filing_dates()`新增`full_history=True`，分頁抓`filings.files[]` archive pointers（`US_MARATHON_STATE.md`第10項） · 完成，AAPL/MSFT視窗深度從2015/2020延伸到1994年理論上限，PLTR不變（無archive可分頁，符合預期）；新發現歷史filing gap上限比近年寬很多（AAPL 37→181天、MSFT 30→91天），未查證原因；`us_pit.py`尚未接上新參數，留給下一輪
+
 ## 第 61 輪 · 2026-08-25 13:34 · TW · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對TW最舊；覆蓋率42.8%仍遠低於80%門檻，跑`backfill_universe.py --batch-size 300`第十八批 · 本批嘗試103檔，新完成70/新跳過18，撞限流牆提前停止（設計內行為），累積覆蓋率1369→1439/3196（42.8%→45.0%）
 
 ## 第 60 輪 · 2026-08-25 13:03 · FUT · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊；接手盤別效應家族地基第一步，新寫`fut_probe_night_session.py`探測`after_market`夜盤原始資料形狀（零額外API呼叫） · 確認settlement_price/open_interest全歷史恆為0（升級自一個月樣本推論）、首日跟TAIFEX夜盤上線日只差一天；**發現關鍵未解決風險：夜盤date欄位代表的交易時段先後順序尚未驗證**，下一輪動`continuous_contract.py`前必須先確認，避免報酬方向顛倒

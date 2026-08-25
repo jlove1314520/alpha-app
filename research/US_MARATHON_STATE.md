@@ -2,7 +2,7 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-25T12:32:41+08:00**（馬拉松第59輪：新寫`us_pit.py`，「下一輪建議工作單位」第7項——用`sec_edgar_client.get_filing_dates()`建構真實（非assumed）PIT對齊，並實測發現`filings.recent`視窗深度對長年掛牌股（AAPL僅回溯到2015、MSFT僅回溯到2020）比理論上限（1994年）淺得多，見下方與`US_LOG.md`本輪記錄）
+**最後更新：2026-08-25T14:02:23+08:00**（馬拉松第62輪：`sec_edgar_client.py`的`get_filing_dates()`新增`full_history=True`參數，分頁擴充`filings.files[]`archive pointers，把AAPL/MSFT視窗深度從2015/2020延伸到1994年理論上限；新發現：歷史資料的filing gap上限明顯比近年寬（AAPL max_gap 37→181天、MSFT 30→91天），推測跟SEC加速申報人規定沿革有關但未查證；`us_pit.py`尚未接上這個新參數，見下方與`US_LOG.md`第62輪記錄）
 
 **地基狀態：🟡 起步中，PIT資料源方向已確認可行（兩個獨立端點都驗證過，各有各的坑），存活者偏差方向已確認「兩個候選方法都不可靠」。第七輪發現一個重要的方法論教訓：`FRC` 這個下市案例第五輪其實從一開始就查錯了實體，「FDIC接管型下市不走Form 25」假設因此變弱。第十輪發現另一個方法論陷阱：XBRL company facts API 的比較期重複揭露問題；第十一輪去重後發現殘留離群值背後還有兩個獨立成因（pre-XBRL標記缺口、pre-IPO歷史資料，見下方）。第35、38輪都嘗試接「下一輪建議工作單位」第4項（中小型股/近期IPO價格深度抽測），腳本 `us_probe_price_depth_smallmid.py` 兩輪都一次都沒執行成功——第一檔就撞 FinMind 402（額度被同小時內的台股回補用光），優雅收工。**第38輪改做第5項（不需FinMind額度）：新增 `sec_edgar_client.py`，把 `sec_edgar_probe.py` 的ticker→CIK查詢跟filingDate/reportDate抽取邏輯包裝成可重用函式（`get_cik_map()`/`get_cik()`/`get_submissions()`/`get_filing_dates()`），smoke test數字跟第三輪探測腳本完全一致，驗證重構沒有改變邏輯。** **第50輪（2026-08-25T08:02）：第4項（中小型股/近期IPO歷史深度抽測）第四次嘗試終於成功——距上次TW軌重度用量約57分鐘，額度已恢復，10檔全部一次跑完無限流。結果：全部10檔日期間隔都只落在2/3/4天（週末/連假），沒有任何一檔出現>7天異常缺口，`first`日期跟實際上市年份合理對應，`last`一致停在`VAL_END`（`load_dev()`封頂生效）。里程碑1「只測AAPL/MSFT兩檔巨型股」的疑慮，這輪多樣性抽測沒有找到反例，初步驗證通過（見`DATA.md`「美股里程碑1（續）」小節、`US_LOG.md`本輪記錄）。** 價格資料（`USStockPrice`）的深度/更新頻率已驗證可用；股票名單（`USStockInfo`）的形狀已摸清但還不能直接拿來建構無偏差宇宙；**SEC EDGAR 申報日期 API 已實測驗證可用（submissions API + company facts API 兩個端點都測過，且已包裝成可重用模組，見下方）**；**美股存活者偏差：`universe.py` 的價格列存在法、`USStockInfo` 快照增減法，這輪實測後都證實不可靠**（見下方，細節在 `DATA.md`「美股存活者偏差調查」小節）；**5檔已知下市股中，只有 TWTR/SIVB/BBBY 三檔的 CIK 已可信驗證（公司名稱＋申報型態都合理）；SBNY/FRC 兩檔改走 FDIC 路徑後也都已確認身分（分別是 CERT=57053/59017，不是 SEC CIK，因為這兩家是不歸 SEC 管的銀行）——5檔已知下市股的身分現在全部有可信結論，只是走了兩條不同的資料源路徑（SEC EDGAR 或 FDIC）。**第44、47輪新增 `fdic_client.py` 可重用模組供未來 `universe.py` 呼叫。仍然沒有美股版的 `universe.py`／`adjust.py`／`pit.py`／`factors.py`——**下一輪還是地基工作，還不能開始測因子**。
 
@@ -33,7 +33,8 @@
 ~~7. 寫美股版 `pit.py`~~ ✅ 第59輪（2026-08-25T12:32）已完成第一版，新寫 `us_pit.py`。`filing_pit(ticker, cik_override=None, forms=("10-K","10-Q"))`用`sec_edgar_client.get_filing_dates()`的真實`filingDate`建構每筆申報一列的PIT對齊表，`pit_source`固定`'real'`（不像TW版有assumed分支）。**方法論決定（刻意不做，非漏做）**：沒有把pre-XBRL標記缺口flag套用到這個模組——那個現象是XBRL company facts端點（每個資料點層級）特有的artifact，跟這裡用的submissions端點（每次申報一列）結構不同，沒有實測證據前不應該把結論跨端點套用，已在`us_pit.py`docstring完整記錄成開放問題。Pre-IPO則不需要額外邏輯，submissions API結構性保證不會列出上市前的申報。**新發現（smoke test實測，非理論）**：`filings.recent`滾動視窗深度對長年掛牌股比理論上限（`filings.files[]`分頁可達1994年）淺很多——AAPL只回溯到2015-06-27（45筆申報）、MSFT只回溯到2020-06-30（25筆，比AAPL申報頻率相近但視窗更短，原因未查）、PLTR正確地從其2020-09 IPO開始（24筆）。新增`coverage_probe(ticker)`診斷函式，之後接`universe.py`/回測前應該先對目標樣本跑一次，不能假設視窗深度一致。完整細節見`US_LOG.md`本輪記錄。**這代表用`filing_pit()`做全歷史回測目前只能覆蓋近5–10年，`filings.files[]`分頁擴充仍是未做的開放工作。**
 8. 寫美股成本模型（`validation/costs.py` 目前完全沒有美股邏輯）——需要研究美股手續費/稅務結構（跟台股證交稅不同，要查SEC Section 31 fee等美股特有成本項目）。
 9.（新增，第56輪發現）如果未來要擴大`KNOWN_DELISTED`名單，考慮系統化來源（例如交易所官方下市公告清單、或掃`efts.sec.gov`全文檢索批次抓Form 25-NSE申報實體，類似第六輪掃過2023-03～06窗口的做法），而不是繼續一檔一檔手動加——目前5檔規模對任何全市場回測都太小，跟TW軌宇宙覆蓋率不足的教訓（`MARATHON_PROTOCOL.md`5b節）是同一類問題，只是美股這邊連「有哪些名字該補」都還不知道，比TW軌的情況更早期。
-10.（新增，第59輪發現）如果要讓`us_pit.py`覆蓋全歷史（不只近5–10年），需要擴充`sec_edgar_client.py`去分頁抓`filings.files[]` archive pointers（`get_submissions()`回傳的原始payload裡有這個欄位但目前沒有函式解析它）——這是`filing_pit()`歷史深度不足問題的根本解法，不是`us_pit.py`本身能獨立解決，需要先回到`sec_edgar_client.py`加功能。
+10. ~~擴充`sec_edgar_client.py`去分頁抓`filings.files[]` archive pointers~~ ✅ 第62輪（2026-08-25T14:02）已完成，新增`get_archive_filings()`＋`get_filing_dates(..., full_history=True)`。AAPL/MSFT視窗深度都成功延伸到1994年理論上限，PLTR不變（2020年IPO，無archive pointer可分頁，結構性預期）。**新發現：歷史filing gap上限比近年寬很多**（AAPL max 37→181天、MSFT max 30→91天），推測跟SEC加速申報人規定沿革有關但這輪未查證，之後設計PIT reliability門檻時不能對全歷史套同一個gap上限。**還沒做**：`us_pit.py`的`filing_pit()`/`coverage_probe()`還沒接上這個新參數（目前仍只用`filings.recent`）——這是下一輪的候選工作單位（見下方新增第11項）。完整見`US_LOG.md`本輪記錄。
+11.（新增，第62輪）把`us_pit.py`的`filing_pit()`接上`sec_edgar_client.get_filing_dates(full_history=True)`，並用第62輪發現的「歷史gap上限比近年寬」現象，設計一個按時期分段的PIT reliability標記邏輯（不能對1994年跟2024年的申報套同一個離群值門檻）——這是`us_pit.py`目前唯一還開著的深度不足問題的收尾工作。
 
 **Holdout 狀態：✅ 未被使用**（跟主線共用同一套機制）。
 
@@ -41,4 +42,4 @@
 
 ## 下一步
 
-見上方「下一輪建議工作單位」第8–10項（第6、7項已完成），一次只做一項。
+見上方「下一輪建議工作單位」第8、9、11項（第6、7、10項已完成），一次只做一項。
