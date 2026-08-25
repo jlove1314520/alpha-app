@@ -412,3 +412,19 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 **判定**：`f_us_low_vol` **CHEAP_PASS**，排入US軌待深挖清單（`US_LEADS.md`#1）。**已加`TRIALS_LEDGER.md`#39**（US軌FDR家族第一筆，m=1，見該檔案US軌FDR區塊）。依協定，US軌FDR家族目前只有這一筆，天生容易通過門檻，深挖時（1b）第一步務必做train/val切分（吸取FUT軌`fut_basis_carry`的教訓：便宜關卡CHEAP_PASS≠可信候選，見`FUT_MARATHON_STATE.md`第75輪記錄），不能因為FDR顯著或val IC看起來很強（+0.134）就跳過完整驗證關卡。
 
 `is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
+
+## 2026-08-26T05:02:18+08:00 — 馬拉松第84輪：接手孤兒工作——`f_us_low_vol`深挖（1b）結果補記+收工，**FAIL，#39的CHEAP_PASS降級**
+
+**取鎖與選軌背景**：取鎖時偵測到`LOCK_STALE`（pid 141036持有鎖29.9分鐘，超過25分鐘陳舊門檻被回收）。回收後檢查`git status`，發現一批**尚未commit但看起來已經完成的US軌工作**：新檔`deep_dive_f_us_low_vol.py`（300行）、`US_LEADS.md`（#1那列已從「尚未深挖」更新成完整的深挖結果）、`TRIALS_LEDGER.md`（已加#41列）。但`US_LOG.md`、`US_MARATHON_STATE.md`都還是第82輪的舊內容，`REPORT.md`心跳也停在第83輪（TW）——**判定：這是上一輪（pid 141036）真正做完1b深挖分析、寫完兩份紀錄檔案後，在寫`US_LOG.md`/`US_MARATHON_STATE.md`/心跳/commit的路上被中止**（研判是Windows工作排程器30分鐘週期到時被強制結束，分析本身花了較長時間，收工程序沒跑完），不是完全沒做事的空鎖。
+
+**這輪做的事：核實孤兒工作，不重做分析**：
+1. 讀`deep_dive_f_us_low_vol.py`全文，確認：(a) 資料存取只透過`load_dev`（`from finmind_client import load_dev`），沒有`load_full_history`/`unlock_holdout_once`字樣，符合協定第4節；(b) 邏輯結構跟`US_LEADS.md`/`TRIALS_LEDGER.md`裡記錄的數字對得上（TRAIN/VAL兩期、1x/2x/3x成本、配對式隨機控制組percentile、SPY beta）；(c) docstring明確提到吸取`fut_basis_carry`（#37 FAIL）教訓，先做train/val切分再判定，方法論上站得住腳。
+2. 跑`is_holdout_consumed()`確認仍是`False`（見下方）。
+3. 補齊`US_MARATHON_STATE.md`最新一版記錄（FAIL結果+下一步建議：待深挖清單已清空，回到1c擴充第二個因子）。
+4. 寫這筆`US_LOG.md`記錄（本筆）。
+
+**結果摘要（數字取自孤兒工作留下的`US_LEADS.md`#1／`TRIALS_LEDGER.md`#41，未重新執行驗證）**：`f_us_low_vol`深挖用同27檔快取樣本+SPY market benchmark，十分位多空(k=3/腳,20日換倉)。TRAIN(2015-2020)×1x/2x/3x：ann_return −13.16%~−13.87%（全負），對配對式隨機控制組percentile僅41.0~48.0（**連中位數都沒贏過**），beta −0.149。VAL(2020-2024)×1x/2x/3x：ann_return +17.53%~+18.67%，percentile 91.0~97.0，但beta **−0.891**（遠非市場中性，接近反向於SPY的方向性押注）。**判定：TRAIN期未過隨機控制組門檻本身已足以結案；VAL期表面轉強伴隨beta驟降，暗示是方向性反向曝險而非橫斷面排序優勢——跟FUT`fut_basis_carry`(#35→#37)、TW`f_rel_strength_regime_switch`(#40)同款「便宜關卡過、深挖不成立」模式第三例。FAIL，不進入候選清單，#39的CHEAP_PASS判定降級。**
+
+**方法論觀察（給之後的無人值守輪次參考）**：這是馬拉松第一次出現「上一輪陳舊鎖檔裡其實藏著完整、正確、只是沒寫完收工程序的工作」，跟先前幾次陳舊鎖檔（pid 136244、136244之前那次）不同——先前幾次都是真的什麼都沒留下。**教訓：陳舊鎖檔不代表上一輪一定一事無成，接手前先看`git status`有沒有看起來完整的孤兒變更，值得的話核實後收下、比重做更有效率，但核實步驟（讀程式碼確認holdout合規、核對數字前後一致）不能省略——不能因為「看起來已經做完」就照單全收不查證。**
+
+`is_holdout_consumed()` 確認為 `False`（`deep_dive_f_us_low_vol.py`全程走`load_dev()`，本輪沒有呼叫任何FinMind API，零新增網路請求）。

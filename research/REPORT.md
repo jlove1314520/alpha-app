@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 84 輪 · 2026-08-26 05:02 · US · 取鎖時偵測到`LOCK_STALE`（pid 141036，29.9分鐘）——接手其留下的孤兒工作（`deep_dive_f_us_low_vol.py`＋`US_LEADS.md`/`TRIALS_LEDGER.md`已完成但未收工的1b深挖分析），核實後補齊`US_LOG.md`/`US_MARATHON_STATE.md`並收工 · `f_us_low_vol`深挖**FAIL**（TRAIN期對隨機控制組僅41-48百分位、VAL期beta驟降至−0.891暗示方向性曝險非橫斷面優勢），#39的CHEAP_PASS判定降級，US軌待深挖清單清空（TRIALS_LEDGER.md#41）
+
 ## 第 83 輪 · 2026-08-26 04:17 · TW · 執行互動session寫好但未跑的`regime_switch_f_rel_strength.py`（大盤位階開關+相對強度十分位多空策略），完成`f_rel_strength`情境切換候選的策略層深挖 · **FAIL**——TRAIN期三成本情境全負報酬/負alpha/負Sortino，VAL期對成本高度敏感，兩期對隨機控制組均僅84~94百分位（未達其他TW候選慣見99~100門檻），排入`TW_LEADS.md`#4/`TRIALS_LEDGER.md`#40；本輪commit刻意排除互動session其餘未commit的App/資料源架構變更
 ## 第 82 輪 · 2026-08-26 03:35 · US · 取鎖時偵測到LOCK_STALE（上一輪疑似異常中止）；TW軌仍有未commit互動session變更延續前例跳過不動；重跑`us_factor_ic.py`（第81輪的IP封鎖已解除）· `f_us_low_vol`第一次真正完成便宜關卡IC測試，**CHEAP_PASS**（percentile=100.0，US軌至今第一個通過便宜關卡的因子），排入待深挖清單
 ## 第 81 輪 · 2026-08-26 02:35 · US · 取鎖乾淨成功；TW軌有未commit互動session變更，延續第80輪判斷跳過不動；新寫`us_factor_ic.py`嘗試跑`f_us_low_vol`第一次1a便宜關卡IC測試 · 40檔隨機樣本全部撞FinMind IP封鎖（403 ip banned，非單純402），0/40可用樣本無法測試——資料可用性發現非因子判定；順手修好早停偵測沒接住403格式的bug（原本只認402/429，浪費39次多餘呼叫）

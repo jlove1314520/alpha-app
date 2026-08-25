@@ -2,7 +2,9 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T03:35:00+08:00**（馬拉松第82輪：重跑`python us_factor_ic.py`——第81輪撞到的IP封鎖已解除，**`f_us_low_vol`第一次真正完成1a便宜關卡IC測試，CHEAP_PASS**（40檔隨機樣本中27檔可用，train IC+0.031/val IC+0.134/IR+0.557/hit_rate 0.71，null percentile=100.0，門檻90.0）。**這是US軌自馬拉松開始以來第一個通過便宜關卡的因子候選**，已排入`US_LEADS.md`#1、`TRIALS_LEDGER.md`#39（US軌FDR家族第一筆，m=1）。**下一步是深挖（1b），且必須先做train/val切分**——吸取FUT軌`fut_basis_carry`的教訓（便宜關卡CHEAP_PASS在深挖後樣本外不成立），不能因為val IC看起來強就跳過完整驗證關卡。順帶發現一個小雷：代號含`/`的股票（如`AKO/B`）會讓FinMind回傳HTTP 400"data_id is illegal"，`us_factor_ic.py`既有的錯誤處理已能正確跳過，記錄供之後參考。**取鎖時偵測到`LOCK_STALE`（上一輪pid 136244持有鎖30.0分鐘，疑似異常中止，未留下任何log）。TW軌互動session未commit變更仍在，延續第80/81輪判斷刻意不動，本輪commit只含US軌相關檔案。**詳見`US_LOG.md`本輪記錄。）
+**最後更新：2026-08-26T05:02:18+08:00**（馬拉松第84輪：接手一個異常中止的鎖檔留下的孤兒工作——取鎖時偵測到`LOCK_STALE`（pid 141036 持有鎖 29.9 分鐘），`git status`發現`deep_dive_f_us_low_vol.py`（新檔）＋`US_LEADS.md`＋`TRIALS_LEDGER.md`已有完整的1b深挖分析結果，但`US_LOG.md`／`US_MARATHON_STATE.md`／心跳三者都沒更新、也沒commit——上一輪顯然是做完深挖分析後、在寫收工紀錄的路上被中止（可能是排程逾時被強制結束）。本輪核實這份孤兒工作（讀`deep_dive_f_us_low_vol.py`程式碼確認全程走`load_dev()`、沒有任何holdout違規；核對`US_LEADS.md`／`TRIALS_LEDGER.md`#41內容前後一致、數字沒有矛盾）後補齊收工程序，**不是重做分析，是誠實接手並完成記錄**。**`f_us_low_vol`深挖（1b）結果：FAIL，#39的CHEAP_PASS判定降級為FAIL**——`deep_dive_f_us_low_vol.py`用同27檔快取樣本+SPY當market benchmark（零新股票API呼叫），十分位多空(k=3/腳,20日換倉)：TRAIN(2015-2020)×1x/2x/3x ann_return −13.16%~−13.87%全負，對配對式隨機控制組percentile僅41.0~48.0（連中位數都沒贏），beta−0.149；VAL(2020-2024)×1x/2x/3x ann_return+17.53%~+18.67%，percentile 91.0~97.0，但beta驟降至−0.891（遠非市場中性，接近反向於SPY的方向性押注，不是穩定的橫斷面排序優勢）。跟FUT`fut_basis_carry`(#35→#37)、TW`f_rel_strength_regime_switch`(#40)同款「便宜關卡過、深挖不成立」模式第三例。US軌FDR家族m維持1（FAIL不需重算）。**下一步：US軌待深挖清單已清空，回到1a/1c工作——建議擴充`us_factors.py`加第二個因子（動能/相對強度，繼續避開PIT依賴）。**TW軌互動session未commit變更仍在，延續第80–83輪判斷刻意不動，本輪commit只含US軌相關檔案。詳見`US_LOG.md`本輪記錄。）
+
+（上一版記錄，保留供對照）**2026-08-26T03:35:00+08:00**（馬拉松第82輪：重跑`python us_factor_ic.py`——第81輪撞到的IP封鎖已解除，**`f_us_low_vol`第一次真正完成1a便宜關卡IC測試，CHEAP_PASS**（40檔隨機樣本中27檔可用，train IC+0.031/val IC+0.134/IR+0.557/hit_rate 0.71，null percentile=100.0，門檻90.0）。**這是US軌自馬拉松開始以來第一個通過便宜關卡的因子候選**，已排入`US_LEADS.md`#1、`TRIALS_LEDGER.md`#39（US軌FDR家族第一筆，m=1）。**下一步是深挖（1b），且必須先做train/val切分**——吸取FUT軌`fut_basis_carry`的教訓（便宜關卡CHEAP_PASS在深挖後樣本外不成立），不能因為val IC看起來強就跳過完整驗證關卡。順帶發現一個小雷：代號含`/`的股票（如`AKO/B`）會讓FinMind回傳HTTP 400"data_id is illegal"，`us_factor_ic.py`既有的錯誤處理已能正確跳過，記錄供之後參考。**取鎖時偵測到`LOCK_STALE`（上一輪pid 136244持有鎖30.0分鐘，疑似異常中止，未留下任何log）。TW軌互動session未commit變更仍在，延續第80/81輪判斷刻意不動，本輪commit只含US軌相關檔案。**詳見`US_LOG.md`本輪記錄。）
 
 （上一版記錄，保留供對照）**2026-08-26T02:35:47+08:00**（馬拉松第81輪：第一次真正嘗試跑`f_us_low_vol`的1a便宜關卡IC測試，新寫`us_factor_ic.py`（重用`factor_ic.py`的`evaluate_factor()`/`build_snapshots()`，只自己寫US專屬的樣本抽樣+calendar proxy）。**結果：40檔隨機樣本全部撞FinMind HTTP 403「ip banned」（不是單純402額度用盡，是IP被暫時封鎖約12分鐘），0/40可用樣本，遠低於IC測試需要的最小10檔橫截面，測試無法執行**。研判是TW軌互動session大量backfill+US round79前一次402疊加，短時間內觸發了比配額歸零更嚴重的封鎖層級。**這是資料可用性發現，不是因子判定，沒有加`TRIALS_LEDGER.md`列**（跟第70/74/77輪先例一致）。**順手修了腳本本身一個bug**：早停偵測原本只認`402`/`429`，沒接住這次的`403`/"ip banned"格式，導致40個樣本白打（浪費39次多餘呼叫在已知被封的IP上）才發現；已加上對應字串偵測，下次同款情況應該第一檔就停手——但這個修正只做了程式碼邏輯檢查，沒有再打API驗證（IP還在封鎖期內，沒必要多耗一次呼叫）。**取鎖時發現TW軌有一批使用者互動session未commit的變更（混合資料源架構），延續第80輪(FUT)的判斷，本輪也刻意不動它、只commit US軌相關檔案。**`f_us_low_vol`便宜關卡IC測試依然是US軌下一步待完成事項，等IP封鎖解除後再試。詳見`US_LOG.md`本輪記錄。）
 
@@ -59,9 +61,9 @@
 
 ## 下一步
 
-**地基狀態更新（第82輪）：`us_factor_ic.py`管線已驗證可用（第81輪只寫了程式碼、被IP封鎖擋住無法驗證；第82輪IP解除後成功跑完，`f_us_low_vol` CHEAP_PASS）。** 候選（挑一項，不要一次全做）：
-- **優先：`f_us_low_vol`深挖（1b）**——US軌第一個進入深挖階段的候選。**第一步務必先做train/val切分**（吸取`FUT_MARATHON_STATE.md`記錄的`fut_basis_carry`教訓：第72輪便宜關卡CHEAP_PASS，第75輪深挖才發現val期樣本外不成立，早知道先切分可以更早發現）。深挖清單可參考`FUT_MARATHON_STATE.md`提過的`deep_dive_fut_basis_carry.py`四項checklist寫法（train/val切分、leave-one-year-out或類似的穩健性檢查、成本敏感度1x/2x/3x、beta對照——US版可以直接對標普500或類似市場基準算beta）。**深挖前必須先寫「為什麼會有效」的經濟解釋**（`MARATHON_PROTOCOL.md`1b節硬性要求），初步方向可以參考低波動異象文獻（leverage constraint theory、lottery preference），但要寫成具體到這個因子本身的版本，不能空泛。
-- 或者：擴充`us_factors.py`加第二個因子（建議先選另一個純價格因子，例如動能/相對強度，繼續避開PIT依賴），跟深挖工作分開輪次做，不要混在同一輪。
-- 第9項（系統化擴充`KNOWN_DELISTED`名單，目前只有5檔手動查證的下市股）——優先序低於上面兩項。
+**地基狀態更新（第84輪）：`us_factor_ic.py`跟`deep_dive_f_us_low_vol.py`兩支管線都已驗證可用（1a/1b全走過一輪）。`f_us_low_vol`結案：CHEAP_PASS→深挖FAIL，US軌第一個完整走完1a+1b全流程的因子，待深挖清單已清空。** 候選（挑一項，不要一次全做）：
+- **優先：擴充`us_factors.py`加第二個因子**（建議選另一個純價格、零PIT依賴的因子，例如動能/相對強度或短期反轉，繼續沿用「先確認管線能跑、再談PIT正確性」的既定策略）。寫完先跑1a便宜關卡（`us_factor_ic.py`架構可直接重用，只需換factor函式），不要一次連因子邏輯+深挖都做。
+- 第9項（系統化擴充`KNOWN_DELISTED`名單，目前只有5檔手動查證的下市股）——優先序低於上面第一項。
+- **`f_us_low_vol`FAIL不代表低波動因子家族在美股完全無效**，只代表這個具體定義（60日std取負號，十分位多空，20日換倉）在27檔小樣本上不成立——如果之後樣本擴大或想換其他低波動變體（例如idiosyncratic vol扣除市場beta後的殘差波動），可以視為新假說重新走完整流程，不是延續同一個候選。
 - **小提醒**：樣本抽樣時如果再次抽到代號含`/`的股票（例如`AKO/B`），FinMind會回傳HTTP 400"data_id is illegal"，這是已知格式限制不是額度問題，`us_factor_ic.py`既有邏輯已能正確跳過不需要額外處理。
-- **如果一開始就撞402/403（額度或IP封鎖顯然還沒恢復），優先選不需要新API額度的工作**（例如上面第二項的因子邏輯撰寫，或本節文件更新本身）。
+- **如果一開始就撞402/403（額度或IP封鎖顯然還沒恢復），優先選不需要新API額度的工作**（例如上面第一項的因子邏輯撰寫、或本節文件更新本身）。
