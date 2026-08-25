@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-08-25 — iPhone 16 實機回報五項緊急修正
+
+使用者拿 iPhone 16 實機開 App，回報四類問題（其中一項有兩個子bug），這輪逐項修。
+
+**修正1 nav貼不到螢幕底部（改了三輪這次才真的用工具實測）：** 根因懷疑是 `#app` 原本用 `height:100dvh`，iOS Safari 網址列展開/收合時 dvh 可能跟當下真正可視區域對不上。`body` 本來就已經 `position:fixed;inset:0`（釘死視覺視窗），改讓 `#app` 也直接 `position:fixed;inset:0`，不透過 dvh 這個會變動的單位換算。**這輪第一次真的用工具測，不是憑感覺改**：裝了 Playwright（Chromium + WebKit 兩種引擎）在精確 393×852 viewport 下量測，nav 底部跟 viewport 底部間距都是 0px。**誠實揭露限制**：兩個瀏覽器引擎的自動化測試都無法重現 iOS Safari 網址列動畫收合這個特定情境（headless 模式沒有真的會動的網址列 UI），沒辦法用自動化工具 100% 重現使用者實機看到的 bug、視覺證明「之前真的壞、現在真的好」——只能確認新寫法本身渲染正確、沒有破版，且這個手法（`position:fixed;inset:0` 取代 `dvh`）是這類 iOS Safari 問題公認的根治寫法。**建議使用者實機再測一次確認。**
+
+**修正2 選股頁產業膠囊重疊：** 根因是 25+ 個產業塞進橫向捲動列，每個 chip 沒設 `white-space:nowrap`，中文字在瀏覽器預設規則下會在任兩字之間換行，chip 被撐成兩行、跟下一列重疊。補上 `white-space:nowrap`（順便修好日誌頁篩選 chips 同樣的潛在問題）；橫向列改成只顯示依樣本檔數排序的常用前 8 個產業 + 一顆「更多」，開新的底部選單看全部（`flex-wrap` 自然換行）。Playwright 393×852 實測 10 個可見 chip 高度全部一致，無重疊。
+
+**修正3 盤中近即時報價（GitHub Actions，不養機器）：** 新增 `.github/workflows/quotes.yml` + `.github/scripts/fetch_quotes_tw.py`（TWSE MIS 即時行情端點，免金鑰，已本機實測成功）+ `fetch_quotes_us.py`（Finnhub，金鑰從 `FINNHUB_API_KEY` secret 讀，沒設定就明確失敗不造假）。App 端新增 `loadIntradayQuotes()`，今日頁自選股優先用近即時報價（20分鐘內才採用），標「盤中 延遲約N分(GitHub Actions)」；台美股狀態燈盤中但資料過期時改標「資料延遲」（琥珀色）。**已檢查全repo沒有洩漏的API金鑰。**
+
+⚠️ **這裡有一個使用者需要自己做的步驟**：這台機器存的 GitHub PAT 沒有 `workflow` scope，無法 push 會新增/修改 `.github/workflows/` 底下檔案的 commit（GitHub 直接拒絕）。腳本本體、`data/quotes_tw.json`、App 端整合都已經正常 push 上去了；**只有 `quotes.yml` 這個檔案還留在本機磁碟（`C:\alpha\alpha-app\.github\workflows\quotes.yml`），還沒進 repo**。使用者要嘛去 GitHub 網頁的「Add file」功能手動貼上去，要嘛去 Settings→Developer settings→Fine-grained tokens 把這支 token 的 Workflows 權限改成 Read and write 之後請下一輪 Claude 重新 commit。另外，美股盤中報價要運作，還需要使用者自己去 Settings→Secrets and variables→Actions 新增 `FINNHUB_API_KEY`（去 finnhub.io 免費註冊拿 key）。
+
+**修正4 選股頁樣本擴大 + 涵蓋率顯示 + 美股/期貨誠實訊息：** `generate_scores_v2.py` 的抽樣數從跟研究驗證管線共用的 `SAMPLE_SIZE=100` 解耦成自己獨立的 `SCORES_SAMPLE_SIZE=300`（不影響 `TRIALS_LEDGER.md` 已記錄的統計結果）；選股頁新增「涵蓋 N/3196 檔全市場宇宙」顯示；美股評分／期貨策略訊號改成具體誠實的文案（期貨明講 22 個策略假說全部未通過驗證）。**本機試跑擴大後的樣本時撞上 FinMind 免費層流量上限被榨乾（這整個 session 今天測試量太大），86/300 檔全部失敗，已中止、沒有用這次幾乎全失敗的結果覆蓋掉現有能正常運作的 69 檔** ——程式碼修正是對的，等流量額度恢復（每小時重置）後重新跑 `python research/generate_scores_v2.py` 就能實際擴大樣本。**VAL_END 資料基準日卡在 2024-12-31 這個根本問題這輪沒有動**：要修需要改 `research/adjust.py`/`research/factors.py`，這兩個檔案是研究驗證管線也在共用的地基模組，docstring 明確把 `load_full_history()` 的使用範圍焊死在「只能用於真正一次性的 holdout 解鎖評估」，貿然繞過風險太高（這個專案的核心資產就是 holdout 保護的可信度）——留給下一輪評估怎麼安全地做（例如寫一份完全獨立、不共用這兩個檔案的抓取邏輯）。選股頁畫面已加註解誠實說明這個限制，不是默默隱藏。
+
+**修正5 sparkline 顏色跟漲跌不一致：** 根因是 `spark()` 原本自己比較「這段線最後一天vs第一天」（多日趨勢）決定顏色，跟旁邊顯示的「今日漲跌%」徽章是不同基準，兩者常對不上（使用者截圖：道瓊+0.26%卻是綠線）。改成 `spark(cl,up)` 明確接收呼叫端已經算好的「今日漲跌」布林值，保證跟徽章顏色一致。單元測試+實機截圖都驗證過。
+
+**影響到哪些檔案：** `index.html`、`.github/scripts/fetch_quotes_tw.py`（新增）、`.github/scripts/fetch_quotes_us.py`（新增）、`.github/workflows/quotes.yml`（新增，**尚未進repo，見上方使用者待辦**）、`data/quotes_tw.json`（新增）、`research/generate_scores_v2.py`。
+
+---
+
 ## 2026-08-25 — 幣值切換（NT$/US$）：今日頁總資產/已實現損益、交易頁持倉損益
 
 使用者這次一口氣提了 7 項新需求，依序做、每項獨立 commit。這是第 1 項（最快見效的先做）。
