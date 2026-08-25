@@ -66,4 +66,65 @@
 | 36 | 2026-08-25 | FUT | `fut_basis_change_momentum_5d`（期現價差5日變化動能：basis變化方向做多/放空，非水位本身） | 策略 | 配對式隨機控制組（200次排列，同`fut_cheap_gate.py`本輪新增），實際策略終值 vs 隨機排列 percentile=0.0 | **FAIL（單測門檻90.0未過，方向嚴重不對——全部200次隨機排列都贏過真實策略）** | 同#35批次，basis家族第二個假說（水位vs動能兩型測試，跟三大法人期貨部位家族#24/#25同款設計邏輯）。真實策略終值0.0078（-99.2%累積，接近歸零），隨機控制組中位數0.6274（-37.3%），真實策略比隨機排列差非常多——basis 5日變化方向本身作為訊號完全沒有預測力，甚至可能是反向指標，但依協定不調參數硬救（不會這輪反手測相反方向），直接記錄FAIL |
 | 37 | 2026-08-25 | FUT | `fut_basis_carry`（#35的深挖/1b，非新假說——對已通過便宜關卡的候選做完整驗證） | 策略（深挖重測） | `deep_dive_fut_basis_carry.py`：(1) train/val切分（TRAIN_END=2020-12-31/VAL_END=2024-12-31），train期period-local配對式隨機控制組percentile=100.0，**val期percentile=46.0（連隨機控制組中位數都未贏過）**；(2) leave-one-year-out：拿掉2000/2001/2002三年，終值717.5→107.9x（僅剩15.0%）；(3) 成本敏感度1x/2x/3x（round-trip 5/10/15bps近似假設）：717.5→320.9/143.4/64.1x（方向不變，但已是次要檢查）；(4) beta vs TAIEX現貨日報酬=0.36（非近零，r²=0.10） | **深挖FAIL（樣本外未通過），#35的CHEAP_PASS判定降級為FAIL，不進入候選清單** | 期貨軌至今唯一走完1b全部四項檢查的候選。核心結論：便宜關卡（單測/批次/累積校正）判定本身沒有問題（train期確實穩健通過），但#35當時標記的最高優先疑慮——「717x的82倍擇時放大倍數可能被少數大事件年份主導」——經walk-forward切分完整驗證後**確認成立**：85%的終值貢獻集中在2000-2002三年（含2000網路泡沫），2021-2024樣本外表現連隨機打散控制組都打不過。cost-of-carry經濟解釋在便宜關卡層級邏輯自洽，但樣本外失敗代表這個解釋救不回這個具體實作，比「統計顯著但缺乏經濟解釋」更根本。完整見`FUT_LEADS.md`#17（已更新）、`FUT_LOG.md`第75輪記錄、`deep_dive_fut_basis_carry.py`（新增，可重複執行） |
 
+---
+
+## 2026-08-25 FDR重新評分對照表（criteria_v2，見 `CRITERIA_V2_LOCK.md`）
+
+**這是「換多重比較校正方法」後的重新評分，不是新證據**——沒有重新抓資料、沒有重新跑隨機控制組，是把上面各列已經記錄的百分位數字套進新公式（BH-FDR，q=0.10，三軌獨立分母）重算一次。上面各列的「舊判定」欄位**不覆寫、不刪除**，這個附表只是新增對照，兩者都留著方便查核。方法細節、A/B分類規則、p值還原公式全部寫死在 `CRITERIA_V2_LOCK.md`，這裡不重複。
+
+**用詞紀律提醒**：下表「新判定」欄位標「待複驗候選（CANDIDATE）」的，都還沒有通過情境分群、成本敏感度、alpha/beta顯著性關卡，**不是PASS，不能上架，不能拿去解鎖holdout**。
+
+### TW軌（m=16，去重後的假說數；q=0.10；BH最大顯著k=10）
+
+| 排名 | # | 假說 | 原始百分位 | 還原p值 | A/B分類 | 舊判定 | 新判定（FDR） |
+|---|---|---|---|---|---|---|---|
+| 1 | #2 | `f_eps_growth` | 100.0 | 0.005 | A | PASS | FDR顯著（維持穩健） |
+| 2 | #7 | `f_eps_surprise` | 100.0 | 0.005 | A | PASS | FDR顯著（維持穩健） |
+| 3 | #9 | `f_low_vol` | 100.0 | 0.005 | A | PASS | FDR顯著（維持穩健） |
+| 4 | #12 | `score_topn_v1` | 100.0 | 0.005 | A | EXPERIMENTAL | FDR顯著（判定不變，卡點是修正3的絕對報酬標準，非顯著性） |
+| 5 | #13 | `f_value_pb` | 99.9 | 0.005 | A | CHEAP_PASS(待深挖) | FDR顯著（維持穩健） |
+| 6 | #15 | `f_quality_roe_stability`（便宜關卡） | 99.9 | 0.005 | A | CHEAP_PASS(待深挖) | FDR顯著（維持穩健） |
+| 7 | #17 | `f_quality_roe_stability`深挖最終版（取代#16） | 100.0 | 0.005 | 反轉→步驟4 | EXPERIMENTAL | FDR顯著，但train/val反轉未解，**轉入情境依賴候選調查（步驟4），不因FDR而直接升級** |
+| 8 | #11 | `weinstein_stage2_unbiased` | 99.5 | 0.005 | A | EXPERIMENTAL | FDR顯著（判定不變，另案走 `WEINSTEIN_ALPHA_GATE_TASK.md` 的alpha/beta關卡，不是這裡的revival對象） |
+| 9 | #8 | `f_revenue_surprise` | 99.0 | 0.010 | A | PASS | FDR顯著（維持穩健） |
+| **10** | **#14** | **`f_value_pe`** | **96.7** | **0.033** | **A** | **CHEAP_PASS(批次)，累積Bonferroni降級為不確定** | **FDR顯著，改列「待複驗候選（CANDIDATE）」——本次唯一復活項** |
+| 11 | #1 | `f_rev_accel` | 84.5 | 0.155 | A | FAIL | 不顯著，維持FAIL |
+| 12 | #4 | `f_inst_flow` | 76.5 | 0.235 | A | FAIL | 不顯著，維持FAIL |
+| 13 | #3 | `f_foreign_streak` | 76.0 | 0.240 | 反轉→步驟4 | FAIL | 不進FDR revival，**轉入情境依賴候選調查（步驟4）** |
+| 14 | #5 | `f_rel_strength` | 38.5 | 0.615 | 反轉→步驟4 | FAIL | 不進FDR revival，**轉入情境依賴候選調查（步驟4）** |
+| 15 | #10 | `weinstein_stage2_pilot_v1` | 24.5 | 0.755 | B（方法論本身有缺陷：靜態控制組+手選宇宙） | FAIL | 維持FAIL，不適用FDR復活 |
+| 16 | #6 | `f_ma_breakout` | 15.0 | 0.850 | A | FAIL | 不顯著，維持FAIL |
+
+### FUT軌（m=17，去重後的假說數；q=0.10；BH最大顯著k=1）
+
+| 排名 | # | 假說 | 原始百分位 | 還原p值 | A/B分類 | 舊判定 | 新判定（FDR） |
+|---|---|---|---|---|---|---|---|
+| 1 | #35 | `fut_basis_carry`（便宜關卡） | 100.0 | 0.005 | A（便宜關卡本身無問題） | CHEAP_PASS | FDR顯著；**但#37深挖(1b)已判樣本外FAIL，維持FAIL，不因便宜關卡FDR顯著而復活** |
+| 2 | #31 | `fut_inst_trust_..._change_5d`高解析度版（取代#27） | 97.8 | 0.022 | A | CHEAP_PASS(批次)降級不確定 | 不顯著，維持FAIL/不確定 |
+| 3 | #30 | `fut_inst_foreign_..._change_5d`高解析度版（取代#25） | 97.4 | 0.026 | A | CHEAP_PASS(批次)降級不確定 | 不顯著，維持FAIL/不確定 |
+| 4 | #34 | `fut_intraday_gap_continuation`高解析度版（取代#33） | 89.6 | 0.104 | A（但重測後比#33更弱，見備註） | CHEAP_PASS(單測)未過批次 | 不顯著，維持FAIL |
+| 5 | #18 | `fut_trend_multi_tf` | 82.5 | 0.175 | A | FAIL | 不顯著，維持FAIL |
+| 6 | #21 | `fut_vol_regime_trend` | 82.5 | 0.175 | A | FAIL | 不顯著，維持FAIL |
+| 7 | #20 | `fut_ma_crossover_20_60` | 75.5 | 0.245 | A | FAIL | 不顯著，維持FAIL |
+| 8 | #22 | `fut_oi_price_confirm_5d` | 62.0 | 0.380 | A | FAIL | 不顯著，維持FAIL |
+| 9 | #19 | `fut_donchian_breakout_20` | 61.0 | 0.390 | A | FAIL | 不顯著，維持FAIL |
+| 10 | #24 | `fut_inst_foreign_net_position_sign` | 57.5 | 0.425 | A | FAIL | 不顯著，維持FAIL |
+| 11 | #37 | `fut_basis_carry`深挖(1b) val期 | 46.0 | 0.540 | B（報酬集中2000-2002三年，85%終值貢獻，見#37原文） | 深挖FAIL | 不顯著，維持FAIL，不適用FDR復活 |
+| 12 | #28 | `fut_inst_dealer_net_position_sign` | 42.5 | 0.575 | A | FAIL | 不顯著，維持FAIL |
+| 13 | #26 | `fut_inst_trust_net_position_sign` | 41.5 | 0.585 | A | FAIL | 不顯著，維持FAIL |
+| 14 | #29 | `fut_inst_dealer_..._change_5d` | 25.0 | 0.750 | B（隨機對照組中位數優於真實策略） | FAIL | 不顯著，維持FAIL，不適用FDR復活 |
+| 15 | #23 | `fut_weekday_effect` | 13.5 | 0.865 | B（隨機大幅贏過真實，方向不對） | FAIL | 不顯著，維持FAIL，不適用FDR復活 |
+| 16 | #32 | `fut_intraday_gap_reversal` | 8.0 | 0.920 | B（92%隨機排列贏過真實策略） | FAIL | 不顯著，維持FAIL，不適用FDR復活 |
+| 17 | #36 | `fut_basis_change_momentum_5d` | 0.0 | 1.000 | B（全部隨機排列贏過真實策略） | FAIL | 不顯著，維持FAIL，不適用FDR復活 |
+
+**US軌**：目前 `TRIALS_LEDGER.md` 沒有任何美股統計檢定試驗（見上方「已調查但不計入試驗數」表，`us_pit.py` 那筆是資料層調查不是統計檢定），無法計算FDR，跳過。
+
+### 統計摘要
+
+- **A/B分類**：TW軌 13筆A類 + 3筆特殊（#3/#5反轉→步驟4，#10方法論缺陷B類）；FUT軌 12筆A類 + 5筆B類（#23/#29/#32/#36/#37，全部符合「隨機對照組表現優於或接近優於策略」或「報酬高度集中少數期間」其中一項，維持否決）。
+- **復活結果**：**TW軌 1 筆復活（`f_value_pe` / #14）**，改列「待複驗候選（CANDIDATE）」；**FUT軌 0 筆復活**——即使換成比累積Bonferroni寬鬆的BH-FDR，FUT軌至今22次策略試驗仍然全部維持FAIL或不確定，包含便宜關卡通過但深挖(1b)已證實樣本外失敗的`fut_basis_carry`（#35/#37）。
+- **情境依賴候選（轉入步驟4，不算FDR revival）**：TW軌 `f_foreign_streak`（#3）、`f_rel_strength`（#5）、`f_quality_roe_stability`深挖（#16/#17，train/val正負號不一致）——這三個train/val方向不一致的假說要另外做情境分群調查，不是簡單套FDR公式能解決的問題。
+
+---
+
 ## 下一列從這裡開始（馬拉松執行個體：在這行上面插入新列，不要覆寫舊列）
