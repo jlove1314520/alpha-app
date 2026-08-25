@@ -170,6 +170,49 @@ This is a CHEAP gate only: in-sample, no walk-forward, no cost sensitivity,
 no economic-explanation writeup required yet (MARATHON_PROTOCOL.md 1a vs
 1b). A CHEAP_PASS here just queues the hypothesis for deep-dive.
 
+Eighth round (marathon round 72, following FUT_MARATHON_STATE.md's "下一輪
+建議工作單位" #1 after round 69 finished the basis-family infra --
+`fut_basis_series.py`'s build_basis_series() gives a clean 100%-coverage
+basis_pct series): first batch of basis (期現價差) hypotheses, a genuinely
+new mechanism family (carry/convergence) distinct from every prior family
+tested (price-only trend, chip/OI, institutional positioning, calendar,
+intraday microstructure). Two hypotheses, level vs. change-momentum, same
+two-hypothesis-per-family pattern as institutional positioning (round 42
+onward) and intraday gap (round 54):
+  - fut_basis_carry: position[t] = -sign(basis_pct[t]), i.e. LONG when
+    futures trade at a discount to spot (basis_pct < 0), SHORT when at a
+    premium (basis_pct > 0). Economic story: classic futures "roll yield" /
+    cost-of-carry convergence -- a futures contract's price converges to
+    spot as expiry approaches (holding spot roughly flat), so a discount
+    mechanically pulls the futures price UP toward spot over time (positive
+    return for a long position), while a premium pulls it DOWN (negative
+    return for a long position). This is the standard "buy backwardation,
+    sell contango" carry framing from the commodity-futures literature
+    (Keynes's normal backwardation theory), applied here to an equity index
+    future where the carry driver is expected dividends net of financing
+    cost rather than storage cost. round 69's basis distribution finding
+    (mean -0.2%, discount 65.7% of days) is consistent with TX historically
+    trading at a modest average discount, which this hypothesis interprets
+    as a *persistent* carry signal, not noise.
+  - fut_basis_change_momentum_5d: position[t] = sign(basis_pct[t] -
+    basis_pct[t-5]), i.e. trade in the direction the basis has been MOVING
+    over the trailing week, regardless of its absolute level. Distinct
+    mechanism from the level/carry hypothesis above: a basis that is deeply
+    discounted but *narrowing* (moving toward zero/premium) signals here as
+    bullish even though the level-based carry signal above would still read
+    bullish too in that specific case, but a basis that is near-zero and
+    *widening toward discount* signals bearish here while the level signal
+    would be near-neutral -- the two hypotheses diverge whenever the basis
+    is moving, which is most of the time. Economic framing: a widening
+    discount (or narrowing premium) plausibly reflects deteriorating
+    forward-looking sentiment among futures-market participants (who are
+    more likely to be leveraged/informed traders than the cash-equity
+    crowd) relative to the spot market, i.e. the basis *change* carries
+    incremental information the static level does not -- same
+    "positioning momentum vs. positioning level" logic already applied to
+    the institutional-investors family (round 42's foreign sign vs.
+    change_5d pair), transplanted to basis instead of net position.
+
 Seventh round (marathon round 54, following FUT_MARATHON_STATE.md's "下一輪
 建議工作單位" #1(a) after the 三大法人期貨部位 family closed out with no
 survivors: switch to a genuinely new mechanism family, 日內均值回歸, first
@@ -488,6 +531,39 @@ def hyp_inst_dealer_net_position_change_5d(series: pd.DataFrame, window: int = 5
     )
 
 
+def _load_basis(series: pd.DataFrame) -> pd.DataFrame:
+    """Inner-join `series` (from build_continuous_series(), already has 'ret')
+    with the basis_pct series from fut_basis_series.build_basis_series().
+
+    Round 69 already verified 100% date-calendar coverage between the two
+    (6185/6185 rows both sides), so this inner join is not expected to drop
+    any rows -- but it is still an inner join, not an assumed-safe direct
+    column assignment, in case that full-sample finding does not hold on
+    some future re-run with different date bounds.
+    """
+    import fut_basis_series  # local import: keeps this as an optional dependency,
+    # consistent with how _load_institutional_net_position() only imports
+    # finmind_client at call time, not module load time
+
+    basis = fut_basis_series.build_basis_series()[["date", "basis_pct"]]
+    merged = series.merge(basis, on="date", how="inner").sort_values("date").reset_index(drop=True)
+    return merged
+
+
+def hyp_basis_carry(series: pd.DataFrame) -> CheapGateResult:
+    merged = _load_basis(series)
+    position = -np.sign(merged["basis_pct"])  # long when discount, short when premium
+    return _permutation_test("fut_basis_carry", position, merged["ret"])
+
+
+def hyp_basis_change_momentum_5d(series: pd.DataFrame, window: int = 5) -> CheapGateResult:
+    merged = _load_basis(series)
+    position = np.sign(merged["basis_pct"].diff(window))
+    return _permutation_test(
+        f"fut_basis_change_momentum_{window}d", position, merged["ret"]
+    )
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -496,8 +572,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_intraday_gap_reversal(series),
-        hyp_intraday_gap_continuation(series),
+        hyp_basis_carry(series),
+        hyp_basis_change_momentum_5d(series),
     ]
 
     for r in results:
