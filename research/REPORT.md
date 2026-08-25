@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 82 輪 · 2026-08-26 03:35 · US · 取鎖時偵測到LOCK_STALE（上一輪疑似異常中止）；TW軌仍有未commit互動session變更延續前例跳過不動；重跑`us_factor_ic.py`（第81輪的IP封鎖已解除）· `f_us_low_vol`第一次真正完成便宜關卡IC測試，**CHEAP_PASS**（percentile=100.0，US軌至今第一個通過便宜關卡的因子），排入待深挖清單
+## 第 81 輪 · 2026-08-26 02:35 · US · 取鎖乾淨成功；TW軌有未commit互動session變更，延續第80輪判斷跳過不動；新寫`us_factor_ic.py`嘗試跑`f_us_low_vol`第一次1a便宜關卡IC測試 · 40檔隨機樣本全部撞FinMind IP封鎖（403 ip banned，非單純402），0/40可用樣本無法測試——資料可用性發現非因子判定；順手修好早停偵測沒接住403格式的bug（原本只認402/429，浪費39次多餘呼叫）
 ## 第 80 輪 · 2026-08-26 02:05 · FUT · 取鎖偵測到LOCK_STALE（上一輪疑似異常中止）；basis家族第三個假說`fut_basis_mean_reversion_60d`便宜關卡測試 · CHEAP_PASS（percentile=100.0），但跟`fut_basis_carry`同款極端放大模式，待深挖時需train/val切分優先驗證
 
 ## 第 79 輪 · 2026-08-26 01:03 · US · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊但依裁示FUT佔比上限20%跳過，US次舊；依使用者「美股軌可以開始建因子管線」裁示，新寫`us_factors.py`第一版（僅一個純價格因子`f_us_low_vol`，跟TW版`f_low_vol`定義/窗口對齊，刻意不碰PIT）· 屬協定1c地基建設非1a假說測試。取鎖後撞FinMind 402（額度被TW軌用光），改用AAPL/MSFT既有快取檔完成smoke test零新增API呼叫，兩檔各8817列，warm-up 60列NaN符合預期，數值範圍合理。地基缺口全補齊（universe/pit/costs/factors都有第一版），下一輪候選：對`f_us_low_vol`跑第一個1a便宜關卡IC測試

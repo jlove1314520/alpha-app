@@ -382,3 +382,33 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 **判定**：第12項到此視為有明確負向結論，不是懸而未決。依`MARATHON_STATE.md`第74輪已預告的退路，建議`era_reliability()`維持現狀（只信任已驗證過的長年掛牌大型股，其他標記`unverified`），不建議再投入輪次救這條路。這不是因子/策略統計檢定，不計入`TRIALS_LEDGER.md`，跟第70/74輪先例一致。完整見`DATA.md`「美股 PIT 資料源調查（五續）」小節。
 
 `is_holdout_consumed()` 確認為 `False`（本輪只呼叫`sec_edgar_client.py`既有函式+一次直接`requests`打XBRL company facts端點，皆走公開SEC API，不碰FinMind/alpha.db）。
+
+## 2026-08-26T02:35:47+08:00 — 馬拉松第81輪：第一次真正跑`f_us_low_vol`的1a便宜關卡IC測試——**FinMind IP被暫時封鎖，測試無法執行，這是資料可用性發現不是因子判定**
+
+**取鎖與選軌背景**：取鎖乾淨（非陳舊鎖檔）。選軌時發現TW軌`git status`顯示一批使用者互動session的未commit變更（混合資料源架構，`TW_MARATHON_STATE.md`本身也在其中），第80輪(FUT)已明確記錄「本輪commit刻意排除，只commit FUT軌相關檔案」。本輪延續同樣判斷，跳過TW，改做次舊的US軌（US round79 01:03 < FUT round80 02:05）。
+
+**做的事**：新寫`us_factor_ic.py`——重用`factor_ic.py`既有的`evaluate_factor()`/`build_snapshots()`（泛型、不需要改，只要輸入符合`{sid: DataFrame}`+`date`/`adj_close`/factor欄位的形狀即可），自己寫US專屬的樣本抽樣（`us_universe.universe()`隨機抽40檔，seed=20260826）跟trading calendar（用AAPL自身日期序列當calendar proxy，因為這軌還沒有類似TAIEX的市場指數序列）。40檔全部走`load_dev`（`load_dev()`已經是唯一合規進入點，符合協定第4節「絕對不碰holdout」規則）。
+
+**結果**：**40次呼叫全部回傳HTTP 403 `{"msg":"ip banned","status":403,"retry_after":~709-731}`**——不是單純額度用盡（402），是這個IP被暫時封鎖（約12分鐘）。原因研判：TW軌互動session的混合資料源大量backfill＋round79前一次402，短時間內對這個IP的FinMind請求量顯然觸發了更嚴重的封鎖層級，而不只是配額歸零。0/40可用樣本，遠低於`evaluate_factor()`要求的最小10檔橫截面，**無法跑IC測試，腳本正確地中止並回報「這是infra/資料可用性發現，不是因子結果」，沒有寫CHEAP_PASS/FAIL判定**。
+
+**⚠️腳本本身有個bug，這輪順手修了**：一開始的`QUOTA_ERROR_MARKERS`只有`("402","429")`，沒接住這次實際的403/"ip banned"格式，導致早停邏輯沒生效，40個樣本全部打完才發現（浪費了39次多餘的呼叫，都打在同一個已知被封的IP上）。已改成`("402","429","ip banned","ip_banned")`，讓下次遇到同款格式能在第一次呼叫就停手。**這個修正只做了邏輯層面的檢查（讀程式碼確認字串比對正確），沒有再打一次API驗證**——目前IP還在封鎖期內，沒必要再消耗一次呼叫只為了驗證早停邏輯本身，晚一點等封鎖解除、下一輪真的要抓資料時自然會驗證到。
+
+**判定**：這不是因子/策略統計檢定，不計入`TRIALS_LEDGER.md`，跟第70/74/77輪先例一致（純infra/資料可用性發現）。`f_us_low_vol`便宜關卡IC測試依然是US軌待完成的下一步，等IP封鎖解除、有足夠新鮮的sample可用時再試一次（下次應該會在第一檔就停手，而不是打完40檔才發現）。
+
+`is_holdout_consumed()` 確認為 `False`（本輪所有價格呼叫都走`us_factors.us_price_series()`→`load_dev()`，全部被拒絕在`_fetch()`層，沒有任何一筆資料真正落地；沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
+
+## 2026-08-26T03:35:00+08:00 — 馬拉松第82輪：`f_us_low_vol`第一次真正完成1a便宜關卡IC測試——**US軌第一個CHEAP_PASS**
+
+**取鎖與選軌背景**：取鎖時偵測到`LOCK_STALE`（上一輪pid 136244持有鎖30.0分鐘後被回收，疑似異常中止，未留下任何log）。三軌時間戳比對：TW軌實際上最舊（第76輪2026-08-25T21:05，之後只有使用者互動session直接改動未commit的檔案，不是馬拉松輪次），但延續第80/81輪的判斷——`git status`確認TW軌一批混合資料源架構的互動session變更仍然未commit（`TW_MARATHON_STATE.md`本身也在其中），繼續刻意不碰。FUT軌（第80輪02:05）依`MARATHON_PROTOCOL.md`「FUT佔比上限20%、選輪次時TW/US優先」的裁示被跳過。改選US軌（第81輪02:35，三者中可用選項裡最舊）。
+
+**做的事**：重跑`python us_factor_ic.py`——第81輪已寫好管線＋修好早停偵測（403/"ip banned"字串偵測），本輪只是重新執行等待IP封鎖解除後的結果。
+
+**結果：IP封鎖已解除，測試順利跑完**。40檔隨機樣本（seed=20260826）：27檔可用、13檔被過濾（8檔EMPTY下市/無資料、2檔<260列太短、1檔含`/`特殊字元觸發FinMind HTTP 400 "data_id is illegal"新踩雷、2檔省略——實際上是27 usable，13 dropped，加總40）。125個不重疊20交易日快照，2015-01-01～2024-12-31。
+
+`f_us_low_vol`（60日日報酬std取負號）：train mean_ic=+0.0310 IR=+0.114（n=76期）、val mean_ic=+0.1340 IR=+0.557 hit_rate=0.71（n=49期），train/val同號（both positive，方向一致）。null percentile=100.0，遠超單測門檻90.0。**PASSES cheap gate: True——US軌自2026-08-23馬拉松第一輪開始以來，第一次有因子真正跑完統計檢定並通過便宜關卡**。
+
+**新發現（小雷，非阻斷性）**：樣本裡出現`AKO/B`這種代號含`/`的股票，FinMind API把它當非法`data_id`直接拒絕（HTTP 400），不是額度/IP問題。`us_factor_ic.py`目前的處理方式是照既有的price ERROR分支自然跳過並繼續下一檔，行為正確，但這是第一次遇到這種格式問題的股票代號，記錄在案供之後`us_universe.py`若要做代號清理/正規化時參考。
+
+**判定**：`f_us_low_vol` **CHEAP_PASS**，排入US軌待深挖清單（`US_LEADS.md`#1）。**已加`TRIALS_LEDGER.md`#39**（US軌FDR家族第一筆，m=1，見該檔案US軌FDR區塊）。依協定，US軌FDR家族目前只有這一筆，天生容易通過門檻，深挖時（1b）第一步務必做train/val切分（吸取FUT軌`fut_basis_carry`的教訓：便宜關卡CHEAP_PASS≠可信候選，見`FUT_MARATHON_STATE.md`第75輪記錄），不能因為FDR顯著或val IC看起來很強（+0.134）就跳過完整驗證關卡。
+
+`is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
