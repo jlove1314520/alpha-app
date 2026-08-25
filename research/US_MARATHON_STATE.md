@@ -2,7 +2,9 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-25T17:02:50+08:00**（馬拉松第68輪：新寫`validation/us_costs.py`，美股成本模型第一版，完成「下一輪建議工作單位」第8項。仿TW model結構，補上零售$0手續費預設值+SEC Section 31 fee($20.60/百萬美元)+FINRA TAF($0.000195/股)兩個強制監管費（僅賣出邊），滑價/借券費維持未校準佔位值。誠實揭露：兩個監管費率是WebSearch查證的當下快照，非多年歷史範圍，套用到跨年回測隱含「費率歷年不變」假設未被驗證。smoke test通過，細節見`US_LOG.md`本輪記錄。**
+**最後更新：2026-08-25T18:33:29+08:00**（馬拉松第70輪：新寫`sec_edgar_filer_category_probe.py`，探測「下一輪建議工作單位」第12項——`era_reliability()`是否有個股逐年申報人分級資料可補PLTR誤判洞。結果：`submissions`頂層`category`欄位存在但只是今天的單一快照（沒解決問題）；XBRL `EntityPublicFloat`確實有逐年資料（AAPL/MSFT/PLTR都測到），是SEC分級規則的原始輸入，理論上可搭配歷史門檻時間表反推逐年分級，但這輪只確認資料存在，門檻表未查證、反推邏輯未寫。問題從「完全開放」推進到「有候選路徑，還要WebSearch查門檻史+寫反推邏輯+拿PLTR重測」三步。細節見`DATA.md`「美股 PIT 資料源調查（三續）」小節、`US_LOG.md`本輪記錄。）
+
+（上一版記錄，保留供對照）**2026-08-25T17:02:50+08:00**（馬拉松第68輪：新寫`validation/us_costs.py`，美股成本模型第一版，完成「下一輪建議工作單位」第8項。仿TW model結構，補上零售$0手續費預設值+SEC Section 31 fee($20.60/百萬美元)+FINRA TAF($0.000195/股)兩個強制監管費（僅賣出邊），滑價/借券費維持未校準佔位值。誠實揭露：兩個監管費率是WebSearch查證的當下快照，非多年歷史範圍，套用到跨年回測隱含「費率歷年不變」假設未被驗證。smoke test通過，細節見`US_LOG.md`本輪記錄。**
 
 （上一版記錄，保留供對照）**2026-08-25T15:34:05+08:00**（馬拉松第65輪：`us_pit.py`的`filing_pit()`/`coverage_probe()`接上`full_history`參數；新增`era_reliability()`＋`_ERA_SEGMENTS`，用WebSearch查證的SEC Release 33-8128真實加速申報人分期時間表（2002/2003/2004/2005-12-15，10-K 90→75→60天、10-Q 45→40→35天）把第62輪發現的「歷史gap上限比近年寬」現象變成分期標記機制，不再全歷史套同一門檻。**smoke test實測發現這個機制對AAPL/MSFT可信（超標集中在1997年壓線案例+2006-2007年疑似對應Apple選擇權回溯授予事件，未獨立查證），但對PLTR不可信（14/24筆超標，遠高於AAPL/MSFT的4%/1.5%）——已知限制：函式不知道個股逐年的「加速申報人」身分，近期IPO股很可能被誤判，見下方與`US_LOG.md`第65輪記錄。**
 
@@ -37,7 +39,7 @@
 9.（新增，第56輪發現）如果未來要擴大`KNOWN_DELISTED`名單，考慮系統化來源（例如交易所官方下市公告清單、或掃`efts.sec.gov`全文檢索批次抓Form 25-NSE申報實體，類似第六輪掃過2023-03～06窗口的做法），而不是繼續一檔一檔手動加——目前5檔規模對任何全市場回測都太小，跟TW軌宇宙覆蓋率不足的教訓（`MARATHON_PROTOCOL.md`5b節）是同一類問題，只是美股這邊連「有哪些名字該補」都還不知道，比TW軌的情況更早期。
 10. ~~擴充`sec_edgar_client.py`去分頁抓`filings.files[]` archive pointers~~ ✅ 第62輪（2026-08-25T14:02）已完成，新增`get_archive_filings()`＋`get_filing_dates(..., full_history=True)`。AAPL/MSFT視窗深度都成功延伸到1994年理論上限，PLTR不變（2020年IPO，無archive pointer可分頁，結構性預期）。**新發現：歷史filing gap上限比近年寬很多**（AAPL max 37→181天、MSFT max 30→91天），推測跟SEC加速申報人規定沿革有關但這輪未查證，之後設計PIT reliability門檻時不能對全歷史套同一個gap上限。**還沒做**：`us_pit.py`的`filing_pit()`/`coverage_probe()`還沒接上這個新參數（目前仍只用`filings.recent`）——這是下一輪的候選工作單位（見下方新增第11項）。完整見`US_LOG.md`本輪記錄。
 ~~11. 把`us_pit.py`的`filing_pit()`接上`sec_edgar_client.get_filing_dates(full_history=True)`，並設計分期PIT reliability標記邏輯~~ ✅ 第65輪（2026-08-25T15:34）已完成，新增`era_reliability()`＋`_ERA_SEGMENTS`（真實SEC分期時間表，WebSearch查證來源見`US_LOG.md`）。**留下的開放問題（不是這輪範圍）**：函式不知道個股逐年「加速申報人」身分，對近期IPO股（PLTR實測14/24誤判率）不可信，只在長年掛牌大型股（AAPL/MSFT）身上驗證過。
-12.（新增，第65輪）如果要讓`era_reliability`對PLTR這類近期IPO股也可信，需要另外查SEC的filer category申報歷史（例如10-K封面頁的「Accelerated filer / Non-accelerated filer」勾選欄位，理論上`company facts`或`submissions` API可能有對應欄位，這輪沒有查證是否存在），或者退而求其次把`era_reliability`的用途限縮成「只信任已驗證過的長年掛牌大型股，其他一律標記`unverified`」——兩個方向都還沒決定，留給下一輪視優先序判斷，也可以直接跳過改做第8/9項。
+12. ~~查SEC的filer category申報歷史是否存在可用欄位~~ 🟡 第70輪（2026-08-25T18:33）已探測，未完成。`submissions`頂層`category`只是今天快照（不可用）；XBRL `EntityPublicFloat`確實有逐年資料、是分級規則原始輸入（有潛力，但未完成）。**剩三個子步驟才能真正解決，建議分輪做**：(a) WebSearch查證SEC accelerated/large-accelerated filer公眾流通市值門檻的歷史變動時間表（門檻本身隨時間變過，這輪完全沒查證細節）；(b) 寫「給定某年float+門檻表→推論當年分級」的反推邏輯；(c) 拿PLTR已知14/24誤判樣本重測，驗證是否真的改善。**如果(a)查證後發現太複雜/不確定性太高，也可以決定放棄，改採第41輪『退而求其次』選項**——把`era_reliability`用途限縮成「只信任已驗證過的長年掛牌大型股，其他一律標記`unverified`」，這仍是合法結論。完整見`DATA.md`「美股 PIT 資料源調查（三續）」小節、`US_LOG.md`第70輪記錄。
 
 **Holdout 狀態：✅ 未被使用**（跟主線共用同一套機制）。
 
@@ -45,4 +47,4 @@
 
 ## 下一步
 
-見上方「下一輪建議工作單位」第9、12項（第6、7、8、10、11項已完成），一次只做一項。
+見上方「下一輪建議工作單位」第9項（系統化擴充`KNOWN_DELISTED`名單），或第12項剩下的三個子步驟之一（a/b/c，建議先做(a)查門檻歷史，(b)(c)要等(a)有結果才能接），一次只做一項。

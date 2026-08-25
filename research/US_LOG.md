@@ -328,3 +328,16 @@
 **沒做的**：沒有查證兩個監管費率的多年歷史變動範圍（只驗證了當下這一刻）；沒有查證IBKR Pro分層計價的精確min/max clamp規則（只用一個代表性數字）；沒有把這個模組接進任何回測腳本（那還需要美股版`factors.py`/`long_short_backtest.py`，目前都不存在）；`limit_status()`等價功能（LULD/熔斷）刻意不做，留白不是遺漏。`US_MARATHON_STATE.md`「下一輪建議工作單位」剩第9、12項未做。
 
 `is_holdout_consumed()` 確認為 `False`（本輪全程沒碰任何FinMind/SEC資料抓取，只有WebSearch文件查證跟寫純邏輯程式碼）。
+
+## 2026-08-25T18:33:29+08:00 — 馬拉松第70輪：filer category 欄位探測（第12項）
+
+接「下一輪建議工作單位」第12項：`era_reliability()`（第65輪）對近期IPO股（PLTR）不可信，因為不知道個股逐年的加速申報人身分。新寫 `sec_edgar_filer_category_probe.py`，對已驗證的三個CIK（AAPL/MSFT/PLTR）測了兩個候選欄位：
+
+1. `submissions/CIK{cik}.json` 頂層 `category` 欄位：**存在，但三檔今天全部顯示`"Large accelerated filer"`**——這是單一「今天」快照，沒有日期/申報context，對PLTR早年分級完全沒有資訊量。跟`USStockInfo`快照陷阱是同一類問題的第三次出現。
+2. XBRL company facts `facts.dei.EntityPublicFloat`：**確實有逐年資料**（AAPL 19筆2009–2025、MSFT 17筆2009–2025、PLTR 6筆2020–2025，含`end`/`filed`/`fy`/`val`）。這是SEC規則據以判定分級的原始輸入（公眾流通市值門檻制），不是分級標籤本身——理論上可以搭配歷史門檻時間表反推逐年分級，但**這輪只確認資料存在，門檻歷史表沒查證，反推邏輯沒寫**。
+
+**判定：問題從「完全開放」推進到「有具體候選路徑，但還要兩個子步驟才能真正解決」**（WebSearch查證門檻歷史時間表 + 寫反推邏輯 + 拿PLTR已知誤判樣本重測）。這不是因子/策略統計檢定，不計入`TRIALS_LEDGER.md`。完整見 `DATA.md`「美股 PIT 資料源調查（三續）」小節。
+
+**沒做的**：沒查歷史門檻時間表；沒寫反推邏輯；沒重測PLTR。這三步留給下一輪視優先序決定要不要接，也可以直接跳過改做第9項（系統化擴充`KNOWN_DELISTED`名單）。
+
+`is_holdout_consumed()` 確認為 `False`（本輪只呼叫`sec_edgar_client.py`既有函式+一次直接`requests`打XBRL company facts端點，皆走公開SEC API，不碰FinMind/alpha.db）。

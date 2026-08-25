@@ -263,6 +263,18 @@ First Republic Bank 是加州州立特許銀行，且（**這點是本輪依一�
 
 **結論**：dedup（同一`end`取最小`filed`）是必要但不充分的修正——中位數已大幅改善且貼近submissions API水準，但殘留離群值不是隨機雜訊，而是兩個可辨識、可分類的結構性成因（pre-XBRL標記缺口、pre-IPO歷史資料）。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～十輪地基工作的先例一致。
 
+### 美股 PIT 資料源調查（三續）：`era_reliability()` 的個股層級盲點是否可修——filer category 欄位探測（2026-08-25 馬拉松第70輪實測）
+
+**背景**：第65輪的 `era_reliability()`（`us_pit.py`）用單一 SEC 全市場加速申報人時間表判斷每次申報的 PIT 可信度，但不知道個股自己的申報人分級歷史，對近期 IPO 股（PLTR 實測 14/24 誤判率）不可信。`US_MARATHON_STATE.md` 下一輪建議工作單位第12項問：SEC 公開 API 是否有個股逐年的申報人分級資料可以補這個洞？這輪用 `research/sec_edgar_filer_category_probe.py` 對同樣三個已驗證 CIK（AAPL/MSFT/PLTR）測了兩個候選欄位。
+
+**結果 1：`submissions/CIK{cik}.json` 頂層 `category` 欄位——存在，但只是「今天」的單一快照**：AAPL/MSFT/PLTR 三檔今天都顯示 `"Large accelerated filer"`。**這個欄位沒有日期/申報context，跟 `filings.recent` 不同**——對 PLTR 這種早年不太可能是「Large accelerated filer」的情況完全沒有資訊量，等於沒解決問題。**這是跟 `USStockInfo`／`company_tickers.json` 同一類地雷（快照 vs. 歷史）在美股財報端的又一個實例，不是新陷阱，是同一個陷阱的第三次出現。**
+
+**結果 2：XBRL company facts 的 `facts.dei.EntityPublicFloat`——確實有逐年資料，是比 `category` 更有潛力的路徑**：三檔都測到多筆逐年資料點，每筆帶 `end`（衡量日）／`filed`（申報日）／`fy`（會計年度）／`val`（美元）。AAPL 19 筆（2009–2025）、MSFT 17 筆（2009–2025）、PLTR 6 筆（2020–2025，從 IPO 當年開始，第一筆 `end=2020-09-30` 就是上市當天，公眾流通市值 $133 億）。**這個欄位不是「申報人分級標籤」本身，而是 SEC 規則據以判定分級的原始輸入（公眾流通市值門檻制）**——理論上可以搭配一份「歷史門檻時間表」（跟 `era_reliability()` 的 `_ERA_SEGMENTS` 同精神）自己反推每年的分級，但**這輪只確認資料存在，沒有做反推邏輯，也沒有查證歷史門檻本身**（門檻本身隨時間變過，這輪完全沒查證，不能假設現在的門檻適用全部歷史年份——這正是 `_ERA_SEGMENTS` 當初要解決的同一類問題，如果要接這條路，門檻時間表需要一樣嚴謹的 WebSearch 查證，不能用猜的）。
+
+**留給下一輪（如果要接這條路，三個子步驟，建議分輪做，不要一輪塞完）**：(a) WebSearch 查證 SEC accelerated filer／large accelerated filer 公眾流通市值門檻的歷史變動時間表（例如 2018年、2020年都有規則修正，這輪完全沒查，只是聽過有變動這件事，沒有查證細節）；(b) 寫反推邏輯（給定某年 `EntityPublicFloat` + 對應年份的門檻表 → 推論當年分級）；(c) 拿 PLTR 已知的14/24誤判樣本重新測，看反推出來的分級能不能改善 `era_reliability()` 的準確率。**如果查證後發現門檻歷史太複雜/不確定性太高，也可以決定放棄這條路，改採第41輪『退而求其次』選項——把 `era_reliability` 用途限縮成「只信任已驗證過的長年掛牌大型股，其他一律標記`unverified`」，這仍然是合法的結論，不是失敗。**
+
+**結論**：這輪把「第12項」從「完全開放的問題」推進到「有一條具體、有資料支撐的候選路徑，但門檻歷史表還沒查證，反推邏輯還沒寫」——是一輪探測性的地基工作，不是完整解法。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～十一輪 PIT 地基工作的先例一致。
+
 ---
 
 ## 2. 存活者偏差（下市／下櫃股票）
