@@ -22,6 +22,12 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 87 輪 · 2026-08-26 06:31 · FUT · 取鎖時偵測到`LOCK_STALE`（pid 140656持有30.0分鐘，上一輪疑似異常中止——`MARATHON_STATE.md`計數器已改86，但`REPORT.md`缺第86輪心跳條目，判斷是死在寫心跳這一步）；核實其留下的孤兒工作（`deep_dive_fut_basis_mean_reversion_60d.py`＋`FUT_LEADS.md`/`FUT_LOG.md`/`TRIALS_LEDGER.md`#43內容一致、holdout未受影響）後補齊第86輪缺漏心跳＋完成收工程序（commit+push） · 沿用第86輪判定：EXPERIMENTAL不變，本輪無新增假說測試
+
+## 第 86 輪 · 2026-08-26 06:20 · FUT · `fut_basis_mean_reversion_60d`(#19)深挖(1b) · **EXPERIMENTAL**（VAL期贏隨機控制組中位數但未達單測門檻(83.5<90.0)、beta近零(0.0286，優於`fut_basis_carry`的0.36)、但LOYO集中度問題跟`fut_basis_carry`相近，介於乾淨PASS跟深挖FAIL之間），排入`TRIALS_LEDGER.md`#43
+
+## 第 85 輪 · 2026-08-26 05:49 · TW · 執行互動session寫好未跑的`deep_dive_f_value_pb.py`（`f_value_pb`#1的1b深挖），61/80快取樣本零新API · **EXPERIMENTAL**：VAL(2021-2024)對配對式隨機控制組穩健勝出(99.0/100.0/100.0百分位)、TRAIN(2015-2020)較弱(88.0/96.0/97.0)，但絕對報酬train/val正負號不一致（TRAIN全負/VAL全正），跟`f_quality_roe_stability`同款模式第三例，證據比ROE更弱，未升格PASS（`TRIALS_LEDGER.md`#42）
+
 ## 第 84 輪 · 2026-08-26 05:02 · US · 取鎖時偵測到`LOCK_STALE`（pid 141036，29.9分鐘）——接手其留下的孤兒工作（`deep_dive_f_us_low_vol.py`＋`US_LEADS.md`/`TRIALS_LEDGER.md`已完成但未收工的1b深挖分析），核實後補齊`US_LOG.md`/`US_MARATHON_STATE.md`並收工 · `f_us_low_vol`深挖**FAIL**（TRAIN期對隨機控制組僅41-48百分位、VAL期beta驟降至−0.891暗示方向性曝險非橫斷面優勢），#39的CHEAP_PASS判定降級，US軌待深挖清單清空（TRIALS_LEDGER.md#41）
 
 ## 第 83 輪 · 2026-08-26 04:17 · TW · 執行互動session寫好但未跑的`regime_switch_f_rel_strength.py`（大盤位階開關+相對強度十分位多空策略），完成`f_rel_strength`情境切換候選的策略層深挖 · **FAIL**——TRAIN期三成本情境全負報酬/負alpha/負Sortino，VAL期對成本高度敏感，兩期對隨機控制組均僅84~94百分位（未達其他TW候選慣見99~100門檻），排入`TW_LEADS.md`#4/`TRIALS_LEDGER.md`#40；本輪commit刻意排除互動session其餘未commit的App/資料源架構變更

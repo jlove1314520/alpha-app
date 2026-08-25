@@ -1,13 +1,13 @@
 # FUT_MARATHON_STATE.md — 期貨軌斷點狀態（覆寫式）
 
-**【2026-08-25晚起、2026-08-26再次確認】資源配置：期貨軌維持最多佔整體馬拉松輪次20%**（22次策略試驗0通過，是三軌中效率最低的一軌）。這不是說完全不做，是說選輪次時TW/US軌優先度更高，FUT軌不要連續佔用太多輪。完整背景見`MARATHON_STATE.md`「2026-08-26 使用者裁示」區塊。
+**【2026-08-25晚起、2026-08-26再次確認】資源配置：期貨軌維持最多佔整體馬拉松輪次20%**（19次策略試驗中僅1個EXPERIMENTAL、0個乾淨PASS，仍是三軌中效率最低的一軌）。這不是說完全不做，是說選輪次時TW/US軌優先度更高，FUT軌不要連續佔用太多輪。完整背景見`MARATHON_STATE.md`「2026-08-26 使用者裁示」區塊。
 **✅ 2026-08-25T22:31（第77輪，US軌）已確認上面那個push積壓問題自行解決**：`git log`確認`fa6c7e5`是目前`HEAD`的祖先且`origin/main`本地快取ref跟`HEAD`一致，代表後續（可能是第76輪TW或更早）某次push已經成功把它推上去了，不需要任何額外動作。以下這行警告保留供歷史對照，但已經不是待辦事項。
 
 **⚠️ 2026-08-25T20:36 push失敗待處理（已解決，見上方）**：本輪commit（fa6c7e5）因DNS解析失敗（`Could not resolve host: github.com`）重試3次仍無法push，commit已在本機完成不會遺失，**下一輪不管選到哪一軌，開始前先跑`git push`把這個積壓的commit推上去**（如果那時網路正常，一個指令就好，不需要重做任何工作）。
 
 **這份檔案只描述期貨軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `FUT_LOG.md`；候選判定看 `FUT_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T02:05:00+08:00**（馬拉松第80輪：basis家族第三個假說`fut_basis_mean_reversion_60d`便宜關卡完成，**CHEAP_PASS**，percentile=100.0，排入待深挖清單。**⚠️跟#17`fut_basis_carry`同款極端終值放大模式（89.24x vs 隨機控制組0.34x），而`fut_basis_carry`第75輪深挖已證實這種放大主要由少數早期事件年份主導、樣本外不成立——這次同樣需要同等懷疑，深挖時第一步務必先做train/val切分。** basis家族三機制（水位/動能/均值回歸）至此全部測完便宜關卡層級。詳見`FUT_LOG.md`本輪記錄、`FUT_LEADS.md`#19、`TRIALS_LEDGER.md`#38。本輪發現機器上有一份未commit的互動session工作（TW軌混合資料源架構），本輪commit刻意排除，只commit FUT軌相關檔案。）
+**最後更新：2026-08-26T06:20:00+08:00**（馬拉松第86輪：`fut_basis_mean_reversion_60d`深挖（1b）完成，新寫`deep_dive_fut_basis_mean_reversion_60d.py`（重用`deep_dive_fut_basis_carry.py`的配對式隨機控制組helper+成本模型）。**判定EXPERIMENTAL**——train期(2000-2020)穩健通過(percentile=100.0)，val期(2021-2024)percentile=83.5（贏過隨機控制組中位數但未達單測門檻90.0，跟#17`fut_basis_carry`的val=46.0連中位數都沒贏明顯不同）；train/val絕對報酬正負號一致（皆為正）；leave-one-year-out顯示終值仍高度集中在少數年份（拿掉前三大貢獻年2002/2007/2004後只剩14.6%，跟#17的15.0%集中度相近）；**beta=0.0286（近零，明顯優於#17的0.36，確實比水位假說更接近market-neutral獨立timing edge）**；3x成本後仍為正。basis家族三機制（水位#17FAIL、動能#18FAIL、均值回歸#19EXPERIMENTAL）至此全部結案——**這是期貨軌至今唯一沒被乾淨判死的候選，但也不是PASS，證據介於乾淨PASS跟#17深挖FAIL之間，不升格使用**。詳見`FUT_LOG.md`本輪記錄、`FUT_LEADS.md`#19（已更新）、`TRIALS_LEDGER.md`#43。**本輪commit範圍**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)+共用append-only`TRIALS_LEDGER.md`（後者附帶包含了第85輪TW軌尚未commit的`f_value_pb`深挖條目#42，因為兩筆新增在檔案裡是相鄰的append，沒有做patch層級拆分——這是誠實揭露而非隱藏，`TRIALS_LEDGER.md`本身設計就是跨軌共用單一歷史總帳，內容本身沒有問題，只是連帶被commit的時間點不是原本那一輪；**TW軌自己的`TW_LEADS.md`/`TW_LOG.md`/`TW_MARATHON_STATE.md`/`DATA.md`/`LEADS.md`跟互動session的混合資料源架構程式碼本輪依然刻意排除**，延續第80–85輪的判斷）。
 
 **上一則保留（第75輪，供對照）：** 2026-08-25T20:36:09+08:00（馬拉松第75輪：`fut_basis_carry`深挖（1b）完成，`deep_dive_fut_basis_carry.py`。**結論：深挖FAIL，第72輪的CHEAP_PASS降級，不進候選清單。** train期（2000-2020）percentile=100.0穩健通過，但**val期（2021-2024）percentile=46.0，連隨機控制組中位數都沒贏過**；leave-one-year-out確認717.5x終值中85%由2000-2002三年貢獻（拿掉這三年只剩107.9x，15.0%）；beta vs TAIEX=0.36非近零（不是市場中性訊號）；成本敏感度1x/2x/3x（round-trip 5/10/15bps近似假設）方向不變但已是次要檢查。**第72輪標記的「82倍擇時放大倍數可能被少數大事件年份主導」疑慮完全成立，這是期貨軌至今唯一走完1b全部四項檢查的候選，也是第一次驗證「便宜關卡CHEAP_PASS≠可信候選」這個協定精神的具體案例**）
 

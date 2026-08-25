@@ -583,3 +583,30 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：`fut_basis_mean_reversion_60d`深挖（1b），第一步先做train/val切分（不要照`fut_basis_carry`先例把四項都做完才發現問題）。basis家族三個機制（水位/動能/均值回歸）至此全部測完便宜關卡層級。
 
 ---
+
+## 2026-08-26T06:20:00+08:00（馬拉松第86輪）期貨軌執行：`fut_basis_mean_reversion_60d`深挖（1b）完成，判定EXPERIMENTAL
+
+**選軌理由**：取鎖時偵測到`LOCK_STALE`（pid 132832持有29.9分鐘，上一輪疑似異常中止，未留下log）。三軌最後更新時間戳比對：FUT（第80輪，2026-08-26T02:05）明顯比US（第84輪，05:02）、TW（第85輪，05:49）舊，依協定簡單輪替選FUT。
+
+**做了什麼**：對`FUT_LEADS.md`#19（`fut_basis_mean_reversion_60d`，第80輪CHEAP_PASS）做1b深挖。新寫`deep_dive_fut_basis_mean_reversion_60d.py`，重用`deep_dive_fut_basis_carry.py`（#17深挖用的既有腳本）的`_matched_permutation_terminal()`配對式隨機控制組helper跟成本模型常數，只換掉position建構邏輯（60日trailing均值偏離的sign，而非水位本身的sign）。四項檢查，順序照協定：
+
+1. **Train/Val切分**（`validation.holdout`的`TRAIN_END=2020-12-31`/`VAL_END=2024-12-31`）：TRAIN(2000-2020) period-local配對式隨機控制組percentile=100.0（real_eq=72.67x，+7167%）。**VAL(2021-2024) percentile=83.5**——贏過隨機控制組中位數（>50）但未達單測門檻90.0，real_eq=1.2118x（+21.2%），同期買進持有為+72.2%（策略跑輸買進持有，但仍贏隨機打散控制組）。train/val絕對報酬正負號一致（皆為正）——這點跟`f_quality_roe_stability`/`f_value_pb`那種「train/val正負號不一致」的EXPERIMENTAL模式不同，也跟#17`fut_basis_carry`（val=46.0連中位數都沒贏）明顯不同，是介於兩者之間的第三種模式。
+2. **Leave-one-year-out**：前三大貢獻年份為2002(+151.5%)/2007(+80.8%)/2004(+50.7%)，排除這三年後終值從89.24x降到13.03x（只剩14.6%），跟#17拿掉2000-2002後只剩15.0%的集中度幾乎一樣。**這個訊號一樣高度依賴少數早期年份，集中度問題沒有比#17好。**
+3. **成本敏感度1x/2x/3x**（round-trip 5/10/15bps，沿用#17深挖記錄的台指期期交稅為主近似假設）：89.24→37.76/15.97/6.75x，方向不變，3x後仍為+575%。
+4. **Beta vs TAIEX現貨日報酬**：beta=0.0286，r²=0.0007。**這是本輪最大的正向發現**——遠比#17的beta=0.36更接近0，代表這個訊號確實比水位假說更接近真正的market-neutral timing edge，不是變相的方向性押注。
+
+**判定：EXPERIMENTAL**（不是乾淨PASS，也不是像#17那樣的乾淨深挖FAIL）。理由：VAL期贏過隨機控制組中位數（比#17強），且beta近零（比#17乾淨很多），但VAL期沒有清楚跨過90.0的單測門檻，且LOYO集中度問題跟#17一樣沒解決——證據強度介於「乾淨PASS」跟「#17那種深挖FAIL」之間，誠實記錄成EXPERIMENTAL，不因為部分指標比#17好就直接升格候選使用。
+
+**經濟解釋**（待驗證方向，非結論）：basis長期均值反映結構性cost-of-carry（預期股利殖利率淨融資成本，相對穩定），暫時偏離這個均值更可能反映期貨市場短期供需失衡（避險/投機部位暫時性推擠），失衡消退後應回歸——這個解釋邏輯自洽，但鑑於VAL證據不夠乾淨+LOYO集中度未解，不能單憑經濟解釋合理就升格使用。
+
+**basis家族結案**：水位(#17)、動能(#18)、均值回歸(#19本輪)三個機制全部測完1a（+可行的1b），結果0 PASS、1 EXPERIMENTAL、2 FAIL。`MARATHON_PROTOCOL.md`第3節期貨候選清單原始的「期現價差」項目至此完整覆蓋，不需要再對這個機制找新變體。
+
+**沒做的事**：沒有做分年份/regime的穩健性子樣本檢查（`FUT_LEADS.md`本輪備註列為可選的下一步，非硬性待辦）。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。全程零新增FinMind API呼叫（`build_continuous_series()`/`build_basis_series()`都命中既有全歷史parquet快取）。
+
+**已更新**：`deep_dive_fut_basis_mean_reversion_60d.py`（新增）、`TRIALS_LEDGER.md`（#43）、`FUT_LEADS.md`（#19＋目前狀態＋下一輪建議更新）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。**本輪commit範圍延續第80–85輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)+共用`TRIALS_LEDGER.md`（`TRIALS_LEDGER.md`附帶包含了第85輪TW軌尚未commit的`f_value_pb`深挖條目#42，因為append-only檔案裡兩筆新增緊鄰、沒有做patch層級拆分，誠實揭露這個範圍細節）。TW軌自己的狀態/log檔案跟互動session的混合資料源架構程式碼本輪依然刻意不動。
+
+**下一輪建議**：basis家族已全部結案，可選方向見`FUT_LEADS.md`本輪更新——(a) 盤別效應家族（日盤/夜盤轉倉時點是否同步，尚未查）；(b) 期現價差以外的全新機制家族；(c) 若要進一步驗證均值回歸候選，可做分年代子樣本穩健性檢查，但非硬性待辦，記得FUT軌20%資源上限，不要連續佔用太多輪。
+
+---
