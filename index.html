@@ -528,6 +528,16 @@
     </div>
     <div id="picks-search-result"></div>
 
+    <!-- 主流題材（資金流向）chips -->
+    <div id="mainstream-wrap" style="margin-top:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
+        <span class="more" id="mainstream-refresh" onclick="loadMainstreamIndustries()">重新整理</span>
+      </div>
+      <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="note">載入中…</div></div>
+      <div class="note" style="margin-top:2px">⚠ 動能/主流本質是擁擠交易，資金集中太久、漲幅過大容易反轉——不是「資金正在流入」就代表可以追高</div>
+    </div>
+
     <!-- 產業篩選 chips -->
     <div id="picks-chips" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px"></div>
 
@@ -646,6 +656,15 @@
           <div class="f"><span>月營收 YoY</span><b id="kn-yoy">—</b></div>
           <div class="f"><span>淨值比 PBR</span><b id="kn-pbr">—</b></div>
         </div>
+      </div>
+      <div class="card">
+        <h3>量能</h3>
+        <div class="facts">
+          <div class="f"><span>今日成交值</span><b id="kn-turnover">—</b></div>
+          <div class="f"><span>量能突破倍數</span><b id="kn-vol-mult">—</b></div>
+        </div>
+        <div class="note" id="kn-liquidity-flag"></div>
+        <div class="note">量能突破倍數＝今日成交值 ÷ 近20日均量（動能訊號，非流動性門檻）；流動性門檻另計：今日成交值絕對值 &lt; NT$3000萬才標示量能不足</div>
       </div>
     </div>
 
@@ -1318,6 +1337,52 @@
     setDataTime('heat-datatime',(results.find(r=>r.date)||{}).date);
   }
 
+  // 2026-08-25 新增：「主流題材」資金流向 chips（選股頁）。沿用 HEAT_CATS 這批 FinMind
+  // 產業指數代碼（Trading_money 是該產業一籃子股票的合計成交值，FinMind 直接給，不用自己
+  // 逐股加總），跟 scores.json 用的 TWSE 官方產業別中文名稱是兩套不同的分類系統、字串對不
+  // 上，這裡手動維護一個對照表（只涵蓋 HEAT_CATS 現有的 8 個大類，不是全部 28 個 TWSE
+  // 分類）——點 chip 篩選 picks 列表要用 scores.json 的字串才篩得到。
+  const HEAT_TO_SCORE_INDUSTRY={
+    Semiconductor:'半導體業', Electronic:'電子工業', CommunicationsInternet:'通信網路業',
+    Optoelectronic:'光電業', FinancialInsurance:'金融保險', ElectricMachinery:'電機機械',
+    ShippingTransportation:'航運業', Tourism:'觀光事業',
+  };
+  async function fetchIndustryFlow(cat){
+    const px=await fm('TaiwanStockPrice',cat.id,_d(30));
+    if(px.length<6)return{...cat,inflow:null};
+    const moneys=px.map(x=>x.Trading_money||0);
+    const last=px[px.length-1];
+    const avg5=moneys.slice(-5).reduce((a,b)=>a+b,0)/5;
+    const avg20=moneys.slice(-20).reduce((a,b)=>a+b,0)/Math.min(20,moneys.length);
+    const inflow=avg20>0?(avg5/avg20-1)*100:null;
+    // 連續流入天數（從最新一天往回數，當日成交值 > 全樣本20日均值 就算一天）+ 這段期間累計漲幅，
+    // 用來判斷「已經漲一段、資金卡位很久」的擁擠度，不是嚴謹的統計檢定，只是即時提示用的粗略估法。
+    let streak=0;
+    for(let i=px.length-1;i>=0&&moneys[i]>avg20;i--)streak++;
+    const streakStartPx=px[Math.max(0,px.length-1-streak)].close;
+    const cumGain=streakStartPx?((last.close-streakStartPx)/streakStartPx*100):0;
+    const crowded=streak>=3&&cumGain>=8;
+    const pct=last.spread!=null?last.spread/(last.close-last.spread)*100:0;
+    return{...cat,inflow,pct,streak,cumGain,crowded,date:last.date};
+  }
+  let MAINSTREAM_CACHE=null;
+  function renderMainstreamChips(){
+    const el=document.getElementById('mainstream-chips');if(!el||!MAINSTREAM_CACHE)return;
+    if(!MAINSTREAM_CACHE.length){el.innerHTML='<div class="note">目前沒有產業呈現5日/20日資金淨流入（或'+fmEmptyMsg('查無資料')+'）</div>';return}
+    el.innerHTML=MAINSTREAM_CACHE.map(r=>{
+      const scoreInd=HEAT_TO_SCORE_INDUSTRY[r.id];
+      const active=PICKS_INDUSTRY===scoreInd;
+      return `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap" onclick="filterPicksByIndustry('${scoreInd}')">${r.label} <span style="color:${active?'#1a1005':'var(--up)'}">+${r.inflow.toFixed(1)}%</span>${r.crowded?' ⚠ 已擁擠':''}</span>`;
+    }).join('');
+  }
+  async function loadMainstreamIndustries(){
+    const el=document.getElementById('mainstream-chips');if(!el)return;
+    el.innerHTML='<div class="note">載入中…</div>';
+    const results=await Promise.all(HEAT_CATS.map(fetchIndustryFlow));
+    MAINSTREAM_CACHE=results.filter(r=>r.inflow!=null&&r.inflow>0).sort((a,b)=>b.inflow-a.inflow).slice(0,5);
+    renderMainstreamChips();
+  }
+
   async function loadInstTotal(){
     const el=document.getElementById('inst-bars');if(!el)return;
     const raw=await fm('TaiwanStockTotalInstitutionalInvestors','',_d(16));
@@ -1766,7 +1831,8 @@
         document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
         setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤`);
       }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
-      ['kn-per','kn-pbr','kn-yield','kn-yoy'].forEach(id=>setTxt(id,'—'));
+      ['kn-per','kn-pbr','kn-yield','kn-yoy','kn-turnover','kn-vol-mult'].forEach(id=>setTxt(id,'—'));
+      setTxt('kn-liquidity-flag','');
       REV_ROWS=[];
       document.getElementById('rev-chart-amt').innerHTML='<div class="note">美股尚未支援月營收（FinMind 此指標僅提供台股）</div>';
       document.getElementById('rev-note').textContent='美股暫無此資料';
@@ -1793,6 +1859,23 @@
       setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（原始未還原股價）`);
     }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
     loadMarginChip(code,px);
+    if(px.length){
+      // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
+      // 流動性門檻是完全獨立的另一件事：不管跟自己比是熱是冷，成交值絕對數字太低（單日<3000萬）
+      // 就是真的量能不足，這種股票不管技術面多漂亮都拉不動——兩個訊號分開判斷，不能混用同一個
+      // 相對倍數當作流動性門檻（那樣的話，像台積電這種天量常態股，只要今天比自己前20日均量
+      // 略低，就會被誤判成「量能不足」，但它其實還是全市場數一數二流動的股票）。
+      const LIQUIDITY_FLOOR=30000000; // NT$3000萬/日，絕對門檻，不是相對值
+      const moneys=px.map(x=>x.Trading_money||0);
+      const todayMoney=moneys[moneys.length-1];
+      const avg20=moneys.slice(-20).reduce((a,b)=>a+b,0)/Math.min(20,moneys.length);
+      const mult=avg20>0?todayMoney/avg20:null;
+      setTxt('kn-turnover',nf(Math.round(todayMoney/1e4))+' 萬');
+      const me=document.getElementById('kn-vol-mult');
+      if(mult!=null){me.textContent=mult.toFixed(2)+' 倍';me.className=mult>=1.3?'pos':(mult<0.7?'neg':'')}
+      const flagEl=document.getElementById('kn-liquidity-flag');
+      flagEl.textContent=todayMoney<LIQUIDITY_FLOOR?'⚠ 量能不足，漲不動（今日成交值低於3000萬元流動性門檻）':'';
+    }else{setTxt('kn-turnover','—');setTxt('kn-vol-mult','—');setTxt('kn-liquidity-flag','')}
     const p=per.length?per[per.length-1]:{};
     setTxt('kn-per',p.PER??'—');setTxt('kn-pbr',p.PBR??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
     loadRevenueChart(code,rev);
@@ -1918,6 +2001,7 @@
   let PICKS_INDUSTRY=null; // null = 全部產業
   async function hydratePicks(forceReload){
     renderMktToggle('picks');onPicksToggleChange();
+    loadMainstreamIndustries();
     if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML='<div class="note">載入中…</div>';
@@ -1945,8 +2029,9 @@
       +industries.map(ind=>chip(ind,PICKS_INDUSTRY===ind,`filterPicksByIndustry('${ind}')`)).join('');
   }
   function filterPicksByIndustry(ind){
-    PICKS_INDUSTRY=ind;
+    PICKS_INDUSTRY=PICKS_INDUSTRY===ind?null:ind; // 再點一次同一個 chip 取消篩選
     if(PICKS_CACHE)renderPicks(PICKS_CACHE);
+    renderMainstreamChips();
   }
   function pickRowHtml(r){
     const lowCov=r.coverage<0.5;
