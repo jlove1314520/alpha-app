@@ -70,6 +70,15 @@
     background:radial-gradient(120% 55% at 50% -8%, rgba(216,176,112,.07), transparent 60%), var(--page);
     padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);
   }
+  /* 2026-08-25 再次收到 iPhone 16 實機回報 nav 貼不到底部，這次沒有再憑猜測改，
+     用 playwright_nav_test.py（Chromium）+ playwright_nav_test_webkit.py（WebKit+iOS UA，
+     更接近真實Safari）在精確 393x852 viewport 下實測：#app/nav 都量到 gap=0px，跟這裡
+     已經是 position:fixed;inset:0（不是dvh）的寫法一致，兩個引擎都重現不出回報的問題。
+     目前最可能的解釋是手機端 Service Worker 快取了修復前的舊版殼層（sw.js 只快取
+     index.html 等殼層檔案，這正是這類問題的已知模式，見 CLAUDE.md「已知地雷」）——
+     這裡把 CACHE 版本號 bump 到 v1.0.4 強制失效舊快取；如果之後又回報同樣問題，
+     先請對方在 App 設定頁按「強制更新」或整個關掉 Safari 分頁重開，再重新測，
+     不要直接假設 CSS 又壞了、回頭亂改這裡的結構。 */
 
   /* ===== 頂部 ===== */
   header.top{
@@ -97,6 +106,10 @@
      flexbox 陷阱，這次順便修掉，不是新增問題）。 */
   main{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px 20px;scrollbar-width:none}
   main::-webkit-scrollbar{display:none}
+  /* 2026-08-25 新增：三個橫向捲動 chips 列（選股頁主流題材/產業篩選、日誌頁篩選）
+     隱藏捲軸，跟其他橫向捲動區塊(main)一致，不然部分瀏覽器會一直顯示一條橫捲軸。 */
+  #mainstream-chips,#picks-chips,#journal-chips{scrollbar-width:none}
+  #mainstream-chips::-webkit-scrollbar,#picks-chips::-webkit-scrollbar,#journal-chips::-webkit-scrollbar{display:none}
   .screen{display:none}
   .screen.active{display:block;animation:fade .18s ease}
   @keyframes fade{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -1083,6 +1096,14 @@
     <div id="search-results"><div class="note" style="padding:16px">輸入代號或公司名開始搜尋</div></div>
   </div>
 
+  <!-- 產業全選單（選股頁「更多」開，2026-08-25 新增，避免橫向捲動列塞不下25+個產業）-->
+  <div class="sheet-mask" id="industry-mask" onclick="closeIndustrySheet()"></div>
+  <div class="sheet" id="industry-sheet">
+    <div class="grab"></div>
+    <h2>選擇產業</h2>
+    <div id="industry-sheet-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
+
   <!-- 刪除確認 -->
   <div class="sheet-mask" id="cmask" onclick="cfNo()"></div>
   <div class="cmodal" id="confirm">
@@ -1241,14 +1262,14 @@
         const px=await fm('USStockPrice',code,_d(16));
         if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
           const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'u':'d';
-          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.Close))}<div class="px"><b>$${nf(last.Close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.Close),chg>=0)}<div class="px"><b>$${nf(last.Close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
         }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · 無報價</span></div>`}
         continue;
       }
       const px=await fm('TaiwanStockPrice',code,_d(16));
       if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
         const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'u':'d';
-        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close))}<div class="px"><b>${nf(last.close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close),chg>=0)}<div class="px"><b>${nf(last.close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 無報價</span></div>`}
     }
     stampUpdated('home');
@@ -1268,7 +1289,7 @@
     const last=px[px.length-1];const prev=px.length>1?c(px[px.length-2]):(us?last.Close:last.close-last.spread);
     const chg=us?last.Close-prev:(last.spread!=null?last.spread:last.close-prev);
     const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
-    const html=`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(c))}<div class="px"><b>${nf(c(last))}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
+    const html=`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(c),chg>=0)}<div class="px"><b>${nf(c(last))}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
     return {html,date:last.date};
   }
   // 2026-08-25 新增：美股三大指數 + 費半，供「大盤速覽」（今日頁）跟「美股指數」（市場頁）共用。
@@ -1521,7 +1542,7 @@
   function renderJournalChips(){
     const el=document.getElementById('journal-chips');
     el.innerHTML=['ALL','TW','US','FUT'].map(k=>
-      `<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${JOURNAL_FILTER===k?600:400};color:${JOURNAL_FILTER===k?'#1a1005':'var(--ink-2)'};background:${JOURNAL_FILTER===k?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${JOURNAL_FILTER===k?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="setJournalFilter('${k}')">${JOURNAL_CHIP_LABEL[k]}</span>`
+      `<span class="press" style="flex-shrink:0;white-space:nowrap;font-size:12px;font-weight:${JOURNAL_FILTER===k?600:400};color:${JOURNAL_FILTER===k?'#1a1005':'var(--ink-2)'};background:${JOURNAL_FILTER===k?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${JOURNAL_FILTER===k?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="setJournalFilter('${k}')">${JOURNAL_CHIP_LABEL[k]}</span>`
     ).join('');
     document.querySelectorAll('#journal-trades [data-mkt]').forEach(el=>{
       el.style.display=(JOURNAL_FILTER==='ALL'||el.dataset.mkt===JOURNAL_FILTER)?'':'none';
@@ -2096,12 +2117,40 @@
   function pickLabel(r){
     return r.name?`${r.name} ${r.code}`:r.code;
   }
+  // 2026-08-25 修正：25+個產業全部塞進一列橫向捲動 chips，CJK文字沒設white-space:nowrap
+  // 時瀏覽器會在任兩個中文字之間換行，chip被撐成兩行、跟下一列內容重疊（iPhone 16實機
+  // 截圖回報過）。修法：(1) 每個chip補white-space:nowrap，文字不會再被逼著換行；
+  // (2) 橫向列只放常用前8個（依樣本中檔數由多到少排序，不是字母序，常用的優先露出），
+  // 其餘用「更多」開下面的全選單（sheet，flex-wrap讓多個chip自然換行，不受單列高度限制）。
+  const PICKS_CHIPS_VISIBLE=8;
+  let PICKS_ALL_INDUSTRIES=[];
   function renderPicksChips(allRows){
-    const industries=[...new Set(allRows.map(r=>r.industry).filter(Boolean))].sort();
+    const counts={};
+    allRows.forEach(r=>{if(r.industry)counts[r.industry]=(counts[r.industry]||0)+1});
+    const industries=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+    PICKS_ALL_INDUSTRIES=industries;
     const chipsEl=document.getElementById('picks-chips');
-    const chip=(label,active,onclick)=>`<span class="press" style="flex-shrink:0;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="${onclick}">${label}</span>`;
+    const visible=industries.slice(0,PICKS_CHIPS_VISIBLE);
+    // 如果目前選的產業篩選不在常用前8名內（從全選單挑的），也要讓它顯示在橫向列上，
+    // 不然使用者選了之後會看不到自己選的是哪個、以為篩選失效。
+    if(PICKS_INDUSTRY&&!visible.includes(PICKS_INDUSTRY))visible.push(PICKS_INDUSTRY);
     chipsEl.innerHTML=chip('全部',PICKS_INDUSTRY===null,'filterPicksByIndustry(null)')
-      +industries.map(ind=>chip(ind,PICKS_INDUSTRY===ind,`filterPicksByIndustry('${ind}')`)).join('');
+      +visible.map(ind=>chip(`${ind}(${counts[ind]})`,PICKS_INDUSTRY===ind,`filterPicksByIndustry('${ind}')`)).join('')
+      +(industries.length>PICKS_CHIPS_VISIBLE?chip('更多 ⋯',false,'openIndustrySheet()'):'');
+  }
+  function chip(label,active,onclick){
+    return `<span class="press" style="flex-shrink:0;white-space:nowrap;font-size:12px;font-weight:${active?600:400};color:${active?'#1a1005':'var(--ink-2)'};background:${active?'var(--gold-grad)':'rgba(255,255,255,.05)'};border:1px solid ${active?'transparent':'rgba(255,255,255,.08)'};padding:6px 13px;border-radius:999px;cursor:pointer" onclick="${onclick}">${label}</span>`;
+  }
+  function openIndustrySheet(){
+    const el=document.getElementById('industry-sheet-list');
+    el.innerHTML=chip('全部',PICKS_INDUSTRY===null,"filterPicksByIndustry(null);closeIndustrySheet()")
+      +PICKS_ALL_INDUSTRIES.map(ind=>chip(ind,PICKS_INDUSTRY===ind,`filterPicksByIndustry('${ind}');closeIndustrySheet()`)).join('');
+    document.getElementById('industry-mask').classList.add('open');
+    document.getElementById('industry-sheet').classList.add('open');
+  }
+  function closeIndustrySheet(){
+    document.getElementById('industry-mask').classList.remove('open');
+    document.getElementById('industry-sheet').classList.remove('open');
   }
   function filterPicksByIndustry(ind){
     PICKS_INDUSTRY=PICKS_INDUSTRY===ind?null:ind; // 再點一次同一個 chip 取消篩選
