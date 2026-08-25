@@ -56,10 +56,18 @@
     font-size:14px; line-height:1.45; overflow:hidden;
     position:fixed; inset:0; width:100%;
   }
+  /* 2026-08-25 修正：iPhone 16 實機回報 nav 貼不到螢幕底部（改了三輪都沒解決）。
+     根因懷疑：#app 原本用 height:100dvh——dvh 在 iOS Safari 上會隨網址列展開/收合
+     即時變動，如果瀏覽器在某個時間點量測到的是「網址列展開時」的動態視窗高度、
+     之後又沒有重新觸發 layout，#app 實際佔用的高度就會跟當下真正可視區域對不上，
+     nav 貼的是「算出來的100dvh」底部，不是「這一刻視覺視窗」的底部。body 本來就已經
+     position:fixed;inset:0（等於直接釘死在視覺視窗），這裡讓 #app 也直接用
+     position:fixed;inset:0，不透過 dvh 這個會變動的單位換算，理論上比 dvh 更可靠。
+     position:fixed 搭配 left:0/right:0（inset:0 展開後的效果）+ max-width + margin:0 auto
+     一樣會置中，寬螢幕（桌機測試）不會整個貼滿。 */
   #app{
-    max-width:430px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;
+    position:fixed;inset:0;max-width:430px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
     background:radial-gradient(120% 55% at 50% -8%, rgba(216,176,112,.07), transparent 60%), var(--page);
-    position:relative;
     padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);
   }
 
@@ -770,6 +778,13 @@
       <span class="note fx-note" id="trade-fx-note">匯率載入中…</span>
       <div class="mkt-toggle" id="trade-ccy-toggle"></div>
     </div>
+
+    <div class="tabbar2" id="trade-tabs">
+      <button class="on" data-sub="bots">機器人</button>
+      <button data-sub="strategy">策略</button>
+    </div>
+
+    <div class="subscreen active" id="trade-sub-bots">
     <div class="kpi-row">
       <div class="kpi">
         <div class="lbl">今日自動交易損益（持倉損益）</div>
@@ -841,6 +856,12 @@
 
     <button class="killer" onclick="toast('⛔ 已送出：全部平倉＋停止所有策略')">⛔ 緊急全平倉（Kill Switch）</button>
     <div class="note" style="text-align:center;margin-top:6px">風控閘門獨立於策略運行 · 斷線自動保護</div>
+    </div>
+
+    <div class="subscreen" id="trade-sub-strategy">
+      <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 紙上模擬，非真實交易，非投資建議</div>
+      <div id="strategy-list"><div class="note">載入中…</div></div>
+    </div>
   </section>
 
   <!-- ════════ 5. 日誌 ════════ -->
@@ -1178,9 +1199,13 @@
     }
   }
   function fmEmptyMsg(fallback){return FM_LAST_FAILED?'連線失敗，請重試（重新整理或稍後再試）':fallback}
-  function spark(cl){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
+  // 2026-08-25 修正：原本線的顏色是看「這段sparkline最後一天vs第一天」（多日趨勢），
+  // 跟旁邊直接顯示的「今日漲跌%」徽章是兩個不同的比較基準，兩者顏色常常對不上
+  // （例如過去9天總體是漲的、但今天是跌的，線會畫成漲色、徽章卻是跌色），使用者
+  // 實機截圖就是這個情況。改成外部明確傳入「今日漲跌」的布林值，跟徽章保證一致。
+  function spark(cl,up){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
-    return `<svg class="spark" viewBox="0 0 64 26"><polyline points="${pts}" fill="none" stroke="var(--${cl[cl.length-1]>=cl[0]?'up':'down'})" stroke-width="2"/></svg>`}
+    return `<svg class="spark" viewBox="0 0 64 26"><polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2"/></svg>`}
   function trendChart(cl,fmtLabel){
     if(cl.length<2)return '<div class="note">近月資料不足</div>';
     const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
@@ -1897,6 +1922,56 @@
       document.getElementById('sub-'+b.dataset.sub).classList.add('active');
     });
   });
+
+  // ── 交易頁子分頁（機器人／策略，2026-08-25 新增，不佔用底部導覽）──
+  document.querySelectorAll('#trade-tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('#trade-tabs button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      document.getElementById('trade-sub-bots').classList.remove('active');
+      document.getElementById('trade-sub-strategy').classList.remove('active');
+      document.getElementById('trade-sub-'+b.dataset.sub).classList.add('active');
+      if(b.dataset.sub==='strategy')loadStrategies();
+    });
+  });
+  // 2026-08-25 新增：策略紙上前測系統。目前沒有任何策略通過完整驗證(含holdout解鎖)，
+  // data/paper_trades.json 的 strategies 是空陣列，這裡誠實顯示「目前無上架策略」，
+  // 不放任何示範/假績效。完整架構規格見 research/PAPER_TRADING_ARCHITECTURE.md
+  // （JSON格式、事前產生訊號不可回填的鐵律、每日排程流程）。
+  function strategyCardHtml(s){
+    const m=s.metrics||{};
+    return `<div class="card press" style="cursor:pointer" onclick="toast('策略詳情頁尚未實作')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div><b style="font-size:15px">${s.name||s.id}</b><div class="note" style="margin-top:2px">${s.market||'—'} · 上架 ${s.listed_date||'—'} · 前測起始 ${s.paper_start_date||'—'}</div></div>
+      </div>
+      <div class="bot-stats" style="margin-top:10px">
+        <div class="s"><span>累計報酬</span><b class="${(m.cum_return_pct||0)>=0?'pos':'neg'}">${m.cum_return_pct!=null?(m.cum_return_pct>=0?'+':'')+m.cum_return_pct.toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>MDD</span><b>${m.mdd_pct!=null?m.mdd_pct.toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>Sortino</span><b>${m.sortino!=null?m.sortino.toFixed(2):'—'}</b></div>
+        <div class="s"><span>交易筆數</span><b>${m.n_trades??0}</b></div>
+      </div>
+      <div class="note" style="margin-top:8px">目前部位：${s.current_position||'無'}</div>
+    </div>`;
+  }
+  async function loadStrategies(){
+    const el=document.getElementById('strategy-list');if(!el)return;
+    try{
+      const r=await fetch('data/paper_trades.json?t='+Date.now());
+      const json=r.ok?await r.json():{strategies:[]};
+      const list=json.strategies||[];
+      if(!list.length){
+        el.innerHTML=`<div class="card" style="text-align:center;padding:28px 16px">
+          <div style="font-size:32px;margin-bottom:10px">📋</div>
+          <div style="font-weight:700;margin-bottom:6px">目前無上架策略，等待驗證通過</div>
+          <div class="note">只有通過馬拉松完整驗證（含 holdout 解鎖）的策略才會上架這裡。研究進度見 research/MARATHON_STATE.md；上架規格見 research/PAPER_TRADING_ARCHITECTURE.md。</div>
+        </div>`;
+        return;
+      }
+      el.innerHTML=list.map(strategyCardHtml).join('');
+    }catch(e){
+      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
+  }
 
   // ── 下單抽屜 ──
   function openSheet(side){
