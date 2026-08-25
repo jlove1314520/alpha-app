@@ -537,6 +537,7 @@
       <div>
         <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
         <div class="note num" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
+        <div class="note" style="margin-top:2px">評分權重從研究驗證期鎖定凍結；資料基準日目前卡在研究驗證窗口截止日，尚未接上每日即時更新，見「設定」頁說明</div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
@@ -569,14 +570,14 @@
       <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價） · 點列可看完整評分報告</div>
     </div>
 
-    <!-- 美股/期貨：這輪尚未實作，見 PROGRESS.md -->
+    <!-- 美股/期貨：見 PROGRESS.md -->
     <div class="card" id="picks-us-panel" style="display:none">
       <h3>美股評分</h3>
-      <div class="note">尚未實作——目前評分引擎（research/score_v2.py）只做了台股資料源，美股評分需要另外的因子計算管線，下一輪視需求評估。</div>
+      <div class="note"><b style="color:var(--ink-2)">建置中，尚無評分。</b>台股評分引擎（research/score_v2.py）的8大因子有一半以上依賴台股專屬資料源（月營收/三大法人籌碼等FinMind台股資料集），美股需要另外設計一套因子管線（規劃用yfinance或Finnhub免費資料源）。目前沒有時程承諾——這是一個尚待排入研究馬拉松佇列的工作單位，不是「快完成了」，請不要預期短期內上線。</div>
     </div>
     <div class="card" id="picks-fut-panel" style="display:none">
       <h3>期貨策略訊號</h3>
-      <div class="note">期貨沒有「選股排行榜」概念（只有少數幾個指數期貨合約可交易），這裡改成「策略訊號」畫面較合理，但目前尚未實作——需要先設計期貨專用的訊號邏輯，下一輪評估。</div>
+      <div class="note"><b style="color:var(--ink-2)">無已驗證策略，不提供訊號。</b>期貨軌（TAIFEX台指期）研究馬拉松目前已測過22個策略假說，全部未通過統計驗證關卡（含一個一度看似通過便宜關卡、但完整樣本外驗證後證實失敗的候選）——這不是還沒開始做，是誠實做過、目前確實還沒有找到站得住腳的訊號。不會為了「有東西可以顯示」硬推一個沒驗證過的訊號上來，那樣比不顯示更危險。</div>
     </div>
   </section>
 
@@ -2230,7 +2231,8 @@
   }
   function renderPicks(json){
     const meta=json.meta||{};
-    document.getElementById('picks-asof-line').textContent='資料基準日 '+(meta.data_asof||'—')+' · 樣本 '+(json.stocks||[]).length+' 檔';
+    const covTxt=meta.universe_size?`（涵蓋 ${(json.stocks||[]).length}/${meta.universe_size} 檔全市場宇宙）`:'';
+    document.getElementById('picks-asof-line').textContent='資料基準日 '+(meta.data_asof||'—')+' · 樣本 '+(json.stocks||[]).length+' 檔'+covTxt;
     const allRows=json.stocks||[];
     renderPicksChips(allRows);
     const listEl=document.getElementById('picks-list');
