@@ -2,9 +2,9 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-25T06:04:00+08:00**（馬拉松第47輪執行後，把第44輪的FDIC查詢邏輯正式包裝成`fdic_client.py`，並解出第44輪留下的開放問題：FRC的FDIC CERT=59017）
+**最後更新：2026-08-25T08:02:55+08:00**（馬拉松第50輪執行後，`us_probe_price_depth_smallmid.py`第四次嘗試終於成功執行，10檔中小型股/近期IPO股`USStockPrice`歷史深度全部驗證通過，「下一輪建議工作單位」第1–5項現在全部完成）
 
-**地基狀態：🟡 起步中，PIT資料源方向已確認可行（兩個獨立端點都驗證過，各有各的坑），存活者偏差方向已確認「兩個候選方法都不可靠」。第七輪發現一個重要的方法論教訓：`FRC` 這個下市案例第五輪其實從一開始就查錯了實體，「FDIC接管型下市不走Form 25」假設因此變弱。第十輪發現另一個方法論陷阱：XBRL company facts API 的比較期重複揭露問題；第十一輪去重後發現殘留離群值背後還有兩個獨立成因（pre-XBRL標記缺口、pre-IPO歷史資料，見下方）。第35、38輪都嘗試接「下一輪建議工作單位」第4項（中小型股/近期IPO價格深度抽測），腳本 `us_probe_price_depth_smallmid.py` 兩輪都一次都沒執行成功——第一檔就撞 FinMind 402（額度被同小時內的台股回補用光），優雅收工。**第38輪改做第5項（不需FinMind額度）：新增 `sec_edgar_client.py`，把 `sec_edgar_probe.py` 的ticker→CIK查詢跟filingDate/reportDate抽取邏輯包裝成可重用函式（`get_cik_map()`/`get_cik()`/`get_submissions()`/`get_filing_dates()`），smoke test數字跟第三輪探測腳本完全一致，驗證重構沒有改變邏輯。** 價格資料（`USStockPrice`）的深度/更新頻率已驗證可用；股票名單（`USStockInfo`）的形狀已摸清但還不能直接拿來建構無偏差宇宙；**SEC EDGAR 申報日期 API 已實測驗證可用（submissions API + company facts API 兩個端點都測過，且已包裝成可重用模組，見下方）**；**美股存活者偏差：`universe.py` 的價格列存在法、`USStockInfo` 快照增減法，這輪實測後都證實不可靠**（見下方，細節在 `DATA.md`「美股存活者偏差調查」小節）；**5檔已知下市股中，只有 TWTR/SIVB/BBBY 三檔的 CIK 已可信驗證（公司名稱＋申報型態都合理）；SBNY/FRC 兩檔改走 FDIC 路徑後也都已確認身分（分別是 CERT=57053/59017，不是 SEC CIK，因為這兩家是不歸 SEC 管的銀行）——5檔已知下市股的身分現在全部有可信結論，只是走了兩條不同的資料源路徑（SEC EDGAR 或 FDIC）。**第44、47輪新增 `fdic_client.py` 可重用模組供未來 `universe.py` 呼叫。仍然沒有美股版的 `universe.py`／`adjust.py`／`pit.py`／`factors.py`——**下一輪還是地基工作，還不能開始測因子**。
+**地基狀態：🟡 起步中，PIT資料源方向已確認可行（兩個獨立端點都驗證過，各有各的坑），存活者偏差方向已確認「兩個候選方法都不可靠」。第七輪發現一個重要的方法論教訓：`FRC` 這個下市案例第五輪其實從一開始就查錯了實體，「FDIC接管型下市不走Form 25」假設因此變弱。第十輪發現另一個方法論陷阱：XBRL company facts API 的比較期重複揭露問題；第十一輪去重後發現殘留離群值背後還有兩個獨立成因（pre-XBRL標記缺口、pre-IPO歷史資料，見下方）。第35、38輪都嘗試接「下一輪建議工作單位」第4項（中小型股/近期IPO價格深度抽測），腳本 `us_probe_price_depth_smallmid.py` 兩輪都一次都沒執行成功——第一檔就撞 FinMind 402（額度被同小時內的台股回補用光），優雅收工。**第38輪改做第5項（不需FinMind額度）：新增 `sec_edgar_client.py`，把 `sec_edgar_probe.py` 的ticker→CIK查詢跟filingDate/reportDate抽取邏輯包裝成可重用函式（`get_cik_map()`/`get_cik()`/`get_submissions()`/`get_filing_dates()`），smoke test數字跟第三輪探測腳本完全一致，驗證重構沒有改變邏輯。** **第50輪（2026-08-25T08:02）：第4項（中小型股/近期IPO歷史深度抽測）第四次嘗試終於成功——距上次TW軌重度用量約57分鐘，額度已恢復，10檔全部一次跑完無限流。結果：全部10檔日期間隔都只落在2/3/4天（週末/連假），沒有任何一檔出現>7天異常缺口，`first`日期跟實際上市年份合理對應，`last`一致停在`VAL_END`（`load_dev()`封頂生效）。里程碑1「只測AAPL/MSFT兩檔巨型股」的疑慮，這輪多樣性抽測沒有找到反例，初步驗證通過（見`DATA.md`「美股里程碑1（續）」小節、`US_LOG.md`本輪記錄）。** 價格資料（`USStockPrice`）的深度/更新頻率已驗證可用；股票名單（`USStockInfo`）的形狀已摸清但還不能直接拿來建構無偏差宇宙；**SEC EDGAR 申報日期 API 已實測驗證可用（submissions API + company facts API 兩個端點都測過，且已包裝成可重用模組，見下方）**；**美股存活者偏差：`universe.py` 的價格列存在法、`USStockInfo` 快照增減法，這輪實測後都證實不可靠**（見下方，細節在 `DATA.md`「美股存活者偏差調查」小節）；**5檔已知下市股中，只有 TWTR/SIVB/BBBY 三檔的 CIK 已可信驗證（公司名稱＋申報型態都合理）；SBNY/FRC 兩檔改走 FDIC 路徑後也都已確認身分（分別是 CERT=57053/59017，不是 SEC CIK，因為這兩家是不歸 SEC 管的銀行）——5檔已知下市股的身分現在全部有可信結論，只是走了兩條不同的資料源路徑（SEC EDGAR 或 FDIC）。**第44、47輪新增 `fdic_client.py` 可重用模組供未來 `universe.py` 呼叫。仍然沒有美股版的 `universe.py`／`adjust.py`／`pit.py`／`factors.py`——**下一輪還是地基工作，還不能開始測因子**。
 
 **已知資訊（避免重複調查）：**
 - `USStockPrice`（FinMind）：免費，且**價格已經是還原股價**（`Adj_Close` 欄位，`DATA.md` 里程碑1已驗證），跟台股的還原股價地雷不對稱，美股這邊反而好處理，不需要自組還原邏輯。
@@ -26,8 +26,13 @@
 1. ~~找 2010-2023 年真正掛牌 NYSE:FRC 的正確 CIK~~ ✅ 第41輪（2026-08-24晚間）已完成調查，但答案是「這個CIK不存在於SEC EDGAR」，不是找到了一個新號碼。**根本原因**：第12(i)條規定FDIC承保的州立、非聯準會會員銀行要直接向FDIC申報，不向SEC申報（來源：`fdic.gov/accounting/bank-securities`、eCFR 12 CFR Part 335）。FRC是加州州立銀行，符合這個結構（推論未逐一驗證獨立控股公司/聯準會會員身分，標記為假設）。**一次解釋了第4–7輪所有異常**：查不到10-K、查不到Form 25。完整見 `DATA.md`「美股存活者偏差調查（根本原因）」小節、`US_LOG.md`本輪記錄、`sec_edgar_frc_root_cause_probe.py`。**第六輪「FDIC接管型下市不走Form 25」假設應直接退役，不是繼續降級**——前提本身就錯了（不是接管後才不交，是本來就不歸SEC管）。
 2. ~~SBNY是否為非聯準會會員州立銀行~~ ✅ 第44輪（2026-08-25凌晨）已用FDIC BankFind Suite公開REST API（`api.fdic.gov`，非原規劃的`efr.fdic.gov`，更簡單直接）獨立確認：SBNY=Signature Bank，CERT=57053，2023-03-12倒閉，FDIC `failures`端點記錄完整（見`US_LOG.md`本輪記錄）。~~剩餘開放問題（FRC的FDIC CERT反查、查詢邏輯包裝成可重用函式）~~ ✅ 第47輪（2026-08-25凌晨）已完成，新寫`fdic_client.py`，FRC的FDIC CERT=59017已查到（見上方「已知資訊」小節）。**這個候選家族（FDIC-insured銀行下市股）目前已經有可重用的查詢工具，但還沒有整合進任何實際的`universe.py`下市偵測邏輯（那個模組本身還不存在）。這類銀行在美股全市場宇宙裡占比應該很小，存活者偏差調查邊際報酬可能不如先接第3/4項或直接開始搭`universe.py`／`pit.py`地基——這條建議維持不變。**
 3. ~~重算 XBRL company facts 的修正後 PIT gap~~ ✅ 第十一輪（2026-08-24凌晨）已完成，新寫 `sec_edgar_xbrl_facts_dedup_probe.py`。去重後中位數大幅改善（AAPL/MSFT/PLTR分別32/28/40天，貼近submissions API水準），但發現兩類無法用去重消除的殘留離群值：pre-XBRL標記缺口（AAPL/MSFT，`end`落在2007–2009年）、pre-IPO歷史資料（PLTR，`end`早於2020年9月上市）。完整見 `DATA.md`「美股 PIT 資料源調查（再續）」小節、`US_LOG.md` 本輪記錄。**還沒查`EarningsPerShareDiluted`以外的concept是否有同樣問題，也還沒查各公司確切的XBRL強制標記生效日期**，留給下一輪視優先序決定要不要接。
-4. **中小型股/近期上市股的 `USStockPrice` 歷史深度抽測——腳本已寫好，`us_probe_price_depth_smallmid.py`，直接跑就好，不用重新設計。** 第35、38輪連續兩次嘗試執行時第一檔（`XPER`）都立刻撞 FinMind 402（額度被同小時內的台股回補用光），完全零檔測到，優雅收工。**第44輪（2026-08-25T04:31）第三次嘗試，仍然是`XPER`第一檔就402**——本輪開始前約4.5小時TW軌第43輪跑了109次嘗試，額度到本輪時間點仍未恢復，改接第2項（見上）。**這已經是連續三輪同一堵牆，下一輪接手前務必先看`TW_LOG.md`最新一筆的實際執行時間戳，估算距今是否已超過FinMind額度重置週期（觀察約每小時），再決定要不要嘗試，不要盲目重跑第四次。** 候選清單（中小型股組：XPER/SWIM/IMOS/ABR/OCSL；近期IPO組：FINW/LAW/NRGV/GPCR/CAVA）跟篩選方法寫在腳本 docstring 裡。
+4. ~~中小型股/近期上市股的 `USStockPrice` 歷史深度抽測~~ ✅ 第50輪（2026-08-25T08:02）第四次嘗試終於成功執行，10檔全部通過（見上方「已知資訊」小節最新一條、`DATA.md`「美股里程碑1（續）」小節）。**這是最後一項待完成的探測工作單位。**
 5. ~~把 `sec_edgar_probe.py` 的邏輯正式包裝成一個可重用的 fetch 函式~~ ✅ 第38輪（2026-08-24T07:31）已完成，新寫 `sec_edgar_client.py`（`get_cik_map()`/`get_cik()`/`get_submissions()`/`get_filing_dates()`，含快取），smoke test驗證數字跟原探測腳本一致。**注意：只包了 ticker→CIK + `filings.recent` 的filingDate/reportDate，沒有包XBRL company facts跟下市/Form 25核實邏輯（那兩類仍是探測階段，故意沒提前固化）。** 之後寫美股版`pit.py`可以直接`import`這個模組。
+
+**第50輪後：探測階段（1–5項）全部完成，下一輪需要轉向真正開始寫地基本體程式碼，不是繼續探測。** 候選（挑一項，不要一次全做）：
+6. 寫美股版 `universe.py`——用 `USStockInfo` 最新快照當現存股票基準，存活者偏差目前沒有可靠的自動化偵測方法（見上方調查結論），**現實做法可能是先接受「近似無偏差」（用現存股票+已知的少數下市股手動名單，例如已核實的TWTR/SIVB/SBNY/FRC/BBBY）當第一版，明確標註「非完美存活者偏差修正」，不要假裝自動化方法已解決**。
+7. 寫美股版 `pit.py`——用 `sec_edgar_client.py` 的 `get_filing_dates()` 對齊財報揭露日，**要把「pre-XBRL標記缺口（`end`早於~2009年中）」跟「pre-IPO歷史資料」兩類已知的不可信PIT gap納入設計**（見上方XBRL調查結論），不能假設所有`end`日期的PIT gap都乾淨。
+8. 寫美股成本模型（`validation/costs.py` 目前完全沒有美股邏輯）——需要研究美股手續費/稅務結構（跟台股證交稅不同，要查SEC Section 31 fee等美股特有成本項目）。
 
 **Holdout 狀態：✅ 未被使用**（跟主線共用同一套機制）。
 
@@ -35,4 +40,4 @@
 
 ## 下一步
 
-見上方「下一輪建議工作單位」，一次只做一項。
+見上方「下一輪建議工作單位」第6–8項（探測階段已全部完成，下一輪要開始寫地基本體程式碼），一次只做一項。
