@@ -2015,7 +2015,7 @@
   }
   // 2026-08-25 新增：設定頁顯示 App 版本／Service Worker 版本／SW 狀態，方便確認
   // 手機是不是真的更新到最新版（用手機開 App 時肉眼比對這裡的版本號即可）。
-  const APP_VERSION='2026-08-25.1';
+  const APP_VERSION='2026-08-25.2';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     if(!('serviceWorker' in navigator)){setTxt('about-sw-ver','瀏覽器不支援');setTxt('about-sw-status','—');return}
