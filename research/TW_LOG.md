@@ -334,3 +334,19 @@
 **下一步**：覆蓋率仍低於80%門檻（60.0%），下一輪若輪到TW軌且額度已恢復，應繼續跑 `backfill_universe.py --batch-size 300`。若一開始就被限流，改做候補工作單位（見`TW_MARATHON_STATE.md`第14項——主線1情境條件式檢驗，`f_foreign_streak`/`f_rel_strength`/`f_quality_roe_stability`方向反轉三假說+4個已PASS因子的分群IC，產出`REGIME_CONDITIONS.md`；這是`METHODOLOGY_FIX_TASK.md`修正2，目前跟宇宙回補並列最高優先序）。
 
 **Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫 `backfill_universe.py` 內部的 `load_dev()`/`adjusted_price_series()` 路徑，未觸碰holdout解鎖函式）。
+
+## 2026-08-26T04:17:00+08:00 — 馬拉松第83輪：`f_rel_strength_regime_switch` 策略層深挖（FAIL）
+
+**取鎖**：乾淨成功（`LOCK_ACQUIRED`），無需回填「上一輪疑似異常中止」的註記。三軌狀態檔時間戳比對：TW（2026-08-26，互動session寫的無精確時分）最舊，選TW軌。
+
+**做了什麼**：讀`TW_MARATHON_STATE.md`第14項與主線`MARATHON_STATE.md`「2026-08-26使用者裁示」段落，發現主線1（情境條件式檢驗）跟主線2（組合策略）已在同日稍早的互動session全部完成，「下一輪建議接續」第一項點名`f_rel_strength`情境切換策略「要不要真的建regime-switching backtest驗證」。檢查發現repo裡已有互動session寫好但**從未執行過**的`regime_switch_f_rel_strength.py`（未commit，讀完全文確認安全：走`load_dev()`+`holdout.assert_no_holdout_leakage()`、零新FinMind呼叫、matched random control同樣走regime開關），判定這是本輪最適合的有界工作單位——執行它、驗證輸出、誠實記錄判定，不需要自己重寫回測邏輯。背景執行（timeout規劃1500秒，實際112秒完成，遠比預期快）。
+
+**結果**：TRAIN(2015-2020)×1x/2x/3x成本全部負報酬(ann −6.82%~−9.22%)/負alpha(−4.66%~−7.11%)/負Sortino(−0.144~−0.233)，對配對式隨機控制組僅84.0~89.0百分位；VAL(2021-2024)只有1x成本微幅轉正(ann+0.50%/alpha+1.77%)，2x/3x轉負，對配對式隨機控制組93.0~94.0百分位——兩期六組全部未達其他TW候選（`f_quality_roe_stability`等）慣見的99~100百分位門檻。**判定FAIL**。
+
+**判定**：策略層完整驗證失敗，不進候選清單。`REGIME_CONDITIONS.md`分群IC找到的動量崩潰/套利限制經濟解釋在因子排序能力(IC)層級是對的，但沒有轉化成扣成本後能打贏隨機選股的可交易邊際優勢——這是TRAIN期乾淨虧損、VAL期對成本極敏感的組合，不是「差一點點沒過」的邊緣案例。完整數字、經濟解釋、與`f_quality_roe_stability`同款模式的對照，見`TW_LEADS.md`#4、`TRIALS_LEDGER.md`#40。
+
+**待辦**：主線`LEADS.md`裡`f_rel_strength_regime_switch`那一列目前仍是PENDING（該檔案因互動session其他未commit變更處於dirty狀態，本輪延續US#82/FUT#80對TW互動session變更的迴避慣例，刻意不動、不commit）——下一個處理主線`LEADS.md`commit的session（互動或馬拉松皆可）需要把該列同步更新成FAIL。本輪commit範圍嚴格限定：只有`regime_switch_f_rel_strength.py`（互動session寫的分析腳本本身，這輪驗證過安全且已產出結果，判定可以入庫）+ `TW_LEADS.md`/`TRIALS_LEDGER.md`/`TW_LOG.md`/`REPORT.md`/`MARATHON_STATE.md`（本輪自己的記錄與心跳），**不動** `DATA.md`/`LEADS.md`/`TW_MARATHON_STATE.md`/`adjust.py`/`backfill_universe.py`/`factors.py`/`generate_scores_v2.py`/`score_v2.py`/`scores.json`/`REGIME_CONDITIONS.md`/`backfill_t86.py`/`portfolio_backtest.py`/`realtime_asof.py`/`regime_conditions.py`/`twse_t86_client.py`/`yf_price_client.py`（互動session的其餘產出，涉及App正式評分/資料源架構等有風險項目，留給使用者自己審過再決定commit）。
+
+**下一步**：見`TW_LEADS.md`「下一輪建議」段落——(1)深挖`f_value_pb`；(2)拆解`f_quality_roe_stability`TRAIN期絕對報酬為負的成因；(3)若時間允許，掃`MARATHON_PROTOCOL.md`第3節還沒碰過的因子家族。宇宙回補（主線3）已在互動session達80%門檻(81.3%)，不再是TW軌本輪強制優先項，但下一輪若碰到額度受限、其他工作單位卡住時仍可回頭補「price done但finrev缺」的405檔。
+
+**Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫`load_dev()`/`assert_no_holdout_leakage()`路徑，未觸碰holdout解鎖函式）。
