@@ -1175,6 +1175,24 @@
     const html=`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(c))}<div class="px"><b>${nf(c(last))}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
     return {html,date:last.date};
   }
+  // 2026-08-25 新增：美股三大指數 + 費半，供「大盤速覽」（今日頁）跟「美股指數」（市場頁）共用。
+  // FinMind USStockPrice 對指數代碼（^DJI/^GSPC/^SOX）的涵蓋不保證跟已驗證過的 ^IXIC 一樣穩，
+  // 抓不到指數本身就換抓對應 ETF 代理（DIA/SPY/SOXX），畫面明確標「以 ETF 代理」，不會用指數
+  // 的名字冒充顯示 ETF 的數字，也不會反過來假裝抓到了指數。
+  const US_INDEXES=[
+    {id:'^DJI',label:'道瓊工業指數',fbId:'DIA',fbName:'SPDR道瓊ETF(DIA)'},
+    {id:'^GSPC',label:'S&P 500',fbId:'SPY',fbName:'SPDR標普500ETF(SPY)'},
+    {id:'^IXIC',label:'NASDAQ',fbId:'QQQ',fbName:'那斯達克100ETF(QQQ)'},
+    {id:'^SOX',label:'費城半導體指數',fbId:'SOXX',fbName:'iShares半導體ETF(SOXX)'},
+  ];
+  async function usIndexRow(id,label,fallbackId,fallbackName){
+    const primary=await idxRow(id,label,'Yahoo Finance（經 FinMind）','USStockPrice');
+    if(primary.date)return primary;
+    return await idxRow(fallbackId,label+'（以 ETF 代理）',`${fallbackName} ETF 代理，非指數本身`,'USStockPrice');
+  }
+  async function loadUsIndexes(){
+    return Promise.all(US_INDEXES.map(x=>usIndexRow(x.id,x.label,x.fbId,x.fbName)));
+  }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
     const [taiex,tpex]=await Promise.all([idxRow('TAIEX','加權指數','TWSE'),idxRow('TPEx','櫃買指數','TPEx')]);
@@ -1208,12 +1226,12 @@
   }
   async function loadHomeIndex(){
     const el=document.getElementById('home-idx-rows');if(!el)return;
-    const [taiex,fut,nasdaq]=await Promise.all([
+    const [taiex,fut,usIdx]=await Promise.all([
       idxRow('TAIEX','加權指數','TWSE'),futNearRow('TX','台指期近月'),
-      idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice'),
+      loadUsIndexes(),
     ]);
-    el.innerHTML=taiex.html+fut.html+nasdaq.html;
-    setDataTime('home-idx-datatime',taiex.date||(fut.near&&fut.near.date)||nasdaq.date);
+    el.innerHTML=taiex.html+fut.html+usIdx.map(r=>r.html).join('');
+    setDataTime('home-idx-datatime',taiex.date||(fut.near&&fut.near.date)||usIdx.find(r=>r.date)?.date);
   }
 
   const HEAT_CATS=[
@@ -1327,9 +1345,9 @@
   }
   async function loadMarketUS(){
     const el=document.getElementById('us-idx-rows');if(!el)return;
-    const nasdaq=await idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice');
-    el.innerHTML=nasdaq.html;
-    setDataTime('us-idx-datatime',nasdaq.date);
+    const usIdx=await loadUsIndexes();
+    el.innerHTML=usIdx.map(r=>r.html).join('');
+    setDataTime('us-idx-datatime',usIdx.find(r=>r.date)?.date);
   }
   const FUT_CONTRACTS=[{id:'TX',label:'台指期近月'},{id:'MTX',label:'小型台指期近月'},{id:'TE',label:'電子期近月'},{id:'TF',label:'金融期近月'}];
   async function loadMarketFUT(){
