@@ -294,3 +294,19 @@
 **沒做的**：`us_pit.py`的`filing_pit()`/`coverage_probe()`還沒接上這個新的`full_history`參數（目前還是只用`filings.recent`），這是下一輪的候選工作單位，不在這輪範圍內。美股成本模型（第8項）也沒動。這輪只接第10項一項，符合協定「一輪一件事」。
 
 這輪沒有打任何FinMind API，`data.sec.gov`請求也全部走`_cached_get`（AAPL/MSFT各多一個archive檔案的快取寫入，PLTR零額外請求因為`filings.files[]`是空的），`is_holdout_consumed()`確認為`False`。
+
+## 2026-08-25T15:34:05+08:00 — 馬拉松第65輪：`us_pit.py` 接上 `full_history`＋分期PIT reliability標記（第11項）
+
+做了`US_MARATHON_STATE.md`「下一輪建議工作單位」第11項的兩個子任務：(a) `filing_pit()`/`coverage_probe()`新增`full_history: bool = False`參數，直接透傳給`sec_edgar_client.get_filing_dates(full_history=...)`；(b) 新增`era_reliability()`函式跟`_ERA_SEGMENTS`常數表，把第62輪「歷史gap上限比近年寬」的現象變成一個按申報期間分段的標記機制，不再對全歷史套同一個門檻。
+
+**動手前先查證SEC真實規則，不是憑印象猜天數**（WebSearch，見來源：SEC.gov《Acceleration of Periodic Report Filing Dates》2002年規則、Ropes & Gray/Willkie法律事務所摘要）：2002-12-15以前，**全部**申報人（不分規模）10-K/10-Q法定期限是90天/45天；SEC Release 33-8128對「加速申報人」（accelerated filer）分三年逐步收緊：財年結束日在2002-12-15以後維持90/45天、2003-12-15以後10-K降到75天、2004-12-15以後10-K降到60天+10-Q降到40天、2005-12-15以後（最終版）10-Q再降到35天。`_ERA_SEGMENTS`就是照這個真實時間表寫的（5段：pre-2002/2002/2003/2004/2005起），不是自己拍腦袋定的門檻。
+
+**`era_reliability()`明確記錄一個刻意不解決的已知限制**：這個函式不知道某公司在某個財年**是不是**加速申報人（需要逐年公眾流通市值歷史，這個模組沒有這份資料），所以2005-12-15以後**一律**套用加速申報人的最嚴門檻（60/35天），對真正非加速申報人（仍適用90/45天）會誤判。這輪smoke test（`python us_pit.py`，`full_history=True`，AAPL/MSFT/PLTR，全部命中第62輪留下的快取，沒有打新的SEC請求）**用實測資料證實了這個限制是真的、不是理論擔心**：
+
+- **AAPL**（128筆，1994–2026）：5/128（4%）`exceeds_era_deadline`，全部集中在2005–2007年（10-K FY2005 68天、10-Q FY2006Q3 181天、10-K FY2006 90天、兩筆FY2007 10-Q 39–40天）。**這個時間點對得上一個真實的公開歷史事件**：Apple 2006年爆發股票選擇權回溯授予（options backdating）調查，導致當年多份定期報告延後申報——**這輪沒有重新查證這件事本身（只是憑既有背景知識辨認出時間點吻合），標記為「合理解釋、未在本輪獨立確認」，不是「已證實原因」**，但如果屬實，這代表`era_reliability`抓到的是真實的延遲申報事件，不是資料雜訊，強化了這個標記機制的可信度。
+- **MSFT**（131筆，1994–2026）：只有2/131（1.5%）超標，1997年兩筆（91天/48天），數字剛好卡在90/45天門檻邊緣，最可能只是「剛好壓線申報」，不是異常事件。
+- **PLTR**（24筆，2020–2026）：**14/24（58%）超標，遠高於AAPL/MSFT**——median gap=39天，卡在35天（加速申報人10-Q最終門檻）跟45天（非加速申報人）之間。**這正是上面記錄的「已知限制」的具體現場**：PLTR 2020年IPO後前幾年很可能有一段時間還不符合「加速申報人」定義（SEC對加速申報人的認定需要「已完成至少一次年報申報週期＋前一會計季末公眾流通市值達門檻」，剛IPO公司通常前一到兩年還不算加速申報人），這輪函式對PLTR全部套用最嚴的35天門檻，很可能大量誤判。**結論：`era_reliability`目前只在AAPL/MSFT這種長年掛牌的大型加速申報人身上可信，PLTR這類「近期IPO/申報人身分可能還在變動」的股票，`exceeds_era_deadline`旗標目前應視為「需要人工複核」，不能當作「確認有問題」直接使用或過濾樣本。**
+
+**沒做的**：沒有去逐年查證PLTR/其他個股實際的加速申報人身分變動時間點（那需要另外查SEC的filer category申報，這輪範圍外）；沒有把`era_reliability`接進任何下游回測邏輯（這個模組目前還是純資料層，`universe.py`/`factors.py`都還沒有美股對應版本）；美股成本模型（第8項）沒動；擴充`KNOWN_DELISTED`（第9項）沒動。
+
+這輪沒有打任何FinMind API；`data.sec.gov`零新請求（全部命中第62輪的快取，`python us_pit.py`跑完只讀本機快取檔）；`is_holdout_consumed()`確認為`False`。
