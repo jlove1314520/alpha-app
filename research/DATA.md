@@ -275,6 +275,28 @@ First Republic Bank 是加州州立特許銀行，且（**這點是本輪依一�
 
 **結論**：這輪把「第12項」從「完全開放的問題」推進到「有一條具體、有資料支撐的候選路徑，但門檻歷史表還沒查證，反推邏輯還沒寫」——是一輪探測性的地基工作，不是完整解法。這不是因子/策略統計檢定，`TRIALS_LEDGER.md` 不需要加列，跟第二～十一輪 PIT 地基工作的先例一致。
 
+### 美股 PIT 資料源調查（四續）：第12項子步驟(a)——SEC accelerated/large accelerated filer 公眾流通市值門檻歷史時間表（2026-08-25 馬拉松第74輪，WebSearch 查證，非實測）
+
+**背景**：第70輪把第12項推進到「XBRL `EntityPublicFloat` 有逐年資料，理論上可反推分級，但門檻歷史表沒查證」。這輪接手三個子步驟裡的第一個 (a)，純文件調查（WebSearch），沒有寫程式碼、沒有打任何 API（跟第4/5節「便宜關卡」精神不同，這是地基調查，不計入 `TRIALS_LEDGER.md`，跟第70輪先例一致）。
+
+**查到的門檻時間表**（依生效時間排序，每個節點都附來源）：
+
+| 時間點 | 規則 | 內容 | 來源 |
+|---|---|---|---|
+| 2002–2005（分期） | Release 33-8128 | 建立「accelerated filer」概念，entry 門檻 $75M 公眾流通市值；10-K/10-Q 申報期限分四階段緊縮（第65輪 `_ERA_SEGMENTS` 已查證：2002/2003/2004/2005-12-15，10-K 90→75→60天、10-Q 45→40→35天）。**這是期限分期，不是門檻本身變動**——$75M 這個 entry 門檻從 2002 到 2005 底都沒變。 | [federalregister.gov 2005-12-27](https://www.federalregister.gov/documents/2005/12/27/05-24479/revisions-to-accelerated-filer-definition-and-accelerated-deadlines-for-filing-periodic-reports)、第65輪既有記錄 |
+| 2005-12-21 通過，2005-12-27 生效 | Release 33-8644 | **新增「large accelerated filer」分類**：LAF entry 門檻 $700M（含）以上；AF 重新定義為 $75M–<$700M 區間；AF→NAF 的 exit 門檻設為 $50M。**LAF→AF 的 exit 門檻這輪查到的資料沒有明確標出 2005 年當時的數字**（下一列 2020 年資料提到「exit 門檻從 $500M 調到 $560M」，反推 2005–2020 期間 LAF exit 門檻應為 $500M，但這是推論不是直接查證到的原始文件數字，標記為「合理推論，未逐字確認」）。 | [SEC 33-8644 final rule PDF](https://www.sec.gov/files/rules/final/33-8644.pdf)、[federalregister.gov](https://www.federalregister.gov/documents/2005/12/27/05-24479/revisions-to-accelerated-filer-definition-and-accelerated-deadlines-for-filing-periodic-reports) |
+| 2018-06-28 | SRC 定義修正 | 「smaller reporting company」門檻調整（<$250M 公眾流通市值，或 <$100M 年營收且公眾流通市值 <$700M）。**這是 SRC 分類，跟 AF/LAF 分類是平行但獨立的規則體系**——一家公司可能同時是 SRC 又是 AF（兩套分類疊加，不是互斥）。這一節目前沒有進一步查證 SRC 跟 AF/LAF 的疊加規則細節，只確認「2018年有這次修正、日期是這個」，標記為「已知有此節點，內容細節未深挖」。 | 第一次 WebSearch 摘要（來源頁面本身未逐一點開確認） |
+| 2020-03-12 通過，約 2020-04-27 生效 | Release 34-88365 | 兩件事同時發生：**(1)** exit 門檻全面調高：AF→NAF 從 $50M→$60M，LAF→AF 從 $500M→$560M，且**新增營收測試**到 exit 門檻判定（原本只看流通市值，這次之後 exit 判定也要看營收）。**(2)** 新增一條路徑：**SRC 若年營收 <$100M 且公眾流通市值 <$700M，可直接列為 non-accelerated filer**（即使流通市值理論上落在 AF 區間內，符合這個營收條件也能豁免）。**這一條對美股軌的個股層級誤判問題（PLTR 14/24）特別關鍵**——代表光看 `EntityPublicFloat` 反推分級是不夠的，2020年之後任何反推邏輯都必須同時查該公司同年度營收才能正確判定，不能只用單一門檻表。 | [SEC 34-88365 final rule PDF](https://www.sec.gov/files/rules/final/2020/34-88365.pdf)、[govinfo.gov Federal Register](https://www.govinfo.gov/content/pkg/FR-2020-03-26/pdf/2020-05546.pdf) |
+| 2026（**提案中，尚未通過**） | Release 33-11419（2026-05-19 聲明） | 提議把 LAF entry 門檻從 $700M 調高到 $2B，且改變流通市值的衡量方式（從「第二會計季度最後一個交易日收盤價」單日取值，改成「第二會計季度最後10個交易日收盤價平均」）。**這是提案，不是生效規則**——WebSearch 結果本身沒有明確標出目前的審議狀態（comment period 是否結束、預計生效日），這輪沒有進一步查證，**任何反推邏輯都不應該套用這個提案門檻**，只能用上面已生效的 $700M/$75M 體系。 | [SEC proposed rule 33-11419 PDF](https://www.sec.gov/files/rules/proposed/2026/33-11419.pdf)、[mofo.com](https://www.mofo.com/resources/insights/260520-sec-proposes-streamlined-filer-status-categories)、[skadden.com](https://www.skadden.com/insights/publications/2026/05/sec-proposes-sweeping-overhaul) |
+
+**對子步驟(b)反推邏輯設計的直接影響（留給下一輪，這輪只記錄，不寫程式碼）**：
+1. Entry 門檻本身其實相對穩定（$75M/$700M 從 2005 底到現在都沒變，2026 提案還沒生效），**反推邏輯的主要複雜度不在「門檻數字隨時間變」，而在 2020 年新增的營收測試**——2020年之後要正確反推分級，`EntityPublicFloat` 不夠，還要同時查同一份 XBRL company facts 裡的年營收欄位（例如 `Revenues` 或 `RevenueFromContractWithCustomerExcludingAssessedTax`，第十輪已知這個 concept 名稱本身不穩定，回溯深度因公司而異）。
+2. Exit 門檻（$50M/$500M → $60M/$560M）2020年才變過，2005–2020 這 15 年是穩定的，反推邏輯可以簡化成「entry/exit 各兩段時期」，不需要逐年查。
+3. **LAF exit 門檻 2005 年當時是否確實是 $500M，這輪沒有拿到一次來源明確寫出這個數字的引用**（是從 2020 年文件的「調整前/調整後」對比句反推出來的），如果子步驟(b)真的要用到這個 2005–2020 期間的 exit 門檻，建議下一輪先直接讀 [33-8644 final rule PDF](https://www.sec.gov/files/rules/final/33-8644.pdf) 原文確認，不要只信這輪的推論。
+4. PLTR（2020-09 IPO）的申報生涯完全落在「2020年新規則之後」，這代表 PLTR 14/24 誤判很可能有相當比例是「營收測試被反推邏輯忽略」造成的，不只是「近期IPO缺乏歷史分級資料」——**這改變了子步驟(c)重測時的預期**：如果子步驟(b)只做流通市值反推、不接營收測試，PLTR 樣本可能還是測不準，不能因為門檻表查完了就預期一定會改善。
+
+**結論**：子步驟(a)完成度：門檻數字時間表已有可信來源（2005/2020/2026三個關鍵節點都有官方文件連結），但 (i) 2018年SRC修正細節未深挖、(ii) 2005年LAF exit門檻數字是推論非直接引用，這兩點留白，不宣稱「完全查證完畢」。子步驟(b)(c)留給下一輪。
+
 ---
 
 ## 2. 存活者偏差（下市／下櫃股票）

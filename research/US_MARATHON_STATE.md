@@ -2,7 +2,9 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-25T18:33:29+08:00**（馬拉松第70輪：新寫`sec_edgar_filer_category_probe.py`，探測「下一輪建議工作單位」第12項——`era_reliability()`是否有個股逐年申報人分級資料可補PLTR誤判洞。結果：`submissions`頂層`category`欄位存在但只是今天的單一快照（沒解決問題）；XBRL `EntityPublicFloat`確實有逐年資料（AAPL/MSFT/PLTR都測到），是SEC分級規則的原始輸入，理論上可搭配歷史門檻時間表反推逐年分級，但這輪只確認資料存在，門檻表未查證、反推邏輯未寫。問題從「完全開放」推進到「有候選路徑，還要WebSearch查門檻史+寫反推邏輯+拿PLTR重測」三步。細節見`DATA.md`「美股 PIT 資料源調查（三續）」小節、`US_LOG.md`本輪記錄。）
+**最後更新：2026-08-25T20:10:00+08:00**（馬拉松第74輪：第12項子步驟(a)——WebSearch查證SEC accelerated/large accelerated filer公眾流通市值門檻歷史時間表，純文件調查不寫程式碼。查到五個節點（2002–2005分期entry$75M不變、2005-12 Release33-8644新增LAF entry$700M+AF exit$50M、2018-06 SRC修正細節未深挖、2020-03 Release34-88365 exit門檻調高$50M→$60M/$500M→$560M**且新增營收測試**+SRC營收<$100M可直接NAF路徑、2026-05提案中尚未生效擬調LAF到$2B），都附官方文件連結。**關鍵發現：反推邏輯複雜度主要在2020年新增的營收測試，不在門檻數字本身變動；PLTR誤判可能有相當比例是反推邏輯沒接營收測試造成的，不只是缺歷史分級資料**。留白：2018年SRC細節未深挖、2005年LAF exit門檻$500M是推論非直接引用。細節見`DATA.md`「美股 PIT 資料源調查（四續）」小節、`US_LOG.md`本輪記錄。）
+
+（上一版記錄，保留供對照）**2026-08-25T18:33:29+08:00**（馬拉松第70輪：新寫`sec_edgar_filer_category_probe.py`，探測「下一輪建議工作單位」第12項——`era_reliability()`是否有個股逐年申報人分級資料可補PLTR誤判洞。結果：`submissions`頂層`category`欄位存在但只是今天的單一快照（沒解決問題）；XBRL `EntityPublicFloat`確實有逐年資料（AAPL/MSFT/PLTR都測到），是SEC分級規則的原始輸入，理論上可搭配歷史門檻時間表反推逐年分級，但這輪只確認資料存在，門檻表未查證、反推邏輯未寫。問題從「完全開放」推進到「有候選路徑，還要WebSearch查門檻史+寫反推邏輯+拿PLTR重測」三步。細節見`DATA.md`「美股 PIT 資料源調查（三續）」小節、`US_LOG.md`本輪記錄。）
 
 （上一版記錄，保留供對照）**2026-08-25T17:02:50+08:00**（馬拉松第68輪：新寫`validation/us_costs.py`，美股成本模型第一版，完成「下一輪建議工作單位」第8項。仿TW model結構，補上零售$0手續費預設值+SEC Section 31 fee($20.60/百萬美元)+FINRA TAF($0.000195/股)兩個強制監管費（僅賣出邊），滑價/借券費維持未校準佔位值。誠實揭露：兩個監管費率是WebSearch查證的當下快照，非多年歷史範圍，套用到跨年回測隱含「費率歷年不變」假設未被驗證。smoke test通過，細節見`US_LOG.md`本輪記錄。**
 
@@ -39,7 +41,7 @@
 9.（新增，第56輪發現）如果未來要擴大`KNOWN_DELISTED`名單，考慮系統化來源（例如交易所官方下市公告清單、或掃`efts.sec.gov`全文檢索批次抓Form 25-NSE申報實體，類似第六輪掃過2023-03～06窗口的做法），而不是繼續一檔一檔手動加——目前5檔規模對任何全市場回測都太小，跟TW軌宇宙覆蓋率不足的教訓（`MARATHON_PROTOCOL.md`5b節）是同一類問題，只是美股這邊連「有哪些名字該補」都還不知道，比TW軌的情況更早期。
 10. ~~擴充`sec_edgar_client.py`去分頁抓`filings.files[]` archive pointers~~ ✅ 第62輪（2026-08-25T14:02）已完成，新增`get_archive_filings()`＋`get_filing_dates(..., full_history=True)`。AAPL/MSFT視窗深度都成功延伸到1994年理論上限，PLTR不變（2020年IPO，無archive pointer可分頁，結構性預期）。**新發現：歷史filing gap上限比近年寬很多**（AAPL max 37→181天、MSFT max 30→91天），推測跟SEC加速申報人規定沿革有關但這輪未查證，之後設計PIT reliability門檻時不能對全歷史套同一個gap上限。**還沒做**：`us_pit.py`的`filing_pit()`/`coverage_probe()`還沒接上這個新參數（目前仍只用`filings.recent`）——這是下一輪的候選工作單位（見下方新增第11項）。完整見`US_LOG.md`本輪記錄。
 ~~11. 把`us_pit.py`的`filing_pit()`接上`sec_edgar_client.get_filing_dates(full_history=True)`，並設計分期PIT reliability標記邏輯~~ ✅ 第65輪（2026-08-25T15:34）已完成，新增`era_reliability()`＋`_ERA_SEGMENTS`（真實SEC分期時間表，WebSearch查證來源見`US_LOG.md`）。**留下的開放問題（不是這輪範圍）**：函式不知道個股逐年「加速申報人」身分，對近期IPO股（PLTR實測14/24誤判率）不可信，只在長年掛牌大型股（AAPL/MSFT）身上驗證過。
-12. ~~查SEC的filer category申報歷史是否存在可用欄位~~ 🟡 第70輪（2026-08-25T18:33）已探測，未完成。`submissions`頂層`category`只是今天快照（不可用）；XBRL `EntityPublicFloat`確實有逐年資料、是分級規則原始輸入（有潛力，但未完成）。**剩三個子步驟才能真正解決，建議分輪做**：(a) WebSearch查證SEC accelerated/large-accelerated filer公眾流通市值門檻的歷史變動時間表（門檻本身隨時間變過，這輪完全沒查證細節）；(b) 寫「給定某年float+門檻表→推論當年分級」的反推邏輯；(c) 拿PLTR已知14/24誤判樣本重測，驗證是否真的改善。**如果(a)查證後發現太複雜/不確定性太高，也可以決定放棄，改採第41輪『退而求其次』選項**——把`era_reliability`用途限縮成「只信任已驗證過的長年掛牌大型股，其他一律標記`unverified`」，這仍是合法結論。完整見`DATA.md`「美股 PIT 資料源調查（三續）」小節、`US_LOG.md`第70輪記錄。
+12. ~~查SEC的filer category申報歷史是否存在可用欄位~~ 🟡 第70輪（探測）+第74輪（子步驟a）已推進，未完成。子步驟(a)（WebSearch查門檻歷史時間表）✅ 第74輪（2026-08-25T20:10）已完成，五個節點都有官方文件連結，見`DATA.md`「美股 PIT 資料源調查（四續）」小節。**剩兩個子步驟**：(b) 寫「給定某年float+同年營收+門檻表→推論當年分級」的反推邏輯——**注意第74輪發現2020年後(Release 34-88365)有營收測試，不能只用流通市值單一維度反推，否則PLTR等2020年後IPO股很可能還是測不準**；(c) 拿PLTR已知14/24誤判樣本重測，驗證是否真的改善。**如果(b)寫完發現太複雜/不確定性太高，也可以決定放棄，改採第41輪『退而求其次』選項**——把`era_reliability`用途限縮成「只信任已驗證過的長年掛牌大型股，其他一律標記`unverified`」，這仍是合法結論。完整見`DATA.md`「美股 PIT 資料源調查（三續）」「（四續）」兩小節、`US_LOG.md`第70/74輪記錄。
 
 **Holdout 狀態：✅ 未被使用**（跟主線共用同一套機制）。
 
@@ -47,4 +49,4 @@
 
 ## 下一步
 
-見上方「下一輪建議工作單位」第9項（系統化擴充`KNOWN_DELISTED`名單），或第12項剩下的三個子步驟之一（a/b/c，建議先做(a)查門檻歷史，(b)(c)要等(a)有結果才能接），一次只做一項。
+見上方「下一輪建議工作單位」第9項（系統化擴充`KNOWN_DELISTED`名單），或第12項剩下的兩個子步驟之一（(a)已完成，接下來是(b)寫反推邏輯——記得接營收測試，或(c)要等(b)有結果才能接），一次只做一項。
