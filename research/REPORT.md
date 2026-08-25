@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 66 輪 · 2026-08-25 16:04 · FUT · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊；basis家族地基第一步，確認TAIEX現貨指數資料源 · 完成，新增`fut_probe_spot_index.py`，實測3個FinMind候選（不採信兩次互相矛盾的WebSearch/WebFetch文件摘要）：`TaiwanStockPrice`/`TAIEX`是正解（全歷史6185列乾淨無異常，列數跟期貨連續序列樣本天數一致），排除`TaiwanVariousIndicators5Seconds`（不支援多日查詢）跟`TaiwanStockTotalReturnIndex`（回傳報酬指數非現貨價）；地基探測非假說測試，未加`TRIALS_LEDGER.md`列
+
 ## 第 65 輪 · 2026-08-25 15:34 · US · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對US最舊；`us_pit.py`接上`full_history`參數＋新增分期PIT reliability標記`era_reliability()`（`US_MARATHON_STATE.md`第11項） · 完成，門檻用WebSearch查證的SEC真實加速申報人分期時間表；smoke test實測AAPL/MSFT可信（超標率4%/1.5%）但PLTR不可信（58%超標，近期IPO股身分未知的已知限制被實測證實），已記錄新開放問題（第12項），地基工作非假說測試，`TRIALS_LEDGER.md`加一列非試驗調查記錄
 
 ## 第 64 輪 · 2026-08-25 15:13 · TW · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對TW最舊；全市場宇宙回補第十九批 · 本批嘗試110檔，新完成77/新跳過13，撞限流牆提前停止（設計內行為），累積覆蓋率1439→1516/3196（45.0%→47.4%），仍低於80%門檻

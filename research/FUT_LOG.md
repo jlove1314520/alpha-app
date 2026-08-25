@@ -436,3 +436,29 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：兩個選項擇一：(a) 驗證夜盤`date`欄位的時序假設（用夜盤收盤跟隔日日盤開盤的相關性當間接證據，或查TAIFEX官方文件），這是動`continuous_contract.py`寫夜盤連續序列之前的必要前置步驟，不能跳過；(b) 若這輪時間/額度不夠驗證時序，改測期現價差basis家族地基（需要新增台股加權指數現貨資料源，是完全獨立的另一條路，不受夜盤時序問題阻擋）。兩者都是小型地基工作，接手時先評估30分鐘時間預算。
 
 ---
+
+## 馬拉松第66輪（2026-08-25T16:04:29+08:00）
+
+**選軌依據**：讀三軌state「最後更新」時間戳——TW 2026-08-25T15:13:42、US 2026-08-25T15:34:05、FUT 2026-08-25T14:32:52，FUT最久沒被碰，本輪選FUT軌。取鎖`LOCK_ACQUIRED`（乾淨，無陳舊鎖檔）。
+
+**做的事**：依第63輪「下一輪建議工作單位」第2項——不碰`continuous_contract.py`本身（夜盤連續序列建構是核心地基改動，風險較高，留給專門一輪處理），改接手完全獨立的期現價差basis家族地基第一步：確認台股加權指數（TAIEX）現貨價格資料源在FinMind免費層是否可用。
+
+**過程（誠實記錄WebSearch/WebFetch的不可靠性）**：先用WebSearch/WebFetch查FinMind官方文件兩次，兩次AI摘要給出**互相矛盾且部分明顯錯誤**的答案（一次說`TaiwanVariousIndicators5Seconds`是最佳選擇，另一次改推薦`TaiwanStockKBar`分K資料，都沒有提到後來證實可用的`TaiwanStockPrice`/`TAIEX`組合）——這印證了`MARATHON_PROTOCOL.md`第3節「查到的方法一定要重新走這個專案自己的完整驗證關卡」的規則不只適用於策略假說，也適用於基礎資料源查證本身。**沒有直接採信任何一次網路摘要，改寫`fut_probe_spot_index.py`對3個候選`(dataset, data_id)`組合各打一次小樣本（2024-01單月）API呼叫實測。**
+
+**結果**：
+- `('TaiwanVariousIndicators5Seconds', '')`：**HTTP 400**，該dataset明確拒絕多日區間查詢（"we only send one day data, so end_date parameter need be none"）——不適合日頻歷史回測，排除。
+- `('TaiwanStockTotalReturnIndex', 'TAIEX')`：可用，但回傳的是**報酬指數**（2024-01-02收盤價38475.17，遠高於同日真實TAIEX收盤17853.76），是股利再投資後的還原數字，**不是**basis計算該用的現貨標的價格，排除（但確認這個dataset本身存在，未來如果需要報酬指數可以回頭用）。
+- `('TaiwanStockPrice', 'TAIEX')`：✅ **可用，且正是需要的原始現貨指數**——回傳open/max/min/close/Trading_Volume等完整OHLC欄位，2024-01-02收盤17853.76跟真實TAIEX當日收盤一致。**這是basis家族的正確現貨資料源。**
+- 全歷史範圍（`FULL_HISTORY_START`=2000-01-01～`FULL_HISTORY_END`=2024-12-31）追加驗證：**6,185列，日期範圍2000-01-04～2024-12-31，open/max/min/close全部無NaN、無≤0異常值、無重複日期**。**6,185這個列數跟`FUT_MARATHON_STATE.md`多處記錄的期貨連續合約全樣本天數完全一致**（「累計15個FAIL...這批便宜關卡...對台指期日頻」等處反覆提到的樣本規模），暗示現貨指數跟期貨連續序列的交易日曆高度重合，未來用日期做inner join銜接時應該不會遇到大量缺口問題（但這只是列數巧合對上，還沒有實際逐日join驗證，下一輪或深挖時要做這一步再確認）。
+
+**這輪只做地基第一步（資料源確認），沒有寫basis計算邏輯本身**（近月合約選取規則、basis定義的正負號慣例、跟`continuous_contract.py`銜接的join key設計都還沒動），照`MARATHON_PROTOCOL.md`第5節「地基搭建也要遵守誠實記錄原則...每一輪只搭一部分」的精神，不要為了看起來有進度而囫圇吞棗。
+
+**經濟解釋（暫不適用）**：本輪是純資料源地基探測，沒有測任何交易假說，不適用`MARATHON_PROTOCOL.md`第1b節要求。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。全程僅3次短窗口探測API呼叫（各22列，2024-01單月）+1次全歷史API呼叫（6185列），未觸碰holdout邊界（`load_dev()`全程截斷在`VAL_END`）。
+
+**已更新**：新增`fut_probe_spot_index.py`、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落＋更新「下一輪建議工作單位」）。**沒有新增`TRIALS_LEDGER.md`列**（地基資料源探測不是假說測試，同`fut_probe_night_session.py`／`fut_probe_institutional_positions.py`先例）。
+
+**下一輪建議**：basis家族地基第二步——寫近月期貨選取邏輯（`continuous_contract.py`已有的「近月」定義可以直接參考/重用，不需要重新設計）跟TAIEX現貨的逐日join，實際算出basis序列（近月期貨收盤/結算價 − TAIEX現貨收盤），檢查join後的覆蓋率（列數巧合對上6185不代表交易日曆100%重合，需要實際驗證）、basis值的分布是否合理（正常情況台指期通常小幅貼水或升水，不應該出現離譜的異常值）。若這輪不想繼續basis家族，另一個獨立選項仍是：確認夜盤合約轉倉時點是否跟日盤同步（第63輪解決時序方向問題後留下的前置查證項），為之後動`continuous_contract.py`寫夜盤連續序列鋪路。
+
+---
