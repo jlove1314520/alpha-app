@@ -144,6 +144,28 @@
   .bars .b em{font-size:9px;color:var(--ink-3);font-style:normal}
   .bars .b .v{font-size:9px;color:var(--ink-2);font-variant-numeric:tabular-nums}
   .baseline{border-top:1px solid #383835;margin-top:0}
+  /* 2026-08-25 新增：月營收雙圖（金額+YoY雙向）+ 觸控玻璃小卡，見 PROGRESS.md */
+  .rev-chart-wrap{touch-action:none;user-select:none;-webkit-user-select:none}
+  .rev-chart-amt,.rev-chart-yoy,.rev-chart-labels{display:flex;gap:3px}
+  .rev-chart-amt{align-items:flex-end;height:92px;padding-top:4px}
+  .rc-bar{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:pointer}
+  .rc-bar i{width:100%;max-width:24px;border-radius:4px 4px 0 0;background:var(--gold-grad);display:block}
+  .rev-chart-yoy{position:relative;height:64px;border-top:1px solid transparent}
+  .rc-zero{position:absolute;left:0;right:0;top:50%;border-top:1px dashed #46443f}
+  .rev-chart-yoy .rc-bar{height:100%;position:relative;justify-content:center}
+  .rev-chart-yoy .rc-bar i{max-width:24px;position:absolute;left:50%;transform:translateX(-50%);min-height:2px}
+  .rev-chart-yoy .rc-bar i.up{bottom:50%;border-radius:3px 3px 0 0;background:var(--up)}
+  .rev-chart-yoy .rc-bar i.dn{top:50%;border-radius:0 0 3px 3px;background:var(--down)}
+  .rev-chart-labels{padding-top:3px}
+  .rev-chart-labels span{flex:1;text-align:center;font-size:9px;color:var(--ink-3)}
+  .glass-tip{position:fixed;z-index:80;min-width:168px;padding:10px 13px;border-radius:14px;
+    background:rgba(20,17,13,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 36px rgba(0,0,0,.5);
+    opacity:0;pointer-events:none;transition:opacity .15s ease;font-size:12px}
+  .glass-tip.show{opacity:1}
+  .glass-tip b.hd{display:block;font-size:13.5px;margin-bottom:6px;color:var(--accent)}
+  .glass-tip .row{display:flex;justify-content:space-between;gap:16px;padding:2px 0;color:var(--ink-2)}
+  .glass-tip .row span{color:var(--ink-3)}
   .div-bars{display:flex;align-items:center;gap:6px;height:110px}
   .div-bars .db{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:center;position:relative}
   .div-bars .db .u,.div-bars .db .dn{width:100%;max-width:22px;border-radius:4px}
@@ -617,8 +639,12 @@
     <div class="subscreen" id="sub-rev">
       <div class="card">
         <h3>月營收（近 8 月 · 億元）</h3>
-        <div class="bars" id="rev-bars"><div class="note">載入中…</div></div>
-        <div class="baseline"></div>
+        <div class="rev-chart-wrap" id="rev-chart-wrap">
+          <div class="rev-chart-amt" id="rev-chart-amt"><div class="note">載入中…</div></div>
+          <div class="rev-chart-yoy" id="rev-chart-yoy"><div class="rc-zero"></div></div>
+          <div class="rev-chart-labels" id="rev-chart-labels"></div>
+        </div>
+        <div class="note" style="margin-top:2px">上：營收金額（從0起跳）；下：年增率YoY（以0為中心，紅漲綠跌隨顯示偏好）。觸控/按住任一根柱可看細節</div>
         <div class="note" id="rev-note">來源：FinMind 月營收</div>
       </div>
       <div class="card ai-card">
@@ -1000,6 +1026,7 @@
   </div>
 
   <div class="toast" id="toast">已送出</div>
+  <div class="glass-tip" id="rev-tip"></div>
 </div>
 
 <script>
@@ -1518,6 +1545,92 @@
     if(last)setTxt('fin-note',`來源：FinMind 財報 XBRL 解析 · ${fyq(last.date)}（注意：僅為期末日資料，非公告日，可能早於實際公告時間）`);
   }
 
+  // 2026-08-25 新增：月營收雙圖（上金額/下YoY雙向）+ 觸控玻璃小卡。REV_ROWS 是目前這檔股票
+  // 圖上顯示的 8 個月資料，給 setupRevChartTouch() 的手指拖曳事件用來查目前指到哪一根柱。
+  let REV_ROWS=[];
+  async function loadRevenueChart(code,rev){
+    const amtEl=document.getElementById('rev-chart-amt'),yoyEl=document.getElementById('rev-chart-yoy'),lblEl=document.getElementById('rev-chart-labels');
+    if(!amtEl)return;
+    if(!rev.length){amtEl.innerHTML='<div class="note">查無月營收</div>';yoyEl.innerHTML='';lblEl.innerHTML='';setTxt('kn-yoy','—');REV_ROWS=[];return}
+    const px=await fm('TaiwanStockPrice',code,_d(430));
+    if(currentCode!==code)return;
+    const priceAt=(y,m)=>{
+      const inMonth=px.filter(p=>{const d=p.date.split('-');return +d[0]===y&&+d[1]===m});
+      return inMonth.length?inMonth[inMonth.length-1].close:null;
+    };
+    const bars=rev.slice(-8);
+    REV_ROWS=bars.map(r=>{
+      let py=r.revenue_year,pm=r.revenue_month-1;if(pm===0){pm=12;py--}
+      const prev=rev.find(x=>x.revenue_year===py&&x.revenue_month===pm);
+      const mom=prev&&prev.revenue?(r.revenue-prev.revenue)/prev.revenue*100:null;
+      const yr=rev.find(x=>x.revenue_year===r.revenue_year-1&&x.revenue_month===r.revenue_month);
+      const yoy=yr&&yr.revenue?(r.revenue-yr.revenue)/yr.revenue*100:null;
+      return {...r,mom,yoy,price:priceAt(r.revenue_year,r.revenue_month)};
+    });
+    const amtVals=REV_ROWS.map(r=>r.revenue/1e8);const amtMax=Math.max(...amtVals)||1;
+    amtEl.innerHTML=REV_ROWS.map((r,i)=>`<div class="rc-bar" data-i="${i}"><i style="height:${Math.max(6,r.revenue/1e8/amtMax*100).toFixed(0)}%"></i></div>`).join('');
+    const yoyVals=REV_ROWS.map(r=>r.yoy).filter(v=>v!=null);
+    const yoyAbsMax=Math.max(...yoyVals.map(Math.abs),1)||1;
+    yoyEl.innerHTML='<div class="rc-zero"></div>'+REV_ROWS.map((r,i)=>{
+      if(r.yoy==null)return `<div class="rc-bar" data-i="${i}"></div>`;
+      const h=Math.min(50,Math.abs(r.yoy)/yoyAbsMax*50);
+      return `<div class="rc-bar" data-i="${i}"><i class="${r.yoy>=0?'up':'dn'}" style="height:${h.toFixed(0)}%"></i></div>`;
+    }).join('');
+    lblEl.innerHTML=REV_ROWS.map(r=>`<span>${r.revenue_month}月</span>`).join('');
+    const rl=REV_ROWS[REV_ROWS.length-1];
+    const ye=document.getElementById('kn-yoy');ye.textContent=rl.yoy!=null?(rl.yoy>=0?'+':'')+rl.yoy.toFixed(1)+'%':'—';ye.className=rl.yoy>=0?'pos':'neg';
+    document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${rl.yoy!=null?` · YoY <b class="${rl.yoy>=0?'pos':'neg'}">${rl.yoy>=0?'+':''}${rl.yoy.toFixed(1)}%</b>`:''} · FinMind`;
+  }
+
+  function renderRevTip(r,clientX,clientY){
+    const tip=document.getElementById('rev-tip');if(!tip||!r)return;
+    const fmt=v=>v==null?'—':(v>=0?'+':'')+v.toFixed(1)+'%';
+    tip.innerHTML=`<b class="hd">${r.revenue_year}/${String(r.revenue_month).padStart(2,'0')}</b>
+      <div class="row"><span>股價</span><b>${r.price!=null?nf(r.price):'—'}</b></div>
+      <div class="row"><span>營收</span><b>${nf(Math.round(r.revenue/1e8))} 億</b></div>
+      <div class="row"><span>月增率 MoM</span><b class="${r.mom>=0?'pos':'neg'}">${fmt(r.mom)}</b></div>
+      <div class="row"><span>年增率 YoY</span><b class="${r.yoy>=0?'pos':'neg'}">${fmt(r.yoy)}</b></div>`;
+    const app=document.getElementById('app'),rect=app.getBoundingClientRect();
+    const tipW=190,tipH=124;
+    let x=clientX+14,y=clientY-tipH-14;
+    if(x+tipW>rect.right)x=clientX-tipW-14;
+    if(x<rect.left)x=rect.left+4;
+    if(y<rect.top)y=clientY+18;
+    if(y+tipH>rect.bottom)y=rect.bottom-tipH-4;
+    tip.style.left=x+'px';tip.style.top=y+'px';
+    tip.classList.add('show');
+  }
+  function hideRevTip(){const t=document.getElementById('rev-tip');if(t)t.classList.remove('show')}
+  function setupRevChartTouch(){
+    const wrap=document.getElementById('rev-chart-wrap');if(!wrap)return;
+    let active=false;
+    const pick=clientX=>{
+      const n=REV_ROWS.length;if(!n)return null;
+      const rect=wrap.getBoundingClientRect();
+      let idx=Math.floor((clientX-rect.left)/rect.width*n);
+      return REV_ROWS[Math.max(0,Math.min(n-1,idx))];
+    };
+    const onMove=e=>{
+      if(!active)return;
+      const t=e.touches?e.touches[0]:e;
+      const r=pick(t.clientX);if(r)renderRevTip(r,t.clientX,t.clientY);
+      if(e.cancelable)e.preventDefault();
+    };
+    const onStart=e=>{
+      active=true;
+      const t=e.touches?e.touches[0]:e;
+      const r=pick(t.clientX);if(r)renderRevTip(r,t.clientX,t.clientY);
+    };
+    const onEnd=()=>{active=false;hideRevTip()};
+    wrap.addEventListener('touchstart',onStart,{passive:true});
+    wrap.addEventListener('touchmove',onMove,{passive:false});
+    wrap.addEventListener('touchend',onEnd);
+    wrap.addEventListener('touchcancel',onEnd);
+    wrap.addEventListener('mousedown',onStart);
+    wrap.addEventListener('mousemove',onMove);
+    window.addEventListener('mouseup',onEnd);
+  }
+
   async function openStock(code){
     if(typeof code!=='string')code=currentCode;
     currentCode=code;
@@ -1528,7 +1641,8 @@
     document.getElementById('sub-ov').classList.add('active');
     setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
-    document.getElementById('rev-bars').innerHTML='<div class="note">載入中…</div>';
+    document.getElementById('rev-chart-amt').innerHTML='<div class="note">載入中…</div>';
+    document.getElementById('rev-chart-yoy').innerHTML='';document.getElementById('rev-chart-labels').innerHTML='';
     document.getElementById('trend-chart').innerHTML='<div class="note">載入中…</div>';
     if(us){
       const px=await fm('USStockPrice',code,_d(35));
@@ -1540,7 +1654,8 @@
         setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤`);
       }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
       ['kn-per','kn-pbr','kn-yield','kn-yoy'].forEach(id=>setTxt(id,'—'));
-      document.getElementById('rev-bars').innerHTML='<div class="note">美股尚未支援月營收（FinMind 此指標僅提供台股）</div>';
+      REV_ROWS=[];
+      document.getElementById('rev-chart-amt').innerHTML='<div class="note">美股尚未支援月營收（FinMind 此指標僅提供台股）</div>';
       document.getElementById('rev-note').textContent='美股暫無此資料';
       ['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
       setTxt('chip-note','美股暫無三大法人資料（僅適用台股）');
@@ -1553,7 +1668,7 @@
     document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
     const [px,per,rev,inst]=await Promise.all([
       fm('TaiwanStockPrice',code,_d(35)),fm('TaiwanStockPER',code,_d(16)),
-      fm('TaiwanStockMonthRevenue',code,_d(430)),instNet(code)]);
+      fm('TaiwanStockMonthRevenue',code,_d(640)),instNet(code)]);
     loadFinancials(code);
     if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
@@ -1564,15 +1679,7 @@
     }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
     const p=per.length?per[per.length-1]:{};
     setTxt('kn-per',p.PER??'—');setTxt('kn-pbr',p.PBR??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
-    if(rev.length){
-      const bars=rev.slice(-8);const vals=bars.map(r=>r.revenue/1e8);const mx=Math.max(...vals)||1;
-      document.getElementById('rev-bars').innerHTML=bars.map((r,i)=>{const isl=i===bars.length-1;
-        return `<div class="b"><span class="v">${Math.round(vals[i])}</span><i style="height:${Math.max(8,vals[i]/mx*100).toFixed(0)}%${isl?';background:var(--accent-deep);outline:2px solid var(--accent);outline-offset:-2px':''}"></i><em>${r.revenue_month}月</em></div>`}).join('');
-      const rl=rev[rev.length-1];const yr=rev.find(x=>x.revenue_year===rl.revenue_year-1&&x.revenue_month===rl.revenue_month);
-      const yoy=yr?(rl.revenue-yr.revenue)/yr.revenue*100:null;
-      const ye=document.getElementById('kn-yoy');ye.textContent=yoy!=null?(yoy>=0?'+':'')+yoy.toFixed(1)+'%':'—';ye.className=yoy>=0?'pos':'neg';
-      document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${yoy!=null?` · YoY <b class="${yoy>=0?'pos':'neg'}">${yoy>=0?'+':''}${yoy.toFixed(1)}%</b>`:''} · FinMind`;
-    }else{document.getElementById('rev-bars').innerHTML='<div class="note">查無月營收</div>';setTxt('kn-yoy','—')}
+    loadRevenueChart(code,rev);
     if(inst){
       setChip('chip-foreign',inst.foreign);setChip('chip-trust',inst.trust);setChip('chip-dealer',inst.dealer);setChip('chip-total',inst.total);
       setTxt('chip-note',`最新 ${inst.date} · FinMind`);
@@ -2013,6 +2120,7 @@
   applyColorScheme(localStorage.getItem('alpha_color_scheme')||'TW');
   renderCcyToggles();renderCcyAmounts();renderFxNote();
   fetchFx().then(()=>{renderCcyToggles();renderCcyAmounts()});
+  setupRevChartTouch();
   hydrateHome();
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>
