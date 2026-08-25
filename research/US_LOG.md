@@ -353,3 +353,20 @@
 **判定**：子步驟(a)完成，(b)(c)留給下一輪，也可以視優先序改做第9項（系統化擴充`KNOWN_DELISTED`）。這不是因子/策略統計檢定，不計入`TRIALS_LEDGER.md`，跟第70輪先例一致。
 
 `is_holdout_consumed()` 確認為 `False`（本輪完全沒有呼叫任何資料抓取函式，純WebSearch文件調查）。
+
+## 2026-08-25T22:31:58+08:00 — 馬拉松第77輪：第12項子步驟(b)(c)——filer category反推邏輯執行與PLTR重測，**結論：此路不通**（接續異常中止留下的腳本）
+
+**交接背景**：取鎖時偵測到`LOCK_STALE`（pid 131600持有鎖60.1分鐘），回收後發現repo裡有一個未提交的檔案`research/sec_edgar_filer_category_infer.py`——內容是完整的第12項子步驟(b)實作（依第74輪查證的門檻表寫Era A/B/C分類邏輯＋2020年營收測試，含完整docstring跟四項LIMITATIONS），但從未被執行過、沒有任何log記錄。推斷這是某次啟動後異常中止（可能是`STATUS_CONTROL_C_EXIT`或類似崩潰，沒有留下痕跡）的執行個體留下的成果。本輪判斷：腳本本身完整可用，直接接手跑子步驟(c)，不重寫。
+
+**做的事**：`python sec_edgar_filer_category_infer.py`（smoke test，AAPL/MSFT/PLTR三檔）。
+
+**結果**：
+- AAPL（19財年）/MSFT（17財年）全部分類`LAF`，符合預期。
+- AAPL FY2009的`EntityPublicFloat`資料點重複出現三次（數值相同）——推翻了腳本docstring裡「不需要去重」的假設（該假設先前未經實測，這輪是第一次驗證，結果不成立）。不影響分類結論，但未來若要用逐筆計數會需要先去重。
+- **PLTR六個財年（2020–2025）全部分類`LAF`，沒有一年落入AF/NAF**——float從IPO當年就是$13.3B，遠超$700M門檻，2020年營收測試的`float_val < _LAF_FLOAT`條件從未成立，測試等於沒被觸發。
+
+**關鍵判定：這推翻了第74輪的預期**。第74輪推測PLTR 14/24誤判可能源自「反推邏輯沒接營收測試」，暗示PLTR早期float應落在受營收測試影響的邊界。但本輪反推分類器（已含營收測試）判定PLTR全部財年是LAF，跟`era_reliability()`原本套用的全市場LAF假設完全一致，沒有任何分歧。**「filer category誤判」這個假說被證偽——兩種方法算出的類別相同，代表第65輪發現的PLTR 14/24 gap超標不可能是用錯申報期限造成的，真正原因未知（COVID寬限令/真實延遲/gap計算定義問題等候選，本輪未查證）。**
+
+**判定**：第12項到此視為有明確負向結論，不是懸而未決。依`MARATHON_STATE.md`第74輪已預告的退路，建議`era_reliability()`維持現狀（只信任已驗證過的長年掛牌大型股，其他標記`unverified`），不建議再投入輪次救這條路。這不是因子/策略統計檢定，不計入`TRIALS_LEDGER.md`，跟第70/74輪先例一致。完整見`DATA.md`「美股 PIT 資料源調查（五續）」小節。
+
+`is_holdout_consumed()` 確認為 `False`（本輪只呼叫`sec_edgar_client.py`既有函式+一次直接`requests`打XBRL company facts端點，皆走公開SEC API，不碰FinMind/alpha.db）。

@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 77 輪 · 2026-08-25 22:31 · US · 取鎖時偵測到`LOCK_STALE`（pid 131600持有60.1分鐘，**上一輪疑似異常中止**，未留下任何log，遺留未提交/未執行的`sec_edgar_filer_category_infer.py`）；接手完成第12項子步驟(b)(c)——filer category反推分類器實測+PLTR重測 · **第12項結案，負向結果**：AAPL/MSFT/PLTR全部財年分類`LAF`，PLTR跟`era_reliability()`既有的全市場LAF假設完全一致沒有分歧，代表第65輪PLTR 14/24 gap誤判不是filer category誤判造成的，真正原因未知；建議不再投入輪次救這條路（`DATA.md`「五續」、`US_LOG.md`本輪記錄）
+
 ## 第 76 輪 · 2026-08-25 21:05 · TW · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對TW最舊；全市場宇宙回補第二十三批 · 本批嘗試104檔，新完成76/新跳過13，撞限流牆提前停止（設計內行為），累積覆蓋率1743→1819/3196（54.5%→56.9%），仍低於80%門檻
 
 ## 第 75 輪 · 2026-08-25 20:36 · FUT · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊；`fut_basis_carry`深挖（1b），`deep_dive_fut_basis_carry.py`新增，四項檢查（train/val切分/leave-one-year-out/成本敏感度/beta對照） · **深挖FAIL**：val期percentile=46.0連隨機控制組都沒贏過，717x終值85%集中在2000-2002三年，beta=0.36非市場中性，第72輪CHEAP_PASS降級為FAIL不進候選清單（`TRIALS_LEDGER.md`#37、`FUT_LEADS.md`#17）
