@@ -462,3 +462,41 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：basis家族地基第二步——寫近月期貨選取邏輯（`continuous_contract.py`已有的「近月」定義可以直接參考/重用，不需要重新設計）跟TAIEX現貨的逐日join，實際算出basis序列（近月期貨收盤/結算價 − TAIEX現貨收盤），檢查join後的覆蓋率（列數巧合對上6185不代表交易日曆100%重合，需要實際驗證）、basis值的分布是否合理（正常情況台指期通常小幅貼水或升水，不應該出現離譜的異常值）。若這輪不想繼續basis家族，另一個獨立選項仍是：確認夜盤合約轉倉時點是否跟日盤同步（第63輪解決時序方向問題後留下的前置查證項），為之後動`continuous_contract.py`寫夜盤連續序列鋪路。
 
 ---
+
+## 2026-08-25T17:34:50+08:00 — 馬拉松第69輪期貨軌執行：basis家族地基第二步完成（近月期貨×TAIEX現貨join，全樣本100%覆蓋）+ 意外發現並修復`validation/holdout.py`的pandas 3.0.5相容性bug
+
+**選軌理由**：取鎖乾淨成功`LOCK_ACQUIRED`，無陳舊鎖檔。比對TW（16:35:41）／US（17:02:50）／FUT（16:04:29，最舊）三軌最後更新時間戳，選期貨軌。
+
+**做了什麼**：
+
+1. **basis家族地基第二步（第66輪「下一輪建議工作單位」第1項）**：新寫`fut_basis_series.py`，`build_basis_series()`函式：
+   - 近月期貨：直接重用`continuous_contract.py`的`build_continuous_series()`／`front_month_series()`既有定義（最小`contract_date`且當天有非空收盤價的合約），**用原始（未經比價法調整的）`close`欄位**，不是`adj_close`——因為basis是「當天實際成交價 vs 當天實際現貨價」的同日快照，比價法調整的用途是讓*報酬率*序列跨轉倉平滑銜接，套用在同日價差快照上反而是錯誤用法（早期區段會被乘上調整係數，扭曲了那天真實的期現價差）。
+   - 現貨：`load_dev("TaiwanStockPrice", "TAIEX", ...)`，第66輪已確認的正確資料源。
+   - 用`date`欄位inner join，計算`basis = fut_close - spot_close`跟`basis_pct = basis / spot_close`（因為TAIEX指數水位全樣本期間漲了約5倍，原始點數差不能跨期間直接比較，要看百分比）。
+2. **意外撞到並修復一個真實bug**：第一次執行時，`holdout.assert_no_holdout_leakage()`直接丟`TypeError: '>' not supported between instances of 'Timestamp' and 'str'`——不是我寫的程式碼邏輯錯，是`validation/holdout.py`本身的`cap_to_dev`／`cap_to_train`／`validation_slice`／`assert_no_holdout_leakage`／`unlock_holdout_once`五個函式全部直接拿`df[date_col]`（可能是`datetime64` dtype，例如`continuous_contract.py`的`load_position_session()`一開始就把`date`轉成`pd.to_datetime`）跟`VAL_END`／`TRAIN_END`（純Python字串）比大小，這在**pandas 3.0.5**下不再自動把字串轉型再比較（舊版pandas的`Timestamp > str`行為是自動解析字串），直接丟`TypeError`。這解釋了為什麼`factor_ic.py`等既有呼叫者都沒撞到過這個問題——它們全部是在`prepare_market_data()`等日期轉型**之前**呼叫這個檢查，餵進去的還是原始字串dtype，剛好繞開了這個地雷；`fut_basis_series.py`是第一個把**已經轉成`datetime64`的df**餵給這個檢查的呼叫者。
+   - **修法**：五個函式的日期比較全部改成先用`pd.to_datetime(df[date_col])`／`pd.Timestamp(max_date)`統一轉型，再跟`pd.Timestamp(VAL_END)`等比較——雙邊都正規化成`Timestamp`後比較，字串dtype跟`datetime64` dtype都能正確處理，行為對舊呼叫者（字串dtype）完全不變（有寫smoke test驗證，見下）。
+   - **性質判斷**：這是fail-loud（直接crash）不是fail-silent（悄悄放行holdout洩漏），所以不是「已經發生過的洩漏事件」，是「這個安全機制本身在特定合法輸入型態下會直接壞掉、擋住合法呼叫者」的可用性bug，修復範圍侷限在型態正規化這五行，沒有動任何日期邊界常數（`TRAIN_END`／`VAL_END`不變）、沒有動`unlock_holdout_once()`的鎖檔機制邏輯本身。
+   - **驗證**：跑了一次獨立smoke test（字串dtype df＋datetime64 dtype df，各測`cap_to_dev`／`validation_slice`／`assert_no_holdout_leakage`能正常通過＋確認`assert_no_holdout_leakage`在真正洩漏情境下**還是會正確丟出**`AssertionError`，不是被我改壞成永遠不報錯），全部符合預期，細節見本輪`git log`/commit diff。
+3. 執行`fut_basis_series.py`的`__main__`探測（全歷史`2000-01-01`～`2024-12-31`，零額外新API呼叫——`continuous_contract.build_continuous_series()`跟`TaiwanStockPrice`/`TAIEX`都命中既有本機parquet快取）：
+
+   | 指標 | 結果 |
+   |---|---|
+   | 近月期貨原始列數 | 6185 |
+   | basis序列列數（inner join後）| 6185 |
+   | **join覆蓋率** | **100.0000%（0筆無對應現貨列）** |
+   | basis（點數）均值/中位數 | -16.67 / -10.61 |
+   | basis_pct 均值/中位數 | -0.203% / -0.117% |
+   | 貼水（fut<spot）天數佔比 | 65.72%（4065/6185）|
+   | 升水（fut>spot）天數佔比 | 34.26%（2119/6185）|
+   | \|basis_pct\|>5% 極端值 | 2筆，都在2008-10-24／10-27（金融海嘯期間） |
+   | null/非正值 | 0 |
+
+   **判定：地基乾淨可用，第66輪「列數巧合對上」的未驗證假設本輪確認成立（100%覆蓋，不是巧合）。** basis分布合理：均值輕微貼水（-0.2%），跟台股相對高殖利率、期現理論價差公式（cost-of-carry扣掉預期股利）的方向一致，是經濟上說得通的現象，不是異常；唯二超過5%的極端值都落在2008年金融海嘯崩盤期間，屬於已知的市場極端波動情境，不是資料品質問題。**這是地基驗證，不是假說測試，沒有新增`TRIALS_LEDGER.md`列**（比照第39/60/63/66輪先例）。
+
+**沒做的事**：沒有拿basis序列去測任何策略假說（那是下一步，這輪只把序列本身算出來並驗證乾淨）；沒有動`continuous_contract.py`本身（`fut_basis_series.py`只是import它既有的公開函式，沒有修改其邏輯）；holdout邊界常數（`TRAIN_END`/`VAL_END`）本身沒有變動，只有比較邏輯的型態處理被修正。
+
+**Holdout 確認**：本輪開始前跟結束前都跑`is_holdout_consumed()`→`False`。全程零額外FinMind API呼叫（兩份輸入都命中既有全歷史parquet快取）。
+
+**下一輪建議**：basis家族第一批假說可以開始測了（例如：basis水位是否預示短期期貨報酬、basis變化動能、basis均值回歸），用`fut_cheap_gate.py`既有的便宜關卡框架加新的假說函式進去即可，不用重寫框架，記得比照TRIALS_LEDGER累積校正規則。或者繼續獨立的夜盤分支（確認夜盤轉倉時點是否跟日盤同步，第63輪解決時序方向後留下的前置查證項）。
+
+---

@@ -14,6 +14,18 @@ history an actual strategy will need) -- deliberately hardcoded rather than
 a function parameter, so changing them means editing this file directly,
 which is itself a small amount of intentional friction against casually
 redefining "holdout" mid-project.
+
+Dtype note (found FUT marathon round 69, fixed same round): under pandas
+3.0.5, comparing a `pandas.Timestamp` scalar/Series directly against a raw
+Python string (e.g. `Timestamp(...) > "2024-12-31"`) raises `TypeError`
+instead of auto-parsing the string, unlike older pandas. All date
+comparisons below now go through `pd.to_datetime(...)` / `pd.Timestamp(...)`
+on both sides before comparing, so this module works whether `date_col` is
+string-dtype (the common case -- FinMind raw responses) or already-parsed
+datetime64-dtype (e.g. continuous_contract.py parses `date` immediately on
+load). This was a real, fail-loud (crash, not silent-pass) gap, not a
+theoretical one -- it was hit for real by fut_basis_series.py, whose input
+already has parsed dates.
 """
 from __future__ import annotations
 
@@ -42,15 +54,16 @@ def cap_to_dev(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
     itself so an uncapped copy never even gets pulled or cached, which is a
     stronger guarantee than filtering after the fact.
     """
-    return df[df[date_col] <= VAL_END].copy()
+    return df[pd.to_datetime(df[date_col]) <= pd.Timestamp(VAL_END)].copy()
 
 
 def cap_to_train(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
-    return df[df[date_col] <= TRAIN_END].copy()
+    return df[pd.to_datetime(df[date_col]) <= pd.Timestamp(TRAIN_END)].copy()
 
 
 def validation_slice(df: pd.DataFrame, date_col: str = "date") -> pd.DataFrame:
-    return df[(df[date_col] > TRAIN_END) & (df[date_col] <= VAL_END)].copy()
+    dates = pd.to_datetime(df[date_col])
+    return df[(dates > pd.Timestamp(TRAIN_END)) & (dates <= pd.Timestamp(VAL_END))].copy()
 
 
 def is_holdout_consumed() -> bool:
@@ -80,7 +93,7 @@ def assert_no_holdout_leakage(df: pd.DataFrame, date_col: str = "date", context:
     if df.empty or date_col not in df.columns:
         return
     max_date = df[date_col].max()
-    if max_date > VAL_END:
+    if pd.Timestamp(max_date) > pd.Timestamp(VAL_END):
         raise AssertionError(
             f"HOLDOUT LEAKAGE{f' ({context})' if context else ''}: data contains rows up to "
             f"{max_date!r}, which is after VAL_END ({VAL_END}), but holdout has not been unlocked "
@@ -124,7 +137,8 @@ def unlock_holdout_once(df: pd.DataFrame, reason: str, approved_by: str, date_co
     _append_log(ts, reason, approved_by, blocked=False)
 
     end = datetime.now().strftime("%Y-%m-%d")
-    return df[(df[date_col] > VAL_END) & (df[date_col] <= end)].copy()
+    dates = pd.to_datetime(df[date_col])
+    return df[(dates > pd.Timestamp(VAL_END)) & (dates <= pd.Timestamp(end))].copy()
 
 
 def _append_log(ts: str, reason: str, approved_by: str, blocked: bool, prior: dict | None = None) -> None:
