@@ -48,6 +48,21 @@
 
 ---
 
+## 2026-08-25 — App 圖示換新（私人銀行風格金色四角星）+ maskable 安全區版本
+
+這批需求的第 4 項。用使用者提供的 SVG（深底圓角方形+暖金光暈+漸層四角星）重製 `icon192.png`/`icon512.png`，新增專門的 `icon512-maskable.png`（內容內縮 10% 塞進安全區，背景滿版無圓角，確保 Android 圓形裁切不會切到星星尖角），`manifest.webmanifest` 的 maskable 項目改指向新檔案（原本 any/maskable 共用同一張圖，是使用者這次要求修正的問題）。
+
+**過程中的技術細節（可能有參考價值）**：
+- 這台機器沒有 sharp/cairo 這類原生圖形函式庫（`pip install cairosvg` 裝得起來但缺 `libcairo-2.dll`，Windows 上常見的坑），改用 `resvg-py`（Rust 編譯好的 binary，pip 裝了就能跑，不需要額外系統相依），順利轉檔。
+- 使用者給的原始 SVG 漸層少了 `gradientUnits="userSpaceOnUse"`，這個屬性一漏，瀏覽器/渲染器會把漸層座標 `(98,104)-(414,420)` 當成 0–1 的分數值誤解讀，顏色方向會跑掉——已補上，實測漸層方向正確。
+- 曾經想過用瀏覽器 canvas 轉檔（Chrome 自動化工具截圖/下載都撞到限制：自動觸發下載被瀏覽器擋掉、截圖是有損 JPEG 不適合當精確圖示），繞了一圈才改用 `resvg-py` 這個更乾淨的路徑，過程記在這裡避免以後重踩。
+
+**保留 `icon_source.svg`/`icon_source_maskable.svg` 原始向量檔在 repo 裡**，之後要再調整圖示（換顏色、換圖案）直接改這兩個檔案重新跑 `resvg-py` 就好，不用重新設計。
+
+**影響到哪些檔案：** `icon192.png`、`icon512.png`（覆蓋重製）、`icon512-maskable.png`（新增）、`icon_source.svg`/`icon_source_maskable.svg`（新增）、`manifest.webmanifest`、`sw.js`（快取清單+版本號 bump 到 v1.0.3）、`index.html`（`APP_VERSION` bump）。
+
+---
+
 ## 2026-08-25 — 根治資料卡住 8/21：Service Worker 改版、iPhone 版面用純 flexbox、每卡加「資料時間」
 
 使用者回報 iPhone 16 版面還是跑掉、底部導覽沒貼底、資料卡在 8/21 不更新。這輪找到並修好兩個真的 bug（不是誤會、是實測驗證過的資料流問題），不是表面調整。
