@@ -169,6 +169,57 @@ signal family.
 This is a CHEAP gate only: in-sample, no walk-forward, no cost sensitivity,
 no economic-explanation writeup required yet (MARATHON_PROTOCOL.md 1a vs
 1b). A CHEAP_PASS here just queues the hypothesis for deep-dive.
+
+Seventh round (marathon round 54, following FUT_MARATHON_STATE.md's "下一輪
+建議工作單位" #1(a) after the 三大法人期貨部位 family closed out with no
+survivors: switch to a genuinely new mechanism family, 日內均值回歸, first
+confirming whether the daily bars even support an "intraday" decomposition
+at all -- they do: build_continuous_series() already carries
+adj_open/adj_max/adj_min/adj_close, so overnight (yesterday's adj_close to
+today's adj_open) and intraday (today's adj_open to today's adj_close) can
+be split out with zero new data source. Foundation check (done ad hoc
+before writing this function, not a separate probe script since it's a
+one-line describe() call, not a multi-step investigation like the earlier
+地基 probes): 6185 rows, only 1 NaN (the very first day's overnight_gap,
+expected -- no prior close to compare against), no non-positive
+open/close, overnight_gap std ~0.89%, intraday_ret std ~1.16%, both
+economically sane magnitudes for a daily index future.
+  - fut_intraday_gap_reversal: position[t] = -sign(overnight_gap[t]),
+    i.e. fade the overnight gap -- go short for the day session after a
+    gap up at the open, long after a gap down, flat on an exact-zero gap.
+    Traded against intraday_ret[t] (same day, NOT shifted -- the gap is
+    fully observable at today's open, before the day's own intraday
+    return realizes, so no lookahead; this is a deliberately different
+    pairing convention from every price/OI/institutional hypothesis above,
+    which all decide on day t and trade day t+1's close-to-close return).
+    Economic story this is testing: opening-auction overreaction --
+    order-imbalance-driven gaps (news, overnight index futures/ADR moves,
+    or simply an overnight order backlog clearing at the open) are
+    commonly hypothesized to overshoot the "true" new price on thin
+    opening liquidity, with intraday trading arbitraging some of that
+    overshoot back out by the close (a distinct microstructure story from
+    every trend/momentum/carry mechanism tested so far in this file).
+    RESULT: FAILED badly (percentile=8.0, i.e. 92% of random permutations
+    beat the real reversal strategy) -- this is itself informative, not
+    just a null result: it points toward the *opposite* mechanism (gap
+    continuation) being worth testing as a separate hypothesis this same
+    round, per MARATHON_PROTOCOL.md's 2-3-hypotheses-per-round allowance --
+    this is NOT "調參數硬救" the failed reversal signal (no parameter of
+    the reversal signal was retuned), it is testing a distinct a priori
+    economic story (order-flow persistence / gap continuation, the
+    standard alternative to opening-overreaction in the market
+    microstructure literature) that happens to be the sign-flip of the
+    first signal's *position*, decided BEFORE seeing this round's second
+    result, not chosen because it happened to win.
+  - fut_intraday_gap_continuation: position[t] = +sign(overnight_gap[t]),
+    i.e. trade WITH the gap for the day session -- long after a gap up,
+    short after a gap down. Economic story: overnight gaps often reflect
+    genuine new information (macro news, overnight US market moves via
+    ADRs/index futures that Taiwan's own index cannot trade against until
+    its own open) that continues to be digested/priced in through the
+    day's session, rather than being pure noise that reverts -- the
+    standard "informed overnight order flow" alternative to the
+    overreaction story above.
 """
 from __future__ import annotations
 
@@ -245,6 +296,55 @@ def _permutation_test(name: str, position: pd.Series, ret: pd.Series) -> CheapGa
         percentile=percentile,
         passes=percentile >= 90.0,
     )
+
+
+def _permutation_test_same_day(name: str, position: pd.Series, ret: pd.Series) -> CheapGateResult:
+    """Same spirit as _permutation_test, but for signals decided and traded
+    within the SAME day (no cross-day shift) -- e.g. an overnight-gap signal
+    observed at today's open, traded against today's own open-to-close
+    return. Using _permutation_test here would silently introduce a
+    spurious 1-day lag between an already-same-day-paired signal/return,
+    which is wrong for this pairing convention, not just a stylistic
+    choice -- hence a dedicated function rather than reusing the shifted
+    one."""
+    valid = position.notna() & ret.notna()
+    pos = position[valid].reset_index(drop=True)
+    r = ret[valid].reset_index(drop=True)
+
+    strat_ret = pos * r
+    real_equity = float((1.0 + strat_ret).cumprod().iloc[-1])
+
+    rng = np.random.default_rng(SHUFFLE_SEED)
+    pos_arr = pos.to_numpy()
+    r_arr = r.to_numpy()
+    random_terminals = np.empty(N_SHUFFLES)
+    for i in range(N_SHUFFLES):
+        shuffled_pos = rng.permutation(pos_arr)
+        random_terminals[i] = np.prod(1.0 + shuffled_pos * r_arr)
+
+    percentile = float((random_terminals < real_equity).mean() * 100.0)
+    return CheapGateResult(
+        name=name,
+        n_days=len(pos),
+        real_terminal_equity=real_equity,
+        random_median_equity=float(np.median(random_terminals)),
+        percentile=percentile,
+        passes=percentile >= 90.0,
+    )
+
+
+def hyp_intraday_gap_reversal(series: pd.DataFrame) -> CheapGateResult:
+    overnight_gap = series["adj_open"] / series["adj_close"].shift(1) - 1.0
+    intraday_ret = series["adj_close"] / series["adj_open"] - 1.0
+    position = -np.sign(overnight_gap)  # fade the gap: short after gap-up, long after gap-down
+    return _permutation_test_same_day("fut_intraday_gap_reversal", position, intraday_ret)
+
+
+def hyp_intraday_gap_continuation(series: pd.DataFrame) -> CheapGateResult:
+    overnight_gap = series["adj_open"] / series["adj_close"].shift(1) - 1.0
+    intraday_ret = series["adj_close"] / series["adj_open"] - 1.0
+    position = np.sign(overnight_gap)  # trade with the gap: long after gap-up, short after gap-down
+    return _permutation_test_same_day("fut_intraday_gap_continuation", position, intraday_ret)
 
 
 def hyp_trend_multi_tf(series: pd.DataFrame) -> CheapGateResult:
@@ -396,8 +496,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_inst_dealer_net_position_sign(series),
-        hyp_inst_dealer_net_position_change_5d(series, window=5),
+        hyp_intraday_gap_reversal(series),
+        hyp_intraday_gap_continuation(series),
     ]
 
     for r in results:

@@ -345,3 +345,25 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：三大法人期貨部位家族已完全結案，優先序改回`MARATHON_PROTOCOL.md`第3節剩餘期貨候選家族——(a) 日內均值回歸（需先確認日頻資料是否支援拆解「日內」報酬，可能改用隔夜vs當日拆解代替）；(b) 期現價差basis（需新增台股加權指數現貨資料源，小型地基工作）；(c) 盤別效應（需把`after_market` session納入連續合約建構，小型地基工作）。三者都需要先做地基，接手時先評估30分鐘時間預算，做不完就只做地基那一半，比照第39/48輪先例。
 
 ---
+
+## 馬拉松第54輪（2026-08-25T10:05+08:00）
+
+**選軌依據**：讀三軌state「最後更新」時間戳——TW 2026-08-25T09:03:00、US 2026-08-25T09:33:32、FUT 2026-08-25T08:32:52，FUT最久沒被碰，本輪選FUT軌。取鎖`LOCK_ACQUIRED`（乾淨，無陳舊鎖檔）。
+
+**做的事**：依`FUT_MARATHON_STATE.md`「下一輪建議工作單位」#1(a)，接手日內均值回歸家族，第一步先確認地基。
+
+**地基確認**（用python直接檢查，非獨立probe腳本——一行`describe()`就能確認，不需要多步驟investigation）：`continuous_contract.build_continuous_series()`回傳的`series`已經有`adj_open`/`adj_max`/`adj_min`/`adj_close`四欄，隔夜跳空(`overnight_gap = adj_open/adj_close.shift(1)-1`)跟日內報酬(`intraday_ret = adj_close/adj_open-1`)可以直接拆解，**不需要新資料源**（跟`FUT_MARATHON_STATE.md`原本估計「可能需要隔夜vs當日拆解代替」不同，實測發現地基已經現成，不用額外工作）。6185天樣本：`overnight_gap`只有1筆NaN（首日無前一日收盤可比較，預期內）、`intraday_ret`零NaN、無零值/負值價格異常、兩者標準差分別約0.89%/1.16%，量級合理。
+
+**測了2個假說**（同一輪，互為相反方向，`fut_cheap_gate.py`新增`_permutation_test_same_day()`——既有`_permutation_test()`是跨日shift配對，日內訊號是同日決策同日交易，需要不shift的版本，否則會錯誤地多墊一天落後）：
+1. `fut_intraday_gap_reversal`（放空gap up、做多gap down）：percentile=8.0，**FAIL**，而且方向嚴重不對——92%的隨機排列贏過真實策略（真實終值-79.5% vs 隨機中位數-45.2%）。
+2. `fut_intraday_gap_continuation`（做多gap up、放空gap down）：#1失敗後方向明顯指向「跳空會延續」而非反轉，測相反方向（換一個獨立可證偽的經濟假說，不是對#1調參數）。percentile=92.0，單測門檻90.0過，但**本批次(n=2)Bonferroni校正門檻95.0未過**（累積校正n=33門檻99.70更沒過）。真實終值+117.0% vs 隨機中位數約-19.4%，方向清楚但統計證據比先前#25/#27那種「批次過、只有累積校正沒過」的模式更弱一截——連本批次校正都沒過，誠實記錄為弱訊號，不排入深挖清單。
+
+**經濟解釋**（給#2留待未來驗證用，目前只是方向，不是結論）：隔夜跳空可能反映總經新聞/美股ADR或期指隔夜走勢等真實新資訊，台指期本身開盤前無法交易，日內session持續消化這個資訊而非反轉——市場微結構文獻裡「開盤反應不足」對「開盤過度反應」的標準替代假說。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。全程只讀本機parquet快取（`build_continuous_series()`命中既有全歷史快取），零額外API呼叫。
+
+**已更新**：`fut_cheap_gate.py`（新增docstring第七輪段落、`_permutation_test_same_day()`、`hyp_intraday_gap_reversal()`、`hyp_intraday_gap_continuation()`、`main()`換成本輪兩個假說）、`TRIALS_LEDGER.md`（#32/#33，累積31→33）、`FUT_LEADS.md`（#14/#15新增列＋「目前狀態」段落新增第54輪小節）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落＋「下一輪建議」更新）。
+
+**下一輪建議**：見`FUT_LEADS.md`「目前狀態」第54輪小節——(a)若要繼續深究`fut_intraday_gap_continuation`，先加大`N_SHUFFLES`解析度重測（percentile 92.0離批次門檻95.0不遠，值得先排除是不是解析度不足造成的模糊，同第51輪對三大法人動能假說的處理方式）；(b)或換到剩餘候選家族（期現價差basis、盤別效應），兩者都需要小型地基工作，接手時先評估時間預算。
+
+---
