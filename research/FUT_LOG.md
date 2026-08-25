@@ -563,3 +563,23 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：basis家族第三個、也是最後一個方向——均值回歸（basis偏離自身歷史均值後的回歸傾向），用`fut_cheap_gate.py`既有的`_load_basis()`框架加新假說函式即可。如果這個新假說也通過便宜關卡，**深挖時把train/val切分放第一步**，不要等全部檢查做完才驗證樣本外穩健性。次要選項：盤別效應家族地基（`after_market`轉倉時點是否跟日盤同步，第63輪解決時序方向後留下的前置查證項）。
 
 ---
+
+## 2026-08-26T02:05:00+08:00（馬拉松第80輪）期貨軌執行：basis家族第三個假說`fut_basis_mean_reversion_60d`便宜關卡（1a），CHEAP_PASS，待深挖
+
+**選軌理由**：取鎖時偵測到`LOCK_STALE`（pid 134988持有約40.1分鐘，上一輪疑似異常中止，未留下對應log）。三軌時間戳比對，FUT最舊（2026-08-25T20:36:09），依協定選FUT。
+
+**做了什麼**：依`FUT_MARATHON_STATE.md`第75輪「下一輪建議工作單位」#1，basis家族剩下唯一沒測的機制——均值回歸（basis偏離自身trailing 60日均值後的回歸傾向）。`fut_cheap_gate.py`新增`hyp_basis_mean_reversion(window=60)`，沿用既有`_load_basis()`（零額外API呼叫，命中`build_basis_series()`既有全歷史parquet快取）。position[t] = -sign(basis_pct[t] - basis_pct.rolling(60).mean().shift(1))，即今天basis比自身近60日均值更貼水則做多（賭回歸向上），更升水則放空。
+
+結果：percentile=100.0（單測門檻90.0過），真實策略終值89.2392（+8823.9%累積，n_days=6125因60日warm-up損失部分樣本），隨機控制組中位數0.3433（-65.7%）。FUT軌獨立FDR家族第21筆試驗，最嚴格單測門檻100×(1-0.10/21)=99.52，同樣過。**CHEAP_PASS，排入待深挖清單**。
+
+**誠實揭露（不能省略的警語）**：89.24x的終值放大幅度，跟#17`fut_basis_carry`（717.5x/8.79x≈82倍）同款模式——`fut_basis_carry`第75輪深挖已證實這種極端放大主要由2000-2002三個早期事件年份主導、2021-2024樣本外表現連隨機控制組都打不過。這次的89倍同樣需要用同等懷疑角度看待，**不能因為便宜關卡通過就當作候選宣傳**，深挖(1b)時第一步必須先做train/val切分（吸取第75輪教訓：train/val切分放第一步，若val不過直接記FAIL收工，不必照`fut_basis_carry`先例把四項檢查都做完才發現問題）。
+
+**沒做的事**：沒有做深挖（1b），本輪只是便宜關卡（1a），依協定一輪做完一個有界工作單位就收工。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。全程零額外FinMind API呼叫。
+
+**已更新**：`fut_cheap_gate.py`（新增`hyp_basis_mean_reversion`，`main()`改跑本輪這個假說）、`TRIALS_LEDGER.md`（#38）、`FUT_LEADS.md`（#19＋目前狀態更新）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。**發現這台機器上有一份尚未commit的互動session工作（`research/REPORT.md`/`DATA.md`/`LEADS.md`/`TW_MARATHON_STATE.md`/多個TW軌程式碼檔案的修改＋數個新檔案），描述混合資料源架構上線、宇宙覆蓋率突破80%——這份工作不屬於本輪FUT軌範圍，本輪commit刻意排除這些檔案（`git add`只限定FUT軌相關檔案+心跳相關的`REPORT.md`/`MARATHON_STATE.md`），留給使用者或下一次互動session review後自行commit，避免把未經審閱的大量異動夾帶進自動馬拉松commit。**
+
+**下一輪建議**：`fut_basis_mean_reversion_60d`深挖（1b），第一步先做train/val切分（不要照`fut_basis_carry`先例把四項都做完才發現問題）。basis家族三個機制（水位/動能/均值回歸）至此全部測完便宜關卡層級。
+
+---

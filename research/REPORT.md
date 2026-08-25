@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 80 輪 · 2026-08-26 02:05 · FUT · 取鎖偵測到LOCK_STALE（上一輪疑似異常中止）；basis家族第三個假說`fut_basis_mean_reversion_60d`便宜關卡測試 · CHEAP_PASS（percentile=100.0），但跟`fut_basis_carry`同款極端放大模式，待深挖時需train/val切分優先驗證
+
 ## 第 79 輪 · 2026-08-26 01:03 · US · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊但依裁示FUT佔比上限20%跳過，US次舊；依使用者「美股軌可以開始建因子管線」裁示，新寫`us_factors.py`第一版（僅一個純價格因子`f_us_low_vol`，跟TW版`f_low_vol`定義/窗口對齊，刻意不碰PIT）· 屬協定1c地基建設非1a假說測試。取鎖後撞FinMind 402（額度被TW軌用光），改用AAPL/MSFT既有快取檔完成smoke test零新增API呼叫，兩檔各8817列，warm-up 60列NaN符合預期，數值範圍合理。地基缺口全補齊（universe/pit/costs/factors都有第一版），下一輪候選：對`f_us_low_vol`跑第一個1a便宜關卡IC測試
 
 ## 第 78 輪 · 2026-08-26 00:36 · TW · 取鎖時偵測到`LOCK_STALE`（pid 132048持有30.1分鐘，**上一輪疑似異常中止**，未留下任何log）；三軌時間戳比對FUT最舊但依使用者裁示FUT軌佔比上限20%、選輪次時TW/US優先，改選次舊的TW；全市場宇宙回補第二十四批 · 本批嘗試137檔，新完成100/新跳過22，撞限流牆提前停止（設計內行為），累積覆蓋率1819→1919/3196（56.9%→60.0%），仍低於80%門檻
@@ -744,3 +746,27 @@ Repeat: Stop If Still Running:        Disabled
 **下一步**：(a) 情境分群IC框架（`METHODOLOGY_FIX_TASK.md`修正2）——這是`f_value_pe`跟三個方向反轉候選要走的下一關；(b) `f_value_pe`的成本敏感度測試；(c) 策略級風險調整後判定標準（修正3）；(d) 四個PASS因子組成多因子策略（修正4）。FUT軌配額調降至20%輪次、TW軌宇宙覆蓋率繼續往80%補（目前56.9%）維持既有優先序不變。
 
 **Holdout複查：** `is_holdout_consumed()` 確認為 `False`，本輪未觸碰任何holdout機制。
+
+---
+
+## 2026-08-26T00:00:00+08:00（互動 session）— 混合資料源架構上線，宇宙覆蓋率破80%，App即時算分補完
+
+**這是使用者直接指示、互動 session 完成的工作，不是排程自動觸發的馬拉松輪次，不計入心跳記錄/全局輪次計數器。**
+
+**背景**：使用者這輪開場先確認 FinMind 免費層已完全用盡（實測連 1 筆最小請求都直接 402），裁示四項優先序：(1) 解除資料源瓶頸（最高優先）；(2) 情境條件式因子檢驗；(3) 組合策略回測；(4) App 選股頁改即時算分。
+
+**做了什麼（依優先序）**：
+
+**(1) 資料源混合架構**：
+- 新增 `yf_price_client.py`：yfinance 台股價量客戶端（`{代號}.TW`/`.TWO` 兩後綴皆試），`auto_adjust=True` 直接拿還原股價，免費無明顯流量限制。輸出額外附加 FinMind 相容欄位別名（`max`/`min`/`Trading_Volume`/`Trading_money`），讓 `factors.py::prepare_factors()`／`backtest/engine.py` 不用改就能吃這個新來源。`Trading_money` 是 `close*volume` 近似值（FinMind 原始是逐筆成交值加總），已在程式碼註解揭露這個近似。
+- `adjust.py::adjusted_price_series()` 改為 yfinance 優先，原本的 FinMind 手動還原邏輯降為備援（yfinance 兩後綴都查無資料時才用，主要是較舊下市股）。
+- 新增 `twse_t86_client.py`＋`backfill_t86.py`：三大法人買賣超改用 TWSE T86 端點（`www.twse.com.tw/rwd/zh/fund/T86`）為主，這個端點**支援任意歷史日期查詢**（實測驗證），且**按日期查詢一次涵蓋全市場**（跟 FinMind「一檔股票任意區間」相反的資料形狀），對回補全市場歷史反而更有效率。`factors.py::_institutional_daily_net()` 改成「T86為主、FinMind補缺口、FinMind也失敗則誠實留空」三層降級，不讓一個資料源失敗就讓整檔股票的其他因子一起報廢。
+- **⚠️ 意外發現：TWSE T86 端點有自己的反爬蟲封鎖**，`backfill_t86.py` 第一次嘗試（0.4秒間隔）在約30次呼叫內就被封鎖（307 + 「FOR SECURITY REASONS」HTML頁，非JSON）。已加 `TWSEBlockedError` 明確偵測＋立刻停止（不重試，重試只會延長封鎖），呼叫間隔調高到2.0秒（未驗證是否足夠）。目前 T86 快取只有約36個交易日，遠遠不足以支撐三大法人相關因子的完整分析，這是誠實揭露的進行中限制，不是已解決。
+- **實測確認 TWSE openapi（`t187ap05_L`月營收／`t187ap06_L_ci`綜合損益表）跟 MOPS 官方歷史查詢頁都無法取代 FinMind 的月營收/財報歷史**：前者只回傳最新一期全市場快照、無歷史區間查詢參數（curl 直接驗證，所有列的資料年月/出表日期都相同）；後者有反爬蟲防護擋下直接呼叫（`t21sc03_114_7_0.html` 回傳「FOR SECURITY REASONS...」）。**這兩類資料的歷史回補仍100%依賴FinMind**，額度用盡時已加降級處理（`factors.py::prepare_factors()`四個因子區塊、`score_v2.py::_revenue_yoy_latest()`/`_revenue_growth_12m()`都補上try/except，額度用盡時該項留空但不讓整檔/整批失敗）。
+- `backfill_universe.py`：done 判定改成只看價格（財報/月營收變成盡力而為、不擋 done），`MAX_CONSECUTIVE_RATE_LIMITS` 15→60（新架構下舊門檻太容易被少數舊下市股連續失敗誤觸發提早停止）。**實測結果：一批560檔，7分鐘內新完成405檔（0檔需要FinMind、405檔財報/月營收額度用盡待補），宇宙覆蓋率從60.0%推進到81.3%（2597/3196），突破80%門檻。**
+
+**(2)/(3) 情境條件式檢驗＋組合策略回測**：見下一則條目（`regime_conditions.py`執行結果，這輪同時進行，另開條目記錄避免混在一起）。
+
+**(4) App選股頁即時算分**：新增 `realtime_asof.py::as_of_today()`——一個只在 `generate_scores_v2.py` 抓資料範圍內生效的 context manager，暫時把 `validation.holdout.VAL_END` 這個模組屬性拉高到今天。因為這個專案所有資料層讀取（`load_dev()`/`fetch_yf_adjusted()`/`institutional_daily_net_t86()`）都是「執行當下才 import/讀取 VAL_END」的設計（local import 或屬性存取，不是 import 時snapshot），這個機制能一次讓所有下游資料層讀到新邊界，離開 context manager 後立刻還原。**這不是繞過holdout**：`HOLDOUT_LOCK.json`／`is_holdout_consumed()`完全沒被碰，`score_v2.py`的`FACTOR_DEFS`權重維持凍結不變——這正是使用者2026-08-25裁示「凍結權重＋當前資料＝合法正式out-of-sample」字面上要求的機制。過程中額外發現並修好兩個真bug：(a) `basis`用今天日曆日期比對`d["date"]==as_of`，今天還沒收盤/沒資料時全部篩空，改用大盤序列實際最後一筆日期當基準日；(b) `score_v2.py::compute_scores_v2()`空結果時`pd.DataFrame([]).set_index()`崩潰（沿用`adjust.py`已修過的同類bug模式）。**已用5/8/15檔小樣本測試跑通全流程**（FinMind目前仍402，只驗證了管線不崩潰、能產出誠實的部分結果，還沒有跑滿300檔的正式版本並寫回`scores.json`）。
+
+**Holdout複查：** `is_holdout_consumed()` 確認為 `False`，本輪未觸碰任何holdout機制（`realtime_asof.py`的機制本身經過設計特別確認不會、也不需要碰它，見該檔案docstring）。

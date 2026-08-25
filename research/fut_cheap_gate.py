@@ -263,6 +263,37 @@ economically sane magnitudes for a daily index future.
     day's session, rather than being pure noise that reverts -- the
     standard "informed overnight order flow" alternative to the
     overreaction story above.
+
+Ninth round (marathon round 80, following FUT_MARATHON_STATE.md's "下一輪
+建議工作單位" #1 after round 75's deep-dive found fut_basis_carry FAILed
+out-of-sample: the third and last basis mechanism from
+MARATHON_PROTOCOL.md 第3節's "期現價差" entry, after level/carry (round 72,
+CHEAP_PASS but round-75 deep-dive FAIL) and change-momentum (round 72,
+FAIL) -- basis *mean reversion around its own trailing average*, a
+genuinely distinct construction from both prior basis hypotheses:
+  - fut_basis_mean_reversion_60d: position[t] = -sign(basis_pct[t] -
+    trailing_60d_mean(basis_pct)[t]), i.e. LONG when today's basis is more
+    discounted than its own trailing 60-day average (betting the basis
+    reverts back UP toward its recent norm), SHORT when today's basis is
+    more premium-heavy than its own trailing average. This differs from
+    fut_basis_carry (which trades the level relative to zero, i.e. always
+    long on any discount regardless of how "normal" that discount is) and
+    from fut_basis_change_momentum_5d (which trades the direction of the
+    most recent 5-day move, not deviation from a longer-run norm).
+    Economic story: the basis's long-run average level already reflects
+    the structural cost-of-carry driver (expected dividend yield net of
+    financing cost, which is fairly stable), so temporary deviations from
+    that structural average more plausibly reflect transient supply/
+    demand imbalances in the futures market itself (e.g. a wave of
+    hedging flow or speculative positioning temporarily pushing the
+    futures price away from its fair-value spread to spot) that should
+    unwind as that flow normalizes -- a standard mean-reversion-around-a-
+    slow-moving-equilibrium story, distinct from both the carry-level and
+    carry-momentum framings already tested. The 60-day window mirrors the
+    slowest lookback already used elsewhere in this file (the 60-day leg
+    of hyp_trend_multi_tf's momentum vote and hyp_vol_regime_trend's
+    realized-vol window), not a value searched for on this specific
+    series.
 """
 from __future__ import annotations
 
@@ -564,6 +595,18 @@ def hyp_basis_change_momentum_5d(series: pd.DataFrame, window: int = 5) -> Cheap
     )
 
 
+def hyp_basis_mean_reversion(series: pd.DataFrame, window: int = 60) -> CheapGateResult:
+    merged = _load_basis(series)
+    trailing_mean = merged["basis_pct"].rolling(window).mean().shift(1)  # excludes
+    # today's own basis_pct value -- the "recent norm" reference must be known
+    # before today's deviation from it can be read, same no-lookahead spirit as
+    # hyp_vol_regime_trend's trailing_median_vol
+    deviation = merged["basis_pct"] - trailing_mean
+    position = -np.sign(deviation)  # long when more discounted than recent norm
+    # (betting reversion back up), short when more premium-heavy than recent norm
+    return _permutation_test(f"fut_basis_mean_reversion_{window}d", position, merged["ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -572,8 +615,7 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_basis_carry(series),
-        hyp_basis_change_momentum_5d(series),
+        hyp_basis_mean_reversion(series),
     ]
 
     for r in results:
