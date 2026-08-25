@@ -320,3 +320,28 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：三大法人期貨部位家族已全覆蓋，優先序改回`MARATHON_PROTOCOL.md`第3節清單其他候選家族——(a) 若優先序判斷值得，把`N_SHUFFLES`從200加密（例如→1000+）一次重新檢驗`fut_inst_foreign_net_position_change_5d`（#8）跟`fut_inst_trust_net_position_change_5d`（#10）是否能跨過累積校正門檻（先評估30分鐘時間預算，1605天樣本+更高N_SHUFFLES執行時間未知）；(b) 日內均值回歸（需先確認日頻資料形狀是否支援拆解，可能改用隔夜vs當日拆解代替）；(c) 期現價差basis（需新增台股加權指數現貨資料源，小型地基工作）；(d) 盤別效應（需把`after_market` session納入連續合約建構，小型地基工作）。
 
 ---
+
+## 2026-08-25T08:32:52+08:00 — 馬拉松第51輪：高解析度重測外資/投信淨部位動能，三大法人期貨部位家族完全結案
+
+**取鎖**：`LOCK_ACQUIRED`，乾淨成功，無陳舊鎖檔。
+
+**選軌依據**：讀三軌state「最後更新」時間戳——TW 2026-08-25T07:05、US 2026-08-25T08:02:55、FUT 2026-08-25T06:35，FUT最久沒被碰，本輪選FUT軌。
+
+**做的事**：依`FUT_MARATHON_STATE.md`第48輪「下一輪建議」#1，把`fut_inst_foreign_net_position_change_5d`（`TRIALS_LEDGER.md`#25）跟`fut_inst_trust_net_position_change_5d`（#27）這兩個「單測/批次過但累積校正未過」的假說，用更高解析度重新檢驗是否只是原本N_SHUFFLES=200（0.5%步階）測不準。新增獨立腳本`fut_recheck_inst_momentum_highres.py`——monkey-patch匯入後的`fut_cheap_gate`模組的`N_SHUFFLES`屬性（200→2000），不改`fut_cheap_gate.py`檔案本身的預設值（保留給其他/未來假說用），呼叫既有`hyp_inst_foreign_net_position_change_5d`／`hyp_inst_trust_net_position_change_5d`函式不變。
+
+**結果**：
+- `fut_inst_foreign_net_position_change_5d`：percentile 97.0（N=200）→ **97.40**（N=2000），10倍解析度下幾乎沒變（測量雜訊範圍內）。
+- `fut_inst_trust_net_position_change_5d`：percentile 96.5（N=200）→ **97.80**（N=2000），同樣幾乎沒變。
+- 累積校正門檻（n=31，含本批2列）＝99.68，兩者都清楚低於門檻。**結論：不是原本解析度不足造成的模糊地帶，是用足夠精確度後仍然確定沒有跨過累積校正門檻。**
+
+三大法人期貨部位家族（水位×動能×3類別=6個假說，跨第39/42/45/48/51輪）至此完全結案：0 PASS、4 FAIL（外資水位/投信水位/自營商水位/自營商動能）、2「單測過但累積校正確認未過」（外資動能/投信動能，第51輪高解析度確認）。沒有任何候選進入深挖清單，之後不需要再回頭處理這個家族（除非有全新的機制假說，不是既有水位/動能兩種構造的變體）。
+
+**過程**：全程零額外API呼叫（`_load_institutional_net_position()`內部`finmind_client.load_dev()`命中第39/42/45/48輪已快取的全歷史parquet）。執行時間極短（numpy向量化排列測試，1600天樣本×2000次排列，數秒內完成），先前state檔案擔心的「可能接近30分鐘鎖檔窗口」的顧慮在實測後證實是過度保守。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`（腳本內建二次assert，執行輸出也印出確認）。全程只讀本機parquet快取，沒有任何觸及holdout的操作。
+
+**已更新**：新增`fut_recheck_inst_momentum_highres.py`、`TRIALS_LEDGER.md`（#30/#31，累積29→31）、`FUT_LEADS.md`（#13新增列＋「目前狀態」段落改寫為完全結案）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落＋「下一輪建議」改為剩餘3個候選家族＋「下一步」段落同步）。
+
+**下一輪建議**：三大法人期貨部位家族已完全結案，優先序改回`MARATHON_PROTOCOL.md`第3節剩餘期貨候選家族——(a) 日內均值回歸（需先確認日頻資料是否支援拆解「日內」報酬，可能改用隔夜vs當日拆解代替）；(b) 期現價差basis（需新增台股加權指數現貨資料源，小型地基工作）；(c) 盤別效應（需把`after_market` session納入連續合約建構，小型地基工作）。三者都需要先做地基，接手時先評估30分鐘時間預算，做不完就只做地基那一半，比照第39/48輪先例。
+
+---
