@@ -82,7 +82,12 @@
   .dot{display:inline-block;width:6px;height:6px;border-radius:50%;flex-shrink:0}
 
   /* ===== 畫面容器 ===== */
-  main{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);scrollbar-width:none}
+  /* 2026-08-25 改版：nav 從 position:fixed 改回純 flexbox 排版（見下面 nav 規則的說明），
+     main 不再需要用 --nav-h 預留「被蓋住」的空間，padding-bottom 只是一般視覺留白。
+     min-height:0 是 flex 子元素能正常內部捲動的關鍵——沒有這行，某些瀏覽器裡 main 會
+     被內容撐開、把 nav 一起往下推出畫面，而不是自己出現捲軸（這是 iPhone 上很常見的
+     flexbox 陷阱，這次順便修掉，不是新增問題）。 */
+  main{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 16px 20px;scrollbar-width:none}
   main::-webkit-scrollbar{display:none}
   .screen{display:none}
   .screen.active{display:block;animation:fade .18s ease}
@@ -245,20 +250,22 @@
   .imp{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
 
   /* ===== 底部導覽 ===== */
-  /* 2026-08-24 修正：原本 position:absolute 是相對 #app 定位，#app 若因為
-     100dvh 計算誤差或內容撐高而超出視窗，導覽列會被往下推、被內容捲動蓋掉。
-     改用 position:fixed 直接釘在「視窗」底部，不受 #app 內部狀態影響；
-     用 left:50%+transform 置中並限制 max-width 跟 #app 一致，避免桌面寬螢幕
-     上變成貼齊左右滿版的長條。z-index 明確設在一般內容之上、但低於
-     .sheet-mask(40)/.sheet(41)，讓下單抽屜/搜尋視窗打開時仍蓋住導覽列
-     （這是原本、也是預期的行為，沒有改變）。 */
+  /* 2026-08-25 改版：改回純 flexbox 排版，不再用 position:fixed。
+     舊寫法（position:fixed 釘在視窗底部）是 2026-08-24 為了解決「導覽列被內容捲動蓋掉」
+     的 bug 加的，當時有效，但 iOS Safari 的網址列會動態縮放/顯示（動態工具列），
+     position:fixed 元素搭配動態工具列在實機上有已知的跳動/位置不穩問題（桌面瀏覽器
+     模擬測試看不出來，這輪用戶回報在真機 iPhone 16 上版面跑掉，懷疑就是這個）。
+     改成 nav 是 #app（display:flex;flex-direction:column;height:100dvh）的最後一個
+     flex 子元素，自然貼齊 #app 底部，不需要 fixed／z-index／置中技巧。
+     「導覽列被內容捲動蓋掉」那個舊 bug 的真正根因其實是 body 沒有被釘住導致整頁被
+     意外捲動（見上面 body 規則的說明），已經在那邊修掉了，跟 nav 用不用 fixed 是
+     兩件事——body 繼續維持 position:fixed;inset:0，這裡拿掉 nav 的 fixed 不會讓舊
+     bug 復發。 */
   nav{
-    position:fixed;left:50%;bottom:0;transform:translateX(-50%);
-    width:100%;max-width:430px;box-sizing:border-box;min-height:var(--nav-h);
-    z-index:30;
+    flex:0 0 auto;width:100%;box-sizing:border-box;min-height:var(--nav-h);
     background:rgba(12,11,10,.92);backdrop-filter:blur(16px);
     border-top:1px solid var(--hairline);display:flex;
-    padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);
+    padding:10px 6px calc(10px + env(safe-area-inset-bottom));
     padding-left:calc(6px + env(safe-area-inset-left));padding-right:calc(6px + env(safe-area-inset-right));
   }
   nav button{flex:1;background:none;border:0;color:var(--ink-4);font-size:10px;font-family:inherit;cursor:pointer;
@@ -354,6 +361,7 @@
     <div class="card">
       <h3>大盤速覽</h3>
       <div id="home-idx-rows"><div class="note">載入中…</div></div>
+      <div class="note" id="home-idx-datatime"></div>
     </div>
 
     <div class="card">
@@ -385,6 +393,7 @@
       <div class="card">
         <h3>大盤指數</h3>
         <div id="idx-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="idx-datatime"></div>
         <div class="note">來源：FinMind TaiwanStockPrice（TAIEX / TPEx）</div>
       </div>
 
@@ -396,6 +405,7 @@
           <div class="li"><span class="sw" style="background:#383835"></span>平</div>
           <div class="li"><span class="sw" style="background:#265244"></span>跌</div>
         </div>
+        <div class="note" id="heat-datatime"></div>
         <div class="note">來源：FinMind 各類股指數（TaiwanStockPrice）</div>
       </div>
 
@@ -407,6 +417,7 @@
           <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
           <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
         </div>
+        <div class="note" id="inst-datatime"></div>
         <div class="note">來源：FinMind 三大法人買賣金額總表（TaiwanStockTotalInstitutionalInvestors）</div>
       </div>
 
@@ -422,6 +433,7 @@
       <div class="card">
         <h3>美股指數</h3>
         <div id="us-idx-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="us-idx-datatime"></div>
         <div class="note">來源：FinMind USStockPrice</div>
       </div>
       <div class="card">
@@ -435,6 +447,7 @@
       <div class="card">
         <h3>期貨報價（近月）</h3>
         <div id="fut-quote-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="fut-quote-datatime"></div>
         <div class="note">來源：FinMind TaiwanFuturesDaily</div>
       </div>
       <div class="card">
@@ -902,10 +915,14 @@
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
-        <div class="f"><span>版本</span><b>Prototype 0.1</b></div>
+        <div class="f"><span>App 版本</span><b id="about-app-ver">Prototype 0.1</b></div>
+        <div class="f"><span>Service Worker 版本</span><b id="about-sw-ver">查詢中…</b></div>
         <div class="f"><span>資料源</span><b>FinMind / SEC EDGAR</b></div>
+        <div class="f"><span>SW 狀態</span><b id="about-sw-status">查詢中…</b></div>
       </div>
       <div class="note">Alpha 台美股 AI 交易 · 原型階段，尚未串接真實下單</div>
+      <button class="btn ghost" style="width:100%;margin-top:12px" onclick="forceUpdateApp()">強制更新（清除快取＋重新整理）</button>
+      <div class="note" style="text-align:center;margin-top:6px">手機上資料一直沒更新、卡在舊日期時，點這顆</div>
     </div>
   </section>
 
@@ -1040,9 +1057,6 @@
     _cache[k]=d;
     try{localStorage.setItem('fmc_'+k,JSON.stringify({t:Date.now(),d}))}catch(e){} // 存滿了就算了，不影響功能
   }
-  function fmCacheStale(k){ // 過期也沒關係，抓失敗時拿舊資料墊著，總比顯示「查無資料」誤導人好
-    try{const raw=localStorage.getItem('fmc_'+k);return raw?JSON.parse(raw).d:null}catch(e){return null}
-  }
   // 2026-08-24 新增：手動「重新整理」按鈕用——清掉全部 FinMind 快取（記憶體＋localStorage），
   // 讓接下來的 hydrateXxx() 重新真的打一次 API，不要停在 3 分鐘內的舊快取。
   function fmClearCache(){
@@ -1056,20 +1070,30 @@
     const t=new Date();
     el.textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
   }
+  // 2026-08-25 修正：資料卡在舊日期不更新的另一半根因（另一半在 sw.js）——這裡原本
+  // fetch 失敗時會「改用舊快取」（fmCacheStale，沒有任何新鮮度限制，可能是好幾天前
+  // 存的），畫面看起來正常但其實是舊資料，使用者無從分辨。改成：失敗就是失敗，不
+  // 回退舊資料，回傳空陣列讓呼叫端顯示「查無資料」的同時，設 FM_LAST_FAILED=true，
+  // 讓呼叫端可以用 fmEmptyMsg() 分辨「這次是連線失敗」還是「這檔本來就沒資料」。
+  let FM_LAST_FAILED=false;
   async function fm(ds,id,start){
     const k=ds+id+start;
-    const cached=fmCacheRead(k);if(cached)return cached;
+    const cached=fmCacheRead(k);if(cached){FM_LAST_FAILED=false;return cached}
     try{
       const r=await fetch(`${FM}?dataset=${ds}&data_id=${id}&start_date=${start}`);
+      if(!r.ok)throw new Error('HTTP '+r.status);
       const j=await r.json();
       const d=(j&&Array.isArray(j.data))?j.data:[];
       fmCacheWrite(k,d);
+      FM_LAST_FAILED=false;
       return d;
     }catch(e){
-      console.warn('[Alpha] FinMind 抓取失敗，改用舊快取：',ds,id,e);
-      return fmCacheStale(k)||[];
+      console.warn('[Alpha] FinMind 抓取失敗（不回退舊資料，誠實回報查無資料）：',ds,id,e);
+      FM_LAST_FAILED=true;
+      return [];
     }
   }
+  function fmEmptyMsg(fallback){return FM_LAST_FAILED?'連線失敗，請重試（重新整理或稍後再試）':fallback}
   function spark(cl){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
     return `<svg class="spark" viewBox="0 0 64 26"><polyline points="${pts}" fill="none" stroke="var(--${cl[cl.length-1]>=cl[0]?'up':'down'})" stroke-width="2"/></svg>`}
@@ -1122,19 +1146,27 @@
   }
 
   // ══════ 市場頁（大盤指數 / 類股 / 三大法人 / 期貨籌碼）══════
+  // 2026-08-25 新增：統一的「資料時間」格式，跟「最後更新」（瀏覽器實際刷新畫面的時間）
+  // 是不同概念——這個是資料本身屬於哪個交易日，明確標「FinMind 盤後」提醒不是即時報價。
+  function fmtDataTime(dateStr){
+    return dateStr?`資料時間 ${dateStr.replaceAll('-','/')}（FinMind 盤後）`:'';
+  }
+  function setDataTime(elId,dateStr){const el=document.getElementById(elId);if(el)el.textContent=fmtDataTime(dateStr)}
   async function idxRow(id,label,srcLabel,ds='TaiwanStockPrice'){
     const px=await fm(ds,id,_d(16));
-    if(!px.length)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
+    if(!px.length)return {html:`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>—</b><span>${fmEmptyMsg('查無資料')}</span></div></div>`,date:null};
     const us=ds==='USStockPrice';const c=x=>us?x.Close:x.close;
     const last=px[px.length-1];const prev=px.length>1?c(px[px.length-2]):(us?last.Close:last.close-last.spread);
     const chg=us?last.Close-prev:(last.spread!=null?last.spread:last.close-prev);
     const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(c))}<div class="px"><b>${nf(c(last))}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
+    const html=`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel} · ${last.date}</span></div>${spark(px.slice(-9).map(c))}<div class="px"><b>${nf(c(last))}</b><span class="${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div></div>`;
+    return {html,date:last.date};
   }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
     const [taiex,tpex]=await Promise.all([idxRow('TAIEX','加權指數','TWSE'),idxRow('TPEx','櫃買指數','TPEx')]);
-    el.innerHTML=taiex+tpex;
+    el.innerHTML=taiex.html+tpex.html;
+    setDataTime('idx-datatime',taiex.date||tpex.date);
   }
   // 2026-08-24 改版：原本寫死只抓台指期（TX），改成可傳入合約代碼＋名稱，
   // 讓市場頁「期貨」分頁可以同時列台指期/小台/電子期/金融期，共用同一套
@@ -1142,7 +1174,7 @@
   // 算正逆價差（近月期貨－現貨）時可以直接拿 near.close 用，不用重新解析字串。
   async function futNearRow(dataId='TX',label='台指期近月'){
     const raw=await fm('TaiwanFuturesDaily',dataId,_d(10));
-    const fallback={html:`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`,near:null};
+    const fallback={html:`<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>${fmEmptyMsg('查無資料')}</span></div></div>`,near:null};
     if(!raw.length)return fallback;
     // 注意：TAIFEX 夜盤（after_market）掛在「下一個」交易日日期上，當天日盤（position）還沒開盤時
     // 資料裡最新的日期反而只有夜盤、沒有日盤——要挑「有 position 場次」的最新日期，不能直接挑最大日期
@@ -1167,7 +1199,8 @@
       idxRow('TAIEX','加權指數','TWSE'),futNearRow('TX','台指期近月'),
       idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice'),
     ]);
-    el.innerHTML=taiex+fut.html+nasdaq;
+    el.innerHTML=taiex.html+fut.html+nasdaq.html;
+    setDataTime('home-idx-datatime',taiex.date||(fut.near&&fut.near.date)||nasdaq.date);
   }
 
   const HEAT_CATS=[
@@ -1190,22 +1223,23 @@
     const el=document.getElementById('heat-grid');if(!el)return;
     const results=await Promise.all(HEAT_CATS.map(async c=>{
       const px=await fm('TaiwanStockPrice',c.id,_d(10));
-      if(!px.length)return{...c,pct:null};
+      if(!px.length)return{...c,pct:null,date:null};
       const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;
-      return{...c,pct};
+      return{...c,pct,date:last.date};
     }));
     el.innerHTML=results.map(r=>r.pct==null
       ?`<div class="tile" style="background:#383835"><b>${r.label}</b><span>—</span></div>`
       :`<div class="tile" style="background:${heatColor(r.pct)}"><b>${r.label}</b><span>${r.pct>=0?'+':''}${r.pct.toFixed(2)}%</span></div>`
     ).join('');
+    setDataTime('heat-datatime',(results.find(r=>r.date)||{}).date);
   }
 
   async function loadInstTotal(){
     const el=document.getElementById('inst-bars');if(!el)return;
     const raw=await fm('TaiwanStockTotalInstitutionalInvestors','',_d(16));
     const totals=raw.filter(r=>r.name==='total');
-    if(!totals.length){el.innerHTML='<div class="note">查無資料</div>';return}
+    if(!totals.length){el.innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>';return}
     const last5=totals.slice(-5);
     const nets=last5.map(r=>({date:r.date,net:(r.buy-r.sell)/1e8}));
     const mx=Math.max(...nets.map(n=>Math.abs(n.net)))||1;
@@ -1213,6 +1247,7 @@
     const todayNet=nets[nets.length-1].net;
     const te=document.getElementById('inst-today');
     te.textContent=(todayNet>=0?'+':'')+Math.round(todayNet)+' 億';te.style.color=todayNet>=0?'var(--up)':'var(--down)';
+    setDataTime('inst-datatime',nets[nets.length-1].date);
   }
 
   async function loadFutInst(){
@@ -1279,13 +1314,16 @@
   }
   async function loadMarketUS(){
     const el=document.getElementById('us-idx-rows');if(!el)return;
-    el.innerHTML=await idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice');
+    const nasdaq=await idxRow('^IXIC','NASDAQ','Nasdaq Composite','USStockPrice');
+    el.innerHTML=nasdaq.html;
+    setDataTime('us-idx-datatime',nasdaq.date);
   }
   const FUT_CONTRACTS=[{id:'TX',label:'台指期近月'},{id:'MTX',label:'小型台指期近月'},{id:'TE',label:'電子期近月'},{id:'TF',label:'金融期近月'}];
   async function loadMarketFUT(){
     const el=document.getElementById('fut-quote-rows');if(!el)return;
     const results=await Promise.all(FUT_CONTRACTS.map(c=>futNearRow(c.id,c.label)));
     el.innerHTML=results.map(r=>r.html).join('');
+    setDataTime('fut-quote-datatime',(results.find(r=>r.near)||{}).near&&results.find(r=>r.near).near.date);
     // 正逆價差：近月台指期收盤 － 加權指數（現貨）收盤，同一天比較
     const spotPx=await fm('TaiwanStockPrice','TAIEX',_d(10));
     const txNear=results[0].near;
@@ -1469,7 +1507,7 @@
         const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(2)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
         document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
         setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤`);
-      }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
+      }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
       ['kn-per','kn-pbr','kn-yield','kn-yoy'].forEach(id=>setTxt(id,'—'));
       document.getElementById('rev-bars').innerHTML='<div class="note">美股尚未支援月營收（FinMind 此指標僅提供台股）</div>';
       document.getElementById('rev-note').textContent='美股暫無此資料';
@@ -1779,7 +1817,7 @@
     try{
       const usCode=isUS(row.code);
       const px=await fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70));
-      if(!px.length){planEl.innerHTML='<div class="note">查無報價資料，無法計算分批進場價位。</div>';return}
+      if(!px.length){planEl.innerHTML='<div class="note">'+fmEmptyMsg('查無報價資料')+'，無法計算分批進場價位。</div>';return}
       const closes=px.map(x=>usCode?x.Close:x.close).filter(x=>x!=null);
       const last=closes[closes.length-1];
       const low20=Math.min(...closes.slice(-20));
@@ -1835,6 +1873,38 @@
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
     setTxt('set-cache-count',cacheCount+' 筆快取');
     renderColorSchemeToggle();
+    loadAboutVersions();
+  }
+  // 2026-08-25 新增：設定頁顯示 App 版本／Service Worker 版本／SW 狀態，方便確認
+  // 手機是不是真的更新到最新版（用手機開 App 時肉眼比對這裡的版本號即可）。
+  const APP_VERSION='2026-08-25.1';
+  async function loadAboutVersions(){
+    setTxt('about-app-ver',APP_VERSION);
+    if(!('serviceWorker' in navigator)){setTxt('about-sw-ver','瀏覽器不支援');setTxt('about-sw-status','—');return}
+    try{
+      const swText=await fetch('sw.js?_='+Date.now(),{cache:'no-store'}).then(r=>r.text());
+      const m=swText.match(/CACHE\s*=\s*'([^']+)'/);
+      setTxt('about-sw-ver',m?m[1]:'讀不到');
+    }catch(e){setTxt('about-sw-ver','讀取失敗')}
+    const reg=await navigator.serviceWorker.getRegistration().catch(()=>null);
+    if(!reg){setTxt('about-sw-status','尚未註冊');return}
+    setTxt('about-sw-status',reg.active?'已啟用':(reg.installing?'安裝中':(reg.waiting?'等待啟用':'未知')));
+  }
+  async function forceUpdateApp(){
+    try{
+      if('serviceWorker' in navigator){
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r=>r.unregister()));
+      }
+      if('caches' in window){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+      toast('已清除快取，重新整理中…');
+      setTimeout(()=>location.reload(true),400);
+    }catch(e){
+      toast('強制更新失敗：'+e.message);
+    }
   }
 
   // ── 漲跌顏色偏好（2026-08-24 新增）：預設台股慣例紅漲綠跌，可切成國際慣例綠漲紅跌。
