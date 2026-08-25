@@ -1143,20 +1143,49 @@
     const h=+m.hour,mi=+m.minute,s=+m.second;
     return {h,mi,s,wd,hhmmss:`${m.hour}:${m.minute}:${m.second}`};
   }
-  function mktPill(elId,tz,openMin,closeMin){
+  // 2026-08-25 新增：盤中近即時報價（GitHub Actions 排程抓，見 .github/workflows/quotes.yml）。
+  // FinMind 免費版只有盤後日線，畫面顯示「盤中」卻只能給前一日收盤價會誤導使用者。
+  let INTRADAY_TW=null,INTRADAY_US=null;
+  function intradayAgeMin(data){
+    if(!data||!data.fetched_at)return null;
+    return (Date.now()-new Date(data.fetched_at).getTime())/60000;
+  }
+  async function loadIntradayQuotes(){
+    try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok)INTRADAY_TW=await r.json()}catch(e){}
+    try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok)INTRADAY_US=await r.json()}catch(e){}
+    updateClocks();
+  }
+  // 資料超過20分鐘沒更新就不當作「盤中即時」使用了（寧可退回FinMind日線，也不要
+  // 顯示過期到失去意義的「盤中」報價卻讓人以為是新的）。
+  const INTRADAY_STALE_MIN=20;
+  function intradayQuote(code,us){
+    const src=us?INTRADAY_US:INTRADAY_TW;
+    if(!src||!src.quotes)return null;
+    const q=src.quotes[code];if(!q)return null;
+    const age=intradayAgeMin(src);
+    if(age==null||age>INTRADAY_STALE_MIN)return null;
+    return{...q,ageMin:age};
+  }
+  function mktPill(elId,tz,openMin,closeMin,intradayGetter){
     const el=document.getElementById(elId);if(!el)return;
     const z=zonedNow(tz);
     const mins=z.h*60+z.mi;
     const open=z.wd>=1&&z.wd<=5&&mins>=openMin&&mins<closeMin;
-    el.querySelector('.dot').style.background=open?'var(--good)':'var(--ink-3)';
-    el.querySelector('b').textContent=open?'盤中':'已收盤';
+    let label=open?'盤中':'已收盤',dot='var(--good)';
+    if(open){
+      const age=intradayGetter?intradayAgeMin(intradayGetter()):null;
+      if(age==null||age>INTRADAY_STALE_MIN){label='資料延遲';dot='var(--warn)'}
+    }else{dot='var(--ink-3)'}
+    el.querySelector('.dot').style.background=dot;
+    el.querySelector('b').textContent=label;
     el.querySelector('.tm').textContent=z.hhmmss.slice(0,5); // 只顯示 HH:MM，秒數只用來判斷開盤狀態、不佔版面
   }
   function updateClocks(){
-    mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30);
-    mktPill('mkt-us','America/New_York',9*60+30,16*60);
+    mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30,()=>INTRADAY_TW);
+    mktPill('mkt-us','America/New_York',9*60+30,16*60,()=>INTRADAY_US);
   }
   updateClocks();setInterval(updateClocks,1000);
+  loadIntradayQuotes();setInterval(loadIntradayQuotes,2*60*1000);
 
   // ══════ 真實資料層（FinMind，瀏覽器直抓，免後端）══════
   const FM="https://api.finmindtrade.com/api/v4/data";
@@ -1244,10 +1273,18 @@
     </svg>`;
   }
 
+  // 有近即時報價（20分鐘內）就優先用它顯示，並標「盤中 延遲約N分」；沒有就照舊用FinMind
+  // 日線，不會因為加了這個功能反而讓沒有近即時資料的股票顯示變差。
+  function intradayTag(iq){
+    if(!iq)return '';
+    const mins=Math.max(1,Math.round(iq.ageMin));
+    return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
+  }
   async function hydrateHome(){
     const el=document.getElementById('wl-list');if(!el)return;
     loadStockInfo();
     loadHomeIndex();
+    await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
     for(const code of WL){
@@ -1258,18 +1295,36 @@
       const rowEl=wrap.querySelector('.swipe-row');
       attachSwipe(rowEl,code);
       wrap.querySelector('.swipe-del').onclick=()=>confirmDelete(code);
+      // 近即時報價(iq)獨立於FinMind日線之外——FinMind當次抓取失敗時，只要有新鮮的iq
+      // 還是要能顯示價格（沒有sparkline歷史線，那個非得靠FinMind多日收盤不可），不能
+      // 因為FinMind那次呼叫失敗就整列顯示「無報價」，明明近即時報價是有的。
+      const iq=intradayQuote(code,us);
       if(us){
         const px=await fm('USStockPrice',code,_d(16));
         if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
-          const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'u':'d';
-          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.Close),chg>=0)}<div class="px"><b>$${nf(last.Close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+          const price=iq?iq.price:last.Close;
+          const chg=iq&&iq.change!=null?iq.change:last.Close-prev;
+          const pct=iq&&iq.change_pct!=null?iq.change_pct:(prev?chg/prev*100:0);
+          const cls=chg>=0?'u':'d';
+          const meta=iq?`${code} · 美股${intradayTag(iq)}`:`${code} · 美股 · ${last.date}`;
+          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${spark(px.slice(-9).map(x=>x.Close),chg>=0)}<div class="px"><b>$${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+        }else if(iq){
+          const cls=(iq.change||0)>=0?'u':'d';
+          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股${intradayTag(iq)}</span></div><div class="px"><b>$${nf(iq.price)}</b><span class="chg-tag ${cls}">${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%</span></div>`;
         }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · 無報價</span></div>`}
         continue;
       }
       const px=await fm('TaiwanStockPrice',code,_d(16));
       if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
-        const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'u':'d';
-        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · ${last.date}</span></div>${spark(px.slice(-9).map(x=>x.close),chg>=0)}<div class="px"><b>${nf(last.close)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+        const price=iq?iq.price:last.close;
+        const chg=iq&&iq.change!=null?iq.change:(last.spread!=null?last.spread:last.close-prev);
+        const pct=iq&&iq.change_pct!=null?iq.change_pct:(prev?chg/prev*100:0);
+        const cls=chg>=0?'u':'d';
+        const meta=iq?`${code}${intradayTag(iq)}`:`${code} · ${last.date}`;
+        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${spark(px.slice(-9).map(x=>x.close),chg>=0)}<div class="px"><b>${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+      }else if(iq){
+        const cls=(iq.change||0)>=0?'u':'d';
+        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${intradayTag(iq)}</span></div><div class="px"><b>${nf(iq.price)}</b><span class="chg-tag ${cls}">${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%</span></div>`;
       }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 無報價</span></div>`}
     }
     stampUpdated('home');
