@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 59 輪 · 2026-08-25 12:32 · US · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對US最舊；新寫`us_pit.py`（美股版PIT對齊，`US_MARATHON_STATE.md`第7項），用`sec_edgar_client.get_filing_dates()`真實filingDate建構`filing_pit()` · 完成，`pit_source`固定'real'；smoke test發現`filings.recent`視窗深度對長年掛牌股比理論上限淺很多（AAPL僅回溯2015-06、MSFT僅回溯2020-06），新增`coverage_probe()`診斷函式；刻意未套用pre-XBRL缺口flag（記錄為開放方法論問題，非漏做）
+
 ## 第 58 輪 · 2026-08-25 12:04 · TW · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對TW最舊；覆蓋率40.5%仍遠低於80%門檻，跑`backfill_universe.py --batch-size 300`第十七批 · 本批嘗試103檔，新完成74/新跳過14，撞限流牆提前停止（設計內行為），累積覆蓋率1295→1369/3196（40.5%→42.8%）
 
 ## 第 57 輪 · 2026-08-25 11:33 · FUT · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊；對`fut_intraday_gap_continuation`（第54輪percentile=92.0）做高解析度重測（N_SHUFFLES 200→2000，同第51輪先例） · percentile 89.60，跌破單測門檻90.0本身（不是逼近門檻，是明確下降），確認原本讀數偏高估；日內均值回歸家族第一批（反轉+順勢）完全結案，0 PASS

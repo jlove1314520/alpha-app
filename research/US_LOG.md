@@ -265,3 +265,15 @@
 **下一步（`US_MARATHON_STATE.md`第7/8項未動，留給下一輪）**：美股版`pit.py`（要處理pre-XBRL標記缺口跟pre-IPO歷史資料兩類已知不可信PIT gap）、美股成本模型。這輪只接第6項一項，符合協定「一輪一件事」。
 
 `is_holdout_consumed()`確認為`False`。
+
+## 2026-08-25T12:32:41+08:00 — 馬拉松第59輪：新寫美股版 `pit.py`（第7項）
+
+做了`US_MARATHON_STATE.md`「下一輪建議工作單位」第7項：新寫`research/us_pit.py`，用`sec_edgar_client.py`已驗證的`get_filing_dates()`（submissions API的`filingDate`/`reportDate`）建構`filing_pit(ticker, cik_override=None, forms=("10-K","10-Q"))`函式，回傳每筆申報一列的PIT對齊表（欄位：ticker/cik/form/fiscal_period_end/pit_date/gap_days/pit_source）。跟`pit.py`（TW版）介面對稱（`any_assumed()`同款函式簽名），但這裡`pit_source`固定是`'real'`——submissions API的`filingDate`是SEC自己公布的真實申報日，不是像TW財報那樣要用+45天假設。
+
+**刻意沒做的設計決策（記錄理由，不是漏做）**：第7項原始措辭要求把「pre-XBRL標記缺口」跟「pre-IPO歷史資料」兩類已知不可信PIT gap「納入設計」。查證後發現：pre-XBRL缺口這個現象是第十/十一輪在**XBRL company facts API**（每個資料點層級，因比較期重複揭露而產生的去重artifact）診斷出來的，跟本模組用的**submissions API**（每次申報一列，沒有比較期重複揭露這個機制）是不同端點、不同資料形狀——沒有實測證據顯示這個artifact會出現在submissions API上，如果不驗證就把這個flag原封不動搬過來，等於在沒有證據的情況下把一個端點的結論套用到另一個端點，違反協定第4節的誠實記錄精神。所以`XBRL_MANDATE_PHASE1_CUTOFF`常數保留（供未來真的要碰XBRL facts端點時用），但**沒有**在`filing_pit()`裡套用成reliability flag，這點在模組docstring裡完整記錄成一個開放的方法論問題，不是最終結論。Pre-IPO這一類則不需要額外flag邏輯：因為submissions API本質上只會列出真實存在的申報，公司上市前沒有申報，`filing_pit()`自然回傳空/從IPO後才開始的資料，這是結構性保證，不是靠額外程式碼判斷。
+
+**新發現、且是這輪跑smoke test才第一次量化出來的**：`filings.recent`滾動視窗的實際深度，用AAPL/MSFT/PLTR三檔（沿用前幾輪已驗證的CIK，全部命中快取無新API呼叫）實測——AAPL 45筆申報，最早`fiscal_period_end`只回溯到**2015-06-27**（不是理論上`filings.files[]`分頁能拿到的1994年）；MSFT 25筆，最早只回溯到**2020-06-30**，比AAPL的視窗還短，兩檔申報頻率相近但視窗深度差很多，原因未查（可能跟filer規模分級或申報數量門檻有關，這輪沒有進一步追查）；PLTR 24筆，最早`2020-09-30`剛好貼著其2020年9月IPO時間，符合結構性保證的預期。gap_days（filingDate−reportDate）三檔統計跟第三輪(`sec_edgar_probe.py`)/第38輪(`sec_edgar_client.py`)的既有數字一致（AAPL median 34天、MSFT median 28天、PLTR median 39天，range 25–37/24–30/34–57），驗證重構沒有改變邏輯。**這代表：任何要用`filing_pit()`做全歷史回測的假設都要先意識到，長年掛牌股（AAPL/MSFT這類）目前只能拿到近5–10年的PIT對齊財報日期，不是全歷史——這是新增的`coverage_probe()`診斷函式存在的理由，之後接美股版`universe.py`/PIT回測時要先對目標樣本跑一次`coverage_probe()`，不能假設視窗深度對所有股票一致。**
+
+**沒做的**：`filings.files[]`分頁擴充（把視窗往更早年份延伸）仍然完全沒碰；美股成本模型（第8項）沒動；`universe.py`還沒接上`us_pit.py`做實際回測。這輪只接第7項一項，符合協定「一輪一件事」。
+
+這輪沒有打任何新的FinMind API（純SEC EDGAR，且全部命中既有快取），跟`MARATHON_PROTOCOL.md`第4節「holdout只限制FinMind/alpha.db」的範圍一致，`is_holdout_consumed()`確認為`False`。
