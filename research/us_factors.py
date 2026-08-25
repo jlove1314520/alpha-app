@@ -29,6 +29,29 @@ TW's f_low_vol (factors.py's factor (i)), chosen deliberately so any later
 comparison of "does low-vol work the same way in both markets" isn't
 confounded by a definition difference. Lower realized volatility scores
 higher (the negation), same convention as the TW version.
+**Cheap-gate result: FAIL** (see US_LEADS.md #1 / TRIALS_LEDGER.md #41) --
+kept in the module (not deleted) as the honesty-log convention this project
+follows for every FAIL, same as TW's factors.py keeping failed factors.
+
+**f_us_momentum_12m** (2026-08-26, marathon round, US track's second
+factor): classic Jegadeesh-Titman "12-1" cross-sectional momentum -- trailing
+cumulative return from t-MOM_LOOKBACK to t-MOM_SKIP trading days ago,
+deliberately skipping the most recent ~1 month (MOM_SKIP) to avoid
+confounding with the well-documented short-term reversal effect, which is a
+different (opposite-signed) phenomenon from 12-month momentum. Per
+US_MARATHON_STATE.md's "下一步" (round-82 writeup: "建議擴充us_factors.py加
+第二個因子（動能/相對強度，繼續避開PIT依賴）"), this is deliberately
+price-only like f_us_low_vol -- no financial-statement / SEC EDGAR PIT
+dependency, same reasoning as f_us_low_vol's docstring above (this track's
+open PIT-reliability questions are sidestepped entirely for now). Unlike TW's
+`f_rel_strength` (return relative to TAIEX), this is *not* benchmark-relative
+-- this track has no broad-market return series computed yet (only AAPL's
+date column is used, as a calendar proxy, not a return proxy -- see
+us_factor_ic.py's own docstring on why), and a cross-sectional IC test does
+not need a benchmark anyway (it ranks stocks against each other on the same
+day, not against the market). A benchmark-relative variant is a reasonable
+follow-up once a US market-return series exists, not a blocker for this
+round's cheap gate.
 
 A factor being defined here is not a claim that it works -- same honesty
 rule as TW's factors.py: nothing here has been through a cheap gate yet.
@@ -40,6 +63,8 @@ import pandas as pd
 from finmind_client import load_dev
 
 LOW_VOL_WINDOW = 60  # trading days -- matches TW's factors.py LOW_VOL_WINDOW exactly, see docstring
+MOM_LOOKBACK = 252  # trading days ~= 12 months
+MOM_SKIP = 21  # trading days ~= 1 month, excluded to avoid short-term-reversal confound
 
 
 def us_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
@@ -74,10 +99,16 @@ def prepare_us_factors(price_df: pd.DataFrame) -> pd.DataFrame:
     daily_ret = d["adj_close"].pct_change()
     d["f_us_low_vol"] = -daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).std()
 
+    # f_us_momentum_12m -- 12-1 動能：t-252 到 t-21 交易日累積報酬，排除近1個月避開短期反轉混淆。
+    # 純價格資料，天然 point-in-time，同 f_us_low_vol 精神。
+    px_lag_skip = d["adj_close"].shift(MOM_SKIP)
+    px_lag_lookback = d["adj_close"].shift(MOM_LOOKBACK)
+    d["f_us_momentum_12m"] = px_lag_skip / px_lag_lookback - 1.0
+
     return d
 
 
-US_FACTOR_COLUMNS = ["f_us_low_vol"]
+US_FACTOR_COLUMNS = ["f_us_low_vol", "f_us_momentum_12m"]
 
 
 if __name__ == "__main__":
@@ -111,4 +142,13 @@ if __name__ == "__main__":
         print(f"  f_us_low_vol: {n_nan} NaN (expect exactly {expected_nan} warm-up rows), "
               f"{len(valid)} valid, range [{valid.min():.5f}, {valid.max():.5f}]" if len(valid) else "  NO valid rows")
         assert n_nan == expected_nan, f"{sid}: expected {expected_nan} NaN warm-up rows, got {n_nan}"
-    print("\nOK: f_us_low_vol computes end-to-end on both smoke-test tickers with the expected warm-up shape.")
+
+        # f_us_momentum_12m warm-up: shift(MOM_LOOKBACK) is the binding constraint
+        # (MOM_LOOKBACK > MOM_SKIP), so exactly MOM_LOOKBACK leading NaN rows expected.
+        n_nan_mom = d["f_us_momentum_12m"].isna().sum()
+        valid_mom = d["f_us_momentum_12m"].dropna()
+        expected_nan_mom = MOM_LOOKBACK
+        print(f"  f_us_momentum_12m: {n_nan_mom} NaN (expect exactly {expected_nan_mom} warm-up rows), "
+              f"{len(valid_mom)} valid, range [{valid_mom.min():.5f}, {valid_mom.max():.5f}]" if len(valid_mom) else "  NO valid rows")
+        assert n_nan_mom == expected_nan_mom, f"{sid}: expected {expected_nan_mom} NaN warm-up rows, got {n_nan_mom}"
+    print("\nOK: f_us_low_vol and f_us_momentum_12m both compute end-to-end on both smoke-test tickers with the expected warm-up shape.")

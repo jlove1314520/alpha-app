@@ -427,4 +427,22 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 
 **方法論觀察（給之後的無人值守輪次參考）**：這是馬拉松第一次出現「上一輪陳舊鎖檔裡其實藏著完整、正確、只是沒寫完收工程序的工作」，跟先前幾次陳舊鎖檔（pid 136244、136244之前那次）不同——先前幾次都是真的什麼都沒留下。**教訓：陳舊鎖檔不代表上一輪一定一事無成，接手前先看`git status`有沒有看起來完整的孤兒變更，值得的話核實後收下、比重做更有效率，但核實步驟（讀程式碼確認holdout合規、核對數字前後一致）不能省略——不能因為「看起來已經做完」就照單全收不查證。**
 
+## 2026-08-26T07:33:00+08:00 — 馬拉松第89輪：接手孤兒工作（第二次）——US軌`f_us_momentum_12m`（#2）1a便宜關卡結果補記+收工，**FAIL，未進深挖**
+
+**取鎖與選軌背景**：取鎖時偵測到`LOCK_STALE`（pid 138560持有鎖30.0分鐘後被回收，超過25分鐘陳舊門檻）。`git status`檢查發現一批看起來已完成的US軌工作：`us_factors.py`（新增`f_us_momentum_12m`因子定義+smoke test）、`us_factor_ic.py`（改成只測尚無判定的新因子，跳過已有終局判定的`f_us_low_vol`）、`US_LEADS.md`（#2新增列，完整結果）、`TRIALS_LEDGER.md`（已加#44列）、`US_MARATHON_STATE.md`（已更新到「馬拉松第88輪」的敘述）。但`US_LOG.md`（本檔案）跟`REPORT.md`心跳都還停在第87輪——判定模式跟第84輪（pid 141036那次）完全一致：**上一輪（pid 138560）真正做完1a便宜關卡測試、寫完程式碼跟三份紀錄檔案後，在寫`US_LOG.md`/心跳/`MARATHON_STATE.md`計數器/commit的路上被Windows工作排程器30分鐘週期強制中止**，不是空鎖。
+
+**這輪做的事：核實孤兒工作，不重做分析**（同第84輪先例的核實步驟）：
+1. 讀`us_factors.py`跟`us_factor_ic.py`的完整diff，確認：(a) `f_us_momentum_12m`是純價格因子（`adj_close`的t-252到t-21累積報酬），零PIT依賴，跟`f_us_low_vol`同精神；(b) `us_factor_ic.py`資料存取仍只透過`load_dev`（`from finmind_client import load_dev`），全文搜尋確認沒有`load_full_history`/`unlock_holdout_once`/下單相關字樣；(c) 新增的`ALREADY_VERDICTED`跳過邏輯合理（`f_us_low_vol`已有終局FAIL判定，重測會浪費API額度且錯誤地把單因子批次跟雙因子批次的bonferroni_n混淆）。
+2. 跑`is_holdout_consumed()`確認仍是`False`（見下方）。
+3. 核對`US_LEADS.md`#2跟`TRIALS_LEDGER.md`#44的數字是否一致——**一致**：TRAIN(2015-2020) mean_ic=−0.0129 IR=−0.042（n=76期）、VAL(2021-2024) mean_ic=+0.0613 IR=+0.205 hit_rate=0.57（n=49期）、null percentile=94.6，同一批27/40可用樣本（同種子），跟`US_MARATHON_STATE.md`敘述完全對得上。
+4. 補齊這筆`US_LOG.md`記錄（本筆）——`US_MARATHON_STATE.md`本身孤兒工作已經寫好，不需要再改。
+
+**結果摘要（數字取自孤兒工作留下的`US_LEADS.md`#2／`TRIALS_LEDGER.md`#44，未重新執行驗證）**：`f_us_momentum_12m`（12-1動能，Jegadeesh-Titman經典定義，t-252到t-21交易日累積報酬，跳過近1個月避開短期反轉混淆）用同一批40檔隨機樣本（27檔可用）跑`evaluate_factor()`：TRAIN(2015-2020) mean_ic=−0.0129 IR=−0.042（n=76期，為負）；VAL(2021-2024) mean_ic=+0.0613 IR=+0.205 hit_rate=0.57（n=49期，為正）；對隨機打散null percentile=94.6（單測門檻90.0，此關本身有過）。**但`evaluate_factor()`的same_sign檢查（train/val方向一致性）未過**——train為負、val為正，依協定同號要求優先於percentile門檻，直接判**FAIL，不進深挖**。
+
+**判定**：`f_us_momentum_12m` **FAIL**（便宜關卡本身沒過，即使null percentile單獨看有過線）。US軌因子驗證累積2筆，皆FAIL（#1`f_us_low_vol`深挖FAIL、#2`f_us_momentum_12m`便宜關卡FAIL），至今尚無任何PASS/EXPERIMENTAL候選。US軌FDR家族m=2（兩者皆FAIL，累積校正暫不影響）。經濟解釋（孤兒工作已寫好，本輪核實無誤）：12-1動能是文獻中最穩健的美股異常之一，這裡train/val反轉較可能是27檔樣本太小＋未做regime控制所致，不是動能本身無效的證據，值得標記「情境依賴候選」保留追蹤但不升格。
+
+**取鎖模式再次確認**：這是馬拉松第二次出現「上一輪陳舊鎖檔裡藏著完整正確、只差收工程序的工作」（第一次是第84輪核實pid 141036那次），跟第77輪（FUT，補心跳）、第87輪（FUT，補心跳）的「只缺心跳一步」模式略有不同——這次連`US_LOG.md`本身的細節記錄都缺，缺漏範圍比純心跳缺漏更大，但核實方法完全沿用第84輪建立的先例（讀程式碼查holdout合規→核對數字→補記錄），沒有另外發明新流程。
+
+`is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
+
 `is_holdout_consumed()` 確認為 `False`（`deep_dive_f_us_low_vol.py`全程走`load_dev()`，本輪沒有呼叫任何FinMind API，零新增網路請求）。

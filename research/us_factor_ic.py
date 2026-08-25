@@ -1,9 +1,14 @@
-"""US-track cheap-gate IC test for f_us_low_vol -- first real 1a test on this track.
+"""US-track cheap-gate IC test -- f_us_low_vol (round 82, FAIL on deep-dive,
+see US_LEADS.md #1) and f_us_momentum_12m (2026-08-26 marathon round, second
+factor, this round's 1a test).
 
 **Why this exists:** per US_MARATHON_STATE.md's "下一步" (round 79's writeup),
 `us_factors.py` had a first factor (`f_us_low_vol`) but no IC-test pipeline to
-run it against -- round 79 was infra only (protocol section 1c), this round
-is the first actual protocol-1a cheap gate for the US track.
+run it against -- round 79 was infra only (protocol section 1c), round 82 was
+the first actual protocol-1a cheap gate for the US track. This module is
+generic over `US_FACTOR_COLUMNS` (loops the whole list, see `main()`), so
+adding `f_us_momentum_12m` to that list in `us_factors.py` and rerunning this
+script unchanged is this round's 1a test -- no fork needed.
 
 **Reuses `evaluate_factor()`/`build_snapshots()` from `factor_ic.py` as-is**
 (imported, not copy-pasted) -- both functions are already generic over any
@@ -155,12 +160,22 @@ def main():
     snapshots = build_snapshots(calendar, SNAPSHOT_START, holdout.VAL_END)
     print(f"{len(snapshots)} non-overlapping 20-trading-day snapshots, {SNAPSHOT_START}..{holdout.VAL_END}")
 
+    # 2026-08-26 round: only test factors that don't already have a recorded verdict.
+    # f_us_low_vol already went through cheap gate (round 82, CHEAP_PASS) + deep-dive
+    # (FAIL, see US_LEADS.md #1 / TRIALS_LEDGER.md #41) -- rerunning its cheap gate here
+    # would burn API quota re-fetching prices with zero new information (its verdict is
+    # already final), and would incorrectly conflate this round's single-new-factor
+    # bonferroni_n=1 batch with a 2-factor batch it isn't. Only f_us_momentum_12m is new.
+    ALREADY_VERDICTED = {"f_us_low_vol"}
+    columns_to_test = [c for c in US_FACTOR_COLUMNS if c not in ALREADY_VERDICTED]
+
     results = []
-    for col in US_FACTOR_COLUMNS:
+    for col in columns_to_test:
         print(f"\nEvaluating {col}...")
         r = evaluate_factor(col, data, snapshots, bonferroni_n=1)  # bonferroni_n=1: genuinely
-        # standalone single-factor test this round (US_FACTOR_COLUMNS has exactly one entry) --
-        # per factor_ic.py's own docstring, only pass a real count for an actual multi-factor batch
+        # standalone single-new-factor test this round (columns_to_test has exactly one entry
+        # -- f_us_momentum_12m) -- per factor_ic.py's own docstring, only pass a real count
+        # for an actual multi-factor batch of *new, unverdicted* factors
         results.append(r)
         print(f"  train: mean_ic={r.train_mean_ic:+.4f} IR={r.train_ic_ir:+.3f} (n={r.n_dates_train} dates)")
         print(f"  val:   mean_ic={r.val_mean_ic:+.4f} IR={r.val_ic_ir:+.3f} hit_rate={r.val_hit_rate:.2f} (n={r.n_dates_val} dates)")
