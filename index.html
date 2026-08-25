@@ -339,15 +339,19 @@
       <span>最後更新：<b id="home-updated-tm">--:--</b></span>
       <span class="more" onclick="fmClearCache();hydrateHome()">重新整理</span>
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
+      <span class="note fx-note" id="home-fx-note">匯率載入中…</span>
+      <div class="mkt-toggle" id="home-ccy-toggle"></div>
+    </div>
     <div class="kpi-row">
       <div class="kpi">
         <div class="lbl">總資產（台＋美）</div>
-        <div class="val">NT$ 7,412,380</div>
+        <div class="val" data-ntd="7412380">NT$ 7,412,380</div>
         <div class="sub"><span class="pos">▲ 1.24%</span> 今日</div>
       </div>
       <div class="kpi">
         <div class="lbl">今日已實現損益</div>
-        <div class="val pos">+ NT$ 18,420</div>
+        <div class="val pos" data-ntd="18420" data-ccy-signed="1">+ NT$ 18,420</div>
         <div class="sub">當沖 3 筆 · 勝 2 敗 1</div>
       </div>
     </div>
@@ -692,10 +696,14 @@
       <div class="mkt-toggle" id="trade-toggle"></div>
     </div>
     <div class="note" id="trade-unit-note" style="margin-bottom:10px">單位：張數（台股現股/當沖以張為單位）</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
+      <span class="note fx-note" id="trade-fx-note">匯率載入中…</span>
+      <div class="mkt-toggle" id="trade-ccy-toggle"></div>
+    </div>
     <div class="kpi-row">
       <div class="kpi">
-        <div class="lbl">今日自動交易損益</div>
-        <div class="val pos">+ NT$ 12,180</div>
+        <div class="lbl">今日自動交易損益（持倉損益）</div>
+        <div class="val pos" data-ntd="12180" data-ccy-signed="1">+ NT$ 12,180</div>
         <div class="sub">7 筆 · 勝率 71%</div>
       </div>
       <div class="kpi">
@@ -884,7 +892,7 @@
         <div class="f"><span>期貨報價/籌碼</span><b>TAIFEX（經 FinMind）</b></div>
         <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
       </div>
-      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗時會退回上次成功的快取。所有資料為盤後/延遲資料，非即時報價。</div>
+      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗會誠實顯示查無資料，不會偷用過期的舊快取頂替。所有資料為盤後/延遲資料，非即時報價。</div>
     </div>
 
     <div class="card">
@@ -903,6 +911,11 @@
         <div class="mkt-toggle" id="color-scheme-toggle" style="padding:2px"></div>
       </div>
       <div class="note">預設「台股慣例」：紅漲綠跌；也提供「國際慣例」：綠漲紅跌，依個人習慣切換，整站即時套用。</div>
+      <div class="setting-row" style="margin-top:10px">
+        <span>預設幣別</span>
+        <div class="mkt-toggle" id="settings-ccy-toggle" style="padding:2px"></div>
+      </div>
+      <div class="note" id="settings-fx-note">匯率載入中…</div>
     </div>
 
     <div class="card">
@@ -1930,8 +1943,58 @@
   }
   function setColorScheme(key){applyColorScheme(key);renderColorSchemeToggle();toast('已切換：'+COLOR_SCHEMES[key].label)}
 
+  // ── 幣別切換（2026-08-25 新增）：今日頁總資產/已實現損益、交易頁持倉損益支援 NT$/US$。
+  // 匯率抓 FinMind TaiwanExchangeRate（USD），用 spot_buy/spot_sell 中價；抓不到就不換算、
+  // 不准用寫死的舊匯率頂替（見 CLAUDE.md 已知地雷），畫面誠實顯示「匯率未更新」。
+  let CCY=localStorage.getItem('alpha_ccy')||'TWD';
+  let FX_RATE=null,FX_DATE=null;
+  const CCY_TOGGLE_IDS=['home-ccy-toggle','trade-ccy-toggle','settings-ccy-toggle'];
+  const FX_NOTE_IDS=['home-fx-note','trade-fx-note','settings-fx-note'];
+  async function fetchFx(){
+    const rows=await fm('TaiwanExchangeRate','USD',_d(10));
+    if(!rows.length){FX_RATE=null;FX_DATE=null;renderFxNote();return}
+    const last=rows[rows.length-1];
+    const buy=Number(last.spot_buy),sell=Number(last.spot_sell);
+    if(!buy||!sell){FX_RATE=null;FX_DATE=null;renderFxNote();return}
+    FX_RATE=(buy+sell)/2;FX_DATE=last.date;
+    renderFxNote();
+  }
+  function renderFxNote(){
+    const txt=FX_RATE?`匯率 ${FX_RATE.toFixed(2)}（${FX_DATE.replaceAll('-','/')}）`:'匯率未更新';
+    FX_NOTE_IDS.forEach(id=>setTxt(id,txt));
+  }
+  function fmtCcyAmount(ntd,signed){
+    const useUsd=CCY==='USD'&&FX_RATE;
+    const amt=useUsd?ntd/FX_RATE:ntd;
+    const sym=useUsd?'US$':'NT$';
+    const absTxt=Math.abs(amt).toLocaleString(undefined,{maximumFractionDigits:CCY==='USD'?2:0});
+    return signed?(amt>=0?'+ ':'− ')+sym+' '+absTxt:sym+' '+absTxt;
+  }
+  function renderCcyAmounts(){
+    document.querySelectorAll('[data-ntd]').forEach(el=>{
+      const ntd=Number(el.dataset.ntd);
+      el.textContent=fmtCcyAmount(ntd,el.dataset.ccySigned==='1');
+    });
+  }
+  function renderCcyToggles(){
+    CCY_TOGGLE_IDS.forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      el.innerHTML=['TWD','USD'].map(k=>{
+        const disabled=k==='USD'&&!FX_RATE;
+        return `<span class="press mtg-opt${CCY===k?' on':''}" style="${disabled?'opacity:.4':''}" onclick="setCcy('${k}')">${k==='TWD'?'NT$':'US$'}</span>`;
+      }).join('');
+    });
+  }
+  function setCcy(key){
+    if(key==='USD'&&!FX_RATE){toast('匯率未更新，暫時無法切換至美元');return}
+    CCY=key;localStorage.setItem('alpha_ccy',key);
+    renderCcyToggles();renderCcyAmounts();
+  }
+
   // ── 啟動：載入真實自選股報價 + 註冊 PWA ──
   applyColorScheme(localStorage.getItem('alpha_color_scheme')||'TW');
+  renderCcyToggles();renderCcyAmounts();renderFxNote();
+  fetchFx().then(()=>{renderCcyToggles();renderCcyAmounts()});
   hydrateHome();
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>
