@@ -367,3 +367,19 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：見`FUT_LEADS.md`「目前狀態」第54輪小節——(a)若要繼續深究`fut_intraday_gap_continuation`，先加大`N_SHUFFLES`解析度重測（percentile 92.0離批次門檻95.0不遠，值得先排除是不是解析度不足造成的模糊，同第51輪對三大法人動能假說的處理方式）；(b)或換到剩餘候選家族（期現價差basis、盤別效應），兩者都需要小型地基工作，接手時先評估時間預算。
 
 ---
+
+## 馬拉松第57輪（2026-08-25T11:33+08:00）
+
+**選軌依據**：讀三軌state「最後更新」時間戳——TW 2026-08-25T10:31:00、US 2026-08-25T11:02:00、FUT 2026-08-25T10:05:00，FUT最久沒被碰，本輪選FUT軌。取鎖`LOCK_ACQUIRED`（乾淨，無陳舊鎖檔）。
+
+**做的事**：依第54輪「下一輪建議工作單位」#1（優先項），對`fut_intraday_gap_continuation`（#33，percentile=92.0，單測過但本批次校正95.0未過）做高解析度重測，排除是不是200次排列的粗解析度造成的模糊地帶。新增`fut_recheck_intraday_gap_continuation_highres.py`（monkey-patch `fut_cheap_gate.N_SHUFFLES`從200→2000，跟第51輪對三大法人動能假說的處理方式同一套做法：不改`fut_cheap_gate.py`本身的模組層級預設值，只在這支獨立腳本的執行過程裡局部覆蓋，呼叫既有`hyp_intraday_gap_continuation()`函式不做任何改動）。
+
+**結果**：percentile 92.0（N=200）→ 89.60（N=2000）。**跟第51輪三大法人動能假說重測後幾乎不變（97.0→97.40、96.5→97.80）明顯不同——這次結果不是逼近門檻，反而下降，而且首次跌破單測門檻90.0本身**。真實策略終值+117.0%（訊號本身沒變，只是隨機排列控制組的抽樣數變多，測量更精確）。結論：原本#33的92.0讀數落在N=200測量雜訊範圍內偏高估，不是解析度不足掩蓋了一個更強的真訊號；`fut_intraday_gap_continuation`現在應視為**確定FAIL**，不再是待觀察的弱訊號。日內均值回歸家族第一批（反轉#14/#32、順勢#15/#33，現在都已高解析度確認）兩個方向雙雙結案：0 PASS。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`（開始前另外跑了一次獨立確認，見上方指令輸出；腳本內建二次assert，執行輸出也印出確認）。全程只讀本機parquet快取（`_load_series()`命中`build_continuous_series()`既有全歷史快取），零額外API呼叫，沒有任何觸及holdout的操作。
+
+**已更新**：新增`fut_recheck_intraday_gap_continuation_highres.py`、`TRIALS_LEDGER.md`（#34，累積33→34）、`FUT_LEADS.md`（#16新增列＋「目前狀態」段落新增第57輪小節，累計FAIL數更新為15）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落＋「下一輪建議」改為剩餘2個候選家族＋「下一步」段落同步）。
+
+**下一輪建議**：日內均值回歸家族第一批已完全結案（0 PASS），沒有候選需要深挖。換到`MARATHON_PROTOCOL.md`第3節剩餘期貨候選家族——(a) 期現價差basis（需要新增台股加權指數現貨資料源，小型地基工作）；(b) 盤別效應（需要把`after_market` session納入連續合約建構，小型地基工作）。兩者都不能直接套用既有`build_continuous_series()`輸出，接手時先評估30分鐘時間預算，做不完就只做地基那一半，比照第39/48輪先例。
+
+---
