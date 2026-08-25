@@ -2,7 +2,7 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-25T09:33:32+08:00**（馬拉松第53輪：發現一個未被記錄的孤兒未追蹤檔案`us_delisting_client.py`——推測是某個異常中止、從未寫log/commit的輪次留下的殘留產物；驗證時發現並修復其分類邏輯bug後正式納入版本控制，見下方與`US_LOG.md`本輪記錄）
+**最後更新：2026-08-25T11:02:00+08:00**（馬拉松第56輪：新寫`us_universe.py`，「下一輪建議工作單位」第6項——現存快照+手動維護5檔已驗證下市股，明確標註不是完整存活者偏差修正，見下方與`US_LOG.md`本輪記錄）
 
 **地基狀態：🟡 起步中，PIT資料源方向已確認可行（兩個獨立端點都驗證過，各有各的坑），存活者偏差方向已確認「兩個候選方法都不可靠」。第七輪發現一個重要的方法論教訓：`FRC` 這個下市案例第五輪其實從一開始就查錯了實體，「FDIC接管型下市不走Form 25」假設因此變弱。第十輪發現另一個方法論陷阱：XBRL company facts API 的比較期重複揭露問題；第十一輪去重後發現殘留離群值背後還有兩個獨立成因（pre-XBRL標記缺口、pre-IPO歷史資料，見下方）。第35、38輪都嘗試接「下一輪建議工作單位」第4項（中小型股/近期IPO價格深度抽測），腳本 `us_probe_price_depth_smallmid.py` 兩輪都一次都沒執行成功——第一檔就撞 FinMind 402（額度被同小時內的台股回補用光），優雅收工。**第38輪改做第5項（不需FinMind額度）：新增 `sec_edgar_client.py`，把 `sec_edgar_probe.py` 的ticker→CIK查詢跟filingDate/reportDate抽取邏輯包裝成可重用函式（`get_cik_map()`/`get_cik()`/`get_submissions()`/`get_filing_dates()`），smoke test數字跟第三輪探測腳本完全一致，驗證重構沒有改變邏輯。** **第50輪（2026-08-25T08:02）：第4項（中小型股/近期IPO歷史深度抽測）第四次嘗試終於成功——距上次TW軌重度用量約57分鐘，額度已恢復，10檔全部一次跑完無限流。結果：全部10檔日期間隔都只落在2/3/4天（週末/連假），沒有任何一檔出現>7天異常缺口，`first`日期跟實際上市年份合理對應，`last`一致停在`VAL_END`（`load_dev()`封頂生效）。里程碑1「只測AAPL/MSFT兩檔巨型股」的疑慮，這輪多樣性抽測沒有找到反例，初步驗證通過（見`DATA.md`「美股里程碑1（續）」小節、`US_LOG.md`本輪記錄）。** 價格資料（`USStockPrice`）的深度/更新頻率已驗證可用；股票名單（`USStockInfo`）的形狀已摸清但還不能直接拿來建構無偏差宇宙；**SEC EDGAR 申報日期 API 已實測驗證可用（submissions API + company facts API 兩個端點都測過，且已包裝成可重用模組，見下方）**；**美股存活者偏差：`universe.py` 的價格列存在法、`USStockInfo` 快照增減法，這輪實測後都證實不可靠**（見下方，細節在 `DATA.md`「美股存活者偏差調查」小節）；**5檔已知下市股中，只有 TWTR/SIVB/BBBY 三檔的 CIK 已可信驗證（公司名稱＋申報型態都合理）；SBNY/FRC 兩檔改走 FDIC 路徑後也都已確認身分（分別是 CERT=57053/59017，不是 SEC CIK，因為這兩家是不歸 SEC 管的銀行）——5檔已知下市股的身分現在全部有可信結論，只是走了兩條不同的資料源路徑（SEC EDGAR 或 FDIC）。**第44、47輪新增 `fdic_client.py` 可重用模組供未來 `universe.py` 呼叫。仍然沒有美股版的 `universe.py`／`adjust.py`／`pit.py`／`factors.py`——**下一輪還是地基工作，還不能開始測因子**。
 
@@ -29,10 +29,10 @@
 4. ~~中小型股/近期上市股的 `USStockPrice` 歷史深度抽測~~ ✅ 第50輪（2026-08-25T08:02）第四次嘗試終於成功執行，10檔全部通過（見上方「已知資訊」小節最新一條、`DATA.md`「美股里程碑1（續）」小節）。**這是最後一項待完成的探測工作單位。**
 5. ~~把 `sec_edgar_probe.py` 的邏輯正式包裝成一個可重用的 fetch 函式~~ ✅ 第38輪（2026-08-24T07:31）已完成，新寫 `sec_edgar_client.py`（`get_cik_map()`/`get_cik()`/`get_submissions()`/`get_filing_dates()`，含快取），smoke test驗證數字跟原探測腳本一致。**注意：只包了 ticker→CIK + `filings.recent` 的filingDate/reportDate，沒有包XBRL company facts跟下市/Form 25核實邏輯（那兩類仍是探測階段，故意沒提前固化）。** 之後寫美股版`pit.py`可以直接`import`這個模組。
 
-**第50輪後：探測階段（1–5項）全部完成，開始寫地基本體程式碼。第53輪：新增 `us_delisting_client.py`（`get_delisting_status(ticker, cik_override, fdic_cert, expected_name_fragment)`），把先前分散在探測腳本裡的下市判定邏輯包裝成可重用函式，是第6項的必要積木（不是第6項本身，`universe.py`要做的「累積{ticker: 已驗證身分}對照表」還沒開始）。驗證時發現並修復一個分類bug：原始版本把Form 25家族（交易所下市申報）跟Form 15家族（SEC註銷登記，必然晚於Form25、間隔天數變異極大，TWTR 10天到SIVB真正事件630天都有）混在一起算「distinct filingDate」，導致每一檔正常下市（本來就有25跟15兩個不同日期）都被誤判成「多重事件、無法判定」；修復後改成只用Form25家族日期判定事件數，Form15只當輔助資訊，重跑5檔已知案例（TWTR/BBBY/SIVB/SBNY/FRC）全部正確。細節見`US_LOG.md`第53輪記錄。** 候選（挑一項，不要一次全做）：
-6. 寫美股版 `universe.py`——用 `USStockInfo` 最新快照當現存股票基準，存活者偏差目前沒有可靠的自動化偵測方法（見上方調查結論），**現實做法可能是先接受「近似無偏差」（用現存股票+已知的少數下市股手動名單，例如已核實的TWTR/SIVB/SBNY/FRC/BBBY，現在可以直接呼叫`us_delisting_client.get_delisting_status()`取得已驗證的下市日期）當第一版，明確標註「非完美存活者偏差修正」，不要假裝自動化方法已解決**。
+**第50輪後：探測階段（1–5項）全部完成，開始寫地基本體程式碼。第53輪：新增 `us_delisting_client.py`（`get_delisting_status(ticker, cik_override, fdic_cert, expected_name_fragment)`），把先前分散在探測腳本裡的下市判定邏輯包裝成可重用函式，是第6項的必要積木（不是第6項本身，`universe.py`要做的「累積{ticker: 已驗證身分}對照表」還沒開始）。驗證時發現並修復一個分類bug：原始版本把Form 25家族（交易所下市申報）跟Form 15家族（SEC註銷登記，必然晚於Form25、間隔天數變異極大，TWTR 10天到SIVB真正事件630天都有）混在一起算「distinct filingDate」，導致每一檔正常下市（本來就有25跟15兩個不同日期）都被誤判成「多重事件、無法判定」；修復後改成只用Form25家族日期判定事件數，Form15只當輔助資訊，重跑5檔已知案例（TWTR/BBBY/SIVB/SBNY/FRC）全部正確。細節見`US_LOG.md`第53輪記錄。** ~~寫美股版 `universe.py`~~ ✅ 第56輪（2026-08-25T11:02）已完成第一版，新寫 `us_universe.py`。`active_stock_ids()`用最新`USStockInfo`快照（過濾ETF跟SPAC warrant/units/rights，剩6618檔）；`known_delisted_stock_ids()`把`us_delisting_client.py` smoke test已驗證的5檔（TWTR/SIVB/BBBY走SEC EDGAR、SBNY/FRC走FDIC）固化成`KNOWN_DELISTED`常數表（未重新打API）；`universe()`合併兩者，**明確加`bias_correction`欄位標註「非完美存活者偏差修正」，寫在資料裡而不只是文件裡**。驗證：`python us_universe.py`跑通，6623列，5檔delisted全部正確保留。**這只是第一版，`KNOWN_DELISTED`只有5檔，真實下市股母體未知且可能大得多——任何用這份宇宙的回測都還帶著未量化的存活者偏差缺口，不能宣稱已解決。** 候選（挑一項，不要一次全做）：
 7. 寫美股版 `pit.py`——用 `sec_edgar_client.py` 的 `get_filing_dates()` 對齊財報揭露日，**要把「pre-XBRL標記缺口（`end`早於~2009年中）」跟「pre-IPO歷史資料」兩類已知的不可信PIT gap納入設計**（見上方XBRL調查結論），不能假設所有`end`日期的PIT gap都乾淨。
 8. 寫美股成本模型（`validation/costs.py` 目前完全沒有美股邏輯）——需要研究美股手續費/稅務結構（跟台股證交稅不同，要查SEC Section 31 fee等美股特有成本項目）。
+9.（新增，第56輪發現）如果未來要擴大`KNOWN_DELISTED`名單，考慮系統化來源（例如交易所官方下市公告清單、或掃`efts.sec.gov`全文檢索批次抓Form 25-NSE申報實體，類似第六輪掃過2023-03～06窗口的做法），而不是繼續一檔一檔手動加——目前5檔規模對任何全市場回測都太小，跟TW軌宇宙覆蓋率不足的教訓（`MARATHON_PROTOCOL.md`5b節）是同一類問題，只是美股這邊連「有哪些名字該補」都還不知道，比TW軌的情況更早期。
 
 **Holdout 狀態：✅ 未被使用**（跟主線共用同一套機制）。
 
@@ -40,4 +40,4 @@
 
 ## 下一步
 
-見上方「下一輪建議工作單位」第6–8項（探測階段已全部完成，下一輪要開始寫地基本體程式碼），一次只做一項。
+見上方「下一輪建議工作單位」第7–9項（第6項`universe.py`第一版已完成），一次只做一項。

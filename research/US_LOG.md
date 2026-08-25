@@ -245,3 +245,23 @@
 **這輪沒做的**：沒有開始寫`universe.py`本體（這個模組只是`universe.py`未來會呼叫的其中一個積木，`universe.py`要做的「累積{ticker: 已驗證身分}對照表」這件事，docstring裡明確寫這輪範圍之外）；沒有測試`confirmed_sec_form15_only_no_form25_anchor`分支（沒有已知的真實案例可驗證，留待未來遇到時驗證）；沒有查證是否還有其他孤兒未追蹤檔案（這輪只是在例行`ls`時偶然發現這一個，沒有系統性掃描整個research目錄比對git狀態，如果之後想徹底排查，`git status --short research/`可以列出所有未追蹤/未commit的異動，值得未來某一輪專門做一次）。
 
 `is_holdout_consumed()`確認為`False`（本輪完全沒有呼叫任何FinMind相關函式，只讀SEC EDGAR/FDIC的既有本地快取）。
+
+---
+
+## 2026-08-25T11:02:00+08:00 — 馬拉松第56輪：美股版 `universe.py` 第一版（`US_MARATHON_STATE.md` 建議工作單位第6項）
+
+做了「下一輪建議工作單位」第6項：新寫 `us_universe.py`。**明確標註不是完整的存活者偏差修正**——第4/5/7/41/44/47/50輪查過，台股`universe.py`「價格列存在=地面真相」跟`USStockInfo`快照增減兩個方法在美股都不可靠（見`US_MARATHON_STATE.md`），美股又沒有等同`TaiwanStockDelisting`的免費可查詢下市名單端點，所以這輪採用狀態檔案建議的現實做法：現存快照 + 手動維護的已驗證下市股清單。
+
+**`active_stock_ids()`**：抓最新`USStockInfo`快照（`_fetch()`直接呼叫，理由同`universe.py`對`TaiwanStockInfo`的處理——這是snapshot時間戳不是上市日，走`load_dev()`會被`VAL_END`濾光），過濾掉ETF（`Subsector=='ETF'`，2026-08-22快照12429列裡5247列）跟SPAC衍生工具（stock_name含Warrant/Units/Rights，565列，判斷邏輯標記為「判斷call，未驗證是否有誤刪」）。剩6618檔。
+
+**`known_delisted_stock_ids()`**：直接沿用`us_delisting_client.py`的`__main__` smoke test已經驗證過的5檔（TWTR/SIVB/BBBY走SEC EDGAR Form 25、SBNY/FRC走FDIC failures），日期跟來源都寫進`KNOWN_DELISTED`常數，附註SIVB是「人工排歧義後的日期」（自動分類器本身回傳ambiguous，因為有一組2017-2018不相關的Form 25 cluster）。**這輪沒有重新呼叫網路API**——5檔的身分/日期在先前輪次已經獨立驗證過，這輪只是把已知答案固化成程式碼裡的表格，不是重新查證。
+
+**`universe()`**：合併兩者，欄位跟台股版對齊（`stock_id`/`stock_name`/`status`/`delist_date`），但額外加一欄`bias_correction`常數字串（`active_snapshot_plus_hand_verified_delisted__NOT_COMPLETE`），確保之後任何用這份宇宙做回測的程式碼都會在資料裡直接看到這個限制，不是只寫在文件裡容易被忽略。
+
+**驗證**：`python us_universe.py` 跑通，6623列（6618 active + 5 delisted），5檔已知下市股全部正確保留在合併結果裡（防呆檢查：如果任何一檔被去重邏輯誤刪會直接assert失敗）。`is_holdout_consumed()`確認仍是`False`。
+
+**這輪沒有新打任何外部API**——`USStockInfo`快照已經在之前輪次快取在`research/data/raw/`，這輪的`_fetch()`呼叫命中快取，零額度消耗。
+
+**下一步（`US_MARATHON_STATE.md`第7/8項未動，留給下一輪）**：美股版`pit.py`（要處理pre-XBRL標記缺口跟pre-IPO歷史資料兩類已知不可信PIT gap）、美股成本模型。這輪只接第6項一項，符合協定「一輪一件事」。
+
+`is_holdout_consumed()`確認為`False`。
