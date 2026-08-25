@@ -310,3 +310,21 @@
 **沒做的**：沒有去逐年查證PLTR/其他個股實際的加速申報人身分變動時間點（那需要另外查SEC的filer category申報，這輪範圍外）；沒有把`era_reliability`接進任何下游回測邏輯（這個模組目前還是純資料層，`universe.py`/`factors.py`都還沒有美股對應版本）；美股成本模型（第8項）沒動；擴充`KNOWN_DELISTED`（第9項）沒動。
 
 這輪沒有打任何FinMind API；`data.sec.gov`零新請求（全部命中第62輪的快取，`python us_pit.py`跑完只讀本機快取檔）；`is_holdout_consumed()`確認為`False`。
+
+## 2026-08-25T17:02:50+08:00 — 馬拉松第68輪：美股成本模型第一版（`US_MARATHON_STATE.md` 第8項）
+
+做了「下一輪建議工作單位」第8項：新寫 `validation/us_costs.py`，仿 `validation/costs.py`（TW model）的結構跟誠實揭露精神，補上美股版的 `round_trip_cost_pct()`/`short_round_trip_cost_pct()`。
+
+跟TW model的關鍵差異（不是換個數字，是不同的成本結構）：
+- **無證交稅**：TW的0.3%/0.15% STT在美股沒有對應項目。
+- **無漲跌停鎖死機制**：TW的`limit_status()`在美股沒有對應功能，US是LULD/市場級熔斷機制（不同運作方式），這輪刻意不做對應函式。
+- **零售手續費預設為$0**（Schwab標準/IBKR Lite，WebSearch 2026-08-25驗證，來源brokerchooser.com/stockbrokers.com對兩家官網定價頁的轉述，非一手PDF核對），但保留`IBKR_PRO_COMMISSION_PER_SHARE`當敏感度測試備用常數（IBKR Pro是分層計價，這個常數只是粗略代表值，不是精確重現分層規則）。
+- **兩個強制性監管費**（僅賣出邊）：SEC Section 31 fee（$20.60/百萬美元成交額，2026-04-04生效，來源FINRA Information Notice 20260317／Federal Register 2026-04233）、FINRA TAF（$0.000195/股，2026-01-01生效，min $0.01/max $9.79每筆，來源finra.org/rules-guidance/guidance/trading-activity-fee）。**兩者都是WebSearch查證，非直接呼叫官方API/PDF逐字核對**。
+
+**誠實揭露的關鍵限制（寫在模組docstring裡，這裡摘要）**：這兩個監管費率是主管機關定期（SEC約每年）依市場量體調整的浮動費率，不是像TW STT那樣的穩定法定稅率——這份模組目前只驗證了「當下（2026-08-25）這一刻」的費率快照，**沒有查證歷史費率的變動範圍**，如果拿今天的費率套用到跨年（例如2015–2026）的回測，等於隱含假設「監管費率歷年不變」，這個假設本身沒被驗證過，跟TW軌/US軌都已經踩過的「數字用最新快照套全歷史」同一類地雷（呼應`us_pit.py`的`era_reliability()`分期教訓），這裡故意用文字揭露而不是假裝精確。滑價（`DEFAULT_SLIPPAGE_BPS=5.0`）跟借券費（`BORROW_FEE_ANNUAL_PCT=2.0`）維持跟TW model同款「未校準佔位值」狀態，同樣的誠實揭露。
+
+**smoke test**（`python validation/us_costs.py`）：100股@$50範例，手算SEC fee($0.1030)+TAF($0.0195)+滑價跟函式輸出完全吻合（誤差<1e-12），30天空頭成本嚴格大於即時買賣來回成本（借券費驗證有生效）。輸出：`round_trip_cost_pct=0.102450%`、`short_round_trip_cost_pct(30天)=0.266834%`。
+
+**沒做的**：沒有查證兩個監管費率的多年歷史變動範圍（只驗證了當下這一刻）；沒有查證IBKR Pro分層計價的精確min/max clamp規則（只用一個代表性數字）；沒有把這個模組接進任何回測腳本（那還需要美股版`factors.py`/`long_short_backtest.py`，目前都不存在）；`limit_status()`等價功能（LULD/熔斷）刻意不做，留白不是遺漏。`US_MARATHON_STATE.md`「下一輪建議工作單位」剩第9、12項未做。
+
+`is_holdout_consumed()` 確認為 `False`（本輪全程沒碰任何FinMind/SEC資料抓取，只有WebSearch文件查證跟寫純邏輯程式碼）。

@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 68 輪 · 2026-08-25 17:02 · US · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對US最舊；新寫美股成本模型`validation/us_costs.py`（`US_MARATHON_STATE.md`第8項） · 完成，SEC Section 31 fee+FINRA TAF兩監管費用WebSearch查證（$20.60/百萬美元、$0.000195/股），零售手續費預設$0，smoke test通過；誠實揭露費率僅當下快照未查證歷史範圍；地基工作非假說測試，未加`TRIALS_LEDGER.md`列
+
 ## 第 67 輪 · 2026-08-25 16:35 · TW · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對TW最舊；全市場宇宙回補第二十批 · 本批嘗試102檔，新完成73/新跳過14，撞限流牆提前停止（設計內行為），累積覆蓋率1516→1589/3196（47.4%→49.7%，已過半），仍低於80%門檻
 
 ## 第 66 輪 · 2026-08-25 16:04 · FUT · 取鎖乾淨成功（無陳舊鎖檔），三軌時間戳比對FUT最舊；basis家族地基第一步，確認TAIEX現貨指數資料源 · 完成，新增`fut_probe_spot_index.py`，實測3個FinMind候選（不採信兩次互相矛盾的WebSearch/WebFetch文件摘要）：`TaiwanStockPrice`/`TAIEX`是正解（全歷史6185列乾淨無異常，列數跟期貨連續序列樣本天數一致），排除`TaiwanVariousIndicators5Seconds`（不支援多日查詢）跟`TaiwanStockTotalReturnIndex`（回傳報酬指數非現貨價）；地基探測非假說測試，未加`TRIALS_LEDGER.md`列
