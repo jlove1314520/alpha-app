@@ -230,3 +230,15 @@
 **Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫 `backfill_universe.py` 內部的 `load_dev()`/`adjusted_price_series()` 路徑，未觸碰holdout解鎖函式）。
 
 **上一輪異常提醒**：取鎖時偵測到`LOCK_STALE`（pid 128940，30.0分鐘），已在心跳記錄跟`TW_MARATHON_STATE.md`同步註明，供使用者留意「上一輪疑似失敗」這個訊號。
+
+## 2026-08-25T10:31:00+08:00 — 馬拉松第55輪：全市場宇宙回補第十六批
+
+**做了什麼**：取鎖乾淨成功（`LOCK_ACQUIRED`，無陳舊鎖檔）。比對三軌「最後更新」時間戳，TW（2026-08-25T09:03:00）早於US（2026-08-25T09:33:32）跟FUT（2026-08-25T10:05:00），輪替規則指向TW。開始前 `data/backfill_state.json` 為1221 done/264 skip（共1485筆），跟 `TW_MARATHON_STATE.md` 第52輪記錄一致（無資料落差，代表第52輪本身乾淨結束）。覆蓋率38.2%仍遠低於80%門檻，跑 `backfill_universe.py --batch-size 300`（自動接續）。呼叫時額度已恢復（沒有立刻被限流）。
+
+**結果**：本批嘗試117檔（前100/後17兩段輸出，後段連續15次限流判斷額度已用盡、提前停止，符合`MAX_CONSECUTIVE_RATE_LIMITS`設計，非bug）。新完成74/新跳過22。**累積覆蓋率：1221→1295/3196（38.2%→40.5%）**，累積永久跳過：264→286檔。已用`backfill_state.json`實際筆數（1295 done/286 skip=1581筆）覆核腳本輸出摘要，數字一致。
+
+**判定**：基礎建設/資料落地工作單位，不是假說檢定，不計入 `TRIALS_LEDGER.md`。
+
+**下一步**：覆蓋率仍遠低於80%門檻（40.5%），下一輪若輪到TW軌且額度已恢復，應繼續跑 `backfill_universe.py --batch-size 300`。若一開始就被限流，改做候補工作單位（深挖 `f_value_pb`——repo裡仍有疑似留下的未提交 `deep_dive_f_value_pb.py`，接手前先讀過、實際跑一次驗證輸出合理再沿用；或拆解 `f_quality_roe_stability` TRAIN期絕對報酬為負是否為週轉成本drag）並誠實記錄跳過原因。
+
+**Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫 `backfill_universe.py` 內部的 `load_dev()`/`adjusted_price_series()` 路徑，未觸碰holdout解鎖函式）。
