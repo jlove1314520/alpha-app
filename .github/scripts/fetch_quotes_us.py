@@ -35,7 +35,12 @@ OUT_PATH = REPO_ROOT / "data" / "quotes_us.json"
 # 路徑可以直接重用，用複製一份常數 + 註解交代來源的方式，不是遺漏同步）。
 US_TICKERS = ["NVDA", "AAPL", "MSFT", "TSM", "GOOGL", "AMZN"]
 
-FINNHUB_URL = "https://finnhub.io/api/v2/quote"
+FINNHUB_URL = "https://finnhub.io/api/v1/quote"  # 2026-08-26 修正：原本寫成 v2，Finnhub
+# 沒有 v2/quote 這個端點——實測 v2 回傳 HTTP 200 但內容是一個 HTML 頁面（不是 JSON），
+# r.raise_for_status() 不會發現異常（200 本身不是錯誤狀態碼），但 r.json() 解析 HTML
+# 會丟例外，被下面的 try/except 吃掉、記成該檔「失敗」——6 檔全部這樣失敗，
+# matched=0。真正的端點是 v1（實測：不帶有效 key 時回傳 401 + 正確的 JSON 錯誤訊息
+# {"error":"Invalid API key."}，證實 v1 才是有在處理請求的正確端點）。
 
 
 def is_us_trading_window(now: datetime) -> bool:
@@ -63,6 +68,11 @@ def main():
     for tk in US_TICKERS:
         try:
             r = requests.get(FINNHUB_URL, params={"symbol": tk, "token": api_key}, timeout=15)
+            # 2026-08-26 新增診斷輸出：每檔印HTTP狀態碼+回應前120字元，之後端點/格式
+            # 出問題能一眼看出，不用再靠猜（這次v1/v2打錯的教訓）。回應本身理論上不會
+            # 回顯金鑰，但保險起見還是先把字串裡任何看起來像金鑰的片段遮掉再印。
+            body_preview = r.text[:120].replace(api_key, "***") if api_key else r.text[:120]
+            print(f"  ・{tk}: HTTP {r.status_code}，回應前120字元：{body_preview!r}")
             r.raise_for_status()
             d = r.json()
             price = d.get("c")  # current price
@@ -83,7 +93,11 @@ def main():
                 "quote_time": d.get("t"),  # Finnhub 回傳 unix timestamp
             }
         except Exception as e:
-            print(f"  ・{tk} 失敗：{e}")
+            # requests 的 HTTPError 訊息本身會echo回完整請求URL（含?token=...），這裡
+            # 印例外前也要遮蔽，不能只顧到上面body_preview那一行——這是實測時才發現的
+            # 遮蔽漏洞，不是理論上的顧慮（本機測試時親眼看到金鑰被印進錯誤訊息）。
+            msg = str(e).replace(api_key, "***") if api_key else str(e)
+            print(f"  ・{tk} 失敗：{msg}")
             failed.append(tk)
 
     out = {
