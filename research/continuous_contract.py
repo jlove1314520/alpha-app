@@ -16,14 +16,32 @@ the smallest contract_date that has data today", and that definition
 naturally rolls on settlement day with zero extra logic -- which is exactly
 H1 by construction, no H1/H2 branch needed here.
 
-Session choice: only `trading_session == "position"` rows are used. Per
-DATA.md section 6, `settlement_price`/`open_interest` are only populated
+Session choice: defaults to `trading_session == "position"` (day session).
+Per DATA.md section 6, `settlement_price`/`open_interest` are only populated
 under "position" (high-confidence but not officially-confirmed inference:
 `position` = day session / day-session settlement snapshot, `after_market` =
 night session, based on after_market's data start date lining up with
-TAIFEX's night-session launch date). Night-session bars are NOT included in
-this continuous series yet -- that would be a separate, deliberate decision
-if a strategy ever needs it, not a default.
+TAIFEX's night-session launch date). `open_interest` will read as 0 for
+every night-session row -- that is the known, verified data shape (round 60),
+not a bug in this module.
+
+Night session support (round 91): `session="after_market"` is now a first-
+class option on `load_session()`/`build_continuous_series()`, gated on two
+rounds of prior verification, not assumed -- round 63
+(fut_verify_night_session_timing.py) established that a night-session row
+labeled `date`=T represents "evening of T-1 through early morning of T" (it
+PRECEDES day session T, not follows it), and round 90
+(fut_probe_night_session_rollover.py) confirmed the front-month contract
+rollover itself lands on the exact same calendar `date` label in both
+sessions (92/92 exact match in the overlap window) -- so no separate
+rollover-timing logic is needed for night session, the existing
+front_month_series()/rollover_events() machinery is reused as-is, just fed
+after_market-filtered rows instead of position-filtered ones. The night
+series' own ratio-adjustment factors are computed from night session's own
+close prices at the anchor day (NOT copied from the day-session ratios) --
+day and night can have different closes for the same contract on the same
+date, so mixing the two sessions' price scales into one ratio chain would be
+wrong.
 
 Known gap (honesty, not silently ignored): if the incoming front contract is
 missing a quote on the exact day the outgoing contract makes its last
@@ -41,14 +59,19 @@ FULL_HISTORY_START = "2000-01-01"
 FULL_HISTORY_END = "2024-12-31"  # matches the on-disk full-history cache key; see FUT_LOG.md
 
 
-def load_position_session(
+def load_session(
     contract: str = "TX",
+    session: str = "position",
     start_date: str = FULL_HISTORY_START,
     end_date: str = FULL_HISTORY_END,
 ) -> pd.DataFrame:
     """Raw TaiwanFuturesDaily rows for `contract`, filtered to single-month
     contracts (excludes spread contract_date rows like "202406/202407") and
-    to the `position` session (see module docstring for why).
+    to `session` -- "position" (day) or "after_market" (night, see module
+    docstring for the round 63/90 verification this relies on). The spread-
+    row filter is applied identically for both sessions: round 60's probe
+    (fut_probe_night_session.py) confirmed night session also carries spread
+    rows (~30.6% of after_market rows) that need the same exclusion.
 
     Passing the exact (start_date, end_date) that matches an existing
     data/raw/ parquet cache key lets this hit the cache with zero network
@@ -61,10 +84,21 @@ def load_position_session(
     if df.empty:
         return df
     df = df[~df["contract_date"].astype(str).str.contains("/")].copy()
-    df = df[df["trading_session"] == "position"].copy()
+    df = df[df["trading_session"] == session].copy()
     df["date"] = pd.to_datetime(df["date"])
     df["contract_date"] = df["contract_date"].astype(int)
     return df.sort_values(["date", "contract_date"]).reset_index(drop=True)
+
+
+def load_position_session(
+    contract: str = "TX",
+    start_date: str = FULL_HISTORY_START,
+    end_date: str = FULL_HISTORY_END,
+) -> pd.DataFrame:
+    """Backward-compat wrapper: day session only. Every caller written before
+    round 91 uses this name and this exact signature -- kept as-is rather
+    than renamed, so nothing else needs to change. See load_session()."""
+    return load_session(contract, "position", start_date, end_date)
 
 
 def front_month_series(df: pd.DataFrame) -> pd.DataFrame:
@@ -135,6 +169,7 @@ def build_continuous_series(
     contract: str = "TX",
     start_date: str = FULL_HISTORY_START,
     end_date: str = FULL_HISTORY_END,
+    session: str = "position",
 ) -> tuple[pd.DataFrame, list[dict]]:
     """The public entry point. Returns (series, skipped_events).
 
@@ -147,8 +182,15 @@ def build_continuous_series(
     list means every transition had a clean adjustment ratio, a non-empty
     list means some transitions have NO adjustment applied (raw price used
     as-is for those, which will show up as a visible jump in adj_close).
+
+    `session` defaults to "position" (day session) for every pre-round-91
+    caller's behavior to stay identical. Pass session="after_market" for the
+    night-session series (round 91 addition -- see module docstring for the
+    round 63/90 findings this relies on). Night and day series are each
+    self-contained: the night series' adjustment ratios come from night
+    session's own close prices, never mixed with day-session prices.
     """
-    df = load_position_session(contract, start_date, end_date)
+    df = load_session(contract, session, start_date, end_date)
     front = front_month_series(df)
     events, skipped = rollover_events(df, front)
 

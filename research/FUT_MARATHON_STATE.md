@@ -7,7 +7,9 @@
 
 **這份檔案只描述期貨軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `FUT_LOG.md`；候選判定看 `FUT_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T08:33:39+08:00**（馬拉松第90輪：取鎖時偵測到`LOCK_STALE`（pid 145052持有26.6分鐘，上一輪疑似異常中止，但確認沒有留下任何未commit的殘留工作，是乾淨崩潰）。盤別效應家族地基第二步——夜盤轉倉時點與日盤同步性驗證。新寫`fut_probe_night_session_rollover.py`，重用`continuous_contract.py`既有的`load_position_session()`/`front_month_series()`（日盤半邊零改動），對夜盤（`after_market`）套同一套規則獨立算出主連轉倉事件日期，直接比對2017-05-16起（夜盤有資料範圍）日盤／夜盤的轉倉日期集合。**結果：92/92筆完全同日期（exact match），零偏移量**——日盤既有H1轉倉規則可以直接沿用套到夜盤序列，不需要為夜盤另外設計獨立的轉倉時點判斷。第60/63輪標記的「動工前必須先查證轉倉時點是否同步」這個前置風險項至此解決，結果是好消息。**沒有測任何假說，沒有新增`TRIALS_LEDGER.md`列**（地基驗證同第39/60/63輪先例）。完整見`FUT_LOG.md`本輪記錄、`FUT_LEADS.md`本輪新增段落。**本輪commit範圍延續第80–89輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`TW_LEADS.md`/`TW_LOG.md`/`.github/workflows/quotes.yml`）依然刻意排除不動。
+**最後更新：2026-08-26T10:34:09+08:00**（馬拉松第93輪：夜盤感知連續序列建構完成，1c地基改動。`continuous_contract.py`新增通用`load_session(contract, session, start_date, end_date)`（`load_position_session()`改為薄包裝，7個既有呼叫端零破壞性變更）＋`build_continuous_series()`新增`session: str = "position"`參數（預設值不變，既有兩種呼叫方式都不受影響）。依據是第63輪（夜盤`date`標籤領先日盤）＋第90輪（轉倉事件日期跟日盤92/92完全同步）的查證結果，敢直接重用`front_month_series()`/`rollover_events()`而不用另外設計夜盤專屬轉倉邏輯；夜盤序列的比價調整因子用夜盤自己的收盤價計算，不混用日盤比率。**雙重驗證**：新寫`fut_validate_night_continuous_series.py`，獨立重跑第90輪方法（完全不經過本輪新程式碼），比對轉倉日期集合——**92/92 exact match，零差異**；1867列（2017-05-16～2024-12-31）NaN/非正值皆為0、0筆skipped events、`open_interest`全零（跟第60輪發現一致）。**回歸測試**：日盤（預設session）路徑重跑後數字完全不變（6185天/300次轉倉/0 skipped，跟既有基準吻合），三個既有呼叫端模組匯入無誤。**沒有測任何策略假說，沒有新增`TRIALS_LEDGER.md`列**（同第39/60/63/90輪先例）。**盤別效應家族地基至此完全就緒**——下一輪可以直接開始測第一批盤別效應假說（夜盤vs日盤報酬、隔夜跳空等），不用再處理地基問題。詳見`FUT_LOG.md`本輪記錄。**本輪commit範圍延續第80–92輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`.github/workflows/quotes.yml`）依然刻意排除不動。）
+
+**上一則保留（第90輪，供對照）：**取鎖時偵測到`LOCK_STALE`（pid 145052持有26.6分鐘，上一輪疑似異常中止，但確認沒有留下任何未commit的殘留工作，是乾淨崩潰）。盤別效應家族地基第二步——夜盤轉倉時點與日盤同步性驗證。新寫`fut_probe_night_session_rollover.py`，重用`continuous_contract.py`既有的`load_position_session()`/`front_month_series()`（日盤半邊零改動），對夜盤（`after_market`）套同一套規則獨立算出主連轉倉事件日期，直接比對2017-05-16起（夜盤有資料範圍）日盤／夜盤的轉倉日期集合。**結果：92/92筆完全同日期（exact match），零偏移量**——日盤既有H1轉倉規則可以直接沿用套到夜盤序列，不需要為夜盤另外設計獨立的轉倉時點判斷。第60/63輪標記的「動工前必須先查證轉倉時點是否同步」這個前置風險項至此解決，結果是好消息。**沒有測任何假說，沒有新增`TRIALS_LEDGER.md`列**（地基驗證同第39/60/63輪先例）。完整見`FUT_LOG.md`本輪記錄、`FUT_LEADS.md`本輪新增段落。**本輪commit範圍延續第80–89輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`TW_LEADS.md`/`TW_LOG.md`/`.github/workflows/quotes.yml`）依然刻意排除不動。
 
 **上一則保留（第86輪，供對照）：**`fut_basis_mean_reversion_60d`深挖（1b）完成，新寫`deep_dive_fut_basis_mean_reversion_60d.py`（重用`deep_dive_fut_basis_carry.py`的配對式隨機控制組helper+成本模型）。**判定EXPERIMENTAL**——train期(2000-2020)穩健通過(percentile=100.0)，val期(2021-2024)percentile=83.5（贏過隨機控制組中位數但未達單測門檻90.0，跟#17`fut_basis_carry`的val=46.0連中位數都沒贏明顯不同）；train/val絕對報酬正負號一致（皆為正）；leave-one-year-out顯示終值仍高度集中在少數年份（拿掉前三大貢獻年2002/2007/2004後只剩14.6%，跟#17的15.0%集中度相近）；**beta=0.0286（近零，明顯優於#17的0.36，確實比水位假說更接近market-neutral獨立timing edge）**；3x成本後仍為正。basis家族三機制（水位#17FAIL、動能#18FAIL、均值回歸#19EXPERIMENTAL）至此全部結案——**這是期貨軌至今唯一沒被乾淨判死的候選，但也不是PASS，證據介於乾淨PASS跟#17深挖FAIL之間，不升格使用**。詳見`FUT_LOG.md`本輪記錄、`FUT_LEADS.md`#19（已更新）、`TRIALS_LEDGER.md`#43。**本輪commit範圍**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)+共用append-only`TRIALS_LEDGER.md`（後者附帶包含了第85輪TW軌尚未commit的`f_value_pb`深挖條目#42，因為兩筆新增在檔案裡是相鄰的append，沒有做patch層級拆分——這是誠實揭露而非隱藏，`TRIALS_LEDGER.md`本身設計就是跨軌共用單一歷史總帳，內容本身沒有問題，只是連帶被commit的時間點不是原本那一輪；**TW軌自己的`TW_LEADS.md`/`TW_LOG.md`/`TW_MARATHON_STATE.md`/`DATA.md`/`LEADS.md`跟互動session的混合資料源架構程式碼本輪依然刻意排除**，延續第80–85輪的判斷）。
 
@@ -63,14 +65,14 @@
 
 ## 下一步
 
-**（本節2026-08-26第90輪重寫，取代上方line 51-58那份已經被第80/86輪超越的舊版「下一輪建議」——那份還停留在basis家族均值回歸尚未測的階段，現在basis三機制已全部結案，見本頁最上方最新段落，不要再照line 51-58那份舊清單走。）**
+**（本節2026-08-26第93輪重寫，取代上方第90輪那份——那份還在等夜盤連續序列地基動工，第93輪（本輪）已經把它做完並雙重驗證過，見本頁最上方最新段落，不要再照第90輪那份清單走。）**
 
-**basis家族（水位#17FAIL、動能#18FAIL、均值回歸#19EXPERIMENTAL）已全部結案，不要再對這個家族做參數調整硬救或重測。** 三大法人期貨部位家族、日內均值回歸家族第一批也都已完全結案（細節同前段落）。**盤別效應家族地基：第63輪解決夜盤時序方向，第90輪（本輪）解決轉倉時點同步性（92/92筆exact match，可直接沿用日盤H1規則），前置查證已完整，下一步可以直接寫夜盤感知的連續序列建構本身。**
+**basis家族、三大法人期貨部位家族、日內均值回歸家族第一批全部已完全結案（細節同前段落）。盤別效應家族地基至此完全就緒**：第63輪解決夜盤時序方向、第90輪解決轉倉時點同步性、第93輪（本輪）完成`continuous_contract.py`的`session`參數改動並雙重驗證（92/92 exact match、零NaN/skipped）。**下一步可以直接開始測第一批盤別效應假說本身，不用再處理任何地基問題。**
 
 **下一輪建議（優先順序由上到下）**：
-1. 盤別效應家族：寫`build_night_continuous_series()`或給`continuous_contract.py`既有函式加`session`參數，把夜盤納入連續序列建構——地基查證已完成，這是核心地基改動本身，寫完後才能真正測盤別效應假說（日盤vs夜盤報酬差異、隔夜跳空等）。
+1. 盤別效應家族第一批假說：用`build_continuous_series(session="after_market")`（本輪新增）跟既有日盤版本，測「夜盤報酬vs日盤報酬」「隔夜跳空」等`MARATHON_PROTOCOL.md`第3節列出的方向。**注意時序方向**：第63輪確認夜盤`date`=T代表「T-1晚間到T清晨」，領先日盤T，設計報酬/跳空定義時要對齊這個方向，不要憑直覺假設夜盤T在日盤T之後。用`fut_cheap_gate.py`既有便宜關卡框架，加新的資料載入邏輯即可，不用重寫地基。
 2. 或者：換一個全新機制家族測試假說，`MARATHON_PROTOCOL.md`第3節清單裡還沒測過的（期現價差以外的其他技術面/籌碼面變體）。
 3. （較低優先，不擋路）`fut_basis_mean_reversion_60d`（#19 EXPERIMENTAL）regime/年代分段穩健性檢查，非硬性待辦。
 4. （較低優先，不擋路）連續合約累積漂移的經濟成因未拆解，可另立獨立假說，但不急。
 
-下一個馬拉松輪次接手時，先讀 `FUT_LOG.md` 最新一條（第90輪）看上一輪實際做到哪裡，再讀 `fut_probe_night_session_rollover.py`（本輪新增）了解轉倉同步性驗證的方法，如果要寫夜盤連續序列，也可以直接重用它算出的轉倉事件日期。**已測過FAIL/CHEAP_PASS-但降級的18個訊號＋1個EXPERIMENTAL（純技術面/籌碼面/季節性6個 + 三大法人部位水位×3類別+自營商動能4個 + 日內跳空反轉/順勢2個 + basis三機制3個，含各自的高解析度重測）不要重測相同設定。**記得FUT軌資源配置上限20%，選輪次時TW/US軌優先度更高。
+下一個馬拉松輪次接手時，先讀 `FUT_LOG.md` 最新一條（第93輪）看夜盤連續序列怎麼建構、怎麼驗證過的，`continuous_contract.py`模組docstring也已更新說明依據。**已測過FAIL/CHEAP_PASS-但降級的18個訊號＋1個EXPERIMENTAL（純技術面/籌碼面/季節性6個 + 三大法人部位水位×3類別+自營商動能4個 + 日內跳空反轉/順勢2個 + basis三機制3個，含各自的高解析度重測）不要重測相同設定。**記得FUT軌資源配置上限20%，選輪次時TW/US軌優先度更高。

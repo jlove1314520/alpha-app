@@ -630,3 +630,23 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **已更新**：新增`fut_probe_night_session_rollover.py`；`FUT_LEADS.md`（地基狀態備註更新，見下方）；`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。**沒有新增`TRIALS_LEDGER.md`列**（地基驗證不是假說測試，同第39/60/63輪先例）。本輪commit範圍延續第80–89輪判斷：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`TW_LEADS.md`/`TW_LOG.md`/`.github/workflows/quotes.yml`）依然刻意排除不動。
 
 **下一輪建議**：(a) 寫夜盤感知的連續序列建構（轉倉同步性已確認，可以直接沿用日盤轉倉事件日期，風險降低）；(b) 或換一個全新機制家族測試假說（`MARATHON_PROTOCOL.md`第3節清單）；(c) 記得FUT軌資源配置上限20%，不要連續佔用太多輪，若TW/US軌有更高優先待辦應優先讓給那兩軌。
+
+---
+
+## 2026-08-26T10:34:09+08:00 — 馬拉松第93輪期貨軌執行：夜盤感知連續序列建構（1c地基改動）
+
+**選軌理由**：`marathon_lock.py acquire` 成功（乾淨`LOCK_ACQUIRED`，非陳舊鎖檔）。比對三軌最後更新時間戳：FUT（第90輪，08:33）／US（第91輪，09:04）／TW（第92輪，約09:35–10:06）——FUT最久沒被碰，選期貨軌。同時確認FUT軌資源配置20%上限：近10輪（83–92）FUT只佔2輪（86、90）=20%，選這輪不算連續佔用超額。
+
+**做了什麼**（照`FUT_MARATHON_STATE.md`第90輪「下一輪建議」第1項）：
+1. 讀`continuous_contract.py`確認`load_position_session()`/`front_month_series()`/`rollover_events()`三個函式本身不寫死session（只有`load_position_session()`寫死`trading_session == "position"`），代表夜盤支援可以用最小改動達成：把session過濾邏輯抽成通用的`load_session(contract, session, start_date, end_date)`，`load_position_session()`改成薄包裝（保留原簽章給既有7個呼叫端，零破壞性變更）；`build_continuous_series()`新增`session: str = "position"`參數（預設值不變，既有呼叫端`build_continuous_series()`／`build_continuous_series(contract, start_date, end_date)`兩種呼叫方式都不受影響）。
+2. 更新模組docstring說明夜盤支援的依據：round 63（夜盤`date`標籤代表「前一晚到當天清晨」，領先日盤）+ round 90（轉倉事件日期跟日盤完全同步，92/92 exact match）——這兩輪的查證結果是這次改動敢直接重用`front_month_series()`/`rollover_events()`而不用另外設計夜盤專屬轉倉邏輯的依據，不是憑空假設。**特別注意**：夜盤序列的比價調整因子是用夜盤自己的收盤價算出來的（不是複製日盤的比率），因為同一天同一合約日盤/夜盤收盤價本來就不同，混用會算錯。
+3. **雙重驗證，不只信任「能跑起來」**：新寫`fut_validate_night_continuous_series.py`，獨立重跑一次round 90的方法（直接呼叫`fut_probe_night_session_rollover.py`的`_night_front_month_series()`/`_switch_dates()`，完全不經過這輪新寫的`load_session()`/`build_continuous_series()`），比對兩條獨立路徑算出的轉倉日期集合是否完全一致。**結果：92/92轉倉事件、日期集合`exact match: True`，零差異**。另外檢查：1867列涵蓋2017-05-16～2024-12-31，`open`/`max`/`min`/`close`/`adj_*`八個欄位NaN皆為0、無非正值價格、`open_interest`全為0（跟round 60發現一致，不是bug）、0筆skipped events。
+4. **回歸測試**：重跑`python continuous_contract.py`（既有`__main__`區塊），確認日盤（預設session）路徑結果跟改動前完全一致——6185個交易日、300次轉倉事件、0筆skipped，數字跟`FUT_MARATHON_STATE.md`／`FUT_CONTINUOUS_CONTRACT_DESIGN.md`一路記錄的基準完全吻合，沒有意外改變既有行為。另外`python -c "import fut_basis_series, fut_cheap_gate, fut_drift_probe"`確認三個既有呼叫端模組匯入無誤。
+
+**沒有測任何策略假說，沒有新增`TRIALS_LEDGER.md`列**（這是地基建設，1c類，同第39/60/63/90輪先例——`build_night_continuous_series`還沒被拿去測任何盤別效應假說，只是把「能建構」這件事做出來並驗證乾淨）。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。**全程零新增FinMind API呼叫**——`fut_validate_night_continuous_series.py`跟回歸測試都命中既有全歷史parquet快取（跟round 90/60同一批快取鍵），沒有打過任何新的網路請求。
+
+**已更新**：`continuous_contract.py`（新增`load_session()`、`load_position_session()`改包裝、`build_continuous_series()`新增`session`參數、docstring更新）；新增`fut_validate_night_continuous_series.py`；`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。**沒有動`FUT_LEADS.md`**（沒有候選判定產生，這輪是純地基）。本輪commit範圍延續第80–92輪判斷：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`.github/workflows/quotes.yml`）依然刻意排除不動。
+
+**下一輪建議**：(a) **現在可以真正開始測盤別效應假說了**——地基（`build_continuous_series(session="after_market")`）已就緒且雙重驗證過，例如「夜盤報酬vs日盤報酬」「隔夜跳空（日盤收盤→夜盤開盤，或夜盤收盤→日盤開盤，注意round 63確認的時序方向：夜盤T領先日盤T）」等第一批假說可以直接用便宜關卡框架（`fut_cheap_gate.py`）加新的資料載入函式測試，不用再處理地基問題；(b) 或換一個全新機制家族（`MARATHON_PROTOCOL.md`第3節清單裡還沒測過的）；(c) 記得FUT軌資源配置上限20%，不要連續佔用太多輪。

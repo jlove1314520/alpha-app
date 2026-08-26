@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 93 輪 · 2026-08-26 10:34 · FUT · 取鎖乾淨（非陳舊鎖檔）；夜盤感知連續序列建構（1c地基改動）——`continuous_contract.py`新增通用`load_session()`＋`build_continuous_series()`新增`session`參數（`session="after_market"`即為夜盤序列，日盤預設值不變、7個既有呼叫端零破壞性變更），依據第63輪（夜盤時序方向）＋第90輪（轉倉同步性）查證結果重用既有轉倉機制；新寫`fut_validate_night_continuous_series.py`獨立重跑第90輪方法交叉驗證 · **驗證通過**：92/92轉倉事件exact match零差異、1867列NaN/skipped/非正值皆為0；回歸測試確認日盤路徑數字完全不變（6185天/300次轉倉）。盤別效應家族地基至此完全就緒，下一輪可直接開始測第一批盤別效應假說，不需要新測試判定（1c地基類，同第39/60/63/90輪先例不加`TRIALS_LEDGER.md`列）
+
 ## 第 92 輪 · 2026-08-26 09:35 · TW · 取鎖時偵測到`LOCK_STALE`（pid 146212持有30.0分鐘，上一輪疑似異常中止）；接手孤兒工作——上一輪已完成`f_short_reversal_1m`（短期反轉，21交易日自身累積報酬取負號）1a便宜關卡測試並產出`factor_ic_short_reversal.py`/`factors.py`定義/`TRIALS_LEDGER.md`#46，但崩潰在完成前，`TW_LOG.md`/`TW_LEADS.md`都還沒補上記錄。本輪重跑腳本確認數字一致（零新API呼叫），補齊`TW_LOG.md`本輪記錄與`TW_LEADS.md`#5列 · **FAIL**（TRAIN mean_ic=+0.0496/VAL mean_ic=−0.0054方向不一致，null percentile=23.1遠未達90.0門檻）；短期反轉家族結案，本輪無新測試，僅補齊上一輪遺漏的文件記錄
 
 ## 第 91 輪 · 2026-08-26 09:04 · US · 取鎖乾淨（非陳舊鎖檔接手）；`f_us_reversal_1m`（US軌第三個因子，短期反轉，跟`f_us_momentum_12m`的`MOM_SKIP`用完全相同的21交易日窗口）1a便宜關卡測試（`us_factor_ic.py`沿用既有`evaluate_factor()`框架，同一批27/40可用隨機樣本，`ALREADY_VERDICTED`同步補上`f_us_momentum_12m`維持單因子bonferroni_n=1語義） · **FAIL**（TRAIN mean_ic=+0.0938/VAL mean_ic=−0.0198方向不一致，null percentile=49.5遠未達90.0門檻、甚至低於50，比第88輪動能因子的FAIL更明確，`TRIALS_LEDGER.md`#45）；US軌三個純price-only因子（低波動/動能/反轉）至此全數測完1a，全部FAIL，尚無PASS/EXPERIMENTAL候選
