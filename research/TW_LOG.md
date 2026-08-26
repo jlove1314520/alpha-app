@@ -388,3 +388,19 @@
 **下一步**：短期反轉家族（唯一測過的變體`f_short_reversal_1m`）已FAIL結案；`TW_MARATHON_STATE.md`第14項候補清單其餘項目（`f_value_pb`分群IC/`f_quality_roe_stability`TRAIN期成因拆解/`MARATHON_PROTOCOL.md`第3節繼續掃BAB/特異波動率/Amihud流動性/季節性/資產成長異常/Piotroski F-score/accruals）仍是下一輪可選項。
 
 **Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只重跑`factor_ic_short_reversal.py`的`load_dev()`路徑，未觸碰holdout解鎖函式）。
+
+## 2026-08-26T11:03:40+08:00 — 馬拉松第94輪：補齊主線 `LEADS.md` 待辦（`f_rel_strength_regime_switch` PENDING→FAIL）
+
+**取鎖**：乾淨成功（`LOCK_ACQUIRED`）。三軌狀態檔最後commit時間比對：TW 08:06:39、US 09:06:59、FUT 10:35:53，TW最舊，選TW軌。
+
+**做了什麼**：讀`TW_MARATHON_STATE.md`／`TW_LEADS.md`，發現第83輪（2026-08-26 04:17）已經把`f_rel_strength_regime_switch`策略層深挖跑完並判定FAIL，但因為當時互動session的其他檔案處於dirty狀態，主線`research/LEADS.md`本身那一列被刻意跳過、留在舊的`PENDING`狀態，且從那之後US#88/#91、FUT#93等後續輪次都延續同樣的迴避慣例沒有補上——這是一筆確定、已有完整數字、只是還沒被寫進權威記錄檔的待辦，不需要新的API呼叫或新的回測，是這輪最適合的有界工作單位。
+
+**做的事**：讀`data/regime_switch_f_rel_strength.csv`（本機既有，第83輪產出）確認欄位跟`TW_LEADS.md`#4記錄的數字完全一致（TRAIN 1x/2x/3x：ann_return −6.82%/−8.03%/−9.22%、alpha全負、Sortino全負、beta+0.073、隨機控制組84.0/87.0/89.0；VAL 1x/2x/3x：ann_return +0.50%/−0.62%/−1.74%、alpha 1x略正2x/3x轉負、Sortino 0.141/0.103/0.066、beta+0.191、隨機控制組93.0/94.0/94.0）。發現CSV本身沒有MDD欄位（腳本原本就沒算），據實記錄「MDD未計算」而非編造數字。更新`research/LEADS.md`該列：候選名稱補上策略描述、判定PENDING→FAIL、Val/Train/隨機控制組百分位欄位填入1x成本下的實際數字、備註完整說明1x/2x/3x全部情境+經濟解釋+跟`f_quality_roe_stability`同款模式的對照+未測項範圍限制。
+
+**判定**：文件同步工作，不是新的假說檢定，`TRIALS_LEDGER.md`不需要新增列（#40已經是這筆試驗的權威記錄，這輪只是讓`LEADS.md`跟它同步，不是重新測試）。
+
+**本輪commit範圍**：只有`LEADS.md`（本輪唯一修改）+`TW_LOG.md`/`REPORT.md`/`MARATHON_STATE.md`（本輪記錄與心跳）。**不動**`.github/workflows/quotes.yml`（working copy裡另一筆跟本輪工作無關的uncommitted變更，延續前幾輪一貫紀律，留給使用者自己審過決定）。
+
+**下一步**：`TW_MARATHON_STATE.md`第14項候補清單仍是下一輪可選項——(a) 拆解`f_quality_roe_stability`TRAIN期絕對報酬為負是否為週轉成本drag；(b) `weinstein_stage2_unbiased`的alpha/beta顯著性關卡（`WEINSTEIN_ALPHA_GATE_TASK.md`）；(c) `f_value_pe`成本敏感度測試；(d) 照`MARATHON_PROTOCOL.md`第3節繼續掃BAB/特異波動率/Amihud流動性/季節性/資產成長異常/Piotroski F-score/accruals盈餘品質；(e) 三大法人期貨部位/T86回補（覆蓋率仍嚴重落後，見混合資料源架構條目）。
+
+**Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪沒有呼叫任何FinMind/資料載入函式，純文件編輯）。

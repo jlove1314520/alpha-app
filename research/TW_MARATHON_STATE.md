@@ -2,7 +2,9 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26（互動 session，非馬拉松自動輪次）——混合資料源架構上線，宇宙覆蓋率突破 80% 門檻**
+**最後更新：2026-08-26T11:03:40+08:00（馬拉松第94輪）——補齊主線`LEADS.md`待辦：`f_rel_strength_regime_switch`從PENDING同步為FAIL（第83輪已測完，這輪只是把數字寫進權威記錄檔），純文件同步、無新API呼叫、無新判定。**
+
+（上一版記錄，保留供對照）**2026-08-26（互動 session，非馬拉松自動輪次）——混合資料源架構上線，宇宙覆蓋率突破 80% 門檻**
 
 **這輪（互動 session，使用者直接下指示，不是排程觸發的馬拉松輪次）做的事，完整見 `DATA.md`/`REPORT.md` 2026-08-26 條目：**
 1. **FinMind 額度這天完全用盡（連最小請求都 402），解除瓶頸為最高優先**。價量歷史改用 yfinance 為主（`yf_price_client.py`，`adjust.py::adjusted_price_series()` 已切換，FinMind 手動還原邏輯降為備援）；三大法人買賣超改用 TWSE T86 為主（`twse_t86_client.py`／`backfill_t86.py`，按日期快取，一次呼叫涵蓋全市場）；月營收/財報**實測確認 TWSE openapi 只有最新快照、無歷史區間查詢，MOPS 歷史頁有反爬蟲防護擋下**，這兩類暫時仍 100% 依賴 FinMind，已加降級處理（額度用盡時該因子留空，不讓整檔股票的其他因子一起報廢，見 `factors.py`/`score_v2.py` 的 try/except）。
