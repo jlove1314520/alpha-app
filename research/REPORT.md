@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 123 輪 · 2026-08-27T06:01+08:00 · US（跳過，暫停規則生效中）· 取鎖時偵測到`LOCK_STALE`（pid 158272持有29.9分鐘，上一輪疑似異常中止，未查到殘留未commit工作）；三軌時間戳TW 05:20(第122輪)/US 04:32(第120輪，最舊)/FUT 05:01(第121輪)，依輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（`git log`確認自`a89f311`第122輪以來無互動session介入），暫停規則仍完全生效中；US軌依舊無組合策略相關工作可做，round 108/111遺留的(a)(b)(c)三項本質仍是為單因子鋪路，同round111/114/117/120判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄
+
+---
 ## 第 122 輪 · 2026-08-27T05:20+08:00 · TW · 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 04:21(第119輪，最舊)/US 04:32(第120輪)/FUT 05:01(第121輪，最新)，依輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（`git log`確認自`69c2285`第119輪以來只有第120/121輪跳過提交跟一則自動盤中報價提交，無互動session介入），暫停規則仍完全生效中，延續協定允許的地基工作：`backfill_t86.py --batch-size 200` · 本輪跑`run_batch`：200嘗試/200完成（12空）、未撞限流牆，累積T86快取836→1036/3305（25.3%→31.3%），`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列（地基工作非假說測試） · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第122輪記錄
 
 ---

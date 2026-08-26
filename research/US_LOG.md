@@ -646,3 +646,19 @@ round 108/111遺留的「下一步」(a)驗證PE因子分子、(b) gap_days異�
 **本輪沒有做任何實質工作**，只確認`is_holdout_consumed()`為`False`（本輪未打任何API）、補寫這則log跟`US_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round 108的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則或明確回應`portfolio_multifactor_v2`「下一步」選項後再接續。
 
 沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---
+
+## 第 123 輪（2026-08-27T06:01+08:00，US軌，跳過）
+
+取鎖時偵測到`LOCK_STALE`（pid 158272持有29.9分鐘，上一輪即第123輪的前次嘗試疑似異常中止）。查證工作目錄乾淨，未發現殘留未commit的孤兒工作。
+
+三軌時間戳：TW 05:20（第122輪，最新）/US 04:32（第120輪，最舊）/FUT 05:01（第121輪）——依輪替選US。
+
+複查`MARATHON_PROTOCOL.md`最上方暫停規則：`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「待使用者確認」，`git log`確認自`a89f311`（第122輪TW T86回補）以來只有第120/121輪跳過提交，沒有任何使用者互動session介入，暫停規則整體仍完全生效中。
+
+US軌檢查有沒有組合策略相關工作可做：`PORTFOLIO_STRATEGY_SPEC.md`規格書內容全部圍繞TAIEX/TWSE/台股樣本，跟US軌完全無關，沒有可做的組合策略工作，跟round 111/114/117/120判斷邏輯一致。round 108/111遺留的「下一步」(a)(b)(c)三項本質上仍是為單一因子（`f_us_value_pb`/`f_us_value_pe`）鋪路的地基工作，保守跳過，不代為決定暫停規則的邊界該怎麼解讀。
+
+**本輪沒有做任何實質工作**，只確認`is_holdout_consumed()`為`False`（本輪未打任何API）、補寫這則log跟`US_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round 108的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則或明確回應`portfolio_multifactor_v2`「下一步」選項後再接續。
+
+沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
