@@ -1321,7 +1321,7 @@
   // 2026-08-27 新增（P1-1）：統一的頁面頂端診斷橫幅，取代「六個面板各喊一次連線
   // 失敗」——集中檢查各個資料檔案的新鮮度，一次列出哪些過期/缺失、原因分類、
   // 下次排程時間。個別面板本身維持簡潔的空狀態（不重複顯示落落長的錯誤訊息）。
-  function updateDiagBanner(){
+  async function updateDiagBanner(){
     const el=document.getElementById('diag-banner');if(!el)return;
     const nowTW=zonedNow('Asia/Taipei'),nowUS=zonedNow('America/New_York');
     const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810;
@@ -1337,6 +1337,12 @@
     if(twMAge==null||twMAge>24*60)problems.push({name:'大盤指數/類股/三大法人',reason:twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'台股收盤後 14:10'});
     const usMAge=marketDataAgeMin(MARKET_US_CACHE);
     if(usMAge==null||usMAge>24*60)problems.push({name:'美股四大指數',reason:usMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'美股收盤後 21:30 UTC'});
+    // 2026-08-27 新增：個股基本面快照（月營收/PER/PBR）改排程累積更新後，超過3天沒更新
+    // 就代表 update_fundamentals_daily.py 那步連續失敗，提醒使用者可能看到過期的基本面數字。
+    await loadFundamentals('');
+    const fundGenAt=FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.meta&&FUNDAMENTALS_CACHE.meta.generated_at;
+    const fundAgeMin=fundGenAt?(Date.now()-new Date(fundGenAt).getTime())/60000:null;
+    if(fundAgeMin==null||fundAgeMin>3*24*60)problems.push({name:'個股基本面（月營收/PER/PBR）',reason:fundAgeMin==null?'無資料或缺少更新時間戳':'資料可能過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
     if(!problems.length){el.style.display='none';return}
     el.style.display='';
     el.innerHTML='⚠ 部分資料異常：'+problems.map(p=>`<b>${p.name}</b>（${p.reason}，下次排程 ${p.schedule}）`).join('；');
