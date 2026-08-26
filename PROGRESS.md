@@ -2,6 +2,46 @@
 
 給協作用（包含另一個 Claude「Cowork」）看的進度紀錄。最新的寫在最上面，條列簡潔，讓沒看過對話的人也能接手。
 
+**⚠ 給 Cowork：`data/STATUS.json` 是單一事實來源，優先讀那個，不要只憑檔名猜測。**
+你只能用完整路徑讀 raw 檔案、無法列目錄/讀 commit 紀錄，過去因此誤判
+`market.yml`、`data/market_tw.json` 這些檔案「不存在」，其實只是你不知道正確
+路徑。`data/STATUS.json` 由 `generate_status_json.py` 產生，逐一列出
+`data/` 底下每個檔案的來源/筆數/新鮮度、每個 workflow 的排程跟最近一次執行
+狀態、`index.html` 每個面板實際讀哪個資料源（包含仍在打 FinMind 的），以及
+目前待辦跟已知限制——每次有相關異動都會重新產生，直接讀那個檔案就好。
+
+---
+
+## 2026-08-27（續2）— 新增 data/STATUS.json 給 Cowork 讀，解決「不知道的檔案=不存在」的誤判
+
+**背景**：Cowork 只能用完整路徑讀 raw 檔案，無法列目錄、無法讀 commit 紀錄，
+導致它不知道 `market.yml`、`data/market_tw.json` 這些新檔案的存在，誤判成
+「沒做事」。使用者要求建立一份單一事實來源，取代只寫在 PROGRESS.md（那是給
+人看的敘事日誌，Cowork 需要的是結構化、程式可讀的現況快照）。
+
+新增 `generate_status_json.py`（repo根目錄），逐一核對（不是自動掃描）
+`data/` 底下7個檔案 + 2個 GitHub Actions workflow + `index.html` 的每個資料
+面板，產生 `data/STATUS.json`：
+- `data_files`：每個檔案的 generated_at/筆數/來源/status(ok|stale|error)，
+  含意外發現的 `data/margin_maintenance.json`——這份其實是**另一個獨立目錄**
+  `C:\alpha\alpha-data\`（`compute_margin_maintenance.py`）手動產生後寫進來
+  的，不受 alpha-app 任何 workflow 排程，會靜默過期，已記錄進
+  `known_limitations`。
+- `workflows`：即時查 GitHub API 拿兩個 workflow 最近一次執行的真實
+  status/時間，不是猜的。
+- `app_data_sources`：22個面板逐一列出實際讀什麼——`data/fundamentals.json`、
+  `data/market_tw.json`/`market_us.json`、`data/quotes_tw.json`/`quotes_us.json`
+  這幾個已migrate；財報分頁、個股走勢圖、個股三大法人/融資融券chip、主流題材
+  chips、期貨籌碼、AI相關佔位卡，都誠實列出「仍是FinMind」或「無資料源(誠實
+  佔位)」。
+- `todo`/`known_limitations`：整理出7項待辦（含優先級跟卡住原因）跟5項已知
+  限制，包含使用者上一輪問的「`data/indices.json`原始規格 vs 現有
+  `market_tw.json`/`market_us.json`是否算完成」這個尚待裁示的項目。
+
+**維護規則**：往後每次異動 `data/`、`.github/workflows/` 或 `index.html`
+的資料來源，都要重跑這支腳本再一起 commit（腳本docstring裡也寫明）。
+PROGRESS.md 頂部加了一段指引 Cowork 優先讀 `data/STATUS.json`。
+
 ---
 
 ## 2026-08-27 — 個股頁月營收/財報比率脫離client-side FinMind、補上統一診斷橫幅、清掉兩處debug遺漏的假資料
