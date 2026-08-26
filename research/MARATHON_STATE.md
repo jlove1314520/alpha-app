@@ -4,7 +4,7 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 121 輪。最新一輪：第 121 輪 · 2026-08-27T05:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨；三軌時間戳FUT最舊（第118輪03:31），正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」且自第120輪以來無互動session介入，FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第121輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 122 輪。最新一輪：第 122 輪 · 2026-08-27T05:20+08:00 · TW · 取鎖乾淨；三軌時間戳TW最舊（第119輪04:21），正常輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」且自第119輪以來無互動session介入，延續協定允許的地基工作`backfill_t86.py --batch-size 200`：200嘗試/200完成(12空)/未撞限流牆，累積T86快取836→1036/3305（25.3%→31.3%）。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第122輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
 
 **上一則保留（第120輪，供對照）**：2026-08-27T04:32+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨；三軌時間戳US最舊（第117輪03:01），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」且自第119輪以來無互動session介入，US軌無組合策略相關工作（規格書全部圍繞TAIEX/TWSE台股樣本），round108/111遺留(a)(b)(c)三項本質仍是為單因子鋪路，同round111/114/117判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第120輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 

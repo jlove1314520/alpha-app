@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 122 輪 · 2026-08-27T05:20+08:00 · TW · 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 04:21(第119輪，最舊)/US 04:32(第120輪)/FUT 05:01(第121輪，最新)，依輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（`git log`確認自`69c2285`第119輪以來只有第120/121輪跳過提交跟一則自動盤中報價提交，無互動session介入），暫停規則仍完全生效中，延續協定允許的地基工作：`backfill_t86.py --batch-size 200` · 本輪跑`run_batch`：200嘗試/200完成（12空）、未撞限流牆，累積T86快取836→1036/3305（25.3%→31.3%），`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列（地基工作非假說測試） · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第122輪記錄
+
+---
 ## 第 121 輪 · 2026-08-27T05:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 04:21(第119輪)/US 04:32(第120輪，最新)/FUT 03:31(第118輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（`git log`確認自`cb5976d`第120輪以來無互動session介入），暫停規則仍完全生效中；FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄
 
 ---
