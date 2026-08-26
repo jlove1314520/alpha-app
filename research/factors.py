@@ -81,12 +81,11 @@ REVENUE_SUE_TRAILING_MONTHS = 12
 ROE_STABILITY_TRAILING_QUARTERS = 8
 
 
-def _institutional_daily_net(stock_id: str, start_date: str) -> pd.DataFrame:
-    """Daily net buy (shares) per institutional category, wide format:
-    date, foreign_net, trust_net, dealer_net, total_net.
-    """
-    raw = load_dev("TaiwanStockInstitutionalInvestorsBuySell", stock_id, start_date)
+def _finmind_institutional_wide(stock_id: str, start_date: str) -> pd.DataFrame:
+    """Original (pre-2026-08-26) FinMind-based path. Kept as the fallback for
+    whatever date range twse_t86_client's cache doesn't cover yet."""
     cols = ["date", "foreign_net", "trust_net", "dealer_net", "total_net"]
+    raw = load_dev("TaiwanStockInstitutionalInvestorsBuySell", stock_id, start_date)
     if raw.empty:
         return pd.DataFrame(columns=cols)
     raw = raw.copy()
@@ -111,6 +110,46 @@ def _institutional_daily_net(stock_id: str, start_date: str) -> pd.DataFrame:
             wide[c] = 0.0
     wide["total_net"] = wide[["foreign_net", "trust_net", "dealer_net"]].sum(axis=1)
     return wide[cols]
+
+
+def _institutional_daily_net(stock_id: str, start_date: str) -> pd.DataFrame:
+    """Daily net buy (shares) per institutional category, wide format:
+    date, foreign_net, trust_net, dealer_net, total_net.
+
+    **2026-08-26 hybrid switch:** TWSE's own T86 open data
+    (`twse_t86_client`, cached per-date via `backfill_t86.py`) is now
+    PRIMARY -- FinMind's free tier hit a 402 quota wall this day. Since
+    `backfill_t86.py` fills its date cache incrementally (like
+    `backfill_universe.py` does for price), any given stock/range request
+    may only be PARTIALLY covered by T86 at a given point in time. Rather
+    than an all-or-nothing fallback (which would silently zero out
+    institutional flow on every T86-uncovered date once T86 has *any* data
+    at all), this fills exactly the gap dates from FinMind -- and if
+    FinMind itself is unavailable (402, or any other error), degrades
+    gracefully to "T86-only, gap dates absent" instead of raising, since a
+    factor computation for one stock should not abort the whole backfill
+    batch over one missing side-channel.
+    """
+    from twse_t86_client import institutional_daily_net_t86
+
+    t86 = institutional_daily_net_t86(stock_id, start_date)
+    if t86.empty:
+        try:
+            return _finmind_institutional_wide(stock_id, start_date)
+        except Exception:  # noqa: BLE001 -- e.g. FinMind 402; degrade to "no data" rather than abort
+            return pd.DataFrame(columns=["date", "foreign_net", "trust_net", "dealer_net", "total_net"])
+
+    try:
+        fm = _finmind_institutional_wide(stock_id, start_date)
+    except Exception:  # noqa: BLE001 -- FinMind unavailable: T86-only is still a valid, honest result
+        return t86
+    if fm.empty:
+        return t86
+    fm_gap = fm[~fm["date"].isin(set(t86["date"]))]
+    if fm_gap.empty:
+        return t86
+    combined = pd.concat([t86, fm_gap], ignore_index=True).sort_values("date").reset_index(drop=True)
+    return combined
 
 
 def _foreign_streak_strength(net: np.ndarray, avg_vol: np.ndarray) -> np.ndarray:
@@ -320,21 +359,39 @@ def prepare_factors(
     value20 = d["Trading_money"].rolling(INST_FLOW_WINDOW, min_periods=INST_FLOW_WINDOW).mean()
     d["f_inst_flow"] = net_amount.rolling(INST_FLOW_WINDOW, min_periods=INST_FLOW_WINDOW).sum() / (value20 * INST_FLOW_WINDOW)
 
-    # (a) 月營收 YoY 加速度 -- point-in-time via pit_date
-    rev_pit = _revenue_yoy_acceleration(stock_id, start_date)
-    d = _asof_join(d, rev_pit, "yoy_accel", "f_rev_accel")
+    # (a)/(b)/(g)/(h) 月營收/財報衍生因子 -- 全部依賴 FinMind
+    # TaiwanStockMonthRevenue/TaiwanStockFinancialStatements，額度用盡時個別捕捉
+    # 例外（2026-08-26 補上，跟下面 f_quality_roe_stability/f_value_pb/pe 同一套
+    # 降級模式一致）：不能讓其中一個資料集額度用盡就讓這檔股票其他 7 個因子
+    # （價格/成交量/三大法人為基礎的）也一起報廢，那正是使用者這輪要求解決的
+    # 「整條停擺」問題。
+    try:
+        rev_pit = _revenue_yoy_acceleration(stock_id, start_date)  # (a) 月營收 YoY 加速度
+        d = _asof_join(d, rev_pit, "yoy_accel", "f_rev_accel")
+    except RuntimeError as e:
+        print(f"    [factors] f_rev_accel skipped for {stock_id}: {e}")
+        d["f_rev_accel"] = np.nan
 
-    # (b) EPS 成長 -- point-in-time via pit_date
-    eps_pit = _eps_yoy_growth(stock_id, start_date)
-    d = _asof_join(d, eps_pit, "eps_yoy", "f_eps_growth")
+    try:
+        eps_pit = _eps_yoy_growth(stock_id, start_date)  # (b) EPS 成長
+        d = _asof_join(d, eps_pit, "eps_yoy", "f_eps_growth")
+    except RuntimeError as e:
+        print(f"    [factors] f_eps_growth skipped for {stock_id}: {e}")
+        d["f_eps_growth"] = np.nan
 
-    # (g) PEAD/財報意外 (SUE) -- point-in-time via pit_date
-    sue_pit = _eps_surprise_sue(stock_id, start_date)
-    d = _asof_join(d, sue_pit, "eps_sue", "f_eps_surprise")
+    try:
+        sue_pit = _eps_surprise_sue(stock_id, start_date)  # (g) PEAD/財報意外 (SUE)
+        d = _asof_join(d, sue_pit, "eps_sue", "f_eps_surprise")
+    except RuntimeError as e:
+        print(f"    [factors] f_eps_surprise skipped for {stock_id}: {e}")
+        d["f_eps_surprise"] = np.nan
 
-    # (h) 營收意外 (SUE) -- point-in-time via pit_date
-    rev_sue_pit = _revenue_surprise_sue(stock_id, start_date)
-    d = _asof_join(d, rev_sue_pit, "revenue_sue", "f_revenue_surprise")
+    try:
+        rev_sue_pit = _revenue_surprise_sue(stock_id, start_date)  # (h) 營收意外 (SUE)
+        d = _asof_join(d, rev_sue_pit, "revenue_sue", "f_revenue_surprise")
+    except RuntimeError as e:
+        print(f"    [factors] f_revenue_surprise skipped for {stock_id}: {e}")
+        d["f_revenue_surprise"] = np.nan
 
     # (i) 低波動: 60 日日報酬標準差取負號（波動越低分數越高），純價格資料，天然 point-in-time
     daily_ret = d["adj_close"].pct_change()

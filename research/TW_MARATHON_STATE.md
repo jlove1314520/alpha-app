@@ -2,11 +2,17 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T00:36:06+08:00**（馬拉松第78輪，取鎖時偵測到`LOCK_STALE`（pid 132048持有鎖30.1分鐘後被回收，第77輪US軌之後某一輪疑似異常中止，未留下任何log）：全市場宇宙回補第二十四批，`backfill_universe.py --batch-size 300`，額度已恢復未被立即限流。本批嘗試137檔，新完成100/新跳過22，撞限流牆提前停止（設計內行為）。累積覆蓋率1819→1919/3196（56.9%→60.0%），累積永久跳過384→406）
+**最後更新：2026-08-26（互動 session，非馬拉松自動輪次）——混合資料源架構上線，宇宙覆蓋率突破 80% 門檻**
 
-**地基狀態：✅ 完整可用，不需要額外搭建。** `universe.py`（全市場宇宙）、`adjust.py`（還原股價）、`pit.py`（point-in-time）、`factors.py`（因子計算框架）、`factor_ic.py`（IC 檢定引擎，含 Bonferroni 校正）、`score.py`（綜合分引擎）、`long_short_backtest.py`（十分位多空回測引擎，含配對式隨機控制組/CAPM beta/成本模型）全部可以直接重用。
+**這輪（互動 session，使用者直接下指示，不是排程觸發的馬拉松輪次）做的事，完整見 `DATA.md`/`REPORT.md` 2026-08-26 條目：**
+1. **FinMind 額度這天完全用盡（連最小請求都 402），解除瓶頸為最高優先**。價量歷史改用 yfinance 為主（`yf_price_client.py`，`adjust.py::adjusted_price_series()` 已切換，FinMind 手動還原邏輯降為備援）；三大法人買賣超改用 TWSE T86 為主（`twse_t86_client.py`／`backfill_t86.py`，按日期快取，一次呼叫涵蓋全市場）；月營收/財報**實測確認 TWSE openapi 只有最新快照、無歷史區間查詢，MOPS 歷史頁有反爬蟲防護擋下**，這兩類暫時仍 100% 依賴 FinMind，已加降級處理（額度用盡時該因子留空，不讓整檔股票的其他因子一起報廢，見 `factors.py`/`score_v2.py` 的 try/except）。
+2. **全市場宇宙回補（`backfill_universe.py`）done 判定改成只看價格**（財報/月營收變成盡力而為、不擋 done），一批 560 檔幾乎全部靠 yfinance 成功，**累積覆蓋率 60.0%→81.3%（2597/3196），一次性突破 80% 門檻**。`MAX_CONSECUTIVE_RATE_LIMITS` 從 15 調高到 60（舊門檻在新架構下太容易被「一串較舊下市股剛好連續失敗」誤觸發提早停止）。
+3. **⚠️ TWSE T86 端點有自己的反爬蟲封鎖**：`backfill_t86.py` 第一次嘗試在約 30 次呼叫內就被封鎖（回傳「FOR SECURITY REASONS」HTML 頁而非 JSON，307 狀態碼），已加 `TWSEBlockedError` 偵測+立刻停止（不重試）、呼叫間隔從 0.4 秒調高到 2.0 秒（未驗證是否足夠，之後如果還是被擋要再拉長）。**目前 T86 快取只有 36 個交易日**（2015-01-09～2015-02-09 附近），三大法人相關因子（`f_foreign_streak`/`f_inst_flow`）目前實際上大部分日期還是要等 FinMind 額度恢復才有值，這不是已解決、是進行中，誠實記錄。
+4. `generate_scores_v2.py`（App 選股頁）加上 `realtime_asof.py::as_of_today()`，基準日從固定 `VAL_END`（2024-12-31）改成即時最新交易日，機制是暫時性拉高 `validation.holdout.VAL_END` 這個模組屬性（不碰 holdout 鎖），詳見該檔案 docstring。過程中順便修好兩個真 bug：`score_v2.py::compute_scores_v2()` 全部股票都算不出分數時 `pd.DataFrame([]).set_index()` 會崩潰（空結果的邊界情況）；`_revenue_yoy_latest()`/`_revenue_growth_12m()` 沒有捕捉 FinMind 402 例外。
 
-**⚠️ 目前最高優先序：全市場宇宙回補未達門檻，優先於測新因子/深挖候選**（見 `MARATHON_PROTOCOL.md` 第5b節）。累積覆蓋率：**1919/3196（60.0%）**，門檻80%。下一輪若輪到TW軌，先跑 `python backfill_universe.py --batch-size 300`（除非一開始就立刻被限流，那種情況改做候補工作單位（14）情境條件式檢驗或系統化掃因子家族）。
+**地基狀態：✅ 完整可用，不需要額外搭建。** `universe.py`（全市場宇宙）、`adjust.py`（還原股價，現以 yfinance 為主）、`pit.py`（point-in-time）、`factors.py`（因子計算框架）、`factor_ic.py`（IC 檢定引擎，含 Bonferroni 校正）、`score.py`（綜合分引擎）、`long_short_backtest.py`（十分位多空回測引擎，含配對式隨機控制組/CAPM beta/成本模型）、`twse_t86_client.py`/`yf_price_client.py`（新增的混合資料源客戶端）全部可以直接重用。
+
+**宇宙覆蓋率：81.3%（2597/3196），已達 80% 門檻。** 下一輪起工作單位優先序照 `MARATHON_PROTOCOL.md` 第5b節「達到門檻後改回測新因子/深挖候選為主」，回補變成背景待辦——但**財報/月營收欄位額度用盡時被跳過的股票（本輪560檔嘗試裡405檔屬於此類）需要之後找機會用 `backfill_universe.py` 重跑同一批 stock_id 補上，這批「price done但finrev缺」的名單目前沒有另外落地追蹤（設計上是每次呼叫因子計算時自動重試，不需要專門的回補清單，見 `backfill_universe.py` 2026-08-26 docstring）**。
 
 **已知的立即可做工作（優先序）：**
 1. ~~`f_value_pb`／`f_value_pe`／`f_quality_roe_stability` 重測~~ ✅ 第一輪（2026-08-23上午）已完成，見 `TW_LOG.md`／`TW_LEADS.md`／`TRIALS_LEDGER.md` #13–#15。

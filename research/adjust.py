@@ -1,4 +1,20 @@
-"""還原股價 (back-adjusted TW stock price) built from raw price + dividend data.
+"""還原股價 (back-adjusted TW stock price).
+
+**2026-08-26 architecture change:** FinMind's free tier hit a hard 402
+(quota exhausted) wall this day, and the user directed a hybrid source
+switch -- price/volume history now comes PRIMARILY from yfinance
+(`yf_price_client.py`), which returns already dividend/split-adjusted
+closes for free with no comparable rate limit. The FinMind-based manual
+back-adjustment below (raw TaiwanStockPrice + TaiwanStockDividend) is kept
+as the FALLBACK for stock_ids yfinance doesn't carry -- mainly older
+delisted names not on Yahoo Finance at all. `adjusted_price_series()`
+tries yfinance first and only falls through to the FinMind reconstruction
+if yfinance comes back empty; the returned DataFrame carries a `source`
+column ('yfinance' or 'finmind') so callers/audits can tell which path
+served any given row.
+
+Below this point is the ORIGINAL FinMind-based fallback path, unchanged
+except for being demoted from primary to fallback:
 
 FinMind's free tier does not offer adjusted prices for TW stocks
 (TaiwanStockPriceAdj is paid-tier only -- see DATA.md, milestone-1 audit,
@@ -99,13 +115,33 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
 
 
 def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
-    """Raw TaiwanStockPrice rows (capped at VAL_END, see module docstring) with
-    an added `adj_close` column (back-adjusted)."""
+    """Adjusted daily price series, capped at VAL_END. Tries yfinance first
+    (see module docstring, 2026-08-26); falls back to the FinMind-based
+    manual back-adjustment below if yfinance has no data for this stock_id.
+
+    Columns: date, open, high, low, close, volume, adj_close, source.
+    `close` is the raw (unadjusted) close on the yfinance path too, for
+    column-shape compatibility with the FinMind path -- yfinance's
+    auto_adjust=True close IS the adjusted value, so on that path
+    close == adj_close by construction (both hold the adjusted number;
+    there is no separately-fetchable raw close from yfinance without a
+    second, unadjusted request, which isn't worth the extra API call here).
+    """
+    from yf_price_client import fetch_yf_adjusted
+
+    yf_df = fetch_yf_adjusted(stock_id, start_date)
+    if not yf_df.empty:
+        out = yf_df.copy()
+        out["adj_close"] = out["close"]
+        out.attrs["n_events_applied"] = None  # not tracked on this path -- yfinance handles it internally
+        return out
+
     raw = load_dev("TaiwanStockPrice", stock_id, start_date)
     if raw.empty:
         # Bug fixed 2026-08-22: this used to call .sort_values("date") before checking
         # emptiness -- an empty DataFrame has zero columns, so that raised KeyError('date')
         # instead of just returning the (correctly empty) result.
+        raw["source"] = None  # keep column-shape consistent even in the empty case
         return raw
     raw = raw.sort_values("date").reset_index(drop=True)
     events = adjustment_events(stock_id, start_date)
@@ -117,5 +153,6 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
 
     out = raw.copy()
     out["adj_close"] = adj
+    out["source"] = "finmind"
     out.attrs["n_events_applied"] = len(events)
     return out

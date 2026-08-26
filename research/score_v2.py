@@ -61,7 +61,13 @@ TW_TZ = timezone(timedelta(hours=8))
 # 這裡重複呼叫不會真的多打 FinMind API。
 
 def _revenue_yoy_latest(stock_id: str, start_date: str) -> float | None:
-    rev = month_revenue_pit(stock_id, start_date)
+    try:
+        rev = month_revenue_pit(stock_id, start_date)
+    except RuntimeError:
+        # 2026-08-26：FinMind 額度用盡等錯誤在這裡也要降級成「沒有這個數字」，
+        # 不能讓一檔股票的月營收抓不到就讓整批 compute_scores_v2() 全部崩潰
+        # （跟 factors.py 那批因子的降級處理同一個修法）。
+        return None
     if rev.empty:
         return None
     rev = rev.sort_values(["revenue_year", "revenue_month"]).reset_index(drop=True)
@@ -78,7 +84,10 @@ def _revenue_yoy_latest(stock_id: str, start_date: str) -> float | None:
 
 
 def _revenue_growth_12m(stock_id: str, start_date: str) -> float | None:
-    rev = month_revenue_pit(stock_id, start_date)
+    try:
+        rev = month_revenue_pit(stock_id, start_date)
+    except RuntimeError:
+        return None  # same degrade-not-crash rationale as _revenue_yoy_latest() above
     if rev.empty or len(rev) < 24:
         return None
     rev = rev.sort_values(["revenue_year", "revenue_month"]).reset_index(drop=True)
@@ -142,6 +151,12 @@ def compute_scores_v2(
             "raw_pe": pe,
             "raw_peg": peg,
         })
+    if not rows:
+        # Bug fixed 2026-08-26 (surfaced by an all-FinMind-402 test run): pd.DataFrame([])
+        # has zero columns, so .set_index("stock_id") on it raises KeyError('stock_id')
+        # instead of returning the (correctly empty) result -- same class of bug as the
+        # one already fixed in adjust.py's adjustment_events()/adjusted_price_series().
+        return pd.DataFrame()
     cs = pd.DataFrame(rows).set_index("stock_id")
     if cs.empty:
         return cs

@@ -6,27 +6,26 @@
 本身**沒有刪除**，因為 `score.py` 的函式還有其他研究腳本在用；只是 App 顯示用的
 `scores.json` 之後改由這支腳本產生。
 
-基準日一樣沿用 `VAL_END`（`load_dev()` 架構上的截斷點），不是即時資料——這是既有、
-已經在 `FACTORS.md`/`STRATEGY_LOG.md` 揭露過的架構限制。
+**2026-08-26 補上即時資料路徑，解除延宕兩輪的架構卡關：** 基準日改成「今天」，
+不再固定卡在 `VAL_END`（2024-12-31）。做法是 `realtime_asof.py` 的
+`as_of_today()`——一個只在這支腳本的抓資料範圍內生效的 context manager，暫時把
+`validation.holdout.VAL_END` 這個模組屬性拉高到今天，讓 `load_dev()`／
+`yf_price_client.fetch_yf_adjusted()`／`twse_t86_client.institutional_daily_net_t86()`
+這些全部走「執行當下才 import/讀取 VAL_END」設計的資料層讀到新邊界，離開這個
+context manager 後立刻還原成 2024-12-31。**這不是繞過 holdout**：`HOLDOUT_LOCK.json`／
+`is_holdout_consumed()` 完全沒被碰，`score_v2.py` 的 `FACTOR_DEFS` 權重維持凍結、
+不會被這輪或未來任何一次即時算分重新估計——這正是使用者 2026-08-25 那條規則
+（「凍結權重＋當前資料＝合法正式out-of-sample，不算碰研究holdout」）字面上要求的
+機制，細節/理由見 `realtime_asof.py` docstring 跟 `MARATHON_STATE.md` 2026-08-25
+條目。**注意分工**：`factor_ic.py`／`TRIALS_LEDGER.md` 那一套嚴謹驗證管線完全沒有
+被這裡影響——這支腳本自己開關這個 context manager，不會讓 VAL_END 的改變外溢到
+同一個 Python process 裡其他同時執行的程式碼（沒有其他程式碼會在這個 with 區塊
+執行期間跑）。
 
-**2026-08-25 使用者回報 App 選股頁只有 69 檔、資料停在 2024-12-31，這裡誠實記錄
-這輪實際做了什麼、沒做什麼：**
-- **樣本數 69→更大**：這輪把樣本數從 `factor_ic.py` 共用的 `SAMPLE_SIZE=100`（那個
-  常數是驗證管線在用的，動它會牽動 `TRIALS_LEDGER.md` 已經記錄過的統計結果，不能
-  為了這裡的展示需求去改），改成這支腳本自己獨立的 `SCORES_SAMPLE_SIZE`＋自己的
-  seed（跟研究驗證用的抽樣完全分開，互不影響），這樣可以放心加大而不影響任何已經
-  做過的統計檢定。
-- **VAL_END 卡在 2024-12-31 這件事，這輪沒有動**：使用者的規則澄清（凍結權重代入
-  當前資料不算碰holdout）在政策上是合理的，但要讓這支腳本真的抓到「今天」的資料，
-  必須讓 `adjust.py::adjusted_price_series()` 跟 `factors.py::prepare_factors()`
-  改用 `finmind_client.load_full_history()`——這兩個函式是**驗證管線也在共用的地基
-  模組**，`adjust.py` 模組docstring本身明白寫「這是刻意設計、只有真正做一次性
-  holdout評估時才能繞過」，`load_full_history()`自己的docstring也寫「唯一合法用途
-  是餵給unlock_holdout_once()」——這兩份文件都是這個專案已經很謹慎地把holdout保護
-  焊死在程式碼設計裡的結果，不是可以隨手加一個參數繞過的地方。在沒有更完整評估
-  「怎麼改才不會影響到驗證管線的其他呼叫路徑」之前，貿然改這裡風險太高（這個
-  專案的核心資產就是holdout保護的可信度），這部分留給下一輪/使用者決定要怎麼做
-  （例如：另外寫一份不共用 adjust.py/factors.py 的獨立抓取邏輯，専門給這支腳本用）。
+**2026-08-25 使用者回報 App 選股頁只有 69 檔的追加**：樣本數已從 `factor_ic.py`
+共用的 `SAMPLE_SIZE=100`（驗證管線在用，動它會牽動 `TRIALS_LEDGER.md` 已經記錄過
+的統計結果，不能為了展示需求去改）換成這支腳本自己獨立的 `SCORES_SAMPLE_SIZE`
+＋自己的 seed，跟研究驗證用的抽樣完全分開、互不影響。
 """
 from __future__ import annotations
 
@@ -38,11 +37,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from factor_ic import load_sample_with_factors, START_DATE
 from finmind_client import load_dev
+from realtime_asof import as_of_today
 from score import load_industry_map, load_name_map
 from score_v2 import export_scores_v2_json
 from strategies.weinstein_stage2 import prepare_market_data
 from universe import universe
-from validation.holdout import VAL_END
 
 # 跟 factor_ic.py 的 SAMPLE_SIZE/SAMPLE_SEED（驗證管線在用，見上面docstring說明）
 # 完全獨立的一組常數，只給這支「消費端展示產品」腳本自己用，互不影響。
@@ -66,10 +65,24 @@ def main(top_n: int | None = None, out_path: str = "../scores.json",
     # 前端排行榜清單只顯示前 30 名，但搜尋框可以查到樣本內任何一檔已經算出分數的股票；
     # 樣本外的股票（沒被抽到樣本、或 coverage<0.5）誠實顯示「查無評分資料」，不是假裝算得出來。
     sample_ids = sample_scores_universe_ids(sample_size, sample_seed)
-    market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
-    market_df = prepare_market_data(market_raw)
-    data = load_sample_with_factors(sample_ids, market_df)
-    print(f"{len(data)}/{len(sample_ids)} 檔可用")
+    with as_of_today() as as_of:
+        from yf_price_client import fetch_yf_index
+        market_raw = fetch_yf_index("^TWII", START_DATE)
+        if market_raw.empty:
+            # yfinance index fetch failed for some reason -- fall back to FinMind,
+            # which may itself be capped at the true VAL_END (2024-12-31) if its
+            # quota is exhausted; stale-but-valid beats crashing the whole run.
+            market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
+        market_df = prepare_market_data(market_raw)
+        data = load_sample_with_factors(sample_ids, market_df)
+        # 基準日不能直接用「今天」的日曆日期：今天可能還沒收盤、還沒有這天的
+        # OHLC（尤其是這支腳本白天跑的時候），直接拿日曆日期去比對 d["date"]==as_of
+        # 會因為那天根本沒有資料列而全部篩掉，變成「0 檔計算出分數」（2026-08-26
+        # 這輪測試時發現的真bug，不是資料源問題）。改用大盤序列實際存在的最後一筆
+        # 日期，這才是「目前實際上看得到的最新交易日」。
+        if not market_df.empty:
+            as_of = market_df["date"].max()
+    print(f"{len(data)}/{len(sample_ids)} 檔可用，基準日（即時，非 VAL_END）{as_of}")
 
     industry_map = load_industry_map()
     name_map = load_name_map()
@@ -77,10 +90,10 @@ def main(top_n: int | None = None, out_path: str = "../scores.json",
     print(f"產業對照表 {len(industry_map)} 筆，公司名稱對照表 {len(name_map)} 筆，全市場宇宙 {universe_size} 檔")
 
     cs = export_scores_v2_json(
-        VAL_END, data, industry_map, name_map, out_path,
+        as_of, data, industry_map, name_map, out_path,
         start_date=START_DATE, top_n=top_n, universe_size=universe_size,
     )
-    print(f"已產生 {out_path}，{len(cs)} 檔計算出分數，基準日 {VAL_END}")
+    print(f"已產生 {out_path}，{len(cs)} 檔計算出分數，基準日 {as_of}")
     if not cs.empty:
         print(cs[["industry", "total_score", "coverage", "rank"]].head(10).to_string())
     return cs

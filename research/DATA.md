@@ -430,3 +430,29 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 ## 給下一步（里程碑 2：驗證框架）的提醒
 
 在驗證框架的成本模型裡，除了鐵律裡列的手續費/證交稅/滑價，**「資料偏差」本身也要當成一種要揭露的成本**：任何在 2005 年前的台股回測、任何用到季報「期末日當公告日」的訊號，都要在報告裡標註「此結果可能因資料偏差而失真，僅供初篩」，不能當作乾淨的樣本外驗證結果。
+
+---
+
+## 2026-08-26：FinMind 額度用盡（402），混合資料源架構——實測結果
+
+**背景**：FinMind 免費層這天完全用盡（連 1 筆最小請求都直接 402），使用者裁示改混合架構。以下是**實測結果**，不是規劃猜測——每個資料源都直接 curl/呼叫過確認可用性/限制。
+
+**✅ 價量歷史 → yfinance（已全面改為主要來源，見 `yf_price_client.py`／`adjust.py`）：**
+- 台股上市用 `{代號}.TW`、上櫃用 `{代號}.TWO`，兩個後綴都試、哪個有資料用哪個。
+- `auto_adjust=True` 直接拿到還原股價（股利+分割皆已調整），**免費、無明顯流量限制**，比 FinMind 免費層本來就不給的 `TaiwanStockPriceAdj` 還好用。
+- 缺口：較舊的下市股（尤其 2015 年前下市者）Yahoo Finance 常常兩個後綴都查無資料——這種情況退回原本 FinMind 手動還原邏輯當備援；FinMind 額度用盡期間，這批舊下市股暫時無法補（不是新問題，資料源本身沒有，等 FinMind 額度恢復才能透過備援補齊）。
+- 為維持所有既有下游程式碼（`factors.py::prepare_factors()`、`backtest/engine.py` 的漲跌停偵測）不用改，yfinance 輸出額外附加 FinMind 相容欄位別名（`max`/`min`/`Trading_Volume`/`Trading_money`）——`Trading_money`是`close*volume`近似值（FinMind原始是逐筆成交值加總，yfinance只有日收盤，兩者量級一致但非逐筆精確值），只用在20日滾動平均正規化，這個近似不影響結論。
+
+**✅ 三大法人買賣超 → TWSE T86（已全面改為主要來源，見 `twse_t86_client.py`／`backfill_t86.py`）：**
+- `https://www.twse.com.tw/rwd/zh/fund/T86?response=json&date=YYYYMMDD&selectType=ALL` **支援任意歷史日期查詢**（不是只有最新日）——實測 2024-01-02 正常回傳全市場 14,524 筆（含個股+ETF+權證）。
+- 結構跟 FinMind 相反：FinMind 是「一檔股票、任意日期區間」一次呼叫；T86 是「一個日期、全市場」一次呼叫——**這對回補全市場歷史反而更有效率**：一天的 HTTP 呼叫就能覆蓋全部 3,196 檔，不用每檔各打一次。快取單位因此改成「一個交易日一個 parquet 檔」，見 `twse_t86_client.py` docstring。
+- `backfill_t86.py`：仿 `backfill_universe.py` 的可斷點續傳批次設計，用日期而非股票 ID 當回補單位。
+- `factors.py::_institutional_daily_net()` 已改用「T86 為主、FinMind 補缺口日期、FinMind 也失敗則誠實留空」的三層降級邏輯，不會因為某個資料源不可用就讓整檔股票的其他因子一起報廢。
+
+**❌ 月營收／財報 → TWSE openapi／MOPS 官方開放資料，實測後確認「無法完整取代」，誠實記錄原因：**
+- `https://openapi.twse.com.tw/v1/opendata/t187ap05_L`（月營收）、`t187ap06_L_ci`（綜合損益表）：**實測回傳只有「最新一期」的全市場快照**（1085/987 筆全部欄位 `資料年月`/`出表日期` 相同值），**沒有歷史區間查詢參數**——這兩個端點適合「每天/每季抓一次保持最新」，完全不能拿來回補歷史訓練/驗證期資料。
+- MOPS 官方查詢頁（`mops.twse.com.tw/nas/t21/...`）有反爬蟲防護，直接呼叫回傳「FOR SECURITY REASONS, THIS PAGE CAN NOT BE ACCESSED」（測試 URL：`t21sc03_114_7_0.html`）——需要先走表單頁拿 session/cookie 才能過關，這輪判斷投入產出比不划算（要嘛做一個容易失效的爬蟲、要嘛等 FinMind 額度恢復），**沒有動手做，誠實記錄成「已嘗試、被擋，暫不追加」，不是漏做**。
+- **現況：月營收/財報歷史回補仍然 100% 依賴 FinMind**，額度用盡期間這兩類資料無法新增（`factors.py`/`backfill_universe.py` 已加降級處理，額度用盡時跳過但不讓整批/整檔失敗，等額度恢復會自動補上，不需要额外動作）。
+- **一個有價值的副產品**：`t187ap05_L`/`t187ap06_L_ci` 這種「全市場最新快照、一次呼叫」的特性，非常適合 `generate_scores_v2.py` 的即時算分需求（只需要「今天」這一期的值，不需要歷史），但這輪沒有實作進去（見 `generate_scores_v2.py` 2026-08-26 條目，即時路徑目前仍是 FinMind 主、額度用盡就該檔股票的財報/營收類因子留空，不是致命缺口，但下一輪可以考慮接上這兩個端點當 fallback，減少即時算分被 FinMind 額度卡住的機率）。
+
+**宇宙覆蓋率結果（見 `TW_MARATHON_STATE.md` 最新數字）**：改用 yfinance 為主要價格來源後，`backfill_universe.py` 不再受 FinMind 額度牽制，單批次（無需等待 FinMind 額度恢復）就能大幅推進覆蓋率——2026-08-26 這輪從 60.0% 推進到本文件寫下當下的最新數字（見 `TW_MARATHON_STATE.md`），細節數字以那份文件為準（覆寫式，反映當下最新狀態）。
