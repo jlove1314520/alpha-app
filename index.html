@@ -373,6 +373,7 @@
       <span class="pill num" id="mkt-us"><span class="dot"></span>美股 <b>—</b> <span class="tm">--:--</span></span>
     </div>
   </header>
+  <div id="diag-banner" style="display:none;background:rgba(250,178,25,.1);border-bottom:1px solid rgba(250,178,25,.25);color:var(--warn);font-size:11px;padding:8px 16px;line-height:1.5"></div>
 
   <main id="main">
 
@@ -695,11 +696,11 @@
           <div class="rev-chart-labels" id="rev-chart-labels"></div>
         </div>
         <div class="note" style="margin-top:2px">上：營收金額（從0起跳）；下：年增率YoY（以0為中心，紅漲綠跌隨顯示偏好）。觸控/按住任一根柱可看細節</div>
-        <div class="note" id="rev-note">來源：FinMind 月營收</div>
+        <div class="note" id="rev-note">來源：research 快照（data/fundamentals.json）</div>
       </div>
-      <div class="card ai-card">
+      <div class="card ai-card" style="opacity:.7">
         <div class="ai-tag">✦ AI 營收解讀</div>
-        <p>連 4 月創同期新高，主因 <b>3nm 滿載＋AI 加速器追單</b>。法說會指引 Q3 美元營收 QoQ +8–10%，目前 7 月已達季目標 36%，進度略超前。</p>
+        <div class="note">功能建置中 · 尚未接上真實法說會/新聞資料，暫不顯示具體解讀內容</div>
       </div>
     </div>
 
@@ -755,18 +756,13 @@
     </div>
 
     <div class="subscreen" id="sub-ai">
-      <div class="card ai-card">
-        <div class="ai-tag">✦ AI 個股簡報 · 今日 13:05</div>
-        <p style="margin-bottom:8px"><b>現在的故事：</b>AI 資本支出循環仍在上行，3nm/2nm 產能到 2027 已被預訂。短線催化劑是下週 NVDA 財報與 CoWoS 擴產新聞。</p>
-        <p style="margin-bottom:8px"><b>風險點：</b>① 今晚 CPI 若燙、費半修正會拖累 ADR；② 新台幣升值侵蝕毛利（每升 1% 影響約 0.4pp）；③ 關稅政策對 HPC 客戶拉貨節奏的不確定性。</p>
-        <p><b>籌碼面：</b>外資 5 日買超 4 天、大戶持股續增，與基本面同向。</p>
-        <div class="src">依據：26Q2 法說逐字稿 · MOPS 財報 · TWSE 籌碼 · 新聞 12 則（點看原文）</div>
+      <div class="card ai-card" style="opacity:.7">
+        <div class="ai-tag">✦ AI 個股簡報</div>
+        <div class="note">功能建置中 · 尚未接上真實法說會/新聞/籌碼綜合分析資料，暫不顯示具體判斷內容</div>
       </div>
-      <div class="card">
-        <h3>券商報告雷達（摘要+連結，不轉載原文）</h3>
-        <div class="ev"><span class="imp" style="background:var(--up)"></span><div class="tm">8/19</div><div class="tx"><b>外資 M 系</b>　目標價上調至 1,680（新聞轉述）</div></div>
-        <div class="ev"><span class="imp" style="background:var(--up)"></span><div class="tm">8/15</div><div class="tx"><b>本土 Y 證券</b>　維持買進，上修 2026 EPS 至 82.5</div></div>
-        <div class="ev"><span class="imp" style="background:var(--ink-3)"></span><div class="tm">8/12</div><div class="tx"><b>外資 G 系</b>　中立，評價已反映（新聞轉述）</div></div>
+      <div class="card" style="opacity:.7">
+        <h3>券商報告雷達</h3>
+        <div class="note">功能建置中 · 尚未接上真實券商研究報告資料源</div>
       </div>
     </div>
 
@@ -1294,6 +1290,7 @@
       }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 無報價（${noQuoteReason(code,false)}）</span></div>`}
     }
     stampUpdated('home');
+    updateDiagBanner();
   }
 
   // ══════ 市場頁（大盤指數 / 類股 / 三大法人 / 期貨籌碼）══════
@@ -1308,7 +1305,42 @@
   // 呼叫 FinMind——FinMind 免費層已 402 額度用盡，client-side 直打全部會失敗
   // （見 research/ 第79輪記錄）。跟 quotes_tw.json/quotes_us.json 同一套「排程抓→
   // commit→App只讀檔」模式，見 .github/workflows/market.yml。
+  // 2026-08-27 新增：個股月營收/財報比率(PER/PBR/殖利率)改讀 data/fundamentals.json
+  // （見 research/build_fundamentals_json.py），跟 market_tw.json 一樣是本機檔案、
+  // 不呼叫 FinMind。這份檔案是手動快照非排程自動更新（該腳本docstring已揭露原因），
+  // 只查得到「產生當下研究端剛好有快取」的股票，查不到時回傳空物件，呼叫端會
+  // 自然顯示「—」而不是崩潰。
+  let FUNDAMENTALS_CACHE=null;
+  async function loadFundamentals(code){
+    if(!FUNDAMENTALS_CACHE){
+      try{const r=await fetch('data/fundamentals.json?t='+Date.now());if(r.ok)FUNDAMENTALS_CACHE=await r.json()}catch(e){FUNDAMENTALS_CACHE={fundamentals:{}}}
+    }
+    return (FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.fundamentals&&FUNDAMENTALS_CACHE.fundamentals[code])||{};
+  }
   let MARKET_TW_CACHE=null,MARKET_US_CACHE=null;
+  // 2026-08-27 新增（P1-1）：統一的頁面頂端診斷橫幅，取代「六個面板各喊一次連線
+  // 失敗」——集中檢查各個資料檔案的新鮮度，一次列出哪些過期/缺失、原因分類、
+  // 下次排程時間。個別面板本身維持簡潔的空狀態（不重複顯示落落長的錯誤訊息）。
+  function updateDiagBanner(){
+    const el=document.getElementById('diag-banner');if(!el)return;
+    const nowTW=zonedNow('Asia/Taipei'),nowUS=zonedNow('America/New_York');
+    const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810;
+    const usOpen=nowUS.wd>=1&&nowUS.wd<=5&&(nowUS.h*60+nowUS.mi)>=570&&(nowUS.h*60+nowUS.mi)<960;
+    const problems=[];
+    // 台股/美股報價：只有在盤中卻過期/缺失才算問題，休市時資料本來就該是舊的。
+    const twQAge=intradayAgeMin(INTRADAY_TW);
+    if(twOpen&&(twQAge==null||twQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股台股報價',reason:twQAge==null?'無資料':'資料過舊',schedule:'盤中每10分鐘（09:00–13:30）'});
+    const usQAge=intradayAgeMin(INTRADAY_US);
+    if(usOpen&&(usQAge==null||usQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股美股報價',reason:usQAge==null?'無資料':'資料過舊',schedule:'盤中每10分鐘'});
+    // 大盤/類股/三大法人、美股指數：這兩個一天只排程1-2次，用24小時當過期門檻。
+    const twMAge=marketDataAgeMin(MARKET_TW_CACHE);
+    if(twMAge==null||twMAge>24*60)problems.push({name:'大盤指數/類股/三大法人',reason:twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'台股收盤後 14:10'});
+    const usMAge=marketDataAgeMin(MARKET_US_CACHE);
+    if(usMAge==null||usMAge>24*60)problems.push({name:'美股四大指數',reason:usMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'美股收盤後 21:30 UTC'});
+    if(!problems.length){el.style.display='none';return}
+    el.style.display='';
+    el.innerHTML='⚠ 部分資料異常：'+problems.map(p=>`<b>${p.name}</b>（${p.reason}，下次排程 ${p.schedule}）`).join('；');
+  }
   async function loadMarketDataFiles(force){
     if(force||!MARKET_TW_CACHE){
       try{const r=await fetch('data/market_tw.json?t='+Date.now());if(r.ok)MARKET_TW_CACHE=await r.json()}catch(e){}
@@ -1603,6 +1635,7 @@
     if(MKT_STATE.market==='US')loadMarketUS();
     if(MKT_STATE.market==='FUT')loadMarketFUT();
     stampUpdated('market');
+    updateDiagBanner();
   }
 
   // ── 左滑刪除 ──
@@ -1800,7 +1833,7 @@
       const prev=rev.find(x=>x.revenue_year===py&&x.revenue_month===pm);
       const mom=prev&&prev.revenue?(r.revenue-prev.revenue)/prev.revenue*100:null;
       const yr=rev.find(x=>x.revenue_year===r.revenue_year-1&&x.revenue_month===r.revenue_month);
-      const yoy=yr&&yr.revenue?(r.revenue-yr.revenue)/yr.revenue*100:null;
+      const yoy=r.yoyPre!=null?r.yoyPre:(yr&&yr.revenue?(r.revenue-yr.revenue)/yr.revenue*100:null);
       return {...r,mom,yoy,price:priceAt(r.revenue_year,r.revenue_month)};
     });
     const amtVals=REV_ROWS.map(r=>r.revenue/1e8);const amtMax=Math.max(...amtVals)||1;
@@ -1815,7 +1848,7 @@
     lblEl.innerHTML=REV_ROWS.map(r=>`<span>${r.revenue_month}月</span>`).join('');
     const rl=REV_ROWS[REV_ROWS.length-1];
     const ye=document.getElementById('kn-yoy');ye.textContent=rl.yoy!=null?(rl.yoy>=0?'+':'')+rl.yoy.toFixed(1)+'%':'—';ye.className=rl.yoy>=0?'pos':'neg';
-    document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${rl.yoy!=null?` · YoY <b class="${rl.yoy>=0?'pos':'neg'}">${rl.yoy>=0?'+':''}${rl.yoy.toFixed(1)}%</b>`:''} · FinMind`;
+    document.getElementById('rev-note').innerHTML=`${rl.revenue_year}/${rl.revenue_month} 月營收 ${nf(Math.round(rl.revenue/1e8))} 億${rl.yoy!=null?` · YoY <b class="${rl.yoy>=0?'pos':'neg'}">${rl.yoy>=0?'+':''}${rl.yoy.toFixed(1)}%</b>`:''} · research快照`;
   }
 
   function renderRevTip(r,clientX,clientY){
@@ -1905,9 +1938,16 @@
       return;
     }
     document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
-    const [px,per,rev,inst]=await Promise.all([
-      fm('TaiwanStockPrice',code,_d(35)),fm('TaiwanStockPER',code,_d(16)),
-      fm('TaiwanStockMonthRevenue',code,_d(640)),instNet(code)]);
+    // 2026-08-27 架構修正：PER/PBR/殖利率、月營收改讀 data/fundamentals.json
+    // （見 build_fundamentals_json.py），不再對 FinMind 打 TaiwanStockPER／
+    // TaiwanStockMonthRevenue——這兩個資料集目前沒有排程自動更新（TWSE官方開放
+    // 資料只有最新快照、無歷史區間查詢，見該腳本docstring揭露），是研究端既有
+    // 快取整理出的快照。價格走勢/融資/三大法人這幾塊這輪還沒有替換掉FinMind，
+    // 維持原樣（會誠實顯示連線失敗，不是假資料）。
+    const [px,fund,inst]=await Promise.all([
+      fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code)]);
+    const per=fund.ratios?[fund.ratios]:[];
+    const rev=fund.month_revenue?fund.month_revenue.map(r=>({revenue_year:r.year,revenue_month:r.month,revenue:r.revenue,yoyPre:r.yoy!=null?r.yoy*100:null})):[];
     loadFinancials(code);
     if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
@@ -1935,7 +1975,7 @@
       flagEl.textContent=todayMoney<LIQUIDITY_FLOOR?'⚠ 量能不足，漲不動（今日成交值低於3000萬元流動性門檻）':'';
     }else{setTxt('kn-turnover','—');setTxt('kn-vol-mult','—');setTxt('kn-liquidity-flag','')}
     const p=per.length?per[per.length-1]:{};
-    setTxt('kn-per',p.PER??'—');setTxt('kn-pbr',p.PBR??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
+    setTxt('kn-per',p.per??'—');setTxt('kn-pbr',p.pbr??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
     loadRevenueChart(code,rev);
     if(inst){
       setChip('chip-foreign',inst.foreign);setChip('chip-trust',inst.trust);setChip('chip-dealer',inst.dealer);setChip('chip-total',inst.total);
