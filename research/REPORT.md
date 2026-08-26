@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 118 輪 · 2026-08-27T03:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 02:43(第116輪)/US 03:01(第117輪，最新)/FUT 02:01(第115輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（自第117輪以來無互動session介入），暫停規則仍完全生效中；FUT軌唯一明確待辦（`fut_day_gap_continuation`高解析度重測或全新因子家族）本質仍是單因子相關工作，跟round109/112/115判斷邏輯一致保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪附記
+
 ## 第 117 輪 · 2026-08-27T03:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 02:43(第116輪，最新)/US 01:31(最舊)/FUT 02:01，正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（`git log`確認自`bf7895a`第116輪以來無互動session介入），暫停規則仍完全生效中；US軌無組合策略相關工作（規格書全部圍繞TAIEX/TWSE台股樣本，跟US軌無關），round108/111遺留(a)(b)(c)三項本質仍是為單因子鋪路，同round111/114判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`本輪附記
 
 ## 第 116 輪 · 2026-08-27T02:43+08:00 · TW · 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 01:20(第113輪，最舊)/US 01:31/FUT 02:01，正常輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」且無新使用者回應，`portfolio_multifactor_v2`下一步三選項依round109/110/113一貫判斷不代為決定，延續暫停規則允許的地基工作 · 跑`backfill_t86.run_batch(200)`：200嘗試/200成功/7空(假日)，未撞限流牆 · 累積T86快取436→636/3305個工作日（19.2%）· 順帶核對確認全市場宇宙回補（`backfill_universe.py`）已達2597/3196=81.3%，早超過80%門檻，本輪未動它 · 無新`TRIALS_LEDGER.md`列（地基工作非假說測試），`is_holdout_consumed()`確認`False` · 見`TW_LOG.md`/`TW_MARATHON_STATE.md`本輪記錄
