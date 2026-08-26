@@ -81,6 +81,8 @@ AMIHUD_WINDOW = 20  # Amihud (2002) illiquidity, ~1 trading month
 SUE_TRAILING_QUARTERS = 8
 REVENUE_SUE_TRAILING_MONTHS = 12
 ROE_STABILITY_TRAILING_QUARTERS = 8
+ASSET_GROWTH_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Cooper/Gulen/Schill 2008
+ACCRUALS_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Sloan 1996 balance-sheet approach
 
 
 def _finmind_institutional_wide(stock_id: str, start_date: str) -> pd.DataFrame:
@@ -322,6 +324,59 @@ def _roe_stability(stock_id: str, start_date: str) -> pd.DataFrame:
     return merged[["pit_date", "roe_stability"]]
 
 
+def _asset_growth(stock_id: str, start_date: str) -> pd.DataFrame:
+    """資產成長異常 (asset growth anomaly, Cooper, Gulen & Schill 2008)：資產
+    成長越快的公司，後續報酬文獻上越低（過度投資/擴張過快的訊號）。定義為
+    `TotalAssets` 同比成長（跟 4 季前比較，YoY 而非季對季，避開季節性），取負號
+    （低成長分數較高，符合本專案「分數高=預期未來報酬較好」的慣例）。用
+    `balance_sheet_pit` 同一個資料源、同一組 pit_date +45 天延遲假設，跟
+    `_roe_stability` 完全同一個快取鍵（同一 stock_id/start_date），零額外
+    FinMind 呼叫。2026-08-26 馬拉松新增（MARATHON_PROTOCOL.md 第 3 節「資產
+    成長/保守投資」家族，尚未測過）。
+    """
+    bs = balance_sheet_pit(stock_id, start_date)
+    if bs.empty or "TotalAssets" not in bs.columns:
+        return pd.DataFrame(columns=["pit_date", "asset_growth"])
+    bs = bs[["fiscal_period_end", "pit_date", "TotalAssets"]].sort_values(
+        "fiscal_period_end"
+    ).reset_index(drop=True)
+    bs["asset_growth"] = -(
+        bs["TotalAssets"] / bs["TotalAssets"].shift(ASSET_GROWTH_LAG_QUARTERS) - 1
+    )
+    return bs[["pit_date", "asset_growth"]]
+
+
+def _accruals(stock_id: str, start_date: str) -> pd.DataFrame:
+    """盈餘品質應計項目 (accruals, Sloan 1996)：應計項目占比越高的公司，後續報酬
+    文獻上越低（會計盈餘裡「非現金」部分較多，較不具持續性，市場常對此定價不足）。
+    本專案沒有現金流量表資料源（`TaiwanStockCashFlowsStatement` 從未抓取過），無法用
+    Sloan 原始的「NI - CFO」定義，改用 Sloan (1996) 論文本身也採用過的資產負債表法
+    (balance-sheet approach，Richardson/Sloan/Soliman/Tuna 2005 同款簡化)：
+    ΔWC = Δ(CurrentAssets - Cash) - Δ(CurrentLiabilities - ShorttermBorrowings)，
+    accruals = ΔWC(YoY，4季前) / TotalAssets，取負號（低應計分數較高）。
+    **已知簡化，非完整版**：省略了折舊費用調整項（Sloan 原公式是 ΔWC - Depreciation，
+    這裡沒有折舊資料來源，等同假設折舊調整項相對次要，未驗證這個假設的影響量級，
+    誠實揭露而非假裝完整）。用 `balance_sheet_pit` 同一個資料源、同一組 pit_date +45
+    天延遲假設，跟 `_asset_growth`/`_roe_stability` 完全同一個快取鍵，零額外 FinMind
+    呼叫。2026-08-26 馬拉松新增（MARATHON_PROTOCOL.md 第 3 節「品質」家族 accruals
+    盈餘品質，尚未測過）。
+    """
+    bs = balance_sheet_pit(stock_id, start_date)
+    required = ["CurrentAssets", "CashAndCashEquivalents", "CurrentLiabilities",
+                "ShorttermBorrowings", "TotalAssets"]
+    if bs.empty or any(c not in bs.columns for c in required):
+        return pd.DataFrame(columns=["pit_date", "accruals"])
+    bs = bs[["fiscal_period_end", "pit_date"] + required].sort_values(
+        "fiscal_period_end"
+    ).reset_index(drop=True)
+    noncash_ca = bs["CurrentAssets"] - bs["CashAndCashEquivalents"]
+    op_cl = bs["CurrentLiabilities"] - bs["ShorttermBorrowings"]
+    wc = noncash_ca - op_cl
+    delta_wc = wc - wc.shift(ACCRUALS_LAG_QUARTERS)
+    bs["accruals"] = -(delta_wc / bs["TotalAssets"])
+    return bs[["pit_date", "accruals"]]
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
@@ -429,6 +484,15 @@ def prepare_factors(
     idio_var = (roll_var_stock - beta_60 ** 2 * roll_var_mkt).clip(lower=0.0)
     d["f_idio_vol"] = -np.sqrt(idio_var)
 
+    # (p) Betting-against-beta (Frazzini & Pedersen 2014)：沿用上面 f_idio_vol
+    # 已經算好的 60 日滾動 beta（beta_60），取負號（低 beta 分數較高）。文獻上的解釋是
+    # 槓桿受限的投資人無法直接借錢放大低 beta 股票的報酬，只能改買高 beta 股票追求同樣的
+    # 期望報酬，導致高 beta 股票被系統性追捧、風險調整後報酬反而較差。純價格資料，天然
+    # point-in-time，2026-08-26 馬拉松新增（MARATHON_PROTOCOL.md 第 3 節「低風險」家族
+    # 第三個測試，f_low_vol/f_idio_vol 是前兩個）。零額外計算成本、零額外資料（重用同一個
+    # beta_60）。
+    d["f_bab"] = -beta_60
+
     # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
     # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓
     # 整檔股票的其他 11 個因子也一起報廢（2026-08-22 遇到 FinMind 流量限制時發現這個問題）。
@@ -438,6 +502,24 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_quality_roe_stability skipped for {stock_id}: {e}")
         d["f_quality_roe_stability"] = np.nan
+
+    # (q) 資產成長異常 -- point-in-time via pit_date（沿用 balance_sheet_pit，同
+    # `f_quality_roe_stability` 的快取鍵，零額外 API 呼叫）。
+    try:
+        ag_pit = _asset_growth(stock_id, start_date)
+        d = _asof_join(d, ag_pit, "asset_growth", "f_asset_growth")
+    except RuntimeError as e:
+        print(f"    [factors] f_asset_growth skipped for {stock_id}: {e}")
+        d["f_asset_growth"] = np.nan
+
+    # (r) 盈餘品質應計項目 (accruals, Sloan 1996 balance-sheet approach) -- 沿用
+    # balance_sheet_pit 同一個快取鍵，零額外 API 呼叫。
+    try:
+        acc_pit = _accruals(stock_id, start_date)
+        d = _asof_join(d, acc_pit, "accruals", "f_accruals")
+    except RuntimeError as e:
+        print(f"    [factors] f_accruals skipped for {stock_id}: {e}")
+        d["f_accruals"] = np.nan
 
     # (k)/(l) 價值 PB/PE -- 直接讀 FinMind 算好的 PER/PBR。
     # **PIT 狀態（2026-08-23 馬拉松第四輪更新）**：2330 單檔跳變偵測（`verify_pit_value_pb.py`，
