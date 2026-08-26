@@ -14,6 +14,16 @@
 
 **順帶核對全市場宇宙回補現況**（不是本輪主動做的工作，只是查證）：讀`data/backfill_state.json`，`done`2597＋`skip`469＝3066/3196已全部處理過，`done`覆蓋率2597/3196=81.3%，早已超過`MARATHON_PROTOCOL.md`第5b節的80%門檻——這解釋了為什麼第110輪記錄裡`portfolio_backtest_v2.py`提到「全市場81.3%樣本」這個數字的來源。本輪未執行`backfill_universe.py`。
 
+---
+
+## 2026-08-27T04:21+08:00 — 馬拉松第119輪：T86回補接續（暫停單因子試驗規則生效中，屬允許的地基工作，非新假說）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳TW最舊（第116輪02:43，US第117輪03:01，FUT第118輪03:31）照輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`仍是「待使用者確認」狀態（`git log`確認自第116輪以來無互動session介入），無新使用者回應；`portfolio_multifactor_v2`下一步三選項（全市場樣本重跑/train-only IC樣本外測試/大盤MDD-Sortino補算）依第109/110/113/116輪一貫判斷仍不代為決定，繼續等待使用者回應。延續第116輪的地基工作：`backfill_t86.py`（預設batch-size 200）。
+
+**本輪跑`run_batch(batch_size=200)`**：接手前已快取636天，本輪批次嘗試200天、新完成200（13天無交易/假日/無筆數）、未撞限流牆。累積T86快取636→836/3305個工作日（25.3%）。
+
+`is_holdout_consumed()`確認`False`。本輪未觸及`backfill_universe.py`（宇宙回補早已達81.3%，超過80%門檻，非本輪工作範圍）。無新`TRIALS_LEDGER.md`/`TW_LEADS.md`列（本輪工作單位是地基資料回補，非因子假說測試）。
+
 **沒有新增`TRIALS_LEDGER.md`列**（地基/資料回補，非假說測試，同前例）。`is_holdout_consumed()`確認`False`。下一輪如果又撿到TW軌且暫停規則仍生效：繼續跑`backfill_t86.py --batch-size 200`；如果使用者已回應`PORTFOLIO_STRATEGY_SPEC.md`的下一步選項，優先處理那個，不要繼續回補。
 
 ---
