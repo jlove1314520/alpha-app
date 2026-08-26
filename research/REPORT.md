@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 112 輪 · 2026-08-26T21:32+08:00 · （跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 20:37/US 21:03(第111輪剛更新)/FUT 19:34(最舊)，正常輪替本應選FUT，但FUT唯一明確待辦（`fut_day_gap_continuation`邊界候選N=2000高解析度重測）本質是1b深挖，屬單因子相關工作，比照第111輪處理US round108待辦的判斷邏輯保守跳過；`PORTFOLIO_STRATEGY_SPEC.md`跟FUT軌無關，本輪無組合策略工作可做 · 無新判定，`is_holdout_consumed()`確認`False` · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪附記
+
 ## 第 111 輪 · 2026-08-26T21:02+08:00 · （跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌輪替本應選US（時間戳最舊19:05），但US無組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`仍是TW專屬的台股多因子規格，跟US的1c地基工作無關）；FUT（19:34）同樣無組合策略相關工作；TW（20:36）是三軌中最晚更新，本輪不輪到TW；依`MARATHON_PROTOCOL.md`暫停規則第3點，本輪判斷US/FUT皆無工作可做，直接跳過整輪，不代為決定要不要啟動TW那邊留給使用者的高成本重跑選項 · 無新判定，`is_holdout_consumed()`確認`False` · 見`US_MARATHON_STATE.md`/`US_LOG.md`本輪附記
 
 ## 第 110 輪 · 2026-08-26T20:36+08:00 · （跳過，暫停規則生效中）· 取鎖時`LOCK_STALE`（pid 154480約30分鐘，查證後非異常中止——是同時段互動session跑`portfolio_backtest_v2.py`太久沒更新鎖檔心跳，該session已自行commit+push`fa369b9`，跟本輪取鎖幾乎同時，屬鎖機制邊界案例非資料損毀）；SPEC+v2回測(12組合)已由該session完成並push，最佳兩組alpha p=0.053接近顯著未過關，其「下一步」建議明確留給使用者決定；US本應輪到但無組合策略相關工作，依暫停規則跳過新工作 · 無新判定，僅核對狀態+補`TW_MARATHON_STATE.md` · 詳見`TW_LOG.md`本輪記錄

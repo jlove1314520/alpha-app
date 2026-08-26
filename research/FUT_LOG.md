@@ -730,3 +730,17 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：(a) 對`fut_day_gap_continuation`用`N_SHUFFLES=2000`高解析度重測確認邊界結果（同round54先例，monkey-patch局部覆蓋，不改`fut_cheap_gate.py`本身預設值），這是唯一一個FUT軌目前處於「不確定」而非清楚FAIL的1a層級案例，值得優先釐清；(b) 若(a)確認FAIL，盤別效應家族三批構造全部窮盡，應換一個全新機制家族（`MARATHON_PROTOCOL.md`第3節期貨清單裡「日內均值回歸」以外的變體、或星期效應以外的季節性）；(c) FUT軌資源配置20%上限，近10輪（100-109）含本輪：100US/101TW/102TW/103US/104FUT/105TW/106US/107TW/108US/109FUT，FUT佔2/10=20%，剛好觸頂，下一輪若還選FUT要先重新盤點是否超額。
 
 ---
+
+## 第112輪（2026-08-26T21:32+08:00）——跳過，暫停規則生效中
+
+**取鎖**：乾淨（`LOCK_ACQUIRED`，非陳舊鎖檔）。
+
+**選軌判斷**：三軌state檔案「最後更新」時間戳——TW 20:37、US 21:03（第111輪剛更新）、FUT 19:34（最舊）。正常輪替本應選FUT。
+
+**為何跳過**：FUT軌目前唯一明確的「下一步」待辦是對round109`fut_day_gap_continuation`（邊界模糊候選，累積FDR校正差0.15個百分點未過）用`N_SHUFFLES=2000`高解析度重測。這雖然不是「全新假說」，但本質是1b層級的深挖驗證，目的是推進一個因子候選的最終判定——跟第111輪處理US round108「驗證PE因子分子」待辦時的判斷邏輯一致：使用者的暫停規則寫的是「不分軌道」禁止任何單因子相關工作（1a便宜關卡或1b深挖皆然），不因為候選不是全新假說就破例。`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬多因子規格，跟FUT軌完全無關，本輪也沒有組合策略相關工作可做。依`MARATHON_PROTOCOL.md`第0節第3點，本輪直接跳過整輪，不動`fut_cheap_gate.py`或任何因子/回測程式碼。
+
+**本輪沒有做任何實質工作**，只確認狀態（`is_holdout_consumed()`為`False`）、補寫這則log跟`FUT_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round109的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則後從那裡接續，不需要重新規劃。
+
+沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---
