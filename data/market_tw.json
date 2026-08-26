@@ -1,0 +1,256 @@
+{
+  "fetched_at": "2026-08-26T15:48:45+00:00",
+  "errors": [
+    "tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_index (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1032)')))"
+  ],
+  "taiex": {
+    "name": "發行量加權股價指數",
+    "close": 45169.46,
+    "change_pct": 0.91
+  },
+  "sectors": [
+    {
+      "name": "水泥窯製類指數",
+      "close": 623.51,
+      "change_pct": 0.47
+    },
+    {
+      "name": "塑膠化工類指數",
+      "close": 1069.87,
+      "change_pct": 1.82
+    },
+    {
+      "name": "機電類指數",
+      "close": 15789.59,
+      "change_pct": 0.83
+    },
+    {
+      "name": "水泥類指數",
+      "close": 122.54,
+      "change_pct": 0.15
+    },
+    {
+      "name": "食品類指數",
+      "close": 1953.18,
+      "change_pct": 0.26
+    },
+    {
+      "name": "塑膠類指數",
+      "close": 322.34,
+      "change_pct": 3.41
+    },
+    {
+      "name": "紡織纖維類指數",
+      "close": 481.62,
+      "change_pct": 0.44
+    },
+    {
+      "name": "電機機械類指數",
+      "close": 542.94,
+      "change_pct": 1.53
+    },
+    {
+      "name": "電器電纜類指數",
+      "close": 109.2,
+      "change_pct": 0.44
+    },
+    {
+      "name": "化學生技醫療類指數",
+      "close": 178.06,
+      "change_pct": 0.2
+    },
+    {
+      "name": "化學類指數",
+      "close": 188.86,
+      "change_pct": 0.82
+    },
+    {
+      "name": "生技醫療類指數",
+      "close": 104.59,
+      "change_pct": 0.6
+    },
+    {
+      "name": "玻璃陶瓷類指數",
+      "close": 137.52,
+      "change_pct": 1.66
+    },
+    {
+      "name": "造紙類指數",
+      "close": 287.01,
+      "change_pct": 1.0
+    },
+    {
+      "name": "鋼鐵類指數",
+      "close": 122.07,
+      "change_pct": 0.72
+    },
+    {
+      "name": "橡膠類指數",
+      "close": 197.1,
+      "change_pct": 0.57
+    },
+    {
+      "name": "汽車類指數",
+      "close": 293.76,
+      "change_pct": 0.43
+    },
+    {
+      "name": "電子工業類指數",
+      "close": 2868.56,
+      "change_pct": 0.82
+    },
+    {
+      "name": "半導體類指數",
+      "close": 1521.73,
+      "change_pct": 0.89
+    },
+    {
+      "name": "電腦及週邊設備類指數",
+      "close": 450.7,
+      "change_pct": 1.44
+    },
+    {
+      "name": "光電類指數",
+      "close": 68.11,
+      "change_pct": 3.48
+    },
+    {
+      "name": "通信網路類指數",
+      "close": 231.13,
+      "change_pct": 0.1
+    },
+    {
+      "name": "電子零組件類指數",
+      "close": 906.51,
+      "change_pct": 0.63
+    },
+    {
+      "name": "電子通路類指數",
+      "close": 357.97,
+      "change_pct": 0.73
+    },
+    {
+      "name": "資訊服務類指數",
+      "close": 229.37,
+      "change_pct": 0.03
+    },
+    {
+      "name": "其他電子類指數",
+      "close": 266.34,
+      "change_pct": 0.66
+    },
+    {
+      "name": "建材營造類指數",
+      "close": 461.71,
+      "change_pct": 0.5
+    },
+    {
+      "name": "航運類指數",
+      "close": 218.8,
+      "change_pct": 0.51
+    },
+    {
+      "name": "觀光餐旅類指數",
+      "close": 103.07,
+      "change_pct": 0.09
+    },
+    {
+      "name": "金融保險類指數",
+      "close": 3233.38,
+      "change_pct": 2.31
+    },
+    {
+      "name": "貿易百貨類指數",
+      "close": 242.51,
+      "change_pct": 0.05
+    },
+    {
+      "name": "油電燃氣類指數",
+      "close": 96.83,
+      "change_pct": 1.38
+    },
+    {
+      "name": "綠能環保類指數",
+      "close": 130.7,
+      "change_pct": 1.12
+    },
+    {
+      "name": "數位雲端類指數",
+      "close": 40.43,
+      "change_pct": 0.37
+    },
+    {
+      "name": "運動休閒類指數",
+      "close": 58.82,
+      "change_pct": 0.44
+    },
+    {
+      "name": "居家生活類指數",
+      "close": 100.12,
+      "change_pct": 1.31
+    },
+    {
+      "name": "其他類指數",
+      "close": 281.42,
+      "change_pct": 0.28
+    }
+  ],
+  "tx_futures": {
+    "contract_month": "202609",
+    "last": 45027.0,
+    "change": 287.0,
+    "change_pct": 0.64,
+    "settlement_price": 45032.0,
+    "trading_session": "一般"
+  },
+  "futures": {
+    "TX": {
+      "contract_month": "202609",
+      "last": 45027.0,
+      "change": 287.0,
+      "change_pct": 0.64,
+      "settlement_price": 45032.0,
+      "trading_session": "一般"
+    },
+    "MTX": {
+      "contract_month": "202608W4",
+      "last": 45016.0,
+      "change": 305.0,
+      "change_pct": 0.68,
+      "settlement_price": 45016.0,
+      "trading_session": "一般"
+    },
+    "TE": {
+      "contract_month": "202609",
+      "last": 2869.85,
+      "change": 26.45,
+      "change_pct": 0.93,
+      "settlement_price": 2866.35,
+      "trading_session": "一般"
+    },
+    "TF": {
+      "contract_month": "202609",
+      "last": 3230.6,
+      "change": 65.8,
+      "change_pct": 2.08,
+      "settlement_price": 3231.0,
+      "trading_session": "一般"
+    }
+  },
+  "institutional": {
+    "date": "20260826",
+    "foreign_net_lots": 418477.1,
+    "trust_net_lots": 8660.6,
+    "dealer_net_lots": -26282.0,
+    "total_net_lots": 400855.8
+  },
+  "institutional_history": [
+    {
+      "date": "20260826",
+      "foreign_net_lots": 418477.1,
+      "trust_net_lots": 8660.6,
+      "dealer_net_lots": -26282.0,
+      "total_net_lots": 400855.8
+    }
+  ]
+}

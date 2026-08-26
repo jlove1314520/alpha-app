@@ -1,0 +1,20 @@
+{
+  "engine_version": "score_v2.1-frozen",
+  "frozen_at": "2026-08-26",
+  "dev_period": {
+    "train_end": "2020-12-31",
+    "val_end": "2024-12-31"
+  },
+  "source": "docs\\Alpha_評分引擎_10分制設計小抄.md 第三節，score_v2.py::FACTOR_DEFS 原始常數的一次性快照",
+  "weights": {
+    "earnings_growth": 0.18,
+    "revenue_momentum": 0.18,
+    "growth_quality": 0.12,
+    "chips": 0.14,
+    "technical": 0.1,
+    "valuation_adj": 0.12,
+    "analyst": 0.08,
+    "catalyst": 0.08
+  },
+  "weights_sha256": "4d1a7df9f8f5866856b2e054dd31a0e9834f0b61af4a91bd00c86033fc5e0738"
+}

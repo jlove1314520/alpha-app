@@ -26,6 +26,14 @@ context manager 後立刻還原成 2024-12-31。**這不是繞過 holdout**：`H
 共用的 `SAMPLE_SIZE=100`（驗證管線在用，動它會牽動 `TRIALS_LEDGER.md` 已經記錄過
 的統計結果，不能為了展示需求去改）換成這支腳本自己獨立的 `SCORES_SAMPLE_SIZE`
 ＋自己的 seed，跟研究驗證用的抽樣完全分開、互不影響。
+
+**2026-08-26（晚）補上凍結權重稽核軌跡**：權重來源改成明確讀
+`score_live.py::load_frozen_weights()`（唯讀 `weights_frozen.json`，含
+sha256 完整性驗證），套用進 `score_v2.FACTOR_DEFS` 後才開始算分——不再只是
+「FACTOR_DEFS 沒被改」這種消極保證，而是有一份 commit 進 git 的凍結檔可以
+逐次核對，`weights_hash` 也會寫進 `scores.json` 的 `meta`，日後任何一批分數
+都能回頭確認用的是哪一版權重。`score_live.py` 本身有寫入防護：任何嘗試寫
+`weights_frozen.json` 的程式碼都會被攔截中止，不靠「記得不要這樣做」。
 """
 from __future__ import annotations
 
@@ -39,6 +47,7 @@ from factor_ic import load_sample_with_factors, START_DATE
 from finmind_client import load_dev
 from realtime_asof import as_of_today
 from score import load_industry_map, load_name_map
+from score_live import apply_frozen_weights, load_frozen_weights
 from score_v2 import export_scores_v2_json
 from strategies.weinstein_stage2 import prepare_market_data
 from universe import universe
@@ -64,6 +73,11 @@ def main(top_n: int | None = None, out_path: str = "../scores.json",
     # 的誠實版本是：把「這次抽樣、算出來的全部樣本」都匯出（不是只匯出前 30 名），
     # 前端排行榜清單只顯示前 30 名，但搜尋框可以查到樣本內任何一檔已經算出分數的股票；
     # 樣本外的股票（沒被抽到樣本、或 coverage<0.5）誠實顯示「查無評分資料」，不是假裝算得出來。
+    frozen = load_frozen_weights()
+    apply_frozen_weights(frozen)
+    print(f"已套用凍結權重 weights_frozen.json（frozen_at={frozen['frozen_at']}，"
+          f"sha256={frozen['weights_sha256'][:12]}...）")
+
     sample_ids = sample_scores_universe_ids(sample_size, sample_seed)
     with as_of_today() as as_of:
         from yf_price_client import fetch_yf_index
@@ -92,6 +106,7 @@ def main(top_n: int | None = None, out_path: str = "../scores.json",
     cs = export_scores_v2_json(
         as_of, data, industry_map, name_map, out_path,
         start_date=START_DATE, top_n=top_n, universe_size=universe_size,
+        weights_hash=frozen["weights_sha256"],
     )
     print(f"已產生 {out_path}，{len(cs)} 檔計算出分數，基準日 {as_of}")
     if not cs.empty:
