@@ -6,7 +6,9 @@
 
 **（2026-08-26T11:34 第95輪已確認）上面第91輪記錄的push失敗已自然解決**：`git fetch`+`git status`確認`up to date with 'origin/main'`，後續輪次（92-94）已經把積壓的commit`3cf1a1c`推上去了，不需要額外處理。
 
-**最後更新：2026-08-26T12:15+08:00**（馬拉松第97輪：規模分層重測第二批——延續第95輪「下一步」建議首選，`us_factor_ic_by_size.py`把`TIER`常數從`"large"`切成`"mid"`（seed=202608262，跟大型股tier的202608261區分），零額外程式碼改動，重測同三個既有因子。**結果：US軌至今第一批CHEAP_PASS**——`f_us_low_vol` percentile=100.0（train+0.0300/val+0.1123/門檻96.7，過），比大型股tier(第95輪：≈83.4)明顯強、比不分層版(第39輪：100.0)接近；`f_us_momentum_12m` percentile=99.9（過），但信心等級低——這個因子三次測試(不分層/大型股/中型股)train/val方向組合三次互不相同，比較像小樣本雜訊而非規模效應；`f_us_reversal_1m` percentile=78.4，**FAIL**（same_sign未過），三個tier全部FAIL。US軌因子驗證累積9筆試驗（3不分層+3大型股+3中型股），2筆CHEAP_PASS（待深挖，深挖前務必先做train/val切分＋beta對照，吸取第41輪`f_us_low_vol`不分層版深挖FAIL的教訓）、7筆FAIL。US軌FDR家族m=3（分層重測不新增家族數，同一輪批次）。**下一步建議：small tier尚未測（`TIER`常數切換即可沿用），或優先深挖`f_us_low_vol`中型股CHEAP_PASS。**詳見`US_LOG.md`本輪記錄。）
+**最後更新：2026-08-26T14:05:19+08:00**（馬拉松第99輪：規模分層重測第三批（small tier，四個樣本版本全測完）——延續第97輪「下一步」建議首選，`us_factor_ic_by_size.py`把`TIER`常數從`"mid"`切成`"small"`（seed=20260826_3），零額外程式碼改動，重測同三個既有因子。**結果**：小型股tertile 26/30檔可用。`f_us_low_vol` percentile=100.0（train+0.0182/val+0.2181 IR+1.057 hit_rate 0.88，過）——US軌至今第三個CHEAP_PASS，四個樣本版本（不分層/大型/中型/小型）val IC呈+0.134/+0.038/+0.112/+0.218的梯度，規模越小訊號越強、跟leverage-constraint文獻方向一致，但train期IR僅+0.058遠低於val期，同款#1深挖FAIL的警訊形狀，深挖前不能假設會過。`f_us_momentum_12m` percentile=100.0但same_sign未過（train負/val正）**FAIL**——四次測試(不分層/大型/中型/小型)train/val方向組合出現三種不同排列，坐實小樣本雜訊結論，不建議再追。`f_us_reversal_1m` percentile=14.4**FAIL**（四個版本最差一次），四版本全FAIL，家族可視為結案。US軌因子驗證累積12筆（3不分層+3大型股+3中型股+3小型股），3筆CHEAP_PASS（`f_us_low_vol`不分層/中型/小型，`f_us_momentum_12m`中型信心低）、9筆FAIL。US軌FDR家族m=3。**四個樣本版本規模分層重測工作單位至此全部完成。下一步建議：深挖`f_us_low_vol`中型/小型股CHEAP_PASS（先做train/val切分＋beta對照），或改做宇宙覆蓋率擴充/情境分群類工作。**詳見`US_LOG.md`本輪記錄。）
+
+（上一版記錄，保留供對照）**2026-08-26T12:15+08:00**（馬拉松第97輪：規模分層重測第二批——延續第95輪「下一步」建議首選，`us_factor_ic_by_size.py`把`TIER`常數從`"large"`切成`"mid"`（seed=202608262，跟大型股tier的202608261區分），零額外程式碼改動，重測同三個既有因子。**結果：US軌至今第一批CHEAP_PASS**——`f_us_low_vol` percentile=100.0（train+0.0300/val+0.1123/門檻96.7，過），比大型股tier(第95輪：≈83.4)明顯強、比不分層版(第39輪：100.0)接近；`f_us_momentum_12m` percentile=99.9（過），但信心等級低——這個因子三次測試(不分層/大型股/中型股)train/val方向組合三次互不相同，比較像小樣本雜訊而非規模效應；`f_us_reversal_1m` percentile=78.4，**FAIL**（same_sign未過），三個tier全部FAIL。US軌因子驗證累積9筆試驗（3不分層+3大型股+3中型股），2筆CHEAP_PASS（待深挖，深挖前務必先做train/val切分＋beta對照，吸取第41輪`f_us_low_vol`不分層版深挖FAIL的教訓）、7筆FAIL。US軌FDR家族m=3（分層重測不新增家族數，同一輪批次）。**下一步建議：small tier尚未測（`TIER`常數切換即可沿用），或優先深挖`f_us_low_vol`中型股CHEAP_PASS。**詳見`US_LOG.md`本輪記錄。）
 
 （上一版記錄，保留供對照）**2026-08-26T11:34:59+08:00**（馬拉松第95輪：規模分層重測——延續第91輪「下一步」建議首選，`us_factor_ic_by_size.py`（新增）用`us_universe.py`既有`market_cap`欄位對大型股tier（29/30檔可用，seed=202608261）重測三個既有FAIL因子。**結果：三個全部FAIL**（`f_us_low_vol` percentile=83.4/門檻96.7；`f_us_momentum_12m` percentile=66.8，same_sign未過且反轉方向跟不分層版相反；`f_us_reversal_1m` percentile=53.4，same_sign過但val_IC太弱）。**最有資訊量的發現**：`f_us_momentum_12m`不分層版是train負/val正，分層版變成train正/val負——兩次反轉方向不一致，代表這不是穩定的規模效應，是27-30檔小樣本統計檢定力不足導致的雜訊。US軌因子驗證累積6筆試驗（3不分層+3分層），全部FAIL，仍無PASS/EXPERIMENTAL候選。US軌FDR家族m=3（分層重測不新增家族數，同一輪批次）。**下一步建議：mid/small tier尚未測（`TIER`常數切換即可沿用），或改做第9項（系統化擴充`KNOWN_DELISTED`）。**詳見`US_LOG.md`本輪記錄。）
 
@@ -71,10 +73,9 @@
 
 ## 下一步
 
-**地基狀態更新（第97輪）：純price-only因子家族（低波動/動能/短期反轉）三個因子的不分層版+大型股分層版+中型股分層版全部測完，九筆試驗中2筆CHEAP_PASS（`f_us_low_vol`/`f_us_momentum_12m`中型股tier）、7筆FAIL。US軌至今尚無任何深挖後仍成立的PASS/EXPERIMENTAL候選，FDR家族m=3。** 候選（挑一項，不要一次全做）：
-- **優先A：small tier分層重測**——`us_factor_ic_by_size.py`已經寫好且可重複執行，只要把模組頂部的`TIER`常數從`"mid"`改成`"small"`即可沿用整套流程（large/mid兩個tier已測完，見上方第95/97輪記錄）。
-- **優先B：`f_us_low_vol`中型股CHEAP_PASS（US_LEADS.md#7）深挖**——先做train/val切分＋beta對照，吸取第41輪教訓（不分層版便宜關卡CHEAP_PASS，深挖後VAL期beta驟降至−0.891判定FAIL，不能只看便宜關卡數字漂亮）。`f_us_momentum_12m`中型股CHEAP_PASS（#8）信心等級較低（三次tier測試train/val方向三次互不相同），深挖前建議先換種子/更大樣本複驗穩定性，不要跟#7同等級直接排隊深挖。
+**地基狀態更新（第99輪）：純price-only因子家族（低波動/動能/短期反轉）三個因子的四個樣本版本（不分層/大型/中型/小型）全部測完，十二筆試驗中3筆CHEAP_PASS（`f_us_low_vol`不分層版/中型股/小型股，`f_us_momentum_12m`中型股信心較低）、9筆FAIL。US軌至今尚無任何深挖後仍成立的PASS/EXPERIMENTAL候選，FDR家族m=3。規模分層重測這個工作單位本身已完整結束。** 候選（挑一項，不要一次全做）：
+- **優先A：`f_us_low_vol`中型股/小型股CHEAP_PASS（US_LEADS.md#7/#10）深挖**——先做train/val切分＋beta對照，吸取第41輪教訓（不分層版便宜關卡CHEAP_PASS，深挖後VAL期beta驟降至−0.891判定FAIL，不能只看便宜關卡數字漂亮）；第99輪小型股版本train期IR僅+0.058、遠低於val期+1.057，跟第41輪FAIL前的形狀相似，深挖時優先查這一點。`f_us_momentum_12m`中型股CHEAP_PASS（#8）信心等級低（四次tier測試train/val方向出現三種不同排列，第99輪已進一步坐實為小樣本雜訊），**不建議深挖，可視為結案**。
 - 第9項（系統化擴充`KNOWN_DELISTED`名單，目前只有5檔手動查證的下市股）。
 - **FAIL不代表這些因子家族在美股完全無效**，只代表這些具體定義+這個樣本規模不成立——如果想換變體（例如idiosyncratic vol、benchmark-relative動能、1週反轉而非1個月），可以視為新假說重新走完整流程，不是延續同一個候選。
 - **小提醒**：樣本抽樣時如果再次抽到代號含`/`的股票（例如`AKO/B`），FinMind會回傳HTTP 400"data_id is illegal"，這是已知格式限制不是額度問題，`us_factor_ic.py`既有邏輯已能正確跳過不需要額外處理。
-- **如果一開始就撞402/403（額度或IP封鎖顯然還沒恢復），優先選不需要新API額度的工作**（例如small tier分層邏輯撰寫但先不執行、或本節文件更新本身）。
+- **如果一開始就撞402/403（額度或IP封鎖顯然還沒恢復），優先選不需要新API額度的工作**（例如深挖前的程式碼撰寫但先不執行、或本節文件更新本身）。

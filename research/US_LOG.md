@@ -504,3 +504,21 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 **下一步建議**：(a) small tier分層重測（優先，`TIER="small"`即可沿用）；(b) `f_us_low_vol`中型股CHEAP_PASS（#7）深挖前務必先做train/val切分＋beta對照——吸取第41輪教訓（不分層版便宜關卡CHEAP_PASS，深挖後因VAL期beta驟降至−0.891判定FAIL），不能只看便宜關卡數字漂亮就直接假設市場中性；(c) `f_us_momentum_12m`中型股CHEAP_PASS（#8）信心等級低，深挖前建議先換一個種子/更大樣本複驗是否穩定重現，而非直接排入標準深挖清單。
 
 完整見`US_LEADS.md`#7/#8/#9（新增）、`TRIALS_LEDGER.md`#52/#53/#54（新增）、`us_factor_ic_by_size.py`（本輪改動`TIER`/`SAMPLE_SEED`，可重複執行）。
+
+---
+
+## 2026-08-26T14:05:16+08:00 — 馬拉松第99輪：small tier分層重測（優先A，四個樣本版本全測完）
+
+延續第97輪「下一步」建議首選：`us_factor_ic_by_size.py` 把 `TIER` 常數從 `"mid"` 切成 `"small"`（seed=20260826_3，跟large的20260826_1、mid的20260826_2區分），零額外程式碼改動，重測同三個既有因子。
+
+**結果**：小型股tertile 1856檔（跟mid/large各1855檔規模相近），30檔隨機抽樣26檔可用（4檔EMPTY/樣本過短被排除）。
+
+- `f_us_low_vol`：train mean_ic=+0.0182 IR=+0.058（n=74）、val mean_ic=+0.2181 IR=+1.057 hit_rate=0.88（n=49），null percentile=100.0（門檻96.7，過），same_sign通過。**CHEAP_PASS**——這是US軌至今第三個CHEAP_PASS，跟不分層#1、中型股#7同一個因子。四個樣本版本（不分層/大型/中型/小型）val IC分別為+0.134/+0.038/+0.112/+0.218，呈現「規模越小訊號越強、大型股訊號幾乎消失」的梯度，方向上跟BAB/leverage-constraint文獻（散戶/槓桿受限投資人被迫追高波動小型股以達到報酬目標）一致。**但train期IR只有+0.058，遠低於val期+1.057**——跟#1深挖FAIL的根本原因（train期沒過隨機控制組門檻，val期表面轉強伴隨beta驟降至-0.891）同款警訊形狀，深挖前不能只看這裡的win-rate/hit_rate數字就假設會過。
+- `f_us_momentum_12m`：train mean_ic=-0.0105、val mean_ic=+0.1460，null percentile=100.0但same_sign未過（train負/val正）。**FAIL**。四次測試（不分層/大型/中型/小型）train/val方向組合：負正、正負、正正（CHEAP_PASS）、負正——四次出現三種不同排列，比第97輪記錄的「三次互不相同」證據更強，坐實這是27-30檔小樣本雜訊，不是穩定規模效應，不建議繼續花輪次追這條規模分層路線。
+- `f_us_reversal_1m`：train mean_ic=+0.0695、val mean_ic=+0.0060，null percentile=14.4（門檻96.7，遠未過）。**FAIL**——四個樣本版本（不分層49.5/大型53.4/中型78.4/小型14.4）percentile全部未過門檻，本列是四者最差的一次，短期反轉在美股這個因子定義下的證據最一致地偏弱，家族可視為結案。
+
+**US軌因子驗證累積12筆（3不分層+3大型股+3中型股+3小型股）：3筆CHEAP_PASS（`f_us_low_vol`不分層版/中型股/小型股，`f_us_momentum_12m`中型股信心較低）、9筆FAIL。US軌FDR家族m=3（分層重測不新增家族數，同一批次）。四個樣本版本規模分層重測工作單位至此全部完成。**
+
+holdout狀態確認：`is_holdout_consumed()` = False。
+
+下一輪建議：(a) 深挖`f_us_low_vol`中型股/小型股CHEAP_PASS，先做train/val切分＋beta對照（吸取#1教訓）；(b) 或改做宇宙覆蓋率擴充（`KNOWN_DELISTED`僅5檔）/情境分群類工作。詳見`US_MARATHON_STATE.md`/`US_LEADS.md`#10-12/`TRIALS_LEDGER.md`#57-59。

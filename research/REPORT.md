@@ -10,6 +10,8 @@
 
 ---
 
+## 第 100 輪 · 2026-08-26 14:05 · US · 取鎖乾淨（非陳舊鎖檔）；US時間戳最舊（12:15，FUT 13:05、TW 13:35），選US；延續第97輪「下一步」建議首選，small tier分層重測（四個樣本版本全測完） · `f_us_low_vol`小型股tier**CHEAP_PASS**（percentile=100.0，US軌至今第三個CHEAP_PASS，val IC隨規模遞增，跟leverage-constraint文獻方向一致，但train期IR弱、跟#1深挖FAIL前形狀相似）；`f_us_momentum_12m`FAIL（same_sign未過，四次測試出現三種方向排列，坐實小樣本雜訊）；`f_us_reversal_1m`FAIL（14.4，四版本最差一次，家族結案）；`TRIALS_LEDGER.md`#57/#58/#59、`US_LEADS.md`#10/#11/#12
+
 ## 第 99 輪 · 2026-08-26 13:35 · TW · 取鎖時偵測到`LOCK_STALE`（pid 149044持有30.2分鐘，查證後發現第98輪其實已寫完所有記錄檔，只是commit/push前當機，已補commit`1c32ae1`+push，非真正遺失工作）；TW時間戳最舊（12:08）且FUT近10輪已達30%資源配置上限，選TW；TW軌覆蓋率已達81.3%>80%門檻，優先序回到深挖，執行第96輪標記的`f_idio_vol`深挖前置作業 · `check_idio_vol_low_vol_overlap.py`：跟`f_low_vol`相關性=+0.982、多頭腿Jaccard=0.789、空頭腿=0.835，**HIGH OVERLAP，不進深挖，家族結案**，`TW_LEADS.md`#7判定改列「CHEAP_PASS但降級」
 
 ## 第 98 輪 · 2026-08-26 13:05 · FUT · 取鎖乾淨（非陳舊鎖檔）；FUT最舊，選FUT（近10輪FUT佔20%，選後30%，仍可接受）；盤別效應家族第一批——夜盤自身open→close報酬順勢/反轉，交易同date日盤日內報酬 · `fut_night_session_momentum`FAIL（19.0，方向不對）、`fut_night_session_reversal`FAIL（81.0，方向對但未過90門檻），盤別效應第一批結案0 PASS，`TRIALS_LEDGER.md`#55/#56、`FUT_LEADS.md`#20/#21

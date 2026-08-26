@@ -54,13 +54,13 @@ from us_factors import US_FACTOR_COLUMNS, us_price_series
 from us_universe import universe as build_us_universe
 from validation import holdout
 
-TIER = "mid"  # "large" | "mid" | "small" -- round 97 switches to "mid" per round-95 next-step; see module docstring
+TIER = "small"  # "large" | "mid" | "small" -- round 99 switches to "small", the last untested tier (large: round 95, mid: round 97); see module docstring
 SAMPLE_SIZE = 30
-SAMPLE_SEED = 20260826_2  # distinct from the round-95 large-cap run's seed (20260826_1) on purpose --
-                           # this is a different sampling frame (large-cap tertile only, not the
-                           # full universe), reusing the same seed value would not itself be wrong
-                           # but a distinct seed makes it visually unambiguous in logs which run
-                           # produced which random draw
+SAMPLE_SEED = 20260826_3  # distinct from the round-95 large-cap run's seed (20260826_1) and the
+                           # round-97 mid-cap run's seed (20260826_2) on purpose -- this is a
+                           # different sampling frame (small tertile only), reusing a prior seed
+                           # value would not itself be wrong but a distinct seed makes it visually
+                           # unambiguous in logs which run produced which random draw
 
 
 def large_cap_universe_ids() -> pd.Series:
