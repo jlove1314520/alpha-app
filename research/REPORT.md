@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 111 輪 · 2026-08-26T21:02+08:00 · （跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌輪替本應選US（時間戳最舊19:05），但US無組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`仍是TW專屬的台股多因子規格，跟US的1c地基工作無關）；FUT（19:34）同樣無組合策略相關工作；TW（20:36）是三軌中最晚更新，本輪不輪到TW；依`MARATHON_PROTOCOL.md`暫停規則第3點，本輪判斷US/FUT皆無工作可做，直接跳過整輪，不代為決定要不要啟動TW那邊留給使用者的高成本重跑選項 · 無新判定，`is_holdout_consumed()`確認`False` · 見`US_MARATHON_STATE.md`/`US_LOG.md`本輪附記
+
 ## 第 110 輪 · 2026-08-26T20:36+08:00 · （跳過，暫停規則生效中）· 取鎖時`LOCK_STALE`（pid 154480約30分鐘，查證後非異常中止——是同時段互動session跑`portfolio_backtest_v2.py`太久沒更新鎖檔心跳，該session已自行commit+push`fa369b9`，跟本輪取鎖幾乎同時，屬鎖機制邊界案例非資料損毀）；SPEC+v2回測(12組合)已由該session完成並push，最佳兩組alpha p=0.053接近顯著未過關，其「下一步」建議明確留給使用者決定；US本應輪到但無組合策略相關工作，依暫停規則跳過新工作 · 無新判定，僅核對狀態+補`TW_MARATHON_STATE.md` · 詳見`TW_LOG.md`本輪記錄
 
 ## 第 109 輪 · 2026-08-26T19:34+08:00 · FUT · 取鎖乾淨（非陳舊鎖檔）；FUT時間戳最舊（17:05）且近10輪窗口僅佔10%（未超額），選FUT；延續round104`FUT_LEADS.md`#23明確待辦，盤別效應家族第三批——夜盤收盤(T)→日盤開盤(T)跳空反轉/順勢（`fut_cheap_gate.py`新增`hyp_day_gap_reversal`/`hyp_day_gap_continuation`，零新API） · 反轉版FAIL（percentile=0.5，方向嚴重不對）；順勢版**邊界模糊**（percentile=99.5，單測+本批皆過，但累積FUT家族FDR校正未過，差距0.15個百分點落在N=200排列解析度以內，疑似測量雜訊，不排入待深挖清單，建議下一輪N=2000高解析度重測） · 盤別效應家族三種跳空/報酬構造至此窮盡（6假說：5FAIL+1邊界候選）· 見`TRIALS_LEDGER.md`#70/#71、`FUT_LEADS.md`#24/#25

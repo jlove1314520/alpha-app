@@ -588,3 +588,15 @@ holdout狀態確認：跑前跑後`is_holdout_consumed()`皆為`False`。零新�
 **Holdout狀態確認**：跑前跑後`is_holdout_consumed()`皆為`False`——本輪只打SEC EDGAR公開API，不碰FinMind/alpha.db，holdout規則不適用，同`sec_edgar_*.py`系列腳本一貫慣例。
 
 **下一步**：(a) 用同樣模式驗證PE因子需要的分子（`NetIncomeLoss`或`EarningsPerShareDiluted`，round 10已驗證AAPL/MSFT/PLTR皆有資料）；(b) 針對`gap_days`異常值按年份分段統計，確認是否真的是pre-2009 artifact；(c) 確認可行後才進入1a——寫`f_us_value_pb`的cheap gate測試。這不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列，跟第二～七輪同類地基工作先例一致。完整程式碼見`research/us_fundamentals.py`（docstring含完整方法論跟三項已知限制）、`DATA.md`「美股 PIT 資料源調查（六續）」小節。
+
+---
+
+## 第 111 輪 · 2026-08-26T21:02+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌輪替本應選US（時間戳最舊，19:05），但`MARATHON_PROTOCOL.md`最上方2026-08-26晚使用者裁示的單因子試驗暫停規則第3點適用：US軌沒有`PORTFOLIO_STRATEGY_SPEC.md`相關的組合策略工作可做（那份規格書內容是TW專屬的台股多因子規格：`f_eps_growth`/`f_eps_surprise`/`f_revenue_surprise`/`f_low_vol`/`f_value_pe`，跟US軌無關）。
+
+round 108留下的「下一步」(a)驗證PE因子分子（`NetIncomeLoss`/`EarningsPerShareDiluted`）本身雖然是1c地基工作、不直接構成「測試單因子假說」，但這輪判斷繼續往那個方向推進終究是為了later測`f_us_value_pe`鋪路，在暫停規則明確禁止「不分軌道」開始任何新因子相關工作的精神下，本輪選擇保守跳過，不繼續。
+
+**本輪沒有做任何實質工作**，只確認狀態（`is_holdout_consumed()`為`False`）、補寫這則log跟`US_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round 108的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則後從那裡接續，不需要重新規劃。
+
+沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
