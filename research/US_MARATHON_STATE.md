@@ -2,7 +2,7 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**⚠️ 2026-08-26T12:38 push失敗待處理**：本輪commit（`4c9a44d`）因DNS解析失敗（`Could not resolve host: github.com`）重試3次仍無法push，commit已在本機完成不會遺失，**下一輪不管選到哪一軌，開始前先跑`git push`把這個積壓的commit推上去**（如果那時網路正常，一個指令就好，不需要重做任何工作）——同款問題先前在第75輪FUT軌也發生過、後續輪次自然解決，這次比照處理。
+**✅ 2026-08-26T12:4x push失敗已在同一輪解決**：本輪commit（`4c9a44d`）先因DNS解析失敗（`Could not resolve host: github.com`）重試3次不成功，之後同一輪內DNS恢復、`git push`改為被遠端拒絕（遠端多了一筆`github-actions[bot]`自動報價更新commit，跟本輪改動的檔案完全無重疊），`git merge origin/main`後成功push（`e43eb2b`）。不需要下一輪額外處理，記錄純供對照。
 
 **（2026-08-26T11:34 第95輪已確認）上面第91輪記錄的push失敗已自然解決**：`git fetch`+`git status`確認`up to date with 'origin/main'`，後續輪次（92-94）已經把積壓的commit`3cf1a1c`推上去了，不需要額外處理。
 
