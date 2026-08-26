@@ -404,3 +404,18 @@
 **下一步**：`TW_MARATHON_STATE.md`第14項候補清單仍是下一輪可選項——(a) 拆解`f_quality_roe_stability`TRAIN期絕對報酬為負是否為週轉成本drag；(b) `weinstein_stage2_unbiased`的alpha/beta顯著性關卡（`WEINSTEIN_ALPHA_GATE_TASK.md`）；(c) `f_value_pe`成本敏感度測試；(d) 照`MARATHON_PROTOCOL.md`第3節繼續掃BAB/特異波動率/Amihud流動性/季節性/資產成長異常/Piotroski F-score/accruals盈餘品質；(e) 三大法人期貨部位/T86回補（覆蓋率仍嚴重落後，見混合資料源架構條目）。
 
 **Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪沒有呼叫任何FinMind/資料載入函式，純文件編輯）。
+
+## 2026-08-26T12:08:18+08:00 — 馬拉松第96輪：低風險/流動性家族第一批，2個假說
+
+**做了什麼**：取鎖乾淨成功（`LOCK_ACQUIRED`，無陳舊鎖檔）。三軌時間戳比對：FUT最舊（10:34）但依`MARATHON_PROTOCOL.md`資源配置裁示（FUT上限20%，近10輪已佔4/10=40%，遠超上限），改選次舊的TW（11:03）。TW覆蓋率已達81.3%（>80%門檻），主線1/2已於互動session完成（見`MARATHON_STATE.md`），照`TW_MARATHON_STATE.md`第15項掃`MARATHON_PROTOCOL.md`第3節還沒測過的因子家族。選了「流動性」（Amihud illiquidity，全新家族）跟「低風險」家族第二個測試（idiosyncratic volatility，`f_low_vol`是第一個，已PASS）。
+
+1. **`f_amihud_illiq`**：20日|日報酬|/成交金額均值（Amihud 2002），新增至`factors.py`（純價格+成交量，天然PIT），`factor_ic_amihud_illiq.py`（沿用既有100名快取樣本，零新API呼叫）。**結果FAIL**：TRAIN mean_ic=−0.0131/VAL mean_ic=−0.0097，same_sign=True但方向跟流動性溢酬文獻預期相反（未取負號的原始illiq值理論上應為正），null percentile=38.1（門檻90.0，遠未過）。
+2. **`f_idio_vol`**：60日市場模型變異數分解（Var(r)=beta²·Var(rm)+Var(residual)封閉解，扣掉大盤beta後的殘差波動度，取負號）取代`f_low_vol`的總波動度，Ang et al. (2006)異常，新增至`factors.py`（純價格，天然PIT，零新API呼叫），`factor_ic_idio_vol.py`。**結果CHEAP_PASS，percentile=100.0**：TRAIN mean_ic=+0.1259 IR=+0.624（n=63期）、VAL mean_ic=+0.0963 IR=+0.559 hit_rate=0.68（n=47期），same_sign=True，打贏全部1000次隨機打散——TW軌至今單測解析度最強的候選之一，IR/hit_rate明顯優於多數既有候選。
+
+**依協定只測2個假說收工**（`MARATHON_PROTOCOL.md`第1a節上限2-3個）。`f_amihud_illiq`FAIL不調參數硬救，直接記錄換下一個；`f_idio_vol`CHEAP_PASS排入待深挖清單，**深挖前先做跟`f_low_vol`的相關性/持股重疊度檢查**（避免深挖出兩個實質重疊的候選當成獨立發現），詳見`TW_LEADS.md`#7備註。
+
+**結果**：`TRIALS_LEDGER.md`新增#50（`f_amihud_illiq` FAIL）、#51（`f_idio_vol` CHEAP_PASS），TW軌FDR家族m由18→20。`TW_LEADS.md`新增#6/#7。
+
+**驗證**：`is_holdout_consumed()` 確認仍為 `False`（`load_dev()`唯一入口，零額外FinMind/yfinance呼叫，全程命中`factor_ic.py`既有快取樣本）。
+
+**下一輪**：見`TW_LEADS.md`本輪更新的「下一輪建議」——優先`f_idio_vol`相關性檢查+深挖，其次`f_value_pb`深挖、`f_quality_roe_stability`TRAIN期負報酬拆解，或繼續掃BAB/季節性/資產成長異常/Piotroski F-score/accruals盈餘品質。

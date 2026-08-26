@@ -77,6 +77,7 @@ VOL_SHORT_WINDOW = 20
 VOL_LONG_WINDOW = 60
 LOW_VOL_WINDOW = 60
 SHORT_REVERSAL_WINDOW = 21  # ~1 calendar month in trading days
+AMIHUD_WINDOW = 20  # Amihud (2002) illiquidity, ~1 trading month
 SUE_TRAILING_QUARTERS = 8
 REVENUE_SUE_TRAILING_MONTHS = 12
 ROE_STABILITY_TRAILING_QUARTERS = 8
@@ -403,6 +404,30 @@ def prepare_factors(
     # 跟 f_rel_strength（60 日相對大盤動能）刻意用不同窗口、不同定義（這裡是自身絕對報酬，不是
     # 相對大盤），文獻上短期反轉跟中期動能是兩個獨立、方向常相反的異常，值得分開測。
     d["f_short_reversal_1m"] = -(d["adj_close"] / d["adj_close"].shift(SHORT_REVERSAL_WINDOW) - 1)
+
+    # (n) Amihud 流動性因子: 20 日 |日報酬|/成交金額 均值（Amihud 2002），純價格/成交量
+    # 資料，天然 point-in-time。**方向刻意不取負號**：文獻上流動性越差（數值越大）要求
+    # 的預期報酬溢酬越高，跟 f_low_vol/f_short_reversal_1m 取負號的慣例相反，是設計選擇
+    # 不是疏漏。2026-08-26 馬拉松新增（MARATHON_PROTOCOL.md 第 3 節「流動性」家族，尚未
+    # 測過）。Trading_money 為 0（該日無成交）時整段視為缺值，不當作流動性極佳處理。
+    illiq_daily = np.where(d["Trading_money"] > 0, daily_ret.abs() / d["Trading_money"], np.nan)
+    d["f_amihud_illiq"] = pd.Series(illiq_daily, index=d.index).rolling(
+        AMIHUD_WINDOW, min_periods=AMIHUD_WINDOW
+    ).mean()
+
+    # (o) 特異波動率 (idiosyncratic volatility, Ang et al. 2006)：60 日窗口用市場模型
+    # 變異數分解 Var(r) = beta^2*Var(rm) + Var(residual) 的封閉解算出特異變異數，取負號
+    # （高特異波動率文獻上對應「較低」未來報酬，跟 f_low_vol 的取負號慣例方向一致，但這是
+    # 獨立機制——f_low_vol 是總波動度，這裡扣掉了 beta*大盤波動的部分，兩者可能高度相關但
+    # 概念上不同，文獻上分開列為兩個異常）。純價格資料，天然 point-in-time，2026-08-26
+    # 馬拉松新增（MARATHON_PROTOCOL.md 第 3 節「低風險」家族第二個測試，f_low_vol 是第一個）。
+    mkt_ret = d["mkt_close"].pct_change()
+    roll_var_stock = daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).var()
+    roll_var_mkt = mkt_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).var()
+    roll_cov = daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).cov(mkt_ret)
+    beta_60 = roll_cov / roll_var_mkt
+    idio_var = (roll_var_stock - beta_60 ** 2 * roll_var_mkt).clip(lower=0.0)
+    d["f_idio_vol"] = -np.sqrt(idio_var)
 
     # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
     # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓

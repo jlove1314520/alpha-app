@@ -2,7 +2,7 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T11:03:40+08:00（馬拉松第94輪）——補齊主線`LEADS.md`待辦：`f_rel_strength_regime_switch`從PENDING同步為FAIL（第83輪已測完，這輪只是把數字寫進權威記錄檔），純文件同步、無新API呼叫、無新判定。**
+**最後更新：2026-08-26T12:08:18+08:00（馬拉松第96輪）——低風險/流動性家族第一批：`f_amihud_illiq`（流動性，FAIL）、`f_idio_vol`（低風險家族第二個測試，**CHEAP_PASS，percentile=100.0**，TW軌至今單測解析度最強候選之一，IR/hit_rate明顯優於多數既有候選）。深挖前優先做`f_idio_vol`跟`f_low_vol`的相關性/持股重疊度檢查。完整見`TW_LEADS.md`#6/#7、`TRIALS_LEDGER.md`#50/#51、`TW_LOG.md`本輪記錄。**
 
 （上一版記錄，保留供對照）**2026-08-26（互動 session，非馬拉松自動輪次）——混合資料源架構上線，宇宙覆蓋率突破 80% 門檻**
 
