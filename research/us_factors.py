@@ -53,6 +53,22 @@ day, not against the market). A benchmark-relative variant is a reasonable
 follow-up once a US market-return series exists, not a blocker for this
 round's cheap gate.
 
+**f_us_reversal_1m** (2026-08-26, marathon round, US track's third factor):
+short-term reversal, the well-documented opposite-signed counterpart to
+12-month momentum (Jegadeesh 1990, Lehmann 1990) -- negative of trailing
+1-month (REV_LOOKBACK trading days) cumulative return, so recent losers
+score high and recent winners score low. Deliberately reuses the exact same
+REV_LOOKBACK=MOM_SKIP window (21 trading days) that f_us_momentum_12m
+already skips, on purpose: that window is precisely the horizon the
+momentum literature identifies as reversal-dominated rather than
+momentum-dominated, so this factor is testing "the part of recent price
+action f_us_momentum_12m deliberately excludes", not an arbitrary new
+window choice. Per US_MARATHON_STATE.md round-88 writeup's "下一步建議"
+("擴充第三個因子（短期反轉1週/1個月...）"), this is the 1-month variant
+(not 1-week) -- picked because it shares the same lookback constant already
+in use, minimizing new untested window choices in one round. Price-only,
+zero PIT dependency, same reasoning as the other two factors above.
+
 A factor being defined here is not a claim that it works -- same honesty
 rule as TW's factors.py: nothing here has been through a cheap gate yet.
 """
@@ -65,6 +81,8 @@ from finmind_client import load_dev
 LOW_VOL_WINDOW = 60  # trading days -- matches TW's factors.py LOW_VOL_WINDOW exactly, see docstring
 MOM_LOOKBACK = 252  # trading days ~= 12 months
 MOM_SKIP = 21  # trading days ~= 1 month, excluded to avoid short-term-reversal confound
+REV_LOOKBACK = MOM_SKIP  # trading days ~= 1 month -- deliberately the same window MOM_SKIP
+                         # excludes, see f_us_reversal_1m docstring above
 
 
 def us_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
@@ -105,10 +123,15 @@ def prepare_us_factors(price_df: pd.DataFrame) -> pd.DataFrame:
     px_lag_lookback = d["adj_close"].shift(MOM_LOOKBACK)
     d["f_us_momentum_12m"] = px_lag_skip / px_lag_lookback - 1.0
 
+    # f_us_reversal_1m -- 短期反轉：近1個月累積報酬取負號，purely price-only.
+    # 天然 point-in-time，同 f_us_low_vol/f_us_momentum_12m 精神。
+    ret_1m = d["adj_close"] / d["adj_close"].shift(REV_LOOKBACK) - 1.0
+    d["f_us_reversal_1m"] = -ret_1m
+
     return d
 
 
-US_FACTOR_COLUMNS = ["f_us_low_vol", "f_us_momentum_12m"]
+US_FACTOR_COLUMNS = ["f_us_low_vol", "f_us_momentum_12m", "f_us_reversal_1m"]
 
 
 if __name__ == "__main__":
@@ -151,4 +174,13 @@ if __name__ == "__main__":
         print(f"  f_us_momentum_12m: {n_nan_mom} NaN (expect exactly {expected_nan_mom} warm-up rows), "
               f"{len(valid_mom)} valid, range [{valid_mom.min():.5f}, {valid_mom.max():.5f}]" if len(valid_mom) else "  NO valid rows")
         assert n_nan_mom == expected_nan_mom, f"{sid}: expected {expected_nan_mom} NaN warm-up rows, got {n_nan_mom}"
-    print("\nOK: f_us_low_vol and f_us_momentum_12m both compute end-to-end on both smoke-test tickers with the expected warm-up shape.")
+
+        # f_us_reversal_1m warm-up: shift(REV_LOOKBACK) is the only constraint, so exactly
+        # REV_LOOKBACK leading NaN rows expected (REV_LOOKBACK == MOM_SKIP == 21).
+        n_nan_rev = d["f_us_reversal_1m"].isna().sum()
+        valid_rev = d["f_us_reversal_1m"].dropna()
+        expected_nan_rev = REV_LOOKBACK
+        print(f"  f_us_reversal_1m: {n_nan_rev} NaN (expect exactly {expected_nan_rev} warm-up rows), "
+              f"{len(valid_rev)} valid, range [{valid_rev.min():.5f}, {valid_rev.max():.5f}]" if len(valid_rev) else "  NO valid rows")
+        assert n_nan_rev == expected_nan_rev, f"{sid}: expected {expected_nan_rev} NaN warm-up rows, got {n_nan_rev}"
+    print("\nOK: f_us_low_vol, f_us_momentum_12m, and f_us_reversal_1m all compute end-to-end on both smoke-test tickers with the expected warm-up shape.")

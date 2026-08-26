@@ -1,5 +1,6 @@
 """US-track cheap-gate IC test -- f_us_low_vol (round 82, FAIL on deep-dive,
-see US_LEADS.md #1) and f_us_momentum_12m (2026-08-26 marathon round, second
+see US_LEADS.md #1), f_us_momentum_12m (round 88, FAIL on cheap gate, see
+US_LEADS.md #2), and f_us_reversal_1m (2026-08-26 marathon round, third
 factor, this round's 1a test).
 
 **Why this exists:** per US_MARATHON_STATE.md's "下一步" (round 79's writeup),
@@ -128,7 +129,7 @@ def load_us_sample_with_factors(sample_ids: list[str]) -> tuple[dict[str, pd.Dat
 
 def main():
     sample_ids = sample_us_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
-    print(f"=== US track cheap-gate IC test: f_us_low_vol ===")
+    print(f"=== US track cheap-gate IC test ===")
     print(f"Sample target: {len(sample_ids)} names (seed={SAMPLE_SEED}), snapshot window "
           f"{SNAPSHOT_START}..{holdout.VAL_END}")
 
@@ -160,13 +161,16 @@ def main():
     snapshots = build_snapshots(calendar, SNAPSHOT_START, holdout.VAL_END)
     print(f"{len(snapshots)} non-overlapping 20-trading-day snapshots, {SNAPSHOT_START}..{holdout.VAL_END}")
 
-    # 2026-08-26 round: only test factors that don't already have a recorded verdict.
-    # f_us_low_vol already went through cheap gate (round 82, CHEAP_PASS) + deep-dive
-    # (FAIL, see US_LEADS.md #1 / TRIALS_LEDGER.md #41) -- rerunning its cheap gate here
-    # would burn API quota re-fetching prices with zero new information (its verdict is
-    # already final), and would incorrectly conflate this round's single-new-factor
-    # bonferroni_n=1 batch with a 2-factor batch it isn't. Only f_us_momentum_12m is new.
-    ALREADY_VERDICTED = {"f_us_low_vol"}
+    # Only test factors that don't already have a recorded verdict. f_us_low_vol
+    # went through cheap gate (round 82, CHEAP_PASS) + deep-dive (FAIL, see
+    # US_LEADS.md #1 / TRIALS_LEDGER.md #41); f_us_momentum_12m went through cheap
+    # gate (round 88, FAIL, same_sign train/val mismatch, see US_LEADS.md #2 /
+    # TRIALS_LEDGER.md #42) -- rerunning either here would burn API quota
+    # re-fetching prices with zero new information (both verdicts are already
+    # final), and would incorrectly conflate this round's single-new-factor
+    # bonferroni_n=1 batch with a multi-factor batch it isn't. Only
+    # f_us_reversal_1m is new this round (2026-08-26, third factor).
+    ALREADY_VERDICTED = {"f_us_low_vol", "f_us_momentum_12m"}
     columns_to_test = [c for c in US_FACTOR_COLUMNS if c not in ALREADY_VERDICTED]
 
     results = []

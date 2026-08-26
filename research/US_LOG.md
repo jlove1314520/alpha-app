@@ -446,3 +446,25 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 `is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
 
 `is_holdout_consumed()` 確認為 `False`（`deep_dive_f_us_low_vol.py`全程走`load_dev()`，本輪沒有呼叫任何FinMind API，零新增網路請求）。
+
+## 2026-08-26T09:04:37+08:00 — 馬拉松第91輪：1a便宜關卡——US軌第三個因子`f_us_reversal_1m`（短期反轉）
+
+**取鎖**：`LOCK_ACQUIRED`（乾淨，非陳舊鎖檔接手）。
+
+**選軌**：讀三軌`_MARATHON_STATE.md`最後更新的git commit時間戳，US軌最久沒被碰（07:34:04 vs TW 08:05:29 vs FUT 08:36:07），本輪選US軌。
+
+**做的事**：延續第88輪`US_MARATHON_STATE.md`「下一步建議」（「擴充第三個因子（短期反轉1週/1個月...）」），`us_factors.py`新增`f_us_reversal_1m`——近1個月（`REV_LOOKBACK=21`交易日，刻意跟`f_us_momentum_12m`的`MOM_SKIP`常數完全相同）累積報酬取負號，純價格、零PIT依賴，同前兩個因子精神。smoke test（`python us_factors.py`，用既有快取AAPL/MSFT，零新API呼叫）通過：warm-up剛好21列NaN符合預期，兩檔皆有合理範圍的有效值。
+
+`us_factor_ic.py`的`ALREADY_VERDICTED`同步加入`f_us_momentum_12m`（第88輪已FAIL但先前只排除了`f_us_low_vol`）——避免這輪因為`US_FACTOR_COLUMNS`已有三個因子而被誤判成多因子批次，本輪維持`bonferroni_n=1`的單因子測試語義。
+
+跑`python us_factor_ic.py`：同一批40檔隨機樣本（seed=20260826，跟#1/#2同種子），27/40可用（13檔因下市/資料太短/`AKO/B`格式問題被過濾，跟#1/#2完全一致，因為是同一份快取樣本）。
+
+**結果**：TRAIN(2015-2020) mean_ic=+0.0938 IR=+0.327（n=76期，正）；VAL(2021-2024) mean_ic=−0.0198 IR=−0.075 hit_rate=0.59（n=49期，負）；null percentile=49.5（單測門檻90.0，不只沒過線，還低於50，比隨機打散還不如）。**FAIL**——train/val方向不一致（same_sign未過），且percentile遠低於門檻，比第88輪動能因子的FAIL更明確（動能至少VAL期percentile 94.6有過線）。
+
+**判定**：`f_us_reversal_1m` **FAIL**（便宜關卡本身沒過）。US軌因子驗證累積3筆，全部FAIL（#1`f_us_low_vol`深挖FAIL、#2`f_us_momentum_12m`便宜關卡FAIL、#3本次便宜關卡FAIL）。至今尚無任何PASS/EXPERIMENTAL候選。US軌FDR家族m=3。經濟解釋：短期反轉是文獻中跟12-1動能同樣穩健但方向相反的異常，這裡測的正是動能因子刻意排除的21日窗口本身——train/val反轉較可能是27檔小樣本、未分層抽樣、無regime控制所致（跟#1/#2同款限制），不代表反轉因子在美股完全無效，但目前證據不支持升格。
+
+**下一步建議**：純price-only因子家族（低波動/動能/反轉）三個都已測完，全部FAIL。若延續同路線可考慮規模/流動性分層抽樣重測；或改做US軌宇宙覆蓋率擴充（`KNOWN_DELISTED`目前僅5檔手動查證下市股）/情境分群類工作。
+
+`is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
+
+完整見`US_LEADS.md`#3（新增）、`TRIALS_LEDGER.md`#45（新增）、`us_factors.py`/`us_factor_ic.py`（新增f_us_reversal_1m）。
