@@ -323,6 +323,45 @@ hyp_intraday_gap_reversal/continuation (#14/#15):
     night session price moves may overshoot on temporary imbalance and mean-
     revert once day session's deeper liquidity reopens price discovery --
     the classic thin-market-overreaction story.
+
+Eleventh round (marathon round 104, following round 98's "下一輪建議" (a),
+first of the "two gap constructs" it flagged as untested: this round covers
+the day_close(T-1) -> night_open(T) gap (round 98 already tested night
+session's own FULL realized return, night_ret; this is a materially
+different measurement -- the jump that happens the instant night session
+opens, before any of night session's own price discovery occurs). The
+second gap construct (night_close(T) -> day_open(T)) is deliberately left
+for a future round, same "test 2-3 hypotheses, then stop" discipline as
+every prior round in this file. Direct structural analog of
+hyp_intraday_gap_reversal/continuation (#14/#15, which used
+day_close(T-1) -> day_open(T) predicting day's own intraday_ret) -- same
+construction, just substituting the night session as the "session that
+opens after the gap" instead of the day session:
+  - fut_night_gap_reversal / fut_night_gap_continuation: position[T] =
+    -/+sign(night_open(T) / day_close(T-1) - 1), traded against night
+    session T's own open-to-close return (night_ret, reusing
+    _load_session_pair()'s existing column, not day_ret -- the gap being
+    tested here leads INTO night session, so the session whose own move it
+    should predict is night session itself, not day session). Same-day
+    pairing (_permutation_test_same_day): the gap is realized at
+    night_open(T) and the outcome is night_close(T), both carry the same
+    date label T (round 63 timing). Economic story if continuation wins:
+    the day_close(T-1)->night_open(T) gap is TX's first opportunity to
+    react to news that accumulated since day session T-1 closed (a shorter,
+    more concentrated news-accumulation window than a full overnight gap
+    into the next day session, since night session opens same-day-evening);
+    if the initial reaction at night_open is directionally correct but
+    incomplete, night session's own subsequent move should continue in the
+    same direction as trading continues through the thin overnight session
+    -- an underreaction-at-reopen story, structurally the same logic already
+    used for hyp_intraday_gap_continuation (#15) and the night-session-
+    momentum story (round 98), but applied to a different pair of prices.
+    Economic story if reversal wins instead: the gap itself may overshoot
+    because night session's opening liquidity is thinner than even night
+    session's own steady-state liquidity (the very first print after a
+    liquidity gap), making the initial jump a noisy overreaction that
+    reverts as more participants join through the rest of the night
+    session -- the standard opening-overreaction story.
 """
 from __future__ import annotations
 
@@ -698,6 +737,40 @@ def hyp_night_session_reversal(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test_same_day("fut_night_session_reversal", position, merged["day_ret"])
 
 
+def hyp_night_gap_reversal(series: pd.DataFrame) -> CheapGateResult:
+    """Eleventh round's gap-construct hypothesis (round 98 next-step item
+    (a), first of the two gap constructs it flagged: day close T-1 -> night
+    open T). Unlike hyp_night_session_momentum/reversal (round 98, which
+    used night session's OWN full open-to-close return night_ret to predict
+    day_ret), this tests whether the GAP leading INTO the night session
+    predicts that same night session's own subsequent return -- structural
+    analog of hyp_intraday_gap_reversal/continuation (#14/#15: day close
+    T-1 -> day open T gap predicting day's own intraday_ret), substituting
+    the night session for the day session. _permutation_test_same_day is
+    used because the gap is realized at night_open(T) and traded against
+    night_ret(T), both carrying the same date label T (round 63 timing) --
+    same convention as #14/#15 and hyp_night_session_momentum/reversal."""
+    merged = _load_session_pair(series)
+    gap = merged["night_open"] / merged["adj_close"].shift(1) - 1.0  # day
+    # session's close on the PRIOR row -> night session's own open on this
+    # row's date T; .shift(1) operates on merged's row order (already
+    # date-sorted, inner-joined subset starting 2017-05-16), same pattern
+    # as hyp_intraday_gap_reversal/continuation's series["adj_close"].shift(1)
+    position = -np.sign(gap)  # fade the gap leading into night session
+    return _permutation_test_same_day("fut_night_gap_reversal", position, merged["night_ret"])
+
+
+def hyp_night_gap_continuation(series: pd.DataFrame) -> CheapGateResult:
+    """Paired continuation hypothesis to hyp_night_gap_reversal (same round,
+    not a parameter-tuning rescue -- testing the opposite direction of a
+    brand-new gap construct, same precedent as #14/#15 and round 98's
+    night_session_momentum/reversal pair)."""
+    merged = _load_session_pair(series)
+    gap = merged["night_open"] / merged["adj_close"].shift(1) - 1.0
+    position = np.sign(gap)  # trade with the gap leading into night session
+    return _permutation_test_same_day("fut_night_gap_continuation", position, merged["night_ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -706,8 +779,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_night_session_momentum(series),
-        hyp_night_session_reversal(series),
+        hyp_night_gap_reversal(series),
+        hyp_night_gap_continuation(series),
     ]
 
     for r in results:

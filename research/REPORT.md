@@ -10,6 +10,8 @@
 
 ---
 
+## 第 104 輪 · 2026-08-26 17:05 · FUT · 取鎖乾淨（非陳舊鎖檔）；FUT時間戳最舊（第98輪13:05，TW第102輪16:06、US第103輪16:38），且近10輪窗口FUT只佔20%（未超額），選FUT；延續第98輪「下一輪建議」(a)項，盤別效應家族第二批——日盤收盤(T-1)→夜盤開盤(T)跳空反轉/順勢，`fut_cheap_gate.py`新增`hyp_night_gap_reversal`/`hyp_night_gap_continuation` · **兩個都FAIL**——反轉版percentile=17.5（方向不對）、順勢版percentile=82.5（方向對但未過90.0單測門檻，跟round98`fut_night_session_reversal`(81.0)同款）；盤別效應家族累計4個假說（round98+本輪）全部FAIL；`TRIALS_LEDGER.md`#65/#66、`FUT_LEADS.md`#22/#23
+
 ## 第 103 輪 · 2026-08-26 16:38 · US · 取鎖乾淨（非陳舊鎖檔）；FUT時間戳最舊（13:05）但其自身`FUT_LEADS.md`明確建議近幾輪讓給TW/US（近10輪已佔30%資源上限），故選次舊的US（14:05）；延續第99輪「下一步」建議首選，深挖`f_us_low_vol`小型股tier（#10 CHEAP_PASS）完整1b驗證 · **FAIL**——TRAIN(2015-2020,1x) ann_return=-61.57% beta=+0.260；VAL(2020-2024,1x) ann_return=+280.63% beta=-0.587，train/val正負號翻轉+beta正負號也翻轉，跟round 84不分層版深挖FAIL同款警訊且更嚴重（疑似微型生技/殼股樣本+k=3/leg小decile放大波動）。US軌至今累計13筆試驗、0筆深挖後仍成立的PASS/EXPERIMENTAL；`TRIALS_LEDGER.md`#64、`US_LEADS.md`#13、`deep_dive_f_us_low_vol_small_tier.py`（新增）
 
 ## 第 100 輪 · 2026-08-26 14:05 · US · 取鎖乾淨（非陳舊鎖檔）；US時間戳最舊（12:15，FUT 13:05、TW 13:35），選US；延續第97輪「下一步」建議首選，small tier分層重測（四個樣本版本全測完） · `f_us_low_vol`小型股tier**CHEAP_PASS**（percentile=100.0，US軌至今第三個CHEAP_PASS，val IC隨規模遞增，跟leverage-constraint文獻方向一致，但train期IR弱、跟#1深挖FAIL前形狀相似）；`f_us_momentum_12m`FAIL（same_sign未過，四次測試出現三種方向排列，坐實小樣本雜訊）；`f_us_reversal_1m`FAIL（14.4，四版本最差一次，家族結案）；`TRIALS_LEDGER.md`#57/#58/#59、`US_LEADS.md`#10/#11/#12

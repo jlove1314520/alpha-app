@@ -7,7 +7,7 @@
 
 **這份檔案只描述期貨軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `FUT_LOG.md`；候選判定看 `FUT_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T13:05:49+08:00**（馬拉松第98輪：盤別效應家族第一批假說——夜盤自身report vs 日盤report，2個都FAIL。`fut_cheap_gate.py`新增`_load_session_pair()`（日盤系列跟夜盤`build_continuous_series(session="after_market")`用`date`inner join，round 63/90/91已驗證的時序方向跟轉倉同步性是這個join的依據）＋`hyp_night_session_momentum`/`hyp_night_session_reversal`兩個假說：`fut_night_session_momentum`（順夜盤方向）percentile=19.0，方向不對，**FAIL**；`fut_night_session_reversal`（反夜盤方向）percentile=81.0，方向正確但未過90.0單測門檻，**FAIL**（誠實記錄，不因方向正確就排入待深挖清單）。真實策略終值：動能版-27.2%、反轉版+23.7%；隨機控制組中位數：動能版-3.7%、反轉版-6.4%。地基本身（round 93）運作正常，零額外API呼叫（inner join命中既有全歷史parquet快取）。**盤別效應家族第一批（夜盤vs日盤自身報酬）結案：0 PASS。** basis家族（水位#17FAIL/動能#18FAIL/均值回歸#19EXPERIMENTAL）跟本輪盤別效應第一批加總，FUT軌累積24次策略試驗、僅1個EXPERIMENTAL。詳見`FUT_LOG.md`本輪記錄。**本輪commit範圍延續第80–93輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，其他軌互動session未commit變更依然刻意排除不動。）
+**最後更新：2026-08-26T17:05:24+08:00**（馬拉松第104輪：盤別效應家族第二批假說——日盤收盤(T-1)→夜盤開盤(T)跳空反轉/順勢，2個都FAIL。`fut_cheap_gate.py`新增`hyp_night_gap_reversal`/`hyp_night_gap_continuation`（重用round 98已寫好的`_load_session_pair()`，新增`gap = night_open/adj_close.shift(1) - 1.0`，結構對應#14/#15日盤自身跳空換成夜盤版本，預測目標為夜盤自身`night_ret`）：`fut_night_gap_reversal`percentile=17.5，方向不對，**FAIL**；`fut_night_gap_continuation`percentile=82.5，方向正確但未過90.0單測門檻，**FAIL**（誠實記錄，跟round98`fut_night_session_reversal`(81.0)同款「方向對但不夠強」，不排入待深挖清單）。真實策略終值：反轉版+99.0%、順勢版-53.7%；隨機控制組中位數：反轉版+109.9%、順勢版-56.1%。地基（round 93/98）運作正常，零額外API呼叫（inner join命中既有全歷史parquet快取）。**盤別效應家族第二批（進入夜盤前的跳空）結案：0 PASS。** 累加round 98第一批（夜盤自身完整報酬，2 FAIL），盤別效應家族至今4個假說全部FAIL；跟basis家族（水位#17FAIL/動能#18FAIL/均值回歸#19EXPERIMENTAL）加總，FUT軌累積26次策略試驗、僅1個EXPERIMENTAL。詳見`FUT_LOG.md`本輪記錄。**本輪commit範圍延續第80–98輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，其他軌互動session未commit變更依然刻意排除不動。）
 
 **上一則保留（第90輪，供對照）：**取鎖時偵測到`LOCK_STALE`（pid 145052持有26.6分鐘，上一輪疑似異常中止，但確認沒有留下任何未commit的殘留工作，是乾淨崩潰）。盤別效應家族地基第二步——夜盤轉倉時點與日盤同步性驗證。新寫`fut_probe_night_session_rollover.py`，重用`continuous_contract.py`既有的`load_position_session()`/`front_month_series()`（日盤半邊零改動），對夜盤（`after_market`）套同一套規則獨立算出主連轉倉事件日期，直接比對2017-05-16起（夜盤有資料範圍）日盤／夜盤的轉倉日期集合。**結果：92/92筆完全同日期（exact match），零偏移量**——日盤既有H1轉倉規則可以直接沿用套到夜盤序列，不需要為夜盤另外設計獨立的轉倉時點判斷。第60/63輪標記的「動工前必須先查證轉倉時點是否同步」這個前置風險項至此解決，結果是好消息。**沒有測任何假說，沒有新增`TRIALS_LEDGER.md`列**（地基驗證同第39/60/63輪先例）。完整見`FUT_LOG.md`本輪記錄、`FUT_LEADS.md`本輪新增段落。**本輪commit範圍延續第80–89輪判斷**：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`TW_LEADS.md`/`TW_LOG.md`/`.github/workflows/quotes.yml`）依然刻意排除不動。
 
@@ -65,14 +65,14 @@
 
 ## 下一步
 
-**（本節2026-08-26第93輪重寫，取代上方第90輪那份——那份還在等夜盤連續序列地基動工，第93輪（本輪）已經把它做完並雙重驗證過，見本頁最上方最新段落，不要再照第90輪那份清單走。）**
+**（本節2026-08-26第104輪重寫，取代上方第93輪那份——那份還在等第一批盤別效應假說測試，第98輪跟第104輪（本輪）已經測完兩批共4個假說，見本頁最上方最新段落，不要再照第93輪那份清單走。）**
 
-**basis家族、三大法人期貨部位家族、日內均值回歸家族第一批全部已完全結案（細節同前段落）。盤別效應家族地基至此完全就緒**：第63輪解決夜盤時序方向、第90輪解決轉倉時點同步性、第93輪（本輪）完成`continuous_contract.py`的`session`參數改動並雙重驗證（92/92 exact match、零NaN/skipped）。**下一步可以直接開始測第一批盤別效應假說本身，不用再處理任何地基問題。**
+**basis家族、三大法人期貨部位家族、日內均值回歸家族第一批、盤別效應家族第一批＋第二批全部已完全結案（細節同前段落）。**
 
 **下一輪建議（優先順序由上到下）**：
-1. 盤別效應家族第一批假說：用`build_continuous_series(session="after_market")`（本輪新增）跟既有日盤版本，測「夜盤報酬vs日盤報酬」「隔夜跳空」等`MARATHON_PROTOCOL.md`第3節列出的方向。**注意時序方向**：第63輪確認夜盤`date`=T代表「T-1晚間到T清晨」，領先日盤T，設計報酬/跳空定義時要對齊這個方向，不要憑直覺假設夜盤T在日盤T之後。用`fut_cheap_gate.py`既有便宜關卡框架，加新的資料載入邏輯即可，不用重寫地基。
+1. 盤別效應家族第三批：夜盤收盤(T)→日盤開盤(T)第二種跳空構造（round 98標記過，尚未測試），預測目標改為`day_ret`（不是`night_ret`）——`fut_cheap_gate.py::_load_session_pair()`已經有`night_close`/`adj_open`兩欄，不需要新地基，直接新增`gap2 = merged["adj_open"] / merged["night_close"] - 1.0`即可。或者：夜盤多日累積報酬（而非單日open→close）。
 2. 或者：換一個全新機制家族測試假說，`MARATHON_PROTOCOL.md`第3節清單裡還沒測過的（期現價差以外的其他技術面/籌碼面變體）。
 3. （較低優先，不擋路）`fut_basis_mean_reversion_60d`（#19 EXPERIMENTAL）regime/年代分段穩健性檢查，非硬性待辦。
 4. （較低優先，不擋路）連續合約累積漂移的經濟成因未拆解，可另立獨立假說，但不急。
 
-下一個馬拉松輪次接手時，先讀 `FUT_LOG.md` 最新一條（第93輪）看夜盤連續序列怎麼建構、怎麼驗證過的，`continuous_contract.py`模組docstring也已更新說明依據。**已測過FAIL/CHEAP_PASS-但降級的18個訊號＋1個EXPERIMENTAL（純技術面/籌碼面/季節性6個 + 三大法人部位水位×3類別+自營商動能4個 + 日內跳空反轉/順勢2個 + basis三機制3個，含各自的高解析度重測）不要重測相同設定。**記得FUT軌資源配置上限20%，選輪次時TW/US軌優先度更高。
+下一個馬拉松輪次接手時，先讀 `FUT_LOG.md` 最新一條（第104輪）看盤別效應第二批跳空構造怎麼設計的，`fut_cheap_gate.py`模組docstring也已更新說明依據（"Eleventh round"段落）。**已測過FAIL/CHEAP_PASS-但降級的20個訊號＋1個EXPERIMENTAL（純技術面/籌碼面/季節性6個 + 三大法人部位水位×3類別+自營商動能4個 + 日內跳空反轉/順勢2個 + basis三機制3個 + 盤別效應4個，含各自的高解析度重測）不要重測相同設定。**記得FUT軌資源配置上限20%，選輪次時TW/US軌優先度更高，近10輪（95–104）FUT剛好20%，下一輪若還選FUT要重新盤點窗口。
