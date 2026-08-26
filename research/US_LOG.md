@@ -559,3 +559,32 @@ holdout狀態確認：跑前跑後`is_holdout_consumed()`皆為`False`。零新�
 **下一步建議**：純price-only因子路線至此已完整走過一輪（不分層+3個規模tier×3個因子=12+2便宜關卡即停=14筆），繼續在同一路線加碼（例如更多tier切法、更多price-only因子變體）預期邊際資訊量遞減。優先序改為：(a) 需要基本面/PIT資料的新因子家族（價值PB/PE、品質），屬於1c地基工作——先確認SEC EDGAR資料源可用性/申報日期欄位（`CLAUDE.md`提過既有邏輯可參考，不能動`alpha-data/fetch.py`凍結區本身），這是US軌目前唯一還沒搭的地基缺口；(b) 或宇宙覆蓋率/存活者偏差調查（`KNOWN_DELISTED`僅5檔，`US_LEADS.md`「目前狀態」段落已記錄過這條調查此前是負面結果，需要換SEC EDGAR方法而非繼續猜）。
 
 完整見`TRIALS_LEDGER.md`#68、`US_LEADS.md`#14、`deep_dive_f_us_low_vol_mid_tier.py`（新增，可重複執行）。
+
+## 2026-08-26T19:05+08:00 — 馬拉松第108輪：`us_fundamentals.py`——XBRL company-facts首個可重用wrapper（PB因子地基第一步）
+
+**動機**：延續第106輪「下一步」建議首選(a)——純price-only三因子家族（低波動/動能/短期反轉）四個樣本版本全部結案（12+4=16筆試驗，見`US_LEADS.md`#1-#14），下一個因子家族轉向需要基本面/PIT資料的價值/品質類。round 10（`sec_edgar_xbrl_facts_probe.py`）/round 11（`sec_edgar_xbrl_facts_dedup_probe.py`）已經探測過XBRL company-facts端點本身（含per-datapoint去重邏輯：group by `end`、取最小`filed`），但從未包裝成可重用模組——跟submissions端點走過的路徑一樣（round 3探測→之後某輪才包成`sec_edgar_client.py`），這輪補上XBRL側對應的那一步。
+
+**取鎖**：乾淨（非陳舊鎖檔）。**選軌**：三軌時間戳FUT最舊（17:05）但近10輪窗口（round 98-107）FUT已佔20%（round 98/104兩次）達上限，比照第107輪「近10輪已達20%資源配置上限改選TW」的先例，這輪也跳過FUT，改選次舊的US（18:10，早於TW的19:45）。
+
+**做的事**：新增`research/us_fundamentals.py`：
+- `get_companyfacts(cik)`：重用`sec_edgar_client._cached_get()`同一套快取邏輯，抓`data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json`原始payload（新的快取命名空間，跟submissions分開）。
+- `list_available_concepts(cik, taxonomy)`：診斷用，列出某filer在某分類法下實際回報哪些concept tag。
+- `get_concept_series(cik, concept, taxonomy, forms)`：單一concept的PIT對齊+去重時間序列，去重邏輯照搬round 11驗證過的「group by `end`、取最小`filed`、僅10-K/10-Q」，回傳欄位`end`/`pit_date`/`val`/`form`/`unit`/`gap_days`。
+
+**這輪只搭wrapper本身，沒有計算任何因子**——符合「一輪一個工作單位」跟`sec_edgar_client.py`當年的先例（wrapper先行，因子消費邏輯留給下一輪）。
+
+**Smoke test過程中修了一個真bug**：`get_concept_series()`初版把去重字典的key寫錯（`filed`寫成`pit_date`，比較時用了不存在的key），第一次執行`KeyError: 'filed'`當場報錯，修正為統一用`pit_date`後重跑成功——這個bug在smoke test階段就抓到，沒有汙染任何記錄檔案。
+
+**執行結果**（AAPL/MSFT/PLTR，同三檔round 3/10/11已驗證CIK）：
+
+- `StockholdersEquity`（us-gaap，book value分子）：AAPL 72期（2006-09-30~2026-06-27）、MSFT 73期（2008-06-30~2026-06-30）、PLTR 31期（2017-12-31~2026-06-30），三檔皆有資料。
+- `CommonStockSharesOutstanding`（us-gaap，股數）：AAPL 70期、MSFT 70期、PLTR 25期，三檔皆有資料。
+- `EntityCommonStockSharesOutstanding`（dei，備援股數標籤）：AAPL 69期、MSFT 67期、**PLTR 0期（完全查不到）**。
+
+**關鍵可行性發現**：`StockholdersEquity`+`CommonStockSharesOutstanding`（皆us-gaap）合起來就能算book value per share，**PB因子的兩個核心輸入可行性確認**。但原本以為可以當備援/對照來源的`dei`股數標籤，PLTR完全查不到——**代表股數來源應該以us-gaap標籤為主，dei標籤只能當「gaap標籤剛好缺失時的最後備援」，不能對調優先序**，這是這輪最有資訊量的發現。
+
+**誠實記錄一個尚未解決的異常**：`StockholdersEquity`的`gap_days`（pit_date−end）中位數合理（AAPL 32天/MSFT 27天/PLTR 42天，跟`us_pit.py`的filing gap同量級），但**max值異常大**（AAPL 1123天、MSFT 760天、PLTR 1153天）。推測是`us_pit.py`已經記錄過的pre-XBRL-mandate（`XBRL_MANDATE_PHASE1_CUTOFF="2009-06-15"`）同款artifact在company-facts端點的具體展現——早期期間的數字可能是好幾年後另一份申報書把它當比較期數字第一次以XBRL格式帶出來，這輪**沒有查證這個推測是否成立**，只誠實標記`gap_days`在早期年份不能直接當PIT品質信賴指標使用，下一輪如果要用這個模組建構真正的因子輸入，應該先按`end`年份分段統計（同`era_reliability()`精神）排查。
+
+**Holdout狀態確認**：跑前跑後`is_holdout_consumed()`皆為`False`——本輪只打SEC EDGAR公開API，不碰FinMind/alpha.db，holdout規則不適用，同`sec_edgar_*.py`系列腳本一貫慣例。
+
+**下一步**：(a) 用同樣模式驗證PE因子需要的分子（`NetIncomeLoss`或`EarningsPerShareDiluted`，round 10已驗證AAPL/MSFT/PLTR皆有資料）；(b) 針對`gap_days`異常值按年份分段統計，確認是否真的是pre-2009 artifact；(c) 確認可行後才進入1a——寫`f_us_value_pb`的cheap gate測試。這不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列，跟第二～七輪同類地基工作先例一致。完整程式碼見`research/us_fundamentals.py`（docstring含完整方法論跟三項已知限制）、`DATA.md`「美股 PIT 資料源調查（六續）」小節。

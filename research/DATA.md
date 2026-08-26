@@ -319,6 +319,28 @@ First Republic Bank 是加州州立特許銀行，且（**這點是本輪依一�
 
 ---
 
+### 美股 PIT 資料源調查（六續）：XBRL company-facts 首個可重用 wrapper——`us_fundamentals.py`（2026-08-26 馬拉松第108輪）
+
+**動機**：接續第106輪「下一步」建議首選(a)——純price-only因子家族（低波動/動能/反轉）四個樣本版本全部結案後，US軌下一個因子家族要轉向需要基本面資料的價值/品質類，但這需要先確認SEC EDGAR資料源可行性再動工（屬於1c地基工作，不是1a因子測試）。round 10（`sec_edgar_xbrl_facts_probe.py`）／round 11（`sec_edgar_xbrl_facts_dedup_probe.py`）兩輪已經探測過XBRL company-facts端點本身（含per-datapoint去重邏輯），但**從未包裝成可重用模組**——跟submissions端點（探測兩輪後才在round 3→之後某輪包成`sec_edgar_client.py`）走過同樣的路徑，這輪補上XBRL側對應的那一步。
+
+**做的事**：新增`research/us_fundamentals.py`，重用`sec_edgar_client._cached_get()`同一套快取邏輯，提供`get_companyfacts(cik)`（原始payload）、`list_available_concepts(cik, taxonomy)`（診斷用，查某filer實際回報哪些concept tag）、`get_concept_series(cik, concept, taxonomy, forms)`（PIT對齊+去重的單一concept時間序列，去重邏輯照搬round 11驗證過的「group by `end`、取最小`filed`」）。**這輪只搭wrapper本身，沒有計算任何因子**，符合「一輪一個工作單位」跟`sec_edgar_client.py`當年的先例（wrapper先行，因子消費邏輯留給下一輪）。
+
+**Smoke test結果**（AAPL/MSFT/PLTR，同三檔round 3/10/11已驗證CIK）：
+
+| Ticker | `StockholdersEquity`(us-gaap) | `CommonStockSharesOutstanding`(us-gaap) | `EntityCommonStockSharesOutstanding`(dei) |
+|---|---|---|---|
+| AAPL | 72期，2006-09-30~2026-06-27 | 70期 | 69期 |
+| MSFT | 73期，2008-06-30~2026-06-30 | 70期 | 67期 |
+| PLTR | 31期，2017-12-31~2026-06-30 | 25期 | **0期（完全查不到）** |
+
+**關鍵可行性發現**：`StockholdersEquity`＋`CommonStockSharesOutstanding`（皆為`us-gaap`分類法）三檔全部有資料，**這兩個concept合起來就能算出book value per share（PB因子的核心輸入）**，可行性確認。但`dei:EntityCommonStockSharesOutstanding`（原本以為是股數的備援/對照來源）**PLTR完全查不到（0筆）**——代表這個dei標籤不能當成跨樣本可靠的主要來源，之後美股宇宙擴大抽樣時，股數應該優先用`us-gaap:CommonStockSharesOutstanding`，`dei`標籤只能當「如果gaap標籤剛好缺失時的最後備援」，不能對調優先序。
+
+**誠實記錄一個尚未解決的異常，不淡化**：`StockholdersEquity`的`gap_days`（pit_date−end）分布中位數合理（AAPL 32天/MSFT 27天/PLTR 42天，跟`us_pit.py`的filing gap同量級），但**max值異常大**（AAPL 1123天、MSFT 760天、PLTR 1153天）。推測是round 63/`us_pit.py`已經記錄過的「pre-XBRL-mandate」類型artifact的同款問題在company-facts端點的具體展現——某些早期財報期間的數字，第一次被XBRL標記揭露的時間點，可能是好幾年後的另一筆申報書把它當比較期數字帶出來（例如2006年的期末權益數字，直到2009年XBRL強制令生效後才第一次以XBRL格式出現在某份申報書裡，這份申報書的`filed`日期就會被本模組的去重邏輯誤認為是「最早揭露日」，但實際上該數字在2006年就已經透過非XBRL格式的傳統文字財報揭露過，只是不在這個API的資料範圍內）。**這輪沒有查證這個推測是否成立**，只誠實標記：`get_concept_series()`回傳的`gap_days`欄位在早期年份（尤其pre-2009,即`us_pit.py`的`XBRL_MANDATE_PHASE1_CUTOFF`常數標記的那個日期之前）不能直接當PIT品質信賴指標使用，下一輪如果要用這個模組建構真正的因子輸入，應該先對`gap_days`按`end`年份分段統計（同`us_pit.py`的`era_reliability()`精神），把pre-2009期間的極端值跟近年正常值分開看，不能把72期混在一起算單一統計量。
+
+**下一步**：(a) 用同樣模式驗證PE因子需要的分子（`NetIncomeLoss`或`EarningsPerShareDiluted`，後者round 10已驗證AAPL/MSFT/PLTR皆有資料）；(b) 針對`gap_days`異常值按年份分段統計，確認是否真的是pre-2009 artifact；(c) 確認可行後才進入1a——寫`f_us_value_pb`的cheap gate測試（book value per share = `StockholdersEquity`/`CommonStockSharesOutstanding`，同一`end`期間對齊，除以同期價格）。這是1c地基工作，不是因子/策略統計檢定，`TRIALS_LEDGER.md`不需要加列，跟第二～七輪同類地基工作先例一致。完整程式碼見`research/us_fundamentals.py`（docstring含完整方法論跟三項已知限制：dei標籤不可靠、gap_days早期異常值未解釋、不處理真實會計重編）。
+
+---
+
 ## 2. 存活者偏差（下市／下櫃股票）
 
 ### 下市清單：`TaiwanStockDelisting`
