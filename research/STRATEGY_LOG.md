@@ -6,6 +6,22 @@
 
 ---
 
+## 2026-08-26 — 馬拉松第100輪：`weinstein_stage2_unbiased` alpha/beta 顯著性關卡結果——否決，不解鎖 holdout
+
+依 `WEINSTEIN_ALPHA_GATE_TASK.md`（2026-08-25 使用者直接指示）：新寫 `weinstein_alpha_gate.py`，把
+train/val 總報酬拆成 beta 貢獻跟純 alpha 貢獻（`decompose_alpha_beta()`），並對配對式隨機控制組的
+每一次抽樣（N=200）也做同樣拆解（新寫完整每日淨值序列版本，平行於既有 `one_draw()`），拿真實策略
+的純 alpha 累積報酬對這個新分布算百分位。
+
+**結果：VAL 期 beta=+0.5865（明顯非市場中性），純alpha對隨機控制組 percentile=28.5——不只沒過
+90.0 單測門檻，還輸給隨機控制組中位數。TRAIN 期 percentile=96.5 有過門檻，但 2x/3x 成本敏感度下
+alpha 從 +21.36% 轉負到 −10.84%/−23.28%，不穩健。** 兩期都不構成「明確為正且穩健的 alpha」，依任務
+文件規則直接否決：`weinstein_stage2_unbiased` 判定從 `EXPERIMENTAL` 改為 **否決（純 beta，非真
+alpha）**，不解鎖 holdout，也不回報使用者要求解鎖。完整數字見 `LEADS.md`/`TRIALS_LEDGER.md`#60。
+`is_holdout_consumed()` 全程確認 `False`。
+
+---
+
 ## 2026-08-23 — Cowork 五點覆核回應：因子候選從 1 個增加到 4 個（PIT二次確認、Bonferroni校正、擴大重驗、擴充因子庫）
 
 Cowork 針對上一輪唯一通過的 `f_eps_growth` 提出 5 點要求，逐一誠實回應：

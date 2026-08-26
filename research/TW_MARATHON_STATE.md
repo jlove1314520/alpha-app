@@ -2,7 +2,9 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T13:35:13+08:00（馬拉松第99輪）——`f_idio_vol`深挖前置作業完成：跟`f_low_vol`相關性/持股重疊度檢查，`check_idio_vol_low_vol_overlap.py`（零新API，重用既有快取），結果mean Spearman correlation=+0.982、多頭腿Jaccard重疊0.789、空頭腿0.835，**HIGH OVERLAP**——`f_idio_vol`實質是`f_low_vol`高度共線變體，**決策不進深挖，家族結案**。判定從「CHEAP_PASS，待深挖」改列「CHEAP_PASS（但降級，不建議深挖）」。TW軌待深挖佇列目前為空。下一輪建議：深挖`f_value_pb`，或繼續掃BAB/季節性/資產成長異常/Piotroski F-score/accruals盈餘品質。完整見`TW_LEADS.md`#7、`TW_LOG.md`本輪記錄。（本輪另附帶完成：取鎖時發現`LOCK_STALE`，第98輪FUT工作其實已完整寫完只是commit前當機，已補commit+push，見`REPORT.md`/`FUT_MARATHON_STATE.md`。）**
+**最後更新：2026-08-26T16:06:04+08:00（馬拉松第102輪）——reconciliation：補齊`f_bab`/`f_asset_growth`/`f_accruals`未commit的積壓工作，非新測試。**`TRIALS_LEDGER.md`#61/#62/#63先前已委已記錄這三個因子的結果（`f_bab`低風險家族第三個測試CHEAP_PASS但批次/累積校正未過降級不確定；`f_asset_growth`資產成長異常FAIL；`f_accruals`盈餘品質應計項目FAIL），但驅動腳本`factor_ic_bab.py`/`factor_ic_asset_growth.py`跟`TW_LEADS.md`對應列（#8/#9/#10）一直沒commit，本輪補齊，讓這三筆記錄真正可重複執行。**TW軌待深挖佇列仍為空**（`f_value_pb`是唯一待深挖候選）。低風險（`f_low_vol`/`f_idio_vol`/`f_bab`）、資產成長、accruals盈餘品質三個家族至此皆已測完第一批。下一輪建議：深挖`f_value_pb`，或繼續掃季節性/Piotroski F-score。完整見`TW_LEADS.md`#8/#9/#10、`TW_LOG.md`本輪記錄。
+
+**上一則保留（第99輪，供對照）**：`f_idio_vol`深挖前置作業完成：跟`f_low_vol`相關性/持股重疊度檢查，`check_idio_vol_low_vol_overlap.py`（零新API，重用既有快取），結果mean Spearman correlation=+0.982、多頭腿Jaccard重疊0.789、空頭腿0.835，**HIGH OVERLAP**——`f_idio_vol`實質是`f_low_vol`高度共線變體，**決策不進深挖，家族結案**。判定從「CHEAP_PASS，待深挖」改列「CHEAP_PASS（但降級，不建議深挖）」。完整見`TW_LEADS.md`#7、`TW_LOG.md`第99輪記錄。（該輪另附帶完成：取鎖時發現`LOCK_STALE`，第98輪FUT工作其實已完整寫完只是commit前當機，已補commit+push，見`REPORT.md`/`FUT_MARATHON_STATE.md`。）
 
 （上一版記錄，保留供對照）**2026-08-26（互動 session，非馬拉松自動輪次）——混合資料源架構上線，宇宙覆蓋率突破 80% 門檻**
 

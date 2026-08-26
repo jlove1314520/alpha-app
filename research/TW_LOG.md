@@ -433,3 +433,19 @@
 **驗證**：`is_holdout_consumed()`確認仍為`False`。零額外FinMind/yfinance呼叫（`load_sample_with_factors()`完全命中既有快取，執行時間<10秒，無任何限流/重試訊息）。
 
 **下一輪建議**：`f_idio_vol`家族結案（不留在待深挖佇列）。TW軌待深挖佇列目前為空，下一輪可選：(a) `f_value_pb`深挖（PIT已單檔驗證過，`TW_LEADS.md`#1/#2待辦）；(b) `f_quality_roe_stability`TRAIN期負報酬拆解（`EXPERIMENTAL`懸案）；(c) 繼續掃`MARATHON_PROTOCOL.md`第3節新家族——BAB（betting against beta，跟`f_idio_vol`/`f_low_vol`同「低風險」家族但機制不同，值得測，不受這次降級影響）、季節性、資產成長異常、Piotroski F-score、accruals盈餘品質。
+
+---
+
+## 2026-08-26T16:06:04+08:00 — 馬拉松第102輪：補齊`f_bab`/`f_asset_growth`/`f_accruals`未commit的積壓工作（非新測試，reconciliation）
+
+**做了什麼**：取鎖乾淨成功（`LOCK_ACQUIRED`，無陳舊鎖檔）。三軌時間戳比對：TW（13:35:13）、US（14:05:19，state檔本身輪號標示有誤但時間戳可信）、FUT（13:05:49，最舊）。但檢查`git status`發現一批**已經測完、`TRIALS_LEDGER.md`已經commit記錄（#61 `f_bab`/#62 `f_asset_growth`/#63 `f_accruals`），但支援檔案沒有一起commit**的積壓工作：`factor_ic_bab.py`、`factor_ic_asset_growth.py`（驅動腳本，未追蹤）、主線`LEADS.md`/`STRATEGY_LOG.md`（`weinstein_alpha_gate`任務的文字紀錄，已寫好未commit）、`.github/workflows/quotes.yml`（CI健壯性小改，已寫好未commit）。`TW_LEADS.md`本身也缺對應的#8/#9/#10列（TRIALS_LEDGER已經在引用這三個編號）。
+
+**判斷**：這不是新的假說測試，是誠實記錄的完整性缺口——`TRIALS_LEDGER.md`宣稱這三個因子「可重複執行」，但驅動腳本實際上沒進repo，任何人（包含下一輪馬拉松、Cowork、使用者）都無法重跑驗證。優先把這個缺口補齊，比照第94輪「補齊主線LEADS.md待辦」的先例（純文件/檔案同步，不算新假說檢定）。跟FUT/US時間戳排序無關——這輪是修復記錄完整性，不是照軌道輪替選新工作。
+
+**做的事**：
+1. `TW_LEADS.md`新增#8（`f_bab`）/#9（`f_asset_growth`）/#10（`f_accruals`）三列，內容取自`TRIALS_LEDGER.md`#61/#62/#63已委的數字，並更新「下一輪建議」段落標記這三個家族已結案。
+2. `git add`：`research/factor_ic_bab.py`、`research/factor_ic_asset_growth.py`（驅動腳本，讓#61/#62可重複執行）、`research/LEADS.md`、`research/STRATEGY_LOG.md`（weinstein_alpha_gate任務的既有文字，未做任何內容修改，原樣commit）、`.github/workflows/quotes.yml`（CI健壯性小改，已寫好的`continue-on-error`/`if: always()`調整，未做任何內容修改）、`research/TW_LEADS.md`、本篇log、心跳檔案。
+
+**驗證**：`is_holdout_consumed()`確認為`False`（本輪沒有呼叫任何FinMind/yfinance資料載入函式，純文件/git整理）。三個因子的數字本身（TRAIN/VAL mean_ic/percentile）沿用既有已committed的`TRIALS_LEDGER.md`#61/#62/#63記錄，沒有重新計算，避免不必要的重跑成本。
+
+**下一輪建議**：積壓清理完成後，TW軌待深挖佇列仍為空（`f_value_pb`是唯一待深挖候選）。下一輪照三軌時間戳/FUT 20%上限規則正常輪替選軌即可，不需要再處理這批積壓。
