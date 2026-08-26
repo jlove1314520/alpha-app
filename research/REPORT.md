@@ -9,6 +9,11 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 107 輪 · 2026-08-26T19:45+08:00 · TW · 取鎖偵測到LOCK_STALE（上一輪疑似異常中止，無殘留孤兒工作）；FUT本應輪到但近10輪已達20%資源配置上限改選TW；`f_quality_roe_stability` TRAIN期絕對報酬拆解——60日換倉版本TRAIN/VAL同號皆正，但重跑20日對照組意外發現不再重現round2/3的TRAIN負值（推論為backfill_universe.py期間快取演化所致），尚未升格判定，下一輪需完整重跑deep_dive確認新基準 · 見`TRIALS_LEDGER.md`#69、`TW_LEADS.md`#3
+
+## 第 106 輪 · 2026-08-26T18:10:00+08:00 · US · 深挖`f_us_low_vol`中型股tier（#7 CHEAP_PASS）完整1b驗證，取鎖時偵測到LOCK_STALE · FAIL（TRAIN期未過隨機控制組門檻，四個樣本版本全部跑完，`f_us_low_vol`因子家族結案）
+
+## 第 105 輪 · 2026-08-26T17:36+08:00 · TW · 取鎖時偵測到`LOCK_STALE`（pid 148680持有約30.1分鐘，上一輪疑似異常中止，`git status`乾淨、無殘留孤兒工作）；三軌時間戳TW最舊（102輪16:06），選TW；新測`f_gross_margin_stability`（毛利率穩定度，Novy-Marx精神品質異常變體，`MARATHON_PROTOCOL.md`第3節明列但尚未測過的項目），重用`quarterly_pit`同快取鍵零新API · **FAIL**——train/val同號但強度不足，null percentile=70.7（門檻90.0）；順帶訂正TW軌第102輪「f_value_pb是唯一待深挖候選」的過時字句（實際上第85輪已深挖完成，判定EXPERIMENTAL）；`TRIALS_LEDGER.md`#67、`TW_LEADS.md`#11
 
 ## 第 104 輪 · 2026-08-26 17:05 · FUT · 取鎖乾淨（非陳舊鎖檔）；FUT時間戳最舊（第98輪13:05，TW第102輪16:06、US第103輪16:38），且近10輪窗口FUT只佔20%（未超額），選FUT；延續第98輪「下一輪建議」(a)項，盤別效應家族第二批——日盤收盤(T-1)→夜盤開盤(T)跳空反轉/順勢，`fut_cheap_gate.py`新增`hyp_night_gap_reversal`/`hyp_night_gap_continuation` · **兩個都FAIL**——反轉版percentile=17.5（方向不對）、順勢版percentile=82.5（方向對但未過90.0單測門檻，跟round98`fut_night_session_reversal`(81.0)同款）；盤別效應家族累計4個假說（round98+本輪）全部FAIL；`TRIALS_LEDGER.md`#65/#66、`FUT_LEADS.md`#22/#23
 

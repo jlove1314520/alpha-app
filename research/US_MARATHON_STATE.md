@@ -2,6 +2,8 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
+**最後更新：2026-08-26T18:10:00+08:00**（馬拉松第106輪：取鎖時偵測到`LOCK_STALE`（pid 146308持有30.0分鐘，上一輪疑似異常中止，未查到殘留未commit工作）。延續第103輪「下一步」建議首選——深挖`f_us_low_vol`中型股tier（#7 CHEAP_PASS）。新增`deep_dive_f_us_low_vol_mid_tier.py`（同`deep_dive_f_us_low_vol_small_tier.py`模式，monkeypatch `us_factor_ic_by_size.TIER="mid"`，重用round 97的seed=20260826_2/30檔目標）。**結果：FAIL**——26/30檔可用：TRAIN(2015-2020,1x) ann_return=-28.53%，對配對式隨機控制組percentile僅12.0~16.0（**連中位數都沒贏過**），beta=-0.676；VAL(2020-2024,1x) ann_return=+22.24%，percentile=92.0~95.0，但beta=-1.052（比TRAIN期更負，不是翻轉，是同向加深）。跟#13（小型股tier，beta+0.260→-0.587正負號翻轉）警訊型態不同，但結論相同：TRAIN期沒過隨機控制組門檻本身就是結案理由，VAL期表面轉強來自這段2020-2024美股大盤大漲期間的反向方向性曝險，不是穩定的橫斷面排序優勢。**至此`f_us_low_vol`四個樣本版本全部跑完（不分層#1 FAIL、大型股#4便宜關卡本身沒過、中型股#14 FAIL、小型股#13 FAIL），因子家族結案。US軌至今累計14筆試驗，仍是0筆深挖後成立的PASS/EXPERIMENTAL。**零額外API呼叫（既有快取命中，僅SPY市場基準沿用既有邏輯）。完整見`US_LOG.md`本輪記錄、`US_LEADS.md`#14、`TRIALS_LEDGER.md`#68。**下一步建議**：純price-only三因子家族（低波動/動能/反轉）連同規模分層重測至此全部結案（12+4=16筆試驗，見#1-#14），下一輪應該轉向：(a) 需要基本面/PIT資料的新因子家族（價值/品質），先確認SEC EDGAR資料源可行性再動工，屬於1c地基工作而非1a；(b) 或宇宙覆蓋率/存活者偏差調查（`KNOWN_DELISTED`僅5檔）。
+
 **✅ 2026-08-26T12:4x push失敗已在同一輪解決**：本輪commit（`4c9a44d`）先因DNS解析失敗（`Could not resolve host: github.com`）重試3次不成功，之後同一輪內DNS恢復、`git push`改為被遠端拒絕（遠端多了一筆`github-actions[bot]`自動報價更新commit，跟本輪改動的檔案完全無重疊），`git merge origin/main`後成功push（`e43eb2b`）。不需要下一輪額外處理，記錄純供對照。
 
 **（2026-08-26T11:34 第95輪已確認）上面第91輪記錄的push失敗已自然解決**：`git fetch`+`git status`確認`up to date with 'origin/main'`，後續輪次（92-94）已經把積壓的commit`3cf1a1c`推上去了，不需要額外處理。

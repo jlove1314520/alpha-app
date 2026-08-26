@@ -536,3 +536,26 @@ holdout狀態確認：`is_holdout_consumed()` = False。
 holdout狀態確認：跑前跑後`is_holdout_consumed()`皆為`False`。零新增API呼叫（`load_us_sample_with_factors`同round 99快取，`_load_market_df()`的SPY一次性fetch也命中既有快取，本輪log顯示"market benchmark: SPY, 8038 rows"無新fetch訊息）。
 
 完整見`TRIALS_LEDGER.md`#64、`US_LEADS.md`#13、`deep_dive_f_us_low_vol_small_tier.py`（新增，可重複執行）。
+
+
+---
+
+## 馬拉松第106輪（2026-08-26T18:10:00+08:00）
+
+取鎖時偵測到`LOCK_STALE`（pid 146308持有30.0分鐘，上一輪疑似異常中止，未查到殘留未commit工作，是乾淨崩潰）。
+
+延續第103輪「下一步」建議首選：深挖`f_us_low_vol`中型股tier（`US_LEADS.md`#7 CHEAP_PASS，round 97 cheap gate：train IC+0.0300/val IC+0.1123，null percentile=100.0）。新增`deep_dive_f_us_low_vol_mid_tier.py`，同`deep_dive_f_us_low_vol_small_tier.py`模式（重用`deep_dive_f_us_low_vol.py`的`run_long_short_us`/cost model/SPY benchmark/random control helper），差異是monkeypatch `us_factor_ic_by_size.TIER="mid"`（該模組目前TIER=`"small"`，不直接改檔案避免影響其他script），重用round 97的seed=20260826_2、SAMPLE_SIZE=30。
+
+26/30檔可用（COSO/EMAT/RMIX無資料、BRUN樣本太短）。市場基準SPY命中既有快取（8038筆）。
+
+**結果：FAIL。** TRAIN(2015-2020,1x) ann_return=-28.53%，對100次配對式隨機控制組percentile僅12.0（**連隨機控制組中位數都沒贏過**），beta=-0.676；2x/3x成本下方向不變（percentile 15.0/16.0）。VAL(2020-2024,1x) ann_return=+22.24%，percentile=92.0，但beta=-1.052（比TRAIN期更負，非翻轉、是同向加深）；2x/3x下percentile略升至94.0/95.0。
+
+跟#13（小型股tier，beta+0.260→-0.587正負號翻轉）警訊型態不同——這裡beta在TRAIN/VAL兩期都是負值且持續加深，代表這26檔中型股樣本組合本身結構性地帶有反市場方向性曝險，不是規模效應本身帶來的訊號。VAL期表面轉強的年化報酬跟alpha，較可能來自2020-2024美股大盤大漲期間「反向押注」剛好獲利，不是穩定的橫斷面排序優勢。TRAIN期沒過隨機控制組門檻（percentile 12-16）本身就足以結案，不需要等VAL期數字才能判定。
+
+**`f_us_low_vol`四個樣本版本至此全部跑完**：不分層#1（1b深挖FAIL）、大型股#4（1a便宜關卡本身沒過，未進1b）、中型股本輪#14（1b深挖FAIL）、小型股#13（1b深挖FAIL）——**因子家族結案**。US軌純price-only三因子家族（低波動/動能/反轉）連同規模分層重測（#1-#14共14筆）全部結案，累計仍是0筆深挖後成立的PASS/EXPERIMENTAL。
+
+holdout狀態確認：跑前跑後`is_holdout_consumed()`皆為`False`。零新增API呼叫（`load_us_sample_with_factors`命中既有快取，SPY市場基準也命中既有快取，本輪log顯示"market benchmark: SPY, 8038 rows"無新fetch訊息）。
+
+**下一步建議**：純price-only因子路線至此已完整走過一輪（不分層+3個規模tier×3個因子=12+2便宜關卡即停=14筆），繼續在同一路線加碼（例如更多tier切法、更多price-only因子變體）預期邊際資訊量遞減。優先序改為：(a) 需要基本面/PIT資料的新因子家族（價值PB/PE、品質），屬於1c地基工作——先確認SEC EDGAR資料源可用性/申報日期欄位（`CLAUDE.md`提過既有邏輯可參考，不能動`alpha-data/fetch.py`凍結區本身），這是US軌目前唯一還沒搭的地基缺口；(b) 或宇宙覆蓋率/存活者偏差調查（`KNOWN_DELISTED`僅5檔，`US_LEADS.md`「目前狀態」段落已記錄過這條調查此前是負面結果，需要換SEC EDGAR方法而非繼續猜）。
+
+完整見`TRIALS_LEDGER.md`#68、`US_LEADS.md`#14、`deep_dive_f_us_low_vol_mid_tier.py`（新增，可重複執行）。

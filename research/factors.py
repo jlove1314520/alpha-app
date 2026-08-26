@@ -377,6 +377,30 @@ def _accruals(stock_id: str, start_date: str) -> pd.DataFrame:
     return bs[["pit_date", "accruals"]]
 
 
+def _gross_margin_stability(stock_id: str, start_date: str) -> pd.DataFrame:
+    """品質：毛利率穩定度 (Novy-Marx 精神的品質異常變體，`MARATHON_PROTOCOL.md`
+    第3節「品質」家族明列的項目，尚未測過)。季毛利率 = GrossProfit / Revenue，
+    穩定度分數 = 負的近 8 季毛利率滾動標準差（波動度越低分數越高），統計構造
+    跟 `_roe_stability` 完全一樣，只是把「淨利/權益」換成「毛利/營收」——概念上
+    是不同的品質訊號（毛利率反映核心業務定價力/成本控制的穩定度，ROE 還混雜了
+    財務槓桿跟業外損益）。用 `quarterly_pit` 同一個資料源/同一個快取鍵
+    （TaiwanStockFinancialStatements，同 stock_id/start_date），跟
+    `_roe_stability`/`_asset_growth`/`_accruals` 共用同一批已快取的原始回應，
+    零額外 FinMind 呼叫。
+    """
+    inc = quarterly_pit(stock_id, start_date)
+    if inc.empty or "Revenue" not in inc.columns or "GrossProfit" not in inc.columns:
+        return pd.DataFrame(columns=["pit_date", "gross_margin_stability"])
+    inc = inc[["fiscal_period_end", "pit_date", "Revenue", "GrossProfit"]].sort_values(
+        "fiscal_period_end"
+    ).reset_index(drop=True)
+    gross_margin = inc["GrossProfit"] / inc["Revenue"].replace(0, np.nan)
+    inc["gross_margin_stability"] = -gross_margin.rolling(
+        ROE_STABILITY_TRAILING_QUARTERS, min_periods=ROE_STABILITY_TRAILING_QUARTERS
+    ).std()
+    return inc[["pit_date", "gross_margin_stability"]]
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
@@ -520,6 +544,16 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_accruals skipped for {stock_id}: {e}")
         d["f_accruals"] = np.nan
+
+    # (s) 毛利率穩定度 (Novy-Marx 精神的品質異常變體) -- 沿用 quarterly_pit 同一個
+    # 快取鍵（跟 f_quality_roe_stability/f_asset_growth/f_accruals 完全同源），
+    # 零額外 FinMind 呼叫。
+    try:
+        gm_pit = _gross_margin_stability(stock_id, start_date)
+        d = _asof_join(d, gm_pit, "gross_margin_stability", "f_gross_margin_stability")
+    except RuntimeError as e:
+        print(f"    [factors] f_gross_margin_stability skipped for {stock_id}: {e}")
+        d["f_gross_margin_stability"] = np.nan
 
     # (k)/(l) 價值 PB/PE -- 直接讀 FinMind 算好的 PER/PBR。
     # **PIT 狀態（2026-08-23 馬拉松第四輪更新）**：2330 單檔跳變偵測（`verify_pit_value_pb.py`，

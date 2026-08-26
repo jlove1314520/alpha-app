@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-08-26T19:45+08:00 — 馬拉松第107輪：`f_quality_roe_stability` TRAIN期絕對報酬拆解（延續TW_LEADS.md#3/#17開放問題）
+
+**取鎖**：偵測到`LOCK_STALE`（pid 136608持有29.9分鐘，上一輪疑似異常中止）。三軌時戳比較（TW 17:36 / US 18:10 / FUT 17:05），FUT最久未碰但近10輪（97–106）已達20%資源配置上限（US4/TW4/FUT2，若這輪再選FUT會變30%超標），故跳過FUT改選次久的TW。**訂正（commit前才發現）**：一開始誤判「無殘留孤兒工作」——實際`git status`發現round 105（TW，`f_gross_margin_stability`）跟round 106（US，`f_us_low_vol`中型股tier深挖）兩輪的驅動腳本（`factor_ic_gross_margin_stability.py`／`deep_dive_f_us_low_vol_mid_tier.py`）跟`factors.py`改動、`US_LEADS.md`／`US_LOG.md`／`US_MARATHON_STATE.md`的文件更新都還沒commit（文件內容本身在round 105/106時已經寫好且我session一開始讀檔案時就看到了，只是檔案沒有進git）——這輪一併補commit，不是新工作，是誠實補上前兩輪未落地的部分。
+
+**做了什麼**：新增 `decompose_f_quality_roe_stability_rebalance.py`，延續`TW_LEADS.md`#3「下一輪建議」項2——拆解`deep_dive_f_quality_roe_stability.py`（round 2/3）記錄的TRAIN期(2015-2020)淨成本後絕對年化報酬為負(-3.8%~-4.2%)、VAL期(2021-2024)為正(+13.2%~+13.4%)這個train/val正負號不一致的開放問題。方法：重用`deep_dive_f_quality_roe_stability.py`的十分位多空建構函式（`_decile_legs_factor`/`_random_legs_factor`，import不複製），把`REBALANCE_DAYS`從20日拉長到60日（`TW_LEADS.md`#3建議的兩個方向之一，另一個「縮小十分位比例」刻意不同時做，避免混淆是哪個改動造成效果），同一批80/100快取樣本，零新API呼叫。
+
+**結果，包含一個意外發現**：
+1. **60日換倉版本**：TRAIN三個成本情境ann_return=+10.18%~+10.62%（全正），VAL=+26.45%~+26.72%（全正）——train/val同號，且TRAIN報酬明顯高於20日版本，方向上支持「換倉頻率降低→週轉成本drag下降→TRAIN期淨報酬提升」這個假說。
+2. **意外發現（比原本要測的問題更重要）**：作為對照組重跑的20日換倉版本（跟`deep_dive_f_quality_roe_stability.py`理論上應完全相同的設定），這輪算出TRAIN ann_return=+3.32%~+3.73%（**正值**），跟round 2/3記錄的-3.8%~-4.2%（**負值**）方向相反，數字對不上。獨立寫最小可重現腳本（單一20日、TRAIN、1x成本、非隨機的真實回測，跳過耗時的隨機控制組）重新驗證，結果同樣是+3.73%，確認不是這支新腳本本身的bug，是**同一套程式碼、同一個seed，這次執行跟round 2/3的執行結果不一致**。最可能原因：round 2/3是2026-08-23上午執行，之後（尤其round 79-107這段期間`backfill_universe.py`的大量批次回補）本機`data/raw/`快取為原本80檔樣本裡的部分股票補上了先前缺失的季度財報/資產負債表歷史資料，`f_quality_roe_stability`透過`load_sample_with_factors()`重新計算後這些股票的ROE穩定度數值改變，進而改變十分位進出場名單組成，導致同一段歷史期間的回測結果跟著改變——**這是快取隨時間演化導致「同一支腳本、不同時間點執行結果不同」的具體案例，不是隨機亂數造成的（隨機種子固定），是輸入資料本身變了**。
+
+**這代表什麼，誠實記錄不誇大**：原本驅動`TW_LEADS.md`#3判定EXPERIMENTAL（而非乾淨PASS）的核心限制——「TRAIN/VAL絕對報酬正負號不一致」——**用目前的快取重跑已經不再重現**（兩期現在同號皆正，20日跟60日版本皆然）。但這**不代表可以直接把判定升格為PASS**：(a) 這次只重跑了`ann_return`/`beta`/`alpha`/`Sortino`四個指標的「真實」腿位結果，**沒有重新跑完整的100次隨機控制組對照**（時間預算考量，見下方限制），所以percentile/累積校正這兩項round 2/3已確認過的關卡這次沒有重新驗證，理論上快取變了也可能影響隨機控制組的分布；(b) 樣本仍是同一批80/100快取名單，跟`TW_MARATHON_STATE.md`記錄的全市場宇宙覆蓋率提升（現81.3%）沒有直接關聯——這次的資料改變是「同一批既有80檔裡缺值被補齊」，不是「換了更大的樣本」。**正確的下一步是完整重跑一次`deep_dive_f_quality_roe_stability.py`本身**（不是這支新的分解腳本），讓round 2/3記錄的6組配置（含完整100次隨機控制組）用目前的快取狀態重新產生一套內部一致的新基準，再判斷要不要把`TW_LEADS.md`#3從EXPERIMENTAL調整——這輪不做這件事，留給下一輪。
+
+**限制/未做**：(1) 縮小十分位比例的變體未測（見上方，刻意單一變數控制）；(2) 60日版本的隨機控制組（percentile跑出來99.0/100.0）是用round 2/3同一套固定seed跑的100次抽樣，樣本內部一致但沒有加密解析度驗證；(3) 沒有查證究竟是哪幾檔股票的哪個欄位被backfill補上導致差異，只有間接推論（時間點吻合backfill活動窗口），未逐檔比對round2/3當時的原始factor值存檔（`data/`目錄不進git，可能已不存在，無法逐檔回溯比對）。
+
+**驗證**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`。
+
+---
+
 ## 2026-08-25T21:05:35+08:00 — 馬拉松第76輪：全市場宇宙回補第二十三批
 
 **做了什麼**：取鎖乾淨成功（`LOCK_ACQUIRED`，無陳舊鎖檔）。三軌時間戳比對（TW 19:35 / US 20:10 / FUT 20:36），TW最久沒更新，且覆蓋率54.5%仍低於80%門檻，優先跑`backfill_universe.py --batch-size 300`（自動接續）。開始前state檔案為1743 done/371 skip，跟第73輪記錄一致（無落差）。額度已恢復，未被立即限流。
@@ -449,3 +467,24 @@
 **驗證**：`is_holdout_consumed()`確認為`False`（本輪沒有呼叫任何FinMind/yfinance資料載入函式，純文件/git整理）。三個因子的數字本身（TRAIN/VAL mean_ic/percentile）沿用既有已committed的`TRIALS_LEDGER.md`#61/#62/#63記錄，沒有重新計算，避免不必要的重跑成本。
 
 **下一輪建議**：積壓清理完成後，TW軌待深挖佇列仍為空（`f_value_pb`是唯一待深挖候選）。下一輪照三軌時間戳/FUT 20%上限規則正常輪替選軌即可，不需要再處理這批積壓。
+
+---
+
+## 2026-08-26T17:36:36+08:00 — 馬拉松第105輪：`f_gross_margin_stability`（毛利率穩定度，Novy-Marx精神品質異常變體）1a便宜關卡
+
+**做了什麼**：取鎖時偵測到`LOCK_STALE`（pid 148680持有約30.1分鐘，上一輪疑似異常中止，但沒有找到任何未commit的殘留工作——`git status`乾淨，判斷是乾淨崩潰/逾時，非留下半成品）。三軌時間戳比對：TW（16:06:04，最舊）、US（16:38:29）、FUT（17:05:24），選TW軌。
+
+**訂正一個發現**：`TW_MARATHON_STATE.md`第102輪備註寫「TW軌待深挖佇列仍為空（`f_value_pb`是唯一待深挖候選）」——這句話是錯的，`TW_LEADS.md`#1清楚記錄`f_value_pb`深挖早在第85輪就完成（判定EXPERIMENTAL），這個備註是沿用更早（第92輪前）已過時的字句，沒有跟著更新。本輪沒有照這句話重做`f_value_pb`深挖，改為挑一個真正尚未測過的新假說。
+
+**測試內容**：新增`_gross_margin_stability()`（`factors.py`）跟`factor_ic_gross_margin_stability.py`（驅動腳本），對應`MARATHON_PROTOCOL.md`第3節「品質」家族明列但尚未測過的「毛利率穩定度（Novy-Marx）」項目——季毛利率=GrossProfit/Revenue，穩定度分數=負的近8季滾動標準差，統計構造跟`f_quality_roe_stability`完全相同，只是換成毛利率而非ROE（先花時間確認`quarterly_pit`已快取的原始`TaiwanStockFinancialStatements`回應裡本來就含`Revenue`/`GrossProfit`兩個type值，同一快取鍵，**零新FinMind呼叫**，抽測100名樣本中68/100有這兩個欄位，跟其他已測因子的80/100可用率量級相符）。
+
+**結果：FAIL**。100名樣本（80/100可用，121個不重疊20交易日快照）：TRAIN(2015-2020) mean_ic=+0.0441 IR=+0.285（n=74期）；VAL(2021-2024) mean_ic=+0.0199 IR=+0.143 hit_rate=0.51（n=47期）；same_sign=True（train/val同號），但對隨機打散null percentile=70.7，遠低於單測門檻90.0。跟`f_asset_growth`/`f_accruals`（方向不一致或IC接近零）比，本次是「有一點訊號但不夠強」的形態，不是方向錯。TW軌「品質」家族三個變體至此測完：ROE穩定度（EXPERIMENTAL）、accruals（FAIL）、毛利率穩定度（本輪，FAIL）。TW軌FDR家族m由28→29（BH-FDR分軌獨立計算，這是第29筆）。
+
+**做的事**：
+1. `factors.py`新增`_gross_margin_stability()`＋`prepare_factors()`裡的第(s)段落（try/except降級模式，跟其他新因子一致）。
+2. `factor_ic_gross_margin_stability.py`（新增，可重複執行）。
+3. `TRIALS_LEDGER.md`#67、`TW_LEADS.md`#11（新列＋更新「下一輪建議」，移除已過時的f_value_pb待辦、順帶補一句更正說明）。
+
+**驗證**：`is_holdout_consumed()`確認為`False`。零新FinMind呼叫（`quarterly_pit`命中`f_quality_roe_stability`/`f_asset_growth`/`f_accruals`已建立的同一快取，執行時間約1分鐘內完成，無任何限流/重試訊息）。
+
+**下一輪建議**：TW軌「品質」「低風險」「資產成長」「accruals」四個家族第一批全部結案，待深挖佇列仍為空。下一輪可選：(a) `f_quality_roe_stability`TRAIN期負報酬拆解（唯一的EXPERIMENTAL懸案）；(b) 季節性家族（月效應/財報季效應）——**注意**這是全市場共通的日曆效應，需要先想清楚怎麼構造出跨股票的橫斷面差異（例如跟規模/流動性交乘）才能套進現有`factor_ic.py`的IC測試框架，不是單純「哪個月報酬較高」的市場層級統計；(c) 成長與預估上修——先查FinMind有沒有分析師預估資料，沒有就記錄「資料源不存在」跳過；(d) 籌碼類（融資券/當沖比/借券/外資持股變化）——`CLAUDE.md`/`alpha-data/config.py`確認TWSE openapi有`MI_MARGN`融資券端點，但這是全新資料集，尚未被任何已快取因子用過，測之前要評估是否值得衝新的API額度（符合協定1a.2精神，不要為了可能沒用的假說貿然衝新額度）。
