@@ -662,3 +662,7 @@ US軌檢查有沒有組合策略相關工作可做：`PORTFOLIO_STRATEGY_SPEC.md
 **本輪沒有做任何實質工作**，只確認`is_holdout_consumed()`為`False`（本輪未打任何API）、補寫這則log跟`US_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round 108的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則或明確回應`portfolio_multifactor_v2`「下一步」選項後再接續。
 
 沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+## 2026-08-27T07:31:00+08:00 — 馬拉松第126輪：跳過（暫停規則仍生效，無組合策略工作可做）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 07:13（第125輪，最新）/US 06:01（第123輪，最舊）/FUT 06:32（第124輪）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log`確認自`a89f311`（第122輪，最後一次TW推進；期間123/124/125輪皆為馬拉松自身commit）以來無新使用者互動session介入，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，全部圍繞TAIEX/TWSE樣本，跟US軌無關），round108/111遺留的(a)(b)(c)三項地基工作本質上仍是為單一因子鋪路，同round111/114/117/120/123判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則附記+心跳。`is_holdout_consumed()`確認為`False`，無新`TRIALS_LEDGER.md`列。
