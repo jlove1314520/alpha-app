@@ -522,3 +522,17 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 holdout狀態確認：`is_holdout_consumed()` = False。
 
 下一輪建議：(a) 深挖`f_us_low_vol`中型股/小型股CHEAP_PASS，先做train/val切分＋beta對照（吸取#1教訓）；(b) 或改做宇宙覆蓋率擴充（`KNOWN_DELISTED`僅5檔）/情境分群類工作。詳見`US_MARATHON_STATE.md`/`US_LEADS.md`#10-12/`TRIALS_LEDGER.md`#57-59。
+
+## 2026-08-26T16:38:29+08:00 — 馬拉松第103輪：`f_us_low_vol`小型股tier深挖（1b完整驗證），FAIL
+
+延續第99輪「下一步」建議：深挖`f_us_low_vol`小型股CHEAP_PASS（#10，val IC=+0.2181，四個樣本版本裡最強）。新增`deep_dive_f_us_low_vol_small_tier.py`（重用`deep_dive_f_us_low_vol.py`回測機制+`us_factor_ic_by_size.py`的TIER="small"抽樣，seed=20260826_3，同一批30檔小型股樣本，26檔可用）。
+
+跑了完整1b關卡：TRAIN(2015-01-01..2020-12-31,1x slippage) ann_return=-61.57%，beta=+0.260，random_control_percentile=68.0；VAL(2020-12-31..2024-12-31,1x) ann_return=+280.63%，beta=-0.587，random_control_percentile=100.0。成本2x/3x下方向與數量級皆無實質變化（TRAIN仍負、VAL仍極端正）。
+
+**判定：FAIL。** train/val正負號翻轉，beta正負號也翻轉（+0.260→-0.587），跟round 84不分層版深挖FAIL同款警訊形狀、且更嚴重（VAL期年化報酬跟TRAIN期量級差距達到+280% vs -61.57%的極端程度）。樣本裡有多檔2020年後才有資料的微型生技/殼股（BEEP/HKD/TVGN/AMZE/MOBX等），decile size僅k=3/leg（26檔樣本），懷疑單檔波動放大主導了整段VAL期回測，不是穩定可信的規模效應。誠實記錄：cheap gate的橫斷面IC方向本身沒有錯（#10的val IC=+0.2181確實是真實計算結果），但cheap gate只測IC方向、不測真實部位P&L路徑的train/val一致性，這正是為什麼協定要求CHEAP_PASS必須經過1b深挖才能升格，不能只看cheap gate就採信。
+
+**US軌至今累計13筆試驗、0筆深挖後仍成立的PASS/EXPERIMENTAL。** 中型股tier（#7 CHEAP_PASS，percentile=100.0）尚未深挖，但基於#1（不分層版）+本輪（小型股版）兩次一致的失敗模式，下一輪深挖中型股前不應預設會有不同結果——可以做，但要誠實預期，若同樣FAIL，`f_us_low_vol`整個因子跨所有tier可視為結案。
+
+holdout狀態確認：跑前跑後`is_holdout_consumed()`皆為`False`。零新增API呼叫（`load_us_sample_with_factors`同round 99快取，`_load_market_df()`的SPY一次性fetch也命中既有快取，本輪log顯示"market benchmark: SPY, 8038 rows"無新fetch訊息）。
+
+完整見`TRIALS_LEDGER.md`#64、`US_LEADS.md`#13、`deep_dive_f_us_low_vol_small_tier.py`（新增，可重複執行）。

@@ -10,6 +10,8 @@
 
 ---
 
+## 第 103 輪 · 2026-08-26 16:38 · US · 取鎖乾淨（非陳舊鎖檔）；FUT時間戳最舊（13:05）但其自身`FUT_LEADS.md`明確建議近幾輪讓給TW/US（近10輪已佔30%資源上限），故選次舊的US（14:05）；延續第99輪「下一步」建議首選，深挖`f_us_low_vol`小型股tier（#10 CHEAP_PASS）完整1b驗證 · **FAIL**——TRAIN(2015-2020,1x) ann_return=-61.57% beta=+0.260；VAL(2020-2024,1x) ann_return=+280.63% beta=-0.587，train/val正負號翻轉+beta正負號也翻轉，跟round 84不分層版深挖FAIL同款警訊且更嚴重（疑似微型生技/殼股樣本+k=3/leg小decile放大波動）。US軌至今累計13筆試驗、0筆深挖後仍成立的PASS/EXPERIMENTAL；`TRIALS_LEDGER.md`#64、`US_LEADS.md`#13、`deep_dive_f_us_low_vol_small_tier.py`（新增）
+
 ## 第 100 輪 · 2026-08-26 14:05 · US · 取鎖乾淨（非陳舊鎖檔）；US時間戳最舊（12:15，FUT 13:05、TW 13:35），選US；延續第97輪「下一步」建議首選，small tier分層重測（四個樣本版本全測完） · `f_us_low_vol`小型股tier**CHEAP_PASS**（percentile=100.0，US軌至今第三個CHEAP_PASS，val IC隨規模遞增，跟leverage-constraint文獻方向一致，但train期IR弱、跟#1深挖FAIL前形狀相似）；`f_us_momentum_12m`FAIL（same_sign未過，四次測試出現三種方向排列，坐實小樣本雜訊）；`f_us_reversal_1m`FAIL（14.4，四版本最差一次，家族結案）；`TRIALS_LEDGER.md`#57/#58/#59、`US_LEADS.md`#10/#11/#12
 
 ## 第 99 輪 · 2026-08-26 13:35 · TW · 取鎖時偵測到`LOCK_STALE`（pid 149044持有30.2分鐘，查證後發現第98輪其實已寫完所有記錄檔，只是commit/push前當機，已補commit`1c32ae1`+push，非真正遺失工作）；TW時間戳最舊（12:08）且FUT近10輪已達30%資源配置上限，選TW；TW軌覆蓋率已達81.3%>80%門檻，優先序回到深挖，執行第96輪標記的`f_idio_vol`深挖前置作業 · `check_idio_vol_low_vol_overlap.py`：跟`f_low_vol`相關性=+0.982、多頭腿Jaccard=0.789、空頭腿=0.835，**HIGH OVERLAP，不進深挖，家族結案**，`TW_LEADS.md`#7判定改列「CHEAP_PASS但降級」
