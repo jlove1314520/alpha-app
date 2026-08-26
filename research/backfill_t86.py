@@ -25,7 +25,12 @@ import pandas as pd
 
 from twse_t86_client import DATA_DIR, TWSEBlockedError, fetch_t86_day
 
-START_DATE = "2010-01-01"
+# 2026-08-27 從 2010-01-01 改成 2012-05-02：實測直接向 TWSE T86 端點查
+# 2010-01-04 等更早日期，回傳的是明確的 `{"stat":"查詢日期小於101年05月02日，
+# 請重新查詢!","total":0}`（不是反爬蟲封鎖、不是普通無交易日）——這是 TWSE 這個端點
+# 本身資料起點的硬限制，不是本專案能繞過的。舊起點浪費了兩輪批次（共 186 天，全部
+# 0 筆資料）在注定查不到資料的日期範圍，改對起點後往後的批次才會真的推進覆蓋率。
+START_DATE = "2012-05-02"
 MAX_CONSECUTIVE_ERRORS = 8  # network trouble, not TWSE's own "no trading today" response
 # 2026-08-26 從 0.4 調高到 2.0：實測 0.4 秒間隔在約 30 次呼叫內就觸發 TWSE 這個 `rwd`
 # 端點的反爬蟲封鎖（見 twse_t86_client.py 的 TWSEBlockedError 說明），封鎖後整個 IP

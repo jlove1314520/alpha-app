@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-08-27T01:20+08:00 — 馬拉松第113輪：T86回補（暫停單因子試驗規則生效中，屬允許的地基工作，非新假說）
+
+取鎖時偵測到`LOCK_STALE`（pid 146500持有29.9分鐘，接手後發現無殘留未commit的孤兒程式碼工作，但`backfill_t86.py`有一處未commit的修改——查證是上一輪疑似異常中止前已完成但沒來得及commit的真bug修復，非本輪自己寫的）：`START_DATE`從`2010-01-01`改成`2012-05-02`，原因是實測TWSE T86端點對更早日期回傳明確的`{"stat":"查詢日期小於101年05月02日，請重新查詢!","total":0}`（端點本身資料起點硬限制，不是反爬蟲封鎖也不是本專案能繞過的問題），舊起點的批次浪費了186天全部落空。
+
+三軌時間戳TW最舊（第110輪20:36）照輪替本應選TW；`PORTFOLIO_STRATEGY_SPEC.md`仍是「待使用者確認」狀態，第110輪已完成的組合策略回測v2其「下一步」（全市場樣本重跑/train-only IC樣本外測試/大盤MDD-Sortino補算）該互動session明確要求「不會自己動手，留給使用者決定優先序」——本輪沒有使用者新回應，依第110輪自己留下的判斷（「下一輪如果撿到TW軌，先確認使用者是否已回應，沒有的話繼續等待」）不代為升級啟動這些選項。改做`MARATHON_PROTOCOL.md`第0節第2點明確允許的例外工作：T86三大法人回補（`backfill_t86.py`），這是既有因子/未來組合策略都依賴的地基資料，不算新單因子試驗。
+
+**驗證修復後跑`run_batch(batch_size=200)`**：接手前已快取236天（上一輪異常中止前已用修正後起點跑過一些），本輪批次嘗試200天、新完成200（14天無交易/假日）、未撞限流牆（`hit_error_wall=False`）。累積T86快取236→436/3305個工作日（2012-05-02~2024-12-31全範圍，13.2%）。三大法人相關因子（`f_foreign_streak`/`f_inst_flow`）目前可用樣本仍嚴重不足，覆蓋率持續回補中，未達到可信賴門檻前這些因子的既有判定不變。
+
+**沒有新增`TRIALS_LEDGER.md`列**（地基/資料回補，非假說測試，同`backfill_universe.py`先例）。`is_holdout_consumed()`確認`False`。下一輪如果又撿到TW軌且暫停規則仍生效：繼續跑`backfill_t86.py --batch-size 200`（自動接續，讀取parquet檔案存在性判斷進度，不需要額外state檔案）；如果使用者已回應`PORTFOLIO_STRATEGY_SPEC.md`的下一步選項，優先處理那個。
+
+---
+
 ## 2026-08-26T19:45+08:00 — 馬拉松第107輪：`f_quality_roe_stability` TRAIN期絕對報酬拆解（延續TW_LEADS.md#3/#17開放問題）
 
 **取鎖**：偵測到`LOCK_STALE`（pid 136608持有29.9分鐘，上一輪疑似異常中止）。三軌時戳比較（TW 17:36 / US 18:10 / FUT 17:05），FUT最久未碰但近10輪（97–106）已達20%資源配置上限（US4/TW4/FUT2，若這輪再選FUT會變30%超標），故跳過FUT改選次久的TW。**訂正（commit前才發現）**：一開始誤判「無殘留孤兒工作」——實際`git status`發現round 105（TW，`f_gross_margin_stability`）跟round 106（US，`f_us_low_vol`中型股tier深挖）兩輪的驅動腳本（`factor_ic_gross_margin_stability.py`／`deep_dive_f_us_low_vol_mid_tier.py`）跟`factors.py`改動、`US_LEADS.md`／`US_LOG.md`／`US_MARATHON_STATE.md`的文件更新都還沒commit（文件內容本身在round 105/106時已經寫好且我session一開始讀檔案時就看到了，只是檔案沒有進git）——這輪一併補commit，不是新工作，是誠實補上前兩輪未落地的部分。
