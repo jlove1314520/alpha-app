@@ -37,6 +37,11 @@ class BacktestConfig:
     start_date: str
     end_date: str
     rebalance_weekday: int = 4  # Friday = 4 (Monday = 0); signal_fn is called on rebalance days
+    rebalance_every_n_days: int | None = None  # 2026-08-26 新增（portfolio_backtest_v2.py 需要
+    # 月頻/季頻換股，`rebalance_weekday` 只能做到「每週固定星期幾」，做不到「每 21/63 個交易日」）。
+    # None（預設）＝完全比照舊行為，用 `rebalance_weekday`；設定這個欄位後改用「日曆序位
+    # 索引 % N == 0」判斷換股日，`rebalance_weekday` 那個值在這個模式下被忽略。這是純加法
+    # 擴充，不影響任何既有呼叫端（它們都沒有設定這個新欄位，維持 None，行為完全不變）。
     max_positions: int = 10
     stop_loss_pct: float = 0.15  # tier-3 hard stop, independent of the MA exit
     initial_capital: float = 1_000_000.0
@@ -175,7 +180,7 @@ def run_backtest(
             return  # already scheduled, don't double-queue
         pending.append({"execute_date": exec_day, "stock_id": sid, "side": side, "reason": reason})
 
-    for day in calendar:
+    for day_i, day in enumerate(calendar):
         # 1) execute anything scheduled for today; re-queue anything blocked by a locked limit
         still_pending = []
         for p in pending:
@@ -269,7 +274,12 @@ def run_backtest(
                 schedule(day, sid, "sell", "tier3_hard_stop")
 
         # 3) rebalance day: run the signal, schedule exits/entries
-        if pd.Timestamp(day).weekday() == config.rebalance_weekday:
+        is_rebalance_day = (
+            (day_i % config.rebalance_every_n_days == 0)
+            if config.rebalance_every_n_days is not None
+            else (pd.Timestamp(day).weekday() == config.rebalance_weekday)
+        )
+        if is_rebalance_day:
             scores = signal_fn(price_data, day, market_df)
             ranked = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
             eligible_ids = {sid for sid, _ in ranked}

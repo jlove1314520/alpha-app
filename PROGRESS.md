@@ -4,6 +4,56 @@
 
 ---
 
+## 2026-08-26 — 資料源瓶頸解除、選股頁改即時算分、盤中報價休市誤判修正、組合策略正式回測
+
+這輪橫跨一整天（互動session + 背景馬拉松），內容較多，重點摘要如下，細節都在
+`research/` 底下對應的 .md 檔案，這裡不重複貼數字。
+
+**1. FinMind額度用盡（402），資料源改混合架構**：台股價量歷史改用yfinance為主
+（免費、無明顯流量限制、已還原股價），三大法人買賣超改用TWSE官方T86端點為主。
+月營收/財報實測確認TWSE openapi/MOPS都只有最新快照、無歷史查詢，這兩類仍依賴
+FinMind但已加額度用盡時的優雅降級（不會拖垮整批）。**全市場宇宙覆蓋率60.0%→
+81.3%（2597/3196），突破80%門檻**。細節：`research/DATA.md`、
+`research/TW_MARATHON_STATE.md`（2026-08-26條目）。
+
+**2. 選股頁（scores.json）改即時算分**：基準日從固定卡住的2024-12-31改成最新
+實際交易日，機制上完全不碰holdout鎖（凍結權重代入當前資料，使用者2026-08-25
+已裁示這樣合法）。已跑滿300檔樣本，216檔算出分數（原本卡在69檔）。細節：
+`research/generate_scores_v2.py`、`research/realtime_asof.py`。
+
+**3. 盤中報價（quotes.yml/fetch_quotes_tw.py）休市誤判修正**：使用者手動觸發
+回報「MIS回傳148筆但0檔有報價」，根因是成交價欄位在盤前/休市回傳"-"，舊邏輯
+直接跳過整檔導致誤判成故障。已修正：價格解析加回退鏈（成交價→委買/委賣→昨收
+標記stale）、明確區分休市跟真故障（只有交易時段內0檔才算故障）、JSON加meta
+欄位、台股步驟失敗不再拖累美股步驟。本機實測台北08:10（盤前）exit code從1→0。
+`quotes.yml`本身因PAT權限問題（沒有workflow scope）需要使用者手動去GitHub網頁
+貼上，兩支.py腳本已直接push。
+
+**4. 組合策略正式回測（`research/PORTFOLIO_STRATEGY_SPEC.md`）**：4個已通過因子
+（`f_eps_growth`/`f_eps_surprise`/`f_revenue_surprise`/`f_low_vol`）+待複驗候選
+`f_value_pe`組成投資組合，測等權/IC加權/情境條件式加權(大盤位階bull/bear開關)
+三版本×月頻/季頻×2因子版本共12組合，20檔持股、15%停損、流動性門檻、全成本。
+**誠實負面結果**：全部12組合的alpha對大盤回歸後都沒有嚴格通過5%顯著性門檻，
+但最佳兩組合（IC加權+季頻，兩個因子版本皆是）p值只差一點點沒跨過0.05
+（p=0.053），且絕對報酬（+68%左右）本身就贏過買進持有大盤（+54.58%）、MDD
+（約−8.5%）也更低。判定`FAIL`（依alpha顯著性關卡），**未觸碰holdout**。完整
+表格、參數敏感度、成本敏感度、「這個策略會在什麼情況失效」的誠實討論都在
+`research/REPORT.md`2026-08-26（晚）條目。
+
+**這輪同時裁示：在組合策略報告確認前，暫停背景馬拉松所有新的單因子IC試驗**
+（已跑約30輪單因子、幾乎全滅，邊際效益耗盡），寫進`research/MARATHON_PROTOCOL.md`
+最上方的硬性規定區塊。
+
+**影響到哪些檔案**：`research/`底下新增`yf_price_client.py`/`twse_t86_client.py`/
+`backfill_t86.py`/`realtime_asof.py`/`regime_conditions.py`/`REGIME_CONDITIONS.md`/
+`portfolio_backtest.py`/`portfolio_backtest_v2.py`/`PORTFOLIO_STRATEGY_SPEC.md`；
+修改`adjust.py`/`factors.py`/`score_v2.py`/`generate_scores_v2.py`/
+`backfill_universe.py`/`backtest/engine.py`（新增`rebalance_every_n_days`欄位，
+純加法擴充不影響既有呼叫端）；`scores.json`（App選股頁資料）；`.github/scripts/
+fetch_quotes_tw.py`/`fetch_quotes_us.py`/`.github/workflows/quotes.yml`。
+
+---
+
 ## 2026-08-25 — iPhone 16 實機回報五項緊急修正
 
 使用者拿 iPhone 16 實機開 App，回報四類問題（其中一項有兩個子bug），這輪逐項修。
