@@ -772,3 +772,19 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
 
 ---
+
+## 第121輪（2026-08-27T05:01+08:00）——跳過，暫停規則生效中
+
+**取鎖**：乾淨（`LOCK_ACQUIRED`，非陳舊鎖檔）。
+
+**選軌判斷**：三軌state檔案「最後更新」時間戳——TW 04:21（第119輪）、US 04:32（第120輪，最新）、FUT 03:31（第118輪，最舊）。正常輪替本應選FUT。
+
+**為何跳過**：複查`PORTFOLIO_STRATEGY_SPEC.md`第1行仍「待使用者確認」；`git log`確認自`cb5976d`（第120輪，US跳過）以來沒有新的使用者互動session commit（下一筆就是本輪），暫停規則整體仍完全生效中。FUT軌唯一明確的「下一步」待辦（round109留下：對`fut_day_gap_continuation`邊界候選高解析度重測，或另立新因子家族）本質仍是單因子相關工作，跟round109/112/115/118判斷邏輯完全一致，保守跳過。`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬多因子規格（圍繞TAIEX/TWSE），跟FUT軌完全無關，本輪沒有組合策略相關工作可做。依`MARATHON_PROTOCOL.md`第0節第3點，本輪直接跳過整輪，不動`fut_cheap_gate.py`或任何因子/回測程式碼。
+
+**本輪沒有做任何實質工作**，只確認`is_holdout_consumed()`為`False`、補寫這則log跟`FUT_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round109的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則後從那裡接續，不需要重新規劃。
+
+**額外觀察**：工作目錄偵測到`.github/workflows/market.yml`有未commit的修改，非本輪造成、疑似先前自動報價流程遺留。依協定本輪commit範圍限定FUT軌相關檔案+心跳檔案，刻意不動這個檔案。
+
+沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---
