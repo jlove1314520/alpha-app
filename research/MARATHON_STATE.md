@@ -8,6 +8,8 @@
 
 **▶ 目前狀態：AI 選股引擎 Phase A（步驟 1–4）全部完成並 push；Part 2 挖礦馬拉松已上線自動執行（已跑數輪，三軌都有進展）；Cowork 稽核多空中性結果，三次覆核（付費方案調查/alpha-beta拆解/多空擱置）也已完成並 push。**
 
+**⚠️ 2026-08-26 第102輪新發現的已知限制：目前的 GitHub PAT 沒有 `workflow` scope，任何 commit 只要碰到 `.github/workflows/*.yml` 就會被 GitHub 拒絕 push（`refusing to allow a Personal Access Token to create or update workflow without workflow scope`）。**這不是網路暫時性問題，重試無用。馬拉松輪次如果需要改動 workflow 檔案，commit 時要把該檔案排除在外（留在working tree不動，等使用者換有`workflow` scope的PAT），不要因為push失敗就以為是DNS/網路問題狂重試。這輪受影響的是 `.github/workflows/quotes.yml` 一個小的CI健壯性改動（`continue-on-error`/`if: always()`），已寫好但暫不commit，內容還留在working tree，等使用者處理。
+
 **2026-08-24（傍晚）Cowork 三次覆核摘要：** Cowork 定調「純多前decile 是更穩健且可實際執行的方向，多空放空腿先擱置為研究備選」。(1) 查了 FinMind 完整定價（Free$0/Backer$699月/Sponsor$999月/SponsorPro$3330月，流量300~20000次/hr）跟 yfinance 免費備援（可用於價格但**不支援下市股+財報歷史太短**，只能局部緩解）——這是金流決策，回報資訊給使用者，不會自己付款。這次額度恢復過一次，累積到199/3,196（6.2%），維持標記不放寬。(2) 新增 `decompose_alpha_beta()`：**確認贏隨機是選股alpha不只是beta**——四期純alpha年化+15.22%~+24.31%，Sortino多數>1.0，MDD約−11%~−13%；成本敏感度四期在3x下全維持正值，但Validation(週頻)已相當薄弱（+6.17%）。(3) 全市場重跑純多——待宇宙達80%+才能做，這輪還不能開始。(4) `score_longshort_v1` 判定改為 `PENDING`（放空可行性＋券源確認後再議）。完整數字見 `LEADS.md`/`REPORT.md`/`STRATEGY_LOG.md` 2026-08-24（傍晚）條目。
 
 **2026-08-24（下午）Cowork 二次覆核摘要：** 三關逐一處理——(1) 宇宙覆蓋率新增 `backfill_universe.py`（可斷點續傳，已整合進 `MARATHON_PROTOCOL.md` 5b節，TW軌最高優先序背景任務），這次 session 進度到 223/3,196（≈7.0%），**多空/decile結論一律標記「樣本不足、暫不採信」**（`LEADS.md` 新增這個判定類別）。(2) 月頻train/val不一致查到根源（複利被少數極端月份主導+換股名單不穩定），確認不是bug，但跨期一致關卡目前無法通過，多空框架維持降級。(3) 放空可行性查驗撞限流沒有可信結論（待重驗）；**但意外發現「純多前decile相對大盤」四期全部一致強勁（年化+23.77%~+33.67%，beta合理+0.6~+0.7，alpha顯著為正，贏隨機對照100百分位，沒有跨期不一致問題）**，是目前唯一馬上可執行、不依賴放空的候選雛形，同樣受宇宙覆蓋率限制標記「樣本不足、暫不採信」。**使用者從這輪起要求所有產出一律用繁體中文**，已全面遵守。完整數字見 `LEADS.md`/`REPORT.md`/`STRATEGY_LOG.md` 2026-08-24（下午）條目。
