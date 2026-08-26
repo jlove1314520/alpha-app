@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 90 輪 · 2026-08-26 08:33 · FUT · 取鎖時偵測到`LOCK_STALE`（pid 145052持有26.6分鐘，上一輪疑似異常中止——已核實沒有留下未commit的殘留工作，乾淨崩潰）；盤別效應家族地基第二步，新寫`fut_probe_night_session_rollover.py`驗證夜盤轉倉時點是否與日盤同步 · **同步，零例外**：2017-05-16起92筆日盤轉倉事件跟92筆夜盤轉倉事件exact match（92/92），可直接沿用日盤H1轉倉規則到夜盤序列，第60/63輪標記的前置風險項解決，本輪無新增假說測試
+
 ## 第 89 輪 · 2026-08-26 07:33 · US · 取鎖時偵測到`LOCK_STALE`（pid 138560持有30.0分鐘，上一輪（第88輪）疑似異常中止在寫收工程序這一步——`MARATHON_STATE.md`計數器仍是87未被上一輪改到88，但`US_MARATHON_STATE.md`/`US_LEADS.md`/`TRIALS_LEDGER.md`已有完整第88輪內容，判斷是死在寫`US_LOG.md`/心跳/計數器這幾步）；核實其留下的孤兒工作（`us_factors.py`新增`f_us_momentum_12m`＋`us_factor_ic.py`＋`US_LEADS.md`#2＋`TRIALS_LEDGER.md`#44內容一致、holdout未受影響）後補齊第88輪缺漏`US_LOG.md`記錄＋心跳＋完成收工程序（commit+push） · 沿用第88輪判定：FAIL不變，本輪無新增假說測試
 
 ## 第 88 輪 · 2026-08-26 07:05 · US · `f_us_momentum_12m`（US軌第二個因子，12-1動能，Jegadeesh-Titman經典定義）1a便宜關卡測試（`us_factor_ic.py`沿用`f_us_low_vol`的`evaluate_factor()`框架，同一批27/40可用隨機樣本） · **FAIL**（TRAIN mean_ic=−0.0129/VAL mean_ic=+0.0613方向不一致，null percentile=94.6單測本身有過但same_sign檢查未過，不進深挖，`TRIALS_LEDGER.md`#44）
