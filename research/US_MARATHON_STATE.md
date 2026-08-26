@@ -2,6 +2,8 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
+**⚠️ 2026-08-26T12:38 push失敗待處理**：本輪commit（`4c9a44d`）因DNS解析失敗（`Could not resolve host: github.com`）重試3次仍無法push，commit已在本機完成不會遺失，**下一輪不管選到哪一軌，開始前先跑`git push`把這個積壓的commit推上去**（如果那時網路正常，一個指令就好，不需要重做任何工作）——同款問題先前在第75輪FUT軌也發生過、後續輪次自然解決，這次比照處理。
+
 **（2026-08-26T11:34 第95輪已確認）上面第91輪記錄的push失敗已自然解決**：`git fetch`+`git status`確認`up to date with 'origin/main'`，後續輪次（92-94）已經把積壓的commit`3cf1a1c`推上去了，不需要額外處理。
 
 **最後更新：2026-08-26T12:15+08:00**（馬拉松第97輪：規模分層重測第二批——延續第95輪「下一步」建議首選，`us_factor_ic_by_size.py`把`TIER`常數從`"large"`切成`"mid"`（seed=202608262，跟大型股tier的202608261區分），零額外程式碼改動，重測同三個既有因子。**結果：US軌至今第一批CHEAP_PASS**——`f_us_low_vol` percentile=100.0（train+0.0300/val+0.1123/門檻96.7，過），比大型股tier(第95輪：≈83.4)明顯強、比不分層版(第39輪：100.0)接近；`f_us_momentum_12m` percentile=99.9（過），但信心等級低——這個因子三次測試(不分層/大型股/中型股)train/val方向組合三次互不相同，比較像小樣本雜訊而非規模效應；`f_us_reversal_1m` percentile=78.4，**FAIL**（same_sign未過），三個tier全部FAIL。US軌因子驗證累積9筆試驗（3不分層+3大型股+3中型股），2筆CHEAP_PASS（待深挖，深挖前務必先做train/val切分＋beta對照，吸取第41輪`f_us_low_vol`不分層版深挖FAIL的教訓）、7筆FAIL。US軌FDR家族m=3（分層重測不新增家族數，同一輪批次）。**下一步建議：small tier尚未測（`TIER`常數切換即可沿用），或優先深挖`f_us_low_vol`中型股CHEAP_PASS。**詳見`US_LOG.md`本輪記錄。）
