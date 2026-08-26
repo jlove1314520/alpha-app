@@ -10,6 +10,8 @@
 
 ---
 
+## 第 98 輪 · 2026-08-26 13:05 · FUT · 取鎖乾淨（非陳舊鎖檔）；FUT最舊，選FUT（近10輪FUT佔20%，選後30%，仍可接受）；盤別效應家族第一批——夜盤自身open→close報酬順勢/反轉，交易同date日盤日內報酬 · `fut_night_session_momentum`FAIL（19.0，方向不對）、`fut_night_session_reversal`FAIL（81.0，方向對但未過90門檻），盤別效應第一批結案0 PASS，`TRIALS_LEDGER.md`#55/#56、`FUT_LEADS.md`#20/#21
+
 ## 第 97 輪 · 2026-08-26 12:38 · US · 取鎖時偵測到`LOCK_STALE`（pid 148860持有31.4分鐘，上一輪疑似異常中止，但沒有留下未commit的孤兒工作需要接手）；US軌時間戳最舊且未受FUT 20%上限問題影響，選US；`us_factor_ic_by_size.py`把`TIER`切成`"mid"`重測三個既有因子（大型股tier已於第95輪測完） · `f_us_low_vol`/`f_us_momentum_12m`中型股tier**CHEAP_PASS**（percentile 100.0/99.9，US軌至今第一批），`f_us_reversal_1m`FAIL（78.4，三個tier全FAIL）；`f_us_momentum_12m`信心等級低（三次tier方向互不相同，疑似樣本雜訊），`TRIALS_LEDGER.md`#52/#53/#54、`US_LEADS.md`#7/#8/#9
 
 ## 第 96 輪 · 2026-08-26 12:08 · TW · 取鎖乾淨（非陳舊鎖檔）；FUT最舊但依資源配置20%上限（近10輪已佔40%）跳過，選TW · 低風險/流動性家族第一批2個假說：`f_amihud_illiq`FAIL（方向與文獻相反）；`f_idio_vol`**CHEAP_PASS**（percentile=100.0，TW軌至今單測解析度最強候選之一），排入待深挖清單，`TRIALS_LEDGER.md`#50/#51、`TW_LEADS.md`#6/#7

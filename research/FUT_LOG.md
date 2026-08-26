@@ -650,3 +650,35 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **已更新**：`continuous_contract.py`（新增`load_session()`、`load_position_session()`改包裝、`build_continuous_series()`新增`session`參數、docstring更新）；新增`fut_validate_night_continuous_series.py`；`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。**沒有動`FUT_LEADS.md`**（沒有候選判定產生，這輪是純地基）。本輪commit範圍延續第80–92輪判斷：只commit FUT軌相關檔案+心跳檔案(`REPORT.md`/`MARATHON_STATE.md`)，TW軌互動session未commit變更（`.github/workflows/quotes.yml`）依然刻意排除不動。
 
 **下一輪建議**：(a) **現在可以真正開始測盤別效應假說了**——地基（`build_continuous_series(session="after_market")`）已就緒且雙重驗證過，例如「夜盤報酬vs日盤報酬」「隔夜跳空（日盤收盤→夜盤開盤，或夜盤收盤→日盤開盤，注意round 63確認的時序方向：夜盤T領先日盤T）」等第一批假說可以直接用便宜關卡框架（`fut_cheap_gate.py`）加新的資料載入函式測試，不用再處理地基問題；(b) 或換一個全新機制家族（`MARATHON_PROTOCOL.md`第3節清單裡還沒測過的）；(c) 記得FUT軌資源配置上限20%，不要連續佔用太多輪。
+
+---
+
+## 2026-08-26T13:05:49+08:00 — 馬拉松第98輪期貨軌執行：盤別效應家族第一批假說（夜盤自身報酬 vs 日盤報酬），2個都FAIL
+
+**選軌理由**：`marathon_lock.py acquire`成功（乾淨`LOCK_ACQUIRED`，非陳舊鎖檔）。比對三軌最後更新時間戳：FUT（第93輪，2026-08-26T10:34:09）／TW（第96輪，12:08:18）／US（第97輪，12:15）——FUT明顯最舊。資源配置檢查：近10輪（89–97）FUT只佔2輪（90、93）=20%，選這輪後（89–98窗口）變成3/10=30%，仍在協定「不要連續佔用太多輪」的精神下可接受（不是連續兩輪，中間隔了94–97共4輪TW/US），下一輪起應優先讓給TW/US。
+
+**做了什麼**：依`FUT_MARATHON_STATE.md`第93輪「下一輪建議」(a)項——夜盤感知連續序列建構（`build_continuous_series(session="after_market")`）已在第93輪雙重驗證過，這輪第一次真正拿它來測假說，而不是只驗證地基。`fut_cheap_gate.py`新增`_load_session_pair(series)`：把日盤系列（`_load_series()`既有輸出）跟夜盤自己的`build_continuous_series(session="after_market")`輸出，用`date`欄位inner join（round 63確認夜盤date T代表「T前一晚到清晨」，領先日盤同date T，round 90/91確認轉倉事件完全同步，這個inner join不會有主連合約錯位問題）。算出`night_ret`（夜盤自身open→close）跟`day_ret`（日盤自身open→close，重新算而非沿用`series["ret"]`那個跨日close-to-close定義），兩個假說：
+
+1. **`fut_night_session_momentum`**：`position = sign(night_ret)`，順著夜盤方向交易同一date T的日盤日內報酬。
+2. **`fut_night_session_reversal`**：`position = -sign(night_ret)`，反向操作（跟#14/#15隔夜跳空反轉/順勢同款「同一輪測兩個方向」設計，不是調參數硬救）。
+
+兩者都用`_permutation_test_same_day()`（既有函式，同date配對不跨日shift，跟隔夜跳空假說相同的配對邏輯）。
+
+**結果**：
+
+| 假說 | percentile（單測門檻90.0） | 判定 |
+|---|---|---|
+| `fut_night_session_momentum` | 19.0（方向不對，81%隨機排列贏過真實策略） | **FAIL** |
+| `fut_night_session_reversal` | 81.0（方向正確但強度不夠） | **FAIL** |
+
+真實策略終值：動能版0.7284（-27.2%累積），反轉版1.2365（+23.7%累積）；隨機控制組中位數：動能版0.9630（-3.7%），反轉版0.9357（-6.4%）。n_days=1861（夜盤資料起始於2017-05-16，比日盤全歷史2000-2024短，同`_load_basis()`/`_load_institutional_net_position()`的inner join精神）。
+
+**誠實記錄**：反轉版（81.0）方向正確、也贏過隨機控制組中位數，但離90.0單測門檻還有距離，不是「差一點點過批次校正」那種模糊地帶（跟#33`fut_intraday_gap_continuation`的92.0剛好過單測但沒過批次校正不同——這裡連單測都沒過），依協定誠實記錄FAIL，不排入待深挖清單，也不因為方向正確就調整訊號定義硬救。
+
+**沒做的事**：沒有測日盤收盤→夜盤開盤／夜盤收盤→日盤開盤這兩個「跳空」構造（跟#14/#15已測的日盤自身跳空是不同的資料，這兩個gap還沒測），也沒有測夜盤多日累積報酬（本輪只測夜盤單日open→close），留給下一輪。
+
+**Holdout檢查**：本輪開始前跟結束前都跑`is_holdout_consumed()` → `False`。全程零新增FinMind API呼叫（`build_continuous_series(session="after_market")`／`_load_series()`都命中既有全歷史parquet快取，同第93輪先例）。
+
+**已更新**：`fut_cheap_gate.py`（新增`_load_session_pair()`/`hyp_night_session_momentum`/`hyp_night_session_reversal`，`main()`改跑本輪兩個假說，模組docstring新增「Tenth round」段落）、`TRIALS_LEDGER.md`（#55/#56）、`FUT_LEADS.md`（#20/#21＋目前狀態＋下一輪建議更新）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。
+
+**下一輪建議**：(a) 盤別效應家族第二批——日盤收盤(T-1)→夜盤開盤(T)、夜盤收盤(T)→日盤開盤(T)兩個跳空構造（跟#14/#15的日盤自身跳空不同資料），或夜盤多日累積報酬；(b) 換一個全新機制家族；(c) FUT軌資源配置20%上限，近10輪含本輪已佔30%，下幾輪優先讓給TW/US。

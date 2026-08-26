@@ -294,6 +294,35 @@ genuinely distinct construction from both prior basis hypotheses:
     of hyp_trend_multi_tf's momentum vote and hyp_vol_regime_trend's
     realized-vol window), not a value searched for on this specific
     series.
+
+Tenth round (marathon round 98, following FUT_MARATHON_STATE.md's "下一輪
+建議" #1 after round 93's infra work confirmed build_continuous_series(
+session="after_market") is ready and cross-validated -- basis family fully
+closed (round 80/86 above), first hypotheses from the genuinely new 盤別效應
+(session-effect) family: does the night session's own price discovery
+(round 91 confirmed night session T PRECEDES day session T within the same
+date label, round 90 confirmed rollover events are exactly synchronized
+between the two sessions) forecast the day session's own subsequent
+intraday move? Both directions tested this round, paired precedent from
+hyp_intraday_gap_reversal/continuation (#14/#15):
+  - fut_night_session_momentum / fut_night_session_reversal: position[T] =
+    +/-sign(night session T's own open-to-close return), traded against
+    day session T's own open-to-close return, same-day pairing (not a
+    cross-day shift -- _permutation_test_same_day, same convention as the
+    overnight-gap hypotheses). Economic story if momentum wins: night
+    session price discovery reflects real new information (overnight news,
+    US market/ADR moves that TX itself cannot trade on before the night
+    session opens) that day session continues to digest -- the same
+    "underreaction at reopen" story already used for
+    hyp_intraday_gap_continuation, but here testing the night session's OWN
+    realized move rather than the day-to-day open/close gap (a materially
+    different, more direct measurement of what happened during the
+    overnight window, now that TX actually trades through most of it).
+    Economic story if reversal wins instead: night session volume/liquidity
+    is thinner than day session (well-documented TX market structure), so
+    night session price moves may overshoot on temporary imbalance and mean-
+    revert once day session's deeper liquidity reopens price discovery --
+    the classic thin-market-overreaction story.
 """
 from __future__ import annotations
 
@@ -607,6 +636,68 @@ def hyp_basis_mean_reversion(series: pd.DataFrame, window: int = 60) -> CheapGat
     return _permutation_test(f"fut_basis_mean_reversion_{window}d", position, merged["ret"])
 
 
+def _load_session_pair(series: pd.DataFrame) -> pd.DataFrame:
+    """Inner-join the day-session series (from _load_series(), already has
+    adj_open/adj_close/ret) with the NIGHT session's own continuous series
+    (session="after_market", round 91 addition to continuous_contract.py) on
+    the same date label.
+
+    Round 63 (fut_verify_night_session_timing.py) established that a night
+    session row dated T represents "the evening before T through T's early
+    morning" -- i.e. night session T PRECEDES day session T within the SAME
+    date label, not a lagged/shifted relationship across different date
+    values. Round 90/91 confirmed rollover events are exactly synchronized
+    between the two sessions (92/92 exact match), so this same-date join is
+    not expected to introduce any front-month mismatch across the merged
+    columns.
+
+    Inner join is deliberate (not an oversight): night session data starts
+    2017-05-16 (continuous_contract.py module docstring), well after day
+    session's 2000 start -- same precedent as _load_institutional_net_position()
+    and _load_basis(), both of which also inner-join a later-starting dataset
+    onto the full day-session history.
+    """
+    night, skipped = build_continuous_series(session="after_market")
+    if skipped:
+        print(f"  [note] night session: {len(skipped)} rollover events had no clean "
+              f"adjustment ratio -- proceeding, raw price used unadjusted")
+    night = night[["date", "adj_open", "adj_close"]].rename(
+        columns={"adj_open": "night_open", "adj_close": "night_close"}
+    )
+    merged = series.merge(night, on="date", how="inner").sort_values("date").reset_index(drop=True)
+    merged["night_ret"] = merged["night_close"] / merged["night_open"] - 1.0  # night
+    # session's own open-to-close return, i.e. the price move that happened
+    # BEFORE day session T even opens (per round 63 timing)
+    merged["day_ret"] = merged["adj_close"] / merged["adj_open"] - 1.0  # day session's
+    # own intraday open-to-close return, computed fresh here (not series["ret"],
+    # which is close-to-close across day-session dates -- a different, coarser
+    # return definition not usable for same-day pairing)
+    return merged
+
+
+def hyp_night_session_momentum(series: pd.DataFrame) -> CheapGateResult:
+    """First 盤別效應 (session-effect) hypothesis, round 91's infra now used
+    for the first time. Since night session T precedes day session T within
+    the same date label (round 63), this is a same-day pairing, not a
+    cross-day shift -- position decided from night T's own realized return
+    is traded against day T's own intraday return, using
+    _permutation_test_same_day (same convention as
+    hyp_intraday_gap_reversal/continuation's overnight-gap pairing)."""
+    merged = _load_session_pair(series)
+    position = np.sign(merged["night_ret"])  # trade with night session's direction
+    return _permutation_test_same_day("fut_night_session_momentum", position, merged["day_ret"])
+
+
+def hyp_night_session_reversal(series: pd.DataFrame) -> CheapGateResult:
+    """Paired reversal hypothesis to hyp_night_session_momentum (same round,
+    not a parameter-tuning rescue -- testing the opposite direction of a
+    brand-new signal family is the established precedent from
+    hyp_intraday_gap_reversal/continuation, #14/#15)."""
+    merged = _load_session_pair(series)
+    position = -np.sign(merged["night_ret"])  # fade night session's direction
+    return _permutation_test_same_day("fut_night_session_reversal", position, merged["day_ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -615,7 +706,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_basis_mean_reversion(series),
+        hyp_night_session_momentum(series),
+        hyp_night_session_reversal(series),
     ]
 
     for r in results:
