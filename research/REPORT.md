@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 124 輪 · 2026-08-27T06:32+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 05:20(第122輪)/US 06:01(第123輪，最新)/FUT 05:01(第121輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log`確認自`05d290f`第123輪以來無互動session介入），暫停規則仍完全生效中；FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118/121判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄
+
+---
 ## 第 123 輪 · 2026-08-27T06:01+08:00 · US（跳過，暫停規則生效中）· 取鎖時偵測到`LOCK_STALE`（pid 158272持有29.9分鐘，上一輪疑似異常中止，未查到殘留未commit工作）；三軌時間戳TW 05:20(第122輪)/US 04:32(第120輪，最舊)/FUT 05:01(第121輪)，依輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」（`git log`確認自`a89f311`第122輪以來無互動session介入），暫停規則仍完全生效中；US軌依舊無組合策略相關工作可做，round 108/111遺留的(a)(b)(c)三項本質仍是為單因子鋪路，同round111/114/117/120判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄
 
 ---
