@@ -25,11 +25,14 @@ jobs:
       - name: 抓美股四大指數（yfinance，免金鑰）
         run: python .github/scripts/fetch_market_us.py
         continue-on-error: true
+      - name: 更新個股月營收/PER/PBR/殖利率（TWSE官方openapi，累積式寫回，免金鑰）
+        run: python .github/scripts/update_fundamentals_daily.py
+        continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json
-          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數 $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git add -A data/market_tw.json data/market_us.json data/fundamentals.json
+          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面 $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
