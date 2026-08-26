@@ -42,6 +42,8 @@ jobs:
 
       - name: 抓台股盤中報價（TWSE MIS，免金鑰）
         run: python .github/scripts/fetch_quotes_tw.py
+        continue-on-error: true  # 2026-08-26 新增：台股這步萬一真的故障也不該拖累美股那步
+        # 跟下面 commit 那步一起被跳過——兩邊各自獨立成敗，一邊掛掉不拖垮另一邊（使用者要求）。
 
       - name: 抓美股盤中報價（Finnhub，需要 FINNHUB_API_KEY secret）
         env:
@@ -50,6 +52,9 @@ jobs:
         continue-on-error: true  # 美股這步沒設金鑰時會失敗，不要讓它擋住台股那份已經抓到的資料被 commit
 
       - name: Commit 報價 JSON（有變動才 commit）
+        if: always()  # 2026-08-26 新增：前面兩步不管誰失敗（即使兩個都失敗），只要有任何一份
+        # 檔案真的寫出來了就要 commit——沒有這行，前面任一步驟(continue-on-error標成failure)
+        # 仍會讓 GitHub 預設跳過後面步驟，等於已經抓到的資料白抓了。
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
