@@ -771,6 +771,40 @@ def hyp_night_gap_continuation(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test_same_day("fut_night_gap_continuation", position, merged["night_ret"])
 
 
+def hyp_day_gap_reversal(series: pd.DataFrame) -> CheapGateResult:
+    """Round 109's gap-construct hypothesis -- the second (and last) of the
+    two gap constructs round 98's next-step item (a) flagged, explicitly
+    left untested by round 104's #22/#23 (which only covered the OTHER gap:
+    day close T-1 -> night open T, predicting night_ret). This one is night
+    close T -> day open T, predicting day session T's OWN intraday_ret
+    (day_ret) -- structural mirror of hyp_night_gap_reversal/continuation
+    with night/day roles swapped. Per round 63 timing, night session T
+    precedes day session T within the SAME date label, so night_close(T) ->
+    day_open(T) is still a same-date-T gap (not a cross-day T -> T+1 shift),
+    same as hyp_night_gap_reversal/continuation's day_close(T-1) ->
+    night_open(T) construct -- _permutation_test_same_day applies for the
+    same reason."""
+    merged = _load_session_pair(series)
+    gap = merged["adj_open"] / merged["night_close"] - 1.0  # night session's own
+    # close on THIS row's date T -> day session's own open on the SAME row's
+    # date T (round 63: night T precedes day T within one date label), mirror
+    # of hyp_night_gap_reversal's night_open / adj_close.shift(1) but without
+    # the .shift(1) since both legs already share date T here
+    position = -np.sign(gap)  # fade the gap leading into day session
+    return _permutation_test_same_day("fut_day_gap_reversal", position, merged["day_ret"])
+
+
+def hyp_day_gap_continuation(series: pd.DataFrame) -> CheapGateResult:
+    """Paired continuation hypothesis to hyp_day_gap_reversal (same round,
+    not a parameter-tuning rescue -- testing the opposite direction of a
+    brand-new gap construct, same precedent as #14/#15, round 98's
+    night_session pair, and round 104's night_gap pair)."""
+    merged = _load_session_pair(series)
+    gap = merged["adj_open"] / merged["night_close"] - 1.0
+    position = np.sign(gap)  # trade with the gap leading into day session
+    return _permutation_test_same_day("fut_day_gap_continuation", position, merged["day_ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -779,8 +813,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_night_gap_reversal(series),
-        hyp_night_gap_continuation(series),
+        hyp_day_gap_reversal(series),
+        hyp_day_gap_continuation(series),
     ]
 
     for r in results:

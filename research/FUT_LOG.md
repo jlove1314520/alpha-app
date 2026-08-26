@@ -709,3 +709,24 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **下一輪建議**：(a) 盤別效應家族第三批——夜盤收盤(T)→日盤開盤(T)第二種跳空構造，預測目標改為`day_ret`（資料已現成，`_load_session_pair()`已有`night_close`/`adj_open`兩欄，不需要新地基），或夜盤多日累積報酬；(b) 換一個全新機制家族；(c) FUT軌資源配置20%上限，近10輪含本輪剛好20%，下一輪若還選FUT要重新盤點窗口是否超額。
 
 ---
+## 2026-08-26T19:34:28+08:00 — 馬拉松第109輪：盤別效應家族第三批（進入日盤前的跳空）——夜盤收盤(T)→日盤開盤(T)，round98/104留下的最後一種跳空構造
+
+**取鎖**：乾淨（`LOCK_ACQUIRED`，非陳舊鎖檔，上一輪無殘留孤兒工作）。
+
+**選軌**：讀三軌state檔案「最後更新」時間戳——TW 19:45（round107）、US 19:05（round108）、FUT 17:05:24（round104，最舊）。檢查FUT近10輪（99-108）資源配置：99TW/100US/101TW/102TW/103US/104FUT/105TW/106US/107TW/108US，FUT僅佔1/10=10%，遠低於20%上限，可以選FUT。
+
+**做的事**：延續round104`FUT_LEADS.md`#23「夜盤收盤(T)→日盤開盤(T)這個第二種跳空構造尚未測試，留給下一輪」的明確待辦。`fut_cheap_gate.py`新增`hyp_day_gap_reversal`/`hyp_day_gap_continuation`，重用`_load_session_pair()`既有`night_close`/`adj_open`欄位（round98/104建立的地基，零新資料/零新API）。跟#22/#23（測日盤T-1收盤→夜盤T開盤的跳空，預測夜盤T自身`night_ret`）互為鏡像，本批測夜盤T收盤→日盤T開盤的跳空（round63時序：夜盤T在日盤T之前，仍屬同一date T標籤，非跨日位移，同樣用`_permutation_test_same_day`），能否預測日盤T自身`day_ret`（open→close）。
+
+**結果**：
+- `fut_day_gap_reversal`（反轉版）：percentile=0.5（門檻90.0），方向嚴重不對，199/200隨機排列贏過真實策略（真實-35.9% vs 隨機中位數-17.2%）。**FAIL**，不需要經濟解釋。
+- `fut_day_gap_continuation`（順勢版）：percentile=99.5（單測門檻90.0過；本批n=2 BH門檻k=1時95.0過），真實策略終值+40.5% vs 隨機控制組中位數+8.7%。**但累積FUT家族FDR校正未過**——FUT家族累積試驗數由27→29（本批+2），保守單測門檻100×(1-0.10/29)=99.66，99.5未達，差距僅0.15個百分點，落在`N_SHUFFLES=200`排列解析度（0.5個百分點步階）以內，可能是測量雜訊偏低估而非真正未達標。判定**CHEAP_PASS（單測+本批），累積FDR校正邊界未過，不排入待深挖清單**——這是FUT軌盤別效應家族至今第一次出現「邊界模糊、疑似解析度雜訊」而非清楚判定的案例，同round51→54`fut_intraday_gap_continuation`高解析度重測先例（那次N=2000重測後92.0→89.60反而確認FAIL，證明「重測不一定會讓邊界案例翻盤成PASS」，這次結果需要真的跑過N=2000才能定論，不能預設方向）。
+
+**盤別效應家族現況**：round98第一批（夜盤自身完整報酬）2 FAIL、round104第二批（進入夜盤前的跳空）2 FAIL、本輪第三批（進入日盤前的跳空）1 FAIL+1邊界候選——家族累計6個假說：5 FAIL、1邊界候選，三種跳空/報酬構造全部測完，家族本身可視為已窮盡已知構造。
+
+**holdout檢查**：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`。
+
+**已更新**：`fut_cheap_gate.py`（新增`hyp_day_gap_reversal`/`hyp_day_gap_continuation`，`main()`改跑本輪兩個假說，模組docstring更新指出round98/104的兩個gap構造均已測完）、`TRIALS_LEDGER.md`（#70/#71）、`FUT_LEADS.md`（#24/#25）、`FUT_MARATHON_STATE.md`（覆寫本輪完成段落）。
+
+**下一輪建議**：(a) 對`fut_day_gap_continuation`用`N_SHUFFLES=2000`高解析度重測確認邊界結果（同round54先例，monkey-patch局部覆蓋，不改`fut_cheap_gate.py`本身預設值），這是唯一一個FUT軌目前處於「不確定」而非清楚FAIL的1a層級案例，值得優先釐清；(b) 若(a)確認FAIL，盤別效應家族三批構造全部窮盡，應換一個全新機制家族（`MARATHON_PROTOCOL.md`第3節期貨清單裡「日內均值回歸」以外的變體、或星期效應以外的季節性）；(c) FUT軌資源配置20%上限，近10輪（100-109）含本輪：100US/101TW/102TW/103US/104FUT/105TW/106US/107TW/108US/109FUT，FUT佔2/10=20%，剛好觸頂，下一輪若還選FUT要先重新盤點是否超額。
+
+---
