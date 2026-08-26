@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 114 輪 · 2026-08-27T01:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US 21:02(最舊)/FUT 21:32/TW 01:20(第113輪剛更新)，正常輪替本應選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」、`TW_LOG.md`第113輪記錄TW軌下一步也要等使用者回應才接續，暫停規則整體仍完全生效中；US軌無組合策略相關工作可做，round108/111遺留三項待辦皆為單一因子鋪路性質，比照第111輪判斷保守跳過 · 無新判定，`is_holdout_consumed()`確認`False` · 見`US_MARATHON_STATE.md`/`US_LOG.md`本輪附記
+
 ## 第 113 輪 · 2026-08-27T01:20+08:00 · TW · 取鎖時偵測到`LOCK_STALE`（pid 146500持有29.9分鐘，接手發現上一輪已修好`backfill_t86.py`的`START_DATE`真bug（TWSE端點2012-05-02前無資料回傳明確錯誤訊息、非反爬蟲封鎖）但未commit）；TW最舊照輪替應選TW，`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」且無新使用者回應，第110輪「下一步」留給使用者決定優先序的高成本重跑選項本輪不代為升級；改做暫停規則明確允許的T86三大法人回補地基工作 · 驗證修復後跑`backfill_t86.run_batch(200)`：200嘗試/200成功/14空(假日)，未撞限流牆 · 累積T86快取236→436/3305個工作日（13.2%）· 無新`TRIALS_LEDGER.md`列（地基工作非假說測試），`is_holdout_consumed()`確認`False` · 見`TW_LOG.md`/`TW_MARATHON_STATE.md`本輪記錄
 
 ## 第 112 輪 · 2026-08-26T21:32+08:00 · （跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 20:37/US 21:03(第111輪剛更新)/FUT 19:34(最舊)，正常輪替本應選FUT，但FUT唯一明確待辦（`fut_day_gap_continuation`邊界候選N=2000高解析度重測）本質是1b深挖，屬單因子相關工作，比照第111輪處理US round108待辦的判斷邏輯保守跳過；`PORTFOLIO_STRATEGY_SPEC.md`跟FUT軌無關，本輪無組合策略工作可做 · 無新判定，`is_holdout_consumed()`確認`False` · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪附記

@@ -600,3 +600,17 @@ round 108留下的「下一步」(a)驗證PE因子分子（`NetIncomeLoss`/`Earn
 **本輪沒有做任何實質工作**，只確認狀態（`is_holdout_consumed()`為`False`）、補寫這則log跟`US_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round 108的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則後從那裡接續，不需要重新規劃。
 
 沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---
+
+## 第 114 輪 · 2026-08-27T01:31+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 01:20（第113輪剛更新）、US 21:02（第111輪，最舊）、FUT 21:32（第112輪）——正常輪替本應選US。
+
+複查`MARATHON_PROTOCOL.md`最上方暫停規則現況：`PORTFOLIO_STRATEGY_SPEC.md`第3行仍標記「狀態：待使用者確認」，未見變動；`LEADS.md`的`portfolio_multifactor_v2`列（規格已完整套用，12組合皆FAIL但兩組合p=0.053接近顯著）也仍是最新狀態，`TW_LOG.md`第113輪明確記錄下一輪TW軌工作應先確認使用者是否已回應「下一步」三選項，未回應前不應自行升級——這代表暫停規則整體仍完全生效中，沒有任何解除跡象。`PORTFOLIO_STRATEGY_SPEC.md`全文grep確認不含「美股」/「US軌」字樣，純屬TW專屬規格，US軌依舊沒有組合策略相關工作可接。
+
+round 108/111遺留的「下一步」(a)驗證PE因子分子（`NetIncomeLoss`/`EarningsPerShareDiluted`）、(b) gap_days異常值分段排查、(c) `f_us_value_pb`便宜關卡，三項本質上都是為了推進單一因子（`f_us_value_pb`/`f_us_value_pe`）鋪路的地基工作，跟round 111判斷邏輯一致：保守跳過，不代為決定暫停規則的邊界該怎麼解讀。
+
+**本輪沒有做任何實質工作**，只確認`is_holdout_consumed()`為`False`（本輪未打任何API，沿用round開始前的檢查結果）、補寫這則log跟`US_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round 108的「下一步」(a)(b)(c)三項維持原狀，等使用者解除暫停規則或明確回應`portfolio_multifactor_v2`「下一步」選項後再接續。
+
+沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
