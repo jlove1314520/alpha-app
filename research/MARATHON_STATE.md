@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 124 輪。最新一輪：第 124 輪 · 2026-08-27T06:32+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳FUT最舊（第121輪05:01），正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第123輪以來無互動session介入，FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118/121判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第124輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 125 輪。最新一輪：第 125 輪 · 2026-08-27T07:13+08:00 · TW · 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW最舊（第122輪05:20），正常輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第122輪以來無互動session介入，延續協定允許的地基工作`backfill_t86.py --batch-size 200`：200嘗試/200完成(17空)/未撞限流牆，累積T86快取1036→1236/3305（31.3%→37.4%）。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第125輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+
+**上一則保留（第124輪，供對照）**：2026-08-27T06:32+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳FUT最舊（第121輪05:01），正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第123輪以來無互動session介入，FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118/121判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第124輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。
 
 **上一則保留（第122輪，供對照）**：2026-08-27T05:20+08:00 · TW · 取鎖乾淨；三軌時間戳TW最舊（第119輪04:21），正常輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」且自第119輪以來無互動session介入，延續協定允許的地基工作`backfill_t86.py --batch-size 200`：200嘗試/200完成(12空)/未撞限流牆，累積T86快取836→1036/3305（25.3%→31.3%）。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第122輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 

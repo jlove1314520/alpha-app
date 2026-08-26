@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 125 輪 · 2026-08-27T07:13+08:00 · TW · T86三大法人回補接續（暫停規則生效中，屬允許的地基工作）· `run_batch(batch_size=200)`：200嘗試/200完成(17空)/未撞限流，累積T86快取1036→1236/3305（31.3%→37.4%）；`is_holdout_consumed()`確認`False`，未觸及`backfill_universe.py`（已達81.3%超過80%門檻），無新`TRIALS_LEDGER.md`列（地基工作非假說測試）· 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第125輪記錄
+
+---
 ## 第 124 輪 · 2026-08-27T06:32+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 05:20(第122輪)/US 06:01(第123輪，最新)/FUT 05:01(第121輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log`確認自`05d290f`第123輪以來無互動session介入），暫停規則仍完全生效中；FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118/121判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄
 
 ---
