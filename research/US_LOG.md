@@ -489,3 +489,18 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 **下一步建議**：mid/small tier尚未測（`us_factor_ic_by_size.py`的`TIER`常數切換即可沿用，下一輪可接著做）；或視資源配置優先序改做第9項（系統化擴充`KNOWN_DELISTED`名單，目前僅5檔）。
 
 完整見`US_LEADS.md`#4/#5/#6（新增）、`TRIALS_LEDGER.md`#47/#48/#49（新增）、`us_factor_ic_by_size.py`（新增，可重複執行，`TIER`常數可切mid/small）。
+
+## 2026-08-26T12:xx+08:00 — 馬拉松第97輪：中型股tier分層重測，US軌至今第一批CHEAP_PASS
+
+延續第95輪「下一步」建議首選：`us_factor_ic_by_size.py`把`TIER`常數從`"large"`改成`"mid"`（seed也換成`202608262`，跟大型股tier的`202608261`區分），零額外程式碼改動，重測同三個既有FAIL因子。
+
+中型股tertile（1,855檔）隨機抽樣30檔，26檔可用（3檔EMPTY下市/1檔<260列不足）：
+- `f_us_low_vol`：train mean_ic=+0.0300 IR=+0.104、val mean_ic=+0.1123 IR=+0.377 hit_rate=0.67，null percentile=100.0（門檻96.7）——**CHEAP_PASS**，同號，數字比大型股tier（第95輪：train≈0/val+0.038/percentile 83.4）明顯強，也比不分層版（第39輪：train+0.031/val+0.134/percentile 100.0）接近。
+- `f_us_momentum_12m`：train mean_ic=+0.0119、val mean_ic=+0.0968，null percentile=99.9——**CHEAP_PASS**，但信心等級低：這個因子三次測試（不分層train負/val正、大型股train正/val負、中型股本輪train正/val正）train/val方向組合三次互不相同，比較像小樣本雜訊而非穩定規模效應。
+- `f_us_reversal_1m`：train mean_ic=+0.0913、val mean_ic=−0.0345，null percentile=78.4——**FAIL**（same_sign未過），三個tier全部FAIL，是US軌至今唯一三個tier都沒有CHEAP_PASS過的因子。
+
+`is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，零`load_full_history()`/`unlock_holdout_once()`呼叫）。零額外API呼叫以外的新增支出：本輪對26檔中型股樣本股票發出新的`load_us_sample_with_factors()`請求（未命中大型股/不分層批次的既有快取，因為是不同的股票代號集合），未觸發402/403限流。
+
+**下一步建議**：(a) small tier分層重測（優先，`TIER="small"`即可沿用）；(b) `f_us_low_vol`中型股CHEAP_PASS（#7）深挖前務必先做train/val切分＋beta對照——吸取第41輪教訓（不分層版便宜關卡CHEAP_PASS，深挖後因VAL期beta驟降至−0.891判定FAIL），不能只看便宜關卡數字漂亮就直接假設市場中性；(c) `f_us_momentum_12m`中型股CHEAP_PASS（#8）信心等級低，深挖前建議先換一個種子/更大樣本複驗是否穩定重現，而非直接排入標準深挖清單。
+
+完整見`US_LEADS.md`#7/#8/#9（新增）、`TRIALS_LEDGER.md`#52/#53/#54（新增）、`us_factor_ic_by_size.py`（本輪改動`TIER`/`SAMPLE_SEED`，可重複執行）。
