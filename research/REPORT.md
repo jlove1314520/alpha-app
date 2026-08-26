@@ -22,6 +22,8 @@
 
 **第 1–25 輪是 2026-08-23 這次診斷時，用 `marathon_cycle.log`（實際執行的 start/end 時間戳＋輸出摘要）逐筆比對當天 `git log` 的 commit 時間跟訊息回填的，不是從一開始就有記錄——這個機制本身是這次才建立的，回填只到有可靠原始紀錄（`marathon_cycle.log`）涵蓋的範圍為止，不會回填到更早、log 檔案沒有記到的日期。第 25 輪之後（第 26 輪起）才是照這份新規則、由馬拉松自己即時寫的。**
 
+## 第 92 輪 · 2026-08-26 09:35 · TW · 取鎖時偵測到`LOCK_STALE`（pid 146212持有30.0分鐘，上一輪疑似異常中止）；接手孤兒工作——上一輪已完成`f_short_reversal_1m`（短期反轉，21交易日自身累積報酬取負號）1a便宜關卡測試並產出`factor_ic_short_reversal.py`/`factors.py`定義/`TRIALS_LEDGER.md`#46，但崩潰在完成前，`TW_LOG.md`/`TW_LEADS.md`都還沒補上記錄。本輪重跑腳本確認數字一致（零新API呼叫），補齊`TW_LOG.md`本輪記錄與`TW_LEADS.md`#5列 · **FAIL**（TRAIN mean_ic=+0.0496/VAL mean_ic=−0.0054方向不一致，null percentile=23.1遠未達90.0門檻）；短期反轉家族結案，本輪無新測試，僅補齊上一輪遺漏的文件記錄
+
 ## 第 91 輪 · 2026-08-26 09:04 · US · 取鎖乾淨（非陳舊鎖檔接手）；`f_us_reversal_1m`（US軌第三個因子，短期反轉，跟`f_us_momentum_12m`的`MOM_SKIP`用完全相同的21交易日窗口）1a便宜關卡測試（`us_factor_ic.py`沿用既有`evaluate_factor()`框架，同一批27/40可用隨機樣本，`ALREADY_VERDICTED`同步補上`f_us_momentum_12m`維持單因子bonferroni_n=1語義） · **FAIL**（TRAIN mean_ic=+0.0938/VAL mean_ic=−0.0198方向不一致，null percentile=49.5遠未達90.0門檻、甚至低於50，比第88輪動能因子的FAIL更明確，`TRIALS_LEDGER.md`#45）；US軌三個純price-only因子（低波動/動能/反轉）至此全數測完1a，全部FAIL，尚無PASS/EXPERIMENTAL候選
 
 ## 第 90 輪 · 2026-08-26 08:33 · FUT · 取鎖時偵測到`LOCK_STALE`（pid 145052持有26.6分鐘，上一輪疑似異常中止——已核實沒有留下未commit的殘留工作，乾淨崩潰）；盤別效應家族地基第二步，新寫`fut_probe_night_session_rollover.py`驗證夜盤轉倉時點是否與日盤同步 · **同步，零例外**：2017-05-16起92筆日盤轉倉事件跟92筆夜盤轉倉事件exact match（92/92），可直接沿用日盤H1轉倉規則到夜盤序列，第60/63輪標記的前置風險項解決，本輪無新增假說測試

@@ -76,6 +76,7 @@ MA_WINDOW = 60
 VOL_SHORT_WINDOW = 20
 VOL_LONG_WINDOW = 60
 LOW_VOL_WINDOW = 60
+SHORT_REVERSAL_WINDOW = 21  # ~1 calendar month in trading days
 SUE_TRAILING_QUARTERS = 8
 REVENUE_SUE_TRAILING_MONTHS = 12
 ROE_STABILITY_TRAILING_QUARTERS = 8
@@ -396,6 +397,12 @@ def prepare_factors(
     # (i) 低波動: 60 日日報酬標準差取負號（波動越低分數越高），純價格資料，天然 point-in-time
     daily_ret = d["adj_close"].pct_change()
     d["f_low_vol"] = -daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).std()
+
+    # (m) 短期反轉: 近 21 個交易日（~1 個月）累積報酬取負號，純價格資料，天然 point-in-time。
+    # 2026-08-26 馬拉松新增（MARATHON_PROTOCOL.md 第 3 節「動量變體/短期反轉」家族，尚未測過），
+    # 跟 f_rel_strength（60 日相對大盤動能）刻意用不同窗口、不同定義（這裡是自身絕對報酬，不是
+    # 相對大盤），文獻上短期反轉跟中期動能是兩個獨立、方向常相反的異常，值得分開測。
+    d["f_short_reversal_1m"] = -(d["adj_close"] / d["adj_close"].shift(SHORT_REVERSAL_WINDOW) - 1)
 
     # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
     # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓

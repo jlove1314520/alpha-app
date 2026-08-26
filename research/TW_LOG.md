@@ -350,3 +350,41 @@
 **下一步**：見`TW_LEADS.md`「下一輪建議」段落——(1)深挖`f_value_pb`；(2)拆解`f_quality_roe_stability`TRAIN期絕對報酬為負的成因；(3)若時間允許，掃`MARATHON_PROTOCOL.md`第3節還沒碰過的因子家族。宇宙回補（主線3）已在互動session達80%門檻(81.3%)，不再是TW軌本輪強制優先項，但下一輪若碰到額度受限、其他工作單位卡住時仍可回頭補「price done但finrev缺」的405檔。
 
 **Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫`load_dev()`/`assert_no_holdout_leakage()`路徑，未觸碰holdout解鎖函式）。
+
+## 2026-08-26T05:49:00+08:00 — 馬拉松第85輪：`f_value_pb` 深挖（1b），判定EXPERIMENTAL
+
+**取鎖**：乾淨成功（`LOCK_ACQUIRED`），無需回填「上一輪疑似異常中止」的註記。三軌狀態檔時間戳比對：TW（`TW_MARATHON_STATE.md` mtime 2026-08-26 01:55，早於US的05:02跟FUT的02:05）最舊，選TW軌。
+
+**做了什麼**：讀`TW_MARATHON_STATE.md`第14項候補清單第(a)項與`TW_LEADS.md`#1備註，確認`f_value_pb`便宜關卡已`CHEAP_PASS`、PIT前置驗證已完成（單檔2330跳變偵測，第四輪），下一步是深挖（1b）。repo裡有一份互動session留下、**從未執行過**的`deep_dive_f_value_pb.py`（2026-08-23 17:03），先完整讀過原始碼：方法完全比照`deep_dive_f_quality_roe_stability.py`的精神（十分位多空/配對式隨機控制組100次抽樣/TRAIN+VAL兩期/成本1x2x3x/CAPM beta），資料路徑走`load_dev()`+`holdout.assert_no_holdout_leakage()`，重用既有80/100快取樣本、零新FinMind呼叫，確認安全無holdout風險後執行。背景執行約耗時分鐘級（6組配置×100次隨機抽樣，跟ROE深挖第三輪同等工作量）。
+
+**結果**：61/80名有`f_value_pb`值。**TRAIN(2015-2020)**×1x/2x/3x成本：ann_return −6.93%~−7.42%（全負）、alpha −3.11%~−3.62%（全負）、Sortino −0.168~−0.188（全負）、beta −0.109（近零，market-neutral構造成立）、對配對式隨機控制組percentile=88.0/96.0/97.0（1x未達其他候選慣見的99~100門檻，2x/3x較強）。**VAL(2021-2024)**×1x/2x/3x：ann_return +4.82%~+5.56%（全正）、alpha +8.58%~+9.35%（全正）、Sortino +0.326~+0.358（全正）、beta −0.080~−0.081（近零）、percentile=99.0/100.0/100.0（三組全數穩健通過）。
+
+**判定：EXPERIMENTAL**（不是PASS，不是FAIL）——十分位多空組合在VAL期乾淨、穩健地贏過配對式隨機控制組（beta近零，market-neutral成立），但**TRAIN期絕對報酬/alpha/Sortino全部為負、VAL期全部為正，正負號不一致**，跟`f_quality_roe_stability`（#16/#17）完全同款的「IC/相對排序層級可能成立，絕對報酬層級train/val反轉」模式，是這個模式的第三個實例（第二個是`f_rel_strength_regime_switch`，見#40，但那個是策略層FAIL，不是EXPERIMENTAL——差別在於`f_rel_strength_regime_switch`兩期對隨機控制組都沒有穩健勝出，`f_value_pb`至少VAL期是乾淨的99~100百分位）。**誠實揭露這次證據比ROE深挖更弱**：ROE的6組全部是percentile=100.0，這次TRAIN 1x只有88.0（低於便宜關卡慣用的90門檻），代表TRAIN期的「贏過隨機」本身在最低成本情境下就不夠穩健，是隨著成本墊高才轉強（2x=96.0/3x=97.0），這個方向（成本越高越贏隨機）本身也需要留意，可能代表策略在TRAIN期虧損没有隨機控制組虧得多（因為隨機控制組換手率相近但選股方向錯，兩者一起虧、策略虧得較少），不是策略本身賺錢。
+
+**經濟解釋（憲法要求）**：便宜的帳面淨值（負PBR因子）反映市場對困境/低成長公司的過度悲觀定價，日後基本面改善或估值回歸均值時獲得修正——這是文獻中經典的價值溢酬（value premium，Fama-French HML）。**TRAIN/VAL絕對報酬正負號不一致，本身可能有市場整體風格輪動的解釋**：2015-2020是全球（含台股電子/半導體成長股）成長股顯著跑贏價值股的市場環境，即使選到「最便宜」的一批股票，整體風格逆風下多空組合仍可能虧損（但比隨機選股虧得少或贏得更明確，尤其成本墊高後）；2021-2024則普遍記載有價值股回補輪動（升息環境不利長存續期成長股估值、疫後重啟交易偏好景氣循環/價值股），跟VAL期轉為乾淨正報酬的時間點吻合。**這是觀察到的市場regime模式，不是這輪驗證過的因果機制**，誠實標記為待驗證的解釋，不是確認的因果證據。
+
+**判定不升格為PASS的理由**：train/val絕對報酬正負號不一致這條規則（沿用ROE深挖#16/#17的先例）沒有被這輪的經濟解釋豁免——即使有合理的市場regime故事，也還沒有像`REGIME_CONDITIONS.md`對`f_rel_strength`那樣做過完整的事前可觀測條件分群驗證（大盤位階/波動度/市值/流動性四組），不能只憑「這個故事聽起來合理」就直接升格。**下一步（如果要繼續）**：仿照`regime_conditions.py`對`f_value_pb`也做一次分群IC，看TRAIN/VAL絕對報酬的反轉能不能被「大盤位階（成長/價值風格輪動的代理）」這組條件系統性解釋；如果能，比照`f_rel_strength`升格「情境切換策略候選」流程；如果不能，就跟`f_quality_roe_stability`一樣維持EXPERIMENTAL、不繼續往下挖。
+
+**待辦**：`TW_LEADS.md`#1（`f_value_pb`列）需要更新這輪深挖結果與判定，這輪一併完成（見該檔案本輪更新）。`TRIALS_LEDGER.md`新增#42。**本輪commit範圍嚴格限定**：只有`deep_dive_f_value_pb.py`（互動session寫的分析腳本本身，這輪驗證過安全且已產出結果，判定可以入庫）+ `TW_LEADS.md`/`TRIALS_LEDGER.md`/`TW_LOG.md`/`REPORT.md`/`MARATHON_STATE.md`（本輪自己的記錄與心跳），**不動** `DATA.md`/`LEADS.md`/`TW_MARATHON_STATE.md`/`adjust.py`/`backfill_universe.py`/`factors.py`/`generate_scores_v2.py`/`score_v2.py`/`scores.json`/`REGIME_CONDITIONS.md`/`backfill_t86.py`/`portfolio_backtest.py`/`realtime_asof.py`/`regime_conditions.py`/`twse_t86_client.py`/`yf_price_client.py`（互動session的其餘產出，延續前幾輪US#82/#84、FUT#80、TW#83對這批dirty檔案的迴避慣例，留給使用者自己審過再決定commit）。`.github/workflows/`（untracked）同樣不動，跟本輪工作無關。
+
+**下一步**：(1) 若要繼續深挖`f_value_pb`，考慮補一次分群IC（見上方判定段落）；(2) 拆解`f_quality_roe_stability`TRAIN期絕對報酬為負的成因（候補清單既有項目，這輪未做）；(3) 若時間允許，掃`MARATHON_PROTOCOL.md`第3節還沒碰過的因子家族（短期反轉/BAB/Amihud流動性/季節性/資產成長異常/Piotroski F-score/accruals）。
+
+**Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只呼叫`load_dev()`/`assert_no_holdout_leakage()`路徑，未觸碰holdout解鎖函式）。
+
+## 2026-08-26T09:35頃 — 馬拉松第92輪：接手陳舊鎖檔孤兒工作——補齊`f_short_reversal_1m`便宜關卡的文件記錄
+
+**取鎖**：`LOCK_STALE`（pid 146212持有30.0分鐘後被回收，上一輪疑似異常中止）。三軌狀態檔時間戳：US（第91輪，09:04:37）跟FUT（第90輪，08:33:39）都已有明確馬拉松輪次時間戳，TW（`TW_MARATHON_STATE.md`只標「2026-08-26互動session」無精確時分，且輪替邏輯上TW已經多輪沒被排到）判斷仍是最久沒被馬拉松輪次本身碰過的一軌，選TW軌。
+
+**發現**：`git status`顯示上一輪（pid 146212）已完成`f_short_reversal_1m`（短期反轉，21交易日自身累積報酬取負號，`MARATHON_PROTOCOL.md`第3節「動量變體/短期反轉」家族第一個測試）的1a便宜關卡測試——新寫`factor_ic_short_reversal.py`、`factors.py`加上該因子定義（`SHORT_REVERSAL_WINDOW=21`）、`TRIALS_LEDGER.md`已新增#46列——但**崩潰在完成前，`TW_LOG.md`完全沒有這筆記錄、`TW_LEADS.md`也還沒新增對應列（#46備註寫著見`TW_LEADS.md#5`，但檔案裡根本沒有#5列）**，是一份「數據已產出、判定已下、只差文件收尾」的孤兒工作，不是半成品程式碼。
+
+**驗證**：重跑`python factor_ic_short_reversal.py`（docstring承諾零新API呼叫，沿用既有100名快取樣本）確認數字跟`TRIALS_LEDGER.md`#46完全一致：TRAIN(2015-2020) mean_ic=+0.0496 IR=+0.286（n=74期）；VAL(2021-2024) mean_ic=−0.0054 IR=−0.032 hit_rate=0.53（n=47期）；null percentile=23.1（單測門檻90.0，遠未過）；same_sign=False（train為正、val接近零轉負）。判定**FAIL**，程式輸出跟既有文件字面一致，不是重新詮釋，只是把上一輪確實做完的判定補上遺漏的文件記錄。
+
+**做的事**：這輪本身沒有測新假說（`f_short_reversal_1m`本身的1a判定是上一輪的產出，這輪只驗證+補文件），本輪新增內容：(1) 這篇`TW_LOG.md`記錄；(2) `TW_LEADS.md`新增#5列（`f_short_reversal_1m`），把`TRIALS_LEDGER.md`#46的完整數字/經濟解釋轉貼過去，符合`TW_LEADS.md`一貫的候選登記簿格式。**`TRIALS_LEDGER.md`#46本身不重複新增**（上一輪已經加好，重跑只是驗證數字沒有錯，不產生新試驗）。
+
+**經濟解釋**（延續上一輪已下的判定，未變）：短期反轉是文獻中跟中期動能方向相反但同樣有名的異常，這裡用自身絕對報酬（非相對大盤，跟`f_rel_strength`刻意區隔），val期IC幾乎為零而非清楚反轉，可能是80檔樣本規模不足以捕捉這種通常需要更細（週頻/日頻分層）資料才穩定顯現的效應。不建議直接視為「台股無短期反轉」定論，但目前證據不支持升格。
+
+**本輪commit範圍**：`factor_ic_short_reversal.py`（新增，上一輪產出，已驗證安全可重複執行）+ `factors.py`（`f_short_reversal_1m`定義，上一輪產出）+ `TW_LOG.md`/`TW_LEADS.md`（本輪補齊文件）+ `TRIALS_LEDGER.md`（working copy裡#46這筆是上一輪產出但還沒commit過，這次一併帶上，不是重複新增）+ `REPORT.md`/`MARATHON_STATE.md`（本輪心跳）。**不動**`.github/workflows/quotes.yml`（working copy裡另一筆跟本輪工作無關的uncommitted變更，看起來是使用者要求的CI健壯性修正，跟TW因子研究無關，延續本協定一貫「只commit跟本輪工作直接相關檔案」的紀律，留給使用者自己審過決定）。
+
+**下一步**：短期反轉家族（唯一測過的變體`f_short_reversal_1m`）已FAIL結案；`TW_MARATHON_STATE.md`第14項候補清單其餘項目（`f_value_pb`分群IC/`f_quality_roe_stability`TRAIN期成因拆解/`MARATHON_PROTOCOL.md`第3節繼續掃BAB/特異波動率/Amihud流動性/季節性/資產成長異常/Piotroski F-score/accruals）仍是下一輪可選項。
+
+**Holdout 檢查**：`is_holdout_consumed()` = `False`（本輪只重跑`factor_ic_short_reversal.py`的`load_dev()`路徑，未觸碰holdout解鎖函式）。
