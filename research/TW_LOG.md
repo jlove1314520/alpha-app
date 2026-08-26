@@ -488,3 +488,24 @@
 **驗證**：`is_holdout_consumed()`確認為`False`。零新FinMind呼叫（`quarterly_pit`命中`f_quality_roe_stability`/`f_asset_growth`/`f_accruals`已建立的同一快取，執行時間約1分鐘內完成，無任何限流/重試訊息）。
 
 **下一輪建議**：TW軌「品質」「低風險」「資產成長」「accruals」四個家族第一批全部結案，待深挖佇列仍為空。下一輪可選：(a) `f_quality_roe_stability`TRAIN期負報酬拆解（唯一的EXPERIMENTAL懸案）；(b) 季節性家族（月效應/財報季效應）——**注意**這是全市場共通的日曆效應，需要先想清楚怎麼構造出跨股票的橫斷面差異（例如跟規模/流動性交乘）才能套進現有`factor_ic.py`的IC測試框架，不是單純「哪個月報酬較高」的市場層級統計；(c) 成長與預估上修——先查FinMind有沒有分析師預估資料，沒有就記錄「資料源不存在」跳過；(d) 籌碼類（融資券/當沖比/借券/外資持股變化）——`CLAUDE.md`/`alpha-data/config.py`確認TWSE openapi有`MI_MARGN`融資券端點，但這是全新資料集，尚未被任何已快取因子用過，測之前要評估是否值得衝新的API額度（符合協定1a.2精神，不要為了可能沒用的假說貿然衝新額度）。
+
+---
+
+## 2026-08-26T20:36:21+08:00 — 馬拉松第110輪：暫停規則生效中，本輪跳過新工作；記錄一次鎖檔機制的邊界案例（非資料損毀）
+
+**接手備註（誠實補記一個缺口）**：發現`TW_MARATHON_STATE.md`跟`REPORT.md`心跳都引用「第107輪`TW_LOG.md`本輪記錄」，但這份檔案裡實際上**沒有第107輪的條目**（`grep "^## "`確認上一筆是第105輪，105之後直接跳到現在這筆）——第107輪的commit（`e81010c`）本身確實存在且訊息提到「f_quality_roe_stability TRAIN期報酬拆解+補commit round105/106孤兒工作」，但對應的`TW_LOG.md`詳細記錄疑似漏寫或漏commit。**本輪沒有嘗試回頭補寫第107輪的內容**（沒有第一手資訊，用猜的等於捏造記錄，比留空更糟），只誠實記下這個缺口，供後續有能力查證（例如翻`e81010c`的完整diff）的人補齊。
+
+**背景：使用者暫停規則生效中**。2026-08-26晚使用者裁示：在`PORTFOLIO_STRATEGY_SPEC.md`＋組合策略回測報告正式完成、且使用者親自確認之前，禁止開始任何新的單因子/家族系統掃描，寫進`MARATHON_PROTOCOL.md`最上方。
+
+**取鎖狀況（值得記錄的邊界案例，不是單純的「上一輪異常中止」）**：`marathon_lock.py acquire`回報`LOCK_STALE`（pid 154480持有約30分鐘）。依協定字面上該當作「上一輪疑似異常中止」處理，但深入查證後發現**這其實是誤判**：pid 154480是稍早一個互動session（不是排程馬拉松輪次），使用者在該session直接下指示完成`PORTFOLIO_STRATEGY_SPEC.md`（規格書）跟`portfolio_backtest_v2.py`（12組合完整回測，含成本敏感度+15次隨機控制組配對抽樣），這個計算過程本身耗時較長（單一組合含完整版跑法\>1分鐘，12組合階段2完整版總計數分鐘），該session專注在跑腳本，沒有回頭更新`.marathon.lock`的心跳時間戳，導致鎖檔在**時間門檻判定上**顯得「陳舊」（\>25分鐘沒更新），但實際上那個process還活著、還在正常工作。本輪`acquire()`因此把鎖偷了過來（`marathon_lock.py`的設計就是純時間判定，無法分辨「活著但慢」跟「真的死了」），**但那個互動session幾乎在同一時刻（20:34左右）自己完成了`git commit`+`git push`（commit`fa369b9`），沒有經過我這輪的鎖檔保護**。事後檢查`git log`／`origin/main`確認結果一致、沒有衝突或資料損毀——這次純屬僥倖沒有出事，不是機制設計上真的安全。**記錄這個發現，供之後有機會改善`marathon_lock.py`或`MARATHON_PROTOCOL.md`的人參考**：目前的鎖機制假設「互動session要嘛不會跟排程輪次同時跑，要嘛會乖乖呼叫`marathon_lock.py`」，但這輪证明互動session可能在跑長時間計算時完全不碰鎖檔，讓陳舊判定失真。
+
+**本輪實際做的事**：
+1. 確認`PORTFOLIO_STRATEGY_SPEC.md`存在但狀態仍是「待使用者確認」（不是我能自己判定的事）。
+2. 確認`portfolio_backtest_v2.py`（12組合：因子版本A/B×等權/IC加權/情境加權×月/季頻）已經完整跑完並產出誠實結果（判定FAIL，但兩個最佳組合IC加權+季頻p=0.053接近顯著），且已由該互動session自己完成`LEADS.md`新增`portfolio_multifactor_v2`列＋`REPORT.md`完整專章＋`git commit`+`push`（`fa369b9`）——**這份工作在我這輪抵達之前就已經完成並上線，我沒有新增任何計算或判定**，只是確認它確實在遠端（`git log origin/main`核對過）。
+3. 依三軌時間戳，正常輪替本應選US（時間戳最舊），但US沒有組合策略相關工作可做；該互動session寫在`REPORT.md`的「建議下一步」明確聲明「不會自己動手，留給使用者決定優先序」（含：換全市場81.3%樣本重跑IC加權+季頻看p值會不會改善、train-only IC權重的更嚴格樣本外測試、補大盤本身MDD/Sortino基準）——**本輪判斷不宜代為決定要不要啟動這些高成本重跑**，這是使用者明確保留給自己的判斷，不下放。依暫停規則，本輪不開始任何新工作。
+4. 補寫`TW_MARATHON_STATE.md`（新增第110輪條目）、`REPORT.md`心跳（第110輪）、`MARATHON_STATE.md`全局計數器（109→110）。
+5. 確認`.github/workflows/quotes.yml`仍是唯一working tree改動——這是已知限制（`MARATHON_STATE.md`第11行記錄：目前PAT沒有`workflow` scope，commit碰到`.github/workflows/*.yml`會被GitHub拒絕push），本輪比照既有慣例不commit它，留給使用者換新PAT後處理。
+
+**驗證**：`is_holdout_consumed()`確認為`False`。本輪零FinMind/yfinance呼叫（純文件/git核對）。
+
+**下一輪建議**：如果撿到TW軌，先確認使用者是否已經看過`portfolio_multifactor_v2`的結果並回應「下一步」三個選項之一（換更大樣本重跑/更嚴格樣本外驗證/補大盤基準），有明確指示才動手，沒有的話繼續等待，不要自行決定升級或放棄。`f_quality_roe_stability`TRAIN期報酬拆解懸案（第107輪`TW_LEADS.md`#3）仍待處理，但屬於「新因子深挖」性質，暫停規則生效期間同樣不應優先處理，除非使用者另有指示。

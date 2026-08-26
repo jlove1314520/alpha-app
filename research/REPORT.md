@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 110 輪 · 2026-08-26T20:36+08:00 · （跳過，暫停規則生效中）· 取鎖時`LOCK_STALE`（pid 154480約30分鐘，查證後非異常中止——是同時段互動session跑`portfolio_backtest_v2.py`太久沒更新鎖檔心跳，該session已自行commit+push`fa369b9`，跟本輪取鎖幾乎同時，屬鎖機制邊界案例非資料損毀）；SPEC+v2回測(12組合)已由該session完成並push，最佳兩組alpha p=0.053接近顯著未過關，其「下一步」建議明確留給使用者決定；US本應輪到但無組合策略相關工作，依暫停規則跳過新工作 · 無新判定，僅核對狀態+補`TW_MARATHON_STATE.md` · 詳見`TW_LOG.md`本輪記錄
+
 ## 第 109 輪 · 2026-08-26T19:34+08:00 · FUT · 取鎖乾淨（非陳舊鎖檔）；FUT時間戳最舊（17:05）且近10輪窗口僅佔10%（未超額），選FUT；延續round104`FUT_LEADS.md`#23明確待辦，盤別效應家族第三批——夜盤收盤(T)→日盤開盤(T)跳空反轉/順勢（`fut_cheap_gate.py`新增`hyp_day_gap_reversal`/`hyp_day_gap_continuation`，零新API） · 反轉版FAIL（percentile=0.5，方向嚴重不對）；順勢版**邊界模糊**（percentile=99.5，單測+本批皆過，但累積FUT家族FDR校正未過，差距0.15個百分點落在N=200排列解析度以內，疑似測量雜訊，不排入待深挖清單，建議下一輪N=2000高解析度重測） · 盤別效應家族三種跳空/報酬構造至此窮盡（6假說：5FAIL+1邊界候選）· 見`TRIALS_LEDGER.md`#70/#71、`FUT_LEADS.md`#24/#25
 
 ## 第 108 輪 · 2026-08-26T19:05+08:00 · US · 取鎖乾淨（非陳舊鎖檔）；FUT最舊但近10輪已達20%資源配置上限（比照第107輪先例）跳過，選次舊US；價值/品質因子地基第一步——新增`us_fundamentals.py`（XBRL company-facts可重用wrapper） · 確認`StockholdersEquity`+`CommonStockSharesOutstanding`(us-gaap)三檔(AAPL/MSFT/PLTR)皆有資料，PB因子輸入可行性確認；`dei`備援股數標籤PLTR查不到；`gap_days`早期異常值尚未查證，誠實標記待下一輪 · 1c地基工作，不加`TRIALS_LEDGER.md`列 · 見`DATA.md`「美股 PIT 資料源調查（六續）」、`US_MARATHON_STATE.md`#13
