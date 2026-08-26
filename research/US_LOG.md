@@ -468,3 +468,24 @@ Smoke test（`__main__`區塊）：AAPL/MSFT各8817列價格，`f_us_low_vol`都
 `is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，沒有呼叫`load_full_history()`/`unlock_holdout_once()`）。
 
 完整見`US_LEADS.md`#3（新增）、`TRIALS_LEDGER.md`#45（新增）、`us_factors.py`/`us_factor_ic.py`（新增f_us_reversal_1m）。
+
+## 2026-08-26T11:34:59+08:00 — 馬拉松第95輪：規模分層重測三個既有FAIL因子（大型股tier）
+
+**取鎖**：`LOCK_ACQUIRED`（乾淨，非陳舊鎖檔接手）。
+
+**選軌**：讀三軌`_MARATHON_STATE.md`最後修改時間，US軌最久沒被碰（09:04:37 vs FUT 10:35:19 vs TW 11:04:17），本輪選US軌。取鎖前先確認`US_MARATHON_STATE.md`記錄的第91輪push失敗（commit`3cf1a1c`，DNS解析失敗）是否仍積壓——`git fetch`+`git status`確認`Your branch is up to date with 'origin/main'`，代表後續輪次已經自然把這筆commit推上去了，本輪不需要額外處理。
+
+**做的事**：延續`US_MARATHON_STATE.md`第91輪「下一步」建議首選——「規模/流動性分層抽樣重測」，因為三個純價格因子（`f_us_low_vol`/`f_us_momentum_12m`/`f_us_reversal_1m`）都在同一批27檔未分層小樣本上FAIL，備註都指出這可能是樣本問題而非因子問題。新寫`us_factor_ic_by_size.py`：用`us_universe.py`既有的`market_cap`欄位（零額外API呼叫取得分層依據）對6,618檔active宇宙做market cap三分位切割（5,566檔有可用numeric market_cap，各tertile 1,855檔），本輪只測large tier（mid/small留給未來輪次，避免一輪內三倍API用量）。從large tier抽樣30檔（seed=202608261），29檔可用，跑同一套`evaluate_factor()`框架（`bonferroni_n=3`，三因子同批次）。
+
+**結果**（全部FAIL，誠實負面結果）：
+- `f_us_low_vol`：train mean_ic=+0.0001（幾乎零）、val mean_ic=+0.0377，percentile=83.4（門檻96.7，未過）。比不分層版更弱，不支持「小型股雜訊拖累」假設。
+- `f_us_momentum_12m`：train mean_ic=+0.0191、val mean_ic=−0.0262，percentile=66.8。**same_sign未過，且反轉方向跟不分層版（train負/val正）剛好相反**——這是本輪最有資訊量的發現：兩次不同樣本的train/val反轉方向不一致，代表反轉本身是抽樣雜訊，不是穩定的規模效應。
+- `f_us_reversal_1m`：train mean_ic=+0.0357、val mean_ic=+0.0192，percentile=53.4。same_sign通過（跟不分層版train正/val負不同），但val期IC仍接近雜訊水準，沒有變得可用。
+
+**判定**：三個因子的大型股分層版本全部**FAIL**（`TRIALS_LEDGER.md`#47/#48/#49，`US_LEADS.md`#4/#5/#6）。US軌因子驗證累積6筆試驗（3不分層+3分層），全部FAIL，至今尚無任何PASS/EXPERIMENTAL候選。US軌FDR家族m維持3（獨立分母，見`MARATHON_PROTOCOL.md`第2節——分層重測算US軌自己家族內的新試驗，不影響FDR分母邏輯本身，只是同一輪多筆）。
+
+`is_holdout_consumed()` 確認為 `False`（全程走`us_universe.universe()`/`load_dev()`既有合規路徑，零`load_full_history()`/`unlock_holdout_once()`呼叫）。
+
+**下一步建議**：mid/small tier尚未測（`us_factor_ic_by_size.py`的`TIER`常數切換即可沿用，下一輪可接著做）；或視資源配置優先序改做第9項（系統化擴充`KNOWN_DELISTED`名單，目前僅5檔）。
+
+完整見`US_LEADS.md`#4/#5/#6（新增）、`TRIALS_LEDGER.md`#47/#48/#49（新增）、`us_factor_ic_by_size.py`（新增，可重複執行，`TIER`常數可切mid/small）。
