@@ -419,3 +419,17 @@
 **驗證**：`is_holdout_consumed()` 確認仍為 `False`（`load_dev()`唯一入口，零額外FinMind/yfinance呼叫，全程命中`factor_ic.py`既有快取樣本）。
 
 **下一輪**：見`TW_LEADS.md`本輪更新的「下一輪建議」——優先`f_idio_vol`相關性檢查+深挖，其次`f_value_pb`深挖、`f_quality_roe_stability`TRAIN期負報酬拆解，或繼續掃BAB/季節性/資產成長異常/Piotroski F-score/accruals盈餘品質。
+
+---
+
+## 2026-08-26T13:35:13+08:00 — 馬拉松第99輪：`f_idio_vol` vs `f_low_vol` 相關性/持股重疊度檢查（深挖前置作業，非新假說測試）
+
+**接手備註**：取鎖時偵測到`LOCK_STALE`（pid 149044持有30.2分鐘後被回收）——查證後發現上一輪（第98輪，FUT軌）其實已經把所有記錄檔跟程式碼改動都寫完，只是在git commit/push前當機，不是完全沒進度。本輪commit `1c32ae1` 先把第98輪那批未commit的檔案（`FUT_LEADS.md`/`FUT_LOG.md`/`FUT_MARATHON_STATE.md`/`MARATHON_STATE.md`/`REPORT.md`/`TRIALS_LEDGER.md`/`fut_cheap_gate.py`）補commit+push（`git pull`遇到遠端自動報價更新，乾淨merge無衝突），本輪心跳count因此不重複記第98輪那筆。軌道選擇：TW時間戳（12:08:18）比US（12:15）舊，FUT近10輪已佔30%（達20%上限，優先度降低），選TW。
+
+**做了什麼**：TW軌宇宙覆蓋率已達81.3%（>80%門檻），照`MARATHON_PROTOCOL.md`第5b節優先序改回測因子/深挖。第96輪`TW_LEADS.md`#7明確標記`f_idio_vol`（CHEAP_PASS）深挖前要先跟`f_low_vol`做相關性/持股重疊度檢查，本輪執行這個前置作業。新寫`check_idio_vol_low_vol_overlap.py`：重用`factor_ic.py`既有的100檔快取樣本（SAMPLE_SEED=20260822）跟121個不重疊20交易日快照，逐快照計算(a) `f_low_vol`/`f_idio_vol`兩因子值的橫斷面Spearman相關係數、(b) 兩因子各自最高/最低十分位持股名單的Jaccard重疊度（多頭腿/空頭腿分開算）。
+
+**結果**：110個可用快照（平均每快照64檔可比較）。**mean Spearman correlation = +0.982**（幾乎完全共線）；**多頭腿十分位Jaccard重疊度 = 0.789**、**空頭腿 = 0.835**——遠超腳本內建的「高度重疊」判定門檻（corr>0.7或雙腿重疊>0.5）。**判定：HIGH OVERLAP**——`f_idio_vol`實質上是`f_low_vol`的高度共線變體，不是獨立訊號，兩者選股名單8成以上重複。**決策：不進入完整深挖**，因為就算深挖出漂亮的十分位多空數字，也只是把已經PASS的`f_low_vol`訊號用另一種算法重新發現一次，不會替選股引擎新增邊際資訊，不值得花一輪深挖成本（樣本外/配對隨機控制組/成本敏感度/CAPM beta）去驗證一個高度共線的重複發現。`TW_LEADS.md`#7的判定欄從「CHEAP_PASS→待深挖」改註記為「CHEAP_PASS但降級：與f_low_vol高度共線（附錄檢查已完成），不建議進深挖，記錄保留供文獻對照用」。這不是推翻第96輪的便宜關卡結果（IC測試本身沒有錯，`f_idio_vol`確實通過了單獨測試），是誠實記錄「通過便宜關卡≠值得投入深挖資源」這個額外的判斷維度，`TRIALS_LEDGER.md`不新增列（這是對既有候選的診斷附加資訊，不是新假說測試，沒有新的IC/隨機控制組判定）。
+
+**驗證**：`is_holdout_consumed()`確認仍為`False`。零額外FinMind/yfinance呼叫（`load_sample_with_factors()`完全命中既有快取，執行時間<10秒，無任何限流/重試訊息）。
+
+**下一輪建議**：`f_idio_vol`家族結案（不留在待深挖佇列）。TW軌待深挖佇列目前為空，下一輪可選：(a) `f_value_pb`深挖（PIT已單檔驗證過，`TW_LEADS.md`#1/#2待辦）；(b) `f_quality_roe_stability`TRAIN期負報酬拆解（`EXPERIMENTAL`懸案）；(c) 繼續掃`MARATHON_PROTOCOL.md`第3節新家族——BAB（betting against beta，跟`f_idio_vol`/`f_low_vol`同「低風險」家族但機制不同，值得測，不受這次降級影響）、季節性、資產成長異常、Piotroski F-score、accruals盈餘品質。

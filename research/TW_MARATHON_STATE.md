@@ -2,7 +2,7 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-26T12:08:18+08:00（馬拉松第96輪）——低風險/流動性家族第一批：`f_amihud_illiq`（流動性，FAIL）、`f_idio_vol`（低風險家族第二個測試，**CHEAP_PASS，percentile=100.0**，TW軌至今單測解析度最強候選之一，IR/hit_rate明顯優於多數既有候選）。深挖前優先做`f_idio_vol`跟`f_low_vol`的相關性/持股重疊度檢查。完整見`TW_LEADS.md`#6/#7、`TRIALS_LEDGER.md`#50/#51、`TW_LOG.md`本輪記錄。**
+**最後更新：2026-08-26T13:35:13+08:00（馬拉松第99輪）——`f_idio_vol`深挖前置作業完成：跟`f_low_vol`相關性/持股重疊度檢查，`check_idio_vol_low_vol_overlap.py`（零新API，重用既有快取），結果mean Spearman correlation=+0.982、多頭腿Jaccard重疊0.789、空頭腿0.835，**HIGH OVERLAP**——`f_idio_vol`實質是`f_low_vol`高度共線變體，**決策不進深挖，家族結案**。判定從「CHEAP_PASS，待深挖」改列「CHEAP_PASS（但降級，不建議深挖）」。TW軌待深挖佇列目前為空。下一輪建議：深挖`f_value_pb`，或繼續掃BAB/季節性/資產成長異常/Piotroski F-score/accruals盈餘品質。完整見`TW_LEADS.md`#7、`TW_LOG.md`本輪記錄。（本輪另附帶完成：取鎖時發現`LOCK_STALE`，第98輪FUT工作其實已完整寫完只是commit前當機，已補commit+push，見`REPORT.md`/`FUT_MARATHON_STATE.md`。）**
 
 （上一版記錄，保留供對照）**2026-08-26（互動 session，非馬拉松自動輪次）——混合資料源架構上線，宇宙覆蓋率突破 80% 門檻**
 
