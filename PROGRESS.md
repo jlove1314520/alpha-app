@@ -16,6 +16,40 @@
 
 ---
 
+## 2026-08-28（續24）— 【研究帽】B24 PIT回測骨架（價值成長榜）+FinMind IP封鎖發現
+
+新增`research/run_value_board_v2_pit_backtest.py`：重用既有驗證框架
+（`run_score_backtest.py`的`backtest/engine.py`機制、`portfolio_backtest_v2.py`
+的alpha/beta回歸公式、`benchmark_taiex_stats.py`的TAIEX MDD/Sortino公式），
+訊號函式換成`score_v2.py::compute_scores_v2()`（App正式上線的價值成長榜
+八大因子）。月度再平衡、持股20檔、全成本、隨機對照組(機制驗證先30次)+
+買進持有大盤+alpha回歸。**重要澄清**：走research端`factor_ic.py`既有
+100檔樣本（2010年起），有10年以上可用歷史，不受App JSON路徑12-18個月的
+限制——比使用者原本假設的統計檢定力更高。全程只用`load_dev()`
+（cap在VAL_END），未經同意不解鎖holdout。
+
+**本輪撞到真狀況，誠實記錄**：嘗試執行時FinMind回傳
+`{"msg":"ip banned","status":403,"retry_after":1315}`——這台機器連續多輪
+（B23的177+416檔、這輪重跑1,850檔）的請求量觸發了臨時IP封鎖（比402額度
+用盡更嚴重）。已立即停止所有FinMind呼叫。**PIT回測腳本本身尚未跑完一次
+完整驗證**——懷疑是`score_v2.py::compute_scores_v2()`的
+`_revenue_yoy_latest()`每個as_of日期/每檔股票都呼叫一次
+`month_revenue_pit()`，封鎖期間每次呼叫都要熬過3次重試backoff才失敗，
+嚴重拖慢（這是score_v2.py既有設計特性，不是這輪新bug，但這次規模的回測
+第一次暴露這個效能問題）。下一輪（封鎖解除後，約03:00後）待辦：先小範圍
+重測確認邏輯正確+速度可接受，不要照樣硬跑。
+
+**沒有動App/index.html，這輪不需要跑App冒煙測試**（純research端腳本，
+不影響App）。
+
+**影響檔案**：`research/run_value_board_v2_pit_backtest.py`（新增）、
+`BACKLOG.md`。
+
+**下一步**：等FinMind封鎖解除，驗證PIT回測腳本正確性；B23殘留1,850檔
+回補也要等封鎖解除、且要更保守（分小批測試，不要一次衝全部）。
+
+---
+
 ## 2026-08-28（續23）— 【維運/研究帽】B24：前瞻選股台帳picks_ledger.json
 開始累積（今晚起，鐵律：只能事前快照）
 

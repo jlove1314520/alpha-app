@@ -497,10 +497,46 @@ PASS - 10. 整個測試過程（含所有互動操作，含8/9新增檢查）結
 
 - **B23殘留待辦（因子本身已完成，見上方「B23進度」條目）**：
   1. 用修正後的`_has_calendar_gap()`缺口判定重新統計出的1,850檔待回補
-     股票，等FinMind額度重置後分批繼續（`research/backfill_price_history_gaps.py`
-     已可重跑，`target_codes()`已修正成正確判定邏輯）。
+     股票，`research/backfill_price_history_gaps.py`已可重跑。**2026-08-28
+     02:38本輪重試撞到FinMind「ip banned」（見下方B24條目詳情，
+     retry_after=1315秒≈22分鐘）**，已立即停止，不要在封鎖解除前繼續打。
+     下次重試時務必比這輪更保守（例如先跑50-100檔看穩不穩，不要一次
+     衝1,850檔），這輪連續兩次（B23原輪177+416檔、這輪重跑）對FinMind
+     開太多請求可能是觸發封鎖的原因之一。
   2. B16回測時要對量價配合度/創新高的門檻參數（1.3倍/2.5倍/0.7/0.6/
      80百分位等）做±30%敏感度掃描，只有單點有效就判定為過擬合。
+
+- **🔄 B24 PIT回測（價值成長榜，2026-08-28凌晨開工中）**：新增
+  `research/run_value_board_v2_pit_backtest.py`——重用既有驗證框架
+  （`run_score_backtest.py`同一套`backtest/engine.py::run_backtest()`機制、
+  `portfolio_backtest_v2.py`同一套alpha/beta回歸公式、
+  `benchmark_taiex_stats.py`同一套TAIEX買進持有MDD/Sortino公式），訊號
+  函式換成`score_v2.py::compute_scores_v2()`（=App目前正式上線的價值
+  成長榜八大因子FACTOR_DEFS）。月度再平衡(21交易日)、持股20檔、全成本、
+  對照組含隨機draws(機制驗證先用30次，非最終1000次)+買進持有大盤、
+  alpha/beta回歸。**重要澄清**：走research端`factor_ic.py`既有100檔樣本
+  （2010年起，FinMind歷史parquet快取），有10年以上可用歷史，不受使用者
+  原本假設的「App JSON路徑12-18個月」限制——這是好消息，統計檢定力更高。
+  全程只用`load_dev()`（cap在VAL_END=2024-12-31），`run_backtest()`本身
+  結構性擋掉holdout洩漏，**未經使用者同意不解鎖holdout**（這代表這次
+  回測回答「這套因子在2015-2024歷史資料上能否穩定打敗大盤」，不是
+  「App最近幾個月的實際表現」，後者需要holdout解鎖）。
+
+  **本輪嘗試執行時撞到真狀況**：跑到一半發現FinMind回傳
+  `{"msg":"ip banned","status":403,"retry_after":1315}`——這台機器這幾輪
+  （B23的177+416檔回補+這輪重跑1,850檔）對FinMind的請求量觸發了臨時IP
+  封鎖（比402額度用盡更嚴重，是官方主動封鎖，附倒數1315秒≈22分鐘）。
+  已立即停止所有FinMind呼叫（含B23殘留回補的重跑，也一併中止）。**這支
+  回測腳本本身尚未被完整跑過一次驗證**（懷疑是`score_v2.py::
+  compute_scores_v2()`裡的`_revenue_yoy_latest()`每個as_of日期、每檔股票
+  都呼叫一次`month_revenue_pit()`，在banned期間每次呼叫都要熬過3次重試
+  backoff才失敗，導致嚴重拖慢——這是既有score_v2.py的設計特性，不是這輪
+  新引入的bug，但拿來做「上千次rebalance×30次random draws」規模的回測時
+  第一次暴露出這個效能問題）。
+  **下一輪待辦**：等封鎖解除（約03:00後）優先小範圍重測（例如只跑TRAIN
+  期、不跑random draws）確認腳本本身邏輯正確、且在非封鎖狀態下速度可接受；
+  若正常網路狀態下仍然很慢，要另外處理`month_revenue_pit()`重複呼叫的
+  快取問題，不要照樣硬跑。
 
 - **B16（P0）：價值成長榜+題材動能榜+未來性濾網都必須各自回測驗證**
   （2026-08-27提升為P0；2026-08-27【驗證帽】本輪查證進度：**已確認前置
