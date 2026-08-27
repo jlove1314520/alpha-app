@@ -12,6 +12,41 @@
 
 ---
 
+## 2026-08-27（續5）— 選股頁130檔根因修正：EPS反推備援、上櫃TPEx補齊、TWSE重試、FinMind節流
+
+使用者親自逐檔統計驗證出選股頁coverage=0.54的真正根因（我先前的推測是錯的，
+使用者的統計指正才對）：`earnings_growth`(18%)+`valuation_adj`(12%)+`analyst`(8%)
++`catalyst`(8%)=46%結構性缺失，其中`earnings_growth`單點依賴FinMind
+`TaiwanStockFinancialStatements`（目前反覆遇到IP封鎖/額度上限）。
+
+**P0修正**：`score_v2.py`新增`_eps_yoy_derived_from_per()`——用「收盤價÷本益比」
+反推TTM EPS，在as_of跟約252個交易日前各算一次比較年增率，完全重用既有已快取
+的PER+價格資料，不需要新的網路請求，FinMind失效時自動當earnings_growth的
+備援（`valuation_adj`的PEG依賴同一個eps_yoy會一併恢復）。每筆輸出加
+`eps_yoy_source`標記供稽核。**已用合成資料單元測試驗證邏輯正確**（人工算法跟
+函式輸出精確吻合：yoy=0.30505911488792603兩邊一致）。**無法回報實際coverage/
+合格檔數變化**：測試時兩度撞到FinMind IP封鎖（其中一次即時觀察到retry_after
+從1229秒倒數），300檔全量測試在目前條件下要2小時以上，誠實回報做不到而不是
+編造數字。
+
+**P0架構防護**：`generate_scores_v2.py`新增合格檔數暴跌警報——跑完比對舊
+`scores.json`筆數，新筆數低於舊筆數50%就寫入`meta.coverage_collapse_warning=true`。
+
+**P0上櫃(TPEx)資料源補齊**：`update_fundamentals_daily.py`新增TPEx官方對應
+端點（本益比/淨值比、月營收），之前誤記「TPEx無對應公開資料」，實際上有——
+覆蓋數從2027檔增加到2272檔。
+
+**P1**：四支TWSE腳本新增指數退避重試（T86刻意不加，反爬蟲風險）；
+`finmind_client.py`新增全域0.35秒節流（降低未來再次觸發IP封鎖的風險，無法
+解除已發生的封鎖）；重新查證FCF——MOPS現金流量表查詢端點仍被反爬蟲擋，
+更正為「需要額外工程投入」而非「不存在」。
+
+STATUS.json新增`field_fallback_chains`（EPS/月營收/價量/本益比淨值比/上櫃
+股票五個關鍵欄位的完整回退鏈文件）+ scores.json追蹤（含未掛排程的架構性
+原因說明）。commit `e08cdb2`。
+
+---
+
 ## 2026-08-27（續4）— 自選股sparkline脫離FinMind、融資維持率分母誠實標示、修正金融股資料被誤濾掉的bug
 
 依 STATUS.json 繼續收尾：
