@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 162 輪。最新一輪：第 162 輪 · 2026-08-28T05:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選US（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則仍完全生效中。US軌依舊沒有組合策略相關工作可做，本輪未做任何實質工作。`is_holdout_consumed()`確認`False`，發現不屬於本輪的既有未commit變更（`BACKLOG.md`/`PROGRESS.md`/`data/STATUS.json`/`data/price_history.json`/`scores_momentum.json`/`backfill_final.log`），依規則不觸碰。詳見`REPORT.md`第162輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 163 輪。最新一輪：第 163 輪 · 2026-08-28T05:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選FUT（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則仍完全生效中。FUT軌依舊沒有組合策略相關工作可做（round104留下的盤別效應待辦本質仍是單因子工作），本輪未做任何實質工作。`is_holdout_consumed()`確認`False`，本輪開始時`git status`乾淨，無不屬於本輪的殘留變更。詳見`REPORT.md`第163輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+
+**上一則保留（第162輪，供對照）**：第 162 輪 · 2026-08-28T05:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選US（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則仍完全生效中。US軌依舊沒有組合策略相關工作可做，本輪未做任何實質工作。`is_holdout_consumed()`確認`False`，發現不屬於本輪的既有未commit變更（`BACKLOG.md`/`PROGRESS.md`/`data/STATUS.json`/`data/price_history.json`/`scores_momentum.json`/`backfill_final.log`），依規則不觸碰。詳見`REPORT.md`第162輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 **上一則保留（第159輪，供對照）**：第 159 輪 · 2026-08-28T03:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選US（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，`git log`確認自第156輪以來新增commit皆與解除暫停規則無關。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round111起判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`確認`False`，`git status`本輪開始時確認工作目錄乾淨。詳見`REPORT.md`第159輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
