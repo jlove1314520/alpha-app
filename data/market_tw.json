@@ -1,14 +1,12 @@
 {
-  "fetched_at": "2026-08-27T14:28:03+00:00",
-  "errors": [
-    "tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_index (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1032)')))",
-    "institutional_tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_3insti_daily_trading (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1032)')))"
-  ],
+  "fetched_at": "2026-08-27T17:35:42+00:00",
+  "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
     "close": 45832.62,
     "change_pct": 1.47,
     "sparkline": [
+      39933.3,
       43119.75,
       43386.41,
       43360.66,
@@ -27,10 +25,10 @@
       45224.29,
       44762.32,
       45169.46,
-      45832.62,
-      45975.22
+      45832.62
     ],
     "sparkline_60d": [
+      45557.31,
       46459.16,
       45677.46,
       45070.94,
@@ -89,8 +87,7 @@
       45224.29,
       44762.32,
       45169.46,
-      45832.62,
-      45975.22
+      45832.62
     ]
   },
   "sectors": [
@@ -280,6 +277,33 @@
       "change_pct": 0.98
     }
   ],
+  "tpex": {
+    "date": "20260827",
+    "close": 400.38,
+    "change": 4.72,
+    "change_pct": 1.192943436283678,
+    "sparkline": [
+      362.89,
+      375.03,
+      383.75,
+      391.37,
+      384.19,
+      391.61,
+      391.68,
+      402.02,
+      406.12,
+      400.95,
+      398.32,
+      390.83,
+      384.79,
+      389.96,
+      387.27,
+      386.1,
+      389.41,
+      395.66,
+      400.38
+    ]
+  },
   "tx_futures": {
     "contract_month": "202609",
     "last": 46011.0,

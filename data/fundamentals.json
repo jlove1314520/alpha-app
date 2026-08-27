@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-08-27T20:16:18.336451+08:00",
+    "generated_at": "2026-08-28T01:35:57.214326+08:00",
     "snapshot_note": "起始種子是 2026-08-27 手動執行 build_fundamentals_json.py 的一次性快照（讀研究端FinMind歷史parquet快取整理，涵蓋TWSE+TPEx），此後由這支update_fundamentals_daily.py 排程改用官方openapi累積更新——月營收/PER/PBR/殖利率每次只更新官方端點回傳的「最新一期」，同年月覆蓋、新年月append且只保留近8個月。2026-08-27修正：TPEx上櫃股票改用TPEx自己的openapi（tpex_mainboard_peratio_analysis/mopsfin_t187ap05_OB）更新，之前誤記「無對應公開資料」，實際上有。",
     "ratios_updated_count": 1082,
     "revenue_updated_count": 1085,
