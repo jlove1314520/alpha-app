@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 142 輪 · 2026-08-27T15:31+08:00 · FUT（跳過，暫停規則生效中）· 依輪替選FUT（FUT 14:02第139輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來無新commit觸及），FUT軌唯一待辦（盤別效應第三批/round104）本質仍是單因子工作，同round109/112/115/118/121/124/127/130/133/136/139判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；`git status`確認工作目錄乾淨 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第142輪記錄
+
+---
 ## 第 141 輪 · 2026-08-27T15:01+08:00 · US（跳過，暫停規則生效中）· 依輪替選US（US 13:31第138輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來無新commit觸及），US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round111/114/117/120/123/126/129/132/135/138判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；工作目錄另有互動session未commit修改（fundamentals相關4個檔案+1個新檔），與馬拉松無關，本輪刻意不動、不納入commit · 見`US_MARATHON_STATE.md`/`US_LOG.md`第141輪記錄
 
 ---
