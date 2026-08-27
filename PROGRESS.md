@@ -16,6 +16,77 @@
 
 ---
 
+## 2026-08-27（續20）— 【維運/研究/開發帽，P0 bug修正】動能榜還原權息
+
+**背景**：使用者回報動能榜（`scores_momentum.json`）的`relative_strength`
+（相對強度）因子用未還原權息的原始收盤價，除息當天跳空下跌會被誤判成
+真實下跌，除息季會系統性扭曲排名。這輪同時涵蓋資料管線+因子+UI三個層面
+（單一連貫的bug修正，不是分開的功能開發，因此沒有嚴格拆帽）。
+
+**修法（使用者要求「擇一並說明」，最終採混合方案，涵蓋兩個選項的精神）**：
+- `data/price_history.json`新增`adj_close`欄位（`close`本身不變，供既有
+  用途/稽核比對）。
+- **一次性回補**（`research/build_price_history.py`）：讀research端已快取
+  的FinMind`TaiwanStockDividend`本機parquet，複製`research/adjust.py`的
+  TWSE官方除權息參考價公式，但**繞開`load_dev()`/holdout機制**直接讀
+  parquet——這裡建置的是App正式上線用的即時資料不是回測，不該套用
+  `VAL_END`時間窗。
+- **每日累積**（`.github/scripts/update_price_history.py`）：新增
+  `fetch_ex_dividend_announcements()`讀TWSE官方
+  `rwd/zh/exRight/TWT48U`（除權除息預告表，免金鑰，跟T86同一個端點家族），
+  累積寫進新檔`data/ex_dividend_events.json`；事件的除權息日到達時，用
+  同一條TWSE公式回溯調整該股`adj_close`。**刻意不在每日排程呼叫
+  FinMind**，維持這次session稍早建立的「JSON-only、不依賴研究者本機」
+  架構原則。
+- `research/generate_scores_momentum.py`的`_relative_strength()`改讀
+  `adj_close`（缺欄位時退回`close`，不會比修正前更差）。
+- `index.html`動能榜的disclaimer文字新增還原權息狀態說明。
+
+**過程中親自抓到並修正的真bug（本機實測發現，不是空跑）**：8檔股票
+（1583/2227/2420/2753/4582/6216/6955/8442）的research端FinMind快取已經
+停在2024-12-31，daily排程當天新增的一筆資料緊接在這筆停滯很久的舊資料
+後面——「除權息日前一筆可用資料」因此抓到1年8個月前的收盤價當定錨，
+算出的調整係數完全錯誤（例如2420用2024-12-31的65.4元當「前一日收盤」，
+實際上2026-08-26的真實前一日收盤是53.6元附近，兩者毫不相干）。第一次
+執行時這8檔已經被錯誤套用，發現後手動回溯撤銷（用`factor_applied`除回去）
+並加上守門：前一筆可用資料距離除權息日超過`MAX_PREV_CLOSE_GAP_DAYS=10`天
+就判定「快取缺口過大、無法安全定錨」，不套用（`adj_close`退回等於
+`close`）、記錄`skip_reason`，不會靜默套用錯誤係數。重新執行後這8檔
+全部正確跳過，0筆誤套用。
+
+**已知殘留限制**：TWT48U是「預告表」，只回傳未來約5週內的事件，不支援
+歷史區間查詢（實測：帶`startDate`/`endDate`參數回傳的107筆資料完全不變）
+——涵蓋率隨每天累積逐步提高，剛上線這幾週少數個股可能還沒回溯到最新的
+除權息事件。
+
+**影響檔案**：`.github/scripts/update_price_history.py`（新增除權息偵測/
+回溯調整邏輯）、`research/build_price_history.py`（一次性回補adj_close）、
+`research/generate_scores_momentum.py`（改用adj_close）、`index.html`
+（disclaimer文字）、`generate_status_json.py`（新增`ex_dividend_events.json`
+描述器+TODO/known_limitations更新）、`data/price_history.json`、
+`data/ex_dividend_events.json`（新檔）、`data/quotes_all_tw.json`、
+`scores_momentum.json`、`data/STATUS.json`。
+
+冒煙測試實際輸出（2026-08-27 23:47:30，`node scripts/smoke_test.mjs`）：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+
+=== 冒煙測試結果：全部通過 ===
+```
+
+**下一步（使用者2026-08-27這輪新增指示，順序：還原權息(已完成) →
+歷史+量能深度 → 創新高 → 量價配合度 → B16回測）**：新增B23（動能榜
+量價配合度因子＋創新高因子＋歷史/量能深度延伸），詳見BACKLOG.md。B16
+（三榜回測）維持P0但排在B23之後。
+
+---
+
 ## 2026-08-27（續19）— 【開發帽】補交冒煙測試完整輸出（使用者要求：回報通過必須附輸出）
 
 使用者重申規則：「回報『通過』必須附輸出，無輸出視同未跑。」補上最近一次

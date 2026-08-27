@@ -16,6 +16,21 @@
 **merge-safe，不是覆寫**（吸取build_fundamentals_json.py重跑時砍掉502檔的
 教訓）：只補既有沒有的股票/日期，既有資料不會被覆蓋，股票數只會增加不會
 減少，減少就中止不寫檔。
+
+**2026-08-27新增：`adj_close`（還原權息收盤價）**。同樣讀本機已快取的FinMind
+`TaiwanStockDividend` parquet，複製`research/adjust.py`的TWSE官方除權息參考價
+公式（ref_price=(前一日收盤-現金股利+現金增資認購價×認股比率)/(1+股票股利
+比率+認股比率)，factor=ref_price/前一日收盤，由最近到最早反向套用），但
+**刻意不透過`adjust.py`/`finmind_client.load_dev()`**——那條路徑會把資料
+cap在`validation.holdout.VAL_END`（研究/回測用途的holdout規則），這裡建置
+的是App正式上線用的即時資料，不是回測，不該套用holdout時間窗——所以直接
+讀本機parquet快取（跟這支腳本原本讀`TaiwanStockPrice`同一個做法），自成
+一體不共用holdout邏輯。`close`欄位不變(原始收盤，供既有用途/稽核比對)，
+新增的`adj_close`才是還原後的值，供`generate_scores_momentum.py`的
+`relative_strength`因子改用（見該檔案的P0修正說明）。之後
+`.github/scripts/update_price_history.py`會用TWSE官方`TWT48U`預告表接續
+每日回溯調整新發生的除權息事件，兩邊用同一條公式，一次性回補+每日累積
+互補涵蓋範圍。
 """
 from __future__ import annotations
 
@@ -54,11 +69,55 @@ def _load_concat(dataset: str, code: str) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
+def _dividend_events(code: str, full_price_df: pd.DataFrame) -> list[dict]:
+    """複製`research/adjust.py::adjustment_events()`的公式，但直接讀本機
+    parquet快取、不經過`load_dev()`/holdout（見本檔案檔頭2026-08-27新增
+    說明）。`full_price_df`是這支股票的完整(未裁到90天前)價格歷史，用來找
+    每個除權息日「前一個交易日」的原始收盤價當公式錨點。"""
+    div = _load_concat("TaiwanStockDividend", code)
+    if div.empty:
+        return []
+    close_by_date = dict(zip(full_price_df["date"], full_price_df["close"]))
+    trading_dates = full_price_df["date"].tolist()
+
+    events = []
+    for _, row in div.iterrows():
+        ex_date = row.get("CashExDividendTradingDate") or row.get("StockExDividendTradingDate")
+        if not ex_date:
+            continue
+        cash = row.get("CashEarningsDistribution") or 0.0
+        stock_ratio = row.get("StockEarningsDistribution") or 0.0
+        rights_ratio = row.get("CashIncreaseSubscriptionRate") or 0.0
+        rights_price = row.get("CashIncreaseSubscriptionpRrice") or 0.0
+        if cash == 0 and stock_ratio == 0 and rights_ratio == 0:
+            continue
+        prior = [d for d in trading_dates if d < ex_date]
+        if not prior:
+            continue
+        prev_close = close_by_date[prior[-1]]
+        if prev_close in (None, 0) or pd.isna(prev_close):
+            continue
+        numerator = prev_close - cash + rights_price * rights_ratio
+        denominator = 1 + stock_ratio + rights_ratio
+        if denominator <= 0 or numerator <= 0:
+            continue
+        events.append({"ex_date": ex_date, "factor": (numerator / denominator) / prev_close})
+    return sorted(events, key=lambda e: e["ex_date"])
+
+
 def build_price_rows(code: str) -> list[dict]:
     df = _load_concat("TaiwanStockPrice", code)
     if df.empty or "close" not in df.columns:
         return []
-    df = df.drop_duplicates(subset=["date"], keep="last").sort_values("date")
+    df = df.drop_duplicates(subset=["date"], keep="last").sort_values("date").reset_index(drop=True)
+
+    events = _dividend_events(code, df)
+    adj = df["close"].astype(float).copy()
+    for ev in sorted(events, key=lambda e: e["ex_date"], reverse=True):
+        mask = df["date"] < ev["ex_date"]
+        adj.loc[mask] = adj.loc[mask] * ev["factor"]
+    df["adj_close"] = adj
+
     df = df.tail(PRICE_HISTORY_DAYS)
     out = []
     for _, row in df.iterrows():
@@ -71,6 +130,7 @@ def build_price_rows(code: str) -> list[dict]:
             "high": float(row["max"]) if pd.notna(row.get("max")) else None,
             "low": float(row["min"]) if pd.notna(row.get("min")) else None,
             "close": float(close),
+            "adj_close": float(row["adj_close"]) if pd.notna(row.get("adj_close")) else float(close),
             "volume": float(row["Trading_Volume"]) if pd.notna(row.get("Trading_Volume")) else None,
             "turnover": float(row["Trading_money"]) if pd.notna(row.get("Trading_money")) else None,
         })
@@ -126,10 +186,14 @@ def main():
     payload["meta"]["backfill_note"] = (
         "2026-08-27一次性回補：讀research端FinMind歷史parquet快取"
         "（TaiwanStockPrice）補上約90個交易日OHLCV歷史，供generate_scores_live.py"
-        "的technical因子(站上60日均線×20/60日均量比)使用。收盤價為原始收盤價，"
-        "未還原權息（有除權息的股票，MA60在除權息當天附近會有跳空失真，是刻意"
-        "的簡化，見generate_scores_live.py檔頭說明）。merge-safe，既有較新資料"
-        "不會被覆蓋。"
+        "的technical因子(站上60日均線×20/60日均量比)使用。close為原始收盤價"
+        "（未還原權息，MA60在除權息當天附近會有跳空失真，是刻意的簡化，見"
+        "generate_scores_live.py檔頭說明）。2026-08-27新增adj_close（還原權息"
+        "收盤價，讀本機FinMind TaiwanStockDividend快取算出，跟research/adjust.py"
+        "同一條TWSE官方公式），供generate_scores_momentum.py的relative_strength"
+        "因子改用，修正除息跳空被誤判成下跌的P0 bug——之後由"
+        "update_price_history.py每日排程用TWSE官方TWT48U接續回溯調整新事件。"
+        "merge-safe，既有較新資料不會被覆蓋。"
     )
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {OUT_PATH}，{new_count} 檔有資料（merge前既有 {prior_count} 檔，"

@@ -44,6 +44,7 @@ STALE_HOURS = {
     "data/price_history.json": 72,  # 每日累積式更新，跟fundamentals.json同等寬鬆門檻
     "data/quotes_all_tw.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
     "data/earnings_calendar.json": 72,  # 財報日期變動很慢，門檻可以更寬鬆，先跟其他每日檔案一致
+    "data/ex_dividend_events.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
 }
 
 
@@ -140,7 +141,8 @@ def describe_stock_detail(path: Path) -> dict:
 def describe_price_history(path: Path) -> dict:
     """price_history.json（2026-08-27新增，給generate_scores_live.py的technical
     因子用）——TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes累積式OHLCV快照，
-    起始種子由research/build_price_history.py讀本機FinMind parquet快取回補。"""
+    起始種子由research/build_price_history.py讀本機FinMind parquet快取回補。
+    2026-08-27新增adj_close（還原權息收盤價，見ex_dividend_events.json）。"""
     d = json.loads(path.read_text(encoding="utf-8"))
     meta = d.get("meta", {})
     prices = d.get("prices", {})
@@ -150,7 +152,33 @@ def describe_price_history(path: Path) -> dict:
         "generated_at": meta.get("generated_at"),
         "records": len(prices),
         "source": "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（官方開放資料，累積式寫回，免金鑰）",
-        "detail": f"平均每檔保留{avg_depth}個交易日（上限90天），未還原權息（見generate_scores_live.py已知限制）",
+        "detail": (
+            f"平均每檔保留{avg_depth}個交易日（上限90天）。close為原始收盤（未還原權息，"
+            "generate_scores_live.py的technical因子仍用這欄）；adj_close為還原權息收盤價"
+            f"（2026-08-27新增，題材動能榜relative_strength因子改用這欄）——本輪除權息事件"
+            f"新增{meta.get('ex_dividend_events_added')}筆、套用回溯調整{meta.get('ex_dividend_events_applied')}筆，"
+            "見ex_dividend_events.json"
+        ),
+    }
+
+
+def describe_ex_dividend_events(path: Path) -> dict:
+    """ex_dividend_events.json（2026-08-27新增）——每日排程從TWSE官方
+    rwd/zh/exRight/TWT48U（除權除息預告表）累積寫入的事件帳本，供
+    update_price_history.py回溯調整price_history.json的adj_close用。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    events = d.get("events", {})
+    total_events = sum(len(v) for v in events.values())
+    applied = sum(1 for v in events.values() for ev in v if ev.get("applied") and ev.get("factor_applied"))
+    skipped = sum(1 for v in events.values() for ev in v if ev.get("applied") and ev.get("skip_reason"))
+    pending = total_events - applied - skipped
+    return {
+        "generated_at": meta.get("generated_at"),
+        "records": total_events,
+        "source": "TWSE官方rwd/zh/exRight/TWT48U（除權除息預告表，免金鑰，只回傳未來約5週內事件）",
+        "detail": f"{len(events)}檔股票累積共{total_events}筆事件：已套用{applied}筆、"
+                   f"因快取資料缺口過大而安全跳過{skipped}筆、尚待處理{pending}筆",
     }
 
 
@@ -227,6 +255,7 @@ DESCRIBERS = {
     "company_info.json": describe_company_info,
     "quotes_all_tw.json": describe_quotes_all_tw,
     "earnings_calendar.json": describe_earnings_calendar,
+    "ex_dividend_events.json": describe_ex_dividend_events,
 }
 
 
@@ -488,7 +517,7 @@ TODO = [
     {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE/TPEx官方均無對應端點，只有逐股融資餘額(張)；已完成：該次呼叫失敗時明確寫入data_incomplete=true，App顯示「資料不完整」而非沿用舊值"},
     {"item": "score_live.py的earnings_growth因子沒有PER反推EPS的備援", "priority": "P2", "blocker": "研究端的_eps_yoy_derived_from_per()備援需要「約一年前的PER快照」，但fundamentals.json的ratios只存最新一筆、沒有retained歷史序列，需要另開一份PER歷史累積檔才能補上這條備援"},
     {"item": "generate_scores_live.py沒有規模分層排名", "priority": "P2", "blocker": "revenue_momentum沒有per股票的每日成交量/市值資料可以分層，是刻意的範圍縮減；technical因子已於2026-08-27接上data/price_history.json解決"},
-    {"item": "data/price_history.json的technical因子用未還原權息的收盤價", "priority": "P2", "blocker": "TWSE/TPEx官方開放資料的每日快照端點沒有還原權息後的收盤價，需要另外抓除權息事件表自行還原，目前MA60在除權息當天前後會有跳空失真，是誠實揭露的簡化"},
+    {"item": "generate_scores_live.py的technical因子(MA60)仍用未還原權息的close", "priority": "P2", "blocker": "2026-08-27已為題材動能榜的relative_strength因子修好還原權息(price_history.json新增adj_close欄位，見known_limitations)，但generate_scores_live.py的technical因子還沒改用adj_close，MA60在除權息當天前後仍會有跳空失真——欄位已存在，只是還沒切過去，是可以直接補的一層"},
     {"item": "月營收/PER來源沒有逐筆標記是TWSE或TPEx", "priority": "P2", "blocker": "fundamentals.json目前TWSE跟TPEx資料寫進同一個結構，沒有per-entry的來源標記，之後要精確稽核需要補上"},
     {"item": "PER/PBR缺乏「自行由EPS/BPS計算」這一層備援", "priority": "P2", "blocker": "目前fundamentals.json的PER/PBR只有BWIBBU_ALL/TPEx兩層，沒有再用stock_detail.json的EPS+資產負債表淨值反推這一層備援"},
     {"item": "CLAUDE.md候選：美股報價/AI盤前日報真新聞/Phase2券商下單研究", "priority": "P2", "blocker": "尚未排序，等使用者指示"},
@@ -496,6 +525,7 @@ TODO = [
 
 KNOWN_LIMITATIONS = [
     "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json）+未來性濾網（scores_future.json），跟價值成長榜（scores.json）三榜並列——三榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json/weights_frozen_future.json），不是回測最佳化結果。",
+    "2026-08-27修正P0 bug（使用者回報）：題材動能榜relative_strength因子改用還原權息收盤價（price_history.json新增adj_close欄位）——來源雙軌：一次性回補讀research端FinMind TaiwanStockDividend本機快取（research/build_price_history.py），之後每日排程改讀TWSE官方rwd/zh/exRight/TWT48U除權息預告表累積事件、回溯調整（.github/scripts/update_price_history.py，見data/ex_dividend_events.json）——刻意不在每日排程呼叫FinMind，維持JSON-only架構原則。已知殘留限制：(1)TWT48U只回傳未來約5週的事件預告，不支援歷史查詢，故涵蓋率隨每天累積逐步提高，剛上線這幾週少數個股可能還沒回溯到；(2)實測發現少數股票(如2420/2227/6216/8442等8檔)的research端FinMind快取已經停在很久以前(2024-12-31)，導致「除權息日前一筆可用資料」距離超過10天，判定無法安全定錨調整係數，這類事件會被跳過(adj_close退回等於close，不會比修正前更差)並記錄skip_reason，不會靜默套用錯誤係數。",
     "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
     "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。"
     "三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）："

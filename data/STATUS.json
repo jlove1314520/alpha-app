@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T23:00:19.485718+08:00",
-  "latest_commit": "6494821",
+  "updated_at": "2026-08-27T23:49:07.967069+08:00",
+  "latest_commit": "542111c",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -16,6 +16,14 @@
       "records": 6,
       "source": "yfinance Ticker.get_calendar() + get_earnings_dates()（免金鑰）",
       "detail": "coverage=6/6 檔 session已知=0/6 errors=[]",
+      "status": "ok"
+    },
+    {
+      "path": "data/ex_dividend_events.json",
+      "generated_at": "2026-08-27T23:45:25.623653+08:00",
+      "records": 99,
+      "source": "TWSE官方rwd/zh/exRight/TWT48U（除權除息預告表，免金鑰，只回傳未來約5週內事件）",
+      "detail": "99檔股票累積共99筆事件：已套用0筆、因快取資料缺口過大而安全跳過8筆、尚待處理91筆",
       "status": "ok"
     },
     {
@@ -68,16 +76,16 @@
     },
     {
       "path": "data/price_history.json",
-      "generated_at": "2026-08-27T20:42:41.932179+08:00",
-      "records": 2823,
+      "generated_at": "2026-08-27T23:45:26.147499+08:00",
+      "records": 2826,
       "source": "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（官方開放資料，累積式寫回，免金鑰）",
-      "detail": "平均每檔保留66.4個交易日（上限90天），未還原權息（見generate_scores_live.py已知限制）",
+      "detail": "平均每檔保留66.5個交易日（上限90天）。close為原始收盤（未還原權息，generate_scores_live.py的technical因子仍用這欄）；adj_close為還原權息收盤價（2026-08-27新增，題材動能榜relative_strength因子改用這欄）——本輪除權息事件新增0筆、套用回溯調整0筆，見ex_dividend_events.json",
       "status": "ok"
     },
     {
       "path": "data/quotes_all_tw.json",
-      "generated_at": "2026-08-27T20:42:42.378293+08:00",
-      "records": 2823,
+      "generated_at": "2026-08-27T23:45:26.677146+08:00",
+      "records": 2826,
       "source": "從data/price_history.json衍生的輕量快照（TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes）",
       "detail": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。",
       "status": "ok"
@@ -116,10 +124,10 @@
     },
     {
       "path": "scores_momentum.json",
-      "generated_at": "2026-08-27T22:36:45.439026+08:00",
-      "records": 2370,
+      "generated_at": "2026-08-27T23:45:47.463963+08:00",
+      "records": 2371,
       "source": "research/generate_scores_momentum.py（GitHub Actions market.yml每日排程自動執行，題材動能榜，跟價值成長榜物理分離的獨立引擎，見weights_frozen_momentum.json）",
-      "detail": "engine_version=scoring-momentum-v1 universe_size=2370 avg_coverage=0.757 weights_hash=f3847bc1cb5f coverage_collapse_warning=None backtest_status=尚未回測驗證",
+      "detail": "engine_version=scoring-momentum-v1 universe_size=2371 avg_coverage=0.756 weights_hash=f3847bc1cb5f coverage_collapse_warning=None backtest_status=尚未回測驗證",
       "status": "ok"
     },
     {
@@ -378,9 +386,9 @@
       "blocker": "revenue_momentum沒有per股票的每日成交量/市值資料可以分層，是刻意的範圍縮減；technical因子已於2026-08-27接上data/price_history.json解決"
     },
     {
-      "item": "data/price_history.json的technical因子用未還原權息的收盤價",
+      "item": "generate_scores_live.py的technical因子(MA60)仍用未還原權息的close",
       "priority": "P2",
-      "blocker": "TWSE/TPEx官方開放資料的每日快照端點沒有還原權息後的收盤價，需要另外抓除權息事件表自行還原，目前MA60在除權息當天前後會有跳空失真，是誠實揭露的簡化"
+      "blocker": "2026-08-27已為題材動能榜的relative_strength因子修好還原權息(price_history.json新增adj_close欄位，見known_limitations)，但generate_scores_live.py的technical因子還沒改用adj_close，MA60在除權息當天前後仍會有跳空失真——欄位已存在，只是還沒切過去，是可以直接補的一層"
     },
     {
       "item": "月營收/PER來源沒有逐筆標記是TWSE或TPEx",
@@ -400,6 +408,7 @@
   ],
   "known_limitations": [
     "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json）+未來性濾網（scores_future.json），跟價值成長榜（scores.json）三榜並列——三榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json/weights_frozen_future.json），不是回測最佳化結果。",
+    "2026-08-27修正P0 bug（使用者回報）：題材動能榜relative_strength因子改用還原權息收盤價（price_history.json新增adj_close欄位）——來源雙軌：一次性回補讀research端FinMind TaiwanStockDividend本機快取（research/build_price_history.py），之後每日排程改讀TWSE官方rwd/zh/exRight/TWT48U除權息預告表累積事件、回溯調整（.github/scripts/update_price_history.py，見data/ex_dividend_events.json）——刻意不在每日排程呼叫FinMind，維持JSON-only架構原則。已知殘留限制：(1)TWT48U只回傳未來約5週的事件預告，不支援歷史查詢，故涵蓋率隨每天累積逐步提高，剛上線這幾週少數個股可能還沒回溯到；(2)實測發現少數股票(如2420/2227/6216/8442等8檔)的research端FinMind快取已經停在很久以前(2024-12-31)，導致「除權息日前一筆可用資料」距離超過10天，判定無法安全定錨調整係數，這類事件會被跳過(adj_close退回等於close，不會比修正前更差)並記錄skip_reason，不會靜默套用錯誤係數。",
     "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
     "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）：三大法人涵蓋檔數1,083→1,990檔、融資融券1,063→1,983檔，scores.json全市場平均coverage 0.341→0.376（chips因子權重14%受益最多）。FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
     "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬）。",

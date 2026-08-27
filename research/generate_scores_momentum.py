@@ -119,7 +119,11 @@ def _relative_strength(price_rows: list[dict], taiex_20d: list[float], taiex_60d
     if len(price_rows) < 20:
         return None
     rows = sorted(price_rows, key=lambda r: r["date"])
-    closes = [r["close"] for r in rows]
+    # 2026-08-27修正（P0 bug，使用者回報）：改用adj_close（還原權息收盤價，
+    # 見price_history.json meta.backfill_note）——用原始close的話，除息當天
+    # 跳空下跌會被這個因子誤判成真實下跌，除息季會系統性扭曲排名。舊資料
+    # 若還沒有adj_close欄位（尚未套用過還原）就退回close，不會比修正前更差。
+    closes = [r.get("adj_close", r["close"]) for r in rows]
     parts = []
     if len(closes) >= 20 and len(taiex_20d) >= 20 and closes[-20] and taiex_20d[-20]:
         stock_ret20 = closes[-1] / closes[-20] - 1
