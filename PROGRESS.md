@@ -16,6 +16,41 @@
 
 ---
 
+## 2026-08-27（續18）— CLAUDE.md新增帽子規則 + 【驗證帽】B16查證：發現真正前置障礙
+
+使用者要求在CLAUDE.md新增「帽子規則」（分工紀律，不建立subagent組織）：
+每輪明確聲明戴哪頂帽子（維運/開發/研究/驗證/情報/法遵），一輪一頂；各帽
+有必交產物；做與判分離鐵律（同一輪不得既開發策略又宣告有效）；越權禁止
+（戴A帽不改B帽擁有的檔案）。已寫入CLAUDE.md第九節並commit+push。
+
+**依BACKLOG既有優先序（B2/B1/B4/B16）執行**：
+
+**開發帽**：重跑`node scripts/smoke_test.mjs`，7項全PASS，B1/B2/B4維持✅，
+無新程式碼變更（BACKLOG.md已有紀錄，這輪是重新確認）。
+
+**換帽→驗證帽（B16回測驗證）**：讀`research/CONSTITUTION.md`（Cybex量化
+機器人經驗教訓）+`research/TRIALS_LEDGER.md`（既有嚴謹試驗框架：配對式
+隨機控制組200-2000次排列、Bonferroni/累積校正、`bonferroni_n`跨軌計數）
+後，**誠實查證發現B16目前無法直接執行任何統計檢定**：
+- `generate_scores_momentum.py`/`generate_scores_future.py`是JSON-only
+  上線路徑，讀的是即時累積快照（幾天到90天歷史），不是既有框架用的
+  2010-2024歷史parquet資料。
+- 回測前必須先建一套「用歷史FinMind快取重算這10個新因子」的管線（比照
+  `factors.py::prepare_factors()`模式），工作量不小於這兩支JSON-only
+  腳本本身——這是**研究帽**的SPEC/因子產出，不是驗證帽這輪能直接做的事，
+  依CLAUDE.md「做與判分離」鐵律，不會為了求快另開簡化捷徑。
+- 已確認`is_holdout_consumed()=False`（未消耗），`TRAIN_END=2020-12-31`／
+  `VAL_END=2024-12-31`，新策略要從train/val開始，不能跳過直接碰holdout。
+
+**本輪（驗證帽）產出**：`research/TRIALS_LEDGER.md`「待測」區塊新增查證
+紀錄（記錄「還不能測、為什麼、下一步要先做什麼」，不是假裝跑出結果）；
+`BACKLOG.md`B16項目更新，標明下一步要換研究帽先做歷史因子重算管線。
+
+**下一步**：換研究帽，實作歷史因子重算管線，才能回到驗證帽跑真正的
+統計檢定。
+
+---
+
 ## 2026-08-27（續17）— 新增第三濾網：未來性濾網(a)類因子 + 訊號管線骨架登錄
 
 使用者新增指示：多濾網選股（三濾網架構）+訊號審查管線（依market-signal-

@@ -39,6 +39,31 @@
 
 **待測（已實作但因外部限制卡住，不算試驗，等真的測了才加列）：**
 - （目前無。`f_value_pb`／`f_value_pe`／`f_quality_roe_stability` 已於 2026-08-23 馬拉松第一輪測過，見上方 #13–#15。）
+- **2026-08-27（App App-side session，驗證帽）B16：題材動能榜（`scores_momentum.json`）+
+  未來性濾網（`scores_future.json`）都需要各自回測驗證**——使用者裁示的策略層面決定
+  （見`C:\alpha\alpha-app\BACKLOG.md`B16）。**本輪查證結論：目前無法直接執行任何統計
+  檢定，不是「調查後不可行」，是「調查後發現需要先補一塊基礎建設」**：
+  - `research/generate_scores_momentum.py`/`research/generate_scores_future.py`是
+    JSON-only上線評分路徑，讀`data/price_history.json`/`data/stock_detail.json`等
+    「即時累積快照」（目前只有幾天到90天歷史），**不是**這份`TRIALS_LEDGER.md`既有
+    框架用的`load_dev()`歷史parquet資料（2010-2024，train/val切分）。
+  - 要對這兩個引擎的因子（relative_strength/volume_breakout/chip_concentration/
+    group_breadth/sector_capital_flow/institutional_buying_streak/
+    institutional_ownership_pct/institutional_buying_concentration/
+    gross_margin_level_stability/capacity_utilization_proxy共10個新因子）做
+    train/val期間的歷史回測，第一步必須先在research/建一套「用歷史FinMind快取
+    重算這10個新因子」的管線（比照`factors.py::prepare_factors()`的模式），
+    這塊工作量不小於這兩支JSON-only腳本本身。
+  - 在這塊歷史重算管線完成前，才能套進本檔案既有的嚴謹框架
+    （`_permutation_test()`配對式隨機控制組、Bonferroni/累積校正、`bonferroni_n`
+    計數規則）——**不會為了求快跳過這套既有紀律另開一條簡化的驗證捷徑**，那樣
+    會違反使用者裁示的「做與判分離」鐵律（CLAUDE.md九）。
+  - holdout狀態確認：`is_holdout_consumed()=False`（未消耗），`TRAIN_END=2020-12-31`／
+    `VAL_END=2024-12-31`——這兩個新策略是全新假說，回測要從train/val開始，不能
+    跳過train/val直接碰holdout。
+  - **下一步**：需要先實作「歷史因子重算管線」，屬於研究帽的SPEC/因子產出，不是
+    驗證帽這輪能直接產生的東西——本輪的驗證帽產出就是這條稽核紀錄本身（誠實
+    記錄「還不能測、為什麼、要先做什麼」），不是假裝跑出一個結果。
 
 ---
 
