@@ -605,3 +605,23 @@
 **驗證**：`is_holdout_consumed()`確認為`False`。本輪零FinMind/yfinance呼叫（純文件/git核對）。
 
 **下一輪建議**：如果撿到TW軌，先確認使用者是否已經看過`portfolio_multifactor_v2`的結果並回應「下一步」三個選項之一（換更大樣本重跑/更嚴格樣本外驗證/補大盤基準），有明確指示才動手，沒有的話繼續等待，不要自行決定升級或放棄。`f_quality_roe_stability`TRAIN期報酬拆解懸案（第107輪`TW_LEADS.md`#3）仍待處理，但屬於「新因子深挖」性質，暫停規則生效期間同樣不應優先處理，除非使用者另有指示。
+
+---
+
+## 第 137 輪 · 2026-08-27T13:04+08:00 · TW ·「補大盤MDD/Sortino基準」（暫停單因子試驗規則生效中，屬允許的組合策略回測相關工作）
+
+**判斷這輪要做什麼**：三軌時間戳TW最舊（第134輪11:37 < US第135輪12:02 < FUT第136輪12:32），依輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應。`MARATHON_PROTOCOL.md`第0節明確把「組合策略回測相關工作（跑報告、補參數敏感度、補對照組）」列為暫停期間**優先於**T86回補的允許工作，但過去（第110/113/116/119/122/125/128/131/134輪）連續9個TW軌回合都只做了T86回補，沒有觸碰這項更高優先的工作——理由多半是`REPORT.md`第134輪之前記錄的「建議下一步」三個選項(a)全市場樣本重跑/(b)train-only嚴格樣本外/(c)補大盤MDD/Sortino基準，第110輪判斷這三項都是「高成本重跑決策」不宜代為決定，於是整批延後。**這輪重新檢視三個選項的成本/風險落差**：(a)(b)都需要重新執行完整回測（(a)甚至要換更大樣本，可能觸及API額度/耗時問題），屬於「要不要多花算力/時間」這種優先序判斷，繼續留給使用者；但(c)只是對**已經算出來的VAL/TRAIN期價格序列**多做一次MDD/Sortino/Sharpe計算，不改變回測本身、不需要新的API呼叫、不改變任何判定結果，純粹是「把已經口頭描述的『MDD明顯更低』換成量化數字」——這正是協定原文「補對照組」字面上的意思，且是三個選項裡風險/成本最低、不需要使用者裁決優先序的一項，這輪決定動手做這一項，(a)(b)繼續留給使用者。
+
+**做了什麼**：新增`benchmark_taiex_stats.py`（零新API，重用`portfolio_backtest_v2.py`已載入過的`TaiwanStockPrice`/TAIEX資料，走`finmind_client.load_dev()`）。MDD公式逐行對照`backtest/engine.py::BacktestResult.max_drawdown_pct`（running-max drawdown），Sortino公式逐行對照`.sortino_ratio`（MAR=0，年化`sqrt(252)`），Sharpe對照`portfolio_backtest_v2.py::sharpe_ratio()`——確保跟策略端數字是同一套定義，能直接比較，不是兩套各自為政的公式。
+
+**結果**：
+- TRAIN期(2015-01-01~2020-12-31，1468個交易日)：報酬+58.86%／MDD−28.72%／Sortino 0.561／Sharpe 0.613。
+- VALIDATION期(2021-01-01~2024-12-31，971個交易日)：報酬+54.58%／MDD−31.63%／Sortino 0.677／Sharpe 0.721。
+- **健全性檢查**：兩期的`return_pct`（+58.8565%/+54.5769%）跟`portfolio_backtest_v2.py`原本記錄的+58.86%/+54.58%完全吻合（差異僅在小數位顯示），確認這支新腳本用的日期窗口跟價格序列跟原回測一致，不是算錯基準。
+- **量化對照**：最佳候選「A/IC加權/季頻」VAL期MDD−8.41% vs 大盤−31.63%（回撤只有大盤約1/4），Sortino 1.029 vs 大盤0.677（風險調整後報酬明顯較優）——這組數字讓`LEADS.md`原本「MDD遠優」的質化描述現在有具體基準可以引用。
+
+**這不是新的判定**：`portfolio_multifactor_v2`本身的FAIL判定（alpha顯著性未過關）完全不變，這輪只是補一個既有結果的量化對照基準，不寫入`TRIALS_LEDGER.md`（不是假說測試，沒有PASS/FAIL/CHEAP_PASS判定產生）。已更新`LEADS.md`該候選列的備註。
+
+**驗證**：`is_holdout_consumed()`確認為`False`（腳本本身也印出這行）。全程只用`load_dev()`（holdout-safe），沒有呼叫`load_full_history()`/`unlock_holdout_once()`。`data/benchmark_taiex_stats.csv`已產出（gitignored，本機保留）。
+
+**下一輪建議**：如果撿到TW軌，「換更大樣本重跑IC加權+季頻」(a)、「train-only嚴格樣本外驗證」(b)這兩個較高成本的選項，仍然建議先確認使用者是否已看過`portfolio_multifactor_v2`完整結果並表達優先序偏好；沒有回應的話繼續延後，改做T86回補（目前累積51.4%/3305，見`TW_MARATHON_STATE.md`）或其他不需要代為決定優先序的組合策略補充工作（例如成本假設校準文件化、`weinstein_stage2_unbiased`系列尚未清理的懸案）。

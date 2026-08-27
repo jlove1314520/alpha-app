@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 137 輪 · 2026-08-27T13:04+08:00 · TW · 補大盤MDD/Sortino基準（暫停單因子試驗規則生效中，屬允許的組合策略回測相關工作，優先序高於T86回補）· 新增`benchmark_taiex_stats.py`（零新API，公式對照`backtest/engine.py`）：TAIEX買進持有VAL(2021-2024)報酬+54.58%/MDD−31.63%/Sortino0.677/Sharpe0.721；TRAIN(2015-2020)報酬+58.86%/MDD−28.72%/Sortino0.561/Sharpe0.613，總報酬跟原記錄吻合（健全性確認）；量化對照最佳候選「A/IC加權/季頻」MDD只有大盤約1/4；已更新`LEADS.md`該候選備註，原FAIL判定不變，不寫入`TRIALS_LEDGER.md`。`is_holdout_consumed()`確認`False` · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第137輪記錄
+
+---
 ## 第 136 輪 · 2026-08-27T12:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 11:37/11:38(第134輪)/US 10:32/12:02(第135輪，最新)/FUT 11:01/11:02(第133輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應，FUT軌依舊沒有組合策略相關工作可做（唯一待辦盤別效應第三批仍屬單因子工作），同round109/112/115/118/121/124/127/130/133判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；額外發現`research/generate_scores_v2.py`有非本輪造成的未commit修改（`import json`），依協定不動不commit · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第136輪記錄
 
 ---
