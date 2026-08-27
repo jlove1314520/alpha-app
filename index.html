@@ -1261,37 +1261,23 @@
       const rowEl=wrap.querySelector('.swipe-row');
       attachSwipe(rowEl,code);
       wrap.querySelector('.swipe-del').onclick=()=>confirmDelete(code);
-      // 近即時報價(iq)獨立於FinMind日線之外——FinMind當次抓取失敗時，只要有新鮮的iq
-      // 還是要能顯示價格（沒有sparkline歷史線，那個非得靠FinMind多日收盤不可），不能
-      // 因為FinMind那次呼叫失敗就整列顯示「無報價」，明明近即時報價是有的。
+      // 2026-08-27 架構修正：sparkline改讀 data/quotes_tw.json/quotes_us.json
+      // 本身附帶的近20日收盤序列（見 fetch_quotes_tw.py::fetch_sparkline_20d /
+      // fetch_quotes_us.py 的yfinance批次），不再對FinMind打
+      // TaiwanStockPrice/USStockPrice——這是STATUS.json列的最後一個P0缺口。
+      // rawQ跟iq分開：iq在資料過舊(>20分鐘)時會是null（避免拿舊價格假裝即時），
+      // 但sparkline是日線、不需要這麼嚴格的新鮮度，所以sparkline/備援價格改用
+      // rawQ（不管新不新鮮都給，跟原本FinMind退回邏輯精神一致）。
       const iq=intradayQuote(code,us);
-      if(us){
-        const px=await fm('USStockPrice',code,_d(16));
-        if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
-          const price=iq?iq.price:last.Close;
-          const chg=iq&&iq.change!=null?iq.change:last.Close-prev;
-          const pct=iq&&iq.change_pct!=null?iq.change_pct:(prev?chg/prev*100:0);
-          const cls=chg>=0?'u':'d';
-          const meta=iq?`${code} · 美股${intradayTag(iq)}`:`${code} · 美股 · ${last.date}`;
-          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${spark(px.slice(-9).map(x=>x.Close),chg>=0)}<div class="px"><b>$${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
-        }else if(iq){
-          const cls=(iq.change||0)>=0?'u':'d';
-          rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股${intradayTag(iq)}</span></div><div class="px"><b>$${nf(iq.price)}</b><span class="chg-tag ${cls}">${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%</span></div>`;
-        }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 美股 · 無報價（${noQuoteReason(code,true)}）</span></div>`}
-        continue;
-      }
-      const px=await fm('TaiwanStockPrice',code,_d(16));
-      if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
-        const price=iq?iq.price:last.close;
-        const chg=iq&&iq.change!=null?iq.change:(last.spread!=null?last.spread:last.close-prev);
-        const pct=iq&&iq.change_pct!=null?iq.change_pct:(prev?chg/prev*100:0);
-        const cls=chg>=0?'u':'d';
-        const meta=iq?`${code}${intradayTag(iq)}`:`${code} · ${last.date}`;
-        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${spark(px.slice(-9).map(x=>x.close),chg>=0)}<div class="px"><b>${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
-      }else if(iq){
-        const cls=(iq.change||0)>=0?'u':'d';
-        rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${intradayTag(iq)}</span></div><div class="px"><b>${nf(iq.price)}</b><span class="chg-tag ${cls}">${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%</span></div>`;
-      }else{rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code} · 無報價（${noQuoteReason(code,false)}）</span></div>`}
+      const rawQ=((us?INTRADAY_US:INTRADAY_TW)&&(us?INTRADAY_US:INTRADAY_TW).quotes)?.[code];
+      if(!iq&&!rawQ){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · 無報價（${noQuoteReason(code,us)}）</span></div>`;continue}
+      const price=iq?iq.price:rawQ.price;
+      const chg=iq&&iq.change!=null?iq.change:(rawQ.change??0);
+      const pct=iq&&iq.change_pct!=null?iq.change_pct:(rawQ.change_pct??0);
+      const cls=chg>=0?'u':'d';
+      const meta=iq?`${code}${us?' · 美股':''}${intradayTag(iq)}`:`${code}${us?' · 美股':''} · 已收盤`;
+      const sp=(rawQ&&rawQ.sparkline&&rawQ.sparkline.length>=2)?spark(rawQ.sparkline,chg>=0):'';
+      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b>${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
     }
     stampUpdated('home');
     updateDiagBanner();

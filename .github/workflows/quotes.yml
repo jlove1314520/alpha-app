@@ -38,7 +38,7 @@ jobs:
           python-version: '3.12'
 
       - name: 安裝相依套件
-        run: pip install requests
+        run: pip install requests yfinance
 
       - name: 抓台股盤中報價（TWSE MIS，免金鑰）
         run: python .github/scripts/fetch_quotes_tw.py

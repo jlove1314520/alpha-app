@@ -26,11 +26,20 @@
      交易時段內卻真的一檔都抓不到才視為故障（exit 1）；非交易時段一律 exit 0。
   3. JSON 多寫 `meta` 區塊（是否交易時段、查詢/成功/即時檔數、資料型態），方便
      App 端或人工排查判斷這批資料的性質，不用自己重新猜。
+
+**2026-08-27 新增自選股sparkline，已知限制**：每檔額外用 `STOCK_DAY` 端點抓近
+20日收盤（見 `fetch_sparkline_20d()`），**只涵蓋TWSE上市股票**——實測本輪
+scores.json樣本裡約24檔持續回428（不是間歇性，同一檔重試/隔幾秒再測都一樣），
+查證這些代號都不在 `t187ap03_L`（上市公司清單）裡，是上櫃（TPEx）股票，
+`www.twse.com.tw/exchangeReport/STOCK_DAY` 本來就是TWSE專屬端點，沒有涵蓋
+TPEx——這是永久性限制不是bug，上櫃股票的sparkline會缺，`quotes[code]`裡就是
+沒有`sparkline`欄位，App端要當成「暫無走勢圖」處理，不是誤判成故障。
 """
 from __future__ import annotations
 
 import json
 import sys
+import time
 import requests
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -43,6 +52,7 @@ DEFAULT_WATCHLIST = ["2330", "2454", "2317", "1513", "3231"]
 
 MIS_URL = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料，公司代號清單
+STOCK_DAY_URL = "https://www.twse.com.tw/exchangeReport/STOCK_DAY"  # 個股歷史日線（一次一檔一個月）
 TW_TZ = timezone(timedelta(hours=8))
 
 
@@ -150,6 +160,66 @@ def resolve_price(r: dict) -> tuple[float | None, bool]:
     return None, True
 
 
+STOCK_DAY_HEADERS = {
+    "Referer": "https://www.twse.com.tw/zh/trading/historical/stock-day.html",
+    "User-Agent": "Mozilla/5.0 (compatible; AlphaAppQuoteFetcher/1.0)",
+}
+
+
+def fetch_stock_day_month(code: str, yyyymm: str) -> list[float]:
+    """個股單月日線（`www.twse.com.tw/exchangeReport/STOCK_DAY`，業界常見用法的
+    官方端點，非openapi但長年穩定）。回傳該月每個交易日的收盤價（依日期由舊到新）。
+    stat不是OK（例如該檔當月完全沒交易、代號不存在）就回傳空list，不拋例外。
+
+    **實測發現（2026-08-27）**：不帶 Referer/User-Agent 連續呼叫會間歇性回
+    428（本機測試40檔用同樣節奏，不帶header時約6-7成失敗，帶了header後
+    40/40全部成功）——這不是主要靠放慢節奏解決的頻率限制，是需要瀏覽器風格
+    header 才會放行，類似T86的反爬蟲邏輯（見fetch_market_tw.py docstring）。
+    但實測92檔的完整批次（前面小樣本測試沒觸發）仍間歇性出現428（約25%），
+    看起來是有額外的流量閾值，所以這裡對428單獨重試一次（等1秒），不是無限
+    重試——重試後還失敗就放棄這一檔，讓呼叫端的try/except接住，不影響其他檔。"""
+    for attempt in range(2):
+        r = requests.get(STOCK_DAY_URL, params={"response": "json", "date": f"{yyyymm}01", "stockNo": code},
+                          headers=STOCK_DAY_HEADERS, timeout=15)
+        if r.status_code == 428 and attempt == 0:
+            time.sleep(1.0)
+            continue
+        break
+    r.raise_for_status()
+    d = r.json()
+    if d.get("stat") != "OK":
+        return []
+    return [c for c in (_num(row[6]) for row in d.get("data", [])) if c is not None]
+
+
+def fetch_sparkline_20d(code: str, now_tw: datetime) -> list[float]:
+    """近20日收盤（畫sparkline用）。當月不夠20天（月初）就補抓上個月銜接。"""
+    closes = fetch_stock_day_month(code, now_tw.strftime("%Y%m"))
+    if len(closes) < 20:
+        prev_month = (now_tw.replace(day=1) - timedelta(days=1))
+        closes = fetch_stock_day_month(code, prev_month.strftime("%Y%m")) + closes
+    return closes[-20:]
+
+
+def load_sparkline_cache(codes: list[str], today_str: str) -> dict[str, list[float]]:
+    """讀舊quotes_tw.json裡「今天已經抓過」的sparkline快取。這支腳本每10分鐘跑
+    一次（盤中報價），但個股歷史日線一天只會多一筆、不需要每次都重打
+    STOCK_DAY——沒有官方文件保證的頻率限制，保守起見一天只在第一次執行時對
+    每檔各打1-2次，其餘9次/10分鐘的執行直接沿用當天稍早抓到的快取，不重複打。"""
+    if not OUT_PATH.exists():
+        return {}
+    try:
+        prior = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    out = {}
+    for code, q in prior.get("quotes", {}).items():
+        sp = q.get("sparkline")
+        if sp and q.get("sparkline_date") == today_str:
+            out[code] = sp
+    return out
+
+
 def is_tw_trading_window(now: datetime) -> bool:
     """粗略判斷：週一至五 09:00–13:30 台北時間。**已知簡化，誠實揭露**：沒有扣除
     國定假日（找不到現成、可信賴的台股假日行事曆免費資料源）。這個簡化在實務上
@@ -201,6 +271,34 @@ def main():
             "date": r.get("d"),  # YYYYMMDD
             "stale": stale,
         }
+
+    # 2026-08-27 新增：自選股sparkline走勢（STATUS.json列的最後一個P0缺口）。
+    # 見load_sparkline_cache()docstring：一天只在第一次執行時對每檔各打
+    # STOCK_DAY，其餘同一天的執行沿用快取，不會每10分鐘打好幾百次。
+    today_str = now_tw.strftime("%Y-%m-%d")
+    cache = load_sparkline_cache(list(quotes.keys()), today_str)
+    fetched = cached = failed_sp = 0
+    for code in quotes:
+        if code in cache:
+            quotes[code]["sparkline"] = cache[code]
+            quotes[code]["sparkline_date"] = today_str
+            cached += 1
+            continue
+        try:
+            sp = fetch_sparkline_20d(code, now_tw)
+            if sp:
+                quotes[code]["sparkline"] = sp
+                quotes[code]["sparkline_date"] = today_str
+                fetched += 1
+            time.sleep(0.15)  # 實測穩定節奏（見fetch_stock_day_month docstring），主要靠header不是靠慢
+        except Exception as e:
+            failed_sp += 1
+            # 這裡故意不用「・」（U+30FB）：本機Windows主控台cp950編碼曾經在這裡
+            # 讓整支腳本直接crash（print本身丟UnicodeEncodeError，不是被try/except
+            # 接住的那個例外）——GitHub Actions是UTF-8不會有事，但本機測試會，改用
+            # 純ASCII的"-"比較保險，不影響其他地方原本就在用的「・」（那些沒出過事）。
+            print(f"  - {code} sparkline 失敗（不影響報價本身）：{e}")
+    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔")
 
     data_type = "intraday" if n_live > 0 else ("prev_close" if quotes else "none")
     out = {

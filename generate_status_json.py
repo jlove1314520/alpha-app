@@ -247,7 +247,7 @@ def build_workflows() -> list[dict]:
 APP_DATA_SOURCES = [
     {"panel": "今日頁·大盤速覽（含sparkline）", "source": "data/market_tw.json + data/market_us.json（2026-08-27新增近20日收盤sparkline）"},
     {"panel": "今日頁·自選股報價（主價格）", "source": "data/quotes_tw.json + data/quotes_us.json"},
-    {"panel": "今日頁·自選股sparkline走勢", "source": "FinMind TaiwanStockPrice/USStockPrice（未遷移——任意自選股代碼，跟market_tw/us.json的固定指數不同，額度用盡時sparkline會缺，主價格不受影響）"},
+    {"panel": "今日頁·自選股sparkline走勢", "source": "data/quotes_tw.json（TWSE STOCK_DAY，僅上市股票；上櫃約24檔查不到，見known_limitations）+ data/quotes_us.json（yfinance），2026-08-27起不再打FinMind"},
     {"panel": "今日頁·匯率", "source": "data/fx.json（yfinance TWD=X，2026-08-27起不再打FinMind）"},
     {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},
     {"panel": "今日頁·總資產/已實現損益", "source": "無（尚未串接券商，誠實佔位）"},
@@ -271,14 +271,13 @@ APP_DATA_SOURCES = [
 ]
 
 TODO = [
-    {"item": "data/indices.json（使用者原始規格）vs 現有 market_tw.json/market_us.json 是否視為已完成，待使用者裁示", "priority": "P1", "blocker": "等使用者決定要不要重做成獨立檔名/pipeline"},
     {"item": "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券", "priority": "P2", "blocker": "FinMind僅提供台股這幾類資料，TWSE官方資料也只涵蓋台股，暫無替代來源"},
     {"item": "個股頁財報FCF永久缺口", "priority": "P2", "blocker": "TWSE官方開放資料無現金流量表端點（已查證swagger完整清單確認），非暫時性，需另尋資料源才能補上"},
     {"item": "個股頁財報/三大法人/融資融券僅涵蓋TWSE上市「一般業」", "priority": "P2", "blocker": "上櫃(TPEx)股票、金融/證券/保險等特殊產業分類的財報格式跟一般業不同，TWSE另外分開發布(t187ap06_L_bd/fh/ins/mim等)，尚未處理"},
+    {"item": "個股頁自選股sparkline約24檔上櫃股票查不到", "priority": "P2", "blocker": "TWSE STOCK_DAY端點是TWSE專屬，不涵蓋TPEx上櫃股票，尚未找到TPEx對應的逐股歷史端點"},
     {"item": "個股走勢圖(價格歷史)脫離FinMind", "priority": "P2", "blocker": "需要逐檔排程抓歷史K線，API呼叫量遠大於目前的全市場單次快照模式"},
-    {"item": "個股頁自選股sparkline走勢脫離FinMind", "priority": "P2", "blocker": "任意自選股代碼跟market_tw/us.json的固定指數不同，需要逐檔排程抓歷史，尚未評估"},
     {"item": "主流題材chips / 期貨籌碼 脫離FinMind", "priority": "P2", "blocker": "尚未評估TWSE/TAIFEX官方端點是否有對應逐股/逐法人資料"},
-    {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P2", "blocker": "TWSE官方無對應的全市場融資金額(元)開放資料端點，只有逐股融資餘額(張)，已查證swagger清單確認"},
+    {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE官方無對應的全市場融資金額(元)開放資料端點，只有逐股融資餘額(張)，已查證swagger清單確認；使用者要求分母取不到時要明確標示「資料不完整」"},
     {"item": "CLAUDE.md候選：美股報價/AI盤前日報真新聞/Phase2券商下單研究", "priority": "P2", "blocker": "尚未排序，等使用者指示"},
 ]
 
@@ -286,8 +285,9 @@ KNOWN_LIMITATIONS = [
     "fundamentals.json：TPEx上櫃股票的月營收/PER不會被update_fundamentals_daily.py更新（TWSE官方端點只涵蓋上市），停留在2026-08-27手動快照的舊值。",
     "margin_maintenance.json：2026-08-27起改為market.yml排程自動更新，但分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史，風險遠低於之前逐股迴圈），若這次呼叫失敗當天不會寫入新資料、history停在最後一筆有效值。",
     "stock_detail.json：財報/三大法人/融資融券只涵蓋TWSE上市「一般業」（t187ap06_L_ci分類），上櫃股票、金融控股/證券/保險等特殊產業分類查不到。FCF（自由現金流）永久性缺口——TWSE官方無現金流量表開放資料端點。",
+    "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬），這些代碼的quotes條目就是沒有sparkline欄位。",
     "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券（FinMind僅提供台股這幾類資料）。",
-    "個股頁自選股sparkline走勢、個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",
+    "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
 ]
 

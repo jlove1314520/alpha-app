@@ -21,6 +21,7 @@ import json
 import os
 import sys
 import requests
+import yfinance as yf
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -99,6 +100,23 @@ def main():
             msg = str(e).replace(api_key, "***") if api_key else str(e)
             print(f"  ・{tk} 失敗：{msg}")
             failed.append(tk)
+
+    # 2026-08-27 新增：自選股sparkline（STATUS.json列的P0缺口）。只有6檔，每次都
+    # 直接重抓（不像台股那支要對STOCK_DAY做每日快取），yfinance批次抓不會對Finnhub
+    # 造成額外負擔（兩個不同資料源）。
+    try:
+        hist = yf.download(US_TICKERS, period="1mo", auto_adjust=False, progress=False, group_by="ticker")
+        for tk in US_TICKERS:
+            if tk not in quotes:
+                continue
+            try:
+                closes = hist[tk]["Close"].dropna().tail(20).tolist()
+                if closes:
+                    quotes[tk]["sparkline"] = [round(float(c), 2) for c in closes]
+            except Exception as e:
+                print(f"  - {tk} sparkline 解析失敗：{e}")
+    except Exception as e:
+        print(f"  - sparkline 批次抓取失敗（不影響報價本身）：{e}")
 
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
