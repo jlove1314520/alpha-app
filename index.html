@@ -1354,6 +1354,7 @@
     const marginLast=Array.isArray(marginHistory)&&marginHistory.length?marginHistory[marginHistory.length-1]:null;
     const marginAgeMin=marginLast&&marginLast.date?(Date.now()-new Date(marginLast.date+'T00:00:00+08:00').getTime())/60000:null;
     if(marginAgeMin==null||marginAgeMin>3*24*60)problems.push({name:'大盤融資維持率',reason:marginAgeMin==null?'無資料':'資料過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
+    else if(marginLast&&marginLast.data_incomplete)problems.push({name:'大盤融資維持率',reason:'今日資料不完整（分母/全市場融資金額取得失敗）',schedule:'台股收盤後 14:10'});
     if(!problems.length){el.style.display='none';return}
     el.style.display='';
     el.innerHTML='⚠ 部分資料異常：'+problems.map(p=>`<b>${p.name}</b>（${p.reason}，下次排程 ${p.schedule}）`).join('；');
@@ -1554,10 +1555,18 @@
       return;
     }
     const last=history[history.length-1];
-    const lv=marginLevel(last.ratio_pct);
-    sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}${last.date}</div></div>`;
-    if(chartEl)chartEl.innerHTML=marginChart(history);
-    if(noteEl)noteEl.textContent=`來源：TWSE 全市場融資餘額逐股×收盤價加總（本機 Python 每日計算，累積 ${history.length} 天）÷ FinMind 全市場融資金額（${last.finmind_margin_money_date}）`;
+    // 2026-08-27 修正（使用者要求）：分母(FinMind全市場融資金額)當天取得失敗時，
+    // update_margin_maintenance.py 會寫入 data_incomplete=true、ratio_pct=null
+    // 的明確記錄，這裡要顯示「資料不完整」而不是留著上一筆看起來正常的百分比
+    // 讓人誤以為今天的維持率就是這樣。
+    if(last.data_incomplete){
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:20px;font-weight:700;color:var(--warn)">資料不完整</div><div class="note">${last.date}：${last.incomplete_reason||'分母（全市場融資金額）當天取得失敗'}</div></div>`;
+    }else{
+      const lv=marginLevel(last.ratio_pct);
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}${last.date}</div></div>`;
+    }
+    if(chartEl)chartEl.innerHTML=marginChart(history.filter(h=>!h.data_incomplete));
+    if(noteEl)noteEl.textContent=`來源：TWSE官方MI_MARGN/STOCK_DAY_ALL逐股融資餘額×收盤價加總（GitHub Actions排程，累積 ${history.length} 天）÷ FinMind全市場融資金額（唯一保留的FinMind依賴，一天一次；若當天失敗會明確標示「資料不完整」而非沿用舊值）`;
   }
 
   async function loadFutInst(){
@@ -1990,7 +1999,10 @@
       setTxt('chip-note',`最新 ${inst.date} · TWSE T86（GitHub Actions 排程）`);
       const mx=Math.max(...inst.series.map(s=>Math.abs(s.v)))||1;
       document.getElementById('chip-bars').innerHTML=inst.series.map(s=>`<div class="db"><i class="${s.v>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(s.v)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${s.date.slice(5)}</em></div>`).join('');
-    }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料</div>'}
+    }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
+      document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）</div>';
+      setTxt('chip-note','查無資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）');
+    }
   }
   function editWL(){openSearch()}
 

@@ -1,11 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-08-27T09:53:55.233792+08:00",
+    "generated_at": "2026-08-27T10:51:30.031052+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 999,
     "errors": [],
-    "institutional_source": "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打）；只合併已存在於stock_detail.json的代碼，濾掉ETF/權證等非股票證券",
-    "margin_source": "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打）"
+    "institutional_source": "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打）；只保留官方上市公司清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券",
+    "margin_source": "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打）；只保留官方上市公司清單(t187ap03_L)內的代碼"
   },
   "stocks": {
     "1101": {
@@ -35723,6 +35723,1937 @@
         "margin_balance_today": 8424.0,
         "margin_balance_prev": 8471.0,
         "short_balance_today": 1861.0
+      }
+    },
+    "2883": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 31980.6,
+        "trust_lots": 1.9,
+        "dealer_lots": -123.2,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 31980.6,
+            "trust_lots": 1.9,
+            "dealer_lots": -123.2
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 10700.0,
+        "margin_balance_prev": 10695.0,
+        "short_balance_today": 93.0
+      }
+    },
+    "2892": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 11221.4,
+        "trust_lots": -1669.2,
+        "dealer_lots": 413.3,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 11221.4,
+            "trust_lots": -1669.2,
+            "dealer_lots": 413.3
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2918.0,
+        "margin_balance_prev": 2154.0,
+        "short_balance_today": 17.0
+      }
+    },
+    "2887": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 6734.6,
+        "trust_lots": 323.8,
+        "dealer_lots": 437.6,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 6734.6,
+            "trust_lots": 323.8,
+            "dealer_lots": 437.6
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 41088.0,
+        "margin_balance_prev": 40924.0,
+        "short_balance_today": 225.0
+      }
+    },
+    "2886": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 5546.7,
+        "trust_lots": 275.7,
+        "dealer_lots": 57.9,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 5546.7,
+            "trust_lots": 275.7,
+            "dealer_lots": 57.9
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2738.0,
+        "margin_balance_prev": 2626.0,
+        "short_balance_today": 14.0
+      }
+    },
+    "2851": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 3435.1,
+        "trust_lots": -4.0,
+        "dealer_lots": -22.1,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 3435.1,
+            "trust_lots": -4.0,
+            "dealer_lots": -22.1
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 3013.0,
+        "margin_balance_prev": 3273.0,
+        "short_balance_today": 56.0
+      }
+    },
+    "5871": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 3286.7,
+        "trust_lots": 1.5,
+        "dealer_lots": 15.3,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 3286.7,
+            "trust_lots": 1.5,
+            "dealer_lots": 15.3
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 3842.0,
+        "margin_balance_prev": 3881.0,
+        "short_balance_today": 56.0
+      }
+    },
+    "2897": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 3096.6,
+        "trust_lots": 0.0,
+        "dealer_lots": 40.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 3096.6,
+            "trust_lots": 0.0,
+            "dealer_lots": 40.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1298.0,
+        "margin_balance_prev": 1606.0,
+        "short_balance_today": 34.0
+      }
+    },
+    "1718": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 2933.9,
+        "trust_lots": 0.0,
+        "dealer_lots": 15.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 2933.9,
+            "trust_lots": 0.0,
+            "dealer_lots": 15.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 20369.0,
+        "margin_balance_prev": 20353.0,
+        "short_balance_today": 171.0
+      }
+    },
+    "4763": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 2642.2,
+        "trust_lots": 2.0,
+        "dealer_lots": 207.9,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 2642.2,
+            "trust_lots": 2.0,
+            "dealer_lots": 207.9
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 40196.0,
+        "margin_balance_prev": 40770.0,
+        "short_balance_today": 15.0
+      }
+    },
+    "3673": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 1783.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 156.7,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 1783.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 156.7
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 13945.0,
+        "margin_balance_prev": 14344.0,
+        "short_balance_today": 111.0
+      }
+    },
+    "2820": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 1875.4,
+        "trust_lots": 0.0,
+        "dealer_lots": -85.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 1875.4,
+            "trust_lots": 0.0,
+            "dealer_lots": -85.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 477.0,
+        "margin_balance_prev": 511.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "2882": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 2481.6,
+        "trust_lots": -1026.3,
+        "dealer_lots": 153.8,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 2481.6,
+            "trust_lots": -1026.3,
+            "dealer_lots": 153.8
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 5880.0,
+        "margin_balance_prev": 5828.0,
+        "short_balance_today": 236.0
+      }
+    },
+    "2855": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 1479.4,
+        "trust_lots": -13.1,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 1479.4,
+            "trust_lots": -13.1,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 4729.0,
+        "margin_balance_prev": 4780.0,
+        "short_balance_today": 155.0
+      }
+    },
+    "2889": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 1095.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 98.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 1095.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 98.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2813.0,
+        "margin_balance_prev": 2741.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "6451": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 1163.5,
+        "trust_lots": 0.0,
+        "dealer_lots": 11.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 1163.5,
+            "trust_lots": 0.0,
+            "dealer_lots": 11.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 8592.0,
+        "margin_balance_prev": 8346.0,
+        "short_balance_today": 374.0
+      }
+    },
+    "2891": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 995.0,
+        "trust_lots": -8.3,
+        "dealer_lots": -122.6,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 995.0,
+            "trust_lots": -8.3,
+            "dealer_lots": -122.6
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 3479.0,
+        "margin_balance_prev": 3483.0,
+        "short_balance_today": 134.0
+      }
+    },
+    "6005": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 856.4,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 856.4,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 5741.0,
+        "margin_balance_prev": 5719.0,
+        "short_balance_today": 29.0
+      }
+    },
+    "2905": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 734.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 27.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 734.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 27.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 7013.0,
+        "margin_balance_prev": 7008.0,
+        "short_balance_today": null
+      }
+    },
+    "4977": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 561.7,
+        "trust_lots": 0.0,
+        "dealer_lots": 117.7,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 561.7,
+            "trust_lots": 0.0,
+            "dealer_lots": 117.7
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 6723.0,
+        "margin_balance_prev": 6722.0,
+        "short_balance_today": 35.0
+      }
+    },
+    "9105": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 663.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -0.2,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 663.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -0.2
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 47603.0,
+        "margin_balance_prev": 47559.0,
+        "short_balance_today": null
+      }
+    },
+    "5880": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 53.1,
+        "trust_lots": 1.0,
+        "dealer_lots": 493.9,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 53.1,
+            "trust_lots": 1.0,
+            "dealer_lots": 493.9
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2047.0,
+        "margin_balance_prev": 2072.0,
+        "short_balance_today": 12.0
+      }
+    },
+    "2852": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 425.6,
+        "trust_lots": 0.0,
+        "dealer_lots": -17.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 425.6,
+            "trust_lots": 0.0,
+            "dealer_lots": -17.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1633.0,
+        "margin_balance_prev": 1593.0,
+        "short_balance_today": null
+      }
+    },
+    "2723": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 347.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 347.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1435.0,
+        "margin_balance_prev": 1493.0,
+        "short_balance_today": 12.0
+      }
+    },
+    "6415": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 219.4,
+        "trust_lots": -7.0,
+        "dealer_lots": 60.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 219.4,
+            "trust_lots": -7.0,
+            "dealer_lots": 60.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 4402.0,
+        "margin_balance_prev": 4418.0,
+        "short_balance_today": 72.0
+      }
+    },
+    "7827": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 270.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.7,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 270.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.7
+          }
+        ]
+      }
+    },
+    "5243": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 208.1,
+        "trust_lots": 0.0,
+        "dealer_lots": 14.2,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 208.1,
+            "trust_lots": 0.0,
+            "dealer_lots": 14.2
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 9008.0,
+        "margin_balance_prev": 8987.0,
+        "short_balance_today": 26.0
+      }
+    },
+    "6933": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 153.8,
+        "trust_lots": 0.0,
+        "dealer_lots": 8.3,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 153.8,
+            "trust_lots": 0.0,
+            "dealer_lots": 8.3
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1303.0,
+        "margin_balance_prev": 1063.0,
+        "short_balance_today": 6.0
+      }
+    },
+    "9103": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 141.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -0.4,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 141.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -0.4
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 3568.0,
+        "margin_balance_prev": 3577.0,
+        "short_balance_today": 66.0
+      }
+    },
+    "2816": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 131.2,
+        "trust_lots": 0.0,
+        "dealer_lots": -2.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 131.2,
+            "trust_lots": 0.0,
+            "dealer_lots": -2.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1337.0,
+        "margin_balance_prev": 1187.0,
+        "short_balance_today": 5.0
+      }
+    },
+    "6573": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 62.1,
+        "trust_lots": 0.0,
+        "dealer_lots": 6.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 62.1,
+            "trust_lots": 0.0,
+            "dealer_lots": 6.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": null,
+        "margin_balance_prev": null,
+        "short_balance_today": null
+      }
+    },
+    "5538": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 73.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -5.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 73.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -5.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 74.0,
+        "margin_balance_prev": 75.0,
+        "short_balance_today": null
+      }
+    },
+    "8404": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 59.4,
+        "trust_lots": 0.0,
+        "dealer_lots": 6.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 59.4,
+            "trust_lots": 0.0,
+            "dealer_lots": 6.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 3540.0,
+        "margin_balance_prev": 3543.0,
+        "short_balance_today": null
+      }
+    },
+    "2849": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 65.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -8.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 65.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -8.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 306.0,
+        "margin_balance_prev": 296.0,
+        "short_balance_today": null
+      }
+    },
+    "2762": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 55.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -4.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 55.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -4.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 193.0,
+        "margin_balance_prev": 195.0,
+        "short_balance_today": null
+      }
+    },
+    "912000": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 50.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 50.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 15771.0,
+        "margin_balance_prev": 16451.0,
+        "short_balance_today": null
+      }
+    },
+    "2832": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 35.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 7.1,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 35.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 7.1
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 592.0,
+        "margin_balance_prev": 632.0,
+        "short_balance_today": null
+      }
+    },
+    "910322": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 33.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 33.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": null,
+        "margin_balance_prev": null,
+        "short_balance_today": null
+      }
+    },
+    "4178": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 29.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 3.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 29.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 3.0
+          }
+        ]
+      }
+    },
+    "4148": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 24.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 24.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 349.0,
+        "margin_balance_prev": 352.0,
+        "short_balance_today": null
+      }
+    },
+    "1256": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 22.1,
+        "trust_lots": 0.0,
+        "dealer_lots": -0.1,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 22.1,
+            "trust_lots": 0.0,
+            "dealer_lots": -0.1
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 310.0,
+        "margin_balance_prev": 336.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "8466": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 19.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 19.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1310.0,
+        "margin_balance_prev": 1297.0,
+        "short_balance_today": null
+      }
+    },
+    "2929": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 28.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -10.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 28.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -10.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2041.0,
+        "margin_balance_prev": 2041.0,
+        "short_balance_today": null
+      }
+    },
+    "2239": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 14.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 3.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 14.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 3.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1615.0,
+        "margin_balance_prev": 1610.0,
+        "short_balance_today": null
+      }
+    },
+    "6965": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 14.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 14.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 42.0,
+        "margin_balance_prev": 42.0,
+        "short_balance_today": null
+      }
+    },
+    "4935": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 11.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 3.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 11.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 3.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 616.0,
+        "margin_balance_prev": 617.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "2248": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 13.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 13.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 560.0,
+        "margin_balance_prev": 555.0,
+        "short_balance_today": null
+      }
+    },
+    "4552": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 11.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 2.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 11.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 2.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2473.0,
+        "margin_balance_prev": 2504.0,
+        "short_balance_today": 12.0
+      }
+    },
+    "4569": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 12.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 12.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 739.0,
+        "margin_balance_prev": 761.0,
+        "short_balance_today": null
+      }
+    },
+    "4557": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 8.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 8.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 433.0,
+        "margin_balance_prev": 433.0,
+        "short_balance_today": null
+      }
+    },
+    "4190": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 7.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 2.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 7.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 2.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 280.0,
+        "margin_balance_prev": 280.0,
+        "short_balance_today": null
+      }
+    },
+    "8411": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 5.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 3.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 5.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 3.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 53.0,
+        "margin_balance_prev": 53.0,
+        "short_balance_today": null
+      }
+    },
+    "8499": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 5.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 5.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 592.0,
+        "margin_balance_prev": 592.0,
+        "short_balance_today": null
+      }
+    },
+    "1338": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 3.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 2.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 3.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 2.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 4024.0,
+        "margin_balance_prev": 4077.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "6431": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 3.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 3.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": null,
+        "margin_balance_prev": null,
+        "short_balance_today": null
+      }
+    },
+    "8482": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 3.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 3.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 160.0,
+        "margin_balance_prev": 162.0,
+        "short_balance_today": null
+      }
+    },
+    "5546": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 2.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 2.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 22.0,
+        "margin_balance_prev": 22.0,
+        "short_balance_today": null
+      }
+    },
+    "2939": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": 2.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": 2.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 241.0,
+        "margin_balance_prev": 241.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "7823": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -1.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.4,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -1.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.4
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2.0,
+        "margin_balance_prev": 1.0,
+        "short_balance_today": null
+      }
+    },
+    "6671": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -3.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 2.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -3.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 2.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 85.0,
+        "margin_balance_prev": 86.0,
+        "short_balance_today": null
+      }
+    },
+    "2207": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -10.0,
+        "trust_lots": 2.0,
+        "dealer_lots": 6.8,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -10.0,
+            "trust_lots": 2.0,
+            "dealer_lots": 6.8
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 62.0,
+        "margin_balance_prev": 62.0,
+        "short_balance_today": null
+      }
+    },
+    "911608": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -2.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -2.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      }
+    },
+    "911868": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -2.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -2.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": null,
+        "margin_balance_prev": null,
+        "short_balance_today": null
+      }
+    },
+    "910861": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -3.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -3.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": null,
+        "margin_balance_prev": null,
+        "short_balance_today": null
+      }
+    },
+    "6887": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -3.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -3.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1105.0,
+        "margin_balance_prev": 1074.0,
+        "short_balance_today": null
+      }
+    },
+    "6024": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -9.6,
+        "trust_lots": 0.0,
+        "dealer_lots": 3.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -9.6,
+            "trust_lots": 0.0,
+            "dealer_lots": 3.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 184.0,
+        "margin_balance_prev": 183.0,
+        "short_balance_today": null
+      }
+    },
+    "2850": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -21.2,
+        "trust_lots": 0.0,
+        "dealer_lots": 10.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -21.2,
+            "trust_lots": 0.0,
+            "dealer_lots": 10.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 288.0,
+        "margin_balance_prev": 289.0,
+        "short_balance_today": null
+      }
+    },
+    "4571": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -9.7,
+        "trust_lots": 0.0,
+        "dealer_lots": -2.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -9.7,
+            "trust_lots": 0.0,
+            "dealer_lots": -2.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1052.0,
+        "margin_balance_prev": 1054.0,
+        "short_balance_today": null
+      }
+    },
+    "9136": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -15.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -15.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 11535.0,
+        "margin_balance_prev": 11590.0,
+        "short_balance_today": 4.0
+      }
+    },
+    "6957": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -18.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -18.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1540.0,
+        "margin_balance_prev": 1536.0,
+        "short_balance_today": 24.0
+      }
+    },
+    "7749": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -21.9,
+        "trust_lots": 0.0,
+        "dealer_lots": 2.1,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -21.9,
+            "trust_lots": 0.0,
+            "dealer_lots": 2.1
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1112.0,
+        "margin_balance_prev": 1104.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "5215": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -26.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -8.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -26.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -8.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 726.0,
+        "margin_balance_prev": 702.0,
+        "short_balance_today": null
+      }
+    },
+    "2243": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -37.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -37.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1325.0,
+        "margin_balance_prev": 1320.0,
+        "short_balance_today": 6.0
+      }
+    },
+    "4560": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -50.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -50.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 298.0,
+        "margin_balance_prev": 252.0,
+        "short_balance_today": null
+      }
+    },
+    "4137": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -39.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -14.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -39.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -14.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 1110.0,
+        "margin_balance_prev": 1109.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "2236": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -102.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 1.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -102.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 1.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 11448.0,
+        "margin_balance_prev": 11443.0,
+        "short_balance_today": 3.0
+      }
+    },
+    "2812": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -302.7,
+        "trust_lots": 0.0,
+        "dealer_lots": 201.5,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -302.7,
+            "trust_lots": 0.0,
+            "dealer_lots": 201.5
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2736.0,
+        "margin_balance_prev": 2791.0,
+        "short_balance_today": 21.0
+      }
+    },
+    "5907": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -108.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 0.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -108.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 0.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 5553.0,
+        "margin_balance_prev": 5532.0,
+        "short_balance_today": 4.0
+      }
+    },
+    "2836": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -160.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 29.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -160.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 29.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 6382.0,
+        "margin_balance_prev": 6279.0,
+        "short_balance_today": 4.0
+      }
+    },
+    "6550": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -163.8,
+        "trust_lots": 0.0,
+        "dealer_lots": 12.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -163.8,
+            "trust_lots": 0.0,
+            "dealer_lots": 12.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": null,
+        "margin_balance_prev": null,
+        "short_balance_today": null
+      }
+    },
+    "6781": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -212.5,
+        "trust_lots": 0.1,
+        "dealer_lots": 5.7,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -212.5,
+            "trust_lots": 0.1,
+            "dealer_lots": 5.7
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2280.0,
+        "margin_balance_prev": 2237.0,
+        "short_balance_today": 4.0
+      }
+    },
+    "8442": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -175.0,
+        "trust_lots": 0.0,
+        "dealer_lots": -47.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -175.0,
+            "trust_lots": 0.0,
+            "dealer_lots": -47.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 635.0,
+        "margin_balance_prev": 599.0,
+        "short_balance_today": null
+      }
+    },
+    "2801": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -1421.1,
+        "trust_lots": 564.0,
+        "dealer_lots": 628.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -1421.1,
+            "trust_lots": 564.0,
+            "dealer_lots": 628.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 8163.0,
+        "margin_balance_prev": 8408.0,
+        "short_balance_today": 60.0
+      }
+    },
+    "2838": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -607.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 181.9,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -607.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 181.9
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 742.0,
+        "margin_balance_prev": 744.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "5876": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -1000.1,
+        "trust_lots": 59.0,
+        "dealer_lots": 47.7,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -1000.1,
+            "trust_lots": 59.0,
+            "dealer_lots": 47.7
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 731.0,
+        "margin_balance_prev": 713.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "1409": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -1481.3,
+        "trust_lots": 0.0,
+        "dealer_lots": 17.6,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -1481.3,
+            "trust_lots": 0.0,
+            "dealer_lots": 17.6
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 22293.0,
+        "margin_balance_prev": 22213.0,
+        "short_balance_today": null
+      }
+    },
+    "2880": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -255.8,
+        "trust_lots": -1089.0,
+        "dealer_lots": -163.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -255.8,
+            "trust_lots": -1089.0,
+            "dealer_lots": -163.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2810.0,
+        "margin_balance_prev": 2616.0,
+        "short_balance_today": 34.0
+      }
+    },
+    "2885": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -1567.7,
+        "trust_lots": -113.2,
+        "dealer_lots": 150.4,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -1567.7,
+            "trust_lots": -113.2,
+            "dealer_lots": 150.4
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2866.0,
+        "margin_balance_prev": 2886.0,
+        "short_balance_today": 1.0
+      }
+    },
+    "2845": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -1818.7,
+        "trust_lots": 0.0,
+        "dealer_lots": 78.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -1818.7,
+            "trust_lots": 0.0,
+            "dealer_lots": 78.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 4047.0,
+        "margin_balance_prev": 3725.0,
+        "short_balance_today": 19.0
+      }
+    },
+    "2881": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -2535.0,
+        "trust_lots": -3.1,
+        "dealer_lots": 124.7,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -2535.0,
+            "trust_lots": -3.1,
+            "dealer_lots": 124.7
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 6689.0,
+        "margin_balance_prev": 6408.0,
+        "short_balance_today": 274.0
+      }
+    },
+    "2890": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -2719.4,
+        "trust_lots": -224.1,
+        "dealer_lots": -184.6,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -2719.4,
+            "trust_lots": -224.1,
+            "dealer_lots": -184.6
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 2819.0,
+        "margin_balance_prev": 3067.0,
+        "short_balance_today": 32.0
+      }
+    },
+    "2884": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -11247.8,
+        "trust_lots": 4620.9,
+        "dealer_lots": -39.3,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -11247.8,
+            "trust_lots": 4620.9,
+            "dealer_lots": -39.3
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 4587.0,
+        "margin_balance_prev": 4534.0,
+        "short_balance_today": 806.0
+      }
+    },
+    "2834": {
+      "institutional": {
+        "date": "20260826",
+        "foreign_lots": -11472.0,
+        "trust_lots": 0.0,
+        "dealer_lots": 380.0,
+        "history": [
+          {
+            "date": "20260826",
+            "foreign_lots": -11472.0,
+            "trust_lots": 0.0,
+            "dealer_lots": 380.0
+          }
+        ]
+      },
+      "margin": {
+        "margin_balance_today": 25889.0,
+        "margin_balance_prev": 26208.0,
+        "short_balance_today": 21.0
+      }
+    },
+    "1589": {
+      "margin": {
+        "margin_balance_today": 647.0,
+        "margin_balance_prev": 647.0,
+        "short_balance_today": null
+      }
+    },
+    "2867": {
+      "margin": {
+        "margin_balance_today": 1289.0,
+        "margin_balance_prev": 1289.0,
+        "short_balance_today": null
       }
     }
   }

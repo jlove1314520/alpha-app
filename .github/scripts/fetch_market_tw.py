@@ -42,6 +42,25 @@ MI_INDEX_URL = "https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX"
 TPEX_INDEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_index"
 TAIFEX_FUT_URL = "https://openapi.taifex.com.tw/v1/DailyMarketReportFut"
 T86_URL = "https://www.twse.com.tw/rwd/zh/fund/T86"
+TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
+
+
+def load_tse_company_codes() -> set[str] | None:
+    """回傳全部TWSE上市「公司」代號（含金融股，T86/MI_MARGN涵蓋的範圍跟財報
+    「一般業」分類不同——金融股有融資融券/三大法人資料，只是財報格式不同，
+    2026-08-27修正前這裡錯用「financials已建立的代碼」當篩選門檻，誤把金融股
+    的三大法人資料也濾掉了，這裡改用官方公司清單當篩選門檻才正確）。抓不到
+    就回傳None，呼叫端應該退回不篩選（寧可讓ETF/權證雜訊進來，也不要誤刪
+    真正的股票資料）。"""
+    try:
+        r = requests.get(TSE_LIST_URL, timeout=15)
+        r.raise_for_status()
+        rows = r.json()
+        codes = {row.get("公司代號") for row in rows if row.get("公司代號")}
+        return codes if codes else None
+    except Exception as e:
+        print(f"抓上市公司清單失敗（改回不篩選代碼，不影響正確性只影響ETF/權證噪音多寡）：{e}")
+        return None
 
 # TWSE MI_INDEX 裡「大盤」跟少數幾個大盤變體指數的名稱，跟其餘 27 個類股指數分開處理。
 HEADLINE_NAMES = {"發行量加權股價指數"}
@@ -302,26 +321,29 @@ def main():
                 pass
         stocks = detail.setdefault("stocks", {})
         # T86（selectType=ALL）涵蓋所有證券（股票+ETF+權證+可轉債...等），不是只有
-        # 股票——實測發現高達17576筆，遠超過台股實際上市公司數。這裡只合併「已經
-        # 存在於stocks的代碼」（由update_stock_financials.py用t187ap06_L_ci「上市
-        # 公司」清單建立），不會新增權證/ETF等噪音進來，也不會setdefault創造新entry。
-        # 個股頁「外資買賣超（近5日）」長條圖需要小段歷史，但T86一次只給一天
-        # （反爬蟲風險，見模組docstring）——比照上面institutional_history同樣的
-        # 累積寫法：讀舊的history、把今天併進去、去重、只留最近5天。
+        # 股票——實測發現高達17576筆，遠超過台股實際上市公司數。
+        # **2026-08-27修正**：原本用「已經存在於stocks的代碼」（由
+        # update_stock_financials.py建立）當篩選門檻，結果誤把金融股也濾掉了——
+        # 金融股(如2881富邦金)雖然不在t187ap06_L_ci「一般業」財報名單裡，但T86
+        # 三大法人資料本來就有涵蓋，不該因為財報名單沒有就連這個也濾掉。改用
+        # 官方「上市公司清單」(t187ap03_L，含金融股，不含ETF/權證)當篩選門檻，
+        # 這樣setdefault也可以放心新增entry（不會混進ETF/權證）。
+        tse_codes = load_tse_company_codes()
         matched = 0
         for code, row in per_stock_institutional.items():
-            if code not in stocks:
+            if tse_codes is not None and code not in tse_codes:
                 continue
-            prior_hist = (stocks[code].get("institutional") or {}).get("history", [])
+            entry = stocks.setdefault(code, {})
+            prior_hist = (entry.get("institutional") or {}).get("history", [])
             hist = [h for h in prior_hist if h.get("date") != row["date"]] + [row]
             hist.sort(key=lambda h: h["date"])
             hist = hist[-5:]
-            stocks[code]["institutional"] = {**row, "history": hist}
+            entry["institutional"] = {**row, "history": hist}
             matched += 1
-        detail.setdefault("meta", {})["institutional_source"] = "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打）；只合併已存在於stock_detail.json的代碼，濾掉ETF/權證等非股票證券"
+        detail.setdefault("meta", {})["institutional_source"] = "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打）；只保留官方上市公司清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券"
         detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
         print(f"併入 {detail_path}：T86回應{len(per_stock_institutional)}筆證券，"
-              f"跟既有stocks比對後合併 {matched} 檔（其餘為ETF/權證等非股票，已濾掉）")
+              f"跟官方上市公司清單比對後合併 {matched} 檔（其餘為ETF/權證等非股票，已濾掉）")
 
     # 全部主要區塊都失敗才視為故障；任何一塊成功就算這輪有價值，不要因為 T86
     # 反爬蟲封鎖這種已知風險就讓整支腳本 exit 1 拖累其他已經抓到的資料被 commit。

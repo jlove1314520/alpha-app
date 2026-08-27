@@ -24,7 +24,6 @@ history 停在最後一筆有效資料，App 的診斷橫幅會偵測到超過3�
 from __future__ import annotations
 
 import json
-import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -36,11 +35,27 @@ TW_TZ = timezone(timedelta(hours=8))
 
 MI_MARGN_URL = "https://openapi.twse.com.tw/v1/exchangeReport/MI_MARGN"
 STOCK_DAY_ALL_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
 FINMIND_URL = (
     "https://api.finmindtrade.com/api/v4/data"
     "?dataset=TaiwanStockTotalMarginPurchaseShortSale&start_date={start}"
 )
 HISTORY_DAYS_KEEP = 60
+
+
+def load_tse_company_codes() -> set[str] | None:
+    """同fetch_market_tw.py的load_tse_company_codes()——自成一體的獨立複製，
+    不跨腳本import（見既有慣例）。用來篩選merge進stock_detail.json的代碼，
+    含金融股、不含ETF/權證。"""
+    try:
+        r = requests.get(TSE_LIST_URL, timeout=15)
+        r.raise_for_status()
+        rows = r.json()
+        codes = {row.get("公司代號") for row in rows if row.get("公司代號")}
+        return codes if codes else None
+    except Exception as e:
+        print(f"抓上市公司清單失敗（改回不篩選代碼）：{e}")
+        return None
 
 
 def _num(v):
@@ -105,10 +120,11 @@ def fetch_market_margin_money() -> tuple[str, float]:
 
 
 def merge_stock_detail_margin(per_stock: dict[str, dict]) -> None:
-    """merge進 data/stock_detail.json（個股頁「融資融券」分頁用）。只合併「已經
-    存在於stocks的代碼」（由update_stock_financials.py用t187ap06_L_ci「上市公司」
-    清單建立），避免MI_MARGN涵蓋的非股票證券（若有）灌進來造成雜訊，跟
-    fetch_market_tw.py合併三大法人時同一個原則。"""
+    """merge進 data/stock_detail.json（個股頁「融資融券」分頁用）。
+    **2026-08-27修正**：原本用「已存在於stocks的代碼」（財報「一般業」名單）
+    當篩選門檻，誤把金融股（有MI_MARGN資料，只是財報格式不同）也濾掉了。改用
+    官方上市公司清單(t187ap03_L，含金融股)當篩選門檻，同fetch_market_tw.py的
+    修正。"""
     detail_path = REPO_ROOT / "data" / "stock_detail.json"
     if not detail_path.exists():
         return
@@ -117,12 +133,14 @@ def merge_stock_detail_margin(per_stock: dict[str, dict]) -> None:
     except Exception:
         return
     stocks = detail.setdefault("stocks", {})
+    tse_codes = load_tse_company_codes()
     matched = 0
     for code, row in per_stock.items():
-        if code in stocks:
-            stocks[code]["margin"] = row
-            matched += 1
-    detail.setdefault("meta", {})["margin_source"] = "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打）"
+        if tse_codes is not None and code not in tse_codes:
+            continue
+        stocks.setdefault(code, {})["margin"] = row
+        matched += 1
+    detail.setdefault("meta", {})["margin_source"] = "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打）；只保留官方上市公司清單(t187ap03_L)內的代碼"
     detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"併入 {detail_path}：融資融券合併 {matched} 檔")
 
@@ -144,23 +162,35 @@ def main():
 
     merge_stock_detail_margin(margin_per_stock_detail)
 
+    today = datetime.now(TW_TZ).date().isoformat()
+    # 2026-08-27 修正（使用者要求）：分母（FinMind全市場融資金額）失敗時，改成
+    # 寫入一筆「今天有資料，但不完整」的明確記錄（ratio_pct=None、
+    # data_incomplete=True），不再直接跳過不寫——舊行為的問題是：跳過之後
+    # history最後一筆仍是幾天前「看起來正常」的百分比，畫面上的日期雖然沒動，
+    # 但一個正常大小的數字很容易被誤讀成「今天的維持率就是這樣」。現在即使
+    # 分母失敗，也讓App知道「今天嘗試過，但這個數字不可信」，不是靜默沿用舊值。
     try:
         fm_date, margin_money = fetch_market_margin_money()
+        data_incomplete = False
+        incomplete_reason = None
     except Exception as e:
-        print(f"分母（FinMind全市場融資金額）取得失敗，今天這筆不寫入，維持既有history：{e}")
-        sys.exit(0)  # 不算工作流程失敗——這是已知的優雅降級，不是需要人工介入的錯誤
+        print(f"分母（FinMind全市場融資金額）取得失敗：{e}")
+        fm_date, margin_money = None, None
+        data_incomplete = True
+        incomplete_reason = f"FinMind全市場融資金額取得失敗：{e}"
 
     ratio = collateral_value / margin_money * 100 if margin_money else None
-    today = datetime.now(TW_TZ).date().isoformat()
     record = {
         "date": today,
         "finmind_margin_money_date": fm_date,
-        "collateral_value": round(collateral_value),
+        "collateral_value": round(collateral_value) if collateral_value else None,
         "margin_money": margin_money,
         "matched_stocks": matched,
         "ratio_pct": round(ratio, 2) if ratio is not None else None,
+        "data_incomplete": data_incomplete,
+        "incomplete_reason": incomplete_reason,
     }
-    print(f"維持率估算：{record['ratio_pct']}%")
+    print(f"維持率估算：{record['ratio_pct']}%" if not data_incomplete else f"資料不完整：{incomplete_reason}")
 
     history = []
     if OUT_PATH.exists():
