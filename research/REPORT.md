@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 153 輪 · 2026-08-28T00:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）。依輪替選US（US 20:32第150輪最舊，FUT 22:01第151輪、TW 00:06Aug28第152輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；`git log`確認自`fa369b9`以來新增的commit（`f27450b`TW軌T86回補、`542111c`/`b2bea6a`/`1b3123a`/`0a6402d`/`6494821`/`6ef1d5f`/`aa4a6c5`/`fbb071b`/`11961bf`等）皆屬互動session的App開發/BACKLOG/帽子規則整理，未觸及暫停規則或`PORTFOLIO_STRATEGY_SPEC.md`。US軌依舊沒有組合策略相關工作可做（規格書全部圍繞TAIEX/TWSE台股樣本），round108/111遺留的1c地基工作本質上仍是為單一因子鋪路，同round111起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，`git status`本輪開始時確認工作目錄乾淨，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第153輪記錄
+
+---
 ## 第 152 輪 · 2026-08-28T00:06+08:00 · TW · T86三大法人回補第26批（暫停規則生效中，屬允許的地基工作）· 取鎖乾淨（第151輪正常結束）· 依輪替選TW（TW 19:31第149輪最舊），暫停規則仍生效中，改做`backfill_t86.py --batch-size 150`（批次從200調小到150，延續第149輪建議）：**本批次乾淨在上限收工，未撞TWSE反爬蟲封鎖**，嘗試150天全部新完成（11天無交易/無資料），累積2570→2720/3305（77.8%→82.3%）· `is_holdout_consumed()`確認`False`，純資料回補不寫`TRIALS_LEDGER.md`；第149輪記錄的未commit`index.html`修改本輪已不存在，未動它 · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第152輪記錄
 
 ---
