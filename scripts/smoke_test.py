@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """App 冒煙測試（2026-08-27 新增，使用者要求「每次改完自己跑」）。
 
-**為什麼是 Python + Playwright，不是使用者原本指定的 `scripts/smoke_test.mjs`
-（Node.js + Playwright）**：這台機器沒有安裝 Node.js/npm（實測 `node --version`
-找不到指令），但已經有 `pip install playwright` 裝好、且 `playwright install`
-下載過 Chromium（實測 `p.chromium.launch()` 成功），所以改用 Python版
-Playwright 達成一樣的檢查內容——**內容/檢查項目跟使用者規格逐條對應，只是
-執行環境從node換成python**，不是打折扣的替代方案。如果之後這台機器裝了
-Node.js，要不要另外補一份.mjs版本，可以再議。
+**這是暫時替代版本，現在有正式版了**：一開始這台機器沒裝 Node.js/npm（實測
+`node --version` 找不到指令），改用已經裝好的 Python版 Playwright 頂替。
+2026-08-27（續8）已用 `winget install OpenJS.NodeJS.LTS` 裝好 Node.js，並用
+`npm install --save-dev @playwright/test` 補上使用者原本指定的
+`scripts/smoke_test.mjs`（Node.js + Playwright）版本，已實測可正常執行——
+**兩支腳本檢查項目完全一致**，`.mjs` 是現在的主要版本，這支 `.py` 版保留
+備用（不需要重跑`npm install`就能用，環境更輕量）。
 
 **用法**：`python scripts/smoke_test.py`（預設打 `http://localhost:8792`，
 需要先在repo根目錄另開一個終端機跑 `python -m http.server 8792`；也可以用

@@ -11,3 +11,9 @@ fred_key.txt
 .env
 __pycache__/
 *.pyc
+
+# 2026-08-27新增：Node.js + Playwright（給 scripts/smoke_test.mjs 用），
+# node_modules 是可重新產生的相依套件，不是原始碼，跟 .py/.md「一律版控」
+# 的原則不衝突（那條規則是防止藏程式碼，不是要求commit相依套件）。
+node_modules/
+package-lock.json

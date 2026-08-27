@@ -16,6 +16,45 @@
 
 ---
 
+## 2026-08-27（續8）— 確認P0-1/P0-2已上線 + 補上使用者原規格的smoke_test.mjs
+
+使用者回報「時鐘還是停的」，以為P0-1/P0-2/P0-3是上一輪指定但沒做——**查證後
+確認P0-1（時鐘修復）跟P0-2（錯誤隔離）其實已經在續6完成並push（commit
+`7c2980c`），這輪(續7)完全沒碰`index.html`，所以續6的修正仍然完整存在**。
+使用者手機看到的「還是停的」最可能是`sw.js` service worker快取（CLAUDE.md
+已知地雷：改版後手機端要重新整理一兩次才會更新到最新版），已請使用者確認。
+
+**補上使用者原本就指定、但這台機器當時裝不了的`.mjs`版本**：這台機器一開始
+沒裝Node.js，續6用Python版Playwright(`scripts/smoke_test.py`)頂替。這輪用
+`winget install OpenJS.NodeJS.LTS`裝好Node.js v24.19.0，`npm install
+--save-dev @playwright/test`裝好Playwright，新增`scripts/smoke_test.mjs`
+（跟`.py`版檢查項目逐條對應）。**過程中抓到一個真bug**：`.mjs`版一開始
+把`MKT_STATE`寫成`window.MKT_STATE`，實際上`MKT_STATE`是`<script>`頂層用
+`let`宣告的變數（跟`GLOBAL_ERRORS`同一件事，不會變成window的屬性），導致
+市場切換測試那項直接拋`TypeError`——改成裸引用`MKT_STATE`/`hydrateMarket()`
+（`page.evaluate`傳函式進去時能看到頁面頂層詞法綁定）後修正。
+
+**本機實測結果（`node scripts/smoke_test.mjs`，全部通過）**：
+- [x] 1. 頁面載入無uncaught error/unhandledrejection
+- [x] 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+- [x] 3. 六個分頁都能切換且不拋錯
+- [x] 4. 主要面板都有內容（不是完全空白）
+- [x] 5. 市場頁三個市場切換都不拋錯
+
+新增`package.json`（`@playwright/test` devDependency），`.gitignore`加入
+`node_modules/`/`package-lock.json`（可重新產生的相依套件，不是原始碼，跟
+「.py/.md一律版控」原則不衝突）。`CLAUDE.md`已更新：以後`.mjs`是主要冒煙
+測試腳本，`.py`版保留備用。
+
+**使用者這輪同時給的新規則（已存進memory）**：往後例行commit+push不用先問，
+直接做；只有刪除檔案/改動holdout邏輯/接真實下單/不可逆操作才需要先問——
+理由是Cowork只看得到GitHub上的內容，不push就等於看不到進度。
+
+**下一步**：technical因子（需要每日產出個股日線價格序列JSON，
+`generate_scores_live.py`的coverage才能從目前上限0.74再往上）。
+
+---
+
 ## 2026-08-27（續7）— P1 scores.json自動化：不依賴parquet的JSON-only上線評分路徑
 
 使用者指出核心架構風險：「目前App的核心功能綁在你本機，電腦沒開就靜靜過期」。
