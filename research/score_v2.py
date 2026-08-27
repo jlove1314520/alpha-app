@@ -184,6 +184,58 @@ def _r(x):
     return round(float(x), 4)
 
 
+EPS_YOY_LOOKBACK_TRADING_DAYS = 252  # 約一年的交易日數，用來抓「去年同期」的反推EPS基準點
+
+
+def _eps_yoy_derived_from_per(d: pd.DataFrame, as_of: str) -> tuple[float | None, str | None]:
+    """earnings_growth的備援來源（2026-08-27新增，使用者指正「單點依賴FinMind
+    TaiwanStockFinancialStatements」後的修正）：用 收盤價÷本益比 反推TTM EPS，
+    分別在 as_of 跟約252個交易日前（近似一年前）兩個時點各反推一次，比較兩者
+    算出「TTM EPS年增率」的替代值。**完全不需要任何新的網路請求**——`d`裡的
+    `f_value_pe`（來自factors.py既有的`load_dev("TaiwanStockPER",...)`，已經
+    是本地parquet快取）跟`close`都已經在記憶體裡，只是重新利用既有資料換一種
+    算法，不是新資料源、不受FinMind目前IP封鎖影響。
+
+    回傳 (eps_yoy_derived, "derived_from_per_ttm")，任一步驟拿不到就回傳
+    (None, None)，呼叫端會維持原本「不可得」的處理，不會假裝有值。
+
+    **已知限制，誠實揭露**：這是「TTM反推」不是「單季年增率」，跟FinMind
+    TaiwanStockFinancialStatements算的季度年增率概念不完全相同（TTM會被過去
+    4季的整體表現平滑掉單季波動）——两者不是同一個東西的精確替代，只是同一個
+    「獲利成長方向」問題的另一種合理估計，這也是為什麼要在輸出標記
+    source="derived_from_per_ttm"，不能讓使用者誤以為兩者可以直接比較。
+    """
+    if "f_value_pe" not in d.columns or "close" not in d.columns:
+        return None, None
+    d2 = d.sort_values("date").reset_index(drop=True)
+    idx = d2.index[d2["date"] == as_of]
+    if len(idx) == 0:
+        return None, None
+    i_now = int(idx[0])
+    i_prior = i_now - EPS_YOY_LOOKBACK_TRADING_DAYS
+    if i_prior < 0:
+        return None, None  # 上市不到一年，沒有「去年同期」可比較，誠實回傳不可得
+
+    def _derived_eps(i: int) -> float | None:
+        per = d2.loc[i, "f_value_pe"]  # factors.py 裡是 -PER（方向調整過），這裡要還原成原始正值PER
+        close = d2.loc[i, "close"]
+        if pd.isna(per) or pd.isna(close):
+            return None
+        per_raw = -per
+        if per_raw <= 0:
+            return None  # 虧損公司的PER沒有意義，跟factors.py原本排除負/零PER的邏輯一致
+        return float(close) / per_raw
+
+    eps_now = _derived_eps(i_now)
+    eps_prior = _derived_eps(i_prior)
+    if eps_now is None or eps_prior is None or eps_prior == 0:
+        return None, None
+    yoy = (eps_now - eps_prior) / abs(eps_prior)
+    if not np.isfinite(yoy):
+        return None, None
+    return float(yoy), "derived_from_per_ttm"
+
+
 def compute_scores_v2(
     as_of: str, data: dict[str, pd.DataFrame], industry_map: dict[str, str], start_date: str,
 ) -> pd.DataFrame:
@@ -199,6 +251,12 @@ def compute_scores_v2(
             continue
         r = d.loc[idx[0]]
         eps_yoy = r.get("f_eps_growth", np.nan)
+        eps_source = "finmind_statements" if pd.notna(eps_yoy) else None
+        # 2026-08-27新增：主來源(FinMind財報季度年增率)失效時的備援——用PER反推
+        # TTM EPS年增率，不是另外多打新的資料源，見_eps_yoy_derived_from_per()
+        # docstring。使用者原話：「單點依賴視為架構缺陷，不是外部限制」。
+        if pd.isna(eps_yoy):
+            eps_yoy, eps_source = _eps_yoy_derived_from_per(d, as_of)
         pe = -r["f_value_pe"] if pd.notna(r.get("f_value_pe")) else np.nan
         peg = pe / (eps_yoy * 100) if pd.notna(pe) and pd.notna(eps_yoy) and eps_yoy > 0 else np.nan
         if not np.isfinite(peg):
@@ -213,6 +271,7 @@ def compute_scores_v2(
             "stock_id": sid,
             "industry": industry_map.get(sid, "UNKNOWN"),
             "raw_eps_yoy": eps_yoy,
+            "eps_yoy_source": eps_source,
             "raw_inst_flow": r.get("f_inst_flow", np.nan),
             "raw_ma_breakout": r.get("f_ma_breakout", np.nan),
             "raw_pe": pe,
@@ -297,7 +356,7 @@ def compute_scores_v2(
 
 def _raw_dict(key: str, row: pd.Series) -> dict:
     if key == "earnings_growth":
-        return {"eps_yoy": _r(row["raw_eps_yoy"])}
+        return {"eps_yoy": _r(row["raw_eps_yoy"]), "eps_yoy_source": row.get("eps_yoy_source")}
     if key == "revenue_momentum":
         return {
             "rev_yoy": _r(row["raw_rev_yoy"]),  # 已過基期門檻+硬上限，None=基期太小/無效
@@ -314,7 +373,7 @@ def _raw_dict(key: str, row: pd.Series) -> dict:
     if key == "technical":
         return {"ma60_breakout_x_volume_index": _r(row["raw_ma_breakout"])}
     if key == "valuation_adj":
-        return {"pe": _r(row["raw_pe"]), "eps_yoy": _r(row["raw_eps_yoy"]), "peg": _r(row["raw_peg"])}
+        return {"pe": _r(row["raw_pe"]), "eps_yoy": _r(row["raw_eps_yoy"]), "eps_yoy_source": row.get("eps_yoy_source"), "peg": _r(row["raw_peg"])}
     return {}
 
 

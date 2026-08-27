@@ -42,6 +42,25 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 FM_BASE = "https://api.finmindtrade.com/api/v4/data"
 
+# 2026-08-27 新增：使用者指出這台機器目前被FinMind IP封鎖（非單純額度用盡），
+# 懷疑是呼叫過於頻繁——這裡之前完全沒有任何速率限制，300檔抽樣每檔好幾個
+# 因子各打一次，等於短時間內連續幾千次請求，沒有任何節流。加一個全域的
+# 「兩次真正網路請求之間至少間隔0.35秒」節流（快取命中不算，只節流真正打
+# 出去的請求），沒辦法解除現有的封鎖，但至少不會讓研究馬拉松/選股評分繼續
+# 用同樣不節制的節奏加重或延長下一次封鎖。0.35秒是保守估計值，之後如果仍
+# 觀察到封鎖就要再拉長，不是精確調校過的數字。
+_MIN_CALL_INTERVAL_SEC = 0.35
+_last_call_ts = 0.0
+
+
+def _throttle() -> None:
+    global _last_call_ts
+    now = time.monotonic()
+    wait = _MIN_CALL_INTERVAL_SEC - (now - _last_call_ts)
+    if wait > 0:
+        time.sleep(wait)
+    _last_call_ts = time.monotonic()
+
 
 def _cache_path(dataset: str, data_id: str, start_date: str, end_date: str | None) -> Path:
     id_part = data_id or "ALL"
@@ -83,6 +102,7 @@ def _fetch(
     last_err: Exception | None = None
     for attempt in range(max_retries):
         try:
+            _throttle()
             resp = requests.get(FM_BASE, params=params, timeout=timeout)
             if 400 <= resp.status_code < 500:
                 # Client error (bad dataset name, bad params, paid-tier gate) -- this will

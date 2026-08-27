@@ -15,20 +15,24 @@
 跑得越久歷史就越完整，不需要一次補歷史區間。
 
 資料源（全部官方開放資料，不需要金鑰，實測見 `research/DATA.md` 第474行附近）：
-- 月營收：`openapi.twse.com.tw/v1/opendata/t187ap05_L`——全市場最新一期月營收快照，
-  官方已經算好「去年同月增減(%)」，不需要自己拿前期資料做除法。
-- 本益比/殖利率/淨值比：`openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL`——全市場
-  最新一期 PER/PBR/殖利率快照。
+- 月營收：`openapi.twse.com.tw/v1/opendata/t187ap05_L`（TWSE上市）/
+  `www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_OB`（TPEx上櫃，2026-08-27新增）
+  ——全市場最新一期月營收快照，官方已經算好「去年同月增減(%)」，不需要自己拿
+  前期資料做除法。
+- 本益比/殖利率/淨值比：`openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL`
+  （TWSE上市）/ `www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis`
+  （TPEx上櫃，2026-08-27新增）——全市場最新一期PER/PBR/殖利率快照。
 
-**已知限制，誠實揭露**：這兩個端點只涵蓋 TWSE 上市股票，不含 TPEx 上櫃股票——
-上櫃股票的月營收/PER只能維持用 2026-08-27 那次手動快照的舊資料，不會被這支腳本
-更新（跟`build_fundamentals_json.py`docstring提過的限制是同一類問題，這裡不重複
-解一次，範圍內誠實記錄即可）。
+**2026-08-27修正**：先前這裡誤記「TPEx上櫃股票無對應公開資料」，實際上
+TPEx有對應的官方openapi端點（見上），已補上——**單點依賴一個市場的端點、
+沒有先確認另一個市場是否也有對應資料源，是這裡先前的架構缺陷，不是
+外部真的沒有資料**。
 """
 from __future__ import annotations
 
 import json
 import sys
+import time
 import requests
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -39,6 +43,29 @@ TW_TZ = timezone(timedelta(hours=8))
 
 REVENUE_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap05_L"
 RATIOS_URL = "https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL"
+# 2026-08-27新增：TPEx（上櫃）官方對應端點，補上使用者指出的「上櫃股票缺口」——
+# 這兩個端點欄位命名跟TWSE版本略有不同（見各自fetch函式），但語意對應。
+TPEX_RATIOS_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis"
+TPEX_REVENUE_URL = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_OB"
+
+
+def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+    """同 update_stock_financials.py 的 _get_retry()——自成一體複製，不跨檔案
+    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。"""
+    last_err = None
+    for attempt in range(max_retries):
+        try:
+            r = requests.get(url, **kwargs)
+        except requests.exceptions.RequestException as e:
+            last_err = e
+            if attempt < max_retries - 1:
+                time.sleep(backoff_base * (2 ** attempt))
+            continue
+        if 500 <= r.status_code < 600 and attempt < max_retries - 1:
+            time.sleep(backoff_base * (2 ** attempt))
+            continue
+        return r
+    raise last_err if last_err else RuntimeError(f"GET {url} failed after {max_retries} attempts")
 
 MONTHS_TO_KEEP = 8
 
@@ -70,7 +97,7 @@ def _roc_yearmonth(s: str) -> tuple[int, int] | None:
 
 
 def fetch_ratios() -> dict[str, dict]:
-    r = requests.get(RATIOS_URL, timeout=30)
+    r = _get_retry(RATIOS_URL, timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -91,7 +118,7 @@ def fetch_ratios() -> dict[str, dict]:
 
 
 def fetch_revenue() -> dict[str, dict]:
-    r = requests.get(REVENUE_URL, timeout=30)
+    r = _get_retry(REVENUE_URL, timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -116,6 +143,54 @@ def fetch_revenue() -> dict[str, dict]:
     return out
 
 
+def fetch_ratios_tpex() -> dict[str, dict]:
+    """TPEx（上櫃）版PER/PBR/殖利率，2026-08-27新增。欄位命名跟TWSE版
+    （`fetch_ratios()`）不同：`SecuritiesCompanyCode`/`PriceEarningRatio`/
+    `PriceBookRatio`/`YieldRatio`，語意對應但不是同一組鍵名。"""
+    r = _get_retry(TPEX_RATIOS_URL, timeout=30)
+    r.raise_for_status()
+    rows = r.json()
+    if not isinstance(rows, list):
+        raise RuntimeError("tpex_mainboard_peratio_analysis 回傳非預期格式（可能是無效路徑回傳的HTML）")
+    out: dict[str, dict] = {}
+    for row in rows:
+        code = row.get("SecuritiesCompanyCode")
+        if not code:
+            continue
+        date_iso = _roc_date_to_iso(row.get("Date", ""))
+        out[code] = {
+            "date": date_iso,
+            "per": _num(row.get("PriceEarningRatio")),
+            "pbr": _num(row.get("PriceBookRatio")),
+            "dividend_yield": _num(row.get("YieldRatio")),
+        }
+    return out
+
+
+def fetch_revenue_tpex() -> dict[str, dict]:
+    """TPEx（上櫃）版月營收，2026-08-27新增。欄位命名跟TWSE版
+    （`fetch_revenue()`）完全相同（同屬MOPS財報格式），可以重用同一套解析邏輯。"""
+    r = _get_retry(TPEX_REVENUE_URL, timeout=30)
+    r.raise_for_status()
+    rows = r.json()
+    if not isinstance(rows, list):
+        raise RuntimeError("mopsfin_t187ap05_OB 回傳非預期格式（可能是無效路徑回傳的HTML）")
+    out: dict[str, dict] = {}
+    for row in rows:
+        code = row.get("公司代號")
+        ym = _roc_yearmonth(row.get("資料年月", ""))
+        revenue_thousand = _num(row.get("營業收入-當月營收"))
+        if not code or not ym or revenue_thousand is None:
+            continue
+        yoy_pct = _num(row.get("營業收入-去年同月增減(%)"))
+        out[code] = {
+            "year": ym[0], "month": ym[1],
+            "revenue": revenue_thousand * 1000,  # 同TWSE版一樣是「仟元」，見fetch_revenue()註解
+            "yoy": round(yoy_pct / 100, 4) if yoy_pct is not None else None,
+        }
+    return out
+
+
 def merge_revenue(existing: list[dict] | None, latest: dict) -> list[dict]:
     rows = list(existing or [])
     rows = [r for r in rows if not (r.get("year") == latest["year"] and r.get("month") == latest["month"])]
@@ -135,6 +210,7 @@ def main():
 
     errors = []
     ratios_updated = revenue_updated = 0
+    ratios_updated_tpex = revenue_updated_tpex = 0
 
     try:
         ratios = fetch_ratios()
@@ -142,8 +218,8 @@ def main():
             fundamentals.setdefault(code, {})["ratios"] = r
         ratios_updated = len(ratios)
     except Exception as e:
-        print(f"PER/PBR/殖利率 更新失敗：{e}")
-        errors.append(f"ratios: {e}")
+        print(f"PER/PBR/殖利率(TWSE) 更新失敗：{e}")
+        errors.append(f"ratios_twse: {e}")
 
     try:
         revenue = fetch_revenue()
@@ -152,25 +228,51 @@ def main():
             entry["month_revenue"] = merge_revenue(entry.get("month_revenue"), latest)
         revenue_updated = len(revenue)
     except Exception as e:
-        print(f"月營收 更新失敗：{e}")
-        errors.append(f"revenue: {e}")
+        print(f"月營收(TWSE) 更新失敗：{e}")
+        errors.append(f"revenue_twse: {e}")
+
+    # 2026-08-27新增：上櫃(TPEx)股票，使用者指出「上櫃股票一律加入TPEx自己的
+    # openapi作為來源，不要只用TWSE端點」。TPEx代碼跟TWSE代碼不會重複（不同
+    # 市場），直接setdefault合併不會互相覆蓋。
+    try:
+        ratios_tpex = fetch_ratios_tpex()
+        for code, r in ratios_tpex.items():
+            fundamentals.setdefault(code, {})["ratios"] = r
+        ratios_updated_tpex = len(ratios_tpex)
+    except Exception as e:
+        print(f"PER/PBR/殖利率(TPEx) 更新失敗：{e}")
+        errors.append(f"ratios_tpex: {e}")
+
+    try:
+        revenue_tpex = fetch_revenue_tpex()
+        for code, latest in revenue_tpex.items():
+            entry = fundamentals.setdefault(code, {})
+            entry["month_revenue"] = merge_revenue(entry.get("month_revenue"), latest)
+        revenue_updated_tpex = len(revenue_tpex)
+    except Exception as e:
+        print(f"月營收(TPEx) 更新失敗：{e}")
+        errors.append(f"revenue_tpex: {e}")
 
     payload["meta"] = {
         "generated_at": datetime.now(TW_TZ).isoformat(),
         "snapshot_note": (
             "起始種子是 2026-08-27 手動執行 build_fundamentals_json.py 的一次性快照"
             "（讀研究端FinMind歷史parquet快取整理，涵蓋TWSE+TPEx），此後由這支"
-            "update_fundamentals_daily.py 排程改用TWSE官方openapi累積更新——"
-            "月營收/PER/PBR/殖利率每次只更新TWSE官方端點回傳的「最新一期」，"
-            "同年月覆蓋、新年月append且只保留近8個月。TPEx上櫃股票的月營收/PER"
-            "官方端點無對應公開資料，維持沿用手動快照的舊值，不會被這支腳本更新。"
+            "update_fundamentals_daily.py 排程改用官方openapi累積更新——"
+            "月營收/PER/PBR/殖利率每次只更新官方端點回傳的「最新一期」，"
+            "同年月覆蓋、新年月append且只保留近8個月。2026-08-27修正：TPEx上櫃股票"
+            "改用TPEx自己的openapi（tpex_mainboard_peratio_analysis/"
+            "mopsfin_t187ap05_OB）更新，之前誤記「無對應公開資料」，實際上有。"
         ),
         "ratios_updated_count": ratios_updated,
         "revenue_updated_count": revenue_updated,
+        "ratios_updated_count_tpex": ratios_updated_tpex,
+        "revenue_updated_count_tpex": revenue_updated_tpex,
         "errors": errors,
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-    print(f"寫入 {OUT_PATH}：PER/PBR/殖利率更新 {ratios_updated} 檔，月營收更新 {revenue_updated} 檔"
+    print(f"寫入 {OUT_PATH}：PER/PBR/殖利率更新 TWSE {ratios_updated} 檔+TPEx {ratios_updated_tpex} 檔，"
+          f"月營收更新 TWSE {revenue_updated} 檔+TPEx {revenue_updated_tpex} 檔"
           f"（合計 {len(fundamentals)} 檔有資料）")
     if errors:
         print(f"部分失敗（不中止，維持既有資料）：{errors}")

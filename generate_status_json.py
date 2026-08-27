@@ -170,6 +170,24 @@ def status_from_age(generated_at: str | None, stale_hours: float) -> str:
 INTENTIONALLY_EMPTY = {"paper_trades.json"}
 
 
+def describe_scores(path: Path) -> dict:
+    """scores.json（2026-08-27新增追蹤，使用者要求）——注意這個檔案在repo根目錄，
+    不在data/底下，跟其他data_files是不同的產生管線（research/generate_scores_v2.py
+    本機/排程產生，不是.github/scripts/那批GitHub Actions腳本）。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    stocks = d.get("stocks", [])
+    coverages = [s.get("coverage") for s in stocks if s.get("coverage") is not None]
+    avg_coverage = round(sum(coverages) / len(coverages), 3) if coverages else None
+    return {
+        "generated_at": meta.get("generated_at"),
+        "records": len(stocks),
+        "source": "research/generate_scores_v2.py（本機/排程執行，非GitHub Actions自動排程——見known_limitations）",
+        "detail": f"universe_size={meta.get('universe_size')} avg_coverage={avg_coverage} "
+                  f"weights_hash={(meta.get('weights_hash') or '')[:12]}",
+    }
+
+
 def build_data_files() -> list[dict]:
     out = []
     for path in sorted(DATA_DIR.glob("*.json")):
@@ -186,6 +204,13 @@ def build_data_files() -> list[dict]:
             entry["status"] = "ok"
         else:
             entry["status"] = status_from_age(info.get("generated_at"), STALE_HOURS.get(rel, 24))
+        out.append(entry)
+
+    scores_path = REPO_ROOT / "scores.json"
+    if scores_path.exists():
+        info = describe_scores(scores_path)
+        entry = {"path": "scores.json", **info}
+        entry["status"] = status_from_age(info.get("generated_at"), 30 * 24)  # 目前無排程，門檻放寬到30天避免持續紅字
         out.append(entry)
     return out
 
@@ -270,25 +295,91 @@ APP_DATA_SOURCES = [
     {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "無（尚無交易紀錄，誠實佔位）"},
 ]
 
+# 2026-08-27新增（使用者要求）：每個關鍵欄位的「主來源→備援→推導→標示不可得」
+# 回退鏈，架構層文件——單點依賴視為架構缺陷，不是外部限制（使用者原話）。
+FIELD_FALLBACK_CHAINS = [
+    {
+        "field": "EPS（每股盈餘）／earnings_growth因子",
+        "chain": [
+            "1. FinMind TaiwanStockFinancialStatements（季度財報EPS年增率，research pipeline既有）",
+            "2. 用PER反推TTM EPS（source=\"derived_from_per_ttm\"）：收盤價÷本益比，"
+            "在as_of跟約252個交易日前各反推一次算年增率——完全用已快取的PER+價格"
+            "時間序列，不需要新的網路請求（2026-08-27新增，score_v2.py::_eps_yoy_derived_from_per()）",
+            "3. yfinance trailingEps（尚未實作，列為後續項目）",
+            "4. 標示不可得（factors欄位不出現在該檔的factors物件裡）",
+        ],
+        "source_marking": "scores.json每檔的factors.earnings_growth.raw.eps_yoy_source標記實際用哪一層",
+    },
+    {
+        "field": "月營收",
+        "chain": [
+            "1. TWSE openapi t187ap05_L（上市）/ TPEx openapi mopsfin_t187ap05_OB（上櫃，"
+            "2026-08-27新增）——每日排程累積式更新，見update_fundamentals_daily.py",
+            "2. 研究端FinMind TaiwanStockMonthRevenue快取（2026-08-27手動快照的種子資料，"
+            "上述官方端點更新不到的舊值）",
+            "3. 標示不可得",
+        ],
+        "source_marking": "fundamentals.json目前未逐筆標記來源是TWSE或TPEx（兩者都寫進同一個month_revenue結構），"
+                          "之後如需精確稽核要另外補上per-entry的source欄位",
+    },
+    {
+        "field": "價量（股價/成交量）",
+        "chain": [
+            "1. TWSE MIS即時行情（quotes_tw.json，盤中）/ yfinance TWD=X等（quotes_us.json）",
+            "2. TWSE STOCK_DAY單股歷史日線（sparkline用，僅TWSE上市，2026-08-27新增，"
+            "需要瀏覽器風格Referer/User-Agent才不會間歇性429，見fetch_quotes_tw.py）",
+            "3. FinMind TaiwanStockPrice/USStockPrice（個股頁走勢圖，尚未遷移，仍在用）",
+            "4. 標示不可得",
+        ],
+        "source_marking": "quotes_tw.json每檔的sparkline_date欄位記錄該筆sparkline實際抓取日期",
+    },
+    {
+        "field": "本益比/淨值比（PER/PBR）",
+        "chain": [
+            "1. TWSE openapi BWIBBU_ALL（上市）/ TPEx openapi tpex_mainboard_peratio_analysis"
+            "（上櫃，2026-08-27新增）——每日排程累積式更新",
+            "2. 自行由EPS/BPS計算（尚未實作——目前若BWIBBU/TPEx兩者都失敗就直接標不可得，"
+            "沒有再用stock_detail.json的EPS+t187ap07的淨值反推PER/PBR這一層，是可以再補的一層）",
+            "3. 標示不可得",
+        ],
+        "source_marking": "fundamentals.json每檔的ratios.date記錄實際取得日期",
+    },
+    {
+        "field": "上櫃(TPEx)股票總則",
+        "chain": [
+            "2026-08-27修正：fundamentals.json（PER/PBR/月營收）已補上TPEx對應端點，不再"
+            "只靠TWSE。stock_detail.json（財報EPS/毛利率/ROE、三大法人、融資融券）跟"
+            "quotes_tw.json的sparkline目前仍只有TWSE版本，上櫃股票這幾項還是空缺"
+            "——不是「TPEx沒有對應資料」（TPEx其實有t187ap06_O系列財報端點），"
+            "是還沒接，見todo。",
+        ],
+        "source_marking": None,
+    },
+]
+
 TODO = [
-    {"item": "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券", "priority": "P2", "blocker": "FinMind僅提供台股這幾類資料，TWSE官方資料也只涵蓋台股，暫無替代來源"},
-    {"item": "個股頁財報FCF永久缺口", "priority": "P2", "blocker": "TWSE官方開放資料無現金流量表端點（已查證swagger完整清單確認），非暫時性，需另尋資料源才能補上"},
-    {"item": "個股頁財報(EPS/毛利率/ROE)僅涵蓋TWSE上市「一般業」", "priority": "P2", "blocker": "金融控股/證券/保險等特殊產業分類的財報格式跟一般業不同，TWSE另外分開發布(t187ap06_L_bd/fh/ins/mim等)，尚未處理；三大法人/融資融券不受此限制，已涵蓋全部上市公司含金融股"},
-    {"item": "個股頁自選股sparkline約24檔上櫃股票查不到", "priority": "P2", "blocker": "TWSE STOCK_DAY端點是TWSE專屬，不涵蓋TPEx上櫃股票，尚未找到TPEx對應的逐股歷史端點"},
-    {"item": "個股走勢圖(價格歷史)脫離FinMind", "priority": "P2", "blocker": "2026-08-27評估：可行，跟sparkline同一個TWSE STOCK_DAY端點（TW）/yfinance（US），只是要決定涵蓋範圍（quotes.json既有~150檔宇宙 vs 任意搜尋結果）跟歷史長度，尚未實作，不是無來源"},
-    {"item": "主流題材chips 脫離FinMind", "priority": "P2", "blocker": "2026-08-27評估：MI_INDEX(已用於market_tw.json)有類股價格/漲跌%，但沒有成交值(資金流向需要的量)，尚未找到TWSE官方逐類股成交值端點；此項與使用者要求的「題材生命週期」功能設計高度相關，建議合併處理"},
-    {"item": "期貨籌碼(三大法人期貨部位) 脫離FinMind", "priority": "P2", "blocker": "2026-08-27評估：探測過TAIFEX openapi常見端點命名(OpenInterestOfLargeTradersFutures等)，只找到「大額交易人」未平倉資料(跟三大法人分類不同)，尚未找到逐法人期貨部位的官方端點，需要人工查閱TAIFEX網站或聯繫其資料窗口確認，不是確定無來源"},
-    {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE官方無對應的全市場融資金額(元)開放資料端點，只有逐股融資餘額(張)，已查證swagger清單確認；2026-08-27已改為：該次呼叫失敗時明確寫入data_incomplete=true，App顯示「資料不完整」而非沿用舊值（使用者要求的「或」選項，已完成這部分）"},
+    {"item": "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券", "priority": "P2", "blocker": "FinMind僅提供台股這幾類資料，TWSE/TPEx官方資料也只涵蓋台股，暫無替代來源"},
+    {"item": "個股頁財報FCF", "priority": "P2", "blocker": "2026-08-27重新查證：TWSE/TPEx openapi都無現金流量表端點；MOPS網頁查詢有現金流量表但其查詢端點(ajax_t164sb04)重新實測仍被反爬蟲擋（FOR SECURITY REASONS），需要處理session/cookie才能過關——是「需要額外工程投入」不是「不存在」，尚未投入"},
+    {"item": "stock_detail.json財報(EPS/毛利率/ROE)僅涵蓋TWSE上市「一般業」，上櫃/金融控股/證券/保險未涵蓋", "priority": "P2", "blocker": "TPEx其實有對應端點(mopsfin_t187ap06_O_ci等)，TWSE金融股也有(t187ap06_L_bd/fh/ins/mim等)，只是還沒接——已知可行，非無來源"},
+    {"item": "個股頁自選股sparkline約24檔上櫃股票查不到（quotes_tw.json）", "priority": "P2", "blocker": "TWSE STOCK_DAY端點是TWSE專屬，尚未找到TPEx對應的逐股歷史日線端點（注意：這跟fundamentals.json的TPEx PER/月營收已修正是不同的資料/不同端點）"},
+    {"item": "個股走勢圖(價格歷史)脫離FinMind", "priority": "P2", "blocker": "可行，跟sparkline同一個TWSE STOCK_DAY端點（TW）/yfinance（US），只是要決定涵蓋範圍跟歷史長度，尚未實作"},
+    {"item": "主流題材chips 脫離FinMind", "priority": "P2", "blocker": "MI_INDEX有類股價格/漲跌%但無成交值，尚未找到TWSE官方逐類股成交值端點；跟使用者要求的「題材生命週期」功能設計高度相關，建議合併處理"},
+    {"item": "期貨籌碼(三大法人期貨部位) 脫離FinMind", "priority": "P2", "blocker": "探測過TAIFEX openapi常見端點命名，只找到「大額交易人」資料(跟三大法人分類不同)，需人工查閱TAIFEX網站確認"},
+    {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE/TPEx官方均無對應端點，只有逐股融資餘額(張)；已完成：該次呼叫失敗時明確寫入data_incomplete=true，App顯示「資料不完整」而非沿用舊值"},
+    {"item": "scores.json未掛進GitHub Actions每日排程，停留在特定日期", "priority": "P1", "blocker": "研究pipeline（factor_ic.py/adjust.py等）大量依賴本機research/data/raw/parquet快取（gitignored，GitHub Actions runner每次是全新checkout、完全沒有這份快取），直接掛進CI會變成每次都要對300檔逐檔冷啟動抓取，速度更慢、更容易撞到FinMind額度/IP限制；尚未決定解法（例如把快取選擇性提交、或改用不依賴深度歷史快取的計算方式），暫時維持本機/手動執行"},
+    {"item": "月營收/PER來源沒有逐筆標記是TWSE或TPEx", "priority": "P2", "blocker": "fundamentals.json目前TWSE跟TPEx資料寫進同一個結構，沒有per-entry的來源標記，之後要精確稽核需要補上"},
+    {"item": "PER/PBR缺乏「自行由EPS/BPS計算」這一層備援", "priority": "P2", "blocker": "目前fundamentals.json的PER/PBR只有BWIBBU_ALL/TPEx兩層，沒有再用stock_detail.json的EPS+資產負債表淨值反推這一層備援"},
     {"item": "CLAUDE.md候選：美股報價/AI盤前日報真新聞/Phase2券商下單研究", "priority": "P2", "blocker": "尚未排序，等使用者指示"},
 ]
 
 KNOWN_LIMITATIONS = [
-    "fundamentals.json：TPEx上櫃股票的月營收/PER不會被update_fundamentals_daily.py更新（TWSE官方端點只涵蓋上市），停留在2026-08-27手動快照的舊值。",
-    "margin_maintenance.json：2026-08-27起改為market.yml排程自動更新，但分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史，風險遠低於之前逐股迴圈），若這次呼叫失敗當天不會寫入新資料、history停在最後一筆有效值。",
-    "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」（t187ap06_L_ci分類），金融控股/證券/保險等特殊產業分類查不到；三大法人/融資融券已涵蓋全部上市公司（含金融股，2026-08-27修正過度篩選的bug，之前誤用財報名單當篩選門檻連金融股的三大法人/融資融券也濾掉了，現改用官方上市公司清單t187ap03_L）。上櫃(TPEx)股票三者皆查不到。FCF（自由現金流）永久性缺口——TWSE官方無現金流量表開放資料端點。",
-    "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬），這些代碼的quotes條目就是沒有sparkline欄位。",
+    "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
+    "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。三大法人/融資融券已涵蓋全部上市公司含金融股（2026-08-27修正過度篩選的bug）。FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
+    "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬）。",
     "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券（FinMind僅提供台股這幾類資料）。",
     "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",
+    "2026-08-27發現：這台機器目前曾被FinMind IP封鎖過（非單純額度用盡），research/finmind_client.py原本完全沒有請求節流——已加上每次真正網路請求間至少0.35秒的節流，但這只能降低未來再次觸發封鎖的機率，無法解除已經發生的封鎖，也不是精確調校過的數字。",
+    "scores.json（選股頁分數）不在任何GitHub Actions排程內，只能本機/手動執行後commit，data_asof會停在最後一次手動執行的日期，見todo的架構性blocker說明。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
 ]
 
@@ -300,6 +391,7 @@ def main():
         "data_files": build_data_files(),
         "workflows": build_workflows(),
         "app_data_sources": APP_DATA_SOURCES,
+        "field_fallback_chains": FIELD_FALLBACK_CHAINS,
         "todo": TODO,
         "known_limitations": KNOWN_LIMITATIONS,
     }

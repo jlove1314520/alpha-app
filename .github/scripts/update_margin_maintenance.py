@@ -24,6 +24,7 @@ history 停在最後一筆有效資料，App 的診斷橫幅會偵測到超過3�
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -43,12 +44,31 @@ FINMIND_URL = (
 HISTORY_DAYS_KEEP = 60
 
 
+def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+    """同 update_stock_financials.py 的 _get_retry()——自成一體複製，不跨檔案
+    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。"""
+    last_err = None
+    for attempt in range(max_retries):
+        try:
+            r = requests.get(url, **kwargs)
+        except requests.exceptions.RequestException as e:
+            last_err = e
+            if attempt < max_retries - 1:
+                time.sleep(backoff_base * (2 ** attempt))
+            continue
+        if 500 <= r.status_code < 600 and attempt < max_retries - 1:
+            time.sleep(backoff_base * (2 ** attempt))
+            continue
+        return r
+    raise last_err if last_err else RuntimeError(f"GET {url} failed after {max_retries} attempts")
+
+
 def load_tse_company_codes() -> set[str] | None:
     """同fetch_market_tw.py的load_tse_company_codes()——自成一體的獨立複製，
     不跨腳本import（見既有慣例）。用來篩選merge進stock_detail.json的代碼，
     含金融股、不含ETF/權證。"""
     try:
-        r = requests.get(TSE_LIST_URL, timeout=15)
+        r = _get_retry(TSE_LIST_URL, timeout=15)
         r.raise_for_status()
         rows = r.json()
         codes = {row.get("公司代號") for row in rows if row.get("公司代號")}
@@ -70,7 +90,7 @@ def _num(v):
 def fetch_margin_by_stock() -> tuple[dict[str, float], dict[str, dict]]:
     """回傳 (代號:融資今日餘額張數（給維持率算擔保品市值用）,
     代號:{today,prev,short_today}（給個股頁「融資融券」分頁用，merge進stock_detail.json）)。"""
-    r = requests.get(MI_MARGN_URL, timeout=30)
+    r = _get_retry(MI_MARGN_URL, timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -92,7 +112,7 @@ def fetch_margin_by_stock() -> tuple[dict[str, float], dict[str, dict]]:
 
 
 def fetch_close_by_stock() -> dict[str, float]:
-    r = requests.get(STOCK_DAY_ALL_URL, timeout=30)
+    r = _get_retry(STOCK_DAY_ALL_URL, timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -108,7 +128,7 @@ def fetch_close_by_stock() -> dict[str, float]:
 
 def fetch_market_margin_money() -> tuple[str, float]:
     start = (datetime.now(TW_TZ).date() - timedelta(days=10)).isoformat()
-    r = requests.get(FINMIND_URL.format(start=start), timeout=30)
+    r = _get_retry(FINMIND_URL.format(start=start), timeout=30)
     r.raise_for_status()
     data = r.json()
     rows = data.get("data", [])

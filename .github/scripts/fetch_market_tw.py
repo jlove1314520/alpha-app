@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import requests
 import yfinance as yf
 from datetime import datetime, timedelta, timezone
@@ -45,6 +46,27 @@ T86_URL = "https://www.twse.com.tw/rwd/zh/fund/T86"
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
 
 
+def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+    """同 update_stock_financials.py 的 _get_retry()——自成一體複製，不跨檔案
+    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。
+    **刻意不用在T86_URL**：T86有反爬蟲風險（見下方fetch_institutional_aggregate
+    docstring），重試可能加重被封鎖的機率，那裡維持單次嘗試。"""
+    last_err = None
+    for attempt in range(max_retries):
+        try:
+            r = requests.get(url, **kwargs)
+        except requests.exceptions.RequestException as e:
+            last_err = e
+            if attempt < max_retries - 1:
+                time.sleep(backoff_base * (2 ** attempt))
+            continue
+        if 500 <= r.status_code < 600 and attempt < max_retries - 1:
+            time.sleep(backoff_base * (2 ** attempt))
+            continue
+        return r
+    raise last_err if last_err else RuntimeError(f"GET {url} failed after {max_retries} attempts")
+
+
 def load_tse_company_codes() -> set[str] | None:
     """回傳全部TWSE上市「公司」代號（含金融股，T86/MI_MARGN涵蓋的範圍跟財報
     「一般業」分類不同——金融股有融資融券/三大法人資料，只是財報格式不同，
@@ -53,7 +75,7 @@ def load_tse_company_codes() -> set[str] | None:
     就回傳None，呼叫端應該退回不篩選（寧可讓ETF/權證雜訊進來，也不要誤刪
     真正的股票資料）。"""
     try:
-        r = requests.get(TSE_LIST_URL, timeout=15)
+        r = _get_retry(TSE_LIST_URL, timeout=15)
         r.raise_for_status()
         rows = r.json()
         codes = {row.get("公司代號") for row in rows if row.get("公司代號")}
@@ -80,7 +102,7 @@ def fetch_mi_index() -> tuple[dict | None, list[dict]]:
     等主題式指數跟真正的產業分類指數——只有名稱以「類指數」結尾的才是 TWSE 官方
     28 類產業分類（實測 2026-08-26：37 筆符合，比 App 原本示範資料的 8 大類更完整），
     其餘主題式指數不放進「類股表現」清單，避免混淆。"""
-    r = requests.get(MI_INDEX_URL, timeout=15)
+    r = _get_retry(MI_INDEX_URL, timeout=15)
     r.raise_for_status()
     rows = r.json()
     headline = None
@@ -118,7 +140,7 @@ def fetch_tpex_index() -> dict | None:
     # 疑似缺欄位，不是我們這端設定錯）。main() 已經把每個資料源包在各自的 try/except
     # 裡，這裡失敗只會讓 out["tpex"]=None，不會讓整支腳本連台股大盤/期貨都抓不到，
     # 是設計內的優雅降級，不是需要特別處理的例外。
-    r = requests.get(TPEX_INDEX_URL, timeout=15)
+    r = _get_retry(TPEX_INDEX_URL, timeout=15)
     r.raise_for_status()
     rows = r.json()
     if not rows:
@@ -141,7 +163,7 @@ def fetch_taifex_contracts() -> dict[str, dict]:
     """一次呼叫涵蓋 TAIFEX_CONTRACTS 全部合約（TAIFEX 這個端點本來就回傳全市場
     所有合約，不是只有 TX，這裡只是從同一份回應多篩幾種代碼，不需要多打幾次
     API）。回傳 {contract_code: {...}}，抓不到的代碼不會出現在結果字典裡。"""
-    r = requests.get(TAIFEX_FUT_URL, timeout=15)
+    r = _get_retry(TAIFEX_FUT_URL, timeout=15)
     r.raise_for_status()
     rows = r.json()
     out: dict[str, dict] = {}

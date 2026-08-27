@@ -37,6 +37,7 @@ sha256 完整性驗證），套用進 `score_v2.FACTOR_DEFS` 後才開始算分�
 """
 from __future__ import annotations
 
+import json
 import random
 import sys
 from pathlib import Path
@@ -78,6 +79,18 @@ def main(top_n: int | None = None, out_path: str = "../scores.json",
     print(f"已套用凍結權重 weights_frozen.json（frozen_at={frozen['frozen_at']}，"
           f"sha256={frozen['weights_sha256'][:12]}...）")
 
+    # 2026-08-27新增（使用者要求的風險防護）：coverage門檻0.5跟實際值0.54只差
+    # 0.04，任一因子失效就可能讓合格檔數暴跌——先讀舊檔案的筆數當基準，跑完後
+    # 比較，如果新筆數低於舊筆數的50%就要大聲報警，不能安靜地生出一份空/小榜單
+    # 讓人誤以為「今天剛好符合條件的股票比較少」。
+    prior_count = None
+    out_file = Path(__file__).parent / out_path
+    if out_file.exists():
+        try:
+            prior_count = len(json.loads(out_file.read_text(encoding="utf-8")).get("stocks", []))
+        except Exception:
+            prior_count = None
+
     sample_ids = sample_scores_universe_ids(sample_size, sample_seed)
     with as_of_today() as as_of:
         from yf_price_client import fetch_yf_index
@@ -111,6 +124,22 @@ def main(top_n: int | None = None, out_path: str = "../scores.json",
     print(f"已產生 {out_path}，{len(cs)} 檔計算出分數，基準日 {as_of}")
     if not cs.empty:
         print(cs[["industry", "total_score", "coverage", "rank"]].head(10).to_string())
+
+    # 收尾：跟舊檔案比對合格檔數，暴跌就寫警告進meta（不是另外寫檔，直接補進
+    # 剛產生的scores.json，STATUS.json/App診斷橫幅之後可以檢查這個欄位）。
+    try:
+        payload = json.loads(out_file.read_text(encoding="utf-8"))
+        new_count = len(payload.get("stocks", []))
+        collapse = prior_count is not None and prior_count > 0 and new_count < prior_count * 0.5
+        payload.setdefault("meta", {})["coverage_collapse_warning"] = collapse
+        payload["meta"]["prior_run_stock_count"] = prior_count
+        if collapse:
+            print(f"⚠ 警告：合格檔數從 {prior_count} 暴跌到 {new_count}（低於前次的50%），"
+                  f"已寫入 meta.coverage_collapse_warning=true，不是安靜略過")
+        out_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        print(f"合格檔數暴跌檢查本身失敗（不影響scores.json主體已經寫成功）：{e}")
+
     return cs
 
 
