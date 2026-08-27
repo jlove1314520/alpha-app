@@ -65,6 +65,15 @@ None。改讀`research/build_company_info.py`一次性建置的`data/company_inf
 
 以上任何一項未來要補，原則不變：先問「有沒有第二條路、能不能從已有欄位推導」，
 不是直接放棄——已經在STATUS.json的known_limitations列出，供之後排優先序。
+
+**2026-08-27（P1-新）選股改為「全市場+資料完整度」，取消coverage<0.5硬性排除**
+（使用者裁示）：原本用`COVERAGE_MIN_FOR_RANKING`(0.5)排除約一半股票不進
+`stocks[]`——改成**全部進榜**，`coverage`（資料完整度）跟`missing_factors`
+（缺哪幾項因子）都誠實寫進每筆輸出，由App前端用視覺條+弱化樣式呈現，不是
+伺服器端先幫使用者篩選掉。**流動性門檻維持不變**（使用者原話「這條是對的，
+不要拿掉」）：這輪新增用`data/price_history.json`的turnover算近20日均成交值，
+低於`LIQUIDITY_FLOOR_20D_VALUE`的股票`rank`留`null`+標記「流動性不足」（沿用
+研究端score_v2.py既有設計），不是完全從清單移除。
 """
 from __future__ import annotations
 
@@ -80,7 +89,10 @@ import pandas as pd
 
 import score_v2
 from score_live import apply_frozen_weights, load_frozen_weights
-from score_v2 import COVERAGE_MIN_FOR_RANKING, REVENUE_BASE_FLOOR, REVENUE_YOY_HARD_CAP, _pct_score, _r
+from score_v2 import (
+    COVERAGE_MIN_FOR_RANKING, LIQUIDITY_FLOOR_20D_VALUE, REVENUE_BASE_FLOOR,
+    REVENUE_YOY_HARD_CAP, _pct_score, _r,
+)
 
 REPO_ROOT = Path(__file__).parent.parent
 FUNDAMENTALS_PATH = REPO_ROOT / "data" / "fundamentals.json"
@@ -187,6 +199,18 @@ def _ma_breakout(price_rows: list[dict]) -> float | None:
     return float(result) if np.isfinite(result) else None
 
 
+def _liquidity_20d(price_rows: list[dict]) -> float | None:
+    """近20日均成交值——2026-08-27新增（使用者P1-新要求「保留流動性門檻」）。
+    跟research端score_v2.py的LIQUIDITY_FLOOR_20D_VALUE同一個概念，這裡改用
+    data/price_history.json的turnover欄位（2026-08-27才開始累積，可能不足
+    20天，有多少算多少，至少要有1天才算，不到1天回傳None）。"""
+    rows = [r for r in price_rows if r.get("turnover") is not None]
+    if not rows:
+        return None
+    rows = sorted(rows, key=lambda r: r["date"])[-20:]
+    return sum(r["turnover"] for r in rows) / len(rows)
+
+
 def _chips_signal(institutional: dict | None) -> float | None:
     if not institutional:
         return None
@@ -218,7 +242,9 @@ def build_rows() -> pd.DataFrame:
         fd = fundamentals.get(code, {})
         sd = stock_detail.get(code, {})
         fin = sd.get("financials", {})
-        ma_breakout = _ma_breakout(price_history.get(code) or [])
+        price_rows = price_history.get(code) or []
+        ma_breakout = _ma_breakout(price_rows)
+        liquidity_20d = _liquidity_20d(price_rows)
 
         eps_yoy = _eps_yoy_from_quarters(fin.get("quarters") or [])
         eps_source = "stock_detail_quarters" if eps_yoy is not None else None
@@ -245,6 +271,7 @@ def build_rows() -> pd.DataFrame:
             "raw_inst_flow": chips,
             "raw_pe": pe, "raw_peg": peg,
             "raw_ma_breakout": ma_breakout,
+            "liquidity_20d": liquidity_20d,
         })
 
     cs = pd.DataFrame(rows).set_index("stock_id")
@@ -407,12 +434,27 @@ def main():
             "weights": {k: v["weight"] for k, v in score_v2.FACTOR_DEFS.items()}, "stocks": [],
         }
     else:
-        eligible = cs[cs["coverage"] >= COVERAGE_MIN_FOR_RANKING].copy()
-        eligible = eligible.sort_values("total_score", ascending=False)
-        eligible["display_rank"] = range(1, len(eligible) + 1)
+        # 2026-08-27修正（使用者P1-新裁示，取代舊的coverage<0.5硬性排除）：
+        # 「選股改為全市場+資料完整度，不要用門檻排除」——341/2586檔、平均
+        # coverage 0.597，門檻把約一半直接踢掉。改成全部進榜，coverage當成
+        # 「資料完整度」揭露欄位（前端用視覺條+弱化樣式呈現，不是伺服器端
+        # 藏起來），使用者可以自己用完整度排序/篩選。
+        # 流動性門檻維持（使用者原話：「這條是對的，不要拿掉」）——2026-08-27
+        # 這輪才新增，用data/price_history.json的turnover算近20日均成交值，
+        # 低於LIQUIDITY_FLOOR_20D_VALUE的標記「流動性不足」，不給數字排名
+        # （沿用research端score_v2.py的既有設計：流動性不足的股票留在清單
+        # 供搜尋，但不進主排行榜的排名）。
+        cs["liquidity_insufficient"] = (
+            cs["liquidity_20d"].isna() | (cs["liquidity_20d"] < LIQUIDITY_FLOOR_20D_VALUE)
+        )
+        ranked = cs.sort_values(["liquidity_insufficient", "total_score"], ascending=[True, False]).copy()
+        liquidity_ok_mask = ~ranked["liquidity_insufficient"]
+        ranked.loc[liquidity_ok_mask, "display_rank"] = range(1, int(liquidity_ok_mask.sum()) + 1)
+
         stocks = []
-        for sid, row in eligible.iterrows():
+        for sid, row in ranked.iterrows():
             present = [k for k in score_v2.FACTOR_DEFS if pd.notna(row.get(f"{k}_score"))]
+            missing = [k for k in score_v2.FACTOR_DEFS if k not in present]
             factors_obj = {
                 k: {
                     "score": round(float(row[f"{k}_score"]), 1),
@@ -421,34 +463,48 @@ def main():
                     "reason": _reason(k, row),
                 } for k in present
             }
+            flags = []
+            if row["liquidity_insufficient"]:
+                flags.append("流動性不足")
+            if row["coverage"] < COVERAGE_MIN_FOR_RANKING:
+                flags.append("資料稀疏，分數僅供參考")
+            display_rank = row.get("display_rank")
             stocks.append({
                 "code": sid, "name": name_map.get(sid),
                 "industry": (company_info.get(sid) or {}).get("industry"),
-                "rank": int(row["display_rank"]),
+                "rank": int(display_rank) if pd.notna(display_rank) else None,
                 "total_score": round(float(row["total_score"]), 1),
                 "coverage": round(float(row["coverage"]), 2),
+                "missing_factors": missing,
+                "liquidity_20d": _r(row.get("liquidity_20d")),
                 "data_asof": as_of,
                 "summary": _summary(row, present),
                 "factors": factors_obj,
-                "flags": [],
+                "flags": flags,
                 "news_warning": None,
             })
+        avg_coverage = round(float(cs["coverage"].mean()), 3)
         payload = {
             "meta": {
                 "engine_version": "scoring-live-json",
                 "generated_at": datetime.now(TW_TZ).isoformat(),
                 "data_asof": as_of, "market": "TW",
                 "universe_size": len(cs),
+                "avg_coverage": avg_coverage,
+                "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE,
                 "weights_hash": frozen["weights_sha256"],
                 "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json"
                            "+data/company_info.json（不讀parquet、不呼叫FinMind），"
                            "供GitHub Actions每日排程使用，見generate_scores_live.py檔頭說明。",
                 "disclaimer": (
                     "非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。"
-                    "這是JSON-only上線評分路徑，analyst/catalyst兩項全市場沒有資料源、"
-                    "technical用未還原權息的收盤價（除權息前後會失真）、revenue_momentum未做"
-                    "規模分層——已依coverage規則重新分配權重，不會把沒資料當成0分，"
-                    "細節見generate_scores_live.py檔頭的已知限制說明。"
+                    "2026-08-27改版：不再用coverage<0.5排除股票，全市場都進榜——"
+                    "總分跟「資料完整度」(coverage)是兩件事，高分低完整度不代表可信，"
+                    "請一併參考每檔的coverage數值跟missing_factors清單。"
+                    "analyst/catalyst兩項全市場沒有資料源、technical用未還原權息的收盤價"
+                    "（除權息前後會失真）、revenue_momentum未做規模分層——已依coverage"
+                    "規則重新分配權重，不會把沒資料當成0分，細節見"
+                    "generate_scores_live.py檔頭的已知限制說明。"
                 ),
             },
             "weights": {k: v["weight"] for k, v in score_v2.FACTOR_DEFS.items()},
@@ -456,9 +512,24 @@ def main():
         }
 
     new_count = len(payload["stocks"])
-    collapse = prior_count is not None and prior_count > 0 and new_count < prior_count * 0.5
+    # 2026-08-27修正：移除coverage門檻後，股票數量不太會再暴跌（全部都進榜），
+    # 這個安全網原本盯的「合格檔數暴跌」訊號已經不夠敏感——改成盯「平均coverage
+    # 暴跌」，一個真的讓多數因子失效的bug還是會讓avg_coverage大幅下降，即使
+    # 股票總數沒變。
+    prior_avg_coverage = None
+    if OUT_PATH.exists():
+        try:
+            prior_avg_coverage = json.loads(OUT_PATH.read_text(encoding="utf-8")).get("meta", {}).get("avg_coverage")
+        except Exception:
+            prior_avg_coverage = None
+    new_avg_coverage = payload["meta"].get("avg_coverage")
+    collapse = (
+        prior_avg_coverage is not None and new_avg_coverage is not None
+        and prior_avg_coverage > 0 and new_avg_coverage < prior_avg_coverage * 0.5
+    )
     payload["meta"]["coverage_collapse_warning"] = collapse
     payload["meta"]["prior_run_stock_count"] = prior_count
+    payload["meta"]["prior_run_avg_coverage"] = prior_avg_coverage
     if collapse:
         # 2026-08-27修正：Windows終端機cp950編碼印"⚠"會直接UnicodeEncodeError
         # 崩潰整支腳本（在write_text之前，等於這次分數完全沒寫出去）——跟

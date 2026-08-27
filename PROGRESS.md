@@ -16,6 +16,47 @@
 
 ---
 
+## 2026-08-27（續12）— 新增repo根目錄CLAUDE.md常駐規則 + P1選股改為全市場+資料完整度
+
+使用者要求建立repo根目錄`CLAUDE.md`（常駐工作規則：開工序/單一進行中/
+插隊保護/驗收標準/收工序/自動push/資料原則/安全紅線），已建立並commit
+（`cb7340a`）。使用者後續一度回報CLAUDE.md/BACKLOG.md「沒有出現」，查證
+`git ls-remote`+`git show origin/main`確認兩檔案確實已在遠端最新commit，
+判斷是使用者端快取問題，非漏做——已附證據回報，未重複建立。
+
+**P1-新 選股改為「全市場+資料完整度」（使用者裁示，取代舊的coverage<0.5
+硬性門檻）**：
+- `generate_scores_live.py`：移除伺服器端`coverage>=COVERAGE_MIN_FOR_RANKING`
+  排除，全部2,586檔都寫進`scores.json`（原本只有341檔合格）；每筆新增
+  `missing_factors`欄位；**新增流動性門檻**（這條JSON-only路徑原本完全
+  沒有）——用`data/price_history.json`的turnover算近20日均成交值，低於
+  `LIQUIDITY_FLOOR_20D_VALUE`的標記「流動性不足」、`rank`留null不進數字
+  排名（沿用研究端score_v2.py既有設計，使用者原話「這條是對的，不要拿
+  掉」）；安全網從「合格檔數暴跌」改成「平均coverage暴跌」（因為現在全部
+  進榜，檔數不再是敏感訊號）。
+- `index.html`：`pickRowHtml()`低完整度卡片降不透明度至0.62+加註「資料
+  稀疏，分數僅供參考（缺XX、YY）」，不隱藏；選股頁新增固定說明「總分與
+  資料完整度是兩件事」。
+- 驗證：原本因bug造成假高分的6225/6810（單因子、coverage僅0.10-0.12）
+  現在`rank=null`+雙重標記「流動性不足」+「資料稀疏」，正確不進數字排名；
+  2344（華邦電，coverage 0.54）仍正常排名第1、無標記。
+
+**冒煙測試（`node scripts/smoke_test.mjs`，2026-08-27 21:18，全部通過）**：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+```
+
+**下一步（依BACKLOG.md順序）**：TPEx上櫃三大法人/融資融券資料缺口補齊
+（🔄進行中）→ 美股盤前盤後 → 財報行事曆。
+
+---
+
 ## 2026-08-27（續11）— B4類股卡可點擊 + 冒煙測試新增check6/7（親自抓到真bug）+ BACKLOG.md驗收制度
 
 使用者這輪要求「依序做，做完一項回報一項」+「驗收標準改變：完成=冒煙測試

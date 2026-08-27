@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T20:50:25.026655+08:00",
-  "latest_commit": "0c993fd",
+  "updated_at": "2026-08-27T21:20:35.612501+08:00",
+  "latest_commit": "611af3c",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -100,10 +100,10 @@
     },
     {
       "path": "scores.json",
-      "generated_at": "2026-08-27T20:47:55.242599+08:00",
-      "records": 341,
+      "generated_at": "2026-08-27T21:16:11.284275+08:00",
+      "records": 2586,
       "source": "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，JSON-only，不依賴parquet/FinMind）",
-      "detail": "engine_version=scoring-live-json universe_size=2586 avg_coverage=0.597 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",
+      "detail": "engine_version=scoring-live-json universe_size=2586 avg_coverage=0.341 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",
       "status": "ok"
     }
   ],

@@ -545,6 +545,10 @@
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
+    <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
+         固定顯示在排行榜正上方，不是藏在角落的小字。 -->
+    <div class="note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
+      高分但資料完整度低的股票分數僅供參考、不代表可信——卡片變淡、加註「資料稀疏」的就是這種情況。</div>
 
     <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
     <div class="press" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
@@ -2407,17 +2411,22 @@
     return v.toFixed(0);
   }
   function pickRowHtml(r){
+    // 2026-08-27修正（P1-新，使用者裁示「選股改為全市場+資料完整度，不要用
+    // 門檻排除」）：coverage不再是伺服器端排除條件，這裡改成「視覺弱化」——
+    // 低完整度的卡片降低整體不透明度+加註「資料稀疏」，但仍然完整顯示，
+    // 不隱藏、不排除。流動性門檻維持不變（不進數字排名，rank會是null）。
     const lowCov=r.coverage<0.5;
     const lowLiq=(r.flags||[]).includes('流動性不足');
     const topPick=r.rank===1;
+    const missingLabels=(r.missing_factors||[]).map(k=>FACTOR_LABELS[k]||k);
     return `
-    <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px" onclick="showReport('${r.code}')">
+    <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px;opacity:${lowCov?0.62:1}" onclick="showReport('${r.code}')">
       <div style="display:flex;align-items:center;gap:12px">
         <div class="num" style="width:24px;text-align:center;font-size:15px;font-weight:700;color:${topPick?'var(--gold)':'var(--ink-3)'}">${r.rank??'—'}</div>
         <div class="nm" style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><b style="font-size:15.5px">${pickLabel(r)}</b>${r.industry?`<span style="font-size:9.5px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">${r.industry}</span>`:''}</div>
-          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料不足 · 僅供參考</span>':''}${lowLiq?'<br><span style="color:#c9524a">⚠ 流動性不足 · 不進排行榜</span>':''}</div>
-          <div style="font-size:10px;color:var(--ink-4);margin-top:2px">近20日均成交值 ${fmtLiquidity(r.liquidity_20d)}元</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${r.summary||''}${lowCov?'<br><span style="color:#c9a35a">⚠ 資料稀疏，分數僅供參考'+(missingLabels.length?'（缺'+missingLabels.join('、')+'）':'')+'</span>':''}${lowLiq?'<br><span style="color:#c9524a">⚠ 流動性不足 · 不進數字排名</span>':''}</div>
+          <div style="font-size:10px;color:var(--ink-4);margin-top:2px">近20日均成交值 ${fmtLiquidity(r.liquidity_20d)}元 · 資料完整度 ${Math.round(r.coverage*100)}%</div>
         </div>
         <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
       </div>
