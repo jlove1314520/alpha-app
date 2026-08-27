@@ -150,18 +150,28 @@ def main():
             "這代表merge邏輯有bug，已中止寫入，不要用這份結果覆蓋既有檔案。"
         )
 
+    # 2026-08-27修正（P0-2，使用者回報STATUS.json顯示fundamentals.json是error
+    # 狀態才發現）：這裡原本是`payload = {"meta": {"snapshot_note": ...}, ...}`，
+    # 整個meta被換成只有snapshot_note一個key的新dict，把update_fundamentals_daily.py
+    # daily排程寫進去的`generated_at`/`ratios_updated_count`/`errors`等欄位全部
+    # 覆寫掉——STATUS.json的describe_fundamentals()讀不到generated_at就回報
+    # status=error，即使資料本身(2597檔)完全沒問題，是「meta被誤清空」的假警報，
+    # 不是資料管線真的壞掉。改成merge進existing_payload的meta，只新增/更新
+    # snapshot_note這個key，其他既有欄位原樣保留。
+    meta = dict(existing_payload.get("meta", {}))
+    meta["snapshot_note"] = (
+        "起始種子是手動執行 build_fundamentals_json.py 讀研究端FinMind歷史"
+        "parquet快取整理而成；此後 update_fundamentals_daily.py 排程改用"
+        "TWSE+TPEx官方openapi每日累積更新ratios/month_revenue，覆蓋率已超過"
+        "種子當下的數字。2026-08-27修正：這支腳本重跑時改成merge既有檔案"
+        "（保留daily排程已經更即時的ratios/month_revenue，只補revenue_history_"
+        "scoring這個新欄位或本機快取有、daily排程還沒抓到的股票），不再直接"
+        "覆寫整份檔案——之前重跑會把daily排程累積的覆蓋率砍掉，是bug。"
+        "2026-08-27（續）再修正：連meta本身也曾被整個換掉，把generated_at等"
+        "daily排程欄位一起清空過，現在改成只更新snapshot_note這個key。"
+    )
     payload = {
-        "meta": {
-            "snapshot_note": (
-                "起始種子是手動執行 build_fundamentals_json.py 讀研究端FinMind歷史"
-                "parquet快取整理而成；此後 update_fundamentals_daily.py 排程改用"
-                "TWSE+TPEx官方openapi每日累積更新ratios/month_revenue，覆蓋率已超過"
-                "種子當下的數字。2026-08-27修正：這支腳本重跑時改成merge既有檔案"
-                "（保留daily排程已經更即時的ratios/month_revenue，只補revenue_history_"
-                "scoring這個新欄位或本機快取有、daily排程還沒抓到的股票），不再直接"
-                "覆寫整份檔案——之前重跑會把daily排程累積的覆蓋率砍掉，是bug。"
-            ),
-        },
+        "meta": meta,
         "fundamentals": fundamentals,
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")

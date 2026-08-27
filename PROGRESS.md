@@ -16,6 +16,67 @@
 
 ---
 
+## 2026-08-27（續10）— P0-1補齊12處遺漏錯誤記錄 + P0-2修好fundamentals.json假error + P1發現並修正EPS年增率真bug
+
+使用者這輪明確指出「P0-1已延後四輪，風險更高」+「fundamentals.json顯示
+error」+「要求對榜首/代號名稱做合理性抽查」。逐項處理，**過程中抓到兩個
+真的bug，不是空手而歸的複查**。
+
+**P0-1 錯誤隔離複查**：時鐘修復(setInterval先註冊/null檢查/try-catch)、
+window層級error/unhandledrejection攔截，這些在續6(commit `7c2980c`)就已經
+完成上線，這輪沒有回歸。但**全檔案掃描抓到12處先前遺漏「catch沒有呼叫
+recordGlobalError」的地方**（`WL`自選股讀取、`fmCacheRead`、
+`loadFundamentals`/`loadStockDetail`、`loadStrategies`、`readRC`/`readNotif`/
+`readBroker`、選股頁載入、分批進場計算、about頁sw版本、強制更新清快取），
+全部補上console.warn+recordGlobalError。用`node scripts/smoke_test.mjs`
+驗證全數通過（時鐘3秒內呼叫3-4次、六分頁切換不拋錯、市場三市場切換不拋錯）。
+
+**P0-2 fundamentals.json的error狀態，查明是「我自己的bug」不是排程壞了**：
+根因是續7`build_fundamentals_json.py`重跑時，`payload["meta"]`整個被換成
+只有`snapshot_note`一個key的新dict，把daily排程寫的`generated_at`欄位一起
+清空——STATUS.json的`describe_fundamentals()`讀不到`generated_at`就回報
+status=error，**資料本身2597檔完全沒問題，是meta被誤清空的假警報**。已修正
+`build_fundamentals_json.py`改成merge進既有meta（只更新snapshot_note，不
+動其他key），並重跑`update_fundamentals_daily.py`（daily排程本身從來沒壞）
+恢復`generated_at`，STATUS.json確認status已變回ok。**這個安全網原本就存在**
+（`index.html`的`updateDiagBanner()`早就會在fundamentals過期時顯示警示，
+不會安靜地用舊值算分——這輪只是修復根因，不是新增這個機制）。
+
+**P1 抽查1：華邦電(2344)六項爆9.6~10.0，抓到真bug**——追查發現
+`_eps_yoy_from_quarters()`算「去年同季EPS」時分母是-0.29（2025Q2虧損），
+`(now-prior)/abs(prior)`這個公式在基期趨近零時會爆出失真的+1962%，不是
+真的成長19倍。修正：去年同季EPS非正值時YoY%視為不適用（回傳None，不進
+這個因子排名），基期為正時仍套用±200%硬上限（同月營收既有規則）。修正後
+重跑：**合格檔數從1346暴跌到341**（`coverage_collapse_warning`正確觸發，
+但這是修好bug的正確結果，不是新問題——之前的1346有一部分是靠這個bug
+「免費」拿到earnings_growth+valuation_adj兩項權重才跨過0.5門檻，修好後
+確實該掉出榜單）。2344修正後total_score從9.8變9.9但**因子只剩4項**
+（revenue_momentum/growth_quality/chips/technical，coverage 0.54，
+earnings_growth/valuation_adj正確地不再參與）。過程中另外抓到一個
+Windows終端機`cp950`印⚠字元會讓腳本崩潰、導致scores.json完全沒寫出去
+的地雷（跟CLAUDE.md記錄過的"・"同一類），已改用純ASCII警告字樣修正。
+
+**P1 抽查2：代號→名稱→產業，10檔裡9檔正確，1檔缺名**——6265顯示「方土昶」
+經FinMind官方TaiwanStockInfo交叉驗證**確認正確**（電子通路業，不是誤判）；
+唯一問題是6820顯示name=null，因為原本`name`只讀`quotes_tw.json`（僅使用者
+自選股報價）。**追查發現更大範圍問題**：全市場多數股票的name/industry都是
+null。新增`research/build_company_info.py`（讀FinMind`TaiwanStockInfo`快取
+一次性建置`data/company_info.json`，涵蓋全市場3137檔），修正後
+`generate_scores_live.py`的341檔合格清單**全部有name**（0缺）。**industry
+另外發現一個FinMind原始資料本身的歧義**：約19%（603/3137）股票在同一天
+有兩種不同產業分類（例：2344同一天被標「半導體業」跟「電子工業」）——
+不是排序/快取問題，是FinMind資料本身矛盾，這裡誠實回傳None不猜，寧可
+顯示「—」也不要顯示可能錯的分類。
+
+**驗證**：所有改動/新增的JSON/Python檔案通過驗證，`node scripts/smoke_test.mjs`
+全數PASS。
+
+**下一步**：analyst/catalyst無資料源（暫無解）；還原權息後的收盤價；
+PER歷史累積檔（補earnings_growth的PER反推EPS備援）；603檔industry歧義
+（需要人工判斷或找更權威的產業分類來源）。
+
+---
+
 ## 2026-08-27（續9）— technical因子上線：新增每日個股OHLCV價量歷史JSON
 
 使用者指示：「處理technical因子（需要每日產出個股日線價格序列JSON，coverage

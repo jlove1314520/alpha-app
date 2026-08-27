@@ -1203,7 +1203,7 @@
 
   // ══════ 真實資料層（FinMind，瀏覽器直抓，免後端）══════
   const FM="https://api.finmindtrade.com/api/v4/data";
-  let WL=(()=>{try{return JSON.parse(localStorage.getItem('alpha_wl'))||["2330","2454","2317","1513","3231"]}catch(e){return ["2330","2454","2317","1513","3231"]}})();
+  let WL=(()=>{try{return JSON.parse(localStorage.getItem('alpha_wl'))||["2330","2454","2317","1513","3231"]}catch(e){console.warn('[WL]',e);recordGlobalError('WL',e);return ["2330","2454","2317","1513","3231"]}})();
   let currentCode="2330";
   const _cache={};
   const FM_TTL=3*60*1000; // localStorage 快取有效期：3 分鐘，過期後才重新打 FinMind
@@ -1224,7 +1224,7 @@
       const raw=localStorage.getItem('fmc_'+k);if(!raw)return null;
       const o=JSON.parse(raw);if(Date.now()-o.t>FM_TTL)return null;
       _cache[k]=o.d;return o.d;
-    }catch(e){return null}
+    }catch(e){console.warn('[fmCacheRead]',e);recordGlobalError('fmCacheRead',e);return null}
   }
   function fmCacheWrite(k,d){
     _cache[k]=d;
@@ -1359,7 +1359,7 @@
   let FUNDAMENTALS_CACHE=null;
   async function loadFundamentals(code){
     if(!FUNDAMENTALS_CACHE){
-      try{const r=await fetch('data/fundamentals.json?t='+Date.now());if(r.ok)FUNDAMENTALS_CACHE=await r.json()}catch(e){FUNDAMENTALS_CACHE={fundamentals:{}}}
+      try{const r=await fetch('data/fundamentals.json?t='+Date.now());if(r.ok)FUNDAMENTALS_CACHE=await r.json()}catch(e){console.warn('[loadFundamentals]',e);recordGlobalError('loadFundamentals',e);FUNDAMENTALS_CACHE={fundamentals:{}}}
     }
     return (FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.fundamentals&&FUNDAMENTALS_CACHE.fundamentals[code])||{};
   }
@@ -1372,7 +1372,7 @@
   let STOCK_DETAIL_CACHE=null;
   async function loadStockDetail(code){
     if(!STOCK_DETAIL_CACHE){
-      try{const r=await fetch('data/stock_detail.json?t='+Date.now());if(r.ok)STOCK_DETAIL_CACHE=await r.json()}catch(e){STOCK_DETAIL_CACHE={stocks:{}}}
+      try{const r=await fetch('data/stock_detail.json?t='+Date.now());if(r.ok)STOCK_DETAIL_CACHE=await r.json()}catch(e){console.warn('[loadStockDetail]',e);recordGlobalError('loadStockDetail',e);STOCK_DETAIL_CACHE={stocks:{}}}
     }
     return (STOCK_DETAIL_CACHE&&STOCK_DETAIL_CACHE.stocks&&STOCK_DETAIL_CACHE.stocks[code])||{};
   }
@@ -2123,6 +2123,7 @@
       }
       el.innerHTML=list.map(strategyCardHtml).join('');
     }catch(e){
+      console.warn('[loadStrategies]',e);recordGlobalError('loadStrategies',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
     }
   }
@@ -2160,7 +2161,7 @@
 
   // ══════ 設定頁：券商備註／風控參數／通知偏好都存 localStorage ══════
   const RC_DEFAULT={dailyLoss:35000,maxPosition:20,maxHoldings:5};
-  function readRC(){try{const s=localStorage.getItem('alpha_rc');return s?{...RC_DEFAULT,...JSON.parse(s)}:{...RC_DEFAULT}}catch(e){return{...RC_DEFAULT}}}
+  function readRC(){try{const s=localStorage.getItem('alpha_rc');return s?{...RC_DEFAULT,...JSON.parse(s)}:{...RC_DEFAULT}}catch(e){console.warn('[readRC]',e);recordGlobalError('readRC',e);return{...RC_DEFAULT}}}
   function loadRiskControl(){
     const rc=readRC();
     const dl=document.getElementById('rc-daily-loss'),mp=document.getElementById('rc-max-position'),mh=document.getElementById('rc-max-holdings');
@@ -2178,7 +2179,7 @@
   }
 
   const NOTIF_DEFAULT={daily:true,event:true,price:false};
-  function readNotif(){try{const s=localStorage.getItem('alpha_notif');return s?{...NOTIF_DEFAULT,...JSON.parse(s)}:{...NOTIF_DEFAULT}}catch(e){return{...NOTIF_DEFAULT}}}
+  function readNotif(){try{const s=localStorage.getItem('alpha_notif');return s?{...NOTIF_DEFAULT,...JSON.parse(s)}:{...NOTIF_DEFAULT}}catch(e){console.warn('[readNotif]',e);recordGlobalError('readNotif',e);return{...NOTIF_DEFAULT}}}
   function loadNotif(){
     const n=readNotif();
     Object.keys(n).forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!n[k])});
@@ -2189,7 +2190,7 @@
     localStorage.setItem('alpha_notif',JSON.stringify(n));
   }
 
-  function readBroker(){try{const s=localStorage.getItem('alpha_broker');return s?JSON.parse(s):{tw:'',us:''}}catch(e){return{tw:'',us:''}}}
+  function readBroker(){try{const s=localStorage.getItem('alpha_broker');return s?JSON.parse(s):{tw:'',us:''}}catch(e){console.warn('[readBroker]',e);recordGlobalError('readBroker',e);return{tw:'',us:''}}}
   function loadBroker(){
     const b=readBroker();
     const tw=document.getElementById('set-broker-tw'),us=document.getElementById('set-broker-us');
@@ -2242,6 +2243,7 @@
       renderPicks(json);
       stampUpdated('picks');
     }catch(e){
+      console.warn('[loadPicks]',e);recordGlobalError('loadPicks',e);
       listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
       document.getElementById('picks-asof-line').textContent='—';
     }
@@ -2446,6 +2448,7 @@
           <span class="num" style="font-size:10px;color:var(--ink-4);width:34px;text-align:right">${t.pct}%</span>
         </div>`).join('')+`</div>`;
     }catch(e){
+      console.warn('[renderReport:tranches]',e);recordGlobalError('renderReport:tranches',e);
       planEl.innerHTML='<div class="note">分批進場價位計算失敗（'+e.message+'）。</div>';
     }
   }
@@ -2493,7 +2496,7 @@
       const swText=await fetch('sw.js?_='+Date.now(),{cache:'no-store'}).then(r=>r.text());
       const m=swText.match(/CACHE\s*=\s*'([^']+)'/);
       setTxt('about-sw-ver',m?m[1]:'讀不到');
-    }catch(e){setTxt('about-sw-ver','讀取失敗')}
+    }catch(e){console.warn('[loadAboutVersions]',e);recordGlobalError('loadAboutVersions',e);setTxt('about-sw-ver','讀取失敗')}
     const reg=await navigator.serviceWorker.getRegistration().catch(()=>null);
     if(!reg){setTxt('about-sw-status','尚未註冊');return}
     setTxt('about-sw-status',reg.active?'已啟用':(reg.installing?'安裝中':(reg.waiting?'等待啟用':'未知')));
@@ -2511,6 +2514,7 @@
       toast('已清除快取，重新整理中…');
       setTimeout(()=>location.reload(true),400);
     }catch(e){
+      console.warn('[forceUpdate]',e);recordGlobalError('forceUpdate',e);
       toast('強制更新失敗：'+e.message);
     }
   }
@@ -2550,7 +2554,7 @@
   const FX_NOTE_IDS=['home-fx-note','trade-fx-note','settings-fx-note'];
   let FX_CACHE=null;
   async function fetchFx(){
-    try{const r=await fetch('data/fx.json?t='+Date.now());if(r.ok)FX_CACHE=await r.json()}catch(e){FX_CACHE=null}
+    try{const r=await fetch('data/fx.json?t='+Date.now());if(r.ok)FX_CACHE=await r.json()}catch(e){console.warn('[fetchFx]',e);recordGlobalError('fetchFx',e);FX_CACHE=null}
     const usd=FX_CACHE&&FX_CACHE.usd_twd;
     if(!usd||usd.rate==null){FX_RATE=null;FX_DATE=null;renderFxNote();return}
     FX_RATE=usd.rate;FX_DATE=usd.date;

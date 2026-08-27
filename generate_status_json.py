@@ -147,6 +147,21 @@ def describe_price_history(path: Path) -> dict:
     }
 
 
+def describe_company_info(path: Path) -> dict:
+    """company_info.json（2026-08-27新增，P1抽查發現generate_scores_live.py
+    多數股票name/industry是null後補上）——靜態參考資料（公司名稱不常變動），
+    不用age-based新鮮度判斷，用INTENTIONALLY_EMPTY同一套機制固定回報ok。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    companies = d.get("companies", {})
+    return {
+        "generated_at": None,
+        "records": len(companies),
+        "source": meta.get("source"),
+        "detail": meta.get("industry_ambiguous_note", ""),
+    }
+
+
 def describe_paper_trades(path: Path) -> dict:
     d = json.loads(path.read_text(encoding="utf-8"))
     return {
@@ -168,6 +183,7 @@ DESCRIBERS = {
     "fx.json": describe_fx,
     "stock_detail.json": describe_stock_detail,
     "price_history.json": describe_price_history,
+    "company_info.json": describe_company_info,
 }
 
 
@@ -186,7 +202,7 @@ def status_from_age(generated_at: str | None, stale_hours: float) -> str:
 
 # 這些檔案的「無資料/generated_at為null」是刻意設計（尚未串接真實資料源），不是
 # 排程失敗，用age-based判斷會誤標成error，這裡明確排除、固定回報"ok"。
-INTENTIONALLY_EMPTY = {"paper_trades.json"}
+INTENTIONALLY_EMPTY = {"paper_trades.json", "company_info.json"}
 
 
 def describe_scores(path: Path) -> dict:
