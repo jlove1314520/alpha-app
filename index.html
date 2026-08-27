@@ -374,6 +374,13 @@
     </div>
   </header>
   <div id="diag-banner" style="display:none;background:rgba(250,178,25,.1);border-bottom:1px solid rgba(250,178,25,.25);color:var(--warn);font-size:11px;padding:8px 16px;line-height:1.5"></div>
+  <!-- 2026-08-27新增：全域錯誤收集（window.onerror/unhandledrejection + 各面板
+       自己接住的錯誤），預設摺疊，只在有錯誤時才顯示，讓使用者/我都能看到實際
+       發生過什麼，不是被console.warn悄悄吞掉找不到。 -->
+  <details id="error-log" style="display:none;background:rgba(220,80,80,.08);border-bottom:1px solid rgba(220,80,80,.25);color:#e08080;font-size:10.5px;padding:2px 16px">
+    <summary style="cursor:pointer;padding:6px 0">⚠ 偵測到程式錯誤（點開看詳情，不影響其他功能）</summary>
+    <div id="error-log-list" style="padding:0 0 8px;white-space:pre-wrap;word-break:break-all"></div>
+  </details>
 
   <main id="main">
 
@@ -1053,20 +1060,46 @@
 </div>
 
 <script>
+  // 2026-08-27新增：全域錯誤收集，「修一樣壞一樣」的根治措施之一——任何漏接的
+  // 錯誤最終都會被window.onerror/unhandledrejection攔到，不會完全消失在
+  // console裡沒人看到。只留最近20筆，避免無限累積吃記憶體。
+  let GLOBAL_ERRORS=[];
+  function recordGlobalError(label,err){
+    const msg=(err&&err.message)?err.message:String(err);
+    GLOBAL_ERRORS.push({label,msg,time:new Date().toLocaleTimeString('zh-TW',{hour12:false})});
+    if(GLOBAL_ERRORS.length>20)GLOBAL_ERRORS.shift();
+    renderErrorLog();
+  }
+  function renderErrorLog(){
+    const el=document.getElementById('error-log'),listEl=document.getElementById('error-log-list');
+    if(!el||!listEl)return;
+    if(!GLOBAL_ERRORS.length){el.style.display='none';return}
+    el.style.display='';
+    listEl.textContent=GLOBAL_ERRORS.slice().reverse().map(x=>`[${x.time}] ${x.label}: ${x.msg}`).join('\n');
+  }
+  window.addEventListener('error',e=>{recordGlobalError('window.onerror',e.error||e.message||e)});
+  window.addEventListener('unhandledrejection',e=>{recordGlobalError('unhandledrejection',e.reason)});
+
   // ── 導覽 ──
   const scrs = {home:'scr-home',market:'scr-market',picks:'scr-picks',report:'scr-report',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
+  // 2026-08-27新增（使用者定位的「改A壞B」根因之一）：任一分頁的載入/渲染函式
+  // 失敗，不能連累其他分頁或導覽本身——sync函式包try/catch，async函式的promise
+  // 要接.catch()（try/catch接不住async函式await之後才發生的rejection）。錯誤
+  // 一律記進 recordGlobalError()，讓診斷橫幅看得到，不是單純console.warn完就消失。
+  function _safeSync(label,fn){try{fn()}catch(e){console.warn('['+label+']',e);recordGlobalError(label,e)}}
+  function _safeAsync(label,fn){Promise.resolve().then(fn).catch(e=>{console.warn('['+label+']',e);recordGlobalError(label,e)})}
   function go(name){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(scrs[name]).classList.add('active');
     document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.classList.toggle('on', b.dataset.scr===name));
     document.getElementById('main').scrollTo(0,0);
-    if(name==='home')hydrateHome();
-    if(name==='market')hydrateMarket();
-    if(name==='picks')hydratePicks();
-    if(name==='trade')onTradeInit();
-    if(name==='journal')renderJournalChips();
-    if(name==='report')renderReport();
-    if(name==='settings')hydrateSettings();
+    if(name==='home')_safeAsync('hydrateHome',hydrateHome);
+    if(name==='market')_safeAsync('hydrateMarket',hydrateMarket);
+    if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
+    if(name==='trade')_safeSync('onTradeInit',onTradeInit);
+    if(name==='journal')_safeSync('renderJournalChips',renderJournalChips);
+    if(name==='report')_safeSync('renderReport',renderReport);
+    if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
   }
   document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.scr)));
 
@@ -1088,9 +1121,9 @@
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
   }
   async function loadIntradayQuotes(){
-    try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok)INTRADAY_TW=await r.json()}catch(e){}
-    try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok)INTRADAY_US=await r.json()}catch(e){}
-    updateClocks();
+    try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok)INTRADAY_TW=await r.json()}catch(e){console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
+    try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok)INTRADAY_US=await r.json()}catch(e){console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
+    try{updateClocks()}catch(e){console.warn('[loadIntradayQuotes:updateClocks]',e);recordGlobalError('loadIntradayQuotes:updateClocks',e)}
   }
   // 資料超過20分鐘沒更新就不當作「盤中即時」使用了（寧可退回FinMind日線，也不要
   // 顯示過期到失去意義的「盤中」報價卻讓人以為是新的）。
@@ -1123,6 +1156,13 @@
   // 時間戳一律顯示資料本身的實際時間（fetched_at 或最後一筆報價日期），不是現在幾點。
   function mktPill(elId,tz,openMin,closeMin,intradayGetter){
     const el=document.getElementById(elId);if(!el)return;
+    // 2026-08-27新增：querySelector的結果也要null檢查——版面改版後如果.dot/b/.tm
+    // 這幾個子元素被移掉或改了class，這裡原本會直接對null呼叫.style/.textContent
+    // 拋錯，而這個函式是從setInterval(updateClocks,1000)每秒呼叫一次，拋錯的話
+    // 會讓整個script區塊的初始化在第一次執行時就中斷（見updateClocks下面的說明），
+    // 不只是這個時鐘壞掉，是「改A壞B」的根因之一。
+    const dotEl=el.querySelector('.dot'),bEl=el.querySelector('b'),tmEl=el.querySelector('.tm');
+    if(!dotEl||!bEl||!tmEl)return;
     const z=zonedNow(tz);
     const mins=z.h*60+z.mi;
     const open=z.wd>=1&&z.wd<=5&&mins>=openMin&&mins<closeMin;
@@ -1138,16 +1178,28 @@
       else if(open){label='資料延遲';dot='var(--warn)';tm=dTm}
       else{label='已收盤('+(d.getMonth()+1)+'/'+d.getDate()+')';dot='var(--ink-3)';tm=dTm}
     }
-    el.querySelector('.dot').style.background=dot;
-    el.querySelector('b').textContent=label;
-    el.querySelector('.tm').textContent=tm;
+    dotEl.style.background=dot;
+    bEl.textContent=label;
+    tmEl.textContent=tm;
   }
   function updateClocks(){
     mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30,()=>INTRADAY_TW);
     mktPill('mkt-us','America/New_York',9*60+30,16*60,()=>INTRADAY_US);
   }
-  updateClocks();setInterval(updateClocks,1000);
-  loadIntradayQuotes();setInterval(loadIntradayQuotes,2*60*1000);
+  // 2026-08-27修正（使用者定位的根因）：原本是「updateClocks();setInterval(...)」
+  // 同一行、先執行後註冊——如果第一次同步執行updateClocks()時拋錯，setInterval
+  // 永遠不會被註冊到（拋錯會中止當前script區塊剩下的同步程式碼），時鐘從此
+  // 永久停擺，且後面所有初始化呼叫（loadIntradayQuotes等）也不會執行到。
+  // 改成：先註冊interval（用try/catch包住每次執行，不會因為一次失敗就整個
+  // 停掉），再包在try/catch裡執行一次首次呼叫，兩者都不會讓拋錯往外傳播。
+  setInterval(()=>{try{updateClocks()}catch(e){console.warn('[clock]',e);recordGlobalError('clock',e)}},1000);
+  try{updateClocks()}catch(e){console.warn('[clock]',e);recordGlobalError('clock',e)}
+  // loadIntradayQuotes是async function：一般try/catch包不住之後才發生的promise
+  // rejection（async函式一呼叫就立刻回傳pending promise，try/catch的範圍只涵蓋
+  // 同步丟出的那段），要用.catch()才能真正接住，不然還是會變成unhandledrejection。
+  const _safeLoadIntradayQuotes=()=>loadIntradayQuotes().catch(e=>{console.warn('[loadIntradayQuotes]',e);recordGlobalError('loadIntradayQuotes',e)});
+  setInterval(_safeLoadIntradayQuotes,2*60*1000);
+  _safeLoadIntradayQuotes();
 
   // ══════ 真實資料層（FinMind，瀏覽器直抓，免後端）══════
   const FM="https://api.finmindtrade.com/api/v4/data";
@@ -1176,13 +1228,13 @@
   }
   function fmCacheWrite(k,d){
     _cache[k]=d;
-    try{localStorage.setItem('fmc_'+k,JSON.stringify({t:Date.now(),d}))}catch(e){} // 存滿了就算了，不影響功能
+    try{localStorage.setItem('fmc_'+k,JSON.stringify({t:Date.now(),d}))}catch(e){console.warn('[fmCacheWrite]',e);recordGlobalError('fmCacheWrite',e)} // 存滿了就算了，不影響功能
   }
   // 2026-08-24 新增：手動「重新整理」按鈕用——清掉全部 FinMind 快取（記憶體＋localStorage），
   // 讓接下來的 hydrateXxx() 重新真的打一次 API，不要停在 3 分鐘內的舊快取。
   function fmClearCache(){
     Object.keys(_cache).forEach(k=>delete _cache[k]);
-    try{Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).forEach(k=>localStorage.removeItem(k))}catch(e){}
+    try{Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).forEach(k=>localStorage.removeItem(k))}catch(e){console.warn('[fmClearCache]',e);recordGlobalError('fmClearCache',e)}
   }
   // 2026-08-24 新增：畫面上「最後更新：HH:MM」的共用函式，標的是「瀏覽器這次實際刷新畫面的時間」，
   // 不是資料本身的交易日（那個各卡片自己的 date 欄位已經有顯示）。
@@ -1209,6 +1261,10 @@
       FM_LAST_FAILED=false;
       return d;
     }catch(e){
+      // 2026-08-27：這裡刻意不call recordGlobalError()——fm()是高頻呼叫的資料層
+      // 函式，FinMind額度用盡時可能短時間內失敗幾十次，全部灌進診斷橫幅的錯誤log
+      // 會淹沒真正的程式邏輯bug。這類失敗已經有專門的UI機制處理（FM_LAST_FAILED+
+      // fmEmptyMsg()讓每個面板顯示「連線失敗」），不需要疊加一份錯誤log。
       console.warn('[Alpha] FinMind 抓取失敗（不回退舊資料，誠實回報查無資料）：',ds,id,e);
       FM_LAST_FAILED=true;
       return [];
@@ -1248,8 +1304,8 @@
   }
   async function hydrateHome(){
     const el=document.getElementById('wl-list');if(!el)return;
-    loadStockInfo();
-    loadHomeIndex();
+    _safeAsync('loadStockInfo',loadStockInfo);
+    _safeAsync('loadHomeIndex',loadHomeIndex);
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
@@ -1350,7 +1406,7 @@
     // update_margin_maintenance.py 連續失敗（常見原因：分母那唯一一次FinMind呼叫
     // 額度用盡），提醒使用者畫面上那個數字可能不是最新的，不要誤以為永遠有效。
     let marginHistory=[];
-    try{const r=await fetch('data/margin_maintenance.json?t='+Date.now());if(r.ok)marginHistory=await r.json()}catch(e){}
+    try{const r=await fetch('data/margin_maintenance.json?t='+Date.now());if(r.ok)marginHistory=await r.json()}catch(e){console.warn('[updateDiagBanner:margin]',e);recordGlobalError('updateDiagBanner:margin',e)}
     const marginLast=Array.isArray(marginHistory)&&marginHistory.length?marginHistory[marginHistory.length-1]:null;
     const marginAgeMin=marginLast&&marginLast.date?(Date.now()-new Date(marginLast.date+'T00:00:00+08:00').getTime())/60000:null;
     if(marginAgeMin==null||marginAgeMin>3*24*60)problems.push({name:'大盤融資維持率',reason:marginAgeMin==null?'無資料':'資料過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
@@ -1361,10 +1417,10 @@
   }
   async function loadMarketDataFiles(force){
     if(force||!MARKET_TW_CACHE){
-      try{const r=await fetch('data/market_tw.json?t='+Date.now());if(r.ok)MARKET_TW_CACHE=await r.json()}catch(e){}
+      try{const r=await fetch('data/market_tw.json?t='+Date.now());if(r.ok)MARKET_TW_CACHE=await r.json()}catch(e){console.warn('[loadMarketDataFiles:tw]',e);recordGlobalError('loadMarketDataFiles:tw',e)}
     }
     if(force||!MARKET_US_CACHE){
-      try{const r=await fetch('data/market_us.json?t='+Date.now());if(r.ok)MARKET_US_CACHE=await r.json()}catch(e){}
+      try{const r=await fetch('data/market_us.json?t='+Date.now());if(r.ok)MARKET_US_CACHE=await r.json()}catch(e){console.warn('[loadMarketDataFiles:us]',e);recordGlobalError('loadMarketDataFiles:us',e)}
     }
   }
   function marketDataAgeMin(data){
@@ -1548,7 +1604,7 @@
     try{
       const r=await fetch('data/margin_maintenance.json?t='+Date.now());
       if(r.ok)history=await r.json();
-    }catch(e){}
+    }catch(e){console.warn('[loadMarginMaintenance]',e);recordGlobalError('loadMarginMaintenance',e)}
     if(!Array.isArray(history)||!history.length){
       sumEl.innerHTML='<div class="note">查無資料（本機每日計算尚未產生歷史）</div>';
       if(chartEl)chartEl.innerHTML='';
@@ -1660,9 +1716,14 @@
   }
   async function hydrateMarket(){
     renderMktToggle('market');
-    await Promise.all([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance()]);
-    if(MKT_STATE.market==='US')loadMarketUS();
-    if(MKT_STATE.market==='FUT')loadMarketFUT();
+    // 2026-08-27修正：改用Promise.allSettled——Promise.all只要其中一個
+    // sub-panel失敗就整個await立刻拋錯，會讓下面stampUpdated/updateDiagBanner
+    // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance()]);
+    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance'];
+    results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
+    if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
+    if(MKT_STATE.market==='FUT')_safeAsync('loadMarketFUT',loadMarketFUT);
     stampUpdated('market');
     updateDiagBanner();
   }
@@ -1680,7 +1741,7 @@
     row.addEventListener('touchmove',e=>move(e.touches[0].clientX),{passive:true});
     row.addEventListener('touchend',end);
     row.addEventListener('mousedown',e=>{start(e.clientX);const mm=ev=>move(ev.clientX);const mu=()=>{end();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu)};document.addEventListener('mousemove',mm);document.addEventListener('mouseup',mu)});
-    row.addEventListener('click',()=>{if(moved)return;if(row.dataset.open){row.dataset.open='';row.style.transition='transform .22s';set(0);return}openStock(code)});
+    row.addEventListener('click',()=>{if(moved)return;if(row.dataset.open){row.dataset.open='';row.style.transition='transform .22s';set(0);return}_safeAsync('openStock',()=>openStock(code))});
   }
 
   // ── 刪除確認視窗 ──
@@ -1702,7 +1763,7 @@
     try{
       const c=localStorage.getItem('alpha_info'),cu=localStorage.getItem('alpha_info_us');
       if(c&&cu){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
-    }catch(e){}
+    }catch(e){console.warn('[loadStockInfo:cacheRead]',e);recordGlobalError('loadStockInfo:cacheRead',e)}
     try{
       const [rTW,rUS]=await Promise.all([fetch(`${FM}?dataset=TaiwanStockInfo`),fetch(`${FM}?dataset=USStockInfo`)]);
       const jTW=await rTW.json(),jUS=await rUS.json();
@@ -1720,8 +1781,8 @@
       try{
         localStorage.setItem('alpha_info',JSON.stringify({map:STOCKNAME,list:STOCKLIST}));
         localStorage.setItem('alpha_info_us',JSON.stringify({map:STOCKNAME_US,list:STOCKLIST_US}));
-      }catch(e){}
-    }catch(e){}
+      }catch(e){console.warn('[loadStockInfo:cacheWrite]',e);recordGlobalError('loadStockInfo:cacheWrite',e)}
+    }catch(e){console.warn('[loadStockInfo:fetch]',e);recordGlobalError('loadStockInfo:fetch',e)}
     infoLoading=false;
   }
   async function openSearch(){
@@ -2169,7 +2230,7 @@
   let PICKS_INDUSTRY=null; // null = 全部產業
   async function hydratePicks(forceReload){
     renderMktToggle('picks');onPicksToggleChange();
-    loadMainstreamIndustries();
+    _safeAsync('loadMainstreamIndustries',loadMainstreamIndustries);
     if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML='<div class="note">載入中…</div>';
@@ -2528,12 +2589,18 @@
   }
 
   // ── 啟動：載入真實自選股報價 + 註冊 PWA ──
-  applyColorScheme(localStorage.getItem('alpha_color_scheme')||'TW');
-  renderCcyToggles();renderCcyAmounts();renderFxNote();
-  fetchFx().then(()=>{renderCcyToggles();renderCcyAmounts()});
-  setupRevChartTouch();
-  hydrateHome();
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  // 2026-08-27新增：每一步都獨立包起來，任何一步失敗（例如applyColorScheme
+  // 存取到不存在的DOM元素）都不能讓後面的hydrateHome()等初始化整批中斷不執行
+  // ——這正是使用者定位的「改A壞B」根因：一段同步程式碼中途拋錯，同一個
+  // <script>區塊後面的敘述就不會再執行了。
+  _safeSync('applyColorScheme',()=>applyColorScheme(localStorage.getItem('alpha_color_scheme')||'TW'));
+  _safeSync('renderCcyToggles',renderCcyToggles);
+  _safeSync('renderCcyAmounts',renderCcyAmounts);
+  _safeSync('renderFxNote',renderFxNote);
+  _safeAsync('fetchFx',()=>fetchFx().then(()=>{renderCcyToggles();renderCcyAmounts()}));
+  _safeSync('setupRevChartTouch',setupRevChartTouch);
+  _safeAsync('hydrateHome',hydrateHome);
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)})}
 </script>
 </body>
 </html>

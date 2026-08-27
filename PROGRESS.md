@@ -10,6 +10,62 @@
 狀態、`index.html` 每個面板實際讀哪個資料源（包含仍在打 FinMind 的），以及
 目前待辦跟已知限制——每次有相關異動都會重新產生，直接讀那個檔案就好。
 
+**⚠ 每次改動 `index.html` 的共用區塊（header/nav/全域script/setInterval等）
+後，一律先跑 `python scripts/smoke_test.py` 通過才能commit**（見下方
+2026-08-27續6條目、`CLAUDE.md`「App穩定性與錯誤隔離原則」）。
+
+---
+
+## 2026-08-27（續6）— 止血：修好時鐘停擺bug + 根治「修一樣壞一樣」的錯誤隔離缺失
+
+使用者回報右上角時鐘又停了，且反覆出現「改A壞B」——根因定位為錯誤隔離缺失，
+不是運氣問題。
+
+**P0-1 時鐘修復**：原本 `updateClocks();setInterval(updateClocks,1000);` 同一行、
+先執行後註冊——若首次同步執行`updateClocks()`拋錯，`setInterval`永遠不會被
+註冊，時鐘永久停擺，且同一`<script>`區塊後續程式碼一併中斷。修正：
+`mktPill()`內所有DOM取用（含`querySelector`結果）都補null檢查；改成先註冊
+interval（每次執行都包try/catch）、再包try/catch執行首次呼叫，兩者都不讓
+拋錯外傳。
+
+**P0-2 錯誤隔離**：
+- `go()`導覽分派函式：sync分頁函式包try/catch、async分頁函式的promise接
+  `.catch()`，任一分頁失敗只記錄不外溢。
+- `hydrateMarket()`原本用`Promise.all`平行抓5個子面板，其中一個失敗就讓
+  `await`之後的`stampUpdated`/`updateDiagBanner`等收尾動作全部不執行——改用
+  `Promise.allSettled`，任一子面板失敗不影響其他子面板跟收尾動作。
+- 新增全域`recordGlobalError()`+`GLOBAL_ERRORS`陣列+可摺疊的錯誤log UI
+  （預設隱藏，有錯誤才顯示在診斷橫幅下方），並掛上
+  `window.addEventListener('error'/'unhandledrejection')`兜底。
+- 清查全檔案，補上16處先前遺漏`recordGlobalError()`的catch（含`loadIntradayQuotes`
+  原本的空`catch(e){}`）；`fm()`的catch因為是高頻資料層呼叫、已有專門UI機制
+  處理，刻意不call，並留註解說明原因避免誤會是漏寫。
+
+**P0-3 冒煙測試**：使用者原本指定`scripts/smoke_test.mjs`（Node.js+Playwright），
+但實測這台機器沒裝Node.js（`node --version`找不到指令），改用已經裝好、
+實測可行的Python版Playwright寫成`scripts/smoke_test.py`，檢查項目逐條對應
+規格（載入無uncaught error、時鐘interval真的在跑、六分頁切換不拋錯、主要
+面板有內容、市場頁三市場切換不拋錯）。
+
+**驗證方式（不是只寫測試就信任它）**：故意注入一個null-reference bug重現
+使用者回報的那類問題，第一次跑冒煙測試時發現測試本身有bug（`GLOBAL_ERRORS`
+是top-level`let`宣告，不會變成`window.GLOBAL_ERRORS`，導致測試永遠讀到空
+陣列、永遠PASS）——修正測試後重新注入同一個bug驗證測試正確回報FAIL、且
+FAIL訊息精確指出是哪個function、哪個錯誤訊息；同時驗證了即使時鐘持續拋錯，
+分頁切換/面板渲染/市場切換這些原本會被拖累的功能都不受影響（error isolation
+確實生效），才把注入的bug還原、重新確認乾淨PASS。
+
+```
+### 冒煙測試 2026-08-27 14:24（全部通過）
+- [x] 1. 頁面載入無uncaught error/unhandledrejection
+- [x] 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+- [x] 3. 六個分頁都能切換且不拋錯
+- [x] 4. 主要面板都有內容（不是完全空白）
+- [x] 5. 市場頁三個市場切換都不拋錯
+```
+
+CLAUDE.md新增「App穩定性與錯誤隔離原則」章節記錄這些規則。
+
 ---
 
 ## 2026-08-27（續5）— 選股頁130檔根因修正：EPS反推備援、上櫃TPEx補齊、TWSE重試、FinMind節流
