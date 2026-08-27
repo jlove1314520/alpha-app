@@ -942,3 +942,15 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 `is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。
 
 ---
+
+## 2026-08-28T01:01+08:00 — 馬拉松第154輪：跳過（暫停規則生效中）
+
+**選軌理由**：取鎖乾淨（第153輪正常結束）。三軌時間戳：FUT 22:01（第151輪，最舊）、TW 00:06（第152輪）、US 00:31（第153輪，最新）——依輪替選FUT。
+
+**判斷過程**：複查`PORTFOLIO_STRATEGY_SPEC.md`（第3行）仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中，跟FUT軌本身無關（規格書全部圍繞TAIEX/TWSE台股樣本）。FUT軌round104留下的唯一明確待辦（盤別效應第三批跳空構造/另立新因子家族）本質仍是單因子相關工作，同round109/112/115/118/121/124/127/130/133/136/139/142/145/148/151連續判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則log跟`FUT_MARATHON_STATE.md`附記、心跳。
+
+**額外發現**：`git status`顯示有不屬於本輪的未commit修改（`index.html`／`research/generate_scores_momentum.py`／`research/weights_frozen_momentum.json`已修改；`_tmp_backfill_gaps2.log`／`research/backfill_price_history_gaps.py`為新檔案），研判是另一個互動session正在進行的工作，依規則不觸碰、不commit、不刪除，本輪commit範圍只限心跳/記錄檔。
+
+`is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---

@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 154 輪 · 2026-08-28T01:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（第153輪正常結束）。依輪替選FUT（FUT 22:01第151輪最舊，TW 00:06第152輪、US 00:31第153輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。FUT軌唯一明確待辦（盤別效應第三批跳空構造/另立新因子家族，round104留下）本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列。**另發現`git status`有不屬於本輪的未commit修改**（`index.html`等，研判為另一互動session進行中的工作），依規則不觸碰 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第154輪記錄
+
+---
 ## 第 153 輪 · 2026-08-28T00:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）。依輪替選US（US 20:32第150輪最舊，FUT 22:01第151輪、TW 00:06Aug28第152輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；`git log`確認自`fa369b9`以來新增的commit（`f27450b`TW軌T86回補、`542111c`/`b2bea6a`/`1b3123a`/`0a6402d`/`6494821`/`6ef1d5f`/`aa4a6c5`/`fbb071b`/`11961bf`等）皆屬互動session的App開發/BACKLOG/帽子規則整理，未觸及暫停規則或`PORTFOLIO_STRATEGY_SPEC.md`。US軌依舊沒有組合策略相關工作可做（規格書全部圍繞TAIEX/TWSE台股樣本），round108/111遺留的1c地基工作本質上仍是為單一因子鋪路，同round111起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，`git status`本輪開始時確認工作目錄乾淨，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第153輪記錄
 
 ---
