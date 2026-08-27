@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T21:37:28.265368+08:00",
-  "latest_commit": "95477ce",
+  "updated_at": "2026-08-27T21:43:44.227713+08:00",
+  "latest_commit": "40a0bf3",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -8,6 +8,14 @@
       "records": 3137,
       "source": "FinMind TaiwanStockInfo（research端本機parquet快取整理，一次性/不常變動）",
       "detail": "603檔股票在FinMind快取裡同一天有超過一種產業分類（原始資料本身的歧義，不是這支腳本的bug），這些股票的industry誠實留None，不猜一個可能錯的分類；name欄位沒有觀察到這個問題。",
+      "status": "ok"
+    },
+    {
+      "path": "data/earnings_calendar.json",
+      "generated_at": "2026-08-27T21:40:36.453664+08:00",
+      "records": 6,
+      "source": "yfinance Ticker.get_calendar() + get_earnings_dates()（免金鑰）",
+      "detail": "coverage=6/6 檔 session已知=0/6 errors=[]",
       "status": "ok"
     },
     {
@@ -131,6 +139,10 @@
     {
       "panel": "今日頁·自選股報價（主價格）",
       "source": "data/quotes_tw.json + data/quotes_us.json（美股2026-08-27新增extended_hours：yfinance盤前/盤後價，跟Finnhub regular quote分開顯示，見panel下方風險揭露）"
+    },
+    {
+      "panel": "今日頁·自選股財報行事曆徽章（僅美股，21天內才顯示）",
+      "source": "data/earnings_calendar.json（yfinance get_calendar()，2026-08-27新增）"
     },
     {
       "panel": "今日頁·自選股sparkline走勢",
@@ -344,6 +356,7 @@
     "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",
     "2026-08-27發現：這台機器目前曾被FinMind IP封鎖過（非單純額度用盡），research/finmind_client.py原本完全沒有請求節流——已加上每次真正網路請求間至少0.35秒的節流，但這只能降低未來再次觸發封鎖的機率，無法解除已經發生的封鎖，也不是精確調校過的數字。",
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
-    "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。"
+    "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
+    "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。"
   ]
 }

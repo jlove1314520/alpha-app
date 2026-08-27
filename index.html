@@ -1367,6 +1367,7 @@
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
     let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
+    const earningsCal=await loadEarningsCalendar(); // 2026-08-27新增（P2-新，財報行事曆）
     for(const code of WL){
       const nm=nameOf(code);const us=isUS(code);
       const wrap=document.createElement('div');wrap.className='swipe-wrap';
@@ -1406,8 +1407,22 @@
           showedExtendedHours=true;
         }
       }
+      // 2026-08-27新增（P2-新，財報行事曆）：只在21天內有下一次財報時才顯示，
+      // 太遠的日期對「接下來要注意什麼」沒有實際參考價值，只會讓每一列都塞滿
+      // 用不到的資訊。
+      let earningsHtml='';
+      if(us&&earningsCal[code]&&earningsCal[code].next_earnings_date){
+        const days=(new Date(earningsCal[code].next_earnings_date)-new Date())/86400000;
+        if(days>=0&&days<=21){
+          const d=new Date(earningsCal[code].next_earnings_date);
+          const sessionTxt=earningsCal[code].estimated_session==='pre'?'盤前'
+            :(earningsCal[code].estimated_session==='post'?'盤後':'時段未知');
+          earningsHtml=`<div class="note" style="margin-top:2px;color:var(--ink-3)">📅 財報：${d.getMonth()+1}/${d.getDate()}（${sessionTxt}，估計）</div>`;
+        }
+      }
       rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b>${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
+      if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
     }
     const extNote=document.getElementById('wl-extended-hours-note');
     if(extNote)extNote.style.display=showedExtendedHours?'':'none';
@@ -1471,6 +1486,16 @@
       try{const r=await fetch('data/quotes_all_tw.json?t='+Date.now());if(r.ok)QUOTES_ALL_TW_CACHE=await r.json()}catch(e){console.warn('[loadQuotesAllTw]',e);recordGlobalError('loadQuotesAllTw',e);QUOTES_ALL_TW_CACHE={quotes:{}}}
     }
     return (QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes)||{};
+  }
+  // 2026-08-27新增（P2-新，財報行事曆）：data/earnings_calendar.json
+  // （見 .github/scripts/fetch_earnings_calendar.py，yfinance get_calendar()，
+  // 只涵蓋美股追蹤標的）。
+  let EARNINGS_CALENDAR_CACHE=null;
+  async function loadEarningsCalendar(){
+    if(!EARNINGS_CALENDAR_CACHE){
+      try{const r=await fetch('data/earnings_calendar.json?t='+Date.now());if(r.ok)EARNINGS_CALENDAR_CACHE=await r.json()}catch(e){console.warn('[loadEarningsCalendar]',e);recordGlobalError('loadEarningsCalendar',e);EARNINGS_CALENDAR_CACHE={earnings:{}}}
+    }
+    return (EARNINGS_CALENDAR_CACHE&&EARNINGS_CALENDAR_CACHE.earnings)||{};
   }
   // 類股指數名稱（market_tw.json的sectors[].name，官方28+類，2026-08-27實測
   // 共37種）→company_info.json的industry分類文字。**這是「依股票產業分類分組」

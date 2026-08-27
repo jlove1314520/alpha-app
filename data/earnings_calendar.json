@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "generated_at": "2026-08-27T21:40:36.453664+08:00",
+    "source": "yfinance Ticker.get_calendar() + get_earnings_dates()（免金鑰）",
+    "coverage": "6/6 檔",
+    "errors": [],
+    "session_disclaimer": "estimated_session（盤前/盤後）是根據該公司過去財報公布時間點的推估，不是官方保證的公布時段，公司偶爾會改變公布時間。"
+  },
+  "earnings": {
+    "NVDA": {
+      "next_earnings_date": "2026-11-18",
+      "next_earnings_date_range": null,
+      "estimated_session": "unknown",
+      "session_basis": "推估失敗：Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
+      "eps_estimate": 2.34,
+      "revenue_estimate": 104434313520
+    },
+    "AAPL": {
+      "next_earnings_date": "2026-10-30",
+      "next_earnings_date_range": null,
+      "estimated_session": "unknown",
+      "session_basis": "推估失敗：Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
+      "eps_estimate": 1.98013,
+      "revenue_estimate": 113550860190
+    },
+    "MSFT": {
+      "next_earnings_date": "2026-10-29",
+      "next_earnings_date_range": null,
+      "estimated_session": "unknown",
+      "session_basis": "推估失敗：Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
+      "eps_estimate": 4.72455,
+      "revenue_estimate": 90668190940
+    },
+    "TSM": {
+      "next_earnings_date": "2026-10-15",
+      "next_earnings_date_range": null,
+      "estimated_session": "unknown",
+      "session_basis": "推估失敗：Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
+      "eps_estimate": 4.45834,
+      "revenue_estimate": 1454960072270
+    },
+    "GOOGL": {
+      "next_earnings_date": "2026-10-29",
+      "next_earnings_date_range": null,
+      "estimated_session": "unknown",
+      "session_basis": "推估失敗：Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
+      "eps_estimate": 3.00444,
+      "revenue_estimate": 127081092080
+    },
+    "AMZN": {
+      "next_earnings_date": "2026-10-30",
+      "next_earnings_date_range": null,
+      "estimated_session": "unknown",
+      "session_basis": "推估失敗：Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.",
+      "eps_estimate": 1.94834,
+      "revenue_estimate": 202153635130
+    }
+  }
+}

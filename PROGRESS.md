@@ -16,6 +16,35 @@
 
 ---
 
+## 2026-08-27（續15）— P2財報行事曆（BACKLOG.md使用者指定序列全部完成）
+
+新增`.github/scripts/fetch_earnings_calendar.py`：yfinance
+`Ticker.get_calendar()`抓追蹤美股標的（跟`fetch_quotes_us.py`同一份
+`US_TICKERS`）下一次財報日期，寫進`data/earnings_calendar.json`，掛進
+`market.yml`每日排程。`index.html`自選股列新增財報徽章（21天內才顯示）。
+
+**已知限制**：公布時段（盤前/盤後）推估用`get_earnings_dates()`歷史公布
+時間，這台機器持續遇到`curl_cffi`對`guce.yahoo.com`的DNS解析問題（環境
+特定，非程式bug——`socket.gethostbyname()`本身正常，GitHub Actions runner
+環境不一定有同樣問題），`estimated_session`誠實降級為`unknown`，不影響
+`next_earnings_date`本身的可靠性（本機測試6/6檔成功）。
+
+**冒煙測試（`node scripts/smoke_test.mjs`，2026-08-27 21:44，全部通過）**：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+```
+
+**BACKLOG.md使用者指定的完整序列（P0三項→全市場改造→上櫃法人補齊→
+盤前盤後→財報行事曆）全部完成，🔄進行中/❌待處理目前皆為空。**
+
+---
+
 ## 2026-08-27（續14）— P2美股盤前盤後（Extended Hours）
 
 **新增**：

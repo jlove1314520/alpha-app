@@ -43,6 +43,7 @@ STALE_HOURS = {
     "data/stock_detail.json": 96,  # 財報一季才更新一次，但三大法人/融資融券是每日，用寬鬆門檻涵蓋兩者
     "data/price_history.json": 72,  # 每日累積式更新，跟fundamentals.json同等寬鬆門檻
     "data/quotes_all_tw.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
+    "data/earnings_calendar.json": 72,  # 財報日期變動很慢，門檻可以更寬鬆，先跟其他每日檔案一致
 }
 
 
@@ -183,6 +184,25 @@ def describe_quotes_all_tw(path: Path) -> dict:
     }
 
 
+def describe_earnings_calendar(path: Path) -> dict:
+    """earnings_calendar.json（2026-08-27新增，P2財報行事曆）——見
+    fetch_earnings_calendar.py：yfinance get_calendar()抓下一次財報日
+    （穩定），get_earnings_dates()推估盤前/盤後時段目前在這台機器持續遇到
+    curl_cffi對guce.yahoo.com的DNS解析問題（socket.gethostbyname()正常，
+    curl_cffi內部解析失敗，環境特定問題非程式bug），estimated_session誠實
+    降級為'unknown'，不影響next_earnings_date本身的可靠性。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    earnings = d.get("earnings", {})
+    known_session = sum(1 for e in earnings.values() if e.get("estimated_session") != "unknown")
+    return {
+        "generated_at": meta.get("generated_at"),
+        "records": len(earnings),
+        "source": meta.get("source"),
+        "detail": f"coverage={meta.get('coverage')} session已知={known_session}/{len(earnings)} errors={meta.get('errors')}",
+    }
+
+
 def describe_paper_trades(path: Path) -> dict:
     d = json.loads(path.read_text(encoding="utf-8"))
     return {
@@ -206,6 +226,7 @@ DESCRIBERS = {
     "price_history.json": describe_price_history,
     "company_info.json": describe_company_info,
     "quotes_all_tw.json": describe_quotes_all_tw,
+    "earnings_calendar.json": describe_earnings_calendar,
 }
 
 
@@ -342,6 +363,7 @@ def build_workflows() -> list[dict]:
 APP_DATA_SOURCES = [
     {"panel": "今日頁·大盤速覽（含sparkline）", "source": "data/market_tw.json + data/market_us.json（2026-08-27新增近20日收盤sparkline）"},
     {"panel": "今日頁·自選股報價（主價格）", "source": "data/quotes_tw.json + data/quotes_us.json（美股2026-08-27新增extended_hours：yfinance盤前/盤後價，跟Finnhub regular quote分開顯示，見panel下方風險揭露）"},
+    {"panel": "今日頁·自選股財報行事曆徽章（僅美股，21天內才顯示）", "source": "data/earnings_calendar.json（yfinance get_calendar()，2026-08-27新增）"},
     {"panel": "今日頁·自選股sparkline走勢", "source": "data/quotes_tw.json（TWSE STOCK_DAY，僅上市股票；上櫃約24檔查不到，見known_limitations）+ data/quotes_us.json（yfinance），2026-08-27起不再打FinMind"},
     {"panel": "今日頁·匯率", "source": "data/fx.json（yfinance TWD=X，2026-08-27起不再打FinMind）"},
     {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},
@@ -456,6 +478,7 @@ KNOWN_LIMITATIONS = [
     "2026-08-27發現：這台機器目前曾被FinMind IP封鎖過（非單純額度用盡），research/finmind_client.py原本完全沒有請求節流——已加上每次真正網路請求間至少0.35秒的節流，但這只能降低未來再次觸發封鎖的機率，無法解除已經發生的封鎖，也不是精確調校過的數字。",
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
+    "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。",
 ]
 
 

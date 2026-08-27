@@ -154,16 +154,38 @@
   測試，只驗證了新增的yfinance extended_hours部分（獨立函式，用真實網路
   呼叫驗證過）。
 
+- **P2-新 財報行事曆**（2026-08-27完成）：新增`.github/scripts/fetch_earnings_calendar.py`，
+  用yfinance `Ticker.get_calendar()`抓追蹤美股標的（跟`fetch_quotes_us.py`的
+  `US_TICKERS`同一份清單）的下一次財報日期，寫進`data/earnings_calendar.json`，
+  掛進`market.yml`每日排程。`index.html`自選股列新增財報徽章（只在21天內
+  才顯示，避免每列塞滿用不到的遠期資訊），例："📅 財報：9/6（盤後，估計）"。
+  **已知限制**：公布時段（盤前/盤後）用`get_earnings_dates()`歷史公布時間
+  推估，這台機器目前遇到`curl_cffi`對`guce.yahoo.com`的DNS解析問題（不是
+  程式bug，`socket.gethostbyname()`本身正常，GitHub Actions runner環境
+  不一定有同樣問題），`estimated_session`誠實降級為`unknown`（顯示「時段
+  未知」），不影響`next_earnings_date`本身的可靠性（6/6檔測試成功）。
+
+  冒煙測試實際輸出（2026-08-27 21:44，`node scripts/smoke_test.mjs`）：
+  ```
+  PASS - 1. 頁面載入無uncaught error/unhandledrejection
+  PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+  PASS - 3. 六個分頁都能切換且不拋錯
+  PASS - 4. 主要面板都有內容（不是完全空白）
+  PASS - 5. 市場頁三個市場切換都不拋錯
+  PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+  PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+  === 冒煙測試結果：全部通過 ===
+  ```
+  另外用注入測試資料驗證：財報日期落在21天內時正確顯示徽章文字。
+
 ## 🔄 進行中
 
-- **P2-新 財報行事曆**（2026-08-27登錄）：評估yfinance earnings dates或
-  SEC申報建立data/earnings_calendar.json，標示追蹤標的財報日與公布時段
-  （盤前/盤後）。**進度：尚未開始。**
-
-## ❌ 待處理（依使用者指定順序排列）
-
 （目前為空——依使用者指定的P0→全市場改造→上櫃法人補齊→盤前盤後→財報
-行事曆順序，前四項皆已完成，財報行事曆是最後一項，已列在上方🔄。）
+行事曆順序，全部五項已完成。）
+
+## ❌ 待處理
+
+（目前為空。）
 
 ---
 
@@ -183,3 +205,12 @@
   `CERTIFICATE_VERIFY_FAILED`（對方伺服器端問題），`_get_retry()` 有正確
   重試+記錄失敗，不是這裡的 bug，但代表 TPEx 股票的 turnover/最新價量
   可能延遲一天更新。
+- **財報公布時段（盤前/盤後）推估失敗**：`get_earnings_dates()` 在這台
+  機器持續遇到 `curl_cffi` 對 `guce.yahoo.com` 的 DNS 解析問題（環境特定，
+  非程式 bug），`estimated_session` 誠實降級為 `unknown`；`next_earnings_date`
+  本身（來自 `get_calendar()`）不受影響。GitHub Actions runner 環境不一定
+  有同樣問題，之後排程實跑可能就會恢復正常。
+- **IBKR `outsideRth` 旗標尚未實作**：使用者原話「先記進 BACKLOG，現在不
+  實作」——未來若接 IBKR 下單，延長時段（盤前/盤後）下單需要帶這個旗標，
+  目前完全沒有下單串接（見 CLAUDE.md 安全紅線：自動下單只做介面/下單計畫，
+  絕不串接真實下單 API），這條純粹是記錄給未來參考。
