@@ -6,6 +6,10 @@
 
 ---
 
+## 2026-08-28T03:31+08:00 — 馬拉松第159輪：跳過（暫停規則生效中，無組合策略相關工作可做）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 02:01（第156輪，最舊）／FUT 02:31（第157輪）／TW 03:18（第158輪，最新）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。`git log`確認自第156輪（`aad3c9a`）以來新增的commit（`11961bf`/`fbb071b`新增pull-to-refresh+時鐘重整按鈕根治+夜間自主循環啟動、`f27450b`第152輪TW T86回補記錄、`efd7b6f`動能榜因子修正、`39888ae`自動報價更新、`d0999bb`第154輪FUT跳過記錄、`1982542`前瞻選股台帳picks_ledger.json、`168a1e1`merge、`f10b244`第155輪TW T86回補記錄、`a13ad74`第157輪FUT跳過記錄、`b902678`第158輪TW T86回補記錄、`8f68548`B24 PIT回測骨架、`b85f025`夜間循環第4輪UX走查）全部屬於互動session的App開發/夜間自主循環或TW軌回補/其他軌跳過記錄，跟解除暫停規則或`PORTFOLIO_STRATEGY_SPEC.md`都無關。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，全部圍繞TAIEX/TWSE樣本，跟US軌無關），round108/111遺留的1c地基工作本質上仍是為單一因子鋪路，同round111起連續判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則log跟`US_MARATHON_STATE.md`附記、心跳。`git status`本輪開始時確認工作目錄乾淨。`is_holdout_consumed()`確認為`False`（本輪未打任何API），無新`TRIALS_LEDGER.md`列。
+
 ## 2026-08-28T00:31+08:00 — 馬拉松第153輪：跳過（暫停規則生效中，無組合策略相關工作可做）
 
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 20:32（第150輪，最舊）／FUT 22:01（第151輪）／TW 00:06 Aug28（第152輪，最新）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，沒有任何新動作，暫停規則整體仍完全生效中。`git log`確認自`fa369b9`以來新增的commit全部屬於互動session的App開發/BACKLOG登錄/帽子規則整理（`f27450b`/`542111c`/`b2bea6a`/`1b3123a`/`0a6402d`/`6494821`/`6ef1d5f`/`aa4a6c5`/`fbb071b`/`11961bf`），跟解除暫停規則或`PORTFOLIO_STRATEGY_SPEC.md`都無關。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，全部圍繞TAIEX/TWSE樣本，跟US軌無關），round108/111遺留的1c地基工作本質上仍是為單一因子鋪路，同round111/114/117/120/123/126/129/132/135/138/141/144/147/150判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則log跟`US_MARATHON_STATE.md`附記、心跳。`git status`本輪開始時確認工作目錄乾淨。`is_holdout_consumed()`確認為`False`（本輪未打任何API），無新`TRIALS_LEDGER.md`列。

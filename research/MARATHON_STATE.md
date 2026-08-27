@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 158 輪。最新一輪：第 158 輪 · 2026-08-28T03:18+08:00 · TW · T86三大法人回補第28批（暫停規則生效中，屬允許的地基工作）· 取鎖乾淨，依輪替選TW（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，改做`backfill_t86.py --batch-size 150`。**本批次乾淨在上限收工，未撞TWSE反爬蟲封鎖**，嘗試150天全部新完成（15天無交易/無資料），累積2869→3019/3305（86.8%→91.3%）。`is_holdout_consumed()`跑完前後皆確認`False`。發現不屬於本輪的未commit變更（`data/price_history.json`、`_tmp_pit2.log`，另一互動session），依規則不觸碰。詳見`REPORT.md`第158輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 159 輪。最新一輪：第 159 輪 · 2026-08-28T03:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選US（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，`git log`確認自第156輪以來新增commit皆與解除暫停規則無關。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round111起判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`確認`False`，`git status`本輪開始時確認工作目錄乾淨。詳見`REPORT.md`第159輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+
+**上一則保留（第158輪，供對照）**：第 158 輪 · 2026-08-28T03:18+08:00 · TW · T86三大法人回補第28批（暫停規則生效中，屬允許的地基工作）· 取鎖乾淨，依輪替選TW（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，改做`backfill_t86.py --batch-size 150`。**本批次乾淨在上限收工，未撞TWSE反爬蟲封鎖**，嘗試150天全部新完成（15天無交易/無資料），累積2869→3019/3305（86.8%→91.3%）。`is_holdout_consumed()`跑完前後皆確認`False`。發現不屬於本輪的未commit變更（`data/price_history.json`、`_tmp_pit2.log`，另一互動session），依規則不觸碰。詳見`REPORT.md`第158輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 
 **上一則保留（第152輪，供對照）**：第 152 輪 · 2026-08-28T00:06+08:00 · TW · 取鎖乾淨（第151輪正常結束）。依輪替選TW（最舊），暫停規則仍生效中，改做T86三大法人回補第26批（`backfill_t86.py --batch-size 150`）：乾淨在批次上限收工，未撞TWSE反爬蟲封鎖，累積已快取2570→2720/3305（77.8%→82.3%）。詳見`REPORT.md`第152輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 
