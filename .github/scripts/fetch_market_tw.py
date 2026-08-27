@@ -138,6 +138,17 @@ def fetch_taiex_sparkline() -> list[float]:
     return [round(float(c), 2) for c in h["Close"].tail(20).tolist()]
 
 
+def fetch_taiex_sparkline_60d() -> list[float]:
+    """2026-08-27新增（題材動能榜，relative_strength因子需要近60日大盤收盤序列，
+    原本的 fetch_taiex_sparkline() 只留20天給App畫圖用，這裡改用period='3mo'
+    抓足夠天數，跟上面那支各自獨立、不互相影響——不是修改既有sparkline的長度，
+    是新增一個給評分引擎用的較長版本，避免動到App現有的sparkline顯示範圍。"""
+    h = yf.Ticker("^TWII").history(period="3mo")
+    if h.empty:
+        return []
+    return [round(float(c), 2) for c in h["Close"].tail(60).tolist()]
+
+
 def fetch_tpex_index() -> dict | None:
     # 已知風險（2026-08-26 本機測試發現，不確定 GitHub Actions Ubuntu runner 是否也
     # 會遇到）：這台 Windows 機器的 Python/OpenSSL 對 TPEx 網站憑證的驗證會噴
@@ -322,6 +333,11 @@ def main():
         except Exception as e:
             print(f"TAIEX sparkline(^TWII) 失敗：{e}")
             out["errors"].append(f"taiex_sparkline: {e}")
+        try:
+            out["taiex"]["sparkline_60d"] = fetch_taiex_sparkline_60d()
+        except Exception as e:
+            print(f"TAIEX sparkline_60d(^TWII) 失敗：{e}")
+            out["errors"].append(f"taiex_sparkline_60d: {e}")
 
     try:
         out["tpex"] = fetch_tpex_index()

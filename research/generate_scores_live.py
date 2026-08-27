@@ -78,6 +78,7 @@ None。改讀`research/build_company_info.py`一次性建置的`data/company_inf
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -108,6 +109,15 @@ GROWTH_QUALITY_MONTHS = 24  # 近12個月 vs 再前12個月，24個月起跳，�
 MA_WINDOW = 60
 VOL_SHORT_WINDOW = 20
 VOL_LONG_WINDOW = 60
+# 2026-08-27新增：非個股證券（ETF/ETN/存託憑證等），見build_rows()說明。
+NON_STOCK_INDUSTRIES = {
+    "ETF", "ETN", "上櫃ETF", "上櫃指數股票型基金(ETF)", "指數投資證券(ETN)",
+    "受益證券", "存託憑證", "Index", "大盤", "所有證券",
+}
+# 有些ETF不在company_info.json裡（該檔案讀FinMind快取，可能還沒收錄較新上市
+# 的ETF），光靠industry分類濾不掉——00開頭代碼保留給ETF/ETN/受益證券，不是
+# 普通股票，用代碼格式當補充過濾。
+_NON_STOCK_CODE_PATTERN = re.compile(r"^00\d{2,4}[A-Z]?$")
 
 
 def _load_json(path: Path) -> dict:
@@ -235,7 +245,16 @@ def build_rows() -> pd.DataFrame:
             price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {})
         except Exception:
             price_history = {}
-    all_codes = sorted(set(fundamentals) | set(stock_detail) | set(price_history))
+    # 2026-08-27修正（真bug，題材動能榜開發時交叉測試才發現）：原本沒有過濾
+    # ETF/ETN/存託憑證等非個股證券，導致這些代碼混進評分排行榜（例如00910
+    # 「第一金太空衛星」這類ETF曾經出現在scores.json前段）。用company_info.json
+    # 的industry分類過濾掉，跟generate_scores_momentum.py用同一份NON_STOCK_
+    # INDUSTRIES常數（兩支腳本各自獨立複製，不跨檔案import，同既有慣例）。
+    company_info = _company_info()
+    candidate_codes = set(fundamentals) | set(stock_detail) | set(price_history)
+    non_stock_codes = {code for code, v in company_info.items() if v.get("industry") in NON_STOCK_INDUSTRIES}
+    non_stock_codes |= {code for code in candidate_codes if _NON_STOCK_CODE_PATTERN.match(code)}
+    all_codes = sorted(candidate_codes - non_stock_codes)
 
     rows = []
     for code in all_codes:

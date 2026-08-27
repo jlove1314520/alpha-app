@@ -1,0 +1,14 @@
+{
+  "engine_version": "scoring-momentum-v1",
+  "frozen_at": "2026-08-27",
+  "dev_period": null,
+  "note": "**這是初始設計權重，不是回測最佳化後的結果**——題材動能榜在使用者裁示下獨立於價值成長榜的weights_frozen.json版本控管，這份權重是專家判斷的起始值，用來讓引擎先能運作，之後BACKLOG.md的B16回測驗證完成前，任何一版分數都必須標示「尚未經過組合策略回測驗證，不代表能贏大盤」。",
+  "weights": {
+    "relative_strength": 0.24,
+    "volume_breakout": 0.20,
+    "chip_concentration": 0.22,
+    "group_breadth": 0.18,
+    "sector_capital_flow": 0.16
+  },
+  "weights_sha256": "f3847bc1cb5fa379a2700ed73483589cd24742c5226c28bbda9a8c5972b35059"
+}

@@ -544,10 +544,17 @@
       <div>
         <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
         <div class="note num" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
-        <div class="note" style="margin-top:2px">權重凍結於 2024-12-31 前之研究期，本期分數為正式 out-of-sample 應用 ｜ 非投資建議</div>
+        <div class="note" id="picks-weight-note" style="margin-top:2px">非投資建議</div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
+    <!-- 2026-08-27新增（策略層面決定：拆成兩個獨立榜單，不要用單一分數通吃）：
+         價值成長榜=現行引擎（財報導向），題材動能榜=新引擎（股價領先財報的
+         題材股）。兩榜共用同一份資料與流動性門檻，因子/權重各自獨立版本控管。 -->
+    <div class="mkt-toggle" id="picks-board-toggle" style="margin-top:8px;width:100%"></div>
+    <!-- 2026-08-27新增（策略層面重要決定，使用者要求「最重要」，兩榜都要固定
+         顯示，回測完成前不得移除）：本榜是資料排序，不是驗證過的策略。 -->
+    <div class="note" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
     <div class="note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
@@ -2410,7 +2417,13 @@
   // coverage/summary/factors{score,percentile,raw,reason}。舊版 composite/_meta/stock_id
   // 欄位已經不存在，這裡整段跟著改，不是選擇性相容兩種格式。
   let PICKS_CACHE=null;
+  // 2026-08-27新增（策略層面決定：拆成兩個獨立榜單，不要用單一分數通吃）：
+  // 題材動能榜完全獨立的資料/因子集合，跟價值成長榜的PICKS_CACHE分開存放，
+  // 切換榜單不需要重新fetch（除非強制重新整理）。
+  let PICKS_MOMENTUM_CACHE=null;
+  let PICKS_BOARD='value'; // 'value' | 'momentum'
   let REPORT_CACHE=null;
+  let REPORT_CACHE_BOARD='value'; // 記錄目前顯示的報告屬於哪個榜單，factorRowHtml()要看這個決定用哪套FACTOR_LABELS
   let ENTRY_PLAN_CACHE=null;
   const FACTOR_LABELS={
     earnings_growth:'財報成長', revenue_momentum:'營收動能', growth_quality:'成長性/未來性',
@@ -2418,6 +2431,14 @@
     analyst:'機構觀點', catalyst:'題材/事件',
   };
   const FACTOR_ORDER=['earnings_growth','revenue_momentum','growth_quality','chips','technical','valuation_adj','analyst','catalyst'];
+  // 題材動能榜的因子集合，跟上面價值成長榜完全獨立（見
+  // research/generate_scores_momentum.py檔頭說明：因子/權重各自版本控管）。
+  const MOMENTUM_FACTOR_LABELS={
+    relative_strength:'相對強度/價格動能', volume_breakout:'量能突破',
+    chip_concentration:'籌碼集中', group_breadth:'族群齊漲度',
+    sector_capital_flow:'產業資金流入',
+  };
+  const MOMENTUM_FACTOR_ORDER=['relative_strength','volume_breakout','chip_concentration','group_breadth','sector_capital_flow'];
   // 2026-08-24 改版：分數文字用金/白/暗三階（不再用紅黃綠號誌色，跟金色主題
   // 衝突），讀條一律金色漸層（資料完整度低才用調暗的扁平金色，見 barFill()）。
   function scoreColor(v){
@@ -2430,24 +2451,48 @@
   }
   const PICKS_TOP_N=30; // 排行榜預設只顯示前 30 名，樣本其餘檔數靠搜尋查（見 generate_scores_v2.py 說明）
   let PICKS_INDUSTRY=null; // null = 全部產業
+  // 2026-08-27新增（策略層面決定）：兩榜共用同一個載入/渲染函式，只是檔名跟
+  // 存放的cache變數不同——PICKS_BOARD決定要抓哪個檔案、存進哪個cache。
+  function _picksBoardConfig(){
+    return PICKS_BOARD==='momentum'
+      ?{file:'scores_momentum.json',cacheGet:()=>PICKS_MOMENTUM_CACHE,cacheSet:v=>PICKS_MOMENTUM_CACHE=v,label:'generate_scores_momentum.py'}
+      :{file:'scores.json',cacheGet:()=>PICKS_CACHE,cacheSet:v=>PICKS_CACHE=v,label:'generate_scores_v2.py'};
+  }
   async function hydratePicks(forceReload){
     renderMktToggle('picks');onPicksToggleChange();
+    renderPicksBoardToggle();
     _safeAsync('loadMainstreamIndustries',loadMainstreamIndustries);
-    if(PICKS_CACHE&&!forceReload){renderPicks(PICKS_CACHE);stampUpdated('picks');return}
+    const cfg=_picksBoardConfig();
+    if(cfg.cacheGet()&&!forceReload){renderPicks(cfg.cacheGet());stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML='<div class="note">載入中…</div>';
     try{
-      const res=await fetch('scores.json?_='+Date.now());
+      const res=await fetch(cfg.file+'?_='+Date.now());
       if(!res.ok)throw new Error('HTTP '+res.status);
       const json=await res.json();
-      PICKS_CACHE=json;
+      cfg.cacheSet(json);
       renderPicks(json);
       stampUpdated('picks');
     }catch(e){
       console.warn('[loadPicks]',e);recordGlobalError('loadPicks',e);
-      listEl.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗（'+e.message+'）。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進repo，不是即時報價。</div>';
+      listEl.innerHTML=`<div class="note">尚未產生 ${cfg.file}，或載入失敗（${e.message}）。此清單由 research/${cfg.label} 在本機/排程產生後 commit 進repo，不是即時報價。</div>`;
       document.getElementById('picks-asof-line').textContent='—';
     }
+  }
+  // 切換價值成長榜/題材動能榜——兩榜完全獨立的因子/權重（見
+  // research/score_live_momentum.py檔頭說明），切換時保留各自的cache，
+  // 不用每次都重新fetch。
+  function switchPicksBoard(board){
+    if(PICKS_BOARD===board)return;
+    PICKS_BOARD=board;
+    PICKS_INDUSTRY=null; // 換榜單時清掉產業篩選，避免舊榜單選的產業在新榜單裡對不上
+    renderPicksBoardToggle();
+    hydratePicks(false);
+  }
+  function renderPicksBoardToggle(){
+    const el=document.getElementById('picks-board-toggle');if(!el)return;
+    const mk=(id,label)=>`<span class="mtg-opt press${PICKS_BOARD===id?' on':''}" style="flex:1;text-align:center" onclick="switchPicksBoard('${id}')">${label}</span>`;
+    el.innerHTML=mk('value','價值成長榜')+mk('momentum','題材動能榜');
   }
   // 沒有公司名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
   function pickLabel(r){
@@ -2488,9 +2533,13 @@
     document.getElementById('industry-mask').classList.remove('open');
     document.getElementById('industry-sheet').classList.remove('open');
   }
+  function currentPicksCache(){
+    return PICKS_BOARD==='momentum'?PICKS_MOMENTUM_CACHE:PICKS_CACHE;
+  }
   function filterPicksByIndustry(ind){
     PICKS_INDUSTRY=PICKS_INDUSTRY===ind?null:ind; // 再點一次同一個 chip 取消篩選
-    if(PICKS_CACHE)renderPicks(PICKS_CACHE);
+    const cache=currentPicksCache();
+    if(cache)renderPicks(cache);
     renderMainstreamChips();
   }
   function fmtLiquidity(v){
@@ -2507,7 +2556,8 @@
     const lowCov=r.coverage<0.5;
     const lowLiq=(r.flags||[]).includes('流動性不足');
     const topPick=r.rank===1;
-    const missingLabels=(r.missing_factors||[]).map(k=>FACTOR_LABELS[k]||k);
+    const labelsForBoard=PICKS_BOARD==='momentum'?MOMENTUM_FACTOR_LABELS:FACTOR_LABELS;
+    const missingLabels=(r.missing_factors||[]).map(k=>labelsForBoard[k]||k);
     return `
     <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px;opacity:${lowCov?0.62:1}" onclick="showReport('${r.code}')">
       <div style="display:flex;align-items:center;gap:12px">
@@ -2526,6 +2576,12 @@
     const meta=json.meta||{};
     const covTxt=meta.universe_size?`（涵蓋 ${(json.stocks||[]).length}/${meta.universe_size} 檔全市場宇宙）`:'';
     document.getElementById('picks-asof-line').textContent='資料基準日 '+(meta.data_asof||'—')+' · 樣本 '+(json.stocks||[]).length+' 檔'+covTxt;
+    const weightNoteEl=document.getElementById('picks-weight-note');
+    if(weightNoteEl){
+      weightNoteEl.textContent=meta.engine_version==='scoring-momentum-v1'
+        ?'題材動能榜：因子聚焦股價領先財報的動能訊號，財報只當地雷排除用，估值不扣分 ｜ 非投資建議'
+        :'價值成長榜：權重凍結於2024-12-31前之研究期，本期分數為正式out-of-sample應用 ｜ 非投資建議';
+    }
     const allRows=json.stocks||[];
     renderPicksChips(allRows);
     const listEl=document.getElementById('picks-list');
@@ -2552,7 +2608,7 @@
     q=q.trim();
     if(!q){resEl.innerHTML='';listCard.style.display='';chipsEl.style.display='';return}
     listCard.style.display='none';chipsEl.style.display='none';
-    const rows=(PICKS_CACHE&&PICKS_CACHE.stocks)||[];
+    const rows=(currentPicksCache()&&currentPicksCache().stocks)||[];
     const ql=q.toLowerCase();
     const hits=rows.filter(r=>r.code.toLowerCase().includes(ql)||(r.name&&r.name.includes(q)));
     if(!hits.length){
@@ -2564,27 +2620,35 @@
 
   // ── 個股研究報告頁 ──
   function showReport(code){
-    const row=(PICKS_CACHE&&PICKS_CACHE.stocks||[]).find(r=>r.code===code);
+    const cache=currentPicksCache();
+    const row=(cache&&cache.stocks||[]).find(r=>r.code===code);
     if(!row){toast('查無這檔的評分資料');return}
     REPORT_CACHE=row;
+    REPORT_CACHE_BOARD=PICKS_BOARD;
     ENTRY_PLAN_CACHE=null;
     go('report');
   }
   function factorRowHtml(key){
-    const weights=(PICKS_CACHE&&PICKS_CACHE.weights)||{};
+    const cache=REPORT_CACHE_BOARD==='momentum'?PICKS_MOMENTUM_CACHE:PICKS_CACHE;
+    const labels=REPORT_CACHE_BOARD==='momentum'?MOMENTUM_FACTOR_LABELS:FACTOR_LABELS;
+    const weights=(cache&&cache.weights)||{};
     const weightPct=Math.round((weights[key]||0)*100);
     const f=REPORT_CACHE.factors&&REPORT_CACHE.factors[key];
     if(!f){
-      // 這輪缺資料的類別（analyst/catalyst，見 score_v2.py 說明）：誠實列出來，
+      // 這輪缺資料的類別（價值成長榜的analyst/catalyst，見score_v2.py說明；
+      // 題材動能榜的任何因子也可能因為個股資料不足而缺）：誠實列出來，
       // 不要悄悄省略——讓使用者看得出「總分不是滿權重算出來的」。
+      const reasonTxt=REPORT_CACHE_BOARD==='momentum'
+        ?'這檔股票目前這項因子資料不足（例如上市時間太短、價量歷史不夠），不是永久缺資料源。'
+        :(key==='analyst'?'台股暫無免費機構目標價資料源。':'需要新聞/供應鏈連動分析，下一輪實作。');
       return `<div class="factor-row">
-        <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${FACTOR_LABELS[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span>
+        <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span>
           <span style="font-size:9px;color:#c9a35a;background:rgba(216,176,112,.08);padding:2px 6px;border-radius:5px">尚無資料 · 不計入</span></div>
-        <div class="fr-reason" style="color:var(--ink-4)">${key==='analyst'?'台股暫無免費機構目標價資料源。':'需要新聞/供應鏈連動分析，下一輪實作。'}</div>
+        <div class="fr-reason" style="color:var(--ink-4)">${reasonTxt}</div>
       </div>`;
     }
     return `<div class="factor-row">
-      <div class="fr-top"><span class="fr-name">${FACTOR_LABELS[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
+      <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
       <div class="meter" style="height:5px"><i class="bar-fill" style="width:${(f.score*10).toFixed(0)}%;background:var(--gold-grad)"></i></div>
       <div class="fr-reason">${f.reason||''}</div>
     </div>`;
@@ -2608,7 +2672,8 @@
     }));
     updateReportWatchBtn(row.code);
 
-    const factorsHtml=FACTOR_ORDER.map(factorRowHtml).join('');
+    const orderForBoard=REPORT_CACHE_BOARD==='momentum'?MOMENTUM_FACTOR_ORDER:FACTOR_ORDER;
+    const factorsHtml=orderForBoard.map(factorRowHtml).join('');
     document.getElementById('report-factors').innerHTML=factorsHtml||'<div class="note">無評分資料</div>';
 
     // 產業分析/財報數據/技術型態：直接引用已算好的 raw 數據，不編造敘述

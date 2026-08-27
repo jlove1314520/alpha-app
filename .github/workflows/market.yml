@@ -49,14 +49,21 @@ jobs:
       # 2026-08-27新增：只讀repo內JSON（不讀parquet、不呼叫FinMind），解除「App核心
       # 功能綁在研究者本機」的架構風險，見 research/generate_scores_live.py 檔頭說明。
       # 放在上面幾步之後，才能用到當次剛更新的fundamentals.json/stock_detail.json。
-      - name: 產生選股頁scores.json（JSON-only上線評分路徑）
+      - name: 產生價值成長榜scores.json（JSON-only上線評分路徑）
         run: python research/generate_scores_live.py
+        continue-on-error: true
+      # 2026-08-27新增（策略層面決定：拆成兩個獨立榜單，不要用單一分數通吃）。
+      # 因子/權重跟上面的價值成長榜完全獨立，各自版本控管（見
+      # research/score_live_momentum.py檔頭說明）。回測驗證前，兩榜頁面都要
+      # 顯示「本榜為資料排序，尚未經過組合策略回測驗證」的警語（見BACKLOG.md）。
+      - name: 產生題材動能榜scores_momentum.json（JSON-only上線評分路徑）
+        run: python research/generate_scores_momentum.py
         continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json scores.json
-          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數 $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json scores.json scores_momentum.json
+          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能) $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
