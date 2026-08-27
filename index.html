@@ -388,7 +388,7 @@
   <section class="screen active" id="scr-home">
     <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span>最後更新：<b id="home-updated-tm">--:--</b></span>
-      <span class="more" onclick="fmClearCache();hydrateHome()">重新整理</span>
+      <span class="more" onclick="refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
       <span class="note fx-note" id="home-fx-note">匯率載入中…</span>
@@ -430,6 +430,11 @@
       <h3>今日事件</h3>
       <div class="note">事件行事曆建置中 · 尚未接上真實財經日曆資料源</div>
     </div>
+
+    <!-- 2026-08-28新增（使用者要求：手機第五次回報時鐘/資料卡舊，最大嫌疑是SW快取
+         舊版index.html——首頁底部固定顯示版本號，讓使用者一眼比對手機是不是新版，
+         不用進設定頁翻）。 -->
+    <div class="note" style="text-align:center;opacity:.5;margin:10px 0 4px" id="home-footer-version">Alpha v--</div>
   </section>
 
   <!-- ════════ 2. 市場 ════════ -->
@@ -440,7 +445,7 @@
     </div>
     <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span>最後更新：<b id="market-updated-tm">--:--</b></span>
-      <span class="more" onclick="fmClearCache();hydrateMarket()">重新整理</span>
+      <span class="more" onclick="refreshTap(this,'market-updated-tm',async()=>{fmClearCache();await hydrateMarket()})">重新整理</span>
     </div>
 
     <!-- 台股 -->
@@ -572,7 +577,7 @@
     <div id="mainstream-wrap" style="margin-top:12px">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
-        <span class="more" id="mainstream-refresh" onclick="loadMainstreamIndustries()">重新整理</span>
+        <span class="more" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
       </div>
       <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="note">載入中…</div></div>
       <div class="note" style="margin-top:2px">⚠ 動能/主流本質是擁擠交易，資金集中太久、漲幅過大容易反轉——不是「資金正在流入」就代表可以追高</div>
@@ -582,7 +587,7 @@
     <div id="picks-chips" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="card" id="picks-list-card" style="margin-top:10px">
-      <h3>綜合評分排行<span class="more" id="picks-refresh" onclick="fmClearCache();hydratePicks(true)">重新整理</span></h3>
+      <h3>綜合評分排行<span class="more" id="picks-refresh" onclick="refreshTap(this,null,async()=>{fmClearCache();await hydratePicks(true)})">重新整理</span></h3>
       <div class="note" style="margin-bottom:8px">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
       <div id="picks-list"><div class="note">載入中…</div></div>
       <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價） · 點列可看完整評分報告</div>
@@ -2361,6 +2366,28 @@
 
   // ── Toast ──
   let tmr;
+  // 2026-08-28新增（使用者回報「所有重新整理按鈕都按不動」）：實測發現按鈕
+  // 本身的onclick都有正確觸發fetch（見smoke_test.mjs check 8），真正的問題是
+  // 「沒有任何視覺回饋」——home-updated-tm/market-updated-tm這兩個「最後更新」
+  // 時間戳欄位存在於HTML卻從來沒有任何JS寫入過（死欄位，永遠卡在--:--），
+  // 使用者看不到任何變化，感覺上就是「按了沒反應」。這個共用helper讓每個
+  // 重新整理按鈕點下去：文字先變「更新中…」＋暫時不可再點－>執行實際重整
+  // 邏輯->成功就更新對應的時間戳欄位＋toast確認->無論成功失敗都還原按鈕文字。
+  async function refreshTap(el,tsElId,fn){
+    if(!el){await fn();return}
+    const orig=el.textContent;
+    el.textContent='更新中…';el.style.pointerEvents='none';
+    try{
+      await fn();
+      if(tsElId){const tsEl=document.getElementById(tsElId);if(tsEl)tsEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour12:false})}
+      toast('已更新');
+    }catch(e){
+      console.warn('[refreshTap]',e);recordGlobalError('refreshTap',e);
+      toast('更新失敗，請重試');
+    }finally{
+      el.textContent=orig;el.style.pointerEvents='';
+    }
+  }
   function toast(msg){
     const t=document.getElementById('toast');
     t.textContent=msg; t.classList.add('show');
@@ -2785,11 +2812,16 @@
     renderColorSchemeToggle();
     loadAboutVersions();
   }
-  // 2026-08-25 新增：設定頁顯示 App 版本／Service Worker 版本／SW 狀態，方便確認
-  // 手機是不是真的更新到最新版（用手機開 App 時肉眼比對這裡的版本號即可）。
-  const APP_VERSION='2026-08-25.2';
+  // 2026-08-25 新增，2026-08-28擴充：設定頁+首頁底部顯示 App 版本／Service
+  // Worker 版本／SW 狀態，方便確認手機是不是真的更新到最新版（用手機開 App
+  // 時肉眼比對這裡的版本號即可）。**這個常數由 .git/hooks/pre-commit 在每次
+  // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
+  // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
+  // 可以注入版本號，改用git hook在commit前用sed改這一行。
+  const APP_VERSION='2026-08-28.0011';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
+    setTxt('home-footer-version','Alpha v'+APP_VERSION);
     if(!('serviceWorker' in navigator)){setTxt('about-sw-ver','瀏覽器不支援');setTxt('about-sw-status','—');return}
     try{
       const swText=await fetch('sw.js?_='+Date.now(),{cache:'no-store'}).then(r=>r.text());
@@ -2903,6 +2935,10 @@
   _safeAsync('fetchFx',()=>fetchFx().then(()=>{renderCcyToggles();renderCcyAmounts()}));
   _safeSync('setupRevChartTouch',setupRevChartTouch);
   _safeAsync('hydrateHome',hydrateHome);
+  // 2026-08-28新增：版本號要在頁面一載入就顯示在首頁底部（不是只有進了設定頁
+  // 才觸發loadAboutVersions()那次），使用者才能不用點進設定就一眼確認手機是
+  // 不是新版。
+  _safeAsync('loadAboutVersions',loadAboutVersions);
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)})}
 </script>
 </body>

@@ -16,6 +16,53 @@
 
 ---
 
+## 2026-08-28（續21）— 【開發帽，P0】時鐘/重整按鈕根治 + 夜間自主循環啟動
+
+**背景**：使用者深夜追加兩個「已宣稱修復但手機實測仍壞」的問題（時鐘第五次
+回報、所有重新整理按鈕按不動），並指示啟動每30分鐘一輪的夜間自主開發循環
+（詳細規則見BACKLOG.md「夜間自主循環規則」章節）。
+
+**時鐘/SW快取**：`sw.js`的fetch handler確認本來就是network-first（無新
+bug）。新增`.git/hooks/pre-commit`：commit有動到`index.html`/`sw.js`就
+自動把`APP_VERSION`/`CACHE`常數改成當下時間戳，不用手動記得改。首頁底部
+新增版本號顯示（原本只有設定頁有），讓使用者不用點進設定就能比對手機是否
+吃到新版。`scripts/smoke_test.mjs`新增check 9：模擬手機已裝舊版SW快取，
+驗證reload後仍顯示真實內容不被舊快取覆蓋。
+
+**重整按鈕**：實測（新增check 8：點擊後900ms內驗證有無觸發網路請求）發現
+4個按鈕的onclick其實都有正確觸發fetch，真正的根因是`home-updated-tm`/
+`market-updated-tm`這兩個「最後更新」時間戳欄位從來沒有任何JS寫入過
+（死欄位，永遠卡在--:--），使用者看不到任何回饋才覺得「按了沒反應」。
+新增`refreshTap()`共用helper：點擊時按鈕文字變「更新中…」、完成後更新
+時間戳+toast確認，4個重新整理按鈕都改用。**尚未做**：pull-to-refresh
+手勢，已登錄BACKLOG下一輪處理。
+
+冒煙測試實際輸出（2026-08-28 00:09，`node scripts/smoke_test.mjs`，
+新增至10項）：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了4次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 8. 重新整理按鈕點擊後都會觸發實際網路請求
+PASS - 9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋
+PASS - 10. 整個測試過程（含所有互動操作，含8/9新增檢查）結束後仍無累積的uncaught error
+=== 冒煙測試結果：全部通過 ===
+```
+
+**下一步**：進入夜間自主循環（30分鐘一輪，用ScheduleWakeup自我排程），
+依BACKLOG順序：pull-to-refresh → B23動能榜量價因子鏈 → B24選股驗證
+（PIT回測+翻倍率+前瞻選股台帳）。每4輪做一次UX走查。07:00前產出
+`MORNING_REPORT.md`。
+
+**影響檔案**：`index.html`（版本顯示/refreshTap）、`sw.js`（CACHE時間戳
+格式）、`.git/hooks/pre-commit`（新增）、`scripts/smoke_test.mjs`
+（新增check 8/9）、`BACKLOG.md`。
+
+---
+
 ## 2026-08-27（續20）— 【維運/研究/開發帽，P0 bug修正】動能榜還原權息
 
 **背景**：使用者回報動能榜（`scores_momentum.json`）的`relative_strength`

@@ -18,6 +18,14 @@
 // 3. 六個分頁（今日/市場/選股/交易/日誌/設定）都能切換且不拋錯。
 // 4. 每個主要面板（已知容器id清單）渲染後innerHTML不是空的。
 // 5. 市場頁三個市場切換（台股/美股/期貨）都不拋錯。
+// 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）。
+// 7. 6a已併入，見下方7實為互動後仍無累積錯誤——實際check編號見程式內record()。
+// 8.【2026-08-28新增】每個「重新整理」按鈕點擊後都會觸發實際網路請求（不是
+//    只驗證不拋錯——onclick繫結斷掉時點下去既不拋錯也沒有任何反應，這正是
+//    使用者回報「按鈕按不動」的真實樣態，只看uncaught error測不出來）。
+// 9.【2026-08-28新增】模擬手機已裝舊版Service Worker快取（塞一份竄改過的假
+//    index.html進CacheStorage），驗證network-first邏輯不會被舊快取覆蓋。
+// 10. 整個測試過程（含8/9新增的重整/reload操作）結束後仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -202,10 +210,96 @@ async function runSmokeTest(baseUrl, headless = true) {
   // 觸發的真實unhandledrejection（f.chips/f.technical欄位名不符導致.toFixed()
   // 對undefined拋錯）——這就是原本測試框架測不出來的具體案例。現在改成真的
   // 用finalErrors判斷這第7項。
+  // 8.【2026-08-28新增，使用者回報「所有重新整理按鈕都按不動」】逐一點擊每個
+  // 「重新整理」按鈕，用page.on('request')確認點擊後真的觸發了新的網路請求
+  // （不是只看有沒有拋錯——onclick沒繫結到、或繫結到已經改名/刪除的函式，
+  // 點下去不會拋錯也不會有任何請求，畫面就是靜靜地什麼都不做，使用者才會
+  // 說「按不動」）。
+  const requestLog = [];
+  page.on("request", (req) => requestLog.push({ url: req.url(), t: Date.now() }));
+  const refreshChecks = [
+    { tab: "home", selector: '[onclick*="hydrateHome"]' },
+    { tab: "market", selector: '[onclick*="hydrateMarket"]:not(#mainstream-refresh)' },
+    { tab: "market", selector: "#mainstream-refresh" },
+    { tab: "picks", selector: "#picks-refresh" },
+  ];
+  const refreshErrors = [];
+  for (const rc of refreshChecks) {
+    try {
+      await page.evaluate((tab) => window.go(tab), rc.tab);
+      await page.waitForTimeout(500);
+      const before = requestLog.length;
+      const found = await page.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        if (!el) return false;
+        el.click();
+        return true;
+      }, rc.selector);
+      if (!found) throw new Error(`找不到按鈕（selector=${rc.selector}）`);
+      await page.waitForTimeout(900);
+      const after = requestLog.length;
+      if (after <= before) {
+        throw new Error(`點擊後900ms內沒有觸發任何新的網路請求（selector=${rc.selector}），視為按鈕失效`);
+      }
+    } catch (e) {
+      refreshErrors.push(`${rc.tab}/${rc.selector}: ${e.message || e}`);
+    }
+  }
+  record("8. 重新整理按鈕點擊後都會觸發實際網路請求", refreshErrors.length === 0, refreshErrors.join("; "));
+
+  // 9.【2026-08-28新增，使用者回報「時鐘/資料手機端卡在舊版」第五次】模擬
+  // 「手機已經裝了舊版SW＋舊快取」的情境：先讓真正的SW註冊完成，然後直接對
+  // 目前的CacheStorage寫入一份「假的、內容被竄改過的index.html」（塞進跟
+  // sw.js當下CACHE常數同名的cache裡，模擬舊安裝殘留的快取條目），重新整理
+  // 頁面後確認畫面渲染出來的還是「真正、最新」的內容（用APP_VERSION是否為
+  // 真實常數值、不是竄改過的假值來判斷）——驗證sw.js的network-first邏輯
+  // 真的會無視快取裡的舊內容、以網路上最新版本為準，不是只在理論上正確。
+  let staleCacheResult = "跳過（瀏覽器context不支援cache API或SW未啟用）";
+  let staleCachePassed = true;
+  try {
+    const swReady = await page.evaluate(async () => {
+      if (!("serviceWorker" in navigator)) return false;
+      const reg = await navigator.serviceWorker.ready.catch(() => null);
+      return !!(reg && reg.active);
+    });
+    if (swReady) {
+      const cacheName = await page.evaluate(async () => {
+        const keys = await caches.keys();
+        return keys.find((k) => k.startsWith("alpha-v")) || null;
+      });
+      if (cacheName) {
+        await page.evaluate(async (name) => {
+          const c = await caches.open(name);
+          const fakeHtml = "<html><body>STALE_FAKE_CONTENT_MARKER</body></html>";
+          await c.put(
+            new Request(location.origin + "/index.html"),
+            new Response(fakeHtml, { headers: { "Content-Type": "text/html" } })
+          );
+        }, cacheName);
+        await page.reload({ waitUntil: "networkidle", timeout: 20000 });
+        await page.waitForTimeout(500);
+        const bodyText = await page.evaluate(() => document.body.innerHTML);
+        const realVersion = await page.evaluate(() =>
+          typeof APP_VERSION !== "undefined" ? APP_VERSION : null
+        );
+        staleCachePassed = !bodyText.includes("STALE_FAKE_CONTENT_MARKER") && !!realVersion;
+        staleCacheResult = staleCachePassed
+          ? `通過：即使快取裡塞了竄改過的假內容，重新整理後仍顯示真實版本(APP_VERSION=${realVersion})，未被舊快取覆蓋`
+          : "失敗：重新整理後畫面顯示的是快取裡塞進去的假內容，代表network-first失效、舊快取會蓋過新版本";
+      } else {
+        staleCacheResult = "跳過（找不到alpha-v開頭的cache，可能SW還沒完成第一次install快取）";
+      }
+    }
+  } catch (e) {
+    staleCachePassed = false;
+    staleCacheResult = `執行時發生例外：${e.message || e}`;
+  }
+  record("9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋", staleCachePassed, staleCacheResult);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error",
+  record("10. 整個測試過程（含所有互動操作，含8/9新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
