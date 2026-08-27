@@ -172,19 +172,30 @@ INTENTIONALLY_EMPTY = {"paper_trades.json"}
 
 def describe_scores(path: Path) -> dict:
     """scores.json（2026-08-27新增追蹤，使用者要求）——注意這個檔案在repo根目錄，
-    不在data/底下，跟其他data_files是不同的產生管線（research/generate_scores_v2.py
-    本機/排程產生，不是.github/scripts/那批GitHub Actions腳本）。"""
+    不在data/底下。**2026-08-27（晚）新增雙管線**：`research/generate_scores_v2.py`
+    （本機/互動session手動執行，讀research端FinMind parquet快取，因子覆蓋較完整）
+    跟 `research/generate_scores_live.py`（GitHub Actions每日排程執行，只讀repo內
+    fundamentals.json/stock_detail.json，不依賴parquet/FinMind，但technical/analyst/
+    catalyst三項恆缺）都會寫這同一份scores.json——用meta.engine_version區分
+    這次是哪條管線產生的（"scoring-v2" vs "scoring-live-json"）。"""
     d = json.loads(path.read_text(encoding="utf-8"))
     meta = d.get("meta", {})
     stocks = d.get("stocks", [])
     coverages = [s.get("coverage") for s in stocks if s.get("coverage") is not None]
     avg_coverage = round(sum(coverages) / len(coverages), 3) if coverages else None
+    engine = meta.get("engine_version", "unknown")
+    source = ("research/generate_scores_v2.py（本機/互動session手動執行，非GitHub Actions）"
+              if engine == "scoring-v2" else
+              "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，"
+              "JSON-only，不依賴parquet/FinMind）"
+              if engine == "scoring-live-json" else f"未知engine_version={engine}")
     return {
         "generated_at": meta.get("generated_at"),
         "records": len(stocks),
-        "source": "research/generate_scores_v2.py（本機/排程執行，非GitHub Actions自動排程——見known_limitations）",
-        "detail": f"universe_size={meta.get('universe_size')} avg_coverage={avg_coverage} "
-                  f"weights_hash={(meta.get('weights_hash') or '')[:12]}",
+        "source": source,
+        "detail": f"engine_version={engine} universe_size={meta.get('universe_size')} avg_coverage={avg_coverage} "
+                  f"weights_hash={(meta.get('weights_hash') or '')[:12]} "
+                  f"coverage_collapse_warning={meta.get('coverage_collapse_warning')}",
     }
 
 
@@ -210,7 +221,9 @@ def build_data_files() -> list[dict]:
     if scores_path.exists():
         info = describe_scores(scores_path)
         entry = {"path": "scores.json", **info}
-        entry["status"] = status_from_age(info.get("generated_at"), 30 * 24)  # 目前無排程，門檻放寬到30天避免持續紅字
+        # 2026-08-27：現在有GitHub Actions每日排程（generate_scores_live.py）維持新鮮度，
+        # 門檻收回跟其他每日檔案一致（24小時起，稍微放寬給收盤後排程時間差）。
+        entry["status"] = status_from_age(info.get("generated_at"), 30)
         out.append(entry)
     return out
 
@@ -366,7 +379,8 @@ TODO = [
     {"item": "主流題材chips 脫離FinMind", "priority": "P2", "blocker": "MI_INDEX有類股價格/漲跌%但無成交值，尚未找到TWSE官方逐類股成交值端點；跟使用者要求的「題材生命週期」功能設計高度相關，建議合併處理"},
     {"item": "期貨籌碼(三大法人期貨部位) 脫離FinMind", "priority": "P2", "blocker": "探測過TAIFEX openapi常見端點命名，只找到「大額交易人」資料(跟三大法人分類不同)，需人工查閱TAIFEX網站確認"},
     {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE/TPEx官方均無對應端點，只有逐股融資餘額(張)；已完成：該次呼叫失敗時明確寫入data_incomplete=true，App顯示「資料不完整」而非沿用舊值"},
-    {"item": "scores.json未掛進GitHub Actions每日排程，停留在特定日期", "priority": "P1", "blocker": "研究pipeline（factor_ic.py/adjust.py等）大量依賴本機research/data/raw/parquet快取（gitignored，GitHub Actions runner每次是全新checkout、完全沒有這份快取），直接掛進CI會變成每次都要對300檔逐檔冷啟動抓取，速度更慢、更容易撞到FinMind額度/IP限制；尚未決定解法（例如把快取選擇性提交、或改用不依賴深度歷史快取的計算方式），暫時維持本機/手動執行"},
+    {"item": "score_live.py的earnings_growth因子沒有PER反推EPS的備援", "priority": "P2", "blocker": "研究端的_eps_yoy_derived_from_per()備援需要「約一年前的PER快照」，但fundamentals.json的ratios只存最新一筆、沒有retained歷史序列，需要另開一份PER歷史累積檔才能補上這條備援"},
+    {"item": "generate_scores_live.py沒有規模分層排名/技術面因子", "priority": "P2", "blocker": "JSON-only路徑沒有per股票的每日OHLC/成交量歷史，technical因子完全無來源、revenue_momentum沒有按流動性分層，是刻意的範圍縮減，見generate_scores_live.py檔頭說明"},
     {"item": "月營收/PER來源沒有逐筆標記是TWSE或TPEx", "priority": "P2", "blocker": "fundamentals.json目前TWSE跟TPEx資料寫進同一個結構，沒有per-entry的來源標記，之後要精確稽核需要補上"},
     {"item": "PER/PBR缺乏「自行由EPS/BPS計算」這一層備援", "priority": "P2", "blocker": "目前fundamentals.json的PER/PBR只有BWIBBU_ALL/TPEx兩層，沒有再用stock_detail.json的EPS+資產負債表淨值反推這一層備援"},
     {"item": "CLAUDE.md候選：美股報價/AI盤前日報真新聞/Phase2券商下單研究", "priority": "P2", "blocker": "尚未排序，等使用者指示"},
@@ -379,7 +393,7 @@ KNOWN_LIMITATIONS = [
     "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券（FinMind僅提供台股這幾類資料）。",
     "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",
     "2026-08-27發現：這台機器目前曾被FinMind IP封鎖過（非單純額度用盡），research/finmind_client.py原本完全沒有請求節流——已加上每次真正網路請求間至少0.35秒的節流，但這只能降低未來再次觸發封鎖的機率，無法解除已經發生的封鎖，也不是精確調校過的數字。",
-    "scores.json（選股頁分數）不在任何GitHub Actions排程內，只能本機/手動執行後commit，data_asof會停在最後一次手動執行的日期，見todo的架構性blocker說明。",
+    "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
 ]
 

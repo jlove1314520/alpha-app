@@ -67,7 +67,12 @@ def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwar
         return r
     raise last_err if last_err else RuntimeError(f"GET {url} failed after {max_retries} attempts")
 
-MONTHS_TO_KEEP = 8
+MONTHS_TO_KEEP = 8  # App圖表用「近8月」，維持不變
+# 2026-08-27新增：score_live.py的growth_quality因子需要「近12個月營收總和 vs
+# 再前12個月營收總和」，24個月是硬性下限，跟research/build_fundamentals_json.py
+# 的MONTHS_TO_KEEP=26保持一致（多留一點緩衝），存進獨立欄位revenue_history_scoring，
+# 不影響既有month_revenue／App圖表。
+SCORING_MONTHS_TO_KEEP = 26
 
 
 def _num(v):
@@ -191,12 +196,12 @@ def fetch_revenue_tpex() -> dict[str, dict]:
     return out
 
 
-def merge_revenue(existing: list[dict] | None, latest: dict) -> list[dict]:
+def merge_revenue(existing: list[dict] | None, latest: dict, keep: int = MONTHS_TO_KEEP) -> list[dict]:
     rows = list(existing or [])
     rows = [r for r in rows if not (r.get("year") == latest["year"] and r.get("month") == latest["month"])]
     rows.append(latest)
     rows.sort(key=lambda r: (r["year"], r["month"]))
-    return rows[-MONTHS_TO_KEEP:]
+    return rows[-keep:]
 
 
 def main():
@@ -226,6 +231,8 @@ def main():
         for code, latest in revenue.items():
             entry = fundamentals.setdefault(code, {})
             entry["month_revenue"] = merge_revenue(entry.get("month_revenue"), latest)
+            entry["revenue_history_scoring"] = merge_revenue(
+                entry.get("revenue_history_scoring"), latest, keep=SCORING_MONTHS_TO_KEEP)
         revenue_updated = len(revenue)
     except Exception as e:
         print(f"月營收(TWSE) 更新失敗：{e}")
@@ -248,6 +255,8 @@ def main():
         for code, latest in revenue_tpex.items():
             entry = fundamentals.setdefault(code, {})
             entry["month_revenue"] = merge_revenue(entry.get("month_revenue"), latest)
+            entry["revenue_history_scoring"] = merge_revenue(
+                entry.get("revenue_history_scoring"), latest, keep=SCORING_MONTHS_TO_KEEP)
         revenue_updated_tpex = len(revenue_tpex)
     except Exception as e:
         print(f"月營收(TPEx) 更新失敗：{e}")

@@ -16,6 +16,80 @@
 
 ---
 
+## 2026-08-27（續7）— P1 scores.json自動化：不依賴parquet的JSON-only上線評分路徑
+
+使用者指出核心架構風險：「目前App的核心功能綁在你本機，電腦沒開就靜靜過期」。
+解法不是把研究端parquet快取搬上CI，而是讓上線評分完全不需要它——只讀repo內
+已commit的JSON。
+
+**深化資料保留深度（為了讓JSON-only路徑有足夠歷史算YoY）**：
+- `research/build_fundamentals_json.py`：`MONTHS_TO_KEEP` 13→26，新增
+  `revenue_history_scoring` 欄位（up to 26個月，給growth_quality因子用；
+  `month_revenue` 維持8個月不變，App圖表UI不受影響）。**重跑時發現真bug**：
+  這支腳本原本是「一次性種子」直接覆寫`data/fundamentals.json`，但daily排程
+  （`update_fundamentals_daily.py`）已經用TWSE+TPEx官方openapi把覆蓋率從種子
+  當下累積到2272檔——直接覆寫會把每日累積、本機快取沒有的502檔整批砍掉
+  （2272→1774）。已修正成merge-safe（保留daily排程較新的ratios/month_revenue，
+  只補revenue_history_scoring或本機快取獨有的股票；覆蓋率下降就中止不寫檔）。
+  重跑後：2272→2597檔，無任何流失，2330確認有26個月scoring用歷史。
+- `update_fundamentals_daily.py`：daily累積邏輯同步維護`revenue_history_scoring`
+  （新增`SCORING_MONTHS_TO_KEEP=26`），跟`month_revenue`平行累積不互相影響。
+- 新增 `research/build_stock_financials_history.py`（一次性、merge-safe）：
+  `stock_detail.json`的財報季度原本只有1季（daily排程剛開始跑），讀research端
+  FinMind歷史parquet快取（`TaiwanStockFinancialStatements`+`TaiwanStockBalanceSheet`）
+  回補歷史季度，同樣merge-safe（既有較新資料優先、覆蓋率只增不減）。
+  1093→1983檔，2330從1季回補到8季（2024Q3~2026Q2）。
+
+**發現並修正的關鍵資料正確性bug（`update_stock_financials.py`）**：用回補的
+歷史季度交叉比對月營收總和時發現——(1) TWSE官方單位是仟元，原本沒乘1000；
+(2) 更關鍵：TWSE `t187ap06_L_ci` 對Q2/Q3回傳的其實是**累計數**（第二季報表=
+上半年累計、第三季報表=前三季累計），不是單季數字，原本這支腳本直接把累計數
+當單季存進`quarters`陣列，會讓EPS/營收YoY全部算錯（實測驗證：2330原本存的
+「Q2」revenue是2.4兆，用月營收Apr+May+Jun交叉比對後正確單季值應為1.27兆，
+差了近1倍）。已修正：新增`discretize_quarter()`，用「本次累計數－陣列裡已有
+的同年較早季度加總」還原成單季數字；缺較早季度基準時寧可跳過不merge（不塞
+錯的數字）。本機重跑後，2330等有Q1基準的20檔已修正為正確單季值，979檔因
+缺基準暫時跳過（誠實留白，不影響既有資料，之後研究端有更多歷史或使用者
+授權額外FinMind呼叫時可以補上）。
+
+**新增 `research/generate_scores_live.py`**（P1核心產出）：只讀
+`data/fundamentals.json`+`data/stock_detail.json`（不讀parquet、不呼叫FinMind/
+yfinance），讀凍結權重`weights_frozen.json`（複用既有`score_live.py`的唯讀
++sha256驗證+寫入防護，這支新腳本沒有另外碰weights_frozen.json）。實作5個
+可從JSON算出的因子：earnings_growth（季度EPS YoY）、revenue_momentum（月營收
+YoY，含基期門檻+硬上限）、growth_quality（近12個月營收合計YoY，要求24個月視窗
+內完全連續無缺月才計算）、chips（三大法人買賣超，累積天數視覆蓋）、
+valuation_adj（PEG）；technical/analyst/catalyst三項全市場無來源，誠實留NaN、
+用既有coverage重新分配權重機制處理（不當0分）。本機測試：340檔通過
+coverage≥0.5門檻（研究端parquet版之前是130檔），最高coverage=0.74（5/8類別
+權重，technical/analyst/catalyst恆缺是JSON-only路徑的架構性上限）。
+
+**掛進 `market.yml`**：安裝相依套件加`pandas numpy`；在既有的
+`update_stock_financials.py`/`update_fundamentals_daily.py`/
+`update_margin_maintenance.py`步驟之後、commit步驟之前，新增
+`python research/generate_scores_live.py`步驟（`continue-on-error: true`，
+跟其他步驟一致）；commit清單加入`scores.json`。研究端`generate_scores_v2.py`
+完全沒動，兩條管線都寫同一份`scores.json`，用`meta.engine_version`
+（`"scoring-v2"` vs `"scoring-live-json"`）分辨這次是哪條產生的，互不覆蓋衝突
+——研究者本機有空時手動跑`generate_scores_v2.py`可以得到更完整的版本，其餘
+時間靠每日排程維持不停擺。
+
+**STATUS.json/generate_status_json.py同步更新**：`describe_scores()`改用
+`engine_version`分辨兩條管線來源；`TODO`關閉「scores.json未排程」條目，
+新增「JSON-only路徑缺PER歷史備援/規模分層/technical因子」兩條P2；
+`KNOWN_LIMITATIONS`更新為反映雙管線現況。
+
+**驗證**：所有改動/新增的JSON檔案（fundamentals.json/stock_detail.json/
+STATUS.json/scores.json）通過`json.loads()`驗證；所有改動/新增的Python檔案
+通過`py_compile`；`market.yml`通過`yaml.safe_load()`驗證。這輪沒有動
+`index.html`，未重跑`scripts/smoke_test.py`（跟共用區塊無關）。
+
+**下一步**：979檔因缺Q1基準暫時跳過的財報季度回補；PER歷史累積檔（補上
+earnings_growth的PER反推EPS備援）；JSON-only路徑的規模分層/technical因子
+（需要per股票每日OHLC/成交量歷史，目前committed JSON沒有這個）。
+
+---
+
 ## 2026-08-27（續6）— 止血：修好時鐘停擺bug + 根治「修一樣壞一樣」的錯誤隔離缺失
 
 使用者回報右上角時鐘又停了，且反覆出現「改A壞B」——根因定位為錯誤隔離缺失，

@@ -8,6 +8,18 @@
   歸屬母公司淨利/基本每股盈餘(EPS)。
 - `t187ap07_L_ci`：上市公司資產負債表(一般業)——給歸屬母公司權益合計(ROE分母)。
 
+**2026-08-27發現並修正的資料正確性問題（重要，不是外部限制，是這支腳本的bug）**：
+1. `t187ap06_L_ci` 回傳的數值單位是「仟元」（跟月營收端點同一慣例），但原本
+   這裡沒有乘1000——用回補歷史季度時交叉比對月營收總和才發現這個bug（見
+   `research/build_stock_financials_history.py` 檔頭說明）。已修正：revenue/
+   gross/op/net_income_parent全部乘1000對齊NT元，EPS本身是每股金額不用轉換。
+2. **更關鍵**：TWSE官方季報格式對Q2/Q3是「累計數」（第二季報表其實是上半年
+   累計、第三季報表是前三季累計），不是單季數字——用月營收交叉驗證發現：
+   這支腳本原本直接把Q2的原始回傳值當成「單季」存進quarters陣列，實際上
+   那是H1累計值（跟FinMind第三方整理過的單季數字混在同一個陣列裡會兜不起來，
+   YoY/成長率計算會整個錯）。已修正：`main()`改成用「本次累計數 − 陣列裡
+   已有的同年較早季度加總」還原成單季數字，同年較早季度缺的話就跳過不merge
+   （寧可这一季暫時沒有，也不要塞一個算錯的單季數字進去）。
 **已知限制，誠實揭露**：
 1. 這兩個端點的 `_ci` 後綴是「一般業」分類，不含金融控股(_bd)/證券(_fh)/
    保險(_ins)/其他金融(_mim)——這些特殊產業的財報格式跟一般業不同，TWSE
@@ -87,6 +99,11 @@ def load_existing() -> dict:
 
 
 def fetch_income() -> dict[str, dict]:
+    """回傳「TWSE官方原始回傳值」，**Q2/Q3是累計數（見檔頭2026-08-27說明），
+    這裡先不做單季還原**——單季還原需要陣列裡已有的同年較早季度資料，
+    要在 main() 裡跟既有 quarters 合併時才能做，這裡只負責忠實抓值+單位轉換
+    （仟元→元）。回傳的key統一叫 `*_cum`，提醒呼叫端這是累計數，不能直接當
+    單季用。"""
     r = _get_retry(INCOME_URL, timeout=30)
     r.raise_for_status()
     rows = r.json()
@@ -103,15 +120,59 @@ def fetch_income() -> dict[str, dict]:
         op = _num(row.get("營業利益（損失）"))
         net_parent = _num(row.get("淨利（淨損）歸屬於母公司業主"))
         eps = _num(row.get("基本每股盈餘（元）"))
+        # 2026-08-27修正：官方單位是仟元（跟月營收端點同慣例），原本沒乘1000。
         out[code] = {
             "year": yq[0], "quarter": yq[1],
+            "revenue_cum": revenue * 1000,
+            "gross_cum": gross * 1000 if gross is not None else None,
+            "op_cum": op * 1000 if op is not None else None,
+            "net_income_parent_cum": net_parent * 1000 if net_parent is not None else None,
+            "eps_cum": eps,  # 每股金額本身不用轉換
+        }
+    return out
+
+
+def discretize_quarter(existing_quarters: list[dict], cum: dict) -> dict | None:
+    """把TWSE官方回傳的「累計數」(cum)還原成單季數字。Q1本身就是單季（累計==單季），
+    Q2/Q3/Q4要減掉陣列裡已有的同年較早季度加總才是真正的單季數。如果較早季度
+    缺資料（陣列裡同年份的季度數不夠），寧可回傳None跳過這次merge，也不要塞一個
+    算錯的單季數字進去——這是2026-08-27用月營收交叉驗證抓到的真bug修正，不是
+    自己憑空猜的邊界情況。"""
+    y, q = cum["year"], cum["quarter"]
+    if q == 1:
+        revenue = cum["revenue_cum"]
+        gross, op = cum["gross_cum"], cum["op_cum"]
+        return {
+            "year": y, "quarter": 1,
             "revenue": revenue,
             "gross_margin_pct": round(gross / revenue * 100, 2) if gross is not None and revenue else None,
             "op_margin_pct": round(op / revenue * 100, 2) if op is not None and revenue else None,
-            "net_income_parent": net_parent,
-            "eps": eps,
+            "net_income_parent": cum["net_income_parent_cum"],
+            "eps": cum["eps_cum"],
         }
-    return out
+    prior = [r for r in existing_quarters if r.get("year") == y and r.get("quarter", 0) < q]
+    if len(prior) < q - 1:
+        return None  # 同年較早季度資料不齊，沒辦法安全還原成單季數
+    prior_revenue = sum(r["revenue"] for r in prior)
+    # gross/op只存了百分比，用「百分比x當季revenue」還原絕對值來加總——這是
+    # 近似（受限於百分比只存到小數點後2位），但誤差在還原單季用途上可忽略。
+    prior_gross = sum((r.get("revenue") or 0) * (r.get("gross_margin_pct") or 0) / 100 for r in prior)
+    prior_op = sum((r.get("revenue") or 0) * (r.get("op_margin_pct") or 0) / 100 for r in prior)
+    prior_net = sum(r.get("net_income_parent") or 0 for r in prior)
+    prior_eps = sum(r.get("eps") or 0 for r in prior)
+    revenue = cum["revenue_cum"] - prior_revenue
+    gross = (cum["gross_cum"] - prior_gross) if cum["gross_cum"] is not None else None
+    op = (cum["op_cum"] - prior_op) if cum["op_cum"] is not None else None
+    net = (cum["net_income_parent_cum"] - prior_net) if cum["net_income_parent_cum"] is not None else None
+    eps = (cum["eps_cum"] - prior_eps) if cum["eps_cum"] is not None else None
+    return {
+        "year": y, "quarter": q,
+        "revenue": revenue,
+        "gross_margin_pct": round(gross / revenue * 100, 2) if gross is not None and revenue else None,
+        "op_margin_pct": round(op / revenue * 100, 2) if op is not None and revenue else None,
+        "net_income_parent": net,
+        "eps": round(eps, 2) if eps is not None else None,
+    }
 
 
 def fetch_balance() -> dict[str, dict]:
@@ -151,17 +212,23 @@ def main():
 
     errors = []
     income_updated = 0
+    skipped_no_baseline = 0
     try:
         income = fetch_income()
         equity = fetch_balance()
-        for code, latest in income.items():
+        for code, cum in income.items():
             entry = stocks.setdefault(code, {})
             fin = entry.setdefault("financials", {})
-            fin["quarters"] = merge_quarters(fin.get("quarters"), latest)
+            existing_quarters = fin.get("quarters", [])
+            discrete = discretize_quarter(existing_quarters, cum)
+            if discrete is None:
+                skipped_no_baseline += 1
+                continue
+            fin["quarters"] = merge_quarters(existing_quarters, discrete)
             eq = equity.get(code)
             fin["equity_parent_latest"] = eq
             fin["roe_ttm_pct"] = compute_roe_ttm(fin["quarters"], eq)
-        income_updated = len(income)
+        income_updated = len(income) - skipped_no_baseline
     except Exception as e:
         print(f"財報(income/balance) 更新失敗：{e}")
         errors.append(f"financials: {e}")
@@ -170,11 +237,13 @@ def main():
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
     payload["meta"]["financials_source"] = "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)"
     payload["meta"]["financials_updated_count"] = income_updated
+    payload["meta"]["financials_skipped_no_baseline_count"] = skipped_no_baseline
     payload["meta"].setdefault("errors", [])
     payload["meta"]["errors"] = errors
 
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-    print(f"寫入 {OUT_PATH}：財報更新 {income_updated} 檔（合計 {len(stocks)} 檔有任何資料）")
+    print(f"寫入 {OUT_PATH}：財報更新 {income_updated} 檔，{skipped_no_baseline} 檔因缺同年較早季度"
+          f"基準無法安全還原單季數字而跳過（合計 {len(stocks)} 檔有任何資料）")
     if errors:
         print(f"部分失敗（不中止）：{errors}")
 
