@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 143 輪 · 2026-08-27T16:07+08:00 · TW（暫停規則生效中，做允許的地基工作）· 依輪替選TW，`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，`portfolio_multifactor_v2`「下一步」選項(a)(b)仍留給使用者決定優先序，本輪改做T86三大法人回補第23批：`backfill_t86.py --batch-size 200`，200天全部新完成（11天無交易/無資料），未撞TWSE反爬蟲封鎖，乾淨在批次上限收工，累積1928→2128/3305（58.3%→64.4%）· `is_holdout_consumed()`確認`False`，純資料回補不寫`TRIALS_LEDGER.md` · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第143輪記錄
+
+---
 ## 第 142 輪 · 2026-08-27T15:31+08:00 · FUT（跳過，暫停規則生效中）· 依輪替選FUT（FUT 14:02第139輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來無新commit觸及），FUT軌唯一待辦（盤別效應第三批/round104）本質仍是單因子工作，同round109/112/115/118/121/124/127/130/133/136/139判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；`git status`確認工作目錄乾淨 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第142輪記錄
 
 ---
