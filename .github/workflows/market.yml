@@ -19,6 +19,12 @@ jobs:
           python-version: '3.12'
       - name: 安裝相依套件
         run: pip install requests yfinance
+      - name: 更新個股財報EPS/毛利率/營益率/ROE（TWSE官方t187ap06_L_ci/07_L_ci，免金鑰）
+        # 這步要放最前面：它用t187ap06_L_ci「上市公司」名單建立 stock_detail.json
+        # 的股票清單骨架，下面兩步（三大法人/融資融券）只合併「已存在於這份骨架」
+        # 的代碼，濾掉ETF/權證等非股票證券噪音（見各腳本docstring）。
+        run: python .github/scripts/update_stock_financials.py
+        continue-on-error: true
       - name: 抓台股大盤/類股/三大法人/台指期（TWSE/TPEx/TAIFEX 官方開放資料，免金鑰）
         run: python .github/scripts/fetch_market_tw.py
         continue-on-error: true
@@ -28,11 +34,17 @@ jobs:
       - name: 更新個股月營收/PER/PBR/殖利率（TWSE官方openapi，累積式寫回，免金鑰）
         run: python .github/scripts/update_fundamentals_daily.py
         continue-on-error: true
+      - name: 抓USD/TWD匯率（yfinance，免金鑰）
+        run: python .github/scripts/fetch_fx.py
+        continue-on-error: true
+      - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，僅分母用FinMind）
+        run: python .github/scripts/update_margin_maintenance.py
+        continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/fundamentals.json
-          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面 $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json
+          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼 $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push

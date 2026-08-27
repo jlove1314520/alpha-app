@@ -718,7 +718,7 @@
           <div class="f"><span>ROE（近四季）</span><b id="fin-roe">—</b></div>
           <div class="f"><span>自由現金流（最新季）</span><b id="fin-fcf">—</b></div>
         </div>
-        <div class="note" id="fin-note">來源：FinMind 財報 XBRL 解析</div>
+        <div class="note" id="fin-note">來源：TWSE官方財報開放資料</div>
       </div>
     </div>
 
@@ -731,7 +731,7 @@
           <div class="f"><span>自營商</span><b id="chip-dealer">—</b></div>
           <div class="f"><span>三大法人合計</span><b id="chip-total">—</b></div>
         </div>
-        <div class="note" id="chip-note">來源：FinMind 三大法人</div>
+        <div class="note" id="chip-note">來源：TWSE T86（GitHub Actions 排程）</div>
       </div>
       <div class="card">
         <h3>外資買賣超（近 5 日 · 張）</h3>
@@ -750,7 +750,7 @@
           <div class="f"><span>資券比</span><b id="mg-ratio">—</b></div>
         </div>
         <div class="note" id="mg-short-ratio">券資比：—</div>
-        <div class="note" id="mg-note">來源：FinMind 個股融資融券</div>
+        <div class="note" id="mg-note">來源：TWSE MI_MARGN（GitHub Actions 排程）</div>
         <div class="note" id="mg-maint" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">估算融資維持率：—</div>
       </div>
     </div>
@@ -1157,9 +1157,13 @@
   const FM_TTL=3*60*1000; // localStorage 快取有效期：3 分鐘，過期後才重新打 FinMind
   const _d=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
   const nf=n=>n==null||isNaN(n)?'—':Number(n).toLocaleString();
-  const zhang=n=>n==null||isNaN(n)?'—':(n>=0?'+':'−')+Math.round(Math.abs(n)/1000).toLocaleString();
   function setTxt(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
-  function setChip(id,v){const el=document.getElementById(id);if(!el)return;el.textContent=zhang(v)+' 張';el.className=v>=0?'pos':'neg'}
+  // 2026-08-27 架構修正：三大法人chip改讀stock_detail.json，數值已經是「張」
+  // （fetch_market_tw.py抓T86時已經/1000過），不是原始股數，所以是直接round，
+  // 不像舊版FinMind路徑的setChip()/zhang()還要再/1000一次。
+  function setChipLots(id,v){const el=document.getElementById(id);if(!el)return;
+    el.textContent=(v==null||isNaN(v)?'—':(v>=0?'+':'−')+Math.round(Math.abs(v)).toLocaleString()+' 張');
+    el.className=v>=0?'pos':'neg'}
   const isUS=code=>/^[A-Za-z]/.test(code);
   const nameOf=code=>STOCKNAME[code]||STOCKNAME_US[code]||code;
   function fmCacheRead(k){
@@ -1317,6 +1321,19 @@
     }
     return (FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.fundamentals&&FUNDAMENTALS_CACHE.fundamentals[code])||{};
   }
+  // 2026-08-27 新增：個股頁財報/三大法人/融資融券改讀 data/stock_detail.json
+  // （見 .github/scripts/update_stock_financials.py + fetch_market_tw.py +
+  // update_margin_maintenance.py 三支排程腳本合力寫入），不再對FinMind打
+  // FinancialStatements/BalanceSheet/InstitutionalInvestorsBuySell/
+  // MarginPurchaseShortSale。只涵蓋TWSE「上市公司」（t187ap06_L_ci「一般業」
+  // 分類），上櫃股票/金融股目前查不到會自然回傳{}，呼叫端顯示「—」不崩潰。
+  let STOCK_DETAIL_CACHE=null;
+  async function loadStockDetail(code){
+    if(!STOCK_DETAIL_CACHE){
+      try{const r=await fetch('data/stock_detail.json?t='+Date.now());if(r.ok)STOCK_DETAIL_CACHE=await r.json()}catch(e){STOCK_DETAIL_CACHE={stocks:{}}}
+    }
+    return (STOCK_DETAIL_CACHE&&STOCK_DETAIL_CACHE.stocks&&STOCK_DETAIL_CACHE.stocks[code])||{};
+  }
   let MARKET_TW_CACHE=null,MARKET_US_CACHE=null;
   // 2026-08-27 新增（P1-1）：統一的頁面頂端診斷橫幅，取代「六個面板各喊一次連線
   // 失敗」——集中檢查各個資料檔案的新鮮度，一次列出哪些過期/缺失、原因分類、
@@ -1343,6 +1360,14 @@
     const fundGenAt=FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.meta&&FUNDAMENTALS_CACHE.meta.generated_at;
     const fundAgeMin=fundGenAt?(Date.now()-new Date(fundGenAt).getTime())/60000:null;
     if(fundAgeMin==null||fundAgeMin>3*24*60)problems.push({name:'個股基本面（月營收/PER/PBR）',reason:fundAgeMin==null?'無資料或缺少更新時間戳':'資料可能過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
+    // 2026-08-27 新增：大盤融資維持率改排程累積更新後，超過3天沒新的一天就代表
+    // update_margin_maintenance.py 連續失敗（常見原因：分母那唯一一次FinMind呼叫
+    // 額度用盡），提醒使用者畫面上那個數字可能不是最新的，不要誤以為永遠有效。
+    let marginHistory=[];
+    try{const r=await fetch('data/margin_maintenance.json?t='+Date.now());if(r.ok)marginHistory=await r.json()}catch(e){}
+    const marginLast=Array.isArray(marginHistory)&&marginHistory.length?marginHistory[marginHistory.length-1]:null;
+    const marginAgeMin=marginLast&&marginLast.date?(Date.now()-new Date(marginLast.date+'T00:00:00+08:00').getTime())/60000:null;
+    if(marginAgeMin==null||marginAgeMin>3*24*60)problems.push({name:'大盤融資維持率',reason:marginAgeMin==null?'無資料':'資料過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
     if(!problems.length){el.style.display='none';return}
     el.style.display='';
     el.innerHTML='⚠ 部分資料異常：'+problems.map(p=>`<b>${p.name}</b>（${p.reason}，下次排程 ${p.schedule}）`).join('；');
@@ -1370,7 +1395,10 @@
     const pct=changePctOverride!=null?changePctOverride:item.change_pct;
     const cls=(pct==null)?'':(pct>=0?'pos':'neg');
     const pctTxt=pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`;
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
+    // 2026-08-27：近20日收盤序列跟著market_tw.json/market_us.json一起排程抓（見
+    // fetch_market_tw.py/fetch_market_us.py），不用另外呼叫FinMind畫這條走勢線。
+    const sp=(item.sparkline&&item.sparkline.length>=2)?spark(item.sparkline,(pct==null?item.sparkline[item.sparkline.length-1]>=item.sparkline[0]:pct>=0)):'';
+    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b>${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
   }
   async function loadUsIndexes(){
     await loadMarketDataFiles();
@@ -1728,39 +1756,45 @@
     doSearch();hydrateHome();
   }
 
+  // 2026-08-27 架構修正：改讀 data/stock_detail.json（見 fetch_market_tw.py 從
+  // 排程已經在打的T86回應多榨出來的逐股三大法人買賣超，累積近5日history），不再
+  // 對FinMind打TaiwanStockInstitutionalInvestorsBuySell。只涵蓋跟financials同一份
+  // 「上市公司」名單，查不到回傳null（沿用舊行為，呼叫端已經會處理null）。
+  function _t86Date(d){return d&&d.length===8?`${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`:d}
   async function instNet(code){
-    const raw=await fm('TaiwanStockInstitutionalInvestorsBuySell',code,_d(16));if(!raw.length)return null;
-    const last=raw[raw.length-1].date;let f=0,t=0,d=0;
-    raw.filter(r=>r.date===last).forEach(r=>{const net=(r.buy||0)-(r.sell||0);const n=r.name||'';
-      if(n.includes('Foreign'))f+=net;else if(n.includes('Trust'))t+=net;else if(n.includes('Dealer'))d+=net});
-    const dates=[...new Set(raw.map(r=>r.date))].slice(-5);
-    const series=dates.map(dd=>{let s=0;raw.filter(r=>r.date===dd&&(r.name||'').includes('Foreign')).forEach(r=>s+=(r.buy||0)-(r.sell||0));return{date:dd,v:s}});
-    return{date:last,foreign:f,trust:t,dealer:d,total:f+t+d,series};
+    const detail=await loadStockDetail(code);
+    const inst=detail.institutional;
+    if(!inst)return null;
+    const series=(inst.history||[]).map(h=>({date:_t86Date(h.date),v:h.foreign_lots}));
+    return{date:_t86Date(inst.date),foreign:inst.foreign_lots,trust:inst.trust_lots,dealer:inst.dealer_lots,total:inst.foreign_lots+inst.trust_lots+(inst.dealer_lots||0),series};
   }
 
   // 2026-08-25 新增：個股融資融券（籌碼分頁）。融資餘額變化/融券餘額/資券比/券資比是
-  // FinMind 直接給的準確資料；「估算融資維持率」是自己算的，公式：融資餘額(張)×現價÷
+  // 準確資料；「估算融資維持率」是自己算的，公式：融資餘額(張)×現價÷
   // 估計融資金額，估計融資金額用「近20日均價×融資成數60%」概估原始成本（不知道真正
   // 每筆融資的實際進場價，只能用近期均價概估），畫面上明確標「估算值」，跟上面幾個
   // 準確資料分開，符合使用者要求「準確資料權重要高於估算值」。
+  // 2026-08-27 架構修正：改讀 data/stock_detail.json（見
+  // update_margin_maintenance.py 從排程已經在打的MI_MARGN多榨出來的逐股融資融券），
+  // 不再對FinMind打TaiwanStockMarginPurchaseShortSale。
   async function loadMarginChip(code,px){
-    const raw=await fm('TaiwanStockMarginPurchaseShortSale',code,_d(16));
-    if(!raw.length){
+    const detail=await loadStockDetail(code);
+    const mg=detail.margin;
+    if(!mg||mg.margin_balance_today==null){
       ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
       setTxt('mg-short-ratio','券資比：—');setTxt('mg-note',fmEmptyMsg('查無融資融券資料'));
       setTxt('mg-maint','估算融資維持率：—');
       return;
     }
-    const last=raw[raw.length-1];
-    const marginBal=last.MarginPurchaseTodayBalance,marginPrev=last.MarginPurchaseYesterdayBalance;
-    const shortBal=last.ShortSaleTodayBalance;
+    const marginBal=mg.margin_balance_today,marginPrev=mg.margin_balance_prev??marginBal;
+    const shortBal=mg.short_balance_today||0;
     const chg=marginBal-marginPrev;
     setTxt('mg-balance',nf(marginBal)+' 張');
     const ce=document.getElementById('mg-balance-chg');ce.textContent=(chg>=0?'+':'')+nf(chg)+' 張';ce.className=chg>=0?'pos':'neg';
     setTxt('mg-short',nf(shortBal)+' 張');
     setTxt('mg-ratio',shortBal>0?(marginBal/shortBal).toFixed(1)+' 倍':'—（融券餘額為0）');
     setTxt('mg-short-ratio',`券資比：${marginBal>0?(shortBal/marginBal*100).toFixed(2)+'%':'—'}`);
-    setTxt('mg-note',`最新 ${last.date} · FinMind 個股融資融券`);
+    setTxt('mg-note','來源：TWSE MI_MARGN（GitHub Actions 排程）');
     if(px&&px.length&&marginBal>0){
       const last20=px.slice(-20).map(x=>x.close);
       const avg20=last20.reduce((a,b)=>a+b,0)/last20.length;
@@ -1774,50 +1808,32 @@
     }else{setTxt('mg-maint','估算融資維持率：—（融資餘額為0或無足夠股價資料）')}
   }
 
-  function pivotByDate(raw){
-    const byDate={};
-    raw.forEach(r=>{(byDate[r.date]=byDate[r.date]||{})[r.type]=r.value});
-    return Object.keys(byDate).sort().map(d=>({date:d,...byDate[d]}));
-  }
-  function fyq(dateStr){ // "2026-06-30" -> "26Q2"
-    const [y,m]=dateStr.split('-');const q=Math.ceil(Number(m)/3);
-    return y.slice(2)+'Q'+q;
-  }
+  // 2026-08-27 架構修正：EPS/毛利率/營益率/ROE改讀 data/stock_detail.json（見
+  // update_stock_financials.py，TWSE官方t187ap06_L_ci綜合損益表+t187ap07_L_ci
+  // 資產負債表，累積式寫回），不再對FinMind打FinancialStatements/BalanceSheet。
+  // **FCF維持FinMind、非本輪範圍**：TWSE官方開放資料沒有現金流量表對應端點
+  // （已查證swagger完整清單確認），這是永久性限制，不是漏遷移——查不到就誠實
+  // 顯示「TWSE無此資料源」而不是留著FinMind呼叫假裝有替代來源。
   async function loadFinancials(code){
-    const [finRaw,bsRaw,cfRaw]=await Promise.all([
-      fm('TaiwanStockFinancialStatements',code,_d(760)),
-      fm('TaiwanStockBalanceSheet',code,_d(760)),
-      fm('TaiwanStockCashFlowsStatement',code,_d(760)),
-    ]);
+    const detail=await loadStockDetail(code);
     if(currentCode!==code)return; // 使用者已切到別檔股票，這份資料作廢
-    const fin=pivotByDate(finRaw),bs=pivotByDate(bsRaw),cf=pivotByDate(cfRaw);
-    const epsQ=fin.filter(q=>q.EPS!=null).slice(-8);
-    if(epsQ.length){
-      const vals=epsQ.map(q=>q.EPS);const mx=Math.max(...vals.map(Math.abs))||1;
-      document.getElementById('eps-bars').innerHTML=epsQ.map((q,i)=>{const isl=i===epsQ.length-1;
-        return `<div class="b"><span class="v">${q.EPS.toFixed(1)}</span><i style="height:${Math.max(8,Math.abs(q.EPS)/mx*100).toFixed(0)}%${isl?';background:var(--accent-deep);outline:2px solid var(--accent);outline-offset:-2px':''}"></i><em>${fyq(q.date)}</em></div>`}).join('');
+    const fin=(detail.financials&&detail.financials.quarters)||[];
+    if(fin.length){
+      const vals=fin.map(q=>q.eps).filter(v=>v!=null);
+      const mx=Math.max(...vals.map(Math.abs))||1;
+      document.getElementById('eps-bars').innerHTML=fin.filter(q=>q.eps!=null).map((q,i,arr)=>{const isl=i===arr.length-1;
+        return `<div class="b"><span class="v">${q.eps.toFixed(1)}</span><i style="height:${Math.max(8,Math.abs(q.eps)/mx*100).toFixed(0)}%${isl?';background:var(--accent-deep);outline:2px solid var(--accent);outline-offset:-2px':''}"></i><em>${q.year}Q${q.quarter}</em></div>`}).join('')
+        ||'<div class="note">查無財報 EPS</div>';
     }else{document.getElementById('eps-bars').innerHTML='<div class="note">查無財報 EPS</div>'}
     const last=fin.length?fin[fin.length-1]:null;
-    if(last&&last.Revenue){
-      const gm=last.GrossProfit!=null?last.GrossProfit/last.Revenue*100:null;
-      const om=last.OperatingIncome!=null?last.OperatingIncome/last.Revenue*100:null;
-      setTxt('fin-gross',gm!=null?gm.toFixed(1)+'%':'—');
-      setTxt('fin-op',om!=null?om.toFixed(1)+'%':'—');
-    }else{setTxt('fin-gross','—');setTxt('fin-op','—')}
-    const last4=fin.filter(q=>q.EquityAttributableToOwnersOfParent!=null).slice(-4);
-    const lastBS=bs.length?bs[bs.length-1]:null;
-    if(last4.length===4&&lastBS&&lastBS.EquityAttributableToOwnersOfParent){
-      const ttmNI=last4.reduce((s,q)=>s+q.EquityAttributableToOwnersOfParent,0);
-      const roe=ttmNI/lastBS.EquityAttributableToOwnersOfParent*100;
-      const re=document.getElementById('fin-roe');re.textContent=(roe>=0?'+':'')+roe.toFixed(1)+'%';re.className=roe>=0?'pos':'neg';
-    }else{setTxt('fin-roe','—')}
-    const lastCF=cf.length?cf[cf.length-1]:null;
-    if(lastCF&&lastCF.CashFlowsFromOperatingActivities!=null){
-      const capex=lastCF.PropertyAndPlantAndEquipment||0; // 已是負值（現金流出）
-      const fcf=lastCF.CashFlowsFromOperatingActivities+capex;
-      const fe=document.getElementById('fin-fcf');fe.textContent=(fcf>=0?'+ ':'− ')+'NT$ '+nf(Math.round(Math.abs(fcf)/1e8))+' 億';fe.className=fcf>=0?'pos':'neg';
-    }else{setTxt('fin-fcf','—')}
-    if(last)setTxt('fin-note',`來源：FinMind 財報 XBRL 解析 · ${fyq(last.date)}（注意：僅為期末日資料，非公告日，可能早於實際公告時間）`);
+    setTxt('fin-gross',last&&last.gross_margin_pct!=null?last.gross_margin_pct.toFixed(1)+'%':'—');
+    setTxt('fin-op',last&&last.op_margin_pct!=null?last.op_margin_pct.toFixed(1)+'%':'—');
+    const roe=detail.financials&&detail.financials.roe_ttm_pct;
+    if(roe!=null){const re=document.getElementById('fin-roe');re.textContent=(roe>=0?'+':'')+roe.toFixed(1)+'%';re.className=roe>=0?'pos':'neg'}
+    else{setTxt('fin-roe','—')}
+    setTxt('fin-fcf','TWSE無此資料源');
+    if(last)setTxt('fin-note',`來源：TWSE官方t187ap06_L_ci/t187ap07_L_ci（一般業）· ${last.year}Q${last.quarter}（僅台股上市一般業，上櫃/金融股暫無）；FCF：TWSE無現金流量表開放資料，非暫時缺漏`);
+    else setTxt('fin-note','查無財報資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）');
   }
 
   // 2026-08-25 新增：月營收雙圖（上金額/下YoY雙向）+ 觸控玻璃小卡。REV_ROWS 是目前這檔股票
@@ -1984,8 +2000,8 @@
     setTxt('kn-per',p.per??'—');setTxt('kn-pbr',p.pbr??'—');setTxt('kn-yield',p.dividend_yield!=null?p.dividend_yield+'%':'—');
     loadRevenueChart(code,rev);
     if(inst){
-      setChip('chip-foreign',inst.foreign);setChip('chip-trust',inst.trust);setChip('chip-dealer',inst.dealer);setChip('chip-total',inst.total);
-      setTxt('chip-note',`最新 ${inst.date} · FinMind`);
+      setChipLots('chip-foreign',inst.foreign);setChipLots('chip-trust',inst.trust);setChipLots('chip-dealer',inst.dealer);setChipLots('chip-total',inst.total);
+      setTxt('chip-note',`最新 ${inst.date} · TWSE T86（GitHub Actions 排程）`);
       const mx=Math.max(...inst.series.map(s=>Math.abs(s.v)))||1;
       document.getElementById('chip-bars').innerHTML=inst.series.map(s=>`<div class="db"><i class="${s.v>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(s.v)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${s.date.slice(5)}</em></div>`).join('');
     }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料</div>'}
@@ -2464,19 +2480,21 @@
   function setColorScheme(key){applyColorScheme(key);renderColorSchemeToggle();toast('已切換：'+COLOR_SCHEMES[key].label)}
 
   // ── 幣別切換（2026-08-25 新增）：今日頁總資產/已實現損益、交易頁持倉損益支援 NT$/US$。
-  // 匯率抓 FinMind TaiwanExchangeRate（USD），用 spot_buy/spot_sell 中價；抓不到就不換算、
-  // 不准用寫死的舊匯率頂替（見 CLAUDE.md 已知地雷），畫面誠實顯示「匯率未更新」。
+  // 2026-08-27 架構修正：匯率改讀 data/fx.json（GitHub Actions 排程用 yfinance
+  // TWD=X 抓，見 .github/scripts/fetch_fx.py），不再對 FinMind 打
+  // TaiwanExchangeRate——那是 STATUS.json 列出的 P0 項目（額度耗盡就讓幣值切換
+  // 失效）。抓不到就不換算、不准用寫死的舊匯率頂替（見 CLAUDE.md 已知地雷），
+  // 畫面誠實顯示「匯率未更新」。
   let CCY=localStorage.getItem('alpha_ccy')||'TWD';
   let FX_RATE=null,FX_DATE=null;
   const CCY_TOGGLE_IDS=['home-ccy-toggle','trade-ccy-toggle','settings-ccy-toggle'];
   const FX_NOTE_IDS=['home-fx-note','trade-fx-note','settings-fx-note'];
+  let FX_CACHE=null;
   async function fetchFx(){
-    const rows=await fm('TaiwanExchangeRate','USD',_d(10));
-    if(!rows.length){FX_RATE=null;FX_DATE=null;renderFxNote();return}
-    const last=rows[rows.length-1];
-    const buy=Number(last.spot_buy),sell=Number(last.spot_sell);
-    if(!buy||!sell){FX_RATE=null;FX_DATE=null;renderFxNote();return}
-    FX_RATE=(buy+sell)/2;FX_DATE=last.date;
+    try{const r=await fetch('data/fx.json?t='+Date.now());if(r.ok)FX_CACHE=await r.json()}catch(e){FX_CACHE=null}
+    const usd=FX_CACHE&&FX_CACHE.usd_twd;
+    if(!usd||usd.rate==null){FX_RATE=null;FX_DATE=null;renderFxNote();return}
+    FX_RATE=usd.rate;FX_DATE=usd.date;
     renderFxNote();
   }
   function renderFxNote(){

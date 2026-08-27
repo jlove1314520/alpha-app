@@ -30,6 +30,7 @@ from __future__ import annotations
 import json
 import sys
 import requests
+import yfinance as yf
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -80,6 +81,17 @@ def fetch_mi_index() -> tuple[dict | None, list[dict]]:
     return headline, sectors
 
 
+def fetch_taiex_sparkline() -> list[float]:
+    """MI_INDEX 只給當天單一數字，沒有歷史區間——近20日收盤序列改用 yfinance
+    `^TWII`（實測驗證過跟 MI_INDEX 同一天的收盤值一致，例如 2026-08-25 兩邊都是
+    45169.46），只用來畫App的sparkline走勢線，headline的close/change_pct仍然
+    以MI_INDEX為準（見上面fetch_mi_index），這裡不覆蓋。"""
+    h = yf.Ticker("^TWII").history(period="1mo")
+    if h.empty:
+        return []
+    return [round(float(c), 2) for c in h["Close"].tail(20).tolist()]
+
+
 def fetch_tpex_index() -> dict | None:
     # 已知風險（2026-08-26 本機測試發現，不確定 GitHub Actions Ubuntu runner 是否也
     # 會遇到）：這台 Windows 機器的 Python/OpenSSL 對 TPEx 網站憑證的驗證會噴
@@ -97,7 +109,10 @@ def fetch_tpex_index() -> dict | None:
     change = _num(last.get("Change"))
     prev_close = _num(prev.get("Close")) if prev else None
     change_pct = (change / (close - change) * 100) if (close is not None and change is not None and (close - change)) else None
-    return {"date": last.get("Date"), "close": close, "change": change, "change_pct": change_pct}
+    # 這個端點本來就回傳歷史區間（見上面docstring），近20日收盤序列直接從同一份
+    # 回應取，不需要另外呼叫，用來畫App的sparkline走勢線。
+    sparkline = [c for c in (_num(r.get("Close")) for r in rows[-20:]) if c is not None]
+    return {"date": last.get("Date"), "close": close, "change": change, "change_pct": change_pct, "sparkline": sparkline}
 
 
 TAIFEX_CONTRACTS = ("TX", "MTX", "TE", "TF")  # 台指期/小型台指期/電子期/金融期，市場頁「期貨」分頁需要全部四種
@@ -131,8 +146,10 @@ def fetch_taifex_contracts() -> dict[str, dict]:
     return out
 
 
-def fetch_institutional_aggregate(date_str: str) -> dict | None:
-    """T86 全市場加總（見模組 docstring 的封鎖風險說明，這裡只抓一天）。"""
+def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
+    """T86 全市場加總（見模組 docstring 的封鎖風險說明，這裡只抓一天）。回傳
+    (per_stock字典, 全市場加總dict或None)——per_stock固定回傳{}（不會是None），
+    呼叫端不需要另外判斷None。"""
     headers = {
         "Referer": "https://www.twse.com.tw/zh/trading/foreign/t86.html",
         "User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)",
@@ -142,7 +159,7 @@ def fetch_institutional_aggregate(date_str: str) -> dict | None:
     r.raise_for_status()
     body = r.json()
     if body.get("stat") != "OK" or not body.get("data"):
-        return None
+        return {}, None
     fields = body["fields"]
 
     def _idx(*subs):
@@ -164,10 +181,39 @@ def fetch_institutional_aggregate(date_str: str) -> dict | None:
         if t: trust_sum += t
         if tot: total_sum += tot
     dealer_sum = total_sum - foreign_sum - trust_sum
+
+    # 2026-08-27 新增：順便從同一份T86回應抽出逐股三大法人買賣超，給個股頁「籌碼」
+    # 分頁用（見 update_stock_detail_institutional，寫進 data/stock_detail.json）——
+    # 不多打一次T86（這個端點有反爬蟲風險，見模組docstring），同一次回應多榨一點用途。
+    def _idx_exact(want):
+        return fields.index(want) if want in fields else None
+
+    i_code = _idx("證券代號")
+    # 用exact match不用_idx()的substring比對——"自營商買賣超股數"是
+    # "外資自營商買賣超股數"的substring，會撞到，見上面2026-08-27發現的bug。
+    i_foreign_dealer = _idx_exact("外資自營商買賣超股數")
+    i_dealer_direct = _idx_exact("自營商買賣超股數")
+    per_stock = {}
+    if i_code is not None:
+        for row in body["data"]:
+            code = (row[i_code] or "").strip()
+            if not code:
+                continue
+            fd = _num(row[i_foreign_dealer]) if i_foreign_dealer is not None else None
+            f = (_num(row[i_foreign]) or 0) + (fd or 0)
+            t = _num(row[i_trust]) or 0
+            d = _num(row[i_dealer_direct]) if i_dealer_direct is not None else None
+            per_stock[code] = {
+                "date": date_str,
+                "foreign_lots": round(f / 1000, 1),
+                "trust_lots": round(t / 1000, 1),
+                "dealer_lots": round(d / 1000, 1) if d is not None else None,
+            }
+
     # 股數轉「億元」需要價格加權，這裡沒有股數×價格的逐股資料，只回報「淨買賣股數」
     # （單位：張，股數/1000），不假裝換算成金額——誠實揭露這個簡化，App 端顯示要標
     # 清楚單位是「淨買賣張數」不是金額。
-    return {
+    return per_stock, {
         "date": date_str,
         "foreign_net_lots": round(foreign_sum / 1000, 1),
         "trust_net_lots": round(trust_sum / 1000, 1),
@@ -188,6 +234,13 @@ def main():
         print(f"MI_INDEX 失敗：{e}")
         out["errors"].append(f"taiex/sectors: {e}")
 
+    if out.get("taiex"):
+        try:
+            out["taiex"]["sparkline"] = fetch_taiex_sparkline()
+        except Exception as e:
+            print(f"TAIEX sparkline(^TWII) 失敗：{e}")
+            out["errors"].append(f"taiex_sparkline: {e}")
+
     try:
         out["tpex"] = fetch_tpex_index()
     except Exception as e:
@@ -202,12 +255,13 @@ def main():
         print(f"TAIFEX 失敗：{e}")
         out["errors"].append(f"futures: {e}")
 
+    per_stock_institutional = {}
     try:
         date_str = now_tw.strftime("%Y%m%d")
-        inst = fetch_institutional_aggregate(date_str)
+        per_stock_institutional, inst = fetch_institutional_aggregate(date_str)
         if inst is None:  # 今天可能還沒收盤定案，退回抓昨天
             prev_str = (now_tw - timedelta(days=1)).strftime("%Y%m%d")
-            inst = fetch_institutional_aggregate(prev_str)
+            per_stock_institutional, inst = fetch_institutional_aggregate(prev_str)
         out["institutional"] = inst
         # 「近5日」買賣超需要歷史，但這支腳本一次只抓一天（T86 反爬蟲風險，見模組
         # docstring）——用「讀取上次委進 repo 的 JSON、把今天併進去、去重、只留最近
@@ -233,6 +287,41 @@ def main():
     print(f"寫入 {OUT_PATH}：taiex={out.get('taiex')}，"
           f"sectors={len(out.get('sectors') or [])}筆，tpex={out.get('tpex')}，"
           f"tx={out.get('tx_futures')}，institutional={out.get('institutional')}")
+
+    # 2026-08-27 新增：把同一次T86回應多榨出來的逐股三大法人買賣超，merge進
+    # data/stock_detail.json（個股頁「籌碼」分頁用，見STATUS.json的P1項目）。
+    # 這裡只動"institutional"這個key，不覆寫update_stock_financials.py/
+    # update_margin_maintenance.py各自負責的其他key。
+    if per_stock_institutional:
+        detail_path = REPO_ROOT / "data" / "stock_detail.json"
+        detail = {"meta": {}, "stocks": {}}
+        if detail_path.exists():
+            try:
+                detail = json.loads(detail_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        stocks = detail.setdefault("stocks", {})
+        # T86（selectType=ALL）涵蓋所有證券（股票+ETF+權證+可轉債...等），不是只有
+        # 股票——實測發現高達17576筆，遠超過台股實際上市公司數。這裡只合併「已經
+        # 存在於stocks的代碼」（由update_stock_financials.py用t187ap06_L_ci「上市
+        # 公司」清單建立），不會新增權證/ETF等噪音進來，也不會setdefault創造新entry。
+        # 個股頁「外資買賣超（近5日）」長條圖需要小段歷史，但T86一次只給一天
+        # （反爬蟲風險，見模組docstring）——比照上面institutional_history同樣的
+        # 累積寫法：讀舊的history、把今天併進去、去重、只留最近5天。
+        matched = 0
+        for code, row in per_stock_institutional.items():
+            if code not in stocks:
+                continue
+            prior_hist = (stocks[code].get("institutional") or {}).get("history", [])
+            hist = [h for h in prior_hist if h.get("date") != row["date"]] + [row]
+            hist.sort(key=lambda h: h["date"])
+            hist = hist[-5:]
+            stocks[code]["institutional"] = {**row, "history": hist}
+            matched += 1
+        detail.setdefault("meta", {})["institutional_source"] = "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打）；只合併已存在於stock_detail.json的代碼，濾掉ETF/權證等非股票證券"
+        detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+        print(f"併入 {detail_path}：T86回應{len(per_stock_institutional)}筆證券，"
+              f"跟既有stocks比對後合併 {matched} 檔（其餘為ETF/權證等非股票，已濾掉）")
 
     # 全部主要區塊都失敗才視為故障；任何一塊成功就算這輪有價值，不要因為 T86
     # 反爬蟲封鎖這種已知風險就讓整支腳本 exit 1 拖累其他已經抓到的資料被 commit。

@@ -1,14 +1,222 @@
 {
-  "fetched_at": "2026-08-27T00:56:36+00:00",
+  "fetched_at": "2026-08-27T01:54:51+00:00",
   "errors": [
-    "taiex/sectors: HTTPSConnectionPool(host='openapi.twse.com.tw', port=443): Max retries exceeded with url: /v1/exchangeReport/MI_INDEX (Caused by ConnectTimeoutError(<HTTPSConnection(host='openapi.twse.com.tw', port=443) at 0x7f45771138c0>, 'Connection to openapi.twse.com.tw timed out. (connect timeout=15)'))"
+    "tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_index (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1032)')))"
   ],
-  "tpex": {
-    "date": "20260826",
-    "close": 395.66,
-    "change": 6.25,
-    "change_pct": 1.604992167638222
+  "taiex": {
+    "name": "發行量加權股價指數",
+    "close": 45832.62,
+    "change_pct": 1.47,
+    "sparkline": [
+      43119.75,
+      43386.41,
+      43360.66,
+      44611.6,
+      44396.7,
+      44225.91,
+      44928.76,
+      45120.72,
+      45518.07,
+      46021.48,
+      45811.01,
+      45857.27,
+      45308.68,
+      44719.35,
+      44933.74,
+      45224.29,
+      44762.32,
+      45169.46,
+      45832.62,
+      46259.38
+    ]
   },
+  "sectors": [
+    {
+      "name": "水泥窯製類指數",
+      "close": 628.92,
+      "change_pct": 0.87
+    },
+    {
+      "name": "塑膠化工類指數",
+      "close": 1128.37,
+      "change_pct": 5.47
+    },
+    {
+      "name": "機電類指數",
+      "close": 16050.44,
+      "change_pct": 1.65
+    },
+    {
+      "name": "水泥類指數",
+      "close": 122.24,
+      "change_pct": 0.24
+    },
+    {
+      "name": "食品類指數",
+      "close": 1957.61,
+      "change_pct": 0.23
+    },
+    {
+      "name": "塑膠類指數",
+      "close": 346.85,
+      "change_pct": 7.6
+    },
+    {
+      "name": "紡織纖維類指數",
+      "close": 480.0,
+      "change_pct": 0.34
+    },
+    {
+      "name": "電機機械類指數",
+      "close": 547.76,
+      "change_pct": 0.89
+    },
+    {
+      "name": "電器電纜類指數",
+      "close": 111.36,
+      "change_pct": 1.98
+    },
+    {
+      "name": "化學生技醫療類指數",
+      "close": 184.16,
+      "change_pct": 3.43
+    },
+    {
+      "name": "化學類指數",
+      "close": 192.62,
+      "change_pct": 1.99
+    },
+    {
+      "name": "生技醫療類指數",
+      "close": 108.74,
+      "change_pct": 3.97
+    },
+    {
+      "name": "玻璃陶瓷類指數",
+      "close": 141.62,
+      "change_pct": 2.98
+    },
+    {
+      "name": "造紙類指數",
+      "close": 287.08,
+      "change_pct": 0.02
+    },
+    {
+      "name": "鋼鐵類指數",
+      "close": 122.89,
+      "change_pct": 0.67
+    },
+    {
+      "name": "橡膠類指數",
+      "close": 198.1,
+      "change_pct": 0.51
+    },
+    {
+      "name": "汽車類指數",
+      "close": 296.0,
+      "change_pct": 0.76
+    },
+    {
+      "name": "電子工業類指數",
+      "close": 2916.26,
+      "change_pct": 1.66
+    },
+    {
+      "name": "半導體類指數",
+      "close": 1540.0,
+      "change_pct": 1.2
+    },
+    {
+      "name": "電腦及週邊設備類指數",
+      "close": 465.39,
+      "change_pct": 3.26
+    },
+    {
+      "name": "光電類指數",
+      "close": 71.32,
+      "change_pct": 4.71
+    },
+    {
+      "name": "通信網路類指數",
+      "close": 232.18,
+      "change_pct": 0.45
+    },
+    {
+      "name": "電子零組件類指數",
+      "close": 937.0,
+      "change_pct": 3.36
+    },
+    {
+      "name": "電子通路類指數",
+      "close": 357.81,
+      "change_pct": 0.04
+    },
+    {
+      "name": "資訊服務類指數",
+      "close": 229.14,
+      "change_pct": 0.1
+    },
+    {
+      "name": "其他電子類指數",
+      "close": 269.42,
+      "change_pct": 1.16
+    },
+    {
+      "name": "建材營造類指數",
+      "close": 467.07,
+      "change_pct": 1.16
+    },
+    {
+      "name": "航運類指數",
+      "close": 210.02,
+      "change_pct": 4.01
+    },
+    {
+      "name": "觀光餐旅類指數",
+      "close": 103.67,
+      "change_pct": 0.58
+    },
+    {
+      "name": "金融保險類指數",
+      "close": 3223.07,
+      "change_pct": 0.32
+    },
+    {
+      "name": "貿易百貨類指數",
+      "close": 242.09,
+      "change_pct": 0.17
+    },
+    {
+      "name": "油電燃氣類指數",
+      "close": 96.19,
+      "change_pct": 0.66
+    },
+    {
+      "name": "綠能環保類指數",
+      "close": 130.9,
+      "change_pct": 0.15
+    },
+    {
+      "name": "數位雲端類指數",
+      "close": 40.93,
+      "change_pct": 1.24
+    },
+    {
+      "name": "運動休閒類指數",
+      "close": 59.16,
+      "change_pct": 0.58
+    },
+    {
+      "name": "居家生活類指數",
+      "close": 101.4,
+      "change_pct": 1.28
+    },
+    {
+      "name": "其他類指數",
+      "close": 284.17,
+      "change_pct": 0.98
+    }
+  ],
   "tx_futures": {
     "contract_month": "202609",
     "last": 46011.0,

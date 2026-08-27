@@ -32,7 +32,10 @@ def main():
     failed = []
     for ticker, name in INDICES.items():
         try:
-            h = yf.Ticker(ticker).history(period="5d", auto_adjust=False)
+            # 2026-08-27：period 從 5d 改 1mo，多抓的天數用來附上近20日收盤序列給
+            # App畫sparkline（STATUS.json列的P0項目：大盤速覽目前只有價格沒有走勢
+            # 線），不需要額外對FinMind多打一次請求。
+            h = yf.Ticker(ticker).history(period="1mo", auto_adjust=False)
             if len(h) < 2:
                 failed.append(ticker)
                 continue
@@ -43,6 +46,7 @@ def main():
                 "change": round(float(last - prev), 2),
                 "change_pct": round(float((last / prev - 1) * 100), 3),
                 "as_of": h.index[-1].strftime("%Y-%m-%d"),
+                "sparkline": [round(float(c), 2) for c in h["Close"].tail(20).tolist()],
             }
         except Exception as e:
             print(f"  ・{ticker} 失敗：{e}")
