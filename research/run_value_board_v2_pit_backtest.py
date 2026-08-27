@@ -40,6 +40,7 @@ B16/B24條目、CLAUDE.md安全紅線）。**
 """
 from __future__ import annotations
 
+import pickle
 import sys
 from pathlib import Path
 
@@ -193,8 +194,23 @@ def main():
     holdout.assert_no_holdout_leakage(market_raw, context="market_raw in run_value_board_v2_pit_backtest")
     market_df = prepare_market_data(market_raw)
 
-    print("Loading sample + factors (cached, holdout-safe via load_dev)...")
-    data = load_sample_with_factors(sample_ids, market_df)
+    # 2026-08-28新增：load_sample_with_factors()對100檔樣本本身要約22分鐘
+    # （prepare_factors()真實運算，不是網路請求，見BACKLOG.md記錄），這支
+    # 腳本之後還會反覆重跑（sanity check/拉高random draws次數），每次都
+    # 重付22分鐘不划算——這裡加一層pickle本地快取（只快取這支腳本自己用，
+    # 不動factor_ic.py本身，不影響其他呼叫端）。
+    cache_path = Path(__file__).parent / "data" / "backtests" / "value_board_v2_sample_cache.pkl"
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    if cache_path.exists():
+        print(f"Loading sample + factors from local cache ({cache_path})...")
+        with open(cache_path, "rb") as f:
+            data = pickle.load(f)
+    else:
+        print("Loading sample + factors (no local cache yet, first run takes ~20min)...")
+        data = load_sample_with_factors(sample_ids, market_df)
+        with open(cache_path, "wb") as f:
+            pickle.dump(data, f)
+        print(f"  cached to {cache_path} for next run")
     print(f"  {len(data)}/{len(sample_ids)} usable names")
     for sid, d in data.items():
         holdout.assert_no_holdout_leakage(d, date_col="date", context=f"data[{sid}] in run_value_board_v2_pit_backtest")
