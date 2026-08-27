@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 145 輪 · 2026-08-27T17:01+08:00 · FUT（跳過，暫停規則生效中）· 依輪替選FUT（FUT 15:31第142輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只有一個commit），FUT軌唯一待辦（round104盤別效應第三批跳空構造/另立新因子家族）本質仍是單因子相關工作，同round109/112/115/118/121/124/127/130/133/136/139/142判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；`git status`確認工作目錄乾淨 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第145輪記錄
+
+---
 ## 第 144 輪 · 2026-08-27T16:32+08:00 · US（跳過，暫停規則生效中）· 依輪替選US（US 15:01第141輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只有一個commit），US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round111/114/117/120/123/126/129/132/135/138/141判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；`git status`確認工作目錄乾淨 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第144輪記錄
 
 ---

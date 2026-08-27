@@ -900,3 +900,19 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
 
 ---
+
+## 第145輪（2026-08-27T17:01+08:00）——跳過，暫停規則生效中
+
+**取鎖**：乾淨（`LOCK_ACQUIRED`，非陳舊鎖檔）。
+
+**選軌判斷**：三軌state檔案「最後更新」時間戳——FUT 15:31（第142輪，最舊）、TW 16:07（第143輪）、US 16:32（第144輪，最新）。依輪替選FUT。
+
+**為何跳過**：複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」；`git log -- PORTFOLIO_STRATEGY_SPEC.md`確認該檔案自唯一一次建立commit（`fa369b9`）以來完全沒有新commit觸及過，暫停規則整體仍完全生效中。FUT軌唯一明確的「下一步」待辦（round104留下：盤別效應第三批跳空構造、或另立新因子家族；round86的`fut_basis_mean_reversion_60d` regime穩健性檢查為次要待辦）本質仍是單因子相關工作，跟round109/112/115/118/121/124/127/130/133/136/139/142判斷邏輯完全一致，保守跳過。`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬多因子規格（圍繞TAIEX/TWSE），跟FUT軌完全無關，本輪沒有組合策略相關工作可做。依`MARATHON_PROTOCOL.md`第0節第3點，本輪直接跳過整輪，不動`fut_cheap_gate.py`或任何因子/回測程式碼。
+
+**本輪沒有做任何實質工作**，只確認`is_holdout_consumed()`為`False`（複查結果：`False`）、補寫這則log跟`FUT_MARATHON_STATE.md`附記、心跳（`REPORT.md`/`MARATHON_STATE.md`）。round104的「下一步」1–4項維持原狀，等使用者解除暫停規則後從那裡接續，不需要重新規劃。
+
+**額外觀察**：`git status`（在本輪開始時）確認工作目錄乾淨，沒有遺留的未commit修改。
+
+沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---
