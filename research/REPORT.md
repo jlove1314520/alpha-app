@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 128 輪 · 2026-08-27T08:43+08:00 · TW（T86回補接續，暫停單因子試驗規則生效中，屬允許地基工作）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 07:13(第125輪，最舊)/US 07:31(第126輪)/FUT 08:01(第127輪，最新)，正常輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應，`portfolio_multifactor_v2`下一步三選項不代為決定，繼續等待 · `backfill_t86.py --batch-size 200`：嘗試200天/新完成200(15天無交易或無資料)/未撞限流牆，累積T86快取1236→1436/3305(43.4%) · `is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列（地基工作非假說測試） · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第128輪記錄
+
+---
 ## 第 127 輪 · 2026-08-27T08:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 07:14(第125輪)/US 07:32(第126輪，最新)/FUT 06:32(第124輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log`發現第126輪以來有新commit`7b4fe7d`新增`data/STATUS.json`供Cowork使用，但未觸及`PORTFOLIO_STRATEGY_SPEC.md`且無使用者恢復裁示，暫停規則仍完全生效中）；FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測/新因子家族）本質仍是單因子相關工作，同round109/112/115/118/121/124判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第127輪記錄
 
 ---
