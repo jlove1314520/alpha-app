@@ -53,6 +53,80 @@ def is_us_trading_window(now: datetime) -> bool:
     return wd <= 4 and 9 * 60 + 30 <= minutes < 16 * 60
 
 
+def us_market_session(now: datetime) -> str:
+    """2026-08-27新增（P2-新，盤前盤後）：回傳 'pre'/'regular'/'post'/'closed'。
+    用 `US_TZ`（`zoneinfo`）算的美東時間分鐘數判斷，不是寫死UTC常數——夏令/冬令
+    切換時 `datetime.now(US_TZ)` 本身就會自動反映正確的美東當地時間，這個函式
+    只需要比較「美東當地時間的分鐘數」，不需要另外處理日光節約的偏移量。
+    邊界：盤前 04:00–09:30、盤中 09:30–16:00、盤後 16:00–20:00、其餘/週末休市。
+    """
+    wd = now.weekday()
+    if wd > 4:
+        return "closed"
+    minutes = now.hour * 60 + now.minute
+    if 4 * 60 <= minutes < 9 * 60 + 30:
+        return "pre"
+    if 9 * 60 + 30 <= minutes < 16 * 60:
+        return "regular"
+    if 16 * 60 <= minutes < 20 * 60:
+        return "post"
+    return "closed"
+
+
+def fetch_extended_hours_yf(tickers: list[str]) -> dict[str, dict]:
+    """用yfinance的Ticker.info抓regular/pre/post market報價（2026-08-27新增，
+    使用者指定用yfinance而不是Finnhub，跟上面既有的regular quote來源分開，
+    互不影響——這裡失敗不會讓上面Finnhub抓到的regular quote也跟著不見）。
+
+    **已知限制**：yfinance的`info`只在對應時段才會有`preMarketPrice`/
+    `postMarketPrice`這些欄位（實測驗證：盤中時regular時段查不到post欄位，
+    是Yahoo Finance API本身的行為，不是這裡漏抓）；`marketState`欄位
+    （PRE/REGULAR/POST/CLOSED/PREPRE/POSTPOST）直接沿用Yahoo自己算好的值，
+    不用自己重算一次（這裡另外算`us_market_session()`是給App時鐘顯示用，
+    兩者理論上該一致，不一致時代表Yahoo的市場行事曆跟這裡的簡化規則有落差，
+    不是bug，是已知簡化的展現）。"""
+    out = {}
+    for tk in tickers:
+        try:
+            info = yf.Ticker(tk).get_info()
+        except Exception as e:
+            print(f"  ・{tk} extended_hours 抓取失敗：{e}")
+            continue
+        regular_price = info.get("regularMarketPrice")
+        regular_prev = info.get("regularMarketPreviousClose")
+        regular = None
+        if regular_price is not None:
+            chg = (regular_price - regular_prev) if regular_prev is not None else None
+            pct = (chg / regular_prev * 100) if (chg is not None and regular_prev) else None
+            regular = {
+                "price": regular_price, "prev_close": regular_prev,
+                "change": round(chg, 4) if chg is not None else None,
+                "change_pct": round(pct, 3) if pct is not None else None,
+                "time": info.get("regularMarketTime"),
+            }
+        pre = None
+        if info.get("preMarketPrice") is not None:
+            pre = {
+                "price": info.get("preMarketPrice"),
+                "change": info.get("preMarketChange"),
+                "change_pct": info.get("preMarketChangePercent"),
+                "time": info.get("preMarketTime"),
+            }
+        post = None
+        if info.get("postMarketPrice") is not None:
+            post = {
+                "price": info.get("postMarketPrice"),
+                "change": info.get("postMarketChange"),
+                "change_pct": info.get("postMarketChangePercent"),
+                "time": info.get("postMarketTime"),
+            }
+        out[tk] = {
+            "market_state": info.get("marketState"),
+            "regular": regular, "pre": pre, "post": post,
+        }
+    return out
+
+
 def main():
     now_us = datetime.now(US_TZ)
     trading_window = is_us_trading_window(now_us)
@@ -118,13 +192,32 @@ def main():
     except Exception as e:
         print(f"  - sparkline 批次抓取失敗（不影響報價本身）：{e}")
 
+    # 2026-08-27新增（P2-新，盤前盤後）：獨立抓取，失敗不影響上面Finnhub regular
+    # quote已經抓到的結果。
+    session = us_market_session(now_us)
+    ext_count = 0
+    try:
+        extended = fetch_extended_hours_yf(US_TICKERS)
+        for tk, ext in extended.items():
+            if tk in quotes:
+                quotes[tk]["extended_hours"] = ext
+        ext_count = len(extended)
+    except Exception as e:
+        print(f"  - extended_hours 批次抓取失敗（不影響regular quote）：{e}")
+
     out = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source": "Finnhub /quote（免費額度）",
+        "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
         "meta": {
             "trading_window": trading_window,
+            "market_session": session,  # 'pre'/'regular'/'post'/'closed'，見us_market_session()
             "queried": len(US_TICKERS),
             "matched": len(quotes),
+            "extended_hours_matched": ext_count,
+            "extended_hours_disclaimer": (
+                "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，"
+                "價格常於隔日開盤反轉。"
+            ),
         },
         "quotes": quotes,
     }

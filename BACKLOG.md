@@ -111,20 +111,59 @@
   === 冒煙測試結果：全部通過 ===
   ```
 
+- **P2-新 美股盤前盤後（Extended Hours）**（2026-08-27完成）：
+  - `fetch_quotes_us.py`新增`fetch_extended_hours_yf()`（yfinance
+    `Ticker.get_info()`的`preMarketPrice`/`postMarketPrice`/
+    `regularMarketPrice`），寫進`quotes_us.json`每檔的`extended_hours`
+    子物件，`regular`/`pre`/`post`三個獨立欄位各自帶`time`時間戳，
+    跟既有Finnhub regular quote完全分開存放、互不影響（yfinance失敗不影響
+    Finnhub已抓到的regular報價）。
+  - `us_market_session()`：pre(04:00-09:30)/regular(09:30-16:00)/
+    post(16:00-20:00)/closed，用`zoneinfo.ZoneInfo("America/New_York")`
+    算美東當地時間分鐘數判斷，**不寫死UTC常數**，日光節約由zoneinfo自動
+    處理。
+  - `quotes.yml`排程延長：cron本身不懂時區，改成「排寬（同時涵蓋EDT/EST
+    兩種UTC對應區間）+ 腳本自己精確判斷」——主區塊UTC 08:00-23:59（週一
+    至五）+ 跨午夜收尾區塊UTC 00:00-01:59（週二至六，對應前一個美股交易
+    日晚上20:00 ET收盤）。
+  - `index.html`：新增`usMarketSession()`（跟Python版同一套ET分鐘邊界）+
+    `mktPillUS()`取代原本二態的`mktPill()`呼叫，右上角美股時鐘擴為
+    盤前/盤中/盤後/休市四態；自選股列的美股報價新增獨立一行顯示盤前/
+    盤後價（跟正規盤價明確分開、標示「盤前」/「盤後」字樣），只在真的
+    顯示了盤前/盤後價時才出現風險揭露文字「延長交易時段流動性低、價差大，
+    僅接受限價單，價格常於隔日開盤反轉」（不是固定貼一段沒人看的警語）。
+  - IBKR `outsideRth`旗標：只記錄在這裡，這輪不實作（使用者原話「先記進
+    BACKLOG，現在不實作」）。
+
+  冒煙測試實際輸出（2026-08-27 21:36，`node scripts/smoke_test.mjs`）：
+  ```
+  PASS - 1. 頁面載入無uncaught error/unhandledrejection
+  PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了4次
+  PASS - 3. 六個分頁都能切換且不拋錯
+  PASS - 4. 主要面板都有內容（不是完全空白）
+  PASS - 5. 市場頁三個市場切換都不拋錯
+  PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+  PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+  === 冒煙測試結果：全部通過 ===
+  ```
+  另外用直接注入測試資料驗證：`usMarketSession()`四態分類正確（pre/regular/
+  post/closed各自對應正確的邊界時間）；自選股列注入盤前資料後正確顯示
+  「盤前 $311.2 -0.72%」獨立一行、跟正規盤價$310.5分開，風險揭露文字
+  同時正確顯示。**已知限制**：`fetch_quotes_us.py`完整流程（含Finnhub
+  regular quote）需要`FINNHUB_API_KEY`，本機沒有這把key無法完整端對端
+  測試，只驗證了新增的yfinance extended_hours部分（獨立函式，用真實網路
+  呼叫驗證過）。
+
 ## 🔄 進行中
 
-- **P2-新 美股盤前盤後（Extended Hours）**（2026-08-27登錄）：yfinance
-  preMarketPrice/postMarketPrice寫進quotes_us.json（區分regular/pre/post
-  三種，各自帶時間戳）；排程延長到盤前04:00 ET~盤後20:00 ET（用時區函式
-  換算，不寫死UTC常數，處理日光節約）；美股時鐘狀態擴為盤前/盤中/盤後/
-  休市四種，盤前盤後價跟正規收盤價分開顯示；固定顯示風險揭露文字「延長
-  交易時段流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉」；IBKR
-  outsideRth旗標只記錄不實作。**進度：尚未開始。**
-
-## ❌ 待處理（依使用者指定順序排列）
 - **P2-新 財報行事曆**（2026-08-27登錄）：評估yfinance earnings dates或
   SEC申報建立data/earnings_calendar.json，標示追蹤標的財報日與公布時段
   （盤前/盤後）。**進度：尚未開始。**
+
+## ❌ 待處理（依使用者指定順序排列）
+
+（目前為空——依使用者指定的P0→全市場改造→上櫃法人補齊→盤前盤後→財報
+行事曆順序，前四項皆已完成，財報行事曆是最後一項，已列在上方🔄。）
 
 ---
 

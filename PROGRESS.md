@@ -16,6 +16,46 @@
 
 ---
 
+## 2026-08-27（續14）— P2美股盤前盤後（Extended Hours）
+
+**新增**：
+- `fetch_quotes_us.py::fetch_extended_hours_yf()`：yfinance
+  `Ticker.get_info()`的`preMarketPrice`/`postMarketPrice`/
+  `regularMarketPrice`，寫進`quotes_us.json`每檔的`extended_hours`子物件
+  （`regular`/`pre`/`post`各自帶`time`），跟既有Finnhub regular quote分開
+  存放、互不影響。
+- `us_market_session()`：pre/regular/post/closed四態，用
+  `zoneinfo.ZoneInfo("America/New_York")`算美東當地時間分鐘數，不寫死UTC
+  常數，日光節約自動處理。
+- `quotes.yml`排程延長：cron本身不懂時區，改成「排寬（同時涵蓋EDT/EST）+
+  腳本自己精確判斷」——主區塊UTC 08:00-23:59（週一至五）+ 跨午夜收尾區塊
+  UTC 00:00-01:59（週二至六）。
+- `index.html`：新增`usMarketSession()`+`mktPillUS()`取代原本二態的
+  `mktPill()`呼叫，美股時鐘擴為盤前/盤中/盤後/休市四態；自選股列的美股
+  報價新增獨立一行顯示盤前/盤後價（明確跟正規盤價分開），只在真的顯示了
+  盤前/盤後價時才出現風險揭露文字。
+- IBKR `outsideRth`旗標只記錄進BACKLOG.md，這輪不實作（使用者原話）。
+
+**驗證**：`usMarketSession()`四態分類實測正確；注入測試資料驗證自選股列
+正確顯示「盤前 $311.2 -0.72%」獨立一行+風險揭露文字同時顯示。已知限制：
+`FINNHUB_API_KEY`本機沒有，無法完整端對端測試整支腳本，只驗證了新增的
+yfinance部分（用真實網路呼叫）。
+
+**冒煙測試（`node scripts/smoke_test.mjs`，2026-08-27 21:36，全部通過）**：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了4次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+```
+
+**下一步**：財報行事曆（🔄進行中，BACKLOG.md最後一項）。
+
+---
+
 ## 2026-08-27（續13）— P1補齊TPEx上櫃三大法人/融資融券缺口
 
 使用者裁示：「stock_detail法人資料僅1,083檔，但價量有2,823檔——缺口很可能

@@ -53,11 +53,16 @@ def _git(*args) -> str:
 def describe_quotes(path: Path) -> dict:
     d = json.loads(path.read_text(encoding="utf-8"))
     meta = d.get("meta", {})
+    # 2026-08-27新增：quotes_us.json才有market_session/extended_hours_matched
+    # （P2-新盤前盤後），quotes_tw.json沒有這兩個key，get()回傳None時就不附加。
+    ext_bits = ""
+    if meta.get("market_session") is not None:
+        ext_bits = f" market_session={meta.get('market_session')} extended_hours_matched={meta.get('extended_hours_matched')}"
     return {
         "generated_at": d.get("fetched_at"),
         "records": meta.get("matched"),
         "source": d.get("source"),
-        "detail": f"queried={meta.get('queried')} matched={meta.get('matched')} trading_window={meta.get('trading_window')}",
+        "detail": f"queried={meta.get('queried')} matched={meta.get('matched')} trading_window={meta.get('trading_window')}{ext_bits}",
     }
 
 
@@ -336,7 +341,7 @@ def build_workflows() -> list[dict]:
 # 人工逐行核對 index.html 對照出來的結果（見本檔案docstring說明，不是自動掃描）。
 APP_DATA_SOURCES = [
     {"panel": "今日頁·大盤速覽（含sparkline）", "source": "data/market_tw.json + data/market_us.json（2026-08-27新增近20日收盤sparkline）"},
-    {"panel": "今日頁·自選股報價（主價格）", "source": "data/quotes_tw.json + data/quotes_us.json"},
+    {"panel": "今日頁·自選股報價（主價格）", "source": "data/quotes_tw.json + data/quotes_us.json（美股2026-08-27新增extended_hours：yfinance盤前/盤後價，跟Finnhub regular quote分開顯示，見panel下方風險揭露）"},
     {"panel": "今日頁·自選股sparkline走勢", "source": "data/quotes_tw.json（TWSE STOCK_DAY，僅上市股票；上櫃約24檔查不到，見known_limitations）+ data/quotes_us.json（yfinance），2026-08-27起不再打FinMind"},
     {"panel": "今日頁·匯率", "source": "data/fx.json（yfinance TWD=X，2026-08-27起不再打FinMind）"},
     {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},

@@ -421,6 +421,9 @@
     <div class="card">
       <h3>自選股 <span class="more" onclick="editWL()">管理 →</span></h3>
       <div id="wl-list"><div class="note">載入即時報價…</div></div>
+      <!-- 2026-08-27新增（P2-新，盤前盤後）：只在畫面上真的顯示了盤前/盤後價格時
+           才出現，不是固定貼一段沒人看的警語。 -->
+      <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。</div>
     </div>
 
     <div class="card">
@@ -1194,9 +1197,51 @@
     bEl.textContent=label;
     tmEl.textContent=tm;
   }
+  // 2026-08-27新增（P2-新，盤前盤後）：美股時鐘從「開盤/休市」兩態擴為
+  // 盤前/盤中/盤後/休市四態——跟 fetch_quotes_us.py::us_market_session()
+  // 同一套邊界(04:00-09:30盤前/09:30-16:00盤中/16:00-20:00盤後/其餘休市)，
+  // 用 zonedNow() 算的美東當地時間分鐘數判斷，不是寫死UTC常數，日光節約
+  // 由 Intl.DateTimeFormat 自動處理（跟既有 mktPill() 同一個機制）。
+  function usMarketSession(z){
+    if(z.wd<1||z.wd>5)return 'closed';
+    const m=z.h*60+z.mi;
+    if(m>=4*60&&m<9*60+30)return 'pre';
+    if(m>=9*60+30&&m<16*60)return 'regular';
+    if(m>=16*60&&m<20*60)return 'post';
+    return 'closed';
+  }
+  function mktPillUS(){
+    const el=document.getElementById('mkt-us');if(!el)return;
+    const dotEl=el.querySelector('.dot'),bEl=el.querySelector('b'),tmEl=el.querySelector('.tm');
+    if(!dotEl||!bEl||!tmEl)return;
+    const z=zonedNow('America/New_York');
+    const session=usMarketSession(z);
+    const data=INTRADAY_US;
+    const age=intradayAgeMin(data);
+    let label,dot,tm;
+    if(session==='pre'||session==='post'){
+      label=session==='pre'?'盤前':'盤後';
+      dot='var(--warn)';
+      tm=age!=null?(()=>{const d=new Date(data.fetched_at);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')})():z.hhmmss.slice(0,5);
+    }else if(session==='closed'){
+      if(age==null){label='無資料';dot='var(--ink-3)';tm='--:--'}
+      else{const d=new Date(data.fetched_at);label='已收盤('+(d.getMonth()+1)+'/'+d.getDate()+')';dot='var(--ink-3)';tm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+    }else{ // regular：沿用原本三態邏輯(延遲N分/資料延遲/已收盤)
+      if(age==null){label='無資料';dot='var(--ink-3)';tm='--:--'}
+      else{
+        const d=new Date(data.fetched_at);
+        const dTm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+        if(age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)';tm=dTm}
+        else{label='資料延遲';dot='var(--warn)';tm=dTm}
+      }
+    }
+    dotEl.style.background=dot;
+    bEl.textContent=label;
+    tmEl.textContent=tm;
+  }
   function updateClocks(){
     mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30,()=>INTRADAY_TW);
-    mktPill('mkt-us','America/New_York',9*60+30,16*60,()=>INTRADAY_US);
+    mktPillUS();
   }
   // 2026-08-27修正（使用者定位的根因）：原本是「updateClocks();setInterval(...)」
   // 同一行、先執行後註冊——如果第一次同步執行updateClocks()時拋錯，setInterval
@@ -1321,6 +1366,7 @@
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
+    let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
     for(const code of WL){
       const nm=nameOf(code);const us=isUS(code);
       const wrap=document.createElement('div');wrap.className='swipe-wrap';
@@ -1345,8 +1391,26 @@
       const cls=chg>=0?'u':'d';
       const meta=iq?`${code}${us?' · 美股':''}${intradayTag(iq)}`:`${code}${us?' · 美股':''} · 已收盤`;
       const sp=(rawQ&&rawQ.sparkline&&rawQ.sparkline.length>=2)?spark(rawQ.sparkline,chg>=0):'';
+      // 2026-08-27新增（P2-新，盤前盤後）：美股才有extended_hours（見
+      // fetch_quotes_us.py），只在盤前/盤後時段、且該時段真的有資料時才顯示，
+      // 跟正規盤收盤價分開一行、明確標示「盤前」/「盤後」，不會被誤會成正規盤價。
+      let extHtml='';
+      if(us&&rawQ&&rawQ.extended_hours){
+        const eh=rawQ.extended_hours;
+        const seg=eh.market_state==='PRE'?eh.pre:(eh.market_state==='POST'?eh.post:null);
+        const segLabel=eh.market_state==='PRE'?'盤前':'盤後';
+        if(seg&&seg.price!=null){
+          const segCls=(seg.change??0)>=0?'u':'d';
+          const segPct=seg.change_pct!=null?seg.change_pct:0;
+          extHtml=`<div class="note" style="margin-top:2px">${segLabel} <b class="num ${segCls}">$${nf(seg.price)}</b> <span class="chg-tag ${segCls}">${segPct>=0?'+':''}${segPct.toFixed(2)}%</span></div>`;
+          showedExtendedHours=true;
+        }
+      }
       rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b>${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+      if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
     }
+    const extNote=document.getElementById('wl-extended-hours-note');
+    if(extNote)extNote.style.display=showedExtendedHours?'':'none';
     stampUpdated('home');
     updateDiagBanner();
   }

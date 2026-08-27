@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T21:26:58.795566+08:00",
-  "latest_commit": "3081ffd",
+  "updated_at": "2026-08-27T21:37:28.265368+08:00",
+  "latest_commit": "95477ce",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -130,7 +130,7 @@
     },
     {
       "panel": "今日頁·自選股報價（主價格）",
-      "source": "data/quotes_tw.json + data/quotes_us.json"
+      "source": "data/quotes_tw.json + data/quotes_us.json（美股2026-08-27新增extended_hours：yfinance盤前/盤後價，跟Finnhub regular quote分開顯示，見panel下方風險揭露）"
     },
     {
       "panel": "今日頁·自選股sparkline走勢",
