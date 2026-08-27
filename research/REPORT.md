@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 131 輪 · 2026-08-27T10:22+08:00 · TW · T86三大法人回補接續（暫停單因子試驗規則生效中，屬允許的地基工作）· `run_batch(batch_size=200)`：200嘗試/200成功(8空)，未撞限流；累積T86快取1436→1636/3305（43.4%→49.5%）；`is_holdout_consumed()`確認`False`；未動`backfill_universe.py`（已達81.3%>80%門檻）；`portfolio_multifactor_v2`下一步仍等使用者三選一決定，不下放 · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第131輪記錄
+
+---
 ## 第 130 輪 · 2026-08-27T09:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 08:43(第128輪)/US 09:01(第129輪，最新)/FUT 08:01(第127輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應（`449e7ad`後只有自動報價commit），FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118/121/124/127判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第130輪記錄
 
 ---
