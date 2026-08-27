@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 141 輪 · 2026-08-27T15:01+08:00 · US（跳過，暫停規則生效中）· 依輪替選US（US 13:31第138輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來無新commit觸及），US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round111/114/117/120/123/126/129/132/135/138判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；工作目錄另有互動session未commit修改（fundamentals相關4個檔案+1個新檔），與馬拉松無關，本輪刻意不動、不納入commit · 見`US_MARATHON_STATE.md`/`US_LOG.md`第141輪記錄
+
+---
 ## 第 140 輪 · 2026-08-27T14:52+08:00 · TW（暫停規則生效中，做允許的地基工作）· 依輪替選TW，`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，第137輪已做完風險最低的組合策略補充項(c)，(a)(b)仍留給使用者決定優先序，本輪改做T86三大法人回補第22批：`backfill_t86.py --batch-size 200`，200天全部新完成（12天無交易/無資料），未撞TWSE反爬蟲封鎖，乾淨在批次上限收工，累積1728→1928/3305（52.3%→58.3%）· `is_holdout_consumed()`確認`False`，純資料回補不寫`TRIALS_LEDGER.md` · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第140輪記錄
 
 ---

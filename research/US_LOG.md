@@ -6,6 +6,10 @@
 
 ---
 
+## 2026-08-27T15:01+08:00 — 馬拉松第141輪：跳過（暫停規則生效中，無組合策略相關工作可做）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 14:52（第140輪，最新）／FUT 14:02（第139輪）／US 13:31（第138輪，最舊）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認該檔案自建立（`fa369b9`）以來沒有任何新commit動過，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，TAIEX/TWSE相關，跟US軌無關），round108/111遺留的1c地基工作本質上仍是為單一因子鋪路，同round111/114/117/120/123/126/129/132/135/138判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則附記+心跳。`git status`本輪確認工作目錄有一份不屬於馬拉松的未commit修改（`.github/scripts/update_fundamentals_daily.py`/`data/fundamentals.json`/`data/stock_detail.json`/`research/build_fundamentals_json.py`四個已修改檔案+`research/build_stock_financials_history.py`一個新檔，明顯是互動session的財報資料改動），本輪刻意不動、不納入commit。`is_holdout_consumed()`確認`False`。
+
 ## 2026-08-27T13:31+08:00 — 馬拉松第138輪：跳過（暫停規則生效中，無組合策略相關工作可做）
 
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 13:04（第137輪，最新）／FUT 12:31（第136輪）／US 12:02（第135輪，最舊）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log`確認自第135輪以來新增的commit（`9ce0ad4`第136輪FUT跳過、`369da2d`第137輪TW組合策略基準補算、`e08cdb2`/`5458142`一般互動session選股頁coverage修正）皆與解除暫停規則無關，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，TAIEX/TWSE相關，跟US軌無關），round108/111遺留的1c地基工作本質上仍是為單一因子鋪路，同round111/114/117/120/123/126/129/132/135判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則附記+心跳。`git status`本輪確認工作目錄乾淨，上一輪記錄的`research/generate_scores_v2.py`未commit修改已不存在。`is_holdout_consumed()`確認`False`。
