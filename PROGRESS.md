@@ -12,6 +12,37 @@
 
 ---
 
+## 2026-08-27（續4）— 自選股sparkline脫離FinMind、融資維持率分母誠實標示、修正金融股資料被誤濾掉的bug
+
+依 STATUS.json 繼續收尾：
+
+**1. P0 自選股sparkline**：`fetch_quotes_tw.py` 新增近20日收盤（TWSE
+`STOCK_DAY`，一天快取一次避免每10分鐘重打）；實測發現這個端點需要瀏覽器
+風格 Referer/User-Agent 才不會間歇性回428；確認約24檔持續428是上櫃(TPEx)
+股票，`STOCK_DAY`是TWSE專屬不涵蓋TPEx，非bug。`fetch_quotes_us.py`用
+yfinance批次抓6檔。App自選股列表移除所有FinMind呼叫。**使用者確認
+`data/indices.json`需求已由`market_tw.json`/`market_us.json`滿足，該todo
+關閉。**
+
+**2. P1 融資維持率分母**：分母(FinMind全市場融資金額)當天失敗時，改寫入
+`data_incomplete=true`明確記錄，App顯示「資料不完整」而非沿用舊值。已用
+模擬失敗+還原真實資料完整測試。
+
+**3. 意外抓到並修正一個bug**：三大法人/融資融券merge進`stock_detail.json`
+時，原本用「財報一般業名單」當篩選門檻，誤把金融股（如2881富邦金）也濾
+掉了——金融股沒有「一般業」財報格式，但三大法人/融資融券本來就有涵蓋。
+改用官方上市公司清單(t187ap03_L)當門檻，涵蓋數991/972→1083/1063檔。
+
+**4. P2可行性評估**（個股走勢圖/主流題材/期貨籌碼）：個股走勢圖可行（同
+sparkline的STOCK_DAY端點，未實作）；主流題材缺官方逐類股成交值端點（跟
+使用者要求的「題材生命週期」功能高度相關，建議合併處理）；期貨籌碼探測
+過TAIFEX常見端點命名未果，需人工查閱官網。三項皆非「確定無來源」，App
+維持現狀。
+
+commit `28e1120`（sparkline）、`56ac814`（分母修正+bug修正+P2評估）。
+
+---
+
 ## 2026-08-27（續3）— 收尾剩餘FinMind依賴：P0匯率/大盤sparkline、P1融資維持率排程、P1個股財報籌碼
 
 依 `STATUS.json` 列出的 `app_data_sources` 逐項收尾，四項依序完成：
