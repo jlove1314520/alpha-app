@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 127 輪 · 2026-08-27T08:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 07:14(第125輪)/US 07:32(第126輪，最新)/FUT 06:32(第124輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log`發現第126輪以來有新commit`7b4fe7d`新增`data/STATUS.json`供Cowork使用，但未觸及`PORTFOLIO_STRATEGY_SPEC.md`且無使用者恢復裁示，暫停規則仍完全生效中）；FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測/新因子家族）本質仍是單因子相關工作，同round109/112/115/118/121/124判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第127輪記錄
+
+---
 ## 第 126 輪 · 2026-08-27T07:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 07:13(第125輪，最新)/US 06:01(第123輪，最舊)/FUT 06:32(第124輪)，正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log`確認自`a89f311`第122輪以來無互動session介入），暫停規則仍完全生效中；US軌無組合策略相關工作可做（規格書全屬TAIEX/TWSE台股樣本），round108/111遺留(a)(b)(c)三項本質仍是為單因子鋪路，同round111/114/117/120/123判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第126輪記錄
 
 ---

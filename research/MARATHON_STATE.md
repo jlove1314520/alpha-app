@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 126 輪。最新一輪：第 126 輪 · 2026-08-27T07:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第123輪06:01），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第122輪以來無互動session介入，US軌無組合策略相關工作可做（規格書全屬TAIEX/TWSE台股樣本），round108/111遺留(a)(b)(c)三項本質仍是單因子鋪路，同round111/114/117/120/123判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第126輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 127 輪。最新一輪：第 127 輪 · 2026-08-27T08:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳FUT最舊（第124輪06:32），正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，`git log`發現自第126輪以來有一筆新commit（`7b4fe7d`，新增`data/STATUS.json`給Cowork讀），但該commit未觸及`PORTFOLIO_STRATEGY_SPEC.md`、也未在對話中表示恢復單因子試驗，暫停規則整體仍完全生效中。FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測/新因子家族）本質仍是單因子相關工作，同round109/112/115/118/121/124判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第127輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+
+**上一則保留（第126輪，供對照）**：2026-08-27T07:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第123輪06:01），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第122輪以來無互動session介入，US軌無組合策略相關工作可做（規格書全屬TAIEX/TWSE台股樣本），round108/111遺留(a)(b)(c)三項本質仍是單因子鋪路，同round111/114/117/120/123判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第126輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 **上一則保留（第125輪，供對照）**：2026-08-27T07:13+08:00 · TW · 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW最舊（第122輪05:20），正常輪替選TW，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第122輪以來無互動session介入，延續協定允許的地基工作`backfill_t86.py --batch-size 200`：200嘗試/200完成(17空)/未撞限流牆，累積T86快取1036→1236/3305（31.3%→37.4%）。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第125輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 
