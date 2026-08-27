@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T21:20:35.612501+08:00",
-  "latest_commit": "611af3c",
+  "updated_at": "2026-08-27T21:26:58.795566+08:00",
+  "latest_commit": "3081ffd",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -31,15 +31,15 @@
       "generated_at": "2026-08-27",
       "records": 2,
       "source": "2026-08-27起改排程：TWSE官方MI_MARGN(逐股融資餘額)+STOCK_DAY_ALL(逐股收盤價)算擔保品市值；分母(全市場融資金額)仍用FinMind（唯一保留依賴，一天只呼叫一次，風險低）",
-      "detail": "ratio_pct=193.26 matched_stocks=1227（原本是alpha-data獨立目錄手動產生，已改掛進market.yml排程，見update_margin_maintenance.py）",
+      "detail": "ratio_pct=191.5 matched_stocks=1227（原本是alpha-data獨立目錄手動產生，已改掛進market.yml排程，見update_margin_maintenance.py）",
       "status": "ok"
     },
     {
       "path": "data/market_tw.json",
-      "generated_at": "2026-08-27T02:51:31+00:00",
+      "generated_at": "2026-08-27T13:25:32+00:00",
       "records": 37,
       "source": "TWSE openapi(MI_INDEX)/TPEx openapi/TAIFEX openapi/TWSE T86",
-      "detail": "sectors=37 institutional_history_days=1 errors=[\"tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_index (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1032)')))\"]",
+      "detail": "sectors=37 institutional_history_days=2 errors=[]",
       "status": "ok"
     },
     {
@@ -93,17 +93,17 @@
     {
       "path": "data/stock_detail.json",
       "generated_at": "2026-08-27T15:02:08.939213+08:00",
-      "records": 1983,
+      "records": 2321,
       "source": "TWSE官方t187ap06_L_ci/07_L_ci(財報，僅一般業)+T86(三大法人，跟market_tw.json共用)+MI_MARGN(融資融券，跟大盤維持率共用)",
-      "detail": "財報1944檔/三大法人1083檔/融資融券1063檔（合計1983檔有任一種資料）",
+      "detail": "財報1944檔/三大法人1990檔/融資融券1983檔（合計2321檔有任一種資料）",
       "status": "ok"
     },
     {
       "path": "scores.json",
-      "generated_at": "2026-08-27T21:16:11.284275+08:00",
-      "records": 2586,
+      "generated_at": "2026-08-27T21:26:17.324831+08:00",
+      "records": 2682,
       "source": "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，JSON-only，不依賴parquet/FinMind）",
-      "detail": "engine_version=scoring-live-json universe_size=2586 avg_coverage=0.341 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",
+      "detail": "engine_version=scoring-live-json universe_size=2682 avg_coverage=0.376 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",
       "status": "ok"
     }
   ],
@@ -338,7 +338,7 @@
   ],
   "known_limitations": [
     "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
-    "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。三大法人/融資融券已涵蓋全部上市公司含金融股（2026-08-27修正過度篩選的bug）。FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
+    "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）：三大法人涵蓋檔數1,083→1,990檔、融資融券1,063→1,983檔，scores.json全市場平均coverage 0.341→0.376（chips因子權重14%受益最多）。FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
     "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬）。",
     "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券（FinMind僅提供台股這幾類資料）。",
     "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",

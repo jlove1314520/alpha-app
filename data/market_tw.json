@@ -1,8 +1,6 @@
 {
-  "fetched_at": "2026-08-27T02:51:31+00:00",
-  "errors": [
-    "tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_index (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Subject Key Identifier (_ssl.c:1032)')))"
-  ],
+  "fetched_at": "2026-08-27T13:25:32+00:00",
+  "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
     "close": 45832.62,
@@ -27,7 +25,7 @@
       44762.32,
       45169.46,
       45832.62,
-      46336.38
+      45975.22
     ]
   },
   "sectors": [
@@ -217,6 +215,33 @@
       "change_pct": 0.98
     }
   ],
+  "tpex": {
+    "date": "20260827",
+    "close": 400.38,
+    "change": 4.72,
+    "change_pct": 1.192943436283678,
+    "sparkline": [
+      362.89,
+      375.03,
+      383.75,
+      391.37,
+      384.19,
+      391.61,
+      391.68,
+      402.02,
+      406.12,
+      400.95,
+      398.32,
+      390.83,
+      384.79,
+      389.96,
+      387.27,
+      386.1,
+      389.41,
+      395.66,
+      400.38
+    ]
+  },
   "tx_futures": {
     "contract_month": "202609",
     "last": 46011.0,
@@ -260,11 +285,11 @@
     }
   },
   "institutional": {
-    "date": "20260826",
-    "foreign_net_lots": 418477.1,
-    "trust_net_lots": 8660.6,
-    "dealer_net_lots": -26282.0,
-    "total_net_lots": 400855.8
+    "date": "20260827",
+    "foreign_net_lots": 404547.7,
+    "trust_net_lots": -9560.5,
+    "dealer_net_lots": 397926.2,
+    "total_net_lots": 792913.4
   },
   "institutional_history": [
     {
@@ -273,6 +298,13 @@
       "trust_net_lots": 8660.6,
       "dealer_net_lots": -26282.0,
       "total_net_lots": 400855.8
+    },
+    {
+      "date": "20260827",
+      "foreign_net_lots": 404547.7,
+      "trust_net_lots": -9560.5,
+      "dealer_net_lots": 397926.2,
+      "total_net_lots": 792913.4
     }
   ]
 }

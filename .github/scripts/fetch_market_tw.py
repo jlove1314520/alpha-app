@@ -44,6 +44,11 @@ TPEX_INDEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_index"
 TAIFEX_FUT_URL = "https://openapi.taifex.com.tw/v1/DailyMarketReportFut"
 T86_URL = "https://www.twse.com.tw/rwd/zh/fund/T86"
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
+# 2026-08-27新增（P1-新，使用者要求補齊TPEx上櫃三大法人缺口）：TPEx官方對應
+# 端點，全市場單日快照（免金鑰，不像T86_URL有反爬蟲風險）。跟fundamentals.json
+# 的TPEx補充（fetch_ratios_tpex()/fetch_revenue_tpex()）同一個慣例：不額外
+# 過濾ETF/權證（那份也沒過濾），這裡的取捨一致，已知限制寫進STATUS.json。
+TPEX_INSTITUTIONAL_URL = "https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading"
 
 
 def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
@@ -263,6 +268,42 @@ def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
     }
 
 
+def fetch_institutional_tpex(date_str: str) -> dict[str, dict]:
+    """TPEx（上櫃）三大法人買賣超逐股資料，2026-08-27新增（使用者P1-新：
+    「stock_detail法人資料僅1,083檔，但價量有2,823檔——缺口很可能是上櫃股票」，
+    查證確認：T86_URL(TWSE)只涵蓋上市，這裡補上TPEx官方對應端點。
+    tpex_3insti_daily_trading這個端點回傳的Date是「當次執行當下最新一期」
+    （不支援指定日期查詢，date_str參數只用來對齊輸出裡的date欄位，不是查詢
+    參數——這點跟fetch_institutional_aggregate()的T86_URL不同，T86支援
+    date查詢參數）。欄位名很長且不一致（有些前後有多餘空白），用exact match
+    找需要的三個淨額欄位，找不到就跳過那檔（不要用substring比對猜錯欄位，
+    上一輪T86那邊就踩過這個坑）。"""
+    r = _get_retry(TPEX_INSTITUTIONAL_URL, timeout=20)
+    r.raise_for_status()
+    rows = r.json()
+    if not isinstance(rows, list):
+        raise RuntimeError("tpex_3insti_daily_trading 回傳非預期格式（可能是無效路徑回傳的HTML）")
+    per_stock = {}
+    for row in rows:
+        code = row.get("SecuritiesCompanyCode")
+        if not code:
+            continue
+        foreign = _num(row.get("ForeignInvestorsIncludeMainlandAreaInvestors-Difference"))
+        trust = _num(row.get("SecuritiesInvestmentTrustCompanies-Difference"))
+        dealer = _num(row.get("Dealers-Difference"))
+        actual_date = row.get("Date")
+        date_iso = date_str
+        if actual_date and len(actual_date) == 7 and actual_date.isdigit():
+            date_iso = f"{int(actual_date[:3]) + 1911}{actual_date[3:5]}{actual_date[5:7]}"
+        per_stock[code] = {
+            "date": date_iso,
+            "foreign_lots": round(foreign / 1000, 1) if foreign is not None else None,
+            "trust_lots": round(trust / 1000, 1) if trust is not None else None,
+            "dealer_lots": round(dealer / 1000, 1) if dealer is not None else None,
+        }
+    return per_stock
+
+
 def main():
     now_tw = datetime.now(TW_TZ)
     out = {"fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "errors": []}
@@ -323,6 +364,19 @@ def main():
         print(f"T86 三大法人 失敗：{e}")
         out["errors"].append(f"institutional: {e}")
 
+    # 2026-08-27新增（P1-新，補TPEx上櫃三大法人缺口）：獨立try/except，TPEx
+    # 失敗不影響上面TWSE(T86)已經抓到的結果，也不影響market_tw.json本身
+    # 的"institutional"(全市場加總，只涵蓋上市，這裡刻意不動這個既有欄位
+    # 的定義，只補per-stock字典)。
+    tpex_institutional_codes = set()
+    try:
+        per_stock_tpex = fetch_institutional_tpex(now_tw.strftime("%Y%m%d"))
+        per_stock_institutional = {**per_stock_institutional, **per_stock_tpex}
+        tpex_institutional_codes = set(per_stock_tpex.keys())
+    except Exception as e:
+        print(f"TPEx 三大法人 失敗：{e}")
+        out["errors"].append(f"institutional_tpex: {e}")
+
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {OUT_PATH}：taiex={out.get('taiex')}，"
@@ -353,7 +407,15 @@ def main():
         tse_codes = load_tse_company_codes()
         matched = 0
         for code, row in per_stock_institutional.items():
-            if tse_codes is not None and code not in tse_codes:
+            # 2026-08-27修正：tse_codes只涵蓋TWSE上市，TPEx上櫃代碼本來就不在
+            # 裡面——原本這條filter會把所有TPEx代碼一併濾掉，等於補了資料源
+            # 卻在merge這一步自己擋掉。改成：TWSE來源的代碼仍用官方上市清單
+            # 過濾掉ETF/權證；TPEx來源的代碼不套用這個（本來就不適用的）過濾，
+            # 跟fundamentals.json的TPEx補充（fetch_ratios_tpex等）同一個取捨
+            # ——已知限制（TPEx這裡也還沒有自己的ETF/權證過濾清單）寫進
+            # STATUS.json。
+            is_tpex = code in tpex_institutional_codes
+            if not is_tpex and tse_codes is not None and code not in tse_codes:
                 continue
             entry = stocks.setdefault(code, {})
             prior_hist = (entry.get("institutional") or {}).get("history", [])
@@ -362,10 +424,15 @@ def main():
             hist = hist[-5:]
             entry["institutional"] = {**row, "history": hist}
             matched += 1
-        detail.setdefault("meta", {})["institutional_source"] = "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打）；只保留官方上市公司清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券"
+        detail.setdefault("meta", {})["institutional_source"] = (
+            "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打；只保留官方上市公司"
+            "清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券)+TPEx "
+            "tpex_3insti_daily_trading（2026-08-27新增，上櫃股票，此端點未做"
+            "ETF/權證過濾，是已知限制）"
+        )
         detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-        print(f"併入 {detail_path}：T86回應{len(per_stock_institutional)}筆證券，"
-              f"跟官方上市公司清單比對後合併 {matched} 檔（其餘為ETF/權證等非股票，已濾掉）")
+        print(f"併入 {detail_path}：TWSE+TPEx回應共{len(per_stock_institutional)}筆證券"
+              f"（TPEx {len(tpex_institutional_codes)}筆），合併 {matched} 檔")
 
     # 全部主要區塊都失敗才視為故障；任何一塊成功就算這輪有價值，不要因為 T86
     # 反爬蟲封鎖這種已知風險就讓整支腳本 exit 1 拖累其他已經抓到的資料被 commit。

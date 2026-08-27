@@ -88,14 +88,31 @@
 
 ---
 
+- **P1-新 補足TPEx上櫃三大法人/融資融券資料缺口**（2026-08-27完成）：
+  查證確認缺口確實是上櫃股票（TWSE T86/MI_MARGN都只涵蓋上市）。新增
+  `fetch_institutional_tpex()`（`tpex_3insti_daily_trading`）+
+  `fetch_margin_by_stock_tpex()`（`tpex_mainboard_margin_balance`），merge
+  時修正原本`tse_codes`過濾器會把所有TPEx代碼一併濾掉的問題（TWSE來源仍用
+  官方上市清單過濾ETF/權證，TPEx來源的代碼另外放行，不套用不適用的過濾）。
+  **涵蓋檔數變化**：三大法人 1,083→1,990 檔、融資融券 1,063→1,983 檔、
+  `stock_detail.json`合計 1,983→2,321 檔。**scores.json平均coverage
+  0.341→0.376**（chips因子權重14%受益最多）。已知限制：TPEx這兩個端點未做
+  ETF/權證過濾（跟fundamentals.json的TPEx補充同一個既有取捨，不是新問題）。
+
+  冒煙測試實際輸出（2026-08-27 21:27，`node scripts/smoke_test.mjs`）：
+  ```
+  PASS - 1. 頁面載入無uncaught error/unhandledrejection
+  PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了4次
+  PASS - 3. 六個分頁都能切換且不拋錯
+  PASS - 4. 主要面板都有內容（不是完全空白）
+  PASS - 5. 市場頁三個市場切換都不拋錯
+  PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+  PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+  === 冒煙測試結果：全部通過 ===
+  ```
+
 ## 🔄 進行中
 
-- **P1-新 補足TPEx上櫃三大法人/融資融券資料缺口**（2026-08-27登錄）：
-  stock_detail.json法人資料僅1,083檔，但價量有2,823檔——研判缺口是上櫃股票
-  （TWSE T86只涵蓋上市）。要補抓TPEx對應端點，並在STATUS.json回報補完後
-  涵蓋檔數與coverage平均值變化。**進度：尚未開始。**
-
-## ❌ 待處理（依使用者指定順序排列）
 - **P2-新 美股盤前盤後（Extended Hours）**（2026-08-27登錄）：yfinance
   preMarketPrice/postMarketPrice寫進quotes_us.json（區分regular/pre/post
   三種，各自帶時間戳）；排程延長到盤前04:00 ET~盤後20:00 ET（用時區函式
@@ -103,6 +120,8 @@
   休市四種，盤前盤後價跟正規收盤價分開顯示；固定顯示風險揭露文字「延長
   交易時段流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉」；IBKR
   outsideRth旗標只記錄不實作。**進度：尚未開始。**
+
+## ❌ 待處理（依使用者指定順序排列）
 - **P2-新 財報行事曆**（2026-08-27登錄）：評估yfinance earnings dates或
   SEC申報建立data/earnings_calendar.json，標示追蹤標的財報日與公布時段
   （盤前/盤後）。**進度：尚未開始。**

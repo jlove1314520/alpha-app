@@ -441,7 +441,10 @@ TODO = [
 
 KNOWN_LIMITATIONS = [
     "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
-    "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。三大法人/融資融券已涵蓋全部上市公司含金融股（2026-08-27修正過度篩選的bug）。FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
+    "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。"
+    "三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）："
+    "三大法人涵蓋檔數1,083→1,990檔、融資融券1,063→1,983檔，scores.json全市場平均coverage 0.341→0.376（chips因子權重14%受益最多）。"
+    "FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
     "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬）。",
     "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券（FinMind僅提供台股這幾類資料）。",
     "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",

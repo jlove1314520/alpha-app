@@ -16,6 +16,48 @@
 
 ---
 
+## 2026-08-27（續13）— P1補齊TPEx上櫃三大法人/融資融券缺口
+
+使用者裁示：「stock_detail法人資料僅1,083檔，但價量有2,823檔——缺口很可能
+是上櫃股票（TWSE T86只涵蓋上市）。請補抓櫃買中心(TPEx)的三大法人與融資
+融券資料，並在STATUS.json回報補完後的涵蓋檔數與coverage平均值變化。」
+
+查證確認診斷正確。新增：
+- `fetch_market_tw.py::fetch_institutional_tpex()`（`tpex_3insti_daily_trading`）
+- `update_margin_maintenance.py::fetch_margin_by_stock_tpex()`
+  （`tpex_mainboard_margin_balance`）
+
+兩處merge都修正了同一類bug：原本的`tse_codes`過濾器（官方TWSE上市公司
+清單，用來濾掉ETF/權證）會把所有TPEx代碼一併濾掉——TPEx代碼本來就不在
+TWSE清單裡，等於補了資料源卻在merge這一步自己擋掉。改成：TWSE來源仍套用
+原過濾器，TPEx來源的代碼另外放行。
+
+**涵蓋檔數變化**（已寫進STATUS.json的known_limitations）：
+- 三大法人：1,083 → 1,990 檔
+- 融資融券：1,063 → 1,983 檔
+- `stock_detail.json`合計：1,983 → 2,321 檔
+- `scores.json`全市場平均coverage：0.341 → 0.376（chips因子權重14%受益
+  最多）
+
+已知限制：TPEx這兩個端點未做ETF/權證過濾（跟`fundamentals.json`的TPEx
+補充同一個既有取捨，不是這輪新產生的問題）；大盤融資維持率分子/分母的
+計算刻意不擴大到TPEx（那是TWSE市場專屬定義，維持原設計）。
+
+**冒煙測試（`node scripts/smoke_test.mjs`，2026-08-27 21:27，全部通過）**：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了4次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+```
+
+**下一步（依BACKLOG.md順序）**：美股盤前盤後（🔄進行中）→ 財報行事曆。
+
+---
+
 ## 2026-08-27（續12）— 新增repo根目錄CLAUDE.md常駐規則 + P1選股改為全市場+資料完整度
 
 使用者要求建立repo根目錄`CLAUDE.md`（常駐工作規則：開工序/單一進行中/

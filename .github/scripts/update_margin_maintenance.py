@@ -37,6 +37,10 @@ TW_TZ = timezone(timedelta(hours=8))
 MI_MARGN_URL = "https://openapi.twse.com.tw/v1/exchangeReport/MI_MARGN"
 STOCK_DAY_ALL_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料（含金融股，不含ETF/權證）
+# 2026-08-27新增（P1-新，補TPEx上櫃融資融券缺口）：TPEx官方對應端點，只用來
+# 補stock_detail.json的個股「融資融券」分頁資料，**不**併入大盤融資維持率
+# 分子/分母的計算（那個公式是TWSE市場專屬定義，不擴大範圍，維持原設計）。
+TPEX_MARGIN_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_margin_balance"
 FINMIND_URL = (
     "https://api.finmindtrade.com/api/v4/data"
     "?dataset=TaiwanStockTotalMarginPurchaseShortSale&start_date={start}"
@@ -111,6 +115,27 @@ def fetch_margin_by_stock() -> tuple[dict[str, float], dict[str, dict]]:
     return lots_only, per_stock
 
 
+def fetch_margin_by_stock_tpex() -> dict[str, dict]:
+    """TPEx（上櫃）融資融券逐股資料，只給stock_detail.json的個股分頁用
+    （不併入大盤維持率分子/分母，見TPEX_MARGIN_URL常數說明）。"""
+    r = _get_retry(TPEX_MARGIN_URL, timeout=30)
+    r.raise_for_status()
+    rows = r.json()
+    if not isinstance(rows, list):
+        raise RuntimeError("tpex_mainboard_margin_balance 回傳非預期格式（可能是無效路徑回傳的HTML）")
+    per_stock = {}
+    for row in rows:
+        code = row.get("SecuritiesCompanyCode")
+        if not code:
+            continue
+        per_stock[code] = {
+            "margin_balance_today": _num(row.get("MarginPurchaseBalance")),
+            "margin_balance_prev": _num(row.get("MarginPurchaseBalancePreviousDay")),
+            "short_balance_today": _num(row.get("ShortSaleBalance")),
+        }
+    return per_stock
+
+
 def fetch_close_by_stock() -> dict[str, float]:
     r = _get_retry(STOCK_DAY_ALL_URL, timeout=30)
     r.raise_for_status()
@@ -139,12 +164,14 @@ def fetch_market_margin_money() -> tuple[str, float]:
     return last["date"], last["TodayBalance"]
 
 
-def merge_stock_detail_margin(per_stock: dict[str, dict]) -> None:
+def merge_stock_detail_margin(per_stock: dict[str, dict], tpex_codes: set[str] | None = None) -> None:
     """merge進 data/stock_detail.json（個股頁「融資融券」分頁用）。
     **2026-08-27修正**：原本用「已存在於stocks的代碼」（財報「一般業」名單）
     當篩選門檻，誤把金融股（有MI_MARGN資料，只是財報格式不同）也濾掉了。改用
     官方上市公司清單(t187ap03_L，含金融股)當篩選門檻，同fetch_market_tw.py的
-    修正。"""
+    修正。**2026-08-27（續）再修正**：tse_codes只涵蓋TWSE上市，`tpex_codes`
+    參數（呼叫端傳入TPEx來源的代碼集合）讓這些代碼跳過這個不適用的過濾，
+    避免補了TPEx資料源卻在這裡自己濾掉，同fetch_market_tw.py的修正。"""
     detail_path = REPO_ROOT / "data" / "stock_detail.json"
     if not detail_path.exists():
         return
@@ -154,15 +181,20 @@ def merge_stock_detail_margin(per_stock: dict[str, dict]) -> None:
         return
     stocks = detail.setdefault("stocks", {})
     tse_codes = load_tse_company_codes()
+    tpex_codes = tpex_codes or set()
     matched = 0
     for code, row in per_stock.items():
-        if tse_codes is not None and code not in tse_codes:
+        if code not in tpex_codes and tse_codes is not None and code not in tse_codes:
             continue
         stocks.setdefault(code, {})["margin"] = row
         matched += 1
-    detail.setdefault("meta", {})["margin_source"] = "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打）；只保留官方上市公司清單(t187ap03_L)內的代碼"
+    detail.setdefault("meta", {})["margin_source"] = (
+        "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打；只保留官方上市"
+        "公司清單(t187ap03_L)內的代碼)+TPEx tpex_mainboard_margin_balance"
+        "（2026-08-27新增，上櫃股票）"
+    )
     detail_path.write_text(json.dumps(detail, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-    print(f"併入 {detail_path}：融資融券合併 {matched} 檔")
+    print(f"併入 {detail_path}：融資融券合併 {matched} 檔（含TPEx {len(tpex_codes)}檔）")
 
 
 def main():
@@ -180,7 +212,16 @@ def main():
         matched += 1
     print(f"可配對算擔保品市值的個股 {matched} 檔")
 
-    merge_stock_detail_margin(margin_per_stock_detail)
+    tpex_codes = set()
+    try:
+        margin_per_stock_tpex = fetch_margin_by_stock_tpex()
+        margin_per_stock_detail = {**margin_per_stock_detail, **margin_per_stock_tpex}
+        tpex_codes = set(margin_per_stock_tpex.keys())
+        print(f"TPEx融資融券 {len(margin_per_stock_tpex)} 檔")
+    except Exception as e:
+        print(f"TPEx融資融券 失敗：{e}")
+
+    merge_stock_detail_margin(margin_per_stock_detail, tpex_codes)
 
     today = datetime.now(TW_TZ).date().isoformat()
     # 2026-08-27 修正（使用者要求）：分母（FinMind全市場融資金額）失敗時，改成
