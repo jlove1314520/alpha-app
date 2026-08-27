@@ -16,6 +16,59 @@
 
 ---
 
+## 2026-08-28（續23）— 【維運/研究帽】B24：前瞻選股台帳picks_ledger.json
+開始累積（今晚起，鐵律：只能事前快照）
+
+新增`.github/scripts/build_picks_ledger.py`：三榜（價值成長/題材動能/
+未來性）產生完scores*.json之後，各取Top20（排除流動性不足`rank=null`）
+快照進`data/picks_ledger.json`（代號/名稱/分數/收盤價/時間戳），
+`already_snapshotted()`保證同一個(board, snapshot_date)只能被快照一次，
+不可覆蓋/重建。已掛進`.github/workflows/market.yml`（三榜產生完之後、
+commit之前）。今晚（2026-08-28）已手動跑過一次，三榜共60檔快照成功寫入。
+
+**本機實測抓到的真bug**：future板Top20第1名(6452)的收盤價來自
+`quotes_all_tw.json`裡2020-08-17的資料——6年前！同一種FinMind快取過期
+根因（比B23的2024-12-31案例更嚴重）。已加守門：`price_date`比
+`snapshot_date`早超過10天就判定`price_stale=true`，`close_price`誠實記
+null，不讓錯誤價格污染未來的報酬率計算。今晚快照：value 1檔/future 2檔
+因此記為stale。
+
+**順便修正一個既有的生產環境真bug**：查`market.yml`的commit步驟才發現
+`git add`清單漏了`data/ex_dividend_events.json`——B23前一輪新增的除權息
+事件帳本，daily排程雖然正確產生，卻從未被GitHub Actions自動commit過
+（只有我本機手動commit的那幾次才進repo，daily排程每次跑完都把它的異動
+丟棄）。已補上，順便也把`data/picks_ledger.json`加進commit清單。
+
+`.github/scripts/update_picks_ledger_returns.py`（新增，**骨架未完整
+實作**，使用者原話「可以先設計、不用今晚就實作完」）：定義T+5/20/60/120
+回填的資料結構跟三個待解問題（交易日曆、大盤基準查詢、超額報酬公式），
+下一輪補上實際邏輯。
+
+冒煙測試實際輸出（2026-08-28 01:47，`node scripts/smoke_test.mjs`）：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 8. 重新整理按鈕點擊後都會觸發實際網路請求
+PASS - 9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋
+PASS - 11. pull-to-refresh下拉手勢會觸發實際網路請求
+PASS - 12. 整個測試過程結束後仍無累積的uncaught error
+=== 冒煙測試結果：全部通過 ===
+```
+
+**影響檔案**：`.github/scripts/build_picks_ledger.py`（新增）、
+`.github/scripts/update_picks_ledger_returns.py`（新增，骨架）、
+`.github/workflows/market.yml`（新增快照步驟+補commit清單缺漏）、
+`data/picks_ledger.json`（新檔）、`BACKLOG.md`。
+
+**下一步**：實作回填邏輯（交易日曆/大盤查詢）；B23殘留1,850檔待FinMind
+額度重置回補；App「選股成績單」UI等回填有資料後再做。
+
+---
+
 ## 2026-08-28（續22）— 【研究帽】B23：動能榜歷史深度+創新高+量價配合度因子，
 過程中抓到影響七成股票的日曆缺口真bug
 

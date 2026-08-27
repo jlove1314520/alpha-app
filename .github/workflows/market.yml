@@ -64,11 +64,17 @@ jobs:
       - name: 產生未來性濾網scores_future.json（JSON-only上線評分路徑）
         run: python research/generate_scores_future.py
         continue-on-error: true
+      # 2026-08-28新增（B24第一步，使用者原話「今晚就要開始累積快照，鐵律：
+      # 只能事前快照嚴禁事後補建」）：三榜都產生完之後、commit之前，快照
+      # 各榜Top20進data/picks_ledger.json——前瞻選股台帳，不是回測。
+      - name: 快照三榜Top20進前瞻選股台帳picks_ledger.json
+        run: python .github/scripts/build_picks_ledger.py
+        continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json scores.json scores_momentum.json scores_future.json
-          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性) $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json scores.json scores_momentum.json scores_future.json
+          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push
