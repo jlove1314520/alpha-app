@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 149 輪 · 2026-08-27T19:31+08:00 · TW · T86三大法人回補第25批（暫停規則生效中，屬允許的地基工作）· 取鎖乾淨（第148輪正常結束）· 依輪替選TW（TW 18:22第146輪最舊），暫停規則仍生效中，改做`backfill_t86.py --batch-size 200`：**本輪因代理端美金預算即將用盡，主動提前收工，未跑滿200天上限**（非撞TWSE封鎖，過程持續穩定新增檔案），累積2490→2547/3305（75.3%→77.1%）· `is_holdout_consumed()`確認`False`，純資料回補不寫`TRIALS_LEDGER.md`；發現`index.html`有不屬於本輪的未commit修改，依規則不觸碰、不加入本次commit · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第149輪記錄
+
+---
 ## 第 148 輪 · 2026-08-27T19:01+08:00 · FUT（跳過，暫停規則生效中）· 依輪替選FUT（FUT 17:01第145輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只有一個commit），FUT軌唯一待辦（round104盤別效應第三批跳空構造/另立新因子家族）本質仍是單因子相關工作，同round109/112/115/118/121/124/127/130/133/136/139/142/145判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；`git status`確認工作目錄乾淨 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第148輪記錄
 
 ---
