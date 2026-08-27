@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 134 輪 · 2026-08-27T11:37+08:00 · TW · T86三大法人回補接續（暫停單因子試驗規則生效中，屬允許的地基工作）· `run_batch(batch_size=200)`：背景執行輸出遺失，靠快取檔案數增量反推新完成約64天（未跑滿200上限即提前結束，研判撞到TWSE反爬蟲封鎖）；累積T86快取1636→1700/3305（49.5%→51.4%）；`is_holdout_consumed()`確認`False`；未動`backfill_universe.py`（已達81.3%>80%門檻）；`portfolio_multifactor_v2`下一步仍等使用者三選一決定，不下放 · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第134輪記錄
+
+---
 ## 第 133 輪 · 2026-08-27T11:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 10:22(第131輪)/US 10:33(第132輪，最新)/FUT 09:31(第130輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，132輪後有三筆互動session commit（sparkline/融資維持率標示/金融股bug）皆未觸及SPEC，FUT軌依舊沒有組合策略相關工作可做，唯一待辦（盤別效應第三批跳空構造，round104留下）本質仍是單因子相關工作，同round109/112/115/118/121/124/127/130判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第133輪記錄
 
 ---
