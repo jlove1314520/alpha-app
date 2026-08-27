@@ -41,10 +41,15 @@ parquet 快取（gitignored，只存在互動 session 本機），GitHub Actions
   張數當原始訊號，隨每日排程自然增厚到5天。
 - `valuation_adj`（PEG）：`fundamentals.json` 的 `ratios.per` × 上面算出的
   `earnings_growth`，本益比<=0（虧損股）視為無效。
-- `technical`（技術型態）：**完全沒有來源**——需要per股票的每日OHLC/成交量
-  歷史序列，目前committed的JSON裡沒有任何檔案retained這個（`quotes_tw.json`
-  只有自選股當下報價+20筆sparkline，不是全市場歷史），這裡誠實留NaN，用
-  coverage重新分配權重機制處理，不是bug。
+- `technical`（技術型態）：2026-08-27新增資料源——`data/price_history.json`
+  （`research/build_price_history.py`一次性回補約90個交易日OHLCV歷史，
+  `.github/scripts/update_price_history.py`每日累積式append，TWSE
+  STOCK_DAY_ALL + TPEx tpex_mainboard_quotes）。算法跟研究端
+  `factors.py::prepare_factors()`的`f_ma_breakout`同一個公式：
+  `(close/MA60 - 1) * (vol20/vol60)`，**唯一差異是這裡用原始收盤價，
+  未還原權息**（除權息當天前後MA60會有跳空失真，是刻意的簡化，不是bug）。
+  需要至少60個交易日資料才能算，新股票/剛加入來源的股票資料不足時誠實
+  留None，隨每日累積自然補齊。
 - `analyst`/`catalyst`：跟研究端一樣，這兩項全市場沒有免費資料源，誠實留NaN。
 
 以上任何一項未來要補，原則不變：先問「有沒有第二條路、能不能從已有欄位推導」，
@@ -71,10 +76,14 @@ FUNDAMENTALS_PATH = REPO_ROOT / "data" / "fundamentals.json"
 STOCK_DETAIL_PATH = REPO_ROOT / "data" / "stock_detail.json"
 MARKET_TW_PATH = REPO_ROOT / "data" / "market_tw.json"
 QUOTES_TW_PATH = REPO_ROOT / "data" / "quotes_tw.json"
+PRICE_HISTORY_PATH = REPO_ROOT / "data" / "price_history.json"
 OUT_PATH = REPO_ROOT / "scores.json"
 TW_TZ = timezone(timedelta(hours=8))
 
 GROWTH_QUALITY_MONTHS = 24  # 近12個月 vs 再前12個月，24個月起跳，要求視窗內完全連續
+MA_WINDOW = 60
+VOL_SHORT_WINDOW = 20
+VOL_LONG_WINDOW = 60
 
 
 def _load_json(path: Path) -> dict:
@@ -132,6 +141,28 @@ def _growth_quality(rev_rows: list[dict]) -> float | None:
     return recent12 / prior12 - 1
 
 
+def _ma_breakout(price_rows: list[dict]) -> float | None:
+    """跟 factors.py::prepare_factors() 的 f_ma_breakout 同一個公式：
+    (close/MA60 - 1) * (vol20/vol60)。用原始收盤價，未還原權息（見檔頭說明）。
+    需要至少 MA_WINDOW(60) 筆資料才算，不足時誠實回傳None。"""
+    if len(price_rows) < MA_WINDOW:
+        return None
+    rows = sorted(price_rows, key=lambda r: r["date"])
+    closes = pd.Series([r["close"] for r in rows], dtype=float)
+    volumes = pd.Series([r.get("volume") for r in rows], dtype=float)
+    ma60 = closes.rolling(MA_WINDOW, min_periods=MA_WINDOW).mean().iloc[-1]
+    last_close = closes.iloc[-1]
+    if pd.isna(ma60) or ma60 == 0 or pd.isna(last_close):
+        return None
+    above_ma_pct = last_close / ma60 - 1
+    vol20 = volumes.rolling(VOL_SHORT_WINDOW, min_periods=VOL_SHORT_WINDOW).mean().iloc[-1]
+    vol60 = volumes.rolling(VOL_LONG_WINDOW, min_periods=VOL_LONG_WINDOW).mean().iloc[-1]
+    if pd.isna(vol20) or pd.isna(vol60) or vol60 == 0:
+        return None
+    result = above_ma_pct * (vol20 / vol60)
+    return float(result) if np.isfinite(result) else None
+
+
 def _chips_signal(institutional: dict | None) -> float | None:
     if not institutional:
         return None
@@ -150,13 +181,20 @@ def _chips_signal(institutional: dict | None) -> float | None:
 def build_rows() -> pd.DataFrame:
     fundamentals = _load_json(FUNDAMENTALS_PATH).get("fundamentals", {})
     stock_detail = _load_json(STOCK_DETAIL_PATH).get("stocks", {})
-    all_codes = sorted(set(fundamentals) | set(stock_detail))
+    price_history = {}
+    if PRICE_HISTORY_PATH.exists():
+        try:
+            price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {})
+        except Exception:
+            price_history = {}
+    all_codes = sorted(set(fundamentals) | set(stock_detail) | set(price_history))
 
     rows = []
     for code in all_codes:
         fd = fundamentals.get(code, {})
         sd = stock_detail.get(code, {})
         fin = sd.get("financials", {})
+        ma_breakout = _ma_breakout(price_history.get(code) or [])
 
         eps_yoy = _eps_yoy_from_quarters(fin.get("quarters") or [])
         eps_source = "stock_detail_quarters" if eps_yoy is not None else None
@@ -182,6 +220,7 @@ def build_rows() -> pd.DataFrame:
             "raw_rev_grow": rev_grow_12m,
             "raw_inst_flow": chips,
             "raw_pe": pe, "raw_peg": peg,
+            "raw_ma_breakout": ma_breakout,
         })
 
     cs = pd.DataFrame(rows).set_index("stock_id")
@@ -199,13 +238,14 @@ def compute_scores_live() -> pd.DataFrame:
         "growth_quality": "raw_rev_grow",
         "chips": "raw_inst_flow",
         "valuation_adj": "raw_peg",
+        "technical": "raw_ma_breakout",
     }
     for key, col in raw_col.items():
         sc, pct = _pct_score(cs[col], score_v2.FACTOR_DEFS[key]["higher_better"])
         cs[f"{key}_score"], cs[f"{key}_pct"] = sc, pct
 
-    # technical/analyst/catalyst：JSON-only路徑沒有來源，誠實留NaN，見檔頭說明。
-    for key in ("technical", "analyst", "catalyst"):
+    # analyst/catalyst：JSON-only路徑沒有來源，誠實留NaN，見檔頭說明。
+    for key in ("analyst", "catalyst"):
         cs[f"{key}_score"] = np.nan
         cs[f"{key}_pct"] = np.nan
 
@@ -245,6 +285,8 @@ def _raw_dict(key: str, row: pd.Series) -> dict:
         return {"inst_net_lots_available_days": _r(row["raw_inst_flow"])}
     if key == "valuation_adj":
         return {"pe": _r(row["raw_pe"]), "eps_yoy": _r(row["raw_eps_yoy"]), "peg": _r(row["raw_peg"])}
+    if key == "technical":
+        return {"ma60_breakout_x_volume_ratio": _r(row["raw_ma_breakout"])}
     return {}
 
 
@@ -261,6 +303,8 @@ def _reason(key: str, row: pd.Series) -> str:
         return f"近期（依累積天數，最多5日）三大法人買賣超合計 {row['raw_inst_flow']:+.0f} 張，居全市場前 {front}%。"
     if key == "valuation_adj":
         return f"本益比 {row['raw_pe']:.1f} 倍，PEG={row['raw_peg']:.2f}，估值居全市場前 {front}%。"
+    if key == "technical":
+        return f"價格相對60日均線乖離×近20/60日均量比綜合指標為 {row['raw_ma_breakout']:+.3f}（原始收盤價，未還原權息），居全市場前 {front}%。"
     return ""
 
 
@@ -346,12 +390,14 @@ def main():
                 "data_asof": as_of, "market": "TW",
                 "universe_size": len(cs),
                 "weights_hash": frozen["weights_sha256"],
-                "source": "只讀repo內data/fundamentals.json+data/stock_detail.json（不讀parquet、"
-                           "不呼叫FinMind），供GitHub Actions每日排程使用，見generate_scores_live.py檔頭說明。",
+                "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json"
+                           "（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用，"
+                           "見generate_scores_live.py檔頭說明。",
                 "disclaimer": (
                     "非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。"
-                    "這是JSON-only上線評分路徑，technical/analyst/catalyst三項全市場沒有資料源、"
-                    "revenue_momentum未做規模分層——已依coverage規則重新分配權重，不會把沒資料當成0分，"
+                    "這是JSON-only上線評分路徑，analyst/catalyst兩項全市場沒有資料源、"
+                    "technical用未還原權息的收盤價（除權息前後會失真）、revenue_momentum未做"
+                    "規模分層——已依coverage規則重新分配權重，不會把沒資料當成0分，"
                     "細節見generate_scores_live.py檔頭的已知限制說明。"
                 ),
             },

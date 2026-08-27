@@ -16,6 +16,49 @@
 
 ---
 
+## 2026-08-27（續9）— technical因子上線：新增每日個股OHLCV價量歷史JSON
+
+使用者指示：「處理technical因子（需要每日產出個股日線價格序列JSON，coverage
+才能從0.74再往上）」。
+
+**新增 `data/price_history.json`**：跟 `fundamentals.json`/`stock_detail.json`
+同一套「一次性回補+每日累積」模式：
+- `research/build_price_history.py`（一次性、merge-safe）：讀research端FinMind
+  歷史parquet快取（`TaiwanStockPrice`，2417檔本機有快取），回補約90個交易日
+  OHLCV，寫進repo，2101檔成功建檔（2330確認90天資料）。
+- `.github/scripts/update_price_history.py`（每日排程）：TWSE `STOCK_DAY_ALL`
+  （全市場上市股票最新一日OHLCV快照）+ TPEx `tpex_mainboard_quotes`（上櫃版），
+  累積式append、滾動保留最近90個交易日。本機測試：TWSE 1369檔+TPEx 994檔，
+  合計覆蓋擴大到2823檔（含本機FinMind快取沒有、只有TWSE/TPEx官方端點才有
+  的新代碼）。
+- **誠實揭露的簡化**：收盤價是原始收盤價，未還原權息——除權息當天前後
+  MA60計算會有跳空失真，已寫進STATUS.json的known_limitations/todo。
+
+**`research/generate_scores_live.py` 接上technical因子**：新增 `_ma_breakout()`，
+跟研究端 `factors.py::prepare_factors()` 的 `f_ma_breakout` 同一個公式
+`(close/MA60 - 1) * (vol20/vol60)`，需要至少60個交易日資料才算，不足時誠實
+回傳None。本機測試結果：**合格檔數從340檔（只有5類因子）大幅增加到1346檔**，
+最高coverage從0.74提升到0.84（5+1類別權重，只剩analyst/catalyst兩項恆缺，
+這兩項全市場都沒有免費資料源）。
+
+**掛進 `market.yml`**：在`update_margin_maintenance.py`之後、
+`generate_scores_live.py`之前新增`update_price_history.py`步驟；commit清單
+加入`data/price_history.json`。
+
+**STATUS.json/generate_status_json.py同步更新**：新增`describe_price_history()`
+（回報檔數+平均保留天數），`DESCRIBERS`/`STALE_HOURS`註冊；`TODO`更新
+technical因子已解決、新增「未還原權息」限制條目。
+
+**驗證**：所有JSON檔案通過`json.loads()`、所有Python檔案通過`py_compile`、
+`market.yml`通過`yaml.safe_load()`。這輪沒有動`index.html`，未重跑
+`scripts/smoke_test.mjs`（跟共用區塊無關）。
+
+**下一步**：analyst/catalyst兩項因子（全市場無免費資料源，暫無解）；
+還原權息後的收盤價（需要抓除權息事件表）；979檔缺Q1基準的財報季度回補；
+PER歷史累積檔（補earnings_growth的PER反推EPS備援）。
+
+---
+
 ## 2026-08-27（續8）— 確認P0-1/P0-2已上線 + 補上使用者原規格的smoke_test.mjs
 
 使用者回報「時鐘還是停的」，以為P0-1/P0-2/P0-3是上一輪指定但沒做——**查證後

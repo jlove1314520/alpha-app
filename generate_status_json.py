@@ -41,6 +41,7 @@ STALE_HOURS = {
     "data/margin_maintenance.json": 72,  # 2026-08-27改排程後：一天一次，3天沒新增才算過期
     "data/fx.json": 48,
     "data/stock_detail.json": 96,  # 財報一季才更新一次，但三大法人/融資融券是每日，用寬鬆門檻涵蓋兩者
+    "data/price_history.json": 72,  # 每日累積式更新，跟fundamentals.json同等寬鬆門檻
 }
 
 
@@ -129,6 +130,23 @@ def describe_stock_detail(path: Path) -> dict:
     }
 
 
+def describe_price_history(path: Path) -> dict:
+    """price_history.json（2026-08-27新增，給generate_scores_live.py的technical
+    因子用）——TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes累積式OHLCV快照，
+    起始種子由research/build_price_history.py讀本機FinMind parquet快取回補。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    prices = d.get("prices", {})
+    depths = [len(v) for v in prices.values() if v]
+    avg_depth = round(sum(depths) / len(depths), 1) if depths else None
+    return {
+        "generated_at": meta.get("generated_at"),
+        "records": len(prices),
+        "source": "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（官方開放資料，累積式寫回，免金鑰）",
+        "detail": f"平均每檔保留{avg_depth}個交易日（上限90天），未還原權息（見generate_scores_live.py已知限制）",
+    }
+
+
 def describe_paper_trades(path: Path) -> dict:
     d = json.loads(path.read_text(encoding="utf-8"))
     return {
@@ -149,6 +167,7 @@ DESCRIBERS = {
     "paper_trades.json": describe_paper_trades,
     "fx.json": describe_fx,
     "stock_detail.json": describe_stock_detail,
+    "price_history.json": describe_price_history,
 }
 
 
@@ -380,7 +399,8 @@ TODO = [
     {"item": "期貨籌碼(三大法人期貨部位) 脫離FinMind", "priority": "P2", "blocker": "探測過TAIFEX openapi常見端點命名，只找到「大額交易人」資料(跟三大法人分類不同)，需人工查閱TAIFEX網站確認"},
     {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE/TPEx官方均無對應端點，只有逐股融資餘額(張)；已完成：該次呼叫失敗時明確寫入data_incomplete=true，App顯示「資料不完整」而非沿用舊值"},
     {"item": "score_live.py的earnings_growth因子沒有PER反推EPS的備援", "priority": "P2", "blocker": "研究端的_eps_yoy_derived_from_per()備援需要「約一年前的PER快照」，但fundamentals.json的ratios只存最新一筆、沒有retained歷史序列，需要另開一份PER歷史累積檔才能補上這條備援"},
-    {"item": "generate_scores_live.py沒有規模分層排名/技術面因子", "priority": "P2", "blocker": "JSON-only路徑沒有per股票的每日OHLC/成交量歷史，technical因子完全無來源、revenue_momentum沒有按流動性分層，是刻意的範圍縮減，見generate_scores_live.py檔頭說明"},
+    {"item": "generate_scores_live.py沒有規模分層排名", "priority": "P2", "blocker": "revenue_momentum沒有per股票的每日成交量/市值資料可以分層，是刻意的範圍縮減；technical因子已於2026-08-27接上data/price_history.json解決"},
+    {"item": "data/price_history.json的technical因子用未還原權息的收盤價", "priority": "P2", "blocker": "TWSE/TPEx官方開放資料的每日快照端點沒有還原權息後的收盤價，需要另外抓除權息事件表自行還原，目前MA60在除權息當天前後會有跳空失真，是誠實揭露的簡化"},
     {"item": "月營收/PER來源沒有逐筆標記是TWSE或TPEx", "priority": "P2", "blocker": "fundamentals.json目前TWSE跟TPEx資料寫進同一個結構，沒有per-entry的來源標記，之後要精確稽核需要補上"},
     {"item": "PER/PBR缺乏「自行由EPS/BPS計算」這一層備援", "priority": "P2", "blocker": "目前fundamentals.json的PER/PBR只有BWIBBU_ALL/TPEx兩層，沒有再用stock_detail.json的EPS+資產負債表淨值反推這一層備援"},
     {"item": "CLAUDE.md候選：美股報價/AI盤前日報真新聞/Phase2券商下單研究", "priority": "P2", "blocker": "尚未排序，等使用者指示"},

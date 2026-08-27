@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T15:08:33.912511+08:00",
-  "latest_commit": "7b65863",
+  "updated_at": "2026-08-27T15:42:50.934142+08:00",
+  "latest_commit": "64a0b4c",
   "data_files": [
     {
       "path": "data/fundamentals.json",
@@ -51,6 +51,14 @@
       "status": "ok"
     },
     {
+      "path": "data/price_history.json",
+      "generated_at": "2026-08-27T15:40:30.492195+08:00",
+      "records": 2823,
+      "source": "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（官方開放資料，累積式寫回，免金鑰）",
+      "detail": "平均每檔保留66.4個交易日（上限90天），未還原權息（見generate_scores_live.py已知限制）",
+      "status": "ok"
+    },
+    {
       "path": "data/quotes_tw.json",
       "generated_at": "2026-08-27T02:38:24+00:00",
       "records": 126,
@@ -76,10 +84,10 @@
     },
     {
       "path": "scores.json",
-      "generated_at": "2026-08-27T15:06:38.302016+08:00",
-      "records": 340,
+      "generated_at": "2026-08-27T15:41:49.277460+08:00",
+      "records": 1346,
       "source": "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，JSON-only，不依賴parquet/FinMind）",
-      "detail": "engine_version=scoring-live-json universe_size=2238 avg_coverage=0.618 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",
+      "detail": "engine_version=scoring-live-json universe_size=2593 avg_coverage=0.593 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",
       "status": "ok"
     }
   ],
@@ -287,9 +295,14 @@
       "blocker": "研究端的_eps_yoy_derived_from_per()備援需要「約一年前的PER快照」，但fundamentals.json的ratios只存最新一筆、沒有retained歷史序列，需要另開一份PER歷史累積檔才能補上這條備援"
     },
     {
-      "item": "generate_scores_live.py沒有規模分層排名/技術面因子",
+      "item": "generate_scores_live.py沒有規模分層排名",
       "priority": "P2",
-      "blocker": "JSON-only路徑沒有per股票的每日OHLC/成交量歷史，technical因子完全無來源、revenue_momentum沒有按流動性分層，是刻意的範圍縮減，見generate_scores_live.py檔頭說明"
+      "blocker": "revenue_momentum沒有per股票的每日成交量/市值資料可以分層，是刻意的範圍縮減；technical因子已於2026-08-27接上data/price_history.json解決"
+    },
+    {
+      "item": "data/price_history.json的technical因子用未還原權息的收盤價",
+      "priority": "P2",
+      "blocker": "TWSE/TPEx官方開放資料的每日快照端點沒有還原權息後的收盤價，需要另外抓除權息事件表自行還原，目前MA60在除權息當天前後會有跳空失真，是誠實揭露的簡化"
     },
     {
       "item": "月營收/PER來源沒有逐筆標記是TWSE或TPEx",
