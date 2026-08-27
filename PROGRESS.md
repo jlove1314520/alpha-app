@@ -16,6 +16,50 @@
 
 ---
 
+## 2026-08-28（續25）— 【開發/研究帽】夜間循環第4輪：UX走查+B24回測重啟+更正
+上輪的FinMind封鎖誤判
+
+**UX走查**（393×852，六分頁+報告畫面）：發現並修正UX-1——選股頁「主流
+題材」空狀態訊息把「真的沒有產業符合條件」跟「連線失敗」用「或」糊成
+一句話，`FM_LAST_FAILED`其實已能明確分辨，改成兩句各自獨立的訊息。
+其餘沒發現新bug，`loadStockInfo`的Failed to fetch確認是本機網路本身
+斷斷續續（非regression）。完整記錄見新檔`docs/UX_AUDIT.md`。
+
+**重要更正（上一輪的誤判）**：上輪以為PIT回測腳本「卡住」是FinMind IP
+封鎖導致，這輪追查發現其實是`factor_ic.py::load_sample_with_factors()`
+對100檔樣本的`prepare_factors()`本機運算本身就要約22分鐘（15年技術指標+
+法人流量滾動窗口的真實運算，不是網路卡住）——是一次性成本，之後62次
+回測跑合（2期×(1真實+30隨機)）都是對已載入記憶體資料運算，不會重複付
+這22分鐘。已重新完整啟動這個回測，這輪結束時仍在載入階段，下一輪繼續
+追蹤結果。
+
+**B23殘留回補**：FinMind封鎖已於03:12前解除，測試性跑了保守的80檔，
+但跟同時在跑的PIT回測搶同一份FinMind額度，只有約24檔真的成功補進
+（例如1101已確認補到完整90天連續資料），其餘56檔額度用盡。**教訓**：
+FinMind額度是全域共用的，不要同時跑多個會打FinMind的工作。
+
+冒煙測試實際輸出（2026-08-28 03:22，`node scripts/smoke_test.mjs`）：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了4次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 8. 重新整理按鈕點擊後都會觸發實際網路請求
+PASS - 9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋
+PASS - 11. pull-to-refresh下拉手勢會觸發實際網路請求
+PASS - 12. 整個測試過程結束後仍無累積的uncaught error
+=== 冒煙測試結果：全部通過 ===
+```
+
+**影響檔案**：`index.html`（UX-1修正）、`docs/UX_AUDIT.md`（新增）、
+`data/price_history.json`（B23殘留回補約24檔）、`BACKLOG.md`。
+
+**下一步**：追蹤B24 PIT回測完整結果；時間接近07:00時準備MORNING_REPORT.md。
+
+---
+
 ## 2026-08-28（續24）— 【研究帽】B24 PIT回測骨架（價值成長榜）+FinMind IP封鎖發現
 
 新增`research/run_value_board_v2_pit_backtest.py`：重用既有驗證框架

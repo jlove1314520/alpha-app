@@ -1750,7 +1750,14 @@
   let MAINSTREAM_CACHE=null;
   function renderMainstreamChips(){
     const el=document.getElementById('mainstream-chips');if(!el||!MAINSTREAM_CACHE)return;
-    if(!MAINSTREAM_CACHE.length){el.innerHTML='<div class="note">目前沒有產業呈現5日/20日資金淨流入（或'+fmEmptyMsg('查無資料')+'）</div>';return}
+    if(!MAINSTREAM_CACHE.length){
+      // 2026-08-28修正（UX走查發現）：原本用「或」把「真的沒有產業符合條件」跟
+      // 「連線失敗」兩種語意完全不同的狀態糊成一句話，使用者看了不知道該不該按
+      // 重新整理。FM_LAST_FAILED本來就已經能明確分辨是哪一種，這裡改成兩句
+      // 各自獨立、不含糊的訊息。
+      el.innerHTML='<div class="note">'+(FM_LAST_FAILED?fmEmptyMsg(''):'目前沒有產業呈現5日/20日資金淨流入')+'</div>';
+      return;
+    }
     el.innerHTML=MAINSTREAM_CACHE.map(r=>{
       const scoreInd=HEAT_TO_SCORE_INDUSTRY[r.id];
       const active=PICKS_INDUSTRY===scoreInd;
@@ -2868,7 +2875,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.0110';
+  const APP_VERSION='2026-08-28.0329';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
