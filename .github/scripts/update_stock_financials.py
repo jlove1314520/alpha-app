@@ -176,6 +176,16 @@ def discretize_quarter(existing_quarters: list[dict], cum: dict) -> dict | None:
 
 
 def fetch_balance() -> dict[str, dict]:
+    """2026-08-27新增（B17未來性濾網(a)類因子需要）：除了既有的
+    `equity`（ROE分母），額外抓`common_stock_capital`（股本，台股普通股
+    面額統一為每股新台幣10元，approx shares_outstanding = 股本/10，t187ap03_L
+    的「已發行普通股數」只涵蓋部分公司，用股本反推更穩定）+
+    `non_current_assets`（非流動資產，當「產能利用率」的分母代理——這個
+    endpoint沒有單獨的「固定資產/不動產廠房及設備」欄位，非流動資產包含
+    固定資產但也包含商譽/長期投資等，是刻意的簡化近似，不是精確的固定
+    資產數字，誠實揭露）。回傳結構從原本`{code: equity}`改成
+    `{code: {equity, common_stock_capital, non_current_assets}}`，呼叫端
+    要跟著改。"""
     r = _get_retry(BALANCE_URL, timeout=30)
     r.raise_for_status()
     rows = r.json()
@@ -186,7 +196,11 @@ def fetch_balance() -> dict[str, dict]:
         code = row.get("公司代號")
         equity = _num(row.get("歸屬於母公司業主之權益合計"))
         if code and equity is not None:
-            out[code] = equity
+            out[code] = {
+                "equity": equity,
+                "common_stock_capital": _num(row.get("股本")),
+                "non_current_assets": _num(row.get("非流動資產")),
+            }
     return out
 
 
@@ -225,9 +239,13 @@ def main():
                 skipped_no_baseline += 1
                 continue
             fin["quarters"] = merge_quarters(existing_quarters, discrete)
-            eq = equity.get(code)
+            bal = equity.get(code) or {}
+            eq = bal.get("equity")
             fin["equity_parent_latest"] = eq
             fin["roe_ttm_pct"] = compute_roe_ttm(fin["quarters"], eq)
+            capital = bal.get("common_stock_capital")
+            fin["shares_outstanding_approx"] = round(capital / 10, 0) if capital else None
+            fin["non_current_assets_latest"] = bal.get("non_current_assets")
         income_updated = len(income) - skipped_no_baseline
     except Exception as e:
         print(f"財報(income/balance) 更新失敗：{e}")

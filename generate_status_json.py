@@ -269,7 +269,10 @@ def describe_scores(path: Path) -> dict:
               if engine == "scoring-live-json" else
               "research/generate_scores_momentum.py（GitHub Actions market.yml每日排程自動執行，"
               "題材動能榜，跟價值成長榜物理分離的獨立引擎，見weights_frozen_momentum.json）"
-              if engine == "scoring-momentum-v1" else f"未知engine_version={engine}")
+              if engine == "scoring-momentum-v1" else
+              "research/generate_scores_future.py（GitHub Actions market.yml每日排程自動執行，"
+              "未來性濾網(a)類因子，跟另外兩榜物理分離的獨立引擎，見weights_frozen_future.json）"
+              if engine == "scoring-future-v1" else f"未知engine_version={engine}")
     return {
         "generated_at": meta.get("generated_at"),
         "records": len(stocks),
@@ -312,6 +315,13 @@ def build_data_files() -> list[dict]:
     if scores_momentum_path.exists():
         info = describe_scores(scores_momentum_path)
         entry = {"path": "scores_momentum.json", **info}
+        entry["status"] = status_from_age(info.get("generated_at"), 30)
+        out.append(entry)
+
+    scores_future_path = REPO_ROOT / "scores_future.json"
+    if scores_future_path.exists():
+        info = describe_scores(scores_future_path)
+        entry = {"path": "scores_future.json", **info}
         entry["status"] = status_from_age(info.get("generated_at"), 30)
         out.append(entry)
     return out
@@ -376,7 +386,7 @@ APP_DATA_SOURCES = [
     {"panel": "今日頁·自選股報價（主價格）", "source": "data/quotes_tw.json + data/quotes_us.json（美股2026-08-27新增extended_hours：yfinance盤前/盤後價，跟Finnhub regular quote分開顯示，見panel下方風險揭露）"},
     {"panel": "今日頁·自選股財報行事曆徽章（僅美股，21天內才顯示）", "source": "data/earnings_calendar.json（yfinance get_calendar()，2026-08-27新增）"},
     {"panel": "今日頁·自選股sparkline走勢", "source": "data/quotes_tw.json（TWSE STOCK_DAY，僅上市股票；上櫃約24檔查不到，見known_limitations）+ data/quotes_us.json（yfinance），2026-08-27起不再打FinMind"},
-    {"panel": "選股頁·價值成長榜/題材動能榜（2026-08-27新增雙榜切換）", "source": "scores.json（research/generate_scores_live.py，財報導向）+ scores_momentum.json（research/generate_scores_momentum.py，題材動能導向，兩榜物理分離、因子/權重各自版本控管）——兩榜回測前都固定顯示「本榜為資料排序，尚未經過組合策略回測驗證」"},
+    {"panel": "選股頁·價值成長榜/題材動能榜/未來性濾網（2026-08-27新增三榜切換）", "source": "scores.json（generate_scores_live.py，財報導向）+ scores_momentum.json（generate_scores_momentum.py，題材動能導向）+ scores_future.json（generate_scores_future.py，未來性(a)類因子：法人籌碼行為+毛利率品質+產能利用率代理）——三榜物理分離、因子/權重各自版本控管，回測前都固定顯示「本榜為資料排序，尚未經過組合策略回測驗證」"},
     {"panel": "今日頁·匯率", "source": "data/fx.json（yfinance TWD=X，2026-08-27起不再打FinMind）"},
     {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},
     {"panel": "今日頁·總資產/已實現損益", "source": "無（尚未串接券商，誠實佔位）"},
@@ -465,6 +475,9 @@ TODO = [
     {"item": "B16：價值成長榜+題材動能榜都必須各自回測驗證", "priority": "P0", "blocker": "使用者2026-08-27策略層面裁示：兩榜都是「資料排序」，不是驗證過的策略，回測完成/使用者同意前App已固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」。回測規格：明確交易規則(換股頻率/持股檔數/進出場/停損/單檔上限/全成本)+三個必要對照(動態隨機對照組1000次/買進持有加權指數/對大盤回歸的alpha+beta+顯著性)+評判順序(淨利與MDD達標→Sortino→alpha顯著→夏普最後→勝率不看)。未經使用者同意不得解鎖holdout。尚未開始。"},
     {"item": "題材動能榜的chip_concentration因子用「買超張數」而非「買超佔股本比」", "priority": "P2", "blocker": "沒有現成的已發行股數資料源，是刻意的範圍縮減（跟generate_scores_live.py的chips因子同一個既有簡化）"},
     {"item": "題材動能榜的sector_capital_flow/relative_strength依賴的歷史資料才剛開始累積", "priority": "P2", "blocker": "institutional.history目前只有1-5天（daily排程剛開始跑），price_history.json的turnover欄位也才剛新增，覆蓋率會隨時間自然加深，不是bug"},
+    {"item": "未來性濾網的customer_concentration（營收客戶集中度）因子未實作", "priority": "P2", "blocker": "沒有現成的免費資料源（需要財報附註揭露的前五大客戶占比，公開資料無結構化格式可抓）"},
+    {"item": "未來性濾網的capacity_utilization_proxy只算目前水準、不是使用者原本要的「趨勢」", "priority": "P2", "blocker": "update_stock_financials.py目前只保留最新一筆non_current_assets_latest，沒有retained歷史序列，需要額外累積才能算趨勢；且「非流動資產」不是精確的「固定資產」，是t187ap07_L_ci沒有單獨固定資產欄位下的近似代理"},
+    {"item": "未來性濾網(b)類（事件資料）/(c)類（AI質性研判）因子未實作", "priority": "P2", "blocker": "(b)類依賴訊號管線骨架(BACKLOG.md B19)+docs/Alpha_新聞與供應鏈連動_設計小抄.md既定規格(news_fetch.py/supply_chain.json)先完成；(c)類依賴(b)類的事件資料/供應鏈圖作為AI研判輸入素材，且依使用者規則不計入量化總分、須另闢區塊呈現"},
     {"item": "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券", "priority": "P2", "blocker": "FinMind僅提供台股這幾類資料，TWSE/TPEx官方資料也只涵蓋台股，暫無替代來源"},
     {"item": "個股頁財報FCF", "priority": "P2", "blocker": "2026-08-27重新查證：TWSE/TPEx openapi都無現金流量表端點；MOPS網頁查詢有現金流量表但其查詢端點(ajax_t164sb04)重新實測仍被反爬蟲擋（FOR SECURITY REASONS），需要處理session/cookie才能過關——是「需要額外工程投入」不是「不存在」，尚未投入"},
     {"item": "stock_detail.json財報(EPS/毛利率/ROE)僅涵蓋TWSE上市「一般業」，上櫃/金融控股/證券/保險未涵蓋", "priority": "P2", "blocker": "TPEx其實有對應端點(mopsfin_t187ap06_O_ci等)，TWSE金融股也有(t187ap06_L_bd/fh/ins/mim等)，只是還沒接——已知可行，非無來源"},
@@ -482,7 +495,7 @@ TODO = [
 ]
 
 KNOWN_LIMITATIONS = [
-    "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json），跟價值成長榜（scores.json）並列——兩榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json），不是回測最佳化結果。",
+    "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json）+未來性濾網（scores_future.json），跟價值成長榜（scores.json）三榜並列——三榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json/weights_frozen_future.json），不是回測最佳化結果。",
     "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
     "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。"
     "三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）："

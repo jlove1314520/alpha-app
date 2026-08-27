@@ -16,6 +16,53 @@
 
 ---
 
+## 2026-08-27（續17）— 新增第三濾網：未來性濾網(a)類因子 + 訊號管線骨架登錄
+
+使用者新增指示：多濾網選股（三濾網架構）+訊號審查管線（依market-signal-
+vetting方法）+Reddit社群訊號抓取（合規）+校準迴圈。已讀`docs/`底下既有的
+`Alpha_新聞與供應鏈連動_設計小抄.md`（2026-08-23設計，涵蓋割韭菜偵測/
+supply_chain.json/news.json，跟這輪的「已反映偵測」規格高度重疊，尚未
+實作，登錄進B18/B19依賴項）。
+
+**BACKLOG.md完整登錄**（B16-B22，依使用者這輪指定順序，B16維持原P0排最前）：
+B16回測驗證(P0)、B17未來性濾網(a)類（本輪完成）、B18未來性濾網(b)類事件
+資料、B19訊號管線骨架（含`data/signal_ledger.json`前瞻追蹤台帳鐵律：
+不得事後補建紀錄）、B20未來性濾網(c)類AI質性研判（不計入量化總分）、
+B21 Reddit社群訊號抓取、B22校準迴圈。
+
+**B17未來性濾網(a)類因子已完成**（第三個獨立濾網）：
+- `research/generate_scores_future.py`：5個因子——法人連續買超天數、
+  買超佔股本比（用股本÷10股面額反推約略在外流通張數）、買超集中度
+  （外資佔三大法人買超總量比例）、毛利率水準×穩定度（供應鏈議價力代理）、
+  產能利用率代理（近4季營收/最新一期非流動資產）。
+- `.github/scripts/update_stock_financials.py`新增擷取「股本」+
+  「非流動資產」兩個資產負債表欄位。
+- `research/weights_frozen_future.json`+`research/score_live_future.py`：
+  跟另外兩榜同一套獨立版本控管+寫入防護。
+- **誠實揭露的簡化**：customer_concentration（客戶集中度）無資料源未實作；
+  capacity_utilization_proxy只算目前水準不是趨勢（資料只有最新一筆快照）；
+  非流動資產不是精確的固定資產。
+- `index.html`選股頁擴為三榜切換，重構`BOARD_CONFIG`集中管理（取代原本
+  分散的ternary寫法），掛進`market.yml`每日排程。
+
+**冒煙測試（`node scripts/smoke_test.mjs`，2026-08-27 23:00，全部通過）**：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+```
+
+**下一步（依使用者指定順序）**：B19訊號管線骨架（依market-signal-vetting
+方法，含L1-L4來源分層/交叉驗證/已反映偵測/signal_ledger.json前瞻台帳）
+→ B21 Reddit接入 → B22校準迴圈。B18/B20（事件資料/AI質性研判）依賴B19
+先完成。
+
+---
+
 ## 2026-08-27（續16）— 策略層面決定：拆成兩榜（價值成長榜+題材動能榜）
 
 使用者診斷：AI供應鏈題材股（光通訊/矽光子/CoWoS先進封裝/散熱/PCB/CCL/

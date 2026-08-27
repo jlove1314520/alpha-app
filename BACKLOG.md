@@ -220,11 +220,47 @@
   AI供應鏈題材有重疊，方向正確（**但這不代表這些股票值得投資，兩榜都尚未
   回測驗證，見下方B16**）。
 
+- **B17：未來性濾網 (a)類因子（現在就能算）**（2026-08-27完成）：第三個
+  獨立濾網。新增：
+  - `research/generate_scores_future.py`：`institutional_buying_streak`
+    （法人連續買超天數）、`institutional_ownership_pct`（買超佔股本比，
+    用股本÷10股面額反推約略在外流通張數）、`institutional_buying_
+    concentration`（買超集中度，外資佔三大法人買超總量比例）、
+    `gross_margin_level_stability`（毛利率水準×穩定度，供應鏈議價力代理）、
+    `capacity_utilization_proxy`（產能利用率代理，近4季營收合計/最新一期
+    非流動資產）。
+  - `.github/scripts/update_stock_financials.py`新增擷取`股本`（反推股數）
+    +`非流動資產`（固定資產代理）兩個資產負債表欄位。
+  - `research/weights_frozen_future.json`+`research/score_live_future.py`：
+    跟另外兩榜同一套獨立版本控管+寫入防護。
+  - `customer_concentration`（營收客戶集中度）**這一版未實作**——沒有現成
+    免費資料源，誠實留白。`capacity_utilization_proxy`**只算目前水準、
+    不是趨勢**——`non_current_assets_latest`目前只有最新一筆快照，沒有
+    retained歷史序列；且「非流動資產」不是精確的「固定資產」，是TWSE
+    官方資產負債表沒有單獨固定資產欄位下的近似代理，兩者都已寫進
+    STATUS.json的todo誠實揭露。
+  - `index.html`選股頁擴為三榜切換（價值成長榜/題材動能榜/未來性濾網），
+    重構`BOARD_CONFIG`集中管理三榜的因子標籤/順序/cache，取代原本
+    value/momentum兩路分開寫的ternary。
+  - 掛進`market.yml`每日排程，輸出`scores_future.json`。
+
+  冒煙測試實際輸出（2026-08-27 23:00，`node scripts/smoke_test.mjs`）：
+  ```
+  PASS - 1. 頁面載入無uncaught error/unhandledrejection
+  PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+  PASS - 3. 六個分頁都能切換且不拋錯
+  PASS - 4. 主要面板都有內容（不是完全空白）
+  PASS - 5. 市場頁三個市場切換都不拋錯
+  PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+  PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+  === 冒煙測試結果：全部通過 ===
+  ```
+  另外用注入測試驗證：切換到「未來性濾網」正確顯示對應disclaimer文字+
+  5個專屬因子標籤（非另外兩榜的因子集合），點擊排行列正確開啟報告頁。
+
 ## 🔄 進行中
 
-- **B17：未來性濾網 (a)類因子（現在就能算）**（2026-08-27登錄，依使用者
-  這輪指示開始動工）：第三個獨立濾網「未來性濾網」的第一階段，見下方
-  ❌待處理B17-B21完整規格。**進度：開始建置。**
+（目前為空——B17已完成，下一步依使用者順序是B19訊號台帳骨架，見❌待處理。）
 
 ## ❌ 待處理（依使用者這輪指定順序，B16維持原P0排在最前）
 
@@ -299,8 +335,9 @@
 **三濾網架構現況總覽**（2026-08-27）：
 1. 【價值濾網】= 現行`generate_scores_live.py`（財報導向），維持不變。
 2. 【題材動能濾網】= `generate_scores_momentum.py`（已完成，見上方✅）。
-3. 【未來性濾網】= 新增，因子分三階段(a)/(b)/(c)，(a)類本輪開始建置
-   （見B17🔄），(b)/(c)類依賴B18-B20的事件資料/AI質性研判基礎設施。
+3. 【未來性濾網】= `generate_scores_future.py`，因子分三階段(a)/(b)/(c)，
+   (a)類已完成（見B17✅），(b)/(c)類依賴B18-B20的事件資料/AI質性研判
+   基礎設施，尚未開始。
 
 ---
 

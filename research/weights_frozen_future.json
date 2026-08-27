@@ -1,0 +1,14 @@
+{
+  "engine_version": "scoring-future-v1",
+  "frozen_at": "2026-08-27",
+  "dev_period": null,
+  "note": "**這是初始設計權重，不是回測最佳化後的結果**——未來性濾網(a)類因子（現在就能算的部分）獨立於價值成長榜/題材動能榜的權重版本控管。這份權重是專家判斷的起始值，回測完成、使用者同意前，任何一版分數都必須標示「尚未經過組合策略回測驗證，不代表能贏大盤」。(b)類（事件資料）/(c)類（AI質性研判）因子尚未實作，見BACKLOG.md B18/B20；(c)類完成後依使用者規則不計入這份量化總分，另闢區塊呈現。customer_concentration（營收客戶集中度）因無現成資料源，這一版未實作。",
+  "weights": {
+    "institutional_buying_streak": 0.20,
+    "institutional_ownership_pct": 0.20,
+    "institutional_buying_concentration": 0.15,
+    "gross_margin_level_stability": 0.30,
+    "capacity_utilization_proxy": 0.15
+  },
+  "weights_sha256": "2909ad72626dc2c1ff565775318bba94717c9d4ccaa0200bdf64a845d594915a"
+}
