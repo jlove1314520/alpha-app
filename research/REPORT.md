@@ -9,6 +9,12 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 165 輪 · 2026-08-28T06:32+08:00 · US（跳過，暫停規則生效中）· 取鎖時偵測到`LOCK_STALE`（上一輪疑似失敗，陳舊鎖檔被回收）· 判定：追查發現第164輪（TW軌T86回補）是撞到$5預算上限被安全機制中止（`git log`commit`24724e1`可證，非bug），已補commit其遺留的3個合法檔案（`REPORT.md`/`TW_LOG.md`/`TW_MARATHON_STATE.md`），並修正本檔全局計數器落差（163→165）。三軌時間戳：US 05:01（第162輪，最舊）/FUT 05:31（第163輪）/TW 06:13（第164輪，最新）——依輪替選US，`PORTFOLIO_STRATEGY_SPEC.md`複查仍「待使用者確認」，暫停規則仍完全生效中，US軌依舊沒有組合策略相關工作可做，保守跳過。`is_holdout_consumed()`確認`False`。見`US_MARATHON_STATE.md`/`US_LOG.md`第165輪記錄
+
+## 第 164 輪 · 2026-08-28T06:13+08:00 · TW · T86三大法人回補第30批，達成100%覆蓋率（暫停單因子試驗規則生效中，屬允許的地基工作）· 判定：取鎖乾淨，依輪替選TW，`backfill_t86.py --batch-size 150`嘗試150天全新完成（12天無交易/無資料），累積已快取達全範圍3305個工作日的100%以上（腳本回報3319/glob計數3311，皆≥3305）——T86回補在現有`VAL_END=2024-12-31`範圍內已完成。連同宇宙回補早已過80%門檻，TW軌兩項地基工作都達標，目前沒有已知允許的背景工作可做；`is_holdout_consumed()`確認`False`，`git status`乾淨無殘留。下一輪TW軌若暫停規則仍生效且portfolio下一步仍無使用者回應，應整輪跳過（比照US/FUT）。見`TW_MARATHON_STATE.md`/`TW_LOG.md`第164輪記錄
+
+## 第 163 輪 · 2026-08-28T05:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選FUT（最舊），複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則仍完全生效中。FUT軌依舊沒有組合策略相關工作可做（round104留下的盤別效應待辦本質仍是單因子工作），本輪未做任何實質工作。`is_holdout_consumed()`確認`False`，本輪開始時`git status`乾淨，無不屬於本輪的殘留變更。見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第163輪記錄
+
 ## 第 162 輪 · 2026-08-28T05:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）。依輪替選US（US 03:31第159輪最舊，FUT 04:01第160輪、TW 04:31第161輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。`git log`確認自第159輪以來新增的commit（第160輪FUT跳過、B24 PIT回測結果與方法論修正、B23回補計數bug修正、第161輪TW T86回補）皆與解除暫停規則無關，未觸及`PORTFOLIO_STRATEGY_SPEC.md`。US軌依舊沒有組合策略相關工作可做，round108/111遺留的1c地基工作本質仍是單因子相關工作，同round111起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，發現不屬於本輪的既有未commit變更（`BACKLOG.md`/`PROGRESS.md`/`data/STATUS.json`/`data/price_history.json`/`scores_momentum.json`/`backfill_final.log`），依規則不觸碰，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第162輪記錄
 
 ---
