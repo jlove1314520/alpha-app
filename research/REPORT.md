@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 155 輪 · 2026-08-28T01:31+08:00 · TW · T86三大法人回補第27批（暫停規則生效中，屬允許的地基工作）· 取鎖乾淨（第154輪正常結束）。依輪替選TW（TW 00:06第152輪最舊，US 00:31第153輪、FUT 01:01第154輪較新），暫停規則仍生效中，改做`backfill_t86.py --batch-size 150`（延續第152輪批次大小）：**本批次乾淨在上限收工，未撞TWSE反爬蟲封鎖**，嘗試150天新完成149天（6天無交易/無資料，1天網路暫時性逾時留待下次自動重試），累積2720→2869/3305（82.3%→86.8%）· `is_holdout_consumed()`確認`False`，純資料回補不寫`TRIALS_LEDGER.md`；發現兩筆不屬於本輪的未commit新檔案（`.github/scripts/build_picks_ledger.py`／`data/picks_ledger.json`），依規則不觸碰 · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第155輪記錄
+
+---
 ## 第 154 輪 · 2026-08-28T01:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（第153輪正常結束）。依輪替選FUT（FUT 22:01第151輪最舊，TW 00:06第152輪、US 00:31第153輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。FUT軌唯一明確待辦（盤別效應第三批跳空構造/另立新因子家族，round104留下）本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列。**另發現`git status`有不屬於本輪的未commit修改**（`index.html`等，研判為另一互動session進行中的工作），依規則不觸碰 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第154輪記錄
 
 ---
