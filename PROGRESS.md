@@ -12,6 +12,54 @@
 
 ---
 
+## 2026-08-27（續3）— 收尾剩餘FinMind依賴：P0匯率/大盤sparkline、P1融資維持率排程、P1個股財報籌碼
+
+依 `STATUS.json` 列出的 `app_data_sources` 逐項收尾，四項依序完成：
+
+**1. P0 匯率**：新增 `.github/scripts/fetch_fx.py`（yfinance `TWD=X`），
+`data/fx.json` 取代 App 端的 FinMind `TaiwanExchangeRate` 呼叫。
+
+**2. P0 大盤指數sparkline**：`market_tw.json`/`market_us.json` 新增近20日
+收盤序列（TAIEX用`^TWII`交叉驗證跟MI_INDEX同日收盤一致；TPEx用既有
+`tpex_index`回應本來就有的歷史，沒多打；美股四大指數用yfinance）。今日頁/
+市場頁「大盤速覽」改用`spark()`畫走勢線，不再是純文字列。個股頁自選股的
+sparkline（任意自選股代碼）不在這次範圍內，仍是FinMind。
+
+**3. P1 融資維持率排程化**：新增 `update_margin_maintenance.py`，分子（逐股
+融資擔保品市值）改用TWSE官方 `MI_MARGN`+`STOCK_DAY_ALL`，取代原本卡在
+`C:\alpha\alpha-data\`（另一個獨立目錄）手動執行、會靜默過期的舊做法。分母
+（全市場融資金額）唯一保留FinMind依賴——查證過TWSE官方沒有對應的全市場
+金額端點，只有逐股張數，這裡是一天一次的全市場加總呼叫，不是逐股迴圈，
+風險遠低於之前。App診斷橫幅新增「超過3天未更新」偵測。
+
+**4. P1 個股頁財報/籌碼**：新增 `update_stock_financials.py`（TWSE
+`t187ap06_L_ci`綜合損益表+`t187ap07_L_ci`資產負債表，給EPS/毛利率/營益率/
+ROE），並讓 `fetch_market_tw.py`/`update_margin_maintenance.py` 順手從
+已經在打的T86/MI_MARGN多榨出逐股三大法人/融資融券，三者合力寫進新的
+`data/stock_detail.json`。**FCF維持誠實空缺**：查證TWSE swagger完整清單
+確認沒有現金流量表開放資料端點，這是永久性限制，畫面顯示「TWSE無此資料源」
+而不是留著FinMind呼叫假裝有替代來源。**範圍限制**：只涵蓋TWSE上市「一般業」
+（`t187ap06_L_ci`分類），上櫃股票、金融控股/證券/保險等特殊產業分類查不到，
+已記錄進`STATUS.json`的`known_limitations`。
+
+**過程中的兩個bug（自己寫的，本機測試時抓到並修正）**：
+1. T86逐股欄位比對用substring匹配時，「自營商買賣超股數」是「外資自營商
+   買賣超股數」的substring，撞到欄位取錯值（dealer_lots算成0）。
+2. 三大法人chip改讀新資料（已經是「張」）卻沿用舊的`zhang()`格式化函式
+   （預期輸入是原始股數、內部會再/1000），造成畫面數字比正確值小1000倍。
+
+兩者都在本機瀏覽器實測時發現（2330的自營商/外資數字不合理），修正後驗證：
+外資+5,204張／投信-521張／自營商+227張／合計+4,910張，融資餘額27,677張、
+估算維持率169.2%，財報毛利率67.0%/營益率59.3%，皆與原始API回應手算核對
+一致。
+
+`data/STATUS.json` 已重新產生（`generate_status_json.py` 補上 `fx.json`/
+`stock_detail.json` 的解析器），`app_data_sources`/`todo`/
+`known_limitations` 反映本輪異動。commit `f25c6cc`——這次 `market.yml` 的
+異動用新補的 workflow-scope PAT 直接 push 成功，不用再手動貼。
+
+---
+
 ## 2026-08-27（續2）— 新增 data/STATUS.json 給 Cowork 讀，解決「不知道的檔案=不存在」的誤判
 
 **背景**：Cowork 只能用完整路徑讀 raw 檔案，無法列目錄、無法讀 commit 紀錄，
