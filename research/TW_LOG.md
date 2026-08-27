@@ -745,3 +745,19 @@
 **這不是新的假說判定**：純資料回補，不寫入`TRIALS_LEDGER.md`（跟第125/128/131/134/140/143/146輪同款慣例）。
 
 **下一輪建議**：如果撿到TW軌，繼續判斷是否已有使用者回應`portfolio_multifactor_v2`的「下一步」選項(a)/(b)；沒有的話，T86覆蓋率（77.1%）持續逼近全範圍，可以再跑一批`backfill_t86.py --batch-size 200`。
+
+## 第 161 輪 · 2026-08-28T04:31+08:00 · TW · T86三大法人回補第29批（暫停單因子試驗規則生效中，屬允許的地基工作）
+
+**取鎖狀況**：本輪取鎖乾淨（`LOCK_ACQUIRED`，非stale），代表第160輪（FUT，跳過）正常結束。
+
+**判斷這輪要做什麼**：三軌時間戳TW最舊（第158輪03:18 < US第159輪03:31 < FUT第160輪04:01），依輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。`portfolio_multifactor_v2`「下一步」選項(a)全市場樣本重跑、(b)train-only嚴格樣本外仍留給使用者決定優先序，本輪不代為決定；股票宇宙回補（`backfill_universe.py`）覆蓋率確認仍是81.3%（2597/3196 done，早已過80%門檻，未再動），改延續T86回補地基工作（維持第152/155/158輪的批次大小150）。
+
+**做了什麼**：`python backfill_t86.py --batch-size 150`。開始前已快取3019/3305個工作日（91.3%）。
+
+**結果**：**本批次乾淨在上限收工，未撞TWSE反爬蟲封鎖**（無`TWSEBlockedError`）。嘗試150天，全部150天新完成（其中7天無交易/無資料，屬正常，非錯誤）。累積已快取3019→3169/3305（91.3%→95.9%）。
+
+**驗證**：`is_holdout_consumed()`確認為`False`。全程只呼叫`twse_t86_client.fetch_t86_day()`（既有模組，非holdout相關資料源）。零FinMind呼叫。`git status`（`alpha-app`目錄）確認除了這一輪要commit的log/state檔案外，還有兩筆**不屬於本輪、疑似其他互動session的殘留**：(1) `M data/price_history.json`（跟第158輪記錄的一致，推測其他互動session進行中）；(2) `?? research/backfill_final.log`（未追蹤、編碼疑似Big5造成console輸出亂碼，內容是2026-04-01起大量`TaiwanStockPrice`403 Forbidden錯誤，推測是某次手動/其他session執行`backfill_universe.py`留下、未清理的debris，跟本輪`backfill_t86.py`無關）——依規則本輪完全不觸碰這兩者，不加進本次commit，留給使用者或該互動session自行處理。
+
+**這不是新的假說判定**：純資料回補，不寫入`TRIALS_LEDGER.md`（跟第125/128/131/134/140/143/146/149/152/155/158輪同款慣例）。
+
+**下一輪建議**：如果撿到TW軌，繼續判斷是否已有使用者回應`portfolio_multifactor_v2`的「下一步」選項(a)/(b)；沒有的話，T86覆蓋率（95.9%）已逼近全範圍（剩136個工作日待處理），可以再跑一批`backfill_t86.py --batch-size 150`（或視當時額度狀況調整批次大小），有機會在接下來1–2批內達到100%。達到100%後，T86這項地基工作應轉為背景待辦，TW軌下一輪需要重新盤點「已知的立即可做工作」清單（見`TW_MARATHON_STATE.md`第85行附近），因為既有清單第14項列的「主線1情境條件式檢驗」本質上屬於系統化掃因子家族，在暫停規則解除前不能做——屆時如果宇宙/T86兩項地基都已達門檻、portfolio選項(a)(b)使用者仍未回應，TW軌可能會連續多輪陷入「沒有允許的工作可做」的狀態，比照US/FUT軌現行做法改為整輪跳過。
