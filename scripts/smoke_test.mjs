@@ -25,7 +25,10 @@
 //    使用者回報「按鈕按不動」的真實樣態，只看uncaught error測不出來）。
 // 9.【2026-08-28新增】模擬手機已裝舊版Service Worker快取（塞一份竄改過的假
 //    index.html進CacheStorage），驗證network-first邏輯不會被舊快取覆蓋。
-// 10. 整個測試過程（含8/9新增的重整/reload操作）結束後仍無累積的uncaught error。
+// 11.【2026-08-28新增】pull-to-refresh下拉手勢（合成touch事件）會觸發實際
+//     網路請求。
+// 12. 整個測試過程（含8/9/11新增的重整/reload/手勢操作）結束後仍無累積的
+//     uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -296,10 +299,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   }
   record("9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋", staleCachePassed, staleCacheResult);
 
+  // 11.【2026-08-28新增】pull-to-refresh手勢——用合成的touch事件模擬「在#main
+  // 頂端往下拉超過門檻再放開」，確認會觸發實際網路請求（跟check 8驗證按鈕
+  // 用同一個requestLog機制）。
+  let ptrError = "";
+  try {
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(400);
+    const before = requestLog.length;
+    await page.evaluate(() => {
+      const main = document.getElementById("main");
+      main.scrollTo(0, 0);
+      const fire = (type, y) => {
+        const t = new Touch({ identifier: 0, target: main, clientX: 100, clientY: y });
+        main.dispatchEvent(new TouchEvent(type, { touches: type === "touchend" ? [] : [t], changedTouches: [t], bubbles: true, cancelable: true }));
+      };
+      fire("touchstart", 50);
+      fire("touchmove", 200); // 下拉150px，超過PTR_THRESHOLD(64*0.5換算後的門檻)
+      fire("touchend", 200);
+    });
+    await page.waitForTimeout(900);
+    const after = requestLog.length;
+    if (after <= before) ptrError = "下拉手勢後900ms內沒有觸發任何新的網路請求";
+  } catch (e) {
+    ptrError = `執行時發生例外：${e.message || e}`;
+  }
+  record("11. pull-to-refresh下拉手勢會觸發實際網路請求", ptrError === "", ptrError);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("10. 整個測試過程（含所有互動操作，含8/9新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

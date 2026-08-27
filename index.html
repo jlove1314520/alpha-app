@@ -382,6 +382,10 @@
     <div id="error-log-list" style="padding:0 0 8px;white-space:pre-wrap;word-break:break-all"></div>
   </details>
 
+  <!-- 2026-08-28新增（使用者要求的pull-to-refresh，跟refreshTap()按鈕是
+       同一個任務的另一半）：下拉指示器，預設隱藏，只在#main下拉時顯示。 -->
+  <div id="ptr-indicator" style="position:absolute;left:50%;top:0;transform:translate(-50%,-100%);z-index:5;font-size:11px;color:var(--ink-3);padding:6px 12px;transition:transform .15s;pointer-events:none">↓ 下拉重新整理</div>
+
   <main id="main">
 
   <!-- ════════ 1. 今日 ════════ -->
@@ -1115,7 +1119,9 @@
   // 一律記進 recordGlobalError()，讓診斷橫幅看得到，不是單純console.warn完就消失。
   function _safeSync(label,fn){try{fn()}catch(e){console.warn('['+label+']',e);recordGlobalError(label,e)}}
   function _safeAsync(label,fn){Promise.resolve().then(fn).catch(e=>{console.warn('['+label+']',e);recordGlobalError(label,e)})}
+  let CURRENT_TAB='home'; // 2026-08-28新增，供pull-to-refresh判斷目前在哪一頁該重整什麼
   function go(name){
+    CURRENT_TAB=name;
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(scrs[name]).classList.add('active');
     document.querySelectorAll('#nav button[data-scr]').forEach(b=>b.classList.toggle('on', b.dataset.scr===name));
@@ -2388,6 +2394,49 @@
       el.textContent=orig;el.style.pointerEvents='';
     }
   }
+  // 2026-08-28新增：下拉重新整理（pull-to-refresh）。只有#main捲到最頂端
+  // （scrollTop===0）時才開始追蹤下拉距離，避免跟頁面內本身的上下捲動互相
+  // 干擾；每個分頁對應到自己的重整動作，跟按鈕(refreshTap)共用同一套邏輯。
+  const PTR_TAB_ACTIONS={
+    home:()=>{fmClearCache();return hydrateHome()},
+    market:()=>{fmClearCache();return hydrateMarket()},
+    picks:()=>{fmClearCache();return hydratePicks(true)},
+  };
+  const PTR_THRESHOLD=64;
+  function setupPullToRefresh(){
+    const mainEl=document.getElementById('main'),indEl=document.getElementById('ptr-indicator');
+    if(!mainEl||!indEl)return;
+    let startY=null,pulling=false,triggered=false;
+    mainEl.addEventListener('touchstart',e=>{
+      if(mainEl.scrollTop>0){startY=null;return}
+      startY=e.touches[0].clientY;pulling=true;triggered=false;
+    },{passive:true});
+    mainEl.addEventListener('touchmove',e=>{
+      if(!pulling||startY===null)return;
+      const dy=e.touches[0].clientY-startY;
+      if(dy<=0){indEl.style.transform='translate(-50%,-100%)';return}
+      const dist=Math.min(dy*0.5,PTR_THRESHOLD*1.4);
+      indEl.style.transform=`translate(-50%, ${dist-40}px)`;
+      indEl.textContent=dist>=PTR_THRESHOLD?'↑ 放開重新整理':'↓ 下拉重新整理';
+      triggered=dist>=PTR_THRESHOLD;
+    },{passive:true});
+    mainEl.addEventListener('touchend',async()=>{
+      if(!pulling)return;
+      pulling=false;
+      if(triggered){
+        const action=PTR_TAB_ACTIONS[CURRENT_TAB];
+        indEl.textContent='更新中…';indEl.style.transform='translate(-50%, 24px)';
+        if(action){
+          try{await action();toast('已更新')}
+          catch(e){console.warn('[pullToRefresh]',e);recordGlobalError('pullToRefresh',e);toast('更新失敗，請重試')}
+        }else{
+          toast('此頁無需下拉更新');
+        }
+      }
+      indEl.style.transform='translate(-50%,-100%)';
+      startY=null;triggered=false;
+    });
+  }
   function toast(msg){
     const t=document.getElementById('toast');
     t.textContent=msg; t.classList.add('show');
@@ -2818,7 +2867,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.0011';
+  const APP_VERSION='2026-08-28.0014';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -2934,6 +2983,7 @@
   _safeSync('renderFxNote',renderFxNote);
   _safeAsync('fetchFx',()=>fetchFx().then(()=>{renderCcyToggles();renderCcyAmounts()}));
   _safeSync('setupRevChartTouch',setupRevChartTouch);
+  _safeSync('setupPullToRefresh',setupPullToRefresh);
   _safeAsync('hydrateHome',hydrateHome);
   // 2026-08-28新增：版本號要在頁面一載入就顯示在首頁底部（不是只有進了設定頁
   // 才觸發loadAboutVersions()那次），使用者才能不用點進設定就一眼確認手機是
