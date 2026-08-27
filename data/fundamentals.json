@@ -1,10 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-08-27T07:38:11.838121+08:00",
+    "generated_at": "2026-08-27T08:58:46.401545+08:00",
     "snapshot_note": "起始種子是 2026-08-27 手動執行 build_fundamentals_json.py 的一次性快照（讀研究端FinMind歷史parquet快取整理，涵蓋TWSE+TPEx），此後由這支update_fundamentals_daily.py 排程改用TWSE官方openapi累積更新——月營收/PER/PBR/殖利率每次只更新TWSE官方端點回傳的「最新一期」，同年月覆蓋、新年月append且只保留近8個月。TPEx上櫃股票的月營收/PER官方端點無對應公開資料，維持沿用手動快照的舊值，不會被這支腳本更新。",
-    "ratios_updated_count": 1082,
-    "revenue_updated_count": 1085,
-    "errors": []
+    "ratios_updated_count": 0,
+    "revenue_updated_count": 0,
+    "errors": [
+      "ratios: HTTPSConnectionPool(host='openapi.twse.com.tw', port=443): Max retries exceeded with url: /v1/exchangeReport/BWIBBU_ALL (Caused by ConnectTimeoutError(<HTTPSConnection(host='openapi.twse.com.tw', port=443) at 0x7fdf3a1073b0>, 'Connection to openapi.twse.com.tw timed out. (connect timeout=30)'))",
+      "revenue: HTTPSConnectionPool(host='openapi.twse.com.tw', port=443): Max retries exceeded with url: /v1/opendata/t187ap05_L (Caused by ConnectTimeoutError(<HTTPSConnection(host='openapi.twse.com.tw', port=443) at 0x7fdf39c54e00>, 'Connection to openapi.twse.com.tw timed out. (connect timeout=30)'))"
+    ]
   },
   "fundamentals": {
     "1101": {
