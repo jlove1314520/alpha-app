@@ -75,6 +75,14 @@ def make_score_v2_signal_fn(industry_map: dict[str, str], start_date: str, top_n
     def signal_fn(price_data: dict[str, pd.DataFrame], as_of: str, market_df: pd.DataFrame) -> dict[str, float]:
         cs = compute_scores_v2(as_of, price_data, industry_map, start_date)
         cs = eligible_for_ranking_v2(cs)
+        # 2026-08-28修正（sanity check親自抓到的真bug）：compute_scores_v2()在
+        # 完全沒有任何股票有資料的as_of日期會回傳零欄位的空DataFrame（跟
+        # adjust.py/build_price_history.py之前修過的同一種「空DataFrame沒有
+        # 欄位」陷阱），這裡沒擋住的話cs.sort_values("total_score",...)會
+        # KeyError整支腳本中止。改成這種情況誠實回傳空dict（=這個再平衡日
+        # 沒有任何新持倉建議，不是硬湊一個假結果）。
+        if cs.empty or "total_score" not in cs.columns:
+            return {}
         top = cs.sort_values("total_score", ascending=False).head(top_n)
         return dict(zip(top.index, top["total_score"]))
     return signal_fn
