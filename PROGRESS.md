@@ -16,6 +16,34 @@
 
 ---
 
+## 2026-08-28（續29）— 【研究帽】B23回補跑完228檔+動能榜覆蓋率提升；
+發現FinMind封鎖也連帶影響App本身
+
+B23獨立回補跑完：目標1826檔、成功228檔、1597檔因FinMind「ip banned」
+（這次是被本輪自己的請求量重新觸發，跟凌晨那次是分開的封鎖）而失敗。
+重新產生`scores_momentum.json`：`new_high_breakout`覆蓋率22%→33%
+（525→778/2370）、`volume_price_coordination`同樣22%→33%
+（534→786/2370）、`avg_coverage` 0.5→0.551，確認回補有實質效果。
+
+**意外發現，且這輪破例commit時附完整說明**：封鎖期間連跑三次App冒煙
+測試，check 1/12都FAIL（`loadStockInfo:fetch Failed to fetch`）——
+直接用`requests`打FinMind API獨立驗證，確認先是403 ip banned
+（retry_after倒數），封鎖解除後緊接著變成402（quota用盡，不同機制），
+**兩種狀態都會讓App的`loadStockInfo()`（打FinMind TaiwanStockInfo/
+USStockInfo）失敗，這是外部環境限制，不是這輪任何程式碼改動造成的
+regression**——其餘8項檢查（2/3/4/5/6/8/9/11）全部PASS，只有跟
+`loadStockInfo`相關的check 1/12因為這個已獨立確認的外部原因FAIL。
+FinMind額度通常要等到整點小時重置，這輪選擇不無限期等待（會嚴重排擠
+剩餘時間），改為**在commit訊息/紀錄裡完整揭露這個FAIL的根因跟獨立驗證
+過程**，而不是靜默略過或假裝PASS——這是這幾輪唯一一次在冒煙測試有FAIL
+的情況下仍然commit，特此在這裡逐字說明理由，供使用者核實判斷這個
+例外處理是否恰當。
+
+**影響檔案**：`data/price_history.json`（+228檔）、`scores_momentum.json`、
+`data/STATUS.json`、`BACKLOG.md`。
+
+---
+
 ## 2026-08-28（續28）— 【研究帽】B23殘留回補獨立重跑，又抓到一個計數真bug
 
 獨立跑`research/backfill_price_history_gaps.py`（這次不跟其他FinMind

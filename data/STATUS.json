@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-28T03:29:32.620074+08:00",
-  "latest_commit": "b902678",
+  "updated_at": "2026-08-28T04:55:50.987362+08:00",
+  "latest_commit": "0e62a50",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -132,10 +132,10 @@
     },
     {
       "path": "scores_momentum.json",
-      "generated_at": "2026-08-28T01:36:25.881806+08:00",
+      "generated_at": "2026-08-28T04:55:35.429161+08:00",
       "records": 2370,
       "source": "research/generate_scores_momentum.py（GitHub Actions market.yml每日排程自動執行，題材動能榜，跟價值成長榜物理分離的獨立引擎，見weights_frozen_momentum.json）",
-      "detail": "engine_version=scoring-momentum-v1 universe_size=2370 avg_coverage=0.5 weights_hash=0ea99f55d5a4 coverage_collapse_warning=None backtest_status=尚未回測驗證",
+      "detail": "engine_version=scoring-momentum-v1 universe_size=2370 avg_coverage=0.551 weights_hash=0ea99f55d5a4 coverage_collapse_warning=None backtest_status=尚未回測驗證",
       "status": "ok"
     },
     {
