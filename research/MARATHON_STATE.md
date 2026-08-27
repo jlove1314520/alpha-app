@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 129 輪。最新一輪：第 129 輪 · 2026-08-27T09:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第126輪07:31），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應（`git log`確認`7b4fe7d`新增`data/STATUS.json`跟暫停規則無關），US軌無組合策略相關工作可做，round108/111遺留(a)(b)(c)三項本質仍是單因子鋪路，同round111/114/117/120/123/126判斷邏輯保守跳過。本輪未做任何實質工作。`is_holdout_consumed()`為`False`，未新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。詳見`REPORT.md`第129輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 130 輪。最新一輪：第 130 輪 · 2026-08-27T09:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳FUT最舊（第127輪08:01），正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應（`git log`確認`449e7ad`後只有自動報價流程commit），FUT軌唯一待辦（`fut_day_gap_continuation`高解析度重測）本質仍是單因子相關工作，同round109/112/115/118/121/124/127判斷邏輯保守跳過。本輪未做任何實質工作。`is_holdout_consumed()`為`False`，未新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。詳見`REPORT.md`第130輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+
+**上一則保留（第129輪，供對照）**：2026-08-27T09:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第126輪07:31），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應（`git log`確認`7b4fe7d`新增`data/STATUS.json`跟暫停規則無關），US軌無組合策略相關工作可做，round108/111遺留(a)(b)(c)三項本質仍是單因子鋪路，同round111/114/117/120/123/126判斷邏輯保守跳過。本輪未做任何實質工作。`is_holdout_consumed()`為`False`，未新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。詳見`REPORT.md`第129輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 **上一則保留（第126輪，供對照）**：2026-08-27T07:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第123輪06:01），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」且自第122輪以來無互動session介入，US軌無組合策略相關工作可做（規格書全屬TAIEX/TWSE台股樣本），round108/111遺留(a)(b)(c)三項本質仍是單因子鋪路，同round111/114/117/120/123判斷邏輯保守跳過，本輪未做任何實質工作。`is_holdout_consumed()`為`False`，詳見`REPORT.md`第126輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
