@@ -4,7 +4,7 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 132 輪。最新一輪：第 132 輪 · 2026-08-27T10:32+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第129輪09:01），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應，US軌依舊沒有組合策略相關工作可做（規格書全為TAIEX/TWSE專屬），round108/111遺留的1c地基工作本質仍是單因子鋪路，同round111/114/117/120/123/126/129判斷邏輯保守跳過整輪，不做任何實質工作。`is_holdout_consumed()`為`False`。工作目錄另有一份不屬於馬拉松的未commit修改（`.github/scripts/fetch_quotes_tw.py`，互動session的sparkline功能），本輪刻意不動、不納入commit。詳見`REPORT.md`第132輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 133 輪。最新一輪：第 133 輪 · 2026-08-27T11:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳FUT最舊（第130輪09:31），正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，132輪後有三筆互動session commit（`28e1120`/`56ac814`/`e9c09af`，sparkline/融資維持率標示/金融股bug修正）皆未觸及SPEC、跟解除暫停規則無關，FUT軌依舊沒有組合策略相關工作可做（規格書全為TAIEX/TWSE專屬），round104留下的盤別效應第三批待辦本質仍是單因子鋪路，同round109/112/115/118/121/124/127/130判斷邏輯保守跳過整輪，不做任何實質工作。`is_holdout_consumed()`為`False`。`git status`確認工作目錄乾淨，無殘留未commit修改。詳見`REPORT.md`第133輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
 **上一則保留（第129輪，供對照）**：2026-08-27T09:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳US最舊（第126輪07:31），正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應（`git log`確認`7b4fe7d`新增`data/STATUS.json`跟暫停規則無關），US軌無組合策略相關工作可做，round108/111遺留(a)(b)(c)三項本質仍是單因子鋪路，同round111/114/117/120/123/126判斷邏輯保守跳過。本輪未做任何實質工作。`is_holdout_consumed()`為`False`，未新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。詳見`REPORT.md`第129輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 

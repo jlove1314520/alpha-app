@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 133 輪 · 2026-08-27T11:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 10:22(第131輪)/US 10:33(第132輪，最新)/FUT 09:31(第130輪，最舊)，正常輪替選FUT，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，132輪後有三筆互動session commit（sparkline/融資維持率標示/金融股bug）皆未觸及SPEC，FUT軌依舊沒有組合策略相關工作可做，唯一待辦（盤別效應第三批跳空構造，round104留下）本質仍是單因子相關工作，同round109/112/115/118/121/124/127/130判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第133輪記錄
+
+---
 ## 第 132 輪 · 2026-08-27T10:32+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）；三軌時間戳TW 10:22(第131輪，最新)/US 09:01(第129輪，最舊)/FUT 09:31(第130輪)，正常輪替選US，複查`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，無新使用者回應（129輪後只有TW T86回補跟一般互動session的FinMind依賴收尾commit），US軌依舊沒有組合策略相關工作可做，round108/111遺留的1c地基工作本質仍是單因子鋪路，同round111/114/117/120/123/126/129判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第132輪記錄
 
 ---
