@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 167 輪 · 2026-08-28T07:33+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選TW（三軌時間戳TW 06:13第164輪最舊）· 判定：複查第164輪留下的三個解除條件（使用者回應portfolio_multifactor_v2下一步(a)/(b)、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停規則解除）皆未成立，TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）也都已達標，目前無已知允許的工作單位，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。見`TW_MARATHON_STATE.md`/`TW_LOG.md`第167輪記錄
+
 ## 第 166 輪 · 2026-08-28T07:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（第165輪US軌正常結束），依輪替選FUT（三軌時間戳FUT 05:31第163輪最舊）· 判定：複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則仍完全生效中；FUT軌無組合策略相關工作可做（規格書全繞TAIEX/TWSE），TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）也都已達標，目前三軌皆無已知允許的工作單位。本輪唯一實質動作是開工前補push第165輪遺留的1個commit（`0020a2a`），本輪本身未做任何新工作。`is_holdout_consumed()`確認`False`。見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第166輪記錄
 
 ## 第 165 輪 · 2026-08-28T06:32+08:00 · US（跳過，暫停規則生效中）· 取鎖時偵測到`LOCK_STALE`（上一輪疑似失敗，陳舊鎖檔被回收）· 判定：追查發現第164輪（TW軌T86回補）是撞到$5預算上限被安全機制中止（`git log`commit`24724e1`可證，非bug），已補commit其遺留的3個合法檔案（`REPORT.md`/`TW_LOG.md`/`TW_MARATHON_STATE.md`），並修正本檔全局計數器落差（163→165）。三軌時間戳：US 05:01（第162輪，最舊）/FUT 05:31（第163輪）/TW 06:13（第164輪，最新）——依輪替選US，`PORTFOLIO_STRATEGY_SPEC.md`複查仍「待使用者確認」，暫停規則仍完全生效中，US軌依舊沒有組合策略相關工作可做，保守跳過。`is_holdout_consumed()`確認`False`。見`US_MARATHON_STATE.md`/`US_LOG.md`第165輪記錄
