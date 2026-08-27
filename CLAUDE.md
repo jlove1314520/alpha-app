@@ -50,3 +50,29 @@
 - API 金鑰只放 GitHub Secrets，絕不寫進任何 commit 的檔案（本 repo 公開）
 - 研究紀律：PIT、survivorship-free、全成本、FDR 分軌、隨機對照組
 - holdout 未經使用者明確同意不得解鎖
+
+## 九、帽子規則（分工紀律，不建立 subagent 組織）
+
+**一、每輪工作開始時，明確聲明本輪戴哪頂帽子（擇一）：**
+維運（管線/STATUS/workflow）、開發（App功能/UI）、研究（因子/策略）、
+驗證（回測/對照組）、情報（新聞/社群/訊號）、法遵（稅務/法規）。
+**一輪只戴一頂，做完該帽子的產物才能換帽。**
+
+**二、帽子各有必交產物，做完必更新，沒產出就明寫「本輪無產出＋原因」：**
+- 維運 → `data/STATUS.json`
+- 開發 → 冒煙測試結果
+- 研究 → SPEC 或因子（設計文件/因子程式碼）
+- 驗證 → `TRIALS_LEDGER`（回測/對照組結果紀錄）
+- 情報 → `signal_ledger`
+- 法遵 → `docs/compliance` 備忘錄
+
+**三、做與判分離（鐵律）**：
+同一輪不得既開發策略又宣告其有效；策略有效性只能由「驗證帽」輪次以
+隨機對照＋FDR＋全成本判定，且結果交由 Cowork 稽核。
+
+**四、越權禁止**：戴 A 帽時不改 B 帽擁有的檔案。檔案歸屬：
+- `data/STATUS.json`、`.github/workflows/` = 維運
+- `index.html`、`scripts/smoke_test.*` = 開發
+- `research/`（因子/策略/回測程式碼與紀錄）= 研究與驗證
+- `signal_ledger`（`data/signal_ledger.json`）= 情報
+- `compliance/` = 法遵
