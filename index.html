@@ -2512,10 +2512,11 @@
   // research/generate_scores_momentum.py檔頭說明：因子/權重各自版本控管）。
   const MOMENTUM_FACTOR_LABELS={
     relative_strength:'相對強度/價格動能', volume_breakout:'量能突破',
+    new_high_breakout:'創新高', volume_price_coordination:'量價配合度',
     chip_concentration:'籌碼集中', group_breadth:'族群齊漲度',
     sector_capital_flow:'產業資金流入',
   };
-  const MOMENTUM_FACTOR_ORDER=['relative_strength','volume_breakout','chip_concentration','group_breadth','sector_capital_flow'];
+  const MOMENTUM_FACTOR_ORDER=['relative_strength','volume_breakout','new_high_breakout','volume_price_coordination','chip_concentration','group_breadth','sector_capital_flow'];
   // 未來性濾網(a)類因子集合（見research/generate_scores_future.py檔頭說明）。
   const FUTURE_FACTOR_LABELS={
     institutional_buying_streak:'法人連續買超天數', institutional_ownership_pct:'買超佔股本比',
@@ -2670,7 +2671,7 @@
     const weightNoteEl=document.getElementById('picks-weight-note');
     if(weightNoteEl){
       const noteByEngine={
-        'scoring-momentum-v1':'題材動能榜：因子聚焦股價領先財報的動能訊號，財報只當地雷排除用，估值不扣分 ｜ 相對強度已改用還原權息收盤價，除息事件涵蓋率隨每日累積逐步提高，剛上線這幾週可能還沒回溯到少數個股的最新事件 ｜ 非投資建議',
+        'scoring-momentum-v1':'題材動能榜：因子聚焦股價領先財報的動能訊號，財報只當地雷排除用，估值不扣分 ｜ 相對強度已改用還原權息收盤價，除息事件涵蓋率隨每日累積逐步提高，剛上線這幾週可能還沒回溯到少數個股的最新事件 ｜ ⚠ 創新高/量價配合度因子的門檻參數（1.3倍/2.5倍/0.6/0.7等）為經驗值，尚未經統計驗證 ｜ 非投資建議',
         'scoring-future-v1':'未來性濾網：因子聚焦法人籌碼行為+毛利率品質+產能利用率代理（(a)類，現在就能算的部分）｜ 非投資建議',
       };
       weightNoteEl.textContent=noteByEngine[meta.engine_version]
@@ -2867,7 +2868,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.0014';
+  const APP_VERSION='2026-08-28.0110';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

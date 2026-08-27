@@ -16,6 +16,63 @@
 
 ---
 
+## 2026-08-28（續22）— 【研究帽】B23：動能榜歷史深度+創新高+量價配合度因子，
+過程中抓到影響七成股票的日曆缺口真bug
+
+**歷史/量能深度延伸**：593檔候選宇宙股票深度不足60列。TWSE STOCK_DAY
+單股端點本輪實測被反爬蟲整批擋下（53檔全428），改用FinMind即時線上API
+（不經過本機parquet快取/holdout，見`research/backfill_price_history_gaps.py`
+docstring）補齊，成功177檔，撞到FinMind免費額度402後416檔待下次額度重置
+繼續（新腳本已可重跑）。
+
+**真bug（本機測試親自抓到）**：只看列數≥60不夠，列數夠不代表這些列連續
+——2337有90列卻是89列2024年舊資料+1列2026年新資料，中間20個月空白，用
+這種視窗算「創新高」因子算出+375%的荒謬數字。**全市場實測：2,270檔裡
+1,649檔（超過七成）都有這種日曆缺口**，代表既有的`relative_strength`
+因子可能一直對多數股票算出不可靠數字，只是沒人發現。已修正：新增
+`_has_calendar_gap()`守門（日曆天跨度>列數3倍即判定不連續），套用到全部
+四個依賴價量視窗的因子，資料不可靠就誠實回傳None不硬算。修正後
+`new_high_breakout`/`volume_price_coordination`覆蓋率誠實降到約22%（原本
+未修正前是虛高但錯誤的79%）。用修正後判定重新統計，實際需回補股票是
+1,850檔，比原本593檔的估計大很多，已記錄進BACKLOG下一輪繼續。
+
+**新增兩個因子**：`new_high_breakout`（創新高，用adj_close避免除息跳空
+誤判）+`volume_price_coordination`（量價配合度，使用者原話a-f規則全部
+實作：吸收比/量能梯度/回檔量縮/價漲量縮背離/高檔爆量不漲/派發訊號，含
+警語標籤）。創新高+量價配合度聯動：假突破打3折。
+`weights_frozen_momentum.json`重新分配7個因子權重，相關的價格/量能動能
+群組(relative_strength+volume_breakout+new_high_breakout+
+volume_price_coordination)合計0.48，未超過使用者要求的55%上限。頁面已
+標「參數未驗證」。
+
+冒煙測試實際輸出（2026-08-28 01:08，`node scripts/smoke_test.mjs`，第一次
+check1 FAIL是網路瞬斷讀FinMind失敗，重跑確認暫時性非regression，第二次
+全部通過）：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 8. 重新整理按鈕點擊後都會觸發實際網路請求
+PASS - 9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋
+PASS - 11. pull-to-refresh下拉手勢會觸發實際網路請求
+PASS - 12. 整個測試過程結束後仍無累積的uncaught error
+=== 冒煙測試結果：全部通過 ===
+```
+
+**影響檔案**：`research/generate_scores_momentum.py`（新增2因子+
+`_has_calendar_gap()`守門）、`research/backfill_price_history_gaps.py`
+（新檔，一次性回補）、`research/weights_frozen_momentum.json`（權重
+重分配）、`index.html`（因子標籤/disclaimer）、`data/price_history.json`、
+`scores_momentum.json`、`BACKLOG.md`。
+
+**下一步**：繼續B23殘留（1,850檔待回補，等FinMind額度重置）；之後進入
+B24（PIT回測+翻倍率+前瞻選股台帳）。
+
+---
+
 ## 2026-08-28（續21）— 【開發帽，P0】時鐘/重整按鈕根治 + 夜間自主循環啟動
 
 **背景**：使用者深夜追加兩個「已宣稱修復但手機實測仍壞」的問題（時鐘第五次

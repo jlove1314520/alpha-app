@@ -78,10 +78,13 @@ TW_TZ = timezone(timedelta(hours=8))
 FACTOR_LABELS = {
     "relative_strength": "相對強度/價格動能",
     "volume_breakout": "量能突破",
+    "new_high_breakout": "創新高",
+    "volume_price_coordination": "量價配合度",
     "chip_concentration": "籌碼集中",
     "group_breadth": "族群齊漲度",
     "sector_capital_flow": "產業資金流入",
 }
+NEW_HIGH_WINDOW = 60  # "近60日內價格創階段高"，使用者原話
 VOL_AVG_WINDOW = 20
 SECTOR_FLOW_RECENT_DAYS = 5
 SECTOR_FLOW_PRIOR_DAYS = 15
@@ -107,6 +110,26 @@ def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _has_calendar_gap(dates: list[str], max_ratio: float = 3.0) -> bool:
+    """2026-08-28新增（真bug，B23實測親自抓到）：`len(price_rows)>=N`只保證
+    「有N筆資料」，不保證這N筆是「最近N個連續交易日」——實測發現1,649/2,270檔
+    （超過七成！）的price_history.json在90列的視窗裡藏著巨大的日曆天缺口
+    （典型樣態：research端FinMind快取停在2024-12-31、後面緊接daily排程當天
+    新增的1筆2026年資料，中間20個月完全空白）。用這種「表面上60列，其實
+    只有2個真實交易日+58列一年多前舊資料」的視窗算報酬率/創新高，會算出
+    荒謬的數字（實測2337算出「創新高+375%」，其實是拿2024年20元的股價跟
+    2026年125元的股價相減，兩個時間點根本不相鄰）。這裡用「日曆天跨度是否
+    遠超過trading-day筆數合理應該對應的天數」當守門：60個交易日正常對應
+    約84個日曆天（含週末），這裡用3倍(約180天/半年)當寬鬆容忍度（涵蓋國定
+    假日/連假），超過就判定為「這個視窗裡混進了不連續的舊資料」，回傳True
+    讓呼叫端拒絕使用這個視窗（回傳None，不硬算一個可能是假訊號的數字）。"""
+    if len(dates) < 2:
+        return False
+    d0 = datetime.strptime(dates[0], "%Y-%m-%d")
+    d1 = datetime.strptime(dates[-1], "%Y-%m-%d")
+    return (d1 - d0).days > len(dates) * max_ratio
+
+
 def _relative_strength(price_rows: list[dict], taiex_20d: list[float], taiex_60d: list[float]) -> float | None:
     """2026-08-27修正（真bug，本機測試親自抓到：0/2374檔算出這個因子）：原本
     要求`len(taiex_20d)>=21`才計算「20日報酬率」，但`market_tw.json`的
@@ -124,12 +147,17 @@ def _relative_strength(price_rows: list[dict], taiex_20d: list[float], taiex_60d
     # 跳空下跌會被這個因子誤判成真實下跌，除息季會系統性扭曲排名。舊資料
     # 若還沒有adj_close欄位（尚未套用過還原）就退回close，不會比修正前更差。
     closes = [r.get("adj_close", r["close"]) for r in rows]
+    dates = [r["date"] for r in rows]
     parts = []
-    if len(closes) >= 20 and len(taiex_20d) >= 20 and closes[-20] and taiex_20d[-20]:
+    # 2026-08-28新增：日曆缺口守門（見_has_calendar_gap()說明），20/60日兩腳
+    # 各自獨立檢查各自用到的那段視窗，其中一腳有缺口就只跳過那一腳，不用
+    # 整個因子都放棄（例如20日視窗是連續的、60日視窗混進舊資料，20日腳
+    # 仍然可用）。
+    if len(closes) >= 20 and len(taiex_20d) >= 20 and closes[-20] and taiex_20d[-20] and not _has_calendar_gap(dates[-20:]):
         stock_ret20 = closes[-1] / closes[-20] - 1
         mkt_ret20 = taiex_20d[-1] / taiex_20d[-20] - 1
         parts.append(stock_ret20 - mkt_ret20)
-    if len(closes) >= 60 and len(taiex_60d) >= 60 and closes[-60] and taiex_60d[-60]:
+    if len(closes) >= 60 and len(taiex_60d) >= 60 and closes[-60] and taiex_60d[-60] and not _has_calendar_gap(dates[-60:]):
         stock_ret60 = closes[-1] / closes[-60] - 1
         mkt_ret60 = taiex_60d[-1] / taiex_60d[-60] - 1
         parts.append(stock_ret60 - mkt_ret60)
@@ -143,12 +171,167 @@ def _volume_breakout(price_rows: list[dict]) -> float | None:
     if len(rows) < 6:
         return None
     rows = sorted(rows, key=lambda r: r["date"])
+    # 2026-08-28新增：日曆缺口守門（見_has_calendar_gap()），避免均量被摻進
+    # 舊資料稀釋/扭曲。
+    if _has_calendar_gap([r["date"] for r in rows[-(VOL_AVG_WINDOW + 1):]]):
+        return None
     today = rows[-1]["turnover"]
     window = rows[-(VOL_AVG_WINDOW + 1):-1] or rows[:-1]
     avg = sum(r["turnover"] for r in window) / len(window)
     if not avg:
         return None
     return today / avg
+
+
+def _new_high_breakout(price_rows: list[dict]) -> float | None:
+    """創新高因子（2026-08-28新增，B23第二步，使用者原話：「創新高＋量價配合度
+    高→兩者相乘（最強組合）；創新高但量價配合度低→創新高因子分數打折，不讓
+    假突破拿高分」——這裡先算「創新高強度」本身，跟量價配合度的聯動在
+    build_rows()合併時處理，見該處說明）。今日adj_close相對「今日以前」
+    NEW_HIGH_WINDOW日內最高adj_close的比值減1：正值＝今天真的創了新高，數值
+    是突破幅度；負值＝還沒創新高，數值是離前波高點的距離（百分比，越接近0
+    代表越接近前高）。用adj_close（還原權息收盤價）而非原始close，避免除息
+    跳空被誤判成假的「創新低」。"""
+    rows = sorted(price_rows, key=lambda r: r["date"])
+    rows = [r for r in rows if r.get("adj_close", r.get("close")) is not None]
+    if len(rows) < NEW_HIGH_WINDOW + 1:
+        return None
+    window_rows = rows[-(NEW_HIGH_WINDOW + 1):]
+    if _has_calendar_gap([r["date"] for r in window_rows]):
+        return None  # 見_has_calendar_gap()：這個視窗混進了不連續的舊資料，不硬算
+    closes = [r.get("adj_close", r.get("close")) for r in window_rows]
+    prior_high = max(closes[:-1])
+    if not prior_high:
+        return None
+    return closes[-1] / prior_high - 1
+
+
+def _volume_price_coordination(price_rows: list[dict]) -> tuple[float | None, list[str]]:
+    """量價配合度因子（0-10分尺度，2026-08-28新增，B23第三步）。使用者原話
+    逐條實作，門檻全部是經驗值、未經統計驗證（B24回測時要做±30%參數敏感度
+    掃描，見weights_frozen_momentum.json的note）。
+
+    **簡化揭露（誠實聲明，不是嚴謹技術分析）**：「突破段」/「回檔段」/
+    「上漲段」/「前波高點」這幾個概念真正的技術分析需要更嚴謹的轉折點偵測
+    演算法，這裡用簡化的操作型定義：
+    - 突破段＝近60日收盤序列裡，從最後一天往前數，收盤價連續在60日高點97%
+      以上的天數；突破前20日＝緊接在突破段開始前的20個交易日。
+    - 回檔段＝從最後一天往前數，收盤價連續較前一日下跌的天數；上漲段＝
+      緊接在回檔段開始前、收盤價連續不創新低的天數。
+    回傳(raw_score, flags)——raw_score越高代表量價配合度越健康（會再經
+    _pct_score()百分位化），flags是警訊字串list（可能為空，合併進該股的
+    flags欄位顯示在UI）。資料不足20天就誠實回傳(None, [])，不是硬湊一個
+    可能不可靠的數字。"""
+    rows = sorted(price_rows, key=lambda r: r["date"])
+    rows = [r for r in rows if r.get("adj_close", r.get("close")) is not None and r.get("volume") is not None]
+    if len(rows) < 25:
+        return None, []
+    if _has_calendar_gap([r["date"] for r in rows]):
+        return None, []  # 見_has_calendar_gap()：這批資料混進了不連續的舊資料，不硬算
+    closes = [r.get("adj_close", r.get("close")) for r in rows]
+    vols = [r["volume"] for r in rows]
+    changes = [None] + [closes[i] - closes[i - 1] for i in range(1, len(closes))]
+
+    score = 0.0
+    flags: list[str] = []
+
+    # (a) 吸收比：近20日「上漲日均量÷下跌日均量」>1.3加分
+    n = min(20, len(closes) - 1)
+    idx0 = len(closes) - n
+    up_vols = [vols[i] for i in range(idx0, len(closes)) if changes[i] and changes[i] > 0]
+    down_vols = [vols[i] for i in range(idx0, len(closes)) if changes[i] and changes[i] <= 0]
+    if up_vols and down_vols:
+        avg_down = sum(down_vols) / len(down_vols)
+        if avg_down and (sum(up_vols) / len(up_vols)) / avg_down > 1.3:
+            score += 2.5
+
+    # 60日高點 + 突破段判定（供b/d使用）
+    window60 = closes[-60:] if len(closes) >= 60 else closes
+    high60 = max(window60)
+    near_high = [c >= high60 * 0.97 for c in window60] if high60 else [False] * len(window60)
+    breakout_len = 0
+    for flag in reversed(near_high):
+        if flag:
+            breakout_len += 1
+        else:
+            break
+    breakout_len = max(breakout_len, 1)
+    b_start = len(closes) - breakout_len
+    breakout_vols = vols[b_start:]
+    pre_start = max(0, b_start - 20)
+    pre_breakout_vols = vols[pre_start:b_start]
+
+    # (b) 量能梯度：突破段均量÷突破前20日均量，1.5~3倍為健康區
+    if breakout_vols and pre_breakout_vols:
+        avg_pre = sum(pre_breakout_vols) / len(pre_breakout_vols)
+        if avg_pre:
+            gradient = (sum(breakout_vols) / len(breakout_vols)) / avg_pre
+            if 1.5 <= gradient <= 3.0:
+                score += 2.5
+
+    # 回檔段/上漲段判定（供c使用）：從尾端往前數連續下跌天數＝回檔段，
+    # 緊接其前的連續（不下跌）天數＝上漲段
+    pullback_len = 0
+    for i in range(len(closes) - 1, 0, -1):
+        if closes[i] < closes[i - 1]:
+            pullback_len += 1
+        else:
+            break
+    upmove_len = 0
+    j = len(closes) - 1 - pullback_len
+    while j > 0 and closes[j] >= closes[j - 1]:
+        upmove_len += 1
+        j -= 1
+
+    # (c) 回檔量縮：回檔段均量÷上漲段均量<0.6（洗盤特徵）加分
+    if pullback_len > 0 and upmove_len > 0:
+        pullback_vols = vols[len(vols) - pullback_len:]
+        upmove_vols = vols[len(vols) - pullback_len - upmove_len: len(vols) - pullback_len]
+        if upmove_vols:
+            avg_upmove = sum(upmove_vols) / len(upmove_vols)
+            if avg_upmove and (sum(pullback_vols) / len(pullback_vols)) / avg_upmove < 0.6:
+                score += 2.5
+
+    # (d) 價漲量縮背離：目前在60日高點附近，但今天量能<前波高點量能的0.7倍
+    if near_high[-1] and len(window60) > breakout_len:
+        pre_section = window60[:len(window60) - breakout_len]
+        if pre_section:
+            prior_peak_val = max(pre_section)
+            offset = len(closes) - len(window60)
+            try:
+                prior_peak_idx = offset + window60.index(prior_peak_val)
+                prior_peak_vol = vols[prior_peak_idx]
+                if prior_peak_vol and vols[-1] < prior_peak_vol * 0.7:
+                    score -= 2.5
+                    flags.append("量價背離，續航存疑")
+            except (ValueError, IndexError):
+                pass
+
+    # (e) 高檔爆量不漲：單日量>20日均量2.5倍且當日漲幅<1%或收黑，且股價位於
+    # 近60日高檔區(>80百分位) → 重扣＋標警語
+    if len(vols) >= 21:
+        avg20 = sum(vols[-21:-1]) / 20
+        today_change_pct = (closes[-1] / closes[-2] - 1) if closes[-2] else None
+        pct_rank_60 = None
+        if len(window60) >= 2 and (max(window60) - min(window60)) > 0:
+            pct_rank_60 = (closes[-1] - min(window60)) / (max(window60) - min(window60))
+        if avg20 and today_change_pct is not None and pct_rank_60 is not None:
+            if vols[-1] > avg20 * 2.5 and today_change_pct < 0.01 and pct_rank_60 > 0.80:
+                score -= 4.0
+                flags.append("⚠️ 高檔爆量滯漲，出貨嫌疑")
+
+    # (f) 派發訊號：近10日下跌日均量>上漲日均量1.3倍 → 扣分＋標警語
+    n10 = min(10, len(closes) - 1)
+    idx10 = len(closes) - n10
+    up_vols10 = [vols[i] for i in range(idx10, len(closes)) if changes[i] and changes[i] > 0]
+    down_vols10 = [vols[i] for i in range(idx10, len(closes)) if changes[i] and changes[i] <= 0]
+    if up_vols10 and down_vols10:
+        avg_up10 = sum(up_vols10) / len(up_vols10)
+        if avg_up10 and (sum(down_vols10) / len(down_vols10)) > avg_up10 * 1.3:
+            score -= 2.0
+            flags.append("下跌放量")
+
+    return score, flags
 
 
 def _chip_concentration(institutional: dict | None) -> float | None:
@@ -277,6 +460,15 @@ def build_rows() -> pd.DataFrame:
 
         rel_strength = _relative_strength(price_rows, taiex_20d, taiex_60d)
         vol_breakout = _volume_breakout(price_rows)
+        new_high = _new_high_breakout(price_rows)
+        vp_raw, vp_flags = _volume_price_coordination(price_rows)
+        # 2026-08-28新增（使用者原話，逐字照抄）：「創新高但量價配合度低（無量
+        # 創高/高檔爆量）→創新高因子的分數打折，不讓假突破拿高分——寧可漏掉，
+        # 不要騙自己」。只在「真的創了新高(new_high>0)且量價配合度數字為負
+        # (代表d/e/f扣分規則觸發、量能配合不健康)」才打折；資料不足
+        # (vp_raw is None)時不處理，不對缺資料的股票做無根據的懲罰。
+        if new_high is not None and new_high > 0 and vp_raw is not None and vp_raw < 0:
+            new_high = new_high * 0.3
         chip_conc = _chip_concentration(sd.get("institutional"))
         group_breadth = group_breadth_by_industry.get(industry) if industry else None
         sector_flow = sector_flow_trend.get(industry) if industry else None
@@ -294,11 +486,14 @@ def build_rows() -> pd.DataFrame:
             "stock_id": code,
             "raw_relative_strength": rel_strength,
             "raw_volume_breakout": vol_breakout,
+            "raw_new_high_breakout": new_high,
+            "raw_volume_price_coordination": vp_raw,
             "raw_chip_concentration": chip_conc,
             "raw_group_breadth": group_breadth,
             "raw_sector_capital_flow": sector_flow,
             "liquidity_20d": liquidity_20d,
             "financial_risk_flag": financial_risk,
+            "vp_flags": vp_flags,
         })
 
     return pd.DataFrame(rows).set_index("stock_id")
@@ -312,12 +507,14 @@ def compute_scores_momentum(weights: dict[str, float]) -> pd.DataFrame:
     raw_col = {
         "relative_strength": "raw_relative_strength",
         "volume_breakout": "raw_volume_breakout",
+        "new_high_breakout": "raw_new_high_breakout",
+        "volume_price_coordination": "raw_volume_price_coordination",
         "chip_concentration": "raw_chip_concentration",
         "group_breadth": "raw_group_breadth",
         "sector_capital_flow": "raw_sector_capital_flow",
     }
     for key, col in raw_col.items():
-        sc, pct = _pct_score(cs[col], higher_better=True)  # 五項全部「越高越好」，估值不扣分故不需方向反轉
+        sc, pct = _pct_score(cs[col], higher_better=True)  # 全部「越高越好」，估值不扣分故不需方向反轉
         cs[f"{key}_score"], cs[f"{key}_pct"] = sc, pct
 
     totals, covs = [], []
@@ -344,6 +541,8 @@ def _raw_dict(key: str, row: pd.Series) -> dict:
     col_map = {
         "relative_strength": "raw_relative_strength",
         "volume_breakout": "raw_volume_breakout",
+        "new_high_breakout": "raw_new_high_breakout",
+        "volume_price_coordination": "raw_volume_price_coordination",
         "chip_concentration": "raw_chip_concentration",
         "group_breadth": "raw_group_breadth",
         "sector_capital_flow": "raw_sector_capital_flow",
@@ -359,6 +558,12 @@ def _reason(key: str, row: pd.Series) -> str:
         return f"近20/60日報酬率相對大盤 {v*100:+.1f}%（平均），居全市場前 {front}%。"
     if key == "volume_breakout":
         return f"今日成交值為近20日均量的 {v:.2f} 倍，居全市場前 {front}%。"
+    if key == "new_high_breakout":
+        if v > 0:
+            return f"今日收盤價創近{NEW_HIGH_WINDOW}日新高，突破前波高點 {v*100:+.1f}%，居全市場前 {front}%。（參數未驗證）"
+        return f"今日收盤價距近{NEW_HIGH_WINDOW}日高點 {v*100:.1f}%，尚未創新高，居全市場前 {front}%。（參數未驗證）"
+    if key == "volume_price_coordination":
+        return f"量價配合度綜合指標 {v:+.1f}（吸收比/量能梯度/回檔量縮/背離扣分等規則加總），居全市場前 {front}%。（參數未驗證，見weights_frozen_momentum.json）"
     if key == "chip_concentration":
         return f"三大法人買超張數×連續買超天數加成指標 {v:+.0f}，居全市場前 {front}%。"
     if key == "group_breadth":
@@ -414,6 +619,12 @@ def main():
                 flags.append("流動性不足")
             if row.get("financial_risk_flag"):
                 flags.append("財報地雷警示（近期虧損或營收年減劇烈惡化）")
+            # 2026-08-28新增：量價配合度因子的(d)/(e)/(f)警訊規則，使用者要求
+            # 「直接反映在分數並顯示標籤」——分數面已經在build_rows()裡扣過，
+            # 這裡把對應的警語字串併入flags讓UI顯示。
+            for vf in (row.get("vp_flags") or []):
+                if vf not in flags:
+                    flags.append(vf)
             display_rank = row.get("display_rank")
             info = company_info.get(sid) or {}
             stocks.append({

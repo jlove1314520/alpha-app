@@ -1,14 +1,16 @@
 {
   "engine_version": "scoring-momentum-v1",
-  "frozen_at": "2026-08-27",
+  "frozen_at": "2026-08-28",
   "dev_period": null,
-  "note": "**這是初始設計權重，不是回測最佳化後的結果**——題材動能榜在使用者裁示下獨立於價值成長榜的weights_frozen.json版本控管，這份權重是專家判斷的起始值，用來讓引擎先能運作，之後BACKLOG.md的B16回測驗證完成前，任何一版分數都必須標示「尚未經過組合策略回測驗證，不代表能贏大盤」。",
+  "note": "**這是初始設計權重，不是回測最佳化後的結果**——題材動能榜在使用者裁示下獨立於價值成長榜的weights_frozen.json版本控管，這份權重是專家判斷的起始值，用來讓引擎先能運作，之後BACKLOG.md的B24回測驗證完成前，任何一版分數都必須標示「尚未經過組合策略回測驗證，不代表能贏大盤」。2026-08-28更新（B23）：新增new_high_breakout（創新高）+volume_price_coordination（量價配合度）兩個因子，並重新分配權重——使用者明確要求「量價因子＋創新高因子＋相對強度三者相關性高，合計權重不得超過動能榜55%，其餘留給籌碼/族群/資金流」，這裡把volume_breakout也一併算進這個相關群組（同屬價格/量能動能訊號），四者合計relative_strength(0.16)+volume_breakout(0.10)+new_high_breakout(0.10)+volume_price_coordination(0.12)=0.48，低於55%上限；chip_concentration(0.20)+group_breadth(0.14)+sector_capital_flow(0.18)=0.52拿剩下的多數。這兩個新因子用的所有門檻參數（1.3倍/2.5倍/0.6/0.7/80百分位等）都是經驗值、未經統計驗證，見generate_scores_momentum.py內對應函式註解，B24回測時要對這些門檻做±30%參數敏感度掃描。",
   "weights": {
-    "relative_strength": 0.24,
-    "volume_breakout": 0.20,
-    "chip_concentration": 0.22,
-    "group_breadth": 0.18,
-    "sector_capital_flow": 0.16
+    "relative_strength": 0.16,
+    "volume_breakout": 0.10,
+    "new_high_breakout": 0.10,
+    "volume_price_coordination": 0.12,
+    "chip_concentration": 0.20,
+    "group_breadth": 0.14,
+    "sector_capital_flow": 0.18
   },
-  "weights_sha256": "f3847bc1cb5fa379a2700ed73483589cd24742c5226c28bbda9a8c5972b35059"
+  "weights_sha256": "0ea99f55d5a41bd7a28b556cba5bd74c3f2c5baa7e9a10e55860e01ae2db8d0f"
 }
