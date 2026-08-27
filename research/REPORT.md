@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 157 輪 · 2026-08-28T02:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（第156輪正常結束）。依輪替選FUT（FUT 01:01第154輪最舊，TW 01:31第155輪、US 02:01第156輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。FUT軌round104留下的唯一明確待辦（盤別效應第三批跳空構造/另立新因子家族）本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列。另發現`git status`有不屬於本輪的未commit修改（`_tmp_backfill3.log`／`_tmp_pit_backtest.log`／`research/run_value_board_v2_pit_backtest.py`，研判為另一互動session的PIT回測工作），依規則不觸碰 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第157輪記錄
+
+---
 ## 第 156 輪 · 2026-08-28T02:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）。依輪替選US（US 00:31第153輪最舊，FUT 01:01第154輪、TW 01:31第155輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。`git log`確認自第153輪以來新增的commit（`f10b244`TW第155輪T86回補、`168a1e1`merge、`1982542`前瞻選股台帳picks_ledger.json、`d0999bb`第154輪FUT跳過、`efd7b6f`動能榜因子修正、`39888ae`自動報價更新）皆與解除暫停規則無關。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round108/111遺留的1c地基工作本質仍是單因子相關工作，同round111起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，`git status`本輪開始時確認工作目錄乾淨，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第156輪記錄
 
 ---
