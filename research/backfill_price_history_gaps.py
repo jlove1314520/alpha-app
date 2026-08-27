@@ -175,10 +175,20 @@ def main():
             if not rows:
                 failed += 1
                 continue
-            before_len = len(prices.get(code, []))
-            prices[code] = merge_backfill(prices.get(code), rows)
-            after_len = len(prices[code])
-            if after_len > before_len:
+            before = prices.get(code, [])
+            before_len = len(before)
+            # 2026-08-28修正（真bug，這輪親自抓到）：原本只比「列數是否增加」
+            # 判斷有沒有補到——但很多目標股票本來就已經在90列的cap，補齊
+            # 缺口後列數不會變多（還是90列），只是內容從「有巨大日曆缺口」
+            # 變成「真正連續」，這種情況原本被誤判成「無增益」，其實是這支
+            # 腳本最主要的價值所在。改成同時看列數增加「或」缺口狀態改善
+            # （修好了）才算真的有補到。
+            before_gap = _has_calendar_gap(sorted(r["date"] for r in before)) if before else True
+            prices[code] = merge_backfill(before, rows)
+            after = prices[code]
+            after_len = len(after)
+            after_gap = _has_calendar_gap(sorted(r["date"] for r in after)) if after else True
+            if after_len > before_len or (before_gap and not after_gap):
                 backfilled += 1
             else:
                 skipped_no_gain += 1
