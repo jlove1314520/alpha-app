@@ -694,3 +694,7 @@ US軌檢查有沒有組合策略相關工作可做：`PORTFOLIO_STRATEGY_SPEC.md
 ## 2026-08-27T10:32:00+08:00 — 馬拉松第132輪：跳過（暫停規則仍生效，無組合策略工作可做）
 
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 10:22（第131輪，最新）/US 09:01（第129輪，最舊）/FUT 09:31（第130輪）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log`確認自第129輪以來只有TW軌T86回補（`ce55cc3`）跟一次一般互動session的FinMind依賴收尾（`f25c6cc`/`5c30ae8`，匯率/sparkline/融資維持率/財報籌碼，跟組合策略暫停規則無關）介入，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，全部圍繞TAIEX/TWSE樣本，跟US軌無關），round108/111遺留的(a)(b)(c)三項地基工作本質上仍是為單一因子鋪路，同round111/114/117/120/123/126/129判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則log跟`US_MARATHON_STATE.md`附記、心跳。`is_holdout_consumed()`確認為`False`（本輪未打任何API），無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。附記：工作目錄另有一份不屬於馬拉松的未commit修改（`.github/scripts/fetch_quotes_tw.py`，看起來是互動session新增sparkline功能尚未commit），本輪刻意不動它、不納入本輪commit範圍，比照過往「TW軌互動session未commit變更不動」的先例。
+
+## 2026-08-27T20:32:00+08:00 — 馬拉松第150輪：跳過（暫停規則仍生效，無組合策略工作可做）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 19:31（第149輪，最新）/FUT 19:01（第148輪）/US 18:31（第147輪，最舊）——依輪替選US。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，全部圍繞TAIEX/TWSE樣本，跟US軌無關），round108/111遺留的(a)(b)(c)三項地基工作本質上仍是為單一因子鋪路，同round111/114/117/120/123/126/129/132/135/138/141/144/147判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則log跟`US_MARATHON_STATE.md`附記、心跳。`git status`本輪開始時確認工作目錄乾淨。`is_holdout_consumed()`確認為`False`（本輪未打任何API），無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。

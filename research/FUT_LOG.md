@@ -932,3 +932,13 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 沒有新增`TRIALS_LEDGER.md`列（沒有任何判定產生）。
 
 ---
+
+## 2026-08-27T22:01:00+08:00 — 馬拉松第151輪：跳過（暫停規則仍生效，無組合策略工作可做）＋收尾第150輪積壓commit
+
+**取鎖時偵測到`LOCK_STALE`**（pid 96956, 89.9分鐘沒更新，自動回收）。檢查`git status`發現確有四份未commit的修改（`REPORT.md`/`MARATHON_STATE.md`/`US_MARATHON_STATE.md`/`US_LOG.md`），逐一比對內容確認是第150輪（US軌，跳過判定）完整寫完的記錄，只是卡在commit這一步沒做完（研判是session額度/連線中斷，不是內容寫壞），**不重做，直接沿用並在本輪一併commit+push**。
+
+三軌時間戳：FUT 19:01（第148輪，最舊）、TW 19:31（第149輪）、US 20:32（第150輪，最新）——依輪替選FUT。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。FUT軌依舊沒有組合策略相關工作可做（規格書全部圍繞TAIEX/TWSE台股樣本，跟FUT軌無關），FUT軌唯一明確待辦（盤別效應第三批跳空構造/另立新因子家族，round104留下）本質仍是單因子相關工作，跟round109/112/115/118/121/124/127/130/133/136/139/142/145/148判斷邏輯一致，保守跳過。**本輪判斷是整輪跳過、不做任何實質工作**，只補這則log跟`FUT_MARATHON_STATE.md`附記、心跳，並收尾第150輪積壓的commit。
+
+`is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---

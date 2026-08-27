@@ -9,6 +9,12 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 151 輪 · 2026-08-27T22:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖時偵測到`LOCK_STALE`（pid 96956，89.9分鐘），研判上一輪（第150輪，US）session中途中斷來不及commit——但檢查確認第150輪四份記錄檔（`REPORT.md`/`MARATHON_STATE.md`/`US_MARATHON_STATE.md`/`US_LOG.md`）內容本身已完整寫好，本輪沿用不重做，一併收尾commit。依輪替選FUT（FUT 19:01第148輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」，FUT軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round109起判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列 · 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第151輪記錄
+
+---
+## 第 150 輪 · 2026-08-27T20:32+08:00 · US（跳過，暫停規則生效中）· 依輪替選US（US 18:31第147輪最舊），`PORTFOLIO_STRATEGY_SPEC.md`仍「狀態：待使用者確認」（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只有一個commit），US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），同round111/114/117/120/123/126/129/132/135/138/141/144/147判斷邏輯保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，無新`TRIALS_LEDGER.md`列；`git status`確認工作目錄乾淨 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第150輪記錄
+
+---
 ## 第 149 輪 · 2026-08-27T19:31+08:00 · TW · T86三大法人回補第25批（暫停規則生效中，屬允許的地基工作）· 取鎖乾淨（第148輪正常結束）· 依輪替選TW（TW 18:22第146輪最舊），暫停規則仍生效中，改做`backfill_t86.py --batch-size 200`：**本輪因代理端美金預算即將用盡，主動提前收工，未跑滿200天上限**（非撞TWSE封鎖，過程持續穩定新增檔案），累積2490→2547/3305（75.3%→77.1%）· `is_holdout_consumed()`確認`False`，純資料回補不寫`TRIALS_LEDGER.md`；發現`index.html`有不屬於本輪的未commit修改，依規則不觸碰、不加入本次commit · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第149輪記錄
 
 ---
