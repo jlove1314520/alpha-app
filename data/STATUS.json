@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-27T20:25:46.406996+08:00",
-  "latest_commit": "9912980",
+  "updated_at": "2026-08-27T20:50:25.026655+08:00",
+  "latest_commit": "0c993fd",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -60,10 +60,18 @@
     },
     {
       "path": "data/price_history.json",
-      "generated_at": "2026-08-27T15:40:30.492195+08:00",
+      "generated_at": "2026-08-27T20:42:41.932179+08:00",
       "records": 2823,
       "source": "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（官方開放資料，累積式寫回，免金鑰）",
       "detail": "平均每檔保留66.4個交易日（上限90天），未還原權息（見generate_scores_live.py已知限制）",
+      "status": "ok"
+    },
+    {
+      "path": "data/quotes_all_tw.json",
+      "generated_at": "2026-08-27T20:42:42.378293+08:00",
+      "records": 2823,
+      "source": "從data/price_history.json衍生的輕量快照（TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes）",
+      "detail": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。",
       "status": "ok"
     },
     {
@@ -92,7 +100,7 @@
     },
     {
       "path": "scores.json",
-      "generated_at": "2026-08-27T20:24:43.570390+08:00",
+      "generated_at": "2026-08-27T20:47:55.242599+08:00",
       "records": 341,
       "source": "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，JSON-only，不依賴parquet/FinMind）",
       "detail": "engine_version=scoring-live-json universe_size=2586 avg_coverage=0.597 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False",

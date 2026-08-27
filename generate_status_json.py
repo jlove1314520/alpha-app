@@ -42,6 +42,7 @@ STALE_HOURS = {
     "data/fx.json": 48,
     "data/stock_detail.json": 96,  # 財報一季才更新一次，但三大法人/融資融券是每日，用寬鬆門檻涵蓋兩者
     "data/price_history.json": 72,  # 每日累積式更新，跟fundamentals.json同等寬鬆門檻
+    "data/quotes_all_tw.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
 }
 
 
@@ -162,6 +163,21 @@ def describe_company_info(path: Path) -> dict:
     }
 
 
+def describe_quotes_all_tw(path: Path) -> dict:
+    """quotes_all_tw.json（2026-08-27新增，B4類股成分股清單用）——從
+    price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），
+    見update_price_history.py/build_price_history.py的snapshot邏輯。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    quotes = d.get("quotes", {})
+    return {
+        "generated_at": meta.get("generated_at"),
+        "records": len(quotes),
+        "source": "從data/price_history.json衍生的輕量快照（TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes）",
+        "detail": meta.get("note", ""),
+    }
+
+
 def describe_paper_trades(path: Path) -> dict:
     d = json.loads(path.read_text(encoding="utf-8"))
     return {
@@ -184,6 +200,7 @@ DESCRIBERS = {
     "stock_detail.json": describe_stock_detail,
     "price_history.json": describe_price_history,
     "company_info.json": describe_company_info,
+    "quotes_all_tw.json": describe_quotes_all_tw,
 }
 
 

@@ -310,7 +310,12 @@ def _raw_dict(key: str, row: pd.Series) -> dict:
     if key == "valuation_adj":
         return {"pe": _r(row["raw_pe"]), "eps_yoy": _r(row["raw_eps_yoy"]), "peg": _r(row["raw_peg"])}
     if key == "technical":
-        return {"ma60_breakout_x_volume_ratio": _r(row["raw_ma_breakout"])}
+        # 2026-08-27修正（B4冒煙測試check#6抓到真bug）：跟score_v2.py的_raw_dict()
+        # 用同一個key名（`ma60_breakout_x_volume_index`）——這是同一個公式算出的
+        # 同一個指標，原本這裡取了不同key名，導致index.html的renderReport()
+        # （寫死讀score_v2.py那個key名）在這條JSON-only路徑產生的scores.json上
+        # 讀到undefined，對undefined呼叫.toFixed()整個拋出unhandledrejection。
+        return {"ma60_breakout_x_volume_index": _r(row["raw_ma_breakout"])}
     return {}
 
 

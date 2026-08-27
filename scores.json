@@ -1,12 +1,12 @@
 {
   "meta": {
     "engine_version": "scoring-live-json",
-    "generated_at": "2026-08-27T20:24:43.570390+08:00",
+    "generated_at": "2026-08-27T20:47:55.242599+08:00",
     "data_asof": "2026-08-27",
     "market": "TW",
     "universe_size": 2586,
     "weights_hash": "4d1a7df9f8f5866856b2e054dd31a0e9834f0b61af4a91bd00c86033fc5e0738",
-    "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用，見generate_scores_live.py檔頭說明。",
+    "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json+data/company_info.json（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用，見generate_scores_live.py檔頭說明。",
     "disclaimer": "非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。這是JSON-only上線評分路徑，analyst/catalyst兩項全市場沒有資料源、technical用未還原權息的收盤價（除權息前後會失真）、revenue_momentum未做規模分層——已依coverage規則重新分配權重，不會把沒資料當成0分，細節見generate_scores_live.py檔頭的已知限制說明。",
     "coverage_collapse_warning": false,
     "prior_run_stock_count": 341
@@ -62,7 +62,7 @@
           "score": 10.0,
           "percentile": 1.0,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 7.6245
+            "ma60_breakout_x_volume_index": 7.6245
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +7.624（原始收盤價，未還原權息），居全市場前 1%。"
         }
@@ -103,7 +103,7 @@
           "score": 9.3,
           "percentile": 0.93,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.1543
+            "ma60_breakout_x_volume_index": 1.1543
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.154（原始收盤價，未還原權息），居全市場前 7%。"
         },
@@ -154,7 +154,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6162
+            "ma60_breakout_x_volume_index": 0.6162
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.616（原始收盤價，未還原權息），居全市場前 13%。"
         },
@@ -221,7 +221,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.9068
+            "ma60_breakout_x_volume_index": 0.9068
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.907（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -272,7 +272,7 @@
           "score": 8.2,
           "percentile": 0.82,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3398
+            "ma60_breakout_x_volume_index": 0.3398
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.340（原始收盤價，未還原權息），居全市場前 18%。"
         },
@@ -323,7 +323,7 @@
           "score": 7.3,
           "percentile": 0.73,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.125
+            "ma60_breakout_x_volume_index": 0.125
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.125（原始收盤價，未還原權息），居全市場前 27%。"
         },
@@ -374,7 +374,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8222
+            "ma60_breakout_x_volume_index": 0.8222
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.822（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -433,7 +433,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6264
+            "ma60_breakout_x_volume_index": 0.6264
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.626（原始收盤價，未還原權息），居全市場前 13%。"
         }
@@ -474,7 +474,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8409
+            "ma60_breakout_x_volume_index": 0.8409
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.841（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -525,7 +525,7 @@
           "score": 8.3,
           "percentile": 0.83,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.4219
+            "ma60_breakout_x_volume_index": 0.4219
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.422（原始收盤價，未還原權息），居全市場前 17%。"
         },
@@ -576,7 +576,7 @@
           "score": 8.6,
           "percentile": 0.86,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5405
+            "ma60_breakout_x_volume_index": 0.5405
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.541（原始收盤價，未還原權息），居全市場前 14%。"
         },
@@ -643,7 +643,7 @@
           "score": 9.5,
           "percentile": 0.95,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.606
+            "ma60_breakout_x_volume_index": 1.606
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.606（原始收盤價，未還原權息），居全市場前 5%。"
         },
@@ -694,7 +694,7 @@
           "score": 7.2,
           "percentile": 0.72,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.106
+            "ma60_breakout_x_volume_index": 0.106
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.106（原始收盤價，未還原權息），居全市場前 28%。"
         },
@@ -745,7 +745,7 @@
           "score": 8.8,
           "percentile": 0.88,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6633
+            "ma60_breakout_x_volume_index": 0.6633
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.663（原始收盤價，未還原權息），居全市場前 12%。"
         },
@@ -863,7 +863,7 @@
           "score": 6.2,
           "percentile": 0.62,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0157
+            "ma60_breakout_x_volume_index": 0.0157
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.016（原始收盤價，未還原權息），居全市場前 38%。"
         }
@@ -904,7 +904,7 @@
           "score": 9.3,
           "percentile": 0.93,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.1904
+            "ma60_breakout_x_volume_index": 1.1904
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.190（原始收盤價，未還原權息），居全市場前 7%。"
         },
@@ -963,7 +963,7 @@
           "score": 4.8,
           "percentile": 0.48,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0456
+            "ma60_breakout_x_volume_index": -0.0456
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.046（原始收盤價，未還原權息），居全市場前 52%。"
         }
@@ -1004,7 +1004,7 @@
           "score": 7.9,
           "percentile": 0.79,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2591
+            "ma60_breakout_x_volume_index": 0.2591
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.259（原始收盤價，未還原權息），居全市場前 21%。"
         },
@@ -1055,7 +1055,7 @@
           "score": 4.2,
           "percentile": 0.42,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0738
+            "ma60_breakout_x_volume_index": -0.0738
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.074（原始收盤價，未還原權息），居全市場前 58%。"
         },
@@ -1106,7 +1106,7 @@
           "score": 6.6,
           "percentile": 0.66,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0429
+            "ma60_breakout_x_volume_index": 0.0429
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.043（原始收盤價，未還原權息），居全市場前 34%。"
         },
@@ -1157,7 +1157,7 @@
           "score": 7.8,
           "percentile": 0.78,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2337
+            "ma60_breakout_x_volume_index": 0.2337
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.234（原始收盤價，未還原權息），居全市場前 22%。"
         },
@@ -1208,7 +1208,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1514
+            "ma60_breakout_x_volume_index": 0.1514
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.151（原始收盤價，未還原權息），居全市場前 26%。"
         },
@@ -1259,7 +1259,7 @@
           "score": 6.6,
           "percentile": 0.66,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0439
+            "ma60_breakout_x_volume_index": 0.0439
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.044（原始收盤價，未還原權息），居全市場前 34%。"
         },
@@ -1310,7 +1310,7 @@
           "score": 9.2,
           "percentile": 0.92,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.0364
+            "ma60_breakout_x_volume_index": 1.0364
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.036（原始收盤價，未還原權息），居全市場前 8%。"
         },
@@ -1361,7 +1361,7 @@
           "score": 9.8,
           "percentile": 0.98,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 3.4415
+            "ma60_breakout_x_volume_index": 3.4415
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +3.442（原始收盤價，未還原權息），居全市場前 2%。"
         },
@@ -1412,7 +1412,7 @@
           "score": 9.4,
           "percentile": 0.94,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.413
+            "ma60_breakout_x_volume_index": 1.413
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.413（原始收盤價，未還原權息），居全市場前 6%。"
         },
@@ -1463,7 +1463,7 @@
           "score": 7.7,
           "percentile": 0.77,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2193
+            "ma60_breakout_x_volume_index": 0.2193
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.219（原始收盤價，未還原權息），居全市場前 23%。"
         },
@@ -1514,7 +1514,7 @@
           "score": 7.3,
           "percentile": 0.73,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1268
+            "ma60_breakout_x_volume_index": 0.1268
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.127（原始收盤價，未還原權息），居全市場前 27%。"
         },
@@ -1565,7 +1565,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6353
+            "ma60_breakout_x_volume_index": 0.6353
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.635（原始收盤價，未還原權息），居全市場前 13%。"
         },
@@ -1616,7 +1616,7 @@
           "score": 6.4,
           "percentile": 0.64,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0222
+            "ma60_breakout_x_volume_index": 0.0222
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.022（原始收盤價，未還原權息），居全市場前 36%。"
         },
@@ -1718,7 +1718,7 @@
           "score": 0.2,
           "percentile": 0.02,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -1.0595
+            "ma60_breakout_x_volume_index": -1.0595
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -1.060（原始收盤價，未還原權息），居全市場前 98%。"
         },
@@ -1769,7 +1769,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.604
+            "ma60_breakout_x_volume_index": 0.604
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.604（原始收盤價，未還原權息），居全市場前 13%。"
         },
@@ -1820,7 +1820,7 @@
           "score": 7.1,
           "percentile": 0.71,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1015
+            "ma60_breakout_x_volume_index": 0.1015
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.101（原始收盤價，未還原權息），居全市場前 29%。"
         },
@@ -1871,7 +1871,7 @@
           "score": 6.9,
           "percentile": 0.69,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0758
+            "ma60_breakout_x_volume_index": 0.0758
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.076（原始收盤價，未還原權息），居全市場前 31%。"
         },
@@ -1922,7 +1922,7 @@
           "score": 8.9,
           "percentile": 0.89,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.7265
+            "ma60_breakout_x_volume_index": 0.7265
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.727（原始收盤價，未還原權息），居全市場前 11%。"
         },
@@ -1973,7 +1973,7 @@
           "score": 7.3,
           "percentile": 0.73,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.135
+            "ma60_breakout_x_volume_index": 0.135
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.135（原始收盤價，未還原權息），居全市場前 27%。"
         },
@@ -2024,7 +2024,7 @@
           "score": 1.9,
           "percentile": 0.19,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2659
+            "ma60_breakout_x_volume_index": -0.2659
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.266（原始收盤價，未還原權息），居全市場前 81%。"
         },
@@ -2075,7 +2075,7 @@
           "score": 8.2,
           "percentile": 0.82,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3358
+            "ma60_breakout_x_volume_index": 0.3358
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.336（原始收盤價，未還原權息），居全市場前 18%。"
         },
@@ -2126,7 +2126,7 @@
           "score": 8.5,
           "percentile": 0.85,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5214
+            "ma60_breakout_x_volume_index": 0.5214
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.521（原始收盤價，未還原權息），居全市場前 15%。"
         },
@@ -2177,7 +2177,7 @@
           "score": 5.5,
           "percentile": 0.55,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0091
+            "ma60_breakout_x_volume_index": -0.0091
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.009（原始收盤價，未還原權息），居全市場前 45%。"
         },
@@ -2228,7 +2228,7 @@
           "score": 9.9,
           "percentile": 0.99,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 4.7003
+            "ma60_breakout_x_volume_index": 4.7003
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +4.700（原始收盤價，未還原權息），居全市場前 1%。"
         },
@@ -2279,7 +2279,7 @@
           "score": 9.3,
           "percentile": 0.93,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.3059
+            "ma60_breakout_x_volume_index": 1.3059
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.306（原始收盤價，未還原權息），居全市場前 7%。"
         },
@@ -2330,7 +2330,7 @@
           "score": 6.5,
           "percentile": 0.65,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0308
+            "ma60_breakout_x_volume_index": 0.0308
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.031（原始收盤價，未還原權息），居全市場前 35%。"
         },
@@ -2389,7 +2389,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.308
+            "ma60_breakout_x_volume_index": 0.308
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.308（原始收盤價，未還原權息），居全市場前 19%。"
         },
@@ -2448,7 +2448,7 @@
           "score": 8.9,
           "percentile": 0.89,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.7817
+            "ma60_breakout_x_volume_index": 0.7817
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.782（原始收盤價，未還原權息），居全市場前 11%。"
         }
@@ -2497,7 +2497,7 @@
           "score": 0.2,
           "percentile": 0.02,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -1.0049
+            "ma60_breakout_x_volume_index": -1.0049
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -1.005（原始收盤價，未還原權息），居全市場前 98%。"
         }
@@ -2538,7 +2538,7 @@
           "score": 9.3,
           "percentile": 0.93,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.318
+            "ma60_breakout_x_volume_index": 1.318
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.318（原始收盤價，未還原權息），居全市場前 7%。"
         },
@@ -2597,7 +2597,7 @@
           "score": 6.9,
           "percentile": 0.69,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0729
+            "ma60_breakout_x_volume_index": 0.0729
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.073（原始收盤價，未還原權息），居全市場前 31%。"
         }
@@ -2646,7 +2646,7 @@
           "score": 7.2,
           "percentile": 0.72,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1148
+            "ma60_breakout_x_volume_index": 0.1148
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.115（原始收盤價，未還原權息），居全市場前 28%。"
         },
@@ -2697,7 +2697,7 @@
           "score": 9.8,
           "percentile": 0.98,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 3.9665
+            "ma60_breakout_x_volume_index": 3.9665
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +3.966（原始收盤價，未還原權息），居全市場前 2%。"
         },
@@ -2748,7 +2748,7 @@
           "score": 6.1,
           "percentile": 0.61,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0073
+            "ma60_breakout_x_volume_index": 0.0073
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.007（原始收盤價，未還原權息），居全市場前 39%。"
         },
@@ -2799,7 +2799,7 @@
           "score": 8.9,
           "percentile": 0.89,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.7721
+            "ma60_breakout_x_volume_index": 0.7721
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.772（原始收盤價，未還原權息），居全市場前 11%。"
         },
@@ -2857,7 +2857,7 @@
           "score": 6.7,
           "percentile": 0.67,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0456
+            "ma60_breakout_x_volume_index": 0.0456
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.046（原始收盤價，未還原權息），居全市場前 33%。"
         }
@@ -2898,7 +2898,7 @@
           "score": 8.2,
           "percentile": 0.82,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3831
+            "ma60_breakout_x_volume_index": 0.3831
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.383（原始收盤價，未還原權息），居全市場前 18%。"
         },
@@ -2949,7 +2949,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8838
+            "ma60_breakout_x_volume_index": 0.8838
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.884（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -3000,7 +3000,7 @@
           "score": 6.6,
           "percentile": 0.66,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0441
+            "ma60_breakout_x_volume_index": 0.0441
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.044（原始收盤價，未還原權息），居全市場前 34%。"
         },
@@ -3051,7 +3051,7 @@
           "score": 4.5,
           "percentile": 0.45,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0548
+            "ma60_breakout_x_volume_index": -0.0548
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.055（原始收盤價，未還原權息），居全市場前 55%。"
         },
@@ -3102,7 +3102,7 @@
           "score": 7.0,
           "percentile": 0.7,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.085
+            "ma60_breakout_x_volume_index": 0.085
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.085（原始收盤價，未還原權息），居全市場前 30%。"
         },
@@ -3153,7 +3153,7 @@
           "score": 7.9,
           "percentile": 0.79,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2518
+            "ma60_breakout_x_volume_index": 0.2518
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.252（原始收盤價，未還原權息），居全市場前 21%。"
         },
@@ -3212,7 +3212,7 @@
           "score": 6.6,
           "percentile": 0.66,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.045
+            "ma60_breakout_x_volume_index": 0.045
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.045（原始收盤價，未還原權息），居全市場前 34%。"
         }
@@ -3261,7 +3261,7 @@
           "score": 8.3,
           "percentile": 0.83,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3913
+            "ma60_breakout_x_volume_index": 0.3913
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.391（原始收盤價，未還原權息），居全市場前 17%。"
         }
@@ -3310,7 +3310,7 @@
           "score": 6.1,
           "percentile": 0.61,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0111
+            "ma60_breakout_x_volume_index": 0.0111
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.011（原始收盤價，未還原權息），居全市場前 39%。"
         },
@@ -3361,7 +3361,7 @@
           "score": 9.6,
           "percentile": 0.96,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 2.0236
+            "ma60_breakout_x_volume_index": 2.0236
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +2.024（原始收盤價，未還原權息），居全市場前 4%。"
         },
@@ -3420,7 +3420,7 @@
           "score": 4.9,
           "percentile": 0.49,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0407
+            "ma60_breakout_x_volume_index": -0.0407
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.041（原始收盤價，未還原權息），居全市場前 51%。"
         }
@@ -3469,7 +3469,7 @@
           "score": 9.1,
           "percentile": 0.91,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.9227
+            "ma60_breakout_x_volume_index": 0.9227
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.923（原始收盤價，未還原權息），居全市場前 9%。"
         },
@@ -3520,7 +3520,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8911
+            "ma60_breakout_x_volume_index": 0.8911
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.891（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -3571,7 +3571,7 @@
           "score": 3.7,
           "percentile": 0.37,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1049
+            "ma60_breakout_x_volume_index": -0.1049
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.105（原始收盤價，未還原權息），居全市場前 63%。"
         },
@@ -3622,7 +3622,7 @@
           "score": 7.9,
           "percentile": 0.79,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2538
+            "ma60_breakout_x_volume_index": 0.2538
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.254（原始收盤價，未還原權息），居全市場前 21%。"
         },
@@ -3681,7 +3681,7 @@
           "score": 4.8,
           "percentile": 0.48,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0433
+            "ma60_breakout_x_volume_index": -0.0433
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.043（原始收盤價，未還原權息），居全市場前 52%。"
         }
@@ -3722,7 +3722,7 @@
           "score": 9.4,
           "percentile": 0.94,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.526
+            "ma60_breakout_x_volume_index": 1.526
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.526（原始收盤價，未還原權息），居全市場前 6%。"
         },
@@ -3824,7 +3824,7 @@
           "score": 6.9,
           "percentile": 0.69,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0678
+            "ma60_breakout_x_volume_index": 0.0678
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.068（原始收盤價，未還原權息），居全市場前 31%。"
         },
@@ -3883,7 +3883,7 @@
           "score": 5.7,
           "percentile": 0.57,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0045
+            "ma60_breakout_x_volume_index": -0.0045
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.004（原始收盤價，未還原權息），居全市場前 43%。"
         }
@@ -3924,7 +3924,7 @@
           "score": 6.8,
           "percentile": 0.68,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.057
+            "ma60_breakout_x_volume_index": 0.057
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.057（原始收盤價，未還原權息），居全市場前 32%。"
         },
@@ -3975,7 +3975,7 @@
           "score": 7.2,
           "percentile": 0.72,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1022
+            "ma60_breakout_x_volume_index": 0.1022
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.102（原始收盤價，未還原權息），居全市場前 28%。"
         },
@@ -4026,7 +4026,7 @@
           "score": 1.5,
           "percentile": 0.15,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3163
+            "ma60_breakout_x_volume_index": -0.3163
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.316（原始收盤價，未還原權息），居全市場前 85%。"
         },
@@ -4085,7 +4085,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5946
+            "ma60_breakout_x_volume_index": 0.5946
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.595（原始收盤價，未還原權息），居全市場前 13%。"
         },
@@ -4144,7 +4144,7 @@
           "score": 5.3,
           "percentile": 0.53,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0209
+            "ma60_breakout_x_volume_index": -0.0209
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.021（原始收盤價，未還原權息），居全市場前 47%。"
         }
@@ -4185,7 +4185,7 @@
           "score": 1.7,
           "percentile": 0.17,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2821
+            "ma60_breakout_x_volume_index": -0.2821
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.282（原始收盤價，未還原權息），居全市場前 83%。"
         },
@@ -4244,7 +4244,7 @@
           "score": 7.0,
           "percentile": 0.7,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0829
+            "ma60_breakout_x_volume_index": 0.0829
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.083（原始收盤價，未還原權息），居全市場前 30%。"
         }
@@ -4293,7 +4293,7 @@
           "score": 5.8,
           "percentile": 0.58,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0005
+            "ma60_breakout_x_volume_index": 0.0005
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.001（原始收盤價，未還原權息），居全市場前 42%。"
         }
@@ -4342,7 +4342,7 @@
           "score": 4.4,
           "percentile": 0.44,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0634
+            "ma60_breakout_x_volume_index": -0.0634
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.063（原始收盤價，未還原權息），居全市場前 56%。"
         }
@@ -4383,7 +4383,7 @@
           "score": 4.2,
           "percentile": 0.42,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0709
+            "ma60_breakout_x_volume_index": -0.0709
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.071（原始收盤價，未還原權息），居全市場前 58%。"
         },
@@ -4434,7 +4434,7 @@
           "score": 1.7,
           "percentile": 0.17,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2804
+            "ma60_breakout_x_volume_index": -0.2804
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.280（原始收盤價，未還原權息），居全市場前 83%。"
         },
@@ -4485,7 +4485,7 @@
           "score": 6.0,
           "percentile": 0.6,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0067
+            "ma60_breakout_x_volume_index": 0.0067
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.007（原始收盤價，未還原權息），居全市場前 40%。"
         },
@@ -4536,7 +4536,7 @@
           "score": 9.8,
           "percentile": 0.98,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 4.0711
+            "ma60_breakout_x_volume_index": 4.0711
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +4.071（原始收盤價，未還原權息），居全市場前 2%。"
         },
@@ -4595,7 +4595,7 @@
           "score": 7.8,
           "percentile": 0.78,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.223
+            "ma60_breakout_x_volume_index": 0.223
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.223（原始收盤價，未還原權息），居全市場前 22%。"
         }
@@ -4652,7 +4652,7 @@
           "score": 7.2,
           "percentile": 0.72,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1028
+            "ma60_breakout_x_volume_index": 0.1028
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.103（原始收盤價，未還原權息），居全市場前 28%。"
         },
@@ -4703,7 +4703,7 @@
           "score": 3.7,
           "percentile": 0.37,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.103
+            "ma60_breakout_x_volume_index": -0.103
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.103（原始收盤價，未還原權息），居全市場前 63%。"
         },
@@ -4762,7 +4762,7 @@
           "score": 7.2,
           "percentile": 0.72,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1077
+            "ma60_breakout_x_volume_index": 0.1077
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.108（原始收盤價，未還原權息），居全市場前 28%。"
         }
@@ -4803,7 +4803,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3121
+            "ma60_breakout_x_volume_index": 0.3121
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.312（原始收盤價，未還原權息），居全市場前 19%。"
         },
@@ -4854,7 +4854,7 @@
           "score": 9.8,
           "percentile": 0.98,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 3.294
+            "ma60_breakout_x_volume_index": 3.294
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +3.294（原始收盤價，未還原權息），居全市場前 2%。"
         },
@@ -4905,7 +4905,7 @@
           "score": 8.5,
           "percentile": 0.85,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5174
+            "ma60_breakout_x_volume_index": 0.5174
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.517（原始收盤價，未還原權息），居全市場前 15%。"
         },
@@ -4956,7 +4956,7 @@
           "score": 3.0,
           "percentile": 0.3,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1471
+            "ma60_breakout_x_volume_index": -0.1471
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.147（原始收盤價，未還原權息），居全市場前 70%。"
         },
@@ -5007,7 +5007,7 @@
           "score": 8.2,
           "percentile": 0.82,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.358
+            "ma60_breakout_x_volume_index": 0.358
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.358（原始收盤價，未還原權息），居全市場前 18%。"
         },
@@ -5058,7 +5058,7 @@
           "score": 6.9,
           "percentile": 0.69,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0667
+            "ma60_breakout_x_volume_index": 0.0667
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.067（原始收盤價，未還原權息），居全市場前 31%。"
         },
@@ -5109,7 +5109,7 @@
           "score": 7.6,
           "percentile": 0.76,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1812
+            "ma60_breakout_x_volume_index": 0.1812
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.181（原始收盤價，未還原權息），居全市場前 24%。"
         },
@@ -5160,7 +5160,7 @@
           "score": 5.9,
           "percentile": 0.59,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0039
+            "ma60_breakout_x_volume_index": 0.0039
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.004（原始收盤價，未還原權息），居全市場前 41%。"
         },
@@ -5211,7 +5211,7 @@
           "score": 8.6,
           "percentile": 0.86,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5648
+            "ma60_breakout_x_volume_index": 0.5648
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.565（原始收盤價，未還原權息），居全市場前 14%。"
         },
@@ -5270,7 +5270,7 @@
           "score": 7.6,
           "percentile": 0.76,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.195
+            "ma60_breakout_x_volume_index": 0.195
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.195（原始收盤價，未還原權息），居全市場前 24%。"
         },
@@ -5337,7 +5337,7 @@
           "score": 0.6,
           "percentile": 0.06,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.5556
+            "ma60_breakout_x_volume_index": -0.5556
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.556（原始收盤價，未還原權息），居全市場前 94%。"
         }
@@ -5488,7 +5488,7 @@
           "score": 9.6,
           "percentile": 0.96,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 2.0291
+            "ma60_breakout_x_volume_index": 2.0291
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +2.029（原始收盤價，未還原權息），居全市場前 4%。"
         },
@@ -5539,7 +5539,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.313
+            "ma60_breakout_x_volume_index": 0.313
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.313（原始收盤價，未還原權息），居全市場前 19%。"
         },
@@ -5590,7 +5590,7 @@
           "score": 9.8,
           "percentile": 0.98,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 3.546
+            "ma60_breakout_x_volume_index": 3.546
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +3.546（原始收盤價，未還原權息），居全市場前 2%。"
         },
@@ -5641,7 +5641,7 @@
           "score": 6.2,
           "percentile": 0.62,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0153
+            "ma60_breakout_x_volume_index": 0.0153
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.015（原始收盤價，未還原權息），居全市場前 38%。"
         },
@@ -5692,7 +5692,7 @@
           "score": 4.6,
           "percentile": 0.46,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0518
+            "ma60_breakout_x_volume_index": -0.0518
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.052（原始收盤價，未還原權息），居全市場前 54%。"
         },
@@ -5743,7 +5743,7 @@
           "score": 8.0,
           "percentile": 0.8,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2914
+            "ma60_breakout_x_volume_index": 0.2914
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.291（原始收盤價，未還原權息），居全市場前 20%。"
         },
@@ -5802,7 +5802,7 @@
           "score": 9.1,
           "percentile": 0.91,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.9637
+            "ma60_breakout_x_volume_index": 0.9637
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.964（原始收盤價，未還原權息），居全市場前 9%。"
         }
@@ -5851,7 +5851,7 @@
           "score": 7.6,
           "percentile": 0.76,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1851
+            "ma60_breakout_x_volume_index": 0.1851
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.185（原始收盤價，未還原權息），居全市場前 24%。"
         },
@@ -5902,7 +5902,7 @@
           "score": 8.0,
           "percentile": 0.8,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2722
+            "ma60_breakout_x_volume_index": 0.2722
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.272（原始收盤價，未還原權息），居全市場前 20%。"
         },
@@ -5961,7 +5961,7 @@
           "score": 7.9,
           "percentile": 0.79,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2448
+            "ma60_breakout_x_volume_index": 0.2448
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.245（原始收盤價，未還原權息），居全市場前 21%。"
         }
@@ -6010,7 +6010,7 @@
           "score": 8.6,
           "percentile": 0.86,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5608
+            "ma60_breakout_x_volume_index": 0.5608
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.561（原始收盤價，未還原權息），居全市場前 14%。"
         },
@@ -6061,7 +6061,7 @@
           "score": 0.6,
           "percentile": 0.06,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.5337
+            "ma60_breakout_x_volume_index": -0.5337
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.534（原始收盤價，未還原權息），居全市場前 94%。"
         },
@@ -6112,7 +6112,7 @@
           "score": 2.1,
           "percentile": 0.21,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2342
+            "ma60_breakout_x_volume_index": -0.2342
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.234（原始收盤價，未還原權息），居全市場前 79%。"
         },
@@ -6171,7 +6171,7 @@
           "score": 3.6,
           "percentile": 0.36,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1082
+            "ma60_breakout_x_volume_index": -0.1082
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.108（原始收盤價，未還原權息），居全市場前 64%。"
         },
@@ -6230,7 +6230,7 @@
           "score": 6.1,
           "percentile": 0.61,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0103
+            "ma60_breakout_x_volume_index": 0.0103
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.010（原始收盤價，未還原權息），居全市場前 39%。"
         }
@@ -6271,7 +6271,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8636
+            "ma60_breakout_x_volume_index": 0.8636
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.864（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -6322,7 +6322,7 @@
           "score": 2.7,
           "percentile": 0.27,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1821
+            "ma60_breakout_x_volume_index": -0.1821
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.182（原始收盤價，未還原權息），居全市場前 73%。"
         },
@@ -6373,7 +6373,7 @@
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1438
+            "ma60_breakout_x_volume_index": -0.1438
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.144（原始收盤價，未還原權息），居全市場前 69%。"
         },
@@ -6424,7 +6424,7 @@
           "score": 6.3,
           "percentile": 0.63,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0208
+            "ma60_breakout_x_volume_index": 0.0208
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.021（原始收盤價，未還原權息），居全市場前 37%。"
         },
@@ -6475,7 +6475,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1395
+            "ma60_breakout_x_volume_index": 0.1395
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.139（原始收盤價，未還原權息），居全市場前 26%。"
         },
@@ -6526,7 +6526,7 @@
           "score": 1.8,
           "percentile": 0.18,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2736
+            "ma60_breakout_x_volume_index": -0.2736
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.274（原始收盤價，未還原權息），居全市場前 82%。"
         },
@@ -6585,7 +6585,7 @@
           "score": 4.2,
           "percentile": 0.42,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0724
+            "ma60_breakout_x_volume_index": -0.0724
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.072（原始收盤價，未還原權息），居全市場前 58%。"
         },
@@ -6636,7 +6636,7 @@
           "score": 6.5,
           "percentile": 0.65,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0331
+            "ma60_breakout_x_volume_index": 0.0331
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.033（原始收盤價，未還原權息），居全市場前 35%。"
         },
@@ -6687,7 +6687,7 @@
           "score": 2.0,
           "percentile": 0.2,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2455
+            "ma60_breakout_x_volume_index": -0.2455
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.245（原始收盤價，未還原權息），居全市場前 80%。"
         },
@@ -6738,7 +6738,7 @@
           "score": 5.7,
           "percentile": 0.57,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0056
+            "ma60_breakout_x_volume_index": -0.0056
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.006（原始收盤價，未還原權息），居全市場前 43%。"
         },
@@ -6789,7 +6789,7 @@
           "score": 3.5,
           "percentile": 0.35,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.118
+            "ma60_breakout_x_volume_index": -0.118
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.118（原始收盤價，未還原權息），居全市場前 65%。"
         },
@@ -6840,7 +6840,7 @@
           "score": 3.7,
           "percentile": 0.37,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1014
+            "ma60_breakout_x_volume_index": -0.1014
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.101（原始收盤價，未還原權息），居全市場前 63%。"
         },
@@ -6899,7 +6899,7 @@
           "score": 5.6,
           "percentile": 0.56,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.008
+            "ma60_breakout_x_volume_index": -0.008
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.008（原始收盤價，未還原權息），居全市場前 44%。"
         }
@@ -6948,7 +6948,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0259
+            "ma60_breakout_x_volume_index": -0.0259
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.026（原始收盤價，未還原權息），居全市場前 48%。"
         }
@@ -6997,7 +6997,7 @@
           "score": 6.3,
           "percentile": 0.63,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0199
+            "ma60_breakout_x_volume_index": 0.0199
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.020（原始收盤價，未還原權息），居全市場前 37%。"
         }
@@ -7038,7 +7038,7 @@
           "score": 8.9,
           "percentile": 0.89,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.7293
+            "ma60_breakout_x_volume_index": 0.7293
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.729（原始收盤價，未還原權息），居全市場前 11%。"
         },
@@ -7097,7 +7097,7 @@
           "score": 7.1,
           "percentile": 0.71,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1017
+            "ma60_breakout_x_volume_index": 0.1017
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.102（原始收盤價，未還原權息），居全市場前 29%。"
         }
@@ -7146,7 +7146,7 @@
           "score": 7.5,
           "percentile": 0.75,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1689
+            "ma60_breakout_x_volume_index": 0.1689
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.169（原始收盤價，未還原權息），居全市場前 25%。"
         },
@@ -7197,7 +7197,7 @@
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1389
+            "ma60_breakout_x_volume_index": -0.1389
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.139（原始收盤價，未還原權息），居全市場前 69%。"
         },
@@ -7248,7 +7248,7 @@
           "score": 2.9,
           "percentile": 0.29,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1623
+            "ma60_breakout_x_volume_index": -0.1623
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.162（原始收盤價，未還原權息），居全市場前 71%。"
         },
@@ -7299,7 +7299,7 @@
           "score": 10.0,
           "percentile": 1.0,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 8.3851
+            "ma60_breakout_x_volume_index": 8.3851
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +8.385（原始收盤價，未還原權息），居全市場前 1%。"
         },
@@ -7358,7 +7358,7 @@
           "score": 7.0,
           "percentile": 0.7,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0897
+            "ma60_breakout_x_volume_index": 0.0897
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.090（原始收盤價，未還原權息），居全市場前 30%。"
         }
@@ -7399,7 +7399,7 @@
           "score": 8.6,
           "percentile": 0.86,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5416
+            "ma60_breakout_x_volume_index": 0.5416
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.542（原始收盤價，未還原權息），居全市場前 14%。"
         },
@@ -7458,7 +7458,7 @@
           "score": 4.9,
           "percentile": 0.49,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.039
+            "ma60_breakout_x_volume_index": -0.039
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.039（原始收盤價，未還原權息），居全市場前 51%。"
         }
@@ -7499,7 +7499,7 @@
           "score": 5.8,
           "percentile": 0.58,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.001
+            "ma60_breakout_x_volume_index": 0.001
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.001（原始收盤價，未還原權息），居全市場前 42%。"
         },
@@ -7550,7 +7550,7 @@
           "score": 1.3,
           "percentile": 0.13,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3465
+            "ma60_breakout_x_volume_index": -0.3465
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.346（原始收盤價，未還原權息），居全市場前 87%。"
         },
@@ -7601,7 +7601,7 @@
           "score": 9.5,
           "percentile": 0.95,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.7944
+            "ma60_breakout_x_volume_index": 1.7944
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.794（原始收盤價，未還原權息），居全市場前 5%。"
         },
@@ -7652,7 +7652,7 @@
           "score": 8.8,
           "percentile": 0.88,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6771
+            "ma60_breakout_x_volume_index": 0.6771
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.677（原始收盤價，未還原權息），居全市場前 12%。"
         },
@@ -7711,7 +7711,7 @@
           "score": 6.7,
           "percentile": 0.67,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0457
+            "ma60_breakout_x_volume_index": 0.0457
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.046（原始收盤價，未還原權息），居全市場前 33%。"
         }
@@ -7752,7 +7752,7 @@
           "score": 6.8,
           "percentile": 0.68,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0648
+            "ma60_breakout_x_volume_index": 0.0648
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.065（原始收盤價，未還原權息），居全市場前 32%。"
         },
@@ -7811,7 +7811,7 @@
           "score": 5.6,
           "percentile": 0.56,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0077
+            "ma60_breakout_x_volume_index": -0.0077
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.008（原始收盤價，未還原權息），居全市場前 44%。"
         },
@@ -7862,7 +7862,7 @@
           "score": 1.1,
           "percentile": 0.11,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3849
+            "ma60_breakout_x_volume_index": -0.3849
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.385（原始收盤價，未還原權息），居全市場前 89%。"
         },
@@ -7921,7 +7921,7 @@
           "score": 2.5,
           "percentile": 0.25,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1941
+            "ma60_breakout_x_volume_index": -0.1941
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.194（原始收盤價，未還原權息），居全市場前 75%。"
         },
@@ -7980,7 +7980,7 @@
           "score": 7.5,
           "percentile": 0.75,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1718
+            "ma60_breakout_x_volume_index": 0.1718
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.172（原始收盤價，未還原權息），居全市場前 25%。"
         }
@@ -8021,7 +8021,7 @@
           "score": 5.1,
           "percentile": 0.51,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0306
+            "ma60_breakout_x_volume_index": -0.0306
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.031（原始收盤價，未還原權息），居全市場前 49%。"
         },
@@ -8072,7 +8072,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0239
+            "ma60_breakout_x_volume_index": -0.0239
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.024（原始收盤價，未還原權息），居全市場前 48%。"
         },
@@ -8131,7 +8131,7 @@
           "score": 1.7,
           "percentile": 0.17,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.29
+            "ma60_breakout_x_volume_index": -0.29
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.290（原始收盤價，未還原權息），居全市場前 83%。"
         },
@@ -8182,7 +8182,7 @@
           "score": 3.7,
           "percentile": 0.37,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1021
+            "ma60_breakout_x_volume_index": -0.1021
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.102（原始收盤價，未還原權息），居全市場前 63%。"
         },
@@ -8241,7 +8241,7 @@
           "score": 7.7,
           "percentile": 0.77,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2117
+            "ma60_breakout_x_volume_index": 0.2117
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.212（原始收盤價，未還原權息），居全市場前 23%。"
         }
@@ -8290,7 +8290,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.319
+            "ma60_breakout_x_volume_index": 0.319
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.319（原始收盤價，未還原權息），居全市場前 19%。"
         }
@@ -8331,7 +8331,7 @@
           "score": 2.6,
           "percentile": 0.26,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1838
+            "ma60_breakout_x_volume_index": -0.1838
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.184（原始收盤價，未還原權息），居全市場前 74%。"
         },
@@ -8390,7 +8390,7 @@
           "score": 4.7,
           "percentile": 0.47,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0497
+            "ma60_breakout_x_volume_index": -0.0497
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.050（原始收盤價，未還原權息），居全市場前 53%。"
         }
@@ -8431,7 +8431,7 @@
           "score": 8.4,
           "percentile": 0.84,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.4782
+            "ma60_breakout_x_volume_index": 0.4782
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.478（原始收盤價，未還原權息），居全市場前 16%。"
         },
@@ -8482,7 +8482,7 @@
           "score": 7.1,
           "percentile": 0.71,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0977
+            "ma60_breakout_x_volume_index": 0.0977
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.098（原始收盤價，未還原權息），居全市場前 29%。"
         },
@@ -8533,7 +8533,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1359
+            "ma60_breakout_x_volume_index": 0.1359
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.136（原始收盤價，未還原權息），居全市場前 26%。"
         },
@@ -8584,7 +8584,7 @@
           "score": 9.7,
           "percentile": 0.97,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 2.598
+            "ma60_breakout_x_volume_index": 2.598
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +2.598（原始收盤價，未還原權息），居全市場前 3%。"
         },
@@ -8643,7 +8643,7 @@
           "score": 2.7,
           "percentile": 0.27,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1751
+            "ma60_breakout_x_volume_index": -0.1751
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.175（原始收盤價，未還原權息），居全市場前 73%。"
         },
@@ -8694,7 +8694,7 @@
           "score": 7.9,
           "percentile": 0.79,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2417
+            "ma60_breakout_x_volume_index": 0.2417
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.242（原始收盤價，未還原權息），居全市場前 21%。"
         },
@@ -8753,7 +8753,7 @@
           "score": 7.1,
           "percentile": 0.71,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1014
+            "ma60_breakout_x_volume_index": 0.1014
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.101（原始收盤價，未還原權息），居全市場前 29%。"
         }
@@ -8794,7 +8794,7 @@
           "score": 6.3,
           "percentile": 0.63,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0215
+            "ma60_breakout_x_volume_index": 0.0215
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.022（原始收盤價，未還原權息），居全市場前 37%。"
         },
@@ -8845,7 +8845,7 @@
           "score": 9.7,
           "percentile": 0.97,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 3.1382
+            "ma60_breakout_x_volume_index": 3.1382
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +3.138（原始收盤價，未還原權息），居全市場前 3%。"
         },
@@ -8896,7 +8896,7 @@
           "score": 1.7,
           "percentile": 0.17,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2794
+            "ma60_breakout_x_volume_index": -0.2794
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.279（原始收盤價，未還原權息），居全市場前 83%。"
         },
@@ -8947,7 +8947,7 @@
           "score": 4.7,
           "percentile": 0.47,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.051
+            "ma60_breakout_x_volume_index": -0.051
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.051（原始收盤價，未還原權息），居全市場前 53%。"
         },
@@ -8998,7 +8998,7 @@
           "score": 3.3,
           "percentile": 0.33,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1276
+            "ma60_breakout_x_volume_index": -0.1276
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.128（原始收盤價，未還原權息），居全市場前 67%。"
         },
@@ -9049,7 +9049,7 @@
           "score": 1.2,
           "percentile": 0.12,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3621
+            "ma60_breakout_x_volume_index": -0.3621
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.362（原始收盤價，未還原權息），居全市場前 88%。"
         },
@@ -9100,7 +9100,7 @@
           "score": 2.1,
           "percentile": 0.21,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2309
+            "ma60_breakout_x_volume_index": -0.2309
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.231（原始收盤價，未還原權息），居全市場前 79%。"
         },
@@ -9151,7 +9151,7 @@
           "score": 1.1,
           "percentile": 0.11,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3935
+            "ma60_breakout_x_volume_index": -0.3935
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.394（原始收盤價，未還原權息），居全市場前 89%。"
         },
@@ -9210,7 +9210,7 @@
           "score": 6.1,
           "percentile": 0.61,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0072
+            "ma60_breakout_x_volume_index": 0.0072
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.007（原始收盤價，未還原權息），居全市場前 39%。"
         }
@@ -9259,7 +9259,7 @@
           "score": 9.1,
           "percentile": 0.91,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.027
+            "ma60_breakout_x_volume_index": 1.027
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.027（原始收盤價，未還原權息），居全市場前 9%。"
         },
@@ -9310,7 +9310,7 @@
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1396
+            "ma60_breakout_x_volume_index": -0.1396
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.140（原始收盤價，未還原權息），居全市場前 69%。"
         },
@@ -9361,7 +9361,7 @@
           "score": 2.1,
           "percentile": 0.21,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2357
+            "ma60_breakout_x_volume_index": -0.2357
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.236（原始收盤價，未還原權息），居全市場前 79%。"
         },
@@ -9420,7 +9420,7 @@
           "score": 8.4,
           "percentile": 0.84,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.4494
+            "ma60_breakout_x_volume_index": 0.4494
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.449（原始收盤價，未還原權息），居全市場前 16%。"
         },
@@ -9479,7 +9479,7 @@
           "score": 5.7,
           "percentile": 0.57,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0056
+            "ma60_breakout_x_volume_index": -0.0056
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.006（原始收盤價，未還原權息），居全市場前 43%。"
         }
@@ -9520,7 +9520,7 @@
           "score": 5.3,
           "percentile": 0.53,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.019
+            "ma60_breakout_x_volume_index": -0.019
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.019（原始收盤價，未還原權息），居全市場前 47%。"
         },
@@ -9579,7 +9579,7 @@
           "score": 5.0,
           "percentile": 0.5,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0318
+            "ma60_breakout_x_volume_index": -0.0318
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.032（原始收盤價，未還原權息），居全市場前 50%。"
         }
@@ -9620,7 +9620,7 @@
           "score": 3.4,
           "percentile": 0.34,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1204
+            "ma60_breakout_x_volume_index": -0.1204
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.120（原始收盤價，未還原權息），居全市場前 66%。"
         },
@@ -9671,7 +9671,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8388
+            "ma60_breakout_x_volume_index": 0.8388
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.839（原始收盤價，未還原權息），居全市場前 10%。"
         },
@@ -9722,7 +9722,7 @@
           "score": 4.0,
           "percentile": 0.4,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0835
+            "ma60_breakout_x_volume_index": -0.0835
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.084（原始收盤價，未還原權息），居全市場前 60%。"
         },
@@ -9789,7 +9789,7 @@
           "score": 2.6,
           "percentile": 0.26,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1835
+            "ma60_breakout_x_volume_index": -0.1835
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.184（原始收盤價，未還原權息），居全市場前 74%。"
         }
@@ -9830,7 +9830,7 @@
           "score": 3.3,
           "percentile": 0.33,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1276
+            "ma60_breakout_x_volume_index": -0.1276
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.128（原始收盤價，未還原權息），居全市場前 67%。"
         },
@@ -9881,7 +9881,7 @@
           "score": 3.6,
           "percentile": 0.36,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1089
+            "ma60_breakout_x_volume_index": -0.1089
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.109（原始收盤價，未還原權息），居全市場前 64%。"
         },
@@ -9932,7 +9932,7 @@
           "score": 2.4,
           "percentile": 0.24,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2081
+            "ma60_breakout_x_volume_index": -0.2081
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.208（原始收盤價，未還原權息），居全市場前 76%。"
         },
@@ -9983,7 +9983,7 @@
           "score": 4.5,
           "percentile": 0.45,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0579
+            "ma60_breakout_x_volume_index": -0.0579
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.058（原始收盤價，未還原權息），居全市場前 55%。"
         },
@@ -10034,7 +10034,7 @@
           "score": 1.6,
           "percentile": 0.16,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3082
+            "ma60_breakout_x_volume_index": -0.3082
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.308（原始收盤價，未還原權息），居全市場前 84%。"
         },
@@ -10085,7 +10085,7 @@
           "score": 1.8,
           "percentile": 0.18,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2675
+            "ma60_breakout_x_volume_index": -0.2675
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.268（原始收盤價，未還原權息），居全市場前 82%。"
         },
@@ -10136,7 +10136,7 @@
           "score": 1.2,
           "percentile": 0.12,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3655
+            "ma60_breakout_x_volume_index": -0.3655
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.365（原始收盤價，未還原權息），居全市場前 88%。"
         },
@@ -10195,7 +10195,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6459
+            "ma60_breakout_x_volume_index": 0.6459
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.646（原始收盤價，未還原權息），居全市場前 13%。"
         }
@@ -10244,7 +10244,7 @@
           "score": 3.2,
           "percentile": 0.32,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1331
+            "ma60_breakout_x_volume_index": -0.1331
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.133（原始收盤價，未還原權息），居全市場前 68%。"
         },
@@ -10303,7 +10303,7 @@
           "score": 0.1,
           "percentile": 0.01,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -1.294
+            "ma60_breakout_x_volume_index": -1.294
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -1.294（原始收盤價，未還原權息），居全市場前 99%。"
         }
@@ -10352,7 +10352,7 @@
           "score": 6.8,
           "percentile": 0.68,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0619
+            "ma60_breakout_x_volume_index": 0.0619
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.062（原始收盤價，未還原權息），居全市場前 32%。"
         }
@@ -10393,7 +10393,7 @@
           "score": 6.5,
           "percentile": 0.65,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.034
+            "ma60_breakout_x_volume_index": 0.034
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.034（原始收盤價，未還原權息），居全市場前 35%。"
         },
@@ -10452,7 +10452,7 @@
           "score": 2.3,
           "percentile": 0.23,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2135
+            "ma60_breakout_x_volume_index": -0.2135
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.213（原始收盤價，未還原權息），居全市場前 77%。"
         }
@@ -10493,7 +10493,7 @@
           "score": 2.1,
           "percentile": 0.21,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2372
+            "ma60_breakout_x_volume_index": -0.2372
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.237（原始收盤價，未還原權息），居全市場前 79%。"
         },
@@ -10544,7 +10544,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1359
+            "ma60_breakout_x_volume_index": 0.1359
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.136（原始收盤價，未還原權息），居全市場前 26%。"
         },
@@ -10595,7 +10595,7 @@
           "score": 1.0,
           "percentile": 0.1,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.4215
+            "ma60_breakout_x_volume_index": -0.4215
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.421（原始收盤價，未還原權息），居全市場前 90%。"
         },
@@ -10697,7 +10697,7 @@
           "score": 0.4,
           "percentile": 0.04,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.7432
+            "ma60_breakout_x_volume_index": -0.7432
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.743（原始收盤價，未還原權息），居全市場前 96%。"
         },
@@ -10748,7 +10748,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1531
+            "ma60_breakout_x_volume_index": 0.1531
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.153（原始收盤價，未還原權息），居全市場前 26%。"
         },
@@ -10799,7 +10799,7 @@
           "score": 0.5,
           "percentile": 0.05,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.644
+            "ma60_breakout_x_volume_index": -0.644
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.644（原始收盤價，未還原權息），居全市場前 95%。"
         },
@@ -10850,7 +10850,7 @@
           "score": 2.9,
           "percentile": 0.29,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1651
+            "ma60_breakout_x_volume_index": -0.1651
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.165（原始收盤價，未還原權息），居全市場前 71%。"
         },
@@ -10909,7 +10909,7 @@
           "score": 8.4,
           "percentile": 0.84,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.4767
+            "ma60_breakout_x_volume_index": 0.4767
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.477（原始收盤價，未還原權息），居全市場前 16%。"
         },
@@ -11011,7 +11011,7 @@
           "score": 9.2,
           "percentile": 0.92,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.1396
+            "ma60_breakout_x_volume_index": 1.1396
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.140（原始收盤價，未還原權息），居全市場前 8%。"
         },
@@ -11070,7 +11070,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0236
+            "ma60_breakout_x_volume_index": -0.0236
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.024（原始收盤價，未還原權息），居全市場前 48%。"
         }
@@ -11119,7 +11119,7 @@
           "score": 3.4,
           "percentile": 0.34,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1188
+            "ma60_breakout_x_volume_index": -0.1188
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.119（原始收盤價，未還原權息），居全市場前 66%。"
         }
@@ -11168,7 +11168,7 @@
           "score": 4.1,
           "percentile": 0.41,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0759
+            "ma60_breakout_x_volume_index": -0.0759
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.076（原始收盤價，未還原權息），居全市場前 59%。"
         }
@@ -11217,7 +11217,7 @@
           "score": 8.5,
           "percentile": 0.85,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.486
+            "ma60_breakout_x_volume_index": 0.486
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.486（原始收盤價，未還原權息），居全市場前 15%。"
         }
@@ -11258,7 +11258,7 @@
           "score": 9.8,
           "percentile": 0.98,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 3.331
+            "ma60_breakout_x_volume_index": 3.331
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +3.331（原始收盤價，未還原權息），居全市場前 2%。"
         },
@@ -11309,7 +11309,7 @@
           "score": 3.5,
           "percentile": 0.35,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1164
+            "ma60_breakout_x_volume_index": -0.1164
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.116（原始收盤價，未還原權息），居全市場前 65%。"
         },
@@ -11368,7 +11368,7 @@
           "score": 4.9,
           "percentile": 0.49,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.036
+            "ma60_breakout_x_volume_index": -0.036
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.036（原始收盤價，未還原權息），居全市場前 51%。"
         }
@@ -11409,7 +11409,7 @@
           "score": 4.3,
           "percentile": 0.43,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0645
+            "ma60_breakout_x_volume_index": -0.0645
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.064（原始收盤價，未還原權息），居全市場前 57%。"
         },
@@ -11467,7 +11467,7 @@
           "score": 0.5,
           "percentile": 0.05,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.6474
+            "ma60_breakout_x_volume_index": -0.6474
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.647（原始收盤價，未還原權息），居全市場前 95%。"
         }
@@ -11516,7 +11516,7 @@
           "score": 4.4,
           "percentile": 0.44,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0599
+            "ma60_breakout_x_volume_index": -0.0599
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.060（原始收盤價，未還原權息），居全市場前 56%。"
         },
@@ -11583,7 +11583,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3103
+            "ma60_breakout_x_volume_index": 0.3103
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.310（原始收盤價，未還原權息），居全市場前 19%。"
         }
@@ -11624,7 +11624,7 @@
           "score": 2.2,
           "percentile": 0.22,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2251
+            "ma60_breakout_x_volume_index": -0.2251
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.225（原始收盤價，未還原權息），居全市場前 78%。"
         },
@@ -11675,7 +11675,7 @@
           "score": 1.0,
           "percentile": 0.1,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.4233
+            "ma60_breakout_x_volume_index": -0.4233
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.423（原始收盤價，未還原權息），居全市場前 90%。"
         },
@@ -11726,7 +11726,7 @@
           "score": 4.0,
           "percentile": 0.4,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0848
+            "ma60_breakout_x_volume_index": -0.0848
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.085（原始收盤價，未還原權息），居全市場前 60%。"
         },
@@ -11785,7 +11785,7 @@
           "score": 7.7,
           "percentile": 0.77,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2032
+            "ma60_breakout_x_volume_index": 0.2032
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.203（原始收盤價，未還原權息），居全市場前 23%。"
         },
@@ -11844,7 +11844,7 @@
           "score": 4.8,
           "percentile": 0.48,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0435
+            "ma60_breakout_x_volume_index": -0.0435
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.043（原始收盤價，未還原權息），居全市場前 52%。"
         }
@@ -11893,7 +11893,7 @@
           "score": 6.3,
           "percentile": 0.63,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0197
+            "ma60_breakout_x_volume_index": 0.0197
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.020（原始收盤價，未還原權息），居全市場前 37%。"
         }
@@ -11934,7 +11934,7 @@
           "score": 0.9,
           "percentile": 0.09,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.424
+            "ma60_breakout_x_volume_index": -0.424
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.424（原始收盤價，未還原權息），居全市場前 91%。"
         },
@@ -11993,7 +11993,7 @@
           "score": 6.8,
           "percentile": 0.68,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0621
+            "ma60_breakout_x_volume_index": 0.0621
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.062（原始收盤價，未還原權息），居全市場前 32%。"
         }
@@ -12034,7 +12034,7 @@
           "score": 7.3,
           "percentile": 0.73,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.131
+            "ma60_breakout_x_volume_index": 0.131
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.131（原始收盤價，未還原權息），居全市場前 27%。"
         },
@@ -12101,7 +12101,7 @@
           "score": 8.3,
           "percentile": 0.83,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.4002
+            "ma60_breakout_x_volume_index": 0.4002
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.400（原始收盤價，未還原權息），居全市場前 17%。"
         }
@@ -12142,7 +12142,7 @@
           "score": 1.0,
           "percentile": 0.1,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.4239
+            "ma60_breakout_x_volume_index": -0.4239
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.424（原始收盤價，未還原權息），居全市場前 90%。"
         },
@@ -12201,7 +12201,7 @@
           "score": 0.1,
           "percentile": 0.01,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -1.1969
+            "ma60_breakout_x_volume_index": -1.1969
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -1.197（原始收盤價，未還原權息），居全市場前 99%。"
         }
@@ -12250,7 +12250,7 @@
           "score": 3.6,
           "percentile": 0.36,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.108
+            "ma60_breakout_x_volume_index": -0.108
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.108（原始收盤價，未還原權息），居全市場前 64%。"
         }
@@ -12299,7 +12299,7 @@
           "score": 6.6,
           "percentile": 0.66,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0442
+            "ma60_breakout_x_volume_index": 0.0442
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.044（原始收盤價，未還原權息），居全市場前 34%。"
         }
@@ -12348,7 +12348,7 @@
           "score": 6.5,
           "percentile": 0.65,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0311
+            "ma60_breakout_x_volume_index": 0.0311
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.031（原始收盤價，未還原權息），居全市場前 35%。"
         }
@@ -12389,7 +12389,7 @@
           "score": 8.7,
           "percentile": 0.87,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.6308
+            "ma60_breakout_x_volume_index": 0.6308
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.631（原始收盤價，未還原權息），居全市場前 13%。"
         },
@@ -12440,7 +12440,7 @@
           "score": 1.9,
           "percentile": 0.19,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2631
+            "ma60_breakout_x_volume_index": -0.2631
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.263（原始收盤價，未還原權息），居全市場前 81%。"
         },
@@ -12491,7 +12491,7 @@
           "score": 1.9,
           "percentile": 0.19,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2597
+            "ma60_breakout_x_volume_index": -0.2597
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.260（原始收盤價，未還原權息），居全市場前 81%。"
         },
@@ -12542,7 +12542,7 @@
           "score": 8.0,
           "percentile": 0.8,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2697
+            "ma60_breakout_x_volume_index": 0.2697
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.270（原始收盤價，未還原權息），居全市場前 20%。"
         },
@@ -12593,7 +12593,7 @@
           "score": 4.0,
           "percentile": 0.4,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0853
+            "ma60_breakout_x_volume_index": -0.0853
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.085（原始收盤價，未還原權息），居全市場前 60%。"
         },
@@ -12644,7 +12644,7 @@
           "score": 4.1,
           "percentile": 0.41,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0793
+            "ma60_breakout_x_volume_index": -0.0793
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.079（原始收盤價，未還原權息），居全市場前 59%。"
         },
@@ -12711,7 +12711,7 @@
           "score": 8.6,
           "percentile": 0.86,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5696
+            "ma60_breakout_x_volume_index": 0.5696
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.570（原始收盤價，未還原權息），居全市場前 14%。"
         },
@@ -12778,7 +12778,7 @@
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1428
+            "ma60_breakout_x_volume_index": -0.1428
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.143（原始收盤價，未還原權息），居全市場前 69%。"
         }
@@ -12819,7 +12819,7 @@
           "score": 3.8,
           "percentile": 0.38,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0972
+            "ma60_breakout_x_volume_index": -0.0972
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.097（原始收盤價，未還原權息），居全市場前 62%。"
         },
@@ -12886,7 +12886,7 @@
           "score": 4.0,
           "percentile": 0.4,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0885
+            "ma60_breakout_x_volume_index": -0.0885
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.088（原始收盤價，未還原權息），居全市場前 60%。"
         },
@@ -12945,7 +12945,7 @@
           "score": 7.0,
           "percentile": 0.7,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0784
+            "ma60_breakout_x_volume_index": 0.0784
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.078（原始收盤價，未還原權息），居全市場前 30%。"
         }
@@ -12986,7 +12986,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0227
+            "ma60_breakout_x_volume_index": -0.0227
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.023（原始收盤價，未還原權息），居全市場前 48%。"
         },
@@ -13045,7 +13045,7 @@
           "score": 5.0,
           "percentile": 0.5,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0336
+            "ma60_breakout_x_volume_index": -0.0336
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.034（原始收盤價，未還原權息），居全市場前 50%。"
         }
@@ -13086,7 +13086,7 @@
           "score": 9.4,
           "percentile": 0.94,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 1.5626
+            "ma60_breakout_x_volume_index": 1.5626
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +1.563（原始收盤價，未還原權息），居全市場前 6%。"
         },
@@ -13137,7 +13137,7 @@
           "score": 6.9,
           "percentile": 0.69,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0723
+            "ma60_breakout_x_volume_index": 0.0723
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.072（原始收盤價，未還原權息），居全市場前 31%。"
         },
@@ -13196,7 +13196,7 @@
           "score": 2.3,
           "percentile": 0.23,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2154
+            "ma60_breakout_x_volume_index": -0.2154
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.215（原始收盤價，未還原權息），居全市場前 77%。"
         }
@@ -13237,7 +13237,7 @@
           "score": 5.5,
           "percentile": 0.55,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0094
+            "ma60_breakout_x_volume_index": -0.0094
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.009（原始收盤價，未還原權息），居全市場前 45%。"
         },
@@ -13288,7 +13288,7 @@
           "score": 2.3,
           "percentile": 0.23,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2228
+            "ma60_breakout_x_volume_index": -0.2228
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.223（原始收盤價，未還原權息），居全市場前 77%。"
         },
@@ -13346,7 +13346,7 @@
           "score": 3.5,
           "percentile": 0.35,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1174
+            "ma60_breakout_x_volume_index": -0.1174
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.117（原始收盤價，未還原權息），居全市場前 65%。"
         }
@@ -13387,7 +13387,7 @@
           "score": 2.9,
           "percentile": 0.29,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1594
+            "ma60_breakout_x_volume_index": -0.1594
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.159（原始收盤價，未還原權息），居全市場前 71%。"
         },
@@ -13438,7 +13438,7 @@
           "score": 7.5,
           "percentile": 0.75,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1704
+            "ma60_breakout_x_volume_index": 0.1704
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.170（原始收盤價，未還原權息），居全市場前 25%。"
         },
@@ -13489,7 +13489,7 @@
           "score": 2.6,
           "percentile": 0.26,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1878
+            "ma60_breakout_x_volume_index": -0.1878
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.188（原始收盤價，未還原權息），居全市場前 74%。"
         },
@@ -13548,7 +13548,7 @@
           "score": 1.0,
           "percentile": 0.1,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3998
+            "ma60_breakout_x_volume_index": -0.3998
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.400（原始收盤價，未還原權息），居全市場前 90%。"
         }
@@ -13589,7 +13589,7 @@
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1447
+            "ma60_breakout_x_volume_index": -0.1447
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.145（原始收盤價，未還原權息），居全市場前 69%。"
         },
@@ -13640,7 +13640,7 @@
           "score": 2.3,
           "percentile": 0.23,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2175
+            "ma60_breakout_x_volume_index": -0.2175
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.218（原始收盤價，未還原權息），居全市場前 77%。"
         },
@@ -13699,7 +13699,7 @@
           "score": 5.6,
           "percentile": 0.56,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0062
+            "ma60_breakout_x_volume_index": -0.0062
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.006（原始收盤價，未還原權息），居全市場前 44%。"
         }
@@ -13740,7 +13740,7 @@
           "score": 5.1,
           "percentile": 0.51,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0283
+            "ma60_breakout_x_volume_index": -0.0283
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.028（原始收盤價，未還原權息），居全市場前 49%。"
         },
@@ -13791,7 +13791,7 @@
           "score": 1.5,
           "percentile": 0.15,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3088
+            "ma60_breakout_x_volume_index": -0.3088
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.309（原始收盤價，未還原權息），居全市場前 85%。"
         },
@@ -13842,7 +13842,7 @@
           "score": 7.9,
           "percentile": 0.79,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.2451
+            "ma60_breakout_x_volume_index": 0.2451
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.245（原始收盤價，未還原權息），居全市場前 21%。"
         },
@@ -13893,7 +13893,7 @@
           "score": 7.3,
           "percentile": 0.73,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1207
+            "ma60_breakout_x_volume_index": 0.1207
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.121（原始收盤價，未還原權息），居全市場前 27%。"
         },
@@ -13952,7 +13952,7 @@
           "score": 4.6,
           "percentile": 0.46,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0542
+            "ma60_breakout_x_volume_index": -0.0542
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.054（原始收盤價，未還原權息），居全市場前 54%。"
         }
@@ -14001,7 +14001,7 @@
           "score": 9.0,
           "percentile": 0.9,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.8215
+            "ma60_breakout_x_volume_index": 0.8215
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.822（原始收盤價，未還原權息），居全市場前 10%。"
         }
@@ -14042,7 +14042,7 @@
           "score": 5.4,
           "percentile": 0.54,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0158
+            "ma60_breakout_x_volume_index": -0.0158
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.016（原始收盤價，未還原權息），居全市場前 46%。"
         },
@@ -14101,7 +14101,7 @@
           "score": 6.0,
           "percentile": 0.6,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0053
+            "ma60_breakout_x_volume_index": 0.0053
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.005（原始收盤價，未還原權息），居全市場前 40%。"
         }
@@ -14142,7 +14142,7 @@
           "score": 6.9,
           "percentile": 0.69,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0695
+            "ma60_breakout_x_volume_index": 0.0695
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.070（原始收盤價，未還原權息），居全市場前 31%。"
         },
@@ -14201,7 +14201,7 @@
           "score": 6.3,
           "percentile": 0.63,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0174
+            "ma60_breakout_x_volume_index": 0.0174
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.017（原始收盤價，未還原權息），居全市場前 37%。"
         }
@@ -14250,7 +14250,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0233
+            "ma60_breakout_x_volume_index": -0.0233
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.023（原始收盤價，未還原權息），居全市場前 48%。"
         }
@@ -14291,7 +14291,7 @@
           "score": 0.2,
           "percentile": 0.02,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.9521
+            "ma60_breakout_x_volume_index": -0.9521
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.952（原始收盤價，未還原權息），居全市場前 98%。"
         },
@@ -14350,7 +14350,7 @@
           "score": 5.8,
           "percentile": 0.58,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0022
+            "ma60_breakout_x_volume_index": -0.0022
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.002（原始收盤價，未還原權息），居全市場前 42%。"
         }
@@ -14399,7 +14399,7 @@
           "score": 4.7,
           "percentile": 0.47,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0463
+            "ma60_breakout_x_volume_index": -0.0463
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.046（原始收盤價，未還原權息），居全市場前 53%。"
         }
@@ -14448,7 +14448,7 @@
           "score": 5.9,
           "percentile": 0.59,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0019
+            "ma60_breakout_x_volume_index": 0.0019
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.002（原始收盤價，未還原權息），居全市場前 41%。"
         }
@@ -14497,7 +14497,7 @@
           "score": 5.4,
           "percentile": 0.54,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0144
+            "ma60_breakout_x_volume_index": -0.0144
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.014（原始收盤價，未還原權息），居全市場前 46%。"
         }
@@ -14538,7 +14538,7 @@
           "score": 3.2,
           "percentile": 0.32,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1313
+            "ma60_breakout_x_volume_index": -0.1313
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.131（原始收盤價，未還原權息），居全市場前 68%。"
         },
@@ -14597,7 +14597,7 @@
           "score": 6.7,
           "percentile": 0.67,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0484
+            "ma60_breakout_x_volume_index": 0.0484
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.048（原始收盤價，未還原權息），居全市場前 33%。"
         }
@@ -14646,7 +14646,7 @@
           "score": 5.6,
           "percentile": 0.56,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0082
+            "ma60_breakout_x_volume_index": -0.0082
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.008（原始收盤價，未還原權息），居全市場前 44%。"
         }
@@ -14687,7 +14687,7 @@
           "score": 2.7,
           "percentile": 0.27,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1745
+            "ma60_breakout_x_volume_index": -0.1745
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.175（原始收盤價，未還原權息），居全市場前 73%。"
         },
@@ -14738,7 +14738,7 @@
           "score": 4.2,
           "percentile": 0.42,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0712
+            "ma60_breakout_x_volume_index": -0.0712
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.071（原始收盤價，未還原權息），居全市場前 58%。"
         },
@@ -14789,7 +14789,7 @@
           "score": 2.7,
           "percentile": 0.27,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1794
+            "ma60_breakout_x_volume_index": -0.1794
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.179（原始收盤價，未還原權息），居全市場前 73%。"
         },
@@ -14840,7 +14840,7 @@
           "score": 8.2,
           "percentile": 0.82,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3779
+            "ma60_breakout_x_volume_index": 0.3779
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.378（原始收盤價，未還原權息），居全市場前 18%。"
         },
@@ -14899,7 +14899,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.3267
+            "ma60_breakout_x_volume_index": 0.3267
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.327（原始收盤價，未還原權息），居全市場前 19%。"
         }
@@ -14948,7 +14948,7 @@
           "score": 0.3,
           "percentile": 0.03,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.8393
+            "ma60_breakout_x_volume_index": -0.8393
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.839（原始收盤價，未還原權息），居全市場前 97%。"
         }
@@ -14997,7 +14997,7 @@
           "score": 6.1,
           "percentile": 0.61,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.008
+            "ma60_breakout_x_volume_index": 0.008
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.008（原始收盤價，未還原權息），居全市場前 39%。"
         }
@@ -15038,7 +15038,7 @@
           "score": 7.3,
           "percentile": 0.73,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1269
+            "ma60_breakout_x_volume_index": 0.1269
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.127（原始收盤價，未還原權息），居全市場前 27%。"
         },
@@ -15097,7 +15097,7 @@
           "score": 5.9,
           "percentile": 0.59,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0027
+            "ma60_breakout_x_volume_index": 0.0027
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.003（原始收盤價，未還原權息），居全市場前 41%。"
         }
@@ -15138,7 +15138,7 @@
           "score": 3.6,
           "percentile": 0.36,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1109
+            "ma60_breakout_x_volume_index": -0.1109
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.111（原始收盤價，未還原權息），居全市場前 64%。"
         },
@@ -15197,7 +15197,7 @@
           "score": 0.8,
           "percentile": 0.08,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.4752
+            "ma60_breakout_x_volume_index": -0.4752
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.475（原始收盤價，未還原權息），居全市場前 92%。"
         },
@@ -15248,7 +15248,7 @@
           "score": 1.7,
           "percentile": 0.17,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2945
+            "ma60_breakout_x_volume_index": -0.2945
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.295（原始收盤價，未還原權息），居全市場前 83%。"
         },
@@ -15299,7 +15299,7 @@
           "score": 4.5,
           "percentile": 0.45,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0546
+            "ma60_breakout_x_volume_index": -0.0546
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.055（原始收盤價，未還原權息），居全市場前 55%。"
         },
@@ -15350,7 +15350,7 @@
           "score": 4.5,
           "percentile": 0.45,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0585
+            "ma60_breakout_x_volume_index": -0.0585
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.058（原始收盤價，未還原權息），居全市場前 55%。"
         },
@@ -15401,7 +15401,7 @@
           "score": 1.8,
           "percentile": 0.18,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2706
+            "ma60_breakout_x_volume_index": -0.2706
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.271（原始收盤價，未還原權息），居全市場前 82%。"
         },
@@ -15452,7 +15452,7 @@
           "score": 2.1,
           "percentile": 0.21,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2364
+            "ma60_breakout_x_volume_index": -0.2364
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.236（原始收盤價，未還原權息），居全市場前 79%。"
         },
@@ -15503,7 +15503,7 @@
           "score": 0.8,
           "percentile": 0.08,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.4591
+            "ma60_breakout_x_volume_index": -0.4591
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.459（原始收盤價，未還原權息），居全市場前 92%。"
         },
@@ -15554,7 +15554,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0237
+            "ma60_breakout_x_volume_index": -0.0237
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.024（原始收盤價，未還原權息），居全市場前 48%。"
         },
@@ -15605,7 +15605,7 @@
           "score": 2.5,
           "percentile": 0.25,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1939
+            "ma60_breakout_x_volume_index": -0.1939
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.194（原始收盤價，未還原權息），居全市場前 75%。"
         },
@@ -15656,7 +15656,7 @@
           "score": 1.5,
           "percentile": 0.15,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3145
+            "ma60_breakout_x_volume_index": -0.3145
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.315（原始收盤價，未還原權息），居全市場前 85%。"
         },
@@ -15715,7 +15715,7 @@
           "score": 4.5,
           "percentile": 0.45,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0562
+            "ma60_breakout_x_volume_index": -0.0562
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.056（原始收盤價，未還原權息），居全市場前 55%。"
         }
@@ -15756,7 +15756,7 @@
           "score": 1.4,
           "percentile": 0.14,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3312
+            "ma60_breakout_x_volume_index": -0.3312
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.331（原始收盤價，未還原權息），居全市場前 86%。"
         },
@@ -15815,7 +15815,7 @@
           "score": 5.2,
           "percentile": 0.52,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0252
+            "ma60_breakout_x_volume_index": -0.0252
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.025（原始收盤價，未還原權息），居全市場前 48%。"
         }
@@ -15864,7 +15864,7 @@
           "score": 8.6,
           "percentile": 0.86,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.5582
+            "ma60_breakout_x_volume_index": 0.5582
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.558（原始收盤價，未還原權息），居全市場前 14%。"
         }
@@ -15921,7 +15921,7 @@
           "score": 0.7,
           "percentile": 0.07,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.498
+            "ma60_breakout_x_volume_index": -0.498
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.498（原始收盤價，未還原權息），居全市場前 93%。"
         },
@@ -15980,7 +15980,7 @@
           "score": 5.8,
           "percentile": 0.58,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0
+            "ma60_breakout_x_volume_index": -0.0
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.000（原始收盤價，未還原權息），居全市場前 42%。"
         }
@@ -16029,7 +16029,7 @@
           "score": 3.9,
           "percentile": 0.39,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0905
+            "ma60_breakout_x_volume_index": -0.0905
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.091（原始收盤價，未還原權息），居全市場前 61%。"
         }
@@ -16077,7 +16077,7 @@
           "score": 3.4,
           "percentile": 0.34,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.1216
+            "ma60_breakout_x_volume_index": -0.1216
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.122（原始收盤價，未還原權息），居全市場前 66%。"
         }
@@ -16126,7 +16126,7 @@
           "score": 5.0,
           "percentile": 0.5,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0335
+            "ma60_breakout_x_volume_index": -0.0335
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.034（原始收盤價，未還原權息），居全市場前 50%。"
         }
@@ -16167,7 +16167,7 @@
           "score": 0.9,
           "percentile": 0.09,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.4396
+            "ma60_breakout_x_volume_index": -0.4396
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.440（原始收盤價，未還原權息），居全市場前 91%。"
         },
@@ -16218,7 +16218,7 @@
           "score": 2.2,
           "percentile": 0.22,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.226
+            "ma60_breakout_x_volume_index": -0.226
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.226（原始收盤價，未還原權息），居全市場前 78%。"
         },
@@ -16269,7 +16269,7 @@
           "score": 5.3,
           "percentile": 0.53,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0198
+            "ma60_breakout_x_volume_index": -0.0198
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.020（原始收盤價，未還原權息），居全市場前 47%。"
         },
@@ -16320,7 +16320,7 @@
           "score": 0.3,
           "percentile": 0.03,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.847
+            "ma60_breakout_x_volume_index": -0.847
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.847（原始收盤價，未還原權息），居全市場前 97%。"
         },
@@ -16379,7 +16379,7 @@
           "score": 8.1,
           "percentile": 0.81,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.328
+            "ma60_breakout_x_volume_index": 0.328
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.328（原始收盤價，未還原權息），居全市場前 19%。"
         }
@@ -16428,7 +16428,7 @@
           "score": 5.9,
           "percentile": 0.59,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0035
+            "ma60_breakout_x_volume_index": 0.0035
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.004（原始收盤價，未還原權息），居全市場前 41%。"
         }
@@ -16477,7 +16477,7 @@
           "score": 8.4,
           "percentile": 0.84,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.4474
+            "ma60_breakout_x_volume_index": 0.4474
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.447（原始收盤價，未還原權息），居全市場前 16%。"
         }
@@ -16518,7 +16518,7 @@
           "score": 1.1,
           "percentile": 0.11,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3977
+            "ma60_breakout_x_volume_index": -0.3977
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.398（原始收盤價，未還原權息），居全市場前 89%。"
         },
@@ -16577,7 +16577,7 @@
           "score": 6.5,
           "percentile": 0.65,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0309
+            "ma60_breakout_x_volume_index": 0.0309
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.031（原始收盤價，未還原權息），居全市場前 35%。"
         }
@@ -16626,7 +16626,7 @@
           "score": 3.1,
           "percentile": 0.31,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.146
+            "ma60_breakout_x_volume_index": -0.146
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.146（原始收盤價，未還原權息），居全市場前 69%。"
         }
@@ -16675,7 +16675,7 @@
           "score": 6.2,
           "percentile": 0.62,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0157
+            "ma60_breakout_x_volume_index": 0.0157
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.016（原始收盤價，未還原權息），居全市場前 38%。"
         }
@@ -16724,7 +16724,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1469
+            "ma60_breakout_x_volume_index": 0.1469
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.147（原始收盤價，未還原權息），居全市場前 26%。"
         }
@@ -16773,7 +16773,7 @@
           "score": 0.1,
           "percentile": 0.01,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -1.4543
+            "ma60_breakout_x_volume_index": -1.4543
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -1.454（原始收盤價，未還原權息），居全市場前 99%。"
         }
@@ -16871,7 +16871,7 @@
           "score": 1.8,
           "percentile": 0.18,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2781
+            "ma60_breakout_x_volume_index": -0.2781
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.278（原始收盤價，未還原權息），居全市場前 82%。"
         }
@@ -16912,7 +16912,7 @@
           "score": 0.4,
           "percentile": 0.04,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.71
+            "ma60_breakout_x_volume_index": -0.71
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.710（原始收盤價，未還原權息），居全市場前 96%。"
         },
@@ -16971,7 +16971,7 @@
           "score": 4.3,
           "percentile": 0.43,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0645
+            "ma60_breakout_x_volume_index": -0.0645
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.065（原始收盤價，未還原權息），居全市場前 57%。"
         }
@@ -17020,7 +17020,7 @@
           "score": 5.5,
           "percentile": 0.55,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0116
+            "ma60_breakout_x_volume_index": -0.0116
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.012（原始收盤價，未還原權息），居全市場前 45%。"
         }
@@ -17069,7 +17069,7 @@
           "score": 2.2,
           "percentile": 0.22,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.2297
+            "ma60_breakout_x_volume_index": -0.2297
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.230（原始收盤價，未還原權息），居全市場前 78%。"
         }
@@ -17118,7 +17118,7 @@
           "score": 0.5,
           "percentile": 0.05,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.5823
+            "ma60_breakout_x_volume_index": -0.5823
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.582（原始收盤價，未還原權息），居全市場前 95%。"
         }
@@ -17167,7 +17167,7 @@
           "score": 0.5,
           "percentile": 0.05,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.6501
+            "ma60_breakout_x_volume_index": -0.6501
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.650（原始收盤價，未還原權息），居全市場前 95%。"
         }
@@ -17216,7 +17216,7 @@
           "score": 6.7,
           "percentile": 0.67,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0465
+            "ma60_breakout_x_volume_index": 0.0465
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.047（原始收盤價，未還原權息），居全市場前 33%。"
         }
@@ -17257,7 +17257,7 @@
           "score": 0.6,
           "percentile": 0.06,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.5312
+            "ma60_breakout_x_volume_index": -0.5312
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.531（原始收盤價，未還原權息），居全市場前 94%。"
         },
@@ -17316,7 +17316,7 @@
           "score": 7.4,
           "percentile": 0.74,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.1396
+            "ma60_breakout_x_volume_index": 0.1396
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.140（原始收盤價，未還原權息），居全市場前 26%。"
         }
@@ -17365,7 +17365,7 @@
           "score": 4.6,
           "percentile": 0.46,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.0531
+            "ma60_breakout_x_volume_index": -0.0531
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.053（原始收盤價，未還原權息），居全市場前 54%。"
         }
@@ -17414,7 +17414,7 @@
           "score": 6.2,
           "percentile": 0.62,
           "raw": {
-            "ma60_breakout_x_volume_ratio": 0.0167
+            "ma60_breakout_x_volume_index": 0.0167
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 +0.017（原始收盤價，未還原權息），居全市場前 38%。"
         }
@@ -17463,7 +17463,7 @@
           "score": 1.2,
           "percentile": 0.12,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.3632
+            "ma60_breakout_x_volume_index": -0.3632
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.363（原始收盤價，未還原權息），居全市場前 88%。"
         }
@@ -17512,7 +17512,7 @@
           "score": 0.4,
           "percentile": 0.04,
           "raw": {
-            "ma60_breakout_x_volume_ratio": -0.7425
+            "ma60_breakout_x_volume_index": -0.7425
           },
           "reason": "價格相對60日均線乖離×近20/60日均量比綜合指標為 -0.742（原始收盤價，未還原權息），居全市場前 96%。"
         }

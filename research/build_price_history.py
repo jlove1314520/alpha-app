@@ -27,6 +27,7 @@ import pandas as pd
 
 RAW_DIR = Path(__file__).parent / "data" / "raw"
 OUT_PATH = Path(__file__).parent.parent / "data" / "price_history.json"
+SNAPSHOT_PATH = Path(__file__).parent.parent / "data" / "quotes_all_tw.json"
 PRICE_HISTORY_DAYS = 90  # MA60需要60個交易日，多留緩衝給20/60日均量比計算
 
 
@@ -71,14 +72,22 @@ def build_price_rows(code: str) -> list[dict]:
             "low": float(row["min"]) if pd.notna(row.get("min")) else None,
             "close": float(close),
             "volume": float(row["Trading_Volume"]) if pd.notna(row.get("Trading_Volume")) else None,
+            "turnover": float(row["Trading_money"]) if pd.notna(row.get("Trading_money")) else None,
         })
     return out
 
 
 def merge_rows(existing: list[dict] | None, backfill: list[dict]) -> list[dict]:
-    by_date = {r["date"]: r for r in backfill}
+    """既有(daily排程，較即時)欄位優先，但2026-08-27改成「欄位級」合併，不是
+    整列取代——新增turnover欄位時，既有列缺這個欄位可以從backfill補上，不會
+    因為那一天已經有(舊schema、沒有turnover的)紀錄就整列忽略backfill帶來的
+    新欄位。"""
+    by_date = {r["date"]: dict(r) for r in backfill}
     for r in (existing or []):
-        by_date[r["date"]] = r  # 既有(daily排程，較即時)優先
+        date = r["date"]
+        merged = dict(by_date.get(date, {}))
+        merged.update(r)  # 既有值優先覆蓋，但backfill獨有的key（如turnover缺漏時）保留
+        by_date[date] = merged
     rows = sorted(by_date.values(), key=lambda r: r["date"])
     return rows[-PRICE_HISTORY_DAYS:]
 
@@ -125,6 +134,31 @@ def main():
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {OUT_PATH}，{new_count} 檔有資料（merge前既有 {prior_count} 檔，"
           f"{backfilled} 檔補進更多天數歷史）")
+
+    # 跟update_price_history.py同一套輕量快照(見該腳本說明)，這裡也寫一份，
+    # 讓B4類股清單功能不需要等下一次daily排程才有資料可用。
+    snapshot = {}
+    for code, rows in prices.items():
+        if not rows:
+            continue
+        last = rows[-1]
+        prev = rows[-2] if len(rows) >= 2 else None
+        change_pct = None
+        if prev and prev.get("close") not in (None, 0):
+            change_pct = round((last["close"] - prev["close"]) / prev["close"] * 100, 2)
+        snapshot[code] = {
+            "date": last["date"], "close": last["close"],
+            "change_pct": change_pct, "turnover": last.get("turnover"),
+        }
+    from datetime import datetime, timezone, timedelta
+    tw_tz = timezone(timedelta(hours=8))
+    SNAPSHOT_PATH.write_text(json.dumps({
+        "meta": {"generated_at": datetime.now(tw_tz).isoformat(),
+                 "note": "從data/price_history.json每檔最後兩筆算出的輕量快照，見"
+                         "update_price_history.py同名邏輯說明。"},
+        "quotes": snapshot,
+    }, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    print(f"寫入 {SNAPSHOT_PATH}：{len(snapshot)} 檔輕量快照")
 
 
 if __name__ == "__main__":

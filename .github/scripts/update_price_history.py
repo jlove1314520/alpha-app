@@ -30,6 +30,7 @@ import requests
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 OUT_PATH = REPO_ROOT / "data" / "price_history.json"
+SNAPSHOT_PATH = REPO_ROOT / "data" / "quotes_all_tw.json"
 TW_TZ = timezone(timedelta(hours=8))
 
 STOCK_DAY_ALL_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
@@ -92,6 +93,7 @@ def fetch_twse() -> dict[str, dict]:
             "low": _num(row.get("LowestPrice")),
             "close": close,
             "volume": _num(row.get("TradeVolume")),
+            "turnover": _num(row.get("TradeValue")),  # 2026-08-27新增：類股成分股清單功能要用
         }
     return out
 
@@ -116,6 +118,7 @@ def fetch_tpex() -> dict[str, dict]:
             "low": _num(row.get("Low")),
             "close": close,
             "volume": _num(row.get("TradingShares")),
+            "turnover": _num(row.get("TransactionAmount")),
         }
     return out
 
@@ -165,6 +168,31 @@ def main():
     print(f"寫入 {OUT_PATH}：TWSE {twse_updated} 檔+TPEx {tpex_updated} 檔（合計 {len(prices)} 檔有資料）")
     if errors:
         print(f"部分失敗（不中止，維持既有資料）：{errors}")
+
+    # 2026-08-27新增：類股成分股清單功能（B4）需要「全市場（不只自選股）最新
+    # 一天的收盤價/漲跌%/成交值」，但price_history.json整份90天歷史太大
+    # （32MB+），不適合每次client-side抓整份只為了取最新一天。這裡從剛更新
+    # 的prices取每檔最後兩筆算出這個輕量快照，單獨寫一個小檔。
+    snapshot = {}
+    for code, rows in prices.items():
+        if not rows:
+            continue
+        last = rows[-1]
+        prev = rows[-2] if len(rows) >= 2 else None
+        change_pct = None
+        if prev and prev.get("close") not in (None, 0):
+            change_pct = round((last["close"] - prev["close"]) / prev["close"] * 100, 2)
+        snapshot[code] = {
+            "date": last["date"], "close": last["close"],
+            "change_pct": change_pct, "turnover": last.get("turnover"),
+        }
+    SNAPSHOT_PATH.write_text(json.dumps({
+        "meta": {"generated_at": datetime.now(TW_TZ).isoformat(),
+                 "note": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），"
+                         "供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。"},
+        "quotes": snapshot,
+    }, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    print(f"寫入 {SNAPSHOT_PATH}：{len(snapshot)} 檔輕量快照")
 
 
 if __name__ == "__main__":

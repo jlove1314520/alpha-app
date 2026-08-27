@@ -16,6 +16,66 @@
 
 ---
 
+## 2026-08-27（續11）— B4類股卡可點擊 + 冒煙測試新增check6/7（親自抓到真bug）+ BACKLOG.md驗收制度
+
+使用者這輪要求「依序做，做完一項回報一項」+「驗收標準改變：完成=冒煙測試
+通過+功能可操作，不是程式碼寫好了」。B1/B3快速複查仍正常（分開回報過），
+主力做B2（冒煙測試擴充）+B4（類股卡可點擊，這是使用者今天實測發現完全
+點不動的真問題）。
+
+**B4 類股卡可點擊**：查證確認`loadHeatmap()`原本的`.tile`真的完全沒有
+onclick——使用者的回報是真的，不是快取問題。新增：
+- `data/quotes_all_tw.json`（新增）：`price_history.json`太大（32MB+）不適合
+  client-side整份載入只為了拿「今天」的資料，改由
+  `update_price_history.py`/`build_price_history.py`從每檔最後兩筆算出
+  收盤/漲跌%/成交值的輕量快照另存一份小檔（2823檔）。兩支腳本也補上
+  `turnover`欄位（TWSE`TradeValue`/TPEx`TransactionAmount`），
+  `build_price_history.py`的merge邏輯改成「欄位級」合併（不是整列取代），
+  才能把新欄位補進舊資料而不用整批重覆蓋。
+- 類股名稱→產業分類對照表（37個類股，手工比對+經驗證，其中4個較舊的合併
+  類別水泥窯製/塑膠化工/機電/化學生技醫療用聯集近似對應）。
+- 點擊卡片開bottom sheet顯示成分股（代號/名稱/漲跌%/成交值/AI評分，依
+  漲跌%排序），再點一檔關閉sheet並開個股頁。清單畫面誠實標註「依股票產業
+  分類分組，非TWSE官方指數完整成分股清單」。
+
+**B2 冒煙測試新增check6/7，過程中親自抓到兩個真bug（不是空跑）**：
+1. check6（互動可點擊性：類股卡/選股排行列/自選股列，逐一模擬點擊確認
+   有反應）本身就是照使用者這輪新指示新增的。
+2. **check6跑完後，check7（整個測試過程結束後仍無累積uncaught error）
+   抓到一個原本測不出來的真bug**：點擊選股排行列開報告頁時，
+   `f.chips`/`f.technical`的raw欄位名在`generate_scores_live.py`
+   （JSON-only上線路徑）跟`index.html`讀取的`score_v2.py`舊schema不一致，
+   對undefined呼叫`.toFixed()`拋出unhandledrejection。已修正：`technical`
+   統一key名（同一公式，直接改名對齊）；`chips`因兩條管線單位本質不同
+   （%成交值 vs 累積張數），改成`index.html`兩個key都檢查、各自用正確
+   單位顯示，不能假裝是同一個東西。
+3. **原本的check1本身也有測試框架設計漏洞**：只驗證「頁面剛載入當下」
+   有沒有錯誤，check2-6的互動觸發的新錯誤測不到——這次實測就是check1-6
+   全部顯示PASS，但收尾印出的`finalErrors`裡其實有一筆真的錯誤，只是原本
+   從來沒有真的拿它判斷PASS/FAIL。已修正：新增check7明確用`finalErrors`
+   判斷，不再只是印出來當參考。
+
+**驗收記錄本身也改了規則**：新增`BACKLOG.md`，把使用者這輪的驗收標準
+（完成=冒煙測試通過+可操作，未通過一律標⚠️不得標✅）寫進去，B1-B4逐項
+附上實際冒煙測試輸出（不是「已完成」這種文字宣告）。
+
+**最終冒煙測試結果（`node scripts/smoke_test.mjs`，2026-08-27 20:51，
+全部通過，`scripts/smoke_test.py`同步驗證一致）**：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error
+```
+
+**下一步**：見`BACKLOG.md`的⚠️清單（analyst/catalyst無源、PER歷史備援、
+除權息還原、979檔財報季度回補、603檔industry歧義、TPEx偶發SSL錯誤）。
+
+---
+
 ## 2026-08-27（續10）— P0-1補齊12處遺漏錯誤記錄 + P0-2修好fundamentals.json假error + P1發現並修正EPS年增率真bug
 
 使用者這輪明確指出「P0-1已延後四輪，風險更高」+「fundamentals.json顯示

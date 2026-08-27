@@ -136,8 +136,59 @@ def run_smoke_test(base_url: str, headless: bool = True) -> dict:
                 market_errors.append(f"{m}: {e}")
         record("5. 市場頁三個市場切換都不拋錯", len(market_errors) == 0, "; ".join(market_errors))
 
-        # 收尾再檢查一次GLOBAL_ERRORS，涵蓋上面測試過程中新產生的錯誤
+        # 6. 【2026-08-27新增】互動元素可點擊性——逐一模擬點擊，確認有對應反應
+        # （開頁/開清單），沒反應即視為失敗，跟.mjs版本邏輯一致。
+        interaction_errors = []
+        page.evaluate("async () => { MKT_STATE.market = 'TW'; await hydrateMarket(); }")
+        page.wait_for_timeout(600)
+        try:
+            tile_count = page.evaluate("document.querySelectorAll('#heat-grid .tile').length")
+            if tile_count == 0:
+                raise RuntimeError("找不到任何類股卡（#heat-grid .tile），可能資料沒載入")
+            page.evaluate("document.querySelector('#heat-grid .tile').click()")
+            page.wait_for_timeout(500)
+            sheet_open = page.evaluate("document.getElementById('sector-sheet')?.classList.contains('open')")
+            if not sheet_open:
+                raise RuntimeError("點擊類股卡後 #sector-sheet 沒有開啟，沒有對應反應")
+            page.evaluate("window.closeSectorSheet && window.closeSectorSheet()")
+        except Exception as e:
+            interaction_errors.append(f"類股卡: {e}")
+        try:
+            page.evaluate("go('picks')")
+            page.wait_for_timeout(600)
+            row_count = page.evaluate("document.querySelectorAll('#picks-list .row').length")
+            if row_count == 0:
+                raise RuntimeError("找不到任何選股排行列（#picks-list .row），可能scores.json沒有合格檔數")
+            page.evaluate("document.querySelector('#picks-list .row').click()")
+            page.wait_for_timeout(500)
+            report_active = page.evaluate("document.getElementById('scr-report')?.classList.contains('active')")
+            if not report_active:
+                raise RuntimeError("點擊選股排行列後 #scr-report 沒有變成active，沒有對應反應")
+        except Exception as e:
+            interaction_errors.append(f"選股排行列: {e}")
+        try:
+            page.evaluate("go('home')")
+            page.wait_for_timeout(600)
+            wl_row_count = page.evaluate("document.querySelectorAll('#wl-list .swipe-row').length")
+            if wl_row_count == 0:
+                raise RuntimeError("找不到任何自選股列（#wl-list .swipe-row），可能自選股清單是空的")
+            page.evaluate("document.querySelector('#wl-list .swipe-row').click()")
+            page.wait_for_timeout(500)
+            stock_active = page.evaluate("document.getElementById('scr-stock')?.classList.contains('active')")
+            if not stock_active:
+                raise RuntimeError("點擊自選股列後 #scr-stock 沒有變成active，沒有對應反應")
+        except Exception as e:
+            interaction_errors.append(f"自選股列: {e}")
+        record("6. 互動元素可點擊性（類股卡/選股排行列/自選股列）", len(interaction_errors) == 0,
+               "; ".join(interaction_errors))
+
+        # 7. 收尾再檢查一次GLOBAL_ERRORS，涵蓋上面測試過程(含互動操作)中新產生的
+        # 錯誤——2026-08-27修正：原本這裡只是印出來，從來沒真的判斷PASS/FAIL，
+        # 是測試框架本身的漏洞（這次B4測試親自抓到一個只有點擊後才觸發的真bug）。
         final_errors = page.evaluate("typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []")
+        record("7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error",
+               len(final_errors) == 0,
+               f"GLOBAL_ERRORS={final_errors}" if final_errors else "")
         results["global_errors_final"] = final_errors
 
         browser.close()

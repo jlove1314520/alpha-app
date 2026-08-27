@@ -144,9 +144,70 @@ async function runSmokeTest(baseUrl, headless = true) {
   }
   record("5. 市場頁三個市場切換都不拋錯", marketErrors.length === 0, marketErrors.join("; "));
 
+  // 6. 【2026-08-27新增，使用者要求】互動元素可點擊性檢查——逐一模擬點擊，
+  // 確認有對應反應（開頁/開清單），沒反應即視為失敗。跟前5項不同：前5項是
+  // 「不拋錯」，這項是「真的有效果」，用點擊前後的DOM狀態差異來判斷，不能
+  // 只看有沒有uncaught error（onclick繫結錯誤/沒繫結都不會拋錯，但也不會有
+  // 任何反應，是使用者這次B4類股卡回報過的真實案例）。
+  const interactionErrors = [];
+  // 6a. 類股卡（市場頁已經在上面切換過，MKT_STATE.market目前是FUT，先切回TW）
+  await page.evaluate(async () => { MKT_STATE.market = "TW"; await hydrateMarket(); });
+  await page.waitForTimeout(600);
+  try {
+    const tileCount = await page.evaluate(() => document.querySelectorAll("#heat-grid .tile").length);
+    if (tileCount === 0) throw new Error("找不到任何類股卡（#heat-grid .tile），可能資料沒載入");
+    await page.evaluate(() => document.querySelector("#heat-grid .tile").click());
+    await page.waitForTimeout(500);
+    const sheetOpen = await page.evaluate(() => document.getElementById("sector-sheet")?.classList.contains("open"));
+    if (!sheetOpen) throw new Error("點擊類股卡後 #sector-sheet 沒有開啟，沒有對應反應");
+    await page.evaluate(() => window.closeSectorSheet && window.closeSectorSheet());
+  } catch (e) {
+    interactionErrors.push(`類股卡: ${e.message || e}`);
+  }
+  // 6b. 選股排行列（picks-list的row，點擊應該打開個股評分報告畫面 #scr-report）
+  try {
+    await page.evaluate(() => window.go("picks"));
+    await page.waitForTimeout(600);
+    const rowCount = await page.evaluate(() => document.querySelectorAll("#picks-list .row").length);
+    if (rowCount === 0) throw new Error("找不到任何選股排行列（#picks-list .row），可能scores.json沒有合格檔數");
+    await page.evaluate(() => document.querySelector("#picks-list .row").click());
+    await page.waitForTimeout(500);
+    const reportActive = await page.evaluate(() => document.getElementById("scr-report")?.classList.contains("active"));
+    if (!reportActive) throw new Error("點擊選股排行列後 #scr-report 沒有變成active，沒有對應反應");
+  } catch (e) {
+    interactionErrors.push(`選股排行列: ${e.message || e}`);
+  }
+  // 6c. 自選股列（wl-list的row，點擊應該打開個股頁 #scr-stock）
+  try {
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(600);
+    const wlRowCount = await page.evaluate(() => document.querySelectorAll("#wl-list .swipe-row").length);
+    if (wlRowCount === 0) throw new Error("找不到任何自選股列（#wl-list .swipe-row），可能自選股清單是空的");
+    await page.evaluate(() => document.querySelector("#wl-list .swipe-row").click());
+    await page.waitForTimeout(500);
+    const stockActive = await page.evaluate(() => document.getElementById("scr-stock")?.classList.contains("active"));
+    if (!stockActive) throw new Error("點擊自選股列後 #scr-stock 沒有變成active，沒有對應反應");
+  } catch (e) {
+    interactionErrors.push(`自選股列: ${e.message || e}`);
+  }
+  record("6. 互動元素可點擊性（類股卡/選股排行列/自選股列）", interactionErrors.length === 0, interactionErrors.join("; "));
+
+  // 2026-08-27修正（真bug，這次B4測試親自抓到）：check#1只在頁面剛載入時
+  // 讀一次GLOBAL_ERRORS，之後checks 2-6的互動（尤其是點擊操作）如果觸發新的
+  // unhandledrejection，原本這裡只是把finalErrors印出來，從來沒有真的拿它
+  // 判斷PASS/FAIL——等於check#1「頁面載入無uncaught error」講的是「載入當下」
+  // 而不是「整個測試過程中」，是一個測試框架本身測不出真錯誤的漏洞（跟先前
+  // window.GLOBAL_ERRORS vs 裸GLOBAL_ERRORS同一類「測試本身有假陽性風險」問題）。
+  // 這次實測：check#1-6全部顯示PASS，但finalErrors裡卻有一筆點擊選股排行列
+  // 觸發的真實unhandledrejection（f.chips/f.technical欄位名不符導致.toFixed()
+  // 對undefined拋錯）——這就是原本測試框架測不出來的具體案例。現在改成真的
+  // 用finalErrors判斷這第7項。
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
+  record("7. 整個測試過程（含所有互動操作）結束後仍無累積的uncaught error",
+    finalErrors.length === 0,
+    finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
 
   await browser.close();

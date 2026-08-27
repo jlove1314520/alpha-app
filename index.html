@@ -1048,6 +1048,14 @@
     <div id="industry-sheet-list" style="display:flex;flex-wrap:wrap;gap:8px"></div>
   </div>
 
+  <!-- 2026-08-27新增（B4）：類股卡點擊→成分股清單 -->
+  <div class="sheet-mask" id="sector-mask" onclick="closeSectorSheet()"></div>
+  <div class="sheet" id="sector-sheet" style="max-height:75vh;overflow-y:auto">
+    <div class="grab"></div>
+    <h2 id="sector-sheet-title">類股成分股</h2>
+    <div id="sector-sheet-list"></div>
+  </div>
+
   <!-- 刪除確認 -->
   <div class="sheet-mask" id="cmask" onclick="cfNo()"></div>
   <div class="cmodal" id="confirm">
@@ -1376,6 +1384,100 @@
     }
     return (STOCK_DETAIL_CACHE&&STOCK_DETAIL_CACHE.stocks&&STOCK_DETAIL_CACHE.stocks[code])||{};
   }
+  // 2026-08-27新增（B4：類股卡點擊→成分股清單）：data/company_info.json
+  // （見 research/build_company_info.py，讀FinMind TaiwanStockInfo全市場快取）
+  // 供代號→名稱/產業分類查詢；data/quotes_all_tw.json（見
+  // .github/scripts/update_price_history.py，從price_history.json算出的輕量
+  // 快照)供全市場（不只自選股）最新收盤/漲跌%/成交值查詢，避免載入32MB+的
+  // 完整price_history.json。
+  let COMPANY_INFO_CACHE=null;
+  async function loadCompanyInfo(){
+    if(!COMPANY_INFO_CACHE){
+      try{const r=await fetch('data/company_info.json?t='+Date.now());if(r.ok)COMPANY_INFO_CACHE=await r.json()}catch(e){console.warn('[loadCompanyInfo]',e);recordGlobalError('loadCompanyInfo',e);COMPANY_INFO_CACHE={companies:{}}}
+    }
+    return (COMPANY_INFO_CACHE&&COMPANY_INFO_CACHE.companies)||{};
+  }
+  let QUOTES_ALL_TW_CACHE=null;
+  async function loadQuotesAllTw(){
+    if(!QUOTES_ALL_TW_CACHE){
+      try{const r=await fetch('data/quotes_all_tw.json?t='+Date.now());if(r.ok)QUOTES_ALL_TW_CACHE=await r.json()}catch(e){console.warn('[loadQuotesAllTw]',e);recordGlobalError('loadQuotesAllTw',e);QUOTES_ALL_TW_CACHE={quotes:{}}}
+    }
+    return (QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes)||{};
+  }
+  // 類股指數名稱（market_tw.json的sectors[].name，官方28+類，2026-08-27實測
+  // 共37種）→company_info.json的industry分類文字。**這是「依股票產業分類分組」
+  // 的近似清單，不是TWSE官方指數審核過的完整成分股名冊**（openStock等既有
+  // 功能也沒有這種官方成分股資料源可用），清單畫面會誠實標註這點。部分較舊
+  // 的合併類別（水泥窯製/塑膠化工/機電/化學生技醫療）用「聯集」對應到現行
+  // 拆分後的細項分類，是盡力而為的對應，不保證跟TWSE歷史指數定義逐字一致。
+  const SECTOR_TO_INDUSTRY={
+    '水泥窯製類指數':['水泥工業'], '塑膠化工類指數':['塑膠工業','化學工業'],
+    '機電類指數':['電機機械','電器電纜'], '水泥類指數':['水泥工業'],
+    '食品類指數':['食品工業'], '塑膠類指數':['塑膠工業'],
+    '紡織纖維類指數':['紡織纖維'], '電機機械類指數':['電機機械'],
+    '電器電纜類指數':['電器電纜'],
+    '化學生技醫療類指數':['化學生技醫療','化學工業','生技醫療業'],
+    '化學類指數':['化學工業'], '生技醫療類指數':['生技醫療業'],
+    '玻璃陶瓷類指數':['玻璃陶瓷'], '造紙類指數':['造紙工業'],
+    '鋼鐵類指數':['鋼鐵工業'], '橡膠類指數':['橡膠工業'],
+    '汽車類指數':['汽車工業'], '電子工業類指數':['電子工業'],
+    '半導體類指數':['半導體業'], '電腦及週邊設備類指數':['電腦及週邊設備業'],
+    '光電類指數':['光電業'], '通信網路類指數':['通信網路業'],
+    '電子零組件類指數':['電子零組件業'], '電子通路類指數':['電子通路業'],
+    '資訊服務類指數':['資訊服務業'], '其他電子類指數':['其他電子業','其他電子類'],
+    '建材營造類指數':['建材營造'], '航運類指數':['航運業'],
+    '觀光餐旅類指數':['觀光餐旅','觀光事業'],
+    '金融保險類指數':['金融保險','金融業'], '貿易百貨類指數':['貿易百貨'],
+    '油電燃氣類指數':['油電燃氣業'],
+    '綠能環保類指數':['綠能環保','綠能環保類'],
+    '數位雲端類指數':['數位雲端','數位雲端類'],
+    '運動休閒類指數':['運動休閒','運動休閒類'],
+    '居家生活類指數':['居家生活','居家生活類'], '其他類指數':['其他'],
+  };
+  let SECTOR_LIST_CACHE=null;
+  async function openSectorList(sectorName){
+    try{
+      const industries=SECTOR_TO_INDUSTRY[sectorName];
+      const listEl=document.getElementById('sector-sheet-list');
+      const titleEl=document.getElementById('sector-sheet-title');
+      if(!listEl||!titleEl)return;
+      titleEl.textContent=sectorName.replace('類指數','')+'（成分股，依產業分類）';
+      document.getElementById('sector-mask').classList.add('open');
+      document.getElementById('sector-sheet').classList.add('open');
+      if(!industries){listEl.innerHTML='<div class="note">此類股暫無對應的產業分類資料。</div>';return}
+      listEl.innerHTML='<div class="note">載入中…</div>';
+      const [companies,quotes]=await Promise.all([loadCompanyInfo(),loadQuotesAllTw()]);
+      const codes=Object.keys(companies).filter(c=>industries.includes(companies[c].industry));
+      if(!codes.length){listEl.innerHTML='<div class="note">查無成分股資料。</div>';return}
+      let scoreMap={};
+      if(PICKS_CACHE&&PICKS_CACHE.stocks)scoreMap=Object.fromEntries(PICKS_CACHE.stocks.map(s=>[s.code,s.total_score]));
+      const rows=codes.map(code=>{
+        const q=quotes[code]||{};
+        return{code,name:companies[code].name||code,change_pct:q.change_pct,turnover:q.turnover,score:scoreMap[code]};
+      }).sort((a,b)=>(b.change_pct??-999)-(a.change_pct??-999));
+      listEl.innerHTML='<div class="note" style="margin-bottom:8px">依股票產業分類分組，非TWSE官方指數完整成分股清單；共 '+rows.length+' 檔。</div>'
+        +rows.map(r=>{
+          const chgCls=r.change_pct==null?'':(r.change_pct>=0?'pos':'neg');
+          const chgTxt=r.change_pct==null?'—':(r.change_pct>=0?'+':'')+r.change_pct.toFixed(2)+'%';
+          const turnTxt=r.turnover==null?'—':fmtLiquidity(r.turnover)+'元';
+          const scoreTxt=r.score==null?'—':r.score.toFixed(1);
+          return `<div class="row press" style="cursor:pointer" onclick="closeSectorSheet();openStock('${r.code}')">
+            <div class="nm"><b>${r.name}</b><span>${r.code}</span></div>
+            <div class="num ${chgCls}" style="min-width:64px;text-align:right">${chgTxt}</div>
+            <div class="num" style="min-width:70px;text-align:right;color:var(--ink-3);font-size:11px">${turnTxt}</div>
+            <div class="num" style="min-width:34px;text-align:right;color:var(--gold)">${scoreTxt}</div>
+          </div>`;
+        }).join('');
+    }catch(e){
+      console.warn('[openSectorList]',e);recordGlobalError('openSectorList',e);
+      const listEl=document.getElementById('sector-sheet-list');
+      if(listEl)listEl.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
+  }
+  function closeSectorSheet(){
+    document.getElementById('sector-mask').classList.remove('open');
+    document.getElementById('sector-sheet').classList.remove('open');
+  }
   let MARKET_TW_CACHE=null,MARKET_US_CACHE=null;
   // 2026-08-27 新增（P1-1）：統一的頁面頂端診斷橫幅，取代「六個面板各喊一次連線
   // 失敗」——集中檢查各個資料檔案的新鮮度，一次列出哪些過期/缺失、原因分類、
@@ -1486,10 +1588,16 @@
     await loadMarketDataFiles();
     const sectors=(MARKET_TW_CACHE&&MARKET_TW_CACHE.sectors)||[];
     if(!sectors.length){el.innerHTML='<div class="note">查無資料</div>';document.getElementById('heat-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE);return}
-    el.innerHTML=sectors.map(r=>r.change_pct==null
-      ?`<div class="tile" style="background:#383835"><b>${r.name.replace('類指數','')}</b><span>—</span></div>`
-      :`<div class="tile" style="background:${heatColor(r.change_pct)}"><b>${r.name.replace('類指數','')}</b><span>${r.change_pct>=0?'+':''}${r.change_pct.toFixed(2)}%</span></div>`
-    ).join('');
+    // 2026-08-27新增（B4）：每張卡加onclick開成分股清單（openSectorList），
+    // 用JSON.stringify(r.name)而不是直接內插字串，避免類股名稱萬一含特殊
+    // 字元(引號等)break掉onclick屬性——目前37個類股名稱都是安全的中文字，
+    // 但這樣寫比較保險，不依賴「資料源永遠不會出現特殊字元」這個假設。
+    el.innerHTML=sectors.map(r=>{
+      const nameAttr=JSON.stringify(r.name).replace(/"/g,'&quot;');
+      return r.change_pct==null
+      ?`<div class="tile press" style="background:#383835;cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>—</span></div>`
+      :`<div class="tile press" style="background:${heatColor(r.change_pct)};cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>${r.change_pct>=0?'+':''}${r.change_pct.toFixed(2)}%</span></div>`;
+    }).join('');
     document.getElementById('heat-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE);
   }
 
@@ -2414,8 +2522,17 @@
     if(f.growth_quality)itHtml+=`<div class="f"><span>近12月營收年增</span><b>${(f.growth_quality.raw.rev_growth_12m_yoy*100).toFixed(1)}%</b></div>`;
     if(f.valuation_adj)itHtml+=`<div class="f"><span>本益比 PE</span><b>${f.valuation_adj.raw.pe.toFixed(1)}</b></div>`;
     if(f.valuation_adj)itHtml+=`<div class="f"><span>PEG</span><b>${f.valuation_adj.raw.peg.toFixed(2)}</b></div>`;
-    if(f.chips)itHtml+=`<div class="f"><span>三大法人近20日買超</span><b>${(f.chips.raw.inst_net_pct_of_20d_trading_value*100).toFixed(1)}%</b></div>`;
-    if(f.technical)itHtml+=`<div class="f"><span>技術型態指標</span><b>${f.technical.raw.ma60_breakout_x_volume_index.toFixed(3)}</b></div>`;
+    // 2026-08-27修正（真bug）：scores.json現在有兩條產生管線——研究端
+    // score_v2.py的chips原始值是「近20日均成交值的百分比」
+    // (inst_net_pct_of_20d_trading_value)，JSON-only上線路徑generate_scores_live.py
+    // 沒有per股票成交值資料，只能給「累積張數」(inst_net_lots_available_days)，
+    // 兩者單位不同，不能互相假裝是同一個東西——這裡改成兩個key都檢查，各自用
+    // 正確的單位顯示，缺兩者都沒有時完全不顯示這行（不是對undefined硬呼叫
+    // .toFixed()崩潰，這是原本的bug，導致點一下選股排行列就會拋
+    // unhandledrejection，冒煙測試check#6新增的最終錯誤檢查才抓到）。
+    if(f.chips&&f.chips.raw.inst_net_pct_of_20d_trading_value!=null)itHtml+=`<div class="f"><span>三大法人近20日買超</span><b>${(f.chips.raw.inst_net_pct_of_20d_trading_value*100).toFixed(1)}%</b></div>`;
+    else if(f.chips&&f.chips.raw.inst_net_lots_available_days!=null)itHtml+=`<div class="f"><span>三大法人買賣超（累積張數）</span><b>${f.chips.raw.inst_net_lots_available_days.toFixed(0)} 張</b></div>`;
+    if(f.technical&&f.technical.raw.ma60_breakout_x_volume_index!=null)itHtml+=`<div class="f"><span>技術型態指標</span><b>${f.technical.raw.ma60_breakout_x_volume_index.toFixed(3)}</b></div>`;
     itHtml+='</div>';
     document.getElementById('report-industry-tech').innerHTML=itHtml;
 
