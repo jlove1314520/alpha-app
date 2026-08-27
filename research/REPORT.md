@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 162 輪 · 2026-08-28T05:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔）。依輪替選US（US 03:31第159輪最舊，FUT 04:01第160輪、TW 04:31第161輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中。`git log`確認自第159輪以來新增的commit（第160輪FUT跳過、B24 PIT回測結果與方法論修正、B23回補計數bug修正、第161輪TW T86回補）皆與解除暫停規則無關，未觸及`PORTFOLIO_STRATEGY_SPEC.md`。US軌依舊沒有組合策略相關工作可做，round108/111遺留的1c地基工作本質仍是單因子相關工作，同round111起連續判斷邏輯一致，保守跳過 · 本輪未做任何實質工作，`is_holdout_consumed()`確認`False`，發現不屬於本輪的既有未commit變更（`BACKLOG.md`/`PROGRESS.md`/`data/STATUS.json`/`data/price_history.json`/`scores_momentum.json`/`backfill_final.log`），依規則不觸碰，無新`TRIALS_LEDGER.md`列 · 見`US_MARATHON_STATE.md`/`US_LOG.md`第162輪記錄
+
+---
 ## 第 161 輪 · 2026-08-28T04:31+08:00 · TW · T86三大法人回補第29批（暫停單因子試驗規則生效中，屬允許的地基工作）· 取鎖乾淨（第160輪FUT正常結束）。依輪替選TW（TW 03:18第158輪最舊，US 03:31第159輪、FUT 04:01第160輪較新）。複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則生效中；股票宇宙回補確認仍81.3%（早過80%門檻），改跑`backfill_t86.py --batch-size 150` · 本批次嘗試150天全部新完成（7天無交易/無資料），未撞TWSE反爬蟲封鎖，累積3019→3169/3305（91.3%→95.9%）。`is_holdout_consumed()`確認`False`。發現不屬於本輪的未commit殘留（`data/price_history.json`修改、`research/backfill_final.log`未追蹤debris），依規則不觸碰，無新`TRIALS_LEDGER.md`列（純資料回補） · 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第161輪記錄
 
 ---
