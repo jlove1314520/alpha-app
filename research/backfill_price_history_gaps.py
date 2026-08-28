@@ -73,6 +73,14 @@ RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
 RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 FINMIND_SOURCE_KEY = "finmind"
 
+# 2026-08-28新增（資料源禮儀補洞item 2，使用者實測回報：續29這輪228檔
+# 成功後仍被FinMind判定ip banned，證明「每次請求間隔≥3秒」這個下限本身
+# 不夠——FinMind看起來還有滾動窗口式的總量偵測，不是純粹的請求間隔規則。
+# 加一道額外防線：每處理完固定批量的股票，不管前面3秒節流跑得多順，都
+# 強制停下來冷卻一段時間，降低「持續數百檔不間斷發送」本身觸發封鎖的機率。
+BATCH_SIZE = 50
+BATCH_COOLDOWN_SEC = 30.0
+
 
 def _load_rate_limit_state() -> dict:
     if RATE_LIMIT_STATE_PATH.exists():
@@ -264,8 +272,11 @@ def main():
                 break
             print(f"  {code} 補歷史失敗（跳過，不影響其他檔）：{e}")
             failed += 1
-        if (i + 1) % 50 == 0:
+        if (i + 1) % BATCH_SIZE == 0:
             print(f"  進度 {i+1}/{len(codes)}（已補{backfilled}、失敗{failed}、無增益{skipped_no_gain}）")
+            if i + 1 < len(codes):
+                print(f"  批間強制冷卻{BATCH_COOLDOWN_SEC:.0f}秒（資料源禮儀補洞item 2，不管前面節流多順都強制暫停）")
+                time.sleep(BATCH_COOLDOWN_SEC)
 
     new_count = len(prices)
     if new_count < prior_count:
