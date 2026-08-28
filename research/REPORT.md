@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 186 輪 · 2026-08-28T17:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 15:31第183輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書是台股專屬），round108/111遺留的1c地基工作本質上仍是單因子相關工作，保守跳過。**本輪整輪跳過，未做任何實質工作。**`git status`確認乾淨，僅慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生）。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約76輪、跨度約44小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`US_MARATHON_STATE.md`/`US_LOG.md`第186輪記錄
+
+---
 ## 第 185 輪 · 2026-08-28T16:32+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 15:01第182輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。本輪額外評估option(b)「train-only嚴格樣本外」是否屬於規則1允許的「補參數敏感度/補對照組」範疇——結論否：(b)會改變被測策略的IC權重計算方法論本身，等同於看到p=0.053接近顯著後回頭調整策略定義，牴觸規格書前言的hash-lock精神，跟round137補的「大盤基準統計」（純補充對照數字、不改變策略本身）性質不同，維持交由使用者裁示，不自行動手。TW軌兩項地基工作本輪重新複查仍已達標（宇宙回補`data/backfill_state.json`重新統計done 2597/skip 469=81.3%，T86回補100%），無其他已知允許工作單位。本輪整輪跳過，未做任何實質工作。開工時`git status`確認乾淨，僅慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約75輪、跨度約43.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第185輪記錄
 
 ---
