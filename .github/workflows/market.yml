@@ -77,6 +77,18 @@ jobs:
       - name: 快照三榜Top20進前瞻選股台帳picks_ledger.json
         run: python .github/scripts/build_picks_ledger.py
         continue-on-error: true
+      # 2026-08-29新增（策略監控台升級，使用者原話「forward paper嚴禁事後
+      # 補建，只能逐日往前累積」）：三榜都產生完之後，逐日mark-to-market
+      # 累積前向紙上模擬（不是回測，是真的每天用當天收盤價往前滾），
+      # 寫data/strategy_performance.json；接著重跑generate_strategies_json.py
+      # 把最新的forward_paper數字併回App實際讀的data/strategies.json，
+      # 否則App會一直顯示產生當下（手動執行那次）的舊排行/舊曲線。
+      - name: 更新策略前向紙上模擬performance（逐日累積，嚴禁回填）
+        run: python research/update_strategy_performance.py
+        continue-on-error: true
+      - name: 重新產生策略監控台data/strategies.json（併入最新前向績效）
+        run: python research/generate_strategies_json.py
+        continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
         # 2026-08-28新增（資料源禮儀補洞item 1）：跟quotes.yml同一根因——這支
@@ -89,7 +101,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json
+          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do

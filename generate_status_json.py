@@ -47,6 +47,7 @@ STALE_HOURS = {
     "data/ex_dividend_events.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
     "data/picks_ledger.json": 48,  # 一天一次的前瞻選股快照，跟margin_maintenance.json同等寬鬆門檻
     "data/strategies.json": 168,  # 手動跑generate_strategies_json.py產生，沒有排程，門檻放寬到一週避免誤標stale
+    "data/strategy_performance.json": 48,  # 掛market.yml排程更新，跟picks_ledger.json同等寬鬆門檻
 }
 
 
@@ -262,6 +263,25 @@ def describe_strategies(path: Path) -> dict:
     }
 
 
+def describe_strategy_performance(path: Path) -> dict:
+    """data/strategy_performance.json（2026-08-29新增，策略監控台升級）——
+    `research/update_strategy_performance.py`每個台股開盤日排程更新，
+    逐日mark-to-market累積前向紙上模擬（forward paper），嚴禁事後補建。
+    這是`data/strategies.json`的`forward_paper`欄位的真正資料來源。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    strategies = d.get("strategies", {})
+    summary = {
+        sid: f"{s.get('trading_days_count')}天/{s.get('forward_return_todate_pct')}%"
+        for sid, s in strategies.items()
+    }
+    return {
+        "generated_at": d.get("generated_at"),
+        "records": len(strategies),
+        "source": "research/update_strategy_performance.py（每日mark-to-market，逐日累積不可回填）",
+        "detail": f"as_of_trading_date={d.get('as_of_trading_date')} 各策略(交易日數/累積報酬)={summary}",
+    }
+
+
 def describe_picks_ledger(path: Path) -> dict:
     """data/picks_ledger.json（2026-08-28新增追蹤，資料源禮儀補洞item 3）——
     三榜（價值成長/題材動能/未來性）Top20前瞻選股快照，`build_picks_ledger.py`
@@ -306,6 +326,7 @@ DESCRIBERS = {
     "ex_dividend_events.json": describe_ex_dividend_events,
     "picks_ledger.json": describe_picks_ledger,
     "strategies.json": describe_strategies,
+    "strategy_performance.json": describe_strategy_performance,
 }
 
 
@@ -490,7 +511,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·籌碼·融資融券", "source": "data/stock_detail.json（TWSE MI_MARGN，跟大盤融資維持率共用同一次呼叫，2026-08-27起不再打FinMind；涵蓋全部上市公司含金融股；估算融資維持率為App自算，非官方資料）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
-    {"panel": "交易頁·策略監控台（2026-08-29新增）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md推導，手動執行，無排程）"},
+    {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},
     {"panel": "交易頁·大盤融資維持率", "source": "data/margin_maintenance.json（2026-08-27起改排程：分子TWSE官方MI_MARGN/STOCK_DAY_ALL，分母仍FinMind，見known_limitations）"},
     {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "無（尚無交易紀錄，誠實佔位）"},
 ]

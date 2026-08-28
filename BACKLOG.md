@@ -435,6 +435,92 @@ atomic write可重現性修法**之前**，理論上沒出錯不代表100%沒受
 `data/strategies.json`的`value_board_v2`狀態已更新為`回測未通過`
 （`generate_strategies_json.py`自動從`B24_RESULTS.md`解析，非手動改）。
 
+### 判斷：值不值得深挖（使用者授權「自行判斷、值得就自己排馬拉松繼續挖」）
+
+**判斷：值得深挖，不是死路，不換方向**。理由：
+
+1. 策略贏過買進持有（兩期分別+17pp、+31pp），也贏過**全部**100次隨機
+   對照draws——隨機對照組是從「同一個流動性500檔候選池」抽的，跟策略
+   組承受**類似的beta曝險水準**，卻仍全數輸給策略，這代表「單純持有
+   任意500檔裡的20檔」不足以解釋策略的優勢，選股本身（不只是曝險）
+   看起來是有貢獻的，不是純beta放大的假象。
+2. alpha p值不顯著（0.27/0.14）**更可能是統計檢定力/方法論問題，不是
+   訊號不存在**——用「日頻報酬」對一個「月度再平衡、只有20檔集中持股」
+   的組合做OLS alpha回歸，日內報酬的自相關/集中持股的高特異性變異
+   會拉大標準誤，970~1467個「日」觀測值對月頻策略而言，有效獨立樣本
+   數遠小於表面數字——這是選錯檢定粒度的嫌疑，不是策略沒有肉。
+3. VALIDATION期翻倍率/大賺率都輸隨機對照組更多、地雷率反而更低
+   （15.2%/34.8%/14.9% vs 12.8%/28.9%/16.9%）——risk-adjusted輪廓
+   看起來是健康的，不是靠尾部運氣撐出來的數字。
+
+**下一步（登錄為後續研究工作項，不是這輪要做的事，值得排進馬拉松佇列，
+但這輪不擅自展開多小時的統計調查，避免跟研究馬拉松目前正在跑的
+`portfolio_multifactor_v2`調查搶資源/搶時序）**：
+1. **改用月頻alpha檢定**，不要只用日頻OLS——把策略/大盤報酬聚合成
+   月報酬（跟21日再平衡週期對齊），重新做alpha回歸，樣本數變小（約
+   72個月TRAIN、48個月VALIDATION）但每個觀測值的獨立性更高，是更
+   適合這個策略頻率的檢定方式。
+2. **套用「少走彎路指南」偽影六家族控制**（見上方登錄）——尤其
+   ②改曝險/加減beta這項：拿同樣beta水準(~0.5)、但完全隨機選股的
+   對照組（不是分數排序），比較兩者alpha p值差異，隔離「beta本身」
+   跟「選股能力」兩個效應。
+3. 若使用者之後核准，可以評估把random draws拉到接近1000次以取得
+   更精確的百分位。
+4. 這份判斷+下一步刻意先只登錄在這裡（`BACKLOG.md`，本session擁有），
+   不直接改`research/TW_MARATHON_STATE.md`（目前馬拉松第201輪左右仍在
+   對`portfolio_multifactor_v2`進行中，覆寫式檔案直接改有跟它的下一次
+   寫入撞車的風險）——留給下一個處理TW軌的馬拉松輪次或使用者自己決定
+   何時排進佇列。
+
+## ✅ 2026-08-29 策略監控台升級：簡約卡片＋前向績效曲線＋點進看明細＋排行
+
+使用者要求：績效/排行一律用「每個開盤日前向模擬」(forward paper)，不用
+復盤；卡片簡約化，主圖只放forward return曲線；點進去看完整明細；樣本
+不足的策略誠實標示並排在後面。
+
+**一、`research/update_strategy_performance.py`（新增）→`data/
+strategy_performance.json`**：對`value_board_v2`/`momentum_board`/
+`future_board`三個有每日評分引擎的策略（`fut_track`跟兩個草稿baseline
+沒有每日選股輸出，不追蹤），逐日用`data/price_history.json`真實收盤
+mark-to-market，Top20等權、月度再平衡（21交易日，跟`build_picks_ledger.py`
+同一套`rank<=20`篩選邏輯）、全成本（`validation.costs.round_trip_cost_pct()`，
+跟`backtest/engine.py`同一套費率）。**核心鐵律落實**：`equity_curve`/
+`ledger`只能append「今天」這一筆，第一次執行的那天就是inception day
+（cum_return=0%），沒有、也不可能回頭補建過去的軌跡——今天（2026-08-29）
+是三個策略前向紀錄的起點，`trading_days_count`會隨每天執行逐步累積。
+已掛進`market.yml`（三榜評分產生後、picks_ledger快照後、commit前），
+接著重跑`generate_strategies_json.py`把最新前向績效併回`data/
+strategies.json`。
+
+**二、樣本閘門**：`generate_strategies_json.py`新增`forward_paper_field()`，
+`trading_days_count<20`標`sample_sufficient=false`，App卡片顯示「樣本
+不足(<20交易日)，排名僅供參考」。**排序邏輯全部在後端**（三層：
+tier0=狀態未降級+forward_paper樣本足夠，依`forward_return_todate`高到低；
+tier1=狀態未降級+forward_paper樣本不足，同上排序；tier2=狀態屬於
+`草稿`/`回測未通過`或完全沒有forward_paper，一律排最後）——**刻意的
+保守設計**：`value_board_v2`雖然有forward_paper數據，但因為B24-500
+判定「回測未通過」，排序上仍歸類到tier2排最後，不會因為前向模擬剛好
+走了幾天好運就衝上排行榜前段。前端純粹依陣列順序渲染，不自己排序。
+
+**三、卡片簡約化**（`index.html`，`strategyMonitorCardHtml()`重寫）：
+卡片只顯示策略名、狀態徽章、主數字(`forward_return_todate_pct`)、
+sparkline（用真實`equity_curve`畫，只有1個資料點時不畫線，不補假線）、
+樣本不足小標。原本卡片上的長段backtest指標網格/limitations文字全部
+移除，改點擊卡片展開（`toggleStrategyDetail()`）。
+
+**四、詳情區塊**（`strategyDetailHtml()`新增）：展開後顯示完整前向
+指標（起始日/累積交易日）、每日進出明細（`ledger`最近10筆，逐筆列出
+買賣檔數/當日損益/持股數）、歷史回測結果（若有，標「⚠以下是歷史回測
+結果，不是前向模擬，不代表未來績效」警示）、局限說明、規格/最後更新。
+
+**驗收**：冒煙測試12項全數通過；額外用一次性腳本確認點擊展開/收合
+互動正常運作、無JS錯誤。初始化跑一次（今天inception day）：
+`value_board_v2`/`momentum_board`/`future_board`各自19/20/18檔持股
+（少數股票當日查無收盤價，如實排除不硬湊），`forward_return_todate=
++0.00%`（inception day，尚無報酬可言），排序結果：題材動能榜/未來性
+濾網（tier1，紙上交易中）排前面，價值成長榜/期貨軌/兩個草稿baseline
+（tier2）排後面。
+
 ## ✅ 2026-08-29 新增「策略監控台」——策略清冊＋生命週期，狀態100%由真實檔案推導
 
 使用者原話：「把『盲目相信CC餵的結果』變成『親眼看到每個策略的狀態』」。

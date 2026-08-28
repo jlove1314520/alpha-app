@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-29T01:27:03.695126+08:00",
-  "latest_commit": "56e991a",
+  "updated_at": "2026-08-29T01:48:52.089400+08:00",
+  "latest_commit": "ab98f0f",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -124,10 +124,18 @@
     },
     {
       "path": "data/strategies.json",
-      "generated_at": "2026-08-29T01:26:51.268014+08:00",
+      "generated_at": "2026-08-29T01:42:40.114006+08:00",
       "records": 6,
       "source": "research/generate_strategies_json.py（從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md推導，非手寫）",
-      "detail": "status分布={'回測未通過': 2, '紙上交易中': 2, '草稿': 2}",
+      "detail": "status分布={'紙上交易中': 2, '回測未通過': 2, '草稿': 2}",
+      "status": "ok"
+    },
+    {
+      "path": "data/strategy_performance.json",
+      "generated_at": "2026-08-29T01:41:01.706576+08:00",
+      "records": 3,
+      "source": "research/update_strategy_performance.py（每日mark-to-market，逐日累積不可回填）",
+      "detail": "as_of_trading_date=2026-08-27 各策略(交易日數/累積報酬)={'value_board_v2': '1天/0.0%', 'momentum_board': '1天/0.0%', 'future_board': '1天/0.0%'}",
       "status": "ok"
     },
     {
@@ -265,8 +273,8 @@
       "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"
     },
     {
-      "panel": "交易頁·策略監控台（2026-08-29新增）",
-      "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md推導，手動執行，無排程）"
+      "panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）",
+      "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"
     },
     {
       "panel": "交易頁·大盤融資維持率",
@@ -329,7 +337,7 @@
     "sources": {
       "finmind": {
         "blocked": true,
-        "blocked_remaining_min": 66.1,
+        "blocked_remaining_min": 44.3,
         "block_reason": "HTTP 402 {\"msg\":\"Requests reach the upper limit. https://finmindtrade.com/\",\"status\":402,\"token_tail\":\"\"}",
         "blocked_at": "2026-08-28T16:33:14.439875+00:00"
       },
