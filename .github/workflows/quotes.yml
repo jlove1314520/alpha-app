@@ -61,6 +61,16 @@ jobs:
         if: always()  # 2026-08-26 新增：前面兩步不管誰失敗（即使兩個都失敗），只要有任何一份
         # 檔案真的寫出來了就要 commit——沒有這行，前面任一步驟(continue-on-error標成failure)
         # 仍會讓 GitHub 預設跳過後面步驟，等於已經抓到的資料白抓了。
+        #
+        # 2026-08-28 新增（P0-c）：2026-08-27T23:02Z起連續兩次失敗，查log發現真因不是
+        # 「台股/美股資料源失敗互相拖累」——兩步當時都成功(steps 5/6 conclusion=success)，
+        # 失敗的是這一步的`git push`本身：「! [rejected] main -> main (fetch first)」、
+        # 「remote contains work that you do not have locally」。這個repo有多個獨立寫入者
+        # 同時在推main（這支workflow每10分鐘一次、AlphaMarathon背景迴圈每~30分鐘commit一次、
+        # 加上使用者/Claude手動commit），checkout是job一開始做的，跑到這步時遠端可能已經
+        # 被別人推過，導致push被拒絕——這會讓「已經抓到的兩份資料」整批白丟，不是資料源
+        # 本身的問題。修法：push前先fetch+rebase同步到最新，push失敗就重試（最多5次，
+        # 每次間隔隨機3~8秒錯開，降低多個寫入者同時重試又互撞的機率）。
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -68,4 +78,16 @@ jobs:
           # 檔案不存在也不會讓這行報錯，不像明確列檔名那樣一個缺席就整行失敗。
           git add -A data/
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新盤中報價 $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
+
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "push成功（第${i}次嘗試）"
+              exit 0
+            fi
+            echo "push失敗，可能跟其他寫入者（AlphaMarathon/其他排程）撞在一起，第${i}次，fetch+rebase後重試"
+            git fetch origin main
+            git rebase origin/main || { echo "rebase衝突，放棄自動解決"; git rebase --abort; exit 1; }
+            sleep $((RANDOM % 6 + 3))
+          done
+          echo "重試5次後仍push失敗"
+          exit 1

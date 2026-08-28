@@ -71,6 +71,69 @@ PASS - 12. 整個測試過程結束後仍無累積的uncaught error
 === 冒煙測試結果：全部通過 ===
 ```
 
+## ✅ 2026-08-28 P0-a根治（使用者裝置再次實測回報「數值仍不對」，Cowork提供替換碼）
+
+上面那輪P0-a修正（`fmtTzHHMM()`等時區轉換函式）**函式本身是對的，但用
+錯地方**：`mktPill()`/`mktPillUS()`把`.tm`欄位改成顯示
+`fmtTzHHMM(data.fetched_at, tz)`——也就是「這筆報價資料的時間」，不是
+「現在時鐘時間」。這個欄位緊貼在時鐘pill裡，使用者理所當然當成時鐘看，
+但它只在抓到新報價時才變動，兩次抓價之間完全不動，看起來就跟時鐘停了/
+算錯一樣。**這才是第6次時鐘問題「函式邏輯測試全綠、使用者仍回報數值錯」
+的真正原因**——check 13前一版只驗`fmtTzHHMM()`這個函式本身算得對不對，
+沒驗「畫面上`.tm`那個欄位實際顯示的文字是不是現在時間」，測試綠燈但
+使用者裝置看到的還是壞的。
+
+修正：`.tm`欄位改回顯示`zonedNow(tz).hhmmss.slice(0,5)`，一律是該市場
+「現在時間」，每秒隨`setInterval(updateClocks,1000)`更新；資料新鮮度
+（延遲N分/已收盤）改用旁邊的label文字表達，不疊在時間欄位上，兩件事
+（現在幾點 vs. 資料多新鮮）視覺上分開，不會再混成一個看起來像時鐘、
+實際上是資料時間戳的欄位。
+
+smoke test check 13同步改成：直接讀`#mkt-tw .tm`/`#mkt-us .tm`的
+`textContent`跟測試機用`Intl.DateTimeFormat`算出的當下時間比對（誤差
+≤2分鐘），並且等1.2秒後再讀一次確認畫面文字真的有隨秒數更新——這樣
+測的是「使用者實際看到的畫面」，不是函式本身，防止同一種「函式對、
+接線錯」的bug再復發。冒煙測試14項全數通過，commit `01c489e`。
+
+## ✅ 2026-08-28 P0-c：quotes.yml盤中報價連續失敗（今天台股上午盤整個沒有近即時報價）
+
+**使用者回報**：2026-08-27T23:02Z起連續失敗，今天台股整個上午盤App都
+沒有盤中報價，這也讓時鐘旁的label卡在昨天的「已收盤」狀態。
+
+**查log找真因（用GitHub API下載失敗run的完整job log，非猜測）**：
+兩次失敗（run 33124837901於2026-08-27T23:02Z、run 33090862681於
+2026-08-27T15:59Z）的job log都顯示：抓台股報價、抓美股報價**這兩步
+都成功**（conclusion=success），失敗的是最後「Commit報價JSON」這一步
+的`git push`本身：
+```
+[main 51eb7fb] 自動更新盤中報價 2026-08-27 23:54 UTC
+To https://github.com/jlove1314520/alpha-app
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/jlove1314520/alpha-app'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref.
+##[error]Process completed with exit code 1.
+```
+
+**這推翻了使用者原本的假設**（「改成單一資料源失敗不連累另一市場，
+台股/美股各自獨立continue-on-error」）——查證後發現這兩步**本來就已經
+各自獨立`continue-on-error: true`**（2026-08-26就加好了），跟這次失敗
+無關。真正原因是**這個repo有多個獨立寫入者同時在推main**：這支workflow
+每10分鐘一次、AlphaMarathon背景迴圈每~30分鐘commit一次、加上使用者/
+Claude手動commit——job一開始checkout，跑到最後一步commit+push時遠端
+可能已經被別人推過，導致push被拒絕，**這會讓「兩份都已經抓成功的資料」
+整批白丟**，不是任何一個資料源本身故障。
+
+**修正**（`.github/workflows/quotes.yml`）：push改成迴圈重試（最多5次），
+失敗就`git fetch origin main` + `git rebase origin/main`同步到最新再重試，
+每次間隔隨機3~8秒錯開降低多個寫入者同時重試又互撞的機率；rebase若真的
+衝突（理論上機率很低，這支workflow只碰`data/quotes_*.json`兩個檔案）
+就放棄自動解決直接exit 1，不會用`--force`硬蓋掉別人的commit。
+
+**驗證**：手動觸發`workflow_dispatch`跑一次，確認`data/quotes_tw.json`
+的`generated_at`變成今天日期（結果見下方，跑完後補上）。
+
 ## ✅ 已驗收（各項附實際冒煙測試時間戳與輸出）
 
 - **B1 時鐘修復**：`setInterval` 先註冊再首次執行，兩句分開；`updateClocks()`
