@@ -839,3 +839,15 @@ TW軌兩項地基工作（宇宙回補81.3%＞80%門檻、T86回補100%）都已
 `is_holdout_consumed()`確認`False`。開工前`git status`（`alpha-app`目錄）發現不屬於本輪的殘留變更（`data/rate_limit_state.json`已修改、`research/pit_run_500.log`未追蹤），與第169–172輪記錄的殘留一致，判斷是另一互動session產生，依規則不觸碰、不納入本輪commit。沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
 
 下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
+
+---
+
+## 第 179 輪 · 2026-08-28T13:31+08:00
+
+取鎖乾淨（`LOCK_ACQUIRED`，非陳舊鎖檔）。三軌時間戳TW 12:02最舊（US 12:32第177輪／FUT 13:01第178輪），依輪替選TW。複查三個解除條件：(1) `portfolio_multifactor_v2`下一步(a)/(b)選項使用者回應——未成立，`LEADS.md`該條目自第137輪補充後無新內容；(2) `PORTFOLIO_STRATEGY_SPEC.md`使用者確認——未成立，第3行仍「待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只有這一個commit；(3) 暫停單因子試驗規則解除——未成立，`MARATHON_PROTOCOL.md`最上方該段仍在，本輪讀取時逐字確認未被修改。
+
+TW軌兩項地基工作複查：宇宙回補用`data/backfill_state.json`本輪重新統計（`Counter`），done=2597／skip=469，2597/3196=81.3%，跟第176輪記錄一致，仍＞80%門檻；T86回補依前幾輪記錄維持100%（本輪未重新掃描檔案數，僅依既有記錄，未發現任何跡象顯示需要重查）。沒有其他已知允許的背景工作。依第164/167/170/173/176輪一貫指示，本輪**整輪跳過，不做任何實質工作**。
+
+`is_holdout_consumed()`確認`False`。開工前`git status`（`alpha-app`目錄）發現不屬於本輪的殘留變更（`data/rate_limit_state.json`已修改、`research/pit_run_500.log`未追蹤），與第169–178輪記錄的殘留一致，判斷是另一互動session產生，依規則不觸碰、不納入本輪commit。沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
+
+下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
