@@ -285,6 +285,11 @@ def main():
                 "（technical/analyst/catalyst三項恆缺，見data/STATUS.json todo）",
                 "B24-500全樣本PIT回測：隨機對照組原目標1000次draws，實測後誠實降級為100次"
                 "（實測約102秒/draw，1000次×2期間需約70小時不可行，見run_value_board_v2_pit_backtest.py）",
+                "survivorship-biased（少走彎路指南item四）：可投資宇宙來自universe()現有上市"
+                "清單，下市/併購股不會出現，績效系統性高估，見B24_RESULTS.md「方法說明」",
+                "B24-500判定：不及格（兩期alpha皆不顯著，p=0.2672/0.1441），策略報酬雖贏過"
+                "買進持有+隨機對照組但無法排除beta曝險解釋，App選股頁「尚未經過組合策略回測"
+                "驗證」字樣繼續掛著，見B24_RESULTS.md",
             ],
         ),
         build_strategy(

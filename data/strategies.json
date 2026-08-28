@@ -1,14 +1,32 @@
 {
-  "generated_at": "2026-08-29T00:59:41.695058+08:00",
+  "generated_at": "2026-08-29T01:26:51.268014+08:00",
   "note": "本頁面/檔案所有數字僅供研究參考，非投資建議。狀態欄位100%由本腳本從真實檔案（scores*.json/data/picks_ledger.json/research/TRIALS_LEDGER.md/research/B24_RESULTS.md）推導，找不到來源檔一律顯示null/尚未，不寫死樂觀值。",
   "strategies": [
     {
       "id": "value_board_v2",
       "name": "價值成長榜",
       "type": "選股",
-      "status": "回測中",
+      "status": "回測未通過",
       "spec": "score_v2.py 八大因子（估值/成長/品質/動能等），App選股頁正式上線引擎",
-      "backtest": null,
+      "backtest": {
+        "年化報酬_train_pct": 75.87128558427389,
+        "年化報酬_validation_pct": 85.51728807886627,
+        "sharpe原始": 0.996700860895288,
+        "sharpe_x0.5": 0.498350430447644,
+        "sharpe_x0.7": 0.6976906026267016,
+        "cvar95_日pct": -2.79160008722612,
+        "勝率pct": 45.42857142857143,
+        "mdd_pct": -28.674109948999515,
+        "sortino": 0.9440810468511258,
+        "翻倍率pct": 15.2,
+        "地雷率pct": 14.9,
+        "隨機對照百分位": 100.0,
+        "隨機對照draws次數": 100,
+        "alpha_p值": 0.1440817396337567,
+        "alpha顯著": false,
+        "期間": "2015-01-01~2024-12-31（TRAIN 2015-01-01~2020-12-31，VALIDATION 2021-01-01~2024-12-31）",
+        "來源檔": "research/B24_RESULTS.md"
+      },
       "paper": {
         "起始日": "2026-08-27",
         "快照數": 2,
@@ -19,9 +37,11 @@
       },
       "limitations": [
         "JSON-only上線路徑（generate_scores_live.py）覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺，見data/STATUS.json todo）",
-        "B24-500全樣本PIT回測：隨機對照組原目標1000次draws，實測後誠實降級為100次（實測約102秒/draw，1000次×2期間需約70小時不可行，見run_value_board_v2_pit_backtest.py）"
+        "B24-500全樣本PIT回測：隨機對照組原目標1000次draws，實測後誠實降級為100次（實測約102秒/draw，1000次×2期間需約70小時不可行，見run_value_board_v2_pit_backtest.py）",
+        "survivorship-biased（少走彎路指南item四）：可投資宇宙來自universe()現有上市清單，下市/併購股不會出現，績效系統性高估，見B24_RESULTS.md「方法說明」",
+        "B24-500判定：不及格（兩期alpha皆不顯著，p=0.2672/0.1441），策略報酬雖贏過買進持有+隨機對照組但無法排除beta曝險解釋，App選股頁「尚未經過組合策略回測驗證」字樣繼續掛著，見B24_RESULTS.md"
       ],
-      "last_updated": "2026-08-28T16:03:04.958843+08:00"
+      "last_updated": "2026-08-29T01:26:26.544008+08:00"
     },
     {
       "id": "momentum_board",
@@ -97,7 +117,7 @@
         "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
         "TRIALS_LEDGER.md#10/#11已有較早的weinstein_stage2試點記錄（手選30檔試點FAIL、無偏宇宙+配對式對照組版EXPERIMENTAL），這個新baseline候選要重新設計，不是重跑舊版"
       ],
-      "last_updated": "2026-08-29T00:59:41.695050+08:00"
+      "last_updated": "2026-08-29T01:26:51.268006+08:00"
     },
     {
       "id": "cta_trend_following_baseline",
@@ -111,7 +131,7 @@
         "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
         "跟TRIALS_LEDGER.md已測過的#18`fut_trend_multi_tf`（10/20/60日動能訊號多數決）不是同一個東西——那是截面/多時間框架訊號的組合判定，這裡要做的是經典CTA式單一時序動量（例如12個月回顧報酬正負號），設計上更接近學術文獻的標準定義，不能直接沿用#18已FAIL的結論當作這個新候選也會失敗的證據"
       ],
-      "last_updated": "2026-08-29T00:59:41.695054+08:00"
+      "last_updated": "2026-08-29T01:26:51.268011+08:00"
     }
   ]
 }
