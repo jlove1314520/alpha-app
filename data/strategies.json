@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-08-29T00:30:39.769596+08:00",
+  "note": "本頁面/檔案所有數字僅供研究參考，非投資建議。狀態欄位100%由本腳本從真實檔案（scores*.json/data/picks_ledger.json/research/TRIALS_LEDGER.md/research/B24_RESULTS.md）推導，找不到來源檔一律顯示null/尚未，不寫死樂觀值。",
+  "strategies": [
+    {
+      "id": "value_board_v2",
+      "name": "價值成長榜",
+      "type": "選股",
+      "status": "回測中",
+      "spec": "score_v2.py 八大因子（估值/成長/品質/動能等），App選股頁正式上線引擎",
+      "backtest": null,
+      "paper": {
+        "起始日": "2026-08-27",
+        "快照數": 2,
+        "至今報酬pct": 1.53,
+        "至今報酬樣本數": "19/20（有些pick快照當時價格缺失，如實排除不補值）",
+        "來源": "data/picks_ledger.json",
+        "計算方式": "等權、不重新平衡、不計成本的未實現報酬估計（最早快照收盤價 vs 目前最新收盤價），非嚴謹回測"
+      },
+      "limitations": [
+        "JSON-only上線路徑（generate_scores_live.py）覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺，見data/STATUS.json todo）",
+        "B24-500全樣本PIT回測：隨機對照組原目標1000次draws，實測後誠實降級為100次（實測約102秒/draw，1000次×2期間需約70小時不可行，見run_value_board_v2_pit_backtest.py）"
+      ],
+      "last_updated": "2026-08-28T16:03:04.958843+08:00"
+    },
+    {
+      "id": "momentum_board",
+      "name": "題材動能榜",
+      "type": "選股",
+      "status": "紙上交易中",
+      "spec": "generate_scores_momentum.py 十大因子（相對強度/量價配合度/籌碼集中度等），App選股頁正式上線引擎",
+      "backtest": null,
+      "paper": {
+        "起始日": "2026-08-28",
+        "快照數": 1,
+        "至今報酬pct": 2.86,
+        "至今報酬樣本數": "20/20（有些pick快照當時價格缺失，如實排除不補值）",
+        "來源": "data/picks_ledger.json",
+        "計算方式": "等權、不重新平衡、不計成本的未實現報酬估計（最早快照收盤價 vs 目前最新收盤價），非嚴謹回測"
+      },
+      "limitations": [
+        "尚無PIT回測引擎——generate_scores_momentum.py是JSON-only上線評分路徑，讀「即時累積快照」（data/price_history.json目前僅90天），不是TRIALS_LEDGER.md既有框架用的load_dev()歷史parquet資料（2010-2024train/val切分）",
+        "要做歷史回測，第一步得先建一套「用歷史FinMind快取重算這10個新因子」的管線（比照factors.py::prepare_factors()模式），工作量不小於這支JSON-only腳本本身（見TRIALS_LEDGER.md「待測」章節2026-08-27條目）"
+      ],
+      "last_updated": "2026-08-28T16:03:04.982242+08:00"
+    },
+    {
+      "id": "future_board",
+      "name": "未來性濾網",
+      "type": "選股",
+      "status": "紙上交易中",
+      "spec": "generate_scores_future.py 五大因子（法人籌碼行為/毛利率品質/產能利用率代理等），App選股頁正式上線引擎",
+      "backtest": null,
+      "paper": {
+        "起始日": "2026-08-27",
+        "快照數": 2,
+        "至今報酬pct": 0.27,
+        "至今報酬樣本數": "18/20（有些pick快照當時價格缺失，如實排除不補值）",
+        "來源": "data/picks_ledger.json",
+        "計算方式": "等權、不重新平衡、不計成本的未實現報酬估計（最早快照收盤價 vs 目前最新收盤價），非嚴謹回測"
+      },
+      "limitations": [
+        "尚無PIT回測引擎，跟題材動能榜同一個缺口（見上方momentum_board的limitations，同一份TRIALS_LEDGER.md記錄涵蓋兩榜）",
+        "customer_concentration（營收客戶集中度）因子未實作，沒有現成免費資料源，誠實留白"
+      ],
+      "last_updated": "2026-08-28T16:03:04.966969+08:00"
+    },
+    {
+      "id": "fut_track",
+      "name": "期貨軌（TAIFEX台指期策略假說）",
+      "type": "期貨",
+      "status": "回測未通過",
+      "spec": "台指期連續合約 + 因子/策略假說掃描（fut_cheap_gate.py配對式隨機控制組200次排列）",
+      "backtest": null,
+      "paper": null,
+      "trials_summary": {
+        "已測試假說數": 28,
+        "通過統計驗證數": 0,
+        "來源": "research/TRIALS_LEDGER.md（動態解析FUT軌列數，非寫死數字）"
+      },
+      "limitations": [
+        "截至本次產生，已測試28個策略假說，全部未通過統計驗證關卡",
+        "這不是「還沒開始做」，是誠實做過完整的配對式隨機控制組檢定，目前確實還沒找到站得住腳的訊號",
+        "數字動態從research/TRIALS_LEDGER.md算出，不是寫死的——之後這份帳本增列，這裡會自動更新"
+      ],
+      "last_updated": "2026-08-27T23:22:38.574530+08:00"
+    }
+  ]
+}

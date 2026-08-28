@@ -46,19 +46,39 @@ leakage()`，結構性擋掉任何holdout洩漏——就算這支腳本想不小
 ——後者需要動用holdout，必須先取得使用者明確同意才能做（見BACKLOG.md
 B16/B24條目、CLAUDE.md安全紅線）。**
 
-**這輪只是機制驗證跑，不是最終結果（使用者原話「這是大工程，這一輪先把
-回測執行腳本的骨架/資料準備部分做出來，不用一次做完整套統計檢定」）**：
-- 隨機對照組這輪先用`N_RANDOM_DRAWS_QUICK`（30次，跟run_score_backtest.py
-  第一版同樣的可行性考量：每次draw都要重跑一次完整多年期週期回測，1000次
-  在這輪要驗證機制是否work的階段太慢，等機制確認正確後再視實際跑一次
-  1000次draws要多久決定要不要維持1000或誠實揭露降級數字，跟
-  run_score_backtest.py docstring說明的200→60降級同一個誠實揭露慣例）。
-- 尚未寫進`TRIALS_LEDGER.md`（那裡的紀律要求完整的Bonferroni累積校正跟
-  正式判定，這輪的機制驗證跑不算一次正式試驗，等真正用1000 draws+正式
-  判定跑完才登錄）。
+**2026-08-29第三次修訂：正式全樣本回測（使用者原話「B24-500全樣本回測，
+todo P0/B16，最高優先」，取代先前的機制驗證跑）**：
+- 可投資宇宙從「隨機抽樣500檔」改成「流動性（近20日均成交值）由高到低
+  取前500檔」（`liquidity_ranked_universe_ids()`）——隨機抽樣可能抽到大量
+  流動性不足的股票，跟這支腳本自己的流動性門檻（`liquidity_insufficient`）
+  互相打架；改用流動性排序後的池子，理論上能穩定湊滿20檔持股，不會再
+  重演100檔隨機樣本「合格池只剩11.5檔、40-45%資金閒置現金」的結構性
+  偏誤。流動性排序**用`data/price_history.json`目前(2026-08)最近20個
+  交易日的均成交值算，是一個「現在」的排序、固定用在整個2015-2024回測
+  期間，不是逐期歷史當下重新排序**——這是跟先前「隨機500檔」同一等級
+  的簡化（都是固定用一組ticker清單跑完整段回測，不是每個再平衡日動態
+  改變可投資池），誠實記錄這個簡化，不是嚴格的「歷史當下流動性PIT」。
+- 隨機對照組原本要從`N_RANDOM_DRAWS_QUICK=30`（機制驗證用）升級到使用者
+  規格的1000次，但**實測後誠實降級**：用既有500檔快取實測5次draw（僅
+  VALIDATION 4年期間），機器同時有另一個獨立CPU重載作業在跑（未動它），
+  量到約102秒/draw——換算1000次draws×2期間(TRAIN 6年+VALIDATION 4年)
+  ×1榜需要約70小時（~3天），這一輪不可行。使用者2026-08-29核准降級到
+  `N_RANDOM_DRAWS=100`（比先前30次有意義地提升，且能在同一個session的
+  背景時間內跑完，預估約7小時），跟`run_score_backtest.py`docstring
+  說明的200→60降級同一個誠實揭露慣例——這仍然只是100次，不是1000次，
+  百分位估計的統計把握程度要照實揭露，不能假裝是1000次等級的證據。
+- 新增調整後Sharpe（原值×0.5/×0.7兩欄，標「實盤預期區間」，
+  `sharpe_ratio()`/`adjusted_sharpe()`）、CVaR(95%,日)（`cvar_95()`）、
+  勝率（`win_rate()`，僅供報告參考，不作為判定依據——使用者B24原始規格
+  「評判順序：淨利與MDD達標→Sortino→alpha顯著→夏普最後→勝率不看」）。
+- 這一輪如果結果及格（贏大盤/alpha顯著），才寫進`TRIALS_LEDGER.md`正式
+  登錄；不及格就如實在`B24_RESULTS.md`/`BACKLOG.md`記錄「不及格」，
+  App選股頁「本榜為資料排序，尚未經過組合策略回測驗證」那行字繼續掛著，
+  不因為跑完就拿掉，這是使用者本輪明確的鐵律。
 """
 from __future__ import annotations
 
+import json
 import pickle
 import sys
 from pathlib import Path
@@ -70,7 +90,8 @@ import pandas as pd
 from scipy import stats
 
 from backtest.engine import BacktestConfig, run_backtest
-from factor_ic import SAMPLE_SEED, START_DATE, sample_universe_ids, load_sample_with_factors
+from factor_ic import START_DATE, load_sample_with_factors
+from universe import universe as build_universe
 from finmind_client import load_dev
 from score import load_industry_map
 from score_v2 import compute_scores_v2
@@ -79,17 +100,95 @@ from validation import holdout
 
 TOP_N = 20  # 使用者規格：持股20檔
 REBALANCE_DAYS = 21  # 月度再平衡（21個交易日近似一個月，跟portfolio_backtest_v2.py同一個慣例）
-N_RANDOM_DRAWS_QUICK = 30  # 機制驗證用，見模組docstring「這輪只是機制驗證跑」說明
+N_RANDOM_DRAWS = 100  # 2026-08-29誠實降級（見模組docstring「正式修訂」段落）：目標1000次，實測約102秒/draw
+                       # 換算不可行（~70小時），使用者核准降到100次，比先前機制驗證用的30次有意義提升
 RANDOM_CONTROL_SEED = 20260828
-# 2026-08-28新增（使用者核准「回測樣本擴大：核准擴到500檔（一次性）」）：
-# 刻意**不**改`factor_ic.py`的全域`SAMPLE_SIZE`常數（那會影響其他既有試驗
-# 對「100檔樣本」的既有引用/可重現性），只在這支腳本內用一個獨立的本地
-# 常數，呼叫`sample_universe_ids(VALUE_BOARD_SAMPLE_SIZE, SAMPLE_SEED)`——
-# 同一個seed但不同sample_size，Python的`random.Random(seed).sample()`
-# 內部消耗隨機數的方式跟k有關，500檔集合**不保證**是100檔集合的超集，
-# 是一個全新、獨立的500檔隨機樣本，不是「舊100+新400」的疊加，誠實記錄
-# 這個技術細節。
 VALUE_BOARD_SAMPLE_SIZE = 500
+REPO_ROOT = Path(__file__).resolve().parent.parent
+PRICE_HISTORY_PATH = REPO_ROOT / "data" / "price_history.json"
+LIQUIDITY_LOOKBACK_DAYS = 20
+
+
+def liquidity_ranked_universe_ids(n: int, lookback_days: int = LIQUIDITY_LOOKBACK_DAYS) -> list[str]:
+    """2026-08-29新增（B24-500正式全樣本回測，取代先前的隨機抽樣500檔）：
+    以近`lookback_days`個交易日的均成交值由高到低排序，取前`n`檔——目的是
+    確保扣掉流動性門檻後仍能穩定湊滿`TOP_N`持股，修掉先前隨機抽樣導致
+    「合格池只剩約11.5檔、40-45%資金閒置現金」的結構性偏誤。
+
+    資料來源：App的`data/price_history.json`（每日排程累積，目前約2831檔
+    有紀錄，涵蓋率約universe()全市場3196檔的88.6%），不用另外打API，符合
+    資料源禮儀。**誠實揭露簡化**：這是用「現在」（2026-08）最近20個交易日
+    的均成交值排序，固定用這一組ticker清單跑完整段2015-2024回測，不是
+    逐期歷史當下重新排序——跟先前「隨機500檔」同一等級的簡化，不是嚴格
+    PIT流動性排序（那需要全市場10年逐日成交值歷史，不在這輪範圍內）。
+    只取在`universe()`（survivorship-free全市場清單）裡的股票，維持
+    survivorship-free。
+
+    **2026-08-29修正（首次跑就抓到的真bug）**：`universe()`本身混進了
+    "TAIEX"/"TPEx"這兩個指數代碼（`industry_category`="大盤"，不是個股），
+    成交值天生遠高於任何單一股票，流動性排序沒過濾的話**保證每次都會
+    排到最前面**——不是隨機抽樣時偶爾抽到的邊緣case，是排序法的必然結果，
+    會讓回測試圖「買進」一個指數而不是股票。用跟`backfill_price_history_
+    gaps.py`/`generate_scores_momentum.py`同一份`NON_STOCK_INDUSTRIES`
+    排除清單過濾掉（ETF/ETN/指數/受益證券/存託憑證/大盤等非個股類別）。
+    """
+    non_stock_industries = {
+        "ETF", "ETN", "上櫃ETF", "上櫃指數股票型基金(ETF)", "指數投資證券(ETN)",
+        "受益證券", "存託憑證", "Index", "大盤", "所有證券",
+    }
+    u = build_universe()
+    valid_ids = set(u[~u["industry_category"].isin(non_stock_industries)]["stock_id"])
+    payload = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8"))
+    prices = payload.get("prices", {})
+    ranked = []
+    for sid, rows in prices.items():
+        if sid not in valid_ids or not rows:
+            continue
+        window = sorted(rows, key=lambda r: r["date"])[-lookback_days:]
+        vals = [r["turnover"] for r in window if r.get("turnover") is not None]
+        if not vals:
+            continue
+        ranked.append((sid, sum(vals) / len(vals)))
+    ranked.sort(key=lambda x: -x[1])
+    return [sid for sid, _ in ranked[:n]]
+
+
+def sharpe_ratio(equity_curve: pd.DataFrame) -> float:
+    """跟portfolio_backtest_v2.py::sharpe_ratio()逐行一致的公式，自成一體
+    複製一份（不同因子引擎，各自獨立，不跨檔案import）。"""
+    eq = equity_curve["equity"]
+    if len(eq) < 2:
+        return float("nan")
+    r = eq.pct_change().dropna()
+    if r.empty or r.std() == 0:
+        return float("nan")
+    return float(r.mean() / r.std() * np.sqrt(252))
+
+
+def cvar_95(equity_curve: pd.DataFrame) -> float:
+    """2026-08-29新增（B26規格）：CVaR(95%)——日報酬分布最差5%那段的平均值
+    （不是年化，單位是「日報酬%」，避免跟年化指標混淆）。"""
+    eq = equity_curve["equity"]
+    if len(eq) < 2:
+        return float("nan")
+    r = eq.pct_change().dropna()
+    if r.empty:
+        return float("nan")
+    var_95 = r.quantile(0.05)
+    tail = r[r <= var_95]
+    return float(tail.mean() * 100) if len(tail) else float("nan")
+
+
+def win_rate(trades: pd.DataFrame) -> float:
+    """2026-08-29新增（B24規格「勝率」，僅供報告參考，不作為及格判定依據
+    ——使用者原話「評判順序：淨利與MDD達標→Sortino→alpha顯著→夏普最後→
+    勝率不看」）。closed trades（side=sell）中realized_pnl>0的比例。"""
+    if trades.empty or "side" not in trades.columns:
+        return float("nan")
+    closes = trades[trades["side"].isin(["sell", "close"])]
+    if closes.empty or "realized_pnl" not in closes.columns:
+        return float("nan")
+    return float((closes["realized_pnl"] > 0).mean() * 100)
 
 
 def eligible_for_ranking_v2(cs: pd.DataFrame) -> pd.DataFrame:
@@ -253,10 +352,18 @@ def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: di
           f"大賺率(曾達+50%)={moonshot['big_win_rate']}%  地雷率(曾跌破-30%)={moonshot['mine_rate']}%  "
           f"（{moonshot['n_entries']}次進場事件，{moonshot['truncated_entries']}筆因接近回測尾端資料不足12個月而截斷）")
 
-    print(f"  隨機對照組（{N_RANDOM_DRAWS_QUICK}次，機制驗證用，非最終1000次）...")
+    sharpe_raw = sharpe_ratio(result.equity_curve)
+    sharpe_x05 = sharpe_raw * 0.5 if sharpe_raw == sharpe_raw else float("nan")
+    sharpe_x07 = sharpe_raw * 0.7 if sharpe_raw == sharpe_raw else float("nan")
+    cvar95 = cvar_95(result.equity_curve)
+    wr = win_rate(result.trades)
+    print(f"  Sharpe原始={sharpe_raw:.3f}  調整後×0.5={sharpe_x05:.3f}  ×0.7={sharpe_x07:.3f}（實盤預期區間）  "
+          f"CVaR(95%,日)={cvar95:.3f}%  勝率={wr:.1f}%（僅供參考，不作為及格判定依據）")
+
+    print(f"  隨機對照組（{N_RANDOM_DRAWS}次）...")
     random_finals = []
     random_moonshot_rates, random_big_win_rates, random_mine_rates = [], [], []
-    for i in range(N_RANDOM_DRAWS_QUICK):
+    for i in range(N_RANDOM_DRAWS):
         rcfg = BacktestConfig(start_date=start, end_date=end, max_positions=TOP_N,
                               rebalance_every_n_days=REBALANCE_DAYS, book_name="value_board_v2_random_control")
         rfn = make_random_signal_fn(industry_map, START_DATE, TOP_N, seed=RANDOM_CONTROL_SEED + i)
@@ -267,10 +374,12 @@ def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: di
             random_moonshot_rates.append(rm["moonshot_rate"])
             random_big_win_rates.append(rm["big_win_rate"])
             random_mine_rates.append(rm["mine_rate"])
+        if (i + 1) % 100 == 0:
+            print(f"    draw進度 {i+1}/{N_RANDOM_DRAWS}")
     real_final = result.final_equity
     percentile = 100.0 * float(np.mean([real_final > rf for rf in random_finals]))
     print(f"  真實策略終值 {real_final:,.0f} vs 隨機對照組中位數 {np.median(random_finals):,.0f}"
-          f"（百分位 {percentile:.1f}，{N_RANDOM_DRAWS_QUICK}次draws，非最終1000次）")
+          f"（百分位 {percentile:.1f}，{N_RANDOM_DRAWS}次draws）")
     rand_moonshot_avg = round(float(np.mean(random_moonshot_rates)), 1) if random_moonshot_rates else None
     rand_big_win_avg = round(float(np.mean(random_big_win_rates)), 1) if random_big_win_rates else None
     rand_mine_avg = round(float(np.mean(random_mine_rates)), 1) if random_mine_rates else None
@@ -282,10 +391,12 @@ def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: di
         "label": label, "start": start, "end": end,
         "return_pct": result.total_return_pct, "mdd_pct": result.max_drawdown_pct,
         "sortino": result.sortino_ratio, "n_trades": result.n_trades,
+        "sharpe_raw": sharpe_raw, "sharpe_x05": sharpe_x05, "sharpe_x07": sharpe_x07,
+        "cvar_95_daily_pct": cvar95, "win_rate_pct": wr,
         "buy_and_hold_pct": bh, "bh_mdd_pct": bh_stats["mdd_pct"], "bh_sortino": bh_stats["sortino"],
         "alpha_ann_pct": alpha["alpha_ann_pct"], "beta": alpha["beta"],
         "alpha_pvalue": alpha["alpha_pvalue"], "alpha_significant": alpha["alpha_significant"],
-        "random_control_percentile_quick": percentile, "random_draws_quick": N_RANDOM_DRAWS_QUICK,
+        "random_control_percentile": percentile, "random_draws": N_RANDOM_DRAWS,
         "moonshot_rate": moonshot["moonshot_rate"], "big_win_rate": moonshot["big_win_rate"],
         "mine_rate": moonshot["mine_rate"], "moonshot_n_entries": moonshot["n_entries"],
         "random_moonshot_rate_avg": rand_moonshot_avg, "random_big_win_rate_avg": rand_big_win_avg,
@@ -294,17 +405,19 @@ def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: di
 
 
 def main():
-    sample_ids = sample_universe_ids(VALUE_BOARD_SAMPLE_SIZE, SAMPLE_SEED)
+    sample_ids = liquidity_ranked_universe_ids(VALUE_BOARD_SAMPLE_SIZE)
+    print(f"流動性排序前{VALUE_BOARD_SAMPLE_SIZE}檔（取代先前隨機抽樣），"
+          f"前5檔：{sample_ids[:5]}")
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     holdout.assert_no_holdout_leakage(market_raw, context="market_raw in run_value_board_v2_pit_backtest")
     market_df = prepare_market_data(market_raw)
 
-    # 2026-08-28新增：load_sample_with_factors()對100檔樣本本身要約22分鐘
-    # （prepare_factors()真實運算，不是網路請求，見BACKLOG.md記錄），這支
-    # 腳本之後還會反覆重跑（sanity check/拉高random draws次數），每次都
-    # 重付22分鐘不划算——這裡加一層pickle本地快取（只快取這支腳本自己用，
-    # 不動factor_ic.py本身，不影響其他呼叫端）。
-    cache_path = Path(__file__).parent / "data" / "backtests" / f"value_board_v2_sample_cache_{VALUE_BOARD_SAMPLE_SIZE}.pkl"
+    # 2026-08-29：cache檔名加上liquidity500區分先前的隨機抽樣500檔快取
+    # （value_board_v2_sample_cache_500.pkl），避免誤用到不同選股方法的
+    # 樣本——這是全新的股票清單，不能沿用舊快取。load_sample_with_factors()
+    # 對500檔樣本首次跑約20分鐘（prepare_factors()真實運算，不是網路請求），
+    # 之後重跑（例如拉高random draws次數）直接吃這個快取。
+    cache_path = Path(__file__).parent / "data" / "backtests" / f"value_board_v2_sample_cache_liquidity{VALUE_BOARD_SAMPLE_SIZE}.pkl"
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     if cache_path.exists():
         print(f"Loading sample + factors from local cache ({cache_path})...")
@@ -326,17 +439,19 @@ def main():
     train_result = run_period("TRAIN", data, market_df, industry_map, "2015-01-01", holdout.TRAIN_END)
     val_result = run_period("VALIDATION", data, market_df, industry_map, "2021-01-01", holdout.VAL_END)
 
-    print(f"\n=== SUMMARY（{VALUE_BOARD_SAMPLE_SIZE}檔樣本，機制驗證跑，尚未登錄TRIALS_LEDGER.md）===")
+    print(f"\n=== SUMMARY（流動性前{VALUE_BOARD_SAMPLE_SIZE}檔，{N_RANDOM_DRAWS}次隨機對照draws，正式全樣本回測）===")
     for r in (train_result, val_result):
         print(f"  {r['label']}: 策略={r['return_pct']:+.2f}% vs 買進持有={r['buy_and_hold_pct']:+.2f}%  "
               f"MDD策略/大盤={r['mdd_pct']:.2f}%/{r['bh_mdd_pct']:.2f}%  "
               f"Sortino策略/大盤={r['sortino']:.3f}/{r['bh_sortino']:.3f}  "
-              f"alpha={r['alpha_ann_pct']:+.2f}%(顯著={r['alpha_significant']})  "
-              f"隨機對照百分位={r['random_control_percentile_quick']:.1f}(僅{r['random_draws_quick']}次)  "
+              f"Sharpe原始/×0.5/×0.7={r['sharpe_raw']:.3f}/{r['sharpe_x05']:.3f}/{r['sharpe_x07']:.3f}  "
+              f"CVaR(95%,日)={r['cvar_95_daily_pct']:.3f}%  勝率={r['win_rate_pct']:.1f}%  "
+              f"alpha={r['alpha_ann_pct']:+.2f}%(顯著={r['alpha_significant']}, p={r['alpha_pvalue']:.4f})  "
+              f"隨機對照百分位={r['random_control_percentile']:.1f}({r['random_draws']}次)  "
               f"翻倍率/大賺率/地雷率：策略{r['moonshot_rate']}%/{r['big_win_rate']}%/{r['mine_rate']}% "
               f"vs 隨機{r['random_moonshot_rate_avg']}%/{r['random_big_win_rate_avg']}%/{r['random_mine_rate_avg']}%")
 
-    out_path = Path(__file__).parent / "data" / f"value_board_v2_pit_backtest_{VALUE_BOARD_SAMPLE_SIZE}_quicklook.csv"
+    out_path = Path(__file__).parent / "data" / f"value_board_v2_pit_backtest_liquidity{VALUE_BOARD_SAMPLE_SIZE}_full.csv"
     pd.DataFrame([train_result, val_result]).to_csv(out_path, index=False)
     print(f"saved {out_path}")
     return train_result, val_result
