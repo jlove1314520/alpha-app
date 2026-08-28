@@ -1002,3 +1002,15 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 `is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。
 
 ---
+
+## 2026-08-28T08:32:00+08:00 — 馬拉松第169輪：跳過（暫停規則生效中）
+
+**選軌理由**：取鎖乾淨。三軌時間戳：FUT 07:01（第166輪，最舊）/TW 07:33（第167輪）/US 08:01（第168輪，最新）——依輪替選FUT。
+
+**判定**：複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中，跟FUT軌本身無關（規格書全部圍繞TAIEX/TWSE台股樣本，不涉及期貨）。FUT軌round104留下的盤別效應第三批待辦本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過。同時複查`TW_MARATHON_STATE.md`——TW軌兩項地基背景工作（宇宙回補81.3%、T86回補100%）仍維持已達標，目前三軌皆無已知允許的工作單位可做。**本輪整輪跳過，未做任何實質工作。**
+
+**額外發現**：開工時`git status`發現屬於另一互動session的殘留變更——`data/rate_limit_state.json`（已修改，推測是`6d98d64`速率限制修正之後持續運作的模組寫入狀態）、`research/pit_run_500.log`（未追蹤，推測跟同一session的B24 PIT回測500檔擴大測試有關）。兩者皆非本輪馬拉松產生，依規則不觸碰、不加入本輪commit。
+
+`is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。
+
+---
