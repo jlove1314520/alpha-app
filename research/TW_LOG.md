@@ -931,3 +931,26 @@ TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`
 沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
 
 下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
+
+## 第 194 輪 · 2026-08-28T21:01+08:00 · TW（跳過，暫停規則生效中）
+
+取鎖乾淨（非陳舊鎖檔）。依三軌時間戳輪替選TW（TW 19:31第191輪最舊，US 20:02第192輪、FUT 20:31第193輪次之）。
+
+複查暫停單因子試驗規則的三個解除條件：
+1. `portfolio_multifactor_v2`「下一步」選項(a)換全市場樣本重跑IC加權+季頻、(b)train-only嚴格樣本外——使用者未回應。
+2. `PORTFOLIO_STRATEGY_SPEC.md`使用者確認——`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，狀態仍「待使用者確認」。
+3. 暫停單因子試驗規則本身解除——`MARATHON_PROTOCOL.md`最上方該段仍在，未被移除或修改。
+
+三者皆未成立。重新複查TW軌兩項地基工作：
+- 宇宙回補：`data/backfill_state.json`本輪重新統計，`Counter({'done': 2597, 'skip': 469})`，總計3066筆，2597/3196=81.3%，與第191輪一致（無落差）。
+- T86回補：自第164輪起已達100%（3305個工作日全範圍已快取）。
+
+兩項均已達標，沒有其他已知允許的背景工作單位。
+
+**本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`。開工前`git status`（`alpha-app`目錄）確認乾淨，僅有慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生，非本輪），未觸碰、未納入commit。
+
+沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
+
+下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
