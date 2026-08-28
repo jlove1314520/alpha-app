@@ -42,7 +42,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     --nav-h:64px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;overflow:hidden}
+  /* 2026-08-28修正（黑格問題第二輪，跟status-bar-style改black併用）：
+     100% 靠父層（html的height:100%又靠viewport meta）層層傳遞容易在iOS
+     獨立App模式跟某個環節對不上，改用100lvh（large viewport height，
+     瀏覽器工具列收合時的最大視窗高度）直接量viewport本身，不透過%層層
+     繼承。 */
+  html,body{height:100lvh;min-height:100lvh;overflow:hidden}
   .num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
   @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .rise{animation:rise .5s cubic-bezier(.22,.9,.3,1) both}
@@ -61,7 +66,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
        剛好符合「標題/數字用 Sora、中文內文用系統字體」，不用逐一標記。 */
     font-family:'Sora',system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;
     font-size:14px; line-height:1.45; overflow:hidden;
-    position:fixed; inset:0; width:100%;
+    /* 2026-08-28修正（黑格問題第二輪）：inset:0（等於top/right/bottom/left
+       都是0）會讓body的實際高度回頭依賴「視窗高度」這個量測結果——上一輪
+       實機診斷抓到iOS獨立App模式在black-translucent狀態列下量出的視窗
+       高度會少算狀態列那一截（innerH=793≠螢幕852），inset:0的bottom:0就
+       釘在這個少算的793上。改成明確給height:100lvh，不透過inset反推，
+       直接撐滿大視窗高度。 */
+    position:fixed; top:0; left:0; right:0; height:100lvh; width:100%;
   }
   /* 2026-08-25 修正：iPhone 16 實機回報 nav 貼不到螢幕底部（改了三輪都沒解決）。
      根因懷疑：#app 原本用 height:100dvh——dvh 在 iOS Safari 上會隨網址列展開/收合
@@ -71,9 +82,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      position:fixed;inset:0（等於直接釘死在視覺視窗），這裡讓 #app 也直接用
      position:fixed;inset:0，不透過 dvh 這個會變動的單位換算，理論上比 dvh 更可靠。
      position:fixed 搭配 left:0/right:0（inset:0 展開後的效果）+ max-width + margin:0 auto
-     一樣會置中，寬螢幕（桌機測試）不會整個貼滿。 */
+     一樣會置中，寬螢幕（桌機測試）不會整個貼滿。
+     2026-08-28修正（黑格問題第二輪，上面這段2026-08-25的診斷仍然成立，
+     這輪是另一個更晚才浮現的根因，兩者不衝突）：inset:0 的 bottom:0 是
+     「相對視窗高度回推」，這輪實機診斷抓到iOS獨立App模式在
+     black-translucent狀態列下，回報的視窗高度本身就少算了狀態列的59px
+     （innerH=793≠螢幕852），bottom:0 釘住的是這個少算後的793，底部因此
+     露出59px沒渲染到的黑格。改成明確給height:100lvh（大視窗高度，工具列
+     收合時的最大值），不透過inset的0值反推，直接撐滿。 */
   #app{
-    position:fixed;inset:0;max-width:430px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
+    position:fixed;top:0;left:0;right:0;height:100lvh;max-width:430px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
     background:radial-gradient(120% 55% at 50% -8%, rgba(216,176,112,.07), transparent 60%), var(--page);
     padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);
   }
@@ -1353,7 +1371,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 一眼看出innerH有沒有等於實體螢幕高，不用另外開DevTools量。
     const screenH=screen.height;
     const clientH=document.documentElement.clientHeight;
-    el.textContent=`standalone=${standalone} · innerH=${innerH} · visualVP=${visualVP} · safeBottom=${safeBottom} · navGap=${navGap} · screenH=${screenH} · clientH=${clientH}`;
+    // 2026-08-28新增（驗證100lvh修正用）：#app實際渲染高度，理論上改完
+    // 應該要接近screenH（實體螢幕高），不再卡在少算狀態列高度的innerH。
+    const appEl=document.getElementById('app');
+    const appH=appEl?Math.round(appEl.getBoundingClientRect().height):'n/a';
+    el.textContent=`standalone=${standalone} · innerH=${innerH} · visualVP=${visualVP} · safeBottom=${safeBottom} · navGap=${navGap} · screenH=${screenH} · clientH=${clientH} · appH=${appH}`;
   }
   setInterval(()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag]',e);recordGlobalError('viewportDiag',e)}},1000);
   window.addEventListener('resize',()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag:resize]',e);recordGlobalError('viewportDiag:resize',e)}});
@@ -2981,7 +3003,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.2345';
+  const APP_VERSION='2026-08-28.2355';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
