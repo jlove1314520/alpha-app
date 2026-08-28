@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 177 輪。最新一輪：第 177 輪 · 2026-08-28T12:32+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 11:01第174輪最舊）。複查`portfolio_multifactor_v2`下一步回應、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除三個條件，皆未成立（自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–176輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約67輪、跨度約40小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第177輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 178 輪。最新一輪：第 178 輪 · 2026-08-28T13:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 11:31第175輪最舊）。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「待使用者確認」、`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中。FUT軌round104留下的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。同時複查TW軌兩項地基工作仍已達標，三軌皆無已知允許工作單位。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–177輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約68輪、跨度約40.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第178輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+
+**上一則保留（第177輪，供對照）**：第 177 輪 · 2026-08-28T12:32+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 11:01第174輪最舊）。複查`portfolio_multifactor_v2`下一步回應、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除三個條件，皆未成立（自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–176輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第177輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 **上一則保留（第176輪，供對照）**：第 176 輪 · 2026-08-28T12:02+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 10:31第173輪最舊）。複查三個解除條件皆未成立。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）仍已達標，無其他已知允許工作單位。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第176輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 

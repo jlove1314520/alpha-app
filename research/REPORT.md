@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 178 輪 · 2026-08-28T13:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 11:31第175輪最舊）· 判定：複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中。FUT軌round104留下的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。同時複查`TW_MARATHON_STATE.md`第176輪記錄，TW軌兩項地基工作仍已達標，三軌皆無已知允許工作單位。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–177輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約68輪、跨度約40.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第178輪記錄
+
+---
 ## 第 177 輪 · 2026-08-28T12:32+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 11:01第174輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），本質仍是單因子相關工作，保守跳過。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–176輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約67輪、跨度約40小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`US_MARATHON_STATE.md`/`US_LOG.md`第177輪記錄
 
 ---
