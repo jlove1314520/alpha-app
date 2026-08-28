@@ -9,6 +9,13 @@ on:
 permissions:
   contents: write
 
+# 2026-08-28新增（系統性修正，取代單純push重試這個OK繃，跟quotes.yml共用
+# 同一個concurrency group"repo-push-main"，讓兩支workflow「跨workflow」
+# 排隊、同一時間只有一個在推main，見quotes.yml同一段註解的完整說明）。
+concurrency:
+  group: repo-push-main
+  cancel-in-progress: false
+
 jobs:
   fetch-market:
     runs-on: ubuntu-latest

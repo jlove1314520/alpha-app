@@ -202,6 +202,38 @@ FinMind而言不夠，它看起來還有滾動窗口式的總量偵測，不是�
 （`total_snapshots=3 boards=['future','momentum','value']`），其餘17個
 data_files全部維持`ok`，沒有連帶弄壞別的項目。
 
+## ✅ 2026-08-28 系統性修正：push重試OK繃升級為concurrency group串行化
+
+P0-c跟資料源禮儀補洞item 1都是同一個病灶的不同症狀——`quotes.yml`（每10
+分鐘）、`market.yml`（一天兩次）、加上這台機器本機的AlphaMarathon背景
+迴圈，三個獨立寫入者同時推main，push被拒絕時前面已修的「fetch+rebase
+重試最多5次」只是OK繃（治標：撞到了就重試），沒有從根本降低「撞到」
+本身的機率。使用者要求系統性修正：
+
+1. **`quotes.yml`+`market.yml`都加`concurrency: group: repo-push-main,
+   cancel-in-progress: false`**——GitHub Actions的concurrency group是
+   跨workflow共用的（只要group名字一樣），這兩支workflow現在會排進
+   同一個佇列，同一時間只有一個在跑，其餘排隊等待（不取消，只是晚點
+   跑，該抓的資料還是會抓到，不會漏）。這樣兩支Actions workflow之間
+   從此不可能再互撞，push重試迴圈對它們倆而言變成真正的「雙保險」而
+   不是「唯一防線」。
+2. **AlphaMarathon背景迴圈**（`research/MARATHON_PROTOCOL.md`，Windows
+   工作排程器每30分鐘喚醒一次的headless Claude Code執行個體，不是固定
+   的Python腳本，git操作是agent照協定文件的指示自己下指令）**不受
+   GitHub Actions的concurrency group管轄**，仍可能跟`quotes.yml`/
+   `market.yml`撞車——已在協定文件第4節（防呆機制）跟第6節（收工檢查
+   清單）新增規則：commit之後、push之前一定要先`git fetch origin main`
+   +`git rebase origin/main`，push前後各留一行log（「準備推送：<hash>」
+   /「推送成功」/「推送失敗：<原因>」），衝突時`git rebase --abort`
+   放棄推送、不用`--force`，把「這輪commit完但push失敗」誠實寫進心跳。
+3. push重試迴圈（`quotes.yml`/`market.yml`裡最多5次fetch+rebase重試）
+   保留當雙保險，沒有拿掉。
+
+**驗證**：下一個台股交易時段（09:00–13:30）之後，確認`data/quotes_tw.json`
+的`generated_at`有變成當天日期（結果見下方，跑完後補上——現在是非交易
+時段，無法立即驗證，跟P0-c那次workflow_dispatch權限不足的驗證缺口是
+同一件事，一併等下一個交易時段自然驗證）。
+
 ## ✅ 已驗收（各項附實際冒煙測試時間戳與輸出）
 
 - **B1 時鐘修復**：`setInterval` 先註冊再首次執行，兩句分開；`updateClocks()`

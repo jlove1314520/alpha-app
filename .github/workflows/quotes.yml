@@ -33,6 +33,20 @@ on:
 permissions:
   contents: write  # 要 commit 回 repo，需要寫入權限
 
+# 2026-08-28新增（系統性修正，取代單純push重試這個OK繃）：quotes.yml每10
+# 分鐘一次、market.yml一天兩次，兩支workflow都會commit+push main，加上這台
+# 機器上AlphaMarathon背景迴圈也在推——多個寫入者同時推main是「! [rejected]
+# (fetch first)」連續失敗的真因（見BACKLOG.md P0-c/資料源禮儀補洞item 1）。
+# concurrency group用同一個名字"repo-push-main"，讓quotes.yml/market.yml
+# 這兩支workflow「跨workflow」共用同一個佇列，同一時間只有一個在跑，其餘
+# 排隊等待（cancel-in-progress:false——不能取消排隊中的執行，那樣會漏掉
+# 該次該抓的資料，只是讓它晚一點跑，不是不跑）。下面的push重試迴圈保留
+# 當雙保險（AlphaMarathon背景迴圈不受GitHub Actions concurrency管轄，仍
+# 可能跟這兩支workflow撞車，重試迴圈是最後一道防線）。
+concurrency:
+  group: repo-push-main
+  cancel-in-progress: false
+
 jobs:
   fetch-quotes:
     runs-on: ubuntu-latest
