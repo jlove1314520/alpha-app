@@ -41,6 +41,12 @@ TRIALS_LEDGER_PATH = RESEARCH_DIR / "TRIALS_LEDGER.md"
 B24_RESULTS_PATH = RESEARCH_DIR / "B24_RESULTS.md"
 PICKS_LEDGER_PATH = DATA_DIR / "picks_ledger.json"
 PRICE_HISTORY_PATH = DATA_DIR / "price_history.json"
+STRATEGY_PERFORMANCE_PATH = DATA_DIR / "strategy_performance.json"
+FORWARD_PAPER_SAMPLE_MIN_DAYS = 20  # 少於這個交易日數，App卡片標「樣本不足」，排序退到後段
+# 2026-08-29策略監控台升級（使用者裁示）：狀態屬於這兩種的策略，不管forward
+# paper數字多好看，排序一律排在最後——「回測未通過」的策略不該因為前向模擬
+# 剛好走了幾天好運就衝上排行榜前段，這是刻意的保守設計，不是bug。
+RANK_DEMOTED_STATUSES = {"草稿", "回測未通過"}
 
 # 三榜各自的PIT回測背景log檔案（見run_value_board_v2_pit_backtest.py等），
 # 用來偵測「回測中」——只有價值成長榜目前有對應的回測腳本在跑，題材動能/
@@ -184,6 +190,33 @@ def paper_field(board_key: str) -> dict | None:
     }
 
 
+def forward_paper_field(strategy_id: str) -> dict | None:
+    """2026-08-29策略監控台升級新增：讀`data/strategy_performance.json`
+    （`update_strategy_performance.py`每個台股開盤日排程逐日累積，嚴禁
+    事後補建），回傳這個策略的前向模擬摘要。找不到就是`None`——刻意不
+    退回舊的`paper_field()`（picks_ledger快照式的「至今報酬」估計），
+    兩者是不同概念：`paper_field()`是「快照收盤價vs現在」的粗估，這裡
+    是「逐日mark-to-market+全成本+按各策略再平衡規則換股」的前向模擬，
+    卡片排行/主圖只用這個，不是`paper_field()`。"""
+    d = _load_json(STRATEGY_PERFORMANCE_PATH)
+    if d is None:
+        return None
+    s = d.get("strategies", {}).get(strategy_id)
+    if not s:
+        return None
+    trading_days = s.get("trading_days_count") or 0
+    return {
+        "inception_date": s.get("inception_date"),
+        "forward_return_todate_pct": s.get("forward_return_todate_pct"),
+        "trading_days_count": trading_days,
+        "sample_sufficient": trading_days >= FORWARD_PAPER_SAMPLE_MIN_DAYS,
+        "equity_curve": s.get("equity_curve", []),
+        "ledger": s.get("ledger", []),
+        "source": "data/strategy_performance.json（research/update_strategy_performance.py"
+                  "每個台股開盤日排程更新，逐日mark-to-market，非復盤）",
+    }
+
+
 def scores_meta(scores_filename: str) -> dict | None:
     path = REPO_ROOT / scores_filename
     d = _load_json(path)
@@ -201,6 +234,7 @@ def build_strategy(
     b24 = parse_b24_results(board_key) if board_key else None
     backtest = backtest_field_from_b24(b24)
     paper = paper_field(board_key) if board_key else None
+    forward_paper = forward_paper_field(strategy_id)
     in_progress = backtest_in_progress(board_key) if board_key else False
 
     if backtest is not None:
@@ -218,13 +252,14 @@ def build_strategy(
         _mtime_iso(REPO_ROOT / scores_filename) if scores_filename else None,
         _mtime_iso(B24_RESULTS_PATH) if backtest is not None else None,
         _mtime_iso(PICKS_LEDGER_PATH) if paper is not None else None,
+        _mtime_iso(STRATEGY_PERFORMANCE_PATH) if forward_paper is not None else None,
     ]
     last_updated_candidates = [t for t in last_updated_candidates if t]
     last_updated = max(last_updated_candidates) if last_updated_candidates else None
 
     out = {
         "id": strategy_id, "name": name, "type": stype, "status": status,
-        "spec": spec, "backtest": backtest, "paper": paper,
+        "spec": spec, "backtest": backtest, "paper": paper, "forward_paper": forward_paper,
         "limitations": limitations, "last_updated": last_updated,
     }
     if extra:
@@ -246,6 +281,7 @@ def build_futures_track() -> dict:
         "spec": "台指期連續合約 + 因子/策略假說掃描（fut_cheap_gate.py配對式隨機控制組200次排列）",
         "backtest": None,  # 這是逐假說的篩選帳本，不是單一組合策略的backtest指標組，故意留null
         "paper": None,  # picks_ledger.json目前沒有futures板的快照
+        "forward_paper": None,  # 沒有每日選股輸出可以前向模擬
         "trials_summary": {
             "已測試假說數": trials["n_tested"], "通過統計驗證數": trials["n_passed"],
             "來源": trials["source"],
@@ -269,7 +305,7 @@ def build_draft_baseline(strategy_id: str, name: str, stype: str, spec: str, lim
     的鐵律，因為草稿是最保守、最低的狀態，不是樂觀假設。"""
     return {
         "id": strategy_id, "name": name, "type": stype, "status": "草稿",
-        "spec": spec, "backtest": None, "paper": None,
+        "spec": spec, "backtest": None, "paper": None, "forward_paper": None,
         "limitations": limitations, "last_updated": _now_iso(),
     }
 
@@ -345,11 +381,33 @@ def main():
         ),
     ]
 
+    # 2026-08-29策略監控台升級：卡片排序（best-on-top，套樣本閘門+狀態降級）。
+    # 排序邏輯全部在這裡（後端），前端純粹依陣列順序渲染，不得自己重新排序
+    # 或另外硬寫規則——見模組docstring「鐵律」。三層：
+    #   tier 0：狀態未被降級 + 有forward_paper + 樣本足夠(>=20交易日) → 依forward_return由高到低
+    #   tier 1：狀態未被降級 + 有forward_paper + 樣本不足(<20交易日) → 同上排序，卡片標「樣本不足」
+    #   tier 2：狀態屬於RANK_DEMOTED_STATUSES（草稿/回測未通過）或完全沒有forward_paper → 排最後
+    def _sort_key(s):
+        fp = s.get("forward_paper")
+        demoted = s["status"] in RANK_DEMOTED_STATUSES
+        if fp is None or demoted:
+            tier = 2
+        elif fp["sample_sufficient"]:
+            tier = 0
+        else:
+            tier = 1
+        ret = fp["forward_return_todate_pct"] if (fp and fp.get("forward_return_todate_pct") is not None) else float("-inf")
+        return (tier, -ret)
+
+    strategies.sort(key=_sort_key)
+
     payload = {
         "generated_at": _now_iso(),
         "note": "本頁面/檔案所有數字僅供研究參考，非投資建議。狀態欄位100%由本腳本從真實檔案"
                 "（scores*.json/data/picks_ledger.json/research/TRIALS_LEDGER.md/"
-                "research/B24_RESULTS.md）推導，找不到來源檔一律顯示null/尚未，不寫死樂觀值。",
+                "research/B24_RESULTS.md/data/strategy_performance.json）推導，找不到來源檔一律"
+                "顯示null/尚未，不寫死樂觀值。排行/卡片主圖只用forward_paper（每日前向模擬，"
+                "嚴禁事後補建）；backtest（歷史回測）只在詳情頁顯示且需標「非未來保證」。",
         "strategies": strategies,
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
