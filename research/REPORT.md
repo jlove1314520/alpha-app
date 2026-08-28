@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 168 輪 · 2026-08-28T08:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選US（三軌時間戳US 06:32第165輪最舊）· 判定：複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立以來仍只有一個commit，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round108/111遺留的1c地基工作本質仍是單因子相關工作，同round111起連續判斷邏輯一致，保守跳過。本輪整輪跳過，未做任何實質工作。開工時一度看到不屬於馬拉松的另一互動session未commit變更，複查後已消失，commit前確認乾淨。`is_holdout_consumed()`確認`False`。見`US_MARATHON_STATE.md`/`US_LOG.md`第168輪記錄
+
 ## 第 167 輪 · 2026-08-28T07:33+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選TW（三軌時間戳TW 06:13第164輪最舊）· 判定：複查第164輪留下的三個解除條件（使用者回應portfolio_multifactor_v2下一步(a)/(b)、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停規則解除）皆未成立，TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）也都已達標，目前無已知允許的工作單位，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。見`TW_MARATHON_STATE.md`/`TW_LOG.md`第167輪記錄
 
 ## 第 166 輪 · 2026-08-28T07:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（第165輪US軌正常結束），依輪替選FUT（三軌時間戳FUT 05:31第163輪最舊）· 判定：複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，暫停規則仍完全生效中；FUT軌無組合策略相關工作可做（規格書全繞TAIEX/TWSE），TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）也都已達標，目前三軌皆無已知允許的工作單位。本輪唯一實質動作是開工前補push第165輪遺留的1個commit（`0020a2a`），本輪本身未做任何新工作。`is_holdout_consumed()`確認`False`。見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第166輪記錄
