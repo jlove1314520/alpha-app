@@ -45,6 +45,7 @@ STALE_HOURS = {
     "data/quotes_all_tw.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
     "data/earnings_calendar.json": 72,  # 財報日期變動很慢，門檻可以更寬鬆，先跟其他每日檔案一致
     "data/ex_dividend_events.json": 72,  # 跟price_history.json同一次排程產生，門檻一致
+    "data/picks_ledger.json": 48,  # 一天一次的前瞻選股快照，跟margin_maintenance.json同等寬鬆門檻
 }
 
 
@@ -241,6 +242,33 @@ def describe_paper_trades(path: Path) -> dict:
     }
 
 
+def describe_picks_ledger(path: Path) -> dict:
+    """data/picks_ledger.json（2026-08-28新增追蹤，資料源禮儀補洞item 3）——
+    三榜（價值成長/題材動能/未來性）Top20前瞻選股快照，`build_picks_ledger.py`
+    每次market.yml排程跑完寫入，鐵律是只能事前快照、不能事後補建（見BACKLOG
+    B24）。這裡沒有頂層generated_at欄位，用meta.last_snapshot_at當新鮮度
+    依據；之前沒有專屬解析器，會落到generic fallback（generated_at=None）
+    被status_from_age()誤判成"error"，其實資料一直是好的，只是沒人幫它寫
+    解析器。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    meta = d.get("meta", {})
+    snapshots = d.get("snapshots", [])
+    boards = sorted({s.get("board") for s in snapshots if s.get("board")})
+    latest_dates = {}
+    for s in snapshots:
+        b = s.get("board")
+        sd = s.get("snapshot_date")
+        if b and sd and (b not in latest_dates or sd > latest_dates[b]):
+            latest_dates[b] = sd
+    return {
+        "generated_at": meta.get("last_snapshot_at"),
+        "records": len(snapshots),
+        "source": ".github/scripts/build_picks_ledger.py（market.yml排程，三榜產生後、commit前快照，非回測）",
+        "detail": f"total_snapshots={meta.get('total_snapshots')} boards={boards} "
+                  f"latest_snapshot_date_by_board={latest_dates}",
+    }
+
+
 DESCRIBERS = {
     "quotes_tw.json": describe_quotes,
     "quotes_us.json": describe_quotes,
@@ -256,6 +284,7 @@ DESCRIBERS = {
     "quotes_all_tw.json": describe_quotes_all_tw,
     "earnings_calendar.json": describe_earnings_calendar,
     "ex_dividend_events.json": describe_ex_dividend_events,
+    "picks_ledger.json": describe_picks_ledger,
 }
 
 

@@ -131,8 +131,76 @@ Claude手動commit——job一開始checkout，跑到最後一步commit+push時�
 衝突（理論上機率很低，這支workflow只碰`data/quotes_*.json`兩個檔案）
 就放棄自動解決直接exit 1，不會用`--force`硬蓋掉別人的commit。
 
-**驗證**：手動觸發`workflow_dispatch`跑一次，確認`data/quotes_tw.json`
-的`generated_at`變成今天日期（結果見下方，跑完後補上）。
+**驗證卡住的地方（需要使用者協助，不是我能自己解決的）**：試過用GitHub
+API觸發`workflow_dispatch`，回傳`403 Resource not accessible by personal
+access token`——目前存的Fine-grained PAT沒有勾選Actions的寫入權限，只有
+Contents（push用）。兩個選項：(a) 使用者到GitHub網頁「Actions → 盤中
+近即時報價（台股+美股）→ Run workflow」手動按一次（安全，不影響其他
+東西）；(b) 使用者把PAT的repo權限加開「Actions: Read and write」，之後
+我就能用API幫忙重跑。**不影響修正本身是否正確**——下一次自然排程觸發
+（美股區塊每10分鐘一次，全天都有）就會自動驗證到，屆時回頭補上結果；
+若使用者想立刻確認，用選項(a)最快。
+
+## ✅ 2026-08-28 首頁診斷橫幅假警報「美股四大指數/大盤指數無資料」（併入P0批次）
+
+**真因**（Cowork定位，已查證）：`updateDiagBanner()`在`hydrateHome()`一
+開始就執行，但`MARKET_TW_CACHE`/`MARKET_US_CACHE`只有`loadMarketDataFiles()`
+會填，而它之前只被市場頁的hydrate呼叫過——首頁橫幅檢查新鮮度時這兩個
+快取變數還是`null`，`marketDataAgeMin(null)`回傳`null`，被判定成「無
+資料（尚未排程抓取或抓取失敗）」，但實際上`market_us.json`/`market_tw.json`
+當時都在24小時新鮮度門檻內（實測`fetched_at`約13.5小時前，道瓊/S&P/
+NASDAQ/費半數值都在）。
+
+**修正**：比照`updateDiagBanner()`已經有的`await loadFundamentals('')`
+同一模式，函式開頭加`await loadMarketDataFiles()`，確保檢查新鮮度前
+快取已經載入。冒煙測試12項全數通過，commit `34710cc`。
+
+**順便更正**：選股頁「美股評分建置中」原本語氣暗示美股「沒有來源需要
+另外設計」，已查證yfinance提供`.financials`/`.balance_sheet`/`.cashflow`
+（損益表/資產負債表/現金流量表），改為「資料源已查證可行，已排入
+BACKLOG B29，接在P0跟台股回測工作之後」——不是無來源，是還沒排到，
+措辭要如實反映。期貨頁「22假說未通過」等既有誠實護欄維持不動，沒有
+為了好看拿掉。
+
+## ✅ 2026-08-28 資料源禮儀補洞三項（使用者指定具體項目，逐一查證+修正）
+
+上面「資料源禮儀」章節a/b/c/d雖然標✅完成，但使用者裝置實測+回頭複查
+發現三個具體殘留缺口，逐一查證根因並修正：
+
+**item 1：`rate_limit_status.sources`只登記到"finmind"，TWSE/TPEx/期貨
+不在名單裡**——查證發現**不是沒接線**：`fetch_market_tw.py`/
+`update_fundamentals_daily.py`/`update_margin_maintenance.py`/
+`update_price_history.py`等腳本呼叫`_get_retry()`時都有正確傳
+`"twse_openapi"`/`"twse_t86"`/`"tpex_openapi"`/`"twse_exright"`這些
+source key，節流機制的程式碼本身是對的。**真因是跟P0-c同一種病**：
+用GitHub API查`market.yml`最近一次執行紀錄（run 33145019649，
+2026-08-28T05:31Z），最後一步「Commit市場資料JSON」失敗，log顯示同一句
+`! [rejected] main -> main (fetch first)`——這支workflow跑到commit那一刻
+常常已經被別人（quotes.yml每10分鐘一次/AlphaMarathon背景迴圈）推過，
+push被拒絕，這一輪抓到的TWSE/TPEx節流登記連同其他資料整批白丟，所以
+共用狀態檔長期只看得到「finmind」（來自本機`research/finmind_client.py`
+的commit比較不受這個race影響，因為是我手動fetch確認同步後才commit）。
+**修正**：`market.yml`套用跟`quotes.yml`同一套push重試迴圈（fetch+rebase，
+最多5次，間隔隨機3~8秒錯開）。
+
+**item 2：`research/backfill_price_history_gaps.py`接上節流/斷路器＋
+批間強制冷卻**——查證發現**節流/斷路器本身已經接了**（`_rate_limit_wait_or_raise()`
+在每次請求前呼叫、命中402/403/428/429立刻標記封鎖不重試），這部分
+2026-08-28上午就做了。但續29條目顯示：即使每次請求都遵守3秒下限，
+這輪228檔成功後仍被FinMind判定ip banned——證明「單純3秒間隔」對
+FinMind而言不夠，它看起來還有滾動窗口式的總量偵測，不是純粹按請求
+間隔判斷。**修正**：新增`BATCH_SIZE=50`/`BATCH_COOLDOWN_SEC=30.0`，
+每處理完50檔就強制停下來冷卻30秒，不管前面3秒節流跑得多順，額外降低
+「持續數百檔不間斷發送」本身觸發封鎖的機率。
+
+**item 3：`generate_status_json.py`補上`data/picks_ledger.json`的解析器**
+——查證發現這個檔案確實沒有專屬describer，落到generic fallback
+（`generated_at=None`），被`status_from_age()`判定成`"error"`。已新增
+`describe_picks_ledger()`，用`meta.last_snapshot_at`當新鮮度依據，`detail`
+附三榜(`value`/`momentum`/`future`)各自最新快照日期。重新產生STATUS.json
+驗證：`data/picks_ledger.json`的`status`從`"error"`變成`"ok"`
+（`total_snapshots=3 boards=['future','momentum','value']`），其餘17個
+data_files全部維持`ok`，沒有連帶弄壞別的項目。
 
 ## ✅ 已驗收（各項附實際冒煙測試時間戳與輸出）
 

@@ -72,9 +72,28 @@ jobs:
         continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
+        # 2026-08-28新增（資料源禮儀補洞item 1）：跟quotes.yml同一根因——這支
+        # workflow跑到這步時常常遠端已經被其他寫入者（quotes.yml每10分鐘一次/
+        # AlphaMarathon背景迴圈）推過，`git push`被拒絕，導致這輪已經抓成功的
+        # 全部資料（含data/rate_limit_state.json裡TWSE/TPEx/期貨的節流登記）
+        # 整批白丟——這正是為什麼共用的斷路器狀態檔長期只看得到"finmind"這個
+        # key，TWSE系列的登記每次都在這裡被push race吃掉。修法同quotes.yml：
+        # push前fetch+rebase同步最新，失敗重試最多5次。
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
-          git push
+
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "push成功（第${i}次嘗試）"
+              exit 0
+            fi
+            echo "push失敗，可能跟其他寫入者（quotes.yml/AlphaMarathon）撞在一起，第${i}次，fetch+rebase後重試"
+            git fetch origin main
+            git rebase origin/main || { echo "rebase衝突，放棄自動解決"; git rebase --abort; exit 1; }
+            sleep $((RANDOM % 6 + 3))
+          done
+          echo "重試5次後仍push失敗"
+          exit 1
