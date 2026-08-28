@@ -123,6 +123,8 @@
 - **絕對不碰 holdout**：任何資料抓取都必須經過 `finmind_client.load_dev()`（自動截斷在 `VAL_END`）或明確標註為 membership/metadata 用途的 `_fetch()`（同 `universe.py`/`score.py` 的先例）。**永遠不要呼叫 `load_full_history()` 或 `unlock_holdout_once()`**——這兩個函式的存在是給「使用者明確授權的一次性 holdout 測試」用的，不是給日常挖礦用的，你沒有被授權碰它們，這條沒有模糊空間。每一輪收工前跑一次 `python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` 確認還是 `False`，寫進這一輪的 log。
 - **絕對不自動下真單**：這個專案完全沒有接任何真實券商 API，這條規則目前是自動滿足的（沒有下單程式碼存在），但如果你在某一輪不小心寫出了看起來像是「送出委託」的程式碼，**立刻停手**，那不是這個馬拉松該做的事。
 - **絕對不做危險的 git 操作**：不能 `git push --force`、不能 `git reset --hard`、不能刪除任何既有檔案（除非是你自己這一輪建立、還沒 commit 的暫存檔）。只能 `git add`（限定改動的檔案，不要 `git add -A`）、`git commit`、`git push`。如果 push 失敗（例如網路暫時性問題，這個環境已知會發生），可以重試幾次，重試間隔用短暫等待，不要無限重試。
+- **push 前一定要 `git fetch origin main` + `git rebase origin/main`（2026-08-28 新增，系統性修正）**：這個 repo 除了你之外，還有 `quotes.yml`（每 10 分鐘）跟 `market.yml`（一天兩次）這兩支 GitHub Actions workflow 也會 commit+push main——這兩支已經加了 `concurrency: group: repo-push-main` 讓它們彼此不會同時推，但你（本機背景迴圈）不受那個 concurrency group 管轄，仍然可能跟它們撞車（`! [rejected] main -> main (fetch first)`）。**commit 之後、`git push` 之前，先 `git fetch origin main` 再 `git rebase origin/main`**，把本機的 commit 疊在最新的遠端狀態上面，降低 push 被拒絕的機率；如果 rebase 真的衝突（理論上機率低，你這輪改的檔案通常跟 Actions 那兩支腳本不重疊），`git rebase --abort` 放棄這次推送，把「這輪 commit 完但 push 失敗，改動留在本機」寫進心跳，不要用 `--force`。
+- **push 前後都要留一行 log（2026-08-28 新增）**：push 前印一行「準備推送：<commit hash 前 7 碼>」，push 成功後印一行「推送成功」，push 失敗（含 rebase 衝突放棄）印一行「推送失敗：<原因>」——這些 log 是 `marathon_cycle.log` 的一部分（stdout 本來就會被導進去），目的是之後如果又發生資料被覆蓋/消失的情況，回頭查 log 能立刻看出是不是這裡的 push 沒成功。
 - **誠實記錄，包含大量 FAIL**：這是健康的訊號，不是失敗的訊號。**不要因為「這輪好像沒測出什麼有用的東西」就不記錄或美化結果**——沒過便宜關卡也要留下一行記錄（哪怕只是在 `TRIALS_LEDGER.md` 加一列），讓下一輪、讓 Cowork、讓使用者都看得到誠實的全貌。
 - **全程 PIT**：任何基本面資料都要透過 `pit.py` 的 `pit_date` 對齊，不能直接用財報所屬期間日。如果測試一個新的資料集/因子，PIT 正確性沒驗證過，**要明確標註「PIT 狀態未驗證」**，不能假設它是乾淨的。
 
@@ -160,7 +162,7 @@
 3. 如果有新的候選判定（無論 PASS/FAIL/EXPERIMENTAL/CHEAP_PASS），`TRIALS_LEDGER.md` 跟對應軌 `_LEADS.md` 都要更新。
 4. **寫心跳（2026-08-23 新增，使用者要求，硬性步驟，不能省略）：** 讀 `MARATHON_STATE.md` 最上面「馬拉松全局輪次計數器」那行目前的數字 N，在 `research/REPORT.md` 最上面「心跳記錄」區塊（第一筆歷史條目的正上方，`---` 分隔線下面）插入一筆新的 `## 第 N+1 輪 · <這輪實際的日期時間，用系統時間，不要憑印象> · <TW/US/FUT> · <這輪做了什麼，一句話> · <結果/判定，一句話>`，然後把 `MARATHON_STATE.md` 那行的數字改成 N+1。**不管這輪做了什麼（就算只是回補了幾檔宇宙資料、或第 0 節判定要換軌但沒做出實質進展），都要留這一筆**——這是唯一能讓使用者不用逐一比對 `git log`/`marathon_cycle.log` 就一眼看出「馬拉松最近有沒有在跑」的機制。如果第 0 節第 2 步偵測到 `LOCK_STALE`，這筆心跳的「結果/判定」欄要順便寫「（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）」。
 5. `git status` 確認要 commit 的檔案清單合理（不要不小心帶到 `research/data/` 底下的東西，那是 gitignore 的；`REPORT.md`／`MARATHON_STATE.md` 這兩個心跳相關的檔案一定要在這次 commit 裡）。
-6. `git add`（限定檔案）→ `git commit`（訊息簡短說明這輪做了什麼）→ `git push`。push 失敗時參考第 4 節的重試規則。
+6. `git add`（限定檔案）→ `git commit`（訊息簡短說明這輪做了什麼）→ `git fetch origin main` → `git rebase origin/main` → `git push`（見第 4 節新增的 push 前 fetch+rebase 規則跟 push 前後留 log 的規則，這裡不重複細節）。push 失敗時參考第 4 節的重試規則。
 7. `python marathon_lock.py release`。
 8. 結束。**不要在這一輪結束後又開始下一個工作單位**——下一輪 30 分鐘後自然會被喚醒。
 
