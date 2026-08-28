@@ -1155,3 +1155,15 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **額外發現**：開工時`git status`確認工作目錄僅`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤），跟第169–206輪記錄一致（另一互動session殘留），依規則不觸碰、不加入本輪commit。
 
 `is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約99輪、跨度約56.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 第 212 輪 · 2026-08-29T06:31+08:00
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 05:04（第209輪，最舊）、US 05:33（第210輪）、TW 06:02（第211輪，最新）——依輪替選FUT。獨立複查三個解除條件：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」；`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自建立（`fa369b9`）以來仍只有這一個 commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）判定仍 FAIL，(a) 換更大樣本重跑 / (b) train-only 嚴格樣本外，兩選項仍待使用者裁示，未見新回應。
+3. 暫停規則本身（`MARATHON_PROTOCOL.md` 最上方章節）未被修改或移除。
+
+三個解除條件皆未成立。FUT軌round104留下的唯一明確待辦（盤別效應第三批跳空構造/另立新因子家族）本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過。`PORTFOLIO_STRATEGY_SPEC.md` 全部圍繞 TAIEX/TWSE 台股樣本，FUT軌本身沒有組合策略相關工作可接。
+
+`is_holdout_consumed()` 確認 `False`。`git status` 檢查發現兩個不屬於本輪的殘留檔案（`research/pit_run_500.log`、`research/pit_run_liquidity500_full.log`），研判是另一互動session的PIT回測相關工作留下的，依規則不觸碰、不commit、不刪除。
+
+**本輪整輪跳過，未做任何實質工作。** FUT軌round104的「下一步」1–4項維持原狀不變，等使用者解除暫停規則後從那裡接續。沒有新增 `TRIALS_LEDGER.md` 列。
