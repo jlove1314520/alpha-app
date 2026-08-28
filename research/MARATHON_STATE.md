@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-28T21:01+08:00**
+**最後更新：2026-08-28T23:02+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 197 輪。最新一輪：第 197 輪 · 2026-08-28T22:54+08:00 · TW（補對照組嘗試，未完成）· 依`MARATHON_PROTOCOL.md`第0節規則1允許範圍，嘗試把`portfolio_multifactor_v2`VAL期最佳兩組合隨機控制組重抽次數15→100，卡在`load_sample_with_factors()`異常變慢（>115秒未回傳，根因未查清）未完成，既有判定不變，腳本commit保留供下一輪接續。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約87輪、跨度約50小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第197輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 198 輪。最新一輪：第 198 輪 · 2026-08-28T23:02+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 21:31第195輪最舊）。複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書是台股專屬）。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約88輪、跨度約50.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第198輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+
+**上一則保留（第197輪，供對照）**：第 197 輪 · 2026-08-28T22:54+08:00 · TW（補對照組嘗試，未完成）· 依`MARATHON_PROTOCOL.md`第0節規則1允許範圍，嘗試把`portfolio_multifactor_v2`VAL期最佳兩組合隨機控制組重抽次數15→100，卡在`load_sample_with_factors()`異常變慢（>115秒未回傳，根因未查清）未完成，既有判定不變，腳本commit保留供下一輪接續。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約87輪、跨度約50小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第197輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 
 **上一則保留（第193輪，供對照）**：第 193 輪 · 2026-08-28T20:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 19:01第190輪最舊）。複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit）。FUT軌round104留下的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約83輪、跨度約48小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第193輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。
 
