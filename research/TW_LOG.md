@@ -1009,3 +1009,15 @@ TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`
 **判定：round201的「環境資源競爭導致OOM/靜默終止」懷疑，這輪找不到證據支持，改為更簡單的解釋（背景執行檢查時機過早）**——不代表環境競爭假設一定是錯的（沒有直接反證），但目前手上的兩次成功案例都指向「其實有跑完，只是檢查太早」這個更簡單、更符合`tasklist`空窗期觀察的解釋，比「隨機OOM但兩次都剛好成功」更節省假設。**至此A_4pass(99.0)/B_plus_value_pe(100.0)兩組合的N=100隨機控制組數字都已確認**，`LEADS.md`已同步補充。**`portfolio_multifactor_v2`整體判定仍不變（FAIL，卡在alpha顯著性p>0.05這關，隨機對照組再強也不能取代這一關）**。沒有新的候選判定，`TRIALS_LEDGER.md`未新增列（既有候選的對照組補強，非新試驗）。
 
 `is_holdout_consumed()`確認`False`（全程命中`load_dev()`既有快取，零額外API呼叫）。`git status`確認除本輪修改的`research/LEADS.md`外，只有其他互動session留下的`BACKLOG.md`/`data/rate_limit_state.json`/`data/strategies.json`/`research/generate_strategies_json.py`（修改）、`data/strategy_performance.json`/`research/pit_run_*.log`/`research/update_strategy_performance.py`（未追蹤）——均不觸碰、不納入本輪commit。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）維持已達標，暫停單因子試驗規則三個解除條件複查仍全部未成立。下一輪如果又撿到TW軌：`portfolio_multifactor_v2`的(a)全市場更大樣本重跑／(b)train-only嚴格樣本外，這兩個選項仍是唯一剩下的、可以在不等使用者裁示的情況下著手的方向（回頭看`METHODOLOGY_FIX_TASK.md`跟round109/110的既有討論確認這兩者屬於「補強既有候選的驗證深度」而非「新單因子試驗」）；如果使用者已回應`PORTFOLIO_STRATEGY_SPEC.md`確認或裁示暫停規則，優先處理那個。
+
+## 2026-08-29T03:01+08:00 — 馬拉松第205輪：跳過（暫停規則生效中），發現並記錄`TW_LOG.md`第202輪結尾與長期慣例的措辭矛盾
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 01:44（第202輪，最舊）、FUT 02:01（第203輪）、US 02:31（第204輪，最新）——依輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中。
+
+**本輪主要發現（文件內部矛盾）**：重新複查round202遺留的「下一步」時，發現`TW_LOG.md`第202輪記錄結尾寫「`portfolio_multifactor_v2`的(a)全市場更大樣本重跑／(b)train-only嚴格樣本外，這兩個選項仍是唯一剩下的、可以在不等使用者裁示的情況下著手的方向（回頭看`METHODOLOGY_FIX_TASK.md`跟round109/110的既有討論確認這兩者屬於「補強既有候選的驗證深度」而非「新單因子試驗」）」——但這個措辭跟同一輪`TW_MARATHON_STATE.md`本身的說法互相矛盾（後者寫「兩者成本較高，過去多輪一貫留給使用者裁定優先序，未擅自決定」），也跟round109起連續90餘輪（含round110原始使用者session明確要求「不會自己動手，留給使用者決定優先序」、round185明確論證option(b)牴觸hash-lock精神）的一貫判斷相反。
+
+**本輪判斷（不擅自解決矛盾，依既定慣例行事）**：round109/110/185等多輪的判斷有明確論證支持（尤其round185指出(b)本質是回頭調整IC權重計算方法論，違反規格書前言的hash-lock精神），且是長期一致、有大量先例的判斷；round202結尾那句話沒有任何新論證支持它跟既有判斷的偏離，研判是撰寫心得時的措辭疏失（可能是把「這兩個選項理論上不需要新增資料/API」誤寫成「可以不等使用者裁示」，兩者是不同的事）。**依既定的長期判斷維持不代為啟動(a)/(b)**，同時把這個矛盾寫進`TW_MARATHON_STATE.md`本輪條目跟這裡，讓使用者或後續維護者能明確看到並親自裁決要不要改變既定判斷，不是悄悄忽略掉。
+
+TW軌兩項地基工作複查：`universe()`回傳3196（獨立呼叫確認，非讀舊記錄）、`backfill_state.json`統計done=2597/skip=469（total=3066，僅記錄已嘗試過的名字，跟universe()總數不同，不能直接拿state檔案的total當分母），2597/3196=81.3%，跟第194輪以來一致，仍在80%門檻之上；T86回補維持100%。沒有其他已知允許的背景工作單位。**本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫，全程只讀既有`.md`/`.json`檔案跟呼叫`universe()`本身不觸網）。`git status`確認除慣常的`data/rate_limit_state.json`（已修改）跟`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤）外無其他變更——跟round200起記錄的另一互動session殘留一致，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約95輪、跨度約54.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
