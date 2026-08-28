@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-29T01:02+08:00**
+**最後更新：2026-08-29T01:44+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 201 輪。最新一輪：第 201 輪 · 2026-08-29T01:40+08:00 · TW（補對照組，取鎖時偵測到LOCK_STALE，pid 189544持有29.9分鐘，上一輪疑似失敗）。接續round200的N=100隨機控制組調查：`load_sample_with_factors()`已因T86快取修復恢復正常。A_4pass組合N=100完整跑完，percentile從N=15的100.0修正為99.0；B_plus_value_pe組合三次嘗試皆process無聲消失，排除跨組合記憶體累積假設，改懷疑環境資源競爭。既有`portfolio_multifactor_v2`判定（FAIL）不變。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約91輪、跨度約52小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第201輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 202 輪。最新一輪：第 202 輪 · 2026-08-29T01:44+08:00 · TW（推翻round201「process無聲消失」誤判，補齊B_plus_value_pe的N=100數字）。開工前`tasklist`確認環境乾淨，發現round201其實已成功寫出B_plus_value_pe的N=100結果（CSV mtime早於round201 log時間），是檢查時機過早的誤判，非環境資源競爭。本輪獨立process重新驗證，數字逐位吻合：percentile(N=100)=100.0（報酬+68.42%，alpha p=0.0535未達顯著）。至此A_4pass(99.0)/B_plus_value_pe(100.0)兩組合N=100數字都已確認，`LEADS.md`已同步補充。`portfolio_multifactor_v2`判定不變（FAIL）。沒有已知的下一個補對照組工作單位，剩下(a)/(b)兩個較高成本選項仍留給使用者裁定。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約92輪、跨度約52小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第202輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+
+**上一則保留（第201輪，供對照）**：第 201 輪 · 2026-08-29T01:40+08:00 · TW（補對照組，取鎖時偵測到LOCK_STALE，pid 189544持有29.9分鐘，上一輪疑似失敗）。接續round200的N=100隨機控制組調查：`load_sample_with_factors()`已因T86快取修復恢復正常。A_4pass組合N=100完整跑完，percentile從N=15的100.0修正為99.0；B_plus_value_pe組合三次嘗試皆process無聲消失，排除跨組合記憶體累積假設，改懷疑環境資源競爭。既有`portfolio_multifactor_v2`判定（FAIL）不變。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第201輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**（round202已推翻本輪「process無聲消失」的診斷，見上方最新條目。）**
 
 **上一則保留（第199輪，供對照）**：第 199 輪 · 2026-08-28T23:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT。複查三個解除條件皆未成立。FUT軌依舊沒有組合策略相關工作可做，本輪整輪跳過。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第199輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。
 

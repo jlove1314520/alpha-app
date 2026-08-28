@@ -995,3 +995,17 @@ TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`
 **這輪唯一站得住腳的新數字**：A_4pass/ic_weighted/quarterly VAL期percentile從N=15的100.0修正為N=100的99.0——**LEADS.md已同步補充這個修正值，但B_plus_value_pe仍缺N=100數字，`portfolio_multifactor_v2`整體判定（FAIL，alpha未達顯著性門檻）不受影響、不變**。沒有新的候選判定，`TRIALS_LEDGER.md`未新增列（這是既有候選的對照組補強工作，不是新試驗）。
 
 零額外API呼叫（全程命中既有快取，`load_sample_with_factors`跟T86分組快取皆為local file cache）。`is_holdout_consumed()`確認`False`。開工前`git status`確認除本輪新增的`deep_dive_portfolio_v2_random_control_n100_single.py`外，只有其他互動session留下的`data/rate_limit_state.json`（修改）、`research/B24_RESULTS.md`/`research/pit_run_*.log`（未追蹤）——均不觸碰、不納入本輪commit。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）維持已達標，暫停單因子試驗規則三個解除條件複查仍全部未成立。
+
+## 2026-08-29T01:44+08:00 — 馬拉松第202輪：推翻round201「process無聲消失」診斷——B_plus_value_pe其實已經N=100跑完，是檢查時機太早的誤判
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT（第199輪，2026-08-28T23:31）＜US（第200輪，2026-08-29T01:02）＜TW（第201輪，2026-08-29T01:40）——三者中FUT最舊，理論上輪替應選FUT，但複查`MARATHON_PROTOCOL.md`第0節暫停規則第1/3點：這段凍結期TW軌若有組合策略相關工作待做，優先於單純輪替；TW軌round201明確留下「B_plus_value_pe仍缺N=100數字」的待辦，屬於允許範圍內的「補對照組」工作，因此本輪選TW而非照輪替選FUT。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「待使用者確認」、`portfolio_multifactor_v2`(a)/(b)選項仍未見使用者回應，暫停規則仍完全生效中。
+
+**開工前`tasklist -FI "IMAGENAME eq python.exe"`／`node.exe`確認環境乾淨（無其他process在跑）**——round201記錄的「本機同時有其他互動session重度工作」這次不成立，直接用這個乾淨環境重跑`deep_dive_portfolio_v2_random_control_n100_single.py B_plus_value_pe`（背景執行，逾時後移到background，這點跟round197/200記錄過的「背景輸出常讀不到」問題一樣，stdout檔案讀回是空的）。
+
+**關鍵發現：B_plus_value_pe的N=100數字其實不需要重跑就已經存在**——check `data/portfolio_backtest_v2_random_control_n100.csv`（round201原始兩組合腳本的輸出路徑，不是single版）時發現這個檔案**兩列都有值**（A_4pass percentile=99.0、B_plus_value_pe percentile=100.0），檔案mtime是01:13，**早於round201寫入log的01:40**。這代表round201判定「process無聲消失」是誤判——**B版本的計算其實在round201執行期間已經安靜地跑完並把結果寫進磁碟**，只是round201用`tasklist`確認python.exe已終止的檢查時機發生在CSV真正寫出之前（B版本207-214筆交易的100次隨機重抽，運算量比A版本略大，耗時更久），把「還沒寫完」誤判成「消失」。
+
+**本輪跑的`deep_dive_portfolio_v2_random_control_n100_single.py B_plus_value_pe`本身也順利完成**（背景process結束後`tasklist`確認乾淨，`data/portfolio_backtest_v2_random_control_n100_B_plus_value_pe.csv`成功產出，mtime 01:27），**兩份獨立跑法的數字逐位吻合**：報酬+68.4184%/MDD−8.6496%/Sortino1.0364/alpha+10.2610%(p=0.05346)/**percentile(N=100)=100.0**（隨機對照組中位數+29.5396%）。兩次完全一致排除了「數字本身不穩定/有隨機性bug」的疑慮，`run_one()`內部隨機種子行為正常。
+
+**判定：round201的「環境資源競爭導致OOM/靜默終止」懷疑，這輪找不到證據支持，改為更簡單的解釋（背景執行檢查時機過早）**——不代表環境競爭假設一定是錯的（沒有直接反證），但目前手上的兩次成功案例都指向「其實有跑完，只是檢查太早」這個更簡單、更符合`tasklist`空窗期觀察的解釋，比「隨機OOM但兩次都剛好成功」更節省假設。**至此A_4pass(99.0)/B_plus_value_pe(100.0)兩組合的N=100隨機控制組數字都已確認**，`LEADS.md`已同步補充。**`portfolio_multifactor_v2`整體判定仍不變（FAIL，卡在alpha顯著性p>0.05這關，隨機對照組再強也不能取代這一關）**。沒有新的候選判定，`TRIALS_LEDGER.md`未新增列（既有候選的對照組補強，非新試驗）。
+
+`is_holdout_consumed()`確認`False`（全程命中`load_dev()`既有快取，零額外API呼叫）。`git status`確認除本輪修改的`research/LEADS.md`外，只有其他互動session留下的`BACKLOG.md`/`data/rate_limit_state.json`/`data/strategies.json`/`research/generate_strategies_json.py`（修改）、`data/strategy_performance.json`/`research/pit_run_*.log`/`research/update_strategy_performance.py`（未追蹤）——均不觸碰、不納入本輪commit。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）維持已達標，暫停單因子試驗規則三個解除條件複查仍全部未成立。下一輪如果又撿到TW軌：`portfolio_multifactor_v2`的(a)全市場更大樣本重跑／(b)train-only嚴格樣本外，這兩個選項仍是唯一剩下的、可以在不等使用者裁示的情況下著手的方向（回頭看`METHODOLOGY_FIX_TASK.md`跟round109/110的既有討論確認這兩者屬於「補強既有候選的驗證深度」而非「新單因子試驗」）；如果使用者已回應`PORTFOLIO_STRATEGY_SPEC.md`確認或裁示暫停規則，優先處理那個。
