@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 180 輪 · 2026-08-28T14:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 12:32第177輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格），round108/111起遺留的1c地基工作本質仍是單因子相關工作，同round111–177連續判斷邏輯一致，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`已修改、`research/pit_run_500.log`未追蹤，跟第169–179輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約70輪、跨度約41.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`US_MARATHON_STATE.md`/`US_LOG.md`第180輪記錄
+
+---
 ## 第 179 輪 · 2026-08-28T13:31+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 12:02第176輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。TW軌兩項地基工作本輪重新複查仍已達標（宇宙回補`data/backfill_state.json`重新統計done 2597/skip 469=81.3%，T86回補100%），無其他已知允許工作單位。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–178輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約69輪、跨度約41小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第179輪記錄
 
 ---
