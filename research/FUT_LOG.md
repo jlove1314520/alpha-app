@@ -1115,3 +1115,13 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **額外發現**：開工時`git status`確認乾淨，僅慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生，跟第169–193輪記錄一致），依規則不觸碰、不加入本輪commit。
 
 `is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約86輪、跨度約49.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-08-28T23:31+08:00 — 馬拉松第199輪：跳過，暫停規則生效中
+
+**取鎖**：乾淨（非陳舊鎖檔）。三軌時間戳：FUT 22:01（第196輪，最舊）、TW 22:54（第197輪）、US 23:02（第198輪，最新）——依輪替選FUT。
+
+**判定**：複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit，暫停規則整體仍完全生效中，跟FUT軌本身無關（規格書全部圍繞TAIEX/TWSE台股樣本，不涉及期貨）。同時複查`LEADS.md`最新`portfolio_multifactor_v2`條目——仍是「換更大樣本重跑」(a)、「train-only嚴格樣本外」(b)兩個選項留給使用者決定，未見新回應。FUT軌round104留下的盤別效應第三批待辦本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過。同時複查`TW_MARATHON_STATE.md`第197輪記錄——TW軌兩項地基背景工作（宇宙回補81.3%、T86回補100%）仍維持已達標，本輪（第197輪）額外嘗試補`portfolio_multifactor_v2`隨機控制組N15→100但卡在`load_sample_with_factors()`效能異常未完成，也不是FUT軌能接手的工作。目前三軌皆無已知允許的工作單位可做。**本輪整輪跳過，未做任何實質工作。**
+
+**額外發現**：開工時`git status`確認乾淨，僅慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生，跟第169–196輪記錄一致），依規則不觸碰、不加入本輪commit。
+
+`is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約89輪、跨度約51小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
