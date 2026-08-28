@@ -50,12 +50,64 @@ TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公
 # 過濾ETF/權證（那份也沒過濾），這裡的取捨一致，已知限制寫進STATUS.json。
 TPEX_INSTITUTIONAL_URL = "https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading"
 
+# 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
+# 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
+# 邏輯——跨repo/跨目錄不import是既有慣例）。
+RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 
-def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str) -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(timezone.utc).isoformat()
+    _save_rate_limit_state(state)
+
+
+def _get_retry(url: str, source: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
     """同 update_stock_financials.py 的 _get_retry()——自成一體複製，不跨檔案
     import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。
     **刻意不用在T86_URL**：T86有反爬蟲風險（見下方fetch_institutional_aggregate
-    docstring），重試可能加重被封鎖的機率，那裡維持單次嘗試。"""
+    docstring），重試可能加重被封鎖的機率，那裡維持單次嘗試（但一樣會過
+    2026-08-28新增的跨process節流/斷路檢查，見`fetch_institutional_aggregate()`
+    內直接呼叫`_rate_limit_wait_or_raise()`的地方）。"""
+    _rate_limit_wait_or_raise(source)
     last_err = None
     for attempt in range(max_retries):
         try:
@@ -65,6 +117,9 @@ def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwar
             if attempt < max_retries - 1:
                 time.sleep(backoff_base * (2 ** attempt))
             continue
+        if r.status_code in (402, 403, 428, 429):
+            _rate_limit_record_block(source, r.status_code, r.text[:200])
+            raise RuntimeError(f"{source}回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
         if 500 <= r.status_code < 600 and attempt < max_retries - 1:
             time.sleep(backoff_base * (2 ** attempt))
             continue
@@ -80,7 +135,7 @@ def load_tse_company_codes() -> set[str] | None:
     就回傳None，呼叫端應該退回不篩選（寧可讓ETF/權證雜訊進來，也不要誤刪
     真正的股票資料）。"""
     try:
-        r = _get_retry(TSE_LIST_URL, timeout=15)
+        r = _get_retry(TSE_LIST_URL, "twse_openapi", timeout=15)
         r.raise_for_status()
         rows = r.json()
         codes = {row.get("公司代號") for row in rows if row.get("公司代號")}
@@ -107,7 +162,7 @@ def fetch_mi_index() -> tuple[dict | None, list[dict]]:
     等主題式指數跟真正的產業分類指數——只有名稱以「類指數」結尾的才是 TWSE 官方
     28 類產業分類（實測 2026-08-26：37 筆符合，比 App 原本示範資料的 8 大類更完整），
     其餘主題式指數不放進「類股表現」清單，避免混淆。"""
-    r = _get_retry(MI_INDEX_URL, timeout=15)
+    r = _get_retry(MI_INDEX_URL, "twse_openapi", timeout=15)
     r.raise_for_status()
     rows = r.json()
     headline = None
@@ -156,7 +211,7 @@ def fetch_tpex_index() -> dict | None:
     # 疑似缺欄位，不是我們這端設定錯）。main() 已經把每個資料源包在各自的 try/except
     # 裡，這裡失敗只會讓 out["tpex"]=None，不會讓整支腳本連台股大盤/期貨都抓不到，
     # 是設計內的優雅降級，不是需要特別處理的例外。
-    r = _get_retry(TPEX_INDEX_URL, timeout=15)
+    r = _get_retry(TPEX_INDEX_URL, "tpex_openapi", timeout=15)
     r.raise_for_status()
     rows = r.json()
     if not rows:
@@ -179,7 +234,7 @@ def fetch_taifex_contracts() -> dict[str, dict]:
     """一次呼叫涵蓋 TAIFEX_CONTRACTS 全部合約（TAIFEX 這個端點本來就回傳全市場
     所有合約，不是只有 TX，這裡只是從同一份回應多篩幾種代碼，不需要多打幾次
     API）。回傳 {contract_code: {...}}，抓不到的代碼不會出現在結果字典裡。"""
-    r = _get_retry(TAIFEX_FUT_URL, timeout=15)
+    r = _get_retry(TAIFEX_FUT_URL, "taifex_openapi", timeout=15)
     r.raise_for_status()
     rows = r.json()
     out: dict[str, dict] = {}
@@ -211,8 +266,15 @@ def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
         "Referer": "https://www.twse.com.tw/zh/trading/foreign/t86.html",
         "User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)",
     }
+    # 2026-08-28新增：跟其他端點一樣先過跨process節流/斷路檢查，但維持「單次
+    # 嘗試不重試」的既有設計（見上面_get_retry() docstring說明），只是這裡是
+    # 直接requests.get()不經過_get_retry()，所以節流/斷路邏輯要手動呼叫一次。
+    _rate_limit_wait_or_raise("twse_t86")
     r = requests.get(T86_URL, params={"response": "json", "date": date_str, "selectType": "ALL"},
                       headers=headers, timeout=20)
+    if r.status_code in (402, 403, 428, 429):
+        _rate_limit_record_block("twse_t86", r.status_code, r.text[:200])
+        raise RuntimeError(f"twse_t86回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
     r.raise_for_status()
     body = r.json()
     if body.get("stat") != "OK" or not body.get("data"):
@@ -289,7 +351,7 @@ def fetch_institutional_tpex(date_str: str) -> dict[str, dict]:
     date查詢參數）。欄位名很長且不一致（有些前後有多餘空白），用exact match
     找需要的三個淨額欄位，找不到就跳過那檔（不要用substring比對猜錯欄位，
     上一輪T86那邊就踩過這個坑）。"""
-    r = _get_retry(TPEX_INSTITUTIONAL_URL, timeout=20)
+    r = _get_retry(TPEX_INSTITUTIONAL_URL, "tpex_openapi", timeout=20)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):

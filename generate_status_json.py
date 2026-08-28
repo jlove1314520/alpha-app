@@ -318,6 +318,12 @@ def build_data_files() -> list[dict]:
     for path in sorted(DATA_DIR.glob("*.json")):
         if path.name == "STATUS.json":
             continue
+        if path.name == "rate_limit_state.json":
+            # 2026-08-28新增：這個檔案不是「App資料」，是跨process共用的節流/
+            # 斷路狀態，已經有專屬的build_rate_limit_status()整理成人類看得懂
+            # 的格式放進STATUS.json的rate_limit_status欄位——這裡跳過，不要
+            # 讓它又混進data_files清單、被通用解析器誤標成「未知/error」。
+            continue
         rel = f"data/{path.name}"
         describer = DESCRIBERS.get(path.name)
         if describer:
@@ -541,6 +547,39 @@ KNOWN_LIMITATIONS = [
 ]
 
 
+def build_rate_limit_status() -> dict:
+    """2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」
+    規則b：收到428/403就停打該來源至少2小時，寫入STATUS）——讀
+    `data/rate_limit_state.json`（各.github/scripts與research腳本共用的
+    跨process節流/斷路狀態檔），整理成人類看得懂的摘要，讓使用者/協作者
+    一眼看到目前哪些來源在封鎖冷卻中、還剩多久。這個狀態檔本身由各腳本
+    自己讀寫，這裡只負責「讀出來呈現」，不負責產生內容。"""
+    path = DATA_DIR / "rate_limit_state.json"
+    if not path.exists():
+        return {"note": "尚未有任何腳本觸發過rate_limit_state.json（沒有請求記錄，也沒有被封鎖過）"}
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return {"note": f"讀取rate_limit_state.json失敗：{e}"}
+    now = datetime.now(timezone.utc).timestamp()
+    sources = {}
+    for name, src in state.get("sources", {}).items():
+        blocked_until = src.get("blocked_until")
+        is_blocked = bool(blocked_until and now < blocked_until)
+        sources[name] = {
+            "blocked": is_blocked,
+            "blocked_remaining_min": round((blocked_until - now) / 60, 1) if is_blocked else None,
+            "block_reason": src.get("block_reason") if is_blocked else None,
+            "blocked_at": src.get("blocked_at") if is_blocked else None,
+        }
+    return {
+        "note": "各資料源目前的請求節流/斷路狀態（≥3秒間隔+收到428/403封鎖2小時，"
+                "2026-08-28新增，見BACKLOG.md「資料源禮儀」）。blocked=true代表目前"
+                "所有腳本都會拒絕對這個來源發送請求，不是故障，是主動禮讓。",
+        "sources": sources,
+    }
+
+
 def main():
     payload = {
         "updated_at": datetime.now(TW_TZ).isoformat(),
@@ -549,6 +588,7 @@ def main():
         "workflows": build_workflows(),
         "app_data_sources": APP_DATA_SOURCES,
         "field_fallback_chains": FIELD_FALLBACK_CHAINS,
+        "rate_limit_status": build_rate_limit_status(),
         "todo": TODO,
         "known_limitations": KNOWN_LIMITATIONS,
     }

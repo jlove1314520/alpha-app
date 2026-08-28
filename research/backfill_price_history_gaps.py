@@ -39,6 +39,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -60,6 +61,60 @@ NON_STOCK_INDUSTRIES = {
     "受益證券", "存託憑證", "Index", "大盤", "所有證券",
 }
 
+# 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則）：
+# 跟`research/finmind_client.py`共用同一份跨process狀態檔（同一個source key
+# "finmind"）——這支腳本本來就刻意不經過finmind_client.py（見模組docstring：
+# 不走load_dev/holdout），但仍然打的是同一個FinMind API，必須共用同一套
+# 節流/斷路狀態，不然這支腳本自己開的請求量還是會讓finmind_client.py那邊的
+# 節流形同虛設（2026-08-27晚到2026-08-28整晚的實際incident就是因為好幾支
+# 「各自獨立process」的腳本互相不知道對方在打同一個來源）。
+RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
+FINMIND_SOURCE_KEY = "finmind"
+
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str = FINMIND_SOURCE_KEY) -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(timezone.utc).isoformat()
+    _save_rate_limit_state(state)
+
 
 def _num(v):
     if v in (None, "", "-", "N/A"):
@@ -72,10 +127,17 @@ def _num(v):
 
 def fetch_finmind_price(code: str) -> list[dict]:
     """FinMind即時線上API（不經過本機parquet快取，也不經過load_dev/holdout，
-    見模組docstring）。免token，回傳失敗/空資料就回傳[]，呼叫端try/except接住。"""
+    見模組docstring）。免token，回傳失敗/空資料就回傳[]，呼叫端try/except接住。
+    2026-08-28新增：發送前先過共用的跨process節流/斷路檢查（見上方
+    `_rate_limit_wait_or_raise()`），封鎖中會直接RuntimeError不發請求；
+    收到額度/封鎖類狀態碼會立刻標記封鎖，不會重試。"""
+    _rate_limit_wait_or_raise()
     r = requests.get(FINMIND_URL, params={
         "dataset": "TaiwanStockPrice", "data_id": code, "start_date": BACKFILL_START_DATE,
     }, timeout=20)
+    if r.status_code in (402, 403, 428, 429):
+        _rate_limit_record_block(FINMIND_SOURCE_KEY, r.status_code, r.text[:200])
+        raise RuntimeError(f"FinMind回應HTTP {r.status_code}，已標記封鎖{RATE_LIMIT_BLOCK_SECONDS//3600}小時：{r.text[:200]}")
     r.raise_for_status()
     d = r.json()
     if d.get("msg") != "success":
@@ -167,11 +229,10 @@ def main():
     print(f"候選宇宙中深度不足({DEPTH_TARGET}列)的股票：{len(codes)} 檔，開始用FinMind即時API回補"
           f"（TWSE STOCK_DAY本輪已實測被反爬蟲整批擋下，改走這條路，見模組docstring）")
 
-    backfilled, failed, skipped_no_gain = 0, 0, 0
+    backfilled, failed, skipped_no_gain, blocked_skip = 0, 0, 0, 0
     for i, code in enumerate(codes):
         try:
-            rows = fetch_finmind_price(code)
-            time.sleep(0.3)
+            rows = fetch_finmind_price(code)  # 內部已含3秒節流，不用另外sleep
             if not rows:
                 failed += 1
                 continue
@@ -193,6 +254,14 @@ def main():
             else:
                 skipped_no_gain += 1
         except Exception as e:
+            # 2026-08-28新增：一旦被斷路器判定為封鎖中，後面每一檔都會立刻拋出
+            # 同樣的RuntimeError（不會真的發請求）——與其讓迴圈空轉幾百次徒增
+            # 「失敗」計數造成誤導，這裡偵測到「封鎖中」的訊息就直接整批中止，
+            # 剩下沒處理到的股票留給下次（額度/封鎖解除後）重跑，不硬撐跑完。
+            if "封鎖冷卻中" in str(e):
+                blocked_skip = len(codes) - i
+                print(f"  偵測到{FINMIND_SOURCE_KEY}進入封鎖冷卻，中止本輪剩餘{blocked_skip}檔（留待下次）：{e}")
+                break
             print(f"  {code} 補歷史失敗（跳過，不影響其他檔）：{e}")
             failed += 1
         if (i + 1) % 50 == 0:
@@ -212,7 +281,8 @@ def main():
         "反爬蟲整批擋下（53檔測試全部428），才改走這條路（見模組docstring"
         "「方法演進紀錄」）。"
         f"本輪：目標{len(codes)}檔、成功補進{backfilled}檔、{failed}檔查詢"
-        f"失敗（配額/無資料）、{skipped_no_gain}檔查到資料但沒有新增天數。"
+        f"失敗（配額/無資料）、{skipped_no_gain}檔查到資料但沒有新增天數"
+        + (f"、{blocked_skip}檔因偵測到FinMind進入封鎖冷卻而中止未處理（留待下次）。" if blocked_skip else "。")
     )
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {OUT_PATH}：目標{len(codes)}檔，成功補進{backfilled}檔、失敗{failed}檔、無增益{skipped_no_gain}檔")

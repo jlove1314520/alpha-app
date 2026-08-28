@@ -47,10 +47,63 @@ FINMIND_URL = (
 )
 HISTORY_DAYS_KEEP = 60
 
+# 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
+# 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
+# 邏輯——跨repo/跨目錄不import是既有慣例）。FinMind那一路刻意用跟
+# finmind_client.py同一個source key "finmind"，讓兩邊互相看得到對方的封鎖
+# 狀態，不會各自為政。
+RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 
-def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str) -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(timezone.utc).isoformat()
+    _save_rate_limit_state(state)
+
+
+def _get_retry(url: str, source: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
     """同 update_stock_financials.py 的 _get_retry()——自成一體複製，不跨檔案
-    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。"""
+    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。
+    2026-08-28新增`source`：發送前先過跨process共用節流/斷路檢查。"""
+    _rate_limit_wait_or_raise(source)
     last_err = None
     for attempt in range(max_retries):
         try:
@@ -60,6 +113,9 @@ def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwar
             if attempt < max_retries - 1:
                 time.sleep(backoff_base * (2 ** attempt))
             continue
+        if r.status_code in (402, 403, 428, 429):
+            _rate_limit_record_block(source, r.status_code, r.text[:200])
+            raise RuntimeError(f"{source}回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
         if 500 <= r.status_code < 600 and attempt < max_retries - 1:
             time.sleep(backoff_base * (2 ** attempt))
             continue
@@ -72,7 +128,7 @@ def load_tse_company_codes() -> set[str] | None:
     不跨腳本import（見既有慣例）。用來篩選merge進stock_detail.json的代碼，
     含金融股、不含ETF/權證。"""
     try:
-        r = _get_retry(TSE_LIST_URL, timeout=15)
+        r = _get_retry(TSE_LIST_URL, "twse_openapi", timeout=15)
         r.raise_for_status()
         rows = r.json()
         codes = {row.get("公司代號") for row in rows if row.get("公司代號")}
@@ -94,7 +150,7 @@ def _num(v):
 def fetch_margin_by_stock() -> tuple[dict[str, float], dict[str, dict]]:
     """回傳 (代號:融資今日餘額張數（給維持率算擔保品市值用）,
     代號:{today,prev,short_today}（給個股頁「融資融券」分頁用，merge進stock_detail.json）)。"""
-    r = _get_retry(MI_MARGN_URL, timeout=30)
+    r = _get_retry(MI_MARGN_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -118,7 +174,7 @@ def fetch_margin_by_stock() -> tuple[dict[str, float], dict[str, dict]]:
 def fetch_margin_by_stock_tpex() -> dict[str, dict]:
     """TPEx（上櫃）融資融券逐股資料，只給stock_detail.json的個股分頁用
     （不併入大盤維持率分子/分母，見TPEX_MARGIN_URL常數說明）。"""
-    r = _get_retry(TPEX_MARGIN_URL, timeout=30)
+    r = _get_retry(TPEX_MARGIN_URL, "tpex_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -137,7 +193,7 @@ def fetch_margin_by_stock_tpex() -> dict[str, dict]:
 
 
 def fetch_close_by_stock() -> dict[str, float]:
-    r = _get_retry(STOCK_DAY_ALL_URL, timeout=30)
+    r = _get_retry(STOCK_DAY_ALL_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -153,7 +209,7 @@ def fetch_close_by_stock() -> dict[str, float]:
 
 def fetch_market_margin_money() -> tuple[str, float]:
     start = (datetime.now(TW_TZ).date() - timedelta(days=10)).isoformat()
-    r = _get_retry(FINMIND_URL.format(start=start), timeout=30)
+    r = _get_retry(FINMIND_URL.format(start=start), "finmind", timeout=30)
     r.raise_for_status()
     data = r.json()
     rows = data.get("data", [])

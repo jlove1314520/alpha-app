@@ -366,6 +366,90 @@ PASS - 10. 整個測試過程（含所有互動操作，含8/9新增檢查）結
 - 紀律不變：單一進行中、冒煙測試不過不commit、假資料零容忍、不碰holdout、
   不接真實下單、全程繁中。
 
+**2026-08-28上午新增（使用者裁示「資料源禮儀——428是我們自己打出來的」）**：
+- **資料抓取／開發測試分離**：夜間循環的「開發/測試」輪次（寫程式、跑App
+  冒煙測試、UX走查、code review）**不得觸發任何對TWSE/TPEx/FinMind的外部
+  請求**。需要抓資料（回補歷史、跑research腳本、backtest需要載入樣本）的
+  輪次，要在該輪一開始明確聲明「這輪是資料抓取輪」，且不得跟另一個也會
+  打同一來源的資料抓取工作同時進行（見下方「資料源禮儀」章節的教訓）。
+  App冒煙測試本身會觸發`loadStockInfo()`打FinMind——這是App正常運作的
+  一部分，不算違反這條規則，但如果FinMind當下在共用狀態檔裡是封鎖中，
+  冒煙測試出現check 1/12 FAIL是預期中的行為，不用為此重跑到PASS為止，
+  在紀錄裡註明原因即可（沿用續29條目已建立的處理方式）。
+
+## 🚦 資料源禮儀（2026-08-28使用者裁示，「428是我們自己打出來的」）
+
+**背景**：2026-08-27晚到2026-08-28整晚的夜間循環，對TWSE STOCK_DAY單股
+端點跟FinMind先後觸發過至少三次限流/封鎖（TWSE 428、FinMind 402額度用盡
+兩次、FinMind 403 ip banned一次）。根因不是外部端點本身不穩定，是**這台
+機器自己短時間內開了太多請求**——尤其是好幾支「各自獨立process」的腳本
+（`build_price_history.py`／`update_price_history.py`／
+`backfill_price_history_gaps.py`／PIT回測需要載入的research樣本）先後或
+交錯執行，每支腳本各自的節流都只是「同一個process內」的in-memory計時，
+彼此完全不知道對方也在打同一個來源，疊加起來的真實請求頻率遠比任何單一
+腳本自己以為的要高很多。
+
+**已完成（2026-08-28上午）**：
+
+a) **跨process共用的速率限制+斷路器**——新增`data/rate_limit_state.json`
+   （merge-safe的JSON狀態檔，各腳本自己讀寫，不是誰的私有記憶體），schema：
+   `{"sources": {"<source_key>": {"last_request_at": <unix ts>,
+   "blocked_until": <unix ts或無>, "block_reason": "...", "blocked_at": "..."}}}`。
+   規則：
+   - 同一來源兩次真正發出的請求間隔至少3秒（使用者明確指定的下限），不夠
+     就在發送前sleep補足。
+   - 收到402/403/428/429（額度用盡/封鎖/請求過快類狀態碼）就立刻把該來源
+     標記「封鎖中，2小時內」，寫進共用狀態檔，**不重試**（重試只會讓封鎖
+     更久）——其他process下次要打同一來源時，一讀到共用狀態檔就會直接
+     RuntimeError拒絕發送，不會傻傻撞上去。
+   - Source key清單：`finmind`（FinMind全部dataset共用一個，`research/
+     finmind_client.py`跟`backfill_price_history_gaps.py`/
+     `update_margin_maintenance.py`都指向同一個key，互相看得到對方的
+     封鎖狀態）、`twse_stock_day`（單股歷史日線，實測過會428的那個）、
+     `twse_t86`（三大法人，維持既有「不重試」設計，但一樣過節流/斷路
+     檢查）、`twse_openapi`（STOCK_DAY_ALL/BWIBBU_ALL/MI_MARGN/t187ap0*系列
+     等openapi.twse.com.tw端點）、`twse_exright`（TWT48U除權息預告表）、
+     `tpex_openapi`（TPEx各openapi端點）、`taifex_openapi`（期貨）。
+   - 已套用到：`research/finmind_client.py`（研究端FinMind的唯一入口，
+     高槓桿）、`research/backfill_price_history_gaps.py`、
+     `.github/scripts/update_price_history.py`、`fetch_quotes_tw.py`、
+     `fetch_market_tw.py`、`update_fundamentals_daily.py`、
+     `update_margin_maintenance.py`、`update_stock_financials.py`——
+     這8支是2026-08-27晚實際會打TWSE/TPEx/FinMind的腳本全部。**尚未套用**：
+     `fetch_earnings_calendar.py`（yfinance，不在使用者這輪指定的
+     TWSE/TPEx/FinMind範圍內，故意不動）。
+
+b) **已抓過的資料走本地快取，同一資料當日不重複請求**——這條規則本來就是
+   `research/finmind_client.py`既有的parquet快取設計（`_fetch()`命中快取
+   直接回傳，不重新發送請求），跟`.github/scripts/`那幾支「累積式寫回」
+   腳本（讀repo裡已commit的JSON當底、只merge新增部分）的既有設計。這次
+   沒有新增機制，是確認既有設計已經符合這條規則，重點反而是(a)沒做到位
+   （個別腳本節流不夠、彼此不協調）。
+
+   **已知殘留風險（誠實揭露，不是這輪能完全解決的）**：`fetch_quotes_tw.py`
+   的`fetch_stock_day_month()`現在每檔股票最低要等3秒，如果`scores.json`
+   樣本規模擴大到近全市場（2000+檔），單純把sparkline全部抓過一輪可能要
+   1.5小時以上——這支腳本本來就有「當天只在第一次執行時對每檔各打1-2次，
+   其餘9次/10分鐘的執行直接沿用當天稍早抓到的快取」的既有節流設計，
+   長期下來不是每次都要付這個代價，但**新股票剛加進樣本、或某天快取被
+   清空**的情況下，第一次全量抓取仍然會很慢——這是嚴格遵守3秒下限的
+   必然代價，沒有偷偷放寬這個數字來換取速度，誠實記錄這個取捨。
+
+c) **資料抓取／開發測試分離**——見上方「夜間自主循環規則」章節新增條目。
+
+d) **STATUS.json新增`rate_limit_status`欄位**——`generate_status_json.py`
+   會讀`data/rate_limit_state.json`整理成人類看得懂的格式（哪些來源目前
+   封鎖中、還剩多久），使用者/協作者透過`data/STATUS.json`就能看到，不用
+   自己去解讀原始狀態檔。
+
+**24小時觀察（使用者要求，2026-08-28 07:59起算基準點）**：本輪已確認
+TWSE `STOCK_DAY`單股端點（昨晚實測428的那個具體案例：1305這檔）目前
+回應200，看起來不是永久性封鎖，是臨時性的（TWSE的行為模式看起來比
+FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時間）。
+之後夜間循環的每輪值守都會附帶檢查`data/rate_limit_state.json`+快速
+測一次TWSE關鍵端點，累積到24小時後在這裡回報完整結論（目前只有這一個
+基準點，還不算完整的24小時觀察）。
+
 ## ❌ 待處理（依使用者2026-08-27/28指定順序：還原權息✅ → 重整/時鐘✅ →
 歷史+量能深度 → 創新高 → 量價配合度 → B24選股驗證(PIT回測+翻倍率+前瞻台帳)
 → B16原有回測項目併入B24 → 其餘BACKLOG項目依App頁面優先序）

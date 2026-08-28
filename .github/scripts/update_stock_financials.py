@@ -52,11 +52,62 @@ INCOME_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap06_L_ci"
 BALANCE_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap07_L_ci"
 QUARTERS_TO_KEEP = 8
 
+# 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
+# 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
+# 邏輯——跨repo/跨目錄不import是既有慣例）。
+RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 
-def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str) -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(timezone.utc).isoformat()
+    _save_rate_limit_state(state)
+
+
+def _get_retry(url: str, source: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
     """official端點逾時/暫時性錯誤重試(指數退避)，2026-08-27新增——使用者指出
     「TWSE端點逾時目前是靜靜跳過」。4xx（含反爬蟲/IP封鎖）不重試，直接把該次
-    response交給呼叫端自己的raise_for_status()處理，重試那類錯誤不會成功。"""
+    response交給呼叫端自己的raise_for_status()處理，重試那類錯誤不會成功。
+    2026-08-28新增`source`：發送前先過跨process共用節流/斷路檢查。"""
+    _rate_limit_wait_or_raise(source)
     last_err = None
     for attempt in range(max_retries):
         try:
@@ -66,6 +117,9 @@ def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwar
             if attempt < max_retries - 1:
                 time.sleep(backoff_base * (2 ** attempt))
             continue
+        if r.status_code in (402, 403, 428, 429):
+            _rate_limit_record_block(source, r.status_code, r.text[:200])
+            raise RuntimeError(f"{source}回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
         if 500 <= r.status_code < 600 and attempt < max_retries - 1:
             time.sleep(backoff_base * (2 ** attempt))
             continue
@@ -104,7 +158,7 @@ def fetch_income() -> dict[str, dict]:
     要在 main() 裡跟既有 quarters 合併時才能做，這裡只負責忠實抓值+單位轉換
     （仟元→元）。回傳的key統一叫 `*_cum`，提醒呼叫端這是累計數，不能直接當
     單季用。"""
-    r = _get_retry(INCOME_URL, timeout=30)
+    r = _get_retry(INCOME_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -186,7 +240,7 @@ def fetch_balance() -> dict[str, dict]:
     資產數字，誠實揭露）。回傳結構從原本`{code: equity}`改成
     `{code: {equity, common_stock_capital, non_current_assets}}`，呼叫端
     要跟著改。"""
-    r = _get_retry(BALANCE_URL, timeout=30)
+    r = _get_retry(BALANCE_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):

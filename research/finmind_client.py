@@ -31,7 +31,9 @@ ever actually becomes a problem.
 """
 from __future__ import annotations
 
+import json
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -42,24 +44,80 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 FM_BASE = "https://api.finmindtrade.com/api/v4/data"
 
-# 2026-08-27 新增：使用者指出這台機器目前被FinMind IP封鎖（非單純額度用盡），
-# 懷疑是呼叫過於頻繁——這裡之前完全沒有任何速率限制，300檔抽樣每檔好幾個
-# 因子各打一次，等於短時間內連續幾千次請求，沒有任何節流。加一個全域的
-# 「兩次真正網路請求之間至少間隔0.35秒」節流（快取命中不算，只節流真正打
-# 出去的請求），沒辦法解除現有的封鎖，但至少不會讓研究馬拉松/選股評分繼續
-# 用同樣不節制的節奏加重或延長下一次封鎖。0.35秒是保守估計值，之後如果仍
-# 觀察到封鎖就要再拉長，不是精確調校過的數字。
-_MIN_CALL_INTERVAL_SEC = 0.35
-_last_call_ts = 0.0
+# 2026-08-28 大幅升級（使用者裁示「428是我們自己打出來的」，「資料源禮儀」
+# 三條規則）：2026-08-27加的0.35秒節流只是「同一個process內」的in-memory
+# 節流——2026-08-27晚到2026-08-28整晚的真實incident（IP banned 403、
+# quota exhausted 402各發生過至少兩次）證明這完全不夠：那一晚是好幾支
+# 「各自獨立process」的腳本（build_price_history.py／update_price_history.py／
+# backfill_price_history_gaps.py／這支client餵給的各research腳本）先後或
+# 交錯執行，每個process的_last_call_ts都是從0開始算，互相之間完全沒有
+# 協調，短時間內疊加起來的真實請求頻率遠比任何單一process自己的節流數字
+# 高很多。改用**跨process共用的檔案狀態**（`data/rate_limit_state.json`，
+# 跟`.github/scripts/`那邊的request_guard.py共用同一份schema、各自複製一份
+# 邏輯──跨repo/跨目錄不import是既有慣例，見其他腳本docstring）：
+# - 間隔從0.35秒拉長到3秒（使用者明確指定的下限）。
+# - 新增斷路器：收到428/403就把這個來源標記「封鎖中，至少2小時內不再打」，
+#   寫進共用狀態檔，讓其他process（不管是不是同一支腳本）也會看到並遵守。
+# - `generate_status_json.py`會把這份狀態檔的內容併進`data/STATUS.json`，
+#   使用者/協作者都看得到目前哪些來源被封鎖、封鎖到什麼時候。
+RATE_LIMIT_STATE_PATH = Path(__file__).parent.parent / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
+SOURCE_KEY = "finmind"
+
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
+    """真正發送請求前一定要呼叫。如果這個來源目前在封鎖冷卻中，直接拋
+    RuntimeError（不要讓呼叫端誤以為「沒資料」，這是「不能問」不是「問了沒有」，
+    兩者對下游的意義完全不同，不能混淆）。沒被封鎖的話，確保跟上次真正
+    發出的請求間隔至少`RATE_LIMIT_MIN_INTERVAL_SEC`秒，不夠就在這裡sleep。"""
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    """收到428/403後呼叫，把這個來源標記成封鎖中，讓所有process（不限
+    這支腳本）都會透過共用狀態檔看到並停止繼續打這個來源。"""
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(timezone.utc).isoformat()
+    _save_rate_limit_state(state)
 
 
 def _throttle() -> None:
-    global _last_call_ts
-    now = time.monotonic()
-    wait = _MIN_CALL_INTERVAL_SEC - (now - _last_call_ts)
-    if wait > 0:
-        time.sleep(wait)
-    _last_call_ts = time.monotonic()
+    """舊名稱保留相容（_fetch()內部呼叫點沿用這個名字），內容已經改成
+    上面跨process共用的版本，不再是單純in-memory節流。"""
+    _rate_limit_wait_or_raise(SOURCE_KEY)
 
 
 def _cache_path(dataset: str, data_id: str, start_date: str, end_date: str | None) -> Path:
@@ -102,8 +160,19 @@ def _fetch(
     last_err: Exception | None = None
     for attempt in range(max_retries):
         try:
-            _throttle()
+            _throttle()  # 這裡如果目前在封鎖冷卻中會直接RuntimeError，不會發出請求
             resp = requests.get(FM_BASE, params=params, timeout=timeout)
+            if resp.status_code in (402, 403, 428, 429):
+                # 2026-08-28新增：這幾個狀態碼是「額度用盡/被封鎖/請求過快」，不是
+                # 「這個dataset本來就查不到」——重試只會讓封鎖更久，這裡立刻把這個
+                # 來源標記封鎖2小時（見_rate_limit_record_block()），讓其他process
+                # 也會透過共用狀態檔看到並停手，不是只有這個process自己記得。
+                _rate_limit_record_block(SOURCE_KEY, resp.status_code, resp.text[:200])
+                raise RuntimeError(
+                    f"FinMind回應HTTP {resp.status_code}（額度/封鎖類錯誤，已標記{SOURCE_KEY}"
+                    f"封鎖{RATE_LIMIT_BLOCK_SECONDS//3600}小時，見{RATE_LIMIT_STATE_PATH}）："
+                    f"dataset={dataset} data_id={data_id} -- {resp.text[:300]}"
+                )
             if 400 <= resp.status_code < 500:
                 # Client error (bad dataset name, bad params, paid-tier gate) -- this will
                 # never succeed on retry, so fail fast instead of burning the retry budget.

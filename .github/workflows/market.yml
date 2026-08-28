@@ -75,6 +75,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json scores.json scores_momentum.json scores_future.json
+          git add -A data/market_tw.json data/market_us.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push

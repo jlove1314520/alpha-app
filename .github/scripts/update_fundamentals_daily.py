@@ -48,10 +48,61 @@ RATIOS_URL = "https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL"
 TPEX_RATIOS_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis"
 TPEX_REVENUE_URL = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_OB"
 
+# 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
+# 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
+# 邏輯——跨repo/跨目錄不import是既有慣例）。
+RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 
-def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str) -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(timezone.utc).isoformat()
+    _save_rate_limit_state(state)
+
+
+def _get_retry(url: str, source: str, max_retries: int = 3, backoff_base: float = 1.0, **kwargs):
     """同 update_stock_financials.py 的 _get_retry()——自成一體複製，不跨檔案
-    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。"""
+    import（既有慣例）。2026-08-27新增：端點逾時要重試，不能靜靜跳過。
+    2026-08-28新增`source`：發送前先過跨process共用節流/斷路檢查。"""
+    _rate_limit_wait_or_raise(source)
     last_err = None
     for attempt in range(max_retries):
         try:
@@ -61,6 +112,9 @@ def _get_retry(url: str, max_retries: int = 3, backoff_base: float = 1.0, **kwar
             if attempt < max_retries - 1:
                 time.sleep(backoff_base * (2 ** attempt))
             continue
+        if r.status_code in (402, 403, 428, 429):
+            _rate_limit_record_block(source, r.status_code, r.text[:200])
+            raise RuntimeError(f"{source}回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
         if 500 <= r.status_code < 600 and attempt < max_retries - 1:
             time.sleep(backoff_base * (2 ** attempt))
             continue
@@ -102,7 +156,7 @@ def _roc_yearmonth(s: str) -> tuple[int, int] | None:
 
 
 def fetch_ratios() -> dict[str, dict]:
-    r = _get_retry(RATIOS_URL, timeout=30)
+    r = _get_retry(RATIOS_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -123,7 +177,7 @@ def fetch_ratios() -> dict[str, dict]:
 
 
 def fetch_revenue() -> dict[str, dict]:
-    r = _get_retry(REVENUE_URL, timeout=30)
+    r = _get_retry(REVENUE_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -152,7 +206,7 @@ def fetch_ratios_tpex() -> dict[str, dict]:
     """TPEx（上櫃）版PER/PBR/殖利率，2026-08-27新增。欄位命名跟TWSE版
     （`fetch_ratios()`）不同：`SecuritiesCompanyCode`/`PriceEarningRatio`/
     `PriceBookRatio`/`YieldRatio`，語意對應但不是同一組鍵名。"""
-    r = _get_retry(TPEX_RATIOS_URL, timeout=30)
+    r = _get_retry(TPEX_RATIOS_URL, "tpex_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
@@ -175,7 +229,7 @@ def fetch_ratios_tpex() -> dict[str, dict]:
 def fetch_revenue_tpex() -> dict[str, dict]:
     """TPEx（上櫃）版月營收，2026-08-27新增。欄位命名跟TWSE版
     （`fetch_revenue()`）完全相同（同屬MOPS財報格式），可以重用同一套解析邏輯。"""
-    r = _get_retry(TPEX_REVENUE_URL, timeout=30)
+    r = _get_retry(TPEX_REVENUE_URL, "tpex_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):

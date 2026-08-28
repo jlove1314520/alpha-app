@@ -48,6 +48,60 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SCORES_PATH = REPO_ROOT / "scores.json"
 OUT_PATH = REPO_ROOT / "data" / "quotes_tw.json"
 
+# 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
+# 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
+# 邏輯——跨repo/跨目錄不import是既有慣例）：STOCK_DAY_URL（單股歷史日線）
+# 是這支腳本裡實測過會428的端點（見fetch_stock_day_month() docstring），
+# 用跨process共用的狀態檔節流+斷路，不是只有這個process自己記得。MIS即時
+# 報價端點目前沒有觀察到同樣的問題，這輪先不動它，只保護有實測過會出事的
+# STOCK_DAY_URL。
+RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
+RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
+RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
+
+
+def _load_rate_limit_state() -> dict:
+    if RATE_LIMIT_STATE_PATH.exists():
+        try:
+            return json.loads(RATE_LIMIT_STATE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"sources": {}}
+
+
+def _save_rate_limit_state(state: dict) -> None:
+    RATE_LIMIT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rate_limit_wait_or_raise(source: str) -> None:
+    state = _load_rate_limit_state()
+    src = state["sources"].get(source, {})
+    now = time.time()
+    blocked_until = src.get("blocked_until")
+    if blocked_until and now < blocked_until:
+        remain_min = round((blocked_until - now) / 60, 1)
+        raise RuntimeError(
+            f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
+            f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
+        )
+    last = src.get("last_request_at")
+    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
+        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    src["last_request_at"] = time.time()
+    state["sources"][source] = src
+    _save_rate_limit_state(state)
+
+
+def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
+    from datetime import timezone as _tz
+    state = _load_rate_limit_state()
+    src = state["sources"].setdefault(source, {})
+    src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
+    src["blocked_at"] = datetime.now(_tz.utc).isoformat()
+    _save_rate_limit_state(state)
+
 DEFAULT_WATCHLIST = ["2330", "2454", "2317", "1513", "3231"]
 
 MIS_URL = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
@@ -176,15 +230,16 @@ def fetch_stock_day_month(code: str, yyyymm: str) -> list[float]:
     40/40全部成功）——這不是主要靠放慢節奏解決的頻率限制，是需要瀏覽器風格
     header 才會放行，類似T86的反爬蟲邏輯（見fetch_market_tw.py docstring）。
     但實測92檔的完整批次（前面小樣本測試沒觸發）仍間歇性出現428（約25%），
-    看起來是有額外的流量閾值，所以這裡對428單獨重試一次（等1秒），不是無限
-    重試——重試後還失敗就放棄這一檔，讓呼叫端的try/except接住，不影響其他檔。"""
-    for attempt in range(2):
-        r = requests.get(STOCK_DAY_URL, params={"response": "json", "date": f"{yyyymm}01", "stockNo": code},
-                          headers=STOCK_DAY_HEADERS, timeout=15)
-        if r.status_code == 428 and attempt == 0:
-            time.sleep(1.0)
-            continue
-        break
+    看起來是有額外的流量閾值——**2026-08-28升級**：不再只靠單次重試，改成
+    跨process共用節流（同一來源兩次請求間隔至少3秒）+ 斷路器（收到428/403
+    就標記這個來源封鎖2小時，見模組開頭的`_rate_limit_wait_or_raise()`）。
+    封鎖中會直接RuntimeError，呼叫端的try/except接住、不影響其他檔。"""
+    _rate_limit_wait_or_raise("twse_stock_day")
+    r = requests.get(STOCK_DAY_URL, params={"response": "json", "date": f"{yyyymm}01", "stockNo": code},
+                      headers=STOCK_DAY_HEADERS, timeout=15)
+    if r.status_code in (402, 403, 428, 429):
+        _rate_limit_record_block("twse_stock_day", r.status_code, r.text[:200])
+        raise RuntimeError(f"twse_stock_day回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
     r.raise_for_status()
     d = r.json()
     if d.get("stat") != "OK":
