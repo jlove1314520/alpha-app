@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-08-28T22:54+08:00 — 馬拉松第197輪：嘗試補對照組（`portfolio_multifactor_v2` VAL期最佳兩組合隨機控制組15→100次重抽），因環境效能問題未完成
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 21:01（第194輪，最舊）、US 21:31（第195輪）、FUT 22:01（第196輪，最新）——依輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中；`LEADS.md`最新`portfolio_multifactor_v2`條目的(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者回應。
+
+**本輪嘗試的工作單位**：依`MARATHON_PROTOCOL.md`第0節規則1明確允許的「補參數敏感度、補對照組」範圍（不需要等待(a)/(b)決定），針對`portfolio_backtest_v2.py`已完成的12組合VAL期結果中，percentile已達成N=15滿分100.0的最佳兩組合（`A_4pass/ic_weighted/quarterly`、`B_plus_value_pe/ic_weighted/quarterly`），把隨機控制組重抽次數從15拉高到100，確認「滿分100.0」不是重抽次數太少（N=15時單次贏就能拉到93.3%，解析度太粗）造成的天花板假象。新增`deep_dive_portfolio_v2_random_control_n100.py`（重用`portfolio_backtest_v2.py`的`run_one()`/資料載入邏輯，`do_cost_sensitivity=False`沿用既有1x/2x/3x數字不重跑，只加碼`do_random_control=True, n_random=100`，零額外API呼叫）。
+
+**結果：未完成，卡在環境效能問題，不是研究判定**。逐步排查：(1) `import`+`sample_universe_ids`+`load_dev('TaiwanStockPrice','TAIEX',...)`+`prepare_market_data`——全部在2秒內完成，正常；(2) `load_sample_with_factors(sample_ids, market_df)`（loop讀取100檔樣本的價格+財報快取並算因子）——**單獨測試超過115秒仍未回傳**（用`python -u`確認非stdout緩衝問題，是真的在跑但異常慢）。過去輪次（如round 96寫`portfolio_backtest_v2.py`本體時）跑同一個函式沒有記錄過類似延遲，這是本輪第一次觀察到，原因未知（可能是本機快取檔案這段時間累積變多、磁碟/防毒掃描、或其他背景程序搶資源），**沒有足夠時間在這輪內查清楚根因**，誠實記錄而非猜測性下結論。過程中也發現一個工具面問題：用背景執行方式（timeout後自動移到background）跑這類腳本時，stdout常常讀不到任何內容（即使程序仍在執行），這跟第134輪T86回補記錄過的「背景執行輸出遺失」是同一類已知問題，這次額外確認了根因很可能單純是Python預設區塊緩衝（`python -u`或`flush=True`才會即時寫出，只是這次連用`-u`都还没等到完成就先超時了，所以還沒驗證`-u`本身能不能解決）。
+
+**沒有新增`TRIALS_LEDGER.md`列**（工具/環境問題，不是完成的假說判定，`portfolio_multifactor_v2`既有的FAIL/percentile=100.0(N=15)判定不變、未被推翻也未被強化）。腳本本身邏輯正確（沿用`run_one()`既有、已驗證過的機制，只是改參數），予以commit保留給下一輪接續，不算半成品濫竽充數——下一輪如果又撿到TW軌且暫停規則仍生效，建議：(a)先用前景執行（不要background）跑`python deep_dive_portfolio_v2_random_control_n100.py`，接受這樣可能要犧牲一整輪的時間但至少保證看得到完整輸出；(b)或先單獨用小n_random（如10）驗證`load_sample_with_factors`這次到底要花多久，如果真的是永久性變慢（不是這次的偶發現象），要往上通報使用者，因為這會拖慢所有依賴這個函式的既有腳本（`portfolio_backtest_v2.py`本體、`factor_ic.py`便宜關卡等），不只是這次的補充工作。
+
+`is_holdout_consumed()`確認`False`（本輪`load_sample_with_factors`卡住前後都用`load_dev()`，沒有觸碰`load_full_history()`/`unlock_holdout_once()`）。`git status`確認除了新增的腳本本身，只有慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生，不觸碰、不納入本輪commit）。
+
+---
+
 ## 2026-08-27T11:37+08:00 — 馬拉松第134輪：T86回補接續（暫停單因子試驗規則生效中，屬允許的地基工作，非新假說）
 
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳TW最舊（第131輪10:22，US第132輪10:33，FUT第133輪11:02，FUT該輪跳過未做實質工作）照輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`仍是「待使用者確認」狀態，無新使用者回應；`portfolio_multifactor_v2`下一步三選項依第109~131輪一貫判斷仍不代為決定，繼續等待使用者回應。延續第131輪的地基工作：`backfill_t86.py`（預設batch-size 200）。

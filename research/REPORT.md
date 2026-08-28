@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 197 輪 · 2026-08-28T22:54+08:00 · TW（補對照組嘗試，未完成，非跳過）· 判定：依`MARATHON_PROTOCOL.md`第0節規則1允許範圍，嘗試把`portfolio_multifactor_v2`VAL期最佳兩組合的隨機控制組重抽次數15→100（`deep_dive_portfolio_v2_random_control_n100.py`），**卡在`load_sample_with_factors()`異常變慢（單獨測試>115秒未回傳，過去輪次無此紀錄，根因未查清）未完成**，既有FAIL/percentile=100.0(N=15)判定不變。腳本邏輯正確，commit保留供下一輪接續（建議前景執行）。TW軌兩項地基工作仍達標（宇宙回補81.3%、T86回補100%）。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約87輪、跨度約50小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第197輪記錄
+
+---
 ## 第 196 輪 · 2026-08-28T22:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 20:31第193輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit）。FUT軌round104遺留的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。**本輪整輪跳過，未做任何實質工作。**`git status`確認乾淨，僅慣常的`research/pit_run_500.log`未追蹤殘留（另一互動session產生）。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約86輪、跨度約49.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第196輪記錄
 
 ---
