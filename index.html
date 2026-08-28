@@ -1021,6 +1021,11 @@
       <button class="btn ghost" style="width:100%;margin-top:12px" onclick="forceUpdateApp()">強制更新（清除快取＋重新整理）</button>
       <div class="note" style="text-align:center;margin-top:6px">手機上資料一直沒更新、卡在舊日期時，點這顆</div>
     </div>
+
+    <!-- 2026-08-28新增：實機縮放/貼底問題診斷讀數（灰色小字，不影響版面）。
+    headless測試環境沒有真實的視窗高度/工具列/安全區域行為，測不出縮放跑版
+    問題，這裡直接把relevant的即時數值印出來，讓使用者截圖回報用。 -->
+    <div class="note" id="viewport-diag" style="text-align:center;margin-top:10px;color:var(--ink-3);font-size:10px;line-height:1.7;word-break:break-all"></div>
   </section>
 
   </main>
@@ -1314,6 +1319,34 @@
   const _safeLoadIntradayQuotes=()=>loadIntradayQuotes().catch(e=>{console.warn('[loadIntradayQuotes]',e);recordGlobalError('loadIntradayQuotes',e)});
   setInterval(_safeLoadIntradayQuotes,2*60*1000);
   _safeLoadIntradayQuotes();
+
+  // 2026-08-28新增：設定頁底部縮放/貼底問題診斷讀數（純唯讀，不影響其他
+  // 版面邏輯）。獨立的setInterval+resize監聽，自成一體try/catch，跟上面
+  // 時鐘的錯誤隔離同一個精神——這裡拋錯只會讓這行診斷文字不更新，不會
+  // 拖累其他任何功能。
+  let _safeAreaProbeEl=null;
+  function _safeAreaBottomPx(){
+    if(!_safeAreaProbeEl){
+      _safeAreaProbeEl=document.createElement('div');
+      _safeAreaProbeEl.style.cssText='height:env(safe-area-inset-bottom);position:fixed;visibility:hidden;top:0;left:0;width:0';
+      document.body.appendChild(_safeAreaProbeEl);
+    }
+    return _safeAreaProbeEl.offsetHeight;
+  }
+  function updateViewportDiag(){
+    const el=document.getElementById('viewport-diag');if(!el)return;
+    const standalone=(navigator.standalone===true)||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+    const innerH=window.innerHeight;
+    const visualVP=window.visualViewport?Math.round(window.visualViewport.height):'n/a';
+    const safeBottom=_safeAreaBottomPx();
+    const navEl=document.getElementById('nav');
+    const navGap=navEl?(window.innerHeight-navEl.getBoundingClientRect().bottom):'n/a';
+    el.textContent=`standalone=${standalone} · innerH=${innerH} · visualVP=${visualVP} · safeBottom=${safeBottom} · navGap=${navGap}`;
+  }
+  setInterval(()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag]',e);recordGlobalError('viewportDiag',e)}},1000);
+  window.addEventListener('resize',()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag:resize]',e);recordGlobalError('viewportDiag:resize',e)}});
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag:vvresize]',e);recordGlobalError('viewportDiag:vvresize',e)}});
+  try{updateViewportDiag()}catch(e){console.warn('[viewportDiag]',e);recordGlobalError('viewportDiag',e)}
 
   // ══════ 真實資料層（FinMind，瀏覽器直抓，免後端）══════
   const FM="https://api.finmindtrade.com/api/v4/data";
@@ -2936,7 +2969,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.1508';
+  const APP_VERSION='2026-08-28.1905';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
