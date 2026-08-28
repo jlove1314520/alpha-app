@@ -14,9 +14,28 @@ Sortino/MDD優先」，先做價值成長榜。這支腳本重用既有、已經
 **重要澄清（跟使用者原話「目前只夠回測約12-18個月」的認知落差）**：
 使用者原話假設的12-18個月，指的可能是App即時JSON路徑（`price_history.json`
 90天/`fundamentals.json`26個月營收）的資料深度——但這支腳本走的是research端
-既有的`factor_ic.py`樣本（100檔，2010年起，FinMind歷史parquet快取），
-已經有長達10年以上的可用歷史，**不受那個12-18個月限制**。這是好消息：
-可以測的期間比使用者原本以為的長很多，統計檢定力也更高。
+既有的`factor_ic.py`樣本，2010年起、FinMind歷史parquet快取，已經有長達
+10年以上的可用歷史，**不受那個12-18個月限制**。這是好消息：可以測的期間
+比使用者原本以為的長很多，統計檢定力也更高。
+
+**2026-08-28第二次修訂：樣本擴大到500檔（使用者核准「回測樣本擴大：核准
+擴到500檔（一次性）」，見`VALUE_BOARD_SAMPLE_SIZE`）**——第一次機制驗證跑
+（100檔）發現嚴重方法論問題：扣掉流動性門檻後合格股票池平均只有約11.5檔，
+從未達到20檔持股目標，代表約40-45%資金整個回測期間閒置在現金，這對「策略
+vs 100%投入的買進持有大盤」是結構性不公平比較。500檔樣本應該能大幅改善
+這個問題（更大的池子，流動性門檻後仍有機會穩定湊到20檔）。**遵守「資料源
+禮儀」規則（見BACKLOG.md，2026-08-28同一天新增的全域速率限制）**：
+`research/finmind_client.py`現在對FinMind的請求嚴格3秒節流+斷路器，500檔
+裡任何一檔如果本機parquet快取沒有涵蓋到的資料（institutional/revenue等），
+第一次抓取都要付這個代價——**這是刻意的、已經跟使用者說明過的取捨，寧可
+慢也不要再觸發封鎖**，載入階段可能要數小時，不是這支腳本的bug，是誠實
+遵守速率限制的必然結果。
+
+**新增翻倍率/大賺率/地雷率統計（使用者原話，見`compute_moonshot_stats()`）**：
+對每一次「買進」事件往後看12個月(252個交易日)的價格路徑，取期間內曾經
+達到過的最高/最低報酬率（不是只看最後平倉報酬），算出翻倍率(曾達+100%)/
+大賺率(曾達+50%)/地雷率(曾跌破-30%)，並對隨機對照組的每一次draw也算同一
+組指標取平均，當作「亂槍打鳥」的對照基準。
 
 **Holdout紀律（本輪嚴格遵守，未經使用者同意不解鎖）**：全程只用
 `finmind_client.load_dev()`（自動cap在`VAL_END=2024-12-31`），`backtest/
@@ -51,7 +70,7 @@ import pandas as pd
 from scipy import stats
 
 from backtest.engine import BacktestConfig, run_backtest
-from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, START_DATE, sample_universe_ids, load_sample_with_factors
+from factor_ic import SAMPLE_SEED, START_DATE, sample_universe_ids, load_sample_with_factors
 from finmind_client import load_dev
 from score import load_industry_map
 from score_v2 import compute_scores_v2
@@ -62,6 +81,15 @@ TOP_N = 20  # 使用者規格：持股20檔
 REBALANCE_DAYS = 21  # 月度再平衡（21個交易日近似一個月，跟portfolio_backtest_v2.py同一個慣例）
 N_RANDOM_DRAWS_QUICK = 30  # 機制驗證用，見模組docstring「這輪只是機制驗證跑」說明
 RANDOM_CONTROL_SEED = 20260828
+# 2026-08-28新增（使用者核准「回測樣本擴大：核准擴到500檔（一次性）」）：
+# 刻意**不**改`factor_ic.py`的全域`SAMPLE_SIZE`常數（那會影響其他既有試驗
+# 對「100檔樣本」的既有引用/可重現性），只在這支腳本內用一個獨立的本地
+# 常數，呼叫`sample_universe_ids(VALUE_BOARD_SAMPLE_SIZE, SAMPLE_SEED)`——
+# 同一個seed但不同sample_size，Python的`random.Random(seed).sample()`
+# 內部消耗隨機數的方式跟k有關，500檔集合**不保證**是100檔集合的超集，
+# 是一個全新、獨立的500檔隨機樣本，不是「舊100+新400」的疊加，誠實記錄
+# 這個技術細節。
+VALUE_BOARD_SAMPLE_SIZE = 500
 
 
 def eligible_for_ranking_v2(cs: pd.DataFrame) -> pd.DataFrame:
@@ -154,6 +182,54 @@ def alpha_significance(equity_curve: pd.DataFrame, market_df: pd.DataFrame) -> d
     }
 
 
+def compute_moonshot_stats(trades: pd.DataFrame, price_data: dict[str, pd.DataFrame], horizon_days: int = 252) -> dict:
+    """使用者核心關切的「翻倍率/大賺率/地雷率」指標（2026-08-28新增，B24
+    任務2使用者原話：「翻倍率=Top20中12個月內最高漲幅曾達+100%的檔數比例；
+    大賺率=曾達+50%的比例...同時報告反面——12個月跌超過-30%的比例（地雷率）」）。
+
+    對每一次「買進」事件（不是每檔獨立股票，同一檔股票在回測期間多次
+    進出各自算一次entry），往後看最多`horizon_days`個交易日（約12個月）
+    的adj_close價格路徑，取這段期間內**曾經達到過的最高/最低報酬率**
+    （不是只看最後平倉報酬——用意是回答「有沒有翻倍過」而不是「最後有
+    沒有賺」，這兩個問題答案可能不同：曾經翻倍又跌回來，仍然算「翻倍
+    率」裡的一次命中）。entry太靠近回測結束、可用天數不足`horizon_days`
+    的，用「已有的最長天數」代替，不強制排除（否則會系統性剔除近期表現
+    最好/最差的entry，造成倖存者偏誤），但用`truncated_entries`誠實記錄
+    有幾筆是截斷的。"""
+    if trades.empty:
+        return {"n_entries": 0, "moonshot_rate": None, "big_win_rate": None, "mine_rate": None, "truncated_entries": 0}
+    buys = trades[trades["side"] == "buy"]
+    moonshot, big_win, mine, truncated, n = 0, 0, 0, 0, 0
+    for _, row in buys.iterrows():
+        sid, entry_date, entry_price = row["stock_id"], row["date"], row["price"]
+        df = price_data.get(sid)
+        if df is None or entry_price in (None, 0) or pd.isna(entry_price):
+            continue
+        future = df[df["date"] > entry_date].sort_values("date").head(horizon_days)
+        if future.empty or "adj_close" not in future.columns:
+            continue
+        if len(future) < horizon_days:
+            truncated += 1
+        max_ret = float(future["adj_close"].max()) / entry_price - 1
+        min_ret = float(future["adj_close"].min()) / entry_price - 1
+        n += 1
+        if max_ret >= 1.0:
+            moonshot += 1
+        if max_ret >= 0.5:
+            big_win += 1
+        if min_ret <= -0.3:
+            mine += 1
+    if n == 0:
+        return {"n_entries": 0, "moonshot_rate": None, "big_win_rate": None, "mine_rate": None, "truncated_entries": 0}
+    return {
+        "n_entries": n,
+        "moonshot_rate": round(moonshot / n * 100, 1),
+        "big_win_rate": round(big_win / n * 100, 1),
+        "mine_rate": round(mine / n * 100, 1),
+        "truncated_entries": truncated,
+    }
+
+
 def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: dict, start: str, end: str) -> dict:
     print(f"\n=== {label}: {start}..{end} ===")
     _eligible_pool_cache.clear()
@@ -172,18 +248,35 @@ def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: di
     print(f"  alpha(年化)={alpha['alpha_ann_pct']:+.2f}%  beta={alpha['beta']:+.3f}  "
           f"p={alpha['alpha_pvalue']:.4f}  顯著={alpha['alpha_significant']}（n={alpha['n_days']}天）")
 
+    moonshot = compute_moonshot_stats(result.trades, data)
+    print(f"  翻倍率(12個月內曾達+100%)={moonshot['moonshot_rate']}%  "
+          f"大賺率(曾達+50%)={moonshot['big_win_rate']}%  地雷率(曾跌破-30%)={moonshot['mine_rate']}%  "
+          f"（{moonshot['n_entries']}次進場事件，{moonshot['truncated_entries']}筆因接近回測尾端資料不足12個月而截斷）")
+
     print(f"  隨機對照組（{N_RANDOM_DRAWS_QUICK}次，機制驗證用，非最終1000次）...")
     random_finals = []
+    random_moonshot_rates, random_big_win_rates, random_mine_rates = [], [], []
     for i in range(N_RANDOM_DRAWS_QUICK):
         rcfg = BacktestConfig(start_date=start, end_date=end, max_positions=TOP_N,
                               rebalance_every_n_days=REBALANCE_DAYS, book_name="value_board_v2_random_control")
         rfn = make_random_signal_fn(industry_map, START_DATE, TOP_N, seed=RANDOM_CONTROL_SEED + i)
         rr = run_backtest(rfn, data, market_df, rcfg)
         random_finals.append(rr.final_equity)
+        rm = compute_moonshot_stats(rr.trades, data)
+        if rm["moonshot_rate"] is not None:
+            random_moonshot_rates.append(rm["moonshot_rate"])
+            random_big_win_rates.append(rm["big_win_rate"])
+            random_mine_rates.append(rm["mine_rate"])
     real_final = result.final_equity
     percentile = 100.0 * float(np.mean([real_final > rf for rf in random_finals]))
     print(f"  真實策略終值 {real_final:,.0f} vs 隨機對照組中位數 {np.median(random_finals):,.0f}"
           f"（百分位 {percentile:.1f}，{N_RANDOM_DRAWS_QUICK}次draws，非最終1000次）")
+    rand_moonshot_avg = round(float(np.mean(random_moonshot_rates)), 1) if random_moonshot_rates else None
+    rand_big_win_avg = round(float(np.mean(random_big_win_rates)), 1) if random_big_win_rates else None
+    rand_mine_avg = round(float(np.mean(random_mine_rates)), 1) if random_mine_rates else None
+    print(f"  隨機對照組翻倍率/大賺率/地雷率平均：{rand_moonshot_avg}% / {rand_big_win_avg}% / {rand_mine_avg}%"
+          f"（真實策略 {moonshot['moonshot_rate']}% / {moonshot['big_win_rate']}% / {moonshot['mine_rate']}% ——"
+          f"「選中比例」是否顯著高於「亂槍打鳥」看這兩組數字的差距）")
 
     return {
         "label": label, "start": start, "end": end,
@@ -193,11 +286,15 @@ def run_period(label: str, data: dict, market_df: pd.DataFrame, industry_map: di
         "alpha_ann_pct": alpha["alpha_ann_pct"], "beta": alpha["beta"],
         "alpha_pvalue": alpha["alpha_pvalue"], "alpha_significant": alpha["alpha_significant"],
         "random_control_percentile_quick": percentile, "random_draws_quick": N_RANDOM_DRAWS_QUICK,
+        "moonshot_rate": moonshot["moonshot_rate"], "big_win_rate": moonshot["big_win_rate"],
+        "mine_rate": moonshot["mine_rate"], "moonshot_n_entries": moonshot["n_entries"],
+        "random_moonshot_rate_avg": rand_moonshot_avg, "random_big_win_rate_avg": rand_big_win_avg,
+        "random_mine_rate_avg": rand_mine_avg,
     }
 
 
 def main():
-    sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
+    sample_ids = sample_universe_ids(VALUE_BOARD_SAMPLE_SIZE, SAMPLE_SEED)
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     holdout.assert_no_holdout_leakage(market_raw, context="market_raw in run_value_board_v2_pit_backtest")
     market_df = prepare_market_data(market_raw)
@@ -207,7 +304,7 @@ def main():
     # 腳本之後還會反覆重跑（sanity check/拉高random draws次數），每次都
     # 重付22分鐘不划算——這裡加一層pickle本地快取（只快取這支腳本自己用，
     # 不動factor_ic.py本身，不影響其他呼叫端）。
-    cache_path = Path(__file__).parent / "data" / "backtests" / "value_board_v2_sample_cache.pkl"
+    cache_path = Path(__file__).parent / "data" / "backtests" / f"value_board_v2_sample_cache_{VALUE_BOARD_SAMPLE_SIZE}.pkl"
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     if cache_path.exists():
         print(f"Loading sample + factors from local cache ({cache_path})...")
@@ -229,15 +326,17 @@ def main():
     train_result = run_period("TRAIN", data, market_df, industry_map, "2015-01-01", holdout.TRAIN_END)
     val_result = run_period("VALIDATION", data, market_df, industry_map, "2021-01-01", holdout.VAL_END)
 
-    print("\n=== SUMMARY（機制驗證跑，非正式試驗結果，尚未登錄TRIALS_LEDGER.md）===")
+    print(f"\n=== SUMMARY（{VALUE_BOARD_SAMPLE_SIZE}檔樣本，機制驗證跑，尚未登錄TRIALS_LEDGER.md）===")
     for r in (train_result, val_result):
         print(f"  {r['label']}: 策略={r['return_pct']:+.2f}% vs 買進持有={r['buy_and_hold_pct']:+.2f}%  "
               f"MDD策略/大盤={r['mdd_pct']:.2f}%/{r['bh_mdd_pct']:.2f}%  "
               f"Sortino策略/大盤={r['sortino']:.3f}/{r['bh_sortino']:.3f}  "
               f"alpha={r['alpha_ann_pct']:+.2f}%(顯著={r['alpha_significant']})  "
-              f"隨機對照百分位={r['random_control_percentile_quick']:.1f}(僅{r['random_draws_quick']}次)")
+              f"隨機對照百分位={r['random_control_percentile_quick']:.1f}(僅{r['random_draws_quick']}次)  "
+              f"翻倍率/大賺率/地雷率：策略{r['moonshot_rate']}%/{r['big_win_rate']}%/{r['mine_rate']}% "
+              f"vs 隨機{r['random_moonshot_rate_avg']}%/{r['random_big_win_rate_avg']}%/{r['random_mine_rate_avg']}%")
 
-    out_path = Path(__file__).parent / "data" / "value_board_v2_pit_backtest_quicklook.csv"
+    out_path = Path(__file__).parent / "data" / f"value_board_v2_pit_backtest_{VALUE_BOARD_SAMPLE_SIZE}_quicklook.csv"
     pd.DataFrame([train_result, val_result]).to_csv(out_path, index=False)
     print(f"saved {out_path}")
     return train_result, val_result
