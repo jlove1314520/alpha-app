@@ -28,6 +28,10 @@
         {
           "date": "2026-08-27",
           "cum_return_pct": 0.0
+        },
+        {
+          "date": "2026-08-28",
+          "cum_return_pct": -1.9288
         }
       ],
       "ledger": [
@@ -57,10 +61,17 @@
           "sells": [],
           "daily_pnl_pct": 0.0,
           "n_holdings": 19
+        },
+        {
+          "date": "2026-08-28",
+          "buys": [],
+          "sells": [],
+          "daily_pnl_pct": -1.9288,
+          "n_holdings": 19
         }
       ],
-      "forward_return_todate_pct": 0.0,
-      "trading_days_count": 1
+      "forward_return_todate_pct": -1.9288,
+      "trading_days_count": 2
     },
     "momentum_board": {
       "inception_date": "2026-08-27",
@@ -90,6 +101,10 @@
       "equity_curve": [
         {
           "date": "2026-08-27",
+          "cum_return_pct": 0.0
+        },
+        {
+          "date": "2026-08-28",
           "cum_return_pct": 0.0
         }
       ],
@@ -121,10 +136,17 @@
           "sells": [],
           "daily_pnl_pct": 0.0,
           "n_holdings": 20
+        },
+        {
+          "date": "2026-08-28",
+          "buys": [],
+          "sells": [],
+          "daily_pnl_pct": 0.0,
+          "n_holdings": 20
         }
       ],
       "forward_return_todate_pct": 0.0,
-      "trading_days_count": 1
+      "trading_days_count": 2
     },
     "future_board": {
       "inception_date": "2026-08-27",
@@ -153,6 +175,10 @@
         {
           "date": "2026-08-27",
           "cum_return_pct": 0.0
+        },
+        {
+          "date": "2026-08-28",
+          "cum_return_pct": -0.7254
         }
       ],
       "ledger": [
@@ -181,12 +207,19 @@
           "sells": [],
           "daily_pnl_pct": 0.0,
           "n_holdings": 18
+        },
+        {
+          "date": "2026-08-28",
+          "buys": [],
+          "sells": [],
+          "daily_pnl_pct": -0.7254,
+          "n_holdings": 18
         }
       ],
-      "forward_return_todate_pct": 0.0,
-      "trading_days_count": 1
+      "forward_return_todate_pct": -0.7254,
+      "trading_days_count": 2
     }
   },
-  "generated_at": "2026-08-29T01:41:01.706576+08:00",
-  "as_of_trading_date": "2026-08-27"
+  "generated_at": "2026-08-28T19:29:45.464901+00:00",
+  "as_of_trading_date": "2026-08-28"
 }

@@ -1,11 +1,12 @@
 {
-  "fetched_at": "2026-08-28T07:39:10+00:00",
+  "fetched_at": "2026-08-28T19:28:53+00:00",
   "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
     "close": 45975.22,
     "change_pct": 0.31,
     "sparkline": [
+      43119.75,
       43386.41,
       43360.66,
       44611.6,
@@ -24,10 +25,10 @@
       44762.32,
       45169.46,
       45832.62,
-      45975.22,
-      46331.45
+      45975.22
     ],
     "sparkline_60d": [
+      46459.16,
       45677.46,
       45070.94,
       43502.78,
@@ -86,8 +87,7 @@
       44762.32,
       45169.46,
       45832.62,
-      45975.22,
-      46331.45
+      45975.22
     ]
   },
   "sectors": [
@@ -348,11 +348,11 @@
     }
   },
   "institutional": {
-    "date": "20260827",
-    "foreign_net_lots": 404547.7,
-    "trust_net_lots": -9560.5,
-    "dealer_net_lots": 397926.2,
-    "total_net_lots": 792913.4
+    "date": "20260828",
+    "foreign_net_lots": 456955.6,
+    "trust_net_lots": 3674.3,
+    "dealer_net_lots": 305196.3,
+    "total_net_lots": 765826.2
   },
   "institutional_history": [
     {
@@ -368,6 +368,13 @@
       "trust_net_lots": -9560.5,
       "dealer_net_lots": 397926.2,
       "total_net_lots": 792913.4
+    },
+    {
+      "date": "20260828",
+      "foreign_net_lots": 456955.6,
+      "trust_net_lots": 3674.3,
+      "dealer_net_lots": 305196.3,
+      "total_net_lots": 765826.2
     }
   ]
 }
