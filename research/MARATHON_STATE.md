@@ -4,7 +4,7 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 175 輪。最新一輪：第 175 輪 · 2026-08-28T11:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 10:01第172輪最舊）。複查`portfolio_multifactor_v2`下一步回應、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除三個條件，皆未成立（自`fa369b9`以來仍只一個commit）。FUT軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round104遺留的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。同時複查TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）仍已達標。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–174輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第175輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 176 輪。最新一輪：第 176 輪 · 2026-08-28T12:02+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 10:31第173輪最舊）。複查`portfolio_multifactor_v2`下一步回應、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除三個條件，皆未成立（自`fa369b9`以來仍只一個commit）。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）仍已達標，無其他已知允許工作單位。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–175輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約66輪、跨度約39.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第176輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
 
 **上一則保留（第173輪，供對照）**：第 173 輪 · 2026-08-28T10:31+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 09:02第170輪最舊）。複查`portfolio_multifactor_v2`下一步回應、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除三個條件，皆未成立。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，無其他已知允許背景工作。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–172輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第173輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 
