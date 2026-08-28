@@ -234,6 +234,96 @@ P0-c跟資料源禮儀補洞item 1都是同一個病灶的不同症狀——`quo
 時段，無法立即驗證，跟P0-c那次workflow_dispatch權限不足的驗證缺口是
 同一件事，一併等下一個交易時段自然驗證）。
 
+## 🔄 2026-08-29 B24-500正式全樣本回測（進行中，背景執行）
+
+使用者裁示「B24-500全樣本回測，todo P0/B16，最高優先」，取代先前的
+機制驗證跑。改動見`research/run_value_board_v2_pit_backtest.py`：
+
+1. **可投資宇宙**：從「隨機抽樣500檔」改成「流動性（近20日均成交值）
+   由高到低取前500檔」（`liquidity_ranked_universe_ids()`）。**首次跑就
+   抓到真bug**：`universe()`本身混進"TAIEX"/"TPEx"兩個指數代碼
+   （`industry_category`="大盤"），流動性排序沒過濾的話**保證每次都會
+   排到最前面**（指數成交值天生遠高於任何個股）——已用跟
+   `backfill_price_history_gaps.py`同一份`NON_STOCK_INDUSTRIES`排除清單
+   過濾掉，實測確認TAIEX/TPEx/0050/0056等ETF都已排除。
+
+2. **隨機對照draws數，實測後誠實降級**：目標1000次，用既有500檔快取
+   實測5次draw（機器同時有另一個獨立CPU重載作業在跑，未動它），量到
+   約102秒/draw——換算1000次×2期間(TRAIN 6年+VALIDATION 4年)需要約
+   **70小時（~3天）**，這一輪不可行。**使用者核准降級到100次**
+   （比先前機制驗證用的30次有意義提升，預估約7小時能跑完），跟
+   `run_score_backtest.py`docstring說明的200→60降級同一個誠實揭露慣例。
+
+3. **新增B26規格的報告欄位**：調整後Sharpe（×0.5/×0.7兩欄）、
+   CVaR(95%,日)、勝率（僅供參考不作判定依據）。
+
+4. **題材動能榜/未來性濾網無法比照辦理（誠實揭露重大範疇發現）**：
+   查證`score_live_momentum.py`/`score_live_future.py`只能讀今天的JSON
+   快照算分數（`compute_scores_momentum(weights)`/`compute_scores_future
+   (weights)`不接受`as_of`歷史日期參數），**根本沒有PIT回測引擎**——
+   這在`research/TRIALS_LEDGER.md`「待測」章節2026-08-27條目已有相同
+   結論記錄（獨立佐證非本輪誤判）。要做到「三榜各自獨立跑一次」，得先
+   把這兩套引擎（10個新因子）移植成歷史PIT介面，工作量不小於JSON-only
+   腳本本身，是另一筆實實在在的開發工作，有因子邏輯寫錯風險——**本輪
+   使用者核准先只跑價值成長榜，題材動能/未來性濾網PIT引擎列為BACKLOG
+   後續工作項**（暫未編號，待這輪結果出爐後再排優先序）。
+
+背景執行中：`research/pit_run_liquidity500_full.log`，已設置Monitor
+持續盯進度/錯誤。跑完會產生`research/data/value_board_v2_pit_backtest_
+liquidity500_full.csv`跟`research/B24_RESULTS.md`（供
+`generate_strategies_json.py`讀取），並回頭更新這裡的結論（及格/不及格
+都照實寫，App選股頁「尚未經過組合策略回測驗證」那行字繼續掛著直到
+真的及格才拿掉，這是使用者本輪明確的鐵律）。
+
+## ✅ 2026-08-29 新增「策略監控台」——策略清冊＋生命週期，狀態100%由真實檔案推導
+
+使用者原話：「把『盲目相信CC餵的結果』變成『親眼看到每個策略的狀態』」。
+
+**一、`research/generate_strategies_json.py`（新增）→`data/strategies.json`**：
+每個策略一筆，欄位`id/name/type/status/spec/backtest/paper/limitations/
+last_updated`。**鐵律落實**：`status`由五個互斥狀態（`回測通過`/
+`回測未通過`/`回測中`/`紙上交易中`/`規格完成`/`草稿`，優先序見腳本
+docstring）從真實檔案推導，找不到來源檔一律`null`/`草稿`，不寫死樂觀值。
+
+- `backtest`欄位讀`research/B24_RESULTS.md`（目前該檔案還不存在，因為
+  B24-500回測仍在跑，價值成長榜因此正確顯示`backtest=null`）。
+- `paper`欄位讀`data/picks_ledger.json`，「至今報酬」用最早快照收盤價
+  vs `data/price_history.json`目前最新收盤價算等權未實現報酬（不重新
+  平衡、不計成本，簡化寫進limitations裡）。
+- 期貨軌（`fut_track`）**動態解析**`research/TRIALS_LEDGER.md`的FUT列
+  數與PASS數，不hardcode「22個」——**跑出來實際是28個已測試假說、
+  0個通過**（使用者原話「22個假說全未通過」，帳本後來又新增了幾列，
+  實測數字已跟使用者記憶的22有落差，這裡如實用動態算出的28，不是
+  為了配合使用者的記憶而硬湊22）。
+
+**驗收（跑出來的實際狀態，2026-08-29）**：
+- 價值成長榜：`回測中`（B24-500背景跑中，見上方條目）
+- 題材動能榜／未來性濾網：`紙上交易中`（有picks_ledger快照，但無PIT
+  回測引擎，limitations如實記錄這個缺口）
+- 期貨軌：`回測未通過`（28個假說、0個通過統計驗證）
+
+**二、App新增「策略監控台」子分頁**（`index.html`，掛在既有交易頁下，
+`機器人/策略/策略監控台`三個子分頁並列——沒有跟既有「策略」子分頁
+(`#strategy-list`，只顯示通過完整驗證+holdout解鎖的紙上交易策略，目前
+恆空)混用，是兩個不同概念，刻意分開）：
+- 每個策略一張卡：狀態徽章（顏色分級：`回測通過`=綠/`回測未通過`=紅/
+  `回測中`=琥珀/`紙上交易中`=金/`規格完成`=灰/`草稿`=淺灰）+ 真實數字
+  （backtest存在才顯示指標網格，否則顯示「尚未回測」或「回測進行中…」）
+  + 誠實limitations清單。
+- 期貨軌卡片如實顯示「已測試28個策略假說，通過統計驗證0個」。
+- 子分頁頂部固定顯示「⚠ 研究參考用途，非投資建議；狀態100%由腳本從
+  真實檔案推導」。
+- 資料只讀`data/strategies.json`，卡片渲染函式`strategyMonitorCardHtml()`
+  不含任何硬寫的策略清單/數字。
+
+**三、明確不做（本輪排除，使用者原話）**：不建動態切換/最佳組合引擎
+——目前0個策略通過驗證，沒有東西可切，等真的有策略PASS再談。
+
+冒煙測試11/12通過（check 1的`loadStockInfo:fetch Failed to fetch`已
+獨立驗證是FinMind當下402額度用盡，`curl`直打FinMind API確認同樣402，
+跟這輪UI改動無關——同一套獨立驗證後仍commit的例外處理，見續29條目
+先例，這裡逐字揭露不是靜默略過）。
+
 ## ✅ 已驗收（各項附實際冒煙測試時間戳與輸出）
 
 - **B1 時鐘修復**：`setInterval` 先註冊再首次執行，兩句分開；`updateClocks()`
