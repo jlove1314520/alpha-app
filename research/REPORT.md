@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 172 輪 · 2026-08-28T10:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 08:32第169輪最舊）· 判定：複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中。FUT軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round104遺留的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–171輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第172輪記錄
+
 ## 第 171 輪 · 2026-08-28T09:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 08:01第168輪最舊）· 判定：複查`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round108/111遺留的1c地基工作本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169/170輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。見`US_MARATHON_STATE.md`/`US_LOG.md`第171輪記錄
 
 ## 第 170 輪 · 2026-08-28T09:02+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選TW（三軌時間戳TW 07:33第167輪最舊）· 判定：複查`portfolio_multifactor_v2`下一步(a)/(b)使用者回應/`PORTFOLIO_STRATEGY_SPEC.md`使用者確認/暫停單因子試驗規則解除三個解除條件，皆未成立（`git log`確認`fa369b9`以來仍只一個commit）。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，無其他允許工作。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。見`TW_MARATHON_STATE.md`/`TW_LOG.md`第170輪記錄

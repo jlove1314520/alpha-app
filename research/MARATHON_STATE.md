@@ -4,7 +4,9 @@
 
 **最後更新：2026-08-25T17:34:50+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 171 輪。最新一輪：第 171 輪 · 2026-08-28T09:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 08:01第168輪最舊）。複查`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除兩個條件，皆未成立（`git log`確認`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round108/111遺留的1c地基工作本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169/170輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第171輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 172 輪。最新一輪：第 172 輪 · 2026-08-28T10:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 08:32第169輪最舊）。複查`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除兩個條件，皆未成立（`git log`確認`fa369b9`以來仍只一個commit）。FUT軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round104遺留的盤別效應第三批待辦本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–171輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第172輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+
+**上一則保留（第171輪，供對照）**：第 171 輪 · 2026-08-28T09:31+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 08:01第168輪最舊）。複查`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除兩個條件，皆未成立（`git log`確認`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），round108/111遺留的1c地基工作本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169/170輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第171輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 **上一則保留（第170輪，供對照）**：第 170 輪 · 2026-08-28T09:02+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨，依輪替選TW（三軌時間戳TW 07:33第167輪最舊）。複查`portfolio_multifactor_v2`下一步(a)/(b)使用者回應、`PORTFOLIO_STRATEGY_SPEC.md`使用者確認、暫停單因子試驗規則解除三個條件，皆未成立。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）仍維持已達標，無其他允許工作。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169輪記錄一致），非本輪產生，未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第170輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
 
