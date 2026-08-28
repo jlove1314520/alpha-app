@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 182 輪 · 2026-08-28T15:01+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 13:31第179輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。TW軌兩項地基工作本輪重新複查仍已達標（宇宙回補`data/backfill_state.json`重新統計done 2597/skip 469=81.3%，T86回補100%），無其他已知允許工作單位。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更——本輪首度不是慣常的`data/rate_limit_state.json`／`research/pit_run_500.log`那組，而是`BACKLOG.md`已修改（內容是quotes即時報價workflow驗證卡住，因為目前GitHub Fine-grained PAT沒有Actions寫入權限，等使用者用網頁手動觸發或加開PAT權限），依規則不觸碰、不納入本輪commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約72輪、跨度約42.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`第182輪記錄
+
+---
 ## 第 181 輪 · 2026-08-28T14:31+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 13:01第178輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。FUT軌規格書為台股專屬，round104留下的盤別效應第三批待辦本質仍是單因子相關工作，同round109–178連續判斷邏輯一致，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`已修改、`research/pit_run_500.log`未追蹤，跟第169–180輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約71輪、跨度約42小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第181輪記錄
 
 ---

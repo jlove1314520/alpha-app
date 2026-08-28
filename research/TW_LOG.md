@@ -851,3 +851,19 @@ TW軌兩項地基工作複查：宇宙回補用`data/backfill_state.json`本輪�
 `is_holdout_consumed()`確認`False`。開工前`git status`（`alpha-app`目錄）發現不屬於本輪的殘留變更（`data/rate_limit_state.json`已修改、`research/pit_run_500.log`未追蹤），與第169–178輪記錄的殘留一致，判斷是另一互動session產生，依規則不觸碰、不納入本輪commit。沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
 
 下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
+
+---
+
+## 2026-08-28T15:01+08:00 — 馬拉松第182輪：跳過（暫停單因子試驗規則仍生效中，無其他已知允許工作單位）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 13:31（第179輪，最舊）/US 14:01（第180輪）/FUT 14:31（第181輪）——依輪替選TW。
+
+複查三個解除條件：(1) `portfolio_multifactor_v2`下一步(a)換更大樣本重跑IC加權+季頻／(b)train-only嚴格樣本外——`LEADS.md`最新條目仍是這兩個選項留給使用者，未見新回應；(2) `PORTFOLIO_STRATEGY_SPEC.md`使用者確認——`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`（2026-08-26晚）以來仍只此一個commit，第3行仍「狀態：待使用者確認」；(3) 暫停單因子試驗規則本身解除——`MARATHON_PROTOCOL.md`最上方該段仍在，未被修改。三者皆不成立。
+
+TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`Counter`），done=2597／skip=469，2597/3196=81.3%，跟第179輪記錄一致，仍＞80%門檻；T86回補依前幾輪記錄維持100%（本輪未重新掃描檔案數，僅依既有記錄）。沒有其他已知允許的背景工作。依第164/167/…/179輪一貫指示，本輪**整輪跳過，不做任何實質工作**。
+
+`is_holdout_consumed()`確認`False`（本輪未打任何API）。開工前`git status`（`alpha-app`目錄）發現不屬於本輪的殘留變更——**本輪首度不是慣常的`data/rate_limit_state.json`／`research/pit_run_500.log`那組**，而是`BACKLOG.md`已修改：diff顯示是另一互動session在驗證「盤中近即時報價」GitHub Actions workflow時卡住（`workflow_dispatch`用GitHub API觸發回傳403，目前存的Fine-grained PAT只有Contents寫入權限、沒有Actions寫入權限），寫了兩個待使用者處理的選項（網頁手動觸發／加開PAT權限）。這是開發帽（`index.html`/workflow相關）的進行中工作，跟本輪研究帽的TW軌無關，依`alpha-app/CLAUDE.md`第九節帽子規則不越權觸碰、不納入本輪commit。
+
+沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
+
+下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
