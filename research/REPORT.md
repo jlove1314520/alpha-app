@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 203 輪 · 2026-08-29T02:01+08:00 · FUT（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選FUT（三軌時間戳FUT 23:31第199輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit）。FUT軌依舊沒有組合策略相關工作可做（規格書是台股專屬）。同時複查TW軌round202已補齊`portfolio_multifactor_v2`兩組合N=100數字，判定仍FAIL，沒有留下FUT軌可接手的工作。**本輪整輪跳過，未做任何實質工作。**`git status`發現另一互動session留下的未提交異動（`data/rate_limit_state.json`等），未觸碰、未納入本輪commit。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約93輪、跨度約53小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第203輪記錄
+
 ## 第 202 輪 · 2026-08-29T01:44+08:00 · TW（推翻round201的「process無聲消失」誤判，補齊B_plus_value_pe的N=100數字）· 判定：開工前`tasklist`確認環境乾淨，發現round201其實已經成功寫出B_plus_value_pe的N=100結果（`data/portfolio_backtest_v2_random_control_n100.csv`mtime早於round201 log時間），只是檢查時機在CSV寫出前造成誤判「消失」。本輪獨立process重新驗證，數字逐位吻合：報酬+68.42%/MDD−8.65%/alpha+10.26%(p=0.0535)/**percentile(N=100)=100.0**。至此A_4pass(99.0)/B_plus_value_pe(100.0)兩組合的N=100隨機控制組數字都已確認，`LEADS.md`同步補充。`portfolio_multifactor_v2`整體判定不變（FAIL，卡在alpha顯著性）。沒有已知的下一個補對照組工作單位——A/B兩組合數字都已拿到，剩下(a)全市場更大樣本重跑／(b)train-only嚴格樣本外仍留給使用者裁定優先序。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約92輪、跨度約52小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`LEADS.md`第202輪記錄
 
 ---
