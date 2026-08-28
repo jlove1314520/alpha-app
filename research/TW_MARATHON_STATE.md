@@ -2,7 +2,9 @@
 
 **這份檔案只描述台股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `TW_LOG.md`；候選判定看 `TW_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-08-28T09:02+08:00（馬拉松第170輪）**——取鎖乾淨，依輪替選TW（三軌時間戳TW 07:33最舊）。依第164/167輪指示複查三個解除條件：(1)`portfolio_multifactor_v2`下一步(a)/(b)使用者回應——未成立；(2)`PORTFOLIO_STRATEGY_SPEC.md`使用者確認——未成立，仍「待使用者確認」（`git log`確認自`fa369b9`以來仍只此一個commit）；(3)暫停單因子試驗規則解除——未成立。三者皆不成立，且TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，**本輪整輪跳過，未做任何實質工作**。`is_holdout_consumed()`確認`False`。開工時發現不屬於本輪的殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169輪FUT記錄一致，另一互動session產生），未觸碰、未納入commit。完整見`TW_LOG.md`第170輪記錄。
+**最後更新：2026-08-28T10:31+08:00（馬拉松第173輪）**——取鎖乾淨，依輪替選TW（三軌時間戳TW 09:02最舊）。複查三個解除條件：(1)`portfolio_multifactor_v2`下一步(a)/(b)使用者回應——未成立；(2)`PORTFOLIO_STRATEGY_SPEC.md`使用者確認——未成立，仍「待使用者確認」；(3)暫停單因子試驗規則解除——未成立。三者皆不成立，且TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，**本輪整輪跳過，未做任何實質工作**。`is_holdout_consumed()`確認`False`。開工時發現不屬於本輪的殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–172輪記錄一致，另一互動session產生），未觸碰、未納入commit。完整見`TW_LOG.md`第173輪記錄。
+
+**上一則保留（第170輪，供對照）**：2026-08-28T09:02+08:00（馬拉松第170輪）**——取鎖乾淨，依輪替選TW（三軌時間戳TW 07:33最舊）。依第164/167輪指示複查三個解除條件：(1)`portfolio_multifactor_v2`下一步(a)/(b)使用者回應——未成立；(2)`PORTFOLIO_STRATEGY_SPEC.md`使用者確認——未成立，仍「待使用者確認」（`git log`確認自`fa369b9`以來仍只此一個commit）；(3)暫停單因子試驗規則解除——未成立。三者皆不成立，且TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，**本輪整輪跳過，未做任何實質工作**。`is_holdout_consumed()`確認`False`。開工時發現不屬於本輪的殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169輪FUT記錄一致，另一互動session產生），未觸碰、未納入commit。完整見`TW_LOG.md`第170輪記錄。
 
 **上一則保留（第167輪，供對照）**：2026-08-28T07:33+08:00（馬拉松第167輪）——取鎖乾淨，依輪替選TW（三軌時間戳TW 06:13最舊）。依第164輪指示複查三個解除條件：(1)`portfolio_multifactor_v2`下一步(a)/(b)使用者回應——未成立；(2)`PORTFOLIO_STRATEGY_SPEC.md`使用者確認——未成立，仍「待使用者確認」；(3)暫停單因子試驗規則解除——未成立。三者皆不成立，且TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，**本輪整輪跳過，未做任何實質工作**。`is_holdout_consumed()`確認`False`。完整見`TW_LOG.md`第167輪記錄。
 
