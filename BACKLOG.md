@@ -771,6 +771,68 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
 1. 不進行大規模策略搜尋（數百種策略掃描）。
 2. 不接入任何第三方LLM路由閘道（OmniRoute類）。
 
+- **B27：台股現金流量表/FCF**（2026-08-28登錄，Cowork更正先前「無來源」
+  誤判，**排在P0/資料源禮儀補洞/B24-500之後，只登錄規格不執行**）：
+  1. FinMind有`TaiwanStockCashFlowsStatement`（2008年起，涵蓋上市/上櫃/
+     興櫃）——先前STATUS.json/BACKLOG把FCF標成「TWSE/TPEx官方無此端點，
+     永久性限制」是只查了TWSE/TPEx官方路徑，沒查FinMind這條路，已在
+     `generate_status_json.py`更正對應panel/todo/known_limitations文字
+     （不再說「永久性」，改標「可做、排隊中」）。
+  2. 季資料，一季抓一次、硬快取；一律走GitHub Actions排程→產出repo
+     JSON，App只讀JSON，不client-side直接打FinMind。
+  3. 納入`rate_limit_status`斷路器登記，source key沿用既有`"finmind"`。
+  尚未開始。
+
+- **B28：期貨三大法人部位（脫離client-side直打，改走Actions排程）**
+  （2026-08-28登錄，只登錄規格不執行）：
+  1. FinMind有`TaiwanFuturesInstitutionalInvestors`（2018年起）——市場頁
+     「期貨籌碼」panel目前就是用這個dataset，但**仍是client-side直接打**
+     （見`data/STATUS.json`app_data_sources「期貨籌碼」標「未遷移」），
+     不符合架構紅線第1條。TODO裡另一條「期貨籌碼脫離FinMind」是想找
+     TAIFEX原生端點徹底離開FinMind、目前卡在只找到「大額交易人」資料，
+     跟B28不衝突：B28是先把「現有FinMind來源」遷進Actions排程這個較快
+     達成的中繼站，TAIFEX原生端點仍是更長期的目標。
+  2. 日資料但全市場一次呼叫、量小，納入節流/斷路器登記。
+  尚未開始。
+
+- **B29：美股財報/FCF**（2026-08-28登錄，Cowork更正先前「無替代來源」
+  誤判，**只登錄規格不執行**）：
+  1. yfinance提供`.financials`/`.balance_sheet`/`.cashflow`（損益表/
+     資產負債表/現金流量表）——先前把「個股頁美股分頁月營收/財報/三大
+     法人/融資融券」整包標「暫無替代來源」太粗，已在`generate_status_json.py`
+     拆成三條分別更正：財報/FCF可做（本項B29）；月營收結構性不存在
+     （美股公司無此揭露義務，不是資料源缺漏）；三大法人/融資融券見下方
+     「難/顆粒度不同」項，維持不做。
+  2. **接線前先實測確認欄位確實存在再接**，不要假設yfinance回傳格式
+     （yfinance非官方API，欄位命名/可得性可能隨時間變動）。
+  尚未開始。
+
+- **B30：客戶集中度/供應鏈**（2026-08-28登錄，只登錄規格不執行）：
+  1. 質性供應鏈關係資料：改用`ic.tpex.org.tw`產業價值鏈平台，**併入
+     既有B19（訊號台帳骨架/供應鏈連動）**，不另開獨立管線。
+  2. 量化「前五大客戶占營收%」**仍無結構化免費來源**——這部分維持
+     `未來性濾網customer_concentration因子未實作`（見上方TODO既有條目）
+     現狀不變，如實標示，不因為B30有其他進展就順便美化這一項。
+  尚未開始。
+
+**仍標「難/顆粒度不同」，如實揭露（2026-08-28登錄）**：
+- 美股「每日」三大法人/融資融券無免費對應；替代方案=SEC 13F（季度
+  機構持股）+ FINRA放空餘額（週）——性質跟台股「每日」資料不同，若日後
+  要做，App必須明確標示「季/週資料非每日」，不能讓使用者誤以為是同等
+  頻率的資料。目前暫不列入排隊。
+
+**架構紅線（2026-08-28使用者裁示，所有新增資料源一律遵守，違反就是
+重演封鎖）**：
+1. 一律走GitHub Actions排程→產出repo JSON，App只讀JSON，禁止
+   client-side直接打任何外部API。
+2. 全部納入`rate_limit_status`斷路器登記，≥3秒間隔、指數退避、
+   428/403冷卻。季資料一季一次、日資料全市場一次呼叫。
+3. finlab／富果Fugle若要用：需API key/token，只放GitHub Secrets，絕不
+   寫進任何commit檔案；先評估免費層額度上限再決定接不接。
+4. 禁止爬statementdog／三竹／stockanalysis.com／WSJ（ToS/版權牆），跟
+   先前拒絕爬X同一原則。twstock只是包裝公開端點、非新來源，要用也得
+   套我們自己的節流。
+
 
 
 - **✅ 動能榜還原權息修正（P0，使用者回報，2026-08-27完成）**：

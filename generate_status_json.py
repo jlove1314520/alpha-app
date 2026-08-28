@@ -464,7 +464,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·營收·月營收圖", "source": "data/fundamentals.json"},
     {"panel": "個股頁·營收·AI營收解讀", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "個股頁·財報·EPS/毛利率/營益率/ROE", "source": "data/stock_detail.json（TWSE官方t187ap06_L_ci/07_L_ci，2026-08-27起不再打FinMind；僅涵蓋「上市一般業」，上櫃/金融控股/證券/保險等特殊分類查不到，App會顯示原因）"},
-    {"panel": "個股頁·財報·自由現金流(FCF)", "source": "無（TWSE官方無現金流量表開放資料，永久性限制，已誠實顯示「TWSE無此資料源」，不是暫時缺漏）"},
+    {"panel": "個股頁·財報·自由現金流(FCF)", "source": "無（尚未接線，非無來源——2026-08-28查證更正：TWSE/TPEx官方openapi確實無現金流量表端點，但FinMind有TaiwanStockCashFlowsStatement(2008年起，涵蓋上市/上櫃/興櫃)，已排入BACKLOG B27：季資料、一季抓一次、硬快取、走排程Actions→JSON，不client-side直抓）"},
     {"panel": "個股頁·籌碼·三大法人買賣超", "source": "data/stock_detail.json（TWSE T86，跟market_tw.json共用同一次呼叫，2026-08-27起不再打FinMind；涵蓋全部上市公司含金融股，2026-08-27修正過度篩選的bug）"},
     {"panel": "個股頁·籌碼·融資融券", "source": "data/stock_detail.json（TWSE MI_MARGN，跟大盤融資維持率共用同一次呼叫，2026-08-27起不再打FinMind；涵蓋全部上市公司含金融股；估算融資維持率為App自算，非官方資料）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
@@ -542,8 +542,9 @@ TODO = [
     {"item": "未來性濾網的customer_concentration（營收客戶集中度）因子未實作", "priority": "P2", "blocker": "沒有現成的免費資料源（需要財報附註揭露的前五大客戶占比，公開資料無結構化格式可抓）"},
     {"item": "未來性濾網的capacity_utilization_proxy只算目前水準、不是使用者原本要的「趨勢」", "priority": "P2", "blocker": "update_stock_financials.py目前只保留最新一筆non_current_assets_latest，沒有retained歷史序列，需要額外累積才能算趨勢；且「非流動資產」不是精確的「固定資產」，是t187ap07_L_ci沒有單獨固定資產欄位下的近似代理"},
     {"item": "未來性濾網(b)類（事件資料）/(c)類（AI質性研判）因子未實作", "priority": "P2", "blocker": "(b)類依賴訊號管線骨架(BACKLOG.md B19)+docs/Alpha_新聞與供應鏈連動_設計小抄.md既定規格(news_fetch.py/supply_chain.json)先完成；(c)類依賴(b)類的事件資料/供應鏈圖作為AI研判輸入素材，且依使用者規則不計入量化總分、須另闢區塊呈現"},
-    {"item": "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券", "priority": "P2", "blocker": "FinMind僅提供台股這幾類資料，TWSE/TPEx官方資料也只涵蓋台股，暫無替代來源"},
-    {"item": "個股頁財報FCF", "priority": "P2", "blocker": "2026-08-27重新查證：TWSE/TPEx openapi都無現金流量表端點；MOPS網頁查詢有現金流量表但其查詢端點(ajax_t164sb04)重新實測仍被反爬蟲擋（FOR SECURITY REASONS），需要處理session/cookie才能過關——是「需要額外工程投入」不是「不存在」，尚未投入"},
+    {"item": "個股頁美股分頁完全不支援財報/FCF（BACKLOG B29）", "priority": "P2", "blocker": "2026-08-28查證更正：yfinance提供.financials/.balance_sheet/.cashflow（損益表/資產負債表/現金流量表），可做、排隊中——接線前先實測確認欄位確實存在再接，不要假設。已排入BACKLOG B29，尚未開始"},
+    {"item": "個股頁美股分頁完全不支援月營收/三大法人/融資融券", "priority": "P2", "blocker": "月營收：美股公司無此揭露義務，結構性不存在，非資料源缺漏。三大法人/融資融券：無「每日」免費對應資料——替代方案=SEC 13F(季度機構持股)+FINRA放空餘額(週)，但顆粒度跟台股「每日」不同，若要做需在App明確標「季/週資料非每日」，2026-08-28使用者裁示先如實揭露，暫不列入排隊"},
+    {"item": "個股頁財報FCF（BACKLOG B27）", "priority": "P2", "blocker": "2026-08-27查證：TWSE/TPEx openapi都無現金流量表端點，MOPS網頁查詢端點又被反爬蟲擋——但2026-08-28更正：FinMind有TaiwanStockCashFlowsStatement(2008+，上市櫃興櫃)，可做、排隊中，非無來源。規劃：季資料一季抓一次、硬快取、走排程Actions→JSON，不client-side直抓，納入節流/斷路器登記，尚未開始接線"},
     {"item": "stock_detail.json財報(EPS/毛利率/ROE)僅涵蓋TWSE上市「一般業」，上櫃/金融控股/證券/保險未涵蓋", "priority": "P2", "blocker": "TPEx其實有對應端點(mopsfin_t187ap06_O_ci等)，TWSE金融股也有(t187ap06_L_bd/fh/ins/mim等)，只是還沒接——已知可行，非無來源"},
     {"item": "個股頁自選股sparkline約24檔上櫃股票查不到（quotes_tw.json）", "priority": "P2", "blocker": "TWSE STOCK_DAY端點是TWSE專屬，尚未找到TPEx對應的逐股歷史日線端點（注意：這跟fundamentals.json的TPEx PER/月營收已修正是不同的資料/不同端點）"},
     {"item": "個股走勢圖(價格歷史)脫離FinMind", "priority": "P2", "blocker": "可行，跟sparkline同一個TWSE STOCK_DAY端點（TW）/yfinance（US），只是要決定涵蓋範圍跟歷史長度，尚未實作"},
@@ -565,9 +566,9 @@ KNOWN_LIMITATIONS = [
     "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。"
     "三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）："
     "三大法人涵蓋檔數1,083→1,990檔、融資融券1,063→1,983檔，scores.json全市場平均coverage 0.341→0.376（chips因子權重14%受益最多）。"
-    "FCF永久性缺口——TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）。",
+    "FCF：TWSE/TPEx官方均無現金流量表端點，MOPS網頁查詢被反爬蟲擋（已重新驗證，非未查證的臆測）——但2026-08-28更正：這只是「TWSE/TPEx官方路徑」走不通，FinMind TaiwanStockCashFlowsStatement(2008+)可行，已排入BACKLOG B27排隊中，不是永久性缺口。",
     "quotes_tw.json：自選股sparkline約24檔上櫃(TPEx)股票查不到（TWSE STOCK_DAY端點是TWSE專屬）。",
-    "個股頁美股分頁完全不支援月營收/財報/三大法人/融資融券（FinMind僅提供台股這幾類資料）。",
+    "個股頁美股分頁：月營收結構性不存在（美股公司無揭露義務）；三大法人/融資融券無「每日」免費對應（替代=SEC 13F季度+FINRA放空週資料，顆粒度不同，暫不列入排隊）；財報/FCF已查證yfinance可行，排入BACKLOG B29。",
     "個股走勢圖、主流題材chips、期貨籌碼，仍100%依賴FinMind免費額度，額度用盡時會誠實顯示連線失敗（不是假資料）。",
     "2026-08-27發現：這台機器目前曾被FinMind IP封鎖過（非單純額度用盡），research/finmind_client.py原本完全沒有請求節流——已加上每次真正網路請求間至少0.35秒的節流，但這只能降低未來再次觸發封鎖的機率，無法解除已經發生的封鎖，也不是精確調校過的數字。",
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
