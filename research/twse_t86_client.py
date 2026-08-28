@@ -153,6 +153,53 @@ def fetch_t86_day(date_str: str, force_refresh: bool = False, timeout: float = 1
     return out
 
 
+# 2026-08-29馬拉松第200輪新增：process內快取，見_load_all_t86_grouped()docstring。
+_T86_GROUPED_CACHE: dict[str, pd.DataFrame] | None = None
+_T86_GROUPED_CACHE_KEY: tuple[int, float] | None = None
+
+
+def _load_all_t86_grouped() -> dict[str, pd.DataFrame]:
+    """把DATA_DIR底下所有T86_*.parquet讀進來一次、依stock_id分組快取在
+    這個process的記憶體裡，同一個process內重複查詢不同股票時只查dict，
+    不必重新掃描/讀取全部檔案。
+
+    背景（2026-08-29馬拉松第200輪，接續round197留下的效能問題）：
+    `institutional_daily_net_t86()`原本每次呼叫都重新glob+逐檔
+    `read_parquet`全部T86快取檔（100%回補後約3300+檔、288MB），對
+    `load_sample_with_factors()`這種對N個股票逐一呼叫的迴圈等於把全部
+    檔案重複讀了N次——實測診斷：單一股票（僅40列價格資料）光是
+    `prepare_factors()`就要37秒，追到`_institutional_daily_net()`每次都
+    重新掃描全部3319個T86檔案是根因。改成process內只讀一次（實測17.6秒）、
+    依stock_id分組快取後，後續每檔股票查詢只是dict查找，總時間從
+    N×(掃描全部檔案) 降為 (掃描全部檔案一次)+N×(dict查找)。
+
+    快取有效性用「檔案數量+最新mtime」當key判斷是否需要重建——理論上
+    `backfill_t86.py`不會跟這裡的分析腳本同時在跑，但保守起見還是加這個
+    檢查，避免同一個process執行期間如果檔案有變動卻用到舊快取。
+    """
+    global _T86_GROUPED_CACHE, _T86_GROUPED_CACHE_KEY
+    files = sorted(DATA_DIR.glob("T86_*.parquet"))
+    if not files:
+        return {}
+    key = (len(files), max(p.stat().st_mtime for p in files))
+    if _T86_GROUPED_CACHE is not None and _T86_GROUPED_CACHE_KEY == key:
+        return _T86_GROUPED_CACHE
+    frames = []
+    for p in files:
+        day = pd.read_parquet(p)
+        if not day.empty:
+            frames.append(day)
+    if not frames:
+        _T86_GROUPED_CACHE = {}
+        _T86_GROUPED_CACHE_KEY = key
+        return _T86_GROUPED_CACHE
+    combined = pd.concat(frames, ignore_index=True)
+    grouped = {sid: g for sid, g in combined.groupby("stock_id", sort=False)}
+    _T86_GROUPED_CACHE = grouped
+    _T86_GROUPED_CACHE_KEY = key
+    return grouped
+
+
 def institutional_daily_net_t86(stock_id: str, start_date: str, end_date: str | None = None) -> pd.DataFrame:
     """Per-stock time series, built from whatever T86 daily caches already
     exist in DATA_DIR for the requested range -- does NOT fetch missing
@@ -164,25 +211,24 @@ def institutional_daily_net_t86(stock_id: str, start_date: str, end_date: str | 
 
     Columns match factors.py's _institutional_daily_net() output shape:
     date, foreign_net, trust_net, dealer_net, total_net.
+
+    2026-08-29起改走`_load_all_t86_grouped()`process內快取（見該函式
+    docstring的效能背景），語意跟舊版逐檔掃描完全相同（同樣是「檔案的
+    date欄位落在[start_date, effective_end]區間內」的那些列），只是不再
+    每次呼叫都重新讀取全部檔案。
     """
     from validation.holdout import VAL_END
 
     effective_end = end_date if (end_date and end_date <= VAL_END) else VAL_END
-    frames = []
-    for p in sorted(DATA_DIR.glob("T86_*.parquet")):
-        date_str = p.stem.replace("T86_", "")
-        iso = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
-        if iso < start_date or iso > effective_end:
-            continue
-        day = pd.read_parquet(p)
-        if day.empty:
-            continue
-        row = day[day["stock_id"] == stock_id]
-        if not row.empty:
-            frames.append(row)
-    if not frames:
-        return pd.DataFrame(columns=["date", "foreign_net", "trust_net", "dealer_net", "total_net"])
-    out = pd.concat(frames, ignore_index=True).sort_values("date").reset_index(drop=True)
+    empty = pd.DataFrame(columns=["date", "foreign_net", "trust_net", "dealer_net", "total_net"])
+    grouped = _load_all_t86_grouped()
+    g = grouped.get(stock_id)
+    if g is None or g.empty:
+        return empty
+    sub = g[(g["date"] >= start_date) & (g["date"] <= effective_end)]
+    if sub.empty:
+        return empty
+    out = sub.sort_values("date").reset_index(drop=True)
     return out[["date", "foreign_net", "trust_net", "dealer_net", "total_net"]]
 
 

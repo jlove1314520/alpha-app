@@ -968,3 +968,13 @@ TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`
 沒有新增`TRIALS_LEDGER.md`列（無工作單位可記錄）。
 
 下一輪如果又撿到TW軌：繼續檢查上述三個條件，任一成立才恢復工作，否則比照本輪繼續跳過。
+
+## 2026-08-29T00:34+08:00 — 馬拉松第200輪：修好round197的效能謎團根因（T86 process內快取），但N=100隨機控制組仍卡（新問題，非同一個bug）
+
+取鎖乾淨。依輪替選TW。複查暫停規則三個解除條件仍未成立（`PORTFOLIO_STRATEGY_SPEC.md`仍「待使用者確認」、`portfolio_multifactor_v2`(a)/(b)未見回應）。
+
+**接續round197留下的`deep_dive_portfolio_v2_random_control_n100.py`**（`load_sample_with_factors()`卡在單檔40列資料要37秒，根因未查明）：
+
+**根因已查明並修好**：`twse_t86_client.py`的`institutional_daily_net_t86()`每次呼叫都重新`glob`+逐檔`read_parquet`全部T86快取檔（100%回補後3319檔、288MB），對`load_sample_with_factors()`這種對N個股票逐一呼叫的迴圈等於把全部檔案重複讀了N次。改成process內用「檔案數量+最新mtime」當key的分組快取（`_load_all_t86_grouped()`），第一次呼叫花~38秒讀全部檔案，之後每檔股票查詢只是dict查找。**5檔股票對照測試確認新舊邏輯輸出完全一致**（`.equals()`為True），新版第2檔起降到0.4秒/檔（原本20-25秒/檔）。已commit。
+
+**但完整腳本（N_RANDOM=100，2組合）仍未跑完，是新問題**：sample載入這次順利通過（80/100可用，比之前快很多），但進入第一組合`run_one(..., n_random=100)`後process無聲消失（無traceback、`tasklist`確認python.exe已不在，前後兩次重跑都是同樣結果），懷疑是記憶體問題（T86分組快取本身~1.4-1.7GB，再加上100檔股票的完整價格/因子DataFrame、加上`run_one`內部100次隨機重抽可能各自配置新DataFrame，Windows OOM可能是靜默終止而非拋MemoryError）。**這是全新問題，跟round197原本卡住的地方（load階段）不同**，下一輪如果要接續，建議：(1)先用小n_random（如10-20）驗證`run_one`本身在N=100 sample下能不能跑完，二分法定位是記憶體還是別的bug；(2)或監控工作管理員/`Resource Monitor`記憶體曲線抓OOM證據。既有`portfolio_multifactor_v2`判定（FAIL，percentile=100.0但只測過N=15）維持不變、未被推翻也未被強化——這輪沒有新的候選判定，`TRIALS_LEDGER.md`未新增列。`is_holdout_consumed()`確認`False`。
