@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 201 輪 · 2026-08-29T01:40+08:00 · TW（補對照組，取鎖時偵測到LOCK_STALE，上一輪疑似失敗）· 判定：接續round200的N=100隨機控制組調查——`load_sample_with_factors()`已因T86快取修復恢復正常。**A_4pass/ic_weighted/quarterly VAL期N=100完整跑完**：percentile從N=15的100.0修正為**99.0**（報酬+68.33%），確認N=15滿分是解析度不足假象。**B_plus_value_pe組合三次嘗試（同process/獨立process/連成功過的A_4pass重跑也一樣）皆process無聲消失**，排除跨組合記憶體累積假設，改懷疑環境資源競爭（本機同時有其他互動session在跑）。既有`portfolio_multifactor_v2`判定（FAIL）不變。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約91輪、跨度約52小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`LEADS.md`第201輪記錄
+
+---
 ## 第 200 輪 · 2026-08-29T01:02+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 23:02第198輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書是台股專屬）。**本輪整輪跳過，未做任何實質工作。**`git status`發現另一互動session（策略監控台功能+B24-500流動性宇宙升級）留下大量未提交異動，全部未觸碰、未納入本輪commit。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約90輪、跨度約51.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`US_MARATHON_STATE.md`/`US_LOG.md`第200輪記錄
 
 ---

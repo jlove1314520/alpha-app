@@ -978,3 +978,20 @@ TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`
 **根因已查明並修好**：`twse_t86_client.py`的`institutional_daily_net_t86()`每次呼叫都重新`glob`+逐檔`read_parquet`全部T86快取檔（100%回補後3319檔、288MB），對`load_sample_with_factors()`這種對N個股票逐一呼叫的迴圈等於把全部檔案重複讀了N次。改成process內用「檔案數量+最新mtime」當key的分組快取（`_load_all_t86_grouped()`），第一次呼叫花~38秒讀全部檔案，之後每檔股票查詢只是dict查找。**5檔股票對照測試確認新舊邏輯輸出完全一致**（`.equals()`為True），新版第2檔起降到0.4秒/檔（原本20-25秒/檔）。已commit。
 
 **但完整腳本（N_RANDOM=100，2組合）仍未跑完，是新問題**：sample載入這次順利通過（80/100可用，比之前快很多），但進入第一組合`run_one(..., n_random=100)`後process無聲消失（無traceback、`tasklist`確認python.exe已不在，前後兩次重跑都是同樣結果），懷疑是記憶體問題（T86分組快取本身~1.4-1.7GB，再加上100檔股票的完整價格/因子DataFrame、加上`run_one`內部100次隨機重抽可能各自配置新DataFrame，Windows OOM可能是靜默終止而非拋MemoryError）。**這是全新問題，跟round197原本卡住的地方（load階段）不同**，下一輪如果要接續，建議：(1)先用小n_random（如10-20）驗證`run_one`本身在N=100 sample下能不能跑完，二分法定位是記憶體還是別的bug；(2)或監控工作管理員/`Resource Monitor`記憶體曲線抓OOM證據。既有`portfolio_multifactor_v2`判定（FAIL，percentile=100.0但只測過N=15）維持不變、未被推翻也未被強化——這輪沒有新的候選判定，`TRIALS_LEDGER.md`未新增列。`is_holdout_consumed()`確認`False`。
+
+## 2026-08-29T01:40+08:00 — 馬拉松第201輪：接續round200的N=100隨機控制組調查——排除「跨組合記憶體累積」假設，改為懷疑環境層級不穩定
+
+取鎖：偵測到`LOCK_STALE`（pid 189544，held 29.9分鐘，回收）——**上一輪疑似失敗**，記錄於此。
+
+開工時發現`TW_LOG.md`/`TW_MARATHON_STATE.md`已有一則2026-08-29T00:34「第200輪」記錄（T86 client效能bug修好、N=100腳本卡在`run_one(...,n_random=100)`疑似OOM），但`MARATHON_STATE.md`全域輪次計數器的官方第200輪是US軌（跳過）——這是`LOCK_STALE`場景下兩個process並行工作留下的輪次編號衝突（TW自己的log用了「第200輪」字樣，但未被計入全域輪替序列），**不是本輪造成的**，如實記錄、不回頭更動已提交的歷史記錄。本輪繼續沿用round200 TW_LOG entry建議的「先驗證再深挖」路線，但發現前先重跑`deep_dive_portfolio_v2_random_control_n100.py`（round197原始腳本）確認`load_sample_with_factors()`本身已經因T86快取修復（`cf4917c`，已commit）恢復正常（96.5秒完整回傳80/100可用樣本，不再是round197記錄的>115秒無回應）。
+
+**接續進度**：
+1. 完整跑`deep_dive_portfolio_v2_random_control_n100.py`（A_4pass+B_plus_value_pe兩組合，N_RANDOM=100，同一process）：**A_4pass/ic_weighted/quarterly VALIDATION完整跑完**——報酬=+68.33%、隨機對照組中位數=+27.90%、**percentile(N=100)=99.0**（對比round197記錄的N=15版percentile=100.0，證實N=15的「滿分」確實是重抽次數太少造成的天花板假象，N=100後降到99.0，仍然是極端強的訊號，不是假警報，但精確度提升後不再是100.0滿分）。**B_plus_value_pe組合process無聲消失**（無traceback，`tasklist`確認python.exe已終止），跟round200記錄的症狀一致。
+2. 為了排除「兩組合在同一process裡跑、記憶體累積到第二組才爆」這個假設，新增`deep_dive_portfolio_v2_random_control_n100_single.py`（只跑單一指定組合、獨立process，見下方commit）。**單獨跑B_plus_value_pe（全新process，第一次嘗試combo1完全沒跑過）：一樣無聲消失**——這排除了「跨組合累積」假設，代表B_plus_value_pe這個組合本身（不管是不是第一個跑）就會觸發某種環境層級的中止。
+3. 為了進一步排除「B_plus_value_pe特有的資料/因子bug」，改回頭單獨跑A_4pass（**這組在步驟1的同process版本裡才剛成功跑完N=100**）：**這次單獨重跑同樣無聲消失**，跟步驟1的成功形成矛盾——同一個組合、同樣的程式碼、只是換了一次process呼叫，結果從「完整成功」變成「無聲消失」。
+
+**判定：排除腳本邏輯本身的bug（同一組合同一段程式碼，結果不可重現地時而成功時而失敗），改為懷疑是環境層級不穩定**——本機同時間有其他互動session在做重度工作（`git status`顯示BACKLOG/STATUS.json/strategies.json/twse_t86_client.py等大量未提交異動、且`CLAUDE.md`在本輪執行期間被外部修改，證實有並行活動），懷疑是記憶體壓力/資源競爭導致Windows不定期靜默終止python.exe（沒有拋MemoryError、沒有traceback，符合OOM killer或防毒軟體介入的行為模式，但未能在本輪確認確切機制）。**下一輪如果要接續，建議**：(1)先用`tasklist`確認沒有其他重度python/node process在跑再測試；(2)如果環境乾淨時仍然不穩定，改用工作管理員/Resource Monitor即時盯著記憶體曲線抓證據；(3)或先放棄N=100目標，改用N=30-50折衷值降低單次執行的資源需求，用比N=15更高但比N=100保守的解析度先拿到一個可信結果。
+
+**這輪唯一站得住腳的新數字**：A_4pass/ic_weighted/quarterly VAL期percentile從N=15的100.0修正為N=100的99.0——**LEADS.md已同步補充這個修正值，但B_plus_value_pe仍缺N=100數字，`portfolio_multifactor_v2`整體判定（FAIL，alpha未達顯著性門檻）不受影響、不變**。沒有新的候選判定，`TRIALS_LEDGER.md`未新增列（這是既有候選的對照組補強工作，不是新試驗）。
+
+零額外API呼叫（全程命中既有快取，`load_sample_with_factors`跟T86分組快取皆為local file cache）。`is_holdout_consumed()`確認`False`。開工前`git status`確認除本輪新增的`deep_dive_portfolio_v2_random_control_n100_single.py`外，只有其他互動session留下的`data/rate_limit_state.json`（修改）、`research/B24_RESULTS.md`/`research/pit_run_*.log`（未追蹤）——均不觸碰、不納入本輪commit。TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）維持已達標，暫停單因子試驗規則三個解除條件複查仍全部未成立。
