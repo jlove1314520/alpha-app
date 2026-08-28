@@ -856,6 +856,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="tabbar2" id="trade-tabs">
       <button class="on" data-sub="bots">機器人</button>
       <button data-sub="strategy">策略</button>
+      <button data-sub="monitor">策略監控台</button>
     </div>
 
     <div class="subscreen active" id="trade-sub-bots">
@@ -913,6 +914,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="subscreen" id="trade-sub-strategy">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 紙上模擬，非真實交易，非投資建議</div>
       <div id="strategy-list"><div class="note">載入中…</div></div>
+    </div>
+
+    <!-- 2026-08-29新增：策略監控台——不是「已上架紙上交易」（上面strategy-list那個
+    分頁，只顯示通過完整驗證+holdout解鎖的策略，目前一定是空的），這裡是「所有
+    正在研究中的策略清冊」，讓使用者一眼看到每個策略走到哪一步，取代「盲目相信
+    CC餵的結果」。資料只讀data/strategies.json，卡片內容/狀態全部來自那個檔案，
+    這裡不寫死任何策略清單或數字。 -->
+    <div class="subscreen" id="trade-sub-monitor">
+      <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 研究參考用途，非投資建議；狀態100%由腳本從真實檔案推導</div>
+      <div id="strategy-monitor-list"><div class="note">載入中…</div></div>
     </div>
   </section>
 
@@ -2435,8 +2446,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       b.classList.add('on');
       document.getElementById('trade-sub-bots').classList.remove('active');
       document.getElementById('trade-sub-strategy').classList.remove('active');
+      document.getElementById('trade-sub-monitor').classList.remove('active');
       document.getElementById('trade-sub-'+b.dataset.sub).classList.add('active');
       if(b.dataset.sub==='strategy')loadStrategies();
+      if(b.dataset.sub==='monitor')loadStrategyMonitor();
     });
   });
   // 2026-08-25 新增：策略紙上前測系統。目前沒有任何策略通過完整驗證(含holdout解鎖)，
@@ -2475,6 +2488,68 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       el.innerHTML=list.map(strategyCardHtml).join('');
     }catch(e){
       console.warn('[loadStrategies]',e);recordGlobalError('loadStrategies',e);
+      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
+  }
+
+  // 2026-08-29新增：策略監控台卡片渲染——狀態徽章顏色分級，數字全部來自
+  // data/strategies.json（research/generate_strategies_json.py產生），這裡
+  // 純渲染不做任何判定/計算，找不到欄位就顯示「—」或省略該區塊，不補假數字。
+  const STRATEGY_STATUS_COLOR={
+    '回測通過':'var(--good)','回測未通過':'var(--critical)','回測中':'var(--warn)',
+    '紙上交易中':'var(--accent)','規格完成':'var(--ink-2)','草稿':'var(--ink-3)',
+  };
+  function strategyMonitorCardHtml(s){
+    const color=STRATEGY_STATUS_COLOR[s.status]||'var(--ink-3)';
+    let backtestHtml='';
+    if(s.backtest){
+      const b=s.backtest;
+      backtestHtml=`<div class="bot-stats" style="margin-top:10px;flex-wrap:wrap">
+        <div class="s"><span>年化(VAL)</span><b>${b['年化報酬_validation_pct']!=null?b['年化報酬_validation_pct'].toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>Sharpe×0.7</span><b>${b['sharpe_x0.7']!=null?b['sharpe_x0.7'].toFixed(2):'—'}</b></div>
+        <div class="s"><span>MDD</span><b>${b['mdd_pct']!=null?b['mdd_pct'].toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>Sortino</span><b>${b['sortino']!=null?b['sortino'].toFixed(2):'—'}</b></div>
+        <div class="s"><span>CVaR95(日)</span><b>${b['cvar95_日pct']!=null?b['cvar95_日pct'].toFixed(2)+'%':'—'}</b></div>
+        <div class="s"><span>勝率</span><b>${b['勝率pct']!=null?b['勝率pct'].toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>翻倍率</span><b>${b['翻倍率pct']!=null?b['翻倍率pct'].toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>地雷率</span><b>${b['地雷率pct']!=null?b['地雷率pct'].toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>隨機對照百分位</span><b>${b['隨機對照百分位']!=null?b['隨機對照百分位'].toFixed(1)+'（'+b['隨機對照draws次數']+'次）':'—'}</b></div>
+        <div class="s"><span>alpha p值</span><b>${b['alpha_p值']!=null?b['alpha_p值'].toFixed(4)+(b['alpha顯著']?'（顯著）':'（不顯著）'):'—'}</b></div>
+      </div>
+      <div class="note" style="margin-top:6px">期間：${b['期間']||'—'} · 來源：${b['來源檔']||'—'}</div>`;
+    }else if(s.trials_summary){
+      const t=s.trials_summary;
+      backtestHtml=`<div class="note" style="margin-top:10px;padding:8px;background:rgba(208,59,59,.08);border-radius:8px">
+        已測試 <b>${t['已測試假說數']??'—'}</b> 個策略假說，通過統計驗證 <b>${t['通過統計驗證數']??'—'}</b> 個
+        （來源：${t['來源']||'—'}）——誠實記錄，不是還沒開始做，是做過完整檢定仍未找到站得住腳的訊號
+      </div>`;
+    }else{
+      backtestHtml=`<div class="note" style="margin-top:10px;color:var(--ink-3)">${s.status==='回測中'?'回測進行中…（背景執行，完成後這裡會自動出現數字）':'尚未回測'}</div>`;
+    }
+    const paperHtml=s.paper?`<div class="note" style="margin-top:8px">紙上交易：${s.paper['起始日']||'—'}起、${s.paper['快照數']??'—'}次快照、至今報酬 <b class="${(s.paper['至今報酬pct']||0)>=0?'pos':'neg'}">${s.paper['至今報酬pct']!=null?(s.paper['至今報酬pct']>=0?'+':'')+s.paper['至今報酬pct']+'%':'—'}</b>（${s.paper['計算方式']||''}）</div>`:'';
+    const limHtml=(s.limitations&&s.limitations.length)?`<div class="note" style="margin-top:8px;color:var(--ink-3);font-size:11px;line-height:1.6">${s.limitations.map(l=>'• '+l).join('<br>')}</div>`:'';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div><b style="font-size:15px">${s.name||s.id}</b><div class="note" style="margin-top:2px">${s.type||'—'} · ${s.spec||''}</div></div>
+        <span style="flex:0 0 auto;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${color};border:1px solid ${color}">${s.status}</span>
+      </div>
+      ${backtestHtml}
+      ${paperHtml}
+      ${limHtml}
+      <div class="note" style="margin-top:8px;font-size:10px">最後更新：${s.last_updated?fmtTzMMDDHHMM(new Date(s.last_updated),'Asia/Taipei'):'—'}</div>
+    </div>`;
+  }
+  async function loadStrategyMonitor(){
+    const el=document.getElementById('strategy-monitor-list');if(!el)return;
+    try{
+      const r=await fetch('data/strategies.json?t='+Date.now());
+      if(!r.ok){el.innerHTML='<div class="note">查無資料（data/strategies.json尚未產生）</div>';return}
+      const json=await r.json();
+      const list=json.strategies||[];
+      if(!list.length){el.innerHTML='<div class="note">查無策略資料</div>';return}
+      el.innerHTML=list.map(strategyMonitorCardHtml).join('');
+    }catch(e){
+      console.warn('[loadStrategyMonitor]',e);recordGlobalError('loadStrategyMonitor',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
     }
   }
@@ -3003,7 +3078,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.2355';
+  const APP_VERSION='2026-08-29.0040';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
