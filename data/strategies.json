@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-29T00:30:39.769596+08:00",
+  "generated_at": "2026-08-29T00:59:41.695058+08:00",
   "note": "本頁面/檔案所有數字僅供研究參考，非投資建議。狀態欄位100%由本腳本從真實檔案（scores*.json/data/picks_ledger.json/research/TRIALS_LEDGER.md/research/B24_RESULTS.md）推導，找不到來源檔一律顯示null/尚未，不寫死樂觀值。",
   "strategies": [
     {
@@ -84,6 +84,34 @@
         "數字動態從research/TRIALS_LEDGER.md算出，不是寫死的——之後這份帳本增列，這裡會自動更新"
       ],
       "last_updated": "2026-08-27T23:22:38.574530+08:00"
+    },
+    {
+      "id": "weinstein_stage2_baseline",
+      "name": "Weinstein第二階段掃描（股票baseline候選）",
+      "type": "選股",
+      "status": "草稿",
+      "spec": "站上30週均線 + 均線上揚 + 相對強弱——股票最自然的baseline，尚未實作（跟research/strategies/weinstein_stage2.py既有的backtest基礎設施同名但不同東西：那是回測引擎沿用的market-regime prepare函式，不是這個策略本身）",
+      "backtest": null,
+      "paper": null,
+      "limitations": [
+        "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
+        "TRIALS_LEDGER.md#10/#11已有較早的weinstein_stage2試點記錄（手選30檔試點FAIL、無偏宇宙+配對式對照組版EXPERIMENTAL），這個新baseline候選要重新設計，不是重跑舊版"
+      ],
+      "last_updated": "2026-08-29T00:59:41.695050+08:00"
+    },
+    {
+      "id": "cta_trend_following_baseline",
+      "name": "CTA趨勢跟隨（期貨baseline候選，時序動量）",
+      "type": "期貨",
+      "status": "草稿",
+      "spec": "時序動量（time-series momentum）——期貨最該先做的一條baseline，獨立跑，尚未實作",
+      "backtest": null,
+      "paper": null,
+      "limitations": [
+        "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
+        "跟TRIALS_LEDGER.md已測過的#18`fut_trend_multi_tf`（10/20/60日動能訊號多數決）不是同一個東西——那是截面/多時間框架訊號的組合判定，這裡要做的是經典CTA式單一時序動量（例如12個月回顧報酬正負號），設計上更接近學術文獻的標準定義，不能直接沿用#18已FAIL的結論當作這個新候選也會失敗的證據"
+      ],
+      "last_updated": "2026-08-29T00:59:41.695054+08:00"
     }
   ]
 }

@@ -260,6 +260,20 @@ def build_futures_track() -> dict:
     }
 
 
+def build_draft_baseline(strategy_id: str, name: str, stype: str, spec: str, limitations: list[str]) -> dict:
+    """2026-08-29新增（使用者「少走彎路指南」item六：登錄兩個新baseline
+    候選，狀態=草稿/待回測，先只登錄規格不執行）。這兩個策略目前**完全
+    沒有實作**（沒有對應的scores*.json/backtest/paper任何來源檔），
+    `草稿`是唯一誠實的狀態——不透過`build_strategy()`那套「從檔案推導」
+    的邏輯（沒有檔案可推導），直接宣告草稿本身沒有違反「不寫死樂觀值」
+    的鐵律，因為草稿是最保守、最低的狀態，不是樂觀假設。"""
+    return {
+        "id": strategy_id, "name": name, "type": stype, "status": "草稿",
+        "spec": spec, "backtest": None, "paper": None,
+        "limitations": limitations, "last_updated": _now_iso(),
+    }
+
+
 def main():
     strategies = [
         build_strategy(
@@ -299,6 +313,31 @@ def main():
             ],
         ),
         build_futures_track(),
+        build_draft_baseline(
+            strategy_id="weinstein_stage2_baseline", name="Weinstein第二階段掃描（股票baseline候選）",
+            stype="選股",
+            spec="站上30週均線 + 均線上揚 + 相對強弱——股票最自然的baseline，"
+                 "尚未實作（跟research/strategies/weinstein_stage2.py既有的backtest基礎設施"
+                 "同名但不同東西：那是回測引擎沿用的market-regime prepare函式，不是這個策略本身）",
+            limitations=[
+                "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
+                "TRIALS_LEDGER.md#10/#11已有較早的weinstein_stage2試點記錄（手選30檔試點FAIL、"
+                "無偏宇宙+配對式對照組版EXPERIMENTAL），這個新baseline候選要重新設計，不是重跑舊版",
+            ],
+        ),
+        build_draft_baseline(
+            strategy_id="cta_trend_following_baseline", name="CTA趨勢跟隨（期貨baseline候選，時序動量）",
+            stype="期貨",
+            spec="時序動量（time-series momentum）——期貨最該先做的一條baseline，獨立跑，"
+                 "尚未實作",
+            limitations=[
+                "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
+                "跟TRIALS_LEDGER.md已測過的#18`fut_trend_multi_tf`（10/20/60日動能訊號多數決）"
+                "不是同一個東西——那是截面/多時間框架訊號的組合判定，這裡要做的是經典CTA式"
+                "單一時序動量（例如12個月回顧報酬正負號），設計上更接近學術文獻的標準定義，"
+                "不能直接沿用#18已FAIL的結論當作這個新候選也會失敗的證據",
+            ],
+        ),
     ]
 
     payload = {

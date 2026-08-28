@@ -34,11 +34,49 @@ finmind_client.load_dev() and yf_price_client.fetch_yf_adjusted() do.
 """
 from __future__ import annotations
 
+import os
 import time
+import uuid
 from pathlib import Path
 
 import pandas as pd
 import requests
+
+
+def _atomic_read_parquet(path: Path) -> pd.DataFrame:
+    """2026-08-29新增（determinism_self_test.py實測發現），跟
+    `finmind_client.py::_atomic_read_parquet()`同一份修法，自成一體
+    複製——讀取端偶爾在另一個process正在os.replace()換名的瞬間開檔
+    會遇到Windows暫時性PermissionError（不是資料損毀），加短重試。"""
+    for attempt in range(20):
+        try:
+            return pd.read_parquet(path)
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.05 * (attempt + 1))
+
+
+def _atomic_to_parquet(df: pd.DataFrame, path: Path) -> None:
+    """2026-08-29新增（可重現性稽核）：跟`finmind_client.py::_atomic_to_
+    parquet()`同一份修法，自成一體複製——`df.to_parquet(path)`不是atomic
+    的，兩個process同時fetch同一個尚未快取的date會互相interleave寫入，
+    可能產生截斷parquet檔，是回測不可重現的根因候選之一。改成寫進pid+uuid
+    專屬臨時檔，`os.replace()`原子性換名，並發讀取者只會讀到完整新檔或
+    完整舊檔。"""
+    tmp_path = path.with_name(f"{path.name}.tmp.{os.getpid()}.{uuid.uuid4().hex[:8]}")
+    df.to_parquet(tmp_path, index=False)
+    # 2026-08-29新增（determinism_self_test.py實測發現，跟finmind_client.py
+    # 同一份修法）：Windows的os.replace()在併發下偶爾拋PermissionError（暫時性
+    # 檔案鎖，不是資料損毀），加短重試。
+    for attempt in range(20):
+        try:
+            os.replace(tmp_path, path)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 DATA_DIR = Path(__file__).parent / "data" / "raw_twse_t86"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -77,7 +115,7 @@ def fetch_t86_day(date_str: str, force_refresh: bool = False, timeout: float = 1
     """
     path = _cache_path(date_str)
     if path.exists() and not force_refresh:
-        return pd.read_parquet(path)
+        return _atomic_read_parquet(path)
 
     last_err: Exception | None = None
     body = None
@@ -112,7 +150,7 @@ def fetch_t86_day(date_str: str, force_refresh: bool = False, timeout: float = 1
 
     if not isinstance(body, dict) or body.get("stat") != "OK" or not body.get("data"):
         out = pd.DataFrame(columns=_COLS)
-        out.to_parquet(path, index=False)
+        _atomic_to_parquet(out, path)
         return out
 
     fields = body["fields"]
@@ -149,7 +187,7 @@ def fetch_t86_day(date_str: str, force_refresh: bool = False, timeout: float = 1
         })
 
     out = pd.DataFrame(out_rows, columns=_COLS)
-    out.to_parquet(path, index=False)
+    _atomic_to_parquet(out, path)
     return out
 
 
@@ -186,7 +224,7 @@ def _load_all_t86_grouped() -> dict[str, pd.DataFrame]:
         return _T86_GROUPED_CACHE
     frames = []
     for p in files:
-        day = pd.read_parquet(p)
+        day = _atomic_read_parquet(p)
         if not day.empty:
             frames.append(day)
     if not frames:

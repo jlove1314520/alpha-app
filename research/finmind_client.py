@@ -32,12 +32,63 @@ ever actually becomes a problem.
 from __future__ import annotations
 
 import json
+import os
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import requests
+
+
+def _atomic_read_parquet(path: Path) -> pd.DataFrame:
+    """2026-08-29新增（determinism_self_test.py實測發現，配對`_atomic_to_
+    parquet()`）：即使寫入是atomic的，讀取端在另一個process剛好正在
+    `os.replace()`換名的那個瞬間去開檔，Windows偶爾還是會回傳
+    PermissionError（不是資料損毀，是暫時性檔案鎖狀態——這個瞬間本身
+    極短，重試立刻就會成功）。加短重試，讀取端才不會因為這個暫時性
+    windows檔案系統狀態就整支腳本意外中止。"""
+    for attempt in range(20):
+        try:
+            return pd.read_parquet(path)
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.05 * (attempt + 1))
+
+
+def _atomic_to_parquet(df: pd.DataFrame, path: Path) -> None:
+    """2026-08-29新增（可重現性稽核發現的真bug）：`df.to_parquet(path)`本身
+    不是atomic的——如果兩個process同時fetch同一個尚未快取的(dataset,
+    data_id, start_date, end_date)組合（例如這個process跟同時在跑的
+    AlphaMarathon背景迴圈），兩邊都會判斷「快取不存在」而各自發送請求、
+    各自寫入同一個路徑，寫入過程中互相interleave可能產生截斷/損毀的
+    parquet檔，導致「同輸入、不同次執行讀到不同（甚至讀取失敗）的資料」
+    ——這正是回測不可重現的根因候選之一。修法：每個process寫進自己專屬
+    的臨時檔（檔名帶pid+uuid，不會撞名），寫完才用`os.replace()`原子性
+    地換名成正式路徑——`os.replace()`在同一個檔案系統上是atomic的
+    （POSIX/Windows皆然），並發的讀取者只會讀到「完全新」或「完全舊」
+    的檔案，不會讀到寫一半的檔案；兩個process同時寫，最後贏的那個換名
+    生效，但因為兩邊寫的都是同一個API呼叫算出的同樣資料，內容不會不一致，
+    差別只在誰先誰後贏得換名，不影響正確性。"""
+    tmp_path = path.with_name(f"{path.name}.tmp.{os.getpid()}.{uuid.uuid4().hex[:8]}")
+    df.to_parquet(tmp_path, index=False)
+    # 2026-08-29新增（determinism_self_test.py實測發現）：Windows的os.replace()
+    # 在另一個process剛好也在讀/寫同一個目標路徑時，偶爾會拋PermissionError
+    # （[WinError 5]拒絕存取，跟POSIX rename()不同，POSIX不受open file handle
+    # 影響）——實測4個並發writer各30次寫入中出現4次，是暫時性的檔案鎖，不是
+    # 資料損毀（reader全程沒讀到任何壞資料，見determinism_self_test.py Test A
+    # 結果），重試幾次就會過。加短重試，避免這個Windows特有的暫時性錯誤讓
+    # 呼叫端整支腳本意外中止。
+    for attempt in range(20):
+        try:
+            os.replace(tmp_path, path)
+            return
+        except PermissionError:
+            if attempt == 19:
+                raise
+            time.sleep(0.05 * (attempt + 1))
 
 DATA_DIR = Path(__file__).parent / "data" / "raw"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -149,7 +200,7 @@ def _fetch(
     """
     path = _cache_path(dataset, data_id, start_date, end_date)
     if path.exists() and not force_refresh:
-        return pd.read_parquet(path)
+        return _atomic_read_parquet(path)
 
     params = {"dataset": dataset, "start_date": start_date}
     if data_id:
@@ -202,7 +253,7 @@ def _fetch(
 
     data = body.get("data", []) if isinstance(body, dict) else []
     df = pd.DataFrame(data)
-    df.to_parquet(path, index=False)
+    _atomic_to_parquet(df, path)
     return df
 
 
