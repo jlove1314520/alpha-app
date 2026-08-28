@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-29T01:48:52.089400+08:00",
-  "latest_commit": "ab98f0f",
+  "updated_at": "2026-08-29T07:51:28.689101+08:00",
+  "latest_commit": "c6baca6",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -12,7 +12,7 @@
     },
     {
       "path": "data/earnings_calendar.json",
-      "generated_at": "2026-08-28T15:40:28.078028+08:00",
+      "generated_at": "2026-08-29T03:29:37.539552+08:00",
       "records": 6,
       "source": "yfinance Ticker.get_calendar() + get_earnings_dates()（免金鑰）",
       "detail": "coverage=6/6 檔 session已知=6/6 errors=[]",
@@ -20,15 +20,15 @@
     },
     {
       "path": "data/ex_dividend_events.json",
-      "generated_at": "2026-08-28T15:40:20.751110+08:00",
-      "records": 100,
+      "generated_at": "2026-08-29T03:29:28.782782+08:00",
+      "records": 103,
       "source": "TWSE官方rwd/zh/exRight/TWT48U（除權除息預告表，免金鑰，只回傳未來約5週內事件）",
-      "detail": "100檔股票累積共100筆事件：已套用17筆、因快取資料缺口過大而安全跳過8筆、尚待處理75筆",
+      "detail": "103檔股票累積共103筆事件：已套用17筆、因快取資料缺口過大而安全跳過8筆、尚待處理78筆",
       "status": "ok"
     },
     {
       "path": "data/fundamentals.json",
-      "generated_at": "2026-08-28T15:39:50.590814+08:00",
+      "generated_at": "2026-08-29T03:29:15.688264+08:00",
       "records": 2597,
       "source": "起始種子=research端FinMind快取整理；此後累積更新=TWSE openapi(BWIBBU_ALL/t187ap05_L)",
       "detail": "ratios_updated=1081 revenue_updated=1085 errors=[]",
@@ -36,31 +36,31 @@
     },
     {
       "path": "data/fx.json",
-      "generated_at": "2026-08-28T07:39:51.481031+00:00",
+      "generated_at": "2026-08-28T19:29:16.599952+00:00",
       "records": 1,
       "source": "yfinance TWD=X",
-      "detail": "rate=31.598 date=2026-08-28 errors=[]",
+      "detail": "rate=31.644 date=2026-08-28 errors=[]",
       "status": "ok"
     },
     {
       "path": "data/margin_maintenance.json",
-      "generated_at": "2026-08-28",
-      "records": 3,
+      "generated_at": "2026-08-29",
+      "records": 4,
       "source": "2026-08-27起改排程：TWSE官方MI_MARGN(逐股融資餘額)+STOCK_DAY_ALL(逐股收盤價)算擔保品市值；分母(全市場融資金額)仍用FinMind（唯一保留依賴，一天只呼叫一次，風險低）",
-      "detail": "ratio_pct=193.24 matched_stocks=1228（原本是alpha-data獨立目錄手動產生，已改掛進market.yml排程，見update_margin_maintenance.py）",
+      "detail": "ratio_pct=190.77 matched_stocks=1228（原本是alpha-data獨立目錄手動產生，已改掛進market.yml排程，見update_margin_maintenance.py）",
       "status": "ok"
     },
     {
       "path": "data/market_tw.json",
-      "generated_at": "2026-08-28T07:39:10+00:00",
+      "generated_at": "2026-08-28T19:28:53+00:00",
       "records": 37,
       "source": "TWSE openapi(MI_INDEX)/TPEx openapi/TAIFEX openapi/TWSE T86",
-      "detail": "sectors=37 institutional_history_days=2 errors=[]",
+      "detail": "sectors=37 institutional_history_days=3 errors=[]",
       "status": "ok"
     },
     {
       "path": "data/market_us.json",
-      "generated_at": "2026-08-28T07:39:40+00:00",
+      "generated_at": "2026-08-28T19:29:07+00:00",
       "records": 4,
       "source": "yfinance",
       "detail": "indices=['^DJI', '^GSPC', '^IXIC', '^SOX']",
@@ -76,31 +76,31 @@
     },
     {
       "path": "data/picks_ledger.json",
-      "generated_at": "2026-08-28T15:40:35.386382+08:00",
-      "records": 5,
+      "generated_at": "2026-08-29T03:29:44.757779+08:00",
+      "records": 8,
       "source": ".github/scripts/build_picks_ledger.py（market.yml排程，三榜產生後、commit前快照，非回測）",
-      "detail": "total_snapshots=5 boards=['future', 'momentum', 'value'] latest_snapshot_date_by_board={'value': '2026-08-28', 'momentum': '2026-08-28', 'future': '2026-08-28'}",
+      "detail": "total_snapshots=8 boards=['future', 'momentum', 'value'] latest_snapshot_date_by_board={'value': '2026-08-29', 'momentum': '2026-08-29', 'future': '2026-08-29'}",
       "status": "ok"
     },
     {
       "path": "data/price_history.json",
-      "generated_at": "2026-08-28T15:40:21.800547+08:00",
-      "records": 2831,
+      "generated_at": "2026-08-29T03:29:29.822693+08:00",
+      "records": 2832,
       "source": "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（官方開放資料，累積式寫回，免金鑰）",
-      "detail": "平均每檔保留72.0個交易日（上限90天）。close為原始收盤（未還原權息，generate_scores_live.py的technical因子仍用這欄）；adj_close為還原權息收盤價（2026-08-27新增，題材動能榜relative_strength因子改用這欄）——本輪除權息事件新增1筆、套用回溯調整17筆，見ex_dividend_events.json",
+      "detail": "平均每檔保留72.1個交易日（上限90天）。close為原始收盤（未還原權息，generate_scores_live.py的technical因子仍用這欄）；adj_close為還原權息收盤價（2026-08-27新增，題材動能榜relative_strength因子改用這欄）——本輪除權息事件新增3筆、套用回溯調整0筆，見ex_dividend_events.json",
       "status": "ok"
     },
     {
       "path": "data/quotes_all_tw.json",
-      "generated_at": "2026-08-28T15:40:23.816550+08:00",
-      "records": 2831,
+      "generated_at": "2026-08-29T03:29:31.873409+08:00",
+      "records": 2832,
       "source": "從data/price_history.json衍生的輕量快照（TWSE STOCK_DAY_ALL+TPEx tpex_mainboard_quotes）",
       "detail": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。",
       "status": "ok"
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-08-28T12:49:24+00:00",
+      "generated_at": "2026-08-28T21:13:36+00:00",
       "records": 1989,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
       "detail": "queried=2351 matched=1989 trading_window=False",
@@ -108,23 +108,23 @@
     },
     {
       "path": "data/quotes_us.json",
-      "generated_at": "2026-08-28T12:49:26+00:00",
+      "generated_at": "2026-08-28T21:13:39+00:00",
       "records": 6,
       "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
-      "detail": "queried=6 matched=6 trading_window=False market_session=pre extended_hours_matched=6",
+      "detail": "queried=6 matched=6 trading_window=False market_session=post extended_hours_matched=6",
       "status": "ok"
     },
     {
       "path": "data/stock_detail.json",
-      "generated_at": "2026-08-28T15:39:09.364990+08:00",
-      "records": 2321,
+      "generated_at": "2026-08-29T03:28:52.176869+08:00",
+      "records": 2326,
       "source": "TWSE官方t187ap06_L_ci/07_L_ci(財報，僅一般業)+T86(三大法人，跟market_tw.json共用)+MI_MARGN(融資融券，跟大盤維持率共用)",
-      "detail": "財報1944檔/三大法人1990檔/融資融券1983檔（合計2321檔有任一種資料）",
+      "detail": "財報1944檔/三大法人2031檔/融資融券1983檔（合計2326檔有任一種資料）",
       "status": "ok"
     },
     {
       "path": "data/strategies.json",
-      "generated_at": "2026-08-29T01:42:40.114006+08:00",
+      "generated_at": "2026-08-28T19:29:47.696442+00:00",
       "records": 6,
       "source": "research/generate_strategies_json.py（從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md推導，非手寫）",
       "detail": "status分布={'紙上交易中': 2, '回測未通過': 2, '草稿': 2}",
@@ -132,34 +132,34 @@
     },
     {
       "path": "data/strategy_performance.json",
-      "generated_at": "2026-08-29T01:41:01.706576+08:00",
+      "generated_at": "2026-08-28T19:29:45.464901+00:00",
       "records": 3,
       "source": "research/update_strategy_performance.py（每日mark-to-market，逐日累積不可回填）",
-      "detail": "as_of_trading_date=2026-08-27 各策略(交易日數/累積報酬)={'value_board_v2': '1天/0.0%', 'momentum_board': '1天/0.0%', 'future_board': '1天/0.0%'}",
+      "detail": "as_of_trading_date=2026-08-28 各策略(交易日數/累積報酬)={'value_board_v2': '2天/-1.9288%', 'momentum_board': '2天/0.0%', 'future_board': '2天/-0.7254%'}",
       "status": "ok"
     },
     {
       "path": "scores.json",
-      "generated_at": "2026-08-28T15:40:30.823947+08:00",
+      "generated_at": "2026-08-29T03:29:40.241844+08:00",
       "records": 2351,
       "source": "research/generate_scores_live.py（GitHub Actions market.yml每日排程自動執行，JSON-only，不依賴parquet/FinMind）",
-      "detail": "engine_version=scoring-live-json universe_size=2351 avg_coverage=0.417 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False backtest_status=None",
+      "detail": "engine_version=scoring-live-json universe_size=2351 avg_coverage=0.419 weights_hash=4d1a7df9f8f5 coverage_collapse_warning=False backtest_status=None",
       "status": "ok"
     },
     {
       "path": "scores_momentum.json",
-      "generated_at": "2026-08-28T15:40:33.332079+08:00",
-      "records": 2370,
+      "generated_at": "2026-08-29T03:29:42.706082+08:00",
+      "records": 2371,
       "source": "research/generate_scores_momentum.py（GitHub Actions market.yml每日排程自動執行，題材動能榜，跟價值成長榜物理分離的獨立引擎，見weights_frozen_momentum.json）",
-      "detail": "engine_version=scoring-momentum-v1 universe_size=2370 avg_coverage=0.551 weights_hash=0ea99f55d5a4 coverage_collapse_warning=None backtest_status=尚未回測驗證",
+      "detail": "engine_version=scoring-momentum-v1 universe_size=2371 avg_coverage=0.553 weights_hash=0ea99f55d5a4 coverage_collapse_warning=None backtest_status=尚未回測驗證",
       "status": "ok"
     },
     {
       "path": "scores_future.json",
-      "generated_at": "2026-08-28T15:40:35.084051+08:00",
-      "records": 2160,
+      "generated_at": "2026-08-29T03:29:44.457498+08:00",
+      "records": 2173,
       "source": "research/generate_scores_future.py（GitHub Actions market.yml每日排程自動執行，未來性濾網(a)類因子，跟另外兩榜物理分離的獨立引擎，見weights_frozen_future.json）",
-      "detail": "engine_version=scoring-future-v1 universe_size=2160 avg_coverage=0.479 weights_hash=2909ad72626d coverage_collapse_warning=None backtest_status=尚未回測驗證",
+      "detail": "engine_version=scoring-future-v1 universe_size=2173 avg_coverage=0.476 weights_hash=2909ad72626d coverage_collapse_warning=None backtest_status=尚未回測驗證",
       "status": "ok"
     }
   ],
@@ -168,15 +168,15 @@
       "file": ".github/workflows/market.yml",
       "name": "大盤/類股/三大法人/期貨/美股指數",
       "schedule": "台股收盤後(06:10 UTC)/美股收盤後(21:30 UTC)，週一至週五",
-      "last_run": "2026-08-28T07:38:43Z",
+      "last_run": "2026-08-28T18:35:35Z",
       "last_status": "success"
     },
     {
       "file": ".github/workflows/quotes.yml",
       "name": "盤中近即時報價（台股+美股）",
       "schedule": "盤中每10分鐘：台股09:00-13:30、美股13:30-21:00(左右)，週一至週五",
-      "last_run": "2026-08-28T16:59:42Z",
-      "last_status": "in_progress"
+      "last_run": "2026-08-28T19:41:49Z",
+      "last_status": "success"
     }
   ],
   "app_data_sources": [
@@ -336,10 +336,10 @@
     "note": "各資料源目前的請求節流/斷路狀態（≥3秒間隔+收到428/403封鎖2小時，2026-08-28新增，見BACKLOG.md「資料源禮儀」）。blocked=true代表目前所有腳本都會拒絕對這個來源發送請求，不是故障，是主動禮讓。",
     "sources": {
       "finmind": {
-        "blocked": true,
-        "blocked_remaining_min": 44.3,
-        "block_reason": "HTTP 402 {\"msg\":\"Requests reach the upper limit. https://finmindtrade.com/\",\"status\":402,\"token_tail\":\"\"}",
-        "blocked_at": "2026-08-28T16:33:14.439875+00:00"
+        "blocked": false,
+        "blocked_remaining_min": null,
+        "block_reason": null,
+        "blocked_at": null
       },
       "twse_openapi": {
         "blocked": false,
