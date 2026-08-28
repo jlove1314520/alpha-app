@@ -1145,3 +1145,13 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 **額外發現**：開工時`git status`發現工作目錄仍有另一互動session的殘留變更（`data/rate_limit_state.json`已修改、`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`未追蹤，跟第169–203輪記錄一致），依規則不觸碰、不加入本輪commit。
 
 `is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約96輪、跨度約55小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-08-29T05:01+08:00 — 馬拉松第209輪：跳過，暫停規則生效中
+
+**取鎖**：乾淨（非陳舊鎖檔）。三軌時間戳：FUT 03:32（第206輪，最舊）、US 04:02（第207輪）、TW 04:31（第208輪，最新）——依輪替選FUT。
+
+**判定**：獨立複查三個解除條件皆未成立：(1) `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -3 -- research/PORTFOLIO_STRATEGY_SPEC.md`（於repo根目錄`C:\alpha\alpha-app`執行）確認自建立（`fa369b9`）以來仍只有這一個commit；(2) `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）——判定仍FAIL（卡在alpha顯著性p>0.05），「換更大樣本重跑」(a)、「train-only嚴格樣本外」(b)兩個選項仍留給使用者決定，未見新回應；(3) 暫停規則本身（`MARATHON_PROTOCOL.md`最上方）未被修改移除。FUT軌round104留下的盤別效應第三批待辦本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過。同時複查`TW_MARATHON_STATE.md`第208輪記錄——TW軌兩項地基背景工作（宇宙回補81.3%、T86回補100%）仍維持已達標，round205已釐清的round202文件矛盾判斷維持有效，沒有留下FUT軌能接手的工作。目前三軌皆無已知允許的工作單位可做。**本輪整輪跳過，未做任何實質工作。**
+
+**額外發現**：開工時`git status`確認工作目錄僅`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤），跟第169–206輪記錄一致（另一互動session殘留），依規則不觸碰、不加入本輪commit。
+
+`is_holdout_consumed()`確認為`False`（本輪未打任何API）。無新`TRIALS_LEDGER.md`列（沒有任何判定產生）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約99輪、跨度約56.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
