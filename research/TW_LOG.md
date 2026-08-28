@@ -1021,3 +1021,13 @@ TW軌兩項地基工作複查：`data/backfill_state.json`本輪重新統計（`
 TW軌兩項地基工作複查：`universe()`回傳3196（獨立呼叫確認，非讀舊記錄）、`backfill_state.json`統計done=2597/skip=469（total=3066，僅記錄已嘗試過的名字，跟universe()總數不同，不能直接拿state檔案的total當分母），2597/3196=81.3%，跟第194輪以來一致，仍在80%門檻之上；T86回補維持100%。沒有其他已知允許的背景工作單位。**本輪整輪跳過，未做任何實質工作。**
 
 `is_holdout_consumed()`確認`False`（本輪零API呼叫，全程只讀既有`.md`/`.json`檔案跟呼叫`universe()`本身不觸網）。`git status`確認除慣常的`data/rate_limit_state.json`（已修改）跟`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤）外無其他變更——跟round200起記錄的另一互動session殘留一致，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約95輪、跨度約54.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-08-29T04:31+08:00 — 馬拉松第208輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 03:01（第205輪，最舊）、FUT 03:32（第206輪）、US 04:02（第207輪，最新）——依輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，`git log --oneline -15`確認最近15個commit裡沒有任何使用者對規格書或`portfolio_multifactor_v2`(a)/(b)選項的新回應（都是馬拉松自己的跳過記錄或前一互動session的其他功能開發），暫停規則整體仍完全生效中。
+
+複查`LEADS.md`最新`portfolio_multifactor_v2`條目——判定仍FAIL（alpha p>0.05未達顯著性門檻，最佳兩組合p=0.053/0.0535接近但未過）。round201/202已把A_4pass/B_plus_value_pe兩組合的N=100隨機控制組數字都補齊（99.0／100.0），round137已補算大盤同期MDD/Sortino基準當量化對照——**「補參數敏感度、補對照組」這條路徑已經沒有已知的剩餘工作項目**，唯一還沒做的是(a)換更大樣本重跑、(b)train-only嚴格樣本外，這兩個選項round109/110/185已多輪論證過屬於「需使用者裁定優先序/牴觸hash-lock精神」的類別，round205已再次確認並釐清round202結尾一則措辭矛盾不足以推翻這個長期判斷。本輪重新讀過round205完整記錄，同意其論證，**依既定判斷維持不代為啟動(a)/(b)**。
+
+TW軌兩項地基工作複查：`universe()`回傳3196、`backfill_state.json`統計done=2597/skip=469，2597/3196=81.3%，跟第194輪以來一致；T86回補維持100%。沒有其他已知允許的背景工作單位。**本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認除慣常的`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤，另一互動session殘留）外無其他變更，均不觸碰、不納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約98輪、跨度約56小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
