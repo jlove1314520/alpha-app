@@ -331,12 +331,13 @@ async function runSmokeTest(baseUrl, headless = true) {
   }
   record("11. pull-to-refresh下拉手勢會觸發實際網路請求", ptrError === "", ptrError);
 
-  // 13.【2026-08-28新增，P0-a，第6次時鐘問題】永久斷言：頁面用fmtTzHHMM()
-  // 換算出來的台北/紐約時間，要跟測試機（Node.js）自己用Intl.DateTimeFormat
-  // 對同一個時區算出來的當下時間相差在2分鐘以內。直接測「時區轉換函式
-  // 本身」而不是某個特定UI欄位的文字——這樣不管之後誰在哪裡呼叫這個函式，
-  // 正確性都被這條斷言鎖住，防止同一類bug（依賴裝置本地時區換算）再次
-  // 復發到別的地方。
+  // 13.【2026-08-28根治，P0-a，第6次時鐘問題】前一版只驗fmtTzHHMM()這個
+  // 函式本身算得對不對，驗不到「畫面實際顯示的文字」——真因是mktPill()/
+  // mktPillUS()把.tm欄位改成顯示data.fetched_at（資料時間，抓價間隔內
+  // 完全不動），不是zonedNow(tz).hhmmss（現在時間，每秒動），函式驗證
+  // 全綠但畫面看起來就是「時鐘停了/算錯」。改成直接讀#mkt-tw .tm / #mkt-us
+  // .tm的textContent跟測試機算出的當下時間比對，並且等1.2秒後再讀一次
+  // 確認畫面文字有隨秒數更新（不是只驗開頭那一次的靜態值）。
   function nowHHMMInTz(tz) {
     return new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, hour: "2-digit", minute: "2-digit" }).format(new Date());
   }
@@ -346,21 +347,43 @@ async function runSmokeTest(baseUrl, headless = true) {
     let diff = Math.abs((ha * 60 + ma) - (hb * 60 + mb));
     return Math.min(diff, 1440 - diff); // 跨日邊界（例如23:59 vs 00:00）取較小值
   }
+  function readTm(sel) {
+    return page.evaluate((s) => {
+      const el = document.querySelector(s);
+      return el ? el.textContent.trim() : null;
+    }, sel);
+  }
   const tzErrors = [];
   try {
-    const pageTaipei = await page.evaluate(() => fmtTzHHMM(new Date(), "Asia/Taipei"));
-    const expectTaipei = nowHHMMInTz("Asia/Taipei");
-    const diffTaipei = minutesDiff(pageTaipei, expectTaipei);
-    if (diffTaipei > 2) tzErrors.push(`Asia/Taipei: 頁面算出${pageTaipei}，測試機算出${expectTaipei}，相差${diffTaipei}分鐘`);
+    const pageTaipei1 = await readTm("#mkt-tw .tm");
+    const expectTaipei1 = nowHHMMInTz("Asia/Taipei");
+    if (pageTaipei1 === null) tzErrors.push("#mkt-tw .tm 找不到元素");
+    else {
+      const diff = minutesDiff(pageTaipei1, expectTaipei1);
+      if (diff > 2) tzErrors.push(`#mkt-tw .tm: 畫面顯示${pageTaipei1}，測試機算出${expectTaipei1}，相差${diff}分鐘`);
+    }
 
-    const pageNY = await page.evaluate(() => fmtTzHHMM(new Date(), "America/New_York"));
-    const expectNY = nowHHMMInTz("America/New_York");
-    const diffNY = minutesDiff(pageNY, expectNY);
-    if (diffNY > 2) tzErrors.push(`America/New_York: 頁面算出${pageNY}，測試機算出${expectNY}，相差${diffNY}分鐘`);
+    const pageNY1 = await readTm("#mkt-us .tm");
+    const expectNY1 = nowHHMMInTz("America/New_York");
+    if (pageNY1 === null) tzErrors.push("#mkt-us .tm 找不到元素");
+    else {
+      const diff = minutesDiff(pageNY1, expectNY1);
+      if (diff > 2) tzErrors.push(`#mkt-us .tm: 畫面顯示${pageNY1}，測試機算出${expectNY1}，相差${diff}分鐘`);
+    }
+
+    // 等1.2秒，確認畫面文字真的有隨setInterval(updateClocks,1000)更新，
+    // 不是初始化時算一次之後就卡住不動（這正是第1~5次「完全停擺」bug的樣子）。
+    await page.waitForTimeout(1200);
+    const pageTaipei2 = await readTm("#mkt-tw .tm");
+    const expectTaipei2 = nowHHMMInTz("Asia/Taipei");
+    if (pageTaipei2 !== null) {
+      const diff = minutesDiff(pageTaipei2, expectTaipei2);
+      if (diff > 2) tzErrors.push(`#mkt-tw .tm(1.2秒後): 畫面顯示${pageTaipei2}，測試機算出${expectTaipei2}，相差${diff}分鐘`);
+    }
   } catch (e) {
     tzErrors.push(`執行時發生例外：${e.message || e}`);
   }
-  record("13. 台北/紐約時間換算跟測試機一致（誤差≤2分鐘，防止裝置本地時區依賴復發）",
+  record("13. 台北/紐約時鐘畫面顯示值跟測試機一致且會隨秒數更新（誤差≤2分鐘，防止裝置本地時區依賴復發）",
     tzErrors.length === 0, tzErrors.join("; "));
 
   // 14.【2026-08-28新增，P0-b】永久斷言：每個「重新整理」按鈕都存在、可點擊、

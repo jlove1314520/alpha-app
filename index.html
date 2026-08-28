@@ -1228,13 +1228,15 @@
   // 「資料的時間」但其實只是當下時鐘——使用者實測回報過這個誤導。改成三態誠實規則：
   // 完全沒資料→「無資料」；盤中且資料新鮮→「延遲N分」；休市→「已收盤(M/D)」，
   // 時間戳一律顯示資料本身的實際時間（fetched_at 或最後一筆報價日期），不是現在幾點。
+  // 2026-08-28 P0-a 根治（第6次時鐘問題的真因）：前面幾輪修正把.tm改成
+  // 顯示fmtTzHHMM(d,tz)算出來的「資料時間」（data.fetched_at），不是
+  // 「現在時鐘時間」——這個欄位視覺上緊貼在時鐘pill裡，使用者會當成時鐘看，
+  // 但它其實只在每次抓到新報價時才變動，抓價間隔內完全不動，看起來就像
+  // 「時鐘停了/算錯」。改回.tm=zonedNow(tz).hhmmss.slice(0,5)，一律顯示
+  // 該市場「現在時間」，每秒隨setInterval(updateClocks,1000)更新；資料
+  // 新鮮度改用label文字（「延遲N分」/「已收盤(M/D)」）表達，不再疊在時間欄位上。
   function mktPill(elId,tz,openMin,closeMin,intradayGetter){
     const el=document.getElementById(elId);if(!el)return;
-    // 2026-08-27新增：querySelector的結果也要null檢查——版面改版後如果.dot/b/.tm
-    // 這幾個子元素被移掉或改了class，這裡原本會直接對null呼叫.style/.textContent
-    // 拋錯，而這個函式是從setInterval(updateClocks,1000)每秒呼叫一次，拋錯的話
-    // 會讓整個script區塊的初始化在第一次執行時就中斷（見updateClocks下面的說明），
-    // 不只是這個時鐘壞掉，是「改A壞B」的根因之一。
     const dotEl=el.querySelector('.dot'),bEl=el.querySelector('b'),tmEl=el.querySelector('.tm');
     if(!dotEl||!bEl||!tmEl)return;
     const z=zonedNow(tz);
@@ -1242,22 +1244,16 @@
     const open=z.wd>=1&&z.wd<=5&&mins>=openMin&&mins<closeMin;
     const data=intradayGetter?intradayGetter():null;
     const age=intradayAgeMin(data);
-    let label,dot,tm;
-    if(age==null){
-      label='無資料';dot='var(--ink-3)';tm='--:--';
-    }else{
-      const d=new Date(data.fetched_at);
-      // 2026-08-28修正（P0-a）：原本用d.getHours()/getMonth()/getDate()依賴
-      // 裝置本地時區，改用fmtTzHHMM()/fmtTzMD()明確指定這個pill自己的tz
-      // 參數（呼叫端傳'Asia/Taipei'），不受使用者裝置系統時區影響。
-      const dTm=fmtTzHHMM(d,tz);
-      if(open&&age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)';tm=dTm}
-      else if(open){label='資料延遲';dot='var(--warn)';tm=dTm}
-      else{label='已收盤('+fmtTzMD(d,tz)+')';dot='var(--ink-3)';tm=dTm}
-    }
+    let label,dot;
+    if(age==null){label='無資料';dot='var(--ink-3)';}
+    else{const d=new Date(data.fetched_at);
+      if(open&&age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)'}
+      else if(open){label='資料延遲';dot='var(--warn)'}
+      else{label='已收盤('+fmtTzMD(d,tz)+')';dot='var(--ink-3)'}}
     dotEl.style.background=dot;
     bEl.textContent=label;
-    tmEl.textContent=tm;
+    // 2026-08-28 P0-a 根治：.tm=該市場現在時間(每秒更新的時鐘)，非 fetched_at。
+    tmEl.textContent=z.hhmmss.slice(0,5);
   }
   // 2026-08-27新增（P2-新，盤前盤後）：美股時鐘從「開盤/休市」兩態擴為
   // 盤前/盤中/盤後/休市四態——跟 fetch_quotes_us.py::us_market_session()
@@ -1272,6 +1268,8 @@
     if(m>=16*60&&m<20*60)return 'post';
     return 'closed';
   }
+  // 2026-08-28 P0-a 根治：同mktPill()，.tm改回顯示美東現在時間(每秒更新)，
+  // 不再顯示data.fetched_at資料時間——那才是前6輪時鐘問題看起來「算錯」的真因。
   function mktPillUS(){
     const el=document.getElementById('mkt-us');if(!el)return;
     const dotEl=el.querySelector('.dot'),bEl=el.querySelector('b'),tmEl=el.querySelector('.tm');
@@ -1280,30 +1278,19 @@
     const session=usMarketSession(z);
     const data=INTRADAY_US;
     const age=intradayAgeMin(data);
-    let label,dot,tm;
-    // 2026-08-28修正（P0-a）：以下全部改用fmtTzHHMM()/fmtTzMD()明確指定
-    // 'America/New_York'，原本用d.getHours()/getMonth()/getDate()依賴
-    // 裝置本地時區——美股資料時間戳理應以美東當地時間呈現（跟上面
-    // usMarketSession()判斷開盤/盤前/盤後的邏輯一致），不受使用者裝置
-    // 系統時區影響，也不能寫死UTC-4/-5固定時差（夏令時間切換會錯）。
-    if(session==='pre'||session==='post'){
-      label=session==='pre'?'盤前':'盤後';
-      dot='var(--warn)';
-      tm=age!=null?fmtTzHHMM(new Date(data.fetched_at),'America/New_York'):z.hhmmss.slice(0,5);
-    }else if(session==='closed'){
-      if(age==null){label='無資料';dot='var(--ink-3)';tm='--:--'}
-      else{const d=new Date(data.fetched_at);label='已收盤('+fmtTzMD(d,'America/New_York')+')';dot='var(--ink-3)';tm=fmtTzHHMM(d,'America/New_York')}
-    }else{ // regular：沿用原本三態邏輯(延遲N分/資料延遲/已收盤)
-      if(age==null){label='無資料';dot='var(--ink-3)';tm='--:--'}
-      else{
-        const dTm=fmtTzHHMM(new Date(data.fetched_at),'America/New_York');
-        if(age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)';tm=dTm}
-        else{label='資料延遲';dot='var(--warn)';tm=dTm}
-      }
-    }
+    let label,dot;
+    if(session==='pre'||session==='post'){label=session==='pre'?'盤前':'盤後';dot='var(--warn)';}
+    else if(session==='closed'){
+      if(age==null){label='無資料';dot='var(--ink-3)'}
+      else{label='已收盤('+fmtTzMD(new Date(data.fetched_at),'America/New_York')+')';dot='var(--ink-3)'}}
+    else{
+      if(age==null){label='無資料';dot='var(--ink-3)'}
+      else if(age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)'}
+      else{label='資料延遲';dot='var(--warn)'}}
     dotEl.style.background=dot;
     bEl.textContent=label;
-    tmEl.textContent=tm;
+    // 2026-08-28 P0-a 根治：.tm=美東現在時間(每秒更新)，非 fetched_at。
+    tmEl.textContent=z.hhmmss.slice(0,5);
   }
   function updateClocks(){
     mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30,()=>INTRADAY_TW);
@@ -2938,7 +2925,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.1147';
+  const APP_VERSION='2026-08-28.1446';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
