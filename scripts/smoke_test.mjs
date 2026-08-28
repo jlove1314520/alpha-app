@@ -27,8 +27,13 @@
 //    index.html進CacheStorage），驗證network-first邏輯不會被舊快取覆蓋。
 // 11.【2026-08-28新增】pull-to-refresh下拉手勢（合成touch事件）會觸發實際
 //     網路請求。
-// 12. 整個測試過程（含8/9/11新增的重整/reload/手勢操作）結束後仍無累積的
-//     uncaught error。
+// 13.【2026-08-28新增，P0-a，第6次時鐘問題永久斷言】頁面用fmtTzHHMM()換算
+//     出來的台北/紐約時間，跟測試機自己用Intl.DateTimeFormat算出的當下
+//     時間相差≤2分鐘——直接測時區轉換函式本身，不依賴裝置本地時區。
+// 14.【2026-08-28新增，P0-b永久斷言】每個「重新整理」按鈕都帶有共用的
+//     refresh-btn金色樣式class，不是靠巧合套到某個巢狀CSS選擇器。
+// 12. 整個測試過程（含8/9/11/13/14新增的重整/reload/手勢/時區操作）結束後
+//     仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -326,10 +331,62 @@ async function runSmokeTest(baseUrl, headless = true) {
   }
   record("11. pull-to-refresh下拉手勢會觸發實際網路請求", ptrError === "", ptrError);
 
+  // 13.【2026-08-28新增，P0-a，第6次時鐘問題】永久斷言：頁面用fmtTzHHMM()
+  // 換算出來的台北/紐約時間，要跟測試機（Node.js）自己用Intl.DateTimeFormat
+  // 對同一個時區算出來的當下時間相差在2分鐘以內。直接測「時區轉換函式
+  // 本身」而不是某個特定UI欄位的文字——這樣不管之後誰在哪裡呼叫這個函式，
+  // 正確性都被這條斷言鎖住，防止同一類bug（依賴裝置本地時區換算）再次
+  // 復發到別的地方。
+  function nowHHMMInTz(tz) {
+    return new Intl.DateTimeFormat("en-US", { timeZone: tz, hour12: false, hour: "2-digit", minute: "2-digit" }).format(new Date());
+  }
+  function minutesDiff(hhmmA, hhmmB) {
+    const [ha, ma] = hhmmA.split(":").map(Number);
+    const [hb, mb] = hhmmB.split(":").map(Number);
+    let diff = Math.abs((ha * 60 + ma) - (hb * 60 + mb));
+    return Math.min(diff, 1440 - diff); // 跨日邊界（例如23:59 vs 00:00）取較小值
+  }
+  const tzErrors = [];
+  try {
+    const pageTaipei = await page.evaluate(() => fmtTzHHMM(new Date(), "Asia/Taipei"));
+    const expectTaipei = nowHHMMInTz("Asia/Taipei");
+    const diffTaipei = minutesDiff(pageTaipei, expectTaipei);
+    if (diffTaipei > 2) tzErrors.push(`Asia/Taipei: 頁面算出${pageTaipei}，測試機算出${expectTaipei}，相差${diffTaipei}分鐘`);
+
+    const pageNY = await page.evaluate(() => fmtTzHHMM(new Date(), "America/New_York"));
+    const expectNY = nowHHMMInTz("America/New_York");
+    const diffNY = minutesDiff(pageNY, expectNY);
+    if (diffNY > 2) tzErrors.push(`America/New_York: 頁面算出${pageNY}，測試機算出${expectNY}，相差${diffNY}分鐘`);
+  } catch (e) {
+    tzErrors.push(`執行時發生例外：${e.message || e}`);
+  }
+  record("13. 台北/紐約時間換算跟測試機一致（誤差≤2分鐘，防止裝置本地時區依賴復發）",
+    tzErrors.length === 0, tzErrors.join("; "));
+
+  // 14.【2026-08-28新增，P0-b】永久斷言：每個「重新整理」按鈕都存在、可點擊、
+  // 且帶有共用的refresh-btn class（不是靠巧合套到某個巢狀CSS選擇器）。
+  const refreshBtnClassErrors = [];
+  for (const rc of refreshChecks) {
+    try {
+      await page.evaluate((tab) => window.go(tab), rc.tab);
+      await page.waitForTimeout(300);
+      const hasClass = await page.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        return el ? el.classList.contains("refresh-btn") : null;
+      }, rc.selector);
+      if (hasClass === null) refreshBtnClassErrors.push(`${rc.tab}/${rc.selector}: 找不到元素`);
+      else if (hasClass === false) refreshBtnClassErrors.push(`${rc.tab}/${rc.selector}: 存在但沒有refresh-btn class`);
+    } catch (e) {
+      refreshBtnClassErrors.push(`${rc.tab}/${rc.selector}: ${e.message || e}`);
+    }
+  }
+  record("14. 每個重新整理按鈕都帶有共用的refresh-btn金色樣式class",
+    refreshBtnClassErrors.length === 0, refreshBtnClassErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

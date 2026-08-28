@@ -118,6 +118,15 @@
   .card{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;padding:14px;margin-bottom:12px}
   .card h3{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
   .card h3 .more{color:var(--accent);font-weight:500;font-size:11px;cursor:pointer}
+  /* 2026-08-28新增（P0-b，使用者裝置實測回報「市場頁重新整理按鈕未套金色
+     樣式」）：根因是原本唯一的規則`.card h3 .more`要求元素必須巢狀在
+     `.card h3`裡面才會生效——首頁/市場頁的重新整理按鈕其實是包在
+     `.note`容器裡（不是h3），沒套到這條規則，顏色退回預設（不是金色）；
+     選股頁「綜合評分排行」剛好有包在h3裡所以看起來是對的，但這是巧合
+     不是設計。改成獨立、不依賴DOM巢狀結構的`.refresh-btn`class，四個
+     重新整理按鈕統一套用同一份規則，跟`.press`（已有的:active{scale(.97)}
+     既有class）搭配使用，不用每頁各寫一份。 */
+  .refresh-btn{color:var(--accent);font-weight:500;font-size:11px;cursor:pointer}
   .sec-title{font-size:12px;color:var(--ink-3);letter-spacing:.5px;margin:16px 2px 8px;font-weight:600}
 
   /* ===== KPI ===== */
@@ -392,7 +401,7 @@
   <section class="screen active" id="scr-home">
     <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span>最後更新：<b id="home-updated-tm">--:--</b></span>
-      <span class="more" onclick="refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
+      <span class="press refresh-btn" onclick="refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
       <span class="note fx-note" id="home-fx-note">匯率載入中…</span>
@@ -449,7 +458,7 @@
     </div>
     <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span>最後更新：<b id="market-updated-tm">--:--</b></span>
-      <span class="more" onclick="refreshTap(this,'market-updated-tm',async()=>{fmClearCache();await hydrateMarket()})">重新整理</span>
+      <span class="press refresh-btn" onclick="refreshTap(this,'market-updated-tm',async()=>{fmClearCache();await hydrateMarket()})">重新整理</span>
     </div>
 
     <!-- 台股 -->
@@ -581,7 +590,7 @@
     <div id="mainstream-wrap" style="margin-top:12px">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
-        <span class="more" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
+        <span class="press refresh-btn" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
       </div>
       <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="note">載入中…</div></div>
       <div class="note" style="margin-top:2px">⚠ 動能/主流本質是擁擠交易，資金集中太久、漲幅過大容易反轉——不是「資金正在流入」就代表可以追高</div>
@@ -591,7 +600,7 @@
     <div id="picks-chips" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px"></div>
 
     <div class="card" id="picks-list-card" style="margin-top:10px">
-      <h3>綜合評分排行<span class="more" id="picks-refresh" onclick="refreshTap(this,null,async()=>{fmClearCache();await hydratePicks(true)})">重新整理</span></h3>
+      <h3>綜合評分排行<span class="press refresh-btn" id="picks-refresh" onclick="refreshTap(this,null,async()=>{fmClearCache();await hydratePicks(true)})">重新整理</span></h3>
       <div class="note" style="margin-bottom:8px">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
       <div id="picks-list"><div class="note">載入中…</div></div>
       <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價） · 點列可看完整評分報告</div>
@@ -1097,7 +1106,7 @@
   let GLOBAL_ERRORS=[];
   function recordGlobalError(label,err){
     const msg=(err&&err.message)?err.message:String(err);
-    GLOBAL_ERRORS.push({label,msg,time:new Date().toLocaleTimeString('zh-TW',{hour12:false})});
+    GLOBAL_ERRORS.push({label,msg,time:fmtTzHHMM(new Date(),'Asia/Taipei')});
     if(GLOBAL_ERRORS.length>20)GLOBAL_ERRORS.shift();
     renderErrorLog();
   }
@@ -1145,6 +1154,38 @@
     const wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[m.weekday];
     const h=+m.hour,mi=+m.minute,s=+m.second;
     return {h,mi,s,wd,hhmmss:`${m.hour}:${m.minute}:${m.second}`};
+  }
+  // 2026-08-28修正（P0-a，第6次時鐘問題，使用者裝置實測回報「會動但數值
+  // 錯」）：根因不是setInterval沒註冊到（那是前5次「完全停擺」的bug，已經
+  // 修好），這次是好幾個「顯示某個時間戳」的地方（市場資料時間/最後更新/
+  // 錯誤log時間）用了Date.prototype.getHours()/getMinutes()/getMonth()/
+  // getDate()或toLocaleTimeString()/toLocaleString()都沒指定timeZone
+  // 參數——這些method不指定timeZone時，一律用「執行環境（使用者瀏覽器/
+  // 裝置系統）」當下的本地時區去換算，不是強制轉換成台北或紐約時間。如果
+  // 使用者手機系統時區不是Asia/Taipei（出國、系統時區被覆寫等情況），
+  // 畫面顯示的時間就會偏移，但setInterval本身仍正常在跑（時鐘「看起來
+  // 有在動」，只是換算出來的數值不對）。修法：全部改用跟zonedNow()同一套
+  // Intl.DateTimeFormat+明確timeZone機制，不使用Date物件的本地時區
+  // getter，也不手寫+8/-12/-13這種固定時差常數（會忽略夏令時間，紐約
+  // 一年裡有大半時間是UTC-4不是UTC-5）。
+  function fmtTzHHMM(dateInput,tz){
+    const d=(dateInput instanceof Date)?dateInput:new Date(dateInput);
+    if(isNaN(d.getTime()))return '--:--';
+    return new Intl.DateTimeFormat('en-US',{timeZone:tz,hour12:false,hour:'2-digit',minute:'2-digit'}).format(d);
+  }
+  function fmtTzMMDDHHMM(dateInput,tz){
+    const d=(dateInput instanceof Date)?dateInput:new Date(dateInput);
+    if(isNaN(d.getTime()))return '--/-- --:--';
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}).formatToParts(d);
+    const m={};parts.forEach(p=>m[p.type]=p.value);
+    return `${m.month}/${m.day} ${m.hour}:${m.minute}`;
+  }
+  function fmtTzMD(dateInput,tz){
+    const d=(dateInput instanceof Date)?dateInput:new Date(dateInput);
+    if(isNaN(d.getTime()))return '--/--';
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,month:'2-digit',day:'2-digit'}).formatToParts(d);
+    const m={};parts.forEach(p=>m[p.type]=p.value);
+    return `${+m.month}/${+m.day}`;
   }
   // 2026-08-25 新增：盤中近即時報價（GitHub Actions 排程抓，見 .github/workflows/quotes.yml）。
   // FinMind 免費版只有盤後日線，畫面顯示「盤中」卻只能給前一日收盤價會誤導使用者。
@@ -1206,10 +1247,13 @@
       label='無資料';dot='var(--ink-3)';tm='--:--';
     }else{
       const d=new Date(data.fetched_at);
-      const dTm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+      // 2026-08-28修正（P0-a）：原本用d.getHours()/getMonth()/getDate()依賴
+      // 裝置本地時區，改用fmtTzHHMM()/fmtTzMD()明確指定這個pill自己的tz
+      // 參數（呼叫端傳'Asia/Taipei'），不受使用者裝置系統時區影響。
+      const dTm=fmtTzHHMM(d,tz);
       if(open&&age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)';tm=dTm}
       else if(open){label='資料延遲';dot='var(--warn)';tm=dTm}
-      else{label='已收盤('+(d.getMonth()+1)+'/'+d.getDate()+')';dot='var(--ink-3)';tm=dTm}
+      else{label='已收盤('+fmtTzMD(d,tz)+')';dot='var(--ink-3)';tm=dTm}
     }
     dotEl.style.background=dot;
     bEl.textContent=label;
@@ -1237,18 +1281,22 @@
     const data=INTRADAY_US;
     const age=intradayAgeMin(data);
     let label,dot,tm;
+    // 2026-08-28修正（P0-a）：以下全部改用fmtTzHHMM()/fmtTzMD()明確指定
+    // 'America/New_York'，原本用d.getHours()/getMonth()/getDate()依賴
+    // 裝置本地時區——美股資料時間戳理應以美東當地時間呈現（跟上面
+    // usMarketSession()判斷開盤/盤前/盤後的邏輯一致），不受使用者裝置
+    // 系統時區影響，也不能寫死UTC-4/-5固定時差（夏令時間切換會錯）。
     if(session==='pre'||session==='post'){
       label=session==='pre'?'盤前':'盤後';
       dot='var(--warn)';
-      tm=age!=null?(()=>{const d=new Date(data.fetched_at);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')})():z.hhmmss.slice(0,5);
+      tm=age!=null?fmtTzHHMM(new Date(data.fetched_at),'America/New_York'):z.hhmmss.slice(0,5);
     }else if(session==='closed'){
       if(age==null){label='無資料';dot='var(--ink-3)';tm='--:--'}
-      else{const d=new Date(data.fetched_at);label='已收盤('+(d.getMonth()+1)+'/'+d.getDate()+')';dot='var(--ink-3)';tm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+      else{const d=new Date(data.fetched_at);label='已收盤('+fmtTzMD(d,'America/New_York')+')';dot='var(--ink-3)';tm=fmtTzHHMM(d,'America/New_York')}
     }else{ // regular：沿用原本三態邏輯(延遲N分/資料延遲/已收盤)
       if(age==null){label='無資料';dot='var(--ink-3)';tm='--:--'}
       else{
-        const d=new Date(data.fetched_at);
-        const dTm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+        const dTm=fmtTzHHMM(new Date(data.fetched_at),'America/New_York');
         if(age<=INTRADAY_STALE_MIN){label='延遲'+Math.max(1,Math.round(age))+'分';dot='var(--good)';tm=dTm}
         else{label='資料延遲';dot='var(--warn)';tm=dTm}
       }
@@ -1315,8 +1363,13 @@
   // 不是資料本身的交易日（那個各卡片自己的 date 欄位已經有顯示）。
   function stampUpdated(scr){
     const el=document.getElementById(scr+'-updated-tm');if(!el)return;
-    const t=new Date();
-    el.textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+    // 2026-08-28修正（P0-a，第6次時鐘問題的真正根因）：原本用
+    // t.getHours()/getMinutes()依賴裝置本地時區，這支函式從2026-08-24
+    // 就存在、是「最後更新」欄位真正的驅動來源（hydrateHome()/
+    // hydrateMarket()資料重新整理完成時都會呼叫），比昨晚新增的
+    // refreshTap()疊加寫入還早、更根本。改用fmtTzHHMM()明確指定
+    // Asia/Taipei。
+    el.textContent=fmtTzHHMM(new Date(),'Asia/Taipei');
   }
   // 2026-08-25 修正：資料卡在舊日期不更新的另一半根因（另一半在 sw.js）——這裡原本
   // fetch 失敗時會「改用舊快取」（fmCacheStale，沒有任何新鮮度限制，可能是好幾天前
@@ -1435,7 +1488,11 @@
           const d=new Date(earningsCal[code].next_earnings_date);
           const sessionTxt=earningsCal[code].estimated_session==='pre'?'盤前'
             :(earningsCal[code].estimated_session==='post'?'盤後':'時段未知');
-          earningsHtml=`<div class="note" style="margin-top:2px;color:var(--ink-3)">📅 財報：${d.getMonth()+1}/${d.getDate()}（${sessionTxt}，估計）</div>`;
+          // 2026-08-28修正（P0-a）：原本getMonth()/getDate()依賴裝置本地
+          // 時區——next_earnings_date是純日期字串會被解析成UTC午夜，西半球
+          // 時區的裝置用本地時區取值會少算一天。改用fmtTzMD()明確指定
+          // America/New_York（美股財報情境，跟資料語意一致）。
+          earningsHtml=`<div class="note" style="margin-top:2px;color:var(--ink-3)">📅 財報：${fmtTzMD(d,'America/New_York')}（${sessionTxt}，估計）</div>`;
         }
       }
       rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b>${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
@@ -1644,7 +1701,10 @@
     if(!data||!data.fetched_at)return '查無資料（尚未排程抓取或本次抓取失敗）';
     const age=marketDataAgeMin(data);
     const d=new Date(data.fetched_at);
-    return `資料時間 ${d.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}（GitHub Actions 排程，約${Math.max(0,Math.round(age))}分鐘前）`;
+    // 2026-08-28修正（P0-a）：原本toLocaleString('zh-TW',...)沒指定
+    // timeZone，依賴裝置本地時區——這是台股大盤/三大法人資料時間戳，
+    // 改用fmtTzMMDDHHMM()明確指定Asia/Taipei。
+    return `資料時間 ${fmtTzMMDDHHMM(d,'Asia/Taipei')}（GitHub Actions 排程，約${Math.max(0,Math.round(age))}分鐘前）`;
   }
   function idxRowHtml(label,srcLabel,item,changePctOverride){
     if(!item||item.close==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
@@ -2392,7 +2452,9 @@
     el.textContent='更新中…';el.style.pointerEvents='none';
     try{
       await fn();
-      if(tsElId){const tsEl=document.getElementById(tsElId);if(tsEl)tsEl.textContent=new Date().toLocaleTimeString('zh-TW',{hour12:false})}
+      // 2026-08-28修正（P0-a）：原本toLocaleTimeString('zh-TW',...)沒指定
+      // timeZone，依賴裝置本地時區，改用fmtTzHHMM()明確指定Asia/Taipei。
+      if(tsElId){const tsEl=document.getElementById(tsElId);if(tsEl)tsEl.textContent=fmtTzHHMM(new Date(),'Asia/Taipei')}
       toast('已更新');
     }catch(e){
       console.warn('[refreshTap]',e);recordGlobalError('refreshTap',e);
@@ -2465,7 +2527,8 @@
       maxHoldings:Number(document.getElementById('rc-max-holdings').value)||0,
     };
     localStorage.setItem('alpha_rc',JSON.stringify(rc));
-    setTxt('rc-saved-note','已儲存 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+    // 2026-08-28修正（P0-a）：同上，改用fmtTzHHMM()明確指定Asia/Taipei。
+    setTxt('rc-saved-note','已儲存 · '+fmtTzHHMM(new Date(),'Asia/Taipei'));
     toast('風控參數已儲存');
   }
 
@@ -2875,7 +2938,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.0329';
+  const APP_VERSION='2026-08-28.1147';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

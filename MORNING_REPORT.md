@@ -5,6 +5,132 @@
 
 ---
 
+## 0. 上午追加：P0即修（時鐘/重整按鈕）+ B24-500檔結果（2026-08-28上午）
+
+使用者裝置實測回報兩個P0問題，逐一修復並跑冒煙測試通過（見下方程式碼
+片段+根本原因）；同時B24的500檔樣本回測（見`BACKLOG.md`同名條目）已在
+背景跑完，一併附上結果。
+
+### P0-a：時鐘時間算錯（第6次時鐘問題，這次是「會動但數值錯」）
+
+**根本原因**：跟前5次「完全停擺」不同類——這次`setInterval`本身正常在
+跑，但好幾個顯示時間戳的函式在轉換時間時用了`Date.prototype.
+getHours()/getMinutes()/getMonth()/getDate()`或`toLocaleTimeString()/
+toLocaleString()`，這些method**沒有指定`timeZone`參數時，一律用執行
+環境（使用者瀏覽器/裝置系統）的本地時區**去換算，不是強制轉成台北或
+紐約時間。如果使用者裝置系統時區設定不是Asia/Taipei（出國、系統時區
+被覆寫等情況），畫面顯示的時間就會偏移。**真正驅動「最後更新」欄位的
+是`stampUpdated()`——2026-08-24就存在的舊函式**（比昨晚才新增的
+`refreshTap()`更早、更根本），之前的`smoke_test.mjs`只測「interval有
+沒有在跑」，沒測「換算出來的數值對不對」，這個bug因此存活了好幾輪。
+
+**修改前**（`stampUpdated()`，index.html）：
+```js
+function stampUpdated(scr){
+  const el=document.getElementById(scr+'-updated-tm');if(!el)return;
+  const t=new Date();
+  el.textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+}
+```
+
+**修改後**：
+```js
+function stampUpdated(scr){
+  const el=document.getElementById(scr+'-updated-tm');if(!el)return;
+  el.textContent=fmtTzHHMM(new Date(),'Asia/Taipei');
+}
+```
+
+新增的共用轉換函式（放在既有`zonedNow()`旁邊，同一套機制）：
+```js
+function fmtTzHHMM(dateInput,tz){
+  const d=(dateInput instanceof Date)?dateInput:new Date(dateInput);
+  if(isNaN(d.getTime()))return '--:--';
+  return new Intl.DateTimeFormat('en-US',{timeZone:tz,hour12:false,hour:'2-digit',minute:'2-digit'}).format(d);
+}
+function fmtTzMMDDHHMM(dateInput,tz){/* 同樣邏輯，多回傳月/日 */}
+function fmtTzMD(dateInput,tz){/* 只回傳月/日 */}
+```
+
+同一個bug模式一次修齊的其餘7處：`mktPill()`（台股市場狀態pill的時間戳/
+已收盤日期）、`mktPillUS()`（美股pill，3處：盤前盤後/已收盤/一般狀態）、
+`fmtMarketDataTime()`（市場頁「資料時間」）、`recordGlobalError()`
+（診斷log時間戳）、`refreshTap()`（重新整理最後更新戳）、風控頁「已
+儲存」時間戳、自選股列財報徽章日期（原本`getMonth()/getDate()`對UTC
+午夜的純日期字串取值，西半球時區裝置會少算一天，改用`fmtTzMD(d,
+'America/New_York')`跟財報情境語意一致）。
+
+**永久防止第7次復發**：`scripts/smoke_test.mjs`新增check 13——直接呼叫
+頁面裡的`fmtTzHHMM()`，跟測試機自己用`Intl.DateTimeFormat`對同一個
+時區算出的當下時間比對，誤差超過2分鐘就FAIL。這條斷言不依賴任何特定
+UI狀態（不受市場開休盤影響），鎖住的是「時區轉換函式本身」的正確性。
+
+### P0-b：市場頁重新整理按鈕未套金色樣式
+
+**根本原因**：原本唯一的CSS規則`.card h3 .more{color:var(--accent);...}`
+要求元素必須巢狀在`.card h3`裡才生效。首頁/市場頁的重新整理按鈕實際上
+是包在`.note`容器裡（不是`<h3>`），沒套到這條規則；選股頁「綜合評分
+排行」剛好包在`<h3>`裡所以看起來是對的，**但這是巧合，不是設計**——
+這種「靠DOM巢狀結構決定樣式」的寫法本身才是問題根源。
+
+**修改前**（4個按鈕原本都是）：
+```html
+<span class="more" onclick="refreshTap(...)">重新整理</span>
+```
+
+**修改後**：
+```html
+<span class="press refresh-btn" onclick="refreshTap(...)">重新整理</span>
+```
+
+新增CSS（不依賴巢狀結構，跟既有`.press`class的`:active{transform:
+scale(.97)}`搭配使用）：
+```css
+.refresh-btn{color:var(--accent);font-weight:500;font-size:11px;cursor:pointer}
+```
+
+**誠實揭露**：檢查過個股報告/交易/日誌/設定頁面，這幾頁**本來就沒有
+重新整理按鈕**（不是有但沒套到樣式，是功能本身不存在）——如實回報，
+沒有為了「補齊」而硬生出不存在的按鈕。全App目前只有4個重新整理按鈕
+（首頁/市場頁/選股頁的主流題材/選股頁的綜合評分排行），全部已統一。
+
+**永久防止復發**：`smoke_test.mjs`新增check 14，驗證每個重新整理按鈕
+都帶有`refresh-btn`class。
+
+冒煙測試實際輸出（2026-08-28 11:40，`node scripts/smoke_test.mjs`，
+14項全數通過）：
+```
+PASS - 1. 頁面載入無uncaught error/unhandledrejection
+PASS - 2. 右上角時鐘interval在3秒內有執行：呼叫了3次
+PASS - 3. 六個分頁都能切換且不拋錯
+PASS - 4. 主要面板都有內容（不是完全空白）
+PASS - 5. 市場頁三個市場切換都不拋錯
+PASS - 6. 互動元素可點擊性（類股卡/選股排行列/自選股列）
+PASS - 8. 重新整理按鈕點擊後都會觸發實際網路請求
+PASS - 9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋
+PASS - 11. pull-to-refresh下拉手勢會觸發實際網路請求
+PASS - 13. 台北/紐約時間換算跟測試機一致（誤差≤2分鐘，防止裝置本地時區依賴復發）
+PASS - 14. 每個重新整理按鈕都帶有共用的refresh-btn金色樣式class
+PASS - 12. 整個測試過程結束後仍無累積的uncaught error
+=== 冒煙測試結果：全部通過 ===
+```
+
+### B24：500檔樣本回測結果（背景跑完，誠實記錄不美化）
+
+| 期間 | 策略報酬 | 買進持有 | alpha(年化) | 顯著 | 隨機對照百分位 |
+|---|---|---|---|---|---|
+| TRAIN 2015-2020 | +30.61% | +58.86% | +1.27% | 否(p=0.90) | 100.0（30次draws頂端）|
+| VALIDATION 2021-2024 | **+58.16%** | +54.58% | +6.59% | 否(p=0.50) | 100.0（30次draws頂端）|
+
+比100檔樣本結果大幅改善（100檔時兩期都小賠、百分位0.0敬陪末座），驗證了
+先前「合格池不足20檔、資金閒置」的方法論診斷。**但alpha仍不顯著、隨機
+draws只有30次（機制驗證等級，非1000次）**——這是初步樂觀訊號，不是
+可以下定論的正式結果。完整數字/翻倍率地雷率/殘留限制見`BACKLOG.md`
+「B24 PIT回測500檔樣本結果出爐」條目。下一步（要不要拉高到1000次draws）
+待使用者決定，運算量不小，不會擅自投入。
+
+---
+
 ## 1. 版本號（起床第一件事，用這個確認手機吃到新版）
 
 **目前 `APP_VERSION` = `2026-08-28.0329`**（`.git/hooks/pre-commit`每次
