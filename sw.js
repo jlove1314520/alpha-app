@@ -9,7 +9,7 @@
    ——完全不呼叫 respondWith()，讓瀏覽器照平常方式直接打網路，成功拿新資料、
    失敗就是網路錯誤，由 App 的 fetch 呼叫端（index.html 的 fm()）自己顯示
    「連線失敗，請重試」，不會被這裡默默塞舊資料進去。 */
-const CACHE = 'alpha-v2026-08-28.1905'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
+const CACHE = 'alpha-v2026-08-28.2345'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
 const SHELL_URLS = ['./', './index.html', './manifest.webmanifest', './icon192.png', './icon512.png', './icon512-maskable.png'];
 
 self.addEventListener('install', e => {

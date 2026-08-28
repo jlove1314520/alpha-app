@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- 2026-08-28修正（實機回報「功能列下方59px黑色空白」，根因定位）：
+black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
+（=實體852−頂端狀態列59），且釘在螢幕頂端，#app{position:fixed;inset:0}
+的bottom:0落在793、螢幕底部793~852這59px變成沒渲染的黑色空白（實測
+診斷innerH=793、safeBottom=34、螢幕852，數字對得上：852-793=59≈
+59px黑格）。改成black：狀態列變不透明黑，App從狀態列下方起算、鋪滿到
+實體底部，黑格消失。 -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#0b0a09">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon192.png">
@@ -1341,7 +1348,12 @@
     const safeBottom=_safeAreaBottomPx();
     const navEl=document.getElementById('nav');
     const navGap=navEl?(window.innerHeight-navEl.getBoundingClientRect().bottom):'n/a';
-    el.textContent=`standalone=${standalone} · innerH=${innerH} · visualVP=${visualVP} · safeBottom=${safeBottom} · navGap=${navGap}`;
+    // 2026-08-28新增（驗證black-translucent→black修正用，之後可移除）：
+    // screenH（實體螢幕高）/clientH（documentElement.clientHeight）方便
+    // 一眼看出innerH有沒有等於實體螢幕高，不用另外開DevTools量。
+    const screenH=screen.height;
+    const clientH=document.documentElement.clientHeight;
+    el.textContent=`standalone=${standalone} · innerH=${innerH} · visualVP=${visualVP} · safeBottom=${safeBottom} · navGap=${navGap} · screenH=${screenH} · clientH=${clientH}`;
   }
   setInterval(()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag]',e);recordGlobalError('viewportDiag',e)}},1000);
   window.addEventListener('resize',()=>{try{updateViewportDiag()}catch(e){console.warn('[viewportDiag:resize]',e);recordGlobalError('viewportDiag:resize',e)}});
@@ -2969,7 +2981,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-28.1905';
+  const APP_VERSION='2026-08-28.2345';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
