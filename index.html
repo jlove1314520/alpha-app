@@ -2492,52 +2492,94 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
-  // 2026-08-29新增：策略監控台卡片渲染——狀態徽章顏色分級，數字全部來自
-  // data/strategies.json（research/generate_strategies_json.py產生），這裡
-  // 純渲染不做任何判定/計算，找不到欄位就顯示「—」或省略該區塊，不補假數字。
+  // 2026-08-29策略監控台升級（簡約卡片＋前向績效曲線＋點進看明細＋排行）：
+  // 卡片本身只放「策略名/狀態徽章/主數字(forward_return_todate)/sparkline/
+  // 樣本不足小標」，原本卡片上的長段文字說明全部移到點開的詳情區塊。排序
+  // 由後端(generate_strategies_json.py)決定，這裡純粹依陣列順序渲染，不
+  // 額外排序。曲線只用data/strategy_performance.json的真實equity_curve，
+  // 不得畫假線——沒有forward_paper就不畫曲線，顯示「尚無前向數據」而不是
+  // 補一條假的平線。
   const STRATEGY_STATUS_COLOR={
     '回測通過':'var(--good)','回測未通過':'var(--critical)','回測中':'var(--warn)',
     '紙上交易中':'var(--accent)','規格完成':'var(--ink-2)','草稿':'var(--ink-3)',
   };
-  function strategyMonitorCardHtml(s){
-    const color=STRATEGY_STATUS_COLOR[s.status]||'var(--ink-3)';
-    let backtestHtml='';
+  function strategyDetailHtml(s){
+    const fp=s.forward_paper;
+    let html='';
+    if(fp){
+      html+=`<div class="note" style="margin-bottom:8px">前向模擬起始：${fp.inception_date||'—'} · 累積交易日：${fp.trading_days_count??'—'}天`
+           +`${fp.sample_sufficient?'':'（未達20天樣本門檻，數字仍在累積中）'}</div>`;
+      if(fp.ledger&&fp.ledger.length){
+        const recent=fp.ledger.slice(-10).slice().reverse();
+        html+=`<div style="font-size:11px;font-weight:600;color:var(--ink-2);margin-bottom:4px">每日進出明細（最近${recent.length}筆，逐日累積不可回填）</div>`;
+        html+=recent.map(e=>{
+          const pnl=e.daily_pnl_pct;
+          return `<div class="note" style="padding:4px 0;border-bottom:1px solid var(--hairline)">
+            ${e.date} · 買${(e.buys||[]).length}檔/賣${(e.sells||[]).length}檔 · 當日<b class="${(pnl||0)>=0?'pos':'neg'}">${pnl!=null?(pnl>=0?'+':'')+pnl.toFixed(2)+'%':'—'}</b> · 持股${e.n_holdings??'—'}檔
+          </div>`;
+        }).join('');
+      }
+    }else{
+      html+=`<div class="note" style="color:var(--ink-3)">尚無前向模擬資料（這個策略沒有每日更新的評分引擎可以模擬）</div>`;
+    }
     if(s.backtest){
       const b=s.backtest;
-      backtestHtml=`<div class="bot-stats" style="margin-top:10px;flex-wrap:wrap">
-        <div class="s"><span>年化(VAL)</span><b>${b['年化報酬_validation_pct']!=null?b['年化報酬_validation_pct'].toFixed(1)+'%':'—'}</b></div>
-        <div class="s"><span>Sharpe×0.7</span><b>${b['sharpe_x0.7']!=null?b['sharpe_x0.7'].toFixed(2):'—'}</b></div>
-        <div class="s"><span>MDD</span><b>${b['mdd_pct']!=null?b['mdd_pct'].toFixed(1)+'%':'—'}</b></div>
-        <div class="s"><span>Sortino</span><b>${b['sortino']!=null?b['sortino'].toFixed(2):'—'}</b></div>
-        <div class="s"><span>CVaR95(日)</span><b>${b['cvar95_日pct']!=null?b['cvar95_日pct'].toFixed(2)+'%':'—'}</b></div>
-        <div class="s"><span>勝率</span><b>${b['勝率pct']!=null?b['勝率pct'].toFixed(1)+'%':'—'}</b></div>
-        <div class="s"><span>翻倍率</span><b>${b['翻倍率pct']!=null?b['翻倍率pct'].toFixed(1)+'%':'—'}</b></div>
-        <div class="s"><span>地雷率</span><b>${b['地雷率pct']!=null?b['地雷率pct'].toFixed(1)+'%':'—'}</b></div>
-        <div class="s"><span>隨機對照百分位</span><b>${b['隨機對照百分位']!=null?b['隨機對照百分位'].toFixed(1)+'（'+b['隨機對照draws次數']+'次）':'—'}</b></div>
-        <div class="s"><span>alpha p值</span><b>${b['alpha_p值']!=null?b['alpha_p值'].toFixed(4)+(b['alpha顯著']?'（顯著）':'（不顯著）'):'—'}</b></div>
-      </div>
-      <div class="note" style="margin-top:6px">期間：${b['期間']||'—'} · 來源：${b['來源檔']||'—'}</div>`;
+      html+=`<div class="note" style="margin-top:10px;padding:8px;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:8px">
+        ⚠ 以下是歷史回測結果，不是前向模擬，不代表未來績效<br>
+        年化(VAL)=${b['年化報酬_validation_pct']!=null?b['年化報酬_validation_pct'].toFixed(1)+'%':'—'} ·
+        Sharpe×0.7=${b['sharpe_x0.7']!=null?b['sharpe_x0.7'].toFixed(2):'—'} ·
+        MDD=${b['mdd_pct']!=null?b['mdd_pct'].toFixed(1)+'%':'—'} ·
+        alpha p值=${b['alpha_p值']!=null?b['alpha_p值'].toFixed(4):'—'}（${b['alpha顯著']?'顯著':'不顯著'}）·
+        期間=${b['期間']||'—'}
+      </div>`;
     }else if(s.trials_summary){
       const t=s.trials_summary;
-      backtestHtml=`<div class="note" style="margin-top:10px;padding:8px;background:rgba(208,59,59,.08);border-radius:8px">
-        已測試 <b>${t['已測試假說數']??'—'}</b> 個策略假說，通過統計驗證 <b>${t['通過統計驗證數']??'—'}</b> 個
-        （來源：${t['來源']||'—'}）——誠實記錄，不是還沒開始做，是做過完整檢定仍未找到站得住腳的訊號
+      html+=`<div class="note" style="margin-top:10px;padding:8px;background:rgba(208,59,59,.08);border-radius:8px">
+        已測試 <b>${t['已測試假說數']??'—'}</b> 個策略假說，通過統計驗證 <b>${t['通過統計驗證數']??'—'}</b> 個 —— 誠實記錄，不是還沒開始做
       </div>`;
-    }else{
-      backtestHtml=`<div class="note" style="margin-top:10px;color:var(--ink-3)">${s.status==='回測中'?'回測進行中…（背景執行，完成後這裡會自動出現數字）':'尚未回測'}</div>`;
+    }else if(s.status!=='回測中'){
+      html+=`<div class="note" style="margin-top:10px;color:var(--ink-3)">尚未回測</div>`;
     }
-    const paperHtml=s.paper?`<div class="note" style="margin-top:8px">紙上交易：${s.paper['起始日']||'—'}起、${s.paper['快照數']??'—'}次快照、至今報酬 <b class="${(s.paper['至今報酬pct']||0)>=0?'pos':'neg'}">${s.paper['至今報酬pct']!=null?(s.paper['至今報酬pct']>=0?'+':'')+s.paper['至今報酬pct']+'%':'—'}</b>（${s.paper['計算方式']||''}）</div>`:'';
-    const limHtml=(s.limitations&&s.limitations.length)?`<div class="note" style="margin-top:8px;color:var(--ink-3);font-size:11px;line-height:1.6">${s.limitations.map(l=>'• '+l).join('<br>')}</div>`:'';
-    return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-        <div><b style="font-size:15px">${s.name||s.id}</b><div class="note" style="margin-top:2px">${s.type||'—'} · ${s.spec||''}</div></div>
-        <span style="flex:0 0 auto;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${color};border:1px solid ${color}">${s.status}</span>
+    if(s.limitations&&s.limitations.length){
+      html+=`<div style="font-size:11px;font-weight:600;color:var(--ink-2);margin-top:10px;margin-bottom:4px">局限說明</div>`;
+      html+=`<div class="note" style="color:var(--ink-3);font-size:11px;line-height:1.6">${s.limitations.map(l=>'• '+l).join('<br>')}</div>`;
+    }
+    html+=`<div class="note" style="margin-top:8px;font-size:10px">規格：${s.spec||'—'}<br>最後更新：${s.last_updated?fmtTzMMDDHHMM(new Date(s.last_updated),'Asia/Taipei'):'—'}</div>`;
+    return html;
+  }
+  function strategyMonitorCardHtml(s,idx){
+    const color=STRATEGY_STATUS_COLOR[s.status]||'var(--ink-3)';
+    const fp=s.forward_paper;
+    const ret=fp&&fp.forward_return_todate_pct!=null?fp.forward_return_todate_pct:null;
+    const mainNumHtml=ret!=null
+      ?`<b class="${ret>=0?'pos':'neg'}" style="font-size:22px">${ret>=0?'+':''}${ret.toFixed(2)}%</b>`
+      :`<b style="font-size:14px;color:var(--ink-3)">尚無前向數據</b>`;
+    const curve=(fp&&fp.equity_curve)?fp.equity_curve.map(p=>p.cum_return_pct):[];
+    const up=curve.length>1?curve[curve.length-1]>=curve[0]:true;
+    const sparkHtml=curve.length>=2?spark(curve,up):'';
+    const sampleTag=(fp&&!fp.sample_sufficient)
+      ?`<div class="note" style="color:var(--warn);font-size:10px;margin-top:2px">樣本不足(&lt;20交易日，目前${fp.trading_days_count}天)，排名僅供參考</div>`:'';
+    const cardId=`sm-detail-${idx}`;
+    return `<div class="card press" style="cursor:pointer" onclick="toggleStrategyDetail('${cardId}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="flex:1;min-width:0">
+          <b style="font-size:15px">${s.name||s.id}</b>
+          <div style="margin-top:4px">${mainNumHtml}</div>
+          ${sampleTag}
+        </div>
+        <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${color};border:1px solid ${color}">${s.status}</span>
+          ${sparkHtml}
+        </div>
       </div>
-      ${backtestHtml}
-      ${paperHtml}
-      ${limHtml}
-      <div class="note" style="margin-top:8px;font-size:10px">最後更新：${s.last_updated?fmtTzMMDDHHMM(new Date(s.last_updated),'Asia/Taipei'):'—'}</div>
+      <div id="${cardId}" style="display:none;margin-top:12px;border-top:1px solid var(--hairline);padding-top:12px">
+        ${strategyDetailHtml(s)}
+      </div>
     </div>`;
+  }
+  function toggleStrategyDetail(id){
+    const el=document.getElementById(id);if(!el)return;
+    el.style.display=el.style.display==='none'?'':'none';
   }
   async function loadStrategyMonitor(){
     const el=document.getElementById('strategy-monitor-list');if(!el)return;
@@ -2547,7 +2589,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const json=await r.json();
       const list=json.strategies||[];
       if(!list.length){el.innerHTML='<div class="note">查無策略資料</div>';return}
-      el.innerHTML=list.map(strategyMonitorCardHtml).join('');
+      el.innerHTML=list.map((s,i)=>strategyMonitorCardHtml(s,i)).join('');
     }catch(e){
       console.warn('[loadStrategyMonitor]',e);recordGlobalError('loadStrategyMonitor',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
@@ -3078,7 +3120,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-29.0040';
+  const APP_VERSION='2026-08-29.0148';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
