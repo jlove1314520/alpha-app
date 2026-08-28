@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 174 輪 · 2026-08-28T11:01+08:00 · US（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選US（三軌時間戳US 09:31第171輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立（`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit）。US軌依舊沒有組合策略相關工作可做（規格書為台股專屬），`US_MARATHON_STATE.md`「下一步」清單全是`f_us_low_vol`中型股深挖／`f_us_momentum_12m`深挖／`KNOWN_DELISTED`擴充，本質仍是單因子相關工作，保守跳過。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–173輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`（本輪未打任何API）。見`US_MARATHON_STATE.md`/`US_LOG.md`第174輪記錄
+
+---
 ## 第 173 輪 · 2026-08-28T10:31+08:00 · TW（跳過，暫停規則生效中）· 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 09:02第170輪最舊）· 判定：複查三個解除條件（`portfolio_multifactor_v2`下一步(a)/(b)使用者回應／`PORTFOLIO_STRATEGY_SPEC.md`使用者確認／暫停規則解除）皆未成立，TW軌兩項地基工作（宇宙回補81.3%、T86回補100%）都已達標，無其他已知允許背景工作。本輪整輪跳過，未做任何實質工作。開工時發現另一互動session殘留變更（`data/rate_limit_state.json`、`research/pit_run_500.log`，跟第169–172輪記錄一致），未觸碰、未納入commit。`is_holdout_consumed()`確認`False`。見`TW_MARATHON_STATE.md`/`TW_LOG.md`第173輪記錄
 
 ---
