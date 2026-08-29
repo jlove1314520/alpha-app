@@ -4,7 +4,7 @@
 
 **最後更新：2026-08-29T11:01+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 221 輪。最新一輪：第 221 輪 · 2026-08-29T11:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨，依輪替選FUT（三軌時間戳FUT 09:32第218輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。FUT軌round104留下的「下一步」1–4項本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`確認僅慣常的`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤，另一互動session殘留）無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約111輪、跨度約62小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第221輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 222 輪。最新一輪：第 222 輪 · 2026-08-29T11:31+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨，依輪替選US（三軌時間戳US 10:01第219輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。US軌沒有組合策略相關工作可做（規格書是台股專屬），同round111起連續判斷邏輯一致，保守跳過，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`確認僅慣常的`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤，另一互動session殘留）無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約112輪、跨度約62.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第222輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
 
 **上一則保留（第220輪，供對照）**：第 220 輪 · 2026-08-29T10:31+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 09:02（第217輪，最舊）、FUT 09:32（第218輪）、US 10:01（第219輪，最新）——依輪替選TW。詳見`REPORT.md`第220輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
 
