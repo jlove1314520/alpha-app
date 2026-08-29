@@ -1110,3 +1110,13 @@ TW軌沒有已知的剩餘工作項目：地基兩項（宇宙全量回補81.3%/
 `is_holdout_consumed()` 確認 `False`。`git status` 確認僅 `data/rate_limit_state.json`（GitHub Actions自動更新的App資料檔，非本輪研究範圍）跟四個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，另一互動session殘留）無其他變更，均不觸碰、不納入本輪commit。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約116輪、跨度約64.5小時，需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-08-29T15:01+08:00 — 馬拉松第229輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 13:31（第226輪，最舊）、FUT 14:01（第227輪）、US 14:31（第228輪，最新）——依輪替選TW。獨立複查三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自 `fa369b9` 以來仍只一個commit；(2) `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）判定仍FAIL（alpha顯著性p>0.05未過），選項(a)換更大樣本重跑、(b)train-only嚴格樣本外，均未見使用者新回應；(3) `MARATHON_PROTOCOL.md` 第0節暫停規則本文完整重讀一遍，未被修改移除。皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項允許的背景工作本輪重新獨立複查（非直接沿用舊結論）：`data/backfill_state.json` 用 `Counter(d.get('status') for d in values)` 重新統計，done=2597／skip=469，2597/3196=81.3%，跟第220輪以來一致，仍達80%門檻，不是本輪優先工作單位；T86回補（`backfill_t86.py`）自第164輪起已達全範圍3305個工作日100%以上（沿用該輪記錄，本輪未見任何跡象顯示範圍擴大或需要重跑）。**沒有已知的剩餘允許工作項目**，唯一還沒做的(a)全市場更大樣本重跑／(b)train-only嚴格樣本外仍是需使用者裁示的類別，本輪依既定判斷維持不代為啟動。**本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認僅 `data/rate_limit_state.json`（GitHub Actions自動更新的App資料檔，非本輪研究範圍）跟四個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，另一互動session殘留）無其他變更，均不觸碰、不納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約119輪、跨度約66.0小時，需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
