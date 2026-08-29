@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-08-29T10:31+08:00 — 馬拉松第220輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 09:02（第217輪，最舊）、FUT 09:32（第218輪）、US 10:01（第219輪，最新）——依輪替選TW。
+
+獨立複查暫停規則三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；(2) `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL，(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍留給使用者決定，未見新回應；(3) `MARATHON_PROTOCOL.md`第0節暫停規則本身未被修改移除（本輪完整重讀一遍確認）。三者皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項地基背景工作複查：重新統計`backfill_state.json`（`Counter(v['status'] for v in d.values())`），done=2597/skip=469，2597/3196=81.3%，跟第194輪以來一致，仍達80%門檻，不需要跑`backfill_universe.py`；T86回補設計上以parquet快取本身為進度依據，維持既有100%記錄。round205/208/211/214/217已釐清「補參數敏感度、補對照組」這條路徑（成本敏感度1x/2x/3x、N=100隨機控制組A/B兩組合、大盤MDD/Sortino基準）已在round137/201/202全部補齊，**沒有已知的剩餘允許工作項目**，唯一還沒做的(a)/(b)仍是需使用者裁示的類別，本輪依既定判斷維持不代為啟動。沒有其他已知允許的背景工作單位。**本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認僅慣常的`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤，另一互動session殘留）無其他變更，均不觸碰、不納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約110輪、跨度約61.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
+
 ## 2026-08-28T22:54+08:00 — 馬拉松第197輪：嘗試補對照組（`portfolio_multifactor_v2` VAL期最佳兩組合隨機控制組15→100次重抽），因環境效能問題未完成
 
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 21:01（第194輪，最舊）、US 21:31（第195輪）、FUT 22:01（第196輪，最新）——依輪替選TW。複查`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，暫停規則整體仍完全生效中；`LEADS.md`最新`portfolio_multifactor_v2`條目的(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者回應。
