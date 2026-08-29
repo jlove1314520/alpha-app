@@ -13,6 +13,30 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-08-29T04:05+08:00 — Weinstein v2抓到真bug並修好：0筆交易→有效交易
+
+執行第2/4關（`weinstein_v2_alpha_gate.py`）第一次跑，發現TRAIN/
+VALIDATION**兩期都是0筆交易**——追查發現`stage2_signal_v2()`假設
+`price_data`已經有相對強度欄位（沿用sanity階段用的`factor_ic.py`快取
+現成的`f_rel_strength`），但這支campaign腳本走的是不同資料路徑
+（`adjusted_price_series()`直接載入，不經過`factors.py::prepare_
+factors()`），那個欄位根本沒被算過，每天每檔都被誤判「資料缺失」跳過。
+**這是sanity階段測試涵蓋率不足的真實案例**：sanity PASS了，但測的
+不是後續關卡實際會用的資料載入路徑。
+
+修法：新增`prepare_price_data_v2()`獨立計算相對強度（60日個股報酬−
+60日大盤報酬，跟`factors.py::f_rel_strength`同一個定義，不依賴外部
+欄位是否存在），三支消費端腳本（sanity/run_weinstein_unbiased_v2/
+weinstein_v2_alpha_gate）全部改用同一個函式。sanity重跑數字不變
+（仍PASS），確認bug只在campaign腳本的資料路徑，不影響sanity本身的
+判定方向。
+
+修好後重跑：**VALIDATION期353筆交易，+56.72%報酬，贏過買進持有
+（+54.58%）；TRAIN期515筆交易**，第2/4關（n=200隨機控制組+成本敏感度+
+alpha/beta拆解）背景執行中，已設置Monitor，會持續更新這裡。
+
+---
+
 ## 2026-08-29T03:40+08:00 — B24乾淨重跑完成：判定結論穩健但發現新的非決定性來源
 
 B24可重現性乾淨重跑跑完了。**判定結論一致**（兩次獨立跑法都是不及格：

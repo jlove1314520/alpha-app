@@ -28,8 +28,8 @@ from universe import universe as build_universe
 from validation import holdout
 from validation.control_group import extract_trade_schedule, run_matched_control_group
 from backtest.engine import BacktestConfig, run_backtest, buy_leg_rate, sell_leg_rate
-from strategies.weinstein_stage2 import prepare_price_data, prepare_market_data
-from strategies.weinstein_stage2_v2 import stage2_signal_v2
+from strategies.weinstein_stage2 import prepare_market_data
+from strategies.weinstein_stage2_v2 import prepare_price_data_v2, stage2_signal_v2
 
 SAMPLE_SEED = 20260822  # 跟v1同一個seed，方便v1/v2用同一批股票池直接比較差異
 SAMPLE_SIZE = 100
@@ -86,8 +86,8 @@ def main():
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     holdout.assert_no_holdout_leakage(market_raw, context="market_raw in run_weinstein_unbiased_v2")
 
-    price_data = prepare_price_data(raw_price_data)
     market_df = prepare_market_data(market_raw)
+    price_data = prepare_price_data_v2(raw_price_data, market_df)
 
     results = {}
 

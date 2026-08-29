@@ -72,13 +72,23 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   快取快篩，40個季度檢查點，通過三個gate的股票池mean=95.2/median=107.0
   （486檔候選中，合理範圍，非系統性0檔或全部通過）；通過gate的股票事後
   20交易日報酬平均+2.24% vs 全樣本平均+1.41%，方向正確(+0.83pp)）。
-- **第2/4關（隨機控制組≥100draws+成本敏感度）程式碼已就緒**：
-  `strategies/run_weinstein_unbiased_v2.py`+`weinstein_v2_alpha_gate.py`
-  （複製`run_weinstein_unbiased.py`/`weinstein_alpha_gate.py`既有v1
-  基礎設施，只換訊號函式，n=200配對式隨機控制組+1x/2x/3x成本敏感度+
-  alpha/beta拆解），**尚未執行**——B24可重現性乾淨重跑是更高優先的前置
-  關卡，兩個重運算工作同時跑會互相拖慢（見B24-500那輪實測102秒/draw
-  的CPU競爭教訓），等B24乾淨重跑完成後立刻執行這支。
+- **B24乾淨重跑完成後，執行第2/4關時抓到真bug並修好**：第一版
+  `stage2_signal_v2()`假設呼叫端已經算好相對強度欄位（沿用
+  `factor_ic.py`快取現成的`f_rel_strength`），但`run_weinstein_
+  unbiased_v2.py`走的是不同資料路徑（`adjusted_price_series()`，不經過
+  `factors.py::prepare_factors()`），根本沒算過這個欄位——導致整個
+  TRAIN/VALIDATION期間**0筆交易**（每天都被誤判「資料缺失」跳過）。
+  這證明第1關sanity雖然PASS，但**測的不是後續關卡實際會用的資料載入
+  路徑**（sanity用了factor_ic.py快取，剛好有這個欄位）——已修正：新增
+  `prepare_price_data_v2()`獨立算相對強度（不依賴外部欄位是否存在），
+  sanity腳本也同步改用同一條路徑重新驗證（結果不變，仍PASS，證明
+  bug只在campaign腳本的資料路徑，不影響sanity本身的判定）。**教訓已
+  寫進`weinstein_stage2_v2.py`docstring：之後sanity要用跟後續關卡完全
+  同一條資料載入路徑測試**。
+- **第2/4關（隨機控制組n=200+成本敏感度+alpha/beta拆解）執行中**：
+  修好bug後重跑，VALIDATION期353筆交易、+56.72%報酬，贏過買進持有
+  （+54.58%）；TRAIN期515筆交易，結果持續更新中，見`research/
+  MARATHON_LOG.md`最新一則。
 - 第3/5/6/9關（密集參數高原/leave-one-out/逐年一致性/下檔保護證明）
   尚未開始，第2/4關結果出來後視情況補上。
 

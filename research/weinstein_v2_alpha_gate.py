@@ -24,8 +24,8 @@ from finmind_client import load_dev
 from validation import holdout
 from validation.control_group import extract_trade_schedule
 from backtest.engine import BacktestConfig, run_backtest, buy_leg_rate, sell_leg_rate
-from strategies.weinstein_stage2 import prepare_market_data, prepare_price_data
-from strategies.weinstein_stage2_v2 import stage2_signal_v2
+from strategies.weinstein_stage2 import prepare_market_data
+from strategies.weinstein_stage2_v2 import prepare_price_data_v2, stage2_signal_v2
 from strategies.run_weinstein_unbiased_v2 import (
     SAMPLE_SEED, SAMPLE_SIZE, START_DATE, load_sample_price_data,
     main as run_weinstein_v2_main,
@@ -159,7 +159,7 @@ def main():
     rng = random.Random(SAMPLE_SEED)
     sample_ids = rng.sample(list(u["stock_id"]), SAMPLE_SIZE)
     raw_price_data = load_sample_price_data(sample_ids)
-    price_data = prepare_price_data(raw_price_data)
+    price_data = prepare_price_data_v2(raw_price_data, market_df)
     indexed_price_data = {sid: df.set_index("date") for sid, df in price_data.items()}
     print(f"  {len(price_data)}/{SAMPLE_SIZE} 檔可用（應與run_weinstein_v2_main()內部一致）")
 

@@ -27,8 +27,8 @@ import numpy as np
 import pandas as pd
 
 from finmind_client import load_dev
-from strategies.weinstein_stage2 import prepare_price_data, prepare_market_data
-from strategies.weinstein_stage2_v2 import stage2_signal_v2
+from strategies.weinstein_stage2 import prepare_market_data
+from strategies.weinstein_stage2_v2 import prepare_price_data_v2, stage2_signal_v2
 from factor_ic import START_DATE
 
 CACHE_PATH = Path(__file__).parent / "data" / "backtests" / "value_board_v2_sample_cache_liquidity500.pkl"
@@ -43,7 +43,12 @@ def main():
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     market_df = prepare_market_data(market_raw)  # 跟run_value_board_v2_pit_backtest.py同一種用法，market_raw欄位本身已相容
 
-    data_prepared = prepare_price_data(data)
+    # 2026-08-29修正：改用跟run_weinstein_unbiased_v2.py/weinstein_v2_alpha_gate.py
+    # 同一個prepare_price_data_v2()（獨立算相對強度，不依賴外部欄位），這支sanity
+    # 腳本第一版直接用factor_ic.py快取裡現成的f_rel_strength欄位，剛好沒踩到那個
+    # bug（那個欄位在那個特定快取裡本來就有），但沒測到後續關卡實際會用的資料
+    # 載入路徑——見weinstein_stage2_v2.py docstring「真bug修正」段落完整說明。
+    data_prepared = prepare_price_data_v2(data, market_df)
 
     # 抽樣檢查點：每季一次，2015-2024，共約40個檢查點
     calendar = sorted({d for df in data_prepared.values() for d in df["date"]})
