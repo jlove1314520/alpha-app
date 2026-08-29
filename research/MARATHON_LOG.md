@@ -13,6 +13,32 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-08-29T04:45+08:00 — Weinstein v2結案：FAIL（隨機控制組+成本敏感度雙雙不過）
+
+第2/4關跑完。**判定：FAIL，移入`STRATEGY_GRAVEYARD.md`，不進第3/5/6/9
+關**。關鍵數字：
+- VALIDATION：表面總報酬+56.72%贏買進持有(+54.58%)，但拆解後beta貢獻
+  +32.93%占過半，純alpha僅+23.80%（配對式隨機控制組n=200中位數
+  +21.31%，**percentile=55.0，遠低於90.0單測門檻**）。成本敏感度：1x
+  alpha+23.80%→2x+4.79%→**3x轉負-16.37%**。
+- TRAIN：純alpha本身就是負的（-3.66%，beta貢獻+19.11%比總報酬
+  +15.45%還高）。隨機控制組percentile=84.0，同樣未達門檻。成本敏感度
+  3x：alpha-31.97%、**總報酬也轉負-19.65%**。
+
+**這是`CLAUDE.md`「復盤原則：流程重於盈虧」點名的典型案例**——表面
+總報酬好看（贏買進持有），拆解後發現主要是beta曝險而非真alpha，且
+alpha經不起真實成本壓力測試。完整數字寫進`STRATEGY_GRAVEYARD.md`，
+`HYPOTHESIS_QUEUE.md`#1標記結案，`data/strategies.json`的
+`weinstein_stage2_baseline`狀態自動從`草稿`升級為`回測未通過`（新增
+`generate_strategies_json.py::_graveyard_heading()`動態檢查
+`STRATEGY_GRAVEYARD.md`是否有對應條目，不是手動改）。**明確不泛化**：
+這只是這個具體實作（60日相對強度窗口+150日均線+TAIEX 200日均線閘門）
+的死法，不代表Weinstein第二階段概念本身沒用。
+
+**立即接續**：佇列#2 CTA趨勢跟隨（期貨，時序動量），開始第1關sanity。
+
+---
+
 ## 2026-08-29T04:05+08:00 — Weinstein v2抓到真bug並修好：0筆交易→有效交易
 
 執行第2/4關（`weinstein_v2_alpha_gate.py`）第一次跑，發現TRAIN/

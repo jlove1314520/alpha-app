@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-29T13:17:10.642104+08:00",
-  "latest_commit": "acc45a9",
+  "updated_at": "2026-08-29T13:27:21.396479+08:00",
+  "latest_commit": "a3ff09e",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -124,10 +124,10 @@
     },
     {
       "path": "data/strategies.json",
-      "generated_at": "2026-08-29T13:16:58.837700+08:00",
+      "generated_at": "2026-08-29T13:27:09.343978+08:00",
       "records": 6,
       "source": "research/generate_strategies_json.py（從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md推導，非手寫）",
-      "detail": "status分布={'紙上交易中': 2, '回測未通過': 2, '草稿': 2}",
+      "detail": "status分布={'紙上交易中': 2, '回測未通過': 3, '草稿': 1}",
       "status": "ok"
     },
     {
@@ -337,7 +337,7 @@
     "sources": {
       "finmind": {
         "blocked": true,
-        "blocked_remaining_min": 106.1,
+        "blocked_remaining_min": 95.9,
         "block_reason": "HTTP 402 {\"msg\":\"Requests reach the upper limit. https://finmindtrade.com/\",\"status\":402,\"token_tail\":\"\"}",
         "blocked_at": "2026-08-29T05:03:19.306506+00:00"
       },

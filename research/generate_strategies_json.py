@@ -296,17 +296,42 @@ def build_futures_track() -> dict:
     }
 
 
-def build_draft_baseline(strategy_id: str, name: str, stype: str, spec: str, limitations: list[str]) -> dict:
+STRATEGY_GRAVEYARD_PATH = RESEARCH_DIR / "STRATEGY_GRAVEYARD.md"
+
+
+def _graveyard_heading(keyword: str) -> bool:
+    """檢查`STRATEGY_GRAVEYARD.md`是否有以`keyword`開頭的`### `條目——
+    簡單的關鍵字比對，不是完整解析（這份檔案目前條目數不多，夠用；
+    條目數變多之後可以考慮換成更嚴謹的結構化格式，比照
+    `parse_fut_trials()`解析`TRIALS_LEDGER.md`表格的做法）。"""
+    if not STRATEGY_GRAVEYARD_PATH.exists():
+        return False
+    text = STRATEGY_GRAVEYARD_PATH.read_text(encoding="utf-8")
+    return bool(re.search(rf"^###\s*{re.escape(keyword)}", text, re.MULTILINE))
+
+
+def build_draft_baseline(strategy_id: str, name: str, stype: str, spec: str, limitations: list[str],
+                          graveyard_keyword: str | None = None) -> dict:
     """2026-08-29新增（使用者「少走彎路指南」item六：登錄兩個新baseline
-    候選，狀態=草稿/待回測，先只登錄規格不執行）。這兩個策略目前**完全
+    候選，狀態=草稿/待回測，先只登錄規格不執行）。這兩個策略原本**完全
     沒有實作**（沒有對應的scores*.json/backtest/paper任何來源檔），
-    `草稿`是唯一誠實的狀態——不透過`build_strategy()`那套「從檔案推導」
-    的邏輯（沒有檔案可推導），直接宣告草稿本身沒有違反「不寫死樂觀值」
-    的鐵律，因為草稿是最保守、最低的狀態，不是樂觀假設。"""
+    `草稿`是唯一誠實的狀態。
+
+    **2026-08-29馬拉松自主循環新增**：如果`HYPOTHESIS_QUEUE.md`佇列已經
+    把這個候選走完關卡測出FAIL（記錄進`STRATEGY_GRAVEYARD.md`），這裡
+    改標`回測未通過`（不是繼續掛著樂觀的草稿）——傳`graveyard_keyword`
+    去檢查`STRATEGY_GRAVEYARD.md`裡有沒有對應的`### `條目，找到就升級
+    狀態，這是「status必須從真實檔案推導」鐵律在草稿候選死亡後的延伸。
+    """
+    in_graveyard = graveyard_keyword is not None and _graveyard_heading(graveyard_keyword)
+    status = "回測未通過" if in_graveyard else "草稿"
+    lims = list(limitations)
+    if in_graveyard:
+        lims = lims + [f"已測試並FAIL，完整數字見STRATEGY_GRAVEYARD.md「{graveyard_keyword}」條目"]
     return {
-        "id": strategy_id, "name": name, "type": stype, "status": "草稿",
+        "id": strategy_id, "name": name, "type": stype, "status": status,
         "spec": spec, "backtest": None, "paper": None, "forward_paper": None,
-        "limitations": limitations, "last_updated": _now_iso(),
+        "limitations": lims, "last_updated": (_mtime_iso(STRATEGY_GRAVEYARD_PATH) if in_graveyard else _now_iso()),
     }
 
 
@@ -361,14 +386,18 @@ def main():
         build_draft_baseline(
             strategy_id="weinstein_stage2_baseline", name="Weinstein第二階段掃描（股票baseline候選）",
             stype="選股",
-            spec="站上30週均線 + 均線上揚 + 相對強弱——股票最自然的baseline，"
-                 "尚未實作（跟research/strategies/weinstein_stage2.py既有的backtest基礎設施"
-                 "同名但不同東西：那是回測引擎沿用的market-regime prepare函式，不是這個策略本身）",
+            spec="站上150日均線+均線上揚+相對強度(60日個股報酬-60日大盤報酬)>0——"
+                 "研究端`strategies/weinstein_stage2_v2.py`（跟`weinstein_stage2.py`"
+                 "既有v1不同版本，v1不改）",
             limitations=[
-                "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
                 "TRIALS_LEDGER.md#10/#11已有較早的weinstein_stage2試點記錄（手選30檔試點FAIL、"
-                "無偏宇宙+配對式對照組版EXPERIMENTAL），這個新baseline候選要重新設計，不是重跑舊版",
+                "無偏宇宙+配對式對照組版EXPERIMENTAL），這是重新設計的v2，不是重跑舊版",
+                "2026-08-29馬拉松自主循環：已走完GATE_SEQUENCE第1/2/4關（sanity PASS，"
+                "隨機控制組+成本敏感度FAIL）——VALIDATION表面總報酬+56.72%贏買進持有，"
+                "但alpha僅+23.80%(percentile=55.0，未達90.0門檻)，3x成本下轉負；"
+                "TRAIN純alpha本身就是負的(-3.66%)，典型「表面漂亮、下檔沒守」案例",
             ],
+            graveyard_keyword="weinstein_stage2_v2",
         ),
         build_draft_baseline(
             strategy_id="cta_trend_following_baseline", name="CTA趨勢跟隨（期貨baseline候選，時序動量）",
