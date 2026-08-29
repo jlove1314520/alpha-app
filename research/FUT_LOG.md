@@ -1167,3 +1167,20 @@ Holdout確認：`is_holdout_consumed()` → `False`（本輪開始前跟結束�
 `is_holdout_consumed()` 確認 `False`。`git status` 檢查發現兩個不屬於本輪的殘留檔案（`research/pit_run_500.log`、`research/pit_run_liquidity500_full.log`），研判是另一互動session的PIT回測相關工作留下的，依規則不觸碰、不commit、不刪除。
 
 **本輪整輪跳過，未做任何實質工作。** FUT軌round104的「下一步」1–4項維持原狀不變，等使用者解除暫停規則後從那裡接續。沒有新增 `TRIALS_LEDGER.md` 列。
+
+---
+
+## 2026-08-29T08:01:00+08:00 — 馬拉松第215輪：跳過，暫停規則生效中
+
+**選軌理由**：`marathon_lock.py acquire` 回傳 `LOCK_ACQUIRED`（取鎖乾淨，非陳舊鎖檔）。三軌時間戳比對：FUT 06:31（第212輪，最舊）、US 07:01（第213輪）、TW 07:31（第214輪，最新）——依輪替選FUT。
+
+**獨立複查三個解除條件，皆未成立**：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」；`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自建立（`fa369b9`）以來仍只有這一個commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）判定仍 **FAIL**（alpha p>0.05未達顯著性門檻），「換更大樣本重跑」(a)、「train-only嚴格樣本外」(b) 兩個選項仍待使用者裁示，未見新回應。
+3. 暫停規則本身未被修改移除。
+
+FUT軌round104留下的「下一步」1–4項（盤別效應第三批跳空構造等）本質仍是單因子相關工作，同round109起連續判斷邏輯一致，保守跳過。`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，FUT軌本身沒有組合策略相關工作可接，符合協定第0節第3項「US/FUT軌如果沒有組合策略相關工作可做，這段期間直接跳過這一輪」的明文指示。
+
+`is_holdout_consumed()` 確認 `False`（本輪未打任何API）。`git status` 檢查發現除慣常的兩個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`，判斷是另一互動session的PIT回測工作殘留）外，還出現本輪未預期的變更：`../BACKLOG.md`／`../data/STATUS.json` 被修改，且新增兩個未追蹤檔案 `HYPOTHESIS_QUEUE.md`／`STRATEGY_GRAVEYARD.md`——這些不屬於研究帽（`research/`）管轄範圍（依 `alpha-app/CLAUDE.md` 第九節帽子規則，`BACKLOG.md`/`data/STATUS.json` 屬維運/開發帽），研判是另一個並行互動session正在進行的工作，本輪不觸碰、不納入commit，僅記錄於此供後續核對。
+
+**本輪整輪跳過，未做任何實質工作。** FUT軌round104的「下一步」1–4項維持原狀不變，等使用者解除暫停規則後從那裡接續。沒有新增 `TRIALS_LEDGER.md` 列。

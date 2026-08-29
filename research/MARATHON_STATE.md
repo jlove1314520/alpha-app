@@ -4,7 +4,7 @@
 
 **最後更新：2026-08-29T07:31+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 214 輪。最新一輪：第 214 輪 · 2026-08-29T07:31+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨，依輪替選TW（三軌時間戳TW 06:01第211輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。TW軌兩項地基工作複查仍已達標（宇宙回補81.3%、T86回補100%），「補參數敏感度、補對照組」路徑已補齊，沒有已知的剩餘工作項目，保守跳過。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約104輪、跨度約59小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第214輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 215 輪。最新一輪：第 215 輪 · 2026-08-29T08:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨，依輪替選FUT（三軌時間戳FUT 06:31第212輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。FUT軌round104留下的待辦本質仍是單因子相關工作，`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞台股樣本，FUT軌沒有組合策略相關工作可接，保守跳過。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`額外發現`BACKLOG.md`/`data/STATUS.json`被修改、`HYPOTHESIS_QUEUE.md`/`STRATEGY_GRAVEYARD.md`新增（研判是另一並行互動session的維運/開發帽工作，不屬研究帽管轄，未觸碰、未納入本輪commit）。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約105輪、跨度約59.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第215輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
 **上一則保留（第211輪，供對照）**：第 211 輪 · 2026-08-29T06:01+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨，依輪替選TW（三軌時間戳TW 04:31第208輪最舊）。獨立複查三個解除條件皆未成立。TW軌兩項地基背景工作複查仍已達標（宇宙回補81.3%、T86回補100%），沒有已知的剩餘允許工作項目。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第211輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
 
