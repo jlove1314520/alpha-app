@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-29T12:32+08:00**
+**最後更新：2026-08-29T13:31+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 225 輪。最新一輪：第 225 輪 · 2026-08-29T13:01+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨，依輪替選US（三軌時間戳US 11:31第222輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，TAIEX/TWSE相關，跟US軌無關），保守跳過，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`確認除慣常的三個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`／`research/pit_run_liquidity500_clean.log`）跟`data/rate_limit_state.json`（GitHub Actions自動更新的App資料檔，非本輪研究範圍）之外無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約115輪、跨度約64.0小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第225輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 226 輪。最新一輪：第 226 輪 · 2026-08-29T13:31+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨，依輪替選TW（三軌時間戳TW 12:02第223輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。TW軌沒有已知的剩餘工作項目（延續第220–223輪判斷），保守跳過，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`確認除四個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`／`research/pit_run_liquidity500_clean.log`／`research/weinstein_v2_run.log`）跟`data/rate_limit_state.json`（GitHub Actions自動更新的App資料檔，非本輪研究範圍）之外無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約116輪、跨度約64.5小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第226輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
 
 **上一則保留（第223輪，供對照）**：第 223 輪 · 2026-08-29T12:02+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨，依輪替選TW（三軌時間戳TW 10:31第220輪最舊）。獨立複查三個解除條件皆未成立。TW軌兩項地基工作複查仍已達標（宇宙回補81.3%、T86回補100%），沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作。詳見`REPORT.md`第223輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
 
