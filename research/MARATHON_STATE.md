@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-08-29T09:32+08:00**
+**最後更新：2026-08-29T10:01+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 218 輪。最新一輪：第 218 輪 · 2026-08-29T09:32+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨，依輪替選FUT（三軌時間戳FUT 08:01第215輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。FUT軌本身沒有組合策略相關工作可接（規格書是台股專屬），本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`確認僅慣常的`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤，另一互動session殘留）無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約108輪、跨度約61小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第218輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 219 輪。最新一輪：第 219 輪 · 2026-08-29T10:01+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨，依輪替選US（三軌時間戳US 08:32第216輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。US軌本身沒有組合策略相關工作可接（規格書是台股專屬），本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`確認僅慣常的`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`（未追蹤，另一互動session殘留）無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約109輪、跨度約61小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第219輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
 
-**上一則保留（第217輪，供對照）**：第 217 輪 · 2026-08-29T09:02+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 07:31（第214輪，最舊）、FUT 08:01（第215輪）、US 08:32（第216輪，最新）——依輪替選TW。詳見`REPORT.md`第217輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。**
+**上一則保留（第218輪，供對照）**：第 218 輪 · 2026-08-29T09:32+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 08:01（第215輪，最舊）、US 08:32（第216輪）、TW 09:02（第217輪，最新）——依輪替選FUT。詳見`REPORT.md`第218輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
 **上一則保留（第215輪，供對照）**：第 215 輪 · 2026-08-29T08:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨，依輪替選FUT（三軌時間戳FUT 06:31第212輪最舊）。獨立複查三個解除條件皆未成立。FUT軌round104留下的待辦本質仍是單因子相關工作，沒有組合策略相關工作可接，保守跳過。本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第215輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
