@@ -64,7 +64,23 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
 差異點：新版用個股自身30週均線判斷（舊版部分用大盤位階當開關），需要在
 深挖階段明確交代跟舊版本的差異，不能含糊地說「這是全新假設」。
 
-**狀態**：待起跑，第1關（sanity）尚未開始。
+**狀態（2026-08-29馬拉松自主循環第1輪更新）**：
+- **v2具體實作**：`strategies/weinstein_stage2_v2.py`（新增，不改v1）——
+  三個gate（站上150日均線+均線上揚+`f_rel_strength`(=60日個股報酬-60日
+  大盤報酬，`factors.py`既有因子)>0），排名依`f_rel_strength`本身。
+- **第1關 sanity：PASS**（`weinstein_v2_sanity.py`，用500檔流動性樣本
+  快取快篩，40個季度檢查點，通過三個gate的股票池mean=95.2/median=107.0
+  （486檔候選中，合理範圍，非系統性0檔或全部通過）；通過gate的股票事後
+  20交易日報酬平均+2.24% vs 全樣本平均+1.41%，方向正確(+0.83pp)）。
+- **第2/4關（隨機控制組≥100draws+成本敏感度）程式碼已就緒**：
+  `strategies/run_weinstein_unbiased_v2.py`+`weinstein_v2_alpha_gate.py`
+  （複製`run_weinstein_unbiased.py`/`weinstein_alpha_gate.py`既有v1
+  基礎設施，只換訊號函式，n=200配對式隨機控制組+1x/2x/3x成本敏感度+
+  alpha/beta拆解），**尚未執行**——B24可重現性乾淨重跑是更高優先的前置
+  關卡，兩個重運算工作同時跑會互相拖慢（見B24-500那輪實測102秒/draw
+  的CPU競爭教訓），等B24乾淨重跑完成後立刻執行這支。
+- 第3/5/6/9關（密集參數高原/leave-one-out/逐年一致性/下檔保護證明）
+  尚未開始，第2/4關結果出來後視情況補上。
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 

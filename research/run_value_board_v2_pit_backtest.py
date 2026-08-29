@@ -79,6 +79,7 @@ todo P0/B16，最高優先」，取代先前的機制驗證跑）**：
 from __future__ import annotations
 
 import json
+import os
 import pickle
 import sys
 from pathlib import Path
@@ -417,7 +418,13 @@ def main():
     # 樣本——這是全新的股票清單，不能沿用舊快取。load_sample_with_factors()
     # 對500檔樣本首次跑約20分鐘（prepare_factors()真實運算，不是網路請求），
     # 之後重跑（例如拉高random draws次數）直接吃這個快取。
-    cache_path = Path(__file__).parent / "data" / "backtests" / f"value_board_v2_sample_cache_liquidity{VALUE_BOARD_SAMPLE_SIZE}.pkl"
+    # 2026-08-29再新增：CACHE_SUFFIX環境變數（預設空字串，不影響既有行為）
+    # ——「B24可重現性乾淨重跑」需要強制建一份100%發生在atomic write修法
+    # （commit c97ac0f）之後的全新快取，不能沿用可能橫跨修法commit前後
+    # 建置的既有快取；用環境變數而不是改檔名常數，這樣不用複製整支腳本，
+    # 也不會動到預設路徑（沒設環境變數時行為完全不變）。
+    cache_suffix = os.environ.get("CACHE_SUFFIX", "")
+    cache_path = Path(__file__).parent / "data" / "backtests" / f"value_board_v2_sample_cache_liquidity{VALUE_BOARD_SAMPLE_SIZE}{cache_suffix}.pkl"
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     if cache_path.exists():
         print(f"Loading sample + factors from local cache ({cache_path})...")
@@ -451,7 +458,7 @@ def main():
               f"翻倍率/大賺率/地雷率：策略{r['moonshot_rate']}%/{r['big_win_rate']}%/{r['mine_rate']}% "
               f"vs 隨機{r['random_moonshot_rate_avg']}%/{r['random_big_win_rate_avg']}%/{r['random_mine_rate_avg']}%")
 
-    out_path = Path(__file__).parent / "data" / f"value_board_v2_pit_backtest_liquidity{VALUE_BOARD_SAMPLE_SIZE}_full.csv"
+    out_path = Path(__file__).parent / "data" / f"value_board_v2_pit_backtest_liquidity{VALUE_BOARD_SAMPLE_SIZE}{cache_suffix}_full.csv"
     pd.DataFrame([train_result, val_result]).to_csv(out_path, index=False)
     print(f"saved {out_path}")
     return train_result, val_result
