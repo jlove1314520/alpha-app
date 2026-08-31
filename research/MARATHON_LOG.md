@@ -63,6 +63,18 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-01T08:25+08:00 — PEAD策略層構造：第7關樣本外背景執行中
+
+`pead_portfolio_v1.py`（新增）：等權組合`f_eps_surprise`+`f_revenue_surprise`
+（刻意只用這兩個PEAD/SUE家族因子，跟`portfolio_multifactor_v2`的4因子
+版本區隔），月頻換股Top20，沿用`portfolio_backtest_v2.py`通用機制（資格池/
+成本模型/alpha回歸，不修改該檔案本身）。TRAIN/VALIDATION兩期各跑N=100
+配對式隨機控制組+成本1x/2x/3x敏感度，背景執行中（單一組合N=15隨機控制組
+先例耗時2分鐘以上，N=100預估較久），已設置背景任務盯著，完成後立即記錄
+第7/8關結果並commit+push。
+
+---
+
 ## 2026-08-29T04:45+08:00 — Weinstein v2結案：FAIL（隨機控制組+成本敏感度雙雙不過）
 
 第2/4關跑完。**判定：FAIL，移入`STRATEGY_GRAVEYARD.md`，不進第3/5/6/9
