@@ -37,6 +37,32 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-01T08:10+08:00 — CTA趨勢跟隨結案：FAIL（第2關隨機控制組percentile=10.0）
+
+`cta_momentum_12m.py`（新增）：252交易日/12個月回顧報酬正負號，月頻
+重平衡，跟已FAIL的`fut_trend_multi_tf`（10/20/60日多數決）刻意區隔。
+
+第1關sanity PASS（5915/6185天有效，long73.9%/short26.1%，29次月頻換倉，
+非結構性no-op）。**第2關隨機控制組（N=200配對式）：percentile=10.0**，
+遠低於90.0單測門檻，且低於50——真實策略終值0.7162（累積虧損-28.4%，
+無成本），同期買進持有+778.9%，隨機控制組中位數+180.9%，真實策略比
+190/200次隨機洗牌自己的部位陣列還差。
+
+人工檢查訊號構造無bug（2000年底/2001年做空對應網路泡沫後續下跌、
+2023-2024全程做多對應多頭格局，方向經濟上合理）。研判是典型「動量崩盤」
+（momentum crash，Daniel & Moskowitz 2016）：12個月落後訊號在V型反彈
+時來不及轉向。**不泛化成「CTA在台指期沒用」**——已FAIL的多窗口投票版
+（`fut_trend_multi_tf`#18，percentile=82.5）比這次單一窗口版本(10.0)
+明顯不那麼差，暗示多窗口平滑可能有幫助，留給未來變體驗證。
+
+依協定第2關未過直接結案，未做第3關以後的關卡。完整數字見
+`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#72/`HYPOTHESIS_QUEUE.md`#2。
+
+**立即接續：佇列#3 PEAD策略層構造（用已PASS的`f_eps_surprise`/
+`f_revenue_surprise`兩因子組portfolio層規則）。**
+
+---
+
 ## 2026-08-29T04:45+08:00 — Weinstein v2結案：FAIL（隨機控制組+成本敏感度雙雙不過）
 
 第2/4關跑完。**判定：FAIL，移入`STRATEGY_GRAVEYARD.md`，不進第3/5/6/9
