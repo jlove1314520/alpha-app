@@ -1,11 +1,11 @@
 {
-  "fetched_at": "2026-08-31T09:22:03+00:00",
+  "fetched_at": "2026-08-31T17:07:01+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
     "trading_window": false,
-    "queried": 2351,
-    "matched": 1990,
-    "live": 1990,
+    "queried": 2352,
+    "matched": 1991,
+    "live": 1991,
     "data_type": "intraday"
   },
   "quotes": {
@@ -18458,7 +18458,30 @@
       "change_pct": 0.0,
       "time": "13:30:00",
       "date": "20260831",
-      "stale": false
+      "stale": false,
+      "sparkline": [
+        90.9,
+        97.6,
+        100.5,
+        103.0,
+        113.0,
+        108.0,
+        105.5,
+        98.1,
+        94.2,
+        96.5,
+        92.8,
+        91.9,
+        92.5,
+        90.2,
+        93.8,
+        93.0,
+        92.5,
+        91.5,
+        90.3,
+        90.3
+      ],
+      "sparkline_date": "2026-08-31"
     },
     "3023": {
       "name": "信邦",
@@ -40981,6 +41004,16 @@
       "prev_close": 43.2,
       "change": -0.6,
       "change_pct": -1.389,
+      "time": "13:30:00",
+      "date": "20260831",
+      "stale": false
+    },
+    "8080": {
+      "name": "泰霖",
+      "price": 28.1,
+      "prev_close": 28.0,
+      "change": 0.1,
+      "change_pct": 0.357,
       "time": "13:30:00",
       "date": "20260831",
       "stale": false
