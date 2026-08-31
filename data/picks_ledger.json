@@ -2,8 +2,8 @@
   "meta": {
     "created_at": "2026-08-28T01:44:36.415088+08:00",
     "schema_note": "前瞻選股台帳（非回測）：每個snapshot是三榜其中一榜在某個data_asof的Top20快照，寫入後不可回頭修改內容（見already_snapshotted()）。returns.t5/t20/t60/t120由update_picks_ledger_returns.py（骨架，2026-08-28新增）在對應的未來交易日回填，回填前恆為null——App顯示時null代表「還沒到回填時間點」，不是資料遺失。",
-    "last_snapshot_at": "2026-08-29T12:00:20.753717+08:00",
-    "total_snapshots": 8
+    "last_snapshot_at": "2026-08-31T21:36:52.931853+08:00",
+    "total_snapshots": 11
   },
   "snapshots": [
     {
@@ -2468,6 +2468,933 @@
           "total_score": 8.6,
           "close_price": 3865.0,
           "price_date": "2026-08-27",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_date": "2026-08-31",
+      "taken_at": "2026-08-31T21:36:52.863056+08:00",
+      "board": "value",
+      "engine_version": "scoring-live-json",
+      "taiex_close_at_snapshot": 46331.45,
+      "picks": [
+        {
+          "code": "3081",
+          "name": "聯亞",
+          "rank": 1,
+          "total_score": 9.6,
+          "close_price": 3530.0,
+          "price_date": "2026-08-31",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6808",
+          "name": "三鼎生技",
+          "rank": 2,
+          "total_score": 9.6,
+          "close_price": null,
+          "price_date": null,
+          "price_stale": true,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6770",
+          "name": "力積電",
+          "rank": 3,
+          "total_score": 9.5,
+          "close_price": 70.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2883",
+          "name": "凱基金",
+          "rank": 4,
+          "total_score": 9.5,
+          "close_price": 32.75,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3450",
+          "name": "聯鈞",
+          "rank": 5,
+          "total_score": 9.5,
+          "close_price": 635.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "8271",
+          "name": "宇瞻",
+          "rank": 6,
+          "total_score": 9.5,
+          "close_price": 232.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2408",
+          "name": "南亞科",
+          "rank": 7,
+          "total_score": 9.5,
+          "close_price": 540.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6531",
+          "name": "愛普*",
+          "rank": 8,
+          "total_score": 9.5,
+          "close_price": 895.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6672",
+          "name": "騰輝電子-KY",
+          "rank": 9,
+          "total_score": 9.4,
+          "close_price": 289.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2368",
+          "name": "金像電",
+          "rank": 10,
+          "total_score": 9.4,
+          "close_price": 1130.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3443",
+          "name": "創意",
+          "rank": 11,
+          "total_score": 9.4,
+          "close_price": 6015.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2467",
+          "name": "志聖",
+          "rank": 12,
+          "total_score": 9.4,
+          "close_price": 610.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "7788",
+          "name": "松川精密",
+          "rank": 13,
+          "total_score": 9.4,
+          "close_price": 327.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6141",
+          "name": "柏承",
+          "rank": 14,
+          "total_score": 9.4,
+          "close_price": 58.2,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "7711",
+          "name": "永擎",
+          "rank": 15,
+          "total_score": 9.4,
+          "close_price": 487.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2491",
+          "name": "吉祥全",
+          "rank": 16,
+          "total_score": 9.3,
+          "close_price": 56.4,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2344",
+          "name": "華邦電",
+          "rank": 17,
+          "total_score": 9.3,
+          "close_price": 181.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4967",
+          "name": "十銓",
+          "rank": 18,
+          "total_score": 9.3,
+          "close_price": 273.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "5475",
+          "name": "德宏",
+          "rank": 19,
+          "total_score": 9.3,
+          "close_price": 204.5,
+          "price_date": "2026-08-31",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3167",
+          "name": "大量",
+          "rank": 20,
+          "total_score": 9.3,
+          "close_price": 783.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_date": "2026-08-31",
+      "taken_at": "2026-08-31T21:36:52.903203+08:00",
+      "board": "momentum",
+      "engine_version": "scoring-momentum-v1",
+      "taiex_close_at_snapshot": 46331.45,
+      "picks": [
+        {
+          "code": "2409",
+          "name": "友達",
+          "rank": 1,
+          "total_score": 10.0,
+          "close_price": 25.85,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2421",
+          "name": "建準",
+          "rank": 2,
+          "total_score": 10.0,
+          "close_price": 163.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6770",
+          "name": "力積電",
+          "rank": 3,
+          "total_score": 10.0,
+          "close_price": 70.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3037",
+          "name": "欣興",
+          "rank": 4,
+          "total_score": 9.9,
+          "close_price": 1110.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6269",
+          "name": "台郡",
+          "rank": 5,
+          "total_score": 9.9,
+          "close_price": 75.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2377",
+          "name": "微星",
+          "rank": 6,
+          "total_score": 9.8,
+          "close_price": 145.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2382",
+          "name": "廣達",
+          "rank": 7,
+          "total_score": 9.8,
+          "close_price": 332.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2481",
+          "name": "強茂",
+          "rank": 8,
+          "total_score": 9.8,
+          "close_price": 154.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3045",
+          "name": "台灣大",
+          "rank": 9,
+          "total_score": 9.8,
+          "close_price": 115.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3406",
+          "name": "玉晶光",
+          "rank": 10,
+          "total_score": 9.8,
+          "close_price": 917.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3450",
+          "name": "聯鈞",
+          "rank": 11,
+          "total_score": 9.8,
+          "close_price": 635.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4958",
+          "name": "臻鼎-KY",
+          "rank": 12,
+          "total_score": 9.8,
+          "close_price": 480.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6226",
+          "name": "光鼎",
+          "rank": 13,
+          "total_score": 9.8,
+          "close_price": 34.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2356",
+          "name": "英業達",
+          "rank": 14,
+          "total_score": 9.7,
+          "close_price": 64.9,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2489",
+          "name": "瑞軒",
+          "rank": 15,
+          "total_score": 9.7,
+          "close_price": 40.2,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3042",
+          "name": "晶技",
+          "rank": 16,
+          "total_score": 9.7,
+          "close_price": 188.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3376",
+          "name": "新日興",
+          "rank": 17,
+          "total_score": 9.7,
+          "close_price": 217.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3543",
+          "name": "州巧",
+          "rank": 18,
+          "total_score": 9.7,
+          "close_price": 54.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3576",
+          "name": "聯合再生",
+          "rank": 19,
+          "total_score": 9.7,
+          "close_price": 17.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3706",
+          "name": "神達",
+          "rank": 20,
+          "total_score": 9.7,
+          "close_price": 92.1,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_date": "2026-08-31",
+      "taken_at": "2026-08-31T21:36:52.930673+08:00",
+      "board": "future",
+      "engine_version": "scoring-future-v1",
+      "taiex_close_at_snapshot": 46331.45,
+      "picks": [
+        {
+          "code": "6452",
+          "name": "康友-KY",
+          "rank": 1,
+          "total_score": 9.8,
+          "close_price": null,
+          "price_date": null,
+          "price_stale": true,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2886",
+          "name": "兆豐金",
+          "rank": 2,
+          "total_score": 9.4,
+          "close_price": 48.2,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4129",
+          "name": "聯合",
+          "rank": 3,
+          "total_score": 9.4,
+          "close_price": 81.7,
+          "price_date": "2026-08-31",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "8406",
+          "name": "金可-KY",
+          "rank": 4,
+          "total_score": 9.4,
+          "close_price": null,
+          "price_date": null,
+          "price_stale": true,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2103",
+          "name": "台橡",
+          "rank": 5,
+          "total_score": 9.3,
+          "close_price": 28.2,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2883",
+          "name": "凱基金",
+          "rank": 6,
+          "total_score": 9.3,
+          "close_price": 32.75,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2059",
+          "name": "川湖",
+          "rank": 7,
+          "total_score": 9.2,
+          "close_price": 14300.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "5508",
+          "name": "永信建",
+          "rank": 8,
+          "total_score": 9.2,
+          "close_price": 52.9,
+          "price_date": "2026-08-31",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "5871",
+          "name": "中租-KY",
+          "rank": 9,
+          "total_score": 9.2,
+          "close_price": 113.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "7792",
+          "name": "安葆",
+          "rank": 10,
+          "total_score": 9.2,
+          "close_price": 301.0,
+          "price_date": "2026-08-31",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2880",
+          "name": "華南金",
+          "rank": 11,
+          "total_score": 9.1,
+          "close_price": 40.25,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2890",
+          "name": "永豐金",
+          "rank": 12,
+          "total_score": 9.1,
+          "close_price": 39.8,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2892",
+          "name": "第一金",
+          "rank": 13,
+          "total_score": 9.1,
+          "close_price": 34.4,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4128",
+          "name": "中天",
+          "rank": 14,
+          "total_score": 9.1,
+          "close_price": 15.05,
+          "price_date": "2026-08-31",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2360",
+          "name": "致茂",
+          "rank": 15,
+          "total_score": 9.0,
+          "close_price": 2010.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2727",
+          "name": "王品",
+          "rank": 16,
+          "total_score": 9.0,
+          "close_price": 234.0,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2897",
+          "name": "王道銀行",
+          "rank": 17,
+          "total_score": 9.0,
+          "close_price": 10.35,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6533",
+          "name": "晶心科",
+          "rank": 18,
+          "total_score": 9.0,
+          "close_price": 265.5,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "1216",
+          "name": "統一",
+          "rank": 19,
+          "total_score": 8.9,
+          "close_price": 75.7,
+          "price_date": "2026-08-28",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "1718",
+          "name": "中纖",
+          "rank": 20,
+          "total_score": 8.9,
+          "close_price": 10.75,
+          "price_date": "2026-08-28",
           "price_stale": false,
           "returns": {
             "t5": null,

@@ -32,6 +32,10 @@
         {
           "date": "2026-08-28",
           "cum_return_pct": -1.9288
+        },
+        {
+          "date": "2026-08-31",
+          "cum_return_pct": 4.7478
         }
       ],
       "ledger": [
@@ -68,10 +72,17 @@
           "sells": [],
           "daily_pnl_pct": -1.9288,
           "n_holdings": 19
+        },
+        {
+          "date": "2026-08-31",
+          "buys": [],
+          "sells": [],
+          "daily_pnl_pct": 6.8079,
+          "n_holdings": 19
         }
       ],
-      "forward_return_todate_pct": -1.9288,
-      "trading_days_count": 2
+      "forward_return_todate_pct": 4.7478,
+      "trading_days_count": 3
     },
     "momentum_board": {
       "inception_date": "2026-08-27",
@@ -105,6 +116,10 @@
         },
         {
           "date": "2026-08-28",
+          "cum_return_pct": 0.0
+        },
+        {
+          "date": "2026-08-31",
           "cum_return_pct": 0.0
         }
       ],
@@ -143,10 +158,17 @@
           "sells": [],
           "daily_pnl_pct": 0.0,
           "n_holdings": 20
+        },
+        {
+          "date": "2026-08-31",
+          "buys": [],
+          "sells": [],
+          "daily_pnl_pct": 0.0,
+          "n_holdings": 20
         }
       ],
       "forward_return_todate_pct": 0.0,
-      "trading_days_count": 2
+      "trading_days_count": 3
     },
     "future_board": {
       "inception_date": "2026-08-27",
@@ -179,6 +201,10 @@
         {
           "date": "2026-08-28",
           "cum_return_pct": -0.7254
+        },
+        {
+          "date": "2026-08-31",
+          "cum_return_pct": -1.3472
         }
       ],
       "ledger": [
@@ -214,12 +240,19 @@
           "sells": [],
           "daily_pnl_pct": -0.7254,
           "n_holdings": 18
+        },
+        {
+          "date": "2026-08-31",
+          "buys": [],
+          "sells": [],
+          "daily_pnl_pct": -0.6263,
+          "n_holdings": 18
         }
       ],
-      "forward_return_todate_pct": -0.7254,
-      "trading_days_count": 2
+      "forward_return_todate_pct": -1.3472,
+      "trading_days_count": 3
     }
   },
-  "generated_at": "2026-08-29T04:00:21.228766+00:00",
-  "as_of_trading_date": "2026-08-28"
+  "generated_at": "2026-08-31T13:36:53.675153+00:00",
+  "as_of_trading_date": "2026-08-31"
 }
