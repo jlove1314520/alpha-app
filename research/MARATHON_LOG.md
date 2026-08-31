@@ -13,6 +13,30 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-01T07:50+08:00 — 心跳補記：約68小時空窗說明，CTA趨勢跟隨正式起跑
+
+**使用者發現這份檔案從04:45起沒有新條目，要求先查清原因再接續。查清後是兩條
+獨立軌道的問題，分開講：**
+
+1. **TW/US/FUT三軌輪次制馬拉松（`MARATHON_STATE.md`，跟這份檔案不同軌）**：
+   靠Windows工作排程器`AlphaMarathon`每30分鐘自動觸發。查出這個排程器的
+   觸發器設了`Duration=P7DT1H35M`+`StopAtDurationEnd=True`，這個7天視窗
+   已經在**2026-08-30 11:35**到期，之後`NextRunTime`變空、永遠不會再自動
+   觸發——**跟三軌本身「暫停單因子試驗規則」無關，是排程器設定本身到期，
+   不是判斷邏輯卡住**。機器在那之後到2026-08-31 23:17又是關機/睡眠狀態，
+   錯過28次觸發視窗。**已修好**：把`Duration`清空、`StopAtDurationEnd`
+   設`False`，改成無限期重複，確認`NextRunTime`已排到2026-09-01 08:00，
+   三軌馬拉松會恢復自動運作。
+2. **這份檔案對應的`HYPOTHESIS_QUEUE.md`佇列（Weinstein→CTA→PEAD→carry）**：
+   從一開始就靠互動session手動跑，**從來沒有掛過任何自動化排程**。上一個
+   session在2026-08-29T04:45完成Weinstein v2結案（FAIL）後，寫下「立即
+   接續CTA趨勢跟隨」就結束了，沒有任何後續session接手——是**無人接手**，
+   不是背景任務當機或卡住。
+
+**現在接續：CTA趨勢跟隨（`HYPOTHESIS_QUEUE.md`#2）第1關sanity開始執行。**
+
+---
+
 ## 2026-08-29T04:45+08:00 — Weinstein v2結案：FAIL（隨機控制組+成本敏感度雙雙不過）
 
 第2/4關跑完。**判定：FAIL，移入`STRATEGY_GRAVEYARD.md`，不進第3/5/6/9
