@@ -1,13 +1,112 @@
 {
-  "fetched_at": "2026-08-31T09:22:06+00:00",
+  "fetched_at": "2026-08-31T11:15:22+00:00",
   "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
   "meta": {
     "trading_window": false,
     "market_session": "pre",
     "queried": 6,
-    "matched": 0,
+    "matched": 2,
     "extended_hours_matched": 6,
     "extended_hours_disclaimer": "延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。"
   },
-  "quotes": {}
+  "quotes": {
+    "NVDA": {
+      "price": 217.55,
+      "prev_close": 227.98,
+      "change": -10.43,
+      "change_pct": -4.575,
+      "high": 229.26,
+      "low": 216.81,
+      "open": 227.36,
+      "quote_time": 1787947200,
+      "sparkline": [
+        206.64,
+        211.94,
+        219.22,
+        218.99,
+        223.96,
+        217.55,
+        217.5,
+        224.09,
+        225.3,
+        225.16,
+        225.01,
+        219.74,
+        217.56,
+        216.85,
+        214.72,
+        208.48,
+        213.05,
+        209.66,
+        227.98,
+        217.55
+      ],
+      "extended_hours": {
+        "market_state": "PRE",
+        "regular": {
+          "price": 217.55,
+          "prev_close": 227.98,
+          "change": -10.43,
+          "change_pct": -4.575,
+          "time": 1787947200
+        },
+        "pre": {
+          "price": 218.5,
+          "change": 0.94999695,
+          "change_pct": 0.4366798,
+          "time": 1788174915
+        },
+        "post": null
+      }
+    },
+    "AMZN": {
+      "price": 266.43,
+      "prev_close": 256.26,
+      "change": 10.17,
+      "change_pct": 3.969,
+      "high": 267.56,
+      "low": 257.78,
+      "open": 258.32,
+      "quote_time": 1787947200,
+      "sparkline": [
+        284.02,
+        277.42,
+        272.65,
+        272.26,
+        274.48,
+        278.09,
+        272.27,
+        267.28,
+        265.13,
+        262.65,
+        261.31,
+        259.45,
+        265.84,
+        260.11,
+        258.63,
+        262.07,
+        261.06,
+        260.28,
+        256.26,
+        266.43
+      ],
+      "extended_hours": {
+        "market_state": "PRE",
+        "regular": {
+          "price": 266.43,
+          "prev_close": 256.26,
+          "change": 10.17,
+          "change_pct": 3.969,
+          "time": 1787947201
+        },
+        "pre": {
+          "price": 265.2,
+          "change": -1.2299805,
+          "change_pct": -0.4616524,
+          "time": 1788174915
+        },
+        "post": null
+      }
+    }
+  }
 }
