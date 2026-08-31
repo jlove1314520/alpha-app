@@ -414,21 +414,19 @@ def main():
         ),
     ]
 
-    # 2026-08-29策略監控台升級：卡片排序（best-on-top，套樣本閘門+狀態降級）。
-    # 排序邏輯全部在這裡（後端），前端純粹依陣列順序渲染，不得自己重新排序
-    # 或另外硬寫規則——見模組docstring「鐵律」。三層：
-    #   tier 0：狀態未被降級 + 有forward_paper + 樣本足夠(>=20交易日) → 依forward_return由高到低
-    #   tier 1：狀態未被降級 + 有forward_paper + 樣本不足(<20交易日) → 同上排序，卡片標「樣本不足」
-    #   tier 2：狀態屬於RANK_DEMOTED_STATUSES（草稿/回測未通過）或完全沒有forward_paper → 排最後
+    # 2026-08-29策略監控台升級（2026-09-01修正：樣本不足不再自成一層，避免打亂
+    # best-on-top規則）：卡片排序（best-on-top，套狀態降級）。排序邏輯全部在這裡
+    # （後端），前端純粹依陣列順序渲染，不得自己重新排序或另外硬寫規則——見模組
+    # docstring「鐵律」。兩層：
+    #   tier 0：狀態未被降級 + 有forward_paper（不分樣本是否足夠）→ 一律依
+    #           forward_return由高到低排序；樣本不足(<20交易日)只在卡片上標
+    #           「樣本不足」提醒判讀要謹慎，不把它踢去後段打亂排名
+    #   tier 1：狀態屬於RANK_DEMOTED_STATUSES（草稿/回測未通過）或完全沒有
+    #           forward_paper（無前向資料）→ 排在所有有前向報酬的策略之後
     def _sort_key(s):
         fp = s.get("forward_paper")
         demoted = s["status"] in RANK_DEMOTED_STATUSES
-        if fp is None or demoted:
-            tier = 2
-        elif fp["sample_sufficient"]:
-            tier = 0
-        else:
-            tier = 1
+        tier = 1 if (fp is None or demoted) else 0
         ret = fp["forward_return_todate_pct"] if (fp and fp.get("forward_return_todate_pct") is not None) else float("-inf")
         return (tier, -ret)
 

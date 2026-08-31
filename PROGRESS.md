@@ -16,6 +16,33 @@
 
 ---
 
+## 2026-09-01（開發帽）— 策略監控台排序修正 + AlphaMarathon排程到期bug修好
+
+**排序修正**：使用者回報「價值成長+4.75%排最下、題材動能+0.00%排最上」
+不符best-on-top。查證後：`價值成長榜`排最下是既有刻意設計（`回測未通過`
+狀態該排最後，2026-08-29就這樣設計，不是bug）；真正修的是
+`generate_strategies_json.py::_sort_key()`——舊code把「樣本不足<20天」
+獨立分一層排在「樣本足夠」之後，目前6檔策略剛好都還沒滿20天所以還沒
+顯現，但已修好避免將來某策略滿20天時突然跳到所有樣本不足策略前面。
+改成兩層（有forward_paper且未被降級的一起依報酬排序；草稿/回測未通過/
+無前向資料才排最後）。冒煙測試12項全PASS。詳見`BACKLOG.md`「2026-09-01
+策略監控台排序修正」條目。
+
+**排程器bug（維運面，順手查到並修好）**：Windows工作排程器`AlphaMarathon`
+（跑TW/US/FUT三軌馬拉松）的觸發器設了7天1小時35分的重複視窗且
+`StopAtDurationEnd=True`，已在2026-08-30 11:35到期，之後永遠不會再自動
+觸發（`NextRunTime`變空）——不是三軌本身的暫停規則卡住，是排程設定本身
+到期，加上機器8/30~8/31晚間睡眠/關機錯過28次觸發。已改成無限期重複，
+`NextRunTime`確認恢復為2026-09-01 08:00起每30分鐘一次。另一條
+`research/HYPOTHESIS_QUEUE.md`佇列（Weinstein→CTA→PEAD→carry）從來沒有
+掛過自動化，上一個互動session在8/29 04:45結案Weinstein後沒人接手，已
+交給背景agent接續CTA趨勢跟隨並往後推進，進度見`research/MARATHON_LOG.md`。
+
+**下一步**：等背景CTA研究agent的結果回報；持續留意`AlphaMarathon`排程
+恢復後是否正常心跳（`research/MARATHON_STATE.md`輪次應該會繼續往上跳）。
+
+---
+
 ## 2026-08-28（續30）— 確認FinMind額度恢復，冒煙測試check 1/12恢復PASS
 
 夜間值守輕量確認：FinMind額度已恢復（`TaiwanStockInfo`測試回200），
