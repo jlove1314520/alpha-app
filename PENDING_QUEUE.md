@@ -25,9 +25,10 @@
   paper_trades.json）——**已於稍早完成**（見`BACKLOG.md`「2026-09-01
   （續）IBKR paper下單管線測試」條目：BUY 1股AAPL Filled@324.58→SELL
   平倉Filled@324.61，帳戶歸零），依指令「若已跑過就跳過」，跳過不重做。
-- [ ] **一.2** Shioaji台股紙上下單「程式建好但不送單」：今晚只把下單
-  計畫→送出的程式寫好+模擬登入驗證流程，真正送單留到開盤且使用者親按，
-  今晚不送。
+- [x] **一.2** Shioaji台股紙上下單「程式建好但不送單」——**已完成**
+  （見`BACKLOG.md`「2026-09-01（續）Shioaji台股paper下單伺服器」條目：
+  `research/shioaji_order_server.py`建好，login+帳戶白名單驗證通過，
+  完全沒有呼叫過`/submit_order`送測試單，留到開盤且使用者親按才做）。
 - [ ] **二.1** 掃`index.html`所有「建置中/尚未實作/尚無評分/尚未接上」
   區塊，列成清單。
 - [ ] **二.2** 有現成資料源的直接建：今日事件接earnings_calendar；美股
