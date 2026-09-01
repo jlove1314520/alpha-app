@@ -7,10 +7,17 @@ just enough to stop the specific failure mode this project actually has
 session that could in principle run long).
 
 Usage (see MARATHON_PROTOCOL.md section 0):
-    python marathon_lock.py acquire   # exit 0 + "LOCK_ACQUIRED" if free
-                                       # exit 1 + "LOCK_HELD by <pid> since <ts>" if held
-    python marathon_lock.py release   # always exits 0 (releasing an
-                                       # already-free lock is not an error)
+    python marathon_lock.py acquire            # default lock (TW/US/FUT three-track marathon)
+    python marathon_lock.py acquire --name X   # named lock for an independent track
+                                                # (2026-09-01: added for the hypothesis-queue
+                                                # track, HYPOTHESIS_QUEUE_PROTOCOL.md, so it
+                                                # doesn't contend with the three-track lock --
+                                                # the two run on independent schedules and must
+                                                # not block each other)
+      # exit 0 + "LOCK_ACQUIRED" if free
+      # exit 1 + "LOCK_HELD by <pid> since <ts>" if held
+    python marathon_lock.py release [--name X]  # always exits 0 (releasing an
+                                                 # already-free lock is not an error)
 
 Stale-lock recovery: a lock older than STALE_MINUTES is treated as free --
 the process that held it almost certainly crashed or was killed without
@@ -25,15 +32,21 @@ import sys
 import time
 from pathlib import Path
 
-LOCK_PATH = Path(__file__).parent / ".marathon.lock"  # gitignored -- transient local state, not project history
+DEFAULT_LOCK_NAME = "marathon"  # unchanged default -- existing TW/US/FUT track keeps using .marathon.lock
 STALE_MINUTES = 25  # a cycle is scheduled every 30 min; a lock older than this almost certainly means
 # the process that created it died without releasing -- not a deliberate long-running cycle.
 
 
-def acquire() -> bool:
-    if LOCK_PATH.exists():
+def _lock_path(name: str) -> Path:
+    filename = ".marathon.lock" if name == DEFAULT_LOCK_NAME else f".{name}.lock"
+    return Path(__file__).parent / filename  # gitignored -- transient local state, not project history
+
+
+def acquire(name: str = DEFAULT_LOCK_NAME) -> bool:
+    lock_path = _lock_path(name)
+    if lock_path.exists():
         try:
-            pid_str, ts_str = LOCK_PATH.read_text(encoding="utf-8").strip().split("|", 1)
+            pid_str, ts_str = lock_path.read_text(encoding="utf-8").strip().split("|", 1)
             age_minutes = (time.time() - float(ts_str)) / 60.0
         except (ValueError, OSError):
             age_minutes = STALE_MINUTES + 1  # unreadable/corrupt lock file -- treat as stale, don't wedge forever
@@ -42,26 +55,35 @@ def acquire() -> bool:
             print(f"LOCK_HELD by {pid_str} since {ts_str} ({age_minutes:.1f} min ago)")
             return False
         print(f"LOCK_STALE (held by {pid_str}, {age_minutes:.1f} min old) -- recovering")
-    LOCK_PATH.write_text(f"{os.getpid()}|{time.time()}", encoding="utf-8")
+    lock_path.write_text(f"{os.getpid()}|{time.time()}", encoding="utf-8")
     print("LOCK_ACQUIRED")
     return True
 
 
-def release() -> None:
+def release(name: str = DEFAULT_LOCK_NAME) -> None:
     try:
-        LOCK_PATH.unlink()
+        _lock_path(name).unlink()
     except FileNotFoundError:
         pass  # already free -- not an error, releasing a non-held lock is a no-op by design
     print("LOCK_RELEASED")
 
 
+def _parse_name(argv: list[str]) -> str:
+    if "--name" in argv:
+        idx = argv.index("--name")
+        if idx + 1 < len(argv):
+            return argv[idx + 1]
+    return DEFAULT_LOCK_NAME
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    lock_name = _parse_name(sys.argv[2:])
     if cmd == "acquire":
-        sys.exit(0 if acquire() else 1)
+        sys.exit(0 if acquire(lock_name) else 1)
     elif cmd == "release":
-        release()
+        release(lock_name)
         sys.exit(0)
     else:
-        print("usage: python marathon_lock.py [acquire|release]")
+        print("usage: python marathon_lock.py [acquire|release] [--name LOCK_NAME]")
         sys.exit(2)

@@ -97,7 +97,9 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   搭配其他篩選）未來若要測需要獨立走完整套關卡，不能沿用這次的失敗
   當作證據。
 
-**佇列狀態：#1已結案（FAIL），接續#2 CTA趨勢跟隨。**
+**佇列狀態（2026-09-01更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案（FAIL）、
+#3 PEAD已結案（FAIL），目前進行中：#4股票股利率carry（因子層第1關cheap_pass，
+待portfolio層構造）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -173,7 +175,17 @@ reversion_60d`，均值回歸版本，EXPERIMENTAL但證據不夠乾淨）已經
 carry家族的三個機制（水位/動能/均值回歸）都測完，**這裡不重複排隊測
 期貨carry**，只排隊測股票股利率這個新角度。
 
-**狀態**：待起跑，第1關（sanity）尚未開始（股票股利率因子）。
+**狀態（2026-09-01更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`自動排程首次試跑）**：
+**第1關cheap IC gate：CHEAP_PASS**。新增`factors.py::_dividend_yield_ttm_cash()`
+（trailing 12個月現金股利加總，用`TaiwanStockDividend`的`CashExDividendTradingDate`
+本身當pit_date，天然PIT-safe不需要延遲假設）+`prepare_factors()`裡的
+`f_dividend_yield_ttm`（除以當日收盤價）+`factor_ic_dividend_yield.py`
+（新增，沿用`factor_ic.py`既有cross-sectional IC框架）。結果：TRAIN
+mean_ic=+0.0606 IR=+0.426、VAL mean_ic=+0.0807 IR=+0.562 hit_rate=0.77、
+train/val同號、null percentile=100.0（門檻90.0）。**這只是因子層第1關，
+不是最終PASS**——下一步是portfolio層構造（月頻/Top-N/成本模型，走完整
+GATE_SEQUENCE第3~9關，跟`pead_portfolio_v1`同一個下一步性質），留給下一次
+排程週期接續。完整見`TRIALS_LEDGER.md`#74。
 
 ### 5. Regime輪動（依市場情境切換曝險/因子權重）
 
@@ -255,9 +267,10 @@ CHEAP_PASS後深挖**FAIL**——VAL期表面轉強但beta驟降至-0.891，代�
    percentile=10.0，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
 3. ~~PEAD策略層構造~~——**2026-09-01已結案：FAIL**（alpha顯著性未過，
    VAL期報酬幾乎等於買進持有，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
-4. **Carry（股票股利率，期貨端已有結論）——現在排隊第一，下一個要跑的。**
-   全新因子，第1關（sanity）尚未開始。
-4. Carry（股票股利率）——期貨carry已有結論不重測，股票端全新。
+4. **Carry（股票股利率，期貨端已有結論不重測）——現在排隊第一，進行中。**
+   2026-09-01：第1關cheap IC gate CHEAP_PASS（`f_dividend_yield_ttm`，
+   percentile=100.0，見`TRIALS_LEDGER.md`#74），下一步是portfolio層構造
+   （GATE_SEQUENCE第3~9關），尚未結案。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。

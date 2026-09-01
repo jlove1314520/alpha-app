@@ -401,6 +401,51 @@ def _gross_margin_stability(stock_id: str, start_date: str) -> pd.DataFrame:
     return inc[["pit_date", "gross_margin_stability"]]
 
 
+DIVIDEND_YIELD_TRAILING_DAYS = 365  # 近12個月現金股利加總的視窗
+
+
+def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
+    """`HYPOTHESIS_QUEUE.md` #4股票股利率carry：TW股票近12個月現金股利/股價
+    （殖利率），高殖利率排名靠前。這裡只算分子（trailing 12個月現金股利加總，
+    元/股），除以股價的動作留到`prepare_factors()`（跟f_value_pb/pe直接讀
+    PER/PBR再除的做法一致）。
+
+    **PIT安全性天然成立、不需要`pit_date`延遲假設**（跟財報類因子不同）：
+    `TaiwanStockDividend`的`CashExDividendTradingDate`（除息交易日）本身就是
+    市場公開資訊的生效日——除息當天全市場都看得到這件事發生了，不像財報有
+    申報延遲，所以這裡直接把ex-date當成`pit_date`使用，不套用`quarterly_pit`
+    那種+45天假設。用`adjust.py::adjustment_events()`已經在用的同一個資料集
+    （`TaiwanStockDividend`），沿用`load_dev()`（VAL_END自動截斷），零額外
+    新資料源需求，但這是這批因子第一次直接讀這個資料集本身（不是透過
+    adjust.py的還原價邏輯），所以走FinMind呼叫（非零額外呼叫）。
+
+    2026-09-01 HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#4起跑。
+    """
+    div = load_dev("TaiwanStockDividend", stock_id, start_date)
+    if div.empty or "CashExDividendTradingDate" not in div.columns:
+        return pd.DataFrame(columns=["pit_date", "ttm_cash_dividend"])
+    events = div[["CashExDividendTradingDate", "CashEarningsDistribution"]].copy()
+    events = events.rename(columns={"CashExDividendTradingDate": "ex_date",
+                                     "CashEarningsDistribution": "cash"})
+    events["ex_date"] = events["ex_date"].replace("", np.nan)
+    events = events.dropna(subset=["ex_date"])
+    events["cash"] = pd.to_numeric(events["cash"], errors="coerce").fillna(0.0)
+    events = events[events["cash"] > 0].sort_values("ex_date").reset_index(drop=True)
+    if events.empty:
+        return pd.DataFrame(columns=["pit_date", "ttm_cash_dividend"])
+    ex_dates = pd.to_datetime(events["ex_date"])
+    # 每個 ex-date 事件當天的 pit_date，值 = 該事件往回 TRAILING_DAYS 內（含自己）
+    # 所有已發生 ex-date 的現金股利加總——只用「已經發生」的事件，天然 PIT-safe。
+    ttm = []
+    for i in range(len(events)):
+        window_start = ex_dates.iloc[i] - pd.Timedelta(days=DIVIDEND_YIELD_TRAILING_DAYS)
+        mask = (ex_dates <= ex_dates.iloc[i]) & (ex_dates > window_start)
+        ttm.append(events.loc[mask, "cash"].sum())
+    events["ttm_cash_dividend"] = ttm
+    events["pit_date"] = events["ex_date"]
+    return events[["pit_date", "ttm_cash_dividend"]]
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
@@ -576,6 +621,21 @@ def prepare_factors(
         print(f"    [factors] f_value_pb/f_value_pe skipped for {stock_id}: {e}")
         d["f_value_pb"] = np.nan
         d["f_value_pe"] = np.nan
+
+    # (t) 股票股利率 carry（`HYPOTHESIS_QUEUE.md` #4，2026-09-01自動排程新增）
+    # -- trailing 12個月現金股利(_dividend_yield_ttm_cash)除以當日收盤價，
+    # 高殖利率排名靠前，不取負號（跟f_value_pb/pe取負號慣例相反，因為這裡
+    # 分數定義本身就是「越高越好」，不是像PBR/PER那樣「越低越好」再取負）。
+    try:
+        div_pit = _dividend_yield_ttm_cash(stock_id, start_date)
+        d = _asof_join(d, div_pit, "ttm_cash_dividend", "_ttm_cash_dividend_raw")
+        d["f_dividend_yield_ttm"] = np.where(
+            d["close"] > 0, d["_ttm_cash_dividend_raw"] / d["close"], np.nan
+        )
+        d = d.drop(columns=["_ttm_cash_dividend_raw"])
+    except RuntimeError as e:
+        print(f"    [factors] f_dividend_yield_ttm skipped for {stock_id}: {e}")
+        d["f_dividend_yield_ttm"] = np.nan
 
     return d
 

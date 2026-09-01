@@ -13,85 +13,56 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
-## 2026-09-01T07:50+08:00 — 心跳補記：約68小時空窗說明，CTA趨勢跟隨正式起跑
+## 2026-09-01T11:35+08:00 — 假設佇列排程建置完成 + Carry第1關CHEAP_PASS
 
-**使用者發現這份檔案從04:45起沒有新條目，要求先查清原因再接續。查清後是兩條
-獨立軌道的問題，分開講：**
+**背景**：使用者裁示「把策略假設佇列掛上自動排程，終結『無人接手就停』」——
+這份檔案下面08:40那則收工斷點之後，佇列本身仍然沒有自動化，這輪把這個
+缺口補上，並用這次建置本身當測試，順便接續佇列#4股票股利率carry。
 
-1. **TW/US/FUT三軌輪次制馬拉松（`MARATHON_STATE.md`，跟這份檔案不同軌）**：
-   靠Windows工作排程器`AlphaMarathon`每30分鐘自動觸發。查出這個排程器的
-   觸發器設了`Duration=P7DT1H35M`+`StopAtDurationEnd=True`，這個7天視窗
-   已經在**2026-08-30 11:35**到期，之後`NextRunTime`變空、永遠不會再自動
-   觸發——**跟三軌本身「暫停單因子試驗規則」無關，是排程器設定本身到期，
-   不是判斷邏輯卡住**。機器在那之後到2026-08-31 23:17又是關機/睡眠狀態，
-   錯過28次觸發視窗。**已修好**：把`Duration`清空、`StopAtDurationEnd`
-   設`False`，改成無限期重複，確認`NextRunTime`已排到2026-09-01 08:00，
-   三軌馬拉松會恢復自動運作。
-2. **這份檔案對應的`HYPOTHESIS_QUEUE.md`佇列（Weinstein→CTA→PEAD→carry）**：
-   從一開始就靠互動session手動跑，**從來沒有掛過任何自動化排程**。上一個
-   session在2026-08-29T04:45完成Weinstein v2結案（FAIL）後，寫下「立即
-   接續CTA趨勢跟隨」就結束了，沒有任何後續session接手——是**無人接手**，
-   不是背景任務當機或卡住。
+**一、排程建置（比照既有`AlphaMarathon`三軌排程的真實架構，不是天真的
+單一確定性Python腳本——因為「佇列全空時要主動想新假設軸」這種需要經濟
+理由判斷的工作，只有LLM agent做得到，純腳本做不到）**：
+1. `marathon_lock.py`推廣成支援具名鎖（`--name hypothesis_queue`，向下
+   相容，預設仍是三軌用的`.marathon.lock`），已測試acquire/release正常，
+   且跟目前正在跑的三軌鎖互不干擾（測試當下三軌鎖確實被另一個活著的
+   排程cycle持有，具名鎖仍能獨立取得，證明隔離有效）。
+2. 新增`HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`（比照
+   `MARATHON_CONTINUATION_PROMPT.txt`極簡bootstrap風格）+
+   `HYPOTHESIS_QUEUE_PROTOCOL.md`（新的完整規則文件：取鎖→挑下一條未
+   結案假設→執行一個有界工作單位→心跳/同步佇列狀態/TRIALS_LEDGER/
+   GRAVEYARD→commit+push→釋放鎖；佇列全空時主動設計regime/擇時型新軸的
+   規則也寫在裡面，見該檔案第1節）。
+3. 新增`C:\alpha\run-hypothesis-queue-cycle.ps1`+
+   `run-hypothesis-queue-hidden.vbs`（逐字比照三軌既有的
+   `run-marathon-cycle.ps1`/`run-marathon-hidden.vbs`，同樣的
+   `--max-budget-usd 5`預算煞車跟工具限制）。
+4. **Windows排程器本身尚未建立/啟用**——新增一個每30~60分鐘會呼叫
+   Claude API、常態花錢的排程，屬於使用者自訂的「花錢」停下條件，這步
+   驟保留給主session跟使用者確認預算沒問題後再掛上去，這裡只完成
+   建置+手動驗證。
 
-**現在接續：CTA趨勢跟隨（`HYPOTHESIS_QUEUE.md`#2）第1關sanity開始執行。**
+**二、手動驗證測試（同時也是佇列#4的真實進度，不是空跑）**：挑到
+佇列#4股票股利率carry（`f_dividend_yield_ttm`，trailing 12個月現金股利/
+股價），新增`factors.py::_dividend_yield_ttm_cash()`（用
+`CashExDividendTradingDate`本身當pit_date，除息生效日天然PIT-safe，不
+需要`quarterly_pit`式的延遲假設）+ `prepare_factors()`裡的因子欄位 +
+`factor_ic_dividend_yield.py`。**第1關cheap IC gate結果：CHEAP_PASS**
+——TRAIN mean_ic=+0.0606 IR=+0.426(n=74)、VAL mean_ic=+0.0807
+IR=+0.562 hit_rate=0.77(n=47)，train/val同號，null percentile=100.0
+（門檻90.0）。**這只是因子層第1關，不是最終PASS**，下一步是portfolio層
+構造（GATE_SEQUENCE第3~9關），留給下一次接手者（不論是排程觸發後的
+無人值守instance，或人工session）。完整見`TRIALS_LEDGER.md`#74、
+`HYPOTHESIS_QUEUE.md`#4。
 
----
+**三、順便修正兩處協定遵循瑕疵**（使用者驗證性提問時發現）：這份檔案
+先前CTA/PEAD相關的5則條目沒有照「最新的寫最上面」規則插到檔案最頂端，
+而是往下接（造成檔案字面最上面其實是最舊的一則）——本次已重新排序成
+真正時間新到舊由上到下；`HYPOTHESIS_QUEUE.md`第100行附近「佇列狀態：
+#1已結案，接續#2 CTA」的舊提示字也已同步更新反映CTA/PEAD都已結案的
+現況。
 
-## 2026-09-01T08:10+08:00 — CTA趨勢跟隨結案：FAIL（第2關隨機控制組percentile=10.0）
-
-`cta_momentum_12m.py`（新增）：252交易日/12個月回顧報酬正負號，月頻
-重平衡，跟已FAIL的`fut_trend_multi_tf`（10/20/60日多數決）刻意區隔。
-
-第1關sanity PASS（5915/6185天有效，long73.9%/short26.1%，29次月頻換倉，
-非結構性no-op）。**第2關隨機控制組（N=200配對式）：percentile=10.0**，
-遠低於90.0單測門檻，且低於50——真實策略終值0.7162（累積虧損-28.4%，
-無成本），同期買進持有+778.9%，隨機控制組中位數+180.9%，真實策略比
-190/200次隨機洗牌自己的部位陣列還差。
-
-人工檢查訊號構造無bug（2000年底/2001年做空對應網路泡沫後續下跌、
-2023-2024全程做多對應多頭格局，方向經濟上合理）。研判是典型「動量崩盤」
-（momentum crash，Daniel & Moskowitz 2016）：12個月落後訊號在V型反彈
-時來不及轉向。**不泛化成「CTA在台指期沒用」**——已FAIL的多窗口投票版
-（`fut_trend_multi_tf`#18，percentile=82.5）比這次單一窗口版本(10.0)
-明顯不那麼差，暗示多窗口平滑可能有幫助，留給未來變體驗證。
-
-依協定第2關未過直接結案，未做第3關以後的關卡。完整數字見
-`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#72/`HYPOTHESIS_QUEUE.md`#2。
-
-**立即接續：佇列#3 PEAD策略層構造（用已PASS的`f_eps_surprise`/
-`f_revenue_surprise`兩因子組portfolio層規則）。**
-
----
-
-## 2026-09-01T08:25+08:00 — PEAD策略層構造：第7關樣本外背景執行中
-
-`pead_portfolio_v1.py`（新增）：等權組合`f_eps_surprise`+`f_revenue_surprise`
-（刻意只用這兩個PEAD/SUE家族因子，跟`portfolio_multifactor_v2`的4因子
-版本區隔），月頻換股Top20，沿用`portfolio_backtest_v2.py`通用機制（資格池/
-成本模型/alpha回歸，不修改該檔案本身）。TRAIN/VALIDATION兩期各跑N=100
-配對式隨機控制組+成本1x/2x/3x敏感度，背景執行中（單一組合N=15隨機控制組
-先例耗時2分鐘以上，N=100預估較久），已設置背景任務盯著，完成後立即記錄
-第7/8關結果並commit+push。
-
----
-
-## 2026-09-01T08:35+08:00 — PEAD策略層構造結案：FAIL（alpha顯著性未過）
-
-跑完N=100完整版：TRAIN(2015-2020)報酬+60.28%/alpha+7.36%(p=0.5349不顯著)/
-beta+0.564，隨機控制組percentile=100.0；VALIDATION(2021-2024)報酬+54.65%/
-alpha+6.03%(p=0.4809不顯著)/beta+0.570，隨機控制組percentile=98.0。
-
-**表面上第7關（樣本外+隨機控制組）過關，但套用本專案已建立的alpha顯著性
-標準（`portfolio_multifactor_v2`/`weinstein_stage2_v2`都用過同一把尺）
-判定FAIL**——隨機控制組percentile高只證明「排序這兩個因子挑的股票比隨機
-挑股票好」（跟因子層IC本來就PASS的結論一致），不能取代CAPM alpha顯著性
-檢定：兩期alpha都遠不顯著(p=0.48~0.53)，且**VAL期總報酬(+54.65%)幾乎
-等於買進持有大盤(+54.58%)，只差+0.07個百分點**，beta+0.56~0.57顯示報酬
-主要是市場曝險，不是選股貢獻的超額報酬。**不泛化成PEAD/SUE因子沒用**——
-死的是「等權/月頻/Top20」這個具體portfolio構造，IC加權或情境式組合等
-變體仍值得未來獨立測試。完整見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#73。
-
-**立即接續：佇列#4股票股利率carry（全新因子，第1關sanity尚未開始）。**
+**沒有觸發三個停下條件中的任何一種**（本輪唯一涉及「花錢」的部分——
+啟用常態排程本身——刻意保留給主session確認，不是本輪自己判斷可以跳過）。
 
 ---
 
@@ -130,6 +101,88 @@ CTA（FAIL）+ PEAD（FAIL）兩條假設本輪都已完整結案並commit+push�
 的其他並行session殘留檔——`research/pit_run_*.log`/`weinstein_v2_run.log`/
 `data/rate_limit_state.json`，這些本輪未觸碰、未commit）。本輪全部commit
 都已push成功。
+
+---
+
+## 2026-09-01T08:35+08:00 — PEAD策略層構造結案：FAIL（alpha顯著性未過）
+
+跑完N=100完整版：TRAIN(2015-2020)報酬+60.28%/alpha+7.36%(p=0.5349不顯著)/
+beta+0.564，隨機控制組percentile=100.0；VALIDATION(2021-2024)報酬+54.65%/
+alpha+6.03%(p=0.4809不顯著)/beta+0.570，隨機控制組percentile=98.0。
+
+**表面上第7關（樣本外+隨機控制組）過關，但套用本專案已建立的alpha顯著性
+標準（`portfolio_multifactor_v2`/`weinstein_stage2_v2`都用過同一把尺）
+判定FAIL**——隨機控制組percentile高只證明「排序這兩個因子挑的股票比隨機
+挑股票好」（跟因子層IC本來就PASS的結論一致），不能取代CAPM alpha顯著性
+檢定：兩期alpha都遠不顯著(p=0.48~0.53)，且**VAL期總報酬(+54.65%)幾乎
+等於買進持有大盤(+54.58%)，只差+0.07個百分點**，beta+0.56~0.57顯示報酬
+主要是市場曝險，不是選股貢獻的超額報酬。**不泛化成PEAD/SUE因子沒用**——
+死的是「等權/月頻/Top20」這個具體portfolio構造，IC加權或情境式組合等
+變體仍值得未來獨立測試。完整見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#73。
+
+**立即接續：佇列#4股票股利率carry（全新因子，第1關sanity尚未開始）。**
+
+---
+
+## 2026-09-01T08:25+08:00 — PEAD策略層構造：第7關樣本外背景執行中
+
+`pead_portfolio_v1.py`（新增）：等權組合`f_eps_surprise`+`f_revenue_surprise`
+（刻意只用這兩個PEAD/SUE家族因子，跟`portfolio_multifactor_v2`的4因子
+版本區隔），月頻換股Top20，沿用`portfolio_backtest_v2.py`通用機制（資格池/
+成本模型/alpha回歸，不修改該檔案本身）。TRAIN/VALIDATION兩期各跑N=100
+配對式隨機控制組+成本1x/2x/3x敏感度，背景執行中（單一組合N=15隨機控制組
+先例耗時2分鐘以上，N=100預估較久），已設置背景任務盯著，完成後立即記錄
+第7/8關結果並commit+push。
+
+---
+
+## 2026-09-01T08:10+08:00 — CTA趨勢跟隨結案：FAIL（第2關隨機控制組percentile=10.0）
+
+`cta_momentum_12m.py`（新增）：252交易日/12個月回顧報酬正負號，月頻
+重平衡，跟已FAIL的`fut_trend_multi_tf`（10/20/60日多數決）刻意區隔。
+
+第1關sanity PASS（5915/6185天有效，long73.9%/short26.1%，29次月頻換倉，
+非結構性no-op）。**第2關隨機控制組（N=200配對式）：percentile=10.0**，
+遠低於90.0單測門檻，且低於50——真實策略終值0.7162（累積虧損-28.4%，
+無成本），同期買進持有+778.9%，隨機控制組中位數+180.9%，真實策略比
+190/200次隨機洗牌自己的部位陣列還差。
+
+人工檢查訊號構造無bug（2000年底/2001年做空對應網路泡沫後續下跌、
+2023-2024全程做多對應多頭格局，方向經濟上合理）。研判是典型「動量崩盤」
+（momentum crash，Daniel & Moskowitz 2016）：12個月落後訊號在V型反彈
+時來不及轉向。**不泛化成「CTA在台指期沒用」**——已FAIL的多窗口投票版
+（`fut_trend_multi_tf`#18，percentile=82.5）比這次單一窗口版本(10.0)
+明顯不那麼差，暗示多窗口平滑可能有幫助，留給未來變體驗證。
+
+依協定第2關未過直接結案，未做第3關以後的關卡。完整數字見
+`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#72/`HYPOTHESIS_QUEUE.md`#2。
+
+**立即接續：佇列#3 PEAD策略層構造（用已PASS的`f_eps_surprise`/
+`f_revenue_surprise`兩因子組portfolio層規則）。**
+
+---
+
+## 2026-09-01T07:50+08:00 — 心跳補記：約68小時空窗說明，CTA趨勢跟隨正式起跑
+
+**使用者發現這份檔案從04:45起沒有新條目，要求先查清原因再接續。查清後是兩條
+獨立軌道的問題，分開講：**
+
+1. **TW/US/FUT三軌輪次制馬拉松（`MARATHON_STATE.md`，跟這份檔案不同軌）**：
+   靠Windows工作排程器`AlphaMarathon`每30分鐘自動觸發。查出這個排程器的
+   觸發器設了`Duration=P7DT1H35M`+`StopAtDurationEnd=True`，這個7天視窗
+   已經在**2026-08-30 11:35**到期，之後`NextRunTime`變空、永遠不會再自動
+   觸發——**跟三軌本身「暫停單因子試驗規則」無關，是排程器設定本身到期，
+   不是判斷邏輯卡住**。機器在那之後到2026-08-31 23:17又是關機/睡眠狀態，
+   錯過28次觸發視窗。**已修好**：把`Duration`清空、`StopAtDurationEnd`
+   設`False`，改成無限期重複，確認`NextRunTime`已排到2026-09-01 08:00，
+   三軌馬拉松會恢復自動運作。
+2. **這份檔案對應的`HYPOTHESIS_QUEUE.md`佇列（Weinstein→CTA→PEAD→carry）**：
+   從一開始就靠互動session手動跑，**從來沒有掛過任何自動化排程**。上一個
+   session在2026-08-29T04:45完成Weinstein v2結案（FAIL）後，寫下「立即
+   接續CTA趨勢跟隨」就結束了，沒有任何後續session接手——是**無人接手**，
+   不是背景任務當機或卡住。
+
+**現在接續：CTA趨勢跟隨（`HYPOTHESIS_QUEUE.md`#2）第1關sanity開始執行。**
 
 ---
 
