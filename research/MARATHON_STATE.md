@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-01T10:01+08:00**
+**最後更新：2026-09-01T11:01+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 248 輪。最新一輪：第 248 輪 · 2026-09-01T10:31+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT（三軌時間戳FUT 09:03第245輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit，`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應，暫停規則本身未被修改）。FUT軌沒有組合策略相關工作可接、round104「下一步」仍是單因子相關工作，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`除4個未追蹤log殘留（另一互動session殘留）之外無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約138輪、跨度約133.9小時（約5.6天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第248輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 249 輪。最新一輪：第 249 輪 · 2026-09-01T11:01+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選US（三軌時間戳US 09:31第246輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit、`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應、暫停規則本身未被修改）。US軌沒有組合策略相關工作可接（規格書是台股專屬），本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`除4個未追蹤log殘留（另一互動session殘留）之外無其他變更，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約139輪、跨度約134.4小時（約5.6天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第249輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
+
+**上一則保留（第248輪，供對照）**：第 248 輪 · 2026-09-01T10:31+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT（三軌時間戳FUT 09:03第245輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit、`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應、暫停規則本身未被修改）。FUT軌沒有組合策略相關工作可接、round104「下一步」仍是單因子相關工作，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`除4個未追蹤log殘留（另一互動session殘留）之外無其他變更，未觸碰、未納入本輪commit。詳見`REPORT.md`第248輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
 **上一則保留（第246輪，供對照）**：第 246 輪 · 2026-09-01T09:31+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨，依輪替選US（三軌時間戳US 08:01第243輪最舊）。獨立複查三個解除條件皆未成立。US軌沒有組合策略相關工作可做，本輪整輪跳過，未做任何實質工作。詳見`REPORT.md`第246輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
 
