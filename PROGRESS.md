@@ -16,6 +16,23 @@
 
 ---
 
+## 2026-09-01（續8，開發帽）— Shioaji台股paper下單伺服器建好（PENDING_QUEUE一.2），今晚只驗證login，未送測試單
+
+新增`research/shioaji_order_server.py`（逐字比照`ibkr_order_server.py`
+架構）。**查證發現Shioaji沒有IBKR那種可查詢的模擬帳戶旗標**（帳戶物件
+沒有任何欄位標示模擬環境），改用兩層防護：`simulation=True`寫死不接受
+request覆蓋+帳戶ID白名單交叉比對(`0727956`)。Log沿用`data/
+paper_order_log.json`（跟IBKR共用，新增`broker`欄位區分）。**今晚只測
+`/health`（login+帳戶白名單通過）跟token驗證(401)，完全沒有呼叫過
+`/submit_order`送測試單**——留到台股開盤且使用者親自確認才做，這是
+明確裁示。過程中修掉一個print用emoji在cp950編碼下讓伺服器啟動崩潰的
+小bug。全程刻意避開`research/HYPOTHESIS_QUEUE.md`等當下由自主研究
+馬拉松使用中的檔案（鎖檔是活的），沒有衝突。詳見`BACKLOG.md`
+「2026-09-01（續）Shioaji台股paper下單伺服器」條目（標⚠因下單測試
+本身尚未執行）。
+
+---
+
 ## 2026-09-01（續7，開發帽）— IBKR paper下單管線測試完整成功，回補一個NaN寫入JSON的真bug
 
 使用者確認Read-Only API已關、美股盤中，做了一次完整下單管線測試：BUY 1股

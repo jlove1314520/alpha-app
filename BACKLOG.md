@@ -17,6 +17,56 @@
 
 ---
 
+## ⚠ 2026-09-01（續）Shioaji台股paper下單伺服器：程式建好+login驗證通過，
+**今晚沒有送過任何測試單**
+
+PENDING_QUEUE「一.2」項目：逐字比照`research/ibkr_order_server.py`架構
+新增`research/shioaji_order_server.py`（FastAPI，只監聽127.0.0.1，
+`X-Alpha-Local-Token`密鑰驗證，只有`/submit_order`會下單）。
+
+**跟IBKR版本的關鍵差異，誠實記錄**：查證後發現**Shioaji沒有IBKR那種
+可查詢的模擬帳戶旗標**（IBKR的paper帳戶ID有公開"DU"字首慣例；Shioaji
+的`Account`物件`model_dump()`不存在，改用`vars()`查過完整欄位——
+`account_type`/`person_id`/`broker_id`/`account_id`/`signed`/
+`username`——沒有任何一個欄位標示模擬環境，`sj.Shioaji`物件本身也沒有
+可查詢的`simulation`屬性）。真正的安全邊界是`simulation=True`連去的
+伺服器基礎設施本身就跟正式環境分開，不是帳戶物件上一個可讀欄位。已用
+兩層防護補強：①`simulation=True`寫死在程式碼常數，`/submit_order`
+request body完全沒有「要不要模擬」這個欄位可以傳②帳戶ID白名單交叉比對
+（`EXPECTED_SIM_ACCOUNT_ID="0727956"`，2026-09-01實測登入這個模擬環境
+拿到的帳戶），不符合就拒絕下單。
+
+**Log沿用`data/paper_order_log.json`**（跟IBKR共用同一份，不是分開開
+`_tw.json`）——新增`broker`欄位區分"ibkr"/"shioaji"，方便以後做跨券商
+彙總，不用同時讀兩個檔案再合併。
+
+**⚠ 今晚只驗證到`/health`（login+帳戶白名單比對通過，回傳
+`account_id:"0727956"`+`account_type:"simulation"`）跟token驗證機制
+（無token打`/submit_order`正確回401，且這個測試在觸及任何下單邏輯之前
+就被擋下，沒有連線到Shioaji）——**沒有呼叫過`/submit_order`送出任何
+測試單**，真正的下單測試留到台股開盤（08:30後）且使用者親自在旁邊確認
+才做，這是使用者的明確裁示。
+
+**訂單狀態判斷沿用IBKR修好的教訓但尚未實測**：Shioaji的`OrderStatus`
+列舉值（`PendingSubmit`/`PreSubmitted`/`Submitted`/`Filled`/
+`PartFilled`/`Cancelled`/`Failed`/`Inactive`，跟IBKR不同，已用
+`dir(sj.OrderStatus)`查證）跟IBKR不同，保守起見沿用「只有Filled才提早
+結束等待」的邏輯，但**目前沒有Shioaji本身的實測證據**顯示也有IBKR那種
+非終止性中途狀態問題，這個保守假設要等真的送過測試單才能確認是否必要。
+
+**過程中修掉一個小bug**：伺服器啟動時的一行print用了⚠emoji，在
+Windows終端機cp950編碼下`UnicodeEncodeError`直接讓伺服器啟動失敗，
+已移除emoji改用純文字。
+
+**驗收**：`curl /health`確認login+帳戶白名單比對正確運作；`curl
+/submit_order`無token測試確認401正確擋下。**沒有動`index.html`**（下單
+計畫UI卡片是另一個範圍，這輪只做後端伺服器）。**沒有碰**
+`research/HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`/
+`dividend_yield_portfolio_v1.py`/`.hypothesis_queue.lock`——那些檔案
+當下有另一個自主研究馬拉松流程在使用（鎖檔是活的），刻意避開避免衝突。
+
+---
+
 ## ✅ 2026-09-01（續）IBKR paper下單管線測試：完整驗證下單→成交整條會動
 
 使用者確認Gateway唯讀API已關、美股盤中，要求做一次「管線測試」（不是
