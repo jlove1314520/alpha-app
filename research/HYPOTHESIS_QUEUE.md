@@ -107,8 +107,10 @@ sanity通過（非PASS/FAIL判定，工具就緒待未來候選套用，見下�
 IC gate贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，見下方條目
 與`STRATEGY_GRAVEYARD.md`）、#12 Betting-Against-Beta/低beta已結案（FAIL，
 引用`TRIALS_LEDGER.md`#61既有跨軌結果判定、非新測試，train期IR僅0.009+
-跨累積Bonferroni校正未過，見下方條目與`STRATEGY_GRAVEYARD.md`），目前
-排隊第一：#13台股三大法人連續買超持續性（第1關sanity尚未開始）。**
+跨累積Bonferroni校正未過，見下方條目與`STRATEGY_GRAVEYARD.md`）、#13台股
+三大法人連續買超持續性已結案（FAIL，第1關cheap IC gate train/val正負號
+相反+null percentile=81.9未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`），
+目前排隊第一：#14台股月營收公布事件效應（第1關sanity尚未開始）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -520,7 +522,8 @@ cross-sectional排序、純多頭」這個具體實作，未測過多空版本/d
 beta/不同窗口，未來重測需換其中一個變體。完整見
 `STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#78（本輪新增）、
 `MARATHON_LOG.md`2026-09-02對應條目。佇列#12結案，接續佇列第一順位
-#13台股三大法人連續買超持續性。
+#13台股三大法人連續買超持續性（**這個提示字已過時，#13已結案，見上方
+#13條目跟本檔案「排隊順序總結」章節取得最新接續狀態**）。
 
 ---
 
@@ -543,7 +546,25 @@ beta/不同窗口，未來重測需換其中一個變體。完整見
 deep_dive階段要特別確認「連續天數」本身的排序能力是否顯著優於「加總
 金額」這種更簡單的既有做法，否則只是換個統計量重複驗證同一個訊號。
 
-**狀態**：待起跑，第1關（sanity）尚未開始。
+**狀態（2026-09-02更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第十三輪排程，已結案：
+FAIL）**：新增`factors.py::_consecutive_positive_streak_days()`
+（`f_inst_streak_days`：逐日輸出「截至當天為止、三大法人合計淨買超連續
+未中斷的天數」，非正即歸零，重用既有`_institutional_daily_net()`已算好的
+`total_net`欄位）+`factor_ic_inst_streak_days.py`（新增，沿用`factor_ic.py`
+既有cross-sectional IC+洗牌null框架，standalone bonferroni_n=1）。結果
+（100檔快取樣本，80檔可用，121個20交易日快照）：TRAIN mean_ic=+0.0328
+IR=+0.281(n=74)、VAL mean_ic=-0.0236 IR=-0.183 hit_rate=0.53(n=47)，
+**train/val正負號相反**、null percentile=81.9（門檻90.0，未過）。三項判準
+中兩項未過，依協定第1關未過直接結案，未進第2關以後。跟已FAIL的
+`f_foreign_streak`（#3，外資單一法人版，打散對照76.0百分位+train/val
+正負號相反）死法幾乎相同（percentile同一量級76.0 vs 81.9），暗示「連續
+買超」這個時間序列結構本身（不論算外資或三大法人合計、不論用天數或金額
+衡量）在此框架下測不出穩健訊號。**不泛化成「三大法人籌碼流向沒用」**——
+既有`f_inst_flow`（20日淨額/成交值比率）仍在正式因子清單中未被推翻，死的
+只是「連續期間」這個特定衡量角度，未來重測籌碼類因子建議換完全不同構造
+（持股比例變化速率/法人分歧度/大額單筆），不建議再嘗試連續期間的其他
+變體。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#79。佇列#13結案，
+接續佇列第一順位#14台股月營收公布事件效應。
 
 ---
 
@@ -634,9 +655,13 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
     FAIL**（引用`TRIALS_LEDGER.md`#61既有跨軌結果判定、非新測試，
     train期IR僅0.009+跨累積Bonferroni校正未過，見上方條目與
     `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#78），移出排隊佇列。
-13. **台股三大法人連續買超持續性——現在排隊第一。** 2026-09-02新增，
-    待起跑，第1關尚未開始。
-14. 台股月營收公布事件效應——2026-09-02新增，待起跑，第1關尚未開始。
+13. ~~台股三大法人連續買超持續性~~——**2026-09-02第十三輪排程已結案：
+    FAIL**（因子層第1關cheap IC gate，`f_inst_streak_days`train/val正負號
+    相反+null percentile=81.9<90.0門檻，跟已FAIL的`f_foreign_streak`
+    （#3）死法幾乎相同，見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#79），
+    移出排隊佇列。
+14. **台股月營收公布事件效應——現在排隊第一。** 2026-09-02新增，待起跑，
+    第1關尚未開始。
 15. 波動度目標化Vol-Targeting——2026-09-02新增，可獨立於選股類假設先跑，
     不用等其他候選排隊。
 

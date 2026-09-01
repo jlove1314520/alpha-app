@@ -13,6 +13,22 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T04:55 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十三輪排程：佇列#13
+台股三大法人連續買超持續性第1關cheap IC gate — 結果：**FAIL**
+
+新增`factors.py::_consecutive_positive_streak_days()`（`f_inst_streak_days`：
+三大法人合計淨買超連續同方向天數，重用既有`_institutional_daily_net()`
+已算好的`total_net`欄位）+`factor_ic_inst_streak_days.py`（新增，沿用
+`factor_ic.py`既有cross-sectional IC+洗牌null框架）。結果（100檔快取樣本，
+80檔可用，121個20交易日快照）：TRAIN mean_ic=+0.0328 IR=+0.281(n=74)、VAL
+mean_ic=-0.0236 IR=-0.183 hit_rate=0.53(n=47)，train/val正負號相反、null
+percentile=81.9（門檻90.0，未過）。跟已FAIL的`f_foreign_streak`（#3，
+外資單一法人版）死法幾乎相同，暗示「連續買超」這個時間序列結構本身測不出
+穩健訊號，不是統計量選擇的問題。完整見`HYPOTHESIS_QUEUE.md`#13、
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#79。佇列#13結案，接續佇列第一
+順位#14台股月營收公布事件效應（第1關sanity尚未開始）。本輪未觸發任何
+「三個停下條件」，`is_holdout_consumed()`確認仍為`False`。
+
 ## 2026-09-02T04:16 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十二輪排程，佇列#12 Betting-Against-Beta/低beta — **已結案：FAIL**（查核「已知相關背景」時發現此因子`f_bab`其實已在TW marathon軌道測過`TRIALS_LEDGER.md`#61，本輪引用該既有結果判定、未跑新程式；train期IR僅0.009近乎雜訊，且跨軌共用累積Bonferroni校正門檻99.63遠高於單測percentile91.0，兩者疊加判FAIL；完整見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#78/`HYPOTHESIS_QUEUE.md`#12；佇列接續#13台股三大法人連續買超持續性，第1關尚未開始）
 
 ## 2026-09-02T03:59 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十一輪排程，佇列#11產業內相對強度Sector-Neutral Relative Strength第1關cheap IC gate — **已結案：FAIL**（贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，train/val同號但方向與假設預期相反；新增`factor_ic_sector_neutral_rel_strength.py`，不改`factor_ic.py`/`factors.py`本身；完整見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#77/`HYPOTHESIS_QUEUE.md`#11；佇列接續#12 Betting-Against-Beta/低beta，第1關尚未開始）

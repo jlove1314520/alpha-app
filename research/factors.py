@@ -157,6 +157,34 @@ def _institutional_daily_net(stock_id: str, start_date: str) -> pd.DataFrame:
     return combined
 
 
+def _consecutive_positive_streak_days(net: np.ndarray) -> np.ndarray:
+    """三大法人合計連續買超天數 (`HYPOTHESIS_QUEUE.md` #13，2026-09-02 自動排程
+    新增，佇列排隊第一起跑)。經濟理由：三大法人在台股普遍被視為資訊優勢方，
+    連續買超天數代表持續性的資訊優勢累積，比單日金額更能過濾雜訊（單日大額
+    買超可能只是換股操作或程式交易雜訊，連續多日同方向較可能反映真實優勢）。
+
+    跟已經FAIL的`f_foreign_streak`/`_foreign_streak_strength()`刻意做出兩點
+    區隔（不是換皮重測同一個已死機制）：(1) 這裡用**三大法人合計**
+    (`total_net`)，`f_foreign_streak`只算**外資單一法人**(`foreign_net`)；
+    (2) 這裡衡量的統計量是**連續天數本身**（計數/次序統計量），
+    `f_foreign_streak`衡量的是「用成交量正規化的連續期間累積買超金額」（連續
+    量的大小），是根本不同的統計量，不是同一個訊號換個寫法。每日輸出「截至
+    當天為止、連續同方向(>0)未中斷的天數」，net[i]<=0當天歸零。跟
+    `_foreign_streak_strength()`同一種因果/序列邏輯（每個值只依賴到當天為止
+    的歷史，天然point-in-time），故意沿用同一套loop寫法保持風格一致，不是
+    重複造輪子。
+    """
+    out = np.zeros(len(net))
+    streak = 0
+    for i in range(len(net)):
+        if net[i] > 0:
+            streak += 1
+        else:
+            streak = 0
+        out[i] = float(streak)
+    return out
+
+
 def _foreign_streak_strength(net: np.ndarray, avg_vol: np.ndarray) -> np.ndarray:
     """(c) 外資連續買超強度: at each day, the cumulative net-buy over the
     CURRENT unbroken streak of positive-net-buy days (streak resets to 0 the
@@ -485,6 +513,7 @@ def prepare_factors(
     net_amount = d["total_net"] * d["close"]
     value20 = d["Trading_money"].rolling(INST_FLOW_WINDOW, min_periods=INST_FLOW_WINDOW).mean()
     d["f_inst_flow"] = net_amount.rolling(INST_FLOW_WINDOW, min_periods=INST_FLOW_WINDOW).sum() / (value20 * INST_FLOW_WINDOW)
+    d["f_inst_streak_days"] = _consecutive_positive_streak_days(d["total_net"].to_numpy())
 
     # (a)/(b)/(g)/(h) 月營收/財報衍生因子 -- 全部依賴 FinMind
     # TaiwanStockMonthRevenue/TaiwanStockFinancialStatements，額度用盡時個別捕捉
