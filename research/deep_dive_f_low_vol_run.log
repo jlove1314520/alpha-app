@@ -1,0 +1,42 @@
+=== TW deep-dive (1b): f_low_vol ===
+Loading sample (100 requested, cached data/raw/ reused, same seed as #9 cheap gate)...
+  80/100 usable names
+  79/80 names have at least one non-NaN f_low_vol value
+
+=== TRAIN 2015-01-01..2020-12-31, cost 1x (slippage=5.0bps) ===
+  net total_return=+13.99%  ann_return=+2.27%  Sortino=0.212  beta=-0.424  alpha=+9.96% (p=0.6011)
+  random control (100 draws): median_equity=0.3105  real_percentile=99.0
+
+=== TRAIN 2015-01-01..2020-12-31, cost 2x (slippage=10.0bps) ===
+  net total_return=+9.51%  ann_return=+1.57%  Sortino=0.186  beta=-0.424  alpha=+9.21% (p=0.6460)
+  random control (100 draws): median_equity=0.2713  real_percentile=100.0
+
+=== TRAIN 2015-01-01..2020-12-31, cost 3x (slippage=15.0bps) ===
+  net total_return=+5.20%  ann_return=+0.87%  Sortino=0.160  beta=-0.423  alpha=+8.47% (p=0.6921)
+  random control (100 draws): median_equity=0.2370  real_percentile=100.0
+
+=== VAL 2021-01-01..2024-12-31, cost 1x (slippage=5.0bps) ===
+  net total_return=-30.09%  ann_return=-8.87%  Sortino=-0.160  beta=-0.718  alpha=+4.65% (p=0.7590)
+  random control (100 draws): median_equity=0.4380  real_percentile=85.0
+
+=== VAL 2021-01-01..2024-12-31, cost 2x (slippage=10.0bps) ===
+  net total_return=-31.82%  ann_return=-9.46%  Sortino=-0.182  beta=-0.718  alpha=+3.98% (p=0.7277)
+  random control (100 draws): median_equity=0.3999  real_percentile=87.0
+
+=== VAL 2021-01-01..2024-12-31, cost 3x (slippage=15.0bps) ===
+  net total_return=-33.50%  ann_return=-10.05%  Sortino=-0.203  beta=-0.717  alpha=+3.31% (p=0.6969)
+  random control (100 draws): median_equity=0.3651  real_percentile=88.0
+
+=== SUMMARY ===
+  TRAIN 1x: ann_return=+2.27%  beta=-0.424  alpha=+9.96% (p=0.6011)  Sortino=0.212  random_pct=99.0
+  TRAIN 2x: ann_return=+1.57%  beta=-0.424  alpha=+9.21% (p=0.6460)  Sortino=0.186  random_pct=100.0
+  TRAIN 3x: ann_return=+0.87%  beta=-0.423  alpha=+8.47% (p=0.6921)  Sortino=0.160  random_pct=100.0
+  VAL 1x: ann_return=-8.87%  beta=-0.718  alpha=+4.65% (p=0.7590)  Sortino=-0.160  random_pct=85.0
+  VAL 2x: ann_return=-9.46%  beta=-0.718  alpha=+3.98% (p=0.7277)  Sortino=-0.182  random_pct=87.0
+  VAL 3x: ann_return=-10.05%  beta=-0.717  alpha=+3.31% (p=0.6969)  Sortino=-0.203  random_pct=88.0
+
+beta drift check: TRAIN beta=-0.424  VAL beta=-0.718  |drift|=0.294  within a plausible market-neutral-construction range
+
+saved data/deep_dive_f_low_vol.csv
+
+holdout check (after): is_holdout_consumed() -> False (OK)

@@ -13,6 +13,16 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T07:12 — `hypothesis_queue`排程接續#7低波動(TW策略層)十分位多空深挖 — 已結案FAIL（VAL期隨機控制組percentile=85.0未過90.0門檻+兩期alpha不顯著），佇列#7~#15全數結案，剩餘#5/#6/#8/#10皆外部依賴阻塞，下一輪需判斷是否設計新假設軸
+
+（附註：本輪取`hypothesis_queue`具名鎖時鎖檔已陳舊約30分鐘被回收——研判
+上一輪是寫完`HYPOTHESIS_QUEUE.md`#7初始狀態、啟動`deep_dive_f_low_vol.py`
+背景執行後、還沒commit就中斷。本輪確認該背景行程（PID 16888）**真的還
+活著**（跟先前`dividend_yield_portfolio_v1.py`案例不同，那次背景行程在
+輪次交接時被一併終止），輪詢等待約12分鐘後其自然執行完成，未重工也未
+中途干預，讀取完整輸出後做出判定，詳見`HYPOTHESIS_QUEUE.md`#7、
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#82三處同步更新。）
+
 ## 2026-09-02T05:57 — `HYPOTHESIS_QUEUE_PROTOCOL.md`排程首次試跑：佇列#15
 波動度目標化Vol-Targeting第1關sanity+第2關輕量版隨機控制組 — 結果：**FAIL**
 
