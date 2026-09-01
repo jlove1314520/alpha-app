@@ -230,3 +230,45 @@ FAIL/深挖後降級案例的策展摘要，給使用者/App策略監控台看�
   `data/dividend_yield_portfolio_v1_checkpoint.json`（gitignored，
   完整TRAIN/VALIDATION兩期100/100隨機控制組數字）。`HYPOTHESIS_QUEUE.md`
   #4狀態同步更新為FAIL，佇列接續#9殘差動量Residual Momentum。
+
+### f_residual_momentum（HYPOTHESIS_QUEUE.md#9「殘差動量Residual Momentum」，
+Blitz/Huij/Martens 2011，因子層第1關cheap IC gate，2026-09-02FAIL）
+
+- **哪一關死的**：GATE_SEQUENCE第1關cheap IC gate本身——`factor_ic.py`
+  `evaluate_factor()`要求同時滿足三項判準（VAL期IC非零、train/val同號、
+  贏過洗牌null分布），這條在「train/val同號」這一項就沒過，依協定第1關
+  未過直接結案，未進第2關以後（更不用說portfolio層構造）。
+- **具體數字**：`factor_ic_residual_momentum.py`（100檔快取樣本，80檔
+  可用，121個20交易日快照，2015-01-01~2024-12-31）：TRAIN mean_ic=
+  -0.0092 IR=-0.057（n=40期）、VAL mean_ic=+0.0305 IR=+0.248 hit_rate=
+  0.62（n=47期），null percentile=90.6（門檻90.0，單看percentile勉強
+  過）。
+- **死因**：TRAIN期IC幾乎為零且方向為負，VAL期轉正但幅度很小——如果只看
+  VAL單期percentile會誤以為過關，但train/val方向相反代表這個關係在不同
+  期間不穩定，是雜訊主導，不是穩健的橫斷面預測能力。跟`dividend_yield_
+  portfolio_v1`（#75）「表面贏但alpha不顯著」的死法不同——這條連因子層
+  最便宜的第1關單測都沒過，比portfolio層才死的案例更早、更便宜地被拆穿。
+- **這個死法能不能泛化**：**不能泛化成「剝離beta找殘差動量這個機制本身
+  沒用」**。有兩個明確保留的理由，未來重測前要先看過：
+  1. 這次用的是簡化的一階近似（12個月股票報酬減去「252日滾動beta×12個月
+     大盤報酬」，不是逐日重算複利殘差再累加，見`factors.py::prepare_
+     factors()`「(u)」段落docstring）——跟`f_rel_strength`用「股票報酬-
+     大盤報酬」隱含beta=1同一種近似程度，但沒有驗證過這個近似對「beta
+     隨時間變動」是否夠敏感。
+  2. 只測了CAPM單因子（純市場beta），文獻原始設計（Blitz/Huij/Martens
+     2011）建議延伸到三因子（加size/value），本專案目前沒有現成的TW版
+     size/value系統性因子可以零成本複用，這條路徑沒有測到。
+  未來若要重測，需要換一種殘差計算方式（例如真的逐日跑滾動迴歸取殘差
+  再累加）或延伸多因子模型，不能沿用這次同一個具體實作（252日CAPM一階
+  近似）當作「這個經濟機制已經測過」的證據。
+- **跟已死案例的區隔**：跟`f_rel_strength_regime_switch`（#40）、
+  Weinstein第二階段v2、`cta_momentum_12m`（#72）三個已死的原始價格動量
+  類假設死法不同——那三個都是「表面贏了但拆解後是beta曝險」，這條是
+  「觀測層級本身train/val就不一致，連表面訊號方向都不穩定」，屬於協定
+  「快殺標準」的「觀測層級就無訊號」類別，不是同一個偽影家族換皮。
+- **原始記錄**：`research/factors.py`（新增`f_residual_momentum`欄位，
+  `prepare_factors()`函式內，未加入`FACTOR_COLUMNS`/`ALL_FACTOR_COLUMNS`
+  清單，跟`f_dividend_yield_ttm`等其他standalone因子同一種做法）、
+  `research/factor_ic_residual_momentum.py`（新增，可重複執行）、
+  `TRIALS_LEDGER.md`#76。`HYPOTHESIS_QUEUE.md`#9狀態同步更新為FAIL，
+  佇列接續#10市場regime擇時overlay（下一個排隊項目，方法論框架待建立）。

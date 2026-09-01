@@ -13,6 +13,34 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T02:58+08:00 — 殘差動量#9：因子層第1關cheap IC gate起跑並結案FAIL（HYPOTHESIS_QUEUE_PROTOCOL.md軌道，跟三軌馬拉松無關）
+
+**背景**：`hypothesis_queue`具名鎖正常取得（非陳舊回收），`git pull`已是
+最新，`git status`乾淨（只有幾個非本輪殘留的`*_run.log`檔案，未觸碰、未
+納入commit）。依`HYPOTHESIS_QUEUE.md`「排隊順序總結」跟各條目狀態欄兩處
+對得上，確認佇列第一順位是#9殘差動量Residual Momentum（第1關sanity尚未
+開始）。
+
+**動作**：新增`factors.py::prepare_factors()`「(u)殘差動量」段落——
+`f_residual_momentum`用252日滾動CAPM beta（沿用`f_bab`/`f_idio_vol`同一套
+cov/var計算，只換窗口60→252天），以「12個月股票報酬-beta×12個月大盤
+報酬」近似12個月累積殘差報酬。新增`factor_ic_residual_momentum.py`（沿用
+`factor_ic.py`既有cross-sectional IC框架，standalone bonferroni_n=1），
+100檔快取樣本、80檔可用、121個20交易日快照，前景一次執行完成（未跨輪）。
+
+**結果**：TRAIN mean_ic=-0.0092（n=40，方向為負）、VAL mean_ic=+0.0305
+（n=47，方向為正）、null percentile=90.6（單看勉強過90.0門檻）——但
+train/val正負號不一致，`evaluate_factor()`三項判準之一未過，直接判
+**FAIL**，未進第2關以後。已更新`HYPOTHESIS_QUEUE.md`#9條目狀態+排隊順序
+總結、`STRATEGY_GRAVEYARD.md`新增條目（明確聲明不泛化理由：一階近似+
+只測CAPM單因子未延伸size/value）、`TRIALS_LEDGER.md`#76。佇列#9結案，
+接續佇列第一順位#10市場regime擇時overlay（方法論框架待建立）。
+
+**`is_holdout_consumed()`確認**：本輪只跑因子層IC測試（`snapshot_start`到
+`VAL_END`），未觸及holdout範圍，仍為`False`。
+
+---
+
 ## 2026-09-02T02:31+08:00 — Carry #4：TRAIN+VALIDATION全部跑完，人工核對alpha顯著性後結案FAIL
 
 **背景**：`hypothesis_queue`鎖檔正常取得（非陳舊回收）。`git status`乾淨

@@ -97,10 +97,12 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   搭配其他篩選）未來若要測需要獨立走完整套關卡，不能沿用這次的失敗
   當作證據。
 
-**佇列狀態（2026-09-02T02:31更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
+**佇列狀態（2026-09-02T02:58更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
 （FAIL）、#3 PEAD已結案（FAIL）、#4股票股利率carry已結案（FAIL，alpha顯著性
-未過，見下方條目與`STRATEGY_GRAVEYARD.md`），目前排隊第一：#9殘差動量
-Residual Momentum（尚未起跑，第1關sanity待開始）。**
+未過，見下方條目與`STRATEGY_GRAVEYARD.md`）、#9殘差動量Residual Momentum
+已結案（FAIL，第1關cheap IC gate train/val正負號不一致，見下方條目與
+`STRATEGY_GRAVEYARD.md`），目前排隊第一：#10市場regime擇時overlay（方法論
+框架待建立，尚未起跑）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -365,7 +367,22 @@ switch`#40、Weinstein第二階段、CTA的`cta_momentum_12m`）不同——那�
 「原始價格/相對強度動量」，沒有先剝離beta；跟PEAD（SUE盈餘動量）也不同，
 那是財報驚訝不是價格動量。這是本項目第一次測試「剝離beta後的動量」。
 
-**狀態**：待起跑，第1關（sanity）尚未開始。
+**狀態（2026-09-02T02:58更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第九輪排程，
+已結案：FAIL）**：新增`factors.py::prepare_factors()`「(u)殘差動量」段落
+（`f_residual_momentum`：252日滾動CAPM beta，用「12個月股票報酬-beta×
+12個月大盤報酬」近似12個月累積殘差報酬，沿用`f_bab`/`f_idio_vol`同一套
+cov/var計算，只換窗口從60天到252天）+`factor_ic_residual_momentum.py`
+（新增，沿用`factor_ic.py`既有cross-sectional IC框架，standalone
+bonferroni_n=1）。結果：TRAIN mean_ic=-0.0092（n=40，方向為負）、VAL
+mean_ic=+0.0305（n=47，方向為正）、null percentile=90.6（單看勉強過
+90.0門檻）——**但train/val正負號不一致**，`evaluate_factor()`三項判準
+之一未過，直接判**FAIL**，未進第2關以後。**不泛化成「剝離beta後的動量
+機制本身沒用」**——這次用的是簡化一階近似（未逐日重算複利殘差）+只測
+CAPM單因子（未延伸size/value三因子，本專案目前沒有現成TW版size/value
+系統性因子可零成本複用），未來若要重測需要換一種殘差計算方式或延伸多
+因子模型，不能沿用這次的具體實作當作「這個經濟機制已經測過」的證據。
+完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#76。佇列#9結案，接續
+佇列第一順位#10市場regime擇時overlay。
 
 ---
 
@@ -534,10 +551,11 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
 6. 量價配合——卡在題材動能榜PIT引擎地基。
 7. 低波動（TW版策略層）——可直接沿用US的deep_dive方法框架。
 8. 類股輪動——卡在題材動能榜PIT引擎地基，跟#6同一個依賴。
-9. **殘差動量Residual Momentum——現在排隊第一。** 2026-09-02新增，待起跑，
-   第1關sanity尚未開始。
-10. 市場regime擇時overlay——2026-09-02新增，方法論框架待建立，不依賴
-    特定候選先過關。
+9. ~~殘差動量Residual Momentum~~——**2026-09-02第九輪排程已結案：FAIL**
+   （因子層第1關cheap IC gate，train/val正負號不一致，見
+   `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#76），移出排隊佇列。
+10. **市場regime擇時overlay——現在排隊第一。** 2026-09-02新增，方法論框架
+    待建立，不依賴特定候選先過關。
 11. 產業內相對強度Sector-Neutral——2026-09-02新增，待起跑，第1關尚未開始。
 12. Betting-Against-Beta/低beta——2026-09-02新增，待起跑，第1關尚未開始。
 13. 台股三大法人連續買超持續性——2026-09-02新增，待起跑，第1關尚未開始。

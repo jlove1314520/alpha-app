@@ -83,6 +83,7 @@ REVENUE_SUE_TRAILING_MONTHS = 12
 ROE_STABILITY_TRAILING_QUARTERS = 8
 ASSET_GROWTH_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Cooper/Gulen/Schill 2008
 ACCRUALS_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Sloan 1996 balance-sheet approach
+RESIDUAL_MOMENTUM_WINDOW = 252  # ~12 個月交易日, Blitz/Huij/Martens 2011
 
 
 def _finmind_institutional_wide(stock_id: str, start_date: str) -> pd.DataFrame:
@@ -561,6 +562,28 @@ def prepare_factors(
     # 第三個測試，f_low_vol/f_idio_vol 是前兩個）。零額外計算成本、零額外資料（重用同一個
     # beta_60）。
     d["f_bab"] = -beta_60
+
+    # (u) 殘差動量 Residual Momentum (Blitz/Huij/Martens 2011,
+    # `HYPOTHESIS_QUEUE.md` #9，2026-09-02自動排程新增，佇列排隊第一起跑)。
+    # 經濟理由：目前已死的三條假設（Weinstein第二階段/CTA趨勢跟隨/PEAD策略層）
+    # 共同死因是「表面報酬漂亮但拆解後是beta曝險、alpha不顯著」，傳統動量訊號
+    # 本身常隱含大量市場beta。這裡先用CAPM單因子迴歸剝離beta，只對「剝離後的
+    # 殘差報酬」做動量排序，文獻上發現這樣波動更低、動量崩盤現象更輕微。
+    # 實作：用trailing 252個交易日（~12個月）窗口估計滾動beta（跟f_bab/
+    # f_idio_vol同一套cov/var算法，只是窗口從60天換成252天，不是新機制），
+    # 再用「12個月股票報酬 - beta*12個月大盤報酬」近似12個月累積殘差報酬
+    # （這是簡化的一階近似，跟f_rel_strength用「股票報酬-大盤報酬」隱含
+    # beta=1的簡化方式同一種近似程度，不是逐日複利精確重算，方法論上一致，
+    # 不是這條因子獨有的簡化）。跟已死的`f_rel_strength_regime_switch`/
+    # Weinstein第二階段/`cta_momentum_12m`不同之處：那些都是原始價格/相對
+    # 強度動量，沒有先剝離beta；這是本項目第一次測試「剝離beta後的動量」。
+    # 純價格資料，天然point-in-time，零額外API呼叫（重用daily_ret/mkt_ret）。
+    ret_252 = d["adj_close"] / d["adj_close"].shift(RESIDUAL_MOMENTUM_WINDOW) - 1
+    mkt_ret_252 = d["mkt_close"] / d["mkt_close"].shift(RESIDUAL_MOMENTUM_WINDOW) - 1
+    roll_var_mkt_252 = mkt_ret.rolling(RESIDUAL_MOMENTUM_WINDOW, min_periods=RESIDUAL_MOMENTUM_WINDOW).var()
+    roll_cov_252 = daily_ret.rolling(RESIDUAL_MOMENTUM_WINDOW, min_periods=RESIDUAL_MOMENTUM_WINDOW).cov(mkt_ret)
+    beta_252 = roll_cov_252 / roll_var_mkt_252
+    d["f_residual_momentum"] = ret_252 - beta_252 * mkt_ret_252
 
     # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
     # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓
