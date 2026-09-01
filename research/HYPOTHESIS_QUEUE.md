@@ -97,12 +97,14 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   搭配其他篩選）未來若要測需要獨立走完整套關卡，不能沿用這次的失敗
   當作證據。
 
-**佇列狀態（2026-09-02T02:58更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
+**佇列狀態（2026-09-02T03:25更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
 （FAIL）、#3 PEAD已結案（FAIL）、#4股票股利率carry已結案（FAIL，alpha顯著性
 未過，見下方條目與`STRATEGY_GRAVEYARD.md`）、#9殘差動量Residual Momentum
 已結案（FAIL，第1關cheap IC gate train/val正負號不一致，見下方條目與
-`STRATEGY_GRAVEYARD.md`），目前排隊第一：#10市場regime擇時overlay（方法論
-框架待建立，尚未起跑）。**
+`STRATEGY_GRAVEYARD.md`）、#10市場regime擇時overlay方法論框架已建置完成+
+sanity通過（非PASS/FAIL判定，工具就緒待未來候選套用，見下方條目），目前
+排隊第一：#11產業內相對強度Sector-Neutral Relative Strength（第1關sanity
+尚未開始）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -407,8 +409,24 @@ CAPM單因子（未延伸size/value三因子，本專案目前沒有現成TW版s
 輪動）原本的區隔說明一致，這條就是把#5從「待B24收尾後才排」提前正式
 排入佇列、給出具體下一步。
 
-**狀態**：待起跑，方法論框架（regime判定規則+疊加曝險回測工具）待建立，
-不依賴任何特定候選先存在才能開工。
+**狀態（2026-09-02T03:25更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第十輪排程，
+方法論框架建置完成+sanity通過，非PASS/FAIL判定）**：新增
+`research/regime_overlay.py`——沿用兩個既有市場層級regime定義（200日
+均線位階、20日波動度vs擴張窗中位數，皆非這輪新發明，見檔案docstring）
+組成`EXPOSURE_MAP`（第一版單調參數，非搜尋/優化），並用TAIEX買進持有
+本身當sanity測試對象。結果：①combined_regime分布非系統性單一格（4種
+組合皆出現）；②TRAIN+VAL全期間MDD由-31.63%改善到-17.10%，Sharpe
+0.55→0.60；③三個已知歷史危機期間（2018Q4貿易戰急跌/2020Q1新冠崩盤/
+2022全年空頭）regime標籤正確辨識為多數空頭/高波動，窗內overlay MDD相對
+baseline皆明顯改善（約腰斬）——機制方向正確，非常數/no-op/標籤錯位。
+**這不是PASS/FAIL判定**：套用對象是大盤買進持有而非任何選股策略，不是
+可部署的擇時策略，只是驗證「regime判定規則+疊加曝險回測工具」這個
+基礎設施本身做對了事。市場廣度(breadth)規則仍未實作（誠實記錄「待補」，
+理由見腳本docstring）。**下一步待未來有選股候選通過1~8關後**，把
+`compute_regime_labels()`+`apply_overlay()`接到那個候選的日報酬序列上，
+正式測第9關（下檔保護）——目前佇列裡沒有這樣的候選（Weinstein/CTA/
+PEAD/Carry/殘差動量皆FAIL），所以#10本輪工作到此為止，接續佇列往下
+一項推進。完整見`MARATHON_LOG.md`2026-09-02T03:25條目。
 
 ---
 
@@ -554,9 +572,14 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
 9. ~~殘差動量Residual Momentum~~——**2026-09-02第九輪排程已結案：FAIL**
    （因子層第1關cheap IC gate，train/val正負號不一致，見
    `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#76），移出排隊佇列。
-10. **市場regime擇時overlay——現在排隊第一。** 2026-09-02新增，方法論框架
-    待建立，不依賴特定候選先過關。
-11. 產業內相對強度Sector-Neutral——2026-09-02新增，待起跑，第1關尚未開始。
+10. 市場regime擇時overlay——**2026-09-02第十輪排程：方法論框架建置完成+
+    sanity通過**（`research/regime_overlay.py`，regime標籤在三個已知歷史
+    危機期間正確辨識+overlay確實降低曝險與MDD，見上方條目完整數字）。
+    **這不是PASS/FAIL判定**，是基礎設施就緒——套用對象是TAIEX買進持有，
+    不是選股策略。下一步待未來有選股候選通過1~8關後才能正式測第9關，
+    目前佇列裡沒有這樣的候選，本輪工作到此為止，移出「排隊第一」位置。
+11. **產業內相對強度Sector-Neutral——現在排隊第一。** 2026-09-02新增，
+    待起跑，第1關尚未開始。
 12. Betting-Against-Beta/低beta——2026-09-02新增，待起跑，第1關尚未開始。
 13. 台股三大法人連續買超持續性——2026-09-02新增，待起跑，第1關尚未開始。
 14. 台股月營收公布事件效應——2026-09-02新增，待起跑，第1關尚未開始。

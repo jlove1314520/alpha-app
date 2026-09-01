@@ -13,6 +13,44 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T03:25+08:00 — #10市場regime擇時overlay：方法論框架建置完成+sanity通過（HYPOTHESIS_QUEUE_PROTOCOL.md軌道第十輪，跟三軌馬拉松無關）
+
+**背景**：`hypothesis_queue`具名鎖正常取得（`LOCK_ACQUIRED`，非陳舊回收），
+`git pull`已是最新，`git status`乾淨（只有一個不是本輪產生的殘留未推送
+commit——Shioaji報價自動更新，以及幾個非本輪殘留的`*_run.log`檔案，未
+觸碰、未納入本輪commit）。`HYPOTHESIS_QUEUE.md`條目狀態欄跟「排隊順序
+總結」兩處核對一致（#1~4、#9皆已結案FAIL，下一順位為#10），無不同步
+需要修正。
+
+**本輪工作**：#10「沒有已過關的候選可以套用」，依協定「完全沒開始過→
+先把地基做好」，本輪新增`research/regime_overlay.py`（regime判定規則+
+疊加曝險回測工具，完整設計理由跟參數選擇見檔案docstring）——沿用兩個
+既有、已在其他腳本驗證過的市場層級regime定義（`prepare_market_data().gate`
+的200日均線位階、`regime_conditions.py`同款的20日波動度vs擴張窗中位數），
+組成exposure_map（第一版單調參數，非搜尋/優化結果），並用TAIEX買進持有
+本身當sanity測試對象（唯一不需要選股候選就能驗證機制正確性的方式）。
+
+**sanity結果（PYTHONIOENCODING=utf-8乾淨重跑，log見
+`regime_overlay_sanity_run.log`）**：①combined_regime分布非系統性單一格
+（4種組合都出現，46.0%/25.3%/21.8%/6.8%）；②全期間(2010-05-05~2024-12-31,
+TRAIN+VAL)MDD由baseline-31.63%改善到overlay-17.10%，Sharpe同時從0.55升到
+0.60（CAGR則從+7.97%降到+6.38%，符合降曝險犧牲部分上檔換取下檔保護的
+預期方向）；③三個已知歷史危機期間regime標籤正確辨識為多數空頭/高波動
+（2018Q4貿易戰急跌：空頭天數占比95.4%/高波動89.2%，窗內MDD-14.23%→
+-8.08%；2020Q1新冠崩盤：空頭60.7%/高波動100.0%，窗內MDD-26.53%→
+-13.41%；2022全年空頭：空頭80.5%/高波動93.1%，窗內MDD-31.63%→-17.10%）
+——機制方向正確，不是常數/no-op/標籤錯位。
+
+**這輪的性質不是PASS/FAIL判定**——套用對象是TAIEX買進持有本身而非任何
+選股策略，這不是可部署的擇時策略，只證明「工具能力就緒+sanity通過」。
+市場廣度(breadth)規則仍未實作（誠實記錄「待補」，理由見檔案docstring）。
+第2關（隨機控制組）在「擇時overlay」語境下需要另外設計對照組定義，留給
+未來有實際候選要套用第9關（下檔保護）時再處理。`HYPOTHESIS_QUEUE.md`
+#10條目狀態已更新，接續佇列第一順位改為#11產業內相對強度Sector-Neutral
+（下一輪起跑第1關sanity）。`is_holdout_consumed()`確認仍為`False`。
+
+---
+
 ## 2026-09-02T02:58+08:00 — 殘差動量#9：因子層第1關cheap IC gate起跑並結案FAIL（HYPOTHESIS_QUEUE_PROTOCOL.md軌道，跟三軌馬拉松無關）
 
 **背景**：`hypothesis_queue`具名鎖正常取得（非陳舊回收），`git pull`已是
