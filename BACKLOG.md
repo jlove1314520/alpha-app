@@ -17,6 +17,46 @@
 
 ---
 
+## ✅ 2026-09-01（續）Shioaji交易時段閘門+期貨四商品補齊
+
+使用者要求兩件事：①`shioaji_quotes.py`加交易時段閘門避免非盤中一直
+登入永豐；②台股期貨（台指期/小台/電子期/金融期）比照現貨一併接上
+Shioaji。
+
+**一、交易時段閘門**：新增`_is_tw_trading_window()`——週一至五
+08:30–13:45（涵蓋現貨盤前~盤後緩衝，也涵蓋TAIFEX期貨日盤約08:45–13:45，
+兩者用同一組閘門不分開判斷，因為股票/指數/期貨本來就在同一次
+`snapshots()`呼叫裡）。非這個時段**完全不呼叫`login()`**，改呼叫
+`_write_market_closed()`：保留`quotes_sinopac.json`裡最後一次真正抓到
+的`quotes`資料不變、`fetched_at`維持最後一次真正抓到資料的時間戳（不
+更新成現在），只把`market_status`標成`"closed"`，另外用`checked_at`
+記錄這次「確認非交易時段」的時間。已實測驗證：23:10非交易時段執行，
+正確跳過登入、保留了22:50最後一次抓到的10筆真實報價、`market_status`
+正確標`closed`。同樣沿用`fetch_quotes_tw.py::is_tw_trading_window()`
+的既有誠實揭露慣例（沒扣除國定假日）。
+
+**二、期貨四商品補齊**：新增`FUTURES_NEAR_MONTH`對應表，比照已驗證過的
+台指期近月（`Futures.TXF.TXFR1`）模式，補上小型台指期
+（`Futures.MXF.MXFR1`）、電子期（`Futures.EXF.EXFR1`）、金融期
+（`Futures.FXF.FXFR1`）——Shioaji對每個期貨群組都提供"XXXR1"這個
+「近月」別名，四組都已用真實模擬環境連線逐一驗證過存在且能拿到
+snapshot（實測數字：TXF 46834/MXF 46835/EXF 2975.15/FXF 3470，皆為
+真實報價）。`index.html`的`loadMarketFUT()`（期貨頁）改用新增的
+`shioajiFutRowSource()`統一處理App「期貨」頁`FUT_CONTRACTS`四個id
+（TX/MTX/TE/TF）→Shioaji四個quotes key（TXF_NEAR/MXF_NEAR/EXF_NEAR/
+FXF_NEAR）的對應，各自標「Shioaji 即時 · 近月合約」，查不到才退回現有
+TAIFEX CSV來源。**順手修正一個資料源不一致的小問題**：正逆價差計算
+原本用`market_tw.json`的原始TAIFEX/TWSE數字，現在改用跟畫面卡片顯示
+「同一個」資料源（Shioaji優先/退回TAIFEX CSV），避免卡片顯示Shioaji
+數字、下面價差卻用TAIFEX CSV數字算出兩者對不起來的情況。
+
+**驗收**：`node scripts/smoke_test.mjs`12項全PASS；Playwright驗證4檔
+期貨都正確顯示Shioaji來源標籤+正確數字，正逆價差計算數字一致
+（-115，46834-46948.72四捨五入）；另外用暫時繞過時段閘門的方式（僅
+供驗證，不影響正式腳本預設行為）確認4檔期貨的抓取邏輯本身無bug。
+
+---
+
 ## ✅ 2026-09-01（續）兩券商即時報價接進App：台股Shioaji、美股IBKR，分工不重疊
 
 使用者要求台股一律走Shioaji、美股一律走IBKR，兩者不重疊。

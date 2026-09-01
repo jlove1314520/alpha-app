@@ -1919,23 +1919,27 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const srcHtml=srcLabel||`TAIFEX${cm?` · ${cm} 近月合約`:''}`;
     return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcHtml}</span></div><div class="px"><b class="num">${nf(fut.last)}</b><span class="num ${cls}">${fut.change_pct>=0?'+':''}${(fut.change_pct||0).toFixed(2)}%</span></div></div>`;
   }
-  // 2026-09-01新增：台指期近月優先用Shioaji即時報價（TXFR1「近月」別名，
-  // 見shioaji_quotes.py），查不到/過期才退回現有TAIFEX CSV來源。
-  function txfNearRowSource(twCache){
+  // 2026-09-01新增，同日補齊四檔：期貨近月優先用Shioaji即時報價（App
+  // 「期貨」頁FUT_CONTRACTS的id → shioaji_quotes.py寫進quotes_sinopac.json
+  // 的key，兩邊各自獨立命名，這裡做對應），查不到/過期才退回現有TAIFEX
+  // CSV來源（market_tw.json::futures）。
+  const FUT_ID_TO_SINOPAC_KEY={TX:'TXF_NEAR',MTX:'MXF_NEAR',TE:'EXF_NEAR',TF:'FXF_NEAR'};
+  function shioajiFutRowSource(appFutId,fallbackFut){
     const age=intradayAgeMin(INTRADAY_SINOPAC);
     const fresh=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.connected&&age!=null&&age<=INTRADAY_STALE_MIN;
-    const q=fresh?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes.TXF_NEAR:null;
+    const key=FUT_ID_TO_SINOPAC_KEY[appFutId];
+    const q=(fresh&&key)?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes[key]:null;
     if(q&&q.last!=null){
       return {fut:{last:q.last,change_pct:q.change_pct},srcLabel:'Shioaji 即時 · 近月合約'};
     }
-    return {fut:twCache.tx_futures,srcLabel:null};
+    return {fut:fallbackFut,srcLabel:null};
   }
   async function loadHomeIndex(){
     const el=document.getElementById('home-idx-rows');if(!el)return;
     await loadMarketDataFiles();
     await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{},usIdx=await loadUsIndexes();
-    const taiexSrc=taiexRowSource(tw),txfSrc=txfNearRowSource(tw);
+    const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+futRowHtml('台指期近月',txfSrc.fut,txfSrc.srcLabel)+usIdx.map(r=>r.html).join('');
     document.getElementById('home-idx-datatime').textContent=fmtMarketDataTime(tw);
   }
@@ -2180,12 +2184,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function loadMarketFUT(){
     const el=document.getElementById('fut-quote-rows');if(!el)return;
     await loadMarketDataFiles();
+    await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{};
     const futs=tw.futures||{};
-    el.innerHTML=FUT_CONTRACTS.map(c=>futRowHtml(c.label,futs[c.id])).join('');
+    const sources=FUT_CONTRACTS.map(c=>({...c,src:shioajiFutRowSource(c.id,futs[c.id])}));
+    el.innerHTML=sources.map(c=>futRowHtml(c.label,c.src.fut,c.src.srcLabel)).join('');
     document.getElementById('fut-quote-datatime').textContent=fmtMarketDataTime(tw);
-    // 正逆價差：近月台指期收盤 － 加權指數（現貨）收盤，同一天比較（都來自 market_tw.json）
-    const tx=futs.TX,taiex=tw.taiex;
+    // 正逆價差：近月台指期收盤－加權指數（現貨）收盤——2026-09-01改用跟畫面上
+    // 顯示的同一個資料源（Shioaji優先/退回TAIFEX CSV），避免上面卡片顯示
+    // Shioaji的數字、下面價差卻用TAIFEX CSV的數字算出不一致的結果。
+    const txSrc=sources.find(c=>c.id==='TX'),taiexSrc=taiexRowSource(tw);
+    const tx=txSrc&&txSrc.src.fut,taiex=taiexSrc.item;
     if(tx&&tx.last!=null&&taiex&&taiex.close!=null){
       setTxt('basis-spot',nf(taiex.close));
       setTxt('basis-fut',nf(tx.last));
@@ -3322,7 +3331,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-01.2253';
+  const APP_VERSION='2026-09-01.2316';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

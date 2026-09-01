@@ -308,8 +308,12 @@ def describe_quotes_sinopac(path: Path) -> dict:
     台股即時報價，由本機`research/shioaji_quotes.py`排程觸發（原因跟
     quotes_ibkr.json一樣：GitHub Actions連不到本機的.env/secrets/憑證，
     也不該把金鑰放進CI），只有這台機器有在跑排程時才會持續更新。
-    `connected:false`是誠實的失敗狀態（永豐模擬環境非服務時段08:00-21:00/
-    金鑰有誤/連線失敗），不當作status_from_age()意義上的錯誤。"""
+    `connected:false`是誠實的失敗狀態（連線失敗/金鑰有誤），不當作
+    status_from_age()意義上的錯誤。**2026-09-01新增交易時段閘門**：
+    `market_status=="closed"`代表非台股交易時段（週一至五08:30-13:45外）
+    沒有登入永豐、`quotes`是保留的最後一次盤中資料，`fetched_at`也維持
+    最後一次真正抓到資料的時間戳不變——這是正常、預期的節流行為，不是
+    錯誤，同樣不當作status_from_age()意義上的錯誤。"""
     d = json.loads(path.read_text(encoding="utf-8"))
     quotes = d.get("quotes", {})
     n_with_data = sum(1 for q in quotes.values() if q.get("last") is not None)
@@ -317,8 +321,8 @@ def describe_quotes_sinopac(path: Path) -> dict:
         "generated_at": d.get("fetched_at"),
         "records": len(quotes),
         "source": "research/shioaji_quotes.py（本機Sinopac Shioaji模擬環境，非GitHub Actions排程）",
-        "detail": f"connected={d.get('connected')} error={d.get('error')} "
-                  f"有報價數={n_with_data}/{len(quotes)}",
+        "detail": f"connected={d.get('connected')} market_status={d.get('market_status')} "
+                  f"error={d.get('error')} 有報價數={n_with_data}/{len(quotes)}",
     }
 
 

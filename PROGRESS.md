@@ -16,6 +16,22 @@
 
 ---
 
+## 2026-09-01（續6，開發帽）— Shioaji交易時段閘門+期貨四商品(台指期/小台/電子期/金融期)補齊
+
+`shioaji_quotes.py`新增`_is_tw_trading_window()`閘門（週一至五
+08:30-13:45），非這個時段完全不登入永豐，改用`_write_market_closed()`
+保留最後一次盤中資料、標`market_status="closed"`，避免收盤後到21:00
+服務時段結束前一直浪費API配額登入。已實測驗證閘門正確跳過登入+正確
+保留10筆最後真實資料。同時補齊`FUTURES_NEAR_MONTH`（小型台指期MXF/
+電子期EXF/金融期FXF，跟已驗證的台指期TXF同一套"XXXR1"近月別名，四組
+都已用真實模擬帳戶連線驗證過）。`index.html`的`loadMarketFUT()`
+（期貨頁）改用Shioaji優先，順手修正正逆價差計算跟畫面卡片用不同資料源
+的不一致問題。冒煙測試12項全PASS，Playwright驗證4檔期貨正確顯示
+Shioaji來源+數字一致。詳見`BACKLOG.md`「2026-09-01（續）Shioaji交易
+時段閘門+期貨四商品補齊」條目。
+
+---
+
 ## 2026-09-01（續5，開發帽）— 兩券商即時報價接進App：台股Shioaji、美股IBKR分工
 
 新增`research/shioaji_quotes.py`（Shioaji simulation模式，只讀不下單，

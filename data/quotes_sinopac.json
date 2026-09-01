@@ -1,6 +1,8 @@
 {
-  "fetched_at": "2026-09-01T22:50:53.628369+08:00",
+  "fetched_at": "2026-09-01T23:11:27.179066+08:00",
+  "checked_at": "2026-09-01T23:14:55.509816+08:00",
   "connected": true,
+  "market_status": "closed",
   "error": null,
   "quotes": {
     "2330": {
@@ -59,14 +61,44 @@
       "label": "加權指數"
     },
     "TXF_NEAR": {
-      "last": 46855.0,
-      "bid": 46852.0,
-      "ask": 46854.0,
+      "last": 46834.0,
+      "bid": 46832.0,
+      "ask": 46836.0,
       "close": 47201.0,
-      "change_pct": -0.73,
+      "change_pct": -0.78,
       "data_type": "REALTIME",
       "exchange": "TAIFEX",
       "label": "台指期近月"
+    },
+    "MXF_NEAR": {
+      "last": 46835.0,
+      "bid": 46833.0,
+      "ask": 46834.0,
+      "close": 47201.0,
+      "change_pct": -0.78,
+      "data_type": "REALTIME",
+      "exchange": "TAIFEX",
+      "label": "小型台指期近月"
+    },
+    "EXF_NEAR": {
+      "last": 2975.15,
+      "bid": 2973.25,
+      "ask": 2976.35,
+      "close": 3005.0,
+      "change_pct": -0.99,
+      "data_type": "REALTIME",
+      "exchange": "TAIFEX",
+      "label": "電子期近月"
+    },
+    "FXF_NEAR": {
+      "last": 3470.0,
+      "bid": 3410.0,
+      "ask": 3469.8,
+      "close": 3393.4,
+      "change_pct": 2.26,
+      "data_type": "REALTIME",
+      "exchange": "TAIFEX",
+      "label": "金融期近月"
     }
   }
 }
