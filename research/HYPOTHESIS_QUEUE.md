@@ -111,9 +111,11 @@ IC gate贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，見�
 三大法人連續買超持續性已結案（FAIL，第1關cheap IC gate train/val正負號
 相反+null percentile=81.9未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`）、
 #14台股月營收公布事件效應已結案（FAIL，事件研究設計贏過洗牌null分布這一項
-未過，percentile=68.0未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`），
-目前排隊第一：#15波動度目標化Vol-Targeting（第1關sanity尚未開始，可獨立於
-選股類假設先跑）。**
+未過，percentile=68.0未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`）、
+#15波動度目標化Vol-Targeting已結案（FAIL，第2關輕量版隨機控制組Sharpe/
+CAGR percentile僅8.0/3.0，遠低於90.0門檻且低於50，見下方條目與
+`STRATEGY_GRAVEYARD.md`），目前排隊第一：#7低波動（TW策略層，可直接沿用
+US的deep_dive方法框架，第1關sanity尚未開始）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -637,8 +639,30 @@ SUE類訊號偏離原始日頻cross-sectional驗證設計、改包裝成月頻�
 的因子或策略假設，也不依賴任何選股候選先通過關卡才能開工（可以獨立
 於Carry/其他候選的判定結果先行測試）。
 
-**狀態**：待起跑，第1關（sanity）尚未開始，可以獨立於選股類假設先跑，
-不用等其他候選排隊。
+**狀態（2026-09-02更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`排程首次試跑，
+已結案：FAIL）**：新增`vol_targeting_v1.py`——TAIEX（不依賴選股候選，套用
+對象是大盤買進持有本身）60交易日滾動已實現波動度、目標年化波動率15%、
+`exposure=clip(TARGET_VOL/realized_vol,0,1.0)`（刻意不允許槓桿，見腳本
+docstring說明理由）、`exposure.shift(1)`避免未來函數。**第1關sanity**：
+exposure非常數（min=0.434/max=1.000/mean=0.911/std=0.144，60.6%天數被
+上限1.0截斷）、realized_vol與exposure相關係數=-0.946（機制方向正確）、
+MDD全期間確實改善（-31.63%→-27.34%）、三個已知危機期間overlay MDD皆
+改善——但同一組數字裡Sharpe/Sortino/Calmar在TRAIN/VAL/全期間**全部**比
+買進持有差，是先於第2關就浮現的警訊。**第2關（輕量版隨機控制組，打亂
+exposure時序N=100draws）**：真實（依realized_vol計時）曝險序列的Sharpe
+percentile=8.0、CAGR percentile=3.0，遠低於90.0門檻且低於50——代表92%/
+97%的隨機打亂時序反而表現更好，只有MDD percentile=90.0，但MDD單項改善
+不能證明timing本身有加值（降低平均曝險本身幾乎必然壓低MDD，不論時機好
+壞）。依協定快殺標準「觀測層級就無訊號」判**FAIL**，未進第3關以後。
+死因研判：60日滾動已實現波動度是落後指標，市場V型/U型復甦時價格常在
+波動度真正回落前就已反彈，導致這個機制系統性錯過反彈段報酬。**不泛化
+成「波動度目標化/風險平價概念本身沒用」**——這次刻意不允許槓桿（拿掉
+文獻機制「低波動期加碼」那一半）、只測單一60日窗口/單一15%目標/單一
+TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選股組合上。完整
+見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#81。佇列#15結案，接續佇列
+第一順位#7低波動（TW策略層，可直接沿用US的deep_dive方法框架，目前佇列
+裡唯一無阻塞依賴的下一個排隊項目——#5依附B24/B25、#6/#8卡題材動能榜PIT
+引擎、#10待有選股候選通過1~8關）。
 
 ---
 
@@ -658,7 +682,8 @@ SUE類訊號偏離原始日頻cross-sectional驗證設計、改包裝成月頻�
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。
-7. 低波動（TW版策略層）——可直接沿用US的deep_dive方法框架。
+7. **低波動（TW版策略層）——現在排隊第一。** 可直接沿用US的deep_dive
+   方法框架，第1關尚未開始。
 8. 類股輪動——卡在題材動能榜PIT引擎地基，跟#6同一個依賴。
 9. ~~殘差動量Residual Momentum~~——**2026-09-02第九輪排程已結案：FAIL**
    （因子層第1關cheap IC gate，train/val正負號不一致，見
@@ -688,8 +713,12 @@ SUE類訊號偏離原始日頻cross-sectional驗證設計、改包裝成月頻�
     見上方條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#80），移出
     排隊佇列。因子層IC（`TRIALS_LEDGER.md`#8）本身仍是PASS，未被推翻，
     死的只是「事件窗口」這個具體策略層構造。
-15. **波動度目標化Vol-Targeting——現在排隊第一。** 2026-09-02新增，可獨立
-    於選股類假設先跑，不用等其他候選排隊，第1關尚未開始。
+15. ~~波動度目標化Vol-Targeting~~——**2026-09-02排程首次試跑已結案：FAIL**
+    （第2關輕量版隨機控制組，打亂exposure時序後真實Sharpe/CAGR percentile
+    僅8.0/3.0，遠低於90.0門檻且低於50，只有MDD單項改善但不足以證明timing
+    本身有加值，見上方條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`
+    #81），移出排隊佇列。不泛化成波動度目標化概念本身沒用——這次刻意不
+    允許槓桿、只測單一窗口/單一標的。
 
 **B25/B26任務提醒（2026-09-02新增，跟上面九條假設是平行的另一個工作
 項目，不是同一序列）**：`BACKLOG.md`已有完整規格「登記但尚未執行」——

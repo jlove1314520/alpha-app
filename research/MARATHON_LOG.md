@@ -13,6 +13,35 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T05:57 — `HYPOTHESIS_QUEUE_PROTOCOL.md`排程首次試跑：佇列#15
+波動度目標化Vol-Targeting第1關sanity+第2關輕量版隨機控制組 — 結果：**FAIL**
+
+新增`vol_targeting_v1.py`（新增，可重複執行）——測試對象是TAIEX買進持有
+本身（不依賴任何選股候選，跟`regime_overlay.py`#10同一個做法），60交易日
+滾動已實現波動度、目標年化波動率15%、`exposure=clip(target/realized,0,
+1.0)`（刻意不允許槓桿）、`exposure.shift(1)`避免未來函數。**第1關sanity**：
+機制方向正確（realized_vol與exposure相關係數=-0.946）、exposure非常數
+（60.6%天數被上限1.0截斷）、MDD全期間確實改善（-31.63%→-27.34%），**但
+Sharpe/Sortino/Calmar在TRAIN/VAL/全期間全部比買進持有差**——先於第2關就
+浮現警訊，本輪判斷這個訊號夠重要不能只當infra完成帶過，加做一個計算成本
+低的第2關（輕量版隨機控制組，打亂exposure時序N=100draws）。**第2關結果**：
+真實（依realized_vol計時）曝險序列的Sharpe percentile=8.0、CAGR
+percentile=3.0，遠低於90.0門檻且低於50——92%/97%的隨機打亂時序反而表現
+更好，只有MDD percentile=90.0，但單項改善不足以證明timing本身有加值（降
+平均曝險本身幾乎必然壓低MDD）。依協定快殺標準「觀測層級就無訊號」判
+**FAIL**，未進第3關以後。死因研判：60日滾動已實現波動度是落後指標，市場
+V型/U型復甦時價格常在波動度真正回落前就已反彈，機制系統性錯過反彈段
+報酬。**不泛化成「波動度目標化/風險平價概念本身沒用」**——這次刻意不
+允許槓桿（拿掉文獻機制「低波動期加碼」那一半）、只測單一60日窗口/單一
+15%目標/單一TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選股
+組合上。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#81、
+`HYPOTHESIS_QUEUE.md`#15（狀態已同步更新為FAIL，「排隊順序總結」章節同步
+更新）。佇列#15結案，接續佇列第一順位#7低波動（TW策略層，可直接沿用US的
+deep_dive方法框架，目前佇列裡唯一無阻塞依賴的下一個排隊項目——#5依附
+B24/B25、#6/#8卡題材動能榜PIT引擎、#10待有選股候選通過1~8關）。
+
+---
+
 ## 2026-09-02T05:26 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十四輪排程：佇列#14
 台股月營收公布事件效應第1關sanity（事件研究設計）— 結果：**FAIL**
 
