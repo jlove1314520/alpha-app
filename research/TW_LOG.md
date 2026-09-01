@@ -1291,3 +1291,20 @@ TW軌兩項地基背景工作複查：重新統計 `backfill_state.json`，`Coun
 `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認除了4個慣常的未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`）之外，另外出現3個新的未追蹤殘留：`research/dividend_yield_portfolio_v1.py`、`research/.hypothesis_queue.lock`、`research/hypothesis_queue_cycle.log`——依檔名判斷應是另一個互動session（`HYPOTHESIS_QUEUE.md`/`HYPOTHESIS_QUEUE_PROTOCOL.md`相關的既有機制）產生，本輪未觸碰、未納入本輪commit。`git fetch origin main` 本輪因DNS解析失敗（`Could not resolve host: github.com`）無法確認遠端同步狀態，push階段依協定重試，結果如實記錄在下方。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約155輪、跨度約143.0小時（約6.0天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-09-01T21:31+08:00 — 馬拉松第268輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 20:01（第265輪，最舊）、FUT 20:31（第266輪）、US 21:01（第267輪，最新）——依輪替選TW。
+
+獨立複查三個解除條件皆未成立：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- PORTFOLIO_STRATEGY_SPEC.md` 確認自 `fa369b9` 以來仍只一個commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）仍FAIL（alpha p>0.05未顯著），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩選項仍未見使用者新回應。
+3. `MARATHON_PROTOCOL.md` 第0節暫停規則本文完整重讀一遍，未被修改移除。
+
+兩項允許的背景工作也獨立複查仍已達標：`data/backfill_state.json` 本輪重新統計 `Counter(d.values())` 得 done=2597／skip=469，2597/3066=84.70%（跟上一輪一致），遠高於80%門檻；T86回補本輪改用 `find data/raw_twse_t86 -iname "*.parquet" | wc -l` 獨立確認共3319個parquet檔，最新檔案為 `T86_20240624.parquet`，自第164輪起維持100%完成記錄。
+
+**TW軌沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認除了4個慣常的未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`）之外，另有 `data/quotes_ibkr.json`（已修改）／`research/ibkr_quotes.py`（已修改）——研判是另一互動session的IBKR串接工作，跟前幾輪記錄的 `dividend_yield_portfolio_v1.py` 等殘留不同（那組本輪未再出現，可能已被該session自行清理或commit），本輪未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約158輪、跨度約145.0小時（約6.0天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
