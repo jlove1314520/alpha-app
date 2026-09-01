@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-02T00:31+08:00**
+**最後更新：2026-09-02T01:31+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 275 輪。最新一輪：第 275 輪 · 2026-09-02T01:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT（三軌時間戳FUT 23:31第272輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit、`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應、暫停規則本身未被修改）。FUT軌round104留下的盤別效應第三批「下一步」本質仍是單因子相關工作，沒有組合策略相關工作可接，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`開工時僅5個既有未追蹤log殘留，另偵測到`dividend_yield_portfolio_v1.py`為另一互動session修改殘留，皆未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約165輪、跨度約149.0小時（約6.2天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第275輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 276 輪。最新一輪：第 276 輪 · 2026-09-02T01:31+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選US（三軌時間戳US 00:01第273輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`自`fa369b9`以來仍只一個commit、`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL、(a)/(b)未見使用者新回應、暫停規則本身未被修改）。US軌`PORTFOLIO_STRATEGY_SPEC.md`是台股專屬規格，沒有組合策略相關工作可接，本輪整輪跳過，未做任何實質工作。`is_holdout_consumed()`確認`False`。`git status`開工時偵測到`research/HYPOTHESIS_QUEUE.md`／`research/MARATHON_LOG.md`／`research/dividend_yield_portfolio_v1.py`為修改狀態（研判是獨立排程軌`AlphaHypothesisQueue`與另一互動session殘留），另有5個既有未追蹤log殘留，皆未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約166輪、跨度約149.5小時（約6.2天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第276輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
 
-**上一則保留（第271輪，供對照）**：第 271 輪 · 2026-09-01T23:01+08:00 · TW（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選TW（三軌時間戳TW 21:31第268輪最舊）。獨立複查三個解除條件皆未成立。TW軌兩項允許背景工作複查仍已達標（回補覆蓋率84.70%＞80%門檻、T86回補100%），沒有已知的剩餘工作項目，本輪整輪跳過。詳見`REPORT.md`第271輪條目、`TW_MARATHON_STATE.md`/`TW_LOG.md`本輪記錄。
+**上一則保留（第275輪，供對照）**：第 275 輪 · 2026-09-02T01:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT（三軌時間戳FUT 23:31第272輪最舊）。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，本輪整輪跳過。詳見`REPORT.md`第275輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。
 
 **上一則保留（第270輪，供對照）**：第 270 輪 · 2026-09-01T22:31+08:00 · US（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選US（三軌時間戳US 21:01第267輪最舊）。獨立複查三個解除條件皆未成立。US軌依舊沒有組合策略相關工作可做（規格書是台股專屬），本輪整輪跳過，未做任何實質工作。詳見`REPORT.md`第270輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。**
 
