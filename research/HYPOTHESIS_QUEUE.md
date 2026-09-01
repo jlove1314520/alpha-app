@@ -105,8 +105,10 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
 sanity通過（非PASS/FAIL判定，工具就緒待未來候選套用，見下方條目）、#11
 產業內相對強度Sector-Neutral Relative Strength已結案（FAIL，第1關cheap
 IC gate贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，見下方條目
-與`STRATEGY_GRAVEYARD.md`），目前排隊第一：#12 Betting-Against-Beta/低beta
-（第1關sanity尚未開始）。**
+與`STRATEGY_GRAVEYARD.md`）、#12 Betting-Against-Beta/低beta已結案（FAIL，
+引用`TRIALS_LEDGER.md`#61既有跨軌結果判定、非新測試，train期IR僅0.009+
+跨累積Bonferroni校正未過，見下方條目與`STRATEGY_GRAVEYARD.md`），目前
+排隊第一：#13台股三大法人連續買超持續性（第1關sanity尚未開始）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -489,9 +491,36 @@ hit_rate=0.59(n=41)，**train/val同號（皆負）**、|val_ic|=0.034超過最�
 異常），不能因為`f_low_vol`已經PASS就假設這條也一定PASS，需要獨立驗證；
 也要注意跟US軌`f_us_low_vol`深挖後發現「方向性反向曝險」的FAIL教訓做
 對照（見`TRIALS_LEDGER.md`#39/#41），這條要在deep_dive階段特別檢查beta
-本身的穩定性，不能只看表面排序報酬。
+本身的穩定性，不能只看表面排序報酬。**（2026-09-02修正遺漏）此外
+`f_bab`這個因子本身其實已在TW marathon軌道測過**（`TRIALS_LEDGER.md`
+#61，2026-08-26，跟這裡`f_bab`的因子定義完全相同——60日滾動beta取
+負號、cross-sectional排序），先前這個段落沒有揭露這件事，是本輪
+發現並修正的遺漏。
 
-**狀態**：待起跑，第1關（sanity）尚未開始。
+**狀態（2026-09-02更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第十二輪排程，
+已結案：FAIL——引用既有結果判定，非新測試）**：本輪沒有跑新程式，是
+補齊上面「已知相關背景」的遺漏後，依`TRIALS_LEDGER.md`#61既有結果做出
+判定。#61原始數字：TRAIN mean_ic=+0.0020 IR=+0.009（n=63，基本上是
+雜訊）、VAL mean_ic=+0.0302 IR=+0.141 hit_rate=0.47（n=47）、train/val
+同號，對隨機打散null的percentile=91.0單獨看剛好過90.0門檻，**但當時
+TW軌累積因子家族數m=27（含此因子），跨累積Bonferroni校正門檻=
+100×(1-0.10/27)=99.63，91.0離這個門檻差距很大**，TW軌本身已判定
+「CHEAP_PASS(單測)但批次/累積校正未過，降級為不確定，不進深挖清單」。
+**這條假設佇列（獨立具名鎖`hypothesis_queue`）跟TW marathon雖互不阻塞，
+但共寫同一份跨軌累積的`TRIALS_LEDGER.md`帳本**——多重比較的「已測
+次數」是全專案共用，不是分軌各自歸零，若重新用standalone
+bonferroni_n=1框架把同一個因子當「全新測試」重跑（數字會完全相同），
+等於繞過已誠實套用的累積校正、把已判「證據不足」的因子透過換框架
+包裝成「新的CHEAP_PASS」，違反`CONSTITUTION.md`第2節「多重比較」跟
+`CLAUDE.md`最高投資原則第5條「誠實判不及格」的要求。加上TRAIN期IR
+僅0.009（獨立支持理由：協定明訂可用快殺標準之一「觀測層級就無訊號」，
+train半段量不到訊號），判定**FAIL**，不進第2關以後。**不泛化成
+「beta曝險程度這個風險管理維度本身沒用」**——只測過「60日滾動beta、
+cross-sectional排序、純多頭」這個具體實作，未測過多空版本/downside
+beta/不同窗口，未來重測需換其中一個變體。完整見
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#78（本輪新增）、
+`MARATHON_LOG.md`2026-09-02對應條目。佇列#12結案，接續佇列第一順位
+#13台股三大法人連續買超持續性。
 
 ---
 
@@ -601,9 +630,12 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
     FAIL**（第1關cheap IC gate贏過洗牌null分布這一項未過，percentile=
     82.8<90.0門檻，train/val同號但方向與假設預期相反，見
     `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#77），移出排隊佇列。
-12. **Betting-Against-Beta/低beta——現在排隊第一。** 2026-09-02新增，
+12. ~~Betting-Against-Beta/低beta~~——**2026-09-02第十二輪排程已結案：
+    FAIL**（引用`TRIALS_LEDGER.md`#61既有跨軌結果判定、非新測試，
+    train期IR僅0.009+跨累積Bonferroni校正未過，見上方條目與
+    `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#78），移出排隊佇列。
+13. **台股三大法人連續買超持續性——現在排隊第一。** 2026-09-02新增，
     待起跑，第1關尚未開始。
-13. 台股三大法人連續買超持續性——2026-09-02新增，待起跑，第1關尚未開始。
 14. 台股月營收公布事件效應——2026-09-02新增，待起跑，第1關尚未開始。
 15. 波動度目標化Vol-Targeting——2026-09-02新增，可獨立於選股類假設先跑，
     不用等其他候選排隊。
