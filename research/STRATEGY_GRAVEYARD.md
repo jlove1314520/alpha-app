@@ -272,3 +272,60 @@ Blitz/Huij/Martens 2011，因子層第1關cheap IC gate，2026-09-02FAIL）
   `research/factor_ic_residual_momentum.py`（新增，可重複執行）、
   `TRIALS_LEDGER.md`#76。`HYPOTHESIS_QUEUE.md`#9狀態同步更新為FAIL，
   佇列接續#10市場regime擇時overlay（下一個排隊項目，方法論框架待建立）。
+
+### 產業內相對強度 Sector-Neutral Relative Strength（HYPOTHESIS_QUEUE.md#11，
+`f_rel_strength`去產業內均值，因子層第1關cheap IC gate，2026-09-02FAIL）
+
+- **哪一關死的**：GATE_SEQUENCE第1關cheap IC gate本身（跟#9殘差動量、#4
+  股利率因子同一種第1關「因子層cross-sectional IC＋洗牌null分布＋train/val
+  同號」三項判準）——這條在「贏過洗牌null分布」這一項沒過（percentile=
+  82.8，門檻90.0），依協定第1關未過直接結案，未進第2關以後（更不用說
+  portfolio層構造）。
+- **具體數字**：`factor_ic_sector_neutral_rel_strength.py`（新增，可重複
+  執行，沿用同一個100檔快取樣本，80檔可用，其中73檔有非ETF產業分類，121個
+  20交易日快照，2015-01-01~2024-12-31）：診斷（`MIN_GROUP_SIZE=3`）每快照
+  中位數可用產業組數10組、組內中位數成員數4檔、中位數可用個股數39檔（103/
+  121個快照有足夠橫斷面樣本），組別稀疏度尚可、不是結構性no-op。TRAIN
+  mean_ic=-0.0323 IR=-0.160（n=62期）、VAL mean_ic=-0.0340 IR=-0.176
+  hit_rate=0.59（n=41期），train/val**同號**（皆為負），|val_mean_ic|=
+  0.034超過0.02最低門檻，但null percentile=82.8**未達**90.0門檻。
+- **死因**：三項判準裡「同號」跟「幅度非零」都過了，唯獨「贏過洗牌隨機
+  對照組」這一項沒過——82.8雖然不算「遠低於」90.0（跟#9的90.6勉強壓線
+  但同號未過剛好相反：這條同號過了、percentile沒過），但這是`factor_ic.py`
+  `evaluate_factor()`原封不動搬過來的判準邏輯（跟#4/#9用同一套threshold常數
+  BASE_ALPHA/N_SHUFFLES/SHUFFLE_SEED，事前綁定、非事後移動門柱），
+  `passes=False`是這套已經套用在#4/#9兩次的固定判準機械算出的結果，不是
+  本輪臨場放寬或收緊的主觀判斷。此外，兩期IC本身方向為**負**（IR僅
+  -0.16~-0.18，比CHEAP_PASS的股利率因子IR+0.43~+0.56明顯弱得多），意味著
+  即使未來換更大樣本/不同demean方式讓percentile剛好壓線過關，這個訊號的
+  經濟方向也跟假設定義（「做多產業內前段班」預期正向延續）相反——是產業內
+  短期反轉而非延續，跟原始假設的機制敘事不符，不是同一個東西換個方向講。
+- **這個死法能不能泛化**：**不能泛化成「產業中性化這個中性化角度本身
+  沒用」**，有明確保留的理由：
+  1. 產業分類來源用`universe.py::universe()`的`industry_category`（單一
+     `keep="last"`快照），沒有處理`build_company_info.py`已經發現的「同一
+     股票同一天FinMind回傳兩種產業分類」歧義問題（約24%代碼有此現象）——
+     這會讓部分股票被分進錯誤的產業組，稀釋demean的訊噪比，是這次具體
+     實作的資料品質限制，不是機制本身無效的證明。
+  2. `MIN_GROUP_SIZE=3`跟100檔快取樣本（3.1%抽樣率）組合出中位數組內
+     4檔的稀疏度，「產業內排序」在只有3~5檔的小組裡統計力天生偏弱——換
+     更大樣本（例如300~500檔）讓每個產業組都有10檔以上，統計力可能明顯
+     改善，這條未測過。
+  3. 只測了`f_rel_strength`（60日相對大盤動能）一種基底因子的產業中性化
+     版本，沒測試其他窗口（例如12個月動能）或其他基底因子（例如營收/
+     籌碼類）的產業中性化版本。
+  未來若要重測，需要先修正產業分類歧義處理（比照`company_info.json`的
+  同日多分類→留None規則）+ 擴大樣本規模，不能沿用這次的具體實作（100檔
+  快取樣本+`universe.py`粗略產業對照）當作「產業中性化這個角度已經測過」
+  的證據。
+- **跟已死案例的區隔**：跟#9殘差動量都屬於「beta/曝險剝離」家族但剝離的
+  維度不同（#9剝離跨時間系統性因子曝險，這條剝離橫截面產業曝險），死法
+  也不同——#9是train/val**方向不一致**（雜訊主導），這條是**方向一致但
+  幅度不足以贏過隨機對照**，且方向本身跟假設預期相反，屬於協定「快殺
+  標準」的「觀測層級就無訊號」類別的另一種呈現方式，不是同一個偽影家族
+  換皮。
+- **原始記錄**：`research/factor_ic_sector_neutral_rel_strength.py`（新增，
+  可重複執行，不改`factor_ic.py`本身，比照`dividend_yield_portfolio_v1`
+  「只改自己、不動共用模組」的教訓）、`TRIALS_LEDGER.md`#77。
+  `HYPOTHESIS_QUEUE.md`#11狀態同步更新為FAIL，佇列接續#12
+  Betting-Against-Beta/低beta（下一個排隊項目，待起跑）。

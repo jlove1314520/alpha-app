@@ -97,14 +97,16 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   搭配其他篩選）未來若要測需要獨立走完整套關卡，不能沿用這次的失敗
   當作證據。
 
-**佇列狀態（2026-09-02T03:25更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
+**佇列狀態（2026-09-02更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
 （FAIL）、#3 PEAD已結案（FAIL）、#4股票股利率carry已結案（FAIL，alpha顯著性
 未過，見下方條目與`STRATEGY_GRAVEYARD.md`）、#9殘差動量Residual Momentum
 已結案（FAIL，第1關cheap IC gate train/val正負號不一致，見下方條目與
 `STRATEGY_GRAVEYARD.md`）、#10市場regime擇時overlay方法論框架已建置完成+
-sanity通過（非PASS/FAIL判定，工具就緒待未來候選套用，見下方條目），目前
-排隊第一：#11產業內相對強度Sector-Neutral Relative Strength（第1關sanity
-尚未開始）。**
+sanity通過（非PASS/FAIL判定，工具就緒待未來候選套用，見下方條目）、#11
+產業內相對強度Sector-Neutral Relative Strength已結案（FAIL，第1關cheap
+IC gate贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，見下方條目
+與`STRATEGY_GRAVEYARD.md`），目前排隊第一：#12 Betting-Against-Beta/低beta
+（第1關sanity尚未開始）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -449,7 +451,24 @@ PEAD/Carry/殘差動量皆FAIL），所以#10本輪工作到此為止，接續�
 測試中出現方向正確但下檔沒守住的情形，這條的假設是「限制在產業內排序
 可能降低beta污染、提升訊噪比」。
 
-**狀態**：待起跑，第1關（sanity）尚未開始。
+**狀態（2026-09-02第十一輪排程，已結案：FAIL）**：新增
+`factor_ic_sector_neutral_rel_strength.py`（沿用`factor_ic.py`既有
+cross-sectional IC+洗牌null框架，不改該共用模組本身）——`f_rel_strength`
+在每個橫斷面快照裡減去同產業分類（`universe.py::industry_category`，
+排除ETF/基金類，`MIN_GROUP_SIZE=3`）內平均值。結果（100檔快取樣本，
+80檔可用，73檔有非ETF產業分類，121個20交易日快照）：診斷顯示組別稀疏度
+尚可（中位數每快照10組、組內4檔、39檔可用個股，非結構性no-op）。TRAIN
+mean_ic=-0.0323 IR=-0.160(n=62)、VAL mean_ic=-0.0340 IR=-0.176
+hit_rate=0.59(n=41)，**train/val同號（皆負）**、|val_ic|=0.034超過最低
+門檻，但**null percentile=82.8未達90.0門檻**——三項判準之一未過，依協定
+第1關未過直接結案，未進第2關以後。兩期IC方向皆為負，跟假設定義（做多
+產業內前段班預期正向延續）相反，暗示若有訊號也是產業內短期反轉而非
+延續。**不泛化成「產業中性化這個角度本身沒用」**——這次實作有兩個明確
+保留：①產業分類用`universe.py`單一快照未處理`build_company_info.py`
+已知的同日多產業分類歧義（約24%代碼受影響）；②100檔快取樣本組合
+`MIN_GROUP_SIZE=3`統計力偏弱，未測過更大樣本。完整見
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#77。佇列#11結案，接續佇列
+第一順位#12 Betting-Against-Beta/低beta。
 
 ---
 
@@ -578,9 +597,12 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
     **這不是PASS/FAIL判定**，是基礎設施就緒——套用對象是TAIEX買進持有，
     不是選股策略。下一步待未來有選股候選通過1~8關後才能正式測第9關，
     目前佇列裡沒有這樣的候選，本輪工作到此為止，移出「排隊第一」位置。
-11. **產業內相對強度Sector-Neutral——現在排隊第一。** 2026-09-02新增，
+11. ~~產業內相對強度Sector-Neutral~~——**2026-09-02第十一輪排程已結案：
+    FAIL**（第1關cheap IC gate贏過洗牌null分布這一項未過，percentile=
+    82.8<90.0門檻，train/val同號但方向與假設預期相反，見
+    `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#77），移出排隊佇列。
+12. **Betting-Against-Beta/低beta——現在排隊第一。** 2026-09-02新增，
     待起跑，第1關尚未開始。
-12. Betting-Against-Beta/低beta——2026-09-02新增，待起跑，第1關尚未開始。
 13. 台股三大法人連續買超持續性——2026-09-02新增，待起跑，第1關尚未開始。
 14. 台股月營收公布事件效應——2026-09-02新增，待起跑，第1關尚未開始。
 15. 波動度目標化Vol-Targeting——2026-09-02新增，可獨立於選股類假設先跑，

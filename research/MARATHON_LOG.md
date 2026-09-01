@@ -13,6 +13,8 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T03:59 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十一輪排程，佇列#11產業內相對強度Sector-Neutral Relative Strength第1關cheap IC gate — **已結案：FAIL**（贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，train/val同號但方向與假設預期相反；新增`factor_ic_sector_neutral_rel_strength.py`，不改`factor_ic.py`/`factors.py`本身；完整見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#77/`HYPOTHESIS_QUEUE.md`#11；佇列接續#12 Betting-Against-Beta/低beta，第1關尚未開始）
+
 ## 2026-09-02T03:25+08:00 — #10市場regime擇時overlay：方法論框架建置完成+sanity通過（HYPOTHESIS_QUEUE_PROTOCOL.md軌道第十輪，跟三軌馬拉松無關）
 
 **背景**：`hypothesis_queue`具名鎖正常取得（`LOCK_ACQUIRED`，非陳舊回收），
