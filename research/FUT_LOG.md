@@ -1349,3 +1349,20 @@ FUT軌round104留下的盤別效應第三批「下一步」1–4項本質仍是�
 **本輪整輪跳過，未做任何實質工作。** `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認除4個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，另一互動session殘留）之外無其他變更，未觸碰、未納入本輪commit（未見round244提到的`TRIALS_LEDGER.md`未commit修改，該筆應已在其他session被處理，本輪不做任何推測，只如實記錄現況）。沒有新增`TRIALS_LEDGER.md`列。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約135輪、跨度約132.4小時（約5.5天）；且本輪偵測到上一輪（第244輪之後那一輪）疑似崩潰、陳舊鎖檔被回收，未留下任何記錄，需留意排程器/機器穩定性。需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
+
+## 第 248 輪 · 2026-09-01T10:31+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 09:03（第245輪，最舊）、US 09:31（第246輪）、TW 10:01（第247輪，最新）——依輪替選FUT。
+
+獨立複查暫停規則三個解除條件：
+1. `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit，未變。
+2. `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL（alpha p>0.05未顯著），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩選項仍未見使用者新回應。
+3. `MARATHON_PROTOCOL.md`第0節暫停規則本文完整重讀一遍，未被修改移除。
+
+三者皆未成立，暫停規則整體仍完全生效中。FUT軌round104留下的盤別效應第三批「下一步」本質仍是單因子相關工作，`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，FUT軌沒有組合策略相關工作可接，保守跳過。
+
+**本輪整輪跳過，未做任何實質工作。** `is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認僅4個未追蹤log殘留（`pit_run_500.log`／`pit_run_liquidity500_clean.log`／`pit_run_liquidity500_full.log`／`weinstein_v2_run.log`，另一互動session殘留）之外無其他變更，未觸碰、未納入本輪commit。round104的「下一步」1–4項維持原狀不變，等使用者解除暫停規則後從那裡接續。沒有新增`TRIALS_LEDGER.md`列。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約138輪、跨度約133.9小時（約5.6天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
