@@ -32,10 +32,13 @@
 - [x] **二.1** 掃`index.html`所有「建置中/尚未實作/尚無評分/尚未接上」
   區塊，列成清單——**已完成**（session內部完成，清單見稍早派工B29
   agent時給的完整分類：可建/卡資料源/Phase2占位三類，未另存獨立文件）。
-- [ ] **二.2** 有現成資料源的直接建：**今日事件接earnings_calendar已完成**
-  （見`BACKLOG.md`「2026-09-02 App功能補完」條目）；**美股評分(B29)用
-  yfinance財報建因子管線還在進行中**（另外派給獨立background agent處理，
-  這是工作量較大的部分，尚未收到完成通知）。
+- [x] **二.2** 有現成資料源的直接建：今日事件接earnings_calendar已完成
+  （見`BACKLOG.md`「2026-09-02 App功能補完」條目）；**B29美股財報yfinance
+  因子管線已完成並驗證**（`commit 8b04197`：實測6檔yfinance欄位後選定
+  毛利率/營業利益率/營收年增率/FCF margin四指標，`data/us_financials.
+  json`6/6檔成功、數字合理性人工複查通過，例如NVDA毛利率71%/AMZN FCF
+  margin僅1%皆符合各自業務特性——**只做後端管線，`index.html`還沒有
+  顯示這些指標的UI區塊，也還沒掛GitHub Actions排程**，留給下一輪）。
 - [x] **二.3** 設定頁那行diag灰字讀數收進隱藏debug開關（平常不顯示）——
   **已完成**（見`BACKLOG.md`同上條目：點「App版本」5下切換，預設隱藏，
   Playwright驗證過行為正確）。
