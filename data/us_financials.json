@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-09-02T00:23:24+08:00",
+  "source": "yfinance Ticker.financials（年度損益表）+ Ticker.cashflow（年度現金流量表），免金鑰。指標定義見本檔案docstring。",
+  "coverage": "6/6 檔成功",
+  "errors": {},
+  "financials": {
+    "NVDA": {
+      "period_end": "2026-01-31",
+      "prior_period_end": "2025-01-31",
+      "gross_margin": 0.710681,
+      "operating_margin": 0.603817,
+      "revenue_yoy": 0.654735,
+      "free_cash_flow": 96676000000.0,
+      "fcf_margin": 0.447703,
+      "missing_fields": [],
+      "warnings": []
+    },
+    "AAPL": {
+      "period_end": "2025-09-30",
+      "prior_period_end": "2024-09-30",
+      "gross_margin": 0.469052,
+      "operating_margin": 0.319708,
+      "revenue_yoy": 0.064255,
+      "free_cash_flow": 98767000000.0,
+      "fcf_margin": 0.237329,
+      "missing_fields": [],
+      "warnings": []
+    },
+    "MSFT": {
+      "period_end": "2026-06-30",
+      "prior_period_end": "2025-06-30",
+      "gross_margin": 0.679441,
+      "operating_margin": 0.467808,
+      "revenue_yoy": 0.177887,
+      "free_cash_flow": 66987000000.0,
+      "fcf_margin": 0.201866,
+      "missing_fields": [],
+      "warnings": []
+    },
+    "TSM": {
+      "period_end": "2025-12-31",
+      "prior_period_end": "2024-12-31",
+      "gross_margin": 0.598913,
+      "operating_margin": 0.508288,
+      "revenue_yoy": 0.31605,
+      "free_cash_flow": 992378400000.0,
+      "fcf_margin": 0.260531,
+      "missing_fields": [],
+      "warnings": []
+    },
+    "GOOGL": {
+      "period_end": "2025-12-31",
+      "prior_period_end": "2024-12-31",
+      "gross_margin": 0.596523,
+      "operating_margin": 0.320326,
+      "revenue_yoy": 0.150901,
+      "free_cash_flow": 73266000000.0,
+      "fcf_margin": 0.181876,
+      "missing_fields": [],
+      "warnings": []
+    },
+    "AMZN": {
+      "period_end": "2025-12-31",
+      "prior_period_end": "2024-12-31",
+      "gross_margin": 0.502857,
+      "operating_margin": 0.111553,
+      "revenue_yoy": 0.123778,
+      "free_cash_flow": 7695000000.0,
+      "fcf_margin": 0.010733,
+      "missing_fields": [],
+      "warnings": []
+    }
+  }
+}

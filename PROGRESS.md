@@ -16,6 +16,25 @@
 
 ---
 
+## 2026-09-02（研究帽）— B29美股財報/FCF因子管線後端完成（PENDING_QUEUE二.2「B29」項）
+
+延續前一條目提到「B29另外派給獨立agent處理中」，這輪完成該任務。實測
+AAPL/MSFT/NVDA/TSM/GOOGL/AMZN六檔yfinance欄位（`.financials`/
+`.cashflow`），確認`Total Revenue`/`Gross Profit`/`Operating Income`/
+`Free Cash Flow`六檔都穩定存在，選定4個指標：毛利率、營業利益率、
+營收年增率（年度非季）、FCF margin。新增`research/factors_us_
+financials.py`，追蹤範圍讀`data/earnings_calendar.json`的`earnings`
+keys、yfinance呼叫節流1.5秒、單檔失敗不中斷、缺欄位誠實留`None`不
+補0。本機執行成功，輸出`data/us_financials.json`，6/6檔取得資料、
+無缺欄位，數字合理性檢查通過（毛利率/營業利益率皆落在0~1、AMZN FCF
+margin僅1%符合其重資本支出業務特性，非算錯）。**這輪只做後端+本機
+驗證，未掛GitHub Actions排程、`index.html`個股頁尚未加顯示這些指標
+的UI區塊**（誠實留給下一輪，理由跟細節見`BACKLOG.md` B29條目最新
+更新）。改動檔案：新增`research/factors_us_financials.py`、新增
+`data/us_financials.json`、更新`BACKLOG.md`。
+
+---
+
 ## 2026-09-02（開發帽）— App今日事件卡片+debug開關+smoke test新防線（PENDING_QUEUE二.2部分/二.3/二.4）
 
 背景agent做「二、App功能掃描」反覆卡住無進度（兩輪澄清仍0 commit），

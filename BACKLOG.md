@@ -1600,17 +1600,50 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
   2. 日資料但全市場一次呼叫、量小，納入節流/斷路器登記。
   尚未開始。
 
-- **B29：美股財報/FCF**（2026-08-28登錄，Cowork更正先前「無替代來源」
-  誤判，**只登錄規格不執行**）：
+- **✅ B29：美股財報/FCF因子管線（2026-09-02完成後端，前端UI留給下一輪）**：
   1. yfinance提供`.financials`/`.balance_sheet`/`.cashflow`（損益表/
      資產負債表/現金流量表）——先前把「個股頁美股分頁月營收/財報/三大
      法人/融資融券」整包標「暫無替代來源」太粗，已在`generate_status_json.py`
      拆成三條分別更正：財報/FCF可做（本項B29）；月營收結構性不存在
      （美股公司無此揭露義務，不是資料源缺漏）；三大法人/融資融券見下方
      「難/顆粒度不同」項，維持不做。
-  2. **接線前先實測確認欄位確實存在再接**，不要假設yfinance回傳格式
-     （yfinance非官方API，欄位命名/可得性可能隨時間變動）。
-  尚未開始。
+  2. **實測結果**（對AAPL/MSFT/NVDA/TSM/GOOGL/AMZN六檔實測）：
+     `Ticker.financials`（年度損益表）index在六檔之間命名不完全一致，
+     但`Total Revenue`/`Gross Profit`/`Operating Income`六檔都穩定存在；
+     `Ticker.cashflow`六檔都有`Free Cash Flow`這個yfinance算好的現成
+     欄位（不用自己拿Operating CF減Capex再組，避免正負號風險）；欄位
+     columns是`pandas.Timestamp`由新到舊排序，但`financials`跟
+     `cashflow`兩個DataFrame的欄位集合不保證完全對齊（實測GOOGL的
+     cashflow比financials多一年舊資料）——實作用「先取financials最新
+     期別的實際日期，再拿這個日期去cashflow裡找同一欄」對齊，不用
+     位置索引假設。
+  3. **最後選了4個指標**（原因：所有追蹤股票都穩定拿得到、公式簡單）：
+     毛利率`gross_margin`＝Gross Profit/Total Revenue、營業利益率
+     `operating_margin`＝Operating Income/Total Revenue、營收年增率
+     `revenue_yoy`（最近兩個財年，非季）、自由現金流利潤率`fcf_margin`
+     ＝Free Cash Flow/Total Revenue（原始金額`free_cash_flow`也一併
+     輸出）。
+  4. 新增`research/factors_us_financials.py`：追蹤範圍讀
+     `data/earnings_calendar.json`的`earnings` keys（目前6檔美股），
+     yfinance呼叫間節流1.5秒、單檔失敗try/except記錄不中斷其他檔案，
+     缺欄位誠實留`None`並印出+記進輸出JSON的`missing_fields`/`warnings`，
+     零容忍假資料。輸出`data/us_financials.json`（`generated_at`+
+     `source`+逐檔股票的4指標字典）。
+  5. **驗收結果**：本機執行`python research/factors_us_financials.py`
+     成功、無未處理例外，`data/us_financials.json`能被`json.load()`
+     讀回、6/6檔皆成功無缺欄位。數字合理性檢查：毛利率/營業利益率均落在
+     0~1之間（NVDA 71%/60%、AAPL 47%/32%、MSFT 68%/47%、TSM 60%/51%、
+     GOOGL 60%/32%、AMZN 50%/11%，符合各公司公開已知的財報特徵），
+     AMZN FCF margin僅1%（重資本支出業務型態的合理現象，非算錯）。
+  6. **已知限制**：只用年度財報，非季度，更新頻率隨財報公布約一年一次；
+     `Free Cash Flow`是yfinance自算的衍生欄位，算法細節未公開文件化，
+     僅供排序參考不是精確會計數字；yfinance非官方API，欄位命名/可得性
+     可能隨版本變動。
+  7. **範圍界定（誠實記錄，不打腫臉充胖子）**：這輪只做後端管線+本機
+     驗證，**尚未掛GitHub Actions排程、`index.html`個股頁尚未新增顯示
+     這些指標的UI區塊**——原始任務指示允許步驟5（前端UI）為選做，評估
+     後判斷「先確保後端管線紮實、不為了求完整讓範圍失控」優先，UI顯示
+     留給下一輪接手（可比照既有「總覽」分頁PER/殖利率的寫法）。
 
 - **B30：客戶集中度/供應鏈**（2026-08-28登錄，只登錄規格不執行）：
   1. 質性供應鏈關係資料：改用`ic.tpex.org.tw`產業價值鏈平台，**併入
