@@ -1346,3 +1346,24 @@ TW軌兩項地基背景工作複查：重新統計 `backfill_state.json`，`Coun
 `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認僅5個未追蹤殘留（`research/dividend_yield_portfolio_v1_run.log`／`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`），未觸碰、未納入本輪commit。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約164輪、跨度約148.5小時（約6.2天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
+
+## 2026-09-02T02:01+08:00 — 馬拉松第277輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位；額外精簡state檔案
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 00:32（第274輪，最舊）、FUT 01:02（第275輪）、US 01:32（第276輪，最新）——依輪替選TW。
+
+獨立複查三個解除條件皆未成立：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自 `fa369b9` 以來仍只一個commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）仍FAIL（alpha p>0.05未顯著），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩選項仍未見使用者新回應。
+3. `MARATHON_PROTOCOL.md` 第0節暫停規則本文完整重讀一遍，未被修改移除。
+
+兩項允許的背景工作也獨立複查仍已達標：`data/backfill_state.json` 本輪重新統計 `Counter(d.values())` 得 done=2597／skip=469，2597/3066=84.70%（跟上一輪一致），遠高於80%門檻；T86回補本輪重新用 `find data/raw_twse_t86 -name "*.parquet" | wc -l` 確認共3319個parquet檔，自第164輪起維持100%完成記錄。
+
+**TW軌沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作。**
+
+**額外整理（非新工作單位，屬於本輪覆寫state檔案的一部分）**：`TW_MARATHON_STATE.md` 累積42則高度重複的「上一則保留（跳過）」對照條目，內容與本檔案完全重複，已使檔案膨脹到53KB。依該檔案自訂宗旨（「只描述現在的狀態」，細節看本檔案），本輪精簡只保留最近3則跳過摘要（第274/268/262輪）＋2026-08-26暫停規則生效前的實質歷史段落（含混合資料源架構上線、宇宙回補逐批記錄等非重複內容），移除約38則同性質「跳過」摘要條目。**未刪除任何一行本檔案（TW_LOG.md）的內容**，所有逐輪細節完整保留在這裡，只是不再於state檔案裡重複保存。
+
+`is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認乾淨（除本輪修改的三個檔案外，另有既有未追蹤log殘留：`research/dividend_yield_portfolio_v1_run.log`／`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，未觸碰、未納入本輪commit）。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約167輪、跨度約150小時（約6.25天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
