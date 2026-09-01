@@ -109,8 +109,11 @@ IC gate贏過洗牌null分布這一項未過，percentile=82.8<90.0門檻，見�
 引用`TRIALS_LEDGER.md`#61既有跨軌結果判定、非新測試，train期IR僅0.009+
 跨累積Bonferroni校正未過，見下方條目與`STRATEGY_GRAVEYARD.md`）、#13台股
 三大法人連續買超持續性已結案（FAIL，第1關cheap IC gate train/val正負號
-相反+null percentile=81.9未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`），
-目前排隊第一：#14台股月營收公布事件效應（第1關sanity尚未開始）。**
+相反+null percentile=81.9未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`）、
+#14台股月營收公布事件效應已結案（FAIL，事件研究設計贏過洗牌null分布這一項
+未過，percentile=68.0未過90.0門檻，見下方條目與`STRATEGY_GRAVEYARD.md`），
+目前排隊第一：#15波動度目標化Vol-Targeting（第1關sanity尚未開始，可獨立於
+選股類假設先跑）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -591,7 +594,26 @@ IC驗證）有關聯但層級不同——`f_revenue_surprise`是橫截面IC驗�
 PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/月頻/Top20」
 這個具體構造，不代表用事件窗口設計的營收驚喜策略也會失敗。
 
-**狀態**：待起跑，第1關（sanity）尚未開始。
+**狀態（2026-09-02T05:26更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第十四輪排程，
+已結案：FAIL）**：新增`monthly_revenue_event_study.py`——事件錨定窗口設計
+（跟`factor_ic.py`固定日曆網格cross-sectional、`pead_portfolio_v1`月頻
+再平衡都刻意不同：逐股用自己的月營收公布`pit_date`
+（`pit.py::month_revenue_pit()`既有PIT邏輯）當事件起點，公布後第一個交易日
+進場、持有20交易日，池化`factors.py::_revenue_surprise_sue()`(SUE)跟事件後
+報酬）。100檔快取樣本，61檔有可用事件，總事件數8322筆（TRAIN 5594筆跨109
+個月、VAL 2728筆跨47個月）。結果：TRAIN pooled Spearman IC=+0.0601
+(p=0.0000,n=5594)、VAL pooled Spearman IC=+0.0204(p=0.2863,n=2728)，
+train/val**同號**（皆正），quintile利差TRAIN+0.0318→VAL+0.0085（樣本外
+萎縮73%），VAL |IC| vs 500次洗牌null percentile=68.0（門檻90.0，未過）。
+三項判準（幅度非零/同號/贏過null）中「贏過洗牌null」這項未過，依協定第1關
+cheap gate標準判**FAIL**，未進第2關以後。**不泛化成「月營收驚喜訊號完全
+沒用」**——因子層日頻cross-sectional IC驗證（`TRIALS_LEDGER.md`#8，PASS）
+不受影響、依然成立，這裡死的是「事件窗口設計」這個具體策略層構造，跟PEAD
+策略層（#3，FAIL，月頻再平衡構造）是兩種不同portfolio構造但殊途同歸，暗示
+SUE類訊號偏離原始日頻cross-sectional驗證設計、改包裝成月頻或事件窗口構造
+時訊噪比整體偏弱。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#80、
+`MARATHON_LOG.md`2026-09-02T05:26條目。佇列#14結案，接續佇列第一順位#15
+波動度目標化Vol-Targeting。
 
 ---
 
@@ -660,10 +682,14 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
     相反+null percentile=81.9<90.0門檻，跟已FAIL的`f_foreign_streak`
     （#3）死法幾乎相同，見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#79），
     移出排隊佇列。
-14. **台股月營收公布事件效應——現在排隊第一。** 2026-09-02新增，待起跑，
-    第1關尚未開始。
-15. 波動度目標化Vol-Targeting——2026-09-02新增，可獨立於選股類假設先跑，
-    不用等其他候選排隊。
+14. ~~台股月營收公布事件效應~~——**2026-09-02第十四輪排程已結案：FAIL**
+    （事件研究設計第1關cheap gate，贏過洗牌null分布這一項未過，
+    percentile=68.0<90.0門檻，train/val同號但VAL期樣本外萎縮73%+不顯著，
+    見上方條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#80），移出
+    排隊佇列。因子層IC（`TRIALS_LEDGER.md`#8）本身仍是PASS，未被推翻，
+    死的只是「事件窗口」這個具體策略層構造。
+15. **波動度目標化Vol-Targeting——現在排隊第一。** 2026-09-02新增，可獨立
+    於選股類假設先跑，不用等其他候選排隊，第1關尚未開始。
 
 **B25/B26任務提醒（2026-09-02新增，跟上面九條假設是平行的另一個工作
 項目，不是同一序列）**：`BACKLOG.md`已有完整規格「登記但尚未執行」——

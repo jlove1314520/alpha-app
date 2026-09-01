@@ -13,6 +13,37 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T05:26 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十四輪排程：佇列#14
+台股月營收公布事件效應第1關sanity（事件研究設計）— 結果：**FAIL**
+
+新增`monthly_revenue_event_study.py`（新增，事件錨定窗口設計，跟既有
+`factor_ic.py`固定日曆網格快照/`pead_portfolio_v1.py`月頻再平衡都不同——
+逐股用自己的月營收公布`pit_date`（`pit.py::month_revenue_pit()`既有PIT
+邏輯）當事件起點，公布後第一個交易日進場、持有20交易日，池化所有股票的
+事件層級SUE值(`factors.py::_revenue_surprise_sue()`)跟事件後報酬）。100檔
+快取樣本，61檔有可用事件，總事件數8322筆（TRAIN 5594筆跨109個月、VAL
+2728筆跨47個月，樣本涵蓋度足夠）。結果：TRAIN pooled Spearman
+IC=+0.0601(p=0.0000,n=5594)、VAL pooled Spearman IC=+0.0204(p=0.2863,
+n=2728)，train/val**同號**（皆正），quintile利差方向正確但VAL期明顯萎縮
+（TRAIN spread+0.0318→VAL spread+0.0085，收斂73%），VAL |IC| vs 500次
+洗牌null percentile=68.0（門檻90.0，未過）。三項判準（幅度非零/同號/贏過
+null）中「贏過洗牌null」這項未過，依協定第1關cheap gate標準判**FAIL**，
+未進第2關以後（成本敏感度等）。過程中修正一個實作細節：一開始對原始月
+營收表直接做holdout斷言誤觸發AssertionError（`pit_date`揭露日本來就會
+晚於`load_dev`用來裁切VAL_END的營收期間`date`欄位，個別rows的`pit_date`
+超過VAL_END是正常現象非洩漏），改把斷言移到最終事件表（用天生受
+`adjusted_price_series()`保護的`entry_date`）後解決，過程中沒有真正碰觸
+holdout資料本身。**不泛化成「月營收驚喜這個訊號完全沒用」**——因子層日頻
+cross-sectional IC驗證（`TRIALS_LEDGER.md`#8，PASS）依然成立不受影響，
+這裡死的是「事件窗口設計本身」（VAL期樣本外顯著性/贏過隨機對照都不夠）
+——跟PEAD策略層（#3，FAIL，月頻再平衡構造）是兩種不同構造但殊途同歸的
+結果，暗示SUE類訊號的訊噪比在portfolio/event層級整體偏弱，不論用哪種
+構造包裝。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#80、
+`HYPOTHESIS_QUEUE.md`#14。佇列#14結案，接續佇列第一順位#15波動度目標化
+Vol-Targeting。
+
+---
+
 ## 2026-09-02T04:55 — `HYPOTHESIS_QUEUE_PROTOCOL.md`第十三輪排程：佇列#13
 台股三大法人連續買超持續性第1關cheap IC gate — 結果：**FAIL**
 
