@@ -16,6 +16,30 @@
 
 ---
 
+## 2026-09-02（開發帽）— 圖表逐一診斷（PENDING_QUEUE「線圖不顯示」項第一部分）：修好1個真bug
+
+用Playwright在本機393×852視窗實測5類圖表的`<svg><polyline points="...">`
+是不是有真的座標點（不是只看面板有沒有文字）。結論：4類正常（自選股列表
+sparkline、首頁/市場頁大盤+台指期+美股四大指數sparkline中的加權指數/道瓊/
+S&P/NASDAQ/費半、策略監控台權益曲線、個股頁走勢圖trendChart、個股頁月營收
+長條圖），找到並修好1個真bug：**櫃買指數(TPEx)sparkline永遠畫不出來**——
+`loadMarketIndex()`組給`idxRowHtml()`的物件漏掉`sparkline`欄位，不是資料
+不足，是即使`market_tw.json::tpex.sparkline`以後累積再多天也永遠傳不進
+渲染函式。已修正：把`sparkline:tw.tpex.sparkline`加進去，現在回到正常的
+「資料不足時暫不顯示、資料夠2點自動出現」邏輯。
+
+另外查證發現使用者原話提到的兩個圖表跟實際程式碼有出入，如實記錄（不是
+bug，是範圍認知落差，本輪未動）：個股頁「籌碼」分頁的融資融券目前是純
+文字沒有圖表（`marginChart()`實際只接在市場頁大盤融資維持率）；「選股
+成績單」目前是純文字統計列沒有曲線元件。完整診斷細節（含每個圖表的
+Playwright實測數據）見`BACKLOG.md`同日條目。
+
+改動檔案：`index.html`（`loadMarketIndex()`約1969行）。冒煙測試
+`node scripts/smoke_test.mjs`13項全PASS。診斷用的暫時性Playwright腳本
+已刪除未進commit。
+
+---
+
 ## 2026-09-02（研究帽）— B29美股財報/FCF因子管線後端完成（PENDING_QUEUE二.2「B29」項）
 
 延續前一條目提到「B29另外派給獨立agent處理中」，這輪完成該任務。實測

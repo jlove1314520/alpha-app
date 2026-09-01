@@ -1966,7 +1966,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{};
     const taiexSrc=taiexRowSource(tw);
-    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+idxRowHtml('櫃買指數','TPEx',tw.tpex&&{close:tw.tpex.close,change_pct:tw.tpex.change_pct});
+    // 2026-09-02修正（圖表診斷任務發現的真bug）：這裡組給idxRowHtml()的物件原本
+    // 只挑close/change_pct兩個欄位，漏掉market_tw.json::tpex.sparkline——不是「資料
+    // 還沒累積到2點」這種資料不足，而是即使sparkline以後累積到20點，這裡也永遠不會
+    // 把它傳進去，櫃買指數那條走勢線注定永久畫不出來。改成把sparkline也一併帶進去。
+    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+idxRowHtml('櫃買指數','TPEx',tw.tpex&&{close:tw.tpex.close,change_pct:tw.tpex.change_pct,sparkline:tw.tpex.sparkline});
     document.getElementById('idx-datatime').textContent=fmtMarketDataTime(tw);
   }
   function futRowHtml(label,fut,srcLabel){
@@ -3388,7 +3392,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.0016';
+  const APP_VERSION='2026-09-02.0036';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

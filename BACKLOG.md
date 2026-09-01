@@ -17,6 +17,73 @@
 
 ---
 
+## ✅ 2026-09-02（續）圖表逐一診斷：5類圖表根因分類，修好1個真bug
+
+對應`PENDING_QUEUE.md`「App 兩個 UX 問題排進今晚（線圖不顯示 + 數字不會跳動）」
+的第一部分（線圖診斷）。用Playwright在本機393×852視窗實測抓DOM（不是用肉眼猜），
+逐一檢查`<svg>`裡`<polyline>`的`points`屬性是不是有真的座標點，對5類圖表分別
+判定根因：
+
+1. **自選股列表sparkline（`spark()`約1571行，呼叫點約1636行，讀`quotes_tw.json`/
+   `quotes_us.json`的`sparkline`欄位）——正常，非bug**。實測2330/1101/AAPL/NVDA
+   四檔都畫出20點的真實polyline，數值隨股價正確變化。
+
+2. **首頁/市場頁大盤+台指期+美股四大指數sparkline（`idxRowHtml()`約1921行，
+   呼叫`spark()`約1928行）——找到並修好1個真bug**：加權指數/台指期/美股四大
+   指數（道瓊/S&P/NASDAQ/費半）實測都正常畫出20點。但**櫃買指數(TPEx)永遠
+   畫不出線**——根因不是「資料還沒累積到2點」（雖然目前`market_tw.json`裡
+   `tpex.sparkline`確實也只有1個元素，這部分是(a)類資料不足），但**更嚴重的
+   是`loadMarketIndex()`（約1969行）組給`idxRowHtml()`的物件`{close:...,
+   change_pct:...}`根本沒有把`tw.tpex.sparkline`這個欄位帶進去**——這是(b)類
+   真bug：即使`sparkline`以後每天排程累積到20點，這裡也永遠不會把它傳進渲染
+   函式，這條線注定永久畫不出來，不是「等資料」就會自己好。**已修正**：改成
+   `{close:tw.tpex.close,change_pct:tw.tpex.change_pct,sparkline:tw.tpex.sparkline}`
+   把sparkline一併帶進去。修完後現狀：因為`tpex.sparkline`目前確實只有1個
+   點（累積中），畫面上暫時還是不會顯示線，這部分回到正常的(a)類「資料不足」
+   狀態（`spark()`本身的`length<2`防呆正常運作），等排程再抓幾天資料自然會
+   出現，不需要額外動作。
+
+3. **策略監控台權益曲線（`spark()`約2748行，讀`data/strategy_performance.json`
+   的`equity_curve`）——正常，非bug**。實測三個策略（`value_board_v2`/
+   `momentum_board`/`future_board`）都有4個真實點且正確畫線。**特別記錄
+   `momentum_board`目前4天報酬全部是0.0%**：這會讓`spark()`算出mn=mx=0，
+   畫出一條貼齊視覺區塊底部邊緣的水平flat線——**這不是空白/沒畫出來，是
+   忠實反映「這個策略目前累積報酬確實是零」**，實際截圖確認畫面上真的有一條
+   紅色水平線（見策略監控台「題材動能榜」卡片右上角），只是因為數值真的是
+   平的，視覺上不明顯，跟"沒有畫出線"是兩回事，不需要修程式碼。
+
+4. **個股頁走勢圖（`trendChart()`約1574行，讀`fm('TaiwanStockPrice'/
+   'USStockPrice',...)`即時打FinMind）——正常，非bug**。實測2330（26個點）
+   都正確畫出完整曲線+最後一點圓點+數值標籤。這條路徑依賴FinMind即時額度，
+   額度用盡時會誠實顯示「連線失敗」文字（`fmEmptyMsg()`），不是空白也不是
+   假資料，這個既有防呆本輪沒有改動。
+
+5. **個股頁「營收」月營收長條圖（`loadRevenueChart()`約2447行）——正常，
+   非bug**。這其實是div高度百分比堆出來的長條圖，不是SVG折線圖，實測8根柱子
+   都有72%~100%不等的真實高度，不是全部塞在同一個值或空白。
+
+**額外查證發現、跟使用者原始指令描述有出入的兩處，如實記錄（不是bug，是
+範圍認知落差）**：
+- 使用者原話提到「個股頁『籌碼』分頁的融資融券走勢圖」對應`marginChart()`
+  （約2125行）——**實測後發現這個函式其實只接在市場頁「大盤融資維持率」
+  卡片**（`#margin-chart`，讀全市場整體`data/margin_maintenance.json`），
+  個股頁「籌碼」分頁的融資融券（`loadMarginChip()`約2385行）**目前是純文字
+  數字（融資餘額/融券餘額/資券比/估算維持率），沒有任何SVG圖表**——不是
+  「圖壞了」，是這個位置從一開始就沒有做成圖表，如果要加圖是新功能而不是
+  修bug，本輪沒有動它。市場頁大盤融資維持率的`marginChart()`本身實測正常
+  （6個真實點，正確畫出折線）。
+- 使用者原話提到「選股成績單」有「三榜前向報酬曲線」對應`picksReportCardHtml`
+  （約2820行）——**實測後發現這個卡片目前完全沒有`<svg>`元素，是純文字統計
+  列（T+5/20/60/120平均報酬+vs大盤超額+翻倍率/地雷率），沒有畫任何曲線**，
+  跟`spark()`/`trendChart()`/`marginChart()`都無關。這不是「曲線畫不出來」
+  的bug，是這裡從設計上就沒有曲線元件，如果要加是新功能，本輪沒有動它。
+
+**修改檔案**：`index.html`（`loadMarketIndex()`加`sparkline`欄位傳遞，約
+1969行）。**驗收**：`node scripts/smoke_test.mjs`13項全PASS；診斷用的
+Playwright腳本（`scripts/_diag*_tmp.mjs`）驗證用完即刪，未進commit。
+
+---
+
 ## ✅ 2026-09-02 App功能補完（PENDING_QUEUE二.2部分/二.3/二.4）：今日事件卡片、
 debug開關、smoke test新防線
 
