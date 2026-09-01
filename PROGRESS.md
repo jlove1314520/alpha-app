@@ -16,6 +16,25 @@
 
 ---
 
+## 2026-09-01（續，維運+開發帽）— picks_ledger回填邏輯補完+App「選股成績單」分頁上線
+
+`update_picks_ledger_returns.py`從骨架補完：交易日曆用`price_history.json`
+的2330序列近似、大盤超額改用yfinance `^TWII`（發現`price_history.json`裡
+`TAIEX`那把快取是2024年舊資料沒人維護，換成已經在用的yfinance資料源，
+不新增依賴）、沿用`build_picks_ledger.py`同一套price_stale>10天守門。
+已本機驗證邏輯正確，對真實資料誠實回填0筆（`price_history.json`最新只到
+08-31，最早快照08-27扣週末只累積2個交易日，還沒滿T+5，不是bug）。已掛進
+`market.yml`。App新增「選股成績單」分頁（交易頁第4個子分頁），三榜前向
+追蹤成績（報酬/vs大盤超額/翻倍率/地雷率），樣本不足誠實標示不補假數字；
+使用者原提「vs隨機20檔基準」因缺抽樣基礎設施改用TAIEX超額替代，已在
+BACKLOG說明。冒煙測試12項全PASS，另用Playwright驗證兩條渲染路徑（樣本
+不足/樣本足夠）都正確。另外也建了假設佇列自動排程`AlphaHypothesisQueue`
+（每30分鐘，跟三軌`AlphaMarathon`用同一套機制、具名鎖互不干擾），已實測
+觸發成功（無彈窗、心跳正常、Carry往下推進）。詳見`BACKLOG.md`「2026-09-01
+選股成績單」條目、`research/HYPOTHESIS_QUEUE_PROTOCOL.md`。
+
+---
+
 ## 2026-09-01（開發帽）— 策略監控台排序修正 + AlphaMarathon排程到期bug修好
 
 **排序修正**：使用者回報「價值成長+4.75%排最下、題材動能+0.00%排最上」

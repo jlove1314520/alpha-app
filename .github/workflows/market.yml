@@ -77,6 +77,13 @@ jobs:
       - name: 快照三榜Top20進前瞻選股台帳picks_ledger.json
         run: python .github/scripts/build_picks_ledger.py
         continue-on-error: true
+      # 2026-09-01新增（update_picks_ledger_returns.py從骨架補完實作）：快照
+      # 之後、commit之前，檢查每個既有快照是否到了T+5/20/60/120交易日，到了
+      # 就回填實際報酬+大盤超額（yfinance ^TWII），只填還沒填過的欄位，鐵律
+      # 「填過的欄位永遠不再更動」。
+      - name: 回填前瞻選股台帳的T+N報酬（只算已發生的日子，嚴禁事後改既有快照）
+        run: python .github/scripts/update_picks_ledger_returns.py
+        continue-on-error: true
       # 2026-08-29新增（策略監控台升級，使用者原話「forward paper嚴禁事後
       # 補建，只能逐日往前累積」）：三榜都產生完之後，逐日mark-to-market
       # 累積前向紙上模擬（不是回測，是真的每天用當天收盤價往前滾），

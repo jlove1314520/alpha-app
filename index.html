@@ -857,6 +857,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <button class="on" data-sub="bots">機器人</button>
       <button data-sub="strategy">策略</button>
       <button data-sub="monitor">策略監控台</button>
+      <button data-sub="picks">選股成績單</button>
     </div>
 
     <div class="subscreen active" id="trade-sub-bots">
@@ -924,6 +925,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="subscreen" id="trade-sub-monitor">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 研究參考用途，非投資建議；狀態100%由腳本從真實檔案推導</div>
       <div id="strategy-monitor-list"><div class="note">載入中…</div></div>
+    </div>
+
+    <!-- 2026-09-01新增：選股成績單——三榜(價值成長/題材動能/未來性)Top20每日快照
+    的前向紙上追蹤成績，不是回測。資料100%來自data/picks_ledger.json，這裡不寫死
+    任何數字；沒有足夠樣本就誠實標「樣本還太少，需累積」，不得補假數字湊版面。 -->
+    <div class="subscreen" id="trade-sub-picks">
+      <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 前向紙上追蹤，非回測，非投資建議；只計算已經過去的交易日，嚴禁事後補建</div>
+      <div id="picks-report-list"><div class="note">載入中…</div></div>
     </div>
   </section>
 
@@ -2447,9 +2456,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('trade-sub-bots').classList.remove('active');
       document.getElementById('trade-sub-strategy').classList.remove('active');
       document.getElementById('trade-sub-monitor').classList.remove('active');
+      document.getElementById('trade-sub-picks').classList.remove('active');
       document.getElementById('trade-sub-'+b.dataset.sub).classList.add('active');
       if(b.dataset.sub==='strategy')loadStrategies();
       if(b.dataset.sub==='monitor')loadStrategyMonitor();
+      if(b.dataset.sub==='picks')loadPicksReportCard();
     });
   });
   // 2026-08-25 新增：策略紙上前測系統。目前沒有任何策略通過完整驗證(含holdout解鎖)，
@@ -2592,6 +2603,85 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       el.innerHTML=list.map((s,i)=>strategyMonitorCardHtml(s,i)).join('');
     }catch(e){
       console.warn('[loadStrategyMonitor]',e);recordGlobalError('loadStrategyMonitor',e);
+      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
+  }
+
+  // 2026-09-01新增：選股成績單——三榜Top20快照的前向紙上追蹤成績（不是回測）。
+  // 資料100%來自data/picks_ledger.json，聚合全部在前端做（後端只負責逐日快照+
+  // 逐日回填T+N報酬，不做聚合統計，避免兩邊各算一套數字互相對不齊）。
+  // 樣本數門檻(20筆)沿用策略監控台forward_paper「<20天樣本不足」同一個量級的
+  // 保守判斷精神，但這裡量的是「已回填的個股筆數」不是「交易日數」，兩者單位
+  // 不同，各自獨立設門檻。地雷門檻(單筆虧損≥30%)是這裡新定義的顯示用途門檻，
+  // 不是統計顯著性檢定，純粹給使用者一個「多慘算地雷」的直覺標準，UI上會把
+  // 門檻數字直接寫出來，不藏在程式碼裡。
+  const PICKS_BOARD_TITLES={value:'價值成長榜',momentum:'題材動能榜',future:'未來性濾網'};
+  const PICKS_MIN_SAMPLE=20;
+  const PICKS_DOUBLE_THRESHOLD=100;   // 翻倍：單筆報酬≥100%
+  const PICKS_LANDMINE_THRESHOLD=-30; // 地雷：單筆報酬≤-30%
+
+  function _picksAggregateWindow(snapshots, board, windowKey){
+    const filled=[];
+    for(const snap of snapshots){
+      if(snap.board!==board)continue;
+      for(const pick of (snap.picks||[])){
+        const r=pick.returns&&pick.returns[windowKey];
+        if(r&&r.return_pct!=null)filled.push(r);
+      }
+    }
+    const n=filled.length;
+    if(n<PICKS_MIN_SAMPLE)return {n, sufficient:false};
+    const avgReturn=filled.reduce((a,r)=>a+r.return_pct,0)/n;
+    const excessVals=filled.filter(r=>r.excess_vs_taiex_pct!=null).map(r=>r.excess_vs_taiex_pct);
+    const avgExcess=excessVals.length?excessVals.reduce((a,v)=>a+v,0)/excessVals.length:null;
+    const doubleRate=filled.filter(r=>r.return_pct>=PICKS_DOUBLE_THRESHOLD).length/n*100;
+    const landmineRate=filled.filter(r=>r.return_pct<=PICKS_LANDMINE_THRESHOLD).length/n*100;
+    return {n, sufficient:true, avgReturn, avgExcess, excessN:excessVals.length, doubleRate, landmineRate};
+  }
+
+  function picksReportCardHtml(board, snapshotCount, windows){
+    const rows=Object.entries(windows).map(([key,label])=>{
+      const agg=picksWindowData[board][key];
+      if(!agg.sufficient){
+        return `<div class="s"><span>${label}</span><b style="color:var(--ink-3);font-size:11px">樣本還太少，需累積（目前${agg.n}筆，門檻${PICKS_MIN_SAMPLE}筆）</b></div>`;
+      }
+      const ret=agg.avgReturn, exc=agg.avgExcess;
+      return `<div class="s"><span>${label}（n=${agg.n}）</span><b class="${ret>=0?'pos':'neg'}">${ret>=0?'+':''}${ret.toFixed(1)}%${exc!=null?`　vs大盤${exc>=0?'+':''}${exc.toFixed(1)}%`:''}</b></div>`;
+    }).join('');
+    // 翻倍率/地雷率取樣本數最多的那個窗口代表（通常是t5，累積最快）
+    const bestWindow=Object.keys(windows).map(k=>picksWindowData[board][k]).filter(a=>a.sufficient).sort((a,b)=>b.n-a.n)[0];
+    const rateLine=bestWindow
+      ?`<div class="note" style="margin-top:8px">翻倍率(單筆≥+${PICKS_DOUBLE_THRESHOLD}%)：<b>${bestWindow.doubleRate.toFixed(1)}%</b>　·　地雷率(單筆≤${PICKS_LANDMINE_THRESHOLD}%)：<b>${bestWindow.landmineRate.toFixed(1)}%</b>（樣本n=${bestWindow.n}）</div>`
+      :`<div class="note" style="margin-top:8px;color:var(--ink-3)">翻倍率/地雷率：樣本還太少，需累積</div>`;
+    return `<div class="card">
+      <h3>${PICKS_BOARD_TITLES[board]||board}</h3>
+      <div class="note" style="margin-bottom:8px">已累積 ${snapshotCount} 筆快照</div>
+      <div class="bot-stats" style="flex-direction:column;align-items:stretch;gap:6px">${rows}</div>
+      ${rateLine}
+    </div>`;
+  }
+
+  let picksWindowData={};
+  async function loadPicksReportCard(){
+    const el=document.getElementById('picks-report-list');if(!el)return;
+    try{
+      const r=await fetch('data/picks_ledger.json?t='+Date.now());
+      if(!r.ok){el.innerHTML='<div class="note">查無資料（data/picks_ledger.json尚未產生）</div>';return}
+      const json=await r.json();
+      const snapshots=json.snapshots||[];
+      if(!snapshots.length){el.innerHTML='<div class="note">尚無快照，累積中</div>';return}
+      const windows={t5:'T+5交易日',t20:'T+20交易日',t60:'T+60交易日',t120:'T+120交易日'};
+      const boards=Object.keys(PICKS_BOARD_TITLES);
+      picksWindowData={};
+      const html=boards.map(board=>{
+        const snapshotCount=snapshots.filter(s=>s.board===board).length;
+        picksWindowData[board]={};
+        for(const key of Object.keys(windows))picksWindowData[board][key]=_picksAggregateWindow(snapshots, board, key);
+        return picksReportCardHtml(board, snapshotCount, windows);
+      }).join('');
+      el.innerHTML=html;
+    }catch(e){
+      console.warn('[loadPicksReportCard]',e);recordGlobalError('loadPicksReportCard',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
     }
   }
@@ -3120,7 +3210,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-08-29.0148';
+  const APP_VERSION='2026-09-01.2027';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
