@@ -16,6 +16,21 @@
 
 ---
 
+## 2026-09-01（續5，開發帽）— 兩券商即時報價接進App：台股Shioaji、美股IBKR分工
+
+新增`research/shioaji_quotes.py`（Shioaji simulation模式，只讀不下單，
+刻意不呼叫`activate_ca`）：抓5檔台股自選股代表+TAIEX+台指期近月，寫
+`data/quotes_sinopac.json`。**已用真實模擬帳戶實測成功**，全部7檔真實
+報價都拿到。`index.html`落實分工鐵律：台股`intradayQuote()`先查Shioaji、
+美股先查IBKR，加權指數/台指期近月也接上Shioaji，各自標清楚來源+即時/
+延遲，查不到才退回既有來源。冒煙測試12項全PASS，Playwright驗證分工
+正確（台股顯示Shioaji標籤、過期的IBKR資料正確退回Yahoo Finance）。
+本機排程腳本(`run-shioaji-quotes-cycle.ps1`)已測試一輪跑通；Windows
+排程任務本身待使用者用schtasks建立。詳見`BACKLOG.md`「2026-09-01（續）
+兩券商即時報價接進App」條目。
+
+---
+
 ## 2026-09-01（續4，開發帽）— IBKR paper下單伺服器建好，抓到並修好一個嚴重的成交誤判bug
 
 新增`research/ibkr_order_server.py`（FastAPI本機伺服器，只監聽127.0.0.1，

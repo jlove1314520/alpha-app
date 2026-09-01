@@ -17,6 +17,49 @@
 
 ---
 
+## ✅ 2026-09-01（續）兩券商即時報價接進App：台股Shioaji、美股IBKR，分工不重疊
+
+使用者要求台股一律走Shioaji、美股一律走IBKR，兩者不重疊。
+
+**一、`research/shioaji_quotes.py`（新增）**：simulation模式登入永豐
+（只讀`SINOPAC_API_KEY`/`SECRET_KEY`，**刻意不呼叫`activate_ca`**——這支
+只抓報價不下單，不需要下單權限，多一層防護），抓5檔台股自選股代表+
+TAIEX（`api.Contracts.Indexs.TSE.IX0001`）+台指期近月（`api.Contracts.
+Futures.TXF.TXFR1`，Shioaji自己提供的「近月」別名，不用自己算交割日），
+寫`data/quotes_sinopac.json`，收工前登出。**已用使用者真實模擬帳戶
+實測成功**：5檔台股+TAIEX+台指期近月全部抓到真實報價（TAIEX
+46948.72跟其他資料源交叉比對一致）。`data_type`統一標`REALTIME`——
+查證後Shioaji（永豐自家經紀商行情）不像IBKR對海外交易所報價那樣有
+延遲訂閱分層制度，這是台灣券商API自家行情，不是隨便寫的樂觀值。
+
+**二、`ibkr_quotes.py`確認維持美股專用**（前一輪已完成的改版，這輪
+沒有再改動）。
+
+**三、`index.html`分工鐵律落實**：`intradayQuote(code,us)`——`!us`
+（台股）先查Shioaji、`us`（美股）先查IBKR，兩者互不重疊，各自查不到
+才退回現有FinMind/TWSE/Yahoo來源。加權指數（`loadMarketIndex`/
+`loadHomeIndex`）、台指期近月（`loadHomeIndex`）也都優先用Shioaji即時
+報價，過期/查不到才退回`market_tw.json`既有來源。每個報價都清楚標示
+「來源+即時/延遲」（Shioaji一律「即時」、IBKR視帳戶訂閱回報「即時」或
+「延遲」）。
+
+**驗收**：`node scripts/smoke_test.mjs`12項全PASS；Playwright模擬自選股
+含台股(2330)+美股(AAPL)，確認2330顯示「Shioaji 即時」、加權指數/台指期
+近月都正確顯示「Shioaji 即時」來源標籤；IBKR部分因為報價檔已超過20分鐘
+新鮮度門檻，正確自動退回Yahoo Finance（不是bug，是既有的過期保護機制
+正常運作）。
+
+**四、本機排程**：`C:\alpha\run-shioaji-quotes-cycle.ps1`+
+`run-shioaji-quotes-hidden.vbs`（repo外，逐字比照`run-ibkr-quotes-
+cycle.ps1`同一套機制：不透過`claude.exe -p`、`git pull --no-rebase`
+避免髒工作目錄卡住、push重試5次）。**已手動測試一輪完整跑通**（抓
+報價→git add→commit→pull→push全部成功）。**Windows排程任務本身
+（`AlphaShioajiQuotes`）還沒建立**——建立新排程任務的動作會被Claude
+Code安全分類器擋下（跟之前`AlphaHypothesisQueue`/`AlphaIbkrQuotes`
+同一個限制），需要使用者自己用`schtasks`指令建立。
+
+---
+
 ## ⚠ 2026-09-01（續）IBKR paper下單伺服器：本機HTTP伺服器建好、抓到並修好
 一個真實的成交狀態誤判bug——**App端UI尚未開始做，先報進度**
 

@@ -1243,7 +1243,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   // 2026-08-25 新增：盤中近即時報價（GitHub Actions 排程抓，見 .github/workflows/quotes.yml）。
   // FinMind 免費版只有盤後日線，畫面顯示「盤中」卻只能給前一日收盤價會誤導使用者。
-  let INTRADAY_TW=null,INTRADAY_US=null,INTRADAY_IBKR=null;
+  let INTRADAY_TW=null,INTRADAY_US=null,INTRADAY_IBKR=null,INTRADAY_SINOPAC=null;
   function intradayAgeMin(data){
     if(!data||!data.fetched_at)return null;
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
@@ -1269,21 +1269,43 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       ageMin:age, source:'ibkr', dataType:q.data_type,
     };
   }
+  // 2026-09-01新增：Shioaji本機報價（research/shioaji_quotes.py），跟
+  // ibkrQuote()同一套邏輯，鏡射過來只是資料源換成台股券商。分工鐵律：
+  // 台股一律走這裡，美股一律走ibkrQuote()，兩者不重疊（見shioaji_quotes.py
+  // /ibkr_quotes.py各自docstring）。
+  function sinopacQuote(code){
+    if(!INTRADAY_SINOPAC||!INTRADAY_SINOPAC.connected)return null;
+    const age=intradayAgeMin(INTRADAY_SINOPAC);
+    if(age==null||age>INTRADAY_STALE_MIN)return null;
+    const q=INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes[code];
+    if(!q||q.last==null)return null;
+    return {
+      price:q.last, prev_close:q.close,
+      change:(q.close!=null?q.last-q.close:null), change_pct:q.change_pct,
+      ageMin:age, source:'sinopac', dataType:q.data_type,
+    };
+  }
   async function loadIntradayQuotes(){
     try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok)INTRADAY_TW=await r.json()}catch(e){console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
     try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok)INTRADAY_US=await r.json()}catch(e){console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
     await ensureIbkrQuotes();
+    await ensureSinopacQuotes();
     try{updateClocks()}catch(e){console.warn('[loadIntradayQuotes:updateClocks]',e);recordGlobalError('loadIntradayQuotes:updateClocks',e)}
   }
-  // 2026-09-01新增：quotes_ibkr.json由本機research/ibkr_quotes.py排程產生，
-  // 不一定存在（使用者沒開IB Gateway、或這台裝置本身不是跑IBKR排程的那台
-  // 機器），查不到就是null，intradayQuote()/loadUsIndexes()會自動退回既有
-  // FinMind/Yahoo資料源，這裡刻意不記recordGlobalError——檔案不存在是完全
-  // 正常的情況，不是錯誤。獨立成一個函式讓loadIntradayQuotes()（自選股用）
-  // 跟loadUsIndexes()（美股四大指數用）都能各自確保資料已載入，不假設呼叫
-  // 順序（沒有做快取，跟這支App其他報價載入函式的既有慣例一致，每次都重抓）。
+  // 2026-09-01新增：quotes_ibkr.json/quotes_sinopac.json由本機
+  // research/ibkr_quotes.py／research/shioaji_quotes.py排程產生，不一定
+  // 存在（使用者沒開Gateway/沒開排程、或這台裝置本身不是跑排程的那台
+  // 機器），查不到就是null，intradayQuote()/loadUsIndexes()/
+  // loadMarketIndex()/loadHomeIndex()會自動退回既有FinMind/Yahoo/TWSE
+  // 資料源，這裡刻意不記recordGlobalError——檔案不存在是完全正常的情況，
+  // 不是錯誤。獨立成函式讓多個載入函式都能各自確保資料已載入，不假設
+  // 呼叫順序（沒有做快取，跟這支App其他報價載入函式的既有慣例一致，
+  // 每次都重抓）。
   async function ensureIbkrQuotes(){
     try{const r=await fetch('data/quotes_ibkr.json?t='+Date.now());INTRADAY_IBKR=r.ok?await r.json():null}catch(e){console.warn('[ensureIbkrQuotes]',e);INTRADAY_IBKR=null}
+  }
+  async function ensureSinopacQuotes(){
+    try{const r=await fetch('data/quotes_sinopac.json?t='+Date.now());INTRADAY_SINOPAC=r.ok?await r.json():null}catch(e){console.warn('[ensureSinopacQuotes]',e);INTRADAY_SINOPAC=null}
   }
   // 資料超過20分鐘沒更新就不當作「盤中即時」使用了（寧可退回FinMind日線，也不要
   // 顯示過期到失去意義的「盤中」報價卻讓人以為是新的）。
@@ -1302,10 +1324,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     return '未涵蓋此檔';
   }
   function intradayQuote(code,us){
-    // 2026-09-01改版：IBKR只接美股（台股IBKR只有延遲、跟現有TWSE來源比
-    // 沒有增益，見research/ibkr_quotes.py docstring），所以只在us=true時
-    // 才檢查IBKR，台股一律走現有FinMind/quotes_tw來源。
-    if(us){
+    // 2026-09-01分工鐵律：台股一律走Shioaji（REALTIME，永豐自家經紀商
+    // 報價，見shioaji_quotes.py），美股一律走IBKR（REALTIME/DELAYED視
+    // 帳戶市場數據訂閱而定，見ibkr_quotes.py），兩者不重疊，各自查不到
+    // 才退回現有FinMind/quotes_tw/quotes_us來源。
+    if(!us){
+      const sinopac=sinopacQuote(code);
+      if(sinopac)return sinopac;
+    }else{
       const ibkr=ibkrQuote(code);
       if(ibkr)return ibkr;
     }
@@ -1545,9 +1571,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function intradayTag(iq){
     if(!iq)return '';
     const mins=Math.max(1,Math.round(iq.ageMin));
-    if(iq.source==='ibkr'){
+    if(iq.source==='ibkr'||iq.source==='sinopac'){
+      const label=iq.source==='ibkr'?'IBKR':'Shioaji';
       const dt=iq.dataType==='REALTIME'?'即時':(iq.dataType==='DELAYED'?'延遲':(iq.dataType||'未知'));
-      return `<span style="color:var(--warn);margin-left:4px">· IBKR ${dt} 約${mins}分前</span>`;
+      return `<span style="color:var(--warn);margin-left:4px">· ${label} ${dt} 約${mins}分前</span>`;
     }
     return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
   }
@@ -1863,24 +1890,53 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       return {html:idxRowHtml(label,'Yahoo Finance',idx[id]),date:idx[id]&&idx[id].as_of};
     });
   }
+  // 2026-09-01新增：加權指數優先用Shioaji即時報價(quotes_sinopac.json)，
+  // 查不到/過期才退回現有TWSE來源（market_tw.json）——分工鐵律，見
+  // intradayQuote()同一段說明。回傳{srcLabel,item}供idxRowHtml()使用，
+  // sparkline借用既有TWSE來源的（Shioaji這支腳本沒有近20日走勢序列）。
+  function taiexRowSource(twCache){
+    const age=intradayAgeMin(INTRADAY_SINOPAC);
+    const fresh=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.connected&&age!=null&&age<=INTRADAY_STALE_MIN;
+    const q=fresh?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes.TAIEX:null;
+    if(q&&q.last!=null){
+      return {srcLabel:'Shioaji 即時',item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.taiex&&twCache.taiex.sparkline}};
+    }
+    return {srcLabel:'TWSE',item:twCache.taiex};
+  }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
     await loadMarketDataFiles();
+    await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{};
-    el.innerHTML=idxRowHtml('加權指數','TWSE',tw.taiex)+idxRowHtml('櫃買指數','TPEx',tw.tpex&&{close:tw.tpex.close,change_pct:tw.tpex.change_pct});
+    const taiexSrc=taiexRowSource(tw);
+    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+idxRowHtml('櫃買指數','TPEx',tw.tpex&&{close:tw.tpex.close,change_pct:tw.tpex.change_pct});
     document.getElementById('idx-datatime').textContent=fmtMarketDataTime(tw);
   }
-  function futRowHtml(label,fut){
+  function futRowHtml(label,fut,srcLabel){
     if(!fut||fut.last==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
     const cls=fut.change_pct>=0?'pos':'neg';
     const cm=fut.contract_month?`${fut.contract_month.slice(0,4)}/${fut.contract_month.slice(4,6)}`:'';
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX · ${cm} 近月合約</span></div><div class="px"><b class="num">${nf(fut.last)}</b><span class="num ${cls}">${fut.change_pct>=0?'+':''}${(fut.change_pct||0).toFixed(2)}%</span></div></div>`;
+    const srcHtml=srcLabel||`TAIFEX${cm?` · ${cm} 近月合約`:''}`;
+    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcHtml}</span></div><div class="px"><b class="num">${nf(fut.last)}</b><span class="num ${cls}">${fut.change_pct>=0?'+':''}${(fut.change_pct||0).toFixed(2)}%</span></div></div>`;
+  }
+  // 2026-09-01新增：台指期近月優先用Shioaji即時報價（TXFR1「近月」別名，
+  // 見shioaji_quotes.py），查不到/過期才退回現有TAIFEX CSV來源。
+  function txfNearRowSource(twCache){
+    const age=intradayAgeMin(INTRADAY_SINOPAC);
+    const fresh=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.connected&&age!=null&&age<=INTRADAY_STALE_MIN;
+    const q=fresh?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes.TXF_NEAR:null;
+    if(q&&q.last!=null){
+      return {fut:{last:q.last,change_pct:q.change_pct},srcLabel:'Shioaji 即時 · 近月合約'};
+    }
+    return {fut:twCache.tx_futures,srcLabel:null};
   }
   async function loadHomeIndex(){
     const el=document.getElementById('home-idx-rows');if(!el)return;
     await loadMarketDataFiles();
+    await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{},usIdx=await loadUsIndexes();
-    el.innerHTML=idxRowHtml('加權指數','TWSE',tw.taiex)+futRowHtml('台指期近月',tw.tx_futures)+usIdx.map(r=>r.html).join('');
+    const taiexSrc=taiexRowSource(tw),txfSrc=txfNearRowSource(tw);
+    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+futRowHtml('台指期近月',txfSrc.fut,txfSrc.srcLabel)+usIdx.map(r=>r.html).join('');
     document.getElementById('home-idx-datatime').textContent=fmtMarketDataTime(tw);
   }
   function hexMix(c1,c2,t){
@@ -3266,7 +3322,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-01.2136';
+  const APP_VERSION='2026-09-01.2253';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

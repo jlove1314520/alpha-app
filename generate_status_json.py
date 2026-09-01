@@ -49,6 +49,7 @@ STALE_HOURS = {
     "data/strategies.json": 168,  # 手動跑generate_strategies_json.py產生，沒有排程，門檻放寬到一週避免誤標stale
     "data/strategy_performance.json": 48,  # 掛market.yml排程更新，跟picks_ledger.json同等寬鬆門檻
     "data/quotes_ibkr.json": 168,  # 只有使用者本機開著IB Gateway+排程在跑才會更新，機器關機/週末沒開很正常，門檻比照strategies.json放寬到一週
+    "data/quotes_sinopac.json": 168,  # 同上，只有使用者本機排程在跑+永豐模擬環境服務時段內才會更新
 }
 
 
@@ -302,6 +303,25 @@ def describe_quotes_ibkr(path: Path) -> dict:
     }
 
 
+def describe_quotes_sinopac(path: Path) -> dict:
+    """data/quotes_sinopac.json（2026-09-01新增）——Shioaji(永豐證券)模擬環境
+    台股即時報價，由本機`research/shioaji_quotes.py`排程觸發（原因跟
+    quotes_ibkr.json一樣：GitHub Actions連不到本機的.env/secrets/憑證，
+    也不該把金鑰放進CI），只有這台機器有在跑排程時才會持續更新。
+    `connected:false`是誠實的失敗狀態（永豐模擬環境非服務時段08:00-21:00/
+    金鑰有誤/連線失敗），不當作status_from_age()意義上的錯誤。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    quotes = d.get("quotes", {})
+    n_with_data = sum(1 for q in quotes.values() if q.get("last") is not None)
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": len(quotes),
+        "source": "research/shioaji_quotes.py（本機Sinopac Shioaji模擬環境，非GitHub Actions排程）",
+        "detail": f"connected={d.get('connected')} error={d.get('error')} "
+                  f"有報價數={n_with_data}/{len(quotes)}",
+    }
+
+
 def describe_picks_ledger(path: Path) -> dict:
     """data/picks_ledger.json（2026-08-28新增追蹤，資料源禮儀補洞item 3）——
     三榜（價值成長/題材動能/未來性）Top20前瞻選股快照，`build_picks_ledger.py`
@@ -346,6 +366,7 @@ DESCRIBERS = {
     "ex_dividend_events.json": describe_ex_dividend_events,
     "picks_ledger.json": describe_picks_ledger,
     "quotes_ibkr.json": describe_quotes_ibkr,
+    "quotes_sinopac.json": describe_quotes_sinopac,
     "strategies.json": describe_strategies,
     "strategy_performance.json": describe_strategy_performance,
 }
