@@ -16,6 +16,20 @@
 
 ---
 
+## 2026-09-02（開發帽）— App今日事件卡片+debug開關+smoke test新防線（PENDING_QUEUE二.2部分/二.3/二.4）
+
+背景agent做「二、App功能掃描」反覆卡住無進度（兩輪澄清仍0 commit），
+改由當輪session直接完成三個子項：今日事件卡片接`data/earnings_calendar.
+json`（21天門檻，誠實標示只涵蓋追蹤美股不含台股）；設定頁`viewport-diag`
+技術性讀數改預設隱藏，點「App版本」5下切換；`scripts/smoke_test.mjs`
+新增檢查15（用route攔截餵新鮮假資料，確認對應面板真的渲染，抓「資料
+新鮮卻顯示無資料」這類SW快取壞殼bug）。冒煙測試13項全PASS，Playwright
+額外驗證debug開關+今日事件卡片行為正確。B29美股財報yfinance因子管線
+（工作量較大）另外派給獨立agent處理中。詳見`BACKLOG.md`「2026-09-02
+App功能補完」條目。
+
+---
+
 ## 2026-09-01（續8，開發帽）— Shioaji台股paper下單伺服器建好（PENDING_QUEUE一.2），今晚只驗證login，未送測試單
 
 新增`research/shioaji_order_server.py`（逐字比照`ibkr_order_server.py`

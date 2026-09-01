@@ -32,8 +32,11 @@
 //     時間相差≤2分鐘——直接測時區轉換函式本身，不依賴裝置本地時區。
 // 14.【2026-08-28新增，P0-b永久斷言】每個「重新整理」按鈕都帶有共用的
 //     refresh-btn金色樣式class，不是靠巧合套到某個巢狀CSS選擇器。
-// 12. 整個測試過程（含8/9/11/13/14新增的重整/reload/手勢/時區操作）結束後
-//     仍無累積的uncaught error。
+// 15.【2026-09-02新增】用route攔截餵一份時間戳是「現在」的真實結構假資料
+//     （今日事件卡片），確認對應面板真的把它畫出來，不是卡在SW快取住的
+//     舊殼/渲染函式壞掉但沒拋錯的空狀態——「資料新鮮卻顯示無資料」防線。
+// 12. 整個測試過程（含8/9/11/13/14/15新增的重整/reload/手勢/時區/防線操作）
+//     結束後仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -406,10 +409,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("14. 每個重新整理按鈕都帶有共用的refresh-btn金色樣式class",
     refreshBtnClassErrors.length === 0, refreshBtnClassErrors.join("; "));
 
+  // 15.【2026-09-02新增，使用者原話：「資料檔明明新鮮、App卻顯示無資料=FAIL
+  // （SW快取壞殼那類）」】用route攔截餵一份時間戳是「現在」的真實結構假資料，
+  // 確認對應面板真的把它畫出來，不是卡在某個舊版殼（例如SW快取住的舊JS
+  // 邏輯、或渲染函式已經壞掉但沒有拋錯）而一直停在空狀態/載入中文字。
+  const staleShellErrors = [];
+  try {
+    const freshEarnings = {
+      meta: { generated_at: new Date().toISOString(), source: "smoke_test注入" },
+      earnings: {
+        AAPL: {
+          next_earnings_date: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+          estimated_session: "post",
+        },
+      },
+    };
+    await page.route("**/data/earnings_calendar.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(freshEarnings) })
+    );
+    await page.evaluate(() => { EARNINGS_CALENDAR_CACHE = null; });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1200);
+    const eventsHtml = await page.evaluate(() => {
+      const el = document.getElementById("today-events");
+      return el ? el.innerHTML : null;
+    });
+    if (eventsHtml === null) staleShellErrors.push("找不到#today-events元素");
+    else if (!eventsHtml.includes("AAPL")) {
+      staleShellErrors.push(`注入新鮮的earnings_calendar.json後，#today-events沒有顯示AAPL，可能卡在舊殼：${eventsHtml.slice(0, 200)}`);
+    }
+    await page.unroute("**/data/earnings_calendar.json**");
+  } catch (e) {
+    staleShellErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("15. 資料檔明明新鮮、App卻顯示無資料=FAIL（SW快取壞殼防線）",
+    staleShellErrors.length === 0, staleShellErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

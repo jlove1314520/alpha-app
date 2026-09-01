@@ -466,7 +466,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>今日事件</h3>
-      <div class="note">事件行事曆建置中 · 尚未接上真實財經日曆資料源</div>
+      <div id="today-events"><div class="note">載入中…</div></div>
     </div>
 
     <!-- 2026-08-28新增（使用者要求：手機第五次回報時鐘/資料卡舊，最大嫌疑是SW快取
@@ -1057,7 +1057,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
-        <div class="f"><span>App 版本</span><b id="about-app-ver">Prototype 0.1</b></div>
+        <div class="f"><span>App 版本</span><b id="about-app-ver" onclick="tapVersionForDebug()" style="cursor:pointer">Prototype 0.1</b></div>
         <div class="f"><span>Service Worker 版本</span><b id="about-sw-ver">查詢中…</b></div>
         <div class="f"><span>資料源</span><b>FinMind / SEC EDGAR</b></div>
         <div class="f"><span>SW 狀態</span><b id="about-sw-status">查詢中…</b></div>
@@ -1443,8 +1443,30 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     return _safeAreaProbeEl.offsetHeight;
   }
+  // 2026-09-02新增（使用者原話：「設定頁那行diag灰字讀數收進隱藏debug開關，
+  // 平常不顯示」）：這行技術性讀數是給開發者/協作者截圖回報用的，一般使用者
+  // 平常看不懂也用不到，預設隱藏；連續點「App版本」5下（3秒內）切換顯示，
+  // 狀態存localStorage，跨次開啟App記得住。
+  let _debugTapCount=0,_debugTapTimer=null;
+  function isDebugDiagOn(){
+    try{return localStorage.getItem('alpha_debug_diag')==='1'}catch(e){return false}
+  }
+  function tapVersionForDebug(){
+    _debugTapCount++;
+    clearTimeout(_debugTapTimer);
+    _debugTapTimer=setTimeout(()=>{_debugTapCount=0},3000);
+    if(_debugTapCount>=5){
+      _debugTapCount=0;
+      const next=!isDebugDiagOn();
+      try{localStorage.setItem('alpha_debug_diag',next?'1':'0')}catch(e){console.warn('[tapVersionForDebug]',e)}
+      toast(next?'已開啟診斷讀數（設定頁底部）':'已關閉診斷讀數');
+      updateViewportDiag();
+    }
+  }
   function updateViewportDiag(){
     const el=document.getElementById('viewport-diag');if(!el)return;
+    if(!isDebugDiagOn()){el.style.display='none';el.textContent='';return}
+    el.style.display='';
     const standalone=(navigator.standalone===true)||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
     const innerH=window.innerHeight;
     const visualVP=window.visualViewport?Math.round(window.visualViewport.height):'n/a';
@@ -1582,6 +1604,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const el=document.getElementById('wl-list');if(!el)return;
     _safeAsync('loadStockInfo',loadStockInfo);
     _safeAsync('loadHomeIndex',loadHomeIndex);
+    _safeAsync('loadTodayEvents',loadTodayEvents);
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     el.innerHTML='';
@@ -1719,6 +1742,40 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       try{const r=await fetch('data/earnings_calendar.json?t='+Date.now());if(r.ok)EARNINGS_CALENDAR_CACHE=await r.json()}catch(e){console.warn('[loadEarningsCalendar]',e);recordGlobalError('loadEarningsCalendar',e);EARNINGS_CALENDAR_CACHE={earnings:{}}}
     }
     return (EARNINGS_CALENDAR_CACHE&&EARNINGS_CALENDAR_CACHE.earnings)||{};
+  }
+  // 2026-09-02新增（使用者原話：「今日事件接earnings_calendar」）：首頁
+  // 「今日事件」卡片，接上data/earnings_calendar.json，列出21天內即將公布
+  // 財報的股票（跟個股頁盤前/盤後那段既有邏輯同一個門檻，方便對照）。
+  // **誠實揭露範圍**：這份行事曆目前只涵蓋`.github/scripts/
+  // fetch_earnings_calendar.py`追蹤清單裡的美股（yfinance來源），不是「今日
+  // 所有市場事件」，也不含台股（台股月營收/財報公告日期目前沒有現成的
+  // 行事曆資料源），卡片文案要講清楚範圍，不能讓使用者誤以為涵蓋全市場。
+  async function loadTodayEvents(){
+    const el=document.getElementById('today-events');if(!el)return;
+    try{
+      const cal=await loadEarningsCalendar();
+      const now=Date.now();
+      const rows=Object.entries(cal)
+        .map(([code,info])=>{
+          if(!info||!info.next_earnings_date)return null;
+          const days=(new Date(info.next_earnings_date)-now)/86400000;
+          if(!(days>=0&&days<=21))return null;
+          return {code,days,...info};
+        })
+        .filter(Boolean)
+        .sort((a,b)=>a.days-b.days);
+      if(!rows.length){el.innerHTML='<div class="note">近21天內（美股，`fetch_earnings_calendar.py`追蹤清單）查無即將公布的財報，或資料尚未更新</div>';return}
+      const sessionLabel={pre:'盤前',post:'盤後'};
+      el.innerHTML=rows.map(r=>{
+        const d=new Date(r.next_earnings_date);
+        const dateTxt=`${d.getUTCMonth()+1}/${d.getUTCDate()}`;
+        const sess=sessionLabel[r.estimated_session]||'';
+        return `<div class="row" style="cursor:default"><div class="nm"><b>${nameOf(r.code)||r.code}</b><span>${r.code} · 美股財報</span></div><div class="px"><b>${dateTxt}</b><span>${sess}</span></div></div>`;
+      }).join('')+'<div class="note" style="margin-top:6px">僅涵蓋追蹤清單內的美股財報日期（yfinance），非全市場事件，不含台股</div>';
+    }catch(e){
+      console.warn('[loadTodayEvents]',e);recordGlobalError('loadTodayEvents',e);
+      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
   }
   // 類股指數名稱（market_tw.json的sectors[].name，官方28+類，2026-08-27實測
   // 共37種）→company_info.json的industry分類文字。**這是「依股票產業分類分組」
@@ -3331,7 +3388,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-01.2316';
+  const APP_VERSION='2026-09-02.0016';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
