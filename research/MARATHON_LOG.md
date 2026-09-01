@@ -13,6 +13,46 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-01T20:10+08:00 — Carry #4：portfolio層腳本寫好，第7/8關驗證跑到一半收工
+
+**背景**：接續11:35那則的斷點（第1關cheap IC gate CHEAP_PASS後，下一步是
+portfolio層構造）。這輪`HYPOTHESIS_QUEUE_PROTOCOL.md`自動排程觸發，取得
+`hypothesis_queue`具名鎖後開始執行。
+
+**做了什麼**：新增`dividend_yield_portfolio_v1.py`——逐字比照
+`pead_portfolio_v1.py`同一套機制（`factor_ic.py`抽樣宇宙+快取因子、
+`backtest/engine.py`月頻換股21日+三成本層級、`score.py`同產業z-score、
+`validation/holdout.py`TRAIN/VAL防呆），單因子`f_dividend_yield_ttm`（同
+產業z-score後即為composite），Top20、月頻，跑TRAIN(2015~)/VALIDATION
+(2021~)兩期樣本外+成本敏感度(1x/2x/3x)+隨機控制組(N=100)。
+
+**卡住的地方（不是bug，是計算量）**：實際執行`python
+dividend_yield_portfolio_v1.py`，光是TRAIN/VALIDATION各100次隨機控制組
+backtest加上成本敏感度重跑，單次呼叫（背景執行）已跑超過13分鐘仍未產出
+`data/dividend_yield_portfolio_v1_results.csv`（用`ps`查行程本身CPU時間
+確認持續運算中，不是掛死——記憶體從278MB穩定成長到472MB後打住，符合
+「載入完資料後進入純運算迴圈」的預期行為，非異常）。依協定「一輪只做一個
+有界工作單位，不要在單次無人值守呼叫裡硬做到天荒地老」原則，本輪不繼續
+死等，先收工。
+
+**下一步（給下一次排程觸發或人工session接手）**：腳本本身已完整寫好、
+`可重複執行`（沒有中間快取污染風險，重跑會從頭產生完整結果），直接
+`cd research && python dividend_yield_portfolio_v1.py`即可拿到TRAIN/VAL
+兩期完整數字（報酬/MDD/Sortino/alpha顯著性/beta/成本敏感度/隨機控制組
+percentile），然後依`HYPOTHESIS_QUEUE_PROTOCOL.md`第2節「判定標準要跟
+既有已結案案例同一把尺」——**隨機控制組percentile表面過關不夠，alpha
+顯著性(p值)+beta拆解才是最終判準**（跟`weinstein_stage2_v2`/
+`pead_portfolio_v1`同一標準）——完成後同步更新`HYPOTHESIS_QUEUE.md`#4
+狀態、`TRIALS_LEDGER.md`新增一列、PASS則進`STRATEGY_GRAVEYARD.md`或
+`generate_strategies_json.py`。若未來多次重跑都遇到同樣的長時間問題，
+可考慮把`n_random`降到50並在腳本docstring註明理由，但這個決定留給屆時
+真的卡住的那一輪判斷，這輪不擅自改動既有100 draws的標準門檻。
+
+**沒有觸發三個停下條件中的任何一種**——這是計算耗時問題，不是要不要拉
+draws到1000/survivorship-free宇宙/花錢的決策，不需要問使用者。
+
+---
+
 ## 2026-09-01T11:35+08:00 — 假設佇列排程建置完成 + Carry第1關CHEAP_PASS
 
 **背景**：使用者裁示「把策略假設佇列掛上自動排程，終結『無人接手就停』」——

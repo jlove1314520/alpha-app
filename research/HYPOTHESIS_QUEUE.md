@@ -184,8 +184,19 @@ carry家族的三個機制（水位/動能/均值回歸）都測完，**這裡�
 mean_ic=+0.0606 IR=+0.426、VAL mean_ic=+0.0807 IR=+0.562 hit_rate=0.77、
 train/val同號、null percentile=100.0（門檻90.0）。**這只是因子層第1關，
 不是最終PASS**——下一步是portfolio層構造（月頻/Top-N/成本模型，走完整
-GATE_SEQUENCE第3~9關，跟`pead_portfolio_v1`同一個下一步性質），留給下一次
-排程週期接續。完整見`TRIALS_LEDGER.md`#74。
+GATE_SEQUENCE第3~9關，跟`pead_portfolio_v1`同一個下一步性質）。
+
+**狀態（2026-09-01T20:10更新，同日第二輪排程）**：portfolio層腳本已寫好
+——`dividend_yield_portfolio_v1.py`（新增，逐字比照`pead_portfolio_v1.py`
+架構，單因子`f_dividend_yield_ttm`、Top20、月頻21日換股），對應TRAIN/
+VALIDATION兩期樣本外+成本敏感度(1x/2x/3x)+隨機控制組(N=100)的第7/8關
+測試已啟動執行，但**單次執行超過13分鐘仍未跑完**（計算量問題非bug，
+`ps`確認行程持續運算中），本輪依「有界工作單位」原則先收工，未拿到
+最終數字，**尚未結案**。下一輪（或人工session）直接重跑
+`python dividend_yield_portfolio_v1.py`即可拿到完整結果，判定時比照
+`pead_portfolio_v1`/`weinstein_stage2_v2`同一把尺：隨機控制組percentile
+過關不夠，alpha顯著性(p值)+beta拆解才是最終判準。完整見
+`MARATHON_LOG.md`2026-09-01T20:10條目、`TRIALS_LEDGER.md`#74。
 
 ### 5. Regime輪動（依市場情境切換曝險/因子權重）
 
@@ -269,8 +280,10 @@ CHEAP_PASS後深挖**FAIL**——VAL期表面轉強但beta驟降至-0.891，代�
    VAL期報酬幾乎等於買進持有，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
 4. **Carry（股票股利率，期貨端已有結論不重測）——現在排隊第一，進行中。**
    2026-09-01：第1關cheap IC gate CHEAP_PASS（`f_dividend_yield_ttm`，
-   percentile=100.0，見`TRIALS_LEDGER.md`#74），下一步是portfolio層構造
-   （GATE_SEQUENCE第3~9關），尚未結案。
+   percentile=100.0，見`TRIALS_LEDGER.md`#74）。同日第二輪：portfolio層
+   腳本`dividend_yield_portfolio_v1.py`已寫好，第7/8關驗證已啟動執行但
+   單輪未跑完（計算耗時，非bug），下一輪直接重跑該腳本即可拿完整結果，
+   尚未結案。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。
