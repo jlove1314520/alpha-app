@@ -1330,3 +1330,22 @@ FUT軌round104留下的盤別效應第三批「下一步」1–4項本質仍是�
 **本輪整輪跳過，未做任何實質工作。** `is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認除慣常的四個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_full.log`／`research/pit_run_liquidity500_clean.log`／`research/weinstein_v2_run.log`，另一互動session殘留）跟`data/rate_limit_state.json`（GitHub Actions自動更新的App資料檔，非本輪研究範圍）之外無其他變更，未觸碰、未納入本輪commit。沒有新增`TRIALS_LEDGER.md`列。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約132輪、跨度約72.9小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
+
+## 2026-09-01T09:03:00+08:00 — 馬拉松第245輪：跳過，暫停規則生效中
+
+**取鎖狀況**：本輪開頭 `marathon_lock.py acquire` 回傳 `LOCK_STALE (held by 32928, 29.9 min old) -- recovering` 後 `LOCK_ACQUIRED`——**上一輪（第244輪之後、本輪之前應該還有一輪，但鎖檔陳舊代表那一輪疑似卡死或崩潰，沒有留下任何記錄**（`REPORT.md`最新一筆仍是第244輪，`MARATHON_STATE.md`計數器仍是244，中間沒有第245輪之前的其他痕跡，代表卡死的那一輪確實什麼都沒寫成功就異常終止）。
+
+**選軌理由**：比對三軌最後更新時間戳——TW `2026-09-01T08:32`（第244輪，最新）／US `2026-09-01T08:01`（第243輪）／FUT `2026-08-29T21:31`（第242輪，最舊）——依輪替規則選FUT。
+
+**獨立複查三個解除條件，皆未成立**：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」；`git log --oneline -- PORTFOLIO_STRATEGY_SPEC.md` 確認自 `fa369b9` 建立以來仍只有這一個commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）判定仍FAIL（alpha p=0.0535/0.053，未達5%顯著性門檻）；「換更大樣本重跑」(a)、「train-only嚴格樣本外」(b)兩個選項仍未見使用者新回應。
+3. `MARATHON_PROTOCOL.md` 第0節暫停規則本文完整重讀一遍（本輪開頭執行的三步驟之一），未被修改移除。
+
+FUT軌round104留下的盤別效應第三批「下一步」1–4項本質仍是單因子相關工作，`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，FUT軌本身沒有組合策略相關工作可接，同round109起連續判斷邏輯一致，保守跳過。
+
+**本輪整輪跳過，未做任何實質工作。** `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認除4個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，另一互動session殘留）之外無其他變更，未觸碰、未納入本輪commit（未見round244提到的`TRIALS_LEDGER.md`未commit修改，該筆應已在其他session被處理，本輪不做任何推測，只如實記錄現況）。沒有新增`TRIALS_LEDGER.md`列。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約135輪、跨度約132.4小時（約5.5天）；且本輪偵測到上一輪（第244輪之後那一輪）疑似崩潰、陳舊鎖檔被回收，未留下任何記錄，需留意排程器/機器穩定性。需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
