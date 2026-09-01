@@ -95,6 +95,44 @@ alpha+6.03%(p=0.4809不顯著)/beta+0.570，隨機控制組percentile=98.0。
 
 ---
 
+## 2026-09-01T08:40+08:00 — 本次執行收工：斷點留給下一個接手者
+
+CTA（FAIL）+ PEAD（FAIL）兩條假設本輪都已完整結案並commit+push，佇列
+狀態、`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`都已同步更新。順便修好
+了三軌輪次制馬拉松（`MARATHON_STATE.md`）的排程器7天視窗到期問題（見本檔
+案08-25T07:50條目），三軌馬拉松已恢復自動運作，跟這條佇列是不同軌道。
+
+**下一步斷點：佇列#4股票股利率carry**（`HYPOTHESIS_QUEUE.md`原文：TW股票
+近12個月現金股利/股價，高殖利率排名靠前）——**這是全新因子，跟CTA/PEAD
+不同，CTA/PEAD都是重用既有基礎設施或既有PASS因子，這條要從零開始**：
+1. 資料源已知可用：`TaiwanStockDividend`（`adjust.py`已在用，欄位
+   `CashExDividendTradingDate`/`CashEarningsDistribution`），需要新寫
+   trailing 12個月現金股利加總（依ex-date分桶，PIT-safe——只加總ex-date
+   已發生的部分，不看未來）除以現價，新增到`factors.py`（可能命名
+   `f_dividend_yield_ttm`，不要跟`_roe_stability`等既有function混在一起，
+   獨立新增）。
+2. 第1關sanity+第2關隨機控制組：因為這是股票橫斷面因子（不是像CTA那種
+   單一時間序列），應該沿用`factor_ic.py`既有的cross-sectional IC+
+   洗牌null分布測試框架（跟`f_low_vol`/`f_eps_surprise`等既有PASS因子
+   同一套機制），不是`fut_cheap_gate.py`那種單一序列排列測試——**這點
+   下一個接手者要留意，不要套錯框架**。可能需要寫一支類似
+   `factor_ic_gross_margin_stability.py`（`TRIALS_LEDGER.md`#67先例）的
+   新腳本`factor_ic_dividend_yield.py`。
+3. 因子層IC過關後才進portfolio層構造（走完整GATE_SEQUENCE第3~9關），
+   不能因子IC都還沒測就跳去測策略層——跟CTA（直接測策略層，因為CTA本來
+   就是策略假設不是因子假設）、PEAD（因子已PASS只補策略層）都不一樣。
+4. 停下三條件其中任一種出現時要停：1000draws授權、survivorship-free
+   宇宙授權、任何不可逆/花錢操作——本輪跑完CTA+PEAD都沒有觸發任何一種，
+   純粹是「這是全新因子工程，值得從乾淨的斷點交接，不要在長session尾端
+   倉促動手」的判斷，不是碰到停下條件。
+
+**收工前確認**：`git status`乾淨（除了已知不屬於本輪、也不屬於這條佇列
+的其他並行session殘留檔——`research/pit_run_*.log`/`weinstein_v2_run.log`/
+`data/rate_limit_state.json`，這些本輪未觸碰、未commit）。本輪全部commit
+都已push成功。
+
+---
+
 ## 2026-08-29T04:45+08:00 — Weinstein v2結案：FAIL（隨機控制組+成本敏感度雙雙不過）
 
 第2/4關跑完。**判定：FAIL，移入`STRATEGY_GRAVEYARD.md`，不進第3/5/6/9
