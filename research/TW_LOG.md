@@ -1218,3 +1218,17 @@ TW軌兩項地基背景工作複查：重新統計 `backfill_state.json`，`Coun
 `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 這次發現一個新的觀察：`research/marathon_lock.py` 有未commit修改，內容是替鎖機制加上 `--name` 具名鎖參數（新增docstring說明是為`HYPOTHESIS_QUEUE_PROTOCOL.md`的hypothesis-queue軌道準備獨立鎖檔，避免跟本三軌馬拉松的預設鎖互相阻塞），另有一個未追蹤檔案 `research/HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`。這兩者跟round244已經記錄過的觀察（另一個互動session似乎在`HYPOTHESIS_QUEUE.md`框架下持續進行組合策略/因子測試）方向一致，判定為另一個獨立互動session的進行中工作、非本輪所做，依規則不觸碰、不納入本輪commit。另有4個慣常的未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`），同樣不觸碰。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約140輪、跨度約134.9小時（約5.6天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。另外，`research/marathon_lock.py` 目前存在一筆未commit的具名鎖擴充功能，看起來是另一個互動session為了讓`hypothesis-queue`軌道跟本三軌馬拉松互不阻塞而做的準備工作——這代表可能已經有第二套獨立於本協定運作的假說測試機制在進行，建議使用者確認這套機制是否也應該遵守`MARATHON_PROTOCOL.md`第0節的暫停規則，避免兩套機制各自為政。**
+
+## 2026-09-01T13:01+08:00 — 馬拉松第253輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 11:31（第250輪，最舊）、FUT 12:01（第251輪）、US 12:31（第252輪，最新）——依輪替選TW。
+
+獨立複查三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自 `fa369b9` 以來仍只一個commit；(2) `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）仍判定FAIL（alpha p>0.05未達顯著），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者新回應；(3) `MARATHON_PROTOCOL.md` 第0節暫停規則本文完整重讀一遍，未被修改移除。三個條件皆未成立，暫停規則繼續生效。
+
+兩項允許的背景工作也重新獨立複查：`data/backfill_state.json` 本輪重新統計 `Counter(d.values())` 得 done=2597／skip=469，2597/3196=81.26%，跟第194輪以來一致（未變動），仍遠高於80%門檻，不需要跑 `backfill_universe.py`；T86回補自第164輪起維持100%完成記錄，本輪未見新增待處理跡象。
+
+**TW軌沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認僅4個慣常的未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，跟round250記錄一致，判定為另一互動session殘留），未觸碰、未納入本輪commit；上一輪（round250）記錄的 `research/marathon_lock.py` 未commit修改本輪已不存在（該互動session顯然已自行commit或撤回該修改，非本輪動作）。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約143輪、跨度約136.9小時（約5.7天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
