@@ -87,9 +87,28 @@ def compute_composite_at_date(as_of, data, industry_map, liquidity) -> pd.DataFr
     return cs.reset_index()[["stock_id", "industry", "composite", "n_components", "liquidity_proxy"]]
 
 
+def _eligible_single_factor(cs: pd.DataFrame) -> pd.DataFrame:
+    """跟`pbv2._eligible()`同精神的流動性篩選，但**不套用`n_components>=2`
+    門檻**——這支策略刻意單因子（見模組docstring），composite只可能
+    n_components=1，若沿用`pbv2._eligible()`（`score.MIN_COMPONENTS_FOR_
+    RANKING=2`，多因子組合設計的門檻）會把每一列都篩掉，導致0檔候選、
+    0筆交易（2026-09-01自動排程輪次跑出TRAIN/VAL兩期皆0筆交易、報酬
+    0.00%的異常結果，回頭查出的根因——不是無訊號，是實作bug，比照
+    weinstein_stage2_v2那次「sanity測的不是後續關卡實際資料路徑」的
+    教訓，這裡是「借用的共用函式門檻假設跟本策略設計不合」）。改成只
+    要求composite本身非NaN（n_components>=1），流動性下限篩選邏輯完全
+    不變、逐行沿用`pbv2._eligible()`。"""
+    pool = cs[cs["n_components"] >= 1].copy()
+    liq = pool["liquidity_proxy"].dropna()
+    if len(liq) >= 10:  # 分位數樣本太小沒有意義，門檻沿用factor_ic.py慣例的量級
+        floor = np.percentile(liq, pbv2.LIQUIDITY_FLOOR_PERCENTILE)
+        pool = pool[pool["liquidity_proxy"].isna() | (pool["liquidity_proxy"] >= floor)]
+    return pool.sort_values("composite", ascending=False)
+
+
 def make_signal_fn(industry_map, liquidity):
     def signal_fn(price_data, as_of, market_df):
-        cs = pbv2._eligible(compute_composite_at_date(as_of, price_data, industry_map, liquidity))
+        cs = _eligible_single_factor(compute_composite_at_date(as_of, price_data, industry_map, liquidity))
         top = cs.head(TOP_N)
         return dict(zip(top["stock_id"], top["composite"]))
     return signal_fn
@@ -99,7 +118,7 @@ def make_random_signal_fn(industry_map, liquidity, seed):
     rng = random.Random(seed)
 
     def signal_fn(price_data, as_of, market_df):
-        cs = pbv2._eligible(compute_composite_at_date(as_of, price_data, industry_map, liquidity))
+        cs = _eligible_single_factor(compute_composite_at_date(as_of, price_data, industry_map, liquidity))
         pool = cs["stock_id"].tolist()
         picks = pool if len(pool) <= TOP_N else rng.sample(pool, TOP_N)
         return {sid: 1.0 for sid in picks}

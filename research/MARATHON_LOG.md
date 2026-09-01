@@ -13,6 +13,68 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-01T23:58+08:00 — Carry #4：接續上一輪的鎖，確認bug修復＋背景重跑仍在進行
+
+**背景**：`HYPOTHESIS_QUEUE_PROTOCOL.md`本輪排程觸發（`hypothesis_queue`軌，
+獨立於三軌馬拉松）。取鎖時發現上一輪（23:23那則的PID 47756）鎖檔陳舊
+（29.8分鐘沒更新，已回收）——研判上一輪是寫完23:23那則心跳、重新在背景
+啟動`python dividend_yield_portfolio_v1.py`（PID 48852）之後就中斷了，
+沒來得及commit+push，工作目錄留下未提交的bug修復（`_eligible_single_
+factor()`）跟那則心跳文字。
+
+**確認**：核對23:23那則的bug分析（`_eligible()`的`n_components>=2`門檻
+在單因子策略下把候選全篩空，導致0筆交易）跟修復程式碼（`dividend_yield_
+portfolio_v1.py`新增`_eligible_single_factor()`，只改本地函式不動共用
+模組，避免影響`pead_portfolio_v1.py`），邏輯正確、不重工，直接沿用。
+
+**背景行程狀態**：PID 48852自23:23:07持續執行中，本輪等待約6分鐘
+（`dividend_yield_portfolio_v1_run.log`仍是0位元組）仍未結束——累計已跑
+超過35分鐘，比上一輪估計的10~20分鐘更久（TRAIN/VAL兩期各100次隨機
+控制組排列，計算量本來就大，非bug徵兆，跟先前0筆交易那種秒殺結束的
+異常不同）。這個行程是先前那輪留下的獨立OS行程（父行程已消失、鎖檔已
+被回收，行程本身仍存活），不依附於本次claude session，本輪結束後預期
+會繼續在背景跑完。
+
+**本輪動作**：commit上一輪遺留的bug修復（程式碼本身正確，直接沿用）+
+這則心跳，讓下一輪排程觸發時能看到`dividend_yield_portfolio_v1_run.log`
+的完整結果並下判定。未新增判定（PASS/FAIL/CHEAP_PASS/EXPERIMENTAL），
+`HYPOTHESIS_QUEUE.md`#4狀態同步更新為「bug已修復、背景重跑中，等下一輪
+拿結果」。`*_run.log`等執行期log檔（含這支腳本的log）維持不進版控（跟
+`.gitignore`裡`*_cycle.log`同精神，屬可重生執行輸出非原始碼），本輪也
+沒有其他判定要寫進`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`。
+
+---
+
+## 2026-09-01T23:23+08:00 — Carry #4：抓到並修好0筆交易bug，重跑中（仍在跑第7/8關）
+
+**背景**：`HYPOTHESIS_QUEUE_PROTOCOL.md`本輪排程觸發。取鎖時發現上一輪
+（20:10那則的PID）鎖檔陳舊（39.3分鐘沒更新，已回收），研判上一輪疑似
+中途失敗/被中斷，不是正常收工。
+
+**發現**：上一輪留下的`dividend_yield_portfolio_v1_run.log`（23:01時間戳，
+代表上一輪其實有跑完，只是沒來得及寫心跳/commit就中斷了）顯示**TRAIN/
+VALIDATION兩期皆0筆交易、報酬0.00%、alpha=0%**——這不是「沒有訊號」，
+是明顯異常（因子層IC本身是正的CHEAP_PASS結果），查下去是實作bug：
+`dividend_yield_portfolio_v1.py`借用`portfolio_backtest_v2.py::_eligible()`
+做流動性資格篩選，但該函式套用`score.MIN_COMPONENTS_FOR_RANKING=2`
+（多因子組合設計的門檻），這支策略刻意單因子（`COMPONENTS=
+["dividend_yield"]`，`n_components`永遠是1），每一列都被篩掉→0檔候選
+→0筆交易。`pead_portfolio_v1.py`（本腳本逐字比照的範本）用2個成分
+（eps_surprise+revenue_surprise）所以沒踩到這個門檻，這次刻意單因子
+才暴露出來。
+
+**修好**：新增`_eligible_single_factor()`（只在`dividend_yield_
+portfolio_v1.py`本地定義，不改`portfolio_backtest_v2.py`共用模組，
+避免影響`pead_portfolio_v1.py`等其他依賴它的腳本）——流動性下限篩選
+邏輯逐行沿用，只把`n_components>=2`門檻改成`n_components>=1`（單因子
+本來就只可能是1）。已重新在背景執行`python dividend_yield_portfolio_v1.py`
+（預期跟上次一樣，含2組TRAIN/VAL x 100次隨機控制組，耗時可能超過
+10~20分鐘），本輪等結果出來才能判定，若又超過有界時間收工則留給下一輪
+排程接續（教訓：這類bug比計算耗時更值得優先排查，下次看到「0筆交易」
+不能直接當作「這次計算量大還沒跑完」的正常現象放過）。
+
+---
+
 ## 2026-09-01T20:10+08:00 — Carry #4：portfolio層腳本寫好，第7/8關驗證跑到一半收工
 
 **背景**：接續11:35那則的斷點（第1關cheap IC gate CHEAP_PASS後，下一步是

@@ -97,9 +97,9 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   搭配其他篩選）未來若要測需要獨立走完整套關卡，不能沿用這次的失敗
   當作證據。
 
-**佇列狀態（2026-09-01更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案（FAIL）、
-#3 PEAD已結案（FAIL），目前進行中：#4股票股利率carry（因子層第1關cheap_pass，
-待portfolio層構造）。**
+**佇列狀態（2026-09-01T23:58更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
+（FAIL）、#3 PEAD已結案（FAIL），目前進行中：#4股票股利率carry（因子層第1關
+cheap_pass，portfolio層腳本已寫好且bug已修復，第7/8關背景重跑中，尚未結案）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -198,6 +198,18 @@ VALIDATION兩期樣本外+成本敏感度(1x/2x/3x)+隨機控制組(N=100)的第
 過關不夠，alpha顯著性(p值)+beta拆解才是最終判準。完整見
 `MARATHON_LOG.md`2026-09-01T20:10條目、`TRIALS_LEDGER.md`#74。
 
+**狀態（2026-09-01T23:23更新，第三輪排程）**：上一版執行結果TRAIN/
+VALIDATION兩期皆0筆交易，查出是**實作bug**（借用的`pbv2._eligible()`
+帶`n_components>=2`門檻，跟本策略刻意單因子的設計不合，把候選全篩空）
+不是無訊號。已修復（新增本地`_eligible_single_factor()`，只改本策略
+不動共用模組），重新在背景執行。
+
+**狀態（2026-09-01T23:58更新，第四輪排程）**：接續上一輪，確認bug修復
+邏輯正確並commit。背景重跑（PID 48852）已累計執行超過35分鐘仍在跑
+（TRAIN/VAL各100次隨機控制組排列，計算量本身就大，非異常），**仍未
+結案**，等下一輪排程觸發時查看`dividend_yield_portfolio_v1_run.log`
+完整結果再判定。
+
 ### 5. Regime輪動（依市場情境切換曝險/因子權重）
 
 **經濟理由**：市場在不同狀態（多頭/空頭/高波動/低波動）下，同一個因子的
@@ -280,10 +292,11 @@ CHEAP_PASS後深挖**FAIL**——VAL期表面轉強但beta驟降至-0.891，代�
    VAL期報酬幾乎等於買進持有，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
 4. **Carry（股票股利率，期貨端已有結論不重測）——現在排隊第一，進行中。**
    2026-09-01：第1關cheap IC gate CHEAP_PASS（`f_dividend_yield_ttm`，
-   percentile=100.0，見`TRIALS_LEDGER.md`#74）。同日第二輪：portfolio層
-   腳本`dividend_yield_portfolio_v1.py`已寫好，第7/8關驗證已啟動執行但
-   單輪未跑完（計算耗時，非bug），下一輪直接重跑該腳本即可拿完整結果，
-   尚未結案。
+   percentile=100.0，見`TRIALS_LEDGER.md`#74）。portfolio層腳本
+   `dividend_yield_portfolio_v1.py`已寫好，第一次執行0筆交易查出是實作
+   bug（`n_components>=2`門檻跟單因子設計不合）已修復，第7/8關背景重跑
+   中（已累計超過35分鐘），尚未結案，下一輪查看
+   `dividend_yield_portfolio_v1_run.log`結果再判定。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。
