@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 """IBKR (Interactive Brokers) 即時報價擷取（2026-09-01新增，使用者原話：
-「接IBKR即時報價進App（只讀，paper，禁止任何下單）」）。
+「接IBKR即時報價進App（只讀，paper，禁止任何下單）」；同日改版：改成
+「台股維持TWSE來源，IBKR只抓美股（自選股+四大指數），因為IBKR對這個
+paper帳戶只有美股是REALTIME、台股是DELAYED，沒有增益」）。
+
+**2026-09-01改版重點**：拿掉台股（`_qualify_tw_stock`/`DEFAULT_TW_
+WATCHLIST`），實測證實TW部分抓到的全是DELAYED（見`git log`裡改版前的
+commit紀錄），跟App現有TWSE來源比沒有新增價值，換成美股自選股
+（`DEFAULT_US_WATCHLIST`）+原有的四大美股指數。美股股票合約用
+`Stock(symbol, 'SMART', 'USD')`（IBKR官方文件標準寫法，讓IBKR自己SMART
+路由選最佳交易所，跟指數合約需要指定精確exchange不同）。
 
 **這支腳本只做一件事：連本機IB Gateway，抓報價，寫JSON。不下單、不改單、
 不查/改帳戶設定。** 沿用專案既有「本機腳本→JSON→App」模式（跟研究馬拉松
@@ -23,21 +32,26 @@
   「自選股存在localStorage」），這支在使用者電腦上跑的Python腳本**沒有
   辦法讀瀏覽器的localStorage**——這是純前端PWA架構的既有取捨（見
   `CLAUDE.md`「重要決策與原因」），不是這次的疏漏。這裡改用
-  `DEFAULT_TW_WATCHLIST`（`index.html`裡`WL`預設值的同一份清單）當代表，
+  `DEFAULT_US_WATCHLIST`（幾檔常見大型美股當代表，不是`index.html`裡
+  `WL`真正的內容，`WL`是台股/美股混合的單一清單）當代表，
   如果使用者實際自選股不一樣，抓到的標的會對不上——**這點已经先在對話裡
   跟使用者說明，若之後要做到「抓使用者真正的自選股」，需要另外設計一個
   讓Python腳本讀到localStorage內容的機制（例如App端主動把自選股清單也
   寫出一份到repo，但那樣就違背「自選股只存本機」的既有隱私/簡單性決策，
   要使用者自己決定要不要那樣改）**。
-- 美股四大指數的IBKR合約（`Index`類型，需要指定正確的exchange）**這輪
-  只能先寫最佳猜測值，因為寫這支腳本的當下IB Gateway沒有開著，無法用
-  `ib.qualifyContracts()`實測驗證**——已經用`CANDIDATE_EXCHANGES`設計
-  多組候選exchange依序嘗試+`qualifyContracts()`確認哪個真的能解析成合約，
-  解析失敗會清楚印出來、不會假裝成功，但**這個清單本身的正確性要等使用者
-  真的開了Gateway、實際跑過一次才能確認**，不是這輪就能保證的。
-- 台股（TWSE）合約的exchange/currency設定同樣需要`qualifyContracts()`
-  實測驗證，只是TW股票合約定義比較單純（`Stock(code, 'TWSE', 'TWD')`是
-  IBKR官方文件+社群一致的標準寫法，比指數合約的不確定性低很多）。
+- 美股四大指數的IBKR合約（`Index`類型，需要指定正確的exchange）**已用
+  使用者本機真實Gateway實測**：S&P500(CBOE)/那斯達克(COMP,NASDAQ)成功
+  解析且拿到REALTIME報價；道瓊(INDU,CME)/費城半導體(SOX,PHLX)合約能
+  解析成功（有conId）但這個帳戶對這兩個交易所沒有市場數據訂閱權限，
+  多次重測結果一致——**這是IBKR帳戶市場數據訂閱層級的問題，不是程式碼
+  bug**，`last`會誠實是`None`，App端會自動退回Yahoo Finance顯示。若要
+  修，需要使用者自己到IBKR Account Management確認/申請對應的市場數據
+  訂閱。
+- 美股個股（`DEFAULT_US_WATCHLIST`）用`Stock(symbol,'SMART','USD')`，
+  比台股合約更單純（不用指定精確交易所，IBKR SMART路由自動選），但
+  **這份預設清單本身還沒有實測過**（2026-09-01改版當下沒有現成的美股
+  自選股可以測，只測過美股指數），需要下一次使用者開著Gateway時實際
+  跑一次確認每檔都能正確qualify。
 - 連不到Gateway（IB Gateway沒開/port不對/防火牆擋）：誠實寫
   `{"connected": false, "error": "..."}`到JSON，不寫任何報價欄位，
   不留舊資料造成App顯示過期數字誤導使用者（沿用`build_picks_ledger.py`
@@ -69,8 +83,9 @@ IB_CLIENT_ID = 47     # 任意選定但要唯一，若使用者同時開其他IB
 CONNECT_TIMEOUT_SEC = 8
 TICK_WAIT_SEC = 3      # 訂閱報價後等多久讓tick資料進來，太短可能抓到還沒更新的初始None
 
-# index.html的WL預設值（2026-08-28版本）同一份清單，見模組docstring「已知限制」
-DEFAULT_TW_WATCHLIST = ["2330", "2454", "2317", "1513", "3231"]
+# 美股自選股代表清單（見模組docstring「已知限制」：Python腳本讀不到
+# index.html用localStorage存的真實自選股，這裡用5檔常見大型美股當代表）。
+DEFAULT_US_WATCHLIST = ["AAPL", "MSFT", "NVDA", "TSLA", "GOOGL"]
 
 # 美股四大指數，跟.github/scripts/fetch_market_us.py同一組指數（道瓊/S&P500/那斯達克/費半），
 # 但改用IBKR的Index合約定義（symbol, 候選exchange清單——依序嘗試qualifyContracts()，
@@ -100,8 +115,8 @@ def _write_failure(reason: str) -> None:
     print(f"寫入失敗狀態到 {OUT_PATH}：{reason}")
 
 
-def _qualify_tw_stock(ib: IB, code: str):
-    contract = Stock(code, "TWSE", "TWD")
+def _qualify_us_stock(ib: IB, symbol: str):
+    contract = Stock(symbol, "SMART", "USD")
     qualified = ib.qualifyContracts(contract)
     return qualified[0] if qualified else None
 
@@ -209,17 +224,17 @@ def main():
 
         quotes: dict[str, dict] = {}
 
-        for code in DEFAULT_TW_WATCHLIST:
-            contract = _qualify_tw_stock(ib, code)
+        for symbol in DEFAULT_US_WATCHLIST:
+            contract = _qualify_us_stock(ib, symbol)
             if contract is None:
-                print(f"  [TW] {code} 合約無法解析（qualifyContracts失敗），跳過")
+                print(f"  [US] {symbol} 合約無法解析（qualifyContracts失敗），跳過")
                 continue
             ticker = _request_market_data_with_fallback(ib, contract)
             q = _extract_quote(ticker)
-            q["exchange"] = "TWSE"
-            quotes[code] = q
+            q["exchange"] = "SMART"
+            quotes[symbol] = q
             ib.cancelMktData(contract)
-            print(f"  [TW] {code}: last={q['last']} ({q['data_type']})")
+            print(f"  [US] {symbol}: last={q['last']} ({q['data_type']})")
 
         for us_key, meta in US_INDICES.items():
             contract, used_exchange = _qualify_us_index(ib, meta["symbol"], meta["candidate_exchanges"])

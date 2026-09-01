@@ -17,6 +17,35 @@
 
 ---
 
+## ⚠ 2026-09-01（續）IBKR改版：台股退回TWSE，只接美股——**且發現使用者的
+前提不成立**
+
+使用者原本要求「台股改抓美股+四大指數，因為IBKR對美股才是REALTIME」。
+`research/ibkr_quotes.py`已改版（拿掉`_qualify_tw_stock`/
+`DEFAULT_TW_WATCHLIST`，換成`_qualify_us_stock`/`DEFAULT_US_WATCHLIST`
+=`["AAPL","MSFT","NVDA","TSLA","GOOGL"]`，`Stock(symbol,'SMART','USD')`
+合約），`index.html`的`intradayQuote()`判斷條件從`if(!us)`改成`if(us)`
+才檢查IBKR，台股一律走現有TWSE/FinMind來源不再碰IBKR。
+
+**但實測結果**（美股開盤後、市場真的在跑的時段測的，不是猜的）：
+**這個paper帳戶對美股個股+美股指數也全部是DELAYED，不是REALTIME**——
+跟使用者的前提相反。5檔美股(AAPL/MSFT/NVDA/TSLA/GOOGL)全部
+`data_type:"DELAYED"`；四大指數裡S&P500維持DELAYED、道瓊/費半依然完全
+沒有數據（跟改版前的結論一致，這兩個是exchange級的訂閱缺口，不分美股
+台股）。**已經誠實記錄在`quotes_ibkr.json`跟App的顯示標籤上**（「IBKR
+延遲」不是「IBKR即時」），沒有為了配合使用者的預期而假裝是REALTIME。
+這代表**這個paper帳戶目前對任何市場（台股/美股/指數）都沒有即時報價
+權限**，只有delayed——若要真的拿到REALTIME，需要使用者到IBKR Account
+Management確認/申請市場數據訂閱（多半需要對應的月費，即使是delayed
+有些交易所也要訂閱，realtime通常要付費更多），這是帳戶層級的事，不是
+程式碼能解決的。
+
+**驗收**：用Playwright模擬自選股同時有台股(2330)+美股(AAPL)兩檔，確認
+2330顯示「已收盤」（走TWSE，沒有IBKR標籤）、AAPL顯示「IBKR 延遲」+
+正確報價，行為符合預期。`node scripts/smoke_test.mjs`12項全PASS。
+
+---
+
 ## ⚠ 2026-09-01 IBKR即時報價接入（只讀，paper，已實測部分成功）
 
 使用者要求接IB Gateway paper帳戶即時報價進App，只讀、禁止任何下單。

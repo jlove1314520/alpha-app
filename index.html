@@ -1248,12 +1248,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!data||!data.fetched_at)return null;
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
   }
-  // 2026-09-01新增：IBKR本機Gateway即時/延遲報價（research/ibkr_quotes.py，
+  // 2026-09-01新增，同日改版：IBKR本機Gateway報價（research/ibkr_quotes.py，
   // 本機排程觸發，不經過GitHub Actions——見該檔案docstring「掛排程」）。
-  // 優先序：IBKR(quotes_ibkr.json，新鮮且connected)→現有FinMind/quotes_tw。
-  // 只覆蓋DEFAULT_TW_WATCHLIST那5檔+四大美股指數（IBKR腳本的既知限制，
-  // 見ibkr_quotes.py docstring「已知限制」：沒辦法讀瀏覽器localStorage的
-  // 真實自選股清單），其餘股票照舊完全不受影響。
+  // **只接美股**（台股維持現有TWSE來源，IBKR對台股只有延遲、沒有增益，
+  // 改版原因見ibkr_quotes.py docstring開頭）：DEFAULT_US_WATCHLIST那5檔
+  // 美股+四大美股指數。實測這個paper帳戶對這些美股標的也是DELAYED不是
+  // REALTIME（IBKR帳戶市場數據訂閱層級限制，誠實顯示標籤，不假裝即時）。
+  // 只覆蓋這9個標的（IBKR腳本的既知限制，見ibkr_quotes.py docstring
+  // 「已知限制」：沒辦法讀瀏覽器localStorage的真實自選股清單），其餘股票
+  // 照舊完全不受影響。
   function ibkrQuote(code){
     if(!INTRADAY_IBKR||!INTRADAY_IBKR.connected)return null;
     const age=intradayAgeMin(INTRADAY_IBKR);
@@ -1299,7 +1302,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     return '未涵蓋此檔';
   }
   function intradayQuote(code,us){
-    if(!us){
+    // 2026-09-01改版：IBKR只接美股（台股IBKR只有延遲、跟現有TWSE來源比
+    // 沒有增益，見research/ibkr_quotes.py docstring），所以只在us=true時
+    // 才檢查IBKR，台股一律走現有FinMind/quotes_tw來源。
+    if(us){
       const ibkr=ibkrQuote(code);
       if(ibkr)return ibkr;
     }
@@ -3260,7 +3266,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-01.2113';
+  const APP_VERSION='2026-09-01.2136';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

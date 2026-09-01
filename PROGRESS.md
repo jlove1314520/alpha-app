@@ -16,6 +16,21 @@
 
 ---
 
+## 2026-09-01（續3，開發帽）— IBKR改版：台股退回TWSE，只接美股；發現使用者前提不成立
+
+使用者要求「台股改抓美股，因為IBKR對美股才是REALTIME」，已改版
+`research/ibkr_quotes.py`（美股個股`DEFAULT_US_WATCHLIST`+四大指數）+
+`index.html`（`intradayQuote()`只在`us=true`才檢查IBKR，台股維持
+TWSE）。**但美股開盤後實測發現：這個paper帳戶對美股個股/指數也全部是
+DELAYED，跟台股一樣，不是使用者以為的REALTIME**——已誠實標示「IBKR
+延遲」不是「即時」，沒有配合預期造假。這代表目前這個paper帳戶對任何
+市場都沒有即時報價權限，需要使用者自己去IBKR Account Management確認/
+申請市場數據訂閱，不是程式碼能解的。冒煙測試12項全PASS，Playwright
+驗證台股/美股分流行為正確。詳見`BACKLOG.md`「2026-09-01（續）IBKR改版」
+條目。
+
+---
+
 ## 2026-09-01（續2，開發+維運帽）— IBKR即時報價接入（只讀paper，實測部分成功）
 
 新增`research/ibkr_quotes.py`：連本機IB Gateway paper帳戶（三層安全：
