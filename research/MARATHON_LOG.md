@@ -13,6 +13,43 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T01:41+08:00 — Carry #4：接續checkpoint機制持續有效，TRAIN隨機控制組推進到85/100
+
+**背景**：`hypothesis_queue`鎖檔陳舊（held by 48584, 30.7分鐘，回收）——
+研判上一輪寫完01:20那則狀態/心跳更新後，還沒來得及commit+push就中斷
+（工作目錄留有未commit的checkpoint程式碼+這兩份文件的狀態更新，內容
+核對正確，直接沿用不重工）。`ps`確認沒有殘留背景行程（乾淨，可安全
+重新啟動）。
+
+**動作**：本輪內用前景阻塞方式（非背景nohup，吸取00:45那輪的教訓）
+連續呼叫`python dividend_yield_portfolio_v1.py`兩次，各約9分鐘（7分鐘
+計算預算+資料載入~102秒），checkpoint接續機制運作正常：TRAIN隨機
+控制組進度44/100→65/100→85/100，真實回測與成本敏感度未重算。順手
+修正上一則(01:20)心跳裡兩處編輯中斷造成的語句破碎（`run_one()`那句
+跟結尾那句）。
+
+**收工**：TRAIN還差約15筆才完成，接著才輪到VALIDATION全套（真實+
+成本敏感度+100隨機），估計還需要2~3輪。`is_holdout_consumed()`確認
+仍為False。未產出PASS/FAIL判定。同步更新`HYPOTHESIS_QUEUE.md`#4狀態
+與排隊順序總結章節的進度數字。
+
+---
+
+## 2026-09-02T01:20+08:00 — Carry #4：根治「每輪從零重跑」問題，加上checkpoint續跑機制並驗證進度真的在累積
+
+**動作**：量測出瓶頸（資料載入~102秒、單次真實回測~14秒、單次隨機回測
+~17秒，TRAIN+VAL合計約206次回測、約35~40分鐘），把`run_one()`改成
+checkpoint可續跑（落盤`data/dividend_yield_portfolio_v1_checkpoint.json`，
+本機`.gitignore`狀態，不進版控），先用n_random=3縮小規模自測（中斷後
+接續 vs 一次跑完，逐欄位數值完全相同，DETERMINISM_CHECK_PASS），再在
+本輪內連續呼叫兩次腳本驗證TRAIN隨機控制組進度0→22→44/100真的累積、
+真實回測與成本敏感度不重算。**本輪因USD budget將近用盡收工**，未產出
+PASS/FAIL判定，holdout確認仍為False。下一輪執行
+`python research/dividend_yield_portfolio_v1.py`會自動接續TRAIN剩餘
+部分再進VALIDATION。完整見#4 2026-09-02T01:20條目。
+
+---
+
 ## 2026-09-02T00:45+08:00 — Carry #4：修正「背景行程能存活到下一輪」的錯誤假設，重跑中未結案
 
 **背景**：`HYPOTHESIS_QUEUE_PROTOCOL.md`本輪排程觸發（`hypothesis_queue`軌）。

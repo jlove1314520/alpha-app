@@ -224,6 +224,39 @@ dividend_yield_portfolio_v1_results.csv`仍是23:01的舊殘留（0筆交易，
 調整`HYPOTHESIS_QUEUE_PROTOCOL.md`的長計算任務處理方式（例如換一種
 真正跨輪存活的啟動方式，或把這個工作單位改為「這輪就等到跑完為止」）。
 
+**狀態（2026-09-02T01:20更新，第六輪排程，根治性修復）**：先精確量測
+瓶頸（`market load: 1.5s`、`sample+factors load(80檔): 102.2s`、單次真實
+回測`14.12s`、單次隨機回測`17.03s`），算出TRAIN+VALIDATION合計約需
+206次回測（各1真實+2成本情境+100隨機）、總計約35~40分鐘——這正是連續
+五輪卡住的量化根因。**根治方案**：把`run_one()`改成checkpoint可續跑
+（新增`CHECKPOINT_PATH`落盤`data/dividend_yield_portfolio_v1_checkpoint.json`，
+真實回測/成本敏感度/每10筆隨機控制組都會落盤，`main()`帶7分鐘時間預算
+安全落在外層工具10分鐘逾時上限內，未跑完回傳`None`不做任何判定）。**改
+之前先用n_random=3的縮小規模自測**：故意deadline過期只做完真實+成本、
+再deadline足夠接續完成剩餘隨機控制組，跟完全不中斷一次跑完的對照組
+逐欄位數值完全相同（`DETERMINISM_CHECK_PASS`），確認續跑邏輯正確不是
+只是「看起來能跑」。**本輪內用同一session連續呼叫兩次腳本驗證真的在
+累積進度**（TRAIN隨機控制組0→22→44/100，真實回測+成本敏感度已完成
+不重算），`data/dividend_yield_portfolio_v1_checkpoint.json`不納入git
+（`research/data/`本來就在`.gitignore`），是這台機器上的本機持久狀態，
+之後每次排程觸發都會自動接續，**不會再重算已完成的部分**。本輪因USD
+budget將近用盡而收工，**尚未結案**——下一輪執行
+`python research/dividend_yield_portfolio_v1.py`會自動接續TRAIN剩餘
+隨機控制組（44/100起），完成TRAIN後接著跑VALIDATION，預估TRAIN還需要
+約3段、VALIDATION（期間較短，單次回測應更快）需要額外幾段，最終才會
+產出`data/dividend_yield_portfolio_v1_results.csv`跟第7/8關判定。
+
+**狀態（2026-09-02T01:41更新，第七輪排程）**：接續上一輪（鎖檔陳舊
+30.7分鐘後由本輪回收，研判上一輪是寫完上面2026-09-02T01:20那則狀態
+後、還沒commit就中斷）。確認上一輪的checkpoint機制程式碼正確、沒有
+背景行程殘留（`ps`確認乾淨），直接沿用不重工。本輪內用前景阻塞方式
+連續呼叫腳本兩次，每次約9分鐘（7分鐘計算預算+資料載入~102秒+~14秒
+真實回測時間），**TRAIN隨機控制組進度44/100→65/100→85/100，持續在
+累積、無重算**。仍未結案（TRAIN還差約15筆才完成，接著才輪到
+VALIDATION全套）。下一輪執行`python research/dividend_yield_portfolio_v1.py`
+會自動接續，預估還需要2~3輪才能跑完TRAIN+VALIDATION並產出第7/8關
+判定。
+
 ### 5. Regime輪動（依市場情境切換曝險/因子權重）
 
 **經濟理由**：市場在不同狀態（多頭/空頭/高波動/低波動）下，同一個因子的
@@ -478,13 +511,13 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
    2026-09-01：第1關cheap IC gate CHEAP_PASS（`f_dividend_yield_ttm`，
    percentile=100.0，見`TRIALS_LEDGER.md`#74）。portfolio層腳本
    `dividend_yield_portfolio_v1.py`已寫好，第一次執行0筆交易查出是實作
-   bug（`n_components>=2`門檻跟單因子設計不合）已修復。2026-09-02第五輪
-   排程發現「背景行程會存活到下一輪」的假設錯誤（headless呼叫結束時
-   背景行程被一併終止），已連續第三輪重跑仍未結案，純粹是計算耗時
-   （單次完整跑可能需30分鐘以上）超過單輪時間預算，非bug非無訊號——
-   下一輪需重新執行`python research/dividend_yield_portfolio_v1.py`並
-   評估是否要改變長計算任務的處理方式，詳見`MARATHON_LOG.md`
-   2026-09-02T00:45條目。
+   bug（`n_components>=2`門檻跟單因子設計不合）已修復。**2026-09-02第六
+   輪根治性修復**：加上checkpoint可續跑機制（已用小規模自測確認續跑
+   結果跟一次跑完完全一致），真正解決連續五輪從零重跑的問題。**第七輪
+   （2026-09-02T01:41）確認機制持續有效**，TRAIN隨機控制組進度已推進到
+   85/100，真實回測+成本敏感度已完成不重算，**下一輪
+   `python research/dividend_yield_portfolio_v1.py`會自動接續，不重算
+   已完成部分**，詳見`MARATHON_LOG.md`2026-09-02T01:41條目。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。
