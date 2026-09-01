@@ -117,6 +117,21 @@ def _check_token(x_alpha_local_token: str | None) -> None:
         raise HTTPException(status_code=401, detail="token不正確或缺少X-Alpha-Local-Token標頭")
 
 
+def _sanitize_nan(obj):
+    """NaN不是合法JSON語法（RFC 8259），json.dumps預設allow_nan=True會偷偷
+    寫出裸露的NaN token，Python自己讀得回來但瀏覽器JS的JSON.parse()會
+    直接拋SyntaxError——2026-09-01一次性下單管線測試已經真的踩到這個坑
+    （市場數據沒有即時權限時ticker.last是NaN，一路帶進limit_price寫進
+    log），寫檔前統一轉成None，這裡是正式服務也要補的防呆。"""
+    if isinstance(obj, float) and obj != obj:
+        return None
+    if isinstance(obj, dict):
+        return {k: _sanitize_nan(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize_nan(v) for v in obj]
+    return obj
+
+
 def _append_paper_trade(entry: dict) -> None:
     """append-only寫入data/paper_order_log.json，讀不到既有檔案就從空list開始。
     這裡只負責寫本機檔案，commit+push是使用者手動或另外的排程機制的事，
@@ -128,7 +143,7 @@ def _append_paper_trade(entry: dict) -> None:
             data = json.loads(PAPER_TRADES_PATH.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             data = []
-    data.append(entry)
+    data.append(_sanitize_nan(entry))
     PAPER_TRADES_PATH.parent.mkdir(parents=True, exist_ok=True)
     PAPER_TRADES_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 

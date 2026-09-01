@@ -16,6 +16,20 @@
 
 ---
 
+## 2026-09-01（續7，開發帽）— IBKR paper下單管線測試完整成功，回補一個NaN寫入JSON的真bug
+
+使用者確認Read-Only API已關、美股盤中，做了一次完整下單管線測試：BUY 1股
+AAPL（限價326.31）→`Filled`@324.58、手續費1.000003 USD→隨即SELL 1股
+平倉（限價323.07）→`Filled`@324.61、手續費1.006885 USD→`ib.positions()`
+確認帳戶歸零。兩筆都記進`data/paper_order_log.json`。過程中抓到真bug：
+`reqMktData()`沒做延遲數據回退，遇到市場數據訂閱錯誤時`ticker.last`是
+NaN，一路帶進限價單被拒絕，且**這筆失敗記錄把裸露的NaN token寫進JSON**
+（不合法JSON語法，瀏覽器`JSON.parse()`會拋錯）——已回補修進正式的
+`ibkr_order_server.py`（新增`_sanitize_nan()`，不只是測試腳本自己修）。
+詳見`BACKLOG.md`「2026-09-01（續）IBKR paper下單管線測試」條目。
+
+---
+
 ## 2026-09-01（續6，開發帽）— Shioaji交易時段閘門+期貨四商品(台指期/小台/電子期/金融期)補齊
 
 `shioaji_quotes.py`新增`_is_tw_trading_window()`閘門（週一至五

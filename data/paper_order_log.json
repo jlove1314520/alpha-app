@@ -53,5 +53,39 @@
       "PreSubmitted: Fill 1.0@320.52",
       "Filled: "
     ]
+  },
+  {
+    "attempt_id": "a7f3bc25a845",
+    "at": "2026-09-01T23:41:15.676831+08:00",
+    "note": "測試單，驗證ib_async下單管線，非投資建議",
+    "symbol": "AAPL",
+    "action": "BUY",
+    "quantity": 1,
+    "order_type": "LMT",
+    "limit_price": 326.31,
+    "status": "Filled",
+    "filled": 1.0,
+    "avg_fill_price": 324.58,
+    "commission": 1.000003,
+    "commission_currency": "USD",
+    "order_id": 6,
+    "perm_id": 1440294973
+  },
+  {
+    "attempt_id": "ce568b09bb43",
+    "at": "2026-09-01T23:41:19.693337+08:00",
+    "note": "測試單，驗證ib_async下單管線，非投資建議",
+    "symbol": "AAPL",
+    "action": "SELL",
+    "quantity": 1,
+    "order_type": "LMT",
+    "limit_price": 323.07,
+    "status": "Filled",
+    "filled": 1.0,
+    "avg_fill_price": 324.61,
+    "commission": 1.006885,
+    "commission_currency": "USD",
+    "order_id": 7,
+    "perm_id": 1440294974
   }
 ]

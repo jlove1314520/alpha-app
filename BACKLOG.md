@@ -17,6 +17,33 @@
 
 ---
 
+## ✅ 2026-09-01（續）IBKR paper下單管線測試：完整驗證下單→成交整條會動
+
+使用者確認Gateway唯讀API已關、美股盤中，要求做一次「管線測試」（不是
+App推薦交易）驗證`ib_async→Gateway→送單→成交回報`整條路徑。
+
+**測試結果：完整成功**——BUY 1股AAPL（限價326.31，貼近參考價324.69的
++0.5%）：`PendingSubmit→Submitted→Filled`，成交價324.58、手續費
+1.000003 USD、orderId=6/permId=1440294973；隨即SELL 1股平倉（限價
+323.07）：同樣`Filled`，成交價324.61、手續費1.006885 USD，平倉後
+`ib.positions()`確認帳戶歸零。兩筆都完整記進`data/paper_order_log.json`
+（時間戳+標「測試單，驗證ib_async下單管線，非投資建議」）。
+
+**過程中抓到並修好一個真bug（回補進正式的`ibkr_order_server.py`，
+不只是測試腳本本身）**：第一次嘗試時`reqMktData()`沒做延遲數據回退，
+遇到Error 10089/10168「市場數據需要額外訂閱」，`ticker.last`變成NaN，
+一路帶進限價單被IBKR直接拒絕（`Cancelled: Unable to parse field
+'Limit Price' for input string: 'nan'`）；**更嚴重的是這筆失敗記錄把
+裸露的`NaN` token寫進了`data/paper_order_log.json`**——`NaN`不是合法
+JSON語法（RFC 8259），Python自己讀得回來，但瀏覽器JS的`JSON.parse()`
+會直接拋`SyntaxError`，若這份log以後接上任何前端顯示功能會整份壞掉。
+已修正：`ibkr_order_server.py`新增`_sanitize_nan()`，寫檔前統一把NaN
+轉成`null`，這是正式服務的防呆，不只是這次測試腳本自己修一次就算了。
+已清掉那筆壞資料的舊記錄，確認`data/paper_order_log.json`目前6筆記錄
+全部是合法JSON。
+
+---
+
 ## ✅ 2026-09-01（續）Shioaji交易時段閘門+期貨四商品補齊
 
 使用者要求兩件事：①`shioaji_quotes.py`加交易時段閘門避免非盤中一直
