@@ -1176,3 +1176,17 @@ TW軌兩項地基背景工作複查：重新統計 `backfill_state.json`，`Coun
 `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認僅 `data/rate_limit_state.json`（GitHub Actions自動更新的App資料檔，非本輪研究範圍）跟四個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`，另一互動session殘留）無其他變更，均不觸碰、不納入本輪commit。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約131輪、跨度約72.4小時，需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
+
+## 2026-09-01T08:32+08:00 — 馬拉松第244輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 21:01（第241輪，最舊）、FUT 21:31（第242輪）、US 08:01（第243輪，最新）——依輪替選TW。距上一輪TW工作（第241輪）間隔約35.5小時（期間US/FUT各跑了一輪都判斷跳過，機器/排程器有中斷，非本輪異常）。
+
+獨立複查暫停規則三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自建立（`fa369b9`）以來仍只有這一個commit；(2) `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）判定仍FAIL，(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍留給使用者決定，未見新回應；(3) `MARATHON_PROTOCOL.md` 第0節暫停規則本身未被修改移除（本輪完整重讀一遍確認）。三者皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項地基背景工作複查：重新統計 `backfill_state.json`，`Counter(d.values())` 得 done=2597/skip=469，2597/3196=81.26%，跟第194輪以來一致（未變動），仍達80%門檻，不需要跑 `backfill_universe.py`；T86回補自第164輪起維持100%記錄，本輪未見新增待處理跡象。round137/201/202已補齊「補參數敏感度、補對照組」這條允許路徑（成本敏感度1x/2x/3x、N=100隨機控制組A/B兩組合、大盤MDD/Sortino基準），**沒有已知的剩餘允許工作項目**，唯一還沒做的(a)/(b)仍是需使用者裁示的類別，本輪依既定判斷維持不代為啟動。**TW軌本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 除5個未追蹤log殘留（`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/weinstein_v2_run.log`／`research/pead_run_output.log`，另一互動session殘留）外，**另發現 `research/TRIALS_LEDGER.md` 有一筆未commit的修改**（新增第73列`pead_portfolio_v1`結果，判定FAIL，對應已committed的`5f5d9b1`「PEAD策略層構造起跑：等權SUE二因子組合，第7關樣本外背景執行中」——研判是那次互動session啟動的背景回測跑完後留下的結果，尚未回頭commit）：這不是本輪馬拉松做的變更，屬於另一個獨立的、已經在HYPOTHESIS_QUEUE.md框架下運作的互動session的工作產物，本輪不觸碰、不納入本輪commit（協定第4節「git add限定改動的檔案」原則，只commit本輪自己動的四個檔案）。均如實記錄，不代為commit他人未完成的工作。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約134輪、跨度約131.9小時（約5.5天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。另外，這次意外發現另一個互動session似乎已在HYPOTHESIS_QUEUE.md/STRATEGY_GRAVEYARD.md框架下持續進行組合策略測試（`f_eps_surprise`/`f_revenue_surprise`等權PEAD組合等），跟本檔案描述的暫停規則現況可能已有落差，建議使用者確認`MARATHON_PROTOCOL.md`本身是否也需要跟著更新以反映最新工作方式，避免馬拉松跟互動session各自依據不同版本的規則運作。**
