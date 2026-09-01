@@ -1,0 +1,57 @@
+[
+  {
+    "attempt_id": "ecf108ca40119451",
+    "phase": "intent",
+    "at": "2026-09-01T21:49:01.778028+08:00",
+    "symbol": "AAPL",
+    "action": "BUY",
+    "quantity": 1,
+    "order_type": "MKT",
+    "limit_price": null,
+    "note": "模擬交易，非投資建議"
+  },
+  {
+    "attempt_id": "ecf108ca40119451",
+    "phase": "result",
+    "at": "2026-09-01T21:49:03.527445+08:00",
+    "status": "Cancelled",
+    "filled": 0.0,
+    "remaining": 0.0,
+    "avg_fill_price": 0.0,
+    "order_id": 4,
+    "perm_id": 0,
+    "log": [
+      "PendingSubmit: ",
+      "Cancelled: Error 10349, reqId 4: \\u59d4\\u8a17\\u55aeTIF\\u5df2\\u6839\\u64da\\u59d4\\u8a17\\u55ae\\u9810\\u7f6e\\u8a2d\\u5b9a\\u81f3DAY\\u3002"
+    ]
+  },
+  {
+    "attempt_id": "cda42cba25340287",
+    "phase": "intent",
+    "at": "2026-09-01T21:50:40.318740+08:00",
+    "symbol": "AAPL",
+    "action": "SELL",
+    "quantity": 1,
+    "order_type": "MKT",
+    "limit_price": null,
+    "note": "模擬交易，非投資建議"
+  },
+  {
+    "attempt_id": "cda42cba25340287",
+    "phase": "result",
+    "at": "2026-09-01T21:50:41.739687+08:00",
+    "status": "Filled",
+    "filled": 1.0,
+    "remaining": 0.0,
+    "avg_fill_price": 320.52,
+    "order_id": 8,
+    "perm_id": 1440294965,
+    "log": [
+      "PendingSubmit: ",
+      "Cancelled: Error 10349, reqId 8: \\u59d4\\u8a17\\u55aeTIF\\u5df2\\u6839\\u64da\\u59d4\\u8a17\\u55ae\\u9810\\u7f6e\\u8a2d\\u5b9a\\u81f3DAY\\u3002",
+      "PreSubmitted: ",
+      "PreSubmitted: Fill 1.0@320.52",
+      "Filled: "
+    ]
+  }
+]

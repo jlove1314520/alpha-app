@@ -16,6 +16,23 @@
 
 ---
 
+## 2026-09-01（續4，開發帽）— IBKR paper下單伺服器建好，抓到並修好一個嚴重的成交誤判bug
+
+新增`research/ibkr_order_server.py`（FastAPI本機伺服器，只監聽127.0.0.1，
+`X-Alpha-Local-Token`密鑰驗證+每次下單前重驗paper帳戶+只有`/submit_order`
+會下單+下單前後寫log）。**用真實paper帳戶(DU0698784)實測抓到嚴重bug**：
+BUY 1股AAPL被誤報`Cancelled/filled=0`，但帳戶部位/現金都真的變動了——
+根因是IBKR對某些單會先送一個非終止性的「Cancelled」資訊性訊息(Error
+10349)，等待邏輯看到就提早跳出蓋掉後面真正的Filled狀態。已修正（只有
+Filled/ValidationError才提早結束，其他等滿時間預算+交叉比對trade.fills），
+已用SELL平倉確認部位歸零。**修好的邏輯還沒有機會重新驗證**——我要再測
+一次BUY時被Claude Code安全分類器擋下（下單動作本身被歸類敏感操作），
+已請使用者自己驗證。`index.html`下單計畫UI完全還沒開始做，這輪只完成
+本機伺服器部分。詳見`BACKLOG.md`「2026-09-01（續）IBKR paper下單伺服器」
+條目（標⚠，多項驗證未完成）。
+
+---
+
 ## 2026-09-01（續3，開發帽）— IBKR改版：台股退回TWSE，只接美股；發現使用者前提不成立
 
 使用者要求「台股改抓美股，因為IBKR對美股才是REALTIME」，已改版

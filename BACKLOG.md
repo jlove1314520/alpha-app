@@ -17,6 +17,54 @@
 
 ---
 
+## ⚠ 2026-09-01（續）IBKR paper下單伺服器：本機HTTP伺服器建好、抓到並修好
+一個真實的成交狀態誤判bug——**App端UI尚未開始做，先報進度**
+
+使用者要求「下單計畫」功能（AI只擬計畫、送單永遠使用者親按），且指定
+架構：App是純前端PWA沒辦法主動觸發本機程式，經`AskUserQuestion`確認後
+選定「本機輕量HTTP伺服器」方案。
+
+**一、`research/ibkr_order_server.py`（新增）**：FastAPI+uvicorn（兩者
+這台機器已裝，未新增相依套件），**只監聽`127.0.0.1`**（刻意不開放區網/
+其他裝置，最保守的預設，之後真要手機遠端下單需要另外加驗證機制再議）。
+四層安全防護：①`X-Alpha-Local-Token`共享密鑰（防瀏覽器裡其他分頁/惡意
+網頁對localhost做DNS rebinding式攻擊，不是防使用者自己）②每次下單前
+都重新驗證帳戶ID是"DU"開頭③只有`/submit_order`會真的下單，其他都是
+唯讀查詢④下單前後都寫進log檔。**endpoint**：`GET /health`（連線+帳戶
+確認）、`GET /account_summary`（可用資金/部位）、`POST /submit_order`
+（下單）。
+
+**命名澄清**：使用者原話要記進`paper_trades.json`，但那個檔名**已經被
+既有功能佔用**（`PAPER_TRADING_ARCHITECTURE.md`規劃的策略績效追蹤，
+schema是`{strategies:[...]}`，完全不同用途），改用新檔案
+`data/paper_order_log.json`避免撞名破壞`loadStrategies()`。
+
+**二、用使用者真實paper帳戶(`DU0698784`)實測，抓到一個嚴重的真bug並
+修好**：第一次測BUY 1股AAPL，回報`status:"Cancelled", filled:0`，
+但**帳戶部位真的多了1股、現金真的被扣款**——查證後發現IBKR對這筆單先
+送了一個非終止性的「Cancelled」狀態（Error 10349，其實只是「TIF已根據
+預置設定至DAY」的資訊性訊息，不是真的取消），我的等待邏輯看到
+"Cancelled"就提早跳出，蓋掉了後面才到的PreSubmitted→Filled真相。
+**這是會讓使用者誤以為「沒有任何東西成交」但實際上真的買了股票的
+嚴重問題**，已修正：只有"Filled"（明確成功）或"ValidationError"
+（Gateway端立即拒絕，例如Read-Only API擋下）才提早結束等待，其他狀態
+一律等滿整個時間預算；另外加上`trade.fills`交叉比對，即使status字串
+異常也不會漏掉真實成交紀錄。已用SELL 1股AAPL把意外部位平倉，帳戶確認
+歸零(position_qty:0)。
+
+**三、還沒做的部分**：修好的邏輯**還沒有機會重新跑一次完整驗證**——
+我打算再測一次BUY確認修好後status正確回報"Filled"，但這個動作被
+Claude Code自己的安全分類器擋下了（下單這個動作本身被歸類為敏感操作，
+跟稍早建排程任務同一類限制），已請使用者自己用`!`前綴的curl指令驗證。
+`index.html`的下單計畫UI（選標的/方向/張數→計畫卡→確認送出）**完全
+還沒開始做**，這輪只做到本機伺服器本身。
+
+**四、下單被Gateway拒絕的已知情境**：Read-Only API勾選時會回
+`ValidationError`（Warning 321），伺服器會回傳清楚的409錯誤說明原因，
+不會誤判成別的狀態。
+
+---
+
 ## ⚠ 2026-09-01（續）IBKR改版：台股退回TWSE，只接美股——**且發現使用者的
 前提不成立**
 
