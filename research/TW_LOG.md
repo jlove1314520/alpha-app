@@ -1386,3 +1386,22 @@ TW軌兩項地基背景工作複查：重新統計 `backfill_state.json`，`Coun
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約171輪、跨度約151.4小時（約6.31天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
 
 ---
+
+## 2026-09-02T05:01+08:00 — 馬拉松第283輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 03:31（第280輪，最舊）、FUT 04:02（第281輪）、US 04:31（第282輪，最新）——依輪替選TW。
+
+獨立複查三個解除條件皆未成立：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md` 確認自 `fa369b9` 以來仍只一個commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）仍FAIL（alpha p>0.05未顯著），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩選項仍未見使用者新回應。
+3. `MARATHON_PROTOCOL.md` 第0節暫停規則本文完整重讀一遍，未被修改移除。
+
+兩項允許的背景工作也獨立複查仍已達標：`data/backfill_state.json` 口徑跟上一輪一致，84.70%遠高於80%門檻；T86回補自第164輪起維持100%完成記錄。
+
+**TW軌沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。`git status` 確認僅既有9個未追蹤殘留log（`research/dividend_yield_portfolio_v1_run.log`／`research/pit_run_500.log`／`research/pit_run_liquidity500_clean.log`／`research/pit_run_liquidity500_full.log`／`research/val_continue_run.log`／`research/val_continue_run2.log`／`research/val_continue_run3.log`／`research/val_continue_run4.log`／`research/weinstein_v2_run.log`，研判是另一互動session殘留，非本輪產生），皆未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約174輪、跨度約152.4小時（約6.35天），需使用者親自確認 `PORTFOLIO_STRATEGY_SPEC.md` 或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
