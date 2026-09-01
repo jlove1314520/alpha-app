@@ -210,6 +210,20 @@ VALIDATION兩期皆0筆交易，查出是**實作bug**（借用的`pbv2._eligibl
 結案**，等下一輪排程觸發時查看`dividend_yield_portfolio_v1_run.log`
 完整結果再判定。
 
+**狀態（2026-09-02T00:45更新，第五輪排程）**：上一輪假設「背景行程會
+存活到下一輪」**是錯的**——本輪發現PID 48852已不存在、log仍是0位元組，
+研判headless呼叫結束時背景行程被一併終止（詳見`MARATHON_LOG.md`
+2026-09-02T00:45條目的完整分析）。本輪重新啟動計算，前景等待約23分鐘
+（確認行程持續運算中、非卡死），**觀察時間內仍未跑完**，`data/
+dividend_yield_portfolio_v1_results.csv`仍是23:01的舊殘留（0筆交易，
+已知是先前bug修復前的結果，非本輪產出）。**下一輪必須重新執行**
+`python research/dividend_yield_portfolio_v1.py`，不能假設能接續本輪
+留下的行程。這是這條假設連續第三輪「重跑中未結案」的根本原因——每輪
+都在從頭重算，不是bug也不是無訊號，是單輪時間預算跟計算所需時間（實測
+單次完整跑可能需要30分鐘以上）有落差，需要下一輪或使用者評估是否要
+調整`HYPOTHESIS_QUEUE_PROTOCOL.md`的長計算任務處理方式（例如換一種
+真正跨輪存活的啟動方式，或把這個工作單位改為「這輪就等到跑完為止」）。
+
 ### 5. Regime輪動（依市場情境切換曝險/因子權重）
 
 **經濟理由**：市場在不同狀態（多頭/空頭/高波動/低波動）下，同一個因子的
@@ -464,9 +478,13 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
    2026-09-01：第1關cheap IC gate CHEAP_PASS（`f_dividend_yield_ttm`，
    percentile=100.0，見`TRIALS_LEDGER.md`#74）。portfolio層腳本
    `dividend_yield_portfolio_v1.py`已寫好，第一次執行0筆交易查出是實作
-   bug（`n_components>=2`門檻跟單因子設計不合）已修復，第7/8關背景重跑
-   中（已累計超過35分鐘），尚未結案，下一輪查看
-   `dividend_yield_portfolio_v1_run.log`結果再判定。
+   bug（`n_components>=2`門檻跟單因子設計不合）已修復。2026-09-02第五輪
+   排程發現「背景行程會存活到下一輪」的假設錯誤（headless呼叫結束時
+   背景行程被一併終止），已連續第三輪重跑仍未結案，純粹是計算耗時
+   （單次完整跑可能需30分鐘以上）超過單輪時間預算，非bug非無訊號——
+   下一輪需重新執行`python research/dividend_yield_portfolio_v1.py`並
+   評估是否要改變長計算任務的處理方式，詳見`MARATHON_LOG.md`
+   2026-09-02T00:45條目。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。
