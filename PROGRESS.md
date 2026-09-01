@@ -16,6 +16,18 @@
 
 ---
 
+## 2026-09-02（開發帽）— smoke test新增檢查16：「圖該顯示卻空白」防線（PENDING_QUEUE「線圖不顯示」項第三部分）
+
+跟既有check 15（資料新鮮卻顯示無資料=FAIL）同精神，但check 15只驗面板
+innerHTML非空，測不出「面板有文字但線沒畫出來」——正是前一條目抓到的
+櫃買指數sparkline漏傳bug的樣態。新增check 16：route攔截餵兩組≥2點的有效
+假資料（`quotes_tw.json`的2330 sparkline、`strategies.json`一個策略的
+`equity_curve`），直接驗`svg.spark polyline`的`points`屬性真的有座標，
+不是空字串。改動檔案：`scripts/smoke_test.mjs`。`node scripts/smoke_test.mjs`
+14項全PASS（含新check 16）。
+
+---
+
 ## 2026-09-02（開發帽）— 圖表逐一診斷（PENDING_QUEUE「線圖不顯示」項第一部分）：修好1個真bug
 
 用Playwright在本機393×852視窗實測5類圖表的`<svg><polyline points="...">`

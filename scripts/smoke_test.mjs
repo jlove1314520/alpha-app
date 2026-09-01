@@ -35,8 +35,13 @@
 // 15.【2026-09-02新增】用route攔截餵一份時間戳是「現在」的真實結構假資料
 //     （今日事件卡片），確認對應面板真的把它畫出來，不是卡在SW快取住的
 //     舊殼/渲染函式壞掉但沒拋錯的空狀態——「資料新鮮卻顯示無資料」防線。
-// 12. 整個測試過程（含8/9/11/13/14/15新增的重整/reload/手勢/時區/防線操作）
-//     結束後仍無累積的uncaught error。
+// 16.【2026-09-02新增，同一精神但針對「圖」】用route攔截餵一份有效、至少2個
+//     資料點的假sparkline/equity_curve資料，確認對應<svg>裡真的畫出了
+//     <polyline>（points屬性不是空字串），不是只驗面板innerHTML非空——那樣
+//     測不出「面板有文字但沒有真的畫線」這種情況（見2026-09-02圖表診斷任務
+//     發現的櫃買指數sparkline漏傳bug，這條防線就是為了防止同類問題復發）。
+// 12. 整個測試過程（含8/9/11/13/14/15/16新增的重整/reload/手勢/時區/防線
+//     操作）結束後仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -445,10 +450,97 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("15. 資料檔明明新鮮、App卻顯示無資料=FAIL（SW快取壞殼防線）",
     staleShellErrors.length === 0, staleShellErrors.join("; "));
 
+  // 16.【2026-09-02新增，「圖該顯示卻空白」防線，跟check 15同精神但針對「圖」
+  // 這個更具體的情況】只驗面板innerHTML非空測不出「面板有文字但沒有真的畫線」
+  // ——2026-09-02圖表診斷任務就抓到一個真實案例：櫃買指數sparkline的資料
+  // 物件漏傳sparkline欄位，面板本身照樣正常顯示數字/文字，只有那條線缺席，
+  // 純看「面板有沒有內容」完全測不出來。這裡用route攔截餵一份有效、資料點
+  // 足夠（至少2個點）的假sparkline/equity_curve資料，直接檢查對應<svg>裡
+  // <polyline>的points屬性是不是有實際座標點（不是空字串/不存在）。
+  const chartBlankErrors = [];
+  try {
+    // 16a. 自選股列表sparkline（spark()，讀quotes_tw.json::quotes[code].sparkline）
+    const fakeQuotesTw = {
+      generated_at: new Date().toISOString(),
+      quotes: {
+        "2330": {
+          name: "台積電", price: 999, prev_close: 990, change: 9, change_pct: 0.91,
+          time: "13:30:00", date: "20260101", stale: false,
+          sparkline: [980, 985, 990, 995, 999],
+        },
+      },
+    };
+    await page.route("**/data/quotes_tw.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeQuotesTw) })
+    );
+    await page.evaluate(() => {
+      // 確保自選股清單至少含2330，且強制重新fetch（不沿用舊快取變數）。
+      const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]");
+      if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); }
+      INTRADAY_TW = null;
+    });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1500);
+    const wlPolyline = await page.evaluate(() => {
+      const el = document.getElementById("wl-list");
+      if (!el) return { found: false, reason: "找不到#wl-list" };
+      const poly = el.querySelector("svg.spark polyline");
+      if (!poly) return { found: false, reason: "沒有svg.spark polyline元素" };
+      return { found: true, points: poly.getAttribute("points") };
+    });
+    if (!wlPolyline.found) chartBlankErrors.push(`自選股sparkline：${wlPolyline.reason}`);
+    else if (!wlPolyline.points || !wlPolyline.points.trim()) chartBlankErrors.push(`自選股sparkline：polyline存在但points屬性是空字串`);
+    await page.unroute("**/data/quotes_tw.json**");
+
+    // 16b. 策略監控台權益曲線（spark()，讀strategies.json::forward_paper.equity_curve）
+    const fakeStrategies = {
+      strategies: [{
+        id: "smoke_test_fake", name: "冒煙測試假策略", type: "test", status: "紙上交易中",
+        spec: "smoke_test注入，非真實策略",
+        forward_paper: {
+          inception_date: "2026-01-01", forward_return_todate_pct: 3.5,
+          trading_days_count: 5, sample_sufficient: false,
+          equity_curve: [
+            { date: "2026-01-01", cum_return_pct: 0 },
+            { date: "2026-01-02", cum_return_pct: 1.2 },
+            { date: "2026-01-03", cum_return_pct: -0.5 },
+            { date: "2026-01-04", cum_return_pct: 3.5 },
+          ],
+          ledger: [], source: "smoke_test",
+        },
+        limitations: [], last_updated: new Date().toISOString(),
+      }],
+    };
+    await page.route("**/data/strategies.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeStrategies) })
+    );
+    await page.evaluate(() => window.go("trade"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => {
+      const b = [...document.querySelectorAll("#trade-tabs button")].find(x => x.dataset.sub === "monitor");
+      if (b) b.click();
+    });
+    await page.waitForTimeout(1200);
+    const monitorPolyline = await page.evaluate(() => {
+      const el = document.getElementById("strategy-monitor-list");
+      if (!el) return { found: false, reason: "找不到#strategy-monitor-list" };
+      const poly = el.querySelector("svg.spark polyline");
+      if (!poly) return { found: false, reason: "沒有svg.spark polyline元素" };
+      return { found: true, points: poly.getAttribute("points") };
+    });
+    if (!monitorPolyline.found) chartBlankErrors.push(`策略監控台權益曲線：${monitorPolyline.reason}`);
+    else if (!monitorPolyline.points || !monitorPolyline.points.trim()) chartBlankErrors.push(`策略監控台權益曲線：polyline存在但points屬性是空字串`);
+    await page.unroute("**/data/strategies.json**");
+  } catch (e) {
+    chartBlankErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("16. 圖該顯示卻空白防線（有效≥2點假資料，驗polyline的points屬性真的有座標）",
+    chartBlankErrors.length === 0, chartBlankErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

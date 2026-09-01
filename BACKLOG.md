@@ -17,6 +17,30 @@
 
 ---
 
+## ✅ 2026-09-02（續）smoke test新增檢查16：「圖該顯示卻空白」防線
+
+對應`PENDING_QUEUE.md`同一個任務的第三部分。跟既有檢查15（資料新鮮卻顯示
+無資料=FAIL）同一個精神，但檢查15只驗面板`innerHTML`非空，測不出「面板有
+文字但沒有真的畫線」這種情況——這正是上一條目抓到的櫃買指數sparkline漏傳
+bug的樣態：面板文字（指數數字/漲跌%）都正常顯示，只有那條線缺席，光看
+innerHTML非空完全看不出來。
+
+**新增檢查16**（`scripts/smoke_test.mjs`）：用`page.route()`攔截餵兩組
+有效、資料點足夠（≥2點）的假資料——
+1. `data/quotes_tw.json`：假造2330的`sparkline:[980,985,990,995,999]`，
+   確認`#wl-list`裡`svg.spark polyline`真的存在且`points`屬性不是空字串。
+2. `data/strategies.json`：假造一個策略的`forward_paper.equity_curve`
+   4個非零變化的點，確認`#strategy-monitor-list`裡`svg.spark polyline`
+   同樣有真實座標。
+
+跟check 15一樣，這條防線直接查`points`屬性本身，不是只看面板有沒有內容，
+往後同類「資料物件漏傳欄位導致某條線永久畫不出來」的bug會被這條防線抓到。
+
+**修改檔案**：`scripts/smoke_test.mjs`（新增check 16，檔頭註解同步更新）。
+**驗收**：`node scripts/smoke_test.mjs`14項全PASS（含新check 16）。
+
+---
+
 ## ✅ 2026-09-02（續）圖表逐一診斷：5類圖表根因分類，修好1個真bug
 
 對應`PENDING_QUEUE.md`「App 兩個 UX 問題排進今晚（線圖不顯示 + 數字不會跳動）」
