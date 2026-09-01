@@ -76,6 +76,35 @@ commit、假資料零容忍寧可空狀態、流程重於盈虧、動`index.html
 
 - [ ] **App 台股新增「籌碼」分頁（免費層今晚做，分點層登錄待付費決策）**
 
+  **查證發現（處理前，2026-09-02凌晨）**：這個任務比字面上看起來大很多，
+  誠實記錄，不要低估：
+  1. **App層目前沒有「個股每日籌碼」JSON管線**——`research/twse_t86_
+     client.py`（三大法人T86）是研究馬拉松用的parquet快取，服務對象是
+     因子回測，不是App每天讀的JSON；`data/margin_maintenance.json`只有
+     6筆「大盤整體」融資維持率，不是逐股資料。要做這個功能，第一步得先
+     新增一支`.github/scripts/`底下的每日抓取腳本（產出逐股的三大法人/
+     融資融券/股權分散/借券JSON），不是「接上既有JSON」這麼簡單。
+  2. **會撞到已知的PAT地雷**：這個新抓取步驟要掛進
+     `.github/workflows/market.yml`，但這個repo的GitHub PAT沒有
+     `workflow` scope，任何commit觸及`.github/workflows/*.yml`都會被
+     GitHub拒絕push（見`research/MARATHON_STATE.md`2026-08-26第102輪
+     記錄）——處理方式沿用既有慣例：workflow檔案的修改留在working tree
+     不commit，其餘檔案正常commit，等使用者換有workflow scope的PAT再
+     由使用者自己補上那個步驟。
+  3. 均價試算（三大法人累計淨買×當日均價估算成本均線）依賴上面的逐股
+     三大法人資料先有，是接在這個地基之後的第二層工作。
+  4. 千張大戶持股比例（`TaiwanStockHoldingSharesPer`）跟借券賣出目前
+     這個repo完全沒有既有的抓取邏輯可以參考，需要從FinMind/TWSE官方
+     端點原地開工（依`CLAUDE.md`資料原則：先試主來源→備援→由已有欄位
+     推導，三條都試過再誠實標「卡資料」）。
+
+  **暫緩理由**：今晚已經有兩次背景agent反覆卡在混淆狀態、零進度燒了
+  超過300萬token（App功能掃描、B29第一次嘗試），改用全新（非fork）
+  agent後B29狀況好轉但還在跑。這個籌碼任務範圍比B29更大、更多未知數
+  （4種新資料型態+workflow地雷+UI+成本均線估算），倉促再開一個大戰場
+  風險偏高。**先不派工，留給下一輪session或使用者醒來後決定要不要
+  拆更小的單位分批做**，這裡的查證筆記留給接手的人，不用重新摸索。
+
   原始指令全文：
 
   > 【指令開始】App 台股新增「籌碼」分頁（免費層今晚做，分點層登錄待付費決策）
