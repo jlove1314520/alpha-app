@@ -143,8 +143,17 @@ FAIL的多窗口投票版本（`fut_trend_multi_tf`#18，percentile=82.5）比�
 不是重新驗證因子本身IC是否存在**——那部分已經有紮實證據了，缺的是portfolio
 層級的完整驗證，跟B24對score_v2的處理是同一層級的工作。
 
-**狀態**：待排入portfolio-level構造（可能併入B24系列的新一輪迭代，不是
-從零開始的因子探勘）。
+**狀態（2026-09-01結案）：FAIL，移入`STRATEGY_GRAVEYARD.md`**。
+`pead_portfolio_v1.py`（新增，可重複執行）：等權組合，月頻Top20。
+第7關樣本外表面過關（TRAIN/VAL隨機控制組percentile 100.0/98.0），但
+**alpha顯著性未過**（本專案已建立的評判標準，`portfolio_multifactor_v2`/
+`weinstein_stage2_v2`都用過）——TRAIN alpha+7.36%(p=0.5349)、VAL
+alpha+6.03%(p=0.4809)皆不顯著，VAL期總報酬(+54.65%)幾乎等於買進持有
+大盤(+54.58%，只差+0.07pp)，beta+0.56~0.57顯示報酬主要來自市場曝險。
+**不泛化成「PEAD/SUE因子沒用」**——因子層IC（`TRIALS_LEDGER.md`#7/#8）
+依然PASS，死的是「等權/月頻/Top20」這個具體portfolio構造，未來IC加權
+或情境式組合變體仍值得獨立測試。完整見`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#73。
 
 ### 4. Carry（股票股利率因子，期貨basis carry已有明確結論）
 
@@ -244,8 +253,10 @@ CHEAP_PASS後深挖**FAIL**——VAL期表面轉強但beta驟降至-0.891，代�
    移出排隊佇列。
 2. ~~CTA趨勢跟隨（期貨）~~——**2026-09-01已結案：FAIL**（第2關隨機控制組
    percentile=10.0，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
-3. **PEAD策略層構造——現在排隊第一，下一個要跑的。**因子已PASS，缺
-   portfolio層構造，可能併入B24下一輪。
+3. ~~PEAD策略層構造~~——**2026-09-01已結案：FAIL**（alpha顯著性未過，
+   VAL期報酬幾乎等於買進持有，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
+4. **Carry（股票股利率，期貨端已有結論）——現在排隊第一，下一個要跑的。**
+   全新因子，第1關（sanity）尚未開始。
 4. Carry（股票股利率）——期貨carry已有結論不重測，股票端全新。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。

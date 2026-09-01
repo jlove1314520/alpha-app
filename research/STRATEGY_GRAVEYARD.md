@@ -152,3 +152,30 @@ FAIL/深挖後降級案例的策展摘要，給使用者/App策略監控台看�
 - **原始記錄**：`research/cta_momentum_12m.py`（新增，可重複執行）、
   `TRIALS_LEDGER.md`#72。`HYPOTHESIS_QUEUE.md`#2狀態同步更新為FAIL，
   佇列接續#3 PEAD策略層構造。
+
+### pead_portfolio_v1（SUE二因子等權組合，月頻Top20，股票，2026-09-01FAIL）
+
+- **哪一關死的**：alpha顯著性（本專案已建立、非`HYPOTHESIS_QUEUE.md`
+  GATE_SEQUENCE明文編號、但`portfolio_multifactor_v2`/`weinstein_stage2_v2`
+  兩個先例都用過的既有評判標準）——隨機控制組percentile技術上過關
+  （TRAIN 100.0/VAL 98.0），但這不能取代alpha顯著性檢定。
+- **具體數字**：TRAIN(2015-2020)報酬+60.28%/alpha+7.36%(p=0.5349)/
+  beta+0.564；VALIDATION(2021-2024)報酬+54.65%/alpha+6.03%(p=0.4809)/
+  beta+0.570，**VAL期總報酬跟買進持有大盤(+54.58%)只差+0.07個百分點**，
+  兩期alpha都遠不顯著(p遠高於0.05)。
+- **死因**：beta約+0.56~0.57代表報酬主要來自市場曝險，不是選股貢獻的
+  超額報酬；隨機控制組贏的是「排序這兩個因子挑的股票比隨機挑股票好」，
+  這跟`f_eps_surprise`/`f_revenue_surprise`因子層IC本來就PASS的結論一致
+  且不矛盾，但沒有轉化成portfolio層級統計上站得住腳的alpha——跟
+  `weinstein_stage2_v2`（表面總報酬贏買進持有，拆解後主要是beta貢獻）
+  同一種死法，也跟`portfolio_multifactor_v2`（隨機控制組99~100分但alpha
+  p值全部>0.05）同一個卡關點。
+- **這個死法能不能泛化**：**不能泛化成「PEAD/SUE因子沒用」**——因子層
+  IC本身依然是`TRIALS_LEDGER.md`#7/#8的PASS結論，沒有被推翻。這裡死的
+  是「等權、月頻、Top20」這個具體portfolio構造方式，未來變體（IC加權、
+  更窄資格池、跟其他因子情境式組合）仍值得獨立測試，不能因為這次死了
+  就認定PEAD概念在這個宇宙沒有可執行的形式。
+- **原始記錄**：`research/pead_portfolio_v1.py`（新增，可重複執行，沿用
+  `portfolio_backtest_v2.py`通用機制不修改該檔案）、`TRIALS_LEDGER.md`#73，
+  `data/pead_portfolio_v1_results.csv`（gitignored）。`HYPOTHESIS_QUEUE.md`
+  #3狀態同步更新為FAIL，佇列接續#4股票股利率carry。

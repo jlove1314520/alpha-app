@@ -75,6 +75,26 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-01T08:35+08:00 — PEAD策略層構造結案：FAIL（alpha顯著性未過）
+
+跑完N=100完整版：TRAIN(2015-2020)報酬+60.28%/alpha+7.36%(p=0.5349不顯著)/
+beta+0.564，隨機控制組percentile=100.0；VALIDATION(2021-2024)報酬+54.65%/
+alpha+6.03%(p=0.4809不顯著)/beta+0.570，隨機控制組percentile=98.0。
+
+**表面上第7關（樣本外+隨機控制組）過關，但套用本專案已建立的alpha顯著性
+標準（`portfolio_multifactor_v2`/`weinstein_stage2_v2`都用過同一把尺）
+判定FAIL**——隨機控制組percentile高只證明「排序這兩個因子挑的股票比隨機
+挑股票好」（跟因子層IC本來就PASS的結論一致），不能取代CAPM alpha顯著性
+檢定：兩期alpha都遠不顯著(p=0.48~0.53)，且**VAL期總報酬(+54.65%)幾乎
+等於買進持有大盤(+54.58%)，只差+0.07個百分點**，beta+0.56~0.57顯示報酬
+主要是市場曝險，不是選股貢獻的超額報酬。**不泛化成PEAD/SUE因子沒用**——
+死的是「等權/月頻/Top20」這個具體portfolio構造，IC加權或情境式組合等
+變體仍值得未來獨立測試。完整見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#73。
+
+**立即接續：佇列#4股票股利率carry（全新因子，第1關sanity尚未開始）。**
+
+---
+
 ## 2026-08-29T04:45+08:00 — Weinstein v2結案：FAIL（隨機控制組+成本敏感度雙雙不過）
 
 第2/4關跑完。**判定：FAIL，移入`STRATEGY_GRAVEYARD.md`，不進第3/5/6/9
