@@ -179,3 +179,54 @@ FAIL/深挖後降級案例的策展摘要，給使用者/App策略監控台看�
   `portfolio_backtest_v2.py`通用機制不修改該檔案）、`TRIALS_LEDGER.md`#73，
   `data/pead_portfolio_v1_results.csv`（gitignored）。`HYPOTHESIS_QUEUE.md`
   #3狀態同步更新為FAIL，佇列接續#4股票股利率carry。
+
+### dividend_yield_portfolio_v1（HYPOTHESIS_QUEUE.md#4「股票股利率carry」，
+單因子`f_dividend_yield_ttm`月頻Top20，股票，2026-09-02FAIL）
+
+- **哪一關死的**：alpha顯著性（本專案已建立、`portfolio_multifactor_v2`/
+  `weinstein_stage2_v2`/`pead_portfolio_v1`三個先例都用過的既有評判
+  標準）——腳本內建的第7/8關判定邏輯（`gate7_pass`/`gate8_pass`，見
+  `dividend_yield_portfolio_v1.py`第298/311行）**沒有把alpha顯著性納入
+  判準**，只看「VAL報酬為正+隨機控制組percentile>=90.0」與「VAL MDD/
+  成本情境/beta<1.3」，技術上印出兩關皆PASS，但套用本專案既有的alpha
+  p值標準後兩期都不顯著，依協定第2節「判定標準要跟既有已結案案例同一把
+  尺」改判FAIL，不採信腳本自己印出的表面PASS字樣。
+- **具體數字**：TRAIN(2015-2020)報酬+68.07%/MDD-28.33%/Sortino0.431/
+  alpha+11.29%(p=0.4868不顯著)/beta+0.585，買進持有+58.86%，隨機控制組
+  (N=100)percentile=99.0。VALIDATION(2021-2024)報酬+71.93%/MDD-12.40%/
+  Sortino1.009/alpha+9.89%(p=0.1487不顯著)/beta+0.448，買進持有+54.58%，
+  隨機控制組(N=100)percentile=100.0。成本1x/2x/3x：TRAIN
+  +68.07%/+65.07%/+63.29%、VAL+71.93%/+66.88%/+62.52%（三個成本情境
+  VAL皆正，這點腳本第8關判準沒錯）。
+- **死因**：兩期alpha p值（0.4868、0.1487）都遠高於0.05標準顯著性門檻，
+  beta（+0.585、+0.448）代表報酬有相當比例來自市場曝險，不是純粹選股
+  貢獻的超額報酬——隨機控制組贏的是「排序股利率高的股票比隨機挑股票
+  好」（跟`f_dividend_yield_ttm`因子層IC本來就CHEAP_PASS的結論一致且
+  不矛盾，`TRIALS_LEDGER.md`#74），但沒有轉化成portfolio層級統計上站
+  得住腳的alpha。跟`pead_portfolio_v1`（#73，兩期alpha p=0.53/0.48）
+  同一種死法，但**這次VAL期相對買進持有的超額報酬明顯更大**（+17.35個
+  百分點 vs PEAD的+0.07個百分點）、VAL alpha p值也更接近顯著（0.1487
+  vs PEAD的0.4809）——證據比PEAD稍強但仍未跨過0.05門檻，誠實記錄為
+  FAIL不因為「比上一個死掉的案例好一點」就放寬標準。
+- **這個死法能不能泛化**：**不能泛化成「股利率因子沒用」**——因子層
+  IC（`TRIALS_LEDGER.md`#74，train/val同號、null percentile=100.0）依然
+  是CHEAP_PASS的結論，沒有被推翻。這裡死的是「等權、月頻、Top20」這個
+  具體portfolio構造方式（跟PEAD死掉的構造完全相同，是本專案第二次同一種
+  構造方式在不同因子上死於同一個alpha顯著性問題），值得記錄的教訓是
+  「等權Top20月頻」這個portfolio構造本身可能系統性地讓beta稀釋掉alpha
+  訊號，未來變體（IC加權、更窄Top-N資格池、跟其他因子情境式組合、或者
+  搭配regime overlay降低beta曝險期間的部位）仍值得獨立測試。
+- **流程教訓（順帶記一筆，跟`CLAUDE.md`「復盤原則」呼應）**：腳本自己
+  印出的gate7/gate8判定文字不能直接採信為最終結案依據——寫portfolio層
+  驗證腳本時，第7/8關的PASS/FAIL判準應該直接把`alpha_significant`納入
+  程式碼邏輯（而非只印出數字讓人工事後核對），避免未來排程實例誤信
+  腳本自己的PASS字樣就草率結案。這條教訓留給下次寫類似portfolio驗證
+  腳本時參考，不回頭修改`pead_portfolio_v1.py`/`dividend_yield_
+  portfolio_v1.py`本身（已完成的驗證腳本，人工判讀已經抓出正確結論，
+  不算bug需要熱修）。
+- **原始記錄**：`research/dividend_yield_portfolio_v1.py`（沿用
+  `portfolio_backtest_v2.py`通用機制不修改該檔案，checkpoint機制詳見
+  `MARATHON_LOG.md`2026-09-02T01:20條目）、`TRIALS_LEDGER.md`#75，
+  `data/dividend_yield_portfolio_v1_checkpoint.json`（gitignored，
+  完整TRAIN/VALIDATION兩期100/100隨機控制組數字）。`HYPOTHESIS_QUEUE.md`
+  #4狀態同步更新為FAIL，佇列接續#9殘差動量Residual Momentum。

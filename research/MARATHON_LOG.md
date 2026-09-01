@@ -13,6 +13,33 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T02:31+08:00 — Carry #4：TRAIN+VALIDATION全部跑完，人工核對alpha顯著性後結案FAIL
+
+**背景**：`hypothesis_queue`鎖檔正常取得（非陳舊回收）。`git status`乾淨
+（只有幾個非本輪殘留log檔，未觸碰），`git pull`已是最新。
+
+**動作**：接續上一輪TRAIN 85/100的進度，本輪內用背景啟動+前景`ps`監控
+方式連續呼叫`python dividend_yield_portfolio_v1.py`四次：第一次TRAIN
+85→100/100完成；第二~四次VALIDATION真實回測+成本敏感度完成後，隨機
+控制組0→30→60→90→100/100完成。全部跑完後`data/dividend_yield_
+portfolio_v1_results.csv`產出，腳本內建第7/8關判定印出表面PASS。
+
+**判定**：核對腳本原始碼確認`gate7_pass`/`gate8_pass`（第298/311行）
+只看報酬vs買進持有+隨機控制組percentile+MDD/beta<1.3，**沒有納入alpha
+顯著性**。套用本專案已建立的評判標準（同`pead_portfolio_v1`/
+`weinstein_stage2_v2`），TRAIN alpha p=0.4868、VAL alpha p=0.1487，兩期
+皆不顯著（>0.05），改判**FAIL**，不採信腳本表面PASS。已更新
+`STRATEGY_GRAVEYARD.md`新增條目、`TRIALS_LEDGER.md`#75、
+`HYPOTHESIS_QUEUE.md`#4狀態與排隊順序總結。**不泛化成股利率因子沒用**
+——因子層IC（#74）仍是CHEAP_PASS，死的是等權/月頻/Top20這個portfolio
+構造，跟PEAD同一種死法。
+
+**下一步**：佇列#4已結案，接續佇列第一順位#9殘差動量Residual Momentum
+（待起跑，第1關sanity尚未開始）。`is_holdout_consumed()`確認仍為
+`False`。本輪即將commit+push+release lock收工，不開始下一個工作單位。
+
+---
+
 ## 2026-09-02T01:41+08:00 — Carry #4：接續checkpoint機制持續有效，TRAIN隨機控制組推進到85/100
 
 **背景**：`hypothesis_queue`鎖檔陳舊（held by 48584, 30.7分鐘，回收）——

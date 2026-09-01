@@ -97,9 +97,10 @@ weinstein_stage2.py`的`gate`欄位（TAIEX vs MA200大盤位階開關）也已�
   搭配其他篩選）未來若要測需要獨立走完整套關卡，不能沿用這次的失敗
   當作證據。
 
-**佇列狀態（2026-09-01T23:58更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
-（FAIL）、#3 PEAD已結案（FAIL），目前進行中：#4股票股利率carry（因子層第1關
-cheap_pass，portfolio層腳本已寫好且bug已修復，第7/8關背景重跑中，尚未結案）。**
+**佇列狀態（2026-09-02T02:31更新）：#1 Weinstein已結案（FAIL）、#2 CTA已結案
+（FAIL）、#3 PEAD已結案（FAIL）、#4股票股利率carry已結案（FAIL，alpha顯著性
+未過，見下方條目與`STRATEGY_GRAVEYARD.md`），目前排隊第一：#9殘差動量
+Residual Momentum（尚未起跑，第1關sanity待開始）。**
 
 ### 2. CTA趨勢跟隨（時序動量，期貨）
 
@@ -256,6 +257,23 @@ budget將近用盡而收工，**尚未結案**——下一輪執行
 VALIDATION全套）。下一輪執行`python research/dividend_yield_portfolio_v1.py`
 會自動接續，預估還需要2~3輪才能跑完TRAIN+VALIDATION並產出第7/8關
 判定。
+
+**狀態（2026-09-02T02:31更新，第八輪排程，已結案：FAIL）**：接續上一輪
+（`ps`確認無殘留背景行程），本輪內用背景+前景監控方式連續呼叫腳本四次，
+TRAIN隨機控制組85→100/100（完成），VALIDATION真實回測+成本敏感度完成後
+隨機控制組0→30→60→90→100/100（完成），**TRAIN+VALIDATION全部跑完，
+`data/dividend_yield_portfolio_v1_results.csv`已產出**。腳本自身內建的
+第7/8關判定邏輯（只看報酬贏買進持有+percentile>=90.0+MDD/beta<1.3）印出
+表面PASS，但**這個判準沒有納入alpha顯著性**——套用本專案已建立的評判
+標準（`portfolio_multifactor_v2`/`weinstein_stage2_v2`/`pead_portfolio_v1`
+同一把尺）後，TRAIN alpha p=0.4868、VAL alpha p=0.1487，兩期都遠不顯著
+（>0.05），VAL期報酬+71.93%相對買進持有+54.58%有+17.35pp超額（比PEAD的
++0.07pp明顯更大、VAL p值也比PEAD的0.4809更接近顯著），但仍未跨過0.05
+門檻，人工判讀後改判**FAIL**，不採信腳本自己印出的PASS字樣。**不泛化成
+「股利率因子沒用」**——因子層IC（#74）依然CHEAP_PASS，死的是「等權/
+月頻/Top20」這個具體portfolio構造（跟PEAD同一種構造、同一種死法）。完整
+見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#75、`MARATHON_LOG.md`
+2026-09-02T02:31條目。佇列#4結案，接續佇列第一順位#9殘差動量。
 
 ### 5. Regime輪動（依市場情境切換曝險/因子權重）
 
@@ -507,23 +525,17 @@ PEAD策略層（已FAIL）的重複測試——PEAD策略層FAIL的是「等權/
    percentile=10.0，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
 3. ~~PEAD策略層構造~~——**2026-09-01已結案：FAIL**（alpha顯著性未過，
    VAL期報酬幾乎等於買進持有，見`STRATEGY_GRAVEYARD.md`），移出排隊佇列。
-4. **Carry（股票股利率，期貨端已有結論不重測）——現在排隊第一，進行中。**
-   2026-09-01：第1關cheap IC gate CHEAP_PASS（`f_dividend_yield_ttm`，
-   percentile=100.0，見`TRIALS_LEDGER.md`#74）。portfolio層腳本
-   `dividend_yield_portfolio_v1.py`已寫好，第一次執行0筆交易查出是實作
-   bug（`n_components>=2`門檻跟單因子設計不合）已修復。**2026-09-02第六
-   輪根治性修復**：加上checkpoint可續跑機制（已用小規模自測確認續跑
-   結果跟一次跑完完全一致），真正解決連續五輪從零重跑的問題。**第七輪
-   （2026-09-02T01:41）確認機制持續有效**，TRAIN隨機控制組進度已推進到
-   85/100，真實回測+成本敏感度已完成不重算，**下一輪
-   `python research/dividend_yield_portfolio_v1.py`會自動接續，不重算
-   已完成部分**，詳見`MARATHON_LOG.md`2026-09-02T01:41條目。
+4. ~~Carry（股票股利率）~~——**2026-09-02第八輪已結案：FAIL**（alpha顯著性
+   未過，TRAIN p=0.4868/VAL p=0.1487皆遠不顯著，見`STRATEGY_GRAVEYARD.md`/
+   `TRIALS_LEDGER.md`#75），移出排隊佇列。因子層IC（#74）本身仍是
+   CHEAP_PASS，未被推翻，死的只是這個具體portfolio構造。
 5. Regime輪動——作為強制overlay接上已過關候選，不是獨立假設，依附在
    B24收尾+B25之後。
 6. 量價配合——卡在題材動能榜PIT引擎地基。
 7. 低波動（TW版策略層）——可直接沿用US的deep_dive方法框架。
 8. 類股輪動——卡在題材動能榜PIT引擎地基，跟#6同一個依賴。
-9. 殘差動量Residual Momentum——2026-09-02新增，待起跑，第1關尚未開始。
+9. **殘差動量Residual Momentum——現在排隊第一。** 2026-09-02新增，待起跑，
+   第1關sanity尚未開始。
 10. 市場regime擇時overlay——2026-09-02新增，方法論框架待建立，不依賴
     特定候選先過關。
 11. 產業內相對強度Sector-Neutral——2026-09-02新增，待起跑，第1關尚未開始。
