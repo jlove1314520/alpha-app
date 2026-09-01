@@ -17,6 +17,59 @@
 
 ---
 
+## ⚠ 2026-09-01 IBKR即時報價接入（只讀，paper，已實測部分成功）
+
+使用者要求接IB Gateway paper帳戶即時報價進App，只讀、禁止任何下單。
+
+**一、`research/ibkr_quotes.py`（新增）**：連本機IB Gateway paper
+（127.0.0.1:4002，`readonly=True`），三層安全防護（連線readonly+
+Gateway端使用者自己勾選Read-Only API+**程式碼自己檢查帳戶ID是否為
+"DU"開頭，不是paper帳戶就立刻中止不抓任何東西**，不只是相信使用者
+設定對）。抓`DEFAULT_TW_WATCHLIST`（5檔，因為Python腳本讀不到
+`index.html`用localStorage存的真實自選股——已知限制，見腳本docstring）
++美股四大指數。**已用使用者本機真實IB Gateway（帳戶`DU0698784`確認
+為paper）實測**：
+- 台股5檔（2330/2454/2317/1513/3231）：全部成功抓到延遲報價（帳戶
+  沒有即時權限，Error 354提示，程式碼已做即時→延遲的retry容錯）。
+- 美股指數：S&P500(CBOE)/那斯達克(NASDAQ)成功，**道瓊(CME)/費城半導體
+  (PHLX)這個帳戶沒有延遲數據權限，多次重測結果一致**——這是IBKR帳戶
+  市場數據訂閱層級的問題，不是程式碼bug，已誠實記錄在`quotes_ibkr.json`
+  （這兩檔`last:null`），App端會自動退回Yahoo Finance顯示，不會空白。
+  若要修，需要使用者自己到IBKR Account Management確認/申請對應的免費
+  延遲數據訂閱。
+
+**二、`index.html`**：報價優先序IBKR(quotes_ibkr.json，新鮮且connected)
+→現有FinMind/quotes_tw，只覆蓋上述9個標的（其餘股票完全不受影響）。
+自選股列/美股四大指數兩處都會顯示清楚的來源+即時/延遲標籤（「IBKR
+延遲 約N分前」/「IBKR 即時」/退回時顯示「Yahoo Finance」）。已用
+Playwright實測（含攔截真實quotes_ibkr.json資料）確認渲染正確、無錯誤。
+
+**三、本機排程**：`C:\alpha\run-ibkr-quotes-cycle.ps1`+
+`run-ibkr-quotes-hidden.vbs`（repo外，比照三軌馬拉松的.ps1/.vbs機制，
+但**不透過`claude.exe -p`**——這是純機械式抓資料寫檔案，不需要LLM
+判斷）。已手動測試兩輪，完整跑通（抓報價→git add→commit→
+pull --no-rebase→push，全部成功）。**排除掉一個真的踩到的坑**：
+原本用`git pull --rebase`（比照market.yml），但這台機器同時也在互動
+開發、常常有未commit的修改（例如index.html正在改），`--rebase`只要
+偵測到任何未暫存變更就直接拒絕執行，改用`git pull --no-rebase`
+（一般合併）才能在髒的工作目錄下正常運作。
+
+**⚠ Windows排程任務本身尚未建立**——建立新排程任務的動作被Claude Code
+自己的安全分類器擋下（不是Windows權限問題，是這個工具本身的防護，
+跟稍早建`AlphaHypothesisQueue`那次一樣），已請使用者自己用`schtasks
+/Create`指令建立（見對話紀錄），使用者尚未確認是否已建立/多久跑一次。
+
+**四、`generate_status_json.py`**：新增`describe_quotes_ibkr()`解析器
+避免落到generic fallback被誤判成error，`quotes_ibkr.json`的過期門檻
+放寬到168小時（一週）——因為只有使用者本機開著Gateway才會更新，機器
+關機/週末沒開是正常狀態不是錯誤。
+
+**驗收**：`node scripts/smoke_test.mjs`12項全PASS。標⚠不標✅是因為
+排程任務本身還沒實際掛上去自動觸發，且道瓊/費半兩個標的的資料缺口
+需要使用者自己去IBKR端確認訂閱，不是可以由我這邊獨立完成驗證的項目。
+
+---
+
 ## ✅ 2026-09-01 選股成績單：picks_ledger回填邏輯補完+App新分頁
 
 使用者要求把`update_picks_ledger_returns.py`從骨架補完，並在App加一個

@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-01T20:25:33.621986+08:00",
-  "latest_commit": "db0389f",
+  "updated_at": "2026-09-01T21:11:47.755397+08:00",
+  "latest_commit": "b0c7cf4",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -99,6 +99,14 @@
       "status": "ok"
     },
     {
+      "path": "data/quotes_ibkr.json",
+      "generated_at": "2026-09-01T21:09:27.780054+08:00",
+      "records": 9,
+      "source": "research/ibkr_quotes.py（本機IB Gateway paper帳戶，非GitHub Actions排程）",
+      "detail": "connected=True account_type=paper error=None 有報價數=7/9",
+      "status": "ok"
+    },
+    {
       "path": "data/quotes_tw.json",
       "generated_at": "2026-09-01T11:12:12+00:00",
       "records": 1991,
@@ -175,8 +183,8 @@
       "file": ".github/workflows/quotes.yml",
       "name": "盤中近即時報價（台股+美股）",
       "schedule": "盤中每10分鐘：台股09:00-13:30、美股13:30-21:00(左右)，週一至週五",
-      "last_run": "2026-09-01T09:39:45Z",
-      "last_status": "success"
+      "last_run": "2026-09-01T12:50:23Z",
+      "last_status": "in_progress"
     }
   ],
   "app_data_sources": [

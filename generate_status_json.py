@@ -48,6 +48,7 @@ STALE_HOURS = {
     "data/picks_ledger.json": 48,  # 一天一次的前瞻選股快照，跟margin_maintenance.json同等寬鬆門檻
     "data/strategies.json": 168,  # 手動跑generate_strategies_json.py產生，沒有排程，門檻放寬到一週避免誤標stale
     "data/strategy_performance.json": 48,  # 掛market.yml排程更新，跟picks_ledger.json同等寬鬆門檻
+    "data/quotes_ibkr.json": 168,  # 只有使用者本機開著IB Gateway+排程在跑才會更新，機器關機/週末沒開很正常，門檻比照strategies.json放寬到一週
 }
 
 
@@ -282,6 +283,25 @@ def describe_strategy_performance(path: Path) -> dict:
     }
 
 
+def describe_quotes_ibkr(path: Path) -> dict:
+    """data/quotes_ibkr.json（2026-09-01新增）——IBKR本機IB Gateway paper帳戶
+    即時/延遲報價，由本機`research/ibkr_quotes.py`排程觸發（不經GitHub
+    Actions，那邊連不到使用者本機的Gateway），只有這台機器有在跑排程時才會
+    持續更新，其他機器/裝置看到的是最後一次push的快照，不代表當下就是壞的。
+    `connected:false`是誠實的失敗狀態（IB Gateway沒開/連線失敗），不當作
+    status_from_age()意義上的錯誤，只在detail裡註明原因。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    quotes = d.get("quotes", {})
+    n_with_data = sum(1 for q in quotes.values() if q.get("last") is not None)
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": len(quotes),
+        "source": "research/ibkr_quotes.py（本機IB Gateway paper帳戶，非GitHub Actions排程）",
+        "detail": f"connected={d.get('connected')} account_type={d.get('account_type')} "
+                  f"error={d.get('error')} 有報價數={n_with_data}/{len(quotes)}",
+    }
+
+
 def describe_picks_ledger(path: Path) -> dict:
     """data/picks_ledger.json（2026-08-28新增追蹤，資料源禮儀補洞item 3）——
     三榜（價值成長/題材動能/未來性）Top20前瞻選股快照，`build_picks_ledger.py`
@@ -325,6 +345,7 @@ DESCRIBERS = {
     "earnings_calendar.json": describe_earnings_calendar,
     "ex_dividend_events.json": describe_ex_dividend_events,
     "picks_ledger.json": describe_picks_ledger,
+    "quotes_ibkr.json": describe_quotes_ibkr,
     "strategies.json": describe_strategies,
     "strategy_performance.json": describe_strategy_performance,
 }

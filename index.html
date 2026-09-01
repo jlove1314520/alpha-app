@@ -1243,15 +1243,44 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   // 2026-08-25 新增：盤中近即時報價（GitHub Actions 排程抓，見 .github/workflows/quotes.yml）。
   // FinMind 免費版只有盤後日線，畫面顯示「盤中」卻只能給前一日收盤價會誤導使用者。
-  let INTRADAY_TW=null,INTRADAY_US=null;
+  let INTRADAY_TW=null,INTRADAY_US=null,INTRADAY_IBKR=null;
   function intradayAgeMin(data){
     if(!data||!data.fetched_at)return null;
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
   }
+  // 2026-09-01新增：IBKR本機Gateway即時/延遲報價（research/ibkr_quotes.py，
+  // 本機排程觸發，不經過GitHub Actions——見該檔案docstring「掛排程」）。
+  // 優先序：IBKR(quotes_ibkr.json，新鮮且connected)→現有FinMind/quotes_tw。
+  // 只覆蓋DEFAULT_TW_WATCHLIST那5檔+四大美股指數（IBKR腳本的既知限制，
+  // 見ibkr_quotes.py docstring「已知限制」：沒辦法讀瀏覽器localStorage的
+  // 真實自選股清單），其餘股票照舊完全不受影響。
+  function ibkrQuote(code){
+    if(!INTRADAY_IBKR||!INTRADAY_IBKR.connected)return null;
+    const age=intradayAgeMin(INTRADAY_IBKR);
+    if(age==null||age>INTRADAY_STALE_MIN)return null;
+    const q=INTRADAY_IBKR.quotes&&INTRADAY_IBKR.quotes[code];
+    if(!q||q.last==null)return null;
+    return {
+      price:q.last, prev_close:q.close,
+      change:(q.close!=null?q.last-q.close:null), change_pct:q.change_pct,
+      ageMin:age, source:'ibkr', dataType:q.data_type,
+    };
+  }
   async function loadIntradayQuotes(){
     try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok)INTRADAY_TW=await r.json()}catch(e){console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
     try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok)INTRADAY_US=await r.json()}catch(e){console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
+    await ensureIbkrQuotes();
     try{updateClocks()}catch(e){console.warn('[loadIntradayQuotes:updateClocks]',e);recordGlobalError('loadIntradayQuotes:updateClocks',e)}
+  }
+  // 2026-09-01新增：quotes_ibkr.json由本機research/ibkr_quotes.py排程產生，
+  // 不一定存在（使用者沒開IB Gateway、或這台裝置本身不是跑IBKR排程的那台
+  // 機器），查不到就是null，intradayQuote()/loadUsIndexes()會自動退回既有
+  // FinMind/Yahoo資料源，這裡刻意不記recordGlobalError——檔案不存在是完全
+  // 正常的情況，不是錯誤。獨立成一個函式讓loadIntradayQuotes()（自選股用）
+  // 跟loadUsIndexes()（美股四大指數用）都能各自確保資料已載入，不假設呼叫
+  // 順序（沒有做快取，跟這支App其他報價載入函式的既有慣例一致，每次都重抓）。
+  async function ensureIbkrQuotes(){
+    try{const r=await fetch('data/quotes_ibkr.json?t='+Date.now());INTRADAY_IBKR=r.ok?await r.json():null}catch(e){console.warn('[ensureIbkrQuotes]',e);INTRADAY_IBKR=null}
   }
   // 資料超過20分鐘沒更新就不當作「盤中即時」使用了（寧可退回FinMind日線，也不要
   // 顯示過期到失去意義的「盤中」報價卻讓人以為是新的）。
@@ -1270,12 +1299,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     return '未涵蓋此檔';
   }
   function intradayQuote(code,us){
+    if(!us){
+      const ibkr=ibkrQuote(code);
+      if(ibkr)return ibkr;
+    }
     const src=us?INTRADAY_US:INTRADAY_TW;
     if(!src||!src.quotes)return null;
     const q=src.quotes[code];if(!q)return null;
     const age=intradayAgeMin(src);
     if(age==null||age>INTRADAY_STALE_MIN)return null;
-    return{...q,ageMin:age};
+    return{...q,ageMin:age,source:'finmind'};
   }
   // 2026-08-26 修正（P1-2）：原本不管有沒有資料都顯示「現在時鐘時間」，導致「美股
   // 資料延遲 11:23」這種文字即使完全沒抓到資料也會出現、且旁邊的時間看起來像是
@@ -1506,6 +1539,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function intradayTag(iq){
     if(!iq)return '';
     const mins=Math.max(1,Math.round(iq.ageMin));
+    if(iq.source==='ibkr'){
+      const dt=iq.dataType==='REALTIME'?'即時':(iq.dataType==='DELAYED'?'延遲':(iq.dataType||'未知'));
+      return `<span style="color:var(--warn);margin-left:4px">· IBKR ${dt} 約${mins}分前</span>`;
+    }
     return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
   }
   async function hydrateHome(){
@@ -1803,9 +1840,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   async function loadUsIndexes(){
     await loadMarketDataFiles();
+    await ensureIbkrQuotes();
     const idx=(MARKET_US_CACHE&&MARKET_US_CACHE.indices)||{};
     const order=[['^DJI','道瓊工業指數'],['^GSPC','S&P 500'],['^IXIC','NASDAQ'],['^SOX','費城半導體指數']];
-    return order.map(([id,label])=>({html:idxRowHtml(label,'Yahoo Finance',idx[id]),date:idx[id]&&idx[id].as_of}));
+    const ibkrAge=intradayAgeMin(INTRADAY_IBKR);
+    const ibkrFresh=INTRADAY_IBKR&&INTRADAY_IBKR.connected&&ibkrAge!=null&&ibkrAge<=INTRADAY_STALE_MIN;
+    return order.map(([id,label])=>{
+      const ibkrQ=ibkrFresh?INTRADAY_IBKR.quotes[id]:null;
+      if(ibkrQ&&ibkrQ.last!=null){
+        // IBKR沒有近20日走勢序列，sparkline借用既有Yahoo資料源的（不影響
+        // 主數字/漲跌%的即時性，走勢線本來就不需要跟主數字同一個資料源）。
+        const item={close:ibkrQ.last,change_pct:ibkrQ.change_pct,sparkline:idx[id]&&idx[id].sparkline};
+        const dt=ibkrQ.data_type==='REALTIME'?'即時':(ibkrQ.data_type==='DELAYED'?'延遲':(ibkrQ.data_type||'未知'));
+        return {html:idxRowHtml(label,`IBKR ${dt}`,item),date:INTRADAY_IBKR.fetched_at};
+      }
+      return {html:idxRowHtml(label,'Yahoo Finance',idx[id]),date:idx[id]&&idx[id].as_of};
+    });
   }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
@@ -3210,7 +3260,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-01.2027';
+  const APP_VERSION='2026-09-01.2113';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

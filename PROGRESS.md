@@ -16,6 +16,26 @@
 
 ---
 
+## 2026-09-01（續2，開發+維運帽）— IBKR即時報價接入（只讀paper，實測部分成功）
+
+新增`research/ibkr_quotes.py`：連本機IB Gateway paper帳戶（三層安全：
+readonly連線+Gateway端Read-Only API+程式碼自己驗證帳戶ID是"DU"開頭
+不是paper就中止），抓5檔預設自選股+美股四大指數。**用使用者本機真實
+Gateway實測**：台股5檔全部成功（延遲報價）、S&P500/那斯達克成功、
+道瓊/費城半導體這個帳戶沒有延遲數據訂閱權限（誠實記null，不是bug，
+需使用者去IBKR端確認）。`index.html`報價優先序改成IBKR→現有FinMind，
+只影響這9個標的，來源+即時/延遲標籤清楚顯示。本機排程腳本
+`run-ibkr-quotes-cycle.ps1`已測試兩輪跑通（含git commit+push），中途
+修正一個真的踩到的坑：`git pull --rebase`在這台機器（同時也在互動開發）
+只要有任何未commit修改就直接拒絕，改用`--no-rebase`才行。Windows排程
+任務本身建立被Claude Code自己的安全分類器擋下（跟建
+`AlphaHypothesisQueue`那次同一個限制），已請使用者自己用`schtasks
+/Create`建立，尚待使用者確認。冒煙測試12項全PASS。詳見`BACKLOG.md`
+「2026-09-01 IBKR即時報價接入」條目（標⚠因排程未確認掛上+兩個指數
+缺口待使用者處理，不是完全的✅）。
+
+---
+
 ## 2026-09-01（續，維運+開發帽）— picks_ledger回填邏輯補完+App「選股成績單」分頁上線
 
 `update_picks_ledger_returns.py`從骨架補完：交易日曆用`price_history.json`
