@@ -51,6 +51,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
   @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
   .rise{animation:rise .5s cubic-bezier(.22,.9,.3,1) both}
+  /* 2026-09-02新增（PENDING_QUEUE「數字盤中自動跳動」）：漲跌閃爍動畫——
+     跟上面.rise（進場淡入）、下面.grow（寬度從0長出）用途完全不同，那兩個
+     是「元素第一次出現」的動畫，不是「數值變動」的動畫，不能硬套。這裡是
+     盤中輪詢偵測到數字真的變動時，短暫閃一下背景色再淡出，讓使用者看得到
+     變化，跟進場/長度動畫語意上分開。 */
+  @keyframes flash-up-kf{0%{background:rgba(12,163,12,.35)}100%{background:transparent}}
+  @keyframes flash-down-kf{0%{background:rgba(208,59,59,.35)}100%{background:transparent}}
+  .flash-up{animation:flash-up-kf .5s ease-out}
+  .flash-down{animation:flash-down-kf .5s ease-out}
   .press{transition:transform .12s ease,background .2s ease,border-color .2s ease}
   .press:active{transform:scale(.97)}
   /* 2026-08-24 修正：測試發現捲動日誌頁時，整個網頁文件（html）會被捲動
@@ -428,6 +437,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <span>最後更新：<b id="home-updated-tm">--:--</b></span>
       <span class="press refresh-btn" onclick="refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
     </div>
+    <!-- 2026-09-02新增：盤中自動輪詢狀態誠實揭露，文字由updatePollNote()動態
+         填入（「約每15秒自動更新（近即時輪詢，非逐筆tick）」或「已收盤，暫停
+         自動更新」），不讓使用者誤以為是逐筆串流。 -->
+    <div class="note" id="home-poll-note" style="margin-bottom:8px;color:var(--ink-3)"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
       <span class="note fx-note" id="home-fx-note">匯率載入中…</span>
       <div class="mkt-toggle" id="home-ccy-toggle"></div>
@@ -485,6 +498,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <span>最後更新：<b id="market-updated-tm">--:--</b></span>
       <span class="press refresh-btn" onclick="refreshTap(this,'market-updated-tm',async()=>{fmClearCache();await hydrateMarket()})">重新整理</span>
     </div>
+    <div class="note" id="market-poll-note" style="margin-bottom:8px;color:var(--ink-3)"></div>
 
     <!-- 台股 -->
     <div id="market-tw-panel">
@@ -1430,6 +1444,90 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   setInterval(_safeLoadIntradayQuotes,2*60*1000);
   _safeLoadIntradayQuotes();
 
+  // ══════ 盤中近即時輪詢（2026-09-02新增，PENDING_QUEUE「數字盤中自動跳動」）══════
+  // 跟上面既有的2分鐘_safeLoadIntradayQuotes()是兩件事：那支只更新
+  // INTRADAY_TW/US/IBKR/SINOPAC快取+時鐘label，不會讓自選股/大盤數字真的
+  // 動起來（沒有重繪畫面）。這裡額外每15秒觸發一次，且只在三個條件同時
+  // 成立才會真的打網路+重繪：①台股或美股至少一個在其交易時段②使用者正在
+  // 看「今日」或「市場」分頁③App分頁在前景可見——三者缺一律跳過，不背景
+  // 空轉浪費資源，也不誤導使用者以為所有分頁都在即時跳動。**這不是逐筆
+  // 串流**，只是定時重新fetch既有的quotes_*.json靜態檔（後端排程本身多久
+  // 更新一次是另一回事，這裡純粹是前端多久重新讀一次），畫面上明確標示
+  // 「近即時輪詢」而非「即時」，避免使用者誤解成逐筆tick。
+  const FAST_POLL_INTERVAL_MS=15000;
+  let PREV_QUOTE_PRICES={}; // code/指數label -> 上一次輪詢看到的價格，判斷要不要閃爍用，非權威資料
+  function isTwTradingWindowNow(){
+    // 沿用research/shioaji_quotes.py::_is_tw_trading_window()同一組時窗
+    // （週一至五08:30–13:45台北時間，涵蓋現貨盤前~盤後緩衝），不是自己另外
+    // 發明一套邊界，跟後端資料源禮儀的既有慣例一致。
+    const z=zonedNow('Asia/Taipei');
+    const mins=z.h*60+z.mi;
+    return z.wd>=1&&z.wd<=5&&mins>=8*60+30&&mins<13*60+45;
+  }
+  function isUsTradingWindowNow(){
+    // 沿用既有usMarketSession()（盤前/盤中/盤後/休市四態），非'closed'都算
+    // 「在交易時段」——跟.github/workflows/quotes.yml涵蓋盤前盤後的既有範圍
+    // 一致（quotes_us.json本來就會在這整段時間持續更新）。
+    return usMarketSession(zonedNow('America/New_York'))!=='closed';
+  }
+  function pollStatusText(twActive,usActive){
+    if(!twActive&&!usActive)return '已收盤，暫停自動更新';
+    const which=twActive&&usActive?'台美股皆':(twActive?'台股':'美股');
+    return `🔄 ${which}在交易時段，約每15秒自動更新（近即時輪詢，非逐筆tick）`;
+  }
+  // 每個tick都會更新這兩個誠實揭露文字（不管待會要不要真的去fetch），讓
+  // 使用者一眼看到目前是不是在自動更新中，跟下面「要不要真的打網路」分開判斷。
+  function updatePollNote(){
+    const twActive=isTwTradingWindowNow(),usActive=isUsTradingWindowNow();
+    const txt=pollStatusText(twActive,usActive);
+    const h=document.getElementById('home-poll-note');if(h)h.textContent=txt;
+    const m=document.getElementById('market-poll-note');if(m)m.textContent=txt;
+    return {twActive,usActive};
+  }
+  // 數字變動時的視覺回饋：比對這次渲染後畫面上的data-flash-value跟上次輪詢
+  // 記住的值，不同才加flash-up/flash-down（見CSS約52行新增的flash-up-kf/
+  // flash-down-kf keyframes，跟.rise/.grow是不同用途的動畫，不能共用）。
+  // 動畫結束後用animationend自動移除class，不用setTimeout猜時間。
+  function flashPriceEls(scopeSelector){
+    const scope=document.querySelector(scopeSelector);if(!scope)return;
+    scope.querySelectorAll('[data-flash-code]').forEach(el=>{
+      const code=el.dataset.flashCode;
+      const cur=parseFloat(el.dataset.flashValue);
+      if(isNaN(cur))return;
+      const prev=PREV_QUOTE_PRICES[code];
+      if(prev!=null&&prev!==cur){
+        el.classList.remove('flash-up','flash-down');
+        void el.offsetWidth; // 強制reflow，讓同方向的連續變動也能重新觸發動畫
+        el.classList.add(cur>prev?'flash-up':'flash-down');
+        el.addEventListener('animationend',()=>el.classList.remove('flash-up','flash-down'),{once:true});
+      }
+      PREV_QUOTE_PRICES[code]=cur;
+    });
+  }
+  async function fastPollTick(){
+    const {twActive,usActive}=updatePollNote();
+    if(!twActive&&!usActive)return; // 兩個市場都收盤，不輪詢
+    if(CURRENT_TAB!=='home'&&CURRENT_TAB!=='market')return; // 使用者沒在看這兩頁，不輪詢
+    if(document.visibilityState!=='visible')return; // App在背景/螢幕鎖定，不輪詢
+    try{
+      // 沿用既有載入函式重新fetch對應JSON，不重新發明抓資料邏輯。
+      await loadIntradayQuotes();
+    }catch(e){console.warn('[fastPollTick:load]',e);recordGlobalError('fastPollTick:load',e);return}
+    try{
+      if(CURRENT_TAB==='home'){
+        await hydrateHome();
+        flashPriceEls('#wl-list');
+        flashPriceEls('#home-idx-rows');
+      }else if(CURRENT_TAB==='market'){
+        if(MKT_STATE.market==='TW'){await loadMarketIndex();flashPriceEls('#idx-rows')}
+        else if(MKT_STATE.market==='US'){await loadMarketUS();flashPriceEls('#us-idx-rows')}
+        else if(MKT_STATE.market==='FUT'){await loadMarketFUT()}
+      }
+    }catch(e){console.warn('[fastPollTick:render]',e);recordGlobalError('fastPollTick:render',e)}
+  }
+  setInterval(()=>{fastPollTick().catch(e=>{console.warn('[fastPollTick]',e);recordGlobalError('fastPollTick',e)})},FAST_POLL_INTERVAL_MS);
+  try{updatePollNote()}catch(e){console.warn('[updatePollNote]',e);recordGlobalError('updatePollNote',e)}
+
   // 2026-08-28新增：設定頁底部縮放/貼底問題診斷讀數（純唯讀，不影響其他
   // 版面邏輯）。獨立的setInterval+resize監聽，自成一體try/catch，跟上面
   // 時鐘的錯誤隔離同一個精神——這裡拋錯只會讓這行診斷文字不更新，不會
@@ -1666,7 +1764,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
           earningsHtml=`<div class="note" style="margin-top:2px;color:var(--ink-3)">📅 財報：${fmtTzMD(d,'America/New_York')}（${sessionTxt}，估計）</div>`;
         }
       }
-      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b>${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+      // data-flash-code/data-flash-value：給盤中快速輪詢(fastPollTick())用來判斷
+      // 「這次重繪後的價格」跟「上次輪詢看到的價格」是否不同，不同才閃爍，見
+      // flashPriceEls()。這裡只是標記資料，平常渲染不受影響。
+      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b data-flash-code="${code}" data-flash-value="${price}">${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
       if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
     }
@@ -1926,7 +2027,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 2026-08-27：近20日收盤序列跟著market_tw.json/market_us.json一起排程抓（見
     // fetch_market_tw.py/fetch_market_us.py），不用另外呼叫FinMind畫這條走勢線。
     const sp=(item.sparkline&&item.sparkline.length>=2)?spark(item.sparkline,(pct==null?item.sparkline[item.sparkline.length-1]>=item.sparkline[0]:pct>=0)):'';
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b>${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
+    // data-flash-code用label（可能含中文/空白，用encodeURIComponent避免破壞屬性值）：
+    // 給盤中快速輪詢(fastPollTick())的flashPriceEls()判斷這個指數的價格是否較上次
+    // 輪詢變動，見hydrateHome()裡自選股列同樣的用法。
+    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
   }
   async function loadUsIndexes(){
     await loadMarketDataFiles();
@@ -3392,7 +3496,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.0036';
+  const APP_VERSION='2026-09-02.0047';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

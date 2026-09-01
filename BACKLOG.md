@@ -17,6 +17,63 @@
 
 ---
 
+## ⚠ 2026-09-02（續）App數字盤中自動輪詢（PENDING_QUEUE「數字不會跳動」項）
+
+對應`PENDING_QUEUE.md`「App 兩個 UX 問題排進今晚」的第二部分。前端加一個
+額外的15秒定時輪詢，不是重新發明抓資料邏輯（沿用既有`loadIntradayQuotes()`），
+只是加定時觸發器+重繪+視覺回饋。
+
+**一、輪詢條件（三者同時成立才真的打網路，省資源）**：①`isTwTradingWindowNow()`
+（沿用`research/shioaji_quotes.py::_is_tw_trading_window()`同一組週一至五
+08:30–13:45台北時間）或`isUsTradingWindowNow()`（沿用既有`usMarketSession()`
+盤前/盤中/盤後任一態，跟`.github/workflows/quotes.yml`涵蓋盤前盤後的既有
+範圍一致）至少一個為真②`CURRENT_TAB`是`home`或`market`③
+`document.visibilityState==='visible'`（App在背景/螢幕鎖定時跳過）。三者
+缺一律跳過，不會背景空轉。
+
+**二、實作**（`index.html`約1446行起新增）：`fastPollTick()`每15秒執行，
+條件成立時呼叫既有`loadIntradayQuotes()`重新fetch `quotes_tw.json`/
+`quotes_us.json`/`quotes_ibkr.json`/`quotes_sinopac.json`，再依`CURRENT_TAB`
+重繪對應面板（首頁呼叫`hydrateHome()`+`loadHomeIndex()`已內含；市場頁依
+`MKT_STATE.market`分別呼叫`loadMarketIndex()`/`loadMarketUS()`/
+`loadMarketFUT()`）。
+
+**三、數字變動視覺回饋**：**刻意不套用既有`.rise`/`.grow`**——查證後這兩個
+class分別是「元素進場淡入」跟「寬度從0長出來」動畫，用途跟「數值變動閃爍」
+完全不同，硬套會語意錯亂。新增獨立的`flash-up-kf`/`flash-down-kf`
+keyframes（背景色短暫閃紅/綠0.5秒後淡出），`flashPriceEls()`比對
+`data-flash-value`（渲染時寫入的最新值）跟`PREV_QUOTE_PRICES`（上次輪詢
+記住的值）是否不同，不同才加`flash-up`/`flash-down`，用`animationend`
+事件自動移除class（不用`setTimeout`猜時間）。**第一次輪詢只seed基準值、
+不觸發flash**（沒有真正的「上一次」可比較，避免一進畫面就誤閃）。已用
+獨立單元測試（`flashPriceEls()`直接呼叫，繞開網路/interval時序）驗證：
+首次seed不flash、漲價後立即出現`flash-up`、跌價後立即出現`flash-down`
+（且前一個class正確被移除）、0.7秒後動畫結束class自動清空——全部符合
+預期。
+
+**四、誠實標示**：首頁/市場頁「最後更新」列下方新增`#home-poll-note`/
+`#market-poll-note`，文字由`updatePollNote()`動態填入，交易時段顯示
+「🔄 台股/美股/台美股皆在交易時段，約每15秒自動更新（近即時輪詢，非逐筆
+tick）」，收盤時顯示「已收盤，暫停自動更新」——不管待會要不要真的打網路
+都會更新這行文字，讓使用者一眼看到目前狀態。
+
+**改動檔案**：`index.html`（CSS新增`flash-up-kf`/`flash-down-kf`約52行；
+`#home-poll-note`/`#market-poll-note`元素約428/486行；`idxRowHtml()`/
+`hydrateHome()`價格元素加`data-flash-code`/`data-flash-value`；輪詢邏輯
+`fastPollTick()`等約1446行起新增）。
+
+**驗收**：`node scripts/smoke_test.mjs`14項全PASS（沒有新增輪詢專屬的
+smoke check，因為任務優先順序把smoke test新增項目限定在「圖該顯示卻空白」
+這條，見前一條目check 16；輪詢功能改用上述獨立Playwright單元測試驗證
+`flashPriceEls()`邏輯本身正確，另外用route攔截+monkeypatch驗證過
+`fastPollTick()`確實會重新fetch+重繪，過程用完即刪未進commit）。**標⚠
+不標✅**：目前是非交易時段完成開發（本機測試用monkeypatch模擬交易時段
+為真），**還沒有機會在真實台股/美股開盤時段用真人手機肉眼確認畫面數字
+真的會自動跳動+閃爍**，這部分留給使用者下次開盤時親自確認，或下一輪
+session在對應時段用Playwright實測。
+
+---
+
 ## ✅ 2026-09-02（續）smoke test新增檢查16：「圖該顯示卻空白」防線
 
 對應`PENDING_QUEUE.md`同一個任務的第三部分。跟既有檢查15（資料新鮮卻顯示
