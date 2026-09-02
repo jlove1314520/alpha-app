@@ -13,6 +13,27 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03（系統時間，見commit時間戳）— hypothesis_queue軌道：#21月營收「意外」漂移×低關注度第1關cheap gate — FAIL（兩組皆未過，快殺結案）
+
+新增`revenue_trend_surprise_low_attention.py`（改造已FAIL的#14：意外定義
+從YoY改成trailing 12個月線性趨勢外推殘差+樣本依近20日均成交值中位數切成
+低/高關注度兩組分開跑cheap gate）。開發過程中修好一個bug：
+`adjusted_price_series()`的volume欄位名依資料來源分岔（yfinance路徑
+`volume`、FinMind回退路徑`Trading_Volume`），原本只認`volume`會漏篩約
+一半走FinMind路徑的樣本股票，已修正兩種欄位名都接受。結果：低關注度組
+null percentile=31.2、高關注度組89.8（皆未過90.0門檻），且**方向與假設
+預期相反**（低關注度組理應更強、實際更弱）——兩組皆FAIL，沒有分組差異，
+依`HYPOTHESIS_QUEUE.md`#21原話判死。完整見`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#91、`HYPOTHESIS_QUEUE.md`#21。**佇列#21結案，接續
+佇列第一順位#22（品質×營收加速×法人吸籌複合訊號+低波動閘門），下一輪
+從第1關sanity開始（含四個濾網門檻值訂定），不跳關。**
+
+`git status`確認`data/rate_limit_state.json`有未commit修改+多個
+`research/*_run.log`未追蹤檔案，判斷是其他自動化來源的殘留，本輪未觸碰、
+未納入commit。`is_holdout_consumed()`確認仍為`False`。
+
+---
+
 ## 2026-09-03T13:47（系統時間，見commit時間戳）— hypothesis_queue軌道：#20純毛利率因子Gross Profitability第1關cheap IC gate — FAIL（第1關未過，快殺結案）
 
 本輪接手時發現`hypothesis_queue`具名鎖為陳舊鎖（held by PID 57132，

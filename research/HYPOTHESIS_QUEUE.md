@@ -1273,7 +1273,29 @@ sanity階段先選最簡單的線性外推，不用一開始就上複雜模型�
 
 **下檔保護要求**：同上（見#20條目），適用本輪全部5條新假設。
 
-**狀態**：尚未開始，排隊接續#20之後。下一輪從第1關sanity開始，不跳關。
+**狀態（2026-09-03更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第二十二輪排程，
+已結案：FAIL）**：新增`revenue_trend_surprise_low_attention.py`——意外
+定義改用trailing 12個月線性迴歸外推值的殘差（`_revenue_trend_surprise()`，
+沿用`pit.py::month_revenue_pit()`同一套PIT邏輯）+近20個交易日均成交值
+（volume*close，`adjusted_price_series()`衍生，注意yfinance路徑欄位名
+`volume`、FinMind回退路徑欄位名`Trading_Volume`，兩種都要接受否則會漏篩
+一半樣本，已修正）中位數切成低/高關注度兩組分開跑cheap gate。結果（100檔
+快取樣本，62檔有可用事件，總事件數8958筆，median_dollar_volume_20d=
+4,177,417）：**低關注度組**（n=4479）TRAIN IC=+0.0071(p=0.6863)、VAL
+IC=+0.0117(p=0.6850)，同號但幅度接近雜訊，null percentile=**31.2**
+（門檻90.0，遠未過）→FAIL；**高關注度組**（n=4479）TRAIN IC=+0.0097
+(p=0.6007)、VAL IC=-0.0416(p=0.1017)，**train/val正負號相反**，null
+percentile=89.8（門檻90.0，差0.2個百分點未過）→FAIL。**兩組皆FAIL、
+沒有分組差異**，依`HYPOTHESIS_QUEUE.md`#21原話「兩組都不顯著視同改造
+沒有解決#14根本問題」判**FAIL**，未進第2關以後。**意外之處（誠實記錄）**：
+方向與假設預期相反——低關注度組證據明顯比高關注度組更弱，跟「市場對
+低關注股反應不足」的經濟機制敘事矛盾，可能原因見`STRATEGY_GRAVEYARD.md`
+對應條目完整分析。**不泛化成「月營收驚喜×關注度分組這個機制方向完全
+沒用」**——只測了「線性外推trend殘差+成交值中位數分組」這一種具體組合，
+未測法人持股比例當關注度代理（原本列的另一個候選）、未測moving
+average trend、未測非對稱分組。完整見`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#91。佇列#21結案，接續佇列第一順位#22（品質×營收
+加速×法人吸籌複合訊號+低波動閘門）。
 
 ---
 
