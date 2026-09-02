@@ -1500,3 +1500,15 @@ TW軌兩項地基背景工作獨立複查：`data/backfill_state.json`重新統�
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約195輪、跨度約176.9小時（約7.37天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
 
 **本輪附帶發現（git衛生，非工作單位本身）**：commit後`git rebase origin/main`前依協定規則需要乾淨工作目錄，但`data/rate_limit_state.json`被另一互動session/`AlphaHypothesisQueue`軌道的存活背景process持續每幾秒改寫一次（額度追蹤快取），導致`git stash`/`checkout`反覆撞到新變更。過程中發現repo已累積6個先前輪次（206/224×2/225，及一個未標記的更早session）留下、從未`pop`回來的舊stash——逐一檢查`git stash show --stat`確認**全部6個都只改動`data/rate_limit_state.json`（4-5行差異，同性質的額度快取瞬間快照，非真實工作成果）**，判定安全可清除，已執行`git stash clear`。本輪造成暫存的兩個stash（`STRATEGY_GRAVEYARD.md`/`pit.py`/`quotes_sinopac.json`/17個未追蹤log檔案，皆屬另一session）已透過`git stash apply`完整還原到工作目錄，未遺失，只有`rate_limit_state.json`本身的其中一個瞬間快照沒有刻意還原（該檔案性質是持續被覆寫的快取，任何舊快照都會在下一次寫入時失去意義，不影響任何實質工作）。**提醒**：日後若`AlphaHypothesisQueue`或其他session也需要在馬拉松之間做`stash`操作，建議把`data/rate_limit_state.json`加進`.gitignore`（它本質是執行期快取，不該被版本控制追蹤），可以從根本避免這類反覆衝突——本輪未擅自修改`.gitignore`（屬於「維運帽」/需先提案的變更範疇），僅記錄供使用者決定是否要做。
+
+## 第307輪 · 2026-09-03T07:01+08:00 · TW · 跳過（暫停規則生效中）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 05:31（第304輪，最舊）、FUT 06:02（第305輪）、US 06:31（第306輪，最新）——依輪替選TW。與上一輪TW相隔約1小時30分，略超出正常30分鐘排程間隔（幅度不大，非崩潰跡象）。
+
+獨立複查三個解除條件皆未成立：(1)`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit；(2)`LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535「接近顯著」），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩選項仍未見使用者新回應；(3)`MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。三者皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項地基背景工作獨立複查：`data/backfill_state.json`重新統計done=2597/skip=469，共3066筆，跟第304輪一致無變化。覆蓋率（依協定5b節定義：done/universe）=2597/3196≈81.3%，遠高於80%門檻，不需要跑`backfill_universe.py`；T86回補自第164輪起維持100%完成記錄，本輪未重新掃描（理由同過往：無新資料源變動，重複掃描不會產生新資訊）。**沒有已知的剩餘允許工作項目**，(a)/(b)仍待使用者裁示，本輪不代為啟動。**TW軌本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`開工時確認僅既有殘留變更（`data/rate_limit_state.json`／`research/pit.py`已修改，另有17個未追蹤log/腳本檔案），研判皆為另一互動session／`AlphaHypothesisQueue`軌道留下，未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約198輪、跨度約178.4小時（約7.43天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
