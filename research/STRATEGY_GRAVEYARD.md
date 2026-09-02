@@ -712,3 +712,24 @@ cheap gate，2026-09-02FAIL）
   `data/spillover_overlay_gate3_grid.csv`/`data/spillover_overlay_gate6_yearly.csv`
   （新增）。佇列#19結案，接續佇列第一順位#20（純毛利率因子Gross
   Profitability）。
+
+### 純毛利率因子 Gross Profitability（品質，2026-09-03）
+
+- **哪一關死的**：GATE_SEQUENCE第1關cheap IC gate（因子層級，未進第2關
+  以後）。
+- **具體數字**：`f_gross_profitability`（GrossProfit/TotalAssets，比率
+  越高排名越靠前）TRAIN mean_ic=+0.0030 IR=+0.024(n=74)、VAL
+  mean_ic=+0.0114 IR=+0.089 hit_rate=0.62(n=47)，train/val同號（皆正）
+  但幅度都接近雜訊，對500次洗牌null分布的percentile=48.4（門檻90.0，
+  遠未過，甚至低於50——代表半數以上的隨機打散排序表現優於真實排序）。
+- **這個死法能不能泛化**：不泛化成「毛利率相關的品質異常在台股完全
+  無效」——只測過100檔快取樣本+單一GrossProfit/TotalAssets定義（Novy-
+  Marx原始論文的「水位」版本），未測更大樣本、未測是否受成長股（高
+  毛利率但資產也快速膨脹）稀釋。跟已FAIL的`f_gross_margin_stability`
+  （`TRIALS_LEDGER.md`#67，測毛利率隨時間「穩定性」，percentile=70.7）
+  是不同構造、死法不同但同屬毛利率相關訊號在此樣本規模下測不出穩健
+  訊號，兩者用的是同一批財報資料，暗示問題可能出在樣本規模/財報資料
+  雜訊，不是「水位」vs「穩定度」的構造選擇本身。
+- **原始記錄**：`TRIALS_LEDGER.md`#90、`HYPOTHESIS_QUEUE.md`#20、
+  `factor_ic_gross_profitability.py`（新增，可重複執行）。佇列#20結案，
+  接續佇列第一順位#21（月營收「意外」漂移×低關注度）。

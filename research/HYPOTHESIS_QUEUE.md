@@ -885,6 +885,13 @@ PASS，但**第6關逐年一致性FAIL**（TRAIN期11個年度僅4個正報酬�
 `TRIALS_LEDGER.md`#89。**佇列#19結案，接續佇列第一順位#20（純毛利率
 因子Gross Profitability）**。
 
+**2026-09-03（第二十一輪排程更新，#20已結案：FAIL）**：`f_gross_
+profitability`（GrossProfit/TotalAssets）第1關cheap IC gate未過——
+null percentile=48.4（門檻90.0，遠未過且低於50），IC幅度兩期皆接近
+雜訊，依協定判FAIL，未進第2關以後。完整見上方#20條目與
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#90。**佇列#20結案，接續
+佇列第一順位#21（月營收「意外」漂移×低關注度，改造已陣亡的#14）**。
+
 ---
 
 ### 16. 同產業配對交易 / 統計套利（Pair Trading / Statistical Arbitrage）
@@ -1213,7 +1220,25 @@ Novy-Marx原始論文真正的訊號定義，本專案至今沒有直接測過�
 組）、地雷率（重挫機率）顯著低於隨機、regime危機情境（大盤空頭/高
 波動期間）有降曝險或至少不放大虧損。
 
-**狀態**：尚未開始，排隊接續#19之後。下一輪從第1關sanity開始，不跳關。
+**狀態（2026-09-03更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第二十一輪排程，
+已結案：FAIL）**：新增`factors.py::_gross_profitability()`（GrossProfit
+[`quarterly_pit`損益表]/TotalAssets[`balance_sheet_pit`資產負債表]，
+兩者用同一組+45天延遲假設合併，跟`_roe_stability`同一個merge模式）+
+`prepare_factors()`「(x) 純毛利率因子」段落+`factor_ic_gross_profitability.py`
+（新增，沿用`factor_ic.py`既有cross-sectional IC框架，standalone
+bonferroni_n=1）。結果（100檔快取樣本，80檔可用，121個20交易日快照）：
+TRAIN mean_ic=+0.0030 IR=+0.024(n=74)、VAL mean_ic=+0.0114 IR=+0.089
+hit_rate=0.62(n=47)，train/val同號（皆正），但**null percentile=48.4
+（門檻90.0，遠未過且低於50）**——IC幅度兩期皆接近雜訊，代表打散對照組
+半數以上表現優於真實排序。三項判準（幅度非零/同號/贏過洗牌null）中
+兩項未過，依協定第1關cheap gate標準判**FAIL**，未進第2關以後。**不
+泛化成「毛利率相關的品質異常在台股完全無效」**——這次只測了100檔快取
+樣本+單一GrossProfit/TotalAssets定義（Novy-Marx原始論文的「水位」
+版本），未測更大樣本、未測是否受成長股稀釋。跟已FAIL的
+`f_gross_margin_stability`（#67，測毛利率「穩定性」，percentile=70.7）
+死法不同但同屬毛利率相關訊號在此樣本規模下測不出穩健訊號。完整見
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#90。佇列#20結案，接續佇列
+第一順位#21（月營收「意外」漂移×低關注度）。
 
 ---
 

@@ -432,6 +432,44 @@ def _gross_margin_stability(stock_id: str, start_date: str) -> pd.DataFrame:
     return inc[["pit_date", "gross_margin_stability"]]
 
 
+def _gross_profitability(stock_id: str, start_date: str) -> pd.DataFrame:
+    """`HYPOTHESIS_QUEUE.md` #20 純毛利率因子 (Gross Profitability, Novy-Marx
+    2013)：GP = GrossProfit / TotalAssets，橫截面排序做多GP最高分位，不取負號
+    （分數定義本身就是「越高越好」，跟f_dividend_yield_ttm同一種慣例）。
+
+    經濟機制：核心業務真正的獲利能力（毛利，不受財務槓桿/業外損益污染）相對
+    公司資產規模，市場對這個訊號的定價效率不足，超額報酬被認為是行為性（低估
+    持續）而非承擔額外系統性風險的補償。**跟已FAIL的`f_gross_margin_stability`
+    （`TRIALS_LEDGER.md`#67）不是同一個構造**——那條測的是毛利率隨時間的
+    「穩定性」（近8季滾動標準差），這條測的是毛利率相對總資產的「水位」
+    （Novy-Marx原始論文定義），本專案至今沒有直接測過這個版本。
+
+    合併方式跟`_roe_stability`完全同一個模式：GrossProfit來自`quarterly_pit`
+    （損益表），TotalAssets來自`balance_sheet_pit`（資產負債表），兩個PIT
+    函式用同一組`fiscal_period_end`+45天延遲假設，`merge(on="fiscal_period_end")`
+    不會引入新的前瞻偏誤路徑，只是合併兩個已經延遲過的序列。零額外FinMind呼叫
+    ——跟`_gross_margin_stability`/`_asset_growth`共用同一批已快取的原始回應
+    （`quarterly_pit`已經抓過GrossProfit、`balance_sheet_pit`已經抓過
+    TotalAssets，兩者都被`_accruals`/`_asset_growth`用過）。
+
+    2026-09-03 `HYPOTHESIS_QUEUE_PROTOCOL.md`自動排程新增，佇列#20第1關起跑。
+    """
+    inc = quarterly_pit(stock_id, start_date)
+    bs = balance_sheet_pit(stock_id, start_date)
+    if inc.empty or bs.empty or "GrossProfit" not in inc.columns \
+            or "TotalAssets" not in bs.columns:
+        return pd.DataFrame(columns=["pit_date", "gross_profitability"])
+    inc = inc[["fiscal_period_end", "pit_date", "GrossProfit"]]
+    bs = bs[["fiscal_period_end", "TotalAssets"]]
+    merged = inc.merge(bs, on="fiscal_period_end", how="inner").sort_values(
+        "fiscal_period_end"
+    ).reset_index(drop=True)
+    if merged.empty:
+        return pd.DataFrame(columns=["pit_date", "gross_profitability"])
+    merged["gross_profitability"] = merged["GrossProfit"] / merged["TotalAssets"].replace(0, np.nan)
+    return merged[["pit_date", "gross_profitability"]]
+
+
 DIVIDEND_YIELD_TRAILING_DAYS = 365  # 近12個月現金股利加總的視窗
 
 
@@ -679,6 +717,17 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_gross_margin_stability skipped for {stock_id}: {e}")
         d["f_gross_margin_stability"] = np.nan
+
+    # (x) 純毛利率因子 Gross Profitability (Novy-Marx 2013) -- 沿用
+    # quarterly_pit/balance_sheet_pit 同一個快取鍵（跟 f_gross_margin_stability/
+    # f_quality_roe_stability/f_asset_growth/f_accruals 完全同源），零額外
+    # FinMind 呼叫。`HYPOTHESIS_QUEUE.md` #20，2026-09-03自動排程新增。
+    try:
+        gp_pit = _gross_profitability(stock_id, start_date)
+        d = _asof_join(d, gp_pit, "gross_profitability", "f_gross_profitability")
+    except RuntimeError as e:
+        print(f"    [factors] f_gross_profitability skipped for {stock_id}: {e}")
+        d["f_gross_profitability"] = np.nan
 
     # (k)/(l) 價值 PB/PE -- 直接讀 FinMind 算好的 PER/PBR。
     # **PIT 狀態（2026-08-23 馬拉松第四輪更新）**：2330 單檔跳變偵測（`verify_pit_value_pb.py`，

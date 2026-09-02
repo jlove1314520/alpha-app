@@ -1,0 +1,15 @@
+
+=== 純毛利率因子 (f_gross_profitability, GrossProfit/TotalAssets), HYPOTHESIS_QUEUE.md#20新假設, standalone (bonferroni_n=1) ===
+Sample: 100 names, snapshot_start=2015-01-01, bonferroni_n=1 (required percentile >= 90.0)
+Loading sample + computing factors (cached after first run)...
+  80/100 usable names
+  121 non-overlapping 20-trading-day snapshots, 2015-01-01..2024-12-31
+
+Evaluating f_gross_profitability...
+  train: mean_ic=+0.0030 IR=+0.024 (n=74 dates)
+  val:   mean_ic=+0.0114 IR=+0.089 hit_rate=0.62 (n=47 dates)
+  null percentile: 48.4 (need >=90.0)  same_sign: True
+  PASSES: False  reasons: ['val_mean_ic too small or undefined (0.0114)', 'not distinguishable from random-shuffle null at the Bonferroni-corrected bar (percentile=48.4, required>=90.0 for n=1)']
+
+=== 純毛利率因子 (f_gross_profitability, GrossProfit/TotalAssets), HYPOTHESIS_QUEUE.md#20新假設, standalone (bonferroni_n=1) SUMMARY ===
+  f_gross_profitability: FAIL  val_ic=+0.0114  percentile=48.4/90.0

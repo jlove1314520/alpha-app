@@ -13,6 +13,27 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T13:47（系統時間，見commit時間戳）— hypothesis_queue軌道：#20純毛利率因子Gross Profitability第1關cheap IC gate — FAIL（第1關未過，快殺結案）
+
+本輪接手時發現`hypothesis_queue`具名鎖為陳舊鎖（held by PID 57132，
+60.2分鐘沒更新），依協定判定為上一輪疑似失敗/中斷，回收後繼續（`ps`
+未再交叉確認該PID，僅依鎖檔本身60分鐘逾時判斷，跟協定第0節的陳舊
+判定機制一致）。`git status`發現`data/rate_limit_state.json`有未commit
+的修改+多個`research/*_run.log`未追蹤檔案，判斷是其他自動化來源（三軌
+馬拉松或先前輪次）的殘留，本輪未觸碰、未納入commit。
+
+新增`factors.py::_gross_profitability()`（GrossProfit[`quarterly_pit`]/
+TotalAssets[`balance_sheet_pit`]，同`_roe_stability`merge模式）+
+`prepare_factors()`「(x)」段落+`factor_ic_gross_profitability.py`。結果：
+TRAIN mean_ic=+0.0030 IR=+0.024(n=74)、VAL mean_ic=+0.0114 IR=+0.089
+hit_rate=0.62(n=47)，train/val同號但幅度皆接近雜訊，null percentile=
+48.4（門檻90.0，遠未過且低於50）。依協定第1關cheap gate標準判**FAIL**，
+未進第2關以後。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#90、
+`HYPOTHESIS_QUEUE.md`#20。**佇列#20結案，接續佇列第一順位#21（月營收
+「意外」漂移×低關注度，改造已陣亡的#14），下一輪從第1關sanity開始。**
+
+---
+
 ## 2026-09-03T09:xx（系統時間，見commit時間戳）— hypothesis_queue軌道：#19跨市場美股隔夜報酬外溢效應第2關以後 — FAIL（第6關逐年一致性未過，快殺結案）
 
 新增`spillover_overlay_v1.py`，把#19第1關已CHEAP_PASS（`TRIALS_LEDGER.md`
