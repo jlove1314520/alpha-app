@@ -43,8 +43,11 @@
 // 17.【2026-09-02新增，B29美股個股頁財報UI】route攔截假us_financials.json，
 //     驗有快照代號（AAPL）財報頁四指標真的畫出數字、無快照代號（TSLA）誠實
 //     顯示「暫無」且不殘留切換前那檔股票的舊數字。
-// 12. 整個測試過程（含8/9/11/13/14/15/16/17新增的重整/reload/手勢/時區/防線
-//     操作）結束後仍無累積的uncaught error。
+// 18.【2026-09-02新增，IBKR Paper下單UI卡片】驗美股/台股買進按鈕分工正確
+//     （美股開真的IBKR下單卡片、台股維持示範版，不能混）、伺服器未啟動時
+//     連線狀態有清楚提示、沒填token前端會擋下送出。
+// 12. 整個測試過程（含8/9/11/13/14/15/16/17/18新增的重整/reload/手勢/時區/
+//     防線操作）結束後仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -598,10 +601,53 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("17. B29美股個股頁財報UI：有快照代號畫出四指標數字、無快照代號誠實顯示且不殘留舊代號數字",
     usFinErrors.length === 0, usFinErrors.join("; "));
 
+  // 18.【2026-09-02新增，IBKR Paper下單UI卡片】驗：(a) 分工鐵律——美股個股頁
+  // 按「買進」要開真的IBKR下單卡片（#ibkr-sheet），不是台股那個全示範版
+  // （#sheet）；台股個股頁按「買進」要維持原本示範版行為（防止把美股邏輯
+  // 誤接到台股，那是真的會打Paper API送單，混錯市場很危險）。(b) 本機下單
+  // 伺服器沒啟動時（測試環境本來就沒有），連線狀態要顯示清楚的「未啟動」
+  // 提示，不能是空白或掛掉的uncaught error。(c) 沒填token時按送出要擋下來，
+  // 不能真的送出fetch請求。
+  const ibkrUiErrors = [];
+  try {
+    await page.evaluate((code) => window.openStock(code), "AAPL");
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector(".buy-cta .btn.buy").click());
+    await page.waitForTimeout(2500);
+    const usSheetOpen = await page.evaluate(() => document.getElementById("ibkr-sheet")?.classList.contains("open"));
+    const twSheetOpenWrong = await page.evaluate(() => document.getElementById("sheet")?.classList.contains("open"));
+    if (!usSheetOpen) ibkrUiErrors.push("美股按買進後，#ibkr-sheet沒有打開");
+    if (twSheetOpenWrong) ibkrUiErrors.push("美股按買進後，台股示範版#sheet竟然也開了（分工鐵律破功）");
+    const healthText = await page.evaluate(() => document.getElementById("ibkr-health")?.textContent || "");
+    if (!healthText || (!healthText.includes("未啟動") && !healthText.includes("失敗"))) {
+      ibkrUiErrors.push(`測試環境沒有真的啟動ibkr_order_server.py，連線狀態應顯示未啟動/失敗訊息，實際："${healthText}"`);
+    }
+    await page.evaluate(() => { document.getElementById("ibkr-token").value = ""; });
+    await page.evaluate(() => window.submitIbkrOrderUI());
+    await page.waitForTimeout(300);
+    const resultText = await page.evaluate(() => document.getElementById("ibkr-result")?.textContent || "");
+    if (!resultText.includes("token")) ibkrUiErrors.push(`沒填token應該被前端擋下並提示，實際訊息："${resultText}"`);
+    await page.evaluate(() => window.closeIbkrSheet());
+
+    await page.evaluate(() => window.openStock("2330"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.querySelector(".buy-cta .btn.buy").click());
+    await page.waitForTimeout(300);
+    const twSheetOpen = await page.evaluate(() => document.getElementById("sheet")?.classList.contains("open"));
+    const ibkrSheetOpenWrong = await page.evaluate(() => document.getElementById("ibkr-sheet")?.classList.contains("open"));
+    if (!twSheetOpen) ibkrUiErrors.push("台股按買進後，原本的示範版#sheet沒有打開（回歸壞掉）");
+    if (ibkrSheetOpenWrong) ibkrUiErrors.push("台股按買進後，IBKR下單卡片#ibkr-sheet竟然也開了（分工鐵律破功）");
+    await page.evaluate(() => window.closeSheet());
+  } catch (e) {
+    ibkrUiErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("18. IBKR Paper下單UI卡片：美股/台股分工正確、伺服器未啟動時有清楚提示、無token時前端擋下送出",
+    ibkrUiErrors.length === 0, ibkrUiErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

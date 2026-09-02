@@ -17,6 +17,46 @@
 
 ---
 
+## ✅ 2026-09-02（續）B29美股個股頁財報UI + IBKR Paper下單UI卡片
+
+對應使用者指令「二、收尾兩個App建置中UI」。兩項都改`index.html`（開發帽），
+`scripts/smoke_test.mjs`各自新增一條檢查（check 17/18），皆用Playwright
+截圖驗證實際畫面（非只驗DOM）。
+
+**1. B29美股財報個股頁UI**：個股頁「財報」分頁美股分支接上`data/
+us_financials.json`（B29後端），取代原本寫死的「美股尚未支援財報解析」。
+新增`loadUsFinancials()`/`loadFinancialsUS()`。四指標：毛利率→
+`fin-gross`、營益率→`fin-op`、營收年增（年度）/FCF利潤率（年度）借用
+ROE/FCF欄位動態改標籤（`#fin-roe-lbl`/`#fin-fcf-lbl`/`#eps-bars-title`，
+切換TW/US股票互相reset）。只涵蓋固定6檔（NVDA/AAPL/MSFT/TSM/GOOGL/
+AMZN），查無快照代號誠實顯示「暫無」。**smoke check 17**通過；Playwright
+截圖確認AAPL財報頁正確顯示46.9%/32.0%/+6.4%/23.7%四個數字。
+
+**2. IBKR Paper下單UI卡片**：新增`#ibkr-sheet`（跟台股原有的`#sheet`——
+全是寫死示範資料——是兩套獨立UI，刻意不合併，避免「哪些數字是真的」混
+淆），接`research/ibkr_order_server.py`本機伺服器（`http://127.0.0.1:8793`）。
+`openTradeSheet(side)`分工：`isUS(currentCode)`為真才走`openIbkrSheet()`，
+台股維持`openSheet()`原示範行為不變（Shioaji下單UI這輪不在範圍內）。
+卡片功能：開啟時自動打`/health`+`/account_summary`顯示連線狀態/部位/
+可用資金，token存`localStorage(alpha_ibkr_token)`（伺服器啟動時終端機
+印出，使用者手動貼上），送出前端擋兩關（無token/數量非正整數/LMT無限價
+/伺服器未連線都擋下不送），送出後把`status`/`filled`/`avg_fill_price`/
+`order_id`完整顯示給使用者看，不是無聲吞掉。**真實送單一律使用者在這張
+卡片親自按「送出」，App不會自動送單**——同步更新「設定」頁免責聲明，
+把「不會串接任何真實券商下單API」改成如實揭露這個Paper帳戶例外（模擬
+資金、非自動、僅使用者主動觸發）。**smoke check 18**通過（驗美股/台股
+分工正確、伺服器未啟動時顯示清楚提示、無token時前端擋下）；Playwright
+截圖確認卡片版面/按鈕高亮狀態正確渲染。
+
+**驗收**：`node scripts/smoke_test.mjs`——**13→15項全部新check皆PASS**
+（含新增的17/18），check 6（類股卡熱力圖）跟這兩項改動無關，用`git
+stash`對照確認改動前後同樣FAIL（既有問題非本次迴歸）。改動檔案：
+`index.html`、`scripts/smoke_test.mjs`。**未動**`research/`（背景另一個
+agent同時在做#16配對交易任務，刻意不碰）。下一步：確認挖礦馬拉松排程
+仍存活（使用者指令三）。
+
+---
+
 ## ⚠ 2026-09-02（續）App數字盤中自動輪詢（PENDING_QUEUE「數字不會跳動」項）
 
 對應`PENDING_QUEUE.md`「App 兩個 UX 問題排進今晚」的第二部分。前端加一個

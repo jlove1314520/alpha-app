@@ -850,8 +850,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="buy-cta">
       <button class="btn ghost" onclick="toast('已加入策略觀察清單')">＋策略</button>
-      <button class="btn sell" onclick="openSheet('sell')">賣出</button>
-      <button class="btn buy" onclick="openSheet('buy')">買進</button>
+      <button class="btn sell" onclick="openTradeSheet('sell')">賣出</button>
+      <button class="btn buy" onclick="openTradeSheet('buy')">買進</button>
     </div>
   </section>
 
@@ -1064,7 +1064,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card">
       <h3>免責聲明</h3>
       <div class="note" style="line-height:1.7">
-        Alpha 是研究/教育用途的原型 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。App 內「產生下單計畫」按鈕僅顯示計畫內容，<b style="color:var(--ink-2)">未串接、也不會串接任何真實券商下單 API</b>。投資有風險，盈虧請自負。
+        Alpha 是研究/教育用途的原型 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。App 內「產生下單計畫」按鈕僅顯示計畫內容，<b style="color:var(--ink-2)">不會串接任何真實資金帳戶的下單 API</b>。<b style="color:var(--ink-2)">例外（2026-09-02起）</b>：美股個股頁的「IBKR Paper 下單」卡片會在你本機另外啟動下單伺服器、並且親自按下送出時，向 IBKR **模擬（Paper）帳戶**送出真實委託——這不涉及真實資金，且一律需要你手動觸發，App 不會自動送單，也不會對真實帳戶下單。投資有風險，盈虧請自負。
       </div>
     </div>
 
@@ -1129,6 +1129,42 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </div>
     <button class="btn buy" id="sheet-cta" style="width:100%" onclick="confirmOrder()">滑動確認 → 送出委託（原型：點擊）</button>
     <div class="note" style="text-align:center">風控閘門全數通過才可送單 · 委託後可即時撤單</div>
+  </div>
+
+  <!-- 2026-09-02新增：IBKR Paper下單卡片（僅美股，接research/ibkr_order_server.py
+       本機伺服器，見PROGRESS.md/BACKLOG.md）。跟上面#sheet（台股，全示範資料）
+       是兩套獨立UI，不合併——上面那個標「示範」字樣的每一格數字都是假的，這裡
+       是會真的打本機API下Paper單的功能，混在一起會混淆「哪些是真的」。 -->
+  <div class="sheet-mask" id="ibkr-mask" onclick="closeIbkrSheet()"></div>
+  <div class="sheet" id="ibkr-sheet">
+    <div class="grab"></div>
+    <h2>IBKR Paper 下單 <span style="font-size:11px;color:var(--warn);font-weight:400">模擬帳戶</span></h2>
+    <div class="note" style="margin:-6px 0 10px">⚠ 僅限IBKR Paper（模擬）帳戶，非投資建議，不構成買賣訊號。需先在本機另開終端機執行 <code>python research/ibkr_order_server.py</code>，App無法自動幫你啟動它。真實送單一律由你在本頁親自按下「送出」，App不會自動送單。</div>
+    <div class="frow"><span>連線狀態</span><b id="ibkr-health">檢查中…</b></div>
+    <div class="frow"><span>標的</span><b id="ibkr-symbol">—</b></div>
+    <div class="frow"><span>方向</span>
+      <span style="display:flex;gap:6px">
+        <button class="btn ghost" id="ibkr-side-buy" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrSide('BUY')">買進</button>
+        <button class="btn ghost" id="ibkr-side-sell" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrSide('SELL')">賣出</button>
+      </span>
+    </div>
+    <div class="frow"><span>數量（股）</span><input id="ibkr-qty" type="number" min="1" step="1" value="1" style="width:90px;text-align:right;background:var(--surface-2);border:1px solid var(--hairline);border-radius:8px;padding:6px 8px;color:var(--ink);font-family:inherit;font-size:13.5px" oninput="updateIbkrPreview()"></div>
+    <div class="frow"><span>單別</span>
+      <span style="display:flex;gap:6px">
+        <button class="btn ghost" id="ibkr-type-mkt" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrOrderType('MKT')">市價</button>
+        <button class="btn ghost" id="ibkr-type-lmt" style="padding:5px 14px;font-size:12.5px" onclick="setIbkrOrderType('LMT')">限價</button>
+      </span>
+    </div>
+    <div class="frow" id="ibkr-limit-row" style="display:none"><span>限價</span><input id="ibkr-limit-price" type="number" step="0.01" style="width:90px;text-align:right;background:var(--surface-2);border:1px solid var(--hairline);border-radius:8px;padding:6px 8px;color:var(--ink);font-family:inherit;font-size:13.5px"></div>
+    <div class="frow"><span>目前部位（此標的）</span><b id="ibkr-position">—</b></div>
+    <div class="frow"><span>可用資金（Paper）</span><b id="ibkr-buying-power">—</b></div>
+    <div class="gate" style="margin-top:12px">
+      <div class="g">🔑 本機驗證token（伺服器啟動時終端機會印出，貼在下面）</div>
+      <input id="ibkr-token" type="text" placeholder="貼上 X-Alpha-Local-Token" oninput="saveIbkrToken()" style="width:100%;margin-top:6px;background:var(--surface);border:1px solid var(--hairline);border-radius:8px;padding:8px 10px;color:var(--ink);font-family:inherit;font-size:12.5px">
+    </div>
+    <div id="ibkr-result" class="note" style="min-height:14px"></div>
+    <button class="btn buy" id="ibkr-submit-btn" style="width:100%;margin-top:6px" onclick="submitIbkrOrderUI()">送出 Paper 委託（IBKR）</button>
+    <div class="note" style="text-align:center">此為模擬(Paper)帳戶操作，不涉及真實資金；送出後仍可能被Gateway拒絕（例如Read-Only API未取消勾選），以「連線狀態」/送出結果訊息為準，不是按下去就保證成交</div>
   </div>
 
   <!-- 搜尋股票（加入自選）-->
@@ -3008,6 +3044,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
 
   // ── 下單抽屜 ──
+  // 2026-09-02新增：分工鐵律「台股一律Shioaji、美股一律IBKR」延伸到下單——
+  // 美股導去真正會打research/ibkr_order_server.py的IBKR Paper下單卡片，
+  // 台股維持原本的全示範版（Shioaji下單後端這輪不在範圍內，見PENDING_QUEUE）。
+  function openTradeSheet(side){
+    if(isUS(currentCode))openIbkrSheet(side);
+    else openSheet(side);
+  }
   function openSheet(side){
     const t=document.getElementById('sheet-title'), c=document.getElementById('sheet-cta');
     if(side==='buy'){t.textContent='買進 '+currentCode;c.className='btn buy';c.textContent='滑動確認 → 送出買進（示範）'}
@@ -3021,6 +3064,109 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('sheet').classList.remove('open');
   }
   function confirmOrder(){ closeSheet(); toast('✓ 委託已送出 · 09:31:07 · 可於「交易」頁追蹤'); }
+
+  // ── IBKR Paper 下單卡片（2026-09-02新增，真的會打本機research/ibkr_order_server.py） ──
+  const IBKR_ORDER_SERVER='http://127.0.0.1:8793';
+  let IBKR_STATE={side:'BUY',orderType:'MKT',connected:false};
+  function readIbkrToken(){try{return localStorage.getItem('alpha_ibkr_token')||''}catch(e){console.warn('[readIbkrToken]',e);return''}}
+  function saveIbkrToken(){try{localStorage.setItem('alpha_ibkr_token',document.getElementById('ibkr-token').value.trim())}catch(e){console.warn('[saveIbkrToken]',e);recordGlobalError('saveIbkrToken',e)}}
+  // .btn.ghost在CSS裡定義在.btn.buy/.btn.sell之後，同specificity會蓋掉背景色，
+  // 不能靠疊加class做「選中態」高亮，改用行內style直接控制，避免cascade順序陷阱。
+  function _segStyle(el,on,onBg,onFg){
+    el.style.background=on?onBg:'';el.style.color=on?onFg:'';
+  }
+  function setIbkrSide(side){
+    IBKR_STATE.side=side;
+    _segStyle(document.getElementById('ibkr-side-buy'),side==='BUY','var(--up-deep)','#fff');
+    _segStyle(document.getElementById('ibkr-side-sell'),side==='SELL','var(--down-deep)','#fff');
+    document.getElementById('ibkr-submit-btn').className='btn '+(side==='BUY'?'buy':'sell');
+    document.getElementById('ibkr-submit-btn').textContent=(side==='BUY'?'送出買進':'送出賣出')+' Paper 委託（IBKR）';
+  }
+  function setIbkrOrderType(t){
+    IBKR_STATE.orderType=t;
+    _segStyle(document.getElementById('ibkr-type-mkt'),t==='MKT','var(--accent)','#fff');
+    _segStyle(document.getElementById('ibkr-type-lmt'),t==='LMT','var(--accent)','#fff');
+    document.getElementById('ibkr-limit-row').style.display=t==='LMT'?'flex':'none';
+  }
+  function updateIbkrPreview(){/* 目前僅數量輸入即時性檢查用，實際部位/資金要打API才有真數字，見checkIbkrHealthAndAccount() */}
+  async function checkIbkrHealthAndAccount(){
+    const he=document.getElementById('ibkr-health');
+    he.textContent='檢查中…';he.className='';
+    try{
+      const r=await fetch(IBKR_ORDER_SERVER+'/health');
+      const j=await r.json();
+      if(j.ok){IBKR_STATE.connected=true;he.textContent='已連線 · Paper帳戶 '+j.account_id;he.className='pos'}
+      else{IBKR_STATE.connected=false;he.textContent='連線失敗：'+(j.error||'未知錯誤');he.className='neg'}
+    }catch(e){
+      IBKR_STATE.connected=false;
+      he.textContent='連不到本機下單伺服器（未啟動？）— 請先在本機另開終端機執行 python research/ibkr_order_server.py';
+      he.className='neg';
+      console.warn('[checkIbkrHealthAndAccount:health]',e);
+    }
+    try{
+      const r=await fetch(IBKR_ORDER_SERVER+'/account_summary?symbol='+encodeURIComponent(currentCode));
+      if(r.ok){
+        const j=await r.json();
+        setTxt('ibkr-position',(j.position_qty||0)+' 股');
+        const bp=j.summary&&j.summary.BuyingPower;
+        setTxt('ibkr-buying-power',bp!=null?'$'+nf(Math.round(+bp)):'—');
+      }else{setTxt('ibkr-position','—');setTxt('ibkr-buying-power','—')}
+    }catch(e){
+      setTxt('ibkr-position','—');setTxt('ibkr-buying-power','—');
+      console.warn('[checkIbkrHealthAndAccount:account_summary]',e);
+    }
+  }
+  function openIbkrSheet(side){
+    setTxt('ibkr-symbol',currentCode);
+    setIbkrSide(side==='sell'?'SELL':'BUY');
+    setIbkrOrderType('MKT');
+    document.getElementById('ibkr-qty').value=1;
+    document.getElementById('ibkr-limit-price').value='';
+    document.getElementById('ibkr-token').value=readIbkrToken();
+    document.getElementById('ibkr-result').textContent='';
+    document.getElementById('ibkr-mask').classList.add('open');
+    document.getElementById('ibkr-sheet').classList.add('open');
+    checkIbkrHealthAndAccount().catch(e=>{console.warn('[openIbkrSheet]',e);recordGlobalError('openIbkrSheet',e)});
+  }
+  function closeIbkrSheet(){
+    document.getElementById('ibkr-mask').classList.remove('open');
+    document.getElementById('ibkr-sheet').classList.remove('open');
+  }
+  async function submitIbkrOrderUI(){
+    const resEl=document.getElementById('ibkr-result');
+    const token=readIbkrToken();
+    const qty=parseInt(document.getElementById('ibkr-qty').value,10);
+    const limitPrice=document.getElementById('ibkr-limit-price').value;
+    if(!token){resEl.textContent='請先貼上本機驗證token（伺服器終端機啟動時會印出）';resEl.className='note neg';return}
+    if(!qty||qty<=0){resEl.textContent='數量必須是正整數';resEl.className='note neg';return}
+    if(IBKR_STATE.orderType==='LMT'&&!limitPrice){resEl.textContent='限價單必須輸入限價';resEl.className='note neg';return}
+    if(!IBKR_STATE.connected){resEl.textContent='目前連不上本機下單伺服器，無法送單（見上方「連線狀態」）';resEl.className='note neg';return}
+    const btn=document.getElementById('ibkr-submit-btn');
+    btn.disabled=true;btn.style.opacity='.5';
+    resEl.textContent='送出中…';resEl.className='note';
+    try{
+      const body={symbol:currentCode,action:IBKR_STATE.side,quantity:qty,order_type:IBKR_STATE.orderType};
+      if(IBKR_STATE.orderType==='LMT')body.limit_price=parseFloat(limitPrice);
+      const r=await fetch(IBKR_ORDER_SERVER+'/submit_order',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Alpha-Local-Token':token},
+        body:JSON.stringify(body),
+      });
+      const j=await r.json();
+      if(!r.ok){resEl.textContent='被拒絕：'+(j.detail||JSON.stringify(j));resEl.className='note neg'}
+      else{
+        resEl.textContent=`狀態：${j.status} · 成交 ${j.filled}/${qty} 股 · 均價 ${j.avg_fill_price||'—'} · 委託編號 ${j.order_id}`;
+        resEl.className='note pos';
+        toast('✓ IBKR Paper 委託已送出，狀態：'+j.status);
+      }
+    }catch(e){
+      resEl.textContent='送出失敗（連線中斷或伺服器未啟動）：'+(e.message||e);
+      resEl.className='note neg';
+      console.warn('[submitIbkrOrderUI]',e);recordGlobalError('submitIbkrOrderUI',e);
+    }finally{
+      btn.disabled=false;btn.style.opacity='1';
+    }
+  }
 
   // ── 機器人開關 ──
   function flipBot(el,name){
@@ -3531,7 +3677,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.2138';
+  const APP_VERSION='2026-09-02.2148';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

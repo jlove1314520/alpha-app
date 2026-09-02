@@ -16,6 +16,28 @@
 
 ---
 
+## 2026-09-02（開發帽）— IBKR Paper下單UI卡片（PENDING「二、收尾兩個App建置中UI」第二項）
+
+個股頁新增`#ibkr-sheet`，接`research/ibkr_order_server.py`本機伺服器
+（`http://127.0.0.1:8793`）。分工鐵律延伸到下單UI：`openTradeSheet(side)`
+判斷`isUS(currentCode)`，美股才開真的IBKR Paper下單卡片，台股維持原本
+`#sheet`全示範版不變。卡片開啟時自動打`/health`+`/account_summary`顯示
+連線狀態/部位/可用資金，token存`localStorage`（使用者手動從伺服器終端
+機貼上），送出前端擋（無token/數量非正整數/LMT無限價/伺服器未連線都
+擋），送出後完整顯示`status`/`filled`/`avg_fill_price`/`order_id`。真實
+送單一律使用者親自按「送出」。同步更新「設定」頁免責聲明揭露這個Paper
+帳戶例外。
+
+`scripts/smoke_test.mjs`新增check 18（驗美股/台股買進按鈕分工正確、
+伺服器未啟動時顯示清楚提示、無token時前端擋下送出）。冒煙測試：**15項
+全PASS**（含新check17/18）；check 6（類股卡熱力圖，既有問題非本次迴歸）
+FAIL照實記錄。Playwright截圖確認卡片版面/按鈕高亮正確渲染。
+
+改動檔案：`index.html`、`scripts/smoke_test.mjs`。下一步：確認挖礦馬拉松
+排程仍存活（使用者指令三）。
+
+---
+
 ## 2026-09-02（開發帽）— B29美股個股頁財報UI（把後端四指標接到個股頁）
 
 `index.html`個股頁「財報」分頁美股分支，接上`data/us_financials.json`
