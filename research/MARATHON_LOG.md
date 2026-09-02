@@ -13,6 +13,31 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T06:54 — `hypothesis_queue`軌道排程：重新確認外部依賴未解鎖，佇列實質已空，新增#25月轉效應（尚未開始第1關）
+
+接手鎖檔為`LOCK_STALE`（上一輪PID 50392，30.0分鐘前）。`git status`確認
+非本輪殘留變更（`data/rate_limit_state.json`/`research/pit.py`修改+
+多個其他自動化來源的run.log）不觸碰、不納入本輪commit。讀`HYPOTHESIS_
+QUEUE.md`確認#1~24已全數結案（FAIL或外部依賴阻塞），依協定重新逐一
+查證#5/#6/#8/#10三個外部依賴：①`BACKLOG.md`確認題材動能榜PIT回測
+引擎仍未建置（`momentum_board`狀態仍是「紙上交易中」，#6/#8依附此
+地基仍動不了）；②B25/B26已於2026-09-02完成，但#5/#10真正阻塞點是
+「佇列裡至今沒有任何一條假設通過完整GATE_SEQUENCE可供regime overlay
+套用」，這個條件未變。**確認三個依賴皆未解鎖，判定佇列實質已空**，
+依協定設計新假設軸：**#25月轉效應（Turn-of-Month Effect，指數層級、
+非選股）**——機構現金流時點（月薪提撥/基金申購集中月初、月底window
+dressing）驅動的日曆結構效應，經濟機制跟已測過的三種「非選股」timing
+機制（#10大盤均線/波動度開關、#15自身已實現波動度、#19美股隔夜報酬
+外溢）皆不同，也跟已FAIL的FUT軌`fut_weekday_effect`（週末效應）不同
+類別，本專案至今未測過。完整假設定義+下檔保護要求已寫入`HYPOTHESIS_
+QUEUE.md`新增#25章節與「排隊順序總結」項目25，本輪只登記假設、未寫
+任何程式碼、未跑任何測試（依協定「佇列已空」情境的工作單位定義）。
+`is_holdout_consumed()`確認為`False`。**本輪工作到此為止**，下一輪從
+#25第1關cheap gate開始（`fetch_yf_index("^TWII")`+實際交易日曆判定
+月轉窗口，不用自然日期近似），不跳關。commit+push後收工。
+
+---
+
 ## 2026-09-03T06:35 — `hypothesis_queue`軌道排程：#23狀態順序修正+#24（除權息季節行為效應）已結案FAIL
 
 接手鎖檔為`LOCK_STALE`（上一輪PID 66908，29.9分鐘前）。`git status`發現
