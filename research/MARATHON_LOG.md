@@ -13,6 +13,28 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T07:27 — `hypothesis_queue`軌道排程：#25月轉效應第1關cheap gate已結案FAIL，新增#26全市場融資餘額成長率regime訊號（尚未開始第1關）
+
+接手`LOCK_ACQUIRED`（無陳舊鎖檔）。`git pull`+`git status`確認乾淨，
+發現非本輪殘留變更（`data/rate_limit_state.json`/`research/pit.py`
+修改+多個其他自動化來源的`*_run.log`）——不觸碰、不納入本輪commit。
+新增`turn_of_month_gate.py`：TAIEX月轉窗口效應（N=3/N=4兩種定義），
+用實際交易日序列判定窗口位置、N=200次洗牌置換檢定。結果：N=3
+TRAIN percentile=94.0過關但VAL percentile=28.0且**train/val正負號
+反轉**；N=4同樣train/val正負號反轉且TRAIN未過門檻。依協定第1關
+cheap gate標準判**FAIL**，已寫入`STRATEGY_GRAVEYARD.md`+
+`TRIALS_LEDGER.md`#96+`HYPOTHESIS_QUEUE.md`#25條目跟排隊順序總結。
+重新查證#5/#6/#8/#10三個外部依賴：題材動能榜PIT引擎仍未建置、佇列裡
+至今無任何候選通過完整GATE_SEQUENCE可供regime overlay套用——兩個
+阻塞條件均未改變，判定佇列實質已空，設計新假設軸**#26全市場融資
+餘額成長率當槓桿/擁擠度regime訊號**（機制類別：市場結構性槓桿/
+擁擠度，跟已測過的價格/報酬衍生timing訊號、日曆結構效應都不同），
+已登記進`HYPOTHESIS_QUEUE.md`，尚未開始第1關（下一輪第一步是資料
+可行性/樣本代表性查證，不是直接跳去測訊號）。`is_holdout_consumed()`
+確認仍為`False`，本輪未觸碰VAL_END以後任何資料。
+
+---
+
 ## 2026-09-03T06:54 — `hypothesis_queue`軌道排程：重新確認外部依賴未解鎖，佇列實質已空，新增#25月轉效應（尚未開始第1關）
 
 接手鎖檔為`LOCK_STALE`（上一輪PID 50392，30.0分鐘前）。`git status`確認
