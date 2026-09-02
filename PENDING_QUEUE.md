@@ -50,11 +50,13 @@
   未過，TRAIN p=0.4868/VAL p=0.1487皆遠不顯著，見`HYPOTHESIS_QUEUE.md`
   排隊順序總結item 4、`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#75）。
 - [ ] **三.2** B25 regime分情境報告、B26調整後Sharpe(×0.5/×0.7)+CVaR
-  ——**尚未執行，只完成了「排入佇列」這一半**：已在`HYPOTHESIS_QUEUE.md`
-  補一段B25/B26任務提醒（指向`BACKLOG.md`既有完整規格），但B25/B26本身
-  需要的實際計算（重跑B24-500回測+regime標記+分情境統計、調整後Sharpe/
-  CVaR計算）還沒有人做——**不要誤以為寫了提醒等於做完**，這是留給下一輪
-  馬拉松cycle或後續session的真工作，繼續排在佇列裡不要劃掉。
+  ——**2026-09-02查證：B26其實已經在B24-500正式回測那輪一併做完**
+  （`research/B24_RESULTS.md`已有Sharpe×0.5/×0.7、CVaR(95%,日)、勝率
+  完整數字，`BACKLOG.md`狀態已補記✅），**只剩B25（regime分情境報告）
+  真的還沒做**——需要重跑B24-500用的500檔快取＋幫每個交易日標regime
+  （TAIEX vs 200日均線多空、20日報酬絕對值<3%盤整、60日滾動波動率
+  歷史前20%高波動）＋算三個板各情境下的年化報酬/勝率/MDD/隨機對照組
+  百分位，寫進報告。已派給獨立agent處理（見下方紀錄）。
 - [x] **三.3** `HYPOTHESIS_QUEUE.md`新增7條新方向（殘差動量/regime擇時
   overlay/產業內相對強度/betting-against-beta/台股三大法人連續買超/
   台股月營收公布事件效應/波動度目標化），各自經濟理由+事前綁定關卡——
