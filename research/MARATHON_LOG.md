@@ -13,6 +13,29 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T06:35 — `hypothesis_queue`軌道排程：#23狀態順序修正+#24（除權息季節行為效應）已結案FAIL
+
+接手鎖檔為`LOCK_STALE`（上一輪PID 66908，29.9分鐘前）。`git status`發現
+多個其他自動化來源殘留（`composite_*`/`f52w_high_*`/`dividend_yield_*`
+等run.log、`data/rate_limit_state.json`、`research/pit.py`修改），依協定
+不觸碰、不納入本輪commit。**先修正一個文件不一致**：`HYPOTHESIS_QUEUE.md`
+#23段落內兩則狀態（T05:52「未跑完」vs「已結案:FAIL」）文字順序跟實際
+時序相反（`MARATHON_LOG.md`確認T05:56的FAIL判定才是最終結論），已調整
+順序避免誤導。**#24（除權息季節行為效應）第1關**：新增
+`ex_dividend_seasonal_sanity.py`（用原始未還原收盤價，複用
+`adjust.py::adjustment_events()`）。100檔快取樣本62檔可用，443筆純
+現金股利事件（TRAIN267/VAL176）。Sanity PASS（7-9月旺季事件佔比69.8%
+符合已知結構事實、除息跌幅vs理論殖利率rho=+0.6858強確認資料完整性）。
+三個cheap gate（殖利率→除息前報酬/殖利率→除息後報酬/旺季vs非旺季
+填息率洗牌檢定）皆FAIL，percentile分別32.6/83.0(正負號相反)/
+87.0-86.2-60.6，皆未過90.0門檻（87.0/86.2雖接近仍依鐵律判死）。完整見
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#94(補#23核心比較)/#95。
+**佇列#20~24（使用者裁示新增5條）全數結案，剩餘#5/#6/#8/#10仍卡外部
+依賴，下一輪需先確認是否解鎖，未解鎖則判定佇列實質已空、需設計新
+假設軸**。本輪因USD budget將近用盡，commit+push後收工。
+
+---
+
 ## 2026-09-03T05:56 — `hypothesis_queue`軌道第二十六輪排程：#23（Piotroski F-score價值榜排雷閘門）已結案FAIL
 
 接手時取得鎖檔為`LOCK_STALE`（上一輪PID 55044，29.8分鐘前，疑似寫完

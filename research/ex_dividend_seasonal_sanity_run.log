@@ -1,0 +1,60 @@
+=== 除權息季節行為效應 sanity (HYPOTHESIS_QUEUE.md#24, standalone bonferroni_n=1) ===
+Sample: 100 names (SAMPLE_SEED=20260822), pre_window=5交易日, forward_horizon=20交易日, 用原始未還原收盤價
+  [7822] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [2381] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  progress 20/100, 13 usable so far
+  [8999] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [1606] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [1107] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [7418] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [7893] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  progress 40/100, 23 usable so far
+  [6958A] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [6232] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [7912] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  progress 60/100, 33 usable so far
+  [5528] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [5375] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  progress 80/100, 47 usable so far
+  [1221] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  [7896] adjustment_events ERROR (finmind 目前處於封鎖冷卻中（還剩約67.2分鐘，原因：HTTP 402 {"msg":"Requests reach the upper limit. https://finmindtrade.com/","status":402,"token_tail":""}），依「資料源禮儀」規則拒絕發送請求), dropping
+  progress 100/100, 62 usable so far
+
+62/100 檔股票有可用現金股利除息事件，總事件數=443
+
+月份分布：
+month
+2       5
+3      13
+4      17
+5       6
+6      69
+7     190
+8     102
+9      17
+10      4
+11      6
+12     14
+7-9月旺季事件佔比=69.8%
+
+除息觀測跌幅 vs 理論殖利率 Spearman rho=+0.6858 (p=0.0000, n=443) [資料完整性sanity，非策略訊號本身，應強正相關]
+
+TRAIN: 267筆事件跨11年 | VAL: 176筆事件跨4年
+
+[殖利率→除息前報酬(棄息殺盤)] TRAIN IC=+0.0180 (p=0.7722, n=262)
+[殖利率→除息前報酬(棄息殺盤)] VAL   IC=+0.0337 (p=0.6603, n=173)
+[殖利率→除息前報酬(棄息殺盤)] VAL |IC| vs 500次洗牌null percentile=32.6 (需要>=90.0), same_sign=True
+[殖利率→除息前報酬(棄息殺盤)] FAIL  reasons: ['null percentile=32.6未過門檻90.0']
+
+[殖利率→除息後報酬(填息漂移)] TRAIN IC=+0.0872 (p=0.1585, n=263)
+[殖利率→除息後報酬(填息漂移)] VAL   IC=-0.1114 (p=0.1457, n=172)
+[殖利率→除息後報酬(填息漂移)] VAL |IC| vs 500次洗牌null percentile=83.0 (需要>=90.0), same_sign=False
+[殖利率→除息後報酬(填息漂移)] FAIL  reasons: ['train/val正負號不一致', 'null percentile=83.0未過門檻90.0']
+
+填息率：旺季(7-9月) vs 非旺季，洗牌置換檢定（N=500）：
+  20交易日內填息率：旺季=48.9%  非旺季=41.8%(n=134)  差距=+7.1%  vs洗牌null percentile=87.0 (需要>=90.0)
+  60交易日內填息率：旺季=65.4%  非旺季=58.2%(n=134)  差距=+7.2%  vs洗牌null percentile=86.2 (需要>=90.0)
+  120交易日內填息率：旺季=72.8%  非旺季=68.7%(n=134)  差距=+4.2%  vs洗牌null percentile=60.6 (需要>=90.0)
+
+=== 第1關 SANITY PASS ===
+（sanity只驗證資料完整性與事件分布合理性；上面兩個cheap gate各自獨立判定CHEAP_PASS/FAIL，是否進入第2關以後由兩者結果+使用者裁示的「稅後淨alpha」前置條件共同決定，不是sanity PASS就自動晉級）
