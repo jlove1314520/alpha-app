@@ -924,3 +924,24 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 03:31（第300輪，最舊）／TW 04:02（第301輪）／FUT 04:31（第302輪，最新）——依輪替選US。與上一輪US相隔約1小時30分，略超出正常30分鐘排程間隔（幅度不大，非崩潰跡象）。獨立複查三個解除條件皆未成立：(1)`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；(2)`LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535「接近顯著」），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者新回應；(3)`MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。US軌依舊沒有組合策略相關工作可做（規格書是台股專屬，全部圍繞TAIEX/TWSE樣本），`US_MARATHON_STATE.md`「下一步」清單本質仍是單因子相關工作（`f_us_low_vol`中型股深挖、`f_us_momentum_12m`中型股深挖、擴充`KNOWN_DELISTED`名單），同round111起連續判斷邏輯一致，保守跳過。**本輪整輪跳過，未做任何實質工作。**`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`開工時確認工作目錄僅既有殘留變更（`data/rate_limit_state.json`／`research/pit.py`／`research/STRATEGY_GRAVEYARD.md`已修改，另有多個未追蹤log/腳本檔案），皆非本輪產生、研判為另一互動session/`AlphaHypothesisQueue`軌道留下，未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約194輪、跨度約176.4小時（約7.35天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
 
 詳見`REPORT.md`第303輪條目、`US_MARATHON_STATE.md`本輪記錄。
+
+## 2026-09-03T06:31+08:00 — 馬拉松第306輪：跳過（暫停規則生效中，無組合策略相關工作可做）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 05:01（第303輪，最舊）／TW 05:32（第304輪）／FUT 06:01（第305輪，最新）——依輪替選US。與上一輪US（第303輪，05:01）相隔約1小時30分，略超出正常30分鐘排程間隔（幅度不大，非崩潰跡象）。
+
+獨立複查三個解除條件：
+1. `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit——**未成立**。
+2. `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535「接近顯著」），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者新回應——**未成立**。
+3. `MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除——**未成立**。
+
+US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，跟US軌無關），`US_MARATHON_STATE.md`下方「下一步」清單本質仍是單因子相關工作（`f_us_low_vol`中型股深挖、`f_us_momentum_12m`中型股深挖、擴充`KNOWN_DELISTED`名單），同round111起連續判斷邏輯一致，保守跳過。
+
+**本輪整輪跳過，未做任何實質工作。**
+
+驗證：`python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` → `False`（本輪零API呼叫）。
+
+`git status`開工時確認工作目錄僅既有殘留變更（`data/rate_limit_state.json`／`research/pit.py`已修改，另有多個未追蹤log/腳本檔案），皆非本輪產生，研判為另一互動session/`AlphaHypothesisQueue`軌道留下，未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約197輪、跨度約177.9小時（約7.41天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+詳見`REPORT.md`第306輪條目、`US_MARATHON_STATE.md`本輪記錄。
