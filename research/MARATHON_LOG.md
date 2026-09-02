@@ -13,6 +13,33 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T04:55 — `hypothesis_queue`軌道：#23 Piotroski F-score價值榜排雷閘門，接續「原始vs+gate比較」步驟，本輪未跑完
+
+延續#23（地基+第1關sanity已PASS，見`TRIALS_LEDGER.md`#93）「下一步」——
+新增`piotroski_fscore_gate_v1.py`：重用既有B24-500快取
+（`value_board_v2_sample_cache_liquidity500.pkl`，不重抓價量）+對500檔
+各自呼叫`piotroski_fscore_sanity.py::_fscore_components()`算F-score+asof
+join回每檔股票的日曆，疊加在`compute_scores_v2()`候選池上做F-score門檻
+（自適應選F>=8/7/6，取平均候選數>=TOP_N(20)裡最嚴格的門檻），跑TRAIN+
+VALIDATION兩期「真實回測」（本輪刻意跳過100次隨機控制組，先看方向性
+alpha/mine_rate證據，見腳本docstring完整理由），跟既有基準
+（`data/value_board_v2_pit_backtest_liquidity500_full.csv`，原始版TRAIN
+alpha p=0.2672／VAL alpha p=0.1441皆不顯著）比較。**本輪執行後未觀察到
+完成**：先用shell層級`nohup ... &`背景執行，套用先前dividend_yield/
+f52w_high已知的教訓（headless呼叫結束時shell層背景行程被一併終止，
+process成功exit 0但log完全空白，等同沒跑），改用Bash工具原生
+`run_in_background`機制重跑一次；`tasklist`確認python3.13.exe行程仍在
+執行中（記憶體占用~741MB，跟500MB pickle快取載入量級吻合，非卡死），
+但受本輪剩餘時間/USD預算限制，未等到腳本印出任何一行輸出或完成，
+`piotroski_fscore_gate_v1_run.log`仍是空檔案。**尚未結案**——下一輪
+直接重跑`python research/piotroski_fscore_gate_v1.py`，若這次背景行程
+真的沒有存活下來，資料層仍受益：500檔中先前已快取過財報的股票（本機
+`data/raw/*.parquet`）不需要重抓，只有真正缺快取的股票需要付節流時間，
+所以重跑不是從零開始，跟checkpoint機制精神類似（雖然這支腳本本身沒有
+落盤checkpoint，是靠底層parquet快取自然達成部分續跑效果）。
+
+---
+
 ## 2026-09-03T04:27（系統時間，hypothesis_queue排程，第二十四輪）— #23 Piotroski F-score當價值榜排雷閘門，地基完成+第1關sanity — SANITY_PASS（非最終判準）
 
 本輪先補上一輪遺留的待辦：把上一輪（#22）的FAIL結果同步進「排隊順序

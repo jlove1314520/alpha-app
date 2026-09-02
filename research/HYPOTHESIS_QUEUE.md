@@ -1426,6 +1426,17 @@ F>=8均值0.0%（在**未經value_board_v2價值篩選的一般樣本**上兩個
 版本的alpha與地雷率，這是本條「驗證改造」小節明講的核心比較，走完整
 GATE_SEQUENCE剩餘關卡，不是重新驗證F-score本身IC。
 
+**狀態（2026-09-03T04:55更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第二十五輪
+排程，本輪未跑完）**：新增`piotroski_fscore_gate_v1.py`——重用B24-500
+既有快取（不重抓價量）+對500檔算F-score+自適應選門檻（F>=8/7/6取平均
+候選數>=TOP_N裡最嚴格者），跑TRAIN/VALIDATION真實回測（本輪刻意跳過
+100次隨機控制組，先看方向性alpha/mine_rate證據）跟既有基準比較。本輪
+受時間/預算限制**未觀察到腳本完成**，`tasklist`確認背景行程仍在執行中
+（記憶體量級跟500MB快取吻合，非卡死），完整心跳見`MARATHON_LOG.md`
+2026-09-03T04:55條目。**尚未結案**——下一輪直接重跑
+`python research/piotroski_fscore_gate_v1.py`即可（底層parquet快取
+已涵蓋部分股票，非從零重跑）。
+
 ---
 
 ### 24. 除權息季節行為效應（台股專屬微結構，2026-09-03使用者裁示新增）
