@@ -13,6 +13,27 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T23:58 — hypothesis_queue軌道：補齊#17第3/5/6關（本輪與另一
+併行實例同時作業，發現對方已完成第2/7/8關並結案FAIL，本輪不重工只補缺）
+
+本輪接手時發現本機同時有另一個`hypothesis_queue`相關實例正在/剛完成同一
+條假設的作業（`marathon_lock.py`本輪`acquire`回傳乾淨`LOCK_ACQUIRED`非
+陳舊，但工作目錄同時出現另一方寫入的`f52w_high_portfolio_v1.py`存活背景
+行程PID 5099、以及T23:48的心跳條目與#17已結案FAIL的完整`HYPOTHESIS_
+QUEUE.md`/`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#85條目——研判是兩個
+`AlphaHypothesisQueue`排程觸發時間點重疊，或另一方鎖檔生命週期與本輪不
+同步，本輪未深入追查根因，僅誠實記錄這個現象供之後排查用）。查證後對方
+的第7關數字（TRAIN alpha p=0.3155、VAL alpha p=0.0831）跟本輪自己獨立
+算出的完全一致，未重工。**本輪唯一新增的是對方沒做的第3/5/6關**：執行
+本機已存在但未跑過的`f52w_high_gates.py`——第3關參數密集高原PASS（8/8
+網格點皆正報酬）、第5關leave-one-out PASS（拿掉2017年後複利仍正+48.29%）、
+第6關逐年一致性FAIL（6年中僅4年正報酬，未達5/6門檻）。已補進
+`TRIALS_LEDGER.md`#86、`STRATEGY_GRAVEYARD.md`#17條目補充段落，不影響
+已結案的FAIL判定（第6關FAIL跟第7關alpha不顯著是兩個獨立死因，互相強化）。
+**未觸碰對方已寫好的`HYPOTHESIS_QUEUE.md`#17狀態段落跟#18起步作業
+（`factor_ic_short_term_reversal_1w.py`，對方似乎已在推進，本輪不重複
+開工#18，交給對方或下一輪接續）。**
+
 ## 2026-09-02T23:48 — hypothesis_queue軌道：接續#17（52週高點接近度）走完第2/7/8關 — 結案FAIL
 
 `CLAUDE.md`「提案先於執行」規則已由使用者於本輪前補上第二版更精確裁示

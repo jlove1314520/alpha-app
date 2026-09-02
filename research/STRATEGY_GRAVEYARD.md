@@ -636,7 +636,19 @@ cheap gate，2026-09-02FAIL）
   Top20」這個具體portfolio構造，跟PEAD/股利率同一種死法。未來若要重測，
   值得優先嘗試放大樣本數（目前僅100檔快取樣本、80檔可用）或調整Top-N/
   排名權重，而非直接放棄這個因子方向——這是本佇列目前最接近過關的候選。
-- **原始記錄**：`TRIALS_LEDGER.md`#85、`HYPOTHESIS_QUEUE.md`#17、
+- **補充（2026-09-02T23:55，另一輪接續，`TRIALS_LEDGER.md`#86）**：上面
+  只做了第2/4/7/9關，複製了PEAD/股利率/低波動三個先例共同跳過第3/5/6關
+  的缺口——本輪新增`f52w_high_gates.py`補齊：**第3關參數密集高原PASS**
+  （TOP_N∈{10,15,20,25,30}、REBALANCE_DAYS∈{10,21,42,63}共8個網格點，
+  8/8皆正報酬）、**第5關leave-one-out PASS**（拿掉貢獻最大的2017年
+  (+28.00%)後剩餘複利報酬仍為正+48.29%）、**第6關逐年一致性FAIL**（TRAIN
+  期6個年度中僅4個正報酬，2015/2018為負，未達>=5/6門檻）。第6關FAIL跟
+  第7關alpha不顯著是兩個獨立死因、互相強化，不是單一角度的偶然結論。
+  依`HYPOTHESIS_QUEUE.md`「統一關卡」不得跳關的要求，這裡補上了PEAD
+  (#73)/股利率(#75)/低波動(#82)三個先前案例都欠缺的第3/5/6關資料。
+- **原始記錄**：`TRIALS_LEDGER.md`#85/#86、`HYPOTHESIS_QUEUE.md`#17、
   `f52w_high_portfolio_v1.py`（新增，可重複執行，checkpoint機制已驗證
-  可跨次接續不重算）、`data/f52w_high_portfolio_v1_results.csv`（新增）。
+  可跨次接續不重算）、`f52w_high_gates.py`（新增，可重複執行）、
+  `data/f52w_high_portfolio_v1_results.csv`、`data/f52w_high_gate3_grid.csv`、
+  `data/f52w_high_gate6_yearly.csv`（新增）。
   佇列#17結案，接續佇列第一順位#18（短期反轉1週）。
