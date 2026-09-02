@@ -677,3 +677,38 @@ cheap gate，2026-09-02FAIL）
   `factor_ic_short_term_reversal_1w.py`（新增，可重複執行）。佇列#18
   結案，佇列#1~18原始排隊全部結案，本輪新增#19（跨市場美股隔夜報酬
   外溢效應）接續。
+
+### 跨市場美股隔夜報酬外溢效應 擇時overlay層（HYPOTHESIS_QUEUE.md#19，2026-09-03FAIL）
+- **死因**：第1關cheap gate（`TRIALS_LEDGER.md`#88）已CHEAP_PASS（美股
+  ^GSPC隔夜報酬對台股^TWII次日報酬時序相關r=0.40~0.46，train/val皆
+  p<0.0001，本佇列證據最強候選），這次把訊號轉成具體擇時規則
+  （`spillover_overlay_v1.py`：`exposure=0.3 if us_ret<0.0 else 1.0`）
+  走GATE_SEQUENCE第2關以後。**第2關隨機控制組PASS**（打亂exposure時序
+  N=100，TRAIN/VAL真實值percentile皆100.0）、**第3關參數密集高原PASS**
+  （49點網格78%報酬為正），但**第6關逐年一致性FAIL**：TRAIN期
+  2010~2020共11個年度僅4個年度報酬為正，遠低於>=5/6門檻，且TRAIN總報酬
+  本身-22.10%大幅落後同期買進持有+79.42%，依協定第6關未過快殺結案，
+  未進第4/7/8/9關。
+- **根本原因**：THRESHOLD=0.0（美股當日只要收黑就降曝險）觸發頻率接近
+  每天一半交易日，把一個原本設計成「危機才降曝險」的防禦型regime
+  overlay，實務上變成近乎逐日翻轉的高頻方向性擇時賭注——扣除頻繁切換的
+  手續費/證交稅/滑價後，即使方向判斷本身正確也被成本侵蝕，加上台股
+  2010-2020是強勢多頭格局，任何頻繁踏空的機制都容易系統性跑輸買進持有。
+- **第5關「退化通過」的誠實記錄（不是真PASS，是判準邊界情形）**：
+  `gate5_leave_one_out()`沿用`f52w_high_gates.py`同一套判準（「原本為正
+  的話，拿掉最大貢獻年份後不能翻負」），但TRAIN總報酬本身已為負，判準
+  條件在數學上自動滿足，不代表機制真的通過leave-one-out的實質檢驗——
+  這不影響最終FAIL結論（已在更早的第6關被快殺），但記錄下來提醒未來
+  類似判準寫法在輸入可能為負報酬時要另外處理，不能照抄。
+- **不泛化成什麼**：不泛化成「跨市場美股隔夜外溢相關性沒用」——因子/
+  相關性層級的第1關CHEAP_PASS（`TRIALS_LEDGER.md`#88）不受這次結果
+  推翻，死的只是「THRESHOLD=0.0+EXPOSURE_DOWN=0.3」這個切換過於頻繁的
+  具體擇時規則。未來若要重測，建議方向是拉大THRESHOLD（例如只在美股
+  當日跌幅超過-1%~-2%才觸發，把切換頻率降到真正regime-gate等級——一年
+  觸發數次而非隔天翻轉），但這是未來獨立測試的變體，不能拿本次FAIL的
+  具體參數反推「拉大threshold應該會PASS」當結論。
+- **原始記錄**：`TRIALS_LEDGER.md`#89、`HYPOTHESIS_QUEUE.md`#19、
+  `spillover_overlay_v1.py`（新增，可重複執行）、
+  `data/spillover_overlay_gate3_grid.csv`/`data/spillover_overlay_gate6_yearly.csv`
+  （新增）。佇列#19結案，接續佇列第一順位#20（純毛利率因子Gross
+  Profitability）。

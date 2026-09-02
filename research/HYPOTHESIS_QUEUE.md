@@ -873,6 +873,18 @@ Piotroski F-score當價值榜排雷閘門、#24除權息季節行為效應。**�
 →#20→#21→#22→#23→#24**，不因為第1關CHEAP_PASS就跳過#20~24優先度或
 提前判定#19最終PASS/FAIL。
 
+**2026-09-03（第二十輪排程更新，#19已結案：FAIL）**：新增
+`spillover_overlay_v1.py`——把#19已CHEAP_PASS的相關性轉成具體擇時規則
+（`exposure=0.3 if 美股當日收黑 else 1.0`），走完GATE_SEQUENCE第2/3關皆
+PASS，但**第6關逐年一致性FAIL**（TRAIN期11個年度僅4個正報酬，遠低於
+>=5/6門檻，且TRAIN總報酬-22.10%大幅落後同期買進持有+79.42%），依協定
+快殺結案，未進第4/7/8/9關。根因是THRESHOLD=0.0觸發頻率過高（近乎逐日
+翻轉），把防禦型regime overlay變成高頻方向性賭注，被切換成本+踏空
+多頭格局侵蝕。**不泛化成相關性沒用**——第1關CHEAP_PASS（#88）不受影響，
+死的是這個具體擇時規則。完整見`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#89。**佇列#19結案，接續佇列第一順位#20（純毛利率
+因子Gross Profitability）**。
+
 ---
 
 ### 16. 同產業配對交易 / 統計套利（Pair Trading / Statistical Arbitrage）

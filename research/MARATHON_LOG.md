@@ -13,6 +13,23 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T09:xx（系統時間，見commit時間戳）— hypothesis_queue軌道：#19跨市場美股隔夜報酬外溢效應第2關以後 — FAIL（第6關逐年一致性未過，快殺結案）
+
+新增`spillover_overlay_v1.py`，把#19第1關已CHEAP_PASS（`TRIALS_LEDGER.md`
+#88）的相關性轉成具體擇時規則（`exposure=0.3 if 美股當日收黑 else 1.0`，
+THRESHOLD=0.0/EXPOSURE_DOWN=0.3事前綁定非搜尋）。第2關隨機控制組PASS
+（打亂exposure時序N=100，TRAIN/VAL真實值percentile皆100.0）、第3關參數
+密集高原PASS（49點網格78%正報酬），**第6關逐年一致性FAIL**（TRAIN期
+2010~2020共11年僅4年正報酬，遠低於>=5/6門檻，且TRAIN總報酬-22.10%大幅
+落後同期買進持有+79.42%），依協定快殺結案，未進第4/7/8/9關。根因：
+THRESHOLD=0.0觸發頻率近乎逐日，把防禦型overlay變成高頻方向賭注，被
+切換成本+多頭格局踏空侵蝕。不泛化成相關性沒用——第1關CHEAP_PASS不受
+影響。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#89、
+`HYPOTHESIS_QUEUE.md`#19。**佇列#19結案，接續佇列第一順位#20（純毛利率
+因子Gross Profitability），下一輪從第1關sanity開始。**
+
+---
+
 ## 2026-09-03T00:54 — hypothesis_queue軌道：#19跨市場美股隔夜報酬外溢效應第1關cheap gate — CHEAP_PASS（本佇列證據最強候選，尚未結案）
 
 新增`spillover_overnight_gate.py`：對每個台股交易日t，配對「日曆日期
