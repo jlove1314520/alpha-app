@@ -1460,3 +1460,17 @@ TW軌兩項地基背景工作獨立複查：`data/backfill_state.json`重新統�
 `is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認除既有殘留變更（`../data/rate_limit_state.json`已修改）外，另偵測到`HYPOTHESIS_QUEUE.md`／`MARATHON_LOG.md`／`STRATEGY_GRAVEYARD.md`／`factors.py`已staged（git index區，`M`）、`factor_ic_short_term_reversal_1w.py`為新增未追蹤檔案，另有10個未追蹤log/腳本檔案。staged的四項研判是另一個已核准的獨立自主馬拉松軌道（`AlphaHypothesisQueue`，見`../CLAUDE.md`「適用範圍界線」段落點名的既有排程性質腳本之一）留下的進行中變更，不屬本協定（`MARATHON_PROTOCOL.md`／三軌TW/US/FUT）管轄範圍；其餘未追蹤檔案皆為另一互動session殘留。以上均未觸碰、未納入本輪commit。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約186輪、跨度約171.4小時（約7.14天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-09-03T02:31+08:00 — 馬拉松第298輪：跳過（暫停規則生效中），偵測到陳舊鎖檔（上一輪疑似失敗），複查三個解除條件皆未成立
+
+**本輪取鎖時偵測到`LOCK_STALE`**（`marathon_lock.py acquire`輸出`LOCK_STALE (held by 60884, 60.0 min old) -- recovering`，不是乾淨的`LOCK_ACQUIRED`）——依`MARATHON_PROTOCOL.md`第0節第2步規則記錄：**上一輪疑似失敗（陳舊鎖檔被回收）**。查了一下`git log`跟本輪`git status`，沒有發現任何殘留的未commit孤兒工作或半完成的檔案改動（只有既有的其他互動session殘留log/腳本，見下），研判上一輪（第297輪，US，01:01）本身工作內容單純（同本輪一樣是「跳過」判定，沒有實質資料寫入），很可能只是收尾階段（寫心跳/commit/push/release）某一步卡住或程序被中斷，沒有造成資料損毀，但如實記錄這個觀察供後續維護者參考。
+
+三軌時間戳：TW 00:02（第295輪，最舊）、FUT 00:31（第296輪）、US 01:01（第297輪，最新）——依輪替選TW。與上一輪TW（第295輪，00:02）相隔約2小時29分，明顯超出正常30分鐘排程間隔（且中間有本輪偵測到的陳舊鎖檔插曲），如實記錄此觀察。
+
+獨立複查暫停規則三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；(2) `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535「接近顯著」），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者新回應；(3) `MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。三者皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項地基背景工作獨立複查：`data/backfill_state.json`重新統計done=2597/skip=469，共3066筆，`universe()`回傳全市場3196檔，3066/3196≈95.9%，跟第295輪一致無變化，遠高於80%門檻，不需要跑`backfill_universe.py`；T86回補自第164輪起維持100%完成記錄，本輪未重新掃描（理由同過往：無新資料源變動，重複掃描不會產生新資訊）。**沒有已知的剩餘允許工作項目**，(a)/(b)仍待使用者裁示，本輪不代為啟動。**TW軌本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認除既有殘留變更（`../data/rate_limit_state.json`已修改）外，另有15個未追蹤log/腳本檔案（`b25_regime_report_run.log`／`dividend_yield_portfolio_v1_run.log`／`f52w_high_gates_run.log`等），皆為另一互動session（`AlphaHypothesisQueue`軌道，`git log`可見同時段持續有該軌道自己的commit，例如`909f522` hypothesis_queue軌道#20因子測試）留下的殘留，未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約189輪、跨度約173.9小時（約7.25天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
