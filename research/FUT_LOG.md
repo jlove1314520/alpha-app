@@ -1595,3 +1595,22 @@ FUT軌round104留下的盤別效應第三批「下一步」本質仍是單因子
 round104的「下一步」1–4項維持原狀不變，等使用者解除暫停規則後從那裡接續。沒有新增 `TRIALS_LEDGER.md` 列。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約178輪、跨度約154.4小時（約6.43天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-09-02T21:32+08:00 — 第290輪（FUT軌，跳過，暫停規則生效中）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 07:01（第287輪，最舊）、US 07:31（第288輪）、TW 21:28（第289輪，最新）——依輪替選FUT。本輪與上一次FUT輪（07:01）相隔約14.5小時，明顯超出正常30分鐘排程間隔，如實記錄此觀察（鎖檔本身乾淨，非陳舊鎖檔回收）。
+
+獨立複查三個解除條件皆未成立：
+1. `PORTFOLIO_STRATEGY_SPEC.md` 第3行仍「狀態：待使用者確認」，`git log --oneline -- PORTFOLIO_STRATEGY_SPEC.md` 確認自建立（`fa369b9`）以來仍只有這一個commit。
+2. `LEADS.md` 最新 `portfolio_multifactor_v2` 條目（round202補充）判定仍FAIL（alpha p>0.05未顯著），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩選項仍未見使用者新回應。
+3. `MARATHON_PROTOCOL.md` 第0節暫停規則本文本輪完整重讀一遍，未被修改移除。
+
+FUT軌round104留下的盤別效應第三批「下一步」本質仍是單因子相關工作；`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，FUT軌沒有組合策略相關工作可接，且「宇宙全量回補」（第5b節）是TW軌專屬的地基工作、FUT軌沒有對應項目，保守跳過。
+
+開工前`git status`確認僅既有非本輪產生的殘留變更（`../index.html`／`TRIALS_LEDGER.md`／`pair_trading_sanity.py`已修改，另有數個未追蹤log/腳本檔案），皆為另一互動session留下，未觸碰、未納入本輪commit。
+
+**本輪整輪跳過，未做任何實質工作。** `is_holdout_consumed()` 確認 `False`（本輪零API呼叫）。
+
+round104的「下一步」1–4項維持原狀不變，等使用者解除暫停規則後從那裡接續。沒有新增 `TRIALS_LEDGER.md` 列。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約181輪、跨度約168.9小時（約7.04天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
