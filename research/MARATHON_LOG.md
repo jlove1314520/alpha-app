@@ -13,6 +13,28 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T05:56 — `hypothesis_queue`軌道第二十六輪排程：#23（Piotroski F-score價值榜排雷閘門）已結案FAIL
+
+接手時取得鎖檔為`LOCK_STALE`（上一輪PID 55044，29.8分鐘前，疑似寫完
+#23上一則狀態後未及commit就中斷）。`git status`發現多個其他自動化來源
+留下的未commit殘留（`composite_*`/`f52w_high_*`/`dividend_yield_*`等
+run.log與腳本），依協定不觸碰、不納入本輪commit。發現前一輪留下**4個
+重複的`piotroski_fscore_gate_v1.py`背景行程**同時在跑（headless呼叫
+結束時背景行程未被清理，累積成殭屍行程），本輪確認時4者皆已自然執行
+完畢，`data/piotroski_fscore_gate_v1_results.csv`已產出且內容完整可用。
+**核心比較**（原始`value_board_v2` vs +F-score gate）：自適應選定
+F>=6（最寬鬆門檻）。原始：TRAIN alpha=+6.26%(p=0.2672)/mine_rate=25.3%；
+VAL alpha=+12.38%(p=0.1441)/mine_rate=16.9%。+gate：TRAIN alpha=+7.92%
+(p=0.4743)/mine_rate=29.1%；VAL alpha=+5.24%(p=0.1772)/mine_rate=5.7%
+（VAL return由+85.52%驟降至+33.31%，交易數718→98）。依#23事前訂的
+「兩期alpha從不顯著轉顯著+地雷率下降才算證明」判準，本次兩期alpha
+p值皆變差、地雷率一升一降無統一改善，**判FAIL**。完整見
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#94、`HYPOTHESIS_QUEUE.md`
+#23。**佇列#23結案，接續佇列第一順位#24（除權息季節行為效應），尚未
+開始第1關**。本輪即將commit+push收工，下一輪從#24第1關sanity開始。
+
+---
+
 ## 2026-09-03T05:52 — `hypothesis_queue`軌道：#23接續，發現並修正「重複launch造成4個併發行程」的執行方式問題，仍未跑完
 
 接續上一輪（04:55T那則）留下的`piotroski_fscore_gate_v1.py`背景行程。本輪
