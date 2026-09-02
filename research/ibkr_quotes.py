@@ -71,6 +71,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import requests
 from ib_async import IB, Index, Stock
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -198,6 +199,40 @@ def _extract_quote(ticker) -> dict:
     }
 
 
+YAHOO_TIMEOUT_SEC = 5
+# 2026-09-02新增（使用者裁示「指數修復：改走Yahoo免費源寫入報價檔」）：
+# 道瓊(CME)/費半(PHLX)這個paper帳戶確認沒有市場數據訂閱，IBKR一律回傳
+# None（見模組docstring「已知限制」，已用使用者本機Gateway多次實測
+# 確認不是暫時性問題）。先前的設計是讓App前端在client-side退回
+# data/market_us.json（Yahoo來源，但那是每日排程跑一次的收盤快照，
+# 盤中看到的其實是「昨天收盤」不是「現在」）。這裡改成在這支腳本自己
+# 執行的當下，對IBKR回傳None的指數直接呼叫Yahoo Finance免費的chart
+# API，把當下抓到的Yahoo價格寫進同一份quotes_ibkr.json，跟這支腳本
+# 其他報價共用同一個更新頻率（盤中每1~5分鐘一次，見docstring「掛排程」），
+# 比每日快照更接近「現在」。**誠實標示**：這終究是Yahoo免費源、不是
+# IBKR真即時，data_type統一標"YAHOO_DELAYED"，不偽裝成REALTIME。
+def _fetch_yahoo_index_quote(yahoo_symbol: str) -> dict | None:
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{yahoo_symbol}"
+    try:
+        # 不帶User-Agent容易被Yahoo以「非瀏覽器來源」擋掉，這裡假裝一般瀏覽器請求
+        # ——這是存取這個免費公開端點的既有慣例做法，不是規避付費/繞過驗證。
+        resp = requests.get(url, params={"range": "1d", "interval": "1m"},
+                             headers={"User-Agent": "Mozilla/5.0"}, timeout=YAHOO_TIMEOUT_SEC)
+        resp.raise_for_status()
+        meta = resp.json()["chart"]["result"][0]["meta"]
+        last = meta.get("regularMarketPrice")
+        prev_close = meta.get("previousClose") or meta.get("chartPreviousClose")
+        if last is None:
+            return None
+        change_pct = round((last - prev_close) / prev_close * 100.0, 4) if prev_close else None
+        return {"last": float(last), "bid": None, "ask": None,
+                "close": float(prev_close) if prev_close is not None else None,
+                "change_pct": change_pct, "data_type": "YAHOO_DELAYED", "source": "yahoo_fallback"}
+    except Exception as e:
+        print(f"    [Yahoo fallback] {yahoo_symbol} 抓取失敗（誠實留空，不塞舊資料）：{type(e).__name__}: {e}")
+        return None
+
+
 def main():
     ib = IB()
     try:
@@ -246,9 +281,19 @@ def main():
             q = _extract_quote(ticker)
             q["exchange"] = used_exchange
             q["label"] = meta["label"]
-            quotes[us_key] = q
             ib.cancelMktData(contract)
-            print(f"  [US指數] {meta['label']}: last={q['last']} ({q['data_type']}, exchange={used_exchange})")
+            if q["last"] is None:
+                # IBKR這個標的沒有市場數據訂閱（已知限制，見模組docstring），
+                # 改抓Yahoo免費源當替代，不是留null等前端自己想辦法退回舊快照。
+                yq = _fetch_yahoo_index_quote(us_key)
+                if yq is not None:
+                    q.update(yq)
+                    print(f"  [US指數] {meta['label']}: IBKR無訂閱→改用Yahoo，last={q['last']} ({q['data_type']})")
+                else:
+                    print(f"  [US指數] {meta['label']}: IBKR無訂閱，Yahoo備援也失敗，誠實留null")
+            else:
+                print(f"  [US指數] {meta['label']}: last={q['last']} ({q['data_type']}, exchange={used_exchange})")
+            quotes[us_key] = q
 
         payload = {
             "fetched_at": datetime.now(TW_TZ).isoformat(),

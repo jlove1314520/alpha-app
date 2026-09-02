@@ -1722,6 +1722,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </svg>`;
   }
 
+  // 2026-09-02新增（使用者裁示「誠實標示：每個報價旁加badge『即時/延遲~15分/
+  // 盤後』，美股IBKR paper一律標延遲，不得偽裝即時」）：統一的資料新鮮度badge
+  // 文字對照表，供所有顯示報價來源的地方共用，避免各處各寫一套、字眼不一致。
+  // 沿用IBKR/Shioaji既有回報的data_type字串（見ibkr_quotes.py/shioaji_quotes.py
+  // 的MARKET_DATA_TYPE_LABEL），不自己發明新分類。
+  function intradayDataTypeLabel(dt){
+    if(dt==='REALTIME')return '即時';
+    if(dt==='DELAYED')return '延遲~15分';
+    if(dt==='YAHOO_DELAYED')return 'Yahoo延遲~15分';
+    if(dt==='FROZEN'||dt==='DELAYED_FROZEN')return '盤後';
+    return dt||'未知';
+  }
   // 有近即時報價（20分鐘內）就優先用它顯示，並標「盤中 延遲約N分」；沒有就照舊用FinMind
   // 日線，不會因為加了這個功能反而讓沒有近即時資料的股票顯示變差。
   function intradayTag(iq){
@@ -1729,8 +1741,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const mins=Math.max(1,Math.round(iq.ageMin));
     if(iq.source==='ibkr'||iq.source==='sinopac'){
       const label=iq.source==='ibkr'?'IBKR':'Shioaji';
-      const dt=iq.dataType==='REALTIME'?'即時':(iq.dataType==='DELAYED'?'延遲':(iq.dataType||'未知'));
-      return `<span style="color:var(--warn);margin-left:4px">· ${label} ${dt} 約${mins}分前</span>`;
+      return `<span style="color:var(--warn);margin-left:4px">· ${label} ${intradayDataTypeLabel(iq.dataType)} 約${mins}分前</span>`;
     }
     return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
   }
@@ -2114,10 +2125,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         // IBKR沒有近20日走勢序列，sparkline借用既有Yahoo資料源的（不影響
         // 主數字/漲跌%的即時性，走勢線本來就不需要跟主數字同一個資料源）。
         const item={close:ibkrQ.last,change_pct:ibkrQ.change_pct,sparkline:idx[id]&&idx[id].sparkline};
-        const dt=ibkrQ.data_type==='REALTIME'?'即時':(ibkrQ.data_type==='DELAYED'?'延遲':(ibkrQ.data_type||'未知'));
-        return {html:idxRowHtml(label,`IBKR ${dt}`,item),date:INTRADAY_IBKR.fetched_at};
+        // 2026-09-02新增：ibkr_quotes.py對IBKR無訂閱的指數（道瓊/費半）現在會
+        // 自己改抓Yahoo寫進同一份quotes_ibkr.json，data_type多一種"YAHOO_
+        // DELAYED"，來源標籤要老實反映「這其實是Yahoo不是IBKR」，不能沿用
+        // 「IBKR xxx」這個前綴誤導使用者。
+        const srcLabel=ibkrQ.data_type==='YAHOO_DELAYED'?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`;
+        return {html:idxRowHtml(label,srcLabel,item),date:INTRADAY_IBKR.fetched_at};
       }
-      return {html:idxRowHtml(label,'Yahoo Finance',idx[id]),date:idx[id]&&idx[id].as_of};
+      return {html:idxRowHtml(label,'Yahoo Finance（每日收盤快照）',idx[id]),date:idx[id]&&idx[id].as_of};
     });
   }
   // 2026-09-01新增：加權指數優先用Shioaji即時報價(quotes_sinopac.json)，
@@ -3677,7 +3692,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.2148';
+  const APP_VERSION='2026-09-02.2241';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

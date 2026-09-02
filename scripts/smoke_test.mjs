@@ -644,10 +644,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("18. IBKR Paper下單UI卡片：美股/台股分工正確、伺服器未啟動時有清楚提示、無token時前端擋下送出",
     ibkrUiErrors.length === 0, ibkrUiErrors.join("; "));
 
+  // 19.【2026-09-02新增，即時價格四修之一：指數Yahoo備援誠實標示】
+  // route攔截假quotes_ibkr.json，模擬道瓊/費半這種IBKR無訂閱、改用Yahoo
+  // 備援寫回的情境（data_type="YAHOO_DELAYED"），驗市場頁指數badge正確
+  // 顯示「Yahoo 延遲~15分」，不是沿用舊邏輯誤標成「IBKR 未知」或忽略
+  // 這個新data_type值。
+  const yahooFallbackErrors = [];
+  try {
+    const fakeIbkr = {
+      fetched_at: new Date().toISOString(), connected: true, account_type: "paper", error: null,
+      quotes: {
+        "^DJI": { last: 52999.12, bid: null, ask: null, close: 52766.88, change_pct: 0.44,
+                  data_type: "YAHOO_DELAYED", source: "yahoo_fallback", exchange: "CME", label: "道瓊工業指數" },
+      },
+    };
+    await page.route("**/data/quotes_ibkr.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeIbkr) })
+    );
+    await page.evaluate(() => { INTRADAY_IBKR = null; });
+    await page.evaluate(() => window.go("market"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.setMarketToggle("market", "US"));
+    await page.waitForTimeout(1500);
+    const html = await page.evaluate(() => document.getElementById("us-idx-rows")?.innerHTML || "");
+    if (!html.includes("Yahoo 延遲")) {
+      yahooFallbackErrors.push(`YAHOO_DELAYED的道瓊指數沒有顯示「Yahoo 延遲」badge，實際內容片段：${html.slice(0, 300)}`);
+    }
+    if (html.includes("IBKR 未知") || html.includes("IBKR YAHOO_DELAYED")) {
+      yahooFallbackErrors.push("YAHOO_DELAYED被誤標成IBKR來源，沒有誠實反映這其實是Yahoo備援");
+    }
+    await page.unroute("**/data/quotes_ibkr.json**");
+  } catch (e) {
+    yahooFallbackErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("19. 指數Yahoo備援誠實標示：IBKR無訂閱改用Yahoo時badge正確顯示「Yahoo 延遲~15分」",
+    yahooFallbackErrors.length === 0, yahooFallbackErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

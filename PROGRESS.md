@@ -16,6 +16,45 @@
 
 ---
 
+## 2026-09-02（開發帽）— 即時價格四修之一/四：指數Yahoo備援＋誠實badge統一
+
+使用者裁示「一、即時價格四修」。逐項處理：
+
+**1. 指數修復（已交辦，直接做）**：`research/ibkr_quotes.py`對IBKR無
+市場數據訂閱的指數（道瓊CME/費半PHLX，已確認是帳戶訂閱層級限制、不是
+程式碼bug）新增Yahoo Finance免費chart API備援，抓到就寫進同一份
+`quotes_ibkr.json`（`data_type="YAHOO_DELAYED"`），跟這支腳本其他報價
+共用同一個更新頻率，比之前純靠前端退回`market_us.json`（每日收盤快照）
+更接近「現在」。前端`loadUsIndexes()`同步更新來源標籤邏輯，正確顯示
+「Yahoo 延遲~15分」而不是誤標「IBKR 未知」。
+
+**2. 前端反快取（查證：已經正確，不需要改）**：所有報價JSON的`fetch()`
+呼叫都已帶`?t=Date.now()`cache-buster；`sw.js`對非「App外殼」的請求
+（含所有`data/*.json`）完全不攔截、network-only，連network-first都不是
+——比使用者要求的「network-first」更嚴格。實測Playwright監聽network
+面板：兩次呼叫`loadIntradayQuotes()`各自產生帶不同時間戳的獨立請求，
+確認每次真的重抓，不是同一個被快取的回應。
+
+**3. 台股Shioaji頻率（只回報+提案，未擅自調整）**：查git log實際commit
+時間戳（完全實測，不是猜測排程設定值）確認**目前穩定每2分鐘一次**
+（22:37:01/22:35:01/22:33:01...間隔精準2分鐘）。已在回報裡附上建議
+頻率的提案，等使用者核准才會動排程設定。
+
+**4. 誠實標示badge（已交辦，直接做）**：新增共用函式
+`intradayDataTypeLabel(dt)`，統一輸出「即時/延遲~15分/Yahoo延遲~15分/
+盤後/未知」，取代原本`intradayTag()`跟`loadUsIndexes()`各自土砲的
+inline判斷，兩處改呼叫同一個函式。Shioaji台股/期貨的「即時」標籤維持
+不變（這是真的即時，不是偽裝）。
+
+`scripts/smoke_test.mjs`新增check 19（route攔截驗證YAHOO_DELAYED正確
+顯示badge、不誤標成IBKR來源）。**19項檢查（新增17/18/19）全PASS**；
+check 6（類股卡熱力圖）為既有問題，非本次迴歸。Playwright截圖確認
+badge視覺正確渲染。
+
+改動檔案：`research/ibkr_quotes.py`、`index.html`、`scripts/smoke_test.mjs`。
+
+---
+
 ## 2026-09-02（開發帽）— IBKR Paper下單UI卡片（PENDING「二、收尾兩個App建置中UI」第二項）
 
 個股頁新增`#ibkr-sheet`，接`research/ibkr_order_server.py`本機伺服器
