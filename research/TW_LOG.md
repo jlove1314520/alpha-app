@@ -6,6 +6,20 @@
 
 ---
 
+## 2026-09-02T21:28+08:00 — 馬拉松第289輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 06:31（第286輪，最舊）、FUT 07:01（第287輪）、US 07:31（第288輪，最新）——依輪替選TW。與上一輪TW（第286輪，06:31）相隔約14小時57分，明顯超出正常30分鐘排程間隔，疑似排程器在此期間未觸發，但本輪僅如實記錄此觀察，不代表鎖檔異常（本次`acquire()`回傳乾淨`LOCK_ACQUIRED`，非`LOCK_STALE`）。
+
+獨立複查暫停規則三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；(2) `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者新回應；(3) `MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。三者皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項地基背景工作複查：`data/backfill_state.json`鍵數重新統計為3066筆，`universe()`回傳全市場3196檔，3066/3196≈95.9%，遠高於80%門檻，不需要跑`backfill_universe.py`；T86回補自第164輪起維持100%完成記錄（本輪未另外查核T86專屬狀態檔，因主要門檻——宇宙回補覆蓋率——已確認達標，依協定第5b節第5點，門檻達標後工作單位應改回測新因子/深挖，但暫停規則凍結了這條路徑，故本輪無論如何都無新工作單位）。round137/201/202已補齊成本敏感度1x/2x/3x、N=100隨機控制組A/B兩組合、大盤MDD/Sortino基準，**沒有已知的剩餘允許工作項目**，(a)/(b)仍待使用者裁示，本輪不代為啟動。**TW軌本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`開工時確認僅11個既有未追蹤log/腳本殘留（`dividend_yield_portfolio_v1_run.log`／`monthly_revenue_event_study_run.log`／`pair_trading_sanity.py`／`pit_run_500.log`／`pit_run_liquidity500_clean.log`／`pit_run_liquidity500_full.log`／`val_continue_run.log`／`val_continue_run2.log`／`val_continue_run3.log`／`val_continue_run4.log`／`weinstein_v2_run.log`，另一互動session留下），未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約180輪、跨度約168.9小時（約7.04天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+---
+
 ## 2026-09-01T10:01+08:00 — 馬拉松第247輪：跳過（暫停規則生效中），複查三個解除條件皆未成立，無新工作單位
 
 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 08:32（第244輪，最舊）、FUT 09:03（第245輪）、US 09:31（第246輪，最新）——依輪替選TW。
