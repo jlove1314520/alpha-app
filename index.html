@@ -788,7 +788,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="subscreen" id="sub-fin">
       <div class="card">
-        <h3>季度獲利（EPS · 元）</h3>
+        <h3 id="eps-bars-title">季度獲利（EPS · 元）</h3>
         <div class="bars" id="eps-bars"><div class="note">載入中…</div></div>
         <div class="baseline"></div>
       </div>
@@ -797,8 +797,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="facts">
           <div class="f"><span>毛利率</span><b id="fin-gross">—</b></div>
           <div class="f"><span>營益率</span><b id="fin-op">—</b></div>
-          <div class="f"><span>ROE（近四季）</span><b id="fin-roe">—</b></div>
-          <div class="f"><span>自由現金流（最新季）</span><b id="fin-fcf">—</b></div>
+          <div class="f"><span id="fin-roe-lbl">ROE（近四季）</span><b id="fin-roe">—</b></div>
+          <div class="f"><span id="fin-fcf-lbl">自由現金流（最新季）</span><b id="fin-fcf">—</b></div>
         </div>
         <div class="note" id="fin-note">來源：TWSE官方財報開放資料</div>
       </div>
@@ -1814,6 +1814,39 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     return (STOCK_DETAIL_CACHE&&STOCK_DETAIL_CACHE.stocks&&STOCK_DETAIL_CACHE.stocks[code])||{};
   }
+  // 2026-09-02新增（B29：美股個股頁財報UI）：data/us_financials.json（見
+  // research/factors_us_financials.py）是yfinance年度損益表/現金流量表算出
+  // 的固定6檔快照（NVDA/AAPL/MSFT/TSM/GOOGL/AMZN），**不是排程自動更新**，
+  // 也不是逐季資料（yfinance年報欄位是年度，不是季度）——查不到的代號一律
+  // 顯示「美股暫無財報快照」，不得假裝有資料。
+  let US_FINANCIALS_CACHE=null;
+  async function loadUsFinancials(code){
+    if(!US_FINANCIALS_CACHE){
+      try{const r=await fetch('data/us_financials.json?t='+Date.now());if(r.ok)US_FINANCIALS_CACHE=await r.json()}catch(e){console.warn('[loadUsFinancials]',e);recordGlobalError('loadUsFinancials',e);US_FINANCIALS_CACHE={financials:{}}}
+    }
+    return (US_FINANCIALS_CACHE&&US_FINANCIALS_CACHE.financials&&US_FINANCIALS_CACHE.financials[code])||null;
+  }
+  async function loadFinancialsUS(code){
+    const f=await loadUsFinancials(code);
+    if(currentCode!==code)return; // 使用者已切到別檔股票，這份資料作廢
+    setTxt('eps-bars-title','年度利潤率（美股，非逐季）');
+    setTxt('fin-roe-lbl','營收年增（年度）');
+    setTxt('fin-fcf-lbl','FCF 利潤率（年度）');
+    if(!f){
+      document.getElementById('eps-bars').innerHTML='<div class="note">美股暫無財報快照（僅涵蓋 NVDA/AAPL/MSFT/TSM/GOOGL/AMZN 這 6 檔）</div>';
+      ['fin-gross','fin-op','fin-roe','fin-fcf'].forEach(id=>setTxt(id,'—'));
+      setTxt('fin-note','美股暫無此代號的財報快照');
+      return;
+    }
+    document.getElementById('eps-bars').innerHTML=`<div class="note">毛利率 ${(f.gross_margin*100).toFixed(1)}% · 營益率 ${(f.operating_margin*100).toFixed(1)}% · 期間 ${f.period_end}（較前期 ${f.prior_period_end}）</div>`;
+    setTxt('fin-gross',f.gross_margin!=null?(f.gross_margin*100).toFixed(1)+'%':'—');
+    setTxt('fin-op',f.operating_margin!=null?(f.operating_margin*100).toFixed(1)+'%':'—');
+    if(f.revenue_yoy!=null){const re=document.getElementById('fin-roe');re.textContent=(f.revenue_yoy>=0?'+':'')+(f.revenue_yoy*100).toFixed(1)+'%';re.className=f.revenue_yoy>=0?'pos':'neg'}
+    else setTxt('fin-roe','—');
+    setTxt('fin-fcf',f.fcf_margin!=null?(f.fcf_margin*100).toFixed(1)+'%':'—');
+    const warn=(f.missing_fields&&f.missing_fields.length)?` · 缺漏欄位：${f.missing_fields.join('/')}`:'';
+    setTxt('fin-note',`來源：yfinance 年報快照（非排程自動更新，僅6檔固定清單）· 期末 ${f.period_end}${warn}`);
+  }
   // 2026-08-27新增（B4：類股卡點擊→成分股清單）：data/company_info.json
   // （見 research/build_company_info.py，讀FinMind TaiwanStockInfo全市場快取）
   // 供代號→名稱/產業分類查詢；data/quotes_all_tw.json（見
@@ -2667,11 +2700,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('chip-bars').innerHTML='<div class="note">美股暫無此資料</div>';
       ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
       setTxt('mg-short-ratio','券資比：—');setTxt('mg-note','美股暫無融資融券資料（僅適用台股）');setTxt('mg-maint','估算融資維持率：—');
-      document.getElementById('eps-bars').innerHTML='<div class="note">美股尚未支援財報解析（僅適用台股）</div>';
-      ['fin-gross','fin-op','fin-roe','fin-fcf'].forEach(id=>setTxt(id,'—'));
-      setTxt('fin-note','美股暫無此資料');
+      document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
+      loadFinancialsUS(code);
       return;
     }
+    setTxt('eps-bars-title','季度獲利（EPS · 元）');
+    setTxt('fin-roe-lbl','ROE（近四季）');
+    setTxt('fin-fcf-lbl','自由現金流（最新季）');
     document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
     // 2026-08-27 架構修正：PER/PBR/殖利率、月營收改讀 data/fundamentals.json
     // （見 build_fundamentals_json.py），不再對 FinMind 打 TaiwanStockPER／
@@ -3496,7 +3531,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.0047';
+  const APP_VERSION='2026-09-02.2138';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

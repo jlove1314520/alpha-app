@@ -40,7 +40,10 @@
 //     <polyline>（points屬性不是空字串），不是只驗面板innerHTML非空——那樣
 //     測不出「面板有文字但沒有真的畫線」這種情況（見2026-09-02圖表診斷任務
 //     發現的櫃買指數sparkline漏傳bug，這條防線就是為了防止同類問題復發）。
-// 12. 整個測試過程（含8/9/11/13/14/15/16新增的重整/reload/手勢/時區/防線
+// 17.【2026-09-02新增，B29美股個股頁財報UI】route攔截假us_financials.json，
+//     驗有快照代號（AAPL）財報頁四指標真的畫出數字、無快照代號（TSLA）誠實
+//     顯示「暫無」且不殘留切換前那檔股票的舊數字。
+// 12. 整個測試過程（含8/9/11/13/14/15/16/17新增的重整/reload/手勢/時區/防線
 //     操作）結束後仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
@@ -537,10 +540,68 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("16. 圖該顯示卻空白防線（有效≥2點假資料，驗polyline的points屬性真的有座標）",
     chartBlankErrors.length === 0, chartBlankErrors.join("; "));
 
+  // 17.【2026-09-02新增，B29美股個股頁財報UI】用route攔截餵一份us_financials.json
+  // 假資料，確認：(a) 有快照的代號（AAPL）財報頁四指標（毛利率/營益率/營收年增/
+  // FCF利潤率）真的被畫出實際數字，不是卡在舊版「美股尚未支援財報解析」文字；
+  // (b) 沒有快照的代號（TSLA）誠實顯示「暫無財報快照」而不是空白/沿用上一檔
+  // 股票殘留的數字（切換代號後沒有正確reset＝資料汙染，比空白更危險）。
+  const usFinErrors = [];
+  try {
+    const fakeUsFin = {
+      generated_at: new Date().toISOString(),
+      financials: {
+        AAPL: {
+          period_end: "2025-09-30", prior_period_end: "2024-09-30",
+          gross_margin: 0.4691, operating_margin: 0.3197, revenue_yoy: 0.0643,
+          free_cash_flow: 98767000000.0, fcf_margin: 0.2373,
+          missing_fields: [], warnings: [],
+        },
+      },
+    };
+    await page.route("**/data/us_financials.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeUsFin) })
+    );
+    await page.evaluate(() => { US_FINANCIALS_CACHE = null; });
+    await page.evaluate((code) => window.openStock(code), "AAPL");
+    await page.waitForTimeout(600);
+    await page.evaluate(() => {
+      const b = [...document.querySelectorAll("#stock-tabs button")].find(x => x.dataset.sub === "fin");
+      if (b) b.click();
+    });
+    await page.waitForTimeout(300);
+    const aaplVals = await page.evaluate(() => ({
+      gross: document.getElementById("fin-gross")?.textContent,
+      op: document.getElementById("fin-op")?.textContent,
+      roe: document.getElementById("fin-roe")?.textContent,
+      fcf: document.getElementById("fin-fcf")?.textContent,
+      epsBars: document.getElementById("eps-bars")?.innerHTML || "",
+    }));
+    if (aaplVals.epsBars.includes("尚未支援")) usFinErrors.push("AAPL：eps-bars仍是舊版「美股尚未支援財報解析」文字，B29 UI沒接上");
+    if (!aaplVals.gross || aaplVals.gross === "—") usFinErrors.push(`AAPL：毛利率沒有畫出數字（拿到"${aaplVals.gross}"）`);
+    if (!aaplVals.op || aaplVals.op === "—") usFinErrors.push(`AAPL：營益率沒有畫出數字（拿到"${aaplVals.op}"）`);
+    if (!aaplVals.roe || aaplVals.roe === "—") usFinErrors.push(`AAPL：營收年增沒有畫出數字（拿到"${aaplVals.roe}"）`);
+    if (!aaplVals.fcf || aaplVals.fcf === "—") usFinErrors.push(`AAPL：FCF利潤率沒有畫出數字（拿到"${aaplVals.fcf}"）`);
+
+    await page.evaluate((code) => window.openStock(code), "TSLA");
+    await page.waitForTimeout(600);
+    const tslaVals = await page.evaluate(() => ({
+      gross: document.getElementById("fin-gross")?.textContent,
+      note: document.getElementById("fin-note")?.textContent || "",
+    }));
+    if (tslaVals.gross !== "—") usFinErrors.push(`TSLA（無快照）：切換代號後毛利率沒有正確reset，殘留"${tslaVals.gross}"（資料汙染）`);
+    if (!tslaVals.note.includes("暫無")) usFinErrors.push(`TSLA（無快照）：fin-note沒有誠實揭露查無資料，內容是"${tslaVals.note}"`);
+
+    await page.unroute("**/data/us_financials.json**");
+  } catch (e) {
+    usFinErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("17. B29美股個股頁財報UI：有快照代號畫出四指標數字、無快照代號誠實顯示且不殘留舊代號數字",
+    usFinErrors.length === 0, usFinErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

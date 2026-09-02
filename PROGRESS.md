@@ -16,6 +16,29 @@
 
 ---
 
+## 2026-09-02（開發帽）— B29美股個股頁財報UI（把後端四指標接到個股頁）
+
+`index.html`個股頁「財報」分頁美股分支，接上`data/us_financials.json`
+（B29後端，2026-09-02稍早已完成，見`BACKLOG.md`）取代原本寫死的「美股
+尚未支援財報解析」。新增`loadUsFinancials(code)`/`loadFinancialsUS(code)`
+（跟既有`loadFundamentals`同一套快取模式），四指標對應：毛利率→
+`fin-gross`、營益率→`fin-op`、營收年增（年度）/FCF利潤率（年度）借用
+`fin-roe`/`fin-fcf`欄位並動態改標籤（`#fin-roe-lbl`/`#fin-fcf-lbl`/
+`#eps-bars-title`），切換TW/US股票時互相reset避免標籤或數字殘留。只
+涵蓋固定6檔（NVDA/AAPL/MSFT/TSM/GOOGL/AMZN），查不到的代號誠實顯示
+「美股暫無財報快照」，`fin-note`明講「非排程自動更新、僅6檔固定清單」。
+
+`scripts/smoke_test.mjs`新增check 17（route攔截假`us_financials.json`，
+驗AAPL四指標真的畫出數字、TSLA誠實顯示無快照且不殘留AAPL舊數字）。
+冒煙測試結果：**13項檢查（含新check17）全PASS**；check 6（類股卡熱力圖）
+FAIL，但用`git stash`對照確認改動前後同樣FAIL，是既有問題非本次迴歸，
+如實記錄不隱藏，未另外修（不在本次任務範圍）。
+
+改動檔案：`index.html`、`scripts/smoke_test.mjs`。下一步：IBKR下單UI
+卡片（PENDING_QUEUE三.2）。
+
+---
+
 ## 2026-09-02（開發帽）— App數字盤中自動輪詢（PENDING_QUEUE「數字不會跳動」項，標⚠待真實開盤時段驗證）
 
 前端加15秒定時輪詢，沿用既有`loadIntradayQuotes()`不重新發明抓資料邏輯，

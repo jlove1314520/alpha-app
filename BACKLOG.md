@@ -1748,7 +1748,7 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
   2. 日資料但全市場一次呼叫、量小，納入節流/斷路器登記。
   尚未開始。
 
-- **✅ B29：美股財報/FCF因子管線（2026-09-02完成後端，前端UI留給下一輪）**：
+- **✅ B29：美股財報/FCF因子管線（2026-09-02完成後端+前端UI）**：
   1. yfinance提供`.financials`/`.balance_sheet`/`.cashflow`（損益表/
      資產負債表/現金流量表）——先前把「個股頁美股分頁月營收/財報/三大
      法人/融資融券」整包標「暫無替代來源」太粗，已在`generate_status_json.py`
@@ -1787,11 +1787,29 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
      `Free Cash Flow`是yfinance自算的衍生欄位，算法細節未公開文件化，
      僅供排序參考不是精確會計數字；yfinance非官方API，欄位命名/可得性
      可能隨版本變動。
-  7. **範圍界定（誠實記錄，不打腫臉充胖子）**：這輪只做後端管線+本機
-     驗證，**尚未掛GitHub Actions排程、`index.html`個股頁尚未新增顯示
-     這些指標的UI區塊**——原始任務指示允許步驟5（前端UI）為選做，評估
-     後判斷「先確保後端管線紮實、不為了求完整讓範圍失控」優先，UI顯示
-     留給下一輪接手（可比照既有「總覽」分頁PER/殖利率的寫法）。
+  7. **範圍界定（誠實記錄，不打腫臉充胖子）**：後端管線+本機驗證這輪
+     完成，UI留給下一輪接手。**尚未掛GitHub Actions排程**——`data/
+     us_financials.json`目前是2026-09-02手動跑出的一次性快照，不會
+     自動更新，UI已誠實揭露這一點（見下一條）。
+  8. **2026-09-02（續）：個股頁「財報」分頁UI完成**。`index.html`新增
+     `loadUsFinancials(code)`（讀`data/us_financials.json`，跟
+     `loadFundamentals`/`loadStockDetail`同一套快取模式）+
+     `loadFinancialsUS(code)`（渲染函式），接進`openStock()`的美股分支
+     取代原本寫死的「美股尚未支援財報解析」。四指標對應：毛利率→
+     `fin-gross`、營益率→`fin-op`、營收年增（年度）→借用`fin-roe`欄位
+     並改標籤成「營收年增（年度）」、FCF利潤率（年度）→借用`fin-fcf`
+     欄位並改標籤——因為美股沒有ROE/逐季FCF資料，直接沿用TW版的標籤
+     會誤導，改成動態文字（`#fin-roe-lbl`/`#fin-fcf-lbl`/
+     `#eps-bars-title`三個id，切換TW/US股票時互相reset，避免殘留錯的
+     標籤或上一檔股票的數字）。只涵蓋6檔固定清單（NVDA/AAPL/MSFT/TSM/
+     GOOGL/AMZN），查不到的代號（含所有其他美股）誠實顯示「美股暫無
+     財報快照」，`fin-note`明講「非排程自動更新、僅6檔固定清單」。
+     冒煙測試新增check 17（`scripts/smoke_test.mjs`，route攔截假
+     `us_financials.json`，驗AAPL四指標真的畫出數字、TSLA誠實顯示無
+     快照且不殘留AAPL的舊數字）——**12項舊檢查+新check17共13項全
+     PASS**；check 6（類股卡熱力圖，跟本次改動無關的既有真實API資料
+     面板）在改動前後同樣FAIL（已用`git stash`對照確認為既有問題，不是
+     這次引入的迴歸），如實記錄不隱藏。
 
 - **B30：客戶集中度/供應鏈**（2026-08-28登錄，只登錄規格不執行）：
   1. 質性供應鏈關係資料：改用`ic.tpex.org.tw`產業價值鏈平台，**併入
