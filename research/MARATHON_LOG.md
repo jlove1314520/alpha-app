@@ -13,6 +13,64 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T22:27 — hypothesis_queue軌道：修正#16文件內部矛盾（誤重跑
+記錄vs已結案FAIL）+ #17（52週高點接近度）第1關cheap IC gate測試 — 第1關
+CHEAP_PASS（TRAIN IR+0.389/VAL IR+0.465、null percentile=100.0），但發現
+`CLAUDE.md`新增「提案先於執行」鐵律與本自動化軌道運作前提衝突，本輪到
+此為止不繼續往第2關推進，待使用者裁示。
+
+**本輪做了什麼**：
+1. 讀`HYPOTHESIS_QUEUE_PROTOCOL.md`+`CONSTITUTION.md`，`git pull`+
+   `git status`確認乾淨（發現一批其他自動化留下的log殘留檔+
+   `data/rate_limit_state.json`變動，不是本輪產生，未觸碰、未納入commit），
+   取得`hypothesis_queue`具名鎖（`LOCK_ACQUIRED`，非陳舊）。
+2. 讀`HYPOTHESIS_QUEUE.md`挑下一條，發現#16（配對交易）有兩則互相矛盾的
+   狀態紀錄：一則寫「已結案FAIL」（引用`TRIALS_LEDGER.md`#83），另一則
+   （T21:28時間戳）寫「第1關sanity PASS，非最終判定，下一輪從第2關開始」。
+   查證`TRIALS_LEDGER.md`#83與`STRATEGY_GRAVEYARD.md`確認FAIL才是真正
+   結案狀態，T21:28那則是某輪誤重跑`pair_trading_sanity.py`後補寫、數字
+   完全重複、未推翻原判定——已在`HYPOTHESIS_QUEUE.md`該處加註修正說明，
+   不重啟#16、不再跑第2關。
+3. 依「排隊順序總結」正確接續#17（52週高點接近度，George & Hwang 2004
+   錨定不足）。新增`factors.py::prepare_factors()`「(v)」段落
+   （`f_52w_high_prox`：收盤價/252日滾動最高價）+`factor_ic_52w_high.py`。
+   執行結果：TRAIN mean_ic=+0.0760 IR=+0.389(n=74)、VAL mean_ic=+0.0863
+   IR=+0.465 hit_rate=0.68(n=47)、train/val同號、null percentile=100.0
+   （門檻90.0）——三項判準皆過，**第1關CHEAP_PASS**，是本佇列第二個通過
+   第1關的候選（第一個是#4股利率因子`f_dividend_yield_ttm`，portfolio
+   層構造後來FAIL）。
+4. **執行到這裡時，發現`C:\alpha\alpha-app\CLAUDE.md`已被更新**，新增
+   最高優先鐵律「提案先於執行（總司令核准制，2026-09-02使用者裁示）」：
+   「任何『更動、優化、調整參數/頻率/架構、或新建議』，一律先想清楚，
+   寫成簡短提案...經核准才執行，嚴禁自作主張直接改」，例外只有「純bug
+   修復」跟「使用者已明確交辦的任務」。
+
+**為什麼在這裡停下（判斷理由）**：這條新鐵律的字面範圍（任何新建議/
+更動都要先提案核准）跟`hypothesis_queue`這整個無人值守排程軌道的設計
+前提直接衝突——這類軌道存在的理由就是「終結無人接手就停」，運作方式
+是Windows工作排程器定期喚醒headless instance、無人在場、依協定自主
+往下跑，只在三個明訂條件（1000draws規模/survivorship-free宇宙/不可逆
+或花錢操作）才停下來問。如果新鐵律適用於這條軌道，那麼「繼續往第2關
+推進」本身就是需要先提案的「新建議/更動」，而headless instance在
+無人的情況下不可能真的等到「核准」——我判斷不應該自己解讀「這個協定
+本身視同已交辦所以不受新規則約束」就逕自往下做，比照協定既有「三個
+停下條件」的處理精神：把問題完整寫下來、commit+push、正常收工，不
+空等、不假裝繼續按舊模式跑下去。
+
+**已完成、確定沒有疑慮的部分（本輪已commit的產出）**：#17第1關cheap IC
+gate的CHEAP_PASS結果、#16文件矛盾的修正——這些是「執行既有協定既定
+步驟、記錄已完成測量結果」，不是「提出新建議」，不受影響。
+
+**留給下一輪/使用者的問題**：這條新鐵律是否適用於`hypothesis_queue`／
+三軌馬拉松這類原本設計成自主執行的無人值守排程軌道？若適用，這些軌道
+之後每次觸發應該怎麼運作（例如改成「做完當前工作單位就停下寫提案，不
+再自動接續下一關/下一條假設，直到使用者核准」）？若不適用（例如新鐵律
+主要針對互動式session的臨場決策，不含這類已經過使用者事先明確授權、
+訂有明確停下條件的自動化協定），下一輪可以直接從#17第2關隨機控制組
+接續。**`is_holdout_consumed()`確認為`False`。**
+
+---
+
 ## 2026-09-02T21:27 — `hypothesis_queue`排程接續：佇列#16同產業配對交易/統計套利第1關sanity(PASS)+第2關隨機控制組(N=100) — 已結案FAIL（相關係數篩選相對隨機挑12對配對無顯著加值，percentile=56.0/39.0遠低於90.0門檻，被控制組拆穿的縮小候選池型偽影），接續佇列第一順位#17。附註：本輪取鎖時上一輪鎖檔已陳舊，已回收接手；`pair_trading_sanity.py`是上一輪留下的未commit殘留，本輪確認邏輯正確、重跑確認determinism後沿用未重工。（這行時間戳跟上一則T21:28的排列順序看似倒反，是因為本輪自己的行程在收工commit前意外中斷、隔了一段時間才由接手的人補commit——內容本身在21:27~21:28這個時間窗內完成，不是憑空捏造時間，見下方TRIALS_LEDGER.md #83與STRATEGY_GRAVEYARD.md對應條目核對）
 
 ## 2026-09-02T21:28 — `hypothesis_queue`排程接續#16同產業配對交易/統計套利 — 第1關sanity PASS（100檔樣本72檔可用、15產業群組、90候選配對、相關係數篩選0.70門檻篩出12組、555次進場事件全部組合皆有觸發、方向性sanity收斂比例中位數85.5%），非最終判定，下一輪從第2關隨機控制組開始，見`HYPOTHESIS_QUEUE.md`#16與`pair_trading_sanity.py`

@@ -84,6 +84,7 @@ ROE_STABILITY_TRAILING_QUARTERS = 8
 ASSET_GROWTH_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Cooper/Gulen/Schill 2008
 ACCRUALS_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Sloan 1996 balance-sheet approach
 RESIDUAL_MOMENTUM_WINDOW = 252  # ~12 個月交易日, Blitz/Huij/Martens 2011
+HIGH_52W_WINDOW = 252  # ~52 週交易日, George & Hwang 2004
 
 
 def _finmind_institutional_wide(stock_id: str, start_date: str) -> pd.DataFrame:
@@ -613,6 +614,19 @@ def prepare_factors(
     roll_cov_252 = daily_ret.rolling(RESIDUAL_MOMENTUM_WINDOW, min_periods=RESIDUAL_MOMENTUM_WINDOW).cov(mkt_ret)
     beta_252 = roll_cov_252 / roll_var_mkt_252
     d["f_residual_momentum"] = ret_252 - beta_252 * mkt_ret_252
+
+    # (v) 52週高點接近度 52-Week High Proximity (George & Hwang 2004,
+    # `HYPOTHESIS_QUEUE.md` #17，2026-09-02自動排程新增，佇列排隊第一起跑)。
+    # 經濟理由：股價接近52週高點時，投資人對「創新高」這個顯著錨點反應不足
+    # （anchoring/underreaction），文獻上發現這個訊號比傳統動量更強、更不容易
+    # 被動量因子解釋掉。跟f_rel_strength（60日相對大盤報酬）本質不同：這裡量
+    # 的是「價格水位相對歷史極值的位置」，不是報酬率本身，同一檔股票兩者可能
+    # 給出不同排序（例如近期報酬普通但前期大漲、現在仍貼近52週高點的股票）。
+    # 實作：當前收盤價 / 過去252個交易日(含當日)最高價，比率越接近1代表越
+    # 接近52週高點。純價格資料，天然point-in-time，零額外API呼叫。
+    d["f_52w_high_prox"] = d["adj_close"] / d["adj_close"].rolling(
+        HIGH_52W_WINDOW, min_periods=HIGH_52W_WINDOW
+    ).max()
 
     # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
     # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓
