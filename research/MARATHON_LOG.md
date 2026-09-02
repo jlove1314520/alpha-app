@@ -13,6 +13,26 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-02T23:48 — hypothesis_queue軌道：接續#17（52週高點接近度）走完第2/7/8關 — 結案FAIL
+
+`CLAUDE.md`「提案先於執行」規則已由使用者於本輪前補上第二版更精確裁示
+（「適用範圍界線」段落），明確確認`hypothesis_queue`不受此規則約束，
+上一輪（22:27）因誤讀第一版裁示而暫停在#17第1關之後，本輪確認裁示已
+到位，接續往下跑。
+
+新增`f52w_high_portfolio_v1.py`（逐字比照`dividend_yield_portfolio_v1.py`
+架構+checkpoint可續跑機制），本輪內連續呼叫腳本5次累積進度（TRAIN隨機
+控制組0→21→44→64→83→100/100，VALIDATION 0→60→100/100；第五次呼叫因
+外層timeout中途中斷、log為空，但checkpoint機制確認資料完整落盤未遺失，
+下一次呼叫接續無誤）。結果：TRAIN alpha+10.84%(p=0.3155)、VAL
+alpha+10.47%(p=0.0831)，隨機控制組percentile兩期皆100.0，腳本內建判準
+印出表面PASS，但依既有alpha顯著性+beta拆解評判標準（PEAD/股利率/
+Weinstein同一把尺）人工override判**FAIL**——兩期alpha皆未跨過p<0.05
+門檻（VAL p=0.083是本佇列目前所有FAIL案例中最接近顯著的一次）。已寫入
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#85、`HYPOTHESIS_QUEUE.md`
+#17條目與「排隊順序總結」章節。**佇列#17結案，接續佇列第一順位#18
+短期反轉（1週），下一輪從第1關cheap IC gate開始。**
+
 ## 2026-09-02T22:27 — hypothesis_queue軌道：修正#16文件內部矛盾（誤重跑
 記錄vs已結案FAIL）+ #17（52週高點接近度）第1關cheap IC gate測試 — 第1關
 CHEAP_PASS（TRAIN IR+0.389/VAL IR+0.465、null percentile=100.0），但發現

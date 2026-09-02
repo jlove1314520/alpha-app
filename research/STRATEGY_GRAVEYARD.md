@@ -615,3 +615,28 @@ cheap gate，2026-09-02FAIL）
 - **原始記錄**：`TRIALS_LEDGER.md`#83、`HYPOTHESIS_QUEUE.md`#16、
   `pair_trading_sanity.py`/`pair_trading_control_v1.py`（新增，可重複
   執行）。佇列#16結案，接續佇列第一順位#17（52週高點接近度）。
+
+### 52週高點接近度 52-Week High Proximity 策略層（HYPOTHESIS_QUEUE.md#17，2026-09-02FAIL）
+- **死因**：因子層cheap IC gate（`TRIALS_LEDGER.md`#84）CHEAP_PASS後，
+  組成月頻Top20單因子portfolio構造測第7/8關——`f52w_high_portfolio_v1.py`
+  跑出的表面數字很漂亮（TRAIN/VAL隨機控制組percentile皆100.0、beta偏低
+  +0.35~+0.44、MDD受控、成本敏感度皆正、腳本內建判準自己印出PASS），
+  但**alpha顯著性未過**：TRAIN alpha+10.84%(p=0.3155)、VAL alpha+10.47%
+  (p=0.0831)，兩期都未跨過本專案套用的p<0.05顯著門檻，依既有標準（PEAD/
+  股利率/Weinstein同一把尺）人工override為FAIL，不採信腳本自身PASS字樣。
+- **這次死法的特殊之處（誠實記錄，不是無關緊要的細節）**：VAL期p=0.0831
+  是本佇列（#1~#17）目前所有FAIL案例中alpha p值最接近顯著的一次（比PEAD
+  的0.4809、股利率的0.1487都更接近0.05），且beta明顯低於PEAD/股利率
+  （+0.35~+0.44 vs PEAD的+0.56~+0.57）——暗示這個因子的訊噪比可能真的
+  優於前面測過的其餘候選，只是這次「等權/月頻/Top20」的具體構造仍未能
+  把訊號放大到統計顯著。**事前綁定門檻不因為這次比較接近就放寬**，門檻
+  就是p<0.05，0.083不算過。
+- **不泛化成什麼**：不泛化成「52週高點接近度因子沒用」——因子層IC
+  （`TRIALS_LEDGER.md`#84，CHEAP_PASS）不受影響，死的只是「等權/月頻/
+  Top20」這個具體portfolio構造，跟PEAD/股利率同一種死法。未來若要重測，
+  值得優先嘗試放大樣本數（目前僅100檔快取樣本、80檔可用）或調整Top-N/
+  排名權重，而非直接放棄這個因子方向——這是本佇列目前最接近過關的候選。
+- **原始記錄**：`TRIALS_LEDGER.md`#85、`HYPOTHESIS_QUEUE.md`#17、
+  `f52w_high_portfolio_v1.py`（新增，可重複執行，checkpoint機制已驗證
+  可跨次接續不重算）、`data/f52w_high_portfolio_v1_results.csv`（新增）。
+  佇列#17結案，接續佇列第一順位#18（短期反轉1週）。
