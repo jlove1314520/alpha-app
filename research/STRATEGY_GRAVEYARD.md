@@ -652,3 +652,28 @@ cheap gate，2026-09-02FAIL）
   `data/f52w_high_portfolio_v1_results.csv`、`data/f52w_high_gate3_grid.csv`、
   `data/f52w_high_gate6_yearly.csv`（新增）。
   佇列#17結案，接續佇列第一順位#18（短期反轉1週）。
+
+### 短期反轉（1週）Short-Term Reversal (Jegadeesh 1990) 因子層（HYPOTHESIS_QUEUE.md#18，2026-09-02FAIL）
+- **死因**：第1關cheap IC gate未過。`f_short_term_reversal_1w`
+  （-(當前收盤價/5交易日前收盤價-1)）在100檔快取樣本(80檔可用)上：
+  TRAIN mean_ic=+0.0219 IR=+0.129(n=74)、VAL mean_ic=+0.0097 IR=+0.064
+  hit_rate=0.45(n=47)，train/val雖同號（皆正），但VAL期IC幅度太小接近
+  雜訊，且對隨機打散null percentile=41.3，遠低於90.0門檻、甚至低於50
+  （代表過半數隨機打散的排列表現都優於這個真實因子）。三項判準（幅度非零/
+  同號/贏過洗牌null）中兩項未過，依協定第1關cheap gate標準判**FAIL**，
+  未進第2關以後。
+- **跟已FAIL的`f_short_reversal_1m`的關係（誠實記錄，非重複測試）**：
+  `TRIALS_LEDGER.md`#46測過21交易日（~1個月）窗口版本，同樣FAIL
+  （percentile=23.1），該筆紀錄原文建議「若之後樣本擴大或改用更短窗口
+  （1週）可再測」——本輪就是遵照這個建議，真正把窗口縮短到5個交易日，
+  結果percentile從23.1微幅上升到41.3，方向上略有改善但幅度不足以逆轉
+  結論，依然遠未過關。
+- **不泛化成什麼**：不泛化成「短期反轉在台股完全無效」——只測過100檔
+  快取樣本+單一5日窗口，未測更細（日頻分層/更大樣本/不同市值分層）版本，
+  但目前證據不支持升格，也不建議再嘗試相鄰窗口長度的變體（1個月跟1週
+  兩個端點都已經一致偏弱，暗示問題可能在樣本規模而非窗口長度本身）。
+- **原始記錄**：`TRIALS_LEDGER.md`#87、`HYPOTHESIS_QUEUE.md`#18、
+  `factors.py::prepare_factors()`「(w)」段落、
+  `factor_ic_short_term_reversal_1w.py`（新增，可重複執行）。佇列#18
+  結案，佇列#1~18原始排隊全部結案，本輪新增#19（跨市場美股隔夜報酬
+  外溢效應）接續。

@@ -85,6 +85,7 @@ ASSET_GROWTH_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Cooper/Gulen/Sc
 ACCRUALS_LAG_QUARTERS = 4  # YoY (同比，避開季節性), Sloan 1996 balance-sheet approach
 RESIDUAL_MOMENTUM_WINDOW = 252  # ~12 個月交易日, Blitz/Huij/Martens 2011
 HIGH_52W_WINDOW = 252  # ~52 週交易日, George & Hwang 2004
+SHORT_TERM_REVERSAL_1W_WINDOW = 5  # ~1 週交易日, Jegadeesh 1990
 
 
 def _finmind_institutional_wide(stock_id: str, start_date: str) -> pd.DataFrame:
@@ -627,6 +628,19 @@ def prepare_factors(
     d["f_52w_high_prox"] = d["adj_close"] / d["adj_close"].rolling(
         HIGH_52W_WINDOW, min_periods=HIGH_52W_WINDOW
     ).max()
+
+    # (w) 短期反轉（1週）Short-Term Reversal (Jegadeesh 1990, `HYPOTHESIS_QUEUE.md`
+    # #18，2026-09-02自動排程新增，佇列排隊第一起跑)。經濟理由：流動性提供者
+    # 承接短期價格壓力後要求的溢酬——短期內被過度賣壓的股票，很快被流動性
+    # 提供者買入承接、推回真實價值附近，產生反轉；是流動性機制，跟本佇列已測
+    # 過的所有假設（動量/財報意外/籌碼/beta類）經濟機制不同類別。**跟已FAIL
+    # 的`f_short_reversal_1m`（21交易日/~1個月窗口，`TRIALS_LEDGER.md`#46）
+    # 刻意用不同窗口**——那筆FAIL紀錄本身明寫「若改用更短窗口（1週）可再測」，
+    # 這是遵照那個建議、真正測試更短窗口，不是同一個已死機制換皮。純價格
+    # 資料，天然point-in-time，零額外API呼叫（重用daily adj_close序列）。
+    d["f_short_term_reversal_1w"] = -(
+        d["adj_close"] / d["adj_close"].shift(SHORT_TERM_REVERSAL_1W_WINDOW) - 1
+    )
 
     # (j) 品質 ROE穩定度 -- point-in-time via pit_date（合併季報+資產負債表兩個 PIT 序列）。
     # 用 TaiwanStockBalanceSheet，這是這批新因子裡第一次用到的資料集，捕捉例外而不是讓

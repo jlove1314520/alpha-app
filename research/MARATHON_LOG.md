@@ -13,6 +13,29 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T00:22 — hypothesis_queue軌道：接手崩潰排程，補完#18短期反轉（1週）FAIL判定commit
+
+本輪`marathon_lock.py acquire`回傳乾淨`LOCK_ACQUIRED`（非陳舊），但
+`git status`發現上一輪（T23:59那則心跳，見下方）已經把#18判死+新增#19
+假設的全部文件內容（`HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`/
+`STRATEGY_GRAVEYARD.md`/`factors.py`/`factor_ic_short_term_reversal_1w.py`）
+寫好並staged，卻沒有commit就結束（推測上一輪執行到commit那一步之前
+中斷，鎖檔則正常釋放）。逐項核對：`TRIALS_LEDGER.md`#87已存在於最新
+commit（35e680f，代表這筆是更早前另一個併行實例寫入並commit的，跟本次
+staged的其餘檔案指向同一組結果、數字一致，不是缺漏）；`STRATEGY_
+GRAVEYARD.md`的#18條目與`HYPOTHESIS_QUEUE.md`的#18結案文字、新增#19
+章節內容互相引用一致；`factors.py`新增段落乾淨（僅新增`SHORT_TERM_
+REVERSAL_1W_WINDOW`常數+一段`f_short_term_reversal_1w`計算，未動到
+既有因子）；`is_holdout_consumed()`確認仍為`False`。判定這批staged
+變更是完整且一致的已完成工作單位，非其他自動化來源的殘留（另有
+`data/rate_limit_state.json`與一批`research/*_run.log`未追蹤檔案，
+研判是三軌馬拉松或其他背景行程留下的殘留，本輪未觸碰、未納入commit），
+本輪直接補commit+push，不重跑#18測試、不額外開工#19第1關（依協定
+「一輪只做一個有界工作單位」，補完crash commit本身就是這輪的工作單位，
+#19第1關留給下一次排程觸發接續）。
+
+## 2026-09-02T23:59 — hypothesis_queue軌道：#18短期反轉（1週）第1關cheap IC gate — 已結案FAIL（`f_short_term_reversal_1w`train/val同號但null percentile=41.3遠低於90.0門檻且低於50，跟已FAIL的1個月窗口版本#46刻意做出區隔，見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#87），佇列#1~18原始15條項目全部結案。判定佇列實質已空後設計新假設軸#19（跨市場美股隔夜報酬外溢效應，指數層級擇時、非選股，資料可行性已用既有`yf_price_client.py::fetch_yf_index()`確認），僅登記假設尚未開始第1關，剩餘#5/#6/#8/#10仍卡外部依賴。本輪同時發現residual git狀態有其他自動化留下的殘留（`f52w_high_gates.py`等log/腳本檔），未觸碰、未納入本次commit。
+
 ## 2026-09-02T23:58 — hypothesis_queue軌道：補齊#17第3/5/6關（本輪與另一
 併行實例同時作業，發現對方已完成第2/7/8關並結案FAIL，本輪不重工只補缺）
 
