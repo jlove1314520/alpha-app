@@ -13,6 +13,8 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03 — 使用者裁示：#20（純毛利率GP）實作正確性健檢，四點皆查證正確，FAIL維持墓園（不重跑，不影響佇列進度）：公式（FinMind GrossProfit數值上精確等於Revenue−CostOfGoodsSold，8季diff=0.0）/PIT對齊（跟其他已CHEAP_PASS因子共用同一套機制）/涵蓋率（逐快照中位數N=56，跟f_52w_high_prox的N=60同量級，非崩塌稀釋）/方向（TRAIN/VAL兩期mean_ic皆正，跟「高GP做多」假設一致）全部確認無bug，完整過程見HYPOTHESIS_QUEUE.md#20「實作正確性健檢」章節。同時登記使用者新增的z-score複合評分假設（吸取#22硬AND組合過度擬合教訓），排入佇列#26之後接續。
+
 ## 2026-09-03T07:27 — `hypothesis_queue`軌道排程：#25月轉效應第1關cheap gate已結案FAIL，新增#26全市場融資餘額成長率regime訊號（尚未開始第1關）
 
 接手`LOCK_ACQUIRED`（無陳舊鎖檔）。`git pull`+`git status`確認乾淨，

@@ -733,6 +733,17 @@ cheap gate，2026-09-02FAIL）
 - **原始記錄**：`TRIALS_LEDGER.md`#90、`HYPOTHESIS_QUEUE.md`#20、
   `factor_ic_gross_profitability.py`（新增，可重複執行）。佇列#20結案，
   接續佇列第一順位#21（月營收「意外」漂移×低關注度）。
+- **2026-09-03實作正確性健檢（使用者裁示追加，理由：GP是跨19國最穩健
+  品質因子之一，死在mean_ic≈noise跟強證據矛盾，疑似bug非真的無訊號）**：
+  逐一查證公式/科目對應（FinMind`GrossProfit`欄位數值上精確等於
+  `Revenue−CostOfGoodsSold`，8季全部diff=0.0）、PIT對齊（跟其他已通過
+  cheap gate因子共用同一套`+45天`延遲+`merge_asof`機制，非#20獨有未經
+  驗證路徑）、涵蓋率（77/100可用、逐快照中位數N=56，跟CHEAP_PASS的
+  `f_52w_high_prox`中位數N=60同量級，不是涵蓋率崩塌稀釋成noise）、
+  方向（TRAIN/VAL兩期`mean_ic`皆為正，跟「高GP做多」假設一致沒有接反）
+  ——**四點皆查證正確，沒有發現任何實作/資料bug，正式接受FAIL、不
+  重跑，維持墓園判定**。完整健檢過程見`HYPOTHESIS_QUEUE.md`#20「實作
+  正確性健檢」章節。
 
 ### revenue_trend_surprise_low_attention（月營收「意外」漂移x低關注度分組，改造#14，股票，2026-09-03FAIL）
 
