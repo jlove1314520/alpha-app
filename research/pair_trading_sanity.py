@@ -92,7 +92,14 @@ def pair_diagnostics(px_a: pd.Series, px_b: pd.Series) -> dict | None:
     return {"common_days": len(common), "log_price_corr": corr, "log_a": a, "log_b": b}
 
 
-def zscore_events(log_a: pd.Series, log_b: pd.Series) -> dict:
+def raw_entries(log_a: pd.Series, log_b: pd.Series) -> list[dict]:
+    """抽出`zscore_events()`用到的原始進場/出場z-score事件清單。
+
+    獨立成一個函式是為了讓`pair_trading_control_v1.py`（第2關隨機控制組）能
+    直接pool多個配對的原始事件做聚合統計，不用重新複製一份同樣的邏輯——
+    這是這輪(#16第2關)才新增的重構，`zscore_events()`本身邏輯完全不變，只是
+    把裡面已經在算的entries清單抽出來給外部重用。
+    """
     spread = (log_a - log_b).reset_index(drop=True)
     roll_mean = spread.rolling(Z_WINDOW).mean()
     roll_std = spread.rolling(Z_WINDOW).std()
@@ -110,7 +117,11 @@ def zscore_events(log_a: pd.Series, log_b: pd.Series) -> dict:
             i += CONVERGE_HORIZON  # 進場後跳過追蹤窗口，避免同一次偏離重複計入多個事件
         else:
             i += 1
+    return entries
 
+
+def zscore_events(log_a: pd.Series, log_b: pd.Series) -> dict:
+    entries = raw_entries(log_a, log_b)
     return {
         "n_entries": len(entries),
         "z_std": float(z.dropna().std()) if z.dropna().shape[0] > 1 else float("nan"),
