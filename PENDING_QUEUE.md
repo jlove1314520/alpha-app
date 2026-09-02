@@ -34,9 +34,11 @@
 >
 > 做完一、驗收後，馬拉松繼續自主跑。
 
-- [ ] **一** Shioaji報價升級為逐筆tick串流（B34，原始編號B21跟既有
-  「Reddit社群訊號抓取」條目撞號，見下方一.5筆記）——**進行中，Shioaji
-  API方法簽章查證中**
+- [x] **一** Shioaji報價升級為逐筆tick串流（B34，原始編號B21跟既有
+  「Reddit社群訊號抓取」條目撞號）——**已完成**（見`BACKLOG.md`/
+  `PROGRESS.md`對應條目：改成`api.subscribe()`常駐訂閱、15秒flush+push、
+  單元測試6項全PASS、smoke check 22 PASS，下次台股開盤才能做最終SDK
+  行為驗證，已誠實記錄）。
 - [x] **二** 登錄B35（秒級即時手機端架構項，原始編號B20跟既有「未來性
   濾網(c)類因子」條目撞號）到BACKLOG.md，只登記不開工——**已完成**
   （見`BACKLOG.md`對應條目，commit `8b65e72`）

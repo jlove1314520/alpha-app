@@ -763,10 +763,43 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("21. 四大美股指數報價不得為null（用2026-09-02實測真實資料結構當fixture）",
     fourIndicesErrors.length === 0, fourIndicesErrors.join("; "));
 
+  // 22.【2026-09-03新增，B34 Shioaji逐筆tick串流】route攔截假quotes_
+  // sinopac.json，模擬新的data_type="REALTIME_TICK"，驗自選股列表badge
+  // 正確顯示「Shioaji 即時(tick)」，不是沿用舊的「即時」或顯示成「未知」。
+  const tickBadgeErrors = [];
+  try {
+    const fakeSinopac = {
+      fetched_at: new Date().toISOString(), connected: true, market_status: "open", error: null,
+      quotes: {
+        "2330": { last: 1050.0, close: 1035.0, change_pct: 1.5, data_type: "REALTIME_TICK",
+                  volume_this_tick: 3, total_volume: 1200, exchange: "TSE" },
+      },
+    };
+    await page.route("**/data/quotes_sinopac.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeSinopac) })
+    );
+    await page.evaluate(() => {
+      const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]");
+      if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); }
+      INTRADAY_SINOPAC = null;
+    });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1500);
+    const wlHtml = await page.evaluate(() => document.getElementById("wl-list")?.innerHTML || "");
+    if (!wlHtml.includes("即時(tick)")) {
+      tickBadgeErrors.push(`自選股列表沒有顯示「即時(tick)」badge，片段：${wlHtml.slice(0, 400)}`);
+    }
+    await page.unroute("**/data/quotes_sinopac.json**");
+  } catch (e) {
+    tickBadgeErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("22. Shioaji逐筆tick串流誠實標示：data_type=REALTIME_TICK正確顯示「即時(tick)」badge",
+    tickBadgeErrors.length === 0, tickBadgeErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -16,6 +16,57 @@
 
 ---
 
+## 2026-09-03（維運/開發帽）— B34：Shioaji報價升級為逐筆tick串流
+
+使用者裁示「Shioaji報價升級為逐筆tick串流」。`research/shioaji_quotes.py`
+從「輪詢快照」（`api.snapshots()`）改成「訂閱逐筆串流」（`api.subscribe()`
++`set_on_tick_stk_v1_callback`等六個回呼），架構從「短命腳本每次重新
+登入」變成「常駐行程登入一次、跑到收盤」，`run-shioaji-quotes-cycle.ps1`
+角色改成PID檔案判斷的啟動器。
+
+**git commit/push頻率：15秒**（使用者已核准調整、不需要再提案，這裡是
+我選定的實際頻率與理由）——跟App前端既有的15秒盤中自動輪詢頻率
+（`index.html::fastPollTick()`）對齊：flush比前端輪詢快沒有意義（使用者
+根本還沒重新抓資料，白白多耗git操作），flush比前端輪詢慢就違背這次
+升級的目的（App還是要等更久才看到新價），15秒是雙方都不浪費的對齊點，
+比舊版2分鐘輪詢頻率快8倍。沒有變動時不commit（沿用`git diff --quiet`）。
+
+**API方法簽章查證方式（誠實揭露）**：這次改版時台股非交易時段，沒有
+真實tick事件可以連線測試——所有callback簽章/欄位名稱是查證已安裝版本
+（`shioaji==1.7.4`）的型別存根`shioaji/_core.pyi`得到（讀原始碼等級
+定義，不是憑印象猜），確認`api.quote.subscribe()`已deprecated改用
+`api.subscribe()`、callback是單一參數不是舊版雙參數、TAIEX指數用
+`set_on_quote_idx_v1_callback`（跟股票/期貨的tick callback不同介面，
+指數沒有逐筆成交概念只有quote更新）。**唯一沒把握的地方**：tick的
+`pct_chg`/`price_chg`欄位是否本身帶正負號，先假設是、同時記錄原始
+`chg_type`整數值供人工核對，若下次開盤驗證錯了要修正——這是誠實記錄
+「還沒驗證的假設」不是隱藏風險。
+
+`data_type`新增`"REALTIME_TICK"`，`index.html::intradayDataTypeLabel()`
+對應顯示「即時(tick)」，跟舊版snapshot的「即時」區分開來。
+
+**驗證**：新增`research/shioaji_tick_stream_test.py`（6項單元測試：
+tick/bidask/quote_idx callback正確更新狀態、bidask更新不洗掉tick既有
+欄位、callback內部例外不外溢中斷訂閱、payload可正確JSON序列化、交易
+時段邊界判斷回歸防線）**全部PASS**，刻意不連真Shioaji連線（模擬環境
+在非交易時段沒有真實tick可測）。`scripts/smoke_test.mjs`新增check 22
+（route攔截驗證badge正確顯示「Shioaji 即時(tick)」），**22項檢查全
+PASS**；check 6（類股卡熱力圖）既有問題非本次迴歸。
+
+**尚未驗證的部分（誠實記錄，不是忘記做）**：下次台股開盤才能真正驗證
+tick訂閱本身是否如預期運作（合約訂閱是否成功、callback是否真的被
+觸發、正負號假設是否正確）——這輪能做到的是「程式邏輯本身測過、API
+簽章查證過」，SDK實際行為要等下次開盤才能做最終確認。使用者已在原始
+指令裡明確理解這個時序限制（「開盤前先把程式備妥」「下次開盤留一段
+實際tick log佐證」）。
+
+改動檔案：`research/shioaji_quotes.py`（重寫）、新增
+`research/shioaji_tick_stream_test.py`、`index.html`、
+`scripts/smoke_test.mjs`、`.gitignore`、`C:\alpha\run-shioaji-quotes-
+cycle.ps1`（repo外，啟動器邏輯）。
+
+---
+
 ## 2026-09-02（開發帽）— 指數Yahoo備援回報「還是null」的根因：不是程式碼bug，是資料從沒重跑過
 
 使用者回報「現在只有^GSPC有值，^DJI/^IXIC/^SOX還是null」。**查證後

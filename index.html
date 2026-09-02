@@ -1749,6 +1749,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 沿用IBKR/Shioaji既有回報的data_type字串（見ibkr_quotes.py/shioaji_quotes.py
   // 的MARKET_DATA_TYPE_LABEL），不自己發明新分類。
   function intradayDataTypeLabel(dt){
+    // 2026-09-03新增：Shioaji從輪詢快照(REALTIME)升級成逐筆tick訂閱(B34)，
+    // 新的data_type值刻意跟舊的分開標示，讓使用者看得出來這是真的逐筆
+    // 進來的還是舊版的定期快照（見research/shioaji_quotes.py模組docstring）。
+    if(dt==='REALTIME_TICK')return '即時(tick)';
     if(dt==='REALTIME')return '即時';
     if(dt==='DELAYED')return '延遲~15分';
     if(dt==='YAHOO_DELAYED')return 'Yahoo延遲~15分';
@@ -3733,7 +3737,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.2248';
+  const APP_VERSION='2026-09-03.0103';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
