@@ -16,6 +16,39 @@
 
 ---
 
+## 2026-09-02（開發帽）— 指數Yahoo備援回報「還是null」的根因：不是程式碼bug，是資料從沒重跑過
+
+使用者回報「現在只有^GSPC有值，^DJI/^IXIC/^SOX還是null」。**查證後
+發現不是程式碼問題**——直接跑`python research/ibkr_quotes.py`（IB
+Gateway剛好開著），實測結果：**四大指數全部拿到值**（^DJI透過Yahoo
+備援`YAHOO_DELAYED`、^GSPC/^IXIC/^SOX直接從IBKR拿到`DELAYED`真實
+報價），跟使用者回報的現象完全不符。
+
+追下去發現：`data/quotes_ibkr.json`是**一般git追蹤的檔案**（不是
+gitignore排除的），最後一次commit是**2026-09-01 21:08**——那次的快照
+內容剛好是`^GSPC=7684.37`有值、`^DJI/^IXIC/^SOX=null`，**跟使用者
+回報的現象一字不差**。因為`AlphaIbkrQuotes`排程從來沒真正建立過（見
+稍早`BACKLOG.md`「本機排程」條目、`PENDING_QUEUE.md`「四」的既有
+揭露），**沒有人在我加了Yahoo備援之後重新跑過這支腳本**，使用者看到
+的其實是我改代碼之前、9/1晚上留下的舊快照——不是新代碼跑出來的結果
+沒生效，是新代碼根本還沒被執行過一次。
+
+已手動執行一次`ibkr_quotes.py`並commit這份新鮮的`quotes_ibkr.json`
+（含四個指數全部有值的真實證據），同時新增smoke check 21（用這次
+實測到的真實資料結構當fixture，route攔截驗四大指數在市場頁全部顯示
+數字、沒有任何一個是「—」）。**21項檢查全PASS**；check 6既有問題非
+本次迴歸。Playwright截圖確認四大指數正確顯示（道瓊Yahoo延遲~15分、
+其餘三個IBKR延遲~15分）。
+
+**尚未解決的根本缺口（不在這次任務範圍，如實記錄）**：`AlphaIbkrQuotes`
+排程仍然不存在，這次手動commit的新鮮快照過20分鐘後一樣會變舊——要
+真正解決「數字持續是新的」，還是得靠使用者自己用`schtasks`建立排程
+（Claude Code安全分類器擋下我自己建立排程的動作，這是已知既有限制）。
+
+改動檔案：`data/quotes_ibkr.json`、`scripts/smoke_test.mjs`。
+
+---
+
 ## 2026-09-02（開發帽）— 籌碼頁重新配置：市場頁精簡入口卡＋獨立市場籌碼總覽頁
 
 使用者裁示「二、籌碼頁重新配置（不加底部按鈕、不擁擠）」。原本市場頁

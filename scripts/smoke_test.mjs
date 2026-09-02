@@ -46,8 +46,15 @@
 // 18.【2026-09-02新增，IBKR Paper下單UI卡片】驗美股/台股買進按鈕分工正確
 //     （美股開真的IBKR下單卡片、台股維持示範版，不能混）、伺服器未啟動時
 //     連線狀態有清楚提示、沒填token前端會擋下送出。
-// 12. 整個測試過程（含8/9/11/13/14/15/16/17/18新增的重整/reload/手勢/時區/
-//     防線操作）結束後仍無累積的uncaught error。
+// 19.【2026-09-02新增，即時價格四修】route攔截假us_financials.json…（見
+//     19號check本體）驗Yahoo備援指數正確標「Yahoo 延遲~15分」。
+// 20.【2026-09-02新增，籌碼頁重新配置】市場頁籌碼入口卡摘要數字+點進去
+//     完整市場籌碼總覽頁都正確渲染。
+// 21.【2026-09-02新增，使用者原話「四大美股指數報價不得為null」】用實測
+//     真實資料結構當fixture，驗四大美股指數在市場頁全部顯示數字，不是
+//     任何一個「—」。
+// 12. 整個測試過程（含8/9/11/13/14/15/16/17/18/19/20/21新增的重整/
+//     reload/手勢/時區/防線操作）結束後仍無累積的uncaught error。
 
 import { chromium } from "@playwright/test";
 
@@ -706,10 +713,60 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("20. 籌碼頁重新配置：市場頁入口卡顯示摘要數字、點進去正確看到完整市場籌碼總覽頁",
     chipsEntryErrors.length === 0, chipsEntryErrors.join("; "));
 
+  // 21.【2026-09-02新增，使用者原話「四大美股指數報價不得為null」】用
+  // 2026-09-02 23:25本機實測ibkr_quotes.py抓到的真實資料結構當fixture
+  // （道瓊IBKR無訂閱走Yahoo備援、S&P500/NASDAQ/費半直接拿到IBKR DELAYED
+  // 報價——見research/ibkr_quotes.py實測log），route攔截餵給前端，驗
+  // 四大指數在市場頁「美股」分頁全部顯示實際數字，沒有任何一個是「—/
+  // 查無資料」。這條測試曾經被誤會成「程式碼bug」，實際查證後發現是
+  // 「quotes_ibkr.json從2026-09-01起沒有人手動重跑過，部署的資料本身
+  // 是舊的、缺三個指數」，不是程式碼邏輯壞——這條測試用真實資料結構
+  // 當防線，之後如果邏輯真的壞掉能立刻抓到，跟「資料沒更新」的情況分開。
+  const fourIndicesErrors = [];
+  try {
+    const realWorldIbkr = {
+      fetched_at: new Date().toISOString(), connected: true, account_type: "paper", error: null,
+      quotes: {
+        "^DJI": { last: 53070.5, bid: null, ask: null, close: 52766.88, change_pct: 0.5754,
+                  data_type: "YAHOO_DELAYED", source: "yahoo_fallback", exchange: "CME", label: "道瓊工業指數" },
+        "^GSPC": { last: 7670.4, bid: null, ask: null, close: 7631.47, change_pct: 0.5101,
+                   data_type: "DELAYED", exchange: "CBOE", label: "S&P 500" },
+        "^IXIC": { last: 26193.84, bid: null, ask: null, close: 26099.77, change_pct: 0.3604,
+                   data_type: "DELAYED", exchange: "NASDAQ", label: "那斯達克綜合指數" },
+        "^SOX": { last: 11322.03, bid: null, ask: null, close: 11288.61, change_pct: 0.2961,
+                  data_type: "DELAYED", exchange: "PHLX", label: "費城半導體指數" },
+      },
+    };
+    await page.route("**/data/quotes_ibkr.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(realWorldIbkr) })
+    );
+    await page.evaluate(() => { INTRADAY_IBKR = null; });
+    await page.evaluate(() => window.go("market"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.setMarketToggle("market", "US"));
+    await page.waitForTimeout(2000);
+    const rows = await page.evaluate(() =>
+      [...document.querySelectorAll("#us-idx-rows .row")].map(r => ({
+        name: r.querySelector(".nm b")?.textContent,
+        price: r.querySelector(".px b")?.textContent,
+        src: r.querySelector(".nm span")?.textContent,
+      }))
+    );
+    if (rows.length !== 4) fourIndicesErrors.push(`應該有4個指數列，實際${rows.length}個：${JSON.stringify(rows)}`);
+    for (const r of rows) {
+      if (!r.price || r.price === "—") fourIndicesErrors.push(`${r.name}顯示「—」（null），來源標籤="${r.src}"`);
+    }
+    await page.unroute("**/data/quotes_ibkr.json**");
+  } catch (e) {
+    fourIndicesErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("21. 四大美股指數報價不得為null（用2026-09-02實測真實資料結構當fixture）",
+    fourIndicesErrors.length === 0, fourIndicesErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
