@@ -1474,3 +1474,15 @@ TW軌兩項地基背景工作獨立複查：`data/backfill_state.json`重新統�
 `is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`確認除既有殘留變更（`../data/rate_limit_state.json`已修改）外，另有15個未追蹤log/腳本檔案（`b25_regime_report_run.log`／`dividend_yield_portfolio_v1_run.log`／`f52w_high_gates_run.log`等），皆為另一互動session（`AlphaHypothesisQueue`軌道，`git log`可見同時段持續有該軌道自己的commit，例如`909f522` hypothesis_queue軌道#20因子測試）留下的殘留，未觸碰、未納入本輪commit。
 
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約189輪、跨度約173.9小時（約7.25天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+## 2026-09-03T04:02+08:00 — 馬拉松第301輪：跳過（暫停規則生效中），複查三個解除條件皆未成立
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 02:31（第298輪，最舊）、FUT 03:02（第299輪）、US 03:31（第300輪，最新）——依輪替選TW。與上一輪TW（第298輪，02:31）相隔約1小時31分，略超出正常30分鐘排程間隔，幅度不大，非崩潰跡象。
+
+獨立複查暫停規則三個解除條件：(1) `PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自建立（`fa369b9`）以來仍只有這一個commit；(2) `LEADS.md`最新`portfolio_multifactor_v2`條目（round202補充）判定仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535「接近顯著」），(a)換更大樣本重跑／(b)train-only嚴格樣本外兩個選項仍未見使用者新回應；(3) `MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。三者皆未成立，暫停規則整體仍完全生效中。
+
+TW軌兩項地基背景工作獨立複查：`data/backfill_state.json`重新統計done=2597/skip=469，共3066筆，`universe()`回傳全市場3196檔，3066/3196≈95.9%，跟第298輪一致無變化，遠高於80%門檻，不需要跑`backfill_universe.py`；T86回補自第164輪起維持100%完成記錄，本輪未重新掃描（理由同過往：無新資料源變動，重複掃描不會產生新資訊）。**沒有已知的剩餘允許工作項目**，(a)/(b)仍待使用者裁示，本輪不代為啟動。**TW軌本輪整輪跳過，未做任何實質工作。**
+
+`is_holdout_consumed()`確認`False`（本輪零API呼叫）。`git status`開工時確認除既有殘留變更（`../data/rate_limit_state.json`／`research/pit.py`已修改）外，另有17個未追蹤log/腳本檔案，研判皆為另一互動session／`AlphaHypothesisQueue`軌道留下的殘留，未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約192輪、跨度約175.4小時（約7.31天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
