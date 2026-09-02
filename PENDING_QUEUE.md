@@ -21,7 +21,7 @@
 自主跑，正在處理Carry #4（抓到並修好一個0筆交易的真bug，重跑中）——
 不是停著要「恢復」，指令裡的前提（馬拉松已停）不成立，如實記錄。
 
-- [ ] **一.1** IBKR紙上下單測試（1股AAPL，送單前assert paper帳戶，記
+- [x] **一.1** IBKR紙上下單測試（1股AAPL，送單前assert paper帳戶，記
   paper_trades.json）——**已於稍早完成**（見`BACKLOG.md`「2026-09-01
   （續）IBKR paper下單管線測試」條目：BUY 1股AAPL Filled@324.58→SELL
   平倉Filled@324.61，帳戶歸零），依指令「若已跑過就跳過」，跳過不重做。
@@ -45,9 +45,10 @@
 - [x] **二.4** 加smoke test防線：資料檔明明新鮮、App卻顯示無資料=FAIL
   （SW快取壞殼那類）——**已完成**（`scripts/smoke_test.mjs`新增檢查15，
   13項全PASS）。
-- [ ] **三.1** Carry #4判生死（alpha顯著性+下檔保護），PASS進監控台、
-  FAIL進墓園——**馬拉松已在自主處理中（見上方背景查證），不重複派工，
-  等它自然跑完**。
+- [x] **三.1** Carry #4判生死（alpha顯著性+下檔保護），PASS進監控台、
+  FAIL進墓園——**馬拉松已自主跑完並結案：FAIL**（第八輪，alpha顯著性
+  未過，TRAIN p=0.4868/VAL p=0.1487皆遠不顯著，見`HYPOTHESIS_QUEUE.md`
+  排隊順序總結item 4、`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#75）。
 - [ ] **三.2** B25 regime分情境報告、B26調整後Sharpe(×0.5/×0.7)+CVaR
   ——**尚未執行，只完成了「排入佇列」這一半**：已在`HYPOTHESIS_QUEUE.md`
   補一段B25/B26任務提醒（指向`BACKLOG.md`既有完整規格），但B25/B26本身
@@ -62,9 +63,19 @@
   內容被同一時段的馬拉松cycle（Carry #4那輪）一併commit進`2b73f69`（
   跟它自己對Carry狀態的更新同一個commit，不是我自己單獨commit，但內容
   完整無缺，已用`git diff HEAD`確認落地、`grep`確認3處文字都在）。
-- [ ] **四** 全部做完且各自驗收後，確認挖礦馬拉松（假設佇列自動排程）
-  持續運作，一條接一條不idle——**排程本身本來就在跑，不需要「恢復」，
-  只需確認新增的三.2/三.3工作項目會被自然接續**。
+- [x] **四** 全部做完且各自驗收後，確認挖礦馬拉松（假設佇列自動排程）
+  持續運作，一條接一條不idle——**2026-09-02T21:5x再次確認**：
+  `AlphaMarathon`/`AlphaHypothesisQueue`兩個Windows排程皆`Ready`狀態且
+  最近一次執行成功（`LastTaskResult=0`）；`hypothesis_queue`軌過程中
+  發現一次排程崩潰（PID 60976在完成#16判定後commit前中斷，跟今晚稍早
+  兩次API中斷同一類問題），已接手修復（清乾淨鎖檔+補commit+修正
+  `MARATHON_LOG.md`格式損壞，見對應commit），佇列非空、`#17`已排定
+  接續。**同時發現一個獨立於本次任務的既有缺口**：`AlphaIbkrQuotes`
+  排程從未真正建立過（`BACKLOG.md`「本機排程」條目本來就寫明卡在
+  Claude Code安全分類器擋下建立排程的動作，需要使用者自己跑
+  `schtasks`），`data/quotes_ibkr.json`已停留在2026-09-01 21:34沒更新
+  超過24小時——不是本次改動造成的迴歸，是舊缺口一直沒補，如實記錄
+  留給使用者決定要不要現在補。
 
 **鐵律（適用於這整批）**：資料源禮儀（≥3秒/斷路器/不打爆FinMind/TWSE/
 永豐）、determinism、paper-first、真實下單永遠使用者親按、金鑰/憑證不進
