@@ -28,8 +28,10 @@
 > 回報：若四點都正確、IC 仍是 noise，就正式接受 FAIL 留墓園；若發現 bug，修正後只重跑 gate1 看是否復活，復活才排回完整 gauntlet。
 > 其餘 #21–#24 的 FAIL 維持判死，不複查。做完繼續原本馬拉松佇列。
 
-- [ ] **#20 GP實作正確性健檢**——查公式科目對應/PIT對齊/涵蓋率/方向
-  四點，不重跑全套gauntlet，若有bug修正後只重跑gate1。
+- [x] **#20 GP實作正確性健檢**——**已完成**：四點皆查證正確（公式數值
+  上精確驗證diff=0.0、PIT對齊共用已驗證機制、涵蓋率跟CHEAP_PASS因子
+  同量級、方向兩期皆正未接反），無bug，正式接受FAIL維持墓園，未重跑
+  gauntlet。見`HYPOTHESIS_QUEUE.md`#20「實作正確性健檢」章節。
 
 ---
 
@@ -56,11 +58,10 @@
 >
 > 先跑 baseline 複合（GP + 價值 + 月營收意外，等權），過 cheap gate 才打完整 gauntlet；過不了就換因子組合，但每次先寫「為什麼這幾個因子互補」的經濟理由。通過完整 gauntlet、進 forward-paper 前停下提案給我。
 
-- [ ] **登記z-score複合評分假設進HYPOTHESIS_QUEUE.md**——吸取#22（硬AND
-  組合，sanity死在候選池只剩14%）的教訓，改用z-score加總複合。隨機
-  對照draws≥300（比一般假設的100更嚴，防組合p-hacking）、對照組是
-  「隨機選同數量因子亂加權」、正交性檢查（複合alpha對各單因子迴歸）、
-  因子權重只用TRAIN期凍結。baseline用GP+價值+月營收意外等權。
+- [x] **登記z-score複合評分假設進HYPOTHESIS_QUEUE.md**——**已完成**：
+  登記為#27，排隊接續#26之後，完整方法論（隨機對照≥300draws、正交性
+  檢查、TRAIN期凍結權重、leave-one-factor-out）已寫入
+  `HYPOTHESIS_QUEUE.md`#27，尚未開始第1關，交由馬拉松自主接續。
 
 ---
 
