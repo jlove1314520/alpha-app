@@ -680,10 +680,36 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("19. 指數Yahoo備援誠實標示：IBKR無訂閱改用Yahoo時badge正確顯示「Yahoo 延遲~15分」",
     yahooFallbackErrors.length === 0, yahooFallbackErrors.join("; "));
 
+  // 20.【2026-09-02新增，籌碼頁重新配置】市場頁「籌碼」精簡入口卡要顯示今日
+  // 三大法人合計+融資維持率摘要（不是空的—），點下去要正確導到scr-chips-
+  // market頁面並看到完整的三大法人買賣超圖+融資維持率圖（不是空白頁）。
+  const chipsEntryErrors = [];
+  try {
+    await page.evaluate(() => window.go("market"));
+    await page.waitForTimeout(2500);
+    const entryVals = await page.evaluate(() => ({
+      inst: document.getElementById("chips-entry-inst")?.textContent,
+      margin: document.getElementById("chips-entry-margin")?.textContent,
+    }));
+    if (!entryVals.inst || entryVals.inst === "—") chipsEntryErrors.push(`籌碼入口卡「三大法人合計」沒有畫出數字，拿到"${entryVals.inst}"`);
+    if (!entryVals.margin || entryVals.margin === "—") chipsEntryErrors.push(`籌碼入口卡「融資維持率」沒有畫出數字，拿到"${entryVals.margin}"`);
+    await page.evaluate(() => window.go("chips-market"));
+    await page.waitForTimeout(1000);
+    const detailVisible = await page.evaluate(() => document.getElementById("scr-chips-market")?.classList.contains("active"));
+    const instBarsHtml = await page.evaluate(() => document.getElementById("inst-bars")?.innerHTML || "");
+    if (!detailVisible) chipsEntryErrors.push("點籌碼入口卡後沒有正確導到scr-chips-market頁面");
+    if (!instBarsHtml || instBarsHtml.includes("載入中")) chipsEntryErrors.push(`市場籌碼總覽頁的三大法人買賣超圖沒有畫出內容，innerHTML="${instBarsHtml.slice(0,100)}"`);
+    await page.evaluate(() => window.go("market"));
+  } catch (e) {
+    chipsEntryErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("20. 籌碼頁重新配置：市場頁入口卡顯示摘要數字、點進去正確看到完整市場籌碼總覽頁",
+    chipsEntryErrors.length === 0, chipsEntryErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

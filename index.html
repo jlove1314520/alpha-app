@@ -521,29 +521,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：TWSE 官方28類產業分類指數，GitHub Actions 排程抓取</div>
       </div>
 
-      <div class="card">
-        <h3>三大法人買賣超（近日 · 淨買賣張數）</h3>
-        <div class="div-bars" id="inst-bars"><div class="note">載入中…</div></div>
-        <div class="legend">
-          <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
-          <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
-          <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
+      <!-- 2026-09-02重新配置（使用者裁示「籌碼頁重新配置，不加底部按鈕、不擁擠」）：
+           原本佔兩張卡的「三大法人買賣超」+「大盤融資維持率」完整圖表移到獨立的
+           scr-chips-market頁面，這裡只留一張精簡入口卡（今日三大法人合計+資券
+           變化摘要），點進去才看完整圖表——市場頁本身不因為籌碼資訊變擁擠。 -->
+      <div class="card" style="cursor:pointer" onclick="go('chips-market')">
+        <h3>籌碼 <span style="font-size:11px;color:var(--accent);font-weight:400">看更多 ›</span></h3>
+        <div class="facts">
+          <div class="f"><span>三大法人合計（今日）</span><b id="chips-entry-inst">—</b></div>
+          <div class="f"><span>大盤融資維持率</span><b id="chips-entry-margin">—</b></div>
         </div>
-        <div class="note" id="inst-datatime"></div>
-        <div class="note">來源：TWSE T86 全市場逐日加總（張數，非金額），GitHub Actions 排程抓取，歷史隨時間累積</div>
-      </div>
-
-      <div class="card">
-        <h3>大盤融資維持率</h3>
-        <div id="margin-summary"><div class="note">載入中…</div></div>
-        <div id="margin-chart"></div>
-        <div class="legend">
-          <div class="li"><span class="sw" style="background:var(--warn)"></span>&lt;160% 注意</div>
-          <div class="li"><span class="sw" style="background:var(--serious)"></span>&lt;150% 危險</div>
-          <div class="li"><span class="sw" style="background:var(--critical)"></span>&lt;130% 斷頭區</div>
-        </div>
-        <div class="note">跌破 150% 為市場公認警戒；跌破整戶維持率(通常130%)交易人會被要求補繳保證金或遭券商斷頭砍倉</div>
-        <div class="note" id="margin-note">來源：TWSE 全市場融資餘額逐股×收盤價加總（本機 Python 每日計算）÷ FinMind 全市場融資金額</div>
+        <div class="note">來源：TWSE T86 全市場加總 + 融資餘額（GitHub Actions 排程）</div>
       </div>
 
       <div class="card ai-card" style="opacity:.7">
@@ -592,6 +580,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         </div>
         <div class="note" id="fut-note">來源：FinMind 期貨三大法人（TaiwanFuturesInstitutionalInvestors · TX）</div>
       </div>
+    </div>
+  </section>
+
+  <!-- ════════ 2a-2. 市場籌碼總覽（2026-09-02新增，市場頁「籌碼」入口卡點進來）════════ -->
+  <section class="screen" id="scr-chips-market">
+    <button class="back" onclick="go('market')">‹ 返回</button>
+    <div style="font-size:22px;font-weight:700;letter-spacing:-.01em;margin:2px 0 12px">市場籌碼總覽</div>
+    <div class="note" style="margin:-8px 0 12px">全市場層級（三大法人加總/融資維持率），不是個股籌碼——查個股籌碼請到該股頁面「籌碼」分頁。</div>
+
+    <div class="card">
+      <h3>三大法人買賣超（近日 · 淨買賣張數）</h3>
+      <div class="div-bars" id="inst-bars"><div class="note">載入中…</div></div>
+      <div class="legend">
+        <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
+        <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
+        <div class="li" style="margin-left:auto;color:var(--ink)">今日 <b id="inst-today">—</b></div>
+      </div>
+      <div class="note" id="inst-datatime"></div>
+      <div class="note">來源：TWSE T86 全市場逐日加總（張數，非金額），GitHub Actions 排程抓取，歷史隨時間累積</div>
+    </div>
+
+    <div class="card">
+      <h3>大盤融資維持率</h3>
+      <div id="margin-summary"><div class="note">載入中…</div></div>
+      <div id="margin-chart"></div>
+      <div class="legend">
+        <div class="li"><span class="sw" style="background:var(--warn)"></span>&lt;160% 注意</div>
+        <div class="li"><span class="sw" style="background:var(--serious)"></span>&lt;150% 危險</div>
+        <div class="li"><span class="sw" style="background:var(--critical)"></span>&lt;130% 斷頭區</div>
+      </div>
+      <div class="note">跌破 150% 為市場公認警戒；跌破整戶維持率(通常130%)交易人會被要求補繳保證金或遭券商斷頭砍倉</div>
+      <div class="note" id="margin-note">來源：TWSE 全市場融資餘額逐股×收盤價加總（本機 Python 每日計算）÷ FinMind 全市場融資金額</div>
     </div>
   </section>
 
@@ -1225,7 +1245,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   window.addEventListener('unhandledrejection',e=>{recordGlobalError('unhandledrejection',e.reason)});
 
   // ── 導覽 ──
-  const scrs = {home:'scr-home',market:'scr-market',picks:'scr-picks',report:'scr-report',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
+  const scrs = {home:'scr-home',market:'scr-market','chips-market':'scr-chips-market',picks:'scr-picks',report:'scr-report',trade:'scr-trade',journal:'scr-journal',stock:'scr-stock',settings:'scr-settings'};
   // 2026-08-27新增（使用者定位的「改A壞B」根因之一）：任一分頁的載入/渲染函式
   // 失敗，不能連累其他分頁或導覽本身——sync函式包try/catch，async函式的promise
   // 要接.catch()（try/catch接不住async函式await之後才發生的rejection）。錯誤
@@ -1241,6 +1261,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('main').scrollTo(0,0);
     if(name==='home')_safeAsync('hydrateHome',hydrateHome);
     if(name==='market')_safeAsync('hydrateMarket',hydrateMarket);
+    if(name==='chips-market')_safeAsync('loadChipsMarketDetail',loadChipsMarketDetail);
     if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
     if(name==='trade')_safeSync('onTradeInit',onTradeInit);
     if(name==='journal')_safeSync('renderJournalChips',renderJournalChips);
@@ -2299,6 +2320,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const te=document.getElementById('inst-today');
     te.textContent=(todayNet>=0?'+':'')+Math.round(todayNet)+' 張';te.style.color=todayNet>=0?'var(--up)':'var(--down)';
     document.getElementById('inst-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE)+(history.length<5?`（累積中，目前${history.length}天）`:'');
+    // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-inst）跟這裡是
+    // 同一份資料的兩種呈現，不重新fetch，直接複寫同樣的文字/顏色。
+    const ee=document.getElementById('chips-entry-inst');
+    if(ee){ee.textContent=te.textContent;ee.style.color=te.style.color}
   }
 
   // 2026-08-25 新增：大盤（全市場）融資維持率。這個數字沒辦法在瀏覽器端直接算——
@@ -2359,6 +2384,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     if(chartEl)chartEl.innerHTML=marginChart(history.filter(h=>!h.data_incomplete));
     if(noteEl)noteEl.textContent=`來源：TWSE官方MI_MARGN/STOCK_DAY_ALL逐股融資餘額×收盤價加總（GitHub Actions排程，累積 ${history.length} 天）÷ FinMind全市場融資金額（唯一保留的FinMind依賴，一天一次；若當天失敗會明確標示「資料不完整」而非沿用舊值）`;
+    // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-margin）簡短文字版。
+    const ee=document.getElementById('chips-entry-margin');
+    if(ee){
+      if(last.data_incomplete){ee.textContent='資料不完整';ee.style.color='var(--warn)'}
+      else{const lv=marginLevel(last.ratio_pct);ee.textContent=(last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—')+(lv?'·'+lv.l:'');ee.style.color=lv?lv.c:'var(--ink)'}
+    }
+  }
+
+  // 2026-09-02新增：市場籌碼總覽頁（scr-chips-market）進來時重新確保資料
+  // 新鮮——loadInstTotal()/loadMarginMaintenance()本來就會在市場頁載入時
+  // 跑過一次（用來填精簡入口卡），這裡重跑一次是防呆（例如使用者長時間
+  // 停留在市場頁很久才點進籌碼總覽，或未來有深連結直接進這頁的情境），
+  // market_tw.json有快取不會重打，margin_maintenance.json本來就很小，
+  // 重新抓一次成本可忽略。
+  async function loadChipsMarketDetail(){
+    await Promise.allSettled([loadInstTotal(),loadMarginMaintenance()]);
   }
 
   async function loadFutInst(){
@@ -3692,7 +3733,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-02.2241';
+  const APP_VERSION='2026-09-02.2248';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
