@@ -865,6 +865,14 @@ Piotroski F-score當價值榜排雷閘門、#24除權息季節行為效應。**�
 投入/不可逆或花錢操作）之外，只有「某條假設通過完整關卡準備部署」
 才停下問總司令，其餘自主一條接一條跑完、跑完就換下一條。
 
+**2026-09-03（第十九輪排程更新）**：#19第1關cheap gate**CHEAP_PASS**
+（r=0.40~0.46兩期、p<0.0001、洗牌null percentile滿分100.0，本佇列至今
+證據最強的候選，完整數字見上方#19條目與`TRIALS_LEDGER.md`#88）。**#19
+尚未結案**——第2關以後（成本敏感度、portfolio層擇時規則構造、alpha
+顯著性拆解）待下一輪接續，**佇列排隊順序仍是#19（未結案，接續第2關）
+→#20→#21→#22→#23→#24**，不因為第1關CHEAP_PASS就跳過#20~24優先度或
+提前判定#19最終PASS/FAIL。
+
 ---
 
 ### 16. 同產業配對交易 / 統計套利（Pair Trading / Statistical Arbitrage）
@@ -1134,6 +1142,29 @@ gate開始（先確認`fetch_yf_index(ticker="^GSPC")`真的能拿到合理的�
 不跳關、不因為是新機制就放寬第一關的cheap gate標準。**其餘#5/#6/#8/#10
 仍登記在案**，任一外部依賴解鎖時應優先評估是否能接續，不因為新增#19
 就永久放棄它們。
+
+**狀態（2026-09-03更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第十九輪排程，
+第1關cheap gate：CHEAP_PASS，本佇列證據最強的候選）**：新增
+`spillover_overnight_gate.py`——用`fetch_yf_index()`分別取`^GSPC`/
+`^TWII`日線，對每個台股交易日t，配對「日曆日期嚴格早於t的最近一個美股
+交易日」的隔夜報酬（`us_ret[d]=close[d]/close[d-1]-1`）當訊號，目標變數
+是台股t日close-to-close報酬，測時序（非cross-sectional）Pearson/Spearman
+相關 + 洗牌null(N=500,打散美股訊號序列)。**時序對齊sanity**：3662組配對，
+美股訊號日到台股交易日日曆天數差min=1/max=5/median=1.0（確認訊號嚴格
+早於目標，無未來函數）。結果：TRAIN(<=2020-12-31,n=2693) Pearson
+r=+0.3987(p<0.0001)、Spearman ρ=+0.3778(p<0.0001)、洗牌null percentile=
+100.0；VAL(2021-01-01~2024-12-31,n=969) Pearson r=+0.4550(p<0.0001)、
+Spearman ρ=+0.4616(p<0.0001)、洗牌null percentile=100.0。三項判準（幅度
+非零/train-val同號/贏過洗牌null）全過，**相關係數量級(r=0.40~0.46)是本
+佇列至今第1關證據最強的候選**（p值遠低於0.0001，兩期方向一致且percentile
+滿分）。**這只是第1關（相關性存在性驗證），不是最終PASS**——下一步是把
+這個訊號轉成具體的台股當日曝險擇時規則（例如美股大跌超過某個門檻時降低
+台股曝險），比照`regime_overlay.py`（#10）已建置的overlay框架整合，走
+完整GATE_SEQUENCE第2關以後（含成本敏感度、leave-one-out、逐年一致性、
+alpha顯著性拆解——經濟理由再強，最終判準仍是`portfolio_multifactor_v2`
+一路以來的alpha顯著性+beta拆解標準，不能因為第1關相關係數漂亮就放寬
+後續關卡）。完整見`TRIALS_LEDGER.md`#88、`MARATHON_LOG.md`本輪心跳條目、
+`data/spillover_overnight_aligned.csv`（新增，gitignored）。
 
 ---
 

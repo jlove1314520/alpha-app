@@ -13,6 +13,25 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T00:54 — hypothesis_queue軌道：#19跨市場美股隔夜報酬外溢效應第1關cheap gate — CHEAP_PASS（本佇列證據最強候選，尚未結案）
+
+新增`spillover_overnight_gate.py`：對每個台股交易日t，配對「日曆日期
+嚴格早於t的最近一個美股(^GSPC)交易日」隔夜報酬當訊號，跟台股(^TWII)t日
+close-to-close報酬測時序相關（非cross-sectional）。時序對齊sanity先過
+（3662組配對，訊號日到台股日曆天數差min=1/max=5/median=1.0，無未來
+函數）。TRAIN(<=2020-12-31,n=2693) Pearson r=+0.3987(p<0.0001)、洗牌
+null(N=500)percentile=100.0；VAL(2021-2024,n=969) Pearson r=+0.4550
+(p<0.0001)、percentile=100.0，Spearman兩期同號同量級。三項cheap gate
+判準全過，**判CHEAP_PASS**——相關係數量級(0.40~0.46)是本佇列至今第1關
+證據最強的候選（前兩個CHEAP_PASS股利率/52週高點的p值也顯著但這次
+r量級/percentile更乾淨）。**這只是第1關，不是最終PASS**——依「有界
+工作單位」原則本輪到此收工，下一輪從第2關以後開始：把訊號轉成具體
+台股當日曝險擇時規則、比照`regime_overlay.py`(#10)整合、走完整成本
+敏感度/leave-one-out/逐年一致性/alpha顯著性拆解。完整見
+`HYPOTHESIS_QUEUE.md`#19、`TRIALS_LEDGER.md`#88。
+
+---
+
 ## 2026-09-03T00:39 — 使用者裁示登記5條新假設#20~#24進佇列（登記，未執行）：純毛利率因子(GP)/月營收意外×低關注度(改造#14)/品質×營收加速×法人吸籌複合訊號+低波動閘門/Piotroski F-score排雷閘門/除權息季節行為效應——原始編號#18~#22跟馬拉松已自主佔用的#18/#19衝突，重新編號#20~#24，接續#19之後依序執行。下一輪（或使用者本人）可從#20第1關sanity開始，其餘照協定自主往下跑，只有全部關卡過關要部署才停下問。
 
 ## 2026-09-03T00:22 — hypothesis_queue軌道：接手崩潰排程，補完#18短期反轉（1週）FAIL判定commit
