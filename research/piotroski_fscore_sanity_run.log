@@ -1,0 +1,21 @@
+[piotroski_sanity#23] sampling 100 stocks, seed=20260822
+[piotroski_sanity#23] 47/100 stocks usable
+[piotroski_sanity#23] 121 snapshots, 2015-01-01..2024-12-31
+
+[piotroski_sanity#23] 121 snapshots with >=1 valid F-score
+          n_valid  mean_fscore  median_fscore    frac_ge7  frac_ge8
+count  121.000000   121.000000     121.000000  121.000000     121.0
+mean    45.917355     3.287229       3.256198    0.011707       0.0
+std      0.842484     0.413664       0.551950    0.018429       0.0
+min     42.000000     2.173913       2.000000    0.000000       0.0
+25%     46.000000     3.166667       3.000000    0.000000       0.0
+50%     46.000000     3.434783       3.000000    0.000000       0.0
+75%     46.000000     3.543478       4.000000    0.021739       0.0
+max     47.000000     3.826087       4.000000    0.065217       0.0
+
+[piotroski_sanity#23] 9/9項欄位齊全覆蓋率（跨全部stock-quarter觀測值）: 100.0%
+[piotroski_sanity#23] mean F>=7 候選池比例: 1.2%
+[piotroski_sanity#23] mean F>=8 候選池比例: 0.0%
+[piotroski_sanity#23] mean 每快照有效樣本數: 45.9
+
+[piotroski_sanity#23] VERDICT: SANITY_PASS

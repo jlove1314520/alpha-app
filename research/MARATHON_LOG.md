@@ -13,6 +13,32 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T04:27（系統時間，hypothesis_queue排程，第二十四輪）— #23 Piotroski F-score當價值榜排雷閘門，地基完成+第1關sanity — SANITY_PASS（非最終判準）
+
+本輪先補上一輪遺留的待辦：把上一輪（#22）的FAIL結果同步進「排隊順序
+總結」章節的正式編號清單（19~22四項，上一輪只更新了條目本身、未同步
+清單，已補齊）。接著開始#23：先查證FinMind免費層是否有齊全的Piotroski
+F-score九項指標所需欄位（`TaiwanStockFinancialStatements`/
+`TaiwanStockBalanceSheet`/`TaiwanStockCashFlowsStatement`，直接對2330
+列舉`type`值確認）——7項有直接對應欄位，2項需要文件化proxy（CFO近似
+FCF、CapitalStock面額股本近似股數），9項皆可算，資料源這關不卡。新增
+`piotroski_fscore_sanity.py`：100檔快取樣本47檔可用（比#22少，因
+F-score需要更多欄位同時齊全，天然涵蓋率更嚴），121個快照，F-score分布
+mean=3.29/median=3.26（非退化常數），但F>=7候選池均值僅1.2%、F>=8僅
+0.0%（一般樣本未經value_board_v2價值篩選，符合Piotroski原始論文預期
+——他的應用場景本來就是低淨值市值比價值股宇宙，不是全市場）。判定
+SANITY_PASS（地基就緒），**未進第2關以後**——下一步是套用value_board_v2
+既有排序候選池比較「原始版」vs「+F-score gate」兩版本alpha/地雷率，
+待下一輪接續。完整見`HYPOTHESIS_QUEUE.md`#23、`TRIALS_LEDGER.md`#93。
+
+`git status`確認`data/rate_limit_state.json`有未commit修改+多個
+`research/*_run.log`未追蹤檔案，判斷是其他自動化來源的殘留，本輪未觸碰、
+未納入commit。`is_holdout_consumed()`確認仍為`False`。
+
+---
+
+## 2026-09-03（hypothesis_queue排程，第二十三輪）— #22品質x營收加速x法人吸籌x低波動合取訊號第1關sanity — FAIL（合取候選池14.0%快照有候選，門檻30.0%未過，四gate近似獨立無協同，推翻假設前提；上一輪鎖檔陳舊30.1分鐘被回收，疑似上一輪跑到一半中斷；本輪因USD預算將近用盡未同步更新「排隊順序總結」章節數字列表，僅更新#22條目本身，下一輪需補上）
+
 ## 2026-09-03（系統時間，見commit時間戳）— hypothesis_queue軌道：#21月營收「意外」漂移×低關注度第1關cheap gate — FAIL（兩組皆未過，快殺結案）
 
 新增`revenue_trend_surprise_low_attention.py`（改造已FAIL的#14：意外定義

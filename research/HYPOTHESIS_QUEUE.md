@@ -768,6 +768,28 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     剩餘#5/#6/#8/#10仍卡外部依賴（同上）——本輪判定佇列實質已空，設計
     新假設軸#19（跨市場美股隔夜報酬外溢效應，見下方新章節），現在排隊
     第一，尚未開始第1關。**
+19. ~~跨市場美股隔夜報酬外溢效應~~——**2026-09-03第二十輪排程已結案：
+    FAIL**（第1關cheap gate CHEAP_PASS但第2關以後具體擇時規則第6關逐年
+    一致性未過，TRAIN期11年僅4年正報酬，見上方#19條目與
+    `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#89），移出排隊佇列。不
+    泛化成相關性沒用——第1關CHEAP_PASS（#88）不受影響，死的是這個具體
+    擇時規則。
+20. ~~純毛利率因子Gross Profitability~~——**2026-09-03T13:47排程已結案：
+    FAIL**（第1關cheap IC gate，null percentile=48.4遠未過90.0門檻，見
+    上方#20條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#90），移出
+    排隊佇列。
+21. ~~月營收「意外」漂移×低關注度~~——**2026-09-03排程已結案：FAIL**
+    （低/高關注度兩組皆未過90.0門檻且方向與假設預期相反，見上方#21
+    條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#91），移出排隊
+    佇列。
+22. ~~品質×營收加速×法人吸籌複合訊號+低波動閘門~~——**2026-09-03第
+    二十三輪排程已結案：FAIL**（第1關sanity，四gate合取候選池14.0%
+    快照有候選，門檻30.0%未過，四者近似統計獨立無協同，推翻假設核心
+    前提，見上方#22條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`
+    #92），移出排隊佇列。**佇列#19~22（馬拉松自主新增的#19+使用者
+    2026-09-03裁示新增5條中的前3條#20~22）至此全部結案，現在排隊第一
+    順位是#23（Piotroski F-score價值榜排雷閘門），尚未開始第1關，下一輪
+    從sanity（含F-score九項指標的FinMind欄位對應查證）開始，不跳關。**
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後）**：15條原始佇列項目中
 #1~4、#7、#9、#11~15共10條已結案（皆FAIL），#10已建置方法論框架（非
@@ -1337,8 +1359,13 @@ roe_stability`等ROE/FCF相關因子）、營收動能（`#14`已FAIL，但這�
 
 **下檔保護要求**：同上（見#20條目），適用本輪全部5條新假設。
 
-**狀態**：尚未開始，排隊接續#21之後。下一輪從第1關sanity開始（含四個
-濾網各自門檻值的訂定），不跳關。
+**狀態（2026-09-03更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第二十三輪排程，
+已結案：FAIL）**：`composite_quality_revaccel_inst_lowvol_sanity.py`（新增）
+第1關sanity——四gate個別通過率合理（56.8%/49.6%/13.0%/49.2%），但四者
+合取候選池僅14.0%快照有候選（門檻30.0%，未過），觀察值≈四通過率連乘積
+（近似統計獨立、無協同），推翻假設核心前提，判**FAIL**，未進第2關。完整
+見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#92。佇列#22結案，接續佇列
+第一順位#23（Piotroski F-score價值榜排雷閘門）。
 
 ---
 
@@ -1378,8 +1405,26 @@ GATE_SEQUENCE走（不是另外自訂一套判準），只是比較基準（base
 
 **下檔保護要求**：同上（見#20條目），適用本輪全部5條新假設。
 
-**狀態**：尚未開始，排隊接續#22之後。下一輪從第1關sanity開始（含
-F-score九項指標的FinMind欄位對應查證），不跳關。
+**狀態（2026-09-03更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`第二十四輪排程，
+地基完成+第1關sanity：SANITY_PASS，非最終PASS/FAIL判定）**：新增
+`piotroski_fscore_sanity.py`——先查證FinMind免費層9項F-score指標欄位
+（`TaiwanStockFinancialStatements`/`TaiwanStockBalanceSheet`/
+`TaiwanStockCashFlowsStatement`）：7項有直接對應欄位，2項需文件化proxy
+（②CFO正沿用既有`pit.py::cash_flow_pit()`簡化——CFO近似FCF；⑦未發行
+新股稀釋用`CapitalStock`面額股本近似股數，無直接流通股數欄位），**9項
+皆可算，不因「資料不可及」快殺**。100檔快取樣本47檔可用（比#22少，因
+F-score需要更多欄位同時齊全，涵蓋率天然更嚴）、121個20交易日快照
+(2015-2024)，9/9項欄位齊全覆蓋率100.0%（可用樣本內）。F-score分布：
+mean=3.29/median=3.26（0-9分，非常數/非退化）、F>=7候選池均值僅1.2%、
+F>=8均值0.0%（在**未經value_board_v2價值篩選的一般樣本**上兩個標準
+門檻幾乎無候選——這是符合Piotroski原始論文預期的結果，原始應用是套在
+已篩過的低淨值市值比價值股宇宙，不是全市場，不代表F-score本身失效，
+但暗示下一步套到value_board_v2時若候選池仍過薄，可能需要降低門檻）。
+完整數字見`TRIALS_LEDGER.md`#93。**下一步（尚未做）**：用
+`run_value_board_v2_pit_backtest.py`既有value_board_v2排序+候選池，
+比較「原始版本」vs「+F-score gate（F>=7，若候選池過薄則測F>=6）」兩
+版本的alpha與地雷率，這是本條「驗證改造」小節明講的核心比較，走完整
+GATE_SEQUENCE剩餘關卡，不是重新驗證F-score本身IC。
 
 ---
 
