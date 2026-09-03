@@ -977,3 +977,19 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約203輪、跨度約180.9小時（約7.54天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
 
 詳見`REPORT.md`第312輪條目、`US_MARATHON_STATE.md`本輪記錄。
+
+---
+
+## 2026-09-03T11:01+08:00 — 馬拉松第315輪：跳過（暫停規則生效中，無組合策略相關工作可做）
+
+取鎖時偵測到`LOCK_STALE`（pid 71184持有約30.1分鐘，上一輪即第314輪疑似異常中止、未正常釋放鎖，已自動回收）。依輪替選US（三軌時間戳US 09:31第312輪最舊）。
+
+獨立複查三個解除條件皆未成立：(1)`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit；(2)`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL；(3)`MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。
+
+US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，跟US軌無關）。**本輪整輪跳過，未做任何實質工作，零API呼叫。**
+
+`is_holdout_consumed()`確認`False`。`git status`開工時確認工作目錄僅既有殘留變更（`data/rate_limit_state.json`／`research/pit.py`已修改，另有多個未追蹤log/腳本檔案），皆非本輪產生、研判為另一互動session留下，未觸碰、未納入本輪commit。
+
+**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約206輪、跨度約182.4小時（約7.60天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
+
+詳見`REPORT.md`第315輪條目、`US_MARATHON_STATE.md`本輪記錄。
