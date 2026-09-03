@@ -9,6 +9,10 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 331 輪 · 2026-09-04T06:10+08:00 · TW（取鎖偵測到陳舊鎖檔，pid 34360持有約30分鐘，上一輪疑似異常中止已回收）· 接續第330輪，重跑`#79 f_inst_streak_days`300檔樣本cheap gate並跑到完成，同時補齊第330輪漏掉的心跳更新 · 248/300可用，TRAIN ic=+0.0232、VAL ic=-0.0150（train/val正負號仍相反）、null percentile 86.1（門檻90.0未過，原100檔樣本81.9）——`CALIBRATION_PROBE.md`「未定（待300檔重跑）」正式改回確定FAIL，寫入`TRIALS_LEDGER.md`#100
+
+## 第 330 輪 · 2026-09-04T05:32+08:00 · TW（本輪commit`70201b8`原始只更新`TW_LOG.md`，未依協定同步`MARATHON_STATE.md`/`REPORT.md`，此為第331輪補寫的心跳）· 啟動#79`f_inst_streak_days`300檔樣本重跑，因session預算提前結束、背景process結果未知 · 誠實記錄留給下一輪查核（第331輪已接續完成並確認FAIL，見上方）
+
 ## 第 329 輪 · 2026-09-04T05:07+08:00 · US（暫停規則已解除，US軌恢復實質工作）· 新增`us_portfolio_backtest.py`（US軌組合回測地基，Top-N長多/月頻季頻換股引擎，成本改接`validation/us_costs.py`） · 合成假資料自我測試PASS（零API呼叫）：6筆交易、+23.26%報酬、MDD-12.96%、Sortino0.984、hard_stop 2筆（含engineered崩盤案例），buy/sell腳位reg_fee正負性斷言全數通過；純基礎建設無候選判定，`TRIALS_LEDGER.md`/`US_LEADS.md`本輪無新增列
 
 ## 第 328 輪 · 2026-09-04T04:31+08:00 · FUT（偵測到上一輪陳舊鎖檔，pid 15340持有30.1分鐘，上一輪疑似失敗，已自動回收）· 查證CALIBRATION_PROBE.md指令「#34同理各自重跑」對FUT軌是否可行 · 不可行——TX期貨無橫斷面維度可比照股票擴大樣本，延長歷史期數會動用holdout（FULL_HISTORY_END已等於VAL_END）、提高N_SHUFFLES已測過(round57)且方向相反(92.0→89.60下降)，判定TRIALS_LEDGER.md#34維持FAIL不列入待重跑名單，TW/US的#77/#79/#91/#47/#52不受影響
