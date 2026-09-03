@@ -14,7 +14,9 @@
 
 ---
 
-## 佇列（2026-09-03，使用者標記「緊急P0」，優先於下方馬拉松校準探針先處理）
+## P0一（2026-09-03，「緊急P0：手機報價顯示昨天舊資料」）——**已被下面
+P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不成立，不再單獨
+執行，保留原文只為紀錄軌跡**
 
 原始指令全文：
 
@@ -31,16 +33,137 @@
 >
 > 做完各自 Playwright 截圖 + smoke test 驗證，回報。
 
-- [ ] **P0一** SW徹底不快取報價+app-shell過期問題（network-first/no-store
-  確認、SW版本bump+skipWaiting+clients.claim、Playwright驗證舊快取→
-  開App會自動抓新資料）
-- [ ] **P0二** 每個價格旁顯示資料時間戳，收盤後標「今日收盤」不再標「即時」
-- [ ] **P0三** 確認報價排程實際執行紀錄，回報AlphaIbkrQuotes/
-  AlphaShioajiQuotes排程建了沒、有沒有在跑、為什麼美股停在09-02 23:25
+## P0二（2026-09-03，「緊急P0，插到PENDING_QUEUE最前面」——更精確診斷，
+指出是接錯欄位不是快取）——**部分內容已被P0三取代（P0三發現真正根因是
+20分鐘閘門+commit洪水，不是接錯欄位），P0二裡「加smoke test/全App掃一遍」
+的要求仍然有效，併入P0三一起做**
+
+原始指令全文：
+
+> 全程繁體中文。緊急 P0，插到 PENDING_QUEUE 最前面，做完手上這一步就接。
+>
+> 【症狀】使用者手機 App 首頁「自選股」卡的 2330 顯示 2385（昨天收盤）。但 data/quotes_sinopac.json 裡 2330 是 last=2390（今天 09-03 13:30 tick 收盤）、prev_close=2385。結論：自選股卡沒用 Shioaji tick 的 last，而是顯示了 prev_close 或舊的 EOD 日線收盤。這是接錯欄位/接錯資料源，不是快取。
+>
+> 【修法】
+> 1. 找到自選股卡（#wl-list，hydrateHome / 自選股渲染函式）的價格來源，回報它現在到底讀哪個檔、哪個欄位（quotes_sinopac.last？prev_close？還是 market/日線的最後一筆？）。
+> 2. 改成：顯示價一律優先用 Shioaji tick 的 last（有值就用）；只有 tick 無值時才回退 EOD 日線收盤。不准再拿 prev_close 當現價。
+> 3. 標籤誠實：盤中標「即時(tick)」；收盤後標「今日收盤」；回退到 EOD 時標「日線收盤（T-1）」並顯示該筆資料日期。每個價格旁顯示資料時間戳，讓過期一眼看穿。
+> 4. 順便查 EOD 日線管線：為什麼收盤後 3 小時了日線還停在 09-02？回報排程時間並提案（先報不改）該不該提前到收盤後即跑。
+> 5. 加 smoke test：「自選股卡每檔顯示價 == quotes_sinopac 對應 last（當 last 有值時）」，不相等即 FAIL，讓這個 bug 以後無法無聲復發。
+> 6. 全部 App 上其他顯示現價的地方（市場頁、個股頁、交易頁）用同一條規則全面掃一遍，回報有沒有同樣接到 prev_close/EOD 的。
+>
+> Playwright 截圖驗證自選股卡確實顯示 2390（或當時的 last），smoke test 通過後回報。
+
+## P0三（2026-09-03，最終且最完整的P0診斷——**正在執行中，以這版為準**）
+
+原始指令全文：
+
+> 全程繁體中文。以下為總司令核准的 P0 緊急修復，插到 PENDING_QUEUE 最前面依序做，每項各自 Playwright 截圖 + smoke test。
+>
+> 一、止血：tick 推送洪水（今天 995 commit，餓死 Actions）
+> 1. research/shioaji_quotes.py tick 程式：本機逐筆訂閱不變，但 commit+push 改為「最多每 60 秒一次、且只在任一報價值有變時」。總司令已核准此頻率調整，不需再提案。
+> 2. 兩支 workflow（quotes.yml / market.yml）的 push 重試：改成「先等 30 秒讓 in-flight push 落地再 fetch+rebase」、重試上限提到 10 次，避免再被餓死。
+> 3. 回報今天各排程實際成功落地次數（quotes_tw / market_tw），並手動 workflow_dispatch 補跑一次讓今天的日線與大盤資料落地。
+>
+> 二、修根因：收盤後今天的收盤價被 20 分鐘閘門丟掉（index.html 1383、1798–1805）
+> 1. sinopacQuote()/ibkrQuote()：當報價檔 market_status 為 closed、且該筆 tick 的成交時間屬於「當日」，一律接受為「今日收盤」，不套 INTRADAY_STALE_MIN；20 分鐘閘門只在盤中生效。
+> 2. 標籤：盤中「即時(tick)」；收盤後「今日收盤 MM-DD」；真的退回 EOD 日線時標「日線收盤 T-1（MM-DD）」。每個價格旁顯示資料日期。
+> 3. 全 App 掃一遍所有顯示現價的地方（首頁自選股、市場頁、個股頁、交易頁、籌碼頁）套同一規則。
+> 4. 加 smoke test：「收盤後自選股每檔顯示價 == quotes_sinopac 對應 last」不等即 FAIL。
+>
+> 三、監控補洞（讓這種事以後自己叫出來）
+> 1. data/STATUS.json：每個排程跑完必寫 last_run/last_status；新增「排程錯過時窗」判定（例：台股盤中 quotes 超過 30 分鐘沒落地 = 異常）。
+> 2. App 設定頁顯示各資料檔的「最後更新時間 + 是否逾期」，逾期標紅。
+> 3. 給 7 個沒有時間戳的資料檔（company_info / fundamentals / margin_maintenance / picks_ledger / price_history / quotes_all_tw / stock_detail）補 generated_at + source。
+> 4. package.json 的 test 接上 node scripts/smoke_test.mjs。
+>
+> 四、結構解法只提案、先不做（需總司令核准）：寫一份簡短提案比較 (A) 報價 JSON 改推獨立 live-data 分支、amend+force 維持單一 commit，main 不再被洪水淹；(B) 直接把 B20 雲端中繼提前為下一步。各列工程量、風險、對手機即時度的影響，等總司令選。
+>
+> 五、restate 三軌馬拉松的暫停規則：把「選項(a)/(b)」原文與 PORTFOLIO_STRATEGY_SPEC.md 待確認的具體內容整理成一段給總司令看，先不動馬拉松，等裁示。
+>
+> 做完回報，附今天各排程落地次數與 smoke test 結果。
+
+- [x] **P0三-一.1** shioaji_quotes.py commit洪水止血——**已完成**：根因
+  是`_write_market_closed()`每次都更新`checked_at`寫進git追蹤檔案，
+  讓外層`.ps1`的`git diff --quiet`永遠判定「有變動」，2分鐘排程*24小時
+  不間斷commit。已修正：狀態未變完全不寫檔；`FLUSH_INTERVAL_SEC`調到
+  60秒；新增`_meaningful_quotes()`只比較last/change_pct/bid/ask決定
+  要不要commit，排除tick_at/volume這些會讓判斷永遠為真的欄位。8項
+  單元測試全PASS（含2項新回歸測試），commit `8f14332`已push。
+- [ ] **P0三-一.2** quotes.yml/market.yml的push重試改善（先等30秒讓
+  in-flight push落地、重試上限提到10次）——**待做，會碰
+  `.github/workflows/*.yml`，這個repo的PAT沒有workflow scope，改動
+  要留在working tree不commit，等使用者用有scope的PAT自己補上，這個
+  既有地雷要在回報裡講清楚**
+- [ ] **P0三-一.3** 回報今天quotes_tw/market_tw排程實際落地次數，
+  workflow_dispatch補跑一次
+- [ ] **P0三-二** 修根因：20分鐘閘門在收盤後誤丟今日收盤價（`index.html`
+  `sinopacQuote()`/`ibkrQuote()`）+ 全App現價顯示規則統一（首頁自選股/
+  市場頁/個股頁/交易頁/籌碼頁）+ smoke test「收盤後自選股顯示價==
+  quotes_sinopac的last」
+- [ ] **P0三-三** 監控補洞：STATUS.json排程異常判定、設定頁逾期標紅、
+  7個資料檔補generated_at+source、package.json接上smoke_test.mjs
+- [ ] **P0三-四** 只提案不動工：live-data分支 vs B20雲端中繼提前，
+  兩案比較（工程量/風險/即時度影響）
+- [ ] **P0三-五** 整理三軌馬拉松暫停規則現況（選項a/b原文+
+  PORTFOLIO_STRATEGY_SPEC.md待確認內容）給總司令看，先不動馬拉松
 
 ---
 
-## 佇列（2026-09-03，使用者裁示，馬拉松校準探針，P0處理完後接續）
+## 甲乙丙（2026-09-03，總司令裁示，接在P0三之後依序執行——**部分內容
+會取代/推進P0三-四/五、也會取代下方稍早的「校準探針」條目，這是目前
+最新、範圍最大的一批指示**）
+
+原始指令全文：
+
+> 全程繁體中文。以下為總司令裁示，append PENDING_QUEUE，接在正在做的 P0 修復之後依序執行。
+>
+> 甲、三軌馬拉松解除暫停（總司令裁示：確認 SPEC＋解除暫停）
+> 1. research/PORTFOLIO_STRATEGY_SPEC.md 第 3 行狀態改為「已確認（2026-09-03 總司令）」，規則內容不動、不得因回測結果回頭偷改。
+> 2. MARATHON_PROTOCOL.md 第 0 節暫停規則解除，三軌恢復實質工作，主軸改為多因子組合策略（portfolio_multifactor v2 及其迭代），不再單因子亂挖。
+> 3. 但恢復前先跑「管線校準探針」（上次指令未被登記，這次務必登記執行）：拿橫截面 12-1 動能當已知應有訊號的 benchmark 過同一套 cheap gate + gauntlet。結論(甲)管線正常→v2 的 p=0.053 視為真的差一點，照 SPEC 繼續迭代；結論(乙)檢定力不足（樣本 N 太小、null 分布不合理）→先修管線再跑，並回頭把先前 N<30 的 FAIL 標「未定」。校準結論回報總司令。
+> 4. 通過完整 gauntlet、要進 forward-paper 前才停下提案；死路記墓園續跑。
+>
+> 乙、Phase 1 即時架構「冷熱分離」（總司令核准動工；架構細節見 Cowork 提案文件，照此實作）
+> 1. 停止盤中 git push：research/shioaji_quotes.py 盤中只更新記憶體，不 commit；13:30 收盤後寫一次當日收盤快照 commit（一天 1 次）。美股 ibkr_quotes.py 同理（收盤後一次）。驗收：當日 repo commit 數 < 20，Actions 報價/大盤排程當日落地次數恢復正常。
+> 2. 新增本機 alpha_live_server.py（FastAPI，沿用 ibkr_order_server.py 的 token/白名單模式）：GET /live/quotes（快照）、GET /live/stream（SSE 逐筆）、GET /live/kbars?code=（當日 1 分 K，Shioaji api.kbars()；美股用 IBKR reqHistoricalData）。只聽本機 port，只開讀取端點，不開任何下單端點。
+> 3. cloudflared 建 Tunnel 對外，前面設 Cloudflare Access（免費）email OTP 保護；隧道 token 與設定放本機 secrets/（.gitignore 已擋）。寫一份使用者操作步驟（申請 Cloudflare 帳號→建 Tunnel→設 Access）給總司令自己操作，任何需要登入/填資料的步驟由總司令親自做。
+> 4. App 前端：偵測隧道可用→改用 SSE 即時更新數字與 K 線；連不上→退回 git 冷資料並明確標「離線，顯示最後收盤 MM-DD」。標籤規則沿用：即時(tick)／今日收盤／日線 T-1。
+> 5. 個股頁改用 TradingView lightweight-charts（Apache-2.0，cdnjs 載入、版本釘死）：盤中 1 分 K 來自 /live/kbars，逐筆 series.update()；歷史日線沿用既有資料。
+> 6. 驗收：Playwright + smoke test；並在下次台股開盤，總司令手機開 App 看台積電數字與 K 線每秒在動。
+>
+> 丙、之後分期（登記進 BACKLOG，先不做）：Phase 2 新聞管線（MOPS/EDGAR/RSS 標題連結＋割韭菜過濾）＋籌碼集中度模組（集保 TDCC OpenAPI 大戶週變化＋TWSE OpenAPI 外資/借券/當沖）；Phase 3 paper 下單走隧道（Access 保護），真實下單永遠只在本機且使用者親按。
+>
+> 全部做完回報，附 commit 數、Actions 落地次數、smoke test 結果、Cloudflare 操作步驟文件。
+
+- [ ] **甲.1** `PORTFOLIO_STRATEGY_SPEC.md`第3行狀態改「已確認
+  （2026-09-03總司令）」，規則內容不動
+- [ ] **甲.2** `MARATHON_PROTOCOL.md`第0節暫停規則解除，主軸改多因子
+  組合策略（portfolio_multifactor v2迭代），不再單因子亂挖
+- [ ] **甲.3** 管線校準探針（正式登記執行）：12-1動能benchmark過同一套
+  cheap gate+gauntlet，判定管線正常(甲)還是檢定力不足(乙)，回報結論；
+  若(乙)要回頭把先前N<30的FAIL標「未定」
+- [ ] **甲.4** 解除暫停後：通過完整gauntlet要進forward-paper前才停下
+  提案，死路記墓園續跑（沿用既有紀律，不必額外改檔案）
+- [ ] **乙.1** Phase 1冷熱分離：shioaji_quotes.py/ibkr_quotes.py盤中只
+  更新記憶體不commit，收盤後一天commit一次
+- [ ] **乙.2** 新增`research/alpha_live_server.py`（FastAPI，/live/quotes
+  /live/stream(SSE)/live/kbars，只讀不下單，沿用ibkr_order_server.py
+  的token模式）
+- [ ] **乙.3** cloudflared Tunnel+Cloudflare Access設置——**需要總司令
+  自己操作登入/申請帳號的步驟**，我只能寫操作步驟文件，不能代為註冊
+  外部服務帳號
+- [ ] **乙.4** App前端偵測隧道可用性，SSE即時更新/離線退回冷資料標示
+- [ ] **乙.5** 個股頁改用TradingView lightweight-charts（cdnjs載入、
+  版本釘死），盤中1分K走/live/kbars
+- [ ] **乙.6** 驗收：Playwright+smoke test，下次開盤總司令手機實測
+- [ ] **丙** Phase 2（新聞管線+籌碼集中度模組）+ Phase 3（paper下單走
+  隧道）登記進BACKLOG.md，先不開工
+
+---
+
+## （已併入上方「甲乙丙」區塊的甲.3/甲.4——這是同一件事第一次被提出時
+的原始記錄，保留供追溯，執行以上方甲乙丙區塊為準，不要重複做）
 
 原始指令全文：
 
@@ -57,12 +180,6 @@
 > 二、#27 多因子 z-score 複合評分：照原設計跑。但若結論是（乙），先修管線再跑 #27，否則結果一樣不可信。
 >
 > 做完回報，等總司令看校準結論再定方向。
-
-- [ ] **校準一** 12-1動能管線校準探針——用現有cheap gate+完整gauntlet跑
-  已知應該有訊號的12-1動能，判定管線是（甲）沒問題還是（乙）檢定力
-  不足，回報結論
-- [ ] **校準二** #27 z-score複合評分——若校準結論是（乙）須先修管線
-  再跑，否則結果不可信；若（甲）則照原設計跑
 
 ---
 
