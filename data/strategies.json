@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T23:29:27.600417+00:00",
+  "generated_at": "2026-09-03T11:47:12.752734+00:00",
   "note": "本頁面/檔案所有數字僅供研究參考，非投資建議。狀態欄位100%由本腳本從真實檔案（scores*.json/data/picks_ledger.json/research/TRIALS_LEDGER.md/research/B24_RESULTS.md/data/strategy_performance.json）推導，找不到來源檔一律顯示null/尚未，不寫死樂觀值。排行/卡片主圖只用forward_paper（每日前向模擬，嚴禁事後補建）；backtest（歷史回測）只在詳情頁顯示且需標「非未來保證」。",
   "strategies": [
     {
@@ -20,7 +20,7 @@
       "forward_paper": {
         "inception_date": "2026-08-27",
         "forward_return_todate_pct": 0.0,
-        "trading_days_count": 5,
+        "trading_days_count": 6,
         "sample_sufficient": false,
         "equity_curve": [
           {
@@ -41,6 +41,10 @@
           },
           {
             "date": "2026-09-02",
+            "cum_return_pct": 0.0
+          },
+          {
+            "date": "2026-09-03",
             "cum_return_pct": 0.0
           }
         ],
@@ -100,6 +104,13 @@
             "sells": [],
             "daily_pnl_pct": 0.0,
             "n_holdings": 20
+          },
+          {
+            "date": "2026-09-03",
+            "buys": [],
+            "sells": [],
+            "daily_pnl_pct": 0.0,
+            "n_holdings": 20
           }
         ],
         "source": "data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程更新，逐日mark-to-market，非復盤）"
@@ -108,7 +119,7 @@
         "尚無PIT回測引擎——generate_scores_momentum.py是JSON-only上線評分路徑，讀「即時累積快照」（data/price_history.json目前僅90天），不是TRIALS_LEDGER.md既有框架用的load_dev()歷史parquet資料（2010-2024train/val切分）",
         "要做歷史回測，第一步得先建一套「用歷史FinMind快取重算這10個新因子」的管線（比照factors.py::prepare_factors()模式），工作量不小於這支JSON-only腳本本身（見TRIALS_LEDGER.md「待測」章節2026-08-27條目）"
       ],
-      "last_updated": "2026-09-02T23:29:24.817307+00:00"
+      "last_updated": "2026-09-03T11:47:10.415740+00:00"
     },
     {
       "id": "future_board",
@@ -120,15 +131,15 @@
       "paper": {
         "起始日": "2026-08-27",
         "快照數": 7,
-        "至今報酬pct": 1.05,
+        "至今報酬pct": 0.98,
         "至今報酬樣本數": "18/20（有些pick快照當時價格缺失，如實排除不補值）",
         "來源": "data/picks_ledger.json",
         "計算方式": "等權、不重新平衡、不計成本的未實現報酬估計（最早快照收盤價 vs 目前最新收盤價），非嚴謹回測"
       },
       "forward_paper": {
         "inception_date": "2026-08-27",
-        "forward_return_todate_pct": -0.1037,
-        "trading_days_count": 5,
+        "forward_return_todate_pct": -1.2436,
+        "trading_days_count": 6,
         "sample_sufficient": false,
         "equity_curve": [
           {
@@ -150,6 +161,10 @@
           {
             "date": "2026-09-02",
             "cum_return_pct": -0.1037
+          },
+          {
+            "date": "2026-09-03",
+            "cum_return_pct": -1.2436
           }
         ],
         "ledger": [
@@ -206,6 +221,13 @@
             "sells": [],
             "daily_pnl_pct": 1.367,
             "n_holdings": 18
+          },
+          {
+            "date": "2026-09-03",
+            "buys": [],
+            "sells": [],
+            "daily_pnl_pct": -1.1411,
+            "n_holdings": 18
           }
         ],
         "source": "data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程更新，逐日mark-to-market，非復盤）"
@@ -214,7 +236,7 @@
         "尚無PIT回測引擎，跟題材動能榜同一個缺口（見上方momentum_board的limitations，同一份TRIALS_LEDGER.md記錄涵蓋兩榜）",
         "customer_concentration（營收客戶集中度）因子未實作，沒有現成免費資料源，誠實留白"
       ],
-      "last_updated": "2026-09-02T23:29:24.817307+00:00"
+      "last_updated": "2026-09-03T11:47:10.415740+00:00"
     },
     {
       "id": "value_board_v2",
@@ -244,15 +266,15 @@
       "paper": {
         "起始日": "2026-08-27",
         "快照數": 7,
-        "至今報酬pct": 0.62,
+        "至今報酬pct": 0.19,
         "至今報酬樣本數": "19/20（有些pick快照當時價格缺失，如實排除不補值）",
         "來源": "data/picks_ledger.json",
         "計算方式": "等權、不重新平衡、不計成本的未實現報酬估計（最早快照收盤價 vs 目前最新收盤價），非嚴謹回測"
       },
       "forward_paper": {
         "inception_date": "2026-08-27",
-        "forward_return_todate_pct": 0.7419,
-        "trading_days_count": 5,
+        "forward_return_todate_pct": -7.4183,
+        "trading_days_count": 6,
         "sample_sufficient": false,
         "equity_curve": [
           {
@@ -274,6 +296,10 @@
           {
             "date": "2026-09-02",
             "cum_return_pct": 0.7419
+          },
+          {
+            "date": "2026-09-03",
+            "cum_return_pct": -7.4183
           }
         ],
         "ledger": [
@@ -331,6 +357,13 @@
             "sells": [],
             "daily_pnl_pct": -0.8759,
             "n_holdings": 19
+          },
+          {
+            "date": "2026-09-03",
+            "buys": [],
+            "sells": [],
+            "daily_pnl_pct": -8.1001,
+            "n_holdings": 19
           }
         ],
         "source": "data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程更新，逐日mark-to-market，非復盤）"
@@ -342,7 +375,7 @@
         "B24-500判定：不及格（兩次獨立跑法——原始跑+atomic write修法後的乾淨重跑——皆不顯著，p=0.2672/0.1441與0.3795/0.1685），策略報酬雖贏過買進持有+隨機對照組但無法排除beta曝險解釋，App選股頁「尚未經過組合策略回測驗證」字樣繼續掛著",
         "可重現性殘留限制（2026-08-29乾淨重跑新發現）：精確數字不可逐位元重現（TRAIN報酬75.87%→71.79%），根因是FinMind額度即時狀態導致每次跑因子完整度不同（不是快取寫入損毀，那個bug已修好）——判定結論(不及格)在兩次跑之間穩健，但精確數字不穩健，見B24_RESULTS.md「可重現性乾淨重跑」章節"
       ],
-      "last_updated": "2026-09-02T23:29:24.817307+00:00"
+      "last_updated": "2026-09-03T11:47:10.415740+00:00"
     },
     {
       "id": "fut_track",
@@ -363,7 +396,7 @@
         "這不是「還沒開始做」，是誠實做過完整的配對式隨機控制組檢定，目前確實還沒找到站得住腳的訊號",
         "數字動態從research/TRIALS_LEDGER.md算出，不是寫死的——之後這份帳本增列，這裡會自動更新"
       ],
-      "last_updated": "2026-09-02T23:27:59.455464+00:00"
+      "last_updated": "2026-09-03T11:45:46.879418+00:00"
     },
     {
       "id": "weinstein_stage2_baseline",
@@ -379,7 +412,7 @@
         "2026-08-29馬拉松自主循環：已走完GATE_SEQUENCE第1/2/4關（sanity PASS，隨機控制組+成本敏感度FAIL）——VALIDATION表面總報酬+56.72%贏買進持有，但alpha僅+23.80%(percentile=55.0，未達90.0門檻)，3x成本下轉負；TRAIN純alpha本身就是負的(-3.66%)，典型「表面漂亮、下檔沒守」案例",
         "已測試並FAIL，完整數字見STRATEGY_GRAVEYARD.md「weinstein_stage2_v2」條目"
       ],
-      "last_updated": "2026-09-02T23:27:59.455464+00:00"
+      "last_updated": "2026-09-03T11:45:46.878418+00:00"
     },
     {
       "id": "cta_trend_following_baseline",
@@ -394,7 +427,7 @@
         "2026-08-29使用者裁示登錄，只登錄規格不執行，回測排在B24-500之後",
         "跟TRIALS_LEDGER.md已測過的#18`fut_trend_multi_tf`（10/20/60日動能訊號多數決）不是同一個東西——那是截面/多時間框架訊號的組合判定，這裡要做的是經典CTA式單一時序動量（例如12個月回顧報酬正負號），設計上更接近學術文獻的標準定義，不能直接沿用#18已FAIL的結論當作這個新候選也會失敗的證據"
       ],
-      "last_updated": "2026-09-02T23:29:27.600400+00:00"
+      "last_updated": "2026-09-03T11:47:12.752718+00:00"
     }
   ]
 }
