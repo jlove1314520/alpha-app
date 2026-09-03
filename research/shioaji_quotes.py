@@ -18,15 +18,19 @@ Windows排程器每隔幾分鐘呼叫一次、跑完就結束，git commit/push�
 shioaji_quotes.py`在開盤前手動啟動**（使用者原話「開盤前先把程式備妥」），
 會自己等到交易時段開始才登入，交易時段結束會自動登出並結束行程。
 
-**git commit/push頻率（使用者已核准調整頻率、不需要再提案，這裡是我
-選定的實際頻率與理由，見`PROGRESS.md`同步記錄）**：常駐迴圈內每
-`FLUSH_INTERVAL_SEC`（15秒）把記憶體裡累積到的最新報價flush成JSON並
-commit+push一次——選15秒是**跟App前端既有的15秒盤中自動輪詢頻率
-（`index.html::fastPollTick()`）對齊**：flush得比前端輪詢還快沒有意義
-（使用者根本還沒重新抓資料，白白多耗git操作次數），flush得比前端輪詢慢
-就違背這次升級的目的（App還是要等更久才看得到新價），15秒是兩邊都不
-浪費的對齊點。比舊版2分鐘輪詢頻率快8倍。**沒有變動就不commit**（沿用
-`git diff --quiet`判斷，避免產生空白commit灌爆歷史）。
+**git commit/push頻率（2026-09-03緊急修正為60秒，使用者P0裁示核准，
+不需要再提案）**：原本選15秒（對齊前端輪詢頻率）**在實測中造成嚴重
+後果**——常駐迴圈+`checked_at`每次都變動的舊版`_write_market_closed()`
+交互作用，當天累積995次commit（見`_write_market_closed()`函式docstring
+的完整根因分析），把GitHub Actions排程餓死（同一個repo的push配額被
+洪水佔滿，其他排程的push被迫排隊/失敗）。**修正為`FLUSH_INTERVAL_SEC`
+=60秒，且只在任一報價值真的變動時才commit**（`_flush_and_push()`裡
+新增「跟上次committed內容的quotes逐檔比對last/change_pct等關鍵欄位」
+判斷，不是「只要tick_at時間戳有變就commit」——tick_at幾乎每次都會變
+但價格常常沒變，舊邏輯等於變相每60秒必定commit一次，新邏輯是真正的
+「事件觸發」）。這是使用者在實際運作後回饋的教訓，比原始設計時的
+理論對齊考量更重要：**手機即時感受不能用repo commit數量硬撐，要有
+節制**，60秒+內容比對是這次調整後的權衡點。
 
 **API方法簽章來源（誠實揭露：查證方式跟查證程度）**：這次改版**沒有
 在真實模擬環境連線的情況下測試過tick訂閱**（改版當下台股非交易時段，
@@ -100,7 +104,7 @@ FUTURES_NEAR_MONTH = {
 }
 
 CONTRACTS_READY_WAIT_SEC = 3  # 登入後合約清單非同步下載，太快存取會KeyError
-FLUSH_INTERVAL_SEC = 15  # 見模組docstring「git commit/push頻率」完整理由
+FLUSH_INTERVAL_SEC = 60  # 2026-09-03緊急修正，見模組docstring「git commit/push頻率」完整理由
 TRADING_WINDOW_POLL_SEC = 30  # 常駐迴圈裡多久檢查一次「是否還在交易時段」
 
 
@@ -148,24 +152,56 @@ def _is_tw_trading_window(now: datetime) -> bool:
 
 
 def _write_market_closed() -> None:
-    """非交易時段：保留最後一次盤中資料，只把market_status標成closed。"""
+    """非交易時段：保留最後一次盤中資料，只把market_status標成closed。
+
+    **2026-09-03緊急修復（P0，使用者回報「今天995次commit餓死Actions」）**：
+    根因是這個函式舊版每次呼叫都把`checked_at`更新成當下時間戳寫進
+    `data/quotes_sinopac.json`——這個檔案是git追蹤的，`checked_at`每次
+    都不同，導致外層`.ps1`launcher的`git diff --quiet`判斷**永遠看到
+    有變動**，每2分鐘排程觸發一次就commit一次，24小時不間斷（不分
+    盤中盤後），這才是flood的真正主因，不是tick串流本身（tick串流
+    只有交易時段才會啟動，觸發頻率遠低於這個「非交易時段」路徑，且
+    今天多數時段台股根本沒開盤）。
+
+    **修法**：`checked_at`改成只在記憶體/print訊息裡回報，**不寫進
+    會被committed的JSON內容比較**——判斷「要不要覆寫檔案」只看
+    `quotes`/`market_status`/`connected`這幾個真正有意義的欄位是否
+    改變，沒改變就完全不碰檔案（連write都不做），讓外層`git diff
+    --quiet`天然看到「沒有變動」、不會產生空轉commit。`checked_at`
+    欄位保留在payload裡（前端/診斷需要知道「最後一次確認的時間」），
+    但只有在確實要寫檔（有意義的變動）時才會更新到新的時間戳，非
+    交易時段裡連續好幾輪呼叫如果都沒有變動，`checked_at`會停留在
+    上一次真正寫檔的時間，這是刻意的犧牲（誠實反映「沒有再檢查出
+    新東西」，比每次都灌一個新時間戳但其實什麼都没变化更誠實）。
+    """
     existing = {}
     if OUT_PATH.exists():
         try:
             existing = json.loads(OUT_PATH.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             existing = {}
+
+    existing_quotes = existing.get("quotes", {})
+    existing_status = existing.get("market_status")
+    existing_connected = existing.get("connected", False)
+
+    # 已經是closed狀態、quotes內容沒變、connected旗標沒變 → 什麼都不用寫，
+    # 讓git diff維持乾淨，外層.ps1 launcher不會產生空轉commit。
+    if existing_status == "closed" and existing_connected is False:
+        print(f"非交易時段，狀態未變（quotes {len(existing_quotes)}檔維持不變），不寫檔避免空轉commit")
+        return
+
     payload = {
         "fetched_at": existing.get("fetched_at"),
         "checked_at": datetime.now(TW_TZ).isoformat(),
-        "connected": existing.get("connected", False),
+        "connected": False,
         "market_status": "closed",
         "error": None,
-        "quotes": existing.get("quotes", {}),
+        "quotes": existing_quotes,
     }
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print("非交易時段（週一至五08:30-13:45外），不登入永豐，保留最後一次盤中資料，market_status=closed")
+    print("非交易時段（週一至五08:30-13:45外），不登入永豐，保留最後一次盤中資料，market_status=closed（狀態剛轉換，寫入一次）")
 
 
 class TickState:
@@ -322,18 +358,52 @@ def _build_payload(state: TickState) -> dict:
     }
 
 
+_MEANINGFUL_QUOTE_FIELDS = ("last", "change_pct", "bid", "ask")
+
+
+def _meaningful_quotes(quotes: dict) -> dict:
+    """只抽出真正代表「報價有變動」的欄位（last/change_pct/bid/ask），
+    排除`tick_at`（幾乎每一筆tick都不同，即使價格完全沒變）、
+    `volume_this_tick`/`total_volume`（成交量會持續累加，但單獨累加
+    不代表「使用者關心的報價數字」變了）、`_raw_chg_type`等除錯欄位。
+    2026-09-03緊急修復用：舊版直接對整份JSON做`git diff --quiet`，
+    因為`tick_at`每次都變，等於每次flush都判定「有變動」，60秒一次
+    flush就等於60秒一定commit一次，完全沒有達到「只在報價值有變時」
+    的效果——這個函式就是修正的核心，把「有沒有變動」的判斷限縮到
+    使用者真正在意的價格/報價數字上。"""
+    return {code: {k: q.get(k) for k in _MEANINGFUL_QUOTE_FIELDS} for code, q in quotes.items()}
+
+
+def _last_committed_quotes(rel_path: str) -> dict | None:
+    """讀git HEAD版本的quotes_sinopac.json（不是磁碟上還沒commit的
+    版本），拿來跟目前狀態比較有沒有「真的」變動。找不到（例如檔案
+    從未commit過）就回傳None，呼叫端視為「一定要寫」。"""
+    result = subprocess.run(
+        ["git", "show", f"HEAD:{rel_path}"], cwd=REPO_ROOT, capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        return json.loads(result.stdout).get("quotes", {})
+    except json.JSONDecodeError:
+        return None
+
+
 def _flush_and_push(state: TickState) -> None:
-    """把目前累積的最新報價寫進JSON，沒有變動就不commit（沿用既有
-    `.ps1`的`git diff --quiet`判斷邏輯，這裡直接在Python裡做，因為
-    常駐迴圈需要自己push、不能等外層`.ps1`收尾才push一次）。"""
+    """把目前累積的最新報價寫進本機JSON（一律寫，本機檔案保持新鮮，
+    給同機的App/其他工具讀取用），但**只有在報價數字真的變動時才
+    commit+push**——見`_meaningful_quotes()`/`_last_committed_quotes()`
+    docstring的2026-09-03緊急修復根因說明，不能再用全檔`git diff
+    --quiet`判斷（那個判斷法因為tick_at/volume每次都變，等於每次
+    flush都會commit，這正是995次commit洪水的直接原因之一）。"""
     payload = _build_payload(state)
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     rel_path = str(OUT_PATH.relative_to(REPO_ROOT))
-    diff = _git(["diff", "--quiet", "--", rel_path])
-    if diff.returncode == 0:
-        return  # 沒有變動，不commit
+    prev_quotes = _last_committed_quotes(rel_path)
+    if prev_quotes is not None and _meaningful_quotes(prev_quotes) == _meaningful_quotes(payload["quotes"]):
+        return  # 價格/報價數字都沒變，只是tick_at/volume累加，不commit
 
     timestamp = datetime.now(TW_TZ).strftime("%Y-%m-%d %H:%M:%S")
     _git(["commit", "-m", f"Shioaji tick stream update {timestamp}", "--", rel_path])

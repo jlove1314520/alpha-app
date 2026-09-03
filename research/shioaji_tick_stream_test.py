@@ -131,6 +131,30 @@ def test_build_payload_produces_valid_json_serializable_structure():
     print("test_build_payload_produces_valid_json_serializable_structure PASS")
 
 
+def test_meaningful_quotes_ignores_tick_at_and_volume():
+    """2026-09-03緊急修復回歸測試：995次commit洪水的根因是舊版拿整份
+    JSON做git diff，tick_at/volume每筆都變導致每次flush都判定「有變動」
+    ——這裡直接驗證`_meaningful_quotes()`會忽略這些欄位，只比較真正的
+    報價數字（last/change_pct/bid/ask）。"""
+    q1 = {"2330": {"last": 1050.0, "change_pct": 1.5, "bid": 1049.0, "ask": 1050.0,
+                    "tick_at": "2026-09-03T09:30:15+08:00", "volume_this_tick": 3, "total_volume": 1200}}
+    q2 = {"2330": {"last": 1050.0, "change_pct": 1.5, "bid": 1049.0, "ask": 1050.0,
+                    "tick_at": "2026-09-03T09:30:16+08:00", "volume_this_tick": 5, "total_volume": 1205}}
+    assert sq._meaningful_quotes(q1) == sq._meaningful_quotes(q2), \
+        "只有tick_at/volume變動、價格完全相同時，_meaningful_quotes()應該視為相等"
+    print("test_meaningful_quotes_ignores_tick_at_and_volume PASS")
+
+
+def test_meaningful_quotes_detects_real_price_change():
+    """反面驗證：last真的變了，_meaningful_quotes()要能偵測到，不能
+    矯枉過正變成永遠回傳True（那樣就完全不commit了，一樣是bug）。"""
+    q1 = {"2330": {"last": 1050.0, "change_pct": 1.5, "bid": 1049.0, "ask": 1050.0}}
+    q2 = {"2330": {"last": 1051.0, "change_pct": 1.6, "bid": 1050.0, "ask": 1051.0}}
+    assert sq._meaningful_quotes(q1) != sq._meaningful_quotes(q2), \
+        "last/change_pct/bid/ask真的變動時，_meaningful_quotes()應該偵測到差異"
+    print("test_meaningful_quotes_detects_real_price_change PASS")
+
+
 def test_trading_window_boundary():
     """`_is_tw_trading_window()`既有既有的簡化限制（不扣國定假日），這裡
     只驗證最基本的邊界行為沒有被這次改版意外弄壞（升級過程中這個函式
@@ -156,6 +180,8 @@ def main():
         test_quote_idx_handler_computes_change_pct_from_reference,
         test_callback_exception_does_not_propagate,
         test_build_payload_produces_valid_json_serializable_structure,
+        test_meaningful_quotes_ignores_tick_at_and_volume,
+        test_meaningful_quotes_detects_real_price_change,
         test_trading_window_boundary,
     ]
     failed = []
