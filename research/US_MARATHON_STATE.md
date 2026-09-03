@@ -2,7 +2,9 @@
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-**最後更新：2026-09-03T11:01+08:00**（馬拉松第315輪：取鎖時偵測到`LOCK_STALE`（pid 71184持有約30.1分鐘，上一輪即第314輪疑似異常中止、未正常釋放鎖，已自動回收）。依輪替選US（三軌時間戳US 09:31第312輪最舊）。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`仍未確認、`LEADS.md`最新`portfolio_multifactor_v2`仍FAIL、暫停規則本身未被修改）。US軌依舊沒有組合策略相關工作可做，本輪整輪跳過，未做任何實質工作，零API呼叫。`is_holdout_consumed()`確認`False`。`git status`僅既有殘留變更（非本輪產生：`data/rate_limit_state.json`／`research/pit.py`已修改，另有多個未追蹤log/腳本檔案，研判為另一互動session留下），未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約206輪、跨度約182.4小時（約7.60天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第315輪條目、`US_LOG.md`本輪記錄。
+**最後更新：2026-09-03T12:31+08:00**（馬拉松第318輪：取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 11:01（第315輪，最舊）、TW 11:31（第316輪）、FUT 12:01（第317輪，最新）——依輪替選US。獨立複查三個解除條件皆未成立：(1)`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`確認自`fa369b9`以來仍只一個commit；(2)`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL（alpha p>0.05未顯著，最佳兩組合p=0.053/0.0535「接近顯著」）；(3)`MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`全部圍繞TAIEX/TWSE台股樣本，跟US軌無關）。**本輪整輪跳過，未做任何實質工作，零API呼叫。**`is_holdout_consumed()`確認`False`。`git status`開工時確認僅既有非本輪產生的殘留變更（`data/rate_limit_state.json`／`research/pit.py`已修改，另有多個未追蹤log/腳本檔案，研判為另一互動session／`AlphaHypothesisQueue`軌道留下），未觸碰、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約209輪、跨度約183.9小時（約7.66天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第318輪條目、`US_LOG.md`本輪記錄。
+
+**上一則保留（第315輪，供對照）**：2026-09-03T11:01+08:00（馬拉松第315輪：取鎖時偵測到`LOCK_STALE`，pid 71184持有約30.1分鐘，上一輪即第314輪疑似異常中止、未正常釋放鎖，已自動回收）。依輪替選US。獨立複查三個解除條件皆未成立。US軌依舊沒有組合策略相關工作可做，本輪整輪跳過，未做任何實質工作，零API呼叫。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第315輪條目、`US_LOG.md`本輪記錄。
 
 **上一則保留（第312輪，供對照）**：第 312 輪 · 2026-09-03T09:31+08:00 · 取鎖乾淨（非陳舊鎖檔）。依輪替選US（三軌時間戳US 08:02第309輪最舊）。獨立複查三個解除條件皆未成立。US軌依舊沒有組合策略相關工作可做，本輪整輪跳過，未做任何實質工作，零API呼叫。`is_holdout_consumed()`確認`False`。詳見`REPORT.md`第312輪條目、`US_LOG.md`本輪記錄。
 
