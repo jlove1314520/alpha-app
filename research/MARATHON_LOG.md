@@ -13,6 +13,11 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T11:35 — hypothesis_queue軌：接續#26全市場融資餘額成長率
+resumable週頻backfill（batch-size 150） — 成功150/150週（17週非交易日），
+累積進度315→465/662週（47.6%→70.2%），資料涵蓋延伸至2021-03，仍未達
+2022/2024關鍵年份覆蓋，尚未進cheap gate，下一輪繼續回補。
+
 ## 2026-09-03T11:06 — hypothesis_queue排程接續#26全市場融資餘額成長率地基
 回補 — 執行`backfill_margin_debt_market.py --batch-size 150`一批，成功
 150/150週（其中11週非交易日/無資料，正常）、0封鎖0錯誤，累積進度
