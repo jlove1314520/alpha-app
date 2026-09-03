@@ -1797,6 +1797,32 @@ API取得`tables[0]`第3列「今日餘額」，比照`fetch.py`既有節流/重
 查證未寫入`alpha.db`（唯讀）、未修改任何凍結區檔案、`is_holdout_
 consumed()`確認仍為`False`。
 
+**狀態（2026-09-03排程接續，地基建置：抓取client+resumable週頻backfill
+已完成並驗證可用，回補進度2.3%，尚未進cheap gate）**：新增
+`margin_debt_market_client.py`（`fetch_margin_market_day()`單日抓取+
+逐日parquet快取，跟`twse_t86_client.py`同一套atomic read/write pattern，
+解決本輪探測到的新編碼陷阱——`requests`的`.json()`在這個API上會誤判
+編碼，需手動`json.loads(resp.content.decode('utf-8'))`）+
+`backfill_margin_debt_market.py`（`run_batch()`，resumable、bounded
+batch，同`backfill_t86.py`同一種設計）。**刻意採用週頻抽樣、不是逐日**
+（跟本條目原文字面「逐日呼叫」不同，這是本輪工程判斷非事後偷改範圍，
+理由：全市場總融資餘額是緩慢變化的存量指標、20日/60日成長率用週頻
+資料仍可合理近似中期趨勢，同時把約3300+次逐日呼叫壓縮到約680次週頻
+呼叫，大幅降低反爬蟲封鎖風險與所需輪數，完整理由見腳本docstring）。
+**驗證批次**：`run_batch(batch_size=15)`成功抓取15/15週（0錯誤、0封鎖、
+0非交易日誤判），確認schema解析正確（`tables[0]`第3列「融資金額(仟元)」
+「今日餘額」欄，單位仟元）、快取機制正常運作。**累積進度：15/662週
+（2.3%）**，全範圍`2012-05-02~2024-12-31`（TRAIN+VAL，不觸碰holdout）。
+**下一步（尚未做）**：下一輪繼續呼叫`python research/
+backfill_margin_debt_market.py --batch-size 150`累積回補進度（比照
+`backfill_t86.py`慣例，每輪跑一個batch即可，不用一次跑完），累積到
+一定覆蓋率後（不需要100%，但要涵蓋2013-01-02/2015/2018/2020/2022/
+2024這幾個先前查證過的已知結構性事實年份附近）才進cheap gate（計算
+20日/60日成長率對TAIEX後續報酬與MDD做洗牌置換檢定，比照#25
+`turn_of_month_gate.py`同一套框架）。本輪查證/驗證用requests未寫入
+`alpha.db`（唯讀）、未修改任何凍結區檔案，`is_holdout_consumed()`
+確認仍為`False`。
+
 ---
 
 ### 27. 多因子「複合評分」策略（z-score blend，2026-09-03使用者裁示新增）

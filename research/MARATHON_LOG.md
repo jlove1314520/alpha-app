@@ -13,6 +13,26 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T10:41 — `hypothesis_queue`軌道排程：#26新增抓取client+resumable週頻backfill並驗證可用，回補進度2.3%（15/662週），尚未進cheap gate
+
+接手鎖檔`LOCK_ACQUIRED`（乾淨取得，非陳舊回收）。`git pull`一開始因
+`data/quotes_sinopac.json`衝突報錯，重新檢查後確認已自然解決（其他
+自動化來源的fast-forward，未觸碰）。`git status`確認殘留變更同前兩輪
+判斷一致：`data/rate_limit_state.json`、`research/pit.py`（新增
+`cash_flow_pit()`）、多個`*_run.log`未追蹤檔案——沿用前兩輪已建立的
+判斷，這批屬於另一條與#22相關的並行研究殘留、非本軌道本輪產出，**不
+觸碰、不納入commit**。本輪工作：#26第1關cheap gate地基——新增
+`margin_debt_market_client.py`（單日抓取+parquet快取，解決本輪新發現
+的`.json()`編碼陷阱）+`backfill_margin_debt_market.py`（resumable週頻
+backfill，同`backfill_t86.py`同一種設計，刻意用週頻不用逐日，理由見
+`HYPOTHESIS_QUEUE.md`#26條目與腳本docstring）。驗證批次
+`run_batch(batch_size=15)`成功15/15、0錯誤、0封鎖，確認schema解析
+正確。累積進度15/662週（2.3%）。**尚未進cheap gate**——下一輪繼續呼叫
+`backfill_margin_debt_market.py --batch-size 150`累積回補進度即可，
+不用重寫。`is_holdout_consumed()`確認仍為`False`。
+
+---
+
 ## 2026-09-03T09:24 — `hypothesis_queue`軌道排程：接手陳舊鎖檔，補完上一輪已完成但未commit的#26資料可行性查證，本輪不新開工作單位
 
 接手鎖檔為`LOCK_STALE`（上一輪PID 56972，30.0分鐘前）。查`git status`
