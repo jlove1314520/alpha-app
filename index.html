@@ -1088,6 +1088,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
     </div>
 
+    <!-- 2026-09-03（P0三-三.2，使用者原話「App設定頁顯示各資料檔的最後更新時間+是否逾期，
+    逾期標紅」）：規則跟generate_status_json.py::build_schedule_health()同一套，但在手機端
+    「現在」直接算，不依賴STATUS.json本身有沒有更新（今天的事故正是排程沒落地）。 -->
+    <div class="card">
+      <h3>資料新鮮度 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'data-freshness-tm',async()=>{await loadDataFreshness()})">重新整理</span></h3>
+      <div class="note" id="data-freshness-summary">檢查中…</div>
+      <div id="data-freshness-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">檢查時間：<b id="data-freshness-tm">--:--</b>。規則：盤中資料超過30分鐘沒更新、每日排程超過寬限3小時沒落地，就標紅「逾期」。標「本機」的項目只有你這台電腦開機且排程在跑才會更新。已知簡化：不扣國定假日，假日當天盤中項目會誤標逾期。</div>
+    </div>
+
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
@@ -3829,6 +3839,123 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     setTxt('set-cache-count',cacheCount+' 筆快取');
     renderColorSchemeToggle();
     loadAboutVersions();
+    _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
+  }
+
+  // ── 2026-09-03（P0三-三.2）設定頁「資料新鮮度」：每個資料檔最後更新時間＋是否
+  // 逾期（逾期標紅）。判定規則跟 generate_status_json.py::build_schedule_health()
+  // 同一套：盤中資料不得超過30分鐘沒更新（開盤前30分鐘寬限，要求上一交易日收盤
+  // 資料）；每日排程在排程時刻後寬限3小時內必須落地；盤後/假日至少要有最近一個
+  // 交易日的收盤資料。小檔直接抓時間戳；三個超大檔（fundamentals 8MB/stock_detail
+  // 12MB/price_history 48MB）不在手機上整份抓，改讀STATUS.json的schedule_health並
+  // 註明「依STATUS.json」。顏色刻意用固定色碼，不用--up/--down（那組會隨漲跌顏色
+  // 偏好切換，紅綠語意會反過來）。已知簡化（誠實揭露）：不扣國定假日。
+  const FRESHNESS_INTRADAY_GAP_MIN=30;
+  const FRESHNESS_ITEMS=[
+    {label:'台股逐筆tick（本機Shioaji）',file:'data/quotes_sinopac.json',kind:'intraday',tz:'Asia/Taipei',open:[9,0],close:[13,30],local:true},
+    {label:'台股盤中報價（GitHub Actions）',file:'data/quotes_tw.json',kind:'intraday',tz:'Asia/Taipei',open:[9,0],close:[13,30]},
+    {label:'美股即時報價（本機IBKR）',file:'data/quotes_ibkr.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0],local:true},
+    {label:'美股盤中報價（GitHub Actions）',file:'data/quotes_us.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
+    {label:'台股大盤/類股/三大法人',file:'data/market_tw.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
+    {label:'美股四大指數',file:'data/market_us.json',kind:'daily',tz:'UTC',run:[21,30],grace:3},
+    {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
+    {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
+    {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
+    {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
+    {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,viaStatus:true},
+    {label:'個股財報/法人/融資',file:'data/stock_detail.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,viaStatus:true},
+    {label:'個股價量歷史',file:'data/price_history.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,viaStatus:true},
+  ];
+  const FRESH_OK_COLOR='#1aa876',FRESH_BAD_COLOR='#e6383f';
+  function _zonedParts(d,tz){
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',weekday:'short'}).formatToParts(d);
+    const o={};parts.forEach(x=>o[x.type]=x.value);
+    const wd={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[o.weekday];
+    return {y:+o.year,m:+o.month,d:+o.day,h:(+o.hour)%24,mi:+o.minute,wd};
+  }
+  // 「最近一個週一至週五、且距now至少minAgeMs」的tz當地hh:mm時刻。往前推日時直接減
+  // 86400000ms，跨日光節約切換那一天會差1小時（只影響邊界，已知簡化）。
+  function _lastWeekdayInstant(now,tz,h,mi,minAgeMs){
+    const z=_zonedParts(now,tz);
+    const offsetMs=Date.UTC(z.y,z.m-1,z.d,z.h,z.mi)-Math.floor(now.getTime()/60000)*60000;
+    let cand=new Date(Date.UTC(z.y,z.m-1,z.d,h,mi)-offsetMs);
+    for(let i=0;i<10;i++){
+      const cz=_zonedParts(cand,tz);
+      if(cz.wd>=1&&cz.wd<=5&&(now-cand)>=(minAgeMs||0))return cand;
+      cand=new Date(cand.getTime()-86400000);
+    }
+    return cand;
+  }
+  function _inSession(now,tz,open,close){
+    const z=_zonedParts(now,tz);if(z.wd===0||z.wd===6)return false;
+    const m=z.h*60+z.mi;return m>=open[0]*60+open[1]&&m<close[0]*60+close[1];
+  }
+  function _freshnessJudge(item,ts,now){
+    let due,rule;
+    if(item.kind==='intraday'){
+      const gap=FRESHNESS_INTRADAY_GAP_MIN*60000;
+      if(_inSession(now,item.tz,item.open,item.close)){
+        const sOpen=_lastWeekdayInstant(now,item.tz,item.open[0],item.open[1],0);
+        if(now-sOpen<gap){due=new Date(_lastWeekdayInstant(now,item.tz,item.close[0],item.close[1],0).getTime()-gap);rule='開盤前30分鐘寬限，需有上一交易日收盤資料';}
+        else{due=new Date(now.getTime()-gap);rule='盤中不得超過30分鐘未更新';}
+      }else{due=new Date(_lastWeekdayInstant(now,item.tz,item.close[0],item.close[1],0).getTime()-gap);rule='盤後/假日需有最近一個交易日收盤資料';}
+    }else{
+      due=_lastWeekdayInstant(now,item.tz,item.run[0],item.run[1],item.grace*3600000);
+      rule='每個平日排程後'+item.grace+'小時內須落地';
+    }
+    const status=!ts?'missing':(ts>=due?'ok':'overdue');
+    return {status,due,rule};
+  }
+  function _extractFreshnessTs(d){
+    if(!d)return null;
+    let v=null;
+    if(Array.isArray(d)){const last=d[d.length-1]||{};v=last.generated_at||(last.date?last.date+'T23:59:59+08:00':null);}
+    else{const m=d.meta||{};v=d.fetched_at||d.generated_at||m.generated_at||m.last_snapshot_at;}
+    if(!v)return null;const t=new Date(v);return isNaN(t)?null:t;
+  }
+  async function loadDataFreshness(){
+    const list=document.getElementById('data-freshness-list');if(!list)return;
+    const now=new Date();
+    let statusDoc=null;
+    try{const r=await fetch('data/STATUS.json?t='+Date.now());if(r.ok)statusDoc=await r.json();}
+    catch(e){console.warn('[loadDataFreshness:STATUS]',e);recordGlobalError('loadDataFreshness:STATUS',e);}
+    // 各檔獨立抓、獨立判定，用allSettled：一個檔壞了只有那一列顯示「讀取失敗」，其他列照常。
+    const settled=await Promise.allSettled(FRESHNESS_ITEMS.map(async item=>{
+      let ts=null,via='';
+      if(item.viaStatus){
+        const checks=statusDoc&&statusDoc.schedule_health&&Array.isArray(statusDoc.schedule_health.checks)?statusDoc.schedule_health.checks:[];
+        const c=checks.find(x=>x.file===item.file);
+        if(c&&c.last_data_at){ts=new Date(c.last_data_at);if(isNaN(ts))ts=null;}
+        via=statusDoc&&statusDoc.updated_at?'依STATUS.json（'+fmtTzMMDDHHMM(new Date(statusDoc.updated_at),'Asia/Taipei')+'產生，大檔不在手機上整份抓）':'STATUS.json讀取失敗';
+      }else{
+        const r=await fetch(item.file+'?t='+Date.now());
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        ts=_extractFreshnessTs(await r.json());
+      }
+      return Object.assign({item,ts,via},_freshnessJudge(item,ts,now));
+    }));
+    const rows=settled.map((s,i)=>{
+      const item=FRESHNESS_ITEMS[i];
+      if(s.status==='rejected'){
+        console.warn('[loadDataFreshness:'+item.file+']',s.reason);recordGlobalError('loadDataFreshness:'+item.file,s.reason);
+        return {item,ts:null,via:'',status:'missing',due:null,rule:'讀取失敗：'+((s.reason&&s.reason.message)||s.reason)};
+      }
+      return s.value;
+    });
+    const fmt=d=>d?fmtTzMMDDHHMM(d,'Asia/Taipei'):'—';
+    list.innerHTML=rows.map(r=>{
+      const bad=r.status!=='ok';
+      const badge=bad?`<span style="color:${FRESH_BAD_COLOR};font-weight:700">${r.status==='missing'?'無資料':'逾期'}</span>`:`<span style="color:${FRESH_OK_COLOR};font-weight:600">正常</span>`;
+      const sub=(bad&&r.due?('應≥'+fmt(r.due)+'，'):'')+r.rule+(r.via?'；'+r.via:'');
+      return `<div class="fresh-row" data-file="${r.item.file}" data-status="${r.status}" style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid rgba(128,128,128,.15)">`
+        +`<div style="min-width:0"><div style="font-size:12px;font-weight:600;color:${bad?FRESH_BAD_COLOR:'var(--ink)'}">${r.item.label}${r.item.local?' <span style="font-size:10px;opacity:.7">本機</span>':''}</div>`
+        +`<div style="font-size:10px;opacity:.75;color:${bad?FRESH_BAD_COLOR:'inherit'}">${sub}</div></div>`
+        +`<div style="text-align:right;white-space:nowrap;font-size:12px">${badge}<div style="font-size:10px;opacity:.8;color:${bad?FRESH_BAD_COLOR:'inherit'}">${fmt(r.ts)}</div></div></div>`;
+    }).join('');
+    const badRows=rows.filter(r=>r.status!=='ok');
+    const sum=document.getElementById('data-freshness-summary');
+    if(sum)sum.innerHTML=badRows.length?`<b style="color:${FRESH_BAD_COLOR}">${badRows.length} 項逾期/無資料</b>：${badRows.map(r=>r.item.label).join('、')}`:`<b style="color:${FRESH_OK_COLOR}">全部正常</b>`;
+    setTxt('data-freshness-tm',fmtTzMMDDHHMM(now,'Asia/Taipei'));
   }
   // 2026-08-25 新增，2026-08-28擴充：設定頁+首頁底部顯示 App 版本／Service
   // Worker 版本／SW 狀態，方便確認手機是不是真的更新到最新版（用手機開 App
@@ -3836,7 +3963,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-03.2200';
+  const APP_VERSION='2026-09-03.2359';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -842,10 +842,44 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("23. 收盤後自選股顯示價必須等於quotes_sinopac的last（P0根因回歸防線，防止20分鐘閘門誤丟今日收盤價復發）",
     closedTodayPriceErrors.length === 0, closedTodayPriceErrors.join("; "));
 
+  // 24.【2026-09-03新增，P0三-三.2】設定頁「資料新鮮度」卡片：每個監控項目都
+  // 要畫出一列、每列的狀態只能是ok/overdue/missing三者之一、不能出現undefined/
+  // NaN、摘要行不能停在「檢查中…」。這裡不斷言「全部正常」——逾期是真實狀態
+  // （今天quotes.yml整天沒落地就該紅），要驗的是「判定有跑完、有誠實畫出來」。
+  const freshnessErrors = [];
+  try {
+    await page.evaluate(() => window.go("settings"));
+    await page.waitForFunction(
+      () => document.querySelectorAll("#data-freshness-list .fresh-row").length > 0,
+      null, { timeout: 15000 }
+    ).catch(() => {});
+    await page.waitForTimeout(500);
+    const info = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll("#data-freshness-list .fresh-row")];
+      return {
+        expected: typeof FRESHNESS_ITEMS !== "undefined" ? FRESHNESS_ITEMS.length : -1,
+        n: rows.length,
+        statuses: rows.map(r => r.dataset.status),
+        html: document.getElementById("data-freshness-list")?.innerHTML || "",
+        summary: document.getElementById("data-freshness-summary")?.textContent || "",
+      };
+    });
+    if (info.n === 0) freshnessErrors.push("沒有畫出任何資料檔列");
+    if (info.expected > 0 && info.n !== info.expected) freshnessErrors.push(`應有${info.expected}列，實際${info.n}列`);
+    const badStatus = info.statuses.filter(s => !["ok", "overdue", "missing"].includes(s));
+    if (badStatus.length) freshnessErrors.push(`出現非法狀態值：${badStatus.join(",")}`);
+    if (/undefined|NaN/.test(info.html)) freshnessErrors.push("列內容出現undefined/NaN");
+    if (!info.summary || info.summary.includes("檢查中")) freshnessErrors.push(`摘要行未完成：「${info.summary}」`);
+  } catch (e) {
+    freshnessErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("24. 設定頁資料新鮮度卡片：每個監控檔都畫出一列、狀態值合法、無undefined/NaN、摘要有完成（逾期標紅只驗有跑完，不強求全綠）",
+    freshnessErrors.length === 0, freshnessErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
