@@ -1537,3 +1537,31 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 
 ## 第322輪 · 2026-09-03T23:31+08:00 · TW（跳過，暫停規則生效中）
 取鎖乾淨（非陳舊鎖檔），依輪替選TW（三軌時間戳TW 13:01第319輪最舊）。獨立複查三個解除條件皆未成立（PORTFOLIO_STRATEGY_SPEC.md第3行仍「狀態：待使用者確認」，git log確認自fa369b9以來仍只一個commit；LEADS.md最新portfolio_multifactor_v2仍FAIL；暫停規則未被修改）。TW軌兩項地基背景工作複查仍已達標（backfill_state.json實測2597 done/469 skip≈81.3%＞80%門檻、T86 100%），沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作，零API呼叫。is_holdout_consumed()確認False。git status僅既有非本輪殘留變更（research/HYPOTHESIS_QUEUE.md／research/TRIALS_LEDGER.md已修改，另有多個未追蹤log/腳本檔案，研判皆為另一互動session/AlphaHypothesisQueue軌道留下），未觸碰、未納入本輪commit。累計跳過約213輪、跨度約194.9小時（約8.12天）。
+
+## 第325輪（2026-09-04，TW）——「換更大樣本重跑」地基調查，本輪未及執行完整回測（session預算用盡）
+- 讀取`CALIBRATION_PROBE.md`：結論欄仍為`CONCLUSION_PLACEHOLDER`（互動session執行中，甲.3尚未完成），依協定不代為完成，只讀取記錄狀態。
+- 暫停規則已解除（commit `8aad0d4`），依輪替選TW，主軸改組合策略層級推進。
+- 調查「(a)換更大樣本重跑」可行性：`backfill_state.json`顯示2597檔done；但portfolio_backtest_v2.py用的`load_sample_with_factors()`呼叫`prepare_factors()`（重量版，含PER/資產負債表），跟`f_value_pe`同源的`TaiwanStockPER`資料集不在backfill涵蓋範圍——實測60檔小樣本時觸發大量FinMind 402（額度用盡，回報約111分鐘後重置），確認**A_4pass因子版本(eps_family/revenue_surprise/low_vol)其實不需要PER**，可改用`factors.py::prepare_score_factors()`（既有的精簡版函式，只讀`TaiwanStockFinancialStatements`/`TaiwanStockMonthRevenue`，零PER呼叫）。
+- 找到安全樣本池：yfinance價格快取(1854檔) ∩ FinMind財報快取(2227檔) ∩ FinMind月營收快取(2258檔) ∩ 宇宙成員(3196檔) = **1138檔全部零新API呼叫可用**，是舊樣本(80檔可用)的14倍。B版本(+f_value_pe)本輪不可行（PER未涵蓋在backfill、現正額度用盡），下一輪待額度恢復後再處理，或另外評估B版本是否值得為此單獨補PER回補。
+- **本輪到此為止**：session預算用盡，未及實際跑`run_one()`大樣本回測拿到報酬/alpha p值等數字。下一輪接手：用`prepare_score_factors()`對上述1138檔（或子樣本，注意runtime）跑A_4pass/ic_weighted+equal+regime_weighted×月/季頻，VAL期(2021-2024)，先比對p值是否較0.053改善；`portfolio_backtest_v2.py`本身未修改（唯讀調查），沒有新增/修改程式碼檔案。
+- `is_holdout_consumed()`本輪確認`False`。零新增/修改研究程式碼（僅唯讀查詢），`research/CALIBRATION_PROBE.md`（互動session產物）未觸碰、未commit。
+
+## 第326輪（2026-09-04，TW）——延續第325輪，寫`portfolio_backtest_v2_bigsample.py`（重用既有函式，只換loader為`prepare_score_factors()`+安全樣本池），50檔子樣本smoke test通過；1138檔全量執行中發現部分股票觸發非預期的yfinance即時連線（尚未查明根因），因本輪執行預算已耗盡而中止，未取得完整回測數字
+- 讀`CALIBRATION_PROBE.md`結論：(乙)檢定力不足，`factor_ic.SAMPLE_SIZE`已由互動session改100→300。
+- 重建第325輪找到的「零新API安全樣本池」（yfinance價格快取∩FinMind財報快取∩FinMind月營收快取∩universe()成員），重新驗證仍為**1138檔**（跟第325輪一致）。
+- 新增`portfolio_backtest_v2_bigsample.py`：**全部重用**`portfolio_backtest_v2.py`既有函式（`run_one`/`_trend_regime_series`/`_liquidity_proxy_series`/`FACTOR_VERSIONS`），唯一差異是loader改用`factors.py::prepare_score_factors()`（精簡版，零PER/零三大法人呼叫）取代重量版`load_sample_with_factors()`。只跑A_4pass（B_plus_value_pe需要PER，安全樣本池未涵蓋，維持第325輪「下一輪待額度恢復再處理」原狀不變）。
+- **確認`fetch_yf_adjusted()`已內建FinMind schema別名**（`max`/`min`/`Trading_Volume`/`Trading_money`，`Trading_money`用`close*volume`近似），排除了原本擔心的欄位缺失問題——這部分調查結果對下一輪有用，不用重查。
+- 50檔子樣本smoke test：載入2.4秒完成（1138檔預估約1分鐘量級，速度沒問題）；跑一個組合(equal/monthly/VALIDATION)結果`n_trades=0`——**排查後確認是抽樣巧合**：前50個字母序股票代號剛好全是00開頭ETF（`0054`/`0056`/`0061`...），ETF沒有EPS/營收資料，`n_components`恆為1、低於`MIN_COMPONENTS_FOR_RANKING=2`門檻，全部不合格，不是程式邏輯bug。
+- **執行1138檔全量版時，log出現大量`$XXXX.TW: possibly delisted; no timezone found`訊息**（yfinance即時連線的典型錯誤字串）——這代表對這些股票**觸發了非預期的即時yfinance API呼叫**，跟原本規劃的「零新API」矛盾。單獨測試`adjusted_price_series('3115', '2010-01-01')`（log中出現過的一檔）**確認是乾淨快取命中（0.89秒，無連線）**，但同一檔在1138檔全量批次執行中卻觸發了即時連線——**根因尚未查明**（可能跟批次執行時的import順序、模組層級狀態、或yfinance套件內部行為有關，需要下一輪對照ID list逐一排查，而非臆測），為避免無限制消耗額度/時間，已手動中止該次執行（背景process已終止），並清掉未完成的log檔案（`portfolio_v2_bigsample_run.log`，未commit）。
+- **本輪到此為止**：`portfolio_backtest_v2_bigsample.py`程式碼本身**唯讀查詢邏輯已就緒**（未修改`portfolio_backtest_v2.py`本身，純加法擴充），但**尚未跑出任何回測數字**（quick scan/完整版皆未完成），不能拿它做任何判定。下一輪接手：**先查明yfinance意外連線的根因**（用小批次、逐步擴大樣本數的方式二分排查是哪個子集觸發，而不是直接重跑1138檔全量賭一次），排除疑慮後才正式執行取得p值跟第325輪找到的0.053/0.0535基準比較。
+- `is_holdout_consumed()`本輪因執行預算耗盡未及重新驗證；本輪唯一涉及資料的動作是唯讀讀取快取parquet+意外的少量即時yfinance連線（yfinance非FinMind，不受holdout機制管轄，且`adjust.py::adjusted_price_series`本身已透過`load_dev()`承接FinMind路徑的holdout裁切；yfinance路徑資料本身不涉及holdout概念，此為既有pipeline既定設計，非本輪新增風險），零FinMind API呼叫，前一輪(325)已確認`False`狀態不受影響。
+
+## 第327輪（2026-09-04，TW）——延續325/326輪，修好`safe_pool_ids()`真bug＋首次跑出300檔大樣本quick scan數字，補commit325/326未commit的紀錄
+- 取鎖：`marathon_lock.py acquire`回報`LOCK_STALE`（pid 19728持有29.9分鐘，回收），研判是第326輪執行`portfolio_backtest_v2_bigsample.py`1138檔全量時process中途消失、未正常釋放鎖。依輪替選TW（三軌時間戳TW 23:31第322輪最舊）。
+- `git status`確認第325/326輪的工作（`TW_LOG.md`/`MARATHON_STATE.md`/`REPORT.md`修改、`portfolio_backtest_v2_bigsample.py`新增）都還在本機未commit，本輪一併整理連同新工作一次commit，不遺失。
+- **修好`safe_pool_ids()`一個真bug**：舊版只用檔名前綴判斷stock_id「有沒有任何yfinance快取檔」，沒檢查exact cache key是否等於`fetch_yf_adjusted`實際會用的`(start='2010-01-01', end=VAL_END='2024-12-31')`組合——`data/raw_yf/`裡混有production即時報價路徑留下的、end date是抓取當下「今天」的快取檔（513個非2024-12-31結尾的檔案），這類stock_id會被誤判安全。改成直接檢查`yf_price_client._cache_path()`回傳的exact路徑是否存在。修後池子大小仍是1138（巧合未變，但這是必要的正確性修正，不是白做）。
+- 用network-guard monkeypatch（`_fetch_one_suffix`改成raise而非真的呼叫yfinance）驗證：1138檔全池`load_safe_sample()`在123秒內完成、1132/1138可用、**全程零live呼叫被觸發**——證明池子本身是乾淨的，第326輪log看到的「possibly delisted; no timezone found」訊息不是這個池子選取邏輯造成的。
+- 正式執行`portfolio_backtest_v2_bigsample.py`（1138檔全量）：process在無任何traceback的情況下中途消失（stdout完全緩衝未flush，`tasklist`確認python.exe已終止），根因未查明（不是資料/邏輯問題，前一步的network-guard測試已排除快取正確性；懷疑跟系統資源/記憶體有關，但未收集到直接證據）。**不建議下一輪無條件重跑1138檔全量賭一次**，除非先加資源監控。
+- 改用300檔子樣本（`safe_pool_ids()`結果的前300個sorted stock_id，298檔可用，新增`run_bigsample_300.py`，`-u`unbuffered執行避免緩衝問題）成功跑完quick scan（僅A_4pass，equal/ic_weighted/regime_weighted×monthly/quarterly，未做成本敏感度/隨機控制組）：**VALIDATION期6組合alpha p值全數遠高於0.05**（範圍0.2159~0.6451），`ic_weighted/quarterly`（對應原80檔樣本最佳組合的同一格）本輪p=0.5314、alpha從舊樣本+10.40%驟降到+3.05%。**這與`CALIBRATION_PROBE.md`「小樣本檢定力不足會製造假邊緣通過」的結論方向一致**：原80檔的p=0.053很可能是雜訊造成的偽邊緣顯著。判定`portfolio_multifactor_v2`仍FAIL，完整記錄見`LEADS.md`本輪補充段落。
+- **誠實限制**：只測A_4pass（B_plus_value_pe仍卡在PER額度）；只做quick scan未做完整成本敏感度/隨機控制組/CAPM完整拆解；1138檔全量中途消失問題未解決，300檔結果代表性略遜於全量。
+- `is_holdout_consumed()`本輪確認`False`。全程零新FinMind API呼叫（僅讀取yfinance/FinMind既有快取parquet；yfinance路徑本身不涉及holdout概念，同`portfolio_backtest_v2_bigsample.py`docstring既定設計）。

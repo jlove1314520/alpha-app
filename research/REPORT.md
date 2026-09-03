@@ -9,6 +9,12 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 327 輪 · 2026-09-04T04:15+08:00 · TW · 修好safe_pool_ids()真bug（exact cache key，非檔名前綴）；network-guard驗證1138檔安全池零live呼叫；1138檔全量執行process仍不明原因中途消失；改跑300檔子樣本quick scan · portfolio_multifactor_v2 VALIDATION期6組合alpha p值全數遠高於0.05（0.2159~0.6451，原80檔最佳組合0.053），判定仍FAIL但證據更站得住腳，方向符合CALIBRATION_PROBE.md「小樣本假邊緣通過」結論
+
+## 第 326 輪 · 2026-09-04T03:53+08:00 · TW · 延續325輪，新增portfolio_backtest_v2_bigsample.py（重用既有函式，loader改prepare_score_factors避開PER額度），50檔smoke test過，1138檔全量執行時process中途消失，本輪執行預算耗盡未commit · 未及取得回測數字，第327輪接續查明並改用300檔子樣本補完
+
+## 第 325 輪 · 2026-09-04T03:20+08:00 · TW · 暫停規則解除後首輪，調查「換更大樣本重跑」地基，找到1138檔零新API安全樣本池（prepare_score_factors，避開PER額度問題） · 未及跑完整回測數字，session預算用盡提前收工，下一輪接續（見TW_LOG.md第325輪）
+
 ## 第 324 輪 · 2026-09-04T02:32+08:00 · US（跳過，暫停規則生效中） · 依輪替選US（三軌時間戳US 23:03第321輪最舊） · 判定：獨立複查三個解除條件皆未成立——(1)`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`本輪重新確認自`fa369b9`以來仍只一個commit；(2)`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL（p=0.053/0.0535接近顯著但未過）；(3)`MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。US軌依舊沒有組合策略相關工作可做（規格書全部圍繞TAIEX/TWSE台股樣本，跟US軌無關；`US_LEADS.md`本輪複查亦無任何組合策略相關候選）。**本輪整輪跳過，未做任何實質工作，零API呼叫。**`is_holdout_consumed()`本輪成功以既有指令路徑重新驗證，確認`False`。`git status`確認：既有非本輪產生的殘留變更（`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改，屬維運帽子/自動化workflow跟US軌無關；`research/`底下約17個未追蹤log/腳本殘留檔案，研判為另一互動session/`AlphaHypothesisQueue`軌道留下），未觸碰、未查看、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約215輪、跨度約197.9小時（約8.25天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 ## 第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中） · 依輪替選FUT（三軌時間戳FUT 22:02第320輪最舊） · 判定：獨立複查三個解除條件皆未成立——(1)`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」，`git log --oneline -- research/PORTFOLIO_STRATEGY_SPEC.md`本輪重新確認自`fa369b9`以來仍只一個commit；(2)`LEADS.md`最新`portfolio_multifactor_v2`條目仍FAIL（p=0.053/0.0535接近顯著但未過）；(3)`MARATHON_PROTOCOL.md`第0節暫停規則本文本輪完整重讀一遍，未被修改移除。FUT軌沒有組合策略相關工作可接（規格書全部圍繞TAIEX/TWSE台股樣本），round104「下一步」本質仍是單因子相關工作，「宇宙全量回補」是TW軌專屬地基工作、FUT軌無對應項目。**沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作，零API呼叫。**`is_holdout_consumed()`本輪成功以既有指令路徑重新驗證，確認`False`。`git status`確認：既有非本輪產生的殘留未追蹤log檔案外，**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案，先前幾輪未見），未觸碰、未查看、未納入本輪commit，僅記錄觀察。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約214輪、跨度約195.4小時（約8.14天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。

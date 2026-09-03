@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-04T02:32+08:00**
+**最後更新：2026-09-04T04:15+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 324 輪。最新一輪：第 324 輪 · 2026-09-04T02:32+08:00 · US（跳過，暫停規則生效中）。**取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 23:03（第321輪，最舊）、TW 23:31（第322輪）、FUT 2026-09-04T00:01（第323輪，最新）——依輪替選US。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」、`LEADS.md`最新`portfolio_multifactor_v2`仍FAIL、暫停規則未被修改）。US軌沒有組合策略相關工作可做（規格書全部圍繞TAIEX/TWSE台股樣本），沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作，零API呼叫。`is_holdout_consumed()`確認`False`（本輪成功以既有指令路徑重新驗證）。`git status`確認：既有非本輪產生的殘留變更（`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改、約17個未追蹤log/腳本殘留檔案），未觸碰、未查看、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約215輪、跨度約197.9小時（約8.25天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第324輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 327 輪。最新一輪：第 327 輪 · 2026-09-04T04:15+08:00 · TW（修好safe_pool_ids真bug＋300檔quick scan首次拿到大樣本p值，portfolio_multifactor_v2仍FAIL，詳見TW_MARATHON_STATE.md/LEADS.md）。最新一輪：第 325 輪 · 2026-09-04T03:20+08:00 · TW（暫停規則已解除，調查換更大樣本重跑地基，本輪未及跑完整回測，session預算用盡提前收工）。**取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 23:03（第321輪，最舊）、TW 23:31（第322輪）、FUT 2026-09-04T00:01（第323輪，最新）——依輪替選US。獨立複查三個解除條件皆未成立（`PORTFOLIO_STRATEGY_SPEC.md`第3行仍「狀態：待使用者確認」、`LEADS.md`最新`portfolio_multifactor_v2`仍FAIL、暫停規則未被修改）。US軌沒有組合策略相關工作可做（規格書全部圍繞TAIEX/TWSE台股樣本），沒有已知的剩餘允許工作項目，本輪整輪跳過，未做任何實質工作，零API呼叫。`is_holdout_consumed()`確認`False`（本輪成功以既有指令路徑重新驗證）。`git status`確認：既有非本輪產生的殘留變更（`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改、約17個未追蹤log/腳本殘留檔案），未觸碰、未查看、未納入本輪commit。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約215輪、跨度約197.9小時（約8.25天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 詳見`REPORT.md`第324輪條目、`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
