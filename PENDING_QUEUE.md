@@ -155,12 +155,27 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   提案，死路記墓園續跑（沿用既有紀律，不必額外改檔案）
 - [ ] **乙.1** Phase 1冷熱分離：shioaji_quotes.py/ibkr_quotes.py盤中只
   更新記憶體不commit，收盤後一天commit一次
-- [ ] **乙.2** 新增`research/alpha_live_server.py`（FastAPI，/live/quotes
-  /live/stream(SSE)/live/kbars，只讀不下單，沿用ibkr_order_server.py
-  的token模式）
-- [ ] **乙.3** cloudflared Tunnel+Cloudflare Access設置——**需要總司令
-  自己操作登入/申請帳號的步驟**，我只能寫操作步驟文件，不能代為註冊
-  外部服務帳號
+- [x] **乙.2** 新增`research/alpha_live_server.py`——**已完成第一版，
+  誠實範圍見檔案docstring**：`/live/quotes`已完整可用（讀既有JSON
+  快照）；`/live/stream`目前是輪詢重新比對再送（非真逐筆tick，因為
+  `shioaji_quotes.py`的`TickState`只存在它自己行程記憶體，這支獨立
+  伺服器讀不到，要做到真逐筆需要下一輪把兩個行程合併/共用記憶體）；
+  `/live/kbars`回501尚未實作（避免另開一個Shioaji連線跟現有常駐行程
+  衝突）。監聽`0.0.0.0:8001`（不是127.0.0.1，理由：Cloudflare Tunnel
+  Private Network路由連的是區網IP不是loopback），靠token擋未授權
+  存取。實測`/health`/`/live/quotes`(401/200)/`/live/stream`(SSE事件
+  正確送出)/`/live/kbars`(501)/LAN IP連通皆通過。commit `4fb191a`已push。
+- [x] **乙.3-前置** cloudflared本體已透過`winget install Cloudflare.
+  cloudflared`裝好（`C:\Program Files (x86)\cloudflared\cloudflared.exe`
+  version 2026.8.3）。**`service install <token>`這條指令本身無法由我
+  執行**——實測回傳「Cannot establish a connection to the service
+  control manager: Access is denied」，這是Windows Service Control
+  Manager要求的Administrator權限，我這邊的終端機工具沒有、也無法自我
+  提升到系統管理員層級（沒有互動式UAC同意窗可以按）。**需要總司令自己
+  開一個「以系統管理員身分執行」的PowerShell/CMD視窗，貼上同一條指令
+  跑一次**（`cloudflared.exe`已經裝好，這步只差權限，不是任何設定
+  錯誤）。已用`ipconfig`/`Get-NetIPAddress`查到區網IP：**Wi-Fi介面
+  192.168.3.241**，供設定Private Network路由CIDR用。
 - [ ] **乙.4** App前端偵測隧道可用性，SSE即時更新/離線退回冷資料標示
 - [ ] **乙.5** 個股頁改用TradingView lightweight-charts（cdnjs載入、
   版本釘死），盤中1分K走/live/kbars
