@@ -118,6 +118,13 @@ TRADING_WINDOW_POLL_SEC = 30  # 常駐迴圈裡多久檢查一次「是否還在
 LIVE_STATE_PATH = Path(__file__).parent / ".live_state_sinopac.json"
 LIVE_STATE_MIN_INTERVAL_SEC = 1.0  # 熱檔最多每秒寫一次：tick一秒可能好幾筆，寫檔不必跟著每筆寫
 
+# 2026-09-04（總司令裁示乙.1「冷熱分離」）：**盤中不再commit/push**。盤中只更新記憶體
+# 與本機熱檔（上面LIVE_STATE_PATH，給alpha_live_server.py讀），git追蹤的冷檔
+# data/quotes_sinopac.json只在13:30收盤、常駐迴圈結束時寫一次並commit+push一次
+# （當日收盤快照）。驗收目標：當日repo commit數<20、Actions報價/大盤排程恢復落地。
+# 設成True可退回2026-09-03的「60秒且有變動才commit」行為（只留作緊急退路，不是預設）。
+INTRADAY_GIT_PUSH = False
+
 
 def _load_env(path: Path) -> dict[str, str]:
     kv = {}
@@ -477,20 +484,27 @@ def _last_committed_quotes(rel_path: str) -> dict | None:
         return None
 
 
-def _flush_and_push(state: TickState) -> None:
-    """把目前累積的最新報價寫進本機JSON（一律寫，本機檔案保持新鮮，
-    給同機的App/其他工具讀取用），但**只有在報價數字真的變動時才
-    commit+push**——見`_meaningful_quotes()`/`_last_committed_quotes()`
-    docstring的2026-09-03緊急修復根因說明，不能再用全檔`git diff
-    --quiet`判斷（那個判斷法因為tick_at/volume每次都變，等於每次
-    flush都會commit，這正是995次commit洪水的直接原因之一）。"""
+def _flush_and_push(state: TickState, final: bool = False) -> None:
+    """把目前累積的最新報價寫進git追蹤的冷檔並commit+push。
+
+    **2026-09-04乙.1之後的行為**：`INTRADAY_GIT_PUSH=False`（預設）時，盤中呼叫
+    （final=False）**什麼都不做**——不寫冷檔、不commit（盤中資料走熱檔＋
+    alpha_live_server.py）；只有收盤收尾那次（final=True）才寫冷檔並commit+push
+    一次，當作當日收盤快照。盤中不寫冷檔是刻意的：寫了不commit會讓工作區一直
+    髒著，干擾同機其他排程（馬拉松/假說佇列）的git操作。
+
+    `INTRADAY_GIT_PUSH=True`（緊急退路）時沿用2026-09-03的邏輯：一律寫冷檔，
+    **只有在報價數字真的變動時才commit+push**——見`_meaningful_quotes()`/
+    `_last_committed_quotes()`docstring的緊急修復根因說明。"""
+    if not final and not INTRADAY_GIT_PUSH:
+        return
     payload = _build_payload(state)
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     rel_path = str(OUT_PATH.relative_to(REPO_ROOT))
     prev_quotes = _last_committed_quotes(rel_path)
-    if prev_quotes is not None and _meaningful_quotes(prev_quotes) == _meaningful_quotes(payload["quotes"]):
+    if not final and prev_quotes is not None and _meaningful_quotes(prev_quotes) == _meaningful_quotes(payload["quotes"]):
         return  # 價格/報價數字都沒變，只是tick_at/volume累加，不commit
 
     timestamp = datetime.now(TW_TZ).strftime("%Y-%m-%d %H:%M:%S")
@@ -621,7 +635,7 @@ def run_stream_daemon() -> None:
         api.set_on_bidask_fop_v1_callback(on_bidask_fop)
         api.set_on_quote_idx_v1_callback(on_quote_idx)
 
-        print(f"訂閱完成：{subscribed}，進入常駐flush迴圈（每{FLUSH_INTERVAL_SEC}秒）", flush=True)
+        print(f"訂閱完成：{subscribed}，進入常駐迴圈（每{FLUSH_INTERVAL_SEC}秒檢查；盤中{'會' if INTRADAY_GIT_PUSH else '不'}commit，收盤後commit一次）", flush=True)
 
         elapsed_since_window_check = 0.0
         while True:
@@ -634,7 +648,7 @@ def run_stream_daemon() -> None:
                     print("交易時段結束，收尾並登出", flush=True)
                     break
 
-        _flush_and_push(state)  # 收盤前最後flush一次，不遺漏最後幾筆
+        _flush_and_push(state, final=True)  # 收盤收尾：寫當日收盤快照並commit+push（乙.1之後全天唯一一次）
         state.maybe_write_live_state(force=True, market_status="closed")  # 熱檔也標記收盤，live server據此顯示「今日收盤」
     finally:
         try:

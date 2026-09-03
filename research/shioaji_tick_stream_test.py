@@ -224,8 +224,32 @@ def test_live_state_hot_file_written_atomically():
     print("test_live_state_hot_file_written_atomically PASS")
 
 
+def test_intraday_flush_is_noop_when_intraday_push_disabled():
+    """2026-09-04乙.1：INTRADAY_GIT_PUSH=False時，盤中_flush_and_push()不能寫冷檔、
+    不能碰git（這裡把OUT_PATH指到暫存檔、_git換成會記錄呼叫的假函式驗證）。"""
+    import tempfile, os
+    tmpdir = tempfile.mkdtemp()
+    fake_out = sq.Path(tmpdir) / "quotes_sinopac.json"
+    calls = []
+    orig_out, orig_git, orig_flag = sq.OUT_PATH, sq._git, sq.INTRADAY_GIT_PUSH
+    sq.OUT_PATH, sq._git, sq.INTRADAY_GIT_PUSH = fake_out, (lambda args: calls.append(args) or type("R", (), {"returncode": 0})()), False
+    try:
+        state = sq.TickState(); state.live_state_path = None
+        sq._make_tick_stk_handler(state, "2330", None)(_fake_tick_stk())
+        sq._flush_and_push(state)  # 盤中
+        assert not fake_out.exists(), "盤中不該寫冷檔"
+        assert calls == [], f"盤中不該有任何git呼叫：{calls}"
+    finally:
+        sq.OUT_PATH, sq._git, sq.INTRADAY_GIT_PUSH = orig_out, orig_git, orig_flag
+        for f in os.listdir(tmpdir):
+            os.remove(os.path.join(tmpdir, f))
+        os.rmdir(tmpdir)
+    print("test_intraday_flush_is_noop_when_intraday_push_disabled PASS")
+
+
 def main():
     tests = [
+        test_intraday_flush_is_noop_when_intraday_push_disabled,
         test_kbar_aggregation_per_minute,
         test_live_state_hot_file_written_atomically,
         test_tick_stk_handler_updates_state,
