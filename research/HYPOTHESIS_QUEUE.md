@@ -819,8 +819,10 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     `TRIALS_LEDGER.md`#97），移出排隊佇列。不泛化成「融資餘額槓桿
     水位這個維度完全無效」——只測了週頻近似成長率+Spearman相關+
     同長度forward回撤幅度這個具體構造。**佇列#1~26全數結案，現在
-    排隊第一順位是#27（多因子z-score複合評分），尚未開始第1關。
-    剩餘#5/#6/#8/#10仍卡外部依賴，下一輪需重新確認。**
+    排隊第一順位是#27（多因子z-score複合評分），第1關cheap IC gate
+    已CHEAP_PASS（2026-09-03排程接續，詳見下方#27條目），第2關
+    300-draw隨機因子組合控制進行中。剩餘#5/#6/#8/#10仍卡外部依賴，
+    下一輪需重新確認。**
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後）**：15條原始佇列項目中
 #1~4、#7、#9、#11~15共10條已結案（皆FAIL），#10已建置方法論框架（非
@@ -1980,9 +1982,48 @@ board_v2`既有實作可以參考因子定義，不用重新設計。
 **下檔保護要求**：同本輪其餘假設（見#20條目「下檔保護要求」小節），
 不能只贏買進持有，MDD/地雷率/regime存活都要證明。
 
-**狀態**：尚未開始，排隊接續#26之後。下一輪從第1關開始：先算候選
-因子（GP/ROE/B-P/E-P/中期動能/月營收意外/法人連續買超）的相關矩陣，
-挑出3-5個低相關的組成baseline複合，再跑cheap gate（隨機對照300
-draws，比較亂加權對照組）。過不了就換因子組合，但換之前要先寫清楚
-「為什麼這幾個因子互補」的經濟理由，不能盲目試錯。通過完整gauntlet、
-要進forward-paper前停下來提案給使用者，不得自行部署。
+**狀態（2026-09-03排程接續，第1關CHEAP_PASS，未結案）**：新增
+`composite_zscore_v1.py`——相關矩陣確認baseline三因子（`f_gross_
+profitability`/`f_value_pb`/`f_revenue_surprise`）兩兩相關係數絕對值
+皆<0.4（GP vs value_pb=-0.378、GP vs revenue_surprise=+0.162、
+value_pb vs revenue_surprise=-0.200），非高度相關，符合「低相關」
+前提；選`f_value_pb`而非`f_value_pe`當估值因子理由：`TRIALS_LEDGER.md`
+#13 CHEAP_PASS狀態比#14（累積校正後降級為不確定）更穩固。逐日橫斷面
+z-score加總後跑cheap IC gate（沿用`factor_ic.py`既有框架，standalone
+bonferroni_n=1）：TRAIN mean_ic=+0.0735 IR=+0.458(n=74)、VAL
+mean_ic=+0.0826 IR=+0.529 hit_rate=0.66(n=47)，train/val同號，
+null percentile=**100.0**（門檻90.0，過關）——**CHEAP_PASS**，本佇列
+證據最強的複合候選之一。**但這只是第1關，且刻意未包含使用者原話額外
+要求的「隨機對照draws>=300、對照組是隨機選同數量因子亂配權重」這個
+更嚴格控制**（見腳本檔頭範圍聲明）——目前的cheap gate只證明「這個
+複合分數本身有可辨識的橫斷面預測力」，不等於證明「贏過任意隨機3因子
+組合」，尤其GP（#20）跟月營收意外相關的revenue_surprise單因子IC
+本身接近雜訊，複合後轉強需要下一輪用300-draw隨機組合控制驗證不是
+巧合疊加，不能只因cheap gate過關就樂觀認定「弱訊號組合出強訊號」
+成立。**下一輪**：300-draw隨機因子組合控制→正交性檢查→leave-one-
+factor-out→若都過再進portfolio層構造（走完整GATE_SEQUENCE第2~9關）。
+完整見`TRIALS_LEDGER.md`#97、`composite_zscore_v1.py`（新增，可重複
+執行）、`composite_zscore_v1_run.log`（新增）。
+
+**狀態更新（2026-09-03T23:47排程接續，仍未結案）**：上一輪（陳舊鎖檔顯示
+崩潰，未commit）已寫好`composite_zscore_v1_random_control.py`（300-draw
+隨機因子組合控制，方法見腳本檔頭）但有實作bug——`weighted_zscore_composite`
+每次呼叫後沒清掉暫存欄位`_f_composite_random_draw`，baseline補算階段留下
+的殘留欄位讓後續draw迴圈merge時左右兩側同名欄位被pandas加`_x`/`_y`後綴，
+導致`KeyError`當場崩潰（第1個draw就死，300 draws一次都沒跑成）。本輪已
+修好（merge前先drop殘留欄位，見腳本diff）並在背景重新啟動執行，跑到本輪
+收工時**仍未跑完**（300 draws每次都要對~80檔股票重新merge+121個快照算
+Spearman IC，比預期慢很多，本輪內等待20分鐘以上仍在跑，過程中還撞到
+本機另一個排程觸發的hypothesis_queue instance搶走鎖檔又提前結束的插曲，
+但雙方都沒寫壞任何已提交的檔案，只是巧合印證了`marathon_lock.py`docstring
+自己講的「not thread-safe against true concurrency」）。**下一輪待辦**：
+`python composite_zscore_v1_random_control.py`背景進程若還在跑（本輪
+收工時pid 28324仍存活，用`nohup`背景啟動，理論上會在本次claude session
+結束後於作業系統上繼續跑），先檢查`data/composite_zscore_v1_random_
+control.csv`是否已產生（300列，欄位`draw/factors/weights/train_ic/
+val_ic`）；若已產生，直接讀取算出的`baseline_val_ic`跟隨機分布比較算
+percentile（跟腳本`main()`同一套公式：`100*mean(abs(baseline)>abs(random
+draws))`，門檻90.0）寫進本條目跟`TRIALS_LEDGER.md`正式判CHEAP_PASS或
+FAIL；若進程已死但CSV沒產生完整300列，直接重跑（bug已修好，理論上這次
+可以順利跑完，只是慢，需要抓時間預算，必要時背景啟動後這輪先收工，
+下一輪只做「檢查結果」不用重跑）。

@@ -13,6 +13,19 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T23:50 — hypothesis_queue軌：接續#27多因子z-score複合評分第2關
+（300-draw隨機因子組合控制）— 上一輪陳舊鎖檔（未commit）留下的
+`composite_zscore_v1_random_control.py`有merge欄位殘留bug（第1個draw就
+KeyError崩潰），本輪修好並背景重啟執行，收工時仍在跑（未跑完300draws，
+比預期慢很多）。過程中偵測到本機另一個hypothesis_queue排程instance因
+本輪耗時過久（>25分鐘）搶走陳舊鎖檔又提前結束（未commit任何東西，無
+損害），純屬`marathon_lock.py`docstring自己承認的並行限制，供未來輪次
+知悉。下一輪先檢查`data/composite_zscore_v1_random_control.csv`是否已
+產生完整300列，據此判CHEAP_PASS/FAIL，見`HYPOTHESIS_QUEUE.md`#27最新
+狀態段落。`is_holdout_consumed()`仍是False。
+
+---
+
 ## 2026-09-03T14:22 — hypothesis_queue軌：#26全市場融資餘額成長率第1關
 cheap gate（662週回補完成後首測） — 20d(4w)/60d(12w)兩種窗口定義的
 融資成長率對後續TAIEX回撤幅度Spearman相關皆train/val正負號相反，60d
