@@ -175,10 +175,14 @@ def main():
     print(f"  {len(snapshots)} non-overlapping 20-trading-day snapshots, {SNAPSHOT_START}..{holdout.VAL_END}", flush=True)
 
     # 確認baseline複合欄位已存在（前一輪composite_zscore_v1.main()跑過的話會有，
-    # 若這次是獨立重跑則自己補算，equal weight=1.0跟baseline定義完全一致）
-    for sid, d in data.items():
-        if BASELINE_COMPOSITE_COL not in d.columns:
-            weighted_zscore_composite({sid: d}, {f: 1.0 for f in BASELINE_FACTORS})
+    # 若這次是獨立重跑則自己補算，equal weight=1.0跟baseline定義完全一致）。
+    # 2026-09-04修正bug：原本逐檔用單一股票dict{sid: d}呼叫
+    # weighted_zscore_composite，導致內部groupby("date")每組只有1檔股票，
+    # std必為NaN/0，複合分數全部變NaN（本輪實測TRAIN/VAL n=0皆為此因）——
+    # 必須對整個data字典一次呼叫，橫斷面z-score才有意義。
+    if not all(BASELINE_COMPOSITE_COL in d.columns for d in data.values()):
+        weighted_zscore_composite(data, {f: 1.0 for f in BASELINE_FACTORS})
+        for sid, d in data.items():
             d[BASELINE_COMPOSITE_COL] = d[RANDOM_COMPOSITE_COL]
 
     baseline_train_ic, baseline_val_ic, n_train, n_val = mean_ic_train_val(BASELINE_COMPOSITE_COL, data, snapshots)
@@ -198,7 +202,11 @@ def main():
     # ——這樣任何一個draw都能獨立重放（不依賴前面所有draw的呼叫順序完全一致），
     # checkpoint接續時直接從index=start_i繼續即可，不需要重放前面的抽樣過程。
     def _draw_for_index(i: int) -> tuple[list[str], dict[str, float]]:
-        local_rng = random.Random((CONTROL_SEED, i))
+        # 2026-09-04修正bug：random.Random((CONTROL_SEED, i))在這台機器的
+        # Python 3.13(WindowsApps發行版)不支援tuple當seed（TypeError，300 draws
+        # 一次都沒跑成），改用字串seed（等價的可重放獨立種子，字串本身就是
+        # random模組原生支援的seed型別）。
+        local_rng = random.Random(f"{CONTROL_SEED}_{i}")
         chosen = local_rng.sample(FACTOR_POOL, DRAW_K)
         weights = {f: local_rng.uniform(WEIGHT_LOW, WEIGHT_HIGH) for f in chosen}
         return chosen, weights

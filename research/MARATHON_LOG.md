@@ -13,6 +13,26 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04 03:14 — `hypothesis_queue`排程接續#27（多因子z-score複合評分）第2關 — 修好兩個真bug，checkpoint進度10/300，仍未結案
+
+接手時上一輪的`composite_zscore_v1_random_control.py`背景行程跟checkpoint都
+已消失（同`#4`dividend_yield_portfolio_v1踩過的模式：headless session結束
+背景行程被一併終止），重新啟動後發現**這支腳本在這台機器上其實從來沒有
+成功跑完過任何一個draw**，抓到兩個真bug（都是純bug修復，直接修不提案）：
+①`random.Random((CONTROL_SEED, i))`用tuple當seed，這台機器的Python 3.13
+(WindowsApps)不支援tuple seed，第一個draw就`TypeError`崩潰；②baseline
+複合分數用`weighted_zscore_composite({sid: d}, ...)`逐檔（單一股票dict）
+呼叫，內部橫斷面z-score`groupby("date")`每組只剩1檔股票，std必為NaN，
+複合分數全部變NaN，導致`TRAIN/VAL mean_ic=+nan(n=0)`。兩個bug都已修好
+（seed改字串、baseline改對整個`data`字典一次呼叫），修完後baseline數字
+正確重現（TRAIN+0.0735/VAL+0.0826，跟`composite_zscore_v1.py`原始
+CHEAP_PASS數字完全一致），checkpoint機制正常運作，本輪內累積到10/300
+draws、行程持續正常運算無錯誤。**本輪因USD budget將近用盡收工，尚未
+結案**——下一輪執行`python research/composite_zscore_v1_random_control.py`
+會自動從checkpoint（10/300）接續（若checkpoint這次真的活過session邊界；
+若又消失則從0重跑，但至少bug已修好，不會再一次draw都跑不出來）。
+`is_holdout_consumed()`本輪確認仍為`False`，未修改任何凍結區檔案。
+
 ## 2026-09-04T00:15 — hypothesis_queue排程：#27隨機控制組(300draws)補checkpoint機制 — 未結案，已改善根基設施
 
 接手時發現上一輪背景啟動的`composite_zscore_v1_random_control.py`（無checkpoint
