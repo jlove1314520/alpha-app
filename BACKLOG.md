@@ -17,6 +17,12 @@
 
 ---
 
+## ✅ 2026-09-04凌晨（研究/驗證帽）管線校準探針：結論(乙)檢定力不足→cheap gate樣本100→300
+
+見`research/CALIBRATION_PROBE.md`。要點：100檔樣本對|IC|≈0.03弱訊號漏殺率60%（20組子樣本）；
+300檔清楚過關；`factor_ic.SAMPLE_SIZE`改300；TRIALS_LEDGER #77/#79/#91/#47/#52/#34標未定；
+馬拉松下一輪TW軌先用300檔重跑`portfolio_multifactor_v2`。暫停規則已解除（甲.2）。
+
 ## ✅ 2026-09-04凌晨（開發帽）乙.4/乙.5：App接本機即時伺服器（SSE）＋lightweight-charts
 
 詳見`PROGRESS.md`同日條目、`PENDING_QUEUE.md`「乙.4/乙.5補充」區塊。smoke test 23項全PASS
@@ -64,6 +70,25 @@ cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等�
    啟動器＋Windows工作排程器任務，開機/開盤前自動拉起，否則手機端永遠連不到。
 8. **美股IBKR 1分K**：需先查證`reqHistoricalData()`與`ibkr_quotes.py`現有短命連線是否
    衝突（或改成常駐訂閱後用tick聚合，跟台股同一套），確認前維持501。
+9. **籌碼分頁免費層第二單位（需提案核准）**：(a)股權分散／千張大戶持股比例週變化
+   ——FinMind `TaiwanStockHoldingSharesPer`（週資料），建議新增`.github/scripts/
+   fetch_holding_dispersion.py`只抓自選股＋三榜前100名、一週一次、寫`data/holding_
+   dispersion.json`；(b)借券賣出——TWSE openapi `exchangeReport/TWT93U`（借券賣出
+   餘額，每日），併進`update_margin_maintenance.py`同一次MI_MARGN流程或獨立腳本；
+   兩者都要掛`market.yml`步驟（PAT無workflow scope，留working tree）。本機對FinMind
+   曾被IP封鎖，(a)只能在Actions上實測。(c)均價試算目前只有外資版、以收盤價概算，
+   等逐日資料累積到≥20日再評估是否有意義。
+10. **籌碼分點層——卡付費資料源，待使用者決定**（使用者2026-09-02指令二）：券商分點
+    進出、關鍵分點、特定券商（秘密買賣超）、分點均價，免費拿不到（FinMind分點是
+    sponsor付費／永豐Shioaji無分點／TWSE狂爬會觸封鎖＋ToS灰色，2026-09-02已探勘證實
+    掛驗證碼不可行）。可行選項：付費FinMind sponsor或富果分點API。**不得為了有畫面
+    而用非分點資料假裝成分點。**
+11. **籌碼類訊號驗證紀律（寫進設計）**：分點/主力/法人籌碼屬擁擠且爭議方法，未來要走
+    `signal_ledger`校準「能否預測扣成本後報酬」；App已固定顯示「非投資建議、跟大戶
+    不等於獲利、大戶也可能出貨」（`#chip-disclaimer`）。
+12. **`ibkr_quotes.py`沒有任何Windows排程任務**（2026-09-04查明，quotes_ibkr.json停在
+    09-02 23:25的真正原因）：要不要建`AlphaIbkrQuotes`（需IB Gateway常開、美股盤中
+    每N分鐘）由總司令決定；`run-ibkr-quotes-cycle.ps1`已改成盤中不commit。
 
 ---
 

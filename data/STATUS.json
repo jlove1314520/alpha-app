@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-04T02:34:10.059099+08:00",
-  "latest_commit": "ad19f9b",
+  "updated_at": "2026-09-04T03:06:13.528651+08:00",
+  "latest_commit": "130df4e",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -124,18 +124,18 @@
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-09-02T10:43:31+00:00",
-      "records": 1990,
+      "generated_at": "2026-09-03T18:23:34+00:00",
+      "records": 197,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
-      "detail": "queried=2352 matched=1990 trading_window=False",
-      "status": "stale"
+      "detail": "queried=209 matched=197 trading_window=False",
+      "status": "ok"
     },
     {
       "path": "data/quotes_us.json",
-      "generated_at": "2026-09-02T22:01:14+00:00",
+      "generated_at": "2026-09-03T18:23:40+00:00",
       "records": 6,
       "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
-      "detail": "queried=6 matched=6 trading_window=False market_session=post extended_hours_matched=6",
+      "detail": "queried=6 matched=6 trading_window=True market_session=regular extended_hours_matched=6",
       "status": "ok"
     },
     {
@@ -220,10 +220,9 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-04T02:34:15+08:00",
+    "checked_at": "2026-09-04T03:06:18+08:00",
     "any_overdue": true,
     "overdue_names": [
-      "台股盤中報價（GitHub Actions quotes.yml）",
       "美股盤中報價（GitHub Actions quotes.yml）",
       "美股即時報價（本機IBKR）",
       "大盤融資維持率（market.yml）"
@@ -234,8 +233,8 @@
         "name": "台股盤中報價（GitHub Actions quotes.yml）",
         "file": "data/quotes_tw.json",
         "owner": "GitHub Actions",
-        "status": "overdue",
-        "last_data_at": "2026-09-02T18:43+08:00",
+        "status": "ok",
+        "last_data_at": "2026-09-04T02:23+08:00",
         "expected_at_or_after": "2026-09-03T13:00+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"
@@ -255,8 +254,8 @@
         "file": "data/quotes_us.json",
         "owner": "GitHub Actions",
         "status": "overdue",
-        "last_data_at": "2026-09-03T06:01+08:00",
-        "expected_at_or_after": "2026-09-04T02:04+08:00",
+        "last_data_at": "2026-09-04T02:23+08:00",
+        "expected_at_or_after": "2026-09-04T02:36+08:00",
         "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"
       },
@@ -266,7 +265,7 @@
         "owner": "本機排程",
         "status": "overdue",
         "last_data_at": "2026-09-02T23:25+08:00",
-        "expected_at_or_after": "2026-09-04T02:04+08:00",
+        "expected_at_or_after": "2026-09-04T02:36+08:00",
         "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "只有使用者這台機器開著IB Gateway才會更新"
       },
@@ -499,10 +498,10 @@
     "note": "各資料源目前的請求節流/斷路狀態（≥3秒間隔+收到428/403封鎖2小時，2026-08-28新增，見BACKLOG.md「資料源禮儀」）。blocked=true代表目前所有腳本都會拒絕對這個來源發送請求，不是故障，是主動禮讓。",
     "sources": {
       "finmind": {
-        "blocked": false,
-        "blocked_remaining_min": null,
-        "block_reason": null,
-        "blocked_at": null
+        "blocked": true,
+        "blocked_remaining_min": 111.9,
+        "block_reason": "HTTP 402 {\"msg\":\"Requests reach the upper limit. https://finmindtrade.com/\",\"status\":402,\"token_tail\":\"\"}",
+        "blocked_at": "2026-09-03T18:58:13.408520+00:00"
       },
       "twse_openapi": {
         "blocked": false,

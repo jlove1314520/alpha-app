@@ -237,15 +237,16 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   （commit `8aad0d4`：🛑區塊整段換成「✅暫停規則解除」，明訂每輪工作單位必須是
   組合策略層級推進，單因子IC只允許作為組合成分替換候選的前置檢查；並要求
   馬拉松開工先讀`CALIBRATION_PROBE.md`的校準結論）
-- [~] **甲.3** 管線校準探針（正式登記執行）：12-1動能benchmark過同一套
+- [x] **甲.3**（**已完成，結論(乙)檢定力不足——樣本太小；已修管線SAMPLE_SIZE 100→300、#77/#79/#91/#47/#52/#34標未定，完整見`research/CALIBRATION_PROBE.md`**）管線校準探針（正式登記執行）：12-1動能benchmark過同一套
   cheap gate+gauntlet，判定管線正常(甲)還是檢定力不足(乙)，回報結論；
   若(乙)要回頭把先前N<30的FAIL標「未定」——**執行中**：
   `research/calibration_probe_momentum_12_1.py`（新增）四段：A標準100檔cheap
   gate／B檢定力診斷（null sd、80%檢定力最小可偵測IC）／C 300檔大樣本＋20組
   100檔子樣本漏殺率／D組合層gauntlet縮影（v2引擎、等權、季/月頻、隨機對照30次、
   成本1x/2x/3x）。結論寫`research/CALIBRATION_PROBE.md`。
-- [ ] **甲.4** 解除暫停後：通過完整gauntlet要進forward-paper前才停下
-  提案，死路記墓園續跑（沿用既有紀律，不必額外改檔案）
+- [x] **甲.4** 解除暫停後：通過完整gauntlet要進forward-paper前才停下
+  提案，死路記墓園續跑（沿用既有紀律，不必額外改檔案）——**已在
+  `MARATHON_PROTOCOL.md`第0節新版第4點重申，無其他改動**
 - [x] **乙.1** Phase 1冷熱分離：shioaji_quotes.py/ibkr_quotes.py盤中只
   更新記憶體不commit，收盤後一天commit一次——**已完成**（commit `6ad70f5`）：
   `shioaji_quotes.py`新增`INTRADAY_GIT_PUSH=False`，盤中`_flush_and_push()`
@@ -476,7 +477,18 @@ commit、假資料零容忍寧可空狀態、流程重於盈虧、動`index.html
 ## 佇列（2026-09-02凌晨，隔夜批次進行中收到，使用者原話全文，排在隔夜
 批次之後處理，使用者自己也明講「排在隔夜其他項之後、不影響馬拉松」）
 
-- [ ] **App 台股新增「籌碼」分頁（免費層今晚做，分點層登錄待付費決策）**
+- [~] **App 台股新增「籌碼」分頁（免費層今晚做，分點層登錄待付費決策）**——
+  **2026-09-04凌晨完成第一單位（commit `130df4e`）**：個股頁籌碼分頁新增
+  「三大法人逐日／累計買賣超」表（外資/投信/自營/合計/累計，讀既有
+  `stock_detail.json` institutional.history，目前5個交易日、每日排程會變長）、
+  「外資估算成本」（淨買超日張數×當日收盤加權概算，明標「估算、非精確成本」，
+  有走勢圖時畫成priceLine）、籌碼免責文字（非投資建議／跟著大戶不等於獲利／
+  大戶也可能出貨／尚未經signal_ledger校準）；融資融券變化本來就有。smoke
+  check 26，24項全PASS。**未做、已登記BACKLOG提案**：股權分散/千張大戶週變化
+  （FinMind `TaiwanStockHoldingSharesPer`）、借券賣出（TWSE `TWT93U`）——都要
+  新的Actions抓取腳本＋market.yml步驟（PAT地雷），且這台機器對FinMind曾被封鎖
+  無法本機實測，依「提案先於執行」先提案；分點層已登錄BACKLOG「卡付費資料源、
+  待使用者決定」。
 
   **查證發現（處理前，2026-09-02凌晨）**：這個任務比字面上看起來大很多，
   誠實記錄，不要低估：

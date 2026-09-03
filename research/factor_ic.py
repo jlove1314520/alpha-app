@@ -40,7 +40,10 @@ from validation import holdout
 
 FORWARD_HORIZON = 20  # trading days
 SAMPLE_SEED = 20260822
-SAMPLE_SIZE = 100
+# 2026-09-04（管線校準探針結論(乙)，見CALIBRATION_PROBE.md）：100→300。100檔樣本對
+# |IC|≈0.03的文獻等級弱訊號檢定力只有四~五成（20組隨機100檔子樣本漏殺率60%），300檔
+# 的80%檢定力最小可偵測|IC|從0.038降到0.021。seed不變，前100檔跟舊樣本完全相同。
+SAMPLE_SIZE = 300
 START_DATE = "2010-01-01"
 SNAPSHOT_START = "2015-01-01"
 N_SHUFFLES = 1000  # raised from 200 (2026-08-22 Cowork review) so a Bonferroni-corrected

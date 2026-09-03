@@ -16,6 +16,25 @@
 
 ---
 
+## 2026-09-04凌晨（研究帽→驗證帽）— 甲.1~甲.4：SPEC確認、暫停規則解除、管線校準探針結論(乙)；乙.1盤中不push；籌碼分頁第一單位
+
+- **甲.1/甲.2**（`8aad0d4`）：SPEC狀態「已確認（2026-09-03總司令）」；`MARATHON_PROTOCOL.md`
+  🛑暫停區塊整段換成解除規則，主軸改多因子組合策略迭代，馬拉松開工先讀`CALIBRATION_PROBE.md`。
+- **甲.3校準探針**（`calibration_probe_momentum_12_1.py`，21分鐘）：12-1動能在標準100檔樣本
+  邊緣過關（percentile 92.2）；300檔清楚過關（99.4）；**20組隨機100檔子樣本漏殺率60%**；
+  80%檢定力最小可偵測|IC| 100檔=0.038、300檔=0.021。組合層單因子動能在80檔看不見
+  （VAL輸隨機，alpha p=0.98），但台股動能文獻上本就偏弱，此項不單獨作為證據。
+  **結論(乙)：檢定力不足，樣本太小、null分布正常。** 已做：`factor_ic.SAMPLE_SIZE`
+  100→300；TRIALS_LEDGER #77/#79/#91（TW）、#47/#52（US）、#34（FUT）改標未定；
+  `portfolio_multifactor_v2`的p=0.053不再視為「差一點」，等300檔重跑（下一輪TW軌第一個
+  工作單位）。
+- **乙.1**（`6ad70f5`）：`shioaji_quotes.py`盤中不commit（`INTRADAY_GIT_PUSH=False`），收盤
+  一次；查明`ibkr_quotes.py`根本沒有排程任務；`run-ibkr-quotes-cycle.ps1`盤中不commit。
+- **籌碼分頁第一單位**（`130df4e`）：三大法人逐日／累計表、外資估算成本priceLine、免責文字，
+  smoke 24項PASS；第二單位（千張大戶/借券）與分點層登記BACKLOG提案。
+
+---
+
 ## 2026-09-04凌晨（開發帽）— 乙.4/乙.5：App接本機即時伺服器（SSE）＋個股頁lightweight-charts，並補使用者三個修正
 
 **做了什麼（commit `49a0ead`）**：
