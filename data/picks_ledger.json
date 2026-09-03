@@ -2,7 +2,7 @@
   "meta": {
     "created_at": "2026-08-28T01:44:36.415088+08:00",
     "schema_note": "前瞻選股台帳（非回測）：每個snapshot是三榜其中一榜在某個data_asof的Top20快照，寫入後不可回頭修改內容（見already_snapshotted()）。returns.t5/t20/t60/t120由update_picks_ledger_returns.py（骨架，2026-08-28新增）在對應的未來交易日回填，回填前恆為null——App顯示時null代表「還沒到回填時間點」，不是資料遺失。",
-    "last_snapshot_at": "2026-09-03T07:29:22.644095+08:00",
+    "last_snapshot_at": "2026-09-03T19:47:08.085924+08:00",
     "total_snapshots": 20
   },
   "snapshots": [

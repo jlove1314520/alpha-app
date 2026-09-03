@@ -1,14 +1,11 @@
 {
-  "fetched_at": "2026-09-02T23:28:18+00:00",
+  "fetched_at": "2026-09-03T11:46:07+00:00",
   "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
     "close": 46164.72,
     "change_pct": 1.67,
     "sparkline": [
-      43360.66,
-      44611.6,
-      44396.7,
       44225.91,
       44928.76,
       45120.72,
@@ -24,13 +21,13 @@
       45169.46,
       45832.62,
       45975.22,
+      46331.45,
       46128.47,
-      46948.72
+      46948.72,
+      46164.72,
+      45857.66
     ],
     "sparkline_60d": [
-      45070.94,
-      43502.78,
-      44704.44,
       43225.54,
       43149.46,
       44169.04,
@@ -86,8 +83,11 @@
       45169.46,
       45832.62,
       45975.22,
+      46331.45,
       46128.47,
-      46948.72
+      46948.72,
+      46164.72,
+      45857.66
     ]
   },
   "sectors": [
@@ -278,63 +278,64 @@
     }
   ],
   "tpex": {
-    "date": "20260902",
-    "close": 406.96,
-    "change": -3.81,
-    "change_pct": -0.9275263529469048,
+    "date": "20260903",
+    "close": 395.25,
+    "change": -11.71,
+    "change_pct": -2.8774326715156286,
     "sparkline": [
       410.77,
-      406.96
+      406.96,
+      395.25
     ]
   },
   "tx_futures": {
     "contract_month": "202609",
-    "last": 47209.0,
-    "change": 1232.0,
-    "change_pct": 2.68,
-    "settlement_price": 47201.0,
+    "last": 46189.0,
+    "change": -1012.0,
+    "change_pct": -2.14,
+    "settlement_price": 46165.0,
     "trading_session": "一般"
   },
   "futures": {
     "TX": {
       "contract_month": "202609",
-      "last": 47209.0,
-      "change": 1232.0,
-      "change_pct": 2.68,
-      "settlement_price": 47201.0,
+      "last": 46189.0,
+      "change": -1012.0,
+      "change_pct": -2.14,
+      "settlement_price": 46165.0,
       "trading_session": "一般"
     },
     "MTX": {
       "contract_month": "202609",
-      "last": 47217.0,
-      "change": 1240.0,
-      "change_pct": 2.7,
-      "settlement_price": 47201.0,
+      "last": 46182.0,
+      "change": -1019.0,
+      "change_pct": -2.16,
+      "settlement_price": 46165.0,
       "trading_session": "一般"
     },
     "TE": {
       "contract_month": "202609",
-      "last": 3003.5,
-      "change": 90.35,
-      "change_pct": 3.1,
-      "settlement_price": 3005.0,
+      "last": 2926.55,
+      "change": -78.45,
+      "change_pct": -2.61,
+      "settlement_price": 2927.6,
       "trading_session": "一般"
     },
     "TF": {
       "contract_month": "202609",
-      "last": 3393.4,
-      "change": 64.4,
-      "change_pct": 1.93,
-      "settlement_price": 3393.4,
+      "last": 3410.6,
+      "change": 17.2,
+      "change_pct": 0.51,
+      "settlement_price": 3410.6,
       "trading_session": "一般"
     }
   },
   "institutional": {
-    "date": "20260902",
-    "foreign_net_lots": -334832.2,
-    "trust_net_lots": 49805.8,
-    "dealer_net_lots": -511466.7,
-    "total_net_lots": -796493.1
+    "date": "20260903",
+    "foreign_net_lots": -130629.1,
+    "trust_net_lots": 29300.2,
+    "dealer_net_lots": -552143.1,
+    "total_net_lots": -653471.9
   },
   "institutional_history": [
     {
@@ -378,6 +379,13 @@
       "trust_net_lots": 49805.8,
       "dealer_net_lots": -511466.7,
       "total_net_lots": -796493.1
+    },
+    {
+      "date": "20260903",
+      "foreign_net_lots": -130629.1,
+      "trust_net_lots": 29300.2,
+      "dealer_net_lots": -552143.1,
+      "total_net_lots": -653471.9
     }
   ]
 }
