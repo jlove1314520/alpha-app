@@ -13,6 +13,37 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T04:53 — hypothesis_queue排程接續（#27複合z-score第2關） — 上一輪（陳舊鎖檔held by pid 20592）背景行程存活到checkpoint 122/300後結束，本輪已重新背景啟動（PID 1869，25分鐘預算），確認存活+仍在載入階段，收工留給下一輪接續
+
+取得具名鎖時發現陳舊鎖（held by pid 20592, 30.1分鐘），研判上一輪已
+異常結束（未commit）。查`data/composite_zscore_v1_random_control_
+checkpoint.json`：draws已從上一輪心跳的100/300推進到**122/300**
+（`Get-Process python`確認上一輪行程已死，checkpoint機制再次驗證有效，
+存活期間確實有累積進度，不是白跑）。本輪判斷維持既有策略（reload成本
+~20分鐘遠高於每輪重啟的固定成本，不重啟只等待），用
+`CZC_TIME_BUDGET_SECONDS=1500`（25分鐘）重新背景啟動
+`composite_zscore_v1_random_control.py`（nohup+disown，PID 1869），
+等待約3分鐘後確認行程仍存活（`ps aux`可見）且log顯示仍在
+`load_sample_with_factors()`載入階段（尚未進入draw迴圈輸出），符合
+已知~20分鐘reload行為、非卡死。**本輪不繼續同步等待**（避免單輪
+無限期阻塞），收工讓行程在OS層背景繼續累積，下一輪先查checkpoint
+是否已到300再決定判CHEAP_PASS/FAIL或繼續等待。
+
+## 2026-09-04T03:53 — hypothesis_queue排程接續（#27複合z-score第2關） — 背景行程重啟，checkpoint 100/300
+
+接手時確認上一輪背景行程（PID 34408）已死（`Get-Process python`查無），
+checkpoint `data/composite_zscore_v1_random_control_checkpoint.json`
+已從上一輪心跳的30/300推進到**100/300**（該行程存活到某個時間點後
+才被session邊界終止，不是bug，是「不重啟只觀察」策略的預期結果）。
+本輪判斷：既然checkpoint機制已驗證有效（不重算已完成的draws），直接
+用較大時間預算（`CZC_TIME_BUDGET_SECONDS=1500`，25分鐘）重新背景啟動
+`composite_zscore_v1_random_control.py`，涵蓋約20分鐘的資料重新載入
+成本後應還能再累積若干draws。本輪內等待這次背景執行完成或達到時間
+預算上限，再依checkpoint最終進度決定：滿300則正式判定percentile
+CHEAP_PASS/FAIL並更新`HYPOTHESIS_QUEUE.md`/`TRIALS_LEDGER.md`；未滿則
+記錄進度，收工留給下一輪接續（維持「重啟成本(~20分鐘reload)遠高於
+等待成本」的判斷，不因為單輪要等25分鐘就提前放棄）。
+
 ## 2026-09-04 03:23 — `hypothesis_queue`排程接續#27（多因子z-score複合評分）第2關 — 確認背景行程這次真的活過session邊界，checkpoint進度10→30/300，本輪不重啟只觀察
 
 上一輪具名鎖是陳舊鎖（held by pid 31248, 29.9分鐘）被本輪回收，研判上一輪

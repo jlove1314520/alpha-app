@@ -2054,3 +2054,16 @@ control.py`（`CHECKPOINT_PATH`+`deadline`時間預算+每10筆draw落盤，
 2026-09-04 03:23條目。下一輪先查`data/composite_zscore_v1_random_
 control_checkpoint.json`是否已到300 draws，到了就直接判percentile
 CHEAP_PASS/FAIL，沒到且行程還活著就繼續等，行程死了才重跑。
+
+**狀態更新（2026-09-04T04:53排程接續，仍未結案）**：接手時發現陳舊鎖檔
+（held by pid 20592, 30.1分鐘），研判上一輪異常結束未commit。checkpoint
+已從上一輪心跳的100/300推進到**122/300**（行程存活期間確實有累積進度，
+`Get-Process python`確認舊行程已死）。本輪維持「不重啟、等待」策略，用
+`CZC_TIME_BUDGET_SECONDS=1500`重新背景啟動（PID 1869，nohup+disown），
+等待約3分鐘後確認仍存活且處於已知的~20分鐘資料載入階段（未進入draw
+迴圈輸出，非卡死），本輪不繼續同步等待、收工讓行程於OS層背景繼續，
+完整分析見`MARATHON_LOG.md`2026-09-04T04:53條目。**下一輪待辦**：先查
+`data/composite_zscore_v1_random_control_checkpoint.json`是否已到300
+draws，到了就直接判percentile CHEAP_PASS/FAIL並更新
+`TRIALS_LEDGER.md`，沒到且行程還活著就沿用同一策略繼續等待，行程死了
+才重跑（已確認checkpoint機制正確，重跑只需接續而非從頭）。
