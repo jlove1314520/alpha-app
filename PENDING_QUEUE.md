@@ -97,10 +97,18 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   既有地雷要在回報裡講清楚**
 - [ ] **P0三-一.3** 回報今天quotes_tw/market_tw排程實際落地次數，
   workflow_dispatch補跑一次
-- [ ] **P0三-二** 修根因：20分鐘閘門在收盤後誤丟今日收盤價（`index.html`
-  `sinopacQuote()`/`ibkrQuote()`）+ 全App現價顯示規則統一（首頁自選股/
-  市場頁/個股頁/交易頁/籌碼頁）+ smoke test「收盤後自選股顯示價==
-  quotes_sinopac的last」
+- [x] **P0三-二** 修根因：20分鐘閘門在收盤後誤丟今日收盤價——**已完成**：
+  根因是`sinopacQuote()`/`ibkrQuote()`對`connected`/20分鐘閘門不分盤中
+  盤後一律套用，收盤後`connected`變`false`直接return null，整條intraday
+  資料被略過，退回完全不同管線的prev_close/EOD。新增`_shouldTreatAsLive()`
+  優先信任後端`market_status`欄位、`_intradaySourceFresh()`統一套用到
+  四處（自選股/個股頁頭部/市場頁大盤指數/市場頁期貨/市場頁美股指數）。
+  個股頁頭部價格原本完全沒接Shioaji/IBKR即時報價，這次一併接上。
+  smoke check 23（收盤後顯示價==quotes_sinopac的last）+ check 22修正，
+  23項全PASS，Playwright截圖確認2330正確顯示2390+「今日收盤」badge。
+  commit `420914a`已push。**交易頁/籌碼頁查證後沒有這個bug模式**（交易頁
+  是demo假資料或走IBKR order server帳戶摘要，籌碼頁是三大法人/融資
+  彙總數字，都不經過sinopacQuote()/ibkrQuote()這條路徑）。
 - [ ] **P0三-三** 監控補洞：STATUS.json排程異常判定、設定頁逾期標紅、
   7個資料檔補generated_at+source、package.json接上smoke_test.mjs
 - [ ] **P0三-四** 只提案不動工：live-data分支 vs B20雲端中繼提前，
