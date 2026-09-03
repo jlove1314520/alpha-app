@@ -1319,6 +1319,44 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!data||!data.fetched_at)return null;
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
   }
+  // 2026-09-03新增（P0根因修復）：判斷一個ISO時間戳是否落在指定時區的
+  // 「今天」——用來讓收盤後的sinopacQuote()/ibkrQuote()知道「這筆資料雖然
+  // 已經超過20分鐘沒更新，但確實是今天收盤時記錄的，不是隔夜留下的舊值」，
+  // 用en-CA locale（輸出YYYY-MM-DD）方便直接字串比較，不用手動組日期。
+  function _isSameLocalDate(iso,tz){
+    if(!iso)return false;
+    const d=new Date(iso);
+    if(isNaN(d.getTime()))return false;
+    const fmt=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'});
+    return fmt.format(d)===fmt.format(new Date());
+  }
+  // 2026-09-03新增：判斷「這份INTRADAY_*資料現在應不應該當作盤中即時
+  // 串流看待」——**優先信任後端自己回報的`market_status`欄位**（
+  // shioaji_quotes.py會誠實寫"open"/"closed"，這是最準確的第一手signal，
+  // 完全對應使用者P0裁示原文「當報價檔market_status為closed...」）；只有
+  // 在這個欄位不存在時（目前ibkr_quotes.py還沒有這個欄位，見PENDING_QUEUE
+  // P0三-一.3待查）才退回用前端算的交易時段當估計值，不是無條件都用前端
+  // 時鐘猜。
+  function _shouldTreatAsLive(data,fallbackInWindow){
+    if(data&&typeof data.market_status==='string')return data.market_status==='open';
+    return fallbackInWindow;
+  }
+  // 統一判斷「這份INTRADAY_*資料現在能不能拿來當現價顯示」，取代原本
+  // 市場頁大盤指數/期貨卡各自重複一份幾乎一樣的connected&&age<=STALE_MIN
+  // 檢查——每一處都有同一個bug（收盤後20分鐘閘門把今天的收盤價誤判成
+  // 過期，退回顯示別的資料源的prev_close/EOD，見sinopacQuote()/
+  // ibkrQuote()同一輪P0修復的完整根因說明）。盤中沿用原本的新鮮度閘門
+  // （偵測即時流是否卡住失效）；收盤後只要資料確實是今天的就一律接受，
+  // 標記isTodayClose讓呼叫端知道要顯示「今日收盤」而不是「即時」。
+  function _intradaySourceFresh(data,tz,fallbackInWindow){
+    if(!data)return {fresh:false,isTodayClose:false};
+    if(_shouldTreatAsLive(data,fallbackInWindow)){
+      const age=intradayAgeMin(data);
+      return {fresh:!!data.connected&&age!=null&&age<=INTRADAY_STALE_MIN,isTodayClose:false};
+    }
+    const dataIsToday=_isSameLocalDate(data.fetched_at,tz);
+    return {fresh:dataIsToday,isTodayClose:dataIsToday};
+  }
   // 2026-09-01新增，同日改版：IBKR本機Gateway報價（research/ibkr_quotes.py，
   // 本機排程觸發，不經過GitHub Actions——見該檔案docstring「掛排程」）。
   // **只接美股**（台股維持現有TWSE來源，IBKR對台股只有延遲、沒有增益，
@@ -1328,16 +1366,34 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 只覆蓋這9個標的（IBKR腳本的既知限制，見ibkr_quotes.py docstring
   // 「已知限制」：沒辦法讀瀏覽器localStorage的真實自選股清單），其餘股票
   // 照舊完全不受影響。
+  // 2026-09-03修正（P0根因，使用者實測回報：收盤後今天的收盤tick被20分鐘
+  // 閘門誤丟成過期，畫面退回EOD/prev_close，看起來像整個管線沒更新——真正
+  // 根因不是接錯欄位，是這個閘門不分盤中/盤後一律套用）：**20分鐘新鮮度
+  // 閘門只在「現在應該是盤中」時生效**，用來偵測「即時串流卡住/掛掉」；
+  // 一旦已經過了收盤時間，只要這筆資料的`fetched_at`確實是「今天」記錄的
+  // （不是隔夜/更早留下的），就一律接受當作「今日收盤」顯示，不管距離
+  // 現在已經過了幾小時——這才是使用者想看到的「收盤後這支股票收在多少」，
+  // 不是被閘門擋掉退回另一條資料源的prev_close/EOD值。回傳物件新增
+  // `isTodayClose`旗標，供`intradayTag()`判斷要顯示「今日收盤」而非
+  // 「即時(tick)」或「延遲N分」。
   function ibkrQuote(code){
-    if(!INTRADAY_IBKR||!INTRADAY_IBKR.connected)return null;
+    if(!INTRADAY_IBKR)return null;
     const age=intradayAgeMin(INTRADAY_IBKR);
-    if(age==null||age>INTRADAY_STALE_MIN)return null;
+    const live=_shouldTreatAsLive(INTRADAY_IBKR,isUsTradingWindowNow());
+    const dataIsToday=_isSameLocalDate(INTRADAY_IBKR.fetched_at,'America/New_York');
+    if(live){
+      if(!INTRADAY_IBKR.connected)return null;
+      if(age==null||age>INTRADAY_STALE_MIN)return null;
+    }else if(!dataIsToday){
+      return null; // 真的是隔夜留下的舊資料，誠實退回EOD，不是bug
+    }
     const q=INTRADAY_IBKR.quotes&&INTRADAY_IBKR.quotes[code];
     if(!q||q.last==null)return null;
     return {
       price:q.last, prev_close:q.close,
       change:(q.close!=null?q.last-q.close:null), change_pct:q.change_pct,
       ageMin:age, source:'ibkr', dataType:q.data_type,
+      isTodayClose:!live&&dataIsToday,
     };
   }
   // 2026-09-01新增：Shioaji本機報價（research/shioaji_quotes.py），跟
@@ -1345,15 +1401,23 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 台股一律走這裡，美股一律走ibkrQuote()，兩者不重疊（見shioaji_quotes.py
   // /ibkr_quotes.py各自docstring）。
   function sinopacQuote(code){
-    if(!INTRADAY_SINOPAC||!INTRADAY_SINOPAC.connected)return null;
+    if(!INTRADAY_SINOPAC)return null;
     const age=intradayAgeMin(INTRADAY_SINOPAC);
-    if(age==null||age>INTRADAY_STALE_MIN)return null;
+    const live=_shouldTreatAsLive(INTRADAY_SINOPAC,isTwTradingWindowNow());
+    const dataIsToday=_isSameLocalDate(INTRADAY_SINOPAC.fetched_at,'Asia/Taipei');
+    if(live){
+      if(!INTRADAY_SINOPAC.connected)return null;
+      if(age==null||age>INTRADAY_STALE_MIN)return null;
+    }else if(!dataIsToday){
+      return null; // 真的是隔夜留下的舊資料，誠實退回EOD，不是bug
+    }
     const q=INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes[code];
     if(!q||q.last==null)return null;
     return {
       price:q.last, prev_close:q.close,
       change:(q.close!=null?q.last-q.close:null), change_pct:q.change_pct,
       ageMin:age, source:'sinopac', dataType:q.data_type,
+      isTodayClose:!live&&dataIsToday,
     };
   }
   async function loadIntradayQuotes(){
@@ -1763,11 +1827,21 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 日線，不會因為加了這個功能反而讓沒有近即時資料的股票顯示變差。
   function intradayTag(iq){
     if(!iq)return '';
-    const mins=Math.max(1,Math.round(iq.ageMin));
     if(iq.source==='ibkr'||iq.source==='sinopac'){
       const label=iq.source==='ibkr'?'IBKR':'Shioaji';
+      // 2026-09-03新增：收盤後但資料確實是今天的（見ibkrQuote()/sinopacQuote()
+      // 的isTodayClose判斷），標「今日收盤」+資料時間戳，不再顯示「約N分前」
+      // 這種暗示「盤中即時」的措辭（收盤後過了幾小時，講「N分前」會誤導）。
+      if(iq.isTodayClose){
+        const tz=iq.source==='ibkr'?'America/New_York':'Asia/Taipei';
+        const src=iq.source==='ibkr'?INTRADAY_IBKR:INTRADAY_SINOPAC;
+        const ts=src&&src.fetched_at?fmtTzHHMM(new Date(src.fetched_at),tz):'';
+        return `<span style="color:var(--ink-3);margin-left:4px">· ${label} 今日收盤${ts?' '+ts:''}</span>`;
+      }
+      const mins=Math.max(1,Math.round(iq.ageMin));
       return `<span style="color:var(--warn);margin-left:4px">· ${label} ${intradayDataTypeLabel(iq.dataType)} 約${mins}分前</span>`;
     }
+    const mins=Math.max(1,Math.round(iq.ageMin));
     return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
   }
   async function hydrateHome(){
@@ -2142,8 +2216,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     await ensureIbkrQuotes();
     const idx=(MARKET_US_CACHE&&MARKET_US_CACHE.indices)||{};
     const order=[['^DJI','道瓊工業指數'],['^GSPC','S&P 500'],['^IXIC','NASDAQ'],['^SOX','費城半導體指數']];
-    const ibkrAge=intradayAgeMin(INTRADAY_IBKR);
-    const ibkrFresh=INTRADAY_IBKR&&INTRADAY_IBKR.connected&&ibkrAge!=null&&ibkrAge<=INTRADAY_STALE_MIN;
+    const {fresh:ibkrFresh,isTodayClose}=_intradaySourceFresh(INTRADAY_IBKR,'America/New_York',isUsTradingWindowNow());
     return order.map(([id,label])=>{
       const ibkrQ=ibkrFresh?INTRADAY_IBKR.quotes[id]:null;
       if(ibkrQ&&ibkrQ.last!=null){
@@ -2153,8 +2226,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         // 2026-09-02新增：ibkr_quotes.py對IBKR無訂閱的指數（道瓊/費半）現在會
         // 自己改抓Yahoo寫進同一份quotes_ibkr.json，data_type多一種"YAHOO_
         // DELAYED"，來源標籤要老實反映「這其實是Yahoo不是IBKR」，不能沿用
-        // 「IBKR xxx」這個前綴誤導使用者。
-        const srcLabel=ibkrQ.data_type==='YAHOO_DELAYED'?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`;
+        // 「IBKR xxx」這個前綴誤導使用者。2026-09-03新增：收盤後但資料確實
+        // 是今天的（isTodayClose），標「今日收盤」不再講「延遲N分」這種
+        // 暗示盤中即時的措辭。
+        const srcLabel=isTodayClose
+          ?`IBKR 今日收盤`
+          :(ibkrQ.data_type==='YAHOO_DELAYED'?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`);
         return {html:idxRowHtml(label,srcLabel,item),date:INTRADAY_IBKR.fetched_at};
       }
       return {html:idxRowHtml(label,'Yahoo Finance（每日收盤快照）',idx[id]),date:idx[id]&&idx[id].as_of};
@@ -2165,11 +2242,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // intradayQuote()同一段說明。回傳{srcLabel,item}供idxRowHtml()使用，
   // sparkline借用既有TWSE來源的（Shioaji這支腳本沒有近20日走勢序列）。
   function taiexRowSource(twCache){
-    const age=intradayAgeMin(INTRADAY_SINOPAC);
-    const fresh=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.connected&&age!=null&&age<=INTRADAY_STALE_MIN;
+    const {fresh,isTodayClose}=_intradaySourceFresh(INTRADAY_SINOPAC,'Asia/Taipei',isTwTradingWindowNow());
     const q=fresh?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes.TAIEX:null;
     if(q&&q.last!=null){
-      return {srcLabel:'Shioaji 即時',item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.taiex&&twCache.taiex.sparkline}};
+      const srcLabel=isTodayClose?'Shioaji 今日收盤':'Shioaji 即時';
+      return {srcLabel,item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.taiex&&twCache.taiex.sparkline}};
     }
     return {srcLabel:'TWSE',item:twCache.taiex};
   }
@@ -2199,12 +2276,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // CSV來源（market_tw.json::futures）。
   const FUT_ID_TO_SINOPAC_KEY={TX:'TXF_NEAR',MTX:'MXF_NEAR',TE:'EXF_NEAR',TF:'FXF_NEAR'};
   function shioajiFutRowSource(appFutId,fallbackFut){
-    const age=intradayAgeMin(INTRADAY_SINOPAC);
-    const fresh=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.connected&&age!=null&&age<=INTRADAY_STALE_MIN;
+    const {fresh,isTodayClose}=_intradaySourceFresh(INTRADAY_SINOPAC,'Asia/Taipei',isTwTradingWindowNow());
     const key=FUT_ID_TO_SINOPAC_KEY[appFutId];
     const q=(fresh&&key)?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes[key]:null;
     if(q&&q.last!=null){
-      return {fut:{last:q.last,change_pct:q.change_pct},srcLabel:'Shioaji 即時 · 近月合約'};
+      const srcLabel=isTodayClose?'Shioaji 今日收盤 · 近月合約':'Shioaji 即時 · 近月合約';
+      return {fut:{last:q.last,change_pct:q.change_pct},srcLabel};
     }
     return {fut:fallbackFut,srcLabel:null};
   }
@@ -2778,13 +2855,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('rev-chart-yoy').innerHTML='';document.getElementById('rev-chart-labels').innerHTML='';
     document.getElementById('trend-chart').innerHTML='<div class="note">載入中…</div>';
     if(us){
-      const px=await fm('USStockPrice',code,_d(35));
-      if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
+      const [px]=await Promise.all([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes()]);
+      // 2026-09-03新增（P0全App現價掃描）：個股頁頭部價格原本完全略過
+      // IBKR即時/收盤報價，一律顯示FinMind日線最後一筆——現在改成跟
+      // 首頁自選股/市場頁同一套「先試intradayQuote()、查不到才退回FinMind」
+      // 規則，個股頁看到的現價才會跟其他分頁一致。
+      const iq=intradayQuote(code,true);
+      if(iq&&iq.price!=null){
+        const cls=(iq.change||0)>=0?'pos':'neg';
+        const pe=document.getElementById('sh-price');pe.textContent='$'+nf(iq.price);pe.className=cls;
+        const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(2)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
+        if(px.length)document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
+        setTxt('trend-note',`來源：IBKR${intradayTag(iq)}`);
+      }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
         const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(last.Close);pe.className=cls;
         const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(2)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
         document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
-        setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤`);
+        setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價）`);
       }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
       ['kn-per','kn-pbr','kn-yield','kn-yoy','kn-turnover','kn-vol-mult'].forEach(id=>setTxt(id,'—'));
       setTxt('kn-liquidity-flag','');
@@ -2811,16 +2899,27 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 快取整理出的快照。價格走勢/融資/三大法人這幾塊這輪還沒有替換掉FinMind，
     // 維持原樣（會誠實顯示連線失敗，不是假資料）。
     const [px,fund,inst]=await Promise.all([
-      fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code)]);
+      fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);
     const per=fund.ratios?[fund.ratios]:[];
     const rev=fund.month_revenue?fund.month_revenue.map(r=>({revenue_year:r.year,revenue_month:r.month,revenue:r.revenue,yoyPre:r.yoy!=null?r.yoy*100:null})):[];
     loadFinancials(code);
-    if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
+    // 2026-09-03新增（P0全App現價掃描）：個股頁頭部價格原本完全略過Shioaji
+    // 即時/收盤報價，一律顯示FinMind日線最後一筆——現在改成跟首頁自選股/
+    // 市場頁同一套「先試intradayQuote()、查不到才退回FinMind」規則（沒在
+    // Shioaji既有5檔預設清單裡的股票會自然查不到，正常退回FinMind，不是bug）。
+    const iq=intradayQuote(code,false);
+    if(iq&&iq.price!=null){
+      const cls=(iq.change||0)>=0?'pos':'neg';
+      const pe=document.getElementById('sh-price');pe.textContent=nf(iq.price);pe.className=cls;
+      const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
+      if(px.length)document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.close),v=>nf(v));
+      setTxt('trend-note',`來源：Shioaji${intradayTag(iq)}`);
+    }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;
       const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
       document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.close),v=>nf(v));
-      setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（原始未還原股價）`);
+      setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價，原始未還原股價）`);
     }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
     loadMarginChip(code,px);
     if(px.length){
@@ -3737,7 +3836,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-03.0103';
+  const APP_VERSION='2026-09-03.2200';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

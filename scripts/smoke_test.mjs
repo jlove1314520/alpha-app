@@ -796,10 +796,56 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("22. Shioaji逐筆tick串流誠實標示：data_type=REALTIME_TICK正確顯示「即時(tick)」badge",
     tickBadgeErrors.length === 0, tickBadgeErrors.join("; "));
 
+  // 23.【2026-09-03新增，P0根因回歸測試，使用者原話「收盤後自選股每檔
+  // 顯示價==quotes_sinopac對應last，不等即FAIL」】模擬market_status=
+  // closed但fetched_at是「今天」的情境（收盤後、20分鐘閘門修復前的
+  // bug重現條件），驗自選股卡顯示的價格數字精確等於quotes_sinopac.last，
+  // 不是prev_close也不是別的資料源退回值——這是這次P0修復要防止無聲
+  // 復發的核心斷言，比check 22（只驗badge文字）更直接驗數字本身。
+  const closedTodayPriceErrors = [];
+  try {
+    const todayIso = new Date().toISOString();
+    const fakeClosedToday = {
+      fetched_at: todayIso, connected: false, market_status: "closed", error: null,
+      quotes: {
+        "2330": { last: 2390.0, close: 2385.0, change_pct: 0.21, data_type: "REALTIME_TICK",
+                  volume_this_tick: 0, total_volume: 45000, exchange: "TSE" },
+      },
+    };
+    await page.route("**/data/quotes_sinopac.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeClosedToday) })
+    );
+    await page.evaluate(() => {
+      const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]");
+      if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); }
+      INTRADAY_SINOPAC = null;
+    });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1500);
+    const priceText = await page.evaluate(() => {
+      const row = [...document.querySelectorAll("#wl-list .swipe-row")]
+        .find(r => r.querySelector('[data-flash-code="2330"]'));
+      return row ? row.querySelector('[data-flash-code="2330"]').textContent : null;
+    });
+    const wlHtml = await page.evaluate(() => document.getElementById("wl-list")?.innerHTML || "");
+    if (priceText === null) closedTodayPriceErrors.push("找不到2330的價格元素");
+    else if (priceText.replace(/,/g, "") !== "2390") {
+      closedTodayPriceErrors.push(`收盤後自選股顯示價應該等於quotes_sinopac.last=2390，實際顯示"${priceText}"（懷疑退回prev_close=2385或其他資料源）`);
+    }
+    if (!wlHtml.includes("今日收盤")) {
+      closedTodayPriceErrors.push(`收盤後badge應該顯示「今日收盤」，片段：${wlHtml.slice(0, 300)}`);
+    }
+    await page.unroute("**/data/quotes_sinopac.json**");
+  } catch (e) {
+    closedTodayPriceErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("23. 收盤後自選股顯示價必須等於quotes_sinopac的last（P0根因回歸防線，防止20分鐘閘門誤丟今日收盤價復發）",
+    closedTodayPriceErrors.length === 0, closedTodayPriceErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
