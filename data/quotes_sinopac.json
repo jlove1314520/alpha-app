@@ -1,104 +1,73 @@
 {
-  "fetched_at": "2026-09-01T23:11:27.179066+08:00",
-  "checked_at": "2026-09-03T08:29:03.521955+08:00",
+  "fetched_at": "2026-09-03T08:31:25.538158+08:00",
   "connected": true,
-  "market_status": "closed",
+  "market_status": "open",
   "error": null,
   "quotes": {
-    "2330": {
-      "last": 2440.0,
-      "bid": 2435.0,
-      "ask": 2440.0,
-      "close": 2405.0,
-      "change_pct": 1.45,
-      "data_type": "REALTIME",
-      "exchange": "TSE"
+    "1513": {
+      "last": 165.0,
+      "close": 165.0,
+      "change_pct": 0.0,
+      "volume_this_tick": 2,
+      "total_volume": 0,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-09-03T08:31:15.896867",
+      "_raw_chg_type": 3,
+      "exchange": "TSE",
+      "bid": 164.5,
+      "ask": 165.0
     },
-    "2454": {
-      "last": 4315.0,
-      "bid": 4315.0,
-      "ask": null,
-      "close": 3925.0,
-      "change_pct": 9.93,
-      "data_type": "REALTIME",
+    "3231": {
+      "bid": 187.0,
+      "ask": 187.5,
+      "last": 187.0,
+      "close": 185.5,
+      "change_pct": 0.8,
+      "volume_this_tick": 121,
+      "total_volume": 0,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-09-03T08:31:21.714896",
+      "_raw_chg_type": 2,
       "exchange": "TSE"
     },
     "2317": {
-      "last": 256.0,
-      "bid": 255.5,
-      "ask": 256.0,
-      "close": 250.0,
-      "change_pct": 2.4,
-      "data_type": "REALTIME",
+      "bid": 252.5,
+      "ask": 253.0,
+      "last": 253.0,
+      "close": 251.0,
+      "change_pct": 0.79,
+      "volume_this_tick": 256,
+      "total_volume": 0,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-09-03T08:31:22.516685",
+      "_raw_chg_type": 2,
       "exchange": "TSE"
     },
-    "1513": {
-      "last": 166.0,
-      "bid": 166.0,
-      "ask": 166.5,
-      "close": 164.0,
-      "change_pct": 1.21,
-      "data_type": "REALTIME",
+    "2454": {
+      "bid": 4400.0,
+      "ask": 4445.0,
+      "last": 4445.0,
+      "close": 4275.0,
+      "change_pct": 3.97,
+      "volume_this_tick": 123,
+      "total_volume": 0,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-09-03T08:31:23.324162",
+      "_raw_chg_type": 2,
       "exchange": "TSE"
     },
-    "3231": {
-      "last": 182.0,
-      "bid": 182.0,
-      "ask": 182.5,
-      "close": 178.0,
-      "change_pct": 2.24,
-      "data_type": "REALTIME",
-      "exchange": "TSE"
-    },
-    "TAIEX": {
-      "last": 46948.72,
-      "bid": null,
-      "ask": null,
-      "close": 46128.47,
-      "change_pct": 1.78,
-      "data_type": "REALTIME",
+    "2330": {
+      "last": 2360.0,
+      "close": 2385.0,
+      "change_pct": -1.04,
+      "volume_this_tick": 1065,
+      "total_volume": 0,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-09-03T08:31:24.322613",
+      "_raw_chg_type": 4,
       "exchange": "TSE",
-      "label": "加權指數"
-    },
-    "TXF_NEAR": {
-      "last": 46834.0,
-      "bid": 46832.0,
-      "ask": 46836.0,
-      "close": 47201.0,
-      "change_pct": -0.78,
-      "data_type": "REALTIME",
-      "exchange": "TAIFEX",
-      "label": "台指期近月"
-    },
-    "MXF_NEAR": {
-      "last": 46835.0,
-      "bid": 46833.0,
-      "ask": 46834.0,
-      "close": 47201.0,
-      "change_pct": -0.78,
-      "data_type": "REALTIME",
-      "exchange": "TAIFEX",
-      "label": "小型台指期近月"
-    },
-    "EXF_NEAR": {
-      "last": 2975.15,
-      "bid": 2973.25,
-      "ask": 2976.35,
-      "close": 3005.0,
-      "change_pct": -0.99,
-      "data_type": "REALTIME",
-      "exchange": "TAIFEX",
-      "label": "電子期近月"
-    },
-    "FXF_NEAR": {
-      "last": 3470.0,
-      "bid": 3410.0,
-      "ask": 3469.8,
-      "close": 3393.4,
-      "change_pct": 2.26,
-      "data_type": "REALTIME",
-      "exchange": "TAIFEX",
-      "label": "金融期近月"
+      "bid": 2360.0,
+      "ask": 2385.0
     }
   }
 }
