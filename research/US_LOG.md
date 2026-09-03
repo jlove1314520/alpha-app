@@ -1052,3 +1052,21 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 **下一步（留給下一輪或後續輪次）**：把這個引擎接上真實美股資料——需要（a）用`us_universe.py`抽一個夠大的樣本（考量FinMind額度，可能要跨多輪回補，比照`backfill_universe.py`對TW軌的做法）；（b）用SPY（`load_dev("USStockPrice","SPY",...)`，`deep_dive_f_us_low_vol.py`已有先例）當交易日曆來源＋CAPM迴歸的市場基準；（c）決定US版的多因子組合成分（`US_LEADS.md`目前累積的CHEAP_PASS/FAIL紀錄，尤其`f_us_low_vol`/`f_us_momentum_12m`已在多個tier測試中FAIL，不建議直接沿用，需要先看還有哪些因子通過過cheap gate）；（d）寫一份`US_PORTFOLIO_STRATEGY_SPEC.md`（比照TW`PORTFOLIO_STRATEGY_SPEC.md`的精神，交易規則寫死不能事後偷改）。**這輪只交付引擎本身＋合成資料驗證，沒有動用任何真實資料或API額度，也沒有產生任何候選判定，所以`TRIALS_LEDGER.md`／`US_LEADS.md`本輪無新增列**（純基礎建設，屬協定第1c節，不是1a/1b假說測試）。
 
 詳見`REPORT.md`第329輪條目、`US_MARATHON_STATE.md`本輪記錄、`us_portfolio_backtest.py`（新增，含`__main__`自我測試，可重複執行）。
+
+---
+
+## 2026-09-04T07:03+08:00 — 馬拉松第333輪：`us_portfolio_backtest.py`接上真實資料首跑（引擎接線驗證，非新候選）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 05:07（第329輪，最舊）／TW 06:10（第331輪）／FUT 06:33（第332輪）——依輪替選US。先讀`CALIBRATION_PROBE.md`結論（依`MARATHON_PROTOCOL.md`第0節第3點），確認結論(乙)不影響US軌本輪工作方向（US軌尚無任何通過cheap gate的候選，不受該結論的重新分類規則牽動）。
+
+**接續第329輪「下一步」(a)+(b)**：新增`us_portfolio_pilot_real_data.py`，把`us_portfolio_backtest.py`引擎接上真實資料，**零新增FinMind API呼叫**——直接掃`data/raw/`底下既有`USStockPrice__*__1990-01-01__2024-12-31.parquet`快取（前幾輪`us_factor_ic.py`/`us_factor_ic_by_size.py`/`deep_dive_f_us_low_vol*.py`陸續抓過的），找到138檔已快取美股（不含SPY）＋SPY本身，透過`us_price_series()`/`load_dev()`命中快取讀取。SPY同時當交易日曆來源（沿用`deep_dive_f_us_low_vol.py`的`_load_market_df()`，未重寫）＋CAPM迴歸市場基準（重用`portfolio_backtest_v2.py`的`alpha_significance()`，未重寫，證實TW版函式對`equity_curve`/`market_df`的欄位需求本來就跟軌道無關，可直接跨軌重用）。
+
+**訊號函式刻意選用`f_us_momentum_12m`——這是已經定案FAIL的因子**（`US_LEADS.md`#2/#5/#8/#11，四個樣本版本全部FAIL），選它純粹是因為`prepare_us_factors()`輸出已經有這欄、零額外程式碼，**不是要重新挑戰這個因子的判定**。腳本docstring跟本則log都明寫：這輪的唯一主張是「引擎在138檔真實股票+真實SPY日曆上能跑完不crash、輸出數字合理」，是接線驗證，不是策略判定，**不寫入`TRIALS_LEDGER.md`**（沿用第329輪「純基礎建設無候選判定」的先例）。
+
+**結果**：138檔快取中119檔可用（19檔被`prepare_us_factors()`的<260天門檻濾掉，多為近期上市/資料較短的名字，如AMTM/ANTA/BRIA等）。TRAIN(2015-2020,季頻,Top15)：58筆交易、total_return+132.55%、MDD-34.51%、Sortino0.748、beta+0.867、alpha_ann+6.21%（p=0.242，不顯著）。VAL(2021-2024)：71筆交易、total_return+62.13%、MDD-47.92%、Sortino0.508、beta+0.902、alpha_ann+6.03%（p=0.691，不顯著）。**兩期alpha皆不顯著、beta接近1（非市場中性但方向合理，跟`f_us_low_vol`深挖那種beta翻負值的異常警訊形狀不同）**——這個「看起來普通、不亮眼」的結果本身是健康訊號：用一個已知FAIL的因子接線測試，沒有意外跑出漂亮數字，代表引擎沒有隱藏bug把雜訊訊號誤判成有效策略，跟流程紀律（`CLAUDE.md`「復盤原則：流程重於盈虧」）一致。`unresolved_at_end`兩期皆為空list（無未平倉掛單卡住），全部交易正確結算。
+
+`is_holdout_consumed()`確認`False`（全程走`load_dev()`既有快取，零新增API呼叫）。原始輸出：`round333_us_portfolio_pilot.log`（本機暫存輸出，跟`research/`底下其他既有`*_run.log`檔案同慣例，不納入本次commit）。
+
+**下一步**：US軌組合回測地基（引擎+真實資料接線）至此完成，接下來若要有真正能用的多因子組合策略，**卡點在US軌至今沒有任何一個通過cheap gate且深挖後仍成立的因子**——純price-only三因子家族（低波動/動能/反轉）已全部結案（見`US_LEADS.md`目前狀態），下一個可能突破口是需要PIT基本面資料的因子家族（價值/品質），這需要先確認SEC EDGAR資料源可行性（`CLAUDE.md`提過既有資料源之一，只能參考公開API文件重新寫，不能動`alpha-data/fetch.py`本身）；或者擴大`us_universe.py`樣本規模（比照`CALIBRATION_PROBE.md`「檢定力不足」的教訓，US軌至今每次因子測試都只用27-40檔隨機子樣本，遠小於本輪138檔的引擎測試規模，換更大樣本重測既有FAIL因子也是合理下一步）。`US_PORTFOLIO_STRATEGY_SPEC.md`（第329輪「下一步」(d)）待有至少一個PASS候選後再寫，先寫規格書但沒有候選可填會本末倒置。
+
+詳見`REPORT.md`第333輪條目、`US_MARATHON_STATE.md`本輪記錄、`us_portfolio_pilot_real_data.py`（新增，含`main()`可重複執行）。
