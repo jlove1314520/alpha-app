@@ -13,6 +13,29 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T05:54 — hypothesis_queue排程接續（#27複合z-score第2關） — 誤判PID 883已死重複啟動PID 1126、發現後立即kill 1126避免checkpoint雙寫，確認883持續存活於170/300無資料損毀，收工留給下一輪
+
+鎖檔非陳舊（LOCK_ACQUIRED）。接手時用`tasklist`（Windows原生指令）查
+python.exe回報「無符合準則的工作」，誤判上一輪04:52啟動的PID 883已
+自然到期死亡（其3600秒時間預算理論到期時間~05:52.5跟檢查時刻幾乎重疊），
+因此重新用`CZC_TIME_BUDGET_SECONDS=3600 nohup ... &`啟動了新行程
+（PID 1126）。**啟動後用`ps aux`（MSYS/Git-Bash指令，非`tasklist`）交叉
+確認才發現PID 883其實仍存活**（`tasklist`偵測不到Git-Bash背景啟動的
+python行程，是這次誤判的根因——之後幾輪若要判斷行程存活，優先用
+`ps aux`/`ps -p <pid>`，不要只信`tasklist`）。發現兩個行程同時對同一份
+checkpoint檔案背景運算後，立即`kill -9 1126`終止我誤啟動的那個（1126
+啟動後僅約2-3分鐘、仍卡在~20分鐘資料載入階段、尚未寫入任何checkpoint，
+確認`data/composite_zscore_v1_random_control_checkpoint.json`
+draw_records數量在kill前後皆為**170**，未被雙寫破壞），保留原本合法
+的PID 883繼續獨自運算，並清除誤啟動行程留下的空log檔
+`composite_zscore_v1_random_control_run.log`（未commit進repo）。
+**下一輪待辦**：確認存活用`ps -p 883`而非`tasklist`；查
+`data/composite_zscore_v1_random_control_checkpoint.json`是否已到
+300 draws（PID 883時間預算3600秒，啟動於05:27，理論到期~06:27，
+中途若自然結束且draws未滿則需再次背景啟動接續，記得用`ps`交叉確認
+而非只信`tasklist`)；到300就直接判percentile CHEAP_PASS/FAIL並更新
+`TRIALS_LEDGER.md`/`HYPOTHESIS_QUEUE.md`#27。
+
 ## 2026-09-04T05:27 — hypothesis_queue排程接續（#27複合z-score第2關） — 接手時PID 1869背景行程仍存活且checkpoint從122進步到150/300，監控中途行程自然結束於155/300（25分鐘時間預算到期，非當掉），已用CZC_TIME_BUDGET_SECONDS=3600重新背景啟動（PID 883），確認無crash後收工留給下一輪
 
 鎖檔非陳舊（LOCK_ACQUIRED），接手時上一輪（04:53）啟動的背景行程

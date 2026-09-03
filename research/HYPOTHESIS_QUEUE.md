@@ -2079,3 +2079,18 @@ draws，到了就直接判percentile CHEAP_PASS/FAIL並更新
 教訓是時間預算不能設太小（25分鐘會在reload+多輪draw運算後不夠、提前
 正常退出），這次拉大到1小時應能減少「進度還在推進但被時間預算切斷」
 的無謂重啟次數。完整見`MARATHON_LOG.md`2026-09-04T05:27條目。
+
+**狀態更新（2026-09-04T05:54排程接續，仍未結案，新發現存活偵測方法
+盲點）**：接手時誤用Windows原生`tasklist`查python.exe回報「無符合準則
+的工作」，誤判上一輪05:27啟動的PID 883（3600秒預算，理論到期時間跟
+本輪檢查時刻幾乎重疊）已死，因此重複啟動了一個新行程（PID 1126）。
+啟動後改用`ps aux`（MSYS/Git-Bash指令）交叉確認才發現**PID 883其實
+仍存活**——`tasklist`偵測不到Git-Bash背景啟動的python行程，是這次
+誤判的根因。發現雙行程同時對同一份checkpoint運算後立即`kill -9
+1126`，確認`data/composite_zscore_v1_random_control_checkpoint.json`
+draw_records數量在kill前後皆為**170**（1126啟動後僅約2-3分鐘、仍卡在
+~20分鐘資料載入階段，尚未寫入任何checkpoint），未被雙寫破壞，保留
+PID 883繼續獨自運算。**下一輪起，判斷背景行程存活一律用`ps -p <pid>`
+/`ps aux`，不要只信`tasklist`**——這是本輪唯一的方法論修正，記進本
+段落供下一輪與其他馬拉松軌道參考（同一台機器上其他背景長跑腳本也
+可能中同一個坑）。完整見`MARATHON_LOG.md`2026-09-04T05:54條目。
