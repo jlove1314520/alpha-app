@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 329 輪 · 2026-09-04T05:07+08:00 · US（暫停規則已解除，US軌恢復實質工作）· 新增`us_portfolio_backtest.py`（US軌組合回測地基，Top-N長多/月頻季頻換股引擎，成本改接`validation/us_costs.py`） · 合成假資料自我測試PASS（零API呼叫）：6筆交易、+23.26%報酬、MDD-12.96%、Sortino0.984、hard_stop 2筆（含engineered崩盤案例），buy/sell腳位reg_fee正負性斷言全數通過；純基礎建設無候選判定，`TRIALS_LEDGER.md`/`US_LEADS.md`本輪無新增列
+
 ## 第 328 輪 · 2026-09-04T04:31+08:00 · FUT（偵測到上一輪陳舊鎖檔，pid 15340持有30.1分鐘，上一輪疑似失敗，已自動回收）· 查證CALIBRATION_PROBE.md指令「#34同理各自重跑」對FUT軌是否可行 · 不可行——TX期貨無橫斷面維度可比照股票擴大樣本，延長歷史期數會動用holdout（FULL_HISTORY_END已等於VAL_END）、提高N_SHUFFLES已測過(round57)且方向相反(92.0→89.60下降)，判定TRIALS_LEDGER.md#34維持FAIL不列入待重跑名單，TW/US的#77/#79/#91/#47/#52不受影響
 
 ## 第 327 輪 · 2026-09-04T04:15+08:00 · TW · 修好safe_pool_ids()真bug（exact cache key，非檔名前綴）；network-guard驗證1138檔安全池零live呼叫；1138檔全量執行process仍不明原因中途消失；改跑300檔子樣本quick scan · portfolio_multifactor_v2 VALIDATION期6組合alpha p值全數遠高於0.05（0.2159~0.6451，原80檔最佳組合0.053），判定仍FAIL但證據更站得住腳，方向符合CALIBRATION_PROBE.md「小樣本假邊緣通過」結論

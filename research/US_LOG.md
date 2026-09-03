@@ -1036,3 +1036,19 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 **提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約215輪、跨度約197.9小時（約8.25天），需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。**
 
 詳見`REPORT.md`第324輪條目、`US_MARATHON_STATE.md`本輪記錄。
+
+---
+
+## 2026-09-04T05:07+08:00 — 馬拉松第329輪：新增`us_portfolio_backtest.py`（US軌組合回測地基，第一個實質工作單位）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 02:32（第324輪，最舊）／TW 04:15（第327輪）／FUT 04:31（第328輪，最新）——依輪替選US。確認暫停規則已於2026-09-03解除（`MARATHON_PROTOCOL.md`第0節本文，總司令裁示已寫入`8aad0d4`），本輪起US軌恢復依協定第5節「US可先建立跟TW同構的組合回測地基」的工作方向，不再是「無工作可做而跳過」。
+
+**現況盤點**：US軌已有因子層地基（`us_universe.py`/`us_pit.py`/`us_factors.py`/`us_factor_ic.py`/`validation/us_costs.py`），但沒有TW`portfolio_backtest_v2.py`對應的Top-N/換股頻率組合回測引擎——`backtest/engine.py`（TW版）的`buy_leg_rate()`/`sell_leg_rate()`直接呼叫`validation/costs.py`的TW專屬flat-rate簽名，跟`validation/us_costs.py`需要`price`/`shares`的簽名不相容（`deep_dive_f_us_low_vol.py`docstring已記錄過同一個不相容性，當時的解法是另寫一個one-off long-short迴圈，不是改`backtest/engine.py`本身）。
+
+**本輪工作**：新增`us_portfolio_backtest.py`，仿照`backtest/engine.py`的day-by-day walk機制（`EXECUTION_LAG_DAYS`直接從`backtest.engine`匯入不重新定義、mark-to-market、`assert_no_holdout_leakage()`），但獨立成一個模組，四點跟TW版本不同且都在docstring明確揭露：(1)不做漲跌停鎖定判斷（`us_costs.py`本身文件已載明美股沒有台股式±10%機制）；(2)成本用`us_costs.py`公開常數在每筆成交當下即時算（SEC fee/FINRA TAF不是scale-invariant的百分比，不能像TW版預先算好一個固定leg rate）；(3)`cost_multiplier`（1x/2x/3x）只套用在滑價跟`commission_per_share`，不套用在SEC fee/FINRA TAF（那是現行法定費率，不是這個專案不確定要壓力測試的摩擦假設）；(4)欄位需求最小化為`date`+`adj_close`（沒有漲跌停判斷就不需要open/high/low）。
+
+**驗證**：本輪只用合成假資料（6檔手刻價格路徑、其中一檔在第60天強制-30%觸發停損）跑`__main__`自我測試，**零FinMind API呼叫**（協定第4節額度紀律精神——沒理由為了驗證引擎機制本身去燒API額度，合成資料就能免費驗證）。測試結果：6筆交易、total_return+23.26%、MDD-12.96%、Sortino0.984、hard_stop出場2筆（預期CRASH_A那檔至少1筆，實際2筆，符合預期下界）；額外斷言驗證buy腳位reg_fee恆為0、sell腳位reg_fee恆為正、費用恆不為負，全數PASS。`is_holdout_consumed()`確認`False`。
+
+**下一步（留給下一輪或後續輪次）**：把這個引擎接上真實美股資料——需要（a）用`us_universe.py`抽一個夠大的樣本（考量FinMind額度，可能要跨多輪回補，比照`backfill_universe.py`對TW軌的做法）；（b）用SPY（`load_dev("USStockPrice","SPY",...)`，`deep_dive_f_us_low_vol.py`已有先例）當交易日曆來源＋CAPM迴歸的市場基準；（c）決定US版的多因子組合成分（`US_LEADS.md`目前累積的CHEAP_PASS/FAIL紀錄，尤其`f_us_low_vol`/`f_us_momentum_12m`已在多個tier測試中FAIL，不建議直接沿用，需要先看還有哪些因子通過過cheap gate）；（d）寫一份`US_PORTFOLIO_STRATEGY_SPEC.md`（比照TW`PORTFOLIO_STRATEGY_SPEC.md`的精神，交易規則寫死不能事後偷改）。**這輪只交付引擎本身＋合成資料驗證，沒有動用任何真實資料或API額度，也沒有產生任何候選判定，所以`TRIALS_LEDGER.md`／`US_LEADS.md`本輪無新增列**（純基礎建設，屬協定第1c節，不是1a/1b假說測試）。
+
+詳見`REPORT.md`第329輪條目、`US_MARATHON_STATE.md`本輪記錄、`us_portfolio_backtest.py`（新增，含`__main__`自我測試，可重複執行）。
