@@ -1879,6 +1879,24 @@ consumed()`確認仍為`False`。`git status`確認殘留變更（`data/
 rate_limit_state.json`、`research/pit.py`及多個`.log`未追蹤檔案）
 跟前幾輪判斷一致，非本輪產生，不觸碰、不納入commit。
 
+**狀態（2026-09-03T12:29更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`排程接續
+回補，本批次一次補完剩餘全部）**：接續上一輪，執行`python research/
+backfill_margin_debt_market.py --batch-size 150`（背景執行，輪詢
+`research/data/raw_margin_debt_market/`檔案數量直到連續3次（60秒）
+數量不變才視為批次完成）。**成功補完剩餘全部88週（其中4週非交易日/
+無資料，正常現象），0錯誤0封鎖**。**累積進度：574→662/662週
+（86.7%→100.0%）——全範圍`2012-05-02~2024-12-31`（TRAIN+VAL）週頻
+回補正式完成，資料地基就緒**。**下一輪要做的事（不跳關，直接進第1關
+cheap gate，不用再回補）**：讀取`research/data/raw_margin_debt_market/`
+全部662個週檔，計算全市場總融資餘額20日/60日成長率，對TAIEX後續報酬
+與MDD做洗牌置換檢定（比照`turn_of_month_gate.py`同一套cheap gate
+框架：真實訊號 vs N≥100次隨機打亂時序的對照組，percentile需≥90.0
+門檻，train/val同號才算過），事前先鎖定判準（不能事後移動門柱）。
+本輪未寫入`alpha.db`、未修改任何凍結區檔案，`is_holdout_consumed()`
+確認仍為`False`。`git status`確認殘留變更（`data/rate_limit_state.json`、
+`research/pit.py`及多個`.log`未追蹤檔案）跟前幾輪判斷一致，非本輪
+產生，不觸碰、不納入commit。
+
 ---
 
 ### 27. 多因子「複合評分」策略（z-score blend，2026-09-03使用者裁示新增）
