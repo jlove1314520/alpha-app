@@ -208,6 +208,7 @@ def main():
 
     if filled:
         ledger.setdefault("meta", {})["last_returns_backfill_at"] = datetime.now(TW_TZ).isoformat()
+        ledger["meta"]["generated_at"] = ledger["meta"]["last_returns_backfill_at"]  # 2026-09-03（P0三-三.3）回填也算一次寫入
         LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
         print(f"回填完成：本輪新填 {filled} 個(snapshot, code, tN)欄位"
               f"（另有{skipped_stale_or_missing}個因價格資料過期/缺失跳過，留null等下次）")

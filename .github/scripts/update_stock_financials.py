@@ -307,6 +307,7 @@ def main():
 
     payload.setdefault("meta", {})
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
+    payload["meta"]["source"] = "TWSE openapi t187ap06_L_ci/t187ap07_L_ci（財報）+ TWSE T86/TPEx tpex_3insti_daily_trading（三大法人）+ TWSE MI_MARGN/TPEx tpex_mainboard_margin_balance（融資融券），各由market.yml不同步驟合併寫入"  # 2026-09-03（P0三-三.3）
     payload["meta"]["financials_source"] = "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)"
     payload["meta"]["financials_updated_count"] = income_updated
     payload["meta"]["financials_skipped_no_baseline_count"] = skipped_no_baseline

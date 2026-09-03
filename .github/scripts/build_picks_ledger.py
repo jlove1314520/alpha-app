@@ -144,6 +144,8 @@ def main():
         print(f"  {board} 板 {snap['snapshot_date']}：快照 {len(snap['picks'])} 檔")
 
     ledger["meta"]["last_snapshot_at"] = datetime.now(TW_TZ).isoformat()
+    ledger["meta"]["generated_at"] = ledger["meta"]["last_snapshot_at"]  # 2026-09-03（P0三-三.3）統一欄位名，跟其他資料檔一致
+    ledger["meta"]["source"] = ".github/scripts/build_picks_ledger.py（market.yml排程；讀scores.json/scores_momentum.json/scores_future.json三榜Top20+quotes_all_tw.json收盤價+market_tw.json大盤收盤）"
     ledger["meta"]["total_snapshots"] = len(ledger["snapshots"])
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")

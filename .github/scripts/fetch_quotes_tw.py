@@ -46,6 +46,15 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SCORES_PATH = REPO_ROOT / "scores.json"
+# 2026-09-03（P0三-一.3查證後修正）：scores.json自從改成全市場宇宙後有18,804列，其中
+# 16,453列是6位數權證代號、31列是帶字母的特別股——舊版直接把整份scores.json當查詢
+# 清單，變成一次查2,352個代號（48批×兩前綴）、sparkline逐檔打數千次，MIS回502整支
+# 腳本直接炸掉、Actions那邊更是卡到3.5小時佔住concurrency group、報價一整天沒落地。
+# 這裡回到檔頭docstring原本寫明的範圍（自選股+選股頁看得到的那些），三榜各取前
+# TOP_N_PER_BOARD名，並過濾掉權證/特別股（`_is_stock_code()`），全市場收盤價另有
+# quotes_all_tw.json負責，不是這支的工作。
+BOARD_SCORE_PATHS = [REPO_ROOT / "scores.json", REPO_ROOT / "scores_momentum.json", REPO_ROOT / "scores_future.json"]
+TOP_N_PER_BOARD = 100
 OUT_PATH = REPO_ROOT / "data" / "quotes_tw.json"
 
 # 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
@@ -108,19 +117,39 @@ MIS_URL = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
 TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公司基本資料，公司代號清單
 STOCK_DAY_URL = "https://www.twse.com.tw/exchangeReport/STOCK_DAY"  # 個股歷史日線（一次一檔一個月）
 TW_TZ = timezone(timedelta(hours=8))
+# 2026-09-03新增：sparkline附加抓取的總時間預算與連續失敗斷路（理由見main()迴圈註解）。
+# 這支每10分鐘排程一次，正常一輪1-3分鐘；sparkline最多給4分鐘，超過就停止新抓。
+SPARKLINE_TIME_BUDGET_SEC = 240
+SPARKLINE_MAX_CONSECUTIVE_FAILURES = 8
+
+
+def _is_stock_code(code: str) -> bool:
+    """只接受普通股/ETF代號：4位數字（普通股、0050這類ETF），或00開頭的5-6位數字
+    （00878這類ETF/ETN）。6位數權證（0xxxxx/7xxxxx）、帶字母的特別股（2887I）
+    一律排除——它們不是App自選股/選股頁會顯示的標的，只會把MIS查詢清單灌爆。"""
+    if not code or not code.isdigit():
+        return False
+    return len(code) == 4 or (len(code) in (5, 6) and code.startswith("00"))
 
 
 def load_universe_codes() -> list[str]:
     codes = set(DEFAULT_WATCHLIST)
-    if SCORES_PATH.exists():
+    for path in BOARD_SCORE_PATHS:
+        if not path.exists():
+            continue
         try:
-            data = json.loads(SCORES_PATH.read_text(encoding="utf-8"))
+            data = json.loads(path.read_text(encoding="utf-8"))
+            taken = 0
+            # scores*.json的stocks已依rank排序（rank=1在最前），取前TOP_N_PER_BOARD個合格代號
             for row in data.get("stocks", []):
                 code = row.get("code")
-                if code:
+                if code and _is_stock_code(code):
                     codes.add(code)
+                    taken += 1
+                    if taken >= TOP_N_PER_BOARD:
+                        break
         except Exception as e:
-            print(f"讀 scores.json 失敗（不影響繼續跑，只是少了這批代號）：{e}")
+            print(f"讀 {path.name} 失敗（不影響繼續跑，只是少了這批代號）：{e}")
     return sorted(codes)
 
 
@@ -153,6 +182,7 @@ def fetch_batch(codes: list[str], tse_codes: set[str] | None) -> list[dict]:
     這裡沿用同樣的教訓，改用 requests 就正常）。"""
     out = []
     batch_size = 50
+    failed_batches = 0
     headers = {
         "Referer": "https://mis.twse.com.tw/stock/index.jsp",
         "User-Agent": "Mozilla/5.0 (compatible; AlphaAppQuoteFetcher/1.0)",
@@ -167,10 +197,29 @@ def fetch_batch(codes: list[str], tse_codes: set[str] | None) -> list[dict]:
                 parts.append(f"tse_{c}.tw")
                 parts.append(f"otc_{c}.tw")
         ex_ch = "|".join(parts)
-        r = requests.get(MIS_URL, params={"ex_ch": ex_ch, "json": "1", "delay": "0"}, headers=headers, timeout=20)
-        r.raise_for_status()
-        data = r.json()
+        # 2026-09-03：MIS偶發502（本機實測），舊版raise_for_status直接讓整支腳本
+        # 失敗、已抓到的其他批次全白丟。改成同一批失敗先等3秒重試一次，再失敗就
+        # 跳過這一批繼續（記錄失敗批次數），全部批次都失敗才視為真故障往上拋。
+        data = None
+        for attempt in (1, 2):
+            try:
+                r = requests.get(MIS_URL, params={"ex_ch": ex_ch, "json": "1", "delay": "0"}, headers=headers, timeout=20)
+                r.raise_for_status()
+                data = r.json()
+                break
+            except Exception as e:
+                print(f"  MIS 第{i // batch_size + 1}批第{attempt}次失敗：{e}")
+                if attempt == 1:
+                    time.sleep(3)
+        if data is None:
+            failed_batches += 1
+            continue
         out.extend(data.get("msgArray", []))
+    total_batches = (len(codes) + batch_size - 1) // batch_size
+    if failed_batches:
+        print(f"MIS 共{total_batches}批，失敗{failed_batches}批（已跳過，不影響其他批次）")
+    if total_batches and failed_batches == total_batches:
+        raise RuntimeError(f"MIS 全部{total_batches}批都失敗，判定為真故障")
     return out
 
 
@@ -333,27 +382,46 @@ def main():
     today_str = now_tw.strftime("%Y-%m-%d")
     cache = load_sparkline_cache(list(quotes.keys()), today_str)
     fetched = cached = failed_sp = 0
+    # 2026-09-03（P0三-一.3查證後的修正）：GitHub Actions run 33754429235 卡在這個迴圈
+    # 超過3.5小時——當天第一次執行沒有快取，數百檔逐檔打STOCK_DAY，TWSE不回應時每檔
+    # 吃滿15秒timeout（＋3秒節流），數百檔×18秒就是好幾個小時，整支workflow被拖到
+    # 佔住concurrency group、後面每一輪排程都被cancelled、報價一整天沒落地。sparkline
+    # 只是附加功能，不能拖垮報價本身：這裡加「總時間預算」＋「連續失敗斷路」，超過
+    # 就停止新抓（已抓到的保留、沒抓到的這輪就沒有sparkline，App端本來就會當
+    # 「暫無走勢圖」處理），報價JSON照常寫出。
+    sparkline_started = time.monotonic()
+    consecutive_failures = 0
+    stopped_reason = None
     for code in quotes:
         if code in cache:
             quotes[code]["sparkline"] = cache[code]
             quotes[code]["sparkline_date"] = today_str
             cached += 1
             continue
+        if time.monotonic() - sparkline_started > SPARKLINE_TIME_BUDGET_SEC:
+            stopped_reason = f"超過時間預算{SPARKLINE_TIME_BUDGET_SEC}秒"
+            break
+        if consecutive_failures >= SPARKLINE_MAX_CONSECUTIVE_FAILURES:
+            stopped_reason = f"連續失敗{consecutive_failures}檔（來源疑似不回應/封鎖）"
+            break
         try:
             sp = fetch_sparkline_20d(code, now_tw)
             if sp:
                 quotes[code]["sparkline"] = sp
                 quotes[code]["sparkline_date"] = today_str
                 fetched += 1
+            consecutive_failures = 0
             time.sleep(0.15)  # 實測穩定節奏（見fetch_stock_day_month docstring），主要靠header不是靠慢
         except Exception as e:
             failed_sp += 1
+            consecutive_failures += 1
             # 這裡故意不用「・」（U+30FB）：本機Windows主控台cp950編碼曾經在這裡
             # 讓整支腳本直接crash（print本身丟UnicodeEncodeError，不是被try/except
             # 接住的那個例外）——GitHub Actions是UTF-8不會有事，但本機測試會，改用
             # 純ASCII的"-"比較保險，不影響其他地方原本就在用的「・」（那些沒出過事）。
             print(f"  - {code} sparkline 失敗（不影響報價本身）：{e}")
-    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔")
+    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔"
+          + (f"；提前停止新抓：{stopped_reason}（報價本身不受影響，未抓到的檔這輪沒有sparkline）" if stopped_reason else ""))
 
     data_type = "intraday" if n_live > 0 else ("prev_close" if quotes else "none")
     out = {

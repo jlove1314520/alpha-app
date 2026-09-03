@@ -1,5 +1,7 @@
 {
   "meta": {
+    "generated_at": "2026-08-27T20:27:18+08:00",
+    "generated_at_note": "2026-09-03回填：取自這個檔案最後一次git commit時間（build_company_info.py當時沒寫時間戳），不是重新產生；下次重跑腳本會寫入真正的產生時間",
     "source": "FinMind TaiwanStockInfo（research端本機parquet快取整理，一次性/不常變動）",
     "note": "供generate_scores_live.py顯示公司名稱/產業分類用，跟quotes_tw.json（僅自選股當下報價）用途不同、互不影響。",
     "industry_ambiguous_count": 603,

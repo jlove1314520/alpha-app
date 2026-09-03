@@ -306,6 +306,10 @@ def main():
         "ratio_pct": round(ratio, 2) if ratio is not None else None,
         "data_incomplete": data_incomplete,
         "incomplete_reason": incomplete_reason,
+        # 2026-09-03（P0三-三.3）：這個檔案頂層是list（App/舊解析器都依賴這個形狀，不改），
+        # 時間戳與來源改寫進每一筆record，最後一筆的generated_at就是整份檔案的產生時間。
+        "generated_at": datetime.now(TW_TZ).isoformat(),
+        "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
     }
     print(f"維持率估算：{record['ratio_pct']}%" if not data_incomplete else f"資料不完整：{incomplete_reason}")
 

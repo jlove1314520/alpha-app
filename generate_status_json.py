@@ -108,9 +108,11 @@ def describe_margin_maintenance(path: Path) -> dict:
     rows = json.loads(path.read_text(encoding="utf-8"))
     last = rows[-1] if rows else {}
     return {
-        "generated_at": last.get("date"),
+        # 2026-09-03（P0三-三.3）：每筆record現在帶generated_at/source（頂層仍是list，
+        # 不改形狀），優先用最後一筆的generated_at，舊資料退回date。
+        "generated_at": last.get("generated_at") or last.get("date"),
         "records": len(rows),
-        "source": "2026-08-27起改排程：TWSE官方MI_MARGN(逐股融資餘額)+STOCK_DAY_ALL(逐股收盤價)算擔保品市值；"
+        "source": last.get("source") or "2026-08-27起改排程：TWSE官方MI_MARGN(逐股融資餘額)+STOCK_DAY_ALL(逐股收盤價)算擔保品市值；"
                   "分母(全市場融資金額)仍用FinMind（唯一保留依賴，一天只呼叫一次，風險低）",
         "detail": f"ratio_pct={last.get('ratio_pct')} matched_stocks={last.get('matched_stocks')}（原本是alpha-data獨立目錄手動產生，"
                   "已改掛進market.yml排程，見update_margin_maintenance.py）",
@@ -195,10 +197,12 @@ def describe_company_info(path: Path) -> dict:
     meta = d.get("meta", {})
     companies = d.get("companies", {})
     return {
-        "generated_at": None,
+        # 2026-09-03（P0三-三.3）：build_company_info.py現在會寫generated_at；既有檔案
+        # 已回填「最後一次git commit時間」並在generated_at_note誠實註明來源。
+        "generated_at": meta.get("generated_at"),
         "records": len(companies),
         "source": meta.get("source"),
-        "detail": meta.get("industry_ambiguous_note", ""),
+        "detail": (meta.get("generated_at_note", "") + " " + meta.get("industry_ambiguous_note", "")).strip(),
     }
 
 
@@ -496,7 +500,7 @@ def fetch_workflow_runs() -> dict[str, dict]:
         if not path.startswith(".github/workflows/"):
             continue
         fname = path.split("/")[-1]
-        entry = {"name": w.get("name"), "last_run": None, "last_status": None}
+        entry = {"name": w.get("name"), "last_run": None, "last_status": None, "today_runs": None}
         try:
             rr = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/actions/workflows/{w['id']}/runs?per_page=1", timeout=15)
             rr.raise_for_status()
@@ -504,6 +508,20 @@ def fetch_workflow_runs() -> dict[str, dict]:
             if runs:
                 entry["last_run"] = runs[0].get("created_at")
                 entry["last_status"] = runs[0].get("conclusion") or runs[0].get("status")
+        except Exception:
+            pass
+        # 2026-09-03（P0三-三.1）：今天（台北日）各結論的次數——quotes.yml每10分鐘一次
+        # 卻一天只成功落地0次、其他都cancelled，這種「排程有在觸發但沒有落地」的
+        # 狀態光看last_status看不出來，要看分布。
+        try:
+            today_tw = datetime.now(TW_TZ).date().isoformat()
+            rr = requests.get(f"https://api.github.com/repos/{GITHUB_REPO}/actions/workflows/{w['id']}/runs?per_page=100&created={today_tw}", timeout=15)
+            rr.raise_for_status()
+            counts: dict[str, int] = {}
+            for run in rr.json().get("workflow_runs", []):
+                k = run.get("conclusion") or run.get("status") or "unknown"
+                counts[k] = counts.get(k, 0) + 1
+            entry["today_runs"] = {"date_tw": today_tw, "total": sum(counts.values()), **counts}
         except Exception:
             pass
         out[fname] = entry
@@ -528,8 +546,148 @@ def build_workflows() -> list[dict]:
             "schedule": schedule,
             "last_run": info.get("last_run"),
             "last_status": info.get("last_status"),
+            "today_runs": info.get("today_runs"),
         })
     return out
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-03（P0三-三.1）排程錯過時窗判定 schedule_health
+#
+# 背景：今天quotes.yml排程觸發了5次、成功落地0次（4次cancelled、1次卡3.5小時），
+# 手機一整天看的是前一天的資料，但STATUS.json/data_files的age-based門檻（24小時）
+# 要到隔天才會變stale——「盤中超過30分鐘沒落地」這種異常需要用「時窗」判定，
+# 不是用「檔案幾小時沒動」判定。這裡每條規則只回答一個問題：依這個排程的節奏，
+# 現在「應該」已經有多新的資料？實際資料時間戳有沒有達到？沒達到=overdue。
+#
+# 已知簡化（誠實揭露）：不扣國定假日——假日當天盤中規則會誤判overdue（跟
+# fetch_quotes_tw.py::is_tw_trading_window()同一個既有簡化）；App設定頁顯示時
+# 會附註這一點。
+# ---------------------------------------------------------------------------
+try:
+    from zoneinfo import ZoneInfo
+    NY_TZ = ZoneInfo("America/New_York")
+except Exception:  # 極舊環境沒有tzdata時退回固定-4（夏令），不讓整支腳本炸掉
+    NY_TZ = timezone(timedelta(hours=-4))
+TAIPEI_TZ = timezone(timedelta(hours=8))
+INTRADAY_MAX_GAP_MIN = 30
+
+
+def _parse_ts(val) -> datetime | None:
+    if not val:
+        return None
+    try:
+        ts = datetime.fromisoformat(str(val).replace("Z", "+00:00"))
+        return ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def _last_weekday_instant(now: datetime, tz, hour: int, minute: int, min_age: timedelta = timedelta(0)) -> datetime:
+    """回傳「最近一個週一至週五、且距現在至少min_age」的 tz 當地 hh:mm 時刻（UTC aware）。"""
+    local = now.astimezone(tz)
+    cand = local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    for _ in range(10):
+        if cand.weekday() < 5 and (now - cand.astimezone(timezone.utc)) >= min_age:
+            return cand.astimezone(timezone.utc)
+        cand -= timedelta(days=1)
+    return cand.astimezone(timezone.utc)
+
+
+def _in_session(now: datetime, tz, open_hm: tuple[int, int], close_hm: tuple[int, int]) -> bool:
+    local = now.astimezone(tz)
+    if local.weekday() >= 5:
+        return False
+    m = local.hour * 60 + local.minute
+    return open_hm[0] * 60 + open_hm[1] <= m < close_hm[0] * 60 + close_hm[1]
+
+
+def _intraday_rule(now: datetime, ts: datetime | None, tz, open_hm, close_hm) -> tuple[str, datetime, str]:
+    """盤中：資料時間戳距現在不得超過INTRADAY_MAX_GAP_MIN分鐘（開盤後前30分鐘寬限，
+    要求的是上一個收盤資料）；盤後/假日：至少要有最近一個交易日的收盤資料。"""
+    if _in_session(now, tz, open_hm, close_hm):
+        session_open = _last_weekday_instant(now, tz, *open_hm)
+        if now - session_open < timedelta(minutes=INTRADAY_MAX_GAP_MIN):
+            due = _last_weekday_instant(now, tz, *close_hm) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+            rule = f"開盤前{INTRADAY_MAX_GAP_MIN}分鐘寬限期：需有上一交易日收盤資料"
+        else:
+            due = now - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+            rule = f"盤中：資料不得超過{INTRADAY_MAX_GAP_MIN}分鐘未更新"
+    else:
+        due = _last_weekday_instant(now, tz, *close_hm) - timedelta(minutes=INTRADAY_MAX_GAP_MIN)
+        rule = "盤後/假日：需有最近一個交易日的收盤資料"
+    if ts is None:
+        return "missing", due, rule
+    return ("ok" if ts >= due else "overdue"), due, rule
+
+
+def _daily_rule(now: datetime, ts: datetime | None, tz, run_hm, grace_h: float) -> tuple[str, datetime, str]:
+    """每日排程：最近一個「已經過了grace_h小時」的平日排程時刻之後，必須有資料。"""
+    due = _last_weekday_instant(now, tz, *run_hm, min_age=timedelta(hours=grace_h))
+    rule = f"每個平日{run_hm[0]:02d}:{run_hm[1]:02d}（{getattr(tz, 'key', None) or 'UTC'}）排程，寬限{grace_h}小時"
+    if ts is None:
+        return "missing", due, rule
+    return ("ok" if ts >= due else "overdue"), due, rule
+
+
+def _file_ts(rel: str) -> datetime | None:
+    path = REPO_ROOT / rel
+    if not path.exists():
+        return None
+    try:
+        d = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if isinstance(d, list):
+        last = d[-1] if d else {}
+        return _parse_ts(last.get("generated_at") or (last.get("date") + "T23:59:59+08:00" if last.get("date") else None))
+    meta = d.get("meta") or {}
+    return _parse_ts(d.get("fetched_at") or d.get("generated_at") or meta.get("generated_at") or meta.get("last_snapshot_at"))
+
+
+def build_schedule_health() -> dict:
+    now = datetime.now(timezone.utc)
+    checks = [
+        # (name, file, kind, args, owner, note)
+        ("台股盤中報價（GitHub Actions quotes.yml）", "data/quotes_tw.json", "intraday", (TAIPEI_TZ, (9, 0), (13, 30)),
+         "GitHub Actions", "每10分鐘；盤中超過30分鐘沒落地=異常"),
+        ("台股逐筆tick（本機Shioaji）", "data/quotes_sinopac.json", "intraday", (TAIPEI_TZ, (9, 0), (13, 30)),
+         "本機排程AlphaShioajiQuotes", "只有使用者這台機器開機且排程在跑才會更新；乙.1冷熱分離上線後盤中不再push，只在收盤後commit一次"),
+        ("美股盤中報價（GitHub Actions quotes.yml）", "data/quotes_us.json", "intraday", (NY_TZ, (9, 30), (16, 0)),
+         "GitHub Actions", "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"),
+        ("美股即時報價（本機IBKR）", "data/quotes_ibkr.json", "intraday", (NY_TZ, (9, 30), (16, 0)),
+         "本機排程", "只有使用者這台機器開著IB Gateway才會更新"),
+        ("台股大盤/類股/法人（market.yml 06:10 UTC）", "data/market_tw.json", "daily", (timezone.utc, (6, 10), 3.0),
+         "GitHub Actions", "台北14:10排程，寬限3小時→17:10後仍沒有當天資料=異常"),
+        ("美股四大指數（market.yml 21:30 UTC）", "data/market_us.json", "daily", (timezone.utc, (21, 30), 3.0),
+         "GitHub Actions", "台北隔天05:30排程，寬限3小時"),
+        ("個股基本面PER/月營收（market.yml）", "data/fundamentals.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
+        ("個股價量歷史（market.yml）", "data/price_history.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
+        ("個股財報/法人/融資（market.yml）", "data/stock_detail.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
+        ("大盤融資維持率（market.yml）", "data/margin_maintenance.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
+        ("前瞻選股台帳（market.yml）", "data/picks_ledger.json", "daily", (timezone.utc, (6, 10), 3.0), "GitHub Actions", ""),
+    ]
+    out = []
+    for name, rel, kind, args, owner, note in checks:
+        ts = _file_ts(rel)
+        if kind == "intraday":
+            status, due, rule = _intraday_rule(now, ts, *args)
+        else:
+            status, due, rule = _daily_rule(now, ts, *args)
+        out.append({
+            "name": name, "file": rel, "owner": owner, "status": status,
+            "last_data_at": ts.astimezone(TAIPEI_TZ).isoformat(timespec="minutes") if ts else None,
+            "expected_at_or_after": due.astimezone(TAIPEI_TZ).isoformat(timespec="minutes"),
+            "rule": rule, "note": note,
+        })
+    overdue = [c["name"] for c in out if c["status"] != "ok"]
+    return {
+        "checked_at": now.astimezone(TAIPEI_TZ).isoformat(timespec="seconds"),
+        "any_overdue": bool(overdue),
+        "overdue_names": overdue,
+        "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
+        "checks": out,
+    }
 
 
 # 人工逐行核對 index.html 對照出來的結果（見本檔案docstring說明，不是自動掃描）。
@@ -705,6 +863,7 @@ def main():
         "latest_commit": _git("rev-parse", "--short", "HEAD"),
         "data_files": build_data_files(),
         "workflows": build_workflows(),
+        "schedule_health": build_schedule_health(),  # 2026-09-03（P0三-三.1）排程錯過時窗判定
         "app_data_sources": APP_DATA_SOURCES,
         "field_fallback_chains": FIELD_FALLBACK_CHAINS,
         "rate_limit_status": build_rate_limit_status(),

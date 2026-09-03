@@ -423,6 +423,7 @@ def main():
 
     payload.setdefault("meta", {})
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
+    payload["meta"]["source"] = "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息事件回溯調整；起始種子=research/build_price_history.py（FinMind快取）"  # 2026-09-03（P0三-三.3）
     payload["meta"]["twse_updated_count"] = twse_updated
     payload["meta"]["tpex_updated_count"] = tpex_updated
     payload["meta"]["errors"] = errors
@@ -453,6 +454,7 @@ def main():
         }
     SNAPSHOT_PATH.write_text(json.dumps({
         "meta": {"generated_at": datetime.now(TW_TZ).isoformat(),
+                 "source": "從data/price_history.json衍生（TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes）",  # 2026-09-03（P0三-三.3）
                  "note": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），"
                          "供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。"},
         "quotes": snapshot,

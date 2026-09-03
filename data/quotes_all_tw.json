@@ -1,6 +1,7 @@
 {
   "meta": {
     "generated_at": "2026-09-03T19:46:50.862718+08:00",
+    "source": "從data/price_history.json衍生（TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes）",
     "note": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。"
   },
   "quotes": {

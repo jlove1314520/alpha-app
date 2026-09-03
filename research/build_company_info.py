@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -79,6 +80,7 @@ def main():
 
     payload = {
         "meta": {
+            "generated_at": datetime.now(timezone(timedelta(hours=8))).isoformat(),  # 2026-09-03（P0三-三.3）補時間戳
             "source": "FinMind TaiwanStockInfo（research端本機parquet快取整理，一次性/不常變動）",
             "note": "供generate_scores_live.py顯示公司名稱/產業分類用，跟quotes_tw.json"
                     "（僅自選股當下報價）用途不同、互不影響。",

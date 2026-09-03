@@ -318,6 +318,8 @@ def main():
 
     payload["meta"] = {
         "generated_at": datetime.now(TW_TZ).isoformat(),
+        # 2026-09-03（P0三-三.3）：每個資料檔的meta都要有source，跟generated_at一起讓STATUS.json/App設定頁能直接顯示來源與新鮮度
+        "source": "TWSE openapi BWIBBU_ALL+t187ap05_L（上市）/ TPEx openapi tpex_mainboard_peratio_analysis+mopsfin_t187ap05_OB（上櫃），每日排程累積更新；起始種子=research/build_fundamentals_json.py（FinMind快取一次性快照）",
         "snapshot_note": (
             "起始種子是 2026-08-27 手動執行 build_fundamentals_json.py 的一次性快照"
             "（讀研究端FinMind歷史parquet快取整理，涵蓋TWSE+TPEx），此後由這支"
