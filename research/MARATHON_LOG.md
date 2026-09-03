@@ -13,6 +13,8 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T10:32 — hypothesis_queue軌接續#26全市場融資餘額成長率地基建置 — 回補進度15→149/662週（22.5%），尚未進cheap gate，下一輪繼續呼叫backfill_margin_debt_market.py
+
 ## 2026-09-03T10:41 — `hypothesis_queue`軌道排程：#26新增抓取client+resumable週頻backfill並驗證可用，回補進度2.3%（15/662週），尚未進cheap gate
 
 接手鎖檔`LOCK_ACQUIRED`（乾淨取得，非陳舊回收）。`git pull`一開始因

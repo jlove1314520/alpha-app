@@ -1823,6 +1823,20 @@ backfill_margin_debt_market.py --batch-size 150`累積回補進度（比照
 `alpha.db`（唯讀）、未修改任何凍結區檔案，`is_holdout_consumed()`
 確認仍為`False`。
 
+**狀態（2026-09-03排程接續，回補進度延續）**：接續上一輪，執行
+`python research/backfill_margin_debt_market.py --batch-size 150`
+（前景阻塞監控，因單批次超過工具10分鐘逾時上限被系統移至背景繼續
+執行，本輪用逐次輪詢`research/data/raw_margin_debt_market/`快取檔案
+數量確認持續累積、非卡死）。**累積進度：15→149/662週（22.5%）**，
+本輪新增134週快取，過程中未見錯誤（輸出log因python stdout緩衝暫時
+看不到內容，以實際落盤的parquet檔案數為準）。**尚未達到cheap gate
+所需覆蓋率**（仍需涵蓋2013/2015/2018/2020/2022/2024這幾個關鍵年份
+附近的完整覆蓋，目前僅覆蓋到約2015年初，2018年以後年份尚未回補到），
+**下一輪繼續呼叫**`python research/backfill_margin_debt_market.py
+--batch-size 150`接續回補（resumable，不會重算已完成的部分）。本輪
+未寫入`alpha.db`、未修改任何凍結區檔案，`is_holdout_consumed()`確認
+仍為`False`。
+
 ---
 
 ### 27. 多因子「複合評分」策略（z-score blend，2026-09-03使用者裁示新增）
