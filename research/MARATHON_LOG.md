@@ -13,6 +13,35 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T06:52 — hypothesis_queue排程接續（#27複合z-score第2關） — 接手時PID 883已自然結束（checkpoint停在232/300、mtime 06:35，本輪檢查時刻06:51已無存活行程），確認progress未遺失後用`CZC_TIME_BUDGET_SECONDS=3600`重新nohup+disown背景啟動（新PID 2037），確認3分鐘內存活無crash後收工留給下一輪
+
+`ps -p 883`（本輪查證方法沿用上一輪教訓，未用`tasklist`）確認已不存在，
+`ps aux | grep python`同樣確認乾淨無殘留，判定行程已自然結束（研判是
+05:27:37啟動+3600秒理論到期06:27:37後、在完成232/300那次draw之後的
+下一次deadline檢查點正常退出，不是崩潰——跟06:27條目記錄的「deadline
+判斷點只在draw之間檢查」機制一致）。查`data/composite_zscore_v1_random_
+control_checkpoint.json`確認`draw_records`共**232筆**（比上一輪06:27
+記錄的220多12筆，確認PID 883存活期間持續有效累積，資料未遺失也未被
+覆寫損毀）。**剩餘68 draws**。用`CZC_TIME_BUDGET_SECONDS=3600`重新
+nohup+disown背景啟動（新PID 2037），啟動後確認log正常印出「Loading
+sample + computing factors」且`ps -p 2037`3分鐘內持續存活、無crash訊息，
+依既有多輪驗證的「重啟成本(~20分鐘reload)遠高於等待成本」結論本輪維持
+不碰這個新行程，讓它繼續在OS層背景運算。**進度估算**：以先前觀測速率
+（約60~75秒/draw）估計剩餘68 draws還需要約68~85分鐘（不含本次已耗掉的
+~20分鐘reload），遠超單輪工作預算。**下一輪待辦不變**：先用`ps -p
+2037`（若已不存在則用`ps aux | grep python`交叉確認，不要只信
+`tasklist`）確認存活狀態；存活就不碰、繼續等；已死（不論到期正常結束
+或異常崩潰）則檢查checkpoint是否已到300 draws，未到則用
+`CZC_TIME_BUDGET_SECONDS`（建議維持3600或更大）重新nohup+disown背景
+啟動接續（checkpoint機制已驗證正確續跑，不重算已完成draw）；到300則
+直接算percentile（`100*mean(abs(baseline_val_ic)>abs(random_draw_val_ic))`，
+門檻90.0）判CHEAP_PASS/FAIL並更新`TRIALS_LEDGER.md`/`HYPOTHESIS_QUEUE.md`
+#27。holdout本輪確認仍為`is_holdout_consumed()=False`。本輪`git status`
+確認repo同時有其他自動化來源留下的殘留變更（`.github/workflows/market.yml`
+／`.github/workflows/quotes.yml`／`data/rate_limit_state.json`已修改、
+另有多支非本輪產生的`research/*_run.log`與`*.py`未追蹤檔案）——依協定
+規則不觸碰、不納入本輪commit，只記錄在此供後續追蹤。
+
 ## 2026-09-04T06:27 — hypothesis_queue排程接續（#27複合z-score第2關） — 確認PID 883持續存活並自然跨過自身3600秒時間預算理論到期時刻仍未結束，checkpoint從210進步到220/300，監控5分鐘無異常，維持「不重啟、等待」策略收工留給下一輪
 
 用`ps -p 883`（非`tasklist`，記取上一輪教訓）確認PID 883仍存活（啟動於

@@ -2110,3 +2110,11 @@ deadline判斷點只在draw之間檢查、不會中途切斷正在算的那一�
 （`100*mean(abs(baseline_val_ic)>abs(random_draw_val_ic))`，門檻90.0）
 判CHEAP_PASS/FAIL並更新`TRIALS_LEDGER.md`。完整見`MARATHON_LOG.md`
 2026-09-04T06:27條目。
+
+**狀態更新（2026-09-04T06:52排程接續，仍未結案）**：接手時上一輪PID 883
+已自然結束（checkpoint停在232/300，比06:27記錄的220多12筆，未遺失），
+用`CZC_TIME_BUDGET_SECONDS=3600`重新nohup+disown背景啟動（新PID 2037），
+確認3分鐘內存活無crash後維持「不重啟、等待」策略收工。**剩餘68 draws**，
+估計還需68~85分鐘。下一輪待辦同上一則：`ps -p 2037`確認存活就繼續等，
+已死則檢查checkpoint是否已到300再判定是否重啟或直接算percentile。完整見
+`MARATHON_LOG.md`2026-09-04T06:52條目。
