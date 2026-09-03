@@ -17,6 +17,44 @@
 
 ---
 
+## ✅ 2026-09-04凌晨（維運帽）P0三收尾：quotes.yml整天0次落地的根因＋監控補洞
+
+詳見`PROGRESS.md`同日條目與`PENDING_QUEUE.md` P0三區塊。要點：
+- 根因是`fetch_quotes_tw.py`查詢清單隨scores.json膨脹到2,352檔（含權證），已縮回
+  209檔+加時間預算/斷路（`51ff9e7`）。
+- `data/STATUS.json`新增`schedule_health`（排程錯過時窗判定）；App設定頁新增
+  「資料新鮮度」卡片（逾期紅字）；7個資料檔補`generated_at`+`source`；
+  `npm test`接smoke test（`51ff9e7`/`93b0898`）。smoke test 22項全PASS。
+- ⚠ 兩支workflow的push重試/timeout改動只在working tree，等使用者用有workflow
+  scope的PAT補commit；卡住的run 33754429235與手動補跑需使用者在GitHub網頁按。
+
+## 📝 登記待辦（2026-09-04凌晨，只登記、未開工）
+
+1. **【P1，需提案】scores.json/scores_momentum.json/scores_future.json的宇宙含
+   16,453檔6位數權證＋31檔帶字母特別股**（18,804列只有2,320列是普通股），三榜
+   檔案各17-19MB、任何下游把整份當清單的腳本都會被灌爆（今天quotes.yml就是）。
+   修法要動`generate_scores_live.py`等評分引擎的宇宙定義（過濾非普通股/ETF），
+   屬於評分管線變更，依「提案先於執行」先提案：建議在三支generate_scores_*.py
+   的宇宙建構處統一套`_is_stock_code()`同款過濾，並回頭確認price_history/
+   fundamentals裡權證列的來源（疑似TPEx tpex_mainboard_quotes含權證）。
+2. **`AlphaData`排程**（alpha-data每日抓取）2026-09-03 15:30結束碼=1（失敗），
+   本輪沒展開查，下次維運輪查log。
+3. **`data/margin_maintenance.json`在09-03 market.yml成功的那次run沒更新**（最後
+   一筆仍是07:29那次），設定頁資料新鮮度卡片已標紅；下次維運輪看該run的
+   `update_margin_maintenance.py`步驟輸出。
+4. **丙（總司令裁示，分期）**：Phase 2 新聞管線（MOPS/EDGAR/RSS標題連結＋割韭菜
+   過濾）＋籌碼集中度模組（集保TDCC OpenAPI大戶週變化＋TWSE OpenAPI外資/借券/
+   當沖）；Phase 3 paper下單走隧道（Cloudflare Access保護），真實下單永遠只在
+   本機且使用者親按。**先不做，等乙全部完成後再排。**
+5. **`/live/stream`改成真正tick回呼觸發推送**（使用者2026-09-03深夜補充指令二）：
+   目前是每2秒輪詢比對再送（回應已標`mode:"poll-diff-2s"`），之後要讓
+   `shioaji_quotes.py`收到一筆tick就直接餵SSE，需要兩個行程合併或改用行程間
+   佇列，這才是真正秒級；使用者說「不用現在做」。
+6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
+   2026-09-04條目，需有workflow scope的PAT。
+
+---
+
 ## ✅ 2026-09-03（研究帽）登記5條新假設進HYPOTHESIS_QUEUE.md（#20~#24）
 
 使用者裁示新增5條有經濟理由的假設，等待馬拉松自主接續執行（本輪只

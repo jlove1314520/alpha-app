@@ -16,6 +16,59 @@
 
 ---
 
+## 2026-09-04凌晨（維運帽→開發帽）— P0三收尾：quotes.yml整天沒落地的真正根因＋監控補洞（並補記三個先前漏寫的commit）
+
+**先補記（前一個session commit了但沒更新這份檔案，這裡補齊）**：
+- `8f14332` P0三-一.1：`shioaji_quotes.py` commit洪水止血（`_write_market_closed()`每次
+  改`checked_at`讓`git diff --quiet`永遠為真，2分鐘排程×24小時=當天995次commit；
+  改成狀態沒變不寫檔、flush 60秒、只比較last/change_pct/bid/ask決定要不要commit）。
+- `420914a` P0三-二：20分鐘閘門收盤後誤丟今日收盤價（`connected=false`直接return
+  null退回prev_close）；新增`_shouldTreatAsLive()`/`_intradaySourceFresh()`統一套到
+  自選股/個股頁頭部/市場頁四處，smoke check 23驗「收盤後顯示價==quotes_sinopac.last」。
+- `4fb191a` 乙.2：`research/alpha_live_server.py`本機唯讀即時報價伺服器第一版
+  （`/live/quotes`可用、`/live/stream`是2秒輪詢比對、`/live/kbars`回501）；乙.3前置
+  cloudflared已用winget裝好，`service install`需系統管理員權限，要使用者自己開
+  管理員視窗執行；區網IP 192.168.3.241。
+
+**今晚查明的事（P0三-一.3）**：2026-09-03台北日quotes.yml觸發5次、成功0次——4次被
+concurrency group cancelled，1次（run 33754429235）從12:18Z卡在「抓台股盤中報價」
+步驟3.5小時以上。根因不是push撞車，是`fetch_quotes_tw.py`的查詢清單：scores.json
+改全市場後有18,804列、其中16,453列是6位數權證，腳本把整份當清單→查2,352檔、
+sparkline逐檔打STOCK_DAY每檔15秒timeout→數小時；MIS偶發502又讓整支腳本直接炸掉。
+
+| 檔案 | 09-03 commit次數 | 最後一筆 |
+|---|---|---|
+| data/quotes_tw.json | 0 | 09-02 18:43 |
+| data/market_tw.json | 2 | 09-03 19:46（當天日線/大盤已落地） |
+| data/quotes_sinopac.json | 1089（21:43止血後0次） | 09-03 13:45 |
+| 全repo | 1163 | — |
+
+**改了什麼**：
+- `.github/scripts/fetch_quotes_tw.py`：清單回到檔頭原本定義（自選股+三榜各前100名、
+  `_is_stock_code()`過濾權證/特別股，209檔）；MIS批次失敗重試一次再跳過；sparkline
+  240秒總預算+連續8檔失敗斷路。本機實測：MIS深夜對全部批次回RemoteDisconnected
+  （TWSE夜間不服務），腳本正確以非0結束、不寫假資料。
+- `.github/workflows/quotes.yml`/`market.yml`（**只在working tree，PAT無workflow
+  scope**）：push前先fetch+rebase、失敗先等30秒、重試10次、`timeout-minutes`
+  15/120、market.yml commit前重跑`generate_status_json.py`。
+- `generate_status_json.py`：新增`schedule_health`（錯過時窗判定）+`today_runs`。
+- App設定頁新增「資料新鮮度」卡片（13檔、逾期紅字）；smoke test新增檢查24。
+- 7個資料檔的產生腳本補`meta.generated_at`+`source`；`package.json` test接smoke test。
+- 取消卡住的run／workflow_dispatch補跑：PAT對Actions API回403，**需使用者在GitHub
+  網頁按Cancel + Run workflow**。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 2026-09-03 23:5x，**22項全PASS、0 FAIL**
+（含新增24）。Playwright截圖：設定頁資料新鮮度卡片4項逾期紅字（台股Actions報價、
+IBKR、美股Actions報價、融資維持率）、其餘綠字正常。
+
+**順帶發現、已登記BACKLOG未處理**：scores*.json宇宙含16,453檔權證（三榜檔案各
+17-19MB）；`AlphaData`排程09-03 15:30結束碼1；`margin_maintenance.json`09-03的
+market.yml成功run沒有更新它（最後一筆07:29）。
+
+**下一步**：依PENDING_QUEUE順序接乙.4/乙.5（含使用者新補的三個修正），之後甲、乙.1。
+
+---
+
 ## 2026-09-03（維運/開發帽）— B34：Shioaji報價升級為逐筆tick串流
 
 使用者裁示「Shioaji報價升級為逐筆tick串流」。`research/shioaji_quotes.py`

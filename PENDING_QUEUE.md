@@ -90,13 +90,31 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   60秒；新增`_meaningful_quotes()`只比較last/change_pct/bid/ask決定
   要不要commit，排除tick_at/volume這些會讓判斷永遠為真的欄位。8項
   單元測試全PASS（含2項新回歸測試），commit `8f14332`已push。
-- [ ] **P0三-一.2** quotes.yml/market.yml的push重試改善（先等30秒讓
-  in-flight push落地、重試上限提到10次）——**待做，會碰
-  `.github/workflows/*.yml`，這個repo的PAT沒有workflow scope，改動
-  要留在working tree不commit，等使用者用有scope的PAT自己補上，這個
-  既有地雷要在回報裡講清楚**
-- [ ] **P0三-一.3** 回報今天quotes_tw/market_tw排程實際落地次數，
-  workflow_dispatch補跑一次
+- [x] **P0三-一.2** quotes.yml/market.yml的push重試改善——**已改好，但
+  只能留在working tree（PAT無workflow scope，commit會被GitHub拒收）**：
+  第一次push前先fetch+rebase、每次失敗先等30秒再fetch+rebase、重試上限
+  5→10次；另外加了`timeout-minutes`（quotes 15分鐘／market 120分鐘，理由
+  見一.3）跟market.yml commit前重跑`generate_status_json.py`的步驟。
+  **需要使用者自己用有workflow scope的PAT把這兩個檔案的改動commit上去**
+  （`git add .github/workflows && git commit && git push`），或在GitHub網頁
+  直接貼上。
+- [x] **P0三-一.3** 落地次數已查明（2026-09-03台北日）：quotes.yml觸發5次、
+  **成功落地0次**（4次被concurrency group cancelled、1次`run 33754429235`
+  從12:18Z卡在「抓台股盤中報價」步驟超過3.5小時仍in_progress），
+  `data/quotes_tw.json`當天0次commit、最後一筆停在09-02；market.yml觸發
+  1次成功（11:07Z，`market_tw.json`當天2次commit，19:46台北落地，當天
+  日線/大盤資料**已經落地，不需要再補跑**）。**卡死根因**：scores.json改
+  全市場宇宙後有18,804列（16,453列是6位數權證），fetch_quotes_tw.py把整份
+  當查詢清單→一次查2,352檔、sparkline逐檔打STOCK_DAY每檔吃滿15秒timeout
+  →數小時，MIS偶發502又讓整支炸掉。已修：範圍回到檔頭原本定義（自選股+
+  三榜各前100名、過濾權證/特別股，共209檔）、MIS批次失敗重試再跳過、
+  sparkline 240秒總預算+連續8檔失敗斷路（commit `51ff9e7`）。
+  **workflow_dispatch補跑與取消卡住的run都做不到**：這個PAT對Actions API
+  回403「Resource not accessible by personal access token」，需要使用者
+  在GitHub網頁操作：(1) Actions→該run→Cancel workflow（不取消的話會佔到
+  6小時上限、約02:18台北自動timeout）；(2) Actions→「盤中近即時報價」→
+  Run workflow。本機直接跑腳本補落地也試過：MIS在深夜（23:5x）對所有
+  批次回`RemoteDisconnected`，是TWSE端夜間不服務，非程式問題。
 - [x] **P0三-二** 修根因：20分鐘閘門在收盤後誤丟今日收盤價——**已完成**：
   根因是`sinopacQuote()`/`ibkrQuote()`對`connected`/20分鐘閘門不分盤中
   盤後一律套用，收盤後`connected`變`false`直接return null，整條intraday
@@ -109,12 +127,24 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   commit `420914a`已push。**交易頁/籌碼頁查證後沒有這個bug模式**（交易頁
   是demo假資料或走IBKR order server帳戶摘要，籌碼頁是三大法人/融資
   彙總數字，都不經過sinopacQuote()/ibkrQuote()這條路徑）。
-- [ ] **P0三-三** 監控補洞：STATUS.json排程異常判定、設定頁逾期標紅、
-  7個資料檔補generated_at+source、package.json接上smoke_test.mjs
-- [ ] **P0三-四** 只提案不動工：live-data分支 vs B20雲端中繼提前，
-  兩案比較（工程量/風險/即時度影響）
-- [ ] **P0三-五** 整理三軌馬拉松暫停規則現況（選項a/b原文+
-  PORTFOLIO_STRATEGY_SPEC.md待確認內容）給總司令看，先不動馬拉松
+- [x] **P0三-三** 監控補洞——**已完成**（commit `51ff9e7`+`93b0898`）：
+  (1) `generate_status_json.py`新增`schedule_health`（盤中30分鐘／每日排程
+  寬限3小時的「錯過時窗」判定，11個監控項）與`workflows[].today_runs`
+  （今天各結論次數）；「每個排程跑完必寫」那半段靠market.yml新增的
+  generate_status_json步驟（見一.2，待使用者commit workflow）；(2) App
+  設定頁新增「資料新鮮度」卡片，13個資料檔各一列，逾期/無資料紅字、正常
+  綠字，手機端「現在」直接算不依賴STATUS.json（三個超大檔例外，讀STATUS.json
+  並註明）；(3) 7個資料檔的產生腳本都補`meta.generated_at`+`source`
+  （margin_maintenance頂層是list，寫進每筆record不改形狀；company_info既有
+  檔以git commit時間回填並在`generated_at_note`註明不是重新產生）；(4)
+  `package.json` test→`node scripts/smoke_test.mjs`。smoke test新增檢查24，
+  22項全PASS；Playwright截圖確認4項逾期紅字正確。
+- [x] **P0三-四** ——**已被「乙」取代，不再另寫提案**：總司令已核准Phase 1
+  冷熱分離（盤中不push、本機live server+Cloudflare Tunnel），這條路直接讓
+  main不再被洪水淹，(A)live-data分支／(B)B20提前兩案要解的問題已由乙的
+  裁示解掉。
+- [x] **P0三-五** ——**已被「甲」取代**：總司令已裁示「確認SPEC＋解除暫停」，
+  不需要再整理選項(a)/(b)給總司令選。
 
 ---
 
@@ -206,8 +236,8 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 - [ ] **乙.5** 個股頁改用TradingView lightweight-charts（cdnjs載入、
   版本釘死），盤中1分K走/live/kbars
 - [ ] **乙.6** 驗收：Playwright+smoke test，下次開盤總司令手機實測
-- [ ] **丙** Phase 2（新聞管線+籌碼集中度模組）+ Phase 3（paper下單走
-  隧道）登記進BACKLOG.md，先不開工
+- [x] **丙** Phase 2（新聞管線+籌碼集中度模組）+ Phase 3（paper下單走
+  隧道）——**已登記進BACKLOG.md「登記待辦」區塊，未開工**
 
 ---
 
