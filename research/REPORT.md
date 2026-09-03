@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 332 輪 · 2026-09-04T06:33+08:00 · FUT · 依2026-09-03「US/FUT主軸也是組合策略層級」裁示，查證跨商品橫斷面池的資料源可用性（`fut_probe_multi_commodity.py`，新增，唯讀） · MTX/TE/TF三商品皆有資料且深度足夠（2000/2001年起～2024-12-31），唯TF只有日盤無夜盤；非因子判定，不佔TRIALS_LEDGER列，跨商品pooling方法論設計待未來輪次
+
 ## 第 331 輪 · 2026-09-04T06:10+08:00 · TW（取鎖偵測到陳舊鎖檔，pid 34360持有約30分鐘，上一輪疑似異常中止已回收）· 接續第330輪，重跑`#79 f_inst_streak_days`300檔樣本cheap gate並跑到完成，同時補齊第330輪漏掉的心跳更新 · 248/300可用，TRAIN ic=+0.0232、VAL ic=-0.0150（train/val正負號仍相反）、null percentile 86.1（門檻90.0未過，原100檔樣本81.9）——`CALIBRATION_PROBE.md`「未定（待300檔重跑）」正式改回確定FAIL，寫入`TRIALS_LEDGER.md`#100
 
 ## 第 330 輪 · 2026-09-04T05:32+08:00 · TW（本輪commit`70201b8`原始只更新`TW_LOG.md`，未依協定同步`MARATHON_STATE.md`/`REPORT.md`，此為第331輪補寫的心跳）· 啟動#79`f_inst_streak_days`300檔樣本重跑，因session預算提前結束、背景process結果未知 · 誠實記錄留給下一輪查核（第331輪已接續完成並確認FAIL，見上方）

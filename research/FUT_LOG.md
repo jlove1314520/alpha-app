@@ -1832,3 +1832,31 @@ FUT軌round104留下的盤別效應第三批「下一步」本質仍是單因子
 **下一輪建議**：FUT #34已徹底結案（不必再回頭）。可回到`FUT_LEADS.md`既有的「下一輪建議」清單：(a) 盤別效應家族第三批（夜盤收盤(T)→日盤開盤(T)跳空）、(b) 全新機制家族、(c) `fut_basis_mean_reversion_60d`的regime/年代分段穩健性檢查。FUT軌資源配置上限20%提醒同前。
 
 `git status`開工前確認：除了既有非本輪產生的殘留變更（`.github/workflows/market.yml`／`.github/workflows/quotes.yml`／`data/rate_limit_state.json`／`research/MARATHON_LOG.md`已修改，另有約17個未追蹤log/腳本殘留檔案，皆研判為另一互動session／`AlphaHypothesisQueue`軌道留下）之外無其他變更，未觸碰、未納入本輪commit。
+
+---
+
+## 2026-09-04T06:33+08:00 — 第332輪（FUT軌，地基查證：多商品資料可用性）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳（本輪開工時）：FUT 04:31（第328輪，最舊）、US 05:07（第329輪）、TW 06:09/06:10（第331輪，最新）——依輪替選FUT。
+
+**主軸背景**：2026-09-03總司令裁示（`MARATHON_PROTOCOL.md`最上方區塊）明確要求「US／FUT軌：主軸同樣是組合策略層級（US可先建立跟TW同構的組合回測地基），沒有組合層級工作可做時才跳過，理由要寫清楚」。FUT #34上一輪（328）已查證確定「無法比照TW/US做300檔重跑」，並在`FUT_LEADS.md`結尾記下「唯一可能真正類比股票『多標的橫斷面』的方向，是同時測試TX以外的其他TAIFEX商品（MTX小台、TE電子期、TF金融期）當作『多個獨立標的』的池子——但這是全新的方法論設計，不是本輪待辦」。本輪選擇把這個「未來方向」往前推一步：**先查證資料源可用性，這是`MARATHON_PROTOCOL.md`第1c節「地基還沒搭好，先查資料源可用性，不要急著測因子」的精神**（跟US軌一開始查`USStockPrice`可用性同款做法）。
+
+**做了什麼**：新增`fut_probe_multi_commodity.py`（唯讀探針，透過`finmind_client.load_dev()`走既有holdout截斷機制，零新的資料抓取邏輯，只是換`data_id`）。用跟`continuous_contract.py`完全相同的`(FULL_HISTORY_START, FULL_HISTORY_END)`窗口（2000-01-01～2024-12-31）各查一次`TaiwanFuturesDaily`資料集，`data_id`分別為`MTX`（小型台指）、`TE`（電子期）、`TF`（金融期）。3次API呼叫（每個商品一次，全部命中新cache key，非重複請求）。
+
+**結果（三個商品皆有資料，深度都足夠）**：
+
+| 商品 | 可用 | 單月合約列數 | 資料起始 | 資料結束 | 盤別 | 相異合約月數 |
+|---|---|---|---|---|---|---|
+| MTX（小型台指） | 是 | 46,494 | 2001-04-09 | 2024-12-31 | position + after_market | 744 |
+| TE（電子期） | 是 | 40,835 | 2000-01-04 | 2024-12-31 | position + after_market | 306 |
+| TF（金融期） | 是 | 31,894 | 2000-01-04 | 2024-12-31 | **僅position** | 306 |
+
+**新發現（誠實記錄，非本輪待辦但影響未來設計）**：TF（金融期）只有日盤（`position`）資料，沒有`after_market`（夜盤）——跟TX/MTX/TE三者都同時有兩種盤別不同。如果未來真的做跨商品pooling，若要用到夜盤資料，TF會是唯一缺角的商品，屆時要嘛排除TF的夜盤分析、要嘛整組商品池只用日盤以求一致，這個決定留給實際動手設計pooling方法論時再做，本輪只負責誠實記下這個資料形狀差異，不擅自下設計決定。
+
+**這不是TRIALS_LEDGER判定**：沒有測試任何因子/策略，是純資料可用性查證（同`FUT_MARATHON_STATE.md`過去「地基搭建」性質的記錄），不加`TRIALS_LEDGER.md`列，也不是CHEAP_PASS/FAIL/EXPERIMENTAL。
+
+**下一輪建議（若要接續這個方向）**：資料源可用性已確認，下一步是設計「跨商品橫斷面池」本身——例如「同一天T，池子裡有幾個商品（TX/MTX/TE/TF，扣掉盤別限制後可能是3或4個）」「同一套排列檢定要怎麼跨商品共用null分布」——這是全新方法論設計，不是重跑既有腳本，可能需要跨兩三輪才能想清楚，不是硬性待辦（`FUT_LEADS.md`既有「下一輪建議」清單：盤別效應家族第三批、全新單一機制家族、`fut_basis_mean_reversion_60d`regime複驗，三者仍是更快能出結果的替代選項，下一輪選哪個依實際情況判斷即可）。
+
+`is_holdout_consumed()`本輪成功確認`False`（本輪3次API呼叫皆透過`load_dev()`走既有dev截斷機制，零繞過holdout風險）。
+
+`git status`開工前確認：除既有非本輪產生的殘留變更（`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改，另有多個未追蹤log/腳本殘留檔案，研判是另一互動session／`AlphaHypothesisQueue`軌道留下）之外無其他變更，未觸碰、未查看、未納入本輪commit。本輪新增檔案：`fut_probe_multi_commodity.py`（程式碼）；`data/raw/`底下新增3個parquet快取檔案（gitignored，不進commit）；`data/rate_limit_state.json`本輪也會更新（既有殘留變更之上疊加本輪3次請求的時間戳，gitignored，不進commit）。
