@@ -13,6 +13,18 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T11:06 — hypothesis_queue排程接續#26全市場融資餘額成長率地基
+回補 — 執行`backfill_margin_debt_market.py --batch-size 150`一批，成功
+150/150週（其中11週非交易日/無資料，正常）、0封鎖0錯誤，累積進度
+315/662週（47.6%，接續上一輪的149/662），資料涵蓋範圍延伸至
+2012-05~2018-05。尚未涵蓋2020/2022/2024關鍵年份，尚未進cheap gate，
+未結案。本輪`git status`確認`data/rate_limit_state.json`、
+`research/pit.py`及多個`.log`/`composite_quality_revaccel_inst_lowvol_
+sanity.py`未追蹤檔案非本輪產生，依協定不觸碰、不納入commit。
+`is_holdout_consumed()`本輪未觸碰holdout。
+
+---
+
 ## 2026-09-03T10:32 — hypothesis_queue軌接續#26全市場融資餘額成長率地基建置 — 回補進度15→149/662週（22.5%），尚未進cheap gate，下一輪繼續呼叫backfill_margin_debt_market.py
 
 ## 2026-09-03T10:41 — `hypothesis_queue`軌道排程：#26新增抓取client+resumable週頻backfill並驗證可用，回補進度2.3%（15/662週），尚未進cheap gate
