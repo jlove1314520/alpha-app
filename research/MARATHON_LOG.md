@@ -13,6 +13,16 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T14:22 — hypothesis_queue軌：#26全市場融資餘額成長率第1關
+cheap gate（662週回補完成後首測） — 20d(4w)/60d(12w)兩種窗口定義的
+融資成長率對後續TAIEX回撤幅度Spearman相關皆train/val正負號相反，60d
+窗口VAL percentile=88.5接近但未過90.0門檻，依協定判**FAIL**，未進第2
+關以後。佇列#1~26全數結案，接續佇列第一順位#27（多因子z-score複合
+評分）。完整見`HYPOTHESIS_QUEUE.md`#26、`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#97。
+
+---
+
 ## 2026-09-03T12:29 — hypothesis_queue軌：接續#26全市場融資餘額成長率
 resumable週頻backfill（batch-size 150），本批次一次補完剩餘全部 —
 成功補完剩餘88週（4週非交易日），累積進度574→662/662週

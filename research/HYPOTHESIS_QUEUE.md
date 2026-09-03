@@ -812,6 +812,15 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     排隊第一。資料可行性查證已於2026-09-03排程接續完成並確認可行
     （找到TWSE官方全市場歷史數字，見下方#26條目「資料可行性查證：
     已確認可行」段落），下一輪從第1關cheap gate開始，不跳關。**
+26. ~~全市場融資餘額成長率（Margin Debt Growth）~~——**2026-09-03
+    排程接續已結案：FAIL**（662週回補完成後第1關cheap gate，20d/60d
+    兩種窗口定義皆train/val正負號相反，60d窗口VAL percentile=88.5
+    接近但未過90.0門檻，見上方#26條目與`STRATEGY_GRAVEYARD.md`/
+    `TRIALS_LEDGER.md`#97），移出排隊佇列。不泛化成「融資餘額槓桿
+    水位這個維度完全無效」——只測了週頻近似成長率+Spearman相關+
+    同長度forward回撤幅度這個具體構造。**佇列#1~26全數結案，現在
+    排隊第一順位是#27（多因子z-score複合評分），尚未開始第1關。
+    剩餘#5/#6/#8/#10仍卡外部依賴，下一輪需重新確認。**
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後）**：15條原始佇列項目中
 #1~4、#7、#9、#11~15共10條已結案（皆FAIL），#10已建置方法論框架（非
@@ -1896,6 +1905,23 @@ cheap gate，不用再回補）**：讀取`research/data/raw_margin_debt_market/
 確認仍為`False`。`git status`確認殘留變更（`data/rate_limit_state.json`、
 `research/pit.py`及多個`.log`未追蹤檔案）跟前幾輪判斷一致，非本輪
 產生，不觸碰、不納入commit。
+
+**狀態（2026-09-03排程接續，第1關cheap gate：已結案，FAIL）**：新增
+`margin_debt_growth_gate.py`——週頻融資餘額`.pct_change(4)`/
+`.pct_change(12)`近似20日/60日成長率，配對TAIEX日線算後續同長度窗口
+最大回撤幅度（絕對值），Spearman相關+洗牌置換檢定（N=200，打散配對
+本身，保留兩邊各自時序不變）。**20d(4w)**：TRAIN(n=408)corr=-0.0490
+(percentile=14.0)、VAL(n=190)corr=+0.0633(percentile=86.0)，train/val
+正負號相反。**60d(12w)**：TRAIN(n=400)corr=-0.0954(percentile=3.5)、
+VAL(n=181)corr=+0.0870(percentile=88.5)，正負號仍相反，VAL percentile
+接近但未過90.0門檻。兩種窗口定義皆train/val方向不一致，依協定第1關
+cheap gate標準判**FAIL**，未進第2關以後（比照#24/#25「不因接近門檻
+而放寬」同一把尺，88.5雖接近90.0仍判死）。**不泛化成「融資餘額槓桿
+水位這個維度完全無效」**——只測了週頻近似成長率+Spearman相關+同長度
+forward回撤幅度這個具體構造，未測用水位（而非成長率）當訊號、未測
+非線性/極端分位效應。完整見`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#97。**佇列#26結案，接續佇列第一順位#27（多因子
+z-score複合評分）**。
 
 ---
 
