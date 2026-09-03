@@ -13,6 +13,29 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T06:27 — hypothesis_queue排程接續（#27複合z-score第2關） — 確認PID 883持續存活並自然跨過自身3600秒時間預算理論到期時刻仍未結束，checkpoint從210進步到220/300，監控5分鐘無異常，維持「不重啟、等待」策略收工留給下一輪
+
+用`ps -p 883`（非`tasklist`，記取上一輪教訓）確認PID 883仍存活（啟動於
+05:27:37，本輪檢查時刻06:22~06:27橫跨其3600秒理論到期時刻06:27:37前後，
+但行程並未在到期瞬間結束——研判時間預算判斷點只在完整完成一次draw之後
+才檢查，若當下正在算draw本身不會被中途切斷）。本輪內輪詢5分鐘（每分鐘
+一次），checkpoint`draw_records`從210停滯4分鐘後於06:27推進到220，確認
+仍在持續累積、非卡死，只是單draw耗時偏長（約54~75秒/draw，比純運算量
+預期慢，可能跟本機同時有其他排程軌道競爭CPU有關，未深究）。**依既有
+多輪驗證的「重啟成本(~20分鐘reload)遠高於等待成本」結論，本輪維持不
+碰這個行程**，讓它繼續在OS層背景運算（PID 883，`CZC_TIME_BUDGET_
+SECONDS=3600`，nohup+disown，不受本次claude session結束影響）。**進度
+估算**：剩餘80 draws，以本輪觀測速率（約60~75秒/draw）估計還需要
+80~100分鐘才能跑滿300 draws，遠超單輪工作預算，**下一輪待辦不變**：
+用`ps -p 883`（若已不存在，改用`ps aux | grep python`確認真的沒有殘留）
+確認存活狀態；存活就不碰、繼續等；已死（不論是本輪之後到期正常結束，
+或異常崩潰）則檢查checkpoint是否已到300 draws，未到則用`CZC_TIME_
+BUDGET_SECONDS`（建議維持3600或更大）重新nohup+disown背景啟動接續
+（checkpoint機制已驗證可正確續跑，不會重算已完成的draw）；到300則直接
+算percentile（`100*mean(abs(baseline_val_ic)>abs(random_draw_val_ic))`，
+門檻90.0）判CHEAP_PASS/FAIL並更新`TRIALS_LEDGER.md`/`HYPOTHESIS_QUEUE.md`
+#27。holdout本輪確認仍為`is_holdout_consumed()=False`。
+
 ## 2026-09-04T05:54 — hypothesis_queue排程接續（#27複合z-score第2關） — 誤判PID 883已死重複啟動PID 1126、發現後立即kill 1126避免checkpoint雙寫，確認883持續存活於170/300無資料損毀，收工留給下一輪
 
 鎖檔非陳舊（LOCK_ACQUIRED）。接手時用`tasklist`（Windows原生指令）查
