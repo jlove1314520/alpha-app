@@ -13,6 +13,29 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04 03:23 — `hypothesis_queue`排程接續#27（多因子z-score複合評分）第2關 — 確認背景行程這次真的活過session邊界，checkpoint進度10→30/300，本輪不重啟只觀察
+
+上一輪具名鎖是陳舊鎖（held by pid 31248, 29.9分鐘）被本輪回收，研判上一輪
+（03:14那則）寫完心跳後在commit+push之前就中斷，但**其背景啟動的
+`composite_zscore_v1_random_control.py`（PID 34408，03:05:47啟動）這次真的
+存活過了上一輪session邊界**，接手時checkpoint已從上一輪紀錄的10/300推進到
+30/300，且行程仍在正常運算（log持續增長、無錯誤、CPU非0）——這修正了先前
+`HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`多次記錄的假設「headless session結束
+背景行程必被終止」，至少這次沒發生，可能跟Windows工作排程器實際觸發間隔跟
+行程存活時間的巧合有關，不代表以後每次都保證存活，下一輪仍要先檢查行程是否
+還活著再決定要不要重啟。**本輪判斷**：既然行程活著且有進度，**重啟的成本
+（~20分鐘reload）遠高於等待的成本**，本輪刻意不碰這個行程（不kill、不重啟），
+只確認存活+進度後就收工，把運算時間留給背景行程繼續累積，避免像先前幾輪
+因為改機制、修bug而重複支付載入成本。**尚未結案**——下一輪先查checkpoint
+draw_records是否已到300（若是，直接讀`data/composite_zscore_v1_random_
+control.csv`跟`main()`同一套percentile公式判CHEAP_PASS/FAIL；若行程已死
+但checkpoint<300，重跑指令即可從中斷處接續，不會重算已完成的draws）。
+`is_holdout_consumed()`本輪確認仍為`False`，未碰任何凍結區檔案，`git
+status`檢查到其他自動化軌道（marathon三軌）留下的殘留變更（`.github/
+workflows/market.yml`/`quotes.yml`/`data/rate_limit_state.json`/
+`research/MARATHON_STATE.md`/`research/REPORT.md`/`research/TW_LOG.md`跟
+一批`research/*_run.log`），依協定不觸碰、不納入本輪commit。
+
 ## 2026-09-04 03:14 — `hypothesis_queue`排程接續#27（多因子z-score複合評分）第2關 — 修好兩個真bug，checkpoint進度10/300，仍未結案
 
 接手時上一輪的`composite_zscore_v1_random_control.py`背景行程跟checkpoint都

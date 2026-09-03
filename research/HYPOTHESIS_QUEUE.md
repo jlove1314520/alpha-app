@@ -2046,3 +2046,11 @@ control.py`（`CHECKPOINT_PATH`+`deadline`時間預算+每10筆draw落盤，
 待辦**：先查`data/composite_zscore_v1_random_control_checkpoint.json`
 ／`data/composite_zscore_v1_random_control.csv`是否已有進度或完整
 結果，完整見`MARATHON_LOG.md`2026-09-04T00:15條目。
+
+**狀態更新（2026-09-04 03:23排程接續，仍未結案）**：背景行程（PID 34408）
+這次真的存活過了上一輪session邊界，checkpoint從上一輪的10/300推進到
+30/300，本輪確認存活+持續進步後判斷「重啟成本(~20分鐘reload)遠高於等待
+成本」，刻意不碰這個行程，只等它自然跑完，完整分析見`MARATHON_LOG.md`
+2026-09-04 03:23條目。下一輪先查`data/composite_zscore_v1_random_
+control_checkpoint.json`是否已到300 draws，到了就直接判percentile
+CHEAP_PASS/FAIL，沒到且行程還活著就繼續等，行程死了才重跑。
