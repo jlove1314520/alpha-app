@@ -507,6 +507,15 @@ hit_rate=0.59(n=41)，**train/val同號（皆負）**、|val_ic|=0.034超過最�
 `STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#77。佇列#11結案，接續佇列
 第一順位#12 Betting-Against-Beta/低beta。
 
+**【2026-09-04馬拉松第334輪補充——`CALIBRATION_PROBE.md`「未定」路徑300檔
+重跑，`TRIALS_LEDGER.md`#101】**：保留②「更大樣本統計力可能改善」被本輪
+證偽——300檔樣本（248可用，組內中位數成員數4→6檔、可用產業組數10→20組，
+確實變密了）percentile不升反降（82.8→**41.9**），IC量級也萎縮約
+1/3~1/5，判定從「未定」正式改回**確定FAIL**，且比原100檔證據更明確
+排除檢定力不足的可能。保留①（產業分類歧義未修正）、只測單一基底因子
+兩項限制仍未解除。完整見`STRATEGY_GRAVEYARD.md`該條目補充、
+`TRIALS_LEDGER.md`#101。
+
 ---
 
 ### 12. Betting-Against-Beta / 低beta（Frazzini-Pedersen 2014）

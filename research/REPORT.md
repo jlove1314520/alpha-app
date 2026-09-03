@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第 334 輪 · 2026-09-04T07:33+08:00 · TW · 接續第331輪，重跑`#77 f_rel_strength`產業中性版300檔樣本cheap gate（依`CALIBRATION_PROBE.md`指令） · 248/300可用，train/val同號但null percentile從82.8驟降到41.9（未過90.0門檻），判定從「未定」正式改回確定FAIL，反駁原本「更大樣本統計力改善」的猜測，寫入`TRIALS_LEDGER.md`#101
+
 ## 第 333 輪 · 2026-09-04T07:03+08:00 · US · 接續第329輪「下一步」，新增`us_portfolio_pilot_real_data.py`把`us_portfolio_backtest.py`引擎接上138檔真實快取美股+SPY（零新增API呼叫） · 訊號用已定案FAIL的`f_us_momentum_12m`純接線測試（不進TRIALS_LEDGER）：TRAIN/VAL兩期alpha皆不顯著（p=0.242/0.691）、beta合理（0.87/0.90）、引擎全程無crash、unresolved皆空——US軌「組合回測地基」（引擎+真實資料）至此完成，下一步卡點是US軌尚無任何深挖後成立的PASS因子
 
 ## 第 332 輪 · 2026-09-04T06:33+08:00 · FUT · 依2026-09-03「US/FUT主軸也是組合策略層級」裁示，查證跨商品橫斷面池的資料源可用性（`fut_probe_multi_commodity.py`，新增，唯讀） · MTX/TE/TF三商品皆有資料且深度足夠（2000/2001年起～2024-12-31），唯TF只有日盤無夜盤；非因子判定，不佔TRIALS_LEDGER列，跨商品pooling方法論設計待未來輪次

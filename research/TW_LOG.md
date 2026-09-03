@@ -1581,3 +1581,13 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 - **判定**：`#79`從`CALIBRATION_PROBE.md`標記的「未定（待300檔重跑）」正式改回**確定FAIL**——300檔後percentile往門檻方向小幅移動（符合「檢定力隨樣本擴大提升」的預期），但train/val方向不一致這項判準跟樣本大小無關，300檔沒有解決這個根本問題，不是被錯殺的邊緣案例。已寫入`TRIALS_LEDGER.md`#100、`STRATEGY_GRAVEYARD.md`（原條目續記補充，未新開條目）。
 - 下一輪可接續依`CALIBRATION_PROBE.md`「接著依序重跑#77/#79/#91」指令，處理`#77`（`f_rel_strength`產業中性版）或`#91`（`revenue_trend_surprise_low_attention`），兩者目前仍列「未定（待300檔重跑）」。
 - `is_holdout_consumed()`本輪確認`False`。全程讀取本機快取（T86回補100%＋既有FinMind快取），零新增API呼叫。`git status`開工時確認除既有殘留變更（`.github/workflows/market.yml`／`.github/workflows/quotes.yml`／`data/rate_limit_state.json`已修改，另有多個未追蹤log/腳本殘留檔案），研判皆為另一互動session／自動化workflow留下，未觸碰、未查看、未納入本輪commit。已刪除舊的`round330_inst_streak_300.log`殘留檔（未曾commit，屬暫存執行紀錄），新的`round331_inst_streak_300.log`同樣不進commit（仿照既有`*_run.log`慣例不追蹤）。
+
+## 第334輪（2026-09-04T07:33+08:00，TW）——接續第331輪，重跑`#77 f_rel_strength`產業中性版300檔樣本cheap gate，確認FAIL（且證據比100檔更明確排除檢定力不足）
+
+- **取鎖**：乾淨（非陳舊鎖檔，pid正常釋放）。
+- **選軌**：三軌時間戳TW 06:10（第331輪，最舊）／US 07:03（第333輪）／FUT 06:33（第332輪）——依輪替選TW。
+- **工作單位**：依`CALIBRATION_PROBE.md`結論(乙)＋`MARATHON_PROTOCOL.md`操作指令「接著依序重跑#77/#79/#91」，接續第331輪完成`#79`後留下的下一步，本輪重跑`#77`（`f_rel_strength`產業中性版，`factor_ic_sector_neutral_rel_strength.py`），是`portfolio_multifactor_v3`（若未來要迭代組合成分因子）的替換候選前置檢查，不是新開單因子試驗。
+- **執行**：腳本零修改重跑（`factor_ic.py::SAMPLE_SIZE`已由校準探針改100→300）。300檔樣本248/300可用，216/248有非ETF產業分類，121個20交易日快照，診斷（`MIN_GROUP_SIZE=3`）中位數每快照可用產業組20組（原10組）、組內中位數成員數6檔（原4檔）、中位數可用個股156檔（85/121快照有效）。TRAIN mean_ic=-0.0113 IR=-0.107（n=46期）；VAL mean_ic=-0.0065 IR=-0.074 hit_rate=0.49（n=39期）；train/val同號（皆負，跟原100檔一致）；null percentile=**41.9**（門檻90.0，未過，**大幅低於**原100檔樣本的82.8）。執行時間約2分鐘，全程讀取本機快取，零新增API呼叫。
+- **判定**：`#77`從`CALIBRATION_PROBE.md`標記的「未定（待300檔重跑）」正式改回**確定FAIL**——但這次跟`#79`（percentile小幅提升）方向相反：percentile從82.8驟降到41.9、IC量級縮小約1/3~1/5，反駁了`STRATEGY_GRAVEYARD.md`原記錄的保留②「更大樣本讓每組10檔以上，統計力可能明顯改善」猜測；本輪組內密度確實改善（4→6檔）但percentile不升反降，暗示原100檔樣本的82.8很可能是小樣本雜訊放大出的假邊緣訊號，不是被稀釋的真訊號。已寫入`TRIALS_LEDGER.md`#101、`STRATEGY_GRAVEYARD.md`（同條目續記，未新開）、`HYPOTHESIS_QUEUE.md`#11（同步補充）。
+- **is_holdout_consumed()**：確認`False`（全程讀取本機快取，零新增API呼叫）。
+- **下一步**：`CALIBRATION_PROBE.md`「未定」清單TW軌最後一個項目`#91`（`revenue_trend_surprise_low_attention`）待下一輪TW軌接續重跑；三個TW軌「未定」項目跑完後，這個300檔補查任務即告一段落。
