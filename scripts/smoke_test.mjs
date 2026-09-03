@@ -876,10 +876,44 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("24. 設定頁資料新鮮度卡片：每個監控檔都畫出一列、狀態值合法、無undefined/NaN、摘要有完成（逾期標紅只驗有跑完，不強求全綠）",
     freshnessErrors.length === 0, freshnessErrors.join("; "));
 
+  // 25.【2026-09-03深夜新增，乙.4/乙.5】(a)未設定即時伺服器時首頁要誠實標
+  // 「離線…顯示最後收盤」（使用者指定字眼）；(b)個股頁走勢圖改用lightweight-charts
+  // 後必須真的畫出東西：canvas（函式庫載入成功）或退回SVG折線（離線/CDN故障）
+  // 兩者擇一，但不能空白/停在「載入中」。FinMind日線用route餵假資料，避免測試
+  // 結果被FinMind額度/封鎖左右（跟check 15/16同一精神）。
+  const liveUiErrors = [];
+  try {
+    await page.evaluate(() => { try { localStorage.removeItem("alpha_live_url"); localStorage.removeItem("alpha_live_token"); } catch (e) {} });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(500);
+    const st = await page.evaluate(() => { loadLiveConfig(); renderLiveStatus(); return document.getElementById("home-live-status")?.textContent || ""; });
+    if (!/離線/.test(st) || !/最後收盤/.test(st)) liveUiErrors.push(`首頁即時狀態列應標「離線…顯示最後收盤」，實際「${st}」`);
+    const fakeRows = [];
+    for (let i = 30; i >= 1; i--) {
+      const d = new Date(Date.now() - i * 86400000); const ds = d.toISOString().slice(0, 10);
+      const c = 1000 + (30 - i) * 3;
+      fakeRows.push({ date: ds, stock_id: "2330", open: c - 5, max: c + 8, min: c - 9, close: c, spread: 3, Trading_Volume: 20000000, Trading_money: 20000000 * c });
+    }
+    await page.route("**/api.finmindtrade.com/**", (route) => {
+      if (route.request().url().includes("TaiwanStockPrice")) route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ msg: "success", status: 200, data: fakeRows }) });
+      else route.continue();
+    });
+    await page.evaluate(() => window.openStock("2330"));
+    await page.waitForFunction(() => { const el = document.getElementById("trend-chart"); return el && (el.querySelector("canvas") || el.querySelector("svg polyline")); }, null, { timeout: 15000 }).catch(() => {});
+    const ch = await page.evaluate(() => { const el = document.getElementById("trend-chart"); return { canvas: !!el.querySelector("canvas"), svg: !!el.querySelector("svg polyline"), text: (el.textContent || "").slice(0, 80), lwc: typeof LightweightCharts !== "undefined" }; });
+    if (!ch.canvas && !ch.svg) liveUiErrors.push(`個股頁走勢圖沒有畫出canvas也沒有SVG折線（lightweight-charts載入=${ch.lwc}，內容「${ch.text}」）`);
+    await page.unroute("**/api.finmindtrade.com/**");
+    results.stock_chart_renderer = ch.canvas ? "lightweight-charts(canvas)" : (ch.svg ? "svg-fallback" : "none");
+  } catch (e) {
+    liveUiErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("25. 即時伺服器未設定時首頁誠實標「離線，顯示最後收盤」；個股頁走勢圖（lightweight-charts canvas或SVG退回）真的有畫出來",
+    liveUiErrors.length === 0, liveUiErrors.join("; ") || `renderer=${results.stock_chart_renderer}`);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

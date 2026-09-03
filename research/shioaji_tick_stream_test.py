@@ -19,6 +19,11 @@ from datetime import datetime, timezone, timedelta
 
 import shioaji_quotes as sq
 
+# 測試進程內把熱檔預設路徑改到暫存目錄，避免測試把假tick寫進正式的熱檔讓
+# alpha_live_server.py誤以為現在有即時資料（新建的TickState讀的是模組常數）。
+import tempfile as _tempfile
+sq.LIVE_STATE_PATH = sq.Path(_tempfile.gettempdir()) / "alpha_test_live_state.json"
+
 TW_TZ = timezone(timedelta(hours=8))
 
 
@@ -173,8 +178,56 @@ def test_trading_window_boundary():
     print("test_trading_window_boundary PASS")
 
 
+def test_kbar_aggregation_per_minute():
+    """2026-09-03深夜新增：同一分鐘內多筆tick聚合成一根K（O=第一筆、H/L=極值、
+    C=最後一筆、V=累加），下一分鐘另開一根；跨日自動清空。"""
+    state = sq.TickState()
+    state.live_state_path = None  # 這個測試不碰檔案
+    t0 = datetime(2026, 9, 4, 9, 0, 5)
+    state.add_tick("2330", 1000.0, 3, t0)
+    state.add_tick("2330", 1005.0, 2, t0.replace(second=20))
+    state.add_tick("2330", 998.0, 1, t0.replace(second=50))
+    state.add_tick("2330", 1002.0, 4, t0.replace(minute=1, second=1))
+    bars = state.kbars_snapshot()["2330"]
+    assert len(bars) == 2, f"應有2根K，實際{len(bars)}"
+    b0, b1 = bars
+    assert (b0["t"], b0["o"], b0["h"], b0["l"], b0["c"], b0["v"]) == ("2026-09-04T09:00", 1000.0, 1005.0, 998.0, 998.0, 6), b0
+    assert (b1["t"], b1["o"], b1["c"], b1["v"]) == ("2026-09-04T09:01", 1002.0, 1002.0, 4), b1
+    state.add_tick("2330", 1010.0, 1, datetime(2026, 9, 5, 9, 0, 0))  # 跨日
+    bars2 = state.kbars_snapshot()["2330"]
+    assert len(bars2) == 1 and bars2[0]["t"] == "2026-09-05T09:00", "跨日應清空前一天的K"
+    state.add_tick("2330", None, 1, t0)  # price None不能炸也不能加bar
+    print("test_kbar_aggregation_per_minute PASS")
+
+
+def test_live_state_hot_file_written_atomically():
+    """2026-09-03深夜新增：熱檔內容要同時有quotes/kbars/mode/kbars_mode，且有
+    每秒最多一次的節流（第二次緊接著呼叫不寫、force=True才寫）。"""
+    import tempfile, json as _json, os
+    tmpdir = tempfile.mkdtemp()
+    path = sq.Path(tmpdir) / "hot.json"
+    state = sq.TickState()
+    state.live_state_path = path
+    sq._make_tick_stk_handler(state, "2330", None)(_fake_tick_stk(close="1050.0"))
+    assert path.exists(), "第一筆tick後熱檔應該已寫出"
+    doc = _json.loads(path.read_text(encoding="utf-8"))
+    assert doc["mode"] == "hot-file" and doc["kbars_mode"] == "tick-aggregated-1m", doc.keys()
+    assert doc["quotes"]["2330"]["last"] == 1050.0
+    assert doc["kbars"]["2330"][0]["c"] == 1050.0 and doc["market_status"] == "open"
+    assert state.maybe_write_live_state() is False, "1秒內第二次呼叫應被節流"
+    assert state.maybe_write_live_state(force=True, market_status="closed") is True
+    assert _json.loads(path.read_text(encoding="utf-8"))["market_status"] == "closed"
+    assert not (sq.Path(tmpdir) / "hot.json.tmp").exists(), "暫存檔應已被原子替換掉"
+    for f in os.listdir(tmpdir):
+        os.remove(os.path.join(tmpdir, f))
+    os.rmdir(tmpdir)
+    print("test_live_state_hot_file_written_atomically PASS")
+
+
 def main():
     tests = [
+        test_kbar_aggregation_per_minute,
+        test_live_state_hot_file_written_atomically,
         test_tick_stk_handler_updates_state,
         test_bidask_stk_handler_updates_state_without_clobbering_tick_fields,
         test_quote_idx_handler_computes_change_pct_from_reference,

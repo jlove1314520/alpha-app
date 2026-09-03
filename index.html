@@ -19,6 +19,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- 2026-09-03深夜（乙.5）：TradingView lightweight-charts 5.2.1（Apache-2.0）。使用者原話指定cdnjs，但cdnjs
+     沒有收錄這個函式庫（api.cdnjs.com搜尋結果為空），改用官方npm經jsdelivr發行、版本釘死；async載入，
+     載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@5.2.1/dist/lightweight-charts.standalone.production.js" async></script>
 <title>Alpha 台美股 AI 交易</title>
 <style>
   /* 2026-08-24 改版：私人銀行風格（暗色＋香檳金）。設計 Token 整組換掉，
@@ -437,6 +441,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <span>最後更新：<b id="home-updated-tm">--:--</b></span>
       <span class="press refresh-btn" onclick="refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
     </div>
+    <!-- 2026-09-03深夜（乙.4）：即時伺服器連線狀態。連上→「即時連線中」；連不上/未設定→
+         「離線，顯示最後收盤 MM-DD」（使用者指定字眼，退回git冷資料時必須明講）。 -->
+    <div class="note" id="home-live-status" style="margin:-4px 0 8px;font-size:10px"></div>
     <!-- 2026-09-02新增：盤中自動輪詢狀態誠實揭露，文字由updatePollNote()動態
          填入（「約每15秒自動更新（近即時輪詢，非逐筆tick）」或「已收盤，暫停
          自動更新」），不讓使用者誤以為是逐筆串流。 -->
@@ -765,7 +772,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="subscreen active" id="sub-ov">
       <div class="card">
-        <h3>走勢（近月日收盤）</h3>
+        <h3 style="display:flex;justify-content:space-between;align-items:center"><span>走勢</span><span class="mkt-toggle" id="trend-mode-toggle" style="padding:2px"></span></h3>
         <div id="trend-chart"><div class="note">載入中…</div></div>
         <div class="note" id="trend-note">來源：FinMind 日收盤價</div>
       </div>
@@ -1056,6 +1063,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
       </div>
       <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗會誠實顯示查無資料，不會偷用過期的舊快取頂替。所有資料為盤後/延遲資料，非即時報價。</div>
+    </div>
+
+    <!-- 2026-09-03深夜（乙.4）：Phase 1冷熱分離的「熱」資料入口。網址/token只存本機localStorage。 -->
+    <div class="card">
+      <h3>即時伺服器（Phase 1 冷熱分離）</h3>
+      <div class="setting-row">
+        <span>伺服器網址</span>
+        <div class="setting-input"><input id="set-live-url" type="url" placeholder="https://…或 http://192.168.x.x:8001" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+      </div>
+      <div class="setting-row" style="margin-top:8px">
+        <span>X-Alpha-Local-Token</span>
+        <div class="setting-input"><input id="set-live-token" type="password" placeholder="伺服器啟動時印在終端機" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+      </div>
+      <div class="note" id="live-status-note" style="margin-top:8px">尚未設定</div>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="testLiveConnection()">測試連線</button>
+      <div class="note" style="margin-top:6px">連得上時：首頁/市場頁/個股頁的數字改由本機 alpha_live_server.py 的串流更新（伺服器端目前是每2秒比對一次再送，不是真逐筆推送，回應會標 mode=poll-diff-2s），個股頁可切「1分K(即時)」（本機 tick 聚合，非 api.kbars）。連不上時自動退回 GitHub 冷資料並標「離線，顯示最後收盤」。三個端點一律驗 token，即使已經過 Cloudflare Access／私有網路。網址與 token 只存在你的裝置本機，不會上傳。</div>
     </div>
 
     <div class="card">
@@ -1431,8 +1454,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     };
   }
   async function loadIntradayQuotes(){
-    try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok)INTRADAY_TW=await r.json()}catch(e){console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
-    try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok)INTRADAY_US=await r.json()}catch(e){console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
+    // 2026-09-03深夜（乙.4）：即時串流連線中時，quotes_tw/us這兩份Actions冷檔（10分鐘才變一次、
+    // 台股那份859KB）60秒內不重抓——串流每幾秒觸發一次重繪，每次都重抓會把手機流量吃光。
+    const liveSkip=LIVE.connected;
+    if(!(liveSkip&&Date.now()-INTRADAY_TW_AT<60000)){
+      try{const r=await fetch('data/quotes_tw.json?t='+Date.now());if(r.ok){INTRADAY_TW=await r.json();INTRADAY_TW_AT=Date.now()}}catch(e){console.warn('[loadIntradayQuotes:tw]',e);recordGlobalError('loadIntradayQuotes:tw',e)}
+    }
+    if(!(liveSkip&&Date.now()-INTRADAY_US_AT<60000)){
+      try{const r=await fetch('data/quotes_us.json?t='+Date.now());if(r.ok){INTRADAY_US=await r.json();INTRADAY_US_AT=Date.now()}}catch(e){console.warn('[loadIntradayQuotes:us]',e);recordGlobalError('loadIntradayQuotes:us',e)}
+    }
     await ensureIbkrQuotes();
     await ensureSinopacQuotes();
     try{updateClocks()}catch(e){console.warn('[loadIntradayQuotes:updateClocks]',e);recordGlobalError('loadIntradayQuotes:updateClocks',e)}
@@ -1447,14 +1477,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 呼叫順序（沒有做快取，跟這支App其他報價載入函式的既有慣例一致，
   // 每次都重抓）。
   async function ensureIbkrQuotes(){
+    if(LIVE.connected&&Date.now()-LIVE.ibkrAt<20000)return; // 2026-09-03深夜：串流剛送來的資料比git冷檔新，不要蓋掉
     try{const r=await fetch('data/quotes_ibkr.json?t='+Date.now());INTRADAY_IBKR=r.ok?await r.json():null}catch(e){console.warn('[ensureIbkrQuotes]',e);INTRADAY_IBKR=null}
   }
   async function ensureSinopacQuotes(){
+    if(LIVE.connected&&Date.now()-LIVE.sinopacAt<20000)return; // 同上
     try{const r=await fetch('data/quotes_sinopac.json?t='+Date.now());INTRADAY_SINOPAC=r.ok?await r.json():null}catch(e){console.warn('[ensureSinopacQuotes]',e);INTRADAY_SINOPAC=null}
   }
   // 資料超過20分鐘沒更新就不當作「盤中即時」使用了（寧可退回FinMind日線，也不要
   // 顯示過期到失去意義的「盤中」報價卻讓人以為是新的）。
   const INTRADAY_STALE_MIN=20;
+  // 2026-09-03深夜（乙.4）本機即時伺服器連線狀態（函式定義在設定頁區塊startLiveStream()等）。
+  const LIVE={url:null,token:null,configured:false,connected:false,lastEventAt:null,kbarsLast:{},abort:null,retryMs:3000,lastError:null,sinopacAt:0,ibkrAt:0,sourceMode:null,streamMode:null};
+  let INTRADAY_TW_AT=0,INTRADAY_US_AT=0;
   // 2026-08-26 新增（P2）：「無報價」要說明原因，不能只丟一個沒有解釋的空狀態——
   // 依可取得的訊號盡量誠實分類成「休市」／「資料源失敗」／「未涵蓋」三種之一。
   function noQuoteReason(code,us){
@@ -1637,6 +1672,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   async function fastPollTick(){
     const {twActive,usActive}=updatePollNote();
+    if(LIVE.connected)return; // 2026-09-03深夜（乙.4）：即時串流接管更新（scheduleLiveRerender），輪詢冷檔沒有意義
     if(!twActive&&!usActive)return; // 兩個市場都收盤，不輪詢
     if(CURRENT_TAB!=='home'&&CURRENT_TAB!=='market')return; // 使用者沒在看這兩頁，不輪詢
     if(document.visibilityState!=='visible')return; // App在背景/螢幕鎖定，不輪詢
@@ -2875,13 +2911,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const cls=(iq.change||0)>=0?'pos':'neg';
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(iq.price);pe.className=cls;
         const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(2)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
-        if(px.length)document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
+        if(px.length)renderStockChart(code,px,true);
         setTxt('trend-note',`來源：IBKR${intradayTag(iq)}`);
       }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
         const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(last.Close);pe.className=cls;
         const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(2)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
-        document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.Close),v=>'$'+nf(v));
+        renderStockChart(code,px,true);
         setTxt('trend-note',`來源：FinMind USStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價）`);
       }else{setTxt('sh-price','—');setTxt('sh-chg',fmEmptyMsg('查無此代號'));document.getElementById('trend-chart').innerHTML='<div class="note">'+fmEmptyMsg('查無資料')+'</div>'}
       ['kn-per','kn-pbr','kn-yield','kn-yoy','kn-turnover','kn-vol-mult'].forEach(id=>setTxt(id,'—'));
@@ -2922,13 +2958,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const cls=(iq.change||0)>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(iq.price);pe.className=cls;
       const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
-      if(px.length)document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.close),v=>nf(v));
+      if(px.length)renderStockChart(code,px,false);
       setTxt('trend-note',`來源：Shioaji${intradayTag(iq)}`);
     }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;
       const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
-      document.getElementById('trend-chart').innerHTML=trendChart(px.map(x=>x.close),v=>nf(v));
+      renderStockChart(code,px,false);
       setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價，原始未還原股價）`);
     }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
     loadMarginChip(code,px);
@@ -3840,7 +3876,208 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     renderColorSchemeToggle();
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
+    _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
   }
+
+  // ══════ 2026-09-03深夜（乙.4）本機即時伺服器：偵測→SSE接管→連不上退回冷資料 ══════
+  // 伺服器=research/alpha_live_server.py（三端點一律要X-Alpha-Local-Token）。瀏覽器原生
+  // EventSource不能帶自訂標頭，所以這裡用fetch()讀text/event-stream自己切事件——刻意
+  // 為了保住token驗證（使用者補充指令三），不是不會用EventSource。
+  function loadLiveConfig(){
+    try{LIVE.url=((localStorage.getItem('alpha_live_url')||'').trim().replace(/\/+$/,''))||null;LIVE.token=(localStorage.getItem('alpha_live_token')||'').trim()||null}
+    catch(e){console.warn('[loadLiveConfig]',e);LIVE.url=null;LIVE.token=null}
+    LIVE.configured=!!(LIVE.url&&LIVE.token);
+  }
+  function saveLiveConfig(){
+    const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
+    try{if(u)localStorage.setItem('alpha_live_url',u.value.trim());if(t)localStorage.setItem('alpha_live_token',t.value.trim())}catch(e){console.warn('[saveLiveConfig]',e);recordGlobalError('saveLiveConfig',e)}
+    loadLiveConfig();renderLiveStatus();restartLiveStream();
+  }
+  function liveHeaders(){return {'X-Alpha-Local-Token':LIVE.token||''}}
+  async function liveFetch(path,timeoutMs){
+    const ac=new AbortController();const t=setTimeout(()=>ac.abort(),timeoutMs||4000);
+    try{return await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',signal:ac.signal})}finally{clearTimeout(t)}
+  }
+  function lastCloseLabel(){
+    // 使用者指定字眼「離線，顯示最後收盤 MM-DD」：用台北日期、MM-DD兩位數格式
+    const d=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.fetched_at?new Date(INTRADAY_SINOPAC.fetched_at):null;
+    if(!d||isNaN(d))return '—';
+    const z=_zonedParts(d,'Asia/Taipei');return String(z.m).padStart(2,'0')+'-'+String(z.d).padStart(2,'0');
+  }
+  function renderLiveStatus(){
+    let txt,color;
+    if(!LIVE.configured){txt='離線（未設定即時伺服器），顯示最後收盤 '+lastCloseLabel();color='var(--ink-3)'}
+    else if(LIVE.connected){txt='● 即時連線中（本機伺服器・'+(LIVE.sourceMode==='hot-file'?'熱檔秒級':'冷檔')+(LIVE.streamMode?'・'+LIVE.streamMode:'')+'）';color='#1aa876'}
+    else{txt='離線（連不上即時伺服器'+(LIVE.lastError?'：'+LIVE.lastError:'')+'），顯示最後收盤 '+lastCloseLabel();color='#e6383f'}
+    const el=document.getElementById('home-live-status');if(el){el.textContent=txt;el.style.color=color}
+    const note=document.getElementById('live-status-note');if(note){note.textContent=txt;note.style.color=color}
+    const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
+    if(u&&document.activeElement!==u)u.value=LIVE.url||'';
+    if(t&&document.activeElement!==t)t.value=LIVE.token||'';
+  }
+  async function testLiveConnection(){
+    loadLiveConfig();
+    if(!LIVE.configured){toast('請先填伺服器網址與token');return}
+    try{
+      const r=await liveFetch('/live/quotes',5000);
+      if(r.status===401){LIVE.lastError='token不正確';toast('token不正確（401）')}
+      else if(!r.ok){LIVE.lastError='HTTP '+r.status;toast('伺服器回應 HTTP '+r.status)}
+      else{const d=await r.json();LIVE.lastError=null;toast('連線成功：台股來源 '+((d.sinopac&&d.sinopac.source_mode)||'無')+'、1分K '+Object.keys(d.kbars_last||{}).length+' 檔');restartLiveStream()}
+    }catch(e){LIVE.lastError=e.name==='AbortError'?'逾時':(e.message||String(e));toast('連不上：'+LIVE.lastError)}
+    renderLiveStatus();
+  }
+  function applyLiveSnapshot(ev){
+    if(ev.sinopac&&ev.sinopac.quotes){INTRADAY_SINOPAC=ev.sinopac;LIVE.sinopacAt=Date.now();LIVE.sourceMode=ev.sinopac.source_mode||null}
+    if(ev.ibkr&&ev.ibkr.quotes){INTRADAY_IBKR=ev.ibkr;LIVE.ibkrAt=Date.now()}
+    LIVE.kbarsLast=ev.kbars_last||{};LIVE.lastEventAt=Date.now();LIVE.streamMode=ev.mode||null;
+  }
+  async function rerenderAfterLive(){
+    try{
+      if(CURRENT_TAB==='home'){await hydrateHome();flashPriceEls('#wl-list');flashPriceEls('#home-idx-rows')}
+      else if(CURRENT_TAB==='market'){
+        if(MKT_STATE.market==='TW'){await loadMarketIndex();flashPriceEls('#idx-rows')}
+        else if(MKT_STATE.market==='US'){await loadMarketUS();flashPriceEls('#us-idx-rows')}
+        else if(MKT_STATE.market==='FUT'){await loadMarketFUT()}
+      }else if(CURRENT_TAB==='stock'){liveUpdateStockPage()}
+      renderLiveStatus();
+    }catch(e){console.warn('[rerenderAfterLive]',e);recordGlobalError('rerenderAfterLive',e)}
+  }
+  let _liveRerenderTimer=null,_liveLastRerender=0;
+  function scheduleLiveRerender(){
+    if(_liveRerenderTimer)return;
+    const wait=Math.max(0,3000-(Date.now()-_liveLastRerender)); // 首頁/市場頁重繪最多每3秒一次；個股頁1分K更新很輕，同一節奏即可
+    _liveRerenderTimer=setTimeout(()=>{_liveRerenderTimer=null;_liveLastRerender=Date.now();rerenderAfterLive()},wait);
+  }
+  async function startLiveStream(){
+    loadLiveConfig();renderLiveStatus();
+    if(!LIVE.configured||LIVE.abort)return;
+    const ac=new AbortController();LIVE.abort=ac;
+    try{
+      const r=await fetch(LIVE.url+'/live/stream',{headers:liveHeaders(),cache:'no-store',signal:ac.signal});
+      if(!r.ok){LIVE.lastError=r.status===401?'token不正確':'HTTP '+r.status;throw new Error(LIVE.lastError)}
+      LIVE.connected=true;LIVE.lastError=null;LIVE.retryMs=3000;renderLiveStatus();
+      const reader=r.body.getReader();const dec=new TextDecoder();let buf='';
+      while(true){
+        const {value,done}=await reader.read();if(done)break;
+        buf+=dec.decode(value,{stream:true});
+        let idx;
+        while((idx=buf.indexOf('\n\n'))>=0){
+          const chunk=buf.slice(0,idx);buf=buf.slice(idx+2);
+          const dataLines=chunk.split('\n').filter(l=>l.startsWith('data:')).map(l=>l.slice(5).trim());
+          if(!dataLines.length)continue; // retry:/": keepalive"註解行，沒有資料
+          try{applyLiveSnapshot(JSON.parse(dataLines.join('\n')));scheduleLiveRerender()}catch(e){console.warn('[live:parse]',e)}
+        }
+      }
+      LIVE.lastError='串流結束';
+    }catch(e){
+      if(!ac.signal.aborted)LIVE.lastError=LIVE.lastError||(e.name==='TypeError'?'無回應或被拒絕':(e.message||String(e)));
+    }finally{
+      LIVE.connected=false;
+      if(LIVE.abort===ac)LIVE.abort=null;
+      renderLiveStatus();
+      if(!ac.signal.aborted){
+        const wait=LIVE.retryMs;LIVE.retryMs=Math.min(30000,LIVE.retryMs*2); // 指數退避，最多30秒
+        setTimeout(()=>{startLiveStream().catch(e=>{console.warn('[live:reconnect]',e)})},wait);
+      }
+    }
+  }
+  function restartLiveStream(){
+    const old=LIVE.abort;LIVE.abort=null;if(old){try{old.abort()}catch(e){}}
+    LIVE.retryMs=3000;
+    setTimeout(()=>{startLiveStream().catch(e=>{console.warn('[live:start]',e);recordGlobalError('startLiveStream',e)})},200);
+  }
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'&&LIVE.configured&&!LIVE.connected&&!LIVE.abort)restartLiveStream();
+  });
+
+  // ══════ 2026-09-03深夜（乙.5）個股頁走勢圖：TradingView lightweight-charts ══════
+  // 日線=既有FinMind資料（沿用）；1分K=本機/live/kbars（shioaji_quotes.py用tick聚合，非api.kbars），
+  // 串流每個事件帶kbars_last→series.update()。函式庫載不到（離線/CDN故障）→退回既有SVG折線。
+  const STOCK_CHART={chart:null,series:null,mode:'daily',userPickedMode:false,code:null,us:false,daily:[],intraday:[],dailyNote:''};
+  function _cssVar(n,fb){try{return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||fb}catch(e){return fb}}
+  function lwcAvailable(){return typeof window.LightweightCharts!=='undefined'&&typeof window.LightweightCharts.createChart==='function'&&!!window.LightweightCharts.CandlestickSeries}
+  function _destroyStockChart(){if(STOCK_CHART.chart){try{STOCK_CHART.chart.remove()}catch(e){console.warn('[destroyStockChart]',e)}}STOCK_CHART.chart=null;STOCK_CHART.series=null}
+  // lightweight-charts的時間軸一律以UTC顯示，這裡把台北時間加8小時偏移，讓刻度顯示台北時間（常見做法）。
+  function _minuteBarToLwc(b){return {time:Math.floor(new Date(b.t+':00+08:00').getTime()/1000)+8*3600,open:b.o,high:b.h,low:b.l,close:b.c}}
+  function renderStockChart(code,rows,us){
+    const el=document.getElementById('trend-chart');if(!el)return;
+    if(STOCK_CHART.code!==code){STOCK_CHART.userPickedMode=false;STOCK_CHART.mode='daily'}
+    STOCK_CHART.code=code;STOCK_CHART.us=us;
+    STOCK_CHART.daily=(rows||[]).map(r=>us?{time:r.date,open:r.Open,high:r.High,low:r.Low,close:r.Close}:{time:r.date,open:r.open,high:r.max,low:r.min,close:r.close})
+      .filter(x=>x.time&&x.close!=null&&x.open!=null&&x.high!=null&&x.low!=null);
+    const hasIntraday=!us&&LIVE.connected&&!!LIVE.kbarsLast[code];
+    if(hasIntraday&&!STOCK_CHART.userPickedMode)STOCK_CHART.mode='intraday';
+    if(!hasIntraday)STOCK_CHART.mode='daily';
+    renderTrendModeToggle(hasIntraday);
+    setTimeout(()=>{const n=document.getElementById('trend-note');if(n&&n.textContent&&!/^1分K/.test(n.textContent))STOCK_CHART.dailyNote=n.textContent},0); // 記住日線來源說明，切回日線時還原（loadIntradayBars是非同步的，這個timeout(0)一定跑在它覆寫之前）
+    if(!lwcAvailable()){
+      _destroyStockChart();el.style.height='';
+      const closes=STOCK_CHART.daily.map(x=>x.close);
+      el.innerHTML=trendChart(closes,v=>(us?'$':'')+nf(v))+'<div class="note" style="font-size:10px">圖表函式庫（lightweight-charts）未載入，顯示簡易折線</div>';
+      return;
+    }
+    _destroyStockChart();el.innerHTML='';el.style.height='220px';
+    const LWC=window.LightweightCharts;
+    const chart=LWC.createChart(el,{width:el.clientWidth||320,height:220,
+      layout:{background:{type:'solid',color:'transparent'},textColor:_cssVar('--ink-3','#9aa0a6')},
+      grid:{vertLines:{color:'rgba(128,128,128,.12)'},horzLines:{color:'rgba(128,128,128,.12)'}},
+      rightPriceScale:{borderVisible:false},
+      timeScale:{borderVisible:false,timeVisible:STOCK_CHART.mode==='intraday',secondsVisible:false},
+      handleScroll:{vertTouchDrag:false}});
+    const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
+    const series=chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
+    STOCK_CHART.chart=chart;STOCK_CHART.series=series;
+    if(STOCK_CHART.mode==='intraday'){loadIntradayBars(code)}
+    else{series.setData(STOCK_CHART.daily);chart.timeScale().fitContent()}
+  }
+  async function loadIntradayBars(code){
+    try{
+      const r=await liveFetch('/live/kbars?code='+encodeURIComponent(code),5000);
+      if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||('HTTP '+r.status))}
+      const d=await r.json();
+      STOCK_CHART.intraday=(d.bars||[]).map(_minuteBarToLwc);
+      if(STOCK_CHART.series&&STOCK_CHART.code===code&&STOCK_CHART.mode==='intraday'){
+        STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:true}});
+        STOCK_CHART.series.setData(STOCK_CHART.intraday);STOCK_CHART.chart.timeScale().fitContent();
+      }
+      setTxt('trend-note',`1分K：本機 Shioaji tick 聚合（${d.mode}，${(d.bars||[]).length} 根，${d.hot_file_status==='hot-file'?'即時更新中':'非即時：常駐行程未在跑或已收盤'}）`);
+    }catch(e){
+      console.warn('[loadIntradayBars]',e);recordGlobalError('loadIntradayBars',e);
+      STOCK_CHART.mode='daily';STOCK_CHART.userPickedMode=false;
+      if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});STOCK_CHART.series.setData(STOCK_CHART.daily);STOCK_CHART.chart.timeScale().fitContent()}
+      renderTrendModeToggle(false);
+      setTxt('trend-note','1分K取得失敗（'+(e.message||e)+'），改顯示日線');
+    }
+  }
+  function renderTrendModeToggle(hasIntraday){
+    const el=document.getElementById('trend-mode-toggle');if(!el)return;
+    if(!hasIntraday){el.innerHTML='';return}
+    el.innerHTML=[['daily','日線'],['intraday','1分K(即時)']].map(([k,l])=>`<span class="press mtg-opt${STOCK_CHART.mode===k?' on':''}" onclick="setTrendMode('${k}')">${l}</span>`).join('');
+  }
+  function setTrendMode(k){
+    STOCK_CHART.mode=k;STOCK_CHART.userPickedMode=true;
+    if(k==='intraday'){loadIntradayBars(STOCK_CHART.code)}
+    else if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});STOCK_CHART.series.setData(STOCK_CHART.daily);STOCK_CHART.chart.timeScale().fitContent();setTxt('trend-note',STOCK_CHART.dailyNote||'')}
+    renderTrendModeToggle(true);
+  }
+  function liveUpdateStockPage(){
+    const code=currentCode;if(!code||CURRENT_TAB!=='stock')return;
+    const us=isUS(code);
+    const iq=intradayQuote(code,us);
+    if(iq&&iq.price!=null){
+      const cls=(iq.change||0)>=0?'pos':'neg';
+      const pe=document.getElementById('sh-price');if(pe){pe.textContent=(us?'$':'')+nf(iq.price);pe.className=cls}
+      const ce=document.getElementById('sh-chg');if(ce){ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(us?2:1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls}
+    }
+    const bar=LIVE.kbarsLast[code];
+    if(!bar||STOCK_CHART.code!==code)return;
+    const tg=document.getElementById('trend-mode-toggle');
+    if(tg&&!tg.innerHTML)renderTrendModeToggle(true); // 開頁時還沒有1分K、現在有了→補上切換鈕
+    if(STOCK_CHART.series&&STOCK_CHART.mode==='intraday'){
+      try{STOCK_CHART.series.update(_minuteBarToLwc(bar))}catch(e){console.warn('[liveUpdateStockPage:update]',e)}
+    }
+  }
+  window.addEventListener('resize',()=>{if(STOCK_CHART.chart){const el=document.getElementById('trend-chart');if(el&&el.clientWidth)STOCK_CHART.chart.applyOptions({width:el.clientWidth})}});
 
   // ── 2026-09-03（P0三-三.2）設定頁「資料新鮮度」：每個資料檔最後更新時間＋是否
   // 逾期（逾期標紅）。判定規則跟 generate_status_json.py::build_schedule_health()
@@ -3963,7 +4200,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-03.2359';
+  const APP_VERSION='2026-09-04.0020';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4085,6 +4322,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 才觸發loadAboutVersions()那次），使用者才能不用點進設定就一眼確認手機是
   // 不是新版。
   _safeAsync('loadAboutVersions',loadAboutVersions);
+  // 2026-09-03深夜（乙.4）：讀即時伺服器設定並嘗試連線；沒設定/連不上就維持冷資料路徑並標「離線」。
+  _safeSync('loadLiveConfig',loadLiveConfig);
+  _safeSync('renderLiveStatus',renderLiveStatus);
+  _safeAsync('startLiveStream',startLiveStream);
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)})}
 </script>
 </body>

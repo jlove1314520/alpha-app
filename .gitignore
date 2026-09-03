@@ -15,6 +15,9 @@ research/.shioaji_stream.pid
 research/shioaji_stream_stdout.log
 research/shioaji_stream_stderr.log
 research/.alpha_live_token
+# 2026-09-03深夜：shioaji_quotes.py常駐行程寫的本機熱檔（秒級快照+當日1分K），只給alpha_live_server.py讀，永遠不commit
+research/.live_state_sinopac.json
+research/.live_state_sinopac.json.tmp
 *.parquet
 *.db
 fred_key.txt

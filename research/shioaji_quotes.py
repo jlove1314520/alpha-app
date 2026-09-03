@@ -107,6 +107,17 @@ CONTRACTS_READY_WAIT_SEC = 3  # 登入後合約清單非同步下載，太快存
 FLUSH_INTERVAL_SEC = 60  # 2026-09-03緊急修正，見模組docstring「git commit/push頻率」完整理由
 TRADING_WINDOW_POLL_SEC = 30  # 常駐迴圈裡多久檢查一次「是否還在交易時段」
 
+# 2026-09-03深夜（使用者補充指令一＋乙「冷熱分離」）：常駐行程把「最新報價快照」＋
+# 「當日每分鐘OHLC」寫進本機**熱檔**（gitignored、永遠不commit）。1分K是用這支行程
+# 本來就持續收到的tick自己聚合出來的（見TickState.add_tick()），**不另開第二條Shioaji
+# 連線、不呼叫api.kbars()**——使用者明確裁示這樣做，理由是第二條連線會跟現有常駐連線
+# 衝突。alpha_live_server.py的/live/quotes、/live/stream、/live/kbars直接讀這個熱檔，
+# 跟它原本讀data/quotes_sinopac.json的做法一致，只是改讀秒級更新的檔案：兩個獨立行程
+# 在Windows上要「共用記憶體」，同機本地檔案是最不需要額外相依、最不會出事的做法
+# （真正把兩個行程合併成一個、tick回呼直接餵SSE，使用者已裁示排進佇列稍後做）。
+LIVE_STATE_PATH = Path(__file__).parent / ".live_state_sinopac.json"
+LIVE_STATE_MIN_INTERVAL_SEC = 1.0  # 熱檔最多每秒寫一次：tick一秒可能好幾筆，寫檔不必跟著每筆寫
+
 
 def _load_env(path: Path) -> dict[str, str]:
     kv = {}
@@ -214,6 +225,12 @@ class TickState:
     def __init__(self):
         self._lock = threading.Lock()
         self._quotes: dict[str, dict] = {}
+        # 2026-09-03深夜新增：當日1分K聚合（key -> {"YYYY-MM-DDTHH:MM" -> bar}），
+        # 只保留「今天」，跨日自動清空。
+        self._kbars: dict[str, dict[str, dict]] = {}
+        self._kbars_day: str | None = None
+        self._last_live_write = 0.0
+        self.live_state_path: Path | None = LIVE_STATE_PATH  # 測試可改指到暫存檔
 
     def update(self, key: str, patch: dict) -> None:
         with self._lock:
@@ -223,6 +240,69 @@ class TickState:
     def snapshot(self) -> dict:
         with self._lock:
             return {k: dict(v) for k, v in self._quotes.items()}
+
+    def add_tick(self, key: str, price, volume, ts) -> None:
+        """用已收到的一筆tick更新當日1分K（O/H/L/C/V）。`ts`是tick.datetime
+        （Shioaji給的是台北時間、naive datetime）；沒有就用現在時間。指數quote
+        沒有成交量，呼叫端傳0。"""
+        if price is None:
+            return
+        if ts is None:
+            ts = datetime.now(TW_TZ).replace(tzinfo=None)
+        day = ts.strftime("%Y-%m-%d")
+        minute = ts.strftime("%Y-%m-%dT%H:%M")
+        try:
+            vol = int(volume or 0)
+        except (TypeError, ValueError):
+            vol = 0
+        with self._lock:
+            if self._kbars_day != day:
+                self._kbars = {}
+                self._kbars_day = day
+            bars = self._kbars.setdefault(key, {})
+            bar = bars.get(minute)
+            if bar is None:
+                bars[minute] = {"t": minute, "o": price, "h": price, "l": price, "c": price, "v": vol}
+            else:
+                bar["h"] = max(bar["h"], price)
+                bar["l"] = min(bar["l"], price)
+                bar["c"] = price
+                bar["v"] += vol
+
+    def kbars_snapshot(self) -> dict[str, list[dict]]:
+        with self._lock:
+            return {k: [dict(b) for _, b in sorted(v.items())] for k, v in self._kbars.items()}
+
+    def maybe_write_live_state(self, force: bool = False, market_status: str = "open") -> bool:
+        """把最新快照＋當日1分K寫進本機熱檔（見LIVE_STATE_PATH說明），每秒最多
+        一次；callback執行緒直接呼叫，失敗只印log絕不拋出（不能讓訂閱掛掉）。
+        用「寫暫存檔→原子替換」避免讀的一方（alpha_live_server.py）讀到寫一半
+        的檔案。回傳這次有沒有真的寫。"""
+        if self.live_state_path is None:
+            return False
+        now_mono = time.monotonic()
+        with self._lock:
+            if not force and now_mono - self._last_live_write < LIVE_STATE_MIN_INTERVAL_SEC:
+                return False
+            self._last_live_write = now_mono
+        try:
+            payload = {
+                "updated_at": datetime.now(TW_TZ).isoformat(),
+                "market_status": market_status,
+                "connected": True,
+                "error": None,
+                "mode": "hot-file",
+                "kbars_mode": "tick-aggregated-1m",
+                "quotes": self.snapshot(),
+                "kbars": self.kbars_snapshot(),
+            }
+            tmp = self.live_state_path.with_suffix(".json.tmp")
+            tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+            tmp.replace(self.live_state_path)
+            return True
+        except Exception as e:
+            print(f"  [live_state熱檔寫入失敗] {type(e).__name__}: {e}", flush=True)
+            return False
 
 
 def _to_float(v):
@@ -258,6 +338,8 @@ def _make_tick_stk_handler(state: TickState, key: str, label: str | None):
             if label:
                 patch["label"] = label
             state.update(key, patch)
+            state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
+            state.maybe_write_live_state()
         except Exception as e:
             # callback裡任何例外都不能讓整個訂閱掛掉，只記log繼續收下一筆
             print(f"  [tick_stk callback異常] {key}: {type(e).__name__}: {e}", flush=True)
@@ -273,6 +355,7 @@ def _make_bidask_stk_handler(state: TickState, key: str):
                 "bid": _clean_positive(bid_list[0]) if bid_list else None,
                 "ask": _clean_positive(ask_list[0]) if ask_list else None,
             })
+            state.maybe_write_live_state()
         except Exception as e:
             print(f"  [bidask_stk callback異常] {key}: {type(e).__name__}: {e}", flush=True)
     return handler
@@ -299,6 +382,8 @@ def _make_tick_fop_handler(state: TickState, key: str, label: str | None):
             if label:
                 patch["label"] = label
             state.update(key, patch)
+            state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
+            state.maybe_write_live_state()
         except Exception as e:
             print(f"  [tick_fop callback異常] {key}: {type(e).__name__}: {e}", flush=True)
     return handler
@@ -313,6 +398,7 @@ def _make_bidask_fop_handler(state: TickState, key: str):
                 "bid": _clean_positive(bid_list[0]) if bid_list else None,
                 "ask": _clean_positive(ask_list[0]) if ask_list else None,
             })
+            state.maybe_write_live_state()
         except Exception as e:
             print(f"  [bidask_fop callback異常] {key}: {type(e).__name__}: {e}", flush=True)
     return handler
@@ -335,6 +421,8 @@ def _make_quote_idx_handler(state: TickState, key: str, label: str | None):
             if label:
                 patch["label"] = label
             state.update(key, patch)
+            state.add_tick(key, last, 0, getattr(quote, "datetime", None))  # 指數沒有成交量
+            state.maybe_write_live_state()
         except Exception as e:
             print(f"  [quote_idx callback異常] {key}: {type(e).__name__}: {e}", flush=True)
     return handler
@@ -547,6 +635,7 @@ def run_stream_daemon() -> None:
                     break
 
         _flush_and_push(state)  # 收盤前最後flush一次，不遺漏最後幾筆
+        state.maybe_write_live_state(force=True, market_status="closed")  # 熱檔也標記收盤，live server據此顯示「今日收盤」
     finally:
         try:
             api.logout()
