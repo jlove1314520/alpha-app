@@ -13,6 +13,29 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T07:29 — hypothesis_queue排程接續（#27複合z-score第2關） — 接手時PID 2037仍存活（06:52啟動，已運算37分鐘），checkpoint從06:52記錄的260/300持續輪詢7分鐘（07:21~07:28，每分鐘一次）皆維持260不動，查腳本確認`_save_checkpoint`每10筆draw才落盤一次（`composite_zscore_v1_random_control.py`第226-227行），推算260→270正在批次運算中屬正常現象非卡死，維持「不重啟、等待」策略不碰行程收工
+
+`ps -p 2037`確認行程存在（WINPID 34720，STIME 06:52:03），`tasklist`
+交叉確認CPU占用時Git Bash參數帶引號被MSYS路徑轉換搞亂（`/FI`被誤譯成
+路徑），改用純`ps -p`結果已足夠判斷「行程存在」這個唯一需要的訊號，
+沒有進一步追查CPU占用細節（不影響本輪判斷，記錄下來避免下一輪重複
+踩同一個Git Bash引號陷阱，若真的需要CPU占用可改用
+`powershell.exe -Command "Get-Process -Id 34720"`）。**進度**：以06:52
+（232筆）→07:21（260筆）約29分鐘28筆估算速率約62秒/draw，剩餘40筆
+理論還需約41分鐘（純運算時間，不含批次寫入延遲的變異）。**下一輪
+待辦**：先`ps -p 2037`確認存活狀態；存活就不碰繼續等（並查checkpoint
+是否已推進到270/280/...更接近300）；已死則檢查checkpoint是否已到300，
+未到用`CZC_TIME_BUDGET_SECONDS`（建議3600以上）重新nohup+disown背景
+啟動接續；到300就直接算percentile（`100*mean(abs(baseline_val_ic)>
+abs(random_draw_val_ic))`，門檻90.0）判CHEAP_PASS/FAIL並更新
+`TRIALS_LEDGER.md`/`HYPOTHESIS_QUEUE.md`#27。holdout本輪確認仍為
+`is_holdout_consumed()=False`。本輪`git status`確認repo同時有其他
+自動化來源留下的殘留變更（`.github/workflows/market.yml`/`quotes.yml`/
+`data/rate_limit_state.json`/多個`research/*_run.log`），依協定不觸碰、
+不納入本輪commit。
+
+---
+
 ## 2026-09-04T06:52 — hypothesis_queue排程接續（#27複合z-score第2關） — 接手時PID 883已自然結束（checkpoint停在232/300、mtime 06:35，本輪檢查時刻06:51已無存活行程），確認progress未遺失後用`CZC_TIME_BUDGET_SECONDS=3600`重新nohup+disown背景啟動（新PID 2037），確認3分鐘內存活無crash後收工留給下一輪
 
 `ps -p 883`（本輪查證方法沿用上一輪教訓，未用`tasklist`）確認已不存在，
