@@ -13,6 +13,30 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T00:15 — hypothesis_queue排程：#27隨機控制組(300draws)補checkpoint機制 — 未結案，已改善根基設施
+
+接手時發現上一輪背景啟動的`composite_zscore_v1_random_control.py`（無checkpoint
+版本）已持續運算超過45分鐘、CPU時間持續增加確認非卡死，但該腳本**300 draws
+跑完才一次寫入CSV**，跟「headless呼叫結束背景行程會被終止」這個已知風險（見
+`HYPOTHESIS_QUEUE.md`#4 dividend_yield_portfolio_v1的教訓）疊加，等同每次
+都可能從零重跑。已仿照`dividend_yield_portfolio_v1.py`已驗證有效的checkpoint
+模式（`CHECKPOINT_PATH`+`deadline`時間預算+每10筆draw落盤，且改用
+`(CONTROL_SEED, i)`衍生種子讓任一draw可獨立重放，不依賴rng呼叫順序）改寫
+腳本，終止舊行程（未產出任何部分結果，無進度可繼承）。**新發現**：這份
+腳本每次啟動要先跑`load_sample_with_factors()`（100檔股票、全部~25個
+`prepare_factors()`因子），實測光是這個載入步驟就要20分鐘以上（比先前
+`dividend_yield_portfolio_v1`的~100秒載入慢一個數量級——那個腳本只算
+單一因子，這個要算全部因子池），是比「300 draws本身要跑多久」更嚴重的
+瓶頸：每次重啟都要重付這筆固定成本。已用大時間預算（3000秒）重新在背景
+啟動（PID 33776，`composite_zscore_v1_random_control_run.log`），仍未
+拿到結果，下一輪先檢查`data/composite_zscore_v1_random_control_
+checkpoint.json`是否已有進度／`data/composite_zscore_v1_random_control.csv`
+是否已產出完整結果，若行程已死但只有部分checkpoint，直接重跑指令即可
+接續（不會重算已完成的draws），只是仍要重付一次載入成本。本輪因USD
+budget將近用盡收工。
+
+---
+
 ## 2026-09-03T23:50 — hypothesis_queue軌：接續#27多因子z-score複合評分第2關
 （300-draw隨機因子組合控制）— 上一輪陳舊鎖檔（未commit）留下的
 `composite_zscore_v1_random_control.py`有merge欄位殘留bug（第1個draw就

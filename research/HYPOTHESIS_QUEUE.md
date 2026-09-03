@@ -2027,3 +2027,17 @@ draws))`，門檻90.0）寫進本條目跟`TRIALS_LEDGER.md`正式判CHEAP_PASS�
 FAIL；若進程已死但CSV沒產生完整300列，直接重跑（bug已修好，理論上這次
 可以順利跑完，只是慢，需要抓時間預算，必要時背景啟動後這輪先收工，
 下一輪只做「檢查結果」不用重跑）。
+
+**狀態更新（2026-09-04T00:15排程接續，仍未結案，已改善根基設施）**：
+接手時上一輪背景行程仍在運算（CPU持續增加、非卡死）但完全沒有
+checkpoint機制，300 draws跑完才一次寫入。已比照`dividend_yield_
+portfolio_v1.py`checkpoint模式改寫`composite_zscore_v1_random_
+control.py`（`CHECKPOINT_PATH`+`deadline`時間預算+每10筆draw落盤，
+`(CONTROL_SEED,i)`衍生種子讓任一draw可獨立重放），終止舊行程重新
+啟動。**新發現的更嚴重瓶頸**：`load_sample_with_factors()`（100檔×
+全部~25個因子）光載入就要20分鐘以上，比每次重啟省下多少draw運算都
+更貴——真正的成本大頭是「重啟本身」不是「300 draws本身」。已用大
+時間預算(3000秒)重新在背景啟動，本輪收工時仍未產出結果。**下一輪
+待辦**：先查`data/composite_zscore_v1_random_control_checkpoint.json`
+／`data/composite_zscore_v1_random_control.csv`是否已有進度或完整
+結果，完整見`MARATHON_LOG.md`2026-09-04T00:15條目。

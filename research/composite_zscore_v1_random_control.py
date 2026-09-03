@@ -25,11 +25,26 @@ bonferroni_n=1（standalone單一控制測試，非批次），required_percenti
 （跟本佇列其餘標準gate同一把尺）。
 
 2026-09-03自動排程接續composite_zscore_v1.py「下一輪」。
+
+2026-09-04（無人值守hypothesis_queue排程接續）：改成checkpoint可續跑版本。
+原因：本輪接手時發現前一輪背景啟動的行程（無`nohup`級OS分離，只是
+headless session內用`&`丟到背景）已持續運算超過45分鐘、CPU時間持續
+增加確認非卡死，但**這份腳本原本完全沒有checkpoint機制，300 draws跑完
+才一次寫入CSV**——這正是`HYPOTHESIS_QUEUE.md`#4（`dividend_yield_
+portfolio_v1`）已經踩過並記錄在案的同一個根因（headless呼叫結束時
+背景行程被一併終止，見該條目2026-09-02T00:45狀態）。與其重複賭一次
+「這次背景行程會不會活過session邊界」，直接比照`dividend_yield_
+portfolio_v1.py`已驗證有效的checkpoint模式（`CHECKPOINT_PATH`落盤+
+`deadline`時間預算+每N筆draw就存檔一次），讓這份腳本也能真正跨輪累積
+進度，不看運氣。舊行程已終止（未產出任何部分結果，沒有進度可繼承）。
 """
 from __future__ import annotations
 
+import json
+import os
 import random
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -51,6 +66,19 @@ N_DRAWS = 300
 DRAW_K = 3  # 跟baseline因子數量一致
 CONTROL_SEED = 20260903
 WEIGHT_LOW, WEIGHT_HIGH = -1.0, 1.0
+
+CHECKPOINT_PATH = Path(__file__).parent / "data" / "composite_zscore_v1_random_control_checkpoint.json"
+
+
+def _load_checkpoint() -> dict:
+    if CHECKPOINT_PATH.exists():
+        return json.loads(CHECKPOINT_PATH.read_text(encoding="utf-8"))
+    return {"draw_records": []}
+
+
+def _save_checkpoint(ckpt: dict) -> None:
+    CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    CHECKPOINT_PATH.write_text(json.dumps(ckpt, indent=2, ensure_ascii=False), encoding="utf-8")
 
 # 完整清單，逐一對照 factors.py::prepare_factors() 原始碼（行518-769）確認，
 # 是該函式實際會產出的全部f_*欄位，非部分抽樣，也非憑印象列舉。
@@ -130,21 +158,21 @@ def mean_ic_train_val(factor_col: str, data: dict[str, pd.DataFrame], snapshots:
 def main():
     sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
     print("=== HYPOTHESIS_QUEUE.md#27 composite_zscore_v1 隨機因子組合控制 "
-          f"(N_DRAWS={N_DRAWS}, draw_k={DRAW_K}, pool_size={len(FACTOR_POOL)}) ===")
+          f"(N_DRAWS={N_DRAWS}, draw_k={DRAW_K}, pool_size={len(FACTOR_POOL)}) ===", flush=True)
 
     market_raw = load_dev("TaiwanStockPrice", "TAIEX", START_DATE)
     holdout.assert_no_holdout_leakage(market_raw, context="market_raw in composite_zscore_v1_random_control")
     market_df = prepare_market_data(market_raw)
 
-    print("Loading sample + computing factors (cached after first run)...")
+    print("Loading sample + computing factors (cached after first run)...", flush=True)
     data = load_sample_with_factors(sample_ids, market_df)
-    print(f"  {len(data)}/{len(sample_ids)} usable names")
+    print(f"  {len(data)}/{len(sample_ids)} usable names", flush=True)
     for sid, d in data.items():
         holdout.assert_no_holdout_leakage(d, date_col="date", context=f"data[{sid}] in composite_zscore_v1_random_control")
 
     calendar = sorted(market_df["date"].tolist())
     snapshots = build_snapshots(calendar, SNAPSHOT_START, holdout.VAL_END)
-    print(f"  {len(snapshots)} non-overlapping 20-trading-day snapshots, {SNAPSHOT_START}..{holdout.VAL_END}")
+    print(f"  {len(snapshots)} non-overlapping 20-trading-day snapshots, {SNAPSHOT_START}..{holdout.VAL_END}", flush=True)
 
     # 確認baseline複合欄位已存在（前一輪composite_zscore_v1.main()跑過的話會有，
     # 若這次是獨立重跑則自己補算，equal weight=1.0跟baseline定義完全一致）
@@ -154,15 +182,32 @@ def main():
             d[BASELINE_COMPOSITE_COL] = d[RANDOM_COMPOSITE_COL]
 
     baseline_train_ic, baseline_val_ic, n_train, n_val = mean_ic_train_val(BASELINE_COMPOSITE_COL, data, snapshots)
-    print(f"\n--- Baseline複合 (等權GP+value_pb+revenue_surprise) ---")
-    print(f"  TRAIN mean_ic={baseline_train_ic:+.4f} (n={n_train})  VAL mean_ic={baseline_val_ic:+.4f} (n={n_val})")
+    print(f"\n--- Baseline複合 (等權GP+value_pb+revenue_surprise) ---", flush=True)
+    print(f"  TRAIN mean_ic={baseline_train_ic:+.4f} (n={n_train})  VAL mean_ic={baseline_val_ic:+.4f} (n={n_val})", flush=True)
 
-    rng = random.Random(CONTROL_SEED)
-    draw_records = []
-    print(f"\n--- {N_DRAWS} 次隨機因子組合抽樣 (Uniform({WEIGHT_LOW},{WEIGHT_HIGH}) 權重) ---")
-    for i in range(N_DRAWS):
-        chosen = rng.sample(FACTOR_POOL, DRAW_K)
-        weights = {f: rng.uniform(WEIGHT_LOW, WEIGHT_HIGH) for f in chosen}
+    TIME_BUDGET_SECONDS = float(os.environ.get("CZC_TIME_BUDGET_SECONDS", "420"))
+    deadline = time.time() + TIME_BUDGET_SECONDS
+
+    ckpt = _load_checkpoint()
+    draw_records: list[dict] = ckpt.get("draw_records", [])
+    start_i = len(draw_records)
+    if start_i > 0:
+        print(f"\n--- 從checkpoint接續：已完成{start_i}/{N_DRAWS} draws ---", flush=True)
+
+    # 每個draw用「(CONTROL_SEED, i)」衍生獨立種子，而非單一rng實例依序呼叫
+    # ——這樣任何一個draw都能獨立重放（不依賴前面所有draw的呼叫順序完全一致），
+    # checkpoint接續時直接從index=start_i繼續即可，不需要重放前面的抽樣過程。
+    def _draw_for_index(i: int) -> tuple[list[str], dict[str, float]]:
+        local_rng = random.Random((CONTROL_SEED, i))
+        chosen = local_rng.sample(FACTOR_POOL, DRAW_K)
+        weights = {f: local_rng.uniform(WEIGHT_LOW, WEIGHT_HIGH) for f in chosen}
+        return chosen, weights
+
+    incomplete = False
+    print(f"\n--- {N_DRAWS} 次隨機因子組合抽樣 (Uniform({WEIGHT_LOW},{WEIGHT_HIGH}) 權重, "
+          f"本次時間預算{TIME_BUDGET_SECONDS:.0f}秒) ---", flush=True)
+    for i in range(start_i, N_DRAWS):
+        chosen, weights = _draw_for_index(i)
         weighted_zscore_composite(data, weights)
         train_ic, val_ic, _, _ = mean_ic_train_val(RANDOM_COMPOSITE_COL, data, snapshots)
         draw_records.append({
@@ -170,28 +215,38 @@ def main():
             "weights": ",".join(f"{weights[f]:+.3f}" for f in chosen),
             "train_ic": train_ic, "val_ic": val_ic,
         })
-        if (i + 1) % 50 == 0:
-            print(f"  ...{i+1}/{N_DRAWS} draws done")
+        if (i + 1) % 10 == 0:
+            _save_checkpoint({"draw_records": draw_records})
+            print(f"  ...{i+1}/{N_DRAWS} draws done (checkpoint saved)", flush=True)
+        if time.time() > deadline:
+            _save_checkpoint({"draw_records": draw_records})
+            print(f"  時間預算已到，進度{len(draw_records)}/{N_DRAWS}，已checkpoint，下次執行接續", flush=True)
+            incomplete = True
+            break
 
+    if incomplete:
+        return None
+
+    _save_checkpoint({"draw_records": draw_records})
     draws_df = pd.DataFrame(draw_records)
     val_ics_all = draws_df["val_ic"].dropna().to_numpy()
 
     percentile = 100.0 * float(np.mean(np.abs(baseline_val_ic) > np.abs(val_ics_all))) if len(val_ics_all) and not np.isnan(baseline_val_ic) else float("nan")
     required_percentile = 100.0 * (1 - BASE_ALPHA / 1)  # bonferroni_n=1, standalone
 
-    print(f"\n--- 結果 ---")
-    print(f"  有效draws (val_ic非NaN): {len(val_ics_all)}/{N_DRAWS}")
+    print(f"\n--- 結果 ---", flush=True)
+    print(f"  有效draws (val_ic非NaN): {len(val_ics_all)}/{N_DRAWS}", flush=True)
     print(f"  隨機組合 val_ic 分布: median={np.median(val_ics_all):+.4f} "
           f"p10={np.percentile(val_ics_all,10):+.4f} p90={np.percentile(val_ics_all,90):+.4f} "
-          f"max_abs={np.max(np.abs(val_ics_all)):+.4f}")
-    print(f"  baseline VAL mean_ic={baseline_val_ic:+.4f}")
-    print(f"  percentile (baseline贏過隨機組合的比例): {percentile:.1f} (need >={required_percentile:.1f})")
+          f"max_abs={np.max(np.abs(val_ics_all)):+.4f}", flush=True)
+    print(f"  baseline VAL mean_ic={baseline_val_ic:+.4f}", flush=True)
+    print(f"  percentile (baseline贏過隨機組合的比例): {percentile:.1f} (need >={required_percentile:.1f})", flush=True)
     passes = (not np.isnan(percentile)) and percentile >= required_percentile
-    print(f"  隨機因子組合控制 PASSES: {passes}")
+    print(f"  隨機因子組合控制 PASSES: {passes}", flush=True)
 
     Path("data").mkdir(exist_ok=True)
     draws_df.to_csv("data/composite_zscore_v1_random_control.csv", index=False)
-    print("\n已存 data/composite_zscore_v1_random_control.csv (gitignored)")
+    print("\n已存 data/composite_zscore_v1_random_control.csv (gitignored)", flush=True)
 
     return {
         "baseline_train_ic": baseline_train_ic, "baseline_val_ic": baseline_val_ic,
