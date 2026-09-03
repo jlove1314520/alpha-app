@@ -13,7 +13,25 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
-## 2026-09-04T04:53 — hypothesis_queue排程接續（#27複合z-score第2關） — 上一輪（陳舊鎖檔held by pid 20592）背景行程存活到checkpoint 122/300後結束，本輪已重新背景啟動（PID 1869，25分鐘預算），確認存活+仍在載入階段，收工留給下一輪接續
+## 2026-09-04T05:27 — hypothesis_queue排程接續（#27複合z-score第2關） — 接手時PID 1869背景行程仍存活且checkpoint從122進步到150/300，監控中途行程自然結束於155/300（25分鐘時間預算到期，非當掉），已用CZC_TIME_BUDGET_SECONDS=3600重新背景啟動（PID 883），確認無crash後收工留給下一輪
+
+鎖檔非陳舊（LOCK_ACQUIRED），接手時上一輪（04:53）啟動的背景行程
+（PID 1869）確認仍存活，checkpoint從心跳記錄的122/300推進到**150/300**
+（前5分鐘觀察窗又推進到155/300），確認「不重啟、等待」策略持續有效、
+行程真的能跨輪session邊界存活（04:52:31啟動，存活到至少05:27，遠超過
+單輪session長度）。本輪監控5分鐘後PID 1869自然消失，checkpoint停在
+155/300，研判是上一輪設定的25分鐘時間預算（`CZC_TIME_BUDGET_SECONDS=1500`）
+到期後腳本自行正常結束（非崩潰，`Get-Process`確認乾淨消失、無錯誤log）。
+用更大的時間預算（`CZC_TIME_BUDGET_SECONDS=3600`，1小時）重新nohup+disown
+背景啟動（PID 883，05:27:37），確認3分鐘內無crash（進程持續存活、
+checkpoint仍是155/300，符合預期的~20分鐘reload階段）後收工，讓行程在
+OS層背景繼續累積剩餘145 draws。holdout確認仍`False`。**下一輪待辦**：
+先查`data/composite_zscore_v1_random_control_checkpoint.json`是否已到
+300 draws，到了就直接判percentile CHEAP_PASS/FAIL並更新
+`TRIALS_LEDGER.md`+`HYPOTHESIS_QUEUE.md`#27條目；沒到且行程還活著就
+沿用同一策略（不重啟、監控幾分鐘確認無crash即收工）；行程死了才重跑
+（時間預算可以再拉大，避免因25分鐘上限而中途正常退出、浪費下一輪
+的~20分鐘reload成本）。
 
 取得具名鎖時發現陳舊鎖（held by pid 20592, 30.1分鐘），研判上一輪已
 異常結束（未commit）。查`data/composite_zscore_v1_random_control_
