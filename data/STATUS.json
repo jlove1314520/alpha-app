@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-04T00:03:35.086716+08:00",
-  "latest_commit": "7902472",
+  "updated_at": "2026-09-04T02:34:10.059099+08:00",
+  "latest_commit": "ad19f9b",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -211,8 +211,8 @@
       "file": ".github/workflows/quotes.yml",
       "name": "盤中近即時報價（台股+美股）",
       "schedule": "盤中每10分鐘：台股09:00-13:30、美股13:30-21:00(左右)，週一至週五",
-      "last_run": "2026-09-03T12:18:06Z",
-      "last_status": "in_progress",
+      "last_run": "2026-09-03T16:30:01Z",
+      "last_status": "success",
       "today_runs": {
         "date_tw": "2026-09-04",
         "total": 0
@@ -220,7 +220,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-04T00:03:40+08:00",
+    "checked_at": "2026-09-04T02:34:15+08:00",
     "any_overdue": true,
     "overdue_names": [
       "台股盤中報價（GitHub Actions quotes.yml）",
@@ -256,7 +256,7 @@
         "owner": "GitHub Actions",
         "status": "overdue",
         "last_data_at": "2026-09-03T06:01+08:00",
-        "expected_at_or_after": "2026-09-03T23:33+08:00",
+        "expected_at_or_after": "2026-09-04T02:04+08:00",
         "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"
       },
@@ -266,7 +266,7 @@
         "owner": "本機排程",
         "status": "overdue",
         "last_data_at": "2026-09-02T23:25+08:00",
-        "expected_at_or_after": "2026-09-03T23:33+08:00",
+        "expected_at_or_after": "2026-09-04T02:04+08:00",
         "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "只有使用者這台機器開著IB Gateway才會更新"
       },

@@ -17,6 +17,13 @@
 
 ---
 
+## ✅ 2026-09-04凌晨（開發帽）乙.4/乙.5：App接本機即時伺服器（SSE）＋lightweight-charts
+
+詳見`PROGRESS.md`同日條目、`PENDING_QUEUE.md`「乙.4/乙.5補充」區塊。smoke test 23項全PASS
+（含新增25）、Playwright端到端通過。⚠ 乙.6「總司令手機下次開盤實測」尚未做（需先完成乙.3
+cloudflared服務安裝＋Access設定，並讓`alpha_live_server.py`常駐）。偏差：lightweight-charts
+cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等確認連線衝突）。
+
 ## ✅ 2026-09-04凌晨（維運帽）P0三收尾：quotes.yml整天0次落地的根因＋監控補洞
 
 詳見`PROGRESS.md`同日條目與`PENDING_QUEUE.md` P0三區塊。要點：
@@ -52,6 +59,11 @@
    佇列，這才是真正秒級；使用者說「不用現在做」。
 6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
    2026-09-04條目，需有workflow scope的PAT。
+7. **`alpha_live_server.py`掛常駐排程**（乙.6前置）：目前只能手動`python research/
+   alpha_live_server.py`前景執行，要比照`run-shioaji-quotes-cycle.ps1`做一支PID判斷的
+   啟動器＋Windows工作排程器任務，開機/開盤前自動拉起，否則手機端永遠連不到。
+8. **美股IBKR 1分K**：需先查證`reqHistoricalData()`與`ibkr_quotes.py`現有短命連線是否
+   衝突（或改成常駐訂閱後用tick聚合，跟台股同一套），確認前維持501。
 
 ---
 

@@ -16,6 +16,38 @@
 
 ---
 
+## 2026-09-04凌晨（開發帽）— 乙.4/乙.5：App接本機即時伺服器（SSE）＋個股頁lightweight-charts，並補使用者三個修正
+
+**做了什麼（commit `49a0ead`）**：
+- `research/shioaji_quotes.py`：`TickState.add_tick()`用已收到的tick聚合當日1分K（OHLCV），
+  `maybe_write_live_state()`每秒最多一次原子寫本機熱檔`.live_state_sinopac.json`（gitignored）；
+  收盤收尾把熱檔標closed。**沒有**另開Shioaji連線、**沒有**呼叫api.kbars()（使用者修正一）。
+  單元測試新增2項，10項全PASS。
+- `research/alpha_live_server.py`：三端點優先讀熱檔（120秒內新鮮）否則退回git冷檔，回應帶
+  `source_mode`；`/live/kbars`台股讀熱檔bars（`mode:"tick-aggregated-1m"`）、無tick 404、美股501
+  （IBKR無常駐tick，未確認衝突不硬做）；`/live/stream`每個事件帶`mode:"poll-diff-2s"`＋15秒
+  keepalive（使用者修正二）；三端點只有一條`_check_token()`路徑、無私有網段免token分支
+  （使用者修正三）。本機實測：無token→401×3；kbars 2330→200/2454→404/AAPL→501。
+- `index.html`：設定頁「即時伺服器」卡片；`fetch()`讀SSE（EventSource不能帶token標頭）、
+  指數退避重連；連線中停用15秒輪詢、冷檔60秒不重抓；首頁/設定頁狀態列「即時連線中／
+  離線，顯示最後收盤 MM-DD」；個股頁lightweight-charts 5.2.1（**cdnjs未收錄→改jsdelivr釘死
+  版本**，載不到退回SVG折線），日線/1分K切換、串流`kbars_last`逐筆`series.update()`。
+- `scripts/smoke_test.mjs`新增檢查25。
+
+**驗證**：smoke test 2026-09-04 00:1x **23項全PASS、0 FAIL**（renderer=lightweight-charts(canvas)）。
+Playwright端到端（假熱檔+本機8011伺服器）：`LIVE.connected=true`、`mode=poll-diff-2s`、
+`source_mode=hot-file`；首頁2330價格隨串流1,174→…；個股頁自動切1分K（17根）、6.5秒後頭部價
+1,175→1,177與`kbars_last.c`一致；拔掉伺服器→「離線（連不上即時伺服器：無回應或被拒絕），
+顯示最後收盤 MM-DD」；GLOBAL_ERRORS=[]。截圖：首頁即時狀態列、個股頁1分K、設定頁卡片、
+離線狀態（存在session scratchpad，未入repo）。
+
+**還沒完成／要總司令動手的**：乙.3 cloudflared `service install`（需系統管理員）＋Cloudflare
+Access；`alpha_live_server.py`尚未掛常駐排程；真實tick聚合要等下次開盤實測；美股1分K未做。
+
+**下一步**：依PENDING_QUEUE順序接甲.1/甲.2/甲.3（管線校準探針）、乙.1（盤中不push）。
+
+---
+
 ## 2026-09-04凌晨（維運帽→開發帽）— P0三收尾：quotes.yml整天沒落地的真正根因＋監控補洞（並補記三個先前漏寫的commit）
 
 **先補記（前一個session commit了但沒更新這份檔案，這裡補齊）**：

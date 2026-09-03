@@ -164,13 +164,43 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 >
 > 做完乙.4/乙.5 後回報，附上：三個端點目前的驗證/聚合狀態、smoke test 結果。
 
-- [ ] **補一** shioaji_quotes.py常駐行程內用已收到的tick聚合「當日每分鐘
-  OHLC」（不另開連線），alpha_live_server.py `/live/kbars`讀這份共用資料
-- [ ] **補二** `/live/stream`回應加`mode:"poll-diff-2s"`誠實標示；「改成
-  tick回呼直接推送SSE」登記進佇列稍後做（不是現在）
-- [ ] **補三** 三個/live端點一律要求X-Alpha-Local-Token，不因私有網路跳過
-- [ ] **乙.4/乙.5** 照上方甲乙丙區塊原文執行，做完回報三端點驗證/聚合狀態
-  + smoke test結果
+- [x] **補一** ——**已完成**（commit `49a0ead`）：`shioaji_quotes.py`的
+  `TickState.add_tick()`用已收到的tick聚合當日每分鐘OHLCV（不另開連線、
+  不呼叫api.kbars()），`maybe_write_live_state()`每秒最多一次把「最新快照
+  +當日1分K」原子寫進本機熱檔`research/.live_state_sinopac.json`
+  （gitignored）；`alpha_live_server.py`三端點優先讀熱檔（120秒內新鮮）、
+  否則退回git冷檔，`/live/kbars`回`mode:"tick-aggregated-1m"`。「共用記憶體」
+  的誠實說明：兩個獨立行程在Windows上共用資料，用同機本地熱檔是最不需要
+  額外相依的做法，跟`/live/quotes`原本讀JSON檔的做法一致；真正同一行程
+  共用物件要等兩支合併（見BACKLOG登記待辦5）。**美股IBKR 1分K未做，回501**：
+  `ibkr_quotes.py`是短命輪詢腳本、沒有常駐tick可聚合，要做得先確認
+  `reqHistoricalData()`會不會跟現有連線衝突，照使用者裁示不硬做、先回報。
+- [x] **補二** ——**已完成**：每個SSE事件payload帶`mode:"poll-diff-2s"`、
+  `/health`回`stream_mode`，docstring/端點docstring都明寫「輪詢比對不是真
+  推送」；「tick回呼直接推SSE」已登記BACKLOG登記待辦第5條，未動工。
+- [x] **補三** ——**已完成**：三個/live端點程式碼裡只有一條`_check_token()`
+  路徑、沒有任何「私有網段免token」分支，docstring明文禁止之後加；
+  `/health`回`token_required_on_live_endpoints:true`。本機實測無token一律401。
+- [x] **乙.4** ——**已完成**：設定頁「即時伺服器」卡片（網址/token存本機
+  localStorage、測試連線）；App用`fetch()`讀SSE（原生EventSource不能帶token
+  標頭，刻意為了保住補三的驗證）、指數退避重連、切回前景重連；連線中
+  `fastPollTick`停用、Actions冷檔60秒內不重抓；首頁與設定頁狀態列：連上
+  「● 即時連線中（本機伺服器・熱檔秒級・poll-diff-2s）」，連不上/未設定
+  「離線（…），顯示最後收盤 MM-DD」。
+- [x] **乙.5** ——**已完成，一處偏差要回報**：個股頁走勢改TradingView
+  lightweight-charts 5.2.1（Apache-2.0）。**cdnjs沒有收錄這個函式庫**
+  （api.cdnjs.com搜尋為空），改用官方npm經jsdelivr發行、版本釘死，
+  async載入、載不到自動退回既有SVG折線。日線沿用既有FinMind資料；連上
+  即時伺服器且該檔有1分K時自動切「1分K(即時)」、可手動切回日線；串流
+  每個事件帶`kbars_last`→`series.update()`逐筆更新，不必另外打/live/kbars。
+- [~] **乙.6** ——**Playwright+smoke test部分已完成**（smoke 23項全PASS含
+  新增25；端到端：假熱檔+本機伺服器→串流連上→首頁價格跳動→個股頁1分K
+  17根隨事件更新→拔掉伺服器退回離線標示，GLOBAL_ERRORS=[]）；**「下次台股
+  開盤總司令手機開App看台積電數字與K線每秒在動」這半段要等**：(1)乙.3
+  cloudflared `service install`需總司令用系統管理員視窗執行＋Cloudflare
+  Access設定；(2)`alpha_live_server.py`要在本機常駐啟動（目前只有手動
+  `python research/alpha_live_server.py`，尚未掛排程）；(3)真實tick進熱檔
+  要等開盤（tick.datetime欄位聚合邏輯只用假tick驗過）。
 
 ---
 
