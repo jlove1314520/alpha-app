@@ -75,5 +75,17 @@
     "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
     "generated_at": "2026-09-02T23:29:33Z",
     "generated_at_note": "2026-09-03回填：取自檔案最後一次git commit時間；之後每筆由update_margin_maintenance.py寫入真正產生時間"
+  },
+  {
+    "date": "2026-09-04",
+    "finmind_margin_money_date": "2026-09-03",
+    "collateral_value": 1067357693740,
+    "margin_money": 578739307000,
+    "matched_stocks": 1225,
+    "ratio_pct": 184.43,
+    "data_incomplete": false,
+    "incomplete_reason": null,
+    "generated_at": "2026-09-04T07:25:09.026585+08:00",
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
   }
 ]
