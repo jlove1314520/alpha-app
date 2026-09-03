@@ -230,17 +230,32 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 >
 > 全部做完回報，附 commit 數、Actions 落地次數、smoke test 結果、Cloudflare 操作步驟文件。
 
-- [ ] **甲.1** `PORTFOLIO_STRATEGY_SPEC.md`第3行狀態改「已確認
-  （2026-09-03總司令）」，規則內容不動
-- [ ] **甲.2** `MARATHON_PROTOCOL.md`第0節暫停規則解除，主軸改多因子
-  組合策略（portfolio_multifactor v2迭代），不再單因子亂挖
-- [ ] **甲.3** 管線校準探針（正式登記執行）：12-1動能benchmark過同一套
+- [x] **甲.1** `PORTFOLIO_STRATEGY_SPEC.md`第3行狀態改「已確認
+  （2026-09-03總司令）」，規則內容不動——**已完成**（commit `8aad0d4`）
+- [x] **甲.2** `MARATHON_PROTOCOL.md`第0節暫停規則解除，主軸改多因子
+  組合策略（portfolio_multifactor v2迭代），不再單因子亂挖——**已完成**
+  （commit `8aad0d4`：🛑區塊整段換成「✅暫停規則解除」，明訂每輪工作單位必須是
+  組合策略層級推進，單因子IC只允許作為組合成分替換候選的前置檢查；並要求
+  馬拉松開工先讀`CALIBRATION_PROBE.md`的校準結論）
+- [~] **甲.3** 管線校準探針（正式登記執行）：12-1動能benchmark過同一套
   cheap gate+gauntlet，判定管線正常(甲)還是檢定力不足(乙)，回報結論；
-  若(乙)要回頭把先前N<30的FAIL標「未定」
+  若(乙)要回頭把先前N<30的FAIL標「未定」——**執行中**：
+  `research/calibration_probe_momentum_12_1.py`（新增）四段：A標準100檔cheap
+  gate／B檢定力診斷（null sd、80%檢定力最小可偵測IC）／C 300檔大樣本＋20組
+  100檔子樣本漏殺率／D組合層gauntlet縮影（v2引擎、等權、季/月頻、隨機對照30次、
+  成本1x/2x/3x）。結論寫`research/CALIBRATION_PROBE.md`。
 - [ ] **甲.4** 解除暫停後：通過完整gauntlet要進forward-paper前才停下
   提案，死路記墓園續跑（沿用既有紀律，不必額外改檔案）
-- [ ] **乙.1** Phase 1冷熱分離：shioaji_quotes.py/ibkr_quotes.py盤中只
-  更新記憶體不commit，收盤後一天commit一次
+- [x] **乙.1** Phase 1冷熱分離：shioaji_quotes.py/ibkr_quotes.py盤中只
+  更新記憶體不commit，收盤後一天commit一次——**已完成**（commit `6ad70f5`）：
+  `shioaji_quotes.py`新增`INTRADAY_GIT_PUSH=False`，盤中`_flush_and_push()`
+  直接return（不寫冷檔、不碰git，只寫熱檔給live server），收盤收尾
+  `final=True`寫冷檔並commit+push一次；回歸測試11項PASS。IBKR那端：
+  **查明`ibkr_quotes.py`根本沒有掛任何Windows排程任務**（只有AlphaData/
+  AlphaHypothesisQueue/AlphaMarathon/AlphaShioajiQuotes四個，這就是
+  quotes_ibkr.json停在09-02 23:25的原因——之前是手動跑的），`C:lpha\n  run-ibkr-quotes-cycle.ps1`（repo外）已改成美東正常盤盤中不commit、盤後
+  才commit一次；要不要建AlphaIbkrQuotes排程（需IB Gateway常開）留給總司令決定。
+  **驗收「當日commit<20」要等下一個交易日觀察。**
 - [x] **乙.2** 新增`research/alpha_live_server.py`——**已完成第一版，
   誠實範圍見檔案docstring**：`/live/quotes`已完整可用（讀既有JSON
   快照）；`/live/stream`目前是輪詢重新比對再送（非真逐筆tick，因為
@@ -380,7 +395,7 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 > - 紀律：便宜關卡（sanity / 隨機對照 / gate1 IC）若給出「便宜且決定性」的負面證據，就快速判死、寫進墓園、換下一個，不要在沒肉的方向硬灌 1000 draws 或密集參數網格浪費算力與時間；只有便宜關卡已見生命跡象的方向，才投入深度驗證。反過來也不准偷懶亂殺——判死一定要有便宜且決定性的證據，不能沒驗證就草草說無效。
 > - 全程照三大停下條件才停問總司令；有任何一個通過完整 gauntlet、要進 forward-paper 前才停下提案。
 
-- [ ] **三** 確認馬拉松繼續依序挖#19~#24，快殺紀律（便宜且決定性證據才
+- [x] **三**（2026-09-04凌晨確認）馬拉松與假說佇列排程皆存活：`AlphaMarathon`最近一輪第324輪(US)、`AlphaHypothesisQueue`正在跑#27第2關300-draw隨機對照，#19~#24已全部結案（見TRIALS_LEDGER #90~#96），佇列非空（#27進行中、#5/#6/#8/#10卡外部依賴）。原條目：確認馬拉松繼續依序挖#19~#24，快殺紀律（便宜且決定性證據才
   判死，不偷懶亂殺也不硬灌算力）——**這已經是`HYPOTHESIS_QUEUE.md`
   最上面「快殺標準」既有明文規定，不是新規則，做完一之後只需確認
   馬拉松排程仍存活、佇列非空即可，不需要另外改檔案**。

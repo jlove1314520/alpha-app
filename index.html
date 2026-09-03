@@ -850,6 +850,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
           <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
         </div>
       </div>
+      <!-- 2026-09-04（PENDING_QUEUE「籌碼分頁」免費層第一單位，只用既有stock_detail.json，
+           不新增抓取管線）：三大法人逐日／累計買賣超表＋外資估算成本（畫在走勢圖上）。
+           股權分散/千張大戶、借券賣出需要新的Actions抓取腳本，見BACKLOG登記待辦。 -->
+      <div class="card">
+        <h3>三大法人逐日／累計買賣超（張）</h3>
+        <div id="chip-trend-table"><div class="note">載入中…</div></div>
+        <div class="note" id="chip-trend-note" style="margin-top:6px"></div>
+        <div class="note" id="chip-cost-note" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">外資估算成本：—</div>
+        <div class="note" id="chip-disclaimer" style="margin-top:8px;color:var(--ink-3)">非投資建議。籌碼訊號屬擁擠且有爭議的方法：跟著大戶不等於獲利，大戶也可能正在出貨；這些數字尚未經 signal_ledger 校準「能否預測扣成本後報酬」。</div>
+      </div>
       <div class="card">
         <h3>融資融券</h3>
         <div class="facts">
@@ -2731,7 +2741,32 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const inst=detail.institutional;
     if(!inst)return null;
     const series=(inst.history||[]).map(h=>({date:_t86Date(h.date),v:h.foreign_lots}));
-    return{date:_t86Date(inst.date),foreign:inst.foreign_lots,trust:inst.trust_lots,dealer:inst.dealer_lots,total:inst.foreign_lots+inst.trust_lots+(inst.dealer_lots||0),series};
+    return{date:_t86Date(inst.date),foreign:inst.foreign_lots,trust:inst.trust_lots,dealer:inst.dealer_lots,total:inst.foreign_lots+inst.trust_lots+(inst.dealer_lots||0),series,history:inst.history||[]};
+  }
+  // 2026-09-04（籌碼分頁免費層第一單位）：三大法人逐日／累計表＋外資估算成本。
+  // 資料只用stock_detail.json既有的institutional.history（market.yml每日累積，剛開始
+  // 只有幾天，會逐日變長）；估算成本=近N日「外資淨買超日」的淨買張數×當日收盤加權
+  // 平均（不知道真正逐筆成交價，只能概估），畫面明確標「估算、非精確成本」，且
+  // 有走勢圖時把這條價位畫上去（lightweight-charts的priceLine）。
+  function renderChipTrend(code,inst,px){
+    const tbl=document.getElementById('chip-trend-table'),note=document.getElementById('chip-trend-note'),cost=document.getElementById('chip-cost-note');
+    if(!tbl)return;
+    const hist=(inst&&inst.history||[]).filter(h=>h&&h.date).slice().sort((a,b)=>a.date<b.date?-1:1);
+    if(!hist.length){tbl.innerHTML='<div class="note">查無逐日法人資料（僅涵蓋TWSE上市／TPEx上櫃股票，且排程剛開始累積）</div>';if(note)note.textContent='';if(cost)cost.textContent='外資估算成本：—（無逐日資料）';return}
+    let cum=0;const fmt=v=>v==null?'—':`<span class="${v>=0?'pos':'neg'}">${v>=0?'+':''}${nf(Math.round(v))}</span>`;
+    const rows=hist.map(h=>{const f=h.foreign_lots||0,t=h.trust_lots||0,d=h.dealer_lots||0,tot=f+t+d;cum+=tot;
+      return `<tr><td style="color:var(--ink-3)">${_t86Date(h.date).slice(5)}</td><td>${fmt(f)}</td><td>${fmt(t)}</td><td>${fmt(d)}</td><td>${fmt(tot)}</td><td>${fmt(cum)}</td></tr>`}).join('');
+    tbl.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;text-align:right"><thead><tr style="color:var(--ink-3)"><th style="text-align:left">日期</th><th>外資</th><th>投信</th><th>自營</th><th>合計</th><th>累計</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    if(note)note.textContent=`自 ${_t86Date(hist[0].date)} 起累積 ${hist.length} 個交易日（TWSE T86／TPEx 每日排程累積，天數會逐日增加）· 三大法人累計 ${cum>=0?'+':''}${nf(Math.round(cum))} 張`;
+    // 外資估算成本
+    const closeByDate={};(px||[]).forEach(r=>{if(r&&r.date&&r.close!=null)closeByDate[r.date]=r.close});
+    let lots=0,amt=0,used=0;
+    hist.forEach(h=>{const f=h.foreign_lots||0;const c=closeByDate[_t86Date(h.date)];if(f>0&&c!=null){lots+=f;amt+=f*c;used++}});
+    if(cost){
+      if(lots>0){const est=amt/lots;cost.innerHTML=`外資估算成本：<b>${nf(est)}</b>（估算、非精確成本：以近 ${hist.length} 日中 ${used} 個外資淨買超日的淨買張數×當日收盤加權概算，不是逐筆成交成本；資料天數愈少愈不可靠）`;
+        try{if(STOCK_CHART.series&&STOCK_CHART.code===code){if(STOCK_CHART.costLine){try{STOCK_CHART.series.removePriceLine(STOCK_CHART.costLine)}catch(e){}}STOCK_CHART.costLine=STOCK_CHART.series.createPriceLine({price:est,color:'#d4a84b',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'外資估算成本'})}}catch(e){console.warn('[renderChipTrend:priceLine]',e)}
+      }else{cost.textContent='外資估算成本：—（近期沒有外資淨買超日，或無對應收盤價）'}
+    }
   }
 
   // 2026-08-25 新增：個股融資融券（籌碼分頁）。融資餘額變化/融券餘額/資券比/券資比是
@@ -2928,6 +2963,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       ['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
       setTxt('chip-note','美股暫無三大法人資料（僅適用台股）');
       document.getElementById('chip-bars').innerHTML='<div class="note">美股暫無此資料</div>';
+      _safeSync('renderChipTrend',()=>renderChipTrend(code,null,[]));
       ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
       setTxt('mg-short-ratio','券資比：—');setTxt('mg-note','美股暫無融資融券資料（僅適用台股）');setTxt('mg-maint','估算融資維持率：—');
       document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
@@ -2993,7 +3029,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       setTxt('chip-note',`最新 ${inst.date} · TWSE T86（GitHub Actions 排程）`);
       const mx=Math.max(...inst.series.map(s=>Math.abs(s.v)))||1;
       document.getElementById('chip-bars').innerHTML=inst.series.map(s=>`<div class="db"><i class="${s.v>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(s.v)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${s.date.slice(5)}</em></div>`).join('');
+      _safeSync('renderChipTrend',()=>renderChipTrend(code,inst,px));
     }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
+      _safeSync('renderChipTrend',()=>renderChipTrend(code,null,px));
       document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）</div>';
       setTxt('chip-note','查無資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）');
     }
@@ -3996,7 +4034,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   const STOCK_CHART={chart:null,series:null,mode:'daily',userPickedMode:false,code:null,us:false,daily:[],intraday:[],dailyNote:''};
   function _cssVar(n,fb){try{return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||fb}catch(e){return fb}}
   function lwcAvailable(){return typeof window.LightweightCharts!=='undefined'&&typeof window.LightweightCharts.createChart==='function'&&!!window.LightweightCharts.CandlestickSeries}
-  function _destroyStockChart(){if(STOCK_CHART.chart){try{STOCK_CHART.chart.remove()}catch(e){console.warn('[destroyStockChart]',e)}}STOCK_CHART.chart=null;STOCK_CHART.series=null}
+  function _destroyStockChart(){if(STOCK_CHART.chart){try{STOCK_CHART.chart.remove()}catch(e){console.warn('[destroyStockChart]',e)}}STOCK_CHART.chart=null;STOCK_CHART.series=null;STOCK_CHART.costLine=null}
   // lightweight-charts的時間軸一律以UTC顯示，這裡把台北時間加8小時偏移，讓刻度顯示台北時間（常見做法）。
   function _minuteBarToLwc(b){return {time:Math.floor(new Date(b.t+':00+08:00').getTime()/1000)+8*3600,open:b.o,high:b.h,low:b.l,close:b.c}}
   function renderStockChart(code,rows,us){
@@ -4200,7 +4238,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-04.0020';
+  const APP_VERSION='2026-09-04.0248';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

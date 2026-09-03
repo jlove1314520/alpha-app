@@ -910,10 +910,33 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("25. 即時伺服器未設定時首頁誠實標「離線，顯示最後收盤」；個股頁走勢圖（lightweight-charts canvas或SVG退回）真的有畫出來",
     liveUiErrors.length === 0, liveUiErrors.join("; ") || `renderer=${results.stock_chart_renderer}`);
 
+  // 26.【2026-09-04新增，籌碼分頁免費層第一單位】個股頁籌碼分頁的「三大法人逐日／
+  // 累計」表：有資料就要有表格列，沒有就要是誠實空狀態文字（不能停在「載入中」）；
+  // 免責文字（非投資建議／跟著大戶不等於獲利）必須在。check 25剛開完2330個股頁。
+  const chipErrors = [];
+  try {
+    await page.evaluate(() => { document.querySelector('#stock-tabs button[data-sub="chip"]')?.click(); });
+    await page.waitForFunction(() => { const t = document.getElementById("chip-trend-table")?.textContent || ""; return t && !t.includes("載入中"); }, null, { timeout: 15000 }).catch(() => {});
+    const info = await page.evaluate(() => ({
+      rows: document.querySelectorAll("#chip-trend-table tbody tr").length,
+      text: (document.getElementById("chip-trend-table")?.textContent || "").slice(0, 80),
+      disclaimer: document.getElementById("chip-disclaimer")?.textContent || "",
+      cost: document.getElementById("chip-cost-note")?.textContent || "",
+    }));
+    if (info.rows === 0 && !/查無/.test(info.text)) chipErrors.push(`三大法人逐日表既無資料列也不是誠實空狀態：「${info.text}」`);
+    if (!/非投資建議/.test(info.disclaimer) || !/不等於獲利/.test(info.disclaimer)) chipErrors.push("缺少籌碼免責文字");
+    if (!/估算/.test(info.cost)) chipErrors.push(`估算成本欄位沒有標「估算」：「${info.cost}」`);
+    results.chip_trend_rows = info.rows;
+  } catch (e) {
+    chipErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("26. 籌碼分頁三大法人逐日／累計表有資料列或誠實空狀態、免責文字與「估算」標示都在",
+    chipErrors.length === 0, chipErrors.join("; ") || `rows=${results.chip_trend_rows}`);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
