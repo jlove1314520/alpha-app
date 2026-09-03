@@ -1862,6 +1862,23 @@ research/backfill_margin_debt_market.py --batch-size 150`接續回補
 所有已知結構性事實年份）。本輪未寫入`alpha.db`、未修改任何凍結區檔案，
 `is_holdout_consumed()`確認仍為`False`。
 
+**狀態（2026-09-03T12:03更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`排程接續
+回補）**：接續上一輪，執行`python research/backfill_margin_debt_market.py
+--batch-size 150`（前景阻塞逾時後自動移至背景，用until-loop輪詢
+`research/data/raw_margin_debt_market/`檔案數量直到連續4次（60秒）
+數量不變才視為批次完成，非卡死判斷法比前幾輪更嚴謹）。**新增109個
+週檔（略少於請求的150，研判是批次內非交易日/假日週數較多，非錯誤，
+下一輪若要精確核對可查腳本本身的skip計數），累積進度：465→574/662週
+（70.2%→86.7%）**，資料涵蓋範圍延伸至2012-05~2023-04-28。**仍未達到
+cheap gate所需覆蓋率**（2023年後段跟2024全年仍未回補到，2024關鍵年份
+附近尚未涵蓋），**下一輪繼續呼叫**`python research/
+backfill_margin_debt_market.py --batch-size 150`接續回補（resumable，
+剩餘約88週，預估再1輪批次即可回補到2024年底、涵蓋所有已知結構性事實
+年份）。本輪未寫入`alpha.db`、未修改任何凍結區檔案，`is_holdout_
+consumed()`確認仍為`False`。`git status`確認殘留變更（`data/
+rate_limit_state.json`、`research/pit.py`及多個`.log`未追蹤檔案）
+跟前幾輪判斷一致，非本輪產生，不觸碰、不納入commit。
+
 ---
 
 ### 27. 多因子「複合評分」策略（z-score blend，2026-09-03使用者裁示新增）
