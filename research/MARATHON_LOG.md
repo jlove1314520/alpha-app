@@ -13,6 +13,50 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-03T09:24 — `hypothesis_queue`軌道排程：接手陳舊鎖檔，補完上一輪已完成但未commit的#26資料可行性查證，本輪不新開工作單位
+
+接手鎖檔為`LOCK_STALE`（上一輪PID 56972，30.0分鐘前）。查`git status`
+發現`research/HYPOTHESIS_QUEUE.md`、`research/MARATHON_LOG.md`有未
+commit的修改，讀內容確認是上一輪（PID 56972，其log條目本身也記載
+接手自更早一輪PID 61548的陳舊鎖）已經完整做完#26資料可行性查證（找到
+正確的TWSE歷史查詢端點`/rwd/zh/marginTrading/MI_MARGN`並實測7個橫跨
+2013~2026的日期確認可行），只是在最後`git commit+push`這步之前就
+當掉、沒收工——這是本軌道自己的殘留進度，不是其他自動化來源。同時
+存在的`data/rate_limit_state.json`、`research/pit.py`（新增
+`cash_flow_pit()`）、以及一批`research/*_run.log`未追蹤檔案，上一輪
+已判斷為非本軌道產出，本輪沿用同一判斷，**不觸碰、不納入commit**。
+本輪動作：確認`is_holdout_consumed()`仍為`False`，只把上一輪已寫好
+內容的`HYPOTHESIS_QUEUE.md`+`MARATHON_LOG.md`兩個檔案commit+push，
+不額外開始#26第1關cheap gate（避免一輪塞兩個工作單位）。下一輪排程
+觸發時應直接從#26第1關cheap gate（寫抓取腳本+洗牌置換檢定）開始。
+
+---
+
+## 2026-09-03T07:57 — `hypothesis_queue`軌道排程：#26全市場融資餘額資料可行性查證完成並確認可行（找到官方全市場歷史數字），尚未進cheap gate
+
+接手鎖檔為`LOCK_STALE`（上一輪PID 61548，29.9分鐘前，疑似上一輪
+中途失敗未收工）。`git status`發現非本輪殘留變更：`data/rate_limit_
+state.json`、`research/pit.py`（新增`cash_flow_pit()`，屬於另一條
+與#22相關的並行研究、非本輪`hypothesis_queue`工作）、多個其他自動化
+來源留下的`*_run.log`——**不觸碰、不納入本輪commit**。`research/
+HYPOTHESIS_QUEUE.md`本身也有未commit的修改，但內容是上一輪
+（PID 61548）對#26資料可行性查證做到一半的紀錄，判斷是本軌道自己
+的殘留進度（非其他自動化來源），**接續完成**：確認正確歷史查詢路徑
+是`https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?date=
+YYYYMMDD&response=json&selectType=ALL`（上一輪寫錯成`/rwd/zh/margin/
+MI_MARGN`，少了`Trading`，回404），用`requests`+`HTTP_HEADERS`實測
+回傳`tables[0]`為官方全市場信用交易統計（第3列「融資金額(千元)」即
+全市場總融資餘額，比原計畫100檔樣本加總更理想），抽測2013~2026共7
+個日期確認回傳合法且數字量級大致符合已知結構（2020低點/2022高點）。
+**結論：資料可行性確認通過**，完整過程與下一步計畫已寫入
+`HYPOTHESIS_QUEUE.md`#26條目與「排隊順序總結」項目25/26。下一輪
+直接進第1關cheap gate（寫抓取腳本+洗牌置換檢定），不需要再查資料
+來源。`is_holdout_consumed()`確認仍為`False`，本輪未寫`alpha.db`
+（唯讀）、未修改任何凍結區檔案（`fetch.py`/`parsers.py`/`config.py`
+/`alpha.db`皆未觸碰）。**本輪工作到此為止**，commit+push後收工。
+
+---
+
 ## 2026-09-03 — 使用者裁示：#20（純毛利率GP）實作正確性健檢，四點皆查證正確，FAIL維持墓園（不重跑，不影響佇列進度）：公式（FinMind GrossProfit數值上精確等於Revenue−CostOfGoodsSold，8季diff=0.0）/PIT對齊（跟其他已CHEAP_PASS因子共用同一套機制）/涵蓋率（逐快照中位數N=56，跟f_52w_high_prox的N=60同量級，非崩塌稀釋）/方向（TRAIN/VAL兩期mean_ic皆正，跟「高GP做多」假設一致）全部確認無bug，完整過程見HYPOTHESIS_QUEUE.md#20「實作正確性健檢」章節。同時登記使用者新增的z-score複合評分假設（吸取#22硬AND組合過度擬合教訓），排入佇列#26之後接續。
 
 ## 2026-09-03T07:27 — `hypothesis_queue`軌道排程：#25月轉效應第1關cheap gate已結案FAIL，新增#26全市場融資餘額成長率regime訊號（尚未開始第1關）
