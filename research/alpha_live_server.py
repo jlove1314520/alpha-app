@@ -129,6 +129,20 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def _json_utf8_charset(request, call_next):
+    """2026-09-04：三個端點的JSON回應（含401/404/501錯誤）一律明標
+    `Content-Type: application/json; charset=utf-8`。FastAPI預設只給
+    `application/json`，手機瀏覽器直接開網址時會把中文錯誤訊息顯示成亂碼
+    （JSON規範上是UTF-8，但瀏覽器「直接顯示」時不一定照規範猜）。SSE的
+    text/event-stream不動。"""
+    response = await call_next(request)
+    ct = response.headers.get("content-type", "")
+    if ct.startswith("application/json") and "charset" not in ct:
+        response.headers["content-type"] = "application/json; charset=utf-8"
+    return response
+
+
 def _check_token(x_alpha_local_token: str | None) -> None:
     if x_alpha_local_token != LOCAL_TOKEN:
         raise HTTPException(status_code=401, detail="token不正確或缺少X-Alpha-Local-Token標頭")
