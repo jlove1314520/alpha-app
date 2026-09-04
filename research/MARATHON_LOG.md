@@ -13,7 +13,7 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
-## 2026-09-04T21:48 — [hypothesis_queue] #30個股融資使用率regime-conditional避開篩選：新增portfolio層構造腳本`margin_utilization_regime_portfolio_v1.py`，checkpoint續跑機制驗證正常，TRAIN真實訊號+成本敏感度完成、隨機控制組進度20/100，尚未結案，下一輪接續。
+## 2026-09-04T23:xx（系統時間，本輪排程接手）— [hypothesis_queue] 接續#30個股融資使用率regime-conditional避開篩選：本輪接手時發現鎖檔陳舊（60分鐘）已由本輪回收，疑似上一輪呼叫結束時背景行程被一併終止；TRAIN隨機控制組進度30→40/100（checkpoint接續），中途誤判「移到背景」的行程已結束、意外啟動第二個並行實例，即時發現並安全終止（未寫入任何內容，checkpoint未受影響），已在HYPOTHESIS_QUEUE.md #30記錄操作教訓（之後長腳本一律明確run_in_background）。仍未結案，下一輪接續。
 
 ## 2026-09-04 21:01+08:00 — hypothesis_queue排程：#30個股融資使用率deep_dive第一步——下跌段vs上漲段分組IC，訊號集中在下跌段（探索性佐證，非最終判定）
 
