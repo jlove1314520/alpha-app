@@ -9,7 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
-## 第350輪 · 2026-09-05T02:05+08:00 · US · 嘗試對`f_us_value_bm`（US軌首個CHEAP_PASS基本面因子）做1b深挖，作為未來portfolio組合成分候選前置檢查 · 未完成（infra發現）：新增`deep_dive_f_us_value_bm.py`（重用`deep_dive_f_us_low_vol.py`引擎），資料載入卡在224/226檔快取名單的尾端幾檔（222/226 WHLR之後、`SEC_companyfacts_*.json`快取數在整段期間維持224不變，排除是額度用盡），約25分鐘無任何新輸出後判定卡死並手動終止行程，沒有產出任何判定；懷疑是尾端某檔觸發即時SEC EDGAR抓取異常緩慢/掛起，需下一輪先定位是哪一檔再修
+## 第351輪 · 2026-09-05T02:34+08:00 · US · 取鎖偵測`LOCK_STALE`（第350輪疑似失敗），回收其未commit產物並定位卡死點 · 無法重現：逐一90秒硬超時測試第350輪卡死的4檔`WMT`/`XPER`/`ZETA`/`ZSQR`（`book_value_per_share_pit`/`us_price_series`），全部0.03~0.08秒瞬間完成，推翻「尾端某檔拖慢」假說，判斷較可能是暫態環境因素；建議下一輪用`timeout 600`重跑完整腳本驗證能否順利跑完
+## 第350輪 · 2026-09-05T02:05+08:00 · US · 嘗試對`f_us_value_bm`（US軌首個CHEAP_PASS基本面因子）做1b深挖，作為未來portfolio組合成分候選前置檢查 · 未完成（infra發現）：新增`deep_dive_f_us_value_bm.py`（重用`deep_dive_f_us_low_vol.py`引擎），資料載入卡在224/226檔快取名單的尾端幾檔（222/226 WHLR之後、`SEC_companyfacts_*.json`快取數在整段期間維持224不變，排除是額度用盡），約25分鐘無任何新輸出後判定卡死並手動終止行程，沒有產出任何判定；懷疑是尾端某檔觸發即時SEC EDGAR抓取異常緩慢/掛起，需下一輪先定位是哪一檔再修（**第351輪已推翻此假說，見上**）
 ## 第349輪 · 2026-09-05T01:04+08:00 · TW · 回收稽核：`#30`個股融資使用率portfolio層構造已結案(FAIL)，補齊`TW_LEADS.md`遺漏列 · FAIL（TRAIN隨機控制組percentile=1.0決定性反證），並發現記錄與獨立`hypothesis_queue`系統交錯續跑同一checkpoint的race condition痕跡（不影響判定正確性）
 ## 第348輪 · 2026-09-05T00:35+08:00 · FUT · 對19檔流動性達標個股期貨實測dispersion_ratio/PCA（round341/344下一步(c)） · 1.6371/27.33% vs TX/MTX/TE的0.1143/97.91%，跟指數期貨形成鮮明對比，方向性正面（取鎖時偵測到陳舊鎖檔，上一輪疑似失敗）
 

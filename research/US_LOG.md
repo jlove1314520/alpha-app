@@ -1124,4 +1124,27 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 
 **結果**：資料載入卡在222/226（WHLR）之後，剩餘約4檔完全無輸出，`SEC_companyfacts_*.json`快取檔案數在卡住期間全程維持224不變（排除是額度用盡或正常抓取只是慢），約25分鐘無任何進展後判定卡死，手動`taskkill`終止行程，**沒有產出任何CHEAP_PASS/FAIL判定**，`data/deep_dive_f_us_value_bm.csv`未產生。已確認`sec_edgar_client.py::_cached_get()`本身有`timeout=20.0`，理論上不該無限期掛住，懷疑是尾端某檔在`book_value_per_share_pit()`內部（非`_cached_get`）的某個迴圈/解析步驟有問題，或該檔的companyfacts JSON異常龐大導致解析極慢，需下一輪先加print定位是哪一檔、哪個步驟卡住，才能決定是bug修復還是排除單一問題股票。
 
-`is_holdout_consumed()`確認`False`（開工前後皆確認）。零新增FinMind呼叫；SEC EDGAR呼叫次數未知（卡住那一步之前的222檔全為快取命中）。診斷log`deep_dive_f_us_value_bm_run.log`（gitignored）保留供下一輪參考。**下一輪工作單位建議**：在`load_value_sample()`迴圈內加逐檔timing print，重跑鎖定卡住的確切ticker，再判斷是bug還是單一股票的資料問題。
+`is_holdout_consumed()`確認`False`（開工前後皆確認）。零新增FinMind呼叫；SEC EDGAR呼叫次數未知（卡住那一步之前的222檔全為快取命中）。診斷log`deep_dive_f_us_value_bm_run.log`保留供下一輪參考（跟既有`*_run.log`慣例一致，本輪一併commit，非gitignored）。**下一輪工作單位建議**：在`load_value_sample()`迴圈內加逐檔timing print，重跑鎖定卡住的確切ticker，再判斷是bug還是單一股票的資料問題。
+
+## 2026-09-05T02:34+08:00 — 馬拉松第351輪：回收第350輪未commit產物＋定位卡死點（結論：無法重現，很可能是暫態環境因素）
+
+**開工偵測**：取鎖時`marathon_lock.py`回報`LOCK_STALE`（pid 55480持有29.9分鐘後被回收），對應上一輪（第350輪）的25分鐘卡死+手動終止事件——那一輪已經誠實記錄了症狀（卡在`load_value_sample()`尾端），但因為headless執行個體本身的時間額度被耗盡，沒能走到commit步驟，`MARATHON_STATE.md`／`REPORT.md`／`US_LOG.md`的改動跟新增的`deep_dive_f_us_value_bm.py`／`deep_dive_f_us_value_bm_run.log`兩個檔案都留在工作目錄未進版控。
+
+**回收稽核**：逐一檢視這些未commit的改動，確認：(1) 內容誠實（老實記錄「未完成、卡死、手動終止」，沒有假造判定），(2) 沒有觸碰凍結區或holdout，(3) 新增的`deep_dive_f_us_value_bm.py`程式碼本身沒有危險操作（純讀取快取檔案+pandas運算，零下單/刪除邏輯）。核實無誤後決定保留並commit這批產物，作為本輪工作的一部分。
+
+**定位卡死點**：`load_value_sample()`用`cached_ticker_ids()`回傳的清單依序處理，log最後一筆成功輸出是`[222/226] WHLR`，代表卡在index 223~226（1-based）。純本機重建`cached_ticker_ids()`順序（零網路呼叫）確認這4檔依序是`WMT`（沃爾瑪，CIK 104169）／`XPER`（CIK 1788999）／`ZETA`（CIK 1851003）／`ZSQR`（CIK 1759186）。
+
+**逐一超時測試（本輪新增診斷，非重跑整支腳本）**：對這4檔分別用`timeout 90`包住`book_value_per_share_pit(ticker, cik_override=cik)`跟`us_price_series(ticker)`單獨呼叫（避免重演25分鐘無界卡死的風險）——**結果全部瞬間完成**：
+
+| ticker | book_value_per_share_pit耗時 | 回傳列數 | us_price_series耗時 | 回傳列數 |
+|---|---|---|---|---|
+| WMT | 0.077秒 | 4 | 0.051秒 | 8817 |
+| XPER | 0.053秒 | 10 | 0.047秒 | 574 |
+| ZETA | 0.036秒 | 0 | 0.046秒 | 896 |
+| ZSQR | 0.042秒 | 25 | 0.043秒 | 1015 |
+
+**推翻上一輪的假說**：第350輪心跳猜測「尾端某檔觸發即時SEC EDGAR抓取異常緩慢/掛起」，本輪額外檢查發現這5檔（含WHLR）的`SEC_companyfacts_*.json`快取mtime全部是`Sep 5 00:07`（round347跑`us_factor_ic_value.py`時就已快取，24小時TTL遠未過期），代表深挖過程根本不會觸發新的網路請求——排除「網路掛起」的可能性。原本另外懷疑「WMT檔案較大（4.18MB，比WHLR的2.69MB大55%）拖慢`book_value_per_share_pit()`內部運算」，本輪直接量測後**證實不成立**（0.077秒，跟其他檔案沒有量級差異）。
+
+**誠實結論**：4個候選函式呼叫單獨測試都無法重現25分鐘卡死，較可能的解釋是第350輪執行當下遇到暫態的環境性因素（系統資源競爭、跟其他背景程序衝突、或單純這台機器在那個時間點被其他行程佔用），不是這幾支函式本身穩定重現的程式邏輯bug。**不排除還有其他未驗證的可能性**（例如卡死點其實不是`load_value_sample()`本身，而是`run_one_value()`後續步驟，或跟`print()`緩衝區/stdout重導向有關），只是本輪的測試方法還無法區分。
+
+`is_holdout_consumed()`確認`False`（開工前後皆確認）。零新增API呼叫（全部命中既有快取，含這4檔的隔離測試）。**下一輪工作單位建議**：用`timeout 600 python deep_dive_f_us_value_bm.py`（加硬超時保護）重跑完整226檔深挖腳本本身（不是拆開的單一函式呼叫），如果這次順利跑完就能直接看到`f_us_value_bm`的1b判定結果；如果還是卡在同一個點，代表問題出在腳本整體執行環境（例如`run_one_value()`內部某個步驟或outer loop的疊加效應），而不是任何單一函式，屆時才需要考慮`faulthandler`/`py-spy`這類抓執行中呼叫堆疊的工具，不要再盲猜個別函式。
