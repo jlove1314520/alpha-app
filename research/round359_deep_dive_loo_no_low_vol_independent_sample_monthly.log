@@ -5,3 +5,8 @@ loaded 300/300 usable names
 
 ========== TRAIN-only mean |IC|（獨立樣本[300:600]重新估計） ==========
   f_eps_growth: train_mean_ic=+0.0492 (n=74)
+  f_eps_surprise: train_mean_ic=+0.0519 (n=74)
+  f_revenue_surprise: train_mean_ic=+0.0590 (n=74)
+TRAIN_ONLY_IC_WEIGHTS（新樣本重估） = {'eps_family': 0.05058631995144985, 'revenue_surprise': 0.058967812852715976}
+
+========== 獨立樣本驗證：loo_no_low_vol / ic_weighted(train-only重估) / VALIDATION，monthly+quarterly，完整版（1x/2x/3x成本 + N=100隨機控制組） ==========

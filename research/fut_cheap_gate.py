@@ -805,6 +805,74 @@ def hyp_day_gap_continuation(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test_same_day("fut_day_gap_continuation", position, merged["day_ret"])
 
 
+def hyp_combo_trend_ma_oi_v1(series: pd.DataFrame) -> CheapGateResult:
+    """Round 361's combination-level hypothesis, per MARATHON_PROTOCOL.md's
+    2026-09-03 pivot to portfolio/combination-level work being the primary
+    axis (not single-factor trials). Round 358 closed off the multi-round
+    (341-358) individual-stock-futures cross-section direction as
+    infeasible (see FUT_MARATHON_STATE.md round 361 for the closure
+    reasoning); this is a first attempt at the FUT-track equivalent of TW's
+    portfolio_multifactor combination -- since TX/MTX has no cross-sectional
+    stock universe to combine factors over, "combination" here means
+    combining multiple already-individually-FAILed but correctly-directioned
+    single-instrument signals into one composite position, testing whether
+    their consensus reduces noise (the diversification argument used for
+    combining weak stock factors into a portfolio, applied at the
+    single-instrument multi-signal level instead).
+
+    Three components, chosen to span two independent information sources
+    (not three variants of the same underlying signal, which would just
+    re-test collinear noise under a new name):
+      - hyp_trend_multi_tf's 10/20/60-day momentum vote (percentile 82.5,
+        FAIL, TRIALS_LEDGER #18) -- price-only trend consensus.
+      - hyp_ma_crossover's 20/60 SMA crossover (percentile 75.5, FAIL,
+        TRIALS_LEDGER #20) -- price-only, different construction (smoothing
+        lag vs raw momentum), correlated with trend_multi_tf but not
+        identical.
+      - hyp_oi_price_confirm's 5-day OI-confirmed 1-day price direction
+        (percentile 62.0, FAIL, TRIALS_LEDGER #22) -- the only non-price-only
+        component (uses open_interest), included specifically for
+        diversification against the two price-only components above.
+    hyp_vol_regime_trend and hyp_donchian_breakout are deliberately excluded:
+    both are trend-following variants near-identical in spirit to
+    trend_multi_tf (vol_regime_trend IS trend_multi_tf gated by volatility;
+    round 33 already found the gating added no improvement), so including
+    them would just weight the trend-following mechanism 3x rather than add
+    a genuinely independent vote.
+
+    Combination rule: majority sign vote across the 3 component positions
+    (each already -1/0/+1), no weighting -- deliberately the simplest
+    possible combination rule for a first test, before considering IC-
+    weighted or volatility-targeted variants (paralleling
+    PORTFOLIO_STRATEGY_SPEC.md's equal-weight baseline before its
+    IC-weighted iteration). Pairwise position correlation is printed as a
+    diagnostic: if the components turn out to be highly correlated, the
+    combo is not really adding diversification and a percentile improvement
+    (if any) should be read cautiously."""
+    close = series["adj_close"]
+
+    trend_scores = pd.DataFrame({f"mom_{n}": close.pct_change(n) for n in (10, 20, 60)})
+    trend_vote = np.sign(np.sign(trend_scores).sum(axis=1))
+
+    sma_fast = close.rolling(20).mean()
+    sma_slow = close.rolling(60).mean()
+    ma_vote = np.sign(sma_fast - sma_slow)
+
+    raw_direction = np.sign(close.diff(1))
+    oi_rising = series["open_interest"].diff(5) > 0
+    oi_vote = raw_direction.where(oi_rising, 0.0)
+
+    components = pd.DataFrame({"trend": trend_vote, "ma": ma_vote, "oi": oi_vote})
+    valid_mask = components.notna().all(axis=1)
+    pairwise_corr = components[valid_mask].corr()
+    print(f"  [combo diagnostic] pairwise position correlation (n={int(valid_mask.sum())} valid days):")
+    print(pairwise_corr.to_string())
+
+    combined_score = components.sum(axis=1)
+    position = np.sign(combined_score)
+    return _permutation_test("fut_combo_trend_ma_oi_v1", position, series["ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -813,8 +881,7 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_day_gap_reversal(series),
-        hyp_day_gap_continuation(series),
+        hyp_combo_trend_ma_oi_v1(series),
     ]
 
     for r in results:

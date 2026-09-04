@@ -2177,3 +2177,17 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 **下一步建議**：round348(c)「設計橫斷面因子」這個前置決策現在有了誠實數字可以選——(a) 走`CCF`/`CDF`兩檔15年長窗口（但N=2橫斷面太窄，做不了真正的cross-sectional排序因子，頂多是這兩檔之間的相對強弱，統計檢定力極低）；(b) 走2021-2024或2022-2024短窗口（N=10~12，橫斷面夠寬但樣本只有3~4年，跟`CALIBRATION_PROBE.md`已證實100檔台股cheap gate都檢定力不足相比，這個規模的因子測試幾乎注定測不出訊號，除非效應量極強）；(c) 放棄個股期貨橫斷面因子這個方向，改回TX/MTX/TE多商品池或TX單一商品的時序類假說（第3節既有清單：多時間框架趨勢/突破/波動regime/期現價差等，這些不需要橫斷面維度）。**本輪不替下一輪做決定**，誠實列出三個選項留給下一輪或使用者判斷，因為這個決定會影響後續好幾輪的方向,不應該在資料probe腳本裡順手決定。
 
 非因子/策略判定（讀不出edge，只是資料可行性查證），跟round332/335/338/341/344/348/349/355同precedent，**不佔`TRIALS_LEDGER.md`列**，補記`FUT_LEADS.md`。結果存`data/fut_stock_futures_liquidity_by_year_round358.csv`，原始輸出`fut_stock_futures_liquidity_by_year_round358.log`。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。
+
+## 2026-09-05T07:05+08:00 — 第361輪（FUT軌）
+
+**取鎖時偵測到`LOCK_STALE`**（US round360的pid 58488持有30.2分鐘後被回收；查證`git log`發現round360其實已把工作做完並成功commit+push`6406cc5`，很可能是收工序最後、release lock前process卡住，不是工作本身失敗）。三軌時間戳：FUT 05:33（第358輪，最舊）／TW 06:03（第359輪）／US 06:33（第360輪，最新）——依輪替選FUT。
+
+**本輪工作單位＝判定round358留下的三選項，選(c)＋FUT軌首個組合策略層級測試**：(a) `CCF`/`CDF`N=2太窄，做不了真正橫斷面排序因子；(b) 2021-2024窗口N=10~12，`CALIBRATION_PROBE.md`已證實台股N=54~74都檢定力不足，N=10~12只會更弱；選(c)放棄個股期貨橫斷面方向，正式結案第341-358輪（8輪）調查線，改測`fut_cheap_gate.py`新增的`hyp_combo_trend_ma_oi_v1()`——等權多數決組合三個既有單測FAIL但方向正確的訊號（`fut_trend_multi_tf`#18 pct82.5、`fut_ma_crossover_20_60`#20 pct75.5、`fut_oi_price_confirm_5d`#22 pct62.0，刻意排除`fut_vol_regime_trend`/`fut_donchian_breakout`避免同機制訊號灌票），回應`MARATHON_PROTOCOL.md`總司令2026-09-03「組合策略層級」主軸裁示，沿用`_permutation_test()`同框架N=200，零新增API呼叫（全部命中`build_continuous_series()`既有快取）。
+
+**結果：percentile=76.5，FAIL**（門檻90.0，`TRIALS_LEDGER.md`#130）。真實策略終值+126.9%（6184天，2000-2024全歷史）vs 隨機中位數+9.55%（n=200），方向正確但強度反而低於最強單一成分`fut_trend_multi_tf`(82.5)。**誠實失敗原因（附診斷）**：三成分pairwise位置相關係數 trend-ma=0.418（同屬價格趨勢家族，不夠獨立）、trend-oi=0.125、ma-oi=0.019（oi確實提供獨立資訊，但`oi_price_confirm`本身有大量0——OI濾網未過的日子——稀釋掉trend+ma原本一致時的多數決結果）。**等權多數決不等於分散化**，呼應TW軌`PORTFOLIO_STRATEGY_SPEC.md`從等權走向IC加權的既有教訓：組合要有效，權重需反映各成分相對強度。
+
+**下一步（留給後續輪次判斷，本輪不代為決定）**：(a)改IC/百分位加權組合重測（trend較高權重、oi較低權重）；(b)拿掉高相關的ma分量只留trend+oi兩個更獨立成分重測；(c)承認FUT軌現有訊號池（多數FAIL、僅1 EXPERIMENTAL）巧婦難為無米之炊，優先權重新排回TW/US軌，FUT維持20%資源配置上限、暫不強求本輪就要有可用組合。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第361輪新增段落、`FUT_MARATHON_STATE.md`第361輪、`TRIALS_LEDGER.md`#130、`fut_cheap_gate.py`（新增`hyp_combo_trend_ma_oi_v1()`）。
+
+**（本輪心跳/計數器/本檔案條目由第362輪無人值守馬拉松接手補寫——開工時發現round361已把研究工作做完、`FUT_LEADS.md`/`FUT_MARATHON_STATE.md`/`TRIALS_LEDGER.md`/`fut_cheap_gate.py`四個檔案異動完整存在於工作目錄卻從未commit，`REPORT.md`心跳與`MARATHON_STATE.md`全局計數器也都停在第360輪，判定round361在完成寫檔後、commit前的收工序階段異常中止；本輪比照round341/342precedent，原封不動補上這篇日誌、心跳、計數器並commit+push，未新增任何研究內容。）**

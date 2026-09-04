@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第361輪 · 2026-09-05T07:37+08:00 · FUT · 取鎖偵測`LOCK_STALE`（US round360 pid 58488持有30.2分鐘後被回收；但`git log`證實round360工作已成功commit+push`6406cc5`，疑似只是收工序release lock前process卡住）；開工發現round358下一步三選項判定選(c)、正式結案第341-358輪個股期貨橫斷面調查線，改測FUT軌首個組合策略層級假說`hyp_combo_trend_ma_oi_v1()`（等權多數決組合`fut_trend_multi_tf`+`fut_ma_crossover_20_60`+`fut_oi_price_confirm_5d`三個既有FAIL訊號）的研究工作本身在工作目錄裡已完整存在（`FUT_LEADS.md`/`FUT_MARATHON_STATE.md`/`TRIALS_LEDGER.md`#130/`fut_cheap_gate.py`四檔皆有內容），但`REPORT.md`心跳、`MARATHON_STATE.md`計數器、`FUT_LOG.md`條目三者皆缺——判定round361本身在完成研究、寫檔後，收工序（心跳/commit）階段異常中止，本輪（無人值守馬拉松第362次喚醒）比照round341/342precedent原封不動補齊三者並commit+push，未新增任何研究內容 · **percentile=76.5，FAIL**（門檻90.0）——真實策略終值+126.9% vs 隨機中位數+9.55%，強度低於最強單一成分trend_multi_tf(82.5)，三成分pairwise相關trend-ma=0.418顯示等權多數決未帶來足夠分散化；下一步（IC加權/拿掉ma分量/優先權讓回TW-US）留給後續輪次判斷
 ## 第360輪 · 2026-09-05T06:33+08:00 · US · 取鎖偵測`LOCK_STALE`（TW round359 pid 50060，上一輪疑似失敗，根因未查明）；判讀round357留下的`f_us_value_bm`完整1b深挖背景process結果（CSV已於06:20完成，pid 1905正常結束） · **FAIL**——VAL期報酬量級（年化121%）跟同一批cached universe上完全不相關的`f_us_low_vol`（#15）幾乎同一量級，判定為universe層級選樣假影（疑似熱門股優先被快取），非value factor本身edge；US軌至今第一次發現此類系統性假影，已在`US_MARATHON_STATE.md`留警示供未來輪次參考
 ## 第359輪 · 2026-09-05T06:03+08:00 · TW · 開工核對發現round356背景process異常消失（無CSV、log只4行、無錯誤訊息，根因未查明）；改用`DEEP_DIVE_CADENCES=monthly`縮小範圍＋`-u`unbuffered重跑`deep_dive_loo_no_low_vol_independent_sample.py`（`safe_pool_ids()[300:600]`獨立樣本，補齊#118第三前提用） · process啟動確認存活（PID 50060），留在背景繼續跑，本輪未取得數字，暫不更新TRIALS_LEDGER/LEADS，下一輪先查CSV是否出現
 
