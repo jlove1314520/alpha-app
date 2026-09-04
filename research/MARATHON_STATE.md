@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-05T03:26+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 353 輪。最新一輪：第 353 輪 · 2026-09-05T03:26+08:00 · TW（取鎖乾淨；深挖round346找到的leave-one-factor-out候選`loo_no_low_vol`——拿掉`low_vol`後剩`eps_family`+`revenue_surprise`，train-only IC加權，VALIDATION/monthly名目p=0.0489，round346已明確要求補齊「成本敏感度1x/2x/3x＋隨機控制組N≥100」深挖前提。新增`deep_dive_loo_no_low_vol.py`，TRAIN-only IC重算跟round346吻合確認可重現，但背景process執行超過22分鐘仍未跑完monthly這第一個cadence的100次隨機控制組，遠超round201/202記錄的3因子版本耗時，`ps aux`確認process持續存活（非round326/327那種無聲消失模式），根因未查明。未殺process，留給下一輪接手查核`data/deep_dive_loo_no_low_vol_validation.csv`是否已出現，或用`DEEP_DIVE_CADENCES=monthly`環境變數縮小範圍重跑，判定維持round346原FAIL不變，詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`第353輪記錄）。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 354 輪。最新一輪：第 354 輪 · 2026-09-05T03:42+08:00 · US（取鎖乾淨；照第351輪建議`timeout 600`重跑完整`deep_dive_f_us_value_bm.py`——這次資料載入226檔全部順利跑完（排除round350懷疑的「尾端幾檔卡死」），但backtest的N=100隨機控制組模擬階段換一個新地方卡在600秒硬超時，無CSV產出。**新發現**：`ps -ef`確認TW軌round353留下的背景process（`deep_dive_loo_no_low_vol.py`，同樣是重度N=100模擬，同時段並行跑了39分鐘以上）——新工作假說是多輪馬拉松背景process疊加造成CPU資源競爭，不是腳本bug（卡死點兩次執行完全不同，不像穩定重現的邏輯錯誤）。`f_us_value_bm`仍維持`CHEAP_PASS（待深挖）`，無新判定。下一輪建議先查有無其他背景process在跑，詳見`US_MARATHON_STATE.md`/`US_LOG.md`第354輪記錄）。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
