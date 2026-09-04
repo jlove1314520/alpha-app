@@ -17,6 +17,12 @@
 
 ---
 
+## ✅ 2026-09-04晚間（維運帽）HTTPS方案A第一階段：自簽CA＋/ca.crt端點
+
+見`PROGRESS.md`同日條目。`research/gen_local_ca.py`新增；`/ca.crt`不驗token可下載；
+`ENABLE_HTTPS`環境變數預設false、正式伺服器仍HTTP未切換。smoke 32項全PASS。**等總司令
+確認手機裝好CA才切換**（見PENDING_QUEUE「HTTPS方案A」區塊HTTPS.四）。
+
 ## ✅ 2026-09-04下午（開發帽）P0產品.一首頁重排版＋兩個回歸P0修正（自選股重複／走勢線撐寬）
 
 見`PROGRESS.md`同日條目。smoke 32項全PASS（新增30~34）。P0產品.二（選股理由）接續。

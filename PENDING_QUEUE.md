@@ -160,11 +160,10 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 > 3. 第二階段程式先寫好不切換：uvicorn --ssl-keyfile/--ssl-certfile 於 8001；CORS 已有，確認 allow_headers 含 X-Alpha-Local-Token、OPTIONS preflight 不驗 token；Playwright 對自簽加 ignoreHTTPSErrors。
 > 4. 回報 /ca.crt 可從 http://192.168.3.241:8001/ca.crt 下載、憑證 SAN/有效期，等總司令說「手機裝好了」再切 HTTPS。
 
-- [ ] **HTTPS.一** 產生根CA＋伺服器葉憑證（私鑰放secrets/不進repo，CA公開憑證DER格式alpha-ca.crt）
-- [ ] **HTTPS.二** alpha_live_server加GET /ca.crt（不需token）
-- [ ] **HTTPS.三** 第二階段程式先寫好不切換：--ssl-keyfile/--ssl-certfile、CORS allow_headers含token、
-  OPTIONS preflight不驗token、Playwright ignoreHTTPSErrors
-- [ ] **HTTPS.四** 回報/ca.crt可下載、SAN/有效期，等總司令說「手機裝好了」才切HTTPS
+- [x] **HTTPS.一** ——**已完成**（commit `c640ee4`）：`research/gen_local_ca.py`（新增）產生根CA（RSA 4096/SHA-256/10年2036-09-01到期/CN=Alpha Local CA/CA:TRUE critical/keyUsage keyCertSign+cRLSign critical）與伺服器葉憑證（RSA 2048/由CA簽/825天2028-12-07到期/SAN=IP:192.168.3.241+IP:127.0.0.1+DNS:localhost/EKU serverAuth critical）。全部6個檔案輸出`secrets/`（私鑰`alpha-ca-key.pem`/`alpha-server-key.pem`絕不進repo，`git status`確認過secrets/沒出現在任何commit）；CA公開憑證DER格式`secrets/alpha-ca.crt`。
+- [x] **HTTPS.二** ——**已完成**：`GET /ca.crt`回傳`secrets/alpha-ca.crt`（DER，`Content-Type: application/x-x509-ca-cert`），刻意不驗token（CA公開憑證本身不是機密，端點程式碼裡完全沒有讀取私鑰的路徑）。本機實測：無token下載200、與原始檔逐位元相同。
+- [x] **HTTPS.三** ——**已完成，維持不切換**：`ENABLE_HTTPS`環境變數（`ALPHA_LIVE_SERVER_HTTPS=1`）控制`uvicorn.run()`要不要帶`ssl_keyfile`/`ssl_certfile`，**預設值是False，正式伺服器目前仍是HTTP**（`/health`回`https_enabled:false`確認）；CORS `allow_headers=["*"]`已涵蓋`X-Alpha-Local-Token`（加註解講清楚不留疑問）；OPTIONS preflight本來就不經過`_check_token()`（Starlette CORSMiddleware框架行為，實測回200）；`scripts/smoke_test.mjs`加`ignoreHTTPSErrors:true`（目前no-op）。**獨立測試埠8013**開`ENABLE_HTTPS=1`驗證整條HTTPS路徑本身正常：`openssl s_client -verify_return_error`回`Verify return code: 0 (ok)`、Python `requests`用CA pem驗證成功200——**憑證鏈本身完全正確**（Windows版curl因schannel強制檢查憑證撤銷狀態、私有CA沒有撤銷基礎設施而報錯，這是curl-for-Windows已知限制不是憑證問題，已用openssl/requests交叉驗證排除）。smoke test 32項全PASS、單元測試13項全PASS，正式伺服器未受影響。
+- [~] **HTTPS.四** 回報見下方PROGRESS.md條目與這裡的HTTPS.一~三；**等總司令確認手機已裝好`secrets/alpha-ca.crt`（透過`http://192.168.3.241:8001/ca.crt`下載安裝）才切換，本session不會自己動`ALPHA_LIVE_SERVER_HTTPS`。**
 
 ---
 

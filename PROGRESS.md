@@ -16,6 +16,35 @@
 
 ---
 
+## 2026-09-04晚間（維運帽）— HTTPS方案A第一階段：自簽CA＋/ca.crt端點（先寫好不切換）
+
+`research/gen_local_ca.py`（新增，可重跑，已有效憑證時預設不覆蓋）產生：
+- 根CA：RSA 4096、SHA-256、CN=Alpha Local CA、CA:TRUE（critical）、keyUsage keyCertSign+cRLSign
+  （critical），有效期2026-09-04~2036-09-01（10年）。
+- 伺服器葉憑證：RSA 2048、由CA簽、SAN=IP:192.168.3.241+IP:127.0.0.1+DNS:localhost、
+  EKU=serverAuth（critical），有效期2026-09-04~2028-12-07（825天，踩在iOS/Safari硬性上限內）。
+- 全部6個檔案在`secrets/`（已gitignore，`git status`/`git add`過程確認私鑰從未進git，這個repo
+  是public的）：`alpha-ca-key.pem`（CA私鑰，唯一真正敏感）、`alpha-ca.pem`/`alpha-ca.crt`
+  （CA公開憑證，PEM/DER雙格式）、`alpha-server-key.pem`/`alpha-server-cert.pem`/
+  `alpha-server-fullchain.pem`（伺服器葉憑證組）。
+
+`alpha_live_server.py`新增`GET /ca.crt`（不驗token，回傳DER格式CA公開憑證，
+`Content-Type: application/x-x509-ca-cert`）；`ENABLE_HTTPS`環境變數（`ALPHA_LIVE_SERVER_
+HTTPS=1`）控制是否切HTTPS，**預設False、正式伺服器目前仍是HTTP，尚未切換**；CORS/preflight
+確認既有設定已涵蓋token標頭與不驗token的preflight。
+
+**驗證**：`/ca.crt`本機下載200、跟`secrets/alpha-ca.crt`逐位元相同；`/health`回
+`https_enabled:false`確認未切換；既有`/live/quotes`token驗證不受影響（401/200照舊）；獨立
+測試埠8013開`ENABLE_HTTPS=1`驗證整條HTTPS路徑：`openssl s_client -verify_return_error`回
+`Verify return code: 0 (ok)`、Python requests用CA pem驗證200——憑證鏈本身正確（Windows curl
+因schannel撤銷檢查對私有CA報錯是curl-for-Windows已知限制，非憑證問題，已交叉驗證排除）。
+smoke test 32項全PASS、單元測試13項全PASS。
+
+**下一步**：等總司令用手機開`http://192.168.3.241:8001/ca.crt`下載並安裝信任這個CA，確認
+「手機裝好了」之後，才設`ALPHA_LIVE_SERVER_HTTPS=1`重啟`alpha_live_server.py`真正切HTTPS。
+
+---
+
 ## 2026-09-04下午（開發帽）— P0產品.一 首頁重排版 ＋ 總司令13:54手機實測兩個回歸的P0修正
 
 **首頁重排版（`37bc0ee`）**：自選股置頂，每列只留名稱/代號、現價、%、走勢線，來源改彩色小點
