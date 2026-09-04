@@ -899,6 +899,13 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     具體構造。**佇列#1~30全數結案。剩餘#5/#6/#8/#10仍卡外部依賴（本輪
     重新查證仍未解鎖），設計新假設軸#31（台指選擇權Put/Call成交量比率
     當市場regime/擇時訊號，見下方新章節），現在排隊第一，尚未開始第1關。**
+31. 台指選擇權Put/Call成交量比率——**2026-09-05接續排程第1關cheap
+    gate：CHEAP_PASS**（`option_pcr_gate.py`，指數層級時序相關性，TRAIN
+    r=+0.0611/null percentile=98.2、VAL r=+0.0587/null percentile=94.0，
+    train/val同號+幅度非零+VAL贏過洗牌null三項判準皆過，見上方#31條目
+    與`TRIALS_LEDGER.md`#121），**尚未結案**——只過第1關，下一輪待第2關
+    以後（成本敏感度/具體擇時規則portfolio層構造/逐年一致性/alpha顯著性
+    拆解）。**現在排隊第一（未結案，接續第2關）**。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後）**：15條原始佇列項目中
 #1~4、#7、#9、#11~15共10條已結案（皆FAIL），#10已建置方法論框架（非
@@ -2844,3 +2851,34 @@ regime，套用在TAIEX（或未來若有選股候選）的曝險上——具體
 工作單位」），未寫任何因子/測試程式碼。下一輪從第1關CHEAP GATE開始
 （先驗證2015年起逐日資料完整性，再算Put/Call比率對後續N日TAIEX報酬的
 相關性/預測力，比照本佇列既有GATE_SEQUENCE，不跳關）。
+
+**狀態（2026-09-05接續排程，第1關cheap gate：CHEAP_PASS）**：新增
+`option_pcr_gate.py`（沿用`spillover_overnight_gate.py`#19同一套指數
+層級時序相關性框架，Pearson+Spearman+N=500洗牌null，非cross-sectional
+選股IC）。資料可行性確認：FinMind`TaiwanOptionDaily`(TXO)2015年起
+逐日資料完整，但**發現一次跨10年抓取會讓FinMind回502 Bad Gateway**
+（payload過大伺服器端逾時），改成逐年呼叫`load_dev`（仍是唯一sanctioned
+entry point，只是分批呼叫，沿用其既有節流/重試邏輯）解決。**方法論
+決定**：只採用`trading_session`==`position`（日盤）成交量計算PCR——
+FinMind該欄位還有`after_market`（夜盤），但夜盤資料2017年年中才出現，
+2015/2016僅有日盤，含入夜盤會讓訊號口徑在全期間內不一致，故排除，
+全期間口徑一致。**時序對齊**：用第t日收盤後才完整可得的PCR（
+put_volume/call_volume）預測第t+1日（次一交易日）台股close-to-close
+報酬，不用來預測第t日自己的報酬（選擇權日盤13:45收盤晚於台股現貨
+13:30收盤，保守起見不假設當日可用）。**結果**（對齊後n=2437）：
+TRAIN(<=2020-12-31,n=1467) Pearson r=+0.0611(p=0.0193)、null
+percentile=98.2；VAL(2020-12-31~2024-12-31,n=970) Pearson r=+0.0587
+(p=0.0676)、null percentile=94.0。三項cheap gate判準（幅度非零/
+train-val同號/VAL贏過洗牌null>=90.0）皆過，判定**CHEAP_PASS**——本
+佇列第一次成功通過第1關的「新資訊來源類」假設（前29條timing/overlay
+類假設中，只有#19美股隔夜外溢跟這條走到CHEAP_PASS，其餘多數第1關就
+FAIL）。方向為正（PCR越高、次日台股報酬越正），事前未綁定方向對錯
+（文獻本身對PC ratio是逆向/順向指標有分歧，不像#30融資使用率有明確
+理論負號預期）。**只是第1關，不是最終判定**——比照#10/#19/#28的教訓，
+接下來要走成本敏感度(第2/4關)、具體擇時規則portfolio層構造、逐年一致性、
+alpha顯著性+beta拆解，任一關未過都要誠實判FAIL，不能因為第1關相關性
+漂亮就預期一定會過。下一輪從第2關（隨機控制組，正式版N>=100）或直接
+設計具體擇時規則（比照#19`spillover_overlay_v1.py`把CHEAP_PASS相關性
+轉成具體exposure規則）開始，兩者皆可，由下一輪根據既有精神判斷。完整
+數字見`TRIALS_LEDGER.md`#121、`data/option_pcr_aligned.csv`
+（gitignored）。

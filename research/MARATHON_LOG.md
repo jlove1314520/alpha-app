@@ -1,6 +1,19 @@
-# MARATHON_LOG.md — 自主研
+# MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
+
+**格式修正說明（2026-09-05 hypothesis_queue排程本輪發現並修正）**：上一輪
+插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
+標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
+
+## 2026-09-05T01:28（hypothesis_queue排程，取得陳舊鎖檔接續，上一輪疑似
+卡住約30分鐘）— 先push上一輪
+未推送成功的commit（佇列#30已結案FAIL文件+新增假設#31登記），接著執行
+#31第1關cheap gate：新增`option_pcr_gate.py`（台指選擇權TXO Put/Call
+日盤成交量比率，比照#19`spillover_overnight_gate.py`同一套指數層級時序
+相關性框架），一次抓10年選擇權資料遇FinMind 502改成逐年分批抓取解決，
+結果**CHEAP_PASS**（TRAIN r=+0.0611/null percentile=98.2，VAL
+r=+0.0587/null percentile=94.0，三項判準皆過），詳見`HYPOTHESIS_QUEUE.md`
+#31與`TRIALS_LEDGER.md`#121。尚未結案，下一輪接續第2關。
 ## 2026-09-05（hypothesis_queue排程）— 完成並commit佇列#30（個股融資使用率regime-conditional portfolio構造）已結案FAIL的文件（該結論由前一輪未commit的session產出，本輪獨立重跑腳本驗證數字一致後補commit）；同步修正排隊順序總結章節的過時提示字；查證#5/#6/#8/#10依賴仍卡住後設計新假設#31（台指選擇權Put/Call成交量比率當市場regime訊號，僅登記尚未開始第1關）。
-究馬拉松可見心跳（2026-08-29啟動）
 
 **這份檔案存在的理由**：使用者裁示「解決使用者『看不到它在跑』——每完成
 一個關卡或每約30分鐘寫一行（時間戳＋現在在跑哪條假設的哪一關＋結果），
