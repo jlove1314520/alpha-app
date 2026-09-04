@@ -1,0 +1,58 @@
+=== Per-code listing window (from on-disk cache, full 2000-2024 history) ===
+code first_date  last_date  n_days  n_skipped_rollover_events  clean_8  long_4
+ CCF 2010-01-25 2024-12-31    3666                          0     True    True
+ CDF 2010-01-25 2024-12-31    3666                          0     True    True
+ JWF 2011-05-03 2024-12-31    3354                         37    False   False
+ ITF 2011-05-03 2024-12-31    3354                         27    False   False
+ HQF 2011-05-03 2024-12-31    1186                         16    False   False
+ KKF 2011-05-03 2024-12-31    3354                         22    False   False
+ GMF 2011-05-03 2024-12-31    3354                          9    False   False
+ FYF 2011-05-03 2024-12-31    3337                         18    False   False
+ EHF 2011-05-03 2024-12-31    3354                         24    False   False
+ HBF 2011-05-03 2024-12-31    2160                         11    False   False
+ NWF 2014-05-02 2024-12-31    2610                          3    False   False
+ OLF 2016-06-27 2024-12-31    2081                          0     True    True
+ PAF 2018-05-02 2024-12-31    1629                          0     True    True
+ QDF 2021-02-01 2024-12-31     951                          1    False   False
+ QRF 2021-08-02 2024-12-31     833                          0     True   False
+ ZFF 2021-12-06 2024-12-31     746                          0     True   False
+ RFF 2023-02-10 2024-12-31     461                          0     True   False
+ RUF 2023-08-01 2024-12-31     347                          0     True   False
+ SXF 2023-12-18 2024-12-31     252                          4    False   False
+
+=== Per-year headcount (>=1 trading day in that calendar year) ===
+ year  n_active
+ 2010         2
+ 2011        10
+ 2012        10
+ 2013        10
+ 2014        11
+ 2015        11
+ 2016        12
+ 2017        12
+ 2018        13
+ 2019        13
+ 2020        13
+ 2021        16
+ 2022        16
+ 2023        19
+ 2024        19
+
+=== Candidate windows ending 2024, by span length (min headcount = binding N) ===
+2010-2024 (15y): min per-year headcount = 2
+2011-2024 (14y): min per-year headcount = 10
+2012-2024 (13y): min per-year headcount = 10
+2013-2024 (12y): min per-year headcount = 10
+2014-2024 (11y): min per-year headcount = 11
+2015-2024 (10y): min per-year headcount = 11
+2016-2024 ( 9y): min per-year headcount = 12
+2017-2024 ( 8y): min per-year headcount = 12
+2018-2024 ( 7y): min per-year headcount = 13
+2019-2024 ( 6y): min per-year headcount = 13
+2020-2024 ( 5y): min per-year headcount = 13
+2021-2024 ( 4y): min per-year headcount = 16
+2022-2024 ( 3y): min per-year headcount = 16
+2023-2024 ( 2y): min per-year headcount = 19
+2024-2024 ( 1y): min per-year headcount = 19
+
+Saved: data/fut_stock_futures_rolling_universe_probe_round355.csv

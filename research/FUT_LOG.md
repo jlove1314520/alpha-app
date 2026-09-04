@@ -2127,3 +2127,28 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 零因子/策略判定，跟round332/335/338/341/344/348同precedent不寫`TRIALS_LEDGER.md`列，補記`FUT_LEADS.md`。結果存`data/fut_stock_futures_dispersion_clean_subset_round349.csv`、`fut_stock_futures_dispersion_clean_subset_run.log`（原始輸出，主控台編碼是Big5導致中文亂碼但數字可讀，未來若要重跑建議加`chcp 65001`或改用`PYTHONIOENCODING=utf-8`）。零新增API呼叫（全部命中round347/348既有快取）。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **下一步**：round348下一步(a)(b)已完成初步處理（本輪），round348下一步(c)「開始設計橫斷面因子的地基完成點」下一輪可以考慮開始，但先決條件是要決定用哪個子集（8檔短窗口 vs 4檔長窗口，各有取捨：更多標的vs更長歷史），或者研究round348原本提過的「滾動式宇宙」——不要求全體同時存在、依上市時間動態納入池子的成分股精神，這樣可能同時保留樣本數跟窗口長度，是比二選一子集更好的長期方向，值得下一輪評估可行性。
+## 第355輪（2026-09-05T04:04+08:00，FUT）：round348下一步(c)前置——「滾動式宇宙」可行性評估
+
+**取鎖時偵測到`LOCK_STALE`（pid 55412持有29.9分鐘後被回收）——上一輪（應為round354後、round355之前某輪，但`MARATHON_STATE.md`計數器顯示上一輪就是US round354，代表這是round354結束後、下一輪自然排程之間鎖檔異常，而非round354本身失敗；`MARATHON_STATE.md`round354心跳條目本身完整、有正常收工敘述，判斷是round354成功結束、正常釋放鎖之後、下一次30分鐘排程啟動時鎖檔status殘留或某次極短暫的異常執行——本輪未深究根因，如實記錄「取鎖偵測到陳舊鎖檔」這個事實，供後續比對。**
+
+三軌時間戳：TW 03:26（第353輪，最新）／US 03:42（第354輪，更新）／FUT 02:35（第352輪，最舊）——依輪替選FUT。
+
+**開工前風險評估（新增，因應US round354/TW round353都記錄的CPU資源競爭發現）**：`ps -ef`確認TW round353留下的背景process（`deep_dive_loo_no_low_vol.py`，pid 1427）本輪開工時**仍在運行**（自03:03起、已運行近1小時），是US round354記錄的「多輪馬拉松背景process疊加造成CPU資源競爭」現象的延續證據。**因此本輪工作單位刻意避開任何N=100隨機控制組等級的重度Monte Carlo模擬**，選擇round352下一步(c)的前半段（「決定用哪個子集，或研究滾動式宇宙可行性」）中純讀取快取、無重度計算的那一半：滾動式宇宙可行性評估。
+
+**做了什麼**：新增`fut_stock_futures_rolling_universe_probe.py`（import重用`continuous_contract.build_continuous_series()`，19碼全部命中round347/348/349已建立的`2000-01-01~2024-12-31`完整快取，**零新增API呼叫**，執行耗時<10秒，完全不涉及round353/354同款的重度模擬瓶頸）。對round344篩出的19檔F結尾個股期貨，讀出每檔實際的on-disk資料起訖日，建立逐年在架數表。
+
+**結果（誠實記錄，含限制）**：
+- 19檔上市時間分散在2010-01-25（CCF/CDF最早）到2023-12-18（SXF最晚），逐年在架數從2010年僅2檔穩定成長到2023-2024年的19檔（全數在架）。
+- **關鍵發現**：2011-2024（14年窗口）逐年最低在架數=10檔；2015-2024（10年窗口）=11檔；2018-2024（7年窗口）=13檔。相較round349兩個固定子集（8檔/346天 或 4檔/1623天）的二選一取捨，**滾動式宇宙確實能同時取得更長窗口跟比8檔子集更寬的橫斷面**（例如2011-2024可以有14年、最少10檔，遠優於8檔子集的346天）。
+- **誠實限制（不能過度樂觀，三點）**：
+  1. 這個headcount只代表「該年有資料」（掛牌存續），**不代表「該年流動性足夠」**——round344流動性篩選（`active_days>=200`且`mean_volume>=50`口/日）只驗證過2024一年，更早年度（尤其2011-2015剛掛牌初期）的流動性完全未知，逐年在架數是上限估計，不是可交易數估計。
+  2. 19檔中11檔有非零`n_skipped_rollover_events`（round347/348已記錄，本輪原樣列出對照），滾動式宇宙若納入這些非乾淨代碼，繼承既有的轉倉銜接雜訊問題，不會因為換成滾動設計而自動解決。
+  3. N=10~13的橫斷面規模，跟`CALIBRATION_PROBE.md`已證實台股100檔cheap gate（每期橫截面N=54~74）在檢定力上都嫌不足（300檔重跑正在進行中）相比，**明顯更薄**——未來若真的在這個滾動宇宙上測橫斷面因子，必須預期比股票版cheap gate更低的檢定力／更寬的信賴區間，不能直接套用相同N_SHUFFLES/門檻假設檢定力足夠。
+
+**判定**：非因子/策略判定，跟round332/335/338/341/344/348/349同precedent不寫`TRIALS_LEDGER.md`列，補記`FUT_LEADS.md`。
+
+**產出檔案**：`fut_stock_futures_rolling_universe_probe.py`（新增）、`data/fut_stock_futures_rolling_universe_probe_round355.csv`（19碼逐檔起訖日）、`data/fut_stock_futures_rolling_universe_yearcounts_round355.csv`（逐年在架數，gitignored）、`fut_stock_futures_rolling_universe_probe_run.log`（原始主控台輸出）。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。
+
+**下一步**：round348下一步(c)前置條件至此完成（子集取捨 vs 滾動宇宙可行性兩個問題都已有數據支持）——**建議下一輪FUT工作單位＝真正動手設計橫斷面因子/建構滾動宇宙面板本身**（例如挑2015-2024十年窗口、最低N=11的版本，先做流動性驗證延伸到全部年度而非只查2024，再决定要不要繼續走這個方向），或者若CPU資源競爭問題仍未解決，優先處理輕量級（非重度模擬）的候選工作單位。**同時提醒下一輪**：開工先跑`ps -ef`確認背景process是否已結束，避免在資源競爭仍存在時啟動另一個重度模擬（沿用US round354已建立的precedent）。
