@@ -1,83 +1,64 @@
 {
-  "fetched_at": "2026-09-03T13:45:06.186754+08:00",
-  "checked_at": "2026-09-03T21:41:01.960524+08:00",
-  "connected": false,
-  "market_status": "closed",
+  "fetched_at": "2026-09-04T13:45:03.277878+08:00",
+  "connected": true,
+  "market_status": "open",
   "error": null,
   "quotes": {
-    "1513": {
-      "last": 162.5,
-      "close": 165.0,
-      "change_pct": -1.51,
-      "volume_this_tick": 166,
-      "total_volume": 2148,
+    "MXF_NEAR": {
+      "bid": 46696.0,
+      "ask": 46706.0,
+      "last": 46705.0,
+      "close": 45819.0,
+      "change_pct": 1.933696,
+      "volume_this_tick": 1,
+      "total_volume": 106490,
       "data_type": "REALTIME_TICK",
-      "tick_at": "2026-09-03T13:30:00",
-      "_raw_chg_type": 4,
-      "exchange": "TSE",
-      "bid": 162.5,
-      "ask": 163.0
-    },
-    "3231": {
-      "bid": 188.0,
-      "ask": 188.5,
-      "last": 188.5,
-      "close": 185.5,
-      "change_pct": 1.61,
-      "volume_this_tick": 4104,
-      "total_volume": 95737,
-      "data_type": "REALTIME_TICK",
-      "tick_at": "2026-09-03T13:30:00",
+      "tick_at": "2026-09-04T13:44:59.786000",
       "_raw_chg_type": 2,
-      "exchange": "TSE"
+      "exchange": "TAIFEX",
+      "label": "小型台指期近月"
     },
-    "2317": {
-      "bid": 247.5,
-      "ask": 248.0,
-      "last": 247.5,
-      "close": 251.0,
-      "change_pct": -1.39,
-      "volume_this_tick": 3833,
-      "total_volume": 28535,
+    "TXF_NEAR": {
+      "bid": 46704.0,
+      "ask": 46707.0,
+      "last": 46704.0,
+      "close": 45819.0,
+      "change_pct": 1.931513,
+      "volume_this_tick": 1,
+      "total_volume": 49750,
       "data_type": "REALTIME_TICK",
-      "tick_at": "2026-09-03T13:30:00",
-      "_raw_chg_type": 4,
-      "exchange": "TSE"
-    },
-    "2454": {
-      "bid": 4340.0,
-      "ask": 4345.0,
-      "last": 4340.0,
-      "close": 4275.0,
-      "change_pct": 1.52,
-      "volume_this_tick": 497,
-      "total_volume": 8299,
-      "data_type": "REALTIME_TICK",
-      "tick_at": "2026-09-03T13:30:00",
+      "tick_at": "2026-09-04T13:44:59.696000",
       "_raw_chg_type": 2,
-      "exchange": "TSE"
+      "exchange": "TAIFEX",
+      "label": "台指期近月"
     },
-    "2330": {
-      "last": 2390.0,
-      "close": 2385.0,
-      "change_pct": 0.2,
-      "volume_this_tick": 2965,
-      "total_volume": 12551,
+    "EXF_NEAR": {
+      "bid": 2947.8,
+      "ask": 2960.75,
+      "last": 2947.8,
+      "close": 2893.15,
+      "change_pct": 1.888945,
+      "volume_this_tick": 3,
+      "total_volume": 44,
       "data_type": "REALTIME_TICK",
-      "tick_at": "2026-09-03T13:30:00",
+      "tick_at": "2026-09-04T13:44:30",
       "_raw_chg_type": 2,
-      "exchange": "TSE",
-      "bid": 2390.0,
-      "ask": 2395.0
+      "exchange": "TAIFEX",
+      "label": "電子期近月"
     },
-    "TAIEX": {
-      "last": 45857.66,
-      "close": 46164.72,
-      "change_pct": -0.6651,
+    "FXF_NEAR": {
+      "bid": 3523.2,
+      "ask": 3527.0,
+      "last": 3525.2,
+      "close": 3494.0,
+      "change_pct": 0.892959,
+      "volume_this_tick": 2,
+      "total_volume": 193,
       "data_type": "REALTIME_TICK",
-      "tick_at": "2026-09-03T13:33:00",
-      "exchange": "TSE",
-      "label": "加權指數"
+      "tick_at": "2026-09-04T13:43:25.298000",
+      "_raw_chg_type": 2,
+      "exchange": "TAIFEX",
+      "label": "金融期近月"
     }
   }
 }
