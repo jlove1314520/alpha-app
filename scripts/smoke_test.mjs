@@ -674,8 +674,14 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.evaluate(() => window.setMarketToggle("market", "US"));
     await page.waitForTimeout(1500);
     const html = await page.evaluate(() => document.getElementById("us-idx-rows")?.innerHTML || "");
-    if (!html.includes("Yahoo 延遲")) {
-      yahooFallbackErrors.push(`YAHOO_DELAYED的道瓊指數沒有顯示「Yahoo 延遲」badge，實際內容片段：${html.slice(0, 300)}`);
+    // 2026-09-04修正：這個檢查跟「現在是不是美股盤中」有關——盤中該標「Yahoo 延遲~15分」，
+    // 盤後（isTodayClose）該標「Yahoo 今日收盤」，兩者都是誠實的Yahoo來源標示；不能出現
+    // 「IBKR 今日收盤」（把Yahoo備援冒充IBKR）。之前只在美股盤中跑過所以沒踩到。
+    if (!html.includes("Yahoo 延遲") && !html.includes("Yahoo 今日收盤")) {
+      yahooFallbackErrors.push(`YAHOO_DELAYED的道瓊指數沒有顯示「Yahoo 延遲」或「Yahoo 今日收盤」badge，實際內容片段：${html.slice(0, 300)}`);
+    }
+    if (html.includes("IBKR 今日收盤")) {
+      yahooFallbackErrors.push("YAHOO_DELAYED在盤後被標成「IBKR 今日收盤」，把Yahoo備援冒充成IBKR");
     }
     if (html.includes("IBKR 未知") || html.includes("IBKR YAHOO_DELAYED")) {
       yahooFallbackErrors.push("YAHOO_DELAYED被誤標成IBKR來源，沒有誠實反映這其實是Yahoo備援");

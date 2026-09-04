@@ -166,7 +166,13 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 >
 > 回報：四項各自截圖、smoke test、以及 Shioaji 實際可訂閱的指數/類股合約清單。
 
-- [ ] **四修.一** 期貨即時源回歸（TXF/MXF/EXF/FXF近月），首頁台指期近月走即時標「Shioaji 即時」
+- [x] **四修.一** 期貨即時源回歸——**已完成**（commit `a8502f2`）：根因是B34改tick串流時
+  `code_to_key`用`TXFR1`連續月別名當key，但tick.code是`TXFI6`實際月份碼→期貨tick全部
+  反查不到被靜默丟掉（訂閱本身一直成功）。新增`_resolve_fop_key()`前三碼對回；重啟後
+  /live/quotes含TXF/MXF/EXF/FXF_NEAR，Playwright實測首頁「台指期近月 Shioaji 即時 · 近月
+  合約 46,164」、期貨頁四檔皆「Shioaji 即時」（截圖fix1_home_futures_live.png／
+  fix1_market_fut_live.png）。順帶修掉smoke check 19在美股盤後時段的既有誠實標示bug
+  （Yahoo備援收盤後被標成IBKR）。
 - [ ] **四修.二** 櫃買指數＋類股指數接Shioaji即時（先列可訂閱合約清單），live server新端點，退回時標「昨日收盤（MM-DD）」
 - [ ] **四修.三** 自選股／大盤速覽走勢線改當日1分K即時sparkline，離線退回20日並標「20日」；fetch_sparkline_20d靜默None修正（error欄位＋重試）
 - [ ] **四修.四** 診斷橫幅「資料過舊」納入即時源、「約每15秒自動更新」文案在SSE連線時改即時文案
@@ -196,8 +202,12 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 > 做完回報：乙.6 劃掉、tick-push 進度、regime 賽道第一個訊號的 TRAIN 危機視窗結果。
 
 - [x] **零.1** 乙.6劃掉（PENDING_QUEUE/BACKLOG）——已完成
-- [ ] **零.2** `/live/stream`改真逐筆推送（tick回呼→SSE），mode改`tick-push`，
-  沿用token／共用記憶體、不開第二條Shioaji連線
+- [x] **零.2** `/live/stream`改真逐筆推送（tick回呼→SSE），mode改`tick-push`——**已完成**
+  （commit `a8502f2`）：shioaji_quotes.py每筆tick經loopback UDP（127.0.0.1:8002，帶同一份
+  token）推給alpha_live_server.py，伺服器LiveMem＋asyncio.Condition喚醒SSE，事件
+  mode=tick-push（250ms合併）；沒新鮮tick自動退回poll-diff-2s。端到端：push→SSE 257ms、
+  錯token被拒；正式上線後/health `stream_mode=tick-push`、30秒1522筆tick；手機端狀態列
+  已顯示「逐筆推送・tick-push」。
 - [ ] **一** 研究賽道轉向regime擇時／下檔保護overlay：寫進協定＋規格書
   （門檻TRAIN先訂死）＋第一個訊號TRAIN危機視窗結果
 - [ ] **二** FUT軌改測同一套regime overlay對期貨曝險的下檔保護

@@ -2285,9 +2285,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         // 「IBKR xxx」這個前綴誤導使用者。2026-09-03新增：收盤後但資料確實
         // 是今天的（isTodayClose），標「今日收盤」不再講「延遲N分」這種
         // 暗示盤中即時的措辭。
+        // 2026-09-04修正：收盤後YAHOO_DELAYED的資料也要標Yahoo，不能因為走了
+        // isTodayClose分支就變成「IBKR 今日收盤」（smoke check 19在美股盤後時段
+        // 跑才踩到的既有誠實標示bug）。
+        const isYahoo=ibkrQ.data_type==='YAHOO_DELAYED';
         const srcLabel=isTodayClose
-          ?`IBKR 今日收盤`
-          :(ibkrQ.data_type==='YAHOO_DELAYED'?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`);
+          ?(isYahoo?'Yahoo 今日收盤':'IBKR 今日收盤')
+          :(isYahoo?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`);
         return {html:idxRowHtml(label,srcLabel,item),date:INTRADAY_IBKR.fetched_at};
       }
       return {html:idxRowHtml(label,'Yahoo Finance（每日收盤快照）',idx[id]),date:idx[id]&&idx[id].as_of};
@@ -4238,7 +4242,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-04.0953';
+  const APP_VERSION='2026-09-04.0957';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
