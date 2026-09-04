@@ -13,6 +13,25 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04（hypothesis_queue排程，本輪鎖檔為陳舊鎖回收，上一輪疑似
+中斷未完成收工）——#28市場廣度背離接續第2關隨機控制組，已結案：FAIL
+
+新增`breadth_divergence_overlay_v1.py`，把第1關sanity（`breadth_divergence_
+sanity.py`）已驗證的divergence_flag轉成具體曝險規則（`exposure=0.3 if
+divergence_flag else 1.0`，shift(1)避免未來函數），跑第2關隨機控制組
+（打亂exposure時序，N=100 draws）：TRAIN真實overlay總報酬+62.86%（反而
+輸給買進持有+79.49%），對打亂分布percentile=54.0；VAL真實overlay總報酬
++42.96%（買進持有+56.36%），percentile=51.0。兩期皆遠低於90.0門檻且貼在
+50附近——用breadth背離挑降曝險時機，跟隨機時點降曝險幾乎沒有差別，依
+快殺標準「已被控制組拆穿之偽影家族換皮」判**FAIL**，未進第3關以後。
+已同步更新`HYPOTHESIS_QUEUE.md`#28條目+「排隊順序總結」、
+`STRATEGY_GRAVEYARD.md`新增條目、`TRIALS_LEDGER.md`#105。**佇列#1~28
+全數結案**，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新確認B24-500仍不及格、
+題材動能榜PIT引擎仍紙上交易中，均無新進展）。**本輪未設計新假設軸#29**
+——因USD budget將近用盡，依「一輪只做一個有界工作單位」原則收工，下一輪
+需先重新確認#5/#6/#8/#10依賴是否解鎖，未解鎖則設計新假設軸#29（應避開
+「純選股排序」跟「timing/overlay類」兩種已知死法）。
+
 ## 2026-09-04T09:xx — hypothesis_queue排程接續（#28市場廣度背離第1關sanity：PASS，非最終判定） — 新增`breadth_divergence_sanity.py`，用既有300檔快取樣本（254檔可用）算breadth_pct（收盤價>自身200日均線比例）跟TAIEX 20日動量組成背離訊號，三項sanity（非退化分布/危機run-up期2/3領先方向正確/觸發後前瞻報酬方向正確）皆PASS，非結構性no-op、非反過來，寫入HYPOTHESIS_QUEUE.md#28＋TRIALS_LEDGER.md#103，本輪工作單位到此為止（依協定一輪一個有界工作單位），下一輪從第2關隨機控制組開始
 
 ---

@@ -998,3 +998,35 @@ VAL mean_ic=+0.0826，null percentile=100.0）之後，依使用者原話額外
 「多因子z-score複合這個構造類別完全沒用」**——只測了GP+value_pb+
 revenue_surprise這三個具體因子的等權組合，未測依驗證強度加權的版本。
 完整數字見`TRIALS_LEDGER.md`#102、`HYPOTHESIS_QUEUE.md`#27。
+
+### 市場廣度背離 Breadth Divergence 當regime擇時overlay（HYPOTHESIS_QUEUE.md#28，2026-09-04FAIL）
+
+**經濟理由**：跟已FAIL的`#2`（CTA價格趨勢）/`#10`（TAIEX趨勢+波動度
+regime，方法論框架非PASS/FAIL）/`#15`（波動度目標化）/`#26`（融資餘額
+成長率）四者機制刻意做出區隔——這條測的是「指數上漲時，有多少比例個股
+真的一起參與上漲」（廣度背離），不是價格趨勢、不是波動度水位、不是
+槓桿水位。第1關sanity（`breadth_divergence_sanity.py`，`TRIALS_LEDGER.md`
+#103）已確認`breadth_pct`非退化、危機run-up期領先惡化、觸發後前瞻報酬
+較低，方向正確。
+
+**實作與結果**：`breadth_divergence_overlay_v1.py`——把divergence_flag
+轉成`exposure=0.3 if divergence_flag else 1.0`（shift(1)避免未來函數），
+走GATE_SEQUENCE第2關（打亂exposure時序，N=100 draws，比照`vol_targeting_
+v1.py`/`spillover_overlay_v1.py`同一套permutation null）。TRAIN：真實
+overlay總報酬+62.86%（反而輸給買進持有+79.49%）、對打亂分布percentile=
+54.0；VAL：真實overlay總報酬+42.96%（買進持有+56.36%）、percentile=51.0。
+兩期皆遠低於90.0門檻，且貼在50附近（不是明顯偏低，是完全沒有加值）。
+
+**判定：FAIL**——依快殺標準「已被控制組拆穿之偽影家族換皮」（改變曝險
+力道）直接結案，未進第3關以後。第1關sanity驗證的方向性事實本身沒有錯，
+但轉成具體規則後，**隨機時點降曝險達到的績效跟用breadth背離挑時機幾乎
+沒有差別**——edge不在「用breadth背離挑降曝險時機」這個時序關係上，只是
+「平均曝險比100%低」的效果。跟`vol_targeting_v1.py`（#15，percentile
+8.0/3.0，同款死法但更極端）、`spillover_overlay_v1.py`（#19，第6關
+逐年一致性FAIL）是這個佇列第三個「timing/overlay類」機制陣亡案例——
+本佇列目前所有regime/擇時型變體全數FAIL（`#10`是唯一存活的，但那是
+「方法論框架待套用」非PASS，且套用對象也還沒出現）。**不泛化成「市場
+廣度這個概念完全沒用」**——只測了「TAIEX 20日動量+60日breadth變化」
+這個具體二元背離定義+固定0.3/1.0曝險二元切換，未測連續函數版本（曝險
+反比於breadth惡化程度，類似vol-targeting但用breadth當輸入）、未測不同
+回顧窗口組合。完整數字見`TRIALS_LEDGER.md`#105、`HYPOTHESIS_QUEUE.md`#28。
