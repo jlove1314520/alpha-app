@@ -1,0 +1,21 @@
+樣本：300檔(SEED=20260822)，跟sanity/第2/3關共用同一個300檔宇宙
+panel：159檔股票 x 2498個交易日（2015-01-02..2024-12-31），應與前3關159檔一致（交叉確認）
+
+再平衡事件數：118次；累計turnover：3.920（單邊換手率總和，每次事件約0.0332）；單次1x round-trip成本率：0.6850%
+
+=== 第4關成本/稅/滑價敏感度（1x/2x/3x，turnover×round_trip_cost×倍數） ===
+
+--- TRAIN ---
+  1x成本: buyhold=+66.14%  rebalanced(淨)+87.99%  淨溢酬=+21.85%
+  2x成本: buyhold=+66.14%  rebalanced(淨)+85.07%  淨溢酬=+18.93%
+  3x成本: buyhold=+66.14%  rebalanced(淨)+82.20%  淨溢酬=+16.06%
+
+--- VAL ---
+  1x成本: buyhold=+83.58%  rebalanced(淨)+112.89%  淨溢酬=+29.32%
+  2x成本: buyhold=+83.58%  rebalanced(淨)+110.52%  淨溢酬=+26.95%
+  3x成本: buyhold=+83.58%  rebalanced(淨)+108.18%  淨溢酬=+24.60%
+
+=== 第4關結論 ===
+三個成本情境（1x/2x/3x）下TRAIN與VAL淨溢酬皆維持為正，turnover成本未能吃光diversification return，支持繼續往第5關（leave-one-out）推進。不代表最終PASS——仍待leave-one-out/逐年一致性/樣本外/前向paper/下檔保護。
+
+明細已存 data\equal_weight_rebalance_costs_v1_grid.csv（gitignored）

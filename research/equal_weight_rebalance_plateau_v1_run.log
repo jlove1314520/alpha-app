@@ -1,0 +1,29 @@
+樣本：300檔(SEED=20260822)，跟sanity/第2關共用同一個300檔宇宙
+panel：159檔股票 x 2498個交易日（2015-01-02..2024-12-31），應與sanity/第2關159檔一致（交叉確認）
+
+=== 第3關參數密集高原結果（GRID=[5, 10, 15, 20, 21, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80]） ===
+  [✓] REBAL_FREQ=  5日  TRAIN溢酬=+27.01%  VAL溢酬=+30.66%
+  [✓] REBAL_FREQ= 10日  TRAIN溢酬=+26.16%  VAL溢酬=+30.72%
+  [✓] REBAL_FREQ= 15日  TRAIN溢酬=+25.29%  VAL溢酬=+28.48%
+  [✓] REBAL_FREQ= 20日  TRAIN溢酬=+24.63%  VAL溢酬=+30.84%
+  [✓] REBAL_FREQ= 21日  TRAIN溢酬=+24.81%  VAL溢酬=+31.72% <-- 原21天參數點
+  [✓] REBAL_FREQ= 25日  TRAIN溢酬=+23.44%  VAL溢酬=+32.20%
+  [✓] REBAL_FREQ= 30日  TRAIN溢酬=+27.01%  VAL溢酬=+29.02%
+  [✓] REBAL_FREQ= 35日  TRAIN溢酬=+27.04%  VAL溢酬=+30.41%
+  [✓] REBAL_FREQ= 40日  TRAIN溢酬=+23.95%  VAL溢酬=+35.05%
+  [✓] REBAL_FREQ= 45日  TRAIN溢酬=+23.48%  VAL溢酬=+35.89%
+  [✓] REBAL_FREQ= 50日  TRAIN溢酬=+30.64%  VAL溢酬=+35.09%
+  [✓] REBAL_FREQ= 55日  TRAIN溢酬=+25.89%  VAL溢酬=+32.25%
+  [✓] REBAL_FREQ= 60日  TRAIN溢酬=+28.15%  VAL溢酬=+32.00%
+  [✓] REBAL_FREQ= 65日  TRAIN溢酬=+25.70%  VAL溢酬=+36.85%
+  [✓] REBAL_FREQ= 70日  TRAIN溢酬=+36.65%  VAL溢酬=+29.58%
+  [✓] REBAL_FREQ= 75日  TRAIN溢酬=+23.99%  VAL溢酬=+37.11%
+  [✓] REBAL_FREQ= 80日  TRAIN溢酬=+27.25%  VAL溢酬=+32.09%
+
+判準1：一整片門檻 —— 17/17點同時為正 = 100.0%（門檻>=70%）  PASS
+判準2：最長連續通過區段 = 17點（門檻>=5點，非孤立尖峰）  PASS
+判準3：原21天參數點本身在高原內 —— TRAIN=+24.81%  VAL=+31.72%  PASS
+
+=== 第3關綜合判定：PASS ===
+
+網格明細已存 data\equal_weight_rebalance_plateau_v1_grid.csv（gitignored）

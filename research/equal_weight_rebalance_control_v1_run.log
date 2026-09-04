@@ -1,0 +1,21 @@
+樣本：300檔(SEED=20260822)，跟sanity版本共用同一個300檔宇宙
+全池panel：159檔股票 x 2498個交易日（2015-01-02..2024-12-31），跟sanity版本應完全一致（159檔，作為交叉確認）
+
+全池(159檔)基準溢酬：TRAIN=+24.81%  VAL=+31.72%（應與sanity腳本結果一致，作為交叉確認：sanity記錄TRAIN+24.81pp/VAL+31.72pp）
+  進度：20/100 draws完成
+  進度：40/100 draws完成
+  進度：60/100 draws完成
+  進度：80/100 draws完成
+  進度：100/100 draws完成
+
+=== 第2關隨機控制組結果（N=100 draws, SUBSET_SIZE=80） ===
+TRAIN溢酬分布：median=+23.47%  mean=+24.25%  std=5.96%  min=+11.25%  max=+36.31%
+VAL溢酬分布：  median=+30.34%  mean=+31.60%  std=11.68%  min=+10.56%  max=+60.88%
+
+判準1：hit_rate(TRAIN且VAL同時為正) = 100.0%  （門檻>=80%）  PASS
+判準2：全池結果在bootstrap分布的百分位 —— TRAIN=57.0%ile  VAL=56.0%ile  （門檻10~90之間）  PASS
+判準3：中位數溢酬明顯>0 —— TRAIN median=+23.47%  VAL median=+30.34%  PASS
+
+=== 第2關綜合判定：CHEAP_PASS ===
+
+100次抽樣明細已存 data\equal_weight_rebalance_control_v1_draws.csv（gitignored）

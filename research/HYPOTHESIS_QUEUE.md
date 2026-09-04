@@ -2390,3 +2390,53 @@ TRAIN=57.0%ile/VAL=56.0%ile（接近中位數，非離群）、兩期中位數�
 最大未知風險）。完整見`TRIALS_LEDGER.md`#108、
 `equal_weight_rebalance_control_v1.py`（新增，可重複執行）、
 `MARATHON_LOG.md`本輪心跳。
+
+**狀態（2026-09-04接續排程，第3關參數密集高原：PASS，非最終判定，補記
+上一輪陳舊鎖檔留下的已計算成果）**：上一輪（`HYPOTHESIS_QUEUE_PROTOCOL.md`
+排程）已新增`equal_weight_rebalance_plateau_v1.py`並跑完，但鎖檔陳舊
+（211分鐘未更新）被本輪回收，本輪確認腳本與結果有效後補記文字（未重新
+執行，`equal_weight_rebalance_plateau_v1_run.log`即上一輪產出，非本輪
+重跑）。**事前綁定三項判準**（固定sanity版本159檔panel，對`REBAL_FREQ`
+跑5~80交易日密集網格step=5共17個點，含原21天參數點）：①一整片門檻——
+TRAIN與VAL溢酬同時為正的比例>=70%；②非孤立尖峰——最長連續通過區段
+>=5個網格點；③原21天參數點本身須落在通過範圍內。結果：**17/17個網格點
+（100%）TRAIN與VAL溢酬同時為正**（範圍TRAIN+23.44%~+36.65%、VAL
++28.48%~+37.11%，全部落在正值區間、無孤立尖峰無斷裂），最長連續通過
+區段=17點（涵蓋整個5~80日網格），21天原始參數點（TRAIN+24.81%/VAL
++31.72%）本身落在高原正中央附近，非邊緣僥倖值。三項判準全過，判**PASS**。
+**這是本佇列29條假設中第3關通過方式最乾淨的案例**——不只是「多數點過」，
+是整個5~80交易日（約週頻到季頻）網格無一例外，強力支持這是Booth & Fama
+(1992)理論主張的、對再平衡頻率不敏感的結構性機制，不是21天這個特定選擇
+的偶然巧合。完整見`TRIALS_LEDGER.md`#110、
+`equal_weight_rebalance_plateau_v1.py`（新增，可重複執行）、
+`equal_weight_rebalance_plateau_v1_run.log`、`data/
+equal_weight_rebalance_plateau_v1_grid.csv`（gitignored，17點明細）、
+`MARATHON_LOG.md`本輪心跳。**佇列#29仍未結案**——下一步第4關成本/稅/
+滑價敏感度。
+
+**狀態（2026-09-04同輪接續，第4關成本/稅/滑價1x/2x/3x敏感度：三情境皆
+維持正溢酬，非最終判定）**：新增`equal_weight_rebalance_costs_v1.py`——
+沿用`long_only_vs_market.py`既有turnover成本慣例（`cost = turnover ×
+validation.costs.round_trip_cost_pct() × cost_multiplier`，不重造成本
+模型），turnover定義為每次再平衡前個股權重相對1/n絕對偏離量總和除以2
+（標準單邊換手率），對`rebal_ret`路徑逐日扣費（buyhold路徑除t0外不交易，
+不額外收費，沿用sanity/第2/3關同一比較基準慣例）。結果：118次再平衡
+事件、累計turnover=3.920（每次事件平均換手率0.0332，對159檔等權重組合
+而言換手幅度不大，因為權重漂移通常是漸進的）、單次1x round-trip成本率
+0.6850%（含手續費雙腳＋證交稅0.3%＋滑價雙腳）。**淨溢酬（TRAIN/VAL）**：
+1x：+21.85%/+29.32%；2x：+18.93%/+26.95%；3x：+16.06%/+24.60%——
+**三個情境下TRAIN與VAL淨溢酬皆維持顯著為正**（3x保守情境下仍有超過
+16pp/24pp的淨超額報酬），turnover成本遠不足以吃光diversification
+return（相對於前3關算出的毛溢酬約+24.81%/+31.72%，3x成本情境僅侵蝕
+約9pp/7pp）。依協定第4關「任一情境轉負就要誠實記錄」的反向檢查——沒有
+任何情境轉負，無需揭露負面情境。**這不是最終PASS**——仍待第5關
+leave-one-out（逐年拿掉最大貢獻年份，檢查終值是否過度集中在少數年份，
+`fut_basis_carry`#35→#37的教訓）、第6關逐年一致性、第7關樣本外（這條
+假設的train/val切分其實跟前面幾關共用同一套，需要另外設計獨立於train/
+val之外的樣本外檢驗方式，或明確論證sanity/第2/3/4關的train/val劃分已
+足夠嚴謹）、第8關前向paper、第9關下檔保護（等權重理論上小型股曝險較高，
+3個已知歷史危機期間MDD/beta穩定度仍是本假設最大未知風險，尚未驗證）。
+完整見`TRIALS_LEDGER.md`#111、`equal_weight_rebalance_costs_v1.py`
+（新增，可重複執行）、`equal_weight_rebalance_costs_v1_run.log`、
+`data/equal_weight_rebalance_costs_v1_grid.csv`（gitignored）、
+`MARATHON_LOG.md`本輪心跳。**佇列#29仍未結案，接續第5關leave-one-out**。

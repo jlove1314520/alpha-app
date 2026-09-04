@@ -1594,3 +1594,7 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 
 ## 第337輪 2026-09-04T09:03+08:00
 重跑`#91`（`revenue_trend_surprise_low_attention`）300檔樣本cheap gate：低關注度組FAIL(percentile 50.2)、高關注度組CHEAP_PASS(percentile 100.0，但方向與原假說相反+TRAIN無訊號)，整體維持FAIL、暫不進待深挖清單。`CALIBRATION_PROBE.md`三個TW軌「未定」項目至此全部處理完畢。詳見`TRIALS_LEDGER.md`#106。零新增API呼叫。
+
+## 第340輪（2026-09-04T18:10+08:00，TW）——train-only IC權重迭代，修補portfolio_multifactor_v2「誠實限制(2)」
+
+取鎖時偵測到`LOCK_STALE`（pid 17608持有30.1分鐘，第339輪US疑似異常中止）。依輪替選TW，接續第337輪待辦。新增`train_only_ic_weight_bigsample.py`：用round327同一批300檔安全樣本池，改用僅TRAIN期mean|IC|重算`portfolio_multifactor_v2`的`ic_weighted`權重（原權重用VAL期IC，非乾淨樣本外）。不修改`portfolio_backtest_v2.py`本身，外部monkeypatch。結果：VALIDATION quarterly alpha+4.83%(p=0.4314)、monthly alpha+5.93%(p=0.1996)，對照原權重quarterly p=0.5314，方向改善但仍遠未過0.05門檻。**判定FAIL不變**，但排除「原FAIL是加權洩漏造成偽陰性」的反駁。寫入`TRIALS_LEDGER.md`#109、`LEADS.md`本輪補充。零新增API呼叫，執行約9分鐘。`is_holdout_consumed()`確認`False`。

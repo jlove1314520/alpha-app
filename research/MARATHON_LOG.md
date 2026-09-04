@@ -13,6 +13,23 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T接續 — hypothesis_queue軌道：#29等權重再平衡溢酬第3/4關 — 第3關PASS(補記上一輪陳舊鎖檔遺留成果)、第4關(成本敏感度)三情境皆正溢酬
+
+接續上一輪（鎖檔陳舊28.9分鐘，本輪回收）。發現上一輪已跑完
+`equal_weight_rebalance_plateau_v1.py`（第3關參數密集高原）但未及寫入
+`HYPOTHESIS_QUEUE.md`/`TRIALS_LEDGER.md`即中斷——確認結果有效（17/17
+網格點TRAIN/VAL溢酬同時為正，100%通過，無孤立尖峰），本輪補記文字
+（`TRIALS_LEDGER.md`#110）。接著本輪新增執行`equal_weight_rebalance_
+costs_v1.py`（第4關成本/稅/滑價1x/2x/3x敏感度，沿用`long_only_vs_
+market.py`既有turnover成本慣例）：118次再平衡事件、累計turnover=3.920、
+1x round-trip成本率0.6850%，淨溢酬1x/2x/3x皆維持顯著為正（TRAIN
++21.85%/+18.93%/+16.06%、VAL+29.32%/+26.95%/+24.60%），無情境轉負
+（`TRIALS_LEDGER.md`#111）。**佇列#29仍未結案**——第1~4關全過，接續
+第5關leave-one-out，第9關下檔保護（等權重小型股曝險）仍是最大未知風險
+待驗證。
+
+## 2026-09-04T09:54:54Z — hypothesis_queue接續#29：發現前一輪陳舊鎖檔(211分鐘)留下的未提交第3關參數高原成果(equal_weight_rebalance_plateau_v1.py，17點網格100%通過)，本輪確認結果有效並commit入庫，因USD budget將近用盡緊急收工，尚未推進第4關成本敏感度，HYPOTHESIS_QUEUE.md #29條目待下一輪補上第3關文字紀錄 — 佇列#29仍未結案
+
 ## 2026-09-04T13:56 — hypothesis_queue軌道：#29等權重再平衡溢酬第2關隨機控制組 — CHEAP_PASS
 
 接續上一輪sanity（PASS，`TRIALS_LEDGER.md`#107）。設計並執行這條假設專屬

@@ -10,6 +10,10 @@
 
 ---
 
+## 第 340 輪 · 2026-09-04T18:10+08:00 · TW · 新增`train_only_ic_weight_bigsample.py`，用TRAIN-only IC重算`portfolio_multifactor_v2`權重（修補「誠實限制(2)」洩漏疑慮） · VALIDATION quarterly alpha p=0.4314（原0.5314），FAIL不變，但排除「原FAIL是加權洩漏造成偽陰性」的反駁，`TRIALS_LEDGER.md`#109
+
+## 第 339 輪 · 2026-09-04T17:32+08:00 · US · 取鎖偵測到陳舊鎖檔已回收；接續round336未完成的`deep_dive_f_us_low_vol_cached_universe.py`1b深挖重跑，重新啟動背景process確認存活 · session預算再次於完成前耗盡，process仍在背景繼續跑未kill，無新判定，本輪心跳為第340輪補記（該輪commit只更新了US_MARATHON_STATE.md，未同步REPORT.md，本輪一併補齊）
+
 ## 第 338 輪 · 2026-09-04T09:33+08:00 · FUT · 新增`fut_multi_commodity_dispersion.py`量化TX/MTX/TE橫斷面離散度（round335選項a） · dispersion_ratio=0.1143、PC1解釋變異=97.91%，兩指標互證跨商品池離散度不足，選項(b)個股期貨查證變成下一輪優先方向
 
 ## 第 337 輪 · 2026-09-04T09:03+08:00 · TW · 重跑`#91`(`revenue_trend_surprise_low_attention`)300檔cheap gate，低關注度組FAIL(50.2)/高關注度組CHEAP_PASS(100.0但方向相反+TRAIN無訊號) · 整體維持FAIL，暫不進待深挖，`CALIBRATION_PROBE.md`三項未定TW軌任務全部處理完畢
