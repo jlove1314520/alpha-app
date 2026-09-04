@@ -4,6 +4,21 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T06:59（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，
+無殘留鎖檔）— 接續上一輪已登記的佇列第36條（個股融券使用率Short Sale
+Utilization Ratio）進行第1關cheap IC gate：新增`factors.py::_short_
+sale_utilization()`+`factor_ic_short_sale_utilization.py`（比照#30
+`_margin_utilization()`框架），300檔快取宇宙248/300可用、121個20交易日
+快照。結果**CHEAP_PASS**：TRAIN mean_ic=-0.0163(n=74)、VAL mean_ic=
+-0.0595 IR=-0.363(n=47)，train/val同號（皆負，與事前綁定方向一致），
+null percentile=100.0（門檻90.0，過關）。已同步`HYPOTHESIS_QUEUE.md`
+#36條目「狀態」小節+「排隊順序總結」新增第36項、`TRIALS_LEDGER.md`
+新增#129列。本輪為佇列地基/第1關工作單位（依協定「一輪只做一個有界
+工作單位」），下一輪從第2關隨機控制組（≥100 draws）開始，不跳關。
+開工前確認殘留變更（`data/rate_limit_state.json`、round359
+deep_dive log）非本輪產生，未觸碰、未納入commit。`is_holdout_
+consumed()`本輪開工/收工前皆確認False。
+
 ## 2026-09-05T06:24（hypothesis_queue排程接續，鎖檔陳舊30.1分鐘後由本輪
 回收，上一輪已完整寫完#35 VRP第1關FAIL判定與`STRATEGY_GRAVEYARD.md`/
 `TRIALS_LEDGER.md`#127，但未同步「排隊順序總結」章節即中斷未commit）—

@@ -969,6 +969,14 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     放空者訊號，資料可行性已查證`TaiwanStockMarginPurchaseShortSale`
     本就含`ShortSaleTodayBalance`/`ShortSaleLimit`欄位可直接複用），
     現在排隊第一，尚未開始第1關。**
+36. 個股融券使用率（Short Sale Utilization Ratio）——**2026-09-05
+    hypothesis_queue接續排程第1關cheap IC gate已完成：CHEAP_PASS**
+    （`factor_ic_short_sale_utilization.py`，train/val同號皆負、null
+    percentile=100.0，見上方#36條目與`TRIALS_LEDGER.md`#129）。**尚未
+    結案**——第2關以後（隨機控制組≥100 draws、參數密集高原、成本/放空
+    借券成本敏感度、leave-one-out、逐年一致性、樣本外）待下一輪接續，
+    **佇列排隊順序仍是#36（未結案，接續第2關）**，剩餘#5/#6/#8/#10
+    仍卡外部依賴（同上）。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後，內容已嚴重過時，僅存
 歷史脈絡——實際最新狀態一律以本章節最後一條編號條目為準）**：15條原始佇列項目中
@@ -3332,10 +3340,20 @@ portfolio construction階段（第4關成本敏感度以後），必須把放空
 借券成本（融券手續費、可能的強制回補風險）計入交易成本敏感度測試，
 不能只用做多端同等的成本假設，這是台股放空實務上的已知額外摩擦成本。
 
-**狀態（2026-09-05接續排程，新假設軸設計完成，尚未開始第1關）**：這輪
-工作單位到此為止（依協定「一輪只做一個有界工作單位」，且本輪同時
-接續完成了#35的收尾與「排隊順序總結」章節同步修正），未寫任何因子/
-測試程式碼。下一輪從第1關cheap IC gate開始（比照`factor_ic_margin_
-utilization.py`既有框架新增`factor_ic_short_sale_utilization.py`，
-300檔快取宇宙，train/val正負號一致+null percentile>=90.0門檻三項
-判準），不跳關。
+**狀態（2026-09-05 hypothesis_queue接續排程，第1關已完成：CHEAP_PASS）**：
+新增`factors.py::_short_sale_utilization()`+`factor_ic_short_sale_
+utilization.py`（比照`_margin_utilization()`/`factor_ic_margin_
+utilization.py`#30框架），300檔快取宇宙248/300可用、121個20交易日
+快照(2015-01-01~2024-12-31)。TRAIN mean_ic=-0.0163 IR=-0.094(n=74)、
+VAL mean_ic=-0.0595 IR=-0.363 hit_rate=0.64(n=47)，**train/val同號
+（皆負，與事前綁定方向一致）**，null percentile=100.0（門檻90.0，
+過關）。三項判準（幅度非零/train-val同號/贏過洗牌null）全過，
+**第1關CHEAP_PASS**，完整數字見`TRIALS_LEDGER.md`#129。**下一步
+（第2關以後）**：隨機控制組（≥100 draws）、參數密集高原、成本/稅/
+滑價敏感度（須依上方「下檔保護要求」把放空借券成本/強制回補風險
+計入）、leave-one-out、逐年一致性、樣本外；**deep_dive須額外排除
+「券資比失衡/融券強制回補風險股」**（融券使用率接近100%可能因軋空
+反向上漲，與知情放空正常訊號機制相反），避免同一高使用率區間混雜
+兩種相反機制。這輪工作單位到此為止（依協定「一輪只做一個有界工作
+單位」），尚未進行portfolio層構造設計，下一輪從第2關隨機控制組開始，
+不跳關。

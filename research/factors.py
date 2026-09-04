@@ -550,6 +550,43 @@ def _margin_utilization(stock_id: str, start_date: str) -> pd.DataFrame:
     return d[["pit_date", "margin_utilization"]].sort_values("pit_date").reset_index(drop=True)
 
 
+def _short_sale_utilization(stock_id: str, start_date: str) -> pd.DataFrame:
+    """`HYPOTHESIS_QUEUE.md` #36個股融券使用率（Short Sale Utilization Ratio）：
+    融券今日餘額(`ShortSaleTodayBalance`) / 融券限額(`ShortSaleLimit`)，比例
+    越高代表越多放空者（需付借券成本、承擔下檔有限上檔無限的不對稱風險）
+    集中做空該股票，是資訊驅動（知情悲觀）而非流動性驅動的訊號（Asquith,
+    Pathak & Ritter 2005；Cohen, Diether & Malloy 2007）。
+
+    跟`_margin_utilization()`（#30）資料源相同但欄位/投資人族群/機制完全
+    不同：那條是融資（散戶槓桿多頭斷頭賣壓，流動性驅動），這條是融券
+    （放空者主動選擇，資訊驅動）。**PIT安全性同樣天然成立**：資料源
+    `TaiwanStockMarginPurchaseShortSale`當日盤後即公布，當日日期本身就是
+    pit_date，不需要額外延遲假設。
+
+    **事前綁定方向為負**：融券使用率越高，預期未來報酬越差——因子值保留
+    原始比例、不取負號（跟`_margin_utilization()`同樣「原始方向即預期方向」
+    設計），cheap gate結果若同號但方向為正，視為方向假設證偽，不因符合
+    「同號」判準就宣稱通過。
+
+    2026-09-05 HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#36第1關起跑。
+    """
+    raw = load_dev("TaiwanStockMarginPurchaseShortSale", stock_id, start_date)
+    if raw.empty:
+        return pd.DataFrame(columns=["pit_date", "short_sale_utilization"])
+    needed = {"date", "ShortSaleTodayBalance", "ShortSaleLimit"}
+    if not needed.issubset(raw.columns):
+        return pd.DataFrame(columns=["pit_date", "short_sale_utilization"])
+    d = raw[["date", "ShortSaleTodayBalance", "ShortSaleLimit"]].copy()
+    d["ShortSaleTodayBalance"] = pd.to_numeric(d["ShortSaleTodayBalance"], errors="coerce")
+    d["ShortSaleLimit"] = pd.to_numeric(d["ShortSaleLimit"], errors="coerce")
+    d = d[d["ShortSaleLimit"] > 0]
+    if d.empty:
+        return pd.DataFrame(columns=["pit_date", "short_sale_utilization"])
+    d["short_sale_utilization"] = d["ShortSaleTodayBalance"] / d["ShortSaleLimit"]
+    d["pit_date"] = d["date"]
+    return d[["pit_date", "short_sale_utilization"]].sort_values("pit_date").reset_index(drop=True)
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
@@ -816,6 +853,21 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_margin_utilization skipped for {stock_id}: {e}")
         d["f_margin_utilization"] = np.nan
+
+    # (z) 個股融券使用率 Short Sale Utilization Ratio (`HYPOTHESIS_QUEUE.md`
+    # #36，2026-09-05自動排程新增，佇列排隊第一起跑)。經濟理由：融券使用率
+    # 越高，代表越多知情/悲觀放空者集中做空該股票，是資訊驅動而非流動性
+    # 驅動的訊號（Asquith, Pathak & Ritter 2005；Cohen, Diether & Malloy
+    # 2007）——跟#30融資使用率資料源相同但投資人族群/機制相反方向的正交
+    # 維度。**事前綁定方向為負**：因子不取負號，見`_short_sale_utilization()`
+    # docstring。資料源同樣是FinMind`TaiwanStockMarginPurchaseShortSale`，
+    # 當日盤後公布即為PIT日期本身。
+    try:
+        short_pit = _short_sale_utilization(stock_id, start_date)
+        d = _asof_join(d, short_pit, "short_sale_utilization", "f_short_sale_utilization")
+    except RuntimeError as e:
+        print(f"    [factors] f_short_sale_utilization skipped for {stock_id}: {e}")
+        d["f_short_sale_utilization"] = np.nan
 
     return d
 
