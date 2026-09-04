@@ -13,6 +13,8 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T12:54 — hypothesis_queue排程接續（重新查證依賴+設計新假設軸#29） — 重新查證`BACKLOG.md`確認B24-500仍「回測未通過」、題材動能榜/未來性濾網仍「紙上交易中」，#5/#6/#8/#10依賴無新進展，佇列#1~28維持全數結案。設計新假設軸#29（等權重再平衡溢酬Diversification Return/Equal-Weight Rebalancing Premium）——刻意跟前28條區隔為機制上真正不同的第三類（非①方向性選股排序、非②timing/exposure overlay，是③portfolio construction：不選股、不做曝險縮放，純粹測「定期拉回等權重」這個機械式再平衡動作本身有沒有加值），完整經濟理由/假設定義/下檔保護要求已寫入`HYPOTHESIS_QUEUE.md`#29條目與「排隊順序總結」。本輪只登記假設、未寫程式碼、未跑任何測試，下一輪從第1關sanity開始，不跳關。
+
 ## 2026-09-04（hypothesis_queue排程，本輪鎖檔為陳舊鎖回收，上一輪疑似
 中斷未完成收工）——#28市場廣度背離接續第2關隨機控制組，已結案：FAIL
 
