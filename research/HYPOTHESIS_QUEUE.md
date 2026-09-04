@@ -2224,3 +2224,20 @@ FinMind發動新一輪爬取）。
 設計，不在同一輪展開第1關sanity），下一輪從sanity（先確認breadth_pct
 時間序列在已知的市場頭部/回檔期間是否真的表現出「領先指數走弱」的
 背離型態，不是反著跑或無訊號）開始，不跳關。
+
+**狀態（2026-09-04接續排程，第1關sanity：PASS，非最終判定）**：新增
+`breadth_divergence_sanity.py`——用既有300檔快取樣本（254檔可用）算
+`breadth_pct`（收盤價>自身200日均線比例，逐日聚合），跟TAIEX 20日動量
+組成背離訊號（指數動量為正但breadth對60日前下降=「背離警戒」）。三項
+sanity皆PASS：①breadth_pct非退化（n=3485天，min=0.000/max=0.878/
+mean=0.528/std=0.172）、divergence_flag觸發率25.0%（非0/非常數）；
+②3個已知危機run-up窗口2/3（2018Q4貿易戰急跌、2020Q1新冠崩盤）顯示
+breadth下降比例73.3%明顯高於無條件基準率50.7%，2022全年空頭run-up
+窗口未見領先（50.0%≈50.7%，緩慢型空頭的run-up本來就不一定有急跌前的
+清楚領先訊號，記錄不隱瞞）；③divergence_flag觸發後(lag1)20日TAIEX
+前瞻報酬+0.17%明顯低於無條件平均+0.66%，方向正確非反過來。**這只是
+第1關sanity，不是最終PASS**——下一輪進第2關隨機控制組（打亂breadth_pct
+時間序列跟TAIEX報酬的時序對齊，證明贏的是「廣度惡化領先指數走弱」這個
+時序關係本身，不是任意曝險縮放都會贏），比照本佇列既有GATE_SEQUENCE，
+不跳關。完整見`MARATHON_LOG.md`本輪心跳、`TRIALS_LEDGER.md`#103、
+`breadth_divergence_sanity_run.log`。

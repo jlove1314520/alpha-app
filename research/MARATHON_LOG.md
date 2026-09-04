@@ -13,6 +13,10 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T09:xx — hypothesis_queue排程接續（#28市場廣度背離第1關sanity：PASS，非最終判定） — 新增`breadth_divergence_sanity.py`，用既有300檔快取樣本（254檔可用）算breadth_pct（收盤價>自身200日均線比例）跟TAIEX 20日動量組成背離訊號，三項sanity（非退化分布/危機run-up期2/3領先方向正確/觸發後前瞻報酬方向正確）皆PASS，非結構性no-op、非反過來，寫入HYPOTHESIS_QUEUE.md#28＋TRIALS_LEDGER.md#103，本輪工作單位到此為止（依協定一輪一個有界工作單位），下一輪從第2關隨機控制組開始
+
+---
+
 ## 2026-09-04T08:25 — hypothesis_queue排程接續（收尾#27＋設計新假設#28） — 接手時發現上一輪（PID 34684）已把#27判FAIL寫進STRATEGY_GRAVEYARD/TRIALS_LEDGER#102但因鎖檔陳舊（卡住30.3分鐘）未commit，本輪先確認並沿用該判定不重跑；修正HYPOTHESIS_QUEUE.md「排隊順序總結」章節#27的過時提示字（原寫「第2關進行中」，已同步為FAIL），重新查證B24-500/題材動能榜PIT引擎仍無新進展、#5/#6/#8/#10依然卡外部依賴，佇列實質已空，依協定第1節設計新假設軸#28（市場廣度背離Breadth Divergence當regime擇時訊號，經濟機制與已FAIL的#2/#10/#15/#26四者皆不同——不是價格趨勢、不是波動度、不是融資水位，是「指數上漲時參與個股比例」，資料可行性已用既有300檔快取樣本查證可行不需新API呼叫），寫入HYPOTHESIS_QUEUE.md完整條目，本輪工作單位到此為止，未展開第1關sanity
 
 ## 2026-09-04T08:xx — hypothesis_queue排程接續（#27結案：FAIL） — 接手時checkpoint已到300/300 draws（行程自然完成），計算percentile=87.2（門檻90.0，未過），依鐵律不放寬直接判FAIL，寫入STRATEGY_GRAVEYARD/TRIALS_LEDGER#102/HYPOTHESIS_QUEUE，佇列#5/#6/#8/#10仍卡外部依賴未解鎖，新假設軸設計留給下一輪
