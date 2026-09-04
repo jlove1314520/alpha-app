@@ -1160,3 +1160,21 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 **新發現、也是本輪最重要的線索**：本輪執行期間用`ps -ef`確認，**TW軌第353輪留下的獨立背景process（`deep_dive_loo_no_low_vol.py`，pid 1427，自03:03開始，本輪結束時已存活超過39分鐘）跟本次US深挖是同時段並行在跑**——兩者都是重度CPU工作（各自的N=100隨機控制組模擬），雖然分屬不同程式檔案（US用`long_short_backtest.py`、TW用`portfolio_backtest_v2.py`，排除是同一支函式裡的bug），但TW round353自己的心跳也記錄了同款「隨機控制組階段異常緩慢、遠超歷史耗時」症狀，時間點高度重疊。**新工作假說（尚未證實）**：這台機器上不同軌馬拉松留下的獨立背景process疊加執行時，可能造成CPU資源競爭，把原本能在合理時間內完成的N=100模擬拖慢到超過600秒。這個假說解釋了「同一支腳本、同一批快取資料，兩次執行的卡死點完全不一樣」這個現象——如果是純程式碼bug，卡死點應該穩定重現在同一處，但沒有。
 
 `is_holdout_consumed()`確認`False`（開工/收工前皆確認）。零新增API呼叫（全部命中既有快取，跟round347/350/351一致，本輪backtest計算本身也不打任何外部API）。**無新`TRIALS_LEDGER.md`/`US_LEADS.md`列**（`f_us_value_bm`仍維持`CHEAP_PASS（待深挖）`狀態不變，沒有新判定產出）。**下一輪工作單位建議**：(a) 開工先`ps -ef | grep python`確認有沒有其他軌遺留的背景process正在跑，若有，優先考慮等它結束或至少在心跳裡註明「非乾淨環境」下的重跑，避免把資源競爭誤判成腳本bug；(b) 如果環境確認乾淨（沒有其他重度process）仍然卡住，才需要考慮`faulthandler`/`py-spy`直接抓卡住當下的呼叫堆疊；(c) 另一個更快的排除法：先用`N_RANDOM_DRAWS`降到10左右跑一次看能不能在乾淨環境下正常完成，如果能，代表100次模擬本身的運算量在目前機器負載下就已經逼近或超過600秒，屬於「工作量過大」而非「掛起」，屆時可以考慮把硬超時上限拉長（例如1200秒）而不是繼續debug程式碼。
+
+## 2026-09-05T05:13+08:00 — 馬拉松第357輪：驗證round354「跨process資源競爭」假說，改用unbuffered輸出釐清真相
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 04:32（第356輪，最新）／FUT 04:04（第355輪）／US 03:42（第354輪，最舊）——依輪替選US。
+
+開工先`ps -ef | grep python`確認環境乾淨，無其他軌背景process佔用CPU（TW round356留下的`deep_dive_loo_no_low_vol_independent_sample.py`process此時已不在process list中，本輪未去動它，只是確認資源已釋放）。
+
+在確認乾淨的環境下，第三次重跑`deep_dive_f_us_value_bm.py`（`nohup python deep_dive_f_us_value_bm.py > deep_dive_f_us_value_bm_run3.log 2>&1 &`，預設buffered stdout）。等待約6分鐘（分兩段各3分鐘檢查）後，log內容完全沒有新增，仍停在資料載入尾端（WHLR附近），跟round354的run2.log在超時當下的截圖幾乎一樣——但process本身確認持續存活（`ps -ef`可見pid）。**懷疑這不是真的卡住，而是Python把stdout重導向到檔案時預設是block-buffered（不像終端機是line-buffered），所以看起來「沒進度」其實只是還沒flush，不代表真的沒在算。**
+
+為驗證這個懷疑，kill掉該process（pid 1846），改用`python -u`（強制unbuffered）重啟第四次（`deep_dive_f_us_value_bm_run4_unbuffered.log`）。這次可以即時看到真實進度：**資料載入226檔（135可用）在約4分鐘內完整跑完並即時印出**（跟run2/run3最終载入結果一致），接著印出`=== TRAIN 2015-01-01..2020-12-31, cost 1x (slippage=5.0bps) ===`，之後進入`run_one_value()`內部的100次隨機控制組迴圈——**這個迴圈本身腳本設計上沒有逐次進度輸出**（`deep_dive_f_us_value_bm.py`第111行`for i in range(N_RANDOM_DRAWS)`迴圈內沒有print），所以即使真的在正常運算，log在這個階段本來就不會有新增內容，等到6組period/cost全部跑完才會印下一行。等待期間反覆用`ps -ef`確認pid 1905持續存活（不是殭屍process、不是消失）。
+
+**判讀**：round354提出的假說(b)（工作量真的大，不是掛起）成立——135檔×6組(period×cost_multiplier)×100次隨機控制組疊代＝600次完整回測，光是資料載入就要4分鐘，運算階段預期更久，600秒硬超時本來就不夠用。**同時，本輪這個buffering發現補上一塊拼圖**：round354觀察到「同一支腳本、同一批快取資料，兩次執行的卡死點完全不一樣」，原本猜測是跨process資源競爭造成——但buffered stdout在不同次執行中被flush的時間點本來就會因為系統當下狀態（記憶體壓力、buffer填滿速度）而略有不同，這也足以解釋「每次卡在不同地方」的表象，未必真的是資源競爭。兩個假說（資源競爭／buffering造成觀測失真）不互斥，本輪只能確定後者存在，無法排除前者也同時發生，誠實記錄兩者皆為可能因素、不下武斷結論。
+
+process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.py`，log：`deep_dive_f_us_value_bm_run4_unbuffered.log`），未殺掉，比照round353/356TW軌先例。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫（`load_value_sample()`全部命中既有快取，backtest運算本身不打任何外部API，跟round347/350/351/354一致）。**本輪無`TRIALS_LEDGER.md`/`US_LEADS.md`新增列**（`f_us_value_bm`仍維持`CHEAP_PASS（待深挖）`狀態不變，process尚未產出最終數字）。
+
+**下一輪工作單位建議**：(a) 開工先查`data/deep_dive_f_us_value_bm.csv`是否已產出——若有，六組period/cost的完整深挖數字齊全，直接讀取依1b判讀原則（train/val一致性、beta下檔保護、成本敏感度）做最終候選判定，一次性寫進`US_LEADS.md`/`TRIALS_LEDGER.md`；(b) 若process仍在跑，`deep_dive_f_us_value_bm_run4_unbuffered.log`已是unbuffered輸出，可以直接`tail`看真實進度，不必再猜buffering問題；(c) 若process已消失但無CSV，才需要真的懷疑crash或環境問題，屆時建議把硬超時拉長（例如1800秒）並保留`-u`旗標重跑，同時記錄這是第五次嘗試；(d) 之後所有背景長跑腳本，建議預設都加`python -u`或在腳本內`sys.stdout.reconfigure(line_buffering=True)`，避免下一次又被buffering現象誤導成「卡死」。

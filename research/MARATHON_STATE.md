@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-05T03:26+08:00**
+**最後更新：2026-09-05T05:13+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 356 輪。最新一輪：第 356 輪 · 2026-09-05T04:32+08:00 · TW（取鎖時偵測到`LOCK_STALE`，pid 53776持有30.0分鐘後被回收，上一輪疑似失敗，根因未查明。讀round353已跑完的`loo_no_low_vol`完整深挖數字：monthly／VALIDATION alpha+12.26%(p=0.0489)、beta+0.51、隨機控制組percentile=100.0(N=100)；quarterly alpha+11.72%(p=0.1162，不顯著)、beta+0.42、percentile=100.0。**判讀：尚不能判PASS**——`TRIALS_LEDGER.md`#118明列的第三個前提「獨立樣本外驗證」未補齊（round346/353全程用同一批`safe_pool_ids()[:300]`，p值仍帶選擇偏誤）、monthly/quarterly顯著度不一致、beta中度正相關下檔保護未證明。新增`deep_dive_loo_no_low_vol_independent_sample.py`，改用完全獨立的`safe_pool_ids()[300:600]`、在新樣本上重新計算train-only IC權重（不沿用舊樣本權重），跑同套monthly+quarterly完整深挖關卡（1x/2x/3x成本+N=100隨機控制組），判讀原則事前寫在腳本檔頭。process已在背景啟動，本輪僅完成資料載入起點，比照round353先例讓process留在背景繼續跑。暫不更新`LEADS.md`/`TRIALS_LEDGER.md`候選判定，待獨立樣本結果出來後一次性判定。`is_holdout_consumed()`確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`第356輪記錄）。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 357 輪。最新一輪：第 357 輪 · 2026-09-05T05:13+08:00 · US（取鎖乾淨。開工先確認環境無其他軌背景process佔用CPU後，第三次重跑`deep_dive_f_us_value_bm.py`（buffered stdout），等6分鐘log無新增，懷疑是Python檔案輸出預設block-buffered而非真的卡住；kill後改`python -u`（unbuffered）第四次重跑驗證：確認資料載入226檔（135可用）4分鐘內完整跑完並即時印出，之後進入100次隨機控制組迴圈（腳本設計上這階段無逐次進度輸出，非bug），process持續存活。**判讀：round354「工作量真的大」假說成立**——135檔×6組period/cost×100次疊代=600次完整回測，600秒硬超時本來就不夠；同時「每次卡在不同位置」的現象很可能同時受buffered stdout的flush時機影響，不必然全是跨process資源競爭，兩假說不互斥，誠實記錄皆為可能因素。process留在背景繼續跑（pid 1905），未殺掉。暫不更新`LEADS.md`/`TRIALS_LEDGER.md`（`f_us_value_bm`維持`CHEAP_PASS`待深挖不變）。`is_holdout_consumed()`確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第357輪記錄）。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 

@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第357輪 · 2026-09-05T05:13+08:00 · US · 開工確認環境無其他軌背景process後重跑`deep_dive_f_us_value_bm.py`；buffered版等6分鐘log無新增，改`python -u`重跑驗證確認非卡住、是100次隨機控制組運算量真的大（round354假說(b)成立） · 同時發現「每次卡不同位置」可能部分是buffered stdout flush時機造成的觀測失真，非全是資源競爭；process留在背景繼續跑（pid 1905），`f_us_value_bm`維持CHEAP_PASS待深挖不變
 ## 第356輪 · 2026-09-05T04:32+08:00 · TW · 取鎖偵測`LOCK_STALE`（pid 53776，上一輪疑似失敗）；讀round353已跑完的`loo_no_low_vol`完整深挖數字（monthly alpha p=0.0489/percentile 100.0，quarterly不顯著），判讀「尚不能判PASS」（#118第三前提「獨立樣本外驗證」未補、兩cadence顯著度不一致、beta+0.42~0.51下檔保護未證明） · 新增`deep_dive_loo_no_low_vol_independent_sample.py`，改用完全獨立的`safe_pool_ids()[300:600]`、新樣本重估train-only IC權重，跑同套完整深挖關卡；process已在背景啟動，本輪未取得完整數字，留給下一輪判讀CSV後一次性判定並寫進LEADS/TRIALS_LEDGER
 ## 第355輪 · 2026-09-05T04:04+08:00 · FUT · 取鎖偵測`LOCK_STALE`（pid 55412，round354本身心跳完整，異常疑似發生在輪次之間）；開工發現TW round353背景process仍在跑（近1小時），刻意避開重度模擬，改做round348(c)前置：19檔個股期貨「滾動式宇宙」可行性評估 · 逐年在架數表顯示2011-2024最低10檔/2015-2024最低11檔，比round349固定子集（8檔/346天 vs 4檔/1623天）明顯更優，但誠實記錄流動性/轉倉雜訊/檢定力三項限制未解，非因子判定不佔TRIALS_LEDGER
 ## 第354輪 · 2026-09-05T03:42+08:00 · US · 照第351輪建議`timeout 600`重跑完整`deep_dive_f_us_value_bm.py`深挖腳本 · 資料載入226檔這次全順利完成（排除尾端卡死假說），但backtest的N=100隨機控制組階段換位置卡滿600秒無結果；發現TW round353背景process同時段並行執行，新增「跨軌process資源競爭」工作假說待下一輪驗證，`f_us_value_bm`仍`CHEAP_PASS（待深挖）`未變
