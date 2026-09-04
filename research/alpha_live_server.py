@@ -12,12 +12,13 @@ token/白名單模式，只開讀取端點、不開任何下單端點）。
    `shioaji_quotes.py`/`ibkr_quotes.py`常駐行程即時維護的（見那兩支
    腳本模組docstring），這支伺服器只是把它們包裝成一個統一的HTTP端點，
    不用再另外連一次Shioaji/IBKR。
-2. `/live/stream`（SSE）：**目前是「輪詢再包裝」，不是真正的逐筆tick
-   推送**——每`SSE_POLL_INTERVAL_SEC`秒重新讀一次熱檔/JSON檔案、
-   內容有變動才送一個SSE事件出去。**每個事件的payload都帶
-   `mode:"poll-diff-2s"`欄位、/health也回報`stream_mode`**（使用者
-   2026-09-03深夜補充指令二：要在回應/文件裡明確標出來，不要讓接手的人
-   誤以為是真推送；改成tick回呼直接推送已登記BACKLOG稍後做）。**這不是使用者原始規格要的「本機
+2. `/live/stream`（SSE）：**2026-09-04零.2起是真逐筆推送（`mode:"tick-push"`）**
+   ——`shioaji_quotes.py`每收到一筆tick就用loopback UDP（127.0.0.1:8002，
+   只聽本機、token必檢）推給這支伺服器，伺服器更新記憶體`LiveMem`並用
+   asyncio.Condition喚醒所有SSE連線，中間沒有輪詢（250ms內多筆合併）。
+   沒有新鮮tick（收盤後／常駐行程沒跑）時自動退回舊的「每2秒比對熱檔/
+   冷檔」模式並標`mode:"poll-diff-2s"`，/health的`stream_mode`回報當下
+   實際模式。**這不是使用者原始規格要的「本機
    tick→雲端SSE」那種真正逐筆延遲**，因為`shioaji_quotes.py`目前的
    `TickState`只存在於它自己那個行程的記憶體裡，這支獨立的FastAPI
    行程沒有辦法直接讀到那個記憶體——**要做到真正逐筆，需要讓
@@ -103,8 +104,15 @@ LIVE_STATE_PATH = Path(os.environ.get("ALPHA_LIVE_STATE_PATH") or (Path(__file__
 HOT_STATE_MAX_AGE_SEC = 120  # 熱檔超過這麼久沒更新就視為「常駐行程沒在跑」，退回冷檔
 
 SERVER_PORT = 8001
-SSE_POLL_INTERVAL_SEC = 2  # 見模組docstring第2點「誠實範圍」，這是輪詢間隔不是tick延遲
-SSE_MODE = "poll-diff-2s"  # 使用者補充指令二：每個事件都帶這個欄位，誠實標示不是真逐筆推送
+SSE_POLL_INTERVAL_SEC = 2  # 退回輪詢模式時的比對間隔（記憶體沒有新鮮tick時才用）
+SSE_MODE_POLL = "poll-diff-2s"   # 退回模式：每2秒比對熱檔/冷檔，有變才送
+SSE_MODE_PUSH = "tick-push"      # 2026-09-04零.2：shioaji_quotes.py每筆tick經UDP推進來→立刻喚醒SSE
+SSE_MODE = SSE_MODE_POLL  # 相容既有引用；實際每個事件的mode由當下是否有新鮮tick決定
+SSE_PUSH_COALESCE_SEC = 0.25  # tick爆量時把250ms內的多筆合併成一個事件（延遲≤250ms，仍是推送不是輪詢）
+# tick ingress：只聽loopback，不對外；datagram第一個欄位必須帶同一份.alpha_live_token
+TICK_INGRESS_HOST = "127.0.0.1"
+TICK_INGRESS_PORT = int(os.environ.get("ALPHA_TICK_INGRESS_PORT") or 8002)
+MEM_FRESH_SEC = 120  # 記憶體最後一筆tick超過這麼久就不算「即時」，退回熱檔/冷檔
 SSE_KEEPALIVE_SEC = 15  # 沒有變動時定期送註解行，避免隧道/代理把閒置連線切掉
 KBARS_MODE = "tick-aggregated-1m"
 TW_TZ = timezone(timedelta(hours=8))
@@ -141,6 +149,96 @@ async def _json_utf8_charset(request, call_next):
     if ct.startswith("application/json") and "charset" not in ct:
         response.headers["content-type"] = "application/json; charset=utf-8"
     return response
+
+
+class LiveMem:
+    """伺服器行程內的即時狀態（2026-09-04零.2）：由tick ingress（UDP）逐筆更新，
+    SSE連線用asyncio.Condition等待version變動——這就是「tick回呼→SSE」的共用記憶體，
+    只是跨行程的那一段用loopback UDP銜接（shioaji_quotes.py不開第二條連線）。"""
+
+    def __init__(self) -> None:
+        self.quotes: dict[str, dict] = {}
+        self.kbars: dict[str, dict[str, dict]] = {}
+        self.market_status: str = "open"
+        self.last_tick_at: datetime | None = None
+        self.updated_at: str | None = None
+        self.version = 0
+        self.ticks_received = 0
+        self.rejected = 0
+        self.cond: asyncio.Condition | None = None
+
+    def fresh(self) -> bool:
+        return self.last_tick_at is not None and (datetime.now(timezone.utc) - self.last_tick_at).total_seconds() <= MEM_FRESH_SEC
+
+    def seed_from_hot_file(self) -> None:
+        """啟動時用熱檔把當日已累積的1分K/最新報價先載進來（不標新鮮），伺服器重啟
+        不會把今天的K線弄丟。"""
+        doc = _read_json_safe(LIVE_STATE_PATH)
+        if not isinstance(doc, dict):
+            return
+        self.quotes = dict(doc.get("quotes") or {})
+        for key, bars in (doc.get("kbars") or {}).items():
+            self.kbars[key] = {b["t"]: dict(b) for b in bars if isinstance(b, dict) and "t" in b}
+        self.market_status = doc.get("market_status", "open")
+        self.updated_at = doc.get("updated_at")
+
+    def apply(self, msg: dict) -> bool:
+        if msg.get("t") != LOCAL_TOKEN:
+            self.rejected += 1
+            return False
+        key = msg.get("key")
+        if not key:
+            return False
+        q = msg.get("quote")
+        if isinstance(q, dict) and q:
+            self.quotes[key] = q
+        bar = msg.get("bar")
+        if isinstance(bar, dict) and bar.get("t"):
+            day = str(bar["t"])[:10]
+            bars = self.kbars.setdefault(key, {})
+            for t in [t for t in bars if t[:10] != day]:  # 跨日清掉前一天
+                bars.pop(t, None)
+            bars[bar["t"]] = bar
+        self.market_status = msg.get("market_status") or self.market_status
+        self.last_tick_at = datetime.now(timezone.utc)
+        self.updated_at = msg.get("ts") or datetime.now(TW_TZ).isoformat()
+        self.ticks_received += 1
+        self.version += 1
+        return True
+
+    def kbars_list(self, key: str) -> list[dict]:
+        return [dict(b) for _, b in sorted((self.kbars.get(key) or {}).items())]
+
+
+MEM = LiveMem()
+
+
+class _TickIngress(asyncio.DatagramProtocol):
+    def datagram_received(self, data: bytes, addr) -> None:
+        try:
+            msg = json.loads(data.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            MEM.rejected += 1
+            return
+        if MEM.apply(msg) and MEM.cond is not None:
+            asyncio.get_event_loop().create_task(_notify_all())
+
+
+async def _notify_all() -> None:
+    async with MEM.cond:
+        MEM.cond.notify_all()
+
+
+@app.on_event("startup")
+async def _start_tick_ingress() -> None:
+    MEM.cond = asyncio.Condition()
+    MEM.seed_from_hot_file()
+    loop = asyncio.get_event_loop()
+    try:
+        await loop.create_datagram_endpoint(_TickIngress, local_addr=(TICK_INGRESS_HOST, TICK_INGRESS_PORT))
+        print(f"tick ingress 監聽 udp://{TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}（只聽loopback，token必檢）", flush=True)
+    except OSError as e:
+        print(f"tick ingress 無法監聽 {TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}：{e}；/live/stream將退回{SSE_MODE_POLL}", flush=True)
 
 
 def _check_token(x_alpha_local_token: str | None) -> None:
@@ -180,7 +278,16 @@ def _combined_snapshot() -> dict:
     美股目前只有冷檔（ibkr_quotes.py沒有常駐行程）。每一段都帶source_mode。"""
     hot, hot_status = _hot_state()
     cold = _read_json_safe(QUOTES_SINOPAC_PATH)
-    if hot is not None and hot_status == "hot-file":
+    if MEM.fresh():
+        sinopac = {
+            "fetched_at": MEM.updated_at,
+            "connected": True,
+            "market_status": MEM.market_status,
+            "error": None,
+            "quotes": {k: dict(v) for k, v in MEM.quotes.items()},
+            "source_mode": "tick-push-memory",
+        }
+    elif hot is not None and hot_status == "hot-file":
         sinopac = {
             "fetched_at": hot.get("updated_at"),
             "connected": True,
@@ -199,7 +306,11 @@ def _combined_snapshot() -> dict:
         ibkr = dict(ibkr)
         ibkr["source_mode"] = "cold-git-file"
     kbars_last = {}
-    if hot is not None:
+    if MEM.kbars:
+        for key, bars in MEM.kbars.items():
+            if bars:
+                kbars_last[key] = dict(bars[max(bars)])
+    elif hot is not None:
         for key, bars in (hot.get("kbars") or {}).items():
             if bars:
                 kbars_last[key] = bars[-1]
@@ -209,6 +320,7 @@ def _combined_snapshot() -> dict:
         "kbars_last": kbars_last,   # 每檔最新一根1分K，前端逐筆series.update()用，不必另外打/live/kbars
         "kbars_mode": KBARS_MODE,
         "hot_file_status": hot_status,
+        "mem_fresh": MEM.fresh(),
     }
 
 
@@ -241,6 +353,15 @@ def live_kbars(code: str, x_alpha_local_token: str | None = Header(default=None)
             ),
         )
     hot, status = _hot_state()
+    mem_bars = MEM.kbars_list(code)
+    if mem_bars:
+        return {
+            "code": code, "mode": KBARS_MODE,
+            "source": "alpha_live_server記憶體（shioaji_quotes.py每筆tick經UDP推入，非api.kbars()）",
+            "generated_at": MEM.updated_at, "market_status": MEM.market_status,
+            "hot_file_status": "tick-push-memory" if MEM.fresh() else status,
+            "bars": mem_bars,
+        }
     if hot is None:
         raise HTTPException(
             status_code=404,
@@ -263,25 +384,56 @@ def live_kbars(code: str, x_alpha_local_token: str | None = Header(default=None)
     }
 
 
+def _sse_frame(snapshot: dict, mode: str) -> str:
+    event = dict(snapshot)
+    event["mode"] = mode
+    event["sent_at"] = datetime.now(TW_TZ).isoformat()
+    return f"event: snapshot\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+
+
+async def _wait_version_change(v: int, timeout: float) -> bool:
+    """等記憶體version變動（tick進來）；逾時回False。"""
+    try:
+        async with MEM.cond:
+            await asyncio.wait_for(MEM.cond.wait_for(lambda: MEM.version != v), timeout=timeout)
+        return True
+    except asyncio.TimeoutError:
+        return False
+
+
 async def _sse_event_generator():
-    """輪詢版SSE——見模組docstring第2點「誠實範圍」，不是真正逐筆tick
-    推送，是「每SSE_POLL_INTERVAL_SEC秒比對一次熱檔/檔案內容，有變動才送」。
-    每個事件payload都帶`mode:"poll-diff-2s"`；沒有變動時每SSE_KEEPALIVE_SEC
-    秒送一行SSE註解（`: keepalive`）當心跳，避免隧道把閒置連線切掉。
-    """
+    """SSE串流，兩種模式、每個事件都明標`mode`：
+    - `tick-push`（2026-09-04零.2）：記憶體有新鮮tick（MEM.fresh()）時，等
+      asyncio.Condition被tick ingress喚醒就立刻送——shioaji_quotes.py收到tick
+      →UDP→這裡→SSE，中間沒有任何輪詢；250ms內的多筆合併成一個事件。
+    - `poll-diff-2s`：沒有新鮮tick（收盤後／常駐行程沒跑／ingress沒起來）時，
+      退回每2秒比對熱檔/冷檔、有變才送的舊行為。
+    沒有變動時每SSE_KEEPALIVE_SEC秒送一行`: keepalive`。"""
     last_sent: str | None = None
     idle = 0.0
     yield "retry: 3000\n\n"
+    snapshot = _combined_snapshot()
+    last_sent = json.dumps(snapshot, ensure_ascii=False)
+    yield _sse_frame(snapshot, SSE_MODE_PUSH if MEM.fresh() else SSE_MODE_POLL)
     while True:
+        if MEM.fresh() and MEM.cond is not None:
+            v = MEM.version
+            changed = await _wait_version_change(v, SSE_KEEPALIVE_SEC)
+            if changed:
+                await asyncio.sleep(SSE_PUSH_COALESCE_SEC)
+                snapshot = _combined_snapshot()
+                last_sent = json.dumps(snapshot, ensure_ascii=False)
+                idle = 0.0
+                yield _sse_frame(snapshot, SSE_MODE_PUSH)
+            else:
+                yield ": keepalive\n\n"
+            continue
         snapshot = _combined_snapshot()
         body = json.dumps(snapshot, ensure_ascii=False)
         if body != last_sent:
             last_sent = body
             idle = 0.0
-            event = dict(snapshot)
-            event["mode"] = SSE_MODE
-            event["sent_at"] = datetime.now(TW_TZ).isoformat()
-            yield f"event: snapshot\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+            yield _sse_frame(snapshot, SSE_MODE_POLL)
         else:
             idle += SSE_POLL_INTERVAL_SEC
             if idle >= SSE_KEEPALIVE_SEC:
@@ -315,7 +467,11 @@ def health():
         "sinopac_file_exists": QUOTES_SINOPAC_PATH.exists(),
         "ibkr_file_exists": QUOTES_IBKR_PATH.exists(),
         "hot_file_status": hot_status,          # hot-file / hot-file-stale / hot-file-missing
-        "stream_mode": SSE_MODE,                # 誠實標示：/live/stream是2秒輪詢比對，不是真逐筆推送
+        "stream_mode": SSE_MODE_PUSH if MEM.fresh() else SSE_MODE_POLL,  # 當下實際模式：有新鮮tick=tick-push，否則退回2秒輪詢比對
+        "tick_ingress": f"udp://{TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}",
+        "ticks_received": MEM.ticks_received,
+        "tick_rejected": MEM.rejected,
+        "last_tick_at": MEM.last_tick_at.astimezone(TW_TZ).isoformat(timespec="seconds") if MEM.last_tick_at else None,
         "kbars_mode": KBARS_MODE,               # /live/kbars是tick聚合，不是api.kbars()
         "token_required_on_live_endpoints": True,  # 三個/live端點一律要token，不因私有網路跳過
         "us_kbars": "not_implemented",
@@ -325,6 +481,6 @@ def health():
 if __name__ == "__main__":
     print(f"本機即時報價伺服器啟動於 http://0.0.0.0:{SERVER_PORT}", flush=True)
     print(f"本機驗證token（貼進App設定頁「即時伺服器」卡片）：{LOCAL_TOKEN}", flush=True)
-    print(f"熱檔路徑：{LIVE_STATE_PATH}（由shioaji_quotes.py常駐行程盤中每秒寫入；stream_mode={SSE_MODE}, kbars_mode={KBARS_MODE}）", flush=True)
+    print(f"熱檔路徑：{LIVE_STATE_PATH}（備援）；tick ingress udp://{TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}；stream_mode=有新鮮tick時{SSE_MODE_PUSH}、否則{SSE_MODE_POLL}；kbars_mode={KBARS_MODE}", flush=True)
     print("**這是唯讀伺服器，完全沒有任何下單/改單能力，程式碼裡也沒有import任何下單相關模組**", flush=True)
     uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)

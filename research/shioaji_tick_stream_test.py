@@ -23,6 +23,7 @@ import shioaji_quotes as sq
 # alpha_live_server.py誤以為現在有即時資料（新建的TickState讀的是模組常數）。
 import tempfile as _tempfile
 sq.LIVE_STATE_PATH = sq.Path(_tempfile.gettempdir()) / "alpha_test_live_state.json"
+sq.LIVE_PUSH_ENABLED = False  # 既有測試不要真的對正式伺服器送UDP；tick-push有自己的專屬測試
 
 TW_TZ = timezone(timedelta(hours=8))
 
@@ -247,8 +248,55 @@ def test_intraday_flush_is_noop_when_intraday_push_disabled():
     print("test_intraday_flush_is_noop_when_intraday_push_disabled PASS")
 
 
+def test_tick_push_sends_udp_datagram_with_token():
+    """2026-09-04零.2：收到tick後要對LIVE_PUSH_ADDR送一個帶token/key/quote/bar的UDP
+    datagram；token檔不存在時要安靜停用（不拋錯）。"""
+    import socket, json as _json, tempfile, os
+    recv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    recv.bind(("127.0.0.1", 0)); recv.settimeout(2)
+    tmpdir = tempfile.mkdtemp(); tok = sq.Path(tmpdir) / ".alpha_live_token"
+    tok.write_text("TESTTOKEN123", encoding="utf-8")
+    orig_tok = sq.LIVE_TOKEN_PATH
+    sq.LIVE_TOKEN_PATH = tok
+    try:
+        state = sq.TickState(); state.live_state_path = None
+        state.push_addr = recv.getsockname()
+        sq._make_tick_stk_handler(state, "2330", None)(_fake_tick_stk(close="1050.0"))
+        data, _ = recv.recvfrom(65535)
+        msg = _json.loads(data.decode("utf-8"))
+        assert msg["t"] == "TESTTOKEN123" and msg["key"] == "2330" and msg["event"] == "tick", msg
+        assert msg["quote"]["last"] == 1050.0 and msg["bar"]["c"] == 1050.0, msg
+        assert state.push_count == 1
+        # token檔不存在→停用，不拋錯
+        sq.LIVE_TOKEN_PATH = sq.Path(tmpdir) / "missing"
+        state2 = sq.TickState(); state2.live_state_path = None; state2.push_addr = recv.getsockname()
+        assert state2.push_tick("2330") is False and state2._push_disabled_reason
+    finally:
+        sq.LIVE_TOKEN_PATH = orig_tok
+        recv.close()
+        for f in os.listdir(tmpdir):
+            os.remove(os.path.join(tmpdir, f))
+        os.rmdir(tmpdir)
+    print("test_tick_push_sends_udp_datagram_with_token PASS")
+
+
+def test_resolve_fop_key_maps_actual_month_code_to_near_key():
+    """2026-09-04四修.一回歸防線：tick.code是TXFI6/MXFI6這種實際月份碼，訂閱時登記的是
+    TXFR1連續別名——必須能對回TXF_NEAR/MXF_NEAR，不能再被靜默丟掉。"""
+    m = {"TXFR1": "TXF_NEAR", "2330": "2330"}
+    assert sq._resolve_fop_key("TXFR1", m) == "TXF_NEAR"
+    assert sq._resolve_fop_key("TXFI6", m) == "TXF_NEAR"
+    assert sq._resolve_fop_key("MXFI6", m) == "MXF_NEAR"
+    assert sq._resolve_fop_key("EXFI6", m) == "EXF_NEAR"
+    assert sq._resolve_fop_key("FXFJ6", m) == "FXF_NEAR"
+    assert sq._resolve_fop_key("ZZZI6", m) is None
+    print("test_resolve_fop_key_maps_actual_month_code_to_near_key PASS")
+
+
 def main():
     tests = [
+        test_resolve_fop_key_maps_actual_month_code_to_near_key,
+        test_tick_push_sends_udp_datagram_with_token,
         test_intraday_flush_is_noop_when_intraday_push_disabled,
         test_kbar_aggregation_per_minute,
         test_live_state_hot_file_written_atomically,

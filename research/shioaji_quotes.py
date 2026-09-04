@@ -118,6 +118,18 @@ TRADING_WINDOW_POLL_SEC = 30  # 常駐迴圈裡多久檢查一次「是否還在
 LIVE_STATE_PATH = Path(__file__).parent / ".live_state_sinopac.json"
 LIVE_STATE_MIN_INTERVAL_SEC = 1.0  # 熱檔最多每秒寫一次：tick一秒可能好幾筆，寫檔不必跟著每筆寫
 
+# 2026-09-04（總司令裁示零.2「真逐筆推送」）：每收到一筆tick，除了更新記憶體/熱檔，
+# 立刻把該檔最新報價＋當前1分K用一個UDP datagram送到本機loopback的
+# alpha_live_server.py（127.0.0.1:8002，只聽loopback、不對外）。伺服器收到就更新自己
+# 記憶體並喚醒所有SSE連線→這才是「tick回呼→SSE」的真推送（mode=tick-push），不再是
+# 2秒輪詢比對。**不開第二條Shioaji連線**（推的是這支行程已經收到的tick）；datagram
+# 第一個欄位帶跟伺服器同一份`.alpha_live_token`當驗證（沿用既有token模式），伺服器
+# token不符直接丟棄。UDP是fire-and-forget：伺服器沒開時送出去就消失、這支行程完全
+# 不受影響；熱檔照寫，當伺服器重啟時的狀態備援。
+LIVE_PUSH_ENABLED = True
+LIVE_PUSH_ADDR = ("127.0.0.1", 8002)
+LIVE_TOKEN_PATH = Path(__file__).parent / ".alpha_live_token"  # gitignored，跟alpha_live_server.py同一份
+
 # 2026-09-04（總司令裁示乙.1「冷熱分離」）：**盤中不再commit/push**。盤中只更新記憶體
 # 與本機熱檔（上面LIVE_STATE_PATH，給alpha_live_server.py讀），git追蹤的冷檔
 # data/quotes_sinopac.json只在13:30收盤、常駐迴圈結束時寫一次並commit+push一次
@@ -238,6 +250,12 @@ class TickState:
         self._kbars_day: str | None = None
         self._last_live_write = 0.0
         self.live_state_path: Path | None = LIVE_STATE_PATH  # 測試可改指到暫存檔
+        # tick-push（2026-09-04）：UDP socket懶建立；token讀不到就整個停用並只印一次
+        self.push_addr: tuple[str, int] | None = LIVE_PUSH_ADDR if LIVE_PUSH_ENABLED else None
+        self._push_sock = None
+        self._push_token: str | None = None
+        self._push_disabled_reason: str | None = None
+        self.push_count = 0
 
     def update(self, key: str, patch: dict) -> None:
         with self._lock:
@@ -280,6 +298,39 @@ class TickState:
         with self._lock:
             return {k: [dict(b) for _, b in sorted(v.items())] for k, v in self._kbars.items()}
 
+    def push_tick(self, key: str, event: str = "tick", market_status: str = "open") -> bool:
+        """把`key`目前的最新報價＋最新一根1分K用UDP推給本機alpha_live_server.py
+        （見LIVE_PUSH_ADDR說明）。任何失敗只記log、回傳False，絕不拋出（callback
+        執行緒裡不能因為推送失敗讓訂閱掛掉）。"""
+        if self.push_addr is None or self._push_disabled_reason:
+            return False
+        try:
+            if self._push_token is None:
+                if not LIVE_TOKEN_PATH.exists():
+                    self._push_disabled_reason = f"找不到{LIVE_TOKEN_PATH.name}，tick-push停用（先啟動一次alpha_live_server.py讓它產生token）"
+                    print(f"  [tick-push] {self._push_disabled_reason}", flush=True)
+                    return False
+                self._push_token = LIVE_TOKEN_PATH.read_text(encoding="utf-8").strip()
+            if self._push_sock is None:
+                import socket
+                self._push_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self._push_sock.setblocking(False)
+            with self._lock:
+                quote = dict(self._quotes.get(key, {}))
+                bars = self._kbars.get(key) or {}
+                bar = dict(bars[max(bars)]) if bars else None
+            msg = {
+                "t": self._push_token, "event": event, "key": key,
+                "quote": quote, "bar": bar, "market_status": market_status,
+                "ts": datetime.now(TW_TZ).isoformat(),
+            }
+            self._push_sock.sendto(json.dumps(msg, ensure_ascii=False).encode("utf-8"), self.push_addr)
+            self.push_count += 1
+            return True
+        except Exception as e:  # noqa: BLE001
+            print(f"  [tick-push失敗] {key}: {type(e).__name__}: {e}", flush=True)
+            return False
+
     def maybe_write_live_state(self, force: bool = False, market_status: str = "open") -> bool:
         """把最新快照＋當日1分K寫進本機熱檔（見LIVE_STATE_PATH說明），每秒最多
         一次；callback執行緒直接呼叫，失敗只印log絕不拋出（不能讓訂閱掛掉）。
@@ -305,8 +356,21 @@ class TickState:
             }
             tmp = self.live_state_path.with_suffix(".json.tmp")
             tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
-            tmp.replace(self.live_state_path)
-            return True
+            # Windows上讀取方（alpha_live_server.py）剛好開著檔案時rename會被拒（WinError 5），
+            # 重試三次、每次等50ms；仍失敗就放棄這一次（下一秒還會再寫，且tick-push已把
+            # 資料直接推給伺服器，熱檔只是備援）。
+            last_err = None
+            for _ in range(3):
+                try:
+                    tmp.replace(self.live_state_path)
+                    return True
+                except PermissionError as e:
+                    last_err = e
+                    time.sleep(0.05)
+            self._live_write_failures = getattr(self, "_live_write_failures", 0) + 1
+            if self._live_write_failures in (1, 10, 100, 1000):  # 不洗log
+                print(f"  [live_state熱檔寫入失敗x{self._live_write_failures}] {type(last_err).__name__}: {last_err}", flush=True)
+            return False
         except Exception as e:
             print(f"  [live_state熱檔寫入失敗] {type(e).__name__}: {e}", flush=True)
             return False
@@ -346,6 +410,7 @@ def _make_tick_stk_handler(state: TickState, key: str, label: str | None):
                 patch["label"] = label
             state.update(key, patch)
             state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
+            state.push_tick(key)  # 2026-09-04 tick-push：先推（最低延遲），再寫熱檔備援
             state.maybe_write_live_state()
         except Exception as e:
             # callback裡任何例外都不能讓整個訂閱掛掉，只記log繼續收下一筆
@@ -362,6 +427,7 @@ def _make_bidask_stk_handler(state: TickState, key: str):
                 "bid": _clean_positive(bid_list[0]) if bid_list else None,
                 "ask": _clean_positive(ask_list[0]) if ask_list else None,
             })
+            state.push_tick(key, event="bidask")
             state.maybe_write_live_state()
         except Exception as e:
             print(f"  [bidask_stk callback異常] {key}: {type(e).__name__}: {e}", flush=True)
@@ -390,6 +456,7 @@ def _make_tick_fop_handler(state: TickState, key: str, label: str | None):
                 patch["label"] = label
             state.update(key, patch)
             state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
+            state.push_tick(key)
             state.maybe_write_live_state()
         except Exception as e:
             print(f"  [tick_fop callback異常] {key}: {type(e).__name__}: {e}", flush=True)
@@ -405,6 +472,7 @@ def _make_bidask_fop_handler(state: TickState, key: str):
                 "bid": _clean_positive(bid_list[0]) if bid_list else None,
                 "ask": _clean_positive(ask_list[0]) if ask_list else None,
             })
+            state.push_tick(key, event="bidask")
             state.maybe_write_live_state()
         except Exception as e:
             print(f"  [bidask_fop callback異常] {key}: {type(e).__name__}: {e}", flush=True)
@@ -429,10 +497,26 @@ def _make_quote_idx_handler(state: TickState, key: str, label: str | None):
                 patch["label"] = label
             state.update(key, patch)
             state.add_tick(key, last, 0, getattr(quote, "datetime", None))  # 指數沒有成交量
+            state.push_tick(key)
             state.maybe_write_live_state()
         except Exception as e:
             print(f"  [quote_idx callback異常] {key}: {type(e).__name__}: {e}", flush=True)
     return handler
+
+
+def _resolve_fop_key(code: str, code_to_key: dict[str, str]) -> str | None:
+    """期貨tick的`tick.code`是**實際月份合約碼**（例如`TXFI6`=台指期2026/09），但訂閱時
+    `api.Contracts.Futures.TXF.TXFR1`（連續近月別名）的`.code`是`TXFR1`——B34改tick串流
+    時用`contract.code`當反查key，導致所有期貨tick反查不到、被靜默丟掉（總司令
+    2026-09-04手機實測：quotes_sinopac.json只剩5檔+TAIEX）。修法：先精確比對，比不到
+    再用前三碼商品代號（TXF/MXF/EXF/FXF）對回FUTURES_NEAR_MONTH的key。"""
+    if code in code_to_key:
+        return code_to_key[code]
+    prefix = (code or "")[:3].upper()
+    for key, meta in FUTURES_NEAR_MONTH.items():
+        if meta["group"] == prefix:
+            return key
+    return None
 
 
 def _git(args: list[str]) -> subprocess.CompletedProcess:
@@ -614,13 +698,18 @@ def run_stream_daemon() -> None:
             if key:
                 _make_bidask_stk_handler(state, key)(bidask)
 
+        unknown_fop_codes: set[str] = set()
+
         def on_tick_fop(tick):
-            key = code_to_key.get(tick.code)
+            key = _resolve_fop_key(tick.code, code_to_key)
             if key:
                 _make_tick_fop_handler(state, key, FUTURES_NEAR_MONTH.get(key, {}).get("label"))(tick)
+            elif tick.code not in unknown_fop_codes:
+                unknown_fop_codes.add(tick.code)
+                print(f"  [tick_fop] 收到無法對應的期貨代碼 {tick.code}（只印一次）", flush=True)
 
         def on_bidask_fop(bidask):
-            key = code_to_key.get(bidask.code)
+            key = _resolve_fop_key(bidask.code, code_to_key)
             if key:
                 _make_bidask_fop_handler(state, key)(bidask)
 
@@ -650,6 +739,8 @@ def run_stream_daemon() -> None:
 
         _flush_and_push(state, final=True)  # 收盤收尾：寫當日收盤快照並commit+push（乙.1之後全天唯一一次）
         state.maybe_write_live_state(force=True, market_status="closed")  # 熱檔也標記收盤，live server據此顯示「今日收盤」
+        for k in list(state.snapshot().keys()):
+            state.push_tick(k, event="market_closed", market_status="closed")  # 通知live server記憶體也轉「收盤」
     finally:
         try:
             api.logout()
