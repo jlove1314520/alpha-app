@@ -13,6 +13,8 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T13:27 — hypothesis_queue排程接續（#29第1關sanity：PASS，非最終判定） — 新增`equal_weight_rebalance_sanity.py`。基準操作化偏離#29原文（市值加權買進持有）——本專案無市值/流通股數資料源，且#29「資料可行性」段落原文承諾不新增資料工程，兩者矛盾，選擇遵守後者，改用「t0等權重、永不主動調整的buy-and-hold」當基準（理由見腳本docstring，避免混入等權vs市值加權的規模傾斜，呼應`f_low_vol`/`f_bab`死因）。沿用`factor_ic.py`既有300檔快取樣本(SEED=20260822)，234/300通過歷史長度門檻，視窗頭尾涵蓋度篩選後159檔組panel(2015-2024,2498交易日，存活者偏差已誠實揭露)。結果：再平衡事件118次(理論值一致)、拉回前權重離散度均值0.00068(>0,非no-op)、NaN/Inf皆0。TRAIN：buyhold+66.14%(Sharpe+0.691) vs rebalanced+90.95%(Sharpe+0.912)，溢酬+24.81pp；VAL：buyhold+83.58%(Sharpe+1.037) vs rebalanced+115.29%(Sharpe+1.379)，溢酬+31.72pp——兩期方向一致、Sharpe/MDD同步改善，判SANITY PASS。尚未結案，下一輪需先設計這條假設專屬的第2關隨機控制組（不能沿用因子IC的洗牌null，初步構想是隨機化再平衡日曆相位或宇宙bootstrap抽樣）。完整見`HYPOTHESIS_QUEUE.md`#29條目、`TRIALS_LEDGER.md`#107。`git status`確認`research/US_LEADS.md`/`research/US_LOG.md`跟數個`research/*.log`/`.pid`是別的自動化來源（疑似US軌或即時報價常駐程式）留下的殘留變更，本輪未觸碰、不納入commit。
+
 ## 2026-09-04T12:54 — hypothesis_queue排程接續（重新查證依賴+設計新假設軸#29） — 重新查證`BACKLOG.md`確認B24-500仍「回測未通過」、題材動能榜/未來性濾網仍「紙上交易中」，#5/#6/#8/#10依賴無新進展，佇列#1~28維持全數結案。設計新假設軸#29（等權重再平衡溢酬Diversification Return/Equal-Weight Rebalancing Premium）——刻意跟前28條區隔為機制上真正不同的第三類（非①方向性選股排序、非②timing/exposure overlay，是③portfolio construction：不選股、不做曝險縮放，純粹測「定期拉回等權重」這個機械式再平衡動作本身有沒有加值），完整經濟理由/假設定義/下檔保護要求已寫入`HYPOTHESIS_QUEUE.md`#29條目與「排隊順序總結」。本輪只登記假設、未寫程式碼、未跑任何測試，下一輪從第1關sanity開始，不跳關。
 
 ## 2026-09-04（hypothesis_queue排程，本輪鎖檔為陳舊鎖回收，上一輪疑似
