@@ -1652,3 +1652,23 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 - **本輪未能取得完整數字**：背景執行約22分鐘（03:03:09啟動，本輪結束時仍在跑），仍卡在第一個cadence（monthly）的100次隨機控制組計算階段（log只到重複出現numpy `RuntimeWarning: invalid value encountered in reduce`警告，尚未印出任何一筆完整結果），遠超round201/202記錄的完整3因子版本耗時。**process本身持續存活**（`ps aux`確認pid 1427持續在跑，非round326/327那種「process無聲消失、無traceback」的模式），研判可能是機器目前資源競爭（同時段可能有其他自動化session/排程在跑）或這個2因子equal-weight隨機基準函式本身效能瓶頸，根因未查明。**沒有殺掉這個process**——它是獨立OS process，不受本次session結束影響，會在背景繼續跑；下一輪接手時先用`ps aux | grep python`／檢查`data/deep_dive_loo_no_low_vol_validation.csv`是否已出現，若已完成直接讀CSV記錄結果，若process已消失但無CSV則視為異常中止、可考慮縮小成只跑`monthly`單一cadence（`DEEP_DIVE_CADENCES=monthly python deep_dive_loo_no_low_vol.py`，本輪已加上這個環境變數開關方便下一輪選擇性重跑）。
 - **誠實限制**：這輪的p值（不論最終跑出什麼數字）仍然帶著round346「先看3個子版本挑最佳者再深挖」的選擇偏誤，不是乾淨的單一假設檢定，解讀時要明確揭露這一點，不能因為深挖數字好看就視為顯著結果。
 - `is_holdout_consumed()`執行前確認`False`。全程讀取本機快取，零新增API呼叫。
+
+## 第356輪（2026-09-05T04:32+08:00，TW）——round353背景process已跑完，讀CSV判讀＋補齊`#118`第三個尚未滿足的深挖前提（獨立樣本外驗證）
+
+取鎖時偵測到`LOCK_STALE`（pid 53776持有30.0分鐘後被回收）——記錄「上一輪疑似失敗」，但這是第0節要求的通報，不代表本輪追查出根因（本輪未深入查證上一輪異常原因，優先處理TW軌本身的工作單位）。三軌時間戳：TW 03:26（第353輪，最舊）／US 03:42（第354輪）／FUT 04:04（第355輪，最新）——依輪替選TW。
+
+開工先`ps -ef | grep python`確認環境乾淨（無殘留背景process，round353遺留的`deep_dive_loo_no_low_vol.py`已不在跑），再確認`data/deep_dive_loo_no_low_vol_validation.csv`已出現（mtime 04:02），代表round353留下的process已在本輪之前正常跑完，沒有變成round326/327那種無聲消失。
+
+**讀CSV判讀round353的完整深挖數字**：
+- monthly／VALIDATION：報酬+92.76%、alpha+12.26%（**p=0.0489**，名目<0.05）、beta=+0.51、成本1x/2x/3x=+92.76/+81.51/+70.35%（3x成本後仍明顯贏買進持有大盤+54.58%）、隨機控制組percentile=**100.0**（N=100，中位數僅+20.80%）、n=298檔。
+- quarterly／VALIDATION：報酬+80.44%、alpha+11.72%（**p=0.1162**，不顯著）、beta=+0.42、成本1x/2x/3x=+80.44/+74.81/+69.17%、隨機控制組percentile=**100.0**、n=298檔。
+
+**判讀**：monthly cadence已補齊`TRIALS_LEDGER.md`#118明列的前兩個深挖前提（成本敏感度1x/2x/3x皆正、隨機控制組N=100完勝），是round346/353這條leave-one-factor-out支線至今數字最好看的一次。但**還不能判PASS**，三個具體理由：(1) #118本身列出的**第三個**前提——「一個真正獨立於這次探索的樣本外驗證」——round346/353全程都用`safe_pool_ids()[:300]`同一批300檔，這輪的p值仍帶著「先看3個leave-one-out子版本挑最佳者」的選擇偏誤，尚未補齊；(2) monthly/quarterly兩個cadence顯著度不一致（p=0.0489 vs 0.1162），不是兩期都乾淨過關；(3) beta monthly=+0.51、quarterly=+0.42，跟大盤有中度正相關，不是`CLAUDE.md`最高原則要求的「下檔保護」乾淨案例（大盤上漲期間表現好，不代表危機期間有守住）——這點在判定升降級前也需要留意，但本輪未特別去查危機期間表現，留給下一輪或深挖後段補。
+
+**本輪工作單位＝補齊前提(1)**：新增`deep_dive_loo_no_low_vol_independent_sample.py`（重用round353資料載入/monkeypatch機制，未修改任何既有檔案），改用`safe_pool_ids()[300:600]`——完全沒被round346/353因子選擇過程碰過的一批300檔——**在這批新樣本上重新計算train-only IC權重**（不是沿用round353舊樣本的權重數字，樣本換了權重也要重新估計，才是誠實的樣本外測試），再跑同一套monthly+quarterly完整深挖關卡（1x/2x/3x成本+N=100隨機控制組）。判讀原則已寫在腳本檔頭（新樣本上monthly若alpha仍為正且p<0.10、percentile明顯贏隨機控制組→支持不是巧合；若alpha轉負或p值遠高於0.05或percentile不到90→支持選擇偏誤假說，維持FAIL/降級），避免看到結果才回頭解釋。
+
+**本輪未能取得完整數字**：腳本已在背景啟動（`round356_deep_dive_loo_no_low_vol_independent_sample.log`），log只印出資料載入起點（`pool total=1142, using independent slice [300:600]: 2415..4120`／`market data ready`），尚未進入正式回測階段，預期跟round353同款——300檔資料載入本身就要花可觀時間，加上兩個cadence各自N=100隨機控制組耗時，這輪30分鐘窗口內不會跑完。**未殺掉process**，比照round353先例讓它在背景繼續跑；下一輪接手先查`data/deep_dive_loo_no_low_vol_independent_sample.csv`是否已出現，出現就讀CSV記錄結果並依上述判讀原則做出候選判定（PASS升格進`TRIALS_LEDGER.md`新列／FAIL明確結案／仍模糊則說明原因），process已消失但無CSV則視為異常中止、可用`DEEP_DIVE_CADENCES=monthly`環境變數縮小範圍重跑單一cadence（已比照round353加上這個開關）。
+
+**暫不更新`TRIALS_LEDGER.md`/`TW_LEADS.md`的候選判定欄位**——round353的完整數字本身仍卡在`#118`列出的第三個前提未補齊，貿然升格成PASS或EXPERIMENTAL都可能之後被獨立樣本推翻，違反「先看到結果才回頭解釋」的紀律；本輪已把round353的完整數字誠實寫進本檔（`TW_LOG.md`），等獨立樣本結果出來後一併判定、一次寫進`LEADS.md`/`TRIALS_LEDGER.md`，避免同一個候選被拆成兩筆不完整的紀錄。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程讀取本機快取（yfinance價格快取+FinMind財報/月營收快取），零新增API呼叫。
