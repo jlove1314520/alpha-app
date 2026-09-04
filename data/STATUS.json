@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-04T13:50:06.720500+08:00",
-  "latest_commit": "d0bb82b",
+  "updated_at": "2026-09-04T14:11:03.037769+08:00",
+  "latest_commit": "37bc0ee",
   "data_files": [
     {
       "path": "data/company_info.json",
@@ -124,7 +124,7 @@
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-09-04T05:45:26+00:00",
+      "generated_at": "2026-09-04T05:54:13+00:00",
       "records": 197,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
       "detail": "queried=209 matched=197 trading_window=False",
@@ -221,7 +221,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-04T13:50:12+08:00",
+    "checked_at": "2026-09-04T14:11:08+08:00",
     "any_overdue": true,
     "overdue_names": [
       "美股即時報價（本機IBKR）"
@@ -233,7 +233,7 @@
         "file": "data/quotes_tw.json",
         "owner": "GitHub Actions",
         "status": "ok",
-        "last_data_at": "2026-09-04T13:45+08:00",
+        "last_data_at": "2026-09-04T13:54+08:00",
         "expected_at_or_after": "2026-09-04T13:00+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"

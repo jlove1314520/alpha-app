@@ -16,6 +16,27 @@
 
 ---
 
+## 2026-09-04下午（開發帽）— P0產品.一 首頁重排版 ＋ 總司令13:54手機實測兩個回歸的P0修正
+
+**首頁重排版（`37bc0ee`）**：自選股置頂，每列只留名稱/代號、現價、%、走勢線，來源改彩色小點
+（綠即時／黃延遲／灰盤後，點小點展開文字說明）；最後更新／即時連線／輪詢文案／匯率＋幣別合併成一條
+可展開的細狀態列（摘要一行＋狀態小點）；總資產/損益收成「串接券商帳戶 →」CTA；AI日報無內容整張隱藏；
+今日事件只在有事件時顯示；大盤速覽改橫向膠囊帶（一屏約三顆）；底部導覽不動。
+
+**兩個回歸（總司令13:54實測）**：(1) 自選股重複——`hydrateHome()`初次載入與SSE重繪併發把列塞進同一
+容器；改版本號`HYDRATE_HOME_SEQ`＋每個await後檢查＋DocumentFragment一次`replaceChildren`。
+(2) 走勢線壓到數字——四修.三加的`.sparkwrap`在flex列裡被撐寬；改spark() SVG明確`width=64 height=26`、
+`.sparkwrap`固定64×38、`.swipe-row`/`.idx-row`改grid `minmax(0,1fr) 64px auto`、沒線也留同寬空位。
+另：收盤後Actions來源不再顯示「盤中」（依session改「已收盤 · Actions最後一筆」）；`loadStockInfo`
+改共用進行中promise，FinMind不可用時退回`data/company_info.json`補名稱（退路成功不記全域錯誤）。
+
+**smoke test**：新增30（首頁結構）、31（併發兩次hydrateHome後代號/膠囊唯一）、32（SVG與價格矩形不相交、
+寬≤72px）、33（列高差≤8px）、34（收盤時段無「盤中」）——對應總司令原話check 27~30（既有編號已用到30
+故順延）。**32項全PASS、0 FAIL**。實測五列列高皆63px、SVG皆64px、名稱正確顯示中文。
+截圖：regress_wl_card／regress_idx_card／home_before_redesign／home_after_redesign（已送總司令）。
+
+---
+
 ## 2026-09-04上午～下午（開發帽＋維運帽）— 零.2 tick-push真逐筆推送＋總司令手機實測四修
 
 **零.2 tick-push（`a8502f2`）**：`shioaji_quotes.py`每筆tick經loopback UDP（127.0.0.1:8002、帶同一份
