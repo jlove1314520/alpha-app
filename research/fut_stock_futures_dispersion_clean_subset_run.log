@@ -1,0 +1,40 @@
+  警告：EHF 有 24 筆轉倉skipped_events（無調整比率）
+  警告：FYF 有 18 筆轉倉skipped_events（無調整比率）
+  警告：GMF 有 9 筆轉倉skipped_events（無調整比率）
+  警告：HBF 有 11 筆轉倉skipped_events（無調整比率）
+  警告：HQF 有 16 筆轉倉skipped_events（無調整比率）
+  警告：ITF 有 27 筆轉倉skipped_events（無調整比率）
+  警告：JWF 有 37 筆轉倉skipped_events（無調整比率）
+  警告：KKF 有 22 筆轉倉skipped_events（無調整比率）
+  警告：NWF 有 3 筆轉倉skipped_events（無調整比率）
+  警告：QDF 有 1 筆轉倉skipped_events（無調整比率）
+  警告：SXF 有 4 筆轉倉skipped_events（無調整比率）
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+=== round348 19檔F結尾個股期貨面板重跑：兩個乾淨子集（不重抓資料，全部命中快取） ===
+
+（沿用round348已快取的skipped_rollover_events；本輪不重新計算，只重用CODES常數確保面板一致）
+
+=== (b) 資料品質乾淨子集：8檔0-skipped_rollover_events（8檔：CCF,CDF,OLF,PAF,QRF,RFF,RUF,ZFF） ===
+  重疊窗口：2023-08-02 ~ 2024-12-31，共 346 個交易日
+  dispersion_ratio: 0.8574（round347/348 19檔版：1.6371；round338 TX/MTX/TE：0.1143）
+  PC1解釋變異: 37.72%（round347/348 19檔版：27.33%；round338 TX/MTX/TE：97.91%）
+  PC1+PC2+PC3: 61.95%
+  平均兩兩相關係數: 0.2652
+
+=== (a) 長窗口子集：4檔0-skipped且2018年前掛牌（4檔：CCF,CDF,OLF,PAF） ===
+  重疊窗口：2018-05-03 ~ 2024-12-31，共 1623 個交易日
+  dispersion_ratio: 0.9052（round347/348 19檔版：1.6371；round338 TX/MTX/TE：0.1143）
+  PC1解釋變異: 42.25%（round347/348 19檔版：27.33%；round338 TX/MTX/TE：97.91%）
+  PC1+PC2+PC3: 86.41%
+  平均兩兩相關係數: 0.2080
+
+已存結果：data/fut_stock_futures_dispersion_clean_subset_round349.csv
+
+（本腳本純診斷統計，重用round347/348已快取資料，零新增API呼叫，不含任何因子/策略檢定，不寫入TRIALS_LEDGER.md）

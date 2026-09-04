@@ -2106,3 +2106,24 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 零因子/策略判定，跟round332/335/338/341/344同precedent不寫`TRIALS_LEDGER.md`列，補記`FUT_LEADS.md`。結果存`data/fut_stock_futures_dispersion_coverage_round347.csv`（19檔覆蓋率明細）、`data/fut_stock_futures_dispersion_summary_round347.csv`（離散度摘要）、`fut_stock_futures_dispersion_round347_run.log`（原始輸出）。17次新API呼叫（19檔扣除CDF/CCF既有快取），全程遵守`RATE_LIMIT_MIN_INTERVAL_SEC=3.0`節流，未遭遇限流。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **下一步**：(a) 設計不要求全體成員同時存在的滾動式宇宙/窗口建構，把可用樣本期間從250天延長（不同世代的個股期貨輪流加入池子，類似股票universe的動態成分股精神）；(b) 修/繞過skipped_rollover_events較多代碼的資料品質缺口（先只用0 skipped的8檔子集做第一版驗證，或研究能否從其他資料源補上缺報價）；(c) 若(a)(b)完成，才是這個方向可以開始設計橫斷面因子（動能/反轉/成交量等）的地基完成點。
+
+---
+
+## 第352輪（2026-09-05，FUT）
+
+**接續round348下一步(a)+(b)**：19檔F結尾個股期貨離散度/PCA結果（dispersion_ratio=1.6371、PC1=27.33%）建立在只有250個交易日的重疊窗口（被最晚掛牌的SXF拖累）、且11/19檔有非零skipped_rollover_events（轉倉價格銜接不乾淨）之上，本輪同時處理這兩個限制。
+
+新增`fut_stock_futures_dispersion_clean_subset.py`（唯讀，import重用`fut_stock_futures_dispersion_test.py`的`build_return_panel()`/`compute_dispersion()`，不修改原腳本本身），在round348已快取的19檔面板上切出兩個子集，零新增API呼叫：
+
+1. **(b) 資料品質乾淨子集**：8檔0-skipped_rollover_events（CCF/CDF/OLF/PAF/QRF/RFF/RUF/ZFF）。重疊窗口2023-08-02~2024-12-31（346天，比19檔版略長）。**dispersion_ratio=0.8574、PC1=37.72%、PC1+PC2+PC3=61.95%、平均兩兩相關係數=0.2652**。
+2. **(a) 長窗口子集**：4檔0-skipped且2018年前掛牌（CCF/CDF/OLF/PAF）。重疊窗口延長到2018-05-03~2024-12-31（1623天，是19檔版250天的6.5倍）。**dispersion_ratio=0.9052、PC1=42.25%、PC1+PC2+PC3=86.41%、平均兩兩相關係數=0.2080**。
+
+**誠實解讀（不能只挑對自己有利的數字）**：兩個乾淨子集的dispersion_ratio（0.86、0.91）都明顯低於round348原始19檔結果（1.6371）、PC1解釋變異（37.72%、42.25%）都明顯高於原始19檔結果（27.33%）——代表round348偏樂觀的離散度數字，有一部分可能來自那11檔非零skipped_rollover_events代碼的轉倉銜接雜訊（機械性不連續造成的虛假變異），不是全部都是真實的橫斷面獨立性。**但即使拿掉這個雜訊，乾淨子集的dispersion_ratio（0.86~0.91）仍然遠優於round338 TX/MTX/TE指數期貨家族的0.1143（高7~8倍）、PC1（37.72%~42.25%）仍然遠低於TX/MTX/TE的97.91%**——核心結論「個股期貨池比指數期貨池更具跨商品橫斷面獨立性」依然成立，只是幅度應該從round348的「14倍/一個數量級」下修到「7~8倍」這個更保守、更站得住腳的數字。
+
+**另一個誠實限制**：4檔長窗口子集PC1+PC2+PC3=86.41%——即使只是4檔的池子，3個主成分就解釋了86%變異，比8檔短窗口子集的61.95%集中得多，樣本數太小本身也會系統性推高PC1集中度（4檔的相關矩陣自由度有限），這個數字的可信度低於8檔版本，只能當作「窗口延長後的參考點」，不是更強的證據。
+
+**副作用觀察，非本輪判定範圍**：`compute_dispersion()`的`avg_cs_range_daily_pct`欄位在round347原始輸出跟本輪兩個子集都是`inf`（用`git show`確認round347的CSV本來就有這個值，不是本輪引入的新問題），可能是某天某檔報酬因轉倉調整或除權息缺口產生極端值導致`max-min`爆炸；這個欄位目前沒有被用在任何判定邏輯裡（dispersion_ratio用的是`daily_cs_std`不是`daily_cs_range`），先誠實記錄，不在本輪修，留給之後真的要用到這個欄位時再處理。
+
+零因子/策略判定，跟round332/335/338/341/344/348同precedent不寫`TRIALS_LEDGER.md`列，補記`FUT_LEADS.md`。結果存`data/fut_stock_futures_dispersion_clean_subset_round349.csv`、`fut_stock_futures_dispersion_clean_subset_run.log`（原始輸出，主控台編碼是Big5導致中文亂碼但數字可讀，未來若要重跑建議加`chcp 65001`或改用`PYTHONIOENCODING=utf-8`）。零新增API呼叫（全部命中round347/348既有快取）。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**下一步**：round348下一步(a)(b)已完成初步處理（本輪），round348下一步(c)「開始設計橫斷面因子的地基完成點」下一輪可以考慮開始，但先決條件是要決定用哪個子集（8檔短窗口 vs 4檔長窗口，各有取捨：更多標的vs更長歷史），或者研究round348原本提過的「滾動式宇宙」——不要求全體同時存在、依上市時間動態納入池子的成分股精神，這樣可能同時保留樣本數跟窗口長度，是比二選一子集更好的長期方向，值得下一輪評估可行性。
