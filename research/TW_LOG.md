@@ -1672,3 +1672,18 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **暫不更新`TRIALS_LEDGER.md`/`TW_LEADS.md`的候選判定欄位**——round353的完整數字本身仍卡在`#118`列出的第三個前提未補齊，貿然升格成PASS或EXPERIMENTAL都可能之後被獨立樣本推翻，違反「先看到結果才回頭解釋」的紀律；本輪已把round353的完整數字誠實寫進本檔（`TW_LOG.md`），等獨立樣本結果出來後一併判定、一次寫進`LEADS.md`/`TRIALS_LEDGER.md`，避免同一個候選被拆成兩筆不完整的紀錄。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程讀取本機快取（yfinance價格快取+FinMind財報/月營收快取），零新增API呼叫。
+
+## 第359輪（2026-09-05T06:03+08:00，TW）——發現round356背景process異常消失（無CSV無錯誤訊息），改用`DEEP_DIVE_CADENCES=monthly`縮小範圍＋`-u`unbuffered重跑
+
+**開工檢查**：`ps aux`+`Get-CimInstance Win32_Process`交叉確認，round356啟動的`deep_dive_loo_no_low_vol_independent_sample.py`背景process（原本協定記錄「未殺掉，讓它繼續跑」）**此時已不在process清單裡**，`data/deep_dive_loo_no_low_vol_independent_sample.csv`未產生，`round356_deep_dive_loo_no_low_vol_independent_sample.log`只停在4行輸出（`pool total=1142`／`market data ready`／`loaded 300/300 usable names`／`121 non-overlapping snapshots`／兩個TRAIN-only IC，共計算到`f_eps_surprise`就沒有再往下——連兩個cadence都還沒開始跑），沒有任何Python traceback或錯誤訊息。**判定：異常中止（可能是round356session結束時背景process沒有真正脫離父行程而被一併回收，或其他原因，根因未查明，記錄供後續維護者參考）**——依round356自己留下的指示（`DEEP_DIVE_CADENCES`環境變數）處理，不算違反「process仍存活不殺掉」原則（這個process已經不存在，是重新啟動不是殺掉存活的process）。
+
+**額外確認環境乾淨**：目前唯一存活的相關背景process是US round357的`deep_dive_f_us_value_bm.py -u`（Windows PID 57576），跟本輪TW工作無關、未去動它；另有`alpha_live_server.py`（PID 56188）跟`cybex_bot.py --restarted`（PID 53276）兩個非馬拉松系統的常駐process，不受本輪影響。
+
+**本輪工作單位**：`DEEP_DIVE_CADENCES=monthly nohup python -u deep_dive_loo_no_low_vol_independent_sample.py > round359_deep_dive_loo_no_low_vol_independent_sample_monthly.log 2>&1 & disown`——限定只跑monthly一個cadence（縮小範圍，降低單輪跑不完的機率，也降低若再度異常中止時的重跑成本），加`-u`強制unbuffered（比照US round357的改良做法，讓log即時反映真實進度，避免buffered輸出造成「卡住」的錯覺）。啟動後確認Windows PID 50060存在（`Get-CimInstance`交叉核對指令列為`python.exe -u deep_dive_loo_no_low_vol_independent_sample.py`），log已印出前兩行（`pool total=1142...`／`market data ready`），process正常存活推進中，**本輪未殺掉、留在背景繼續跑**。
+
+**下一輪接手指示**：先查`data/deep_dive_loo_no_low_vol_independent_sample.csv`是否已出現。
+- 若CSV存在且只有monthly一列：讀取monthly數字（alpha/p值/beta/隨機控制組percentile/成本敏感度），依round356腳本檔頭的判讀原則做候選判定（不需要再等quarterly，因為round353已有quarterly完整數字可對照——若新樣本monthly與round353原樣本monthly方向一致且p<0.10，可以視為初步支持，仍要在心跳/LEADS明確標註「僅monthly獨立樣本驗證，quarterly獨立樣本尚未補齊」，不能等同「完整」判定）。
+- 若process已消失但CSV仍不存在：視為第二次異常中止，這時候要優先查根因（例如看`round359...log`最後一行卡在哪、有無記憶體不足跡象），不要無條件再重跑第三次——可以考慮改用同步執行（前景執行，接受這一輪就是專門等它跑完，不做其他事）取代背景執行，排除「背景process沒有真正脫離」這個假說。
+- 若process仍存活但log沒有新進展：正常現象（monthly cadence含N=100隨機控制組本身就耗時），繼續等待，不殺掉。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程讀取本機快取（yfinance價格快取+FinMind財報/月營收快取），零新增API呼叫。暫不更新`TRIALS_LEDGER.md`/`TW_LEADS.md`候選判定欄位，理由同round356（避免拆成兩筆不完整紀錄）。
