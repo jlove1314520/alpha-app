@@ -269,6 +269,15 @@ STOCK_DAY_HEADERS = {
 }
 
 
+class SparklineFetchError(RuntimeError):
+    """帶分類代碼的sparkline失敗（寫進quotes[code]["sparkline_error"]，不再靜默）。"""
+
+    def __init__(self, kind: str, detail: str = ""):
+        super().__init__(f"{kind}: {detail}" if detail else kind)
+        self.kind = kind
+        self.detail = detail
+
+
 def fetch_stock_day_month(code: str, yyyymm: str) -> list[float]:
     """個股單月日線（`www.twse.com.tw/exchangeReport/STOCK_DAY`，業界常見用法的
     官方端點，非openapi但長年穩定）。回傳該月每個交易日的收盤價（依日期由舊到新）。
@@ -283,16 +292,34 @@ def fetch_stock_day_month(code: str, yyyymm: str) -> list[float]:
     跨process共用節流（同一來源兩次請求間隔至少3秒）+ 斷路器（收到428/403
     就標記這個來源封鎖2小時，見模組開頭的`_rate_limit_wait_or_raise()`）。
     封鎖中會直接RuntimeError，呼叫端的try/except接住、不影響其他檔。"""
-    _rate_limit_wait_or_raise("twse_stock_day")
-    r = requests.get(STOCK_DAY_URL, params={"response": "json", "date": f"{yyyymm}01", "stockNo": code},
-                      headers=STOCK_DAY_HEADERS, timeout=15)
-    if r.status_code in (402, 403, 428, 429):
-        _rate_limit_record_block("twse_stock_day", r.status_code, r.text[:200])
-        raise RuntimeError(f"twse_stock_day回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
-    r.raise_for_status()
-    d = r.json()
+    try:
+        _rate_limit_wait_or_raise("twse_stock_day")
+    except RuntimeError as e:
+        raise SparklineFetchError("circuit_open", str(e)[:120])
+    # 2026-09-04（四修.三）：428/429（TWSE限流）先等5秒重試一次再放棄；重試仍失敗才觸發
+    # 2小時斷路器。失敗一律拋SparklineFetchError（kind=http_428/http_429/...）給呼叫端寫進
+    # quotes[code]["sparkline_error"]，不再只print一行就讓該檔靜默沒有sparkline。
+    for attempt in (1, 2):
+        try:
+            r = requests.get(STOCK_DAY_URL, params={"response": "json", "date": f"{yyyymm}01", "stockNo": code},
+                              headers=STOCK_DAY_HEADERS, timeout=15)
+        except requests.RequestException as e:
+            raise SparklineFetchError("network", f"{type(e).__name__}: {e}"[:120])
+        if r.status_code in (428, 429) and attempt == 1:
+            time.sleep(5)
+            continue
+        if r.status_code in (402, 403, 428, 429):
+            _rate_limit_record_block("twse_stock_day", r.status_code, r.text[:200])
+            raise SparklineFetchError(f"http_{r.status_code}", "已重試一次仍限流，標記封鎖2小時")
+        break
+    if r.status_code >= 400:
+        raise SparklineFetchError(f"http_{r.status_code}", r.text[:120])
+    try:
+        d = r.json()
+    except ValueError:
+        raise SparklineFetchError("bad_json", r.text[:120])
     if d.get("stat") != "OK":
-        return []
+        return []  # 該月沒交易/代號不存在（上櫃股票走這裡）：不是錯誤，呼叫端會標not_available
     return [c for c in (_num(row[6]) for row in d.get("data", [])) if c is not None]
 
 
@@ -392,36 +419,56 @@ def main():
     sparkline_started = time.monotonic()
     consecutive_failures = 0
     stopped_reason = None
-    for code in quotes:
+    # 2026-09-04（四修.三，總司令實測2330/2454靜默沒有sparkline）：根因是2026-09-03加的
+    # 240秒時間預算——代號依字母序逐檔抓，預算在約第60~70檔用完，2330之後的都沒抓到，
+    # 而且只print一行、quotes裡沒有任何錯誤欄位（違反「禁止靜默記None」）。修法：
+    # (1)預設自選股永遠排最前面抓；(2)每檔失敗/未抓的原因寫進quotes[code]["sparkline_
+    # error"]（kind），meta也記stop原因；(3)fetch_stock_day_month對428/429重試一次。
+    order = [c for c in DEFAULT_WATCHLIST if c in quotes] + [c for c in sorted(quotes) if c not in DEFAULT_WATCHLIST]
+    skipped_budget = 0
+    for code in order:
         if code in cache:
             quotes[code]["sparkline"] = cache[code]
             quotes[code]["sparkline_date"] = today_str
             cached += 1
             continue
+        if stopped_reason:
+            quotes[code]["sparkline_error"] = "not_attempted:" + ("time_budget" if stopped_reason.startswith("超過") else "circuit_breaker")
+            skipped_budget += 1
+            continue
         if time.monotonic() - sparkline_started > SPARKLINE_TIME_BUDGET_SEC:
             stopped_reason = f"超過時間預算{SPARKLINE_TIME_BUDGET_SEC}秒"
-            break
+            quotes[code]["sparkline_error"] = "not_attempted:time_budget"
+            skipped_budget += 1
+            continue
         if consecutive_failures >= SPARKLINE_MAX_CONSECUTIVE_FAILURES:
             stopped_reason = f"連續失敗{consecutive_failures}檔（來源疑似不回應/封鎖）"
-            break
+            quotes[code]["sparkline_error"] = "not_attempted:circuit_breaker"
+            skipped_budget += 1
+            continue
         try:
             sp = fetch_sparkline_20d(code, now_tw)
             if sp:
                 quotes[code]["sparkline"] = sp
                 quotes[code]["sparkline_date"] = today_str
                 fetched += 1
+            else:
+                quotes[code]["sparkline_error"] = "not_available:stat_not_ok"  # 上櫃股票/該月無交易，STOCK_DAY是TWSE專屬
             consecutive_failures = 0
             time.sleep(0.15)  # 實測穩定節奏（見fetch_stock_day_month docstring），主要靠header不是靠慢
         except Exception as e:
             failed_sp += 1
             consecutive_failures += 1
+            quotes[code]["sparkline_error"] = (f"{e.kind}:{e.detail}" if isinstance(e, SparklineFetchError) else f"{type(e).__name__}:{e}")[:160]
             # 這裡故意不用「・」（U+30FB）：本機Windows主控台cp950編碼曾經在這裡
             # 讓整支腳本直接crash（print本身丟UnicodeEncodeError，不是被try/except
             # 接住的那個例外）——GitHub Actions是UTF-8不會有事，但本機測試會，改用
             # 純ASCII的"-"比較保險，不影響其他地方原本就在用的「・」（那些沒出過事）。
             print(f"  - {code} sparkline 失敗（不影響報價本身）：{e}")
-    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔"
-          + (f"；提前停止新抓：{stopped_reason}（報價本身不受影響，未抓到的檔這輪沒有sparkline）" if stopped_reason else ""))
+    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔、未嘗試 {skipped_budget} 檔"
+          + (f"；提前停止新抓：{stopped_reason}（報價本身不受影響，未抓到的檔已寫sparkline_error）" if stopped_reason else ""))
+    sparkline_meta = {"cached": cached, "fetched": fetched, "failed": failed_sp, "not_attempted": skipped_budget,
+                      "stopped_reason": stopped_reason, "time_budget_sec": SPARKLINE_TIME_BUDGET_SEC}
 
     data_type = "intraday" if n_live > 0 else ("prev_close" if quotes else "none")
     out = {
@@ -433,6 +480,7 @@ def main():
             "matched": len(quotes),
             "live": n_live,
             "data_type": data_type,
+            "sparkline": sparkline_meta,  # 2026-09-04：這輪sparkline抓取統計與停止原因，不再只在log裡
         },
         "quotes": quotes,
     }

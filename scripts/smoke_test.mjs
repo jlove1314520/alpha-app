@@ -963,10 +963,35 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("27. 未連即時源時，市場頁櫃買指數／類股熱力圖／大盤指數的盤後資料一律明標收盤日期（MM-DD）",
     idxDateErrors.length === 0, idxDateErrors.join("; "));
 
+  // 28.【2026-09-04新增，四修.三】走勢線標籤：離線（未連即時）時自選股列的走勢線
+  // 必須標「20日」（route餵一份含20點sparkline的quotes_tw.json，跟check 15同一手法），
+  // 不能是無標籤的線。即時「今日」路徑需要live server，由Playwright端到端另行驗證。
+  const sparkTagErrors = [];
+  try {
+    const fakeTw = { fetched_at: new Date().toISOString(), source: "test", meta: { trading_window: false, data_type: "prev_close" },
+      quotes: { "2330": { name: "台積電", price: 1000, prev_close: 990, change: 10, change_pct: 1.01, time: "13:30:00", date: "20260904", stale: true,
+        sparkline: Array.from({ length: 20 }, (_, i) => 950 + i * 2), sparkline_date: "2026-09-04" } } };
+    await page.route("**/data/quotes_tw.json**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeTw) }));
+    await page.evaluate(() => { const wl = JSON.parse(localStorage.getItem("alpha_wl") || "[]"); if (!wl.includes("2330")) { wl.push("2330"); localStorage.setItem("alpha_wl", JSON.stringify(wl)); } INTRADAY_TW = null; INTRADAY_TW_AT = 0; LIVE.connected = false; });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1500);
+    const info = await page.evaluate(() => {
+      const row = [...document.querySelectorAll("#wl-list .swipe-row")].find(r => r.querySelector('[data-flash-code="2330"]'));
+      return { hasSpark: !!row?.querySelector("svg.spark polyline"), tag: row?.querySelector(".sparkwrap em")?.textContent || null };
+    });
+    if (!info.hasSpark) sparkTagErrors.push("餵了20點sparkline但自選股列沒有畫出走勢線");
+    if (info.tag !== "20日") sparkTagErrors.push(`離線時走勢線標籤應為「20日」，實際「${info.tag}」`);
+    await page.unroute("**/data/quotes_tw.json**");
+  } catch (e) {
+    sparkTagErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("28. 未連即時源時自選股走勢線必須標「20日」（即時時為當日1分K標「今日」，端到端另驗）",
+    sparkTagErrors.length === 0, sparkTagErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

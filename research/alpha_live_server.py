@@ -370,7 +370,10 @@ def live_indices(x_alpha_local_token: str | None = Header(default=None)):
 
 
 def _looks_like_us_symbol(code: str) -> bool:
-    return bool(code) and not code.isdigit() and code.upper() == code
+    """只有「純英文字母1~5碼」才當美股代號（AAPL/MSFT）。TAIEX/TPEX/TXF_NEAR/IDX_IX0010這些
+    是台股指數/期貨key，不是美股（2026-09-04四修.三修正：之前把TAIEX/TXF_NEAR誤判成美股回501，
+    大盤速覽的當日1分K永遠拿不到）。"""
+    return bool(code) and code.isalpha() and code.isascii() and code.upper() == code and 1 <= len(code) <= 5 and code not in ("TAIEX", "TPEX")
 
 
 @app.get("/live/kbars")
