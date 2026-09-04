@@ -1598,3 +1598,11 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 ## 第340輪（2026-09-04T18:10+08:00，TW）——train-only IC權重迭代，修補portfolio_multifactor_v2「誠實限制(2)」
 
 取鎖時偵測到`LOCK_STALE`（pid 17608持有30.1分鐘，第339輪US疑似異常中止）。依輪替選TW，接續第337輪待辦。新增`train_only_ic_weight_bigsample.py`：用round327同一批300檔安全樣本池，改用僅TRAIN期mean|IC|重算`portfolio_multifactor_v2`的`ic_weighted`權重（原權重用VAL期IC，非乾淨樣本外）。不修改`portfolio_backtest_v2.py`本身，外部monkeypatch。結果：VALIDATION quarterly alpha+4.83%(p=0.4314)、monthly alpha+5.93%(p=0.1996)，對照原權重quarterly p=0.5314，方向改善但仍遠未過0.05門檻。**判定FAIL不變**，但排除「原FAIL是加權洩漏造成偽陰性」的反駁。寫入`TRIALS_LEDGER.md`#109、`LEADS.md`本輪補充。零新增API呼叫，執行約9分鐘。`is_holdout_consumed()`確認`False`。
+
+## 第343輪（2026-09-04T20:05+08:00，TW）——稽核發現：TRIALS_LEDGER.md#113（leave-one-factor-out）為孤兒紀錄，腳本與LEADS.md補充皆缺失
+
+取鎖時偵測到`LOCK_STALE`（pid 52244持有30.0分鐘，上一輪疑似異常中止未釋放鎖，已回收）。三軌時間戳：TW 18:10（第340輪，最舊）／FUT 18:36（第341輪）／US 19:35（第342輪，最新）——依輪替選TW。
+
+開工先查`git status`，發現`MARATHON_STATE.md`/`REPORT.md`/`TRIALS_LEDGER.md`/`US_LEADS.md`/`US_LOG.md`/`US_MARATHON_STATE.md`皆有未commit變更（推測是round342 US異常中止前寫到一半、未及commit的內容，跟本輪偵測到的陳舊鎖檔吻合）。**稽核這批未commit內容時發現一個獨立於round342的既有缺口**：`TRIALS_LEDGER.md`#113（`portfolio_multifactor_v2` leave-one-factor-out，標記「TW」軌、聲稱「完整見`LEADS.md`第342輪補充」）**這筆紀錄早已於commit`2b11203`（19:27:46，commit訊息是無關的「假設佇列#29」內容，同round339/340已知的「commit訊息與實際內容不完全對應」現象）進了git歷史**，但實際查證：(1)`LEADS.md`全文搜尋確認**沒有**任何leave-one-factor-out相關的補充段落；(2)repo內**沒有**任何`leave_one_factor_out`/`factor_out`檔名的腳本（`git ls-files`/`ls *.py`皆確認）；(3)`git log --all`搜尋「leave-one」/「multifactor」關鍵字也找不到對應commit。**結論：#113這筆「拿掉low_vol monthly alpha+12.90%(p=0.0794)」的結果目前無法重現、無法追溯是哪個腳本產生的，屬於未經留存證據鏈的孤兒紀錄。**
+
+依協定誠實記錄原則，本輪**不**捏造或假裝驗證這個結果，改為：(a) 在此誠實記錄這個稽核發現；(b) 在`LEADS.md``portfolio_multifactor_v2`條目補一段明確標註「#113數字待重新驗證，非可信結果」；(c) 下一輪TW工作單位建議改為**重新寫一支`leave_one_factor_out_bigsample.py`**（沿用round327/340同一套300檔安全樣本池+`pv2.run_one()`引擎，monkeypatch`FACTOR_VERSIONS`加入3個拿掉單一成分的版本，只測`ic_weighted`/`quarterly`/VALIDATION+TRAIN，零新增API呼叫），得到真正可重現、有腳本+CSV佐證的數字後才能升級為正式候選判定，不能沿用#113現有數字。本輪同時把round342（US）遺留的合法完成工作（`f_us_low_vol`家族最終FAIL判定，#115）一併整理commit，避免繼續卡在未commit狀態流失風險。`is_holdout_consumed()`確認`False`。全程零新增API呼叫（僅檔案稽核，未執行任何回測/資料抓取）。
