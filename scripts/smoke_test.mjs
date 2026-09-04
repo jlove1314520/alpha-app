@@ -1019,10 +1019,64 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("29. 「資料過舊」判定納入Shioaji即時源、SSE連線中輪詢文案改即時模式，兩者不同頁矛盾",
     consistencyErrors.length === 0, consistencyErrors.join("; "));
 
+  // 30.【2026-09-04新增，P0產品.一 首頁重排版】結構斷言：細狀態列存在且摘要非空、自選股
+  // 每列有來源小點且列不重複（hydrateHome競態回歸防線）、大盤速覽是膠囊帶（≥3顆）、
+  // AI日報無內容時整張隱藏、走勢線包裝層寬度≤72px（不能被撐成整列）。
+  const homeErrors = [];
+  try {
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1500);
+    const info = await page.evaluate(() => {
+      const codes = [...document.querySelectorAll("#wl-list .swipe-row [data-flash-code]")].map(e => e.dataset.flashCode);
+      const wraps = [...document.querySelectorAll("#wl-list .sparkwrap")].map(w => w.getBoundingClientRect().width);
+      return { summary: document.getElementById("home-status-summary")?.textContent || "", dots: document.querySelectorAll("#wl-list .wl-src-dot").length, rows: codes.length, dup: codes.length !== new Set(codes).size, caps: document.querySelectorAll("#home-idx-rows .idx-cap").length, aiHidden: !!document.getElementById("home-ai-card")?.hidden, maxWrap: wraps.length ? Math.max(...wraps) : 0 };
+    });
+    if (!info.summary || /載入中/.test(info.summary)) homeErrors.push(`細狀態列摘要未完成：「${info.summary}」`);
+    if (info.rows > 0 && info.dots < info.rows) homeErrors.push(`自選股列${info.rows}列但來源小點只有${info.dots}顆`);
+    if (info.dup) homeErrors.push("自選股列重複出現（hydrateHome競態）");
+    if (info.caps < 3) homeErrors.push(`大盤速覽膠囊只有${info.caps}顆`);
+    if (!info.aiHidden) homeErrors.push("AI盤前日報無內容卻沒有隱藏整張卡");
+    if (info.maxWrap > 72) homeErrors.push(`走勢線包裝層被撐到${info.maxWrap.toFixed(0)}px寬`);
+  } catch (e) {
+    homeErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("30. 首頁重排版結構：細狀態列有摘要、自選股列有來源小點且不重複、大盤速覽膠囊≥3、AI日報空卡隱藏、走勢線不被撐寬",
+    homeErrors.length === 0, homeErrors.join("; "));
+
+  // 31~34.【2026-09-04新增，總司令P0緊急原話的check 27~30（既有編號已用到30故順延）】
+  // 先併發呼叫兩次hydrateHome()（模擬輪詢/SSE/重新整理/切分頁同時觸發），再做四項版面斷言。
+  await page.evaluate(() => window.go("home"));
+  await page.evaluate(async () => { await Promise.all([hydrateHome(), hydrateHome()]); });
+  await page.waitForTimeout(800);
+  const lay = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll("#wl-list .swipe-row")];
+    const codes = rows.map(r => r.querySelector("[data-flash-code]")?.dataset.flashCode).filter(Boolean);
+    const caps = [...document.querySelectorAll("#home-idx-rows .idx-cap .cn")].map(e => e.textContent.trim());
+    const inter = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+    const overlaps = [], widths = [], heights = [];
+    for (const r of rows) {
+      heights.push(r.getBoundingClientRect().height);
+      const svg = r.querySelector("svg.spark"); const px = r.querySelector(".px");
+      if (svg) { const sb = svg.getBoundingClientRect(); widths.push(sb.width); if (px && inter(sb, px.getBoundingClientRect())) overlaps.push(r.querySelector("[data-flash-code]")?.dataset.flashCode); }
+    }
+    const z = zonedNow("Asia/Taipei"); const twOpen = z.wd >= 1 && z.wd <= 5 && (z.h * 60 + z.mi) >= 540 && (z.h * 60 + z.mi) < 810;
+    const text = (document.getElementById("wl-list")?.innerText || "") + (document.getElementById("home-idx-rows")?.innerText || "");
+    return { codes, caps, overlaps, maxW: widths.length ? Math.max(...widths) : 0, hDiff: heights.length ? Math.max(...heights) - Math.min(...heights) : 0, twOpen, hasPanZhong: /盤中/.test(text) };
+  });
+  const dupCodes = lay.codes.filter((c, i) => lay.codes.indexOf(c) !== i), dupCaps = lay.caps.filter((c, i) => lay.caps.indexOf(c) !== i);
+  record("31. 併發呼叫兩次hydrateHome後，自選股每個代號在#wl-list只出現一次、大盤速覽每個指數只出現一次",
+    dupCodes.length === 0 && dupCaps.length === 0 && lay.codes.length > 0, (dupCodes.length ? `重複代號：${dupCodes.join(",")}` : "") + (dupCaps.length ? ` 重複膠囊：${dupCaps.join(",")}` : "") + (lay.codes.length ? "" : " 沒有任何自選股列"));
+  record("32. 自選股每列走勢SVG與價格/漲跌元素矩形不相交，且SVG實際寬度≤72px",
+    lay.overlaps.length === 0 && lay.maxW <= 72, (lay.overlaps.length ? `相交：${lay.overlaps.join(",")}` : "") + (lay.maxW > 72 ? ` SVG寬${lay.maxW.toFixed(0)}px` : `SVG寬${lay.maxW.toFixed(0)}px`));
+  record("33. 同一清單內自選股列高差異≤8px（有線沒線都一樣高）",
+    lay.hDiff <= 8, `列高差${lay.hDiff.toFixed(1)}px`);
+  record("34. 台股收盤時段首頁自選股/大盤速覽不得含「盤中」字樣（盤中時段此檢查視為通過）",
+    lay.twOpen || !lay.hasPanZhong, lay.twOpen ? "測試時台股盤中，跳過" : (lay.hasPanZhong ? "收盤後仍出現「盤中」" : ""));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

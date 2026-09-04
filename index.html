@@ -192,7 +192,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .row .px{text-align:right;min-width:74px}
   .row .px b{font-size:14px;display:block;font-variant-numeric:tabular-nums}
   .row .px span{font-size:11.5px;font-variant-numeric:tabular-nums}
-  .spark{flex:0 0 64px}
+  /* 2026-09-04 P0緊急回歸修正：走勢欄任何情況固定64px、不得壓到價格欄 */
+  .spark{width:64px;height:26px;flex:0 0 64px;display:block}
+  .sparkwrap{flex:0 0 64px;width:64px;height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+  .sparkwrap .spark{width:64px;height:26px;flex:none}
+  .sparkwrap em{font-size:8px;line-height:1;color:var(--ink-3);font-style:normal;margin-top:2px}
+  .swipe-row{display:grid;grid-template-columns:minmax(0,1fr) 64px auto;align-items:center;column-gap:10px;min-height:60px}
+  .swipe-row>.note{grid-column:1/-1}
+  .swipe-row .px{text-align:right;min-width:74px;justify-self:end}
+  .idx-row{display:grid;grid-template-columns:minmax(0,1fr) 64px auto;align-items:center;column-gap:10px;min-height:60px}
+  .idx-row .px{justify-self:end}
 
   .chg-tag{font-size:11px;padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums;font-weight:600}
   .chg-tag.u{background:rgba(230,103,103,.15);color:var(--up)}
@@ -382,6 +391,29 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .toast{position:absolute;left:50%;transform:translateX(-50%) translateY(-8px);top:calc(env(safe-area-inset-top) + 52px);background:var(--surface-3);border:1px solid var(--hairline);color:var(--ink);font-size:13px;border-radius:11px;padding:10px 16px;opacity:0;transition:.3s;z-index:60;pointer-events:none;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .note{font-size:10.5px;color:var(--ink-3);margin-top:8px}
+  /* 2026-09-04 P0產品.一 首頁重排版 */
+  [hidden]{display:none!important}
+  .status-strip{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:6px 10px;margin-bottom:10px;font-size:11px;color:var(--ink-2)}
+  .status-summary{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:22px}
+  .status-summary .status-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .status-caret{color:var(--ink-3);font-size:10px;transition:transform .15s}
+  .status-strip.open .status-caret{transform:rotate(180deg)}
+  .status-detail{border-top:1px solid var(--hairline);margin-top:6px;padding-top:6px}
+  .sdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 8px}
+  .sdot.g{background:#1aa876;box-shadow:0 0 0 3px rgba(26,168,118,.18)}
+  .sdot.y{background:#fab219;box-shadow:0 0 0 3px rgba(250,178,25,.18)}
+  .sdot.gr{background:#6b6b66}
+  .wl-src-dot{margin-left:6px;vertical-align:middle;cursor:pointer}
+  .wl-detail{font-size:10px;color:var(--ink-3);padding:2px 2px 6px;line-height:1.5}
+  .idx-strip{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 0 6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .idx-strip::-webkit-scrollbar{display:none}
+  .idx-cap{flex:0 0 31%;min-width:112px;scroll-snap-align:start;background:rgba(255,255,255,.035);border:1px solid var(--hairline);border-radius:12px;padding:8px 9px;display:flex;flex-direction:column;gap:2px}
+  .idx-cap .cn{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .idx-cap .cv{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+  .idx-cap .cp{font-size:11px;font-weight:600}
+  .idx-cap .spark{width:100%;height:22px;flex:none;margin-top:2px}
+  .cta-line{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border:1px dashed var(--hairline);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--accent);cursor:pointer}
+  .cta-line span{font-size:10.5px;color:var(--ink-3)}
   .back{background:none;border:0;color:var(--accent);font-size:13px;font-family:inherit;cursor:pointer;padding:6px 2px;display:inline-flex;align-items:center;gap:4px}
   /* 左滑刪除 */
   .swipe-wrap{position:relative;overflow:hidden;border-bottom:1px solid var(--hairline)}
@@ -437,43 +469,28 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
   <!-- ════════ 1. 今日 ════════ -->
   <section class="screen active" id="scr-home">
-    <div class="note" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span>最後更新：<b id="home-updated-tm">--:--</b></span>
-      <span class="press refresh-btn" onclick="refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
-    </div>
-    <!-- 2026-09-03深夜（乙.4）：即時伺服器連線狀態。連上→「即時連線中」；連不上/未設定→
-         「離線，顯示最後收盤 MM-DD」（使用者指定字眼，退回git冷資料時必須明講）。 -->
-    <div class="note" id="home-live-status" style="margin:-4px 0 8px;font-size:10px"></div>
-    <!-- 2026-09-02新增：盤中自動輪詢狀態誠實揭露，文字由updatePollNote()動態
-         填入（「約每15秒自動更新（近即時輪詢，非逐筆tick）」或「已收盤，暫停
-         自動更新」），不讓使用者誤以為是逐筆串流。 -->
-    <div class="note" id="home-poll-note" style="margin-bottom:8px;color:var(--ink-3)"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px">
-      <span class="note fx-note" id="home-fx-note">匯率載入中…</span>
-      <div class="mkt-toggle" id="home-ccy-toggle"></div>
-    </div>
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="lbl">總資產（台＋美）</div>
-        <div class="val" style="color:var(--ink-3);font-size:15px">尚未串接券商</div>
-        <div class="sub">去「設定」填入券商帳戶後顯示</div>
+    <!-- 2026-09-04 P0產品.一：首頁重排版（內容優先）。所有系統狀態（最後更新／即時連線／
+         輪詢文案／匯率＋幣別）合併成一條可展開的細狀態列；自選股置頂；未串接券商收成一行CTA；
+         AI日報無內容整張不顯示；今日事件只在有事件時顯示；大盤速覽改橫向膠囊帶。底部導覽不動。
+         既有元素id全部保留（home-updated-tm/home-live-status/home-poll-note/home-fx-note/
+         home-ccy-toggle/home-idx-rows/home-idx-datatime/wl-list/today-events），既有函式與smoke
+         test不用改對象。 -->
+    <div class="status-strip" id="home-status-strip">
+      <div class="status-summary" onclick="toggleHomeStatus()">
+        <span class="sdot gr" id="home-status-dot"></span>
+        <span class="status-text" id="home-status-summary">狀態載入中…</span>
+        <span class="press refresh-btn" onclick="event.stopPropagation();refreshTap(this,'home-updated-tm',async()=>{fmClearCache();await hydrateHome()})">重新整理</span>
+        <span class="status-caret" id="home-status-caret">▾</span>
       </div>
-      <div class="kpi">
-        <div class="lbl">今日已實現損益</div>
-        <div class="val" style="color:var(--ink-3);font-size:15px">尚未串接券商</div>
-        <div class="sub">無真實交易紀錄可計算</div>
+      <div class="status-detail" id="home-status-detail" hidden>
+        <div class="note" style="margin:0">最後更新：<b id="home-updated-tm">--:--</b>（本機瀏覽器抓取時間）</div>
+        <div class="note" id="home-live-status" style="margin:4px 0 0;font-size:10px"></div>
+        <div class="note" id="home-poll-note" style="margin:4px 0 0;color:var(--ink-3)"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:8px">
+          <span class="note fx-note" id="home-fx-note" style="margin:0">匯率載入中…</span>
+          <div class="mkt-toggle" id="home-ccy-toggle"></div>
+        </div>
       </div>
-    </div>
-
-    <div class="card ai-card" style="opacity:.7">
-      <div class="ai-tag">✦ AI 盤前日報</div>
-      <div class="note">功能建置中 · 尚未接上真實新聞/法人資料，暫不顯示具體市場判斷內容</div>
-    </div>
-
-    <div class="card">
-      <h3>大盤速覽</h3>
-      <div id="home-idx-rows"><div class="note">載入中…</div></div>
-      <div class="note" id="home-idx-datatime"></div>
     </div>
 
     <div class="card">
@@ -481,12 +498,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="wl-list"><div class="note">載入即時報價…</div></div>
       <!-- 2026-08-27新增（P2-新，盤前盤後）：只在畫面上真的顯示了盤前/盤後價格時
            才出現，不是固定貼一段沒人看的警語。 -->
-      <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格常於隔日開盤反轉。</div>
+      <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格僅供參考</div>
+      <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
     </div>
 
     <div class="card">
+      <h3>大盤速覽</h3>
+      <div class="idx-strip" id="home-idx-rows"><div class="note">載入中…</div></div>
+      <div class="note" id="home-idx-datatime"></div>
+    </div>
+
+    <div class="cta-line" id="home-broker-cta" onclick="go('settings')">串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span></div>
+
+    <div class="card ai-card" id="home-ai-card" hidden>
+      <div class="ai-tag">✦ AI 盤前日報</div>
+      <div class="note" id="home-ai-body"></div>
+    </div>
+
+    <div class="card" id="home-events-card" hidden>
       <h3>今日事件</h3>
-      <div id="today-events"><div class="note">載入中…</div></div>
+      <div id="today-events"></div>
     </div>
 
     <!-- 2026-08-28新增（使用者要求：手機第五次回報時鐘/資料卡舊，最大嫌疑是SW快取
@@ -1602,6 +1633,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     tmEl.textContent=z.hhmmss.slice(0,5);
   }
   function updateClocks(){
+    try{renderHomeStatusSummary()}catch(e){console.warn('[updateClocks:summary]',e)}  // 2026-09-04 P0產品.一
     mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30,()=>INTRADAY_TW);
     mktPillUS();
   }
@@ -1851,7 +1883,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 實機截圖就是這個情況。改成外部明確傳入「今日漲跌」的布林值，跟徽章保證一致。
   function spark(cl,up){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
-    return `<svg class="spark" viewBox="0 0 64 26"><polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2"/></svg>`}
+    return `<svg class="spark" width="64" height="26" viewBox="0 0 64 26" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2"/></svg>`}
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
   // 否則退回既有近20日日線並標「20日」。標籤永遠顯示，使用者一眼分得出是今日還是20日。
   const LIVE_KB={};  // code -> {at, closes:[...], lastT}
@@ -1870,13 +1902,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     Object.keys(kl).forEach(code=>{const c=LIVE_KB[code];if(!c)return;const b=kl[code];if(!b||b.c==null)return;
       if(c.lastT===b.t){if(c.closes.length)c.closes[c.closes.length-1]=b.c}else{c.closes.push(b.c);c.lastT=b.t}});
   }
-  function sparkWithTag(closes,up,tag){const s=spark(closes,up);if(!s)return '';return `<span class="sparkwrap" style="display:flex;flex-direction:column;align-items:center;flex:0 0 64px">${s}<em style="font-size:8px;line-height:1;color:var(--ink-3);font-style:normal">${tag}</em></span>`}
+  function sparkWithTag(closes,up,tag){const s=spark(closes,up);if(!s)return '<span class="sparkwrap"></span>';return `<span class="sparkwrap">${s}<em>${tag}</em></span>`}
+  const SPARK_PLACEHOLDER='<span class="sparkwrap"></span>';  // 沒線也留同寬空位，每列一樣高、欄位不位移
   // 回傳{html,mode}：mode='today'(即時1分K)/'20d'/''(無)
   function rowSparkline(code,fallback20d,up){
     const live=LIVE.connected&&LIVE_KB[code]&&LIVE_KB[code].closes.length>=2?LIVE_KB[code].closes:null;
     if(live)return {html:sparkWithTag(live,up,'今日'),mode:'today'};
     if(fallback20d&&fallback20d.length>=2)return {html:sparkWithTag(fallback20d,up,'20日'),mode:'20d'};
-    return {html:'',mode:''};
+    return {html:SPARK_PLACEHOLDER,mode:''};
   }
   function trendChart(cl,fmtLabel){
     if(cl.length<2)return '<div class="note">近月資料不足</div>';
@@ -1913,7 +1946,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   // 有近即時報價（20分鐘內）就優先用它顯示，並標「盤中 延遲約N分」；沒有就照舊用FinMind
   // 日線，不會因為加了這個功能反而讓沒有近即時資料的股票顯示變差。
-  function intradayTag(iq){
+  function intradayTag(iq,us){
     if(!iq)return '';
     if(iq.source==='ibkr'||iq.source==='sinopac'){
       const label=iq.source==='ibkr'?'IBKR':'Shioaji';
@@ -1930,24 +1963,36 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       return `<span style="color:var(--warn);margin-left:4px">· ${label} ${intradayDataTypeLabel(iq.dataType)} 約${mins}分前</span>`;
     }
     const mins=Math.max(1,Math.round(iq.ageMin));
+    // 2026-09-04 P0緊急回歸修正：13:30後不得出現「盤中」——依該市場現在的session顯示
+    const open=us===true?isUsTradingWindowNow():(us===false?isTwTradingWindowNow():(isTwTradingWindowNow()||isUsTradingWindowNow()));
+    if(!open)return `<span style="color:var(--ink-3);margin-left:4px">· 已收盤 · Actions 最後一筆 約${mins}分前</span>`;
     return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
   }
+  const WL_DETAIL_OPEN=new Set();
+  function toggleWlDetail(code){const d=document.querySelector(`[data-wl-detail="${code}"]`);if(!d)return;const open=d.hidden;d.hidden=!open;if(open)WL_DETAIL_OPEN.add(code);else WL_DETAIL_OPEN.delete(code)}
+  let HYDRATE_HOME_SEQ=0;
   async function hydrateHome(){
     const el=document.getElementById('wl-list');if(!el)return;
-    _safeAsync('loadStockInfo',loadStockInfo);
+    // 2026-09-04 P0產品.一修正：初次載入與即時重繪可能同時執行，兩個迴圈會把列塞進同一個容器
+    // 造成自選股重複出現。改成每次執行拿一個序號、列先組進fragment，最後只有「最新那次」才整批替換。
+    const runId=++HYDRATE_HOME_SEQ;
+    const frag=document.createDocumentFragment();
+    try{await loadStockInfo()}catch(e){console.warn('[hydrateHome:loadStockInfo]',e);recordGlobalError('hydrateHome:loadStockInfo',e)}
+    if(runId!==HYDRATE_HOME_SEQ)return;
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
-    el.innerHTML='';
     if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
+    if(runId!==HYDRATE_HOME_SEQ)return;
     let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
     const earningsCal=await loadEarningsCalendar(); // 2026-08-27新增（P2-新，財報行事曆）
+    if(runId!==HYDRATE_HOME_SEQ)return;
     for(const code of WL){
       const nm=nameOf(code);const us=isUS(code);
       const wrap=document.createElement('div');wrap.className='swipe-wrap';
       wrap.innerHTML=`<button class="swipe-del" data-code="${code}"><span>✕</span>刪除</button><div class="swipe-row"><div class="nm"><b>${nm}</b><span>${code} · 載入中…</span></div></div>`;
-      el.appendChild(wrap);
+      frag.appendChild(wrap);
       const rowEl=wrap.querySelector('.swipe-row');
       attachSwipe(rowEl,code);
       wrap.querySelector('.swipe-del').onclick=()=>confirmDelete(code);
@@ -1960,12 +2005,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // rawQ（不管新不新鮮都給，跟原本FinMind退回邏輯精神一致）。
       const iq=intradayQuote(code,us);
       const rawQ=((us?INTRADAY_US:INTRADAY_TW)&&(us?INTRADAY_US:INTRADAY_TW).quotes)?.[code];
-      if(!iq&&!rawQ){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · 無報價（${noQuoteReason(code,us)}）</span></div>`;continue}
+      if(!iq&&!rawQ){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · 無報價（${noQuoteReason(code,us)}）</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b></div>`;continue}
       const price=iq?iq.price:rawQ.price;
       const chg=iq&&iq.change!=null?iq.change:(rawQ.change??0);
       const pct=iq&&iq.change_pct!=null?iq.change_pct:(rawQ.change_pct??0);
       const cls=chg>=0?'u':'d';
-      const meta=iq?`${code}${us?' · 美股':''}${intradayTag(iq)}`:`${code}${us?' · 美股':''} · 已收盤`;
+      // 2026-09-04 P0產品.一：來源/新鮮度文字收進可展開的說明，列上只留一顆彩色小點
+      const srcText=iq?`${intradayTag(iq,us)||'· 近即時（Actions排程）'}`:'· 已收盤（Actions排程最後一筆）';
+      const mktOpenNow=us?isUsTradingWindowNow():isTwTradingWindowNow();
+      const dotCls=!mktOpenNow?'gr':((iq&&(iq.source==='sinopac'||iq.source==='ibkr')&&!iq.isTodayClose&&/REALTIME/.test(iq.data_type||''))?'g':(iq&&!iq.isTodayClose?'y':'gr'));
+      const meta=`${code}${us?' · 美股':''}<span class="sdot ${dotCls} wl-src-dot" data-wl-dot="${code}" title="點一下看資料來源" onclick="event.stopPropagation();toggleWlDetail('${code}')"></span>`;
       const sp=rowSparkline(code,rawQ&&rawQ.sparkline,chg>=0).html;  // 2026-09-04四修.三：即時→今日1分K，離線→20日
       // 2026-08-27新增（P2-新，盤前盤後）：美股才有extended_hours（見
       // fetch_quotes_us.py），只在盤前/盤後時段、且該時段真的有資料時才顯示，
@@ -2005,7 +2054,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b data-flash-code="${code}" data-flash-value="${price}">${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
       if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
+      // 2026-09-04 P0產品.一：可展開的來源說明（預設收合；smoke test仍能在DOM裡讀到「今日收盤」「即時(tick)」等字樣）
+      const det=document.createElement('div');det.className='wl-detail';det.dataset.wlDetail=code;det.hidden=!WL_DETAIL_OPEN.has(code);
+      det.innerHTML=`${srcText.replace(/^·\s*/,'')}`;
+      wrap.appendChild(det);
     }
+    if(runId!==HYDRATE_HOME_SEQ)return;  // 期間又有一次更新開跑，這批結果作廢，讓最新那次接手
+    el.replaceChildren(frag);
     const extNote=document.getElementById('wl-extended-hours-note');
     if(extNote)extNote.style.display=showedExtendedHours?'':'none';
     stampUpdated('home');
@@ -2133,7 +2188,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         })
         .filter(Boolean)
         .sort((a,b)=>a.days-b.days);
-      if(!rows.length){el.innerHTML='<div class="note">近21天內（美股，`fetch_earnings_calendar.py`追蹤清單）查無即將公布的財報，或資料尚未更新</div>';return}
+      const card=document.getElementById('home-events-card');
+      if(!rows.length){el.innerHTML='<div class="note">近21天內（美股，`fetch_earnings_calendar.py`追蹤清單）查無即將公布的財報，或資料尚未更新</div>';if(card)card.hidden=true;return}
+      if(card)card.hidden=false;  // 2026-09-04 P0產品.一：只在有事件時顯示
       const sessionLabel={pre:'盤前',post:'盤後'};
       el.innerHTML=rows.map(r=>{
         const d=new Date(r.next_earnings_date);
@@ -2297,7 +2354,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     return `資料時間 ${fmtTzMMDDHHMM(d,'Asia/Taipei')}（GitHub Actions 排程，約${Math.max(0,Math.round(age))}分鐘前）`;
   }
   function idxRowHtml(label,srcLabel,item,changePctOverride){
-    if(!item||item.close==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
+    if(!item||item.close==null)return `<div class="row idx-row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b><span>查無資料</span></div></div>`;
     const pct=changePctOverride!=null?changePctOverride:item.change_pct;
     const cls=(pct==null)?'':(pct>=0?'pos':'neg');
     const pctTxt=pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`;
@@ -2308,7 +2365,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // data-flash-code用label（可能含中文/空白，用encodeURIComponent避免破壞屬性值）：
     // 給盤中快速輪詢(fastPollTick())的flashPriceEls()判斷這個指數的價格是否較上次
     // 輪詢變動，見hydrateHome()裡自選股列同樣的用法。
-    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
+    return `<div class="row idx-row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${sp}<div class="px"><b data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
+  }
+  // 2026-09-04 P0產品.一：首頁大盤速覽膠囊（跟idxRowHtml同一份資料，不同排版）
+  function idxCapsuleHtml(label,srcLabel,item){
+    if(!item||item.close==null)return `<div class="idx-cap"><div class="cn">${label}</div><div class="cv" style="color:var(--ink-3)">—</div><div class="cp" style="color:var(--ink-3)">查無資料</div></div>`;
+    const pct=item.change_pct;const cls=pct==null?'':(pct>=0?'pos':'neg');
+    const up=(pct==null&&item.sparkline&&item.sparkline.length>=2)?item.sparkline[item.sparkline.length-1]>=item.sparkline[0]:(pct==null?true:pct>=0);
+    const spk=rowSparkline(item.liveKey||'',item.sparkline,up);
+    const live=LIVE.connected&&LIVE_KB[item.liveKey||'']&&LIVE_KB[item.liveKey||''].closes.length>=2?LIVE_KB[item.liveKey||''].closes:null;
+    const capSvg=spark(live||item.sparkline||[],up);
+    const isLive=/Shioaji 即時|IBKR (即時|延遲)|Yahoo 延遲/.test(srcLabel||'');
+    return `<div class="idx-cap" title="${(srcLabel||'').replace(/"/g,'')}"><div class="cn"><span class="sdot ${isLive?'g':'gr'}" style="width:6px;height:6px;margin-right:4px"></span>${label}</div><div class="cv ${cls}" data-flash-code="${encodeURIComponent(label)}" data-flash-value="${item.close}">${nf(item.close)}</div><div class="cp ${cls}">${pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`}${spk.mode?`<span style="font-size:9px;color:var(--ink-3);font-weight:400;margin-left:4px">${spk.mode==='today'?'今日':'20日'}</span>`:''}</div>${capSvg}</div>`;
   }
   async function loadUsIndexes(){
     await loadMarketDataFiles();
@@ -2335,9 +2403,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const srcLabel=isTodayClose
           ?(isYahoo?'Yahoo 今日收盤':'IBKR 今日收盤')
           :(isYahoo?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`);
-        return {html:idxRowHtml(label,srcLabel,item),date:INTRADAY_IBKR.fetched_at};
+        return {html:idxRowHtml(label,srcLabel,item),date:INTRADAY_IBKR.fetched_at,label,srcLabel,item};
       }
-      return {html:idxRowHtml(label,'Yahoo Finance（每日收盤快照）',idx[id]),date:idx[id]&&idx[id].as_of};
+      return {html:idxRowHtml(label,'Yahoo Finance（每日收盤快照）',idx[id]),date:idx[id]&&idx[id].as_of,label,srcLabel:'Yahoo Finance（每日收盤快照）',item:idx[id]};
     });
   }
   // 2026-09-01新增：加權指數優先用Shioaji即時報價(quotes_sinopac.json)，
@@ -2431,7 +2499,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const tw=MARKET_TW_CACHE||{},usIdx=await loadUsIndexes();
     if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-04四修.三
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
-    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+futRowHtml('台指期近月',txfSrc.fut,txfSrc.srcLabel)+usIdx.map(r=>r.html).join('');
+    // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
+    const capsules=[idxCapsuleHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)];
+    if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR'}));
+    usIdx.forEach(r=>{if(r.item)capsules.push(idxCapsuleHtml(r.label,r.srcLabel,r.item))});
+    el.innerHTML=capsules.join('')||'<div class="note">查無資料</div>';
     // 2026-09-04（四修.四）：加權/台指期走Shioaji即時時，時間戳寫即時時間；否則明標收盤日
     const liveTw=(taiexSrc.srcLabel||'').startsWith('Shioaji')||!!txfSrc.srcLabel;
     document.getElementById('home-idx-datatime').textContent=liveTw
@@ -2781,8 +2853,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
   // ── 搜尋股票（台股 + 美股）──
   let STOCKNAME={},STOCKLIST=[],STOCKNAME_US={},STOCKLIST_US=[],infoLoading=false,infoLoaded=false;
-  async function loadStockInfo(){
-    if(infoLoaded||infoLoading)return;infoLoading=true;
+  // 2026-09-04：改成「共用同一個進行中的promise」——之前第二個呼叫者遇到infoLoading=true會直接
+  // return，hydrateHome() await完根本沒等到名稱載好，自選股列就渲染成只有代號。
+  let INFO_PROMISE=null;
+  function loadStockInfo(){
+    if(infoLoaded)return Promise.resolve();
+    if(INFO_PROMISE)return INFO_PROMISE;
+    INFO_PROMISE=_loadStockInfoImpl().finally(()=>{INFO_PROMISE=null});
+    return INFO_PROMISE;
+  }
+  async function _loadStockInfoImpl(){
+    if(infoLoaded)return;infoLoading=true;
+    let finmindErr=null;
     try{
       const c=localStorage.getItem('alpha_info'),cu=localStorage.getItem('alpha_info_us');
       if(c&&cu){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
@@ -2805,7 +2887,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         localStorage.setItem('alpha_info',JSON.stringify({map:STOCKNAME,list:STOCKLIST}));
         localStorage.setItem('alpha_info_us',JSON.stringify({map:STOCKNAME_US,list:STOCKLIST_US}));
       }catch(e){console.warn('[loadStockInfo:cacheWrite]',e);recordGlobalError('loadStockInfo:cacheWrite',e)}
-    }catch(e){console.warn('[loadStockInfo:fetch]',e);recordGlobalError('loadStockInfo:fetch',e)}
+    }catch(e){console.warn('[loadStockInfo:fetch]',e);finmindErr=e}
+    // 2026-09-04：FinMind打不到（額度/IP封鎖/離線）時，退回repo內data/company_info.json補台股名稱與搜尋清單
+    // （零外部資料，3137檔），不讓自選股列變成只有代號。美股名稱沒有本地備援，維持代號。
+    // 錯誤記錄政策：退路成功→FinMind失敗只留console.warn（功能沒壞，不該亮診斷紅字）；
+    // 退路也失敗→兩個都記進recordGlobalError（這才是真的壞）。
+    if(!infoLoaded){
+      try{
+        const r=await fetch('data/company_info.json?t='+Date.now());
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const d=await r.json();const comps=(d&&d.companies)||{};STOCKNAME=STOCKNAME||{};STOCKLIST=STOCKLIST||[];
+        for(const [id,c] of Object.entries(comps)){if(!c||!c.name)continue;if(!STOCKNAME[id]){STOCKNAME[id]=c.name;STOCKLIST.push({id,name:c.name,ind:c.industry||'',mkt:'TW'})}}
+        if(Object.keys(STOCKNAME).length){infoLoaded=true;console.warn('[loadStockInfo] FinMind不可用，改用data/company_info.json補台股名稱',Object.keys(comps).length)}
+        else throw new Error('company_info.json沒有任何公司名稱');
+      }catch(e2){
+        console.warn('[loadStockInfo:companyInfoFallback]',e2);recordGlobalError('loadStockInfo:companyInfoFallback',e2);
+        if(finmindErr)recordGlobalError('loadStockInfo:fetch',finmindErr);
+      }
+    }
     infoLoading=false;
   }
   async function openSearch(){
@@ -4025,6 +4124,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 伺服器=research/alpha_live_server.py（三端點一律要X-Alpha-Local-Token）。瀏覽器原生
   // EventSource不能帶自訂標頭，所以這裡用fetch()讀text/event-stream自己切事件——刻意
   // 為了保住token驗證（使用者補充指令三），不是不會用EventSource。
+  // ── 2026-09-04 P0產品.一：首頁細狀態列（可展開）。摘要一行＋一顆小點，展開才看得到
+  // 最後更新／即時連線／輪詢文案／匯率。小點：綠=即時連線且資料新鮮、黃=已設定但離線或資料延遲、灰=盤後/未設定。
+  function toggleHomeStatus(){const st=document.getElementById('home-status-strip'),d=document.getElementById('home-status-detail');if(!st||!d)return;const open=d.hidden;d.hidden=!open;st.classList.toggle('open',open)}
+  function renderHomeStatusSummary(){
+    const el=document.getElementById('home-status-summary'),dot=document.getElementById('home-status-dot');if(!el||!dot)return;
+    const zTw=zonedNow('Asia/Taipei');const twOpen=zTw.wd>=1&&zTw.wd<=5&&(zTw.h*60+zTw.mi)>=540&&(zTw.h*60+zTw.mi)<810;
+    const usSess=usMarketSession(zonedNow('America/New_York'));
+    const twTxt='台股'+(twOpen?'盤中':'已收盤'),usTxt='美股'+({pre:'盤前',regular:'盤中',post:'盤後',closed:'休市'}[usSess]||'休市');
+    let liveTxt,cls;
+    if(LIVE.connected){liveTxt=LIVE.streamMode==='tick-push'?'即時逐筆':'即時連線';cls='g'}
+    else if(LIVE.configured){liveTxt='離線（最後收盤 '+lastCloseLabel()+'）';cls='y'}
+    else{liveTxt='未設即時源';cls='gr'}
+    if(!twOpen&&usSess==='closed'&&cls==='g')cls='gr';  // 全部收盤時即使連著也是灰（沒有在動的東西）
+    const upd=document.getElementById('home-updated-tm');const updTxt=upd&&upd.textContent&&upd.textContent!=='--:--'?' · 更新 '+upd.textContent:'';
+    const txt=`${twTxt} · ${usTxt} · ${liveTxt}${updTxt}`;
+    if(el.textContent!==txt)el.textContent=txt;
+    dot.className='sdot '+cls;
+  }
   function loadLiveConfig(){
     try{LIVE.url=((localStorage.getItem('alpha_live_url')||'').trim().replace(/\/+$/,''))||null;LIVE.token=(localStorage.getItem('alpha_live_token')||'').trim()||null}
     catch(e){console.warn('[loadLiveConfig]',e);LIVE.url=null;LIVE.token=null}
@@ -4054,6 +4171,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const el=document.getElementById('home-live-status');if(el){el.textContent=txt;el.style.color=color}
     const note=document.getElementById('live-status-note');if(note){note.textContent=txt;note.style.color=color}
     try{updatePollNote()}catch(e){console.warn('[renderLiveStatus:updatePollNote]',e)}  // 2026-09-04四修.四：輪詢文案跟著連線狀態走
+    try{renderHomeStatusSummary()}catch(e){console.warn('[renderLiveStatus:summary]',e)}
     if(LIVE.connected!==renderLiveStatus._lastConnected){renderLiveStatus._lastConnected=LIVE.connected;_safeAsync('updateDiagBanner',updateDiagBanner)}  // 連線狀態一變就重算橫幅，不讓「資料過舊」殘留
     const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
     if(u&&document.activeElement!==u)u.value=LIVE.url||'';
@@ -4344,7 +4462,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-04.1347';
+  const APP_VERSION='2026-09-04.1409';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
