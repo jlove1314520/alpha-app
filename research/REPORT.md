@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+
+## 第 337 輪 · 2026-09-04T09:03+08:00 · TW · 重跑`#91`(`revenue_trend_surprise_low_attention`)300檔cheap gate，低關注度組FAIL(50.2)/高關注度組CHEAP_PASS(100.0但方向相反+TRAIN無訊號) · 整體維持FAIL，暫不進待深挖，`CALIBRATION_PROBE.md`三項未定TW軌任務全部處理完畢
+
 ## 第 336 輪 · 2026-09-04T08:33+08:00 · US · 接續#104開放問題新增未分層1b深挖重跑腳本（cached universe），session budget耗盡process未完成 · 無結果可判定，誠實記錄未完成，下一輪檢查輸出檔案
 
 ## 第 335 輪 · 2026-09-04T08:03+08:00 · FUT · 修正`continuous_contract.py`真bug（MTX週合約contract_date未過濾導致crash），建成`fut_multi_commodity_pool.py`（TX/MTX/TE首版跨商品日報酬池） · 零新增API呼叫。重要發現：重疊窗口TX-MTX相關係數0.997、TX/MTX-TE約0.954~0.955，三者幾乎是同一大盤beta的三種包裝，非相對獨立標的——「跨商品橫斷面池」方向需先評估離散度是否足夠，非TRIALS_LEDGER判定

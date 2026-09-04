@@ -1591,3 +1591,6 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 - **判定**：`#77`從`CALIBRATION_PROBE.md`標記的「未定（待300檔重跑）」正式改回**確定FAIL**——但這次跟`#79`（percentile小幅提升）方向相反：percentile從82.8驟降到41.9、IC量級縮小約1/3~1/5，反駁了`STRATEGY_GRAVEYARD.md`原記錄的保留②「更大樣本讓每組10檔以上，統計力可能明顯改善」猜測；本輪組內密度確實改善（4→6檔）但percentile不升反降，暗示原100檔樣本的82.8很可能是小樣本雜訊放大出的假邊緣訊號，不是被稀釋的真訊號。已寫入`TRIALS_LEDGER.md`#101、`STRATEGY_GRAVEYARD.md`（同條目續記，未新開）、`HYPOTHESIS_QUEUE.md`#11（同步補充）。
 - **is_holdout_consumed()**：確認`False`（全程讀取本機快取，零新增API呼叫）。
 - **下一步**：`CALIBRATION_PROBE.md`「未定」清單TW軌最後一個項目`#91`（`revenue_trend_surprise_low_attention`）待下一輪TW軌接續重跑；三個TW軌「未定」項目跑完後，這個300檔補查任務即告一段落。
+
+## 第337輪 2026-09-04T09:03+08:00
+重跑`#91`（`revenue_trend_surprise_low_attention`）300檔樣本cheap gate：低關注度組FAIL(percentile 50.2)、高關注度組CHEAP_PASS(percentile 100.0，但方向與原假說相反+TRAIN無訊號)，整體維持FAIL、暫不進待深挖清單。`CALIBRATION_PROBE.md`三個TW軌「未定」項目至此全部處理完畢。詳見`TRIALS_LEDGER.md`#106。零新增API呼叫。

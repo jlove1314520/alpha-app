@@ -1,0 +1,39 @@
+=== 月營收「意外」漂移x低關注度 sanity (HYPOTHESIS_QUEUE.md#21, standalone bonferroni_n=1) ===
+Sample: 300 names (SAMPLE_SEED=20260822), forward_horizon=20交易日, trend_trailing_months=12, attention_window=20交易日
+  progress 20/300, 14 usable so far
+  progress 40/300, 26 usable so far
+  progress 60/300, 36 usable so far
+  progress 80/300, 47 usable so far
+  progress 100/300, 62 usable so far
+  progress 120/300, 77 usable so far
+  progress 140/300, 86 usable so far
+  progress 160/300, 95 usable so far
+  progress 180/300, 110 usable so far
+  progress 200/300, 120 usable so far
+  progress 220/300, 130 usable so far
+  progress 240/300, 144 usable so far
+  progress 260/300, 155 usable so far
+  progress 280/300, 169 usable so far
+  progress 300/300, 182 usable so far
+
+182/300 檔股票有可用事件，總事件數=25913
+
+關注度median split: median_dollar_volume_20d=6,436,931 低關注度組n=12957 | 高關注度組n=12956
+
+--- 低關注度 ---
+TRAIN pooled Spearman IC=+0.0071 (p=0.4886, n=9638)
+VAL   pooled Spearman IC=-0.0113 (p=0.5143, n=3319)
+TRAIN quintile spread=+0.0121 | VAL quintile spread=+0.0164
+VAL |IC| vs 500次洗牌null percentile=50.2 (需要>=90.0)
+same_sign=False -> 低關注度 FAIL reasons: ['train/val正負號不一致', 'null percentile=50.2未過門檻90.0']
+
+--- 高關注度 ---
+TRAIN pooled Spearman IC=-0.0026 (p=0.8105, n=8368)
+VAL   pooled Spearman IC=-0.0558 (p=0.0002, n=4588)
+TRAIN quintile spread=+0.0028 | VAL quintile spread=-0.0058
+VAL |IC| vs 500次洗牌null percentile=100.0 (需要>=90.0)
+same_sign=True -> 高關注度 PASS
+
+=== 分組差異判定 ===
+低關注度組: FAIL | 高關注度組: PASS
+最終判定: FAIL（高關注度組通過但低關注度組未通過，方向與假設相反）
