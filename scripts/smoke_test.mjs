@@ -88,7 +88,12 @@ async function runSmokeTest(baseUrl, headless = true) {
   };
 
   const browser = await chromium.launch({ headless });
-  const page = await browser.newPage({ viewport: { width: 393, height: 852 } });
+  // 2026-09-04（HTTPS方案A第二階段，先寫好不切換）：自簽憑證正式啟用後，這支測試若要
+  // 連alpha_live_server.py的https端點，Playwright預設會因為不認得自簽CA而擋掉——加
+  // ignoreHTTPSErrors讓瀏覽器層面忽略憑證信任錯誤（跟手機端「安裝CA後瀏覽器自然信任」
+  // 不衝突，這裡純粹是測試環境的等效繞過，不影響手機端的真實信任鏈驗證）。目前伺服器
+  // 仍是HTTP（ENABLE_HTTPS預設false），這個選項現在是no-op，先寫好等總司令核准切換。
+  const page = await browser.newPage({ viewport: { width: 393, height: 852 }, ignoreHTTPSErrors: true });
 
   const pageErrors = [];
   page.on("pageerror", (exc) => pageErrors.push(String(exc)));

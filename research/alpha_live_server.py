@@ -89,7 +89,7 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 
 import os
 from datetime import datetime, timedelta, timezone
@@ -104,6 +104,19 @@ LIVE_STATE_PATH = Path(os.environ.get("ALPHA_LIVE_STATE_PATH") or (Path(__file__
 HOT_STATE_MAX_AGE_SEC = 120  # 熱檔超過這麼久沒更新就視為「常駐行程沒在跑」，退回冷檔
 
 SERVER_PORT = 8001
+# 2026-09-04（總司令裁示HTTPS方案A）：自簽CA＋伺服器葉憑證，解決PWA（https頁面）抓這支
+# http本機伺服器的「混合內容」封鎖。憑證由research/gen_local_ca.py產生，全部放secrets/
+# （已gitignore，私鑰絕不進repo；這個repo是public的）。
+SECRETS_DIR = Path(__file__).resolve().parent.parent / "secrets"
+CA_CRT_PATH = SECRETS_DIR / "alpha-ca.crt"        # DER格式，/ca.crt端點回傳這個給手機安裝
+SSL_KEYFILE = SECRETS_DIR / "alpha-server-key.pem"
+SSL_CERTFILE = SECRETS_DIR / "alpha-server-cert.pem"
+# **第二階段（先寫好不切換）**：預設仍是HTTP（保持現有手機/PWA連線不中斷），總司令確認
+# 手機已安裝secrets/alpha-ca.crt（透過/ca.crt下載）之後，設這個環境變數才會改監聽HTTPS：
+#   ALPHA_LIVE_SERVER_HTTPS=1 python research/alpha_live_server.py
+# 不做成「憑證檔案存在就自動切」，因為手機裝好CA之前貿然切HTTPS會讓所有裝置連不上，
+# 這個決定必須是總司令明確一個動作（設環境變數/未來排程腳本旗標），不是憑感覺自動判斷。
+ENABLE_HTTPS = os.environ.get("ALPHA_LIVE_SERVER_HTTPS") == "1"
 SSE_POLL_INTERVAL_SEC = 2  # 退回輪詢模式時的比對間隔（記憶體沒有新鮮tick時才用）
 SSE_MODE_POLL = "poll-diff-2s"   # 退回模式：每2秒比對熱檔/冷檔，有變才送
 SSE_MODE_PUSH = "tick-push"      # 2026-09-04零.2：shioaji_quotes.py每筆tick經UDP推進來→立刻喚醒SSE
@@ -133,6 +146,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://jlove1314520.github.io", "http://localhost:8792", "http://127.0.0.1:8792"],
     allow_methods=["GET"],
+    # allow_headers=["*"]已涵蓋X-Alpha-Local-Token（2026-09-04 HTTPS方案A確認，不用額外列名）。
+    # FastAPI/Starlette的CORSMiddleware會在OPTIONS preflight直接攔截回應，不會走到任何
+    # route handler（也就不會經過_check_token()），所以preflight本來就不驗token，這裡是
+    # 框架既有行為，不需要額外程式碼。
     allow_headers=["*"],
 )
 
@@ -495,6 +512,19 @@ async def live_stream(x_alpha_local_token: str | None = Header(default=None)):
     )
 
 
+@app.get("/ca.crt")
+def get_ca_cert():
+    """2026-09-04（HTTPS方案A）：回傳本機自簽CA的公開憑證（DER格式），手機安裝這個之後
+    才會信任伺服器葉憑證，才能在HTTPS模式下連線不跳警告。**這個端點刻意不驗token**——
+    CA公開憑證本身不是機密（機密是私鑰，私鑰永遠留在這台機器的secrets/裡，這個端點
+    完全沒有讀取私鑰的程式碼路徑），任何人下載這份憑證也只能「信任這台機器簽的憑證」，
+    不能拿它偽造新憑證或存取任何資料。"""
+    if not CA_CRT_PATH.exists():
+        raise HTTPException(status_code=404, detail="CA憑證尚未產生：先在本機執行 python research/gen_local_ca.py")
+    return Response(content=CA_CRT_PATH.read_bytes(), media_type="application/x-x509-ca-cert",
+                     headers={"Content-Disposition": "attachment; filename=alpha-ca.crt"})
+
+
 @app.get("/health")
 def health():
     """唯一不需要token的端點——只回報「伺服器活著」，不含任何報價/
@@ -515,6 +545,8 @@ def health():
         "token_required_on_live_endpoints": True,  # 三個/live端點一律要token，不因私有網路跳過
         "us_kbars": "not_implemented",
         "index_quotes_in_memory": sum(1 for k in MEM.quotes if _is_index_key(k)),  # 2026-09-04四修.二：TPEX+37類股
+        "https_enabled": ENABLE_HTTPS,  # 2026-09-04 HTTPS方案A：目前實際監聽模式（見ENABLE_HTTPS說明）
+        "ca_crt_available": CA_CRT_PATH.exists(),
     }
 
 
@@ -523,4 +555,14 @@ if __name__ == "__main__":
     print(f"本機驗證token（貼進App設定頁「即時伺服器」卡片）：{LOCAL_TOKEN}", flush=True)
     print(f"熱檔路徑：{LIVE_STATE_PATH}（備援）；tick ingress udp://{TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}；stream_mode=有新鮮tick時{SSE_MODE_PUSH}、否則{SSE_MODE_POLL}；kbars_mode={KBARS_MODE}", flush=True)
     print("**這是唯讀伺服器，完全沒有任何下單/改單能力，程式碼裡也沒有import任何下單相關模組**", flush=True)
-    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
+    ssl_kwargs = {}
+    if ENABLE_HTTPS:
+        if not (SSL_KEYFILE.exists() and SSL_CERTFILE.exists()):
+            print(f"[錯誤] ALPHA_LIVE_SERVER_HTTPS=1但找不到憑證檔案（{SSL_KEYFILE}/{SSL_CERTFILE}）。"
+                  f"先跑 python research/gen_local_ca.py 產生，或不要設這個環境變數改用HTTP。", flush=True)
+            raise SystemExit(1)
+        ssl_kwargs = {"ssl_keyfile": str(SSL_KEYFILE), "ssl_certfile": str(SSL_CERTFILE)}
+        print(f"HTTPS模式啟用（自簽憑證，手機需先安裝 secrets/alpha-ca.crt，透過/ca.crt下載）：https://0.0.0.0:{SERVER_PORT}", flush=True)
+    else:
+        print(f"HTTP模式（預設；設環境變數ALPHA_LIVE_SERVER_HTTPS=1可切HTTPS，見模組docstring）", flush=True)
+    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT, **ssl_kwargs)
