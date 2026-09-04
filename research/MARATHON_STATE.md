@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-05T02:34+08:00**
+**最後更新：2026-09-05T03:26+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 352 輪。最新一輪：第 352 輪 · 2026-09-05T02:35+08:00 · FUT（取鎖乾淨；接續round348下一步(a)+(b)，把19檔個股期貨離散度/PCA結果換成8檔0-skipped_rollover_events子集與4檔長窗口子集重跑，dispersion_ratio降到0.86~0.91、PC1升到37.72%~42.25%——比round348原始19檔數字（1.6371/27.33%）更保守，代表原始數字部分來自轉倉銜接雜訊；但仍遠優於TX/MTX/TE（0.1143/97.91%），核心結論不變、幅度誠實下修為7~8倍，詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第352輪記錄）。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 353 輪。最新一輪：第 353 輪 · 2026-09-05T03:26+08:00 · TW（取鎖乾淨；深挖round346找到的leave-one-factor-out候選`loo_no_low_vol`——拿掉`low_vol`後剩`eps_family`+`revenue_surprise`，train-only IC加權，VALIDATION/monthly名目p=0.0489，round346已明確要求補齊「成本敏感度1x/2x/3x＋隨機控制組N≥100」深挖前提。新增`deep_dive_loo_no_low_vol.py`，TRAIN-only IC重算跟round346吻合確認可重現，但背景process執行超過22分鐘仍未跑完monthly這第一個cadence的100次隨機控制組，遠超round201/202記錄的3因子版本耗時，`ps aux`確認process持續存活（非round326/327那種無聲消失模式），根因未查明。未殺process，留給下一輪接手查核`data/deep_dive_loo_no_low_vol_validation.csv`是否已出現，或用`DEEP_DIVE_CADENCES=monthly`環境變數縮小範圍重跑，判定維持round346原FAIL不變，詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`第353輪記錄）。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 

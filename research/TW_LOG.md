@@ -1639,3 +1639,16 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **未做的事（刻意，非疏漏）**：本輪沒有嘗試修復兩套自動化系統共用checkpoint鎖的問題本身——這屬於架構層變更，依`C:\alpha\alpha-app\CLAUDE.md`「提案先於執行」鐵律（新的架構/流程變更需要先提案給總司令核准），不是「已交辦任務」或「純bug修復」，這輪只記錄發現，留給使用者決定要不要處理。佇列#1~30全數結案（`HYPOTHESIS_QUEUE.md`本輪核實過的既有文字已確認此結論），下一輪TW軌若接手需依協定第1節廣度優先設計新假設軸#31，或回頭評估`portfolio_multifactor_v2`是否還有其他組合層迭代方向。
 
 全程零新增API呼叫（僅讀取既有checkpoint/CSV/git歷史核對，未執行任何回測/資料抓取）。
+
+---
+
+## 第353輪（2026-09-05，TW）——深挖round346找到的`loo_no_low_vol`候選（成本敏感度+N=100隨機控制組），process執行超過鎖檔窗口仍未跑完，誠實記錄未完成留給下一輪
+
+- 取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 01:04（第349輪，最舊）／US／FUT皆較新——依輪替選TW。
+- 先讀`CALIBRATION_PROBE.md`「結論」一節（協定第0節第3點要求）：確認裡面「下一輪TW軌第一個工作單位」（300檔重跑`portfolio_multifactor_v2`＋#77/#79/#91）已在round327/331/334/337全部完成，本輪不重做。
+- **工作單位**：`TW_LEADS.md`（`portfolio_multifactor_v2`條目round346補充）明確記錄leave-one-factor-out發現「拿掉`low_vol`」（剩`eps_family`+`revenue_surprise`，train-only IC加權）是三個2因子子版本中唯一VALIDATION/monthly名目p<0.05（p=0.0489）、且TRAIN+VAL兩期alpha皆正的子版本，但round346只跑了1x成本、無隨機控制組的quick scan，明確留下「下一步深挖前提：成本敏感度1x/2x/3x、隨機控制組N≥100」——本輪針對這個具體前提補齊，符合`MARATHON_PROTOCOL.md`第0節裁示的「組合策略層級推進」範疇（深挖已通過便宜關卡的候選）。
+- 新增`deep_dive_loo_no_low_vol.py`（重用round340/346既有的資料載入/train-only IC權重計算/monkeypatch機制，未修改任何既有檔案），只跑`loo_no_low_vol`這一個子版本，VALIDATION期monthly+quarterly各用`portfolio_backtest_v2.run_one(do_cost_sensitivity=True, do_random_control=True, n_random=100)`跑完整版（1x/2x/3x成本敏感度+100次配對式隨機控制組，跟round201/202對完整3因子版本用的N=100解析度一致）。
+- 執行前重算TRAIN-only mean\|IC\|，數字跟round346完全吻合（`f_eps_growth`+0.0384／`f_eps_surprise`+0.0399／`f_revenue_surprise`+0.0505／`f_low_vol`+0.0350，n=74），確認可重現。
+- **本輪未能取得完整數字**：背景執行約22分鐘（03:03:09啟動，本輪結束時仍在跑），仍卡在第一個cadence（monthly）的100次隨機控制組計算階段（log只到重複出現numpy `RuntimeWarning: invalid value encountered in reduce`警告，尚未印出任何一筆完整結果），遠超round201/202記錄的完整3因子版本耗時。**process本身持續存活**（`ps aux`確認pid 1427持續在跑，非round326/327那種「process無聲消失、無traceback」的模式），研判可能是機器目前資源競爭（同時段可能有其他自動化session/排程在跑）或這個2因子equal-weight隨機基準函式本身效能瓶頸，根因未查明。**沒有殺掉這個process**——它是獨立OS process，不受本次session結束影響，會在背景繼續跑；下一輪接手時先用`ps aux | grep python`／檢查`data/deep_dive_loo_no_low_vol_validation.csv`是否已出現，若已完成直接讀CSV記錄結果，若process已消失但無CSV則視為異常中止、可考慮縮小成只跑`monthly`單一cadence（`DEEP_DIVE_CADENCES=monthly python deep_dive_loo_no_low_vol.py`，本輪已加上這個環境變數開關方便下一輪選擇性重跑）。
+- **誠實限制**：這輪的p值（不論最終跑出什麼數字）仍然帶著round346「先看3個子版本挑最佳者再深挖」的選擇偏誤，不是乾淨的單一假設檢定，解讀時要明確揭露這一點，不能因為深挖數字好看就視為顯著結果。
+- `is_holdout_consumed()`執行前確認`False`。全程讀取本機快取，零新增API呼叫。
