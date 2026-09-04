@@ -9,6 +9,8 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第347輪 · 2026-09-05T00:10+08:00 · US · 接續第345輪未完成的cheap gate，重跑`f_us_value_bm`（book-to-market） · CHEAP_PASS（US軌第一個基本面因子，突破price-only家族全FAIL僵局）
+
 
 ## 第346輪 · 2026-09-04T22:32+08:00 · TW · 回收上一個異常中止session的合法未commit產物（leave-one-factor-out train-only權重+margin_utilization regime portfolio checkpoint進度），補齊LEADS.md遺漏段落 · 誠實commit，無新PASS/FAIL判定（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）
 

@@ -47,8 +47,9 @@ from __future__ import annotations
 from datetime import date
 
 import pandas as pd
+import requests
 
-from sec_edgar_client import _cached_get
+from sec_edgar_client import _cache_path, _cached_get
 
 _COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
 
@@ -60,10 +61,40 @@ def get_companyfacts(cik: int) -> dict:
     submissions cache -- this is a different, much larger endpoint).
     Caller is responsible for verifying the CIK actually corresponds to the
     intended entity, same caveat as sec_edgar_client.get_submissions().
+
+    Returns `{}` (not an exception) if SEC returns 404 for this CIK --
+    **bug found and fixed 2026-09-04 marathon round** (`us_factor_ic_value.py`'s
+    first real run against ~135 previously-untested CIKs, not a theoretical
+    concern): some filers (observed live: CIK0001174164, a real ticker that
+    resolved via `get_cik_map()`) have a valid submissions/CIK{cik}.json
+    entry but genuinely NO companyfacts payload at all (e.g. never filed
+    any XBRL-tagged report, or filed only non-XBRL forms) -- this is a
+    legitimate "no fundamentals available for this filer" case, the exact
+    same "absent, not exceptional" outcome `get_concept_series()` already
+    returns an empty DataFrame for when a specific CONCEPT is missing.
+    Before this fix, `_cached_get()`'s unconditional `raise_for_status()`
+    turned that per-ticker absence into an unhandled exception that killed
+    the entire calling script (crashed `us_factor_ic_value.py` mid-loop,
+    losing everything after the crash), rather than being isolated to just
+    that one ticker the way this project's error-handling convention
+    requires (see `CLAUDE.md`'s "App穩定性與錯誤隔離原則" -- one panel's
+    failure must not take down unrelated work; the same discipline applies
+    here even though this is research code, not the phone app).
     """
     cik_padded = str(cik).zfill(10)
     url = _COMPANYFACTS_URL.format(cik=cik_padded)
-    return _cached_get(url, f"companyfacts_{cik_padded}")
+    cache_name = f"companyfacts_{cik_padded}"
+    try:
+        return _cached_get(url, cache_name)
+    except requests.exceptions.HTTPError as e:
+        if e.response is not None and e.response.status_code == 404:
+            # Cache the negative result too -- without this, every future round would
+            # re-hit SEC for this same CIK's known-absent companyfacts payload again,
+            # burning a live request for information that's already resolved.
+            import json
+            _cache_path(cache_name).write_text(json.dumps({}), encoding="utf-8")
+            return {}
+        raise  # any other HTTP error (5xx, auth, etc.) is NOT assumed to mean "absent" -- re-raise
 
 
 def list_available_concepts(cik: int, taxonomy: str = "us-gaap") -> list[str]:

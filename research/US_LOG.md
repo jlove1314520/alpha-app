@@ -1107,3 +1107,13 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 
 ## 第342輪（2026-09-04T19:35+08:00）
 判讀round336啟動、round339重啟的`deep_dive_f_us_low_vol_cached_universe.py`背景process結果（本輪開工時process已完成，`data/deep_dive_f_us_low_vol_cached_universe.csv`已產出，零本輪新增API呼叫）。201/225檔可用，decile k≈20/leg。TRAIN percentile 54.0~75.0（未過，beta近乎市場中性−0.056）；VAL percentile 100.0但beta強烈負值−0.90，報酬正負號TRAIN→VAL翻轉。判定**FAIL**——與原27檔樣本#41同款失敗模式在9倍樣本規模下重現，排除小樣本雜訊反駁，`f_us_low_vol`因子家族全部版本徹底結案。寫入`TRIALS_LEDGER.md`#115、`US_LEADS.md`#15（同時補齊#104原本承諾但未實際新增的#15缺口）。`is_holdout_consumed()`開工/收工前皆`False`。另：發現`FUT_MARATHON_STATE.md`已有「第341輪」內容（`76334b9`補commit）但`REPORT.md`/`MARATHON_STATE.md`計數器未同步，本輪一併補齊心跳（詳見`REPORT.md`）。
+
+## 2026-09-05T00:10+08:00 — 馬拉松第347輪：`f_us_value_bm`（book-to-market）cheap gate完成，CHEAP_PASS
+
+**開工發現**：`git status`顯示第345輪遺留兩個未commit的合法產物——`us_fundamentals.py`修正（SEC EDGAR對部分CIK回傳404時改回傳`{}`並快取負結果，不再讓`raise_for_status()`中止整支呼叫端腳本）＋`us_factor_ic_value.py`（cheap gate腳本，上次執行因SEC ReadTimeout逾時未跑完）。核實bug修正邏輯正確（對應`sec_edgar_client.py`既有「absent, not exceptional」慣例，且有完整docstring說明真實觸發案例CIK0001174164），commit後重跑腳本。
+
+**結果**：135/226個已快取ticker可用（73檔無StockholdersEquity/shares資料、9檔價格序列意外為空、8檔全NaN、1檔無法解析CIK）。TRAIN(2015-2020) mean_ic=+0.0154 IR=+0.089；VAL(2021-2024) mean_ic=+0.0716 IR=+0.459 hit_rate=0.67；train/val同號；null percentile=100.0（門檻90.0）。**CHEAP_PASS**——US軌第一個基本面因子測試，也是SEC EDGAR PIT管線第一次真正產出可用訊號，突破price-only三因子家族全FAIL僵局。
+
+寫入`TRIALS_LEDGER.md`#119、`US_LEADS.md`#16。`is_holdout_consumed()`開工/收工前皆`False`。零FinMind API呼叫（純SEC EDGAR+已快取價格）。
+
+**下一輪建議**：深挖`f_us_value_bm`（重用`deep_dive_f_us_low_vol.py`的1b框架：train/val長短倉、配對式隨機控制組、成本敏感度、beta對照），吸取`f_us_low_vol`系列教訓不能只看cheap gate數字。
