@@ -2,10 +2,11 @@
   "meta": {
     "created_at": "2026-08-28T01:44:36.415088+08:00",
     "schema_note": "前瞻選股台帳（非回測）：每個snapshot是三榜其中一榜在某個data_asof的Top20快照，寫入後不可回頭修改內容（見already_snapshotted()）。returns.t5/t20/t60/t120由update_picks_ledger_returns.py（骨架，2026-08-28新增）在對應的未來交易日回填，回填前恆為null——App顯示時null代表「還沒到回填時間點」，不是資料遺失。",
-    "last_snapshot_at": "2026-09-04T19:11:45.421167+08:00",
-    "total_snapshots": 23,
-    "generated_at": "2026-09-04T19:11:45.421167+08:00",
-    "source": ".github/scripts/build_picks_ledger.py（market.yml排程；讀scores.json/scores_momentum.json/scores_future.json三榜Top20+quotes_all_tw.json收盤價+market_tw.json大盤收盤）"
+    "last_snapshot_at": "2026-09-05T07:10:32.012447+08:00",
+    "total_snapshots": 26,
+    "generated_at": "2026-09-05T07:10:33.593434+08:00",
+    "source": ".github/scripts/build_picks_ledger.py（market.yml排程；讀scores.json/scores_momentum.json/scores_future.json三榜Top20+quotes_all_tw.json收盤價+market_tw.json大盤收盤）",
+    "last_returns_backfill_at": "2026-09-05T07:10:33.593434+08:00"
   },
   "snapshots": [
     {
@@ -24,7 +25,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -4.1322,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590029+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -39,7 +45,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -4.0619,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590058+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -54,7 +65,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.1873,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590077+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -69,7 +85,12 @@
           "price_date": "2026-08-27",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -5.9347,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590093+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -84,7 +105,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -9.9678,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590109+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -99,7 +125,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -6.0606,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590124+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -114,7 +145,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.4839,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590139+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -144,7 +180,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.4217,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590154+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -159,7 +200,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.5459,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590170+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -174,7 +220,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 1.0453,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590185+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -189,7 +240,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -5.1429,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590200+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -204,7 +260,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.2384,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590215+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -219,7 +280,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 4.1667,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590231+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -234,7 +300,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 12.1508,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590243+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -249,7 +320,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 4.5208,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590257+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -264,7 +340,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 1.8987,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590272+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -279,7 +360,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 13.7984,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590286+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -294,7 +380,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -17.3502,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590298+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -309,7 +400,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 1.2844,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590313+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -672,7 +768,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -2.7027,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590436+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -687,7 +788,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.722,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590451+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -702,7 +808,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.7547,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590490+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -717,7 +828,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -3.4169,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590505+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -732,7 +848,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 2.2113,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590520+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -747,7 +868,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.8446,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590534+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -762,7 +888,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 0.1773,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590550+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -777,7 +908,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -0.5758,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590565+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -792,7 +928,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 13.7984,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590578+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -807,7 +948,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 2.852,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590592+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -822,7 +968,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.1292,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590606+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -837,7 +988,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.3216,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590617+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -852,7 +1008,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 0.4354,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590631+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -867,7 +1028,12 @@
           "price_date": "2026-08-27",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -1.8653,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590646+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -882,7 +1048,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 1.9062,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590660+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -897,7 +1068,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 2.3952,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590675+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -912,7 +1088,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": 11.6766,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590690+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -927,7 +1108,12 @@
           "price_date": "2026-08-26",
           "price_stale": false,
           "returns": {
-            "t5": null,
+            "t5": {
+              "return_pct": -4.4321,
+              "excess_vs_taiex_pct": null,
+              "exit_date": "2026-09-04",
+              "filled_at": "2026-09-05T07:10:33.590705+08:00"
+            },
             "t20": null,
             "t60": null,
             "t120": null
@@ -7105,6 +7291,933 @@
           "total_score": 8.0,
           "close_price": 703.0,
           "price_date": "2026-09-03",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_date": "2026-09-05",
+      "taken_at": "2026-09-05T07:10:31.602690+08:00",
+      "board": "value",
+      "engine_version": "scoring-live-json",
+      "taiex_close_at_snapshot": 46551.13,
+      "picks": [
+        {
+          "code": "7711",
+          "name": "永擎",
+          "rank": 1,
+          "total_score": 9.9,
+          "close_price": 632.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3094",
+          "name": "聯傑",
+          "rank": 2,
+          "total_score": 9.7,
+          "close_price": 46.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "8926",
+          "name": "台汽電",
+          "rank": 3,
+          "total_score": 9.6,
+          "close_price": 57.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6808",
+          "name": "三鼎生技",
+          "rank": 4,
+          "total_score": 9.6,
+          "close_price": null,
+          "price_date": null,
+          "price_stale": true,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6834",
+          "name": "天二科技",
+          "rank": 5,
+          "total_score": 9.6,
+          "close_price": 94.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6209",
+          "name": "今國光",
+          "rank": 6,
+          "total_score": 9.6,
+          "close_price": 81.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "7610",
+          "name": "聯友金屬-創",
+          "rank": 7,
+          "total_score": 9.6,
+          "close_price": 1820.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2465",
+          "name": "麗臺",
+          "rank": 8,
+          "total_score": 9.6,
+          "close_price": 99.2,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2485",
+          "name": "兆赫",
+          "rank": 9,
+          "total_score": 9.6,
+          "close_price": 41.3,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6693",
+          "name": "廣閎科",
+          "rank": 10,
+          "total_score": 9.6,
+          "close_price": 181.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2883",
+          "name": "凱基金",
+          "rank": 11,
+          "total_score": 9.5,
+          "close_price": 36.7,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3661",
+          "name": "世芯-KY",
+          "rank": 12,
+          "total_score": 9.5,
+          "close_price": 4220.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4967",
+          "name": "十銓",
+          "rank": 13,
+          "total_score": 9.5,
+          "close_price": 276.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "7750",
+          "name": "新代",
+          "rank": 14,
+          "total_score": 9.5,
+          "close_price": 2415.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2395",
+          "name": "研華",
+          "rank": 15,
+          "total_score": 9.5,
+          "close_price": 711.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3167",
+          "name": "大量",
+          "rank": 16,
+          "total_score": 9.4,
+          "close_price": 803.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3702",
+          "name": "大聯大",
+          "rank": 17,
+          "total_score": 9.4,
+          "close_price": 104.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6177",
+          "name": "達麗",
+          "rank": 18,
+          "total_score": 9.4,
+          "close_price": 49.2,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2542",
+          "name": "興富發",
+          "rank": 19,
+          "total_score": 9.4,
+          "close_price": 48.55,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "5475",
+          "name": "德宏",
+          "rank": 20,
+          "total_score": 9.4,
+          "close_price": 190.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_date": "2026-09-05",
+      "taken_at": "2026-09-05T07:10:31.798154+08:00",
+      "board": "momentum",
+      "engine_version": "scoring-momentum-v1",
+      "taiex_close_at_snapshot": 46551.13,
+      "picks": [
+        {
+          "code": "2356",
+          "name": "英業達",
+          "rank": 1,
+          "total_score": 10.0,
+          "close_price": 67.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2357",
+          "name": "華碩",
+          "rank": 2,
+          "total_score": 10.0,
+          "close_price": 1025.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2377",
+          "name": "微星",
+          "rank": 3,
+          "total_score": 10.0,
+          "close_price": 161.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2382",
+          "name": "廣達",
+          "rank": 4,
+          "total_score": 10.0,
+          "close_price": 345.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2385",
+          "name": "群光",
+          "rank": 5,
+          "total_score": 10.0,
+          "close_price": 110.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2388",
+          "name": "威盛",
+          "rank": 6,
+          "total_score": 10.0,
+          "close_price": 81.4,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2395",
+          "name": "研華",
+          "rank": 7,
+          "total_score": 10.0,
+          "close_price": 711.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2409",
+          "name": "友達",
+          "rank": 8,
+          "total_score": 10.0,
+          "close_price": 26.8,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2412",
+          "name": "中華電",
+          "rank": 9,
+          "total_score": 10.0,
+          "close_price": 137.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2421",
+          "name": "建準",
+          "rank": 10,
+          "total_score": 10.0,
+          "close_price": 178.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2426",
+          "name": "鼎元",
+          "rank": 11,
+          "total_score": 10.0,
+          "close_price": 104.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2464",
+          "name": "盟立",
+          "rank": 12,
+          "total_score": 10.0,
+          "close_price": 211.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2489",
+          "name": "瑞軒",
+          "rank": 13,
+          "total_score": 10.0,
+          "close_price": 41.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3017",
+          "name": "奇鋐",
+          "rank": 14,
+          "total_score": 10.0,
+          "close_price": 3570.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3019",
+          "name": "亞光",
+          "rank": 15,
+          "total_score": 10.0,
+          "close_price": 144.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3034",
+          "name": "聯詠",
+          "rank": 16,
+          "total_score": 10.0,
+          "close_price": 524.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3042",
+          "name": "晶技",
+          "rank": 17,
+          "total_score": 10.0,
+          "close_price": 173.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3045",
+          "name": "台灣大",
+          "rank": 18,
+          "total_score": 10.0,
+          "close_price": 118.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3090",
+          "name": "日電貿",
+          "rank": 19,
+          "total_score": 10.0,
+          "close_price": 176.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3094",
+          "name": "聯傑",
+          "rank": 20,
+          "total_score": 10.0,
+          "close_price": 46.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_date": "2026-09-05",
+      "taken_at": "2026-09-05T07:10:31.997647+08:00",
+      "board": "future",
+      "engine_version": "scoring-future-v1",
+      "taiex_close_at_snapshot": 46551.13,
+      "picks": [
+        {
+          "code": "6452",
+          "name": "康友-KY",
+          "rank": 1,
+          "total_score": 9.8,
+          "close_price": null,
+          "price_date": null,
+          "price_stale": true,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "8406",
+          "name": "金可-KY",
+          "rank": 2,
+          "total_score": 9.4,
+          "close_price": null,
+          "price_date": null,
+          "price_stale": true,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4904",
+          "name": "遠傳",
+          "rank": 3,
+          "total_score": 8.7,
+          "close_price": 104.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2880",
+          "name": "華南金",
+          "rank": 4,
+          "total_score": 8.6,
+          "close_price": 44.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3023",
+          "name": "信邦",
+          "rank": 5,
+          "total_score": 8.6,
+          "close_price": 340.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2034",
+          "name": "允強",
+          "rank": 6,
+          "total_score": 8.5,
+          "close_price": 21.1,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2845",
+          "name": "遠東銀",
+          "rank": 7,
+          "total_score": 8.5,
+          "close_price": 13.65,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2886",
+          "name": "兆豐金",
+          "rank": 8,
+          "total_score": 8.5,
+          "close_price": 49.55,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2887",
+          "name": "台新新光金",
+          "rank": 9,
+          "total_score": 8.5,
+          "close_price": 41.5,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2889",
+          "name": "國票金",
+          "rank": 10,
+          "total_score": 8.5,
+          "close_price": 16.6,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2890",
+          "name": "永豐金",
+          "rank": 11,
+          "total_score": 8.5,
+          "close_price": 42.85,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2891",
+          "name": "中信金",
+          "rank": 12,
+          "total_score": 8.5,
+          "close_price": 68.4,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2892",
+          "name": "第一金",
+          "rank": 13,
+          "total_score": 8.5,
+          "close_price": 37.3,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "3034",
+          "name": "聯詠",
+          "rank": 14,
+          "total_score": 8.4,
+          "close_price": 524.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "4952",
+          "name": "凌通",
+          "rank": 15,
+          "total_score": 8.4,
+          "close_price": 50.6,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "5471",
+          "name": "松翰",
+          "rank": 16,
+          "total_score": 8.4,
+          "close_price": 61.1,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6277",
+          "name": "宏正",
+          "rank": 17,
+          "total_score": 8.4,
+          "close_price": 80.3,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "6781",
+          "name": "AES-KY",
+          "rank": 18,
+          "total_score": 8.3,
+          "close_price": 1115.0,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "1216",
+          "name": "統一",
+          "rank": 19,
+          "total_score": 8.1,
+          "close_price": 75.6,
+          "price_date": "2026-09-04",
+          "price_stale": false,
+          "returns": {
+            "t5": null,
+            "t20": null,
+            "t60": null,
+            "t120": null
+          }
+        },
+        {
+          "code": "2395",
+          "name": "研華",
+          "rank": 20,
+          "total_score": 8.1,
+          "close_price": 711.0,
+          "price_date": "2026-09-04",
           "price_stale": false,
           "returns": {
             "t5": null,
