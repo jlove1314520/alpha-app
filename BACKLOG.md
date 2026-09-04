@@ -65,9 +65,12 @@ cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等�
    佇列，這才是真正秒級；使用者說「不用現在做」。
 6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
    2026-09-04條目，需有workflow scope的PAT。
-7. **`alpha_live_server.py`掛常駐排程**（乙.6前置）：目前只能手動`python research/
-   alpha_live_server.py`前景執行，要比照`run-shioaji-quotes-cycle.ps1`做一支PID判斷的
-   啟動器＋Windows工作排程器任務，開機/開盤前自動拉起，否則手機端永遠連不到。
+7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:lphaun-alpha-live-server-cycle.ps1`
+   （PID檔＋port 8001 LISTENING雙重判斷的啟動器，UTF-8 BOM）＋`run-alpha-live-server-hidden.vbs`，
+   排程任務`AlphaLiveServer`每5分鐘檢查、沒在跑就啟動（RunLevel Limited）。開機觸發的
+   `AlphaLiveServerBoot`（/SC ONSTART）需要系統管理員才能建，指令已交總司令；沒建也沒關係，
+   每5分鐘那條開機後最多5分鐘會把它拉起來。cloudflared服務已由總司令裝好（Running/Automatic）、
+   防火牆規則「Alpha Live 8001」（Private）已加。
 8. **美股IBKR 1分K**：需先查證`reqHistoricalData()`與`ibkr_quotes.py`現有短命連線是否
    衝突（或改成常駐訂閱後用tick聚合，跟台股同一套），確認前維持501。
 9. **籌碼分頁免費層第二單位（需提案核准）**：(a)股權分散／千張大戶持股比例週變化

@@ -280,7 +280,7 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   192.168.3.241**，供設定Private Network路由CIDR用。
 - [x] **乙.4** App前端偵測隧道可用性，SSE即時更新/離線退回冷資料標示——**已完成，見上方「乙.4/乙.5補充」區塊**
 - [x] **乙.5** 個股頁改用TradingView lightweight-charts（cdnjs未收錄→jsdelivr釘死5.2.1），盤中1分K走/live/kbars——**已完成，見上方「乙.4/乙.5補充」區塊**
-- [~] **乙.6** 驗收：Playwright+smoke test**已完成**；下次開盤總司令手機實測**待做**（需先乙.3服務安裝＋live server常駐，見補充區塊）
+- [~] **乙.6** 驗收：Playwright+smoke test**已完成**；乙.3 cloudflared服務與防火牆已由總司令裝好（2026-09-04上午），live server常駐排程`AlphaLiveServer`已建、區網IP實測200；**剩總司令手機實測**
 - [x] **丙** Phase 2（新聞管線+籌碼集中度模組）+ Phase 3（paper下單走
   隧道）——**已登記進BACKLOG.md「登記待辦」區塊，未開工**
 
