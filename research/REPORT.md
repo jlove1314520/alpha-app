@@ -10,6 +10,8 @@
 
 ---
 
+## 第 344 輪 · 2026-09-04T21:06+08:00 · FUT（取鎖時偵測到`LOCK_STALE`，pid 52496持有30.0分鐘後被回收，第343輪疑似異常中止未釋放鎖，複查確認`deb2a67`已完整推送非資料遺失） · 接續round341下一步(a)，新增`fut_stock_futures_liquidity_screen.py`對511檔F結尾個股期貨候選做分層抽樣流動性初篩 · 37檔樣本19檔(51.4%)達寬鬆門檻，外推約262檔可能可用（比TX/MTX/TE/TF大一個數量級），非TRIALS_LEDGER判定，補記`FUT_LEADS.md`；round341下一步(b)轉倉規則、(c)離散度實測仍未做，額外觀察round341遺留腳本本輪已從磁碟消失（同round343異常模式第二次出現）
+
 ## 第 343 輪 · 2026-09-04T20:47+08:00 · TW（取鎖時偵測到`LOCK_STALE`，pid 51012持有29.9分鐘後被回收，第342輪疑似異常中止未釋放鎖） · 嘗試延續round340「誠實限制」補完整關卡（成本敏感度1x/2x/3x+隨機控制組n=15）於`ic_weighted_train_only`組合，新增`train_only_ic_weight_bigsample_full_gate.py`monkeypatch重用既有函式 · **無新候選判定**——腳本三次背景執行皆異常：第一次<2分鐘內process無聲提前結束（無traceback，log只到"market data ready"）；第二次同步執行逾10分鐘後被工具自動轉背景、其redirect log檔案未被建立；第三次背景重跑時python直接回報`.py`原始檔本身已從磁碟消失（`FileNotFoundError`），連同前兩次的log檔一併消失，僅存第三次的194bytes錯誤log。事後查證發現工作目錄有round342(US)遺留的6個檔案未commit異動（`MARATHON_STATE.md`/`REPORT.md`/`TW_LOG.md`/`US_LEADS.md`/`US_LOG.md`/`US_MARATHON_STATE.md`），內容完整可讀、與round342心跳描述一致，推論round342 process可能在完成寫檔後、commit前才被本輪取鎖時判定為`LOCK_STALE`而回收，本輪一併補commit。本輪自己新建的`.py`腳本消失的根因未查明（不同於round327已知的「process靜默終止但檔案完整寫出」模式，這次連原始碼檔案本身都消失），懷疑跟round342殘留process或本機資源競爭有關，但無法在目前預算內繼續深究，誠實記錄成待查異常，不臆測結論。`is_holdout_consumed()`確認`False`。零FinMind API呼叫（皆為本機唯讀檢查與腳本嘗試）。
 
 ## 第 342 輪 · 2026-09-04T19:35+08:00 · US · 判讀round336/339背景process完成的`deep_dive_f_us_low_vol_cached_universe.py`結果（201檔可用，k≈20/leg大樣本1b深挖） · TRAIN percentile54-75未過、VAL percentile100但beta-0.90，`f_us_low_vol`家族FAIL重現且徹底結案，`TRIALS_LEDGER.md`#115/`US_LEADS.md`#15
