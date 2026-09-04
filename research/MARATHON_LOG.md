@@ -13,6 +13,34 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04 19:58 — hypothesis_queue排程：#1~29全數結案確認+設計新假設軸#30 — 佇列#5/#6/#8/#10依賴重新查證仍卡住，新增#30個股融資使用率（強制平倉/流動性螺旋風險），第1關cheap gate尚未開始
+
+`HYPOTHESIS_QUEUE_PROTOCOL.md`第0節三步驟（讀CLAUDE.md/CONSTITUTION.md、
+git pull+status、取具名鎖`hypothesis_queue`）皆完成，`git status`發現
+`research/MARATHON_STATE.md`/`REPORT.md`/`TRIALS_LEDGER.md`/`US_LEADS.md`/
+`US_LOG.md`/`US_MARATHON_STATE.md`有非本輪產生的殘留變更（判斷為TW/US
+馬拉松軌道所留），依協定不觸碰、不納入本輪commit。讀完整份
+`HYPOTHESIS_QUEUE.md`確認佇列#1~29全數已結案（皆FAIL），重新查證
+`BACKLOG.md`（`value_board_v2`仍`回測未通過`、題材動能榜/未來性濾網仍
+`紙上交易中`）確認#5/#6/#8/#10四項外部依賴依然全部卡住、無新進展，判定
+佇列實質已空。設計新假設軸**#30個股融資使用率（Margin Financing
+Utilization Ratio）——強制平倉/流動性螺旋風險訊號**（Brunnermeier &
+Pedersen margin spiral機制，跟前29條在①方向性選股排序②timing/exposure
+overlay③portfolio construction④配對交易均值回歸這四大已測類別皆不同的
+第五類）——用FinMind`TaiwanStockMarginPurchaseShortSale`的
+`MarginPurchaseTodayBalance/MarginPurchaseLimit`當融資使用率，事前綁定
+方向為負（使用率越高、未來報酬越差，尤其下跌段）。curl直接測試FinMind
+確認2015年至今歷史齊全可直接複用`factor_ic.py`既有框架，不需新資料工程；
+旁註發現`alpha-data`凍結區`twse_margin`（`MI_MARGN`）只有約2週歷史不適用
+（純唯讀查證`alpha.db`，未改動任何凍結區檔案）。完整經濟理由/具體定義/
+已知背景區隔/資料可行性/下檔保護要求已寫入`HYPOTHESIS_QUEUE.md`新增
+`### 30.`章節與「排隊順序總結」章節。**本輪工作單位到此為止（依協定
+「一輪只做一個有界工作單位」），未寫任何因子/測試程式碼，未新增
+`TRIALS_LEDGER.md`列（尚無PASS/FAIL/CHEAP_PASS判定可記）。下一輪從#30
+第1關cheap IC gate開始，不跳關。**`is_holdout_consumed()`確認`False`。
+
+---
+
 ## 2026-09-04T19:27 — hypothesis_queue軌道：#29等權重再平衡溢酬第6關逐年一致性 — FAIL(最終判定，佇列#29結案)
 
 接手時鎖檔陳舊（30.7分鐘未更新，PID 50296被回收），確認上一輪已正確
