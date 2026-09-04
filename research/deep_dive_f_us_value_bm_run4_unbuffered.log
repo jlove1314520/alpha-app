@@ -148,3 +148,19 @@ Drop reasons:
   market benchmark: SPY, 8038 rows, 1993-01-29..2024-12-31
 
 === TRAIN 2015-01-01..2020-12-31, cost 1x (slippage=5.0bps) ===
+  net total_return=+148.95%  ann_return=+16.43%  Sortino=0.543  beta=+0.506  alpha=+22.17%
+  random control (100 draws): median_equity=0.6930  real_percentile=100.0
+
+=== TRAIN 2015-01-01..2020-12-31, cost 2x (slippage=10.0bps) ===
+  net total_return=+146.53%  ann_return=+16.24%  Sortino=0.540  beta=+0.507  alpha=+21.97%
+  random control (100 draws): median_equity=0.6044  real_percentile=100.0
+
+=== TRAIN 2015-01-01..2020-12-31, cost 3x (slippage=15.0bps) ===
+  net total_return=+144.14%  ann_return=+16.05%  Sortino=0.536  beta=+0.507  alpha=+21.77%
+  random control (100 draws): median_equity=0.5271  real_percentile=100.0
+
+=== VAL 2020-12-31..2024-12-31, cost 1x (slippage=5.0bps) ===
+  net total_return=+2287.00%  ann_return=+121.38%  Sortino=2.882  beta=+0.003  alpha=+131.83%
+  random control (100 draws): median_equity=0.7087  real_percentile=100.0
+
+=== VAL 2020-12-31..2024-12-31, cost 2x (slippage=10.0bps) ===

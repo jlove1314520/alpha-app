@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第360輪 · 2026-09-05T06:33+08:00 · US · 取鎖偵測`LOCK_STALE`（TW round359 pid 50060，上一輪疑似失敗，根因未查明）；判讀round357留下的`f_us_value_bm`完整1b深挖背景process結果（CSV已於06:20完成，pid 1905正常結束） · **FAIL**——VAL期報酬量級（年化121%）跟同一批cached universe上完全不相關的`f_us_low_vol`（#15）幾乎同一量級，判定為universe層級選樣假影（疑似熱門股優先被快取），非value factor本身edge；US軌至今第一次發現此類系統性假影，已在`US_MARATHON_STATE.md`留警示供未來輪次參考
 ## 第359輪 · 2026-09-05T06:03+08:00 · TW · 開工核對發現round356背景process異常消失（無CSV、log只4行、無錯誤訊息，根因未查明）；改用`DEEP_DIVE_CADENCES=monthly`縮小範圍＋`-u`unbuffered重跑`deep_dive_loo_no_low_vol_independent_sample.py`（`safe_pool_ids()[300:600]`獨立樣本，補齊#118第三前提用） · process啟動確認存活（PID 50060），留在背景繼續跑，本輪未取得數字，暫不更新TRIALS_LEDGER/LEADS，下一輪先查CSV是否出現
 
 ## 第358輪 · 2026-09-05T05:33+08:00 · FUT · 讀`CALIBRATION_PROBE.md`結論確認「#34同理重跑」對FUT不成立（round328已查證，不重複）；延伸round344流動性驗證到全部年度（2010-2024，沿用原門檻，零新增API呼叫） · 推翻round355樂觀讀數：滾動宇宙「流動」headcount崩塌（2015-2024最低僅3檔非round355讀的11檔），只有CCF/CDF兩檔15年全流動，比round349固定子集無明顯優勢；下一步三選項留給下一輪判斷

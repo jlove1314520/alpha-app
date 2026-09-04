@@ -1178,3 +1178,21 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 `is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫（`load_value_sample()`全部命中既有快取，backtest運算本身不打任何外部API，跟round347/350/351/354一致）。**本輪無`TRIALS_LEDGER.md`/`US_LEADS.md`新增列**（`f_us_value_bm`仍維持`CHEAP_PASS（待深挖）`狀態不變，process尚未產出最終數字）。
 
 **下一輪工作單位建議**：(a) 開工先查`data/deep_dive_f_us_value_bm.csv`是否已產出——若有，六組period/cost的完整深挖數字齊全，直接讀取依1b判讀原則（train/val一致性、beta下檔保護、成本敏感度）做最終候選判定，一次性寫進`US_LEADS.md`/`TRIALS_LEDGER.md`；(b) 若process仍在跑，`deep_dive_f_us_value_bm_run4_unbuffered.log`已是unbuffered輸出，可以直接`tail`看真實進度，不必再猜buffering問題；(c) 若process已消失但無CSV，才需要真的懷疑crash或環境問題，屆時建議把硬超時拉長（例如1800秒）並保留`-u`旗標重跑，同時記錄這是第五次嘗試；(d) 之後所有背景長跑腳本，建議預設都加`python -u`或在腳本內`sys.stdout.reconfigure(line_buffering=True)`，避免下一次又被buffering現象誤導成「卡死」。
+
+---
+
+## 第360輪（2026-09-05T06:33+08:00，US軌）：判讀`f_us_value_bm`完整1b深挖結果——FAIL，且發現universe層級系統性假影
+
+取鎖時偵測到`LOCK_STALE`（pid 50060持有30.0分鐘後被回收，對應TW round359疑似失敗，根因未查明，已在心跳/`REPORT.md`註明）。三軌時間戳：TW 06:03（第359輪，最新）／FUT 05:33（第358輪）／US 05:13（第357輪，最舊）——依輪替選US。
+
+開工先`ls data/deep_dive_f_us_value_bm.csv`，確認round357留下背景執行的`deep_dive_f_us_value_bm.py`（pid 1905，`python -u`）已於06:20完成並產出完整6列CSV（TRAIN/VAL×成本1x/2x/3x）。`ps -ef`確認pid 1905已正常結束（process list中已不存在，非異常消失——CSV完整齊全，這是process「正常跑完退出」的訊號，不是round356/359那種process異常消失+無CSV的異常中止模式，兩者需要區分）。TW round359留下的`deep_dive_loo_no_low_vol_independent_sample.py`（pid 2473）仍在跑，本輪未去動它。
+
+讀CSV：**TRAIN(2015-2020)** 1x/2x/3x成本下ann_return +16.05%~+16.43%、beta +0.506~+0.507（中度正相關）、alpha +21.77%~+22.17%、random_control_percentile 100.0。**VAL(2020-2024)** ann_return **+120.63%~+121.38%**（總報酬+2254.59%~+2287.00%）、beta **+0.003~+0.004**（近乎market-neutral）、alpha +130.24%~+131.83%、random_control_percentile 100.0。表面上TRAIN/VAL percentile皆100.0、同號、beta也大致合理——比`f_us_low_vol`家族（#41/#115，TRAIN期輸給隨機控制組）「更乾淨地通過」既有判準。
+
+**但VAL期報酬量級（年化121%、4年總報酬2287%）遠超value/book-to-market溢酬的文獻量級（Fama-French HML長期年化約3~5%），本身已是implausibility警訊**。進一步比對發現：`US_LEADS.md`#15（`f_us_low_vol`不分層版，同一批`cached_ticker_ids()`超集、同一VAL 2020-12-31~2024-12-31窗口）的VAL期ann_return是+111.1%~113.1%（總報酬約+1950%~2287%量級）——跟`f_us_value_bm`本輪數字幾乎同一量級。兩個完全不相關的因子定義（低波動十分位 vs 帳面市值比十分位）在高度重疊的樣本池上、同一段驗證期得出近似量級的極端超額報酬，判定這是`cached_ticker_ids()`池子本身的選樣偏誤（本輪log可見可用名單含PLTR/SOFI/NTLA/VST/STEM/SANA/TLN等多檔2021-2024巨幅漲勢股，疑似「熱門股優先被查詢/快取」，非隨機或存活者偏差已處理的宇宙），少數極端贏家主導任一十分位切割的多空組合報酬，percentile通過不能排除這個假影（隨機腿抽樣自同一個被污染的池子，對照組本身也帶偏誤）。
+
+**判定：FAIL**（依`MARATHON_PROTOCOL.md`第1b節「沒有economically plausible的理由，即使統計上顯著也要降級標註純統計巧合風險」）。**不泛化成「book-to-market在美股完全無效」**——cheap-gate層的IC方向本身（#119）不受本列影響。**這是US軌迄今第一次發現universe層級的系統性假影，會同時影響多個不相關因子的深挖判定**，重要性超過單一factor的PASS/FAIL本身，已寫入`US_MARATHON_STATE.md`供未來所有在這個池子上的1b深挖參考。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零本輪新增API呼叫（純讀取既有CSV+本機分析）。完整見`TRIALS_LEDGER.md`#128（完整推理）、`US_LEADS.md`#17（新增）。
+
+**下一輪工作單位建議**：(a) 若要挽救`f_us_value_bm`，需換非熱門股偏誤的美股宇宙（例如按市值分層隨機抽樣）重跑cheap gate+1b深挖；(b) 更輕量的驗證：對現有135檔做leave-one-out集中度檢查（比照`STRATEGY_GRAVEYARD.md`銅金比overlay#126），逐一拿掉VAL期報酬貢獻最大的1~3檔ticker，看剩餘樣本報酬是否崩塌，可直接證實/證偽假影假說；(c) 若確認是universe假影，`f_us_low_vol`家族（#41/#115）跟`f_us_value_bm`（本列）的既有FAIL判定不需要改判（兩者各自的死因——beta方向性曝險 vs 報酬量級不可信——本身站得住腳，假影只是額外強化FAIL的理由，不是唯一理由）；(d) US軌下一個可能突破方向：PIT財報資料源的其他基本面因子（品質/成長）、或先處理宇宙選樣偏誤這個地基問題再繼續測任何新因子。
