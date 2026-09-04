@@ -10,6 +10,8 @@
 
 ---
 
+## 第 338 輪 · 2026-09-04T09:33+08:00 · FUT · 新增`fut_multi_commodity_dispersion.py`量化TX/MTX/TE橫斷面離散度（round335選項a） · dispersion_ratio=0.1143、PC1解釋變異=97.91%，兩指標互證跨商品池離散度不足，選項(b)個股期貨查證變成下一輪優先方向
+
 ## 第 337 輪 · 2026-09-04T09:03+08:00 · TW · 重跑`#91`(`revenue_trend_surprise_low_attention`)300檔cheap gate，低關注度組FAIL(50.2)/高關注度組CHEAP_PASS(100.0但方向相反+TRAIN無訊號) · 整體維持FAIL，暫不進待深挖，`CALIBRATION_PROBE.md`三項未定TW軌任務全部處理完畢
 
 ## 第 336 輪 · 2026-09-04T08:33+08:00 · US · 接續#104開放問題新增未分層1b深挖重跑腳本（cached universe），session budget耗盡process未完成 · 無結果可判定，誠實記錄未完成，下一輪檢查輸出檔案
