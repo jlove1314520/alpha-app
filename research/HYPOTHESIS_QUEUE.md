@@ -881,12 +881,14 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     cheap IC gate已CHEAP_PASS**（train/val同號皆負、null percentile=
     100.0，`TRIALS_LEDGER.md`#116），**deep_dive第一步下跌段vs上漲段
     分組IC已完成**（下跌段VAL\|IC\|=0.1817遠大於上漲段0.0280，約6.5倍，
-    方向與核心機制主張完全吻合，`TRIALS_LEDGER.md`#117），仍未進入
-    portfolio層隨機控制組（≥100 draws）等後續關卡。**現在排隊第一，
-    下一輪從設計regime-conditional具體portfolio層構造開始**（依deep_dive
-    發現，訊號集中在下跌段，操作化方向應為「市場轉弱時才啟動避開高
-    融資使用率個股」而非恆定十分位多空），不跳過已完成的第1關與
-    deep_dive第一步。
+    方向與核心機制主張完全吻合，`TRIALS_LEDGER.md`#117）。**portfolio層
+    構造（`margin_utilization_regime_portfolio_v1.py`）已設計完成並開始
+    執行**：regime-conditional避開高融資使用率個股（危機regime時挑最低
+    使用率TOP20、非危機regime挑流動性最高TOP20，控制組核心判準是打贏
+    「危機期隨機選股」而非買進持有大盤，完整設計見上方#30條目最新狀態）。
+    checkpoint可續跑機制運作正常（本輪內驗證），**TRAIN期真實訊號+成本
+    敏感度已完成、隨機控制組進度20/100，尚未結案**，現在排隊第一，下一輪
+    重跑腳本即可自動接續（比照`#4`股利率carry的多輪checkpoint接續先例）。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後）**：15條原始佇列項目中
 #1~4、#7、#9、#11~15共10條已結案（皆FAIL），#10已建置方法論框架（非
@@ -2656,3 +2658,37 @@ percentile=95.9。VAL期下跌段\|IC\|=0.1817遠大於上漲段\|IC\|=0.0280（
 `data/factor_ic_margin_utilization_regime_split_results.csv`、
 `MARATHON_LOG.md`本輪心跳。`is_holdout_consumed()`本輪開工/收工前皆
 確認`False`。
+
+**狀態（2026-09-04接續排程，portfolio層構造已設計完成，第2/7關進行中，
+尚未結案）**：新增`margin_utilization_regime_portfolio_v1.py`——**具體
+設計（事前綁定，測試前寫死）**：沿用`regime_overlay.py`既有市場層級
+regime判定（TAIEX 200日均線位階+20日波動度vs擴張窗中位數），危機regime
+（`CRISIS_REGIME=("bear_below_ma","high_vol")`，跟`regime_overlay.
+EXPOSURE_MAP`曝險最低那格對應）時，從流動性篩選後的候選池挑「融資使用率
+最低」的TOP20檔（=避開最危險名單）；非危機regime時挑「流動性最高」的
+TOP20檔（這條規則刻意跟融資使用率無關、且真實/隨機兩版本逐字相同，隔離
+差異只可能來自危機期選股）。**隨機控制組核心判準是打贏『危機期隨機選股』
+對照組，不是打贏買進持有大盤**——直接測試「危機時刻意挑低融資使用率
+個股」相對「危機時隨機留在場內」有沒有加值，這是本佇列第一次用這種
+「非危機期規則鎖定不變、只隔離危機期選股差異」的控制組設計（跟`#4`/
+`#3`/`#17`的「同樣動作隨機挑N檔」控制組精神一致，但這裡額外鎖定了
+regime切換的另一半，因為假設核心主張本來就是「只在危機時有效」）。
+逐字比照`dividend_yield_portfolio_v1.py`checkpoint可續跑模式（`data/
+margin_utilization_regime_portfolio_v1_checkpoint.json`，gitignored）。
+**執行進度**：TAIEX TRAIN+VAL共3681個交易日，其中786天(21.4%)落在危機
+regime（非系統性0天或全部，佔比合理）；300檔快取宇宙248檔可用。本輪內
+連續呼叫腳本兩次（7分鐘+5分鐘算力預算），確認checkpoint機制正確接續
+（第二次呼叫從第一次留下的進度接續，未重算已完成部分）。**TRAIN期真實
+訊號回測+成本敏感度(1x/2x/3x)已完成**（1x報酬-16.97%、MDD-46.58%、
+alpha-4.18%(p=0.7511不顯著)、beta+0.737，遠遜於同期買進持有+58.86%——
+但這只是TRAIN期單一策略表現，尚未跟隨機控制組比較，不能單獨判讀），
+**TRAIN期隨機控制組進度20/100（尚未跑完，不能判定）**，VALIDATION期
+尚未開始。**尚未結案**——下一輪重新執行
+`python research/margin_utilization_regime_portfolio_v1.py`會自動接續
+TRAIN剩餘隨機控制組，完成TRAIN後接著跑VALIDATION，比照`#4`歷經多輪
+checkpoint接續的先例，預估還需要數輪才能跑完並產出第2/7關判定。**留意
+（不視為bug，記錄避免下一輪誤判）**：TRAIN真實訊號單獨表現不佳
+（alpha不顯著、大幅落後買進持有）不代表這條假設會FAIL——因為判準是
+相對「危機期隨機選股控制組」而非相對買進持有大盤，且非危機期的中性
+流動性選股規則本身就不含任何alpha來源，全期間報酬本來就不預期贏過
+放大曝險的買進持有大盤，只有等100筆隨機控制組跑完才能看percentile。

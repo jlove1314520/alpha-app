@@ -1,0 +1,89 @@
+pool total=1142, using first 300: 0054..2412
+market data ready
+loaded 298/300 usable names
+121 non-overlapping snapshots, 2015-01-01..2024-12-31
+
+========== 步驟1：TRAIN-only mean |IC|（300檔安全樣本池，同round340） ==========
+  f_eps_growth: train_mean_ic=+0.0384 (n=74)
+  f_eps_surprise: train_mean_ic=+0.0399 (n=74)
+  f_revenue_surprise: train_mean_ic=+0.0505 (n=74)
+  f_low_vol: train_mean_ic=+0.0350 (n=74)
+TRAIN_ONLY_IC_WEIGHTS = {'eps_family': 0.039150090787601594, 'revenue_surprise': 0.05051618052481517, 'low_vol': 0.03501856675649444}
+訓練期IC最弱成分：low_vol（預期拿掉它對組合影響最小/改善最多）
+
+========== 步驟2：3個leave-one-out子組合 ic_weighted(train-only) quick scan ==========
+  loo_no_eps_family/monthly/TRAIN: 報酬=+64.52%  MDD=-15.10%  Sortino=0.930  alpha=+6.10%(p=0.0549)  買進持有大盤=+58.86%
+  loo_no_eps_family/monthly/VALIDATION: 報酬=+33.48%  MDD=-7.15%  Sortino=0.800  alpha=+3.74%(p=0.3162)  買進持有大盤=+54.58%
+  loo_no_eps_family/quarterly/TRAIN: 報酬=+41.95%  MDD=-13.08%  Sortino=0.758  alpha=+3.61%(p=0.1861)  買進持有大盤=+58.86%
+  loo_no_eps_family/quarterly/VALIDATION: 報酬=+23.55%  MDD=-11.04%  Sortino=0.508  alpha=+2.09%(p=0.7161)  買進持有大盤=+54.58%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_revenue_surprise/monthly/TRAIN: 報酬=+67.79%  MDD=-16.43%  Sortino=0.993  alpha=+6.33%(p=0.0408)  買進持有大盤=+58.86%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_revenue_surprise/monthly/VALIDATION: 報酬=+41.39%  MDD=-13.96%  Sortino=0.791  alpha=+4.69%(p=0.2814)  買進持有大盤=+54.58%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_revenue_surprise/quarterly/TRAIN: 報酬=+52.20%  MDD=-13.43%  Sortino=0.787  alpha=+4.80%(p=0.1235)  買進持有大盤=+58.86%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_revenue_surprise/quarterly/VALIDATION: 報酬=+20.68%  MDD=-12.03%  Sortino=0.483  alpha=+1.22%(p=0.7920)  買進持有大盤=+54.58%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_low_vol/monthly/TRAIN: 報酬=+97.86%  MDD=-17.57%  Sortino=0.787  alpha=+9.34%(p=0.1315)  買進持有大盤=+58.86%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_low_vol/monthly/VALIDATION: 報酬=+92.76%  MDD=-13.59%  Sortino=1.137  alpha=+12.26%(p=0.0489)  買進持有大盤=+54.58%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_low_vol/quarterly/TRAIN: 報酬=+62.78%  MDD=-19.21%  Sortino=0.562  alpha=+6.23%(p=0.3634)  買進持有大盤=+58.86%
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\numpy\_core\_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+  loo_no_low_vol/quarterly/VALIDATION: 報酬=+80.44%  MDD=-16.86%  Sortino=1.033  alpha=+11.72%(p=0.1162)  買進持有大盤=+54.58%
+
+saved data/leave_one_factor_out_bigsample300.csv
+
+=== 對照：round340完整3因子(train-only IC加權)同樣300檔樣本 ===
+  cadence      label  alpha_ann_pct  alpha_pvalue  return_pct    mdd_pct  sortino
+  monthly      TRAIN       8.226874      0.032489   84.335937  -9.630825 1.005110
+  monthly VALIDATION       5.933928      0.199566   47.515803 -11.114824 0.899711
+quarterly      TRAIN       3.551588      0.243493   43.832641 -12.324883 0.694173
+quarterly VALIDATION       4.829731      0.431443   37.030624 -11.321128 0.689656
+
+=== SUMMARY：VALIDATION/quarterly，3個leave-one-out子組合 vs 完整3因子 ===
+dropped_component  alpha_ann_pct  alpha_pvalue  return_pct    mdd_pct  sortino
+       eps_family       2.088758      0.716098   23.551845 -11.041069 0.507928
+ revenue_surprise       1.219064      0.791952   20.682021 -12.034997 0.482943
+          low_vol      11.717265      0.116156   80.436348 -16.864720 1.032666

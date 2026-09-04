@@ -10,6 +10,8 @@
 
 ---
 
+## 第346輪 · 2026-09-04T22:32+08:00 · TW · 回收上一個異常中止session的合法未commit產物（leave-one-factor-out train-only權重+margin_utilization regime portfolio checkpoint進度），補齊LEADS.md遺漏段落 · 誠實commit，無新PASS/FAIL判定（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）
+
 ## 第 345 輪 · 2026-09-04T21:39+08:00 · US（取鎖時偵測到`LOCK_STALE`，pid 52820持有30.0分鐘後被回收，第344輪疑似異常中止未釋放鎖） · 新增`us_factors_value.py`：US軌第一個PIT基本面因子`f_us_value_bm`（book-to-market，用`us_fundamentals.get_concept_series()`抓StockholdersEquity+shares outstanding，PIT日期取兩者揭露日較晚者） · **本輪為1c地基+資料品質修正，未跑cheap gate，無候選判定**——冒煙測試（AAPL/MSFT/PLTR既有快取CIK）發現並修正兩個真bug：(1) AAPL的`CommonStockSharesOutstanding`在`end=2014-03-29`回傳861,745（比鄰近期少三個數量級，XBRL維度context誤植），加同一檔序列自身中位數0.01x~100x合理性濾網濾除；(2) **更嚴重**：XBRL揭露的股數是「當期實際股數」不隨未來股票分割回溯調整，但`USStockPrice`的`close`／`adj_close`兩欄都已經是分割調整過的（實測AAPL 2009年close/adj_close比值僅約1.19x，量級對應股利調整而非分割），直接相除會讓分割前期間的book-to-market被未來累積分割倍數放大（修正前AAPL 2009年約12倍，是7×4=28倍分割調整的偽影，非真實估值）——已在`book_value_per_share_pit()`內加自建分割偵測（比對相鄰揭露期股數比值是否貼近整數分割倍數，抓到AAPL 2014年7:1與2020年4:1兩次真實分割）並回推調整股數，修正後AAPL/MSFT/PLTR三檔`f_us_value_bm`量級一致合理（0.01~0.43範圍）。`is_holdout_consumed()`確認`False`（純SEC EDGAR+本機快取，零FinMind呼叫）。**下一步（下一輪）**：用`us_portfolio_pilot_real_data.cached_ticker_ids()`交集可解析CIK的樣本（預估30-60檔）跑`factor_ic.evaluate_factor()`cheap gate測試，需要新SEC companyfacts呼叫（目前僅3檔快取），本輪因發現並修復上述bug已耗用大半輪次時間/預算，cheap gate本身留給下一輪。詳見`US_MARATHON_STATE.md`/`US_LOG.md`本輪記錄、`us_factors_value.py`（新增）。
 
 ## 第 344 輪 · 2026-09-04T21:06+08:00 · FUT（取鎖時偵測到`LOCK_STALE`，pid 52496持有30.0分鐘後被回收，第343輪疑似異常中止未釋放鎖，複查確認`deb2a67`已完整推送非資料遺失） · 接續round341下一步(a)，新增`fut_stock_futures_liquidity_screen.py`對511檔F結尾個股期貨候選做分層抽樣流動性初篩 · 37檔樣本19檔(51.4%)達寬鬆門檻，外推約262檔可能可用（比TX/MTX/TE/TF大一個數量級），非TRIALS_LEDGER判定，補記`FUT_LEADS.md`；round341下一步(b)轉倉規則、(c)離散度實測仍未做，額外觀察round341遺留腳本本輪已從磁碟消失（同round343異常模式第二次出現）
