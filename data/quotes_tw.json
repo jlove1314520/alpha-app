@@ -1,12 +1,20 @@
 {
-  "fetched_at": "2026-09-04T05:47:15+00:00",
+  "fetched_at": "2026-09-04T05:45:26+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
     "trading_window": false,
     "queried": 209,
     "matched": 197,
     "live": 197,
-    "data_type": "intraday"
+    "data_type": "intraday",
+    "sparkline": {
+      "cached": 143,
+      "fetched": 7,
+      "failed": 0,
+      "not_attempted": 13,
+      "stopped_reason": "超過時間預算240秒",
+      "time_budget_sec": 240
+    }
   },
   "quotes": {
     "1210": {
@@ -710,7 +718,8 @@
       "change_pct": 0.837,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "2342": {
       "name": "茂矽",
@@ -918,7 +927,8 @@
       "change_pct": 0.744,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "2367": {
       "name": "燿華",
@@ -1225,7 +1235,8 @@
       "change_pct": 1.728,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "2455": {
       "name": "全新",
@@ -2687,7 +2698,8 @@
       "change_pct": 3.497,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3014": {
       "name": "聯陽",
@@ -2730,7 +2742,8 @@
       "change_pct": 8.182,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3019": {
       "name": "亞光",
@@ -3094,7 +3107,8 @@
       "change_pct": 1.603,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3094": {
       "name": "聯傑",
@@ -3137,7 +3151,8 @@
       "change_pct": 0.672,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3147": {
       "name": "大綜",
@@ -3147,7 +3162,8 @@
       "change_pct": 3.953,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3228": {
       "name": "金麗科",
@@ -3157,7 +3173,8 @@
       "change_pct": 1.754,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3231": {
       "name": "緯創",
@@ -3200,7 +3217,8 @@
       "change_pct": 5.913,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3293": {
       "name": "鈊象",
@@ -3210,7 +3228,8 @@
       "change_pct": 0.853,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3324": {
       "name": "雙鴻",
@@ -3220,7 +3239,8 @@
       "change_pct": 10.0,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3374": {
       "name": "精材",
@@ -3230,7 +3250,8 @@
       "change_pct": 7.5,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3376": {
       "name": "新日興",
@@ -3306,7 +3327,8 @@
       "change_pct": 0.172,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3450": {
       "name": "聯鈞",
@@ -3382,7 +3404,8 @@
       "change_pct": 7.117,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3504": {
       "name": "揚明光",
@@ -3458,7 +3481,8 @@
       "change_pct": 2.361,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3532": {
       "name": "台勝科",
@@ -3600,7 +3624,8 @@
       "change_pct": 4.63,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3661": {
       "name": "世芯-KY",
@@ -3610,7 +3635,8 @@
       "change_pct": 4.198,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "3702": {
       "name": "大聯大",
@@ -3752,7 +3778,8 @@
       "change_pct": 0.687,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "4576": {
       "name": "大銀微系統",
@@ -3795,7 +3822,8 @@
       "change_pct": 0.0,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "4760": {
       "name": "勤凱",
@@ -3805,7 +3833,8 @@
       "change_pct": 2.326,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "4763": {
       "name": "材料*-KY",
@@ -4178,7 +4207,8 @@
       "change_pct": -2.129,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "5291": {
       "name": "邑昇",
@@ -4188,7 +4218,8 @@
       "change_pct": -2.475,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "5471": {
       "name": "松翰",
@@ -4231,7 +4262,8 @@
       "change_pct": 4.11,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "5498": {
       "name": "凱崴",
@@ -4241,7 +4273,8 @@
       "change_pct": 0.945,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "5508": {
       "name": "永信建",
@@ -4251,7 +4284,8 @@
       "change_pct": 1.661,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "5534": {
       "name": "長虹",
@@ -4558,7 +4592,8 @@
       "change_pct": 8.091,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6177": {
       "name": "達麗",
@@ -4601,7 +4636,8 @@
       "change_pct": 0.385,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6196": {
       "name": "帆宣",
@@ -4974,7 +5010,8 @@
       "change_pct": -0.847,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6491": {
       "name": "晶碩",
@@ -5017,7 +5054,8 @@
       "change_pct": 0.0,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6526": {
       "name": "達發",
@@ -5126,7 +5164,8 @@
       "change_pct": 5.485,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6679": {
       "name": "鈺太",
@@ -5136,7 +5175,8 @@
       "change_pct": -1.199,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6693": {
       "name": "廣閎科",
@@ -5146,7 +5186,8 @@
       "change_pct": 1.681,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6756": {
       "name": "威鋒電子",
@@ -5203,7 +5244,8 @@
       "change_pct": 5.012,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_available:stat_not_ok"
     },
     "6830": {
       "name": "汎銓",
@@ -5215,6 +5257,7 @@
       "date": "20260904",
       "stale": false,
       "sparkline": [
+        398.0,
         424.5,
         408.5,
         432.0,
@@ -5233,8 +5276,7 @@
         520.0,
         572.0,
         598.0,
-        590.0,
-        597.0
+        590.0
       ],
       "sparkline_date": "2026-09-04"
     },
@@ -5246,7 +5288,30 @@
       "change_pct": 2.521,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline": [
+        207.0,
+        220.5,
+        218.0,
+        212.0,
+        220.5,
+        215.0,
+        209.0,
+        198.5,
+        193.0,
+        196.5,
+        187.0,
+        187.5,
+        188.0,
+        193.5,
+        194.0,
+        193.5,
+        188.0,
+        193.5,
+        190.5,
+        178.5
+      ],
+      "sparkline_date": "2026-09-04"
     },
     "6907": {
       "name": "雅特力-KY",
@@ -5256,7 +5321,8 @@
       "change_pct": 2.254,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "6922": {
       "name": "宸曜",
@@ -5266,7 +5332,8 @@
       "change_pct": 3.731,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "6933": {
       "name": "AMAX-KY",
@@ -5276,7 +5343,8 @@
       "change_pct": 4.967,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "6937": {
       "name": "天虹",
@@ -5286,7 +5354,8 @@
       "change_pct": 1.799,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "7610": {
       "name": "聯友金屬-創",
@@ -5296,7 +5365,8 @@
       "change_pct": 9.97,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "7711": {
       "name": "永擎",
@@ -5306,7 +5376,8 @@
       "change_pct": 9.913,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "7795": {
       "name": "長廣",
@@ -5316,7 +5387,8 @@
       "change_pct": 3.272,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "7855": {
       "name": "和運租車",
@@ -5326,7 +5398,8 @@
       "change_pct": -0.117,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "8103": {
       "name": "瀚荃",
@@ -5336,7 +5409,8 @@
       "change_pct": 1.24,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "8150": {
       "name": "南茂",
@@ -5346,7 +5420,8 @@
       "change_pct": 1.122,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "8210": {
       "name": "勤誠",
@@ -5356,7 +5431,8 @@
       "change_pct": 4.008,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "9907": {
       "name": "統一實",
@@ -5366,7 +5442,8 @@
       "change_pct": -0.651,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     },
     "9919": {
       "name": "康那香",
@@ -5376,7 +5453,8 @@
       "change_pct": 0.0,
       "time": "13:30:00",
       "date": "20260904",
-      "stale": false
+      "stale": false,
+      "sparkline_error": "not_attempted:time_budget"
     }
   }
 }
