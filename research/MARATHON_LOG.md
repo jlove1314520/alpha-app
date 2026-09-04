@@ -4,6 +4,18 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T02:56（hypothesis_queue排程接續）— #32第1關CHEAP
+GATE：**已結案FAIL**。新增`fx_twd_gate.py`（沿用#19/#31同一套指數層級
+時序相關性框架，逐年分批呼叫`TaiwanExchangeRate`避免502），訊號=台幣
+即期匯率`spot_sell`N(20)交易日變動率、目標=TAIEX後M(20)交易日報酬
+（N=M=20事前綁定）。結果：TRAIN Pearson r=+0.0368(null percentile=82.6
+未過90.0)、VAL Pearson r=-0.0723(null percentile=96.0過90.0，方向符合
+事前預期的股匯負相關)，**但train/val正負號相反**，第1關三項判準之一
+未過，直接FAIL，未進第2關以後。跟已FAIL的#9/#11/#13同一種「方向不穩定」
+死法家族。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#123、
+`HYPOTHESIS_QUEUE.md`#32。佇列#32結案，#5/#6/#8/#10仍卡外部依賴，下一輪
+需設計新假設軸#33。
+
 ## 2026-09-05T02:45（hypothesis_queue排程接續）— 修正`HYPOTHESIS_QUEUE.md`
 「排隊順序總結」章節#31字樣不同步（上一輪寫完#31結案FAIL細節後、總結
 區塊仍停留在「尚未結案，接續第2關」舊字樣，本輪發現並修正對齊，正是
