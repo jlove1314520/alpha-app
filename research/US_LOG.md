@@ -1117,3 +1117,11 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 寫入`TRIALS_LEDGER.md`#119、`US_LEADS.md`#16。`is_holdout_consumed()`開工/收工前皆`False`。零FinMind API呼叫（純SEC EDGAR+已快取價格）。
 
 **下一輪建議**：深挖`f_us_value_bm`（重用`deep_dive_f_us_low_vol.py`的1b框架：train/val長短倉、配對式隨機控制組、成本敏感度、beta對照），吸取`f_us_low_vol`系列教訓不能只看cheap gate數字。
+
+## 2026-09-05T02:05+08:00 — 馬拉松第350輪：`f_us_value_bm` 1b深挖嘗試中途卡死（infra發現，非判定）
+
+**工作單位**：對round347 CHEAP_PASS的`f_us_value_bm`（book-to-market）做1b深挖，作為未來US組合策略成分候選前置檢查。新增`deep_dive_f_us_value_bm.py`，重用`deep_dive_f_us_low_vol.py`的`_decile_legs`/`_random_legs`/`run_long_short_us`/`_load_market_df`不改動，只新增`run_one_value()`綁定`factor_col="f_us_value_bm"`，資料來源重用`us_factor_ic_value.py`的`load_value_sample()`（224個已快取companyfacts，理論上零新增API呼叫）。
+
+**結果**：資料載入卡在222/226（WHLR）之後，剩餘約4檔完全無輸出，`SEC_companyfacts_*.json`快取檔案數在卡住期間全程維持224不變（排除是額度用盡或正常抓取只是慢），約25分鐘無任何進展後判定卡死，手動`taskkill`終止行程，**沒有產出任何CHEAP_PASS/FAIL判定**，`data/deep_dive_f_us_value_bm.csv`未產生。已確認`sec_edgar_client.py::_cached_get()`本身有`timeout=20.0`，理論上不該無限期掛住，懷疑是尾端某檔在`book_value_per_share_pit()`內部（非`_cached_get`）的某個迴圈/解析步驟有問題，或該檔的companyfacts JSON異常龐大導致解析極慢，需下一輪先加print定位是哪一檔、哪個步驟卡住，才能決定是bug修復還是排除單一問題股票。
+
+`is_holdout_consumed()`確認`False`（開工前後皆確認）。零新增FinMind呼叫；SEC EDGAR呼叫次數未知（卡住那一步之前的222檔全為快取命中）。診斷log`deep_dive_f_us_value_bm_run.log`（gitignored）保留供下一輪參考。**下一輪工作單位建議**：在`load_value_sample()`迴圈內加逐檔timing print，重跑鎖定卡住的確切ticker，再判斷是bug還是單一股票的資料問題。

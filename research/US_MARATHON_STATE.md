@@ -1,3 +1,5 @@
+**最後更新：2026-09-05T02:05+08:00（馬拉松第350輪）**——嘗試對`f_us_value_bm`（round347 CHEAP_PASS）做1b深挖（作為US組合策略成分候選前置檢查），新增`deep_dive_f_us_value_bm.py`重用既有引擎，但`load_value_sample()`在224/226檔快取名單尾端（222/226 WHLR之後）卡死約25分鐘無進展（`SEC_companyfacts_*.json`快取數全程維持224不變，非額度用盡），手動終止，未產出判定。`is_holdout_consumed()`確認`False`。下一輪工作單位＝加print定位卡住的確切ticker。完整見`US_LOG.md`第350輪記錄。
+
 # US_MARATHON_STATE.md — 美股軌斷點狀態（覆寫式）
 
 **這份檔案只描述美股軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `US_LOG.md`；候選判定看 `US_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
