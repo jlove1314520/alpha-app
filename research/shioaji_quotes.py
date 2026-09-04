@@ -103,6 +103,54 @@ FUTURES_NEAR_MONTH = {
     "FXF_NEAR": {"group": "FXF", "code": "FXFR1", "label": "金融期近月"},
 }
 
+# 2026-09-04（總司令手機實測四修.二）：櫃買指數＋37個TWSE類股指數改走Shioaji Quote
+# （api.Contracts.Indexs.OTC / .TSE）。代碼來自本機合約快取
+# ~/.shioaji/contracts-v2-1.7/TW-IND-info.parquet（不必另開連線查），37個TWSE類股名稱跟
+# market_tw.json::sectors一對一完全吻合、無缺漏（對照表存research/data/shioaji_index_
+# contracts.json）。這些key（TPEX／IDX_*）由alpha_live_server.py的/live/indices端點提供，
+# **不塞進/live/stream的快照**（避免手機端每個事件多10KB）。
+INDEX_SUBSCRIPTIONS = {
+    "TPEX": {"exchange": "OTC", "code": "IX0043", "label": "櫃買指數"},
+    "IDX_IX0013": {"exchange": "TSE", "code": "IX0013", "label": "水泥窯製類指數"},
+    "IDX_IX0014": {"exchange": "TSE", "code": "IX0014", "label": "塑膠化工類指數"},
+    "IDX_IX0015": {"exchange": "TSE", "code": "IX0015", "label": "機電類指數"},
+    "IDX_IX0010": {"exchange": "TSE", "code": "IX0010", "label": "水泥類指數"},
+    "IDX_IX0011": {"exchange": "TSE", "code": "IX0011", "label": "食品類指數"},
+    "IDX_IX0012": {"exchange": "TSE", "code": "IX0012", "label": "塑膠類指數"},
+    "IDX_IX0016": {"exchange": "TSE", "code": "IX0016", "label": "紡織纖維類指數"},
+    "IDX_IX0017": {"exchange": "TSE", "code": "IX0017", "label": "電機機械類指數"},
+    "IDX_IX0018": {"exchange": "TSE", "code": "IX0018", "label": "電器電纜類指數"},
+    "IDX_IX0019": {"exchange": "TSE", "code": "IX0019", "label": "化學生技醫療類指數"},
+    "IDX_IX0020": {"exchange": "TSE", "code": "IX0020", "label": "化學類指數"},
+    "IDX_IX0021": {"exchange": "TSE", "code": "IX0021", "label": "生技醫療類指數"},
+    "IDX_IX0022": {"exchange": "TSE", "code": "IX0022", "label": "玻璃陶瓷類指數"},
+    "IDX_IX0023": {"exchange": "TSE", "code": "IX0023", "label": "造紙類指數"},
+    "IDX_IX0024": {"exchange": "TSE", "code": "IX0024", "label": "鋼鐵類指數"},
+    "IDX_IX0025": {"exchange": "TSE", "code": "IX0025", "label": "橡膠類指數"},
+    "IDX_IX0026": {"exchange": "TSE", "code": "IX0026", "label": "汽車類指數"},
+    "IDX_IX0027": {"exchange": "TSE", "code": "IX0027", "label": "電子工業類指數"},
+    "IDX_IX0028": {"exchange": "TSE", "code": "IX0028", "label": "半導體類指數"},
+    "IDX_IX0029": {"exchange": "TSE", "code": "IX0029", "label": "電腦及週邊設備類指數"},
+    "IDX_IX0030": {"exchange": "TSE", "code": "IX0030", "label": "光電類指數"},
+    "IDX_IX0031": {"exchange": "TSE", "code": "IX0031", "label": "通信網路類指數"},
+    "IDX_IX0032": {"exchange": "TSE", "code": "IX0032", "label": "電子零組件類指數"},
+    "IDX_IX0033": {"exchange": "TSE", "code": "IX0033", "label": "電子通路類指數"},
+    "IDX_IX0034": {"exchange": "TSE", "code": "IX0034", "label": "資訊服務類指數"},
+    "IDX_IX0035": {"exchange": "TSE", "code": "IX0035", "label": "其他電子類指數"},
+    "IDX_IX0036": {"exchange": "TSE", "code": "IX0036", "label": "建材營造類指數"},
+    "IDX_IX0037": {"exchange": "TSE", "code": "IX0037", "label": "航運類指數"},
+    "IDX_IX0038": {"exchange": "TSE", "code": "IX0038", "label": "觀光餐旅類指數"},
+    "IDX_IX0039": {"exchange": "TSE", "code": "IX0039", "label": "金融保險類指數"},
+    "IDX_IX0040": {"exchange": "TSE", "code": "IX0040", "label": "貿易百貨類指數"},
+    "IDX_IX0041": {"exchange": "TSE", "code": "IX0041", "label": "油電燃氣類指數"},
+    "IDX_IX0185": {"exchange": "TSE", "code": "IX0185", "label": "綠能環保類指數"},
+    "IDX_IX0186": {"exchange": "TSE", "code": "IX0186", "label": "數位雲端類指數"},
+    "IDX_IX0187": {"exchange": "TSE", "code": "IX0187", "label": "運動休閒類指數"},
+    "IDX_IX0188": {"exchange": "TSE", "code": "IX0188", "label": "居家生活類指數"},
+    "IDX_IX0042": {"exchange": "TSE", "code": "IX0042", "label": "其他類指數"},
+}
+INDEX_LABELS = {"TAIEX": "加權指數", **{k: v["label"] for k, v in INDEX_SUBSCRIPTIONS.items()}}
+
 CONTRACTS_READY_WAIT_SEC = 3  # 登入後合約清單非同步下載，太快存取會KeyError
 FLUSH_INTERVAL_SEC = 60  # 2026-09-03緊急修正，見模組docstring「git commit/push頻率」完整理由
 TRADING_WINDOW_POLL_SEC = 30  # 常駐迴圈裡多久檢查一次「是否還在交易時段」
@@ -669,6 +717,23 @@ def run_stream_daemon() -> None:
         except Exception as e:
             print(f"  [TAIEX] 訂閱失敗，跳過：{e}", flush=True)
 
+        # 2026-09-04四修.二：櫃買指數＋37類股指數（見INDEX_SUBSCRIPTIONS說明）
+        idx_ok, idx_fail = 0, []
+        for key, meta in INDEX_SUBSCRIPTIONS.items():
+            try:
+                group = getattr(api.Contracts.Indexs, meta["exchange"])
+                contract = getattr(group, meta["code"], None)
+                if contract is None:
+                    contract = group[meta["code"]]
+                api.subscribe(contract, quote_type=sj.QuoteType.Quote, version=sj.QuoteVersion.v1)
+                code_to_key[contract.code] = key
+                idx_ok += 1
+            except Exception as e:
+                idx_fail.append(f"{key}({meta['code']}):{type(e).__name__}")
+        subscribed.append(f"INDICES x{idx_ok}")
+        if idx_fail:
+            print(f"  [指數] {len(idx_fail)}個訂閱失敗，跳過：{idx_fail}", flush=True)
+
         for key, meta in FUTURES_NEAR_MONTH.items():
             try:
                 group = getattr(api.Contracts.Futures, meta["group"])
@@ -716,7 +781,7 @@ def run_stream_daemon() -> None:
         def on_quote_idx(quote):
             key = code_to_key.get(quote.code)
             if key:
-                _make_quote_idx_handler(state, key, "加權指數")(quote)
+                _make_quote_idx_handler(state, key, INDEX_LABELS.get(key, key))(quote)
 
         api.set_on_tick_stk_v1_callback(on_tick_stk)
         api.set_on_bidask_stk_v1_callback(on_bidask_stk)

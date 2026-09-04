@@ -284,7 +284,7 @@ def _combined_snapshot() -> dict:
             "connected": True,
             "market_status": MEM.market_status,
             "error": None,
-            "quotes": {k: dict(v) for k, v in MEM.quotes.items()},
+            "quotes": {k: dict(v) for k, v in _strip_index_keys(MEM.quotes).items()},
             "source_mode": "tick-push-memory",
         }
     elif hot is not None and hot_status == "hot-file":
@@ -293,7 +293,7 @@ def _combined_snapshot() -> dict:
             "connected": True,
             "market_status": hot.get("market_status", "open"),
             "error": None,
-            "quotes": hot.get("quotes") or {},
+            "quotes": _strip_index_keys(hot.get("quotes") or {}),
             "source_mode": "hot-file",
         }
     else:
@@ -331,6 +331,42 @@ def live_quotes(x_alpha_local_token: str | None = Header(default=None)):
     切換冷/熱資料源時不用改解析邏輯。"""
     _check_token(x_alpha_local_token)
     return _combined_snapshot()
+
+
+def _is_index_key(key: str) -> bool:
+    """櫃買指數（TPEX）與37類股指數（IDX_IX00xx）由/live/indices提供，不進stream快照。"""
+    return key == "TPEX" or str(key).startswith("IDX_")
+
+
+def _strip_index_keys(quotes: dict) -> dict:
+    return {k: v for k, v in (quotes or {}).items() if not _is_index_key(k)}
+
+
+@app.get("/live/indices")
+def live_indices(x_alpha_local_token: str | None = Header(default=None)):
+    """櫃買指數＋37類股指數（2026-09-04四修.二）：來源優先記憶體（tick-push），其次熱檔；
+    都沒有就回available=false讓前端退回market_tw.json並標日期。**token一律必檢。**"""
+    _check_token(x_alpha_local_token)
+    if MEM.fresh():
+        quotes, src, gen, ms = MEM.quotes, "tick-push-memory", MEM.updated_at, MEM.market_status
+    else:
+        hot, status = _hot_state()
+        if hot is not None and status == "hot-file":
+            quotes, src, gen, ms = (hot.get("quotes") or {}), "hot-file", hot.get("updated_at"), hot.get("market_status", "open")
+        else:
+            return {"available": False, "reason": "常駐行程沒有新鮮的指數報價（非交易時段或shioaji_quotes.py未在跑）", "hot_file_status": status}
+    tpex = quotes.get("TPEX")
+    sectors = []
+    for key, q in quotes.items():
+        if key.startswith("IDX_") and isinstance(q, dict):
+            sectors.append({"key": key, "code": key[4:], "name": q.get("label") or key, "last": q.get("last"),
+                            "close": q.get("close"), "change_pct": q.get("change_pct"), "tick_at": q.get("tick_at")})
+    sectors.sort(key=lambda r: r["code"])
+    return {
+        "available": bool(tpex or sectors), "source_mode": src, "market_status": ms, "generated_at": gen,
+        "tpex": tpex, "sectors": sectors, "count": len(sectors),
+        "note": "Shioaji Indexs.OTC/TSE Quote訂閱（見shioaji_quotes.py::INDEX_SUBSCRIPTIONS）；change_pct由last與reference自算",
+    }
 
 
 def _looks_like_us_symbol(code: str) -> bool:
@@ -475,6 +511,7 @@ def health():
         "kbars_mode": KBARS_MODE,               # /live/kbars是tick聚合，不是api.kbars()
         "token_required_on_live_endpoints": True,  # 三個/live端點一律要token，不因私有網路跳過
         "us_kbars": "not_implemented",
+        "index_quotes_in_memory": sum(1 for k in MEM.quotes if _is_index_key(k)),  # 2026-09-04四修.二：TPEX+37類股
     }
 
 

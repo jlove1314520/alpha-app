@@ -173,7 +173,7 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   合約 46,164」、期貨頁四檔皆「Shioaji 即時」（截圖fix1_home_futures_live.png／
   fix1_market_fut_live.png）。順帶修掉smoke check 19在美股盤後時段的既有誠實標示bug
   （Yahoo備援收盤後被標成IBKR）。
-- [ ] **四修.二** 櫃買指數＋類股指數接Shioaji即時（先列可訂閱合約清單），live server新端點，退回時標「昨日收盤（MM-DD）」
+- [x] **四修.二** ——**已完成**：Shioaji可訂閱指數合約由本機合約快取`~/.shioaji/contracts-v2-1.7/TW-IND-info.parquet`列出（226檔，其中IX*可訂閱Quote 128檔；對照表`research/data/shioaji_index_contracts.json`），**37個TWSE類股一對一全部命中**（IX0010–IX0042、IX0185–IX0188）、櫃買指數=OTC IX0043，**沒有缺漏**。常駐行程新增`INDEX_SUBSCRIPTIONS`38檔（重啟後log「INDICES x38」全部訂閱成功）；live server新增`/live/indices`（token必檢，這些指數不進stream快照）；市場頁櫃買列＋類股熱力圖連上即時標「Shioaji 即時」、離線退回market_tw.json並一律標「今日/昨日/前次收盤（MM-DD）」。smoke新增check 27（25項PASS）；Playwright：離線截圖fix2_market_offline_dated.png（「TPEx 昨日收盤（09-03）」）、即時截圖fix2_market_live_indices.png（假UDP指數推送：櫃買398.1、37/37類股）。**真實指數quote要等下一個交易日09:00後才會進來**（本次重啟已在13:35收盤後）。
 - [ ] **四修.三** 自選股／大盤速覽走勢線改當日1分K即時sparkline，離線退回20日並標「20日」；fetch_sparkline_20d靜默None修正（error欄位＋重試）
 - [ ] **四修.四** 診斷橫幅「資料過舊」納入即時源、「約每15秒自動更新」文案在SSE連線時改即時文案
 

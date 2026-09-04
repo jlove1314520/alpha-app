@@ -939,10 +939,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("26. 籌碼分頁三大法人逐日／累計表有資料列或誠實空狀態、免責文字與「估算」標示都在",
     chipErrors.length === 0, chipErrors.join("; ") || `rows=${results.chip_trend_rows}`);
 
+  // 27.【2026-09-04新增，四修.二】未連即時伺服器時，市場頁櫃買指數列與類股熱力圖
+  // 的來源標示必須帶收盤日期（今日/昨日/前次收盤（MM-DD）），不得讓盤後漲跌幅
+  // 不標日期地顯示（總司令原話）。
+  const idxDateErrors = [];
+  try {
+    await page.evaluate(() => { try { localStorage.removeItem("alpha_live_url"); localStorage.removeItem("alpha_live_token"); } catch (e) {} LIVE.connected = false; });
+    await page.evaluate(() => window.go("market"));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.setMarketToggle("market", "TW"));
+    await page.waitForTimeout(1500);
+    const info = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll("#idx-rows .row")];
+      const tpex = rows.find(r => r.textContent.includes("櫃買指數"));
+      return { tpexSrc: tpex ? tpex.querySelector(".nm span")?.textContent : null, heat: document.getElementById("heat-datatime")?.textContent || "", idx: document.getElementById("idx-datatime")?.textContent || "" };
+    });
+    if (!info.tpexSrc || !/收盤（\d{2}-\d{2}）/.test(info.tpexSrc)) idxDateErrors.push(`櫃買指數列來源標示沒有帶收盤日期：「${info.tpexSrc}」`);
+    if (!/收盤（\d{2}-\d{2}）/.test(info.heat)) idxDateErrors.push(`類股熱力圖時間標示沒有帶收盤日期：「${info.heat}」`);
+    if (!/收盤（\d{2}-\d{2}）/.test(info.idx)) idxDateErrors.push(`大盤指數時間標示沒有帶收盤日期：「${info.idx}」`);
+  } catch (e) {
+    idxDateErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("27. 未連即時源時，市場頁櫃買指數／類股熱力圖／大盤指數的盤後資料一律明標收盤日期（MM-DD）",
+    idxDateErrors.length === 0, idxDateErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

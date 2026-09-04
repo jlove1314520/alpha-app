@@ -2301,6 +2301,36 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 查不到/過期才退回現有TWSE來源（market_tw.json）——分工鐵律，見
   // intradayQuote()同一段說明。回傳{srcLabel,item}供idxRowHtml()使用，
   // sparkline借用既有TWSE來源的（Shioaji這支腳本沒有近20日走勢序列）。
+  // ── 2026-09-04（四修.二）櫃買指數＋37類股即時：live server的/live/indices（5秒快取），
+  // 連不上退回market_tw.json並**一律標日期**（總司令原話：絕不能再讓昨天的漲跌幅在今天
+  // 盤中不標日期地顯示）。
+  const LIVE_IDX={at:0,data:null};
+  async function getLiveIndices(){
+    if(!LIVE.connected)return null;
+    if(LIVE_IDX.data&&Date.now()-LIVE_IDX.at<5000)return LIVE_IDX.data;
+    try{const r=await liveFetch('/live/indices',4000);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();LIVE_IDX.data=d&&d.available?d:null;LIVE_IDX.at=Date.now();return LIVE_IDX.data}
+    catch(e){console.warn('[getLiveIndices]',e);LIVE_IDX.data=null;LIVE_IDX.at=Date.now();return null}
+  }
+  // market_tw.json這批盤後資料的「收盤日」標籤：今天→今日收盤（MM-DD）；昨天→昨日收盤（MM-DD）；
+  // 更早（例如週一看到週五的）→前次收盤（MM-DD）。永遠帶日期。
+  function twCloseDateLabel(twCache){
+    let d=null;
+    const raw=twCache&&((twCache.tpex&&twCache.tpex.date)||(twCache.taiex&&twCache.taiex.date));
+    if(raw&&/^\d{8}$/.test(raw))d=new Date(`${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6,8)}T14:00:00+08:00`);
+    else if(twCache&&twCache.fetched_at)d=new Date(twCache.fetched_at);
+    if(!d||isNaN(d))return '收盤（日期不明）';
+    const z=_zonedParts(d,'Asia/Taipei'),n=_zonedParts(new Date(),'Asia/Taipei');
+    const md=String(z.m).padStart(2,'0')+'-'+String(z.d).padStart(2,'0');
+    const dayDiff=Math.round((Date.UTC(n.y,n.m-1,n.d)-Date.UTC(z.y,z.m-1,z.d))/86400000);
+    return (dayDiff<=0?'今日收盤':(dayDiff===1?'昨日收盤':'前次收盤'))+`（${md}）`;
+  }
+  function tpexRowSource(twCache,liveIdx){
+    const q=liveIdx&&liveIdx.tpex;
+    if(q&&q.last!=null){
+      return {srcLabel:liveIdx.market_status==='closed'?'Shioaji 今日收盤':'Shioaji 即時',item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.tpex&&twCache.tpex.sparkline}};
+    }
+    return {srcLabel:'TPEx '+twCloseDateLabel(twCache),item:twCache.tpex&&{close:twCache.tpex.close,change_pct:twCache.tpex.change_pct,sparkline:twCache.tpex.sparkline}};
+  }
   function taiexRowSource(twCache){
     const {fresh,isTodayClose}=_intradaySourceFresh(INTRADAY_SINOPAC,'Asia/Taipei',isTwTradingWindowNow());
     const q=fresh?INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes.TAIEX:null;
@@ -2320,8 +2350,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 只挑close/change_pct兩個欄位，漏掉market_tw.json::tpex.sparkline——不是「資料
     // 還沒累積到2點」這種資料不足，而是即使sparkline以後累積到20點，這裡也永遠不會
     // 把它傳進去，櫃買指數那條走勢線注定永久畫不出來。改成把sparkline也一併帶進去。
-    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+idxRowHtml('櫃買指數','TPEx',tw.tpex&&{close:tw.tpex.close,change_pct:tw.tpex.change_pct,sparkline:tw.tpex.sparkline});
-    document.getElementById('idx-datatime').textContent=fmtMarketDataTime(tw);
+    const liveIdx=await getLiveIndices();
+    const tpexSrc=tpexRowSource(tw,liveIdx);
+    el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+idxRowHtml('櫃買指數',tpexSrc.srcLabel,tpexSrc.item);
+    // 2026-09-04四修.二：時間戳跟著實際來源走——即時就寫即時時間，退回盤後就明標收盤日
+    if(liveIdx&&liveIdx.tpex)document.getElementById('idx-datatime').textContent=`Shioaji 即時（${liveIdx.generated_at?fmtTzHHMM(new Date(liveIdx.generated_at),'Asia/Taipei'):'—'}）· 走勢線為近20日收盤`;
+    else document.getElementById('idx-datatime').textContent=`${twCloseDateLabel(tw)}｜${fmtMarketDataTime(tw)}`;
   }
   function futRowHtml(label,fut,srcLabel){
     if(!fut||fut.last==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
@@ -2369,7 +2403,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function loadHeatmap(){
     const el=document.getElementById('heat-grid');if(!el)return;
     await loadMarketDataFiles();
-    const sectors=(MARKET_TW_CACHE&&MARKET_TW_CACHE.sectors)||[];
+    let sectors=(MARKET_TW_CACHE&&MARKET_TW_CACHE.sectors)||[];
+    // 2026-09-04四修.二：連上即時且/live/indices有37類股→用即時漲跌幅（依名稱對應），標「Shioaji 即時」；
+    // 否則沿用market_tw.json盤後資料，但一律明標收盤日（不能讓昨天的漲跌幅在今天盤中不標日期地顯示）。
+    const liveIdx=await getLiveIndices();
+    let heatSrcNote=null;
+    if(liveIdx&&Array.isArray(liveIdx.sectors)&&liveIdx.sectors.length){
+      const byName={};liveIdx.sectors.forEach(s=>{byName[s.name]=s});
+      const merged=sectors.length?sectors.map(r=>{const l=byName[r.name];return l&&l.change_pct!=null?{...r,change_pct:l.change_pct,close:l.last}:{...r,change_pct:null}}):liveIdx.sectors.map(s=>({name:s.name,close:s.last,change_pct:s.change_pct}));
+      const hit=merged.filter(r=>r.change_pct!=null).length;
+      sectors=merged;
+      heatSrcNote=`Shioaji 即時 ${hit}/${merged.length} 類股（${liveIdx.generated_at?fmtTzHHMM(new Date(liveIdx.generated_at),'Asia/Taipei'):'—'}）`+(liveIdx.market_status==='closed'?'（今日收盤）':'');
+    }
     if(!sectors.length){el.innerHTML='<div class="note">查無資料</div>';document.getElementById('heat-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE);return}
     // 2026-08-27新增（B4）：每張卡加onclick開成分股清單（openSectorList），
     // 用JSON.stringify(r.name)而不是直接內插字串，避免類股名稱萬一含特殊
@@ -2381,7 +2426,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       ?`<div class="tile press" style="background:#383835;cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>—</span></div>`
       :`<div class="tile press" style="background:${heatColor(r.change_pct)};cursor:pointer" onclick='openSectorList(${nameAttr})'><b>${r.name.replace('類指數','')}</b><span>${r.change_pct>=0?'+':''}${r.change_pct.toFixed(2)}%</span></div>`;
     }).join('');
-    document.getElementById('heat-datatime').textContent=fmtMarketDataTime(MARKET_TW_CACHE);
+    document.getElementById('heat-datatime').textContent=heatSrcNote||`${twCloseDateLabel(MARKET_TW_CACHE)}｜${fmtMarketDataTime(MARKET_TW_CACHE)}`;
   }
 
   // 這批 8 大類是舊版「主流題材」資金流向 chips 用的 FinMind 產業指數代碼
@@ -3977,7 +4022,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     try{
       if(CURRENT_TAB==='home'){await hydrateHome();flashPriceEls('#wl-list');flashPriceEls('#home-idx-rows')}
       else if(CURRENT_TAB==='market'){
-        if(MKT_STATE.market==='TW'){await loadMarketIndex();flashPriceEls('#idx-rows')}
+        if(MKT_STATE.market==='TW'){await loadMarketIndex();flashPriceEls('#idx-rows');await loadHeatmap()}
         else if(MKT_STATE.market==='US'){await loadMarketUS();flashPriceEls('#us-idx-rows')}
         else if(MKT_STATE.market==='FUT'){await loadMarketFUT()}
       }else if(CURRENT_TAB==='stock'){liveUpdateStockPage()}
@@ -4242,7 +4287,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-04.0957';
+  const APP_VERSION='2026-09-04.1338';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
