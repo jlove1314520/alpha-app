@@ -1030,3 +1030,48 @@ overlay總報酬+62.86%（反而輸給買進持有+79.49%）、對打亂分布pe
 這個具體二元背離定義+固定0.3/1.0曝險二元切換，未測連續函數版本（曝險
 反比於breadth惡化程度，類似vol-targeting但用breadth當輸入）、未測不同
 回顧窗口組合。完整數字見`TRIALS_LEDGER.md`#105、`HYPOTHESIS_QUEUE.md`#28。
+
+### 等權重再平衡溢酬 Diversification Return / Equal-Weight Rebalancing Premium（HYPOTHESIS_QUEUE.md#29，2026-09-04FAIL）
+
+**經濟理由**：設計出跟前28條在機制分類上真正不同的第三類假設——既非
+①方向性選股排序（前28條中10條）、也非②timing/exposure overlay（前28條
+中另一批），是③portfolio construction：給定同一組標的、不做任何選股
+判斷、全程滿倉不做曝險縮放，純粹用「定期拉回等權重」這個機械式再平衡
+動作本身測試Booth & Fama（1992）文獻定義的diversification return/
+volatility harvesting效應。**基準操作化偏離原文的市值加權，改為t0等
+權重buy-and-hold**（本專案無市值/流通股數資料源，避免新增資料工程，
+理由見`HYPOTHESIS_QUEUE.md`#29條目）。
+
+**死因**：走完第1~5關全數PASS——sanity（TRAIN/VAL溢酬+24.81pp/+31.72pp、
+Sharpe/MDD同步改善）、隨機控制組（bootstrap抽80/159檔子集N=100 draws，
+100/100 draws TRAIN且VAL同時為正，CHEAP_PASS）、參數密集高原
+（`REBAL_FREQ`5~80交易日網格17/17點TRAIN/VAL皆正）、成本/稅/滑價
+1x/2x/3x敏感度（三情境皆維持正溢酬，3x保守情境仍有+16.06%/+24.60%）、
+leave-one-out（拿掉貢獻最大年份2020後剩餘複利溢酬+8.72%仍為正）——但
+**第6關逐年一致性未過**：TRAIN期(2015-2020)6個年度中僅4個年度溢酬為正
+（2015/2017/2018/2020，2016/2019為負），4/6=66.7%，未達事前訂定的
+>=5/6=83.3%門檻，依快殺標準判定，未進第7/8/9關。
+
+**這次死法的特殊之處（誠實記錄）**：是本佇列29條假設中通過關卡數最多、
+死得最深的案例之一——跟`f_52w_high_prox`（#17）同一種死法（第3/5關
+乾淨通過，第6關逐年一致性未過），兩者都證明了「效果存在、非隨機、
+非集中在單一年份」但「年度方向本身不夠一致」是兩種獨立的問題，前面幾關
+通不代表後面一定通。依`CLAUDE.md`復盤原則——這不是流程錯（GATE_SEQUENCE
+本身沒問題，關卡設計正確抓到了這個弱點），是流程對但這條假設在這個具體
+樣本/窗口下無edge夠強到通過。
+
+**不泛化成什麼**：不泛化成「等權重再平衡/diversification return這個
+機制在台股完全無效」——第1~5關已扎實證明效果存在，死的只是「這個具體
+159檔快取樣本+2015-2020這個TRAIN窗口」的逐年一致性不夠。未來若要重測，
+值得先檢查VAL期(2021-2024)逐年一致性是否更穩（VAL期整體報酬更平順、
+Sharpe更高於TRAIN），或擴大樣本池到全市場而非300檔快取子集，但這是
+未來獨立測試的變體，不是本次結果的一部分，不能拿本次FAIL反推「擴大
+樣本應該會PASS」當結論。
+
+**原始記錄**：`TRIALS_LEDGER.md`#107/#108/#110/#111/#112/#114、
+`HYPOTHESIS_QUEUE.md`#29、`equal_weight_rebalance_sanity.py`／
+`equal_weight_rebalance_control_v1.py`／`equal_weight_rebalance_plateau_v1.py`／
+`equal_weight_rebalance_costs_v1.py`／`equal_weight_rebalance_leave_one_out_v1.py`
+（皆新增，可重複執行）。佇列#1~29全數結案，剩餘#5/#6/#8/#10仍卡外部
+依賴，下一輪需確認依賴是否解鎖，若仍未解鎖則佇列實質已空，需設計新
+假設軸#30。
