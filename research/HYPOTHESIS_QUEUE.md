@@ -2721,3 +2721,26 @@ checkpoint進度50→**70/100**（`real`/`cost_returns`維持不變，非重算�
 `is_holdout_consumed()`收工前確認`False`。下一輪
 `python research/margin_utilization_regime_portfolio_v1.py`會自動接續
 TRAIN剩餘30筆隨機控制組，完成TRAIN後接著跑VALIDATION。
+
+**狀態（2026-09-05T00:30接續排程，TRAIN隨機控制組已完成100/100，
+VALIDATION進行中44/100，尚未結案）**：確認無殘留背景行程後，本輪內
+連續呼叫腳本三次（明確`run_in_background:true`啟動，各480秒預算，
+逐次等待自然結束再啟下一次，未同時並行）。**TRAIN隨機控制組
+70→100/100（完成）**。**TRAIN真實訊號表現**：1x情境total_return=
+-16.97%、MDD=-46.58%、Sortino=0.077、Sharpe=0.070、400筆交易、
+alpha(年化)=-4.18%(p=0.7512不顯著)、beta=+0.737、成本敏感度1x/2x/3x=
+-16.97%/-22.99%/-33.74%（三情境皆負）、同期買進持有大盤+58.86%。
+**TRAIN隨機控制組（N=100，同樣『非危機期規則鎖定不變、只隨機化危機期
+選股』對照組）終值mean=+0.40%，真實策略percentile=1.0**——遠低於
+90.0門檻，且真實策略還輸給99%的隨機對照組，是本佇列至今percentile
+最極端偏低的結果之一，暗示「危機時刻意挑低融資使用率個股」在TRAIN期
+不但沒有兌現下檔保護、反而系統性劣於隨機選股（可能是低融資使用率
+篩選同時篩掉了流動性/品質較好的標的，或TRAIN期危機regime判定跟實際
+危機時點有落差）。接著啟動VALIDATION：真實訊號+成本敏感度(1x/2x/3x)
+已計算完成，隨機控制組進度0→**44/100**。**仍未結案**——依協定判準
+（隨機控制組percentile過關不夠，alpha顯著性+beta拆解才是最終判準）
+需要VALIDATION完整跑完才能做綜合判定，但TRAIN這一項percentile=1.0已
+是極強的負面訊號，大機率最終結果是FAIL。`is_holdout_consumed()`收工前
+確認`False`。下一輪`python research/margin_utilization_regime_portfolio_v1.py`
+會自動接續VALIDATION剩餘56筆隨機控制組，完成後即可產出最終第2/7關
+判定。完整見`MARATHON_LOG.md`2026-09-05T00:30條目。
