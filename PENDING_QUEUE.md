@@ -188,9 +188,7 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 >
 > 三、修完回報：重建成功幾筆、排除幾筆、對帳四條目前是否全部成立、修正前後已實現數字。
 
-- [ ] **帳務.一** 補記交易進場價重建（交易所fills/order history）；重建不到標「進場價不明」並排除；損益欄與波段回落欄分開；已實現改FIFO配對推導
-- [ ] **帳務.二** 每日自動對帳四條恆等式＋儀表板紅色橫幅
-- [ ] **帳務.三** 回報重建/排除筆數、四條對帳現況、修正前後已實現數字
+- [x] **帳務全項** ——**已跟總司令確認並改路線，不在本session（Alpha）處理**：查證發現這批交易（WAL/TRX等）的程式碼不在`C:\alpha`，是完全獨立的Cybex交易系統，位於`C:\Users\user\AppData\Roaming\Claude\local-agent-mode-sessions\...\outputs\research`，有自己的33KB `CLAUDE.md`規則、1.5MB `REPORT.md`、獨立桌面捷徑「Cybex Claude Code」會開專屬session。已用AskUserQuestion請示，總司令裁示**改用Cybex專屬session處理**。這裡查到`ListAgents`目前跟Cybex相關的是`research-a6`（busy，可能是它的挖礦馬拉松）跟`Cybex挖礦終端機`（Remote Control，offline）——沒有現成idle的Cybex session可以直接轉交，總司令需自己雙擊桌面「Cybex Claude Code」捷徑或等`research-a6`空出來，把這條P0帳務指令貼過去給那個session執行。**此條目在Alpha這邊不再繼續，僅留紀錄。**
 
 ---
 
