@@ -877,8 +877,16 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     overlay、③portfolio construction，也非④配對交易均值回歸，是
     ⑤強制平倉/流動性驅動賣壓——Brunnermeier & Pedersen margin spiral
     機制，資料可行性已查證FinMind`TaiwanStockMarginPurchaseShortSale`
-    涵蓋2015年至今完整歷史可直接複用，完整內容見下方新章節）。**現在
-    排隊第一，下一輪從第1關cheap IC gate開始，不跳關。**
+    涵蓋2015年至今完整歷史可直接複用，完整內容見下方新章節）。**第1關
+    cheap IC gate已CHEAP_PASS**（train/val同號皆負、null percentile=
+    100.0，`TRIALS_LEDGER.md`#116），**deep_dive第一步下跌段vs上漲段
+    分組IC已完成**（下跌段VAL\|IC\|=0.1817遠大於上漲段0.0280，約6.5倍，
+    方向與核心機制主張完全吻合，`TRIALS_LEDGER.md`#117），仍未進入
+    portfolio層隨機控制組（≥100 draws）等後續關卡。**現在排隊第一，
+    下一輪從設計regime-conditional具體portfolio層構造開始**（依deep_dive
+    發現，訊號集中在下跌段，操作化方向應為「市場轉弱時才啟動避開高
+    融資使用率個股」而非恆定十分位多空），不跳過已完成的第1關與
+    deep_dive第一步。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後）**：15條原始佇列項目中
 #1~4、#7、#9、#11~15共10條已結案（皆FAIL），#10已建置方法論框架（非
@@ -2622,3 +2630,29 @@ PurchaseShortSale`）逾600秒未完成，第二次重跑因FinMind快取已建�
 期間（2018Q4/2020Q1/2022全年）高融資使用率股票是否確實跌得比低使用率
 股票更深，這是這條假設核心主張的關鍵驗證，不能只看unconditional IC**。
 完整見`TRIALS_LEDGER.md`#116、`MARATHON_LOG.md`本輪心跳條目。
+
+**狀態（2026-09-04接續排程，deep_dive第一步：下跌段vs上漲段分組IC）**：
+新增`factor_ic_margin_utilization_regime_split.py`（沿用`factor_ic.py`
+既有`evaluate_factor()`/`build_snapshots()`，把#30既有121個20交易日快照
+依TAIEX同窗口報酬正負分成down/up兩組，各自跑一次同一套IC+洗牌null框架，
+全程零新網路請求、複用#116已快取資料）。結果：44個下跌段快照、77個上漲段
+快照。**下跌段**：TRAIN mean_ic=-0.1394、VAL mean_ic=-0.1817 hit_rate=0.89、
+train/val同號、null percentile=100.0。**上漲段**：TRAIN mean_ic=+0.0304、
+VAL mean_ic=+0.0280 hit_rate=0.66、train/val同號但**方向翻正**、null
+percentile=95.9。VAL期下跌段\|IC\|=0.1817遠大於上漲段\|IC\|=0.0280（約
+6.5倍），跟上方「下檔保護要求」小節事前寫明的核心機制主張（機制只在
+下跌段特別有效）完全吻合——unconditional IC（#116的-0.0293/-0.0523）
+其實是被上漲段的弱正訊號稀釋過的結果，真實訊號集中在下跌段且強度遠
+超unconditional版本顯示的程度。**這不是PASS/FAIL/CHEAP_PASS判定**（事前
+已聲明這步驟是探索性佐證，44/77兩組樣本數比unconditional版本小很多，
+統計檢定力較弱，不能單獨當最終判準），但方向一致、幅度懸殊，強力支持
+下一步把這個因子操作化成**regime-conditional的個股避開篩選**（只在
+市場轉弱時啟動，比照`regime_overlay.py`既有市場層級regime標籤機制，
+但這次是個股篩選層級），而非單純恆定十分位多空。**下一輪待辦**：設計
+具體regime-conditional portfolio層構造並走隨機控制組（≥100 draws）
+等後續關卡，3個已知歷史危機期間（2018Q4/2020Q1/2022全年）個股層級
+下檔保護驗證仍待完成。本輪工作單位到此為止（依協定「一輪一個有界
+工作單位」）。完整見`TRIALS_LEDGER.md`#117、
+`data/factor_ic_margin_utilization_regime_split_results.csv`、
+`MARATHON_LOG.md`本輪心跳。`is_holdout_consumed()`本輪開工/收工前皆
+確認`False`。

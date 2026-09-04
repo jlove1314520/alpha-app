@@ -13,6 +13,39 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04 21:01+08:00 — hypothesis_queue排程：#30個股融資使用率deep_dive第一步——下跌段vs上漲段分組IC，訊號集中在下跌段（探索性佐證，非最終判定）
+
+接手前依`HYPOTHESIS_QUEUE_PROTOCOL.md`第0節完成三步驟：讀`CLAUDE.md`/
+`CONSTITUTION.md`、`git pull`+`git status`（發現非本輪產生的殘留變更
+`data/rate_limit_state.json`（已修改但未commit）與`research/
+.alpha_live_server.pid`/`alpha_live_server_*.log`/`run343_full_gate3.log`
+（未追蹤新檔），判斷為其他排程/即時報價來源留下，本輪不觸碰、不納入
+commit；local分支跟origin分歧2 vs 1個commit，用`git stash`保護殘留變更
+後`git rebase origin/main`成功理順，再`git stash pop`還原殘留變更）、
+取具名鎖`hypothesis_queue`（`LOCK_ACQUIRED`，非陳舊鎖檔）。
+
+`HYPOTHESIS_QUEUE.md`確認#1~29全數已結案，#30（個股融資使用率）第1關
+cheap IC gate已於上一輪CHEAP_PASS（`TRIALS_LEDGER.md`#116），本輪接續
+deep_dive。新增`factor_ic_margin_utilization_regime_split.py`（沿用
+`factor_ic.py`既有`evaluate_factor()`/`build_snapshots()`，複用#116已
+快取資料，零新網路請求）——把121個20交易日快照依TAIEX同窗口報酬正負
+分成down（44個）/up（77個）兩組分別跑IC。結果：**下跌段**TRAIN
+mean_ic=-0.1394、VAL mean_ic=-0.1817（train/val同號、null percentile=
+100.0）；**上漲段**TRAIN mean_ic=+0.0304、VAL mean_ic=+0.0280（train/val
+同號但方向翻正、null percentile=95.9）。VAL期下跌段\|IC\|=0.1817約為
+上漲段0.0280的6.5倍，方向與#30條目事前寫明的核心機制主張（Brunnermeier
+& Pedersen margin spiral，只在下跌段特別有效）完全吻合——unconditional
+IC（#116）其實被上漲段弱正訊號稀釋過，真實訊號集中在下跌段。**這不是
+PASS/FAIL/CHEAP_PASS最終判定**（樣本數比unconditional版本小，統計檢定力
+較弱），是探索性佐證，支持下一步應設計regime-conditional的個股避開篩選
+而非恆定十分位多空。完整見`HYPOTHESIS_QUEUE.md`#30條目、
+`TRIALS_LEDGER.md`#117。`is_holdout_consumed()`本輪開工/收工前皆確認
+`False`。**本輪工作單位到此為止（依協定「一輪一個有界工作單位」）**，
+下一輪從設計regime-conditional具體portfolio層構造開始，接續走隨機控制組
+（≥100 draws）等後續關卡。
+
+---
+
 ## 2026-09-04 22:04 — hypothesis_queue排程：#30個股融資使用率第1關cheap IC gate CHEAP_PASS，非最終判定
 
 新增`factors.py::_margin_utilization()`（FinMind
