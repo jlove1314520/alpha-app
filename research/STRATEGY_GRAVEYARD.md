@@ -1229,3 +1229,56 @@ PCR是否更適合當作選股層級的橫斷面訊號而非指數層級擇時�
   `data/fred_yield_curve_aligned.csv`（gitignored）。佇列#33結案，佇列
   #5/#6/#8/#10仍卡外部依賴，下一輪需依`HYPOTHESIS_QUEUE_PROTOCOL.md`
   第1節設計新假設軸#34。
+
+### 銅金比 Copper/Gold Ratio 當全球成長/風險偏好regime訊號（HYPOTHESIS_QUEUE.md#34，2026-09-05 FAIL）
+
+**經濟理由**：銅（工業金屬，需求跟全球製造業/營建景氣連動）對黃金（避險
+資產）的比值，是總經圈廣泛引用的「風險偏好vs風險趨避」量化指標——本佇列
+第一次引入「實體經濟供需」（商品期貨價格）當market regime判定輸入，跟
+先前的#19/#31/#32/#33（皆來自金融市場參與者的部位或預期）資訊來源類別
+不同。
+
+**死因**：第1關cheap gate（`copper_gold_ratio_gate.py`，`TRIALS_LEDGER.md`
+#125）本身CHEAP_PASS（TRAIN Pearson r=-0.2467 p<0.0001 null
+percentile=100.0、VAL r=-0.1758 p<0.0001 null percentile=100.0，本佇列
+timing類假設中訊號最強的一個），**但方向與事前綁定的正相關敘事相反**——
+實測為負相關（銅金比走高，TAIEX後續報酬反而轉弱）。轉具體overlay規則後
+（`copper_gold_ratio_overlay_v1.py`，方向已依實測負相關反轉：比值百分位
+偏高才降曝險）：TRAIN(2015-2020,n=1507)防禦曝險天數占比23.2%、overlay
+總報酬僅**+10.14%**（同期買進持有+52.41%，overlay本身已大幅跑輸基準）。
+第2關隨機控制組（打亂exposure時序，N=100）TRAIN/VAL percentile皆
+=100.0，第3關參數密集高原（threshold_high_pctl∈[0.60,0.90]×
+exposure_down∈[0.0,0.6]共49個網格點，TRAIN期1x成本）44/49點(90%)報酬
+為正，表面雙雙過關。**但第5關leave-one-out揭穿：TRAIN逐年報酬
+2015~2020為-2.11%/+7.10%/+9.70%/-8.20%/+37.43%/-24.09%，複利總報酬
++10.14%幾乎全部由單一年份2019（+37.43%）貢獻，拿掉2019後剩餘複利總
+報酬直接翻負為-19.85%**。依協定第5關未過（原本為正、拿掉最大貢獻年份
+後翻負）直接快殺結案，未進第6關以後，VAL期數字（+124.09%）不納入最終
+判定。
+
+**這次死法的特殊之處**：跟`fut_basis_carry`（#35→#37，717x放大集中在
+2000-2002三年）以及`equal_weight_rebalancing_premium`（#29，逐年一致性
+4/6未過）同屬「表面關卡（隨機控制組/參數高原）都過、但拆解逐年貢獻後
+發現集中度問題」的家族，是這個佇列第一次有overlay類假設死在第5關
+（前面幾條timing假設多半死在第1/2/3關），比第1關cheap gate訊號更強
+（|r|=0.18~0.25，本佇列timing類最強）不代表轉成overlay後就更穩健——
+訊號強度跟策略構造穩健性是兩件事，這是本次最值得記住的教訓。
+
+**不泛化成什麼**：不泛化成「銅金比這個訊號本身沒用」——第1關cheap gate
+的時序相關性（`TRIALS_LEDGER.md`#125）依然CHEAP_PASS，死的是「trailing
+百分位排名(WINDOW=250)+單一固定門檻(0.70)+二元曝險切換(1.0/0.3)」這個
+具體overlay構造。未來若要重測，建議方向：①先做逐年拆解確認訊號本身
+是否也集中在少數年份（本次尚未對「訊號」本身做這個檢查，只對「overlay
+報酬」做，訊號集中度跟報酬集中度可能是同一個問題的兩面）；②改用連續
+曝險縮放取代二元切換；③深挖「銅金比與台股負相關」這個反轉方向背後的
+真實機制（可能是美元強弱/Fed政策預期同時驅動銅金比與台股的共同因子）
+再決定是否值得重新設計規則。這些都是未來獨立測試的變體，不能沿用這次
+的具體實作當作「銅金比overlay已經測過」的證據。
+
+**原始記錄**：`TRIALS_LEDGER.md`#126、`HYPOTHESIS_QUEUE.md`#34、
+`copper_gold_ratio_gate.py`／`copper_gold_ratio_overlay_v1.py`（皆新增，
+可重複執行）、`data/copper_gold_ratio_aligned.csv`／
+`data/copper_gold_ratio_overlay_gate3_grid.csv`／
+`data/copper_gold_ratio_overlay_v1_run.log`（皆gitignored）。佇列#1~34
+全數結案，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪需依
+`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節設計新假設軸#35。
