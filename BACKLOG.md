@@ -26,8 +26,8 @@
 ## ✅ 2026-09-04凌晨（開發帽）乙.4/乙.5：App接本機即時伺服器（SSE）＋lightweight-charts
 
 詳見`PROGRESS.md`同日條目、`PENDING_QUEUE.md`「乙.4/乙.5補充」區塊。smoke test 23項全PASS
-（含新增25）、Playwright端到端通過。⚠ 乙.6「總司令手機下次開盤實測」尚未做（需先完成乙.3
-cloudflared服務安裝＋Access設定，並讓`alpha_live_server.py`常駐）。偏差：lightweight-charts
+（含新增25）、Playwright端到端通過。✅ 乙.6 總司令手機實測2026-09-04 09:38通過（App顯示
+「即時連線中 · poll-diff-2s」；cloudflared服務／防火牆／AlphaLiveServer常駐皆就緒）。偏差：lightweight-charts
 cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等確認連線衝突）。
 
 ## ✅ 2026-09-04凌晨（維運帽）P0三收尾：quotes.yml整天0次落地的根因＋監控補洞
@@ -65,7 +65,8 @@ cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等�
    佇列，這才是真正秒級；使用者說「不用現在做」。
 6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
    2026-09-04條目，需有workflow scope的PAT。
-7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:lphaun-alpha-live-server-cycle.ps1`
+7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:lpha
+un-alpha-live-server-cycle.ps1`
    （PID檔＋port 8001 LISTENING雙重判斷的啟動器，UTF-8 BOM）＋`run-alpha-live-server-hidden.vbs`，
    排程任務`AlphaLiveServer`每5分鐘檢查、沒在跑就啟動（RunLevel Limited）。開機觸發的
    `AlphaLiveServerBoot`（/SC ONSTART）需要系統管理員才能建，指令已交總司令；沒建也沒關係，
