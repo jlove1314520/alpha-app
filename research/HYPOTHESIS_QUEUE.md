@@ -2599,3 +2599,26 @@ unconditional IC更重要，不能只看平均IC就下結論。
 因子/測試程式碼。下一輪從第1關cheap IC gate開始（比照`factor_ic.py`
 既有框架新增`factor_ic_margin_utilization.py`，300檔快取宇宙，
 train/val正負號一致+null percentile>=90.0門檻三項判準），不跳關。
+
+**狀態（2026-09-04接續排程，第1關：CHEAP_PASS）**：新增
+`factors.py::_margin_utilization()`（FinMind
+`TaiwanStockMarginPurchaseShortSale`，`MarginPurchaseTodayBalance/
+MarginPurchaseLimit`，當日盤後公布即pit_date，天然PIT-safe）+
+`prepare_factors()`裡的`f_margin_utilization`（因子值保留原始比例、
+不取負號，事前綁定方向為負）+`factor_ic_margin_utilization.py`
+（新增，沿用`factor_ic.py`既有cross-sectional IC+洗牌null框架，
+standalone bonferroni_n=1）。結果（300檔快取宇宙，248檔可用，121個
+20交易日快照）：TRAIN mean_ic=-0.0293 IR=-0.166(n=74)、VAL
+mean_ic=-0.0523 IR=-0.290 hit_rate=0.55(n=47)，**train/val同號（皆負，
+與事前綁定方向完全一致）**、null percentile=100.0（門檻90.0，過關）。
+**第1關CHEAP_PASS，非最終判定**——本佇列第五類機制（強制平倉/流動性
+螺旋）第一次嘗試就過第1關，且方向跟假設核心主張完全吻合。**執行過程
+記錄**：第一次嘗試（新資料源冷快取，300檔首次抓`TaiwanStockMargin
+PurchaseShortSale`）逾600秒未完成，第二次重跑因FinMind快取已建立在
+480秒內完成，非bug，是資料源冷啟動成本，下一輪重跑同樣300檔宇宙時
+會更快。**下一輪（第2關）待辦**：隨機控制組（≥100 draws）、參數密集
+高原、成本/稅/滑價敏感度、leave-one-out、逐年一致性、樣本外，
+**deep_dive階段依上方「下檔保護要求」小節，額外測試3個已知歷史危機
+期間（2018Q4/2020Q1/2022全年）高融資使用率股票是否確實跌得比低使用率
+股票更深，這是這條假設核心主張的關鍵驗證，不能只看unconditional IC**。
+完整見`TRIALS_LEDGER.md`#116、`MARATHON_LOG.md`本輪心跳條目。

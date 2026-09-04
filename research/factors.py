@@ -515,6 +515,41 @@ def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
     return events[["pit_date", "ttm_cash_dividend"]]
 
 
+def _margin_utilization(stock_id: str, start_date: str) -> pd.DataFrame:
+    """`HYPOTHESIS_QUEUE.md` #30個股融資使用率（Margin Financing Utilization
+    Ratio）：融資今日餘額(`MarginPurchaseTodayBalance`) / 融資限額
+    (`MarginPurchaseLimit`)，比例越高代表越多散戶用槓桿持有該股票，股價下跌時
+    維持率不足觸發券商追繳/斷頭賣壓（Brunnermeier & Pedersen 2009 margin
+    spiral機制，流動性驅動而非資訊驅動的賣壓）。
+
+    **PIT安全性天然成立**：資料源`TaiwanStockMarginPurchaseShortSale`當日
+    盤後即公布，跟`f_inst_flow`/`f_dividend_yield_ttm`同樣的PIT處理慣例，
+    當日日期本身就是pit_date，不需要額外延遲假設。
+
+    **事前綁定方向為負**：融資使用率越高，預期未來報酬越差——因子值保留
+    原始比例、不取負號（跟`f_amihud_illiq`同樣「原始方向即預期方向」的
+    設計，不像`f_value_pb`/`pe`那樣取負號），cheap gate結果若同號但方向為
+    正，視為方向假設證偽，不因符合「同號」判準就宣稱通過。
+
+    2026-09-04 HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#30第1關起跑。
+    """
+    raw = load_dev("TaiwanStockMarginPurchaseShortSale", stock_id, start_date)
+    if raw.empty:
+        return pd.DataFrame(columns=["pit_date", "margin_utilization"])
+    needed = {"date", "MarginPurchaseTodayBalance", "MarginPurchaseLimit"}
+    if not needed.issubset(raw.columns):
+        return pd.DataFrame(columns=["pit_date", "margin_utilization"])
+    d = raw[["date", "MarginPurchaseTodayBalance", "MarginPurchaseLimit"]].copy()
+    d["MarginPurchaseTodayBalance"] = pd.to_numeric(d["MarginPurchaseTodayBalance"], errors="coerce")
+    d["MarginPurchaseLimit"] = pd.to_numeric(d["MarginPurchaseLimit"], errors="coerce")
+    d = d[d["MarginPurchaseLimit"] > 0]
+    if d.empty:
+        return pd.DataFrame(columns=["pit_date", "margin_utilization"])
+    d["margin_utilization"] = d["MarginPurchaseTodayBalance"] / d["MarginPurchaseLimit"]
+    d["pit_date"] = d["date"]
+    return d[["pit_date", "margin_utilization"]].sort_values("pit_date").reset_index(drop=True)
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
@@ -765,6 +800,22 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_dividend_yield_ttm skipped for {stock_id}: {e}")
         d["f_dividend_yield_ttm"] = np.nan
+
+    # (y) 個股融資使用率 Margin Financing Utilization Ratio (`HYPOTHESIS_QUEUE.md`
+    # #30，2026-09-04自動排程新增，佇列排隊第一起跑)。經濟理由：融資使用率越高，
+    # 代表越多散戶用槓桿持有該股票，股價下跌時維持率不足觸發券商追繳/斷頭賣壓，
+    # 是流動性驅動而非資訊驅動的賣壓（Brunnermeier & Pedersen 2009 margin
+    # spiral機制）——本佇列第五種正交機制（前29條分別是①方向性選股排序
+    # ②timing/exposure overlay ③portfolio construction ④配對交易均值回歸，
+    # 這是第一次測「強制平倉」）。**事前綁定方向為負**：因子不取負號，見
+    # `_margin_utilization()`docstring。資料源FinMind
+    # `TaiwanStockMarginPurchaseShortSale`，當日盤後公布即為PIT日期本身。
+    try:
+        margin_pit = _margin_utilization(stock_id, start_date)
+        d = _asof_join(d, margin_pit, "margin_utilization", "f_margin_utilization")
+    except RuntimeError as e:
+        print(f"    [factors] f_margin_utilization skipped for {stock_id}: {e}")
+        d["f_margin_utilization"] = np.nan
 
     return d
 

@@ -13,6 +13,20 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04 22:04 — hypothesis_queue排程：#30個股融資使用率第1關cheap IC gate CHEAP_PASS，非最終判定
+
+新增`factors.py::_margin_utilization()`（FinMind
+`TaiwanStockMarginPurchaseShortSale`）+`f_margin_utilization`因子+
+`factor_ic_margin_utilization.py`。300檔快取宇宙248檔可用，TRAIN
+mean_ic=-0.0293、VAL mean_ic=-0.0523、null percentile=100.0（門檻
+90.0），train/val同號且方向與事前綁定（融資使用率越高未來報酬越差）
+完全一致。**CHEAP_PASS，第1關而已，未進第2關**——依協定「一輪一個
+有界工作單位」本輪到此收工。完整見`HYPOTHESIS_QUEUE.md`#30條目、
+`TRIALS_LEDGER.md`#116。`is_holdout_consumed()`本輪開工/收工前皆
+確認`False`。下一輪從第2關隨機控制組（≥100 draws）開始，不跳關。
+
+---
+
 ## 2026-09-04 19:58 — hypothesis_queue排程：#1~29全數結案確認+設計新假設軸#30 — 佇列#5/#6/#8/#10依賴重新查證仍卡住，新增#30個股融資使用率（強制平倉/流動性螺旋風險），第1關cheap gate尚未開始
 
 `HYPOTHESIS_QUEUE_PROTOCOL.md`第0節三步驟（讀CLAUDE.md/CONSTITUTION.md、
