@@ -17,6 +17,13 @@
 
 ---
 
+## ✅ 2026-09-04上午～下午（開發帽）零.2 tick-push＋手機實測四修
+
+見`PROGRESS.md`同日條目。tick-push真逐筆推送上線（mode=tick-push）；期貨即時源回歸；櫃買＋37類股
+接Shioaji（合約清單`research/data/shioaji_index_contracts.json`，無缺漏）；走勢線即時改當日1分K；
+「資料過舊」與「即時連線中」不再同頁矛盾。smoke 27項PASS（新增26~29）。⚠ 真實指數quote與1分K
+sparkline要下一交易日盤中才看得到真資料。
+
 ## ✅ 2026-09-04凌晨（研究/驗證帽）管線校準探針：結論(乙)檢定力不足→cheap gate樣本100→300
 
 見`research/CALIBRATION_PROBE.md`。要點：100檔樣本對|IC|≈0.03弱訊號漏殺率60%（20組子樣本）；

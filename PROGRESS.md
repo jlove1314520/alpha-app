@@ -16,6 +16,42 @@
 
 ---
 
+## 2026-09-04上午～下午（開發帽＋維運帽）— 零.2 tick-push真逐筆推送＋總司令手機實測四修
+
+**零.2 tick-push（`a8502f2`）**：`shioaji_quotes.py`每筆tick經loopback UDP（127.0.0.1:8002、帶同一份
+token）推給`alpha_live_server.py`，伺服器`LiveMem`＋`asyncio.Condition`喚醒所有SSE連線，事件
+`mode:"tick-push"`（250ms合併）；沒新鮮tick自動退回`poll-diff-2s`。不開第二條Shioaji連線，熱檔改為備援。
+端到端push→SSE 257ms；正式上線後/health `stream_mode=tick-push`、30秒1522筆。
+
+**四修（總司令09:43盤中手機實測）**：
+1. **期貨即時源回歸**（`a8502f2`）：根因是B34改tick串流時`code_to_key`用`TXFR1`連續別名當key，但
+   `tick.code`是`TXFI6`實際月份碼→期貨tick全被靜默丟掉（訂閱其實一直成功）。`_resolve_fop_key()`前三碼
+   對回；首頁/期貨頁四檔恢復「Shioaji 即時」。順帶修smoke check 19在美股盤後時段的既有誠實標示bug
+   （Yahoo備援被標成「IBKR 今日收盤」）。
+2. **櫃買＋類股即時**（`f041ff2`）：Shioaji可訂閱指數合約由本機合約快取parquet列出（IX*可訂閱Quote
+   128檔，對照表`research/data/shioaji_index_contracts.json`）；**37個TWSE類股一對一全命中、櫃買=OTC
+   IX0043，無缺漏**。常駐行程加訂38檔（log「INDICES x38」），live server新增`/live/indices`（不進stream
+   快照）；市場頁即時標「Shioaji 即時」，離線退回market_tw.json一律標「今日/昨日/前次收盤（MM-DD）」。
+   smoke check 27。真實指數quote要等下一交易日09:00後才會進來（本次重啟已在13:35收盤後）。
+3. **走勢線改當日1分K**（`e244ac0`）：自選股每列、加權/台指期近月連上即時時用`/live/kbars`畫「今日」
+   （串流`kbars_last`逐筆併入），離線退回20日日線固定標「20日」；smoke check 28。live server不再把
+   TAIEX/TXF_NEAR誤判成美股回501。`fetch_sparkline_20d`靜默None：根因是240秒時間預算依字母序在約第60檔
+   用完、2330之後全沒抓且無任何欄位；改自選股優先、每檔寫`sparkline_error`、meta.sparkline統計、
+   428/429重試；本機實跑又發現TWSE對排最前面的2330/2454回`stat="很抱歉, 沒有符合條件的資料!"`軟性限流
+   （HTTP 200、手動再打就OK），再加stat非OK等3秒重試一次。
+4. **文案與健康檢查對齊即時源**（`08ba017`）：`diagQuoteProblems()`抽成純函式，台股報價「資料過舊」只在
+   Shioaji即時源也不新鮮時才報；SSE連線中輪詢文案改「● 即時串流連線中（逐筆推送 tick-push）…已停用15秒
+   輪詢」；期貨頁/首頁「資料時間」跟實際來源走。smoke check 29。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 2026-09-04 13:47 **27項全PASS、0 FAIL**（新增26/27/28/29）。
+**截圖**（session scratchpad）：fix1_home_futures_live／fix1_market_fut_live／fix2_market_offline_dated／
+fix2_market_live_indices／fix3_home_today_sparkline／fix4_home_status_consistent／fix4_market_fut_datatime。
+
+**維運**：`AlphaLiveServer`排程（每5分鐘檢查）已建；cloudflared服務與防火牆由總司令裝好；乙.6手機實測
+09:38通過。**下一步**：PENDING_QUEUE「P0產品項目」一～四，之後才是研究賽道轉向（一／二）。
+
+---
+
 ## 2026-09-04凌晨（研究帽→驗證帽）— 甲.1~甲.4：SPEC確認、暫停規則解除、管線校準探針結論(乙)；乙.1盤中不push；籌碼分頁第一單位
 
 - **甲.1/甲.2**（`8aad0d4`）：SPEC狀態「已確認（2026-09-03總司令）」；`MARATHON_PROTOCOL.md`
