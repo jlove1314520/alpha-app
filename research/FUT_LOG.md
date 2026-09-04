@@ -1973,3 +1973,82 @@ build_return_panel()`，零新增API呼叫，全程命中round332/333已建立�
 候選（多標的、彼此相對獨立，跟股票宇宙同精神）；若確認沒有，「跨商品橫斷面池」
 這個大方向可視為在TAIFEX既有商品範圍內結案，回頭選`FUT_LEADS.md`既有清單
 （盤別效應家族第三批/全新單一機制家族/`fut_basis_mean_reversion_60d`regime複驗）。
+
+## 2026-09-04T18:36+08:00 — 第341輪（FUT軌，地基查證：個股期貨資料源，正面結果）
+
+取鎖時偵測到`LOCK_STALE`（pid 42268持有29.9分鐘後被回收，上一輪疑似異常中止未
+釋放鎖）。三軌時間戳：FUT 09:33（第338輪，最舊）、US 17:32（第339輪）、
+TW 18:10（第340輪，最新）——依輪替選FUT。
+
+延續round338「下一步(a')」：查證FinMind是否有台股個股期貨（股票期貨）資料，
+是否涵蓋足夠標的數/深度，能否成為TX/MTX/TE三者太collinear（round338量化結論）
+之後、真正接近股票橫斷面精神的候選池。
+
+**做法**：先用WebSearch/WebFetch查FinMind公開教學頁
+（`https://finmind.github.io/tutor/TaiwanMarket/Derivative/`，公開可讀頁面，
+非付費/需登入來源，符合`MARATHON_PROTOCOL.md`第3節「允許查公開網路資料當假說
+來源」規則），找到候選資料集名稱`TaiwanFutOptDailyInfo`（商品代碼/種類/名稱
+對照表）；這只是「靈感來源」，實際存在與否/內容正確與否全部重新走FinMind API
+實測，不照抄網頁內容。新增`fut_probe_stock_futures_info.py`（唯讀，
+`TaiwanFutOptDailyInfo`是membership/reference清單非時間序列，走`_fetch()`
+直接呼叫，跟`universe.py`的`TaiwanStockInfo`/`TaiwanStockDelisting`同precedent，
+非違規繞過`load_dev()`）。
+
+**結果（正面，誠實記錄，不誇大）**：
+
+1. `TaiwanFutOptDailyInfo`資料集**確實存在**，單日快照（2024-12-30）回傳
+   1406列，欄位`code`/`type`/`name`，其中`type=='TaiwanFuturesDaily'`（期貨，
+   非選擇權）有**1139列**——遠多於目前已知的4種商品（TX/MTX/TE/TF）。
+2. `name`欄位可見大量個股期貨，例如`CDF`＝台積電期貨、`CCF`＝聯電期貨、
+   `CJF`＝華南金期貨（同時`CJ`這個無後綴的base代碼名稱是`華南金(股票期貨)`，
+   明確標註）。粗略以2-letter前綴分組觀察，個股期貨（金融股/傳產/電子股皆有）
+   佔多數，不是少數幾檔。
+3. **深度實測**（走`load_dev('TaiwanFuturesDaily', <code>, ...)`，跟
+   round332對MTX/TE/TF的檢查方式相同）：`CDF`（台積電期貨）單月合約
+   19479列，2010-01-25～2024-12-31（holdout邊界），184個不同合約月份；
+   `CCF`（聯電期貨）18409列，同樣2010-01-25～2024-12-31，184個合約月份。
+   兩者深度跟現有TX/MTX/TE的「已驗證可用」水準相當（14年以上、逐月合約
+   齊全），不是資料稀疏的邊緣商品。
+4. **代碼規則發現（避免下一輪誤踩）**：無後綴的base代碼（例如`CJ`、`CQ`、
+   `CL`）直接查`TaiwanFuturesDaily`回傳**空**——這些是`TaiwanFutOptDailyInfo`
+   目錄裡的「標註列」，真正可查詢的合約序列是帶`F`後綴的代碼（`CJF`／`CQF`／
+   `CLF`⋯，同TX/MTX一貫命名法），跟`1`/`2`後綴的舊版/已停用序列（例如`CJ1`
+   只到2024-09-18、`CQ1`只到2015-09-30，明顯是被`F`後綴序列取代的舊合約）
+   要分開，不能混用。
+5. **規模粗估**：`type=='TaiwanFuturesDaily'`且代碼以`F`結尾的列有**517筆**，
+   排除已知的4個指數/商品期貨代碼（TXF/MXF/EXF/FXF）後約509筆——這是「候選
+   個股期貨主力合約序列」的粗略上限估計，尚未逐一驗證每一檔的實際成交量/
+   流動性是否足夠納入橫斷面池，只確認「代碼存在且至少CDF/CCF兩檔深度良好」。
+
+**判定（誠實記錄，不過度樂觀）**：round338「下一步(a')」查證結果是**正面**——
+FinMind確實涵蓋大量台股個股期貨，深度跟現有已驗證商品相當，這是FUT軌第一次
+出現「數量級遠大於個位數、標的彼此獨立（不同公司）」的候選池，性質上比
+TX/MTX/TE更接近股票橫斷面精神，值得作為下一階段跨商品橫斷面池的主要方向。
+**但這只是資料存在性查證，不是策略判定**：尚未驗證(a)這~500檔的實際流動性
+（成交量/未平倉量門檻，很可能有相當比例是掛牌但成交清淡的邊緣合約，需要
+篩選）、(b)彼此之間的橫斷面離散度是否真的比TX/MTX/TE好（同round338
+`fut_multi_commodity_dispersion.py`方法論，尚未套用在這個新池子上——直覺上
+應該會更好，因為是不同公司而非同一大盤的不同包裝，但直覺不能取代實測）、
+(c)個股期貨是否有股票期貨特有的技術問題（例如是否也有轉倉/連續合約建構
+需求，跟`continuous_contract.py`目前只支援TX/MTX/TE/TF是否相容）。這是純
+資料地基查證，不含因子/策略檢定，不寫`TRIALS_LEDGER.md`列，跟round332/335/338
+同precedent，但**因為是重要的正面新地基發現，本輪額外補一筆到`FUT_LEADS.md`**
+（跟round332/335的處理方式一致：資料可用性發現本身不進`TRIALS_LEDGER`，但
+值得讓下一輪/使用者一眼看到）。
+
+**下一步**：(a)先用`fut_probe_stock_futures_info.py`已列出的~500檔`F`後綴
+候選，逐一（或抽樣）檢查成交量/未平倉量門檻，篩出「真正有流動性」的子集
+（可能剩下幾十到一兩百檔，仍遠多於現有4種商品）；(b)確認個股期貨的轉倉
+時點規則是否跟指數期貨相同（H1，見`FUT_CONTINUOUS_CONTRACT_DESIGN.md`），
+若不同要另外設計；(c)篩選完成後，比照`fut_multi_commodity_dispersion.py`
+方法論算這個新池子的dispersion_ratio/PCA，正式回答「這個池子是否真的比
+TX/MTX/TE有更多可用的橫斷面獨立變異」，那之後才是真正可以開始設計因子/
+排列檢定的地基完成點。
+
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`。全程走`finmind_client`
+既有快取層（`TaiwanFutOptDailyInfo`探測查詢是本輪唯一新增的少量API呼叫，
+CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參數
+組合，若之前未被查過則為新查詢，本輪執行時間內完成無限流）。**額外觀察**：
+`MARATHON_STATE.md`第7行「馬拉松全局輪次計數器」單行內嵌的完整輪次歷史敘事
+已成長到約9萬字元，持續每輪append會越來越肥大——這是既有慣例（非本輪造成），
+只如實記錄觀察供使用者知悉，本輪未擅自精簡/搬移該檔案結構。
