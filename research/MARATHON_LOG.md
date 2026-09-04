@@ -4,6 +4,21 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T06:24（hypothesis_queue排程接續，鎖檔陳舊30.1分鐘後由本輪
+回收，上一輪已完整寫完#35 VRP第1關FAIL判定與`STRATEGY_GRAVEYARD.md`/
+`TRIALS_LEDGER.md`#127，但未同步「排隊順序總結」章節即中斷未commit）—
+本輪先修正「排隊順序總結」缺漏的#35條目（依協定第1節「發現不一致先
+修正掉」），確認`is_holdout_consumed()`仍為False，接著正式寫入佇列
+第36條完整條目（個股融券使用率Short Sale Utilization Ratio當知情
+放空者訊號，資料源沿用#30`TaiwanStockMarginPurchaseShortSale`，改取
+`ShortSaleTodayBalance`/`ShortSaleLimit`欄位，跟#30融資使用率機制/
+投資人族群相反但同源，見條目內文區隔說明）。本輪為佇列地基設計工作
+單位，未寫因子/測試程式碼，下一輪從#36第1關cheap IC gate開始。另確認
+`data/rate_limit_state.json`與兩個US track deep-dive log檔案（`deep_
+dive_f_us_value_bm_run4_unbuffered.log`／`round359_deep_dive_loo_no_
+low_vol_independent_sample_monthly.log`）為AlphaMarathon其他軌道殘留
+變更，非本輪產生，依協定不觸碰、不納入本輪commit。
+
 ## 2026-09-05T05:29（hypothesis_queue排程接續，鎖檔陳舊30.1分鐘後由本輪
 回收，上一輪疑似寫完#34第1關CHEAP_PASS狀態後未commit即中斷）— #34銅金比
 第2關以後已結案：FAIL。新增`copper_gold_ratio_overlay_v1.py`（方向依#34
