@@ -148,6 +148,26 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 
 ---
 
+## HTTPS方案A（2026-09-04下午，總司令裁示，使用者原話全文，收到時正在查P0帳務問題，
+依插隊保護規則先登記，帳務調查完成後接續本項）
+
+原始指令全文：
+
+> 全程繁體中文。總司令裁示方案 A：自簽憑證讓 alpha_live_server 走 HTTPS，解決 PWA（https://jlove1314520.github.io）抓 http://192.168.3.241:8001 的混合內容封鎖。分兩階段，第一階段先做、切換 HTTPS 等總司令確認手機已裝好憑證再做：
+>
+> 1. 產生根 CA（RSA 4096、SHA-256、10 年、CN=Alpha Local CA、CA:TRUE）與伺服器葉憑證（RSA 2048、由 CA 簽、有效期 ≤825 天——iOS 硬性上限、SAN 含 IP:192.168.3.241 與 IP:127.0.0.1、DNS:localhost、EKU=serverAuth）。私鑰放 secrets/ 絕不進 repo；CA 公開憑證另存 DER 格式 alpha-ca.crt。
+> 2. 在目前 HTTP 的 alpha_live_server 加 GET /ca.crt 回傳 alpha-ca.crt（Content-Type: application/x-x509-ca-cert），此端點不需 token。
+> 3. 第二階段程式先寫好不切換：uvicorn --ssl-keyfile/--ssl-certfile 於 8001；CORS 已有，確認 allow_headers 含 X-Alpha-Local-Token、OPTIONS preflight 不驗 token；Playwright 對自簽加 ignoreHTTPSErrors。
+> 4. 回報 /ca.crt 可從 http://192.168.3.241:8001/ca.crt 下載、憑證 SAN/有效期，等總司令說「手機裝好了」再切 HTTPS。
+
+- [ ] **HTTPS.一** 產生根CA＋伺服器葉憑證（私鑰放secrets/不進repo，CA公開憑證DER格式alpha-ca.crt）
+- [ ] **HTTPS.二** alpha_live_server加GET /ca.crt（不需token）
+- [ ] **HTTPS.三** 第二階段程式先寫好不切換：--ssl-keyfile/--ssl-certfile、CORS allow_headers含token、
+  OPTIONS preflight不驗token、Playwright ignoreHTTPSErrors
+- [ ] **HTTPS.四** 回報/ca.crt可下載、SAN/有效期，等總司令說「手機裝好了」才切HTTPS
+
+---
+
 ## P0帳務完整性（2026-09-04下午，總司令實測，使用者原話全文，插最前面）
 
 原始指令全文：
