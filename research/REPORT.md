@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第358輪 · 2026-09-05T05:33+08:00 · FUT · 讀`CALIBRATION_PROBE.md`結論確認「#34同理重跑」對FUT不成立（round328已查證，不重複）；延伸round344流動性驗證到全部年度（2010-2024，沿用原門檻，零新增API呼叫） · 推翻round355樂觀讀數：滾動宇宙「流動」headcount崩塌（2015-2024最低僅3檔非round355讀的11檔），只有CCF/CDF兩檔15年全流動，比round349固定子集無明顯優勢；下一步三選項留給下一輪判斷
 ## 第357輪 · 2026-09-05T05:13+08:00 · US · 開工確認環境無其他軌背景process後重跑`deep_dive_f_us_value_bm.py`；buffered版等6分鐘log無新增，改`python -u`重跑驗證確認非卡住、是100次隨機控制組運算量真的大（round354假說(b)成立） · 同時發現「每次卡不同位置」可能部分是buffered stdout flush時機造成的觀測失真，非全是資源競爭；process留在背景繼續跑（pid 1905），`f_us_value_bm`維持CHEAP_PASS待深挖不變
 ## 第356輪 · 2026-09-05T04:32+08:00 · TW · 取鎖偵測`LOCK_STALE`（pid 53776，上一輪疑似失敗）；讀round353已跑完的`loo_no_low_vol`完整深挖數字（monthly alpha p=0.0489/percentile 100.0，quarterly不顯著），判讀「尚不能判PASS」（#118第三前提「獨立樣本外驗證」未補、兩cadence顯著度不一致、beta+0.42~0.51下檔保護未證明） · 新增`deep_dive_loo_no_low_vol_independent_sample.py`，改用完全獨立的`safe_pool_ids()[300:600]`、新樣本重估train-only IC權重，跑同套完整深挖關卡；process已在背景啟動，本輪未取得完整數字，留給下一輪判讀CSV後一次性判定並寫進LEADS/TRIALS_LEDGER
 ## 第355輪 · 2026-09-05T04:04+08:00 · FUT · 取鎖偵測`LOCK_STALE`（pid 55412，round354本身心跳完整，異常疑似發生在輪次之間）；開工發現TW round353背景process仍在跑（近1小時），刻意避開重度模擬，改做round348(c)前置：19檔個股期貨「滾動式宇宙」可行性評估 · 逐年在架數表顯示2011-2024最低10檔/2015-2024最低11檔，比round349固定子集（8檔/346天 vs 4檔/1623天）明顯更優，但誠實記錄流動性/轉倉雜訊/檢定力三項限制未解，非因子判定不佔TRIALS_LEDGER

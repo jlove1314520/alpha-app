@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-05T05:13+08:00**
+**最後更新：2026-09-05T05:33+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 357 輪。最新一輪：第 357 輪 · 2026-09-05T05:13+08:00 · US（取鎖乾淨。開工先確認環境無其他軌背景process佔用CPU後，第三次重跑`deep_dive_f_us_value_bm.py`（buffered stdout），等6分鐘log無新增，懷疑是Python檔案輸出預設block-buffered而非真的卡住；kill後改`python -u`（unbuffered）第四次重跑驗證：確認資料載入226檔（135可用）4分鐘內完整跑完並即時印出，之後進入100次隨機控制組迴圈（腳本設計上這階段無逐次進度輸出，非bug），process持續存活。**判讀：round354「工作量真的大」假說成立**——135檔×6組period/cost×100次疊代=600次完整回測，600秒硬超時本來就不夠；同時「每次卡在不同位置」的現象很可能同時受buffered stdout的flush時機影響，不必然全是跨process資源競爭，兩假說不互斥，誠實記錄皆為可能因素。process留在背景繼續跑（pid 1905），未殺掉。暫不更新`LEADS.md`/`TRIALS_LEDGER.md`（`f_us_value_bm`維持`CHEAP_PASS`待深挖不變）。`is_holdout_consumed()`確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第357輪記錄）。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 358 輪。最新一輪：第 358 輪 · 2026-09-05T05:33+08:00 · FUT（取鎖乾淨。開工讀`CALIBRATION_PROBE.md`結論，確認「#34同理重跑」對FUT軌不成立（round328已查證），不重複。本輪工作單位＝round355下一步：延伸流動性驗證到全部年度（2010-2024），沿用round344原封不動的門檻。**結果推翻round355的樂觀讀數**——round355「在架」headcount（2011-2024最低10檔）只算掛牌，本輪「流動」headcount崩塌到最低僅2檔（2015-2024最低僅3檔）；只有`CCF`/`CDF`兩檔15年全部年度都流動。滾動宇宙「長窗口換寬橫斷面」構想在流動性檢驗下不成立，比round349固定子集沒有明顯優勢。下一步三選項（2檔長窗口/短窗口N=10~12但檢定力堪憂/放棄橫斷面改回時序類假說）留給下一輪判斷。非因子判定不佔`TRIALS_LEDGER.md`列。`is_holdout_consumed()`確認`False`。零新增API呼叫。詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第358輪記錄）。
+
+**上一輪（供對照）：第 357 輪 · 2026-09-05T05:13+08:00 · US（取鎖乾淨。開工先確認環境無其他軌背景process佔用CPU後，第三次重跑`deep_dive_f_us_value_bm.py`（buffered stdout），等6分鐘log無新增，懷疑是Python檔案輸出預設block-buffered而非真的卡住；kill後改`python -u`（unbuffered）第四次重跑驗證：確認資料載入226檔（135可用）4分鐘內完整跑完並即時印出，之後進入100次隨機控制組迴圈（腳本設計上這階段無逐次進度輸出，非bug），process持續存活。**判讀：round354「工作量真的大」假說成立**——135檔×6組period/cost×100次疊代=600次完整回測，600秒硬超時本來就不夠；同時「每次卡在不同位置」的現象很可能同時受buffered stdout的flush時機影響，不必然全是跨process資源競爭，兩假說不互斥，誠實記錄皆為可能因素。process留在背景繼續跑（pid 1905），未殺掉。暫不更新`LEADS.md`/`TRIALS_LEDGER.md`（`f_us_value_bm`維持`CHEAP_PASS`待深挖不變）。`is_holdout_consumed()`確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第357輪記錄）。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 
