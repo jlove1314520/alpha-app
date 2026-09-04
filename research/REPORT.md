@@ -279,6 +279,8 @@
 
 ## 第 202 輪 · 2026-08-29T01:44+08:00 · TW（推翻round201的「process無聲消失」誤判，補齊B_plus_value_pe的N=100數字）· 判定：開工前`tasklist`確認環境乾淨，發現round201其實已經成功寫出B_plus_value_pe的N=100結果（`data/portfolio_backtest_v2_random_control_n100.csv`mtime早於round201 log時間），只是檢查時機在CSV寫出前造成誤判「消失」。本輪獨立process重新驗證，數字逐位吻合：報酬+68.42%/MDD−8.65%/alpha+10.26%(p=0.0535)/**percentile(N=100)=100.0**。至此A_4pass(99.0)/B_plus_value_pe(100.0)兩組合的N=100隨機控制組數字都已確認，`LEADS.md`同步補充。`portfolio_multifactor_v2`整體判定不變（FAIL，卡在alpha顯著性）。沒有已知的下一個補對照組工作單位——A/B兩組合數字都已拿到，剩下(a)全市場更大樣本重跑／(b)train-only嚴格樣本外仍留給使用者裁定優先序。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約92輪、跨度約52小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`LEADS.md`第202輪記錄
 
+## 第 339 輪 · 2026-09-04T17:32+08:00 · US · 取鎖偵測到陳舊鎖檔（209.8分鐘，已回收）；接續round336未完成的`deep_dive_f_us_low_vol_cached_universe.py`1b深挖重跑，重新啟動背景process（PID 1272確認存活） · 本輪session預算再次於完成前耗盡，process仍在背景繼續跑，未kill，下一輪先檢查是否已產出結果
+
 ---
 ## 第 201 輪 · 2026-08-29T01:40+08:00 · TW（補對照組，取鎖時偵測到LOCK_STALE，上一輪疑似失敗）· 判定：接續round200的N=100隨機控制組調查——`load_sample_with_factors()`已因T86快取修復恢復正常。**A_4pass/ic_weighted/quarterly VAL期N=100完整跑完**：percentile從N=15的100.0修正為**99.0**（報酬+68.33%），確認N=15滿分是解析度不足假象。**B_plus_value_pe組合三次嘗試（同process/獨立process/連成功過的A_4pass重跑也一樣）皆process無聲消失**，排除跨組合記憶體累積假設，改懷疑環境資源競爭（本機同時有其他互動session在跑）。既有`portfolio_multifactor_v2`判定（FAIL）不變。`is_holdout_consumed()`確認`False`。**提醒使用者：自第110輪暫停規則生效以來，三軌合計已連續跳過約91輪、跨度約52小時，需使用者親自確認`PORTFOLIO_STRATEGY_SPEC.md`或裁示選項(a)/(b)/解除暫停規則三者之一才能恢復進度。** 見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`LEADS.md`第201輪記錄
 

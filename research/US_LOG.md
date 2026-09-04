@@ -1070,3 +1070,37 @@ US軌依舊沒有組合策略相關工作可做（`PORTFOLIO_STRATEGY_SPEC.md`�
 **下一步**：US軌組合回測地基（引擎+真實資料接線）至此完成，接下來若要有真正能用的多因子組合策略，**卡點在US軌至今沒有任何一個通過cheap gate且深挖後仍成立的因子**——純price-only三因子家族（低波動/動能/反轉）已全部結案（見`US_LEADS.md`目前狀態），下一個可能突破口是需要PIT基本面資料的因子家族（價值/品質），這需要先確認SEC EDGAR資料源可行性（`CLAUDE.md`提過既有資料源之一，只能參考公開API文件重新寫，不能動`alpha-data/fetch.py`本身）；或者擴大`us_universe.py`樣本規模（比照`CALIBRATION_PROBE.md`「檢定力不足」的教訓，US軌至今每次因子測試都只用27-40檔隨機子樣本，遠小於本輪138檔的引擎測試規模，換更大樣本重測既有FAIL因子也是合理下一步）。`US_PORTFOLIO_STRATEGY_SPEC.md`（第329輪「下一步」(d)）待有至少一個PASS候選後再寫，先寫規格書但沒有候選可填會本末倒置。
 
 詳見`REPORT.md`第333輪條目、`US_MARATHON_STATE.md`本輪記錄、`us_portfolio_pilot_real_data.py`（新增，含`main()`可重複執行）。
+
+---
+
+## 第336輪 · 2026-09-04（US軌）
+
+**取鎖**：偵測到陳舊鎖檔（pid 38752，30.1分鐘未更新）並回收，記入心跳。回收後`git status`確認乾淨（無殘留未commit變更）。
+
+**選軌**：三軌「最後更新」時間戳（讀各state檔案內文，非檔案mtime）：US 07:03（第333輪，最舊）、TW 07:33（第334輪）、FUT 08:03（第335輪）——依輪替選US。
+
+**開工前依協定讀`CALIBRATION_PROBE.md`**：結論(乙)明確給出US軌操作指令「US/FUT軌的#47/#52同理各自重跑」（用更大樣本重跑cheap gate，比照TW的`SAMPLE_SIZE`100→300修正）。
+
+**本輪工作單位**：新增`us_factor_ic_cached_universe.py`，重跑`f_us_low_vol`不分層版cheap gate，樣本從原本每次隨機抽樣~27-40檔改為`cached_ticker_ids()`（`us_portfolio_pilot_real_data.py`既有函式，重用不複製）——這個專案至今已抓過完整1990-2024價格歷史的**所有**ticker，目前225個，零新增API呼叫（純讀本機parquet快取）。
+
+**結果**：201/225可用（>=260天）。TRAIN mean_ic=+0.0251 IR=+0.161（n=76期）；VAL mean_ic=+0.1245 IR=+0.568 hit_rate=0.67（n=49期）；train/val同號；null percentile=**100.0**（門檻90.0，清楚過關）。跟原始27檔樣本（#39：train+0.031/val+0.134/percentile 100.0）方向一致、量級接近，證實不是小樣本雜訊。
+
+**判定**：CHEAP_PASS（清楚過關），但`f_us_low_vol`因子家族整體判定**維持FAIL不變**——原本判死的是1b深挖層（策略構造：十分位多空空頭腿引入非市場中性beta，`TRIALS_LEDGER.md`#41/#64/#68三個tier分別在深挖階段失守），不是cheap-gate統計檢定力問題，本輪重跑沒有、也不打算觸及那個失敗機制。
+
+**釐清`CALIBRATION_PROBE.md`措辭的一個混淆點**：探針原文把「#47/#52」並列成同一組「待重跑」，但這兩者死因不同——#47（大型股tier，percentile 83.4）是cheap-gate層邊緣FAIL，本輪大樣本重跑直接回答了它（翻盤CHEAP_PASS，證實探針診斷正確）；#52（中型股tier）cheap gate本身早就CHEAP_PASS（percentile 100.0），死因是`TRIALS_LEDGER.md`#68的1b深挖（TRAIN期輸給隨機控制組），跟cheap-gate樣本大小無關，「換更大樣本重跑cheap gate」這個修正手段對#52的實際死因不對症。已在`TRIALS_LEDGER.md`#104備註跟「校準探針後的重新分類」章節寫清楚這個區分，避免未來輪次誤把#52也當成「cheap-gate檢定力問題」重跑。
+
+**經濟解釋**：低波動異常（BAB/leverage-constraint理論）的橫斷面排序力在大樣本下確認存在，符合文獻；但策略構造（尤其空頭腿）本身有系統性方向曝險，是「因子層有效、策略構造層無效」的案例，跟TW軌`f_low_vol`十分位多空（`TRIALS_LEDGER.md`#82，同樣死於空頭腿方向性曝險但構造細節不同）屬同一大類教訓。
+
+**這是單因子IC重跑，依`MARATHON_PROTOCOL.md`2026-09-03指令需說明服務哪個組合迭代**：US軌尚無任何通過完整深挖的PASS因子（累計14筆試驗0筆PASS，見round 84總結），因此目前沒有`us_portfolio_multifactor`可迭代——本輪的定位是`CALIBRATION_PROBE.md`要求的管線校準複查（前置檢查性質），不是新因子試驗，也不假裝是組合層推進；US軌真正的組合層突破口仍卡在「需要先有至少一個深挖後PASS的因子」，這個卡點本輪沒有解除。
+
+**API呼叫**：零（全程命中本機parquet快取，`cached_ticker_ids()`只是glob檔名）。`is_holdout_consumed()`確認`False`。
+
+**下一步**：US軌至今仍是0筆深挖後PASS因子。可能方向：(a) SEC EDGAR基本面因子家族（價值/品質，尚未開始）；(b) 改良`f_us_low_vol`的策略構造（純多頭版本、或加入beta中性化手段）而非放棄整個因子家族；(c) 擴大`cached_ticker_ids()`規模繼續累積快取，讓未來的cheap-gate重跑樣本更大。三者皆非硬性待辦，下一輪US可自行判斷。
+
+**檔案改動**：新增`us_factor_ic_cached_universe.py`、`us_factor_ic_cached_universe_run.log`；更新`TRIALS_LEDGER.md`（#104+分類章節）、`US_LEADS.md`（#15）、`US_MARATHON_STATE.md`、`REPORT.md`（心跳）、`MARATHON_STATE.md`（計數器）。
+
+詳見`TRIALS_LEDGER.md`#104、`US_LEADS.md`#15、`REPORT.md`第336輪條目。
+
+## 2026-09-04T17:32+08:00 — 馬拉松第339輪：US（接續round336，process確認存活但session預算再次於完成前耗盡）
+
+取鎖時偵測到`LOCK_STALE`（pid 26380持有209.8分鐘，上一輪疑似異常中止，已自動回收，寫入心跳）。依輪替選US（US 08:33第336輪最舊）。檢查round336啟動的`deep_dive_f_us_low_vol_cached_universe.py`：`data/deep_dive_f_us_low_vol_cached_universe.csv`與log皆不存在/0位元組，process本身已不在（round336的session早已結束），依round336留下的指示（零新增API呼叫可安全重跑）重新啟動。本輪重新執行同一支腳本（背景process，PID 1272，17:32:15啟動），`ps -W`確認存活中，`is_holdout_consumed()`本輪開工/收工前皆確認`False`。**再次未能等到完成**：這次是本輪session的USD預算先耗盡，process在我收工當下仍在跑（未kill，讓它繼續在背景執行，不影響下一輪判斷——下一輪開工時應先檢查`data/deep_dive_f_us_low_vol_cached_universe.csv`是否已產出，若有直接讀取，若process已消失無輸出才需要再重跑一次）。沒有偽造或推測任何數字。**本輪無`TRIALS_LEDGER.md`/`US_LEADS.md`新增列**（無結果可判定）。詳見`US_MARATHON_STATE.md`、`REPORT.md`（心跳）、`MARATHON_STATE.md`（計數器）。
