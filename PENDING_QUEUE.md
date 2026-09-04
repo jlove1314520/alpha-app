@@ -175,7 +175,7 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   （Yahoo備援收盤後被標成IBKR）。
 - [x] **四修.二** ——**已完成**：Shioaji可訂閱指數合約由本機合約快取`~/.shioaji/contracts-v2-1.7/TW-IND-info.parquet`列出（226檔，其中IX*可訂閱Quote 128檔；對照表`research/data/shioaji_index_contracts.json`），**37個TWSE類股一對一全部命中**（IX0010–IX0042、IX0185–IX0188）、櫃買指數=OTC IX0043，**沒有缺漏**。常駐行程新增`INDEX_SUBSCRIPTIONS`38檔（重啟後log「INDICES x38」全部訂閱成功）；live server新增`/live/indices`（token必檢，這些指數不進stream快照）；市場頁櫃買列＋類股熱力圖連上即時標「Shioaji 即時」、離線退回market_tw.json並一律標「今日/昨日/前次收盤（MM-DD）」。smoke新增check 27（25項PASS）；Playwright：離線截圖fix2_market_offline_dated.png（「TPEx 昨日收盤（09-03）」）、即時截圖fix2_market_live_indices.png（假UDP指數推送：櫃買398.1、37/37類股）。**真實指數quote要等下一個交易日09:00後才會進來**（本次重啟已在13:35收盤後）。
 - [x] **四修.三** ——**已完成**：自選股每列、大盤速覽（加權/台指期近月）連上即時時改用`/live/kbars`當日1分K畫「今日」走勢線（串流`kbars_last`逐筆併入、60秒重抓一次全量），離線退回20日日線並固定標「20日」；smoke新增check 28（26項PASS）；Playwright端到端（假1分K）：自選股2330/2454與加權/台指期皆「今日」30點（fix3_home_today_sparkline.png）。順帶修掉live server把TAIEX/TXF_NEAR誤判成美股回501的bug。**fetch_sparkline_20d靜默None根因**：2026-09-03加的240秒時間預算依字母序逐檔抓，約第60檔用完，2330之後全沒抓、也沒寫任何欄位——修法：預設自選股永遠最先抓；每檔失敗/未嘗試原因寫`quotes[code].sparkline_error`（kind:detail）、meta.sparkline記統計與停止原因；428/429先等5秒重試一次再觸發斷路器。本機實跑驗證見下一則commit。
-- [ ] **四修.四** 診斷橫幅「資料過舊」納入即時源、「約每15秒自動更新」文案在SSE連線時改即時文案
+- [x] **四修.四** ——**已完成**：`diagQuoteProblems()`抽成純函式，台股報價「資料過舊」只在Shioaji即時源也不新鮮時才報（美股同理看IBKR）；`pollStatusText()`在SSE連線中改「● 即時串流連線中（逐筆推送 tick-push），數字隨 tick 更新，已停用15秒輪詢」；連線狀態一變就重算橫幅與文案；期貨頁與首頁大盤速覽的「資料時間」跟著實際來源（即時寫即時時間，盤後明標收盤日），不再出現「四檔Shioaji即時」旁邊掛「資料時間07:24 GitHub Actions」。smoke新增check 29（27項PASS）。
 
 ---
 

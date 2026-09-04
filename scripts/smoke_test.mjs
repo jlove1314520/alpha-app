@@ -988,10 +988,41 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("28. 未連即時源時自選股走勢線必須標「20日」（即時時為當日1分K標「今日」，端到端另驗）",
     sparkTagErrors.length === 0, sparkTagErrors.join("; "));
 
+  // 29.【2026-09-04新增，四修.四】「資料過舊」與「即時連線中」不得同頁矛盾：
+  // (a) 台股盤中、Actions quotes_tw 過舊、但 Shioaji 即時源新鮮且 SSE 連線中 → 不得報
+  //     「自選股台股報價 資料過舊」；(b) 即時源也沒有 → 仍要報（防線沒被拆掉）；
+  // (c) SSE 連線中時輪詢文案必須是即時模式文案，不得出現「近即時輪詢」。
+  const consistencyErrors = [];
+  try {
+    const r = await page.evaluate(() => {
+      const out = {};
+      const nowIso = new Date().toISOString();
+      const saved = { tw: INTRADAY_TW, sp: INTRADAY_SINOPAC, conn: LIVE.connected, mode: LIVE.streamMode, src: LIVE.sourceMode };
+      INTRADAY_TW = { fetched_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(), quotes: { "2330": { price: 1 } } }; // Actions冷檔過舊3小時
+      INTRADAY_SINOPAC = { fetched_at: nowIso, connected: true, market_status: "open", quotes: { "2330": { last: 1180, data_type: "REALTIME_TICK" } } };
+      LIVE.connected = true; LIVE.streamMode = "tick-push"; LIVE.sourceMode = "tick-push-memory";
+      out.liveProblems = diagQuoteProblems(true, false).map(p => p.name);
+      out.pollText = pollStatusText(true, false);
+      LIVE.connected = false; INTRADAY_SINOPAC = null;
+      out.offlineProblems = diagQuoteProblems(true, false).map(p => p.name);
+      out.offlinePollText = pollStatusText(true, false);
+      INTRADAY_TW = saved.tw; INTRADAY_SINOPAC = saved.sp; LIVE.connected = saved.conn; LIVE.streamMode = saved.mode; LIVE.sourceMode = saved.src;
+      return out;
+    });
+    if (r.liveProblems.includes("自選股台股報價")) consistencyErrors.push("Shioaji即時源新鮮且SSE連線中，橫幅仍報「自選股台股報價 資料過舊」");
+    if (!r.offlineProblems.includes("自選股台股報價")) consistencyErrors.push("即時源也沒有時，橫幅應該要報台股報價過舊，防線被拆掉了");
+    if (!/即時串流連線中/.test(r.pollText) || /近即時輪詢/.test(r.pollText)) consistencyErrors.push(`SSE連線中的輪詢文案不對：「${r.pollText}」`);
+    if (!/近即時輪詢/.test(r.offlinePollText)) consistencyErrors.push(`離線時輪詢文案應回到近即時輪詢：「${r.offlinePollText}」`);
+  } catch (e) {
+    consistencyErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("29. 「資料過舊」判定納入Shioaji即時源、SSE連線中輪詢文案改即時模式，兩者不同頁矛盾",
+    consistencyErrors.length === 0, consistencyErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

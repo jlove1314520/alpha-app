@@ -1647,6 +1647,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     return usMarketSession(zonedNow('America/New_York'))!=='closed';
   }
   function pollStatusText(twActive,usActive){
+    // 2026-09-04（四修.四）：SSE連線中時，畫面上的數字是由即時串流推動的，不是15秒輪詢——
+    // 文案要跟著實際模式走，不能同一頁又寫「近即時輪詢」又寫「即時連線中」。
+    if(LIVE.connected){
+      const mode=LIVE.streamMode==='tick-push'?'逐筆推送 tick-push':(LIVE.streamMode||'SSE');
+      return `● 即時串流連線中（${mode}${LIVE.sourceMode==='tick-push-memory'?'':'，來源'+(LIVE.sourceMode||'')}），數字隨 tick 更新，已停用15秒輪詢`;
+    }
     if(!twActive&&!usActive)return '已收盤，暫停自動更新';
     const which=twActive&&usActive?'台美股皆':(twActive?'台股':'美股');
     return `🔄 ${which}在交易時段，約每15秒自動更新（近即時輪詢，非逐筆tick）`;
@@ -2218,6 +2224,20 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 2026-08-27 新增（P1-1）：統一的頁面頂端診斷橫幅，取代「六個面板各喊一次連線
   // 失敗」——集中檢查各個資料檔案的新鮮度，一次列出哪些過期/缺失、原因分類、
   // 下次排程時間。個別面板本身維持簡潔的空狀態（不重複顯示落落長的錯誤訊息）。
+  // 2026-09-04（四修.四）：自選股報價「資料過舊」的判定抽成純函式，並納入即時源——
+  // 台股只要Shioaji即時源新鮮（SSE連線中的記憶體推送、或20分鐘內的熱檔/冷檔），就不算過舊，
+  // 即使Actions的quotes_tw.json沒落地；美股同理看IBKR源。這樣「資料過舊」跟「即時連線中」
+  // 不會同頁矛盾。抽成函式也是為了讓smoke test能用twOpen=true直接驗，不受測試時段影響。
+  function diagQuoteProblems(twOpen,usOpen){
+    const problems=[];
+    const twLive=_intradaySourceFresh(INTRADAY_SINOPAC,'Asia/Taipei',true).fresh&&(LIVE.connected||intradayAgeMin(INTRADAY_SINOPAC)<=INTRADAY_STALE_MIN);
+    const twQAge=intradayAgeMin(INTRADAY_TW);
+    if(twOpen&&!twLive&&(twQAge==null||twQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股台股報價',reason:(twQAge==null?'無資料':'資料過舊')+'（Actions quotes_tw 與 Shioaji 即時源皆無新鮮資料）',schedule:'盤中每10分鐘（09:00–13:30）；即時源需本機 live server 連線'});
+    const usLive=_intradaySourceFresh(INTRADAY_IBKR,'America/New_York',true).fresh&&(LIVE.connected||intradayAgeMin(INTRADAY_IBKR)<=INTRADAY_STALE_MIN);
+    const usQAge=intradayAgeMin(INTRADAY_US);
+    if(usOpen&&!usLive&&(usQAge==null||usQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股美股報價',reason:usQAge==null?'無資料':'資料過舊',schedule:'盤中每10分鐘'});
+    return problems;
+  }
   async function updateDiagBanner(){
     const el=document.getElementById('diag-banner');if(!el)return;
     // 2026-08-28修正（P0併入，Cowork定位）：MARKET_TW_CACHE/MARKET_US_CACHE
@@ -2230,12 +2250,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const nowTW=zonedNow('Asia/Taipei'),nowUS=zonedNow('America/New_York');
     const twOpen=nowTW.wd>=1&&nowTW.wd<=5&&(nowTW.h*60+nowTW.mi)>=540&&(nowTW.h*60+nowTW.mi)<810;
     const usOpen=nowUS.wd>=1&&nowUS.wd<=5&&(nowUS.h*60+nowUS.mi)>=570&&(nowUS.h*60+nowUS.mi)<960;
-    const problems=[];
-    // 台股/美股報價：只有在盤中卻過期/缺失才算問題，休市時資料本來就該是舊的。
-    const twQAge=intradayAgeMin(INTRADAY_TW);
-    if(twOpen&&(twQAge==null||twQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股台股報價',reason:twQAge==null?'無資料':'資料過舊',schedule:'盤中每10分鐘（09:00–13:30）'});
-    const usQAge=intradayAgeMin(INTRADAY_US);
-    if(usOpen&&(usQAge==null||usQAge>INTRADAY_STALE_MIN))problems.push({name:'自選股美股報價',reason:usQAge==null?'無資料':'資料過舊',schedule:'盤中每10分鐘'});
+    const problems=diagQuoteProblems(twOpen,usOpen);
     // 大盤/類股/三大法人、美股指數：這兩個一天只排程1-2次，用24小時當過期門檻。
     const twMAge=marketDataAgeMin(MARKET_TW_CACHE);
     if(twMAge==null||twMAge>24*60)problems.push({name:'大盤指數/類股/三大法人',reason:twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'台股收盤後 14:10'});
@@ -2417,7 +2432,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-04四修.三
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     el.innerHTML=idxRowHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)+futRowHtml('台指期近月',txfSrc.fut,txfSrc.srcLabel)+usIdx.map(r=>r.html).join('');
-    document.getElementById('home-idx-datatime').textContent=fmtMarketDataTime(tw);
+    // 2026-09-04（四修.四）：加權/台指期走Shioaji即時時，時間戳寫即時時間；否則明標收盤日
+    const liveTw=(taiexSrc.srcLabel||'').startsWith('Shioaji')||!!txfSrc.srcLabel;
+    document.getElementById('home-idx-datatime').textContent=liveTw
+      ?`台股 Shioaji 即時（${INTRADAY_SINOPAC&&INTRADAY_SINOPAC.fetched_at?fmtTzHHMM(new Date(INTRADAY_SINOPAC.fetched_at),'Asia/Taipei'):'—'}）· 美股指數為每日收盤快照`
+      :`${twCloseDateLabel(tw)}｜${fmtMarketDataTime(tw)}`;
   }
   function hexMix(c1,c2,t){
     const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -2696,7 +2715,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const futs=tw.futures||{};
     const sources=FUT_CONTRACTS.map(c=>({...c,src:shioajiFutRowSource(c.id,futs[c.id])}));
     el.innerHTML=sources.map(c=>futRowHtml(c.label,c.src.fut,c.src.srcLabel)).join('');
-    document.getElementById('fut-quote-datatime').textContent=fmtMarketDataTime(tw);
+    // 2026-09-04（四修.四）：四檔都走Shioaji即時時，不再寫「資料時間 07:24（GitHub Actions 排程）」
+    // 這種跟畫面上數字對不上的時間；改寫即時時間，TAIFEX盤後資料另標收盤日。
+    const liveN=sources.filter(s=>s.src&&s.src.srcLabel).length;
+    document.getElementById('fut-quote-datatime').textContent=liveN
+      ?`Shioaji 即時 ${liveN}/${sources.length} 檔（${INTRADAY_SINOPAC&&INTRADAY_SINOPAC.fetched_at?fmtTzHHMM(new Date(INTRADAY_SINOPAC.fetched_at),'Asia/Taipei'):'—'}）；TAIFEX 盤後資料 ${twCloseDateLabel(tw)}`
+      :`${twCloseDateLabel(tw)}｜${fmtMarketDataTime(tw)}`;
     // 正逆價差：近月台指期收盤－加權指數（現貨）收盤——2026-09-01改用跟畫面上
     // 顯示的同一個資料源（Shioaji優先/退回TAIFEX CSV），避免上面卡片顯示
     // Shioaji的數字、下面價差卻用TAIFEX CSV的數字算出不一致的結果。
@@ -4029,6 +4053,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     else{txt='離線（連不上即時伺服器'+(LIVE.lastError?'：'+LIVE.lastError:'')+'），顯示最後收盤 '+lastCloseLabel();color='#e6383f'}
     const el=document.getElementById('home-live-status');if(el){el.textContent=txt;el.style.color=color}
     const note=document.getElementById('live-status-note');if(note){note.textContent=txt;note.style.color=color}
+    try{updatePollNote()}catch(e){console.warn('[renderLiveStatus:updatePollNote]',e)}  // 2026-09-04四修.四：輪詢文案跟著連線狀態走
+    if(LIVE.connected!==renderLiveStatus._lastConnected){renderLiveStatus._lastConnected=LIVE.connected;_safeAsync('updateDiagBanner',updateDiagBanner)}  // 連線狀態一變就重算橫幅，不讓「資料過舊」殘留
     const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
     if(u&&document.activeElement!==u)u.value=LIVE.url||'';
     if(t&&document.activeElement!==t)t.value=LIVE.token||'';
@@ -4318,7 +4344,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-04.1344';
+  const APP_VERSION='2026-09-04.1347';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
