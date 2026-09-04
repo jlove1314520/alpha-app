@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-04T18:10+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 347 輪。最新一輪：第 347 輪 · 2026-09-05T00:10+08:00 · US（接續第345輪未完成的cheap gate，重跑`f_us_value_bm`book-to-market因子，135/226檔可用，CHEAP_PASS，percentile 100.0，US軌第一個基本面因子測試突破price-only三因子家族全FAIL僵局，寫入`TRIALS_LEDGER.md`#119/`US_LEADS.md`#16，詳見`US_MARATHON_STATE.md`/`US_LOG.md`第347輪記錄）。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 348 輪。最新一輪：第 348 輪 · 2026-09-05T00:35+08:00 · FUT（接續round341/344未答問題，對19檔流動性達標個股期貨實測dispersion_ratio/PCA，1.6371/27.33% vs TX/MTX/TE的0.1143/97.91%，跟指數期貨家族形成鮮明對比，方向性正面但重疊窗口僅250天+多檔skipped_rollover_events偏高，詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`/`FUT_LEADS.md`第348輪記錄）。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 

@@ -2078,3 +2078,31 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 零因子/策略判定，跟round332/335/338/341同precedent不寫`TRIALS_LEDGER.md`列，但因為是重要的正面地基發現，補記`FUT_LEADS.md`。結果存於`data/fut_stock_futures_liquidity_screen_round344.csv`（37列）。API呼叫：35次新查詢（37樣本扣除CDF/CCF既有快取）+ 0次（TaiwanFutOptDailyInfo命中快取），全程遵守`RATE_LIMIT_MIN_INTERVAL_SEC=3.0`節流，未遭遇限流。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **下一步**：round341下一步(b)轉倉規則查證、(c)對這262檔（或抽樣子集）實測dispersion_ratio/PCA，回答「這個池子的橫斷面獨立變異是否真的比TX/MTX/TE多」——那之後才是這個方向的地基完成點，可以開始設計因子。
+
+---
+
+## 第348輪（2026-09-05T00:35+08:00）：round341/344下一步(b)(c)——19檔流動性達標個股期貨的離散度/PCA實測，結果顯著正面
+
+取鎖時偵測到`LOCK_STALE`（pid 49300持有30.2分鐘後被回收），本輪標記「上一輪疑似失敗」，未進一步深究其未commit產物（依協定僅需記錄，第0節第2點）。三軌時間戳：FUT 21:06（第344輪，最舊）／TW 22:32（第346輪）／US 00:10（第347輪，最新）——依輪替選FUT。
+
+延續round341/344留下的關鍵未答問題：round344只完成流動性初篩（(a)，19/37樣本達標），(b)轉倉規則是否跟指數期貨相同、(c)dispersion_ratio/PCA實測——round338證實TX/MTX/TE三者PC1解釋變異達97.91%（幾乎是單一共同因子），這是「跨商品橫斷面池」方向能否成立的關鍵瓶頸，本輪直接處理。
+
+新增`fut_stock_futures_dispersion_test.py`，對round344篩出的19檔流動性達標F結尾個股期貨（CCF/CDF/EHF/FYF/GMF/HBF/HQF/ITF/JWF/KKF/NWF/OLF/PAF/QDF/QRF/RFF/RUF/SXF/ZFF）套用round338同款方法論：
+
+**離散度/PCA結果（19檔重疊窗口）**：
+- 19檔上市時間差異很大（CCF/CDF最早2010-01-26，SXF最晚2023-12-19才有資料），19檔同時有資料的重疊窗口只有**250個交易日（2023-12-19~2024-12-31）**——約1年。
+- **dispersion_ratio = 1.6371**（對照round338 TX/MTX/TE三商品：0.1143，高出約14倍）。
+- **PC1解釋變異比例 = 27.33%**（對照TX/MTX/TE：97.91%），PC1+PC2+PC3合計40.62%。
+- 平均兩兩相關係數僅0.1803（TX/MTX/TE三者兩兩相關係數是0.997/0.955/0.954量級）。
+
+**判定：跟TX/MTX/TE指數期貨家族形成鮮明對比，個股期貨池確實具備跨商品橫斷面池所需的獨立變異結構，不像指數家族幾乎全被單一共同因子（大盤beta）主導。** 這是FUT軌第一次找到「離散度看起來足夠支撐排列檢定式橫斷面策略」的候選池，方向性上是正面訊號。
+
+**誠實限制（不能過度樂觀，逐項記錄）**：
+1. **重疊窗口只有250個交易日**——因為多數個股期貨掛牌時間晚（2011年後陸續掛牌，部分2021~2023年才掛牌），19檔全部同時有資料的共同窗口被最晚掛牌的成員（SXF 2023-12-19）拖到只剩約1年，樣本量對任何日後要做的排列檢定/樣本外驗證都明顯偏薄，需要進一步設計「不要求全體19檔同時存在」的滾動式宇宙建構（類似股票`universe.py`的存活者偏差處理精神），才能延長可用窗口，這是下一步的核心工作。
+2. **多數代碼有非零`skipped_rollover_events`**（EHF 24、FYF 18、GMF 9、HBF 11、HQF 16、ITF 27、JWF 37、KKF 22、NWF 3、QDF 1、SXF 4；只有CCF/CDF/OLF/PAF/QRF/RFF/RUF/ZFF是0）——代表這些代碼有相當比例的轉倉事件缺乏乾淨的價格銜接調整（前後合約在切換錨點日缺報價），`adj_close`對這些代碼並非完全乾淨，可能存在未調整的價格跳空，這點跟TX/MTX/TE/TF/CDF/CCF（round332/341皆為0 skipped）明顯不同，是round341留下的「轉倉規則是否跟指數期貨相同」疑慮的具體證據——**機制本身（H1「前月合約消失即代表已轉倉」）可以泛化執行不crash，但清潔度不如指數期貨**，這是使用任何這19檔資料前必須修的資料品質缺口，不是可以忽略的小事。
+3. n=19僅是round344分層抽樣37檔中的達標子集，並非round344外推估計的262檔全量，實際離散度數字若換一批更大的樣本可能會變（雖然方向不太可能反轉——27.33% vs 97.91%差距懸殊，不太可能是抽樣巧合）。
+4. 本輪只做離散度診斷，完全沒有測任何因子/策略，離散度夠只代表「這個池子理論上有東西可挖」，不代表已經有能用的訊號。
+
+零因子/策略判定，跟round332/335/338/341/344同precedent不寫`TRIALS_LEDGER.md`列，補記`FUT_LEADS.md`。結果存`data/fut_stock_futures_dispersion_coverage_round347.csv`（19檔覆蓋率明細）、`data/fut_stock_futures_dispersion_summary_round347.csv`（離散度摘要）、`fut_stock_futures_dispersion_round347_run.log`（原始輸出）。17次新API呼叫（19檔扣除CDF/CCF既有快取），全程遵守`RATE_LIMIT_MIN_INTERVAL_SEC=3.0`節流，未遭遇限流。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**下一步**：(a) 設計不要求全體成員同時存在的滾動式宇宙/窗口建構，把可用樣本期間從250天延長（不同世代的個股期貨輪流加入池子，類似股票universe的動態成分股精神）；(b) 修/繞過skipped_rollover_events較多代碼的資料品質缺口（先只用0 skipped的8檔子集做第一版驗證，或研究能否從其他資料源補上缺報價）；(c) 若(a)(b)完成，才是這個方向可以開始設計橫斷面因子（動能/反轉/成交量等）的地基完成點。

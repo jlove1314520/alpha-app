@@ -1,0 +1,55 @@
+  警告：EHF 有 24 筆轉倉skipped_events（無調整比率）
+  警告：FYF 有 18 筆轉倉skipped_events（無調整比率）
+  警告：GMF 有 9 筆轉倉skipped_events（無調整比率）
+  警告：HBF 有 11 筆轉倉skipped_events（無調整比率）
+  警告：HQF 有 16 筆轉倉skipped_events（無調整比率）
+  警告：ITF 有 27 筆轉倉skipped_events（無調整比率）
+  警告：JWF 有 37 筆轉倉skipped_events（無調整比率）
+  警告：KKF 有 22 筆轉倉skipped_events（無調整比率）
+  警告：NWF 有 3 筆轉倉skipped_events（無調整比率）
+  警告：QDF 有 1 筆轉倉skipped_events（無調整比率）
+  警告：SXF 有 4 筆轉倉skipped_events（無調整比率）
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\user\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+=== 對round344 19檔流動性達標F結尾個股期貨做離散度/PCA測試 ===
+
+=== 各商品覆蓋天數與日期範圍（回填全歷史，非僅2024） ===
+  CCF: 3665 天 (2010-01-26 ~ 2024-12-31), skipped_rollover_events=0
+  CDF: 3665 天 (2010-01-26 ~ 2024-12-31), skipped_rollover_events=0
+  EHF: 3187 天 (2011-06-21 ~ 2024-12-31), skipped_rollover_events=24
+  FYF: 3213 天 (2011-06-21 ~ 2024-12-31), skipped_rollover_events=18
+  GMF: 3254 天 (2011-06-29 ~ 2024-12-31), skipped_rollover_events=9
+  HBF: 2032 天 (2011-06-21 ~ 2024-12-31), skipped_rollover_events=11
+  HQF: 985 天 (2011-06-20 ~ 2024-12-31), skipped_rollover_events=16
+  ITF: 3076 天 (2011-05-25 ~ 2024-12-31), skipped_rollover_events=27
+  JWF: 3086 天 (2011-07-04 ~ 2024-12-31), skipped_rollover_events=37
+  KKF: 3206 天 (2011-05-04 ~ 2024-12-31), skipped_rollover_events=22
+  NWF: 2605 天 (2014-05-05 ~ 2024-12-31), skipped_rollover_events=3
+  OLF: 2080 天 (2016-06-28 ~ 2024-12-31), skipped_rollover_events=0
+  PAF: 1623 天 (2018-05-03 ~ 2024-12-31), skipped_rollover_events=0
+  QDF: 936 天 (2021-02-17 ~ 2024-12-31), skipped_rollover_events=1
+  QRF: 828 天 (2021-08-03 ~ 2024-12-31), skipped_rollover_events=0
+  RFF: 460 天 (2023-02-13 ~ 2024-12-31), skipped_rollover_events=0
+  RUF: 346 天 (2023-08-02 ~ 2024-12-31), skipped_rollover_events=0
+  SXF: 251 天 (2023-12-19 ~ 2024-12-31), skipped_rollover_events=4
+  ZFF: 745 天 (2021-12-07 ~ 2024-12-31), skipped_rollover_events=0
+
+=== 19檔同時有資料的重疊窗口 ===
+  2023-12-19 ~ 2024-12-31, 共 250 個交易日
+
+=== 離散度比值 dispersion_ratio（19檔，橫斷面std/邊際std平均） ===
+  1.6371
+  （對照round338 TX/MTX/TE三商品：0.1143）
+
+=== 相關矩陣PCA ===
+  PC1解釋變異比例: 27.33%
+  PC1+PC2+PC3解釋變異比例: 40.62%
+  （對照round338 TX/MTX/TE三商品PC1: 97.91%）
+  平均兩兩相關係數: 0.1803
+
+已存覆蓋率明細：data/fut_stock_futures_dispersion_coverage_round347.csv
+已存離散度摘要：data/fut_stock_futures_dispersion_summary_round347.csv
+
+（本腳本純診斷統計，不含任何因子/策略檢定，不寫入TRIALS_LEDGER.md）
