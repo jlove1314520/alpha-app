@@ -2710,3 +2710,14 @@ log為空、checkpoint數值未受影響），第一個行程繼續獨力運算�
 兩期不變），第一個行程本輪結束前仍在繼續運算（可能已推進超過40，但
 本輪未及等到下一次10的倍數落盤點就已收工），**仍未結案**。下一輪
 `python research/margin_utilization_regime_portfolio_v1.py`會自動接續。
+
+**狀態（2026-09-04T23:37接續排程，TRAIN隨機控制組進度70/100）**：本輪
+接手時確認上一輪的行程已正常結束、無殘留背景行程，checkpoint顯示TRAIN
+隨機控制組已到50/100（比上一則紀錄的40更新，代表上一輪收工後行程仍
+存活了一段時間才自然結束）。用明確`run_in_background:true`啟動腳本
+（480秒預算，`MURP_TIME_BUDGET_SECONDS=480`），等待行程自然結束後確認
+checkpoint進度50→**70/100**（`real`/`cost_returns`維持不變，非重算）。
+本輪480秒預算內達最大進度即收工，未觸及VALIDATION期。**仍未結案**，
+`is_holdout_consumed()`收工前確認`False`。下一輪
+`python research/margin_utilization_regime_portfolio_v1.py`會自動接續
+TRAIN剩餘30筆隨機控制組，完成TRAIN後接著跑VALIDATION。

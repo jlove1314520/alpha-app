@@ -13,6 +13,8 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T23:37+08:00 — [hypothesis_queue] 接續#30個股融資使用率regime-conditional避開篩選：`git pull`+`git status`確認乾淨主線外，發現非本輪殘留未提交變更（`.gitignore`／`research/alpha_live_server.py`／`research/us_fundamentals.py`／`scripts/smoke_test.mjs`／`research/gen_local_ca.py`／`research/us_factor_ic_value.py`等，判斷為其他自動化來源留下），本輪不觸碰、不納入commit。取具名鎖`hypothesis_queue`（`LOCK_ACQUIRED`，非陳舊）。確認`margin_utilization_regime_portfolio_v1.py`無殘留背景行程，checkpoint顯示上輪TRAIN隨機控制組已到50/100（比上一則心跳記錄的40更新）。用明確`run_in_background:true`啟動腳本（480秒預算），等待完成後確認TRAIN隨機控制組進度**50→70/100**（checkpoint接續、真實訊號+成本敏感度1x/2x/3x維持不變），本輪480秒預算內達最大進度後正常收工，未跑完VALIDATION。仍未結案，`is_holdout_consumed()`收工前確認`False`。下一輪執行`python research/margin_utilization_regime_portfolio_v1.py`會自動接續TRAIN剩餘30筆。
+
 ## 2026-09-04T23:xx（系統時間，本輪排程接手）— [hypothesis_queue] 接續#30個股融資使用率regime-conditional避開篩選：本輪接手時發現鎖檔陳舊（60分鐘）已由本輪回收，疑似上一輪呼叫結束時背景行程被一併終止；TRAIN隨機控制組進度30→40/100（checkpoint接續），中途誤判「移到背景」的行程已結束、意外啟動第二個並行實例，即時發現並安全終止（未寫入任何內容，checkpoint未受影響），已在HYPOTHESIS_QUEUE.md #30記錄操作教訓（之後長腳本一律明確run_in_background）。仍未結案，下一輪接續。
 
 ## 2026-09-04 21:01+08:00 — hypothesis_queue排程：#30個股融資使用率deep_dive第一步——下跌段vs上漲段分組IC，訊號集中在下跌段（探索性佐證，非最終判定）
