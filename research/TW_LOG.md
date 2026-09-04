@@ -1619,3 +1619,23 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **這輪的工作單位定義**：不是新開一條組合策略迭代，而是把上一個（或上兩個）異常中止、從未進入git歷史的session的合法產物誠實回收、補齊缺漏文件、正式commit——這本身完全符合協定第4節「誠實記錄」原則跟第7節持續維護精神，避免這批已經花費真實運算時間的結果被悄悄流失（跟round343處理`#113`孤兒紀錄同一種必要的維護性工作）。
 
 `is_holdout_consumed()`本輪開工/收工前皆確認`False`。全程零新增API呼叫（僅檔案稽核+讀取既有log/CSV核對，未執行任何回測/資料抓取）。`research/.alpha_live_server.pid`／`research/alpha_live_server_*.log`為不相關常駐程式產生的檔案，本輪未觸碰、未納入commit。
+
+## 第349輪（2026-09-05T01:04+08:00，TW）——回收稽核：`#30`個股融資使用率portfolio層構造已結案(FAIL)，補齊`TW_LEADS.md`遺漏列，發現並記錄與`hypothesis_queue`系統的checkpoint交錯寫入問題
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 22:32（第346輪，最舊）／US 00:10（第347輪）／FUT 00:35（第348輪）——依輪替選TW。
+
+開工先查`git status`，發現3個未commit修改（`research/TRIALS_LEDGER.md`／`research/STRATEGY_GRAVEYARD.md`／`research/HYPOTHESIS_QUEUE.md`）。第346輪commit（`3e1935f`）時`margin_utilization_regime_portfolio_v1`的checkpoint進度是TRAIN 20/100、VAL未開始，本輪開工時checkpoint（`data/margin_utilization_regime_portfolio_v1_checkpoint.json`，gitignored）已經是TRAIN 100/100＋VAL 100/100全部完成，`TRIALS_LEDGER.md`已寫好`#120`（FAIL判定）、`STRATEGY_GRAVEYARD.md`已寫好對應死亡條目、`HYPOTHESIS_QUEUE.md``#30`條目已寫好「已結案：FAIL」狀態，但這三個檔案的變更都還沒commit，且對應的`TW_LEADS.md`列從未補上。
+
+**逐項核實**：
+1. **checkpoint與結果CSV數字比對**：`data/margin_utilization_regime_portfolio_v1_results.csv`（TRAIN return-16.9692%/mdd-46.58%/alpha-4.1807%(p=0.7512)/beta+0.7370/random_control_percentile=1.0/n_random=100；VALIDATION return+65.1992%/alpha+8.9380%(p=0.4991)/beta+0.6377/percentile=99.0/n_random=100）跟`TRIALS_LEDGER.md`#120條目、`STRATEGY_GRAVEYARD.md`死亡條目的數字逐位吻合，非捏造。腳本本身沿用`load_dev()`＋holdout安全機制，跟round346已核實過的版本相同，未再變動。
+2. **`is_holdout_consumed()`**：開工/收工前皆確認`False`。
+3. **`HYPOTHESIS_QUEUE.md`文字順序矛盾稽查**：仔細讀`#30`條目發現一個異常——「已結案：FAIL」狀態段落排在「TRAIN 100/100、VAL僅44/100，尚未結案」狀態段落**之前**，時間邏輯矛盾。`git log --oneline -- research/HYPOTHESIS_QUEUE.md`揪出原因：`f58e421`／`68455c2`／`9fd0c0f`三個commit的訊息格式是`hypothesis_queue: ...`，跟這條`MARATHON_PROTOCOL.md`馬拉松（訊息格式是「馬拉松第N輪」）明顯是**另一套獨立的自動化系統**——`C:\alpha\alpha-app\CLAUDE.md`本身在「提案先於執行」適用範圍界線那節就提過`AlphaHypothesisQueue`是跟`AlphaMarathon`並列的另一條已核准自主挖礦排程，兩者各自運作，這次是第一次在檔案內容裡實際觀察到兩者交錯寫同一份checkpoint造成的race condition痕跡。**已核實不影響最終判定正確性**（checkpoint與CSV數字自洽，見上第1點），但這是一個之前協定文件沒有預期到的系統性防呆缺口——resumable checkpoint腳本目前只用`data/*_checkpoint.json`本身的存在與否/內容當接續依據，沒有跨自動化系統的鎖保護。本輪只誠實記錄發現，**不擅自修改`hypothesis_queue`系統或它的commit歷史**（不同帽子、不同自動化，明顯不在這條`MARATHON_PROTOCOL.md`馬拉松的管轄範圍內，且`MARATHON_PROTOCOL.md`第7節「不能刪掉任何安全規則、這種決定要留給使用者」的精神同樣適用於不擅自介入其他自動化系統），已在`HYPOTHESIS_QUEUE.md``#30`條目最後**附加**（非改寫既有文字）一則說明段落，供下一個接手者（無論是這條馬拉松還是`hypothesis_queue`）理解這個先後順序矛盾的成因。
+
+**本輪產出**：
+- `TW_LEADS.md`新增#12列（`margin_utilization_regime_portfolio_v1`，判定FAIL），並在「目前狀態」章節補一段第349輪摘要——這是協定第2節「有新的候選判定，TRIALS_LEDGER跟對應軌_LEADS.md都要更新」要求，原本這一步在checkpoint完成的那個（未知）session漏掉了，屬於跟round343`#113`／round346`#118`同一種「聲稱完成但LEADS.md漏更新」模式的第三個實例。
+- `HYPOTHESIS_QUEUE.md`附加race condition說明段落（append，未動既有文字）。
+- commit既有的`TRIALS_LEDGER.md`／`STRATEGY_GRAVEYARD.md`未commit內容（非本輪產生，本輪只核實其正確性後一併納入commit，避免這批已花費真實算力的結果繼續懸在working tree裡有被意外覆寫/遺失的風險）。
+
+**未做的事（刻意，非疏漏）**：本輪沒有嘗試修復兩套自動化系統共用checkpoint鎖的問題本身——這屬於架構層變更，依`C:\alpha\alpha-app\CLAUDE.md`「提案先於執行」鐵律（新的架構/流程變更需要先提案給總司令核准），不是「已交辦任務」或「純bug修復」，這輪只記錄發現，留給使用者決定要不要處理。佇列#1~30全數結案（`HYPOTHESIS_QUEUE.md`本輪核實過的既有文字已確認此結論），下一輪TW軌若接手需依協定第1節廣度優先設計新假設軸#31，或回頭評估`portfolio_multifactor_v2`是否還有其他組合層迭代方向。
+
+全程零新增API呼叫（僅讀取既有checkpoint/CSV/git歷史核對，未執行任何回測/資料抓取）。

@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-04T18:10+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 348 輪。最新一輪：第 348 輪 · 2026-09-05T00:35+08:00 · FUT（接續round341/344未答問題，對19檔流動性達標個股期貨實測dispersion_ratio/PCA，1.6371/27.33% vs TX/MTX/TE的0.1143/97.91%，跟指數期貨家族形成鮮明對比，方向性正面但重疊窗口僅250天+多檔skipped_rollover_events偏高，詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`/`FUT_LEADS.md`第348輪記錄）。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 349 輪。最新一輪：第 349 輪 · 2026-09-05T01:04+08:00 · TW（回收稽核：`margin_utilization_regime_portfolio_v1`（`HYPOTHESIS_QUEUE.md`#30）checkpoint已由本馬拉松與另一套獨立`hypothesis_queue`系統交錯續跑至TRAIN 100/100+VAL 100/100完成，核實數字後補齊`TW_LEADS.md`#12列，判定FAIL；並發現記錄兩套自動化系統無共享鎖交錯寫同一份checkpoint的race condition痕跡，不影響判定正確性，詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`HYPOTHESIS_QUEUE.md`第349輪記錄）。
 
 **上一輪（供對照）：第 323 輪 · 2026-09-04T00:01+08:00 · FUT（跳過，暫停規則生效中）。取鎖乾淨（非陳舊鎖檔）。依輪替選FUT。獨立複查三個解除條件皆未成立。FUT軌沒有組合策略相關工作可接，沒有已知的剩餘允許工作項目，本輪整輪跳過。**本輪新觀察到`.github/workflows/market.yml`／`.github/workflows/quotes.yml`已修改**（維運帽子檔案），未觸碰。詳見`REPORT.md`第323輪條目、`FUT_MARATHON_STATE.md`/`FUT_LOG.md`本輪記錄。**
 

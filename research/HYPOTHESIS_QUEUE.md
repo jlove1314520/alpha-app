@@ -2722,6 +2722,26 @@ checkpoint進度50→**70/100**（`real`/`cost_returns`維持不變，非重算�
 `python research/margin_utilization_regime_portfolio_v1.py`會自動接續
 TRAIN剩餘30筆隨機控制組，完成TRAIN後接著跑VALIDATION。
 
+**狀態（2026-09-05接續排程，已結案：FAIL）**：接手時鎖檔已陳舊（29.8分鐘，
+被回收），且發現有一個未受追蹤的既有背景行程仍在執行（推測是上一輪的
+殘留，非本輪誤啟動），checkpoint已推進到TRAIN 100/100+VAL 10/100。本輪
+繼續接續執行（過程中一度誤判行程結束又啟動第二個實例，發現後立即
+`kill -9`安全終止未寫入任何內容的重複實例，checkpoint未受影響），最終
+TRAIN+VAL兩期100/100隨機控制組全數跑完。**結果**：TRAIN return-16.97%、
+alpha-4.18%(p=0.7512不顯著)、beta+0.737、random_control_percentile=
+**1.0**（worse than 99/100隨機對照）；VAL return+65.20%、alpha+8.94%
+(p=0.4991不顯著)、beta+0.638、random_control_percentile=**99.0**（表面
+過90.0門檻）。依既有標準（alpha顯著性+beta拆解為最終判準）：VAL
+percentile雖過關但alpha遠不顯著+顯著beta曝險，TRAIN期更是決定性反證
+（worse than幾乎全部隨機對照，直接牴觸假設核心主張），判**FAIL**，未進
+第3關以後。**不泛化成機制完全無效**——因子層cheap gate（#116）跟
+下跌/上漲段分組IC（#117）方向皆與假設一致，死的是「TOP20純多方向、
+regime二元切換」這個具體構造。完整見`STRATEGY_GRAVEYARD.md`、
+`TRIALS_LEDGER.md`#120。**佇列#1~30全數結案**，重新查證#5/#6/#8/#10
+外部依賴仍全部卡住（`BACKLOG.md`：`value_board_v2`仍`回測未通過`、
+題材動能榜/未來性濾網仍`紙上交易中`，無新進展），佇列實質已空，下一輪
+需依協定第1節設計新假設軸#31。
+
 **狀態（2026-09-05T00:30接續排程，TRAIN隨機控制組已完成100/100，
 VALIDATION進行中44/100，尚未結案）**：確認無殘留背景行程後，本輪內
 連續呼叫腳本三次（明確`run_in_background:true`啟動，各480秒預算，
@@ -2744,3 +2764,28 @@ alpha(年化)=-4.18%(p=0.7512不顯著)、beta=+0.737、成本敏感度1x/2x/3x=
 確認`False`。下一輪`python research/margin_utilization_regime_portfolio_v1.py`
 會自動接續VALIDATION剩餘56筆隨機控制組，完成後即可產出最終第2/7關
 判定。完整見`MARATHON_LOG.md`2026-09-05T00:30條目。
+
+**補記（2026-09-05T01:04馬拉松第349輪，TW軌回收稽核，說明上面兩則
+狀態條目的先後順序矛盾，非資料造假）**：上面「已結案：FAIL」條目與
+本則（VAL 44/100，尚未結案）條目在檔案裡的文字順序看起來矛盾——
+本則commit(`f58e421`)描述VAL僅44/100，卻排在已經聲稱VAL 100/100完成
+的「已結案：FAIL」條目**之後**。核對`git log`發現原因：`f58e421`／
+`68455c2`／`9fd0c0f`三個commit是由另一套**獨立、與這條`MARATHON_
+PROTOCOL.md`馬拉松互不知情、對同一個checkpoint json無共享鎖**的
+`hypothesis_queue`自動化系統寫入的，跟這條馬拉松的TW軌（含產出
+「已結案：FAIL」文字的那個session）**同時**在呼叫同一支`margin_
+utilization_regime_portfolio_v1.py`續跑同一份checkpoint，兩者交錯
+執行導致文字記錄的先後順序跟實際完成時間點不一致，是race condition
+的痕跡。**已核實不影響判定正確性**：最終checkpoint（`data/
+margin_utilization_regime_portfolio_v1_checkpoint.json`，TRAIN/VAL
+各100筆`random_finals`）與`data/margin_utilization_regime_portfolio_
+v1_results.csv`數字完全吻合（TRAIN percentile=1.0／VAL percentile=
+99.0），跟`TRIALS_LEDGER.md`#120、`STRATEGY_GRAVEYARD.md`記載一致，
+FAIL判定成立。**佇列#30正式結案**，`HYPOTHESIS_QUEUE.md`本身不需要
+再改動既有文字（append-only精神，不回頭改寫上面兩則）。**留給之後
+處理的防呆缺口**（非本輪擅自修改，只記錄發現）：resumable checkpoint
+腳本若同時被這條馬拉松跟`hypothesis_queue`系統呼叫會有寫入競爭風險，
+之後若要修，應該讓兩套系統共用`marathon_lock.py`同一把鎖，或至少
+讓checkpoint腳本自己偵測「非預期的進度跳躍」並中止示警，而不是靜默
+覆寫。完整核實過程見`TW_LOG.md`第349輪記錄、`TW_MARATHON_STATE.md`
+第349輪條目。

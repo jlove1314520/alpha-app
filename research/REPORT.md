@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第349輪 · 2026-09-05T01:04+08:00 · TW · 回收稽核：`#30`個股融資使用率portfolio層構造已結案(FAIL)，補齊`TW_LEADS.md`遺漏列 · FAIL（TRAIN隨機控制組percentile=1.0決定性反證），並發現記錄與獨立`hypothesis_queue`系統交錯續跑同一checkpoint的race condition痕跡（不影響判定正確性）
 ## 第348輪 · 2026-09-05T00:35+08:00 · FUT · 對19檔流動性達標個股期貨實測dispersion_ratio/PCA（round341/344下一步(c)） · 1.6371/27.33% vs TX/MTX/TE的0.1143/97.91%，跟指數期貨形成鮮明對比，方向性正面（取鎖時偵測到陳舊鎖檔，上一輪疑似失敗）
 
 ## 第347輪 · 2026-09-05T00:10+08:00 · US · 接續第345輪未完成的cheap gate，重跑`f_us_value_bm`（book-to-market） · CHEAP_PASS（US軌第一個基本面因子，突破price-only家族全FAIL僵局）

@@ -1075,3 +1075,41 @@ Sharpe更高於TRAIN），或擴大樣本池到全市場而非300檔快取子集
 （皆新增，可重複執行）。佇列#1~29全數結案，剩餘#5/#6/#8/#10仍卡外部
 依賴，下一輪需確認依賴是否解鎖，若仍未解鎖則佇列實質已空，需設計新
 假設軸#30。
+
+### 個股融資使用率 Margin Financing Utilization Ratio（HYPOTHESIS_QUEUE.md#30，2026-09-05 FAIL）
+
+**經濟理由**：強制平倉/流動性螺旋（Brunnermeier & Pedersen margin
+spiral機制）——個股融資使用率越高，一旦下跌越容易觸發追繳/斷頭賣壓，
+是本佇列第五類機制（既非選股排序、timing overlay、portfolio
+construction、也非配對交易）。
+
+**死因**：`margin_utilization_regime_portfolio_v1.py`——regime-conditional
+避開高融資使用率個股（危機regime挑最低使用率TOP20，非危機regime挑流動性
+最高TOP20），控制組核心判準是打贏「危機期隨機選股」。結果：**TRAIN**
+return-16.97%、alpha-4.18%(p=0.7512不顯著)、beta+0.737、隨機控制組
+percentile=**1.0**（遠低於90.0門檻，且是本策略worse than 99/100隨機
+對照組，直接牴觸假設核心主張）。**VAL**return+65.20%、alpha+8.94%
+(p=0.4991不顯著)、beta+0.638、percentile=**99.0**（表面過90.0門檻）。
+依本專案既有標準（alpha顯著性+beta拆解為最終判準，percentile表面過關
+不夠），VAL期alpha遠不顯著+顯著beta曝險，加上TRAIN期決定性反證（worse
+than幾乎全部隨機對照），判**FAIL**，未進第3關以後。
+
+**這次死法的特殊之處**：TRAIN/VAL percentile劇烈不一致（1.0 vs
+99.0）——不是「單期偶然」可以解釋的邊緣案例，暗示這個具體TOP20/regime
+二元切換構造對樣本/期間高度敏感，不是穩健機制。
+
+**不泛化成什麼**：不泛化成「強制平倉/流動性螺旋這個機制完全無效」——
+因子層cheap gate（`TRIALS_LEDGER.md`#116）跟下跌段vs上漲段分組IC
+（#117）都給出跟機制主張方向一致的證據（下跌段IC遠強於上漲段，約6.5
+倍），死的是「TOP20純多方向、regime二元切換」這個具體portfolio構造。
+未來若要重測，建議改用連續曝險縮放（而非二元regime切換）或改成放空/
+避開性質的曝險降低（而非純多方向替代持股），並且要先查清楚為何TRAIN/
+VAL方向會如此懸殊不一致，不能直接沿用這次的具體實作當作「機制已測過」
+的證據。
+
+**原始記錄**：`TRIALS_LEDGER.md`#116/#117/#120、`HYPOTHESIS_QUEUE.md`
+#30、`margin_utilization_regime_portfolio_v1.py`（新增，可重複執行）、
+`data/margin_utilization_regime_portfolio_v1_results.csv`。佇列#1~30
+全數結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證`BACKLOG.md`
+`value_board_v2`仍`回測未通過`、題材動能榜/未來性濾網仍`紙上交易中`，
+無新進展），下一輪需設計新假設軸#31。
