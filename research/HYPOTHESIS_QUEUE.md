@@ -973,9 +973,11 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     hypothesis_queue接續排程第1關cheap IC gate已完成：CHEAP_PASS**
     （`factor_ic_short_sale_utilization.py`，train/val同號皆負、null
     percentile=100.0，見上方#36條目與`TRIALS_LEDGER.md`#129）。**尚未
-    結案**——第2關以後（隨機控制組≥100 draws、參數密集高原、成本/放空
-    借券成本敏感度、leave-one-out、逐年一致性、樣本外）待下一輪接續，
-    **佇列排隊順序仍是#36（未結案，接續第2關）**，剩餘#5/#6/#8/#10
+    結案**——第2關以後已起跑（`short_sale_utilization_portfolio_v1.py`，
+    測訊號多頭鏡像半邊，放空腿因引擎不支援尚未驗證，見上方#36條目誠實
+    揭露段落），本輪TRAIN真實策略+成本敏感度已算完，隨機控制組checkpoint
+    進度16/100 draws、VALIDATION期尚未開始，待下一輪接續跑完100 draws
+    才能判定，**佇列排隊順序仍是#36（未結案，接續第2關）**，剩餘#5/#6/#8/#10
     仍卡外部依賴（同上）。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後，內容已嚴重過時，僅存
@@ -3357,3 +3359,25 @@ VAL mean_ic=-0.0595 IR=-0.363 hit_rate=0.64(n=47)，**train/val同號
 兩種相反機制。這輪工作單位到此為止（依協定「一輪只做一個有界工作
 單位」），尚未進行portfolio層構造設計，下一輪從第2關隨機控制組開始，
 不跳關。
+
+**狀態（2026-09-05接續排程，第2關以後起跑，尚未結案：checkpoint進度中）**：
+新增`short_sale_utilization_portfolio_v1.py`——**誠實揭露的範圍限縮**：
+`backtest/engine.py`確認完全不支援放空/負權重（本輪查證，`grep -n short
+backtest/engine.py`零匹配），這支腳本測的是訊號的**多頭鏡像半邊**（融券
+使用率最低分位做多，對應「知情放空者最不感興趣的標的」應有相對較好的
+未來報酬），**不是**完整驗證「賣空高使用率」策略本身——完整放空腿需要
+引擎擴充後才能回答，尚未驗證，不能把這支腳本的PASS/FAIL直接當作對完整
+放空策略的判定，見模組docstring完整說明。沿用`margin_utilization_
+regime_portfolio_v1.py`同一套checkpoint可續跑架構（月頻TOP_N=20、
+控制組=同池隨機選股、三成本層級）。**本輪執行結果**：TRAIN真實策略
+報酬+59.53%（買進持有+58.86%，alpha年化+7.44%但p=0.3717不顯著）、
+成本1x/2x/3x=+59.53%/+45.68%/+31.88%，隨機控制組跑到420秒時間預算
+上限時進度16/100 draws（已checkpoint至`data/short_sale_utilization_
+portfolio_v1_checkpoint.json`），**尚未跑完TRAIN 100 draws、VALIDATION
+期完全尚未開始**，不做任何PASS/FAIL判定。`is_holdout_consumed()`
+執行前後皆確認False。下一輪重新執行`python short_sale_utilization_
+portfolio_v1.py`會自動從中斷處接續（不重算已完成的real/成本敏感度/
+已完成的16個隨機draws），預估還需要多輪time budget才能跑完TRAIN+
+VALIDATION各100 draws，這是`dividend_yield_portfolio_v1.py`/`margin_
+utilization_regime_portfolio_v1.py`同一種「單輪時間預算跟完整計算量
+有落差」情況，不是異常。

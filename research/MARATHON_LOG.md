@@ -4,6 +4,24 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T07:43（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，
+無殘留鎖檔）— 接續佇列第36條（個股融券使用率）第2關以後：新增
+`short_sale_utilization_portfolio_v1.py`（做多融券使用率最低分位，
+誠實揭露這只測訊號多頭鏡像半邊，放空腿因`backtest/engine.py`不支援
+放空/負權重尚未驗證，見腳本docstring與`HYPOTHESIS_QUEUE.md`#36條目
+完整說明）。本輪執行結果：TRAIN真實策略報酬+59.53%（買進持有
++58.86%，alpha年化+7.44%、p=0.3717不顯著）、成本1x/2x/3x=+59.53%/
++45.68%/+31.88%，隨機控制組在420秒時間預算內跑到16/100 draws即
+checkpoint，VALIDATION期尚未開始，**尚未做PASS/FAIL判定**——已同步
+`HYPOTHESIS_QUEUE.md` #36條目「狀態」小節+「排隊順序總結」，未新增
+`TRIALS_LEDGER.md`列（沒有新判定可記）。開工前確認FUT軌道殘留變更
+（`research/FUT_LEADS.md`/`FUT_MARATHON_STATE.md`/`fut_cheap_gate.py`/
+`round359_deep_dive_loo_no_low_vol_independent_sample_monthly.log`/
+`TRIALS_LEDGER.md`本地未提交差異）非本輪產生，`git pull`因
+`data/rate_limit_state.json`衝突用`git stash`保留後解衝突（取較新的
+timestamp），未觸碰、未納入本輪commit。`is_holdout_consumed()`本輪
+執行前後皆確認False。下一輪重跑同一支腳本會自動從checkpoint接續。
+
 ## 2026-09-05T06:59（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，
 無殘留鎖檔）— 接續上一輪已登記的佇列第36條（個股融券使用率Short Sale
 Utilization Ratio）進行第1關cheap IC gate：新增`factors.py::_short_
