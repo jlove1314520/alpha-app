@@ -319,7 +319,18 @@ def fetch_stock_day_month(code: str, yyyymm: str) -> list[float]:
     except ValueError:
         raise SparklineFetchError("bad_json", r.text[:120])
     if d.get("stat") != "OK":
-        return []  # 該月沒交易/代號不存在（上櫃股票走這裡）：不是錯誤，呼叫端會標not_available
+        # 2026-09-04實測：2330/2454這種一定有資料的上市股，排在最前面抓時TWSE會回
+        # stat="很抱歉, 沒有符合條件的資料!"（軟性限流，HTTP仍是200），同一支手動再打就OK。
+        # 所以stat非OK不能直接當「沒資料」：等3秒重試一次，仍非OK才回空並把stat原文帶回去
+        # 讓呼叫端寫進sparkline_error（上櫃股票走這裡會是同一句話，兩者靠retry後結果分辨）。
+        if not getattr(fetch_stock_day_month, "_retrying", False):
+            fetch_stock_day_month._retrying = True
+            try:
+                time.sleep(3)
+                return fetch_stock_day_month(code, yyyymm)
+            finally:
+                fetch_stock_day_month._retrying = False
+        raise SparklineFetchError("stat_not_ok", str(d.get("stat"))[:60])
     return [c for c in (_num(row[6]) for row in d.get("data", [])) if c is not None]
 
 
@@ -453,7 +464,7 @@ def main():
                 quotes[code]["sparkline_date"] = today_str
                 fetched += 1
             else:
-                quotes[code]["sparkline_error"] = "not_available:stat_not_ok"  # 上櫃股票/該月無交易，STOCK_DAY是TWSE專屬
+                quotes[code]["sparkline_error"] = "not_available:empty"  # 兩個月都回OK但沒有任何列（極少見）
             consecutive_failures = 0
             time.sleep(0.15)  # 實測穩定節奏（見fetch_stock_day_month docstring），主要靠header不是靠慢
         except Exception as e:

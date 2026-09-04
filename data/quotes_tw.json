@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-04T05:45:26+00:00",
+  "fetched_at": "2026-09-04T05:50:31+00:00",
   "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
   "meta": {
     "trading_window": false,
@@ -8,11 +8,11 @@
     "live": 197,
     "data_type": "intraday",
     "sparkline": {
-      "cached": 143,
-      "fetched": 7,
-      "failed": 0,
-      "not_attempted": 13,
-      "stopped_reason": "超過時間預算240秒",
+      "cached": 150,
+      "fetched": 0,
+      "failed": 8,
+      "not_attempted": 34,
+      "stopped_reason": "連續失敗8檔（來源疑似不回應/封鎖）",
       "time_budget_sec": 240
     }
   },
@@ -719,7 +719,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_available:empty"
     },
     "2342": {
       "name": "茂矽",
@@ -928,7 +928,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_available:empty"
     },
     "2367": {
       "name": "燿華",
@@ -1236,7 +1236,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_available:empty"
     },
     "2455": {
       "name": "全新",
@@ -2699,7 +2699,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_available:empty"
     },
     "3014": {
       "name": "聯陽",
@@ -2743,7 +2743,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_available:empty"
     },
     "3019": {
       "name": "亞光",
@@ -3108,7 +3108,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3094": {
       "name": "聯傑",
@@ -3152,7 +3152,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3147": {
       "name": "大綜",
@@ -3163,7 +3163,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3228": {
       "name": "金麗科",
@@ -3174,7 +3174,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3231": {
       "name": "緯創",
@@ -3218,7 +3218,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3293": {
       "name": "鈊象",
@@ -3229,7 +3229,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3324": {
       "name": "雙鴻",
@@ -3240,7 +3240,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3374": {
       "name": "精材",
@@ -3251,7 +3251,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "stat_not_ok:很抱歉，沒有符合條件的資料!"
     },
     "3376": {
       "name": "新日興",
@@ -3328,7 +3328,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "3450": {
       "name": "聯鈞",
@@ -3405,7 +3405,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "3504": {
       "name": "揚明光",
@@ -3482,7 +3482,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "3532": {
       "name": "台勝科",
@@ -3625,7 +3625,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "3661": {
       "name": "世芯-KY",
@@ -3636,7 +3636,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "3702": {
       "name": "大聯大",
@@ -3779,7 +3779,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "4576": {
       "name": "大銀微系統",
@@ -3823,7 +3823,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "4760": {
       "name": "勤凱",
@@ -3834,7 +3834,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "4763": {
       "name": "材料*-KY",
@@ -4208,7 +4208,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "5291": {
       "name": "邑昇",
@@ -4219,7 +4219,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "5471": {
       "name": "松翰",
@@ -4263,7 +4263,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "5498": {
       "name": "凱崴",
@@ -4274,7 +4274,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "5508": {
       "name": "永信建",
@@ -4285,7 +4285,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "5534": {
       "name": "長虹",
@@ -4593,7 +4593,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6177": {
       "name": "達麗",
@@ -4637,7 +4637,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6196": {
       "name": "帆宣",
@@ -5011,7 +5011,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6491": {
       "name": "晶碩",
@@ -5055,7 +5055,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6526": {
       "name": "達發",
@@ -5165,7 +5165,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6679": {
       "name": "鈺太",
@@ -5176,7 +5176,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6693": {
       "name": "廣閎科",
@@ -5187,7 +5187,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6756": {
       "name": "威鋒電子",
@@ -5245,7 +5245,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_available:stat_not_ok"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6830": {
       "name": "汎銓",
@@ -5322,7 +5322,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6922": {
       "name": "宸曜",
@@ -5333,7 +5333,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6933": {
       "name": "AMAX-KY",
@@ -5344,7 +5344,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "6937": {
       "name": "天虹",
@@ -5355,7 +5355,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "7610": {
       "name": "聯友金屬-創",
@@ -5366,7 +5366,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "7711": {
       "name": "永擎",
@@ -5377,7 +5377,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "7795": {
       "name": "長廣",
@@ -5388,7 +5388,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "7855": {
       "name": "和運租車",
@@ -5399,7 +5399,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "8103": {
       "name": "瀚荃",
@@ -5410,7 +5410,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "8150": {
       "name": "南茂",
@@ -5421,7 +5421,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "8210": {
       "name": "勤誠",
@@ -5432,7 +5432,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "9907": {
       "name": "統一實",
@@ -5443,7 +5443,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     },
     "9919": {
       "name": "康那香",
@@ -5454,7 +5454,7 @@
       "time": "13:30:00",
       "date": "20260904",
       "stale": false,
-      "sparkline_error": "not_attempted:time_budget"
+      "sparkline_error": "not_attempted:circuit_breaker"
     }
   }
 }
