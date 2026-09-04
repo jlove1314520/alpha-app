@@ -4,6 +4,19 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T01:58（hypothesis_queue排程接續）— #31第2/3關：**已結案FAIL**。
+新增`option_pcr_overlay_v1.py`（沿用#19`spillover_overlay_v1.py`
+overlay/成本/隨機控制組框架，重用`option_pcr_gate.py`快取，未重打API）：
+trailing 250日PCR百分位排名<30%時降曝險至0.3。結果TRAIN overlay報酬
+-36.91%（買進持有+55.93%）、VAL overlay-17.57%（買進持有+59.73%），
+兩期皆大幅跑輸大盤；第2關隨機控制組percentile雖皆=100.0，但第3關
+參數密集高原僅7/49點(14%)為正、遠低於60%門檻，判**FAIL**。防禦型
+overlay在持續多頭市場的機會成本蓋過保護效益。不泛化成PCR訊號沒用
+（第1關cheap gate仍CHEAP_PASS），死的是這個具體二元切換構造。**佇列
+#1~31全數結案**，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪需設計新假設軸
+#32。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#122、
+`HYPOTHESIS_QUEUE.md`#31。`is_holdout_consumed()`確認`False`。
+
 ## 2026-09-05T01:28（hypothesis_queue排程，取得陳舊鎖檔接續，上一輪疑似
 卡住約30分鐘）— 先push上一輪
 未推送成功的commit（佇列#30已結案FAIL文件+新增假設#31登記），接著執行

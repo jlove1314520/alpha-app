@@ -2882,3 +2882,41 @@ alpha顯著性+beta拆解，任一關未過都要誠實判FAIL，不能因為第
 轉成具體exposure規則）開始，兩者皆可，由下一輪根據既有精神判斷。完整
 數字見`TRIALS_LEDGER.md`#121、`data/option_pcr_aligned.csv`
 （gitignored）。
+
+**狀態（2026-09-05接續排程，第2/3關：已結案FAIL）**：新增
+`option_pcr_overlay_v1.py`（沿用`spillover_overlay_v1.py`(#19)同一套
+overlay/成本/隨機控制組框架，重用`option_pcr_gate.py`已產出的
+`data/option_pcr_aligned.csv`快取，未重打FinMind API）——曝險規則：
+`pcr_pctl`（PCR在trailing 250交易日窗口內的百分位排名，只用過去含當天
+資料）低於30百分位時降曝險至0.3，否則維持1.0全曝險（跟已FAIL的#10/#19
+同一個「單邊防禦型」量級，非優化結果）。結果：**TRAIN期防禦曝險天數
+占比27.7%、VAL期30.8%**。TRAIN overlay總報酬**-36.91%** vs baseline
+（買進持有）+55.93%；VAL overlay**-17.57%** vs baseline+59.73%——**overlay
+在兩期都大幅跑輸買進持有**。第2關隨機控制組（打亂exposure時序，N=100）
+TRAIN/VAL percentile皆=100.0（真實策略打贏幾乎全部隨機打亂版本），但這
+只代表「這個防禦時機安排比隨機亂降曝險損失更小」，不代表贏過買進持有
+本身——這是這條假設第一次出現「隨機控制組表面過關、但策略本身仍是
+虧損且大幅跑輸基準」的組合，提醒之後deep_dive不能只看隨機控制組
+percentile，要同時檢查絕對報酬相對基準的差距。**第3關參數密集高原
+（threshold_pctl∈[0.10,0.40]×exposure_down∈[0.0,0.6]，49個網格點，
+TRAIN期1x成本）：僅7/49點(14%)報酬為正，遠低於60%門檻，非一整片，
+判定FAIL**，登錄門檻點(0.30,0.3)本身報酬為-36.91%。依協定第3關未過
+直接結案，未進第5關以後。**死因判讀**：TRAIN(2015-2020)+VAL
+(2020-2024)台股都是持續大多頭（買進持有各+55.93%/+59.73%），此overlay
+在近三成交易日降曝險至0.3，機會成本在長多頭環境下遠大於任何危機情境
+下的下檔保護，是防禦型overlay在持續多頭市場的典型失敗模式（跟#10
+`f_rel_strength_regime_switch`、#19美股隔夜外溢deep_dive前若失敗會是
+同一種死法家族，但#19實際走到gate5/6才知道結果，這條在gate3就被參數
+高原直接攔下，比#19更早、更乾淨地被快殺）。**不泛化成「PCR訊號本身
+沒用」**——第1關cheap gate的時序相關性（`TRIALS_LEDGER.md`#121）依然
+CHEAP_PASS，死的是「trailing百分位排名+單一固定門檻+二元曝險切換」這個
+具體overlay構造，未來若要重測建議改用連續曝險縮放（訊號強度按比例調整
+曝險，而非二元切換）或改成更短的訊號視窗/更極端的門檻（例如只在PCR
+處於歷史極端低位時才觸發，而非30百分位這種相對常見的水準），需要
+獨立走完整GATE_SEQUENCE，不能沿用這次的具體實作當作「PCR overlay已經
+測過」的證據。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#122、
+`option_pcr_overlay_v1.py`（新增，可重複執行）、
+`data/option_pcr_overlay_v1_run.log`、`MARATHON_LOG.md`本輪心跳。
+**佇列#31結案——佇列#1~31全數結案，剩餘#5/#6/#8/#10仍卡外部依賴（未
+重新查證，跟#30/#29查證結果一致，無理由預期已解鎖），下一輪需依協定
+第1節設計新假設軸#32。**
