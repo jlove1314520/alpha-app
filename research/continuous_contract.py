@@ -73,6 +73,19 @@ def load_session(
     (fut_probe_night_session.py) confirmed night session also carries spread
     rows (~30.6% of after_market rows) that need the same exclusion.
 
+    Round 333 fix (multi-commodity generalization): also excludes weekly-
+    contract rows (contract_date like "201308W1"), which MTX has carried
+    since 2013-07-31 (~10.3% of MTX's non-spread rows; TX/TE carry none --
+    confirmed by direct inspection this round) and which are NOT
+    single-month rollover-eligible contracts in the sense this module's
+    front_month_series()/rollover_events() logic assumes -- this function
+    was TX-only in practice until this round even though `contract` was
+    already a parameter, so the gap went unnoticed. Filter is now a strict
+    "contract_date is exactly 6 digits (YYYYMM)" match, which subsumes the
+    spread-row exclusion above (spread rows also fail this pattern) but the
+    original line is kept so each filter's rationale stays independently
+    documented rather than collapsed into one un-explained regex.
+
     Passing the exact (start_date, end_date) that matches an existing
     data/raw/ parquet cache key lets this hit the cache with zero network
     calls -- deliberately defaulted to the known full-history cache key
@@ -84,6 +97,7 @@ def load_session(
     if df.empty:
         return df
     df = df[~df["contract_date"].astype(str).str.contains("/")].copy()
+    df = df[df["contract_date"].astype(str).str.match(r"^\d{6}$")].copy()
     df = df[df["trading_session"] == session].copy()
     df["date"] = pd.to_datetime(df["date"])
     df["contract_date"] = df["contract_date"].astype(int)
