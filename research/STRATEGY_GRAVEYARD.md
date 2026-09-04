@@ -971,3 +971,30 @@ percentile=88.5雖接近90.0門檻仍判FAIL，不因接近而放寬（比照#24
 開始，非本次結案影響範圍）。
 
 完整數字見`TRIALS_LEDGER.md`#97、`HYPOTHESIS_QUEUE.md`#26。
+
+### 多因子複合評分 z-score blend baseline（HYPOTHESIS_QUEUE.md#27，2026-09-04FAIL）
+
+**經濟理由**：吸取#22硬AND合取過度擬合的教訓，改用z-score加總複合
+GP+value_pb+revenue_surprise三個「經濟理由獨立、統計上低相關」的因子
+（兩兩|corr|<0.4），做多複合分數最高分位，理論上分散各因子特異雜訊、
+累加訊號。
+
+**實作與結果**：`composite_zscore_v1.py`（cheap gate已CHEAP_PASS，
+VAL mean_ic=+0.0826，null percentile=100.0）之後，依使用者原話額外
+要求補測`composite_zscore_v1_random_control.py`——從`factors.py`實際
+產出的全部25個f_*因子池抽3個+Uniform(-1,1)隨機權重，N=300 draws（跨
+多輪session用checkpoint累積完成），比較baseline是否顯著贏過「任意
+複合、隨便加權」。結果：baseline贏過隨機組合的percentile=**87.2**
+（門檻90.0，未過），約12.8%隨機3因子加權組合的VAL IC強度與baseline
+相當或更強。
+
+**判定：FAIL**——依「事前綁定門檻不事後移動門柱」鐵律，87.2雖接近
+90.0門檻仍判FAIL，不因接近而放寬（比照#24/#26同一標準），未做正交性
+檢查/leave-one-factor-out，未進portfolio層構造。**誠實保留**：87.2
+落在`CALIBRATION_PROBE.md`探針發現的「100檔樣本檢定力不足邊緣區」
+型態附近，但該探針的修正手段（`SAMPLE_SIZE`100→300）針對的是單因子
+橫斷面IC洗牌null機制，跟這裡「隨機因子組合分布」null機制不同，不能
+自動套用，未來若要重測需獨立驗證更大樣本是否改變此結論。**不泛化成
+「多因子z-score複合這個構造類別完全沒用」**——只測了GP+value_pb+
+revenue_surprise這三個具體因子的等權組合，未測依驗證強度加權的版本。
+完整數字見`TRIALS_LEDGER.md`#102、`HYPOTHESIS_QUEUE.md`#27。

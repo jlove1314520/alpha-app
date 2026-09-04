@@ -13,6 +13,10 @@ CTA趨勢跟隨→PEAD組合層→股票股利率carry→（regime overlay/量�
 
 ---
 
+## 2026-09-04T08:25 — hypothesis_queue排程接續（收尾#27＋設計新假設#28） — 接手時發現上一輪（PID 34684）已把#27判FAIL寫進STRATEGY_GRAVEYARD/TRIALS_LEDGER#102但因鎖檔陳舊（卡住30.3分鐘）未commit，本輪先確認並沿用該判定不重跑；修正HYPOTHESIS_QUEUE.md「排隊順序總結」章節#27的過時提示字（原寫「第2關進行中」，已同步為FAIL），重新查證B24-500/題材動能榜PIT引擎仍無新進展、#5/#6/#8/#10依然卡外部依賴，佇列實質已空，依協定第1節設計新假設軸#28（市場廣度背離Breadth Divergence當regime擇時訊號，經濟機制與已FAIL的#2/#10/#15/#26四者皆不同——不是價格趨勢、不是波動度、不是融資水位，是「指數上漲時參與個股比例」，資料可行性已用既有300檔快取樣本查證可行不需新API呼叫），寫入HYPOTHESIS_QUEUE.md完整條目，本輪工作單位到此為止，未展開第1關sanity
+
+## 2026-09-04T08:xx — hypothesis_queue排程接續（#27結案：FAIL） — 接手時checkpoint已到300/300 draws（行程自然完成），計算percentile=87.2（門檻90.0，未過），依鐵律不放寬直接判FAIL，寫入STRATEGY_GRAVEYARD/TRIALS_LEDGER#102/HYPOTHESIS_QUEUE，佇列#5/#6/#8/#10仍卡外部依賴未解鎖，新假設軸設計留給下一輪
+
 ## 2026-09-04T07:29 — hypothesis_queue排程接續（#27複合z-score第2關） — 接手時PID 2037仍存活（06:52啟動，已運算37分鐘），checkpoint從06:52記錄的260/300持續輪詢7分鐘（07:21~07:28，每分鐘一次）皆維持260不動，查腳本確認`_save_checkpoint`每10筆draw才落盤一次（`composite_zscore_v1_random_control.py`第226-227行），推算260→270正在批次運算中屬正常現象非卡死，維持「不重啟、等待」策略不碰行程收工
 
 `ps -p 2037`確認行程存在（WINPID 34720，STIME 06:52:03），`tasklist`
