@@ -90,7 +90,7 @@ def main() -> None:
         base = {}
         if LAST_PATH.exists():
             try:
-                base = json.loads(LAST_PATH.read_text(encoding="utf-8"))
+                base = json.loads(LAST_PATH.read_text(encoding="utf-8-sig"))
             except json.JSONDecodeError:
                 base = {}
         # ps1 先寫 started/ended/reason(TIMEOUT時) 進來；這裡只在 ps1 沒判定 TIMEOUT 時覆寫 reason

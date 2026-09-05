@@ -1,14 +1,5 @@
 # MARATHON_PROTOCOL.md — 30 分鐘挖礦馬拉松操作規則
 
-## 🛠 2026-09-05 基礎設施維修中（總司令核准提案選項1）：三軌本輪「只寫心跳、不投遞工作」
-
-**這段旗標存在期間**，每一輪只做：`marathon_brief.py` → 取鎖 → 在 `REPORT.md` 心跳寫一行「維修中跳過（第N輪）」→ commit+push → 釋放鎖。
-不投遞任何回測、不讀大檔、不改任何 state/LEADS/LEDGER。維修內容與驗收標準見
-`research/PROPOSAL_2026-09-05_marathon_process_hardening.md`；三輪驗收通過後由互動 session 移除這段旗標並恢復挖礦。
-**馬拉松自己不能判斷維修結束、不能自行移除這段。**
-
----
-
 ## ✅ 2026-09-03 總司令裁示：暫停規則解除，主軸改為「多因子組合策略」
 
 **（取代2026-08-26晚的🛑暫停規則；那段規則自第110輪起讓三軌連續跳過約213輪，
@@ -62,6 +53,21 @@
 下一輪只看到 `LOCK_STALE` 便猜「卡住」。整晚 64 次 cycle 是這樣死的，第 356 輪的「背景回測消失無錯誤訊息」就是陪葬。
 另外舊的 vbs 不等待 PowerShell 結束讓兩輪可以重疊、舊鎖門檻 25 分鐘比實際輪次短會搶鎖。**以下規則全部是為了讓
 「做完就是做完、死掉就知道為什麼死」。**
+
+**2026-09-05 維修驗收（連跑 7 輪的實測數字，不是推論）**：
+
+| 項目 | 修好前（09-04 整晚） | 修好後（09-05 18:02~18:10 連跑7輪） |
+|---|---|---|
+| cycle 死因 | 427 次結束裡 64 次 `Exceeded USD budget`（凌晨 10 小時就 12 輪） | 7 輪全部 `reason=OK`，0 次 BUDGET／TIMEOUT |
+| 每輪花費 | 撞上限 $5（100%） | $0.086～$0.323，最高只用掉預算 4.0%（上限已放寬到 $8） |
+| 每輪讀取量 | 必讀檔案合計約 1.2MB | 最大 52.2KB（目標 <300KB） |
+| 鎖 | 第351/355/356/360/361/363/364/365 輪連續 `LOCK_STALE` | 0 次 `LOCK_STALE`；刻意製造的 2 次重疊都正確 `LOCK_HELD` 退讓（第二輪只花 $0.086/$0.136 就收工） |
+| session 被砍時的背景工作 | 陪葬、無 CSV 無錯誤訊息（第356輪） | **實測故意 `taskkill /T /F` 整棵 session 行程樹**：看門狗與工作行程都存活，工作 45 秒後正常寫出產出檔，登記簿 `status=finished, exit_code=0, expect_exists=True` |
+
+驗收過程中抓到並修掉一個真缺陷：ps1 的 finally 原本用「鎖的時間戳 >= 本輪開始時間」猜擁有權，
+兩輪重疊時會誤釋放另一輪還在用的鎖（實測 18:05:05 那輪釋放了 18:04:44 那輪在 18:05:14 才建立的鎖）。
+現在鎖檔是 `pid|ts|cycle_id` 三欄，`cycle_id` 由 ps1 用環境變數 `ALPHA_CYCLE_ID` 傳給 `marathon_lock.py`，
+finally 只釋放 cycle_id 相符的鎖（重測確認：不相符時 log 寫 `left alone`）。
 
 1. **開工只跑 `python research/marathon_brief.py`**（<60KB），不 cat 整份 `REPORT.md`／`HYPOTHESIS_QUEUE.md`／`TRIALS_LEDGER.md`／
    `*_LOG.md`／三軌 STATE 全文。需要某條目就 `grep -n "#27" research/TRIALS_LEDGER.md` 這種方式抓那一段。

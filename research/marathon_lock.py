@@ -19,6 +19,9 @@ Usage (see MARATHON_PROTOCOL.md section 0):
     python marathon_lock.py release [--name X]  # always exits 0 (releasing an
                                                  # already-free lock is not an error)
 
+Lock file format (2026-09-05): `pid|unix_ts|cycle_id`. cycle_id comes from env ALPHA_CYCLE_ID,
+set by run-marathon-cycle.ps1, so the launcher's finally block can release *only its own* lock.
+
 Stale-lock recovery: a lock older than STALE_MINUTES is treated as free --
 the process that held it almost certainly crashed or was killed without
 reaching its own release() call (headless agent sessions have no guaranteed
@@ -44,21 +47,33 @@ def _lock_path(name: str) -> Path:
     return Path(__file__).parent / filename  # gitignored -- transient local state, not project history
 
 
+def _read_lock(lock_path: Path) -> tuple[str, float, str]:
+    """回傳 (pid, ts, cycle_id)。2026-09-05 起鎖檔是三欄 `pid|ts|cycle_id`；舊的兩欄格式仍讀得動
+    （cycle_id 給 "unknown"）。讀不動就回傳 ts=0 讓呼叫端視為陳舊，不要永遠卡死。"""
+    try:
+        parts = lock_path.read_text(encoding="utf-8").strip().split("|")
+        pid_str, ts_str = parts[0], parts[1]
+        cycle_id = parts[2] if len(parts) > 2 else "unknown"
+        return pid_str, float(ts_str), cycle_id
+    except (ValueError, IndexError, OSError):
+        return "unknown", 0.0, "unknown"
+
+
 def acquire(name: str = DEFAULT_LOCK_NAME) -> bool:
     lock_path = _lock_path(name)
+    # 2026-09-05：cycle_id 由 run-marathon-cycle.ps1 用環境變數傳進來，寫進鎖檔第三欄，
+    # 讓 ps1 的 finally 能精確判斷「這把鎖是不是我這輪的」——舊版用時間戳猜，兩輪重疊時
+    # 會誤釋放另一輪還在用的鎖（驗收實測到，見 PROPOSAL_2026-09-05_marathon_process_hardening.md）。
+    cycle_id = os.environ.get("ALPHA_CYCLE_ID", "unknown")
     if lock_path.exists():
-        try:
-            pid_str, ts_str = lock_path.read_text(encoding="utf-8").strip().split("|", 1)
-            age_minutes = (time.time() - float(ts_str)) / 60.0
-        except (ValueError, OSError):
-            age_minutes = STALE_MINUTES + 1  # unreadable/corrupt lock file -- treat as stale, don't wedge forever
-            pid_str, ts_str = "unknown", "unknown"
+        pid_str, ts, holder_cycle = _read_lock(lock_path)
+        age_minutes = (time.time() - ts) / 60.0 if ts else STALE_MINUTES + 1
         if age_minutes < STALE_MINUTES:
-            print(f"LOCK_HELD by {pid_str} since {ts_str} ({age_minutes:.1f} min ago)")
+            print(f"LOCK_HELD by {pid_str} (cycle {holder_cycle}) since {ts} ({age_minutes:.1f} min ago)")
             return False
-        print(f"LOCK_STALE (held by {pid_str}, {age_minutes:.1f} min old) -- recovering")
-    lock_path.write_text(f"{os.getpid()}|{time.time()}", encoding="utf-8")
-    print("LOCK_ACQUIRED")
+        print(f"LOCK_STALE (held by {pid_str}, cycle {holder_cycle}, {age_minutes:.1f} min old) -- recovering")
+    lock_path.write_text(f"{os.getpid()}|{time.time()}|{cycle_id}", encoding="utf-8")
+    print(f"LOCK_ACQUIRED (cycle {cycle_id})")
     return True
 
 
