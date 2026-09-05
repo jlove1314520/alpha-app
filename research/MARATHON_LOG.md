@@ -1,5 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T18:30（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#37
+（全市場現股當沖比重）發現FinMind`TaiwanStockDayTrading`免費層資料只從
+2024-01-02起有、涵蓋不到TRAIN期（2015-2020），標準cheap gate無法用原
+設計執行。改建TWSE官方資料源：新增`twse_day_trading_client.py`
+（TWTASU）+`twse_market_volume_client.py`（FMTQIK，當分母）+
+`backfill_day_trading_ratio.py`（比照`backfill_t86.py`可續跑批次設計）。
+本輪執行：FMTQIK全市場成交量120個月（2015-01~2024-12）**100%回補完成**；
+TWTASU逐日回補（瓶頸在TWSE反爬蟲需2.0秒/次間隔）本輪僅完成16天即因
+**本輪執行環境USD預算即將用盡被迫提前收工**，checkpoint機制正常（逐日
+atomic寫入不遺失進度），下一輪重跑`backfill_day_trading_ratio.py
+--skip-market-volume`即可自動接續，估計還需約10輪批次才能回補完整
+TRAIN+VAL期。已更新`HYPOTHESIS_QUEUE.md`#37條目+排隊順序總結。
+
 ## 2026-09-05T18:00（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#36
 （個股融券使用率）**最終alpha顯著性判定完成：FAIL，正式結案**。解決
 上一輪（T17:32）留下的TRAIN期alpha不顯著(p=0.3717)/VAL期alpha顯著

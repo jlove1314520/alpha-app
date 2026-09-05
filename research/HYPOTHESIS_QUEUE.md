@@ -984,10 +984,12 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     #5/#6/#8/#10仍卡外部依賴（本輪重新查證仍未解鎖），設計新假設軸
     #37（全市場現股當沖比重當市場過熱regime訊號，見下方新章節），
     現在排隊第一，尚未開始第1關。**
-37. 全市場現股當沖比重（Day-Trading Ratio）——**2026-09-05 hypothesis_
-    queue排程新增，已完成資料可行性查證（FinMind`TaiwanStockDayTrading`
-    免費層確認可用），尚未開始第1關**，下一輪從cheap gate開始，不
-    跳關。
+37. 全市場現股當沖比重（Day-Trading Ratio）——**2026-09-05接續排程：
+    方法論修正+地基建置中**（FinMind免費層資料只從2024起、涵蓋不到
+    TRAIN期，改建TWSE官方TWTASU+FMTQIK資料源，FMTQIK 120個月已100%
+    回補、TWTASU逐日回補進度16/約2500天，checkpoint可續跑，完整內容
+    見上方#37條目最新狀態），現在排隊第一，下一輪從TWTASU回補接續，
+    完整回補後才進第1關cheap gate。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後，內容已嚴重過時，僅存
 歷史脈絡——實際最新狀態一律以本章節最後一條編號條目為準）**：15條原始佇列項目中
@@ -3671,6 +3673,28 @@ construction/timing overlay階段，跟其他總經timing訊號一樣，必須�
 （通用regime先驗可能誤殺選股訊號本身的特異性報酬——但這條本身就是
 regime訊號，不是選股訊號，不完全適用同一個保留，需要屆時另外評估）。
 
-**狀態**：本輪僅完成經濟理由設計+資料可行性查證（`TaiwanStockDayTrading`
-免費層確認可用），依協定「一輪只做一個有界工作單位」，尚未開始第1關
-cheap gate，現在排隊第一，下一輪從第1關開始，不跳關。
+**狀態（2026-09-05T18:30更新，`HYPOTHESIS_QUEUE_PROTOCOL.md`接續排程，
+地基建置中，非PASS/FAIL判定）**：**重大方法論修正**——本輪查證發現
+FinMind`TaiwanStockDayTrading`免費層資料**只從2024-01-02起有**，
+TRAIN_END=2020-12-31（`validation/holdout.py`），代表TRAIN期完全零觀測
+值，標準cheap gate（要求train/val同號）無法用原設計的FinMind近似版執行。
+改查TWSE官方端點，本輪實測確認`TWTASU`（全市場現股當沖成交量值）跟
+`FMTQIK`（全市場每日成交股數/金額，當分母）皆有完整2015年起資料，改建
+獨立資料源取代FinMind近似版：新增`twse_day_trading_client.py`（TWTASU，
+一次一天，取回應「合計」列，`day_trade_volume`=當沖賣出成交數量+資券
+互抵成交數量，方法論假設見該檔案docstring）+`twse_market_volume_client.py`
+（FMTQIK，一次一個月，全市場成交股數當分母——**曾考慮改用已快取的
+Yahoo `^TWII` volume省一個資料源，實測其量級（約200~300萬）遠小於
+FMTQIK真實全市場成交股數（約40~50億），確認不可用，排除**）+
+`backfill_day_trading_ratio.py`（比照`backfill_t86.py`同一種可重複呼叫/
+有界批次/快取檔案本身即完成紀錄設計）。**本輪執行結果**：FMTQIK全市場
+成交量**120個月（2015-01~2024-12）已100%回補完成**；TWTASU逐日回補
+（瓶頸在TWSE反爬蟲封鎖需要2.0秒/次呼叫間隔，跟`backfill_t86.py`同一個
+`rwd`網域、沿用同一個實測安全值）本輪僅完成16天（2015-01-01~2015-01-22）
+即因**這一輪執行環境USD預算即將用盡被迫提前收工**，跟`#30`融資使用率
+先例同一種checkpoint可續跑機制（`TWTASU_*.parquet`逐日atomic寫入，
+中斷不遺失已完成進度），下一輪重跑`python backfill_day_trading_ratio.py
+--skip-market-volume --batch-size 250`即可自動從2015-01-23接續，預估
+還需要約10輪左右的批次（全範圍約2500個工作日，每輪約250天）才能回補
+完整TRAIN+VAL期，屆時才能執行第1關cheap gate。現在排隊第一，下一輪
+從TWTASU回補接續開始，不跳過地基直接嘗試用不完整資料跑cheap gate。
