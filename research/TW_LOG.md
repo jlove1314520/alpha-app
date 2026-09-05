@@ -1902,3 +1902,21 @@ circular-shift null的標準差（TRAIN 0.2378、VAL 0.3157）約為完全打散
 `is_holdout_consumed()`確認`False`。全程零新增API呼叫、零新增運算。
 
 下一輪TW軌接續：`run_detached.py status`確認US背景工作是否已釋放，若是則投遞`tw_deep_dive_quality_roe_stability_full_rerun`；若仍佔用，考慮round388選項(a)（US乾淨宇宙deep dive若已收成PASS，評估TW同構組合地基可行性）。
+
+## 第390輪（2026-09-06T07:30+08:00，TW軌）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 02:30（round385，最舊，明確跳過信號）／US 06:03（round387，背景工作`20260906-060311-6a01`本輪開工時仍`running`，88~90分鐘/150分鐘timeout，`log --tail 30`確認進度正常：TRAIN三個成本倍數已跑完、percentile皆100.0，正在跑VAL 1x，非卡死）／TW 07:05（round389，最新）——FUT/US皆有明確理由跳過，選TW。
+
+`run_detached.py submit`嘗試投遞`tw_deep_dive_quality_roe_stability_full_rerun`，仍因US工作佔用回傳exit=3，確認不可硬跑搶CPU。
+
+**踩坑記錄（已當場修正，未造成資料遺失）**：原本打算比照round377已有的`margin_debt_level_window_robustness.py`新增一支「檢查`margin_debt_level_v1`是否需要複驗」的腳本，用Write工具寫入時才發現該檔名已存在（round377原創），內容被整份覆寫成邏輯等價但格式不同的版本。立刻用`git checkout -- margin_debt_level_window_robustness.py`還原成原始版本，`git status`確認乾淨。順帶確認`margin_debt_level_v1`（#14）的window/heterogeneity/circular-shift三項深挖round377-380都已完整做完並降級「證據不足」結案，不是待辦，避免下一輪重蹈覆轍。
+
+**本輪實際工作單位**：審閱`deep_dive_f_quality_roe_stability.py`（round389準備投遞但被擋下的那支腳本）確認其參數設定是否合理。發現：該腳本第58行`from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, ...`直接吃`factor_ic.py`的`SAMPLE_SIZE`常數，而這個常數已被`CALIBRATION_PROBE.md`結論從100改成300（TW軌#77/#79/#91重跑時的同一次改動）。這代表下一次重跑`deep_dive_f_quality_roe_stability.py`會用300檔樣本（預期約240~260檔可用），不是round 2/3那次的80檔小樣本。
+
+比對`long_short_backtest.py::run_long_short()`的實作（第197行`df.loc[prev_day, "adj_close"]`逐日查表），跟US軌`deep_dive_f_us_low_vol_clean_universe.py`是同一種寫法——US軌248檔規模下單一組合（1真實+100隨機=101次回測）就要10幾分鐘，6組合（2期×3成本）總計遠超20分鐘，第一次投遞用20分鐘timeout被砍（job `20260906-053411-6d75`，`reason=timeout`），改用150分鐘才順利執行（見`US_MARATHON_STATE.md`round387）。TW這次是300檔（比US的248檔更大）、同樣6組合、同樣101次/組合的規模，若沿用round389寫在「下一輪TW軌接續」裡的`--timeout-min 40`直接投遞，很可能重蹈US同一個「timeout訂太保守被中途砍掉、要重投一次浪費一輪」的錯誤。
+
+**處理方式**：不修改`run_long_short()`/`deep_dive_f_quality_roe_stability.py`本身的計算邏輯（效能重構屬於「新的架構/效能變更」，按`CLAUDE.md`「提案先於執行」鐵律需要先寫提案，不在這輪自行決定），只更正`TW_MARATHON_STATE.md`給下一輪的投遞指令，把`--timeout-min`從40改成150（比照US的成功參數）。
+
+全程零新增API呼叫、零新增運算，純程式碼審閱＋文件更正＋一次已還原的誤寫。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+下一輪TW軌接續：`run_detached.py status`確認US背景工作`20260906-060311-6a01`是否已釋放；若已釋放，投遞`python research/run_detached.py submit --name tw_deep_dive_quality_roe_stability_full_rerun --timeout-min 150 -- python -u research/deep_dive_f_quality_roe_stability.py`（**注意timeout是150分鐘，不是round389寫的40分鐘**）；若仍佔用，繼續跳過等下一輪。
