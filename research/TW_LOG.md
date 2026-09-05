@@ -1790,3 +1790,21 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **記錄**：`TRIALS_LEDGER.md`#141（新增列）、`TW_LEADS.md`#14（更新）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，執行約1分鐘。
 
 **下一輪TW軌建議**：(a) 疑慮①TRAIN/VAL異質性查證（切更多子期間、檢視VAL期具體是哪幾次回撤事件在驅動相關係數）；(b) 隨機控制組≥100 draws獨立抽樣版本（目前N=200是排列檢定，非獨立抽樣控制組）；(c) 或轉回`portfolio_multifactor_v2`組合策略層級其他尚未測維度。
+
+## 第379輪（2026-09-05T21:30+08:00，TW）——`margin_debt_level_v1`疑慮①TRAIN/VAL異質性查證：VAL四年一致，TRAIN年度間高度不一致
+
+**取鎖**：乾淨（非陳舊鎖檔）。**選軌**：FUT 18:30最舊但配額已滿、round372自建議優先權回TW/US，跳過；US 20:35次舊、TW 21:00最新——因US下一步需要大量新增FinMind抓取（`us_stratified_universe_sample.py`續抓mid/small tier），而FinMind額度仍鎖到22:38+08:00（開工時21:30，還剩約1小時），繼續US會立即卡住；TW下一步（round377「下一步(a)」TRAIN/VAL異質性查證）是純讀本機快取、零API呼叫，故不機械選次舊的US，改選TW（協定第0節輪替規則的資源配置例外，理由同round373/375對FUT的處理邏輯）。
+
+**工作單位**：round377「下一步(a)」——`margin_debt_level_v1`（`TRIALS_LEDGER.md`#140/#141）保留疑慮①（TRAIN普遍弱於VAL，三個trailing窗口皆同款形狀）查證。新增`margin_debt_level_train_val_heterogeneity.py`（重用`margin_debt_level_gate.py`/`margin_debt_growth_gate.py`既有函式與快取，零新增API呼叫），只測trailing=156週×horizon=60d（#140/#141原始參照案例，事前綁定不擴大到其他窗口）。方法：(1)逐年子期間描述性統計＋年度corr；(2)VAL期leave-one-year-out；(3)VAL期fwd_mdd_abs最深10個觀測點的年份分布。
+
+**結果**：
+- **VAL期四年獨立看全部同號且多數顯著**：2021 corr=+0.7172(p<0.0001)、2022 corr=+0.5162(p=0.0002)、2023 corr=+0.3845(p=0.0070)、2024 corr=+0.5557(p=0.0004)。
+- **VAL期leave-one-year-out四組全部維持正號**：拿掉2021→+0.5262、拿掉2022→+0.7569、拿掉2023→+0.1688(p=0.0521,邊緣)、拿掉2024→+0.3969；最低是拿掉2023年（仍正號，p邊緣不顯著但方向未反轉），洗牌null percentile四組分別為100.0/100.0/95.5/100.0，全部仍贏過null。
+- **VAL期fwd_mdd_abs最深10個觀測點9個集中在2024年5-7月**（同一波回撤事件，多個週度觀測點的60日forward window重疊導致fwd_mdd_abs數值相同0.1869），另1個在2022-04-15；但2024年單獨corr(+0.56)並非四年中最高，2021年才是最高(+0.72)，顯示最深回撤事件的年份≠訊號最強的年份。
+- **TRAIN期年度間高度不一致（新發現，非原本假設的方向）**：2015 corr=+0.1469(ns,n=20)、2016 +0.2474(p=0.09,ns)、**2017 corr=+0.8174(p<0.0001，單年極強)**、2018 corr=-0.0423(ns，接近零甚至反向)、2019 +0.3022(p=0.046)、2020 +0.2702(p=0.07,ns)。
+
+**判讀**：疑慮①部分釐清、部分仍待處理——**VAL期的強相關不是單一年份或單一回撤事件驅動**：四年獨立看同號、leave-one-year-out四組都維持正號（即使最弱的拿掉2023年也只是p值邊緣不顯著，沒有變號），且fwd_mdd_abs最深的年份（2024）反而不是corr最強的年份，排除「VAL corr是被2024年那波回撤的量級單方面撐起來」的疑慮。**但TRAIN期偏弱的更精確根因浮現**：不是「TRAIN六年普遍都弱」，而是「TRAIN六年年度間高度異質——2017年單獨貢獻corr=+0.82的強訊號，其餘5年多半接近零或邊緣不顯著（甚至2018年還反號）」，TRAIN整體corr=+0.117是被2017年那年拉高、其餘年份稀釋後的結果，這跟VAL期「四年都穩定同號」的形狀本質不同。**誠實保留（本輪仍未完全解決的部分）**：(1)為何TRAIN期只有2017年特別強、其餘年份弱或反號，本輪未深究經濟機制（可能跟2017年之前融資餘額水位百分位的暖身期資料品質有關，即`TRIALS_LEDGER.md`#140保留疑慮②，尚未查證）；(2)本查證只做描述性統計與leave-one-year-out，未對子期間本身另做置換檢定顯著性判斷（子期間n太小，個別年份p值不具嚴謹參考力，僅供形狀觀察）；(3)VAL期corr雖非單一年份驅動，但VAL(+0.46)本身量級仍遠高於TRAIN(+0.12)，這個TRAIN/VAL量級落差本身尚未有解釋，本輪只是排除了「VAL量級是巧合/單一事件」這個特定假說，不代表已證明TRAIN/VAL量級落差合理或訊號穩健。**不泛化為「疑慮①已解決」**，仍是CHEAP_PASS階段的候選，未進入第2關剩餘的隨機控制組≥100 draws獨立版本、成本敏感度。
+
+**記錄**：`TRIALS_LEDGER.md`#142（新增列）、`TW_LEADS.md`#14（更新）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，執行約1分鐘。輸出：`data/margin_debt_level_val_year_stats.csv`、`data/margin_debt_level_val_leave_one_year_out.csv`、`data/margin_debt_level_val_top10_drawdowns.csv`（皆新增）。
+
+**下一輪TW軌建議**：(a) 查證TRAIN期2017年為何單獨貢獻強訊號、其餘年份弱/反號的機制（可能連結到#140保留疑慮②暖身期資料品質）；(b) 隨機控制組≥100 draws獨立抽樣版本（目前N=200是排列檢定，非獨立抽樣控制組）；(c) 或轉回`portfolio_multifactor_v2`組合策略層級其他尚未測維度。
