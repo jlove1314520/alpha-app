@@ -1196,3 +1196,28 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 `is_holdout_consumed()`開工/收工前皆確認`False`。零本輪新增API呼叫（純讀取既有CSV+本機分析）。完整見`TRIALS_LEDGER.md`#128（完整推理）、`US_LEADS.md`#17（新增）。
 
 **下一輪工作單位建議**：(a) 若要挽救`f_us_value_bm`，需換非熱門股偏誤的美股宇宙（例如按市值分層隨機抽樣）重跑cheap gate+1b深挖；(b) 更輕量的驗證：對現有135檔做leave-one-out集中度檢查（比照`STRATEGY_GRAVEYARD.md`銅金比overlay#126），逐一拿掉VAL期報酬貢獻最大的1~3檔ticker，看剩餘樣本報酬是否崩塌，可直接證實/證偽假影假說；(c) 若確認是universe假影，`f_us_low_vol`家族（#41/#115）跟`f_us_value_bm`（本列）的既有FAIL判定不需要改判（兩者各自的死因——beta方向性曝險 vs 報酬量級不可信——本身站得住腳，假影只是額外強化FAIL的理由，不是唯一理由）；(d) US軌下一個可能突破方向：PIT財報資料源的其他基本面因子（品質/成長）、或先處理宇宙選樣偏誤這個地基問題再繼續測任何新因子。
+
+---
+
+## 第363輪 · 2026-09-05T08:31+08:00
+
+**取鎖**：偵測到`LOCK_STALE`（round360的pid 44236持有30.2分鐘後被回收）。`git log`已確認round360工作本身成功commit+push（`6406cc5`），研判是收工序release lock前process卡住，未查到殘留未commit工作，同round361 FUT軌pid58488先例。
+
+**本輪工作單位**：延續round360「下一輪建議(c)」——對`f_us_value_bm`135檔樣本做leave-one-out集中度檢查（輕量版），驗證round360發現的universe選樣假影假說（`TRIALS_LEDGER.md`#128、`US_LEADS.md`#17）。
+
+新增`deep_dive_f_us_value_bm_leave_extreme_out.py`：
+- 重用`load_value_sample()`（`us_factor_ic_value.py`，零forked邏輯）取得同一批135檔資料。
+- 用各股自身VAL期(2020-12-31~2024-12-31)買進持有報酬排名，**預先綁定（hash-lock）排除固定前10名**（不依實際報酬數字回頭挑門檻，避免p-hacking）。
+- 重用`run_one_value()`（`deep_dive_f_us_value_bm.py`）跑(a)全135檔基準（應重現round360的+121.38%）、(b)排除前10名後的125檔版本，皆VAL期1x成本。
+- **判準已在程式碼docstring寫死於執行前**：排除後ann_return<+30%＝確認集中度假說成立；>+60%＝否證（偏誤更廣泛分布，非少數個股主導）；中間＝部分成立。
+
+**執行結果：未完成，非失敗**。開工執行後，背景輸出檔案在約20分鐘內只印出`load_value_sample()`本身226檔（135可用/91drop）的loading loop（最後一行`[226/226] ZSQR: OK`剛好是loop最後一筆），loop之後預期的own-return排名/回測結果完全沒有印出。核對`.marathon.lock`確認已逼近25分鐘陳舊門檻（取鎖後約20分鐘），為避免鎖檔被下一輪視為陳舊回收、造成潛在並行執行風險，`taskkill /F`中止了當時記錄到的python process（pid 60876，事後無法100%確認是否即為本腳本的process，因為kill與背景任務「completed」通知幾乎同時發生），未產出`data/deep_dive_f_us_value_bm_leave_extreme_out.csv`。
+
+**這是本輪最主要發現**：`load_value_sample()`226檔SEC company-facts純本地JSON解析（確認零新增API呼叫，跟round347/350/357/360的既有紀錄一致，純磁碟快取讀取）這次耗時遠超先前輪次觀察到的4~6分鐘（round357曾記錄約4分鐘完整跑完226檔），本輪20分鐘內連loading loop本身都才剛好跑完，尚未進入`run_one_value()`的100次隨機控制組運算階段。**沒有查證是本機同時有其他負載拖慢（例如同時有其他背景process在跑）、還是磁碟/系統狀態變化，留給下一輪視情況判斷**——不排除是巧合的單次慢執行，也不排除是需要留意的效能退化，兩種可能性都要記錄、不能只選一種當結論。
+
+**下一輪待辦**：
+(a) 直接重跑`python deep_dive_f_us_value_bm_leave_extreme_out.py`（程式碼邏輯完整、判準已預先綁定，不用改程式碼，只是這輪時間預算不夠）；
+(b) 若同一份程式碼再度耗時逼近鎖檔上限，考慮改用round350`f_us_value_bm`原深挖用過的「啟動背景process後不等待，下一輪才回來讀CSV」模式，避免單輪30分鐘預算被載入階段獨吞；
+(c) 開工先確認環境是否乾淨（`ps -ef | grep python`，同round357先例）再重跑，排除跨process資源競爭的可能性。
+
+`is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`（純本地檔案操作，未觸碰FinMind/alpha.db）。零新增API呼叫。完整見`US_MARATHON_STATE.md`第363輪記錄、`deep_dive_f_us_value_bm_leave_extreme_out.py`（新增）。
