@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+
+## 2026-09-06 05:58（hypothesis_queue排程接續第十三輪，上一輪鎖檔陳舊
+(30.0分鐘)被回收，疑似上一輪失敗未產出）：確認佇列#1~39全數結案，
+剩餘#5/#6/#8/#10重新查證仍卡外部依賴（value_board_v2仍回測未通過、
+題材動能榜/未來性濾網仍紙上交易中），依協定第1節設計新假設軸#40
+（庫藏股買回公告效應Share Buyback Announcement Effect，管理層信心
+信號事件研究，跟前39條①方向性選股②timing overlay③portfolio
+construction④配對交易⑤強制平倉風控機制分類皆不同的第六類：公司
+行動事件驅動）。本輪已完成資料可行性查證並確認可行：公開資訊觀測站
+（MOPS）t35sc09功能（上市公司買回自己公司股份彙總統計表）可用POST
+查詢任意日期範圍，回傳含董事會決議日期（事件日）等完整欄位的HTML
+表格，實測民國114/115年皆有資料。已更新HYPOTHESIS_QUEUE.md新增#40
+完整條目（排隊順序總結+獨立詳細章節）。本輪未寫任何因子/測試程式碼、
+未動TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md（無新PASS/FAIL判定）。
+holdout未消耗（=False）。git status確認repo內非本輪產生的殘留檔案
+（.github/workflows/audit.yml、畸形檔名暫存檔）未觸碰、未納入commit。
+下一輪從第1關cheap gate開始，先寫buyback_announcement_probe.py確認
+歷史回溯範圍，再寫正式回補腳本，不跳關。
 ## 2026-09-06（hypothesis_queue排程接續第十二輪，上一輪鎖檔陳舊
 (149.8分鐘)被回收，疑似上一輪失敗未產出）：查證#39（0050/台灣50指數
 成分股調整事件效應）資料可行性——掃描TWSE openapi全144端點+FinMind
