@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T02:04（hypothesis_queue排程接續第十輪，本輪取鎖乾淨
+`LOCK_ACQUIRED`）：#37（全市場現股當沖比重）TWTASU逐日回補完成剩餘
+121天，**累積2609/2609（100.0%），地基100%回補完成**。新增
+`day_trading_ratio_gate.py`跑第1關cheap gate（訊號=當沖比重trailing
+60日自身百分位排名，目標=未來20日TAIEX報酬，事前綁定方向為負）：
+TRAIN corr=-0.0550(p=0.0396)percentile=98.5過關，**VAL
+corr=-0.0042(p=0.8981)percentile=60.0遠未過**<=10.0門檻，訊號幾乎
+完全消失，典型「TRAIN過擬合、VAL無訊號」形狀，依快殺標準判定
+**FAIL**，不進第2關。已更新`HYPOTHESIS_QUEUE.md`#37條目+「排隊順序
+總結」章節+`TRIALS_LEDGER.md`#146+`STRATEGY_GRAVEYARD.md`對應段落。
+holdout未消耗（`is_holdout_consumed()`=False）。**佇列#1~37全數
+結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證`BACKLOG.md`——B24
+仍`回測未通過`、題材動能榜仍`紙上交易中`，未解鎖）**——本輪因時間/
+預算考量，優先確保#37完整記錄，未在同輪倉促設計新假設軸#38，留給
+下一輪處理，並提醒下一輪避開跟同機器`AlphaMarathon`FUT軌
+`fut_cheap_gate.py`系列已測過的「三大法人期貨部位」類機制重複。
+`git pull`確認乾淨，`git status`確認repo內仍有非本輪產生的殘留
+（`data/rate_limit_state.json`、`.github/workflows/audit.yml`、一個
+帶亂碼檔名的tmp檔、`round366_deep_dive...log`），未觸碰、不納入本輪
+commit。
+
 ## 2026-09-06T01:43（hypothesis_queue排程接續第九輪，本輪取鎖乾淨
 `LOCK_ACQUIRED`）：#37（全市場現股當沖比重）TWTASU逐日回補再接續一批：
 `python backfill_day_trading_ratio.py --skip-market-volume --batch-size
