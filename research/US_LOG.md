@@ -1221,3 +1221,31 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 (c) 開工先確認環境是否乾淨（`ps -ef | grep python`，同round357先例）再重跑，排除跨process資源競爭的可能性。
 
 `is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`（純本地檔案操作，未觸碰FinMind/alpha.db）。零新增API呼叫。完整見`US_MARATHON_STATE.md`第363輪記錄、`deep_dive_f_us_value_bm_leave_extreme_out.py`（新增）。
+
+`is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`（純本地檔案操作，未觸碰FinMind/alpha.db）。零新增API呼叫。完整見`US_MARATHON_STATE.md`第363輪記錄、`deep_dive_f_us_value_bm_leave_extreme_out.py`（新增）。
+
+---
+
+## 第374輪 · 2026-09-05T19:30+08:00
+
+**取鎖**：乾淨（非陳舊鎖檔）。三軌時間戳：US 10:34（第366輪，最舊）／FUT 18:30（第372輪）／TW 19:00（第373輪，最新）——依輪替選US。
+
+**本輪工作單位**：收成round366投遞、留在背景繼續跑的`deep_dive_f_us_value_bm_leave_extreme_out.py`（PID 1910）。開工檢查發現process已結束，`data/deep_dive_f_us_value_bm_leave_extreme_out.csv`已產出，log(`round366_deep_dive_f_us_value_bm_leave_extreme_out.log`)顯示完整執行到底。
+
+**結果**：
+- (a) 全135檔基準重現：VAL(2020-12-31~2024-12-31) ann_return=+121.38%、beta=+0.003、random_control_percentile=100.0——與round360記錄完全吻合，複現無誤。
+- (b) 排除own-return前10名極端贏家後（125檔）：ann_return=**+148.17%**（比基準更高）、beta=-0.027、random_control_percentile=100.0。
+- 排除的top10：ADMA/VST/LNTH/SFM/EP/TLN/SKT/APO/GVA/AGX（own-return+238.8%~+2500%+區間），與round360 named suspects重疊`{TLN, VST}`。
+
+**判定（依腳本docstring事前綁定的三分支判準）**：(b)結果+148.17%遠超「>+60%＝REFUTED」門檻，**集中度假說被否證（REFUTED），不是round360原先預期的CONFIRMED**。拿掉top10後報酬不降反升，代表`cached_ticker_ids()`池子的異常量級分佈廣泛在中段贏家身上，不是集中在少數幾檔名字——比round360「少數熱門股主導」的猜測更嚴重：意味著目標式排除幾檔股票不是解方，必須換一個非「熱門股優先被快取」的隨機/分層抽樣宇宙重建，才能重新信任這個池子上任何因子的VAL期報酬量級。
+
+`f_us_value_bm`本身的FAIL判定（`TRIALS_LEDGER.md`#128、`US_LEADS.md`#17）不受本查核影響、不重啟——不論機制為何，經濟不合理量級本身已足以判死，本查核只是把「為什麼」查清楚。同一結論回頭適用於`f_us_low_vol`（#15，同一批`cached_ticker_ids()`超集、近乎相同VAL期量級+111~113%）：若之後要重測`f_us_low_vol`，本查核已示範「目標式leave-one-out」這條路對universe假影不管用，不必重做一次同款檢查，應直接考慮換乾淨宇宙。
+
+已寫入`TRIALS_LEDGER.md`#139（新增）、`US_LEADS.md`#18（新增）、`US_MARATHON_STATE.md`本輪記錄（覆寫）。
+
+**下一輪工作單位建議**：
+(a) 設計市值分層隨機抽樣的乾淨美股宇宙（取代`cached_ticker_ids()`熱門股偏誤池），這是唯一能讓US軌基本面因子測試重新可信的路徑，屬於地基層級工作，可能需要跨輪次；
+(b) 或轉向PIT財報其他基本面因子家族（品質/成長），但新測試明確標註「仍在舊池子上，量級不可信，只看cheap-gate方向性IC，不看深挖報酬量級」；
+(c) 或暫緩US軌基本面因子深挖，優先權讓給TW軌組合策略層級工作（`portfolio_multifactor_v2`後續迭代）。
+
+`is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`。零新增API呼叫（純讀取round366已產出的CSV+log）。完整見`US_MARATHON_STATE.md`第374輪記錄、`TRIALS_LEDGER.md`#139、`US_LEADS.md`#18。
