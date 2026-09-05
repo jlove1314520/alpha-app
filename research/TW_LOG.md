@@ -1840,3 +1840,27 @@ circular-shift null的標準差（TRAIN 0.2378、VAL 0.3157）約為完全打散
 **下一輪TW軌建議**：(a) 盤點其他用完全打散`_shuffle_percentile()`框架的cheap gate是否有同款自相關高估問題（例如`#97 margin_debt_growth_gate.py`本身雖已FAIL但方法論記錄仍該補充警示）；(b) 轉回`portfolio_multifactor_v2`組合策略層級其他尚未測的維度（regime overlay、下檔保護證明、leave-one-factor-out成本敏感度）；(c) `margin_debt_level_v1`如需重新啟動深挖，需先有獨立於這批樣本的驗證（例如不同的trailing窗口定義或不同市場的類比訊號）。
 
 寫入`TRIALS_LEDGER.md`#143、`TW_LEADS.md`#14補充（降級）、`TW_MARATHON_STATE.md`（本輪最新條目）。
+
+## 第384輪（2026-09-06T02:00+08:00，TW）——`copper_gold_ratio_gate`第1關cheap gate自相關保留版控制組回頭查核，確認同款系統性高估問題成立
+
+**取鎖**：乾淨（`LOCK_ACQUIRED`），非陳舊鎖回收。
+
+**三軌時間戳**：TW 22:00（round380，最舊）／US 01:30（round383，最新）／FUT 18:30（round372，但近10輪已佔20%配額上限，優先權回TW/US，跳過）——依輪替選TW。開工時確認`data/rate_limit_state.json`不存在，FinMind額度無鎖定；`run_detached.py status`確認無running中的背景工作，無需優先收成。
+
+**本輪工作單位＝接續round380「下一步(a)」**：盤點其他用完全打散`_shuffle_percentile()`框架測「慢變訊號×重疊窗口目標」的cheap gate是否有同款自相關高估問題（round380在`margin_debt_level_v1`發現此系統性問題後留下的方法論待辦）。
+
+**盤點範圍**：grep全部使用`_shuffle_percentile`的腳本，共7支：`copper_gold_ratio_gate.py`／`fred_yield_curve_gate.py`／`fx_twd_gate.py`／`margin_debt_growth_gate.py`（#97已FAIL）／`option_pcr_gate.py`／`spillover_overnight_gate.py`／`turn_of_month_gate.py`（另有`day_trading_ratio_gate.py`為`hypothesis_queue`獨立排程本輪同時段新增，已FAIL，不重複查）。逐一檢視訊號/目標定義：`fx_twd_gate`/`fred_yield_curve_gate`皆為M=20日重疊窗口目標+慢變訊號（風險模式相同）但兩者第1關本身已是FAIL判定，即使百分位有同款高估也不影響最終結論，優先權低；`option_pcr_gate`目標是下一交易日報酬（非重疊窗口），風險模式不同；`spillover_overnight_gate`/`turn_of_month_gate`分別是day-level lead-lag與calendar dummy設計，同樣風險模式不同。**唯一仍是CHEAP_PASS且訊號強度最高（|r|=0.18~0.25，本佇列同類最強）的是`copper_gold_ratio_gate`（#125）**，優先查核。
+
+**執行**：新增`copper_gold_ratio_circular_shift_control.py`（重用`copper_gold_ratio_gate.py::build_aligned_series()`/`_split()`，零新增API呼叫，逐字比照`margin_debt_level_circular_shift_control.py`同一套方法）：對訊號做circular shift（`np.roll`，位移量k∈[1,n-1]，TRAIN/VAL各自獨立位移），保留訊號自身自相關結構，只破壞與目標的真實時間對齊；N=500，與同N完全打散版本直接比較（Pearson相關，同原始`copper_gold_ratio_gate.py`判準）。
+
+**結果**：TRAIN(n=1413) real r=-0.2467(p<0.0001)，完全打散null percentile=100.0 vs circular-shift percentile=**95.6**（差距+4.4，尚不明顯，仍過90門檻）。VAL(n=917) real r=-0.1758(p<0.0001)，完全打散null percentile=100.0 vs circular-shift percentile=**62.0**（差距+38.0，遠超15個百分點門檻，已跌破原本「VAL贏過洗牌null≥90.0」判準）。
+
+**判定**：第1關CHEAP_PASS判定本身在自相關保留版控制組下不成立——VAL期原本100.0的表面顯著性主要是完全打散null低估20日重疊窗口目標`tw_fwd_ret_m`（相鄰觀測間19天重疊）自相關造成的假顯著，確認`margin_debt_level_v1`（#143）發現的系統性問題在這裡同樣成立。此候選本已因第5關leave-one-out集中度問題（2019年單一年份貢獻全部overlay報酬）結案FAIL，本次查核是獨立的第二個死因，不改變既有判定，只補充「連第1關本身都站不住腳」的證據，強化整體判定確定性。不泛化成「銅金比/實體需求外溢機制本身無效」——只證明這個具體構造（比值水位+20日重疊窗口+完全打散置換檢定）的第1關顯著性大部分是統計假象。
+
+**誠實保留**：`fx_twd_gate`/`fred_yield_curve_gate`兩者第1關本身已FAIL，本輪未逐一補circular-shift控制組重測（優先權低，即使百分位下修也不影響最終判定）；若未來要在這個資料結構（慢變訊號×重疊窗口目標）上設計新候選，正確做法是一開始就用non-overlapping抽樣或區塊bootstrap，而非事後逐一補circular-shift控制組再個案查核。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，執行約1分鐘。
+
+**下一輪TW軌可接續**：(a)本輪盤點的方法論待辦至此告一段落（唯一風險最高的CHEAP_PASS候選已查核完畢，其餘要嘛已FAIL優先權低、要嘛風險模式不同）；(b)轉回`portfolio_multifactor_v2`組合策略層級尚未測的維度（regime overlay整合、下檔保護證明）；(c)若之後有新候選要用這個資料結構（慢變訊號×重疊窗口目標）設計cheap gate，應優先採用non-overlapping抽樣或區塊bootstrap，避免重蹈同一個系統性問題。
+
+寫入`TRIALS_LEDGER.md`#147、`HYPOTHESIS_QUEUE.md`#34狀態更新、`STRATEGY_GRAVEYARD.md`銅金比條目補充、`TW_MARATHON_STATE.md`（本輪最新條目）。

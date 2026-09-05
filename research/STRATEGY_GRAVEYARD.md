@@ -1283,6 +1283,23 @@ exposure_down∈[0.0,0.6]共49個網格點，TRAIN期1x成本）44/49點(90%)報
 全數結案，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪需依
 `HYPOTHESIS_QUEUE_PROTOCOL.md`第1節設計新假設軸#35。
 
+**補充（2026-09-06 馬拉松第384輪，TW軌，第二個獨立死因）**：回頭查核
+第1關cheap gate（`TRIALS_LEDGER.md`#125，CHEAP_PASS，TRAIN/VAL null
+percentile皆100.0）本身的判準可信度——`margin_debt_level_v1`
+（`TRIALS_LEDGER.md`#143）發現完全打散`_shuffle_percentile()`框架對
+「慢變訊號×重疊窗口目標」（本條目訊號是逐日幾乎不變的比值水位、目標是
+TAIEX後20日重疊窗口報酬）會系統性低估虛無假設變異數。新增
+`copper_gold_ratio_circular_shift_control.py`（保留訊號自相關結構的
+circular-shift控制組，N=500，對照同N完全打散版）：**VAL期percentile
+從100.0（完全打散）降到62.0（circular-shift，跌破90.0門檻），TRAIN期
+從100.0降到95.6（仍過關）**。**確認：連第1關cheap gate本身的顯著性
+都主要是自相關造成的假顯著，不是真實訊號**——這條候選現在有兩個獨立
+死因：①本篇記錄的第5關集中度問題（單一年份2019貢獻全部overlay報酬）；
+②第1關cheap gate本身在嚴謹控制組下就站不住腳。兩者互相印證，判定
+FAIL維持不變（本來就已經FAIL，這只是加深确定性，不影響任何最終判斷）。
+完整見`TRIALS_LEDGER.md`#147、`HYPOTHESIS_QUEUE.md`#34狀態更新、
+`copper_gold_ratio_circular_shift_control.py`（新增，可重複執行）。
+
 ---
 
 ### 賣出台指選擇權波動度風險溢酬 VRP（HYPOTHESIS_QUEUE.md#35，2026-09-05 FAIL）

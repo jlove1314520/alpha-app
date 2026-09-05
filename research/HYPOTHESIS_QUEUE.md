@@ -3243,6 +3243,45 @@ deep_dive才能釐清，此輪不猜測、不下定論。**尚未結案**——�
 浪費一輪工作單位。完整見`TRIALS_LEDGER.md`（本輪新增條目）、
 `MARATHON_LOG.md`本輪心跳。
 
+**方法論補充查核（2026-09-06T02:00+08:00 馬拉松第384輪，TW軌，非
+重新開案——此候選已在`STRATEGY_GRAVEYARD.md`因第5關leave-one-out
+集中度問題結案FAIL，本次是回頭查核第1關cheap gate本身的判準是否
+可信，接續`TW_MARATHON_STATE.md`round380「下一步(a)」方法論盤點）**：
+`margin_debt_level_v1`（`TRIALS_LEDGER.md`#143，round380）發現完全打散
+`_shuffle_percentile()`框架對「慢變訊號×重疊窗口目標」這種資料結構會
+系統性低估虛無假設變異數、高估顯著性。本條目第1關（銅金比水位×TAIEX後
+20日重疊窗口報酬，`TRIALS_LEDGER.md`#125）正是同一種資料結構，且是
+本佇列目前用這套框架測出的最強表面訊號（|r|=0.18~0.25），風險最高，
+本輪優先查核第1關本身是否也有同款假顯著問題（跟這個候選最終死於第5關
+是兩件獨立的事，此查核不影響已成立的FAIL判定，只補充第1關判準本身的
+可信度資訊）。新增`copper_gold_ratio_circular_shift_control.py`（重用
+`copper_gold_ratio_gate.py::build_aligned_series()`/`_split()`，零新增
+API呼叫）：對訊號做circular shift（保留其自相關結構，只破壞與目標的
+真實時間對齊），N=500，與同N完全打散版本直接比較。**結果**：
+TRAIN(n=1413) 完全打散null percentile=100.0 vs circular-shift
+percentile=**95.6**（差距+4.4，尚屬不明顯）；**VAL(n=917) 完全打散
+null percentile=100.0 vs circular-shift percentile=62.0（差距+38.0，
+遠超15個百分點門檻，且62.0已跌破原本「VAL贏過洗牌null≥90.0」這項
+判準的門檻）**。**確認：第1關CHEAP_PASS判定本身在自相關保留版控制組
+下不成立**——原本100.0/100.0的表面顯著性主要是完全打散null低估VAL期
+`tw_fwd_ret_m`（20日重疊窗口報酬，相鄰觀測間19天重疊）自相關造成的
+假顯著。**這是這個候選第二個獨立的死因**（第一個是round前已記錄的
+第5關集中度問題），兩者互相印證這條候選整體證據薄弱，不需要調整
+STRATEGY_GRAVEYARD.md既有FAIL判定（判定不變，只是新增了「連第1關
+自己都站不住腳」這個更早期的補充理由）。**不泛化成「銅金比/實體需求
+外溢機制本身無效」**——只證明這個具體構造（比值水位+20日重疊窗口+
+完全打散置換檢定）的第1關顯著性大部分是統計假象；若未來要重測，需要
+用non-overlapping抽樣（例如每20天才取一個觀測點，去除窗口重疊）或
+區塊bootstrap等真正處理自相關的方法。**方法論延伸提醒（給下一輪／
+下一個碰同款框架的人）**：`fx_twd_gate`/`fred_yield_curve_gate`兩者
+第1關已是FAIL判定，即使百分位有同款高估也不影響最終結論，優先權低，
+暫不重測；未來任何用`_shuffle_percentile()`完全打散版測「慢變訊號×
+重疊窗口目標」的新候選，第1關CHEAP_PASS前應先意識到這個已知風險。
+完整見`TRIALS_LEDGER.md`#147、`STRATEGY_GRAVEYARD.md`既有條目補充、
+`TW_MARATHON_STATE.md`/`TW_LOG.md`第384輪記錄、
+`copper_gold_ratio_circular_shift_control.py`（新增，可重複執行）、
+`data/copper_gold_ratio_circular_shift_control_results.csv`（新增）。
+
 **狀態（2026-09-05接續排程，第2關以後已結案：FAIL）**：新增
 `copper_gold_ratio_overlay_v1.py`（方向依實測負相關反轉：比值trailing
 250日窗口百分位排名>0.70時降曝險至0.3，否則維持1.0）。TRAIN
