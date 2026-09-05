@@ -987,8 +987,8 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
 37. 全市場現股當沖比重（Day-Trading Ratio）——**2026-09-05接續排程：
     地基建置中**（FinMind免費層資料只從2024起、涵蓋不到TRAIN期，改建
     TWSE官方TWTASU+FMTQIK資料源，FMTQIK 120個月已100%回補、TWTASU逐日
-    回補進度累積1054/2609（40.4%），checkpoint可續跑，完整內容見上方
-    #37條目最新狀態），現在排隊第一，下一輪重跑
+    回補進度累積1304/2609（50.0%，剛好過半），checkpoint可續跑，完整
+    內容見上方#37條目最新狀態），現在排隊第一，下一輪重跑
     `backfill_day_trading_ratio.py --skip-market-volume --batch-size 250`
     即可自動接續，完整回補後才進第1關cheap gate。
 
@@ -3725,4 +3725,10 @@ hypothesis_queue排程接續第五輪**（本輪取鎖乾淨`LOCK_ACQUIRED`，�
 完整TRAIN+VAL期。現在排隊第一，下一輪重跑同一指令即可自動從上次
 進度接續，此輪為單純基礎設施回補批次、非新變更/非部署決策，依
 `CLAUDE.md`「已核准的自主挖礦馬拉松不受提案先於執行約束」條款
-執行。
+執行。**2026-09-05接續排程第六輪**（本輪取鎖乾淨`LOCK_ACQUIRED`）：
+重跑同一指令`python backfill_day_trading_ratio.py --skip-market-volume
+--batch-size 250`，本輪嘗試250天、新完成250天（其中18天無交易/無
+資料），累積已快取1304/2609（50.0% of全範圍工作日，剛好過半），
+FMTQIK分母無需重跑，holdout未消耗（`is_holdout_consumed()`=False）。
+預估還需約5輪左右批次才能回補完整TRAIN+VAL期。現在排隊第一，下一輪
+重跑同一指令即可自動從上次進度接續。

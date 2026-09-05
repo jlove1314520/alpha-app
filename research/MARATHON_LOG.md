@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T21:44（hypothesis_queue排程接續第六輪，本輪取鎖乾淨
+`LOCK_ACQUIRED`）：#37（全市場現股當沖比重）TWTASU逐日回補再接續一批：
+`python backfill_day_trading_ratio.py --skip-market-volume --batch-size
+250`，本輪嘗試250天、新完成250天（其中18天無交易/無資料），累積已
+快取1304/2609（50.0% of全範圍工作日，剛好過半，2015-01-01~
+2024-12-31），FMTQIK（分母）已100%回補不用重跑。checkpoint機制運作
+正常（逐日atomic寫入，本輪從上一輪留下的1054天接續，未遺失進度），
+未觸及cheap gate（資料仍不完整），holdout未消耗
+（`is_holdout_consumed()`=False）。已更新`HYPOTHESIS_QUEUE.md`#37
+條目最新進度（含「排隊順序總結」章節同步更新）。下一輪重跑同一指令
+即可自動從上次進度接續，估計還需約5輪左右批次才能回補完整TRAIN+VAL
+期。此輪為單純基礎設施回補批次、非新變更/非部署決策，依`CLAUDE.md`
+「已核准的自主挖礦馬拉松不受提案先於執行約束」條款執行。本輪`git
+status`確認repo內有兩份非本輪產生的殘留未追蹤檔案（一個路徑寫壞的
+暫存txt、一個round366深挖log），判斷屬於三軌馬拉松留下，本輪不觸碰、
+不納入commit。
+
 ## 2026-09-05T21:12（hypothesis_queue排程接續第五輪，本輪取鎖乾淨
 `LOCK_ACQUIRED`，非陳舊鎖回收）：#37（全市場現股當沖比重）TWTASU
 逐日回補再接續一批：`python backfill_day_trading_ratio.py
