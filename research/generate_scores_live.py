@@ -88,6 +88,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import numpy as np
 import pandas as pd
 
+import live_factors
 import score_v2
 from score_live import apply_frozen_weights, load_frozen_weights
 from score_v2 import (
@@ -102,6 +103,7 @@ MARKET_TW_PATH = REPO_ROOT / "data" / "market_tw.json"
 QUOTES_TW_PATH = REPO_ROOT / "data" / "quotes_tw.json"
 COMPANY_INFO_PATH = REPO_ROOT / "data" / "company_info.json"
 PRICE_HISTORY_PATH = REPO_ROOT / "data" / "price_history.json"
+EVENTS_PATH = REPO_ROOT / "data" / "events.json"  # 2026-09-05：題材/事件因子的來源（fetch_events.py 產出）
 OUT_PATH = REPO_ROOT / "scores.json"
 TW_TZ = timezone(timedelta(hours=8))
 
@@ -256,44 +258,71 @@ def build_rows() -> pd.DataFrame:
     non_stock_codes |= {code for code in candidate_codes if _NON_STOCK_CODE_PATTERN.match(code)}
     all_codes = sorted(candidate_codes - non_stock_codes)
 
+    # 2026-09-05（總司令「八因子全部填上」）：每個因子改成 live_factors.py 的「多子訊號複合」，
+    # 有幾個算幾個；並補上原本沒有資料源的兩個因子（analyst→機構行為、catalyst→事件）。
+    events_by_code: dict[str, list] = {}
+    events_source_available = EVENTS_PATH.exists()
+    if events_source_available:
+        try:
+            events_by_code = _load_json(EVENTS_PATH).get("by_stock", {}) or {}
+        except Exception:
+            events_by_code = {}
+
     rows = []
     for code in all_codes:
         fd = fundamentals.get(code, {})
         sd = stock_detail.get(code, {})
         fin = sd.get("financials", {})
         price_rows = price_history.get(code) or []
-        ma_breakout = _ma_breakout(price_rows)
         liquidity_20d = _liquidity_20d(price_rows)
 
-        eps_yoy = _eps_yoy_from_quarters(fin.get("quarters") or [])
-        eps_source = "stock_detail_quarters" if eps_yoy is not None else None
+        quarters = fin.get("quarters") or []
+        eg_val, eg_comp = live_factors.earnings_growth(quarters)
+        eps_yoy = eg_comp.get("eps_yoy")
+
+        tech_val, tech_comp = live_factors.technical(price_rows)
+        ma_breakout = _ma_breakout(price_rows)  # 舊指標保留：既有 index.html/回測都讀這個 key
 
         rev_rows = fd.get("revenue_history_scoring") or fd.get("month_revenue") or []
         rev_stats = _revenue_stats(rev_rows)
-        rev_grow_12m = _growth_quality(rev_rows)
+        rev_grow_12m, gq_comp = live_factors.growth_quality(rev_rows)
+        if rev_grow_12m is None:
+            rev_grow_12m = _growth_quality(rev_rows)  # 舊版嚴格法當備援（完全連續24個月時兩者等價）
 
         chips = _chips_signal(sd.get("institutional"))
+        inst_val, inst_comp = live_factors.inst_behavior(sd.get("institutional"))
+        ev_val, ev_comp = live_factors.event_score(events_by_code.get(code))
 
-        per = (fd.get("ratios") or {}).get("per")
+        ratios = fd.get("ratios") or {}
+        per = ratios.get("per")
+        pbr = ratios.get("pbr")
         pe = per if per is not None and per > 0 else None
+        pb = pbr if pbr is not None and pbr > 0 else None
         peg = (pe / (eps_yoy * 100)) if (pe is not None and eps_yoy is not None and eps_yoy > 0) else None
         if peg is not None and not np.isfinite(peg):
             peg = None
 
         rows.append({
             "stock_id": code,
-            "raw_eps_yoy": eps_yoy, "eps_yoy_source": eps_source,
+            "raw_eps_yoy": eps_yoy, "eps_yoy_source": "stock_detail_quarters" if eps_yoy is not None else None,
+            "raw_earnings_growth": eg_val, "eg_components": eg_comp,
             "raw_rev_yoy": rev_stats["yoy"],
             "raw_rev_prior_year_revenue": rev_stats["prior_year_revenue"],
             "raw_rev_abs_growth": rev_stats["abs_growth"],
-            "raw_rev_grow": rev_grow_12m,
+            "raw_rev_grow": rev_grow_12m, "gq_components": gq_comp,
             "raw_inst_flow": chips,
-            "raw_pe": pe, "raw_peg": peg,
+            "raw_pe": pe, "raw_pb": pb, "raw_peg": peg,
             "raw_ma_breakout": ma_breakout,
+            "raw_technical": tech_val, "tech_components": tech_comp,
+            "raw_gain_60d": live_factors.gain_60d(price_rows),
+            "raw_inst_behavior": inst_val, "inst_components": inst_comp,
+            "raw_event": ev_val, "event_components": ev_comp,
             "liquidity_20d": liquidity_20d,
+            "industry": (company_info.get(code) or {}).get("industry"),
         })
 
     cs = pd.DataFrame(rows).set_index("stock_id")
+    cs.attrs["events_source_available"] = events_source_available
     return cs
 
 
@@ -302,22 +331,38 @@ def compute_scores_live() -> pd.DataFrame:
     if cs.empty:
         return cs
 
+    # 2026-09-05：估值改「同產業百分位」的 PER/PBR/PEG 複合（總司令一.2）。
+    # 三個都是越低越便宜，各自在「同產業」內取百分位（不足 8 檔的產業退回全市場），再平均。
+    # 這麼做的理由：本益比的合理區間在半導體跟金融保險差很多，跨產業直接比會把整個高本益比
+    # 產業判成貴、低本益比產業判成便宜，那不是估值訊號、是產業分類訊號。
+    val_parts = []
+    for col in ("raw_pe", "raw_pb", "raw_peg"):
+        ranks = pd.Series(np.nan, index=cs.index, dtype=float)
+        for ind, grp in cs.groupby(cs["industry"].fillna("__NA__"), dropna=False):
+            sub = grp[col].dropna()
+            if ind != "__NA__" and len(sub) >= 8:
+                ranks.loc[sub.index] = sub.rank(pct=True)
+        remaining = cs[col].notna() & ranks.isna()
+        if remaining.any():
+            ranks.loc[remaining] = cs.loc[remaining, col].rank(pct=True)
+        val_parts.append(ranks)
+    val_df = pd.concat(val_parts, axis=1)
+    cs["raw_valuation_pct_in_industry"] = val_df.mean(axis=1, skipna=True)
+    cs["raw_valuation_n_signals"] = val_df.notna().sum(axis=1)
+
     raw_col = {
-        "earnings_growth": "raw_eps_yoy",
+        "earnings_growth": "raw_earnings_growth",
         "revenue_momentum": "raw_rev_yoy",
         "growth_quality": "raw_rev_grow",
         "chips": "raw_inst_flow",
-        "valuation_adj": "raw_peg",
-        "technical": "raw_ma_breakout",
+        "valuation_adj": "raw_valuation_pct_in_industry",
+        "technical": "raw_technical",
+        "analyst": "raw_inst_behavior",   # 機構「行為」，不是分析師目標價，見 live_factors.py 說明
+        "catalyst": "raw_event",
     }
     for key, col in raw_col.items():
         sc, pct = _pct_score(cs[col], score_v2.FACTOR_DEFS[key]["higher_better"])
         cs[f"{key}_score"], cs[f"{key}_pct"] = sc, pct
-
-    # analyst/catalyst：JSON-only路徑沒有來源，誠實留NaN，見檔頭說明。
-    for key in ("analyst", "catalyst"):
-        cs[f"{key}_score"] = np.nan
-        cs[f"{key}_pct"] = np.nan
 
     totals, covs = [], []
     for _, row in cs.iterrows():
@@ -340,9 +385,38 @@ def compute_scores_live() -> pd.DataFrame:
     return cs.sort_values("rank")
 
 
+def _nan_safe(obj):
+    """把 dict/list 裡的 NaN 換成 None——2026-09-05 新增的複合因子會把子訊號 dict 直接放進
+    scores.json，pandas 的缺值是 float('nan')，json.dump(allow_nan=False) 會直接拋
+    「Out of range float values are not JSON compliant」。這裡統一在輸出前洗一次。"""
+    if isinstance(obj, dict):
+        return {k: _nan_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_nan_safe(v) for v in obj]
+    if isinstance(obj, float) and obj != obj:
+        return None
+    if obj is not None and hasattr(obj, "item") and not isinstance(obj, (str, bytes)):
+        try:
+            v = obj.item()
+            return None if isinstance(v, float) and v != v else v
+        except Exception:
+            return obj
+    return obj
+
+
 def _raw_dict(key: str, row: pd.Series) -> dict:
+    return _nan_safe(_raw_dict_impl(key, row))
+
+
+def _raw_dict_impl(key: str, row: pd.Series) -> dict:
     if key == "earnings_growth":
-        return {"eps_yoy": _r(row["raw_eps_yoy"]), "eps_yoy_source": row.get("eps_yoy_source")}
+        c = row.get("eg_components") or {}
+        return {
+            "composite": _r(row["raw_earnings_growth"]), "eps_yoy": _r(row["raw_eps_yoy"]),
+            "revenue_yoy": _r(c.get("revenue_yoy")), "gross_margin_yoy_pp": _r(c.get("gross_margin_yoy_pp")),
+            "op_margin_yoy_pp": _r(c.get("op_margin_yoy_pp")), "as_of": c.get("as_of"),
+            "n_signals": c.get("n_signals"), "eps_yoy_source": row.get("eps_yoy_source"),
+        }
     if key == "revenue_momentum":
         return {
             "rev_yoy": _r(row["raw_rev_yoy"]),
@@ -350,18 +424,47 @@ def _raw_dict(key: str, row: pd.Series) -> dict:
             "abs_growth": _r(row["raw_rev_abs_growth"]),
         }
     if key == "growth_quality":
-        return {"rev_growth_12m_yoy": _r(row["raw_rev_grow"])}
+        c = row.get("gq_components") or {}
+        return {"rev_growth_12m_yoy": _r(row["raw_rev_grow"]), "method": c.get("method"),
+                "yoy_months": c.get("yoy_months"), "pairs": c.get("pairs"),
+                "months_used": (c.get("months_used") or [])[-3:]}
     if key == "chips":
         return {"inst_net_lots_available_days": _r(row["raw_inst_flow"])}
     if key == "valuation_adj":
-        return {"pe": _r(row["raw_pe"]), "eps_yoy": _r(row["raw_eps_yoy"]), "peg": _r(row["raw_peg"])}
+        return {
+            "pe": _r(row["raw_pe"]), "pb": _r(row["raw_pb"]), "peg": _r(row["raw_peg"]),
+            "eps_yoy": _r(row["raw_eps_yoy"]), "industry": row.get("industry"),
+            "industry_percentile": _r(row["raw_valuation_pct_in_industry"]),
+            "n_signals": int(row["raw_valuation_n_signals"]) if pd.notna(row.get("raw_valuation_n_signals")) else 0,
+        }
     if key == "technical":
         # 2026-08-27修正（B4冒煙測試check#6抓到真bug）：跟score_v2.py的_raw_dict()
         # 用同一個key名（`ma60_breakout_x_volume_index`）——這是同一個公式算出的
         # 同一個指標，原本這裡取了不同key名，導致index.html的renderReport()
         # （寫死讀score_v2.py那個key名）在這條JSON-only路徑產生的scores.json上
         # 讀到undefined，對undefined呼叫.toFixed()整個拋出unhandledrejection。
-        return {"ma60_breakout_x_volume_index": _r(row["raw_ma_breakout"])}
+        c = row.get("tech_components") or {}
+        return {
+            "ma60_breakout_x_volume_index": _r(row["raw_ma_breakout"]),
+            "composite": _r(row["raw_technical"]), "ma_alignment": _r(c.get("ma_alignment")),
+            "range_position_60d": _r(c.get("range_position_60d")), "rsi14": _r(c.get("rsi14_value")),
+            "volume_change": _r(c.get("volume_change")), "n_signals": c.get("n_signals"),
+            "gain_60d": _r(row["raw_gain_60d"]),
+        }
+    if key == "analyst":
+        c = row.get("inst_components") or {}
+        return {
+            "composite": _r(row["raw_inst_behavior"]), "foreign_streak_days": c.get("foreign_streak_days"),
+            "trust_streak_days": c.get("trust_streak_days"), "net_trend": _r(c.get("net_trend")),
+            "history_days": c.get("history_days"), "n_signals": c.get("n_signals"),
+            "note": "機構『行為』（法人實際買賣），非分析師目標價／評等——台股無免費目標價資料源",
+        }
+    if key == "catalyst":
+        c = row.get("event_components") or {}
+        return {
+            "composite": _r(row["raw_event"]), "n_events": c.get("n_events"),
+            "types": c.get("types"), "latest_date": c.get("latest_date"),
+        }
     return {}
 
 
@@ -369,17 +472,70 @@ def _reason(key: str, row: pd.Series) -> str:
     pct = row.get(f"{key}_pct")
     front = max(1, round((1 - pct) * 100)) if pd.notna(pct) else None
     if key == "earnings_growth":
-        return f"最新季度EPS年增 {row['raw_eps_yoy']*100:+.0f}%（季度資料來自stock_detail.json），居全市場前 {front}%。"
+        c = row.get("eg_components") or {}
+        bits = []
+        if c.get("eps_yoy") is not None:
+            bits.append(f"EPS年增 {c['eps_yoy']*100:+.0f}%")
+        if c.get("revenue_yoy") is not None:
+            bits.append(f"營收年增 {c['revenue_yoy']*100:+.0f}%")
+        if c.get("gross_margin_yoy_pp") is not None:
+            bits.append(f"毛利率年變化 {c['gross_margin_yoy_pp']:+.1f}個百分點")
+        if c.get("op_margin_yoy_pp") is not None:
+            bits.append(f"營益率年變化 {c['op_margin_yoy_pp']:+.1f}個百分點")
+        return (f"{c.get('as_of', '最新季')} 對去年同季：" + "、".join(bits)
+                + f"（{c.get('n_signals', 0)}項可得指標平均，來源 TWSE 官方財報 t187ap06_L_ci/07_L_ci），居全市場前 {front}%。")
     if key == "revenue_momentum":
         return f"最新月營收年增 {row['raw_rev_yoy']*100:+.1f}%（已排除基期<3000萬元樣本、±200%硬上限，未做規模分層），居全市場前 {front}%。"
     if key == "growth_quality":
-        return f"近12個月營收合計年增 {row['raw_rev_grow']*100:+.1f}%（要求24個月視窗內無缺月），居全市場前 {front}%。"
+        c = row.get("gq_components") or {}
+        if c.get("method") == "avg_monthly_yoy":
+            how = f"近 {c.get('yoy_months')} 個月的月營收年增率平均"
+        else:
+            how = f"同月配對 {c.get('pairs')} 組的營收合計年增"
+        return (f"{how}為 {row['raw_rev_grow']*100:+.1f}%（月營收歷史為「一次性種子快照＋每日累積」，"
+                f"中間可能有斷層，故用逐月年增平均而非視窗合計），居全市場前 {front}%。")
     if key == "chips":
         return f"近期（依累積天數，最多5日）三大法人買賣超合計 {row['raw_inst_flow']:+.0f} 張，居全市場前 {front}%。"
     if key == "valuation_adj":
-        return f"本益比 {row['raw_pe']:.1f} 倍，PEG={row['raw_peg']:.2f}，估值居全市場前 {front}%。"
+        bits = []
+        if pd.notna(row.get("raw_pe")):
+            bits.append(f"本益比 {row['raw_pe']:.1f} 倍")
+        if pd.notna(row.get("raw_pb")):
+            bits.append(f"股價淨值比 {row['raw_pb']:.2f} 倍")
+        if pd.notna(row.get("raw_peg")):
+            bits.append(f"PEG {row['raw_peg']:.2f}")
+        ind = row.get("industry") or "全市場"
+        return ("、".join(bits) + f"；在「{ind}」同業內的估值百分位平均為 "
+                f"{row['raw_valuation_pct_in_industry']*100:.0f}%（數字越低越便宜），綜合估值居全市場前 {front}%。")
     if key == "technical":
-        return f"價格相對60日均線乖離×近20/60日均量比綜合指標為 {row['raw_ma_breakout']:+.3f}（原始收盤價，未還原權息），居全市場前 {front}%。"
+        c = row.get("tech_components") or {}
+        bits = []
+        if c.get("ma_alignment") is not None:
+            bits.append("均線多頭排列" if c["ma_alignment"] > 0 else ("均線空頭排列" if c["ma_alignment"] < 0 else "均線糾結"))
+        if c.get("range_position_60d") is not None:
+            bits.append(f"位於近60日區間 {((c['range_position_60d'] + 1) / 2 * 100):.0f}% 位置")
+        if c.get("rsi14_value") is not None:
+            bits.append(f"RSI14={c['rsi14_value']:.0f}")
+        if c.get("volume_change") is not None:
+            bits.append(f"近5日均量較20日 {c['volume_change']*100:+.0f}%")
+        return ("、".join(bits) + f"（{c.get('n_signals', 0)}項可得指標平均，原始收盤價未還原權息），居全市場前 {front}%。")
+    if key == "analyst":
+        c = row.get("inst_components") or {}
+        bits = []
+        fs, ts = c.get("foreign_streak_days"), c.get("trust_streak_days")
+        if fs:
+            bits.append(f"外資連續{'買超' if fs > 0 else '賣超'} {abs(fs)} 天")
+        if ts:
+            bits.append(f"投信連續{'買超' if ts > 0 else '賣超'} {abs(ts)} 天")
+        if c.get("net_trend") is not None:
+            bits.append("三大法人淨買超趨勢向上" if c["net_trend"] > 0 else ("趨勢向下" if c["net_trend"] < 0 else "趨勢持平"))
+        return ("；".join(bits) + f"（觀察 {c.get('history_days', 0)} 個交易日。**這是機構『行為』不是分析師目標價**"
+                f"——台股沒有免費的目標價／評等資料源），居全市場前 {front}%。")
+    if key == "catalyst":
+        c = row.get("event_components") or {}
+        types = "、".join(f"{k}×{v}" for k, v in (c.get("types") or {}).items())
+        return (f"近30日 {c.get('n_events', 0)} 則事件（{types}），最新 {c.get('latest_date')}；"
+                f"依事件類型權重×新鮮度（半衰期7天）計分，居全市場前 {front}%。")
     return ""
 
 

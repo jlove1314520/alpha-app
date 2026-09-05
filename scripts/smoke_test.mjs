@@ -1127,10 +1127,30 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("36. 自選股有 ≥2 筆歷史價就必須畫出走勢線（沒畫＝FAIL，不管根因是解析/快取/渲染）",
     sparkGateErrors.length === 0, sparkGateErrors.join("; "));
 
+  // 37.【2026-09-05新增，新一.6】評分頁不得再出現「需要新聞/供應鏈連動分析，下一輪實作」這類
+  // 佔位字——八因子現在全部有真實資料源，缺漏的原因必須逐因子講清楚是哪個資料檔沒有這一檔。
+  const placeholderErrors = [];
+  try {
+    const hit = await page.evaluate(() => {
+      const bad = [];
+      for (const k of Object.keys(FACTOR_MISSING_REASON)) {
+        const t = FACTOR_MISSING_REASON[k] || "";
+        if (/下一輪實作|待實作|TODO|尚未實作，之後/.test(t)) bad.push(k);
+        if (!t || t.length < 10) bad.push(k + "(說明過短)");
+      }
+      return bad;
+    });
+    if (hit.length) placeholderErrors.push(`仍有佔位字/說明不足的因子：${hit.join(",")}`);
+  } catch (e) {
+    placeholderErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("37. 八因子的缺漏原因都是真實資料依賴說明，沒有「下一輪實作」這類佔位字",
+    placeholderErrors.length === 0, placeholderErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

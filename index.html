@@ -749,6 +749,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         </div>
       </div>
     </div>
+    <!-- 2026-09-05（新一.7）極端走勢提醒：60日漲幅>80% 或營收年增觸硬上限時顯示，並隱藏分批買入計畫 -->
+    <div id="report-extreme-warning" style="display:none;background:rgba(250,178,25,.12);border:1px solid rgba(250,178,25,.35);color:var(--warn);font-size:11px;line-height:1.6;padding:8px 10px;border-radius:10px;margin:-2px 0 10px"></div>
     <div class="note" id="report-coverage" style="margin:-6px 0 14px"></div>
 
     <div class="card">
@@ -3978,6 +3980,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     ENTRY_PLAN_CACHE=null;
     go('report');
   }
+  // 2026-09-05（新一.6）每個因子「為什麼這檔沒有」的真實原因。八因子現在全部有資料源
+  // （見 research/live_factors.py），缺的都是「這一檔在那個官方資料檔裡沒有資料」。
+  const FACTOR_MISSING_REASON={
+    earnings_growth:'這檔沒有官方季度財報：data/stock_detail.json 來自 TWSE t187ap06_L_ci/07_L_ci，只涵蓋上市「一般業」，上櫃與金融/證券/保險等特殊業別未涵蓋（需要「最新一季 vs 去年同季」才能算年增）。',
+    revenue_momentum:'這檔在 data/fundamentals.json 沒有月營收（來源：TWSE t187ap05_L／TPEx mopsfin_t187ap05_OB 每日累積）。',
+    growth_quality:'這檔的月營收年增資料不足 6 個月（月營收歷史是「一次性種子快照＋每日累積」，新納入的股票要等累積）。',
+    chips:'這檔沒有三大法人／融資融券資料（來源：TWSE T86＋MI_MARGN／TPEx 對應端點）。',
+    technical:'這檔在 data/price_history.json 的價量歷史不足（至少要 6 個交易日才能算最短的均線與 RSI）。',
+    valuation_adj:'這檔在 data/fundamentals.json 沒有本益比／股價淨值比（來源：TWSE BWIBBU_ALL／TPEx tpex_mainboard_peratio_analysis）。',
+    analyst:'這檔沒有三大法人買賣紀錄可推算機構行為（本因子是法人實際買賣行為，不是分析師目標價——台股沒有免費的目標價／評等資料源）。',
+    catalyst:'事件資料管線（MOPS 重大訊息／法說會／月營收公布／除權息）建置中，尚未產出 data/events.json。',
+  };
+  let EXTREME_MOVE_ACTIVE=false;
   function factorRowHtml(key){
     const boardCfg=BOARD_CONFIG[REPORT_CACHE_BOARD];
     const cache=boardCfg.cacheGet();
@@ -3989,9 +4004,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // 這輪缺資料的類別（價值成長榜的analyst/catalyst，見score_v2.py說明；
       // 題材動能榜/未來性濾網的任何因子也可能因為個股資料不足而缺）：誠實
       // 列出來，不要悄悄省略——讓使用者看得出「總分不是滿權重算出來的」。
-      const reasonTxt=REPORT_CACHE_BOARD==='value'
-        ?(key==='analyst'?'台股暫無免費機構目標價資料源。':'需要新聞/供應鏈連動分析，下一輪實作。')
-        :'這檔股票目前這項因子資料不足（例如上市時間太短、價量/法人歷史不夠），不是永久缺資料源。';
+      // 2026-09-05（新一.6）：原本除了 analyst 之外，價值成長榜每個缺漏因子都套同一句
+      // 「需要新聞/供應鏈連動分析，下一輪實作」——但財報成長/估值/技術型態根本不需要新聞，
+      // 它們缺是因為這檔在對應的官方資料檔裡沒有資料。改成逐因子講真正的資料依賴。
+      const reasonTxt=FACTOR_MISSING_REASON[key]
+        ||'這檔股票目前這項因子資料不足（例如上市時間太短、價量/法人歷史不夠），不是永久缺資料源。';
       return `<div class="factor-row">
         <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span>
           <span style="font-size:9px;color:#c9a35a;background:rgba(216,176,112,.08);padding:2px 6px;border-radius:5px">尚無資料 · 不計入</span></div>
@@ -4004,6 +4021,31 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="fr-reason">${f.reason||''}</div>
     </div>`;
   }
+  // ── 2026-09-05（新一.7）極端走勢防呆 ────────────────────────────────
+  // 60日漲幅 >80%、或營收年增觸到評分引擎的 ±200% 硬上限，代表這檔已經走完一大段、或成長率是
+  // 低基期／併購這類特殊事件造成的。這種情況下「分批買入計畫」那種看起來像操作建議的東西不該
+  // 出現，改在頂端明講風險。判斷只用 scores.json 已經算好的欄位（technical.gain_60d、
+  // growth_quality/revenue_momentum 的年增率），不打任何新的資料源。
+  const EXTREME_60D_GAIN=0.8;
+  const REVENUE_YOY_CAP=2.0;
+  function extremeMoveFlags(row){
+    const out=[];const f=(row&&row.factors)||{};
+    const g=f.technical&&f.technical.raw&&f.technical.raw.gain_60d;
+    if(g!=null&&g>EXTREME_60D_GAIN)out.push(`近60個交易日已上漲 ${(g*100).toFixed(0)}%`);
+    const yoy=f.growth_quality&&f.growth_quality.raw&&f.growth_quality.raw.rev_growth_12m_yoy;
+    if(yoy!=null&&yoy>=REVENUE_YOY_CAP)out.push(`近12個月營收年增平均 ${(yoy*100).toFixed(0)}%（觸及評分上限，多為低基期或併購造成，不代表可延續）`);
+    const rm=f.revenue_momentum&&f.revenue_momentum.raw&&f.revenue_momentum.raw.rev_yoy;
+    if(rm!=null&&rm>=REVENUE_YOY_CAP)out.push(`最新月營收年增 ${(rm*100).toFixed(0)}%（同屬特殊基期）`);
+    return out;
+  }
+  function renderExtremeMoveWarning(row){
+    const host=document.getElementById('report-extreme-warning');if(!host)return;
+    const flags=extremeMoveFlags(row);
+    EXTREME_MOVE_ACTIVE=flags.length>0;
+    if(!EXTREME_MOVE_ACTIVE){host.style.display='none';host.innerHTML='';return}
+    host.style.display='';
+    host.innerHTML=`⚠ 極端走勢提醒：${flags.join('；')}。追高風險顯著升高，本頁已不顯示分批買入計畫。`;
+  }
   async function renderReport(){
     const row=REPORT_CACHE;
     if(!row)return;
@@ -4015,6 +4057,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const covPct=Math.round(row.coverage*100);
     document.getElementById('report-coverage').textContent=`資料完整度 ${covPct}%${row.coverage<0.7?'（部分因子本次缺資料，總分依「重新分配權重」規則計算，僅供參考）':''}`;
     document.getElementById('report-summary').textContent=row.summary||'';
+    _safeSync('renderExtremeMoveWarning',()=>renderExtremeMoveWarning(row));  // 2026-09-05 新一.7
     // 環形讀條：滿圈周長 251.2（r=40），offset 從滿圈（0分）動畫到對應總分的角度
     const ring=document.getElementById('report-ring');
     ring.style.strokeDashoffset='251.2';
@@ -4054,6 +4097,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     // 分批進場計畫：機械式資金分配規則（現價/-4%/-8%），不是估值預測，不是投資建議
     const planEl=document.getElementById('report-entry-plan');
+    // 2026-09-05（新一.7）：極端走勢時完全不顯示分批買入計畫——這種價位下給出「現價/-4%/-8%」
+    // 三檔進場價，看起來就像在建議承接，但實際上追高風險已經顯著升高。頂端的警示列會說明原因。
+    if(EXTREME_MOVE_ACTIVE){
+      planEl.innerHTML='<div class="note" style="color:var(--warn)">⚠ 因極端走勢（見上方提醒），本檔暫不顯示分批買入計畫。</div>';
+      const cta=document.querySelector('#scr-report .buy-cta');if(cta)cta.style.display='none';
+      return;
+    }
+    const cta0=document.querySelector('#scr-report .buy-cta');if(cta0)cta0.style.display='';
     planEl.innerHTML='<div class="note">載入中…</div>';
     try{
       const usCode=isUS(row.code);
@@ -4462,7 +4513,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-04.1409';
+  const APP_VERSION='2026-09-05.2005';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

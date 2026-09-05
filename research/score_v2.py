@@ -45,7 +45,7 @@ FACTOR_DEFS = {
     "chips":            {"label": "籌碼",           "weight": 0.14, "higher_better": True},
     "technical":        {"label": "技術型態",       "weight": 0.10, "higher_better": True},
     "valuation_adj":    {"label": "估值(成長調整)",  "weight": 0.12, "higher_better": False},
-    "analyst":          {"label": "機構觀點",       "weight": 0.08, "higher_better": True},
+    "analyst":          {"label": "機構行為",       "weight": 0.08, "higher_better": True},
     "catalyst":         {"label": "題材/事件",       "weight": 0.08, "higher_better": True},
 }
 assert abs(sum(f["weight"] for f in FACTOR_DEFS.values()) - 1.0) < 1e-9, "權重加總必須是 1.0"
