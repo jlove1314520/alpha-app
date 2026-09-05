@@ -220,3 +220,9 @@
 - **FAIL不代表這些因子家族在美股完全無效**，只代表這些具體定義+這個樣本規模不成立——如果想換變體（例如idiosyncratic vol、benchmark-relative動能、1週反轉而非1個月），可以視為新假說重新走完整流程，不是延續同一個候選。
 - **小提醒**：樣本抽樣時如果再次抽到代號含`/`的股票（例如`AKO/B`），FinMind會回傳HTTP 400"data_id is illegal"，這是已知格式限制不是額度問題，`us_factor_ic.py`既有邏輯已能正確跳過不需要額外處理。
 - **如果一開始就撞402/403（額度或IP封鎖顯然還沒恢復），優先選不需要新API額度的工作**（例如深挖前的程式碼撰寫但先不執行、或本節文件更新本身）。
+
+---
+
+## 第376輪封存（原STATE第3則，第363輪，因2026-09-05起STATE只留最新3則被移出）
+
+**第363輪，供對照**：2026-09-05T08:31+08:00（馬拉松第363輪）——取鎖時偵測到`LOCK_STALE`（round360的pid 44236持有30.2分鐘後被回收，上一輪疑似失敗，`git log`已確認round360工作本身成功commit+push`6406cc5`，疑似只是收工序release lock前process卡住，同round361 FUT軌pid58488先例）。**本輪工作單位＝延續round360「下一步(c)」建議，對`f_us_value_bm`135檔樣本做leave-one-out集中度檢查（輕量版），驗證universe選樣假影假說**：新增`deep_dive_f_us_value_bm_leave_extreme_out.py`——預先綁定（hash-lock）判準：排除VAL期(2020-2024)自身買進持有報酬前10名「極端贏家」（固定筆數、執行前決定，不依觀察到的報酬分布回頭挑門檻）後重跑同套decile long-short回測，<+30%=確認集中度假說成立、>+60%=否證（偏誤更廣泛分布非少數個股）、中間=部分成立，判準寫死於程式碼docstring。**執行結果：未完成，非失敗**——開工執行後發現`load_value_sample()`226檔（135可用+91drop）SEC company-facts純本地JSON解析（零新增API呼叫，先前所有輪次的紀錄都確認這是快取命中）耗時遠超預期，背景輸出檔案20分鐘內只顯示到loading loop本身（[226/226] ZSQR: OK，loop剛好跑完），後續的own-return排名/回測結果完全沒印出就因為逼近鎖檔25分鐘陳舊門檻被迫`taskkill`中止該process（pid 60876），未產出`data/deep_dive_f_us_value_bm_leave_extreme_out.csv`。**這是本輪最主要發現**：`cached_ticker_ids()`+`load_value_sample()`這條路徑即使純讀本地快取，226檔的實際載入時間本身就可能逼近甚至超過單輪30分鐘預算的一大部分，比round357/360觀察到的「載入約4~6分鐘」慢很多（可能跟本輪同時有其他背景負載、或JSON檔案大小差異有關，未查證）——**下一輪待辦**：(a)直接重跑`python deep_dive_f_us_value_bm_leave_extreme_out.py`（程式碼邏輯本身完整、不用改，只是這輪沒能跑完）；(b)或改用round350`f_us_value_bm`原深挖的背景process跨輪次模式（啟動後不等待、下一輪才回來讀CSV），避免單輪時間預算被載入階段吃光；(c)先查證是否本機同時有其他負載拖慢這次執行，避免下次重蹈覆轍。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫（純本地快取讀取，即使慢也未觸發任何外部請求）。完整見`US_LOG.md`第363輪記錄。（後續：round366重跑證實這是buffered stdout觀測失真而非真的效能退化；round374最終判定`f_us_value_bm`因universe假影FAIL；round376已對此假影建立乾淨的分層隨機抽樣宇宙修正方案，見`US_MARATHON_STATE.md`最新記錄。）

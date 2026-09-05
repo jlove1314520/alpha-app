@@ -1243,6 +1243,26 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 
 已寫入`TRIALS_LEDGER.md`#139（新增）、`US_LEADS.md`#18（新增）、`US_MARATHON_STATE.md`本輪記錄（覆寫）。
 
+---
+
+## 第376輪（2026-09-05T20:35+08:00）
+
+**依例外規則選US**（FUT 18:30最舊但近期已佔配額上限且round372自建議讓優先權，跳過；US 19:30次舊，TW 20:00最新）。
+
+**工作單位**：round374「下一步(a)」——設計並啟動市值分層隨機抽樣的乾淨美股宇宙，修正`cached_ticker_ids()`熱門股選樣偏誤（#128/#139記錄的universe層級假影）。
+
+**做了什麼**：
+1. 讀`us_universe.active_stock_ids()`：單一`USStockInfo`快照呼叫覆蓋6,618檔活躍股（含market_cap），5,566檔market_cap>0可分層，比先前#47/#52/#95/#97/#99的做法完全一致（同一個`pd.qcut(q=3)`定義）。
+2. 新增`us_stratified_universe_sample.py`：3個tertile（1856/1855/1855檔）各預先綁定獨立seed（20260905_1/_2/_3）隨機抽100檔，共300檔（比照TW`factor_ic.SAMPLE_SIZE=300`統計力基準），逐檔`us_price_series()`抓歷史價格，記錄n_days/usable/drop_reason到`data/us_stratified_universe_sample.csv`。
+3. 互動session驗證抽樣邏輯正確（300=100×3，tertile切割數字合理），但300檔實際抓價（多數全新，FinMind 3秒/請求速率限制）預估耗時較長，依`MARATHON_PROTOCOL.md`第0b節用`python research/run_detached.py submit --timeout-min 45 --expect research/data/us_stratified_universe_sample.csv -- python -u research/us_stratified_universe_sample.py`投遞至背景。
+4. 過程中兩次submit踩到`--cwd`/相對路徑陷阱（第一次用相對檔名但預設cwd是`alpha-app`而非`research`，第二次`--cwd research`本身又因為呼叫時shell cwd已經在research導致路徑疊加成`research/research`失敗）——最後用「預設cwd（`alpha-app`）+ cmd路徑加`research/`前綴」的組合成功，job_id`20260905-203513-d82d`。
+
+**結果（job已於本輪session內結束，非逾時，只花3.5分鐘）**：抓到第79/300檔（large tier的PYPL）時FinMind回傳HTTP 402額度用盡，腳本依既有`QUOTA_ERROR_MARKERS`優雅停止。寫出`data/us_stratified_universe_sample.csv`：**large tier 72/100可用、mid/small tier各0/100（尚未嘗試，非因子不好）**。查`data/rate_limit_state.json`確認FinMind被鎖到**2026-09-05T22:38+08:00**（約2小時），**這是整個專案共用的額度，接下來約4輪內TW/US任何需要FinMind新資料的工作都會被擋**，記錄到`US_MARATHON_STATE.md`供下一輪判斷是否該選TW/US軌。
+
+**誠實保留**：只完成large tier的72/100，mid/small完全還沒抓；這份新宇宙只修正「熱門股優先被快取」的選樣偏誤，`us_universe.py`既有、已記錄的存活者偏差缺口（僅5檔手動查證下市股）未被觸及，是分開的、都已記錄的限制。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。完整見`US_MARATHON_STATE.md`第376輪記錄、`US_LEADS.md`#19、`us_stratified_universe_sample.py`（新增，可重複執行，冪等——重跑時已抓到的72檔會命中本機parquet快取不重複耗額度）。
+
 **下一輪工作單位建議**：
 (a) 設計市值分層隨機抽樣的乾淨美股宇宙（取代`cached_ticker_ids()`熱門股偏誤池），這是唯一能讓US軌基本面因子測試重新可信的路徑，屬於地基層級工作，可能需要跨輪次；
 (b) 或轉向PIT財報其他基本面因子家族（品質/成長），但新測試明確標註「仍在舊池子上，量級不可信，只看cheap-gate方向性IC，不看深挖報酬量級」；
