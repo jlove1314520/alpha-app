@@ -1269,3 +1269,23 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 (c) 或暫緩US軌基本面因子深挖，優先權讓給TW軌組合策略層級工作（`portfolio_multifactor_v2`後續迭代）。
 
 `is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`。零新增API呼叫（純讀取round366已產出的CSV+log）。完整見`US_MARATHON_STATE.md`第374輪記錄、`TRIALS_LEDGER.md`#139、`US_LEADS.md`#18。
+
+---
+
+## 第381輪（2026-09-06T00:32+08:00）
+
+**輪替判斷**：TW最新（22:00，round380）／US次舊（20:35，round376）／FUT最舊（18:30，round372，但round372自己已建議近10輪佔20%配額上限、優先權回TW/US，跳過）。開工前確認`data/rate_limit_state.json`**已不存在**（原本鎖到22:38+08:00，現在系統時間00:32+08:00，已過期超過1.8小時），FinMind額度應已恢復，選US軌接續round376「下一步」。
+
+**工作單位**：接續round376投遞的`us_stratified_universe_sample.py`分層抽樣宇宙續抓，冪等重跑（已抓到的72檔large tier命中本機parquet快取，不重複耗額度）。
+
+**做了什麼**：
+1. `python run_detached.py status`確認上一個job（`20260905-203513-d82d`）已`finished`，目前無running工作，可以投遞新工作。
+2. 讀`data/us_stratified_universe_sample.csv`確認round376遺留進度：300檔（large/mid/small各100），`drop_reason`分布：`not_attempted_quota_hit`221、缺值(已抓到)72、`too_few_days`6、`quota_error`1。
+3. 用`run_detached.py submit --name us_stratified_universe_sample_resume --timeout-min 40 --expect data/us_stratified_universe_sample.csv -- python -u research/us_stratified_universe_sample.py`投遞續抓，job_id`20260906-003203-4f80`。
+4. session內監看約3分鐘：log顯示第80/300檔（RACE，large tier，round376卡住的第79檔之後）順利抓到（3.0s，非402），**證實FinMind額度確實已恢復**；持續監看至第146/300檔（mid tier中段），全部`usable=True`或正常判定`n_days=0`（該股本身無資料，非額度問題），watchdog存活，未再撞402。
+
+**結果（本輪未等待job完全跑完，job仍在背景breakaway執行，符合第0b節「重度工作不在session內等待」規則）**：large tier剩餘28檔＋mid tier約54檔已於本輪session內確認抓取成功，估計進度到收工時約150/300（依3秒/新請求速率粗估，剩余約154檔×3秒≈8分鐘，job有40分鐘timeout空間，應能在下一輪開工前完成）。
+
+**下一輪接手**：`python research/run_detached.py status`查`20260906-003203-4f80`是否`finished`；若是，讀`data/us_stratified_universe_sample.csv`統計最終可用檔數（預期mid/small tier大部分應可用，因額度已恢復且過程未見新的402），接著可用這份清單重跑`f_us_value_bm`（#128 FAIL）/`f_us_low_vol`（#115 FAIL）cheap gate＋1b深挖，驗證原本implausible的VAL期報酬量級是否在乾淨宇宙上消失（round374 leave-top10-out已REFUTED集中度假說，換乾淨宇宙是round374/376已定案的下一步路徑）。若job仍`running`，比照本輪邏輯繼續監看或直接留給再下一輪。
+
+`is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`。本輪session內零新增API呼叫（額度消耗全部發生在背景job裡，非session直接呼叫）。無新因子/策略判定，不寫`TRIALS_LEDGER.md`新列（純地基續抓，同round376先例）。完整見`US_MARATHON_STATE.md`第381輪記錄。
