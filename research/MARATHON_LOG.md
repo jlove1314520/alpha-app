@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T16:31（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#36
+（個股融券使用率）第3關（參數密集高原）本輪完成，**判定：PASS**。新增
+`short_sale_utilization_gates.py`（逐字比照`f52w_high_gates.py`#17第3關
+同一套TOP_N/REBALANCE_DAYS雙維度網格精神，不改
+`short_sale_utilization_portfolio_v1.py`本體，只測TRAIN期不動VAL）。
+TOP_N in [10,15,20,25,30]（固定REBALANCE_DAYS=21）報酬依序
++74.19%/+77.74%/+59.53%(錨點)/+54.37%/+41.01%；REBALANCE_DAYS in
+[10,21,42,63]（固定TOP_N=20）報酬依序+47.29%/+59.53%(錨點)/+54.05%/
++53.65%。網格共8獨立點**全部為正（8/8=100%，遠高於60%門檻）**，登錄
+門檻點不是單點孤峰。誠實提醒：仍是訊號多頭鏡像半邊（融券使用率最低
+分位），第3關高原穩健不代表第2關發現的TRAIN期alpha不顯著（p=0.3717）
+問題已解決，留到第6關逐年一致性/第7關OOS一併檢視，**尚未結案**。
+`is_holdout_consumed()`開工/收工前皆以獨立`python -c`呼叫確認False。
+零新增API呼叫（純本地快取讀取）。**下一輪從第5關leave-one-out開始，
+不跳關**。已更新`HYPOTHESIS_QUEUE.md`#36條目對應段落（正文+「排隊順序
+總結」章節）、`TRIALS_LEDGER.md`新增#134，commit+push收工。
+
 ## 2026-09-05T16:14（hypothesis_queue排程接續，取鎖時發現LOCK_STALE
 [held by 66552, 29.9 min old]被自動回收recovering，記錄：上一輪疑似
 執行中斷未正常收工——`git pull`確認`Already up to date`、`git status`
