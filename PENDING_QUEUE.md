@@ -221,7 +221,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 > 執行順序：零 → 五（千元股修復已併入零）→ 一（八因子）→ 零之三（產業）→ 三（新聞管線）→ 零之二（分點演習）→ 二（群益唯讀）→ 四（本地摘要）→ 其餘。每完成一項回報一項，附證據。
 
 **執行順序（總司令指定，已完成的標 [x]）**：
-- [ ] **零** 全市場歷史價與走勢線（每日一次全市場抓取＋sparklines.json＋覆蓋率≥95%閘門）
+- [x] **零** 全市場歷史價與走勢線——**已完成**（commit `412154e`）：查明 `update_price_history.py` 本來就是全市場兩請求架構（TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes）；新增 `build_sparklines.py` 從 price_history 切出 `data/sparklines.json`（2827檔/286KB/零額外請求），App 統一讀它；`fetch_quotes_tw.py` 移除整段逐檔抓取與死碼（446→357行）。覆蓋率：官方上市 1094/1094=100%、上市+上櫃 2196/2210=99.4%（門檻95%）；上櫃高價股 5274 也有20點（舊架構永遠拿不到）。smoke check 38，36項全PASS。⚠ market.yml 的新步驟留在 working tree（PAT 無 workflow scope）。
 - [x] **五.千元股** 已完成並併入零（commit `be17ee7`：`_num()` 千分位逗號根因＋5項回歸測試）
 - [x] **一** 評分引擎八因子全部填上——**已完成**（commit `73bfb07`：覆蓋率中位數 0.42→0.74、
   <60% 82.3%→32.1%、7711 rank 1→44、2330 七項因子完整度92%、smoke 35項全PASS）
