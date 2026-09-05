@@ -163,7 +163,8 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 - [x] **HTTPS.一** ——**已完成**（commit `c640ee4`）：`research/gen_local_ca.py`（新增）產生根CA（RSA 4096/SHA-256/10年2036-09-01到期/CN=Alpha Local CA/CA:TRUE critical/keyUsage keyCertSign+cRLSign critical）與伺服器葉憑證（RSA 2048/由CA簽/825天2028-12-07到期/SAN=IP:192.168.3.241+IP:127.0.0.1+DNS:localhost/EKU serverAuth critical）。全部6個檔案輸出`secrets/`（私鑰`alpha-ca-key.pem`/`alpha-server-key.pem`絕不進repo，`git status`確認過secrets/沒出現在任何commit）；CA公開憑證DER格式`secrets/alpha-ca.crt`。
 - [x] **HTTPS.二** ——**已完成**：`GET /ca.crt`回傳`secrets/alpha-ca.crt`（DER，`Content-Type: application/x-x509-ca-cert`），刻意不驗token（CA公開憑證本身不是機密，端點程式碼裡完全沒有讀取私鑰的路徑）。本機實測：無token下載200、與原始檔逐位元相同。
 - [x] **HTTPS.三** ——**已完成，維持不切換**：`ENABLE_HTTPS`環境變數（`ALPHA_LIVE_SERVER_HTTPS=1`）控制`uvicorn.run()`要不要帶`ssl_keyfile`/`ssl_certfile`，**預設值是False，正式伺服器目前仍是HTTP**（`/health`回`https_enabled:false`確認）；CORS `allow_headers=["*"]`已涵蓋`X-Alpha-Local-Token`（加註解講清楚不留疑問）；OPTIONS preflight本來就不經過`_check_token()`（Starlette CORSMiddleware框架行為，實測回200）；`scripts/smoke_test.mjs`加`ignoreHTTPSErrors:true`（目前no-op）。**獨立測試埠8013**開`ENABLE_HTTPS=1`驗證整條HTTPS路徑本身正常：`openssl s_client -verify_return_error`回`Verify return code: 0 (ok)`、Python `requests`用CA pem驗證成功200——**憑證鏈本身完全正確**（Windows版curl因schannel強制檢查憑證撤銷狀態、私有CA沒有撤銷基礎設施而報錯，這是curl-for-Windows已知限制不是憑證問題，已用openssl/requests交叉驗證排除）。smoke test 32項全PASS、單元測試13項全PASS，正式伺服器未受影響。
-- [x] **HTTPS.四** ——**已完成（2026-09-05 10:26，總司令確認手機已安裝Alpha Local CA並完全信任後切換）**：`C:lphaun-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/開機路徑都走這支，重開機後仍是HTTPS）；重啟後`netstat`確認`0.0.0.0:8001 LISTENING`（PID 61172）、啟動log印「HTTPS模式啟用」。本機驗證：`http://192.168.3.241:8001/health`已連不上（000，HTTP已關）；`curl -k https://192.168.3.241:8001/live/quotes`→401、帶token→200；`https://…/ca.crt`→200且與secrets/alpha-ca.crt一致；Python requests用CA pem驗證→200、`openssl s_client`→`Verify return code: 0 (ok)`。CORS：allow_origins含`https://jlove1314520.github.io`、preflight回`access-control-allow-headers: X-Alpha-Local-Token`、OPTIONS無token→200。**總司令需把App設定頁伺服器網址從`http://192.168.3.241:8001`改成`https://192.168.3.241:8001`。**
+- [x] **HTTPS.四** ——**已完成（2026-09-05 10:26，總司令確認手機已安裝Alpha Local CA並完全信任後切換）**：`C:lpha
+un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/開機路徑都走這支，重開機後仍是HTTPS）；重啟後`netstat`確認`0.0.0.0:8001 LISTENING`（PID 61172）、啟動log印「HTTPS模式啟用」。本機驗證：`http://192.168.3.241:8001/health`已連不上（000，HTTP已關）；`curl -k https://192.168.3.241:8001/live/quotes`→401、帶token→200；`https://…/ca.crt`→200且與secrets/alpha-ca.crt一致；Python requests用CA pem驗證→200、`openssl s_client`→`Verify return code: 0 (ok)`。CORS：allow_origins含`https://jlove1314520.github.io`、preflight回`access-control-allow-headers: X-Alpha-Local-Token`、OPTIONS無token→200。**總司令需把App設定頁伺服器網址從`http://192.168.3.241:8001`改成`https://192.168.3.241:8001`。**
 
 ---
 
@@ -188,6 +189,47 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
 > 三、修完回報：重建成功幾筆、排除幾筆、對帳四條目前是否全部成立、修正前後已實現數字。
 
 - [x] **帳務全項** ——**已跟總司令確認並改路線，不在本session（Alpha）處理**：查證發現這批交易（WAL/TRX等）的程式碼不在`C:\alpha`，是完全獨立的Cybex交易系統，位於`C:\Users\user\AppData\Roaming\Claude\local-agent-mode-sessions\...\outputs\research`，有自己的33KB `CLAUDE.md`規則、1.5MB `REPORT.md`、獨立桌面捷徑「Cybex Claude Code」會開專屬session。已用AskUserQuestion請示，總司令裁示**改用Cybex專屬session處理**。這裡查到`ListAgents`目前跟Cybex相關的是`research-a6`（busy，可能是它的挖礦馬拉松）跟`Cybex挖礦終端機`（Remote Control，offline）——沒有現成idle的Cybex session可以直接轉交，總司令需自己雙擊桌面「Cybex Claude Code」捷徑或等`research-a6`空出來，把這條P0帳務指令貼過去給那個session執行。**此條目在Alpha這邊不再繼續，僅留紀錄。**
+
+---
+
+## 週六實測九項（2026-09-05，總司令實測，使用者原話全文，依嚴重度插最前面）
+
+原始指令全文：
+
+> 全程繁體中文。總司令週六實測九項，以下依嚴重度插 PENDING_QUEUE 最前面，每項附證據驗收：
+>
+> 一、資料完整性 P0：千元以上股票整條管線消失
+> quotes_tw.json 中 2330/2454 sparkline_error='not_available:empty'，且 price_history.json 完全沒有 2330、2454。兩檔正好是自選股中唯二股價>1000 者。假設：TWSE STOCK_DAY 回傳帶千分位逗號的字串（"2,410.00"），解析失敗被當空值。
+> 1. 用證據驗證：直接印出 TWSE STOCK_DAY 對 2330 的原始回應與解析結果，不准再猜快取/限流。
+> 2. 修解析（去逗號後轉數值），回補 price_history 全部缺漏股票，回報回補前後股票數與缺漏清單。
+> 3. 評估影響：這些股票在 scores.json/技術因子/回測宇宙裡是否也缺，逐一回報。
+> 4. 閘門：check「price_history 必含 2330/2454/3008/5274」「自選股有 ≥2 筆歷史價卻無走勢線＝FAIL」。
+>
+> 二、評分引擎 P0：只算兩個因子卻顯示 9.9
+> 1. 財報成長／估值(成長調整)／技術型態三個因子改接既有資料（fundamentals.json、price_history），不再標「需要新聞」。只有機構觀點（台股無免費源）與題材/事件（等 Phase 2）維持不計入，文字改為真實原因。
+> 2. 資料完整度 <60% 的股票：不顯示綜合分圓環，改顯示「資料不足，暫不評分（完整度 X%）」，選股榜也不得排進前段。
+> 3. 極端走勢防呆：60 日漲幅 >80% 或月營收年增觸硬上限者，個股頁頂端加風險標示，分批買入計畫改為不顯示。
+> 4. 所屬產業「—」：查 company_info 對上櫃股的覆蓋，補齊。
+>
+> 三、三大法人柱狀圖：改零基線正負向（正值向上、負值向下、共用基線），加閘門「正值柱底 y 必須等於基線 y」。
+>
+> 四、融資維持率：分母改用 TWSE MI_MARGN 每日公布的全市場融資金額，拔掉最後一個 FinMind 依賴；回報前後數值差異。
+>
+> 五、券商唯讀資料經 live server：新增 /live/positions 與 /live/balance（Shioaji list_positions/account_balance、IBKR 部位），一律驗 token、唯讀、不含任何下單能力；首頁總資產／今日損益卡改吃真數字。紙上下單走隧道屬 Phase 3，等總司令另行核准。
+>
+> 六、小修：週末標頭顯示「休市」而非「已收盤(9/5)」；盤前 AI 日報功能未上線前移除其推播開關。
+>
+> 七、登記 P1（先不做，寫進 BACKLOG 附估時）：美股即時篩選（yfinance + IBKR 掃描器 API，誠實標回測資料品質）；ADR 溢價；法說會列表＋MOPS 簡報 PDF 連結（Phase 2 一併）；群益下單 adapter（等總司令確認資金所在）。
+>
+> 每項 Playwright 截圖 + smoke test，一的回補結果與二的修改前後評分對照必須附上。
+
+- [ ] **週六.一** 千元股管線消失（證據驗證→修解析→回補price_history→影響評估→兩條閘門）
+- [ ] **週六.二** 評分引擎（三因子接既有資料／完整度<60%不評分／極端走勢防呆／產業補齊）
+- [ ] **週六.三** 三大法人柱狀圖改零基線正負向＋閘門
+- [ ] **週六.四** 融資維持率分母改TWSE MI_MARGN，拔掉最後一個FinMind依賴
+- [ ] **週六.五** live server新增/live/positions與/live/balance（唯讀、驗token），首頁總資產卡吃真數字
+- [ ] **週六.六** 小修：週末標頭「休市」、移除未上線的AI日報推播開關
+- [ ] **週六.七** 登記P1進BACKLOG附估時（美股即時篩選／ADR溢價／法說會+MOPS PDF／群益adapter）
 
 ---
 
