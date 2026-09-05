@@ -1310,3 +1310,17 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 **下一輪接手**：`python research/run_detached.py status`查`20260906-010314-7940`是否`finished`；若是，用`run_detached.py log 20260906-010314-7940 --tail 30`讀最終SUMMARY區塊（`f_us_value_bm`的CHEAP_PASS/FAIL、train/val IC、null percentile），寫入`TRIALS_LEDGER.md`新列（獨立重測，非覆寫#128，事前綁定bonferroni_n=1）與`US_LEADS.md`。若CHEAP_PASS，排入1b深挖待辦（含「為什麼會有效」的經濟解釋）；若FAIL，因已換乾淨宇宙，可較有信心判定是因子本身無edge而非universe假影。之後同樣手法（重用同一份`data/us_stratified_universe_sample.csv`，無需重建宇宙）重跑`f_us_low_vol`（#115 FAIL）。
 
 `is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`。本輪session內零新增FinMind API呼叫（新增API成本全在背景job的SEC EDGAR fetch，非FinMind）。無新因子判定（job未跑完），不寫`TRIALS_LEDGER.md`新列（留給下一輪收成時寫）。完整見`US_MARATHON_STATE.md`第382輪記錄、`us_factor_ic_value_clean_universe.py`（新增，可重複執行）。
+
+## 第383輪 2026-09-06T01:30+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 22:00（第380輪，最舊）／FUT 18:30（第372輪，配額已滿跳過）／US 01:00（第382輪，最新）——依例外規則本應選TW，但round382投遞的背景job`20260906-010314-7940`已完成，收成優先，選US接續。
+
+**收成**：`f_us_value_bm`乾淨宇宙cheap gate重測——159/248可用，train mean_ic=+0.0432（n=76）、val mean_ic=+0.0853 IR=+0.508 hit_rate=0.69（n=49），train/val同號，null percentile=100.0（門檻90.0），**CHEAP_PASS**。翻轉#128舊池子FAIL判定。
+
+**接續**：新增`us_factor_ic_lowvol_clean_universe.py`（重用既有`build_snapshots()`/`evaluate_factor()`/`prepare_us_factors()`/`us_price_series()`，換ticker清單為`data/us_stratified_universe_sample.csv`，純價格因子零新增API呼叫，248檔全部已在`cached_ticker_ids()`快取內，原地執行未投遞背景）。結果：248/248可用，train mean_ic=+0.0683（n=76）、val mean_ic=+0.1380 IR=+0.689 hit_rate=0.73（n=49），train/val同號，null percentile=100.0，**CHEAP_PASS**。翻轉#15/#115舊池子FAIL判定。
+
+兩個不相關機制因子同輪同乾淨宇宙都CHEAP_PASS，雙重印證universe假影判定（#17/#18/#19/#139）成立且可修復。寫入`TRIALS_LEDGER.md`#144/#145、`US_LEADS.md`#20/#21、`US_MARATHON_STATE.md`本輪記錄。
+
+誠實保留：兩者都只是cheap gate過關，1b深挖尚未做——舊池子的死因都在1b深挖階段（value死於VAL報酬量級不合理、low-vol死於TRAIN輸給隨機控制組/beta非市場中性），不能假設換乾淨宇宙後1b深挖會通過。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。本輪session內零新增API呼叫。下一輪建議：對#20或#21擇一做1b深挖（改寫既有deep_dive腳本換ticker清單），若跑超過5分鐘依協定投遞背景。
