@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第369輪 · 2026-09-05T19:02+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 這是維修旗標下第3輪心跳（第367、368輪已完成），達到`PROPOSAL_2026-09-05_marathon_process_hardening.md`「三輪驗收」門檻，馬拉松本身不能判斷維修結束、需等互動session覆核驗收標準後移除`MARATHON_PROTOCOL.md`維修旗標，恢復三軌實質工作
 ## 第368輪 · 2026-09-05T18:32+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 等互動session驗收`PROPOSAL_2026-09-05_marathon_process_hardening.md`後移除`MARATHON_PROTOCOL.md`維修旗標，恢復三軌實質工作
 ## 第367輪 · 2026-09-05T18:02+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 等互動session驗收`PROPOSAL_2026-09-05_marathon_process_hardening.md`後移除`MARATHON_PROTOCOL.md`維修旗標，恢復三軌實質工作
 ## 第365輪 · 2026-09-05T10:05+08:00 · TW · 取鎖偵測`LOCK_STALE`（round364 pid 56856持有29.9分鐘後被回收，上一輪疑似失敗，`git log`已確認round364工作本身成功commit+push，疑似只是收工序release lock前process卡住，同round360/361/363先例）；本輪工作單位＝`MARATHON_PROTOCOL.md`第3節「成長與預估上修」家族資料源存在性前置檢查（`WebFetch`FinMind官方完整資料集參考文件，零FinMind API呼叫） · **確認FinMind完全沒有分析師EPS/營收預估資料集，這個家族正式標記「資料源不存在」結案**，不計入試驗數，寫入`TRIALS_LEDGER.md`「已調查但不計入試驗數」表、`TW_LEADS.md`「下一輪建議」更新——TW軌第3節家族只剩季節性/籌碼類融資券兩項待碰
