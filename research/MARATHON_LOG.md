@@ -1,5 +1,15 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 06:30（hypothesis_queue排程接續，#40地基完成）：接續上一輪
+新增的#40（庫藏股買回公告效應）——寫`buyback_announcement_probe.py`
+確認MOPS t35sc09可回溯至民國104年(2015)，過程發現表頭其實是兩列
+colspan結構（資料實際20欄非表面18欄），簡易解析會誤判0列。已修正並
+寫成正式模組`mops_buyback_client.py`（`_build_header()`展開colspan）
++可續跑回補腳本`backfill_buyback_announcement.py`（2015-01-01~VAL_END
+逐半年窗口x sii/otc），實測`fetch_window`可正確回傳119列含核心欄位。
+本輪僅測試性抓1個窗口驗證解析正確、未執行完整回補（預算考量），
+已同步`HYPOTHESIS_QUEUE.md`#40條目狀態。下一輪先跑完整回補腳本，
+再寫CAR事件研究檢定腳本，第1關cheap gate仍未過關，不跳關。
 
 ## 2026-09-06 05:58（hypothesis_queue排程接續第十三輪，上一輪鎖檔陳舊
 (30.0分鐘)被回收，疑似上一輪失敗未產出）：確認佇列#1~39全數結案，
