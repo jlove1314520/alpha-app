@@ -1289,3 +1289,24 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 **下一輪接手**：`python research/run_detached.py status`查`20260906-003203-4f80`是否`finished`；若是，讀`data/us_stratified_universe_sample.csv`統計最終可用檔數（預期mid/small tier大部分應可用，因額度已恢復且過程未見新的402），接著可用這份清單重跑`f_us_value_bm`（#128 FAIL）/`f_us_low_vol`（#115 FAIL）cheap gate＋1b深挖，驗證原本implausible的VAL期報酬量級是否在乾淨宇宙上消失（round374 leave-top10-out已REFUTED集中度假說，換乾淨宇宙是round374/376已定案的下一步路徑）。若job仍`running`，比照本輪邏輯繼續監看或直接留給再下一輪。
 
 `is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`。本輪session內零新增API呼叫（額度消耗全部發生在背景job裡，非session直接呼叫）。無新因子/策略判定，不寫`TRIALS_LEDGER.md`新列（純地基續抓，同round376先例）。完整見`US_MARATHON_STATE.md`第381輪記錄。
+
+## 第382輪（2026-09-06T01:00+08:00）
+
+**輪替判斷**：TW最舊（22:00，round380）／FUT（18:30，round372，近10輪已佔20%配額上限，跳過）／US最新（00:32，round381）。依例外規則本應選TW，但round381投遞的背景抓取工作`20260906-003203-4f80`已在本輪開工前完成，優先收成後再接續同一軌，避免斷點閒置。
+
+**收成**：`python run_detached.py status --last 5`確認`20260906-003203-4f80`（`us_stratified_universe_sample_resume`）已`finished`，exit=0，耗時11.2分鐘。`python run_detached.py log 20260906-003203-4f80 --tail 40`看到`=== DONE: 248/300 usable (n_days>=260) ===`，分tier統計：large 92/100、mid 79/100、small 77/100。讀`data/us_stratified_universe_sample.csv`確認：300列齊全，248列`usable=True`，drop原因均為`n_days<260`（歷史太短）或`n_days=0`（無資料/下市代碼），無`quota_error`／`not_attempted_quota_hit`殘留——FinMind額度確實已完全恢復，這份分層抽樣宇宙已完整可用。
+
+**工作單位**：接續round374/376/381既定路徑，用這份乾淨宇宙重跑`f_us_value_bm`（#128 FAIL）cheap gate。
+
+**做了什麼**：
+1. 比對`data/us_stratified_universe_sample.csv`的248檔usable清單跟`us_portfolio_pilot_real_data.cached_ticker_ids()`（511檔）：248檔全部已在511檔快取池內（因抓價過程已把價格parquet寫入通用快取目錄），但**選樣邏輯本身**（市值三分位×固定seed隨機抽樣）跟`cached_ticker_ids()`累積380輪人氣驅動的舊選樣邏輯是獨立的，這份清單仍是有效的乾淨重測輸入，不因價格快取重疊而失去意義。
+2. 查`data/raw/SEC_companyfacts_*.json`快取命中率：248檔中247檔可解析CIK，僅13檔已有快取，234檔需要新SEC EDGAR fetch（非FinMind額度）。
+3. 新增`us_factor_ic_value_clean_universe.py`：完全重用`us_factor_ic_value.py`的`build_snapshots()`/`evaluate_factor()`/`add_value_factor()`/`book_value_per_share_pit()`，唯一差異是ticker清單來源從`cached_ticker_ids()`換成`data/us_stratified_universe_sample.csv`的usable==True清單——單一控制變因替換，不是重新設計因子或判準邏輯。
+4. 用`run_detached.py submit --name us_factor_ic_value_clean_universe --timeout-min 30 -- python -u research/us_factor_ic_value_clean_universe.py`投遞，job_id`20260906-010314-7940`。
+5. session內用`run_detached.py wait 20260906-010314-7940 --max-min 4`監看，4分鐘時仍`STILL_RUNNING`；額外查log確認進度100/248（新SEC fetch速率約每分鐘30檔，無錯誤），4.7分鐘時仍`running`，符合預期速率。
+
+**結果（本輪未等待job跑完，job仍在背景breakaway執行）**：預估依目前速率（100/248於約3.2分鐘），剩餘148檔約再5分鐘可跑完，30分鐘timeout內足夠。
+
+**下一輪接手**：`python research/run_detached.py status`查`20260906-010314-7940`是否`finished`；若是，用`run_detached.py log 20260906-010314-7940 --tail 30`讀最終SUMMARY區塊（`f_us_value_bm`的CHEAP_PASS/FAIL、train/val IC、null percentile），寫入`TRIALS_LEDGER.md`新列（獨立重測，非覆寫#128，事前綁定bonferroni_n=1）與`US_LEADS.md`。若CHEAP_PASS，排入1b深挖待辦（含「為什麼會有效」的經濟解釋）；若FAIL，因已換乾淨宇宙，可較有信心判定是因子本身無edge而非universe假影。之後同樣手法（重用同一份`data/us_stratified_universe_sample.csv`，無需重建宇宙）重跑`f_us_low_vol`（#115 FAIL）。
+
+`is_holdout_consumed()`開工前確認`False`，收工前再次確認`False`。本輪session內零新增FinMind API呼叫（新增API成本全在背景job的SEC EDGAR fetch，非FinMind）。無新因子判定（job未跑完），不寫`TRIALS_LEDGER.md`新列（留給下一輪收成時寫）。完整見`US_MARATHON_STATE.md`第382輪記錄、`us_factor_ic_value_clean_universe.py`（新增，可重複執行）。
