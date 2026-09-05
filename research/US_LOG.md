@@ -1338,3 +1338,17 @@ session內等待約3~4分鐘仍`running`（`watchdog_alive=True`），248檔×2�
 `is_holdout_consumed()`開工/收工前皆確認`False`。本輪session內零新增API呼叫（248檔全部已是`us_price_series()`parquet快取命中）。
 
 **下一輪接手**：`run_detached.py status`確認`20260906-053411-6d75`是否`finished`，若是用`run_detached.py log 20260906-053411-6d75 --tail 40`讀SUMMARY（TRAIN/VAL兩期×3成本倍數的ann_return/beta/alpha/Sortino/random_control_percentile），優先檢查TRAIN期percentile與beta方向（吸取#15/#41/#115舊池子皆敗在這裡的教訓），寫入`TRIALS_LEDGER.md`新列。跑完後同樣手法對`f_us_value_bm`（#20）做1b深挖。
+
+## 第387輪 2026-09-06T06:03+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 02:00（第384輪，最舊）／FUT 02:30（第385輪）／US 05:37（第386輪，最新）——依輪替本應選TW，但round386投遞的背景job`20260906-053411-6d75`在本輪開工時已是`timeout`狀態（`run_detached.py status`確認：`exit=-9`，20分鐘到期被看門狗`taskkill /T /F`砍掉，非正常完成），需要先處理這個懸而未決的job才能讓US軌繼續往下走，故選US收成並處理。
+
+**收成/診斷**：`run_detached.py log 20260906-053411-6d75 --tail 60`顯示job跑完`load_clean_sample_with_factors()`（248/248可用，SPY基準8038筆）並印出第一個組合「TRAIN 2015-01-01..2020-12-31, cost 1x」的標頭後，20分鐘內沒有任何後續輸出即被砍。
+
+**根因判讀（查`US_LOG.md`round336/339記錄佐證，非猜測）**：同一份`run_one()`/`run_long_short_us()`共用回測函式在225檔規模的舊`cached_universe`版本上，歷史上也曾跨越兩輪session budget才跑完單一次完整重跑。`run_long_short_us()`每個period/cost組合要跑1（真實）+100（隨機控制組）＝101次完整逐日回測，內層用`idx[sid].loc[day]`逐檔逐日查表（非向量化），101次×約1500交易日×約50檔/腿的查表量級，單一組合可能就需要10幾分鐘，本輪任務共2期×3成本＝6個組合，總需求遠超20分鐘timeout。**不是本輪新腳本的bug**（`load_clean_sample_with_factors()`本身很快，248/248零錯誤），是20分鐘timeout訂得太保守，且被沿用多輪、刻意不改的`run_one()`計算量本身就大。
+
+**處理**：不改動`run_one()`/`run_long_short_us()`計算邏輯（維持跟#15/#41/#104/#115同一套方法學可比較性），只用更寬裕的timeout重新投遞同一支腳本：`run_detached.py submit --name us_deep_dive_lowvol_clean_universe_retry --timeout-min 150 -- python -u research/deep_dive_f_us_low_vol_clean_universe.py`（job_id`20260906-060311-6a01`），session內等待2分鐘確認`STILL_RUNNING`（非立即崩潰），依協定第0b節不繼續等待，job以`breakaway=True`繼續在背景執行。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。本輪session內零新增API呼叫（純讀log+resubmit，248檔全部命中既有parquet快取）。
+
+**下一輪接手**：先`run_detached.py status`確認`20260906-060311-6a01`是否`finished`；若仍`running`且未逾150分鐘不必重複投遞，直接等下一輪再檢查（`submit`遇running中工作會拒絕，exit 3）；若`finished`則讀log SUMMARY，優先檢查TRAIN期percentile與beta方向，寫入`TRIALS_LEDGER.md`新列。若150分鐘後仍`timeout`，效能優化`run_one()`（例如把逐檔`.loc`查表換成向量化）屬於架構/效能變更，按`CLAUDE.md`「提案先於執行」鐵律，應先寫提案給總司令，不能自行改寫這支被多處沿用的共用回測函式。跑完低波動後同樣手法對`f_us_value_bm`（#20）做1b深挖。
