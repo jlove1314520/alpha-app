@@ -4,7 +4,26 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
-## 2026-09-05T09:04（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，無殘留鎖檔，`git pull`/`git status`確認乾淨，發現非本輪殘留未追蹤檔`deep_dive_f_us_value_bm_leave_extreme_out.py`不觸碰不納入commit）—接續佇列第36條（個股融券使用率）第2關TRAIN隨機控制組：重新執行`short_sale_utilization_portfolio_v1.py`一次，420秒時間預算內記憶體內進度30→49/100draws，因checkpoint僅每滿10筆落盤，實際持久化進度為40/100draws（下一輪從40接續、重算40~49這9筆，非資料遺失，是既有落盤頻率設計）。VALIDATION期仍未開始，**尚未做PASS/FAIL判定**——已同步`HYPOTHESIS_QUEUE.md` #36條目「狀態」小節。`is_holdout_consumed()`執行前後皆確認False。本輪未觸及三個停下條件，正常收工，下次排程觸發從checkpoint 40/100繼續。
+## 2026-09-05T09:23（hypothesis_queue排程接續，取鎖時發現`LOCK_STALE`
+[held by 59452, 30.5 min old]被自動回收recovering，非乾淨LOCK_ACQUIRED
+——記錄：上一輪（T09:04）疑似執行中斷未正常收工。`git pull`確認
+`Already up to date`，但`git status`發現上一輪已`git add`但未commit的
+殘留（`HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`，內容是TRAIN checkpoint
+30→40/100 draws的合法紀錄）——查證確認是本track自己上一輪的合法產出、
+非其他排程來源，決定併入本輪一起補commit，不是「不觸碰納入」的外來
+殘留情況。另確認先前輪筆記提到的未追蹤檔`deep_dive_f_us_value_bm_
+leave_extreme_out.py`現已被其他來源正式`git add`納入版本控制，不再是
+未追蹤殘留，本輪不處理。）—接續佇列第36條（個股融券使用率）第2關TRAIN
+隨機控制組：重新執行`short_sale_utilization_portfolio_v1.py`一次，420秒
+時間預算內記憶體內進度40→59/100draws，因checkpoint僅每滿10筆落盤，實際
+持久化進度為**50/100draws**（下一輪從50接續、重算50~59這9筆，非資料
+遺失，是既有落盤頻率設計）。VALIDATION期仍未開始，**尚未做PASS/FAIL
+判定**——已同步`HYPOTHESIS_QUEUE.md` #36條目「狀態」小節+排隊順序總結
+（原文字停留在過時的20/100，本輪一併修正）。`is_holdout_consumed()`
+執行前後皆以獨立`python -c`呼叫再次確認False。本輪未觸及三個停下條件，
+正常收工，下次排程觸發從checkpoint 50/100繼續。
+
+## 2026-09-05T09:04（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，無殘留鎖檔，`git pull`/`git status`確認乾淨，發現非本輪殘留未追蹤檔`deep_dive_f_us_value_bm_leave_extreme_out.py`不觸碰不納入commit）—接續佇列第36條（個股融券使用率）第2關TRAIN隨機控制組：重新執行`short_sale_utilization_portfolio_v1.py`一次，420秒時間預算內記憶體內進度30→49/100draws，因checkpoint僅每滿10筆落盤，實際持久化進度為40/100draws（下一輪從40接續、重算40~49這9筆，非資料遺失，是既有落盤頻率設計）。VALIDATION期仍未開始，**尚未做PASS/FAIL判定**——已同步`HYPOTHESIS_QUEUE.md` #36條目「狀態」小節。`is_holdout_consumed()`執行前後皆確認False。本輪未觸及三個停下條件，正常收工，下次排程觸發從checkpoint 40/100繼續。**（誠實補充：本輪commit+push未及完成即中斷，具名鎖留下陳舊鎖檔，由下一輪T09:23回收接手，內容已查證正確並補commit，非資料遺失）**
 
 ## 2026-09-05T08:35（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，無殘留鎖檔，`git pull`/`git status`確認乾淨，發現非本輪殘留未追蹤檔`deep_dive_f_us_value_bm_leave_extreme_out.py`不觸碰不納入commit）—接續佇列第36條（個股融券使用率）第2關TRAIN隨機控制組：連續執行`short_sale_utilization_portfolio_v1.py`兩次，持久化進度20→30/100 draws，VALIDATION期仍未開始，**尚未做PASS/FAIL判定**——已同步`HYPOTHESIS_QUEUE.md` #36條目狀態小節。`is_holdout_consumed()`執行前後皆確認False。本輪未觸及三個停下條件，正常收工，下次排程觸發從checkpoint 30/100繼續。
 
