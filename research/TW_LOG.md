@@ -1707,3 +1707,21 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **已寫入**：`TRIALS_LEDGER.md`#131（新增列）、`TW_LEADS.md`#13（新增列，一次性合併round346/353/356/359/362五輪的完整過程與最終判定，避免拆成兩筆不完整紀錄）、`STRATEGY_GRAVEYARD.md`新增死亡條目（`portfolio_multifactor_v2_loo_no_low_vol`）。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程讀取既有CSV/本機快取，零新增API呼叫（純讀取round359已完成的背景process輸出）。**下一步建議**：(a) `portfolio_multifactor_v2`目前所有已測子版本（等權/IC加權原版、拿掉low_vol/eps_family/revenue_surprise三個leave-one-out變體）全數FAIL或維持既有判定，這條探索線至此可視為告一段落；(b) 若要繼續組合策略層級迭代（`MARATHON_PROTOCOL.md`2026-09-03裁示主軸），建議下一輪嘗試全新的成分因子組合（例如引入尚未在`portfolio_multifactor_v2`裡出現過的PASS因子，若有的話）而非再拿現有4個因子做排列組合，或評估regime overlay/下檔保護證明這類尚未測過的維度；(c) 若TW軌暫無新的組合層級工作可做，可回頭掃`MARATHON_PROTOCOL.md`第3節尚未碰過的因子家族（季節性/成長與預估上修/籌碼類融資券）作為未來組合策略的候選成分因子前置檢查。
+
+## 第365輪（2026-09-05T10:05+08:00，TW）——「成長與預估上修」家族資料源存在性查核，正式結案：資料源不存在
+
+**取鎖狀況**：`LOCK_STALE`（上一輪pid 56856持有29.9分鐘後被回收）。查`git log`確認round364（FUT軌）本身已成功commit+push（`fut_cheap_gate.py`新增`hyp_combo_trend_oi_v1()`，`TRIALS_LEDGER.md`#132），疑似跟round360/361/363同款「收工序release lock前process卡住」模式，非工作本身失敗。三軌時間戳：TW 08:01（round362，最舊）／US 08:54（round363）／FUT 09:03（round364，最新）——依輪替選TW。
+
+**本輪工作單位＝`MARATHON_PROTOCOL.md`第3節「成長與預估上修」家族資料源存在性前置檢查**（`TW_MARATHON_STATE.md`round362下一步(c)、`TW_LEADS.md`歷次「下一輪建議」皆列此項為待辦）。依`MARATHON_PROTOCOL.md`第5節明確指示「先確認FinMind有沒有分析師預估資料，沒有就記錄『資料源不存在』跳過」執行。
+
+**做法**：先查`C:\alpha\alpha-data\DATA.md`/`config.py`既有紀錄，未提及分析師預估相關資料集。嘗試`WebFetch` FinMind官方文件頁面（`finmind.github.io/tutor/TaiwanMarket/DataSource/`、`finmindtrade.com/analysis/#/data/api`）皆因是JS渲染的SPA頁面或404無法取得實質內容。改用`WebSearch`找到FinMind官方維護的**完整RESTful API資料集參考文字檔**`https://finmind.github.io/llms-full.txt`，`WebFetch`成功取得完整內容，逐類列出全部75+個台股資料集名稱（技術面20個／籌碼面25個／基本面12個／衍生品20個／即時4個／可轉債6個／其他3個，另加國際市場/總經資料集）。
+
+**結果**：**基本面類12個資料集**（`TaiwanStockFinancialStatements`／`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`／`TaiwanStockDividend`／`TaiwanStockDividendResult`／`TaiwanStockMonthRevenue`／`TaiwanStockCapitalReductionReferencePrice`／`TaiwanStockMarketValue`／`TaiwanStockDelisting`／`TaiwanStockMarketValueWeight`／`TaiwanStockSplitPrice`／`TaiwanStockParValueChange`）**全部是財報/公司行動的歷史實際值**，沒有任何一個是分析師對未來的預測值/consensus estimate；技術面/籌碼面/衍生品各20+個資料集也逐一核對過，同樣沒有分析師預估相關資料集。**結論：FinMind免費層（甚至完整付費層目錄，因為這是官方完整資料集清單，不分免費付費）根本沒有分析師EPS/營收預估資料，這不是「免費層限制」而是「FinMind完全不提供這類資料」。**
+
+**判定**：依協定明文指示，「成長與預估上修」家族**資料源不存在，正式結案**，不留在候選清單。這不算一次統計檢定（沒有做IC測試/隨機控制組），不計入`bonferroni_n`/`TRIALS_LEDGER.md`累積試驗數，記在「已調查但不計入試驗數」表（新增一列）。若未來要測這個家族，需另尋付費資料源（如CMoney/Goodinfo/財報狗，需先確認服務條款是否允許程式化抓取）或改用公司自結財測公告當proxy（本輪未查證FinMind是否有獨立涵蓋「公司自結預估」而非「分析師預估」的資料集，屬未來可補的缺口，非本輪範圍）。
+
+**已寫入**：`TRIALS_LEDGER.md`「已調查但不計入試驗數」表新增一列（2026-09-05）、`TW_LEADS.md`「下一輪建議」段落新增備註（成長與預估上修畫刪除線標記已結案，並補上完整說明）。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零FinMind API呼叫（只查FinMind官方公開文件跟`alpha-data/DATA.md`既有紀錄），符合協定1a.2「不要為了可能沒用的假說去衝新API額度」精神——這輪本身就是在判斷「值不值得衝額度」的前置查核，結果是連查核都不需要衝額度，直接查文件就有答案。
+
+**下一步建議**：`MARATHON_PROTOCOL.md`第3節尚未碰過的因子家族只剩兩個——(a) 季節性（月效應/財報季效應，需先設計橫斷面構造方法，不是單純市場層級的「哪個月報酬較高」）；(b) 籌碼類融資券（TWSE openapi `MI_MARGN`端點，全新資料集，測前先評估是否值得衝新API額度）。二選一皆可作為下一輪TW軌工作單位；若TW軌無新的組合層級工作，也可考慮回頭處理round362提到的「全新成分因子組合」或「regime overlay/下檔保護證明」這類尚未測過的組合策略維度。

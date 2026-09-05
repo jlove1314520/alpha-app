@@ -3424,3 +3424,16 @@ staged但未commit的殘留——查證內容確認是本track自己上一輪合
 皆以獨立`python -c`呼叫再次確認為False。**佇列排隊順序仍是#36（未結案，
 接續第2關TRAIN隨機控制組，下一輪從50/100接續）**，這輪工作單位到此
 為止。
+
+**狀態（2026-09-05馬拉松第365輪，TW軌，取鎖乾淨非陳舊）**：**發現本條目
+存在兩套獨立更新來源**——馬拉松30分鐘排程（`marathon.lock`）跟另一套
+獨立系統（另一具名鎖`hypothesis_queue.lock`，本輪未查證其排程週期），
+兩者都在推進同一份checkpoint、同一份本檔案，開工時checkpoint已是
+50/100（對應上一則T09:23狀態），非馬拉松自己上一輪留下。連續執行
+`python short_sale_utilization_portfolio_v1.py`兩次，TRAIN隨機控制組
+持久化進度50→60→**70/100 draws**（兩次執行皆在420秒內完成本次落盤，
+無中途deadline截斷）。VALIDATION期仍完全尚未開始，不做任何PASS/FAIL
+判定，`is_holdout_consumed()`開工/收工前皆以獨立`python -c`呼叫確認為
+False。零新增API呼叫（純本地快取讀取）。**佇列排隊順序仍是#36（未結案，
+接續第2關TRAIN隨機控制組，下一輪從70/100接續）**，這輪工作單位到此
+為止。
