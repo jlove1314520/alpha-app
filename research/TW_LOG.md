@@ -1687,3 +1687,23 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 - 若process仍存活但log沒有新進展：正常現象（monthly cadence含N=100隨機控制組本身就耗時），繼續等待，不殺掉。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程讀取本機快取（yfinance價格快取+FinMind財報/月營收快取），零新增API呼叫。暫不更新`TRIALS_LEDGER.md`/`TW_LEADS.md`候選判定欄位，理由同round356（避免拆成兩筆不完整紀錄）。
+
+## 第362輪（2026-09-05T08:01+08:00，TW）——round359啟動的獨立樣本驗證background process已跑完，讀CSV判讀＋補齊`#118`最終判定：**FAIL，選擇偏誤假說得到支持**
+
+**開工程序**：取鎖乾淨（`LOCK_ACQUIRED`，非陳舊鎖檔）。三軌時間戳：TW 06:03（第359輪，最舊）／US 06:33（第360輪）／FUT 07:05（第361輪，最新）——依輪替選TW。
+
+**接手round359留下的背景process**：先查`data/deep_dive_loo_no_low_vol_independent_sample.csv`，**已存在**（565 bytes，時間戳06:46，比round359啟動時間06:03晚約43分鐘，跟round353先例的耗時量級一致）。查`ps aux`確認這個特定腳本本身已無存活process（讀取CSV即可，不需要再等待）；環境裡唯一存活的python process是`short_sale_utilization_portfolio_v1.py`（PID 992，07:52啟動），核對其command line後確認**跟本輪工作無關**（研判是另一套獨立`hypothesis_queue`自動化系統留下，該系統無共享鎖、跟本協定描述的「另一套獨立`hypothesis_queue`系統交錯執行同一份checkpoint」現象一致，見round349記錄），本輪未去動它。
+
+**讀取CSV結果**：只有一列（monthly cadence，符合round359限定`DEEP_DIVE_CADENCES=monthly`的預期，quarterly獨立樣本本輪未執行）。monthly cadence／VALIDATION(2021-2024)：`return_pct=+50.31%`、`mdd_pct=-20.14%`、`sortino=+0.598`、`sharpe=+0.661`、`alpha_ann_pct=+4.55%`、`beta=+0.610`、**`alpha_pvalue=0.5647`（`alpha_significant=False`）**、`cost_1x/2x/3x=50.31%/38.89%/27.33%`、`random_control_percentile=97.0`（N=300）。對照round353在原樣本（`safe_pool_ids()[:300]`）monthly：alpha+12.26%（p=0.0489，名目<0.05）、percentile=100.0。
+
+**依round356腳本檔頭事前寫死的判讀原則做最終判定**（原則見`deep_dive_loo_no_low_vol_independent_sample.py`docstring）：三分支準則為「若新樣本monthly alpha轉負、或p值遠高於0.05、或percentile明顯不到90——選擇偏誤假說得到支持，這個子版本應該維持FAIL/降級」。本輪結果：alpha仍為正（+4.55%，未觸發第一支）、percentile=97.0（仍過90，未觸發第三支）、**但p=0.5647明確觸發第二支「p值遠高於0.05」**——單一分支觸發即已足夠判定，不需要三個條件同時成立。beta=+0.61（中度正相關，market-neutral構造在這個獨立樣本上也沒有站得住腳，跟round353原樣本beta+0.51~0.51量級相近但方向一致地不接近零）。
+
+**判定：`loo_no_low_vol`最終判定FAIL，選擇偏誤假說得到支持**。round346/353在同一批300檔（`safe_pool_ids()[:300]`）上比較3個leave-one-out子版本（拿掉eps_family／拿掉revenue_surprise／拿掉low_vol），挑出「看起來最好」的那個（拿掉low_vol，monthly p=0.0489全場最低）——這個挑選動作本身就隱含多重比較，`TRIALS_LEDGER.md`#118當時的備註已誠實承認這一點（「隱含多重比較，未經FDR/多重比較校正前不能視為通過」）。本輪換一批完全獨立、未被這個挑選過程碰過的300檔（`safe_pool_ids()[300:600]`），重新計算train-only IC權重（不沿用舊樣本權重數字）後，原本round353的近似顯著結果（p=0.0489）並未重現（p=0.5647），為這個顧慮提供了直接實證證據，不只是理論上的疑慮。
+
+**quarterly獨立樣本尚未補齊，誠實記錄**：round359刻意限定只跑monthly一個cadence（降低單輪跑不完/再度中止的風險）。round353原樣本quarterly本就是三個子版本裡最弱的一組（p=0.1162，不顯著），monthly（原樣本裡最強的一組）在獨立樣本上都已明確崩潰（p從0.0489升到0.5647），quarterly不太可能反向翻盤支持這個候選，故本輪不強制補測；若之後有人想徹底補齊，可直接執行同腳本設環境變數`DEEP_DIVE_CADENCES=quarterly`重跑。
+
+**依`CLAUDE.md`復盤原則分類死因**：流程對，這個假設本身無edge（不是流程錯）——round346/353的成本敏感度/隨機控制組/train-only權重估計流程本身正確，round362用同一套正確流程在真正獨立的樣本上重新驗證，誠實地發現這個假設站不住腳，這正是流程應該做的事，不是流程失敗。**這個結果對整個leave-one-factor-out探索方法論本身也是一個直接警訊**：未來任何類似「從N個變體裡挑出表現最好的那個」的探索流程，即使名目p值通過門檻，都應該預期存在類似的選擇偏誤風險。**不泛化成`eps_family`/`revenue_surprise`兩個因子本身無edge**——這兩個因子各自的單因子IC測試（`TRIALS_LEDGER.md`#7/#8）早已PASS，沒有被推翻，死的是「拿掉low_vol的這個特定2因子組合子版本」這個具體構造。
+
+**已寫入**：`TRIALS_LEDGER.md`#131（新增列）、`TW_LEADS.md`#13（新增列，一次性合併round346/353/356/359/362五輪的完整過程與最終判定，避免拆成兩筆不完整紀錄）、`STRATEGY_GRAVEYARD.md`新增死亡條目（`portfolio_multifactor_v2_loo_no_low_vol`）。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程讀取既有CSV/本機快取，零新增API呼叫（純讀取round359已完成的背景process輸出）。**下一步建議**：(a) `portfolio_multifactor_v2`目前所有已測子版本（等權/IC加權原版、拿掉low_vol/eps_family/revenue_surprise三個leave-one-out變體）全數FAIL或維持既有判定，這條探索線至此可視為告一段落；(b) 若要繼續組合策略層級迭代（`MARATHON_PROTOCOL.md`2026-09-03裁示主軸），建議下一輪嘗試全新的成分因子組合（例如引入尚未在`portfolio_multifactor_v2`裡出現過的PASS因子，若有的話）而非再拿現有4個因子做排列組合，或評估regime overlay/下檔保護證明這類尚未測過的維度；(c) 若TW軌暫無新的組合層級工作可做，可回頭掃`MARATHON_PROTOCOL.md`第3節尚未碰過的因子家族（季節性/成長與預估上修/籌碼類融資券）作為未來組合策略的候選成分因子前置檢查。

@@ -1336,3 +1336,49 @@ docstring的判準結案為FAIL，不因為Wilcoxon顯著、中位數漂亮就�
 `data/vrp_gate_sampled.csv`（皆gitignored）。佇列#1~35全數結案，剩餘
 #5/#6/#8/#10仍卡外部依賴（本輪重新查證`BACKLOG.md`仍未解鎖），下一輪
 從新假設軸#36（個股融券使用率/借券成本當知情放空者訊號）第1關開始。
+
+### portfolio_multifactor_v2_loo_no_low_vol（拿掉`low_vol`剩`eps_family`+
+`revenue_surprise`兩因子子版本，train-only IC加權，股票，TW軌，
+2026-09-05FAIL）
+
+- **哪一關死的**：獨立樣本外驗證（`TRIALS_LEDGER.md`#118明列的第三個
+  深挖前提，round346/353全程只用同一批`safe_pool_ids()[:300]`留下的
+  缺口，round356/359/362補齊）——不是sanity/隨機控制組/成本敏感度這些
+  常見早期關卡死的，是死在「換一批完全獨立的樣本重新估計權重之後」。
+- **具體數字**：round353在原樣本monthly cadence／VALIDATION：
+  alpha+12.26%（p=0.0489，名目<0.05）、percentile=100.0（N=100配對式
+  隨機控制組）；round362在完全獨立的300檔新樣本（`safe_pool_ids()
+  [300:600]`，重新計算train-only IC權重、不沿用舊樣本權重數字）monthly
+  cadence／VALIDATION：alpha**+4.55%（p=0.5647，不顯著）**、
+  beta+0.610、percentile=97.0（N=300）。
+- **死因**：round356撰寫腳本時事前寫死判讀原則（避免看到結果才回頭
+  解釋）——「若新樣本monthly alpha轉負、或p值遠高於0.05、或percentile
+  明顯不到90，選擇偏誤假說得到支持，這個子版本應該維持FAIL/降級」。
+  本輪p=0.565明確觸發「p值遠高於0.05」這一支（percentile=97.0其實仍
+  過90，但單一分支觸發已足以判定，不需要三個條件同時成立）。核心
+  死因是round346/353在同一批300檔上比較3個leave-one-out子版本（拿掉
+  eps_family/拿掉revenue_surprise/拿掉low_vol）、挑「看起來最好」的
+  那個（拿掉low_vol，monthly p=0.0489全場最低）——這個挑選動作本身
+  就隱含多重比較，#118當時的備註已誠實承認這一點（「隱含多重比較，
+  未經FDR/多重比較校正前不能視為通過」），本輪的獨立樣本測試提供了
+  直接實證證據，不只是理論上的疑慮：換一批完全沒被這個挑選過程碰過
+  的樣本、重新估計權重後，原本的近似顯著結果並未重現。
+- **這個死法能不能泛化**：**能部分泛化——對這條馬拉松所有
+  leave-one-factor-out式「試多個子版本挑最佳者」的方法論是一個直接
+  警訊**，不是只死在這一個候選本身。未來任何類似「從N個變體裡挑出
+  表現最好的那個」的探索流程，即使名目p值通過門檻，都應該預期存在
+  類似的選擇偏誤風險，必須規劃真正獨立的樣本外驗證才能升格，不能
+  只靠同一批樣本的成本敏感度/隨機控制組補強就視為完整。但**不泛化
+  成「`eps_family`/`revenue_surprise`兩個因子本身無edge」**——這兩個
+  因子各自的單因子IC測試（`TRIALS_LEDGER.md`#7/#8）早已PASS，沒有被
+  推翻，死的是「拿掉low_vol的這個特定2因子組合子版本」這個具體構造。
+- **依`CLAUDE.md`復盤原則分類**：流程對，這個假設本身無edge（不是流程
+  錯）——round346/353的成本敏感度/隨機控制組/train-only權重估計流程
+  本身正確，round362用同一套正確流程在獨立樣本上重新驗證，誠實地
+  發現這個假設站不住腳，這正是流程應該做的事，不是流程失敗。
+- **原始記錄**：`TRIALS_LEDGER.md`#131、`TW_LEADS.md`#13、
+  `deep_dive_loo_no_low_vol_independent_sample.py`（round356新增，可
+  重複執行）、`data/deep_dive_loo_no_low_vol_independent_sample.csv`
+  （gitignored）。quarterly cadence獨立樣本本輪未執行（round353原樣本
+  quarterly本就最弱、p=0.1162，monthly都已崩潰不太可能翻盤，未強制
+  補測，若需要可設`DEEP_DIVE_CADENCES=quarterly`重跑同腳本補齊）。
