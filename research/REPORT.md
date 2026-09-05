@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第368輪 · 2026-09-05T18:32+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 等互動session驗收`PROPOSAL_2026-09-05_marathon_process_hardening.md`後移除`MARATHON_PROTOCOL.md`維修旗標，恢復三軌實質工作
 ## 第367輪 · 2026-09-05T18:02+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 等互動session驗收`PROPOSAL_2026-09-05_marathon_process_hardening.md`後移除`MARATHON_PROTOCOL.md`維修旗標，恢復三軌實質工作
 ## 第365輪 · 2026-09-05T10:05+08:00 · TW · 取鎖偵測`LOCK_STALE`（round364 pid 56856持有29.9分鐘後被回收，上一輪疑似失敗，`git log`已確認round364工作本身成功commit+push，疑似只是收工序release lock前process卡住，同round360/361/363先例）；本輪工作單位＝`MARATHON_PROTOCOL.md`第3節「成長與預估上修」家族資料源存在性前置檢查（`WebFetch`FinMind官方完整資料集參考文件，零FinMind API呼叫） · **確認FinMind完全沒有分析師EPS/營收預估資料集，這個家族正式標記「資料源不存在」結案**，不計入試驗數，寫入`TRIALS_LEDGER.md`「已調查但不計入試驗數」表、`TW_LEADS.md`「下一輪建議」更新——TW軌第3節家族只剩季節性/籌碼類融資券兩項待碰
 ## 第364輪 · 2026-09-05T09:02+08:00 · FUT · 取鎖偵測`LOCK_STALE`（round363 pid 58616持有29.8分鐘後被回收，US round363 state記錄本身完整、描述為執行中因效能問題被迫`taskkill`，非收工序卡住，跟round360/361模式不同）；本輪工作單位＝round361下一步(b)：拿掉高相關的`fut_ma_crossover_20_60`分量，只留`fut_trend_multi_tf`+`fut_oi_price_confirm_5d`兩個pairwise相關較低(0.125)的成分重測等權組合，新增`hyp_combo_trend_oi_v1()` · **percentile=82.5，FAIL**（門檻90.0，`TRIALS_LEDGER.md`#132）——恰好等於單一最強成分`fut_trend_multi_tf`本身的percentile，2成分等權組合未產生任何額外分散化增益；FUT軌組合層級兩次嘗試（3成分round361、2成分本輪）均未能超越單一最強成分，等權投票路線階段性結案，下一步（IC加權/oi變體/優先權讓回TW-US）留給後續輪次
