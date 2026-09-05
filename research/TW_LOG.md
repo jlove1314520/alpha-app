@@ -1747,3 +1747,27 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零FinMind API呼叫（只讀本機既有程式碼與文件），符合協定1a.2「不要為了可能沒用的假說去衝新額度」精神——這輪本身就是判斷「有沒有可行構造方法」的前置查核，查核結果是連構造方法都設計不出來，不需要進到需要衝額度的階段。
 
 **下一步建議**：`MARATHON_PROTOCOL.md`第3節尚未碰過的因子家族現在只剩一個——籌碼類融資券市場整體水位（TWSE openapi `MI_MARGN`，全新資料集）。注意個股層級融資使用率（`TRIALS_LEDGER.md`#116/#117/#120）跟融券使用率（#129/#133/#137）都已經測過且皆FAIL，`MI_MARGN`如果要測應該定位在**市場整體規模的regime訊號**（例如全市場融資餘額成長率當槓桿/擁擠度regime，`HYPOTHESIS_QUEUE.md`#26已有類似機制的假設登記），不是重複測個股排序因子。若TW軌評估後認為不值得衝新API額度，也可以轉回組合策略層級工作——`portfolio_multifactor_v2`目前已知的因子替換路線（4因子版、拿掉各單一因子、train-only權重重估、獨立樣本外驗證）幾乎都測過且FAIL，可考慮round362提到的全新成分因子組合、regime overlay、下檔保護證明這類尚未測過的組合策略維度。
+
+## 第375輪（2026-09-05T20:00+08:00，TW）——`margin_debt_level_v1`：全市場融資餘額「水位」regime訊號，60d窗口第1關CHEAP_PASS（20d窗口FAIL）
+
+**選軌理由**：三軌時間戳FUT 18:30（round372，最舊）／TW 19:00（round373）／US 19:30（round374，最新）。FUT雖最舊，但近7個實質輪次（367-371為維修跳過不計入，363/364/365/366/372/373/374）中FUT已佔round364/372共2輪≈28.6%，超過`MARATHON_PROTOCOL.md`「FUT維持最多20%」資源配置上限，且round372自己的結論明確寫「(c)承認FUT軌現有訊號池均未能勝過單因子，優先權重新排回TW/US軌」——依此不機械選最舊的FUT，改選次舊的TW。
+
+**查證round373建議**：round373結尾建議「下一輪TW軌可評估是否值得衝新API額度測`MI_MARGN`當regime overlay輸入」。開工先查`MI_MARGN`是否真的沒測過——`grep -rn "MI_MARGN"`發現`HYPOTHESIS_QUEUE.md`#26、`margin_debt_growth_gate.py`、`backfill_margin_debt_market.py`、`margin_debt_market_client.py`四個既有檔案，確認**這份資料2026-09-03已經測過一次（成長率構造，`TRIALS_LEDGER.md`#97，FAIL：20d/60d兩種窗口train/val方向皆相反）**，662週全範圍（2012-05-02~2024-12-31）也已完整回補，round373在寫建議時沒有查到這段既有工作，是重複建議而非真正空白。
+
+**但沒有直接判定round373重複結案**——仔細讀`TRIALS_LEDGER.md`#97的備註，明確寫著「不泛化成『融資餘額槓桿水位這個維度完全無效』——只測了週頻近似成長率+Spearman相關+同長度forward回撤幅度這個具體構造，**未測用水位（而非成長率）當訊號**」。這是#97自己留下的、明確且尚未補的缺口，值得補測，不是重工。
+
+**構造**：新增`margin_debt_level_gate.py`，重用`margin_debt_growth_gate.py`既有的`_load_margin_series()`/`_load_taiex_daily()`/`_forward_window_mdd()`/`_shuffle_percentile()`/`_split()`等函式（零重複造輪子），新增`_level_percentile()`——對每個週觀測點t，只用**t之前（含t）**的trailing 156週（約3年）窗口算balance[t]在窗口內的百分位排名，嚴格避免look-ahead。前156週（暖身期，約至2015-08-07）不產生訊號。零新增API呼叫，完全命中`backfill_margin_debt_market.py`已完成的662週parquet快取。
+
+**執行結果**（`python margin_debt_level_gate.py`）：
+- 452/607週可用（trailing156週暖身後），level_pct全樣本mean=53.4/std=33.5（合理分布，非構造bug，sanity assert通過）
+- **20d(4w)窗口**：TRAIN(n=257) corr=-0.0205（percentile=33.0）；VAL(n=190) corr=+0.1812（percentile=99.5）——train/val**正負號相反**，依協定判**FAIL**
+- **60d(12w)窗口**：TRAIN(n=257) corr=+0.1170（p=0.0612，percentile=98.0）；VAL(n=181) corr=+0.4567（p<0.0001，percentile=100.0）——train/val**同號**、幅度皆>0.05門檻、VAL贏過洗牌null（≥90.0），依協定三項判準全過，判**CHEAP_PASS**
+
+**誠實保留（不能照單全收）**：
+1. TRAIN期p=0.0612本身邊緣不顯著（雖同號），VAL期p<0.0001且幅度（+0.4567）遠大於TRAIN（+0.1170）——這種「TRAIN弱、VAL特別強」的形狀，跟`STRATEGY_GRAVEYARD.md`已記錄的`f_inst_streak_days`（#79 300檔重跑後）、`revenue_trend_surprise_low_attention`（#106高關注度組）「VAL單期巧合」疑慮同一款式，需要下一步查證（例如換獨立樣本切分），不能直接當作確立的edge。
+2. 20d跟60d兩個窗口互相矛盾（一個FAIL一個CHEAP_PASS）——本輪只測了`margin_debt_growth_gate.py`原本就定義好的兩個事前綁定窗口（非本輪新增、非事後掃描很多horizon挑最佳值），但矛盾本身仍是需要留意的訊號，下一步深挖時要用trailing窗口長度（104週/208週）做參數穩健性檢查，排除是不是156週窗口本身的巧合。
+3. TAIEX回撤本身不是直接可交易的報酬，這只是regime訊號的第1關cheap gate，離「能不能實際疊加到`portfolio_multifactor_v2`曝險上當regime overlay使用」還有一段距離（第2關以後：更大規模隨機控制組、參數穩健性、實際portfolio層構造、成本敏感度）。
+
+**記錄**：`TRIALS_LEDGER.md`#140（新增列）、`TW_LEADS.md`#14（新增列）。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**下一輪TW軌建議**：(a) `margin_debt_level_v1`第2關深挖——先做trailing窗口參數穩健性（104/208週是否還過關）排除156週本身的巧合，通過才值得投入更大規模隨機控制組；(b) 若(a)顯示是巧合，回到`portfolio_multifactor_v2`組合策略層級其他尚未測維度（regime overlay、下檔保護證明，見round362/365/373累積建議）。
