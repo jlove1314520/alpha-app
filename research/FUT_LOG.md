@@ -2219,3 +2219,17 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 **下一步**：(b)嘗試不同的oi變體（例如oi變化幅度分級而非0/1二元濾網）；(c)承認FUT軌現有訊號池經三輪組合嘗試（等權3成分round361、等權2成分round364、加權2成分本輪）均未能勝過單因子，優先權重新排回TW/US軌，FUT維持20%資源配置上限。留給後續輪次判斷，本輪不代為決定。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第372輪新增段落、`FUT_MARATHON_STATE.md`第372輪、`TRIALS_LEDGER.md`#138、`fut_cheap_gate.py`（新增`hyp_combo_trend_oi_weighted_v1()`）。
+
+## 2026-09-06T02:30+08:00 — 第385輪（FUT軌）
+
+取鎖乾淨（非陳舊鎖檔，`LOCK_ACQUIRED`）。三軌時間戳：TW 02:00（第384輪）／US 01:30（第383輪）／FUT 18:30（第372輪，最舊）——FUT最近10輪（375-384）出現次數0/10，配額上限20%已重新歸零（不再處於配額滿載狀態），依輪替選FUT。
+
+**本輪工作單位＝round372「下一步(b)」：換一個不同的OI變體——連續分級conviction權重取代原本的0/1二元濾網**，其餘構造（raw_direction=1日價格方向）刻意不變，只把OI編碼方式當唯一變因。`fut_cheap_gate.py`新增`hyp_oi_price_confirm_graded(oi_window=5, vol_window=60)`：`oi_chg = open_interest.diff(5)`，`trailing_std = oi_chg.rolling(60).std()`（純trailing正規化，無未來函數），`conviction = clip(oi_chg/trailing_std, 0, 2) / 2`（OI下跌/持平時conviction=0，跟binary版`oi_rising=False`分支結果一致；OI上升時給0~1連續權重取代原本固定的1），`position = raw_direction * conviction`。同一套`_permutation_test()`N=200框架，`build_continuous_series()`既有全歷史快取，零新增API呼叫，執行約10秒。事前綁定判準：percentile>=90.0，同既有hyp_*一致。
+
+**結果：real_terminal_equity=0.7717（-22.8%累積，未計成本），random_median_equity=0.9873，percentile=24.5，FAIL**（門檻90.0，`TRIALS_LEDGER.md`#149）。
+
+**判讀**：分級化不只沒有改善binary版本（62.0）的訊號，反而讓策略終值由持平轉為明顯虧損、大幅劣於隨機打散中位數（24.5遠低於50）。可能的解讀：binary濾網「OI有無上升」本身已經是這個資料集裡能榨出的全部資訊，額外的「上升多少」分級可能引入了雜訊或反向訊息（例如OI巨幅上升較可能對應軋空/回補而非新資金入場確認趨勢的原始假設）；也可能是線性clip正規化放大了少數極端OI變動日的雜訊。不泛化為「OI濾網分級化這個構造家族本身無效」——只測了這一種分級函數（線性clip 0~2倍trailing標準差），未測其他分級方式（rank-based、非線性sigmoid）。
+
+**依round372「下一步」清單判定**：(b)換oi變體選項至此已測試並排除（跟binary版一樣FAIL，且更差）；(c)FUT軌現有訊號池經四輪嘗試（等權3成分round361、等權2成分round364、加權2成分round372、分級OI變體本輪）均未能勝過或改善單因子`fut_trend_multi_tf`（82.5），優先權維持回TW/US軌，FUT維持20%資源配額上限，除非有全新的FUT假說家族（`MARATHON_PROTOCOL.md`第3節尚未測的日內均值回歸其他變體/星期效應以外的季節性/盤別效應延伸）。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第385輪新增段落、`FUT_MARATHON_STATE.md`第385輪、`TRIALS_LEDGER.md`#149、`fut_cheap_gate.py`（新增`hyp_oi_price_confirm_graded()`）。

@@ -549,6 +549,48 @@ def hyp_oi_price_confirm(series: pd.DataFrame, oi_window: int = 5) -> CheapGateR
     return _permutation_test(f"fut_oi_price_confirm_{oi_window}d", position, series["ret"])
 
 
+def hyp_oi_price_confirm_graded(series: pd.DataFrame, oi_window: int = 5, vol_window: int = 60) -> CheapGateResult:
+    """Round 385's follow-up to FUT_MARATHON_STATE.md round 372's "下一步(b)":
+    the binary 0/1 oi filter (hyp_oi_price_confirm, TRIALS_LEDGER #22, FAIL
+    at percentile 62.0) discards all information in *how much* OI rose -- a
+    huge OI build plausibly carries more "genuine new money confirms this
+    move" signal than a barely-positive OI tick, but the binary gate treats
+    them identically. This variant replaces the 0/1 gate with a continuous
+    conviction weight, scaling the same underlying hypothesis rather than
+    changing it (isolating the OI encoding as the only variable, same
+    discipline as round 362's combo trials).
+
+    raw_direction (1-day price sign) is deliberately unchanged from the
+    binary version -- still the noisiest possible price input, since the OI
+    filter is what's being tested here, not price-direction estimation.
+
+    Construction: conviction = clip(oi_chg / trailing_std, 0, 2) / 2, i.e.
+    an OI move at or above 2 trailing standard deviations gets full
+    conviction (weight 1.0), a barely-positive OI move gets near-zero
+    weight, and a falling/flat OI (oi_chg <= 0) gets weight 0 exactly like
+    the binary version's oi_rising=False branch -- the two constructions
+    agree exactly on the "OI not rising" case and only differ on how the
+    "OI rising" case is weighted. trailing_std = oi_chg.rolling(vol_window)
+    .std() is a purely trailing (no future data) normalization of that
+    day's OI-change magnitude relative to its own recent history -- not a
+    forecast, just causal unit-scaling so the clip threshold means the same
+    thing across different OI-turnover regimes.
+
+    Pre-registered (hash-locked) pass criterion: percentile >= 90.0, same
+    bar as every other hyp_* in this file. If this also lands near the
+    binary version's 62.0, that would suggest the OI-confirm family itself
+    (not just the binary encoding) lacks edge in this construction, closing
+    off round 372's option (b) and leaving only (c) [deprioritize FUT] as a
+    live option pending a genuinely new FUT hypothesis family."""
+    close = series["adj_close"]
+    raw_direction = np.sign(close.diff(1))
+    oi_chg = series["open_interest"].diff(oi_window)
+    trailing_std = oi_chg.rolling(vol_window).std()
+    conviction = (oi_chg / trailing_std).clip(lower=0.0, upper=2.0) / 2.0
+    position = raw_direction * conviction
+    return _permutation_test(f"fut_oi_price_confirm_graded_{oi_window}d", position, series["ret"])
+
+
 def hyp_weekday_effect(series: pd.DataFrame) -> CheapGateResult:
     weekday = pd.to_datetime(series["date"]).dt.dayofweek  # Monday=0
     position = pd.Series(np.where(weekday == 0, -1.0, 1.0), index=series.index)
@@ -997,7 +1039,7 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_combo_trend_oi_weighted_v1(series),
+        hyp_oi_price_confirm_graded(series),
     ]
 
     for r in results:
