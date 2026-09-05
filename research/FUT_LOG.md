@@ -2191,3 +2191,17 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 `is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第361輪新增段落、`FUT_MARATHON_STATE.md`第361輪、`TRIALS_LEDGER.md`#130、`fut_cheap_gate.py`（新增`hyp_combo_trend_ma_oi_v1()`）。
 
 **（本輪心跳/計數器/本檔案條目由第362輪無人值守馬拉松接手補寫——開工時發現round361已把研究工作做完、`FUT_LEADS.md`/`FUT_MARATHON_STATE.md`/`TRIALS_LEDGER.md`/`fut_cheap_gate.py`四個檔案異動完整存在於工作目錄卻從未commit，`REPORT.md`心跳與`MARATHON_STATE.md`全局計數器也都停在第360輪，判定round361在完成寫檔後、commit前的收工序階段異常中止；本輪比照round341/342precedent，原封不動補上這篇日誌、心跳、計數器並commit+push，未新增任何研究內容。）**
+
+## 2026-09-05T09:02+08:00 — 第364輪（FUT軌）
+
+**取鎖時偵測到`LOCK_STALE`**（round363的pid 58616持有29.8分鐘後被回收；三軌時間戳TW 08:01(362)／US 08:31(363)／FUT 07:05(361)，依輪替選FUT。US round363 state記錄本身已完整寫入且描述為執行時因效能問題被迫`taskkill`中止，非收工序卡住，跟round360/361的收工序卡住模式不同，暫不視為需要額外查核的異常）。
+
+**本輪工作單位＝round361下一步(b)：拿掉高相關的`fut_ma_crossover_20_60`分量，只留`fut_trend_multi_tf`+`fut_oi_price_confirm_5d`兩個pairwise相關較低（0.125）的成分重測等權組合**。`fut_cheap_gate.py`新增`hyp_combo_trend_oi_v1()`，延續round361同一套`_permutation_test()`配對式隨機排列框架N=200，零新增API呼叫（全部命中`build_continuous_series()`既有全歷史快取）。事前綁定判準與round361/其餘hyp_*一致：percentile>=90.0，無因成分數減少而調整門檻。
+
+**結果：percentile=82.5，FAIL**（門檻90.0，`TRIALS_LEDGER.md`#132）。真實策略終值+170.8%（6184天，2000-2024全歷史）vs 隨機中位數-6.9%（n=200）。診斷確認pairwise位置相關trend-oi=0.125，與round361記錄一致（資料未變動）。
+
+**關鍵發現**：拿掉ma後percentile從3成分版的76.5回升到82.5，但恰好等於單一最強成分`fut_trend_multi_tf`本身的percentile(82.5，#18)，不多不少——顯示2成分等權組合並未產生任何額外分散化增益，只是移除ma稀釋效果後、剩下的oi分量（本身percentile僅62.0，且大量日子因OI未上升而回傳0）幾乎沒改變trend_vote主導的整體行為，等同「trend_multi_tf單獨跑，外加一個大部分時間是啞巴的oi濾網」。FUT軌組合層級的兩次嘗試（3成分round361、2成分本輪）均未能超越單一最強成分本身，等權投票這條路線在目前這組成分下可視為階段性結案。
+
+**下一步（留給後續輪次判斷，本輪不代為決定）**：(a)改IC/百分位加權（給trend較高權重、oi用非零觀測時才計入而非稀釋分母）；(b)嘗試不同的oi變體（例如oi變化幅度分級而非0/1二元濾網）；(c)承認FUT軌現有訊號池經兩輪組合嘗試仍無法勝過單因子，優先權重新排回TW/US軌。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第364輪新增段落、`FUT_MARATHON_STATE.md`第364輪、`TRIALS_LEDGER.md`#132、`fut_cheap_gate.py`（新增`hyp_combo_trend_oi_v1()`）。

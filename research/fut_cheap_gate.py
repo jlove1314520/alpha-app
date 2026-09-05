@@ -873,6 +873,62 @@ def hyp_combo_trend_ma_oi_v1(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test("fut_combo_trend_ma_oi_v1", position, series["ret"])
 
 
+def hyp_combo_trend_oi_v1(series: pd.DataFrame) -> CheapGateResult:
+    """Round 362's follow-up to hyp_combo_trend_ma_oi_v1, per that function's
+    round 361 diagnostic finding: pairwise position correlation was
+    trend-ma=0.418 (not independent), trend-oi=0.125, ma-oi=0.019 (both
+    genuinely independent of everything). The 3-way majority-vote combo
+    FAILed (percentile 76.5, TRIALS_LEDGER #130) at a strength *below* the
+    single best component (trend_multi_tf alone, 82.5) -- consistent with
+    ma's correlation with trend diluting rather than diversifying the vote,
+    and oi's frequent 0 (flat, when open interest isn't rising) further
+    diluting the 3-way sum whenever trend+ma agree but oi is silent.
+
+    This is FUT_MARATHON_STATE.md round 361's "下一步(b)" candidate: drop ma
+    entirely, keep only the two components with genuinely low pairwise
+    correlation (trend-oi=0.125) -- testing whether removing the
+    non-independent component recovers some of the diversification the
+    3-way combo lost.
+
+    Combination rule: same equal-weight sum-then-sign as the 3-way version
+    (no re-tuning to a different rule; changing the rule *and* the
+    component set in the same trial would confound which change mattered).
+    With only 2 components (both in {-1,0,+1}), the sum ranges over
+    {-2,-1,0,+1,+2}: agreement gives {-2,+2} (position +-1 after sign), a
+    lone opinion (one flat) gives {-1,+1} (position follows the
+    non-flat one), and direct disagreement gives 0 (flat) -- there is no
+    tie-breaking ambiguity to pre-register since np.sign(0) == 0 already
+    resolves the two-vs-one and disagreement cases identically to how
+    _permutation_test treats 0 elsewhere in this file.
+
+    Pre-registered (hash-locked) pass criterion, written before running:
+    percentile >= 90.0, same bar as every other hyp_* in this file --
+    no bar adjustment for having fewer components. Diagnostic-only,
+    non-binding context: if percentile ends up between the single-best
+    component's 82.5 and the 3-way combo's 76.5, that's read as "still no
+    diversification benefit, just less dilution than the 3-way version";
+    only >=90.0 counts as CHEAP_PASS regardless of where it lands relative
+    to those two reference points."""
+    close = series["adj_close"]
+
+    trend_scores = pd.DataFrame({f"mom_{n}": close.pct_change(n) for n in (10, 20, 60)})
+    trend_vote = np.sign(np.sign(trend_scores).sum(axis=1))
+
+    raw_direction = np.sign(close.diff(1))
+    oi_rising = series["open_interest"].diff(5) > 0
+    oi_vote = raw_direction.where(oi_rising, 0.0)
+
+    components = pd.DataFrame({"trend": trend_vote, "oi": oi_vote})
+    valid_mask = components.notna().all(axis=1)
+    pairwise_corr = components[valid_mask].corr()
+    print(f"  [combo diagnostic] pairwise position correlation (n={int(valid_mask.sum())} valid days):")
+    print(pairwise_corr.to_string())
+
+    combined_score = components.sum(axis=1)
+    position = np.sign(combined_score)
+    return _permutation_test("fut_combo_trend_oi_v1", position, series["ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -881,7 +937,7 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_combo_trend_ma_oi_v1(series),
+        hyp_combo_trend_oi_v1(series),
     ]
 
     for r in results:
