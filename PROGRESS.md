@@ -16,6 +16,15 @@
 
 ---
 
+## 2026-09-05上午（維運帽）— HTTPS方案A第二階段切換完成
+
+總司令確認手機已安裝Alpha Local CA後，啟動器`run-alpha-live-server-cycle.ps1`設`ALPHA_LIVE_SERVER_HTTPS=1`並重啟：
+`0.0.0.0:8001`改走HTTPS（HTTP已關，000）；`curl -k https://192.168.3.241:8001/live/quotes`→401、帶token→200；
+`/ca.crt`→200；CA驗證鏈`Verify return code: 0 (ok)`；CORS preflight回`allow-headers: X-Alpha-Local-Token`。
+排程`AlphaLiveServer`每5分鐘檢查同一支啟動器，重開機後仍HTTPS。**App設定頁網址要改成https://**。
+
+---
+
 ## 2026-09-04晚間（維運帽）— HTTPS方案A第一階段：自簽CA＋/ca.crt端點（先寫好不切換）
 
 `research/gen_local_ca.py`（新增，可重跑，已有效憑證時預設不覆蓋）產生：
