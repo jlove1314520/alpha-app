@@ -1890,3 +1890,15 @@ circular-shift null的標準差（TRAIN 0.2378、VAL 0.3157）約為完全打散
 **下一輪TW軌接續**：優先權轉向尋找新的成分因子候選，而非在已結案的六因子組合上繼續變體實驗——可評估US軌round383/386/387正在測試的`f_us_value_bm`/`f_us_low_vol`乾淨宇宙版本1b深挖若通過，是否適合在TW建立同構的新一代組合回測地基；或轉回`MARATHON_PROTOCOL.md`第3節其餘尚未測的因子家族（籌碼類融資券市場整體水位`MI_MARGN`）。
 
 完整見`STRATEGY_GRAVEYARD.md`新增`portfolio_multifactor_v2`家族條目、`LEADS.md`收尾補充、`TW_MARATHON_STATE.md`（本輪最新條目）。
+
+## 第389輪（2026-09-06T07:05+08:00）
+
+取鎖乾淨。輪替：FUT（round385最舊，但自結論「trend+oi四種組合全FAIL，優先權回TW/US除非新機制假說」明確跳過）／US（round387，背景工作`20260906-060311-6a01`仍running，59.1/150分鐘，無新工作）／TW（round388，最新，仍選TW）。
+
+開工發現`git status`有兩個未追蹤檔案`buyback_car_gate.py`/`buyback_car_gate_high_execution.py`，修改時間戳與本輪開工時間相差不到30秒，判定`hypothesis_queue`獨立排程instance正在同時執行，依規範不觸碰、不commit，避免衝突。
+
+本輪工作單位：盤點`MARATHON_PROTOCOL.md`第3節因子家族，確認已全數掃過（含`TW_LEADS.md`原本標示「尚未測」的`MI_MARGN`——查證後發現這正是`margin_debt_level_v1`已用過的同一資料源，備註過時已更正）。改鎖定`TW_LEADS.md`「最高優先（第107輪新發現）」但橫跨60餘輪未執行的待辦：完整重跑`deep_dive_f_quality_roe_stability.py`本身（含完整100次隨機控制組×2期×3成本倍數）。嘗試`run_detached.py submit`，exit=3被拒絕（US背景工作佔用中，不允許`--allow-concurrent`硬跑）。改做非計算性工作：更正`TW_LEADS.md`過時備註、更新`TW_MARATHON_STATE.md`、把已滿3則的舊條目（round380）歸檔到`TW_STATE_ARCHIVE.md`。
+
+`is_holdout_consumed()`確認`False`。全程零新增API呼叫、零新增運算。
+
+下一輪TW軌接續：`run_detached.py status`確認US背景工作是否已釋放，若是則投遞`tw_deep_dive_quality_roe_stability_full_rerun`；若仍佔用，考慮round388選項(a)（US乾淨宇宙deep dive若已收成PASS，評估TW同構組合地基可行性）。
