@@ -224,10 +224,21 @@ def fetch_batch(codes: list[str], tse_codes: set[str] | None) -> list[dict]:
 
 
 def _num(v) -> float | None:
+    """把 TWSE 回傳的字串轉數值。
+
+    **千分位逗號（2026-09-05 P0，總司令週六實測發現，第二次修）**：TWSE STOCK_DAY 的價格欄
+    是帶千分位的字串——實測 2330 的收盤價是 `'2,410.00'`。裸 `float('2,410.00')` 會丟
+    ValueError → 這裡回 None → 整檔的收盤序列被濾成空 → `fetch_sparkline_20d()` 回 []
+    → `sparkline_error='not_available:empty'`。**只有股價 ≥1000 的股票會中**（2317 的
+    `'256.00'` 沒有逗號所以一直正常），所以症狀是「台積電/聯發科永遠沒有走勢線」。
+    2026-09-04 修過一次，但那次修改沒有留在檔案裡（推測是同一輪 `git pull --rebase
+    --autostash` 處理 quotes_tw.json 衝突時被蓋掉），2026-09-05 再次修復並補上
+    `research/fetch_quotes_tw_test.py` 的回歸測試，讓它不能再無聲消失。
+    """
     if v in (None, "", "-"):
         return None
     try:
-        return float(v)
+        return float(str(v).replace(",", ""))
     except (TypeError, ValueError):
         return None
 
@@ -326,7 +337,7 @@ def fetch_stock_day_month(code: str, yyyymm: str) -> list[float]:
         if not getattr(fetch_stock_day_month, "_retrying", False):
             fetch_stock_day_month._retrying = True
             try:
-                time.sleep(3)
+                time.sleep(8)  # 2026-09-05：3秒對TWSE軟限流不夠，實測拉到8秒才穩
                 return fetch_stock_day_month(code, yyyymm)
             finally:
                 fetch_stock_day_month._retrying = False
@@ -437,11 +448,19 @@ def main():
     # error"]（kind），meta也記stop原因；(3)fetch_stock_day_month對428/429重試一次。
     order = [c for c in DEFAULT_WATCHLIST if c in quotes] + [c for c in sorted(quotes) if c not in DEFAULT_WATCHLIST]
     skipped_budget = 0
+    skipped_tpex = 0
     for code in order:
         if code in cache:
             quotes[code]["sparkline"] = cache[code]
             quotes[code]["sparkline_date"] = today_str
             cached += 1
+            continue
+        # 2026-09-05（第二次補上，09-04 那次修改在 rebase 中遺失）：STOCK_DAY 是 TWSE 專屬端點，
+        # 上櫃（不在 t187ap03_L 上市清單）一定回「很抱歉，沒有符合條件的資料!」——白白吃請求、
+        # 又會把「連續失敗」斷路器打開，害排在後面的上市股一檔都抓不到。直接標明、不送請求。
+        if tse_codes is not None and code not in tse_codes:
+            quotes[code]["sparkline_error"] = "not_available:tpex_not_covered"
+            skipped_tpex += 1
             continue
         if stopped_reason:
             quotes[code]["sparkline_error"] = "not_attempted:" + ("time_budget" if stopped_reason.startswith("超過") else "circuit_breaker")
@@ -469,16 +488,21 @@ def main():
             time.sleep(0.15)  # 實測穩定節奏（見fetch_stock_day_month docstring），主要靠header不是靠慢
         except Exception as e:
             failed_sp += 1
-            consecutive_failures += 1
+            # 2026-09-05（第二次補上）：「這檔查不到資料」(stat_not_ok) 不算來源故障，不計入
+            # 連續失敗斷路器——只有網路錯誤/HTTP錯誤/限流封鎖才算，否則幾檔沒資料的股票就會
+            # 把整批後面的抓取全部關掉（09-05 實測：8 檔 3xxx 上櫃股直接讓斷路器跳掉，
+            # 102 檔還沒輪到的全部 not_attempted）。
+            if not (isinstance(e, SparklineFetchError) and e.kind == "stat_not_ok"):
+                consecutive_failures += 1
             quotes[code]["sparkline_error"] = (f"{e.kind}:{e.detail}" if isinstance(e, SparklineFetchError) else f"{type(e).__name__}:{e}")[:160]
             # 這裡故意不用「・」（U+30FB）：本機Windows主控台cp950編碼曾經在這裡
             # 讓整支腳本直接crash（print本身丟UnicodeEncodeError，不是被try/except
             # 接住的那個例外）——GitHub Actions是UTF-8不會有事，但本機測試會，改用
             # 純ASCII的"-"比較保險，不影響其他地方原本就在用的「・」（那些沒出過事）。
             print(f"  - {code} sparkline 失敗（不影響報價本身）：{e}")
-    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔、未嘗試 {skipped_budget} 檔"
+    print(f"sparkline：沿用快取 {cached} 檔、新抓 {fetched} 檔、失敗 {failed_sp} 檔、未嘗試 {skipped_budget} 檔、上櫃跳過 {skipped_tpex} 檔"
           + (f"；提前停止新抓：{stopped_reason}（報價本身不受影響，未抓到的檔已寫sparkline_error）" if stopped_reason else ""))
-    sparkline_meta = {"cached": cached, "fetched": fetched, "failed": failed_sp, "not_attempted": skipped_budget,
+    sparkline_meta = {"cached": cached, "fetched": fetched, "failed": failed_sp, "not_attempted": skipped_budget, "tpex_skipped": skipped_tpex,
                       "stopped_reason": stopped_reason, "time_budget_sec": SPARKLINE_TIME_BUDGET_SEC}
 
     data_type = "intraday" if n_live > 0 else ("prev_close" if quotes else "none")
