@@ -1,5 +1,25 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T17:32（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#36
+（個股融券使用率）第9關（下檔保護）本輪完成，**判定：機械判準PASS，但
+代價需誠實揭露**。新增`short_sale_utilization_gate9_regime_overlay.py`
+——把`regime_overlay.py`（#10方法論框架）**首次正式接上一個已通過1~6關
+的真實選股候選**，沿用#10既有大盤trend×vol regime判定+既有`EXPOSURE_
+MAP`先驗（不重新優化），疊加到#36真實訊號equity curve上。TRAIN：MDD
+-18.12%→-17.37%、地雷率(單日<-3%)1.23%→0.75%（皆改善，但CAGR+8.39%→
++6.90%、Sharpe0.50→0.45同時下降）。VALIDATION：MDD-9.18%→-7.34%、
+地雷率0.31%→0.10%（皆改善，代價更明顯：CAGR+15.27%→+9.42%、Sharpe
+1.28→1.09）。**最重要的誠實發現**：2022全年對台股大盤是空頭年、但對
+這個選股訊號本身是獲利年，baseline報酬+25.53%，套上未經校準的通用
+regime overlay後只剩+9.49%（平均曝險被砍到0.48）——代表這組先驗會
+誤殺選股訊號本身的特異性報酬來源，不是穩賺不賠的免費保險。完整數字見
+`TRIALS_LEDGER.md`#136、`HYPOTHESIS_QUEUE.md`#36。**GATE_SEQUENCE九關
+已全數走過一輪，#36現在唯一剩下的未決問題是`#135`留下的TRAIN期alpha
+不顯著(p=0.3717) vs VAL期alpha顯著(p=0.0354)最終判斷**，本輪依協定
+刻意不倉促下結論，留給下一輪或視需要提案給總司令一併討論。
+`is_holdout_consumed()`開工/收工前皆以獨立`python -c`呼叫確認為False，
+零新增API呼叫（純本地快取讀取）。
+
 ## 2026-09-05T17:07（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#36
 （個股融券使用率）第5/6關（leave-one-out+逐年一致性）本輪完成，**判定：
 皆PASS**。新增`short_sale_utilization_gate5_loo.py`（逐字比照
