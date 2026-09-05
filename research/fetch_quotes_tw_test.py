@@ -51,22 +51,22 @@ def test_resolve_price_prefers_traded_price():
     print("test_resolve_price_prefers_traded_price PASS")
 
 
-def test_source_has_tpex_skip_and_breaker_exemption():
-    """兩個曾經在 rebase 中無聲消失的修正，用原始碼層級斷言釘住（沒有網路也能測）：
-    (1) 上櫃股不送 STOCK_DAY 請求（`tpex_not_covered`）；
-    (2) `stat_not_ok` 不計入連續失敗斷路器。"""
+def test_source_keeps_comma_fix_and_no_per_stock_sparkline():
+    """原始碼層級斷言（不連網路），釘住兩件事：
+    (1) 千分位逗號處理還在——這個修正曾在 rebase 中無聲消失兩次，害 >=1000 元股票價格變 None；
+    (2) 逐檔抓 sparkline 的舊架構沒有被改回來（走勢線一律走 data/sparklines.json）。"""
     src = SCRIPT.read_text(encoding="utf-8")
-    assert "not_available:tpex_not_covered" in src, "上櫃跳過邏輯不見了（會白吃請求並打開斷路器）"
-    assert 'if not (isinstance(e, SparklineFetchError) and e.kind == "stat_not_ok"):' in src, \
-        "stat_not_ok 又被計入斷路器了（幾檔沒資料就會關掉整批抓取）"
-    assert 'float(str(v).replace(",", ""))' in src, "千分位逗號處理不見了（≥1000元股票會沒有走勢線）"
-    print("test_source_has_tpex_skip_and_breaker_exemption PASS")
+    assert 'float(str(v).replace(",", ""))' in src, "千分位逗號處理不見了（>=1000元股票的價格會變成 None）"
+    for gone in ("def fetch_sparkline_20d", "def fetch_stock_day_month", "SPARKLINE_TIME_BUDGET_SEC ="):
+        assert gone not in src, f"{gone} 又回來了——逐檔抓 STOCK_DAY 的舊架構已被 data/sparklines.json 取代"
+    assert "build_sparklines" in src, "註解應指向新的走勢線來源，讓接手的人找得到"
+    print("test_source_keeps_comma_fix_and_no_per_stock_sparkline PASS")
 
 
 def main() -> int:
     tests = [test_num_handles_thousands_separator, test_num_edge_cases,
              test_is_stock_code_filters_warrants, test_resolve_price_prefers_traded_price,
-             test_source_has_tpex_skip_and_breaker_exemption]
+             test_source_keeps_comma_fix_and_no_per_stock_sparkline]
     failed = []
     for t in tests:
         try:

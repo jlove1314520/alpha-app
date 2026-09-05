@@ -1147,10 +1147,43 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("37. 八因子的缺漏原因都是真實資料依賴說明，沒有「下一輪實作」這類佔位字",
     placeholderErrors.length === 0, placeholderErrors.join("; "));
 
+  // 38.【2026-09-05新增，總司令「零」】全市場走勢線 data/sparklines.json：必須存在、涵蓋
+  // 上市＋上櫃（用 stock_detail 有官方資料的4位數股票當基準）達 95%，並含高價股 2330/2454/3008/5274。
+  const sparkFileErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const [spR, sdR] = await Promise.all([fetch("data/sparklines.json?t=" + Date.now()), fetch("data/stock_detail.json?t=" + Date.now())]);
+      if (!spR.ok) return { error: "sparklines.json HTTP " + spR.status };
+      const sp = (await spR.json()).sparklines || {};
+      let universe = [], covered = 0;
+      if (sdR.ok) {
+        const sd = (await sdR.json()).stocks || {};
+        universe = Object.keys(sd).filter(c => /^\d{4}$/.test(c) && (sd[c].institutional || sd[c].margin || sd[c].financials));
+        covered = universe.filter(c => (sp[c] || []).length >= 2).length;
+      }
+      const need = ["2330", "2454", "3008", "5274"];
+      return { total: Object.keys(sp).length, universe: universe.length, covered,
+               pct: universe.length ? covered / universe.length * 100 : null,
+               highPriced: need.map(c => [c, (sp[c] || []).length]) };
+    });
+    if (r.error) sparkFileErrors.push(r.error);
+    else {
+      if (r.pct !== null && r.pct < 95) sparkFileErrors.push(`上市+上櫃覆蓋率只有 ${r.pct.toFixed(1)}%（要求≥95%），${r.covered}/${r.universe}`);
+      const badHigh = r.highPriced.filter(([, n]) => n < 2);
+      if (badHigh.length) sparkFileErrors.push(`高價股沒有走勢線：${JSON.stringify(badHigh)}`);
+      results.sparklines_total = r.total;
+      results.sparklines_pct = r.pct;
+    }
+  } catch (e) {
+    sparkFileErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("38. data/sparklines.json 全市場走勢線：上市+上櫃覆蓋率≥95%，且含 2330/2454/3008/5274",
+    sparkFileErrors.length === 0, sparkFileErrors.join("; ") || `${results.sparklines_total} 檔，覆蓋率 ${(results.sparklines_pct || 0).toFixed(1)}%`);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

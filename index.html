@@ -1889,6 +1889,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
   // 否則退回既有近20日日線並標「20日」。標籤永遠顯示，使用者一眼分得出是今日還是20日。
   const LIVE_KB={};  // code -> {at, closes:[...], lastT}
+  // ── 2026-09-05（總司令「零」）全市場走勢線：data/sparklines.json（每檔近20收盤，約286KB）
+  // 由 build_sparklines.py 從 price_history.json 切出（零額外網路請求）。取代舊的「逐檔打
+  // TWSE STOCK_DAY」：舊法只有清單內的上市股有線、上櫃股完全沒有、一次抓不完還會被限流打斷。
+  // 現在任何頁面、任何新加入的自選股，只要在全市場歷史裡就立刻有線。
+  let SPARKLINES=null,SPARKLINES_AT=0;
+  async function ensureSparklines(){
+    if(SPARKLINES&&Date.now()-SPARKLINES_AT<10*60*1000)return SPARKLINES;
+    try{
+      const r=await fetch('data/sparklines.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      SPARKLINES=d.sparklines||{};SPARKLINES_AT=Date.now();
+    }catch(e){console.warn('[ensureSparklines]',e);recordGlobalError('ensureSparklines',e);if(!SPARKLINES)SPARKLINES={}}
+    return SPARKLINES;
+  }
+  function sparkFor(code){return (SPARKLINES&&SPARKLINES[code])||null}
   async function getLiveCloses(code){
     if(!LIVE.connected)return null;
     const c=LIVE_KB[code];
@@ -1910,7 +1926,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function rowSparkline(code,fallback20d,up){
     const live=LIVE.connected&&LIVE_KB[code]&&LIVE_KB[code].closes.length>=2?LIVE_KB[code].closes:null;
     if(live)return {html:sparkWithTag(live,up,'今日'),mode:'today'};
-    if(fallback20d&&fallback20d.length>=2)return {html:sparkWithTag(fallback20d,up,'20日'),mode:'20d'};
+    // 2026-09-05：優先用全市場 sparklines.json（涵蓋上市＋上櫃約2827檔）；
+    // fallback20d 是 quotes_tw.json 裡的舊欄位，留著當它還在時的備援，之後會整個消失。
+    const marketWide=sparkFor(code);
+    const closes=(marketWide&&marketWide.length>=2)?marketWide:((fallback20d&&fallback20d.length>=2)?fallback20d:null);
+    if(closes)return {html:sparkWithTag(closes,up,'20日'),mode:'20d'};
     return {html:SPARK_PLACEHOLDER,mode:''};
   }
   function trendChart(cl,fmtLabel){
@@ -1985,6 +2005,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadTodayEvents',loadTodayEvents);
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
+    await ensureSparklines();  // 2026-09-05：全市場走勢線，任何自選股都有
     if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
     if(runId!==HYDRATE_HOME_SEQ)return;
     let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
@@ -2499,6 +2520,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     await loadMarketDataFiles();
     await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{},usIdx=await loadUsIndexes();
+    await ensureSparklines();
     if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-04四修.三
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
@@ -4513,7 +4535,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-05.2005';
+  const APP_VERSION='2026-09-05.2014';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
