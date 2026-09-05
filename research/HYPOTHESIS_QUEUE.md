@@ -976,7 +976,8 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     結案**——第2關以後已起跑（`short_sale_utilization_portfolio_v1.py`，
     測訊號多頭鏡像半邊，放空腿因引擎不支援尚未驗證，見上方#36條目誠實
     揭露段落），本輪TRAIN真實策略+成本敏感度已算完，隨機控制組checkpoint
-    進度16/100 draws、VALIDATION期尚未開始，待下一輪接續跑完100 draws
+    進度20/100 draws（2026-09-05 hypothesis_queue本輪接續執行420秒時間
+    預算內從10進到20，VALIDATION期尚未開始），待下一輪接續跑完100 draws
     才能判定，**佇列排隊順序仍是#36（未結案，接續第2關）**，剩餘#5/#6/#8/#10
     仍卡外部依賴（同上）。
 
@@ -3381,3 +3382,13 @@ portfolio_v1.py`會自動從中斷處接續（不重算已完成的real/成本�
 VALIDATION各100 draws，這是`dividend_yield_portfolio_v1.py`/`margin_
 utilization_regime_portfolio_v1.py`同一種「單輪時間預算跟完整計算量
 有落差」情況，不是異常。
+
+**狀態（2026-09-05 hypothesis_queue接續排程，同一輪工作單位）**：重新
+執行`python short_sale_utilization_portfolio_v1.py`，420秒時間預算內
+TRAIN隨機控制組記憶體內跑到29/100 draws，但checkpoint只在每滿10筆時
+落盤，deadline在29時觸發，實際持久化進度為**20/100 draws**（下一輪會
+從20接續、重算20~29這9筆，不是資料遺失，是既有checkpoint存檔頻率
+設計，同`margin_utilization_regime_portfolio_v1.py`先例）。VALIDATION
+期仍完全尚未開始，不做任何PASS/FAIL判定，`is_holdout_consumed()`執行
+前後皆確認False。**佇列排隊順序仍是#36（未結案，接續第2關TRAIN隨機
+控制組）**，這輪工作單位到此為止。

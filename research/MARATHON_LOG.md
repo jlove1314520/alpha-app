@@ -4,6 +4,18 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T08:04（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，
+無殘留鎖檔，`git pull`/`git status`確認乾淨）— 接續佇列第36條（個股
+融券使用率）第2關TRAIN隨機控制組：重新執行
+`short_sale_utilization_portfolio_v1.py`，420秒時間預算內記憶體內
+進度10→29/100 draws，因checkpoint僅每滿10筆落盤，實際持久化進度為
+20/100 draws（下一輪從20接續、重算20~29這9筆，非資料遺失，是既有
+落盤頻率設計）。VALIDATION期仍未開始，**尚未做PASS/FAIL判定**——已
+同步`HYPOTHESIS_QUEUE.md` #36條目「狀態」小節+「排隊順序總結」，
+未新增`TRIALS_LEDGER.md`列（沒有新判定可記）。`is_holdout_consumed()`
+執行前後皆確認False。本輪未觸及三個停下條件，正常收工，下次排程
+觸發從checkpoint 20/100繼續。
+
 ## 2026-09-05T07:43（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，
 無殘留鎖檔）— 接續佇列第36條（個股融券使用率）第2關以後：新增
 `short_sale_utilization_portfolio_v1.py`（做多融券使用率最低分位，
