@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第373輪 · 2026-09-05T19:00+08:00 · TW · 依輪替選TW（TW 10:05最舊）：`MARATHON_PROTOCOL.md`第3節「季節性（月效應/財報季效應）」家族橫斷面構造可行性查核（純讀`pit.py`/`factors.py`/`DATA.md`既有紀錄，零新增FinMind API呼叫） · **結論：三條可能構造路徑（財報公告時點差異/月營收公告時點差異/規模別一月效應）全部卡在資料源結構性限制**（`pit_date`假設值全股票同公式無變異、真實月營收`create_time`歷史長度不夠涵蓋既有TRAIN/VAL窗口、無市值資料源可分層），跟round365「成長與預估上修」同一類「資料源限制」正式結案，不計入試驗數，寫入`TRIALS_LEDGER.md`/`TW_LEADS.md`/`TW_MARATHON_STATE.md`——`MARATHON_PROTOCOL.md`第3節TW軌尚未碰過的因子家族只剩籌碼類融資券市場整體水位(`MI_MARGN`)一項
 ## 第372輪 · 2026-09-05T18:36+08:00 · FUT · 維修旗標已確認移除（`9319707`），挖礦恢復正常，依輪替選FUT：round364下一步(a)IC/百分位加權版trend+oi兩因子組合（`hyp_combo_trend_oi_weighted_v1`） · FAIL（percentile=81.0，門檻90.0，`TRIALS_LEDGER.md`#138），比trend單獨(82.5)跟等權組合(82.5)都略低，(a)加權方案排除，剩(b)換oi變體/(c)讓優先權回TW/US
 ## 第371輪 · 2026-09-05T18:09+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 三輪驗收門檻已於第369輪達成，本輪維持等待狀態，馬拉松本身不能判斷維修結束、不能自行移除`MARATHON_PROTOCOL.md`維修旗標，需互動session覆核`PROPOSAL_2026-09-05_marathon_process_hardening.md`驗收標準後移除
 ## 第370輪 · 2026-09-05T19:08+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 三輪驗收門檻已於第369輪達成，本輪維持等待狀態，馬拉松本身不能判斷維修結束、不能自行移除`MARATHON_PROTOCOL.md`維修旗標，需互動session覆核`PROPOSAL_2026-09-05_marathon_process_hardening.md`驗收標準後移除

@@ -102,3 +102,9 @@
 ## 下一步
 
 見上方「已知的立即可做工作」。下一個馬拉松輪次接手時，先讀 `TW_LOG.md` 最新一條看上一輪實際做到哪裡（這份 state 檔案是快照，`TW_LOG.md` 才有完整過程）。
+
+---
+
+## 第356輪（由第373輪從`TW_MARATHON_STATE.md`輪替移入archive，原文不動）
+
+**2026-09-05T04:32+08:00（馬拉松第356輪）**——取鎖時偵測到`LOCK_STALE`（pid 53776持有30.0分鐘後被回收，上一輪疑似失敗，根因未查明）。三軌時間戳：TW 03:26（第353輪，最舊）／US 03:42（第354輪）／FUT 04:04（第355輪，最新）——依輪替選TW。**本輪工作單位＝判讀round353已跑完的`loo_no_low_vol`完整深挖數字＋補齊`TRIALS_LEDGER.md`#118第三個尚未滿足的前提（獨立樣本外驗證）**。round353背景process已於本輪開工前正常跑完，讀`data/deep_dive_loo_no_low_vol_validation.csv`：monthly／VALIDATION alpha+12.26%（**p=0.0489**，名目<0.05）、beta=+0.51、隨機控制組percentile=**100.0**（N=100）；quarterly／VALIDATION alpha+11.72%（**p=0.1162**，不顯著）、beta=+0.42、percentile=**100.0**。**判讀：monthly已補齊#118前兩個前提，但尚不能判PASS**——(1) #118明列的第三個前提「獨立樣本外驗證」未補齊（round346/353全程用同一批`safe_pool_ids()[:300]`，p值仍帶選擇偏誤）；(2) monthly/quarterly顯著度不一致；(3) beta中度正相關（+0.42~+0.51），下檔保護未證明。新增`deep_dive_loo_no_low_vol_independent_sample.py`（重用round353機制，未改既有檔案），改用`safe_pool_ids()[300:600]`——完全獨立、沒被因子選擇過程碰過的300檔——**在新樣本上重新計算train-only IC權重**（不沿用舊樣本權重），跑同一套monthly+quarterly完整深挖關卡。判讀原則已事前寫在腳本檔頭，避免看到結果才回頭解釋。**本輪未能取得完整數字**：process已在背景啟動（`round356_deep_dive_loo_no_low_vol_independent_sample.log`），僅完成資料載入起點，比照round353先例讓process在背景繼續跑，未殺掉。下一輪接手先查`data/deep_dive_loo_no_low_vol_independent_sample.csv`是否已出現，出現就讀CSV記錄並依判讀原則做最終候選判定（一次寫進`LEADS.md`/`TRIALS_LEDGER.md`，避免同一候選被拆成兩筆不完整紀錄）。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。**（後續：round359發現此輪留下的背景process已異常消失，最終於round362補齊獨立樣本驗證並判定FAIL，見`TRIALS_LEDGER.md`#131。）**完整見`TW_LOG.md`第356輪記錄。
