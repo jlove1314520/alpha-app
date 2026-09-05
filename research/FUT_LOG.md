@@ -2205,3 +2205,17 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 **下一步（留給後續輪次判斷，本輪不代為決定）**：(a)改IC/百分位加權（給trend較高權重、oi用非零觀測時才計入而非稀釋分母）；(b)嘗試不同的oi變體（例如oi變化幅度分級而非0/1二元濾網）；(c)承認FUT軌現有訊號池經兩輪組合嘗試仍無法勝過單因子，優先權重新排回TW/US軌。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第364輪新增段落、`FUT_MARATHON_STATE.md`第364輪、`TRIALS_LEDGER.md`#132、`fut_cheap_gate.py`（新增`hyp_combo_trend_oi_v1()`）。
+
+## 2026-09-05T18:30+08:00 — 第372輪（FUT軌）
+
+**維修旗標已於本輪開工前確認移除**（`git log -- MARATHON_PROTOCOL.md`確認`9319707`「維修驗收通過並恢復挖礦」已把`a01c442`引入的維修暫停旗標拿掉，第369輪三輪驗收門檻已達成，互動session已覆核並解除），挖礦恢復正常運作。取鎖乾淨（非陳舊鎖檔，`LOCK_ACQUIRED`）。三軌時間戳：FUT 09:02（第364輪，最舊）／TW 10:05（第365輪）／US 10:34（第366輪，最新）——依輪替選FUT。
+
+**本輪工作單位＝round364「下一步(a)」：IC/百分位加權版trend+oi兩因子組合**，取代round361/364的等權加總取號構造。`fut_cheap_gate.py`新增`hyp_combo_trend_oi_weighted_v1()`：權重事前綁定＝已發表單因子cheap gate百分位減50（`fut_trend_multi_tf`82.5-50=32.5，`fut_oi_price_confirm_5d`62.0-50=12.0，皆引用`TRIALS_LEDGER.md`既有#18/#22數字，非本輪重新調參），`combined_score = trend_vote*32.5 + oi_vote*12.0`，`position=sign(combined_score)`，同一套`_permutation_test()`N=200配對式隨機排列框架、`build_continuous_series()`既有全歷史快取，零新增API呼叫。事前綁定判準與既有hyp_*一致：percentile>=90.0。
+
+**結果：percentile=81.0，FAIL**（門檻90.0，`TRIALS_LEDGER.md`#138）。真實策略終值+172.7%（6184天）vs 隨機中位數+4.71%（n=200）。pairwise相關trend-oi=0.125，與round361/364一致（資料未變動）。
+
+**判讀**：加權版（81.0）比單一trend成分本身（82.5，#18）跟等權組合（82.5，#132）都略低，不是略高——因為oi權重（12.0）不足以翻轉trend方向（32.5-12.0=20.5仍同trend號），加權版只在oi與trend反向的日子把combined_score從trend單獨值輕微削弱，等同給trend訊號加了雜訊而非分散化。**round364「下一步」三選項中，(a)加權方案至此已測試並排除**，trend+oi這組2成分組合經等權(#132)、加權(本輪)兩種構造都未能勝過trend單獨。
+
+**下一步**：(b)嘗試不同的oi變體（例如oi變化幅度分級而非0/1二元濾網）；(c)承認FUT軌現有訊號池經三輪組合嘗試（等權3成分round361、等權2成分round364、加權2成分本輪）均未能勝過單因子，優先權重新排回TW/US軌，FUT維持20%資源配置上限。留給後續輪次判斷，本輪不代為決定。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第372輪新增段落、`FUT_MARATHON_STATE.md`第372輪、`TRIALS_LEDGER.md`#138、`fut_cheap_gate.py`（新增`hyp_combo_trend_oi_weighted_v1()`）。

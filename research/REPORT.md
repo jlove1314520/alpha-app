@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第372輪 · 2026-09-05T18:36+08:00 · FUT · 維修旗標已確認移除（`9319707`），挖礦恢復正常，依輪替選FUT：round364下一步(a)IC/百分位加權版trend+oi兩因子組合（`hyp_combo_trend_oi_weighted_v1`） · FAIL（percentile=81.0，門檻90.0，`TRIALS_LEDGER.md`#138），比trend單獨(82.5)跟等權組合(82.5)都略低，(a)加權方案排除，剩(b)換oi變體/(c)讓優先權回TW/US
 ## 第371輪 · 2026-09-05T18:09+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 三輪驗收門檻已於第369輪達成，本輪維持等待狀態，馬拉松本身不能判斷維修結束、不能自行移除`MARATHON_PROTOCOL.md`維修旗標，需互動session覆核`PROPOSAL_2026-09-05_marathon_process_hardening.md`驗收標準後移除
 ## 第370輪 · 2026-09-05T19:08+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 三輪驗收門檻已於第369輪達成，本輪維持等待狀態，馬拉松本身不能判斷維修結束、不能自行移除`MARATHON_PROTOCOL.md`維修旗標，需互動session覆核`PROPOSAL_2026-09-05_marathon_process_hardening.md`驗收標準後移除
 ## 第369輪 · 2026-09-05T19:02+08:00 · （維修）· 基礎設施維修中（總司令核准提案選項1）跳過本輪，只寫心跳、不投遞工作、不讀大檔、不改任何state/LEADS/LEDGER · 這是維修旗標下第3輪心跳（第367、368輪已完成），達到`PROPOSAL_2026-09-05_marathon_process_hardening.md`「三輪驗收」門檻，馬拉松本身不能判斷維修結束、需等互動session覆核驗收標準後移除`MARATHON_PROTOCOL.md`維修旗標，恢復三軌實質工作

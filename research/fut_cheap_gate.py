@@ -929,6 +929,66 @@ def hyp_combo_trend_oi_v1(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test("fut_combo_trend_oi_v1", position, series["ret"])
 
 
+def hyp_combo_trend_oi_weighted_v1(series: pd.DataFrame) -> CheapGateResult:
+    """Round 366's follow-up, FUT_MARATHON_STATE.md round 364 "下一步(a)":
+    equal-weight vote (hyp_combo_trend_oi_v1, TRIALS_LEDGER #132) FAILed at
+    percentile 82.5 -- statistically indistinguishable from trend_multi_tf
+    alone (also 82.5, TRIALS_LEDGER #18), because equal-weight sign-of-sum
+    only differs from trend-alone on days oi actively disagrees (its silent
+    days already reduce to trend-alone under sign()), and those disagreement
+    days evidently weren't enough to move the needle either way.
+
+    This variant replaces the unweighted vote with a percentile-derived
+    weight, pre-registered from already-published single-factor cheap-gate
+    numbers (not tuned by looking at this trial's own result): weight =
+    max(single-factor percentile - 50, 0), i.e. "how far above a coin flip".
+      - trend_multi_tf: percentile 82.5 (TRIALS_LEDGER #18) -> weight 32.5
+      - oi_price_confirm: percentile 62.0 (TRIALS_LEDGER #22) -> weight 12.0
+    combined_score = trend_vote * 32.5 + oi_vote * 12.0; position =
+    sign(combined_score). Because trend's weight (32.5) exceeds oi's (12.0),
+    the combo now always follows trend's direction when oi is silent or
+    agrees, and only flips to flat -- never to oi's direction -- when they
+    disagree (32.5 - 12.0 = 20.5, same sign as trend). This is a genuinely
+    different rule from the equal-weight version (there, disagreement always
+    produced exactly 0; here, disagreement damps trend's conviction to 0 only
+    because oi's weight is large enough to fully cancel, not overturn it --
+    same numeric outcome on disagreement days as equal-weight in this
+    specific 2-component case, but the mechanism generalizes correctly to
+    >2 components and is the honest reason to test it rather than assume
+    the equal-weight result already covered this).
+
+    Pre-registered (hash-locked) pass criterion: percentile >= 90.0, same
+    bar as every other hyp_* in this file. If this lands at/near 82.5 again
+    (same as trend-alone and the equal-weight combo), that would be strong
+    evidence the oi component contributes nothing to this specific
+    trend+oi pairing regardless of weighting scheme, closing off the
+    weighting-scheme branch of FUT_MARATHON_STATE.md round 364's "下一步"
+    options and leaving only (b) [different oi variant] or (c) [deprioritize
+    FUT] as live options for future rounds."""
+    close = series["adj_close"]
+
+    trend_scores = pd.DataFrame({f"mom_{n}": close.pct_change(n) for n in (10, 20, 60)})
+    trend_vote = np.sign(np.sign(trend_scores).sum(axis=1))
+
+    raw_direction = np.sign(close.diff(1))
+    oi_rising = series["open_interest"].diff(5) > 0
+    oi_vote = raw_direction.where(oi_rising, 0.0)
+
+    TREND_WEIGHT = 82.5 - 50.0  # TRIALS_LEDGER #18, pre-registered
+    OI_WEIGHT = 62.0 - 50.0     # TRIALS_LEDGER #22, pre-registered
+
+    components = pd.DataFrame({"trend": trend_vote, "oi": oi_vote})
+    valid_mask = components.notna().all(axis=1)
+    pairwise_corr = components[valid_mask].corr()
+    print(f"  [combo diagnostic] pairwise position correlation (n={int(valid_mask.sum())} valid days), "
+          f"weights: trend={TREND_WEIGHT}, oi={OI_WEIGHT}")
+    print(pairwise_corr.to_string())
+
+    combined_score = trend_vote * TREND_WEIGHT + oi_vote * OI_WEIGHT
+    position = np.sign(combined_score)
+    return _permutation_test("fut_combo_trend_oi_weighted_v1", position, series["ret"])
+
+
 def main() -> None:
     assert holdout.is_holdout_consumed() is False, "holdout must remain untouched"
 
@@ -937,7 +997,7 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_combo_trend_oi_v1(series),
+        hyp_combo_trend_oi_weighted_v1(series),
     ]
 
     for r in results:

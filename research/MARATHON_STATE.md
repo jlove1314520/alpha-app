@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-05T09:02+08:00**
+**最後更新：2026-09-05T18:36+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 365 輪。最新一輪：第 365 輪 · 2026-09-05T10:05+08:00 · TW（取鎖時偵測到`LOCK_STALE`，round364的pid 56856持有29.9分鐘後被回收，上一輪疑似失敗；`git log`已確認round364工作本身成功commit+push，疑似只是收工序release lock前process卡住，同round360/361/363先例）。**本輪工作單位＝`MARATHON_PROTOCOL.md`第3節「成長與預估上修」家族資料源存在性前置檢查**：`WebFetch`FinMind官方完整資料集參考文件（`finmind.github.io/llms-full.txt`，公開文件，零FinMind API呼叫），逐一核對全部75+個台股資料集名稱。**結果：確認FinMind完全沒有分析師EPS/營收預估、consensus estimate這類資料集**——基本面類12個資料集全部是財報/公司行動的歷史實際值，沒有任何一個是分析師預測值。依協定第5節指示，**這個家族正式標記「資料源不存在」結案**，不進入任何統計檢定，不計入`bonferroni_n`，寫入`TRIALS_LEDGER.md`「已調查但不計入試驗數」表新增一列。`is_holdout_consumed()`開工/收工前皆確認`False`。TW軌`MARATHON_PROTOCOL.md`第3節尚未碰過的因子家族只剩季節性、籌碼類融資券兩項。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`TW_LEADS.md`第365輪記錄、`TRIALS_LEDGER.md`新增列。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 372 輪。最新一輪：第 372 輪 · 2026-09-05T18:36+08:00 · FUT（維修旗標已確認移除`9319707`，挖礦恢復正常；期間第366~371輪的心跳/計數器同步落後於`REPORT.md`實際輪次編號，因維修期間第367~371輪依協定刻意不改任何state檔案，本輪一併補上計數器缺口，`REPORT.md`心跳記錄本身在維修期間逐輪照常累加未斷）。**本輪工作單位＝`FUT_MARATHON_STATE.md`round364下一步(a)：IC/百分位加權版trend+oi兩因子組合**（`fut_cheap_gate.py`新增`hyp_combo_trend_oi_weighted_v1()`，權重事前綁定引用既有單因子cheap gate百分位減50）。**結果：percentile=81.0，FAIL**（門檻90.0，`TRIALS_LEDGER.md`#138），比trend單獨(82.5)跟等權組合(82.5)都略低，確認加權不是等權組合表現不佳的解方。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`/`FUT_LEADS.md`第372輪記錄、`TRIALS_LEDGER.md`#138。
 
 **上一輪（供對照）：第 363 輪 · 2026-09-05T08:31+08:00 · US（取鎖時偵測到`LOCK_STALE`，round360的pid 44236持有30.2分鐘後被回收，上一輪疑似失敗，根因未查明，`git log`確認round360工作本身已成功commit+push`6406cc5`，疑似只是收工序release lock前process卡住。本輪延續round360「(c)先對現有135檔做leave-one-out集中度檢查（輕量版）驗證假影假說」的建議，新增`deep_dive_f_us_value_bm_leave_extreme_out.py`：預先綁定（hash-lock）排除VAL期自身報酬前10名「極端贏家」後重跑VAL期1x成本decile long-short回測，PASS/FAIL判準（<+30%=確認集中度假說／>+60%=否證／中間=部分）皆在程式碼docstring寫死於執行前。**執行時發現新的效能問題**：`load_value_sample()`載入226檔SEC company-facts JSON純本地解析耗時約20分鐘（零新增API呼叫），比先前假設的「純快取命中=接近零成本」慢得多——本輪在loading loop剛跑完、尚未印出後續回測結果時因逼近鎖檔上限被迫`taskkill`中止，判定為「未完成，非失敗」。`is_holdout_consumed()`確認`False`。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第363輪記錄）。
 
