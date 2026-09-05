@@ -10,6 +10,12 @@ backfill_day_trading_ratio.py --skip-market-volume --batch-size 250`，
 不完整），holdout未消耗（`is_holdout_consumed()`=False）。已更新
 `HYPOTHESIS_QUEUE.md`#37條目最新進度，下一輪重跑同一指令即可自動從
 2015年較後段接續，估計還需約9輪左右批次才能回補完整TRAIN+VAL期。
+**額外發現（非本輪產生，記錄供其他軌道注意）**：本輪rebase前發現
+`git stash list`累積6個從先前輪次留下、從未還原的舊stash（涉及
+TW_MARATHON_STATE.md/TW_LOG.md等TW軌檔案），研判是其他軌道（可能是
+`AlphaMarathon`三軌）rebase時暫存後忘記pop回去；本輪只暫存+還原了
+自己這次為了rebase新增的2筆（不影響上述6筆），未觸碰/未清理舊有的，
+留給TW軌自己的排程處理。
 
 ## 2026-09-05T18:30（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#37
 （全市場現股當沖比重）發現FinMind`TaiwanStockDayTrading`免費層資料只從
