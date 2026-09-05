@@ -1,5 +1,16 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T19:05（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#37
+（全市場現股當沖比重）TWTASU逐日回補接續一批：`python
+backfill_day_trading_ratio.py --skip-market-volume --batch-size 250`，
+本輪嘗試250天、新完成250天（其中16天無交易/無資料），累積已快取
+291/2609（11.2% of全範圍工作日，2015-01-01~2024-12-31），FMTQIK
+（分母）已100%回補不用重跑。checkpoint機制運作正常（逐日atomic寫入，
+本輪從上一輪留下的41天接續，未遺失進度），未觸及cheap gate（資料仍
+不完整），holdout未消耗（`is_holdout_consumed()`=False）。已更新
+`HYPOTHESIS_QUEUE.md`#37條目最新進度，下一輪重跑同一指令即可自動從
+2015年較後段接續，估計還需約9輪左右批次才能回補完整TRAIN+VAL期。
+
 ## 2026-09-05T18:30（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#37
 （全市場現股當沖比重）發現FinMind`TaiwanStockDayTrading`免費層資料只從
 2024-01-02起有、涵蓋不到TRAIN期（2015-2020），標準cheap gate無法用原

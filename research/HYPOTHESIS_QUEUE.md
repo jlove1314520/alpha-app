@@ -985,10 +985,11 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     #37（全市場現股當沖比重當市場過熱regime訊號，見下方新章節），
     現在排隊第一，尚未開始第1關。**
 37. 全市場現股當沖比重（Day-Trading Ratio）——**2026-09-05接續排程：
-    方法論修正+地基建置中**（FinMind免費層資料只從2024起、涵蓋不到
-    TRAIN期，改建TWSE官方TWTASU+FMTQIK資料源，FMTQIK 120個月已100%
-    回補、TWTASU逐日回補進度16/約2500天，checkpoint可續跑，完整內容
-    見上方#37條目最新狀態），現在排隊第一，下一輪從TWTASU回補接續，
+    地基建置中**（FinMind免費層資料只從2024起、涵蓋不到TRAIN期，改建
+    TWSE官方TWTASU+FMTQIK資料源，FMTQIK 120個月已100%回補、TWTASU逐日
+    回補進度累積291/2609（11.2%），checkpoint可續跑，完整內容見上方
+    #37條目最新狀態），現在排隊第一，下一輪重跑
+    `backfill_day_trading_ratio.py --skip-market-volume`即可自動接續，
     完整回補後才進第1關cheap gate。
 
 **佇列現況小結（2026-09-02T07:09更新，#7結案後，內容已嚴重過時，僅存
@@ -3696,5 +3697,11 @@ FMTQIK真實全市場成交股數（約40~50億），確認不可用，排除**�
 中斷不遺失已完成進度），下一輪重跑`python backfill_day_trading_ratio.py
 --skip-market-volume --batch-size 250`即可自動從2015-01-23接續，預估
 還需要約10輪左右的批次（全範圍約2500個工作日，每輪約250天）才能回補
-完整TRAIN+VAL期，屆時才能執行第1關cheap gate。現在排隊第一，下一輪
-從TWTASU回補接續開始，不跳過地基直接嘗試用不完整資料跑cheap gate。
+完整TRAIN+VAL期，屆時才能執行第1關cheap gate。**2026-09-05T19:05
+hypothesis_queue排程接續第二輪**：重跑`python
+backfill_day_trading_ratio.py --skip-market-volume --batch-size 250`，
+本輪嘗試250天、新完成250天（其中16天無交易/無資料），累積已快取
+291/2609（11.2% of全範圍工作日），FMTQIK分母無需重跑，holdout未消耗。
+預估還需約9輪左右批次才能回補完整TRAIN+VAL期。現在排隊第一，下一輪
+重跑同一指令即可自動從上次進度接續，不跳過地基直接嘗試用不完整資料
+跑cheap gate。
