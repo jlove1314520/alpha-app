@@ -1771,3 +1771,22 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **記錄**：`TRIALS_LEDGER.md`#140（新增列）、`TW_LEADS.md`#14（新增列）。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **下一輪TW軌建議**：(a) `margin_debt_level_v1`第2關深挖——先做trailing窗口參數穩健性（104/208週是否還過關）排除156週本身的巧合，通過才值得投入更大規模隨機控制組；(b) 若(a)顯示是巧合，回到`portfolio_multifactor_v2`組合策略層級其他尚未測維度（regime overlay、下檔保護證明，見round362/365/373累積建議）。
+
+## 第377輪（2026-09-05T21:00+08:00）
+
+**取鎖**：乾淨（非陳舊鎖檔）。**選軌**：FUT 18:30最舊但配額已滿、round372自建議優先權回TW/US，跳過；TW 20:00次舊、US 20:35最新——依例外規則選TW。開工前查`data/rate_limit_state.json`：FinMind額度鎖到2026-09-05T22:38+08:00（round376記錄），本輪設計為純讀本機快取、零新增API呼叫。
+
+**工作單位**：round375「下一步(a)」——`margin_debt_level_v1`（`TRIALS_LEDGER.md`#140，60d(12w)窗口CHEAP_PASS）第2關深挖之一：trailing窗口104/208週參數穩健性檢查，排除156週是否為孤立巧合視窗。新增`margin_debt_level_window_robustness.py`，事前綁定判準寫在腳本docstring（只測60d horizon；104/156/208三個trailing窗口套用跟#140完全相同三判準；兩個替代窗口皆過視為穩健、皆不過視為孤立巧合、一過一不過視為部分穩健）。
+
+**結果**：
+- trailing=104週：暖身後504/607可用，TRAIN(n=309) corr=+0.0612(p=0.2832,percentile=82.5)、VAL(n=181) corr=+0.4036(p<0.0001,percentile=100.0) → CHEAP_PASS
+- trailing=156週（複現#140原始結果一致）：TRAIN(n=257) corr=+0.1170(p=0.0612,percentile=98.0)、VAL(n=181) corr=+0.4567(p<0.0001,percentile=100.0) → CHEAP_PASS
+- trailing=208週：暖身後400/607可用，TRAIN(n=205) corr=+0.3314(p<0.0001,percentile=100.0)、VAL(n=181) corr=+0.4450(p<0.0001,percentile=100.0) → CHEAP_PASS
+
+三個窗口全部CHEAP_PASS，且TRAIN期相關係數隨窗口加寬單調上升（0.0612→0.1170→0.3314），VAL期穩定維持+0.40~+0.46區間。**判定：穩健（事前綁定判準）——156週不是孤立巧合視窗**，#140保留疑慮③（window長度巧合）解除。
+
+**誠實保留**：#140保留疑慮①（TRAIN普遍弱於VAL）在三個窗口都持續存在（即使208週TRAIN也僅+0.3314，仍小於同期VAL+0.4450），本輪未處理，不能因窗口穩健性過關就一併視為此疑慮已解決——需要另外查證是否為VAL期2021-2024特定回撤事件（如2022年系統性下跌）驅動、還是真實穩定訊號。20d(4w)窗口本輪未重測（事前綁定排除，round375已明確FAIL）。
+
+**記錄**：`TRIALS_LEDGER.md`#141（新增列）、`TW_LEADS.md`#14（更新）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，執行約1分鐘。
+
+**下一輪TW軌建議**：(a) 疑慮①TRAIN/VAL異質性查證（切更多子期間、檢視VAL期具體是哪幾次回撤事件在驅動相關係數）；(b) 隨機控制組≥100 draws獨立抽樣版本（目前N=200是排列檢定，非獨立抽樣控制組）；(c) 或轉回`portfolio_multifactor_v2`組合策略層級其他尚未測維度。
