@@ -229,7 +229,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 - [x] **實測.一** **已完成**：根因＝自選股列只查 quotes_tw.json（Actions 只抓前 210 檔），20 檔實測中 12 檔修正前會顯示無報價。新增全 App 唯一的 `resolveQuote()` 四層回退鏈（live→quotes_tw→quotes_all_tw→sparklines 最後收盤），canonicalPrice 改為委派同一支；noQuoteReason 只在不在官方名冊時才說「已下市」。quotes_all_tw 補 top-level fetched_at/source。live server 新增 POST/GET /subscribe（token 驗證、無下單能力、上限 100 檔且只訂 Tick，Shioaji 官方上限 200），shioaji_quotes.py 每 5 秒做增刪訂閱，App 在自選股變動與連線時推送。驗收：隨機 20 檔（含上櫃/千元股/冷門股）全部有價；smoke 新增 check 42，40 項全 PASS。
 - [x] **實測.五** **已完成**：根因＝`go()` 用 `_safeSync` 呼叫 **async** 的 `renderReport`，async 的 rejected promise try/catch 接不到，冒成 unhandledrejection。用修正前版本重現得到 8 筆 `unhandledrejection: Cannot read properties of null (reading 'toFixed')`（即 6442 的 peg=null），修正後同樣操作 0 筆。結構性修法：`_safeSync` 對 thenable 回傳值自動 `.catch()`。橫幅改為一行摘要（幾筆／幾種／最近一筆）＋「複製錯誤詳情」按鈕（帶版本/UA/螢幕/即時源/自選股數），clipboard 被擋時退回自動選取。冒煙測試 40 項全 PASS。
-- [ ] **實測.二** 走勢線改當日盤中曲線（kbars 即時查、前收基線、20 日移到個股頁選項）
+- [x] **實測.二** **已完成**：新增 loopback UDP 查詢通道，`/live/kbars` 對未訂閱代號由常駐行程**在同一條 Shioaji 連線上**呼叫 api.kbars()（雙邊各快取 60 秒）；沿途修掉推送位址寫死 8002 與kbars 時間戳差 8 小時兩個真 bug，並新增 `ALPHA_SHIOAJI_FORCE_RUN` 供非交易時段端到端驗證。前端新增 `sparkBaseline()` 以前收為基線（非 min-max）、漲紅跌綠、基線虛線；標籤當天「今日」、隔日開盤前標日期；個股頁改以當日曲線為預設、20 日降為第二選項。驗收：10 檔全部畫出當日曲線且形狀各異，3 檔對原始 1 分K 筆數與首末高低 1:1 吻合；冒煙 40 項全 PASS。
 - [ ] **實測.三** 漲跌停亮燈（limit_up/limit_down、徽章、K 線虛線、歷史回放驗證）
 - [ ] **實測.四** 分批進場改技術層級階梯（取消極端走勢不顯示，改風險標示）
 - [ ] **實測.六** CLAUDE.md 資料原則加「三來源查證」搜尋紀律
@@ -263,8 +263,40 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [ ] **金流一.2** 上櫃三大法人回補 ≥250 個交易日到 `research/data/raw_tpex_3insti/`（可中斷續跑）
 - [ ] **金流一.3** 前端：市場頁產業金流象限散點圖＋成分股排行、個股頁籌碼徽章、首頁異常小點
 - [ ] **金流一.4** 評分引擎籌碼因子說明改引用 sector_flow 實際欄位（權重不動、不宣稱預測力）
-- [ ] **金流一.5** HYPOTHESIS_QUEUE #41 產業金流加速度輪動效應，三關流程檢驗
+- [ ] **金流一.5** HYPOTHESIS_QUEUE **#42**（原 #41，2026-09-06 總司令裁示改號，避免與已排程的 #41 撞號）產業金流加速度輪動效應，三關流程檢驗
 - [ ] **金流一.6** 驗收：smoke 兩項新檢查＋三張截圖＋回補進度回報
+
+---
+
+## 資料一＋研究方向裁示（2026-09-06，總司令指令原話全文，排在「金流一」之後執行）
+
+原始指令全文：
+
+> 全程繁體中文。總司令新指令，登記 PENDING_QUEUE 原文，排在「金流一」之後執行；順手把佇列「新一 八因子」的勾補上（commit 73bfb07）。
+>
+> 【資料一】Shioaji tick 落地本機（熱資料不經 git）
+> 1. shioaji_quotes.py 每筆 tick 追加寫入本機 research/data/ticks/YYYYMMDD/{code}.jsonl（欄位：ts、close、volume、bid、ask、限價旗標），每 60 秒 flush 一次，不影響即時推送；收盤後 13:45 轉成一份 parquet（每日一檔、全部代碼）並刪 jsonl。此目錄加進 .gitignore，絕不 commit。
+> 2. 訂閱範圍就是現有固定＋動態清單，不新增訂閱。
+> 3. 磁碟保護：估算每日容量並回報；超過 20GB 時從最舊一天開始刪，刪之前回報。
+> 4. 驗收：隔日回報實際落地檔數、筆數、檔案大小，附一檔 2330 的前 5 筆與最後 5 筆。
+>
+> 【研究方向裁示】接受第 388 輪結論，不再做 regime overlay。接下來三條線並行、不深挖已判死家族：
+> （a）#40 庫藏股「勉強未過」屬事件驅動大類第一次測，同大類再設計一條，優先「重大訊息公告類型」事件研究，用 MOPS 既有管線資料。
+> （b）金流一的產業金流加速度，編號改為 #42，避免與排程的 #41 撞號；照三關流程跑。
+> （c）盤中微結構假設等【資料一】累積 ≥20 個交易日後再設計，之前不得用 FinMind 或任何付費源補 tick。
+> 每條線 cheap gate 結果不論 PASS/FAIL 都寫進 HYPOTHESIS_QUEUE 並回報。
+
+**登記備註**：「新一 八因子」的勾在 2026-09-06 上一輪已補上（commit `73bfb07`，
+覆蓋率變化已寫進該行），這裡不重複處理。金流一.5 的假說編號已依裁示由 #41 改為 #42。
+
+- [ ] **資料一.1** shioaji_quotes.py 每筆 tick 寫 `research/data/ticks/YYYYMMDD/{code}.jsonl`（60 秒 flush，不影響推送）＋13:45 轉每日單一 parquet 並刪 jsonl＋加 .gitignore
+- [ ] **資料一.2** 訂閱範圍維持現有固定＋動態清單，不新增訂閱
+- [ ] **資料一.3** 磁碟保護：估算每日容量並回報；>20GB 時從最舊一天刪，刪前先回報
+- [ ] **資料一.4** 驗收：隔日回報落地檔數／筆數／檔案大小，附 2330 前 5 筆與最後 5 筆
+- [ ] **研究.a** 事件驅動大類第二條假說：「重大訊息公告類型」事件研究（用 MOPS 既有管線資料），三關流程
+- [ ] **研究.b** #42 產業金流加速度（同金流一.5），三關流程
+- [ ] **研究.c** 盤中微結構假設——**阻塞中**：等資料一累積 ≥20 個交易日才設計，期間不得用 FinMind 或任何付費源補 tick
+- [ ] **研究.共同** 每條線 cheap gate 結果不論 PASS/FAIL 都寫進 HYPOTHESIS_QUEUE 並回報
 
 ---
 

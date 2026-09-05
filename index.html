@@ -2127,27 +2127,90 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     return SPARKLINES;
   }
   function sparkFor(code){return (SPARKLINES&&SPARKLINES[code])||null}
+  // ── 2026-09-06（實測.二）當日 1 分K ────────────────────────────────────────
+  // 兩點改動：
+  //  1. 不再要求 SSE 已連線。`/live/kbars` 現在對未訂閱的代號會在常駐行程的同一條
+  //     Shioaji 連線上呼叫 api.kbars() 查詢（伺服器端快取 60 秒），只要 live server
+  //     連得上就查得到，不必等那一檔先被訂閱、也不必等串流建立。
+  //  2. 兩種 bar 形狀都收：tick 聚合來的是 {t, c}，api.kbars() 查來的是
+  //     {ts, close, volume}。只認一種的話換了來源就整條線消失。
+  function _barClose(b){return b==null?null:(b.c!=null?b.c:(b.close!=null?b.close:null))}
+  function _barTime(b){return b==null?null:(b.t!=null?b.t:(b.ts!=null?b.ts:null))}
   async function getLiveCloses(code){
-    if(!LIVE.connected)return null;
+    if(!LIVE.configured)return null;
     const c=LIVE_KB[code];
     if(c&&Date.now()-c.at<60000)return c.closes;
-    try{const r=await liveFetch('/live/kbars?code='+encodeURIComponent(code),4000);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();
-      const bars=d.bars||[];LIVE_KB[code]={at:Date.now(),closes:bars.map(b=>b.c),lastT:bars.length?bars[bars.length-1].t:null};return LIVE_KB[code].closes}
-    catch(e){LIVE_KB[code]={at:Date.now(),closes:[],lastT:null};return []}
+    try{
+      const r=await liveFetch('/live/kbars?code='+encodeURIComponent(code),9000);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const bars=d.bars||[];
+      LIVE_KB[code]={at:Date.now(),
+                     closes:bars.map(_barClose).filter(x=>x!=null),
+                     lastT:bars.length?_barTime(bars[bars.length-1]):null,
+                     tradeDate:d.trade_date||null,
+                     mode:d.mode||null};
+      return LIVE_KB[code].closes;
+    }
+    catch(e){
+      // 查不到是常態（live server 沒開、或那一檔今天真的沒成交），走勢線退回 20 日
+      // 日線即可，不記進診斷橫幅——那會被伺服器沒開的日子灌爆。
+      console.warn('[getLiveCloses]',code,e.message||e);
+      LIVE_KB[code]={at:Date.now(),closes:[],lastT:null,tradeDate:null,mode:null};
+      return [];
+    }
   }
   // 串流每個事件帶kbars_last：把最新一根K併進快取（同一分鐘就取代最後一點、新的一分鐘就append），
   // 不必每次重新打/live/kbars。
   function mergeLiveKbarsLast(){
     const kl=LIVE.kbarsLast||{};
     Object.keys(kl).forEach(code=>{const c=LIVE_KB[code];if(!c)return;const b=kl[code];if(!b||b.c==null)return;
-      if(c.lastT===b.t){if(c.closes.length)c.closes[c.closes.length-1]=b.c}else{c.closes.push(b.c);c.lastT=b.t}});
+      const bc=_barClose(b),bt=_barTime(b);
+      if(bc==null)return;
+      if(c.lastT===bt){if(c.closes.length)c.closes[c.closes.length-1]=bc}else{c.closes.push(bc);c.lastT=bt}});
   }
   function sparkWithTag(closes,up,tag){const s=spark(closes,up);if(!s)return '<span class="sparkwrap"></span>';return `<span class="sparkwrap">${s}<em>${tag}</em></span>`}
+  // 2026-09-06（實測.二.2）當日曲線專用：**以前收為基線**，不是 min-max 拉滿。
+  // 差別很實際：min-max 會把「今天只動了 0.3%」畫成一條劇烈起伏的線，看起來像
+  // 大漲大跌；以前收當基準線之後，線離基準多遠就是真的漲跌多少，而且線在基準
+  // 之上是紅、之下是綠，跟旁邊的漲跌幅顏色一定一致。
+  function sparkBaseline(closes,prevClose){
+    if(!closes||closes.length<2)return '';
+    const W=64,H=26,PAD=3;
+    const vals=closes.filter(v=>v!=null&&isFinite(v));
+    if(vals.length<2)return '';
+    const base=(prevClose!=null&&isFinite(prevClose))?prevClose:vals[0];
+    // 讓基線一定落在畫面內，且上下對稱——否則基線貼著邊，看不出「離基準多遠」
+    const span=Math.max(Math.abs(Math.max(...vals)-base),Math.abs(Math.min(...vals)-base))||(base*0.001)||1;
+    const y=v=>{const t=(v-base)/(span*2)+0.5;return (H-PAD-t*(H-PAD*2)).toFixed(1)};
+    const pts=vals.map((v,i)=>`${(i/(vals.length-1)*W).toFixed(1)},${y(v)}`).join(' ');
+    const last=vals[vals.length-1];
+    const up=last>=base;
+    const baseY=y(base);
+    return `<svg class="spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`
+      +`<line x1="0" y1="${baseY}" x2="${W}" y2="${baseY}" stroke="var(--ink-4)" stroke-width="1" stroke-dasharray="2 2" opacity=".55"/>`
+      +`<polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2" stroke-linejoin="round"/>`
+      +`</svg>`;
+  }
+  // 當日曲線的標籤：今天就寫「今日」，隔日開盤前顯示的是前一交易日，就直接標日期。
+  function intradayTagText(code){
+    const c=LIVE_KB[code];
+    const d=c&&c.tradeDate?String(c.tradeDate):null;
+    if(!d)return '今日';
+    const today=(()=>{const z=_zonedParts(new Date(),'Asia/Taipei');return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`})();
+    return d===today?'今日':d.slice(5);
+  }
   const SPARK_PLACEHOLDER='<span class="sparkwrap"></span>';  // 沒線也留同寬空位，每列一樣高、欄位不位移
   // 回傳{html,mode}：mode='today'(即時1分K)/'20d'/''(無)
-  function rowSparkline(code,fallback20d,up){
-    const live=LIVE.connected&&LIVE_KB[code]&&LIVE_KB[code].closes.length>=2?LIVE_KB[code].closes:null;
-    if(live)return {html:sparkWithTag(live,up,'今日'),mode:'today'};
+  function rowSparkline(code,fallback20d,up,prevClose){
+    // 2026-09-06（實測.二.2）當日 1 分K 優先，且以前收為基線。
+    // 不再要求 LIVE.connected——只要 /live/kbars 查得到（含未訂閱代號走 api.kbars()）
+    // 就畫當日曲線；查不到才退回 20 日日線並照舊標「20日」。
+    const kb=LIVE_KB[code];
+    if(kb&&kb.closes&&kb.closes.length>=2){
+      const html=sparkBaseline(kb.closes,prevClose);
+      if(html)return {html:`<span class="sparkwrap">${html}<em>${intradayTagText(code)}</em></span>`,mode:'today'};
+    }
     // 2026-09-05：優先用全市場 sparklines.json（涵蓋上市＋上櫃約2827檔）；
     // fallback20d 是 quotes_tw.json 裡的舊欄位，留著當它還在時的備援，之後會整個消失。
     const marketWide=sparkFor(code);
@@ -2231,7 +2294,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // quotes_all_tw（全市場 2,837 檔收盤，回退鏈第三層）、listed_universe（分辨真的
     // 下市還是我們沒接好）。用 allSettled，任一份失敗只是少一層，不能讓整個首頁不畫。
     await Promise.allSettled([ensureSparklines(),loadQuotesAllTw(),ensureListedUniverse()]);
-    if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
+    // 2026-09-06（實測.二）改成 LIVE.configured：當日曲線現在不需要 SSE 已連線，
+    // /live/kbars 對未訂閱代號會走 api.kbars() 查詢，只要 live server 連得上就有線。
+    if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
     if(runId!==HYDRATE_HOME_SEQ)return;
     let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
     const earningsCal=await loadEarningsCalendar(); // 2026-08-27新增（P2-新，財報行事曆）
@@ -2269,7 +2334,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const mktOpenNow=us?isUsTradingWindowNow():isTwTradingWindowNow();
       const dotCls=!mktOpenNow?'gr':((iq&&(iq.source==='sinopac'||iq.source==='ibkr')&&!iq.isTodayClose&&/REALTIME/.test(iq.data_type||''))?'g':(iq&&!iq.isTodayClose?'y':'gr'));
       const meta=`${code}${us?' · 美股':''}<span class="sdot ${dotCls} wl-src-dot" data-wl-dot="${code}" title="點一下看資料來源" onclick="event.stopPropagation();toggleWlDetail('${code}')"></span>`;
-      const sp=rowSparkline(code,rawQ&&rawQ.sparkline,chg>=0).html;  // 2026-09-04四修.三：即時→今日1分K，離線→20日
+      const sp=rowSparkline(code,rawQ&&rawQ.sparkline,chg>=0,q.prev_close).html;  // 2026-09-06實測.二：當日曲線（前收基線）→ 退回20日
       // 2026-08-27新增（P2-新，盤前盤後）：美股才有extended_hours（見
       // fetch_quotes_us.py），只在盤前/盤後時段、且該時段真的有資料時才顯示，
       // 跟正規盤收盤價分開一行、明確標示「盤前」/「盤後」，不會被誤會成正規盤價。
@@ -2752,7 +2817,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{},usIdx=await loadUsIndexes();
     await ensureSparklines();
-    if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-04四修.三
+    if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-06實測.二
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
     const capsules=[idxCapsuleHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)];
@@ -4727,7 +4792,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     STOCK_CHART.code=code;STOCK_CHART.us=us;
     STOCK_CHART.daily=(rows||[]).map(r=>us?{time:r.date,open:r.Open,high:r.High,low:r.Low,close:r.Close}:{time:r.date,open:r.open,high:r.max,low:r.min,close:r.close})
       .filter(x=>x.time&&x.close!=null&&x.open!=null&&x.high!=null&&x.low!=null);
-    const hasIntraday=!us&&LIVE.connected&&!!LIVE.kbarsLast[code];
+    // 2026-09-06（實測.二.2）判定改成「查得到當日1分K」而不是「串流有推過這一檔」。
+    // 總司令要求當日曲線當預設、20日日線降為第二個切換選項；未訂閱的代號現在也
+    // 查得到 api.kbars()，只看 kbarsLast 會讓它們永遠停在日線。
+    const hasIntraday=!us&&((LIVE_KB[code]&&LIVE_KB[code].closes&&LIVE_KB[code].closes.length>=2)||(LIVE.connected&&!!LIVE.kbarsLast[code]));
     if(hasIntraday&&!STOCK_CHART.userPickedMode)STOCK_CHART.mode='intraday';
     if(!hasIntraday)STOCK_CHART.mode='daily';
     renderTrendModeToggle(hasIntraday);
@@ -4978,7 +5046,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.0706';
+  const APP_VERSION='2026-09-06.0740';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

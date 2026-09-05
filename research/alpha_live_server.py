@@ -84,6 +84,7 @@ from __future__ import annotations
 import asyncio
 import json
 import secrets
+import time
 from pathlib import Path
 
 import uvicorn
@@ -275,6 +276,15 @@ class _TickIngress(asyncio.DatagramProtocol):
         except (UnicodeDecodeError, json.JSONDecodeError):
             MEM.rejected += 1
             return
+        # 2026-09-06（實測.二.1）kbars 查詢的回覆不是 tick，不進 MEM，直接喚醒等待中的請求
+        if msg.get("event") == "kbars_reply":
+            if msg.get("t") != LOCAL_TOKEN:
+                MEM.rejected += 1
+                return
+            fut = _kbars_pending.pop(str(msg.get("req_id")), None)
+            if fut is not None and not fut.done():
+                fut.set_result(msg)
+            return
         if MEM.apply(msg) and MEM.cond is not None:
             asyncio.get_event_loop().create_task(_notify_all())
 
@@ -432,7 +442,7 @@ def _looks_like_us_symbol(code: str) -> bool:
 
 
 @app.get("/live/kbars")
-def live_kbars(code: str, x_alpha_local_token: str | None = Header(default=None)):
+async def live_kbars(code: str, x_alpha_local_token: str | None = Header(default=None)):
     """當日1分K（台股）：讀shioaji_quotes.py常駐行程用tick聚合、寫在熱檔的
     bars，回應帶mode="tick-aggregated-1m"。**token一律必檢，不因私有網路跳過。**
     美股仍501（理由見模組docstring第3點）。"""
@@ -456,10 +466,18 @@ def live_kbars(code: str, x_alpha_local_token: str | None = Header(default=None)
             "hot_file_status": "tick-push-memory" if MEM.fresh() else status,
             "bars": mem_bars,
         }
+    # 2026-09-06（實測.二.1）沒有 tick 聚合資料時，改向常駐行程即時查 api.kbars()。
+    # 這是「未訂閱代號也要有當日曲線」的關鍵路徑：使用者新增的自選股不會馬上有 tick
+    # 歷史（訂閱是從那一刻才開始），但 api.kbars() 查得到今天從開盤到現在的完整 1 分K。
+    queried = await _kbars_via_daemon(code)
+    if queried is not None:
+        return queried
+
     if hot is None:
         raise HTTPException(
             status_code=404,
-            detail="本機熱檔不存在：shioaji_quotes.py常駐行程今天還沒跑過（或這台機器不是跑排程的那台），沒有可聚合的tick。",
+            detail=("本機熱檔不存在，且向常駐行程查 api.kbars() 也沒有回應："
+                    "shioaji_quotes.py 今天還沒跑過（或這台機器不是跑排程的那台）。")
         )
     bars = (hot.get("kbars") or {}).get(code) or []
     if not bars:
@@ -551,6 +569,36 @@ async def _sse_event_generator():
 # Tick+BidAsk 共 10），所以動態清單設 100 檔上限、且**只訂 Tick 不訂 BidAsk**
 # （畫面只需要成交價，五檔買賣不需要），合計約 153 個，離上限還有餘裕。
 # 超過上限的部分會被截掉，並在回應裡明講截掉了幾檔，不會安靜吃掉。
+# ── 2026-09-06（實測.二.1）向常駐行程查 kbars ───────────────────────────────
+# /live/kbars 原本只能回「已訂閱代號的 tick 聚合」，沒訂閱的一律 404。總司令要求
+# 走勢線改成當日盤中曲線，而且**不准開第二條 Shioaji 連線**——能查 api.kbars() 的
+# 只有 shioaji_quotes.py 那條常駐連線。所以這裡走 loopback UDP：送一個查詢過去，
+# 對方在同一條連線上查完，用既有的 tick-push 通道回 event="kbars_reply"。
+# 查不到就誠實回 404 並說明是哪一環沒接上，不塞假資料。
+KBARS_REQ_ADDR = ("127.0.0.1", int(os.environ.get("ALPHA_KBARS_REQ_PORT") or 8003))
+KBARS_REQ_TIMEOUT_SEC = 8.0
+KBARS_CACHE_SEC = 60.0          # 總司令指定：查詢結果快取 60 秒
+_kbars_pending: dict[str, asyncio.Future] = {}
+_kbars_cache: dict[str, tuple[float, dict]] = {}
+_kbars_sock = None
+
+
+def _kbars_request(code: str, req_id: str) -> bool:
+    """把查詢送給常駐行程。送不出去回 False（例如行程沒開），由呼叫端誠實回報。"""
+    global _kbars_sock
+    try:
+        if _kbars_sock is None:
+            import socket
+            _kbars_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            _kbars_sock.setblocking(False)
+        msg = {"t": LOCAL_TOKEN, "op": "kbars", "code": code, "req_id": req_id}
+        _kbars_sock.sendto(json.dumps(msg).encode("utf-8"), KBARS_REQ_ADDR)
+        return True
+    except OSError as e:
+        print(f"  [kbars查詢] 送出失敗 {code}：{type(e).__name__}: {e}", flush=True)
+        return False
+
+
 WATCHLIST_PATH = Path(os.environ.get("ALPHA_LIVE_WATCHLIST_PATH")
                       or (Path(__file__).parent / ".live_watchlist.json"))
 MAX_DYNAMIC_SUBSCRIPTIONS = 100
@@ -615,6 +663,51 @@ async def get_subscribe(x_alpha_local_token: str | None = Header(default=None)):
         return {"codes": [], "updated_at": None, "limit": MAX_DYNAMIC_SUBSCRIPTIONS,
                 "note": "尚未收到任何自選股清單，常駐行程目前只訂 DEFAULT_TW_WATCHLIST"}
     return doc
+
+
+async def _kbars_via_daemon(code: str) -> dict | None:
+    """向常駐行程查當日 1 分K。查得到回結果 dict，查不到回 None（讓呼叫端走既有的 404）。
+
+    快取 60 秒（總司令指定）：走勢線是每列都要畫的東西，20 檔自選股同時開頁面就是
+    20 個查詢，沒有快取會直接打爆 Shioaji 的流量上限。
+    """
+    now = time.time()
+    hit = _kbars_cache.get(code)
+    if hit and now - hit[0] < KBARS_CACHE_SEC:
+        return hit[1]
+
+    req_id = secrets.token_hex(8)
+    loop = asyncio.get_event_loop()
+    fut: asyncio.Future = loop.create_future()
+    _kbars_pending[req_id] = fut
+    if not _kbars_request(code, req_id):
+        _kbars_pending.pop(req_id, None)
+        return None
+    try:
+        msg = await asyncio.wait_for(fut, timeout=KBARS_REQ_TIMEOUT_SEC)
+    except asyncio.TimeoutError:
+        _kbars_pending.pop(req_id, None)
+        print(f"  [kbars查詢] {code} 逾時（{KBARS_REQ_TIMEOUT_SEC}秒）："
+              "常駐行程可能沒開或正在忙", flush=True)
+        return None
+    bars = msg.get("bars") or []
+    if not bars:
+        # 常駐行程有回覆但沒有資料：把它給的原因印出來。第一版這裡直接 return None，
+        # 結果兩邊 log 都是空的，只能靠猜——查不到的原因本身就是最該看見的東西。
+        print(f"  [kbars查詢] {code} 無資料：{msg.get('error') or '常駐行程未附原因'}", flush=True)
+        return None
+    result = {
+        "code": code,
+        "mode": "api-kbars-1m",
+        "source": ("shioaji_quotes.py 在既有常駐連線上呼叫 api.kbars() 查詢"
+                   "（未另開連線），live server 快取 60 秒"),
+        "trade_date": msg.get("trade_date"),
+        "generated_at": msg.get("ts"),
+        "market_status": MEM.market_status,
+        "bars": bars,
+    }
+    _kbars_cache[code] = (now, result)
+    return result
 
 
 @app.get("/live/stream")

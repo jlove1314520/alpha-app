@@ -109,6 +109,139 @@ DYNAMIC_WATCHLIST_PATH = Path(os.environ.get("ALPHA_LIVE_WATCHLIST_PATH")
 # （TAIEX 1＋類股/櫃買指數 38＋期貨 2 檔各 Tick+BidAsk 共 4＋預設 5 檔各 Tick+BidAsk 共 10），
 # 動態清單只訂 Tick（畫面只要成交價，不需要五檔），100 檔＝100 個，合計約 153，留有餘裕。
 MAX_DYNAMIC_SUBSCRIPTIONS = 100
+
+# ── 2026-09-06（實測.二.1）kbars 查詢服務 ─────────────────────────────────────
+# 總司令要求走勢線改成「當日盤中曲線」，而且明講**不准開第二條 Shioaji 連線**。
+# 問題是 alpha_live_server.py 是另一個行程，手上沒有 Shioaji session；能查 kbars 的
+# 只有這支常駐行程。所以這裡開一個只聽 loopback 的 UDP 服務：live server 送
+# {"t":token,"op":"kbars","code":"2330","req_id":...}，這邊在**同一條連線**上呼叫
+# api.kbars()，再用既有的 tick-push 通道把結果送回去（event="kbars_reply"）。
+#
+# 安全性：只綁 127.0.0.1，而且一律驗 token（跟 tick-push 用同一份）。
+# 併發：api.kbars() 在獨立執行緒呼叫，用一把鎖序列化，避免同時多個查詢打進去；
+# 另外對同一代號做 60 秒行程內快取，重複查不會重複打 API（Shioaji 有流量上限）。
+KBARS_REQ_HOST = "127.0.0.1"
+KBARS_REQ_PORT = int(os.environ.get("ALPHA_KBARS_REQ_PORT") or 8003)
+KBARS_QUERY_CACHE_SEC = 60.0
+KBARS_MAX_BARS = 300  # 一個交易日最多 270 根 1 分K，留點餘裕；UDP 單封包要塞得下
+
+
+def _kbars_to_bars(kb) -> list[dict]:
+    """把 api.kbars() 的回傳整理成 [{ts, close, volume}]，只留畫線要用的欄位。
+
+    刻意不整包塞進 UDP：一天 263 根 × 全欄位大約 40KB，接近單封包上限；只留三個
+    欄位大約 10KB，安全很多。開高低要畫 K 棒時再另外設計。
+    """
+    try:
+        ts_list = list(kb.ts)
+        close_list = list(kb.Close)
+        vol_list = list(kb.Volume)
+    except AttributeError:
+        d = dict(kb)
+        ts_list, close_list, vol_list = list(d["ts"]), list(d["Close"]), list(d["Volume"])
+    out = []
+    for i in range(len(ts_list)):
+        raw = ts_list[i]
+        # Shioaji 的 ts 是奈秒數，但它代表的是**台北牆鐘時間**，不是 UTC epoch。
+        # 第一版寫 `fromtimestamp(ns/1e9, TW_TZ)`，等於把它當 UTC 再加 8 小時，
+        # 結果 09:01 的那根變成 17:01、收盤 13:30 變成 21:30（實測抓到）。
+        # 正確做法是先用 UTC 解出牆鐘數字，再把時區標成 +08:00，不做位移。
+        try:
+            t = (datetime.fromtimestamp(int(raw) / 1e9, timezone.utc)
+                 .replace(tzinfo=TW_TZ).isoformat())
+        except (TypeError, ValueError, OSError):
+            t = str(raw)
+        try:
+            c = float(close_list[i])
+        except (TypeError, ValueError):
+            continue
+        try:
+            v = int(vol_list[i])
+        except (TypeError, ValueError):
+            v = None
+        out.append({"ts": t, "close": c, "volume": v})
+    return out[-KBARS_MAX_BARS:]
+
+
+def _start_kbars_service(api, state) -> None:
+    """開一個 daemon 執行緒回應 kbars 查詢。任何失敗都只記 log，不能影響串流。"""
+    import socket
+
+    lock = threading.Lock()
+    cache: dict[str, tuple[float, list[dict], str]] = {}  # code -> (取得時間, bars, 交易日)
+
+    try:
+        token = LIVE_TOKEN_PATH.read_text(encoding="utf-8").strip() if LIVE_TOKEN_PATH.exists() else None
+    except OSError:
+        token = None
+    if not token:
+        print("  [kbars服務] 找不到 live server token，服務不啟動"
+              "（先啟動一次 alpha_live_server.py 產生 token）", flush=True)
+        return
+
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((KBARS_REQ_HOST, KBARS_REQ_PORT))
+    except OSError as e:
+        print(f"  [kbars服務] 無法監聽 {KBARS_REQ_HOST}:{KBARS_REQ_PORT}：{e}；"
+              "未訂閱代號的當日1分K將查不到", flush=True)
+        return
+
+    def _query(code: str) -> tuple[list[dict], str, str | None]:
+        """回傳 (bars, 交易日, 錯誤訊息)。查不到就誠實回空清單＋原因。"""
+        now = time.time()
+        with lock:
+            hit = cache.get(code)
+            if hit and now - hit[0] < KBARS_QUERY_CACHE_SEC:
+                return hit[1], hit[2], None
+        try:
+            with lock:
+                contract = api.Contracts.Stocks[code]
+                if contract is None:
+                    return [], "", f"{code} 不在合約清單（可能已下市或代號有誤）"
+                # 先查今天；今天沒有（週末/盤前）就退到合約的最後更新日，
+                # 也就是最後一個交易日——總司令指定「隔日開盤前仍顯示前一交易日全日」。
+                day = datetime.now(TW_TZ).date().isoformat()
+                kb = api.kbars(contract, start=day, end=day)
+                bars = _kbars_to_bars(kb)
+                if not bars:
+                    day = str(getattr(contract, "update_date", "") or "")
+                    if day:
+                        kb = api.kbars(contract, start=day, end=day)
+                        bars = _kbars_to_bars(kb)
+            with lock:
+                cache[code] = (now, bars, day)
+            return bars, day, None if bars else f"{code} 在 {day} 沒有 1 分K 資料"
+        except Exception as e:  # noqa: BLE001
+            return [], "", f"{type(e).__name__}: {e}"
+
+    def _serve() -> None:
+        while True:
+            try:
+                data, addr = sock.recvfrom(8192)
+            except OSError as e:
+                print(f"  [kbars服務] 收訊失敗，服務結束：{e}", flush=True)
+                return
+            try:
+                msg = json.loads(data.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                continue
+            if msg.get("t") != token or msg.get("op") != "kbars":
+                continue
+            code = str(msg.get("code") or "").strip()
+            req_id = msg.get("req_id")
+            bars, day, err = _query(code)
+            reply = {"t": token, "event": "kbars_reply", "req_id": req_id,
+                     "code": code, "bars": bars, "trade_date": day, "error": err,
+                     "ts": datetime.now(TW_TZ).isoformat()}
+            try:
+                state.push_raw(reply)
+            except Exception as e:  # noqa: BLE001
+                print(f"  [kbars服務] 回覆失敗 {code}：{type(e).__name__}: {e}", flush=True)
+
+    threading.Thread(target=_serve, daemon=True, name="kbars-service").start()
+    print(f"  [kbars服務] 監聽 udp://{KBARS_REQ_HOST}:{KBARS_REQ_PORT}"
+          f"（只聽loopback、驗token、同一條連線查詢、{int(KBARS_QUERY_CACHE_SEC)}秒快取）", flush=True)
 DYNAMIC_POLL_SEC = 5.0  # 每 5 秒看一次清單有沒有變，加自選股後幾秒內就會有 tick
 
 
@@ -211,7 +344,10 @@ LIVE_STATE_MIN_INTERVAL_SEC = 1.0  # 熱檔最多每秒寫一次：tick一秒可
 # token不符直接丟棄。UDP是fire-and-forget：伺服器沒開時送出去就消失、這支行程完全
 # 不受影響；熱檔照寫，當伺服器重啟時的狀態備援。
 LIVE_PUSH_ENABLED = True
-LIVE_PUSH_ADDR = ("127.0.0.1", 8002)
+# 2026-09-06（實測.二.1）改讀環境變數：alpha_live_server.py 的 ingress port 本來就是
+# ALPHA_TICK_INGRESS_PORT 可調的，這邊卻寫死 8002，兩邊一旦不同步，tick 與 kbars 回覆
+# 就會送到錯的行程去（測試時就是這樣：回覆跑到正式服務那邊，查詢端一直等到逾時）。
+LIVE_PUSH_ADDR = ("127.0.0.1", int(os.environ.get("ALPHA_TICK_INGRESS_PORT") or 8002))
 LIVE_TOKEN_PATH = Path(__file__).parent / ".alpha_live_token"  # gitignored，跟alpha_live_server.py同一份
 
 # 2026-09-04（總司令裁示乙.1「冷熱分離」）：**盤中不再commit/push**。盤中只更新記憶體
@@ -381,6 +517,25 @@ class TickState:
     def kbars_snapshot(self) -> dict[str, list[dict]]:
         with self._lock:
             return {k: [dict(b) for _, b in sorted(v.items())] for k, v in self._kbars.items()}
+
+    def push_raw(self, msg: dict) -> bool:
+        """把任意一則訊息用既有的 UDP 通道送給 live server。
+
+        2026-09-06（實測.二.1）新增，給 kbars 查詢的回覆用——它不是一筆 tick，
+        沒有 quote/bar 結構，但要走同一條 loopback 通道與同一份 token，不另外開。
+        """
+        if self.push_addr is None or self._push_disabled_reason:
+            return False
+        try:
+            if self._push_sock is None:
+                import socket
+                self._push_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self._push_sock.setblocking(False)
+            self._push_sock.sendto(json.dumps(msg, ensure_ascii=False).encode("utf-8"), self.push_addr)
+            return True
+        except Exception as e:  # noqa: BLE001
+            print(f"  [push_raw失敗] {msg.get('event')}: {type(e).__name__}: {e}", flush=True)
+            return False
 
     def push_tick(self, key: str, event: str = "tick", market_status: str = "open") -> bool:
         """把`key`目前的最新報價＋最新一根1分K用UDP推給本機alpha_live_server.py
@@ -825,6 +980,8 @@ def run_stream_daemon() -> None:
         api.set_on_bidask_fop_v1_callback(on_bidask_fop)
         api.set_on_quote_idx_v1_callback(on_quote_idx)
 
+        _start_kbars_service(api, state)  # 2026-09-06（實測.二.1）同一條連線上的 kbars 查詢服務
+
         print(f"訂閱完成：{subscribed}，進入常駐迴圈（每{FLUSH_INTERVAL_SEC}秒檢查；盤中{'會' if INTRADAY_GIT_PUSH else '不'}commit，收盤後commit一次）", flush=True)
 
         # 2026-09-06（實測.一.3）動態訂閱狀態。fixed_stock_codes 是啟動時就訂好的
@@ -876,7 +1033,8 @@ def run_stream_daemon() -> None:
             elapsed_since_window_check += FLUSH_INTERVAL_SEC
             if elapsed_since_window_check >= TRADING_WINDOW_POLL_SEC:
                 elapsed_since_window_check = 0.0
-                if not _is_tw_trading_window(datetime.now(TW_TZ)):
+                if (not _is_tw_trading_window(datetime.now(TW_TZ))
+                        and os.environ.get("ALPHA_SHIOAJI_FORCE_RUN") != "1"):
                     print("交易時段結束，收尾並登出", flush=True)
                     break
 
@@ -894,7 +1052,12 @@ def run_stream_daemon() -> None:
 
 def main():
     now = datetime.now(TW_TZ)
-    if not _is_tw_trading_window(now):
+    # 2026-09-06（實測.二.1）非交易時段強制執行的開關。
+    # 用途是端到端驗證 kbars 查詢服務：那條路徑要有真的 Shioaji 連線才測得到，
+    # 但常駐行程平常一到非交易時段就直接結束。設 ALPHA_SHIOAJI_FORCE_RUN=1 可以
+    # 在收盤後照樣登入、訂閱、開 kbars 服務（收盤時本來就沒有 tick，只是不會有
+    # 串流資料，不影響任何既有排程行為）。預設關閉，不會意外在半夜佔著連線。
+    if not _is_tw_trading_window(now) and os.environ.get("ALPHA_SHIOAJI_FORCE_RUN") != "1":
         _write_market_closed()
         return
     run_stream_daemon()
