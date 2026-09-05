@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T07:57（hypothesis_queue排程接續，取鎖乾淨LOCK_ACQUIRED，
+本輪有網路搜尋工具，接續上一輪#41「地基查證卡住待有搜尋工具session」）：
+用`WebSearch`查到上一輪猜錯的MOPS功能代碼正解——`stapap1`（個股董監
+持股明細，POST `ajax_stapap1`，參數year/month/co_id/TYPEK）與
+`stapap1_all`（產業別公司清單，POST `ajax_stapap1_all`）。用`requests`
+實測確認`ajax_stapap1`**接受任意歷史民國年月**（用2330/1101/2317三檔
++1.5秒間隔測試皆成功），**推翻上一輪「工具限制未解」的中繼判斷**——
+這條**不是**資料不可及（跟#38/#39不同死法），但代價是per-company
+逐檔查詢、無法像#40買回股份一次拿全市場，全歷史回補（約1700檔×多年
+×12個月）請求量體大，需要下一輪先設計節流/取樣頻率（比照#40先小樣本
+驗第1關訊號再決定是否投入全量回補）。新增`mops_insider_holdings_
+probe.py`記錄確認過程與可重複呼叫的函式，已同步`HYPOTHESIS_QUEUE.md`
+#41條目+排隊順序總結。本輪未寫因子/測試程式碼、未動`TRIALS_LEDGER.md`/
+`STRATEGY_GRAVEYARD.md`（尚未進第1關，無PASS/FAIL判定）、未產生任何
+`data/`快取檔案。`is_holdout_consumed()`開工/收工前皆確認`False`。
+`git status`確認`.github/workflows/audit.yml`（非本輪產生，前兩輪心跳
+已記錄過）依然未觸碰、未納入本輪commit。下一輪從「設計節流後的個股
+逐檔回補腳本」開始，不跳關。
+
 ## 2026-09-06T07:28（hypothesis_queue排程接續，取鎖乾淨LOCK_ACQUIRED）：
 發現`HYPOTHESIS_QUEUE.md`內文不一致——#40詳細條目章節（第3928行起）
 還停在上一輪「地基完成、尚未執行完整回補」的舊狀態，但「排隊順序
