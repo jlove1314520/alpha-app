@@ -17,6 +17,11 @@
 
 ---
 
+## ✅ 2026-09-05（維運帽）馬拉松基礎設施修穩A~F：四條驗收全通過、挖礦已恢復
+
+見`PROGRESS.md`同日條目與`research/PROPOSAL_2026-09-05_marathon_process_hardening.md`第四節。
+LOCK_STALE 0次／每輪讀取量最大52.2KB／預算使用率最高4.0%／故意殺session後背景工作照跑完且登記簿正確捕捉。
+
 ## ✅ 2026-09-04晚間（維運帽）HTTPS方案A第一階段：自簽CA＋/ca.crt端點
 
 見`PROGRESS.md`同日條目。`research/gen_local_ca.py`新增；`/ca.crt`不驗token可下載；

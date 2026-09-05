@@ -16,6 +16,38 @@
 
 ---
 
+## 2026-09-05傍晚（維運帽）— 馬拉松基礎設施修穩A~F＋四條驗收全通過，挖礦已恢復
+
+總司令核准提案選項1（暫停挖礦、一次做完A~F）。**根因不是四個bug，是同一個結構問題**：每輪是會被
+`--max-budget-usd 5` 砍掉的`claude -p` session，砍掉時Bash子行程陪葬、鎖沒人釋放、下一輪只看到
+`LOCK_STALE`便猜「卡住」——`marathon_cycle.log` 427次結束裡64次是預算砍的，09-05凌晨10小時就12輪。
+
+**做了什麼**（commit `a01c442`＋`9319707`）：
+- A/B `research/run_detached.py`（新增）：重度工作交給 `DETACHED_PROCESS|CREATE_BREAKAWAY_FROM_JOB` 的看門狗行程，
+  session 死掉照跑完；登記簿 `data/jobs.json` 記 status/exit_code/expect_exists；預設拒絕並行；有 wait/reap/log。
+- C `run-marathon-cycle.ps1`（重寫）：25分鐘 wall-clock 硬超時、finally 釋放自己的鎖、stream-json 逐事件存檔、
+  死因與花費寫 `marathon_cycle_last.json`；預算 $5→$8；`--strict-mcp-config` 空設定（省掉98個MCP工具schema）。
+- D `marathon_lock.py` STALE_MINUTES 25→27（嚴格大於ps1硬超時）；兩支vbs改 `bWaitOnReturn=True`。
+- E `research/marathon_brief.py`（新增）開工簡報取代 cat 大檔；三軌 STATE 各裁到最新3則（46/108/87KB→7/10/9KB，
+  其餘進 `*_STATE_ARCHIVE.md`）。
+- F `research/cycle_stats.py`（新增）解析 jsonl 算 reason/cost/read_kb；協定第0節改成「LOCK_STALE先看
+  `marathon_cycle_last.json` 的 reason，不要再猜卡住」；新增第0b節（基礎設施規則＋根因＋驗收數字）。
+
+**驗收（連跑7輪＋1次故意殺session，數字不是推論）**：
+(a) `LOCK_STALE` 0次；刻意2次重疊都正確 `LOCK_HELD` 退讓。
+(b) 每輪讀取量最大52.2KB（原約1.2MB），全部<300KB。
+(c) 預算使用率最高4.0%（$0.086~$0.323／上限$8），7輪全部 `reason=OK`。
+(d) 故意 `taskkill /T /F` 整棵 session 行程樹後，看門狗與工作行程都存活、工作跑完寫出產出檔，
+    登記簿 `status=finished/exit_code=0/expect_exists=True`；逾時路徑也驗過（`status=timeout/exit_code=-9`）。
+
+**驗收中抓到的真缺陷**：ps1 finally 原本用「鎖時間戳>=本輪開始」猜擁有權，兩輪重疊時會誤釋放另一輪
+還在用的鎖（實測18:05:05那輪釋放了18:04:44那輪18:05:14才建立的鎖）→ 鎖檔改 `pid|ts|cycle_id` 三欄，
+`cycle_id` 由 `ALPHA_CYCLE_ID` 環境變數傳入，finally 只釋放相符的鎖，重測確認不相符時 log 寫 `left alone`。
+
+**AlphaMarathon 排程已重新啟用**（下次 18:30），維修旗標已移除。
+
+---
+
 ## 2026-09-05上午（維運帽）— HTTPS方案A第二階段切換完成
 
 總司令確認手機已安裝Alpha Local CA後，啟動器`run-alpha-live-server-cycle.ps1`設`ALPHA_LIVE_SERVER_HTTPS=1`並重啟：
