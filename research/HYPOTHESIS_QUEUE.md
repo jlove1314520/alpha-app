@@ -984,14 +984,23 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     設計新假設軸#37（全市場現股當沖比重當市場過熱regime訊號，見下方
     新章節）——#37已於2026-09-06接續排程第十輪結案：FAIL（見上方item
     37與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#146），移出排隊
-    佇列，完整見上方item 37條目。**#38（大戶籌碼集中度/股東持股分級表）
-    已於2026-09-06接續排程資料可行性查證即死：FinMind`TaiwanStock
-    HoldingSharesPer`需付費會員（免費層HTTP 400），集保結算所TDCC免費
-    開放API（`openapi.tdcc.com.tw/v1/opendata/1-5`）不支援日期參數，
-    永遠只回傳最新一週快照，無歷史時間序列可回測，依快殺標準「資料
-    不可及」判FAIL，未進第1關，見`STRATEGY_GRAVEYARD.md`/
-    `TRIALS_LEDGER.md`#148。移出排隊佇列。設計新假設軸#39（0050/台灣
-    50指數成分股調整事件效應），排隊第一，**資料可行性尚未查證**。**
+    佇列，完整見上方item 37條目。
+38. ~~大戶籌碼集中度（股東持股分級表）~~——**2026-09-06接續排程資料
+    可行性查證即死**：FinMind`TaiwanStockHoldingSharesPer`需付費會員
+    （免費層HTTP 400），集保結算所TDCC免費開放API
+    （`openapi.tdcc.com.tw/v1/opendata/1-5`）不支援日期參數，永遠只
+    回傳最新一週快照，無歷史時間序列可回測，依快殺標準「資料不可及」
+    判FAIL，未進第1關，見`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#148。
+    移出排隊佇列。
+39. ~~0050/台灣50指數成分股調整事件效應~~——**2026-09-06接續排程資料
+    可行性查證即死**：掃描TWSE openapi全144端點+FinMind dataset清單+
+    data.gov.tw搜尋，皆無「歷史成分股名單+調整生效日期」結構化API，
+    跟#38同一種死法，依快殺標準「資料不可及」判FAIL，未進第1關，見
+    `STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#149、
+    `index_reconstitution_probe.py`（新增，可重複執行）。移出排隊
+    佇列。**佇列#1~39全數結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪
+    重新查證仍未解鎖），下一輪需設計新假設軸#40，本輪因預算考量未
+    倉促設計。**
 37. ~~全市場現股當沖比重（Day-Trading Ratio）~~——**2026-09-06接續排程
     第十輪已結案：FAIL**（TWTASU回補完成100%（2609/2609）後跑第1關
     cheap gate，`day_trading_ratio_gate.py`，TRAIN corr=-0.0550
@@ -3883,5 +3892,11 @@ FinMind是否有現成dataset（本輪未查證，避免重蹈#38覆轍，下一
 必須先用短窗口探查確認資料可得性與涵蓋年期，比照`holding_shares_per_
 probe.py`同樣的探查優先原則，確認可行才投入正式因子/事件研究開發）。
 
-**狀態**：2026-09-06登記，尚未開始，下一輪從資料可行性查證開始，不得
-跳過查證直接假設可行。
+**狀態**：~~2026-09-06登記~~——**同日接續排程已結案：FAIL（資料不可及，
+未進第1關）**。查證FinMind/TWSE openapi（掃描全144端點）/data.gov.tw
+三條免費路線，皆無「歷史成分股名單+調整生效日期」結構化API，跟#38
+同一種死法，見`index_reconstitution_probe.py`（新增，可重複執行）、
+`STRATEGY_GRAVEYARD.md`對應段落、`TRIALS_LEDGER.md`#149。移出排隊
+佇列。佇列#1~39全數結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證
+`BACKLOG.md`仍未解鎖），下一輪需設計新假設軸#40，本輪因預算考量未
+倉促設計。

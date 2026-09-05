@@ -1,5 +1,21 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06（hypothesis_queue排程接續第十二輪，上一輪鎖檔陳舊
+(149.8分鐘)被回收，疑似上一輪失敗未產出）：查證#39（0050/台灣50指數
+成分股調整事件效應）資料可行性——掃描TWSE openapi全144端點+FinMind
+dataset清單+data.gov.tw搜尋，皆無「歷史成分股名單+調整生效日期」
+結構化API，跟#38同一種死法，依快殺標準「資料不可及」判**FAIL**，
+未進第1關。同時修正「排隊順序總結」章節格式不一致（#38/#39原先擠在
+#36段落文字裡沒有自己的編號bullet，已拆開對齊）。已更新
+`HYPOTHESIS_QUEUE.md`#39條目+排隊順序總結、`TRIALS_LEDGER.md`#149、
+`STRATEGY_GRAVEYARD.md`對應段落。新增`index_reconstitution_probe.py`
+（可重複執行）。holdout未消耗（=False）。佇列#1~39全數結案，剩餘
+#5/#6/#8/#10仍卡外部依賴（本輪重新查證`BACKLOG.md`仍未解鎖），下一輪
+需設計新假設軸#40，本輪因預算考量未倉促設計。`git status`確認repo內
+仍有非本輪產生的殘留（`data/rate_limit_state.json`、
+`.github/workflows/audit.yml`、帶亂碼檔名tmp檔、
+`round366_deep_dive...log`），未觸碰、不納入本輪commit。
+
 ## 2026-09-06T02:28（hypothesis_queue排程接續第十一輪，上一輪鎖檔陳舊
 (30.2分鐘)被回收，疑似上一輪失敗）：重新查證確認佇列#1~37全數結案、
 #5/#6/#8/#10仍卡外部依賴（BACKLOG.md無新進展）未解鎖，設計新假設軸
