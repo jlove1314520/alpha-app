@@ -1592,6 +1592,49 @@ API。台灣指數公司（TIP）官方雖每季公布調整結果，但只以�
 結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證`BACKLOG.md`仍未
 解鎖），下一輪需設計新假設軸#40。
 
+### 庫藏股買回公告效應（Share Buyback Announcement Effect，管理層信心
+信號事件研究，`HYPOTHESIS_QUEUE.md` #40，2026-09-06 hypothesis_queue
+排程結案）
+
+- **哪一關死的**：第1關cheap gate（CAR事件研究+隨機日期控制組），
+  unconditional版跟執行率分組深挖版皆未過。
+- **具體數字**：`buyback_car_gate.py`——抽樣100檔買回公告股票（母體
+  725檔，`SAMPLE_SEED=20260906`），99檔取得可用還原股價，總可用事件
+  265筆。TRAIN mean_CAR=+4.00%（t-test p<0.0001, n=215）、VAL
+  mean_CAR=+2.12%（t-test p=0.0780, n=50），train/val同號，方向與
+  事前綁定的正向假設一致，但**VAL期mean_CAR vs 200次隨機日期控制組
+  （同一批公司、隨機挑非公告日當偽事件日）percentile=84.5，未過
+  90.0門檻**（勉強未過，非決定性反證）。因為未達門檻屬「勉強」而非
+  「遠低於」，且假設本身「台股特有考量」小節已預先寫明「宣告但執行率
+  低」是cheap talk疑慮，依既有寫明的計畫做`buyback_car_gate_high_
+  execution.py`執行率分組深挖（事前綁定門檻>=80%為高執行率組）：**高
+  執行率組VAL percentile=78.0（n=23，樣本不足30）、低執行率組VAL
+  percentile=85.0（n=27，樣本亦不足30）——高執行率組percentile反而
+  低於低執行率組，跟「高執行率=真實信心表態應有更強CAR」的假設方向
+  相反**，證明cheap talk稀釋假說無法解釋unconditional版本的未過關，
+  執行率分組沒有拯救訊號。
+- **這個死法能不能泛化**：**不泛化成「公司主動決策型事件驅動
+  （corporate action event-driven）這個機制大類完全無效」**——這是
+  本佇列第一次測試這個機制分類（跟已FAIL的#14月營收公布/#24除權息
+  季節經濟機制不同，那兩者是被動揭露/機械調整，這條是管理層主動決策
+  +signaling），只測了「20交易日forward horizon+CAR相對大盤超額報酬
+  +100檔抽樣」這一組具體構造；也不代表「庫藏股宣告完全沒有市場反應」
+  ——TRAIN期訊號存在且高度顯著（p<0.0001），VAL期方向一致且t檢定
+  勉強顯著（p=0.078<0.10），只是幅度不足以在隨機日期控制組面前站穩
+  90百分位這個事前綁定的高標準，且執行率分組排除了「訊號被cheap talk
+  稀釋」這個最自然的補救解釋。死的是「unconditional pooled CAR
+  event study，N=20交易日，100檔抽樣」這個具體判定，未來若要重新
+  評估，值得考慮的方向：擴大樣本至全部725檔（提高VAL期事件數，目前
+  VAL僅50筆是判定信心不足的主因之一）、測試不同forward horizon（如
+  5/10日觀察即時反應強度是否更高）、或改用宣告金額佔市值比重當
+  連續因子做cross-sectional排序而非事件研究pooled平均。
+- **原始記錄**：`buyback_car_gate.py`、`buyback_car_gate_high_
+  execution.py`、`mops_buyback_client.py`/`backfill_buyback_
+  announcement.py`（資料回補地基，皆新增可重複執行）、
+  `TRIALS_LEDGER.md`#150、`HYPOTHESIS_QUEUE.md` #40。佇列#1~40全數
+  結案，剩餘#5/#6/#8/#10仍卡外部依賴，本輪因預算考量未設計新假設軸
+  #41，下一輪從設計#41開始。
+
 ### portfolio_multifactor_v2（多因子組合策略家族，A_4pass/B_plus_value_pe，
 equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
 子版本，股票，TW軌，2026-09-06整併結案）

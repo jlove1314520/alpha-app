@@ -16,6 +16,45 @@
 
 ---
 
+## 2026-09-06 凌晨（開發帽）— 實測.五：錯誤橫幅的根因與可複製的詳情
+
+### 根因（用修正前的版本重現，不是推論）
+把修正前的 `index.html`（commit `13b8dc0`）取出來單獨載入，重現總司令的操作
+（連開 12 檔選股報告頁），`GLOBAL_ERRORS` 出現 **8 筆**：
+
+```
+[07:03] unhandledrejection: Cannot read properties of null (reading 'toFixed')
+```
+
+就是光聖 6442 那條 `valuation_adj.raw.peg = null`。**同一個 App 版本的同一個 bug
+有兩個症狀**：畫面上是「建議進場價 32」，橫幅上是「偵測到程式錯誤」。
+修正後同樣操作跑一次：`GLOBAL_ERRORS` **0 筆**。
+
+### 為什麼它逃得出既有的錯誤隔離
+`go()` 是用 `_safeSync('renderReport', renderReport)` 呼叫的，而 `renderReport`
+是 **async 函式**——async 的錯誤是 rejected promise，不是同步 throw，`try/catch`
+接不到，於是冒到 window 的 `unhandledrejection`。
+這正是 CLAUDE.md 早就寫過的地雷，但靠「呼叫端自己記得要用 `_safeAsync`」防不住：
+記錯一次就是下一條橫幅。
+
+**結構性修法**：`_safeSync()` 改成「回傳值是 thenable 就順手 `.catch()`」，
+同一個標籤同時保護同步與非同步兩種函式，呼叫端不用再分辨。
+實測：`_safeSync('測試async', async()=>{throw ...})` 現在會被記錄
+（GLOBAL_ERRORS 3→4），修改前會直接變成 unhandledrejection。
+
+### 橫幅改版
+- summary 從固定一句「偵測到程式錯誤」改成有內容的一行：
+  `⚠ 偵測到程式錯誤 3 筆／2 種　最近：ensureSparklines — HTTP 503`
+  （同一個錯誤常常連發數十次，只講「有錯誤」沒有資訊量）
+- 新增「複製錯誤詳情」按鈕，一次帶走版本、網址、UA、螢幕尺寸、即時源狀態、
+  自選股檔數與全部錯誤清單，總司令可以直接貼給 Cowork，不用再一段段抄
+- iOS Safari 會在非安全來源／非使用者手勢時擋掉 clipboard API：退回「自動選取
+  整段文字」讓使用者長按複製，並明講原因，不是把失敗吞掉
+
+**冒煙測試：40 項全 PASS、0 FAIL。**
+
+---
+
 ## 2026-09-06 凌晨（開發帽）— 實測.一：新增自選股「無報價」根因與四層統一回退鏈
 
 ### 根因

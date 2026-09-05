@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06（hypothesis_queue排程接續，上一輪鎖檔陳舊(30分鐘)被回收，
+#40最終結案：FAIL）：接續上一輪完成的MOPS資料回補地基，執行完整回補
+（41個快取檔案，1727原始列去重後1824列），寫`buyback_car_gate.py`跑
+第1關cheap gate（CAR事件研究：董事會決議日為事件日、N=20交易日
+forward horizon、CAR=個股超額報酬vs TAIEX、隨機日期控制組N=200）。
+抽樣100檔（母體725檔）、265筆可用事件：TRAIN mean_CAR=+4.00%
+(p<0.0001)、VAL mean_CAR=+2.12%(p=0.078)，train/val同號但VAL null
+percentile=84.5未過90.0門檻。依假設自己預先寫明的深挖計畫測執行率
+分組（`buyback_car_gate_high_execution.py`，區分真實信心表態vs
+cheap talk）：高執行率組VAL percentile=78.0(n=23)、低執行率組
+85.0(n=27)，皆未過且高執行率組反而更低，排除cheap talk稀釋假說，
+判定#40最終FAIL。已同步`HYPOTHESIS_QUEUE.md`#40狀態+排隊順序總結、
+`STRATEGY_GRAVEYARD.md`新增段落、`TRIALS_LEDGER.md`#150。**佇列
+#1~40全數結案，本輪因預算考量未設計新假設軸#41**（比照#37先例，
+優先確保#40完整記錄），下一輪從設計#41開始。`is_holdout_consumed()`
+開工/收工前皆確認`False`。git status確認`.github/workflows/audit.yml`
+（非本輪產生）未觸碰、未納入commit。
+
 ## 2026-09-06 06:30（hypothesis_queue排程接續，#40地基完成）：接續上一輪
 新增的#40（庫藏股買回公告效應）——寫`buyback_announcement_probe.py`
 確認MOPS t35sc09可回溯至民國104年(2015)，過程發現表頭其實是兩列

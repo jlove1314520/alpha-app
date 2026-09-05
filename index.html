@@ -456,9 +456,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <!-- 2026-08-27新增：全域錯誤收集（window.onerror/unhandledrejection + 各面板
        自己接住的錯誤），預設摺疊，只在有錯誤時才顯示，讓使用者/我都能看到實際
        發生過什麼，不是被console.warn悄悄吞掉找不到。 -->
+<!-- 2026-09-06（實測.五）改版：原本 summary 是一句固定的「偵測到程式錯誤」，
+       總司令看到之後還要自己點開、再一段一段抄給 Cowork。改成一行就講清楚
+       「幾筆、最近一筆是什麼」，並附一顆把完整詳情（含裝置與版本資訊）複製到
+       剪貼簿的按鈕。 -->
   <details id="error-log" style="display:none;background:rgba(220,80,80,.08);border-bottom:1px solid rgba(220,80,80,.25);color:#e08080;font-size:10.5px;padding:2px 16px">
-    <summary style="cursor:pointer;padding:6px 0">⚠ 偵測到程式錯誤（點開看詳情，不影響其他功能）</summary>
-    <div id="error-log-list" style="padding:0 0 8px;white-space:pre-wrap;word-break:break-all"></div>
+    <summary id="error-log-summary" style="cursor:pointer;padding:6px 0">⚠ 偵測到程式錯誤</summary>
+    <div style="padding:0 0 8px">
+      <button id="error-log-copy" class="press" style="margin:2px 0 8px;padding:6px 12px;border-radius:8px;border:1px solid rgba(220,80,80,.45);background:rgba(220,80,80,.12);color:#e08080;font-size:11px;cursor:pointer">複製錯誤詳情</button>
+      <div id="error-log-list" style="white-space:pre-wrap;word-break:break-all"></div>
+    </div>
   </details>
 
   <!-- 2026-08-28新增（使用者要求的pull-to-refresh，跟refreshTap()按鈕是
@@ -1333,12 +1340,62 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(GLOBAL_ERRORS.length>20)GLOBAL_ERRORS.shift();
     renderErrorLog();
   }
+  // 2026-09-06（實測.五）一行摘要：幾筆、幾種、最近一筆是什麼。
+  // 同一個錯誤常常連續發生好幾十次（例如某個渲染每次進頁面都拋），只講「有錯誤」
+  // 沒有資訊量，講「12 筆、2 種、最近：renderReport 讀取 null 的 toFixed」才有。
+  function errorLogSummary(){
+    if(!GLOBAL_ERRORS.length)return '';
+    const kinds=new Set(GLOBAL_ERRORS.map(x=>x.label+'|'+x.msg));
+    const last=GLOBAL_ERRORS[GLOBAL_ERRORS.length-1];
+    const msg=last.msg.length>52?last.msg.slice(0,52)+'…':last.msg;
+    return `⚠ 偵測到程式錯誤 ${GLOBAL_ERRORS.length} 筆／${kinds.size} 種　最近：${last.label} — ${msg}`;
+  }
+  // 複製給 Cowork 用的完整內容。除了錯誤本身，把版本、時間、裝置、螢幕、連線狀態
+  // 一起帶上——沒有這些，收到的人第一句一定是「你的版本是哪個」。
+  function errorLogDetailText(){
+    const ver=(document.getElementById('about-app-ver')||{}).textContent||'?';
+    const lines=[
+      'Alpha 錯誤詳情',
+      '時間：'+new Date().toISOString(),
+      'App 版本：'+ver,
+      '網址：'+location.href,
+      'UA：'+navigator.userAgent,
+      '螢幕：'+window.innerWidth+'x'+window.innerHeight+' dpr='+(window.devicePixelRatio||1),
+      '即時源：'+(LIVE.connected?('連線中 '+(LIVE.sourceMode||'')):(LIVE.configured?('已設定但離線'+(LIVE.lastError?'：'+LIVE.lastError:'')):'未設定')),
+      '自選股：'+WL.length+' 檔',
+      '',
+      '錯誤 '+GLOBAL_ERRORS.length+' 筆（新到舊）：',
+    ];
+    GLOBAL_ERRORS.slice().reverse().forEach((x,i)=>lines.push(`${i+1}. [${x.time}] ${x.label}: ${x.msg}`));
+    return lines.join('\n');
+  }
+  async function copyErrorLog(){
+    const text=errorLogDetailText();
+    try{
+      await navigator.clipboard.writeText(text);
+      toast('錯誤詳情已複製，可以直接貼給 Cowork');
+    }catch(e){
+      // iOS Safari 在非使用者手勢或非安全來源下會拒絕 clipboard API。
+      // 退回「選取整段文字」，使用者長按就能複製，不是把失敗吞掉。
+      console.warn('[copyErrorLog]',e);
+      const listEl=document.getElementById('error-log-list');
+      if(listEl){
+        const r=document.createRange();r.selectNodeContents(listEl);
+        const sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
+        toast('這個瀏覽器擋了自動複製，已為你選取，長按選「複製」');
+      }else{toast('複製失敗：'+(e.message||e))}
+    }
+  }
   function renderErrorLog(){
     const el=document.getElementById('error-log'),listEl=document.getElementById('error-log-list');
+    const sumEl=document.getElementById('error-log-summary');
     if(!el||!listEl)return;
     if(!GLOBAL_ERRORS.length){el.style.display='none';return}
     el.style.display='';
-    listEl.textContent=GLOBAL_ERRORS.slice().reverse().map(x=>`[${x.time}] ${x.label}: ${x.msg}`).join('\n');
+    if(sumEl)sumEl.textContent=errorLogSummary();
+    listEl.textContent=errorLogDetailText();
+    const btn=document.getElementById('error-log-copy');
+    if(btn&&!btn._wired){btn._wired=true;btn.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();_safeAsync('copyErrorLog',copyErrorLog)}}
   }
   window.addEventListener('error',e=>{recordGlobalError('window.onerror',e.error||e.message||e)});
   window.addEventListener('unhandledrejection',e=>{recordGlobalError('unhandledrejection',e.reason)});
@@ -1349,7 +1406,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 失敗，不能連累其他分頁或導覽本身——sync函式包try/catch，async函式的promise
   // 要接.catch()（try/catch接不住async函式await之後才發生的rejection）。錯誤
   // 一律記進 recordGlobalError()，讓診斷橫幅看得到，不是單純console.warn完就消失。
-  function _safeSync(label,fn){try{fn()}catch(e){console.warn('['+label+']',e);recordGlobalError(label,e)}}
+  // 2026-09-06（實測.五）_safeSync 補上 async 保護。
+  // 根因證據：用修正前的版本重現總司令的操作（連開 12 檔選股報告頁），
+  // GLOBAL_ERRORS 出現 8 筆 `unhandledrejection: Cannot read properties of null
+  // (reading 'toFixed')`——那正是 6442 的 peg=null。它之所以逃出 _safeSync，是因為
+  // `go()` 用 `_safeSync('renderReport', renderReport)` 呼叫一個 **async** 函式：
+  // async 函式的錯誤是 rejected promise，不是同步 throw，try/catch 接不到，於是
+  // 冒到 window 的 unhandledrejection，變成使用者看到的那條橫幅。
+  // 這裡改成「回傳值是 thenable 就順手 .catch()」，同一個標籤同時保護兩種函式，
+  // 呼叫端不用再去記哪一個是 async（記錯就是下一次同樣的橫幅）。
+  function _safeSync(label,fn){
+    try{
+      const r=fn();
+      if(r&&typeof r.then==='function')r.catch(e=>{console.warn('['+label+']',e);recordGlobalError(label,e)});
+      return r;
+    }catch(e){console.warn('['+label+']',e);recordGlobalError(label,e)}
+  }
   function _safeAsync(label,fn){Promise.resolve().then(fn).catch(e=>{console.warn('['+label+']',e);recordGlobalError(label,e)})}
   let CURRENT_TAB='home'; // 2026-08-28新增，供pull-to-refresh判斷目前在哪一頁該重整什麼
   function go(name){
@@ -4906,7 +4978,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.0236';
+  const APP_VERSION='2026-09-06.0706';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
