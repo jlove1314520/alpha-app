@@ -1,5 +1,14 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T10:21（hypothesis_queue排程接續，LOCK_ACQUIRED乾淨取鎖）：
+`git pull`確認`Already up to date`、`git status`乾淨無殘留。#36（個股
+融券使用率）連續執行兩次`short_sale_utilization_portfolio_v1.py`，
+TRAIN隨機控制組checkpoint持久化進度50→80→90/100 draws（兩次執行皆
+順利跑完正常結束，未觸發timeout截斷）。VALIDATION期仍未開始，
+`is_holdout_consumed()`前後皆確認False。**判定：未結案，接續中，下一輪
+從90/100接續，只差10筆即完成TRAIN**。已更新`HYPOTHESIS_QUEUE.md`#36
+條目對應段落，commit+push收工。
+
 **格式修正說明（2026-09-05 hypothesis_queue排程本輪發現並修正）**：上一輪
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
