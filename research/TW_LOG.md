@@ -1808,3 +1808,35 @@ TW軌兩項地基背景工作複查：`data/backfill_state.json`重新統計done
 **記錄**：`TRIALS_LEDGER.md`#142（新增列）、`TW_LEADS.md`#14（更新）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，執行約1分鐘。輸出：`data/margin_debt_level_val_year_stats.csv`、`data/margin_debt_level_val_leave_one_year_out.csv`、`data/margin_debt_level_val_top10_drawdowns.csv`（皆新增）。
 
 **下一輪TW軌建議**：(a) 查證TRAIN期2017年為何單獨貢獻強訊號、其餘年份弱/反號的機制（可能連結到#140保留疑慮②暖身期資料品質）；(b) 隨機控制組≥100 draws獨立抽樣版本（目前N=200是排列檢定，非獨立抽樣控制組）；(c) 或轉回`portfolio_multifactor_v2`組合策略層級其他尚未測維度。
+
+
+## 第380輪（2026-09-05T22:00+08:00，TW）——`margin_debt_level_v1`第2關：circular-shift自相關保留版控制組，候選整體降級
+
+**取鎖**：乾淨（非陳舊鎖檔），cycle_id `20260905-220036`。
+
+**選軌理由**：三軌時間戳 FUT 18:30（round372，最舊，但近10輪已佔2輪=20%達`MARATHON_PROTOCOL.md`資源上限且round372自建議優先回TW/US，跳過）／US 20:35（round376，次舊，但開工前查`data/rate_limit_state.json`確認FinMind額度仍鎖到22:38+08:00，約37分鐘後才解除，US下一步需大量新增抓取會立即卡住）／TW 21:30（round379，最新）——不機械選次舊US，改選TW（協定第0節資源配置例外，理由同round373/375/377/379處理邏輯）。
+
+**工作單位**：round379下一步(b)「隨機控制組≥100 draws獨立版本（目前N=200是排列檢定非獨立抽樣控制組）」。查證後認為關鍵缺口不是draws數量不夠多，是`margin_debt_level_gate.py`/`margin_debt_growth_gate.py`共用的`_shuffle_percentile()`完全打散配對版本沒有保留`level_pct`（trailing156週百分位排名，本身變動極慢、自相關極強）與`fwd_mdd_abs`（重疊horizon窗口滾動最大回撤，同樣高度自相關）各自的自相關結構——虛無假設下把每個觀測點視為獨立同分布，可能低估null變異數、高估顯著性。
+
+**方法**：新增`margin_debt_level_circular_shift_control.py`。只測60d(12w)窗口（20d已在round375明確FAIL，不重複測）。對`level_pct`做circular shift（`np.roll`，隨機位移量k∈[1,n-1]，`TRAIN`/`VAL`各自獨立在期間內部抽樣位移量，不跨期間位移），保留該序列自身完整自相關結構、只破壞與`fwd_mdd_abs`的真實時間對齊；同時用同一份資料、同seed重算完全打散版本（N=500，供直接比較）。N=500事前綁定（<1000不觸發`CLAUDE.md`「1000 draws規模投入」停下條件）。全程零新增API呼叫，重用`margin_debt_level_gate.py`/`margin_debt_growth_gate.py`既有函式與`backfill_margin_debt_market.py`662週檔快取。
+
+**結果**：
+
+| 期間 | n | real corr | real p | 完全打散null std | 完全打散percentile | circular-shift null std | circular-shift percentile | 差距 |
+|---|---|---|---|---|---|---|---|---|
+| TRAIN | 257 | +0.1170 | 0.0612 | 0.0596 | 97.0 | **0.2378** | **60.6** | +36.4 |
+| VAL | 181 | +0.4567 | <0.0001 | 0.0762 | 100.0 | **0.3157** | **95.0** | +5.0 |
+
+circular-shift null的標準差（TRAIN 0.2378、VAL 0.3157）約為完全打散null（TRAIN 0.0596、VAL 0.0762）的4倍，證實兩序列的自相關確實讓完全打散版本系統性低估了虛無假設下的變異數。**TRAIN期percentile從98.0（#140/#141原記錄，本輪完全打散版N=500複現97.0，數字接近、方法一致）暴跌到60.6，等同幾乎無法區分於雜訊；VAL期percentile從100.0降為95.0，仍相對穩健但已不是「清楚過關」的量級。**
+
+**判讀**：這跟round379發現的「TRAIN期是被2017年單一年份（corr=+0.82）拉高、其餘5年接近零或反號」互相印證，給出一致的技術性解釋——2017年單年的強相關很可能本身就是自相關序列偶然對齊的產物，不是普遍存在的真訊號。VAL期在circular-shift版下仍有95.0百分位，比原本100.0保守但仍不算差，惟已不足以稱為「clean pass」。
+
+**方法論延伸風險（記錄但本輪未逐一重測）**：`margin_debt_growth_gate.py`（`TRIALS_LEDGER.md`#97，已FAIL）與其他任何用同一套完全打散`_shuffle_percentile()`框架測「低頻慢變訊號 vs 重疊窗口回撤」的cheap gate，都可能有同款系統性高估顯著性的問題——這不是`margin_debt_level_v1`獨有的缺陷，需要另外盤點，本輪不逐一重測（超出本輪工作單位範圍）。
+
+**判定**：`margin_debt_level_v1`目前累積的證據（TRAIN在嚴謹控制組下無法區分雜訊、VAL穩健度也從100.0打折至95.0）**不足以支撐繼續投入更多深挖資源**（成本敏感度/regime overlay整合接到`portfolio_multifactor_v2`）。建議下一輪對這條候選標記「證據強度不足，非正式PASS」（已在`TW_LEADS.md`#14更新，非死亡判定，因VAL仍有一定強度，但需要更多獨立驗證才能重新啟動深挖），優先轉向`portfolio_multifactor_v2`其他維度。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，執行約1分鐘。輸出：`data/margin_debt_level_circular_shift_control_results.csv`（新增）。
+
+**下一輪TW軌建議**：(a) 盤點其他用完全打散`_shuffle_percentile()`框架的cheap gate是否有同款自相關高估問題（例如`#97 margin_debt_growth_gate.py`本身雖已FAIL但方法論記錄仍該補充警示）；(b) 轉回`portfolio_multifactor_v2`組合策略層級其他尚未測的維度（regime overlay、下檔保護證明、leave-one-factor-out成本敏感度）；(c) `margin_debt_level_v1`如需重新啟動深挖，需先有獨立於這批樣本的驗證（例如不同的trailing窗口定義或不同市場的類比訊號）。
+
+寫入`TRIALS_LEDGER.md`#143、`TW_LEADS.md`#14補充（降級）、`TW_MARATHON_STATE.md`（本輪最新條目）。
