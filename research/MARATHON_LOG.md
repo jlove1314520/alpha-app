@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T16:14（hypothesis_queue排程接續，取鎖時發現LOCK_STALE
+[held by 66552, 29.9 min old]被自動回收recovering，記錄：上一輪疑似
+執行中斷未正常收工——`git pull`確認`Already up to date`、`git status`
+無殘留未commit變更，判斷上一輪已正常收尾，這次陳舊只是排程間隔巧合，
+非資料遺失）：#36（個股融券使用率）連續執行兩次
+`short_sale_utilization_portfolio_v1.py`，**TRAIN隨機控制組跑完
+100/100、VALIDATION隨機控制組從70跑完到100/100，第2關（隨機控制組）
+本輪判定：PASS**。TRAIN：真實策略+59.53%vs買進持有+58.86%、
+alpha年化+7.44%、beta=+0.310、p=0.3717（不顯著）、隨機控制組
+percentile=100.0。VALIDATION：真實策略+72.46%vs買進持有+54.58%、
+alpha年化+11.88%、beta=+0.278、p=0.0354（顯著）、隨機控制組
+percentile=100.0。腳本內建判準（VAL percentile>=90.0）判PASS，但依
+alpha顯著性+beta拆解同一把尺，TRAIN期不顯著這件事留到第6/7關一併
+檢視，**尚未結案**。`is_holdout_consumed()`前後皆確認False。**判定：
+第2關PASS，下一輪從第3關參數密集高原（TOP_N掃描）開始，不跳關**。
+已更新`HYPOTHESIS_QUEUE.md`#36條目對應段落與「排隊順序總結」章節、
+`TRIALS_LEDGER.md`新增#133，commit+push收工。
+
 ## 2026-09-05T10:21（hypothesis_queue排程接續，LOCK_ACQUIRED乾淨取鎖）：
 `git pull`確認`Already up to date`、`git status`乾淨無殘留。#36（個股
 融券使用率）連續執行兩次`short_sale_utilization_portfolio_v1.py`，
