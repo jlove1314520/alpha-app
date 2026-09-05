@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-05T17:07（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#36
+（個股融券使用率）第5/6關（leave-one-out+逐年一致性）本輪完成，**判定：
+皆PASS**。新增`short_sale_utilization_gate5_loo.py`（逐字比照
+`copper_gold_ratio_overlay_v1.py`#34第5/6關同一套判準，用TRAIN期單一
+真實訊號equity curve逐年拆解，1x成本，只測TRAIN不動VAL；第6關直接複用
+第5關已算好的逐年報酬dict，免費延伸判斷、非新工作單位）。TRAIN逐年
+報酬2015~2020：-1.92%/+5.69%/+21.87%/+2.13%/+14.24%/+8.22%（複利連乘
++59.53%，與`short_sale_utilization_portfolio_v1.py`TRAIN真實策略報酬
+交叉確認一致）。第5關拿掉貢獻最大的2017年(+21.87%)後剩餘複利總報酬
++30.90%仍為正，PASS。第6關6個年度中5個為正(5/6=83.3%)，達門檻PASS。
+完整數字見`TRIALS_LEDGER.md`#135。**誠實保留（本輪新發現，不妄下最終
+結論）**：這條候選出現「TRAIN期alpha不顯著(p=0.3717)、VAL期alpha
+顯著(p=0.0354)」的組合，跟本佇列過往FAIL案例常見型態（多為VAL不顯著）
+相反，需要更審慎判斷才能定最終alpha顯著性判準，本輪刻意不在此做最終
+PASS/FAIL裁決，也未觸及「通過完整GATE_SEQUENCE準備部署」的停下提案
+門檻（第9關下檔保護尚未開始）。`is_holdout_consumed()`開工/收工前皆以
+獨立`python -c`呼叫確認False，零新增API呼叫（純本地快取讀取）。**佇列
+排隊順序仍是#36（未結案，第5/6關PASS，下一輪從第9關下檔保護開始，或
+先處理TRAIN/VAL alpha顯著性不一致的判斷）**，剩餘#5/#6/#8/#10仍卡外部
+依賴，這輪工作單位到此為止。
+
 ## 2026-09-05T16:31（hypothesis_queue排程接續，取鎖乾淨非陳舊）：#36
 （個股融券使用率）第3關（參數密集高原）本輪完成，**判定：PASS**。新增
 `short_sale_utilization_gates.py`（逐字比照`f52w_high_gates.py`#17第3關
