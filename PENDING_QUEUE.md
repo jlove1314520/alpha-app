@@ -223,7 +223,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 >
 > 五、其餘佇列項目照序繼續（柱狀圖零基線、融資維持率分母、休市標籤、群益唯讀、分點演習、產業價值鏈、新聞管線、本地摘要）。每完成一項回報一項附證據。
 
-- [ ] **稽核.一** data_audit.py 七條恆等式＋6442根因＋每晚排程＋設定頁資料健康＋違規率>1%即smoke FAIL
+- [x] **稽核.一** **已完成**：6442 的 32 根因＝報告頁 `peg=null` 讓 renderReport 中途拋錯、上一檔（6808，收盤 32.0）的分批進場價留在畫面上（三個數字逐一吻合，已用 Playwright 重現）。四層防線：缺值安全格式化、REPORT_SEQ 世代守衛、面板 _safeSync 隔離＋進場清空、canonicalPrice ±30% 恆等式。`scripts/data_audit.py` 七類恆等式已產出首份全市場報告（2104 檔、一致性違規率 0.05%、通過 1% 門檻；完整度缺口 52.33% 歸稽核.二）。過程另抓到 **161 檔已下市股票還在選股榜上**（未來成長榜第 1 名是造假下市的康友-KY 6452），新增 build_listed_universe.py / prune_delisted.py 並在 generate_scores_live.py 加同一道過濾。設定頁新增「資料健康」區；冒煙測試新增 39/40/41 三道閘門，39 項全 PASS。⚠ `.github/workflows/audit.yml` 因 PAT 無 workflow scope 留在 working tree。
 - [ ] **稽核.二** data/coverage.json 八因子覆蓋率儀表板＋補齊「抓取失敗/解析失敗」兩類
 - [ ] **稽核.三** 自建全市場資料庫（每日append累積10類官方資料集）
 - [ ] **稽核.四** live server /settings 端點多裝置同步

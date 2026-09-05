@@ -1164,6 +1164,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">檢查時間：<b id="data-freshness-tm">--:--</b>。規則：盤中資料超過30分鐘沒更新、每日排程超過寬限3小時沒落地，就標紅「逾期」。標「本機」的項目只有你這台電腦開機且排程在跑才會更新。已知簡化：不扣國定假日，假日當天盤中項目會誤標逾期。</div>
     </div>
 
+    <!-- 2026-09-06（P0 稽核.一）資料健康：把 scripts/data_audit.py 每晚跑出來的
+    全市場一致性稽核結果直接攤在使用者面前。總司令實測「光聖 6442 現價 1755、
+    建議進場價 32」之後的結構性防線之一——資料對不對，不能只有開發者知道。 -->
+    <div class="card">
+      <h3>資料健康 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'audit-tm',async()=>{await loadDataAudit(true)})">重新整理</span></h3>
+      <div class="note" id="audit-summary">檢查中…</div>
+      <div id="audit-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
+    </div>
+
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
@@ -1496,6 +1506,45 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       isTodayClose:!live&&dataIsToday,
     };
   }
+  // ── 2026-09-06（P0 稽核.一）全 App 唯一的「現價」真值來源 ──────────────────
+  // 背景：總司令實測「光聖 6442 現價 1755、建議進場價 32」。根因是 renderReport()
+  // 在 await 之後沒有世代檢查，上一檔（6808，收盤 32.0）晚回來的 FinMind 結果
+  // 蓋進了 6442 的分批進場計畫（6808 的 last=32.0／low20=31.25／low60=31.25 與
+  // 畫面上三個數字逐一吻合，見 PROGRESS.md 的證據鏈）。
+  // 世代守衛（防線一）修掉那條競態；這支函式是防線二：任何頁面要顯示「由某個
+  // 資料源算出來的價格」時，先跟真值比一次，差超過 30% 就不准顯示數字，改顯示
+  // 誠實的錯誤訊息並記進診斷 log——不管未來是哪一支抓取器出錯，都不會再讓一個
+  // 明顯荒謬的價格安靜地出現在畫面上。
+  // 順序依總司令裁示：即時（Shioaji/IBKR）→ quotes_tw/us → quotes_all_tw 收盤
+  // → sparklines 最後一點。全部查不到就回 null（回 null 代表「無法查核」，
+  // 呼叫端要放行，不能因為查不到真值就把正常資料擋掉）。
+  function canonicalPrice(code){
+    const us=isUS(code);
+    try{
+      const iq=intradayQuote(code,us);
+      if(iq&&iq.price!=null&&isFinite(iq.price))return{price:+iq.price,src:'即時報價'};
+      const cold=(us?INTRADAY_US:INTRADAY_TW);
+      const cq=cold&&cold.quotes&&cold.quotes[code];
+      if(cq&&cq.price!=null&&isFinite(cq.price))return{price:+cq.price,src:us?'quotes_us.json':'quotes_tw.json'};
+      const all=QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes&&QUOTES_ALL_TW_CACHE.quotes[code];
+      if(all&&all.close!=null&&isFinite(all.close))return{price:+all.close,src:'quotes_all_tw.json'};
+      const sp=sparkFor(code);
+      if(sp&&sp.length&&isFinite(sp[sp.length-1]))return{price:+sp[sp.length-1],src:'sparklines.json'};
+    }catch(e){console.warn('[canonicalPrice]',e);recordGlobalError('canonicalPrice',e)}
+    return null;
+  }
+  const PRICE_SANITY_TOLERANCE=0.30;  // 總司令裁示：±30%
+  // 回傳 null=通過（或無法查核），回傳字串=不通過，字串就是要顯示給使用者看的原因。
+  function priceSanityFailure(code,price,label){
+    if(price==null||!isFinite(price))return null;
+    const c=canonicalPrice(code);
+    if(!c||!c.price)return null;                       // 查不到真值→無法查核，放行
+    const diff=Math.abs(price/c.price-1);
+    if(diff<=PRICE_SANITY_TOLERANCE)return null;
+    const msg=`${label} 算出的 ${nf(price.toFixed(2))} 與現價 ${nf(c.price.toFixed(2))}（${c.src}）差 ${(diff*100).toFixed(0)}%，超過 ${(PRICE_SANITY_TOLERANCE*100)}% 容許值，判定為資料不一致，暫不顯示。`;
+    recordGlobalError('priceSanity:'+code,new Error(msg));
+    return msg;
+  }
   async function loadIntradayQuotes(){
     // 2026-09-03深夜（乙.4）：即時串流連線中時，quotes_tw/us這兩份Actions冷檔（10分鐘才變一次、
     // 台股那份859KB）60秒內不重抓——串流每幾秒觸發一次重繪，每次都重抓會把手機流量吃光。
@@ -1812,6 +1861,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   const FM_TTL=3*60*1000; // localStorage 快取有效期：3 分鐘，過期後才重新打 FinMind
   const _d=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
   const nf=n=>n==null||isNaN(n)?'—':Number(n).toLocaleString();
+  // 2026-09-06（P0 稽核.一）缺值安全的數字格式化。
+  // 起因：光聖 6442 的 valuation_adj.raw.peg 是 null，報告頁直接寫 peg.toFixed(2)，
+  // 整個 renderReport() 在中途拋 TypeError 死掉——名稱已經換成「光聖 6442」但
+  // 下面的分批進場計畫還停在上一檔（昇貿 6808，收盤 32）的數字，看起來就像
+  // 「光聖現價 1755、建議進場價 32」。同一段還有 (null*100).toFixed(1) 會安靜地
+  // 印出「0.0%」，那是把「沒有資料」顯示成「成長 0%」，屬於假資料，一併根治。
+  // 規則：任何可能為 null 的數值一律走這兩支，缺值就是「—」，不是 0、不是崩潰。
+  const fmtN=(v,d=2,suffix='')=>(v==null||typeof v!=='number'||!isFinite(v))?'—':v.toFixed(d)+suffix;
+  const fmtPct=(v,d=1)=>(v==null||typeof v!=='number'||!isFinite(v))?'—':(v*100).toFixed(d)+'%';
   function setTxt(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
   // 2026-08-27 架構修正：三大法人chip改讀stock_detail.json，數值已經是「張」
   // （fetch_market_tw.py抓T86時已經/1000過），不是原始股數，所以是直接round，
@@ -3164,6 +3222,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('trend-chart').innerHTML='<div class="note">載入中…</div>';
     if(us){
       const [px]=await Promise.all([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes()]);
+      if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢
       // 2026-09-03新增（P0全App現價掃描）：個股頁頭部價格原本完全略過
       // IBKR即時/收盤報價，一律顯示FinMind日線最後一筆——現在改成跟
       // 首頁自選股/市場頁同一套「先試intradayQuote()、查不到才退回FinMind」
@@ -3209,6 +3268,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 維持原樣（會誠實顯示連線失敗，不是假資料）。
     const [px,fund,inst]=await Promise.all([
       fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);
+    if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢（見 canonicalPrice 註解）
     const per=fund.ratios?[fund.ratios]:[];
     const rev=fund.month_revenue?fund.month_revenue.map(r=>({revenue_year:r.year,revenue_month:r.month,revenue:r.revenue,yoyPre:r.yoy!=null?r.yoy*100:null})):[];
     loadFinancials(code);
@@ -3779,6 +3839,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   let PICKS_FUTURE_CACHE=null;
   let PICKS_BOARD='value'; // 'value' | 'momentum' | 'future'
   let REPORT_CACHE=null;
+  // 2026-09-06（P0 稽核.一）報告頁世代序號：跟首頁 HYDRATE_HOME_SEQ 同一套做法。
+  // renderReport() 內有 await，快速連點兩檔時舊那次的 await 會晚回來並蓋掉新那檔的
+  // 畫面（就是「光聖 6442 顯示 6808 的 32」的根因）。每次進入 renderReport 就把序號
+  // 加一，await 之後只要序號變了就整批作廢，不准再碰 DOM。
+  let REPORT_SEQ=0;
   let REPORT_CACHE_BOARD='value'; // 記錄目前顯示的報告屬於哪個榜單，factorRowHtml()要看這個決定用哪套FACTOR_LABELS
   let ENTRY_PLAN_CACHE=null;
   const FACTOR_LABELS={
@@ -4071,6 +4136,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function renderReport(){
     const row=REPORT_CACHE;
     if(!row)return;
+    const runId=++REPORT_SEQ;
+    // ── 2026-09-06（P0 稽核.一）進場先清空「上一檔留下來的內容」──────────────
+    // 這是「光聖 6442 顯示 32」那一類錯誤的第三層防線。前兩層（世代守衛、價格
+    // 恆等式）只擋得住「錯的東西被寫進來」；這一層擋的是「對的東西沒寫進來，
+    // 舊的東西就留在原地」——只要 renderReport 中途因為任何原因中斷（例如當時
+    // 的 peg=null 讓 toFixed 拋錯），畫面上就會同時出現新股票的名字和舊股票的
+    // 數字，而且完全沒有任何錯誤提示。清空之後最壞情況是顯示「載入中…」，
+    // 不會是另一檔股票的價格。
+    ['report-factors','report-industry-tech','report-entry-plan'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.innerHTML='<div class="note">載入中…</div>';
+    });
+    const opEl=document.getElementById('report-order-plan');if(opEl)opEl.innerHTML='';
+    ENTRY_PLAN_CACHE=null;
     document.getElementById('report-asof').textContent=`資料時間：${row.data_asof}（盤後/延遲資料） ｜ ⚠️ 非投資建議`;
     document.getElementById('report-name').textContent=pickLabel(row);
     document.getElementById('report-industry').textContent=row.industry||'—';
@@ -4088,19 +4166,29 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }));
     updateReportWatchBtn(row.code);
 
-    const orderForBoard=BOARD_CONFIG[REPORT_CACHE_BOARD].factorOrder;
-    const factorsHtml=orderForBoard.map(factorRowHtml).join('');
-    document.getElementById('report-factors').innerHTML=factorsHtml||'<div class="note">無評分資料</div>';
+    _safeSync('renderReport:factors',()=>{
+      const orderForBoard=BOARD_CONFIG[REPORT_CACHE_BOARD].factorOrder;
+      const factorsHtml=orderForBoard.map(factorRowHtml).join('');
+      document.getElementById('report-factors').innerHTML=factorsHtml||'<div class="note">無評分資料</div>';
+    });
 
     // 產業分析/財報數據/技術型態：直接引用已算好的 raw 數據，不編造敘述
+    // 2026-09-06：整段包進 _safeSync（CLAUDE.md 錯誤隔離原則）。原本沒有包，
+    // 一個欄位是 null 就讓整個 renderReport 停在這裡，後面的分批進場計畫完全
+    // 不會被重畫，上一檔的價格就留在畫面上——這正是總司令看到的那個畫面。
+    _safeSync('renderReport:facts',()=>{
     const f=row.factors||{};
     let itHtml='<div class="facts">';
     itHtml+=`<div class="f"><span>所屬產業</span><b>${row.industry||'—'}</b></div>`;
-    if(f.earnings_growth)itHtml+=`<div class="f"><span>EPS 年增</span><b>${(f.earnings_growth.raw.eps_yoy*100).toFixed(1)}%</b></div>`;
-    if(f.revenue_momentum)itHtml+=`<div class="f"><span>月營收年增</span><b>${(f.revenue_momentum.raw.rev_yoy*100).toFixed(1)}%</b></div>`;
-    if(f.growth_quality)itHtml+=`<div class="f"><span>近12月營收年增</span><b>${(f.growth_quality.raw.rev_growth_12m_yoy*100).toFixed(1)}%</b></div>`;
-    if(f.valuation_adj)itHtml+=`<div class="f"><span>本益比 PE</span><b>${f.valuation_adj.raw.pe.toFixed(1)}</b></div>`;
-    if(f.valuation_adj)itHtml+=`<div class="f"><span>PEG</span><b>${f.valuation_adj.raw.peg.toFixed(2)}</b></div>`;
+    // 2026-09-06：每一行都「有值才顯示」，缺值直接不列出這一行（不列 > 列「—」>
+    // 列「0.0%」）。原本只檢查因子物件存在、沒檢查欄位本身，pe/peg 為 null 會崩潰，
+    // eps_yoy/rev_yoy 為 null 會印成 0.0%。
+    const fact=(label,v,fmt)=>{if(v==null||typeof v!=='number'||!isFinite(v))return;itHtml+=`<div class="f"><span>${label}</span><b>${fmt(v)}</b></div>`};
+    if(f.earnings_growth)fact('EPS 年增',f.earnings_growth.raw.eps_yoy,v=>fmtPct(v));
+    if(f.revenue_momentum)fact('月營收年增',f.revenue_momentum.raw.rev_yoy,v=>fmtPct(v));
+    if(f.growth_quality)fact('近12月營收年增',f.growth_quality.raw.rev_growth_12m_yoy,v=>fmtPct(v));
+    if(f.valuation_adj)fact('本益比 PE',f.valuation_adj.raw.pe,v=>fmtN(v,1));
+    if(f.valuation_adj)fact('PEG',f.valuation_adj.raw.peg,v=>fmtN(v,2));
     // 2026-08-27修正（真bug）：scores.json現在有兩條產生管線——研究端
     // score_v2.py的chips原始值是「近20日均成交值的百分比」
     // (inst_net_pct_of_20d_trading_value)，JSON-only上線路徑generate_scores_live.py
@@ -4109,11 +4197,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 正確的單位顯示，缺兩者都沒有時完全不顯示這行（不是對undefined硬呼叫
     // .toFixed()崩潰，這是原本的bug，導致點一下選股排行列就會拋
     // unhandledrejection，冒煙測試check#6新增的最終錯誤檢查才抓到）。
-    if(f.chips&&f.chips.raw.inst_net_pct_of_20d_trading_value!=null)itHtml+=`<div class="f"><span>三大法人近20日買超</span><b>${(f.chips.raw.inst_net_pct_of_20d_trading_value*100).toFixed(1)}%</b></div>`;
-    else if(f.chips&&f.chips.raw.inst_net_lots_available_days!=null)itHtml+=`<div class="f"><span>三大法人買賣超（累積張數）</span><b>${f.chips.raw.inst_net_lots_available_days.toFixed(0)} 張</b></div>`;
-    if(f.technical&&f.technical.raw.ma60_breakout_x_volume_index!=null)itHtml+=`<div class="f"><span>技術型態指標</span><b>${f.technical.raw.ma60_breakout_x_volume_index.toFixed(3)}</b></div>`;
+    if(f.chips&&f.chips.raw.inst_net_pct_of_20d_trading_value!=null)fact('三大法人近20日買超',f.chips.raw.inst_net_pct_of_20d_trading_value,v=>fmtPct(v));
+    else if(f.chips)fact('三大法人買賣超（累積張數）',f.chips.raw.inst_net_lots_available_days,v=>fmtN(v,0,' 張'));
+    if(f.technical)fact('技術型態指標',f.technical.raw.ma60_breakout_x_volume_index,v=>fmtN(v,3));
     itHtml+='</div>';
     document.getElementById('report-industry-tech').innerHTML=itHtml;
+    });
 
     document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，尚未串接特定進出場策略引擎；下方按鈕只依分批進場計畫產生下單計畫，不代表任何策略訊號。';
 
@@ -4131,11 +4220,21 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     try{
       const usCode=isUS(row.code);
       const px=await fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70));
+      // 防線一：await 期間使用者已經切到別檔，這批結果作廢（不作廢就會把這一檔的
+      // 價格寫進另一檔的頁面——光聖 6442 顯示 6808 的 32 就是這樣來的）。
+      if(runId!==REPORT_SEQ)return;
       if(!px.length){planEl.innerHTML='<div class="note">'+fmEmptyMsg('查無報價資料')+'，無法計算分批進場價位。</div>';return}
       const closes=px.map(x=>usCode?x.Close:x.close).filter(x=>x!=null);
       const last=closes[closes.length-1];
       const low20=Math.min(...closes.slice(-20));
       const low60=Math.min(...closes.slice(-60));
+      // 防線二：跟全 App 唯一真值比對，差超過 ±30% 就不顯示任何數字。
+      const sane=priceSanityFailure(row.code,last,'分批進場計畫');
+      if(sane){
+        planEl.innerHTML='<div class="note" style="color:var(--warn)">⚠ '+sane+'</div>';
+        const ctaBad=document.querySelector('#scr-report .buy-cta');if(ctaBad)ctaBad.style.display='none';
+        return;
+      }
       const tranches=[
         {label:'現價進場',price:last,pct:40},
         {label:'回檔加碼（−4%）',price:last*0.96,pct:30},
@@ -4190,6 +4289,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     renderColorSchemeToggle();
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
+    _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
     _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
   }
 
@@ -4485,6 +4585,62 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     else{const m=d.meta||{};v=d.fetched_at||d.generated_at||m.generated_at||m.last_snapshot_at;}
     if(!v)return null;const t=new Date(v);return isNaN(t)?null:t;
   }
+  // 2026-09-06（P0 稽核.一）讀 data/audit_report.json 並呈現。
+  // 這一區刻意「查不到就說查不到」：報告檔不存在代表稽核根本沒跑，那本身就是問題，
+  // 不能顯示成一片綠色的「一切正常」。
+  const AUDIT_CHECK_LABELS={
+    a_price_source:'現價來源一致',
+    a2_not_in_official:'榜單個股仍在官方名冊',
+    a3_stale_price:'榜單個股價格未過期',
+    b_entry_plan:'進場價在現價±30%內',
+    c_range:'現價落在20日高低點內',
+    d_market_cap:'市值＝現價×股數',
+    e_pe:'本益比＝現價/近四季EPS',
+    e_quarters_gap:'季報序列連續',
+    e_quarters_stale:'季報夠新',
+    f_null_as_number:'空值不得顯示成數字',
+    g_comma_parsing:'千分位逗號解析',
+  };
+  let AUDIT_CACHE=null;
+  async function loadDataAudit(force){
+    const sum=document.getElementById('audit-summary'),list=document.getElementById('audit-list');
+    if(!sum||!list)return;
+    try{
+      if(force||!AUDIT_CACHE){
+        const r=await fetch('data/audit_report.json?t='+Date.now());
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        AUDIT_CACHE=await r.json();
+      }
+      const d=AUDIT_CACHE;
+      const pass=d.gate_pass===true;
+      const rate=(d.violation_rate!=null)?(d.violation_rate*100).toFixed(2)+'%':'—';
+      const gap=(d.completeness_gap_rate!=null)?(d.completeness_gap_rate*100).toFixed(1)+'%':'—';
+      sum.innerHTML=`<b style="color:${pass?'var(--up)':'var(--warn)'}">${pass?'✓ 通過':'✗ 未通過'}</b>`
+        +` ｜ 稽核 ${nf(d.universe)} 檔 ｜ 一致性違規率 <b class="num">${rate}</b>（門檻 1%，${nf(d.stocks_with_violation||0)} 檔）`
+        +` ｜ 資料完整度缺口 <b class="num">${gap}</b>（${nf(d.completeness_gap_stocks||0)} 檔，季報斷層/過期）`;
+      const by=d.by_check||{};
+      const rows=Object.keys(by).sort().map(k=>{
+        const v=by[k]||{};
+        const bad=(v.violations||0)>0;
+        return `<div class="f"><span>${AUDIT_CHECK_LABELS[k]||k}</span>`
+          +`<b class="num" style="color:${bad?'var(--warn)':'var(--ink-2)'}">${bad?nf(v.violations)+' 筆違規':'0'}`
+          +`<span style="color:var(--ink-4);font-weight:400"> / 檢查 ${nf(v.checked||0)}${v.unverifiable?'、無法查核 '+nf(v.unverifiable):''}</span></b></div>`;
+      }).join('');
+      const top=(d.top_20||[]).slice(0,20).map(v=>
+        `<div style="font-size:11px;color:var(--ink-3);padding:3px 0;border-top:1px solid var(--hairline)">`
+        +`${v.code&&v.code!=='-'?'<b class="num">'+v.code+'</b> '+(v.name||''):(v.name||'')} · `
+        +`${AUDIT_CHECK_LABELS[v.check]||v.check}：我們 ${v.ours} ／ 官方 ${v.official}`
+        +`${v.diff_pct!=null?'（差 '+v.diff_pct+'%）':''}</div>`).join('');
+      list.innerHTML=`<div class="facts">${rows}</div>`
+        +(top?`<details style="margin-top:8px"><summary style="font-size:11.5px;color:var(--ink-3);cursor:pointer">最嚴重的 ${Math.min(20,(d.top_20||[]).length)} 筆</summary>${top}</details>`:'');
+      const tm=document.getElementById('audit-tm');
+      if(tm&&d.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.generated_at),'Asia/Taipei');
+    }catch(e){
+      console.warn('[loadDataAudit]',e);recordGlobalError('loadDataAudit',e);
+      sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到稽核報告</b>（'+e.message+'）。代表 scripts/data_audit.py 尚未產生 data/audit_report.json，或排程沒有落地——這本身就是需要處理的狀況，不是「沒問題」。';
+      list.innerHTML='';
+    }
+  }
   async function loadDataFreshness(){
     const list=document.getElementById('data-freshness-list');if(!list)return;
     const now=new Date();
@@ -4535,7 +4691,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-05.2014';
+  const APP_VERSION='2026-09-06.0137';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

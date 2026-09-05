@@ -1180,10 +1180,100 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("38. data/sparklines.json 全市場走勢線：上市+上櫃覆蓋率≥95%，且含 2330/2454/3008/5274",
     sparkFileErrors.length === 0, sparkFileErrors.join("; ") || `${results.sparklines_total} 檔，覆蓋率 ${(results.sparklines_pct || 0).toFixed(1)}%`);
 
+  // 39.【2026-09-06新增，總司令 P0 稽核.一】資料一致性稽核閘門。
+  // data/audit_report.json 由 scripts/data_audit.py 每晚產生；一致性違規率 >1%
+  // 或有任何程式碼層級違規（空值直接 toFixed、float() 沒去千分位逗號）就 FAIL，
+  // 不准 commit 到 main。報告檔不存在也算 FAIL——沒跑稽核不等於資料沒問題。
+  const auditErrors = [];
+  let auditInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const res = await fetch("data/audit_report.json?t=" + Date.now());
+      if (!res.ok) return { error: "audit_report.json HTTP " + res.status };
+      return await res.json();
+    });
+    if (r.error) auditErrors.push(r.error + "（代表稽核沒跑，先執行 python scripts/data_audit.py）");
+    else {
+      const rate = r.violation_rate == null ? null : r.violation_rate * 100;
+      if (rate == null) auditErrors.push("報告缺 violation_rate 欄位");
+      else if (rate > 1) auditErrors.push(`一致性違規率 ${rate.toFixed(2)}%>1%（${r.stocks_with_violation} 檔）`);
+      if (r.code_free_violations) auditErrors.push(`程式碼層級違規 ${r.code_free_violations} 筆（空值格式化/千分位解析）`);
+      auditInfo = `違規率 ${rate == null ? "—" : rate.toFixed(2) + "%"}、稽核 ${r.universe} 檔、完整度缺口 ${
+        r.completeness_gap_rate == null ? "—" : (r.completeness_gap_rate * 100).toFixed(1) + "%"}`;
+    }
+  } catch (e) {
+    auditErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("39. 資料一致性稽核閘門：一致性違規率≤1% 且無程式碼層級違規",
+    auditErrors.length === 0, auditErrors.join("; ") || auditInfo);
+
+  // 40.【2026-09-06新增】報告頁批次渲染不得拋未捕捉例外。
+  // 光聖 6442 的「現價 1755、建議進場價 32」根因就是 renderReport() 對 peg=null 呼叫
+  // .toFixed() 拋 TypeError，整段渲染中途死掉，上一檔的分批進場價就留在畫面上——
+  // 名稱換了、數字沒換，而且完全沒有錯誤提示。這條檢查連開 30 檔報告頁，任何一檔
+  // 讓頁面拋例外、或畫面出現 NaN/undefined 就 FAIL。
+  const reportErrors = [];
+  try {
+    const pageErrors = [];
+    const onPageError = (e) => pageErrors.push(String(e).slice(0, 160));
+    page.on("pageerror", onPageError);
+    const codes = await page.evaluate(async () => {
+      if (typeof hydratePicks === "function") await hydratePicks(true);
+      const c = typeof currentPicksCache === "function" ? currentPicksCache() : null;
+      return (c && c.stocks || []).filter(x => x.rank).slice(0, 30).map(x => x.code);
+    });
+    for (const code of codes) {
+      await page.evaluate((c) => showReport(c), code);
+      await page.waitForTimeout(50);
+      const txt = await page.evaluate(() => {
+        const el = document.getElementById("report-industry-tech");
+        return el ? el.innerText : "";
+      });
+      if (/NaN|undefined|Infinity/.test(txt)) reportErrors.push(`${code} 的數據面板出現 NaN/undefined`);
+    }
+    page.off("pageerror", onPageError);
+    if (pageErrors.length) reportErrors.push(`報告頁拋出未捕捉例外 ${pageErrors.length} 次：${pageErrors[0]}`);
+    if (!codes.length) reportErrors.push("拿不到任何有排名的股票，無法測試");
+    else auditInfo = auditInfo;
+  } catch (e) {
+    reportErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("40. 連開30檔選股報告頁：不得拋未捕捉例外、數據面板不得出現NaN/undefined",
+    reportErrors.length === 0, reportErrors.join("; "));
+
+  // 41.【2026-09-06新增】選股榜單不得出現已下市/價格過期的股票。
+  // 稽核第一份報告抓到三份榜單合計 161 檔已下市股票還在排名裡（矽品 2325 於 2018 年
+  // 下市、勝華 2384 於 2014 年下市、康友-KY 6452 甚至是未來成長榜第 1 名），
+  // 顯示的是 2010～2024 年的舊價格。
+  const delistedErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const uniRes = await fetch("data/listed_universe.json?t=" + Date.now());
+      if (!uniRes.ok) return { error: "listed_universe.json HTTP " + uniRes.status };
+      const active = new Set((await uniRes.json()).active || []);
+      if (active.size < 1000) return { error: `在市名冊只有 ${active.size} 檔，明顯不完整` };
+      const bad = [];
+      for (const f of ["scores.json", "scores_momentum.json", "scores_future.json"]) {
+        const res = await fetch(f + "?t=" + Date.now());
+        if (!res.ok) { bad.push(f + " HTTP " + res.status); continue; }
+        const rows = (await res.json()).stocks || [];
+        const miss = rows.filter(x => x.rank && !active.has(x.code)).map(x => x.code);
+        if (miss.length) bad.push(`${f} 有 ${miss.length} 檔不在名冊：${miss.slice(0, 5).join(",")}`);
+      }
+      return { bad };
+    });
+    if (r.error) delistedErrors.push(r.error);
+    else if (r.bad && r.bad.length) delistedErrors.push(r.bad.join("; "));
+  } catch (e) {
+    delistedErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("41. 三份選股榜單的排名股票都必須在官方在市名冊內（不得推薦已下市股票）",
+    delistedErrors.length === 0, delistedErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

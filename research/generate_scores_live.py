@@ -619,6 +619,51 @@ def main():
         # 低於LIQUIDITY_FLOOR_20D_VALUE的標記「流動性不足」，不給數字排名
         # （沿用research端score_v2.py的既有設計：流動性不足的股票留在清單
         # 供搜尋，但不進主排行榜的排名）。
+        # ── 2026-09-06（稽核.一）先剔除已下市/不在市的代號 ──────────────────
+        # 第一份全市場稽核報告抓到：三份榜單合計 69＋69＋23 檔已下市股票還在排名裡，
+        # 帶著 2010～2024 年的舊價格（矽品 2325、勝華 2384、康友-KY 6452 甚至是
+        # 未來成長榜第 1 名）。價量/財報檔案裡留著舊資料是正常的（歷史就是歷史），
+        # 但**排行榜不能推薦一檔已經不存在的股票**，所以在這裡用官方在市名冊擋掉。
+        # 名冊由 scripts/build_listed_universe.py 每日更新；檔案不存在或內容明顯不完整
+        # 時一律不過濾（寧可多顯示，也不要因為抓取失敗把整個榜單清空）。
+        try:
+            uni_path = REPO_ROOT / "data" / "listed_universe.json"
+            active = set(json.loads(uni_path.read_text(encoding="utf-8")).get("active") or [])
+            if len(active) >= 1000:
+                before = len(cs)
+                cs = cs[cs.index.isin(active)]
+                if before != len(cs):
+                    print(f"  剔除不在官方在市名冊的代號：{before - len(cs)} 檔（剩 {len(cs)}）")
+            else:
+                print(f"  ! listed_universe.json 只有 {len(active)} 檔，不完整，跳過下市過濾")
+        except FileNotFoundError:
+            print("  ! 沒有 data/listed_universe.json，跳過下市過濾（先跑 scripts/build_listed_universe.py）")
+        except Exception as e:
+            print(f"  ! 下市過濾失敗（{type(e).__name__}: {e}），跳過")
+
+        # 還在名冊、但價格早就停住的也要擋（正峰 1538、永冠-KY 1589 停在 2024-12-31，
+        # 卻仍排在榜上顯示一年半前的價格當現價）。用 price_history 的全市場最新日期
+        # 當基準，不打網路。
+        try:
+            per_last = {c: (rows[-1].get("date") or "") for c, rows in price_history.items() if rows}
+            latest = max((d for d in per_last.values() if d), default=None)
+            if latest:
+                from datetime import date as _date
+                base = _date(*(int(x) for x in latest.split("-")))
+                stale = set()
+                for c, d in per_last.items():
+                    try:
+                        if (base - _date(*(int(x) for x in d.split("-")))).days > 30:
+                            stale.add(c)
+                    except Exception:
+                        continue
+                before = len(cs)
+                cs = cs[~cs.index.isin(stale)]
+                if before != len(cs):
+                    print(f"  剔除價格落後超過30天的代號：{before - len(cs)} 檔（剩 {len(cs)}）")
+        except Exception as e:
+            print(f"  ! 過期價格過濾失敗（{type(e).__name__}: {e}），跳過")
+
         cs["liquidity_insufficient"] = (
             cs["liquidity_20d"].isna() | (cs["liquidity_20d"] < LIQUIDITY_FLOOR_20D_VALUE)
         )
