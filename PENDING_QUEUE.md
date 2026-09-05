@@ -192,6 +192,60 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 ---
 
+## Cloudflare 網域上線準備（2026-09-06，總司令指令原話全文，今晚執行，插最前面）
+
+原始指令全文：
+
+> 全程繁體中文。總司令已同意購買網域走 Cloudflare Public Hostname（今晚執行），請先把伺服器端準備好，網域一到手就能切：
+>
+> 1. cloudflared 設定：預備 Public Hostname 的 ingress 規則，把 live.<domain> 轉到本機 live server。live server 目前是自簽 HTTPS 於 8001，cloudflared 連它要設 originRequest.noTLSVerify=true（或另開一個僅供 cloudflared 使用的本機 HTTP 監聽），選一種並說明理由。
+> 2. CORS：allow_origins 保留 https://jlove1314520.github.io；因為之後 Cloudflare Access 會擋在前面，前端 fetch 需帶 credentials，伺服器要回 Access-Control-Allow-Credentials: true 且 Allow-Origin 用精確來源（不可用 *）。
+> 3. Cloudflare Access 與跨來源 fetch 的相容：研究並回報 Access application 的 CORS 設定要怎麼填（允許來源 github.io、允許 credentials、允許 X-Alpha-Local-Token 標頭），以及 PWA 是否需要先在瀏覽器開一次 live.<domain> 建立 Access 登入 cookie。寫成總司令今晚可照做的步驟。
+> 4. App 設定頁「伺服器網址」欄位要能接受網域形式（https://live.xxx），並在切換後自動重新測試連線。
+> 5. 加分項（可選）：GitHub Pages 支援免費自訂網域——評估把 App 也放到 app.<domain>，與 live.<domain> 同站，cookie 與 CORS 都更簡單；先評估不要動。
+> 6. 多裝置同步 /settings 端點照佇列進行，網域切好後公司手機就能用。
+>
+> 回報：ingress 規則草稿、CORS 修改、Access CORS 步驟說明。
+
+**排序說明**：這條是後到的，但總司令指名「先把伺服器端準備好」且網域今晚就要切，
+所以排在稽核.二之前執行，做完立刻回頭做稽核.二，不跳過。
+
+- [x] **CF.1** **已完成**：`cloudflared/config.example.yml`。選第三條路 caPool + originServerName=localhost（完整驗證、伺服器零改動）；不選另開 HTTP 監聽是因為同行程已綁 UDP 8002，第二個 uvicorn 會 bind 失敗；noTLSVerify 保留為備援。
+- [x] **CF.2** **已完成**：明確來源清單＋`ALPHA_LIVE_ALLOW_ORIGINS` 環境變數擴充、`allow_credentials=True`、allow_headers 明列並含 CF-Access 兩標頭、`/health` 揭露 cors 設定。實測預檢 github.io=200／白名單外=400。
+- [x] **CF.3** **已完成**：`docs/cloudflare_tunnel_setup.md`。查出 Access 預檢必 403（瀏覽器不在 OPTIONS 帶 cookie）需開 Bypass OPTIONS，且 iOS Safari 會擋 github.io→新網域的跨站 cookie，因此建議改走 Access 服務權杖；App 已加兩個選填欄位。
+- [x] **CF.4** **已完成**：`normalizeLiveUrl()` 自動補 scheme／去尾斜線與路徑（私有 IP 補 http），存檔後自動 `testLiveConnection()`。
+- [x] **CF.5** **已評估未執行**：技術可行、cookie 與 CORS 會簡單很多，但換來源會讓已安裝的 PWA 失效且 localStorage（自選股/設定）全部不見。建議等 /settings 多裝置同步上線後再搬。
+- [ ] **CF.6** /settings 多裝置同步（同稽核.四）
+
+---
+
+## 稽核.二（2026-09-06，總司令指令原話全文）
+
+原始指令全文：
+
+> 全程繁體中文。稽核.一完成得很好，接續稽核.二，優先序依稽核報告：
+>
+> 一、季報斷層 597 檔（P0，這是「財報成長」「估值」兩因子算錯的源頭）
+> 1. 查證：stock_detail 為何缺 2025Q1～2026Q1 五季——是那段時間排程沒跑、MOPS 抓取失敗、還是解析失敗？回報根因。
+> 2. 從 MOPS（公開資訊觀測站）財報全部回補該五季，含損益表與資產負債表主要欄位；回補後重跑 e_quarters_gap/e_quarters_stale 稽核，兩項違規數必須歸零或列出「官方確無此季」的例外清單。
+> 3. 回補完重算八因子分數，回報全市場完整度中位數與 <60% 檔數的變化。
+>
+> 二、coverage.json 覆蓋率儀表板：八因子 × 全市場，每因子覆蓋率%、缺漏檔數、缺漏原因四分類；設定頁顯示。稽核報告的 completeness_gap 與這張表要對得起來。
+>
+> 三、鑫永洋 6241 本益比 22.64 vs 35.64：查是哪邊算錯，修正並確認同類計算全市場一致。
+>
+> 四、稽核排程：data_audit.py 每晚收盤後自動跑、audit_report.json 顯示於設定頁「資料健康」；違規率 >1% 或 code_free_violations >0 時 smoke test FAIL。
+>
+> 五、其餘佇列照序：多裝置 /settings、自建資料庫每日累積、柱狀圖零基線、融資維持率分母、休市標籤、群益唯讀、分點演習、產業價值鏈、新聞管線、本地摘要。每完成一項回報一項附證據。
+
+- [ ] **稽核二.一** 季報斷層根因＋MOPS 回補五季＋重跑稽核＋重算八因子回報完整度變化
+- [ ] **稽核二.二** data/coverage.json 八因子覆蓋率儀表板＋設定頁顯示，與 completeness_gap 對得起來
+- [ ] **稽核二.三** 鑫永洋 6241 本益比 22.64 vs 35.64 根因與全市場一致性
+- [ ] **稽核二.四** 稽核每晚排程＋設定頁資料健康＋smoke FAIL 條件（設定頁與 smoke 已於稽核.一完成，缺排程落地）
+- [ ] **稽核二.五** 其餘佇列照序
+
+---
+
 ## P0 資料一致性（2026-09-06，總司令實測「光聖6442現價1755、建議進場價32」，使用者原話全文，插最前面）
 
 原始指令全文：

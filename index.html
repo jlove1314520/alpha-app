@@ -1113,11 +1113,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>即時伺服器（Phase 1 冷熱分離）</h3>
       <div class="setting-row">
         <span>伺服器網址</span>
-        <div class="setting-input"><input id="set-live-url" type="url" placeholder="https://…或 http://192.168.x.x:8001" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+        <div class="setting-input"><input id="set-live-url" type="url" placeholder="live.你的網域.com 或 192.168.x.x:8001" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
       <div class="setting-row" style="margin-top:8px">
         <span>X-Alpha-Local-Token</span>
         <div class="setting-input"><input id="set-live-token" type="password" placeholder="伺服器啟動時印在終端機" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+      </div>
+      <!-- 2026-09-06（CF.3）Cloudflare Access 服務權杖，兩欄都是選填。
+      區網直連或還沒接 Access 時留空即可，留空就完全不會送這兩個標頭。
+      走 Access 時填這一組比走瀏覽器登入 cookie 可靠：iOS Safari 會封鎖
+      github.io → live.<網域> 的跨站 cookie，服務權杖是純標頭、沒有這個問題。
+      詳見 docs/cloudflare_tunnel_setup.md。 -->
+      <div class="setting-row" style="margin-top:8px">
+        <span>Access Client Id<br><span style="font-size:10px;color:var(--ink-4)">選填，走 Cloudflare Access 才要</span></span>
+        <div class="setting-input"><input id="set-cf-access-id" type="text" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+      </div>
+      <div class="setting-row" style="margin-top:8px">
+        <span>Access Client Secret</span>
+        <div class="setting-input"><input id="set-cf-access-secret" type="password" placeholder="留空＝不使用" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
       <div class="note" id="live-status-note" style="margin-top:8px">尚未設定</div>
       <button class="btn ghost" style="width:100%;margin-top:10px" onclick="testLiveConnection()">測試連線</button>
@@ -4316,19 +4329,76 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     dot.className='sdot '+cls;
   }
   function loadLiveConfig(){
-    try{LIVE.url=((localStorage.getItem('alpha_live_url')||'').trim().replace(/\/+$/,''))||null;LIVE.token=(localStorage.getItem('alpha_live_token')||'').trim()||null}
-    catch(e){console.warn('[loadLiveConfig]',e);LIVE.url=null;LIVE.token=null}
+    try{
+      LIVE.url=((localStorage.getItem('alpha_live_url')||'').trim().replace(/\/+$/,''))||null;
+      LIVE.token=(localStorage.getItem('alpha_live_token')||'').trim()||null;
+      LIVE.cfId=(localStorage.getItem('alpha_cf_access_id')||'').trim()||null;
+      LIVE.cfSecret=(localStorage.getItem('alpha_cf_access_secret')||'').trim()||null;
+    }
+    catch(e){console.warn('[loadLiveConfig]',e);LIVE.url=null;LIVE.token=null;LIVE.cfId=null;LIVE.cfSecret=null}
     LIVE.configured=!!(LIVE.url&&LIVE.token);
+  }
+  // 2026-09-06（CF.4）伺服器網址正規化。網域上線後總司令會在手機上打字輸入
+  // 「live.example.com」這種形式，很容易少打 https://、多打結尾斜線、或不小心
+  // 把 /health 一起貼進來。這裡統一整理成 `https://主機[:port]` 的乾淨形式：
+  //   - 沒有 scheme 的補 https://（唯一例外是 192.168./10./127. 開頭的私有 IP，
+  //     那是區網直連的舊用法，補 http:// 才不會壞掉）
+  //   - 去掉結尾斜線與任何路徑（liveFetch 會自己接 /live/quotes 這類路徑）
+  // 回傳 {url, note}：note 是給使用者看的「我幫你改成這樣」說明，沒改就是空字串。
+  function normalizeLiveUrl(raw){
+    let v=(raw||'').trim();
+    if(!v)return {url:'',note:''};
+    const before=v;
+    if(!/^https?:\/\//i.test(v)){
+      const priv=/^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|127\.)/.test(v);
+      v=(priv?'http://':'https://')+v;
+    }
+    try{
+      const u=new URL(v);
+      v=u.protocol+'//'+u.host;   // host 已含 port，路徑/查詢字串一律丟掉
+    }catch(e){
+      console.warn('[normalizeLiveUrl]',e);
+      return {url:before.replace(/\/+$/,''),note:''};
+    }
+    return {url:v,note:(v===before?'':'已將網址整理為 '+v)};
   }
   function saveLiveConfig(){
     const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
-    try{if(u)localStorage.setItem('alpha_live_url',u.value.trim());if(t)localStorage.setItem('alpha_live_token',t.value.trim())}catch(e){console.warn('[saveLiveConfig]',e);recordGlobalError('saveLiveConfig',e)}
+    let changed=false;
+    try{
+      if(u){
+        const n=normalizeLiveUrl(u.value);
+        changed=(localStorage.getItem('alpha_live_url')||'')!==n.url;
+        u.value=n.url;
+        localStorage.setItem('alpha_live_url',n.url);
+        if(n.note)toast(n.note);
+      }
+      if(t)localStorage.setItem('alpha_live_token',t.value.trim());
+      const ci=document.getElementById('set-cf-access-id'),cs=document.getElementById('set-cf-access-secret');
+      if(ci)localStorage.setItem('alpha_cf_access_id',ci.value.trim());
+      if(cs)localStorage.setItem('alpha_cf_access_secret',cs.value.trim());
+    }catch(e){console.warn('[saveLiveConfig]',e);recordGlobalError('saveLiveConfig',e)}
     loadLiveConfig();renderLiveStatus();restartLiveStream();
+    // 換了網址就自動測一次連線，不用再自己按「測試連線」——切網域當下最想知道的
+    // 就是「這樣改對不對」，讓使用者少一個步驟也少一次誤判成「壞了」。
+    if(changed&&LIVE.configured)_safeAsync('testLiveConnection:auto',testLiveConnection);
   }
-  function liveHeaders(){return {'X-Alpha-Local-Token':LIVE.token||''}}
+  function liveHeaders(){
+    const h={'X-Alpha-Local-Token':LIVE.token||''};
+    // 兩個都有才送。只填一個是設定沒填完，送半組只會換來一個難查的 403，
+    // 不如當成沒設定、讓「測試連線」照既有路徑誠實回報連不上。
+    if(LIVE.cfId&&LIVE.cfSecret){h['CF-Access-Client-Id']=LIVE.cfId;h['CF-Access-Client-Secret']=LIVE.cfSecret}
+    return h;
+  }
+  // 2026-09-06（CF.2/CF.3）credentials:'include'：Cloudflare Access 通過驗證後會在
+  // live.<domain> 種 CF_Authorization cookie，但 App 是從 github.io 打過去的跨來源
+  // 請求，預設不會帶 cookie，Access 會把請求導去登入頁，前端只看得到一個沒有 CORS
+  // 標頭的失敗。伺服器端已對應回 Access-Control-Allow-Credentials: true 且用精確
+  // 來源（帶 credentials 時瀏覽器禁止 Allow-Origin: *）。
+  // 區網直連（http://192.168.x.x:8001）沒有 cookie 也不受影響，這個選項是安全的。
   async function liveFetch(path,timeoutMs){
     const ac=new AbortController();const t=setTimeout(()=>ac.abort(),timeoutMs||4000);
-    try{return await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',signal:ac.signal})}finally{clearTimeout(t)}
+    try{return await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal})}finally{clearTimeout(t)}
   }
   function lastCloseLabel(){
     // 使用者指定字眼「離線，顯示最後收盤 MM-DD」：用台北日期、MM-DD兩位數格式
@@ -4349,6 +4419,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
     if(u&&document.activeElement!==u)u.value=LIVE.url||'';
     if(t&&document.activeElement!==t)t.value=LIVE.token||'';
+    // 2026-09-06（CF.3）Access 服務權杖兩欄同樣回填，規則一致：正在打字的欄位不覆蓋
+    const ci=document.getElementById('set-cf-access-id'),cs=document.getElementById('set-cf-access-secret');
+    if(ci&&document.activeElement!==ci)ci.value=LIVE.cfId||'';
+    if(cs&&document.activeElement!==cs)cs.value=LIVE.cfSecret||'';
   }
   async function testLiveConnection(){
     loadLiveConfig();
@@ -4388,7 +4462,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!LIVE.configured||LIVE.abort)return;
     const ac=new AbortController();LIVE.abort=ac;
     try{
-      const r=await fetch(LIVE.url+'/live/stream',{headers:liveHeaders(),cache:'no-store',signal:ac.signal});
+      const r=await fetch(LIVE.url+'/live/stream',{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal});
       if(!r.ok){LIVE.lastError=r.status===401?'token不正確':'HTTP '+r.status;throw new Error(LIVE.lastError)}
       LIVE.connected=true;LIVE.lastError=null;LIVE.retryMs=3000;renderLiveStatus();
       const reader=r.body.getReader();const dec=new TextDecoder();let buf='';
@@ -4691,7 +4765,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.0137';
+  const APP_VERSION='2026-09-06.0224';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

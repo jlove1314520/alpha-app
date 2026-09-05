@@ -16,6 +16,77 @@
 
 ---
 
+## 2026-09-06 凌晨（維運帽）— Cloudflare 網域上線準備（伺服器端已就緒，等網域）
+
+總司令今晚要買網域走 Cloudflare Public Hostname。伺服器端與 App 端全部準備好，
+操作手冊寫在 `docs/cloudflare_tunnel_setup.md`。
+
+### 查出一個會擋住整件事的問題（今晚要先決定走哪條路）
+如果 App 繼續留在 `jlove1314520.github.io` 並用 Access 的瀏覽器登入 cookie，
+**在 iPhone 上會失敗**，兩層原因：
+
+1. **Access 的 preflight 一定回 403。** App 帶 `X-Alpha-Local-Token` 這個自訂標頭，
+   瀏覽器會先送 `OPTIONS` 預檢，而瀏覽器依設計不會在 OPTIONS 帶 cookie，Access
+   收到沒有 `CF_Authorization` 的請求就擋掉。這是 Cloudflare 官方文件明載的行為，
+   不是設定錯誤。解法是在 Access 應用程式打開 **Bypass options requests to origin**。
+2. **iOS Safari 封鎖跨站 cookie。** `github.io` 與新網域是兩個不同註冊網域，
+   就算第一關過了，`CF_Authorization` 也送不出去。
+
+→ 建議走 **Access 服務權杖（Service Auth）**：兩個 HTTP 標頭
+（`CF-Access-Client-Id` / `CF-Access-Client-Secret`），完全不碰 cookie，沒有
+Safari 問題。App 設定頁已新增這兩個**選填**欄位，留空就完全不啟用，區網直連
+的既有用法一點都沒變。
+
+### cloudflared ingress：選了第三條路
+總司令給的兩個選項是 `noTLSVerify=true` 或另開本機 HTTP 監聽。實際評估後選
+**讓 cloudflared 信任我們自己的 CA**（`caPool` + `originServerName: localhost`）：
+
+- 「另開 HTTP 監聽」不是小改動：`alpha_live_server.py` 同一行程還綁著 tick ingress
+  的 UDP socket（127.0.0.1:8002），第二個 uvicorn 行程會 bind 失敗；要同行程聽兩個
+  port 得改寫啟動流程。為一條 loopback 連線動啟動流程，風險大於收益。
+- `noTLSVerify` 是「這一段不驗任何憑證」。我們**已經有**自己的 CA
+  （`secrets/alpha-ca.pem`），伺服器憑證 SAN 本來就含 `DNS:localhost`，用 caPool
+  就是完整驗證，沒有理由退回不驗。
+- caPool 對伺服器**零改動**，區網直連 192.168.3.241:8001 完全不受影響。
+- 出問題時把兩行換成 `noTLSVerify: true` 即可恢復，那是備援不是預設。
+
+設定草稿：`cloudflared/config.example.yml`（實際設定檔含 tunnel UUID，不進 repo）。
+
+### 伺服器端改動（`research/alpha_live_server.py`）
+- `allow_origins` 改明確清單，另可用環境變數 `ALPHA_LIVE_ALLOW_ORIGINS` 擴充，
+  網域到手不用改程式碼
+- 新增 `allow_credentials=True`（帶 credentials 時瀏覽器禁止 `Allow-Origin: *`，
+  所以來源必須精確，這裡本來就是逐一列舉）
+- `allow_headers` 由 `*` 改明確清單，並加入 `CF-Access-Client-Id` /
+  `CF-Access-Client-Secret`——因為 Access 要開 Bypass OPTIONS，預檢會直接打到這支
+  伺服器，清單漏了就會被我們自己的 middleware 擋成 400
+- `/health` 新增 `cors` 區塊，切網域時可直接看伺服器認哪些來源
+
+實測（起在 8010 避開既有服務）：
+
+| 情境 | 結果 |
+|---|---|
+| github.io 預檢含 Access 兩標頭 | 200，`Allow-Origin` 精確、`Allow-Credentials: true` |
+| 環境變數新增的 app.example.com | 200 |
+| 不在白名單的來源 | 400，正確擋下 |
+
+### App 改動（`index.html`）
+- 伺服器網址支援網域形式：自動補 `https://`、去掉結尾斜線與多餘路徑；私有 IP
+  例外補 `http://`，維持區網直連
+- 換網址存檔後**自動重測連線**，不用再自己按一次
+- `liveFetch` 與 SSE 都加 `credentials: 'include'`
+- 設定頁新增 Access Client Id / Secret 兩個選填欄位（兩個都填才送標頭，只填一個
+  當作沒設定，避免送半組換來難查的 403）
+
+### app.\<domain\> 評估（總司令加分項，先評估未執行）
+技術可行且好處明確（同註冊網域、cookie 與 CORS 都變簡單）。但換網址會讓已安裝
+到手機桌面的 PWA 失效要重裝，而 **localStorage 綁在來源上，自選股與設定會全部
+不見**。建議等 `/settings` 多裝置同步上線之後再搬，那時成本才可接受。今晚不要動。
+
+**冒煙測試：39 項全 PASS、0 FAIL。**
+
+---
+
 ## 2026-09-06 凌晨（開發帽）— P0「光聖 6442 建議進場價 32」根因與四層結構性防線
 
 ### 一、根因（用實測釘死，不是推論）

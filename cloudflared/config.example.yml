@@ -1,0 +1,61 @@
+# Cloudflare Tunnel ingress 設定草稿（2026-09-06，網域到手後即可套用）
+#
+# 用法：把這個檔案複製成實際設定檔（**不要**改這一份，這份是範本、要進 repo）：
+#   copy cloudflared\config.example.yml %USERPROFILE%\.cloudflared\config.yml
+# 然後把 <TUNNEL_UUID> 與 <domain> 換成真值，再重啟 cloudflared 服務。
+#
+# ⚠ 實際設定檔裡會有 tunnel UUID 與憑證路徑，屬於機敏資訊，**不要 commit**。
+#
+# ─────────────────────────────────────────────────────────────────────────
+# 為什麼 origin 走 https://localhost:8001 而不是 noTLSVerify，也不另開 HTTP 監聽
+# ─────────────────────────────────────────────────────────────────────────
+# 總司令給的兩個選項是 (a) originRequest.noTLSVerify=true，(b) 另開一個只給
+# cloudflared 用的本機 HTTP 監聽。實際評估後選了第三條、也是最好的一條：
+# **讓 cloudflared 信任我們自己的 CA**（caPool）。理由：
+#
+#  1. 「另開 HTTP 監聽」在這支伺服器上不是小改動。alpha_live_server.py 同一個
+#     行程還綁著 tick ingress 的 UDP socket（127.0.0.1:8002），再起第二個
+#     uvicorn 行程會在那個 port 上 bind 失敗；要在同一行程內同時監聽兩個 port
+#     得改寫啟動流程（自己組 uvicorn.Server 跑兩個）。為了一條 loopback 連線
+#     去動啟動流程，風險大於收益。
+#  2. noTLSVerify 可以動，但它的意思是「這一段不驗任何憑證」。我們**已經有**
+#     自己的 CA（secrets/alpha-ca.pem），而且伺服器憑證的 SAN 就含 DNS:localhost，
+#     用 caPool 指過去就是完整驗證，沒有理由退回不驗。
+#  3. caPool 對伺服器端零改動：現在跑的自簽 HTTPS（0.0.0.0:8001）原封不動，
+#     手機在區網直連 192.168.3.241:8001 的既有用法也完全不受影響。
+#
+# 如果哪天 caPool 出問題（例如換憑證忘了同步），把 caPool/originServerName 兩行
+# 註解掉、改成 `noTLSVerify: true` 就能先恢復服務——那是 fallback，不是預設。
+
+tunnel: <TUNNEL_UUID>
+credentials-file: C:\Users\user\.cloudflared\<TUNNEL_UUID>.json
+
+ingress:
+  # ── 即時報價伺服器 ────────────────────────────────────────────────
+  - hostname: live.<domain>
+    service: https://localhost:8001
+    originRequest:
+      # 我們自己的根憑證。cloudflared 用它驗證 alpha-server-cert.pem，
+      # 而不是關掉驗證。
+      caPool: C:\alpha\alpha-app\secrets\alpha-ca.pem
+      # TLS 驗證時使用的主機名。伺服器憑證的 SAN 是
+      # [192.168.3.241, 127.0.0.1, localhost]，所以指定 localhost 會通過。
+      originServerName: localhost
+      # SSE（/live/stream）是長連線，預設的閒置逾時會把它砍掉。
+      # 伺服器每 15 秒送一次 keepalive 註解行，這裡放寬到 3 分鐘。
+      disableChunkedEncoding: false
+      connectTimeout: 10s
+      tlsTimeout: 10s
+      keepAliveTimeout: 180s
+      # 不要讓 cloudflared 幫忙壓縮 SSE，否則事件會被緩衝、失去即時性
+      noHappyEyeballs: false
+
+  # ── （加分項，總司令核准後才加）App 本體也放同一個網域 ──────────
+  # GitHub Pages 支援免費自訂網域，設定成 app.<domain> 之後 App 與 live
+  # 就是同一個註冊網域下的兩個子網域，Access cookie 與 CORS 都會簡單很多。
+  # 這一段先留著不啟用，見 docs/cloudflare_tunnel_setup.md 的評估。
+  # - hostname: app.<domain>
+  #   service: https://jlove1314520.github.io
+
+  # ingress 規則的最後一條必須是 catch-all，否則 cloudflared 不會啟動
+  - service: http_status:404

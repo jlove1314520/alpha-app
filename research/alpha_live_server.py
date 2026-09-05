@@ -141,16 +141,54 @@ def _load_or_create_token() -> str:
 
 LOCAL_TOKEN = _load_or_create_token()
 
+# ── CORS 白名單 ────────────────────────────────────────────────────────────
+# 2026-09-06（Cloudflare 網域上線準備 CF.2）：改成「精確來源 + 允許憑證」。
+# 為什麼一定要精確來源：一旦回應帶 `Access-Control-Allow-Credentials: true`，
+# 瀏覽器就**禁止** `Access-Control-Allow-Origin: *`，整個跨來源請求會被擋掉。
+# 這裡本來就是逐一列舉來源（沒有用 *），加上 allow_credentials 後仍然合規。
+#
+# 為什麼需要 credentials：Cloudflare Access 擋在 tunnel 前面，通過驗證後會種一個
+# `CF_Authorization` cookie 在 live.<domain> 這個網域上。App 從 github.io 打過去
+# 是跨來源請求，預設不會帶 cookie，Access 會回 302 導到登入頁，前端只會看到
+# 一個沒有 CORS 標頭的失敗。前端加 `credentials: 'include'`、伺服器回
+# `Allow-Credentials: true`，兩邊都做才成立。
+#
+# 網域還沒買，所以用環境變數擴充：網域到手後設
+#   set ALPHA_LIVE_ALLOW_ORIGINS=https://app.example.com
+# 就會加進白名單，不用改程式碼重新部署。
+_DEFAULT_ALLOW_ORIGINS = [
+    "https://jlove1314520.github.io",   # GitHub Pages 上的正式 App
+    "http://localhost:8792",            # 本機開發與冒煙測試
+    "http://127.0.0.1:8792",
+]
+_extra_origins = [
+    o.strip().rstrip("/")
+    for o in (os.environ.get("ALPHA_LIVE_ALLOW_ORIGINS") or "").split(",")
+    if o.strip()
+]
+ALLOW_ORIGINS = _DEFAULT_ALLOW_ORIGINS + _extra_origins
+
+# 明確列出允許的請求標頭，不用 "*"。Starlette 對 "*" 的做法是把 preflight 要求的
+# 標頭原樣鏡射回去（不會真的回一個 "*"），所以舊寫法其實也不會壞；但 Cloudflare
+# Access 的 CORS 設定要求填出具體標頭名稱，兩邊寫成同一份清單比較不會對不起來，
+# 日後有人改動也看得出來這裡跟 Access 設定是綁在一起的。
+# 走 Cloudflare Access 服務權杖時，瀏覽器會多送 CF-Access-Client-Id/Secret 兩個標頭。
+# 因為 Access 那邊要開「Bypass options requests to origin」（否則預檢一定 403，
+# 見 docs/cloudflare_tunnel_setup.md），預檢會直接打到這支伺服器，所以這份清單
+# 必須含這兩個名字，不然會被我們自己的 CORSMiddleware 擋成 400。
+ALLOW_HEADERS = ["X-Alpha-Local-Token", "Content-Type", "Accept", "Cache-Control",
+                 "CF-Access-Client-Id", "CF-Access-Client-Secret"]
+
 app = FastAPI(title="Alpha Live Quote Server（本機唯讀即時報價，Phase 1冷熱分離）")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://jlove1314520.github.io", "http://localhost:8792", "http://127.0.0.1:8792"],
+    allow_origins=ALLOW_ORIGINS,
     allow_methods=["GET"],
-    # allow_headers=["*"]已涵蓋X-Alpha-Local-Token（2026-09-04 HTTPS方案A確認，不用額外列名）。
     # FastAPI/Starlette的CORSMiddleware會在OPTIONS preflight直接攔截回應，不會走到任何
     # route handler（也就不會經過_check_token()），所以preflight本來就不驗token，這裡是
     # 框架既有行為，不需要額外程式碼。
-    allow_headers=["*"],
+    allow_headers=ALLOW_HEADERS,
+    allow_credentials=True,
 )
 
 
@@ -546,6 +584,10 @@ def health():
         "us_kbars": "not_implemented",
         "index_quotes_in_memory": sum(1 for k in MEM.quotes if _is_index_key(k)),  # 2026-09-04四修.二：TPEX+37類股
         "https_enabled": ENABLE_HTTPS,  # 2026-09-04 HTTPS方案A：目前實際監聽模式（見ENABLE_HTTPS說明）
+        # 2026-09-06：把 CORS 設定攤在 /health 裡，切網域時可以直接看伺服器認的是哪些來源，
+        # 不用去翻程式碼或猜（跨來源失敗的錯誤訊息在瀏覽器端通常很不具體）。
+        "cors": {"allow_origins": ALLOW_ORIGINS, "allow_headers": ALLOW_HEADERS,
+                 "allow_credentials": True},
         "ca_crt_available": CA_CRT_PATH.exists(),
     }
 
