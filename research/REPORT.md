@@ -1589,3 +1589,4 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 **保留紀錄，不重新判定**：`weinstein_stage2_pilot_v1`的`FAIL`判定本身正確，不需要
 重跑或改判——這次覆核是加深對「為什麼FAIL」的理解，不是推翻原判定。
 ## 第383輪 · 2026-09-06T01:30+08:00 · US · TW最舊(22:00)但round382投遞的背景SEC EDGAR fetch工作已完成，優先收成後接續同軌：收成`20260906-010314-7940`確認`f_us_value_bm`乾淨宇宙cheap gate重測CHEAP_PASS（159/248可用，val_ic+0.0853,percentile100.0），翻轉#128舊池子FAIL判定 · 接續原地執行`us_factor_ic_lowvol_clean_universe.py`（零新增API呼叫）重測`f_us_low_vol`，同樣CHEAP_PASS（248/248可用，val_ic+0.1380,percentile100.0），翻轉#15/#115舊池子FAIL判定 · 兩個不相關因子同輪同宇宙皆過關，雙重印證universe假影判定成立且可修復，寫入`TRIALS_LEDGER.md`#144/#145、`US_LEADS.md`#20/#21；兩者僅cheap gate過關，1b深挖尚未做，下一輪待辦
+## 第386輪 · 2026-09-06T05:37+08:00 · US · US最舊(01:30)／TW(02:00)／FUT最新(02:30)：依輪替選US，接續round383「下一輪接手」對`f_us_low_vol`（#21）做1b深挖 · 新增`deep_dive_f_us_low_vol_clean_universe.py`（換乾淨宇宙ticker清單），踩到相對路徑cwd bug後修正為`Path(__file__).parent`寫法 · 投遞背景job`20260906-053411-6d75`（timeout 20分鐘），session內等待約4分鐘仍running，依協定breakaway留背景，下一輪收成

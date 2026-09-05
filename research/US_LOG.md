@@ -1324,3 +1324,17 @@ process已留在背景繼續跑（pid 1905，`python -u deep_dive_f_us_value_bm.
 誠實保留：兩者都只是cheap gate過關，1b深挖尚未做——舊池子的死因都在1b深挖階段（value死於VAL報酬量級不合理、low-vol死於TRAIN輸給隨機控制組/beta非市場中性），不能假設換乾淨宇宙後1b深挖會通過。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。本輪session內零新增API呼叫。下一輪建議：對#20或#21擇一做1b深挖（改寫既有deep_dive腳本換ticker清單），若跑超過5分鐘依協定投遞背景。
+
+## 第386輪 2026-09-06T05:37+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 01:30（第383輪，最舊）／TW 02:00（第384輪）／FUT 02:30（第385輪，最新）——依輪替選US。`run_detached.py status`確認無running中工作需優先收成。
+
+**本輪工作單位＝接續round383「下一輪接手」：對`f_us_low_vol`（#21）做1b深挖**，新增`deep_dive_f_us_low_vol_clean_universe.py`（重用`deep_dive_f_us_low_vol.py`的`run_one()`/`PERIODS`/`COST_MULTIPLIERS`/`REBALANCE_DAYS`/`_load_market_df()`原封不動，唯一差異是ticker清單換成`data/us_stratified_universe_sample.csv`的usable==True清單，比照round383`us_factor_ic_lowvol_clean_universe.py`同一套改法）。
+
+**小bug+修正**：初版用裸字串相對路徑讀CSV，第一次提交（job`20260906-053320-99d4`）因`run_detached.py`實際cwd不是`research/`而`FileNotFoundError`（exit=1）。改用`Path(__file__).parent / "data" / ...`（比照`us_factor_ic_lowvol_clean_universe.py`寫法）修正，驗證`.exists()`為`True`後重新投遞（job`20260906-053411-6d75`，timeout 20分鐘）。
+
+session內等待約3~4分鐘仍`running`（`watchdog_alive=True`），248檔×2期×3成本倍數×100 draws隨機控制組運算量比cheap gate的IC計算重，超過3分鐘不意外。依協定第0b節不繼續等待，job以`breakaway=True`繼續在背景執行。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。本輪session內零新增API呼叫（248檔全部已是`us_price_series()`parquet快取命中）。
+
+**下一輪接手**：`run_detached.py status`確認`20260906-053411-6d75`是否`finished`，若是用`run_detached.py log 20260906-053411-6d75 --tail 40`讀SUMMARY（TRAIN/VAL兩期×3成本倍數的ann_return/beta/alpha/Sortino/random_control_percentile），優先檢查TRAIN期percentile與beta方向（吸取#15/#41/#115舊池子皆敗在這裡的教訓），寫入`TRIALS_LEDGER.md`新列。跑完後同樣手法對`f_us_value_bm`（#20）做1b深挖。
