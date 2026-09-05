@@ -1864,3 +1864,29 @@ circular-shift null的標準差（TRAIN 0.2378、VAL 0.3157）約為完全打散
 **下一輪TW軌可接續**：(a)本輪盤點的方法論待辦至此告一段落（唯一風險最高的CHEAP_PASS候選已查核完畢，其餘要嘛已FAIL優先權低、要嘛風險模式不同）；(b)轉回`portfolio_multifactor_v2`組合策略層級尚未測的維度（regime overlay整合、下檔保護證明）；(c)若之後有新候選要用這個資料結構（慢變訊號×重疊窗口目標）設計cheap gate，應優先採用non-overlapping抽樣或區塊bootstrap，避免重蹈同一個系統性問題。
 
 寫入`TRIALS_LEDGER.md`#147、`HYPOTHESIS_QUEUE.md`#34狀態更新、`STRATEGY_GRAVEYARD.md`銅金比條目補充、`TW_MARATHON_STATE.md`（本輪最新條目）。
+
+## 第388輪（2026-09-06T06:30+08:00，TW）——`portfolio_multifactor_v2`家族整併結案，另清理一筆其他排程instance未commit的合法工作
+
+**開工發現**：`git status`顯示上一輪（`hypothesis_queue`獨立排程instance，非本三軌系統）留下未commit的合法完成工作——`mops_buyback_client.py`（修正MOPS表頭colspan解析bug）/`buyback_announcement_probe.py`/`backfill_buyback_announcement.py`，以及`HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`的對應狀態更新。核實內容（無frozen zone觸碰、無holdout消耗、純新增可續跑腳本）後先行`git commit`（`57a93ac`）+`push`，避免work遺失。同時發現一個路徑bug產生的雜訊檔`research/C:alphaalpha-appresearch_tmp_twse_check.txt`（Windows路徑冒號被誤寫進檔名，純垃圾，非工作產物），已刪除。
+
+**本輪工作單位**：依round384「下一輪可接續(b)」，評估`portfolio_multifactor_v2`組合策略層級是否該做regime overlay整合/下檔保護證明。盤點`LEADS.md`該條目完整歷史（round137/201/202/327/340/346/353/356/359/362）+`TRIALS_LEDGER.md`#109/#118/#131：
+
+- A/B兩因子版本（3成分/4成分）×equal/ic_weighted/regime_weighted三種加權×monthly/quarterly兩種頻率＝12組合（round137首測）
+- train-only嚴格樣本外權重迭代（round340）
+- 三個leave-one-out子版本（拿掉eps_family/revenue_surprise/low_vol，round346）
+- 「拿掉low_vol」子版本的完全獨立300檔樣本外複驗（round356/359/362）
+
+**全數在alpha顯著性這關FAIL**，且證據強度隨樣本擴大單調增加而非減弱：80檔驗證樣本最佳組合p=0.053（邊緣）→300檔獨立樣本同一格p=0.5314→train-only權重p=0.4314→leave-one-out最佳子版本名目p=0.0489→該子版本完全獨立樣本複驗p=0.5647（打回不顯著）。這個模式是「訊號隨樣本增大而消失」的標準特徵，不是「差一點、換更嚴謹方法會過」。
+
+**判斷**：round384提出的(b)選項「regime overlay整合、下檔保護證明」不是有效的下一步——`regime_weighted`（大盤位階情境加權）本身就是round327測過的6組合之一，同樣FAIL；在alpha從未顯著的前提下，繼續疊加regime overlay/下檔保護只是在無edge的基礎上加結構，無法解決根本問題（`CLAUDE.md`最高投資原則要求的是「有alpha的前提下做好下檔保護」，不是「用下檔保護包裝一個沒有alpha的策略」）。
+
+**本輪未執行任何新回測**（零新增API呼叫，純稽核+結案），產出：
+1. `STRATEGY_GRAVEYARD.md`新增家族層級整併條目`### portfolio_multifactor_v2`（完整死法歷程＋不泛化聲明：不代表多因子組合方法論本身無效，只代表這六個成分因子用這幾種混合權重法沒有可累加alpha）。
+2. `LEADS.md`原`portfolio_multifactor_v2`條目補一段收尾註記，指向墓園條目。
+3. **不新增`TRIALS_LEDGER.md`列**——這不是新的統計檢定，是既有結果的整併判斷，符合該檔案「只在真的測過新假說才加列」的規則。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程約5分鐘（大部分時間花在稽核歷史記錄，非執行運算）。
+
+**下一輪TW軌接續**：優先權轉向尋找新的成分因子候選，而非在已結案的六因子組合上繼續變體實驗——可評估US軌round383/386/387正在測試的`f_us_value_bm`/`f_us_low_vol`乾淨宇宙版本1b深挖若通過，是否適合在TW建立同構的新一代組合回測地基；或轉回`MARATHON_PROTOCOL.md`第3節其餘尚未測的因子家族（籌碼類融資券市場整體水位`MI_MARGN`）。
+
+完整見`STRATEGY_GRAVEYARD.md`新增`portfolio_multifactor_v2`家族條目、`LEADS.md`收尾補充、`TW_MARATHON_STATE.md`（本輪最新條目）。

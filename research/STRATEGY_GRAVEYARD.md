@@ -1591,3 +1591,51 @@ API。台灣指數公司（TIP）官方雖每季公布調整結果，但只以�
 `TRIALS_LEDGER.md`#149、`HYPOTHESIS_QUEUE.md` #39。佇列#1~39全數
 結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證`BACKLOG.md`仍未
 解鎖），下一輪需設計新假設軸#40。
+
+### portfolio_multifactor_v2（多因子組合策略家族，A_4pass/B_plus_value_pe，
+equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
+子版本，股票，TW軌，2026-09-06整併結案）
+
+- **哪一關死的**：alpha顯著性（`PORTFOLIO_STRATEGY_SPEC.md`規則第3關）。
+  隨機控制組（第2關）從未是問題——A_4pass percentile=99.0、
+  B_plus_value_pe percentile=100.0（N=100），MDD/Sortino/Sharpe全面優於
+  買進持有大盤（VAL期MDD−8.4%~−8.7% vs 大盤−31.6%）；純粹卡在alpha
+  p值始終高於0.05這一關，且樣本越大越明確不顯著（不是「差一點」）。
+- **具體數字（依時序）**：(1) 原80檔驗證樣本最佳兩組合（A/IC加權/季頻、
+  B/IC加權/季頻）alpha分別+10.40%/+10.26%，p皆=0.053，屬邊緣未過；
+  (2) `CALIBRATION_PROBE.md`判定管線檢定力不足後，`SAMPLE_SIZE`
+  100→300重跑（round327，298檔獨立樣本），同一格`ic_weighted`/
+  `quarterly`p值驟降到0.5314、alpha only+3.05%，其餘5組合p值範圍
+  0.2159~0.6451，全數遠高於0.05；(3) train-only嚴格樣本外權重
+  （round340，排除權重本身看過VAL期表現的洩漏疑慮）：quarterly
+  p=0.4314、monthly p=0.1996，方向略改善但仍不顯著；(4) leave-one-
+  factor-out三個2因子子版本（round346）：拿掉`low_vol`monthly
+  p=0.0489是唯一名目<0.05者，但這是「先看3個子版本挑最佳者」之後
+  才看到的數字，隱含多重比較；(5) 該子版本換完全獨立300檔樣本重新
+  估計權重複驗（round356/359/362，見上方`portfolio_multifactor_v2_
+  loo_no_low_vol`條目）：p從0.0489回到0.5647，選擇偏誤假說得到直接
+  實證支持，原本看似邊緣顯著的訊號未能重現。
+- **這個死法能不能泛化**：**能，針對這個具體規格家族**——`f_value_pe`/
+  `f_value_pb`/`f_rel_strength`/`revenue_surprise`/`eps_family`/
+  `low_vol`六個成分因子的等權/IC加權/大盤位階情境加權三種混合方式、
+  月/季兩種頻率、含或不含`f_value_pe`兩種因子版本、以及三種leave-
+  one-out子版本，總計已測試遠超12種具體構造，全數卡在同一關（alpha
+  顯著性），且樣本越大訊號越弱（不是雜訊縮小後訊號浮現，是訊號本身
+  隨樣本增大而消失）——這是判斷「真的沒有可累加alpha」而非「檢定力
+  不足」的標準模式。**不泛化成「多因子組合這個方法論本身無效」**：
+  死的是這一組特定成分因子（已被個別驗證過的cheap-pass因子）用這幾種
+  特定混合權重法組合起來後沒有可累加的alpha，不代表換一組完全不同的
+  成分因子（例如`f_us_low_vol`/`f_us_value_bm`乾淨宇宙版本，round383/
+  386/387正在測試中）用同一套組合框架也會失敗；也不代表regime overlay
+  （危機降曝險，`CLAUDE.md`最高投資原則要求的強制overlay）本身沒有
+  價值——只是在alpha都不顯著的前提下，continuing to layer regime
+  overlay/下檔保護證明在這個家族上屬於錦上添花而非解決根本問題，
+  故本輪判斷優先權應轉向尋找新的成分因子候選，而非在同一組已知
+  無顯著alpha的因子上疊加更多結構。
+- **原始記錄**：`TRIALS_LEDGER.md`#109/#118/#131、`LEADS.md`
+  `portfolio_multifactor_v2`條目（round137/201/202/327/340/346/353/356/
+  359/362完整數字）、`portfolio_backtest_v2.py`/`portfolio_backtest_v2_
+  bigsample.py`/`train_only_ic_weight_bigsample.py`/`leave_one_factor_
+  out_bigsample.py`/`deep_dive_loo_no_low_vol_independent_sample.py`
+  （皆可重複執行）。子版本`portfolio_multifactor_v2_loo_no_low_vol`
+  詳細死因見上方獨立條目。
