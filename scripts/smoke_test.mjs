@@ -1270,10 +1270,44 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("41. 三份選股榜單的排名股票都必須在官方在市名冊內（不得推薦已下市股票）",
     delistedErrors.length === 0, delistedErrors.join("; "));
 
+  // 42.【2026-09-06新增，總司令實測.一】官方在市名冊內的股票不得出現「無報價」。
+  // 總司令實測新增自選股後顯示「無報價」，但那些股票在 quotes_all_tw.json（2,837 檔）
+  // 與 sparklines.json 裡都有價格——根因是各處只查 quotes_tw.json（Actions 只抓
+  // 前 210 檔），查不到就放棄，沒有往後兩層退。這條檢查隨機抽 25 檔在市股票塞進
+  // 自選股，任何一檔顯示「無報價」或價格是「—」就 FAIL。
+  const quoteChainErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      await Promise.allSettled([ensureSparklines(), loadQuotesAllTw(), ensureListedUniverse()]);
+      const active = [...LISTED_UNIVERSE];
+      if (active.length < 1000) return { error: `在市名冊只有 ${active.length} 檔，不完整` };
+      // 固定幾檔代表性標的（上櫃、千元股）＋隨機抽樣，兩者都要過
+      const must = ["6442", "5274", "3008", "2454", "2330", "4966", "6488"];
+      const pool = active.filter(c => !must.includes(c));
+      const rnd = [];
+      while (rnd.length < 18 && pool.length) rnd.push(pool[Math.floor(Math.random() * pool.length)]);
+      const codes = [...new Set([...must, ...rnd])].slice(0, 25);
+      const bad = [];
+      for (const c of codes) {
+        const q = resolveQuote(c, false);
+        if (!q || q.price == null || !isFinite(q.price)) bad.push(c);
+      }
+      return { checked: codes.length, bad };
+    });
+    if (r.error) quoteChainErrors.push(r.error);
+    else if (r.bad.length) quoteChainErrors.push(`${r.bad.length}/${r.checked} 檔在市股票查不到報價：${r.bad.slice(0, 8).join(",")}`);
+    else quoteChainErrors.length = 0;
+    results.quote_chain_checked = r.checked || 0;
+  } catch (e) {
+    quoteChainErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("42. 官方在市名冊內的股票不得無報價（四層回退鏈：live→quotes_tw→quotes_all_tw→歷史收盤）",
+    quoteChainErrors.length === 0, quoteChainErrors.join("; ") || `抽驗 ${results.quote_chain_checked} 檔全部有價`);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -452,7 +452,16 @@ def main():
             "date": last["date"], "close": last["close"],
             "change_pct": change_pct, "turnover": last.get("turnover"),
         }
+    # 2026-09-06（實測.一.2）：top-level 補 fetched_at 與 source。
+    # App 端的報價回退鏈把這一份當第三層，要判斷「這個價格有多舊」就得知道抓取時間；
+    # 其他報價檔（quotes_tw.json / quotes_us.json）的欄位名就是 fetched_at/source，
+    # 這裡跟著用同一組名字，前端才不用為每個檔案各寫一套讀法。meta 保留不動，
+    # 既有讀 meta 的程式（build_picks_ledger.py 等）不受影響。
+    now_iso = datetime.now(TW_TZ).isoformat()
+    src_label = "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（經 data/price_history.json 衍生）"
     SNAPSHOT_PATH.write_text(json.dumps({
+        "fetched_at": now_iso,
+        "source": src_label,
         "meta": {"generated_at": datetime.now(TW_TZ).isoformat(),
                  "source": "從data/price_history.json衍生（TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes）",  # 2026-09-03（P0三-三.3）
                  "note": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），"

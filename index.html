@@ -1531,18 +1531,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 順序依總司令裁示：即時（Shioaji/IBKR）→ quotes_tw/us → quotes_all_tw 收盤
   // → sparklines 最後一點。全部查不到就回 null（回 null 代表「無法查核」，
   // 呼叫端要放行，不能因為查不到真值就把正常資料擋掉）。
+  // 2026-09-06（實測.一）改為委派 resolveQuote()。原本這裡自己抄了一份一模一樣的
+  // 回退順序，兩份規則遲早會走鐘——真值查核與畫面顯示必須是同一條鏈，否則稽核會
+  // 說「一致」而使用者看到的是另一個數字。
   function canonicalPrice(code){
-    const us=isUS(code);
     try{
-      const iq=intradayQuote(code,us);
-      if(iq&&iq.price!=null&&isFinite(iq.price))return{price:+iq.price,src:'即時報價'};
-      const cold=(us?INTRADAY_US:INTRADAY_TW);
-      const cq=cold&&cold.quotes&&cold.quotes[code];
-      if(cq&&cq.price!=null&&isFinite(cq.price))return{price:+cq.price,src:us?'quotes_us.json':'quotes_tw.json'};
-      const all=QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes&&QUOTES_ALL_TW_CACHE.quotes[code];
-      if(all&&all.close!=null&&isFinite(all.close))return{price:+all.close,src:'quotes_all_tw.json'};
-      const sp=sparkFor(code);
-      if(sp&&sp.length&&isFinite(sp[sp.length-1]))return{price:+sp[sp.length-1],src:'sparklines.json'};
+      const q=resolveQuote(code,isUS(code));
+      if(q&&q.price!=null&&isFinite(q.price))
+        return {price:+q.price,src:QUOTE_TIER_LABEL[q.tier]||q.tier,tier:q.tier};
     }catch(e){console.warn('[canonicalPrice]',e);recordGlobalError('canonicalPrice',e)}
     return null;
   }
@@ -1593,20 +1589,103 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 顯示過期到失去意義的「盤中」報價卻讓人以為是新的）。
   const INTRADAY_STALE_MIN=20;
   // 2026-09-03深夜（乙.4）本機即時伺服器連線狀態（函式定義在設定頁區塊startLiveStream()等）。
-  const LIVE={url:null,token:null,configured:false,connected:false,lastEventAt:null,kbarsLast:{},abort:null,retryMs:3000,lastError:null,sinopacAt:0,ibkrAt:0,sourceMode:null,streamMode:null};
+  const LIVE={url:null,token:null,cfId:null,cfSecret:null,configured:false,connected:false,lastEventAt:null,kbarsLast:{},abort:null,retryMs:3000,lastError:null,sinopacAt:0,ibkrAt:0,sourceMode:null,streamMode:null};
+  // 2026-09-06（實測.一）官方在市名冊。由 scripts/build_listed_universe.py 每日彙整
+  // TWSE/TPEx 的四個官方端點產生。用途只有一個：分辨「這一檔真的不在市」與
+  // 「這一檔在市、只是我們沒接好」。總司令實測新增自選股顯示「無報價」，資料其實
+  // 三個檔案裡都有，就是後者。
+  let LISTED_UNIVERSE=null;
+  async function ensureListedUniverse(){
+    if(LISTED_UNIVERSE)return LISTED_UNIVERSE;
+    try{
+      const r=await fetch('data/listed_universe.json?t='+Math.floor(Date.now()/3600000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      LISTED_UNIVERSE=new Set(d.active||[]);
+    }catch(e){
+      console.warn('[ensureListedUniverse]',e);recordGlobalError('ensureListedUniverse',e);
+      if(!LISTED_UNIVERSE)LISTED_UNIVERSE=new Set();
+    }
+    return LISTED_UNIVERSE;
+  }
+  // 名冊沒載到（size 0）時一律回 true＝「當作在市」，不能因為名冊沒讀到就把
+  // 每一檔股票都標成已下市。
+  function isListedNow(code){return !LISTED_UNIVERSE||LISTED_UNIVERSE.size===0||LISTED_UNIVERSE.has(code)}
   let INTRADAY_TW_AT=0,INTRADAY_US_AT=0;
   // 2026-08-26 新增（P2）：「無報價」要說明原因，不能只丟一個沒有解釋的空狀態——
   // 依可取得的訊號盡量誠實分類成「休市」／「資料源失敗」／「未涵蓋」三種之一。
+  // ── 2026-09-06（實測.一）全 App 唯一的報價回退鏈 ────────────────────────────
+  // 總司令實測：新增一檔自選股後顯示「無報價」，但那一檔在 quotes_all_tw.json 與
+  // sparklines.json 裡都有價格。根因是各處各自只查 quotes_tw.json（Actions 只抓
+  // 前 210 檔），查不到就直接放棄，沒有往後面兩層退。
+  //
+  // 四層，依總司令指定的順序，每一層都標明自己是哪一層：
+  //   1. live      即時（Shioaji tick / IBKR），受 20 分鐘新鮮度限制
+  //   2. quotes    quotes_tw.json / quotes_us.json（約 210 檔，不管新不新鮮都收）
+  //   3. all       quotes_all_tw.json（全市場 2,837 檔盤後收盤）
+  //   4. history   sparklines.json 最後一點
+  //
+  // 第 4 層說明：總司令指定的是「price_history 最後收盤」。price_history.json 是
+  // 好幾 MB 的全歷史檔，在手機上整份抓不划算；sparklines.json（286KB）就是由
+  // build_sparklines.py 從 price_history 切出來的近 20 日收盤，**最後一點就是
+  // price_history 的最後收盤**，是同一個數字的輕量版本，所以用它。
+  function resolveQuote(code,us){
+    const iq=intradayQuote(code,us);
+    if(iq&&iq.price!=null)return Object.assign({},iq,{tier:'live'});
+
+    const cold=(us?INTRADAY_US:INTRADAY_TW);
+    const raw=cold&&cold.quotes?cold.quotes[code]:null;
+    if(raw&&raw.price!=null){
+      return {price:raw.price,change:raw.change??null,change_pct:raw.change_pct??null,
+              prev_close:raw.prev_close??null,sparkline:raw.sparkline,
+              source:'quotes_file',tier:'quotes',
+              asof:cold&&cold.fetched_at?cold.fetched_at:null};
+    }
+
+    if(!us){
+      const a=QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes?QUOTES_ALL_TW_CACHE.quotes[code]:null;
+      if(a&&a.close!=null){
+        // quotes_all_tw 只存收盤與漲跌%，前收由這兩個反推（漲跌% 是相對前收算的）。
+        // change_pct 為 -100 代表前收是 0，那是壞資料，不反推。
+        const pct=(typeof a.change_pct==='number'&&isFinite(a.change_pct)&&a.change_pct!==-100)?a.change_pct:null;
+        const prev=pct!=null?a.close/(1+pct/100):null;
+        return {price:a.close,change:prev!=null?a.close-prev:null,change_pct:pct,
+                prev_close:prev,source:'quotes_all_tw',tier:'all',asof:a.date||null};
+      }
+    }
+
+    const sp=sparkFor(code);
+    if(sp&&sp.length){
+      const last=sp[sp.length-1],prev=sp.length>1?sp[sp.length-2]:null;
+      if(last!=null&&isFinite(last)){
+        return {price:last,change:prev!=null?last-prev:null,
+                change_pct:prev?((last-prev)/prev*100):null,prev_close:prev,
+                sparkline:sp,source:'sparklines',tier:'history',asof:null};
+      }
+    }
+    return null;
+  }
+  // 每一層在 UI 上怎麼講。層級越後面越舊，要讓使用者一眼分得出來，不能都講成「即時」。
+  const QUOTE_TIER_LABEL={
+    live:'即時',
+    quotes:'排程報價（約10分鐘）',
+    all:'全市場盤後收盤',
+    history:'歷史最後收盤',
+  };
+  // 走到這裡代表四層全部沒有。依總司令裁示：只有「已下市/暫停交易」才算真的無報價，
+  // 其他情況都要說出是哪一環沒接上，不能含糊帶過。
   function noQuoteReason(code,us){
+    if(!us&&!isListedNow(code))return '已下市或暫停交易';
+    if(!us&&LISTED_UNIVERSE&&LISTED_UNIVERSE.size>0&&LISTED_UNIVERSE.has(code))
+      return '在官方名冊內但四層來源都沒有這一檔的價格，請回報';
     const src=us?INTRADAY_US:INTRADAY_TW;
-    const inSrc=src&&src.quotes&&src.quotes[code];
-    if(inSrc){
+    if(src&&src.quotes&&src.quotes[code]){
       const age=intradayAgeMin(src);
       if(age!=null&&age>INTRADAY_STALE_MIN)return '休市或排程尚未更新';
       return '資料源失敗';
     }
     if(FM_LAST_FAILED)return '資料源失敗';
-    return '未涵蓋此檔';
+    return us?'美股報價檔未涵蓋此檔':'未涵蓋此檔';
   }
   function intradayQuote(code,us){
     // 2026-09-01分工鐵律：台股一律走Shioaji（REALTIME，永豐自家經紀商
@@ -2076,7 +2155,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadTodayEvents',loadTodayEvents);
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
-    await ensureSparklines();  // 2026-09-05：全市場走勢線，任何自選股都有
+    // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
+    // quotes_all_tw（全市場 2,837 檔收盤，回退鏈第三層）、listed_universe（分辨真的
+    // 下市還是我們沒接好）。用 allSettled，任一份失敗只是少一層，不能讓整個首頁不畫。
+    await Promise.allSettled([ensureSparklines(),loadQuotesAllTw(),ensureListedUniverse()]);
     if(LIVE.connected){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
     if(runId!==HYDRATE_HOME_SEQ)return;
     let showedExtendedHours=false; // 2026-08-27新增：只要有任一列顯示了盤前/盤後價，就顯示風險揭露
@@ -2097,15 +2179,21 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // rawQ跟iq分開：iq在資料過舊(>20分鐘)時會是null（避免拿舊價格假裝即時），
       // 但sparkline是日線、不需要這麼嚴格的新鮮度，所以sparkline/備援價格改用
       // rawQ（不管新不新鮮都給，跟原本FinMind退回邏輯精神一致）。
-      const iq=intradayQuote(code,us);
-      const rawQ=((us?INTRADAY_US:INTRADAY_TW)&&(us?INTRADAY_US:INTRADAY_TW).quotes)?.[code];
-      if(!iq&&!rawQ){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · 無報價（${noQuoteReason(code,us)}）</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b></div>`;continue}
-      const price=iq?iq.price:rawQ.price;
-      const chg=iq&&iq.change!=null?iq.change:(rawQ.change??0);
-      const pct=iq&&iq.change_pct!=null?iq.change_pct:(rawQ.change_pct??0);
+      // 2026-09-06（實測.一）改吃統一的四層回退鏈。原本只查 quotes_tw.json（Actions
+      // 只抓前 210 檔），新增的自選股只要不在那份清單裡就直接顯示「無報價」，
+      // 但那些股票在 quotes_all_tw.json（2,837 檔）與 sparklines.json 裡都有價格。
+      const q=resolveQuote(code,us);
+      const iq=(q&&q.tier==='live')?q:null;
+      const rawQ=q;
+      if(!q){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · 無報價（${noQuoteReason(code,us)}）</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b></div>`;continue}
+      const price=q.price;
+      const chg=q.change??0;
+      const pct=q.change_pct??0;
       const cls=chg>=0?'u':'d';
       // 2026-09-04 P0產品.一：來源/新鮮度文字收進可展開的說明，列上只留一顆彩色小點
-      const srcText=iq?`${intradayTag(iq,us)||'· 近即時（Actions排程）'}`:'· 已收盤（Actions排程最後一筆）';
+      // 每一層講自己的話：不能把「三天前的歷史收盤」講成「已收盤（Actions排程最後一筆）」
+      const srcText=iq?`${intradayTag(iq,us)||'· 近即時（Actions排程）'}`
+        :('· '+(QUOTE_TIER_LABEL[q.tier]||'盤後')+(q.asof?('（'+String(q.asof).slice(5)+'）'):''));
       const mktOpenNow=us?isUsTradingWindowNow():isTwTradingWindowNow();
       const dotCls=!mktOpenNow?'gr':((iq&&(iq.source==='sinopac'||iq.source==='ibkr')&&!iq.isTodayClose&&/REALTIME/.test(iq.data_type||''))?'g':(iq&&!iq.isTodayClose?'y':'gr'));
       const meta=`${code}${us?' · 美股':''}<span class="sdot ${dotCls} wl-src-dot" data-wl-dot="${code}" title="點一下看資料來源" onclick="event.stopPropagation();toggleWlDetail('${code}')"></span>`;
@@ -2939,7 +3027,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function confirmDelete(code){
     const nm=nameOf(code);
     document.getElementById('cf-msg').innerHTML=`確定要從自選股移除<br><b style="font-size:16px">${nm}（${code}）</b>嗎？`;
-    cfAction=()=>{WL=WL.filter(x=>x!==code);localStorage.setItem('alpha_wl',JSON.stringify(WL));hydrateHome()};
+    cfAction=()=>{WL=WL.filter(x=>x!==code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();hydrateHome()};
     document.getElementById('confirm').classList.add('open');
     document.getElementById('cmask').classList.add('open');
   }
@@ -3024,7 +3112,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     box.innerHTML=res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${s.name}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${s.ind}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('');
   }
   function pickStock(code){
-    if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));toast('已加入 '+nameOf(code))}
+    if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();toast('已加入 '+nameOf(code))}
     else{toast('已在自選股中')}
     doSearch();hydrateHome();
   }
@@ -3279,6 +3367,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 資料只有最新快照、無歷史區間查詢，見該腳本docstring揭露），是研究端既有
     // 快取整理出的快照。價格走勢/融資/三大法人這幾塊這輪還沒有替換掉FinMind，
     // 維持原樣（會誠實顯示連線失敗，不是假資料）。
+    // 2026-09-06（實測.一）個股頁也走同一條回退鏈：先把後面幾層要用的檔案備妥，
+    // FinMind 抓不到（額度用盡/冷門股）時才有東西可退。
+    await Promise.allSettled([ensureSparklines(),loadQuotesAllTw(),ensureListedUniverse()]);
+    if(currentCode!==code)return;
     const [px,fund,inst]=await Promise.all([
       fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);
     if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢（見 canonicalPrice 註解）
@@ -3302,7 +3394,23 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
       renderStockChart(code,px,false);
       setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價，原始未還原股價）`);
-    }else{setTxt('sh-price','—');setTxt('sh-chg','查無此代號');document.getElementById('trend-chart').innerHTML='<div class="note">查無資料</div>'}
+    }else{
+      // 2026-09-06（實測.一）FinMind 沒有（冷門股或額度用盡）時退回統一回退鏈的後兩層：
+      // quotes_all_tw（全市場收盤）→ sparklines（歷史最後收盤）。原本這裡直接寫死
+      // 「查無此代號」，但那些股票其實我們手上就有價格，只是沒去拿。
+      const fb=resolveQuote(code,false);
+      if(fb&&fb.price!=null){
+        const chg=fb.change??0,pct=fb.change_pct??0,cls=chg>=0?'pos':'neg';
+        const pe=document.getElementById('sh-price');pe.textContent=nf(fb.price);pe.className=cls;
+        const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
+        const sp=fb.sparkline||sparkFor(code);
+        if(sp&&sp.length>=2)renderStockChart(code,sp.map(c=>({close:c})),false);
+        setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}　FinMind 本次無資料`);
+      }else{
+        setTxt('sh-price','—');setTxt('sh-chg','無報價（'+noQuoteReason(code,false)+'）');
+        document.getElementById('trend-chart').innerHTML='<div class="note">無報價（'+noQuoteReason(code,false)+'）</div>';
+      }
+    }
     loadMarginChip(code,px);
     if(px.length){
       // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
@@ -4280,7 +4388,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const row=REPORT_CACHE;if(!row)return;
     if(WL.includes(row.code)){WL=WL.filter(x=>x!==row.code);toast('已從觀察清單移除')}
     else{WL.push(row.code);toast('已加入觀察清單')}
-    localStorage.setItem('alpha_wl',JSON.stringify(WL));
+    localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();
     updateReportWatchBtn(row.code);
   }
   function generateOrderPlan(){
@@ -4400,6 +4508,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const ac=new AbortController();const t=setTimeout(()=>ac.abort(),timeoutMs||4000);
     try{return await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal})}finally{clearTimeout(t)}
   }
+  // ── 2026-09-06（實測.一.3）把自選股清單推給常駐行程 ────────────────────────
+  // Shioaji 的訂閱清單原本寫死在 shioaji_quotes.py（5 檔），Python 讀不到瀏覽器的
+  // localStorage，所以使用者自己加的股票永遠拿不到 tick。改成每次自選股變動就把
+  // 清單 POST 給 live server，它寫進共用檔案，常駐行程幾秒內完成增刪訂閱。
+  // 沒設定即時伺服器、或伺服器沒開時，這裡靜靜跳過——那是完全正常的狀態
+  // （回退鏈的第 2～4 層照樣有價格），不該跳錯誤給使用者看。
+  let PUSH_WATCHLIST_TIMER=null;
+  function pushWatchlistSoon(){
+    // 連續加好幾檔時只推最後一次，不要每按一下就打一次伺服器
+    if(PUSH_WATCHLIST_TIMER)clearTimeout(PUSH_WATCHLIST_TIMER);
+    PUSH_WATCHLIST_TIMER=setTimeout(()=>{_safeAsync('pushWatchlist',pushWatchlist)},800);
+  }
+  async function pushWatchlist(){
+    if(!LIVE.configured||!LIVE.url)return;
+    const codes=WL.filter(c=>!isUS(c));
+    try{
+      const ac=new AbortController();const t=setTimeout(()=>ac.abort(),5000);
+      const r=await fetch(LIVE.url+'/subscribe',{
+        method:'POST',
+        headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),
+        body:JSON.stringify({codes}),
+        cache:'no-store',credentials:'include',signal:ac.signal});
+      clearTimeout(t);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      if(d.truncated&&d.truncated.length)toast('自選股超過即時訂閱上限，未訂閱：'+d.truncated.slice(0,3).join('、')+(d.truncated.length>3?' 等':''));
+    }catch(e){
+      // 伺服器沒開是常態，不記進診斷橫幅（會淹掉真正的程式錯誤）；
+      // 只在主控台留一行，需要時查得到。
+      console.warn('[pushWatchlist] 推送自選股清單失敗（不影響顯示，回退鏈仍有價格）：',e.message||e);
+    }
+  }
   function lastCloseLabel(){
     // 使用者指定字眼「離線，顯示最後收盤 MM-DD」：用台北日期、MM-DD兩位數格式
     const d=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.fetched_at?new Date(INTRADAY_SINOPAC.fetched_at):null;
@@ -4465,6 +4605,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const r=await fetch(LIVE.url+'/live/stream',{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal});
       if(!r.ok){LIVE.lastError=r.status===401?'token不正確':'HTTP '+r.status;throw new Error(LIVE.lastError)}
       LIVE.connected=true;LIVE.lastError=null;LIVE.retryMs=3000;renderLiveStatus();
+      _safeAsync('pushWatchlist:onconnect',pushWatchlist);  // 2026-09-06：連上就對齊一次訂閱清單
       const reader=r.body.getReader();const dec=new TextDecoder();let buf='';
       while(true){
         const {value,done}=await reader.read();if(done)break;
@@ -4765,7 +4906,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.0224';
+  const APP_VERSION='2026-09-06.0236';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

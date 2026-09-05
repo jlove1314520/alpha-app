@@ -75,6 +75,7 @@ Shioaji模擬環境服務時段08:00-21:00內雖然可以登入，但非交易�
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -93,7 +94,42 @@ TW_TZ = timezone(timedelta(hours=8))
 PID_PATH = Path(__file__).parent / ".shioaji_stream.pid"
 
 # index.html的WL預設值同一份清單，見模組docstring「已知限制」
+# 2026-09-06（實測.一.3）這份清單的角色改了：**不再是唯一來源**，只是「App 還沒
+# 推清單過來之前的預設」。真正的自選股由 App 透過 live server 的 POST /subscribe
+# 推進 DYNAMIC_WATCHLIST_PATH，這支行程每輪讀它做增刪訂閱。
+# 原因：Python 行程讀不到瀏覽器的 localStorage，寫死 5 檔的結果就是使用者自己加的
+# 自選股永遠拿不到 tick（總司令實測「新增自選股無報價」的其中一環）。
 DEFAULT_TW_WATCHLIST = ["2330", "2454", "2317", "1513", "3231"]
+
+# 動態訂閱：與 alpha_live_server.py 的 WATCHLIST_PATH 指同一個檔案。
+DYNAMIC_WATCHLIST_PATH = Path(os.environ.get("ALPHA_LIVE_WATCHLIST_PATH")
+                              or (Path(__file__).parent / ".live_watchlist.json"))
+# Shioaji 官方文件載明 api.subscribe() 數量上限 200 個
+# （https://sinotrade.github.io/zh/tutor/limit/）。固定訂閱已用掉約 53 個
+# （TAIEX 1＋類股/櫃買指數 38＋期貨 2 檔各 Tick+BidAsk 共 4＋預設 5 檔各 Tick+BidAsk 共 10），
+# 動態清單只訂 Tick（畫面只要成交價，不需要五檔），100 檔＝100 個，合計約 153，留有餘裕。
+MAX_DYNAMIC_SUBSCRIPTIONS = 100
+DYNAMIC_POLL_SEC = 5.0  # 每 5 秒看一次清單有沒有變，加自選股後幾秒內就會有 tick
+
+
+def _read_dynamic_watchlist() -> list[str]:
+    """讀 App 推過來的自選股清單。讀不到就回空清單（代表只用預設），不拋例外——
+    這支是常駐行程，任何一次讀檔失敗都不能讓串流整個停掉。"""
+    try:
+        if not DYNAMIC_WATCHLIST_PATH.exists():
+            return []
+        doc = json.loads(DYNAMIC_WATCHLIST_PATH.read_text(encoding="utf-8"))
+        codes = doc.get("codes") or []
+        out, seen = [], set()
+        for c in codes:
+            c = str(c).strip()
+            if c and c not in seen and c.isdigit():
+                seen.add(c)
+                out.append(c)
+        return out[:MAX_DYNAMIC_SUBSCRIPTIONS]
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"  [動態訂閱] 讀清單失敗，這輪維持現狀：{type(e).__name__}: {e}", flush=True)
+        return []
 
 # App「期貨」頁FUT_CONTRACTS追蹤的四個近月合約（index.html::FUT_CONTRACTS）
 FUTURES_NEAR_MONTH = {
@@ -791,10 +827,52 @@ def run_stream_daemon() -> None:
 
         print(f"訂閱完成：{subscribed}，進入常駐迴圈（每{FLUSH_INTERVAL_SEC}秒檢查；盤中{'會' if INTRADAY_GIT_PUSH else '不'}commit，收盤後commit一次）", flush=True)
 
+        # 2026-09-06（實測.一.3）動態訂閱狀態。fixed_stock_codes 是啟動時就訂好的
+        # 預設清單，它們不會被動態邏輯退訂（那是保底，App 沒連線時也要有東西看）。
+        fixed_stock_codes = set(DEFAULT_TW_WATCHLIST)
+        dynamic_subscribed: set[str] = set()
+        elapsed_since_dynamic_check = 0.0
+
         elapsed_since_window_check = 0.0
         while True:
             time.sleep(FLUSH_INTERVAL_SEC)
             _flush_and_push(state)
+
+            elapsed_since_dynamic_check += FLUSH_INTERVAL_SEC
+            if elapsed_since_dynamic_check >= DYNAMIC_POLL_SEC:
+                elapsed_since_dynamic_check = 0.0
+                try:
+                    wanted = set(_read_dynamic_watchlist()) - fixed_stock_codes
+                    to_add = wanted - dynamic_subscribed
+                    to_drop = dynamic_subscribed - wanted
+                    for code in sorted(to_add):
+                        try:
+                            contract = api.Contracts.Stocks[code]
+                            api.subscribe(contract, quote_type=sj.QuoteType.Tick,
+                                          version=sj.QuoteVersion.v1)
+                            code_to_key[contract.code] = code
+                            dynamic_subscribed.add(code)
+                        except Exception as e:
+                            # 單一代號訂閱失敗（下市、代號打錯、超過上限）只跳過這一檔，
+                            # 不能讓整個常駐迴圈掛掉
+                            print(f"  [動態訂閱] {code} 失敗，跳過：{type(e).__name__}: {e}", flush=True)
+                    for code in sorted(to_drop):
+                        try:
+                            contract = api.Contracts.Stocks[code]
+                            api.unsubscribe(contract, quote_type=sj.QuoteType.Tick,
+                                            version=sj.QuoteVersion.v1)
+                            code_to_key.pop(contract.code, None)
+                        except Exception as e:
+                            print(f"  [動態退訂] {code} 失敗：{type(e).__name__}: {e}", flush=True)
+                        finally:
+                            dynamic_subscribed.discard(code)
+                    if to_add or to_drop:
+                        print(f"  [動態訂閱] +{len(to_add)} -{len(to_drop)}，"
+                              f"目前動態 {len(dynamic_subscribed)} 檔"
+                              f"（固定 {len(fixed_stock_codes)} 檔不受影響）", flush=True)
+                except Exception as e:
+                    print(f"  [動態訂閱] 這輪整批失敗，維持現狀：{type(e).__name__}: {e}", flush=True)
+
             elapsed_since_window_check += FLUSH_INTERVAL_SEC
             if elapsed_since_window_check >= TRADING_WINDOW_POLL_SEC:
                 elapsed_since_window_check = 0.0

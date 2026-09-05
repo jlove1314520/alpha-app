@@ -183,7 +183,7 @@ app = FastAPI(title="Alpha Live Quote Server（本機唯讀即時報價，Phase 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOW_ORIGINS,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],  # POST 只有 /subscribe 用（推自選股清單），沒有任何下單能力
     # FastAPI/Starlette的CORSMiddleware會在OPTIONS preflight直接攔截回應，不會走到任何
     # route handler（也就不會經過_check_token()），所以preflight本來就不驗token，這裡是
     # 框架既有行為，不需要額外程式碼。
@@ -536,6 +536,87 @@ async def _sse_event_generator():
         await asyncio.sleep(SSE_POLL_INTERVAL_SEC)
 
 
+# ── /subscribe：App 把自選股清單推給常駐行程 ────────────────────────────────
+# 2026-09-06（實測.一.3）背景：Shioaji 的訂閱清單原本寫死在 shioaji_quotes.py 的
+# DEFAULT_TW_WATCHLIST（5 檔），Python 行程讀不到瀏覽器的 localStorage，所以使用者
+# 自己加的自選股永遠拿不到 tick。改成 App 把清單 POST 過來、寫進一個共用檔案，
+# 常駐行程每輪讀它做增刪訂閱。
+#
+# **這個端點不具備任何下單能力**，它只決定「要串流哪些代號的報價」。伺服器整體
+# 仍然是唯讀的（沒有 place_order，程式碼裡也沒有 import 下單模組）。
+#
+# 訂閱上限：Shioaji 官方文件載明 `api.subscribe()` 數量上限為 200 個
+# （https://sinotrade.github.io/zh/tutor/limit/）。常駐行程已經固定用掉約 53 個
+# （TAIEX 1、類股與櫃買指數 38、期貨 2 檔各 Tick+BidAsk 共 4、預設 5 檔股票各
+# Tick+BidAsk 共 10），所以動態清單設 100 檔上限、且**只訂 Tick 不訂 BidAsk**
+# （畫面只需要成交價，五檔買賣不需要），合計約 153 個，離上限還有餘裕。
+# 超過上限的部分會被截掉，並在回應裡明講截掉了幾檔，不會安靜吃掉。
+WATCHLIST_PATH = Path(os.environ.get("ALPHA_LIVE_WATCHLIST_PATH")
+                      or (Path(__file__).parent / ".live_watchlist.json"))
+MAX_DYNAMIC_SUBSCRIPTIONS = 100
+
+
+def _is_tw_stock_code(code: str) -> bool:
+    """只收台股普通股/ETF代號。擋掉美股代號與亂填的字串，避免常駐行程對著一堆
+    查不到的合約反覆丟例外。"""
+    return bool(code) and code.isdigit() and (
+        len(code) == 4 or (len(code) in (5, 6) and code.startswith("00")))
+
+
+@app.post("/subscribe")
+async def post_subscribe(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    _check_token(x_alpha_local_token)
+    raw = payload.get("codes") if isinstance(payload, dict) else None
+    if not isinstance(raw, list):
+        raise HTTPException(status_code=400, detail="需要 {\"codes\": [\"2330\", ...]} 這樣的 JSON")
+
+    seen, accepted, rejected = set(), [], []
+    for item in raw:
+        code = str(item).strip()
+        if code in seen:
+            continue
+        seen.add(code)
+        (accepted if _is_tw_stock_code(code) else rejected).append(code)
+
+    truncated = accepted[MAX_DYNAMIC_SUBSCRIPTIONS:]
+    accepted = accepted[:MAX_DYNAMIC_SUBSCRIPTIONS]
+
+    doc = {
+        "updated_at": datetime.now(TW_TZ).isoformat(),
+        "codes": accepted,
+        "limit": MAX_DYNAMIC_SUBSCRIPTIONS,
+        "rejected": rejected,
+        "truncated": truncated,
+    }
+    try:
+        WATCHLIST_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"寫入訂閱清單失敗：{e}") from e
+
+    return {
+        "ok": True,
+        "accepted": len(accepted),
+        "codes": accepted,
+        "rejected": rejected,
+        "truncated": truncated,
+        "limit": MAX_DYNAMIC_SUBSCRIPTIONS,
+        "note": ("超過上限的部分沒有訂閱：" + ", ".join(truncated)) if truncated else
+                "全部收下，常駐行程會在下一輪（數秒內）完成訂閱",
+    }
+
+
+@app.get("/subscribe")
+async def get_subscribe(x_alpha_local_token: str | None = Header(default=None)):
+    """目前生效的動態訂閱清單。給 App 與除錯用——看得到伺服器認的是什麼，
+    才不用靠猜判斷「到底推上去了沒」。"""
+    _check_token(x_alpha_local_token)
+    doc = _read_json_safe(WATCHLIST_PATH)
+    if not doc:
+        return {"codes": [], "updated_at": None, "limit": MAX_DYNAMIC_SUBSCRIPTIONS,
+                "note": "尚未收到任何自選股清單，常駐行程目前只訂 DEFAULT_TW_WATCHLIST"}
+    return doc
+
+
 @app.get("/live/stream")
 async def live_stream(x_alpha_local_token: str | None = Header(default=None)):
     """SSE串流（mode=poll-diff-2s，見_sse_event_generator）。**token一律必檢，
@@ -588,6 +669,12 @@ def health():
         # 不用去翻程式碼或猜（跨來源失敗的錯誤訊息在瀏覽器端通常很不具體）。
         "cors": {"allow_origins": ALLOW_ORIGINS, "allow_headers": ALLOW_HEADERS,
                  "allow_credentials": True},
+        # 2026-09-06（實測.一.3）動態訂閱現況，方便對照「App 推了什麼」與「行程訂了什麼」
+        "dynamic_subscriptions": (lambda d: {
+            "count": len(d.get("codes") or []) if d else 0,
+            "updated_at": (d or {}).get("updated_at"),
+            "limit": MAX_DYNAMIC_SUBSCRIPTIONS,
+        })(_read_json_safe(WATCHLIST_PATH)),
         "ca_crt_available": CA_CRT_PATH.exists(),
     }
 
