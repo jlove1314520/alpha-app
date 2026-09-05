@@ -3709,4 +3709,10 @@ backfill_day_trading_ratio.py --skip-market-volume --batch-size 250`，
 本輪嘗試250天、新完成250天（其中16天無交易/無資料），累積已快取
 541/2609（20.7% of全範圍工作日），FMTQIK分母無需重跑，holdout未消耗。
 預估還需約8輪左右批次才能回補完整TRAIN+VAL期。現在排隊第一，下一輪
+重跑同一指令即可自動從上次進度接續。**2026-09-05T20:35接續排程第四輪**
+（本輪取鎖時發現陳舊鎖被回收，疑似上一輪失敗或卡住）：重跑同一指令
+`python backfill_day_trading_ratio.py --skip-market-volume --batch-size 250`，
+本輪嘗試250天、新完成250天（其中11天無交易/無資料），累積已快取
+804/2609（30.8% of全範圍工作日），FMTQIK分母無需重跑，holdout未消耗。
+預估還需約7輪左右批次才能回補完整TRAIN+VAL期。現在排隊第一，下一輪
 重跑同一指令即可自動從上次進度接續。
