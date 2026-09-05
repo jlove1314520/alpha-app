@@ -3392,3 +3392,5 @@ TRAIN隨機控制組記憶體內跑到29/100 draws，但checkpoint只在每滿10
 期仍完全尚未開始，不做任何PASS/FAIL判定，`is_holdout_consumed()`執行
 前後皆確認False。**佇列排隊順序仍是#36（未結案，接續第2關TRAIN隨機
 控制組）**，這輪工作單位到此為止。
+
+**狀態（2026-09-05T08:35 hypothesis_queue排程接續，同一輪工作單位，連續執行兩次script）**：重新執行`python short_sale_utilization_portfolio_v1.py`兩次，TRAIN隨機控制組持久化進度20→30/100 draws（第二次執行記憶體內達39/100但deadline在下一次落盤前觸發，實際持久化仍是30，跟先前輪同一種落盤頻率限制，非資料遺失）。VALIDATION期仍完全尚未開始，不做任何PASS/FAIL判定，`is_holdout_consumed()`確認為False。**佇列排隊順序仍是#36（未結案，接續第2關TRAIN隨機控制組，下一輪從30/100接續）**，這輪工作單位到此為止。
