@@ -4,6 +4,8 @@
 插入心跳時把新條目插在標題文字中間（切斷「自主研」「究馬拉松」），把
 標題還原成完整一行，新條目改放正確位置（標題之後、第一筆既有條目之上）。
 
+## 2026-09-05T09:04（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，無殘留鎖檔，`git pull`/`git status`確認乾淨，發現非本輪殘留未追蹤檔`deep_dive_f_us_value_bm_leave_extreme_out.py`不觸碰不納入commit）—接續佇列第36條（個股融券使用率）第2關TRAIN隨機控制組：重新執行`short_sale_utilization_portfolio_v1.py`一次，420秒時間預算內記憶體內進度30→49/100draws，因checkpoint僅每滿10筆落盤，實際持久化進度為40/100draws（下一輪從40接續、重算40~49這9筆，非資料遺失，是既有落盤頻率設計）。VALIDATION期仍未開始，**尚未做PASS/FAIL判定**——已同步`HYPOTHESIS_QUEUE.md` #36條目「狀態」小節。`is_holdout_consumed()`執行前後皆確認False。本輪未觸及三個停下條件，正常收工，下次排程觸發從checkpoint 40/100繼續。
+
 ## 2026-09-05T08:35（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，無殘留鎖檔，`git pull`/`git status`確認乾淨，發現非本輪殘留未追蹤檔`deep_dive_f_us_value_bm_leave_extreme_out.py`不觸碰不納入commit）—接續佇列第36條（個股融券使用率）第2關TRAIN隨機控制組：連續執行`short_sale_utilization_portfolio_v1.py`兩次，持久化進度20→30/100 draws，VALIDATION期仍未開始，**尚未做PASS/FAIL判定**——已同步`HYPOTHESIS_QUEUE.md` #36條目狀態小節。`is_holdout_consumed()`執行前後皆確認False。本輪未觸及三個停下條件，正常收工，下次排程觸發從checkpoint 30/100繼續。
 
 ## 2026-09-05T08:04（hypothesis_queue排程接續，取鎖成功LOCK_ACQUIRED，
