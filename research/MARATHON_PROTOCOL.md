@@ -1,5 +1,14 @@
 # MARATHON_PROTOCOL.md — 30 分鐘挖礦馬拉松操作規則
 
+## 🛠 2026-09-05 基礎設施維修中（總司令核准提案選項1）：三軌本輪「只寫心跳、不投遞工作」
+
+**這段旗標存在期間**，每一輪只做：`marathon_brief.py` → 取鎖 → 在 `REPORT.md` 心跳寫一行「維修中跳過（第N輪）」→ commit+push → 釋放鎖。
+不投遞任何回測、不讀大檔、不改任何 state/LEADS/LEDGER。維修內容與驗收標準見
+`research/PROPOSAL_2026-09-05_marathon_process_hardening.md`；三輪驗收通過後由互動 session 移除這段旗標並恢復挖礦。
+**馬拉松自己不能判斷維修結束、不能自行移除這段。**
+
+---
+
 ## ✅ 2026-09-03 總司令裁示：暫停規則解除，主軸改為「多因子組合策略」
 
 **（取代2026-08-26晚的🛑暫停規則；那段規則自第110輪起讓三軌連續跳過約213輪，
@@ -40,10 +49,38 @@
 2. **嘗試取得鎖檔**：`cd C:\alpha\alpha-app\research && python marathon_lock.py acquire`。
    - 回傳 exit code 0（印出 `LOCK_ACQUIRED`）→ 繼續下面的步驟。
    - 回傳非 0（印出 `LOCK_HELD by <pid> since <timestamp>`）→ **上一輪還在跑或卡住了，不要並行執行**。什麼都不做，直接結束這一輪（這是正常、健康的行為，不是錯誤，不需要記錄到任何 log）。
-   - 鎖檔會自動判斷「陳舊」（>25 分鐘沒更新，代表上一輪很可能卡死或崩潰）並允許接手，細節見 `marathon_lock.py` 本身的 docstring。**如果這次 `acquire()` 的輸出是 `LOCK_STALE`（不是乾淨的 `LOCK_ACQUIRED`）：記下這件事，這輪結束時寫心跳（見第 6 節）要順便註明「上一輪疑似失敗（陳舊鎖檔被回收）」——這是唯一能讓「上一輪悄悄死掉、什麼都沒留下」這種情況被後人看見的機會，不要略過。**
+   - 鎖檔會自動判斷「陳舊」（>27 分鐘，2026-09-05 起跟 `run-marathon-cycle.ps1` 的 25 分鐘硬超時對齊，見 `marathon_lock.py`）並允許接手。**如果這次 `acquire()` 的輸出是 `LOCK_STALE`：先看簡報第 1 段 `marathon_cycle_last.json` 的 `reason`**——`BUDGET`＝上一輪被 `--max-budget-usd` 砍掉、`TIMEOUT`＝被 25 分鐘硬超時砍掉、`OK`＝上一輪正常結束但沒釋放鎖（罕見，要查）。心跳照實寫「上一輪被 BUDGET/TIMEOUT 砍掉」，**不要再寫「疑似卡住／收工序卡住」這種猜測**——2026-09-05 之前整晚的 LOCK_STALE 全部是預算砍掉，被誤判成卡死好幾輪。
 3. **決定這輪要做哪一軌**：讀 `TW_MARATHON_STATE.md`／`US_MARATHON_STATE.md`／`FUT_MARATHON_STATE.md` 的「最後更新」時間戳，挑**最久沒被碰**的那一軌（簡單輪替，確保三軌都有進度，不會有一軌被無限期忽略）。除非某一軌的 state 檔案裡明確寫著「這裡卡住了，下一輪換別軌」，那就照著跳過。
 
 **做完這一輪所有事之後，無論成功或失敗，最後一定要**：`python marathon_lock.py release`。**用 try/finally 的精神做這件事**——如果中途任何一步出錯，還是要想辦法釋放鎖，不要讓一次失敗的執行卡死接下來所有輪次。
+
+---
+
+## 0b. 基礎設施規則（2026-09-05 新增，根因與修法見 `PROPOSAL_2026-09-05_marathon_process_hardening.md`）
+
+**根因回顧（避免重蹈）**：每輪是一個會被 `--max-budget-usd` 砍掉的 `claude -p` session；砍掉時 Bash 子行程陪葬、鎖沒人釋放、
+下一輪只看到 `LOCK_STALE` 便猜「卡住」。整晚 64 次 cycle 是這樣死的，第 356 輪的「背景回測消失無錯誤訊息」就是陪葬。
+另外舊的 vbs 不等待 PowerShell 結束讓兩輪可以重疊、舊鎖門檻 25 分鐘比實際輪次短會搶鎖。**以下規則全部是為了讓
+「做完就是做完、死掉就知道為什麼死」。**
+
+1. **開工只跑 `python research/marathon_brief.py`**（<60KB），不 cat 整份 `REPORT.md`／`HYPOTHESIS_QUEUE.md`／`TRIALS_LEDGER.md`／
+   `*_LOG.md`／三軌 STATE 全文。需要某條目就 `grep -n "#27" research/TRIALS_LEDGER.md` 這種方式抓那一段。
+   每輪的實際讀取量會被 `cycle_stats.py` 記錄到 `marathon_cycle_last.json` 的 `read_kb`，目標 <300KB。
+2. **任何可能跑超過 5 分鐘的工作（回測、N≥100 隨機對照、大樣本載入、深挖）一律脫離 session**：
+   `python research/run_detached.py submit --name <名稱> --timeout-min 40 --expect <預期產出檔> -- python -u research/<腳本>.py`
+   投遞後 session 內最多 `run_detached.py wait <job_id> --max-min 4` 等 4 分鐘，沒完就把 job_id 寫進該軌 STATE「下一步」，
+   **下一輪用 `run_detached.py status`／`log <job_id>` 收成**。session 被砍工作照跑（看門狗行程已 breakaway 出 Job 物件）。
+3. **一次只跑一個重度工作**：`submit` 遇到已有 running 工作會拒絕（exit 3）。這時這輪改做不需要重算的工作（判讀已完成的
+   CSV、寫 LEADS/LEDGER、地基程式碼），不要 `--allow-concurrent` 硬跑（會互相搶 CPU，第 355／363 輪的教訓）。
+4. **收成時看登記簿狀態**：`finished`＝正常、`failed`＝exit≠0（看 `log`）、`timeout`＝超過 timeout_min 被看門狗砍、
+   `orphaned`＝看門狗自己死了（通常是重開機；`run_detached.py reap` 會標）。`expect_exists` 告訴你預期產出檔在不在，
+   **不要再用「CSV 在不在」倒推「process 有沒有死」**。
+5. **不要在 session 裡 `sleep`/輪詢超過 5 分鐘**；也不要用 `&`／`nohup`／`Start-Process` 自己開背景工作——那些會陪葬，
+   只有 `run_detached.py` 開的不會。
+6. `run-marathon-cycle.ps1` 會在 25 分鐘硬砍本輪（`reason=TIMEOUT`）；一輪的工作單位要設計成 15 分鐘內可以收工。
+   `--max-budget-usd` 現在是 8（`reason=BUDGET`）。兩者都會寫進 `marathon_cycle_last.json`，下一輪簡報第 1 段會印。
+7. 鎖：`marathon_lock.py` 的陳舊門檻 27 分鐘 > ps1 硬超時 25 分鐘，正常在跑的輪次不會被下一輪搶鎖；ps1 的 finally 會
+   釋放本輪建立的鎖，所以「LOCK_STALE」從此只會出現在 ps1 本身也死掉（例如機器重開）的情況。
 
 ---
 
@@ -128,6 +165,7 @@
 ## 4. 防呆機制（technical safeguards）
 
 - **鎖檔**：見第 0 節，`marathon_lock.py`。
+- **重度工作一律 `run_detached.py`（2026-09-05 新增，第 0b 節）**：不在 session 裡等超過 5 分鐘、不自己開背景行程、不並行兩個重度工作。
 - **API/額度錯誤處理**：任何一次 FinMind 呼叫回傳 402（額度用盡）或連續網路錯誤時，**優雅結束這一輪**——把目前做到哪裡寫進 state 檔案（不是丟掉，是誠實記錄「卡在這裡，原因是額度」），然後正常收工（釋放鎖、視情況 commit 已經完成的部分、結束）。**不要為了硬跑而狂重試**——`finmind_client.py` 的 `_fetch()` 本來就有重試機制，如果它都放棄了，你也該放棄，不要在它之上再包一層重試迴圈。
 - **絕對不碰 holdout**：任何資料抓取都必須經過 `finmind_client.load_dev()`（自動截斷在 `VAL_END`）或明確標註為 membership/metadata 用途的 `_fetch()`（同 `universe.py`/`score.py` 的先例）。**永遠不要呼叫 `load_full_history()` 或 `unlock_holdout_once()`**——這兩個函式的存在是給「使用者明確授權的一次性 holdout 測試」用的，不是給日常挖礦用的，你沒有被授權碰它們，這條沒有模糊空間。每一輪收工前跑一次 `python -c "from validation.holdout import is_holdout_consumed; print(is_holdout_consumed())"` 確認還是 `False`，寫進這一輪的 log。
 - **絕對不自動下真單**：這個專案完全沒有接任何真實券商 API，這條規則目前是自動滿足的（沒有下單程式碼存在），但如果你在某一輪不小心寫出了看起來像是「送出委託」的程式碼，**立刻停手**，那不是這個馬拉松該做的事。
@@ -172,7 +210,8 @@
 4. **寫心跳（2026-08-23 新增，使用者要求，硬性步驟，不能省略）：** 讀 `MARATHON_STATE.md` 最上面「馬拉松全局輪次計數器」那行目前的數字 N，在 `research/REPORT.md` 最上面「心跳記錄」區塊（第一筆歷史條目的正上方，`---` 分隔線下面）插入一筆新的 `## 第 N+1 輪 · <這輪實際的日期時間，用系統時間，不要憑印象> · <TW/US/FUT> · <這輪做了什麼，一句話> · <結果/判定，一句話>`，然後把 `MARATHON_STATE.md` 那行的數字改成 N+1。**不管這輪做了什麼（就算只是回補了幾檔宇宙資料、或第 0 節判定要換軌但沒做出實質進展），都要留這一筆**——這是唯一能讓使用者不用逐一比對 `git log`/`marathon_cycle.log` 就一眼看出「馬拉松最近有沒有在跑」的機制。如果第 0 節第 2 步偵測到 `LOCK_STALE`，這筆心跳的「結果/判定」欄要順便寫「（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）」。
 5. `git status` 確認要 commit 的檔案清單合理（不要不小心帶到 `research/data/` 底下的東西，那是 gitignore 的；`REPORT.md`／`MARATHON_STATE.md` 這兩個心跳相關的檔案一定要在這次 commit 裡）。
 6. `git add`（限定檔案）→ `git commit`（訊息簡短說明這輪做了什麼）→ `git fetch origin main` → `git rebase origin/main` → `git push`（見第 4 節新增的 push 前 fetch+rebase 規則跟 push 前後留 log 的規則，這裡不重複細節）。push 失敗時參考第 4 節的重試規則。
-7. `python marathon_lock.py release`。
+7. 若這輪有投遞脫離session工作：job_id、預期產出、下一輪要怎麼收成，已寫進該軌 STATE「下一步」（2026-09-05 新增）。
+8. `python marathon_lock.py release`。
 8. 結束。**不要在這一輪結束後又開始下一個工作單位**——下一輪 30 分鐘後自然會被喚醒。
 
 ---

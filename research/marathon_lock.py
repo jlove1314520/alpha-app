@@ -33,8 +33,10 @@ import time
 from pathlib import Path
 
 DEFAULT_LOCK_NAME = "marathon"  # unchanged default -- existing TW/US/FUT track keeps using .marathon.lock
-STALE_MINUTES = 25  # a cycle is scheduled every 30 min; a lock older than this almost certainly means
-# the process that created it died without releasing -- not a deliberate long-running cycle.
+STALE_MINUTES = 27  # 2026-09-05: run-marathon-cycle.ps1 hard-kills a cycle at 25 min, so a lock older than
+# 27 min can only belong to a cycle that is already dead (killed by budget/timeout before reaching release()).
+# It used to be 25 while real cycles ran up to 27.8 min -> the *next* cycle stole the lock from a cycle that was
+# still alive and both wrote the same state files. Keep this strictly greater than the ps1 $MaxMinutes.
 
 
 def _lock_path(name: str) -> Path:
