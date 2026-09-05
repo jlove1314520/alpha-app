@@ -1,11 +1,19 @@
 {
   "meta": {
-    "generated_at": "2026-08-27T20:27:18+08:00",
+    "generated_at": "2026-09-05T19:42:26.539254+08:00",
     "generated_at_note": "2026-09-03回填：取自這個檔案最後一次git commit時間（build_company_info.py當時沒寫時間戳），不是重新產生；下次重跑腳本會寫入真正的產生時間",
     "source": "FinMind TaiwanStockInfo（research端本機parquet快取整理，一次性/不常變動）",
     "note": "供generate_scores_live.py顯示公司名稱/產業分類用，跟quotes_tw.json（僅自選股當下報價）用途不同、互不影響。",
-    "industry_ambiguous_count": 603,
-    "industry_ambiguous_note": "603檔股票在FinMind快取裡同一天有超過一種產業分類（原始資料本身的歧義，不是這支腳本的bug），這些股票的industry誠實留None，不猜一個可能錯的分類；name欄位沒有觀察到這個問題。"
+    "industry_ambiguous_note": "2026-09-05 已補齊：原 603 檔缺 industry，補後剩 90 檔。剩下的多半是興櫃/已下市/非上市櫃證券，沒有官方產業別可對。",
+    "industry_backfill_2026_09_05": {
+      "before_missing": 603,
+      "after_missing": 90,
+      "source_counts": {
+        "finmind_specific": 481,
+        "twse_code_map": 32
+      },
+      "note": "原本的『歧義』其實是母類「電子工業」與細類同時存在（台積電＝半導體業+電子工業），去掉母類後細類唯一就採用；FinMind 沒涵蓋到的上市股用 TWSE t187ap03_L 產業別代碼對照表補。見 research/backfill_company_industry.py。"
+    }
   },
   "companies": {
     "6238": {
@@ -526,7 +534,7 @@
     },
     "2381": {
       "name": "華宇",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "9157": {
       "name": "陽光能源-DR",
@@ -550,7 +558,7 @@
     },
     "8078": {
       "name": "華寶",
-      "industry": null
+      "industry": "通信網路業"
     },
     "911201": {
       "name": "僑威控",
@@ -614,15 +622,15 @@
     },
     "3638": {
       "name": "F-IML",
-      "industry": null
+      "industry": "半導體業"
     },
     "2384": {
       "name": "勝華",
-      "industry": null
+      "industry": "光電業"
     },
     "6286": {
       "name": "立錡",
-      "industry": null
+      "industry": "半導體業"
     },
     "6280": {
       "name": "崇貿",
@@ -630,7 +638,7 @@
     },
     "2396": {
       "name": "精碟",
-      "industry": null
+      "industry": "光電業"
     },
     "020002": {
       "name": "元富新中國N",
@@ -638,7 +646,7 @@
     },
     "2473": {
       "name": "思源",
-      "industry": null
+      "industry": "半導體業"
     },
     "020004": {
       "name": "兆豐電菁英30N",
@@ -662,7 +670,7 @@
     },
     "3009": {
       "name": "奇美電",
-      "industry": null
+      "industry": "光電業"
     },
     "020005": {
       "name": "永豐外資50N",
@@ -670,7 +678,7 @@
     },
     "3584": {
       "name": "介面",
-      "industry": null
+      "industry": "光電業"
     },
     "6004": {
       "name": "元京證",
@@ -678,11 +686,11 @@
     },
     "2403": {
       "name": "友尚",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3053": {
       "name": "鼎營",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2854": {
       "name": "寶來證",
@@ -690,7 +698,7 @@
     },
     "3534": {
       "name": "雷凌",
-      "industry": null
+      "industry": "半導體業"
     },
     "5854": {
       "name": "合庫",
@@ -702,31 +710,31 @@
     },
     "3063": {
       "name": "飛信",
-      "industry": null
+      "industry": "半導體業"
     },
     "2391": {
       "name": "合勤",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2411": {
       "name": "飛瑞",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2341": {
       "name": "英群",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2336": {
       "name": "致伸",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3080": {
       "name": "威力盟",
-      "industry": null
+      "industry": "光電業"
     },
     "3573": {
       "name": "穎台",
-      "industry": null
+      "industry": "光電業"
     },
     "9922": {
       "name": "優美",
@@ -750,7 +758,7 @@
     },
     "2315": {
       "name": "神達",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "1107": {
       "name": "建台",
@@ -770,7 +778,7 @@
     },
     "2447": {
       "name": "鼎新",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "2887C": {
       "name": "新丙特",
@@ -782,15 +790,15 @@
     },
     "3598": {
       "name": "奕力",
-      "industry": null
+      "industry": "半導體業"
     },
     "5280": {
       "name": "F-敦泰",
-      "industry": null
+      "industry": "半導體業"
     },
     "3061": {
       "name": "璨圓",
-      "industry": null
+      "industry": "光電業"
     },
     "2837": {
       "name": "萬泰銀",
@@ -802,15 +810,15 @@
     },
     "3599": {
       "name": "旺能",
-      "industry": null
+      "industry": "光電業"
     },
     "3614": {
       "name": "誠致",
-      "industry": null
+      "industry": "半導體業"
     },
     "2446": {
       "name": "全懋",
-      "industry": null
+      "industry": "半導體業"
     },
     "2833": {
       "name": "台壽保",
@@ -818,11 +826,11 @@
     },
     "2463": {
       "name": "研揚",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2494": {
       "name": "廣業科",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2831": {
       "name": "中華銀",
@@ -834,11 +842,11 @@
     },
     "6255": {
       "name": "奈普",
-      "industry": null
+      "industry": "光電業"
     },
     "3474": {
       "name": "華亞科",
-      "industry": null
+      "industry": "半導體業"
     },
     "2526": {
       "name": "大陸",
@@ -854,7 +862,7 @@
     },
     "8199": {
       "name": "廣鎵",
-      "industry": null
+      "industry": "光電業"
     },
     "00866": {
       "name": "新光Shiller CAPE",
@@ -874,7 +882,7 @@
     },
     "8008": {
       "name": "建興電",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "910579": {
       "name": "歐聖",
@@ -886,7 +894,7 @@
     },
     "3367": {
       "name": "英華達",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3214": {
       "name": "元砷",
@@ -902,7 +910,7 @@
     },
     "2452": {
       "name": "乾坤",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "910801": {
       "name": "金衛-DR",
@@ -910,7 +918,7 @@
     },
     "2361": {
       "name": "鴻友",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "910861": {
       "name": "神州-DR",
@@ -918,7 +926,7 @@
     },
     "3271": {
       "name": "其樂達",
-      "industry": null
+      "industry": "半導體業"
     },
     "2479": {
       "name": "和立",
@@ -930,19 +938,19 @@
     },
     "6119": {
       "name": "大傳",
-      "industry": null
+      "industry": "電子通路業"
     },
     "2350": {
       "name": "環電",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2469": {
       "name": "力信",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3020": {
       "name": "奇普仕",
-      "industry": null
+      "industry": "電子通路業"
     },
     "6702": {
       "name": "興航",
@@ -966,7 +974,7 @@
     },
     "3697": {
       "name": "F-晨星",
-      "industry": null
+      "industry": "半導體業"
     },
     "6457": {
       "name": "紘康",
@@ -1478,11 +1486,11 @@
     },
     "6176": {
       "name": "瑞儀",
-      "industry": null
+      "industry": "光電業"
     },
     "8105": {
       "name": "凌巨",
-      "industry": null
+      "industry": "光電業"
     },
     "6241": {
       "name": "鑫永洋",
@@ -1518,7 +1526,7 @@
     },
     "6579": {
       "name": "研揚",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6581": {
       "name": "鋼聯",
@@ -1530,7 +1538,7 @@
     },
     "6412": {
       "name": "群電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6411": {
       "name": "晶焱",
@@ -1538,7 +1546,7 @@
     },
     "6442": {
       "name": "光聖",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6578": {
       "name": "達邦蛋白",
@@ -1546,7 +1554,7 @@
     },
     "6409": {
       "name": "旭隼",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6582": {
       "name": "申豐",
@@ -1582,7 +1590,7 @@
     },
     "6285": {
       "name": "啟碁",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6599": {
       "name": "普達系統",
@@ -1614,7 +1622,7 @@
     },
     "6283": {
       "name": "淳安",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6610": {
       "name": "安成生技",
@@ -1642,11 +1650,11 @@
     },
     "6443": {
       "name": "元晶",
-      "industry": null
+      "industry": "光電業"
     },
     "6456": {
       "name": "GIS-KY",
-      "industry": null
+      "industry": "光電業"
     },
     "6589": {
       "name": "台康生技",
@@ -1654,7 +1662,7 @@
     },
     "6405": {
       "name": "悅城",
-      "industry": null
+      "industry": "光電業"
     },
     "6590": {
       "name": "普鴻",
@@ -1670,7 +1678,7 @@
     },
     "6591": {
       "name": "動力-KY",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6292": {
       "name": "迅德",
@@ -1678,7 +1686,7 @@
     },
     "6451": {
       "name": "訊芯-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "6446": {
       "name": "藥華藥",
@@ -1690,7 +1698,7 @@
     },
     "6449": {
       "name": "鈺邦",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6290": {
       "name": "良維",
@@ -1714,7 +1722,7 @@
     },
     "6515": {
       "name": "穎崴",
-      "industry": null
+      "industry": "半導體業"
     },
     "6432": {
       "name": "今展科",
@@ -1742,11 +1750,11 @@
     },
     "6525": {
       "name": "捷敏-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "6526": {
       "name": "達發",
-      "industry": null
+      "industry": "半導體業"
     },
     "6527": {
       "name": "明達醫",
@@ -1758,7 +1766,7 @@
     },
     "6531": {
       "name": "愛普*",
-      "industry": null
+      "industry": "半導體業"
     },
     "6532": {
       "name": "瑞耘",
@@ -1766,7 +1774,7 @@
     },
     "6533": {
       "name": "晶心科",
-      "industry": null
+      "industry": "半導體業"
     },
     "6474": {
       "name": "華豫寧",
@@ -1798,7 +1806,7 @@
     },
     "6426": {
       "name": "統新",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6488": {
       "name": "環球晶",
@@ -1822,7 +1830,7 @@
     },
     "6477": {
       "name": "安集",
-      "industry": null
+      "industry": "光電業"
     },
     "6498": {
       "name": "久禾光",
@@ -1870,7 +1878,7 @@
     },
     "6416": {
       "name": "瑞祺電通",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6560": {
       "name": "欣普羅",
@@ -1918,7 +1926,7 @@
     },
     "6415": {
       "name": "矽力*-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "6570": {
       "name": "維田",
@@ -1926,7 +1934,7 @@
     },
     "6414": {
       "name": "樺漢",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6441": {
       "name": "廣錠",
@@ -1946,7 +1954,7 @@
     },
     "6573": {
       "name": "虹揚-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "6473": {
       "name": "美賣*",
@@ -2002,7 +2010,7 @@
     },
     "6552": {
       "name": "易華電",
-      "industry": null
+      "industry": "半導體業"
     },
     "6555": {
       "name": "榮炭",
@@ -2014,7 +2022,7 @@
     },
     "6558": {
       "name": "興能高",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6419": {
       "name": "京晨科",
@@ -2026,7 +2034,7 @@
     },
     "6438": {
       "name": "迅得",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6550": {
       "name": "北極星藥業-KY",
@@ -2050,7 +2058,7 @@
     },
     "5434": {
       "name": "崇越",
-      "industry": null
+      "industry": "電子通路業"
     },
     "5438": {
       "name": "東友",
@@ -2098,11 +2106,11 @@
     },
     "5469": {
       "name": "瀚宇博",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "5471": {
       "name": "松翰",
-      "industry": null
+      "industry": "半導體業"
     },
     "5474": {
       "name": "聰泰",
@@ -2206,7 +2214,7 @@
     },
     "5388": {
       "name": "中磊",
-      "industry": null
+      "industry": "通信網路業"
     },
     "5392": {
       "name": "能率",
@@ -2326,7 +2334,7 @@
     },
     "5484": {
       "name": "慧友",
-      "industry": null
+      "industry": "光電業"
     },
     "5487": {
       "name": "通泰",
@@ -2434,7 +2442,7 @@
     },
     "4994": {
       "name": "傳奇",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "4995": {
       "name": "晶達",
@@ -2442,7 +2450,7 @@
     },
     "4999": {
       "name": "鑫禾",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "5007": {
       "name": "三星",
@@ -2482,7 +2490,7 @@
     },
     "5203": {
       "name": "訊連",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "5205": {
       "name": "中茂",
@@ -2502,7 +2510,7 @@
     },
     "4989": {
       "name": "榮科",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4980": {
       "name": "佐臻",
@@ -2518,19 +2526,19 @@
     },
     "4956": {
       "name": "光鋐",
-      "industry": null
+      "industry": "光電業"
     },
     "4958": {
       "name": "臻鼎-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4960": {
       "name": "誠美材",
-      "industry": null
+      "industry": "光電業"
     },
     "4961": {
       "name": "天鈺",
-      "industry": null
+      "industry": "半導體業"
     },
     "4966": {
       "name": "譜瑞-KY",
@@ -2542,7 +2550,7 @@
     },
     "4968": {
       "name": "立積",
-      "industry": null
+      "industry": "半導體業"
     },
     "4971": {
       "name": "IET-KY",
@@ -2562,15 +2570,15 @@
     },
     "4976": {
       "name": "佳凌",
-      "industry": null
+      "industry": "光電業"
     },
     "4977": {
       "name": "眾達-KY",
-      "industry": null
+      "industry": "通信網路業"
     },
     "4967": {
       "name": "十銓",
-      "industry": null
+      "industry": "半導體業"
     },
     "5212": {
       "name": "凌網",
@@ -2594,7 +2602,7 @@
     },
     "5269": {
       "name": "祥碩",
-      "industry": null
+      "industry": "半導體業"
     },
     "5271": {
       "name": "紘通",
@@ -2622,7 +2630,7 @@
     },
     "5285": {
       "name": "界霖",
-      "industry": null
+      "industry": "半導體業"
     },
     "5287": {
       "name": "數字",
@@ -2666,7 +2674,7 @@
     },
     "5258": {
       "name": "虹堡",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "5251": {
       "name": "天鉞電",
@@ -2674,7 +2682,7 @@
     },
     "5215": {
       "name": "科嘉-KY",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "5220": {
       "name": "萬達光電",
@@ -2682,7 +2690,7 @@
     },
     "5222": {
       "name": "全訊",
-      "industry": null
+      "industry": "半導體業"
     },
     "5223": {
       "name": "安力-KY",
@@ -2690,7 +2698,7 @@
     },
     "5225": {
       "name": "東科-KY",
-      "industry": null
+      "industry": "其他電子業"
     },
     "5227": {
       "name": "立凱-KY",
@@ -2710,7 +2718,7 @@
     },
     "5236": {
       "name": "凌陽創新",
-      "industry": null
+      "industry": "半導體業"
     },
     "5240": {
       "name": "建騰",
@@ -2718,11 +2726,11 @@
     },
     "5243": {
       "name": "乙盛-KY",
-      "industry": null
+      "industry": "光電業"
     },
     "5244": {
       "name": "弘凱",
-      "industry": null
+      "industry": "光電業"
     },
     "5245": {
       "name": "智晶",
@@ -2738,11 +2746,11 @@
     },
     "5234": {
       "name": "達興材料",
-      "industry": null
+      "industry": "光電業"
     },
     "6282": {
       "name": "康舒",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "5902": {
       "name": "德記",
@@ -2754,7 +2762,7 @@
     },
     "6209": {
       "name": "今國光",
-      "industry": null
+      "industry": "光電業"
     },
     "6210": {
       "name": "慶生",
@@ -2766,19 +2774,19 @@
     },
     "6213": {
       "name": "聯茂",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6214": {
       "name": "精誠",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "6215": {
       "name": "和椿",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6216": {
       "name": "居易",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6217": {
       "name": "中探針",
@@ -2810,7 +2818,7 @@
     },
     "6224": {
       "name": "聚鼎",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6208": {
       "name": "日揚",
@@ -2822,7 +2830,7 @@
     },
     "6206": {
       "name": "飛捷",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6190": {
       "name": "萬泰科",
@@ -2830,11 +2838,11 @@
     },
     "6191": {
       "name": "精成科",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6192": {
       "name": "巨路",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6194": {
       "name": "育富",
@@ -2846,7 +2854,7 @@
     },
     "6196": {
       "name": "帆宣",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6198": {
       "name": "瑞築",
@@ -2858,11 +2866,11 @@
     },
     "6201": {
       "name": "亞弘電",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6202": {
       "name": "盛群",
-      "industry": null
+      "industry": "半導體業"
     },
     "6203": {
       "name": "海韻電",
@@ -2874,19 +2882,19 @@
     },
     "6205": {
       "name": "詮欣",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6197": {
       "name": "佳必琪",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6189": {
       "name": "豐藝",
-      "industry": null
+      "industry": "電子通路業"
     },
     "6225": {
       "name": "天瀚",
-      "industry": null
+      "industry": "光電業"
     },
     "6263": {
       "name": "普萊德",
@@ -2906,7 +2914,7 @@
     },
     "6269": {
       "name": "台郡",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6270": {
       "name": "倍微",
@@ -2914,11 +2922,11 @@
     },
     "6271": {
       "name": "同欣電",
-      "industry": null
+      "industry": "半導體業"
     },
     "6272": {
       "name": "驊陞",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6274": {
       "name": "台燿",
@@ -2934,11 +2942,11 @@
     },
     "6277": {
       "name": "宏正",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6278": {
       "name": "台表科",
-      "industry": null
+      "industry": "光電業"
     },
     "6279": {
       "name": "胡連",
@@ -2946,7 +2954,7 @@
     },
     "6281": {
       "name": "全國電",
-      "industry": null
+      "industry": "電子通路業"
     },
     "6261": {
       "name": "久元",
@@ -2958,7 +2966,7 @@
     },
     "6257": {
       "name": "矽格",
-      "industry": null
+      "industry": "半導體業"
     },
     "6227": {
       "name": "茂綸",
@@ -2974,7 +2982,7 @@
     },
     "6230": {
       "name": "尼得科超眾",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6231": {
       "name": "系微",
@@ -2990,11 +2998,11 @@
     },
     "6235": {
       "name": "華孚",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6226": {
       "name": "光鼎",
-      "industry": null
+      "industry": "光電業"
     },
     "6236": {
       "name": "中湛",
@@ -3002,7 +3010,7 @@
     },
     "6239": {
       "name": "力成",
-      "industry": null
+      "industry": "半導體業"
     },
     "6240": {
       "name": "松崗",
@@ -3014,7 +3022,7 @@
     },
     "6243": {
       "name": "迅杰",
-      "industry": null
+      "industry": "半導體業"
     },
     "6244": {
       "name": "茂迪",
@@ -3050,11 +3058,11 @@
     },
     "6116": {
       "name": "彩晶",
-      "industry": null
+      "industry": "光電業"
     },
     "6117": {
       "name": "迎廣",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6118": {
       "name": "建達",
@@ -3062,7 +3070,7 @@
     },
     "6120": {
       "name": "達運",
-      "industry": null
+      "industry": "光電業"
     },
     "6121": {
       "name": "新普",
@@ -3094,7 +3102,7 @@
     },
     "6128": {
       "name": "上福",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6129": {
       "name": "普誠",
@@ -3106,11 +3114,11 @@
     },
     "6133": {
       "name": "金橋",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6115": {
       "name": "鎰勝",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6114": {
       "name": "久威",
@@ -3190,7 +3198,7 @@
     },
     "6108": {
       "name": "競國",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6109": {
       "name": "亞元",
@@ -3202,7 +3210,7 @@
     },
     "6112": {
       "name": "邁達特",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "6027": {
       "name": "德信",
@@ -3210,7 +3218,7 @@
     },
     "6136": {
       "name": "富爾特",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6138": {
       "name": "茂達",
@@ -3218,7 +3226,7 @@
     },
     "6164": {
       "name": "華興",
-      "industry": null
+      "industry": "光電業"
     },
     "6165": {
       "name": "浪凡",
@@ -3226,7 +3234,7 @@
     },
     "6166": {
       "name": "凌華",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6167": {
       "name": "久正",
@@ -3234,7 +3242,7 @@
     },
     "6168": {
       "name": "宏齊",
-      "industry": null
+      "industry": "光電業"
     },
     "6169": {
       "name": "昱泉",
@@ -3278,7 +3286,7 @@
     },
     "6183": {
       "name": "關貿",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "6184": {
       "name": "大豐電",
@@ -3306,7 +3314,7 @@
     },
     "6139": {
       "name": "亞翔",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6140": {
       "name": "訊達",
@@ -3314,11 +3322,11 @@
     },
     "6141": {
       "name": "柏承",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6142": {
       "name": "友勁",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6143": {
       "name": "振曜",
@@ -3350,11 +3358,11 @@
     },
     "6152": {
       "name": "百一",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6153": {
       "name": "嘉聯益",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6154": {
       "name": "順發",
@@ -3362,7 +3370,7 @@
     },
     "6155": {
       "name": "鈞寶",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6156": {
       "name": "松上",
@@ -3594,11 +3602,11 @@
     },
     "8045": {
       "name": "達運光電",
-      "industry": null
+      "industry": "通信網路業"
     },
     "8046": {
       "name": "南電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "8047": {
       "name": "星雲",
@@ -3650,7 +3658,7 @@
     },
     "8070": {
       "name": "長華*",
-      "industry": null
+      "industry": "電子通路業"
     },
     "8071": {
       "name": "能率網通",
@@ -3658,7 +3666,7 @@
     },
     "8072": {
       "name": "陞泰",
-      "industry": null
+      "industry": "電子通路業"
     },
     "8074": {
       "name": "鉅橡",
@@ -3710,15 +3718,15 @@
     },
     "8011": {
       "name": "台通",
-      "industry": null
+      "industry": "通信網路業"
     },
     "8016": {
       "name": "矽創",
-      "industry": null
+      "industry": "半導體業"
     },
     "8021": {
       "name": "尖點",
-      "industry": null
+      "industry": "其他電子業"
     },
     "8024": {
       "name": "佑華",
@@ -3730,7 +3738,7 @@
     },
     "8028": {
       "name": "昇陽半導體",
-      "industry": null
+      "industry": "半導體業"
     },
     "8032": {
       "name": "光菱",
@@ -3750,7 +3758,7 @@
     },
     "8039": {
       "name": "台虹",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "7931": {
       "name": "續升綠能",
@@ -3782,7 +3790,7 @@
     },
     "7788": {
       "name": "松川精密",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "7789": {
       "name": "開展",
@@ -3838,7 +3846,7 @@
     },
     "7795": {
       "name": "長廣",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "7782": {
       "name": "光速火箭",
@@ -3902,11 +3910,11 @@
     },
     "7768": {
       "name": "頌勝科技",
-      "industry": null
+      "industry": "半導體業"
     },
     "7769": {
       "name": "鴻勁",
-      "industry": null
+      "industry": "半導體業"
     },
     "7770": {
       "name": "君曜",
@@ -4050,7 +4058,7 @@
     },
     "7835": {
       "name": "永悅健康-創",
-      "industry": null
+      "industry": "數位雲端"
     },
     "7833": {
       "name": "綠岩能源",
@@ -4094,11 +4102,11 @@
     },
     "7822": {
       "name": "倍利科",
-      "industry": null
+      "industry": "半導體業"
     },
     "7823": {
       "name": "奧義賽博-KY創",
-      "industry": null
+      "industry": "數位雲端"
     },
     "7824": {
       "name": "智寶",
@@ -4154,7 +4162,7 @@
     },
     "8499": {
       "name": "鼎炫-KY",
-      "industry": null
+      "industry": "其他電子業"
     },
     "8905": {
       "name": "裕國",
@@ -4230,7 +4238,7 @@
     },
     "8487": {
       "name": "愛爾達-創",
-      "industry": null
+      "industry": "數位雲端"
     },
     "8482": {
       "name": "商億-KY",
@@ -4502,7 +4510,7 @@
     },
     "9912": {
       "name": "偉聯",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "9914": {
       "name": "美利達",
@@ -4558,15 +4566,15 @@
     },
     "8112": {
       "name": "至上",
-      "industry": null
+      "industry": "電子通路業"
     },
     "8112A": {
       "name": "至上甲特",
-      "industry": null
+      "industry": "電子通路業"
     },
     "8114": {
       "name": "振樺電",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "8119": {
       "name": "公信",
@@ -4578,7 +4586,7 @@
     },
     "8131": {
       "name": "福懋科",
-      "industry": null
+      "industry": "半導體業"
     },
     "8111": {
       "name": "立碁",
@@ -4594,11 +4602,11 @@
     },
     "8162": {
       "name": "微矽電子-創",
-      "industry": null
+      "industry": "半導體業"
     },
     "8163": {
       "name": "達方",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "8171": {
       "name": "天宇",
@@ -4614,11 +4622,11 @@
     },
     "8150": {
       "name": "南茂",
-      "industry": null
+      "industry": "半導體業"
     },
     "8110": {
       "name": "華東",
-      "industry": null
+      "industry": "半導體業"
     },
     "8109": {
       "name": "博大",
@@ -4626,7 +4634,7 @@
     },
     "8081": {
       "name": "致新",
-      "industry": null
+      "industry": "半導體業"
     },
     "8083": {
       "name": "瑞穎",
@@ -4686,7 +4694,7 @@
     },
     "8101": {
       "name": "華冠",
-      "industry": null
+      "industry": "通信網路業"
     },
     "8102": {
       "name": "傑霖科技",
@@ -4694,11 +4702,11 @@
     },
     "8103": {
       "name": "瀚荃",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "8104": {
       "name": "錸寶",
-      "industry": null
+      "industry": "光電業"
     },
     "8107": {
       "name": "大億金茂",
@@ -4710,7 +4718,7 @@
     },
     "8201": {
       "name": "無敵",
-      "industry": null
+      "industry": "其他電子業"
     },
     "8345": {
       "name": "超秦",
@@ -4822,15 +4830,15 @@
     },
     "8210": {
       "name": "勤誠",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "8213": {
       "name": "志超",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "8215": {
       "name": "明基材",
-      "industry": null
+      "industry": "光電業"
     },
     "8222": {
       "name": "寶一",
@@ -4850,7 +4858,7 @@
     },
     "8249": {
       "name": "菱光",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "8255": {
       "name": "朋程",
@@ -4858,11 +4866,11 @@
     },
     "8261": {
       "name": "富鼎",
-      "industry": null
+      "industry": "半導體業"
     },
     "8271": {
       "name": "宇瞻",
-      "industry": null
+      "industry": "半導體業"
     },
     "8272": {
       "name": "全景軟體",
@@ -4926,7 +4934,7 @@
     },
     "6789": {
       "name": "采鈺",
-      "industry": null
+      "industry": "半導體業"
     },
     "6790": {
       "name": "永豐實",
@@ -4938,7 +4946,7 @@
     },
     "6792": {
       "name": "詠業",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6784": {
       "name": "天凱科技",
@@ -4962,7 +4970,7 @@
     },
     "6799": {
       "name": "來頡",
-      "industry": null
+      "industry": "半導體業"
     },
     "6803": {
       "name": "崑鼎",
@@ -5002,7 +5010,7 @@
     },
     "6756": {
       "name": "威鋒電子",
-      "industry": null
+      "industry": "半導體業"
     },
     "6757": {
       "name": "台灣虎航",
@@ -5034,11 +5042,11 @@
     },
     "6770": {
       "name": "力積電",
-      "industry": null
+      "industry": "半導體業"
     },
     "6771": {
       "name": "平和環保-創",
-      "industry": null
+      "industry": "綠能環保"
     },
     "6775": {
       "name": "穎台科技",
@@ -5046,7 +5054,7 @@
     },
     "6776": {
       "name": "展碁國際",
-      "industry": null
+      "industry": "電子通路業"
     },
     "6780": {
       "name": "學習王",
@@ -5054,11 +5062,11 @@
     },
     "6781": {
       "name": "AES-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6805": {
       "name": "富世達",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6750": {
       "name": "泰創工程",
@@ -5142,7 +5150,7 @@
     },
     "6854": {
       "name": "錼創科技-KY創",
-      "industry": null
+      "industry": "半導體業"
     },
     "6838": {
       "name": "台新藥",
@@ -5150,7 +5158,7 @@
     },
     "6835": {
       "name": "圓裕",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6811": {
       "name": "宏碁資訊",
@@ -5214,11 +5222,11 @@
     },
     "6830": {
       "name": "汎銓",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6831": {
       "name": "邁科",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6832": {
       "name": "金鼎科",
@@ -5230,7 +5238,7 @@
     },
     "6834": {
       "name": "天二科技",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6808": {
       "name": "三鼎生技",
@@ -5246,7 +5254,7 @@
     },
     "6658": {
       "name": "聯策",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6659": {
       "name": "天明製藥",
@@ -5282,7 +5290,7 @@
     },
     "6669": {
       "name": "緯穎",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6670": {
       "name": "復盛應用",
@@ -5294,7 +5302,7 @@
     },
     "6672": {
       "name": "騰輝電子-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6673": {
       "name": "和詮",
@@ -5302,11 +5310,11 @@
     },
     "6674": {
       "name": "鋐寶科技",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6668": {
       "name": "中揚光",
-      "industry": null
+      "industry": "光電業"
     },
     "6655": {
       "name": "科定",
@@ -5422,7 +5430,7 @@
     },
     "6719": {
       "name": "力智",
-      "industry": null
+      "industry": "半導體業"
     },
     "6720": {
       "name": "久昌",
@@ -5434,7 +5442,7 @@
     },
     "6722": {
       "name": "輝創",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6723": {
       "name": "傑智環境",
@@ -5494,11 +5502,11 @@
     },
     "6742": {
       "name": "澤米",
-      "industry": null
+      "industry": "光電業"
     },
     "6743": {
       "name": "安普新",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6716": {
       "name": "應廣",
@@ -5506,7 +5514,7 @@
     },
     "6862": {
       "name": "三集瑞-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6712": {
       "name": "長聖",
@@ -5534,7 +5542,7 @@
     },
     "6691": {
       "name": "洋基工程",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6692": {
       "name": "進能服",
@@ -5546,7 +5554,7 @@
     },
     "6695": {
       "name": "芯鼎",
-      "industry": null
+      "industry": "半導體業"
     },
     "6696": {
       "name": "仁新",
@@ -5558,7 +5566,7 @@
     },
     "6698": {
       "name": "旭暉應材",
-      "industry": null
+      "industry": "其他電子業"
     },
     "6703": {
       "name": "軒郁",
@@ -5574,7 +5582,7 @@
     },
     "6706": {
       "name": "惠特",
-      "industry": null
+      "industry": "光電業"
     },
     "6707": {
       "name": "富基電通",
@@ -5590,7 +5598,7 @@
     },
     "6715": {
       "name": "嘉基",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "7751": {
       "name": "竑騰",
@@ -5678,7 +5686,7 @@
     },
     "7610": {
       "name": "聯友金屬-創",
-      "industry": null
+      "industry": "綠能環保"
     },
     "7562": {
       "name": "博來科技",
@@ -5746,7 +5754,7 @@
     },
     "6988": {
       "name": "威力暘-創",
-      "industry": null
+      "industry": "汽車工業"
     },
     "6990": {
       "name": "華鉬",
@@ -5782,11 +5790,11 @@
     },
     "6969": {
       "name": "成信實業*-創",
-      "industry": null
+      "industry": "綠能環保"
     },
     "7631": {
       "name": "聚賢研發-創",
-      "industry": null
+      "industry": "其他電子業"
     },
     "7669": {
       "name": "碩正科技",
@@ -5802,7 +5810,7 @@
     },
     "7730": {
       "name": "暉盛-創",
-      "industry": null
+      "industry": "半導體業"
     },
     "7731": {
       "name": "火星生技*",
@@ -5834,7 +5842,7 @@
     },
     "7740": {
       "name": "熙特爾-創",
-      "industry": null
+      "industry": "綠能環保"
     },
     "7742": {
       "name": "天弘化",
@@ -5862,7 +5870,7 @@
     },
     "7749": {
       "name": "意騰-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "7738": {
       "name": "東聯互動",
@@ -5882,7 +5890,7 @@
     },
     "7689": {
       "name": "大鵬科CLMX",
-      "industry": null
+      "industry": "通信網路業"
     },
     "7702": {
       "name": "前端風電",
@@ -5922,7 +5930,7 @@
     },
     "7711": {
       "name": "永擎",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "7712": {
       "name": "博盛半導體",
@@ -6006,7 +6014,7 @@
     },
     "6908": {
       "name": "宏碁遊戲-創",
-      "industry": null
+      "industry": "電子通路業"
     },
     "6899": {
       "name": "創為精密",
@@ -6014,7 +6022,7 @@
     },
     "6909": {
       "name": "創控",
-      "industry": null
+      "industry": "半導體業"
     },
     "6911": {
       "name": "群運",
@@ -6038,7 +6046,7 @@
     },
     "6916": {
       "name": "華凌",
-      "industry": null
+      "industry": "光電業"
     },
     "6917": {
       "name": "竟天",
@@ -6186,7 +6194,7 @@
     },
     "6951": {
       "name": "青新-創",
-      "industry": null
+      "industry": "綠能環保"
     },
     "6952": {
       "name": "大武山",
@@ -6222,7 +6230,7 @@
     },
     "6962": {
       "name": "奕力-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "6963": {
       "name": "品元",
@@ -6234,7 +6242,7 @@
     },
     "6863": {
       "name": "永道-KY",
-      "industry": null
+      "industry": "通信網路業"
     },
     "6938": {
       "name": "藍新資訊",
@@ -6242,7 +6250,7 @@
     },
     "6921": {
       "name": "嘉雨思-創",
-      "industry": null
+      "industry": "半導體業"
     },
     "6922": {
       "name": "宸曜",
@@ -6254,7 +6262,7 @@
     },
     "6924": {
       "name": "榮惠-KY創",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "6925": {
       "name": "意藍",
@@ -6270,7 +6278,7 @@
     },
     "6928": {
       "name": "攸泰科技",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6929": {
       "name": "佑全",
@@ -6286,7 +6294,7 @@
     },
     "6933": {
       "name": "AMAX-KY",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "6934": {
       "name": "心誠鎂",
@@ -6302,11 +6310,11 @@
     },
     "6937": {
       "name": "天虹",
-      "industry": null
+      "industry": "半導體業"
     },
     "4952": {
       "name": "凌通",
-      "industry": null
+      "industry": "半導體業"
     },
     "4162": {
       "name": "智擎",
@@ -6486,7 +6494,7 @@
     },
     "2059": {
       "name": "川湖",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2061": {
       "name": "風青",
@@ -6870,7 +6878,7 @@
     },
     "1471": {
       "name": "首利",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "1472": {
       "name": "三洋實業",
@@ -7006,7 +7014,7 @@
     },
     "1582": {
       "name": "信錦",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "1583": {
       "name": "程泰",
@@ -7114,139 +7122,139 @@
     },
     "2395": {
       "name": "研華",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2397": {
       "name": "友通",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2399": {
       "name": "映泰",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2401": {
       "name": "凌陽",
-      "industry": null
+      "industry": "半導體業"
     },
     "2402": {
       "name": "毅嘉",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2404": {
       "name": "漢唐",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2405": {
       "name": "輔信",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2406": {
       "name": "國碩",
-      "industry": null
+      "industry": "光電業"
     },
     "2408": {
       "name": "南亞科",
-      "industry": null
+      "industry": "半導體業"
     },
     "2409": {
       "name": "友達",
-      "industry": null
+      "industry": "光電業"
     },
     "2412": {
       "name": "中華電",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2413": {
       "name": "環科",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2393": {
       "name": "億光",
-      "industry": null
+      "industry": "光電業"
     },
     "2373": {
       "name": "震旦行",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2374": {
       "name": "佳能",
-      "industry": null
+      "industry": "光電業"
     },
     "2375": {
       "name": "凱美",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2376": {
       "name": "技嘉",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2377": {
       "name": "微星",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2379": {
       "name": "瑞昱",
-      "industry": null
+      "industry": "半導體業"
     },
     "2380": {
       "name": "虹光",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2382": {
       "name": "廣達",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2383": {
       "name": "台光電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2385": {
       "name": "群光",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2387": {
       "name": "精元",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2388": {
       "name": "威盛",
-      "industry": null
+      "industry": "半導體業"
     },
     "2390": {
       "name": "云辰",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2392": {
       "name": "正崴",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2414": {
       "name": "精技",
-      "industry": null
+      "industry": "電子通路業"
     },
     "2415": {
       "name": "錩新",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2434": {
       "name": "統懋",
-      "industry": null
+      "industry": "半導體業"
     },
     "2436": {
       "name": "偉詮電",
-      "industry": null
+      "industry": "半導體業"
     },
     "2438": {
       "name": "翔耀",
-      "industry": null
+      "industry": "光電業"
     },
     "2439": {
       "name": "美律",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2440": {
       "name": "太空梭",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4951": {
       "name": "精拓科",
@@ -7258,55 +7266,55 @@
     },
     "2444": {
       "name": "兆勁",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2449": {
       "name": "京元電子",
-      "industry": null
+      "industry": "半導體業"
     },
     "2450": {
       "name": "神腦",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2451": {
       "name": "創見",
-      "industry": null
+      "industry": "半導體業"
     },
     "2453": {
       "name": "凌群",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "2433": {
       "name": "互盛電",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2432": {
       "name": "倚天酷碁-創",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2417": {
       "name": "圓剛",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2419": {
       "name": "仲琦",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2420": {
       "name": "新巨",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2421": {
       "name": "建準",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2423": {
       "name": "固緯",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2424": {
       "name": "隴華",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2371": {
       "name": "大同",
@@ -7314,91 +7322,91 @@
     },
     "2426": {
       "name": "鼎元",
-      "industry": null
+      "industry": "光電業"
     },
     "2427": {
       "name": "三商電",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "2428": {
       "name": "興勤",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2429": {
       "name": "銘旺科",
-      "industry": null
+      "industry": "光電業"
     },
     "2430": {
       "name": "燦坤",
-      "industry": null
+      "industry": "電子通路業"
     },
     "2431": {
       "name": "聯昌",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2425": {
       "name": "承啟",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2369": {
       "name": "菱生",
-      "industry": null
+      "industry": "半導體業"
     },
     "2302": {
       "name": "麗正",
-      "industry": null
+      "industry": "半導體業"
     },
     "2303": {
       "name": "聯電",
-      "industry": null
+      "industry": "半導體業"
     },
     "2305": {
       "name": "全友",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2308": {
       "name": "台達電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2312": {
       "name": "金寶",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2313": {
       "name": "華通",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2314": {
       "name": "台揚",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2316": {
       "name": "楠梓電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2317": {
       "name": "鴻海",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2321": {
       "name": "東訊",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2323": {
       "name": "中環",
-      "industry": null
+      "industry": "光電業"
     },
     "2324": {
       "name": "仁寶",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2301": {
       "name": "光寶科",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2258": {
       "name": "鴻華先進-創",
-      "industry": null
+      "industry": "汽車工業"
     },
     "2256": {
       "name": "歐特明",
@@ -7490,7 +7498,7 @@
     },
     "2254": {
       "name": "巨鎧精密-創",
-      "industry": null
+      "industry": "汽車工業"
     },
     "2255": {
       "name": "凱銳光電",
@@ -7498,7 +7506,7 @@
     },
     "2237": {
       "name": "華德動能-創",
-      "industry": null
+      "industry": "汽車工業"
     },
     "1453": {
       "name": "大將",
@@ -7506,111 +7514,111 @@
     },
     "2327": {
       "name": "國巨*",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2353": {
       "name": "宏碁",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2354": {
       "name": "鴻準",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2355": {
       "name": "敬鵬",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2356": {
       "name": "英業達",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2357": {
       "name": "華碩",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2359": {
       "name": "所羅門",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2360": {
       "name": "致茂",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2362": {
       "name": "藍天",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2363": {
       "name": "矽統",
-      "industry": null
+      "industry": "半導體業"
     },
     "2364": {
       "name": "倫飛",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2365": {
       "name": "昆盈",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2367": {
       "name": "燿華",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2368": {
       "name": "金像電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2352": {
       "name": "佳世達",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2351": {
       "name": "順德",
-      "industry": null
+      "industry": "半導體業"
     },
     "2329": {
       "name": "華泰",
-      "industry": null
+      "industry": "半導體業"
     },
     "2330": {
       "name": "台積電",
-      "industry": null
+      "industry": "半導體業"
     },
     "2331": {
       "name": "精英",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2332": {
       "name": "友訊",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2337": {
       "name": "旺宏",
-      "industry": null
+      "industry": "半導體業"
     },
     "2338": {
       "name": "光罩",
-      "industry": null
+      "industry": "半導體業"
     },
     "2328": {
       "name": "廣宇",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2342": {
       "name": "茂矽",
-      "industry": null
+      "industry": "半導體業"
     },
     "2344": {
       "name": "華邦電",
-      "industry": null
+      "industry": "半導體業"
     },
     "2345": {
       "name": "智邦",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2347": {
       "name": "聯強",
-      "industry": null
+      "industry": "電子通路業"
     },
     "2348": {
       "name": "海悅",
@@ -7622,15 +7630,15 @@
     },
     "2349": {
       "name": "錸德",
-      "industry": null
+      "industry": "光電業"
     },
     "2340": {
       "name": "台亞",
-      "industry": null
+      "industry": "半導體業"
     },
     "2454": {
       "name": "聯發科",
-      "industry": null
+      "industry": "半導體業"
     },
     "1452": {
       "name": "宏益",
@@ -9506,7 +9514,7 @@
     },
     "2441": {
       "name": "超豐",
-      "industry": null
+      "industry": "半導體業"
     },
     "3646": {
       "name": "艾恩特",
@@ -9514,11 +9522,11 @@
     },
     "3652": {
       "name": "精聯",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3653": {
       "name": "健策",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3659": {
       "name": "百辰",
@@ -9526,7 +9534,7 @@
     },
     "3661": {
       "name": "世芯-KY",
-      "industry": null
+      "industry": "半導體業"
     },
     "3663": {
       "name": "鑫科",
@@ -9538,7 +9546,7 @@
     },
     "3665": {
       "name": "貿聯-KY",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3666": {
       "name": "光耀",
@@ -9546,7 +9554,7 @@
     },
     "3669": {
       "name": "圓展",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3672": {
       "name": "康聯訊",
@@ -9554,7 +9562,7 @@
     },
     "3673": {
       "name": "TPK-KY",
-      "industry": null
+      "industry": "光電業"
     },
     "3675": {
       "name": "德微",
@@ -9566,7 +9574,7 @@
     },
     "3679": {
       "name": "新至陞",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3680": {
       "name": "家登",
@@ -9578,7 +9586,7 @@
     },
     "3645": {
       "name": "達邁",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3685": {
       "name": "元創精密",
@@ -9602,7 +9610,7 @@
     },
     "3596": {
       "name": "智易",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3597": {
       "name": "映興",
@@ -9614,11 +9622,11 @@
     },
     "3605": {
       "name": "宏致",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3607": {
       "name": "谷崧",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3609": {
       "name": "三一東林",
@@ -9634,11 +9642,11 @@
     },
     "3617": {
       "name": "碩天",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3622": {
       "name": "洋華",
-      "industry": null
+      "industry": "光電業"
     },
     "3623": {
       "name": "富晶通",
@@ -9674,7 +9682,7 @@
     },
     "3686": {
       "name": "達能",
-      "industry": null
+      "industry": "半導體業"
     },
     "3687": {
       "name": "歐買尬",
@@ -9766,7 +9774,7 @@
     },
     "3715": {
       "name": "定穎投控",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3689": {
       "name": "湧德",
@@ -9782,15 +9790,15 @@
     },
     "3694": {
       "name": "海華",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3701": {
       "name": "大眾控",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3702": {
       "name": "大聯大",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3703": {
       "name": "欣陸",
@@ -9798,15 +9806,15 @@
     },
     "3704": {
       "name": "合勤控",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3593": {
       "name": "力銘",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3706": {
       "name": "神達",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3707": {
       "name": "漢磊",
@@ -9826,11 +9834,11 @@
     },
     "3711": {
       "name": "日月光投控",
-      "industry": null
+      "industry": "半導體業"
     },
     "3712": {
       "name": "永崴投控",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3713": {
       "name": "新晶投控",
@@ -9838,7 +9846,7 @@
     },
     "3714": {
       "name": "富采",
-      "industry": null
+      "industry": "光電業"
     },
     "3705": {
       "name": "永信",
@@ -9874,7 +9882,7 @@
     },
     "3481": {
       "name": "群創",
-      "industry": null
+      "industry": "光電業"
     },
     "3483": {
       "name": "力致",
@@ -9906,7 +9914,7 @@
     },
     "3494": {
       "name": "誠研",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3498": {
       "name": "陽程",
@@ -9918,11 +9926,11 @@
     },
     "3501": {
       "name": "維熹",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3504": {
       "name": "揚明光",
-      "industry": null
+      "industry": "光電業"
     },
     "3508": {
       "name": "位速",
@@ -9930,7 +9938,7 @@
     },
     "3450": {
       "name": "聯鈞",
-      "industry": null
+      "industry": "半導體業"
     },
     "3511": {
       "name": "矽瑪",
@@ -9946,7 +9954,7 @@
     },
     "3380": {
       "name": "明泰",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3388": {
       "name": "崇越電",
@@ -9962,19 +9970,19 @@
     },
     "3406": {
       "name": "玉晶光",
-      "industry": null
+      "industry": "光電業"
     },
     "3413": {
       "name": "京鼎",
-      "industry": null
+      "industry": "半導體業"
     },
     "3416": {
       "name": "融程電",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2455": {
       "name": "全新",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3430": {
       "name": "奇鈦科",
@@ -9982,7 +9990,7 @@
     },
     "3432": {
       "name": "台端",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3434": {
       "name": "哲固",
@@ -9990,7 +9998,7 @@
     },
     "3437": {
       "name": "榮創",
-      "industry": null
+      "industry": "光電業"
     },
     "3438": {
       "name": "類比科",
@@ -10002,11 +10010,11 @@
     },
     "3443": {
       "name": "創意",
-      "industry": null
+      "industry": "半導體業"
     },
     "3447": {
       "name": "展達",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3512": {
       "name": "皇龍",
@@ -10014,11 +10022,11 @@
     },
     "3515": {
       "name": "華擎",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3550": {
       "name": "聯穎",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3551": {
       "name": "世禾",
@@ -10046,7 +10054,7 @@
     },
     "3563": {
       "name": "牧德",
-      "industry": null
+      "industry": "光電業"
     },
     "3564": {
       "name": "其陽",
@@ -10062,7 +10070,7 @@
     },
     "3576": {
       "name": "聯合再生",
-      "industry": null
+      "industry": "光電業"
     },
     "3577": {
       "name": "泓格",
@@ -10078,7 +10086,7 @@
     },
     "3583": {
       "name": "辛耘",
-      "industry": null
+      "industry": "半導體業"
     },
     "3585": {
       "name": "聯致",
@@ -10090,11 +10098,11 @@
     },
     "3588": {
       "name": "通嘉",
-      "industry": null
+      "industry": "半導體業"
     },
     "3591": {
       "name": "艾笛森",
-      "industry": null
+      "industry": "光電業"
     },
     "3548": {
       "name": "兆利",
@@ -10106,7 +10114,7 @@
     },
     "3545": {
       "name": "敦泰",
-      "industry": null
+      "industry": "半導體業"
     },
     "3516": {
       "name": "亞帝歐",
@@ -10114,7 +10122,7 @@
     },
     "3518": {
       "name": "柏騰",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3520": {
       "name": "華盈",
@@ -10142,7 +10150,7 @@
     },
     "3528": {
       "name": "安馳",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3529": {
       "name": "力旺",
@@ -10150,7 +10158,7 @@
     },
     "3592": {
       "name": "瑞鼎",
-      "industry": null
+      "industry": "半導體業"
     },
     "3531": {
       "name": "先益",
@@ -10158,15 +10166,15 @@
     },
     "3532": {
       "name": "台勝科",
-      "industry": null
+      "industry": "半導體業"
     },
     "3533": {
       "name": "嘉澤",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3535": {
       "name": "晶彩科",
-      "industry": null
+      "industry": "光電業"
     },
     "3537": {
       "name": "堡達",
@@ -10182,15 +10190,15 @@
     },
     "3543": {
       "name": "州巧",
-      "industry": null
+      "industry": "光電業"
     },
     "3530": {
       "name": "晶相光",
-      "industry": null
+      "industry": "半導體業"
     },
     "3376": {
       "name": "新日興",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4129": {
       "name": "聯合",
@@ -10318,7 +10326,7 @@
     },
     "4582": {
       "name": "聚恆-創",
-      "industry": null
+      "industry": "綠能環保"
     },
     "4583": {
       "name": "台灣精銳",
@@ -10330,7 +10338,7 @@
     },
     "4585": {
       "name": "達明",
-      "industry": null
+      "industry": "其他電子業"
     },
     "4587": {
       "name": "寶元數控",
@@ -10338,7 +10346,7 @@
     },
     "4588": {
       "name": "玖鼎電力",
-      "industry": null
+      "industry": "其他電子業"
     },
     "4589": {
       "name": "碩陽電機",
@@ -10346,7 +10354,7 @@
     },
     "4590": {
       "name": "富田-創",
-      "industry": null
+      "industry": "電機機械"
     },
     "4609": {
       "name": "唐鋒",
@@ -10382,7 +10390,7 @@
     },
     "4919": {
       "name": "新唐",
-      "industry": null
+      "industry": "半導體業"
     },
     "4923": {
       "name": "力士",
@@ -10398,7 +10406,7 @@
     },
     "4927": {
       "name": "泰鼎-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4930": {
       "name": "燦星網",
@@ -10414,15 +10422,15 @@
     },
     "4934": {
       "name": "太極",
-      "industry": null
+      "industry": "光電業"
     },
     "4935": {
       "name": "茂林-KY",
-      "industry": null
+      "industry": "光電業"
     },
     "4938": {
       "name": "和碩",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "4939": {
       "name": "亞電",
@@ -10430,11 +10438,11 @@
     },
     "4942": {
       "name": "嘉彰",
-      "industry": null
+      "industry": "光電業"
     },
     "4943": {
       "name": "康控-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4946": {
       "name": "辣椒",
@@ -10442,15 +10450,15 @@
     },
     "4949": {
       "name": "有成精密",
-      "industry": null
+      "industry": "光電業"
     },
     "4916": {
       "name": "事欣科",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "4915": {
       "name": "致伸",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4763": {
       "name": "材料*-KY",
@@ -10502,7 +10510,7 @@
     },
     "4904": {
       "name": "遠傳",
-      "industry": null
+      "industry": "通信網路業"
     },
     "4905": {
       "name": "台聯電",
@@ -10510,7 +10518,7 @@
     },
     "4906": {
       "name": "正文",
-      "industry": null
+      "industry": "通信網路業"
     },
     "4907": {
       "name": "富宇",
@@ -10530,7 +10538,7 @@
     },
     "4912": {
       "name": "聯德控股-KY",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4806": {
       "name": "桂田文創",
@@ -10766,7 +10774,7 @@
     },
     "4545": {
       "name": "銘鈺",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "4549": {
       "name": "桓達",
@@ -10966,7 +10974,7 @@
     },
     "3419": {
       "name": "譁裕",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3372": {
       "name": "典範",
@@ -11290,11 +11298,11 @@
     },
     "3002": {
       "name": "歐格",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3003": {
       "name": "健和興",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2906": {
       "name": "高林",
@@ -11434,119 +11442,119 @@
     },
     "2477": {
       "name": "美隆電",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2478": {
       "name": "大毅",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2480": {
       "name": "敦陽科",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "2481": {
       "name": "強茂",
-      "industry": null
+      "industry": "半導體業"
     },
     "2482": {
       "name": "連宇",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2483": {
       "name": "百容",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2484": {
       "name": "希華",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2485": {
       "name": "兆赫",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2486": {
       "name": "一詮",
-      "industry": null
+      "industry": "光電業"
     },
     "2488": {
       "name": "漢平",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2489": {
       "name": "瑞軒",
-      "industry": null
+      "industry": "光電業"
     },
     "2491": {
       "name": "吉祥全",
-      "industry": null
+      "industry": "光電業"
     },
     "2492": {
       "name": "華新科",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2476": {
       "name": "鉅祥",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2457": {
       "name": "飛宏",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2458": {
       "name": "義隆",
-      "industry": null
+      "industry": "半導體業"
     },
     "2459": {
       "name": "敦吉",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2460": {
       "name": "建通",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2461": {
       "name": "光群雷",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2462": {
       "name": "良得電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2464": {
       "name": "盟立",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2465": {
       "name": "麗臺",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2466": {
       "name": "冠西電",
-      "industry": null
+      "industry": "光電業"
     },
     "2467": {
       "name": "志聖",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2468": {
       "name": "華經",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "2471": {
       "name": "資通",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "2472": {
       "name": "立隆電",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2474": {
       "name": "可成",
-      "industry": null
+      "industry": "其他電子業"
     },
     "2493": {
       "name": "揚博",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "2547": {
       "name": "日勝生",
@@ -11666,7 +11674,7 @@
     },
     "2495": {
       "name": "普安",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "2496": {
       "name": "卓越",
@@ -11678,7 +11686,7 @@
     },
     "2498": {
       "name": "宏達電",
-      "industry": null
+      "industry": "通信網路業"
     },
     "2501": {
       "name": "國建",
@@ -11786,7 +11794,7 @@
     },
     "3189": {
       "name": "景碩",
-      "industry": null
+      "industry": "半導體業"
     },
     "3191": {
       "name": "雲嘉南",
@@ -11810,7 +11818,7 @@
     },
     "3209": {
       "name": "全科",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3211": {
       "name": "順達",
@@ -11854,7 +11862,7 @@
     },
     "3229": {
       "name": "晟鈦",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3230": {
       "name": "錦明",
@@ -11902,11 +11910,11 @@
     },
     "3135": {
       "name": "凌航",
-      "industry": null
+      "industry": "半導體業"
     },
     "3138": {
       "name": "耀登",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3141": {
       "name": "晶宏",
@@ -11918,7 +11926,7 @@
     },
     "3150": {
       "name": "鈺寶-創",
-      "industry": null
+      "industry": "半導體業"
     },
     "3152": {
       "name": "璟德",
@@ -11946,11 +11954,11 @@
     },
     "3168": {
       "name": "眾福科",
-      "industry": null
+      "industry": "光電業"
     },
     "3005": {
       "name": "神基",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3114": {
       "name": "好德",
@@ -11958,7 +11966,7 @@
     },
     "3231": {
       "name": "緯創",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3234": {
       "name": "光環",
@@ -11966,11 +11974,11 @@
     },
     "3311": {
       "name": "閎暉",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3312": {
       "name": "弘憶股",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3313": {
       "name": "斐成",
@@ -11982,7 +11990,7 @@
     },
     "3321": {
       "name": "同泰",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3322": {
       "name": "建舜電",
@@ -12006,7 +12014,7 @@
     },
     "3338": {
       "name": "泰碩",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3339": {
       "name": "泰谷",
@@ -12026,7 +12034,7 @@
     },
     "3356": {
       "name": "奇偶",
-      "industry": null
+      "industry": "光電業"
     },
     "3357": {
       "name": "臺慶科",
@@ -12050,7 +12058,7 @@
     },
     "3308": {
       "name": "聯德",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3306": {
       "name": "鼎天",
@@ -12066,7 +12074,7 @@
     },
     "3257": {
       "name": "虹冠電",
-      "industry": null
+      "industry": "半導體業"
     },
     "3259": {
       "name": "鑫創",
@@ -12134,7 +12142,7 @@
     },
     "3296": {
       "name": "勝德",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3297": {
       "name": "杭特",
@@ -12146,7 +12154,7 @@
     },
     "3305": {
       "name": "昇貿",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3285": {
       "name": "微端",
@@ -12158,7 +12166,7 @@
     },
     "3149": {
       "name": "正達",
-      "industry": null
+      "industry": "光電業"
     },
     "3095": {
       "name": "及成",
@@ -12166,23 +12174,23 @@
     },
     "3025": {
       "name": "星通",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3026": {
       "name": "禾伸堂",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3027": {
       "name": "盛達",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3028": {
       "name": "增你強",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3029": {
       "name": "零壹",
-      "industry": null
+      "industry": "資訊服務業"
     },
     "3097": {
       "name": "拍檔",
@@ -12190,95 +12198,95 @@
     },
     "3031": {
       "name": "佰鴻",
-      "industry": null
+      "industry": "光電業"
     },
     "3032": {
       "name": "偉訓",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3033": {
       "name": "威健",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3034": {
       "name": "聯詠",
-      "industry": null
+      "industry": "半導體業"
     },
     "3035": {
       "name": "智原",
-      "industry": null
+      "industry": "半導體業"
     },
     "3036": {
       "name": "文曄",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3037": {
       "name": "欣興",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3024": {
       "name": "憶聲",
-      "industry": null
+      "industry": "光電業"
     },
     "3006": {
       "name": "晶豪科",
-      "industry": null
+      "industry": "半導體業"
     },
     "3008": {
       "name": "大立光",
-      "industry": null
+      "industry": "光電業"
     },
     "3010": {
       "name": "華立",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3011": {
       "name": "今皓",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3013": {
       "name": "晟銘電",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3014": {
       "name": "聯陽",
-      "industry": null
+      "industry": "半導體業"
     },
     "3015": {
       "name": "全漢",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3016": {
       "name": "嘉晶",
-      "industry": null
+      "industry": "半導體業"
     },
     "3017": {
       "name": "奇鋐",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3018": {
       "name": "隆銘綠能",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3019": {
       "name": "亞光",
-      "industry": null
+      "industry": "光電業"
     },
     "3021": {
       "name": "鴻名",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3022": {
       "name": "威強電",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3023": {
       "name": "信邦",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3030": {
       "name": "德律",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3040": {
       "name": "遠見",
@@ -12286,15 +12294,15 @@
     },
     "3059": {
       "name": "華晶科",
-      "industry": null
+      "industry": "光電業"
     },
     "3060": {
       "name": "銘異",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3062": {
       "name": "建漢",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3064": {
       "name": "泰偉",
@@ -12318,7 +12326,7 @@
     },
     "3038": {
       "name": "全台",
-      "industry": null
+      "industry": "光電業"
     },
     "3081": {
       "name": "聯亞",
@@ -12342,11 +12350,11 @@
     },
     "3090": {
       "name": "日電貿",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3092": {
       "name": "鴻碩",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3093": {
       "name": "港建*",
@@ -12354,11 +12362,11 @@
     },
     "3094": {
       "name": "聯傑",
-      "industry": null
+      "industry": "半導體業"
     },
     "3058": {
       "name": "立德",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3078": {
       "name": "僑威",
@@ -12370,39 +12378,39 @@
     },
     "3057": {
       "name": "喬鼎",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3041": {
       "name": "揚智",
-      "industry": null
+      "industry": "半導體業"
     },
     "3042": {
       "name": "晶技",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3043": {
       "name": "科風",
-      "industry": null
+      "industry": "其他電子業"
     },
     "3045": {
       "name": "台灣大",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3046": {
       "name": "建碁",
-      "industry": null
+      "industry": "電腦及週邊設備業"
     },
     "3044": {
       "name": "健鼎",
-      "industry": null
+      "industry": "電子零組件業"
     },
     "3047": {
       "name": "訊舟",
-      "industry": null
+      "industry": "通信網路業"
     },
     "3055": {
       "name": "蔚華科",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3054": {
       "name": "立萬利",
@@ -12414,19 +12422,19 @@
     },
     "3051": {
       "name": "力特",
-      "industry": null
+      "industry": "光電業"
     },
     "3049": {
       "name": "精金",
-      "industry": null
+      "industry": "光電業"
     },
     "3048": {
       "name": "益登",
-      "industry": null
+      "industry": "電子通路業"
     },
     "3050": {
       "name": "鈺德",
-      "industry": null
+      "industry": "光電業"
     },
     "OilGasElectricity": {
       "name": "油電燃氣類指數",

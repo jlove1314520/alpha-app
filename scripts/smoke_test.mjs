@@ -1078,10 +1078,59 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("34. 台股收盤時段首頁自選股/大盤速覽不得含「盤中」字樣（盤中時段此檢查視為通過）",
     lay.twOpen || !lay.hasPanZhong, lay.twOpen ? "測試時台股盤中，跳過" : (lay.hasPanZhong ? "收盤後仍出現「盤中」" : ""));
 
+  // 35~36.【2026-09-05新增，週六.一 P0：千元以上股票整條管線消失】
+  // 35 資料層：price_history.json 必須含這幾檔高價指標股——TWSE 價格欄是 '2,410.00' 這種帶千分位
+  //    的字串，任何解析器忘了去逗號就會把 ≥1000 元的股票整條濾成空（2026-09-04/09-05 各中一次）。
+  // 36 症狀層：自選股「拿得到 ≥2 筆歷史價、卻沒有畫出走勢線」＝FAIL。這條不管根因是解析、
+  //    快取還是渲染，只要使用者看不到線就會被抓到。
+  const dataGateErrors = [];
+  try {
+    const ph = await page.evaluate(async () => {
+      const r = await fetch("data/price_history.json?t=" + Date.now());
+      if (!r.ok) return { error: "HTTP " + r.status };
+      const d = await r.json();
+      const p = d.prices || {};
+      const need = ["2330", "2454", "3008", "5274"];
+      return { total: Object.keys(p).length, have: need.filter(c => (p[c] || []).length >= 2), lens: need.map(c => [c, (p[c] || []).length]) };
+    });
+    if (ph.error) dataGateErrors.push(`price_history.json 讀取失敗：${ph.error}`);
+    else if (ph.have.length !== 4) dataGateErrors.push(`price_history.json 缺高價股歷史：${JSON.stringify(ph.lens)}`);
+    results.price_history_total = ph.total;
+  } catch (e) {
+    dataGateErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("35. price_history.json 必含 2330/2454/3008/5274 且各 ≥2 筆（千分位逗號解析回歸防線）",
+    dataGateErrors.length === 0, dataGateErrors.join("; ") || `全檔 ${results.price_history_total} 檔`);
+
+  const sparkGateErrors = [];
+  try {
+    await page.evaluate(() => { try { localStorage.removeItem("alpha_live_url"); localStorage.removeItem("alpha_live_token"); } catch (e) {} LIVE.connected = false; });
+    await page.evaluate(() => window.go("home"));
+    await page.waitForTimeout(1800);
+    const bad = await page.evaluate(async () => {
+      const r = await fetch("data/quotes_tw.json?t=" + Date.now());
+      const q = r.ok ? ((await r.json()).quotes || {}) : {};
+      const out = [];
+      for (const row of document.querySelectorAll("#wl-list .swipe-row")) {
+        const code = row.querySelector("[data-flash-code]")?.dataset.flashCode;
+        if (!code || !q[code]) continue;
+        const hist = (q[code].sparkline || []).length;
+        const drawn = !!row.querySelector("svg.spark polyline");
+        if (hist >= 2 && !drawn) out.push({ code, hist, err: q[code].sparkline_error });
+      }
+      return out;
+    });
+    if (bad.length) sparkGateErrors.push(`有歷史價卻沒畫走勢線：${JSON.stringify(bad)}`);
+  } catch (e) {
+    sparkGateErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("36. 自選股有 ≥2 筆歷史價就必須畫出走勢線（沒畫＝FAIL，不管根因是解析/快取/渲染）",
+    sparkGateErrors.length === 0, sparkGateErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -119,7 +119,9 @@ STOCK_DAY_URL = "https://www.twse.com.tw/exchangeReport/STOCK_DAY"  # 個股歷�
 TW_TZ = timezone(timedelta(hours=8))
 # 2026-09-03新增：sparkline附加抓取的總時間預算與連續失敗斷路（理由見main()迴圈註解）。
 # 這支每10分鐘排程一次，正常一輪1-3分鐘；sparkline最多給4分鐘，超過就停止新抓。
-SPARKLINE_TIME_BUDGET_SEC = 240
+SPARKLINE_TIME_BUDGET_SEC = 420  # 2026-09-05：240秒只夠抓約40檔（每檔受3秒節流限制），
+# 上櫃股跳過後仍有約110檔要抓；Actions job 的 timeout-minutes 是15分鐘，420秒（7分鐘）留有餘裕。
+# 一天內的後續執行會沿用當天快取累積覆蓋，所以不需要一次抓完。
 SPARKLINE_MAX_CONSECUTIVE_FAILURES = 8
 
 
