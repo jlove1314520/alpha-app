@@ -1879,3 +1879,59 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   「最終判定」段落。全程零因子計算、零回測、僅4次唯讀GET請求（3個
   官方免費端點各1次+FinMind 1次直接被400拒絕），零FinMind額度消耗
   進入正式抓取流程。
+
+## #48 董監事及大股東股權質押比例 Controlling Shareholder / Insider Share
+Pledge Ratio — FAIL（2026-09-06，第1關cheap gate未過）
+
+- **假設**：董監事/經理人/十%以上大股東質押股數佔持有股數比例（`board_
+  pledge_pct`）越高（或近期上升），未來forward報酬顯著較差／下檔風險
+  較高（公司治理／代理成本風險機制，Anderson & Puleo 2020；中國市場
+  股權質押文獻）。
+- **方法**：`irb130_pledge_gate.py`——300檔快取宇宙（seed=20260822，
+  同`#42`/`#43`）中198檔在`irb130_pledge_combined.csv`（MOPS `IRB130`
+  月頻全市場sii+otc彙總表，`backfill_irb130_pledge.py`回補
+  2015-01~2024-12共240次請求全數成功）有紀錄，逐月PIT對齊（月底+1個
+  月緩衝當可得日，避免look-ahead）+`adjusted_price_series`算forward
+  20交易日報酬，兩個訊號口徑（`pledge_level`水位/`pledge_mom`MoM差分）
+  各自跑pooled panel Spearman相關+N=200時序洗牌null對照。
+- **結果**：
+  - `pledge_level`（依TRAIN期樣本數選定為主要指標，n=11384 vs
+    `pledge_mom` n=11206）：TRAIN corr=+0.0044(p=0.6354)、VAL
+    corr=+0.0153(p=0.1694)，**兩期皆為正號，與事前綁定的負相關方向
+    相反**。
+  - `pledge_mom`（對照指標）：TRAIN corr=-0.0012(p=0.8952，幾近純
+    雜訊)、VAL corr=-0.0205(p=0.0665，僅邊緣未達p<0.05)，同號但TRAIN
+    幅度遠低於0.02門檻。
+- **判定**：**FAIL**——`pledge_level`依「事前綁定方向、不因結果換
+  方向」鐵律（同`#42`/`#43`）判死；`pledge_mom`屬「TRAIN無訊號、VAL
+  單獨邊緣顯著」不放行的既定模式（同`#36`/`#106`先例）。主要指標已
+  FAIL，未進第2關以後。
+- **本輪額外發現並修正的方法論bug（重要，記錄供未來新腳本參考）**：
+  原本比照`day_trading_ratio_gate.py`(#37)/`institutional_concentration_
+  gate.py`(#43)/`avg_pairwise_correlation_gate.py`(#42)沿用的單邊有號
+  null percentile公式`pctl=100*mean(shuffled>=real_corr)`（用於「事前
+  綁定負相關」的顯著性判準，門檻`<=10.0`），用模擬資料（見
+  `MARATHON_LOG.md`本輪心跳）驗證證實這個公式的方向解讀跟腳本自己的
+  註解相反：真實負相關越強，算出的percentile越接近100而非接近0——
+  正確的解讀應該是**高percentile=顯著**，跟那三支腳本沿用的`<=10.0`
+  門檻剛好相反。改採`factor_ic.py`（本佇列驗證最多次、最穩健的版本）
+  「null取絕對值比較、方向另外用same_sign獨立檢查」慣例後才重跑拿到
+  上述結果。**已逐一覆核`#37`/`#42`/`#43`三個已結案判定，證實這個
+  公式方向問題不影響它們的最終FAIL結論**：`#42`/`#43`本就因train/val
+  同號但方向與事前綁定相反、在same_sign檢查那一關就已定案FAIL，從未
+  依賴這個有問題的null percentile數值；`#37`VAL期真實相關係數本身
+  幾乎為零（corr=-0.0042,p=0.8981），在任一種percentile公式下都會落
+  在~50附近、遠不顯著，結論不受影響。三者皆**不需重新開案**，但提醒
+  往後任何新設計的regime/overlay類gate腳本一律採`factor_ic.py`的
+  絕對值null慣例，不要再複製這個方向錯誤的公式。
+- **不泛化成**：「股權質押這個資料維度完全無效」——只測了「全體董監
+  持股合計質押比例」單一彙總數字（`IRB130`彙總表未拆分揭露經理人/
+  十%以上大股東個別細項）+月頻+forward 20交易日單一構造，未測其他
+  forward horizon、未做「控制市值後」的分組對照（`#48`事前列的已知
+  混淆風險之一，因第1關本身已FAIL不需要走到那一步）、未測放空高質押
+  比例股票這個鏡像半邊（既有引擎不支援放空，同`#36`/`#45`/`#46`教訓）。
+- **原始記錄**：`TRIALS_LEDGER.md`#178、`HYPOTHESIS_QUEUE.md` #48
+  「最終判定」段落、`irb130_pledge_gate.py`（新增，可重複執行）、
+  `data/irb130_pledge_signal_panel.csv`（新增）。全程零新增FinMind
+  額度消耗（複用既有`adjusted_price_series`快取+上一輪已回補的
+  `irb130_pledge_combined.csv`），原地執行約2分鐘。

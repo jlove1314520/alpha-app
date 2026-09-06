@@ -1159,7 +1159,15 @@ TAIEX標的，未測允許槓桿版本、不同窗口、或套用在真正的選
     不同的第十類假設#48（董監事及大股東股權質押比例當公司治理/代理
     成本風險訊號，見下方新章節），MOPS官方頁面已初步確認存在「董事、
     監察人、經理人及百分之十以上大股東質權設定彙總表(IRB130)」等候選
-    端點，現在排隊第一，尚未開始第1關。**（本輪修正：這一段原文字
+    端點。**#48已於2026-09-06 hypothesis_queue排程接續完成第1關cheap
+    gate並結案：FAIL**（`irb130_pledge_gate.py`，`pledge_level`兩期皆
+    與事前綁定負相關方向相反、`pledge_mom`TRAIN無訊號+VAL僅邊緣顯著，
+    見上方#48「最終判定」段落與`STRATEGY_GRAVEYARD.md`/
+    `TRIALS_LEDGER.md`#178），移出排隊佇列。本輪並發現並修正
+    `#37`/`#42`/`#43`三支既有腳本共用的null percentile方向公式bug，
+    已逐一覆核證實不影響那三者的原判定。**佇列#1~48全數結案，剩餘
+    #5/#6/#8/#10仍卡外部依賴，本輪因預算考量優先確保#48記錄完整，
+    下一輪從設計#49開始，不空轉。**（本輪修正：這一段原文字
     停留在「#47尚未開始第1關」，但#47自身章節（下方）已寫明結案，正是
     `HYPOTHESIS_QUEUE_PROTOCOL.md`第1節警告過的「條目本身已結案但
     排隊順序總結字樣沒同步更新」情況，已於2026-09-06 hypothesis_queue
@@ -5375,9 +5383,38 @@ CSV快取，可安全中斷重跑）。因240次請求x1.5秒節流理論耗時�
 （加計網路延遲預期落在數十分鐘量級），依`MARATHON_PROTOCOL.md`第0b節
 規則用`run_detached.py`脫離session投遞（job`20260906-220343-82ae`，
 timeout 60分鐘，預期產出`data/irb130_pledge_combined.csv`），未在
-session內等待。本輪僅投遞、未收成，**下一輪TW軌先跑
-`python run_detached.py status`確認完成狀態，完成後直接進第1關
-cheap gate**：讀`irb130_pledge_combined.csv`，用`board_pledge_pct`
-水位與其MoM變化兩種訊號口徑，比照`#41`/`#42`/`#43`同一套train/val
-分期+時序洗牌null對照框架測forward報酬Spearman相關性，不跳關。現在
-排隊第一，未結案。
+session內等待。
+
+**最終判定（2026-09-06 hypothesis_queue排程接續，已結案：FAIL）**：
+`python run_detached.py status`確認回補job（`20260906-220343-82ae`）
+已`finished`/`exit=0`，`data/irb130_pledge_combined.csv`成功產出
+（203,194筆，2009檔不重複公司，roc_year 104~113涵蓋完整TRAIN/VAL
+區間）。新增`irb130_pledge_gate.py`跑第1關cheap gate：300檔快取宇宙
+（seed=20260822，同#42/#43）中198檔在質押資料中有紀錄，逐月PIT對齊
+（月底+1個月緩衝當可得日）+`adjusted_price_series`算forward 20交易日
+報酬，兩個訊號口徑測pooled panel Spearman相關+N=200時序洗牌null。
+**`pledge_level`**（依TRAIN期樣本數選定為主要指標）：TRAIN
+corr=+0.0044(p=0.6354)、VAL corr=+0.0153(p=0.1694)，**兩期皆為正號，
+與事前綁定的負相關方向相反**。**`pledge_mom`**（對照指標）：TRAIN
+corr=-0.0012(p=0.8952，幾近零)、VAL corr=-0.0205(p=0.0665，僅邊緣未
+達p<0.05)，同號但TRAIN幅度遠低於0.02門檻。主要指標依「事前綁定方向、
+不因結果換方向」鐵律（同#42/#43）判FAIL，對照指標屬「TRAIN無訊號、
+VAL單獨邊緣顯著」不放行模式（同#36/#106），移出排隊佇列。
+
+**本輪額外發現並修正的方法論bug（重要，影響本佇列另外三支既有腳本，
+已逐一覆核不影響其判定，詳見`STRATEGY_GRAVEYARD.md` #48完整說明）**：
+`day_trading_ratio_gate.py`(#37)/`institutional_concentration_gate.py`
+(#43)/`avg_pairwise_correlation_gate.py`(#42)沿用的單邊有號null
+percentile公式`pctl=100*mean(shuffled>=real_corr)`（門檻`<=10.0`），
+用模擬資料驗證證實方向解讀跟腳本註解相反（真實負相關越強，percentile
+越接近100而非0）。本腳本改採`factor_ic.py`「取絕對值null、方向另外
+用same_sign檢查」的正確慣例。已確認`#37`/`#42`/`#43`三者的FAIL結論
+不受影響（`#42`/`#43`本就在same_sign關卡定案、從未依賴這個percentile
+數值；`#37`VAL期相關係數本身幾近零，任一種公式下都不顯著），不需要
+重新開案，但提醒往後新設計的regime/overlay類gate腳本一律用
+`factor_ic.py`慣例。
+
+**佇列#1~48全數結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證
+`BACKLOG.md`仍未解鎖）。本輪因預算考量優先確保#48完整記錄+方法論bug
+覆核與修正記錄，未倉促設計新假設軸#49，下一輪從設計#49開始，不空轉，
+優先確保這輪的記錄完整。**

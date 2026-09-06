@@ -1,5 +1,41 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 22:53 hypothesis_queue排程接續 — 本輪為純落地/接手輪，
+無新研究產出。取鎖時發現鎖檔陳舊（LOCK_STALE，pid 84872，30.2分鐘，
+疑似上一輪失敗），本輪回收接手。工作目錄裡已有上一輪（pid 84872）
+完整跑完但未commit的#48（董監質押比例）FAIL結案內容（`HYPOTHESIS_
+QUEUE.md`/`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#178皆已就緒，
+內容經覆核前後一致、`is_holdout_consumed()`確認為`False`），本輪
+只做落地工作：驗證一致性後直接commit+push，未重跑或修改任何研究
+邏輯。佇列狀態沿用上一輪結論：**#1~48全數結案，#5/#6/#8/#10仍卡
+外部依賴，下一輪從設計#49開始**（本輪因鎖檔回收+落地確認已是一個
+完整工作單位，未在同一輪內硬塞設計#49，避免倉促）。git狀態確認
+另有其他自動化來源留下的未提交檔案（`.github/workflows/audit.yml`、
+`research/.live_watchlist.json`、`research/data_cache/`、`research/
+deep_dive_f_us_low_vol_persistent_random_control.py`）已記錄、不
+觸碰、不納入本次commit。
+
+## 2026-09-06 hypothesis_queue排程接續 — #48（董監質押比例）第1關cheap
+gate已跑完並結案：FAIL。取鎖時發現上一輪鎖檔陳舊（LOCK_STALE，91808，
+30.3分鐘，疑似上一輪失敗），本輪回收接手。確認回補job
+`20260906-220343-82ae`已完成（`irb130_pledge_combined.csv`
+203,194筆），新增`irb130_pledge_gate.py`：`pledge_level`兩期皆正號
+（與事前綁定負相關方向相反）、`pledge_mom`TRAIN幾近零訊號+VAL僅邊緣
+顯著(p=0.0665)，判FAIL。**過程中發現並修正一個方法論公式bug**：
+`day_trading_ratio_gate.py`/`institutional_concentration_gate.py`/
+`avg_pairwise_correlation_gate.py`共用的單邊有號null percentile公式
+`100*mean(shuffled>=real_corr)`（門檻`<=10.0`）用模擬資料證實方向
+跟腳本自己註解相反（真實負相關越強percentile越接近100而非0），本
+腳本改用`factor_ic.py`絕對值null慣例修正；已逐一覆核`#37`/`#42`/
+`#43`三者判定不受影響（詳見`STRATEGY_GRAVEYARD.md`#48）。已更新
+`HYPOTHESIS_QUEUE.md`（#48條目+排隊順序總結）、`TRIALS_LEDGER.md`
+#178、`STRATEGY_GRAVEYARD.md`#48。因預算考量本輪未設計新假設軸#49，
+下一輪從設計#49開始。`is_holdout_consumed()`全程False（僅讀既有
+holdout-safe快取，未解鎖）。git狀態確認另有其他自動化來源留下的未
+提交檔案（`.github/workflows/audit.yml`、`research/.live_watchlist.json`、
+`research/data_cache/`、`research/deep_dive_f_us_low_vol_persistent_
+random_control.py`）已記錄、不觸碰、不納入本次commit。
+
 ## 2026-09-06 21:58 — hypothesis_queue排程接續：#48（董監事及大股東股權
 質押比例）完成(a)(b)(c)三點資料可行性查證，全數確認可行。用curl直接
 測試找到真實端點`https://siis.twse.com.tw/publish/{sii|otc}/{yyy}
