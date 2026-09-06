@@ -1,5 +1,25 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-07 hypothesis_queue排程接續 — #49第2關placebo設計，仍未
+結案（非PASS/FAIL）。三來源查證確認TRAIN期(2015-2020)無法取得TAIEX
+盤中分鐘/tick價格資料（yfinance回溯上限1m~8天/5m~60天/60m~730天皆
+不覆蓋；FinMind免費層無盤中1分K；TWSE`MI_5MINS`雖支援任意歷史日期
+但欄位是委託/成交統計非指數點位），「隨機時刻切分」placebo判定不
+可行。改用`high`/`low`當替代切分點的比較設計（`overnight_intraday_
+alt_cutpoint_placebo.py`，新增）：發現high/low切分也通過跟open完全
+同一套事前綁定判準且數字更極端，但診斷出這是**選擇偏誤**（high/low
+是當天極值，依定義必然產生偏態，不是經濟機制證據）——這個比較選錯
+對照組，既不能證明open特殊也不能證明不特殊。連續兩輪嘗試gate2操作化
+都因方法論問題卡住，非訊號被推翻。**建議下一輪放棄合成placebo，
+改道直接做gate6逐年一致性**（對已CHEAP_PASS的open切分逐年拆解，
+不需要null model，是#29/#34已示範的標準做法）。完整見
+`HYPOTHESIS_QUEUE.md`#49條目最新更新、`TRIALS_LEDGER.md`#182。
+`is_holdout_consumed()`開工/收工前皆確認`False`。本輪同時注意到
+`C:\alpha\alpha-app\CLAUDE.md`在本輪工作期間被另一個來源新增「七之三、
+研究紀律」章節（移植自Cybex的判斷方法，含存活者偏誤/財報跳空/交易
+時段/借券成本/漲跌停五項台股特有偽影家族），不是本輪產生，未觸碰，
+下一輪應納入閱讀範圍。
+
 ## 2026-09-06 23:57 hypothesis_queue排程接續 — #49第1關cheap gate跑完，
 **CHEAP_PASS**（非最終判定）。新增`overnight_intraday_decomposition_gate.py`，
 TAIEX(^TWII)逐日拆解overnight/intraday報酬，用log報酬加總做期間累積
