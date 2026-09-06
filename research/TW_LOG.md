@@ -1958,3 +1958,19 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
 
 **下一輪TW軌接續**：(1)先`run_detached.py status`確認`20260906-083408-d6ab`是否`finished`，若是優先讀SUMMARY寫入`TRIALS_LEDGER.md`（沿用round392已寫明的檢查重點：TRAIN期percentile/beta方向，VAL期若異常放大比照US`#151/#152`先查leave-top-N-out集中度而非直接判PASS）；(2)若仍`running`，可接續複驗`CALIBRATION_PROBE.md`清單剩餘的`#91 revenue_trend_surprise_low_attention`（TW，尚未複驗）。完整見`TW_MARATHON_STATE.md`第394輪記錄、`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13。
+
+---
+
+## 2026-09-06T10:30+08:00 — 馬拉松第396輪：TW
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 02:30（round385，最舊，明確跳過信號維持有效）／TW 09:30（round394）／US 10:00（round395，最新）——依輪替選TW。
+
+本輪工作單位＝收成TW自己的背景job`20260906-083408-d6ab`（`tw_deep_dive_quality_roe_stability_full_rerun`，300檔乾淨樣本完整重跑，round383/384投遞，`--timeout-min 150`）。`run_detached.py status`確認開工時已`running`約116.8分鐘，`run_detached.py wait 20260906-083408-d6ab --max-min 4`等待後確認`finished, exit=0`（總耗時約123分鐘，2026-09-06T08:34:09起~10:37:51止）。
+
+**結果**：`deep_dive_f_quality_roe_stability.py`原腳本零修改重跑，吃到`factor_ic.py::SAMPLE_SIZE`300檔新常數，248/300可用、176/248（71%）有至少一筆非NaN因子值。TRAIN(2015-2020) 3個成本倍數：ann_return由100檔原樣本的-3.8%~-4.2%**轉正為+7.25%~+7.59%**、beta=+0.223、alpha=+6.21%~+6.55%、random_percentile=100.0（3組皆過）。VAL(2021-2024) 3個成本倍數：ann_return+0.98%~+1.25%（100檔原樣本為+13.2%~13.4%，**同號但量級萎縮至約1/13**）、beta=+0.027~+0.028、alpha=+2.05%~+2.32%、random_percentile=100.0（3組皆過）。
+
+**判定**：`TRIALS_LEDGER.md`#16/#17記錄的EXPERIMENTAL唯一disqualify理由——TRAIN/VAL絕對報酬正負號不一致——本輪300檔重跑後已解決（兩期皆正）。依既有判準（同號+beta可控+隨機控制組穩健勝出）由EXPERIMENTAL上修為**PASS（1b深挖關卡）**。誠實揭露三項尚待查證的保留：(1) VAL期量級大幅萎縮暗示100檔樣本原本的VAL強勢混有小樣本雜訊放大成分；(2) TRAIN期beta+0.223比VAL期+0.027明顯偏離market-neutral，尚未做regime/逐年分解查證；(3) 176/248因子值覆蓋率偏低（71%），原因未查。依`MARATHON_PROTOCOL.md`「停下提案時機」判斷，這只是1b單一關卡從EXPERIMENTAL轉PASS，尚未走完leave-one-out/參數穩健性/regime overlay/獨立樣本外複驗等關卡，**未到「完整GATE_SEQUENCE可部署」門檻，不觸發提案**。
+
+已寫入`TRIALS_LEDGER.md`#156、`TW_LEADS.md`#3更新。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用`SAMPLE_SIZE`已預先回補好的300檔快取）。
+
+**下一輪TW軌接續**：(1)heavy-job-slot本輪已空出，可投遞新的重度工作，例如`f_quality_roe_stability`VAL期逐年分解（比照`US_LEADS.md`#151/#152方法論，排除VAL量級萎縮是否進一步集中在特定年份/個股）；(2)或複驗`CALIBRATION_PROBE.md`清單的`#91 revenue_trend_surprise_low_attention`——**但先grep確認**：`TRIALS_LEDGER.md`#106（2026-09-04）已完成#91的300檔重跑並結案（維持FAIL，高關注度組意外轉CHEAP_PASS但因TRAIN無訊號未列入候選），此項實質已處理過，不要第三次重複（前一輪round394已誤重複過#77一次）；(3)或評估是否將`f_quality_roe_stability`納入`portfolio_multifactor_v2`成分因子替換候選。完整見`TW_MARATHON_STATE.md`第396輪記錄、`TRIALS_LEDGER.md`#156、`TW_LEADS.md`#3。

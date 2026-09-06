@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T09:30+08:00**
+**最後更新：2026-09-06T10:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 395 輪。最新一輪：第 395 輪 · 2026-09-06T10:00+08:00 · US（取鎖乾淨，TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞）**。**本輪工作單位**：`#151`（`f_us_low_vol`乾淨宇宙VAL期異常量級）的leave-top-N-out集中度檢查，新增`deep_dive_f_us_low_vol_leave_extreme_out.py`（單次真實回測，比照round363/`US_LEADS.md`#18對`f_us_value_bm`的方法論）。排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**——異常量級廣泛分布在整個池子，不是靠少數極端贏家撐起來，指向分層抽樣方法本身或2021年後市場結構轉變。判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154、`US_LEADS.md`#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`/`TRIALS_LEDGER.md`第395輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 396 輪。最新一輪：第 396 輪 · 2026-09-06T10:30+08:00 · TW（取鎖乾淨，收成TW自己的背景job`20260906-083408-d6ab`）**。**本輪工作單位**：收成`f_quality_roe_stability`300檔乾淨樣本完整重跑（`run_detached.py wait --max-min 4`確認`finished, exit=0`，耗時約123分鐘）。原EXPERIMENTAL唯一disqualify理由（TRAIN/VAL絕對報酬正負號不一致）已解決——TRAIN由100檔樣本的-3.8%~-4.2%轉正為+7.25%~+7.59%、VAL維持正但量級萎縮至+0.98%~+1.25%（約1/13），兩期同號，6/6組合仍全贏100次隨機控制組。**判定由EXPERIMENTAL上修為PASS（1b深挖關卡）**，誠實揭露VAL量級萎縮/TRAIN-VAL beta差異/因子值覆蓋率71%三項待查保留，未到完整GATE_SEQUENCE可部署程度，不觸發提案。已寫入`TRIALS_LEDGER.md`#156、`TW_LEADS.md`#3更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`TRIALS_LEDGER.md`第396輪記錄。
 
-**上一輪（第393輪，供對照）：第 393 輪 · 2026-09-06T09:00+08:00 · US**。US背景job`20260906-060311-6a01`已收成完畢，本輪對`#151`VAL期做逐年分解＋leave-2022-out，**2022單一年份驅動假說REFUTED**但發現VAL期四年全部超出BAB文獻合理量級，判定`#151`維持EXPERIMENTAL。已寫入`TRIALS_LEDGER.md`#152。完整見`US_MARATHON_STATE.md`第393輪記錄。
+**上一輪（第395輪，供對照）：第 395 輪 · 2026-09-06T10:00+08:00 · US**。TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞，改做`#151`的leave-top-N-out集中度檢查：排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**，判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154。完整見`US_MARATHON_STATE.md`第395輪記錄。
 
 **上一輪（第389輪，供對照）：第 389 輪 · 2026-09-06T07:05+08:00 · TW**。盤點確認`MARATHON_PROTOCOL.md`第3節因子家族已全數掃過，更正`MI_MARGN`過時備註；US heavy job佔用中無法投遞TW的`deep_dive_f_quality_roe_stability.py`完整重跑。完整見`TW_MARATHON_STATE.md`第389輪記錄。
 
