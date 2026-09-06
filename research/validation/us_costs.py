@@ -99,6 +99,56 @@ BORROW_FEE_ANNUAL_PCT = 2.0   # placeholder for US stock-loan (hard-to-borrow) f
                                 # assumes the borrow is available for the full holding period.
 
 
+# Price-tiered hard-to-borrow fee schedule (2026-09-07, US_LEADS.md #20/#21
+# round410/#412's named next step: "成本模型隨股價/流動性反向縮放，而非固定
+# $50代表性價格"). BORROW_FEE_ANNUAL_PCT above is a single flat 2%/yr applied
+# regardless of which stock -- round410 found the VAL-period short leg of both
+# factors is dominated by sub-$50 (often sub-$5) micro-cap names that have gone
+# through repeated reverse splits (the "death spiral" pattern), and stocks in
+# that profile are the textbook hard-to-borrow (HTB) case, not the easy/GC case
+# the flat 2% was implicitly modeling.
+#
+# Grounding for the tiers (WebSearch 2026-09-07, not a per-name calibration --
+# no historical stock-loan rate feed exists for this project; this is a
+# heuristic proxy using PRICE as a stand-in for "hard to borrow", since low
+# price + micro-cap + post-reverse-split is exactly the profile these sources
+# describe as HTB):
+#   - quantrocket.com/blog/borrow-fees-alpha: fees range from ~0.25%/yr for
+#     easy-to-borrow names up to 100%+/yr for hard-to-borrow names.
+#   - interactivebrokers.com/en/pricing/short-sale-cost.php: IBKR's own
+#     published short-sale cost page distinguishes "easy to borrow" (near-zero)
+#     from "hard to borrow" (fee-quoted, can be double-digit % or higher).
+#   - s3partners.com/articles/us-stock-borrow-fees: small-cap / heavy-short-
+#     interest names commonly run into double-digit annualized %, sometimes
+#     100%+ in squeeze conditions.
+# This schedule is a coarse, DIRECTIONAL correction (price as a proxy for
+# borrow difficulty), not a validated fee curve -- treat exactly like
+# DEFAULT_SLIPPAGE_BPS: a placeholder that is more realistic than the
+# alternative (flat 2%), not a precise number.
+BORROW_FEE_TIERS_USD = [
+    (50.0, 1.0),    # price >= $50: easy-to-borrow large/mid-cap regime, ~1%/yr
+    (10.0, 5.0),    # $10-$50: moderate
+    (5.0, 20.0),    # $5-$10: elevated HTB
+    (1.0, 60.0),    # $1-$5: severe HTB (penny-stock / distressed profile)
+]
+BORROW_FEE_TIER_FLOOR_PCT = 100.0  # below $1: worst tier, penny/distressed
+
+
+def borrow_fee_annual_pct_tiered(price: float) -> float:
+    """Price-tiered stand-in for `BORROW_FEE_ANNUAL_PCT`, see the schedule's
+    docstring block above for grounding and caveats. `price` should be the
+    stock's `adj_close` at the time the short is opened (or held), not a
+    fixed representative price -- the whole point of this function is to stop
+    assuming every short costs the same to borrow regardless of what it is.
+    """
+    if price is None or price != price or price <= 0:  # NaN/None/non-positive guard
+        return BORROW_FEE_TIER_FLOOR_PCT
+    for floor, pct in BORROW_FEE_TIERS_USD:
+        if price >= floor:
+            return pct
+    return BORROW_FEE_TIER_FLOOR_PCT
+
+
 def _sec_fee(notional: float) -> float:
     """SEC Section 31 fee for one sell leg, given the dollar notional sold."""
     return notional * SEC_FEE_RATE_PER_DOLLAR

@@ -304,6 +304,7 @@ def load_full_history(
     data_id: str = "",
     start_date: str = "2000-01-01",
     force_refresh: bool = False,
+    allow_holdout: bool = False,
 ) -> pd.DataFrame:
     """Uncapped fetch, through today. The ONLY legitimate use is to build the
     DataFrame handed to validation.holdout.unlock_holdout_once() during a
@@ -313,7 +314,44 @@ def load_full_history(
     Do not call this to "just get the latest data" for ordinary analysis.
     If you find yourself reaching for this function outside of an actual
     holdout unlock, you almost certainly want load_dev() instead.
+
+    2026-09-07 (Cybex.債務2): `allow_holdout` now defaults to False and this
+    function REFUSES to run without it. The docstring above already said
+    "don't use this for ordinary analysis" -- and Cybex proves a docstring
+    is not a control. Cybex ran a "post-2024 out-of-sample" check over a
+    hundred times before anyone noticed the boundary was literally the
+    holdout boundary. Holdout contamination is an availability problem, not
+    a discipline problem (see validation/holdout.py's module docstring), so
+    the fix is the same one that module already applies: make the easy path
+    impossible, not merely discouraged.
+
+    Passing allow_holdout=True is deliberately loud -- it prints a warning
+    naming the caller's file and line. It is NOT the unlock: it only gets
+    you the uncapped DataFrame. The actual holdout read still has to go
+    through validation.holdout.unlock_holdout_once(), which is one-time-use,
+    lock-file enforced, and permanently logged.
     """
+    if not allow_holdout:
+        raise RuntimeError(
+            f"load_full_history(dataset={dataset!r}) refused: this returns UNCAPPED data that can "
+            "include holdout-period rows (after validation.holdout.VAL_END). If you want ordinary "
+            "analysis data, use load_dev() -- it caps at VAL_END at the fetch layer. If this really "
+            "is the one-time holdout evaluation, pass allow_holdout=True AND route the result "
+            "through validation.holdout.unlock_holdout_once(), which is the only sanctioned, "
+            "logged, one-time-use path."
+        )
+
+    # 誰在解除 cap 要留下痕跡。這裡刻意用 stack 取呼叫端檔案/行號，而不是只印一句
+    # 泛泛的警告——「有人繞過 cap 了」沒有用，「哪一行繞過 cap」才查得下去。
+    import inspect
+    caller = inspect.stack()[1]
+    print(
+        f"[HOLDOUT WARNING] load_full_history(dataset={dataset!r}, data_id={data_id!r}) called with "
+        f"allow_holdout=True from {caller.filename}:{caller.lineno} -- this returns UNCAPPED data "
+        "including holdout rows. This is NOT the unlock: the result must still go through "
+        "validation.holdout.unlock_holdout_once() to be a legitimate holdout read.",
+        flush=True,
+    )
     return _fetch(dataset, data_id, start_date, end_date=None, force_refresh=force_refresh)
 
 
