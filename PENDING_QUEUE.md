@@ -222,11 +222,11 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **連線一.1** **已完成**：根因是排程設定 `DisallowStartIfOnBatteries=True`（筆電沒插電就不啟動）＋無登入觸發＋`StartWhenAvailable=False`。防火牆**沒有**擋（log 顯示手機 83 次 200 OK，我第一個判斷錯了已更正）；當時在跑的是 09-05 手動啟動的舊版程式。
 - [x] **連線一.2** **已完成**：排程改為允許電池／切電池不停／錯過補跑／登入時啟動＋每 1 分鐘檢查（不需管理員權限）。`/health` 補 `uptime_sec`／`shioaji_connected`（含定義說明）／`last_tick_at`。設定頁測試連線改兩段式（先 /health 再 /live/quotes），把 Load failed 拆成三類。
 - [~] **連線一.3** **部分完成**：kill 後自動回來三次實測 19／60／10 秒（要求 60 秒內），三種錯誤分類截圖已交。**重開機驗收未做**——重開機會中斷工作階段；設定已是「登入時啟動＋每 1 分鐘」，總司令下次重開機可自驗。
-- [ ] **連線二.1** PC 安裝 Tailscale、MagicDNS、HTTPS 憑證、ACL funnel nodeAttrs
-- [ ] **連線二.2** `tailscale funnel --bg 8001`，本機改純 HTTP，回報 ts.net 網址（只貼給總司令）
+- [x] **連線二.1** **已完成**：Tailscale 1.102.3 安裝、總司令 GUI 登入、節點上線。MagicDNS 與 HTTPS 憑證 tailnet 層級早已啟用，節點能力含 funnel／https／funnel-ports，**ACL 不需修改**。
+- [x] **連線二.2** **已完成**：啟動器 `ALPHA_LIVE_SERVER_HTTPS=0`，Funnel 已開並在背景執行；公開網址只印在終端機給總司令，未寫進任何 repo 檔案。
 - [x] **連線二.3** **已完成並實測**：/docs /redoc /openapi.json 皆回 404；除 /health 與 /ca.crt 外全部 401；401 限速實測連打 25 次，第 22 次起回 429 且 log 記錄封鎖，封鎖期間帶正確 token 也擋。IP 取法為「有 X-Forwarded-For 用它、否則用連線來源」並把來源寫進 log，待 Funnel 開通後實測確認；token 正確即清零計數避免自己被鎖。/health 新增 hardening 自我檢查區塊。
-- [ ] **連線二.4** App 設定頁支援 ts.net 網址（無 port）；SSE 經 Funnel 實測 10 分鐘不斷線；公司手機免裝憑證直連截圖
-- [ ] **連線二.5** Cloudflare 保留備援；Funnel 若頻寬/穩定性不過就回報數據再啟動買網域方案
+- [~] **連線二.4** **多數完成**：App 填「只有網域沒有 port」會自動正規化並自動重測，顯示「● 即時連線中」；SSE 經 Funnel 實測 610 秒 0 次中斷、最大間隔 16.1 秒。**公司手機直連截圖待總司令實測**（我無法操作公司手機）。
+- [x] **連線二.5** **已完成**：`docs/cloudflare_tunnel_setup.md` 標題標為備援方案並說明切回方式，`cloudflared/config.example.yml` 保留不刪。Funnel 實測延遲 31～57ms、10 分鐘 0 斷線，暫不需要啟動買網域方案。
 - [ ] **建置一.1** 新聞事件管線 → `data/news.json`／`data/events.json`（Actions 每 30 分鐘）＋「題材判斷」卡改吃 events.json
 - [ ] **建置一.2** 目標價卡改「估值區間（非目標價）」：同產業 PE 25/50/75 百分位 × 近四季 EPS
 - [ ] **建置一.3** 美股類股（SEC SIC 對映）／ADR 溢價卡（TSM、UMC、ASX、CHT）

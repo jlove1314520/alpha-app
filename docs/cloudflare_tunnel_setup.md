@@ -1,4 +1,10 @@
-# Cloudflare 網域上線手冊（2026-09-06 準備，網域到手後照做）
+# Cloudflare 網域上線手冊（**目前為備援方案，2026-09-06 起主線改用 Tailscale Funnel**）
+
+> **狀態說明（連線二.5）**：2026-09-06 已改用 Tailscale Funnel 對外提供服務——免費、
+> 公司手機不必安裝任何憑證、也不必開 WARP，TLS 由 Tailscale 以 Let's Encrypt 憑證終結。
+> 這份 Cloudflare 手冊**保留不刪**，作為備援：如果哪天 Funnel 的頻寬上限或穩定性不夠用，
+> 照這份買網域走 Cloudflare Tunnel 即可，內容仍然有效（`cloudflared/config.example.yml`
+> 也保留著）。切回去時記得把啟動器的 `ALPHA_LIVE_SERVER_HTTPS` 改回 `"1"`。
 
 這份是給總司令今晚照著做的操作說明。伺服器端與 App 端該改的都已經改好並上線，
 剩下的是 Cloudflare 後台的設定。

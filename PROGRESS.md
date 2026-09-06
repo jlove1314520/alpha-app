@@ -16,6 +16,71 @@
 
 ---
 
+## 2026-09-06 晚間（維運帽）— 連線二：Tailscale Funnel 上線
+
+### 先更正一個我自己造成的誤判
+我在總司令用 GUI 登入之後又跑了 `tailscale up`，那個行程掛著「等待互動登入」，
+把 CLI 的狀態蓋成 `NeedsLogin`，我還拿那個假狀態去跟總司令說「這台沒登入」。
+把我起的行程收掉之後狀態就正常了。**教訓：不要在別人已經完成的流程上再跑一次
+會改變狀態的指令，然後拿被自己弄髒的狀態當證據。**
+
+### 二.1 節點與能力（不需要改 ACL）
+```
+DNSName    : <節點>.<tailnet>.ts.net
+CertDomains: 同上（HTTPS 憑證已啟用）
+CapMap     : funnel / https / funnel-ports?ports=443,8443,10000
+```
+總司令說的沒錯，tailnet 層級早已啟用 Funnel 與 HTTPS 憑證，節點能力裡直接就有
+`funnel`，**ACL 完全不用動**。
+
+### 二.2 本機改純 HTTP、TLS 交給 Tailscale
+啟動器 `run-alpha-live-server-cycle.ps1` 的 `ALPHA_LIVE_SERVER_HTTPS` 改為 `"0"`。
+為什麼不繼續自簽 HTTPS：Funnel 已經在前面做完 TLS，本機再包一層自簽只會讓反向代理
+要嘛關掉驗證、要嘛額外設 caPool，而那一段是 loopback，多一層換不到任何安全性。
+自簽憑證與 `/ca.crt` 都保留，把那個值改回 `"1"` 就能退回舊模式。
+
+**副作用誠實記下**：切純 HTTP 之後，PWA（https 來源）不能再直接連區網的
+`http://192.168.3.241:8001`——瀏覽器會擋 mixed content。手機一律改用 ts.net 網址，
+那個網址在區網與外網都通。
+
+### 實測（走網際網路繞回來）
+| 項目 | 結果 |
+|---|---|
+| `/health` | 200，**憑證未加 `-k` 就通過**（Let's Encrypt 受信任） |
+| `/live/quotes` 無 token | 401 |
+| `/live/quotes` 有 token | 200 |
+| `/docs` | 404 |
+| 預檢（github.io 來源） | 精確來源 ＋ `allow-credentials: true` |
+| 穩態延遲 | 31～57 ms（首次 20.9 秒是憑證簽發，一次性） |
+| SSE 連續 10 分鐘 | **610 秒、0 次中斷**、38 個事件/keepalive、最大間隔 16.1 秒 |
+| App 填「只有網域、沒有 port」 | 自動正規化為 `https://…ts.net`，顯示「● 即時連線中」 |
+
+### 順便把連線二.3 留下的未決問題實測掉了
+當時不確定 Funnel 會不會轉發原始客戶端 IP（官方文件沒寫），所以限速實作成
+「有 XFF 用 XFF、否則用連線來源」並把來源記進 log。現在有答案了：
+
+```
+     10 100.80.211.24     ← 我自己的測試
+      2 195.178.110.211   ← 外部掃描器
+      2 159.65.204.129    ← 外部掃描器
+```
+
+**公開不到一分鐘就有兩個不同的外部 IP 上門掃描**（其中一個在打 `/xmlrpc.php?rsd`，
+典型的 WordPress 漏洞掃描）。這同時證明兩件事：Funnel 確實轉發真實客戶端 IP，
+所以 401 限速的 per-IP 判斷是有效的；以及**先做硬規則再開 Funnel 的順序是對的**，
+不是多慮。
+
+### 二.5 Cloudflare 保留為備援
+`docs/cloudflare_tunnel_setup.md` 標題已標註為備援方案，內容與
+`cloudflared/config.example.yml` 都保留不刪。Funnel 的頻寬上限或穩定性哪天不夠用，
+照那份買網域切過去即可（記得把 `ALPHA_LIVE_SERVER_HTTPS` 改回 `"1"`）。
+
+### 待總司令實測的一項
+「公司手機不裝憑證、不開 WARP 直接連上」需要用公司手機操作，我做不到。
+ts.net 網址已在終端機給總司令。
+
+---
+
 ## 2026-09-06 下午（維運帽）— 連線二.3：公開到網際網路前的安全硬規則
 
 Funnel 一開，這台機器上的服務就是公開的。所以**先把硬規則做完並驗過，才准開 Funnel**
