@@ -2175,3 +2175,11 @@ Pledge Ratio — FAIL（2026-09-06，第1關cheap gate未過）
   `cash_increase_dilution_gate1.py`（新增，可重複執行）。全程零新增
   API呼叫（複用既有本機`TaiwanStockDividend`/`TaiwanStockPrice`快取，
   價格資料94檔全數命中快取）。
+
+## #51子事件3：可轉換公司債轉換價格重設（Convertible Bond Conversion Price Reset）——2026-09-07結案：FAIL
+
+- **假設**：`reset_magnitude=(old_price-new_price)/old_price`（僅向下重設）越大，`effective_date`後20交易日CAR應越負（潛在轉換套利賣壓）。
+- **死因**：TRAIN IC=+0.0117(p=0.5978,n=2031)、VAL IC=+0.0430(p=0.1649,n=1047)，同號但方向與事前綁定的負相關預期相反；VAL洗牌控制組(N=200)null percentile=8.0遠低於90.0門檻且遠低於50。四項判準僅同號成立，其餘全數未過。
+- **不泛化聲明**：不代表可轉債轉換價格重設機制完全無效——只測了單一固定20交易日窗口+effective_date當t0這個具體構造，僅取向下重設半邊（780筆向上重設未測）。
+- **#51（強制交易者事件）三個子事件（強制回補/現金增資折價/可轉債轉換價重設）至此全數FAIL，#51正式結案**，移出排隊佇列。
+- **原始記錄**：`TRIALS_LEDGER.md`#190、`HYPOTHESIS_QUEUE.md` #51條目(i)段落、`cb_conversion_price_reset_gate1.py`／`mops_cb_conversion_price_client.py`（新增，可重複執行）。回填30次MOPS查詢（2市場x15民國年），711檔股票，3078筆最終可用事件。

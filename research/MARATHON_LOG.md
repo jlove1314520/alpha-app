@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-07T05:33+0800 hypothesis_queue排程接續 — 上一輪陳舊鎖檔(pid 74780)回收接手：#51子事件3(可轉債轉換價重設)完成第1關cheap gate並結案FAIL（TRAIN/VAL同號但方向與事前綁定相反、null percentile=8.0），#51三個子事件全數FAIL正式結案，移出佇列。已寫入TRIALS_LEDGER.md#190/STRATEGY_GRAVEYARD.md/HYPOTHESIS_QUEUE.md。is_holdout_consumed()確認False。下一輪待辦：重新查證#50/#52前置依賴，若未解鎖則設計新假設軸#53。
+
 ## 2026-09-07T04:59+0800 hypothesis_queue排程接續 — #51子事件3(可轉債轉換價重設)完成第二段POST驗證，正式確認資料可行：新增mops_cb_conversion_price_client.py，單次查詢(sii/113年)解析329筆轉換價格變更事件成功。下一輪待辦：設計第1關cheap gate。
 
 ## 2026-09-07T(排程接續) hypothesis_queue排程接續 — #51子事件3(可轉債轉換價重設)MOPS查證：解析Vue SPA路由表(index.js)找到候選搜尋表單t108sb08_1_q2（轉換(附認股權)公司債公告彙總表，TYPEK+co_id範圍+year+month可查），POST ajax_t108sb08_1_q2確認回200，但回傳的是二次跳轉頁（真正結果要再POST ajax_t108sb08_1）——本輪因預算用盡未完成第二步驗證，未下可行/不可行結論，詳見HYPOTHESIS_QUEUE.md #51段落。下一輪待辦：完成第二步POST確認能否拿到含「轉換價格重設」字樣的公告列表。
