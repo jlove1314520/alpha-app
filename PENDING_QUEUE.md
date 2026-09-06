@@ -249,7 +249,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **實測.一** **已完成**：根因＝自選股列只查 quotes_tw.json（Actions 只抓前 210 檔），20 檔實測中 12 檔修正前會顯示無報價。新增全 App 唯一的 `resolveQuote()` 四層回退鏈（live→quotes_tw→quotes_all_tw→sparklines 最後收盤），canonicalPrice 改為委派同一支；noQuoteReason 只在不在官方名冊時才說「已下市」。quotes_all_tw 補 top-level fetched_at/source。live server 新增 POST/GET /subscribe（token 驗證、無下單能力、上限 100 檔且只訂 Tick，Shioaji 官方上限 200），shioaji_quotes.py 每 5 秒做增刪訂閱，App 在自選股變動與連線時推送。驗收：隨機 20 檔（含上櫃/千元股/冷門股）全部有價；smoke 新增 check 42，40 項全 PASS。
 - [x] **實測.五** **已完成**：根因＝`go()` 用 `_safeSync` 呼叫 **async** 的 `renderReport`，async 的 rejected promise try/catch 接不到，冒成 unhandledrejection。用修正前版本重現得到 8 筆 `unhandledrejection: Cannot read properties of null (reading 'toFixed')`（即 6442 的 peg=null），修正後同樣操作 0 筆。結構性修法：`_safeSync` 對 thenable 回傳值自動 `.catch()`。橫幅改為一行摘要（幾筆／幾種／最近一筆）＋「複製錯誤詳情」按鈕（帶版本/UA/螢幕/即時源/自選股數），clipboard 被擋時退回自動選取。冒煙測試 40 項全 PASS。
 - [x] **實測.二** **已完成**：新增 loopback UDP 查詢通道，`/live/kbars` 對未訂閱代號由常駐行程**在同一條 Shioaji 連線上**呼叫 api.kbars()（雙邊各快取 60 秒）；沿途修掉推送位址寫死 8002 與kbars 時間戳差 8 小時兩個真 bug，並新增 `ALPHA_SHIOAJI_FORCE_RUN` 供非交易時段端到端驗證。前端新增 `sparkBaseline()` 以前收為基線（非 min-max）、漲紅跌綠、基線虛線；標籤當天「今日」、隔日開盤前標日期；個股頁改以當日曲線為預設、20 日降為第二選項。驗收：10 檔全部畫出當日曲線且形狀各異，3 檔對原始 1 分K 筆數與首末高低 1:1 吻合；冒煙 40 項全 PASS。
-- [ ] **實測.三** 漲跌停亮燈（limit_up/limit_down、徽章、K 線虛線、歷史回放驗證）
+- [x] **實測.三** **已完成**：回退公式適用範圍用合約快取 3154 檔逐檔驗證釘死（TSE+OTC 4 位數普通股 1976 檔 100% 吻合；興櫃 ±20%、ETF 檔位表不同且 98 檔無漲跌幅限制，一律不亮燈）。前收改取 sparklines 真實收盤（反推誤差會讓整檔判錯）。自選股列與個股頁紅底/綠底＋徽章，K 線畫漲跌停虛線。驗收用 2026-09-04 真實漲停 3 檔＋跌停 4 檔回放全部正確、對照組不亮；另發現 2478 只漲 9.61% 卻是真漲停，證明不能用百分比近似。冒煙 40 項全 PASS。**缺口**：ETF 與興櫃待合約欄位推進 /live/quotes 後涵蓋。
 - [ ] **實測.四** 分批進場改技術層級階梯（取消極端走勢不顯示，改風險標示）
 - [ ] **實測.六** CLAUDE.md 資料原則加「三來源查證」搜尋紀律
 
@@ -316,6 +316,29 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [ ] **研究.b** #42 產業金流加速度（同金流一.5），三關流程
 - [ ] **研究.c** 盤中微結構假設——**阻塞中**：等資料一累積 ≥20 個交易日才設計，期間不得用 FinMind 或任何付費源補 tick
 - [ ] **研究.共同** 每條線 cheap gate 結果不論 PASS/FAIL 都寫進 HYPOTHESIS_QUEUE 並回報
+
+---
+
+## 競品一：向籌碼K線學黏著（2026-09-06，總司令指令原話全文，排在「資料一」之後執行）
+
+原始指令全文：
+
+> 全程繁體中文。總司令新指令，登記 PENDING_QUEUE 原文，排在「資料一」之後執行。
+>
+> 【競品一】向籌碼K線學黏著、不學分點（分點=證交所買賣日報表付費商品 NT$100,000/月，本階段不碰、不假裝有）
+> 1. 千張大戶（免費、週更）：新增 scripts/fetch_tdcc_dispersion.py，每週五 20:00 抓一次 https://opendata.tdcc.com.tw/getOD.ashx?id=1-5（CSV：資料日期,證券代號,持股分級,人數,股數,占集保庫存數比例%），原始檔存 research/data/tdcc/YYYYMMDD.csv 累積不刪；產出 data/holders.json：每檔 ≥1000 張級距（分級 15 以上）持股比例、≤1 張級距比例、與上週差、連續增減週數。個股頁籌碌卡新增「千張大戶」列，標「週更，資料日期 MM-DD」。每週只此一次請求。
+> 2. 持股事件聚合頁：首頁新增「我的持股事件」卡，把自選股與紙上持倉的 events.json／news.json（重大訊息、月營收、除權息、法說會、財報）依時間排一條流，點開跳個股頁；不用逐檔點。
+> 3. 訊號誠實標籤：App 內所有籌碼／技術／金流訊號旁加三態徽章「已驗證（附回測期間與樣本外 percentile）／未驗證／實測無效」，資料來自 research/TRIALS_LEDGER.md 與 STRATEGY_GRAVEYARD.md 自動產生 data/signal_status.json；設定頁新增「我們測過但沒用的指標」清單。這是差異化，不是免責聲明，文案要寫成資產。
+> 4. 推播（先提案不做）：查證 iOS PWA Web Push 現況（需加到主畫面、iOS 16.4+）、GitHub Pages 無伺服器可推、本機 live server 加 VAPID 推播的可行性與門檻，列三個方案的成本與限制回報，等總司令裁示。
+> 5. 佇列清理：C4「用總司令帳號查籌碼K線開發者入口」劃掉，理由寫明 CMoney 無對外 API。
+> 6. 驗收：holders.json 覆蓋檔數、2330 千張大戶比例與集保網站人工核對一筆截圖；持股事件卡截圖；signal_status.json 三態各多少筆。
+
+- [ ] **競品一.1** `scripts/fetch_tdcc_dispersion.py` 週五 20:00 抓集保分散表 → `data/holders.json`＋個股頁「千張大戶」列
+- [ ] **競品一.2** 首頁「我的持股事件」卡（自選股＋紙上持倉的事件時間流）
+- [ ] **競品一.3** 訊號三態徽章＋`data/signal_status.json`＋設定頁「我們測過但沒用的指標」
+- [ ] **競品一.4** 推播三方案查證與提案（先提案不做，等裁示）
+- [x] **競品一.5** 佇列清理：籌碼K線開發者入口已劃掉（見下方「零之二」區塊，理由：CMoney 無對外 API）
+- [ ] **競品一.6** 驗收：holders.json 覆蓋檔數＋2330 人工核對截圖＋持股事件卡截圖＋signal_status 三態筆數
 
 ---
 
@@ -447,7 +470,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   <60% 82.3%→32.1%、7711 rank 1→44、2330 七項因子完整度92%、smoke 35項全PASS）
 - [ ] **零之三** 產業地圖（ic.tpex.org.tw 價值鏈＋MOPS 補齊 company_info＋個股頁顯示價值鏈位置）
 - [ ] **三** 免費第一手資料管線（MOPS/法說會/月營收/SEC 8-K/RSS → news.json/events.json，接因子五）
-- [ ] **零之二** 分點資料沙盤演習（14家API矩陣＋富果後台實際端點＋群益確認，只走官方API）
+- [ ] **零之二** 分點資料沙盤演習（14家API矩陣＋群益確認，只走官方API）　**～～富果／籌碼K線開發者後台端點清單～～ 這一小項已於 2026-09-06 依總司令指令劃掉**，理由：CMoney（籌碼K線）沒有對外 API；分點資料的合法來源是證交所「買賣日報表」付費商品（NT$100,000/月），本階段不碰也不假裝有。
 - [ ] **二** 群益證券API唯讀先行（下單入口保持關閉、更新CONSTITUTION）
 - [ ] **四** 本地AI摘要（GPU/記憶體確認→開源模型→法說會PDF摘要）
 - [ ] **其餘** 三大法人柱狀圖零基線／融資維持率分母改MI_MARGN／週末標頭休市／移除未上線推播開關／

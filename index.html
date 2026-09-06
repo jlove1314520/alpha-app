@@ -189,6 +189,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .row .nm{flex:1;min-width:0}
   .row .nm b{font-size:14px;display:block}
   .row .nm span{font-size:11px;color:var(--ink-3)}
+  /* 2026-09-06（實測.三）漲跌停亮燈：整格上色比只換字色顯眼得多，
+     一眼掃過自選股清單就看得到今天誰鎖住了。台股慣例漲紅跌綠。 */
+  .px.at-limit{border-radius:7px;padding:2px 6px}
+  .px.at-limit b{color:#fff!important}
+  .px.at-limit.lu{background:var(--up)}
+  .px.at-limit.ld{background:var(--down)}
+  .limit-badge{display:inline-block;font-size:9px;font-weight:700;line-height:1.5;padding:0 5px;border-radius:5px;color:#fff;margin-left:5px;vertical-align:middle}
+  .limit-badge.lu{background:var(--up)}
+  .limit-badge.ld{background:var(--down)}
   .row .px{text-align:right;min-width:74px}
   .row .px b{font-size:14px;display:block;font-variant-numeric:tabular-nums}
   .row .px span{font-size:11.5px;font-variant-numeric:tabular-nums}
@@ -1614,6 +1623,58 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){console.warn('[canonicalPrice]',e);recordGlobalError('canonicalPrice',e)}
     return null;
   }
+  // ── 2026-09-06（實測.三）漲跌停 ────────────────────────────────────────────
+  // 兩個來源，優先用官方值：
+  //  1. Shioaji 合約的 limit_up / limit_down（由 live server 的 /live/quotes 帶進來）
+  //  2. 沒有即時源時用「前收 × 1.1 / 0.9，依 TWSE 檔位規則取整」
+  //
+  // **回退公式的適用範圍是實測釘死的，不是假設**：拿 Shioaji 合約快取（2026-09-04、
+  // 3154 檔）逐檔對過，結論是
+  //   - TSE + OTC 的 4 位數普通股 1976 檔：公式與官方值 **100% 吻合、0 檔不符**
+  //   - 興櫃（OES）363 檔全部不符——興櫃漲跌幅是 ±20% 不是 ±10%
+  //   - ETF/ETN（00 開頭）用不同的檔位表，且其中 98 檔（元大寶滬深這類境外連結）
+  //     根本沒有漲跌幅限制（limit_up 是 9999.95）
+  // 所以公式只用在「在官方在市名冊內的 4 位數非 00 開頭代號」，其他一律不亮燈，
+  // 寧可不顯示也不要標一個錯的漲停價。
+  const TWSE_TICKS=[[10,0.01],[50,0.05],[100,0.1],[500,0.5],[1000,1],[Infinity,5]];
+  function twseTick(p){for(const [hi,t] of TWSE_TICKS)if(p<hi)return t;return 5}
+  function limitPrices(code,prevClose,liveQuote){
+    if(liveQuote&&liveQuote.limit_up!=null&&liveQuote.limit_down!=null)
+      return {up:+liveQuote.limit_up,down:+liveQuote.limit_down,src:'合約'};
+    if(prevClose==null||!isFinite(prevClose)||prevClose<=0)return null;
+    if(isUS(code))return null;                       // 美股沒有漲跌幅限制
+    if(!/^\d{4}$/.test(code)||code.startsWith('00'))return null;  // ETF/ETN 檔位表不同
+    if(!isListedNow(code))return null;               // 不在上市櫃名冊（興櫃 ±20%、已下市）
+    const ru=prevClose*1.1,rd=prevClose*0.9;
+    const tu=twseTick(ru),td=twseTick(rd);
+    return {up:+(Math.floor(+(ru/tu).toFixed(6))*tu).toFixed(2),
+            down:+(Math.ceil(+(rd/td).toFixed(6))*td).toFixed(2),src:'前收推算'};
+  }
+  // 回傳 'up' / 'down' / null。用 0.001 的容差比對，避免浮點數讓「剛好漲停」比不出來。
+  function limitState(price,lim){
+    if(!lim||price==null||!isFinite(price))return null;
+    if(Math.abs(price-lim.up)<0.001)return 'up';
+    if(Math.abs(price-lim.down)<0.001)return 'down';
+    return null;
+  }
+  // 個股頁頭部：把漲跌停徽章掛在名稱旁，價格格上色。個股頁的元素結構跟自選股列
+  // 不同（名稱在 .stock-head .l 裡），所以另外寫一支，不硬套同一段字串樣板。
+  function applyLimitBadge(code,price,prevClose,liveQuote){
+    const head=document.querySelector('#scr-stock .stock-head');if(!head)return;
+    const old=head.querySelector('.limit-badge');if(old)old.remove();
+    const r=head.querySelector('.r');if(r)r.classList.remove('at-limit','lu','ld');
+    const lim=limitPrices(code,prevClose,liveQuote);
+    const st=limitState(price,lim);
+    if(!st)return;
+    const nameEl=head.querySelector('.l b');
+    if(nameEl)nameEl.insertAdjacentHTML('afterend',limitBadge(st));
+    if(r)r.classList.add('at-limit',st==='up'?'lu':'ld');
+  }
+  function limitBadge(state){
+    if(!state)return '';
+    const isUp=state==='up';
+    return `<span class="limit-badge ${isUp?'lu':'ld'}">${isUp?'漲停':'跌停'}</span>`;
+  }
   const PRICE_SANITY_TOLERANCE=0.30;  // 總司令裁示：±30%
   // 回傳 null=通過（或無法查核），回傳字串=不通過，字串就是要顯示給使用者看的原因。
   function priceSanityFailure(code,price,label){
@@ -1720,7 +1781,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         // quotes_all_tw 只存收盤與漲跌%，前收由這兩個反推（漲跌% 是相對前收算的）。
         // change_pct 為 -100 代表前收是 0，那是壞資料，不反推。
         const pct=(typeof a.change_pct==='number'&&isFinite(a.change_pct)&&a.change_pct!==-100)?a.change_pct:null;
-        const prev=pct!=null?a.close/(1+pct/100):null;
+        // 前收優先用 sparklines 的倒數第二點（那是真實收盤價），只有查不到時才用
+        // change_pct 反推。反推會有誤差：change_pct 只存到小數第二位，反推出來的
+        // 前收可能差一點點，而漲跌停價是拿前收乘 1.1 再取整的，差一點就可能整檔
+        // 判錯（例如 511 反推成 511.02，漲停就從 562 變成 563）。
+        const sp0=sparkFor(code);
+        const prevExact=(sp0&&sp0.length>=2)?sp0[sp0.length-2]:null;
+        const prev=(prevExact!=null&&isFinite(prevExact))?prevExact:(pct!=null?a.close/(1+pct/100):null);
         return {price:a.close,change:prev!=null?a.close-prev:null,change_pct:pct,
                 prev_close:prev,source:'quotes_all_tw',tier:'all',asof:a.date||null};
       }
@@ -2335,6 +2402,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const dotCls=!mktOpenNow?'gr':((iq&&(iq.source==='sinopac'||iq.source==='ibkr')&&!iq.isTodayClose&&/REALTIME/.test(iq.data_type||''))?'g':(iq&&!iq.isTodayClose?'y':'gr'));
       const meta=`${code}${us?' · 美股':''}<span class="sdot ${dotCls} wl-src-dot" data-wl-dot="${code}" title="點一下看資料來源" onclick="event.stopPropagation();toggleWlDetail('${code}')"></span>`;
       const sp=rowSparkline(code,rawQ&&rawQ.sparkline,chg>=0,q.prev_close).html;  // 2026-09-06實測.二：當日曲線（前收基線）→ 退回20日
+      // 2026-09-06（實測.三）漲跌停：優先用合約值，沒有即時源時用前收推算
+      const lim=limitPrices(code,q.prev_close,iq);
+      const limSt=limitState(price,lim);
       // 2026-08-27新增（P2-新，盤前盤後）：美股才有extended_hours（見
       // fetch_quotes_us.py），只在盤前/盤後時段、且該時段真的有資料時才顯示，
       // 跟正規盤收盤價分開一行、明確標示「盤前」/「盤後」，不會被誤會成正規盤價。
@@ -2370,7 +2440,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // data-flash-code/data-flash-value：給盤中快速輪詢(fastPollTick())用來判斷
       // 「這次重繪後的價格」跟「上次輪詢看到的價格」是否不同，不同才閃爍，見
       // flashPriceEls()。這裡只是標記資料，平常渲染不受影響。
-      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span></div>${sp}<div class="px"><b data-flash-code="${code}" data-flash-value="${price}">${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}">${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
       if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
       // 2026-09-04 P0產品.一：可展開的來源說明（預設收合；smoke test仍能在DOM裡讀到「今日收盤」「即時(tick)」等字樣）
@@ -3522,6 +3592,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(iq&&iq.price!=null){
       const cls=(iq.change||0)>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(iq.price);pe.className=cls;
+      _safeSync('applyLimitBadge',()=>applyLimitBadge(code,iq.price,iq.prev_close,iq));
       const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
       if(px.length)renderStockChart(code,px,false);
       setTxt('trend-note',`來源：Shioaji${intradayTag(iq)}`);
@@ -3530,6 +3601,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;
       const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
       renderStockChart(code,px,false);
+      // 2026-09-06（實測.三）沒有即時源時也要判漲跌停，用日線的前一筆收盤當前收
+      _safeSync('applyLimitBadge:daily',()=>applyLimitBadge(code,last.close,prev,null));
       setTxt('trend-note',`來源：FinMind TaiwanStockPrice · 近 ${px.length} 個交易日收盤（日線收盤，非當下報價，原始未還原股價）`);
     }else{
       // 2026-09-06（實測.一）FinMind 沒有（冷門股或額度用盡）時退回統一回退鏈的後兩層：
@@ -3540,6 +3613,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const chg=fb.change??0,pct=fb.change_pct??0,cls=chg>=0?'pos':'neg';
         const pe=document.getElementById('sh-price');pe.textContent=nf(fb.price);pe.className=cls;
         const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
+        _safeSync('applyLimitBadge:fallback',()=>applyLimitBadge(code,fb.price,fb.prev_close,null));
         const sp=fb.sparkline||sparkFor(code);
         if(sp&&sp.length>=2)renderStockChart(code,sp.map(c=>({close:c})),false);
         setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}　FinMind 本次無資料`);
@@ -4817,6 +4891,20 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
     const series=chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
     STOCK_CHART.chart=chart;STOCK_CHART.series=series;
+    // 2026-09-06（實測.三.2）盤中 K 線畫兩條漲跌停虛線。
+    // 這是 K 線圖上最有用的一條參考線：看得到今天離鎖住還有多遠，比只看一個數字直觀。
+    // 只在算得出來時畫（TSE/OTC 4 位數普通股或有合約值），ETF 與興櫃不畫，
+    // 理由見 limitPrices() 的說明——寧可不畫也不要畫一條錯的線。
+    _safeSync('renderStockChart:limitLines',()=>{
+      const prev=(STOCK_CHART.daily.length>1)?STOCK_CHART.daily[STOCK_CHART.daily.length-2].close:null;
+      const lim=limitPrices(code,prev,intradayQuote(code,us));
+      if(!lim)return;
+      const style=(LWC.LineStyle&&LWC.LineStyle.Dashed!=null)?LWC.LineStyle.Dashed:2;
+      series.createPriceLine({price:lim.up,color:getComputedStyle(document.documentElement).getPropertyValue('--up').trim()||'#e6383f',
+        lineWidth:1,lineStyle:style,axisLabelVisible:true,title:'漲停 '+lim.up});
+      series.createPriceLine({price:lim.down,color:getComputedStyle(document.documentElement).getPropertyValue('--down').trim()||'#1aa34a',
+        lineWidth:1,lineStyle:style,axisLabelVisible:true,title:'跌停 '+lim.down});
+    });
     if(STOCK_CHART.mode==='intraday'){loadIntradayBars(code)}
     else{series.setData(STOCK_CHART.daily);chart.timeScale().fitContent()}
   }
@@ -5046,7 +5134,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.0740';
+  const APP_VERSION='2026-09-06.1048';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
