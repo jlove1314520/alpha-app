@@ -2061,3 +2061,49 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 **下一輪TW軌接手**：設計`HYPOTHESIS_QUEUE.md`#48新假設——`#47`已用掉第九種機制分類（交易所監理干預），下一條需再找一個跟已測過九種機制（①方向性選股排序②timing/exposure overlay③portfolio construction④配對交易均值回歸⑤強制平倉/流動性驅動賣壓⑥公司行動事件驅動⑦跨市場套利收斂⑧新股上市被動時間衰減⑨交易所監理干預）真正不同的第十種機制，不是調參數硬救；或依round409留下的選項(a)轉向`portfolio_multifactor_v2`組合層級（regime overlay、下檔保護證明這類尚未測過的維度——因子替換路線已於round340/353/356/359/362/373窮盡且全FAIL，見`TW_LEADS.md`#13條目與round373「下一步」）。
 
 **下一輪TW軌接手**：`f_value_pb`(#1)/`f_value_pe`(#2)兩個估值因子都卡在同一個「相對排序可能成立、絕對報酬train/val方向不一致」的EXPERIMENTAL狀態，不建議繼續在這個具體構造（十分位long/short+20日換倉）上投入更多深挖資源。建議方向：(a)依`MARATHON_PROTOCOL.md`2026-09-03主軸轉向`portfolio_multifactor_v2`組合層級（regime overlay、下檔保護證明，`STRATEGY_GRAVEYARD.md`該家族雖已整併結案，但仍可評估納入新一代成分因子候選的可能性）；(b)`MARATHON_PROTOCOL.md`第3節列出的因子家族中尚有未測變體可評估。完整見`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2、`TW_MARATHON_STATE.md`第409輪記錄、`deep_dive_f_value_pe.py`（既有，可重複執行）、`data/deep_dive_f_value_pe.csv`（新增）。
+
+---
+
+## 第413輪 · 2026-09-06T22:00+08:00 · TW軌
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 21:00（round411，最舊）／US 21:34
+（round412）／FUT 12:00（round399，依例外條款不選）——依輪替選TW。
+`run_detached.py status`確認heavy-job-slot空（0個running）。
+
+**工作單位**：`HYPOTHESIS_QUEUE.md`#48（董監事/經理人/大股東股權質押比例）
+地基建置，接續round411完成的(a)(b)(c)三點資料可行性查證（全過）後「下一輪
+直接進第1關cheap gate」的地基回補步驟。
+
+新增`backfill_irb130_pledge.py`：把`irb130_pledge_probe.py`原本只做6次
+測試請求的探測腳本，擴大為完整TRAIN(2015-2020)+VAL(2021-2024)月頻回補
+——2015-01~2024-12共120個月x{sii,otc}兩市場=240次請求，逐月寫入
+`data/raw_irb130_pledge/{market}_{roc_year}{month:02d}.csv`獨立快取檔
+（可安全中斷重跑，快取命中直接跳過），失敗/空月份寫入只有header的空檔
+標記狀態，避免下次重跑對已知失敗月份重試。
+
+執行前先手動呼叫`fetch_and_cache_month('sii', 2024, 6)`單一月份測試，
+確認回傳`status=fetched_ok, n_rows=1018`，fetch/parse函式正常運作後才
+投遞正式工作。
+
+依`MARATHON_PROTOCOL.md`第0b節規則（240次請求x1.5秒節流理論耗時約6分鐘，
+加計網路延遲實際可能落在數十分鐘量級），用`run_detached.py`脫離session
+投遞。**首次提交（job`20260906-220327-c5a5`）因未指定`--cwd`，watchdog
+在錯誤工作目錄（`C:\alpha\alpha-app`而非`research`）下找不到腳本，
+0.1分鐘內`failed`（exit=2）**——加上`--cwd "C:\alpha\alpha-app\research"`
+重投，job`20260906-220343-82ae`，timeout 60分鐘，預期產出
+`data/irb130_pledge_combined.csv`，確認`status`為`running`後才收工。
+
+本輪僅投遞、未收成，未在session內等待。已把job_id、預期產出、下一輪收成
+步驟寫進`TW_MARATHON_STATE.md`「下一輪TW軌接手」與`HYPOTHESIS_QUEUE.md`
+#48狀態更新段落。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**下一輪TW軌接手**：先`python run_detached.py status`確認job
+`20260906-220343-82ae`完成狀態，`finished`則直接進第1關cheap gate（讀
+`irb130_pledge_combined.csv`，用`board_pledge_pct`水位+MoM變化兩種訊號
+口徑，比照`#41`/`#42`/`#43`同一套train/val分期+時序洗牌null對照框架測
+forward報酬Spearman相關性，不跳關）；若`failed`/`timeout`則看
+`run_detached.py log 20260906-220343-82ae`查原因後決定是否重投。
+
+完整見`TW_MARATHON_STATE.md`第413輪記錄、`HYPOTHESIS_QUEUE.md`#48、
+`backfill_irb130_pledge.py`（新增，可重複執行）、
+`data/jobs/20260906-220343-82ae.log`。

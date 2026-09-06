@@ -5366,3 +5366,18 @@ portfolio構造階段，需檢視「排除高質押比例股票」這個篩選�
 抓取TRAIN+VAL兩期sii+otc月頻歷史，用「質押比例水位」+「MoM變化」兩種
 訊號口徑測forward報酬Spearman相關性（比照`#41`/`#42`/`#43`同一套
 train/val分期+時序洗牌null對照框架），不跳關。現在排隊第一，未結案。
+
+**2026-09-06馬拉松第413輪（TW軌）接續地基建置**：新增
+`backfill_irb130_pledge.py`，把探測階段的少量測試請求擴大為完整
+TRAIN(2015-2020)+VAL(2021-2024)月頻回補（2015-01~2024-12共120個月
+x{sii,otc}兩市場=240次請求，逐月寫入`data/raw_irb130_pledge/`獨立
+CSV快取，可安全中斷重跑）。因240次請求x1.5秒節流理論耗時約6分鐘
+（加計網路延遲預期落在數十分鐘量級），依`MARATHON_PROTOCOL.md`第0b節
+規則用`run_detached.py`脫離session投遞（job`20260906-220343-82ae`，
+timeout 60分鐘，預期產出`data/irb130_pledge_combined.csv`），未在
+session內等待。本輪僅投遞、未收成，**下一輪TW軌先跑
+`python run_detached.py status`確認完成狀態，完成後直接進第1關
+cheap gate**：讀`irb130_pledge_combined.csv`，用`board_pledge_pct`
+水位與其MoM變化兩種訊號口徑，比照`#41`/`#42`/`#43`同一套train/val
+分期+時序洗牌null對照框架測forward報酬Spearman相關性，不跳關。現在
+排隊第一，未結案。
