@@ -1,5 +1,35 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T11:27（台北時間，hypothesis_queue排程接續，取鎖
+LOCK_STALE(held by 68532, 30.0 min old)-recovering，上一輪疑似
+失敗中斷，設計#43並修正#42記錄不一致）：讀完
+`HYPOTHESIS_QUEUE_PROTOCOL.md`+`CONSTITUTION.md`後`git pull`（已是
+最新）+`git status`，發現4個非本輪產生的未commit變更
+（`data/rate_limit_state.json`/`HYPOTHESIS_QUEUE.md`/
+`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`）——比對內容確認這些
+正是上一輪`hypothesis_queue`排程已完成`#42`第1關cheap gate判定
+（FAIL，見`TRIALS_LEDGER.md`#157）但**沒能commit+push+釋放鎖就
+中斷**留下的成果，非其他自動化來源（另有一個確實不相關的未追蹤
+檔案`.github/workflows/audit.yml`，上上輪已確認非本軌產生，本輪
+維持不觸碰）。取鎖時果然回傳`LOCK_STALE`（30分鐘陳舊，pid 68532），
+確認判斷正確。**先修正一處不一致**：`HYPOTHESIS_QUEUE.md`「排隊
+順序總結」章節#42條目文字仍停留在「尚未開始第1關」，跟章節內文
+`#42`已寫好的「最終判定：FAIL」不同步——依協定「發現不一致先修正
+掉」，已更新該條目為FAIL摘要並同步收斂佇列狀態文字。**接著依協定
+第1節「佇列已空」流程**：#1~42全數結案、#5/#6/#8/#10重新查證仍未
+解鎖，回顧四類已死regime/籌碼假設資料建構維度（①單一外部序列
+水位、②個股自身持續性、③報酬相關結構`#42`、④散戶槓桿），設計
+出第五種資料維度的第43條假設：**三大法人買賣超集中度（資金流
+橫斷面分布集中度，非價格廣度非報酬相關性非個股自身歷史）當市場
+領漲廣度regime訊號**，零新資料源（複用`#13`/`#41`已回補的三大
+法人日頻買賣超快取），已寫入新章節（經濟理由+具體假設定義+已知
+相關背景+資料可行性+下檔保護要求）並同步「排隊順序總結」新增#43
+條目。本輪未寫測試程式碼、未動`TRIALS_LEDGER.md`（無新PASS/FAIL
+判定，符合協定「這輪工作單位到此為止」）。`is_holdout_consumed()`
+未查（本輪未做任何資料抓取）。下一輪從#43第1關cheap gate開始，
+不跳關。commit（含補上一輪遺留成果+本輪新增#43設計）+push+釋放鎖
+後收工。
+
 ## 2026-09-06T10:27（台北時間，hypothesis_queue排程接續，取鎖乾淨
 LOCK_ACQUIRED，佇列#1~41全數結案確認、設計新假設軸#42）：讀完
 `HYPOTHESIS_QUEUE_PROTOCOL.md`+`CONSTITUTION.md`+`git pull/status`
