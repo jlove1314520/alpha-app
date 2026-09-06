@@ -1466,3 +1466,23 @@ VAL(2020-2024)   1x/2x/3x: ann_return=+142.25%/+141.87%/+141.48%  beta=-0.171（
 已寫入`TRIALS_LEDGER.md`#165、`US_LEADS.md`#20/#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **下一輪接手**：(1)窄版本null——把f_us_low_vol/f_us_value_bm分數同分佈隨機重排後再照原排序規則選腿，比`_random_legs()`完全隨機挑股更精確模擬「分數無訊號但排序機制不變」；(2)或直接對`#20`（value_bm尚未做過）做VAL期逐年分解，比照`#152`/`#153`對low_vol已完成的方法。完整見`US_MARATHON_STATE.md`/`TRIALS_LEDGER.md`#165第402輪記錄、`US_LEADS.md`#20/#21、`us_leg_overlap_valuebm_lowvol.py`（新增）、`data/us_leg_overlap_valuebm_lowvol.csv`（新增）。
+
+---
+
+## 第404輪（2026-09-06T17:00+08:00）
+
+取鎖乾淨。三軌時間戳：FUT 12:00（第399輪，依例外條款讓回TW/US，最舊）／US 16:06（第402輪）／TW 16:30（第403輪，最新）——選較舊的US。TW背景job`20260906-163407-6cc8`開工時仍`running`，heavy-job-slot佔用中，改做接續round402「下一輪接手」選項(2)：對`f_us_value_bm`(#20)補做VAL期逐年分解＋leave-2022-out。
+
+新增`deep_dive_f_us_value_bm_val_year_breakdown.py`，逐字比照`deep_dive_f_us_low_vol_val_year_breakdown.py`#152方法論（單次真實回測，`_decile_legs`以`functools.partial`綁定`factor_col=f_us_value_bm`，事前綁定與#152相同的CONFIRMED/REFUTED/PARTIAL三分法判準）。
+
+**結果**：159/248可用。VAL期(2020-2024,1x cost)逐年：2021 ann=+92.02%｜2022 ann=+81.51%｜2023 ann=+235.78%｜2024 ann=+198.34%——四年全部為正。full VAL annualized=+142.25%，leave-2022-out annualized=+167.43%（同號、retained_fraction=1.18）。
+
+**判定REFUTED（不是單一2022年份驅動）**，跟`f_us_low_vol`#152同一種「逐年皆正、非單一危機年份撐起」模式。`#20`判定維持EXPERIMENTAL不變（本診斷是排除法而非新的正面證據）。跟round402的`#165`重疊度診斷放在一起看，異常量級成因持續收斂到分層抽樣宇宙本身在2021-2024全期的系統性高離散度。
+
+已寫入`TRIALS_LEDGER.md`#167、`US_LEADS.md`#20更新。
+
+**附帶發現**：session過程中TW job`20260906-163407-6cc8`逾30分鐘timeout被砍，`run_detached.py log`確認只跑完TRAIN 1x一組（含100 draws）就被砍，`--timeout-min 30`對2期×3成本×100draws的完整跑法明顯不足。已在心跳留給下一輪TW軌用更長timeout重投。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，原地執行約2分鐘（非重度工作，未搶heavy-job-slot）。
+
+**下一輪接手**：兩因子VAL期都REFUTED單一年份驅動、都REFUTED池子廣泛隨機暴賺，剩餘懷疑收斂到「乾淨宇宙分層抽樣方法本身」——可考慮換一批不同seed的分層抽樣宇宙重新跑#20/#21其中之一驗證抽樣方法假說。完整見`TRIALS_LEDGER.md`#167、`US_LEADS.md`#20、`deep_dive_f_us_value_bm_val_year_breakdown.py`（新增）、`data/deep_dive_f_us_value_bm_val_year_breakdown.csv`、`data/deep_dive_f_us_value_bm_val_leave_2022_out.csv`（新增）。
