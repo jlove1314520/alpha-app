@@ -1547,3 +1547,27 @@ back-adjusted價格會被「未來」的反向分割回溯放大過去的名目�
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用round383/391/400/404/406/407/408/410已填滿的SEC EDGAR快取+價格快取），原地執行約1分鐘，未搶heavy-job-slot（本輪session內無其他重度工作在跑）。
 
 **下一輪接手**：round410選項(i)已測試並REFUTED，且證實現有資料源無法用「真實原始報價」重做這個篩選。下一步應直接做round410選項(ii)：把做空成本模型（`validation/us_costs.py`的`short_round_trip_cost_pct()`）改成隨股價/流動性反向縮放，而非固定$50/100股名目值；或考慮`#20`/`#21`的VAL期空頭腿異常已經收斂到「資料/成本模型層級的已知限制（back-adjusted價格序列無法還原歷史真實報價，加上簡化的固定名目值做空成本模型）」這個具體、可寫進最終判定的結論，評估是否足以對這兩個因子下最終判定（維持EXPERIMENTAL，明確排除進`portfolio_multifactor_v2`成分候選），而非無限期在同一條線上繼續深挖。完整見`TRIALS_LEDGER.md`#177、`US_LEADS.md`#20/#21、`us_short_leg_price_floor_check.py`（新增，可重複執行）、`data/us_short_leg_price_floor_check.csv`（新增）。
+
+## 第414輪（2026-09-06T22:30+08:00）
+
+**接手判斷**：round350-412對`f_us_value_bm`(#20)/`f_us_low_vol`(#21)短腿的9輪診斷鏈（`TRIALS_LEDGER.md`#171宇宙離散度REFUTED、#172 leg拆解確認多頭腿正常、#174持股查證確認短腿是死亡螺旋微型股、#177價格下限篩選REFUTED因back-adjusted價格失真）已收斂到「短腿在現有FinMind美股資料源下不可修復」。round412建議的下一步（成本模型重設計或最終判定排除）仍是在同一條單因子短腿診斷線上打轉，跟`MARATHON_PROTOCOL.md`2026-09-03主軸（組合策略層級推進）方向不一致。round408已確認兩因子多頭腿本身在TRAIN/VAL兩期都正常（VAL皆低於TRAIN，無異常放大），因此本輪判斷改為直接繞開短腿問題，用長多構造做US軌第一次真正的組合層級測試。
+
+**發現可直接重用的既有地基**：`us_portfolio_backtest.py`（Top-N長多引擎，round329新增、round333接上真實資料，此後被擱置約80輪未使用——`US_LEADS.md` #16起US軌轉往`f_us_value_bm`/`f_us_low_vol`單因子深挖，這個引擎一直沒被用上）+`deep_dive_us_value_bm_lowvol_combo.py`的`build_combo_universe()`（159檔value_bm/low_vol交集清潔宇宙）與`_zscore_cross_section()`（round406已驗證的1/N combo z-score方法）。兩者組合起來剛好是US軌第一個多因子組合Top-N回測所需的全部零件，不需要重新搭地基。
+
+**新增`us_portfolio_multifactor_v1.py`**：
+- 訊號：`combo_signal_fn` = 0.5*z(value_bm) + 0.5*z(low_vol)（逐字沿用round406`_combo_legs()`同款預先綁定1/N權重，非擬合權重）
+- 構造：Top-N=15長多、季頻換倉（63交易日，同round406慣例）、15%硬停損（`USPortfolioConfig.stop_loss_pct`，回應`CLAUDE.md`「最高投資原則」下檔保護要求）
+- 隨機控制：100 draws matched-universe隨機控制組（`random_signal_fn`對同一eligible cross-section給隨機分數，比照`deep_dive_f_us_low_vol.py::run_one()`percentile方法，適配成Top-N長多版本而非decile長短倉）
+- Alpha/beta：重用`portfolio_backtest_v2.py::alpha_significance()`（該函式已泛化，`us_portfolio_pilot_real_data.py`已示範可直接對接`USPortfolioResult.equity_curve`）
+
+**本地smoke test（N_RANDOM_DRAWS縮小為3、期間縮短，驗證無崩潰，非正式結果）**：
+- TRAIN 2015-01-01~2016-06-30：trades=27，total_return=+8.44%，MDD=-10.59%，Sortino=0.485，beta=+0.438，alpha_ann=+5.07%（p=0.4926），percentile=100.0
+- TRAIN 2015-01-01~2020-12-31（全期）：trades=31，total_return=+61.35%，MDD=-38.60%，Sortino=0.523，beta=+0.688，alpha_ann=+1.27%（p=0.7603），percentile=33.3
+
+兩次數字量級都在合理範圍（年化報酬個位數~兩位數%，MDD在可解釋範圍），跟`#20`/`#21`原始十分位長短倉版本VAL期出現的三位數年化報酬完全不同量級，初步佐證Top-N長多構造確實繞開了短腿造成的失真問題來源。
+
+**投遞完整版**：依`MARATHON_PROTOCOL.md`第0b節規則用`run_detached.py`脫離session投遞（首次因script路徑誤加`research/`前綴、跟`--cwd`疊成雙層路徑，0.1分鐘即`failed`——log顯示`can't open file '...\research\research\us_portfolio_multifactor_v1.py'`；修正為單層路徑後重投job`20260906-223658-d62f`，timeout 45分鐘，預期產出`data/us_portfolio_multifactor_v1.csv`，確認`status`為`running`）。本輪僅投遞、未收成，未在session內等待（縮小規模smoke test已足以驗證邏輯正確，完整N=100版本留給下一輪收成）。
+
+**判定**：`#20`/`#21`本身判定不變（仍EXPERIMENTAL，短腿限制未解決——本輪工作是「繞開」不是「解決」，兩者判定各自獨立）。本輪工作本身不是因子/策略判定，是組合構造地基工作，記錄於`US_LEADS.md`#22（新增，標記「待收成」而非PASS/FAIL）。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫（複用round383/391/400/404/406已填滿的SEC EDGAR快取+價格快取）。
+
+**下一輪接手**：先跑`python run_detached.py status`確認job`20260906-223658-d62f`完成狀態，`finished`則讀`data/us_portfolio_multifactor_v1.csv`判讀TRAIN/VAL的percentile/MDD/beta/alpha_pvalue；若VAL期percentile顯著（比照90.0門檻慣例）且下檔指標（MDD/beta）優於`#20`/`#21`原始版本，視為US軌第一個組合層級候選，需寫`TRIALS_LEDGER.md`新列並排隊做完整關卡（train-only樣本外/leave-one-factor-out/成本敏感度），不能憑單一次100 draws設定就判定PASS。完整見`REPORT.md`第414輪條目、`US_MARATHON_STATE.md`本輪記錄、`US_LEADS.md`#22、`us_portfolio_multifactor_v1.py`（新增，可重複執行）。

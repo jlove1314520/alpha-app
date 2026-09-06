@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-06T22:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 413 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 413 輪 · 2026-09-06T22:00+08:00 · TW（取鎖乾淨）**。**本輪工作單位**：`HYPOTHESIS_QUEUE.md`#48（董監事/經理人/大股東股權質押比例）地基建置，接續round411完成的資料可行性查證(a)(b)(c)全過後的下一步。新增`backfill_irb130_pledge.py`，把探測階段的少量測試請求擴大為完整TRAIN(2015-2020)+VAL(2021-2024)月頻回補（120個月x{sii,otc}兩市場=240次請求），依`MARATHON_PROTOCOL.md`第0b節規則用`run_detached.py`脫離session投遞（job`20260906-220343-82ae`，timeout 60分鐘，預期產出`data/irb130_pledge_combined.csv`）。本輪僅投遞、未收成。已寫入`HYPOTHESIS_QUEUE.md`#48狀態更新、`TW_MARATHON_STATE.md`第413輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`TW_MARATHON_STATE.md`第413輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 414 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 414 輪 · 2026-09-06T22:30+08:00 · US（取鎖乾淨）**。**本輪工作單位**：US軌第一次真正跑組合策略層級測試——判斷round350-412對`#20`/`#21`短腿的9輪診斷鏈已收斂到「短腿在現有資料源下不可修復」，改用早先擱置的`us_portfolio_backtest.py`（Top-N長多引擎）+`deep_dive_us_value_bm_lowvol_combo.py`的乾淨159檔宇宙，繞開短腿問題，新增`us_portfolio_multifactor_v1.py`（value_bm+low_vol等權z-score combo、Top-N=15長多、季頻、15%停損、100 draws隨機控制組）。本地縮小規模smoke test兩次正常（數字量級合理），投遞完整版（job`20260906-223658-d62f`，timeout 45分鐘，預期產出`data/us_portfolio_multifactor_v1.csv`）。本輪僅投遞、未收成。`#20`/`#21`判定不變。已寫入`US_LEADS.md`#22、`US_MARATHON_STATE.md`第414輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`US_MARATHON_STATE.md`第414輪記錄。
 
 **上一輪（第412輪，US軌）**：執行round410「下一輪接手」選項(i)——對`f_us_value_bm`(#20)/`f_us_low_vol`(#21)VAL期短腿加價格下限篩選（$5/$1）重跑回測。**結果：REFUTES選項(i)**——用back-adjusted`adj_close`做價格門檻，未讓短腿報酬量級回落（low_vol floor=$5甚至未降反升54.2%）；追查發現常駐短腿ticker的`adj_close`會被未來反向分割回溯放大過去名目價格，篩選器對死亡螺旋股系統性失效，且確認FinMind資料集無原始未調整報價可用（資料源限制）。已寫入`TRIALS_LEDGER.md`#177、`US_LEADS.md`#20/#21、`US_MARATHON_STATE.md`第412輪記錄。詳見`US_MARATHON_STATE.md`第412輪記錄、`TRIALS_LEDGER.md`#177。
 
