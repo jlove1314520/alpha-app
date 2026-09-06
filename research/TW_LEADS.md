@@ -4,6 +4,8 @@
 
 **規則跟 `FACTORS.md`/`LEADS.md` 相同**：判定只能是 `CHEAP_PASS`（過便宜關卡，待深挖）／`PASS`／`FAIL`／`EXPERIMENTAL`／`ABANDONED`；FAIL 也要記，寫清楚為什麼；深挖階段的 `PASS`/`EXPERIMENTAL` 都要附「為什麼會有效」的經濟解釋，沒有解釋要標註「純統計巧合風險，降級」。
 
+**候選必須 DSR 與原始指標並列（2026-09-07 新增，Cowork.債務2.4，本檔全域適用）**：從 2026-09-07 起，任何判定為 `CHEAP_PASS`／`PASS`／`EXPERIMENTAL` 的列，**必須在同一列裡同時寫出 Deflated Sharpe (DSR) 與原始指標**（百分位／IC／年化報酬等），不得只報漂亮的原始指標。DSR 算不出來時**照樣要寫那一行**，寫明為什麼算不出來，並標「不得提請審核」——算不出來不等於通過。這一列一律用 `research/candidate_report.py::report_candidate()` 產生（它會先呼叫 `trial_registry.assert_registered()`，**未登記的判定一律無效，不得寫進本檔**）。稽核：`python research/candidate_report.py --audit`。2026-09-07 之前的既有列不追溯補 DSR——那些列沒留下 Sharpe/T/skew/kurtosis，回頭補等於編數字。
+
 | # | 日期 | 假說名稱 | 假說來源 | 型態 | 便宜關卡 | 深挖結果 | 判定 | 經濟解釋 | 備註 |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | 2026-08-23 | `f_value_pb`（負PBR估值） | `MARATHON_PROTOCOL.md`第3節「價值」家族 | 因子 | 100名樣本，打散對照99.9百分位，過批次(n=3)與累積(n=15)校正門檻 | 第85輪已完成`deep_dive_f_value_pb.py`，見下方新備註 | **【2026-08-26第85輪更新】EXPERIMENTAL**（深挖後，非PASS非FAIL——見下方深挖備註） | 便宜的帳面價值可能反映市場對困境/低成長公司過度悲觀定價，日後基本面改善時修正（經典價值因子文獻）；TRAIN/VAL絕對報酬正負號不一致可能反映2015-2020成長股風格逆風、2021-2024價值股輪動的market regime差異（觀察到的模式，非驗證過的因果） | **【第85輪深挖1b】**：`deep_dive_f_value_pb.py`（61/80名有值，同一批快取樣本，零新API）。TRAIN(2015-2020)×1x/2x/3x：ann_return −6.93%~−7.42%/alpha −3.11%~−3.62%/Sortino −0.168~−0.188全負，beta−0.109，對配對式隨機控制組percentile=88.0/96.0/97.0（1x未達99~100慣見門檻）。VAL(2021-2024)×1x/2x/3x：ann_return +4.82%~+5.56%/alpha +8.58%~+9.35%/Sortino +0.326~+0.358全正，beta−0.080，percentile=99.0/100.0/100.0。**判定EXPERIMENTAL**：跟`f_quality_roe_stability`(#16/#17)同款「相對排序可能成立、絕對報酬train/val反轉」模式第三例，且證據比ROE深挖更弱（ROE全部6組percentile=100.0，這裡TRAIN 1x只有88.0）。未做分群IC驗證反轉能否被regime條件解釋，不升格PASS。完整見`TW_LOG.md`第85輪記錄、`TRIALS_LEDGER.md`#42、`data/deep_dive_f_value_pb.csv`（gitignored）。

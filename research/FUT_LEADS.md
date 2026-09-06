@@ -4,6 +4,8 @@
 
 **規則跟 `LEADS.md` 相同**：判定只能是 `CHEAP_PASS`／`PASS`／`FAIL`／`EXPERIMENTAL`／`ABANDONED`；FAIL 也要記；深挖階段都要附「為什麼會有效」的經濟解釋。**期貨沒有基本面，所有策略都是技術面/籌碼面，不需要 `pit.py` 的財報 point-in-time 邏輯，但未平倉量/三大法人期貨部位這類籌碼資料的時間戳可信度要先驗證（假設每日公布即可信，但沒查證過就不能當定論）。**
 
+**候選必須 DSR 與原始指標並列（2026-09-07 新增，Cowork.債務2.4，本檔全域適用）**：從 2026-09-07 起，任何判定為 `CHEAP_PASS`／`PASS`／`EXPERIMENTAL` 的列，**必須在同一列裡同時寫出 Deflated Sharpe (DSR) 與原始指標**（百分位／IC／年化報酬等），不得只報漂亮的原始指標。DSR 算不出來時**照樣要寫那一行**，寫明為什麼算不出來，並標「不得提請審核」——算不出來不等於通過。這一列一律用 `research/candidate_report.py::report_candidate()` 產生（它會先呼叫 `trial_registry.assert_registered()`，**未登記的判定一律無效，不得寫進本檔**）。稽核：`python research/candidate_report.py --audit`。2026-09-07 之前的既有列不追溯補 DSR——那些列沒留下 Sharpe/T/skew/kurtosis，回頭補等於編數字。
+
 | # | 日期 | 假說名稱 | 假說來源 | 型態 | 便宜關卡 | 深挖結果 | 判定 | 經濟解釋 | 備註 |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | 2026-08-24 | `fut_trend_multi_tf`（10/20/60日動能多數決） | `MARATHON_PROTOCOL.md`第3節期貨候選清單 | 策略 | 配對式隨機排列控制組200次，percentile=82.5（門檻90.0） | 未進深挖 | **FAIL** | （便宜關卡未過，不需要經濟解釋） | 見`TRIALS_LEDGER.md`#18、`fut_cheap_gate.py`、`FUT_LOG.md`本輪。方向正確（真實策略贏隨機中位數）但強度不夠，依協定不調參數硬救 |

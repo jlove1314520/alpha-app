@@ -244,7 +244,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **Cowork.債務2.1** **已完成**：實際 219 筆（原寫死 37）。改由 `selection_bias_ledger.py` 自動計算並回寫，該行明寫「不要手動改」。
 - [x] **Cowork.債務2.2** **已完成**：宣稱校正且有百分位的 9 筆，用正確分母 N=219（門檻 99.9772）重評 → **撐住 3、倒下 5**（#8 f_revenue_surprise 99.0／#13 f_value_pb 99.9／#14 f_value_pe 96.7／#15 f_quality_roe_stability 99.9／#45 f_us_reversal_1m 50.0）。當時分母是 1／3／6。
 - [x] **Cowork.債務2.3** **已完成**：分軌 N＝TW 70／US 42／FUT 36／未分軌 71（未分軌照實列出不硬塞）。DSR 仍算不出（帳本無 Sharpe），不編數字。
-- [ ] **Cowork.債務2.4** 規則升級：報告候選時 DSR 與原始指標並列；未登記的判定一律無效
+- [x] **Cowork.債務2.4** **已完成**：規則變成可執行的閘門而不只是文件裡的一句話。新增 `research/candidate_report.py`——`report_candidate()` 是報告候選的唯一出口，先呼叫 `assert_registered()`（**未登記直接 raise**），再強制同一張表裡同時有原始指標與 Deflated Sharpe；DSR 算不出來時**不准省略那一行**，必須填 `dsr_blocked_reason` 並一律標「不得提請審核」（算不出來≠通過）。`assert_reportable()` 是寫進 LEADS 前的硬擋。`register_trial()` 新增 Sharpe/T/skew/kurtosis 四輸入（要嘛全給要嘛全不給），讓 DSR 從「永遠算不出來」變成往後算得出來。稽核閘門 `--audit` 掃四份 LEADS：**34 列候選全部是 2026-09-07 之前的存量（只報不擋，回頭補等於編數字），強制期內 0 違規**。證據：`--self-test` 全過（含 SR̂=SR0 時 DSR 恰為 0.5、N↑DSR↓、T↑DSR↑、負偏態壓低 DSR 四項決定性檢查與 12 項拒絕條件）、`trial_registry.py --self-test` 全過、`node scripts/smoke_test.mjs` 43 項全部通過。規則同步寫進 `MARATHON_PROTOCOL.md` 第 2 節與四份 `*_LEADS.md` 檔頭。**順帶查出一個未裁示的分歧**：DSR 分母 N 有兩個口徑——`trial_registry` 190 列（排除 2026-08-25 FDR 重新評分對照表 33 列）vs `selection_bias_ledger` 223 列（含），190+33=223。改用哪個會動到債務2.2 的結論，**本輪不自行裁示**，程式暫取較大者（較保守）並在每份報告裡把兩個數字都印出來。
 - [ ] **Cowork.審視1.1** 用 DSR 重評三軌全部 CHEAP_PASS/PASS，回報有幾個倒下
 - [x] **Cowork.審視1.2** **已完成**：真正跨 TW/US/FUT 重複的因子概念為 **`low_vol`（TW 與 US 都測過）**——分軌獨立的前提至少在這個概念上不成立。數字給出，不預設結論。
 - [ ] **Cowork.審視1.3** 不預設結論，數字出來交總司令裁示 q 值或改回全體分母

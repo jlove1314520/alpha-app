@@ -16,6 +16,68 @@
 
 ---
 
+## 2026-09-07 04:15（驗證帽）— Cowork.債務2.4：候選報告 DSR 並列 ＋ 未登記判定一律無效
+
+**做了什麼**：把「報告候選時 DSR 必須與原始指標並列、未登記的判定一律無效」從文件裡的
+一句話，變成不照做就會 raise 的程式閘門。新增 `research/candidate_report.py`：
+
+- `report_candidate()` 是報告候選的**唯一合法出口**。它先呼叫
+  `trial_registry.assert_registered()`——帳本裡查不到就直接 raise，這是「未登記的判定
+  一律無效」的執行點（不是口號）。接著強制輸出的表格裡**同時**有原始指標與
+  Deflated Sharpe：`headline` 留空會被拒（只報 DSR 不算並列）。
+- **DSR 算不出來時不准省略那一行**：必須填 `dsr_blocked_reason` 寫明為什麼算不出來，
+  且該候選一律標「不得提請審核」——**算不出來不等於通過**。這是
+  `SELECTION_BIAS_LEDGER.md` 第 5 節「不編數字」原則的延伸。
+- `assert_reportable()`：寫進 `*_LEADS.md`／提請審核／納入組合成分之前呼叫，
+  不合格直接擋，不讓人自己看數字判斷。
+- `--audit`：掃四份 LEADS，強制期（2026-09-07 起）內判定為 PASS/CHEAP_PASS/EXPERIMENTAL
+  的列沒有並列 DSR 就 exit 1。
+- `trial_registry.register_trial()` 新增 `sharpe`/`n_obs`/`skew`/`kurtosis` 四個 DSR
+  必要輸入（**四個要嘛全給、要嘛全不給**，半套直接拒收），同時寫進帳本列與
+  `TRIALS_REGISTRY.jsonl`。這是把債務2.3 記錄的「DSR 永遠算不出來」根因（這四欄從來
+  沒被記過）從今天起堵住；歷史列不追溯補，回頭補等於編數字。
+
+**為什麼**：規則寫在文件裡擋不住凌晨自動跑的馬拉松。昨天 Cybex.債務3 的登記強制化真正
+起作用的是 `--check` 那個閘門，不是那段文字；這條規則照同一個模式做。
+
+**順帶查出一個未裁示的分歧（重要，需總司令裁示）**：DSR 分母 N 目前有**兩個口徑**——
+`trial_registry.trial_rows()` 算 **190** 列（排除 2026-08-25 那張 FDR 重新評分對照表的
+33 列，理由是那是對既有試驗的重新評分、不是新試驗），`selection_bias_ledger.parse()`
+算 **223** 列（含那 33 列），190+33=223 剛好對得上。`TRIALS_LEDGER.md` 檔頭與
+`SELECTION_BIAS_LEDGER.md` 現在寫的是 223。改用哪一個會直接動到 Cowork.債務2.2 已產出的
+「撐住 3、倒下 5」結論，依 `PENDING_QUEUE.md` 的註記**該由總司令裁示**，本輪不自行決定：
+程式暫取**較大者（較保守，N 越大 → SR0 越高 → DSR 越低 → 判定越嚴）**，並在每份候選報告
+裡把兩個數字與來源都印出來，不藏。
+
+**驗證證據**：
+- `python research/candidate_report.py --self-test` → `✓ self-test 全過`。含四項決定性
+  數值檢查（SR̂=SR0 時 DSR 恰為 0.5；N 5→500 時 DSR 0.898→0.048；T 變大 DSR 上升；
+  負偏態壓低 DSR）與 12 項拒絕條件（未登記、原始指標留空、沒 stats 也沒說明、
+  V 估不出來又沒指定、N<2、V≤0、T<2、kurtosis≤0、年化 Sharpe 誤當單期…）。
+  自我測試踩到並修掉一個真問題：第一版拿 V=0.25 配單期 Sharpe 0.10，SR0≈1.25 遠高於
+  觀測值，三個單調性檢查的 DSR 全部下溢成 0.0——「0 跟 0 比」等於沒測。
+- `python research/trial_registry.py --self-test` → `✓ self-test 全過`（新增 5 項
+  DSR 四輸入的拒絕/落地檢查）。
+- `python research/candidate_report.py --audit` → `✓ PASS`：LEADS 候選列 34 列，
+  **全部是 2026-09-07 之前的存量（只報不擋），強制期內 0 違規**。
+- `node scripts/smoke_test.mjs` → **43 項全部通過**（`=== 冒煙測試結果：全部通過 ===`）。
+
+**改了哪些檔案**：`research/candidate_report.py`（新增）、`research/trial_registry.py`、
+`research/MARATHON_PROTOCOL.md`（第 2 節新增規則）、`research/{LEADS,TW_LEADS,US_LEADS,FUT_LEADS}.md`
+（檔頭各補一條規則）、`PENDING_QUEUE.md`、`PROGRESS.md`。
+**沒有動** `research/alpha_live_server.py`／`shioaji_quotes.py`，因此不觸發常駐服務重啟紀律。
+
+**限制誠實揭露**：`--audit` 是 lint 等級的檢查（看那一列有沒有出現 DSR 字樣），
+擋得住「忘了寫」，擋不住「亂寫一個數字」——真正的保證來自呼叫 `report_candidate()`
+產生那一列。另外既有 34 列候選的 DSR **現在仍然算不出來**（帳本沒有 Sharpe/T/skew/kurt），
+本輪不回頭替它們編數字。
+
+**下一步**：`PENDING_QUEUE.md` 權威清單的下一項 Cowork.審視1.1（用 DSR 重評三軌全部
+CHEAP_PASS/PASS）會直接撞上這個限制——在沒有 Sharpe 的情況下，誠實的答案很可能是
+「絕大多數算不出來」而不是一個排名表。
+
+---
+
 ## 2026-09-07 03:50（驗證帽）— Cybex.債務4：控制組通過標準升級
 
 **改了什麼**：`research/control_group_standard.py`（新增）把「控制組怎麼算贏」從

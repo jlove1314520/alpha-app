@@ -177,6 +177,17 @@ finally 只釋放 cycle_id 相符的鎖（重測確認：不相符時 log 寫 `l
   就對不上）。判定一律呼叫 `research/control_group_standard.py::evaluate_vs_control()`，
   不要各關卡自己寫門檻。要豁免「控制組參數要掃」必須傳 `equivalent_check` 寫明改用哪個
   等價嚴格的檢定——**是換一個一樣嚴的檢定，不是拿掉它**。
+- **候選報告必須 DSR 與原始指標並列（2026-09-07 新增，Cowork.債務2.4）**：報告任何候選
+  （判定 `CHEAP_PASS`/`PASS`/`EXPERIMENTAL`）時，**Deflated Sharpe 一定要跟原始指標寫在
+  同一張表裡**，不得只報漂亮的原始指標。報告一律呼叫
+  `research/candidate_report.py::report_candidate()`（要擋在寫進 LEADS 之前就用
+  `assert_reportable()`），它會先跑 `assert_registered()`——**未登記的判定一律無效**，
+  這是上面那條登記強制化的執行點。**DSR 算不出來時不准省略那一行**：必須填
+  `dsr_blocked_reason` 寫明為什麼算不出來，且該候選一律標「不得提請審核」——
+  算不出來不等於通過。DSR 需要 Sharpe／T／skew／kurtosis 四個輸入，登記時用
+  `register_trial(sharpe=..., n_obs=..., skew=..., kurtosis=...)` 一併記下（四個
+  要嘛全給、要嘛全不給）。DSR 門檻 0.95（Bailey & López de Prado 原文慣例值，
+  不是從別的市場調來的參數）。稽核閘門：`python research/candidate_report.py --audit`。
 - **hash-lock 預先綁定通過標準**的紀律不變：做檢定前先把判定門檻寫死存證，看到結果才回頭調門檻絕對不行，這條沒有因為換了校正方法而放寬。
 - 每次深挖（1b）判定 `PASS`/`EXPERIMENTAL` 之前，**先用當下該軌道的累積 FDR 門檻重新檢查**這個候選的原始便宜關卡數字是否還站得住腳——早期用較寬鬆門檻通過便宜關卡的候選，後來同軌道測試數變多、門檻墊高了，可能已經不夠格進深挖，這種情況要老實記錄「原本通過，重新校正後不再確定」，不能悄悄跳過這個降級。
 
