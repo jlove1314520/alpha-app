@@ -2169,3 +2169,59 @@ consumer依賴過這兩欄）。
 完整見`TW_MARATHON_STATE.md`第416輪記錄、`HYPOTHESIS_QUEUE.md`#49、
 `adjust.py`（修改，`adjusted_price_series()`新增`adj_open`/`adj_high`/
 `adj_low`三欄）。
+
+## 第420輪 · 2026-09-07T02:04+08:00 · TW軌
+
+取鎖乾淨（非陳舊鎖檔，cycle`20260907-020036`）。三軌時間戳：TW 23:30
+（round416，最舊；另有獨立`hypothesis_queue`排程於00:00~01:29多次即時
+推進`HYPOTHESIS_QUEUE.md`#49並已結案FAIL，commit`582ef0d`，不受本輪
+影響）／US 00:30（round418）／FUT 12:00（round399，依例外條款不選）
+——依輪替選TW。`run_detached.py status`確認heavy-job-slot空（0個
+running），`git status`確認無其他行程正在編輯本輪要動的檔案，無撞車
+風險。
+
+**本輪工作單位＝`HYPOTHESIS_QUEUE.md`#51（強制交易者事件）子事件1
+「融券強制回補」反推重建備用路徑查證**，接續round419之前一批
+`hypothesis_queue`排程留下的待辦(b)：「查證子事件1『反推重建』備用
+路徑的官方交易日數規則」。純WebSearch查證＋本機既有快取欄位盤點，
+零新增API呼叫。
+
+**查證結果**：
+1. 官方交易日數規則（兩獨立來源一致）：
+   - `twse-regulation.twse.com.tw`《證券商辦理有價證券買賣融資融券
+     業務操作辦法》第76條：得為融資融券之有價證券，自停止過戶前
+     6個營業日起停止融券賣出4日；已融券者應於停止過戶第6個營業日
+     （含）前還券了結。
+   - 證券投資人及期貨交易人保護中心網站（`sfipc.org.tw`）同一條規則
+     的投資人教育版本，數字一致。
+2. 「停止過戶日」能否從既有資料反推：多個獨立來源（含《公司法》
+   第165條「基準日前5日內停止過戶」的法定框架）一致指出台灣T+2交割
+   下「除權除息交易日＝停止過戶日前2個營業日」。本機已有`TaiwanStock
+   Dividend`快取（2010-2024，2170檔，`CashExDividendTradingDate`/
+   `StockExDividendTradingDate`，`adjust.py`既有管線在用）欄位齊全，
+   **足以反推**：
+   - 停止過戶日 = ExDividendTradingDate + 2個營業日
+   - 強制回補截止日 = 停止過戶日 - 6個營業日 = ExDividendTradingDate - 4個營業日
+
+**判定**：子事件1從round419留下的「未死透，下一輪待查」改判**「可行
+（待實作驗證）」**——不需要抓TWSE/TPEx的「預告表」端點，用既有本機
+快取即可重建強制回補時間表，零新增API呼叫。因來源屬WebSearch（官方
+法規資料庫＋投資人保護中心，2類），未達`CLAUDE.md`「四類來源涵蓋
+三類」滿門檻，**尚不能直接宣稱結案**——下一輪實作前應先用少量真實
+個股手動核對推算結果跟BFI84U即時預告表是否吻合，吻合即視為驗證通過
+（不必再找第三個文件來源）。股票股利/減資參考價變動理論上同一套
+邏輯，但除權除息交易日定義可能有差異，實作時要用`StockExDividend
+TradingDate`分開驗證，不能直接套用現金股利那條公式。
+
+已寫入`HYPOTHESIS_QUEUE.md`#51「(b)子事件1『反推重建』備用路徑查證
+結果」新增段落。這是資料可行性查證，非因子/策略判定，本輪不寫
+`TRIALS_LEDGER.md`。`is_holdout_consumed()`開工/收工前皆確認`False`，
+全程零新增API呼叫。
+
+**下一輪TW軌接手**：(i) 實作反推公式（寫進`forced_trader_events_
+probe.py`或新腳本），用近期1~2檔真實除息案例核對BFI84U即時預告表
+是否吻合；(ii) 完成子事件3（可轉債轉換價重設）的MOPS查證，補齊三
+來源門檻；(iii) 子事件1/3皆確認後，設計#51具體事件研究第1關cheap
+gate（子事件1強制回補、子事件2現金增資皆已確認可行，可擇一先做）。
+
+完整見`TW_MARATHON_STATE.md`第420輪記錄、`HYPOTHESIS_QUEUE.md`#51。

@@ -153,3 +153,5 @@
 **第401輪（原TW_MARATHON_STATE.md，round409時歸檔）**：**上一則保留（第401輪，供對照）**——投遞`f_value_pe`情境分群檢驗背景工作（job`20260906-153323-37f5`），round403已收成完畢，判定與後續見`TRIALS_LEDGER.md`#166/#173、`TW_LEADS.md`#2。完整見`TW_LOG.md`第401輪記錄、`regime_conditions_value_pe.py`（新增，可重複執行）。
 
 **第409輪（原TW_MARATHON_STATE.md，round416時歸檔）**：收成round405投遞的`f_value_pe`成本敏感度背景工作（`20260906-173133-fce9`），TRAIN三組(1x/2x/3x)皆穩健正報酬勝隨機控制組(percentile 100.0)，VAL三組皆負報酬但仍勝隨機控制組(percentile 98~99)——判定**EXPERIMENTAL**（同`f_value_pb`同一家族，train/val絕對報酬方向不一致）。已寫入`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2。完整見`TW_LOG.md`第409輪記錄。
+
+**第411輪（原TW_MARATHON_STATE.md，round420時歸檔）**：`HYPOTHESIS_QUEUE.md`#47（處置股解除後價格反轉）資料可行性查證，接續#47「尚待下一輪查證」(a)(b)(c)三點——TWSE官方openapi`v1/announcement/punish`（僅8筆近期快照）、TWSE舊版rwd端點（`date`參數無作用，證實非可查詢歷史封存）、TPEx官方openapi`v1/tpex_disposal_information`（僅18筆近期快照）、FinMind`TaiwanStockDispositionSecuritiesPeriod`（付費層，標「待採購」）——四類來源查證涵蓋三類，判定**FAIL**（資料不可及，兩官方免費端點都只回傳近期快照，無法支撐train/val分期）。已寫入`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47、`HYPOTHESIS_QUEUE.md`#47「最終判定」段落。完整見`TW_LOG.md`第411輪記錄。
