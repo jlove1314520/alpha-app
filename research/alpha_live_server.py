@@ -220,6 +220,10 @@ class LiveMem:
         self.updated_at: str | None = None
         self.version = 0
         self.ticks_received = 0
+        # 2026-09-06（實測.二.補）常駐行程在每次 kbars_reply 帶回來的當日用量，
+        # 讓 /health 看得到還剩多少額度（官方盤中上限 270 次/日）。
+        self.kbars_calls_today: int | None = None
+        self.kbars_daily_budget: int | None = None
         self.rejected = 0
         self.cond: asyncio.Condition | None = None
 
@@ -281,6 +285,9 @@ class _TickIngress(asyncio.DatagramProtocol):
             if msg.get("t") != LOCAL_TOKEN:
                 MEM.rejected += 1
                 return
+            if msg.get("kbars_calls_today") is not None:
+                MEM.kbars_calls_today = msg.get("kbars_calls_today")
+                MEM.kbars_daily_budget = msg.get("kbars_daily_budget")
             fut = _kbars_pending.pop(str(msg.get("req_id")), None)
             if fut is not None and not fut.done():
                 fut.set_result(msg)
@@ -458,12 +465,29 @@ async def live_kbars(code: str, x_alpha_local_token: str | None = Header(default
         )
     hot, status = _hot_state()
     mem_bars = MEM.kbars_list(code)
+    backfill_note = None
+    if mem_bars:
+        reason = _needs_kbars_backfill(mem_bars)
+        today = datetime.now(TW_TZ).date().isoformat()
+        if reason and _kbars_backfilled.get(code) != today:
+            _kbars_backfilled[code] = today   # 先記再查：查失敗也不重試，避免反覆打 API
+            queried = await _kbars_via_daemon(code)
+            if queried and queried.get("bars"):
+                before = len(mem_bars)
+                mem_bars = _merge_bars(mem_bars, queried["bars"])
+                backfill_note = (f"偵測到{reason}，已補查 api.kbars() 合併"
+                                 f"（{before} → {len(mem_bars)} 根，同一分鐘以 tick 聚合為準）")
+                print(f"  [kbars補齊] {code} {backfill_note}", flush=True)
+            else:
+                backfill_note = f"偵測到{reason}，但補查沒有拿到資料（額度用盡或常駐行程沒回應）"
+                print(f"  [kbars補齊] {code} {backfill_note}", flush=True)
     if mem_bars:
         return {
             "code": code, "mode": KBARS_MODE,
             "source": "alpha_live_server記憶體（shioaji_quotes.py每筆tick經UDP推入，非api.kbars()）",
             "generated_at": MEM.updated_at, "market_status": MEM.market_status,
             "hot_file_status": "tick-push-memory" if MEM.fresh() else status,
+            "backfill": backfill_note,
             "bars": mem_bars,
         }
     # 2026-09-06（實測.二.1）沒有 tick 聚合資料時，改向常駐行程即時查 api.kbars()。
@@ -578,6 +602,69 @@ async def _sse_event_generator():
 KBARS_REQ_ADDR = ("127.0.0.1", int(os.environ.get("ALPHA_KBARS_REQ_PORT") or 8003))
 KBARS_REQ_TIMEOUT_SEC = 8.0
 KBARS_CACHE_SEC = 60.0          # 總司令指定：查詢結果快取 60 秒
+# ── 2026-09-06（實測.二.補.1）當日曲線必須從開盤起算 ────────────────────────
+# tick 聚合只能從「開始訂閱那一刻」算起。常駐行程 09:15 才啟動、或某檔 09:20 才被
+# 加進自選股時，聚合出來的曲線會從半路開始，看起來像那檔股票今天到 09:20 才開盤。
+# 這裡在回傳前檢查兩件事，任一成立就補查一次 api.kbars() 並合併：
+#   (a) 第一根晚於 09:01
+#   (b) 中間有超過 3 分鐘的缺口（冷門股本來就可能好幾分鐘沒成交，3 分鐘是總司令
+#       指定的門檻；用「缺口」而不是「每分鐘都要有」是因為沒成交就是沒有 K，
+#       那是真實情況不是缺漏）
+# **每檔每日只補一次**（總司令指定）：官方盤中 kbars 上限 270 次/日，重複補會很快
+# 燒光額度，而且補過之後缺口就不會再出現，重複補沒有意義。
+KBARS_OPEN_HHMM = "09:01"
+KBARS_MAX_GAP_MIN = 3
+_kbars_backfilled: dict[str, str] = {}   # code -> 已補過的交易日
+
+
+def _bar_minute(b: dict) -> str | None:
+    """兩種 bar 形狀都取得到分鐘字串（tick 聚合是 t、api.kbars 查詢是 ts）。"""
+    v = b.get("t") or b.get("ts")
+    if not v:
+        return None
+    return str(v)[:16]
+
+
+def _needs_kbars_backfill(bars: list[dict]) -> str | None:
+    """需要補就回傳原因字串，不需要回 None。"""
+    mins = [m for m in (_bar_minute(b) for b in bars) if m]
+    if not mins:
+        return "沒有任何 bar"
+    first = mins[0][11:16]
+    if first > KBARS_OPEN_HHMM:
+        return f"第一根是 {first}，晚於 {KBARS_OPEN_HHMM}"
+    for a, b in zip(mins, mins[1:]):
+        try:
+            ta = int(a[11:13]) * 60 + int(a[14:16])
+            tb = int(b[11:13]) * 60 + int(b[14:16])
+        except ValueError:
+            continue
+        if tb - ta > KBARS_MAX_GAP_MIN:
+            return f"{a[11:16]} 到 {b[11:16]} 有 {tb - ta} 分鐘缺口"
+    return None
+
+
+def _merge_bars(agg: list[dict], queried: list[dict]) -> list[dict]:
+    """合併：**同一分鐘以 tick 聚合為準**（總司令指定）。
+
+    tick 是逐筆真值，查詢回來的 K 是交易所彙總；同一分鐘兩者都有時，用手上這份
+    逐筆聚合的，查詢那份只用來填沒有的分鐘。
+    """
+    out: dict[str, dict] = {}
+    for b in queried:
+        m = _bar_minute(b)
+        if m:
+            out[m] = {"t": m, "c": b.get("close") if b.get("close") is not None else b.get("c"),
+                      "v": b.get("volume") if b.get("volume") is not None else b.get("v"),
+                      "src": "api.kbars"}
+    for b in agg:
+        m = _bar_minute(b)
+        if m:
+            merged = dict(b)
+            merged["t"] = m
+            merged["src"] = "tick"
+            out[m] = merged
+    return [out[k] for k in sorted(out)]
 _kbars_pending: dict[str, asyncio.Future] = {}
 _kbars_cache: dict[str, tuple[float, dict]] = {}
 _kbars_sock = None
@@ -763,6 +850,10 @@ def health():
         "cors": {"allow_origins": ALLOW_ORIGINS, "allow_headers": ALLOW_HEADERS,
                  "allow_credentials": True},
         # 2026-09-06（實測.一.3）動態訂閱現況，方便對照「App 推了什麼」與「行程訂了什麼」
+        # 2026-09-06（實測.二.補）今日 api.kbars() 用量。官方盤中上限 270 次/日、
+        # 10 秒 50 次，超過會暫停服務一分鐘、反覆違規停權，所以要看得到。
+        "kbars_usage": {"calls_today": MEM.kbars_calls_today,
+                        "daily_budget": MEM.kbars_daily_budget},
         "dynamic_subscriptions": (lambda d: {
             "count": len(d.get("codes") or []) if d else 0,
             "updated_at": (d or {}).get("updated_at"),

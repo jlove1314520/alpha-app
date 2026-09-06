@@ -126,41 +126,109 @@ KBARS_QUERY_CACHE_SEC = 60.0
 KBARS_MAX_BARS = 300  # 一個交易日最多 270 根 1 分K，留點餘裕；UDP 單封包要塞得下
 
 
+# ── 2026-09-06（實測.二.補.4）api.kbars() 的官方流量限制 ─────────────────────
+# 來源：Shioaji 官方文件「使用限制」中英文兩版（2026-09-06 查證，數字一致）
+#   https://sinotrade.github.io/zh/tutor/limit/
+#   https://sinotrade.github.io/tutor/limit/
+#   - ticks / kbars / snapshots / credit_enquires / short_stock_sources
+#     **合計** 10 秒內最多 50 次
+#   - 盤中 kbars 查詢每日最多 **270 次**
+#   - 盤中 ticks 查詢每日最多 10 次
+#   - 超過次數：暫停服務一分鐘；**反覆違規會被停權 IP 與帳號**
+#   - 流量超額：行情查詢一律回傳空值（不是報錯，是安靜的空）
+#   - `api.usage()` 可查目前用量（bytes / limit_bytes / remaining_bytes）
+#
+# 因為「反覆違規會停權」，這裡採硬性預算，寧可少畫幾條線也不冒停權風險：
+#   每日上限 240 次（官方 270，留 30 次餘裕給臨時查詢）
+#   10 秒內上限 40 次（官方 50，留 10 次餘裕給其他查詢型 API）
+# 預算用完就誠實拒絕並記 log，不排隊、不重試——排隊只會把違規往後推。
+KBARS_DAILY_BUDGET = 240
+KBARS_RATE_WINDOW_SEC = 10.0
+KBARS_RATE_MAX = 40
+_kbars_budget = {"day": None, "count": 0, "window": []}
+# _start_kbars_service() 內部才拿得到 api，主迴圈要用 seed_baseline 只能透過這個 ref。
+# 用 dict 而不是全域變數，是為了讓「服務沒啟動時」的判斷單純：fn 是 None 就跳過。
+_seed_baseline_ref: dict = {"fn": None}
+_kbars_budget_lock = threading.Lock()
+
+
+def kbars_calls_today() -> int:
+    with _kbars_budget_lock:
+        return int(_kbars_budget["count"])
+
+
+def _kbars_budget_take() -> tuple[bool, str]:
+    """扣一次額度。回傳 (可以打嗎, 不行的原因)。"""
+    now = time.time()
+    today = datetime.now(TW_TZ).date().isoformat()
+    with _kbars_budget_lock:
+        if _kbars_budget["day"] != today:
+            _kbars_budget["day"] = today
+            _kbars_budget["count"] = 0
+            _kbars_budget["window"] = []
+        if _kbars_budget["count"] >= KBARS_DAILY_BUDGET:
+            return False, (f"今日 api.kbars() 已用 {_kbars_budget['count']} 次，"
+                           f"達自訂上限 {KBARS_DAILY_BUDGET}（官方盤中上限 270），本次不查")
+        win = [t for t in _kbars_budget["window"] if now - t < KBARS_RATE_WINDOW_SEC]
+        if len(win) >= KBARS_RATE_MAX:
+            _kbars_budget["window"] = win
+            return False, (f"10 秒內已查 {len(win)} 次，達自訂上限 {KBARS_RATE_MAX}"
+                           "（官方 10 秒 50 次，超過會暫停服務一分鐘），本次不查")
+        win.append(now)
+        _kbars_budget["window"] = win
+        _kbars_budget["count"] += 1
+        return True, ""
+
+
+def _kbars_rows(kb) -> list[dict]:
+    """把 api.kbars() 回傳整理成與 tick 聚合同一種形狀：
+    {t:"YYYY-MM-DDTHH:MM", o,h,l,c,v}。這樣才能直接當基底塞進 TickState._kbars，
+    後續 tick 進來會自然落在同一個分鐘 key 上。
+    """
+    try:
+        d = {k: list(v) for k, v in dict(kb).items()}
+    except Exception:  # noqa: BLE001
+        return []
+    ts_list = d.get("ts") or []
+    out = []
+    for i in range(len(ts_list)):
+        try:
+            # ts 是奈秒數，但代表台北牆鐘時間（不是 UTC epoch），只解不位移
+            t = (datetime.fromtimestamp(int(ts_list[i]) / 1e9, timezone.utc)
+                 .replace(tzinfo=None).strftime("%Y-%m-%dT%H:%M"))
+        except (TypeError, ValueError, OSError):
+            continue
+
+        def _f(name, idx=i):
+            try:
+                return float(d[name][idx])
+            except (KeyError, IndexError, TypeError, ValueError):
+                return None
+
+        c = _f("Close")
+        if c is None:
+            continue
+        try:
+            v = int(d["Volume"][i])
+        except (KeyError, IndexError, TypeError, ValueError):
+            v = 0
+        out.append({"t": t, "o": _f("Open") if _f("Open") is not None else c,
+                    "h": _f("High") if _f("High") is not None else c,
+                    "l": _f("Low") if _f("Low") is not None else c,
+                    "c": c, "v": v})
+    return out[-KBARS_MAX_BARS:]
+
+
 def _kbars_to_bars(kb) -> list[dict]:
     """把 api.kbars() 的回傳整理成 [{ts, close, volume}]，只留畫線要用的欄位。
 
     刻意不整包塞進 UDP：一天 263 根 × 全欄位大約 40KB，接近單封包上限；只留三個
     欄位大約 10KB，安全很多。開高低要畫 K 棒時再另外設計。
     """
-    try:
-        ts_list = list(kb.ts)
-        close_list = list(kb.Close)
-        vol_list = list(kb.Volume)
-    except AttributeError:
-        d = dict(kb)
-        ts_list, close_list, vol_list = list(d["ts"]), list(d["Close"]), list(d["Volume"])
-    out = []
-    for i in range(len(ts_list)):
-        raw = ts_list[i]
-        # Shioaji 的 ts 是奈秒數，但它代表的是**台北牆鐘時間**，不是 UTC epoch。
-        # 第一版寫 `fromtimestamp(ns/1e9, TW_TZ)`，等於把它當 UTC 再加 8 小時，
-        # 結果 09:01 的那根變成 17:01、收盤 13:30 變成 21:30（實測抓到）。
-        # 正確做法是先用 UTC 解出牆鐘數字，再把時區標成 +08:00，不做位移。
-        try:
-            t = (datetime.fromtimestamp(int(raw) / 1e9, timezone.utc)
-                 .replace(tzinfo=TW_TZ).isoformat())
-        except (TypeError, ValueError, OSError):
-            t = str(raw)
-        try:
-            c = float(close_list[i])
-        except (TypeError, ValueError):
-            continue
-        try:
-            v = int(vol_list[i])
-        except (TypeError, ValueError):
-            v = None
-        out.append({"ts": t, "close": c, "volume": v})
-    return out[-KBARS_MAX_BARS:]
+    # 2026-09-06（實測.二.補）改由 _kbars_rows() 導出，兩邊共用同一份解析與時區處理，
+    # 不再各寫一份（第一版就是分開寫，時區 bug 只修了其中一份會很難發現）。
+    return [{"ts": r["t"] + "+08:00", "close": r["c"], "volume": r["v"]}
+            for r in _kbars_rows(kb)]
 
 
 def _start_kbars_service(api, state) -> None:
@@ -187,6 +255,26 @@ def _start_kbars_service(api, state) -> None:
               "未訂閱代號的當日1分K將查不到", flush=True)
         return
 
+    def seed_baseline(code: str) -> tuple[int, str | None]:
+        """對單一代號查一次當日 K 並塞成基底。回傳 (塞了幾根, 錯誤訊息)。"""
+        ok, why = _kbars_budget_take()
+        if not ok:
+            return 0, why
+        try:
+            with lock:
+                contract = api.Contracts.Stocks[code]
+                if contract is None:
+                    return 0, f"{code} 不在合約清單"
+                day = datetime.now(TW_TZ).date().isoformat()
+                rows = _kbars_rows(api.kbars(contract, start=day, end=day))
+            if not rows:
+                return 0, f"{code} 今日尚無 1 分K（可能還沒開盤）"
+            return state.seed_kbars(code, rows), None
+        except Exception as e:  # noqa: BLE001
+            return 0, f"{type(e).__name__}: {e}"
+
+    _seed_baseline_ref["fn"] = seed_baseline
+
     def _query(code: str) -> tuple[list[dict], str, str | None]:
         """回傳 (bars, 交易日, 錯誤訊息)。查不到就誠實回空清單＋原因。"""
         now = time.time()
@@ -194,6 +282,9 @@ def _start_kbars_service(api, state) -> None:
             hit = cache.get(code)
             if hit and now - hit[0] < KBARS_QUERY_CACHE_SEC:
                 return hit[1], hit[2], None
+        ok, why = _kbars_budget_take()
+        if not ok:
+            return [], "", why
         try:
             with lock:
                 contract = api.Contracts.Stocks[code]
@@ -207,6 +298,9 @@ def _start_kbars_service(api, state) -> None:
                 if not bars:
                     day = str(getattr(contract, "update_date", "") or "")
                     if day:
+                        ok2, why2 = _kbars_budget_take()
+                        if not ok2:
+                            return [], "", why2
                         kb = api.kbars(contract, start=day, end=day)
                         bars = _kbars_to_bars(kb)
             with lock:
@@ -233,6 +327,8 @@ def _start_kbars_service(api, state) -> None:
             bars, day, err = _query(code)
             reply = {"t": token, "event": "kbars_reply", "req_id": req_id,
                      "code": code, "bars": bars, "trade_date": day, "error": err,
+                     "kbars_calls_today": kbars_calls_today(),
+                     "kbars_daily_budget": KBARS_DAILY_BUDGET,
                      "ts": datetime.now(TW_TZ).isoformat()}
             try:
                 state.push_raw(reply)
@@ -243,6 +339,30 @@ def _start_kbars_service(api, state) -> None:
     print(f"  [kbars服務] 監聽 udp://{KBARS_REQ_HOST}:{KBARS_REQ_PORT}"
           f"（只聽loopback、驗token、同一條連線查詢、{int(KBARS_QUERY_CACHE_SEC)}秒快取）", flush=True)
 DYNAMIC_POLL_SEC = 5.0  # 每 5 秒看一次清單有沒有變，加自選股後幾秒內就會有 tick
+
+
+def _seed_all_baselines(codes: list[str], reason: str) -> None:
+    """對一批代號補當日 1 分K 基底。任何失敗都只記 log，不能影響訂閱與串流。
+
+    刻意逐檔序列處理而不是併發：api.kbars() 有「10 秒 50 次」的官方上限，
+    併發只會更快撞上限（撞到會被暫停服務一分鐘，反覆違規會停權）。
+    """
+    fn = _seed_baseline_ref.get("fn")
+    if fn is None:
+        return
+    ok_n, msgs = 0, []
+    for code in codes:
+        try:
+            added, err = fn(code)
+        except Exception as e:  # noqa: BLE001
+            added, err = 0, f"{type(e).__name__}: {e}"
+        if added:
+            ok_n += 1
+        elif err:
+            msgs.append(f"{code}:{err}")
+    print(f"  [當日基底] {reason}：{ok_n}/{len(codes)} 檔補到資料"
+          f"（今日 api.kbars 已用 {kbars_calls_today()}/{KBARS_DAILY_BUDGET} 次）"
+          + (f"；未補到：{'; '.join(msgs[:4])}" if msgs else ""), flush=True)
 
 
 def _read_dynamic_watchlist() -> list[str]:
@@ -513,6 +633,32 @@ class TickState:
                 bar["l"] = min(bar["l"], price)
                 bar["c"] = price
                 bar["v"] += vol
+
+    def seed_kbars(self, key: str, rows: list[dict]) -> int:
+        """把 api.kbars() 查來的當日 1 分K 當基底塞進聚合表。
+
+        2026-09-06（實測.二.補.2）：tick 聚合只能從「開始訂閱那一刻」算起，所以
+        09:15 才啟動的常駐行程、或 09:20 才被加進自選股的股票，曲線都會從半路開始，
+        看起來像那檔股票今天到 09:20 才開盤。基底補上去之後，第一根一定是 09:00～09:01。
+
+        **同一分鐘以既有的 tick 聚合為準**（總司令指定）：只填沒有的分鐘，
+        已經有 tick 的那一分鐘不覆蓋——tick 是逐筆真值，查詢回來的 K 是彙總。
+        """
+        if not rows:
+            return 0
+        day = rows[-1]["t"][:10]
+        added = 0
+        with self._lock:
+            if self._kbars_day != day:
+                self._kbars = {}
+                self._kbars_day = day
+            bars = self._kbars.setdefault(key, {})
+            for r in rows:
+                if r["t"] not in bars:
+                    bars[r["t"]] = {"t": r["t"], "o": r["o"], "h": r["h"],
+                                    "l": r["l"], "c": r["c"], "v": r["v"]}
+                    added += 1
+        return added
 
     def kbars_snapshot(self) -> dict[str, list[dict]]:
         with self._lock:
@@ -982,6 +1128,12 @@ def run_stream_daemon() -> None:
 
         _start_kbars_service(api, state)  # 2026-09-06（實測.二.1）同一條連線上的 kbars 查詢服務
 
+        # 2026-09-06（實測.二.補.2）啟動時先把當日已經走過的 1 分K 補成基底。
+        # 沒有這一步的話，09:15 才啟動的行程畫出來的曲線會從 09:15 開始，看起來像
+        # 那檔股票今天到 09:15 才開盤。開盤前啟動時這一步查不到東西（還沒有 K），
+        # 屬正常，會被記成「今日尚無 1 分K」而不是錯誤。
+        _seed_all_baselines(DEFAULT_TW_WATCHLIST, "啟動")
+
         print(f"訂閱完成：{subscribed}，進入常駐迴圈（每{FLUSH_INTERVAL_SEC}秒檢查；盤中{'會' if INTRADAY_GIT_PUSH else '不'}commit，收盤後commit一次）", flush=True)
 
         # 2026-09-06（實測.一.3）動態訂閱狀態。fixed_stock_codes 是啟動時就訂好的
@@ -1009,6 +1161,9 @@ def run_stream_daemon() -> None:
                                           version=sj.QuoteVersion.v1)
                             code_to_key[contract.code] = code
                             dynamic_subscribed.add(code)
+                            # 2026-09-06（實測.二.補.2）新訂閱的代號補當日基底，
+                            # 否則它的曲線會從「被加進自選股那一刻」才開始。
+                            _seed_all_baselines([code], f"新增訂閱 {code}")
                         except Exception as e:
                             # 單一代號訂閱失敗（下市、代號打錯、超過上限）只跳過這一檔，
                             # 不能讓整個常駐迴圈掛掉
