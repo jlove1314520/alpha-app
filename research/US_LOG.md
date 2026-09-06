@@ -1571,3 +1571,22 @@ back-adjusted價格會被「未來」的反向分割回溯放大過去的名目�
 **判定**：`#20`/`#21`本身判定不變（仍EXPERIMENTAL，短腿限制未解決——本輪工作是「繞開」不是「解決」，兩者判定各自獨立）。本輪工作本身不是因子/策略判定，是組合構造地基工作，記錄於`US_LEADS.md`#22（新增，標記「待收成」而非PASS/FAIL）。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫（複用round383/391/400/404/406已填滿的SEC EDGAR快取+價格快取）。
 
 **下一輪接手**：先跑`python run_detached.py status`確認job`20260906-223658-d62f`完成狀態，`finished`則讀`data/us_portfolio_multifactor_v1.csv`判讀TRAIN/VAL的percentile/MDD/beta/alpha_pvalue；若VAL期percentile顯著（比照90.0門檻慣例）且下檔指標（MDD/beta）優於`#20`/`#21`原始版本，視為US軌第一個組合層級候選，需寫`TRIALS_LEDGER.md`新列並排隊做完整關卡（train-only樣本外/leave-one-factor-out/成本敏感度），不能憑單一次100 draws設定就判定PASS。完整見`REPORT.md`第414輪條目、`US_MARATHON_STATE.md`本輪記錄、`US_LEADS.md`#22、`us_portfolio_multifactor_v1.py`（新增，可重複執行）。
+
+## 第415輪 · 2026-09-06T23:00+08:00 · US軌
+
+**取鎖乾淨**（非陳舊鎖檔，cycle`20260906-230036`）。三軌時間戳：TW 22:00（round413，最舊）／US 22:30（round414）／FUT 12:00（round399，依例外條款讓回TW/US，不選）——依輪替原選TW，但查證發現TW軌round413留下的下一步（收成`irb130_pledge`回補job、跑#48 cheap gate）已被另一條獨立`hypothesis_queue`排程搶先做完並結案FAIL（commit`2716f7f`），且`portfolio_multifactor_v2`組合家族已於round388整併結案、`margin_debt_level_v1`已於round375-380測完降級、round389已盤點確認TW軌無殘留全新因子家族——TW軌當下沒有未消化的具體下一步。**改選US軌**，因為round414投遞的背景工作已完成、有明確且非重複的收成任務等待處理。
+
+**過程備註（誠實記錄一次方法論插曲）**：本輪一開始曾誤判TW軌`margin_debt_level_v1`（#14）尚待做「trailing窗口104/208週參數穩健性複驗」，依`TRIALS_LEDGER.md`#140的「下一步」字面文字新寫了`margin_debt_level_window_robustness.py`並開始跑，但執行後發現該檔案早已存在（round377已做過完全相同的複驗，`TW_LEADS.md`#14的完整備註欄清楚記載round377/379/380已經測完這個問題並進一步發現circular-shift自相關保留版控制組下證據弱化、整條候選已降級）——確認後用`git checkout`把被覆寫的`margin_debt_level_window_robustness.py`與誤加的`TRIALS_LEDGER.md`列都還原，未造成任何實質破壞（沒有commit、沒有push），改選US軌執行本輪真正的工作單位。教訓：`TRIALS_LEDGER.md`單一列的「下一步」文字可能已被後續輪次執行過但未回頭更新該列本身，之後接手者查證候選現況時要以`_LEADS.md`該候選的完整備註欄（覆寫式、持續更新）為準，不能只看`TRIALS_LEDGER.md`單筆歷史列的字面「下一步」。
+
+**本輪工作單位＝收成round414投遞的US軌第一個組合層級回測結果並判讀**：`run_detached.py status`確認job`20260906-223658-d62f`（`us_portfolio_multifactor_v1`）狀態`finished`，exit=0，`expect_exists=True`，19.4分鐘完成。讀`data/us_portfolio_multifactor_v1.csv`：
+
+- TRAIN(2015-2020)：total_return+61.35%、MDD-38.60%、beta+0.688、alpha_ann+1.27%(p=0.7603,n=1510天)、**random_control_percentile=43.0**（低於隨機控制組中位數，輸給隨機選股）
+- VAL(2020-2024)：total_return+24.79%、MDD-16.72%、beta+0.485、alpha_ann+0.60%(p=0.9260,n=1005天)、**random_control_percentile=60.0**（略高於中位數但遠不到90.0門檻）
+
+**判定：FAIL**。兩期皆未顯著超過matched-universe隨機控制組，alpha p值兩期都>0.76完全不顯著。
+
+**判讀**：MDD/beta量級合理（不像`#20`/`#21`原始十分位長短倉版本因短腿back-adjusted價格失真出現三位數年化報酬），Top-N長多構造本身沒有崩潰、確實繞開了短腿問題，但**繞開短腿≠恢復alpha**——value_bm+low_vol等權0.5/0.5 z-score combo+Top-N=15+季頻換倉這個具體構造，未能證明優於隨機選股。跟TW軌`portfolio_multifactor_v2`「因子層級有訊號、組合層級alpha消失」屬同一模式的美股版實例。**不泛化成「value_bm/low_vol這兩個因子在美股完全無用」**——只測了這一種具體combo構造，其他權重法/Top-N規模/換倉頻率理論上仍可測，但依TW軌round388對同款情況的判斷邏輯，繼續在同一組2因子上換變體的邊際效益可能有限。
+
+已寫入`TRIALS_LEDGER.md`#179、`US_LEADS.md`#22更新（`待收成`→`FAIL`）、`US_MARATHON_STATE.md`本輪記錄（第410輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）。`#20`/`#21`本身判定不受影響（仍EXPERIMENTAL）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用round414已建立的159檔宇宙快取，本輪僅讀取已收成的CSV）。
+
+**下一輪接手**：US軌第一個組合層級構造已結案FAIL，優先權轉向(a)尋找新的美股成分因子候選（US軌因子家族尚未像TW軌一樣系統性掃過`MARATHON_PROTOCOL.md`第3節全部家族）；或(b)改善`#20`/`#21`短腿成本模型（做空成本隨股價/流動性反向縮放，而非固定$50代表性價格）。完整見`TRIALS_LEDGER.md`#179、`US_LEADS.md`#22、`US_MARATHON_STATE.md`本輪記錄。
