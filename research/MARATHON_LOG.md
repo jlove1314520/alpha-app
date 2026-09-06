@@ -1,5 +1,29 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T10:27（台北時間，hypothesis_queue排程接續，取鎖乾淨
+LOCK_ACQUIRED，佇列#1~41全數結案確認、設計新假設軸#42）：讀完
+`HYPOTHESIS_QUEUE_PROTOCOL.md`+`CONSTITUTION.md`+`git pull/status`
+（確認`.github/workflows/audit.yml`非本輪產生，不觸碰）後取鎖成功。
+依協定第1節「佇列已空」流程確認`HYPOTHESIS_QUEUE.md`「排隊順序總結」
+最新狀態（#1~41全數PASS/FAIL結案，剩餘#5/#6/#8/#10仍卡外部依賴——
+重新查證`BACKLOG.md`第1311/1164行`題材動能榜／未來性濾網：紙上交易中`
+/`value_board_v2：回測未通過`，跟上輪查證結果一致，無新進展）。回顧
+已死11條timing/regime類假設（#10/#15/#26/#28/#30/#31/#32/#33/#34/
+#35/#37）共同模式——清一色用「單一外部序列水位/成長率」當訊號——
+設計出經濟機制真正不同的第42條假設：**個股間平均成對相關係數
+（Average Pairwise Correlation）當系統性風險regime訊號**，看的是
+整個股票宇宙內部的橫斷面共同運動結構，不是任何單一序列的水位，且
+零新資料源需求（複用既有300檔快取宇宙，跟`f_bab`/`f_idio_vol`同源
+的rolling covariance計算路徑）。已寫入`HYPOTHESIS_QUEUE.md`新章節
+（經濟理由+具體假設定義+已知相關背景+資料可行性+下檔保護要求）+
+同步「排隊順序總結」章節新增#42條目，同時順手修正#41條目結尾一句
+已過時的「下一輪從設計#42開始」提示字（現在#42已設計完成，改成
+「現在排隊第一，尚未開始第1關」）。本輪未寫測試程式碼、未動
+`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`（無PASS/FAIL判定，符合
+協定「這輪工作單位到此為止」）。`is_holdout_consumed()`未查（本輪
+未做任何資料抓取），下一輪從#42第1關cheap gate開始，不跳關。
+commit+push+釋放鎖後收工。
+
 ## 2026-09-06T14:10（台北時間，hypothesis_queue排程接續，取鎖乾淨
 LOCK_ACQUIRED，#41第六輪擴大pilot樣本35→45檔並結案FAIL）：
 `backfill_insider_holdings.py` PILOT_STOCK_COUNT 35→45，新增200筆
