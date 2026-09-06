@@ -82,6 +82,7 @@ cloudflared行程雖然理論上可以連127.0.0.1，但Private Network路由設
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import secrets
 import time
@@ -146,6 +147,59 @@ LOCAL_TOKEN = _load_or_create_token()
 # 「剛剛被自動重啟過」的關鍵：如果每次看 uptime 都只有幾十秒，代表它一直在崩潰重啟，
 # 那跟「一直沒在跑」是完全不同的故障，不能只看 ok。
 SERVER_STARTED_AT = time.time()
+
+
+def _git_head_sha(repo_root: Path) -> str | None:
+    """讀 .git 取目前 HEAD 的短 sha。刻意不呼叫 git 指令：這支是常駐服務，
+    不該為了一行版本號去 spawn 子行程（也不保證 PATH 上有 git）。"""
+    try:
+        head = (repo_root / ".git" / "HEAD").read_text(encoding="utf-8").strip()
+        if head.startswith("ref:"):
+            ref = head.split(" ", 1)[1].strip()
+            p1 = repo_root / ".git" / ref
+            if p1.exists():
+                return p1.read_text(encoding="utf-8").strip()[:7]
+            # packed-refs 的情況
+            packed = repo_root / ".git" / "packed-refs"
+            if packed.exists():
+                for line in packed.read_text(encoding="utf-8").splitlines():
+                    if line.endswith(" " + ref):
+                        return line.split(" ", 1)[0][:7]
+            return None
+        return head[:7]
+    except OSError:
+        return None
+
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+BUILD_SHA = _git_head_sha(_REPO_ROOT)
+# 2026-09-06（連線一.3 防再犯）行程載入這支檔案時，檔案本身的修改時間。
+# 這是「行程是不是舊版」最直接的判斷：檔案改過但行程沒重啟，Python 不會自己重載，
+# 記憶體裡跑的就是舊程式。總司令這次遇到的正是這個——伺服器檔案已經加了
+# allow_credentials=True，但行程是前一天啟動的，預檢就是缺那個標頭，
+# 瀏覽器判 CORS 失敗，App 只看得到一句沒有資訊量的 Load failed。
+# 判斷「行程跑的是不是舊程式」用**內容雜湊**，不用 mtime。
+# 兩次實測踩到的坑都記在這裡：
+#   第一版寫成 import 時算一次的常數 → 檔案之後被改也偵測不到，機制完全失效。
+#   第二版改成每次請求讀 mtime → 排程的自動 commit（marathon/hypothesis_queue 會
+#     git pull --rebase）會更新檔案 mtime，即使內容一個字都沒變也會誤報「舊版」。
+# 內容雜湊兩個問題都沒有：內容一樣就是一樣，跟檔案時間、git 操作都無關。
+# 限制誠實揭露：只涵蓋這支檔案本身，它 import 的模組改了不會被偵測到。
+def _source_hash() -> str:
+    try:
+        return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
+    except OSError:
+        return ""
+
+
+def _source_mtime() -> float:
+    try:
+        return os.path.getmtime(__file__)
+    except OSError:
+        return 0.0
+
+
+SOURCE_HASH_AT_START = _source_hash()
 
 # ── CORS 白名單 ────────────────────────────────────────────────────────────
 # 2026-09-06（Cloudflare 網域上線準備 CF.2）：改成「精確來源 + 允許憑證」。
@@ -846,6 +900,14 @@ def health():
     return {
         "ok": True,
         "uptime_sec": round(time.time() - SERVER_STARTED_AT, 1),
+        "build": BUILD_SHA,
+        "started_at": datetime.fromtimestamp(SERVER_STARTED_AT, TW_TZ).isoformat(),
+        "source_mtime": datetime.fromtimestamp(_source_mtime(), TW_TZ).isoformat(),
+        # 行程啟動時間早於原始碼修改時間 ⇒ 記憶體裡跑的是舊程式，必須重啟。
+        # 留 5 秒容差：啟動當下寫檔的競態不算。
+        "source_hash": SOURCE_HASH_AT_START,
+        "stale_process": bool(SOURCE_HASH_AT_START and _source_hash()
+                              and SOURCE_HASH_AT_START != _source_hash()),
         "shioaji_connected": bool(_tick_age is not None and _tick_age < 120),
         "shioaji_connected_note": "定義＝120 秒內有收到 tick。收盤時段沒有 tick 是正常的，"
                                   "不代表 shioaji_quotes.py 沒在跑",
@@ -882,6 +944,8 @@ def health():
 
 
 if __name__ == "__main__":
+    print(f"[build] git sha={BUILD_SHA}　原始碼修改時間="
+          f"{datetime.fromtimestamp(_source_mtime(), TW_TZ).isoformat()}", flush=True)
     print(f"本機即時報價伺服器啟動於 http://0.0.0.0:{SERVER_PORT}", flush=True)
     print(f"本機驗證token（貼進App設定頁「即時伺服器」卡片）：{LOCAL_TOKEN}", flush=True)
     print(f"熱檔路徑：{LIVE_STATE_PATH}（備援）；tick ingress udp://{TICK_INGRESS_HOST}:{TICK_INGRESS_PORT}；stream_mode=有新鮮tick時{SSE_MODE_PUSH}、否則{SSE_MODE_POLL}；kbars_mode={KBARS_MODE}", flush=True)

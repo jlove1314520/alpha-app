@@ -1026,6 +1026,20 @@ def run_stream_daemon() -> None:
         except Exception as e:
             _write_failure(f"登入失敗：{type(e).__name__}: {e}")
             return
+        # 2026-09-06（連線一.3 防再犯）啟動時印出 git sha 與原始碼修改時間。
+        # 這兩個行程都是常駐的，改完程式沒重啟就等於沒改——log 裡看得到版本，
+        # 才不用靠猜判斷「現在跑的到底是哪一版」。
+        try:
+            _head = (Path(__file__).resolve().parent.parent / ".git" / "HEAD").read_text(encoding="utf-8").strip()
+            if _head.startswith("ref:"):
+                _p = Path(__file__).resolve().parent.parent / ".git" / _head.split(" ", 1)[1].strip()
+                _sha = _p.read_text(encoding="utf-8").strip()[:7] if _p.exists() else "unknown"
+            else:
+                _sha = _head[:7]
+        except OSError:
+            _sha = "unknown"
+        print(f"[build] git sha={_sha}　原始碼修改時間="
+              f"{datetime.fromtimestamp(os.path.getmtime(__file__), TW_TZ).isoformat()}", flush=True)
         print(f"登入成功，帳戶數：{len(accounts) if accounts else 0}，開始訂閱逐筆tick串流", flush=True)
         time.sleep(CONTRACTS_READY_WAIT_SEC)
 

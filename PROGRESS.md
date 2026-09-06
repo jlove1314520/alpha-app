@@ -16,6 +16,59 @@
 
 ---
 
+## 2026-09-06 中午（維運帽）— 連線一補：Load failed 的真正原因與「舊版行程」自動偵測
+
+### 總司令的診斷正確
+手機直接開 `https://192.168.3.241:8001/live/quotes` 拿得到 401 JSON，代表伺服器活著、
+憑證信任、區網通；但 App 顯示 `Load failed`。原因就是：App 的 fetch 改成
+`credentials:'include'` 之後，伺服器必須回 `Access-Control-Allow-Credentials: true`，
+而 PC 上跑的行程是前一天啟動的舊版，預檢少了那個標頭，瀏覽器判 CORS 失敗。
+
+**這個狀況在我做連線一時已經順帶修好了**（12:14 的重啟換上了新版），實測預檢：
+```
+access-control-allow-origin: https://jlove1314520.github.io
+access-control-allow-credentials: true
+```
+
+### 防再犯：讓「沒重啟」自己講出來
+- `/health` 新增 `build`（git sha）、`started_at`、`source_hash`、`stale_process`
+- 兩支常駐行程啟動時都印 `[build] git sha=...`
+- App 的「測試連線」看到 `stale_process` 直接顯示
+  「⚠ 伺服器是舊版（程式碼已更新但行程沒重啟，build xxx）」，不再是 `Load failed`
+- CLAUDE.md 新增「七之二、常駐服務發布紀律」：動到這兩支檔案的 commit，
+  最後一步必須重啟＋比對 build sha＋跑 OPTIONS 預檢＋確認 `stale_process=false`，
+  四步都過才算完成
+
+### 這個偵測我做錯兩次，兩次都是實測抓到的
+1. **第一版**把 `SOURCE_MTIME` 寫成 import 時的常數 → 檔案之後被改也偵測不到，
+   機制完全失效。實測 touch 檔案後 `stale_process` 仍是 `False` 才發現。
+2. **第二版**改成每次請求讀 mtime → 排程的自動 commit（marathon／hypothesis_queue
+   會 `git pull --rebase`）會更新檔案 mtime，**內容一個字沒變也誤報「舊版」**。
+   實測時 `stale_process` 莫名其妙變 True 才發現。狼來了的警告比沒有更糟。
+3. **第三版**改用**內容雜湊**：內容一樣就是一樣，跟檔案時間與 git 操作都無關。
+
+三種情況實測：
+
+| 情境 | stale_process | 預期 |
+|---|---|---|
+| 剛重啟 | False | False |
+| 只改 mtime、內容不變 | **False** | False（不誤報） |
+| 真的改動內容 | **True** | True |
+
+限制誠實揭露：只涵蓋該支檔案本身，它 import 的模組改了不會被偵測到。
+
+### 四步驗證實跑結果
+| 步驟 | 結果 |
+|---|---|
+| 1 重啟 | 排程自動拉起，PID 84156 |
+| 2 build sha vs HEAD | `97d5095` == `97d5095` |
+| 3 OPTIONS 預檢 | 200，含精確來源與 `allow-credentials: true` |
+| 4 `/health` | `stale_process: false` |
+
+**冒煙測試：41 項全 PASS、0 FAIL。**
+
+---
+
 ## 2026-09-06 中午（維運帽）— 連線一：即時伺服器改成 24 小時常駐
 
 ### 根因（先更正我自己的第一個判斷）

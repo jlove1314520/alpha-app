@@ -169,6 +169,46 @@ draws規模投入／survivorship-free宇宙投入／任何不可逆或花錢操�
 回報時的寫法：不要寫「查不到」，要寫「查了 A（連結）、B（連結）、C（連結），
 三者都沒有；替代路徑是 X」。三個都查過還是沒有，才可以下結論。
 
+## 七之二、常駐服務發布紀律（2026-09-06 總司令裁示，無例外）
+
+`research/alpha_live_server.py` 與 `research/shioaji_quotes.py` 是**常駐行程**。
+改完程式碼不重啟，記憶體裡跑的還是舊版——Python 不會自己重載。
+
+**這條紀律是踩到才寫的**：2026-09-06 把 App 的 fetch 改成 `credentials:'include'`，
+伺服器檔案同一個 commit 也加了 `allow_credentials=True`，但 PC 上的行程是前一天
+啟動的，預檢回應少了 `Access-Control-Allow-Credentials`，瀏覽器判 CORS 失敗，
+App 只顯示一句沒有資訊量的 `Load failed`。程式碼是對的、憑證是好的、區網是通的，
+唯一的問題是**行程沒重啟**，而畫面上完全看不出來。
+
+**任何 commit 只要動到這兩支檔案，提交流程的最後一步必須是：**
+
+1. 重啟服務（kill 行程，排程會在 1 分鐘內自動拉起；或手動跑 cycle 腳本）
+2. 確認啟動 log 印出的 `[build] git sha=` 與 `git rev-parse --short HEAD` 相同
+3. 跑這個 OPTIONS 預檢，回應必須同時含精確來源與 `allow-credentials: true`：
+
+```bash
+curl -s -k -i -X OPTIONS "https://127.0.0.1:8001/live/quotes"   -H "Origin: https://jlove1314520.github.io"   -H "Access-Control-Request-Method: GET"   -H "Access-Control-Request-Headers: x-alpha-local-token"
+```
+
+必須看到：
+```
+access-control-allow-origin: https://jlove1314520.github.io
+access-control-allow-credentials: true
+```
+
+4. 確認 `/health` 的 `stale_process` 是 `false`
+
+**四步都過才算完成**，沒重啟驗過的不准回報「已完成」。
+
+自動防線（不靠人記得）：`/health` 會回 `build`（git sha）、`started_at`、
+`source_hash` 與 `stale_process`；App 的「測試連線」看到 `stale_process` 就直接顯示
+「伺服器是舊版，需重啟」，不再是 `Load failed`。
+
+`stale_process` 用**內容雜湊**判斷，不是檔案時間——這點是實測踩出來的：
+用 mtime 的話，排程的自動 commit（marathon／hypothesis_queue 會 `git pull --rebase`）
+會更新檔案時間，內容一個字沒變也會誤報「舊版」，那種狼來了的警告比沒有更糟。
+限制誠實揭露：只涵蓋那支檔案本身，它 import 的模組改了不會被偵測到。
+
 ## 八、安全紅線
 - 自動下單只做介面、只產生下單計畫，絕不串接真實下單 API
 - 所有分數/訊號/報告標示「非投資建議」

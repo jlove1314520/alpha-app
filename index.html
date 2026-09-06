@@ -4910,7 +4910,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const ac=new AbortController();const t=setTimeout(()=>ac.abort(),6000);
       const r=await fetch(LIVE.url+'/health',{cache:'no-store',credentials:'include',signal:ac.signal});
       clearTimeout(t);
-      if(r.ok)health=await r.json();
+      if(r.ok){
+        health=await r.json();
+        // 2026-09-06（連線一.3 防再犯）伺服器自己會判斷「行程比原始碼舊」。
+        // 總司令這次遇到的就是這個：伺服器檔案已經加了 allow_credentials=True，
+        // 但 PC 上的行程是前一天啟動的，預檢缺那個標頭，瀏覽器判 CORS 失敗，
+        // App 只顯示一句沒有資訊量的 Load failed，完全看不出是「沒重啟」。
+        if(health.stale_process){
+          LIVE.lastError='伺服器是舊版，需重啟';
+          toast('⚠ 伺服器是舊版（程式碼已更新但行程沒重啟，build '+(health.build||'?')+'）。請重啟 alpha_live_server.py，或等排程 1 分鐘內自動拉起。');
+          renderLiveStatus();return;
+        }
+      }
       else{LIVE.lastError='伺服器有回應但 /health 回 HTTP '+r.status;toast(LIVE.lastError);renderLiveStatus();return}
     }catch(e){
       const isHttps=/^https:/i.test(LIVE.url||'');
@@ -4932,7 +4943,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         LIVE.lastError='HTTP '+r.status;toast('伺服器回應 HTTP '+r.status);
       }else{
         const d=await r.json();LIVE.lastError=null;
-        toast('③ 連線成功：伺服器已開機 '+Math.round((health.uptime_sec||0)/60)+' 分鐘、'
+        toast('③ 連線成功：伺服器 build '+(health.build||'?')+'、已開機 '+Math.round((health.uptime_sec||0)/60)+' 分鐘、'
           +(health.shioaji_connected?'即時 tick 進來中':'目前無 tick（收盤時段正常）')
           +'、台股來源 '+((d.sinopac&&d.sinopac.source_mode)||'無'));
         restartLiveStream();
@@ -5291,7 +5302,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.1216';
+  const APP_VERSION='2026-09-06.1233';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
