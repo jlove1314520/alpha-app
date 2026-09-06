@@ -1744,3 +1744,16 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   `TRIALS_LEDGER.md`#157、`HYPOTHESIS_QUEUE.md` #42。佇列#1~42全數
   結案，剩餘#5/#6/#8/#10仍卡外部依賴，本輪因預算考量未設計新假設軸
   #43，下一輪從設計#43開始。
+
+## #43 三大法人買賣超集中度（Institutional Buying Concentration）— FAIL（2026-09-06）
+- **假設**：三大法人買賣超金額在個股間分布集中度（narrow leadership）升高
+  →未來20日TAIEX報酬轉差（事前綁定方向為負）。
+- **死因**：兩個候選指標（HHI/Top10比例）train/val皆顯著正相關（hhi兩期
+  p<0.001，top10 VAL p=0.0094），方向與假設相反——集中度升高反而預示
+  未來報酬更好。依「事前綁定方向，不因結果換方向」鐵律判FAIL，跟`#42`
+  同一種死法（訊號存在但方向相反）。
+- **不泛化成**：資金流集中度這個資料維度沒有訊號——訊號存在性被兩指標
+  兩期資料證實，死的只是「集中度升高應降曝險」這個具體方向假設。
+- **原始記錄**：`institutional_concentration_gate.py`（新增，可重複執行）、
+  `TRIALS_LEDGER.md`#161、`HYPOTHESIS_QUEUE.md` #43。佇列#1~43全數
+  結案，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪從設計#44開始。

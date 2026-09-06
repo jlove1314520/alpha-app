@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T12:28（台北時間，hypothesis_queue排程接續，取鎖
+LOCK_STALE(held by 76852, 29.9 min old)-recovering，上一輪（11:27
+那筆）疑似又中斷了——這是同一個#43工作單位連續第二次遇到陳舊鎖，
+但比對內容發現上一輪其實**已經把最重的工作做完**：`institutional_
+concentration_gate.py`已跑完並產出`data/institutional_concentration_
+{hhi,top10}_aligned.csv`（gitignored，共3012筆），`TRIALS_LEDGER.md`
+#161跟`STRATEGY_GRAVEYARD.md`「#43」章節也都已經寫好完整FAIL記錄，
+只差`HYPOTHESIS_QUEUE.md`本身（#43條目「狀態」小節＋「排隊順序總結」
+章節）還沒同步更新、以及commit+push+釋放鎖——本輪重新執行一次腳本
+（用既有快取，數字跟`TRIALS_LEDGER.md`#161完全一致，確認deterministic）
+驗證判定，接著補完`HYPOTHESIS_QUEUE.md`兩處同步（比照協定第1節「先
+把不一致修正掉」）。**判定：FAIL**——HHI/Top10兩指標TRAIN/VAL皆為
+顯著正相關（HHI兩期p<0.001），跟事前綁定的負相關方向相反，依「事前
+綁定方向不換」鐵律判死，跟`#42`同一種死法。`is_holdout_consumed()`
+確認`False`。佇列#1~43全數結案，本輪因預算考量不再倉促設計#44，
+下一輪從設計新假設軸開始。完整見`HYPOTHESIS_QUEUE.md`#43、
+`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#161。commit+push後正常
+收工並釋放鎖。
+
 ## 2026-09-06T11:27（台北時間，hypothesis_queue排程接續，取鎖
 LOCK_STALE(held by 68532, 30.0 min old)-recovering，上一輪疑似
 失敗中斷，設計#43並修正#42記錄不一致）：讀完
