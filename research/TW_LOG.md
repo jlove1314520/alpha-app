@@ -1941,3 +1941,20 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
 
 下一輪TW軌接續：`run_detached.py status`確認`20260906-083408-d6ab`是否`finished`；若是，讀SUMMARY寫入`TRIALS_LEDGER.md`（優先檢查TRAIN期percentile與beta方向；且鑑於本輪US低波動深挖VAL期出現量級異常的教訓，這次TW的300檔重跑若VAL期也出現類似遠超TRAIN的異常放大量級，同樣不要直接判PASS，先排查是否為2022年單一年份或其他集中事件驅動）。
+
+
+---
+
+## 2026-09-06T09:30+08:00 — 馬拉松第394輪：TW
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 02:30（round385，最舊，明確跳過信號維持有效）／TW 08:30（round392）／US 09:00（round393，最新）——依輪替選TW。`run_detached.py status`確認`20260906-083408-d6ab`（TW自己的`tw_deep_dive_quality_roe_stability_full_rerun`）本輪開工/收工時皆仍`running`（56.9→71.6分鐘/150分鐘），heavy-job-slot持續佔用中，round392排定的「下一輪TW軌接續」（讀SUMMARY寫`TRIALS_LEDGER.md`）尚不能做。
+
+本輪工作單位＝不需heavy-job-slot的輕量複驗：接續`CALIBRATION_PROBE.md`「甲.3」裁示對「未定（待300檔重跑）」候選逐一複驗，比照round334對`#77`的做法。
+
+**過程中一次判斷失誤並已自行修正**：一開始重跑`#77 f_rel_strength`產業內去均值版（`factor_ic_sector_neutral_rel_strength.py`），跑完（花約6分鐘，與heavy job搶CPU）才發現round334（`TRIALS_LEDGER.md`#101）早已用同一套300檔重跑過且數字完全複現（percentile 41.9），屬重複工作，已撤銷該筆重複記列、未寫入`TRIALS_LEDGER.md`。教訓：下次要重跑「未定」候選前，先grep `TRIALS_LEDGER.md`/`HYPOTHESIS_QUEUE.md`確認是否已被複驗過，不要假設清單上列的就是還沒做的。
+
+改測真正尚未複驗的`#79 f_inst_streak_days`（`factor_ic_inst_streak_days.py`，未修改，foreground直接執行約2分鐘，未搶heavy-job-slot）：300檔（248可用，121個快照）TRAIN mean_ic=+0.0232 IR=+0.265(n=74)、VAL mean_ic=-0.0150 IR=-0.175 hit_rate=0.57(n=47)，**train/val正負號仍相反**，null percentile=86.1（100檔原為81.9，略升但仍未過90.0門檻）。**判定維持FAIL**——同號未達成本身就是決定性未過關理由，樣本擴大未翻案。已寫入`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13補充。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
+
+**下一輪TW軌接續**：(1)先`run_detached.py status`確認`20260906-083408-d6ab`是否`finished`，若是優先讀SUMMARY寫入`TRIALS_LEDGER.md`（沿用round392已寫明的檢查重點：TRAIN期percentile/beta方向，VAL期若異常放大比照US`#151/#152`先查leave-top-N-out集中度而非直接判PASS）；(2)若仍`running`，可接續複驗`CALIBRATION_PROBE.md`清單剩餘的`#91 revenue_trend_surprise_low_attention`（TW，尚未複驗）。完整見`TW_MARATHON_STATE.md`第394輪記錄、`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13。

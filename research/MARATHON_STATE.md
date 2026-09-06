@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T08:30+08:00**
+**最後更新：2026-09-06T09:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 393 輪。最新一輪：第 393 輪 · 2026-09-06T09:00+08:00 · US（取鎖乾淨，FUT 02:30最舊但round385明確跳過信號維持有效；US 08:00/TW 08:30兩者中US較舊，選US）**。**本輪工作單位**：開工前`run_detached.py status`確認TW背景job`20260906-083408-d6ab`（quality_roe_stability全量重跑）仍`running`(31.3分鐘/150分鐘)佔用heavy-job-slot，US排定的`us_deep_dive_valuebm_clean_universe`無法投遞——改做不需heavy-slot的輕量診斷：對`#151`（round392 EXPERIMENTAL判定）VAL期做逐年分解＋leave-2022-out（新增`deep_dive_f_us_low_vol_val_year_breakdown.py`，單次真實回測非100 draws重跑，約1分鐘，不佔用重度插槽）。**結果：2022單一年份驅動假說REFUTED**（leave-2022-out年化報酬比全期還高，同號），但發現VAL期四年（2021約+40%~2024約+231%）全部超出BAB文獻合理量級，是貫穿全期的系統性放大而非單一事件，比原假說更嚴重；`#151`判定維持EXPERIMENTAL，下一步改查leave-top-N-out集中度（比照`US_LEADS.md`#18方法論）。已寫入`TRIALS_LEDGER.md`#152、`US_LEADS.md`#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`/`TRIALS_LEDGER.md`第393輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 394 輪。最新一輪：第 394 輪 · 2026-09-06T09:30+08:00 · TW（取鎖乾淨，FUT 02:30最舊但round385明確跳過信號維持有效；TW 08:30/US 09:00兩者中TW較舊，選TW）**。**本輪工作單位**：TW自己的背景job`20260906-083408-d6ab`（quality_roe_stability全量重跑）仍`running`(56.9→71.6分鐘/150分鐘)佔用heavy-job-slot，改做`CALIBRATION_PROBE.md`「未定」候選複驗（比照round334對#77）。**過程一次判斷失誤已自行修正**：先重跑`#77`才發現round334（`TRIALS_LEDGER.md`#101）已做過且數字複現（percentile 41.9），撤銷重複記列，改測`#79 f_inst_streak_days`：300檔重跑percentile 81.9→86.1，train/val正負號仍相反，**判定維持FAIL**。已寫入`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13補充。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`TRIALS_LEDGER.md`第394輪記錄。
 
-**上一輪（第391輪，供對照）：第 391 輪 · 2026-09-06T08:00+08:00 · US**。US背景job`20260906-060311-6a01`本輪開工時仍`running`，改做不需重算的地基準備：新增`deep_dive_f_us_value_bm_clean_universe.py`（只做語法+匯入檢查未執行main）。另補寫round386~390遺漏的心跳。完整見`US_MARATHON_STATE.md`第391輪記錄。
+**上一輪（第393輪，供對照）：第 393 輪 · 2026-09-06T09:00+08:00 · US**。US背景job`20260906-060311-6a01`已收成完畢，本輪對`#151`VAL期做逐年分解＋leave-2022-out，**2022單一年份驅動假說REFUTED**但發現VAL期四年全部超出BAB文獻合理量級，判定`#151`維持EXPERIMENTAL。已寫入`TRIALS_LEDGER.md`#152。完整見`US_MARATHON_STATE.md`第393輪記錄。
 
 **上一輪（第389輪，供對照）：第 389 輪 · 2026-09-06T07:05+08:00 · TW**。盤點確認`MARATHON_PROTOCOL.md`第3節因子家族已全數掃過，更正`MI_MARGN`過時備註；US heavy job佔用中無法投遞TW的`deep_dive_f_quality_roe_stability.py`完整重跑。完整見`TW_MARATHON_STATE.md`第389輪記錄。
 

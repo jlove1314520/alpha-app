@@ -608,6 +608,15 @@ IR=+0.281(n=74)、VAL mean_ic=-0.0236 IR=-0.183 hit_rate=0.53(n=47)，
 變體。完整見`STRATEGY_GRAVEYARD.md`、`TRIALS_LEDGER.md`#79。佇列#13結案，
 接續佇列第一順位#14台股月營收公布事件效應。
 
+**【2026-09-06馬拉松第394輪補充——`CALIBRATION_PROBE.md`「未定」路徑300檔
+重跑，`TRIALS_LEDGER.md`#153】**：300檔樣本（248可用，121個快照）重跑
+`factor_ic_inst_streak_days.py`（未修改）：TRAIN mean_ic=+0.0232
+IR=+0.265(n=74)、VAL mean_ic=-0.0150 IR=-0.175 hit_rate=0.57(n=47)，
+**train/val正負號仍相反**、null percentile=**86.1**（門檻90.0，仍未過，
+較100檔的81.9略升但幅度不大）。判定維持**FAIL**，不升格——同號未達成
+是比percentile邊緣更決定性的未過關理由（`factor_ic.py`判準要求同時同號
+且過門檻），樣本擴大不影響這一點。完整見`TRIALS_LEDGER.md`#153。
+
 ---
 
 ### 14. 台股月營收公布事件效應
