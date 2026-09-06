@@ -1,3 +1,13 @@
+# ⛔ 2026-09-07 本檔案的結果不可引用（總司令裁示）
+#
+# f_value_pe 在正確的全體分母（N=223，Bonferroni 門檻 99.9776 百分位）下
+# 只有 96.7 百分位，**未過第一關，不具備進入深挖的資格**。
+# 這支腳本與它產出的所有結果，屬於「分母錯誤期間的無效深挖」：
+#   - 檔案保留不刪（那是當時真的跑出來的數字，刪掉等於湮滅紀錄）
+#   - 但**不得引用**：不得寫進候選清單、不得作為組合成分、
+#     不得作為任何新假設的「已知有效因子」前提
+# 要重新啟用，必須先讓 f_value_pe 在正確分母下通過第一關。
+
 """TW marathon round: cost-sensitivity / strategy-level deep-dive for
 `f_value_pe` (negative-PER value factor), per `CRITERIA_V2_LOCK.md` line 39:
 情境分群檢驗 -> 成本敏感度 -> alpha/beta顯著性, all three gates required before

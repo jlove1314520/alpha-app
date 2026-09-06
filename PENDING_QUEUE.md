@@ -192,6 +192,27 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 ---
 
+## 【總帳裁示】依選擇偏誤總帳執行（2026-09-07 總司令原話全文，最前面）
+
+> 全程繁體中文。依選擇偏誤總帳（commit c9c9730，N=219，Bonferroni 門檻 99.9772 百分位）結果執行，登記 PENDING_QUEUE 最前面。
+>
+> 1. 立即停止 f_value_pe 的所有深挖工作（TW軌 round401/403/405 的情境分群與成本敏感度、含背景 job）。理由：正確分母下 96.7 百分位，未過第一關，不具備進入深挖的資格。已投入的結果照實歸檔為「分母錯誤期間的無效深挖」，不刪除但標註不可引用。
+> 2. 五個倒下的候選（f_revenue_surprise／f_value_pb／f_value_pe／f_quality_roe_stability／f_us_reversal_1m）在 TW_LEADS／US_LEADS／LEADS／FACTORS 全部降級為 FAIL(多重比較校正後)，備註寫明原分母與正確分母。任何引用它們的下游結論（含 score 引擎的因子權重、PORTFOLIO_STRATEGY_SPEC 的成分）一併檢查並回報受影響範圍。
+> 3. 撐住的三筆（f_eps_growth／f_eps_surprise／f_low_vol）：計算它們作為策略的實際年化 Sharpe，與 SELECTION_BIAS_LEDGER 的 E[max SR]（全體 N=219 下 1.398）並列比較，回報是否高於該值。低於就誠實標記「未超過純運氣期望上限」。註：E[max SR] 目前用假設的試驗間 SR 標準差 0.5，請改用實際可得的試驗 Sharpe 分布重算 V，若多數試驗沒有 Sharpe 數字就誠實標「V 為假設值，結論僅供參考」。
+> 4. f_eps_growth 與 f_eps_surprise 相關 +0.831，屬同一家族，在任何組合或計數場合只能算一個獨立發現，不得當成兩個。寫進 CLAUDE.md。
+> 5. 跨軌重複（low_vol 同時在 TW/US）：回報若改用「全體分母」而非分軌，US 軌現存所有 CHEAP_PASS 是否仍成立。數字給出，不預設結論，等總司令裁示是否廢除分軌獨立分母。
+> 6. 自走一 runner：確認 AlphaDevQueue 排程是否已註冊且正在自走，回報最近一次自動觸發時間；若未註冊就補上。接著依佇列繼續 建置一.1。
+
+- [x] **總帳裁示.1** f_value_pe 深挖停止：無背景 job 在跑；`deep_dive_f_value_pe.py` 與 `regime_conditions_value_pe.py` 已加註「不可引用」，檔案保留不刪
+- [x] **總帳裁示.2** 五個倒下候選已在 LEADS／TW_LEADS／US_LEADS／FACTORS 四個檔案插入降級公告（含原分母與正確分母對照表）；下游受影響範圍已回報
+- [x] **總帳裁示.3** 用實際 14 筆試驗 Sharpe 重算 V=0.1239（非假設值），E[max SR] 由 1.398 修正為 **0.986**；f_low_vol Sharpe 1.379 > 0.986 高於純運氣上限，另兩筆帳本無 Sharpe 無法比較
+- [x] **總帳裁示.4** eps 同家族規則（相關 +0.831 只算一個獨立發現、|r|>0.7 一律同家族）已寫進 CLAUDE.md
+- [x] **總帳裁示.5** US 軌數字已給：分軌門檻 99.8864 vs 全體 99.9776，兩個有百分位的候選在兩種分母下判定相同（f_us_low_vol 都過、f_us_reversal_1m 都不過）→ **改用全體分母不會改變 US 軌任何現存判定**。不預設結論
+- [x] **總帳裁示.6** AlphaDevQueue 已註冊且正在自走：最近觸發 2026-09-07 03:46:01（exit 0），03:16 那輪跑滿 23 分鐘完成 Cybex.債務3／債務4（commit 249a5fd、bd9a914）
+- [ ] **總帳裁示.後續** 依佇列繼續 建置一.1
+
+---
+
 ## 【Cowork 自我更正與補充裁示】（2026-09-07 原話全文，優先於【新方向】執行）
 
 原始指令全文：
@@ -363,7 +384,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **自走一.2** 三個停下條件（需總司令親自操作／不可逆／連兩次失敗），停下時標 `- [!]` 並寫入原因
 - [x] **自走一.3** 排程 `AlphaDevQueue` 每 15 分鐘一輪，用 `marathon_lock.py --name devqueue` 獨立鎖
 - [x] **自走一.4** 每輪上限 60 分鐘，逾時 taskkill 整棵行程樹並記一次失敗；鎖陳舊門檻 62 分鐘 > 60
-- [ ] **自走一.5** 驗收：關掉互動視窗後 30 分鐘內自動產生下一項的 commit（需總司令關窗後觀察）
+- [x] **自走一.5** **已達成**：2026-09-07 03:16 那輪自走跑滿 23 分鐘 reason=OK，自行完成 Cybex.債務3 與債務4（commit `249a5fd`、`bd9a914`），非互動視窗所為；03:46 那輪因工作目錄有未提交變更而正確跳過。
 
 ---
 
