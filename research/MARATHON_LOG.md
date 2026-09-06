@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 15:58 — hypothesis_queue排程：#44景氣對策信號資料可行性查證即死（FAIL，資料不可及/回溯修正污染無法規避，未進第1關），設計#45留待下一輪 — 佇列#1~44全數結案
+
 ## 2026-09-06T15:25（台北時間，hypothesis_queue排程接續，取鎖
 LOCK_STALE(held by 76668, 150.0 min old)-recovering，上一輪疑似崩潰
 中斷但未留下任何未commit變更，`git status`乾淨，判斷上一輪在取得鎖後、

@@ -1757,3 +1757,9 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
 - **原始記錄**：`institutional_concentration_gate.py`（新增，可重複執行）、
   `TRIALS_LEDGER.md`#161、`HYPOTHESIS_QUEUE.md` #43。佇列#1~43全數
   結案，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪從設計#44開始。
+
+## #44 景氣對策信號 NDC Business Cycle Composite Signal — FAIL（2026-09-06，資料不可及）
+- **假設**：NDC景氣對策信號燈號/分數轉紅燈或連續轉差→未來3~6月TAIEX報酬轉差（逆向）。
+- **死因**：官方唯一免費合規管道（data.gov.tw ZIP）只提供回溯修正後最終版數字，無「當時發布版」欄位；官方查詢系統/新聞稿對一般請求403（依鐵律不偽造UA繞過）；Wayback Machine快照未涵蓋逐月分數內容，重建vintage需大型逐月爬取工程。假設本身事前寫明「做不到當時發布版則判資料不可及」，依此快殺。
+- **不泛化成**：景氣對策信號本身無訊號——訊號經濟機制從未被測試，死的是「免費合規管道重建無look-ahead污染PIT版本」這個工程限制。
+- **原始記錄**：`TRIALS_LEDGER.md`#164、`HYPOTHESIS_QUEUE.md` #44、`research/data_cache/ndc/`（原始ZIP）。佇列#1~44全數結案，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪從設計#45開始。
