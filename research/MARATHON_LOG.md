@@ -1,5 +1,28 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 18:24 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+完成#45「下一輪待辦(a)」——排除TSM對照重跑（僅UMC+CHT+ASX三檔pooled）。
+新增`adr_premium_gate_ex_tsm.py`（複用`adr_premium_gate.py`既有
+`build_panel()`/`_split()`/`evaluate()`，不重寫邏輯）。**結果決定性**：
+TRAIN排除TSM pooled n=5558 r=**-0.0364**(p=0.0066)，VAL排除TSM pooled
+n=2853 r=**+0.1094**(p=0.0000)——**train/val符號直接翻轉**，第2項判準
+（同號）決定性未過，即使VAL單獨仍贏過null(percentile=100.0)也不放行
+（同`#42`/`#43`「事前綁定判準不因單項顯著就通融」同一把尺）。逐檔拆解：
+UMC(TRAIN-0.0923/VAL+0.0221不顯著)、CHT(TRAIN+0.2732/VAL-0.0157方向
+反轉不顯著)、ASX(TRAIN+0.0898/VAL+0.1114兩期皆顯著同號，唯一穩定的
+一檔)。證實#45「下一輪待辦(c)」預先訂的判死條件成立：排除TSM後訊號
+不穩定，**判定訊號集中在單一巨型股（TSM），外部效度未證明**，依快殺
+標準「觀測層級就無訊號」（ex-TSM panel層級）對#45整體最終判**FAIL**，
+不進第2關以後、不查證(b)UMC/CHT 2006-2010比率變更公告（budget不值得
+投入去擴大一個已經決定性判死的樣本）。已更新`HYPOTHESIS_QUEUE.md` #45
+條目「最終判定」+排隊順序總結、`TRIALS_LEDGER.md`#169、
+`STRATEGY_GRAVEYARD.md`。重新查證`BACKLOG.md`確認`value_board_v2`仍
+`回測未通過`、題材動能榜/未來性濾網仍卡PIT引擎，#5/#6/#8/#10仍未解鎖
+（無新進展）。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增
+API呼叫（複用既有`data/adr_premium_aligned.csv`）。**佇列#1~45全數
+結案**，本輪因預算考量優先確保#45完整記錄與收斂，未倉促設計新假設軸
+#46，下一輪從設計#46開始，不空轉。本輪收工，準備commit+push+釋放鎖。
+
 ## 2026-09-06 17:55 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
 接續#45（ADR溢價收斂），完成上一輪地基建置後的第1關cheap gate。新增
 `adr_premium_gate.py`：訊號=premium原始水位（比照#45事前寫死的定義，
