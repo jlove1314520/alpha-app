@@ -1,5 +1,20 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T14:10（台北時間，hypothesis_queue排程接續，取鎖乾淨
+LOCK_ACQUIRED，#41第六輪擴大pilot樣本35→45檔並結案FAIL）：
+`backfill_insider_holdings.py` PILOT_STOCK_COUNT 35→45，新增200筆
+請求全數成功（含快取共900筆，ok=590/65.6% empty=310 error=0）。重跑
+pilot IC：panel擴大為N=560/30檔，r=-0.0089（**符號翻轉為負，前三輪
+皆正**）、p=0.8331、null percentile=47.5（**貼在50附近，四輪最差**）。
+四輪序列(r/percentile)：+0.0710/90.5 → +0.0775/94.0 → +0.0417/79.0 →
+-0.0089/47.5，決定性轉為無訊號，依「觀測層級就無訊號」快殺標準判
+**FAIL**，不投入需數千筆額外請求才能達到的正式300檔+VAL期cheap
+gate規模。已更新`HYPOTHESIS_QUEUE.md`#41最終判定+排隊順序總結、
+`STRATEGY_GRAVEYARD.md`新增條目、`TRIALS_LEDGER.md`#155。佇列#1~41
+全數結案，剩餘#5/#6/#8/#10仍卡外部依賴，本輪因預算考量未設計新假設
+軸#42，下一輪從設計#42開始。`is_holdout_consumed()`開工/收工前皆
+確認False，全程只查TRAIN期資料。準備commit+push+釋放鎖。
+
 ## 2026-09-06T09:34（台北時間，hypothesis_queue排程接續，取鎖乾淨
 LOCK_ACQUIRED，接續#41第五輪，擴大pilot樣本25→35檔，發現趨勢逆轉）：
 延續上一輪的prefix-consistent抽樣（`sample_universe_ids(60,seed)`前60

@@ -1682,3 +1682,38 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   out_bigsample.py`/`deep_dive_loo_no_low_vol_independent_sample.py`
   （皆可重複執行）。子版本`portfolio_multifactor_v2_loo_no_low_vol`
   詳細死因見上方獨立條目。
+
+### 內部人（董監事/大股東/經理人）持股轉讓 Insider Holdings Transfer
+（`HYPOTHESIS_QUEUE.md` #41，informed trading信號，股票，TW軌，
+2026-09-06接續第六輪結案）
+
+- **哪一關死的**：地基pilot階段（非正式`factor_ic.py` cheap gate）的
+  觀測層級無訊號。四輪nested樣本（同一seed逐步擴大，非重抽）序列：
+  12檔/N=228/r=+0.0710/percentile=90.5 → 18檔/N=342/r=+0.0775/
+  percentile=94.0 → 24檔/N=446/r=+0.0417/percentile=79.0 → 30檔/
+  N=560/**r=-0.0089（符號翻轉為負）**/**percentile=47.5（貼在50
+  附近，等同隨機猜測）**。
+- **判定理由**：本輪決定性轉為無訊號——若真有穩健橫斷面訊號，
+  percentile應隨樣本數增加趨於穩定，而非退化到接近50；符號在第六輪
+  首次翻轉，打破前三輪「方向一致性」這個唯一穩定觀察，代表先前的
+  一致性本身也只是小樣本雜訊尚未被打散。依協定「快殺標準：觀測層級
+  就無訊號」判FAIL，未投入需數千筆額外請求（全市場300檔規模+涵蓋
+  VAL期共約36季度，累計約3小時以上網路時間）才能達到的正式cheap
+  gate規模——在觀測證據已如此決定性的情況下，這筆額外工程成本的
+  預期價值很低。
+- **這個死法能不能泛化**：**不能泛化成「內部人持股資訊完全不含
+  alpha」這個經濟命題**，也**不是**#38/#39那種「資料不可及」死法
+  ——MOPS互動頁`stapap1`確認接受任意歷史年月，資料源本身可行。只
+  測試了：(a)「全體董監持股合計」單一彙總數字（未涵蓋經理人/持股
+  逾10%大股東個別持股變化）、(b)季度頻率持股變動率（未測逐筆轉讓
+  事前申報事件研究路線）、(c)僅TRAIN期(2016-2020)單一子期間（未
+  做VAL期或跨期一致性測試）、(d)最多30檔有效股票（遠小於標準300
+  檔規模）。未來若要重新評估，值得考慮方向：改用逐筆轉讓事件研究
+  （比照#40買回股份CAR框架）、擴充經理人/大股東持股明細、或找更
+  省請求量的全市場查詢路徑。
+- **原始記錄**：`mops_insider_holdings_probe.py`/`mops_insider_
+  holdings_client.py`/`backfill_insider_holdings.py`/`insider_
+  holdings_pilot_ic.py`（皆新增，可重複執行）、`TRIALS_LEDGER.md`
+  #155、`HYPOTHESIS_QUEUE.md` #41。佇列#1~41全數結案，剩餘#5/#6/
+  #8/#10仍卡外部依賴，本輪因預算考量未設計新假設軸#42，下一輪從
+  設計#42開始。
