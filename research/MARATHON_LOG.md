@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 19:25 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+本輪工作單位：完成`#46`（新股上市長期弱勢IPO Long-Run
+Underperformance）地基查證(a)(b)(c)三點，未進第1關cheap gate（依
+協定「先把地基做好，不用強求一次做完全部關卡」）。(a) TPEx對應端點
+確認可行：`https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O`
+（上櫃股票基本資料），欄位`DateOfListing`格式YYYYMMDD，實測回傳
+合法JSON。(b) TWSE找到官方終止上市清單端點
+`https://openapi.twse.com.tw/v1/company/suspendListingCsvAndHtml`，
+實測383筆（Code/Company/DelistingDate），可用於緩解TWSE端存活者
+偏差，但此清單**沒有上市日期欄位**，下一輪需另外查證383家的原始
+上市日期來源。依`搜尋紀律：三來源查證`鐵律查了TPEx swagger文件
+關鍵字搜尋、Google搜尋、data.gov.tw資料集搜尋三個獨立管道，皆未
+找到TPEx終止上櫃清單的官方API，記錄為現況不可及（非保證永久不
+存在）。(c) 樣本規模粗估：TWSE+TPEx現存合計約1700~1800家量級，加
+TWSE下市383家，總量約2000筆上下，遠超cheap gate統計檢定力需求。
+**範圍界定決策**：下一輪cheap gate先只做TWSE單一交易所（依假設
+定義本身預留的彈性），TPEx留待有初步訊號後再擴充。零新增批次
+API呼叫（本輪僅少量WebFetch驗證端點存在性與欄位格式，未批次抓取
+全市場清單）。`is_holdout_consumed()`本輪開工/收工前皆為`False`
+（本輪未接觸任何回測資料，純資料源可行性查證）。本輪未產生新的
+PASS/FAIL判定，`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`無新增
+條目。完整見`HYPOTHESIS_QUEUE.md` #46條目「2026-09-06 hypothesis_
+queue排程接續（本輪，地基查證(a)(b)(c)完成）」新增段落。下一輪
+待辦已列在該段落最後，從查證下市公司原始上市日期來源開始，不跳關
+進cheap gate。本輪收工，準備commit+push+釋放鎖。
+
 ## 2026-09-06 18:57 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
 發現`HYPOTHESIS_QUEUE.md`「排隊順序總結」章節與#44/#45自身條目內容
 不同步（#44自身「狀態」段落停留在「本輪新增，尚未開始第1關」，但

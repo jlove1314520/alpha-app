@@ -5032,3 +5032,58 @@ portfolio構造階段，需檢視「排除新股」這個篩選規則在三個�
 若查證後發現任一必要資料實際不可及（例如下市公司清單完全查不到
 導致存活者偏差無法緩解到可接受程度），依快殺標準「資料不可及」
 判FAIL並記錄具體死因。現在排隊第一，未結案。
+
+**2026-09-06 hypothesis_queue排程接續（本輪，地基查證(a)(b)(c)完成）**：
+
+(a) **TPEx對應端點確認可行**：官方swagger規格（WebFetch
+`https://www.tpex.org.tw/openapi/swagger.json`）找到
+`/mopsfin_t187ap03_O`（上櫃股票基本資料，跟TWSE`t187ap03_L`同一套
+MOPS命名系列），實測`https://www.tpex.org.tw/openapi/v1/
+mopsfin_t187ap03_O`回傳合法JSON，欄位`DateOfListing`（格式
+YYYYMMDD西元年，例：安心食品1259→20111215），命名與格式跟TWSE端
+不完全一致（TWSE用中文欄位「上市日期」，TPEx用英文`DateOfListing`）
+但語意相同，兩者可分別解析後合併成單一宇宙。
+
+(b) **TWSE下市公司清單找到官方端點，但缺上市日期需二次拼接；TPEx
+下市清單三方查證後確認查無**：
+  - TWSE端：找到`/company/suspendListingCsvAndHtml`（終止上市公司），
+    實測`https://openapi.twse.com.tw/v1/company/suspendListingCsvAndHtml`
+    回傳合法JSON，共**383筆**，欄位為`Code`/`Company`/`DelistingDate`
+    （例：2867三商壽→終止上市日期115/09/01民國年）。**限制**：此清單
+    只有終止上市日期，**沒有上市日期欄位**，若要納入這383家做完整
+    BHAR分析，需額外查證每一家的原始上市日期來源（下一輪待辦，見下）。
+  - TPEx端：依`搜尋紀律：三來源查證`鐵律查了三個獨立管道——①TPEx
+    官方swagger規格關鍵字搜尋（僅找到`tpex_spendi_history`「上櫃歷史
+    公布暫停/恢復交易股票」，是暫停交易不是終止上櫃，不符）、②Google
+    搜尋「TPEx 上櫃 終止上櫃 公司清單 API openapi 下櫃」（無直接命中，
+    只指回TPEx openapi首頁）、③data.gov.tw資料集搜尋「終止上櫃」
+    （明確顯示「無資料」）——**三者皆未找到TPEx終止上櫃清單的官方
+    API**。依鐵律結論寫法：查了TPEx swagger文件、Google搜尋、
+    data.gov.tw搜尋，三者都沒有；暫無替代路徑，記錄為TPEx下市清單
+    現況不可及，非「保證不存在」（未來若有新API上線需重新查證）。
+
+(c) **樣本規模粗估**：TWSE `t187ap03_L`現存上市家數與TPEx
+`mopsfin_t187ap03_O`現存上櫃家數合計約1700~1800家量級（兩交易所
+官網公開統計常態值），加上TWSE下市383家，**若含TWSE下市樣本，
+總IPO事件量級约2000筆上下，遠超統計檢定力最低需求**（cheap gate
+橫斷面相關性只需百檔等級即可判斷方向與null percentile）。
+
+**範圍界定決策（依假設定義本身已預留的彈性「若TPEx資料工程量過大
+可先只做TWSE」）**：鑑於TPEx下市清單不可及、且TPEx現存清單雖可行
+但需額外欄位名稱對應工程，**下一輪cheap gate先只做TWSE單一交易所**
+（現存~1000+家用`t187ap03_L`上市日期，下市383家用
+`suspendListingCsvAndHtml`但**下市383家原始上市日期需額外來源**——
+若下一輪查證不到，就先用「現存公司」子樣本做cheap gate（承認此為
+不含下市股的存活者偏差版本，誠實揭露此局限、不隱藏），TPEx留待
+TWSE端有初步訊號後再視預算擴充。
+
+**下一輪待辦（不跳關，先完成地基再進cheap gate）**：
+1. 查證TWSE383家下市公司的原始上市日期來源（候選：MOPS個別公司
+   歷史資料頁、TWSE公司治理專區、或`t187ap03_L`歷史快照——若都查
+   不到就先用現存公司子樣本，誠實記錄局限）。
+2. 抓取TWSE現存全市場`t187ap03_L`清單存檔（零金鑰、複用`fetch.py`
+   節流模式，估計一次請求即可拿到全部現存家數，不需分批）。
+3. 視(1)結果決定cheap gate樣本範圍（現存+下市 vs 僅現存），開始
+   撰寫`ipo_underperformance_gate.py`，訊號＝距上市交易日數，跟既有
+   train/val分期+時序洗牌null框架一致，不跳關。
+現在排隊第一，未結案。
