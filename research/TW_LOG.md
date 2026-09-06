@@ -2345,3 +2345,61 @@ mean_CAR）；(ii) 子事件3 MOPS查證三候選方向；(iii) `#51`子事件3�
 有進度後記得回頭更新`data/signal_status.json`；(iv) 待開發帽決定是否接進
 `index.html`。完整見`TW_MARATHON_STATE.md`第424輪記錄、`build_signal_status.py`
 （新增，可重複執行）、`data/signal_status.json`（新增）。
+
+## 第426輪 2026-09-07T05:00+08:00（TW軌）
+
+取鎖乾淨（cycle`20260907-050036`）。三軌時間戳：TW 04:00（round424，最舊）／
+US 04:30（round425）／FUT 09-06 12:00（round399，依例外條款不選）——依輪替選TW。
+`run_detached.py status`確認heavy-job-slot空（0個running）；`git status`確認
+`.github/workflows/audit.yml`/`research/.live_watchlist.json`/
+`research/DEV_QUEUE_PROMPT.txt`/`research/data_cache/`/`research/dev_queue_cycle.log`
+為其他既存未commit異動，另有hypothesis_queue排程正在編輯`research/HYPOTHESIS_QUEUE.md`
+/`research/MARATHON_LOG.md`並新增`research/mops_cb_conversion_price_client.py`（子事件3
+CB轉換價重設，見`HYPOTHESIS_QUEUE.md`(f)(g)段落）。本輪選擇不衝突的子事件1工作，
+在`HYPOTHESIS_QUEUE.md`末尾追加(h)段落而非修改(f)(g)，避免覆寫另一條線的進度。
+
+**本輪工作單位＝round424「下一輪TW軌接手(i)」：子事件1二元規格對照
+（`short_ratio>0` vs `==0`比較mean_CAR）**。背景：`#186`（連續比例`short_ratio`
+規格）FAIL時誠實揭露82.2%事件`short_ratio`為零，懷疑連續規格可能被大量零值
+稀釋訊號，留待追加二元對照驗證。
+
+新增`forced_short_covering_gate1_binary.py`：直接import
+`forced_short_covering_gate1.py`既有的事件建構函式（股價/股利/融券資料存取、
+反推公式、宇宙皆不變），重建同一批1707筆事件（零新增API呼叫，全部命中`#186`
+留下的本機快取），改成兩組均值差檢定：`short_ratio>0`（有融券部位）組 vs
+`==0`（無部位）組的VAL期mean_CAR，事前綁定方向為正（有部位組應更高，因為
+只有前者存在強制回補買盤），null分布＝組別標籤洗牌N=200次，percentile>=90.0
+門檻（同base_alpha=0.10）。
+
+**結果**：事件總數1707（同`#186`），`share_has_short`=17.8%。
+TRAIN: has_short n=222 mean_car=-0.01020, no_short n=823 mean_car=-0.01180,
+diff=+0.00160。VAL: has_short n=81 mean_car=-0.00075, no_short n=581
+mean_car=+0.00099, diff=**-0.00174**。train/val diff正負號不一致，
+null percentile=37.5（門檻>=90.0）。四個事前綁定判準（VAL兩組樣本數
+>=15/train-val同號/VAL diff為正/null percentile>=90）全數未過。
+
+**判定：FAIL**，且與`#186`連續規格結論一致——排除「零值稀釋訊號」這個
+解讀，換成二元對照後結果仍是負向。子事件1（強制回補事件窗口）用融券
+部位（連續或二元表示法皆同）預測窗口內超額報酬，兩種合理規格都無法
+支持事前假說。反推公式本身（PIT可得性）不受影響，仍有效。
+
+已登記：
+- `TRIALS_LEDGER.md`#189（`trial_registry.register_trial()`寫入，
+  `trial_registry.py --check`確認PASS，下一可用編號#190）
+- `STRATEGY_GRAVEYARD.md`新增「#51子事件1 融券強制回補 二元規格對照」條目
+- `HYPOTHESIS_QUEUE.md` #51追加(h)段落
+- `data/signal_status.json`51-1摘要更新為含二元規格結果，同步更新
+  `build_signal_status.py`的`DIRECTIONS`常數並重跑腳本產生檔案（避免
+  手動編輯JSON跟腳本常數不同步），確認合法UTF-8 JSON
+
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫。
+
+**下一輪TW軌接手**：子事件1至此已窮盡連續/二元兩種主要規格皆FAIL，暫不
+再追加第三種規格（例如分產業/流動性分層）。優先權轉向(a)子事件3新資料
+cheap gate（`HYPOTHESIS_QUEUE.md` #51(g)待辦，比照子事件2
+`cash_increase_dilution_gate1.py`同一套事件研究框架——轉換價格調整幅度/
+事件密度預測forward報酬）——**先查`git status`/`run_detached.py status`
+確認hypothesis_queue排程是否已經做完這步，避免重工**；若已重工完成，
+改做(b)子事件3小規模回填歷史涵蓋度驗證，或(c)若子事件3也FAIL則#51正式
+結案並設計新方向。完整見`TW_MARATHON_STATE.md`第426輪記錄、
+`forced_short_covering_gate1_binary.py`（新增，可重複執行）。

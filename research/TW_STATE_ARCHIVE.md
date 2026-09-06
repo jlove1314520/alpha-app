@@ -164,4 +164,8 @@
 
 ---
 
+**第420輪（原TW_MARATHON_STATE.md，round426時歸檔）**：**上一則保留（第420輪，供對照）**——取鎖乾淨（非陳舊鎖檔，cycle`20260907-020036`）。三軌時間戳：TW 23:30（round416，最舊，另有獨立`hypothesis_queue`排程於00:00~01:29多次即時推進#49並已結案FAIL，commit`582ef0d`）／US 00:30（round418）／FUT 12:00（round399，依例外條款不選，除非有全新機制假說）——依輪替選TW。`run_detached.py status`確認heavy-job-slot空（0個running），無背景工作衝突；`git status`確認無其他行程正在編輯同一批檔案。**本輪工作單位＝`HYPOTHESIS_QUEUE.md`#51（強制交易者事件）子事件1「反推重建」備用路徑查證，接續round419前一批hypothesis_queue排程留下的「(b)查證子事件1反推重建備用路徑的官方交易日數規則」待辦**：純WebSearch查證+本機既有快取欄位盤點，零新增API呼叫。查得(1)官方法規資料庫`twse-regulation.twse.com.tw`《證券商辦理有價證券買賣融資融券業務操作辦法》第76條：停止融券賣出始於停止過戶前6個營業日、還券了結截止於停止過戶第6個營業日（含）；(2)證券投資人及期貨交易人保護中心網站同一條規則的教育版本，數字一致；(3)多個來源（含《公司法》第165條基準日前5日內停止過戶的法定框架）確認台灣T+2交割下「除權除息交易日＝停止過戶日前2個營業日」。盤點本機已有`TaiwanStockDividend`快取（2010-2024，2170檔，`CashExDividendTradingDate`/`StockExDividendTradingDate`欄位，`adjust.py`既有管線在用）確認**足以反推**：停止過戶日=ExDividendTradingDate+2營業日，強制回補截止日=停止過戶日-6營業日=ExDividendTradingDate-4營業日。**判定：子事件1從round419留下的「未死透待查」改判「可行（待實作驗證）」**——不需要抓預告表端點即可重建強制回補時間表，零新增API呼叫。因來源屬WebSearch（官方法規資料庫+投資人保護中心，2類），未達`CLAUDE.md`「四類來源涵蓋三類」滿門檻，**下一輪實作前先用少量真實個股手動核對推算結果跟BFI84U即時預告表是否吻合**，吻合即視為驗證通過。已寫入`HYPOTHESIS_QUEUE.md`#51子事件1新增段落。`is_holdout_consumed()`開工/收工前皆確認`False`。完整見`TW_LOG.md`第420輪記錄、`HYPOTHESIS_QUEUE.md`#51。
+
+---
+
 （第413輪已於round422歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）

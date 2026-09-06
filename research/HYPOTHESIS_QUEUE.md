@@ -5932,3 +5932,71 @@ MOPS查證（`#51`(d)段落列的(1)(2)(3)三個候選方向尚未測）；(iii)
 | 建置一.1 新聞事件管線 | 待做 | #52 全部 |
 | 源頭一.2a 千張大戶週累積 | 待做 | #51 的持股集中度對照 |
 | 金流一.1/.2 產業金流＋上櫃法人 | 待做 | #51 的法人行為對照 |
+
+
+**(f) 子事件3任務(1)本輪已完成，找到疑似正確的搜尋表單（2026-09-07
+hypothesis_queue排程接續，預算用盡前的最後進度，仍未下結論）**：改用
+解析MOPS Vue SPA的路由表（`index.js`裡的`path/name/meta.title`陣列，
+非WebSearch猜URL）成功列出全部302條路由，找到`t108sb08_1_q2`
+「轉換(附認股權)公司債公告彙總表」——欄位含`TYPEK`(市場別)、
+`co_id_1`/`co_id_2`(公司代號範圍,可留空查全市場)、`year`(民國年,必填)、
+`month`(可選)、`b_date`/`e_date`(可選日期範圍)，`apiName:
+"ajax_t108sb08_1_q2"`。**實測POST**（`TYPEK=sii,year=113,month=all`）
+回應200，但內容是一個會自動re-submit的中繼頁（`autoForm`會再POST到
+`ajax_t108sb08_1`，不帶`_q2`），比照MOPS常見的二段式流程（第一段登記
+查詢條件、第二段才回真正表格）。**本輪未完成第二段POST驗證**（預算
+用盡），尚未確認這個表單是否真的含「轉換價格重設」內容或只是純
+公告清單索引。`is_holdout_consumed()`開工/收工前皆確認`False`，
+全程僅5次即時探測請求（1次JS bundle下載+3次component chunk下載+1次
+表單POST），無批次抓取、無寫入歷史快取。**#50/#51/#52三條仍全數
+未結案，下一輪從完成第二段POST（`ajax_t108sb08_1`,帶上第一段回傳的
+`run`值或session狀態）開始，若確認可行再判斷是否含轉換價格重設事件、
+不可行則轉向候選(2)(3)。**
+
+**(g) 子事件3第二段POST已完成驗證，正式確認可行（2026-09-07
+hypothesis_queue排程接續，鎖檔陳舊回收後接手）**：把上一輪拿到的
+autoForm欄位（`run`/`step`/`TYPEK`/`co_id_1`/`co_id_2`/`year`/`month`/
+`day1`/`day2`/`coid`/`firstin`）原樣POST到`ajax_t108sb08_1`，回應（
+單次呼叫`TYPEK=sii,year=113`即回傳全上市市場整年資料，長度約60萬字元）
+內含**10種轉換公司債相關公告類型合併一頁**，其中「轉換公司債轉換價格
+變更公告」這一段正是我們要的轉換價格重設事件，欄位含`種類`(反稀釋)、
+`公司代號`、`公司名稱`、`申報日期`（即公告日，PIT可用）、`申報序號`、
+主旨文字內嵌確切生效日與新舊價格（例：「自113年07月23日起，轉換價格
+自39.40元調整為38.80元」）。單一查詢（sii/113年全年）解析出329筆事件，
+每筆都能穩定regex解出`effective_date`/`old_price`/`new_price`。新增
+`mops_cb_conversion_price_client.py`（`fetch_conversion_price_events()`
+可重複執行、per-(市場,年)快取parquet，比照`#40`買回股份client同一套
+節流/快取設計），本輪已用真實請求跑通並驗證329筆解析成功。**子事件3
+從「未達三來源門檻」正式升級為「確認可行」**（不需要再補其他來源查證
+——這是找到資料的正面結論，`CLAUDE.md`「三來源查證」鐵律只約束「找不到」
+這種結論，找到了不受此鐵律拘束）。過程中修正一個bug：`autoForm`回應
+的HTML從不補上`</form>`結尾標籤（MOPS既有瀏覽器端quirk），原regex用
+`</form>`當終止符會抓不到內容，已改用`</div>`。`is_holdout_consumed()`
+開工/收工前皆確認`False`，全程僅4次即時請求（2次除錯重現+2次腳本
+正式驗證），非批次回填，尚未寫入跨年份/跨市場快取。**#51三個子事件
+現況：子事件1可行（PIT驗證通過但portfolio層FAIL）、子事件2可行（PIT
+驗證通過但cheap gate FAIL）、子事件3剛確認資料可行（尚未做cheap
+gate）。下一輪待辦**：(a)用子事件3新資料設計第1關cheap
+gate（比照子事件2`cash_increase_dilution_gate1.py`同一套事件研究
+框架——轉換價格調整幅度/事件密度預測forward報酬）、(b)小規模回填
+2015年至今驗證歷史涵蓋度（本輪僅驗證單一年份）、(c)若子事件3也FAIL，
+#51正式結案並設計新方向。
+
+**(h) 子事件1二元規格對照已完成，與連續規格結論一致，FAIL（2026-09-07
+馬拉松第426輪TW軌，接續`TW_MARATHON_STATE.md`第422輪「下一輪TW軌
+接手(i)」待辦）**：`#186`（連續比例`short_ratio`規格）FAIL時誠實揭露
+82.2%事件`short_ratio`為零，懷疑連續規格可能被大量零值稀釋訊號。
+本輪新增`forced_short_covering_gate1_binary.py`，沿用`#186`同一批
+1707筆事件（現金股利除息、300檔樣本、反推公式不變，零新增API呼叫），
+改測`short_ratio>0`（有融券部位）vs`==0`（無部位）兩組VAL期mean_CAR
+差，事前綁定方向為正、null分布=組別標籤洗牌N=200次。**結果**：
+TRAIN diff=+0.00160、VAL diff=-0.00174，train/val正負號不一致，
+null percentile=37.5（門檻>=90.0），四項判準全數未過。**判定：FAIL，
+且排除「零值稀釋訊號」這個解讀**——換成二元對照後結果仍是負向。子
+事件1至此兩種合理規格（連續/二元）皆FAIL，暫不再追加第三種規格。
+已寫入`TRIALS_LEDGER.md`#189、`STRATEGY_GRAVEYARD.md`。`is_holdout_
+consumed()`開工/收工前皆確認`False`。**下一輪TW軌接手**：子事件1
+可視為已窮盡兩種主要規格、皆FAIL，優先權轉向(a)子事件3新資料的
+cheap gate（上方(g)段落待辦，注意可能與hypothesis_queue排程重疊，
+先查`git status`/`run_detached.py status`避免重工）；或(iv)`data/
+signal_status.json`回補子事件1這筆新結果。

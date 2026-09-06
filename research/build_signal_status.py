@@ -47,16 +47,18 @@ DIRECTIONS = [
                 "status": "FAIL",
                 "concluded_at": "2026-09-07",
                 "summary": (
-                    "300檔樣本，1707筆可用事件。TRAIN IC=+0.0192(p=0.54)、"
-                    "VAL IC=-0.0373(p=0.34)，正負號不一致，null percentile=19.0"
-                    "（門檻>=90.0），四項事前綁定判準全數未過。反推公式本身"
+                    "300檔樣本，1707筆可用事件。連續比例規格：TRAIN IC=+0.0192"
+                    "(p=0.54)、VAL IC=-0.0373(p=0.34)，正負號不一致，null "
+                    "percentile=19.0（門檻>=90.0）。追測二元規格（有無融券部位）："
+                    "TRAIN diff=+0.0016、VAL diff=-0.0017，同樣正負號不一致，"
+                    "null percentile=37.5，結論一致，排除「零值稀釋訊號」解讀。"
+                    "兩種合理規格皆FAIL，四項事前綁定判準全數未過。反推公式本身"
                     "（PIT可得性）已驗證可行，FAIL的是「機制對報酬有無預測力」"
-                    "這個獨立問題。82.2%事件short_ratio為零，二元對照規格"
-                    "（有無融券部位）尚未測。"
+                    "這個獨立問題。"
                 ),
                 "refs": {
-                    "trials_ledger": ["#186"],
-                    "docs": ["HYPOTHESIS_QUEUE.md #51(e)", "STRATEGY_GRAVEYARD.md #51"],
+                    "trials_ledger": ["#186", "#189"],
+                    "docs": ["HYPOTHESIS_QUEUE.md #51(h)", "STRATEGY_GRAVEYARD.md #51"],
                 },
             },
             {
