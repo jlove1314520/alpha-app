@@ -2225,3 +2225,79 @@ probe.py`或新腳本），用近期1~2檔真實除息案例核對BFI84U即時�
 gate（子事件1強制回補、子事件2現金增資皆已確認可行，可擇一先做）。
 
 完整見`TW_MARATHON_STATE.md`第420輪記錄、`HYPOTHESIS_QUEUE.md`#51。
+
+## 第422輪 · 2026-09-07T03:00+08:00 · TW軌
+
+取鎖乾淨（非陳舊鎖檔，cycle`20260907-030037`）。三軌時間戳：TW 02:04
+（round420，最舊）／US 02:30（round421）／FUT 12:00（round399，依例外
+條款不選，除非有全新機制假說）——依輪替選TW。`run_detached.py status`
+確認heavy-job-slot空（0個running），無背景工作衝突；`git status`確認
+有一批既存未commit異動（`data/rate_limit_state.json`、
+`.github/workflows/audit.yml`、`research/.live_watchlist.json`、
+`research/DEV_QUEUE_PROMPT.txt`、`research/data_cache/`、
+`research/dev_queue_cycle.log`）為其他既存工作留下，本輪未觸碰、
+保留原狀，不代為commit（非本輪工作範圍，不確定是否完整，交由該工作
+自己收尾）。
+
+**本輪工作單位＝round420「下一步(iii)」：設計`HYPOTHESIS_QUEUE.md`#51
+子事件1（融券強制回補）具體事件研究第1關cheap gate**。子事件1反推
+公式（`停止過戶日=CashExDividendTradingDate後第2交易日`、`強制回補
+視窗=[停止過戶日-6交易日,停止過戶日-3交易日]`）已於round419-421用
+2330/1808兩檔真實個股核對通過，但只停留在人工核對階段，本輪第一次
+寫成可重複執行的具體經濟假說測試。
+
+**經濟機制界定（跟已測過的`#30`/`#36`區分清楚，避免誤判為重測）**：
+`#30`（`f_margin_utilization`）、`#36`（`f_short_sale_utilization`）
+測的是融資/融券使用率對**未來所有時點**報酬的無條件橫斷面預測力。
+本輪測的是完全不同的機制——融券餘額只有在股票即將進入強制回補視窗
+時才會轉成被迫買盤，其他時間高低不代表任何強制交易壓力。事前綁定
+方向：視窗開始前既有融券部位（`ShortSaleTodayBalance/ShortSaleLimit`）
+越大，視窗內超額報酬應該越高。
+
+新增`forced_short_covering_gate1.py`：宇宙採`factor_ic.py`同一個300檔
+樣本（`SAMPLE_SEED=20260822`，跟`#30`/`#36`同一個宇宙方便比較），
+248/300檔已有本機融券快取，其餘52檔本輪正常新抓（FinMind免費層額度
+內，非批次濫用）。對每檔股票每筆`CashExDividendTradingDate`現金股利
+除息事件套公式算出視窗，抓視窗開始前最近一筆short_ratio（PIT安全），
+算視窗內個股報酬扣TAIEX同期報酬（超額報酬），Spearman IC + VAL期
+洗牌null N=200（跟`factor_ic.py`同一套判準：train/val同號、VAL IC>0、
+null percentile>=90.0、VAL p<0.10、n>=30皆須滿足）。
+
+**結果**：248/300檔有可用價格，現金股利除息事件共1984筆，窗口+融券
+資料皆可用事件=1707筆（`short_ratio`分佈：`share_zero`=82.2%，多數
+事件融券餘額為零，樣本高度右偏）。TRAIN IC=+0.0192（p=0.5363,
+n=1045）、**VAL IC=-0.0373（p=0.3376, n=662）**，train/val正負號
+不一致，null percentile=19.0（門檻>=90.0），四個事前綁定判準全數
+未過。
+
+**判定：FAIL（僅這個連續比例規格）**——「短天期融券部位大小線性
+預測強制回補視窗內超額報酬」這個假說沒有證據支持。**不影響子事件1
+反推公式本身的驗證結果**（round419-421用真實個股核對通過的是PIT
+可得性問題——視窗算不算得出來；本輪測的是視窗內有沒有可觀測的異常
+報酬，是獨立的問題，公式本身未被推翻）。
+
+**誠實揭露限制**：82.2%事件的short_ratio為零，用連續比例做Spearman
+IC可能被大量零值稀釋掉訊號，只測了「連續比例大小」這一種規格，未測
+「有無融券部位」的二元對照這個可能更合適的規格變體——依研究紀律一輪
+一個有界工作單位，本輪誠實記負，不在本輪內自行加測第二種規格。
+
+已寫入`TRIALS_LEDGER.md`#186、`STRATEGY_GRAVEYARD.md`（新增`#51子
+事件1`條目）、`HYPOTHESIS_QUEUE.md`#51(e)段落。`is_holdout_consumed()`
+開工/收工前皆確認`False`，全程零新增付費/需登入API呼叫。
+
+**另誠實記錄一項欠款**：`MARATHON_PROTOCOL.md`0a節（2026-09-07裁示）
+要求#50/#51/#52/#49的成績（含FAIL）全部要進`data/signal_status.json`
+供App將來對使用者公開，本輪盤點確認這個檔案至今從未被建立過（截至
+本輪，#49已有一筆最終FAIL、#51已有本輪這筆FAIL），這是轉向後三輪
+（420/421/422）都欠下的地基工作，不是本輪能在既有時間預算內順手做好
+的事（需要先想清楚schema：要不要區分子事件/因子/規格層級、要不要
+含判準明細），誠實記在這裡，不假裝已完成。
+
+**下一輪TW軌接手**：(i) 若判斷值得追加，子事件1可測二元規格
+（`short_ratio>0` vs `==0`兩組比較視窗內mean_CAR，而非連續比例
+Spearman IC）；(ii) 續攻子事件3 MOPS查證（`HYPOTHESIS_QUEUE.md`
+#51(d)段落列的(1)/(2)/(3)三個候選方向尚未測）；(iii) 改用子事件2
+（現金增資，已確認可行）設計對等的第1關cheap gate，作為子事件1的
+獨立對照/補強；(iv) 設計`data/signal_status.json`schema並回補#49/
+#51已有的結果。完整見`TRIALS_LEDGER.md`#186、`HYPOTHESIS_QUEUE.md`
+#51、`forced_short_covering_gate1.py`（新增，可重複執行）。
