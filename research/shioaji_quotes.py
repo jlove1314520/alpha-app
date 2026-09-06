@@ -83,6 +83,17 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# 2026-09-07（資料一.1）逐筆tick落地。同目錄的模組，跑法是`python research/shioaji_quotes.py`
+# 所以research/本來就是sys.path[0]。落地失敗不能害整支報價行程起不來——真的import不到
+# 就退化成「不落地」，即時推送照常，並在啟動log印一次原因。
+try:
+    import tick_recorder
+except ImportError as _e:  # pragma: no cover - 只有檔案被刪掉才會走到
+    tick_recorder = None
+    _TICK_RECORDER_IMPORT_ERROR = str(_e)
+else:
+    _TICK_RECORDER_IMPORT_ERROR = None
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = REPO_ROOT / "data" / "quotes_sinopac.json"
 ENV_PATH = REPO_ROOT / ".env"
@@ -606,6 +617,17 @@ class TickState:
         with self._lock:
             return {k: dict(v) for k, v in self._quotes.items()}
 
+    def latest_bidask(self, key: str) -> tuple:
+        """該代號最近一次BidAsk回呼收到的最佳買/賣價。
+
+        2026-09-07（資料一.1）新增，給tick落地用：`TickSTKv1`本身沒有五檔欄位，
+        逐筆落地要記bid/ask只能取「成交當下手上最新的那一檔報價」。誠實揭露：
+        這**不是**跟該筆成交同一個封包的快照，而且動態訂閱的自選股只訂Tick沒訂
+        BidAsk（見MAX_DYNAMIC_SUBSCRIPTIONS），那些代號會一路是None。"""
+        with self._lock:
+            q = self._quotes.get(key) or {}
+            return q.get("bid"), q.get("ask")
+
     def add_tick(self, key: str, price, volume, ts) -> None:
         """用已收到的一筆tick更新當日1分K（O/H/L/C/V）。`ts`是tick.datetime
         （Shioaji給的是台北時間、naive datetime）；沒有就用現在時間。指數quote
@@ -773,6 +795,27 @@ def _to_float(v):
     return f if f == f else None  # 排除NaN
 
 
+# 2026-09-07（資料一.1）逐筆落地器。模組層單例，因為callback是Shioaji背景執行緒
+# 觸發的、拿不到主迴圈的區域變數；TickRecorder內部有鎖，多執行緒同時record安全。
+# import失敗時是None，所有落地呼叫都會被`if RECORDER`擋掉，即時推送完全不受影響。
+RECORDER = tick_recorder.TickRecorder() if tick_recorder else None
+
+
+def _record_tick(state: TickState, key: str, tick) -> None:
+    """把一筆tick排進落地緩衝。bid/ask取自TickState最近一次BidAsk回呼。
+
+    **刻意不放進callback的try/except保護範圍以外**：這裡自己再包一層，是因為
+    落地是附加功能，就算它整個壞掉也不能讓同一筆tick後續的push_tick()/熱檔寫入
+    被跳過（那會直接害使用者手機看不到報價）。"""
+    if RECORDER is None:
+        return
+    try:
+        bid, ask = state.latest_bidask(key)
+        RECORDER.record(key, tick, bid=bid, ask=ask)
+    except Exception as e:
+        print(f"  [tick落地] {key} 排入緩衝失敗（不影響推送）：{type(e).__name__}: {e}", flush=True)
+
+
 def _make_tick_stk_handler(state: TickState, key: str, label: str | None):
     def handler(tick) -> None:
         try:
@@ -796,6 +839,7 @@ def _make_tick_stk_handler(state: TickState, key: str, label: str | None):
             state.update(key, patch)
             state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
             state.push_tick(key)  # 2026-09-04 tick-push：先推（最低延遲），再寫熱檔備援
+            _record_tick(state, key, tick)  # 2026-09-07 資料一.1：推完才落地，落地不佔推送延遲
             state.maybe_write_live_state()
         except Exception as e:
             # callback裡任何例外都不能讓整個訂閱掛掉，只記log繼續收下一筆
@@ -842,6 +886,7 @@ def _make_tick_fop_handler(state: TickState, key: str, label: str | None):
             state.update(key, patch)
             state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
             state.push_tick(key)
+            _record_tick(state, key, tick)  # 2026-09-07 資料一.1：期貨逐筆也落地
             state.maybe_write_live_state()
         except Exception as e:
             print(f"  [tick_fop callback異常] {key}: {type(e).__name__}: {e}", flush=True)
@@ -995,6 +1040,48 @@ def _flush_and_push(state: TickState, final: bool = False) -> None:
     print(f"  [git push] 5次重試後仍失敗，下次flush時的git pull會自然同步", flush=True)
 
 
+def _flush_ticks() -> None:
+    """把落地緩衝寫進jsonl（主迴圈每60秒一次）。任何失敗只記log，不中斷常駐迴圈。"""
+    if RECORDER is None:
+        return
+    try:
+        RECORDER.flush()
+    except Exception as e:
+        print(f"  [tick落地] flush失敗（下輪再試）：{type(e).__name__}: {e}", flush=True)
+
+
+def _compact_today() -> None:
+    """收盤（13:45離開主迴圈）把當天jsonl壓成單一parquet並刪jsonl。
+
+    壓縮本身會先寫.tmp、讀回核對列數一致才rename、才刪jsonl（見tick_recorder.compact
+    的說明）——所以「壓縮失敗還把原始資料刪了」不會發生。這裡只負責印結果。"""
+    if RECORDER is None:
+        return
+    day = datetime.now(TW_TZ).strftime("%Y%m%d")
+    try:
+        res = tick_recorder.compact(day)
+        print(f"  [tick落地] 收盤壓縮 {day}：{json.dumps(res, ensure_ascii=False)}", flush=True)
+    except Exception as e:
+        print(f"  [tick落地] 收盤壓縮 {day} 失敗，jsonl保留（隔日啟動會自動補壓）："
+              f"{type(e).__name__}: {e}", flush=True)
+
+
+def _compact_stale_on_startup() -> None:
+    """啟動時補壓縮「不是今天」的殘留jsonl。
+
+    為什麼需要：13:45那次壓縮只有在行程活著走完收盤流程時才會跑到。當機、斷電、
+    被工作排程器kill掉的話，那天的jsonl會一直留著。與其另外排一個排程（多一個
+    會壞的東西），不如在每天開盤啟動時順手補——反正這支行程每個交易日都會被拉起。"""
+    if RECORDER is None:
+        return
+    try:
+        res = tick_recorder.compact_stale_days()
+        if res:
+            print(f"  [tick落地] 啟動補壓縮：{json.dumps(res, ensure_ascii=False)}", flush=True)
+    except Exception as e:
+        print(f"  [tick落地] 啟動補壓縮失敗（不影響本日落地）：{type(e).__name__}: {e}", flush=True)
+
+
 def _cleanup_pid() -> None:
     try:
         PID_PATH.unlink(missing_ok=True)
@@ -1040,6 +1127,12 @@ def run_stream_daemon() -> None:
             _sha = "unknown"
         print(f"[build] git sha={_sha}　原始碼修改時間="
               f"{datetime.fromtimestamp(os.path.getmtime(__file__), TW_TZ).isoformat()}", flush=True)
+        if RECORDER is None:
+            print(f"[tick落地] 停用：tick_recorder import失敗（{_TICK_RECORDER_IMPORT_ERROR}）", flush=True)
+        else:
+            print(f"[tick落地] {'啟用' if RECORDER.enabled else '停用（ALPHA_TICK_RECORD=0）'}，"
+                  f"目錄={tick_recorder.TICKS_ROOT}", flush=True)
+            _compact_stale_on_startup()
         print(f"登入成功，帳戶數：{len(accounts) if accounts else 0}，開始訂閱逐筆tick串流", flush=True)
         time.sleep(CONTRACTS_READY_WAIT_SEC)
 
@@ -1160,6 +1253,7 @@ def run_stream_daemon() -> None:
         while True:
             time.sleep(FLUSH_INTERVAL_SEC)
             _flush_and_push(state)
+            _flush_ticks()  # 2026-09-07 資料一.1：每FLUSH_INTERVAL_SEC（60秒）把緩衝的tick寫成jsonl
 
             elapsed_since_dynamic_check += FLUSH_INTERVAL_SEC
             if elapsed_since_dynamic_check >= DYNAMIC_POLL_SEC:
@@ -1207,11 +1301,20 @@ def run_stream_daemon() -> None:
                     print("交易時段結束，收尾並登出", flush=True)
                     break
 
+        # 2026-09-07（資料一.1）收盤收尾：13:45離開迴圈後先把緩衝裡剩下的tick寫完，
+        # 再把當天的jsonl壓成單一parquet並刪jsonl。順序不能倒——先壓縮會漏掉最後
+        # 那不到60秒的tick（含尾盤，正是最有研究價值的一段）。
+        _flush_ticks()
+        _compact_today()
+
         _flush_and_push(state, final=True)  # 收盤收尾：寫當日收盤快照並commit+push（乙.1之後全天唯一一次）
         state.maybe_write_live_state(force=True, market_status="closed")  # 熱檔也標記收盤，live server據此顯示「今日收盤」
         for k in list(state.snapshot().keys()):
             state.push_tick(k, event="market_closed", market_status="closed")  # 通知live server記憶體也轉「收盤」
     finally:
+        # 2026-09-07（資料一.1）不論是正常收盤、例外中斷還是Ctrl+C，都把緩衝裡剩下的
+        # tick寫進jsonl再走。緩衝只在記憶體，行程一沒就永久消失，而tick是不可重來的。
+        _flush_ticks()
         try:
             api.logout()
         except Exception:

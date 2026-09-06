@@ -490,7 +490,10 @@ ORDER-END
 **登記備註**：「新一 八因子」的勾在 2026-09-06 上一輪已補上（commit `73bfb07`，
 覆蓋率變化已寫進該行），這裡不重複處理。金流一.5 的假說編號已依裁示由 #41 改為 #42。
 
-- [ ] **資料一.1** shioaji_quotes.py 每筆 tick 寫 `research/data/ticks/YYYYMMDD/{code}.jsonl`（60 秒 flush，不影響推送）＋13:45 轉每日單一 parquet 並刪 jsonl＋加 .gitignore
+- [x] **資料一.1** **已完成（2026-09-07 00:3x，commit 見 PROGRESS）**：新增 `research/tick_recorder.py`（緩衝→jsonl→parquet），`shioaji_quotes.py` 的股票/期貨 tick handler 在 `push_tick()` **之後**呼叫 `_record_tick()`（推送優先，落地不佔延遲），主迴圈每 60 秒 `_flush_ticks()`，13:45 離開迴圈後 `_compact_today()` 壓成 `ticks/YYYYMMDD.parquet` 並刪 jsonl，`finally` 也會 flush（Ctrl+C／例外不掉資料）。壓縮採「寫 .tmp→讀回核對列數→rename→才刪 jsonl」，核對不過就保留 jsonl。行程被砍導致 13:45 沒壓到的，隔日啟動 `_compact_stale_on_startup()` 自動補。`.gitignore` 加 `research/data/ticks/`（`research/data/` 已涵蓋，這條是雙保險兼文件），`git check-ignore` 實測命中。
+  **證據**：`python research/tick_recorder_test.py` → 11 組斷言全 PASS（含欄位型別、append 不覆寫、壞行不害整天、已有 parquet 不覆蓋、compact_stale 只壓非今日）；`python research/shioaji_tick_stream_test.py` → 15/15 PASS（新增 2 項：tick handler 真的餵到 recorder 且 bid/ask 取自最近五檔、recorder 爆炸不影響報價更新）；`node scripts/smoke_test.mjs` → 43 項全部通過。
+  **常駐服務發布紀律**：`shioaji_quotes.py` 當下**未在執行**（非交易時段會直接 `_write_market_closed()` 結束；PID 檔 40828 已是 stale，`Get-CimInstance Win32_Process` 確認無此行程），所以沒有舊版行程可重啟，2026-09-08 08:30 排程拉起時即載入新版。`alpha_live_server.py` 本輪未改動，`/health` 實測 `stale_process=false`、OPTIONS 預檢 200＋`allow-origin: https://jlove1314520.github.io`＋`allow-credentials: true`。
+  **誠實限制**：真實 tick 落地要等 2026-09-08 開盤才驗得到（收盤時段沒有 tick，無法端到端驗證），這正是 **資料一.4** 的驗收內容。`bid`/`ask` 取自最近一次 BidAsk 回呼、不是同封包快照；動態訂閱的自選股只訂 Tick 沒訂 BidAsk，那些代號會是 null。
 - [ ] **資料一.2** 訂閱範圍維持現有固定＋動態清單，不新增訂閱
 - [ ] **資料一.3** 磁碟保護：估算每日容量並回報；>20GB 時從最舊一天刪，刪前先回報
 - [ ] **資料一.4** 驗收：隔日回報落地檔數／筆數／檔案大小，附 2330 前 5 筆與最後 5 筆

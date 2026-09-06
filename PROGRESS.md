@@ -16,6 +16,71 @@
 
 ---
 
+## 2026-09-07 00:35（開發帽）— 資料一.1：逐筆 tick 落地本機（jsonl → 每日單一 parquet）
+
+**為什麼做這個**：盤中微結構研究（假說 #50 真實滑價估算）的原料只有逐筆成交。
+FinMind 免費層不給盤中資料、付費源在「取得方式鐵律」下屬待採購，我們唯一合法且
+已授權的逐筆來源就是 Shioaji tick 串流——而串流是**過了就沒了**（`api.ticks()`
+盤中每日只有 10 次額度，補不回一整天）。所以只能從現在開始一筆一筆存，存滿
+20 個交易日才有得研究。
+
+**改了什麼**
+- 新增 `research/tick_recorder.py`：`TickRecorder`（記憶體緩衝 → jsonl）＋
+  `compact()`（當日 jsonl → 單一 parquet）＋ `compact_stale_days()`（啟動補壓縮）
+  ＋ CLI（`compact` / `compact-stale` / `stat`）。
+- `research/shioaji_quotes.py`：
+  - `TickState.latest_bidask()` 新方法（落地時取最近一次五檔）。
+  - 股票與期貨 tick handler 在 `state.push_tick()` **之後**呼叫 `_record_tick()`
+    ——順序是刻意的：推送延遲＝使用者手機看到報價的延遲，落地絕不能排在它前面。
+  - 主迴圈每 `FLUSH_INTERVAL_SEC`（60 秒）呼叫 `_flush_ticks()`。
+  - 13:45 離開迴圈後 `_flush_ticks()` → `_compact_today()`（順序不能倒，先壓縮會
+    漏掉最後不到 60 秒的尾盤 tick，那正是最有研究價值的一段）。
+  - `finally` 也 flush 一次：Ctrl+C／例外／被 kill 都不掉緩衝裡的資料。
+  - 啟動時 `_compact_stale_on_startup()` 補壓縮所有非今日的殘留 jsonl，所以 13:45
+    那次沒跑到（當機、斷電、被排程 kill）隔日開盤會自動補上，不必另外排一個排程。
+- `.gitignore` 加 `research/data/ticks/`（`research/data/` 本來就涵蓋它，這條是
+  刻意重複的雙保險兼文件；`git check-ignore -v` 實測命中）。
+- 新增 `research/tick_recorder_test.py`（11 組斷言）；
+  `research/shioaji_tick_stream_test.py` 補 2 項（13 → 15）。
+
+**為什麼是 jsonl 盤中、parquet 收盤**：parquet 不能一行一行 append，行程被砍就會
+壞掉一整天；jsonl 可以 append 而且壞掉最多壞最後一行。但幾百個小檔查詢慢，所以
+收盤壓成一份。壓縮採**寫 `.tmp` → 讀回核對列數 → rename → 才刪 jsonl**，核對不過
+就原封保留 jsonl 並回報原因——寧可佔空間，不要「壓縮失敗還把原始資料刪了」。
+
+**驗證（實際輸出）**
+- `python research/tick_recorder_test.py` → 全部PASS（11 組斷言）
+- `python research/shioaji_tick_stream_test.py` → `=== 全部15項測試PASS ===`
+- `node scripts/smoke_test.mjs` → `=== 冒煙測試結果：全部通過 ===`（43 項）
+- `git check-ignore -v research/data/ticks/20260907/2330.jsonl` →
+  `.gitignore:5:research/data/`（確認不會被 commit）
+
+**常駐服務發布紀律**：`shioaji_quotes.py` 當下**沒有在跑**（非交易時段它會直接
+`_write_market_closed()` 結束；`research/.shioaji_stream.pid` 裡的 40828 已是
+stale，`Get-CimInstance Win32_Process` 確認無此行程），所以沒有舊版行程需要重啟，
+2026-09-08 08:30 排程拉起時就是新版。`alpha_live_server.py` 本輪未改動，仍實測：
+`/health` → `stale_process=false`、build `73aeade`；OPTIONS 預檢 → 200 ＋
+`access-control-allow-origin: https://jlove1314520.github.io` ＋
+`access-control-allow-credentials: true`。
+（附帶發現：`CLAUDE.md`「七之二」寫的驗證指令用 `https://127.0.0.1:8001`，但
+連線三.1 把 uvicorn 綁 127.0.0.1、TLS 由 Tailscale Funnel 終結之後，本機這一段
+已經是**純 http**，用 https 會拿到 `SSL: WRONG_VERSION_NUMBER`。本輪照 http 驗過，
+文件那行要不要改請總司令裁示，未自行更動。）
+
+**誠實揭露的限制**
+- 真實 tick 落地要等 2026-09-08 開盤才驗得到——收盤時段根本沒有 tick 可收，
+  端到端無法在今晚驗證。這正是佇列 **資料一.4** 的驗收內容（隔日回報檔數／筆數／
+  檔案大小＋2330 前後各 5 筆）。目前狀態是「已實作、單元測試全過、尚未經真實盤中驗證」。
+- `bid`/`ask` 取自 `TickState` 最近一次 BidAsk 回呼，**不是**跟該筆成交同一封包的
+  快照；動態訂閱的自選股只訂 Tick 沒訂 BidAsk（訂閱數上限），那些代號會一路是 null。
+- 只收股票與期貨逐筆，不收指數 quote（不是逐筆成交、無量無五檔，對微結構沒用）。
+- `simtrade=true` 是試撮不是真成交，照收不濾（濾掉就還原不回來），濾是分析端的事。
+
+**下一步**：資料一.2（確認訂閱範圍維持現有固定＋動態清單，不新增訂閱）→
+資料一.3（磁碟容量估算與 >20GB 保護）→ 資料一.4（隔日真實驗收）。
+
+---
+
 ## 2026-09-07 凌晨（維運帽）— 自走一：開發佇列背景可續跑＋研究方向重大轉向登記
 
 ### 自走一：把馬拉松那套搬到開發佇列

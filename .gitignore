@@ -3,6 +3,10 @@
 # "*.py" or "research/" pattern here -- that would silently hide code from
 # Cowork's audit, which is exactly the failure this comment exists to prevent.
 research/data/
+# 2026-09-07（資料一.1）逐筆tick落地目錄。上面的 research/data/ 其實已經蓋住它了，
+# 這一條是刻意重複的雙保險兼文件：一天可能好幾百MB的熱資料，絕不能進公開 repo，
+# 萬一以後有人放寬上面那條規則，這一條還在。
+research/data/ticks/
 research/.marathon.lock
 research/.hypothesis_queue.lock
 research/marathon_cycle.log

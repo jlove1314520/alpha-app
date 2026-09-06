@@ -24,6 +24,10 @@ import shioaji_quotes as sq
 import tempfile as _tempfile
 sq.LIVE_STATE_PATH = sq.Path(_tempfile.gettempdir()) / "alpha_test_live_state.json"
 sq.LIVE_PUSH_ENABLED = False  # 既有測試不要真的對正式伺服器送UDP；tick-push有自己的專屬測試
+# 2026-09-07（資料一.1）tick落地：測試裡把落地目錄導到暫存目錄，不要讓假tick混進
+# 正式的research/data/ticks/（那份資料是要拿去做研究的，混進假資料就毀了）。
+sq.RECORDER = sq.tick_recorder.TickRecorder(
+    root=sq.Path(_tempfile.gettempdir()) / "alpha_test_ticks", enabled=True)
 
 TW_TZ = timezone(timedelta(hours=8))
 
@@ -67,6 +71,48 @@ def test_tick_stk_handler_updates_state():
     assert q["volume_this_tick"] == 3
     assert q["total_volume"] == 1200
     print("test_tick_stk_handler_updates_state PASS")
+
+
+def test_tick_handler_feeds_recorder_with_latest_bidask():
+    """2026-09-07（資料一.1）驗證「tick回呼→落地緩衝」這條線真的接上了，
+    而且bid/ask是從TickState取到最近一次BidAsk回呼的值——這是落地資料能不能
+    拿來估滑價的關鍵，接錯就是一整天白收。"""
+    rec = sq.tick_recorder.TickRecorder(root=sq.Path(_tempfile.gettempdir()) / "alpha_test_ticks2",
+                                        enabled=True)
+    orig, sq.RECORDER = sq.RECORDER, rec
+    try:
+        state = sq.TickState()
+        sq._make_bidask_stk_handler(state, "2330")(_fake_bidask_stk())  # 先有五檔
+        sq._make_tick_stk_handler(state, "2330", None)(_fake_tick_stk())  # 再來一筆成交
+        assert rec.pending() == 1, f"落地緩衝應有1筆，實際{rec.pending()}"
+        buf = rec._buf[("20260903", "2330")][0]
+        assert buf["close"] == 1050.0, buf
+        assert buf["volume"] == 3, buf
+        assert buf["bid"] == 1049.0 and buf["ask"] == 1050.0, f"bid/ask應取自最近一次五檔，實際{buf}"
+        assert buf["chg_type"] == 1, buf
+        assert buf["ts"].startswith("2026-09-03T09:30:15"), buf
+    finally:
+        sq.RECORDER = orig
+    print("test_tick_handler_feeds_recorder_with_latest_bidask PASS")
+
+
+def test_recorder_failure_does_not_break_push():
+    """落地壞掉不得影響即時推送。用一個record()一定拋例外的假recorder，
+    驗證tick handler照樣把state更新完（不是在半路被例外中斷）。"""
+    class _Boom:
+        def record(self, *a, **k):
+            raise RuntimeError("模擬落地爆炸")
+
+    orig, sq.RECORDER = sq.RECORDER, _Boom()
+    try:
+        state = sq.TickState()
+        sq._make_tick_stk_handler(state, "2330", None)(_fake_tick_stk())
+        q = state.snapshot()["2330"]
+        assert q["last"] == 1050.0, f"落地爆炸不得影響報價更新，拿到{q}"
+        assert q["data_type"] == "REALTIME_TICK", q
+    finally:
+        sq.RECORDER = orig
+    print("test_recorder_failure_does_not_break_push PASS")
 
 
 def test_bidask_stk_handler_updates_state_without_clobbering_tick_fields():
@@ -301,6 +347,8 @@ def main():
         test_kbar_aggregation_per_minute,
         test_live_state_hot_file_written_atomically,
         test_tick_stk_handler_updates_state,
+        test_tick_handler_feeds_recorder_with_latest_bidask,
+        test_recorder_failure_does_not_break_push,
         test_bidask_stk_handler_updates_state_without_clobbering_tick_fields,
         test_quote_idx_handler_computes_change_pct_from_reference,
         test_callback_exception_does_not_propagate,
