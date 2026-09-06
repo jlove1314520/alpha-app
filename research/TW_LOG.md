@@ -1992,3 +1992,17 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 已寫入`TRIALS_LEDGER.md`#158（提醒：#157同日已被另一輪`hypothesis_queue`軌的平均成對相關係數試驗用掉，本筆改用#158，避免編號衝突）、`TW_LEADS.md`#3更新（判定欄改標降級、備註欄新增round398段落、下一步清單同步修正並移除已完成的「VAL期逐年分解」項目、新增「`portfolio_multifactor_v2`成分因子候選應擱置」建議）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用`SAMPLE_SIZE`已預先回補好的300檔快取）。
 
 **下一輪TW軌接續**：(1)TRAIN期beta+0.223比VAL期+0.027明顯偏離market-neutral的regime查證（尚未做，`TW_LEADS.md`#3下一步(b)）；(2)176/248（71%）因子值覆蓋率偏低原因查證（尚未做，同下一步(c)）；(3)`portfolio_multifactor_v2`納入`f_quality_roe_stability`一事本輪建議擱置，不列為近期優先方向；(4)若US軌`20260906-110113-735e`已於後續輪次完成，heavy-job-slot空出後評估TW軌是否有其他候選需要完整重度深挖（可先grep `TW_LEADS.md`找尚未走完GATE_SEQUENCE的CHEAP_PASS/EXPERIMENTAL候選）。完整見`TW_MARATHON_STATE.md`第398輪記錄、`TRIALS_LEDGER.md`#158、`TW_LEADS.md`#3、`deep_dive_f_quality_roe_stability_val_year_breakdown.py`（新增）、`data/deep_dive_f_quality_roe_stability_val_year_breakdown.csv`（新增）、`data/deep_dive_f_quality_roe_stability_val_leave_year_out.csv`（新增）。
+
+---
+
+## 2026-09-06T15:33+08:00 — 馬拉松第401輪：TW
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：TW 11:30（round398，最舊）／FUT 12:00（round399）／US 12:30（round400，最新）——依輪替選TW。`run_detached.py status`確認全部10個既有job皆已結束（`finished`/`failed`/`orphaned`），`running=0`，heavy-job-slot完全空閒。
+
+**本輪工作單位**：`TW_LEADS.md`#2 `f_value_pe`（負PER估值，FDR重新評分後「待複驗候選（CANDIDATE）」）補做「情境分群檢驗」——`CRITERIA_V2_LOCK.md`第39行明文規定CANDIDATE要再通過「情境分群檢驗→成本敏感度→alpha/beta顯著性關卡」才能談holdout，`f_value_pe`目前這三關都還沒走。`regime_conditions.py`（2026-08-26主線1）當初只測了`f_foreign_streak`/`f_rel_strength`/`f_quality_roe_stability`（train/val反轉候選）跟`f_eps_growth`/`f_eps_surprise`/`f_revenue_surprise`/`f_low_vol`（已通過因子）共7個，`f_value_pe`是`TW_LEADS.md`#2備註原文點名「還需情境分群」但一直沒人補的落差。
+
+新增`regime_conditions_value_pe.py`：重用`regime_conditions.py`既有的`grouped_ic_market_level()`/`grouped_ic_stock_level()`/`_market_regime_labels()`/`_stock_size_and_liquidity()`等函式，不修改該檔案本身（避免弄亂已整理進`REGIME_CONDITIONS.md`的既有7因子分析）。改用`factor_ic.SAMPLE_SIZE`現行的300（`CALIBRATION_PROBE.md`裁示後的新常數，原分析用的是舊100檔樣本），跑同一套四組事前可觀測條件（(a)大盤位階200日均線gate、(b)波動度環境vs擴張窗中位數、(c)個股流動性替代市值三等分、(d)個股20日/120日均量比中位數切）對`f_value_pe`的橫斷面Spearman IC分群。
+
+`ast.parse`確認語法正確後，`python run_detached.py submit --name tw_regime_conditions_value_pe --timeout-min 20 -- python -u research/regime_conditions_value_pe.py`（job`20260906-153323-37f5`）。`run_detached.py wait 20260906-153323-37f5 --max-min 4`在session內等滿4分鐘仍`STILL_RUNNING`——300檔樣本`load_sample_with_factors()`首次載入預期約13分鐘（`CALIBRATION_PROBE.md`已記錄的量級），未逾常，未搶跑其他heavy job（heavy-job-slot本輪僅這一個工作在用）。`is_holdout_consumed()`開工前已確認`False`。全程零新增API呼叫（複用既有300檔因子快取）。
+
+**下一輪TW軌接手**：`run_detached.py status`確認`20260906-153323-37f5`是否`finished`；若是，讀log裡`f_value_pe`四組條件的`mean_ic`/`n_snapshots`/`n_obs`數字（比照`REGIME_CONDITIONS.md`既有7因子的判讀方式：兩組方向是否一致、n_obs是否≥100門檻），寫入`TRIALS_LEDGER.md`新編號＋`TW_LEADS.md`#2更新＋補寫`REGIME_CONDITIONS.md`新增`f_value_pe`小節；若逾20分鐘timeout被砍，記錄`timeout`，檢查是否為300檔首次載入耗時比預期長（可拉長timeout重跑，此腳本運算量本身不大，瓶頸應是資料載入I/O，不需要拆解成更小工作單位）。round398遺留的(1)TRAIN/VAL beta查證、(2)176/248覆蓋率查證兩項仍待查但暫緩優先權（`f_quality_roe_stability`納入`portfolio_multifactor_v2`一事round398已建議擱置）。完整見`TW_MARATHON_STATE.md`第401輪記錄、`regime_conditions_value_pe.py`（新增，可重複執行）、`data/jobs/20260906-153323-37f5.log`。

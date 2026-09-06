@@ -145,3 +145,7 @@
 ---
 
 **第390輪（原TW_MARATHON_STATE.md，round396時歸檔）**：**上一則保留（第390輪，供對照）**——本輪更正下一輪`tw_deep_dive_quality_roe_stability_full_rerun`投遞參數（`--timeout-min`40→150，因`factor_ic.SAMPLE_SIZE`已改300檔跟US低波動同量級），純程式碼審閱，零新增運算；過程中誤覆寫round377已存在的`margin_debt_level_window_robustness.py`已用`git checkout`即時還原。完整見`TW_LOG.md`第390輪記錄。
+
+---
+
+**第394輪（原TW_MARATHON_STATE.md，round401時歸檔）**：**上一則保留（第394輪，供對照）**——接續`CALIBRATION_PROBE.md`「甲.3」複驗`#79 f_inst_streak_days`：300檔（248可用）TRAIN mean_ic=+0.0232/VAL mean_ic=-0.0150，train/val正負號仍相反，null percentile=86.1（未過90.0門檻）——判定維持FAIL。**過程中一次判斷失誤並已自行修正**：先誤重跑`#77`才發現round334已用同一套300檔重跑過且數字複現，已撤銷重複記列。已寫入`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13補充。完整見`TW_LOG.md`第394輪記錄。
