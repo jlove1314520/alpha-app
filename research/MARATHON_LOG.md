@@ -1,5 +1,19 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 21:58 — hypothesis_queue排程接續：#48（董監事及大股東股權
+質押比例）完成(a)(b)(c)三點資料可行性查證，全數確認可行。用curl直接
+測試找到真實端點`https://siis.twse.com.tw/publish/{sii|otc}/{yyy}
+IRB130_{mm}.HTM`（純靜態HTML，經由MOPS互動頁`IRB130`表單action
+`ajax_IRB130`的JS轉址目標反查得到，比照`#40`/`#41`鎖定真實端點手法），
+歷史回溯確認涵蓋2015-2025（sii+otc兩市場皆測試2015-01/更近月份成功），
+PIT時間差確認為正常約3週月頻揭露延遲（非回溯修正風險）。解析正確性
+已驗證（Big5解碼、1101台泥質押比例%人工核對一致）。新增可重複執行
+探測腳本`irb130_pledge_probe.py`，已更新`HYPOTHESIS_QUEUE.md`#48條目
+狀態小節。下一輪直接進第1關cheap gate，不跳關，不需再查資料可行性。
+本輪僅做唯讀HTTP GET測試（約8次請求、每次間隔1.5秒），未寫入任何
+`data/`正式快取、未動`alpha-data`凍結區、`is_holdout_consumed()`維持
+`False`。
+
 ## 2026-09-06 21:25 — hypothesis_queue排程接續：修正#47結案後排隊順序
 總結未同步問題+設計新假設#48（董監事及大股東股權質押比例）。本輪
 發現`HYPOTHESIS_QUEUE.md`「排隊順序總結」章節第46條末尾仍寫著
