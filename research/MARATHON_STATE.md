@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T10:30+08:00**
+**最後更新：2026-09-06T16:06+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 399 輪。最新一輪：第 399 輪 · 2026-09-06T12:00+08:00 · FUT（取鎖乾淨）**。**本輪工作單位**：US背景job`20260906-110113-735e`仍`running`佔用heavy-job-slot，依輪替選FUT（時間戳最舊），依round385下一步(c)例外條款「除非有全新機制假說」測試`fut_daily_reversal_1d`/`fut_daily_continuation_1d`（前一日全天close-to-close報酬預測次日，全新機制、非既有隔夜跳空gap類構造）。結果：反轉percentile=71.0、順勢percentile=29.0，皆FAIL（門檻90.0）。`MARATHON_PROTOCOL.md`第3節期貨假說類別至此全數至少測過一個變體，FUT軌無清楚剩餘的全新機制候選，下一輪若再選到FUT建議優先權讓回TW/US。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第399輪記錄、`TRIALS_LEDGER.md`#159/#160、`FUT_LEADS.md`#27。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 402 輪。最新一輪：第 402 輪 · 2026-09-06T16:06+08:00 · US（取鎖乾淨）**。**本輪工作單位**：三軌時間戳TW 15:33（round401，最新）／US 12:30（round400）／FUT 12:00（round399，最舊）——依輪替本應選FUT，但`FUT_MARATHON_STATE.md`round399明文「下一輪若再選到FUT，建議優先權重新排回TW/US軌」（第0節例外條款：state檔案明寫換軌），故改選US（較TW舊）。接續`US_MARATHON_STATE.md`round400「下一輪接手」：檢查`f_us_value_bm`(#20)跟`f_us_low_vol`(#21)在VAL期十分位切割long/short名單重疊度。新增`us_leg_overlap_valuebm_lowvol.py`（重用`_decile_legs()`原封不動），VAL期51個換倉快照逐一計算。**結果**：多頭腿重疊率0.110≈隨機基準0.119（1.0x，幾乎無額外重疊）；空頭腿重疊率0.349達隨機基準2.9x。**判定PARTIAL**——排除「兩因子收斂到同一批股票/宇宙離散度讓任何排序都暴賺」最寬版本解釋（多頭端不成立），空頭端中度重疊有經濟基礎（低book-to-market成長股與高波動股在2021-2022重疊最高、2023-2024降溫，與升息熊市時間軸吻合）。已寫入`TRIALS_LEDGER.md`#165、`US_LEADS.md`#20/#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫，原地執行（非重度工作）。**注記**：本檔全局計數器先前停在399未同步round400/401，本輪一併補上（round400=US`f_us_value_bm`深挖收成+隨機腿診斷REFUTED懷疑②，round401=TW`f_value_pe`情境分群job投遞待收成）。詳見`US_MARATHON_STATE.md`第402輪記錄、`TRIALS_LEDGER.md`#165、`US_LEADS.md`#20/#21。
 
-**上一輪（第395輪，供對照）：第 395 輪 · 2026-09-06T10:00+08:00 · US**。TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞，改做`#151`的leave-top-N-out集中度檢查：排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**，判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154。完整見`US_MARATHON_STATE.md`第395輪記錄。
+**上一輪（第399輪，供對照）：第 399 輪 · 2026-09-06T12:00+08:00 · FUT**。US背景job`20260906-110113-735e`仍`running`佔用heavy-job-slot，依輪替選FUT，依round385下一步(c)例外條款測試`fut_daily_reversal_1d`/`fut_daily_continuation_1d`：反轉percentile=71.0、順勢percentile=29.0，皆FAIL（門檻90.0）。`MARATHON_PROTOCOL.md`第3節期貨假說類別至此全數至少測過一個變體，FUT軌無清楚剩餘的全新機制候選，下一輪若再選到FUT建議優先權讓回TW/US。完整見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第399輪記錄、`TRIALS_LEDGER.md`#159/#160、`FUT_LEADS.md`#27。
 
 **上一輪（第389輪，供對照）：第 389 輪 · 2026-09-06T07:05+08:00 · TW**。盤點確認`MARATHON_PROTOCOL.md`第3節因子家族已全數掃過，更正`MI_MARGN`過時備註；US heavy job佔用中無法投遞TW的`deep_dive_f_quality_roe_stability.py`完整重跑。完整見`TW_MARATHON_STATE.md`第389輪記錄。
 
