@@ -239,7 +239,14 @@ ALLOW_ORIGINS = _DEFAULT_ALLOW_ORIGINS + _extra_origins
 ALLOW_HEADERS = ["X-Alpha-Local-Token", "Content-Type", "Accept", "Cache-Control",
                  "CF-Access-Client-Id", "CF-Access-Client-Secret"]
 
-app = FastAPI(title="Alpha Live Quote Server（本機唯讀即時報價，Phase 1冷熱分離）")
+# 2026-09-06（連線二.3）公開到網際網路前的硬規則之一：關掉 FastAPI 的互動文件。
+# /docs、/redoc、/openapi.json 會把所有端點、參數與資料結構攤開給任何人看。
+# 在只綁區網時那頂多是方便；一旦經 Tailscale Funnel 公開，那就是免費的偵察地圖。
+# 這三個設成 None 之後，路由本身不存在，回 404。
+app = FastAPI(
+    title="Alpha Live Quote Server（本機唯讀即時報價，Phase 1冷熱分離）",
+    docs_url=None, redoc_url=None, openapi_url=None,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOW_ORIGINS,
@@ -250,6 +257,83 @@ app.add_middleware(
     allow_headers=ALLOW_HEADERS,
     allow_credentials=True,
 )
+
+
+# ── 2026-09-06（連線二.3）401 限速與封鎖 ─────────────────────────────────────
+# 總司令指定：同一 IP 每分鐘 401 超過 20 次就封 10 分鐘並記 log。
+# 這是公開之後最基本的一道：token 是 32 字元隨機字串，暴力猜不可能猜中，但沒有
+# 限速的話對方可以無成本地一直試，也會把 log 灌爆讓真的問題看不見。
+#
+# 「同一 IP」怎麼取：Tailscale 官方文件沒有寫明 Funnel 會不會轉發原始客戶端 IP，
+# 所以這裡不猜——有 X-Forwarded-For 就用它的第一段，沒有就用連線來源，並把實際
+# 用了哪一種記進封鎖 log，等 Funnel 開起來之後用實測確認（若全部流量都顯示成
+# 127.0.0.1，代表沒轉發，那時要改用別的識別方式，不是假裝這樣就夠了）。
+#
+# 一個刻意的設計：只要該 IP 出現一次「token 正確」的請求，就把它的 401 計數清零。
+# 否則自己打錯幾次 token 之後再改對，還要等封鎖過期才能用。
+AUTH_FAIL_WINDOW_SEC = 60
+AUTH_FAIL_MAX = 20
+AUTH_BAN_SEC = 600
+_auth_fails: dict[str, list[float]] = {}
+_auth_bans: dict[str, float] = {}
+
+
+def _client_key(request) -> tuple[str, str]:
+    """回傳 (識別用的key, 來源說明)。來源說明會寫進 log，方便日後查證。"""
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip(), "x-forwarded-for"
+    host = getattr(getattr(request, "client", None), "host", None) or "unknown"
+    return host, "peer"
+
+
+def note_auth_ok(request) -> None:
+    key, _ = _client_key(request)
+    _auth_fails.pop(key, None)
+    _auth_bans.pop(key, None)
+
+
+def note_auth_fail(request) -> None:
+    key, src = _client_key(request)
+    now = time.time()
+    hits = [t for t in _auth_fails.get(key, []) if now - t < AUTH_FAIL_WINDOW_SEC]
+    hits.append(now)
+    _auth_fails[key] = hits
+    if len(hits) > AUTH_FAIL_MAX:
+        _auth_bans[key] = now + AUTH_BAN_SEC
+        _auth_fails.pop(key, None)
+        print(f"[auth-ban] {key}（來源={src}）在 {AUTH_FAIL_WINDOW_SEC} 秒內 401 超過 "
+              f"{AUTH_FAIL_MAX} 次，封鎖 {AUTH_BAN_SEC // 60} 分鐘", flush=True)
+
+
+def auth_banned_until(request) -> float | None:
+    key, _ = _client_key(request)
+    until = _auth_bans.get(key)
+    if until is None:
+        return None
+    if until <= time.time():
+        _auth_bans.pop(key, None)
+        return None
+    return until
+
+
+@app.middleware("http")
+async def _auth_rate_limit(request, call_next):
+    until = auth_banned_until(request)
+    if until is not None:
+        retry = int(until - time.time()) + 1
+        return Response(
+            content=json.dumps({"detail": f"驗證失敗次數過多，已暫時封鎖，請 {retry} 秒後再試"},
+                               ensure_ascii=False),
+            status_code=429, media_type="application/json; charset=utf-8",
+            headers={"Retry-After": str(retry)},
+        )
+    resp = await call_next(request)
+    if resp.status_code == 401:
+        note_auth_fail(request)
+    elif resp.status_code < 400:
+        note_auth_ok(request)
+    return resp
 
 
 @app.middleware("http")
@@ -901,6 +985,13 @@ def health():
         "ok": True,
         "uptime_sec": round(time.time() - SERVER_STARTED_AT, 1),
         "build": BUILD_SHA,
+        # 2026-09-06（連線二.3）公開前的自我檢查：這三項都要是預期值才可以開 Funnel
+        "hardening": {
+            "docs_disabled": app.docs_url is None and app.redoc_url is None and app.openapi_url is None,
+            "auth_rate_limit": f"{AUTH_FAIL_MAX} 次/{AUTH_FAIL_WINDOW_SEC} 秒 → 封 {AUTH_BAN_SEC // 60} 分鐘",
+            "endpoints_without_token": ["/health", "/ca.crt"],
+            "active_bans": len(_auth_bans),
+        },
         "started_at": datetime.fromtimestamp(SERVER_STARTED_AT, TW_TZ).isoformat(),
         "source_mtime": datetime.fromtimestamp(_source_mtime(), TW_TZ).isoformat(),
         # 行程啟動時間早於原始碼修改時間 ⇒ 記憶體裡跑的是舊程式，必須重啟。

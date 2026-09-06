@@ -224,7 +224,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [~] **連線一.3** **部分完成**：kill 後自動回來三次實測 19／60／10 秒（要求 60 秒內），三種錯誤分類截圖已交。**重開機驗收未做**——重開機會中斷工作階段；設定已是「登入時啟動＋每 1 分鐘」，總司令下次重開機可自驗。
 - [ ] **連線二.1** PC 安裝 Tailscale、MagicDNS、HTTPS 憑證、ACL funnel nodeAttrs
 - [ ] **連線二.2** `tailscale funnel --bg 8001`，本機改純 HTTP，回報 ts.net 網址（只貼給總司令）
-- [ ] **連線二.3** 安全硬規則：除 /health 與 /ca.crt 外全驗 token；關閉 /docs /redoc /openapi.json；401 每 IP 每分鐘 >20 次封 10 分鐘；CORS 維持精確清單
+- [x] **連線二.3** **已完成並實測**：/docs /redoc /openapi.json 皆回 404；除 /health 與 /ca.crt 外全部 401；401 限速實測連打 25 次，第 22 次起回 429 且 log 記錄封鎖，封鎖期間帶正確 token 也擋。IP 取法為「有 X-Forwarded-For 用它、否則用連線來源」並把來源寫進 log，待 Funnel 開通後實測確認；token 正確即清零計數避免自己被鎖。/health 新增 hardening 自我檢查區塊。
 - [ ] **連線二.4** App 設定頁支援 ts.net 網址（無 port）；SSE 經 Funnel 實測 10 分鐘不斷線；公司手機免裝憑證直連截圖
 - [ ] **連線二.5** Cloudflare 保留備援；Funnel 若頻寬/穩定性不過就回報數據再啟動買網域方案
 - [ ] **建置一.1** 新聞事件管線 → `data/news.json`／`data/events.json`（Actions 每 30 分鐘）＋「題材判斷」卡改吃 events.json
