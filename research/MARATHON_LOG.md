@@ -1,5 +1,28 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T09:34（台北時間，hypothesis_queue排程接續，取鎖乾淨
+LOCK_ACQUIRED，接續#41第五輪，擴大pilot樣本25→35檔，發現趨勢逆轉）：
+延續上一輪的prefix-consistent抽樣（`sample_universe_ids(60,seed)`前60
+候選篩4位數字代碼取前35檔），跑`backfill_insider_holdings.py`（前景
+9分鐘逾時後自動轉背景，等待約4分鐘後完成），新增200筆請求（加上300筆
+快取命中的舊組合共700筆）全數成功無error（`ok=470(67.1%) empty=230
+error=0`）。重跑`insider_holdings_pilot_ic.py`：panel擴大為**N=446筆/
+24檔股票**，真實Spearman IC **r=+0.0417**（方向仍為正，三輪皆同號）、
+**p=0.3799**（比上一輪0.1525明顯轉差，甚至比上上輪0.2858更不顯著）、
+洗牌null percentile=**79.0**（比上一輪94.0明顯下滑）。**誠實記錄並
+修正上一輪判斷**：上一輪只用兩個資料點（N=228→342）就framed成「改善
+趨勢」，本輪第三個資料點（N=342→446）顯著性反而惡化，三點序列
+（0.2858→0.1525→0.3799、90.5→94.0→79.0）呈非單調震盪，更像小樣本
+雜訊而非訊號隨樣本數穩定浮現的收斂——這是上一輪過早下結論，本輪
+已在`HYPOTHESIS_QUEUE.md` #41條目與排隊順序總結同步修正這個框架，
+不再宣稱「改善趨勢」。仍非正式cheap gate判準（`factor_ic.py`標準
+SAMPLE_SIZE=300/N_SHUFFLES=1000），依協定不用這個非正式檢查宣稱
+PASS/FAIL，未動`TRIALS_LEDGER.md`。`is_holdout_consumed()`確認仍為
+False。下一輪選項：(a)繼續分批擴大樣本觀察震盪是否隨樣本數收斂，
+或(b)規劃分多輪擴到`factor_ic.py`標準300檔規模做正式整合（這是跟
+其他因子相同的既有標準規模，不構成協定stop condition(a)項——該項
+指超出既有300/1000標準之上的規模）。commit+push後收工，釋放鎖。
+
 ## 2026-09-06T09:10（台北時間，hypothesis_queue排程接續，取鎖乾淨
 LOCK_ACQUIRED，接續#41第四輪，擴大pilot樣本）：延續上一輪判定
 （`PILOT_STOCK_COUNT`從15擴大到25，`PILOT_SAMPLE_SIZE`維持60不變，
