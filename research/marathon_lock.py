@@ -59,16 +59,27 @@ def _read_lock(lock_path: Path) -> tuple[str, float, str]:
         return "unknown", 0.0, "unknown"
 
 
+def _stale_minutes_for(name: str) -> int:
+    """每條軌道的陳舊門檻要比它自己的 wall-clock 上限大。
+
+    2026-09-06（自走一）：開發佇列軌（devqueue）每輪上限 60 分鐘，用預設的 27 分鐘
+    會讓還在跑的那一輪被下一輪搶走鎖——馬拉松就是踩過這個坑才把門檻訂成「必須嚴格
+    大於 ps1 的 MaxMinutes」。這裡照同一條規則給 devqueue 一個自己的值（62 > 60）。
+    """
+    return {"devqueue": 62}.get(name, STALE_MINUTES)
+
+
 def acquire(name: str = DEFAULT_LOCK_NAME) -> bool:
     lock_path = _lock_path(name)
+    stale_minutes = _stale_minutes_for(name)
     # 2026-09-05：cycle_id 由 run-marathon-cycle.ps1 用環境變數傳進來，寫進鎖檔第三欄，
     # 讓 ps1 的 finally 能精確判斷「這把鎖是不是我這輪的」——舊版用時間戳猜，兩輪重疊時
     # 會誤釋放另一輪還在用的鎖（驗收實測到，見 PROPOSAL_2026-09-05_marathon_process_hardening.md）。
     cycle_id = os.environ.get("ALPHA_CYCLE_ID", "unknown")
     if lock_path.exists():
         pid_str, ts, holder_cycle = _read_lock(lock_path)
-        age_minutes = (time.time() - ts) / 60.0 if ts else STALE_MINUTES + 1
-        if age_minutes < STALE_MINUTES:
+        age_minutes = (time.time() - ts) / 60.0 if ts else stale_minutes + 1
+        if age_minutes < stale_minutes:
             print(f"LOCK_HELD by {pid_str} (cycle {holder_cycle}) since {ts} ({age_minutes:.1f} min ago)")
             return False
         print(f"LOCK_STALE (held by {pid_str}, cycle {holder_cycle}, {age_minutes:.1f} min old) -- recovering")
