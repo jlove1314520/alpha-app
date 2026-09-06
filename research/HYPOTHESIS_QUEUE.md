@@ -5907,9 +5907,11 @@ IC=-0.0373(p=0.34)，正負號不一致，null percentile=19.0（門檻
 比較視窗內mean_CAR，而非連續比例Spearman IC）；(ii) 續攻子事件3
 MOPS查證（`#51`(d)段落列的(1)(2)(3)三個候選方向尚未測）；(iii) 或改用
 子事件2（現金增資，已確認可行）設計對等的第1關cheap gate，作為
-子事件1的獨立對照/補強。`data/signal_status.json`（`MARATHON_PROTOCOL.md`
-0a節要求的公開成績檔）本輪仍未建立，是欠下的地基工作，下一輪或研究帽
-排程應優先回補schema設計。
+子事件1的獨立對照/補強。**【第424輪更新】**`data/signal_status.json`
+（`MARATHON_PROTOCOL.md`0a節要求的公開成績檔）已建立（`build_signal_status.py`，
+含#49/#50/#51/#52四條方向、#51拆3個sub_events），欠款已還；之後每次
+#49~#52有新結果要記得回頭改`build_signal_status.py`的`DIRECTIONS`常數
+再重跑（非自動同步）。是否接進`index.html`顯示留給開發帽判斷。
 
 ---
 

@@ -2301,3 +2301,47 @@ Spearman IC）；(ii) 續攻子事件3 MOPS查證（`HYPOTHESIS_QUEUE.md`
 獨立對照/補強；(iv) 設計`data/signal_status.json`schema並回補#49/
 #51已有的結果。完整見`TRIALS_LEDGER.md`#186、`HYPOTHESIS_QUEUE.md`
 #51、`forced_short_covering_gate1.py`（新增，可重複執行）。
+
+
+---
+
+## 第424輪 2026-09-07T04:00+08:00（TW軌）
+
+取鎖乾淨（cycle`20260907-040036`）。三軌時間戳：TW 03:00（round422，最舊）／
+US 03:36（round423）／FUT 12:00（round399，依例外條款不選）——依輪替選TW。
+`run_detached.py status`確認heavy-job-slot空（0個running）；`git status`確認
+hypothesis_queue排程正在編輯`#51`相關檔案（`cash_increase_dilution_gate1.py`
+等，round423 US已記錄），本輪選擇不衝突的地基工作，未觸碰同一批檔案。
+
+**本輪工作單位＝round422「下一輪TW軌接手」(iv)：設計`data/signal_status.json`
+schema並回補#49/#51已有結果**。這是round420/421/422三輪都誠實記錄但未完成的
+欠款，本輪還債而非開新假說。
+
+新增`research/build_signal_status.py`：手動核對`TRIALS_LEDGER.md`三筆既有
+結果後填入結構化清單，非自動剖析markdown（避免正則斷章取義）——
+- #49（隔夜/日內拆解）：FAIL，第6關逐年一致性VAL期3/4年同號未過83.3%門檻
+  （`TRIALS_LEDGER.md`#180/#184）。
+- #50（容量受限小型股）：NOT_STARTED，卡在「逐筆tick落地」前置資料。
+- #51（強制交易者事件）：IN_PROGRESS，含3個sub_events——子事件1融券強制
+  回補FAIL（#186）、子事件2現金增資折價FAIL（#187）、子事件3 CB轉換價
+  重設MOPS查證IN_PROGRESS。
+- #52（事件反應速度）：NOT_STARTED，卡在「新聞事件管線」前置資料。
+
+跑腳本產生`data/signal_status.json`，確認UTF-8合法JSON（用Read工具讀回核對
+中文字元正確渲染，非終端機print——終端機cp950編碼會把中文印成亂碼，這是
+顯示層問題不是檔案本身壞掉）。`trial_registry.py --check`（`PYTHONIOENCODING=
+utf-8`跑，同樣是終端機cp950限制，跟登記邏輯無關）維持PASS，本輪未新增
+判定，純資料整理不影響閘門。
+
+**誠實揭露**：`data/signal_status.json`目前只是資料檔，尚未接進`index.html`
+（開發帽工作，本輪只做研究/驗證帽的資料面）；`build_signal_status.py`的
+`DIRECTIONS`常數是手動維護，之後每次#49~#52有新結果要記得回頭改常數再
+重跑腳本，沒有自動同步機制。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`，零新增API呼叫。
+
+**下一輪TW軌接手**：(i) 子事件1二元規格對照（`short_ratio>0` vs `==0`比較
+mean_CAR）；(ii) 子事件3 MOPS查證三候選方向；(iii) `#51`子事件3或`#50`/`#52`
+有進度後記得回頭更新`data/signal_status.json`；(iv) 待開發帽決定是否接進
+`index.html`。完整見`TW_MARATHON_STATE.md`第424輪記錄、`build_signal_status.py`
+（新增，可重複執行）、`data/signal_status.json`（新增）。
