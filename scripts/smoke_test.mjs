@@ -1304,10 +1304,42 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("42. 官方在市名冊內的股票不得無報價（四層回退鏈：live→quotes_tw→quotes_all_tw→歷史收盤）",
     quoteChainErrors.length === 0, quoteChainErrors.join("; ") || `抽驗 ${results.quote_chain_checked} 檔全部有價`);
 
+  // 43.【2026-09-06新增，總司令健檢.一】診斷橫幅的「資料過舊」要看交易日曆，不是 rolling 24 小時。
+  // 原本每逢週末與國定假日都會誤報「大盤/類股/三大法人 資料過舊」，但那些資料本來就只在
+  // 交易日產生，週日看到星期五的收盤資料是完全正常的。誤報比不報更糟：叫久了使用者就
+  // 不看橫幅，真的壞掉時也不會注意。這條同時驗「假日不誤報」與「真的過舊要照報」兩個方向。
+  const calErrors = [];
+  try {
+    const r = await page.evaluate(() => {
+      if (typeof isFreshForCalendar !== "function") return { error: "isFreshForCalendar 不存在" };
+      const TW = ["Asia/Taipei", TW_HOLIDAYS_2026, 13, 30, 4 * 60];
+      const US = ["America/New_York", US_HOLIDAYS_2026, 16, 0, 4 * 60];
+      const t = s => new Date(s).getTime();
+      const cases = [
+        ["週日看週五收盤(台股)", isFreshForCalendar(t("2026-09-04T23:09:29Z"), ...TW, t("2026-09-06T04:00:00Z")), true],
+        ["週日看上上週五(台股)", isFreshForCalendar(t("2026-08-28T23:09:29Z"), ...TW, t("2026-09-06T04:00:00Z")), false],
+        ["交易日盤後資料停在上週五(台股)", isFreshForCalendar(t("2026-09-04T23:09:29Z"), ...TW, t("2026-09-08T12:00:00Z")), false],
+        ["交易日盤中看前一交易日(台股)", isFreshForCalendar(t("2026-09-07T10:00:00Z"), ...TW, t("2026-09-08T03:00:00Z")), true],
+        ["國定假日看前一交易日(台股)", isFreshForCalendar(t("2026-10-08T10:00:00Z"), ...TW, t("2026-10-09T04:00:00Z")), true],
+        ["週日看週五收盤(美股)", isFreshForCalendar(t("2026-09-04T23:09:44Z"), ...US, t("2026-09-06T16:00:00Z")), true],
+        ["感恩節看前一交易日(美股)", isFreshForCalendar(t("2026-11-25T22:00:00Z"), ...US, t("2026-11-26T18:00:00Z")), true],
+        ["交易日盤後資料停在三天前(美股)", isFreshForCalendar(t("2026-09-08T22:00:00Z"), ...US, t("2026-09-11T23:00:00Z")), false],
+      ];
+      return { bad: cases.filter(c => c[1] !== c[2]).map(c => `${c[0]}：判定${c[1] ? "新鮮" : "過舊"}但預期${c[2] ? "新鮮" : "過舊"}`), n: cases.length };
+    });
+    if (r.error) calErrors.push(r.error);
+    else if (r.bad.length) calErrors.push(r.bad.join("; "));
+    results.calendar_cases = r.n || 0;
+  } catch (e) {
+    calErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("43. 資料過舊判定走交易日曆（假日不誤報、真過舊照報）",
+    calErrors.length === 0, calErrors.join("; ") || `${results.calendar_cases} 個情境全部符合`);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

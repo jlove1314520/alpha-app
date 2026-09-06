@@ -1946,6 +1946,64 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 「近即時輪詢」而非「即時」，避免使用者誤解成逐筆tick。
   const FAST_POLL_INTERVAL_MS=15000;
   let PREV_QUOTE_PRICES={}; // code/指數label -> 上一次輪詢看到的價格，判斷要不要閃爍用，非權威資料
+  // ── 2026-09-06（健檢.一）交易日曆 ───────────────────────────────────────────
+  // 問題：診斷橫幅原本用「rolling 24 小時」判斷資料過舊，所以每逢週末與國定假日
+  // 都會亂叫「大盤/類股/三大法人 資料過舊」——但那些資料本來就只在交易日產生，
+  // 週日看到的星期五收盤資料是**完全正常**的，不是故障。誤報比不報更糟：叫久了
+  // 使用者就不看橫幅，真的壞掉時也不會注意。
+  //
+  // 改成跟「最近一個應有交易日的收盤時間」比：資料日期只要不早於那一天，就不算過舊。
+  //
+  // 假日表資料來源：
+  //   台股 2026 年休市日 — 臺灣證券交易所「113 年度～115 年度交易日曆表」公告
+  //     （https://www.twse.com.tw/zh/holidaySchedule/holidaySchedule）
+  //   美股 2026 年休市日 — NYSE 官方 Holidays & Trading Hours
+  //     （https://www.nyse.com/markets/hours-calendars）
+  // 只寫死 2026 年（總司令指示「寫死一份 2026 年的即可」）。跨年前要更新，
+  // 沒更新時的行為是「把該假日當成交易日」——結果只是那天可能誤報一次，
+  // 不會反過來把真的過舊藏起來，這個方向的失敗比較安全。
+  const TW_HOLIDAYS_2026=new Set([
+    '2026-01-01','2026-02-13','2026-02-16','2026-02-17','2026-02-18','2026-02-19','2026-02-20',
+    '2026-02-27','2026-02-28','2026-04-03','2026-04-06','2026-05-01','2026-06-19',
+    '2026-09-25','2026-10-09','2026-10-26','2026-12-25',
+  ]);
+  const US_HOLIDAYS_2026=new Set([
+    '2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19',
+    '2026-07-03','2026-09-07','2026-11-26','2026-12-25',
+  ]);
+  function _ymd(z){return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`}
+  function isTradingDay(dateObj,tz,holidays){
+    const z=_zonedParts(dateObj,tz);
+    if(z.wd===0||z.wd===6)return false;            // 週末
+    return !holidays.has(_ymd(z));
+  }
+  // 回傳「最近一個應該已經收盤的交易日」的 Date（該日當地收盤時間）。
+  // 今天是交易日但還沒收盤時，要往前找到前一個交易日——否則盤中會誤判成過舊。
+  // nowMs 可以外部注入，讓「模擬成週日／模擬成交易日盤後」這種驗收不需要去動
+  // 全域的 Date（動全域 Date 會連帶影響時鐘、SSE、快取判斷，測出來的東西就不準了）。
+  function lastExpectedSessionEnd(tz,holidays,closeH,closeMi,nowMs){
+    const now=(nowMs!=null)?new Date(nowMs):new Date();
+    for(let back=0;back<12;back++){                // 最多往前找 12 天（含連假）
+      const d=new Date(now.getTime()-back*864e5);
+      if(!isTradingDay(d,tz,holidays))continue;
+      const z=_zonedParts(d,tz);
+      // 用該日的當地收盤時刻組出一個絕對時間：拿當天任一時刻的 offset 回推
+      const guess=new Date(d);
+      const cur=_zonedParts(guess,tz);
+      const deltaMin=(closeH*60+closeMi)-(cur.h*60+cur.mi);
+      const end=new Date(guess.getTime()+deltaMin*60000);
+      if(end<=now)return end;
+    }
+    return null;
+  }
+  // 資料時間戳夠不夠新：只要不早於「最近一個應有交易日收盤」再扣掉寬限，就算新鮮。
+  // graceMin 是給排程留的緩衝（收盤後不會立刻產出）。
+  function isFreshForCalendar(fetchedAtMs,tz,holidays,closeH,closeMi,graceMin,nowMs){
+    if(fetchedAtMs==null||!isFinite(fetchedAtMs))return false;
+    const end=lastExpectedSessionEnd(tz,holidays,closeH,closeMi,nowMs);
+    if(end==null)return true;                      // 算不出來就不擋（不製造誤報）
+    return fetchedAtMs>=end.getTime()-(graceMin||0)*60000;
+  }
   function isTwTradingWindowNow(){
     // 沿用research/shioaji_quotes.py::_is_tw_trading_window()同一組時窗
     // （週一至五08:30–13:45台北時間，涵蓋現貨盤前~盤後緩衝），不是自己另外
@@ -2699,9 +2757,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const problems=diagQuoteProblems(twOpen,usOpen);
     // 大盤/類股/三大法人、美股指數：這兩個一天只排程1-2次，用24小時當過期門檻。
     const twMAge=marketDataAgeMin(MARKET_TW_CACHE);
-    if(twMAge==null||twMAge>24*60)problems.push({name:'大盤指數/類股/三大法人',reason:twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'台股收盤後 14:10'});
+    // 2026-09-06（健檢.一）改用交易日曆判斷，不再用 rolling 24 小時。
+    // 台股 13:30 收盤，排程通常在收盤後陸續產出，給 4 小時寬限。
+    const twFresh=isFreshForCalendar(
+      MARKET_TW_CACHE&&MARKET_TW_CACHE.fetched_at?new Date(MARKET_TW_CACHE.fetched_at).getTime():null,
+      'Asia/Taipei',TW_HOLIDAYS_2026,13,30,4*60);
+    if(twMAge==null||!twFresh)problems.push({name:'大盤指數/類股/三大法人',reason:twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）',schedule:'台股收盤後 14:10'});
     const usMAge=marketDataAgeMin(MARKET_US_CACHE);
-    if(usMAge==null||usMAge>24*60)problems.push({name:'美股四大指數',reason:usMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（超過24小時未更新）',schedule:'美股收盤後 21:30 UTC'});
+    // 美股 16:00 ET 收盤，同樣給 4 小時寬限
+    const usFresh=isFreshForCalendar(
+      MARKET_US_CACHE&&MARKET_US_CACHE.fetched_at?new Date(MARKET_US_CACHE.fetched_at).getTime():null,
+      'America/New_York',US_HOLIDAYS_2026,16,0,4*60);
+    if(usMAge==null||!usFresh)problems.push({name:'美股四大指數',reason:usMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）',schedule:'美股收盤後 21:30 UTC'});
     // 2026-08-27 新增：個股基本面快照（月營收/PER/PBR）改排程累積更新後，超過3天沒更新
     // 就代表 update_fundamentals_daily.py 那步連續失敗，提醒使用者可能看到過期的基本面數字。
     await loadFundamentals('');
@@ -5186,7 +5253,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.1116';
+  const APP_VERSION='2026-09-06.1156';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
