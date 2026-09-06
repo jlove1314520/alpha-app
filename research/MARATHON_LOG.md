@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 18:57 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+發現`HYPOTHESIS_QUEUE.md`「排隊順序總結」章節與#44/#45自身條目內容
+不同步（#44自身「狀態」段落停留在「本輪新增，尚未開始第1關」，但
+「排隊順序總結」跟`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#164都
+早已記錄#44最終判定FAIL——資料不可及，官方唯一免費合規管道無「當時
+發布版」燈號欄位，官方查詢系統403、Wayback快照不含逐月分數，依快殺
+標準判死），依`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節指示「先把不一致
+修正掉」，已在#44自身條目補上最終判定段落，跟其他三處記錄對齊。
+確認#43/#44/#45三條全數已結案，佇列實質已空。重新查證`BACKLOG.md`
+`value_board_v2`仍`回測未通過`，#5/#6/#8/#10四項外部依賴仍未解鎖。
+依協定第1節設計新假設軸**#46（新股上市長期弱勢IPO Long-Run
+Underperformance）**——第八種機制分類，源自承銷定價偏樂觀+初期
+情緒消退的**被動**價格衰減，跟`#40`買回股份/`#41`內部人轉讓這類
+管理層**主動**決策事件經濟機制不同，也跟`#39`（指數編製方調整，
+已因資料不可及FAIL）不同（那條測指數層級被動資金流，這條測個股
+自身上市後價格路徑）。已用WebFetch初步確認TWSE官方openapi端點
+`t187ap03_L`（上市公司基本資料）含`上市日期`欄位（格式YYYYMMDD，
+範例：台泥1101→19620209），零金鑰、免費、可複用既有`fetch.py`
+節流模式。尚未查證TPEx對應端點、是否含下市公司清單（存活者偏差
+緩解）、樣本規模量級，下一輪從這三點開始，未跳關進cheap gate。
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`。零新增API呼叫
+（本輪只做一次WebFetch驗證欄位存在，未批次抓取）。完整見
+`HYPOTHESIS_QUEUE.md` #44最終判定段落＋#46新章節＋排隊順序總結。
+本輪未新增TRIALS_LEDGER/STRATEGY_GRAVEYARD條目（#44已有#164、#46
+尚未有測試結果可記錄）。本輪收工，準備commit+push+釋放鎖。
+
 ## 2026-09-06 18:24 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
 完成#45「下一輪待辦(a)」——排除TSM對照重跑（僅UMC+CHT+ASX三檔pooled）。
 新增`adr_premium_gate_ex_tsm.py`（複用`adr_premium_gate.py`既有
