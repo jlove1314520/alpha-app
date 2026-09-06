@@ -4894,15 +4894,53 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(ci&&document.activeElement!==ci)ci.value=LIVE.cfId||'';
     if(cs&&document.activeElement!==cs)cs.value=LIVE.cfSecret||'';
   }
+  // ── 2026-09-06（連線一.2）測試連線分兩段、錯誤分三類 ───────────────────────
+  // 原本只打 /live/quotes，失敗一律顯示瀏覽器丟回來的原始訊息（iOS Safari 就是那句
+  // 沒有資訊量的「Load failed」）。總司令看到那句完全無法判斷是伺服器沒開、token 打錯、
+  // 還是憑證沒信任——三種的處理方式完全不同。
+  // 改成先打 /health（不需 token），再打 /live/quotes（需 token），這樣就能分開：
+  //   /health 就連不上 → 伺服器沒在跑，或憑證/網路問題（用網址是不是 https 再細分）
+  //   /health 通、/live/quotes 401 → token 錯，伺服器是好的
+  //   兩個都通 → 成功
   async function testLiveConnection(){
     loadLiveConfig();
     if(!LIVE.configured){toast('請先填伺服器網址與token');return}
+    let health=null;
     try{
-      const r=await liveFetch('/live/quotes',5000);
-      if(r.status===401){LIVE.lastError='token不正確';toast('token不正確（401）')}
-      else if(!r.ok){LIVE.lastError='HTTP '+r.status;toast('伺服器回應 HTTP '+r.status)}
-      else{const d=await r.json();LIVE.lastError=null;toast('連線成功：台股來源 '+((d.sinopac&&d.sinopac.source_mode)||'無')+'、1分K '+Object.keys(d.kbars_last||{}).length+' 檔');restartLiveStream()}
-    }catch(e){LIVE.lastError=e.name==='AbortError'?'逾時':(e.message||String(e));toast('連不上：'+LIVE.lastError)}
+      const ac=new AbortController();const t=setTimeout(()=>ac.abort(),6000);
+      const r=await fetch(LIVE.url+'/health',{cache:'no-store',credentials:'include',signal:ac.signal});
+      clearTimeout(t);
+      if(r.ok)health=await r.json();
+      else{LIVE.lastError='伺服器有回應但 /health 回 HTTP '+r.status;toast(LIVE.lastError);renderLiveStatus();return}
+    }catch(e){
+      const isHttps=/^https:/i.test(LIVE.url||'');
+      const timeout=e.name==='AbortError';
+      LIVE.lastError=timeout?'連線逾時':'連不上伺服器';
+      toast(timeout
+        ? '① 連線逾時：伺服器可能沒在跑，或手機不在同一個網路'
+        : (isHttps
+            ? '① 連不上：伺服器沒在跑，或這台手機還沒信任自簽憑證（設定→一般→關於→憑證信任設定）'
+            : '① 連不上：伺服器沒在跑，或網址/port 不對'));
+      renderLiveStatus();return;
+    }
+    try{
+      const r=await liveFetch('/live/quotes',6000);
+      if(r.status===401){
+        LIVE.lastError='token不正確';
+        toast('② 伺服器活著（開機 '+Math.round((health.uptime_sec||0)/60)+' 分鐘）但 token 不正確，請重貼一次');
+      }else if(!r.ok){
+        LIVE.lastError='HTTP '+r.status;toast('伺服器回應 HTTP '+r.status);
+      }else{
+        const d=await r.json();LIVE.lastError=null;
+        toast('③ 連線成功：伺服器已開機 '+Math.round((health.uptime_sec||0)/60)+' 分鐘、'
+          +(health.shioaji_connected?'即時 tick 進來中':'目前無 tick（收盤時段正常）')
+          +'、台股來源 '+((d.sinopac&&d.sinopac.source_mode)||'無'));
+        restartLiveStream();
+      }
+    }catch(e){
+      LIVE.lastError=e.name==='AbortError'?'逾時':(e.message||String(e));
+      toast('/health 通但 /live/quotes 失敗（'+LIVE.lastError+'）——多半是憑證或 CORS，不是伺服器沒開');
+    }
     renderLiveStatus();
   }
   function applyLiveSnapshot(ev){
@@ -5253,7 +5291,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.1156';
+  const APP_VERSION='2026-09-06.1216';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -141,6 +141,11 @@ def _load_or_create_token() -> str:
 
 
 LOCAL_TOKEN = _load_or_create_token()
+# 2026-09-06（連線一.2）行程啟動時間，給 /health 的 uptime 用。
+# 總司令要 /health 回 {ok, uptime, shioaji_connected, last_tick_at}——uptime 是判斷
+# 「剛剛被自動重啟過」的關鍵：如果每次看 uptime 都只有幾十秒，代表它一直在崩潰重啟，
+# 那跟「一直沒在跑」是完全不同的故障，不能只看 ok。
+SERVER_STARTED_AT = time.time()
 
 # ── CORS 白名單 ────────────────────────────────────────────────────────────
 # 2026-09-06（Cloudflare 網域上線準備 CF.2）：改成「精確來源 + 允許憑證」。
@@ -829,9 +834,22 @@ def health():
     """唯一不需要token的端點——只回報「伺服器活著」，不含任何報價/
     帳戶資訊，跟ibkr_order_server.py的/health端點同一個設計精神
     （純粹的存活探測，不算資訊洩漏）。"""
+    # 2026-09-06（連線一.2）shioaji_connected 的定義寫清楚，避免看的人誤會：
+    # 這裡回報的是「有沒有在收到 tick」，不是「Shioaji session 是否登入中」——
+    # live server 本來就沒有 Shioaji 連線（那在 shioaji_quotes.py 那個行程裡），
+    # 它只看得到有沒有 tick 從 loopback UDP 推進來。收盤時段沒有 tick 是正常的。
     _, hot_status = _hot_state()
+    _last_tick = MEM.last_tick_at
+    _tick_age = None
+    if _last_tick is not None:
+        _tick_age = (datetime.now(TW_TZ) - _last_tick).total_seconds()
     return {
         "ok": True,
+        "uptime_sec": round(time.time() - SERVER_STARTED_AT, 1),
+        "shioaji_connected": bool(_tick_age is not None and _tick_age < 120),
+        "shioaji_connected_note": "定義＝120 秒內有收到 tick。收盤時段沒有 tick 是正常的，"
+                                  "不代表 shioaji_quotes.py 沒在跑",
+        "last_tick_age_sec": round(_tick_age, 1) if _tick_age is not None else None,
         "sinopac_file_exists": QUOTES_SINOPAC_PATH.exists(),
         "ibkr_file_exists": QUOTES_IBKR_PATH.exists(),
         "hot_file_status": hot_status,          # hot-file / hot-file-stale / hot-file-missing

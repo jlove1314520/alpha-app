@@ -192,6 +192,48 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 ---
 
+## 連線一／連線二／建置一（2026-09-06 總司令裁示，原話全文，插最前面依序做）
+
+**同時撤回「健檢.二 刪除佔位字」**——總司令原話：「總司令要的是把功能做出來,不是刪字」。
+該項改由下方【建置一】取代，佔位字會在功能做出來之後自然消失，不是去刪字。
+
+原始指令全文：
+
+> 全程繁體中文。總司令裁示三件事,插 PENDING_QUEUE 最前面依序做;撤回「健檢.二 刪除佔位字」——總司令要的是把功能做出來,不是刪字。
+>
+> 【連線一】即時伺服器改成 24 小時常駐服務(總司令在家、同區網仍 Load failed)
+> 1. 先查根因並回報:alpha_live_server.py 現在是怎麼啟動的(是否綁在 shioaji 交易日排程)、此刻行程在不在、Windows 防火牆 8001 入站規則、最近 log 錯誤。
+> 2. 不管根因為何,改成:以 NSSM 或 schtasks「開機時啟動 + 失敗每 60 秒重啟」註冊為常駐服務,與交易日無關,永遠在跑;新增 GET /health(無 token,只回 {ok, uptime, shioaji_connected, last_tick_at}),App 設定頁「測試連線」先打 /health 再打 /live/quotes,錯誤訊息分清「伺服器沒在跑」「token 錯」「憑證問題」三種,不再只顯示 Load failed。
+> 3. 驗收:重開機後 2 分鐘內 /health 回 ok;手動 kill 行程後 60 秒內自動回來;截圖。
+>
+> 【連線二】Tailscale Funnel 取代自簽憑證與 WARP(免費,公司手機免裝任何東西)
+> 1. PC 安裝 Tailscale(總司令用自己的帳號登入,憑證與登入狀態不進 repo),tailnet 啟用 MagicDNS 與 HTTPS 憑證,ACL 加 funnel nodeAttrs(官方文件 tailscale.com/kb/1223/funnel)。
+> 2. 執行 tailscale funnel --bg 8001,把公開 443 導到本機 8001;本機改走純 HTTP(ALPHA_LIVE_SERVER_HTTPS=0),TLS 由 Tailscale 以 Let's Encrypt 憑證終結。回報實際網址 https://<pc>.<tailnet>.ts.net(只貼給總司令,不寫進 repo)。
+> 3. 安全硬規則:公開可達後,所有端點除 /health 與 /ca.crt 外一律驗 X-Alpha-Local-Token;關閉 FastAPI /docs、/redoc、/openapi.json;401 每 IP 每分鐘超過 20 次即封 10 分鐘並記 log;CORS allow_origins 維持精確清單。
+> 4. App 設定頁支援直接填 ts.net 網址(無 port);SSE 串流經 Funnel 實測 10 分鐘不斷線並截圖;公司手機不裝憑證、不開 WARP 直接連上,截圖「即時連線中」。
+> 5. Cloudflare 那套保留為備援,不刪。若 Funnel 頻寬上限或穩定性實測不過,回報數據,再啟動買網域方案。
+>
+> 【建置一】三張「尚未實作」卡本輪做出來(順序固定,做完一項回報一項)
+> 1. 新三(9/5 已核准,被插隊延後,現在最優先):MOPS 重大訊息＋月營收公布＋除權息＋法說會公告與簡報 PDF 連結、SEC EDGAR 8-K、鉅亨/中央社/Yahoo RSS → data/news.json、data/events.json(標題、連結、時間、標的、類型;不存全文),Actions 每 30 分鐘。「題材判斷」卡改吃 events.json:列該檔近 30 日事件流＋月營收年增＋法人連續天數,無事件時顯示「近 30 日無重大訊息/營收/法說事件(已查 MOPS 三類)」。
+> 2. 目標價卡改為「估值區間(非目標價)」:同產業 PE 25/50/75 百分位 × 近四季 EPS 得三個價位,附產業樣本數與資料日期;EPS ≤0 或樣本 <8 檔時顯示「同產業樣本不足無法估算」並列出樣本數。分批進場階梯不動。
+> 3. 美股類股/ADR 卡:類股用 SEC EDGAR company tickers 的 SIC 代碼對映(免費官方);ADR 溢價用既有 quotes_us × fx.json ÷ ADR 比率 對 quotes_tw(先做 TSM/2330、UMC/2303、ASX/3711、CHT/2412,比率寫死並附來源),顯示溢價 % 與資料時間。
+> 4. 驗收:三張卡各一張真實資料截圖;events.json 筆數與最新時間;smoke 新增「個股頁不得出現『尚未實作/下一輪/本輪』字串」——這條是等功能做出來後自然歸零的檢查,不是叫你刪字。
+
+- [x] **連線一.1** **已完成**：根因是排程設定 `DisallowStartIfOnBatteries=True`（筆電沒插電就不啟動）＋無登入觸發＋`StartWhenAvailable=False`。防火牆**沒有**擋（log 顯示手機 83 次 200 OK，我第一個判斷錯了已更正）；當時在跑的是 09-05 手動啟動的舊版程式。
+- [x] **連線一.2** **已完成**：排程改為允許電池／切電池不停／錯過補跑／登入時啟動＋每 1 分鐘檢查（不需管理員權限）。`/health` 補 `uptime_sec`／`shioaji_connected`（含定義說明）／`last_tick_at`。設定頁測試連線改兩段式（先 /health 再 /live/quotes），把 Load failed 拆成三類。
+- [~] **連線一.3** **部分完成**：kill 後自動回來三次實測 19／60／10 秒（要求 60 秒內），三種錯誤分類截圖已交。**重開機驗收未做**——重開機會中斷工作階段；設定已是「登入時啟動＋每 1 分鐘」，總司令下次重開機可自驗。
+- [ ] **連線二.1** PC 安裝 Tailscale、MagicDNS、HTTPS 憑證、ACL funnel nodeAttrs
+- [ ] **連線二.2** `tailscale funnel --bg 8001`，本機改純 HTTP，回報 ts.net 網址（只貼給總司令）
+- [ ] **連線二.3** 安全硬規則：除 /health 與 /ca.crt 外全驗 token；關閉 /docs /redoc /openapi.json；401 每 IP 每分鐘 >20 次封 10 分鐘；CORS 維持精確清單
+- [ ] **連線二.4** App 設定頁支援 ts.net 網址（無 port）；SSE 經 Funnel 實測 10 分鐘不斷線；公司手機免裝憑證直連截圖
+- [ ] **連線二.5** Cloudflare 保留備援；Funnel 若頻寬/穩定性不過就回報數據再啟動買網域方案
+- [ ] **建置一.1** 新聞事件管線 → `data/news.json`／`data/events.json`（Actions 每 30 分鐘）＋「題材判斷」卡改吃 events.json
+- [ ] **建置一.2** 目標價卡改「估值區間（非目標價）」：同產業 PE 25/50/75 百分位 × 近四季 EPS
+- [ ] **建置一.3** 美股類股（SEC SIC 對映）／ADR 溢價卡（TSM、UMC、ASX、CHT）
+- [ ] **建置一.4** 驗收：三張卡截圖＋events.json 筆數與最新時間＋smoke 新增佔位字歸零檢查
+
+---
+
 ## 健檢五項（2026-09-06 總司令下班實測截圖，原話全文，插最前面依序修）
 
 原始指令全文：
@@ -222,7 +264,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 > 2. 回報根因(排程沒建/gateway 掉線/腳本崩潰)與已採取的修法;修不了就誠實回報阻塞原因。美股盤中報價(GitHub Actions)仍正常可當回退,不影響冷資料。
 
 - [x] **健檢.一** **已完成**：根因＝用 rolling 24 小時判斷，而那些資料本來就只在交易日產生。改為跟「最近一個應有交易日的收盤時間」比，內建台股 17 個／美股 10 個 2026 年休市日（附官方來源），`lastExpectedSessionEnd()` 會跳過還沒收盤的今天，`nowMs` 可注入以便驗收不用動全域 Date。8 個情境（週末／國定假日／感恩節／盤中／真過舊）全部符合預期，今天週日橫幅完全不顯示；冒煙新增 check 43，41 項全 PASS。
-- [ ] **健檢.二** 個股頁清光「本輪尚未實作／下一輪」佔位字（題材判斷卡改真實資料、目標價改機構行為或移除、全檔殘留清零）
+- [~] **健檢.二** **已撤回**（2026-09-06 總司令裁示：「要的是把功能做出來，不是刪字」）。改由【建置一】三張卡把功能做出來，佔位字會在功能上線後自然消失；smoke 的佔位字歸零檢查移到建置一.4。
 - [ ] **健檢.三** 月營收年增觸頂值改顯示「≥N%（特殊基期，資料存疑）」並標灰
 - [ ] **健檢.四** scores 補 company_info 產業別＋smoke 新增「在市個股 industry 覆蓋率 ≥95%」
 - [ ] **健檢.五** 美股 IBKR 即時報價自 09/02 卡住：查排程／gateway／腳本 log，回報根因與修法或阻塞原因
