@@ -1795,3 +1795,46 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   執行）、`data/adr_premium_aligned.csv`、`data/adr_premium_panel_with_target.csv`、
   `TRIALS_LEDGER.md`#168/#169、`HYPOTHESIS_QUEUE.md` #45。佇列#1~45
   全數結案，剩餘#5/#6/#8/#10仍卡外部依賴，下一輪從設計#46開始。
+
+## #46 新股上市長期弱勢 IPO Long-Run Underperformance — FAIL（2026-09-06，第1關cheap gate觀測層級無訊號）
+- **假設**：新上市股票距上市日的交易日天數（`f_listing_age_days`）與未來
+  報酬正相關——上市越久的股票，預期未來報酬優於新上市股票（事前綁定
+  方向為正，源自Ritter 1991"The Long-Run Performance of Initial Public
+  Offerings"承銷定價偏樂觀+初期投資人情緒消退的被動衰減機制）。跟本
+  佇列已測過的七種機制（方向性選股排序/timing overlay/portfolio
+  construction/配對交易均值回歸/強制平倉流動性驅動賣壓/公司行動事件
+  驅動/跨市場套利收斂）皆不同——這是第八種：純粹的「事件時鐘」，不涉及
+  任何人的主動決策。
+- **死因**：`factor_ic_ipo_listing_age.py`第1關cheap IC gate，300檔抽樣
+  中248檔有效（僅覆蓋TWSE現存上市公司，見下方局限說明）。TRAIN
+  mean_ic=+0.0036（幾乎為零）、VAL mean_ic=-0.0029（符號翻轉為負）、
+  null percentile=**13.4**（需>=90.0，且遠低於50——比隨機打散時序的
+  對照組表現還差），依快殺標準「觀測層級就無訊號」判定，三項判準
+  （VAL量級/train-val同號/贏過洗牌null）全數未過，是決定性反證非
+  邊緣未過。
+- **過程記錄（誠實揭露，非死因本身）**：本輪執行時先發現一個實作bug——
+  `factors.py::_listing_age_days()`把`price_df`的`date`欄位（dtype為
+  str）直接與`pd.Timestamp`相減，300檔中159檔全數factor ERROR、
+  train/val皆n=0 dates，若照這個假結果記錄會誤判。已定位並修復
+  （加`pd.to_datetime(dates)`轉型），修復後重跑才拿到上述248/300檔的
+  真實結果，本次FAIL判定基於修復後的乾淨執行，不受此bug影響。
+- **不泛化成**：「新股長期弱勢」這個文獻異常在美股不存在——本測試只
+  覆蓋(a) TWSE現存上市公司（排除已下市383家，未緩解存活者偏差，
+  且存活者偏差方向若存在會讓弱勢訊號被低估而非高估，跟本次觀測到的
+  「無訊號」結果同向不衝突）、(b) 只用「上市天數」單一連續變數，未做
+  依`HYPOTHESIS_QUEUE.md`#46已揭露的「控制市值後」分組對照（因訊號
+  本身在觀測層級已無方向性，未達需要做混淆排除的門檻）、(c) 未納入
+  TPEx上櫃公司（第1關前已查證TPEx終止上櫃清單不可及，本輪只做
+  TWSE子樣本）、(d) 台股市場結構（IPO承銷制度、蜜月期漲跌停限制、
+  三大法人參與度）跟美股原始文獻樣本（美國IPO市場）本質不同，本次
+  結果不能反推「Ritter 1991發現的美股IPO長期弱勢異常不存在」，只能
+  說「這個機制在台股TWSE現存公司子樣本、用距上市天數這個簡單連續
+  代理變數上，觀測層級量測不到訊號」。
+- **原始記錄**：`build_twse_listing_dates.py`（新增，可重複執行）、
+  `factor_ic_ipo_listing_age.py`（新增，可重複執行）、
+  `research/data/twse_listing_dates.json`（新增，1094檔TWSE現存上市
+  公司官方上市日期快取）、`factors.py::f_listing_age_days`/
+  `_listing_age_days()`（新增因子，已修復date dtype bug）、
+  `TRIALS_LEDGER.md`#175、`HYPOTHESIS_QUEUE.md` #46。佇列#1~46全數
+  結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證仍未解鎖），下一輪
+  從設計#47開始。

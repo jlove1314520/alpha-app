@@ -63,11 +63,17 @@ factor as far as this investigation found.
 """
 from __future__ import annotations
 
+import functools
+import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
 from finmind_client import load_dev
 from pit import balance_sheet_pit, month_revenue_pit, quarterly_pit
+
+TWSE_LISTING_DATES_PATH = Path(__file__).parent / "data" / "twse_listing_dates.json"
 
 FOREIGN_STREAK_VOL_WINDOW = 20
 INST_FLOW_WINDOW = 20
@@ -587,6 +593,50 @@ def _short_sale_utilization(stock_id: str, start_date: str) -> pd.DataFrame:
     return d[["pit_date", "short_sale_utilization"]].sort_values("pit_date").reset_index(drop=True)
 
 
+@functools.lru_cache(maxsize=1)
+def _load_twse_listing_dates() -> dict[str, str]:
+    """讀`build_twse_listing_dates.py`存的靜態對照表（公司代號->YYYYMMDD上市
+    日期），只含TWSE現存上市公司，不含TPEx、不含已下市公司（見
+    `HYPOTHESIS_QUEUE.md`#46範圍界定決策）。lru_cache只讀一次，多檔股票
+    共用同一份記憶體字典，不重複IO。檔案不存在時回傳空字典（讓呼叫端自然
+    產生全NaN因子，而不是讓整個管線炸掉——這條因子屬於「錦上添花」，缺這個
+    快取檔不該讓其他11個因子也一起報廢，跟其他factors捕捉RuntimeError的
+    降級精神一致）。
+    """
+    if not TWSE_LISTING_DATES_PATH.exists():
+        return {}
+    doc = json.loads(TWSE_LISTING_DATES_PATH.read_text(encoding="utf-8"))
+    return doc.get("listing_dates", {})
+
+
+def _listing_age_days(stock_id: str, dates: pd.Series) -> pd.Series:
+    """`HYPOTHESIS_QUEUE.md` #46新股上市長期弱勢：訊號=「距官方上市日的
+    交易日曆天數」，天數越大代表上市越久。**事前綁定方向為正、不取負號**
+    （跟`f_margin_utilization`/`f_short_sale_utilization`同一種「原始方向
+    即預期方向」設計）：假設核心主張新上市股票長期跑輸，即「上市越久預期
+    未來報酬越好」，數值越大分數越高。
+
+    只用TWSE現存上市公司官方`上市日期`（`build_twse_listing_dates.py`
+    存的`twse_listing_dates.json`），查不到的股票（TPEx上櫃、已下市、或
+    尚未回補）回傳全NaN，cross-sectional IC測試會自然忽略這些股票的這個
+    因子欄位（`factor_ic.py::_cross_section`本來就會跳過`pd.isna(fv)`），
+    不影響它們的其他11個因子。**不用「price_df第一筆日期」當上市日代理**
+    ——那個代理對2010年（`factor_ic.py::START_DATE`）以前上市的公司會被
+    資料抓取起始日截斷成假的常數值，混入「離START_DATE多久」這個跟真實
+    上市日無關的confound，這正是本因子選擇改用官方日期、犧牲下市公司
+    覆蓋率的原因。
+
+    2026-09-06 hypothesis_queue排程接續，佇列#46第1關cheap gate起跑。
+    """
+    listing_dates = _load_twse_listing_dates()
+    raw = listing_dates.get(stock_id)
+    if raw is None:
+        return pd.Series(np.nan, index=dates.index)
+    listing_date = pd.Timestamp(raw)
+    dates_dt = pd.to_datetime(dates)
+    return (dates_dt - listing_date).dt.days.astype(float)
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
@@ -868,6 +918,17 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_short_sale_utilization skipped for {stock_id}: {e}")
         d["f_short_sale_utilization"] = np.nan
+
+    # (aa) 新股上市長期弱勢 IPO Long-Run Underperformance (`HYPOTHESIS_QUEUE.md`
+    # #46，2026-09-06自動排程新增，佇列排隊第一起跑)。經濟理由：承銷定價偏
+    # 樂觀+初期投資人情緒消退的被動衰減過程（Ritter 1991），跟本佇列已測過
+    # 的方向性選股/timing/portfolio construction/配對交易/強制平倉/公司行動
+    # 事件驅動/跨市場套利收斂七種機制都不同——這是第八種：純粹的「事件時鐘」
+    # （距上市日多久），不涉及任何人的主動決策。**事前綁定方向為正**：訊號
+    # 不取負號，上市越久分數越高，見`_listing_age_days()`docstring。**只覆蓋
+    # TWSE現存上市公司**（範圍界定決策見`HYPOTHESIS_QUEUE.md`#46），零額外
+    # FinMind呼叫（純本地json查表）。
+    d["f_listing_age_days"] = _listing_age_days(stock_id, d["date"])
 
     return d
 

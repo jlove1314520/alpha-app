@@ -1,5 +1,81 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 21:14 — hypothesis_queue排程接續（LOCK_STALE回收，上一輪
+crash未提交）：取鎖時鎖檔顯示`LOCK_STALE (held by 87920, 29.9 min old)`。
+`git status`檢查發現上一輪（見下方2026-09-06 20:38心跳條目）已經完整
+做完#46第1關cheap gate執行、FAIL判定、`STRATEGY_GRAVEYARD.md`/
+`HYPOTHESIS_QUEUE.md`文件更新、設計新假設#47（處置股解除後價格反轉），
+但在commit前中斷未釋放鎖，`research/HYPOTHESIS_QUEUE.md`/
+`research/MARATHON_LOG.md`/`research/STRATEGY_GRAVEYARD.md`/
+`research/factors.py`四份檔案與`build_twse_listing_dates.py`/
+`factor_ic_ipo_listing_age.py`兩支新腳本全部留在未提交狀態；同時
+`TRIALS_LEDGER.md`#175已被同機器另一條US軌馬拉松的commit（3dc3554）
+意外一併帶走提交（該軌`git add -A`掃到本軌未提交檔案），故該檔案
+本輪`git status`已顯示乾淨。本輪逐一核對四份未提交文件內容前後一致、
+`_listing_age_days()`bug修復記錄清楚、`排隊順序總結`章節已同步標記
+#46已結案/#47排隊第一，未發現需要修正的不一致，確認`is_holdout_consumed()`
+為`False`、`data/twse_listing_dates.json`快取檔存在（1094檔，
+sanity核對過）。**本輪判定：無需新增工作，只需完成上一輪漏掉的
+commit+push這個收尾動作**（回收已完成的一個完整有界工作單位，
+不在本輪額外開始#47第1關，依協定「一輪只做一個有界工作單位」原則，
+下一輪從#47「資料可行性查證」段落(a)(b)(c)三點開始）。`git add`僅限定
+上述六個確認屬於本軌的檔案，不動同時存在於working tree的
+`.github/workflows/audit.yml`/`research/.live_watchlist.json`/
+`research/data_cache/`/`research/deep_dive_f_us_low_vol_persistent_random_control.py`
+（判斷為其他自動化來源留下的殘留，不觸碰、不納入本次commit）。
+
+## 2026-09-06 20:38 — hypothesis_queue排程接續（LOCK_STALE回收，上一輪疑似
+中途失敗未釋放鎖）：取鎖時鎖檔顯示`LOCK_STALE (held by 3188, 30.3 min
+old)`，研判上一輪（見下方2026-09-06 20:05心跳條目）做完`factors.py`新增
+`f_listing_age_days`因子與`factor_ic_ipo_listing_age.py`腳本後，在commit
+前中斷未釋放鎖，`research/MARATHON_LOG.md`/`factors.py`兩份工作檔案留在
+未提交狀態。本輪接續完成上一輪明列的「下一輪待辦」：執行
+`python factor_ic_ipo_listing_age.py`跑完#46第1關cheap gate。首次執行
+發現`_listing_age_days()`實作bug（`date`欄位str型別直接與`pd.Timestamp`
+相減拋錯，159/300檔全數ERROR、n=0 dates），已定位修復（改用
+`pd.to_datetime()`轉型），修復後重跑拿到乾淨結果：248/300檔有效，TRAIN
+mean_ic=+0.0036/VAL mean_ic=-0.0029（符號不一致）、null percentile=
+**13.4**（需>=90.0，且低於50，比隨機還差），依快殺標準「觀測層級就
+無訊號」判**FAIL**，未進第2關以後，見`HYPOTHESIS_QUEUE.md`#46「最終
+判定」段落、`STRATEGY_GRAVEYARD.md`#46、`TRIALS_LEDGER.md`#175。**佇列
+#1~46全數結案**，已設計新假設軸#47（處置股解除後價格反轉
+Post-Disposition-Stock Price Reversion，交易所監理干預類——第九種
+機制分類，跟已測過的八種皆不同），TWSE官方`announcement/punish`端點
+已用WebFetch初步確認回傳合法JSON（`Date`/`Code`/`ReasonsOfDisposition`/
+`DispositionPeriod`/`DispositionMeasures`五個欄位），現在排隊第一，
+尚未開始第1關，下一輪從「資料可行性查證」段落列出的(a)(b)(c)三點開始
+（歷史回溯深度/TPEx對應端點/樣本規模）。`is_holdout_consumed()`本輪
+開工/收工前皆為`False`。本輪本應無新產出但已完整結案一條假設+設計
+一條新假設，屬有界工作單位正常收工，準備commit（含撿回上一輪未提交的
+`factors.py`/本檔案上一則心跳）+push+釋放鎖。
+
+## 2026-09-06 20:05 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+本輪工作單位：完成`#46`（新股上市長期弱勢）下一輪待辦第2/3點，未做第1點
+（TWSE 383家下市公司原始上市日期查證，依假設已預留的彈性本輪直接跳過，
+先做「現存公司子樣本」版本）。(a) 新增`build_twse_listing_dates.py`抓取
+TWSE官方`t187ap03_L`端點，成功解析1094檔現存上市公司「上市日期」，sanity
+核對1101(台泥)=19620209通過，存`research/data/twse_listing_dates.json`。
+(b) 在`factors.py`新增因子`f_listing_age_days`（距官方上市日天數，事前
+綁定方向為正、不取負號）+對應loader`_load_twse_listing_dates()`（lru_cache，
+零額外FinMind呼叫），已接進`prepare_factors()`並手動import驗證可正常
+運作（2330→19940905核對正確）。**刻意不用price_df第一筆日期當上市日
+代理**——對2010年前上市的公司那個代理會被`START_DATE`截斷成假的常數值，
+混入跟真實上市日無關的confound，這是本輪的方法論決策，見`factors.py`
+docstring完整說明。(c) 新增`factor_ic_ipo_listing_age.py`（沿用
+`factor_ic.py`既有cross-sectional IC框架，standalone bonferroni_n=1），
+**本輪僅完成程式撰寫+import語法驗證，尚未實際執行跑第1關cheap gate**
+（本輪USD預算即將用盡，依協定「一輪只做一個有界工作單位」原則收工，
+不趕在預算見底前跑可能耗時的300檔抓取+因子計算）。**只覆蓋TWSE現存
+上市公司**（範圍界定決策，TPEx下市清單本輪重新確認仍查無官方API，
+延續上一輪結論），這是誠實揭露的局限，不是bug。`is_holdout_consumed()`
+本輪開工/收工前皆為`False`（本輪未觸碰任何回測/holdout資料，純資料源
+建置+因子定義）。本輪未產生新的PASS/FAIL判定，`TRIALS_LEDGER.md`/
+`STRATEGY_GRAVEYARD.md`無新增條目。**下一輪待辦**：執行
+`python factor_ic_ipo_listing_age.py`跑完第1關cheap gate三項判準
+（幅度非零/train-val同號且方向為正/VAL贏過洗牌null），若CHEAP_PASS
+再決定是否投入TWSE 383家下市公司原始上市日期查證（緩解存活者偏差）或
+直接進第2關以後。本輪收工，準備commit+push+釋放鎖。
+
 ## 2026-09-06 19:25 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
 本輪工作單位：完成`#46`（新股上市長期弱勢IPO Long-Run
 Underperformance）地基查證(a)(b)(c)三點，未進第1關cheap gate（依
