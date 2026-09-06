@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 17:55 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+接續#45（ADR溢價收斂），完成上一輪地基建置後的第1關cheap gate。新增
+`adr_premium_gate.py`：訊號=premium原始水位（比照#45事前寫死的定義，
+非本輪重選）、target=本地股forward M=20日報酬、N=4小樣本改用「逐標的
+內部時序洗牌」null（每檔股票各自獨立打散自己的premium時序，保留自己
+forward return時序，避免跨標的混洗污染）。結果：TRAIN pooled n=9260
+r=+0.0640(p=0.0000)null percentile=100.0、VAL pooled n=3804
+r=+0.1242(p=0.0000)null percentile=100.0，三項判準（幅度非零/同號/
+贏過null>=90.0）皆過，方向符合事前預期。**判定：CHEAP_PASS**。但額外
+逐檔拆解揭露重要異質性——VAL期只有TSM/ASX顯著同號，UMC/CHT兩者VAL期
+皆不顯著、CHT方向反轉，證實#45原先揭露的TSM主導風險確實存在，訊號未
+證明在四檔標的上普遍成立。已更新`HYPOTHESIS_QUEUE.md` #45條目+排隊
+順序總結、`TRIALS_LEDGER.md`#168。`is_holdout_consumed()`開工/收工前
+皆確認`False`。仍未最終結案（僅第1關），現在排隊第一，下一輪待辦：
+排除TSM對照重跑（僅UMC+CHT+ASX），檢驗訊號是否幾乎完全消失，再決定
+進第2關或提早收斂判死。本輪收工，準備commit+push+釋放鎖。
+
 ## 2026-09-06 17:31 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
 延續#45（ADR溢價收斂）地基建置：(1)用SEC EDGAR官方FY2006 20-F逐字確認
 CHT比率1ADS=10股（"each of which represents ten of our common shares"）。
