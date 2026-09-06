@@ -116,9 +116,19 @@ DEFAULT_TW_WATCHLIST = ["2330", "2454", "2317", "1513", "3231"]
 DYNAMIC_WATCHLIST_PATH = Path(os.environ.get("ALPHA_LIVE_WATCHLIST_PATH")
                               or (Path(__file__).parent / ".live_watchlist.json"))
 # Shioaji 官方文件載明 api.subscribe() 數量上限 200 個
-# （https://sinotrade.github.io/zh/tutor/limit/）。固定訂閱已用掉約 53 個
-# （TAIEX 1＋類股/櫃買指數 38＋期貨 2 檔各 Tick+BidAsk 共 4＋預設 5 檔各 Tick+BidAsk 共 10），
-# 動態清單只訂 Tick（畫面只要成交價，不需要五檔），100 檔＝100 個，合計約 153，留有餘裕。
+# （https://sinotrade.github.io/zh/tutor/limit/）。固定訂閱用掉 **57** 個：
+#   預設 5 檔個股 各 Tick+BidAsk          = 10
+#   TAIEX（IX0001）Quote                  =  1
+#   櫃買＋37 個 TSE 類股指數 各 Quote      = 38
+#   期貨 4 檔近月 各 Tick+BidAsk           =  8
+# 動態清單只訂 Tick（畫面只要成交價，不需要五檔），上限 100 檔＝100 個，
+# 最壞情況合計 157，離官方 200 還有 43 個餘裕。
+#
+# 2026-09-07（資料一.2）更正：這段註解原本寫「約 53 個…期貨 2 檔各 Tick+BidAsk 共 4」，
+# 但 FUTURES_NEAR_MONTH 實際有 4 檔（TXF/MXF/EXF/FXF），是 8 個不是 4 個，總數應為 57。
+# 數字算錯不影響安全（157 仍遠低於 200），但「離上限還有多少」是以後要不要加訂閱的
+# 唯一判斷依據，記錯就會在某次擴充時誤判成還有空間。回歸防線：
+# `shioaji_tick_stream_test.py::test_subscription_budget_within_official_limit`。
 MAX_DYNAMIC_SUBSCRIPTIONS = 100
 
 # ── 2026-09-06（實測.二.1）kbars 查詢服務 ─────────────────────────────────────

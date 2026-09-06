@@ -16,6 +16,55 @@
 
 ---
 
+## 2026-09-07 00:50（開發帽）— 資料一.2：訂閱範圍未擴張，並修正算錯的訂閱額度註解
+
+**這一項要證明的事**：資料一.1 加了逐筆落地，但**沒有為此多訂閱任何東西**。
+會有這個疑慮是因為落地要記 bid/ask，最直覺的做法就是「幫動態訂閱的自選股也訂
+BidAsk」——那會讓動態 100 檔從 100 個訂閱變成 200 個，直接撞破 Shioaji 官方
+`api.subscribe()` 上限 200，後果是**停權 IP 與帳號**，不是報錯而已。所以落地的
+bid/ask 是從既有 BidAsk 回呼留在 `TickState` 裡的值取的，沒訂閱的代號就誠實記 null。
+
+**證據（機器可查）**
+- `git show 4ff6817 -- research/shioaji_quotes.py | grep -E "api\.(sub|unsub)scribe"`
+  → 輸出為空，資料一.1 對訂閱呼叫**一行都沒動**。
+- `_read_dynamic_watchlist()` 結尾 `out[:MAX_DYNAMIC_SUBSCRIPTIONS]` 就地截斷，
+  上限是真的在程式裡執行、不是只寫在註解——App 推 300 檔自選股過來也撞不破。
+
+**順手修的一個實際錯誤**：`MAX_DYNAMIC_SUBSCRIPTIONS` 上方註解原本寫「固定訂閱
+約 53 個…期貨 2 檔各 Tick+BidAsk 共 4」，但 `FUTURES_NEAR_MONTH` 實際有 4 檔
+（TXF／MXF／EXF／FXF）＝8 個。正確的固定數是 **57**：
+
+| 項目 | 數量 |
+|---|---|
+| 預設 5 檔個股 × (Tick+BidAsk) | 10 |
+| TAIEX（IX0001）Quote | 1 |
+| 櫃買＋37 個 TSE 類股指數 × Quote | 38 |
+| 期貨 4 檔近月 × (Tick+BidAsk) | 8 |
+| **固定合計** | **57** |
+| 動態自選股上限（只訂 Tick） | 100 |
+| **最壞總計／官方上限** | **157 / 200** |
+
+少算 4 個不影響安全（157 仍遠低於 200），但「離上限還剩多少」是以後要不要加訂閱的
+唯一判斷依據，記錯就會在某次擴充時誤判成還有空間。註解已更正並寫明修正緣由。
+
+**新增的回歸防線（讓這種事以後不能靠註解，要靠斷言）**
+`research/shioaji_tick_stream_test.py` 15 → 17 項：
+- `test_subscription_budget_within_official_limit`：固定 57＋動態 100＝157 ≤ 200。
+  任何人偷加訂閱，這裡的數字就對不上而 FAIL。
+- `test_dynamic_watchlist_caps_at_max_subscriptions`：300 檔清單實測被截到 100、
+  重複代號與非數字代號都被濾掉（兩者都會虛耗訂閱額度）、檔案不存在或 JSON 壞掉時
+  回空清單而不是拋例外（常駐行程不能因為讀檔失敗就停掉）。
+
+**驗證（實際輸出）**
+- `python research/shioaji_tick_stream_test.py` → `=== 全部17項測試PASS ===`
+  （其中 `test_subscription_budget_within_official_limit PASS（固定57＋動態100＝157／上限200）`）
+- `node scripts/smoke_test.mjs` → `=== 冒煙測試結果：全部通過 ===`
+
+**常駐服務發布紀律**：本輪只改 `shioaji_quotes.py` 的註解與常數說明（無行為變更），
+該行程當下仍未在執行（非交易時段），無舊版可重啟；`alpha_live_server.py` 未改動。
+
+---
+
 ## 2026-09-07 00:35（開發帽）— 資料一.1：逐筆 tick 落地本機（jsonl → 每日單一 parquet）
 
 **為什麼做這個**：盤中微結構研究（假說 #50 真實滑價估算）的原料只有逐筆成交。

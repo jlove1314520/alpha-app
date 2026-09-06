@@ -494,7 +494,10 @@ ORDER-END
   **證據**：`python research/tick_recorder_test.py` → 11 組斷言全 PASS（含欄位型別、append 不覆寫、壞行不害整天、已有 parquet 不覆蓋、compact_stale 只壓非今日）；`python research/shioaji_tick_stream_test.py` → 15/15 PASS（新增 2 項：tick handler 真的餵到 recorder 且 bid/ask 取自最近五檔、recorder 爆炸不影響報價更新）；`node scripts/smoke_test.mjs` → 43 項全部通過。
   **常駐服務發布紀律**：`shioaji_quotes.py` 當下**未在執行**（非交易時段會直接 `_write_market_closed()` 結束；PID 檔 40828 已是 stale，`Get-CimInstance Win32_Process` 確認無此行程），所以沒有舊版行程可重啟，2026-09-08 08:30 排程拉起時即載入新版。`alpha_live_server.py` 本輪未改動，`/health` 實測 `stale_process=false`、OPTIONS 預檢 200＋`allow-origin: https://jlove1314520.github.io`＋`allow-credentials: true`。
   **誠實限制**：真實 tick 落地要等 2026-09-08 開盤才驗得到（收盤時段沒有 tick，無法端到端驗證），這正是 **資料一.4** 的驗收內容。`bid`/`ask` 取自最近一次 BidAsk 回呼、不是同封包快照；動態訂閱的自選股只訂 Tick 沒訂 BidAsk，那些代號會是 null。
-- [ ] **資料一.2** 訂閱範圍維持現有固定＋動態清單，不新增訂閱
+- [x] **資料一.2** **已完成（2026-09-07）**：確認資料一.1 **沒有新增任何訂閱**——`git show 4ff6817 -- research/shioaji_quotes.py | grep 'api.subscribe'` 輸出為空（增刪都沒有）。落地的 bid/ask 是從既有 BidAsk 回呼的 `TickState` 取值，**刻意不為了補齊五檔而多訂 BidAsk**（那會讓動態 100 檔變成 200 個訂閱，直接撞破官方上限）。
+  **順手修一個實際算錯的數字**：`MAX_DYNAMIC_SUBSCRIPTIONS` 上方註解原寫「固定訂閱約 53 個…期貨 2 檔各 Tick+BidAsk 共 4」，但 `FUTURES_NEAR_MONTH` 實際有 4 檔（TXF/MXF/EXF/FXF）＝8 個，正確固定數是 **57**（5×2 個股＋1 TAIEX＋38 指數＋4×2 期貨），最壞總計 **157／官方上限 200**。少算 4 個不影響安全，但「離上限還剩多少」是以後要不要加訂閱的唯一判斷依據，記錯會在某次擴充誤判成還有空間。
+  **證據**：`research/shioaji_tick_stream_test.py` 新增 2 條回歸防線並全數通過（15 → 17 項全 PASS）——`test_subscription_budget_within_official_limit`（固定 57＋動態 100＝157 ≤ 200，任何人偷加訂閱數字就對不上而 FAIL）、`test_dynamic_watchlist_caps_at_max_subscriptions`（300 檔清單實測被截到 100、重複與非數字代號都被濾掉、檔案不存在或 JSON 壞掉回空清單不拋例外）。`node scripts/smoke_test.mjs` → 全部通過。
+  **另確認**：動態上限**是真的有在程式裡執行**，不是只寫在註解——`_read_dynamic_watchlist()` 結尾 `out[:MAX_DYNAMIC_SUBSCRIPTIONS]` 就地截斷，所以 App 推 300 檔自選股過來也不會撞破訂閱上限。
 - [ ] **資料一.3** 磁碟保護：估算每日容量並回報；>20GB 時從最舊一天刪，刪前先回報
 - [ ] **資料一.4** 驗收：隔日回報落地檔數／筆數／檔案大小，附 2330 前 5 筆與最後 5 筆
 - [ ] **研究.a** 事件驅動大類第二條假說：「重大訊息公告類型」事件研究（用 MOPS 既有管線資料），三關流程

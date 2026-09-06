@@ -14,6 +14,7 @@ git commit/push**——這支測試只驗證`shioaji_quotes.py`裡「callback收
 """
 from __future__ import annotations
 
+import json
 from types import SimpleNamespace
 from datetime import datetime, timezone, timedelta
 
@@ -71,6 +72,63 @@ def test_tick_stk_handler_updates_state():
     assert q["volume_this_tick"] == 3
     assert q["total_volume"] == 1200
     print("test_tick_stk_handler_updates_state PASS")
+
+
+def test_subscription_budget_within_official_limit():
+    """2026-09-07（資料一.2）訂閱數不得超過 Shioaji 官方上限 200。
+
+    來源：官方「使用限制」中英文兩版（`C:\\alpha\\CLAUDE.md`「外部 API 頻率上限清單」
+    有連結與查證日期），`api.subscribe()` 同時訂閱數上限 200 個。**超限的後果不是報錯
+    而是停權 IP 與帳號**，所以這裡要的是硬性回歸防線，不是註解裡的估計值——註解會
+    過期（資料一.2 就抓到它把期貨 2 檔算成 4 個、總數少算 4 個），斷言不會。
+
+    這條同時也是「資料一.1 沒有偷加訂閱」的機器可查證據：只要有人在落地功能上多訂
+    一個 BidAsk 想補齊 bid/ask，這裡的數字就會對不上而 FAIL。"""
+    fixed = (len(sq.DEFAULT_TW_WATCHLIST) * 2      # 個股 Tick + BidAsk
+             + 1                                    # TAIEX Quote
+             + len(sq.INDEX_SUBSCRIPTIONS)          # 櫃買＋類股指數，各一個 Quote
+             + len(sq.FUTURES_NEAR_MONTH) * 2)      # 期貨近月 Tick + BidAsk
+    assert fixed == 57, f"固定訂閱應為 57 個（5*2+1+38+4*2），實際{fixed}——改訂閱範圍要同步更新註解"
+    assert sq.MAX_DYNAMIC_SUBSCRIPTIONS == 100, sq.MAX_DYNAMIC_SUBSCRIPTIONS
+    worst = fixed + sq.MAX_DYNAMIC_SUBSCRIPTIONS
+    assert worst <= 200, f"最壞情況訂閱數 {worst} 超過官方上限 200，會被停權"
+    print(f"test_subscription_budget_within_official_limit PASS（固定{fixed}＋動態"
+          f"{sq.MAX_DYNAMIC_SUBSCRIPTIONS}＝{worst}／上限200）")
+
+
+def test_dynamic_watchlist_caps_at_max_subscriptions():
+    """動態清單的上限必須在**讀清單那一步**就砍掉，不能只寫在註解裡。
+
+    這是實際的風險：清單來自 App 推送的 `.live_watchlist.json`，使用者自選股沒有
+    上限；如果讀進來不截斷，一次加 300 檔就會直接撞破 200 的訂閱上限而被停權。
+    順便驗證去重與「非數字代號」的過濾，那兩個也是訂閱數失控的來源。"""
+    import tempfile as _tf
+    orig = sq.DYNAMIC_WATCHLIST_PATH
+    p = sq.Path(_tf.gettempdir()) / "alpha_test_watchlist.json"
+    try:
+        codes = [str(1000 + i) for i in range(300)]
+        # 混進重複與非數字代號，驗證這兩種也被擋掉（都會虛耗訂閱額度）
+        p.write_text(json.dumps({"codes": codes + ["1000", "1001", "abc", "", "2330 "]}),
+                     encoding="utf-8")
+        sq.DYNAMIC_WATCHLIST_PATH = p
+        got = sq._read_dynamic_watchlist()
+        assert len(got) == sq.MAX_DYNAMIC_SUBSCRIPTIONS, \
+            f"300 檔應被截到 {sq.MAX_DYNAMIC_SUBSCRIPTIONS}，實際{len(got)}"
+        assert len(set(got)) == len(got), "不得有重複代號（重複會白白吃掉訂閱額度）"
+        assert all(c.isdigit() for c in got), f"不得含非數字代號：{[c for c in got if not c.isdigit()]}"
+
+        # 讀不到檔案時回空清單，不拋例外（常駐行程不能因為讀檔失敗就停掉）
+        sq.DYNAMIC_WATCHLIST_PATH = sq.Path(_tf.gettempdir()) / "alpha_test_watchlist_missing.json"
+        assert sq._read_dynamic_watchlist() == [], "檔案不存在時應回空清單"
+
+        # 壞掉的 JSON 也一樣：記 log、回空清單、不拋
+        p.write_text("{壞掉的 json", encoding="utf-8")
+        sq.DYNAMIC_WATCHLIST_PATH = p
+        assert sq._read_dynamic_watchlist() == [], "JSON 壞掉時應回空清單而不是拋例外"
+    finally:
+        sq.DYNAMIC_WATCHLIST_PATH = orig
+        p.unlink(missing_ok=True)
+    print("test_dynamic_watchlist_caps_at_max_subscriptions PASS")
 
 
 def test_tick_handler_feeds_recorder_with_latest_bidask():
@@ -347,6 +405,8 @@ def main():
         test_kbar_aggregation_per_minute,
         test_live_state_hot_file_written_atomically,
         test_tick_stk_handler_updates_state,
+        test_subscription_budget_within_official_limit,
+        test_dynamic_watchlist_caps_at_max_subscriptions,
         test_tick_handler_feeds_recorder_with_latest_bidask,
         test_recorder_failure_does_not_break_push,
         test_bidask_stk_handler_updates_state_without_clobbering_tick_fields,
