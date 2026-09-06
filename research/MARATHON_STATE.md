@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T08:00+08:00**
+**最後更新：2026-09-06T08:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 391 輪。最新一輪：第 391 輪 · 2026-09-06T08:00+08:00 · US（取鎖乾淨，FUT 02:30最舊但round385已明確標記「trend+oi四種組合全FAIL,優先權回TW/US」跳過；US 06:03/TW 07:30兩者皆被同一個heavy-job-slot卡住，選US）**。**本輪工作單位**：US背景job`20260906-060311-6a01`（低波動乾淨宇宙深挖，round387投遞，150分鐘timeout）本輪開工時仍`running`（約121分鐘，log顯示5/6組合已完成，VAL 3x進行中），未到期不視為卡死；同一個heavy-job-slot也擋住TW排隊中的`tw_deep_dive_quality_roe_stability_full_rerun`（round390已把timeout參數更正為150分鐘，等US釋放後投遞）。**改做不需重算的地基準備**：新增`deep_dive_f_us_value_bm_clean_universe.py`（重用`deep_dive_f_us_value_bm.py::run_one_value()`＋round382`us_factor_ic_value_clean_universe.py::load_value_sample()`乾淨宇宙loader，單一變因替換手法同`deep_dive_f_us_low_vol_clean_universe.py`），只做語法+匯入檢查，**未執行main（避免佔用heavy-job-slot搶跑）**，供下一輪US job釋放後投遞。**另補寫round386~390遺漏的心跳**——`REPORT.md`心跳插入是協定第6節硬性步驟，過去5輪只更新了各軌`_STATE.md`忘記寫`REPORT.md`跟這個全局計數器，本輪已追記5筆（見`REPORT.md`）並把計數器從387一次補到391。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`/`REPORT.md`第391輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 392 輪。最新一輪：第 392 輪 · 2026-09-06T08:30+08:00 · TW（取鎖乾淨，FUT 02:30最舊但round385已明確標記「trend+oi四種組合全FAIL,優先權回TW/US」跳過；TW 07:30/US 08:00兩者中TW較舊，選TW）**。**本輪工作單位**：開工前`run_detached.py status`確認US背景job`20260906-060311-6a01`已`finished`(exit=0)，heavy-job-slot釋放——先代US軌收成該結果（非重算的順手工作）：TRAIN期3個成本倍數ann_return+20%/beta-0.32/random_pct 100.0（量級合理），但**VAL期3個成本倍數ann_return+90%+/beta-0.82/random_pct 100.0（量級與beta異常，經濟上不尋常）**，判定**EXPERIMENTAL非PASS**，已寫入`TRIALS_LEDGER.md`#151、`US_LEADS.md`#21更新，下一步指定VAL期逐年分解排除2022年單一年份集中驅動。**接著執行TW軌本輪工作單位**：heavy-job-slot空出後，投遞round390排定的`tw_deep_dive_quality_roe_stability_full_rerun`（`--timeout-min 150`，job_id`20260906-083408-d6ab`），session內等待3分鐘確認仍`running`未崩潰，依協定breakaway繼續在背景執行。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`US_LEADS.md`/`TRIALS_LEDGER.md`第392輪記錄。
 
-**上一輪（第390輪，供對照）：第 390 輪 · 2026-09-06T07:30+08:00 · TW**。更正下一輪`tw_deep_dive_quality_roe_stability_full_rerun`投遞參數（`--timeout-min`40→150，因`factor_ic.SAMPLE_SIZE`已改300檔跟US低波動同量級）；過程中誤覆寫round377已存在的`margin_debt_level_window_robustness.py`已用`git checkout`即時還原。完整見`TW_MARATHON_STATE.md`第390輪記錄。
+**上一輪（第391輪，供對照）：第 391 輪 · 2026-09-06T08:00+08:00 · US**。US背景job`20260906-060311-6a01`本輪開工時仍`running`，改做不需重算的地基準備：新增`deep_dive_f_us_value_bm_clean_universe.py`（只做語法+匯入檢查未執行main）。另補寫round386~390遺漏的心跳。完整見`US_MARATHON_STATE.md`第391輪記錄。
 
 **上一輪（第389輪，供對照）：第 389 輪 · 2026-09-06T07:05+08:00 · TW**。盤點確認`MARATHON_PROTOCOL.md`第3節因子家族已全數掃過，更正`MI_MARGN`過時備註；US heavy job佔用中無法投遞TW的`deep_dive_f_quality_roe_stability.py`完整重跑。完整見`TW_MARATHON_STATE.md`第389輪記錄。
 

@@ -1920,3 +1920,24 @@ circular-shift null的標準差（TRAIN 0.2378、VAL 0.3157）約為完全打散
 全程零新增API呼叫、零新增運算，純程式碼審閱＋文件更正＋一次已還原的誤寫。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 下一輪TW軌接續：`run_detached.py status`確認US背景工作`20260906-060311-6a01`是否已釋放；若已釋放，投遞`python research/run_detached.py submit --name tw_deep_dive_quality_roe_stability_full_rerun --timeout-min 150 -- python -u research/deep_dive_f_quality_roe_stability.py`（**注意timeout是150分鐘，不是round389寫的40分鐘**）；若仍佔用，繼續跳過等下一輪。
+
+---
+
+## 第392輪 · 2026-09-06T08:30+08:00
+
+開工`run_detached.py status`確認US背景job`20260906-060311-6a01`（`us_deep_dive_lowvol_clean_universe_retry`）已`finished`，`exit=0`，`expect_exists=True`，heavy-job-slot釋放。
+
+**先代US軌收成該結果**（非重算的順手工作，round390已預先寫明此judgment call留給下一輪視情況決定）：`run_detached.py log 20260906-060311-6a01 --tail 80`讀出完整SUMMARY——
+
+- TRAIN(2015-2020) 3個成本倍數：ann_return+19.75%~+20.99%、beta=-0.316~-0.317、alpha=+30.30%~+31.65%、random_percentile=100.0（3組皆過，量級跟BAB/leverage-constraint文獻一致，合理）。
+- VAL(2020-2024) 3個成本倍數：ann_return+90.64%~+92.46%、beta=-0.820~-0.821、alpha=+125.00%~+127.17%、random_percentile=100.0（3組皆過）。
+
+TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細檢視：VAL期年化報酬(90%+)與beta(-0.82，較TRAIN的-0.317惡化2.6倍)在經濟上並不尋常——(1)這個量級跟`f_us_value_bm`舊池子#128的死因（cheap gate IC乾淨過關但十分位回測VAL期報酬量級「年化121%」經濟不合理）高度相似；(2)VAL期(2020-2024)涵蓋2022年升息熊市，高波動/成長股該年重挫，若這條策略絕大部分報酬集中在2022年單一年份的做空高波動腿獲利，就是regime-specific event driven而非穩定溢酬，跟`margin_debt_level_v1`（#141-143）教訓的「先看起來乾淨、逐年分解才發現集中度」同一種風險模式；(3)按1b深挖規範「沒有economically plausible理由，統計顯著也要降級」，年化90%+遠超BAB文獻報導的溢酬量級。
+
+**判定：EXPERIMENTAL，不判定PASS**。已寫入`TRIALS_LEDGER.md`#151、`US_LEADS.md`#21更新，下一步指定給US軌：VAL期(2020-2024)逐年拆解ann_return/beta/random_percentile，比照#142`margin_debt_level_train_val_heterogeneity.py`同一套逐年+leave-one-year-out方法，確認90%+報酬是否集中在2022年單一年份。
+
+**接著執行TW軌本輪工作單位**：heavy-job-slot空出後，投遞round390排定的`python research/run_detached.py submit --name tw_deep_dive_quality_roe_stability_full_rerun --timeout-min 150 -- python -u research/deep_dive_f_quality_roe_stability.py`（job_id`20260906-083408-d6ab`），`run_detached.py wait 20260906-083408-d6ab --max-min 3`確認3分鐘後仍`running`（未立即崩潰），依協定breakaway繼續在背景執行150分鐘上限內。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
+
+下一輪TW軌接續：`run_detached.py status`確認`20260906-083408-d6ab`是否`finished`；若是，讀SUMMARY寫入`TRIALS_LEDGER.md`（優先檢查TRAIN期percentile與beta方向；且鑑於本輪US低波動深挖VAL期出現量級異常的教訓，這次TW的300檔重跑若VAL期也出現類似遠超TRAIN的異常放大量級，同樣不要直接判PASS，先排查是否為2022年單一年份或其他集中事件驅動）。
