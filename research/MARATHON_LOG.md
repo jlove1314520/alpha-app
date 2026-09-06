@@ -1,5 +1,16 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-07T02:55+0800 hypothesis_queue排程接續（鎖檔乾淨取得，非陳舊
+回收）— 接續#51子事件3任務(i)：用WebSearch找到`t120sb02_q9`/`_q1`/`_w1`
+三個候選網址，逐一實測皆為MOPS SPA殼頁（Angular前端靜態index.html，
+`requests.get()`看不到真實查詢表單），任務(i)本輪未達成，仍未找到
+批次搜尋表單。新增`forced_trader_events_probe.py::
+probe_mops_cb_reset_search_form_urls()`（可重複執行），完整記錄與
+下一輪候選方向見`HYPOTHESIS_QUEUE.md`#51條目本輪新增「(d)子事件3
+任務(i)本輪嘗試，仍未達成」段落。**#50/#51/#52三條仍全數未結案**，
+純地基查證，非PASS/FAIL判定。全程3次SPA殼頁GET探測、零批次抓取、
+`is_holdout_consumed()`開工/收工前皆確認`False`。
+
 ## 2026-09-07T02:26+0800 hypothesis_queue排程接續（取鎖時發現陳舊鎖檔，
 pid 86952，30.1分鐘，已回收接手，疑似上一輪失敗中斷）— 接續#51查證，
 仍未結案（純地基查證，非PASS/FAIL）。(c)**子事件1反推公式已用兩檔

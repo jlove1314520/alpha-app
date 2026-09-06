@@ -118,15 +118,52 @@ def probe_tpex_and_cb_scan() -> None:
         print(f"  {h}")
 
 
+def probe_mops_cb_reset_search_form_urls() -> None:
+    """2026-09-07接續：子事件3任務(i)——嘗試WebSearch找到的t120sb02系列
+    候選網址，確認是否為可用的批次搜尋表單（比照#40 t35sc09那種可POST
+    任意日期範圍拿全市場清單的入口），而不是單一文件檢視器。
+
+    結論（本輪）：t120sb02_q1/t120sb02_w1皆回傳MOPS SPA殼頁（Angular
+    前端應用程式的靜態index.html，title固定是「公開資訊觀測站」，實際
+    查詢表單由JS在瀏覽器端渲染），單純requests.get()拿不到表單欄位或
+    真實查詢邏輯——這條「猜URL直接GET」的路徑本身走不通，不代表
+    t120sb02這個功能代碼本身不存在或不可行，只是需要換一種查證方式
+    （例如找SPA的路由/選單設定JSON、或找對應的ajax_資料端點，比照
+    #40/子事件2成功案例都是先找到真正回傳資料的ajax_端點才成立）。
+    """
+    print("\n=== MOPS t120sb02系列候選網址（WebSearch找到，本輪逐一驗證）===")
+    urls = [
+        "https://mops.twse.com.tw/mops/web/t120sb02_q9",
+        "https://mopsov.twse.com.tw/mops/web/t120sb02_q1",
+        "https://mopsov.twse.com.tw/mops/web/t120sb02_w1",
+    ]
+    for u in urls:
+        r = requests.get(u, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+        text = r.text
+        import re
+
+        m = re.search(r"<title>(.*?)</title>", text, re.S)
+        title = m.group(1).strip() if m else None
+        is_spa_shell = title == "公開資訊觀測站" and "轉換價格" not in text
+        print(f"  {u} HTTP {r.status_code} len={len(text)} title={title!r} "
+              f"spa_shell_only={is_spa_shell}")
+    print("  結論：三個候選網址皆為SPA殼頁，非可直接解析的查詢表單/資料"
+          "端點，這個具體猜測方向未達成任務(i)，下一輪需改找JS路由設定"
+          "或真正的ajax_資料端點。")
+
+
 def main() -> None:
     probe_bfi84u_snapshot_only()
     probe_finmind_margin_suspension_paywall()
     probe_cash_increase_announcement_lag()
     probe_tpex_and_cb_scan()
+    probe_mops_cb_reset_search_form_urls()
     print("\n=== 總結 ===")
     print("子事件2（現金增資）：可行，已確認PIT正確性。")
-    print("子事件1（停資停券）：三來源皆不可行（直接表），備用反推路徑待查。")
-    print("子事件3（可轉債轉換價重設）：僅查2來源，未達三來源門檻，未下結論。")
+    print("子事件1（停資停券）：三來源皆不可行（直接表），但反推重建公式")
+    print("  已用2330/1808兩檔真實個股驗證通過，正式判定可行。")
+    print("子事件3（可轉債轉換價重設）：t120sb02系列候選URL為SPA殼頁，")
+    print("  非查詢表單，任務(i)本輪未達成，仍未達三來源門檻，未下結論。")
 
 
 if __name__ == "__main__":
