@@ -41,10 +41,17 @@
 - `simtrade=true` 是**試撮**不是真成交（開盤前與盤中瞬間），研究時必須先濾掉。
   這裡照收不濾，因為濾掉就再也還原不回來了；濾是分析端的事。
 
+**磁碟保護（資料一.3）**：上限 20GB，超過就從**最舊一天**刪，刪之前先印出來並
+append 進 `ticks/_disk_guard.jsonl`。三個護欄：今天不刪、不刪到只剩零天、紀錄寫在
+刪之前。用掉 80% 就開始示警（還不刪）——真的刪到就已經算失敗了，示警是讓人在
+那之前還有時間決定要搬走還是加大上限。
+
 用法（CLI，給人手動補壓縮或檢查用）：
     python research/tick_recorder.py compact 20260907   # 壓縮指定日期
     python research/tick_recorder.py compact-stale      # 壓縮所有非今日的殘留 jsonl
     python research/tick_recorder.py stat               # 列出目前落地的檔案與大小
+    python research/tick_recorder.py estimate           # 每日容量估算與撐得了幾天
+    python research/tick_recorder.py guard --dry-run    # 看看會刪誰（不真的刪）
 """
 from __future__ import annotations
 
@@ -303,8 +310,161 @@ def stat() -> dict:
     return {"root": str(TICKS_ROOT), "days": days, "total_bytes": total}
 
 
+# ── 磁碟保護（2026-09-06 總司令裁示【資料一】.3）─────────────────────────────
+# 「超過 20GB 時從最舊一天開始刪，刪之前回報」。
+DISK_LIMIT_BYTES = int(os.environ.get("ALPHA_TICKS_DISK_LIMIT_BYTES") or 20 * 1024 ** 3)
+# 用掉幾成就開始示警（還不刪）。有這個是因為「刪除」本身就是失敗——真的刪到就代表
+# 已經沒地方放了，示警是讓人在那之前還有時間決定要不要搬走或加大上限。
+DISK_WARN_RATIO = 0.8
+# 保護動作的落地紀錄。**只放記憶體的統計，服務一重啟就歸零、證明不了任何事**
+# （CLAUDE.md 四之二），所以刪了什麼一定要 append-only 寫進檔案。這個檔在
+# research/data/ 底下，跟 tick 資料一樣不進 git。
+DISK_LOG_PATH = TICKS_ROOT / "_disk_guard.jsonl"
+
+# 一筆 jsonl 實測 169 bytes（見 estimate() docstring）。
+BYTES_PER_TICK_JSONL = 169
+
+
+def _human(n: int) -> str:
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if n < 1024 or unit == "TB":
+            return f"{n:.1f}{unit}" if unit != "B" else f"{n}B"
+        n /= 1024.0
+    return str(n)
+
+
+def _log_event(event: dict) -> None:
+    """把保護動作 append 進 JSONL。寫不進去也不能讓呼叫端掛掉，但要印出來。"""
+    try:
+        DISK_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        event = {"at": datetime.now(TW_TZ).isoformat(), **event}
+        with DISK_LOG_PATH.open("a", encoding="utf-8", newline="\n") as f:
+            f.write(json.dumps(event, ensure_ascii=False) + "\n")
+    except OSError as e:
+        print("  [tick磁碟保護] 紀錄寫入失敗（動作照做，但沒留下紀錄）："
+              + type(e).__name__ + ": " + str(e), flush=True)
+
+
+def estimate(days_ahead: int = 250) -> dict:
+    """估算每日容量與撐得了幾天。
+
+    **有實測資料就用實測，沒有才用假設**——這是資料原則「禁止靜默記 None」的同一
+    精神：估計值要標清楚它是估的還是量的。
+
+    - 已經壓成 parquet 的日子：直接取檔案大小的中位數當「每日實際容量」。
+    - 一天都還沒壓過（例如剛上線的今天）：退回用假設值估，並在回傳裡把假設
+      原封標出來，不假裝那是量到的。
+
+    假設值的來源與算法（2026-09-07 資料一.1 上線時的估計，**尚未經實盤驗證**，
+    09-08 收盤後的 資料一.4 會用實測數字取代）：
+      單筆 jsonl 169 bytes（實測 json.dumps 出來的長度，欄位固定所以幾乎不變動）
+      × 每檔每日約 20,000 筆（台股逐筆交易，中大型股的粗略量級；2330 這種會多得多，
+        冷門股少得多，取中間值）
+      × 約 109 個標的（固定 5 檔個股＋4 檔期貨＋動態自選股上限 100）
+      ≈ 368MB/日的 jsonl；parquet+zstd 對這種高度重複的欄位通常壓到 1/6～1/10，
+      估 ~50MB/日。**這兩個數字都是估的，不要當成事實引用。**
+    """
+    st = stat()
+    sizes = [d["parquet"]["bytes"] for d in st["days"].values() if "parquet" in d]
+    if sizes:
+        sizes.sort()
+        per_day = sizes[len(sizes) // 2]
+        basis = f"實測（{len(sizes)} 個已壓縮日的中位數）"
+    else:
+        per_day = int(BYTES_PER_TICK_JSONL * 20000 * 109 / 7)  # 假設 parquet 壓到 1/7
+        basis = ("假設（單筆169B × 每檔每日約20000筆 × 約109個標的 ÷ 壓縮比7），"
+                 "**尚未經實盤驗證**，資料一.4 會用實測取代")
+    used = st["total_bytes"]
+    remain = max(DISK_LIMIT_BYTES - used, 0)
+    return {
+        "per_day_bytes": per_day, "per_day_human": _human(per_day), "basis": basis,
+        "used_bytes": used, "used_human": _human(used),
+        "limit_bytes": DISK_LIMIT_BYTES, "limit_human": _human(DISK_LIMIT_BYTES),
+        "used_ratio": round(used / DISK_LIMIT_BYTES, 4) if DISK_LIMIT_BYTES else None,
+        "days_until_limit": (remain // per_day) if per_day else None,
+        "days_on_disk": len(st["days"]),
+        "horizon_days": days_ahead,
+        "projected_bytes_at_horizon": used + per_day * days_ahead,
+        "projected_human_at_horizon": _human(used + per_day * days_ahead),
+    }
+
+
+def disk_guard(limit: int | None = None, dry_run: bool = False) -> dict:
+    """超過上限時從**最舊一天**開始刪，刪之前先回報（印出來＋寫進 DISK_LOG_PATH）。
+
+    三個不會被 dry_run 關掉的安全護欄，理由都是「刪掉就回不來」：
+    1. **今天絕不刪**。今天的資料還在寫，刪了等於自己砍自己的腳。
+    2. **最後一天絕不刪**。真的大到只剩一天還超標，那是上限設太小或資料異常，
+       該叫人來看，不是把手上唯一一份資料也刪掉。
+    3. **每刪一天前先寫紀錄**，寫的是刪之前的狀態（刪完再寫，萬一中途當掉就查無此事）。
+
+    回傳 {"action": "none"|"warn"|"deleted", ...}。`dry_run=True` 只回報要刪誰、不動手。
+    """
+    limit = DISK_LIMIT_BYTES if limit is None else limit
+    st = stat()
+    used = st["total_bytes"]
+    today = datetime.now(TW_TZ).strftime("%Y%m%d")
+
+    if used <= limit:
+        ratio = (used / limit) if limit else 0
+        if ratio >= DISK_WARN_RATIO:
+            msg = (f"已用 {_human(used)} / 上限 {_human(limit)}"
+                   f"（{ratio:.0%}），逼近上限但尚未刪除任何資料")
+            print(f"  [tick磁碟保護] ⚠ {msg}", flush=True)
+            _log_event({"action": "warn", "used_bytes": used, "limit_bytes": limit,
+                        "days_on_disk": len(st["days"])})
+            return {"action": "warn", "used_bytes": used, "limit_bytes": limit, "message": msg}
+        return {"action": "none", "used_bytes": used, "limit_bytes": limit,
+                "used_ratio": round(ratio, 4)}
+
+    # 超標了。由舊到新排，逐日刪到回到上限以下。
+    days = sorted(st["days"].keys())
+    deleted, freed = [], 0
+    for day in days:
+        if used - freed <= limit:
+            break
+        if day == today:
+            continue                      # 護欄 1：今天還在寫，不刪
+        if len(days) - len(deleted) <= 1:
+            break                         # 護欄 2：不刪到只剩零天
+        size = sum(v.get("bytes", 0) for v in st["days"][day].values())
+        targets = [_parquet_path(day), _day_dir(day)]
+        # 護欄 3：先回報再動手，紀錄寫的是「刪之前」的狀態
+        print(f"  [tick磁碟保護] 已用 {_human(used - freed)} 超過上限 {_human(limit)}，"
+              f"{'（dry-run，不會真的刪）' if dry_run else ''}刪除最舊一天 {day}"
+              f"（{_human(size)}）", flush=True)
+        _log_event({"action": "dry_run_would_delete" if dry_run else "delete",
+                    "day": day, "freed_bytes": size,
+                    "used_bytes_before": used - freed, "limit_bytes": limit,
+                    "days_on_disk_before": len(days) - len(deleted)})
+        if not dry_run:
+            for t in targets:
+                try:
+                    if t.is_dir():
+                        shutil.rmtree(t, ignore_errors=True)
+                    elif t.exists():
+                        t.unlink()
+                except OSError as e:
+                    print(f"  [tick磁碟保護] 刪除 {t} 失敗：{type(e).__name__}: {e}", flush=True)
+        deleted.append(day)
+        freed += size
+
+    return {"action": "deleted" if deleted else "none", "dry_run": dry_run,
+            "deleted_days": deleted, "freed_bytes": freed,
+            "used_bytes_before": used, "used_bytes_after": used - freed,
+            "limit_bytes": limit,
+            "still_over_limit": (used - freed) > limit}
+
+
 def _cli() -> int:
     cmd = sys.argv[1] if len(sys.argv) > 1 else "stat"
+    if cmd == "estimate":
+        print(json.dumps(estimate(), ensure_ascii=False, indent=1))
+        return 0
+    if cmd == "guard":
+        dry = "--dry-run" in sys.argv
+        print(json.dumps(disk_guard(dry_run=dry), ensure_ascii=False, indent=1))
+        return 0
     if cmd == "compact":
         if len(sys.argv) < 3:
             print("用法：python research/tick_recorder.py compact YYYYMMDD")
@@ -316,7 +476,7 @@ def _cli() -> int:
     elif cmd == "stat":
         print(json.dumps(stat(), ensure_ascii=False, indent=1))
     else:
-        print("未知指令 " + cmd + "；可用：compact / compact-stale / stat")
+        print("未知指令 " + cmd + "；可用：compact / compact-stale / stat / estimate / guard [--dry-run]")
         return 2
     return 0
 

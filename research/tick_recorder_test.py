@@ -31,8 +31,9 @@ def _tick(ts: str, close="123.5", volume=3, chg_type=2, tick_type=1,
 
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="alpha_ticks_test_"))
-    orig_root = tr.TICKS_ROOT
+    orig_root, orig_log = tr.TICKS_ROOT, tr.DISK_LOG_PATH
     tr.TICKS_ROOT = tmp
+    tr.DISK_LOG_PATH = tmp / "_disk_guard.jsonl"
     try:
         rec = tr.TickRecorder(root=tmp, enabled=True)
 
@@ -123,10 +124,69 @@ def main() -> int:
         assert "20260908" in st["days"] and "jsonl" in st["days"]["20260908"], st
         assert st["total_bytes"] > 0, st
 
-        print("全部PASS（11 組斷言）")
+        # ── 12. estimate()：有 parquet 就用實測，沒有才用假設，且要標清楚 ────
+        est = tr.estimate()
+        assert "實測" in est["basis"], f"已有 parquet 應改用實測，實際 basis={est['basis']}"
+        assert est["per_day_bytes"] > 0 and est["days_until_limit"] > 0, est
+        assert est["limit_bytes"] == tr.DISK_LIMIT_BYTES == 20 * 1024 ** 3, est
+
+        # ── 13. disk_guard()：沒超標就什麼都不刪 ───────────────────────────
+        # 比對時排除 _disk_guard.jsonl：它是保護動作自己的紀錄檔，示警時會被建立，
+        # 那是「有留下紀錄」的正確行為，不是「刪了或動了資料」。
+        def _days_on_disk():
+            return sorted(p.name for p in tmp.iterdir() if p.name != "_disk_guard.jsonl")
+
+        before = _days_on_disk()
+        res = tr.disk_guard()
+        assert res["action"] == "none", res
+        assert _days_on_disk() == before, "沒超標不得刪任何東西"
+
+        # ── 14. 逼近上限（>=80%）只示警不刪 ───────────────────────────────
+        used = tr.stat()["total_bytes"]
+        res = tr.disk_guard(limit=int(used / 0.85))  # 用掉約 85%
+        assert res["action"] == "warn", res
+        assert _days_on_disk() == before, "示警階段不得刪任何東西"
+
+        # ── 15. 超標：從最舊一天刪，且今天與最後一天有護欄 ────────────────
+        # 目前磁碟上有 20260905.parquet、20260907.parquet、20260908/（jsonl）。
+        # 把上限設成 1 byte 逼它刪到底，驗證它只刪得掉最舊的、留下最後一天。
+        res = tr.disk_guard(limit=1)
+        assert res["action"] == "deleted", res
+        assert res["deleted_days"][0] == "20260905", f"必須從最舊一天開始刪，實際{res}"
+        assert res["still_over_limit"] is True, "刪到剩一天仍超標時要誠實回報，不能假裝解決了"
+        remaining = sorted(p.stem for p in tmp.iterdir() if p.name != "_disk_guard.jsonl")
+        assert len(remaining) == 1, f"護欄：不得刪到零天，實際剩{remaining}"
+        assert not (tmp / "20260905.parquet").exists(), "最舊一天應已刪除"
+
+        # ── 16. 刪除有落地紀錄（記憶體統計證明不了任何事）─────────────────
+        log = (tmp / "_disk_guard.jsonl").read_text(encoding="utf-8").splitlines()
+        events = [json.loads(x) for x in log]
+        assert any(e["action"] == "warn" for e in events), events
+        deletes = [e for e in events if e["action"] == "delete"]
+        assert deletes and deletes[0]["day"] == "20260905", events
+        assert deletes[0]["freed_bytes"] > 0 and "used_bytes_before" in deletes[0], deletes[0]
+        assert all("at" in e for e in events), "每筆紀錄都要有時間戳"
+
+        # ── 17. dry-run 只回報不動手 ─────────────────────────────────────
+        (tmp / "20260901.parquet").write_bytes(b"x" * 500)
+        keep = _days_on_disk()
+        res = tr.disk_guard(limit=1, dry_run=True)
+        assert res["action"] == "deleted" and res["dry_run"] is True, res
+        assert _days_on_disk() == keep, "dry-run 不得真的刪除"
+
+        # ── 18. 今天的資料絕不刪（還在寫）────────────────────────────────
+        today = datetime.now(tr.TW_TZ).strftime("%Y%m%d")
+        (tmp / today).mkdir(exist_ok=True)
+        (tmp / today / "2330.jsonl").write_bytes(b"x" * 1000)
+        res = tr.disk_guard(limit=1)
+        assert today not in res["deleted_days"], f"今天的資料不得被刪，實際{res}"
+        assert (tmp / today).exists(), "今天的目錄必須還在"
+
+        print("全部PASS（18 組斷言）")
         return 0
     finally:
         tr.TICKS_ROOT = orig_root
+        tr.DISK_LOG_PATH = orig_log
         shutil.rmtree(tmp, ignore_errors=True)
 
 

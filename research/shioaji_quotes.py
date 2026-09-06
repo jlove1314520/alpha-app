@@ -1076,6 +1076,21 @@ def _compact_today() -> None:
               f"{type(e).__name__}: {e}", flush=True)
 
 
+def _tick_disk_guard(where: str) -> None:
+    """磁碟保護（資料一.3）：超過 20GB 從最舊一天刪，刪前先回報。
+
+    只在啟動與收盤各跑一次就夠——資料一天才長一天份，沒必要每 60 秒去 stat 整個
+    目錄（那是白花 I/O）。刪除的護欄與紀錄在 `tick_recorder.disk_guard()`。"""
+    if RECORDER is None:
+        return
+    try:
+        res = tick_recorder.disk_guard()
+        if res.get("action") != "none":
+            print(f"  [tick磁碟保護] {where}：{json.dumps(res, ensure_ascii=False)}", flush=True)
+    except Exception as e:
+        print(f"  [tick磁碟保護] {where} 檢查失敗（不影響落地）：{type(e).__name__}: {e}", flush=True)
+
+
 def _compact_stale_on_startup() -> None:
     """啟動時補壓縮「不是今天」的殘留jsonl。
 
@@ -1143,6 +1158,7 @@ def run_stream_daemon() -> None:
             print(f"[tick落地] {'啟用' if RECORDER.enabled else '停用（ALPHA_TICK_RECORD=0）'}，"
                   f"目錄={tick_recorder.TICKS_ROOT}", flush=True)
             _compact_stale_on_startup()
+            _tick_disk_guard("啟動")
         print(f"登入成功，帳戶數：{len(accounts) if accounts else 0}，開始訂閱逐筆tick串流", flush=True)
         time.sleep(CONTRACTS_READY_WAIT_SEC)
 
@@ -1316,6 +1332,7 @@ def run_stream_daemon() -> None:
         # 那不到60秒的tick（含尾盤，正是最有研究價值的一段）。
         _flush_ticks()
         _compact_today()
+        _tick_disk_guard("收盤")
 
         _flush_and_push(state, final=True)  # 收盤收尾：寫當日收盤快照並commit+push（乙.1之後全天唯一一次）
         state.maybe_write_live_state(force=True, market_status="closed")  # 熱檔也標記收盤，live server據此顯示「今日收盤」
