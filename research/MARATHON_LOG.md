@@ -1,5 +1,21 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 23:57 hypothesis_queue排程接續 — #49第1關cheap gate跑完，
+**CHEAP_PASS**（非最終判定）。新增`overnight_intraday_decomposition_gate.py`，
+TAIEX(^TWII)逐日拆解overnight/intraday報酬，用log報酬加總做期間累積
+報酬的exact可加性分解（恆等式sanity檢查誤差2.22e-16）。事前綁定判準
+（至少一段兩期皆顯著p<0.05+同號+log貢獻占比兩期皆偏離50%±20%）：
+overnight段乾淨通過（TRAIN mean=+0.0788%/t=+7.737/p=0.0000/占比=
++356.2%，VAL mean=+0.0552%/t=+3.124/p=0.0018/占比=+114.6%）；
+intraday段VAL期不顯著(p=0.8954)未通過，但依判準只需一段即
+CHEAP_PASS。跟美股文獻（Lou/Polk/Skouras 2019 JFE；AQR隔夜/盤中報酬
+不對稱現象）方向一致。**開放問題誠實記錄**：本佇列既有隨機控制組模板
+（打亂訊號時序、保留目標時序）不直接適用於這種「同一報酬加性分解」
+機制類型，下一輪需先設計適配的第2關placebo檢定，不強套舊模板產生
+偽結論。完整見`HYPOTHESIS_QUEUE.md`#49條目、`TRIALS_LEDGER.md`#180。
+`is_holdout_consumed()`開工/收工前皆確認`False`。本輪工作到此為止，
+下一輪從設計第2關placebo檢定開始，不跳關。
+
 ## 2026-09-06 23:28 hypothesis_queue排程接續 — 重新查證`BACKLOG.md`
 確認#5/#6/#8/#10四項外部依賴（`value_board_v2`回測未通過、題材動能榜
 /未來性濾網紙上交易中）仍未解鎖，跟上一輪查證結果一致，判定佇列
