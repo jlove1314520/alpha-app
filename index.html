@@ -4463,7 +4463,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     EXTREME_MOVE_ACTIVE=flags.length>0;
     if(!EXTREME_MOVE_ACTIVE){host.style.display='none';host.innerHTML='';return}
     host.style.display='';
-    host.innerHTML=`⚠ 極端走勢提醒：${flags.join('；')}。追高風險顯著升高，本頁已不顯示分批買入計畫。`;
+    // 2026-09-06（實測.四）總司令裁示取消「極端走勢就不顯示分批進場」：
+    // 階梯照顯示，把判斷權留給使用者，這裡只負責把風險講得夠醒目。
+    host.innerHTML=`⚠ 追高風險提醒：${flags.join('；')}。下方進場階梯照常顯示，但請自行判斷是否值得追。`;
   }
   async function renderReport(){
     const row=REPORT_CACHE;
@@ -4542,11 +4544,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const planEl=document.getElementById('report-entry-plan');
     // 2026-09-05（新一.7）：極端走勢時完全不顯示分批買入計畫——這種價位下給出「現價/-4%/-8%」
     // 三檔進場價，看起來就像在建議承接，但實際上追高風險已經顯著升高。頂端的警示列會說明原因。
-    if(EXTREME_MOVE_ACTIVE){
-      planEl.innerHTML='<div class="note" style="color:var(--warn)">⚠ 因極端走勢（見上方提醒），本檔暫不顯示分批買入計畫。</div>';
-      const cta=document.querySelector('#scr-report .buy-cta');if(cta)cta.style.display='none';
-      return;
-    }
     const cta0=document.querySelector('#scr-report .buy-cta');if(cta0)cta0.style.display='';
     planEl.innerHTML='<div class="note">載入中…</div>';
     try{
@@ -4557,6 +4554,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       if(runId!==REPORT_SEQ)return;
       if(!px.length){planEl.innerHTML='<div class="note">'+fmEmptyMsg('查無報價資料')+'，無法計算分批進場價位。</div>';return}
       const closes=px.map(x=>usCode?x.Close:x.close).filter(x=>x!=null);
+      const highs=px.map(x=>usCode?x.High:x.max).filter(x=>x!=null);
+      const lows=px.map(x=>usCode?x.Low:x.min).filter(x=>x!=null);
       const last=closes[closes.length-1];
       const low20=Math.min(...closes.slice(-20));
       const low60=Math.min(...closes.slice(-60));
@@ -4567,18 +4566,71 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const ctaBad=document.querySelector('#scr-report .buy-cta');if(ctaBad)ctaBad.style.display='none';
         return;
       }
-      const tranches=[
-        {label:'現價進場',price:last,pct:40},
-        {label:'回檔加碼（−4%）',price:last*0.96,pct:30},
-        {label:'靠近季線（−8%）',price:last*0.92,pct:30},
-      ];
+      // 2026-09-06（實測.四）改成**技術層級階梯**，不再用固定 −4%／−8%。
+      // 固定百分比的問題是它跟這一檔的實際結構完全無關：−4% 對一檔日波動 1% 的
+      // 金融股是很深的回檔，對一檔日波動 5% 的小型股只是雜訊。改成用這一檔自己的
+      // 均線、前波低點與 ATR 當價位，每一階都標明依據，使用者看得懂為什麼是這個價。
+      const ma=n=>{const a=closes.slice(-n);return a.length<n?null:a.reduce((x,y)=>x+y,0)/a.length};
+      // ATR14：用真實區間（含跳空），沒有高低價時退回收盤差的絕對值
+      const atr=(()=>{
+        const n=14;
+        if(highs.length>=n+1&&lows.length>=n+1){
+          const trs=[];
+          for(let i=closes.length-n;i<closes.length;i++){
+            if(i<1)continue;
+            const h=highs[i],l=lows[i],pc=closes[i-1];
+            if(h==null||l==null||pc==null)continue;
+            trs.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)));
+          }
+          if(trs.length)return trs.reduce((x,y)=>x+y,0)/trs.length;
+        }
+        const diffs=[];
+        for(let i=Math.max(1,closes.length-n);i<closes.length;i++)diffs.push(Math.abs(closes[i]-closes[i-1]));
+        return diffs.length?diffs.reduce((x,y)=>x+y,0)/diffs.length:null;
+      })();
+      const swingLow=lows.length>=20?Math.min(...lows.slice(-20)):low20;
+      const swingHigh=highs.length>=20?Math.max(...highs.slice(-20)):Math.max(...closes.slice(-20));
+
+      // 候選層級。只留「不高於現價」的（進場階梯是等回檔，不是追價），
+      // 現價那一階永遠保留當第一階。
+      const cand=[
+        {label:'現價進場',price:last,basis:'目前成交價'},
+        {label:'5 日均線',price:ma(5),basis:'近 5 日收盤平均'},
+        {label:'10 日均線',price:ma(10),basis:'近 10 日收盤平均'},
+        {label:'20 日均線（月線）',price:ma(20),basis:'近 20 日收盤平均'},
+        {label:'前波低點',price:swingLow,basis:'近 20 日最低價'},
+        {label:'1×ATR 回撤',price:atr!=null?last-atr:null,basis:atr!=null?`ATR14 ${nf(atr.toFixed(2))}`:''},
+        {label:'2×ATR 回撤',price:atr!=null?last-2*atr:null,basis:atr!=null?`ATR14 ${nf(atr.toFixed(2))} 的兩倍`:''},
+      ].filter(x=>x.price!=null&&isFinite(x.price)&&x.price>0&&x.price<=last*1.0001);
+
+      // 依價位由高到低排；價位太接近的（差 <0.5%）只留一個，避免出現三階幾乎同價
+      cand.sort((a,b)=>b.price-a.price);
+      const levels=[];
+      for(const c of cand){
+        if(levels.length&&Math.abs(levels[levels.length-1].price-c.price)/last<0.005){
+          levels[levels.length-1].label+=`／${c.label}`;
+          continue;
+        }
+        levels.push(c);
+      }
+      const picked=levels.slice(0,4);
+      // 資金配置：第一階最重，越往下越輕（等回檔的機率遞減）。四階以內都給得出來。
+      const WEIGHTS={1:[100],2:[60,40],3:[40,35,25],4:[35,30,20,15]};
+      const w=WEIGHTS[picked.length]||[];
+      // 2026-09-06（實測.四）價位取到合法檔位。ATR 算出來的是 1638.21 這種數字，
+      // 台股 1000 元以上的最小跳動單位是 5 元，1638.21 根本掛不進去。往下取整
+      // （買單取整到下一個合法價位，對買方只會更好），美股沒有這個問題所以跳過。
+      const toTick=v=>{if(usCode)return v;const t=twseTick(v);return +(Math.floor(+(v/t).toFixed(6))*t).toFixed(2)};
+      const tranches=picked.map((c,i)=>{const px2=toTick(c.price);
+        return {label:c.label,price:px2,pct:w[i],basis:c.basis,off:((px2/last-1)*100)};});
       ENTRY_PLAN_CACHE={code:row.code,name:row.name,tranches};
       planEl.innerHTML=
-        `<div class="note" style="margin-bottom:12px">⚠️ 機械式資金分批規則（依現價等距分批，非估值預測、非投資建議，僅為進場資金分配參考）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}。</div>`+
+        (EXTREME_MOVE_ACTIVE?`<div class="note" style="margin-bottom:10px;color:var(--warn);border:1px solid rgba(250,178,25,.35);border-radius:9px;padding:8px 10px"><b>⚠ 追高風險高</b>：${extremeMoveFlags(row).join('；')}。階梯照常顯示，判斷權在你。</div>`:'')+
+        `<div class="note" style="margin-bottom:12px">⚠️ 技術層級分批規則（價位取自這一檔自己的均線／前波低點／ATR，非估值預測、非投資建議，僅為進場資金分配參考）。近期支撐參考：20 日低點 ${nf(low20.toFixed(2))}、60 日低點 ${nf(low60.toFixed(2))}、近 20 日最高 ${nf(swingHigh.toFixed(2))}。</div>`+
         `<div style="display:flex;flex-direction:column;gap:10px">`+
         tranches.map((t,i)=>`<div style="display:flex;align-items:center;gap:12px">
           <span class="num" style="width:22px;height:22px;border-radius:50%;background:rgba(216,176,112,.15);color:var(--gold);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</span>
-          <span style="flex:1;font-size:12.5px;color:var(--ink-2)">${t.label}</span>
+          <span style="flex:1;font-size:12.5px;color:var(--ink-2)">${t.label}<br><span style="font-size:9.5px;color:var(--ink-4)">${t.basis}${t.off<-0.05?`　距現價 ${t.off.toFixed(1)}%`:''}</span></span>
           <span class="num" style="font-size:13px;font-weight:600">${nf(t.price.toFixed(2))}</span>
           <span class="num" style="font-size:10px;color:var(--ink-4);width:34px;text-align:right">${t.pct}%</span>
         </div>`).join('')+`</div>`;
@@ -5134,7 +5186,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.1048';
+  const APP_VERSION='2026-09-06.1116';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
