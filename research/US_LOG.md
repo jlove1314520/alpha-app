@@ -1606,3 +1606,28 @@ back-adjusted價格會被「未來」的反向分割回溯放大過去的名目�
 **未commit的其他track檔案（本輪刻意不動）**：`git status`同時顯示`research/marathon_lock.py`（修改，新增devqueue專屬27→62分鐘陳舊門檻）、`scripts/dev_queue_runner.py`、`.github/workflows/audit.yml`、`research/.live_watchlist.json`、`research/data_cache/`皆為untracked/modified，讀`scripts/dev_queue_runner.py`docstring確認這是總司令2026-09-06裁示的另一條獨立「開發佇列自走」track（`CLAUDE.md`帽子規則歸屬「開發」/「維運」帽，非本馬拉松research track擁有），本輪依帽子規則越權禁止原則不觸碰、不commit這些檔案，只commit本輪實際完成的US軌研究產物。
 
 **下一輪接手**：US軌優先權仍是(a)尋找新的美股成分因子候選（US軌因子家族尚未像TW軌一樣系統性掃過`MARATHON_PROTOCOL.md`第3節全部家族）；或(b)改善`#20`/`#21`短腿成本模型（做空成本隨股價/流動性反向縮放，而非固定$50代表性價格）。完整見`TRIALS_LEDGER.md`#181、`US_LEADS.md`#21、`US_MARATHON_STATE.md`第417輪記錄。
+
+## 第421輪 · 2026-09-07T02:43+08:00 · US · 取鎖乾淨（cycle`20260907-023036`），三軌時間戳US 00:30（round418，最舊）／TW 02:04（round420）／FUT 12:00（round399，例外條款不選）——依輪替選US
+
+`run_detached.py status`確認heavy-job-slot空（0個running），`git status`確認無其他行程正在編輯同一批檔案。**本輪工作單位＝round418「下一步」明列的既定快殺檢定**：round410列名的value_bm/low_vol常駐短腿ticker（`WATT`/`CRWD`/`LEE`/`AMTX`/`MNTS`/`DVLT`/`WULF`/`CIIT`/`PALI`）在FINRA/Nasdaq Reg SHO threshold securities list上是否有長期持續紀錄——若有，代表真實世界持續借不到券，這批股票的空頭「報酬」根本不可能被真實策略實現，依`HYPOTHESIS_QUEUE_PROTOCOL.md`快殺標準「結構性不可能」應直接判`#20`/`#21`為FAIL。`CRWD`（CrowdStrike）round418已註記非HTB案例排除，實際查證清單為7檔（`WATT`/`AMTX`/`MNTS`/`DVLT`/`WULF`/`CIIT`/`PALI`）；`LEE`(Lee Enterprises)是NYSE掛牌，本探針資料源不涵蓋，另記錄未查證。
+
+**資料源查證**：先WebFetch確認`nasdaqtrader.com/trader.aspx?id=RegSHOThreshold`頁面說明——Nasdaq市場的Reg SHO threshold securities list每日檔案透過匿名FTP（`ftp://ftp.nasdaqtrader.com/SymbolDirectory/regsho/nasdaqth{YYYYMMDD}.txt`）免費提供，無需登入、無需API key。手動curl測試：HTTPS連線逾時失敗，改用`ftp://`協定anonymous登入成功；`--ftp-pasv`模式下成功下載當日檔案；額外測試4個歷史日期（2021/2022/2023/2024各一天）確認FTP伺服器確實保留歷史檔案可回溯下載，非僅當日快照。
+
+**新增`finra_threshold_probe.py`**（可重複執行）：VAL期(2020-12~2024-12)每月15日附近抽樣一次（找不到當天檔案時往前找最多3天，處理假日/週末），共49個樣本點，逐日下載並快取到`data/raw_finra_threshold/`（gitignored），解析`Reg SHO Threshold Flag`欄位是否為`Y`，統計每檔目標ticker的命中次數。全程走官方免費匿名端點，零違反`CLAUDE.md`「取得方式鐵律」（無驗證碼、無登入牆、無需偽造UA/Referer）。
+
+**結果**：7檔目標ticker在49個樣本點**全數0命中（0/49，0.0%）**，即月頻抽樣完全沒有偵測到任何一檔曾出現在Nasdaq Reg SHO threshold securities list上。
+
+**判定：round418提出的快殺假說REFUTED**——「長期掛在threshold list代表真實世界持續借不到券」這個具體檢定沒有得到支持證據。**誠實揭露限制**：Reg SHO threshold資格認定需要連續5個結算日FTD超標，狀態可能在數天到數週內出現又消失，月頻抽樣（49點涵蓋約1000個交易日，抽樣密度約5%）理論上可能漏掉短暫的threshold事件，因此0/49**不構成**「這些股票在真實世界容易借到券」的正面證據，只能排除「長期、持續性」掛在監理FTD清單這個最強版本的結構性不可能理由。
+
+**綜合判讀**：至此round410提出的(a)(b)兩個候選機制，加上round412 price floor篩選、本輪threshold list查證，總共四個「執行不可行/成本被低估」類型的假說全部被REFUTED或未獲支持證據：
+1. round418 tiered borrow fee（成本模型，最高100%/yr）→ REFUTED（`TRIALS_LEDGER.md`#183，short_ann僅降0.6%~8.4%）
+2. round412 price floor篩選（排除低價股）→ REFUTED（`TRIALS_LEDGER.md`#177，篩選後報酬不降反升）
+3. 本輪 FINRA threshold list歷史紀錄 → REFUTED/未獲支持（`TRIALS_LEDGER.md`#185，0/49命中）
+
+**唯一仍有直接證據支持、尚未被推翻的解釋收斂到round412已發現的核心問題**：這批常駐短腿ticker（`MNTS`/`DVLT`等）的`adj_close`會被「未來」的反向分割回溯放大過去名目價格（`MNTS`在VAL起點2020-12-31達$224,500），用比率計算報酬時方向可能正確但量級可能嚴重失真——這不是借券可得性或成本被低估的問題，是**資料本身的完整性問題**（FinMind美股資料集沒有保留未調整原始報價，`close`欄位與`adj_close`完全相同）。
+
+`#20`/`#21`判定**維持EXPERIMENTAL不變**——本輪是排除法（縮小可能解釋的空間），不是針對異常本身的正面或負面決定性新證據，不足以單獨翻案為FAIL（三個「執行不可行」假說都不支持FAIL）或PASS（`adj_close`資料完整性疑慮仍未解決，不能貿然升格）。
+
+已寫入`TRIALS_LEDGER.md`#185、`US_LEADS.md`#20/#21更新、`US_MARATHON_STATE.md`第421輪記錄（第415/414輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）、`REPORT.md`第421輪心跳。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增付費/需登入API呼叫（純官方免費匿名FTP，1次WebFetch確認端點文件+49次輕量FTP下載）。
+
+**下一輪US軌接手**：不建議再測「這個異常是否可被執行限制解釋」這條線——四個假說（成本模型、price floor、threshold list，加上round407已REFUTED的宇宙離散度）已窮盡皆REFUTED/未獲支持。改查是否有除FinMind外的免費、免登入資料源能提供這批常駐短腿ticker（僅約10檔規模，非全宇宙）的**真實未還原歷史收盤價**（例如stooq.com等提供免費歷史股價的公開來源，需先查證是否真的保留原始未調整報價、是否免費免登入），若能取得可直接用真實原始價格重跑VAL回測，直接驗證異常量級是否消失——這會是比繼續排除各種「執行限制」假說更直接的檢定。若查無替代來源，`#20`/`#21`可能需要誠實記錄「異常成因收斂到資料源本身限制，短期無法進一步驗證」，並考慮比照round382-408已窮盡的診斷鏈長度，評估是否該正式結案（維持EXPERIMENTAL但不再投入更多輪次）。完整見`TRIALS_LEDGER.md`#185、`US_LEADS.md`#20/#21、`finra_threshold_probe.py`（新增，可重複執行）、`data/raw_finra_threshold/`（新增快取，gitignored）。
