@@ -1352,3 +1352,15 @@ session內等待約3~4分鐘仍`running`（`watchdog_alive=True`），248檔×2�
 `is_holdout_consumed()`開工/收工前皆確認`False`。本輪session內零新增API呼叫（純讀log+resubmit，248檔全部命中既有parquet快取）。
 
 **下一輪接手**：先`run_detached.py status`確認`20260906-060311-6a01`是否`finished`；若仍`running`且未逾150分鐘不必重複投遞，直接等下一輪再檢查（`submit`遇running中工作會拒絕，exit 3）；若`finished`則讀log SUMMARY，優先檢查TRAIN期percentile與beta方向，寫入`TRIALS_LEDGER.md`新列。若150分鐘後仍`timeout`，效能優化`run_one()`（例如把逐檔`.loc`查表換成向量化）屬於架構/效能變更，按`CLAUDE.md`「提案先於執行」鐵律，應先寫提案給總司令，不能自行改寫這支被多處沿用的共用回測函式。跑完低波動後同樣手法對`f_us_value_bm`（#20）做1b深挖。
+
+## 第391輪 2026-09-06T08:00+08:00
+
+取鎖乾淨。US背景job `20260906-060311-6a01`（round387投遞，150分鐘timeout，`us_deep_dive_lowvol_clean_universe_retry`）本輪開工時仍`running`（約121分鐘，`log --tail 20`確認5/6組合已跑完，VAL 3x cost進行中），未逾時不視為卡死，但run_detached重度工作插槽仍被佔用，TW排隊中的`tw_deep_dive_quality_roe_stability_full_rerun`也連帶卡住。
+
+**本輪工作單位**：新增 `deep_dive_f_us_value_bm_clean_universe.py`——重用 `deep_dive_f_us_value_bm.py::run_one_value()`/`PERIODS`/`COST_MULTIPLIERS`/`_load_market_df()` 原封不動，資料loader換成 `us_factor_ic_value_clean_universe.py::load_value_sample()`（round382已建置的乾淨宇宙SEC EDGAR loader，SEC快取已由round382背景job填滿，預期零新增API呼叫）。跟round386 `deep_dive_f_us_low_vol_clean_universe.py` 同一套單一變因替換手法。**本輪刻意不執行main()**——只做 `ast.parse` 語法檢查＋`import`匯入檢查（確認 `TARGET_FACTOR`/`PERIODS`/`COST_MULTIPLIERS` 讀取正常），因為 run_detached 插槽已被US低波動job佔用，此時執行完整回測會違反「一次只跑一個重度工作」規則。
+
+**另外補齊協定缺口**：發現round386~390五輪都只更新了各軌 `_MARATHON_STATE.md`，忘記寫 `REPORT.md` 心跳跟 `MARATHON_STATE.md` 全局計數器（`MARATHON_PROTOCOL.md`第6節第4點列為硬性步驟，不能省略）。本輪已在這兩份檔案追記round386~391共6筆心跳、計數器從387補到391。
+
+`is_holdout_consumed()` 開工/收工前皆確認 `False`。零新增API呼叫。
+
+**下一輪接手**：`run_detached.py status` 確認 `20260906-060311-6a01` 是否 `finished`；若是，讀SUMMARY寫入 `TRIALS_LEDGER.md`（**注意log顯示VAL期beta已達-0.821，遠超TRAIN的-0.316，市場中性程度隨樣本期推移明顯惡化，深挖判定時要一併檢視，不要只看alpha/ann_return漂亮就放行**）；插槽空出後投遞 `python research/run_detached.py submit --name us_deep_dive_valuebm_clean_universe --timeout-min 150 -- python -u research/deep_dive_f_us_value_bm_clean_universe.py`（**timeout用150分鐘起跳，不要用20分鐘預設值**）。完整見 `US_MARATHON_STATE.md`/`REPORT.md` 第391輪記錄、`deep_dive_f_us_value_bm_clean_universe.py`（新增，尚未執行過）。

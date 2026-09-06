@@ -2,9 +2,17 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T06:03+08:00**
+**最後更新：2026-09-06T08:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 387 輪。最新一輪：第 387 輪 · 2026-09-06T06:03+08:00 · US（取鎖乾淨，TW最舊02:00／FUT 02:30／US最新05:37，依輪替本應選TW，但round386投遞的背景job`20260906-053411-6d75`開工時已是`timeout`狀態，優先收成處理後選US）**。**本輪工作單位＝收成並診斷round386的逾時job**：`deep_dive_f_us_low_vol_clean_universe.py`跑完`load_clean_sample_with_factors()`（248/248可用）後卡在第一個period/cost組合的101次逐日回測（1真實+100隨機控制組），20分鐘不夠跑完全部6組合——查`US_LOG.md`round336/339同規模歷史紀錄佐證，這是共用回測函式`run_one()`本身運算量大、20分鐘timeout訂太保守，不是新腳本的bug。不改動`run_one()`計算邏輯，只用150分鐘timeout重新投遞（job_id`20260906-060311-6a01`），session內等待2分鐘確認running，breakaway留背景繼續跑，下一輪收成SUMMARY。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`/`REPORT.md`第387輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 391 輪。最新一輪：第 391 輪 · 2026-09-06T08:00+08:00 · US（取鎖乾淨，FUT 02:30最舊但round385已明確標記「trend+oi四種組合全FAIL,優先權回TW/US」跳過；US 06:03/TW 07:30兩者皆被同一個heavy-job-slot卡住，選US）**。**本輪工作單位**：US背景job`20260906-060311-6a01`（低波動乾淨宇宙深挖，round387投遞，150分鐘timeout）本輪開工時仍`running`（約121分鐘，log顯示5/6組合已完成，VAL 3x進行中），未到期不視為卡死；同一個heavy-job-slot也擋住TW排隊中的`tw_deep_dive_quality_roe_stability_full_rerun`（round390已把timeout參數更正為150分鐘，等US釋放後投遞）。**改做不需重算的地基準備**：新增`deep_dive_f_us_value_bm_clean_universe.py`（重用`deep_dive_f_us_value_bm.py::run_one_value()`＋round382`us_factor_ic_value_clean_universe.py::load_value_sample()`乾淨宇宙loader，單一變因替換手法同`deep_dive_f_us_low_vol_clean_universe.py`），只做語法+匯入檢查，**未執行main（避免佔用heavy-job-slot搶跑）**，供下一輪US job釋放後投遞。**另補寫round386~390遺漏的心跳**——`REPORT.md`心跳插入是協定第6節硬性步驟，過去5輪只更新了各軌`_STATE.md`忘記寫`REPORT.md`跟這個全局計數器，本輪已追記5筆（見`REPORT.md`）並把計數器從387一次補到391。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`/`REPORT.md`第391輪記錄。
+
+**上一輪（第390輪，供對照）：第 390 輪 · 2026-09-06T07:30+08:00 · TW**。更正下一輪`tw_deep_dive_quality_roe_stability_full_rerun`投遞參數（`--timeout-min`40→150，因`factor_ic.SAMPLE_SIZE`已改300檔跟US低波動同量級）；過程中誤覆寫round377已存在的`margin_debt_level_window_robustness.py`已用`git checkout`即時還原。完整見`TW_MARATHON_STATE.md`第390輪記錄。
+
+**上一輪（第389輪，供對照）：第 389 輪 · 2026-09-06T07:05+08:00 · TW**。盤點確認`MARATHON_PROTOCOL.md`第3節因子家族已全數掃過，更正`MI_MARGN`過時備註；US heavy job佔用中無法投遞TW的`deep_dive_f_quality_roe_stability.py`完整重跑。完整見`TW_MARATHON_STATE.md`第389輪記錄。
+
+**上一輪（第388輪，供對照）：第 388 輪 · 2026-09-06T06:30+08:00 · TW**。稽核`portfolio_multifactor_v2`家族逾12種構造全數FAIL（p單調惡化0.053→0.53→0.56），判定家族結案，regime overlay非有效下一步；順帶commit前一輪`hypothesis_queue`系統遺留的未commit完成工作。完整見`TW_MARATHON_STATE.md`第388輪記錄、`STRATEGY_GRAVEYARD.md`。
+
+**上一輪（第387輪，供對照）：第 387 輪 · 2026-09-06T06:03+08:00 · US（取鎖乾淨，TW最舊02:00／FUT 02:30／US最新05:37，依輪替本應選TW，但round386投遞的背景job`20260906-053411-6d75`開工時已是`timeout`狀態，優先收成處理後選US）**。收成並診斷round386的逾時job：`deep_dive_f_us_low_vol_clean_universe.py`跑完`load_clean_sample_with_factors()`（248/248可用）後卡在第一個period/cost組合的101次逐日回測（1真實+100隨機控制組），20分鐘不夠跑完全部6組合——查`US_LOG.md`round336/339同規模歷史紀錄佐證，這是共用回測函式`run_one()`本身運算量大、20分鐘timeout訂太保守，不是新腳本的bug。不改動`run_one()`計算邏輯，只用150分鐘timeout重新投遞（job_id`20260906-060311-6a01`），breakaway留背景繼續跑。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第387輪記錄。
 
 **上一輪（第386輪，供對照）：第 386 輪 · 2026-09-06T05:37+08:00 · US（取鎖乾淨，US最舊01:30／TW 02:00／FUT最新02:30，依輪替選US）**。**本輪工作單位＝接續round383「下一輪接手」**：對`f_us_low_vol`（#21）做1b深挖，新增`deep_dive_f_us_low_vol_clean_universe.py`（換乾淨宇宙ticker清單，重用`deep_dive_f_us_low_vol.py`的`run_one()`等函式原封不動）。踩到相對路徑cwd bug（第一次提交`FileNotFoundError`），修正為`Path(__file__).parent`寫法後重新投遞（job_id`20260906-053411-6d75`，timeout 20分鐘），session內等待約3~4分鐘仍running，依協定breakaway留背景。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第386輪記錄。**（後續：round387發現此job逾時被砍，已診斷根因並用150分鐘timeout重新投遞，見上方最新條目。）**
 
