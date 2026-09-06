@@ -1,5 +1,34 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T09:10（台北時間，hypothesis_queue排程接續，取鎖乾淨
+LOCK_ACQUIRED，接續#41第四輪，擴大pilot樣本）：延續上一輪判定
+（`PILOT_STOCK_COUNT`從15擴大到25，`PILOT_SAMPLE_SIZE`維持60不變，
+先實測確認`random.Random(seed).sample()`在不同size下對這個母體是
+prefix-consistent的——`sample_universe_ids(60,seed)==sample_universe_ids(150,seed)[:60]`
+成立，確保新增的10檔股票接續在原本15檔之後、不是重抽整組新樣本）。
+受限於per-company查詢+headless單次Bash呼叫10分鐘上限（一次擴到接近
+factor_ic.py標準300檔規模需6000筆請求、以1.8秒節流估算超過3小時，
+遠超單輪可行時間），本輪只分批擴大10檔，用`run_in_background`跑
+`backfill_insider_holdings.py`（前景10分鐘逾時後自動轉背景，等待
+約5分鐘後完成），**新增500筆請求（含300筆快取命中的舊組合+200筆
+新組合）全數成功無error**（`ok=360(72.0%) empty=140 error=0`）。
+重跑`insider_holdings_pilot_ic.py`：panel擴大為**N=342筆/18檔股票**
+（原25檔中部分股票`adjusted_price_series`載入失敗被跳過），真實
+Spearman IC **r=+0.0775**（方向仍為正、跟上一輪+0.0710同號一致）、
+**p=0.1525**（比上一輪0.2858顯著改善）、洗牌null percentile=
+**94.0**（比上一輪90.5略升，N_SHUFFLES=200整panel打散，非正式判準）。
+**判定：樣本擴大後方向一致性與顯著性皆呈改善趨勢（p值下降、
+percentile上升），支持「這不是雜訊」的假設，但p=0.1525仍未過常規
+p<0.05門檻，樣本規模（18檔/342筆）距離factor_ic.py標準300檔仍有
+數量級差距，依協定「一輪只做一個有界工作單位」原則不強行一次擴到
+300檔，不倉促宣稱CHEAP_PASS或FAIL**。`is_holdout_consumed()`確認
+仍為False。已同步`HYPOTHESIS_QUEUE.md` #41條目「狀態更新（第四輪）」
+小節+排隊順序總結，未動`TRIALS_LEDGER.md`（尚無正式PASS/FAIL/
+CHEAP_PASS判定可記）。下一輪：延續同一套prefix-consistent抽樣邏輯
+繼續分批擴大樣本（例如25→50，視單輪10分鐘時間預算而定），持續觀察
+p值/percentile趨勢是否收斂到顯著或發散回不顯著。commit+push後收工，
+釋放鎖。
+
 ## 2026-09-06T08:49（hypothesis_queue排程接續，取鎖乾淨LOCK_ACQUIRED，
 接續#41地基建置本輪）：依上一輪查證結果，設計節流後的中小樣本回補腳本
 ——新增`mops_insider_holdings_client.py`（per-company per-month查詢+

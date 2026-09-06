@@ -1,5 +1,9 @@
 """`HYPOTHESIS_QUEUE.md` #41（內部人董監持股轉讓）節流後的中小樣本回補腳本
-（2026-09-06 hypothesis_queue排程接續，地基建置本輪）。
+（2026-09-06 hypothesis_queue排程接續，地基建置本輪；2026-09-06接續第四輪
+把`PILOT_STOCK_COUNT`從15擴大到25——受限於per-company查詢+headless單次
+Bash呼叫10分鐘上限，一次擴到接近factor_ic.py標準300檔規模的時間成本過高
+（300檔x20季度=6000筆請求，以1.8秒節流估算需要3小時以上），依協定「一輪
+只做一個有界工作單位」原則分批擴大，本輪+10檔、下一輪可再接續擴大）。
 
 依`HYPOTHESIS_QUEUE.md` #41條目最新狀態的指引：「先用中小樣本抽樣先驗第1關
 cheap gate訊號存在，再決定是否值得投入全量回補的工程成本」——本腳本**只**
@@ -36,7 +40,7 @@ from factor_ic import SAMPLE_SEED, sample_universe_ids
 from mops_insider_holdings_client import fetch_and_cache
 
 PILOT_SAMPLE_SIZE = 60
-PILOT_STOCK_COUNT = 15
+PILOT_STOCK_COUNT = 25
 
 PERIODS = [(f"{y:03d}", m) for y in range(105, 110) for m in ["03", "06", "09", "12"]]
 
