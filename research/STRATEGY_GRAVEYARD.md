@@ -91,6 +91,81 @@ FAIL/深挖後降級案例的策展摘要，給使用者/App策略監控台看�
   隨時間漂移，不能只看VAL期報酬數字轉強就誤判為訊號變強。
 - **原始記錄**：`TRIALS_LEDGER.md`#39/#41，`deep_dive_f_us_low_vol.py`。
 
+### f_us_value_bm／f_us_low_vol 乾淨宇宙版本（US軌，round382-425，
+9輪短腿診斷鏈整併結案，2026-09-07 FAIL）
+
+- **哪一關死的**：資料完整性（非GATE_SEQUENCE任何一關的統計判準本身
+  失敗——cheap gate、1b深挖、多個下檔保護與穩健性檢定全部「數字上」
+  通過甚至過關到不合理的量級，死因是這些數字本身無法被驗證為現實中
+  可執行的報酬）。
+- **背景**：round382/383換用市值分層隨機抽樣（`us_stratified_universe_
+  sample.py`）修正舊池子熱門股偏誤後，`f_us_value_bm`（book-to-market）
+  與`f_us_low_vol`（60日波動負號）兩因子cheap gate皆清楚過關
+  （percentile 100.0），1b深挖（`TRIALS_LEDGER.md`#163）VAL期
+  （2020-2024）年化報酬皆超過三位數（value_bm +141%~142%、low_vol
+  +90%~230%視拆解方式），遠超文獻認定的HML／BAB溢酬量級，判定
+  EXPERIMENTAL、不直接PASS，觸發長達9輪的異常成因診斷。
+- **具體數字（依時序，六個候選解釋依序被排除）**：
+  1. 單一年份驅動（`TRIALS_LEDGER.md`#152/#167）：VAL期逐年拆解顯示
+     四年全部為正、leave-2022-out不降反升——**REFUTED**。
+  2. 持股集中度（`TRIALS_LEDGER.md`#154）：排除own-VAL-return前7%極端
+     贏家後報酬不降反升——**REFUTED**（與`f_us_value_bm`舊池子#18形成
+     鮮明對比，那裡排除極端值後報酬從+121%驟降至<30%）。
+  3. 宇宙離散度（`TRIALS_LEDGER.md`#171）：乾淨宇宙與舊宇宙VAL/TRAIN
+     報酬離散度比值同量級（1.34x vs 1.59x），SPY自身波動率反而下降
+     ——**REFUTED**。
+  4. Long/Short腿拆解（`TRIALS_LEDGER.md`#172）：多頭腿VAL報酬完全在
+     合理範圍（甚至低於TRAIN），異常幾乎100%來自空頭腿。
+  5. 空頭腿持股與成本模型（`TRIALS_LEDGER.md`#174/#177/#183）：空頭腿
+     高度集中在少數「反覆反向分割死亡螺旋」微型股（WATT/CRWD/LEE/
+     AMTX/WULF/CIIT/DVLT/MNTS/PALI等），價格下限篩選因`adj_close`
+     被未來反向分割回溯放大而失效；把借券費率從固定2%/yr大幅提高到
+     文獻上限100%/yr（price-tiered），空頭年化報酬僅降0.6%~8.4%
+     ——**REFUTED**（成本被低估不解釋量級）。
+  6. 換手率混淆（`TRIALS_LEDGER.md`#181）：把隨機控制組換手率鎖定到
+     與真實策略同量級（persistent-random null）後仍是淨損
+     ——**REFUTED**。
+  7. FINRA threshold list歷史紀錄（`TRIALS_LEDGER.md`#185）：常駐空頭
+     ticker月頻抽樣49點0命中——**REFUTED**（但月頻抓不到短暫FTD事件，
+     非強證據）。
+  8. 免key免登入替代資料源（`TRIALS_LEDGER.md`#188）：yfinance實測與
+     FinMind的`adj_close`逐位元相同，證實Yahoo Finance本身也是
+     back-adjusted（非FinMind獨有限制）；stooq.com觸發反機器人驗證，
+     依`CLAUDE.md`取得方式鐵律不得繞過。Alpha Vantage`TIME_SERIES_
+     DAILY`文件宣稱raw報價，但需要API key，需使用者同意才能註冊，
+     馬拉松無人值守輪次不得代為決定。
+- **死因**：排除以上六類解釋後，唯一站得住腳、且已無免費合法管道可
+  進一步驗證的解釋是`adj_close`回溯膨脹歷史名目價格——空頭腿系統性
+  選中的死亡螺旋型微型股，其歷史價格因為「未來」尚未發生的反向分割
+  被回溯放大（例：`MNTS`在VAL起點2020-12-31的adj_close高達
+  $224,500，`DVLT`達$53,100），導致比率報酬計算本身雖然算式正確，
+  卻無法代表真實世界能夠執行的交易結果。這不是策略構造錯誤，也不是
+  隨機控制組/成本模型/樣本方法的問題，是**資料源本身結構性缺乏raw
+  報價欄位**，屬於`CLAUDE.md`「取得方式鐵律」框架下「查了三個來源都
+  沒有→誠實記錄替代路徑」的情境，不是可以靠更聰明的統計方法解決的
+  邊際問題。US軌額外落地了一個Top-N長多組合構造（`#22`，完全避開
+  短腿）試圖繞過這個限制，但在組合層級本身測出FAIL（隨機控制組
+  percentile 43.0/60.0，alpha p值皆>0.7），代表繞開短腿後也沒有可
+  兌現的顯著alpha。
+- **這個死法能不能泛化**：**不泛化到「value/低波動因子在美股無效」**
+  ——文獻基礎（Fama-French HML、BAB/leverage-constraint）不受影響，
+  多頭腿本身在TRAIN/VAL兩期報酬量級都合理、無異常。死的是「用FinMind
+  免費美股資料源建構含空頭腿的長短倉策略，且空頭腿容易選中低價微型
+  股」這個具體資料/構造組合。**若未來取得含raw報價的合法資料源**
+  （例如使用者核准註冊Alpha Vantage、或購買含未調整報價的商業資料），
+  這兩個因子值得重新測試——不是因為經濟機制被推翻，是因為量測工具
+  的限制被移除。
+- **原始記錄**：`TRIALS_LEDGER.md`#144/#163/#165/#167/#170/#171/#172/
+  #174/#177/#181/#183/#185/#188，`US_LEADS.md`#20/#21/#22（完整9輪
+  更新記錄），`us_factor_ic_value_clean_universe.py`／
+  `us_factor_ic_lowvol_clean_universe.py`／
+  `deep_dive_us_value_bm_lowvol_leg_decomposition.py`／
+  `us_short_leg_holdings_check.py`／`us_short_leg_price_floor_check.py`／
+  `us_short_leg_tiered_borrow_check.py`／
+  `deep_dive_f_us_low_vol_persistent_random_control.py`／
+  `finra_threshold_probe.py`／`us_alt_source_raw_price_probe.py`
+  （皆可重複執行）。
+
 ---
 
 ## `HYPOTHESIS_QUEUE.md`佇列本輪新測的陣亡紀錄
