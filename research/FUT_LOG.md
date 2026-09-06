@@ -2233,3 +2233,17 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 **依round372「下一步」清單判定**：(b)換oi變體選項至此已測試並排除（跟binary版一樣FAIL，且更差）；(c)FUT軌現有訊號池經四輪嘗試（等權3成分round361、等權2成分round364、加權2成分round372、分級OI變體本輪）均未能勝過或改善單因子`fut_trend_multi_tf`（82.5），優先權維持回TW/US軌，FUT維持20%資源配額上限，除非有全新的FUT假說家族（`MARATHON_PROTOCOL.md`第3節尚未測的日內均值回歸其他變體/星期效應以外的季節性/盤別效應延伸）。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。完整見`FUT_LEADS.md`第385輪新增段落、`FUT_MARATHON_STATE.md`第385輪、`TRIALS_LEDGER.md`#149、`fut_cheap_gate.py`（新增`hyp_oi_price_confirm_graded()`）。
+
+## 2026-09-06T12:00+08:00 — 第399輪（FUT軌）
+
+取鎖乾淨（非陳舊鎖檔，`LOCK_ACQUIRED`，cycle `20260906-120037`）。三軌時間戳：FUT 02:30（第385輪，最舊，近13輪386-398出現0次，配額遠未觸頂）／US 11:00（第397輪）／TW 11:30（第398輪，最新）——依輪替選FUT。`run_detached.py status`確認US軌`20260906-110113-735e`（`us_deep_dive_valuebm_clean_universe`）本輪仍`running`（59.9分鐘/150分鐘timeout），heavy-job-slot佔用中，故本輪不投遞新重度工作。
+
+**本輪工作單位＝round385下一步(c)例外條款「除非有全新機制假說」**：`grep -n "^def hyp_" fut_cheap_gate.py`盤點既有20個假說函式，確認全部隔夜跳空/盤別類構造（#14/#15、#20/#21、#22-#25）都只用「隔夜跳空到收盤」或「單一session的open→close」這種intraday段，**從未測過最單純的「前一日完整close-to-close報酬預測次日報酬」**——這是`MARATHON_PROTOCOL.md`第3節「日內均值回歸」家族下一個結構上真正獨立的變體，不是對既有FAIL假說調參數硬救。`fut_cheap_gate.py`新增`hyp_daily_reversal_1d()`（`position=-sign(ret_t)`）／`hyp_daily_continuation_1d()`（`position=+sign(ret_t)`，同一輪測相反方向，同#14/#15、#20/#21、#22/#23、#24/#25先例），沿用`_permutation_test()`N=200框架，`build_continuous_series()`既有全歷史快取，零新增API呼叫，執行約10秒。
+
+**結果**：`fut_daily_reversal_1d`：real_terminal_equity=0.7761（-22.4%累積）、random_median_equity=0.4226、**percentile=71.0，FAIL**（門檻90.0）。`fut_daily_continuation_1d`：real_terminal_equity=0.3549（-64.5%累積）、random_median_equity=0.6525、**percentile=29.0，FAIL**（方向不對）。已寫入`TRIALS_LEDGER.md`#159/#160。
+
+**判讀**：反轉方向（71.0>50）優於順勢方向（29.0<50），跟既有隔夜跳空段一貫呈現的「continuation明顯優於reversal」模式（#14/#15：8.0 vs 92.0；#22/#23：17.5 vs 82.5；#24/#25：0.5 vs 99.5）恰好相反——可能反映「隔夜跳空」（新資訊到達的即時反應段）跟「全天收盤對收盤」（涵蓋整段交易時間價格發現完成後的淨結果）是兩個不同的市場微結構機制，但71.0本身遠低於90.0門檻，不能當作任何形式候選使用，僅記錄方向偏好供未來參考，不下結論。
+
+**FUT軌盤點**：`MARATHON_PROTOCOL.md`第3節列出的期貨假說類別（多時間框架趨勢、突破、波動regime、均線、日內均值回歸、期現價差、三大法人期貨部位、未平倉量、隔夜vs日內、星期效應、盤別效應）至此全數至少測過一個變體，個股期貨橫斷面調查線（round341-358）也已結案（流動性/離散度不足），組合策略層級嘗試（round361/364/372/385）四種構造亦全部FAIL。**沒有清楚剩餘的「全新機制」候選**——下一輪若再輪到FUT，建議照round385(c)原意優先權重新排回TW/US軌，除非能想出真正跳脫這份清單的新假說（例如跨商品排列檢定的方法論設計，round338/352已列為未來方向但非本輪待辦）。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫，執行約10秒。完整見`FUT_LEADS.md`第399輪新增段落、`FUT_MARATHON_STATE.md`第399輪、`TRIALS_LEDGER.md`#159/#160、`fut_cheap_gate.py`（新增`hyp_daily_reversal_1d()`/`hyp_daily_continuation_1d()`）。

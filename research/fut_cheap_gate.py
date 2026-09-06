@@ -499,6 +499,21 @@ def hyp_trend_multi_tf(series: pd.DataFrame) -> CheapGateResult:
     return _permutation_test("fut_trend_multi_tf", position, series["ret"])
 
 
+def hyp_daily_reversal_1d(series: pd.DataFrame) -> CheapGateResult:
+    """Fade yesterday's full close-to-close return (day t decided using ret[t],
+    traded on ret[t+1] via _permutation_test's own shift-by-1)."""
+    position = -np.sign(series["ret"])
+    return _permutation_test("fut_daily_reversal_1d", position, series["ret"])
+
+
+def hyp_daily_continuation_1d(series: pd.DataFrame) -> CheapGateResult:
+    """Mirror of hyp_daily_reversal_1d: trade with yesterday's full close-to-close
+    return instead of against it (same-round opposite-direction test, not a
+    parameter tune to rescue a failed hypothesis)."""
+    position = np.sign(series["ret"])
+    return _permutation_test("fut_daily_continuation_1d", position, series["ret"])
+
+
 def hyp_donchian_breakout(series: pd.DataFrame, window: int = 20) -> CheapGateResult:
     close = series["adj_close"]
     upper = close.rolling(window).max().shift(1)  # prior N days, excludes today (no lookahead)
@@ -1039,7 +1054,8 @@ def main() -> None:
           f"{series['date'].min().date()} .. {series['date'].max().date()}")
 
     results = [
-        hyp_oi_price_confirm_graded(series),
+        hyp_daily_reversal_1d(series),
+        hyp_daily_continuation_1d(series),
     ]
 
     for r in results:

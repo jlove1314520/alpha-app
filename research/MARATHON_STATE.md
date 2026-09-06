@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-06T10:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 398 輪。最新一輪：第 398 輪 · 2026-09-06T11:30+08:00 · TW（取鎖乾淨）**。**本輪工作單位**：US背景job`20260906-110113-735e`仍`running`佔用heavy-job-slot，改做`f_quality_roe_stability`VAL期逐年分解＋leave-one-year-out（新增`deep_dive_f_quality_roe_stability_val_year_breakdown.py`）。結果：VAL期四年報酬正負交替，leave-2021-out/leave-2023-out annualized皆變號，判定CONFIRMED（單一年份驅動），round396的PASS（`TRIALS_LEDGER.md`#156）降級回EXPERIMENTAL，TRAIN期結果不受影響。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`第398輪記錄、`TRIALS_LEDGER.md`#158、`TW_LEADS.md`#3。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 399 輪。最新一輪：第 399 輪 · 2026-09-06T12:00+08:00 · FUT（取鎖乾淨）**。**本輪工作單位**：US背景job`20260906-110113-735e`仍`running`佔用heavy-job-slot，依輪替選FUT（時間戳最舊），依round385下一步(c)例外條款「除非有全新機制假說」測試`fut_daily_reversal_1d`/`fut_daily_continuation_1d`（前一日全天close-to-close報酬預測次日，全新機制、非既有隔夜跳空gap類構造）。結果：反轉percentile=71.0、順勢percentile=29.0，皆FAIL（門檻90.0）。`MARATHON_PROTOCOL.md`第3節期貨假說類別至此全數至少測過一個變體，FUT軌無清楚剩餘的全新機制候選，下一輪若再選到FUT建議優先權讓回TW/US。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`FUT_MARATHON_STATE.md`/`FUT_LOG.md`第399輪記錄、`TRIALS_LEDGER.md`#159/#160、`FUT_LEADS.md`#27。
 
 **上一輪（第395輪，供對照）：第 395 輪 · 2026-09-06T10:00+08:00 · US**。TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞，改做`#151`的leave-top-N-out集中度檢查：排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**，判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154。完整見`US_MARATHON_STATE.md`第395輪記錄。
 
