@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-06T10:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 396 輪。最新一輪：第 396 輪 · 2026-09-06T10:30+08:00 · TW（取鎖乾淨，收成TW自己的背景job`20260906-083408-d6ab`）**。**本輪工作單位**：收成`f_quality_roe_stability`300檔乾淨樣本完整重跑（`run_detached.py wait --max-min 4`確認`finished, exit=0`，耗時約123分鐘）。原EXPERIMENTAL唯一disqualify理由（TRAIN/VAL絕對報酬正負號不一致）已解決——TRAIN由100檔樣本的-3.8%~-4.2%轉正為+7.25%~+7.59%、VAL維持正但量級萎縮至+0.98%~+1.25%（約1/13），兩期同號，6/6組合仍全贏100次隨機控制組。**判定由EXPERIMENTAL上修為PASS（1b深挖關卡）**，誠實揭露VAL量級萎縮/TRAIN-VAL beta差異/因子值覆蓋率71%三項待查保留，未到完整GATE_SEQUENCE可部署程度，不觸發提案。已寫入`TRIALS_LEDGER.md`#156、`TW_LEADS.md`#3更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`TRIALS_LEDGER.md`第396輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 397 輪。最新一輪：第 397 輪 · 2026-09-06T11:00+08:00 · US（取鎖乾淨，投遞背景工作）**。**本輪工作單位**：`run_detached.py status`確認TW job`20260906-083408-d6ab`已`finished`，heavy-job-slot空出，依`US_MARATHON_STATE.md`round395「下一步(1)」投遞`us_deep_dive_valuebm_clean_universe`（job`20260906-110113-735e`，`--timeout-min 150`，實際輸出`data/deep_dive_f_us_value_bm_clean_universe.csv`）。session內`wait --max-min 4`確認仍正常運行未崩潰。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第397輪記錄。
 
 **上一輪（第395輪，供對照）：第 395 輪 · 2026-09-06T10:00+08:00 · US**。TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞，改做`#151`的leave-top-N-out集中度檢查：排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**，判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154。完整見`US_MARATHON_STATE.md`第395輪記錄。
 

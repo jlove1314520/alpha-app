@@ -1392,3 +1392,23 @@ session內等待約3~4分鐘仍`running`（`watchdog_alive=True`），248檔×2�
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（純讀既有parquet快取），執行約1分鐘，未搶heavy-job-slot。
 
 **下一輪接手**：(1)先`run_detached.py status`確認TW job是否`finished`，若是則插槽空出，投遞`us_deep_dive_valuebm_clean_universe`（`--timeout-min 150`）；(2)若時間允許，可設計「隨機打亂`f_us_low_vol`分數、同一VAL期同一池子跑一次」的對照診斷，用來坐實VAL期異常量級是池子/期間本身問題而非`f_us_low_vol`因子構造問題（需先寫事前判準再執行）。完整見`US_MARATHON_STATE.md`/`REPORT.md`第395輪記錄、`TRIALS_LEDGER.md`#154、`data/deep_dive_f_us_low_vol_leave_extreme_out.csv`（新增）、`deep_dive_f_us_low_vol_leave_extreme_out.py`（新增，可重複執行）。
+
+## 第397輪 2026-09-06T11:00+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 02:30（第385輪，最舊，明確跳過信號維持有效）／US 10:00（第395輪）／TW 10:30（第396輪，最新）——依輪替選US（較TW舊）。
+
+`run_detached.py status`確認TW背景job`20260906-083408-d6ab`（`tw_deep_dive_quality_roe_stability_full_rerun`）已於round396收成完畢（`finished, exit=0`, 耗時123.7分鐘），heavy-job-slot空出（`running=0 total=9`）。
+
+**本輪工作單位＝round395「下一輪接手」(1)：投遞`us_deep_dive_valuebm_clean_universe`**。開工前`ast.parse`+`import`語法檢查確認`deep_dive_f_us_value_bm_clean_universe.py`（round391已寫好、本輪未動）語法正確。投遞：
+
+```
+python run_detached.py submit --name us_deep_dive_valuebm_clean_universe --timeout-min 150 --expect data/deep_dive_f_us_value_bm_clean_universe_summary.json -- python -u research/deep_dive_f_us_value_bm_clean_universe.py
+```
+
+job_id `20260906-110113-735e`，watchdog_pid 66640。**`--expect`參數打錯**（腳本實際輸出是`data/deep_dive_f_us_value_bm_clean_universe.csv`，不是我打的`_summary.json`），不影響job本身執行，只影響`status`顯示的`expect_exists`欄位會是`None`——下一輪收成時直接讀正確的`.csv`檔名，不必當異常處理。
+
+`run_detached.py wait 20260906-110113-735e --max-min 4`：session內確認`STILL_RUNNING`，4分鐘內未崩潰、未`failed`。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（乾淨宇宙SEC EDGAR快取已由round382背景job填滿，本次僅讀快取）。
+
+**下一輪接手**：`run_detached.py status`確認`20260906-110113-735e`是否`finished`；若是，讀`data/deep_dive_f_us_value_bm_clean_universe.csv`跟`data/jobs/20260906-110113-735e.log`，比照round387/392對`f_us_low_vol`因子的判讀方式（TRAIN/VAL percentile、beta方向、經濟解釋）寫入`TRIALS_LEDGER.md`+`US_LEADS.md`；若逾150分鐘timeout被砍，記錄`timeout`並評估是否需要拆解成更小工作單位重跑。完整見`US_MARATHON_STATE.md`/`REPORT.md`第397輪記錄。
