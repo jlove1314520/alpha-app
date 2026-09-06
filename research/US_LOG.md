@@ -1364,3 +1364,19 @@ session內等待約3~4分鐘仍`running`（`watchdog_alive=True`），248檔×2�
 `is_holdout_consumed()` 開工/收工前皆確認 `False`。零新增API呼叫。
 
 **下一輪接手**：`run_detached.py status` 確認 `20260906-060311-6a01` 是否 `finished`；若是，讀SUMMARY寫入 `TRIALS_LEDGER.md`（**注意log顯示VAL期beta已達-0.821，遠超TRAIN的-0.316，市場中性程度隨樣本期推移明顯惡化，深挖判定時要一併檢視，不要只看alpha/ann_return漂亮就放行**）；插槽空出後投遞 `python research/run_detached.py submit --name us_deep_dive_valuebm_clean_universe --timeout-min 150 -- python -u research/deep_dive_f_us_value_bm_clean_universe.py`（**timeout用150分鐘起跳，不要用20分鐘預設值**）。完整見 `US_MARATHON_STATE.md`/`REPORT.md` 第391輪記錄、`deep_dive_f_us_value_bm_clean_universe.py`（新增，尚未執行過）。
+
+## 第393輪 2026-09-06T09:00+08:00
+
+取鎖乾淨。三軌時間戳：FUT 02:30（round385，最舊，明確跳過信號維持有效）／US 08:00（round391）／TW 08:30（round392，最新）——依輪替選US。`run_detached.py status`：US低波動job已於round392收成完畢；TW的`tw_deep_dive_quality_roe_stability_full_rerun`（`20260906-083408-d6ab`）本輪開工/收工時皆仍`running`（31.3分鐘/150分鐘），heavy-job-slot持續佔用中，US排定的下一個重度工作`us_deep_dive_valuebm_clean_universe`無法投遞（`submit`會被拒絕exit 3）。
+
+**本輪工作單位＝不需heavy-job-slot的輕量診斷：`#151`（round392 EXPERIMENTAL判定）VAL期逐年分解**，接續round392「下一步」對VAL期年化異常量級的regime-specific疑慮。關鍵洞察：`run_one()`裡100 draws隨機控制組才是136分鐘那個重度成本，年度分解只需真實日報酬序列本身重跑一次`run_long_short_us()`（VAL期，1x cost），不需要重跑100次隨機重繪，可在foreground直接執行（實測約1分鐘），不佔用run_detached重度插槽。
+
+新增`deep_dive_f_us_low_vol_val_year_breakdown.py`，事前綁定判準（逐字比照`margin_debt_level_train_val_heterogeneity.py`#142同一套trichotomy）：leave-2022-out變號或衰減至小於30%視為CONFIRMED（2022驅動）、同號且保留大於等於60%視為REFUTED、其餘PARTIAL。
+
+**結果**：全VAL(1006天,1x)年化報酬約92.5%（複現#151）。逐年年化報酬：2021約39.8%(n=252)、2022約80.4%(n=251)、2023約70.2%(n=250)、2024約230.6%(n=252)。leave-2022-out：n=755，年化報酬約98.8%（比全期還高，同號，保留比例約1.07）。
+
+**判定：2022單一年份驅動假說REFUTED**——但逐年分解揭露比原假說更嚴重的問題：VAL期四年沒有任何一年落在BAB文獻合理量級（最溫和的2021年仍約39.8%），是貫穿全VAL期的系統性放大，不是單一事件污染，跟TRAIN期(2015-2020)合理量級(約19.75%~20.99%)形成鮮明對比，暗示訊號在2021年後全面性質變。`#151`的EXPERIMENTAL判定維持不變，下一步方向改為leave-top-N-out集中度檢查（比照`US_LEADS.md`#18對value factor的方法論），不再往regime overlay方向查。
+
+已寫入`TRIALS_LEDGER.md`#152、`US_LEADS.md`#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（純讀既有parquet快取）。
+
+**下一輪接手**：(1)先`run_detached.py status`確認TW job是否`finished`，若是則插槽空出，投遞`us_deep_dive_valuebm_clean_universe`（`--timeout-min 150`）；(2)若時間允許可先做`#151`的leave-top-N-out集中度檢查（重用`deep_dive_f_us_value_bm_leave_extreme_out.py`#18方法論，同樣是輕量診斷不需heavy slot）。完整見`US_MARATHON_STATE.md`/`REPORT.md`第393輪記錄、`TRIALS_LEDGER.md`#152、`data/deep_dive_f_us_low_vol_val_year_breakdown.csv`（新增）、`deep_dive_f_us_low_vol_val_year_breakdown.py`（新增，可重複執行）。
