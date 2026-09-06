@@ -1380,3 +1380,15 @@ session內等待約3~4分鐘仍`running`（`watchdog_alive=True`），248檔×2�
 已寫入`TRIALS_LEDGER.md`#152、`US_LEADS.md`#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（純讀既有parquet快取）。
 
 **下一輪接手**：(1)先`run_detached.py status`確認TW job是否`finished`，若是則插槽空出，投遞`us_deep_dive_valuebm_clean_universe`（`--timeout-min 150`）；(2)若時間允許可先做`#151`的leave-top-N-out集中度檢查（重用`deep_dive_f_us_value_bm_leave_extreme_out.py`#18方法論，同樣是輕量診斷不需heavy slot）。完整見`US_MARATHON_STATE.md`/`REPORT.md`第393輪記錄、`TRIALS_LEDGER.md`#152、`data/deep_dive_f_us_low_vol_val_year_breakdown.csv`（新增）、`deep_dive_f_us_low_vol_val_year_breakdown.py`（新增，可重複執行）。
+
+## 第395輪 2026-09-06T10:00+08:00
+
+取鎖乾淨。`run_detached.py status`確認TW背景job`20260906-083408-d6ab`（`tw_deep_dive_quality_roe_stability_full_rerun`）本輪開工時仍`running`（約87~90分鐘/150分鐘），heavy-job-slot持續佔用中，round393排定的`us_deep_dive_valuebm_clean_universe`依然無法投遞。
+
+**本輪工作單位＝round393「下一步」(2)：`#151`的leave-top-N-out集中度檢查**，逐字比照`deep_dive_f_us_value_bm_leave_extreme_out.py`（round363/`US_LEADS.md`#18，對`f_us_value_bm`舊池子做的同款診斷）。新增`deep_dive_f_us_low_vol_leave_extreme_out.py`：own-VAL-return排名前7%（248檔×7%=17檔，`EXCLUDE_FRAC`固定比例取代round363的固定10檔絕對數，以便跨池子規模比較）視為極端贏家排除組，單次真實回測（不重跑100 draws隨機控制組，同round393#152的速度捷徑，`run_long_short_us()`直接呼叫一次），事前綁定判準（排除後ann_return跌破全樣本30%或變號＝CONFIRMED、保留≥60%且同號＝REFUTED、中間＝PARTIAL，跟round363#18同一套trichotomy）。
+
+**結果：REFUTED**。排除前17名極端贏家（最大者WFRD own-VAL-return+1153.5%）後，231檔樣本VAL(2020-2024,1x cost) ann_return從+92.46%**微升**至+96.76%（beta由-0.821小幅惡化至-0.903），retained_fraction=1.05、同號——跟round363對`f_us_value_bm`排除後從+121%驟降至<30%的CONFIRMED結果形成鮮明對比，證實這次的異常量級**廣泛分布在整個池子**，不是靠少數極端贏家撐起來的假影，指向`us_stratified_universe_sample.csv`分層抽樣方法本身或2021年後市場結構轉變（round392已列的懷疑②，證據權重現在最高於①分層抽樣偏誤、③換手成本模型低估）。判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154、`US_LEADS.md`#21更新。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（純讀既有parquet快取），執行約1分鐘，未搶heavy-job-slot。
+
+**下一輪接手**：(1)先`run_detached.py status`確認TW job是否`finished`，若是則插槽空出，投遞`us_deep_dive_valuebm_clean_universe`（`--timeout-min 150`）；(2)若時間允許，可設計「隨機打亂`f_us_low_vol`分數、同一VAL期同一池子跑一次」的對照診斷，用來坐實VAL期異常量級是池子/期間本身問題而非`f_us_low_vol`因子構造問題（需先寫事前判準再執行）。完整見`US_MARATHON_STATE.md`/`REPORT.md`第395輪記錄、`TRIALS_LEDGER.md`#154、`data/deep_dive_f_us_low_vol_leave_extreme_out.csv`（新增）、`deep_dive_f_us_low_vol_leave_extreme_out.py`（新增，可重複執行）。

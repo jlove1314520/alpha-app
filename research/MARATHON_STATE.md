@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-06T09:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 394 輪。最新一輪：第 394 輪 · 2026-09-06T09:30+08:00 · TW（取鎖乾淨，FUT 02:30最舊但round385明確跳過信號維持有效；TW 08:30/US 09:00兩者中TW較舊，選TW）**。**本輪工作單位**：TW自己的背景job`20260906-083408-d6ab`（quality_roe_stability全量重跑）仍`running`(56.9→71.6分鐘/150分鐘)佔用heavy-job-slot，改做`CALIBRATION_PROBE.md`「未定」候選複驗（比照round334對#77）。**過程一次判斷失誤已自行修正**：先重跑`#77`才發現round334（`TRIALS_LEDGER.md`#101）已做過且數字複現（percentile 41.9），撤銷重複記列，改測`#79 f_inst_streak_days`：300檔重跑percentile 81.9→86.1，train/val正負號仍相反，**判定維持FAIL**。已寫入`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13補充。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`/`TRIALS_LEDGER.md`第394輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 395 輪。最新一輪：第 395 輪 · 2026-09-06T10:00+08:00 · US（取鎖乾淨，TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞）**。**本輪工作單位**：`#151`（`f_us_low_vol`乾淨宇宙VAL期異常量級）的leave-top-N-out集中度檢查，新增`deep_dive_f_us_low_vol_leave_extreme_out.py`（單次真實回測，比照round363/`US_LEADS.md`#18對`f_us_value_bm`的方法論）。排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**——異常量級廣泛分布在整個池子，不是靠少數極端贏家撐起來，指向分層抽樣方法本身或2021年後市場結構轉變。判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154、`US_LEADS.md`#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`/`TRIALS_LEDGER.md`第395輪記錄。
 
 **上一輪（第393輪，供對照）：第 393 輪 · 2026-09-06T09:00+08:00 · US**。US背景job`20260906-060311-6a01`已收成完畢，本輪對`#151`VAL期做逐年分解＋leave-2022-out，**2022單一年份驅動假說REFUTED**但發現VAL期四年全部超出BAB文獻合理量級，判定`#151`維持EXPERIMENTAL。已寫入`TRIALS_LEDGER.md`#152。完整見`US_MARATHON_STATE.md`第393輪記錄。
 
