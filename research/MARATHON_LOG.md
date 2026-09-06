@@ -1,5 +1,15 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-07T03:53+0800 hypothesis_queue排程接續（取鎖時發現陳舊鎖檔，
+pid 94888，31.3分鐘，已回收接手，疑似上一輪失敗中斷）— 稽核後確認上一輪
+已完整做完#51子事件2（現金增資折價）第1關cheap gate並判FAIL，
+`TRIALS_LEDGER.md`#187已登記提交（`trial_registry.py --check`確認PASS，
+無強制期未登記判定），但`HYPOTHESIS_QUEUE.md`/`STRATEGY_GRAVEYARD.md`的
+文字更新與`cash_increase_dilution_gate1.py`腳本本身停留在未提交狀態，
+本輪核對三處記錄互相一致（結果數字、判定、腳本內容吻合）後直接補提交
+落地，未重跑測試、未新增判定，視為安全接續上一輪未完成的收工動作，
+本輪不再另外開新工作單位。`is_holdout_consumed()`確認`False`。
+
 ## 2026-09-07T02:55+0800 hypothesis_queue排程接續（鎖檔乾淨取得，非陳舊
 回收）— 接續#51子事件3任務(i)：用WebSearch找到`t120sb02_q9`/`_q1`/`_w1`
 三個候選網址，逐一實測皆為MOPS SPA殼頁（Angular前端靜態index.html，
