@@ -5546,9 +5546,14 @@ portfolio構造階段，需檢視「只在隔夜段持倉、盤中段空手」�
 只在隔夜持倉的策略下檔應該天生較淺，但這只是先驗直覺，須用三個
 危機窗口的實際數字驗證，不能只憑機制敘述就假設下檔保護存在。
 
-**狀態（2026-09-06 hypothesis_queue排程本輪新增，尚未開始第1關）**：
-本輪僅完成假設設計+已知混淆風險#2（open/high/low未還原）的工程問題
-查證與定位（讀`adjust.py`原始碼確認），**未寫任何測試腳本、未跑任何
-統計檢定**。下一輪從「擴充`adjust.py`還原邏輯涵蓋open/high/low」這個
-必要前置工程開始，驗證完成後才進第1關cheap gate（TRAIN/VAL兩期t檢定
-+複利貢獻占比拆解），不跳關。
+**狀態（2026-09-06馬拉松第416輪更新，前置工程已完成，尚未開始第1關）**：
+`adjust.py::adjusted_price_series()`已擴充完成——yfinance路徑新增
+`adj_open`/`adj_high`/`adj_low`（別名自已調整的OHLC，實測`2330.TW`
+2024全年241個交易日確認`auto_adjust=True`對open/close套用同一因子，
+誤差<1e-6）；FinMind回退路徑重構為統一`factor_cum`乘數序列套用到
+close/open/high/low四欄（合成資料驗證`adj_close`數值與原邏輯逐位元
+相同，無回歸），並修正一個過程中發現的bug：FinMind原始欄位是
+`max`/`min`不是`high`/`low`，已用2330真實8筆除權息事件驗證三欄還原
+因子皆與`adj_close`一致。完整過程見`TW_LOG.md`第416輪記錄。**下一輪
+從#49第1關cheap gate開始**：對TAIEX/0050逐日拆解overnight/intraday
+報酬，TRAIN/VAL兩期t檢定+複利貢獻占比拆解，不跳關。

@@ -119,13 +119,24 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     (see module docstring, 2026-08-26); falls back to the FinMind-based
     manual back-adjustment below if yfinance has no data for this stock_id.
 
-    Columns: date, open, high, low, close, volume, adj_close, source.
-    `close` is the raw (unadjusted) close on the yfinance path too, for
-    column-shape compatibility with the FinMind path -- yfinance's
-    auto_adjust=True close IS the adjusted value, so on that path
-    close == adj_close by construction (both hold the adjusted number;
-    there is no separately-fetchable raw close from yfinance without a
+    Columns: date, open, high, low, close, volume, adj_close, adj_open,
+    adj_high, adj_low, source.
+    `close`/`open`/`high`/`low` are the raw (unadjusted) values on the
+    yfinance path too, for column-shape compatibility with the FinMind path
+    -- yfinance's auto_adjust=True OHLC IS the adjusted value, so on that
+    path close == adj_close (and open == adj_open etc.) by construction
+    (there is no separately-fetchable raw OHLC from yfinance without a
     second, unadjusted request, which isn't worth the extra API call here).
+    Empirically verified 2026-09-06 (see HYPOTHESIS_QUEUE.md#49 known-risk #2):
+    yfinance's auto_adjust=True applies the IDENTICAL multiplicative factor
+    to open/high/low/close on every date (checked 2330.TW 2024, all 241
+    rows: open_factor == close_factor to 1e-6), so aliasing adj_open to the
+    already-adjusted `open` column here is not an assumption, it's confirmed.
+
+    2026-09-06: adj_open/adj_high/adj_low added on the FinMind fallback path
+    (previously only adj_close existed) -- needed so overnight/intraday
+    return decomposition (open_t / close_{t-1}) isn't polluted by ex-dividend
+    jumps in an unadjusted `open` column (HYPOTHESIS_QUEUE.md#49 known-risk #2).
     """
     from yf_price_client import fetch_yf_adjusted
 
@@ -133,6 +144,9 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     if not yf_df.empty:
         out = yf_df.copy()
         out["adj_close"] = out["close"]
+        out["adj_open"] = out["open"]
+        out["adj_high"] = out["high"]
+        out["adj_low"] = out["low"]
         out.attrs["n_events_applied"] = None  # not tracked on this path -- yfinance handles it internally
         return out
 
@@ -146,13 +160,19 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     raw = raw.sort_values("date").reset_index(drop=True)
     events = adjustment_events(stock_id, start_date)
 
-    adj = raw["close"].astype(float).copy()
+    factor_cum = pd.Series(1.0, index=raw.index)
     for _, ev in events.sort_values("ex_date", ascending=False).iterrows():
         mask = raw["date"] < ev["ex_date"]
-        adj.loc[mask] = adj.loc[mask] * ev["factor"]
+        factor_cum.loc[mask] = factor_cum.loc[mask] * ev["factor"]
 
     out = raw.copy()
-    out["adj_close"] = adj
+    out["adj_close"] = raw["close"].astype(float) * factor_cum
+    out["adj_open"] = raw["open"].astype(float) * factor_cum
+    # FinMind's raw TaiwanStockPrice uses "max"/"min" for daily high/low
+    # (confirmed empirically 2026-09-06 -- there is no "high"/"low" column on
+    # this path; only the yfinance path in this function uses those names).
+    out["adj_high"] = raw["max"].astype(float) * factor_cum
+    out["adj_low"] = raw["min"].astype(float) * factor_cum
     out["source"] = "finmind"
     out.attrs["n_events_applied"] = len(events)
     return out

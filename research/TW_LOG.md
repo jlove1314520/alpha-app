@@ -2107,3 +2107,65 @@ forward報酬Spearman相關性，不跳關）；若`failed`/`timeout`則看
 完整見`TW_MARATHON_STATE.md`第413輪記錄、`HYPOTHESIS_QUEUE.md`#48、
 `backfill_irb130_pledge.py`（新增，可重複執行）、
 `data/jobs/20260906-220343-82ae.log`。
+
+## 第416輪 · 2026-09-06T23:30+08:00 · TW軌
+
+取鎖乾淨（非陳舊鎖檔，cycle`20260906-233037`）。三軌時間戳：TW 22:00
+（round413，最舊）／US 23:00（round415）／FUT 12:00（round399，依例外
+條款不選，除非有全新機制假說）——依輪替選TW。`run_detached.py status`
+確認heavy-job-slot空（0個running），無背景工作衝突。
+
+**本輪工作單位＝`HYPOTHESIS_QUEUE.md`#49（日內/隔夜報酬結構分解）必要
+前置工程**：round415的hypothesis_queue排程已在#48收工時查證發現
+`adjust.py::adjusted_price_series()`只還原`close`（產生`adj_close`），
+`open`/`high`/`low`維持原始未還原，若直接拿`open`算隔夜報酬
+（`open_t/close_{t-1}-1`）會被除權息事件（尤其7-9月除息旺季）系統性
+污染成假的季節性偽影，這是#49第1關cheap gate開始前的必要前置步驟。
+
+**做了什麼**：
+1. yfinance路徑（主要資料源）新增`adj_open`/`adj_high`/`adj_low`三欄，
+   別名自已調整過的`open`/`high`/`low`——因為`yf_price_client.py`呼叫
+   `auto_adjust=True`，OHLC本身已同步調整，不需要額外運算。
+2. **實測驗證**（不只憑docstring假設）：抓`2330.TW` 2024全年
+   （`auto_adjust=True`跟`False`各一次），241個交易日逐日比對
+   `adj_open/open`跟`adj_close/close`兩個比值，全部相符（誤差<1e-6），
+   確認yfinance確實對open/close套用同一乘數因子。
+3. FinMind回退路徑（少數yfinance沒有的下市股適用）重構：原本直接對
+   `adj`序列做累積乘法，改成先算出一條獨立的`factor_cum`乘數序列，
+   再分別套用到close/open/high/low四欄。**先用合成資料驗證重構後
+   `adj_close`數值跟原邏輯逐位元相同**（4列2欄的手算案例，
+   `assert (adj_close == adj_old).all()`通過），確認重構本身沒有引入
+   回歸。
+4. **過程中抓到一個新bug**：FinMind`TaiwanStockPrice`原始欄位其實是
+   `max`/`min`（不是`high`/`low`），照docstring字面寫`raw["high"]`
+   會直接`KeyError`（`load_dev('TaiwanStockPrice','2330',...)`欄位
+   實測為`date/stock_id/Trading_Volume/Trading_money/open/max/min/
+   close/spread/Trading_turnover`，完全沒有`high`/`low`）。已修正為
+   `raw["max"]`/`raw["min"]`。
+5. 用2330真實資料（`2023-01-01`起，`load_dev`抓到8筆真實除權息事件）
+   monkeypatch暫時關閉yfinance路徑，跑完整FinMind回退路徑：確認
+   `adj_open`/`adj_high`(`max`)/`adj_low`(`min`)三欄在每個ex_date前
+   一天的還原因子都跟`adj_close`完全一致，函式不crash，
+   `n_events_applied=8`正確。
+
+全程零新增API呼叫（yfinance走既有parquet快取，FinMind走`load_dev`既有
+快取），純本地計算+驗證，**未跑任何回測、未跑第1關cheap gate**。
+`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**判讀**：這是`MARATHON_PROTOCOL.md`第1c節「地基」類工作單位，不是
+因子/策略判定，所以本輪不寫`TRIALS_LEDGER.md`（沒有PASS/FAIL/
+EXPERIMENTAL/CHEAP_PASS判定產出）。修正的bug（`high`/`low`→`max`/
+`min`）只影響本輪新增的程式碼本身，不影響任何既有已完成的判定（原本
+`adjusted_price_series()`從未對外提供過`adj_high`/`adj_low`，沒有下游
+consumer依賴過這兩欄）。
+
+**下一輪TW軌接手**：`adjust.py`前置工程已完成，直接進
+`HYPOTHESIS_QUEUE.md`#49第1關cheap gate——對TAIEX（`fetch_yf_index`）
+或0050逐日拆解`overnight_return_t=open_t/close_{t-1}-1`與
+`intraday_return_t=close_t/open_t-1`（用新的`adj_open`），TRAIN
+(2015-2020)/VAL(2021-2024)兩期各自做單樣本t檢定+複利貢獻占比拆解，
+事前綁定門檻見`HYPOTHESIS_QUEUE.md`#49條目，不跳關。
+
+完整見`TW_MARATHON_STATE.md`第416輪記錄、`HYPOTHESIS_QUEUE.md`#49、
+`adjust.py`（修改，`adjusted_price_series()`新增`adj_open`/`adj_high`/
+`adj_low`三欄）。
