@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 23:28 hypothesis_queue排程接續 — 重新查證`BACKLOG.md`
+確認#5/#6/#8/#10四項外部依賴（`value_board_v2`回測未通過、題材動能榜
+/未來性濾網紙上交易中）仍未解鎖，跟上一輪查證結果一致，判定佇列
+（#1~48全數結案）維持實質已空。**設計新假設軸#49（日內／隔夜報酬
+結構分解 Overnight vs Intraday Return Decomposition）**——第十一種
+機制分類，完全不依賴外部regime訊號的結構性時段切分，跟`#19`（隔夜
+美股方向預測台股報酬，已FAIL）機制不同（那條測跨市場方向外溢，這條
+測台股自身隔夜段vs盤中段報酬結構），完整內容見`HYPOTHESIS_QUEUE.md`
+新增章節。**同時查證發現一個必要前置工程問題**：`adjust.py::
+adjusted_price_series()`只對`close`做除權息還原，`open`/`high`/`low`
+維持原始未還原，若不先修正會在計算隔夜報酬時被除權息事件污染——已
+記錄為下一輪第1關前的必要前置步驟。本輪依協定第1節「設計完就收工，
+下一輪從新加的這條開始跑第1關」規定，未寫任何測試腳本、未跑任何
+統計檢定，`is_holdout_consumed()`確認為`False`。`git status`確認
+另有其他自動化來源留下的未提交檔案（`.github/workflows/audit.yml`、
+`research/.live_watchlist.json`、`research/data_cache/`、`research/
+deep_dive_f_us_low_vol_persistent_random_control.py`）已記錄、不
+觸碰、不納入本次commit。
+
 ## 2026-09-06 22:53 hypothesis_queue排程接續 — 本輪為純落地/接手輪，
 無新研究產出。取鎖時發現鎖檔陳舊（LOCK_STALE，pid 84872，30.2分鐘，
 疑似上一輪失敗），本輪回收接手。工作目錄裡已有上一輪（pid 84872）
