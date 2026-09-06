@@ -2039,4 +2039,25 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 
 **附帶修正**：核對`MARATHON_STATE.md`第7行「馬拉松全局輪次計數器」發現round408（US軌，commit`b8301dd`）未同步更新這一行（仍停在407），本輪一併補上409並附上本輪摘要。
 
+## 第411輪 2026-09-06T21:00+08:00（TW軌）
+
+**本輪工作單位＝`HYPOTHESIS_QUEUE.md`#47（處置股解除後價格反轉 Post-Disposition-Stock Price Reversion）資料可行性查證**，接續#47條目「尚待下一輪查證」列出的(a)(b)(c)三點：(a)TWSE官方端點歷史回溯深度是否足夠支撐train/val分期、(b)TPEx對應端點是否存在及格式是否一致、(c)樣本規模粗估。純資料源探測，零因子計算、零回測、零FinMind額度消耗。
+
+**查證過程與結果**：
+1. TWSE官方openapi `https://openapi.twse.com.tw/v1/announcement/punish`：單次GET，`stat`欄位確認`200`，回傳陣列僅8筆記錄，欄位含`Date`（民國年）、`Code`、`ReasonsOfDisposition`、`DispositionPeriod`、`DispositionMeasures`。日期分布：`1150831`~`1150904`（即2026-08-31~2026-09-04），`n_unique_dates=4`。
+2. TWSE舊版rwd端點`https://www.twse.com.tw/rwd/zh/announcement/punish?response=json`：測試帶`date=20240102`參數與不帶參數兩種呼叫，回傳內容完全相同（`title`皆顯示`115/09/06～115/09/07`），確認`date`參數對此端點無作用——這是一個「目前處於處置期間中」的即時公告牆端點，不是可依日期查詢的歷史封存。
+3. TPEx官方openapi `https://www.tpex.org.tw/openapi/v1/tpex_disposal_information`：單次GET，`stat`欄位確認`200`，回傳陣列18筆記錄。日期分布：`1150826`~`1150903`（即2026-08-26~2026-09-03），`n_unique_dates=6`。同一種「僅近期快照」模式。
+4. 額外查`openapi.twse.com.tw/v1/swagger.json`與`www.tpex.org.tw/openapi/swagger.json`，分別逐一檢查所有path，確認TWSE僅`/announcement/punish`一條、TPEx僅`/tpex_disposal_information`與`/tpex_esb_disposal_information`兩條與處置股相關，沒有帶歷史區間查詢參數的其他端點。
+5. FinMind：查`https://finmind.github.io/tutor/TaiwanMarket/DataList/`確認存在`TaiwanStockDispositionSecuritiesPeriod`資料集頁面連結；實際呼叫`api.finmindtrade.com/api/v4/data`（`dataset=TaiwanStockDispositionSecuritiesPeriod`，`start_date=2015-01-01`）回應HTTP 400，`msg`欄位為「Your level is free. Please update your user level.」——確認為付費層級資料，未嘗試任何繞過手段（換帳號/爬其他鏡像等），依`CLAUDE.md`「取得方式鐵律」標記**待採購**。
+
+**判定：FAIL（資料不可及）**——依`HYPOTHESIS_QUEUE.md`#47條目原文事前綁定的快殺標準「若查證後發現歷史回溯深度不足以支撐train/val分期，依快殺標準『資料不可及』判FAIL並記錄具體死因」執行。TWSE與TPEx兩個官方免費端點都只回傳「當前處置中」的近期快照（4~6個交易日），距`train(2015-2020)/val(2021-2024)`所需的近10年歷史深度差了三個數量級，不是查證不夠仔細，是端點本身的設計定位就是「即時公告牆」而非「歷史資料庫」。FinMind把同一類資料包裝成付費資料集這件事本身構成第四來源的獨立佐證：一個商業資料供應商認定這份歷史資料值得收費打包，反推「官方免費端點沒有歷史深度」不是本輪查證的疏漏，而是市場端已經給出的確認。
+
+依`CLAUDE.md`「搜尋紀律：三來源查證」，四類來源中本輪查證涵蓋(1)官方開放資料入口（TWSE/TPEx openapi）、(2)官方API文件（兩者swagger.json）、(4)其他供應商反推（FinMind付費資料集）共三類，符合「至少涵蓋三類」門檻，缺(3)GitHub/社群未查但前三類已一致，判定成立不需再補。
+
+**不泛化成**「處置股解除後價格反轉」這個機制假說完全不可測——只確認了「TWSE/TPEx免費openapi端點+FinMind免費層」這組資料源組合缺乏歷史深度。`HYPOTHESIS_QUEUE.md`#47條目提到的替代管道（TWSE網站html歷史新聞稿封存）本輪未查證，若未來有人力/預算重新評估可以從那個方向繼續，但依快殺標準，這條在馬拉松自動迴圈裡到此結案。
+
+已寫入`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47（新增）、`HYPOTHESIS_QUEUE.md`#47「最終判定」段落、`TW_MARATHON_STATE.md`覆寫。**佇列#1~47全數結案**，剩餘#5/#6/#8/#10仍卡外部依賴（本輪未重新查證，狀態沿用先前判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程僅4次唯讀GET請求（TWSE openapi×1、TWSE rwd×2、TPEx openapi×1）+1次FinMind呼叫（直接被400拒絕，未進入正式抓取流程），無新增背景工作、未搶heavy-job-slot。
+
+**下一輪TW軌接手**：設計`HYPOTHESIS_QUEUE.md`#48新假設——`#47`已用掉第九種機制分類（交易所監理干預），下一條需再找一個跟已測過九種機制（①方向性選股排序②timing/exposure overlay③portfolio construction④配對交易均值回歸⑤強制平倉/流動性驅動賣壓⑥公司行動事件驅動⑦跨市場套利收斂⑧新股上市被動時間衰減⑨交易所監理干預）真正不同的第十種機制，不是調參數硬救；或依round409留下的選項(a)轉向`portfolio_multifactor_v2`組合層級（regime overlay、下檔保護證明這類尚未測過的維度——因子替換路線已於round340/353/356/359/362/373窮盡且全FAIL，見`TW_LEADS.md`#13條目與round373「下一步」）。
+
 **下一輪TW軌接手**：`f_value_pb`(#1)/`f_value_pe`(#2)兩個估值因子都卡在同一個「相對排序可能成立、絕對報酬train/val方向不一致」的EXPERIMENTAL狀態，不建議繼續在這個具體構造（十分位long/short+20日換倉）上投入更多深挖資源。建議方向：(a)依`MARATHON_PROTOCOL.md`2026-09-03主軸轉向`portfolio_multifactor_v2`組合層級（regime overlay、下檔保護證明，`STRATEGY_GRAVEYARD.md`該家族雖已整併結案，但仍可評估納入新一代成分因子候選的可能性）；(b)`MARATHON_PROTOCOL.md`第3節列出的因子家族中尚有未測變體可評估。完整見`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2、`TW_MARATHON_STATE.md`第409輪記錄、`deep_dive_f_value_pe.py`（既有，可重複執行）、`data/deep_dive_f_value_pe.csv`（新增）。

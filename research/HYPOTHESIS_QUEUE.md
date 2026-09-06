@@ -5223,3 +5223,30 @@ portfolio構造階段，需檢視「排除近期處置股」這個篩選規則�
 列出的(a)(b)(c)三點開始，確認後才進第1關cheap gate，不跳關；若查證
 後發現歷史回溯深度不足以支撐train/val分期，依快殺標準「資料不可及」
 判FAIL並記錄具體死因。現在排隊第一，未結案。
+
+**最終判定（2026-09-06 hypothesis_queue排程接續，(a)(b)(c)三點查證完成，
+結案：FAIL）**：四來源查證——(1)TWSE官方openapi `v1/announcement/punish`
+單次GET確認`stat=200`，僅8筆，涵蓋`1150831`~`1150904`（即2026-08-31~
+2026-09-04），n_unique_dates=4；(2)TWSE舊版rwd端點
+`www.twse.com.tw/rwd/zh/announcement/punish?response=json`，`date`
+查詢參數對回傳內容無作用，回傳同一組「當前處置中」快照，確認是即時
+公告牆非可查詢歷史封存；(3)TPEx官方openapi `v1/tpex_disposal_information`
+單次GET確認`stat=200`，僅18筆，涵蓋`1150826`~`1150903`，
+n_unique_dates=6，同一種模式；(4)FinMind
+`TaiwanStockDispositionSecuritiesPeriod`資料集確認存在但API回應400
+「Your level is free. Please update your user level」，即付費層級，依
+`CLAUDE.md`「取得方式鐵律」標記**待採購**（確切價格需登入查看，本輪
+未深入查價）、未嘗試任何繞過手段。兩官方端點各自swagger.json逐一
+確認`punish`/`disposal`相關路徑均僅此一條，無帶歷史區間查詢參數的
+替代端點。**判定：依本條目事前綁定的快殺標準「資料不可及」判FAIL**——
+兩個免費官方端點都只回傳「當前處置中」近期快照（約4~6個交易日），
+完全無法支撐`train(2015-2020)/val(2021-2024)`分期研究；FinMind把
+同一類資料包裝成付費資料集這件事是第四來源佐證：獨立商業供應商認定
+這份歷史資料值得收費打包，反推官方免費端點沒有歷史深度不是查證疏漏
+而是市場端已給出確認。**不泛化成「處置股解除後價格路徑」機制假說
+完全不可測**——只確認「TWSE/TPEx免費openapi+FinMind免費層」這個具體
+資料源組合缺乏歷史深度；本條目提到的替代管道（TWSE網站html歷史新聞
+稿封存）本輪未查證，若未來重新評估可從那個方向繼續。**佇列#1~47
+全數結案**，剩餘#5/#6/#8/#10仍卡外部依賴（本輪未重新查證，狀態沿用
+先前判定）。完整見`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47
+（新增）。移出排隊佇列。

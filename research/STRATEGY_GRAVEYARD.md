@@ -1838,3 +1838,44 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   `TRIALS_LEDGER.md`#175、`HYPOTHESIS_QUEUE.md` #46。佇列#1~46全數
   結案，剩餘#5/#6/#8/#10仍卡外部依賴（本輪重新查證仍未解鎖），下一輪
   從設計#47開始。
+
+## #47 處置股解除後價格反轉 Post-Disposition-Stock Price Reversion — FAIL（2026-09-06，資料不可及，未進第1關）
+- **假設**：近期曾被交易所列入處置措施（分盤交易）的股票，處置解除後
+  forward報酬顯著較差（事前綁定方向）——第九種機制：交易所監理干預
+  （官方對「投機炒作過熱」的認定訊號），跟已FAIL的#30個股融資使用率
+  （槓桿驅動強制平倉）核心區別在於這是監理機關主動認定，不涉及持有人
+  槓桿部位。完整經濟理由見`HYPOTHESIS_QUEUE.md`#47。
+- **死因**：資料歷史回溯深度不足，不支援`train(2015-2020)/val(2021-2024)`
+  分期，依#47事前綁定的快殺標準「資料不可及」判定，未進入第1關cheap
+  gate。四來源查證（依`CLAUDE.md`「搜尋紀律：三來源查證」，缺(3)但
+  (1)(2)(4)三類一致）：
+  1. TWSE官方openapi `v1/announcement/punish`——單次GET確認`stat=200`，
+     僅8筆，涵蓋日期`1150831`~`1150904`（民國115年即2026-08-31~
+     2026-09-04），n_unique_dates=4。
+  2. TWSE舊版rwd端點`www.twse.com.tw/rwd/zh/announcement/punish`——
+     `date`查詢參數對回傳內容無作用，回傳同一組「當前處置中」快照，
+     確認是即時公告牆而非可查詢的歷史封存。
+  3. TPEx官方openapi `v1/tpex_disposal_information`——單次GET確認
+     `stat=200`，僅18筆，涵蓋`1150826`~`1150903`，n_unique_dates=6，
+     同一種只回傳近期快照的模式。
+  4. FinMind `TaiwanStockDispositionSecuritiesPeriod`資料集——確認
+     存在（`https://finmind.github.io/tutor/TaiwanMarket/Chip/
+     #taiwanstockdispositionsecuritiesperiod-backersponsor`），但API
+     回應400「Your level is free. Please update your user level」，
+     即這是付費層級資料，依`CLAUDE.md`「取得方式鐵律」標記**待採購**
+     （確切價格需登入查看，本輪未深入查價，因不涉及採購決策）、未
+     嘗試任何繞過手段。
+  兩個官方免費端點（TWSE/TPEx）各自的swagger.json逐一確認`punish`/
+  `disposal`相關路徑都只有這一條，沒有帶歷史區間查詢參數的替代端點。
+  FinMind把同一類資料包裝成付費資料集這件事本身是第四來源的佐證：
+  獨立商業供應商認定這份歷史資料值得收費打包，反推「官方免費端點沒有
+  歷史深度」不是本輪查證疏漏，而是市場端已給出確認。
+- **不泛化成**：「處置股解除後價格路徑」這個機制假說完全不可測——只
+  確認了「TWSE/TPEx免費openapi端點+FinMind免費層」這個具體資料源組合
+  缺乏歷史深度。`HYPOTHESIS_QUEUE.md`#47原查證清單提到的替代管道
+  （TWSE網站html歷史新聞稿封存）本輪未查證，若未來重新評估可以從那
+  個方向繼續，但依快殺標準，這條在馬拉松自動迴圈裡到此結案。
+- **原始記錄**：`TRIALS_LEDGER.md`#176、`HYPOTHESIS_QUEUE.md` #47
+  「最終判定」段落。全程零因子計算、零回測、僅4次唯讀GET請求（3個
+  官方免費端點各1次+FinMind 1次直接被400拒絕），零FinMind額度消耗
+  進入正式抓取流程。
