@@ -149,3 +149,5 @@
 ---
 
 **第394輪（原TW_MARATHON_STATE.md，round401時歸檔）**：**上一則保留（第394輪，供對照）**——接續`CALIBRATION_PROBE.md`「甲.3」複驗`#79 f_inst_streak_days`：300檔（248可用）TRAIN mean_ic=+0.0232/VAL mean_ic=-0.0150，train/val正負號仍相反，null percentile=86.1（未過90.0門檻）——判定維持FAIL。**過程中一次判斷失誤並已自行修正**：先誤重跑`#77`才發現round334已用同一套300檔重跑過且數字複現，已撤銷重複記列。已寫入`TRIALS_LEDGER.md`#153、`HYPOTHESIS_QUEUE.md`#13補充。完整見`TW_LOG.md`第394輪記錄。
+
+**第401輪（原TW_MARATHON_STATE.md，round409時歸檔）**：**上一則保留（第401輪，供對照）**——投遞`f_value_pe`情境分群檢驗背景工作（job`20260906-153323-37f5`），round403已收成完畢，判定與後續見`TRIALS_LEDGER.md`#166/#173、`TW_LEADS.md`#2。完整見`TW_LOG.md`第401輪記錄、`regime_conditions_value_pe.py`（新增，可重複執行）。

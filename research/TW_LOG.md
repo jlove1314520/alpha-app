@@ -2024,3 +2024,19 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 程式碼本身未修改（`deep_dive_f_value_pe.py`邏輯無誤，純粹是預估timeout太短），原地重投`run_detached.py submit --name tw_deep_dive_value_pe_cost_sensitivity_retry --timeout-min 150 --expect data/deep_dive_f_value_pe.csv -- python -u research/deep_dive_f_value_pe.py`（job`20260906-173133-fce9`）。開工前確認`run_detached.py status`running=0（無其他heavy job佔用）。session內`wait --max-min 2`仍`STILL_RUNNING`（符合預期）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用既有300檔因子快取）。
 
 **下一輪TW軌接手**：確認`20260906-173133-fce9`是否`finished`（150分鐘timeout，`17:31`起算約`20:01`前應完成，可能需要再等1~2輪）；若`finished`，讀`data/deep_dive_f_value_pe.csv`TRAIN/VAL兩期×三成本倍數判讀，寫入`TRIALS_LEDGER.md`新編號+`TW_LEADS.md`#2；若仍`timeout`，代表300檔×6組×100draws一次跑完這個構造本身太重，需拆成多個獨立job分開投遞。完整見`TW_MARATHON_STATE.md`第405輪記錄。
+
+## 第409輪 2026-09-06T20:00+08:00（TW軌）
+
+**本輪工作單位＝收成round405投遞的`20260906-173133-fce9`（`tw_deep_dive_value_pe_cost_sensitivity_retry`）並完成`CRITERIA_V2_LOCK.md`第39行第二關（成本敏感度）判讀**。`run_detached.py status`確認`finished, exit=0, expect_exists=True`（119.5分鐘，符合round405估計的90~150分鐘量級）。
+
+讀`data/deep_dive_f_value_pe.csv`：TRAIN(2015-2020) 1x/2x/3x——ann_return=+4.60%/+4.03%/+3.46%，alpha=+4.70%/+4.13%/+3.57%（同號皆正），beta≈+0.103（三組幾乎相同），Sortino=+0.387/+0.348/+0.308（同號皆正），random_control_percentile=**100.0**（三組皆是，n_dates=1468）。VAL(2021-2024) 1x/2x/3x——**ann_return=-3.86%/-4.31%/-4.75%（三組皆為負）**，alpha=-1.92%/-2.37%/-2.82%（同號皆負），beta≈-0.058，Sortino=-0.171/-0.200/-0.229（同號皆負），random_control_percentile=**98.0/99.0/99.0**（n_dates=971）。
+
+**判讀**：比照`deep_dive_f_value_pb.py`（`TRIALS_LEDGER.md`#42）既有判讀框架——3倍slippage下percentile僅從100.0/98.0小幅變動到100.0/99.0（TRAIN不降、VAL反而略升），代表這個訊號的相對優勢不是靠壓低成本假設撐出來的，成本敏感度本身沒有讓判定翻盤。但跟`f_value_pb`(#1)卡在同一個結構性問題：**TRAIN期絕對報酬為正、VAL期絕對報酬為負，方向相反**（`f_value_pb`當初是反過來，TRAIN負/VAL正）。VAL期98~99百分位細看`random_control_median_equity`（0.43~0.51，即隨機多空對照組虧49~57%）跟策略本身（虧13~17%累積）的關係，可以確認這是「相對抗跌」而非絕對正報酬——跟`TRIALS_LEDGER.md`#166情境分群發現的「空頭期IC更強」（+0.098 vs 多頭+0.052，價值因子熊市估值折價保護更明顯兌現）方向一致，是同一個經濟機制在策略層的體現。
+
+依`#42`先例，train/val絕對報酬方向不一致本身已是判定**EXPERIMENTAL**（非PASS）的決定性理由，因此本輪不再繼續投入`CRITERIA_V2_LOCK.md`第39行第三關（alpha/beta顯著性）——多做一關統計顯著性檢定不會改變這個結論。`f_value_pe`(#2)最終狀態從「待複驗候選（CANDIDATE）」改列**EXPERIMENTAL**，跟`f_value_pb`(#1)同一狀態、同一因子家族（負估值比率×十分位long/short+20日換倉這個具體構造，在TW軌至今測過的兩個實例都卡在這裡）。
+
+已寫入`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2更新、`TW_MARATHON_STATE.md`覆寫。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用既有300檔快取）。`data/deep_dive_f_value_pe.csv`已提交版控（頂層`data/`目錄，非`research/data/`，比照既有deep_dive CSV慣例，非`.gitignore`涵蓋範圍）。
+
+**附帶修正**：核對`MARATHON_STATE.md`第7行「馬拉松全局輪次計數器」發現round408（US軌，commit`b8301dd`）未同步更新這一行（仍停在407），本輪一併補上409並附上本輪摘要。
+
+**下一輪TW軌接手**：`f_value_pb`(#1)/`f_value_pe`(#2)兩個估值因子都卡在同一個「相對排序可能成立、絕對報酬train/val方向不一致」的EXPERIMENTAL狀態，不建議繼續在這個具體構造（十分位long/short+20日換倉）上投入更多深挖資源。建議方向：(a)依`MARATHON_PROTOCOL.md`2026-09-03主軸轉向`portfolio_multifactor_v2`組合層級（regime overlay、下檔保護證明，`STRATEGY_GRAVEYARD.md`該家族雖已整併結案，但仍可評估納入新一代成分因子候選的可能性）；(b)`MARATHON_PROTOCOL.md`第3節列出的因子家族中尚有未測變體可評估。完整見`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2、`TW_MARATHON_STATE.md`第409輪記錄、`deep_dive_f_value_pe.py`（既有，可重複執行）、`data/deep_dive_f_value_pe.csv`（新增）。
