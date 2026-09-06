@@ -1,0 +1,50 @@
+{
+ "generated_at": "2026-09-06T21:21:03.889144+08:00",
+ "source": "PyPI 官方 JSON API",
+ "policy": "只回報不自動升級；升級須照 CLAUDE.md 七之二 四步驗證",
+ "behind_count": 1,
+ "packages": [
+  {
+   "package": "certifi",
+   "pinned": "2026.6.17",
+   "latest": "2026.7.22",
+   "behind": true,
+   "error": null
+  },
+  {
+   "package": "fastapi",
+   "pinned": "0.141.1",
+   "latest": "0.141.1",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "requests",
+   "pinned": "2.34.2",
+   "latest": "2.34.2",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "starlette",
+   "pinned": "1.6.0",
+   "latest": "1.6.0",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "urllib3",
+   "pinned": "2.7.0",
+   "latest": "2.7.0",
+   "behind": false,
+   "error": null
+  },
+  {
+   "package": "uvicorn",
+   "pinned": "0.52.4",
+   "latest": "0.52.4",
+   "behind": false,
+   "error": null
+  }
+ ]
+}

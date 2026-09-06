@@ -16,6 +16,75 @@
 
 ---
 
+## 2026-09-06 晚間（維運帽）— 連線三：公開後的第二道牆
+
+原則照總司令定的三句話：**縮小面積、限總量、看得見**，不加 WAF、不加 VPN。
+完整說明寫成 `docs/live_server_security.md`。
+
+### 三.1 縮小面積
+uvicorn 綁定改 `127.0.0.1`。Funnel 的流量是由**本機的 tailscaled** 轉進來的，
+所以綁 loopback 完全不影響對外服務，卻讓區網上其他裝置再也連不到這個 port。
+實測：區網 `192.168.3.241:8001` **連不到（000）**、loopback 200、Funnel 公開網址 200，
+`/subscribe` 與 UDP tick 通道都正常。
+
+**沿路修掉一個讓防線失效的預設值**：uvicorn 預設 `proxy_headers=True`，會自動拿
+`X-Forwarded-For` 覆寫 `request.client`——結果是我們**永遠看不到真正的連線來源**，
+我剛加的那道「非 loopback 來源就記警告」一次都不會響。實測時就是這樣：`/security`
+看得到外部 IP，但警告數是 0。改成 `proxy_headers=False` 之後，`request.client`
+恆為 `127.0.0.1`（前提可驗證），XFF 由 `_client_key()` 自己讀，兩件事才分得開。
+
+### 三.2 /health 分層
+沒帶 token 只回 `{ok, ts}`；`build`、`uptime_sec`、`shioaji_connected`、
+`stale_process` 等要帶 token 才回。理由：公開之後連 build sha 都算情報（可以拿去對
+已知漏洞）、uptime 洩漏重啟節奏、`shioaji_connected` 洩漏交易作息。
+App 的兩段式測試連線跟著改——**第二段直接再打一次帶 token 的 `/health`，
+拿不拿得到 `build` 就是 token 對不對的答案**，比看 401 更直接。
+
+### 三.3 限總量（實測）
+| 限制 | 值 | 實測 |
+|---|---|---|
+| 每 IP 每分鐘總請求 | 120 | 連打 135 次 → **前 120 次 200，第 121 次起 429** |
+| SSE 同時連線 | 10 | 計數用 try/finally 包在產生器裡，確保加減成對 |
+| uvicorn 同時連線 / 閒置壽命 | 50 / 15 秒 | 已設定 |
+
+**正常使用離上限有多遠**：實測一次冷啟動加切三個分頁，30 秒內打 18 次，用掉約 15%。
+**已知邊界誠實記下**：自選股每檔載入時各打一次 `/live/kbars`，超過約 100 檔時冷啟動
+可能逼近上限；伺服器端有 60 秒快取所以不會多打 Shioaji，但請求數仍計入限額。
+
+### 三.4 版本鎖定與更新節奏
+`research/requirements-live.txt` 鎖住六個套件版本；`scripts/check_security_updates.py`
+查 PyPI 官方 API，排程 `AlphaDepCheck` 每週一 08:00 執行，**只回報不自動升級**
+（自動升級等於在沒人看著時換掉對外服務的地基）。首次執行結果：certifi 有新版
+（2026.6.17 → 2026.7.22），其餘五個都是最新。
+
+### 三.5 看得見
+新增帶 token 的 `GET /security`：24 小時外部請求數、來源網段數、401、429、
+封鎖中 IP、串流連線數、最近 10 筆被擋路徑。**來源 IP 只到 /24**——看得出是不是
+同一批來源就夠判斷，留完整位址讓這份摘要自己變成敏感資料。
+設定頁新增「安全」小卡，實測顯示：外部請求 69 次／1 個來源網段、429 共 15 次
+（我壓測造成的）、串流 1/10。
+
+### 三.6 token 輪替
+`research/rotate_live_token.py` 一鍵換新並印出，舊 token 立即失效，
+自動終止行程讓排程用新 token 拉起。何時該換寫進 `docs/live_server_security.md`：
+手機遺失、token 貼進截圖或訊息、`/security` 的 401 異常升高、或每季定期輪替。
+
+### 三.7 驗收
+| 項目 | 結果 |
+|---|---|
+| 區網直連 | 不通（000） |
+| Funnel 公開網址 | 200，穩態 35ms |
+| `/health` 無 token | 只有 2 個欄位 `{ok, ts}` |
+| `/health` 有 token | 28 個欄位，含 build/uptime/stale_process |
+| 壓測 | 第 121 次起 429 |
+| `/security` | 正常回傳，設定頁小卡有數字 |
+| 三種錯誤分類 | ①伺服器沒在跑 ②token 不正確 ③連線成功，皆正確 |
+| 冒煙測試 | **41 項全 PASS、0 FAIL** |
+
+**待總司令實測**：手機（含公司手機）經 ts.net 連上的截圖。
+
+---
+
 ## 2026-09-06 晚間（維運帽）— 連線二：Tailscale Funnel 上線
 
 ### 先更正一個我自己造成的誤判

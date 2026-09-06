@@ -271,6 +271,38 @@ app.add_middleware(
 #
 # 一個刻意的設計：只要該 IP 出現一次「token 正確」的請求，就把它的 401 計數清零。
 # 否則自己打錯幾次 token 之後再改對，還要等封鎖過期才能用。
+# ── 2026-09-06（連線三.3/.5）總量限制與安全事件記錄 ────────────────────────
+# 401 限速擋的是「猜 token」；這一層擋的是「就算不猜也一直打」——掃描器、爬蟲、
+# 或單純把服務當免費資源用的人。總司令定的是每 IP 每分鐘 120 次（含成功的 200），
+# App 正常使用差得很遠：首頁一次重整大約十幾個請求，SSE 是一條長連線不重複計數。
+RATE_LIMIT_WINDOW_SEC = 60
+RATE_LIMIT_MAX = 120
+_req_hits: dict[str, list[float]] = {}
+# 安全事件（保留 24 小時）給 /security 用。只留必要欄位，IP 只留到 /24。
+SECURITY_RETENTION_SEC = 86400
+_sec_events: list[dict] = []
+# SSE 同時連線數上限：長連線會一直佔著 worker，沒有上限的話 50 個並行額度
+# 很快就被 SSE 吃光，其他端點就會全部排隊。
+SSE_MAX_CONNECTIONS = 10
+_sse_active = 0
+
+
+def _ip_prefix(ip: str) -> str:
+    """只留到 /24：看得出是不是同一批來源，但不留完整位址。"""
+    parts = str(ip).split(".")
+    if len(parts) == 4:
+        return ".".join(parts[:3]) + ".0/24"
+    return "非IPv4"
+
+
+def _sec_record(kind: str, key: str, path: str) -> None:
+    now = time.time()
+    _sec_events.append({"ts": now, "kind": kind, "ip24": _ip_prefix(key), "path": path[:80]})
+    if len(_sec_events) > 5000:  # 保險絲：任何情況下都不讓它無限長大
+        cutoff = now - SECURITY_RETENTION_SEC
+        _sec_events[:] = [e for e in _sec_events if e["ts"] >= cutoff][-5000:]
+
+
 AUTH_FAIL_WINDOW_SEC = 60
 AUTH_FAIL_MAX = 20
 AUTH_BAN_SEC = 600
@@ -278,13 +310,27 @@ _auth_fails: dict[str, list[float]] = {}
 _auth_bans: dict[str, float] = {}
 
 
+_nonloopback_warned: set[str] = set()
+
+
 def _client_key(request) -> tuple[str, str]:
-    """回傳 (識別用的key, 來源說明)。來源說明會寫進 log，方便日後查證。"""
+    """回傳 (識別用的key, 來源說明)。來源說明會寫進 log，方便日後查證。
+
+    2026-09-06（連線三.1）**前提**：伺服器只綁 127.0.0.1，所以連線來源必定是
+    本機的 tailscaled，`X-Forwarded-For` 也只可能由它填。這個前提成立時，用 XFF
+    當識別是安全的（外部無法直接連進來偽造這個標頭）。
+    如果哪天有非 loopback 的連線來源出現，代表綁定被改回 0.0.0.0 或有別的代理插在
+    中間——那時 XFF 就可能是偽造的，會記一次警告，不要安靜地繼續信任它。
+    """
+    peer = getattr(getattr(request, "client", None), "host", None) or "unknown"
+    if peer not in ("127.0.0.1", "::1", "unknown") and peer not in _nonloopback_warned:
+        _nonloopback_warned.add(peer)
+        print(f"[security] ⚠ 非 loopback 連線來源 {peer}：伺服器應該只綁 127.0.0.1，"
+              "此時 X-Forwarded-For 可能被偽造，請檢查 ALPHA_LIVE_SERVER_HOST", flush=True)
     xff = request.headers.get("x-forwarded-for")
     if xff:
         return xff.split(",")[0].strip(), "x-forwarded-for"
-    host = getattr(getattr(request, "client", None), "host", None) or "unknown"
-    return host, "peer"
+    return peer, "peer"
 
 
 def note_auth_ok(request) -> None:
@@ -317,19 +363,42 @@ def auth_banned_until(request) -> float | None:
     return until
 
 
+def _too_many_requests(detail: str, retry: int) -> Response:
+    return Response(
+        content=json.dumps({"detail": detail}, ensure_ascii=False),
+        status_code=429, media_type="application/json; charset=utf-8",
+        headers={"Retry-After": str(retry)},
+    )
+
+
 @app.middleware("http")
 async def _auth_rate_limit(request, call_next):
+    key, _ = _client_key(request)
+    path = request.url.path
+    now = time.time()
+
     until = auth_banned_until(request)
     if until is not None:
-        retry = int(until - time.time()) + 1
-        return Response(
-            content=json.dumps({"detail": f"驗證失敗次數過多，已暫時封鎖，請 {retry} 秒後再試"},
-                               ensure_ascii=False),
-            status_code=429, media_type="application/json; charset=utf-8",
-            headers={"Retry-After": str(retry)},
-        )
+        _sec_record("banned", key, path)
+        return _too_many_requests(
+            f"驗證失敗次數過多，已暫時封鎖，請 {int(until - now) + 1} 秒後再試",
+            int(until - now) + 1)
+
+    # 2026-09-06（連線三.3）每 IP 每分鐘總請求上限（含成功的 200）
+    hits = [t for t in _req_hits.get(key, []) if now - t < RATE_LIMIT_WINDOW_SEC]
+    hits.append(now)
+    _req_hits[key] = hits
+    if len(hits) > RATE_LIMIT_MAX:
+        _sec_record("rate", key, path)
+        print(f"[rate-limit] {key} 在 {RATE_LIMIT_WINDOW_SEC} 秒內送出 {len(hits)} 個請求，"
+              f"超過上限 {RATE_LIMIT_MAX}，回 429：{path}", flush=True)
+        return _too_many_requests(
+            f"請求過於頻繁（每分鐘上限 {RATE_LIMIT_MAX}），請稍後再試", 30)
+
     resp = await call_next(request)
+    _sec_record("hit", key, path)
     if resp.status_code == 401:
+        _sec_record("401", key, path)
         note_auth_fail(request)
     elif resp.status_code < 400:
         note_auth_ok(request)
@@ -946,12 +1015,77 @@ async def live_stream(x_alpha_local_token: str | None = Header(default=None)):
     不因私有網路跳過。**瀏覽器原生EventSource無法帶自訂標頭，前端要用
     fetch()讀串流（index.html::startLiveStream()），這是刻意為了保住token
     驗證，不是疏忽。"""
+    # 先驗 token 再看名額：順序反過來的話，沒帶 token 的人會從 429/401 的差別
+    # 推出「現在有幾條串流在跑」，等於免費送出一個活動指標。
     _check_token(x_alpha_local_token)
+    # 2026-09-06（連線三.3）SSE 同時連線數上限。長連線會一直佔著 worker，
+    # 沒有上限的話 uvicorn 的 50 個並行額度很快被 SSE 吃光，其他端點全部排隊。
+    # 上限 10 對正常使用綽綽有餘（一支手機一條、一台電腦一條）。
+    if _sse_active >= SSE_MAX_CONNECTIONS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"即時串流同時連線數已達上限 {SSE_MAX_CONNECTIONS}，請關掉其他分頁或稍後再試",
+        )
     return StreamingResponse(
-        _sse_event_generator(),
+        _counted_sse_generator(),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
     )
+
+
+async def _counted_sse_generator():
+    """包一層只為了讓 _sse_active 的加減成對。
+
+    計數放在產生器裡而不是路由函式裡，是因為連線真正結束的時機是產生器被關閉
+    （使用者關分頁、網路斷、Funnel 逾時），路由函式早就 return 了。用 try/finally
+    保證不管怎麼結束都會減回去——漏減一次，那個名額就永遠回不來。"""
+    global _sse_active
+    _sse_active += 1
+    try:
+        async for chunk in _sse_event_generator():
+            yield chunk
+    finally:
+        _sse_active = max(0, _sse_active - 1)
+
+
+@app.get("/security")
+def security(x_alpha_local_token: str | None = Header(default=None)):
+    """過去 24 小時的安全事件摘要（2026-09-06 連線三.5）。
+
+    公開服務最怕的不是被攻擊，是**被攻擊了自己不知道**。這個端點把「有多少外部
+    流量、多少次驗證失敗、多少次被限速擋掉、現在封了幾個 IP、最近被擋的是哪些路徑」
+    攤出來，設定頁的「安全」小卡直接顯示這些數字。
+
+    刻意不回傳完整 IP：看得出是不是同一批來源（/24 前綴）就夠判斷了，
+    留完整位址對排查沒有多大幫助，卻讓這份摘要本身變成敏感資料。
+    """
+    _check_token(x_alpha_local_token)
+    now = time.time()
+    cutoff = now - SECURITY_RETENTION_SEC
+    events = [e for e in _sec_events if e["ts"] >= cutoff]
+    # 外部命中＝不是本機自己打的（本機測試會是 127.0.0.0/24）
+    external = [e for e in events if e["kind"] == "hit" and not e["ip24"].startswith("127.")]
+    blocked = [e for e in events if e["kind"] in ("401", "rate", "banned")]
+    return {
+        "window_hours": 24,
+        "generated_at": datetime.now(TW_TZ).isoformat(),
+        "total_requests": sum(1 for e in events if e["kind"] == "hit"),
+        "external_requests": len(external),
+        "external_sources": len({e["ip24"] for e in external}),
+        "auth_failed_401": sum(1 for e in events if e["kind"] == "401"),
+        "rate_limited_429": sum(1 for e in events if e["kind"] in ("rate", "banned")),
+        "banned_ips_now": len(_auth_bans),
+        "sse_active": _sse_active,
+        "limits": {"per_ip_per_min": RATE_LIMIT_MAX,
+                   "auth_fail_per_min": AUTH_FAIL_MAX,
+                   "ban_minutes": AUTH_BAN_SEC // 60,
+                   "sse_max": SSE_MAX_CONNECTIONS},
+        "recent_blocked": [
+            {"at": datetime.fromtimestamp(e["ts"], TW_TZ).isoformat(),
+             "kind": e["kind"], "source": e["ip24"], "path": e["path"]}
+            for e in blocked[-10:][::-1]
+        ],
+    }
 
 
 @app.get("/ca.crt")
@@ -968,10 +1102,18 @@ def get_ca_cert():
 
 
 @app.get("/health")
-def health():
-    """唯一不需要token的端點——只回報「伺服器活著」，不含任何報價/
-    帳戶資訊，跟ibkr_order_server.py的/health端點同一個設計精神
-    （純粹的存活探測，不算資訊洩漏）。"""
+def health(x_alpha_local_token: str | None = Header(default=None)):
+    """存活探測。**2026-09-06（連線三.2）改成分層回應。**
+
+    沒帶 token 時只回 `{ok, ts}`——公開之後，連 build sha、開機時間、有沒有在收 tick
+    這些都算情報：build sha 讓人知道跑的是哪一版程式碼（可以去對已知漏洞）、
+    uptime 洩漏重啟節奏、shioaji_connected 洩漏交易活動作息。掃描器不需要知道這些。
+
+    帶了正確 token 才回完整診斷欄位（App 的第二段測試連線就是拿這個）。
+    這樣兩件事都成立：任何人都能確認「伺服器活著」，只有自己人看得到細節。
+    """
+    if x_alpha_local_token != LOCAL_TOKEN:
+        return {"ok": True, "ts": datetime.now(TW_TZ).isoformat()}
     # 2026-09-06（連線一.2）shioaji_connected 的定義寫清楚，避免看的人誤會：
     # 這裡回報的是「有沒有在收到 tick」，不是「Shioaji session 是否登入中」——
     # live server 本來就沒有 Shioaji 連線（那在 shioaji_quotes.py 那個行程裡），
@@ -1051,4 +1193,25 @@ if __name__ == "__main__":
         print(f"HTTPS模式啟用（自簽憑證，手機需先安裝 secrets/alpha-ca.crt，透過/ca.crt下載）：https://0.0.0.0:{SERVER_PORT}", flush=True)
     else:
         print(f"HTTP模式（預設；設環境變數ALPHA_LIVE_SERVER_HTTPS=1可切HTTPS，見模組docstring）", flush=True)
-    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT, **ssl_kwargs)
+    # 2026-09-06（連線三.1）縮小攻擊面：只綁 127.0.0.1。
+    # Funnel 的流量是由**本機的 tailscaled** 轉進來的（它連 127.0.0.1:8001），
+    # 所以綁 loopback 完全不影響對外服務，卻讓區網上的其他裝置再也連不到這個 port。
+    # 代價誠實記下：手機在區網直連 http://192.168.3.241:8001 會斷——但那條路本來
+    # 就因為 mixed content 不能用了（見連線二.2），手機一律走 ts.net。
+    # 需要臨時開回區網時設 ALPHA_LIVE_SERVER_HOST=0.0.0.0。
+    host = os.environ.get("ALPHA_LIVE_SERVER_HOST") or "127.0.0.1"
+    print(f"[bind] {host}:{SERVER_PORT}"
+          + ("（只聽 loopback，Funnel 由本機 tailscaled 轉入）" if host.startswith("127.")
+             else "（⚠ 對外開放，非預設值）"), flush=True)
+    uvicorn.run(app, host=host, port=SERVER_PORT,
+                # 2026-09-06（連線三.3）限總量：同時連線數與閒置連線壽命都設上限，
+                # 避免一個慢速攻擊就把 worker 佔滿（SSE 是長連線，本來就會佔著）。
+                limit_concurrency=50, timeout_keep_alive=15,
+                # 2026-09-06（連線三.1）關掉 uvicorn 自動用 X-Forwarded-For 覆寫
+                # request.client。uvicorn 預設會做這件事，結果是我們永遠看不到真正的
+                # 連線來源，「只綁 loopback」這個前提就無從驗證——實測時就是這樣：
+                # /security 看得到外部 IP，但「非 loopback 來源」的警告一次都沒響過。
+                # 關掉之後 request.client 是真實的 peer（應該恆為 127.0.0.1），
+                # XFF 由 _client_key() 自己讀，兩件事才分得開。
+                proxy_headers=False,
+                **ssl_kwargs)

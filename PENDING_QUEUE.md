@@ -192,6 +192,31 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 ---
 
+## 連線三：公開後的第二道牆（2026-09-06 總司令裁示原話全文，排在連線二.4 之後、建置一之前）
+
+原始指令全文：
+
+> 全程繁體中文。總司令裁示：Funnel 公開後加第二道牆，原則是「縮小面積、限總量、看得見」，不加 WAF/VPN。登記 PENDING_QUEUE 為【連線三】，排在連線二.4 之後、建置一之前，做完一項回報一項。
+>
+> 【連線三】公開後的第二道牆
+> 1. 縮面積：uvicorn 綁定改 127.0.0.1（Funnel 由本機 tailscaled 轉入，不需對區網開）；確認 shioaji_quotes.py 的 UDP 通道與 /subscribe 仍正常。綁定後 X-Forwarded-For 只可能來自 tailscaled，_client_key 加註此前提；若有非 loopback 連線來源出現，記 log 警告。
+> 2. /health 免 token 只回 {ok:true, ts}；build、uptime、shioaji_connected、last_tick_at、stale_process 改為帶 token 才回。App 設定頁兩段式測試連線對應調整（第一段只看 ok，第二段帶 token 拿細節）。
+> 3. 限總量：每 IP 每分鐘總請求上限 120（含 200），超過回 429 並記 log；uvicorn 加 limit_concurrency=50、timeout_keep_alive=15；SSE 連線數上限 10。用本機壓測證明超限會被擋而 App 正常使用不會誤觸。
+> 4. 更新節奏：requirements 鎖版本，新增每週一 08:00 排程檢查 fastapi/uvicorn/starlette 是否有安全更新並回報（只回報不自動升級，升級依常駐服務發布紀律四步驗證）。
+> 5. 看得見：新增帶 token 的 GET /security 回傳過去 24h 外部命中數、401 數、429 數、封鎖中 IP 數、最近 10 筆被擋路徑（不含 IP 全文，只到 /24）；設定頁「資料健康」下加「安全」小卡顯示這些數字與資料時間。
+> 6. token 輪替：research/rotate_live_token.py 一鍵換新 token 並印出，舊 token 立即失效；寫進 docs 說明何時該換（手機遺失、懷疑外洩）。
+> 7. 驗收：綁定 127.0.0.1 後 Funnel 仍通（手機截圖）、區網直連 http://192.168.3.241:8001 不通；/health 無 token 只見 ok；壓測 429 截圖；/security 截圖；冒煙全過。
+
+- [x] **連線三.1** **已完成**：綁 127.0.0.1，區網直連 000、loopback 與 Funnel 皆 200，/subscribe 與 UDP 通道正常。沿路修掉 uvicorn 預設 `proxy_headers=True`（會拿 XFF 覆寫 client，害「非 loopback 警告」永遠不響）。
+- [x] **連線三.2** **已完成**：無 token 2 欄、有 token 28 欄；App 第二段改打帶 token 的 /health，用「拿不拿得到 build」判斷 token 正確與否。
+- [x] **連線三.3** **已完成並壓測**：連打 135 次 → 前 120 次 200、第 121 次起 429；正常使用 30 秒 18 次（約 15% 額度）。SSE 上限 10 用 try/finally 確保計數成對。已知邊界：自選股 >100 檔冷啟動可能逼近上限。
+- [x] **連線三.4** **已完成**：`research/requirements-live.txt` 鎖六個套件；`scripts/check_security_updates.py` 查 PyPI 官方 API，排程 `AlphaDepCheck` 每週一 08:00，只回報不升級。首次結果：certifi 有新版，其餘五個最新。
+- [x] **連線三.5** **已完成**：/security 回 24 小時統計與最近 10 筆被擋路徑（IP 只到 /24）；設定頁「安全」小卡實測顯示外部 69 次／1 網段／429 共 15 次／串流 1-10。
+- [x] **連線三.6** **已完成**：`research/rotate_live_token.py`（含 --show），舊 token 立即失效並自動讓排程以新 token 拉起；何時該換寫進 `docs/live_server_security.md`。
+- [~] **連線三.7** **多數完成**：區網不通、Funnel 200、health 分層、壓測 429、/security 截圖、冒煙 41 項全 PASS 都已驗。**手機截圖待總司令實測**。
+
+---
+
 ## 連線一／連線二／建置一（2026-09-06 總司令裁示，原話全文，插最前面依序做）
 
 **同時撤回「健檢.二 刪除佔位字」**——總司令原話：「總司令要的是把功能做出來,不是刪字」。

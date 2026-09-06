@@ -1203,6 +1203,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
     </div>
 
+    <!-- 2026-09-06（連線三.5）安全小卡：服務已經公開到網際網路，最怕的不是被攻擊，
+    是被攻擊了自己不知道。這裡把過去 24 小時的外部流量、驗證失敗、被限速擋掉的次數
+    攤出來，讓總司令一眼看得到。 -->
+    <div class="card">
+      <h3>安全 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'sec-tm',async()=>{await loadSecurity(true)})">重新整理</span></h3>
+      <div class="note" id="sec-summary">檢查中…</div>
+      <div id="sec-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">資料時間：<b id="sec-tm">--:--</b>。統計視窗 24 小時，來源 IP 只顯示到 /24 網段。需要即時伺服器連線才讀得到。</div>
+    </div>
+
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
@@ -4741,6 +4751,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
+    _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
     _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
   }
 
@@ -4912,10 +4923,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       clearTimeout(t);
       if(r.ok){
         health=await r.json();
+        // 2026-09-06（連線三.2）/health 改成分層回應：沒帶 token 只回 {ok, ts}，
+        // 帶了正確 token 才回 build/uptime/stale_process 等診斷欄位。
+        // 所以第二段不用另外猜——**再打一次 /health、這次帶 token**，
+        // 拿不拿得到 build 就是 token 對不對的答案，比看 401 更直接。
+        try{
+          const r2=await liveFetch('/health',6000);
+          if(r2.ok){const d2=await r2.json();if(d2&&d2.build)health=d2;}
+        }catch(e){console.warn('[testLiveConnection:health-token]',e)}
         // 2026-09-06（連線一.3 防再犯）伺服器自己會判斷「行程比原始碼舊」。
         // 總司令這次遇到的就是這個：伺服器檔案已經加了 allow_credentials=True，
         // 但 PC 上的行程是前一天啟動的，預檢缺那個標頭，瀏覽器判 CORS 失敗，
         // App 只顯示一句沒有資訊量的 Load failed，完全看不出是「沒重啟」。
+        if(!health.build){
+          // 拿得到 {ok} 但拿不到細節 ⇒ 伺服器活著、token 不對
+          LIVE.lastError='token不正確';
+          toast('② 伺服器活著，但 token 不正確（拿不到需要驗證的診斷資訊），請重貼一次');
+          renderLiveStatus();return;
+        }
         if(health.stale_process){
           LIVE.lastError='伺服器是舊版，需重啟';
           toast('⚠ 伺服器是舊版（程式碼已更新但行程沒重啟，build '+(health.build||'?')+'）。請重啟 alpha_live_server.py，或等排程 1 分鐘內自動拉起。');
@@ -4938,7 +4963,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const r=await liveFetch('/live/quotes',6000);
       if(r.status===401){
         LIVE.lastError='token不正確';
-        toast('② 伺服器活著（開機 '+Math.round((health.uptime_sec||0)/60)+' 分鐘）但 token 不正確，請重貼一次');
+        toast('② token 不正確（伺服器活著），請重貼一次');
       }else if(!r.ok){
         LIVE.lastError='HTTP '+r.status;toast('伺服器回應 HTTP '+r.status);
       }else{
@@ -5252,6 +5277,47 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       list.innerHTML='';
     }
   }
+  // 2026-09-06（連線三.5）讀 /security。沒設定即時伺服器時誠實說「讀不到」，
+  // 不要顯示成一片綠色的「安全無虞」——那比沒有更危險。
+  let SECURITY_CACHE=null;
+  async function loadSecurity(force){
+    const sum=document.getElementById('sec-summary'),list=document.getElementById('sec-list');
+    if(!sum||!list)return;
+    if(!LIVE.configured){
+      sum.innerHTML='<span style="color:var(--ink-3)">未設定即時伺服器，無法讀取安全統計</span>';
+      list.innerHTML='';return;
+    }
+    try{
+      if(force||!SECURITY_CACHE){
+        const r=await liveFetch('/security',8000);
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        SECURITY_CACHE=await r.json();
+      }
+      const d=SECURITY_CACHE,L=d.limits||{};
+      const warn=(d.auth_failed_401||0)>50||(d.banned_ips_now||0)>0;
+      sum.innerHTML=`<b style="color:${warn?'var(--warn)':'var(--up)'}">${warn?'⚠ 有異常活動':'✓ 未見異常'}</b>`
+        +` ｜ 過去 24 小時外部請求 <b class="num">${nf(d.external_requests||0)}</b> 次／`
+        +`<b class="num">${nf(d.external_sources||0)}</b> 個來源網段`;
+      list.innerHTML='<div class="facts">'
+        +`<div class="f"><span>驗證失敗（401）</span><b class="num" style="color:${(d.auth_failed_401||0)?'var(--warn)':'var(--ink-2)'}">${nf(d.auth_failed_401||0)}</b></div>`
+        +`<div class="f"><span>被限速擋下（429）</span><b class="num" style="color:${(d.rate_limited_429||0)?'var(--warn)':'var(--ink-2)'}">${nf(d.rate_limited_429||0)}</b></div>`
+        +`<div class="f"><span>目前封鎖中 IP</span><b class="num" style="color:${(d.banned_ips_now||0)?'var(--warn)':'var(--ink-2)'}">${nf(d.banned_ips_now||0)}</b></div>`
+        +`<div class="f"><span>串流連線數</span><b class="num">${nf(d.sse_active||0)} / ${nf(L.sse_max||0)}</b></div>`
+        +`<div class="f"><span>每分鐘請求上限</span><b class="num">${nf(L.per_ip_per_min||0)}</b></div>`
+        +'</div>'
+        +((d.recent_blocked||[]).length
+          ? `<details style="margin-top:8px"><summary style="font-size:11.5px;color:var(--ink-3);cursor:pointer">最近被擋的 ${d.recent_blocked.length} 筆</summary>`
+            +d.recent_blocked.map(e=>`<div style="font-size:10.5px;color:var(--ink-3);padding:3px 0;border-top:1px solid var(--hairline)">${String(e.at).slice(11,19)} · ${e.kind} · ${e.source} · ${e.path}</div>`).join('')
+            +'</details>'
+          : '<div class="note" style="margin-top:6px">過去 24 小時沒有任何請求被擋下。</div>');
+      const tm=document.getElementById('sec-tm');
+      if(tm&&d.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.generated_at),'Asia/Taipei');
+    }catch(e){
+      console.warn('[loadSecurity]',e);
+      sum.innerHTML='<span style="color:var(--warn)">讀不到安全統計（'+(e.message||e)+'）</span>';
+      list.innerHTML='';
+    }
+  }
   async function loadDataFreshness(){
     const list=document.getElementById('data-freshness-list');if(!list)return;
     const now=new Date();
@@ -5302,7 +5368,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.1233';
+  const APP_VERSION='2026-09-06.2125';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
