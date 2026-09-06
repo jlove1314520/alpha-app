@@ -1,0 +1,71 @@
+{
+  "get": {
+    "tags": [
+      "證券交易"
+    ],
+    "summary": "上市股票除權除息預告表",
+    "description": "上市股票除權除息預告表",
+    "produces": [
+      "application/json",
+      "text/csv"
+    ],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "Date": {
+              "type": "string",
+              "description": "除權息日期"
+            },
+            "Code": {
+              "type": "string",
+              "description": "股票代號"
+            },
+            "Name": {
+              "type": "string",
+              "description": "名稱"
+            },
+            "Exdividend": {
+              "type": "string",
+              "description": "除權息"
+            },
+            "StockDividendRatio": {
+              "type": "string",
+              "description": "無償配股率"
+            },
+            "SubscriptionRatio": {
+              "type": "string",
+              "description": "現金增資配股率"
+            },
+            "SubscriptionPricePerShare": {
+              "type": "string",
+              "description": "現金增資認購價"
+            },
+            "CashDividend": {
+              "type": "string",
+              "description": "現金股利"
+            },
+            "SharesOffered": {
+              "type": "string",
+              "description": "公開承銷股數"
+            },
+            "SharesEmpOwner": {
+              "type": "string",
+              "description": "員工認購股數"
+            },
+            "SharesholderOwner": {
+              "type": "string",
+              "description": "原股東認購股數"
+            },
+            "StockHoldingRatio": {
+              "type": "string",
+              "description": "按持股比例仟股認購"
+            }
+          }
+        }
+      }
+    }
+  }
+}

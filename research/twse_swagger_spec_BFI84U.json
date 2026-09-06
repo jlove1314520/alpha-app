@@ -1,0 +1,43 @@
+{
+  "get": {
+    "tags": [
+      "證券交易"
+    ],
+    "summary": "集中市場停資停券預告表",
+    "description": "集中市場停資停券預告表",
+    "produces": [
+      "application/json",
+      "text/csv"
+    ],
+    "responses": {
+      "200": {
+        "description": "OK",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "Code": {
+              "type": "string",
+              "description": "股票代號"
+            },
+            "Name": {
+              "type": "string",
+              "description": "股票名稱"
+            },
+            "StartDate": {
+              "type": "string",
+              "description": "停券日(最後回補日)"
+            },
+            "EndDate": {
+              "type": "string",
+              "description": "停券迄日"
+            },
+            "Reason": {
+              "type": "string",
+              "description": "原因"
+            }
+          }
+        }
+      }
+    }
+  }
+}

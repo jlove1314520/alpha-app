@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-07 hypothesis_queue排程接續（取鎖時發現陳舊鎖檔，pid 92972，
+30分鐘，已回收接手）— #50前置依賴查證+#51三子事件資料可行性查證，
+仍未結案（純地基查證，非PASS/FAIL）。確認#50前置依賴「資料一逐筆
+tick落地」剛於2026-09-07起步、遠未累積20交易日，改依協定指引查#51。
+**子事件2（現金增資除權參考價）確認可行**：FinMind`TaiwanStockDividend`
+（本機已有2170檔快取，零新增API呼叫）含`AnnouncementDate`，118筆現金
+增資事件中`AnnouncementDate<ex_date`118/118成立，lag中位數7天。
+**子事件1（融券強制回補/停資停券）三來源皆確認直接預告表不可行**
+（TWSE openapi BFI84U即時快照不支援歷史回溯、FinMind同名dataset付費牆、
+TPEx同構「預告表」佐證），備用反推重建路徑留待下一輪。**子事件3（可轉
+債轉換價重設）僅查2來源（FinMind CB系列付費牆、TPEx為發行資料非重設
+事件），未達三來源門檻未下結論**，MOPS查證留待下一輪。新增
+`forced_trader_events_probe.py`（可重複執行）。完整見`HYPOTHESIS_
+QUEUE.md`#51條目「資料可行性查證」段落。`is_holdout_consumed()`開工/
+收工前皆確認`False`。本輪工作到此為止，下一輪從補齊子事件3的MOPS
+查證+查證子事件1反推路徑開始。
+
 ## 2026-09-07 01:26 hypothesis_queue排程接續 — #49第6關逐年一致性，
 已結案：**FAIL**。依上一輪建議改道跳過gate2 placebo，直接對gate1已
 CHEAP_PASS的overnight段（TAIEX open切分）做逐年一致性檢驗（新增
