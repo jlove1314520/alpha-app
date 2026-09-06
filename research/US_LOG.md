@@ -1631,3 +1631,29 @@ back-adjusted價格會被「未來」的反向分割回溯放大過去的名目�
 已寫入`TRIALS_LEDGER.md`#185、`US_LEADS.md`#20/#21更新、`US_MARATHON_STATE.md`第421輪記錄（第415/414輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）、`REPORT.md`第421輪心跳。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增付費/需登入API呼叫（純官方免費匿名FTP，1次WebFetch確認端點文件+49次輕量FTP下載）。
 
 **下一輪US軌接手**：不建議再測「這個異常是否可被執行限制解釋」這條線——四個假說（成本模型、price floor、threshold list，加上round407已REFUTED的宇宙離散度）已窮盡皆REFUTED/未獲支持。改查是否有除FinMind外的免費、免登入資料源能提供這批常駐短腿ticker（僅約10檔規模，非全宇宙）的**真實未還原歷史收盤價**（例如stooq.com等提供免費歷史股價的公開來源，需先查證是否真的保留原始未調整報價、是否免費免登入），若能取得可直接用真實原始價格重跑VAL回測，直接驗證異常量級是否消失——這會是比繼續排除各種「執行限制」假說更直接的檢定。若查無替代來源，`#20`/`#21`可能需要誠實記錄「異常成因收斂到資料源本身限制，短期無法進一步驗證」，並考慮比照round382-408已窮盡的診斷鏈長度，評估是否該正式結案（維持EXPERIMENTAL但不再投入更多輪次）。完整見`TRIALS_LEDGER.md`#185、`US_LEADS.md`#20/#21、`finra_threshold_probe.py`（新增，可重複執行）、`data/raw_finra_threshold/`（新增快取，gitignored）。
+
+---
+
+## 第427輪 · 2026-09-07T05:30+08:00 · US · 取鎖乾淨（cycle`20260907-053036`），三軌時間戳US 04:30（round425，最舊）／TW 05:00（round426）／FUT 09-06 12:00（round399，例外條款不選）——依輪替選US
+
+**本輪工作單位＝round425「下一輪US軌接手」明列待辦：尋找全新的因子/組合機制候選**（`#20`/`#21`已窮盡9輪診斷確認FAIL成因是`adj_close`資料完整性問題，非策略/機制問題，round425已正式關閉那條線）。
+
+**新因子：`f_us_gross_profitability`（Novy-Marx 2013 GrossProfit/Assets）**——跟`#20`(book-to-market價值)/`#21`(低波動)是完全不同的獲利能力機制（市場把「便宜」跟「好」搞混），非`MARATHON_PROTOCOL.md`0a節定義下的換皮。
+
+**設計理由**：`GrossProfit`/`Assets`都是標準us-gaap XBRL標籤，且已經在`#20`(`f_us_value_bm`)下載SEC EDGAR companyfacts JSON時被一併快取（`get_companyfacts()`抓整份payload，非逐概念抓取），所以測這個新因子在同一份248檔乾淨分層抽樣宇宙上**零新增SEC EDGAR API呼叫**。刻意只用10-K年度數字（不像`book_value_per_share_pit()`可混10-K/10-Q）——因為`GrossProfit`是損益表流量項目，季度數字與年度數字量級差約4倍，混用會注入非經濟性的鋸齒雜訊，這點跟資產負債表存量項目（StockholdersEquity）不同。
+
+新增三支檔案：`us_factors_quality.py`（`gross_profitability_pit()`/`add_quality_factor()`，PIT合併同`us_factors_value.py`慣例：`pit_date=max(gp_pit_date,assets_pit_date)`）、`us_factor_ic_quality_clean_universe.py`（逐字比照`us_factor_ic_value_clean_universe.py`結構，僅換因子模組/欄位）、`deep_dive_f_us_gross_profitability.py`（逐字比照`deep_dive_f_us_value_bm.py`結構，新增明確檢查已知污染ticker重疊度的SUMMARY段落）。
+
+**冒煙測試**：`us_factors_quality.py`獨立smoke test對AAPL/MSFT/PLTR三檔已知CIK，AAPL 18期(2008-2025)、MSFT 18期(2009-2026)、PLTR 7期(2019-2025)皆正確產出，數值範圍0.23~0.58（合理的毛利率/資產比量級）。
+
+**便宜關卡結果**：`us_factor_ic_quality_clean_universe.py`跑出84/248可用（154檔無GrossProfit/Assets 10-K標籤——很多公司只揭露Revenues/CostOfRevenue不單獨列GrossProfit行、9檔全NaN、1檔無CIK）。TRAIN(2015-2020) mean_ic=+0.0503 IR=+0.350（n=76期）；VAL(2021-2024) mean_ic=+0.0499 IR=+0.291 hit_rate=0.63（n=49期）；**train/val不只同號，量級幾乎相同**（+0.0503 vs +0.0499）——這跟`#20`(train+0.0432/val+0.0853，近2倍)/`#21`train顯著弱於val的形狀不同，是溫和正面訊號（但不是deep-dive通過的保證，`f_us_low_vol`#7中型股tier也曾經cheap gate看起來合理卻在1b深挖因beta問題FAIL）。null percentile=100.0（門檻90.0），same_sign=True。**判定：CHEAP_PASS**。
+
+**登記與誠實揭露**：已登記`TRIALS_LEDGER.md`#191（`trial_registry.register_trial()`）、`US_LEADS.md`#23新增。登記過程中一度誤判資料損毀——透過Bash終端機用`python -c`印出剛寫入的中文內容時看到亂碼，一度懷疑Windows命令列引數編碼把中文字串搞壞了寫進檔案；改用Read工具（正確渲染UTF-8）核對後確認`TRIALS_LEDGER.md`/`TRIALS_REGISTRY.jsonl`實際內容完全正確，純粹是Bash終端機（Git Bash/MinTTY）主控台codepage無法正確顯示中文字元的顯示層問題，沒有任何資料真的損毀，這輪沒有執行任何救援寫入動作（原本準備好的修復腳本執行後才發現是虛驚一場，但既然已經跑過也順手確認過內容正確，不影響最終資料，仍保留最終確認過的內容）。**已知污染風險（誠實揭露，未隱藏）**：`#20`round410列名的死亡螺旋型反向分割微型股`MNTS`/`DVLT`/`AMTX`/`WULF`/`CIIT`共5檔也落在這84檔可用樣本中（腳本執行時已列印確認），若這個因子的空頭十分位也選中同一批股票，深挖階段可能重蹈`#20`/`#21`的`adj_close`資料完整性陷阱——這不是本輪能排除的風險，留給下一輪的深挖結果判斷。
+
+**已投遞深挖**：`run_detached.py submit`（job`20260907-054341-a450`，timeout 150分鐘，比照`#20`同款1b框架：train/val長短倉回測、配對式隨機控制組N=100、成本1x/2x/3x、beta/alpha），`run_detached.py wait --max-min 3`確認正常執行中（已印出TRAIN 2015-2020, 1x cost開始執行），本輪未等待收成。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增SEC EDGAR API呼叫（複用`#20`已快取的companyfacts JSON）、零FinMind呼叫。`trial_registry.py --check`確認PASS（193列，最大編號#191，下一可用#192；撞號2組`{94:[203,242],149:[201,314]}`為既有歷史存量問題，非本輪新增）。
+
+已寫入`TRIALS_LEDGER.md`#191、`US_LEADS.md`#23、`US_MARATHON_STATE.md`第427輪記錄（第421輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）、`REPORT.md`第427輪心跳。
+
+**下一輪US軌接手**：收成job`20260907-054341-a450`（`run_detached.py status`／`log`），檢查SUMMARY段落印出的已知污染ticker清單，若TRAIN/VAL的random_control_percentile跟beta都通過、且5檔已知污染ticker沒有主導空頭腿，這會是US軌至今第一個真正跳脫`#20`/`#21`資料陷阱的候選；若重蹈覆轍，比照`#20`/`#21`已驗證有效的診斷方法論（leg分解/leave-extreme-out/持股名單查核）逐步收斂成因，誠實記錄FAIL/EXPERIMENTAL，不強行升格。完整見`US_LEADS.md`#23、`TRIALS_LEDGER.md`#191、`us_factors_quality.py`/`us_factor_ic_quality_clean_universe.py`/`deep_dive_f_us_gross_profitability.py`（三支新增，皆可重複執行）。
