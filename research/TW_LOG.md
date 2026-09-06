@@ -1974,3 +1974,21 @@ TRAIN/VAL方向一致、皆贏隨機控制組，表面像清楚PASS。但仔細�
 已寫入`TRIALS_LEDGER.md`#156、`TW_LEADS.md`#3更新。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用`SAMPLE_SIZE`已預先回補好的300檔快取）。
 
 **下一輪TW軌接續**：(1)heavy-job-slot本輪已空出，可投遞新的重度工作，例如`f_quality_roe_stability`VAL期逐年分解（比照`US_LEADS.md`#151/#152方法論，排除VAL量級萎縮是否進一步集中在特定年份/個股）；(2)或複驗`CALIBRATION_PROBE.md`清單的`#91 revenue_trend_surprise_low_attention`——**但先grep確認**：`TRIALS_LEDGER.md`#106（2026-09-04）已完成#91的300檔重跑並結案（維持FAIL，高關注度組意外轉CHEAP_PASS但因TRAIN無訊號未列入候選），此項實質已處理過，不要第三次重複（前一輪round394已誤重複過#77一次）；(3)或評估是否將`f_quality_roe_stability`納入`portfolio_multifactor_v2`成分因子替換候選。完整見`TW_MARATHON_STATE.md`第396輪記錄、`TRIALS_LEDGER.md`#156、`TW_LEADS.md`#3。
+
+---
+
+## 2026-09-06T11:30+08:00 — 馬拉松第398輪：TW
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 02:30（round385，最舊，明確跳過信號維持有效）／TW 10:30（round396）／US 11:00（round397，最新）——依輪替選TW（較US舊）。`run_detached.py status`確認US軌`us_deep_dive_valuebm_clean_universe`（job`20260906-110113-735e`）本輪開工時仍`running`（約30~37分鐘/150分鐘timeout），heavy-job-slot持續佔用中，round396「下一輪接續(1)」原本設想的「投遞新重度工作」本輪無法做（submit遇running會被拒絕，exit 3）。
+
+本輪工作單位＝改做round396「下一輪接續(1)」括號內舉例的輕量診斷：`f_quality_roe_stability`VAL期逐年分解＋leave-one-year-out，比照`deep_dive_f_us_low_vol_val_year_breakdown.py`（`US_LEADS.md`#151/#152）方法論——單次真實回測（不含100次隨機控制組重跑），事前綁定判準寫在腳本docstring：任一leave-year-out annualized變號或跌破全期30%＝CONFIRMED（單一年份驅動），全部同號且保留≥60%＝REFUTED（廣泛存在），其餘PARTIAL。新增`deep_dive_f_quality_roe_stability_val_year_breakdown.py`，重用`deep_dive_f_quality_roe_stability.py`既有`_decile_legs_factor`/`TARGET_FACTOR`/`REBALANCE_DAYS`，不修改原腳本。
+
+**過程備註（誠實記錄，非隱藏）**：第一次嘗試前景執行設4分20秒逾時，仍卡在「Loading sample」階段未完成即被砍——判斷是與US軌背景job同時搶CPU導致載入變慢（`load_sample_with_factors()`要為300檔重算季度PIT因子，正常應該幾分鐘內完成）。放寬逾時到8分20秒後重跑，這次完整跑完，未見任何崩潰、錯誤或不完整輸出，只是耗時比`US_LEADS.md`#152對應診斷docstring預期的「幾分鐘」略長。
+
+**結果**：248/300可用。全VAL(2021-2024,1x cost) n_days=971，total_return=+4.91%，annualized=+1.25%（與round396#156的1x數字+0.98%~1.25%一致，複現無誤）。逐年拆解：2021 annualized=+15.88%、2022=**-8.21%**、2023=+16.15%、2024=**-11.34%**——**兩正兩負交替**。leave-one-year-out：leave-2021-out annualized=**-1.97%**（**變號**，same_sign=False）；leave-2022-out=+6.05%（同號，retained_fraction=4.84）；leave-2023-out=**-1.93%**（**變號**，same_sign=False）；leave-2024-out=+7.20%（同號，retained_fraction=5.75）。leave-2021-out與leave-2023-out兩項都觸發CONFIRMED判準。
+
+**判定**：**CONFIRMED（單一年份驅動、非全期廣泛存在）**。round396對#156的PASS判定（1b深挖關卡）因此**降級回EXPERIMENTAL**。核心改寫：round396把「VAL期同號但量級萎縮至約1/13」解讀為「訊號變弱但方向仍正確」的溫和訊息；本輪拆解後發現這個小額淨值其實是兩個好年份（2021/2023，各約+16%）跟兩個壞年份（2022/2024，各約-8%~-11%）幾乎完全抵銷後的殘餘量——拿掉任一個好年份，整個VAL期就轉為負報酬。這比「訊號變弱」嚴重得多：這代表VAL期本身可能不是一段有正向edge、只是量級較小的樣本外驗證期，而是「year-to-year方向不穩定、剛好四年加總算出來是正的」，統計上跟巧合淨額難以區分。**不否定TRAIN期結果**：本輪只測VAL期，TRAIN(2015-2020)由負轉正+7.25%~7.59%（#156）不受影響，`f_quality_roe_stability`的橫斷面排序/IC層級證據本身沒有被推翻，死的是「VAL期已具備策略層可信edge、接近可部署」這個更進一步的主張。這是`MARATHON_PROTOCOL.md`第2節「先前通過的判定重新檢查」條款的具體實踐——不因為round396已經寫了PASS就不敢回頭質疑，深挖關卡允許在補齊新診斷後修正先前判定。
+
+已寫入`TRIALS_LEDGER.md`#158（提醒：#157同日已被另一輪`hypothesis_queue`軌的平均成對相關係數試驗用掉，本筆改用#158，避免編號衝突）、`TW_LEADS.md`#3更新（判定欄改標降級、備註欄新增round398段落、下一步清單同步修正並移除已完成的「VAL期逐年分解」項目、新增「`portfolio_multifactor_v2`成分因子候選應擱置」建議）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用`SAMPLE_SIZE`已預先回補好的300檔快取）。
+
+**下一輪TW軌接續**：(1)TRAIN期beta+0.223比VAL期+0.027明顯偏離market-neutral的regime查證（尚未做，`TW_LEADS.md`#3下一步(b)）；(2)176/248（71%）因子值覆蓋率偏低原因查證（尚未做，同下一步(c)）；(3)`portfolio_multifactor_v2`納入`f_quality_roe_stability`一事本輪建議擱置，不列為近期優先方向；(4)若US軌`20260906-110113-735e`已於後續輪次完成，heavy-job-slot空出後評估TW軌是否有其他候選需要完整重度深挖（可先grep `TW_LEADS.md`找尚未走完GATE_SEQUENCE的CHEAP_PASS/EXPERIMENTAL候選）。完整見`TW_MARATHON_STATE.md`第398輪記錄、`TRIALS_LEDGER.md`#158、`TW_LEADS.md`#3、`deep_dive_f_quality_roe_stability_val_year_breakdown.py`（新增）、`data/deep_dive_f_quality_roe_stability_val_year_breakdown.csv`（新增）、`data/deep_dive_f_quality_roe_stability_val_leave_year_out.csv`（新增）。

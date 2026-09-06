@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-06T10:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 397 輪。最新一輪：第 397 輪 · 2026-09-06T11:00+08:00 · US（取鎖乾淨，投遞背景工作）**。**本輪工作單位**：`run_detached.py status`確認TW job`20260906-083408-d6ab`已`finished`，heavy-job-slot空出，依`US_MARATHON_STATE.md`round395「下一步(1)」投遞`us_deep_dive_valuebm_clean_universe`（job`20260906-110113-735e`，`--timeout-min 150`，實際輸出`data/deep_dive_f_us_value_bm_clean_universe.csv`）。session內`wait --max-min 4`確認仍正常運行未崩潰。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`/`US_LOG.md`第397輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 398 輪。最新一輪：第 398 輪 · 2026-09-06T11:30+08:00 · TW（取鎖乾淨）**。**本輪工作單位**：US背景job`20260906-110113-735e`仍`running`佔用heavy-job-slot，改做`f_quality_roe_stability`VAL期逐年分解＋leave-one-year-out（新增`deep_dive_f_quality_roe_stability_val_year_breakdown.py`）。結果：VAL期四年報酬正負交替，leave-2021-out/leave-2023-out annualized皆變號，判定CONFIRMED（單一年份驅動），round396的PASS（`TRIALS_LEDGER.md`#156）降級回EXPERIMENTAL，TRAIN期結果不受影響。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`第398輪記錄、`TRIALS_LEDGER.md`#158、`TW_LEADS.md`#3。
 
 **上一輪（第395輪，供對照）：第 395 輪 · 2026-09-06T10:00+08:00 · US**。TW背景job`20260906-083408-d6ab`仍佔用heavy-job-slot，US排定的重度工作無法投遞，改做`#151`的leave-top-N-out集中度檢查：排除own-VAL-return前17名（7%）極端贏家後，ann_return從+92.46%微升至+96.76%，**REFUTED集中度假說**，判定`#151`維持EXPERIMENTAL不變。已寫入`TRIALS_LEDGER.md`#154。完整見`US_MARATHON_STATE.md`第395輪記錄。
 
