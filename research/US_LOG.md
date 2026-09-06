@@ -1412,3 +1412,33 @@ job_id `20260906-110113-735e`，watchdog_pid 66640。**`--expect`參數打錯**�
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（乾淨宇宙SEC EDGAR快取已由round382背景job填滿，本次僅讀快取）。
 
 **下一輪接手**：`run_detached.py status`確認`20260906-110113-735e`是否`finished`；若是，讀`data/deep_dive_f_us_value_bm_clean_universe.csv`跟`data/jobs/20260906-110113-735e.log`，比照round387/392對`f_us_low_vol`因子的判讀方式（TRAIN/VAL percentile、beta方向、經濟解釋）寫入`TRIALS_LEDGER.md`+`US_LEADS.md`；若逾150分鐘timeout被砍，記錄`timeout`並評估是否需要拆解成更小工作單位重跑。完整見`US_MARATHON_STATE.md`/`REPORT.md`第397輪記錄。
+
+## 第400輪 2026-09-06T12:30+08:00
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：US 11:00（第397輪，最舊）／TW 11:30（第398輪）／FUT 12:00（第399輪，最新）——依輪替選US。
+
+`run_detached.py status`確認`20260906-110113-735e`（`us_deep_dive_valuebm_clean_universe`）本輪開工時仍`running`（89.8分鐘/150分鐘timeout），heavy-job-slot佔用中，故本輪先做不需要heavy-job-slot的輕量診斷。
+
+**工作單位(1)：接續`US_LEADS.md`#21「下一輪工作單位建議(2)」**——原構想是「打亂`f_us_low_vol`分數在同一VAL期同一池子跑一次的對照診斷」。重新檢視`deep_dive_f_us_low_vol.py::run_one()`後發現**不需要寫新程式碼**：其內建的100 draws隨機控制組（`_random_legs()`）本質上就是「在同一宇宙/同一期間/同一換倉機制下完全隨機挑股分兩組」，跟切斷分數-報酬因果關聯的診斷目的邏輯等價。直接重讀既有job`20260906-060311-6a01`（round387投遞/round392收成的`f_us_low_vol`乾淨宇宙1b深挖）的完整log：
+
+```
+TRAIN(2015-2020) random_control_median_equity: 1x=0.7060  2x=0.6161  3x=0.5376（皆淨損 -29.4%~-46.2%）
+VAL(2020-2024)   random_control_median_equity: 1x=0.7828  2x=0.7146  3x=0.6522（皆淨損 -21.7%~-34.8%）
+對照真實策略：VAL 1x net total_return=+1264.82%（`TRIALS_LEDGER.md`#151）
+```
+
+**結論：REFUTED**——「池子/期間本身讓任何長短倉都暴賺」這個最寬版本的懷疑②被否證，隨機腿版本在同一宇宙同一期間中位數是虧損，異常報酬跟`f_us_low_vol`具體排序方式本身高度綁定。誠實限制：`_random_legs()`是完全隨機挑股，非「打亂分數後仍照原規則排序」，兩者統計檢定力可能不同，更精確的窄版本診斷留給下一輪視需要再做。已寫入`TRIALS_LEDGER.md`#162、`US_LEADS.md`#21更新。零新增API呼叫，純讀既有log，未跑新回測，未干擾仍在跑的heavy job。
+
+**工作單位(2)：session過程中`20260906-110113-735e`剛好完成**（`finished, exit=0`，耗時93.5分鐘），依round397「下一輪接手」立即收成。讀`data/deep_dive_f_us_value_bm_clean_universe.csv`（注意：檔案存在repo根目錄`C:\alpha\alpha-app\data\`而非`research/data/`——`run_detached.py`執行時的cwd是`alpha-app`根目錄，`deep_dive_f_us_value_bm_clean_universe.py`裡的相對路徑`data/...`因此落到根目錄，跟`research/data/`下其他手動執行產生的檔案不同層，下一輪如果找不到檔案要記得檢查這裡）：
+
+```
+TRAIN(2015-2020) 1x/2x/3x: ann_return=+49.85%/+49.59%/+49.34%  beta=+0.169（三組一致）  alpha=+56.83%/+56.56%/+56.29%  random_pct=100.0
+VAL(2020-2024)   1x/2x/3x: ann_return=+142.25%/+141.87%/+141.48%  beta=-0.171（三組一致）  alpha=+162.77%/+162.34%/+161.92%  random_pct=100.0
+159/248可用，k=16/腿，TRAIN/VAL同號
+```
+
+判定`#20`（`f_us_value_bm`乾淨宇宙）比照`#151`同一套邏輯給**EXPERIMENTAL（非PASS）**：VAL期量級（141%+）比舊池子#17/#128（121%）更高，換乾淨宇宙沒有解決量級異常，反而更嚴重。
+
+**把(1)(2)放在一起看浮現的新模式**：同一份`us_stratified_universe_sample.csv`乾淨宇宙、同一VAL期(2020-2024)，兩個完全不同的因子（低波動、價值）都各自產生天文數字級正報酬（+90%+、+142%+），但完全隨機挑股卻是虧損。這排除了「因子構造本身有bug」或「舊池子熱門股選樣偏誤」這兩種先前懷疑的解釋（乾淨宇宙已經沒有選樣偏誤，構造用的是業界標準十分位多空），問題收斂為「這份乾淨宇宙在2020-2024可能存在極端的橫斷面報酬離散度，任何有效的排序方式（不論排序依據是什麼）都可能被這種離散度放大成誇張報酬」，這是比原本任何單一因子層級的懷疑都更根本的假說，需要下一輪查證（例如比較兩個因子在VAL期切出的long/short名單重疊度）。已寫入`TRIALS_LEDGER.md`#163、`US_LEADS.md`#20更新。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（純讀既有log/csv）。完整見`US_MARATHON_STATE.md`/`TRIALS_LEDGER.md`#162/#163第400輪記錄。
