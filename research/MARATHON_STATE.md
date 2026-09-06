@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T18:38+08:00**
+**最後更新：2026-09-06T19:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 406 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 406 輪 · 2026-09-06T18:38+08:00 · US（取鎖乾淨；上一cycle於18:25被25分鐘硬超時TIMEOUT砍掉，非卡住）**。**本輪工作單位**：三軌時間戳TW 17:31（round405，最新）／US 17:00（round404）／FUT 12:00（round399，依例外條款讓回TW/US）——選較舊的US。TW背景job`20260906-173133-fce9`（150分鐘timeout）本輪開工時仍`running`（59.7分鐘/150分鐘），heavy-job-slot佔用中，round404建議的換seed分層抽樣需新fetch須走`run_detached.py submit`（此時會被拒絕），改做原地可完成的組合層診斷，落實`MARATHON_PROTOCOL.md`2026-09-03主軸（組合策略層級：權重法迭代/下檔保護證明）。新增`deep_dive_us_value_bm_lowvol_combo.py`：對`f_us_value_bm`(#20)與`f_us_low_vol`(#21)做1/N等權z-score組合測試（事前綁定0.5/0.5無擬合權重），同159檔交集宇宙下兩因子各自單獨也重跑作對照，單次真實回測非100 draws重跑。**結果**：TRAIN期combo(+12.87%)明顯被稀釋（遠低於value_bm單獨+49.85%）；VAL期combo(+87.92%/beta-0.862)幾乎未被稀釋（未低於兩者最大值142.25%的50%），且beta被low_vol的極端負值(-0.954)拉走而非趨向市場中性。判定：兩因子維持EXPERIMENTAL不變（組合構造診斷非新cheap gate），建議現階段不納入`portfolio_multifactor_v2`成分候選。已寫入`TRIALS_LEDGER.md`#170、`US_LEADS.md`#20/#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫，原地執行約2分鐘（非重度工作，未搶heavy-job-slot）。詳見`US_MARATHON_STATE.md`第406輪記錄、`TRIALS_LEDGER.md`#170、`US_LEADS.md`#20/#21。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 407 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 407 輪 · 2026-09-06T19:00+08:00 · US（取鎖乾淨）**。**本輪工作單位**：TW背景job`20260906-173133-fce9`（150分鐘timeout）本輪開工時仍`running`（97.3分鐘/150分鐘），heavy-job-slot佔用中，改做US軌直接檢驗round404/406留下的「宇宙離散度」假說——新增`us_universe_dispersion_check.py`，比較乾淨分層抽樣宇宙(#20/#21用)與舊熱門股偏誤宇宙(#17/#128用)在TRAIN/VAL兩期的橫斷面annualized報酬離散度。**結果**：乾淨宇宙VAL/TRAIN std比值1.34x、舊宇宙1.59x，同量級；SPY自身年化波動率反而從18.42%降至16.54%。**判定：「宇宙離散度」最寬版本假說被REFUTED**——原始個股報酬離散度在VAL期沒有比TRAIN期誇張多少，不足以解釋#20/#21策略層100%+年化的量級差距。已寫入`TRIALS_LEDGER.md`#171、`US_LEADS.md`#20/#21更新。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫，原地執行約3分鐘（非重度工作，未搶heavy-job-slot）。下一步方向轉向策略構造機制本身（拆解long/short腿）。詳見`US_MARATHON_STATE.md`第407輪記錄、`TRIALS_LEDGER.md`#171、`US_LEADS.md`#20/#21。
 
 **心跳缺口補記（第405輪，TW軌）**：`TW_MARATHON_STATE.md`/`TW_LOG.md`/`REPORT.md`已有標記「第405輪」的TW軌內容（重投`tw_deep_dive_value_pe_cost_sensitivity_retry`，job`20260906-173133-fce9`，150分鐘timeout），但這份全局計數器當時未同步更新（同round342曾補齊過的同款缺口）——本輪已在上方把計數器同步推進至406，避免這個缺口被誤讀成「405輪沒發生過」。
 
