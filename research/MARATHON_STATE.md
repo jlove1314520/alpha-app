@@ -2,9 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-06T21:00+08:00**
+**最後更新：2026-09-06T21:34+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 411 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 411 輪 · 2026-09-06T21:00+08:00 · TW（取鎖乾淨）**。**本輪工作單位**：`HYPOTHESIS_QUEUE.md`#47（處置股解除後價格反轉）資料可行性查證，純資料源探測。四來源查證確認TWSE openapi（8筆/4個交易日）、TWSE舊版rwd端點（`date`參數無效，即時公告牆）、TPEx openapi（18筆/6個交易日）三者皆只回傳近期快照，FinMind`TaiwanStockDispositionSecuritiesPeriod`存在但需付費層級。**判定：FAIL（資料不可及，依#47事前綁定快殺標準）**——歷史深度遠不足支撐train/val分期。已寫入`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47（新增）、`HYPOTHESIS_QUEUE.md`#47最終判定、`TW_MARATHON_STATE.md`。佇列#1~47全數結案。`is_holdout_consumed()`開工/收工前皆確認`False`。全程僅4次唯讀GET請求，零回測零API額度消耗。詳見`TW_MARATHON_STATE.md`第411輪記錄、`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 412 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 412 輪 · 2026-09-06T21:34+08:00 · US（取鎖乾淨）**。**本輪工作單位**：執行round410「下一輪接手」選項(i)——對`f_us_value_bm`(#20)/`f_us_low_vol`(#21)VAL期短腿加價格下限篩選（$5/$1）重跑回測。**結果：REFUTES選項(i)**——用back-adjusted`adj_close`做價格門檻，未讓短腿報酬量級回落（low_vol floor=$5甚至未降反升54.2%）；追查發現常駐短腿ticker的`adj_close`會被未來反向分割回溯放大過去名目價格，篩選器對死亡螺旋股系統性失效，且確認FinMind資料集無原始未調整報價可用（資料源限制）。已寫入`TRIALS_LEDGER.md`#177、`US_LEADS.md`#20/#21、`US_MARATHON_STATE.md`第412輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`US_MARATHON_STATE.md`第412輪記錄、`TRIALS_LEDGER.md`#177。
+
+**上一輪（第411輪，TW軌）**：`HYPOTHESIS_QUEUE.md`#47（處置股解除後價格反轉）資料可行性查證，純資料源探測。四來源查證確認TWSE openapi（8筆/4個交易日）、TWSE舊版rwd端點（`date`參數無效，即時公告牆）、TPEx openapi（18筆/6個交易日）三者皆只回傳近期快照，FinMind`TaiwanStockDispositionSecuritiesPeriod`存在但需付費層級。**判定：FAIL（資料不可及，依#47事前綁定快殺標準）**——歷史深度遠不足支撐train/val分期。已寫入`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47（新增）、`HYPOTHESIS_QUEUE.md`#47最終判定、`TW_MARATHON_STATE.md`。佇列#1~47全數結案。詳見`TW_MARATHON_STATE.md`第411輪記錄、`TRIALS_LEDGER.md`#176、`STRATEGY_GRAVEYARD.md`#47。
 
 **心跳缺口補記（第405輪，TW軌）**：`TW_MARATHON_STATE.md`/`TW_LOG.md`/`REPORT.md`已有標記「第405輪」的TW軌內容（重投`tw_deep_dive_value_pe_cost_sensitivity_retry`，job`20260906-173133-fce9`，150分鐘timeout），但這份全局計數器當時未同步更新（同round342曾補齊過的同款缺口）——round406已把計數器同步推進至406。**第408輪（US軌）同款缺口**：`US_MARATHON_STATE.md`/`REPORT.md`已有標記「第408輪」內容（decile long/short腿拆解歸因），但這份全局計數器當時同樣未同步更新（停在407）——本輪（第409輪）已一併補上408與409，避免缺口被誤讀成「該輪沒發生過」。
 

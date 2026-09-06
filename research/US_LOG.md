@@ -1512,3 +1512,38 @@ VAL(2020-2024)   1x/2x/3x: ann_return=+142.25%/+141.87%/+141.48%  beta=-0.171（
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用round383/391/400/404/406/407/408已填滿的SEC EDGAR快取+價格快取），原地執行約2分鐘，未搶heavy-job-slot（本輪session內無其他重度工作在跑）。
 
 **下一輪接手**：這是round404起收斂鏈條（宇宙離散度→組合稀釋度→純比較宇宙分散度→多空腿拆解→本輪持股/價格查證）的終點診斷，下一步是具體可行動的驗證而非再排除：(i)對短腿加價格/流動性下限篩選（例如排除股價<$5或<$1的候選）重跑VAL期回測，看報酬量級是否顯著回落到合理範圍——若是，直接證實異常主要由不可行的做空標的貢獻；(ii)或用更寫實的做空成本模型（成本隨股價/流動性反向縮放，而非固定名目值）。完整見`TRIALS_LEDGER.md`#174、`US_LEADS.md`#20/#21、`us_short_leg_holdings_check.py`（新增，可重複執行）、`data/us_short_leg_holdings_summary.csv`（新增）、`data/us_short_leg_holdings_detail.csv`（新增）。
+
+## 第412輪（2026-09-06T21:34+08:00）
+
+取鎖乾淨（非陳舊鎖檔）。三軌時間戳：FUT 12:00（第399輪，依例外條款讓回TW/US，最舊，本輪不選FUT）／US 20:30（第410輪）／TW 21:00（第411輪，最新）——US比TW舊，選US。`run_detached.py status`確認heavy-job-slot空（0個running），無背景工作衝突。
+
+執行round410「下一輪接手」明列的選項(i)：對VAL期短腿加價格/流動性下限篩選（排除股價<$5或<$1候選）重跑回測，看報酬量級是否顯著回落到合理範圍。
+
+**本輪工作單位**：新增`us_short_leg_price_floor_check.py`，重用`deep_dive_us_value_bm_lowvol_combo.py`的`build_combo_universe()`/`_value_legs`/`_lowvol_legs`/`_zscore_cross_section()`（同round406-410一路沿用的159檔交集宇宙）與`deep_dive_us_value_bm_lowvol_leg_decomposition.py`的`run_decomposed()`（long/short腿分開track equity）。短腿選股邏輯改為：依z-score由低到高排序，跳過當日`adj_close`低於price_floor的候選（次低分數合格者遞補），直到湊滿k檔；長腿（top decile）不變。VAL期單次真實回測，1x成本，測試floor=$5/$1兩個門檻，零新增API呼叫。
+
+**結果**：
+
+- value_bm：baseline(round410無篩選) short_ann=+112.80%；floor=$5 short_ann=**+122.33%**（未降反升8.4%）；floor=$1 short_ann=+113.73%（幾乎不變）。長腿不受影響（+9.78%，同round408）。
+- low_vol：baseline short_ann=+75.91%；floor=$5 short_ann=**+117.04%**（未降反升54.2%）；floor=$1 short_ann=+80.33%（幾乎不變）。長腿不受影響（+4.00%）。
+
+**判定：REFUTES round410選項(i)**——用back-adjusted `adj_close`做價格門檻篩選，不但沒有讓短腿報酬量級回落到合理範圍，low_vol floor=$5甚至讓它更誇張（未降反升54.2%）。
+
+**追查原因**：抽查round410點名的常駐短腿ticker（`TRNR`/`MNTS`/`DVLT`/`WATT`/`WULF`）在VAL期整段的`adj_close`走勢：
+
+```
+MNTS: 2020-12-31 adj_close=$224,500.00  →  2024-12-31 adj_close=$141.61（區間內max=$342,750）
+DVLT: 2020-12-31 adj_close=$53,100.00   →  2024-12-31 adj_close=$2.05（區間內max=$75,150）
+TRNR: 2023-04-28 adj_close=$18,508,000.00（首筆有資料日期即已是天文數字）
+```
+
+back-adjusted價格會被「未來」的反向分割回溯放大過去的名目價格——對於後續會經歷反向分割的死亡螺旋股，VAL期中段/早期的back-adjusted價格常常被墊高到遠高於$5/$1門檻，導致篩選器完全篩不掉它們；因為篩選用「次低分數遞補」機制，某些floor版本反而換上量級更極端的替代候選，這就是floor=$5結果比baseline更高的原因。
+
+額外查證：比對`us_price_series()`快取的`close`欄位與`adj_close`欄位數值，`MNTS`/`DVLT`兩檔逐日完全相同。**確認FinMind`USStockPrice`資料集本身沒有保留未調整原始報價，`close`跟`adj_close`是同一份back-adjusted資料的重複欄位**——「改用raw close重做篩選」這條修法路線在現有資料源下不可行，是資料源限制，不是本輪查得不夠仔細。
+
+**不代表round410的(b)成本模型假說被推翻**——真實歷史報價（非back-adjusted）在這些股票的VAL早期很可能確實是個位數/十位數美元（`MNTS`/`DVLT`最終在2024年adj_close已降到個位數，配合已知多次reverse split，原始報價在分割前理應更低），只是本輪用back-adjusted價格去篩選這件事本身方法論上行不通，機制本身未被否證，反而因為找不到繞過的資料路徑而更加確立。
+
+已寫入`TRIALS_LEDGER.md`#177、`US_LEADS.md`#20/#21更新、`US_MARATHON_STATE.md`第412輪記錄。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用round383/391/400/404/406/407/408/410已填滿的SEC EDGAR快取+價格快取），原地執行約1分鐘，未搶heavy-job-slot（本輪session內無其他重度工作在跑）。
+
+**下一輪接手**：round410選項(i)已測試並REFUTED，且證實現有資料源無法用「真實原始報價」重做這個篩選。下一步應直接做round410選項(ii)：把做空成本模型（`validation/us_costs.py`的`short_round_trip_cost_pct()`）改成隨股價/流動性反向縮放，而非固定$50/100股名目值；或考慮`#20`/`#21`的VAL期空頭腿異常已經收斂到「資料/成本模型層級的已知限制（back-adjusted價格序列無法還原歷史真實報價，加上簡化的固定名目值做空成本模型）」這個具體、可寫進最終判定的結論，評估是否足以對這兩個因子下最終判定（維持EXPERIMENTAL，明確排除進`portfolio_multifactor_v2`成分候選），而非無限期在同一條線上繼續深挖。完整見`TRIALS_LEDGER.md`#177、`US_LEADS.md`#20/#21、`us_short_leg_price_floor_check.py`（新增，可重複執行）、`data/us_short_leg_price_floor_check.csv`（新增）。
