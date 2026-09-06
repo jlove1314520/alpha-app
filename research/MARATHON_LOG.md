@@ -1,5 +1,20 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 16:55 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+延續上一輪新增的#45（ADR溢價收斂）地基查證，完成(a)+部分(b)：新增
+`adr_convergence_probe.py`確認FinMind `USStockPrice`實際收錄
+TSM/UMC/CHT/ASX四檔且資料完整無缺口；換股比率查證意外發現一項重大
+結構性風險——ASX（日月光投控）2018年因合併矽品(SPIL)成立控股公司
+（1股ASE換0.5股新控股公司股份，新ADR比率2:1），用探查腳本實測
+FinMind的ASX價格序列在2018-04-17→04-18（-18.9%）與2018-05-01→05-02
+（-10.7%）出現兩次跳空，時點吻合合併生效期，確認這個ticker橫跨
+2311（日月光半導體工業）與3711（日月光投控）兩個不同法人實體，
+後續資料組裝必須明確切分、不能縫合成單一連續序列。TSM/UMC比率有
+中等信賴度網路二手佐證（皆約5:1、未查到變動記錄），CHT具體比率
+仍未查到官方數字。#45仍未結案、未進第1關cheap gate，下一輪待辦
+（SEC EDGAR查CHT F-6、定案ASX斷點處理方案、寫PIT對齊資料組裝
+腳本）已寫入`HYPOTHESIS_QUEUE.md`#45條目，現在排隊第一。
+
 ## 2026-09-06 16:26 — hypothesis_queue排程接續（取鎖LOCK_STALE(held by
 68460, 29.9 min old)-recovering，上一輪疑似中斷但`git status`乾淨、
 未留下未commit變更，判斷是取得鎖後尚未動作就中斷）：讀完
