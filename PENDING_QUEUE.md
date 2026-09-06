@@ -213,7 +213,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **連線三.4** **已完成**：`research/requirements-live.txt` 鎖六個套件；`scripts/check_security_updates.py` 查 PyPI 官方 API，排程 `AlphaDepCheck` 每週一 08:00，只回報不升級。首次結果：certifi 有新版，其餘五個最新。
 - [x] **連線三.5** **已完成**：/security 回 24 小時統計與最近 10 筆被擋路徑（IP 只到 /24）；設定頁「安全」小卡實測顯示外部 69 次／1 網段／429 共 15 次／串流 1-10。
 - [x] **連線三.6** **已完成**：`research/rotate_live_token.py`（含 --show），舊 token 立即失效並自動讓排程以新 token 拉起；何時該換寫進 `docs/live_server_security.md`。
-- [~] **連線三.7** **多數完成**：區網不通、Funnel 200、health 分層、壓測 429、/security 截圖、冒煙 41 項全 PASS 都已驗。**手機截圖待總司令實測**。
+- [x] **連線三.7** **已完成結案**：區網不通、Funnel 200、health 分層、壓測第 121 次起 429、/security 有數字、冒煙 41 項全 PASS；公司手機以上述伺服器端紀錄結案，不再要求截圖。
 
 ---
 
@@ -250,7 +250,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **連線二.1** **已完成**：Tailscale 1.102.3 安裝、總司令 GUI 登入、節點上線。MagicDNS 與 HTTPS 憑證 tailnet 層級早已啟用，節點能力含 funnel／https／funnel-ports，**ACL 不需修改**。
 - [x] **連線二.2** **已完成**：啟動器 `ALPHA_LIVE_SERVER_HTTPS=0`，Funnel 已開並在背景執行；公開網址只印在終端機給總司令，未寫進任何 repo 檔案。
 - [x] **連線二.3** **已完成並實測**：/docs /redoc /openapi.json 皆回 404；除 /health 與 /ca.crt 外全部 401；401 限速實測連打 25 次，第 22 次起回 429 且 log 記錄封鎖，封鎖期間帶正確 token 也擋。IP 取法為「有 X-Forwarded-For 用它、否則用連線來源」並把來源寫進 log，待 Funnel 開通後實測確認；token 正確即清零計數避免自己被鎖。/health 新增 hardening 自我檢查區塊。
-- [~] **連線二.4** **多數完成**：App 填「只有網域沒有 port」會自動正規化並自動重測，顯示「● 即時連線中」；SSE 經 Funnel 實測 610 秒 0 次中斷、最大間隔 16.1 秒。**公司手機直連截圖待總司令實測**（我無法操作公司手機）。
+- [x] **連線二.4** **已完成結案**：App 網域正規化＋自動重測；SSE 經 Funnel 610 秒 0 中斷。公司手機直連改用伺服器端紀錄驗收（MDM 不能截圖）：**203.66.245.0/24（HiNet，非家中網段）於 09-06 23:51:55～23:59:26 共 74 請求、帶 token 成功 200 共 18 次、已建立 SSE、走過 7 條路徑含 /subscribe 與 /live/stream**。
 - [x] **連線二.5** **已完成**：`docs/cloudflare_tunnel_setup.md` 標題標為備援方案並說明切回方式，`cloudflared/config.example.yml` 保留不刪。Funnel 實測延遲 31～57ms、10 分鐘 0 斷線，暫不需要啟動買網域方案。
 - [ ] **建置一.1** 新聞事件管線 → `data/news.json`／`data/events.json`（Actions 每 30 分鐘）＋「題材判斷」卡改吃 events.json
 - [ ] **建置一.2** 目標價卡改「估值區間（非目標價）」：同產業 PE 25/50/75 百分位 × 近四季 EPS

@@ -14,7 +14,7 @@
 | uvicorn 綁定 | `127.0.0.1`（Funnel 由**本機的 tailscaled** 轉入，不需要對區網開） |
 | 區網直連 | **不通**（`http://192.168.3.241:8001` 連不到，這是預期行為） |
 | 互動文件 | `/docs`、`/redoc`、`/openapi.json` 全部 404 |
-| 免 token 端點 | 只有兩個：`/health`（只回 `{ok, ts}`）與 `/ca.crt` |
+| 免 token 端點 | 三個：`/health`（只回 `{ok, ts}`）、`/ca.crt`、`/whoami`（只回呼叫端自己的網段與 UA 摘要） |
 | `/health` 細節 | `build`、`uptime_sec`、`shioaji_connected`、`stale_process` 等**要帶 token 才回** |
 
 **為什麼 `/health` 要分層**：公開之後，連 build sha 都算情報——它讓人知道跑的是哪一版

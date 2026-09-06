@@ -1178,17 +1178,21 @@ def _external_sources_detail(events: list[dict]) -> list[dict]:
 
 
 @app.get("/whoami")
-def whoami(request: Request, x_alpha_local_token: str | None = Header(default=None)):
-    """讓一支裝置留下「我連上了」的機器可查證據（2026-09-06）。
+def whoami(request: Request):
+    """讓一支裝置留下「我連上了」的機器可查證據。**不需要 token。**
 
-    背景：公司手機受 MDM 限制無法截圖，所以「手機截圖」不能當驗收條件。
-    改成用這個端點——總司令用公司手機開一次，伺服器就記下那個來源網段、
-    時間與 UA 摘要，之後在 `/security` 的 `external_sources_detail` 看得到。
+    2026-09-06 第一版要求帶 token，那是設計錯誤：這個端點存在的理由就是給
+    「受管制、不能截圖、不能用 curl、只能在瀏覽器打開網址」的裝置用，而瀏覽器
+    直接開網址時**沒有辦法自帶自訂標頭**，結果必定 401——等於做了一個給某種裝置
+    用的工具，卻要求那種裝置做不到的事。總司令實測直接踩到。
 
-    刻意只回 /24 網段與 UA 摘要，不回完整 IP 與完整 UA：驗收只需要知道
-    「是不是一個不同的、外部的、帶對 token 的裝置」，不需要留下更多。
+    為什麼免 token 是安全的：它只回**呼叫端自己的資訊**（來源 /24 網段、UA 摘要、
+    伺服器時間），不回傳伺服器的任何狀態、設定或資料，資訊層級跟 `/health` 的
+    `{ok, ts}` 相同。對方本來就知道自己的 IP 和 UA。
+
+    **不用查詢字串帶 token**（例如 `?token=…`）：那會讓 token 留在瀏覽器歷史、
+    分享連結、以及任何中間層的存取紀錄裡，比免 token 更糟。
     """
-    _check_token(x_alpha_local_token)
     key, src = _client_key(request)
     ua = request.headers.get("user-agent", "")
     # UA 摘要：只留平台關鍵字，不留完整字串（完整 UA 可用來指紋識別裝置）
