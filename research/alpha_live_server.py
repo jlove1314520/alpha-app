@@ -89,7 +89,7 @@ import time
 from pathlib import Path
 
 import uvicorn
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 
@@ -281,6 +281,43 @@ _req_hits: dict[str, list[float]] = {}
 # 安全事件（保留 24 小時）給 /security 用。只留必要欄位，IP 只留到 /24。
 SECURITY_RETENTION_SEC = 86400
 _sec_events: list[dict] = []
+# 2026-09-06：安全事件要落地，不能只放記憶體。
+# 原因很直接：總司令要用「伺服器端紀錄」當驗收證據（受 MDM 管制的公司手機截不了圖），
+# 但這支服務今天光是驗證發布紀律就重啟了十幾次，每重啟一次記憶體事件就歸零——
+# 那種證據沒有人能拿來證明任何事。改成 append-only 的 JSONL，啟動時讀回近 24 小時。
+# 檔案在 research/ 底下且已 gitignore，不會進 repo。
+SECURITY_LOG_PATH = Path(__file__).parent / ".security_events.jsonl"
+
+
+def _sec_load() -> None:
+    """啟動時讀回近 24 小時的事件。讀不到/壞掉就從空的開始，不能讓它擋住啟動。"""
+    if not SECURITY_LOG_PATH.exists():
+        return
+    cutoff = time.time() - SECURITY_RETENTION_SEC
+    kept = []
+    try:
+        for line in SECURITY_LOG_PATH.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(e, dict) and e.get("ts", 0) >= cutoff:
+                kept.append(e)
+    except OSError as e:
+        print(f"  [security] 讀不到事件紀錄，從空的開始：{type(e).__name__}: {e}", flush=True)
+        return
+    _sec_events.extend(kept[-5000:])
+    # 順手把過期的行砍掉，檔案不會無限長大
+    try:
+        SECURITY_LOG_PATH.write_text(
+            "".join(json.dumps(e, ensure_ascii=False) + chr(10) for e in _sec_events),
+            encoding="utf-8")
+    except OSError:
+        pass
+    print(f"  [security] 讀回 {len(_sec_events)} 筆近 24 小時事件", flush=True)
 # SSE 同時連線數上限：長連線會一直佔著 worker，沒有上限的話 50 個並行額度
 # 很快就被 SSE 吃光，其他端點就會全部排隊。
 SSE_MAX_CONNECTIONS = 10
@@ -295,9 +332,26 @@ def _ip_prefix(ip: str) -> str:
     return "非IPv4"
 
 
-def _sec_record(kind: str, key: str, path: str) -> None:
+def _sec_record(kind: str, key: str, path: str,
+                status: int | None = None, authed: bool = False) -> None:
+    """記一筆安全事件。
+
+    2026-09-06（驗收改機器可查）補上 `status` 與 `authed`：原本只記路徑，結果
+    「有沒有一個外部來源帶著正確 token 成功拿到資料」這種問題答不出來——而那正是
+    「公司手機連上了沒」的機器可查證據。受管制裝置（MDM）截不了圖，就必須靠這個。
+    """
     now = time.time()
-    _sec_events.append({"ts": now, "kind": kind, "ip24": _ip_prefix(key), "path": path[:80]})
+    ev = {"ts": now, "kind": kind, "ip24": _ip_prefix(key), "path": path[:80],
+          "status": status, "authed": bool(authed)}
+    _sec_events.append(ev)
+    # 只落地「值得當證據」的事件：帶 token 成功的、以及被擋下來的。
+    # 一般的 404 掃描噪音不寫檔（一天可能好幾千筆，會把真正有意義的紀錄淹掉）。
+    if ev["authed"] or kind != "hit":
+        try:
+            with SECURITY_LOG_PATH.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(ev, ensure_ascii=False) + chr(10))
+        except OSError:
+            pass  # 寫不進去不能影響服務；記憶體那份還在
     if len(_sec_events) > 5000:  # 保險絲：任何情況下都不讓它無限長大
         cutoff = now - SECURITY_RETENTION_SEC
         _sec_events[:] = [e for e in _sec_events if e["ts"] >= cutoff][-5000:]
@@ -396,9 +450,10 @@ async def _auth_rate_limit(request, call_next):
             f"請求過於頻繁（每分鐘上限 {RATE_LIMIT_MAX}），請稍後再試", 30)
 
     resp = await call_next(request)
-    _sec_record("hit", key, path)
+    authed = request.headers.get("x-alpha-local-token") == LOCAL_TOKEN
+    _sec_record("hit", key, path, resp.status_code, authed)
     if resp.status_code == 401:
-        _sec_record("401", key, path)
+        _sec_record("401", key, path, 401, False)
         note_auth_fail(request)
     elif resp.status_code < 400:
         note_auth_ok(request)
@@ -517,6 +572,7 @@ async def _notify_all() -> None:
 async def _start_tick_ingress() -> None:
     MEM.cond = asyncio.Condition()
     MEM.seed_from_hot_file()
+    _sec_load()  # 2026-09-06：讀回近 24 小時安全事件，讓驗收證據跨重啟存活
     loop = asyncio.get_event_loop()
     try:
         await loop.create_datagram_endpoint(_TickIngress, local_addr=(TICK_INGRESS_HOST, TICK_INGRESS_PORT))
@@ -1080,11 +1136,72 @@ def security(x_alpha_local_token: str | None = Header(default=None)):
                    "auth_fail_per_min": AUTH_FAIL_MAX,
                    "ban_minutes": AUTH_BAN_SEC // 60,
                    "sse_max": SSE_MAX_CONNECTIONS},
+        # 2026-09-06 外部來源明細。這是「公司手機有沒有連上」的機器可查證據：
+        # 一個非家中網段、帶正確 token、拿到 200、而且建立過 SSE 的來源，
+        # 就是一支真的連上的手機。受 MDM 管制的裝置截不了圖，只能靠這個。
+        "external_sources_detail": _external_sources_detail(events),
         "recent_blocked": [
             {"at": datetime.fromtimestamp(e["ts"], TW_TZ).isoformat(),
              "kind": e["kind"], "source": e["ip24"], "path": e["path"]}
             for e in blocked[-10:][::-1]
         ],
+    }
+
+
+def _external_sources_detail(events: list[dict]) -> list[dict]:
+    by: dict[str, dict] = {}
+    for e in events:
+        if e["kind"] != "hit" or e["ip24"].startswith("127."):
+            continue
+        d = by.setdefault(e["ip24"], {"source": e["ip24"], "first_at": e["ts"], "last_at": e["ts"],
+                                      "requests": 0, "authed_200": 0, "sse": False, "paths": set()})
+        d["first_at"] = min(d["first_at"], e["ts"])
+        d["last_at"] = max(d["last_at"], e["ts"])
+        d["requests"] += 1
+        if e.get("authed") and e.get("status") == 200:
+            d["authed_200"] += 1
+        if e["path"].startswith("/live/stream") and e.get("status") == 200:
+            d["sse"] = True
+        d["paths"].add(e["path"])
+    out = []
+    for d in sorted(by.values(), key=lambda x: -x["authed_200"]):
+        out.append({
+            "source": d["source"],
+            "first_at": datetime.fromtimestamp(d["first_at"], TW_TZ).isoformat(),
+            "last_at": datetime.fromtimestamp(d["last_at"], TW_TZ).isoformat(),
+            "requests": d["requests"],
+            "authed_200": d["authed_200"],
+            "sse_established": d["sse"],
+            "distinct_paths": len(d["paths"]),
+        })
+    return out
+
+
+@app.get("/whoami")
+def whoami(request: Request, x_alpha_local_token: str | None = Header(default=None)):
+    """讓一支裝置留下「我連上了」的機器可查證據（2026-09-06）。
+
+    背景：公司手機受 MDM 限制無法截圖，所以「手機截圖」不能當驗收條件。
+    改成用這個端點——總司令用公司手機開一次，伺服器就記下那個來源網段、
+    時間與 UA 摘要，之後在 `/security` 的 `external_sources_detail` 看得到。
+
+    刻意只回 /24 網段與 UA 摘要，不回完整 IP 與完整 UA：驗收只需要知道
+    「是不是一個不同的、外部的、帶對 token 的裝置」，不需要留下更多。
+    """
+    _check_token(x_alpha_local_token)
+    key, src = _client_key(request)
+    ua = request.headers.get("user-agent", "")
+    # UA 摘要：只留平台關鍵字，不留完整字串（完整 UA 可用來指紋識別裝置）
+    marks = [m for m in ("iPhone", "iPad", "Android", "Macintosh", "Windows",
+                         "CriOS", "Safari", "Chrome", "Firefox", "Edg") if m in ua]
+    return {
+        "ok": True,
+        "your_source": _ip_prefix(key),
+        "source_from": src,
+        "user_agent_summary": "／".join(marks) if marks else "（無法辨識）",
+        "server_time": datetime.now(TW_TZ).isoformat(),
+        "note": "這次連線已記入 /security 的 external_sources_detail，"
+                "可作為「這台裝置成功連上」的證據，不需要截圖",
     }
 
 
