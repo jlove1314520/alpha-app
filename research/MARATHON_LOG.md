@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06 17:31 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
+延續#45（ADR溢價收斂）地基建置：(1)用SEC EDGAR官方FY2006 20-F逐字確認
+CHT比率1ADS=10股（"each of which represents ten of our common shares"）。
+(2)新增`adr_premium_assembly.py`完成PIT對齊資料組裝——merge_asof
+backward+allow_exact_matches=False避免美股ADR時區領先造成的未來函數，
+FX用spot_sell同日對齊。**意外發現重大異常並已修正**：初版用UMC/CHT
+現行比率(5:1/10:1)貫穿2006年至今算出的premium，在2006~2010年持續偏高
+（UMC年均34~54%、CHT年均15~37%），2010~2011之交驟降到趨近0%並穩定至今，
+型態跟全程穩定的TSM(2~8%)明顯不同；WebSearch查到UMC存管契約日期為
+"October 21, 2009"，暗示比率極可能在該時點附近變更過，CHT同時間出現
+幾乎相同斷點並非巧合。保守處置：UMC/CHT起始日改為2011-01-01（排除有
+疑慮的2006-2010），TSM/ASX不變，重跑後四檔premium量級皆合理（TSM
+mean+5.69%、UMC+0.08%、CHT+0.05%、ASX+2.30%，皆遠低於50%量級檢查
+門檻）。已輸出`data/adr_premium_aligned.csv`(13144列)。**#45下一輪待辦**：
+(1)完成PIT對齊已達成，(2)下一步進第1關cheap gate（時序相關性或事件式
+統計檢定，須先決定用premium連續值或收斂速度當訊號）；若未來需要UMC/CHT
+2006-2010歷史，須先查到官方比率變更公告與確切生效日期，本輪未深入（時間
+/預算考量），現在排隊第一，未結案。
+
 ## 2026-09-06 16:55 — hypothesis_queue排程接續（正常取鎖LOCK_ACQUIRED）：
 延續上一輪新增的#45（ADR溢價收斂）地基查證，完成(a)+部分(b)：新增
 `adr_convergence_probe.py`確認FinMind `USStockPrice`實際收錄
