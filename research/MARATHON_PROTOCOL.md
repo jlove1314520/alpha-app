@@ -162,6 +162,13 @@ finally 只釋放 cycle_id 相符的鎖（重測確認：不相符時 log 寫 `l
 - 校正方法改成 **Benjamini-Hochberg (BH) FDR 控制，q=0.10**（不是 Bonferroni），理由：Bonferroni 隨試驗數線性、無上限地墊高門檻，跑得越久越不可能通過。
 - **三軌（TW/US/FUT）各自獨立的假設家族**，不跨軌共用同一個分母——FUT 軌的失敗不該拖累 TW 軌因子的通過門檻，兩者沒有共享的統計邏輯關聯。
 - **`TRIALS_LEDGER.md`**（`research/` 根目錄，跨三軌共用，append-only）：檔案本身不拆分、繼續當作全部試驗的歷史總帳，每測一個假說（不管過還是沒過便宜關卡）都照舊加一列。**套用 FDR 校正時，先用「軌道」欄位分組，各自排序、各自算校正後結果，不是對整份表一次算。**
+- **登記強制化（2026-09-07 新增，Cybex.債務3）**：`TRIALS_LEDGER.md` 的**唯一合法寫入口是
+  `research/trial_registry.py::register_trial()`**，不要再手工貼一列。
+  **未經登記函式登記的候選判定一律無效——不得寫進 `*_LEADS.md`、不得提請審核、不得上線**
+  （`CLAUDE.md` 七之三同一條規則的執行機制）。理由不是形式主義：手工登記已經造成
+  #94／#149 兩組撞號、21 列沒有留下可比較的統計量、以及分母被寫死成 37 三件實害，
+  完整證據見 `REGISTRATION_COVERAGE.md`。登記函式會拒收缺統計量、缺輪次、判定值域不對的列，
+  並同時寫一份機器可讀的 `research/TRIALS_REGISTRY.jsonl`，編號由帳本推導不由呼叫端指定。
 - **hash-lock 預先綁定通過標準**的紀律不變：做檢定前先把判定門檻寫死存證，看到結果才回頭調門檻絕對不行，這條沒有因為換了校正方法而放寬。
 - 每次深挖（1b）判定 `PASS`/`EXPERIMENTAL` 之前，**先用當下該軌道的累積 FDR 門檻重新檢查**這個候選的原始便宜關卡數字是否還站得住腳——早期用較寬鬆門檻通過便宜關卡的候選，後來同軌道測試數變多、門檻墊高了，可能已經不夠格進深挖，這種情況要老實記錄「原本通過，重新校正後不再確定」，不能悄悄跳過這個降級。
 
@@ -249,7 +256,8 @@ finally 只釋放 cycle_id 相符的鎖（重測確認：不相符時 log 寫 `l
 
 1. `is_holdout_consumed()` 是 `False`。
 2. 這一輪做的事已經寫進對應軌的 log（append-only，仿照 `REPORT.md` 的精神）跟 state 檔案（覆寫式，只描述「現在」）。
-3. 如果有新的候選判定（無論 PASS/FAIL/EXPERIMENTAL/CHEAP_PASS），`TRIALS_LEDGER.md` 跟對應軌 `_LEADS.md` 都要更新。
+3. 如果有新的候選判定（無論 PASS/FAIL/EXPERIMENTAL/CHEAP_PASS），**先呼叫 `research/trial_registry.py::register_trial()` 登記**（不要手工貼一列進 `TRIALS_LEDGER.md`），再更新對應軌 `_LEADS.md`。
+3b. **跑 `python research/trial_registry.py --check`，回傳非 0 就不准 commit**（2026-09-07 新增，Cybex.債務3）。它會擋下「有判定卻沒有有效帳本登記」的列——依第 2 節，那種判定一律無效。
 4. **寫心跳（2026-08-23 新增，使用者要求，硬性步驟，不能省略）：** 讀 `MARATHON_STATE.md` 最上面「馬拉松全局輪次計數器」那行目前的數字 N，在 `research/REPORT.md` 最上面「心跳記錄」區塊（第一筆歷史條目的正上方，`---` 分隔線下面）插入一筆新的 `## 第 N+1 輪 · <這輪實際的日期時間，用系統時間，不要憑印象> · <TW/US/FUT> · <這輪做了什麼，一句話> · <結果/判定，一句話>`，然後把 `MARATHON_STATE.md` 那行的數字改成 N+1。**不管這輪做了什麼（就算只是回補了幾檔宇宙資料、或第 0 節判定要換軌但沒做出實質進展），都要留這一筆**——這是唯一能讓使用者不用逐一比對 `git log`/`marathon_cycle.log` 就一眼看出「馬拉松最近有沒有在跑」的機制。如果第 0 節第 2 步偵測到 `LOCK_STALE`，這筆心跳的「結果/判定」欄要順便寫「（偵測到上一輪陳舊鎖檔，上一輪疑似失敗）」。
 5. `git status` 確認要 commit 的檔案清單合理（不要不小心帶到 `research/data/` 底下的東西，那是 gitignore 的；`REPORT.md`／`MARATHON_STATE.md` 這兩個心跳相關的檔案一定要在這次 commit 裡）。
 6. `git add`（限定檔案）→ `git commit`（訊息簡短說明這輪做了什麼）→ `git fetch origin main` → `git rebase origin/main` → `git push`（見第 4 節新增的 push 前 fetch+rebase 規則跟 push 前後留 log 的規則，這裡不重複細節）。push 失敗時參考第 4 節的重試規則。

@@ -87,6 +87,19 @@ def main() -> None:
         i = t.find("## 結論")
         print(t[i:].rstrip() if i >= 0 else t[-4000:])
 
+    _section("7. 試驗登記閘門（trial_registry --check）")
+    # 印在開工簡報裡，讓「未登記的判定一律無效」這條規則每輪都看得到，
+    # 而不是只寫在協定裡靠人記得（2026-09-07 Cybex.債務3）。
+    # 這裡刻意不讓它中斷簡報：閘門的強制點在收工前那一次 --check，不是開工這一次。
+    try:
+        rc = subprocess.run([sys.executable, str(RESEARCH / "trial_registry.py"), "--check"],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace")
+        print(rc.stdout.rstrip() or rc.stderr.rstrip())
+        print(">>> 這一輪若有任何候選判定，先 `register_trial()` 登記再寫進 *_LEADS.md；"
+              "收工前再跑一次 `python research/trial_registry.py --check`，非 0 不准 commit。")
+    except Exception as e:  # noqa: BLE001 — 簡報不能因為子程序失敗就整份不能看
+        print(f"（登記閘門執行失敗，不中斷簡報：{e!r}）")
+
     _section("結束：需要細節請 grep，不要 cat 整份 REPORT/HYPOTHESIS_QUEUE/TRIALS_LEDGER")
 
 

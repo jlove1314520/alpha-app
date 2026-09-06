@@ -16,6 +16,57 @@
 
 ---
 
+## 2026-09-07 03:35（驗證帽）— Cybex.債務3：試驗登記強制化＋登記覆蓋率回報
+
+**做了什麼**
+
+1. **登記強制化**（`research/trial_registry.py`，新增）：`TRIALS_LEDGER.md` 從今天起只能
+   透過 `register_trial()` 寫入，不再手工貼列。函式會拒收「缺可比較統計量」「缺輪次也
+   沒說明」「判定不在值域」「必填留空」的登記，編號**由帳本現況推導、呼叫端不得指定**，
+   並同時寫一份版控的機器可讀 `research/TRIALS_REGISTRY.jsonl`。
+   `--check` 是稽核閘門：2026-09-07 起有判定卻沒有有效帳本登記的列，回 exit 1。
+   `assert_registered()` 給「寫進 LEADS 之前」擋關用。
+2. **規則落地到會被讀到的地方**（不是只寫在一份文件裡）：`MARATHON_PROTOCOL.md` 第 2 節
+   （登記強制化條文）與第 6 節收工清單第 3／3b 項（先登記再寫 LEADS、`--check` 非 0 不准
+   commit）、`HYPOTHESIS_QUEUE_PROTOCOL.md`、`TRIALS_LEDGER.md` 檔頭，另外掛進
+   `marathon_brief.py` 第 7 節——**每輪開工的簡報都會印出登記狀態**，不靠人記得。
+3. **回報「第幾輪之後沒有結構化登記」**（`research/registration_coverage_audit.py` →
+   `research/REGISTRATION_COVERAGE.md`，可重複執行）。
+
+**回報結果（誠實版，分三層講）**
+
+| 層次 | 定義 | 涵蓋率 |
+|---|---|---|
+| L1 結構化登記 | 有呼叫登記函式 | **0 / 103（0%）** |
+| L2 內容登記 | 帳本找得到那一輪測的東西 | 103 / 103（100%） |
+| L3 輪次可追溯 | 帳本那一列說得出自己是第幾輪 | 51 / 103（49.5%） |
+
+**答案不是「第 N 輪之後斷掉」，是從第 26 輪到第 422 輪從來沒有過結構化登記**——全部是
+手工編輯 markdown，登記函式今天才存在。放寬到 L2 反而是滿分（沒有整段漏記）；真正破的是
+**L3：第 334 輪是轉折點**（之前 53 個判定輪只有 24.5% 寫得出輪次，之後 50 個是 76.0%）。
+
+**手工登記已經造成的實害（不是理論風險）**：#94 與 #149 兩組編號各被兩筆不同試驗用掉、
+188 列裡有 21 列沒有任何可比較的統計量、hypothesis_queue 軌 153 則 log 零輪次編號。
+
+**另外發現一件事，本輪刻意沒有動**：多重比較校正分母的來源 `selection_bias_ledger.py`
+目前解析出 221 列，其中 **33 列是 2026-08-25「FDR 重新評分對照表」的重新評分列**（那張表
+自己就寫明「不是新證據、沒有重新抓資料、沒有重新跑控制組」），真正的試驗列是 188 列。
+改分母會直接改動 Cowork.債務2 已完成的重評結論，屬研究結論層級變更，依「提案先於執行」
+留給總司令／債務2.4 裁示，這裡只記錄差異與兩邊算法。
+
+**驗證**：`trial_registry.py --self-test` 全過（含在暫存目錄跑完整寫入路徑，正式帳本未被
+碰到）、`--check` PASS、`node scripts/smoke_test.mjs` **43 項全部通過**。
+
+**影響檔案**：`research/trial_registry.py`（新）、`research/registration_coverage_audit.py`（新）、
+`research/REGISTRATION_COVERAGE.md`（新）、`research/TRIALS_REGISTRY.jsonl`（新，目前 0 筆）、
+`research/marathon_brief.py`、`research/MARATHON_PROTOCOL.md`、
+`research/HYPOTHESIS_QUEUE_PROTOCOL.md`、`research/TRIALS_LEDGER.md`（只加檔頭規則，未動任何歷史列）、
+`PENDING_QUEUE.md`。
+
+**下一步**：權威清單下一項 Cybex.債務4（控制組標準升級）。
+
+---
+
 ## 2026-09-07 01:05（開發帽）— 資料一.3：tick 落地的磁碟保護（20GB 上限＋容量估算）
 
 **容量估算回報（總司令要的第一件事）**

@@ -115,7 +115,12 @@ percentile 遠低於門檻）、已被控制組拆穿之偽影家族換皮——
    - `research/HYPOTHESIS_QUEUE.md` 該條目的「狀態」欄，**以及**「排隊順序
      總結」章節跟任何舊的「佇列狀態：接續#N」提示字——這些地方沒同步更新
      就等於留了地雷給下一輪誤判。
-   - `research/TRIALS_LEDGER.md` 新增一列。
+   - `research/TRIALS_LEDGER.md` 新增一列，**只能透過
+     `research/trial_registry.py::register_trial(track="hypothesis_queue", ...)` 登記**，
+     不要手工貼（2026-09-07 Cybex.債務3：未經登記函式的判定一律無效，不得寫進 LEADS、
+     不得提請審核）。收工前跑 `python research/trial_registry.py --check`，非 0 不准 commit。
+     這一軌的 log 沒有輪次編號，所以登記時用 `round_note=` 寫清楚是哪一次排程接續
+     （例如 `round_note="hypothesis_queue 排程接續 2026-09-07T03:20"`）。
    - FAIL → `research/STRATEGY_GRAVEYARD.md`（誠實記具體死因 + 明確寫「不
      泛化成XXX沒用」聲明，跟 CTA/PEAD 兩則的寫法同一個標準）。
    - PASS → 進監控台：跑 `python research/generate_strategies_json.py`

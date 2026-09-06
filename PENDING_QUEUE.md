@@ -312,7 +312,24 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **Cybex.鐵律** PORTING_HANDBOOK 第 10 節併入 CLAUDE.md 七之三，並補台股五個特有偽影家族（存活者偏誤標為最貴）
 - [x] **Cybex.債務1** **已完成**：`research/selection_bias_audit.py`（Bonferroni＋DSR，含 Acklam 近似、不需 scipy，只抄方法不抄參數）。帳本可解析 217 列／最大編號 182／裁示所述 588，取最嚴 N=588（門檻 99.9915 百分位）：標記通過 73 筆中**只有 9 筆留有可比較統計量**，**撐住 4、倒下 5**（f_revenue_surprise 99.0、weinstein_stage2_unbiased 99.5、f_value_pb 99.9、f_value_pe 96.7、f_quality_roe_stability 99.9 全部倒下；f_eps_growth／f_eps_surprise／f_low_vol／score_topn_v1 撐住）。**其餘 64 筆當初就沒留下足以判斷的證據，既不能算撐住也不能算倒下**。DSR 算不出來（帳本只有 1 筆記到 Sharpe，缺試驗間 SR 變異數）——不編數字。
 - [!] **Cybex.債務2** holdout 洩漏自查＋資料載入函式改 `allow_holdout=False` 預設　**⛔ 自走中止（2026-09-07 01:46）**：涉及不可逆動作，依 CLAUDE.md 必須先問過總司令
-- [ ] **Cybex.債務3** 登記強制化＋回報第幾輪之後沒有結構化登記
+- [x] **Cybex.債務3** **已完成**（2026-09-07 開發佇列自走輪）：
+  **(一) 登記強制化**——`research/trial_registry.py`（新增）是 `TRIALS_LEDGER.md` 唯一合法寫入口：
+  `register_trial()` 編號由帳本推導（呼叫端不得指定，撞號在源頭消失）、拒收缺統計量／缺輪次／
+  判定不在值域／必填留空的列，同時寫一份版控的機器可讀 `research/TRIALS_REGISTRY.jsonl`；
+  `assert_registered()` 供寫進 LEADS 前擋關；`--check` 是稽核閘門（2026-09-07 起的判定沒有有效
+  帳本登記就回 exit 1）。規則寫進 `MARATHON_PROTOCOL.md` 第2節與第6節(3/3b)、
+  `HYPOTHESIS_QUEUE_PROTOCOL.md`、`TRIALS_LEDGER.md` 檔頭，並掛進 `marathon_brief.py` 第7節
+  （每輪開工都看得到，不靠人記得）。
+  **(二) 回報**——`research/registration_coverage_audit.py`（新增）→ `research/REGISTRATION_COVERAGE.md`：
+  **答案不是「第 N 輪之後斷掉」，是從第 26 輪到第 422 輪從來沒有過結構化登記（L1＝0/103），今天才開始**；
+  分層看：L2 內容登記 103/103（100%，帳本沒有整段漏記）、**L3 輪次可追溯只有 51/103（49.5%），
+  轉折點在第 334 輪**（之前 24.5% → 之後 76.0%）。已造成的實害：#94/#149 兩組撞號、
+  21/188 列沒有可比較統計量、hypothesis_queue 軌 153 則 log 零輪次編號。
+  **另發現分母口徑差異（未擅自更動）**：校正分母來源 `selection_bias_ledger.py` 目前算 221 列，
+  其中 33 列是 2026-08-25「FDR 重新評分對照表」的重新評分列（不是新試驗），真正試驗列 188 列——
+  改分母會動到 Cowork.債務2 已完成的結論，留給總司令/債務2.4 裁示。
+  **證據**：`--self-test` 全過（含暫存目錄的完整寫入路徑測試）、`--check` PASS、
+  `node scripts/smoke_test.mjs` 43 項全部通過。
 - [ ] **Cybex.債務4** 控制組標準升級（20/20 或超過最大值、控制組參數要掃、選點事前定義）
 - [ ] **Cybex.債務5** 相位敏感度：週/月頻換股回測平移相位重跑，回報跨相位全距
 - [ ] **Cybex.#53** 全市場報酬離散度速度（水位版 vs 速度版對照）
