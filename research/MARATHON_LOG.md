@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-07 01:26 hypothesis_queue排程接續 — #49第6關逐年一致性，
+已結案：**FAIL**。依上一輪建議改道跳過gate2 placebo，直接對gate1已
+CHEAP_PASS的overnight段（TAIEX open切分）做逐年一致性檢驗（新增
+`overnight_intraday_gate6_consistency.py`），事前綁定門檻沿用#29/#34
+同一把尺（同號年數占比>=5/6=83.3%，TRAIN/VAL兩窗口各自獨立要求通過）。
+**結果**：TRAIN（2010-2020共11年）11/11年同號=100.0%通過；VAL
+（2021-2024共4年）僅3/4年同號=75.0%（2022年overnight轉負-3.46%，
+全球股市系統性下跌年），未達83.3%門檻（N=4等同要求4/4零容錯），未
+通過。依事前綁定不移動門柱鐵律判**FAIL**，不再回頭補做gate2，#49
+正式結案。完整見`HYPOTHESIS_QUEUE.md`#49「最終判定」段落、
+`STRATEGY_GRAVEYARD.md`#49、`TRIALS_LEDGER.md`#184。
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
+（複用round180已快取的`^TWII`資料）。**佇列#1~49全數結案。依
+2026-09-07轉向裁示，舊方向不再新增假設**，已在`HYPOTHESIS_QUEUE.md`
+記下一輪指引（先查證#50前置依賴「資料一逐筆tick落地」是否已累積
+足夠交易日，未足則查#51是否能先開跑，不跳過排序直接挑#52）——本輪
+只做完#49收尾這一個有界工作單位，未擅自開始#50/#51查證，留給下一輪。
+
 ## 2026-09-07 hypothesis_queue排程接續 — #49第2關placebo設計，仍未
 結案（非PASS/FAIL）。三來源查證確認TRAIN期(2015-2020)無法取得TAIEX
 盤中分鐘/tick價格資料（yfinance回溯上限1m~8天/5m~60天/60m~730天皆

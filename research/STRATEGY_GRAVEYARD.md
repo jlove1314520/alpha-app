@@ -1935,3 +1935,65 @@ Pledge Ratio — FAIL（2026-09-06，第1關cheap gate未過）
   `data/irb130_pledge_signal_panel.csv`（新增）。全程零新增FinMind
   額度消耗（複用既有`adjusted_price_series`快取+上一輪已回補的
   `irb130_pledge_combined.csv`），原地執行約2分鐘。
+
+## #49 日內／隔夜報酬結構分解 Overnight vs Intraday Return Decomposition — FAIL（2026-09-07，第6關逐年一致性未過）
+
+- **經濟機制**：第十一種機制分類（交易時段報酬結構分解，跟②timing/
+  exposure overlay的差異是完全不依賴任何外部regime訊號，是每個交易日
+  都相同的結構性時段切分）。假說主張台股TAIEX指數層級，報酬在「收盤到
+  隔天開盤（overnight）」與「開盤到當天收盤（intraday）」兩段之間分布
+  不對稱，對應美股文獻（Lou, Polk & Skouras 2019 JFE「A Tug of War」；
+  AQR/Cliff Asness多次引用的S&P500隔夜/盤中報酬不對稱現象）。
+- **第1關cheap gate（`overnight_intraday_decomposition_gate.py`）**：
+  CHEAP_PASS——TAIEX(^TWII)逐日拆解overnight_ret=open_t/close_{t-1}-1、
+  intraday_ret=close_t/open_t-1，用log報酬做exact可加性分解。
+  overnight段TRAIN(<=2020-12-31,n=2694) mean=+0.0788%/日(p=0.0000)、
+  log貢獻占比=+356.2%；VAL(2021~2024,n=969) mean=+0.0552%/日
+  (p=0.0018)、log貢獻占比=+114.6%，兩期同號、皆顯著、皆遠偏離50%，
+  跟美股文獻方向一致。intraday段VAL期不顯著(p=0.8954)未過，依判準
+  只需其中一段通過即CHEAP_PASS，overnight段乾淨通過。見
+  `TRIALS_LEDGER.md`#180。
+- **第2關placebo（連續兩輪嘗試皆卡在方法論死胡同，非訊號被推翻）**：
+  (a) 「隨機時刻切分」需要盤中分鐘/tick級價格路徑，三來源查證
+  （yfinance分鐘K回溯不足、FinMind免費層無盤中1分K、TWSE官方
+  `MI_5MINS`只有委託/成交統計無指數點位）皆確認TRAIN期(2015-2020)
+  資料不可及，這個操作化方式直接判「資料不可及」死路。
+  (b) 改用當天`high`/`low`當替代切分點做同形式telescoping分解對照，
+  結果高/低切分數字比open切分更極端（TRAIN occ=+2274.0%/-2061.7%
+  vs open的+356.2%），表面上通過同一套判準，但診斷出這是**選擇偏誤
+  造成的數學必然性**（high/low依定義是當天極值，用極值當切分點必然
+  產生偏態），不是任何經濟機制的證據，這個對照組本身選錯了、既不能
+  證明open特殊也不能證明不特殊。見`TRIALS_LEDGER.md`#182。
+- **第6關逐年一致性（本輪，改道跳過gate2直接測，因為只需要既有日線
+  OHLC不需要建構任何placebo/null model）**：新增
+  `overnight_intraday_gate6_consistency.py`，對gate1已CHEAP_PASS的
+  overnight段逐年拆解，事前綁定門檻沿用`#29`/`#34`同一把尺（同號年數
+  占比>=5/6=83.3%，TRAIN與VAL兩個窗口各自獨立要求通過）。
+  **結果**：TRAIN（2010-2020共11年）11/11年同號=100.0%，一致性極高，
+  通過。VAL（2021-2024共4年）僅3/4年同號=75.0%——**2022年overnight段
+  轉負（年度複利-3.46%）**，未達83.3%門檻（N=4時等同要求4/4零容錯），
+  未通過。見`TRIALS_LEDGER.md`#184。
+- **判定**：**FAIL**——依「事前綁定通過標準，不事後移動門柱」鐵律，
+  即使VAL僅4年、單一壞年（2022全球股市系統性下跌年）就跌破零容錯門檻
+  屬於small-N artifact，仍不放寬標準通融放行；比照協定建議「gate6沒過
+  就直接依快殺標準結案，不必再糾結gate2怎麼設計」，不再回頭補做gate2
+  placebo設計，#49至此正式結案。
+- **不泛化成**：「台股/TAIEX隔夜報酬異常不存在」——第1關cheap gate的
+  統計顯著性與跟美股文獻一致的方向性不受本輪推翻，訊號存在性本身在
+  TRAIN/VAL兩期皆有統計證據；死的是「任意4年VAL窗口都要逐年零容錯
+  一致」這個具體嚴格判準。只測了TAIEX指數層級+open切分+這一組事前
+  綁定的逐年一致性門檻，未測：個股層級橫斷面差異（例如外資持股比重
+  高低分組是否有不同的隔夜/盤中結構）、0050層級（已完成的
+  `adj_open`/`adj_high`/`adj_low`還原擴充工程留給未來用）、滾動多年
+  平均代替嚴格逐年二元判準這種較寬鬆的一致性操作化、任何具體「只在
+  隔夜持倉」portfolio構造的每日換手成本敏感度（本佇列已誠實揭露這點
+  很可能是另一個獨立死因，但因gate6先死而未測到那一關）。
+- **原始記錄**：`TRIALS_LEDGER.md`#180/#182/#184、`HYPOTHESIS_QUEUE.md`
+  #49條目完整版本演進、`overnight_intraday_decomposition_gate.py`、
+  `overnight_intraday_alt_cutpoint_placebo.py`、
+  `overnight_intraday_gate6_consistency.py`（三支腳本皆新增，可重複
+  執行）、`data/overnight_intraday_taiex_decomposed.csv`、
+  `data/overnight_intraday_alt_cutpoint.csv`、
+  `data/overnight_gate6_train_years.csv`、
+  `data/overnight_gate6_val_years.csv`（皆新增）。全程零新增API呼叫
+  （複用round180已快取的`^TWII`yfinance資料）。

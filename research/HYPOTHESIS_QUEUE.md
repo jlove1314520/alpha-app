@@ -5665,6 +5665,35 @@ placebo/null model，是本佇列#29/#34已示範過的標準做法），若gate
 `overnight_intraday_alt_cutpoint_placebo.py`（新增，可重複執行）、
 `data/overnight_intraday_alt_cutpoint.csv`（新增）。
 
+**最終判定（2026-09-07 hypothesis_queue排程接續，已結案：FAIL）**：
+依上一輪建議改道，新增`overnight_intraday_gate6_consistency.py`跳過
+gate2直接測gate6逐年一致性（只需既有TAIEX日線OHLC，不需建構任何
+placebo/null model）。只檢驗gate1已CHEAP_PASS的overnight段（open
+切分），事前綁定門檻沿用`#29`/`#34`同一把尺（同號年數占比>=5/6=
+83.3%，TRAIN/VAL兩個窗口各自獨立要求通過）。**結果**：TRAIN
+（2010-2020共11年）11/11年同號=100.0%，一致性極高，通過。VAL
+（2021-2024共4年）僅3/4年同號=75.0%——**2022年overnight段轉負
+（年度複利-3.46%，全球股市系統性下跌年）**，未達83.3%門檻（N=4時
+等同要求4/4零容錯），未通過。依「事前綁定通過標準，不事後移動門柱」
+鐵律，即使VAL僅4年、單一壞年就跌破零容錯門檻屬small-N artifact，
+仍不放寬標準通融放行；比照上一輪建議「gate6沒過就直接依快殺標準
+結案，不必再糾結gate2怎麼設計」，不再回頭補做gate2 placebo，移出
+排隊佇列。**不泛化成「台股/TAIEX隔夜報酬異常不存在」**——第1關cheap
+gate的統計顯著性與跟美股文獻一致的方向性不受本輪推翻，死的是「任意
+4年VAL窗口都要逐年零容錯一致」這個具體嚴格判準，未測個股層級橫斷面
+差異、滾動多年平均代替嚴格逐年二元判準這種較寬鬆操作化、任何具體
+portfolio構造的換手成本敏感度。完整見`TRIALS_LEDGER.md`#184、
+`STRATEGY_GRAVEYARD.md` #49、`overnight_intraday_gate6_consistency.py`
+（新增，可重複執行）、`data/overnight_gate6_train_years.csv`、
+`data/overnight_gate6_val_years.csv`（新增）。`is_holdout_consumed()`
+開工/收工前皆確認`False`，全程零新增API呼叫。**佇列#1~49全數結案。
+依2026-09-07轉向裁示（見下方章節），舊方向不再新增假設，下一輪應從
+#50（容量受限小型股）開始查證前置依賴「資料一逐筆tick落地」是否已
+累積足夠交易日，若未累積足夠則依序查證#51（強制交易者事件，資料源
+查證顯示核心三子事件不依賴tick資料，可能可以先動）是否能先開跑，
+不得跳過#50/#51排序直接挑#52（#52本身也明確依賴建置一.1新聞事件
+管線，同樣待做）。**
+
 ---
 
 ## 【2026-09-07 轉向裁示】#50／#51／#52 新方向登記（舊方向不再新增假設）
