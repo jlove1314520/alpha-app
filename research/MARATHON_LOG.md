@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T08:49（hypothesis_queue排程接續，取鎖乾淨LOCK_ACQUIRED，
+接續#41地基建置本輪）：依上一輪查證結果，設計節流後的中小樣本回補腳本
+——新增`mops_insider_holdings_client.py`（per-company per-month查詢+
+per筆parquet快取，只取「全體董監持股合計」單一彙總數字，避免逐筆
+董監事/經理人明細列數量在公司間變動造成解析不穩）+
+`backfill_insider_holdings.py`（15檔股票x20季度=300筆請求的pilot樣本
+回補，`TYPEK=sii`only、只查TRAIN期105Q1~109Q4即西元2016~2020）。
+實測回補**300筆請求全數成功無error**（`ok=240(80.0%) empty=60
+error=0`，empty多半是股票尚未上市/該季無申報資料，非連線失敗）。
+接著寫`insider_holdings_pilot_ic.py`做**非正式**的訊號存在性pilot
+檢查（明確標註非正式第1關cheap gate，只是決定值不值得投入全量整合
+工程成本的粗篩）：panel N=228筆觀測/12檔股票，季度董監持股合計變動率
+vs下一季報酬，Spearman IC r=+0.0710（事前綁定方向為正，符合），
+**p=0.2858不顯著**，整panel洗牌null percentile=90.5（表面壓線過90.0
+門檻但p值不顯著+樣本量遠小於正式300檔標準，不能當真的第1關判準）。
+**判定：訊號方向正確、有初步跡象但目前樣本量太小無法下定論**——值得
+投入下一輪把樣本擴大到接近標準300檔規模+正式整合進`factor_ic.py`
+`run_ic_test()`機制（SAMPLE_SIZE/N_SHUFFLES/bonferroni），但本輪不
+倉促用這個12檔pilot結果宣稱CHEAP_PASS或FAIL，避免用不夠格的證據
+做決定性判定（`CONSTITUTION.md`「事前綁定通過標準」精神——正式判準
+就該用正式規模的測試才算數）。`is_holdout_consumed()`确认仍為False。
+已同步`HYPOTHESIS_QUEUE.md` #41條目+排隊順序總結，未動`TRIALS_LEDGER.md`
+（尚無正式PASS/FAIL/CHEAP_PASS判定可記）。下一輪：擴大樣本至接近
+factor_ic.py標準規模（可能需要更長回補時間，分批進行）後跑正式
+`factor_ic.py`整合版cheap gate。commit+push後收工，釋放鎖。
+
 ## 2026-09-06T07:57（hypothesis_queue排程接續，取鎖乾淨LOCK_ACQUIRED，
 本輪有網路搜尋工具，接續上一輪#41「地基查證卡住待有搜尋工具session」）：
 用`WebSearch`查到上一輪猜錯的MOPS功能代碼正解——`stapap1`（個股董監
