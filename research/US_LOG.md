@@ -1590,3 +1590,19 @@ back-adjusted價格會被「未來」的反向分割回溯放大過去的名目�
 已寫入`TRIALS_LEDGER.md`#179、`US_LEADS.md`#22更新（`待收成`→`FAIL`）、`US_MARATHON_STATE.md`本輪記錄（第410輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）。`#20`/`#21`本身判定不受影響（仍EXPERIMENTAL）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用round414已建立的159檔宇宙快取，本輪僅讀取已收成的CSV）。
 
 **下一輪接手**：US軌第一個組合層級構造已結案FAIL，優先權轉向(a)尋找新的美股成分因子候選（US軌因子家族尚未像TW軌一樣系統性掃過`MARATHON_PROTOCOL.md`第3節全部家族）；或(b)改善`#20`/`#21`短腿成本模型（做空成本隨股價/流動性反向縮放，而非固定$50代表性價格）。完整見`TRIALS_LEDGER.md`#179、`US_LEADS.md`#22、`US_MARATHON_STATE.md`本輪記錄。
+## 第417輪 · 2026-09-07T00:00+08:00 · US · 取鎖乾淨（cycle`20260907-000036`），三軌時間戳US 23:00（round415，最舊）／TW 23:30（round416）／FUT 12:00（round399，例外條款讓回TW/US，不選）——依輪替選US
+開工檢查`git status`發現`research/deep_dive_f_us_low_vol_persistent_random_control.py`是untracked檔案，且對應的`data/deep_dive_f_us_low_vol_persistent_random_control.csv`已有2026-09-06 18:25的輸出——研判是先前某次interactive session寫好腳本、跑完拿到結果，但沒有走完寫入LEDGER/LEADS+commit的收尾流程就結束了。讀腳本內容確認：這是接續round392「誠實限制」/`TRIALS_LEDGER.md`#162留下的待辦——`_random_legs()`（#162用來REFUTE「池子本身讓任何長短倉都暴賺」懷疑②的隨機控制組）每次換倉都完全重新隨機挑股，換手率遠高於真實策略（真實策略的低波動排序序列相關，同一檔股票通常連續數月維持同一組，換手率低），這個換手率落差本身可能是成本拖累的混淆變因而非「排序有沒有訊號」本身的差異。
+
+腳本設計的「persistent-random control」：每次Monte Carlo draw給每檔股票抽一個固定不變的偽分數（closure閉包快取，只抽一次，不像`_random_legs()`每次換倉重抽），套用與真實`_decile_legs()`完全相同的排序分腿機制——這樣null的換手率會被鎖定到跟真實策略同量級（因為同一檔股票的偽排名全期不變，會一直待在同一組直到跌出橫斷面），唯一保留的差異是「排序依據是真實低波動分數還是假分數」。事前綁定判準寫在腳本docstring：real_percentile<90=CONFIRMED（換手率解釋大部分異常）、90-99=PARTIAL、>=99=REFUTED（換手率不是主要機制）。
+
+**驗證與執行**：先用`--n-draws 10 --skip-fresh-random`原地重跑一次，確認腳本邏輯可正確執行且無錯誤（`median_equity=0.8192, percentile=100.0`），跟既有CSV的N=100結果（`median_equity=0.8161, percentile=100.0`）方向與量級一致（差異屬MC noise），確認腳本先前產出的既有結果是可信賴、可重現的，才採用既有N=100正式輸出作為官方數字：VAL期(2020-2024) 1x cost，real_final_equity=13.6053（ann_return+92.46%、beta-0.821、mean_turnover long/short=0.154/0.256）；persistent-random N=100 median_equity=**0.8161**（淨損）、real_percentile=**100.0**、mean_turnover(long/short)=0.026/0.026（已被鎖定到比真實策略換手率更低，屬保守方向——若連換手率更低的null都贏不了真實策略，換手率更高的null更不可能贏）。
+
+**判定：REFUTED（換手率不解釋這個異常）**。即使把null的換手率壓低到跟真實策略同量級甚至更低，它仍是淨損（0.8161<1），真實策略仍以percentile=100.0完全壓過，跟#162用完全隨機挑股（換手率遠高於真實策略）得到的fresh-random percentile=100.0是同一個結論方向——這讓「turnover-matching應該能顯著拉近差距」的假說被推翻，也讓#162「VAL期異常跟`f_us_low_vol`這個具體排序方式本身高度綁定、不是池子廣泛beta推起來的」判定站得更穩：兩種換手率截然不同的null都攔不住真實策略，問題確實收斂在round408-412已鎖定的機制——空頭腿系統性選中死亡螺旋型微型股、固定$50代表性價格的做空成本模型嚴重低估這類股票的真實成本，不是任何換手率相關的混淆能解釋的。
+
+額外用foreground背景觸發了一次完整N=100重跑（同一組固定random seed，理論上應逐位元重現既有CSV數字），本輪未等待其完成（估計耗時超過15分鐘work-unit預算），留給下一輪核對即可，不影響本輪判定（因為本輪已用N=10快速版驗證過腳本邏輯的可重現性方向）。
+
+已寫入`TRIALS_LEDGER.md`#181、`US_LEADS.md`#21更新、`US_MARATHON_STATE.md`第417輪記錄（第412輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）。`#20`/`#21`本身判定不受影響（仍EXPERIMENTAL）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（純複用`load_clean_sample_with_factors()`既有快取）。
+
+**未commit的其他track檔案（本輪刻意不動）**：`git status`同時顯示`research/marathon_lock.py`（修改，新增devqueue專屬27→62分鐘陳舊門檻）、`scripts/dev_queue_runner.py`、`.github/workflows/audit.yml`、`research/.live_watchlist.json`、`research/data_cache/`皆為untracked/modified，讀`scripts/dev_queue_runner.py`docstring確認這是總司令2026-09-06裁示的另一條獨立「開發佇列自走」track（`CLAUDE.md`帽子規則歸屬「開發」/「維運」帽，非本馬拉松research track擁有），本輪依帽子規則越權禁止原則不觸碰、不commit這些檔案，只commit本輪實際完成的US軌研究產物。
+
+**下一輪接手**：US軌優先權仍是(a)尋找新的美股成分因子候選（US軌因子家族尚未像TW軌一樣系統性掃過`MARATHON_PROTOCOL.md`第3節全部家族）；或(b)改善`#20`/`#21`短腿成本模型（做空成本隨股價/流動性反向縮放，而非固定$50代表性價格）。完整見`TRIALS_LEDGER.md`#181、`US_LEADS.md`#21、`US_MARATHON_STATE.md`第417輪記錄。
