@@ -1486,3 +1486,29 @@ VAL(2020-2024)   1x/2x/3x: ann_return=+142.25%/+141.87%/+141.48%  beta=-0.171（
 `is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫，原地執行約2分鐘（非重度工作，未搶heavy-job-slot）。
 
 **下一輪接手**：兩因子VAL期都REFUTED單一年份驅動、都REFUTED池子廣泛隨機暴賺，剩餘懷疑收斂到「乾淨宇宙分層抽樣方法本身」——可考慮換一批不同seed的分層抽樣宇宙重新跑#20/#21其中之一驗證抽樣方法假說。完整見`TRIALS_LEDGER.md`#167、`US_LEADS.md`#20、`deep_dive_f_us_value_bm_val_year_breakdown.py`（新增）、`data/deep_dive_f_us_value_bm_val_year_breakdown.csv`、`data/deep_dive_f_us_value_bm_val_leave_2022_out.csv`（新增）。
+
+
+---
+
+## 第410輪（2026-09-06T20:30+08:00）
+
+取鎖乾淨。三軌時間戳：FUT 12:00（第399輪，依例外條款讓回TW/US，最舊，round399明文寫下一輪若再選到FUT要讓回TW/US除非有全新機制假說，本輪不選FUT）／US 19:30（第408輪）／TW 20:00（第409輪，最新）——US比TW舊，選US。
+
+`run_detached.py status`確認heavy-job-slot空（0個running），無背景工作衝突。執行round408「下一輪接手」明列的具體行動：把VAL期空頭十分位實際持股名單抓出來、檢查股價分布。
+
+新增`us_short_leg_holdings_check.py`：重用`build_combo_universe()`/`_value_legs`/`_lowvol_legs`（159檔交集宇宙，同round406/407/408），對VAL期每次換倉記錄短腿ticker清單與當日`adj_close`，純bookkeeping非回測，零新增API呼叫。
+
+**結果**：
+
+- value_bm短腿：51次換倉、**30檔不重複ticker**、733筆持股實例，price中位數$33.00（56.3%<$50、21.4%<$10、10.6%<$5、0.3%<$1）。**top10集中度63.0%**（WATT/CRWD/LEE/AMTX四檔51/51次換倉全上榜，即整個VAL期4年從未離開空頭十分位；DVLT 49/51、TRAW 47/51、CIIT 44/51、PVLA 43/51、HD 39/51、MNTS 36/51）。
+- low_vol短腿：64檔不重複ticker、760筆持股實例，price中位數$10.12（78.9%<$50、49.3%<$10、31.3%<$5、3.9%<$1）。top10集中度42.4%（WULF 47/51、CIIT 41/51、DVLT 35/51、PALI 35/51、MNTS 33/51、AMTX 30/51、IMNM 29/51、ELTX 28/51、IVVD 23/51、NTRP 21/51）。
+
+**額外資料觀察**：手動抽查`TRNR`/`MNTS`/`DVLT`原始`adj_close`序列，發現名目股價從個位數美元逐步「膨脹」到數十萬甚至近千萬美元（例如`TRNR`在2023-06-22達$9,688,000）。查證為這批股票在觀察窗內經歷多次連續反向分割（reverse split），是典型「反覆分割稀釋死亡螺旋」小型股模式——`adj_close`為維持價格序列連續性而回溯放大歷史名目價格所致，數學上比率式報酬計算不受影響（非計算錯誤），但佐證這批股票正是市場慣例認定「事實上極難放空、借券成本與強制回補風險極高」的典型類別。
+
+**判定：round408留下的(a)(b)兩個候選機制皆獲支持證據，且相互印證收斂為同一現象的兩面**——分層抽樣宇宙選中的短腿系統性偏向這批死亡螺旋型微型股（因為它們的book-to-market/已實現波動度統計量剛好落在極端值），而這批股票的真實做空經濟性又剛好被`short_round_trip_cost_pct()`固定$50/100股代表性名目值的簡化成本模型嚴重低估。
+
+已寫入`TRIALS_LEDGER.md`#174、`US_LEADS.md`#20/#21更新、`US_MARATHON_STATE.md`第410輪記錄。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫（複用round383/391/400/404/406/407/408已填滿的SEC EDGAR快取+價格快取），原地執行約2分鐘，未搶heavy-job-slot（本輪session內無其他重度工作在跑）。
+
+**下一輪接手**：這是round404起收斂鏈條（宇宙離散度→組合稀釋度→純比較宇宙分散度→多空腿拆解→本輪持股/價格查證）的終點診斷，下一步是具體可行動的驗證而非再排除：(i)對短腿加價格/流動性下限篩選（例如排除股價<$5或<$1的候選）重跑VAL期回測，看報酬量級是否顯著回落到合理範圍——若是，直接證實異常主要由不可行的做空標的貢獻；(ii)或用更寫實的做空成本模型（成本隨股價/流動性反向縮放，而非固定名目值）。完整見`TRIALS_LEDGER.md`#174、`US_LEADS.md`#20/#21、`us_short_leg_holdings_check.py`（新增，可重複執行）、`data/us_short_leg_holdings_summary.csv`（新增）、`data/us_short_leg_holdings_detail.csv`（新增）。

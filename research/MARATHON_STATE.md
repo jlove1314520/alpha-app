@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-06T20:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 409 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 409 輪 · 2026-09-06T20:00+08:00 · TW（取鎖乾淨）**。**本輪工作單位**：收成round405投遞的`20260906-173133-fce9`（`tw_deep_dive_value_pe_cost_sensitivity_retry`，150分鐘timeout，已`finished`）並完成`CRITERIA_V2_LOCK.md`第39行第二關（成本敏感度）判讀——`f_value_pe`TRAIN(1x/2x/3x)ann_return全正+3.46%~+4.60%/percentile=100.0；VAL(1x/2x/3x)ann_return全負-3.86%~-4.75%/percentile=98.0~99.0（相對隨機控制組仍穩健勝出，但絕對報酬train/val方向相反）。**判定：EXPERIMENTAL**（比照`TRIALS_LEDGER.md`#42 `f_value_pb`同款先例，不再進第三關alpha/beta顯著性）。已寫入`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2、`TW_MARATHON_STATE.md`。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`TW_MARATHON_STATE.md`第409輪記錄、`TRIALS_LEDGER.md`#173、`TW_LEADS.md`#2。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 410 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 410 輪 · 2026-09-06T20:30+08:00 · US（取鎖乾淨）**。**本輪工作單位**：落實round408「下一輪接手」明列的具體行動——VAL期空頭十分位實際持股/價格查證。新增`us_short_leg_holdings_check.py`，value_bm短腿51次換倉僅30檔不重複ticker（top10集中度63.0%）、low_vol短腿64檔不重複ticker（top10集中度42.4%），短腿price中位數$10~33、21~49%持股實例<$10；手動抽查`TRNR`/`MNTS`/`DVLT`確認為反覆反向分割「死亡螺旋」微型股。**判定：round408留下的(a)集中度候選與(b)成本模型候選皆獲支持證據，相互印證收斂為同一現象的兩面**。已寫入`TRIALS_LEDGER.md`#174、`US_LEADS.md`#20/#21、`US_MARATHON_STATE.md`。`is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫。詳見`US_MARATHON_STATE.md`第410輪記錄、`TRIALS_LEDGER.md`#174、`US_LEADS.md`#20/#21。
 
 **心跳缺口補記（第405輪，TW軌）**：`TW_MARATHON_STATE.md`/`TW_LOG.md`/`REPORT.md`已有標記「第405輪」的TW軌內容（重投`tw_deep_dive_value_pe_cost_sensitivity_retry`，job`20260906-173133-fce9`，150分鐘timeout），但這份全局計數器當時未同步更新（同round342曾補齊過的同款缺口）——round406已把計數器同步推進至406。**第408輪（US軌）同款缺口**：`US_MARATHON_STATE.md`/`REPORT.md`已有標記「第408輪」內容（decile long/short腿拆解歸因），但這份全局計數器當時同樣未同步更新（停在407）——本輪（第409輪）已一併補上408與409，避免缺口被誤讀成「該輪沒發生過」。
 
