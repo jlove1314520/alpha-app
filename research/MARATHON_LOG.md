@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-06T15:25（台北時間，hypothesis_queue排程接續，取鎖
+LOCK_STALE(held by 76668, 150.0 min old)-recovering，上一輪疑似崩潰
+中斷但未留下任何未commit變更，`git status`乾淨，判斷上一輪在取得鎖後、
+還沒開始寫檔案前就中斷）：讀完`HYPOTHESIS_QUEUE_PROTOCOL.md`+
+`CONSTITUTION.md`+`CLAUDE.md`後`git pull`（已是最新），確認佇列#1~43
+全數結案（上一次成功心跳12:28已完成#43並正常收工），依協定第1節
+「佇列已空」流程設計新假設軸**#44：景氣對策信號燈號（NDC Business
+Cycle Composite Signal）**——本佇列第一次完全不用市場價格衍生資料，
+改用國家發展委員會官方總體景氣綜合指標，是第六種資料建構維度（前
+`#43`已歸納前五種）。WebSearch+WebFetch確認`data.gov.tw/dataset/6099`
+免費ZIP下載、涵蓋多年歷史、無需API金鑰，但明確標註兩個須優先排除的
+方法論陷阱：(1)官方每月回溯修正歷史指標數值，直接用「最終版」數字
+回測有look-ahead風險；(2)綜合分數9項構成項目之一就是股價指數本身，
+訊號與待預測目標變數存在結構性內生關聯，須設計「排除股價指數重新
+合成」的對照測試才能宣稱新增資訊。完整經濟理由+具體假設定義+資料
+可行性查證+下檔保護要求已寫入`HYPOTHESIS_QUEUE.md`新章節#44，並同步
+更新「排隊順序總結」章節。本輪僅完成假設設計，尚未下載實際ZIP檔案、
+未開始撰寫`ndc_business_cycle_gate.py`，下一輪從下載確認資料細節開始，
+不跳關進cheap gate。`is_holdout_consumed()`確認`False`。commit+push
+後正常收工並釋放鎖。
+
 ## 2026-09-06T12:28（台北時間，hypothesis_queue排程接續，取鎖
 LOCK_STALE(held by 76852, 29.9 min old)-recovering，上一輪（11:27
 那筆）疑似又中斷了——這是同一個#43工作單位連續第二次遇到陳舊鎖，
