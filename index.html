@@ -779,9 +779,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="report-industry-tech"></div>
     </div>
 
+    <!-- 2026-09-08（建置一.1）「題材判斷」卡改吃 data/events.json。
+    總司令裁示「要的是把功能做出來，不是刪字」，所以這裡不是把佔位字刪掉，
+    是真的接上資料：近 30 日的重大訊息／月營收／除權息／法說事件時間流，
+    加上月營收年增與法人連續買賣天數。 -->
     <div class="card">
-      <h3>題材判斷（缺貨潮 / 瓶頸 / 缺料）</h3>
-      <div class="note">需要產業新聞與供應鏈連動分析，本輪尚未實作（下一輪接新聞/供應鏈資料源後補），目前沒有這項資料。</div>
+      <h3>近期事件與題材 <span style="font-size:9.5px;color:var(--ink-4);font-weight:400">法人行為與公告事實，非預測訊號</span></h3>
+      <div id="report-events"><div class="note">載入中…</div></div>
     </div>
 
     <div class="card">
@@ -2169,6 +2173,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 規則：任何可能為 null 的數值一律走這兩支，缺值就是「—」，不是 0、不是崩潰。
   const fmtN=(v,d=2,suffix='')=>(v==null||typeof v!=='number'||!isFinite(v))?'—':v.toFixed(d)+suffix;
   const fmtPct=(v,d=1)=>(v==null||typeof v!=='number'||!isFinite(v))?'—':(v*100).toFixed(d)+'%';
+  // 2026-09-08（健檢.三）撞到評分引擎上限的年增率不得當真值顯示。
+  // REVENUE_YOY_CAP=2.0（+200%）是引擎的裁切值，不是公司真的成長兩倍——
+  // 多半是低基期或併購造成的。顯示成乾淨的「200.0%」等於把裁切值當事實報給使用者。
+  // 改成「≥200%」並標灰加註，讓人一眼看出這是上限不是實測值。
+  function fmtPctCapped(v,cap,d=1){
+    if(v==null||typeof v!=='number'||!isFinite(v))return '—';
+    if(cap!=null&&v>=cap)
+      return `<span style="color:var(--ink-3)">≥${(cap*100).toFixed(0)}%<span style="font-size:9.5px">（特殊基期，資料存疑）</span></span>`;
+    return (v*100).toFixed(d)+'%';
+  }
   function setTxt(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
   // 2026-08-27 架構修正：三大法人chip改讀stock_detail.json，數值已經是「張」
   // （fetch_market_tw.py抓T86時已經/1000過），不是原始股數，所以是直接round，
@@ -4555,7 +4569,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 的 peg=null 讓 toFixed 拋錯），畫面上就會同時出現新股票的名字和舊股票的
     // 數字，而且完全沒有任何錯誤提示。清空之後最壞情況是顯示「載入中…」，
     // 不會是另一檔股票的價格。
-    ['report-factors','report-industry-tech','report-entry-plan'].forEach(id=>{
+    ['report-factors','report-industry-tech','report-entry-plan','report-events'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.innerHTML='<div class="note">載入中…</div>';
     });
     const opEl=document.getElementById('report-order-plan');if(opEl)opEl.innerHTML='';
@@ -4569,6 +4583,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('report-coverage').textContent=`資料完整度 ${covPct}%${row.coverage<0.7?'（部分因子本次缺資料，總分依「重新分配權重」規則計算，僅供參考）':''}`;
     document.getElementById('report-summary').textContent=row.summary||'';
     _safeSync('renderExtremeMoveWarning',()=>renderExtremeMoveWarning(row));  // 2026-09-05 新一.7
+    _safeAsync('renderReportEvents',()=>renderReportEvents(row));  // 2026-09-08 建置一.1
     // 環形讀條：滿圈周長 251.2（r=40），offset 從滿圈（0分）動畫到對應總分的角度
     const ring=document.getElementById('report-ring');
     ring.style.strokeDashoffset='251.2';
@@ -4596,8 +4611,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // eps_yoy/rev_yoy 為 null 會印成 0.0%。
     const fact=(label,v,fmt)=>{if(v==null||typeof v!=='number'||!isFinite(v))return;itHtml+=`<div class="f"><span>${label}</span><b>${fmt(v)}</b></div>`};
     if(f.earnings_growth)fact('EPS 年增',f.earnings_growth.raw.eps_yoy,v=>fmtPct(v));
-    if(f.revenue_momentum)fact('月營收年增',f.revenue_momentum.raw.rev_yoy,v=>fmtPct(v));
-    if(f.growth_quality)fact('近12月營收年增',f.growth_quality.raw.rev_growth_12m_yoy,v=>fmtPct(v));
+    if(f.revenue_momentum)fact('月營收年增',f.revenue_momentum.raw.rev_yoy,v=>fmtPctCapped(v,REVENUE_YOY_CAP));
+    if(f.growth_quality)fact('近12月營收年增',f.growth_quality.raw.rev_growth_12m_yoy,v=>fmtPctCapped(v,REVENUE_YOY_CAP));
     if(f.valuation_adj)fact('本益比 PE',f.valuation_adj.raw.pe,v=>fmtN(v,1));
     if(f.valuation_adj)fact('PEG',f.valuation_adj.raw.peg,v=>fmtN(v,2));
     // 2026-08-27修正（真bug）：scores.json現在有兩條產生管線——研究端
@@ -5238,6 +5253,74 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     g_comma_parsing:'千分位逗號解析',
   };
   let AUDIT_CACHE=null;
+  // ── 2026-09-08（建置一.1）事件資料 ─────────────────────────────────────────
+  // data/events.json 由 .github/scripts/fetch_news_events.py 產生，只存索引不存全文：
+  // 標題、連結、時間、標的、類型。全文有著作權疑慮，而且我們要的是「這檔最近發生
+  // 什麼事」——點進去看原文才是正確的閱讀路徑。
+  let EVENTS_CACHE=null,EVENTS_AT=0;
+  async function ensureEvents(){
+    if(EVENTS_CACHE&&Date.now()-EVENTS_AT<10*60*1000)return EVENTS_CACHE;
+    try{
+      const r=await fetch('data/events.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      EVENTS_CACHE=d;EVENTS_AT=Date.now();
+    }catch(e){
+      console.warn('[ensureEvents]',e);recordGlobalError('ensureEvents',e);
+      if(!EVENTS_CACHE)EVENTS_CACHE={events:[]};
+    }
+    return EVENTS_CACHE;
+  }
+  const EVENT_TYPE_COLOR={
+    '月營收':'var(--gold)','除權息':'#7aa2f7','法說會':'var(--up)','併購':'#e0af68',
+    '增減資':'#bb9af7','重大訂單':'var(--up)','人事':'var(--ink-3)','財務':'#7dcfff',
+    '訴訟':'var(--down)','處分資產':'#9ece6a','停復牌':'var(--down)','其他':'var(--ink-3)',
+  };
+  // 近 30 日事件流。無事件時要**講清楚查了什麼**，不能只寫「無資料」——
+  // 「沒查」跟「查了沒有」對使用者是完全不同的資訊。
+  async function renderReportEvents(row){
+    const host=document.getElementById('report-events');if(!host)return;
+    const d=await ensureEvents();
+    const code=row.code;
+    const cutoff=(()=>{const t=new Date(Date.now()-30*864e5);const z=_zonedParts(t,'Asia/Taipei');
+      return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`})();
+    const mine=(d.events||[]).filter(e=>e.code===code&&String(e.date)>=cutoff)
+      .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+    // 上方三個數字：月營收年增、法人連續天數——都取自已經算好的因子 raw，不重算
+    const f=row.factors||{};
+    const facts=[];
+    const revYoy=f.revenue_momentum&&f.revenue_momentum.raw?f.revenue_momentum.raw.rev_yoy:null;
+    if(revYoy!=null&&isFinite(revYoy))facts.push(['最新月營收年增',fmtPctCapped(revYoy,REVENUE_YOY_CAP)]);
+    const an=f.analyst&&f.analyst.raw?f.analyst.raw:null;
+    if(an){
+      if(an.foreign_streak_days!=null)facts.push(['外資連續買賣',`${an.foreign_streak_days>0?'買超':'賣超'} ${Math.abs(an.foreign_streak_days)} 日`]);
+      if(an.trust_streak_days!=null)facts.push(['投信連續買賣',`${an.trust_streak_days>0?'買超':'賣超'} ${Math.abs(an.trust_streak_days)} 日`]);
+    }
+    const factsHtml=facts.length
+      ?'<div class="facts" style="margin-bottom:10px">'+facts.map(([k,v])=>`<div class="f"><span>${k}</span><b class="num">${v}</b></div>`).join('')+'</div>':'';
+
+    if(!mine.length){
+      host.innerHTML=factsHtml
+        +'<div class="note">近 30 日無重大訊息／月營收／法說／除權息事件（已查 MOPS 上市與上櫃重大訊息、TWSE 月營收、除權息四類）。'
+        +(d.fetched_at?`資料時間 ${fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei')}。`:'')
+        +'</div>';
+      return;
+    }
+    host.innerHTML=factsHtml
+      +'<div style="display:flex;flex-direction:column;gap:9px">'
+      +mine.slice(0,12).map(e=>{
+        const c=EVENT_TYPE_COLOR[e.type]||'var(--ink-3)';
+        const t=(e.title||'').replace(/</g,'&lt;');
+        return `<div style="display:flex;gap:9px;align-items:flex-start">
+          <span class="num" style="font-size:10px;color:var(--ink-4);min-width:38px;padding-top:2px">${String(e.date).slice(5)}</span>
+          <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${e.type}</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5">${e.url?`<a href="${e.url}" target="_blank" rel="noopener" style="color:inherit">${t}</a>`:t}</span>
+        </div>`;
+      }).join('')
+      +'</div>'
+      +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆${mine.length>12?'，只顯示最近 12 筆':''}。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
+  }
   async function loadDataAudit(force){
     const sum=document.getElementById('audit-summary'),list=document.getElementById('audit-list');
     if(!sum||!list)return;
@@ -5368,7 +5451,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-06.2125';
+  const APP_VERSION='2026-09-08.0518';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
