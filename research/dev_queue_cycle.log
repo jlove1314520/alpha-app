@@ -344,3 +344,6 @@ prompt: PROMPT_READY: Cybex.債務5 (exit=0)
 TIMEOUT after 60 min -> taskkill /T /F pid=114204
 finally: released .devqueue.lock (cycle_id=20260908-041602)
 ===== DevQueue cycle end: 2026-09-08 05:16:05 cycle_id=20260908-041602 reason=TIMEOUT exit=-9 duration_min=60.1 =====
+
+===== DevQueue cycle start: 2026-09-08 05:31:02 cycle_id=20260908-053102 =====
+工作目錄有 1 個未提交變更（可能是互動視窗正在做事），本輪跳過
