@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-08T06:30+08:00**
+**最後更新：2026-09-08T07:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 433 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 433 輪 · 2026-09-08T06:30+08:00 · US軌（取鎖乾淨，cycle`20260908-063037`）**。**本輪工作單位**：round431「下一輪US軌接手(1)」要求的系統性掃描——`us_reverse_split_contamination_scan.py`（新增）對`data/us_stratified_universe_sample.csv`全部240檔非黑名單usable ticker掃描adj_close反向分割污染特徵（零新增API呼叫）。粗篩命中76/240（31.7%），人工核對後排除`FCNCA`類真實高價股假陽性，收斂到17檔高信心新增名單，`us_contamination_blacklist.py`黑名單由8擴充到25檔。59檔中等比值候選誠實列為未確認，不納入黑名單。`trial_registry.py --check`確認PASS（exit=0，200列，本輪無新判定，屬地基工作不登記）。詳見`US_LEADS.md`#24、`data/us_reverse_split_contamination_scan.csv`。**下一輪US軌接手**：可用擴充後25檔黑名單重驗`#20`/`#21`（round431用8檔量出retained_fraction 0.36/0.68），或處理59檔未確認候選、或改測新因子。TW軌待辦不變：收成`#57`回填job（job`20260908-061051-6640`後續批次），未跑完就投遞下一批。`is_holdout_consumed()`開工/收工前皆確認`False`。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 434 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 434 輪 · 2026-09-08T07:00+08:00 · US軌（取鎖乾淨，cycle`20260908-070037`）**。**本輪工作單位**：round433「下一輪US軌接手(1)」要求的重驗——用擴充後25檔黑名單重跑`deep_dive_f_us_value_bm_contamination_check.py`/`deep_dive_f_us_low_vol_contamination_check.py`（程式碼不改，只是黑名單本身已擴充）。**結果**：`#20`retained_fraction由round431的0.36（PARTIAL）降至0.06，升級為**CONFIRMED**；`#21`由0.68（REFUTED）降至0.05且sign flip，升級為**CONFIRMED**。至此`#20`/`#21`/`#23`三個US PIT基本面因子的異常表現全數confirmed為同一個死亡螺旋反向分割微型股污染陷阱，無一是真實edge。已登記`TRIALS_LEDGER.md`#199/#200，`trial_registry.py --check`確認PASS（exit=0，202列）。TW軌本輪未選中原因：heavy-job-slot被`hypothesis_queue`排程自走投遞的`#57`回填job佔用，該job是TW軌唯一待辦，本輪無新工作可做，故選US軌。詳見`US_MARATHON_STATE.md`第434輪記錄、`US_LEADS.md`#20/#21。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **心跳缺口補記（第424～427輪）**：`REPORT.md`已有標記「第424～427輪」的內容，但當時的執行個體把心跳插入到檔案中段（約第1635行附近）而非規則要求的檔案最上方，且這份全局計數器當時未同步更新（同round405/408/422曾補齊過的同款缺口，這次缺口更大——連續4輪）。本輪（第428輪）已將計數器一次補齊到428；`REPORT.md`歷史錯位條目本身不回頭搬動（append-only精神，避免誤觸其他未完成的並行編輯），僅在此記錄這個已知的顯示層問題，供下次有餘裕時整理。第424～427輪內容摘要：424(TW)建立`data/signal_status.json`；425(US)`#20`/`#21`降級關閉為FAIL；426(TW)`#51`子事件1二元規格對照FAIL；427(US)新增`f_us_gross_profitability`因子，cheap gate CHEAP_PASS並投遞深挖job。
 
