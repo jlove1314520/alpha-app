@@ -2183,3 +2183,11 @@ Pledge Ratio — FAIL（2026-09-06，第1關cheap gate未過）
 - **不泛化聲明**：不代表可轉債轉換價格重設機制完全無效——只測了單一固定20交易日窗口+effective_date當t0這個具體構造，僅取向下重設半邊（780筆向上重設未測）。
 - **#51（強制交易者事件）三個子事件（強制回補/現金增資折價/可轉債轉換價重設）至此全數FAIL，#51正式結案**，移出排隊佇列。
 - **原始記錄**：`TRIALS_LEDGER.md`#190、`HYPOTHESIS_QUEUE.md` #51條目(i)段落、`cb_conversion_price_reset_gate1.py`／`mops_cb_conversion_price_client.py`（新增，可重複執行）。回填30次MOPS查詢（2市場x15民國年），711檔股票，3078筆最終可用事件。
+
+## #53 全市場報酬離散度速度（Cross-Sectional Return Dispersion Velocity）——2026-09-08結案：FAIL（GATE_SEQUENCE第2關）
+
+- **假設**：截面報酬離散度（`disp_t=std_i(r_{i,t})`）與其20日速度版（`vel_t`）異常偏高時降曝險，`exposure_t=clip(1-pctile_{t-1},0,1)`連續縮放，TAIEX標的。
+- **死因**：GATE_SEQUENCE第2關隨機控制組（`control_group_standard.py::evaluate_vs_control()`，控制組3變體circular_shift/block_shuffle_5/block_shuffle_20各N=100）。level規格：TRAIN年化Sharpe+0.444未過控制組最大值+0.873、VAL+0.751未過+1.048。vel規格：TRAIN+0.356未過+0.913、VAL+0.801未過+1.349。四項判定全數未過（贏過平均/落在62~73百分位皆不算通過，2026-09-07標準升級——只有嚴格贏過控制組最大值或配對式20/20全勝才算過）。依快殺標準「已被控制組拆穿之偽影家族換皮」判FAIL，未進第3關。
+- **不泛化聲明**：不代表「全市場截面報酬離散度這個資料維度完全沒有訊號」——第1關sanity（`TRIALS_LEDGER.md`#192）三項皆PASS（危機期間vel_pctile方向正確2/3、level_pctile條件式前瞻報酬方向正確），訊號存在性本身未被推翻。死的是`f(z)=1-z`這一個固定線性映射建構，本輪依#53共同規格「f事前固定不掃斜率」的約定未測試其他映射斜率或視窗長度，未來若重測應優先考慮更陡峭的映射（放大訊號在極端百分位時的曝險縮放幅度）或不同速度視窗長度。相位敏感度不適用（逐日連續曝險，非週期性重平衡）。
+- **對#54/#55的參考意義（誠實記錄，非結論）**：本佇列「市場總開關假設軸」目前唯一走完第2關的候選以FAIL收場，說明「1-percentile線性映射+隨機化時序控制組」這套框架本身門檻不低，但#54（成交值集中度）/#55（法人流離散度）是不同的截面統計量與不同的資料來源，不因#53的結果預先判死，仍須各自獨立走完第2關。
+- **原始記錄**：`TRIALS_LEDGER.md`#194、`HYPOTHESIS_QUEUE.md` #53條目、`cross_sectional_dispersion_gate53_control.py`（新增，可重複執行）。零新增API呼叫（複用#53第1關sanity既有快取與計算結果）。
