@@ -95,7 +95,7 @@ P0二/P0三的更精確診斷取代，這一版的假設（SW快取問題）不�
   第一次push前先fetch+rebase、每次失敗先等30秒再fetch+rebase、重試上限
   5→10次；另外加了`timeout-minutes`（quotes 15分鐘／market 120分鐘，理由
   見一.3）跟market.yml commit前重跑`generate_status_json.py`的步驟。
-  **需要使用者自己用有workflow scope的PAT把這兩個檔案的改動commit上去**
+  ~~需要使用者自己用有workflow scope的PAT把這兩個檔案的改動commit上去~~ **（2026-09-08 取消：實測 push 成功，PAT 有 workflow 權限）**
   （`git add .github/workflows && git commit && git push`），或在GitHub網頁
   直接貼上。
 - [x] **P0三-一.3** 落地次數已查明（2026-09-03台北日）：quotes.yml觸發5次、
@@ -670,7 +670,7 @@ ORDER-END
 - [x] **連線二.3** **已完成並實測**：/docs /redoc /openapi.json 皆回 404；除 /health 與 /ca.crt 外全部 401；401 限速實測連打 25 次，第 22 次起回 429 且 log 記錄封鎖，封鎖期間帶正確 token 也擋。IP 取法為「有 X-Forwarded-For 用它、否則用連線來源」並把來源寫進 log，待 Funnel 開通後實測確認；token 正確即清零計數避免自己被鎖。/health 新增 hardening 自我檢查區塊。
 - [x] **連線二.4** **已完成結案**：App 網域正規化＋自動重測；SSE 經 Funnel 610 秒 0 中斷。公司手機直連改用伺服器端紀錄驗收（MDM 不能截圖）：**203.66.245.0/24（HiNet，非家中網段）於 09-06 23:51:55～23:59:26 共 74 請求、帶 token 成功 200 共 18 次、已建立 SSE、走過 7 條路徑含 /subscribe 與 /live/stream**。
 - [x] **連線二.5** **已完成**：`docs/cloudflare_tunnel_setup.md` 標題標為備援方案並說明切回方式，`cloudflared/config.example.yml` 保留不刪。Funnel 實測延遲 31～57ms、10 分鐘 0 斷線，暫不需要啟動買網域方案。
-- [x] **建置一.1** **已完成**：`.github/scripts/fetch_news_events.py` → events.json 1,210 筆／news.json 70 則（只存索引不存全文）。資料源全部官方實測 200；鉅亨查三路徑後不採用（唯一可通的是站台後端 API，違反取得方式鐵律）。「題材判斷」卡改為「近期事件與題材」：月營收年增＋法人連續天數＋近 30 日事件流，無事件時明列已查四類。⚠ `.github/workflows/news_events.yml` 因 PAT 無 workflow scope 留在 working tree。
+- [x] **建置一.1** **已完成**：`.github/scripts/fetch_news_events.py` → events.json 1,210 筆／news.json 70 則（只存索引不存全文）。資料源全部官方實測 200；鉅亨查三路徑後不採用（唯一可通的是站台後端 API，違反取得方式鐵律）。「題材判斷」卡改為「近期事件與題材」：月營收年增＋法人連續天數＋近 30 日事件流，無事件時明列已查四類。✅ `.github/workflows/news_events.yml` 已於 e9c88a8 推上遠端（每 30 分鐘），**先前說「PAT 無 workflow scope」是錯的**。
 - [ ] **建置一.2** 目標價卡改「估值區間（非目標價）」：同產業 PE 25/50/75 百分位 × 近四季 EPS
 - [ ] **建置一.3** 美股類股（SEC SIC 對映）／ADR 溢價卡（TSM、UMC、ASX、CHT）
 - [ ] **建置一.4** 驗收：三張卡截圖＋events.json 筆數與最新時間＋smoke 新增佔位字歸零檢查
@@ -998,7 +998,7 @@ ORDER-END
 >
 > 五、其餘佇列項目照序繼續（柱狀圖零基線、融資維持率分母、休市標籤、群益唯讀、分點演習、產業價值鏈、新聞管線、本地摘要）。每完成一項回報一項附證據。
 
-- [x] **稽核.一** **已完成**：6442 的 32 根因＝報告頁 `peg=null` 讓 renderReport 中途拋錯、上一檔（6808，收盤 32.0）的分批進場價留在畫面上（三個數字逐一吻合，已用 Playwright 重現）。四層防線：缺值安全格式化、REPORT_SEQ 世代守衛、面板 _safeSync 隔離＋進場清空、canonicalPrice ±30% 恆等式。`scripts/data_audit.py` 七類恆等式已產出首份全市場報告（2104 檔、一致性違規率 0.05%、通過 1% 門檻；完整度缺口 52.33% 歸稽核.二）。過程另抓到 **161 檔已下市股票還在選股榜上**（未來成長榜第 1 名是造假下市的康友-KY 6452），新增 build_listed_universe.py / prune_delisted.py 並在 generate_scores_live.py 加同一道過濾。設定頁新增「資料健康」區；冒煙測試新增 39/40/41 三道閘門，39 項全 PASS。⚠ `.github/workflows/audit.yml` 因 PAT 無 workflow scope 留在 working tree。
+- [x] **稽核.一** **已完成**：6442 的 32 根因＝報告頁 `peg=null` 讓 renderReport 中途拋錯、上一檔（6808，收盤 32.0）的分批進場價留在畫面上（三個數字逐一吻合，已用 Playwright 重現）。四層防線：缺值安全格式化、REPORT_SEQ 世代守衛、面板 _safeSync 隔離＋進場清空、canonicalPrice ±30% 恆等式。`scripts/data_audit.py` 七類恆等式已產出首份全市場報告（2104 檔、一致性違規率 0.05%、通過 1% 門檻；完整度缺口 52.33% 歸稽核.二）。過程另抓到 **161 檔已下市股票還在選股榜上**（未來成長榜第 1 名是造假下市的康友-KY 6452），新增 build_listed_universe.py / prune_delisted.py 並在 generate_scores_live.py 加同一道過濾。設定頁新增「資料健康」區；冒煙測試新增 39/40/41 三道閘門，39 項全 PASS。✅ `.github/workflows/audit.yml` 已於 e9c88a8 推上遠端，**先前說「PAT 無 workflow scope」是錯的**。
 - [ ] **稽核.二** data/coverage.json 八因子覆蓋率儀表板＋補齊「抓取失敗/解析失敗」兩類
 - [ ] **稽核.三** 自建全市場資料庫（每日append累積10類官方資料集）
 - [ ] **稽核.四** live server /settings 端點多裝置同步
