@@ -88,15 +88,49 @@ def find_next() -> tuple[int, str] | None:
     pending = [(i, ln) for i, ln in enumerate(lines) if ln.startswith("- [ ]")]
     if not pending:
         return None
-    order = _explicit_order()
-    if order:
+    order_entries = _explicit_order()
+    if order_entries:
         by_key = {}
         for i, ln in pending:
             by_key.setdefault(item_key(ln), (i, ln))
-        for key in order:
+        # 2026-09-07（總司令裁示 2）公平規則：連續派出兩項 [債務] 之後，
+        # 下一項必須派 [產品]。理由寫在 PENDING_QUEUE 標頭——債務工作永遠有正當
+        # 理由插隊，結果 建置一.1 從 9/5 核准到 9/7 一次都沒開始過。
+        st = _load_state()
+        recent = st.get("_recent_classes", [])
+        need_product = len(recent) >= 2 and all(x == "債務" for x in recent[-2:])
+        ordered = [(k.replace("[產品]", "").strip(), "產品" if "[產品]" in k else "債務")
+                   for k in order_entries]
+        if need_product:
+            for key, cls in ordered:
+                if cls == "產品" and key in by_key:
+                    return by_key[key]
+            # 沒有產品類可派就照原順序走，但把計數清掉，免得下一輪還在等一個
+            # 永遠不會出現的產品項（那會變成另一種卡住）
+            st["_recent_classes"] = []
+            _save_state(st)
+        for key, _cls in ordered:
             if key in by_key:
                 return by_key[key]
     return pending[0]
+
+
+def item_class(text: str) -> str:
+    """這一項是債務還是產品。以 ORDER 清單的標記為準，清單沒有就當債務。"""
+    key = item_key(text)
+    for entry in _explicit_order():
+        if entry.replace("[產品]", "").strip() == key:
+            return "產品" if "[產品]" in entry else "債務"
+    return "債務"
+
+
+def _note_dispatch(text: str) -> None:
+    """記下這一輪派出的是哪一類，供公平規則判斷。只留最近 6 筆。"""
+    st = _load_state()
+    recent = st.get("_recent_classes", [])
+    recent.append(item_class(text))
+    st["_recent_classes"] = recent[-6:]
+    _save_state(st)
 
 
 def item_key(text: str) -> str:
@@ -205,7 +239,8 @@ commit**，不要把好幾項混在同一個 commit 裡。
 - 不准為了讓測試過而放寬測試。
 """
     PROMPT_OUT.write_text(prompt, encoding="utf-8", newline="\n")
-    print(f"PROMPT_READY: {key}")
+    _note_dispatch(text)
+    print(f"PROMPT_READY: {key}（{item_class(text)}類）")
     return 0
 
 

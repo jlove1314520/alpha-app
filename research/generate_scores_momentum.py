@@ -595,6 +595,48 @@ def main():
             "weights": weights, "stocks": [],
         }
     else:
+        # ── 2026-09-07 剔除已下市／價格過期的代號（結構性修法）──────────────
+        # 為什麼三支產生器都要有這段：2026-09-06 只修了 generate_scores_live.py，
+        # 結果 market.yml 排程一跑，動能榜與未來榜又把已下市股票放回榜單
+        # （冒煙 check 41 抓到：momentum 69 檔、future 23 檔，含 2018 年下市的矽品
+        # 2325、2020 年造假下市的康友-KY 6452）。過濾邏輯必須跟著「產生榜單」這件事，
+        # 不能只掛在其中一支。
+        try:
+            _uni = REPO_ROOT / "data" / "listed_universe.json"
+            _active = set(json.loads(_uni.read_text(encoding="utf-8")).get("active") or [])
+            if len(_active) >= 1000:
+                _before = len(cs)
+                cs = cs[cs.index.isin(_active)]
+                if _before != len(cs):
+                    print(f"  剔除不在官方在市名冊的代號：{_before - len(cs)} 檔（剩 {len(cs)}）")
+            else:
+                print(f"  ! listed_universe.json 只有 {len(_active)} 檔，不完整，跳過下市過濾")
+        except FileNotFoundError:
+            print("  ! 沒有 data/listed_universe.json，跳過下市過濾")
+        except Exception as _e:
+            print(f"  ! 下市過濾失敗（{type(_e).__name__}: {_e}），跳過")
+
+        # 還在名冊、但價格早就停住的也要擋（正峰 1538、永冠-KY 1589 停在 2024-12-31）
+        try:
+            _last = {c: (rows[-1].get("date") or "") for c, rows in price_history.items() if rows}
+            _latest = max((d for d in _last.values() if d), default=None)
+            if _latest:
+                from datetime import date as _date
+                _base = _date(*(int(x) for x in _latest.split("-")))
+                _stale = set()
+                for _c, _d in _last.items():
+                    try:
+                        if (_base - _date(*(int(x) for x in _d.split("-")))).days > 30:
+                            _stale.add(_c)
+                    except Exception:
+                        continue
+                _before = len(cs)
+                cs = cs[~cs.index.isin(_stale)]
+                if _before != len(cs):
+                    print(f"  剔除價格落後超過30天的代號：{_before - len(cs)} 檔（剩 {len(cs)}）")
+        except Exception as _e:
+            print(f"  ! 過期價格過濾失敗（{type(_e).__name__}: {_e}），跳過")
+
         cs["liquidity_insufficient"] = (
             cs["liquidity_20d"].isna() | (cs["liquidity_20d"] < LIQUIDITY_FLOOR_20D_VALUE)
         )
