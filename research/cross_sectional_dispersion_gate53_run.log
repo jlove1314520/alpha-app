@@ -1,0 +1,39 @@
+=== #53 全市場報酬離散度速度 第1關 sanity ===
+排除非個股聚合列(6檔): ['Cement', 'Food', 'Other', 'Rubber', 'TAIEX', 'TPEx']
+排除空快取(<2000 bytes): 327 檔
+納入橫斷面計算的個股候選池: 2111 檔
+逐檔載入結果: ok=2094 err=0 too_short(<30列)=17
+
+總交易日數=3680，其中n_t<300判定不可用的天數=0（0.0%），標NaN不靜默丟棄
+
+=== sanity 1: 描述統計（非退化性） ===
+  n_days_total = 3680
+  n_days_valid_disp = 3680
+  disp_mean = 0.12364983242790525
+  disp_std = 0.023626299531093502
+  disp_min = 0.03319441867087668
+  disp_max = 0.24758669923702864
+  n_t_min = 1050
+  n_t_mean = 1413.9154891304347
+  n_t_max = 1838
+  n_days_valid_vel = 3660
+  vel_mean = 0.0015977771378446605
+  vel_std = 0.1342264162793651
+  非退化判定: True
+
+=== sanity 2: 已知危機期間 level/vel 百分位是否偏高 ===
+  無條件基準: level_pctile_mean=0.466  vel_pctile_mean=0.494
+  2018Q4貿易戰急跌 (2018-10-01~2018-12-31, n=65): level_pctile=0.836 vel_pctile=0.520  vel高於基準=True
+  2020Q1新冠崩盤 (2020-02-01~2020-04-30, n=61): level_pctile=0.478 vel_pctile=0.481  vel高於基準=False
+  2022全年空頭 (2022-01-01~2022-12-31, n=246): level_pctile=0.357 vel_pctile=0.509  vel高於基準=True
+  三個危機窗口中vel_pctile高於無條件基準的窗口數: 2/3
+
+=== sanity 3: 條件式前瞻20日TAIEX報酬（tertile切分） ===
+  對齊後樣本數: 3581
+  level_pctile: 低tertile(n=1194) fwd_ret_mean=+0.0108  高tertile(n=1194) fwd_ret_mean=+0.0048  方向正確(高<低)=True
+  vel_pctile: 低tertile(n=1194) fwd_ret_mean=+0.0067  高tertile(n=1194) fwd_ret_mean=+0.0077  方向正確(高<低)=False
+
+=== 三項sanity皆PASS: True ===
+**這是sanity，不是最終PASS/FAIL判定**——下一輪視結果進第2關（隨機控制組，
+依`control_group_standard.py`統一標準+`trial_registry.register_trial()`正式登記）
+或若sanity方向不對則直接判FAIL並記錄。

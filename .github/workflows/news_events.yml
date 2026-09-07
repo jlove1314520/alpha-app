@@ -1,0 +1,45 @@
+# 新聞與事件管線（2026-09-08 建置一.1）
+#
+# ⚠ 這個檔案**還沒 commit**：這台機器的 PAT 沒有 workflow scope，push 帶
+#    .github/workflows/ 的變更會被 GitHub 拒絕。請總司令用有 workflow 權限的
+#    權杖把它推上去，排程才會開始跑。在那之前可本機手動執行：
+#      python .github/scripts/fetch_news_events.py
+name: 新聞與事件
+
+on:
+  schedule:
+    # 每 30 分鐘（總司令指定）。台股盤中與盤後公告都會即時進來。
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: news-events
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝相依
+        run: pip install requests certifi urllib3
+      - name: 抓新聞與事件
+        run: python .github/scripts/fetch_news_events.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/news.json data/events.json
+          if git diff --cached --quiet; then
+            echo "沒有新的新聞或事件，不產生 commit"
+          else
+            git commit -m "新聞與事件：更新 news.json / events.json（每 30 分鐘排程）"
+            git pull --rebase --autostash
+            git push
+          fi

@@ -1,0 +1,70 @@
+# 每晚全市場資料一致性稽核（2026-09-06 總司令 P0 稽核.一）
+#
+# 為什麼放在 GitHub Actions 而不是本機排程：
+#   1. 這支要打 TWSE 與 TPEx 官方端點，runner 的網路與 OpenSSL 版本都比本機穩定
+#      （本機 Python 3.13 的嚴格憑證檢查會擋掉 tpex.org.tw，腳本裡有相容處理，
+#       但線上跑不需要依賴那條 workaround）。
+#   2. 稽核結果要 commit 進 repo 給 App 的設定頁「資料健康」讀，本來就要在 CI 落地。
+#
+# ⚠️ 這個檔案目前**還沒有 commit**：這台機器的 PAT 沒有 workflow scope，push 帶
+#    .github/workflows/ 的變更會被 GitHub 拒絕。請總司令用有 workflow 權限的權杖
+#    把它 commit 上去，排程才會真的開始跑。在那之前可以本機手動執行：
+#      python scripts/build_listed_universe.py
+#      python scripts/prune_delisted.py
+#      python scripts/data_audit.py
+name: 資料一致性稽核
+
+on:
+  schedule:
+    # 台北時間每晚 23:20（= UTC 15:20），排在 market.yml 的盤後更新之後，
+    # 才稽核得到當天的最新資料。
+    - cron: "20 15 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安裝相依
+        run: pip install requests certifi urllib3
+
+      - name: 更新官方在市名冊
+        run: python scripts/build_listed_universe.py
+
+      - name: 剔除榜單裡已下市/價格過期的股票
+        run: python scripts/prune_delisted.py
+
+      # 稽核失敗（違規率>1%）不讓這一步中斷流程——報告本身還是要 commit 進去，
+      # 否則使用者在 App 上看不到「今天出問題了」，只會看到一份舊報告。
+      # 真正的擋門在冒煙測試（check 39），那才是禁止上線的關卡。
+      - name: 全市場一致性稽核
+        id: audit
+        continue-on-error: true
+        run: python scripts/data_audit.py
+
+      - name: Commit 稽核結果
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/audit_report.json data/listed_universe.json scores.json scores_momentum.json scores_future.json
+          if git diff --cached --quiet; then
+            echo "稽核結果與上次相同，不產生 commit"
+          else
+            git commit -m "資料稽核：更新 audit_report.json 與在市名冊（每晚排程）"
+            git push
+          fi
+
+      - name: 稽核未通過就讓這個 job 顯示紅燈
+        if: steps.audit.outcome == 'failure'
+        run: |
+          echo "::error::資料一致性稽核未通過，詳見 data/audit_report.json"
+          exit 1

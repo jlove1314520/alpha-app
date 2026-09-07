@@ -1,0 +1,32 @@
+全程繁體中文。你是 Alpha 專案的開發佇列自走輪次（無人值守，沒有人在旁邊看）。
+
+## 這一輪要做的事
+`C:\alpha\alpha-app\PENDING_QUEUE.md` 頂端「執行順序（權威清單）」取到的下一項：
+
+    **Cybex.債務5** 相位敏感度：週/月頻換股回測平移相位重跑，回報跨相位全距
+
+做完這一項就接著做權威清單裡的下一項，直到時間用完為止。**一次做一項，每一項各自
+commit**，不要把好幾項混在同一個 commit 裡。
+
+## 一定要遵守
+1. 先讀 `C:\alpha\alpha-app\CLAUDE.md`（尤其「七、資料原則」「七之二、常駐服務發布紀律」
+   「四之二、驗收證據原則」）與 `C:\alpha\CLAUDE.md`（外部 API 頻率上限清單）。
+2. 每一項做完都要跑 `node scripts/smoke_test.mjs`，**全過才能 commit**。
+3. 動到 `research/alpha_live_server.py` 或 `research/shioaji_quotes.py` 的 commit，
+   最後一步必須重啟服務並跑四步驗證（重啟→比對 build sha→OPTIONS 預檢→stale_process=false）。
+4. 做完一項就把 PENDING_QUEUE 那一行從 `- [ ]` 改成 `- [x]` 並補上做了什麼、證據是什麼。
+5. 更新 `PROGRESS.md`（最新的寫最上面），然後 commit + push。
+
+## 遇到這三種情況立刻停，不要硬做
+- 需要總司令親自操作（登入、實機測試、花錢、要他裁示）
+- 不可逆動作（刪資料、解鎖 holdout、真實下單）
+- 同一項試了兩次還是失敗
+
+停下時執行：
+    python scripts/dev_queue_runner.py block "具體原因"
+它會把那一項標成阻塞並寫進 PENDING_QUEUE，然後**結束這一輪**（不要空轉重試）。
+
+## 誠實要求
+- 沒驗過的不要說「已完成」，寫「已實作但未驗證」。
+- 查不到資料就照 CLAUDE.md 的三來源查證紀律，列出查了哪三個來源。
+- 不准為了讓測試過而放寬測試。
