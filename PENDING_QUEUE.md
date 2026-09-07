@@ -800,7 +800,25 @@ ORDER-END
 
 **排序說明**：總司令指定排在「實測 二～六」之後，不插隊。
 
-- [ ] **金流一.1** `scripts/build_sector_flow.py` → `data/sector_flow.json`（個股層＋產業層，零額外請求）
+- [x] **金流一.1** **後端已完成（視窗受 holdout 限制，見下）**：新增
+  `.github/scripts/accumulate_institutional.py`（法人歷史往前累積）＋
+  `scripts/build_sector_flow.py`（聚合），兩支都**零額外請求**，已接進 `market.yml`。
+  產出 `data/institutional_history.json`（2,095 檔×9 交易日、0.3MB）與
+  `data/sector_flow.json`（2,095 檔、**40 個真產業**、0.6MB）。
+  - **排除 161 檔非產業證券**（ETF 268／上櫃ETF 122／存託憑證 36／ETN 等在
+    `company_info.industry` 裡長得像產業）。第一版沒濾，ETF 以 -363,316 張
+    排流出第一名，違反規格「ETF、權證、DR 不得混進產業合計」，已修。
+  - **⚠ 20／60 日視窗尚不可用**：`stock_detail.json` 法人 history 上限 5 天、
+    T86 parquet 停在 2024-12-31——**而那是 holdout 邊界不是疏漏**
+    （`VAL_END=2024-12-31`，`backfill_t86.py` 預設就停在那）。近 60 交易日整段
+    在 holdout 裡，回補等於解鎖 holdout，**需總司令明確同意，故未做**。
+    改採往前累積：20 日視窗約 11 個交易日後可用、60 日約 51 個後可用。
+    **不補零、不外插、不用短視窗冒充長視窗**；`windows_missing_days` 明載還缺幾天。
+  - **已知缺口**：自營商為合併值未排除避險（上游 T86 解析已加總，要拆需改
+    `fetch_market_tw.py`，另案）；`est_amount` 為估算非真實成交金額。
+  - **發現**：張數與金額會反向——半導體業近 5 日 **-44,973 張但 +415.7 億**
+    （台積電 2,440 元一張被買、便宜的被賣）。**前端須以金額為主、張數為輔**，
+    只看張數會得到相反的結論。
 - [ ] **金流一.2** 上櫃三大法人回補 ≥250 個交易日到 `research/data/raw_tpex_3insti/`（可中斷續跑）
 - [ ] **金流一.3** 前端：市場頁產業金流象限散點圖＋成分股排行、個股頁籌碼徽章、首頁異常小點
 - [ ] **金流一.4** 評分引擎籌碼因子說明改引用 sector_flow 實際欄位（權重不動、不宣稱預測力）

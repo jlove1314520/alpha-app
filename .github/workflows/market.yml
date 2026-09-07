@@ -41,6 +41,16 @@ jobs:
       - name: 更新個股月營收/PER/PBR/殖利率（TWSE官方openapi，累積式寫回，免金鑰）
         run: python .github/scripts/update_fundamentals_daily.py
         continue-on-error: true
+      # 2026-09-08（金流一.1）法人歷史往前累積 → 產業金流聚合。兩支都零額外
+      # 請求：只讀 stock_detail.json（上一步已經抓好的 T86/TPEx 結果）。
+      # 必須排在 update_fundamentals_daily.py 之後，因為它依賴那支寫出的
+      # institutional 欄位。近 60 交易日的 T86 落在 holdout，不回補（見腳本 docstring）。
+      - name: 累積個股三大法人歷史（零額外請求，金流一.1）
+        run: python .github/scripts/accumulate_institutional.py
+        continue-on-error: true
+      - name: 聚合產業金流地圖（零額外請求，金流一.1）
+        run: python scripts/build_sector_flow.py
+        continue-on-error: true
       - name: 抓USD/TWD匯率（yfinance，免金鑰）
         run: python .github/scripts/fetch_fx.py
         continue-on-error: true
