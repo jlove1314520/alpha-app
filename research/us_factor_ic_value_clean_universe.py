@@ -65,8 +65,8 @@ def load_clean_universe_tickers(exclude_contamination_blacklist: bool = True) ->
     return usable
 
 
-def load_value_sample() -> tuple[dict[str, pd.DataFrame], dict[str, str]]:
-    tickers = load_clean_universe_tickers()
+def load_value_sample(include_contaminated: bool = False) -> tuple[dict[str, pd.DataFrame], dict[str, str]]:
+    tickers = load_clean_universe_tickers(exclude_contamination_blacklist=not include_contaminated)
     print(f"{len(tickers)} tickers in clean stratified universe (usable==True)")
 
     cik_map = get_cik_map()

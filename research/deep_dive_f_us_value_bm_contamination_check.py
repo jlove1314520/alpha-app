@@ -77,7 +77,11 @@ def main():
 
     print("=== US contamination check: f_us_value_bm (#20) known death-spiral tickers ===\n")
 
-    data, drop_reasons = load_value_sample()
+    # round431: load_value_sample()'s underlying load_clean_universe_tickers()
+    # now excludes the blacklist by default (universe-level fix) -- pass
+    # include_contaminated=True here to get the pre-fix full sample as the
+    # "(a) baseline" for this specific leave-out comparison.
+    data, drop_reasons = load_value_sample(include_contaminated=True)
     contaminated_in_sample = sorted(KNOWN_CONTAMINATED_TICKERS & set(data.keys()))
     print(f"{len(data)} usable names; known contaminated tickers present: {contaminated_in_sample} "
           f"({len(contaminated_in_sample)}/{len(data)})\n")

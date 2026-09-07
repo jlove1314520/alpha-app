@@ -99,3 +99,84 @@ Tiingo、Polygon.io、Nasdaq Data Link、EODHD。這幾家對下市股的覆蓋�
   跟舊結果的差別只剩宇宙定義，證明不了偏誤已修正。
 - **外部一改.1**：原本就在等一.4，繼續等。
 - 在價格源補齊之前，**所有美股結論一律維持「宇宙待驗證」標記**，不得升級。
+
+---
+
+# 續查：已下市美股歷史價格（2026-09-08 資料源一.3 續）
+
+總司令裁示依序查證三條免費且合規的來源，每條都實測 TWTR／SIVB／FRC／ATVI 四檔。
+
+## 總表
+
+| 來源 | 下市股覆蓋 | 需要 key | 結論 |
+|---|---|---|---|
+| yfinance（現行主來源） | **0/4** | 否 | 不可行 |
+| **(a)** IBKR MCP 工具 | **0/4** | 否（既有資源） | **不可行** |
+| **(b)** SEC EDGAR XBRL | 端點價，**不成序列** | 否 | **不足以支撐回測** |
+| **(c)** Alpha Vantage 免費層 | **未測完** | **是（免費、無 CAPTCHA）** | **待總司令決定是否領 key** |
+| Stooq | 宣稱有 | 是（**需人工過 CAPTCHA**） | 待總司令決定 |
+
+## (a) IBKR MCP — 0/4，不可行
+
+| 標的 | `search_contracts` | `get_price_history` |
+|---|---|---|
+| **AAPL（對照組）** | ✓ | ✓ **22 根日 K，正常** |
+| TWTR | ✓ 找到 2 個 contract（137780444、145142887，exchange 皆 `VALUE`） | ✗ 兩個都回 `Details currently unavailable` |
+| SIVB | ✗ 普通股查無，只有債券與特別股 `SIVBO` | — |
+| FRC | ✗ 查無 | — |
+| ATVI | ✗ 查無 | — |
+
+**對照組是關鍵**：AAPL 同一支工具同一時間正常回傳，所以 TWTR 的失敗**不是工具當下不通，
+是下市股特有的**。IBKR 保留了部分合約 metadata（TWTR 還查得到名字），
+但**歷史 K 線一律不給**。
+
+## (b) SEC EDGAR XBRL — 只有端點價，不成序列
+
+查 `dei:EntityPublicFloat`（10-K 封面頁的公眾流通市值）與
+`dei:EntityCommonStockSharesOutstanding`：
+
+| 公司 | EntityPublicFloat | SharesOutstanding |
+|---|---|---|
+| SVB Financial（SIVB，CIK 719739） | **13 筆**，最後 2022-06-30 = 23,336,532,366 USD | 51 筆，最後 2023-01-31 = 59,200,925 |
+| Twitter（TWTR，CIK 1418091） | **8 筆**，最後 2021-06-30 = 53,550,000,000 USD | 34 筆，最後 2022-07-22 = 765,246,152 |
+| First Republic（FRC，CIK 1132979） | **完全沒有 companyfacts** | — |
+
+**結論：一年最多一個端點價，不構成序列**，正如總司令預判。
+
+**額外的誠實揭露（重要）**：`EntityPublicFloat` 是**非關係人持股**的市值，
+不是總市值。拿它除以「總」流通股數，得到的是**價格下界，不是價格**。
+就算只當端點價用，這個偏差也必須標明。
+
+Form 25 只給下市**日期**，不給價格。
+
+## (c) Alpha Vantage — 未測完，需要一把免費 key
+
+- `LISTING_STATUS` 端點**免費可用且回真 CSV**：demo key 查 `date=2014-07-10&state=delisted`
+  回 **426 筆**，欄位含 `ipoDate`／`delistingDate`／`status`。
+  → **下市「名冊」這一半 Alpha Vantage 給得起。**
+- 但 demo key **只支援官方文件那一個示範日期**：改成 `date=2023-06-01` 回 `{}`（0 筆），
+  所以查不到 2022/23 才下市的那四檔。
+- `TIME_SERIES_DAILY` 對 TWTR 回：
+  `"The **demo** API key is for demo purposes only. Please claim your free API key…"`
+
+**所以「下市股價格序列」這一半沒測到，不是不可行，是缺 key。**
+
+**我沒有自行去領**：領 key 要提交 email，等於**拿總司令的信箱去註冊第三方服務**。
+這不在「純 bug 修復」或「已明確交辦」的範圍內，依提案先於執行，交總司令決定。
+
+## 目前結論（誠實版）
+
+**還不能說「已下市美股價格無合規免費來源」**——(c) 尚未測完。
+能確定的是：**(a) 與 (b) 都補不了這個缺口**，而 (c) 與 Stooq 都卡在同一件事上：
+**需要總司令花一兩分鐘親自領一把 key。**
+
+兩條路的取得成本比較：
+
+| | Alpha Vantage | Stooq |
+|---|---|---|
+| 費用 | 免費 | 免費（無訂閱費） |
+| 取得方式 | **填 email，無 CAPTCHA**，官方稱「不到 20 秒」 | **需人工過一次 CAPTCHA** |
+| 額度 | 免費層有每日次數限制 | 有每日額度上限 |
+| 下市股價格 | **未證實** | 宣稱有，未證實 |
+
+**建議先領 Alpha Vantage**（成本更低、無 CAPTCHA），測完再決定要不要動 Stooq。
