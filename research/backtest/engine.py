@@ -42,6 +42,15 @@ class BacktestConfig:
     # None（預設）＝完全比照舊行為，用 `rebalance_weekday`；設定這個欄位後改用「日曆序位
     # 索引 % N == 0」判斷換股日，`rebalance_weekday` 那個值在這個模式下被忽略。這是純加法
     # 擴充，不影響任何既有呼叫端（它們都沒有設定這個新欄位，維持 None，行為完全不變）。
+    rebalance_phase: int = 0  # 2026-09-07 新增（Cybex.債務5 相位敏感度）：換股日的「起始相位」。
+    # 固定週期重平衡的相位是**任意選的**——同一個策略只是換個起始日，績效可能差很多
+    # （Cybex 第 315 輪跨相位 Calmar 1.006～2.084，差近兩倍）。所以相位必須是可掃的參數，
+    # 不能是寫死的 0。兩種模式各自的意義：
+    #   - `rebalance_every_n_days` 模式：換股日判定從 `day_i % N == 0` 改為
+    #     `(day_i - phase) % N == 0`，phase 取 0..N-1。
+    #   - `rebalance_weekday` 模式：換股日判定從 `weekday == W` 改為
+    #     `weekday == (W + phase) % 5`，phase 取 0..4（週一到週五）。
+    # 預設 0 ＝ 完全比照舊行為，既有呼叫端一個字都不用改，行為位元級相同。
     max_positions: int = 10
     stop_loss_pct: float = 0.15  # tier-3 hard stop, independent of the MA exit
     initial_capital: float = 1_000_000.0
@@ -275,9 +284,9 @@ def run_backtest(
 
         # 3) rebalance day: run the signal, schedule exits/entries
         is_rebalance_day = (
-            (day_i % config.rebalance_every_n_days == 0)
+            ((day_i - config.rebalance_phase) % config.rebalance_every_n_days == 0)
             if config.rebalance_every_n_days is not None
-            else (pd.Timestamp(day).weekday() == config.rebalance_weekday)
+            else (pd.Timestamp(day).weekday() == (config.rebalance_weekday + config.rebalance_phase) % 5)
         )
         if is_rebalance_day:
             scores = signal_fn(price_data, day, market_df)
