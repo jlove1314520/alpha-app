@@ -575,6 +575,23 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：TWSE 官方28類產業分類指數，GitHub Actions 排程抓取</div>
       </div>
 
+      <!-- 2026-09-08（金流一.3）產業金流。
+           **刻意不畫規格裡的 SVG 象限散點圖**：那張圖的 Y 軸是「近5日日均 vs
+           近20日日均的加速度」、半徑是「20日累計」，但 20 日視窗現在還沒長出來
+           （法人歷史採往前累積，近60交易日的T86落在holdout不能回補，
+           見 scripts/build_sector_flow.py docstring）。
+           沒有 Y 軸卻硬畫散點圖，等於把所有泡泡排在一條線上再叫它象限圖——
+           那是假裝有資料。改用長條排行，20 日視窗長滿後再補象限圖。
+           順帶好處：不用 SVG 就不會重演走勢線畫到數字上的 viewBox 問題。
+           **以估算金額為主、張數為輔**：實測半導體業近5日 -44,973張 但 +415.7億
+           （台積電2440一張被買、便宜的被賣），只看張數會得到相反的結論。 -->
+      <div class="card">
+        <h3>產業金流 <span style="font-size:9.5px;color:var(--ink-4);font-weight:400">法人行為（描述性資訊，非預測訊號）</span></h3>
+        <div class="mkt-toggle" id="flow-toggle" style="margin-bottom:10px"></div>
+        <div id="sector-flow-body"><div class="note">載入中…</div></div>
+        <div class="note" id="sector-flow-note"></div>
+      </div>
+
       <!-- 2026-09-02重新配置（使用者裁示「籌碼頁重新配置，不加底部按鈕、不擁擠」）：
            原本佔兩張卡的「三大法人買賣超」+「大盤融資維持率」完整圖表移到獨立的
            scr-chips-market頁面，這裡只留一張精簡入口卡（今日三大法人合計+資券
@@ -3304,8 +3321,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 2026-08-27修正：改用Promise.allSettled——Promise.all只要其中一個
     // sub-panel失敗就整個await立刻拋錯，會讓下面stampUpdated/updateDiagBanner
     // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
-    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance()]);
-    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance'];
+    // 2026-09-08（金流一.3）產業金流併入同一批 allSettled——它自己有 try/catch，
+    // 掛了只影響自己那張卡，不會拖垮其他面板（錯誤隔離原則）。
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow()]);
+    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
     if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
     if(MKT_STATE.market==='FUT')_safeAsync('loadMarketFUT',loadMarketFUT);
@@ -5330,6 +5349,96 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       +'</div>'
       +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆${mine.length>12?'，只顯示最近 12 筆':''}。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
   }
+  // ── 2026-09-08（金流一.3）產業金流 ────────────────────────────────────────
+  // data/sector_flow.json 由 scripts/build_sector_flow.py 產生（零額外請求）。
+  // 可用視窗寫在 meta.windows_usable，缺的寫在 meta.windows_missing_days——
+  // 前端**只顯示 meta 說可用的視窗**，不自己補零也不用短視窗冒充長視窗。
+  let SECTOR_FLOW=null,SECTOR_FLOW_AT=0,FLOW_WIN=5,FLOW_OPEN=null;
+  async function ensureSectorFlow(){
+    if(SECTOR_FLOW&&Date.now()-SECTOR_FLOW_AT<10*60*1000)return SECTOR_FLOW;
+    try{
+      const r=await fetch('data/sector_flow.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      SECTOR_FLOW=await r.json();SECTOR_FLOW_AT=Date.now();
+    }catch(e){
+      console.warn('[ensureSectorFlow]',e);recordGlobalError('ensureSectorFlow',e);
+      if(!SECTOR_FLOW)SECTOR_FLOW=null;
+    }
+    return SECTOR_FLOW;
+  }
+  function fmtFlowAmt(v){
+    if(v==null||!isFinite(v))return '—';
+    const a=Math.abs(v);
+    if(a>=1e8)return (v/1e8).toFixed(1)+'億';
+    if(a>=1e4)return (v/1e4).toFixed(0)+'萬';
+    return String(Math.round(v));
+  }
+  function setFlowWin(w){FLOW_WIN=w;FLOW_OPEN=null;_safeAsync('renderSectorFlow',()=>renderSectorFlow())}
+  function toggleFlowSector(ind){FLOW_OPEN=(FLOW_OPEN===ind?null:ind);_safeAsync('renderSectorFlow',()=>renderSectorFlow())}
+  async function renderSectorFlow(){
+    const host=document.getElementById('sector-flow-body');
+    const noteEl=document.getElementById('sector-flow-note');
+    const tg=document.getElementById('flow-toggle');
+    if(!host)return;
+    const d=await ensureSectorFlow();
+    if(!d||!d.sectors||!Object.keys(d.sectors).length){
+      host.innerHTML='<div class="note">尚無產業金流資料（data/sector_flow.json 未產生或為空）。</div>';
+      if(tg)tg.innerHTML='';if(noteEl)noteEl.textContent='';
+      return;
+    }
+    const m=d.meta||{},usable=m.windows_usable||[];
+    if(!usable.includes(FLOW_WIN))FLOW_WIN=usable[usable.length-1]||usable[0];
+    // 切換鈕只列 meta 說可用的視窗——缺的不給按，避免按下去是空的
+    if(tg){
+      const lab={1:'當日',5:'近5日',20:'近20日',60:'近60日'};
+      tg.innerHTML=usable.map(w=>`<span class="press mtg-opt${FLOW_WIN===w?' on':''}" style="flex:1;text-align:center" onclick="setFlowWin(${w})">${lab[w]||w+'日'}</span>`).join('');
+    }
+    const key='net_'+FLOW_WIN+'d_est_amount';
+    const lotKey='net_'+FLOW_WIN+'d_lots';
+    const rows=Object.entries(d.sectors)
+      .map(([ind,a])=>({ind,amt:a[key]||0,lots:a[lotKey]||0,n:a.constituents,a}))
+      .filter(r=>r.amt!==0)
+      .sort((x,y)=>y.amt-x.amt);
+    const top=rows.slice(0,8),bot=rows.slice(-5).reverse();
+    const shown=top.concat(bot.filter(b=>!top.some(t=>t.ind===b.ind)));
+    const maxAbs=Math.max(...shown.map(r=>Math.abs(r.amt)),1);
+    host.innerHTML=shown.map(r=>{
+      const pct=Math.max(2,Math.abs(r.amt)/maxAbs*100);
+      const pos=r.amt>0,col=pos?'var(--up)':'var(--down)';
+      const open=FLOW_OPEN===r.ind;
+      let html=`<div class="press" onclick="toggleFlowSector('${r.ind.replace(/'/g,"\'")}')" style="cursor:pointer;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <span style="flex:1;font-size:12px;color:var(--ink-2)">${r.ind}<span style="font-size:9.5px;color:var(--ink-4)"> ${r.n}檔</span></span>
+          <b class="num" style="font-size:12.5px;color:${col}">${pos?'+':''}${fmtFlowAmt(r.amt)}</b>
+          <span class="num" style="font-size:9.5px;color:var(--ink-4);min-width:62px;text-align:right">${nf(Math.round(r.lots))} 張</span>
+          <span style="font-size:10px;color:var(--ink-4)">${open?'▾':'▸'}</span>
+        </div>
+        <div style="height:3px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${col};opacity:.65"></div>
+        </div>
+      </div>`;
+      if(open){
+        const mk=(list,label,c)=>!list||!list.length?'':`<div style="margin-top:6px"><div style="font-size:9.5px;color:var(--ink-4);margin-bottom:3px">${label}</div>`
+          +list.slice(0,10).map(x=>`<div style="display:flex;gap:8px;font-size:11px;padding:2px 0;align-items:baseline">
+              <span class="num" style="color:var(--ink-4);min-width:36px">${x.code}</span>
+              <span style="flex:1;color:var(--ink-2)">${x.name||''}</span>
+              <span class="num" style="color:${c};min-width:58px;text-align:right">${x.est_amount>0?'+':''}${fmtFlowAmt(x.est_amount)}</span>
+              <span class="num" style="color:var(--ink-4);font-size:9.5px;min-width:56px;text-align:right">${nf(Math.round(x.lots||0))} 張</span></div>`).join('')+'</div>';
+        html+=`<div style="padding:4px 0 10px 0">
+          <div class="note" style="margin:0 0 4px 0">成分股依「近 ${r.a.rank_window_days} 日淨買超<b>估算金額</b>」排序（與上方產業數字同一把尺；張數僅供參考，貴的股票少張數也可能是大金額）</div>
+          ${mk(r.a.top_inflow,'買超前 10','var(--up)')}${mk(r.a.top_outflow,'賣超前 10','var(--down)')}</div>`;
+      }
+      return html;
+    }).join('');
+    if(noteEl){
+      const miss=m.windows_missing_days||{};
+      const missTxt=Object.keys(miss).length
+        ?`　${Object.entries(miss).map(([w,n])=>`${w} 日視窗還需累積 ${n} 個交易日`).join('、')}（象限散點圖待 20 日視窗長滿後補上）。`:'';
+      noteEl.innerHTML=`資料日 ${m.date||'—'}，${m.trading_days_available||0} 個交易日。`
+        +`金額為<b>估算</b>（張×1000×當日收盤），非真實成交金額；自營商含避險未拆分。`
+        +`已排除 ETF／ETN／存託憑證等 ${m.non_industry_excluded||0} 檔非產業證券。${missTxt}`;
+    }
+  }
   async function loadDataAudit(force){
     const sum=document.getElementById('audit-summary'),list=document.getElementById('audit-list');
     if(!sum||!list)return;
@@ -5460,7 +5569,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.0541';
+  const APP_VERSION='2026-09-08.0606';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -43,7 +43,9 @@ D = ROOT / "data"
 OUT = D / "sector_flow.json"
 TZ = timezone(timedelta(hours=8))
 
-WINDOWS = (5, 20, 60)
+# 1 日＝規格的「當日」切換；5/20/60 是規格指定的三個視窗。
+# 1 日一定算得出來（只要有一天資料），所以放進來不會有「假裝有」的問題。
+WINDOWS = (1, 5, 20, 60)
 ZSCORE_WINDOW = 60
 ZSCORE_THRESHOLD = 2.0     # 寫死門檻，規格指定 |z|>=2 才亮
 
@@ -214,14 +216,19 @@ def main() -> int:
             agg["acceleration"] = round(d5 - d20, 2)
             agg["quadrant"] = (("流入加速" if d5 > d20 else "流入放緩") if d5 > 0
                                else ("流出放緩" if d5 > d20 else "流出加速"))
+        # 2026-09-08 排序依「估算金額」不是張數——這是實測截圖抓到的不一致：
+        # 半導體業標題 +415.7 億，成分股卻依張數排，聯電 26,202 張排第一，
+        # 而真正撐起那 415 億的台積電（2,440 元一張）只排第四。
+        # 標題講金額、清單講張數，兩者對「誰重要」的答案不一樣，那是誤導。
         ranked = sorted(
             codes,
-            key=lambda c: (stocks_out[c].get(f"net_{w_main}d") or {}).get("total_lots") or 0)
+            key=lambda c: (stocks_out[c].get(f"net_{w_main}d") or {}).get("est_amount") or 0)
 
         def _row(c):
             return {"code": c,
                     "name": (companies.get(c) or {}).get("name"),
-                    "lots": (stocks_out[c].get(f"net_{w_main}d") or {}).get("total_lots")}
+                    "lots": (stocks_out[c].get(f"net_{w_main}d") or {}).get("total_lots"),
+                    "est_amount": (stocks_out[c].get(f"net_{w_main}d") or {}).get("est_amount")}
 
         agg["rank_window_days"] = w_main
         agg["top_inflow"] = [_row(c) for c in ranked[::-1][:10]]
