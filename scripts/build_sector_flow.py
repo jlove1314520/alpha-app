@@ -300,7 +300,54 @@ def main() -> int:
     if missing:
         print("  尚缺：" + "、".join(f"{w} 日視窗還差 {n} 個交易日"
                                      for w, n in missing.items()))
+    _update_queue_countdown(n_dates, dates, missing, usable)
     return 0
+
+
+# PENDING_QUEUE 裡被改寫的區塊標記
+_CD_BEGIN = "<!-- FLOW_COUNTDOWN_BEGIN -->"
+_CD_END = "<!-- FLOW_COUNTDOWN_END -->"
+
+
+def _update_queue_countdown(n_dates, dates, missing, usable) -> None:
+    """每日改寫 PENDING_QUEUE 的金流一倒數行（2026-09-08 總司令裁示 3）。
+
+    為什麼做成自動的：倒數若靠人記得每天改，第一天就會忘。
+    而且**一個過期的倒數比沒有倒數更糟**——會讓人以為快好了。
+    這裡直接把當日實際可用天數寫回去，不經人手。
+    """
+    q = ROOT / "PENDING_QUEUE.md"
+    try:
+        txt = q.read_text(encoding="utf-8")
+        if _CD_BEGIN not in txt or _CD_END not in txt:
+            return
+        if missing:
+            miss_txt = "、".join(
+                f"**{w} 日視窗還需 {n} 個交易日**"
+                for w, n in sorted(missing.items(), key=lambda kv: int(kv[0])))
+            lines = [
+                f"- [!] **金流一.4** **阻塞：等資料累積**——目前法人歷史 "
+                f"**{n_dates} 個交易日**（{dates[0]}~{dates[-1]}），"
+                f"可用視窗 {usable}；{miss_txt}。",
+                "  待補：個股頁異常大買（60 日 z）、逆勢買超、法人 20 日均價、"
+                "市場頁象限散點圖（需 20 日加速度）。**不得縮短視窗湊數。**",
+                "  <sub>此行由 `scripts/build_sector_flow.py` 每日自動改寫。</sub>",
+            ]
+        else:
+            lines = [
+                f"- [ ] **金流一.4** **視窗已足夠，可以動工**——法人歷史 "
+                f"{n_dates} 個交易日，5／20／60 日視窗全部可用。",
+            ]
+        head = txt.split(_CD_BEGIN, 1)[0]
+        tail = txt.split(_CD_END, 1)[1]
+        body = "\n".join(lines)
+        q.write_text(head + _CD_BEGIN + "\n" + body + "\n" + _CD_END + tail,
+                     encoding="utf-8")
+        print("  已更新 PENDING_QUEUE 的金流一倒數行")
+    except Exception as e:  # noqa: BLE001
+        # 倒數更新失敗不能影響主要產出——這只是文件同步，不是資料
+        print(f"  ! 更新 PENDING_QUEUE 倒數失敗（{type(e).__name__}: {e}），"
+              f"不影響本次 sector_flow.json 產出")
 
 
 if __name__ == "__main__":
