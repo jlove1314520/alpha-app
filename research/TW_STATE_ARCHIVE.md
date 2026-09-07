@@ -172,4 +172,8 @@
 
 ---
 
+**第424輪（原TW_MARATHON_STATE.md，round430時歸檔）**：**上一則保留（第424輪，供對照）**——取鎖乾淨（cycle`20260907-040036`）。三軌時間戳：TW 03:00（round422，最舊）／US 03:36（round423）／FUT 12:00（round399，依例外條款不選，除非有全新機制假說）——依輪替選TW。`run_detached.py status`確認heavy-job-slot空（0個running），無背景工作衝突；`git status`確認`.github/workflows/audit.yml`/`research/.live_watchlist.json`/`research/DEV_QUEUE_PROMPT.txt`/`research/data_cache/`/`research/dev_queue_cycle.log`/`research/survivor_sharpe_check.py`為其他既存未commit異動，本輪未觸碰，保留原狀。**本輪工作單位＝round422「下一輪TW軌接手」(iv)：設計`data/signal_status.json`schema並回補#49/#51已有結果**——round422/round423皆誠實記錄這是欠下的地基工作，本輪回補而非再挖新假說；(i)子事件1二元規格對照與(ii)子事件3 MOPS查證留給下一輪或hypothesis_queue排程（`git status`顯示hypothesis_queue排程正在編輯`#51`相關檔案，本輪選擇不衝突的地基工作）。新增`research/build_signal_status.py`：schema定義四條方向（`#49`~`#52`）的公開狀態，欄位含`status`(NOT_STARTED/IN_PROGRESS/FAIL/EXPERIMENTAL/PASS)、`summary`、`refs.trials_ledger`、`refs.docs`；`#51`用`sub_events`陣列拆三個子事件。人工核對`TRIALS_LEDGER.md`#180/#184（#49最終FAIL，第6關逐年一致性VAL 3/4年同號未過83.3%門檻）、#186（#51子事件1FAIL）、#187（#51子事件2FAIL）三筆既有結果後填入，非自動剖析markdown（避免正則斷章取義）。跑腳本產生`data/signal_status.json`（4條方向：#49 FAIL、#50 NOT_STARTED、#51 IN_PROGRESS含3個sub_events、#52 NOT_STARTED），確認UTF-8合法JSON。`trial_registry.py --check`維持PASS（本輪未新增判定，純資料整理）。`is_holdout_consumed()`開工/收工前皆確認`False`，零新增API呼叫。**下一輪TW軌接手**：(i) 子事件1二元規格對照（`short_ratio>0`vs`==0`比較mean_CAR）；(ii) 子事件3 MOPS查證三候選方向；(iii) `#51`子事件3有進度後記得回頭更新`data/signal_status.json`（`build_signal_status.py`的`DIRECTIONS`常數，非自動同步，每次有新結果要手動改常數再重跑腳本）；(iv) 待App端（開發帽）決定`signal_status.json`要不要接進`index.html`顯示，本輪只做資料面、未動`index.html`。完整見`TW_LOG.md`第424輪記錄、`build_signal_status.py`（新增，可重複執行）、`data/signal_status.json`（新增）。
+
+---
+
 （第413輪已於round422歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
