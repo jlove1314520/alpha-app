@@ -1,3 +1,59 @@
+## 2026-09-08 健檢.五：IBKR 報價卡了六天，根因是「排程工作根本不存在」
+
+**根因（三項全查完）**
+
+1. **`AlphaIbkrQuotes` 排程工作不存在。** 不是被 `DisallowStartIfOnBatteries`
+   擋住——**是根本沒註冊過**。`run-ibkr-quotes-cycle.ps1` 的註解白紙黑字寫著
+   「Triggered by Windows Task Scheduler task "AlphaIbkrQuotes"」，
+   但 `schtasks` 裡從頭到尾沒有這個名字。腳本、vbs 啟動器、log 檔全都齊全，
+   **唯獨缺最後一步註冊**。
+2. **IBKR Gateway 是活的**（`ibgateway` PID 108500），沒有掉登入。
+3. **最後一次排程執行是 09/01 21:09，而且成功**（寫入 9 檔、push 成功）。
+   `quotes_ibkr.json` 09/02 23:25 那次寫入**沒有進 log**，所以不是排程跑的
+   ——是 09/02 22:34 改完 `ibkr_quotes.py` 後手動跑的一次。兩個時間戳對得上。
+
+**為什麼拖了六天沒被發現**：App 在本機來源逾期時**靜默回退**到 Yahoo 每日收盤
+快照，標籤只寫「Yahoo Finance（每日收盤快照）」——那句話沒說謊，但使用者看不出
+「本機即時來源其實掛了」，會以為美股本來就只有收盤快照。
+**靜默降級比顯示錯誤更危險：錯誤會被修，靜默降級會被當成正常狀態放著。**
+
+**修法（比照常駐服務紀律）**
+
+建立 `AlphaIbkrQuotes`，四項要求到位三項：
+
+| 要求 | 狀態 |
+|---|---|
+| 允許電池供電 | ✅ `DisallowStartIfOnBatteries=False`、`StopIfGoingOnBatteries=False` |
+| 錯過補跑 | ✅ `StartWhenAvailable=True` |
+| 失敗自動重啟 | ✅ `RestartCount=3`、間隔 1 分 |
+| **開機自啟** | ❌ **需要系統管理員權限，指令已交總司令** |
+
+間隔 5 分鐘（台股版 2 分鐘對 IBKR 太密；ps1 原設計註解寫 "every few minutes"）。
+
+**實測**：手動觸發，結果碼 0，`quotes_ibkr.json` 從 09/02 23:25 更新到 09/08 05:37，
+**9/9 檔全有價、0 檔 None**。道瓊在 IBKR 無訂閱時自動回退 Yahoo 並標
+`yahoo_fallback`。
+
+**順帶查出兩件事**
+
+- **美股報價全部是 `DELAYED`**（paper 帳戶無即時訂閱）。App 上「美股即時報價」
+  名不副實，實際是延遲資料。
+- **IBKR Gateway 每週日 01:00 ET 權杖失效，必須人工重新登入**（官方文件）。
+  這是排程之外的**第二個斷點，而且每週固定發生**。已寫進 `C:lpha\CLAUDE.md`
+  頻率上限清單，含對應流程與「沒有合規自動化解法」的誠實揭露
+  （IBeam 那類方案是代填認證，不採用；正解是 IBKR Web API OAuth，未評估）。
+- **`AlphaShioajiQuotes`（台股版）有同一個電池缺陷**
+  （`DisallowStartIfOnBatteries=True`、`StartWhenAvailable=False`、`RestartCount=0`），
+  現在只是因為插著電才沒發作。**未修——不在本次裁示範圍，提案給總司令。**
+
+**健檢.五.4 誠實標示已上線**：本機 IBKR 逾期時，指數列改標
+「本機IBKR逾期→Yahoo每日收盤快照」，不再靜默降級。
+
+**驗收未完成**：裁示要求「連續兩個美股交易時段都有更新」。
+現在只有單次成功，**兩個時段要到 09/09 才驗得完，不提前宣告完成。**
+
+冒煙測試 41/41 PASS。
+
 ## 2026-09-08 更正：workflow 檔其實推得上去，先前說「PAT 沒權限」是錯的
 
 先前幾輪我一直說 `.github/workflows/*.yml` 因為 PAT 缺 workflow 權限而推不上去，

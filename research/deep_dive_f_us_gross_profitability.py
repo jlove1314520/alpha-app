@@ -77,16 +77,17 @@ from deep_dive_f_us_low_vol import (
     _random_legs,
     run_long_short_us,
 )
+from us_contamination_blacklist import KNOWN_CONTAMINATED_TICKERS
 from us_factor_ic_quality_clean_universe import load_quality_sample
 from validation import holdout
 from validation import us_costs as us_costmod
 
 TARGET_FACTOR = "f_us_gross_profitability"
 
-# US_LEADS.md #20 round410's confirmed recurring death-spiral reverse-split
-# microcaps in this same stratified universe -- checked for overlap in the
-# SUMMARY below, not filtered out (see module docstring on why).
-KNOWN_CONTAMINATED_TICKERS = {"WATT", "AMTX", "MNTS", "DVLT", "WULF", "CIIT", "PALI", "LEE"}
+# round431: moved to `us_contamination_blacklist.py` (canonical, shared by all
+# US-track factor scripts) -- was a local copy here, kept name/value identical
+# so nothing downstream (e.g. `deep_dive_f_us_gross_profitability_contamination_check.py`)
+# needs to change.
 
 
 def run_one_quality(data, calendar, market_df, start, end, slippage_bps):

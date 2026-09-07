@@ -41,6 +41,7 @@ import pandas as pd
 
 from factor_ic import build_snapshots, evaluate_factor
 from sec_edgar_client import get_cik_map
+from us_contamination_blacklist import KNOWN_CONTAMINATED_TICKERS
 from us_factors import us_price_series
 from us_factors_value import add_value_factor, book_value_per_share_pit
 from validation import holdout
@@ -50,9 +51,17 @@ SEC_THROTTLE_SEC = 0.3
 UNIVERSE_CSV = Path(__file__).parent / "data" / "us_stratified_universe_sample.csv"
 
 
-def load_clean_universe_tickers() -> list[str]:
+def load_clean_universe_tickers(exclude_contamination_blacklist: bool = True) -> list[str]:
+    """Canonical clean-universe ticker loader, shared by `load_value_sample()`
+    below and by `us_factor_ic_lowvol_clean_universe.py`/
+    `us_factor_ic_quality_clean_universe.py`. `exclude_contamination_blacklist`
+    defaults True (round431 universe-level fix, see `us_contamination_blacklist.py`)
+    so every caller gets the fix automatically; set False only to reproduce a
+    pre-round431 result exactly."""
     df = pd.read_csv(UNIVERSE_CSV)
     usable = df[df["usable"] == True]["stock_id"].tolist()  # noqa: E712
+    if exclude_contamination_blacklist:
+        usable = [t for t in usable if t not in KNOWN_CONTAMINATED_TICKERS]
     return usable
 
 

@@ -2885,7 +2885,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
           :(isYahoo?'Yahoo 延遲~15分':`IBKR ${intradayDataTypeLabel(ibkrQ.data_type)}`);
         return {html:idxRowHtml(label,srcLabel,item),date:INTRADAY_IBKR.fetched_at,label,srcLabel,item};
       }
-      return {html:idxRowHtml(label,'Yahoo Finance（每日收盤快照）',idx[id]),date:idx[id]&&idx[id].as_of,label,srcLabel:'Yahoo Finance（每日收盤快照）',item:idx[id]};
+      // 2026-09-08（健檢.五.4 總司令裁示）本機IBKR逾期時不得靜默回退。
+      // 舊寫法只標「Yahoo Finance（每日收盤快照）」——那句話本身沒說謊，
+      // 但使用者看不出「本機即時來源其實掛了」，會以為美股本來就只有收盤快照。
+      // 靜默降級比顯示錯誤更危險：錯誤會被修，靜默降級會被當成正常狀態放著，
+      // 這次就是這樣拖了六天（09/02～09/08 排程根本不存在都沒人發現）。
+      const _ibkrStale=INTRADAY_IBKR&&!ibkrFresh;
+      const _fbLabel=_ibkrStale
+        ?'本機IBKR逾期→Yahoo每日收盤快照'
+        :'Yahoo Finance（每日收盤快照）';
+      return {html:idxRowHtml(label,_fbLabel,idx[id]),date:idx[id]&&idx[id].as_of,label,srcLabel:_fbLabel,item:idx[id]};
     });
   }
   // 2026-09-01新增：加權指數優先用Shioaji即時報價(quotes_sinopac.json)，
@@ -5451,7 +5460,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.0518';
+  const APP_VERSION='2026-09-08.0541';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
