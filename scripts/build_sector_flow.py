@@ -66,6 +66,33 @@ def _is_industry(name) -> bool:
     return not any(t in str(name) for t in ("ETF", "ETN", "存託", "受益"))
 
 
+# 一個日期要算「這天有全市場資料」，至少要有最大覆蓋檔數的這個比例。
+# 為什麼需要這道過濾（實測踩到的）：累積器是從各檔 stock_detail 的 history 收來的，
+# 不同股票帶回來的歷史長度不一樣，於是日期軸會被少數股票拉長——
+# 實測 9 個日期裡，20260901~20260907 這 5 天每天約 1,860~2,008 檔，
+# 但 20260826 只有 **4 檔**、20260827 只有 38 檔。
+# 那 4 天不是「全市場那天的資料」，是零星殘留。
+# 不濾掉的話會有兩個後果：(1) 檔案宣稱「9 個交易日」是**高估**；
+# (2) 「20 日視窗還需 11 天」的倒數跟著樂觀，實際還需 15 天。
+# 對使用者而言，一個樂觀的倒數比沒有倒數更糟——他會以為快好了。
+MIN_DATE_COVERAGE = 0.5
+
+
+def _solid_dates(dates: list, series: dict) -> list:
+    """只留「該日有足夠橫斷面覆蓋」的日期。"""
+    counts = {d: sum(1 for b in series.values() if d in b) for d in dates}
+    if not counts:
+        return []
+    peak = max(counts.values())
+    keep = [d for d in dates if counts[d] >= peak * MIN_DATE_COVERAGE]
+    dropped = [(d, counts[d]) for d in dates if d not in keep]
+    if dropped:
+        print("  剔除覆蓋不足的日期（非全市場資料，只是零星殘留）：")
+        for d, n in dropped:
+            print(f"    {d}: 只有 {n} 檔（門檻 {peak * MIN_DATE_COVERAGE:.0f} 檔）")
+    return keep
+
+
 def _load(p: Path, default=None):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
@@ -109,8 +136,11 @@ def main() -> int:
         print("! 沒有 data/institutional_history.json，"
               "先跑 .github/scripts/accumulate_institutional.py")
         return 1
-    dates = hist["dates"]
     series = hist["series"]
+    dates = _solid_dates(hist["dates"], series)
+    if not dates:
+        print("! 沒有任何日期達到覆蓋門檻，不寫出檔案")
+        return 1
     n_dates = len(dates)
 
     ci = _load(D / "company_info.json", {}) or {}
@@ -240,6 +270,8 @@ def main() -> int:
             "generated_at": datetime.now(TZ).isoformat(),
             "date": dates[-1],
             "trading_days_available": n_dates,
+            "dates_dropped_low_coverage": len(hist["dates"]) - n_dates,
+            "date_coverage_rule": f"只採計橫斷面覆蓋 >= 尖峰 {MIN_DATE_COVERAGE:.0%} 的日期",
             "windows_usable": usable,
             "windows_missing_days": missing,
             "zscore_window": ZSCORE_WINDOW,

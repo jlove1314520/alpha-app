@@ -925,6 +925,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            股權分散/千張大戶、借券賣出需要新的Actions抓取腳本，見BACKLOG登記待辦。 -->
       <div class="card">
         <h3>三大法人逐日／累計買賣超（張）</h3>
+        <!-- 2026-09-08（金流一.3）籌碼徽章。只放**現在真的算得出來**的兩個：
+             連續買賣天數、土洋同買。規格另外要的「異常大買（60日z分數）」、
+             「逆勢買超」「法人20日均價」都需要 20/60 日視窗，法人歷史還在往前
+             累積（近60交易日的T86落在holdout不能回補），沒有就不顯示，
+             不用短視窗湊一個看起來像那麼回事的數字。 -->
+        <div id="chip-badges" style="margin-bottom:8px"></div>
         <div id="chip-trend-table"><div class="note">載入中…</div></div>
         <div class="note" id="chip-trend-note" style="margin-top:6px"></div>
         <div class="note" id="chip-cost-note" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">外資估算成本：—</div>
@@ -3460,6 +3466,46 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 只有幾天，會逐日變長）；估算成本=近N日「外資淨買超日」的淨買張數×當日收盤加權
   // 平均（不知道真正逐筆成交價，只能概估），畫面明確標「估算、非精確成本」，且
   // 有走勢圖時把這條價位畫上去（lightweight-charts的priceLine）。
+  // 2026-09-08（金流一.3）個股籌碼徽章，資料來自 data/sector_flow.json。
+  // **只顯示算得出來的**：streak_days 與 foreign_trust_aligned 現在就有；
+  // abnormal（60日z）、逆勢買超、法人20日均價需要更長視窗，沒有就整個不畫，
+  // 不用短視窗冒充——一個看起來像那麼回事的假徽章比沒有徽章傷害大得多。
+  async function renderChipBadges(code){
+    const host=document.getElementById('chip-badges');if(!host)return;
+    host.innerHTML='';
+    const d=await ensureSectorFlow();
+    const e=d&&d.stocks&&d.stocks[code];
+    if(!e)return;
+    const m=d.meta||{},badges=[];
+    const pill=(txt,col)=>`<span style="display:inline-block;font-size:10px;font-weight:700;color:${col};border:1px solid ${col};border-radius:6px;padding:2px 7px;margin:0 5px 5px 0">${txt}</span>`;
+    const sd=e.streak_days||{};
+    const st=sd.total;
+    if(st&&Math.abs(st)>=2)
+      badges.push(pill(`三大法人連${st>0?'買':'賣'} ${Math.abs(st)} 日`,st>0?'var(--up)':'var(--down)'));
+    if(sd.foreign&&Math.abs(sd.foreign)>=2)
+      badges.push(pill(`外資連${sd.foreign>0?'買':'賣'} ${Math.abs(sd.foreign)} 日`,sd.foreign>0?'var(--up)':'var(--down)'));
+    if(sd.trust&&Math.abs(sd.trust)>=2)
+      badges.push(pill(`投信連${sd.trust>0?'買':'賣'} ${Math.abs(sd.trust)} 日`,sd.trust>0?'var(--up)':'var(--down)'));
+    const w0=(m.windows_usable||[])[0];
+    if(e.foreign_trust_aligned&&w0!=null){
+      const f=(e['net_'+w0+'d']||{}).foreign_lots||0;
+      badges.push(pill(f>0?'土洋同買':'土洋同賣',f>0?'var(--up)':'var(--down)'));
+    }
+    if(e.abnormal&&e.z_today!=null)
+      badges.push(pill(`異常大${e.z_today>0?'買':'賣'}（z=${e.z_today}）`,'var(--gold)'));
+    if(!badges.length){
+      host.innerHTML='<div class="note">近期無連續買賣（≥2 日）或土洋同買訊號。</div>';
+      return;
+    }
+    const miss=m.windows_missing_days||{};
+    const missTxt=Object.keys(miss).length
+      ?`　異常大買（60 日 z 分數）、逆勢買超、法人 20 日均價需更長視窗，`
+        +`${Object.entries(miss).map(([w,n])=>`${w} 日還需 ${n} 個交易日`).join('、')}，`
+        +`累積足夠前不顯示。`:'';
+    host.innerHTML=badges.join('')
+      +`<div class="note" style="margin-top:2px">法人行為（描述性資訊，非預測訊號）。`
+      +`資料日 ${m.date||'—'}。${missTxt}</div>`;
+  }
   function renderChipTrend(code,inst,px){
     const tbl=document.getElementById('chip-trend-table'),note=document.getElementById('chip-trend-note'),cost=document.getElementById('chip-cost-note');
     if(!tbl)return;
@@ -3677,6 +3723,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       setTxt('chip-note','美股暫無三大法人資料（僅適用台股）');
       document.getElementById('chip-bars').innerHTML='<div class="note">美股暫無此資料</div>';
       _safeSync('renderChipTrend',()=>renderChipTrend(code,null,[]));
+      _safeAsync('renderChipBadges',()=>renderChipBadges(code));  // 2026-09-08 金流一.3
       ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
       setTxt('mg-short-ratio','券資比：—');setTxt('mg-note','美股暫無融資融券資料（僅適用台股）');setTxt('mg-maint','估算融資維持率：—');
       document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
@@ -3768,6 +3815,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const mx=Math.max(...inst.series.map(s=>Math.abs(s.v)))||1;
       document.getElementById('chip-bars').innerHTML=inst.series.map(s=>`<div class="db"><i class="${s.v>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(s.v)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${s.date.slice(5)}</em></div>`).join('');
       _safeSync('renderChipTrend',()=>renderChipTrend(code,inst,px));
+      _safeAsync('renderChipBadges',()=>renderChipBadges(code));  // 2026-09-08 金流一.3
     }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
       _safeSync('renderChipTrend',()=>renderChipTrend(code,null,px));
       document.getElementById('chip-bars').innerHTML='<div class="note">查無法人資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）</div>';
@@ -5569,7 +5617,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.0606';
+  const APP_VERSION='2026-09-08.0618';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
