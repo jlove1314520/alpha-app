@@ -2403,3 +2403,95 @@ cheap gate（`HYPOTHESIS_QUEUE.md` #51(g)待辦，比照子事件2
 改做(b)子事件3小規模回填歷史涵蓋度驗證，或(c)若子事件3也FAIL則#51正式
 結案並設計新方向。完整見`TW_MARATHON_STATE.md`第426輪記錄、
 `forced_short_covering_gate1_binary.py`（新增，可重複執行）。
+
+## 第428輪 2026-09-08T04:00+08:00（TW軌）
+
+取鎖乾淨（cycle`20260908-040037`）。三軌時間戳：TW 05:00（round426，最舊）／
+US 05:30（round427）／FUT 09-06 12:00（round399，依例外條款不選）——依輪替選TW。
+
+開工前`git status`發現工作目錄疊了一批hypothesis_queue排程已完成但未commit的
+工作：`MARATHON_LOG.md`有兩則2026-09-07的心跳（T05:33「上一輪陳舊鎖檔pid 74780
+回收接手，#51子事件3完成第1關cheap gate並結案FAIL」、T05:56「上一輪陳舊鎖檔pid
+90096回收接手，查證#53地基就緒但預算用盡未寫程式碼」、以及一則無時間戳的
+「hypothesis_queue排程接續（取鎖時發現陳舊鎖檔pid94804，29.9分鐘）完成#53第1關
+sanity」），但對應的檔案異動全部停留在working tree未commit。確認：`.devqueue.lock`
+不存在、`tasklist`確認無python.exe行程在跑——判斷是該排程最後一個週期結束前漏做
+commit這一步，不是中途卡死（沒有殘留行程需要清理）。
+
+**本輪工作單位＝核對這批遺留內容並收尾提交**（非新研究，是完成已交辦/已執行工作
+的收尾動作，比照round419先例）：
+
+逐檔核對`git diff`：
+1. `MARATHON_PROTOCOL.md`新增3c節「相位敏感度」——固定週期重平衡起始相位無經濟
+   意義（Cybex第315輪跨相位Calmar 1.006~2.084），規則要求任何週/月頻換股回測
+   報告數字前先掃相位0..N-1，通過標準比照參數高原（整片相位站得住才算，不是
+   挑格子）。
+2. `backtest/engine.py`新增`BacktestConfig.rebalance_phase`欄位——純加法擴充，
+   預設0，`is_rebalance_day`判斷式從`day_i % N`改為`(day_i - phase) % N`
+   （`rebalance_every_n_days`模式）或`weekday == (W+phase)%5`
+   （`rebalance_weekday`模式），核對確認舊呼叫端不設這個欄位時行為完全不變。
+3. `#51`（強制交易者事件）子事件3 CB轉換價重設完成第1關cheap gate並結案FAIL：
+   `mops_cb_conversion_price_client.py`（前批已有）+ 新的cheap gate測試（3078筆
+   可用事件，2市場×15民國年MOPS轉換公司債公告彙總表），事前綁定假設「重設幅度
+   越大、生效日後20交易日CAR應越負」，結果TRAIN IC=+0.0117(p=0.60,n=2031)、
+   VAL IC=+0.0430(p=0.16,n=1047)，train/val同號但方向與假設相反，VAL洗牌null
+   percentile=8.0遠低於90.0門檻（且遠低於50，代表真實訊號比多數隨機打亂還更
+   偏離假設方向）。四項判準僅同號成立，其餘全數未過，判FAIL。已登記
+   `TRIALS_LEDGER.md`#190。**#51三個子事件（強制回補/現金增資折價/CB轉換價
+   重設）至此全數FAIL，正式結案**——不泛化為「事前已知日期的結構性交易者」
+   這個機制大類完全無效，三個子事件測的是三種不同觸發事件＋三種不同構造，
+   共同點僅止於經濟理由的抽象類比。`data/signal_status.json`與
+   `build_signal_status.py`已同步更新#51整體狀態為FAIL。
+4. `#53`（全市場報酬離散度速度，Cross-Sectional Return Dispersion Velocity）
+   完成第1關sanity並登記`TRIALS_LEDGER.md`#192（**未結案，非最終PASS/FAIL**）：
+   新增`cross_sectional_dispersion_gate53.py`，用`TaiwanStockPrice`parquet快取
+   （排除TAIEX/TPEx等6檔非個股聚合列避免資料洩漏，排除326檔空快取，實得2094檔），
+   計算截面標準差disp_t（水位版）與20日速度版vel_t，皆用expanding百分位轉換
+   （PIT-safe）。三項sanity：①非退化PASS（n_days=3680）②危機窗口2018Q4/2022
+   vel_pctile高於基準（2/3通過，2020Q1未過）③前瞻20日TAIEX報酬方向level_pctile
+   正確、vel_pctile方向錯誤——誠實記錄速度版這輪比水位版表現差，呼應
+   `MARATHON_PROTOCOL.md`3b節「水位→速度是待驗假設非先驗」原則，不得預設
+   速度版較優。
+
+`trial_registry.py --check`（Windows主控台預設cp950編碼會在印出`⚠`字元時
+UnicodeEncodeError crash成exit=1，需要`PYTHONIOENCODING=utf-8`前綴避開這個
+純顯示層問題，不是登記閘門本身失敗——核對後確認真實結果是exit=0，194列，
+撞號2組皆為既有歷史存量非本輪新增，下一可用編號#193）確認PASS。
+
+`git commit`後`git fetch`+`git rebase origin/main`（遠端有Shioaji報價自動更新
+commit），`data/rate_limit_state.json`的`last_request_at`時間戳欄位衝突（純
+運行期狀態非研究內容），取較新值（HEAD側）解決，`git rebase --continue`後
+`git push`成功。
+
+**未觸碰**（確認屬於其他track範圍，非本輪應處理）：
+- `.github/workflows/audit.yml`——檔案本身註明「這個檔案目前還沒有commit：
+  這台機器的PAT沒有workflow scope，push帶`.github/workflows/`的變更會被GitHub
+  拒絕。請總司令用有workflow權限的權杖把它commit上去」，維運/開發帽範圍。
+- `research/DEV_QUEUE_PROMPT.txt`／`.live_watchlist.json`／`dev_queue_cycle.log`／
+  `data_cache/`——讀`DEV_QUEUE_PROMPT.txt`內容確認這是另一條獨立的「開發佇列
+  自走輪次」（`scripts/dev_queue_runner.py`管理，處理`PENDING_QUEUE.md`的App
+  開發任務，跟研究馬拉松是不同的自動化系統），非本track範圍。
+- `data/deep_dive_f_us_gross_profitability.csv`——US軌背景job
+  `20260907-054341-a450`（已finished, exit=0）的產出，留給US軌下一輪收成判讀
+  （是否PASS/EXPERIMENTAL/FAIL要看5檔已知污染ticker是否主導空頭腿）。
+
+**另發現並記錄一個顯示層問題（非本輪修復範圍，僅記錄）**：第424～427輪的心跳
+被前一個執行個體插入`REPORT.md`檔案中段（約第1635行附近）而非規則要求的檔案
+最上方，導致`marathon_brief.py`「最新2輪心跳」只印出過期的第422/423輪內容；
+`MARATHON_STATE.md`全局輪次計數器同時停留在423未更新（連續4輪缺口，比
+round405/408/422單輪缺口更大）。本輪已在`MARATHON_STATE.md`把計數器一次
+補齊到428並記錄缺口說明、在`REPORT.md`最上方正確插入本輪心跳，但**不回頭
+搬動`REPORT.md`裡第424～427輪的錯位條目**（append-only精神，避免誤觸其他
+可能還在進行中的並行編輯；且那批內容本身正確無誤，只是位置不對，不影響
+歷史真實性，只影響「下一個無記憶執行個體只看最新N筆」這個快速摘要機制）。
+
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫（純核對、
+文件整理、commit/push）。
+
+**下一輪TW軌接手**：`#53`走第2關隨機控制組（`control_group_standard.py`統一
+標準——通過只有(a)嚴格大於所有控制組抽樣最大值或(b)配對式20/20全勝兩條路，
+且控制組自身參數要掃過至少兩個變體）＋相位敏感度掃描（`phase_sensitivity.py`，
+若`#53`確定走固定頻率重平衡的話）；`#54`（成交值集中度速度）開工前先量跟`#53`
+的相關係數，>0.7則合併計為一個發現不得分開算兩個獨立候選。完整見
+`REPORT.md`第428輪心跳、`TW_MARATHON_STATE.md`第428輪記錄、
+`TRIALS_LEDGER.md`#190/#192、`MARATHON_PROTOCOL.md`3c節、`data/signal_status.json`。
