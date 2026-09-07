@@ -1,9 +1,0 @@
-/exchangeReport/TWTB4U
-{"get": {"tags": ["證券交易"], "summary": "上市股票每日當日沖銷交易標的及統計", "description": "上市股票每日當日沖銷交易標的及統計", "produces": ["application/json", "text/csv"], "responses": {"200": {"description": "OK", "schema": {"type": "object", "properties": {"Date": {"type": "string", "description": "日期"}, "Code": {"type": "string", "description": "證券代號"}, "Name": {"type": "string", "description": "證券名稱"}, "Suspension": {"type": "string", "description": "暫停現股賣出後現款買進當沖註記"}}}}}}}
-
-/exchangeReport/TWTBAU1
-{"get": {"tags": ["證券交易"], "summary": "集中市場暫停先賣後買當日沖銷交易標的預告表", "description": "集中市場暫停先賣後買當日沖銷交易標的預告表", "produces": ["application/json", "text/csv"], "responses": {"200": {"description": "OK", "schema": {"type": "object", "properties": {"Code": {"type": "string", "description": "證券代號"}, "Name": {"type": "string", "description": "證券名稱"}, "StartDate": {"type": "string", "description": "停止先賣後買開始日"}, "EndDate": {"type": "string", "description": "停止先賣後買結束日"}, "Reason": {"type": "string", "description"
-
-/exchangeReport/TWTBAU2
-{"get": {"tags": ["證券交易"], "summary": "集中市場暫停先賣後買當日沖銷交易歷史查詢", "description": "集中市場暫停先賣後買當日沖銷交易歷史查詢", "produces": ["application/json", "text/csv"], "responses": {"200": {"description": "OK", "schema": {"type": "object", "properties": {"Code": {"type": "string", "description": "股票代號"}, "Name": {"type": "string", "description": "股票名稱"}, "StartDate": {"type": "string", "description": "停止先賣後買開始日"}, "EndDate": {"type": "string", "description": "停止先賣後買結束日"}, "Reason": {"type": "string", "description": 
-

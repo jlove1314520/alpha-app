@@ -146,3 +146,110 @@ def cached_date_range() -> tuple[str | None, str | None, int]:
         return None, None, 0
     dates = [f.stem.replace("TWTASU_", "") for f in files]
     return min(dates), max(dates), len(files)
+
+
+# ---------------------------------------------------------------------------
+# 逐檔版本（`HYPOTHESIS_QUEUE.md` #57，2026-09-08新增）
+#
+# 2026-09-08查證：#57原本以為「逐檔當沖成交量值」需要另找新端點，
+# 三來源查證後發現**根本不需要**——TWTASU回應本來就是逐檔列表（本輪
+# 實測date=20260904回傳1332列，含個股列如`2330 台積電`，最後一列才是
+# `合計`），只是`fetch_day_trading_ratio_day()`（#37用）刻意只取合計列、
+# 逐檔列在記憶體裡直接丟棄、從未落地存檔。TWTB4U（openapi.twse.com.tw
+# swagger schema核對：只有Date/Code/Name/Suspension四欄）才是「當沖資格
+# 標的清單」，不含量值，不是我們要的端點——這是命名相近但完全不同的
+# 兩個資料集，之前的『找不到』誤判就是把這兩個搞混。
+#
+# 因此#57不必新增client、不必等待新端點查證，只需要重新呼叫同一個
+# TWTASU端點並且這次把逐檔列存起來（獨立快取目錄，不跟#37的單列彙總
+# 快取共用，避免混淆兩種粒度）。代價：#37的既有回補（2015-01-01~VAL_END
+# 約2,500個交易日）都得重打一次TWTASU（無法從已快取的彙總parquet反推
+# 回逐檔——原始逐檔JSON從未被保存），這是`backfill_day_trading_detail.py`
+# 要處理的事，不在本函式範圍。
+# ---------------------------------------------------------------------------
+
+DETAIL_DATA_DIR = Path(__file__).parent / "data" / "raw_twse_day_trading_detail"
+DETAIL_DATA_DIR.mkdir(parents=True, exist_ok=True)
+_DETAIL_COLS = ["date", "code", "name", "day_trade_sell_volume", "day_trade_sell_value",
+                "margin_offset_volume", "margin_offset_value"]
+
+
+def _detail_cache_path(date_str: str) -> Path:
+    return DETAIL_DATA_DIR / f"TWTASU_detail_{date_str}.parquet"
+
+
+def fetch_day_trading_detail_day(date_str: str, force_refresh: bool = False,
+                                  timeout: float = 15.0, max_retries: int = 3) -> pd.DataFrame:
+    """date_str: 'YYYYMMDD'。回傳當天逐檔（每檔一列，不含「合計」列）：
+    date、code、name、day_trade_sell_volume、day_trade_sell_value、
+    margin_offset_volume、margin_offset_value。跟`fetch_day_trading_ratio_day()`
+    打同一個TWTASU端點、同一套反爬蟲偵測，但快取到獨立目錄
+    （`DETAIL_DATA_DIR`），彼此互不影響、也不共用快取（同一天會被
+    兩支函式各打一次API，這是刻意的隔離取捨，不是重工）。"""
+    path = _detail_cache_path(date_str)
+    if path.exists() and not force_refresh:
+        return _atomic_read_parquet(path)
+
+    last_err: Exception | None = None
+    body = None
+    for attempt in range(max_retries):
+        try:
+            resp = requests.get(TWTASU_URL, params={
+                "response": "json", "date": date_str,
+            }, timeout=timeout)
+            if "FOR SECURITY REASONS" in resp.text or resp.status_code == 307:
+                raise TWSEBlockedError(
+                    f"TWSE TWTASU端點回傳反爬蟲封鎖頁（date={date_str}）——立刻停止，不要重試。"
+                )
+            resp.raise_for_status()
+            body = resp.json()
+            break
+        except TWSEBlockedError:
+            raise
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+            time.sleep(1.5 * (attempt + 1))
+    else:
+        raise RuntimeError(f"TWTASU detail fetch failed after {max_retries} attempts for date={date_str}: {last_err}")
+
+    if not isinstance(body, dict) or body.get("stat") != "OK" or not body.get("data"):
+        out = pd.DataFrame(columns=_DETAIL_COLS)
+        _atomic_to_parquet(out, path)
+        return out
+
+    def _num(v: str) -> float | None:
+        s = str(v).replace(",", "").strip()
+        if s in ("", "-", "--"):
+            return None
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
+    date_iso = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
+    rows = []
+    for r in body["data"]:
+        raw = str(r[0]).strip()
+        if raw in ("合計", "合 計"):
+            continue
+        parts = raw.split(None, 1)
+        code = parts[0] if parts else raw
+        name = parts[1].strip() if len(parts) > 1 else ""
+        rows.append({
+            "date": date_iso, "code": code, "name": name,
+            "day_trade_sell_volume": _num(r[1]),
+            "day_trade_sell_value": _num(r[2]),
+            "margin_offset_volume": _num(r[3]),
+            "margin_offset_value": _num(r[4]),
+        })
+    out = pd.DataFrame(rows, columns=_DETAIL_COLS)
+    _atomic_to_parquet(out, path)
+    return out
+
+
+def cached_detail_date_range() -> tuple[str | None, str | None, int]:
+    files = sorted(DETAIL_DATA_DIR.glob("TWTASU_detail_*.parquet"))
+    if not files:
+        return None, None, 0
+    dates = [f.stem.replace("TWTASU_detail_", "") for f in files]
+    return min(dates), max(dates), len(files)
