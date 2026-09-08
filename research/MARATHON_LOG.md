@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T00:58+0800 hypothesis_queue排程接續 — #52(TW)背景回補job已
+完成99.9%（2607/2609），新增分類器+彙總統計，確認樣本量足夠支撐gate1
+開工先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`.live_watchlist.json`/
+`dev_queue_cycle.log`/`external_connectivity.jsonl`三個其他常駐服務
+殘留變更，未觸碰、未納入本輪commit）。`run_detached.py status`確認
+job`20260908-235353-95c8`已`finished`（exit=0，執行55.2分鐘），回補
+2607/2609天（99.9%，僅2天502失敗）。新增`material_news_classify.py`
+（8大類事前綁定關鍵字分類器，過程中發現並修正「合併」單獨當關鍵字誤中
+「合併財務報告」財會用語的假陽性，改用專屬詞組）與
+`material_news_aggregate.py`（讀取2607個parquet合併去重649,445→
+649,417筆，套用分類，用既有TRAIN_END/VAL_END切分輸出各類別TRAIN/VAL
+事件數，純描述性、不含任何報酬計算）。**結果：8大類中樣本數最少的
+「停復牌」TRAIN/VAL仍各有225/289筆，判定資料量足以支撐#52第1關cheap
+gate的CAR檢定**，全樣本分類後事件表存
+`data/mops_material_news_events_classified.parquet`（649,417筆）供
+下一輪直接載入。已知限制：`stock_id`涉及2,900個不重複代號超過台股
+上市櫃總數，下一輪對接股價前須先查證並過濾出可對應`TaiwanStockPrice`
+的普通股代號。完整內容見`HYPOTHESIS_QUEUE.md` #52條目(t)段落。
+`trial_registry.py --check`確認PASS（本輪無新判定，純地基建置不登記
+`TRIALS_LEDGER.md`，比照#52先前(j)/(k)/(l)/(m)~(s)各段落同一慣例）。
+`is_holdout_consumed()`開工/收工前皆確認`False`，本輪零新增外部API
+呼叫（僅讀取本機既有parquet快取）。**本輪工作到此為止（一輪一個有界
+工作單位）**，下一輪從#52第1關cheap gate正式CAR檢定開始（先處理上述
+股票代號過濾），不跳關搶跑；同時重新查證#50（`資料一`逐筆tick落地）
+是否已達20交易日門檻解鎖。
+
 ## 2026-09-09T00:22+0800 hypothesis_queue排程接續 — #52(TW)背景回補job
 單純查核進度，不重投。取鎖時發現上一輪鎖檔陳舊（pid 131388，卡了約30
 分鐘後回收，非本輪造成，記錄但無法追查上一輪為何未正常釋放鎖）。開工
