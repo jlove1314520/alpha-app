@@ -2495,3 +2495,38 @@ round405/408/422單輪缺口更大）。本輪已在`MARATHON_STATE.md`把計數
 的相關係數，>0.7則合併計為一個發現不得分開算兩個獨立候選。完整見
 `REPORT.md`第428輪心跳、`TW_MARATHON_STATE.md`第428輪記錄、
 `TRIALS_LEDGER.md`#190/#192、`MARATHON_PROTOCOL.md`3c節、`data/signal_status.json`。
+
+---
+
+## 2026-09-08T09:30+08:00 — 馬拉松第437輪：修正#57回填自走排程的失敗投遞（`--cwd`缺失），重投正常執行中
+
+取鎖乾淨（cycle`20260908-093037`）。三軌時間戳：TW 06:00（round432，最舊）／US 09:00
+（round436，最新）——依輪替選TW。`run_detached.py status`確認heavy-job-slot空（0個
+running），但發現最近一次由`hypothesis_queue`自走排程投遞的`#57`回填job
+（`20260908-092309-48ca`，09:23）**立即失敗（exit=2）**：`log`顯示
+`python: can't open file 'C:\alpha\alpha-app\backfill_day_trading_detail.py'`——
+呼叫`run_detached.py submit`時未帶正確`--cwd`（腳本實際位於`research/`底下，
+不是`alpha-app/`根目錄），工作目錄錯誤導致找不到檔案。
+
+確認`data/raw_twse_day_trading_detail/TWTASU_detail_*.parquet`實際快取量為
+1500/2609（57.5%），與上一輪commit訊息一致，**這次失敗未造成任何倒退**——
+失敗發生在腳本啟動前，沒有寫入任何半成品。用明確`--cwd "C:\alpha\alpha-app\research"`
+重新投遞（job`20260908-093146-c524`），`wait --max-min 2`確認這次正常啟動，
+log印出「已快取1500，待處理1109」，非再次立即失敗，處理中未等待收成。
+
+**本輪未修改`backfill_day_trading_detail.py`程式邏輯本身**——問題出在呼叫端
+（自走排程投遞指令）缺少`--cwd`，不是腳本設計錯誤。若之後`hypothesis_queue`
+排程再次以同樣方式失敗投遞，下一輪應往排程呼叫端（而非這支腳本）找根因。
+
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）確認PASS（exit=0，
+202列，下一可用編號#201，本輪無新判定不涉及登記）。`is_holdout_consumed()`
+開工/收工前皆確認`False`。全程零新增TWSE端點呼叫（本輪僅檢視既有快取檔案數量
+與job log），回填階段的API呼叫由背景job執行、遵守既有節流。
+
+**下一輪TW軌接手**：`run_detached.py status`/`log 20260908-093146-c524`收成
+本輪投遞的job（預期處理250天，跑完後累積約1750/2609≈67.1%，仍未到100%）；
+未跑完就再投遞下一批`--batch-size 250`（**務必帶`--cwd "C:\alpha\alpha-app\research"`**，
+腳本會自動跳過已快取日期）；跑完100%後才進`#57`第1關sanity（比照`#53`/`#54`/`#55`
+同一套`cross_sectional_*_gate5X.py`框架）。完整見`REPORT.md`第437輪心跳、
+`TW_MARATHON_STATE.md`第437輪記錄、`data/jobs/20260908-092309-48ca.log`
+（失敗紀錄）、`data/jobs/20260908-093146-c524.log`（修正後正常執行紀錄）。
