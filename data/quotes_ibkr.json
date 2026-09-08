@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T13:02:11.361147+08:00",
+  "fetched_at": "2026-09-08T14:16:43.704125+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -8,7 +8,7 @@
       "last": null,
       "bid": null,
       "ask": null,
-      "close": null,
+      "close": 319.97,
       "change_pct": null,
       "data_type": "DELAYED",
       "exchange": "SMART"
@@ -17,7 +17,7 @@
       "last": null,
       "bid": null,
       "ask": null,
-      "close": null,
+      "close": 499.7,
       "change_pct": null,
       "data_type": "DELAYED",
       "exchange": "SMART"
@@ -26,7 +26,7 @@
       "last": null,
       "bid": null,
       "ask": null,
-      "close": null,
+      "close": 230.36,
       "change_pct": null,
       "data_type": "DELAYED",
       "exchange": "SMART"
@@ -35,7 +35,7 @@
       "last": null,
       "bid": null,
       "ask": null,
-      "close": null,
+      "close": 354.08,
       "change_pct": null,
       "data_type": "DELAYED",
       "exchange": "SMART"
@@ -50,14 +50,15 @@
       "exchange": "SMART"
     },
     "^DJI": {
-      "last": null,
+      "last": 53414.25,
       "bid": null,
       "ask": null,
-      "close": null,
-      "change_pct": null,
-      "data_type": "REALTIME",
+      "close": 53686.1,
+      "change_pct": -0.5064,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CME",
-      "label": "道瓊工業指數"
+      "label": "道瓊工業指數",
+      "source": "yahoo_fallback"
     },
     "^GSPC": {
       "last": 7718.6,
@@ -82,14 +83,15 @@
       "source": "yahoo_fallback"
     },
     "^SOX": {
-      "last": null,
+      "last": 11735.263,
       "bid": null,
       "ask": null,
-      "close": 11735.26,
-      "change_pct": null,
-      "data_type": "DELAYED",
+      "close": 11352.1,
+      "change_pct": 3.3753,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "PHLX",
-      "label": "費城半導體指數"
+      "label": "費城半導體指數",
+      "source": "yahoo_fallback"
     }
   }
 }

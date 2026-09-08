@@ -180,3 +180,41 @@ Form 25 只給下市**日期**，不給價格。
 | 下市股價格 | **未證實** | 宣稱有，未證實 |
 
 **建議先領 Alpha Vantage**（成本更低、無 CAPTCHA），測完再決定要不要動 Stooq。
+
+---
+
+# 更正：Stooq 領 key 步驟寫錯了（2026-09-08）
+
+**我先前寫的領取步驟與實際頁面不符，總司令實測回報「根本就沒有你說的那些」。**
+
+我當時寫的是「開 `https://stooq.com/q/d/?s=aapl.us&get_apikey` → 填驗證碼 →
+頁面底部出現帶 `apikey=` 的 CSV 連結」。這**不是我親眼看到的畫面**，
+是從第三方說明推得的——那道 JS 工作量證明牆讓我的 HTTP 客戶端只拿得到牆本身
+（796 位元組），看不到頁面內容。我當時有標註「非親眼所見」，但仍然寫成了
+步驟一二三的形式，**那個形式本身就在暗示我確認過，是誤導**。
+
+**教訓（跟本檔前面 Cowork 的 `tail4c7XXXX` 佔位符事故同一類）**：
+沒有親自看到的畫面，不要寫成逐步操作指南。
+要嘛先想辦法看到，要嘛寫成「文件說法如下，未親自驗證，以你看到的為準」，
+**不要寫成看起來可以照做的步驟**。使用者照著做失敗時，
+會先懷疑自己做錯，而不是懷疑指南本身。
+
+**Stooq 現況**：🔴 維持不可用。資料本身免費、無訂閱費，但取得 key 的實際流程
+未經證實，且該站對程式存取設有 JS 驗證牆。**除非總司令另有指示，不再嘗試。**
+
+**改採 Alpha Vantage**（2026-09-08 總司令裁示）。
+註冊頁 <https://www.alphavantage.co/support/#api-key> **已實際讀取確認**，
+表單三個欄位：
+- 「Which of the following best describes you?」（身分下拉）
+- 「Organization (e.g. company, university, etc.):」
+- 「Email:」
+
+**無 CAPTCHA。** key 是畫面顯示還是寄信，註冊頁未載明，**不臆測**。
+
+金鑰存放（`secrets/` 已實測被 `.gitignore` 第 29 行忽略、`git status` 看不到）：
+- 環境變數（優先）：`ALPHA_ALPHAVANTAGE_KEY`
+- 檔案（後備）：`secrets/alphavantage_key.txt`
+
+**拿到 key 後的第一件事不是接系統，是實測 TWTR／SIVB／FRC／ATVI 四檔。**
+下市名冊已證實可用（demo key 回 426 筆真 CSV 含 `delistingDate`），
+但**下市股的價格序列尚未證實**。四檔全滅就誠實回報此路不通，不硬接。
