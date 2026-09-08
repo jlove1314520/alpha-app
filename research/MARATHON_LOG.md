@@ -1,5 +1,40 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T02:52+0800 hypothesis_queue排程接續 — 設計#52 gate2方向性/延續性
+檢定（PEAD式）並smoke test通過，發現TW軌已搶先跑同一件事，未重工，收工。
+開工先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`data/rate_limit_state.json`/
+`dev_queue_cycle.log`/`external_connectivity.jsonl`三個常駐服務殘留變更，
+不動、不納入本輪commit）。確認#51-US仍卡FinMind 402封鎖（`blocked_until`
+2026-09-08T20:38:13Z，本輪查核時仍剩約1小時46分），依上一則心跳「2小時
+封鎖解除後重跑」計畫尚不到時間，改接續上一則心跳的另一個待辦：#52
+（TW）4類CHEAP_PASS後的gate2/3（方向性/延續性檢定，非重複gate1的
+magnitude測試）。新增`material_news_car_gate2_persistence.py`（事前綁定：
+帶符號reaction CAR分正負shock兩組，測後續5/10交易日市場調整forward CAR
+是否同號延續（PEAD drift）而非瞬間消化，控制組=固定forward CAR值隨機
+重貼shock標籤N=200次，只需一種洗牌控制組不套用gate1的
+matched_stock/unmatched_universe兩變體——理由見腳本docstring）。**確認
+零新增FinMind API呼叫**：完整複用`material_news_car_gate.py`既有價格/
+市場快取函式（直接import該模組），TAIEX與per-stock價格皆命中既有
+parquet快取。`--max-stocks 80 --n-permutations 20`smoke test成功執行
+無crash（78/80檔可用、5489筆事件），確認腳本邏輯正確可運作。**嘗試
+用`run_detached.py submit`投遞全量正式job時被拒絕**：系統回報已有一個
+同名精神的工作在跑（`material_news_car_gate2_continuation_52tw`），
+應是AlphaMarathon TW軌已搶先在做同一件事（跟本track歷史上多次「TW軌
+搶先做完#52 gate1、hypothesis_queue只負責查核登記」的模式一致）——
+**依鐵律不重工、不投遞會浪費預算又跟TW軌重疊的競爭job**，本輪腳本
+保留供下一輪查核TW軌job結果時交叉比對（若TW軌腳本設計跟本腳本不同，
+可比較兩種設計是否一致收斂；若TW軌已產出結果，直接讀取登記即可，
+不必再跑本腳本）。`is_holdout_consumed()`開工/收工前皆確認`False`，
+本輪零新增外部API呼叫（僅本機快取讀取+一次被拒絕的job investigate
+提交嘗試，未消耗任何運算資源）。**本輪工作到此為止（一輪一個有界
+工作單位，且本輪額外因發現TW軌重疊而提前收斂，不重工）**，下一輪
+待辦：(1)查`material_news_car_gate2_continuation_52tw`job是否已
+`finished`，若完成則讀其輸出並登記`TRIALS_LEDGER.md`（PASS的話才登記，
+FAIL寫`STRATEGY_GRAVEYARD.md`）；(2)若TW軌job失敗或設計跟本輪不同，
+才考慮用本輪新增的`material_news_car_gate2_persistence.py`正式全量跑；
+(3)重新查證#51-US（此時應已解封，2小時封鎖預計20:38 UTC解除）；
+(4)重新查證#50 tick累積門檻。
+
 ## 2026-09-09T02:xx+0800 hypothesis_queue排程接續 — #51-US（S&P/DJ指數納入
 事件研究）第1關cheap gate建置+試跑，中途撞FinMind額度上限中止，未結案。
 確認backfill job`20260909-013149-9992`已finished（76頁/645篇文章快取
