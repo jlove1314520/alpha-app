@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08 hypothesis_queue排程接續（取鎖時鎖檔陳舊pid124660約30.1分鐘，
+已回收接手，上一輪疑似中途失敗）— 開工查證發現：上一輪其實已把#59第4關
+成本敏感度跑完（`min_variance_portfolio_gate59_costs.py`），並已由**另一條
+獨立排程**（`AlphaMarathon`TW軌第451輪，commit`1075448`「收成#59 GATE2
+job並確認hypothesis_queue已搶先完成GATE2~4」）補commit+push上游，登記
+`TRIALS_LEDGER.md`#212、`STRATEGY_GRAVEYARD.md`新增#59段落——這是兩條
+獨立排程各自具名鎖不互相阻塞、但共用同一個repo檔案系統時的正常現象，
+非錯誤。本輪`git pull`後在不知情狀況下誤重複登記為`trial_registry.py`
+#213（duplicate），已發現並即時`git checkout`還原，未commit進歷史，
+不留痕跡。**確認唯一真正遺漏的是`HYPOTHESIS_QUEUE.md`#59條目本身尚未
+補上第4關最終判定文字**（前一輪TW軌catch-up commit只補了墓園/帳本，
+未動`HYPOTHESIS_QUEUE.md`），本輪補齊：#59結案**FAIL**（TRAIN在最寬鬆
+1x成本情境下淨溢酬已轉負-0.12%，2x/3x惡化至-15.86%/-30.13%；VAL
+1x/2x為正、3x轉負-3.99%，屬決定性反證非邊緣未過，見`TRIALS_LEDGER.md`
+#212完整數字）。③portfolio construction大類（`#29`/`#58`/`#59`）至此
+三戰全滅。重新查證`#50`（1/20交易日，未達標）、`#52`（TWSE openapi
+即時快照+未擷取秒級公告時刻兩問題未解決，仍卡住）皆未解鎖，佇列實質
+已空，依協定設計新假設軸**#60（台指選擇權/期貨結算到期日機械性效應
+Derivatives Settlement/Expiration Mechanical Effect）**——避開已測過
+的9大機制類別，經濟機制核心是衍生性商品到期造成的市場造市者/避險部位
+機械性平倉壓力，比照美股「三巫日」文獻，完整經濟理由/具體假設定義/
+資料可行性/已知限制已寫入`HYPOTHESIS_QUEUE.md`新章節，尚未開始第1關，
+下一輪從TAIFEX官方到期日曆歷史資料可行性查證開始，不跳關進cheap gate。
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
+下一輪待辦：查證TAIFEX官方到期日曆歷史資料可行性（#60）。
+
 ## 2026-09-08T16:01+0800 hypothesis_queue排程（AlphaHypothesisQueue無人值守觸發，全新取鎖）— 完成#59最小變異數投資組合建構GATE_SEQUENCE第3關參數密集高原：**三項判準全數PASS**。新增`min_variance_portfolio_gate59_plateau.py`（複用sanity的`load_prices`/`build_panel`/`simulate`/`summarize`，比照`equal_weight_rebalance_plateau_v1.py`同一套判準結構，只把高原軸從REBAL_FREQ換成COV_WINDOW——理由：REBAL_FREQ=21是`#29`/`#58`/`#59`共用錨點非`#59`自選參數，`#59`真正獨有的參數是COV_WINDOW=60）。GRID=20~140日step10共13點，事前綁定判準：hit_rate>=70%/最長連續通過區段>=4點/原60日參數點須在高原內。**結果：13/13網格點TRAIN與VAL溢酬同時為正，hit_rate=100.0%，最長連續區段=13點，原60日參數點TRAIN=+17.24%/VAL=+36.74%亦為正**，三項全PASS——是本佇列③portfolio construction類（`#29`/`#58`/`#59`）第3關表現最乾淨的一次（`#29`17點未達完美命中、`#58`根本沒走到第3關）。運算耗時僅數秒，遠低於預期（GATE2的400次permutation耗時40分鐘，本關只需13次無permutation的simulate()呼叫）。已用`trial_registry.register_trial()`登記為#211（verdict=未結案，非終局），`PYTHONIOENCODING=utf-8 python trial_registry.py --check`exit=0 PASS（撞號警告2組為既有歷史存量，非本輪造成）。已同步更新`HYPOTHESIS_QUEUE.md`#59條目補上GATE3事前綁定規格與完整結果段落。開工前`git pull`+`git status`確認乾淨（僅發現其他自動化來源殘留變更：`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`/`research/min_variance_portfolio_gate59_control_run.log`/`research/twse_probe.log`/`research/twse_publish_probe.jsonl`——記錄下來、不觸碰、不納入本輪commit）。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫（沿用sanity既有價格快取）。完整輸出見`min_variance_portfolio_gate59_plateau_run.log`、`data/min_variance_portfolio_gate59_plateau_grid.csv`。**本輪工作到此為止（一輪一個有界工作單位）**，下一輪從第4關成本/稅/滑價敏感度（1x/2x/3x）開始，不跳關——需注意月頻再平衡下minvar構造的實際換手率可能遠高於`#29`等權重版本（每次重新求解共變異數矩陣），須實測不能假設相同，證交稅0.3%是台股最大隱形成本。
 
 ## 2026-09-08T16:05+0800 hypothesis_queue排程接續（同一輪接續，非新取鎖）— 完成#59最小變異數投資組合建構GATE_SEQUENCE第2關隨機控制組：**TRAIN+VAL皆PASS**。新增`min_variance_portfolio_gate59_control.py`，沿用`#58`「打散股票-權重對應」專屬控制組設計（判斷可直接沿用，理由見腳本docstring），2變體`per_rebal_permutation`/`fixed_permutation`各N=100，統計量=TRAIN/VAL年化Sharpe(minvar_ret序列本身)。結果：TRAIN真實+1.1022嚴格贏過控制組最大值+1.0822、VAL真實+1.8810嚴格贏過控制組最大值+1.6582（領先幅度比TRAIN更大），依`control_group_standard.py::evaluate_vs_control()`統一標準兩期皆PASS。**對照`#58`同款控制組VAL邊緣未過（FAIL）、`#59`兩期皆嚴格過關**——共變異數結構帶來的分散化效益在這個控制組設計下比只用個股自身波動度更站得住腳，但**這仍非最終判定**，尚未過第3~9關（`#29`死於第6關、`#58`死於本關，`#59`已是本佇列③portfolio construction類走最深的候選）。全程耗時遠超預期（400次全歷史面板模擬x每次116次Ledoit-Wolf共變異數擬合，超過40分鐘），已在`HYPOTHESIS_QUEUE.md`#59條目與`MARATHON_LOG.md`本則之間補一則30分鐘未過的過程心跳（15:16那則）。已用`trial_registry.register_trial()`登記為#210（verdict=未結案，非終局），`--check`PASS（需加`PYTHONIOENCODING=utf-8`環境變數避開Windows終端cp950編碼列印既有警告字元的已知問題，非本輪新增bug，`--check`本身邏輯結果PASS）。已同步更新`HYPOTHESIS_QUEUE.md`#59條目補上GATE2完整結果段落。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫。完整輸出見`min_variance_portfolio_gate59_control_run.log`、`data/min_variance_portfolio_gate59_control_results.csv`。**本輪工作到此為止（一輪一個有界工作單位，本輪因單一GATE耗時異常長已超出正常一輪範圍，未再往下跑第3關）**，下一輪從第3關參數密集高原開始，不跳關。
