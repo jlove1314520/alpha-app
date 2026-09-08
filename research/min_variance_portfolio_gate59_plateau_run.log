@@ -1,0 +1,40 @@
+樣本：300檔(SEED=20260822)，跟sanity/第2關共用同一個300檔宇宙
+panel：159檔股票 x 2498個交易日（2015-01-02..2024-12-31），應與sanity/第2關159檔一致（交叉確認）
+
+REBAL_FREQ固定=21日（跟#29/#58共用錨點，不掃描），COV_WINDOW網格=[20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140]（共13點）
+  [1/13] COV_WINDOW= 20日 完成：TRAIN溢酬=+12.56%  VAL溢酬=+19.66%
+  [2/13] COV_WINDOW= 30日 完成：TRAIN溢酬=+10.52%  VAL溢酬=+29.10%
+  [3/13] COV_WINDOW= 40日 完成：TRAIN溢酬=+13.59%  VAL溢酬=+26.92%
+  [4/13] COV_WINDOW= 50日 完成：TRAIN溢酬=+20.93%  VAL溢酬=+33.69%
+  [5/13] COV_WINDOW= 60日 完成：TRAIN溢酬=+17.24%  VAL溢酬=+36.74%
+  [6/13] COV_WINDOW= 70日 完成：TRAIN溢酬=+14.76%  VAL溢酬=+35.02%
+  [7/13] COV_WINDOW= 80日 完成：TRAIN溢酬=+11.20%  VAL溢酬=+43.31%
+  [8/13] COV_WINDOW= 90日 完成：TRAIN溢酬=+14.02%  VAL溢酬=+34.93%
+  [9/13] COV_WINDOW=100日 完成：TRAIN溢酬=+17.13%  VAL溢酬=+31.43%
+  [10/13] COV_WINDOW=110日 完成：TRAIN溢酬=+16.76%  VAL溢酬=+36.41%
+  [11/13] COV_WINDOW=120日 完成：TRAIN溢酬=+20.66%  VAL溢酬=+38.03%
+  [12/13] COV_WINDOW=130日 完成：TRAIN溢酬=+14.29%  VAL溢酬=+33.99%
+  [13/13] COV_WINDOW=140日 完成：TRAIN溢酬=+13.32%  VAL溢酬=+35.95%
+
+=== 第3關參數密集高原結果（GRID=[20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140]） ===
+  [PASS] COV_WINDOW= 20日  TRAIN溢酬=+12.56%  VAL溢酬=+19.66%
+  [PASS] COV_WINDOW= 30日  TRAIN溢酬=+10.52%  VAL溢酬=+29.10%
+  [PASS] COV_WINDOW= 40日  TRAIN溢酬=+13.59%  VAL溢酬=+26.92%
+  [PASS] COV_WINDOW= 50日  TRAIN溢酬=+20.93%  VAL溢酬=+33.69%
+  [PASS] COV_WINDOW= 60日  TRAIN溢酬=+17.24%  VAL溢酬=+36.74% <-- 原60日參數點
+  [PASS] COV_WINDOW= 70日  TRAIN溢酬=+14.76%  VAL溢酬=+35.02%
+  [PASS] COV_WINDOW= 80日  TRAIN溢酬=+11.20%  VAL溢酬=+43.31%
+  [PASS] COV_WINDOW= 90日  TRAIN溢酬=+14.02%  VAL溢酬=+34.93%
+  [PASS] COV_WINDOW=100日  TRAIN溢酬=+17.13%  VAL溢酬=+31.43%
+  [PASS] COV_WINDOW=110日  TRAIN溢酬=+16.76%  VAL溢酬=+36.41%
+  [PASS] COV_WINDOW=120日  TRAIN溢酬=+20.66%  VAL溢酬=+38.03%
+  [PASS] COV_WINDOW=130日  TRAIN溢酬=+14.29%  VAL溢酬=+33.99%
+  [PASS] COV_WINDOW=140日  TRAIN溢酬=+13.32%  VAL溢酬=+35.95%
+
+判準1：一整片門檻 —— 13/13點同時為正 = 100.0%（門檻>=70%）  PASS
+判準2：最長連續通過區段 = 13點（門檻>=4點，非孤立尖峰）  PASS
+判準3：原60日參數點本身在高原內 —— TRAIN=+17.24%  VAL=+36.74%  PASS
+
+=== 第3關綜合判定：PASS ===
+
+網格明細已存 data\min_variance_portfolio_gate59_plateau_grid.csv（gitignored）
