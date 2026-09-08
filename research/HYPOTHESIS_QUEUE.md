@@ -6697,3 +6697,37 @@ API呼叫（沿用既有`adjust.py`快取）。完整輸出見
 `data/min_variance_portfolio_gate59_daily_returns.csv`（皆新增，可重複執行）。
 **本輪工作到此為止（一輪一個有界工作單位）**，下一輪從第2關隨機控制組
 開始，不跳關。
+
+**GATE_SEQUENCE第2關（隨機控制組）已完成：TRAIN+VAL皆PASS（2026-09-08
+hypothesis_queue排程接續）**。新增`min_variance_portfolio_gate59_control.py`，
+判斷`#58`的「打散股票-權重對應」專屬控制組設計可直接沿用（打散發生在
+`min_variance_weights()`算完`new_w`之後，權重值集合本身不受影響，跟`#58`
+面對的問題結構完全相同，理由見腳本docstring），沿用同一套2變體
+（`per_rebal_permutation`每次事件獨立重排／`fixed_permutation`全程固定
+同一種重排）各N=100抽樣，統計量＝TRAIN/VAL年化Sharpe（訊號取sanity輸出的
+`minvar_ret`序列本身，不扣buyhold）。**結果**：TRAIN真實訊號年化Sharpe
++1.1022 > 200次控制組抽樣（2變體合併）最大值+1.0822，**嚴格通過**；VAL
+真實訊號+1.8810 > 控制組最大值+1.6582，**嚴格通過（差距明顯，非邊緣過關）**。
+兩期皆用`control_group_standard.py::evaluate_vs_control()`統一標準（嚴格
+大於最大值，非百分位/贏平均）判定，GATE_SEQUENCE第2關綜合PASS。**與`#58`
+對照**：`#58`同一套控制組框架下TRAIN嚴格過關（+1.1747對控制組最大值
++1.0512）但VAL邊緣未過（+1.5163對控制組最大值+1.5389，百分位99.0仍判
+FAIL），`#59`VAL不只過關、且領先控制組最大值幅度（+0.2228）比TRAIN領先
+幅度（+0.0200）更大——共變異數結構（非對角線相關性項）帶來的分散化效益
+在這個具體控制組設計下比只用個股自身波動度更站得住腳，方向符合`#59`
+「補上`#58`被簡化掉的那一半」的事前主張，但**這仍不是最終判定**——尚未
+過第3~9關（含成本/稅/滑價敏感度、leave-one-out、逐年一致性、樣本外，
+`#29`與`#58`都死在第2關之後：`#29`死在第6關逐年一致性、`#58`死在本關）。
+已登記`TRIALS_LEDGER.md`#203（非終局判定登記，因這一關結果本身是本佇列
+③portfolio construction類目前走最深的紀錄之一，比照#29/#58在關卡進度上
+的登記慣例）。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零
+新增API呼叫（沿用sanity既有快取，`load_prices`/`build_panel`/
+`min_variance_weights`皆直接import自`min_variance_portfolio_gate59.py`，
+未重寫）。完整輸出見`min_variance_portfolio_gate59_control_run.log`、
+`data/min_variance_portfolio_gate59_control_results.csv`（皆新增，可重複
+執行）。**本輪工作到此為止（一輪一個有界工作單位，本輪耗時遠超預期——
+400次全歷史面板模擬+每次116次再平衡皆需重新Ledoit-Wolf擬合159x159共變異
+數矩陣，運算量遠高於`#58`的簡單反向波動度公式，實測跑了超過40分鐘，遠
+高於`#58`同款控制組的耗時，下一輪若要重跑類似規模的min-variance控制組
+測試應預留更長時間預算或考慮降低N_DRAWS）**，下一輪從第3關參數密集高原
+開始，不跳關。
