@@ -1,0 +1,22 @@
+=== #59 最小變異數投資組合建構 GATE_SEQUENCE第2關：隨機控制組 ===
+panel：159檔股票 x 2498個交易日（2015-01-02..2024-12-31），應與sanity完全一致
+真實minvar_ret序列已從sanity輸出載入：2015-01-05..2024-12-31（2497個交易日，非本輪重算，交叉確認panel一致性)
+  TRAIN/per_rebal_permutation: 100 draws完成，mean=+0.9020 max=+1.0809
+  TRAIN/fixed_permutation: 100 draws完成，mean=+0.8865 max=+1.0822
+
+--- period=TRAIN (n=1526) ---
+  真實minvar年化Sharpe = +1.1022
+  控制組最大值 = +1.0822  平均 = +0.8943  百分位(僅記錄非判準) = 100.0
+  判定: PASS — 通過：訊號 1.1022 嚴格大於全部 200 次控制組抽樣的最大值 1.0822（2 個參數變體合併）
+  VAL/per_rebal_permutation: 100 draws完成，mean=+1.3584 max=+1.6582
+  VAL/fixed_permutation: 100 draws完成，mean=+1.3481 max=+1.5504
+
+--- period=VAL (n=971) ---
+  真實minvar年化Sharpe = +1.8810
+  控制組最大值 = +1.6582  平均 = +1.3532  百分位(僅記錄非判準) = 100.0
+  判定: PASS — 通過：訊號 1.8810 嚴格大於全部 200 次控制組抽樣的最大值 1.6582（2 個參數變體合併）
+
+結果已存: C:\alpha\alpha-app\research\data\min_variance_portfolio_gate59_control_results.csv
+
+=== 第2關綜合判定（TRAIN+VAL皆須PASS）：PASS ===
+EXIT_CODE=0
