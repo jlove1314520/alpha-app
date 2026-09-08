@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T03:xx+0800 hypothesis_queue排程接續 — 收成TW軌job並#52-TW正式
+結案：FAIL。開工先讀協定+`CLAUDE.md`+`git pull`（`data/quotes_ibkr.json`
+為常駐IBKR報價行程殘留，不動、不納入commit），取鎖`LOCK_ACQUIRED`。查
+`HYPOTHESIS_QUEUE.md`「排隊順序總結」確認佇列#1~61全數結案，唯一未結案
+為#52（gate2延續檢定job由TW軌`material_news_car_gate2_continuation_52tw`
+投遞中）。`run_detached.py status --json`確認job`20260909-030107-0bce`
+已`finished`/`exit_code=0`；`expect_exists=false`為相對/絕對路徑不一致
+誤報，實際核對`data/material_news_car_gate2_continuation_result.json`
+確實存在且內容完整（job log印「已存完整結果」）。**結果：4類（併購/
+增減資/財務/人事）全數FAIL**（VAL期訊號皆未嚴格大於400次控制組抽樣
+最大值，與round467 N=25 smoke test方向一致），確認為#52整條假說正式
+結論：「異常反應存在但不可交易（已price-in、無延續）」。已登記
+`TRIALS_LEDGER.md`#223（`trial_registry.py --check`確認PASS，exit=0，
+225列）、更新`HYPOTHESIS_QUEUE.md`#52-TW段落、`STRATEGY_GRAVEYARD.md`
+新增段落。`is_holdout_consumed()`開工/收工前皆確認`False`，本輪零新增
+外部API呼叫（僅查核job狀態+讀既有輸出檔）。**#50仍卡`資料一`逐筆tick
+落地（2/20交易日，本輪重新查證未解鎖），`#52-US`美股版獨立進度尚未
+結案（見`HYPOTHESIS_QUEUE.md`該章節）。下一輪待辦**：若`#52-US`也
+結案且`#50`仍未解鎖，依協定第1節設計新假設軸`#62`，本輪因預算考量
+不硬做，誠實留給下一輪，不空轉硬湊。收工前commit+push。
+
 ## 2026-09-09T02:52+0800 hypothesis_queue排程接續 — 設計#52 gate2方向性/延續性
 檢定（PEAD式）並smoke test通過，發現TW軌已搶先跑同一件事，未重工，收工。
 開工先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`data/rate_limit_state.json`/
