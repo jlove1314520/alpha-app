@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08T23:54+0800 hypothesis_queue排程接續 — #52(TW)背景回補job
+`20260908-220215-b142`確認已逾時（`status=timeout`，執行滿100分鐘，
+watchdog `taskkill /T /F`收尾），依上一則心跳的既定下一步「逾時則重投
+同一指令」重投：新job `20260908-235353-95c8`（`--cwd`第一次嘗試因bash
+路徑跳脫問題誤傳成`C:\alphaalpha-app`，watchdog啟動失敗留下一筆
+`orphaned`殘留紀錄`20260908-235323-b810`，已用`run_detached.py reap`
+回收確認非真實執行中的行程，不影響任何資料；第二次改用正斜線路徑
+`C:/alpha/alpha-app`成功送出）。新job開工log確認正確接續（`已快取1658，
+待處理951`，跟上一個逾時job停止時的1650附近進度一致，未重算已完成部分，
+`backfill_material_news.py`本身的cached-skip邏輯運作正常），timeout設
+100分鐘同前。同步重新查證#50：`data/ticks/`仍為2個檔案（2/20交易日），
+未解鎖，狀態沿用。開工先讀協定+`CLAUDE.md`+`git pull`確認乾淨（發現
+`research/.live_watchlist.json`/`dev_queue_cycle.log`/
+`external_connectivity.jsonl`三個常駐服務殘留變更，不動、不納入本輪
+commit）。`is_holdout_consumed()`開工/收工前皆確認`False`，本輪零新增
+資料抓取API呼叫（僅job管理+檔案數清點）。**本輪工作到此為止（一輪一個
+有界工作單位）**，下一輪待辦：查`95c8`是否已完成/逾時，逾時則再重投
+（自動跳過已快取天數，預期還需1~2輪才能補完951天）；完整跑完後才進入
+#52第1關cheap gate；若下一輪#50/#52仍雙雙未解鎖則依協定判佇列實質已空，
+設計新假設軸#62。
+
 ## 2026-09-08T23:24+0800 hypothesis_queue排程接續 — 修正#61條目下游一則
 不一致（原文字「#49已有既有設計繼續」，實際`#49`已於2026-09-07結案
 FAIL，非待接續）＋查核#52(TW)背景回補job`20260908-220215-b142`：仍

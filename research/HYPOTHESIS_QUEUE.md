@@ -6186,6 +6186,44 @@ hypothesis_queue排程接續）**：開工先讀協定+`CLAUDE.md`+`git pull`
 已完整跑完2,600天則進入#52第1關cheap gate；若仍`running`未逾時則
 比照本則模式繼續單純查核記錄進度，不重投不等待。
 
+**(q) 本輪查核＋重投：job確認已逾時，依上輪待辦重投同一指令（2026-09-08
+T23:54+0800 hypothesis_queue排程接續）**：`run_detached.py status --json`
+確認`20260908-220215-b142`已標記**`status=timeout`（`exit_code=-9`，
+`started_at`22:02:15、`ended_at`23:42:18，執行滿100分鐘被watchdog
+`taskkill /T /F`收尾）**，`data/raw_mops_material_news/`落地快取檔數
+**1,658個parquet（63.8%）**，log結尾確認最後嘗試到約1,650/2,600
+（過程中穿插多次`502 Server Error: Bad Gateway`，屬`mopsov.twse.com.tw`
+端偶發性錯誤，非我方觸發限流，`backfill_material_news.py`本身對單日
+失敗會記錄失敗訊息後繼續下一天，非中止整批）。依上一則(p)交辦「逾時則
+直接用同一指令重投」，用`run_detached.py submit`重投：**第一次嘗試因
+Bash工具路徑跳脫問題，`--cwd C:\alpha\alpha-app`被誤解析成
+`C:\alphaalpha-app`（反斜線被吃掉），watchdog啟動時`Popen`丟出
+`NotADirectoryError`並意外留下一筆`pid=null`的殘留job紀錄
+`20260908-235323-b810`（因為同名job存在中，第二次嘗試被`REFUSED`同名
+併發保護擋下）**——用`run_detached.py reap`確認該殘留紀錄無真實行程
+（`reaped orphaned=1`，狀態改為`orphaned`），不影響任何已落地的快取
+資料。**第二次改用正斜線路徑`--cwd "C:/alpha/alpha-app"`成功送出**：
+新job`20260908-235353-95c8`，開工log確認`已快取1658，待處理951`——
+跟前一個逾時job停止時記錄的約1,650一致，證實`backfill_material_news.py`
+的per-day parquet快取跳過邏輯正常運作，非從頭重跑。timeout同前設100
+分鐘。同步重新查證#50：`data/ticks/`實際檔案數仍為2個
+（`20260907.parquet`/`20260908.parquet`），對照20交易日門檻仍遠
+（2/20），未解鎖，狀態沿用。`git status`確認僅`research/.live_
+watchlist.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`三個其他常駐服務殘留變更，未
+觸碰、不納入本輪commit。`is_holdout_consumed()`開工/收工前皆確認
+`False`，本輪零新增資料抓取API呼叫（僅job提交/reap/狀態查詢與檔案
+數清點）。**本輪工作到此為止（一輪一個有界工作單位）**，下一輪待辦：
+先查`20260908-235353-95c8`是否已標記`timeout`或`finished`——951天
+剩餘量以先前約17天/分鐘速率估算需約56分鐘，理論上單輪100分鐘應可
+跑完，若`finished`則2,600天全數落地、可直接進入#52第1關cheap gate
+（8類`type`分類CAR檢定，事前已寫死規格，不得跳關搶跑）；若因502
+錯誤率上升等因素仍未跑完而逾時，比照本則模式用同一指令重投（自動
+跳過已快取天數）；#50需持續累積至20交易日，本輪未變化，狀態沿用；
+若下一輪#50/#52仍雙雙未解鎖，才依協定判佇列實質已空、設計新假設軸
+#62（目前佇列#1~61全數結案，僅剩#50/#52兩項卡外部依賴，尚未達到
+「全部PASS/FAIL」的空佇列判定條件，本輪不強行設計#62）。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
