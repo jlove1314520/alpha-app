@@ -6395,13 +6395,20 @@ Cowork 的指示是「#56 必須明確區別於已 FAIL 的 #26，**若無法區
   `--timeout-min 30`接續投遞下一批`20260908-105304-92e0`（同一命令
   `backfill_day_trading_detail.py --batch-size 250`，detached背景
   執行、本輪不等待完成）。
-- **狀態**：**資料源已確認可得，回填進行中（84.7%），尚未開跑
+- **2026-09-08T11:22+0800 hypothesis_queue排程接續**：收成
+  `20260908-105304-92e0`（`exit_code=0`，本批250天全數成功，其中17天為
+  假日/無資料），核對真實檔案數確認累積快取**2461/2609＝94.3%**，全程
+  未撞到TWSE反爬蟲封鎖。已用同一套正確`--cwd`（`research/`絕對路徑）+
+  `--timeout-min 30`接續投遞下一批`20260908-112207-fdef`（同一命令
+  `backfill_day_trading_detail.py --batch-size 250`，detached背景
+  執行、本輪不等待完成，剩餘僅148天，預估這批應能跑完）。
+- **狀態**：**資料源已確認可得，回填進行中（94.3%），尚未開跑
   GATE_SEQUENCE第1關**。下一輪hypothesis_queue接手：先用
-  `run_detached.py status --last 5`/`log 20260908-105304-92e0`收成本輪
-  投遞的批次，未跑完就再投遞下一批（`--batch-size 250`會自動跳過已
-  快取日期，提交時務必用`--cwd`指到`research/`絕對路徑，避免重蹈48ca
-  的覆轍），跑完2,609天後才進入`#57`第1關sanity（比照
-  `#53`/`#54`/`#55`同一套`cross_sectional_*_gate5X.py`框架）。
+  `run_detached.py status --last 5`/`log 20260908-112207-fdef`收成本輪
+  投遞的批次，若已跑完2,609天即可直接進入`#57`第1關sanity（比照
+  `#53`/`#54`/`#55`同一套`cross_sectional_*_gate5X.py`框架）；若仍未
+  跑完就再投遞下一批（`--batch-size 250`會自動跳過已快取日期，提交時
+  務必用`--cwd`指到`research/`絕對路徑，避免重蹈48ca的覆轍）。
 
 ### 五條的執行順序（依資料就緒度，不依「哪條看起來最有希望」）
 
