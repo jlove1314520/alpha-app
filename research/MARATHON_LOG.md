@@ -1,5 +1,15 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09 hypothesis_queue排程接續（上一輪鎖檔陳舊29.9分鐘，已回收接手）
+— 重新查核佇列：#49/#51/#52（TW+US）皆已結案FAIL、#50仍卡`資料一`逐筆
+tick落地外部依賴（本輪重新查證`research/data/ticks/`實際檔數仍2/20交易
+日，未解鎖）。判定四條結構性優勢方向已無可推進項目，依協定第1節設計
+新假設軸**#62（鉅額逐筆交易Block Trade跟隨訊號，第⑫類機制：知情大額
+交易/資訊不對稱，跟已測11類經濟機制皆不同）**，已寫入
+`HYPOTHESIS_QUEUE.md`，資料可行性尚未查證，留給下一輪從三來源查證開始，
+不跳關搶跑cheap gate。本輪因budget考量未執行任何資料抓取，僅設計+記錄，
+零新增外部API呼叫。`is_holdout_consumed()`確認`False`。本輪工作到此為止。
+
 ## 2026-09-09T03:xx+0800 hypothesis_queue排程接續 — 收成TW軌job並#52-TW正式
 結案：FAIL。開工先讀協定+`CLAUDE.md`+`git pull`（`data/quotes_ibkr.json`
 為常駐IBKR報價行程殘留，不動、不納入commit），取鎖`LOCK_ACQUIRED`。查
