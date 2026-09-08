@@ -7380,3 +7380,72 @@ PROTOCOL.md`0a節四條結構性優勢方向（#49/#50/#51/#52/#61）中，#61�
 軸#62。完整見`TW_LEADS.md`#15、`TRIALS_LEDGER.md`#219、
 `STRATEGY_GRAVEYARD.md` #61條目、`cbc_decision_event_gate61.py`
 （新增，可重複執行）。
+
+---
+
+### #51-US 強制交易者事件（美股版）：S&P 500 指數成分調整資料可行性查證
+
+**2026-09-08T22:30+0800 馬拉松第460輪（US軌）**——依round458交辦，查證
+`MARATHON_PROTOCOL.md`0a節「#50/#51美股版尚未查證資料源與地基」。
+本輪heavy-job-slot被TW軌job`b142`（MOPS重大訊息全範圍回填）佔用中，
+選做不需搶重度算力的地基查證工作。
+
+**經濟機制**：S&P 500／S&P 100／S&P MidCap 400／S&P SmallCap 600 指數
+成分調整——S&P Dow Jones Indices公告某股票將於指定生效日納入／剔除，
+被動追蹤指數的基金**不論價格都必須在生效日交易**（法規/合約義務，
+非預測性），且**公告日明顯早於生效日**（本輪實測樣本：公告Sep 4,
+2026、生效Sep 21, 2026，相隔11個交易日；臨時性單一成分變更間隔較短，
+約3~7個交易日）。這與`#51`台股版三個子事件（融券強制回補/現金增資
+除權/CB轉換價重設）性質相同（結構性、日期事前已知），但**機制主體
+不同**（被動指數基金的法規追蹤義務，非借券回補/除權評價/轉換價格
+重設），符合0a節「非同一機制換皮」的獨立假設要求。
+
+**資料可行性查證（三個獨立管道）**：
+1. **官方主入口 `www.spglobal.com/spdji`**：WebFetch與`requests`（標準
+   `User-Agent: Mozilla/5.0`表頭，非偽裝特定瀏覽器指紋）皆回傳**403**，
+   判定為官方站台本身的機器人防護（非需要登入/驗證碼的高牆），依
+   `CLAUDE.md`取得方式鐵律**不嘗試繞過**（不換IP、不偽造更進階的瀏覽器
+   指紋）。
+2. **官方新聞稿子網域 `press.spglobal.com`（PRNewswire代管）**：`requests`
+   直接可用（200），首頁HTML內含分類新聞列表分頁連結
+   `index.php?s=2429&o=<offset>&l=<limit>&pagetemplate=rss`，實測
+   `o=0~3680`皆為合法分頁參數（推算約3,680篇同類新聞稿，涵蓋多年）。
+   單篇公告內文為結構化表格（`Effective Date | Index Name | Action |
+   Company Name | Ticker | GICS Sector`），可用正規表示式穩定解析，
+   零登入、零驗證碼、零速率限制跡象（本輪僅發出個位數請求測試）。
+   這是**官方公開端點**（S&P Global自家新聞稿發布系統），符合鐵律。
+3. **社群/第三方比對**（僅作交叉核對用，非資料來源本體）：
+   `github.com/fja05680/sp500`（historyofmarket.com、Pineify等聚合站
+   同理）——確認業界確實把這份資料當作可用的分析素材，反推官方資料
+   存在且有人用過，但**不作為正式資料源**（避免二手資料的樣本選擇
+   偏誤，且部分僅到2019年）。
+
+**結論：可行（FEASIBLE）**，走`press.spglobal.com`RSS分頁列表為索引、
+逐篇解析內文表格取得「公司/動作/生效日」，比照`mops_material_news_
+client.py`（#52-TW）同款per-day/per-page快取parquet設計，建立
+`sp500_index_changes_client.py`。**尚未驗證**：(a)分類`s=2429`是否
+100%純指數變更公告，可能混入其他S&P Dow Jones Indices一般新聞（下一輪
+建client時需用標題關鍵字`"Set to Join"`／`"will replace"`過濾並人工
+抽樣核對）；(b)公告日與生效日的间隔在臨時性單一成分變更（例如企業被
+收購下市觸發的插補）是否同樣夠長，本輪僅驗證了一次季度性再平衡樣本。
+
+**與#50-US（容量受限小型股）盤點**：`#50`事前綁定要求用**我們自己
+落地的逐筆tick**估真實滑價，目前研究專案沒有任何美股tick擷取管線
+（Shioaji僅涵蓋台股，IBKR quotes僅存目前報價非逐筆歷史），判定
+`#50`美股版**與台股版同樣卡在前置依賴（無自建tick資料），本輪不投入
+更多查證，維持卡住狀態誠實記錄**，不得用假設滑價值硬做（違反鐵律）。
+
+**本輪工作到此為止（一輪一個有界工作單位，純資料可行性查證，非試驗
+判定，不登記`TRIALS_LEDGER.md`）**。`is_holdout_consumed()`開工/收工
+前皆確認`False`，全程零FinMind/SEC EDGAR歷史資料API呼叫（僅WebSearch
+查證與`press.spglobal.com`個位數次測試性HTTP請求，且該端點無公開
+速率上限文件、非付費/登入資源）。**下一輪US軌接手**：建立
+`sp500_index_changes_client.py`（分頁遍歷`s=2429`列表、標題關鍵字
+過濾、解析生效日表格、per-page快取parquet），累積出2015年起的歷史
+指數變更事件表後，才進入`#51-US`第1關cheap gate（事件研究框架比照
+`fut_settlement_event_gate60.py`/`cbc_decision_event_gate61.py`，
+生效日±N日報酬 vs 隨機交易日null）。**已知風險，設計時要記得**：
+美股「指數效應」是文獻已大量研究的現象（Harris & Gurel 1986等），
+近二十年因套利資金搶跑已明顯減弱甚至反轉，**測試前不預設會過**，
+只是誠實驗證我們的框架在這個機制上測不測得出東西。完整見
+`US_MARATHON_STATE.md`第460輪記錄、`REPORT.md`第460輪心跳。
