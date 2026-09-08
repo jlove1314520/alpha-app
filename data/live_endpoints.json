@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "note": "即時伺服器端點候選清單。App 啟動時並行打各端點的 /health（免 token）自動發現，使用者永不手填。",
+    "why_public": "Tailscale 官方文件載明所有 TLS 憑證都記錄在憑證透明度（CT）公開帳本，包含裝置完整網域名稱；且實測 Funnel 開通不到一分鐘即遭外部掃描。網址早已公開，隱藏它零安全效益，卻造成每台裝置手動設定與架構變更後全部斷線。",
+    "security": "此檔絕不含 token。X-Alpha-Local-Token 只存在使用者裝置的 localStorage，永不進 repo。端點本身仍要求 token 才回傳資料，/health 與 /whoami 為免 token 的診斷端點。",
+    "change_policy": "日後任何端點變更只允許改這個檔案，禁止要求總司令手動更新任何裝置。見 CLAUDE.md 四之一。",
+    "updated_at": "2026-09-08"
+  },
+  "endpoints": [
+    {
+      "url": "https://alpha-pc.tail4c7616.ts.net",
+      "label": "Tailscale Funnel（家用 PC）",
+      "priority": 1,
+      "enabled": true,
+      "note": "現行主要端點。Funnel 對外做 TLS 終結，伺服器只聽 127.0.0.1。任何網路皆可用。"
+    },
+    {
+      "url": "",
+      "label": "自訂網域（保留，尚未購買）",
+      "priority": 2,
+      "enabled": false,
+      "note": "日後若購買網域，填入 https://live.<domain> 並把 enabled 改為 true 即可，不需要動任何裝置。"
+    }
+  ]
+}

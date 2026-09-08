@@ -1154,7 +1154,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 2026-09-03深夜（乙.4）：Phase 1冷熱分離的「熱」資料入口。網址/token只存本機localStorage。 -->
     <div class="card">
       <h3>即時伺服器（Phase 1 冷熱分離）</h3>
-      <div class="setting-row">
+      <!-- 2026-09-08（自動連線一）自動發現結果。使用者永不手填，這裡只是讓他
+           看得到「系統選了哪一個、花了多久」，不是要他操作。 -->
+      <div id="live-discovery" class="note" style="margin-bottom:8px"></div>
+      <!-- 2026-09-08（自動連線二.4）IBKR 權杖到期主動提醒。
+           官方規則：開 auto-restart 後每日重啟免重登，**但每週日 01:00 ET
+           安全權杖失效必須人工登入一次**，這件事沒有合規的自動化解法
+           （IBeam 那類是代填認證，不採用）。
+           既然自動化不了，至少不要讓總司令自己撞到才發現。 -->
+      <div id="ibkr-token-warn" style="margin-bottom:8px"></div>
+      <details id="live-manual-adv" style="margin-top:4px">
+        <summary style="font-size:11.5px;color:var(--ink-4);cursor:pointer;list-style:none">進階：手動指定伺服器網址</summary>
+      <div class="setting-row" style="margin-top:8px">
         <span>伺服器網址</span>
         <div class="setting-input"><input id="set-live-url" type="url" placeholder="貼上完整 ts.net 網址" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
@@ -1164,6 +1175,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            使用者根本無法自我檢查貼對沒有（包含有沒有誤帶 :8001）。
            所以這裡把「目前實際生效的網址」完整攤開顯示，可換行、可一鍵複製。 -->
       <div id="live-url-full" class="note" style="margin-top:6px;display:none"></div>
+      <div class="note" style="margin-top:6px">填了手動值就以手動值優先，自動發現會停用。要恢復自動，清空這一欄即可。</div>
+      </details>
       <!-- 2026-09-08（連線四.1）舊區網位址引導。總司令的手機在 4G 下顯示「連線逾時」，
            根因不是網路也不是伺服器，是設定裡還留著 https://192.168.3.241:8001——
            連線二.2 把伺服器改成純 HTTP、連線三.1 又把綁定改成 127.0.0.1 之後，
@@ -2446,8 +2459,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   // 有近即時報價（20分鐘內）就優先用它顯示，並標「盤中 延遲約N分」；沒有就照舊用FinMind
   // 日線，不會因為加了這個功能反而讓沒有近即時資料的股票顯示變差。
+  // 2026-09-08（實測.七）**回傳結構化物件 {text,color}，不再回傳 HTML 字串。**
+  // 這是總司令實測抓到的 bug：原本回傳 `<span ...>` HTML，但兩個呼叫點
+  // （3748 美股 IBKR、3803 台股 Shioaji）用 setTxt() → el.textContent，
+  // HTML 被當成純文字整串印在畫面上，**個股頁的資料新鮮度提示長期是壞的**。
+  // 根本原因是同一個函式同時服務 HTML 與 textContent 兩種情境，
+  // 光修呼叫端只是把地雷往後推——**改成回傳資料而非標記，這類錯配就不可能再發生**。
+  // 需要樣式的呼叫端自己組 span（見 intradayTagHtml()）。
   function intradayTag(iq,us){
-    if(!iq)return '';
+    if(!iq)return null;
     if(iq.source==='ibkr'||iq.source==='sinopac'){
       const label=iq.source==='ibkr'?'IBKR':'Shioaji';
       // 2026-09-03新增：收盤後但資料確實是今天的（見ibkrQuote()/sinopacQuote()
@@ -2457,16 +2477,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const tz=iq.source==='ibkr'?'America/New_York':'Asia/Taipei';
         const src=iq.source==='ibkr'?INTRADAY_IBKR:INTRADAY_SINOPAC;
         const ts=src&&src.fetched_at?fmtTzHHMM(new Date(src.fetched_at),tz):'';
-        return `<span style="color:var(--ink-3);margin-left:4px">· ${label} 今日收盤${ts?' '+ts:''}</span>`;
+        return {text:`· ${label} 今日收盤${ts?' '+ts:''}`,color:'var(--ink-3)'};
       }
       const mins=Math.max(1,Math.round(iq.ageMin));
-      return `<span style="color:var(--warn);margin-left:4px">· ${label} ${intradayDataTypeLabel(iq.dataType)} 約${mins}分前</span>`;
+      return {text:`· ${label} ${intradayDataTypeLabel(iq.dataType)} 約${mins}分前`,color:'var(--warn)'};
     }
     const mins=Math.max(1,Math.round(iq.ageMin));
     // 2026-09-04 P0緊急回歸修正：13:30後不得出現「盤中」——依該市場現在的session顯示
     const open=us===true?isUsTradingWindowNow():(us===false?isTwTradingWindowNow():(isTwTradingWindowNow()||isUsTradingWindowNow()));
-    if(!open)return `<span style="color:var(--ink-3);margin-left:4px">· 已收盤 · Actions 最後一筆 約${mins}分前</span>`;
-    return `<span style="color:var(--warn);margin-left:4px">· 盤中 延遲約${mins}分(GitHub Actions)</span>`;
+    if(!open)return {text:`· 已收盤 · Actions 最後一筆 約${mins}分前`,color:'var(--ink-3)'};
+    return {text:`· 盤中 延遲約${mins}分(GitHub Actions)`,color:'var(--warn)'};
+  }
+  // 2026-09-08（實測.七）需要樣式的地方用這支，需要純文字的直接取 .text
+  function intradayTagHtml(iq,us){
+    const t=intradayTag(iq,us);
+    if(!t)return '';
+    return `<span style="color:${t.color};margin-left:4px">${t.text}</span>`;
+  }
+  function intradayTagText(iq,us){
+    const t=intradayTag(iq,us);
+    return t?t.text:'';
   }
   const WL_DETAIL_OPEN=new Set();
   function toggleWlDetail(code){const d=document.querySelector(`[data-wl-detail="${code}"]`);if(!d)return;const open=d.hidden;d.hidden=!open;if(open)WL_DETAIL_OPEN.add(code);else WL_DETAIL_OPEN.delete(code)}
@@ -2522,7 +2552,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const cls=chg>=0?'u':'d';
       // 2026-09-04 P0產品.一：來源/新鮮度文字收進可展開的說明，列上只留一顆彩色小點
       // 每一層講自己的話：不能把「三天前的歷史收盤」講成「已收盤（Actions排程最後一筆）」
-      const srcText=iq?`${intradayTag(iq,us)||'· 近即時（Actions排程）'}`
+      const srcText=iq?`${intradayTagHtml(iq,us)||'· 近即時（Actions排程）'}`
         :('· '+(QUOTE_TIER_LABEL[q.tier]||'盤後')+(q.asof?('（'+String(q.asof).slice(5)+'）'):''));
       const mktOpenNow=us?isUsTradingWindowNow():isTwTradingWindowNow();
       const dotCls=!mktOpenNow?'gr':((iq&&(iq.source==='sinopac'||iq.source==='ibkr')&&!iq.isTodayClose&&/REALTIME/.test(iq.data_type||''))?'g':(iq&&!iq.isTodayClose?'y':'gr'));
@@ -3745,7 +3775,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(iq.price);pe.className=cls;
         const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(2)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
         if(px.length)renderStockChart(code,px,true);
-        setTxt('trend-note',`來源：IBKR${intradayTag(iq)}`);
+        setTxt('trend-note',`來源：IBKR${intradayTagText(iq)}`);  // 2026-09-08 實測.七
       }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].Close:last.Close;
         const chg=last.Close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
         const pe=document.getElementById('sh-price');pe.textContent='$'+nf(last.Close);pe.className=cls;
@@ -3800,7 +3830,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       _safeSync('applyLimitBadge',()=>applyLimitBadge(code,iq.price,iq.prev_close,iq));
       const ce=document.getElementById('sh-chg');ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls;
       if(px.length)renderStockChart(code,px,false);
-      setTxt('trend-note',`來源：Shioaji${intradayTag(iq)}`);
+      setTxt('trend-note',`來源：Shioaji${intradayTagText(iq)}`);  // 2026-09-08 實測.七
     }else if(px.length){const last=px[px.length-1];const prev=px.length>1?px[px.length-2].close:last.close-last.spread;
       const chg=last.spread!=null?last.spread:last.close-prev;const pct=prev?chg/prev*100:0;const cls=chg>=0?'pos':'neg';
       const pe=document.getElementById('sh-price');pe.textContent=nf(last.close);pe.className=cls;
@@ -4907,6 +4937,87 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(el.textContent!==txt)el.textContent=txt;
     dot.className='sdot '+cls;
   }
+  // ── 2026-09-08（自動連線一）端點自動發現 ───────────────────────────────
+  // **總司令裁示：不該讓使用者每次手填伺服器網址。**
+  // 原本「網址不寫進公開 repo」的理由不成立——Tailscale 官方文件載明所有 TLS
+  // 憑證都記錄在憑證透明度（CT）公開帳本、含裝置完整網域名稱，且實測 Funnel
+  // 開通不到一分鐘即遭外部掃描。**網址早已公開，隱藏它零安全效益**，
+  // 卻造成每台裝置都要手動設定、架構一變更全部裝置斷線。
+  //
+  // token 不在這裡面，也永遠不會進 repo——端點本身仍然要求 token 才給資料，
+  // /health 與 /whoami 是刻意設計的免 token 診斷端點。
+  let LIVE_ENDPOINTS=null,DISCOVERY={running:false,at:0,tookMs:null,picked:null,tried:[]};
+  const LIVE_FAIL_STREAK={n:0};
+  async function fetchEndpointList(){
+    if(LIVE_ENDPOINTS)return LIVE_ENDPOINTS;
+    try{
+      const r=await fetch('data/live_endpoints.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      LIVE_ENDPOINTS=(d.endpoints||[])
+        .filter(e=>e&&e.enabled&&e.url)
+        .sort((a,b)=>(a.priority||99)-(b.priority||99));
+    }catch(e){
+      console.warn('[fetchEndpointList]',e);recordGlobalError('fetchEndpointList',e);
+      LIVE_ENDPOINTS=[];
+    }
+    return LIVE_ENDPOINTS;
+  }
+  // 並行打所有候選的 /health（免 token、2 秒逾時），第一個回 {ok:true} 的勝出。
+  // 並行不是為了快看——是因為候選端點彼此獨立，序列試會讓「第一個掛掉」
+  // 白白拖慢所有人 2 秒。
+  async function discoverLiveEndpoint(force){
+    if(DISCOVERY.running)return null;
+    // 手動覆寫優先：使用者自己填了就尊重他，不要偷偷換掉（裁示一.5）
+    if(!force&&localStorage.getItem('alpha_live_url_manual')==='1')return null;
+    DISCOVERY.running=true;
+    const t0=Date.now();DISCOVERY.tried=[];
+    try{
+      const list=await fetchEndpointList();
+      if(!list.length){DISCOVERY.picked=null;return null}
+      const probe=(ep)=>new Promise(resolve=>{
+        const ac=new AbortController();
+        const timer=setTimeout(()=>{ac.abort()},2000);
+        fetch(ep.url+'/health',{cache:'no-store',signal:ac.signal})
+          .then(r=>r.ok?r.json():null)
+          .then(j=>resolve(j&&j.ok===true?ep:null))
+          .catch(()=>resolve(null))
+          .finally(()=>clearTimeout(timer));
+      });
+      const results=await Promise.all(list.map(ep=>probe(ep).then(ok=>{
+        DISCOVERY.tried.push({url:ep.url,label:ep.label,ok:!!ok});
+        return ok;
+      })));
+      // 依 priority 順序取第一個成功的（list 已排序，results 同序）
+      const hit=results.find(Boolean)||null;
+      DISCOVERY.tookMs=Date.now()-t0;
+      DISCOVERY.at=Date.now();
+      DISCOVERY.picked=hit?{url:hit.url,label:hit.label}:null;
+      if(hit){
+        localStorage.setItem('alpha_live_url',hit.url);
+        localStorage.setItem('alpha_live_url_label',hit.label||'');
+        LIVE_FAIL_STREAK.n=0;
+      }
+      return hit;
+    }catch(e){
+      console.warn('[discoverLiveEndpoint]',e);recordGlobalError('discoverLiveEndpoint',e);
+      return null;
+    }finally{DISCOVERY.running=false}
+  }
+  // 執行中自我修復：連續失敗 3 次就重跑一次發現（裁示一.3）
+  async function liveSelfHeal(reason){
+    LIVE_FAIL_STREAK.n++;
+    if(LIVE_FAIL_STREAK.n<3)return;
+    LIVE_FAIL_STREAK.n=0;
+    const before=LIVE.url;
+    const hit=await discoverLiveEndpoint();
+    if(hit&&hit.url!==before){
+      loadLiveConfig();
+      toast('已自動切換至 '+(hit.label||hit.url));
+      restartLiveStream();
+    }
+    console.warn('[liveSelfHeal]',reason,'→',hit?hit.url:'仍無可用端點');
+  }
   function loadLiveConfig(){
     try{
       LIVE.url=((localStorage.getItem('alpha_live_url')||'').trim().replace(/\/+$/,''))||null;
@@ -4982,6 +5093,51 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       }catch(e2){console.warn('[copyLiveUrl:fallback]',e2);toast('複製失敗，請手動選取')}
     }
   }
+  // 2026-09-08（自動連線一.2）把發現過程顯示出來——耗時與選中端點。
+  function renderDiscovery(){
+    const box=document.getElementById('live-discovery');if(!box)return;
+    const manual=localStorage.getItem('alpha_live_url_manual')==='1';
+    if(manual){
+      box.innerHTML='<span style="color:var(--warn)">使用手動端點，已停用自動發現。</span>'
+        +'（清空下方「進階」裡的網址欄即可恢復自動）';
+      return;
+    }
+    if(DISCOVERY.running){box.textContent='正在自動尋找可用的伺服器…';return}
+    if(!DISCOVERY.at){box.textContent='尚未執行自動發現。';return}
+    const tried=DISCOVERY.tried.map(t=>(t.ok?'✓ ':'✗ ')+t.label).join('　');
+    if(DISCOVERY.picked){
+      box.innerHTML='<b style="color:var(--up)">已自動連上：'+DISCOVERY.picked.label+'</b>'
+        +'（耗時 '+DISCOVERY.tookMs+' ms）<br>'
+        +'<span style="color:var(--ink-4)">候選：'+tried+'</span><br>'
+        +'<span style="color:var(--ink-4)">你不需要手動填網址。日後端點變更由 data/live_endpoints.json 統一更新，裝置端不用動。</span>';
+    }else{
+      box.innerHTML='<b style="color:#e6383f">所有候選端點都連不上</b>（耗時 '+DISCOVERY.tookMs+' ms）<br>'
+        +'<span style="color:var(--ink-4)">候選：'+(tried||'清單為空')+'</span><br>'
+        +'<span style="color:var(--ink-4)">請確認家中 PC 的即時伺服器有在跑。</span>';
+    }
+  }
+  // 2026-09-08（自動連線二.4）IBKR 權杖每週日 01:00 ET 失效，到期前 24 小時起提醒。
+  function renderIbkrTokenWarn(){
+    const box=document.getElementById('ibkr-token-warn');if(!box)return;
+    try{
+      const z=_zonedParts(new Date(),'America/New_York');
+      // 下一個「週日 01:00 ET」距離現在幾小時。wd: 0=週日
+      const nowMin=z.wd*24*60+z.h*60+z.mi;
+      const targetMin=0*24*60+1*60;            // 週日 01:00
+      let diffMin=targetMin-nowMin;
+      if(diffMin<=0)diffMin+=7*24*60;          // 已過就算下一週
+      const hrs=diffMin/60;
+      // 剛過期的判定：週日 01:00 之後、且 Gateway 這邊沒有新鮮資料
+      const stale=INTRADAY_IBKR&&!INTRADAY_IBKR.connected;
+      if(hrs>24&&!stale){box.innerHTML='';box.style.display='none';return}
+      box.style.display='';
+      const msg=stale
+        ? '<b>IBKR 權杖可能已到期</b>——伺服器回報未連上 Gateway。請到 PC 上重新登入 IB Gateway。'
+        : 'IBKR 權杖將於約 '+Math.round(hrs)+' 小時後（美東週日 01:00）到期，屆時需在 PC 上手動重登一次 Gateway。';
+      box.innerHTML='<div style="border:1px solid var(--gold);border-radius:8px;padding:8px 10px;background:rgba(212,168,75,.08);font-size:11.5px;color:var(--ink-2);line-height:1.6">⚠ '
+        +msg+'<br><span style="color:var(--ink-4)">這是 IBKR 官方的每週安全機制，沒有合規的自動化解法。</span></div>';
+    }catch(e){console.warn('[renderIbkrTokenWarn]',e);recordGlobalError('renderIbkrTokenWarn',e)}
+  }
   function renderLegacyLiveWarn(){
     const box=document.getElementById('live-url-legacy-warn');if(!box)return;
     const reason=legacyLiveUrlReason(LIVE.url);
@@ -5016,6 +5172,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         changed=(localStorage.getItem('alpha_live_url')||'')!==n.url;
         u.value=n.url;
         localStorage.setItem('alpha_live_url',n.url);
+        // 2026-09-08（自動連線一.5）填了手動值就記旗標、以手動值優先；
+        // 清空則解除，回到自動發現。使用者要看得出自己覆寫了什麼。
+        if(n.url)localStorage.setItem('alpha_live_url_manual','1');
+        else{localStorage.removeItem('alpha_live_url_manual');_safeAsync('rediscover',()=>discoverLiveEndpoint(true).then(()=>{loadLiveConfig();renderLiveStatus()}))}
         if(n.note)toast(n.note);
       }
       if(t)localStorage.setItem('alpha_live_token',t.value.trim());
@@ -5087,6 +5247,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     let txt,color;
     if(!LIVE.configured){txt='離線（未設定即時伺服器），顯示最後收盤 '+lastCloseLabel();color='var(--ink-3)'}
     else if(LIVE.connected){txt='● 即時連線中（本機伺服器・'+(LIVE.sourceMode==='tick-push-memory'?'逐筆推送':(LIVE.sourceMode==='hot-file'?'熱檔秒級':'冷檔'))+(LIVE.streamMode?'・'+LIVE.streamMode:'')+'）';color='#1aa876'}
+    // 2026-09-08（自動連線二.1）重連過程不得靜默：正在重試就明講第幾次。
+    else if(LIVE.retryCount>0){
+      txt='重新連線中（第 '+LIVE.retryCount+' 次）'
+        +(DISCOVERY.picked?'・'+DISCOVERY.picked.label:'')
+        +'，暫時顯示最後收盤 '+lastCloseLabel();
+      color='var(--warn)';
+    }
     else{txt='離線（連不上即時伺服器'+(LIVE.lastError?'：'+LIVE.lastError:'')+'），顯示最後收盤 '+lastCloseLabel();color='#e6383f'}
     const el=document.getElementById('home-live-status');if(el){el.textContent=txt;el.style.color=color}
     const note=document.getElementById('live-status-note');if(note){note.textContent=txt;note.style.color=color}
@@ -5102,6 +5269,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(cs&&document.activeElement!==cs)cs.value=LIVE.cfSecret||'';
     _safeSync('renderLegacyLiveWarn',renderLegacyLiveWarn);  // 2026-09-08 連線四.1
     _safeSync('renderLiveUrlFull',renderLiveUrlFull);        // 2026-09-08 連線五.1
+    _safeSync('renderDiscovery',renderDiscovery);            // 2026-09-08 自動連線一.2
+    _safeSync('renderIbkrTokenWarn',renderIbkrTokenWarn);    // 2026-09-08 自動連線二.4
   }
   // ── 2026-09-06（連線一.2）測試連線分兩段、錯誤分三類 ───────────────────────
   // 原本只打 /live/quotes，失敗一律顯示瀏覽器丟回來的原始訊息（iOS Safari 就是那句
@@ -5248,9 +5417,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       if(LIVE.abort===ac)LIVE.abort=null;
       renderLiveStatus();
       if(!ac.signal.aborted){
+        // 2026-09-08（自動連線二.1）重連過程不得靜默——把第幾次寫進狀態列。
+        // 使用者看到「重新連線中（第 3 次）」跟看到一片空白，
+        // 對「系統有沒有在做事」的判斷完全不同。
+        LIVE.retryCount=(LIVE.retryCount||0)+1;
         const wait=LIVE.retryMs;LIVE.retryMs=Math.min(30000,LIVE.retryMs*2); // 指數退避，最多30秒
+        renderLiveStatus();
+        // 連續失敗達門檻就重跑端點發現（自動連線一.3）
+        _safeAsync('liveSelfHeal',()=>liveSelfHeal('SSE 斷線第 '+LIVE.retryCount+' 次'));
         setTimeout(()=>{startLiveStream().catch(e=>{console.warn('[live:reconnect]',e)})},wait);
-      }
+      }else{LIVE.retryCount=0}
     }
   }
   function restartLiveStream(){
@@ -5260,6 +5436,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='visible'&&LIVE.configured&&!LIVE.connected&&!LIVE.abort)restartLiveStream();
+  });
+  // 2026-09-08（自動連線二.2）網路恢復時立刻重試一次，不等退避計時。
+  // 退避到 30 秒時，使用者可能已經接回網路卻還要乾等半分鐘——
+  // 那半分鐘裡畫面看起來就是「還是壞的」，是最容易被誤判成沒修好的時候。
+  window.addEventListener('online',()=>{
+    if(!LIVE.configured)return;
+    LIVE.retryMs=1000;   // 重置退避，網路剛回來值得立刻試
+    if(!LIVE.connected){
+      toast('偵測到網路恢復，立即重新連線');
+      restartLiveStream();
+    }
   });
 
   // ══════ 2026-09-03深夜（乙.5）個股頁走勢圖：TradingView lightweight-charts ══════
@@ -5744,7 +5931,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.1254';
+  const APP_VERSION='2026-09-08.1503';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -5869,7 +6056,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 2026-09-03深夜（乙.4）：讀即時伺服器設定並嘗試連線；沒設定/連不上就維持冷資料路徑並標「離線」。
   _safeSync('loadLiveConfig',loadLiveConfig);
   _safeSync('renderLiveStatus',renderLiveStatus);
-  _safeAsync('startLiveStream',startLiveStream);
+  // 2026-09-08（自動連線一.2）啟動時自動發現端點，使用者永不手填。
+  // 順序很重要：先發現、再連線——先連線的話第一次一定用到舊的或空的網址，
+  // 使用者會看到一次沒必要的「連不上」再自己好起來，那種閃爍比慢一點更糟。
+  // 發現本身有 2 秒逾時且並行，最壞情況只多等 2 秒。
+  _safeAsync('discoverLiveEndpoint',()=>discoverLiveEndpoint()
+    .then(()=>{loadLiveConfig();renderLiveStatus();return startLiveStream()}));
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)})}
 </script>
 </body>
