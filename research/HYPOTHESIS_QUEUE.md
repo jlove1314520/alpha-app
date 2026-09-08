@@ -6363,6 +6363,40 @@ consumed()`開工/收工前皆確認`False`，本輪全程零新增外部API呼�
 若job`timeout`（40分鐘內未完成）則檢討是否需要進一步優化或縮減
 N=100。
 
+**(v) job已確認finished，正式N=200結果已讀取並登記（2026-09-09
+hypothesis_queue排程接續，`trial_registry.register_trial()`#221，僅查核
+job狀態+讀既有輸出檔，零新增外部API呼叫）**：`run_detached.py status
+--json`確認job`20260909-011334-1783`（`material_news_car_gate1_52tw`）
+`status=finished`、`exit_code=0`（執行10.1分鐘）。讀
+`data/material_news_car_gate_result.json`：**8大類中4類PASS**（
+`control_percentile`皆=100.0，即訊號嚴格大於全部400次控制組抽樣最大值）：
+併購（signal=0.0695>control_max=0.0508）、增減資（0.1164>0.0391）、
+財務（0.0401>0.0365）、人事（0.0806>0.0370）。**4類FAIL**：停復牌
+（0.1229<control_max=0.1334，percentile=99.75）、訴訟（0.0672<0.1064，
+percentile=99.75）、法說會（0.0334<0.0419，percentile=64.5）、處分資產
+（0.0268<0.0425，percentile=50.0）。**證實(u)段落的預警**：N=50中規模
+前景測試曾6類PASS（含停復牌/訴訟），改N=200正式全量後這兩類轉FAIL——
+N越小控制組max越不極端、越容易虛胖PASS，過去中規模數字不得引用。
+
+**誠實揭露，這只是gate1，不是策略PASS**：4類PASS的`control_percentile`
+皆=100.0，依協定「效果量級越誇張越應懷疑」原則，需先排除PIT時間戳
+洩漏才能升級信任度——但也要承認這4類（併購/增減資/財務/人事）本身就是
+重大會實質影響價格的公告類型，測到「異常反應幅度存在」某種程度上接近
+同義反覆，並不等於已經找到**可交易的方向性**alpha。真正決定這條假設
+生死的是下一關：**反應是否延續超過T+0/T+1讓人來得及進場**（PEAD式
+漂移），而非僅僅「有沒有異常反應」。**#50/#51/#52三條仍全數未結案**
+（#50仍卡`資料一`逐筆tick累積未達20交易日門檻，本輪未重新查證，沿用
+前次2/20狀態）。**本輪工作到此為止**（一輪一個有界工作單位），下一輪
+待辦：(1)對4類PASS類別設計方向性/延續性檢定（reaction_day+1~+5後續
+漂移方向是否可預測且事前綁定顯著，而非僅測magnitude）——這是#52真正
+的gate2/3，不是複製本輪的magnitude控制組測試；(2)人工抽查PIT時間戳
+歸類有無系統性洩漏（例如公告時刻誤標導致提前反應被誤記入reaction
+window）；(3)若通過方向性檢定，才呼叫`candidate_report.py::
+report_candidate()`把4類PASS個別寫進`TW_LEADS.md`（無Sharpe需填
+`dsr_blocked_reason`，這是事件CAR震幅檢定非投資組合報酬序列）。完整見
+`TRIALS_LEDGER.md`#221。`is_holdout_consumed()`開工/收工前皆確認
+`False`，全程零新增外部API呼叫。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應

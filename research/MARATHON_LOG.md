@@ -1,5 +1,36 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T01:57+0800 hypothesis_queue排程接續 — 確認#52(TW) job已
+finished，讀取並登記官方N=200結果，未做新研究 — 8類中4類CHEAP_PASS
+（併購/增減資/財務/人事，control_percentile皆=100.0）、4類FAIL
+（停復牌/訴訟/法說會/處分資產），已登記`TRIALS_LEDGER.md`#221。開工
+先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`dev_queue_cycle.log`/
+`external_connectivity.jsonl`兩個常駐服務殘留變更，不動、不納入本輪
+commit）。找到`run_detached.py status --json`正確語法（`--last N`
+即可，無需job-id/name flag），確認job`20260909-011334-1783`
+`status=finished`/`exit_code=0`。讀`data/material_news_car_gate_
+result.json`：4類PASS的`control_percentile`皆=100.0（訊號嚴格大於
+全部400次控制組抽樣最大值），依協定「效果量級越誇張越應懷疑」原則
+誠實揭露——但同時指出這4類本身就是重大影響價格的公告類型，測到
+「異常反應存在」某種程度接近同義反覆，真正決定生死的是下一關
+（反應能否延續到T+1以後讓人來得及進場，PEAD式漂移，而非僅magnitude）。
+用`register_trial()`登記`TRIALS_LEDGER.md`#221（`trial_registry.py
+--check`確認PASS，223列/下一可用#222），並在`HYPOTHESIS_QUEUE.md`
+#52條目新增(v)段落記錄完整數字+下一輪待辦。**發現一個小疏失**：
+bash多行雙引號heredoc內含反引號（`` `資料一` ``等markdown程式碼格式）
+觸發command substitution，導致#221登記文字裡「資料一」三字被吞掉（
+`資料一逐筆tick`變成`逐筆tick`），意思仍可讀但不精確——下一輪若要
+補救可直接修正該列文字，或當作可忽略的cosmetic issue（不影響任何
+數字/判定本身）；記錄於此避免未來重蹈覆轍（**教訓：python -c多行
+內容要用單引號outer或寫暫存.py檔，不要在雙引號heredoc裡放反引號**）。
+#50仍卡`資料一`逐筆tick累積未達20交易日門檻，本輪未重新查證，沿用
+前次2/20狀態（不確定是否已推進，誠實標註未驗證）。`is_holdout_
+consumed()`開工/收工前皆確認`False`，全程零新增外部API呼叫（僅
+`run_detached.py status`查核+讀既有輸出JSON）。**本輪工作到此為止
+（一輪一個有界工作單位）**，下一輪待辦：(1)#52對4類PASS類別設計
+方向性/延續性檢定（gate2/3，非重複本輪magnitude測試）；(2)人工抽查
+PIT時間戳歸類有無系統性洩漏；(3)重新查證#50 tick累積門檻。
+
 ## 2026-09-09T01:20+0800 hypothesis_queue排程接續 — 查核#52(TW)進度，
 發現AlphaMarathon TW軌round465已搶先做完gate1股票代號過濾+CAR檢定腳本
 並投遞正式job，本輪未重工只查核，因預算即將用盡提前收工。開工先讀協定+
