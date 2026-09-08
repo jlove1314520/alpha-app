@@ -1,39 +1,39 @@
 {
-  "fetched_at": "2026-09-08T20:51:46.877320+08:00",
+  "fetched_at": "2026-09-08T20:56:38.228759+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 318.08,
-      "bid": 318.0,
-      "ask": 318.16,
+      "last": 318.14,
+      "bid": 318.12,
+      "ask": 318.15,
       "close": 319.97,
-      "change_pct": -0.5907,
+      "change_pct": -0.5719,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 496.84,
-      "bid": 496.83,
-      "ask": 496.9,
+      "last": 496.75,
+      "bid": 496.61,
+      "ask": 496.86,
       "close": 499.7,
-      "change_pct": -0.5723,
+      "change_pct": -0.5904,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 232.15,
-      "bid": 232.11,
-      "ask": 232.16,
+      "last": 232.05,
+      "bid": 232.05,
+      "ask": 232.08,
       "close": 230.36,
-      "change_pct": 0.777,
+      "change_pct": 0.7336,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
       "last": 355.45,
-      "bid": 355.3,
+      "bid": 355.45,
       "ask": 355.5,
       "close": 354.08,
       "change_pct": 0.3869,
@@ -41,23 +41,24 @@
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 336.3,
-      "bid": 336.3,
-      "ask": 336.39,
+      "last": 336.14,
+      "bid": 336.1,
+      "ask": 336.27,
       "close": 338.46,
-      "change_pct": -0.6382,
+      "change_pct": -0.6855,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "^DJI": {
-      "last": null,
+      "last": 53414.25,
       "bid": null,
       "ask": null,
-      "close": null,
-      "change_pct": null,
-      "data_type": "REALTIME",
+      "close": 53686.1,
+      "change_pct": -0.5064,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CME",
-      "label": "道瓊工業指數"
+      "label": "道瓊工業指數",
+      "source": "yahoo_fallback"
     },
     "^GSPC": {
       "last": 7717.81,
