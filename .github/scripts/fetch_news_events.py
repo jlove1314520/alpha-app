@@ -218,6 +218,20 @@ def fetch_events(s: requests.Session) -> tuple[list[dict], dict]:
 CODE_RE = re.compile(r"(?<!\d)(\d{4})(?!\d)")
 
 
+# 2026-09-08（題材萃取一.1）精確比對器，取代原本的「標題四位數」規則。
+try:
+    from news_matcher import (load_company_names as _load_names,
+                              match_article as _match_article)
+    _NAME2CODE, _AMBIGUOUS = _load_names()
+except Exception as _e:  # noqa: BLE001
+    # 比對器載入失敗時退回「不標記」，**不要退回舊的錯誤規則**——
+    # 舊規則的精確率只有 1/6，退回去等於刻意產生錯誤資料。
+    print(f"! news_matcher 載入失敗（{type(_e).__name__}），本輪不標記個股")
+    _NAME2CODE, _AMBIGUOUS = {}, set()
+    def _match_article(t, b, n, a):  # noqa: ANN001
+        return {"codes": [], "by_number": [], "by_name": []}
+
+
 def fetch_news(s: requests.Session, known_codes: set[str]) -> tuple[list[dict], dict]:
     """RSS 新聞。標的用「標題裡出現的 4 位數代號」比對，比對不到就留空。
 
@@ -237,7 +251,13 @@ def fetch_news(s: requests.Session, known_codes: set[str]) -> tuple[list[dict], 
                 pub = clean(it.findtext("pubDate"))
                 if not (title and link):
                     continue
-                codes = [c for c in CODE_RE.findall(title) if c in known_codes]
+                # 2026-09-08（題材萃取一.1）改用精確比對器。
+                # 舊寫法只認標題裡的四位數，實測 179 則標到 6 筆、**其中 5 筆是錯的**
+                # （2505元被當成國揚、2030年/2023年被當成彰源/燁輝）。
+                # 新規則：四位數後不得接單位字＋官方名稱精確比對＋歧義排除，
+                # 實測標到 21 則、23 個 (股票,新聞) 組合，且假陽性由規則擋掉。
+                m = _match_article(title, "", _NAME2CODE, known_codes)
+                codes = m["codes"]
                 news.append({"title": title[:140], "url": link, "published": pub,
                              "source": name, "codes": codes})
                 n += 1
