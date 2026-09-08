@@ -1,49 +1,49 @@
 {
-  "fetched_at": "2026-09-08T16:46:39.270620+08:00",
+  "fetched_at": "2026-09-08T16:51:43.602245+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 318.55,
-      "bid": 318.4,
-      "ask": 318.55,
+      "last": 318.44,
+      "bid": 318.42,
+      "ask": 318.61,
       "close": 319.97,
-      "change_pct": -0.4438,
+      "change_pct": -0.4782,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
       "last": 496.52,
-      "bid": 496.41,
-      "ask": 496.99,
+      "bid": 496.68,
+      "ask": 496.92,
       "close": 499.7,
       "change_pct": -0.6364,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 230.75,
-      "bid": 230.5,
-      "ask": 230.85,
+      "last": 230.71,
+      "bid": 230.72,
+      "ask": 230.83,
       "close": 230.36,
-      "change_pct": 0.1693,
+      "change_pct": 0.1519,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 353.11,
-      "bid": 352.88,
-      "ask": 353.43,
+      "last": 353.22,
+      "bid": 353.15,
+      "ask": 353.44,
       "close": 354.08,
-      "change_pct": -0.2739,
+      "change_pct": -0.2429,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
       "last": 336.71,
-      "bid": 336.71,
-      "ask": 336.9,
+      "bid": 336.6,
+      "ask": 336.73,
       "close": 338.46,
       "change_pct": -0.517,
       "data_type": "DELAYED",
@@ -61,14 +61,15 @@
       "source": "yahoo_fallback"
     },
     "^GSPC": {
-      "last": 7717.81,
+      "last": 7718.6,
       "bid": null,
       "ask": null,
-      "close": 7718.6,
-      "change_pct": -0.0102,
-      "data_type": "DELAYED",
+      "close": 7747.71,
+      "change_pct": -0.3757,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500"
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
     },
     "^IXIC": {
       "last": 26506.99,
