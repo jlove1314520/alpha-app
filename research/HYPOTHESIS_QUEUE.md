@@ -6198,6 +6198,26 @@ vs被迫離職），未做語意過濾即全部納入，若真實機制只存在
 （`MARATHON_PROTOCOL.md`0a節「四條方向的成績全部要進signal_status.json」
 的要求）。
 
+**2026-09-08 馬拉松第458輪US軌執行結果（選項(b)，Item 1.01，FAIL，
+#52-US整體結案）**：`us_8k_item101_gate52.py`（新增，復用
+`us_8k_pead_gate52.py`同一套PIT/反應日/控制緩衝機制）。同一批22檔
+tickers（seed 20260908_52，複用round454已cached的
+`get_8k_events(full_history=True)`，**零新增API呼叫**，執行僅數秒）。
+經濟機制：Item 1.01（新供應合約/信貸協議/授權夥伴關係/併購協議等）是
+非排程、傾向正面或中性的揭露，與2.02（排程財報）、5.02（非排程負面
+主管異動）皆不同象限，非既有兩個family換皮。**結果**：TRAIN（n=289）
+same-sign比例=0.4879 vs 控制組max=0.5747（seed_a）/0.5581（seed_b）
+（百分位36.0，未過）；VAL（n=61）same-sign比例=0.4754 vs 控制組max=
+0.6667/0.6792（百分位43.0，未過）。兩期訊號比例皆低於控制組平均（約
+0.497），是三個item family裡最乾淨的無edge結果，判**FAIL**。已登記
+`TRIALS_LEDGER.md`#220、`STRATEGY_GRAVEYARD.md`新增段落、`US_LEADS.md`
+#31。**誠實揭露**：未依協議金額/對手方/交易類型做語意過濾，混入例行性
+小型協議可能稀釋訊號，屬「無法排除」而非「已排除」的限制。**#52-US
+（SEC EDGAR 8-K事件反應速度）三個item family（2.02/5.02/1.01）全部
+FAIL，正式整體結案為無edge**，依`MARATHON_PROTOCOL.md`0a節「不得無限期
+繼續換皮測試」紀律不再測第四個item family。已同步更新
+`data/signal_status.json`。
+
 ### #49 隔夜 vs 日內拆解
 照既有設計繼續，不受轉向影響。
 

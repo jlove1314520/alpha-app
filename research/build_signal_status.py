@@ -112,9 +112,43 @@ DIRECTIONS = [
     },
     {
         "id": "52",
-        "name": "事件反應速度（MOPS重大訊息T+0/T+1，依類型分群）",
-        "status": "NOT_STARTED",
-        "blocked_by": "前置資料「建置一.1 新聞事件管線」尚未完成，規格已寫、未跑數字",
+        "name": "事件反應速度（重大申報/訊息 T+0/T+1，依類型分群，台美股分開跑）",
+        "status": "IN_PROGRESS",
+        "note": "台股(MOPS)與美股(SEC EDGAR)是同一個經濟假說在兩個市場各自的資料源，各自獨立判定。",
+        "sub_events": [
+            {
+                "id": "52-tw",
+                "name": "台股 MOPS 重大訊息",
+                "status": "IN_PROGRESS",
+                "summary": (
+                    "2026-09-08 hypothesis_queue排程確認「不指定co_id+單日範圍」窄查詢"
+                    "可繞過MOPS內部筆數上限，回填只需逐日（非逐公司）查詢，成本比預期低"
+                    "三個數量級，欄位含精確到秒的發言時間。技術路徑已解決，下一步為寫正式"
+                    "回填客戶端，尚未跑cheap gate數字。"
+                ),
+                "refs": {"docs": ["HYPOTHESIS_QUEUE.md #52 (k)", "MARATHON_LOG.md 2026-09-08T21:27"]},
+            },
+            {
+                "id": "52-us",
+                "name": "美股 SEC EDGAR 8-K 事件反應速度",
+                "status": "FAIL",
+                "concluded_at": "2026-09-08",
+                "summary": (
+                    "測過三個item family：Item 2.02（排程財報PEAD）、Item 5.02（非排程"
+                    "主管異動）、Item 1.01（非排程重大協議）——涵蓋排程性/非排程負面/"
+                    "非排程正中性三種不同性質的揭露，皆用同一套PIT錨點(acceptanceDateTime)"
+                    "/反應日對齊/配對式控制組機制測試，全部FAIL。2.02兩期方向一致但量級"
+                    "不足（TRAIN百分位62.5/VAL 83.5）；5.02 TRAIN幾乎等於隨機、VAL反向"
+                    "（百分位55.0/8.0）；1.01兩期皆低於控制組平均（百分位36.0/43.0），"
+                    "是三者中最乾淨的無edge結果。已足以支持整體無edge結論，不再測第四個"
+                    "item family。"
+                ),
+                "refs": {
+                    "trials_ledger": ["#215", "#216", "#217", "#218", "#220"],
+                    "docs": ["HYPOTHESIS_QUEUE.md #52-US", "STRATEGY_GRAVEYARD.md #52-US", "US_LEADS.md #29-31"],
+                },
+            },
+        ],
         "refs": {"docs": ["MARATHON_PROTOCOL.md 0a節 #52"]},
     },
 ]
