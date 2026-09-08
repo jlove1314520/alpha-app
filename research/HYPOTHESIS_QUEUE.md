@@ -8372,3 +8372,36 @@ TRAIN期（2015-2020）；「交易方式」欄位需先確認三種類型（定
 年利率3.5%），不反映個股急迫程度，可能要排除或單獨分析，只有競價/
 議借才是市場出清價格**，這是設計gate腳本前必須先做的資料探索，
 不是本輪範圍。
+
+**第478輪（2026-09-09T07:30，TW軌）client+回補+資料探索完成**：
+本輪開工發現`twse_lending_fee_client.py`已於07:25由互動session寫好
+但未commit（`git status`顯示`??`未追蹤，工作目錄還有另外兩個常駐服務
+產生的檔案異動）——確認該檔案框架與`twse_t86_client.py`/
+`twse_block_trade_client.py`一致（反爬蟲封鎖偵測、原子讀寫快取、
+民國年轉ISO、`stock_id`/`stock_name`拆分），先跑`fetch_lending_fee_year
+(2015)`smoke test確認可正常讀回快取（70,637筆，與第477輪查證數字
+一致）。**本輪新增`backfill_lending_fee.py`**（逐年批次，同
+`backfill_block_trade.py`精神但單位是年不是日）並直接在session內跑完
+全部範圍（2012~VAL_END所屬年度2024，共13個年度，因為逐年批次總請求數
+只有個位數~十幾筆，一次即可跑完不需要`run_detached.py`）：**13/13年度
+100%回補完成，新增1,019,541筆，零`TWSEBlockedError`、零其他錯誤**。
+`load_all_cached()`驗證：總筆數1,090,178、日期範圍2012-01-02~
+2024-12-31、**零筆null date**（`_roc_date_to_iso()`格式解析全部成功）。
+**解決上一輪遺留的「交易方式」分類問題**：全歷史`trade_type`分布為
+議借810,999筆、競價279,172筆、**定價僅7筆**（佔比0.0006%，遠低於能
+單獨分析的樣本量）——**結論：定價類型可直接排除或忽略不影響結果**，
+不需要為它設計特殊處理邏輯，gate腳本可以直接使用議借+競價（或全體，
+定價那7筆混進去也不會有可觀測影響）。`fee_rate`全體描述統計：
+mean=2.76%、median=2.0%、std=3.34%、min=0%、max=20%，數值分布合理
+（非常數、非全空、無明顯單位錯誤）。**本輪未寫gate1 cheap gate腳本**
+（一輪一個有界工作單位，資料落地完成即止）。`trial_registry.py --check`
+本輪無新判定（純資料工程，非策略判定，不觸發`register_trial()`）。
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零FinMind/SEC
+EDGAR呼叫，13次TWSE官方rwd端點請求（2秒節流）。**下一輪待辦**：仿
+`material_news_car_gate1_52tw.py`或`block_trade_gate62.py`框架寫
+`lending_fee_gate63.py`：主統計量＝逐股`fee_rate`（議借+競價，過濾掉
+單日單股多筆時取當日成交量加權平均或簡單平均，需先決定，不得假設）
+相對自身60日移動平均的z-score急升幅度，事件定義＝z超過事前訂好的
+門檻（例如z≥2，需在寫gate腳本時事前綁定、不得測完再挑），事後H日
+（例如H=5/10）該股報酬是否顯著轉負，控制組沿用
+`control_group_standard.py`2026-09-07升級標準。
