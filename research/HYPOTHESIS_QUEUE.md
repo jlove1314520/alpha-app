@@ -8214,3 +8214,27 @@ VAL_END），到位後改用**不設`--max-events`上限**（或至少大幅提�
 避免抽樣偏向早期年份）重跑`block_trade_gate62.py`才能真正檢驗VAL期
 sell-initiated方向，屆時若`n_val>=20`才進入正式`register_trial()`
 判定流程。本輪未跑任何訊號判定數字，不涉及`register_trial()`。
+
+**(h) 正式判定＋#62整體結案（2026-09-09T06:00+08:00 馬拉松第475輪TW軌，
+與上方(g)幾乎同時，兩者非同一份執行——(g)是`hypothesis_queue`排程用
+`--max-events 500`抽樣smoke test誤判`n_val=0`；本段是馬拉松session
+不設`--max-events`上限、用當時已回補到位的1600個交易日快取（同一份
+job`20260909-052241-9b09`完成後的資料）跑出的正式結果，兩者不衝突，
+差異純粹是`--max-events`抽樣把VAL期事件抽掉了，data本身早已足夠）**：
+`python -u block_trade_gate62.py --n-permutations 200`（無`--max-events`
+限制，用全部19027筆聚合配對交易事件），VAL期sell-initiated
+n_val=237（三個N值皆同，遠超20門檻）。**結果：N5百分位0.8、N10
+百分位7.8、N20百分位0.8，三個N值方向一致朝反方向（VAL期
+mean_post_ret皆為正，非事前假設的負），全部FAIL**，非邊緣case。
+已`register_trial()`登記`TRIALS_LEDGER.md`#224，`STRATEGY_GRAVEYARD.md`
+新增段落，`TW_LEADS.md`#16。**`#62`gate1整體結案為FAIL**，
+第⑫類「知情大額交易跟隨/資訊不對稱」機制大類0勝1敗結案。
+**下一輪起提醒**：不需要再為`#62`繼續回補block trade資料或重跑
+`block_trade_gate62.py`（已有足夠VAL樣本判定FAIL，非資料不足未決）；
+job`20260909-060428-cae6`若仍在跑，讓它自然完成即可（累積更多天數
+對已結案的`#62`無實質用途，但也無害，不需要主動終止）。
+`MARATHON_PROTOCOL.md`0a節四條結構性優勢方向（#49/#50/#51/#52）與
+本輪新增的第⑫類（#62）至此皆已結案或卡外部依賴（僅`#50`因tick
+2/20未解鎖），依0a節「誠實判斷點」尚未到可下「無可驗證預測優勢」
+結論的時點（`#50`仍待tick累積），下一輪若TW/US軌皆無新方向可查證，
+應優先協助`#50`的tick累積查核或等待，而非倉促設計第⑬類新假說。
