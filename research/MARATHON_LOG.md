@@ -1,5 +1,19 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08T21:55+0800 hypothesis_queue排程接續（本輪取鎖時發現上一輪
+鎖檔陳舊，PID130628疑似卡死約30分鐘後回收）— #52(TW)寫正式回補客戶端。
+開工先讀協定+CLAUDE.md+`git pull`確認乾淨（僅`dev_queue_cycle.log`/
+`external_connectivity.jsonl`兩個其他排程留下的殘留變更，未觸碰）。
+挑選：延續上一輪待辦，新增`mops_material_news_client.py`（per-day快取
+parquet，session由呼叫端管理）＋`backfill_material_news.py`（有界批次
+backfill迴圈，比照`backfill_day_trading_ratio.py`）。小批次驗證3天
+（2015-01-01/01-02/01-05）全部成功，修正一個編碼假警報（終端機cp950
+顯示問題，資料本身UTF-8乾淨）與一個真實小缺陷（表頭空欄名污染，已
+過濾）。全範圍約2,609工作日，目前已快取3天。`is_holdout_consumed()`
+開工/收工前皆確認`False`。本輪預算考量提前收工，未投遞完整背景回填，
+下一輪待辦：`run_detached.py submit`跑`backfill_material_news.py
+--batch-size 2600`。詳見`HYPOTHESIS_QUEUE.md` #52條目「(l)」段落。
+
 ## 2026-09-08T21:27+0800 hypothesis_queue排程接續 — #52(TW)單日窄查詢
 突破+修正#51舊字樣不一致。開工先確認佇列狀態：#1~61全數結案，發現
 `HYPOTHESIS_QUEUE.md`結尾（#61條目「下一輪TW軌接手」段落）誤寫

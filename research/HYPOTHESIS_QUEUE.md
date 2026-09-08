@@ -6073,6 +6073,27 @@ TAIEX既有日線的日期集合即可，不需要新資料源）；(ii) 依`CLA
 單輪session內硬等）；(iii) 回填完成後才回頭執行#52事前寫死的第1關
 cheap gate規格（8類`type`分類CAR檢定），不得跳關搶跑。
 
+**(l) 正式客戶端`mops_material_news_client.py`＋回補腳本
+`backfill_material_news.py`已寫完並小批次驗證通過（2026-09-08
+hypothesis_queue排程接續）**：比照`mops_buyback_client.py`同款
+per-day快取parquet設計（`data/raw_mops_material_news/MATNEWS_
+{YYYYMMDD}.parquet`，已存在就跳過），`fetch_material_news_day(session,
+date_str)`需外部傳入`requests.Session`，session生命週期與過期重建
+邏輯留給呼叫端`backfill_material_news.py`。小批次驗證（3個交易日：
+2015-01-01/01-02/01-05）全部成功落盤，無超限錯誤，確認同一session
+可跨多天沿用。修正兩個問題：(1)一個編碼假警報——首次用`print()`看到
+疑似亂碼，經寫入UTF-8檔案比對位元組確認資料本身乾淨，純粹是Windows
+終端機cp950顯示限制，跟`mops_buyback_client.py`docstring記錄同一種
+假警報；(2)一個真實小缺陷——表頭第6欄是無文字圖示/連結欄，原始解析
+混入空字串欄名的髒欄位，已加一行過濾丟棄。全範圍`pd.bdate_range`估計
+2,609個工作日（2015-01-01~2024-12-31），目前已快取3天。
+`is_holdout_consumed()`開工/收工前皆確認`False`。**本輪工作到此為止
+（一輪一個有界工作單位，本輪預算考量提前收工，未投遞完整背景回填）**，
+下一輪待辦：用`run_detached.py submit`投遞`backfill_material_news.py
+--batch-size 2600`背景執行（比照既有腳本checkpoint可續跑設計，中斷可
+直接重跑從快取斷點接續），完成後才回頭執行#52第1關cheap gate，不得
+跳關搶跑。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
