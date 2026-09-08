@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-08T10:00+08:00**
+**最後更新：2026-09-08T11:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 438 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 438 輪 · 2026-09-08T10:00+08:00 · US軌（取鎖乾淨，cycle`20260908-100037`）**。**本輪工作單位**：嘗試投遞round436排定的`us_portfolio_gross_profitability_v1.py`正式N=100版本，因heavy-job-slot被`hypothesis_queue`自走排程的`#57`回填job佔用而被拒絕（exit=3）。已確認該腳本經`load_quality_sample()`鏈路會在執行期自動吃到round436剛擴充的48檔污染黑名單，不需修改。`wait --max-min 4`等滿仍`STILL_RUNNING`，未硬跑`--allow-concurrent`。本輪誠實記錄零新增API呼叫、零回測產出。`trial_registry.py --check`確認PASS（202列）。詳見`US_MARATHON_STATE.md`/`REPORT.md`第438輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 440 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 440 輪 · 2026-09-08T11:00+08:00 · US軌（取鎖乾淨，cycle`20260908-110037`）**。**本輪工作單位**：`CALIBRATION_PROBE.md`裁示清單剩餘項US軌`#47`（`f_us_low_vol`大型股分層重測，08-26原始100檔年代從未複驗）——確認宇宙規模未變（6,618檔active/5,566檔market_cap可用/三分位各約1,855檔），將`us_factor_ic_by_size.py`改`TIER="large"`、`SAMPLE_SIZE`30→90試跑，發現此腳本遠比預期慢（12/90即撞240秒逾時，約16秒/檔），且heavy-job-slot被TW backfill佔用無法改走`run_detached.py`，本輪**未取得任何結果、未產生輸出檔**，僅保留程式碼異動供下一輪投遞。`trial_registry.py --check`確認PASS（202列，無新判定）。詳見`US_MARATHON_STATE.md`/`REPORT.md`第440輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
-**上一輪（第437輪，供對照）** · 2026-09-08T09:30+08:00 · TW軌（取鎖乾淨，cycle`20260908-093037`）**。**本輪工作單位**：修正`hypothesis_queue`自走排程投遞`#57`回填job時因缺少`--cwd`導致的立即失敗（`20260908-092309-48ca`，找不到`backfill_day_trading_detail.py`）——確認快取量1500/2609（57.5%）未因此倒退，用正確`--cwd`重投（job`20260908-093146-c524`）確認正常執行中。本輪未修改腳本邏輯，問題出在呼叫端缺`--cwd`。本輪未新增API呼叫。`trial_registry.py --check`確認PASS（202列）。詳見`TW_MARATHON_STATE.md`/`TW_LOG.md`第437輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
+**上一輪（第439輪，供對照）** · 2026-09-08T10:30+08:00 · TW軌（取鎖乾淨，cycle`20260908-103037`）**。**本輪工作單位**：heavy-job-slot被`#57`回填job佔用，改做`PENDING_QUEUE.md`『資料一.4』長期未結驗收——`data/ticks/20260907.parquet`共1個檔案/146,846筆/20個標的核對通過，`simtrade`欄位試撮/真實成交分佈正確。`trial_registry.py --check`確認PASS（202列）。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第439輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **心跳缺口補記（第424～427輪）**：`REPORT.md`已有標記「第424～427輪」的內容，但當時的執行個體把心跳插入到檔案中段（約第1635行附近）而非規則要求的檔案最上方，且這份全局計數器當時未同步更新（同round405/408/422曾補齊過的同款缺口，這次缺口更大——連續4輪）。本輪（第428輪）已將計數器一次補齊到428；`REPORT.md`歷史錯位條目本身不回頭搬動（append-only精神，避免誤觸其他未完成的並行編輯），僅在此記錄這個已知的顯示層問題，供下次有餘裕時整理。第424～427輪內容摘要：424(TW)建立`data/signal_status.json`；425(US)`#20`/`#21`降級關閉為FAIL；426(TW)`#51`子事件1二元規格對照FAIL；427(US)新增`f_us_gross_profitability`因子，cheap gate CHEAP_PASS並投遞深挖job。
 

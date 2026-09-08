@@ -54,8 +54,10 @@ from us_factors import US_FACTOR_COLUMNS, us_price_series
 from us_universe import universe as build_us_universe
 from validation import holdout
 
-TIER = "small"  # "large" | "mid" | "small" -- round 99 switches to "small", the last untested tier (large: round 95, mid: round 97); see module docstring
-SAMPLE_SIZE = 30
+TIER = "large"  # round 439 (2026-09-08): CALIBRATION_PROBE.md follow-up reruns #47 (large) and
+                # #52 (mid) at a larger sample size, same spirit as TW's factor_ic.SAMPLE_SIZE
+                # 100->300 bump (~3x) -- large: this round, mid: next US-track round
+SAMPLE_SIZE = 90
 SAMPLE_SEED = 20260826_3  # distinct from the round-95 large-cap run's seed (20260826_1) and the
                            # round-97 mid-cap run's seed (20260826_2) on purpose -- this is a
                            # different sampling frame (small tertile only), reusing a prior seed
