@@ -6397,6 +6397,44 @@ report_candidate()`把4類PASS個別寫進`TW_LEADS.md`（無Sharpe需填
 `TRIALS_LEDGER.md`#221。`is_holdout_consumed()`開工/收工前皆確認
 `False`，全程零新增外部API呼叫。
 
+**(w) gate2方向性延續檢定（PEAD式漂移）設計+smoke test（2026-09-09
+馬拉松TW軌round467新增，接續(v)段落待辦(1)）**：(v)段落已誠實指出gate1
+只證明「異常反應存在」（4類PASS本身就是重大會實質影響價格的公告類型，
+測到反應幅度接近同義反覆），不等於「可交易」——真正決定生死的是看到
+reaction_day+1的初始反應方向後，接下來還有沒有可預測的延續。新增
+`material_news_car_gate2_continuation.py`：只測gate1已PASS的4類（併購/
+增減資/財務/人事），car0＝跟gate1同一CAR窗口[reaction_day前一交易日收盤,
+reaction_day+1收盤]但**帶正負號**（gate1只取絕對值），post_ret＝
+[reaction_day+1, reaction_day+1+H]（H=5交易日）signed超額報酬，
+signal_stat=VAL期mean(sign(car0)*post_ret)。控制組2變體N=200：
+(a)`sign_shuffle`——固定post_ret、隨機打散sign配對，測car0方向本身有無
+預測力；(b)`random_window`——固定sign、post_ret換成同股票VAL期隨機一段
+等長H天非事件窗口，排除「這個特定H=5窗口本身有大盤層級趨勢」的偽陽性。
+同`control_group_standard.py`2026-09-07升級標準（訊號需嚴格大於全部400次
+抽樣最大值）。**smoke test**：`--max-stocks 80 --n-permutations 10`
+（驗證N<20時控制組正確跳過）、`--max-stocks 150 --n-permutations 25`
+（兩變體確實各產出25筆draws，非空跑）。後者結果：**4類全FAIL**（
+`control_percentile`＝併購22.0／增減資70.0／財務42.0／人事8.0，皆非邊緣
+case，訊號跟控制組max差距不小），初步方向與市場效率一致（看到初始反應
+時已經price-in，接下來5天沒有可預測的同向延續）——但這只是150檔/N=25
+小樣本快篩，依round465教訓「小N可能虛胖或虛薄」不得引用為正式結論。
+**未投遞正式N=200全量job**：heavy-job-slot被US軌job`20260909-013149-9992`
+（`sp500_index_changes_backfill_51us`）佔用中（running），依協定「一次
+只跑一個重度工作」本輪不加`--allow-concurrent`硬跑。`trial_registry.py
+--check`確認PASS（exit=0，223列，本輪僅smoke test非正式判定，不登記）。
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增外部API呼叫。
+**下一輪待辦**：heavy-job-slot空出後投遞
+`run_detached.py submit --name material_news_car_gate2_continuation_52tw
+--timeout-min 30 --expect data/material_news_car_gate2_continuation_result.json
+-- python -u research/material_news_car_gate2_continuation.py`，收成後讀
+`data/material_news_car_gate2_continuation_result.json`——若4類仍全FAIL
+（與小樣本快篩一致），#52整條假說的誠實結論是「異常反應存在但不可交易
+（已price-in、無延續）」，寫進`STRATEGY_GRAVEYARD.md`並更新
+`data/signal_status.json`；若有類別PASS，才呼叫`register_trial()`登記
+後續深挖方向性交易策略。完整見`TW_MARATHON_STATE.md`第467輪記錄、
+`REPORT.md`第467輪心跳、`material_news_car_gate2_continuation.py`
+（新增，可重複執行）。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應

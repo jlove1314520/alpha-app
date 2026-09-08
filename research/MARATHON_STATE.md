@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-09T01:00+08:00**
+**最後更新：2026-09-09T02:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 465 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 465 輪 · 2026-09-09T01:00+08:00 · TW軌（取鎖乾淨，cycle`20260909-010037`）**。**本輪工作單位**：TW軌job`95c8`（MOPS重大訊息回補）已完成（2607/2609=99.9%），先解決已知限制(2)股票代號過濾（`universe.py`官方宇宙過濾649,417→623,496筆），新增`material_news_car_gate.py`實作`#52`第1關CAR事件研究，smoke test通過後投遞正式N=200全量job（`20260909-011334-1783`），中規模N=50前景驗證顯示8類中6類PASS但效果量級偏大暫不採信，session內觀察N=200進度顯示部分類別（停復牌/訴訟）隨N增加轉為FAIL，符合「小N易虛胖PASS」預期。`trial_registry.py --check`確認PASS（exit=0，222列，本輪無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第465輪記錄。**計數器缺口補記**：本檔第459～464輪未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`，僅本檔頂部行漏更新，同款顯示層問題，見round458同類註記），下一輪若有餘裕可回頭補齊，不影響`REPORT.md`本身的逐輪紀錄完整性。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 467 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 467 輪 · 2026-09-09T02:00+08:00 · TW軌（取鎖乾淨，cycle`20260909-020037`）**。**本輪工作單位**：確認`hypothesis_queue`排程已於01:57搶先完成#52 gate1的N=200結果登記（4/8類CHEAP_PASS：併購/增減資/財務/人事），本輪不重工，改依`HYPOTHESIS_QUEUE.md` #52(v)「下一輪待辦(1)」設計gate2方向性延續檢定（PEAD式漂移）：新增`material_news_car_gate2_continuation.py`並完成smoke test（150檔/N=25，4類全FAIL，百分位22.0/70.0/42.0/8.0）；heavy-job-slot被US軌job`9992`佔用，未投遞正式N=200全量job，留給下一輪。`trial_registry.py --check`確認PASS（exit=0，223列，本輪無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第467輪記錄。**計數器缺口補記**：本檔第459～464輪未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`，僅本檔頂部行漏更新，同款顯示層問題，見round458同類註記），下一輪若有餘裕可回頭補齊，不影響`REPORT.md`本身的逐輪紀錄完整性。
 
 **上一輪（第439輪，供對照）** · 2026-09-08T10:30+08:00 · TW軌（取鎖乾淨，cycle`20260908-103037`）**。**本輪工作單位**：heavy-job-slot被`#57`回填job佔用，改做`PENDING_QUEUE.md`『資料一.4』長期未結驗收——`data/ticks/20260907.parquet`共1個檔案/146,846筆/20個標的核對通過，`simtrade`欄位試撮/真實成交分佈正確。`trial_registry.py --check`確認PASS（202列）。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第439輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
