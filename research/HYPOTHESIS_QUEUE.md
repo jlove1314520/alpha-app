@@ -6135,6 +6135,36 @@ consumed()`開工/收工前皆確認`False`，本輪零新增API呼叫（僅查�
 220215-b142`是否已完成/逾時，逾時則重投同一指令（自動跳過已快取
 天數），完整跑完後才進入#52第1關cheap gate。
 
+**(o) 本輪查核：job仍健康執行中，速率推算會撞100分鐘timeout未跑完，
+不重投、記錄預期下一輪處置（2026-09-08 馬拉松第461輪TW軌）**。開工
+先跑`marathon_brief.py`並取鎖乾淨（cycle`20260908-230036`）。三軌
+時間戳：TW 22:00（round459，最舊）／US 22:30（round460，最新）——
+依輪替選TW（FUT依例外條款不選）。核對`TW_MARATHON_STATE.md`round459
+記載的「查證#51資料可行性」提示已過時——`#51`三個子事件已於
+2026-09-07正式結案FAIL（見上方#51條目「(i)子事件3第1關cheap gate
+已完成，結案：FAIL，#51整體正式結案」），不得誤判#51仍待查證。
+`run_detached.py status --last 5`確認`20260908-220215-b142`**仍為
+`running`**（已執行61.6分鐘，`watchdog_alive=True`），實際落地快取
+檔數**996個parquet**（累積進度38.3%，比上一則心跳記載的815個/31.2%
+再前進約7個百分點）。**速率推算**：61.6分鐘處理996天，平均約16.2
+天/分鐘；剩餘1,604天以同速率估算還需約99分鐘，總計約161分鐘——
+**明顯會在100分鐘timeout（約23:42）被watchdog中止**，屬預期內、
+可續跑設計（`backfill_material_news.py`per-day parquet快取，已存在
+就跳過），非錯誤。`git status`確認僅`dev_queue_cycle.log`/
+`external_connectivity.jsonl`兩個其他排程殘留變更，未觸碰。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）確認PASS
+（exit=0，222列，本輪無新判定）。**本輪判斷：job健康執行中且未達
+timeout，不重投、不等待**（等待完整跑完不符合「一輪一個有界工作
+單位」原則）。`is_holdout_consumed()`開工/收工前皆確認`False`，本輪
+零新增API呼叫（僅查詢job狀態與檔案數）。**本輪工作到此為止**，下一
+輪待辦：**先查`20260908-220215-b142`是否已標記`timeout`**（預期約
+23:42後會發生）——若已逾時，直接用同一指令（`backfill_material_
+news.py --batch-size 2600`，`--cwd research`）重投，會自動跳過已
+快取的996+天從斷點接續，**不得從頭重跑**；若屆時仍`running`未逾時
+則比照本則(n)/(o)模式繼續單純查核記錄進度，不重投不等待；完整跑完
+2600天後才進入#52第1關cheap gate（8類`type`分類CAR檢定，事前已寫死
+規格，不得跳關搶跑）。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
