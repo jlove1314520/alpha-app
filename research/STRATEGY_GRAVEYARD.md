@@ -2459,3 +2459,34 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
 - **原始記錄**：`TRIALS_LEDGER.md`#221/#223、`HYPOTHESIS_QUEUE.md` #52
   條目(x)段落、`material_news_car_gate.py`／`material_news_car_gate2_
   continuation.py`（皆可重複執行）。零新增API呼叫。
+
+## #62 鉅額逐筆交易（Block Trade）跟隨訊號（配對交易子集）—— 2026-09-09結案：FAIL（gate1，馬拉松第475輪TW軌）
+
+- **假設**：`www.twse.com.tw/rwd/zh/block/BFIAUU`鉅額逐筆交易（門檻500交易單位
+  或1,500萬元）只取「配對交易」型態（排除拍賣/標購兩種不同競價機制），以
+  vwap相對當日收盤價偏離代理買賣方發起方（vwap<close視為sell-initiated），
+  事前假設賣壓延續（第⑫類「知情大額交易跟隨/資訊不對稱」機制，round471三
+  來源查證判可行，經濟文獻依據Kraus & Stoll 1972、Holthausen et al. 1987）。
+  事前綁定：N=5/10/20交易日三個窗口各自獨立判定，signal=VAL期(2021-01-01~
+  2024-12-31)mean(post_ret)，控制組matched_stock/unmatched_universe兩變體
+  N=200（2026-09-07升級標準：訊號需嚴格大於全部400次抽樣最大值）。
+- **死因**：第1關cheap gate。回補（`backfill_block_trade.py`背景job，
+  round472~474持續推進，round475開工時已累積1600個交易日快取涵蓋VAL期至
+  2021-02-17）追上後VAL期n_val=237（三個N值皆同）事件量已足夠判定。三個N
+  值方向一致朝反方向（sell-initiated後市場調整報酬皆為正而非事前假設的
+  負）：N5百分位0.8、N10百分位7.8、N20百分位0.8，皆遠低於嚴格大於控制組
+  最大值的門檻，非邊緣case。
+- **不泛化聲明**：只測了「配對交易」這一種競價機制、vwap<close這一種方向
+  代理、N=5/10/20三個事前綁定窗口，不代表「拍賣」「標購」型態或其他方向
+  代理（例如逐筆bid/ask比對）結論相同；但依既有紀律不應為了湊出能過關的
+  結果而事後放寬篩選或另尋代理定義。**研判**：台股鉅額配對交易的「賣方」
+  較可能是機構調節部位（ETF成分股權重調整、大股東質押後轉讓）而非資訊
+  不對稱下的知情交易；亦可能反映一次性大量成交的流動性溢價（買方付溢價
+  換取立即成交），隔日賣壓被市場快速消化甚至反彈。buy-initiated方向依
+  事前綁定未判定（僅測sell方向）。第⑫類機制大類至此本佇列第一次測試，
+  0勝1敗結案。
+- **原始記錄**：`TRIALS_LEDGER.md`#224、`HYPOTHESIS_QUEUE.md` #62條目、
+  `block_trade_gate62.py`／`twse_block_trade_client.py`／
+  `backfill_block_trade.py`（皆可重複執行）。全程零新增FinMind/SEC EDGAR
+  呼叫；`www.twse.com.tw`背景回補job本輪前累積約1600次請求（2秒/次節流，
+  官方公開JSON端點）。

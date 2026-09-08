@@ -47,12 +47,19 @@ OUT = D / "news_evidence.json"
 TZ = timezone(timedelta(hours=8))
 UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaResearch/1.0)"}
 
+# ── 節流常數（題材一.2：全部寫在檔頭，改的人一眼看得到）────────────────
 # **白名單制**：只抓這兩家的內文。沒列在這裡的一律不抓——
 # 白名單比黑名單安全：新增來源時必須明確決定，不會因為忘記排除而誤抓。
+# 這兩家都在 robots.txt **主動宣告 sitemap**，是明確邀請索引的來源。
 BODY_ALLOWED = {"www.cna.com.tw", "tw.stock.yahoo.com"}
-REQ_INTERVAL = 2.0
-MAX_PER_RUN = 200          # 每輪上限，避免一次打太多；增量累積
-SENT_MAX = 160            # 單句保存長度上限
+REQ_INTERVAL = 2.0         # 逐則間隔（秒）
+MAX_PER_RUN = 200          # 每輪上限。**不要一次把 3,537 則全打過去**——
+                           # 增量累積，排程每 30 分鐘跑一次自然會補完。
+MAX_RETRY = 2              # 單則失敗重試上限
+RETRY_BACKOFF = 5.0        # 重試間隔（秒）
+MAX_CONSECUTIVE_FAIL = 10  # 連續失敗這麼多則就停止本輪——
+                           # 多半是被限流或斷網，繼續打只會延長問題
+SENT_MAX = 160             # 單句保存長度上限
 
 _last = [0.0]
 
@@ -79,14 +86,28 @@ def pattern_hit(text: str, kws: list, patterns: list) -> str | None:
 
 
 def fetch_body(url: str) -> str:
-    wait = REQ_INTERVAL - (time.time() - _last[0])
-    if wait > 0:
-        time.sleep(wait)
-    _last[0] = time.time()
-    r = requests.get(url, timeout=25, headers=UA)
-    if r.status_code != 200:
+    html = ""
+    for attempt in range(1, MAX_RETRY + 2):      # 首次 + MAX_RETRY 次重試
+        wait = REQ_INTERVAL - (time.time() - _last[0])
+        if wait > 0:
+            time.sleep(wait)
+        _last[0] = time.time()
+        try:
+            r = requests.get(url, timeout=25, headers=UA)
+        except Exception:                        # noqa: BLE001
+            if attempt > MAX_RETRY:
+                return ""
+            time.sleep(RETRY_BACKOFF)
+            continue
+        if r.status_code == 200:
+            html = r.text
+            break
+        # 4xx 不重試——那是「這頁就是沒有」，重試只是浪費額度
+        if 400 <= r.status_code < 500 or attempt > MAX_RETRY:
+            return ""
+        time.sleep(RETRY_BACKOFF)
+    if not html:
         return ""
-    html = r.text
     # 2026-09-09 修正：**第一版抓全頁的 <p> 是錯的**，會把側欄「相關新聞」的
     # 連結文字一起抓進來。實測抽驗立刻露餡——「中方不證實女警西藏土石流失聯…
     # 盧秀燕憂中火增氣不拆煤…」這種一整團無關標題被判定成台積電的水冷散熱證據，
@@ -128,8 +149,22 @@ def split_sentences(text: str) -> list:
 
 
 def main() -> int:
-    news = (json.loads((D / "news.json").read_text(encoding="utf-8"))
-            .get("news") or [])
+    # 2026-09-09（題材一.1）**輸入改讀 news_urls.json**（sitemap 收集的 3,537 則），
+    # 不再讀 RSS 產出的 news.json。理由：RSS 每次只給 20~50 則最新的，
+    # sitemap 一次就有數千則，而且下游原本一則都沒用到——管線是斷的。
+    # news.json 仍保留作為標題層證據（build_themes 的 C 級之二）。
+    urls_doc = json.loads((D / "news_urls.json").read_text(encoding="utf-8"))
+    news = []
+    seen_url = set()
+    for u in urls_doc.get("urls") or []:
+        url = u.get("url")
+        # 去重 + 只取白名單內的兩家
+        if not url or url in seen_url:
+            continue
+        if not any(h in url for h in BODY_ALLOWED):
+            continue
+        seen_url.add(url)
+        news.append({"url": url, "source": u.get("source"), "title": "", "published": ""})
     kwdoc = json.loads((D / "seed" / "theme_keywords.json").read_text(encoding="utf-8"))
     theme_kw = {tid: v["keywords"] for tid, v in (kwdoc.get("themes") or {}).items()}
 
@@ -152,13 +187,22 @@ def main() -> int:
 
     out = list(prior.values())
     fetched = hit_articles = 0
+    consecutive_fail = 0
     for n in todo[:MAX_PER_RUN]:
         url = n["url"]
         try:
             body = fetch_body(url)
         except Exception as e:  # noqa: BLE001
             print(f"  ! {url[:60]} 失敗 {type(e).__name__}")
+            consecutive_fail += 1
+            if consecutive_fail >= MAX_CONSECUTIVE_FAIL:
+                print(f"  連續失敗 {consecutive_fail} 則，判斷是限流或斷網，停止本輪")
+                break
             continue
+        consecutive_fail = 0 if body else consecutive_fail + 1
+        if consecutive_fail >= MAX_CONSECUTIVE_FAIL:
+            print(f"  連續 {consecutive_fail} 則取不到內文，停止本輪")
+            break
         fetched += 1
         if not body:
             out.append({"url": url, "quotes": [], "note": "內文取得為空"})

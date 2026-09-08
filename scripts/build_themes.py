@@ -24,8 +24,11 @@ v1 的 A 級要求「公司在 MOPS 自述屬於某題材」——**但公司從
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import sys
+import unicodedata
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -50,6 +53,28 @@ MIN_C_DOMAINS = 2
 # 總司令點名的八個題材，驗收要逐一回報卡在哪裡
 SPOTLIGHT = ["adv_package", "glass_substrate", "pcb", "ccl",
              "ic_design", "thermal", "probe_card", "ai_server"]
+
+
+def _source_key(text: str) -> str:
+    """同文轉載偵測用的來源鍵（題材二.2）。
+
+    **同一篇稿被多家媒體轉載時，網域數會膨脹，但真正的來源只有一個。**
+    用「兩個網域」當獨立性門檻在這種情況下會被繞過——
+    實測 2330→光罩 就是這樣過關的：中央社原稿 + Yahoo 轉載，
+    看起來是 2 個網域，其實是同一則報導。
+
+    做法：把文字正規化（去空白、全形轉半形、去括號內容與標點）後取雜湊。
+    雜湊相同就視為同一來源，不論網域幾個。
+    """
+    t = unicodedata.normalize("NFKC", text or "")
+    # **只去括號字元、保留內容**。第一版把括號內容整段刪掉，結果
+    # 「…光罩 專家：輝達」與「…光罩（專家：輝達）」會得到不同雜湊——
+    # 跟本意正好相反（單元測試抓到的）。轉載常見的差異是加減括號、
+    # 不是換掉內容，所以要保留內容才對得起來。
+    t = re.sub(r"[（(\[【《）)\]】》]", "", t)
+    t = re.sub(r"[\s　]+", "", t)               # 去所有空白
+    t = re.sub(r"[，。、；：！？「」『』…—－·,.;:!?\"'-]", "", t)
+    return hashlib.sha1(t.encode("utf-8")).hexdigest()[:16]
 
 
 def _load(p: Path, default=None):
@@ -159,40 +184,63 @@ def main() -> int:
                     if len(evidence) >= 3:
                         break
 
-            # ── C 級之一：內文題材句（news_evidence.json，句型已強制）──────
+            # ── C 級之一：內文題材句 ──────────────────────────────────────
+            # 2026-09-09（題材二）三項修正：
+            # (1) **補上網域檢查**，跟標題路徑同一把尺。原本內文路徑一命中就標
+            #     normal，等於內文證據的門檻比標題證據鬆——同一個等級兩套標準。
+            # (2) **同文轉載偵測**：同一篇稿被多家轉載，網域數會膨脹但**來源只有一個**。
+            #     以正規化標題的雜湊當來源鍵，雜湊相同者視為同一來源。
+            # (3) 句型由 news_body_extract 強制（關係方向要求），這裡不再放行無句型者。
             if level != "A":
+                c_ev, doms, srckeys = [], set(), set()
                 for ev in body_ev:
                     for q in ev.get("quotes") or []:
-                        if q.get("theme_id") == tid and code in (q.get("codes") or []):
-                            level, conf = "C", "normal"
-                            evidence.append({
-                                "level": "C", "matched": q.get("matched"),
-                                "pattern": q.get("pattern"), "source": ev.get("source"),
-                                "date": ev.get("date"), "url": ev.get("url"),
-                                "quote": q.get("quote", "")[:160],
-                            })
-                            break
-                    if len(evidence) >= 3:
-                        break
+                        if q.get("theme_id") != tid or code not in (q.get("codes") or []):
+                            continue
+                        if not q.get("pattern"):
+                            continue          # 沒句型＝純共現，不採
+                        doms.add(urlparse(ev.get("url", "")).netloc)
+                        srckeys.add(_source_key(q.get("quote", "")))
+                        c_ev.append({
+                            "level": "C", "matched": q.get("matched"),
+                            "pattern": q.get("pattern"), "source": ev.get("source"),
+                            "date": ev.get("date"), "url": ev.get("url"),
+                            "quote": q.get("quote", "")[:160],
+                        })
+                if c_ev:
+                    # **獨立來源數以「去轉載後的來源鍵」為準，不是網域數**
+                    level = "C"
+                    conf = "normal" if len(srckeys) >= MIN_C_DOMAINS else "low"
+                    evidence = c_ev[:3]
 
             # ── C 級之二：標題層。≥2 網域，或單篇但句型明確 ───────────────
             if level != "A" and not evidence:
-                doms, c_ev, pat_ev = set(), [], None
+                doms, srckeys, c_ev, pat_ev = set(), set(), [], None
                 for n, codes, txt in news_hits:
                     if code not in codes:
                         continue
                     hit = next((k for k in kws if k in txt), None)
                     if not hit:
                         continue
-                    doms.add(urlparse(n.get("url", "")).netloc)
                     frag = pattern_hit(txt, kws, patterns)
-                    if frag and not pat_ev:
+                    # 2026-09-09（題材二.3）**關係方向要求同樣適用標題路徑。**
+                    # 只修內文路徑不夠——實測 2330→光罩 就是從這條進來的，
+                    # 句型欄位是 None（純共現），靠「兩個網域」就過關了。
+                    # 「台積電攜ASML開發12吋光罩」只證明兩者被寫在同一句，
+                    # 不證明台積電做光罩。沒有句型一律不採。
+                    if not frag:
+                        continue
+                    doms.add(urlparse(n.get("url", "")).netloc)
+                    # 題材二.2 同文轉載：以正規化標題的雜湊當來源鍵
+                    srckeys.add(_source_key(n.get("title") or ""))
+                    if not pat_ev:
                         pat_ev = frag
                     c_ev.append({"level": "C", "matched": hit, "pattern": frag,
                                  "source": n.get("source"),
                                  "date": (n.get("published") or "")[:16],
                                  "url": n.get("url"), "quote": (n.get("title") or "")[:140]})
-                if len(doms) >= MIN_C_DOMAINS:
+                # **獨立性以去轉載後的來源鍵計，不是網域數**
+                if len(srckeys) >= MIN_C_DOMAINS:
                     level, conf, evidence = "C", "normal", c_ev[:3]
                 elif c_ev and pat_ev:
                     # 單篇但句型明確：採用但標低信心，畫面要淡化並註明「單一來源」
