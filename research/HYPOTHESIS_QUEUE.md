@@ -6450,7 +6450,7 @@ Cowork 的指示是「#56 必須明確區別於已 FAIL 的 #26，**若無法區
 4. ~~**#57**~~（逐檔當沖比重截面離散度速度）——**2026-09-08 hypothesis_queue排程接續已結案：FAIL**（GATE_SEQUENCE第2關隨機控制組未過，四項判定全數未過，見上方#57條目最新狀態與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#201），移出此順序清單。
 5. ~~#56~~（撤案）
 
-**#53/#54/#55/#57四條全數FAIL、#56撤案，#53～#57「市場總開關假設軸」家族正式結案：0勝5敗。佇列#1~57全數結案，設計新假設軸#58（見下方新章節），現在排隊第一。第1關sanity已於2026-09-08 hypothesis_queue排程接續完成：PASS（三個期間波動度比值皆<1.0、NaN/Inf皆為0，完整數字見下方#58條目「狀態」段落），尚未做隨機控制組，下一輪從第2關開始，不跳關。**
+**#53/#54/#55/#57四條全數FAIL、#56撤案，#53～#57「市場總開關假設軸」家族正式結案：0勝5敗。佇列#1~57全數結案，設計新假設軸#58（見下方新章節）。#58第1關sanity PASS（非最終判定），第2關隨機控制組已於2026-09-08馬拉松第443輪TW軌完成：TRAIN PASS/VAL FAIL，GATE_SEQUENCE要求兩期皆PASS，**#58結案：FAIL**（完整數字見下方#58條目結案段落與`STRATEGY_GRAVEYARD.md`）。佇列#1~58全數結案，下一輪需要判斷新假設方向。**
 
 ---
 
@@ -6540,3 +6540,19 @@ Zhang (2006)低波動異常的加權版本預期一致，但**這只是sanity方
 對應哪組報酬」，這條的加權依賴trailing波動度而非固定等權重，模板可能需要
 調整，若不適用需重新設計，比照`#49`遇到模板不適用時的處理方式：誠實記錄
 開放問題、不強行套用）。
+
+**結案（2026-09-08 馬拉松第443輪，TW軌）：第2關隨機控制組 FAIL**。判斷`#29`
+的bootstrap子集模板不適用（理由見`STRATEGY_GRAVEYARD.md` #58條目），改設計
+專屬控制組——打散股票-權重對應（保留權重值集合邊際分布不變），2變體
+`per_rebal_permutation`／`fixed_permutation`各N=100，統計量=TRAIN/VAL年化
+Sharpe。**TRAIN PASS**（訊號+1.1747嚴格贏過控制組最大值+1.0512），**VAL
+FAIL**（訊號+1.5163沒有贏過控制組最大值+1.5389，百分位99.0但未達嚴格門檻）。
+GATE_SEQUENCE要求TRAIN+VAL皆PASS，VAL未過即整體FAIL，**#58結案：FAIL**。
+邊緣結果，不泛化為風險平價機制本身無效，完整不泛化聲明見墓園條目。
+已登記`TRIALS_LEDGER.md`#202。`is_holdout_consumed()`開工/收工前皆`False`。
+完整見`STRATEGY_GRAVEYARD.md` #58條目、`inverse_vol_weighted_portfolio_gate58_control.py`
+（新增）、`data/inverse_vol_weighted_portfolio_gate58_control_results.csv`（新增）。
+**佇列#1~58全數結案，下一輪TW軌需要判斷新的假設方向**（`0a`節四條結構性
+優勢方向#49~#52尚未全部測完，或回顧`MARATHON_PROTOCOL.md`「回顧已死假設
+共同模式」找尚未測過的③portfolio construction其他變體，避免再挑已經測過
+兩次都FAIL的①timing overlay大類）。

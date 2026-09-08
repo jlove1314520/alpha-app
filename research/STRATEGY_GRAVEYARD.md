@@ -2267,3 +2267,11 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
 - **不泛化聲明**：不代表「當沖比重截面離散度這個資料維度完全沒有訊號」——第1關sanity三項皆PASS（危機窗口2/3命中、tertile條件式前瞻報酬方向level/vel兩版皆正確），訊號存在性本身未被推翻。死的是`f(z)=1-z`這一個固定線性映射建構，跟#53同一個教訓：這個具體overlay構造本身的門檻，本佇列目前測過的四個不同資料維度（報酬離散度/成交值集中度/法人流離散度/當沖比重）**沒有一個能贏過隨機化時序控制組**。
 - **家族結論**：**至此`#53～#57`「市場總開關假設軸」家族全數結案：0勝5敗**（#56撤案不計入勝負）。完整家族層級總結見上方「【家族層級】橫斷面離散度速度（台股）」條目，本輪已同步更新為正式結案狀態。
 - **原始記錄**：`TRIALS_LEDGER.md`#201、`HYPOTHESIS_QUEUE.md` #57條目、`day_trading_ratio_dispersion_gate57.py`／`day_trading_ratio_dispersion_gate57_control.py`（新增，可重複執行）、`data/day_trading_ratio_dispersion_gate57.csv`／`data/day_trading_ratio_dispersion_gate57_control_results.csv`（新增）。零新增API呼叫（複用#57第1關sanity既有快取與計算結果）。
+
+## #58 反向波動度加權投資組合建構（Inverse-Volatility-Weighted Portfolio Construction）——2026-09-08結案：FAIL（GATE_SEQUENCE第2關，馬拉松第443輪TW軌）
+
+- **假設**：`w_{i,t}=(1/σ_{i,t})/Σ_j(1/σ_{j,t})`（`σ`為trailing 60日日報酬標準差），月頻（21交易日）再平衡，跟`#29`共用同一批159檔PIT宇宙（2015-2020）與同一個t0等權重buy-and-hold基準操作化。第1關sanity已PASS（三個期間波動度比值invvol/buyhold皆<1.0：TRAIN 0.7903/VAL 0.7175/FULL 0.7555，加權確實降低組合波動度，前提成立）。
+- **控制組設計判斷（本輪自主判斷，非佇列預先指定）**：`#29`的bootstrap子集控制組（換一批股票測效果在不在）不適用於`#58`——`#58`要測的不是「有沒有波動度分散」而是「權重高低是不是真的對應個股波動度高低」，換股票測不出這個。本輪改設計專屬控制組：固定`REBAL_FREQ=21`/`VOL_WINDOW=60`，每次再平衡把算出的權重值集合原封不動、但**打散股票-權重對應**（保留邊際分布，只重排分配對象），2變體`per_rebal_permutation`（每次事件獨立重排，N=100）／`fixed_permutation`（全程固定一組重排，N=100），統計量取TRAIN/VAL年化Sharpe（invvol_ret本身，不扣buyhold，避免混入`#29`已測過的機械式再平衡效果）。
+- **死因**：TRAIN期PASS（真實訊號年化Sharpe+1.1747嚴格贏過200次控制組抽樣最大值+1.0512），但**VAL期FAIL**（真實訊號+1.5163沒有贏過控制組最大值+1.5389，控制組百分位99.0，但2026-09-07標準升級後「贏過平均/落在高百分位」不算通過，只有嚴格贏過最大值或配對式20/20全勝才算）。GATE_SEQUENCE規則要求TRAIN+VAL皆PASS才算過關，VAL未過即整體FAIL。
+- **不泛化聲明**：這是非常邊緣的FAIL（VAL百分位99.0，只差控制組最大值一點點），不代表反向波動度加權完全沒有風險調整後報酬的改善能力——sanity階段觀察到的invvol版本全期間total_return/sharpe/mdd皆優於buyhold版本方向正確，且TRAIN期已嚴格通過控制組檢定；死的是「這個具體實作（trailing 60日窗口/21日頻率/159檔樣本）在VAL期的邊際優勢小到跟隨機權重分配幾乎無法區分」，不是「風險平價這個經濟機制本身無效」。若未來有新的具體機制假說（例如不同的波動度估計窗口、或改用完整共變異數風險平價而非僅個股自身波動度），仍可視為獨立測試，不算換皮。
+- **原始記錄**：`TRIALS_LEDGER.md`#202、`HYPOTHESIS_QUEUE.md` #58條目、`inverse_vol_weighted_portfolio_gate58.py`／`inverse_vol_weighted_portfolio_gate58_control.py`（新增，可重複執行）、`data/inverse_vol_weighted_portfolio_gate58_daily_returns.csv`／`data/inverse_vol_weighted_portfolio_gate58_control_results.csv`（新增）。零新增API呼叫（複用#29/#58已快取個股parquet）。
