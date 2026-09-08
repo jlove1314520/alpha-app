@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T15:16:50.252903+08:00",
+  "fetched_at": "2026-09-08T16:01:40.845273+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -50,35 +50,36 @@
       "exchange": "SMART"
     },
     "^DJI": {
-      "last": null,
+      "last": 53414.25,
       "bid": null,
       "ask": null,
-      "close": null,
-      "change_pct": null,
-      "data_type": "REALTIME",
-      "exchange": "CME",
-      "label": "道瓊工業指數"
-    },
-    "^GSPC": {
-      "last": 7718.6,
-      "bid": null,
-      "ask": null,
-      "close": 7747.71,
-      "change_pct": -0.3757,
+      "close": 53686.1,
+      "change_pct": -0.5064,
       "data_type": "YAHOO_DELAYED",
-      "exchange": "CBOE",
-      "label": "S&P 500",
+      "exchange": "CME",
+      "label": "道瓊工業指數",
       "source": "yahoo_fallback"
     },
-    "^IXIC": {
-      "last": null,
+    "^GSPC": {
+      "last": 7717.81,
       "bid": null,
       "ask": null,
-      "close": 26506.99,
-      "change_pct": null,
+      "close": 7718.6,
+      "change_pct": -0.0102,
       "data_type": "DELAYED",
+      "exchange": "CBOE",
+      "label": "S&P 500"
+    },
+    "^IXIC": {
+      "last": 26506.99,
+      "bid": null,
+      "ask": null,
+      "close": 26584.1,
+      "change_pct": -0.2901,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數"
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
     },
     "^SOX": {
       "last": 11735.263,
