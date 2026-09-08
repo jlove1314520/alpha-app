@@ -107,6 +107,9 @@ def main() -> int:
     events = (_load(D / "events.json", {}) or {}).get("events") or []
     prior_ms = {(m["code"], m["theme_id"]): m
                 for m in ((_load(OUT, {}) or {}).get("memberships") or [])}
+    # 2026-09-09（v3）內文題材句。這是唯一能表達「這家公司做這件事」的素材——
+    # 標題只講漲跌與價格，題材詞彙全在內文（實測 300 則標題裡 11 個題材詞 0 次）。
+    body_ev = (_load(D / "news_evidence.json", {}) or {}).get("evidence") or []
 
     try:
         from news_matcher import load_company_names, load_active_codes, match_article
@@ -156,8 +159,24 @@ def main() -> int:
                     if len(evidence) >= 3:
                         break
 
-            # ── C 級：新聞。≥2 網域，或單篇但句型明確 ────────────────────
+            # ── C 級之一：內文題材句（news_evidence.json，句型已強制）──────
             if level != "A":
+                for ev in body_ev:
+                    for q in ev.get("quotes") or []:
+                        if q.get("theme_id") == tid and code in (q.get("codes") or []):
+                            level, conf = "C", "normal"
+                            evidence.append({
+                                "level": "C", "matched": q.get("matched"),
+                                "pattern": q.get("pattern"), "source": ev.get("source"),
+                                "date": ev.get("date"), "url": ev.get("url"),
+                                "quote": q.get("quote", "")[:160],
+                            })
+                            break
+                    if len(evidence) >= 3:
+                        break
+
+            # ── C 級之二：標題層。≥2 網域，或單篇但句型明確 ───────────────
+            if level != "A" and not evidence:
                 doms, c_ev, pat_ev = set(), [], None
                 for n, codes, txt in news_hits:
                     if code not in codes:
