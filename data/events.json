@@ -1,12 +1,12 @@
 {
- "fetched_at": "2026-09-09T04:03:55.870615+08:00",
+ "fetched_at": "2026-09-09T06:52:17.717761+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 94,
-   "kept": 94
+   "rows": 108,
+   "kept": 108
   },
   "tpex_mops": {
    "ok": true,
@@ -24,7 +24,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 1354,
+ "count": 1457,
  "events": [
   {
    "code": "4552",
@@ -279,6 +279,933 @@
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
+   "code": "6902",
+   "name": "GOGOLOOK",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司受邀參加宏遠證券舉辦之「2026年趨勢產業論壇」",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3708",
+   "name": "上緯投控",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司名稱由「上緯國際投資控股股份有限公司」更名為 「上緯國際控股股份有限公司」，公告期間：115年6月11日至 115年9月10日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1721",
+   "name": "國慶科技",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2072",
+   "name": "世紀風電",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3406",
+   "name": "玉晶光",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "澄清媒體報導內容-工商時報B03版",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1218",
+   "name": "泰山",
+   "date": "2026-09-08",
+   "type": "訴訟",
+   "title": "公告本公司因油安事件對中聯油脂股份有限公司、福壽實 業股份有限公司、福懋油脂股份有限公司及南僑油脂事業股 份有限公司等四家公司提起民事訴訟",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1326",
+   "name": "台化",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司2026年8月合併營業額",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1303",
+   "name": "南亞",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司2026年8月合併營業額",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6505",
+   "name": "台塑化",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司2026年8月合併營業額",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1301",
+   "name": "台塑",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司2026年8月合併營業額",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5484",
+   "name": "慧友",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司民國115年08月份合併營收",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2637",
+   "name": "慧洋-KY",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司受邀參加元大證券舉辦之2026年第三季投資論壇",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2889",
+   "name": "國票金",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司國票綜合證券公告114年度股東會年報補充揭露",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3706",
+   "name": "神達",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "新聞稿-神達控股公佈一百一十五年八月營收",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3005",
+   "name": "神基",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "新聞稿-神基八月自結合併營收為38.61億元，年增18.39%",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8021",
+   "name": "尖點",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司115年現金增資發行新股認股基準日暨 公司債停止轉換期間相關事宜公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8222",
+   "name": "寶一",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司國內第一次有擔保轉換公司債收足債款",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2609",
+   "name": "陽明",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "代重要子公司陽明(新加坡)有限公司公告 法人董事改派代表人",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2646",
+   "name": "星宇航空",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司發行115年度國內第一次及第二次無擔保轉換公司債 之代收價款行庫及存儲專戶行庫",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6965",
+   "name": "中傑-KY",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司受邀參加由中信證券舉辦之線上座談會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8473",
+   "name": "山林水",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "代母公司鶴京企業(股)公司公告 董事會決議召開115年股東臨時會相關事宜",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3037",
+   "name": "欣興",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "公告本公司董事會決議授權董事長購置不動產相關事宜",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6505",
+   "name": "台塑化",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "修正公告本公司2026年8月合併營業額(文字更正)",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6873",
+   "name": "泓德能源",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司國內第一次無擔保轉換公司債到期還本暨 終止上櫃買賣事宜",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4912",
+   "name": "聯德控股-KY",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司115年8月份自結合併營收情形",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "7768",
+   "name": "頌勝科技",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "受邀參加元大證券辦理之第三季投資論壇",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2890",
+   "name": "永豐金",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "永豐金控公告其與子公司115年8月合併自結損益",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2428",
+   "name": "興勤",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "本公司115年08月份自結合併營業收入公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8462",
+   "name": "柏文",
+   "date": "2026-09-08",
+   "type": "法說會",
+   "title": "公告本公司受邀參加華南永昌證券舉辦之2026年第二季法人說明會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2327",
+   "name": "國巨*",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司115年8月自結合併營收",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2464",
+   "name": "盟立",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司國內第三次無擔保轉換公司債轉換價格調整",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2327",
+   "name": "國巨*",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司受邀參加由合作金庫證券舉辦之投資人說明會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3017",
+   "name": "奇鋐",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司-AVC TECH. (VIETNAM) CO., LTD.公告租地委建第五期廠房土建工程",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3017",
+   "name": "奇鋐",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司-AVC TECH. (VIETNAM) CO., LTD.公告租地委建第五期廠房機電工程",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1225",
+   "name": "福懋油",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "說明媒體報導事項",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6230",
+   "name": "尼得科超眾",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司公司治理主管異動",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "7823",
+   "name": "奧義賽博-KY創",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司第二次買回庫藏股執行完畢",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6442",
+   "name": "光聖",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司受邀參加凱基證券2026年第三季投資論壇",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "7610",
+   "name": "聯友金屬-創",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司可轉換公司聯友金屬一創(代號:76101)近期達公布 注意交易資訊標準，故公告相關訊息，以利投資人區別瞭解",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6108",
+   "name": "競國",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司修訂減資換股基準日及換股作業計畫等相關事宜",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "9905",
+   "name": "大華",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代孫公司濟南聯合製罐有限公司公告處分理財商品",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6937",
+   "name": "天虹",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司受邀參加元大證券舉辦之「2026 年第三季投資論壇」",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6657",
+   "name": "華安",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "本公司股東參與源華智醫股份有限公司 現金增資股款催繳公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2891",
+   "name": "中信金",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "代子公司中國信託綜合證券公告私募現金增資收足股款",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2428",
+   "name": "興勤",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "代重要子公司東莞為勤電子有限公司公告董事會決議不分配股利",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6933",
+   "name": "AMAX-KY",
+   "date": "2026-09-08",
+   "type": "法說會",
+   "title": "本公司受邀參加中信證券舉辦之法人說明會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2441",
+   "name": "超豐",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司買回股份之金額達新台幣三億元以上",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5215",
+   "name": "科嘉-KY",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司蘇州嘉吉/科德/嘉財/艾普來/百宏/嘉皇/嘉駿 公告一年內累積處分同一有價證券達實收資本額20%",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5215",
+   "name": "科嘉-KY",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司蘇州嘉吉/科德/嘉財/艾普來/百宏/嘉皇/嘉駿 公告一年內累積取得同一有價證券達實收資本額20%",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6142",
+   "name": "友勁",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司辦理減資變更登記完成",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2239",
+   "name": "英利-KY",
+   "date": "2026-09-08",
+   "type": "法說會",
+   "title": "本公司受邀參加富邦證券舉辦之法人說明會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4764",
+   "name": "雙鍵",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "本公司115年現金增資股款催繳公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2812",
+   "name": "台中銀",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司暨子公司115年8月份財務及業務資料。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2543",
+   "name": "皇昌",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "董事會通過本公司與昌投資股份有限公司及長榮鋼鐵股份有限公司合資成立專案公司",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3715",
+   "name": "定穎投控",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司受邀參加元大證券舉辦之2026第三季投資論壇",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3715",
+   "name": "定穎投控",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司超穎電子電路股份有限公司公告自地委建廠房",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3231",
+   "name": "緯創",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "[更新]代子公司翔譽科技股份有限公司(簡稱翔譽科技)及 經緯航太科技股份有限公司(簡稱經緯航太)公告合併基準日",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3715",
+   "name": "定穎投控",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司Dynamic Technology Manufacturing (Thailand) Co., Ltd.公告自地委建廠房",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8210",
+   "name": "勤誠",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司會計主管及公司治理主管異動",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8210",
+   "name": "勤誠",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代重要子公司勤昆科技(昆山)有限公司公告監事異動",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8210",
+   "name": "勤誠",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代重要子公司庠逸信息科技(上海)有限公司公告監事異動",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2441",
+   "name": "超豐",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司股份買回計畫執行完畢",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2059",
+   "name": "川湖",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "澄清經濟日報A03版報導",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1235",
+   "name": "興泰",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "公告本公司董事會決議除權息基準日及現金股利發放日",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1702",
+   "name": "南僑",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司南僑油脂事業股份有限公司公告說明媒體報導",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2367",
+   "name": "燿華",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司火災事件說明",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2338",
+   "name": "光罩",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "公告本公司董事會決議自115年第三季起 更換簽證會計師事務所及簽證會計師",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2308",
+   "name": "台達電",
+   "date": "2026-09-08",
+   "type": "處分資產",
+   "title": "本公司代子公司Delta Electronics (USA) Inc.公告取得不動產使用權資產",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2338",
+   "name": "光罩",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司財務主管異動",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6655",
+   "name": "科定",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "公告本公司董事會決議買回庫藏股 (更正買回股份總金額上限、預計買回期間)",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6901",
+   "name": "鑽石投資",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司所有投資標的股數變動及公允價值變化 以及本公司每股淨值、現金及約當現金餘額",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2428",
+   "name": "興勤",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "代重要子公司興勤（常州）電子有限公司公告董事會 決議不分配股利",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2338",
+   "name": "光罩",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "公告本公司董事長決定限制員工權利新股之增資基準日",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1626",
+   "name": "艾美特-KY",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司艾美特電器(深圳)有限公司依「公開發行公司資金貸與 及背書保證處理準則」第二十五條第一項第三款規定公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1626",
+   "name": "艾美特-KY",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司艾美特電器(九江)有限公司依「公開發行公司資金貸與 及背書保證處理準則」第二十五條第一項第三款規定公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1442",
+   "name": "名軒",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司現金股利分派除息基準日",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2530",
+   "name": "華建",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司發行國內第五次無擔保轉換公司債案向 金管會申請延長募集期間",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1532",
+   "name": "勤美",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "本公司代重要子公司China Metal International Holdings Inc.公告董事會決議發放股利",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1532",
+   "name": "勤美",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "本公司代重要子公司China Metal International Holdings Inc.公告董事會決議股利配發基準日 及除息交易日等相關日期",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1532",
+   "name": "勤美",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "本公司代重要子公司United Elite Agents Limited公告 董事會決議發放股利",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1532",
+   "name": "勤美",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "本公司代重要子公司United Elite Agents Limited公告 董事會決議股利配發基準日及除息交易日等相關日期",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6142",
+   "name": "友勁",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司辦理減資變更登記完成(更正減資後流通在外股數)",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2338",
+   "name": "光罩",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司依「公開發行公司資金貸與及背書保證處理準則」 第二十二條第一項第三款公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2891",
+   "name": "中信金",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司中國信託商業銀行公告擬以競價拍賣方式取得漢民測試系 統股份有限公司首次公開發行之股票",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5876",
+   "name": "上海商銀",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司115年8月份合併自結損益",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "9955",
+   "name": "佳龍",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司現金增資案延長特定人股款繳款期間(更正補充公告)",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3712",
+   "name": "永崴投控",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代子公司崴強科技股份有限公司依「公開發行公司資金貸與及 背書保證處理準則」第二十二條第一項第三款之規定公告",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2237",
+   "name": "華德動能-創",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "公告本公司註銷限制員工權利新股減資變更登記完成",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2801",
+   "name": "彰銀",
+   "date": "2026-09-08",
+   "type": "併購",
+   "title": "公告本公司115年8月份合併自結盈餘。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2323",
+   "name": "中環",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司取得有價證券",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2323",
+   "name": "中環",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司處分有價證券",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2371",
+   "name": "大同",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "代子公司大同開發股份有限公司公告副總經理異動",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2608",
+   "name": "嘉里大榮",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司召開115年上半年業績發表會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1219",
+   "name": "福壽",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "澄清媒體報導事項說明",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2614",
+   "name": "東森",
+   "date": "2026-09-08",
+   "type": "增減資",
+   "title": "本公司辦理115年現金增資發行新股訂定認股基準日相關事宜",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2317",
+   "name": "鴻海",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司參與投資人說明會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2474",
+   "name": "可成",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "公告本公司買回股份金額達新台幣三億元以上",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1795",
+   "name": "美時",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "代重要子公司Alvogen Korea Co., Ltd.公告 召開2026年股東臨時會",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6902",
+   "name": "GOGOLOOK",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "本公司背書保證達『公開發行公司資金貸與及背書 保證處理準則』第二十五條第一項第四款之規定",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6902",
+   "name": "GOGOLOOK",
+   "date": "2026-09-08",
+   "type": "人事",
+   "title": "公告本公司董事會通過解除經理人競業禁止之限制",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1219",
+   "name": "福壽",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "油品苯駢芘超標案因應說明",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6669",
+   "name": "緯穎",
+   "date": "2026-09-08",
+   "type": "其他",
+   "title": "有關本公司115年除權畸零股洽特定人認購事宜說明",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
    "code": "2379",
    "name": "",
    "date": "2026-09-08",
@@ -347,6 +1274,528 @@
    "date": "2026-09-08",
    "type": "除權息",
    "title": "除權息交易日（現金 0.055 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "6492",
+   "name": "生華科",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "生華科新藥CX-5461獲美國NCI贊助聯用國際製藥大廠賽諾菲 及再生元製藥已上市免疫檢查點抑制劑Cemiplimab治療難治性微 衛星穩定型結直腸癌人體試驗已成功收治首位患者。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4530",
+   "name": "天意能創",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司名稱由「宏易創新國際股份有限公司」 更名為「天意能創股份有限公司」， 公告期間：115年7月09日至115年10月08日。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4747",
+   "name": "強生*",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣5元」 公告期間：115年7月22日至115年10月21日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5904",
+   "name": "寶雅*",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司股票面額變更由「新台幣10元」變更為「新台幣1元」 公告期間：115年7月2日至115年10月1日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8472",
+   "name": "納維康",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司名稱由「夠麻吉股份有限公司」更名為 「納維康生技股份有限公司」，公告期間：115年6月29日 至115年9月28日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6016",
+   "name": "康和證",
+   "date": "2026-09-07",
+   "type": "併購",
+   "title": "公告本公司115年8月份合併自結損益",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6907",
+   "name": "雅特力-KY",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司受邀參加宏遠證券2026年趨勢產業論壇",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4966",
+   "name": "譜瑞-KY",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司受邀參加宏遠證券舉辦之2026年趨勢產業論壇",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6015",
+   "name": "宏遠證",
+   "date": "2026-09-07",
+   "type": "併購",
+   "title": "公告本公司自行結算一一五年八月份合併損益",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6584",
+   "name": "南俊國際",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司受邀參加由元大證券舉辦之2026元大證券第三季投資論壇",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6584",
+   "name": "南俊國際",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司受邀參加瑞銀證券舉辦之UBS Taiwan Summit 2026",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5353",
+   "name": "台林",
+   "date": "2026-09-07",
+   "type": "法說會",
+   "title": "本公司受邀參加台新綜合證券主辦之線上法說會",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2061",
+   "name": "風青",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "本公司有價證券近期多次達公布注意交易資訊標準，故公告相關 訊息，以利投資人區別暸解。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6967",
+   "name": "汎瑋材料",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "公告本公司現金增資收足股款暨增資基準日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5460",
+   "name": "同協",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "更正本公司115年4月營收公告、各項產品業務營收統計資料 及115年5-7月營收公告之本年累計營業收入淨額。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2230",
+   "name": "泰茂",
+   "date": "2026-09-07",
+   "type": "併購",
+   "title": "(更正事實發生日)115年度第二季合併財務報告合併現金流量表 及附註揭露內容",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8089",
+   "name": "康全電訊",
+   "date": "2026-09-07",
+   "type": "法說會",
+   "title": "公告本公司受邀參加永豐金證券舉辦之法人說明會",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3489",
+   "name": "森寶",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "本公司接獲長耀資產有限公司及華允資產管理股份有限公司 通知，依據公司法第369-8條第1項規定公告股權變動事宜(取得本 公司股份超過已發行股份總數三分之一以上)",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "7703",
+   "name": "銳澤",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "本公司及母公司朋億(股)公司與聖暉工程科技(股)公司， 受邀參加元大證券辦理之投資論壇",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3663",
+   "name": "鑫科",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司處分有價證券",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8086",
+   "name": "宏捷科",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "本公司受邀參加2026年元大證券第三季投資論壇",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8431",
+   "name": "匯鑽科",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "本公司有價證券近期多次達公布注意交易資訊標準 ，故公告相關訊息，以利投資人區別暸解。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4542",
+   "name": "科嶠",
+   "date": "2026-09-07",
+   "type": "人事",
+   "title": "本公司115/09/07董事會重大決議事項",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4542",
+   "name": "科嶠",
+   "date": "2026-09-07",
+   "type": "人事",
+   "title": "公告本公司董事會決議發行國內第二次 無擔保轉換公司債暨國內第三次無擔保轉換 公司債案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1595",
+   "name": "川寶",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司調整配息率",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5015",
+   "name": "華祺",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "115年8月資金貸與對個別對象資金貸與限額誤植更正",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6020",
+   "name": "大展證",
+   "date": "2026-09-07",
+   "type": "併購",
+   "title": "公告本公司一一五年八月份合併營運情形",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3713",
+   "name": "新晶投控",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "代重要子公司公告-頂晶科技股份有限公司115年8月 銀行融資額度使用情形及未來三個月現金收支預估情形",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6613",
+   "name": "朋億*",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "本公司與母公司聖暉工程科技(股)公司及子公司銳澤實業(股)公司，受邀參加元大證券舉辦之第三季投資論壇",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4416",
+   "name": "三圓",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司本週到期票據、應償還借款及利息等相關資訊",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4416",
+   "name": "三圓",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司普通股公司債到期還款計劃說明",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "7842",
+   "name": "天能綠電",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司庫藏股買回數量達已發行股份總數百分之二",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4416",
+   "name": "三圓",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司之關係人退票事宜",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4416",
+   "name": "三圓",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司關係人遭臺灣臺北地方法院支付命令事宜",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5347",
+   "name": "世界",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "本公司代重要子公司VisionPower Semiconductor Manufacturing Company Pte. Ltd.公告董事會決議辦理現金增資發行新股",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4568",
+   "name": "科際精密",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "(補充說明115/8/12公告)-代重要子公司 TAIKO INVESTMENT CO.,LTD.公告取消現金減資",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4568",
+   "name": "科際精密",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "(補充說明115/8/12公告-其他敘明事項)公告本公司取消現金增資 100%越南子公司Koge Micro Tech Vietnam,LLC",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4702",
+   "name": "中美實",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告取得有價證券",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5347",
+   "name": "世界",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "本公司代重要子公司VisionPower Semiconductor Manufacturing Company Pte. Ltd.公告現金增資基準日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4806",
+   "name": "桂田文創",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "更正公告本公司辦理減資資本變更登記完成(更正最後過戶日)",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4806",
+   "name": "桂田文創",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "更正公告本公司減資換股作業計畫(更正最後過戶日)",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3230",
+   "name": "錦明",
+   "date": "2026-09-07",
+   "type": "人事",
+   "title": "本公司董事會修訂115年度員工認股權憑證發行 及認股辦法部分條文",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1295",
+   "name": "生合",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司新任菌種研究所副所長",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "8091",
+   "name": "翔名",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告翔名股份有限公司國內第四次無擔保轉換公司債(簡稱：翔名四，代碼：80914)發行公司行使債券贖回權暨訂於115年10月27日終止櫃檯買賣等相關事宜。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1785",
+   "name": "光洋科",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司註銷收回限制員工權利新股辦理變更登記完成",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5457",
+   "name": "宣德",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司註銷收回限制員工權利新股辦理更登記完成",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5364",
+   "name": "力麗店",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "代重要子公司愷森能源股份有限公司公告董事會決議辦理 現金增資案及增資基準日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "5364",
+   "name": "力麗店",
+   "date": "2026-09-07",
+   "type": "增減資",
+   "title": "公告本公司擬參與重要子公司愷森能源股份有限公司現金增資",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6111",
+   "name": "光聚晶電",
+   "date": "2026-09-07",
+   "type": "併購",
+   "title": "本公司重編民國一一四年第二季、第三季及年度合併財 務報告、以及一一四年度個體財務報告之董事會召開日期。",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6180",
+   "name": "橘子",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告本公司第15次買回庫藏股執行完畢及執行狀況",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4741",
+   "name": "泓瀚",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "公告受新竹市環保局罰鍰新台幣34萬元",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6620",
+   "name": "漢達",
+   "date": "2026-09-07",
+   "type": "人事",
+   "title": "公告本公司董事會決議買回庫藏股事宜",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6620",
+   "name": "漢達",
+   "date": "2026-09-07",
+   "type": "人事",
+   "title": "本公司董事會通過解除經理人競業禁止之限制案",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4745",
+   "name": "合富-KY",
+   "date": "2026-09-07",
+   "type": "其他",
+   "title": "代重要子公司合富（中國）醫療科技股份有限公司公告 參加2026年上海轄區上市公司集體接待日暨中報業績說明會",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "01010T",
+   "name": "",
+   "date": "2026-09-07",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.09872 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "1466",
+   "name": "",
+   "date": "2026-09-07",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.2 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "6533",
+   "name": "",
+   "date": "2026-09-07",
+   "type": "除權息",
+   "title": "除權息交易日",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "00400A",
+   "name": "",
+   "date": "2026-09-07",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.12 元）",
    "source": "TWSE 除權息",
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
@@ -1159,528 +2608,6 @@
    "title": "公告本公司115年度現金增資發行普通股參與發行海外存託 憑證之發行條件",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6492",
-   "name": "生華科",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "生華科新藥CX-5461獲美國NCI贊助聯用國際製藥大廠賽諾菲 及再生元製藥已上市免疫檢查點抑制劑Cemiplimab治療難治性微 衛星穩定型結直腸癌人體試驗已成功收治首位患者。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4530",
-   "name": "天意能創",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司名稱由「宏易創新國際股份有限公司」 更名為「天意能創股份有限公司」， 公告期間：115年7月09日至115年10月08日。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4747",
-   "name": "強生*",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣5元」 公告期間：115年7月22日至115年10月21日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5904",
-   "name": "寶雅*",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司股票面額變更由「新台幣10元」變更為「新台幣1元」 公告期間：115年7月2日至115年10月1日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "8472",
-   "name": "納維康",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司名稱由「夠麻吉股份有限公司」更名為 「納維康生技股份有限公司」，公告期間：115年6月29日 至115年9月28日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6016",
-   "name": "康和證",
-   "date": "2026-09-07",
-   "type": "併購",
-   "title": "公告本公司115年8月份合併自結損益",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6907",
-   "name": "雅特力-KY",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司受邀參加宏遠證券2026年趨勢產業論壇",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4966",
-   "name": "譜瑞-KY",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司受邀參加宏遠證券舉辦之2026年趨勢產業論壇",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6015",
-   "name": "宏遠證",
-   "date": "2026-09-07",
-   "type": "併購",
-   "title": "公告本公司自行結算一一五年八月份合併損益",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6584",
-   "name": "南俊國際",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司受邀參加由元大證券舉辦之2026元大證券第三季投資論壇",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6584",
-   "name": "南俊國際",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司受邀參加瑞銀證券舉辦之UBS Taiwan Summit 2026",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5353",
-   "name": "台林",
-   "date": "2026-09-07",
-   "type": "法說會",
-   "title": "本公司受邀參加台新綜合證券主辦之線上法說會",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "2061",
-   "name": "風青",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "本公司有價證券近期多次達公布注意交易資訊標準，故公告相關 訊息，以利投資人區別暸解。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6967",
-   "name": "汎瑋材料",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "公告本公司現金增資收足股款暨增資基準日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5460",
-   "name": "同協",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "更正本公司115年4月營收公告、各項產品業務營收統計資料 及115年5-7月營收公告之本年累計營業收入淨額。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "2230",
-   "name": "泰茂",
-   "date": "2026-09-07",
-   "type": "併購",
-   "title": "(更正事實發生日)115年度第二季合併財務報告合併現金流量表 及附註揭露內容",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "8089",
-   "name": "康全電訊",
-   "date": "2026-09-07",
-   "type": "法說會",
-   "title": "公告本公司受邀參加永豐金證券舉辦之法人說明會",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "3489",
-   "name": "森寶",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "本公司接獲長耀資產有限公司及華允資產管理股份有限公司 通知，依據公司法第369-8條第1項規定公告股權變動事宜(取得本 公司股份超過已發行股份總數三分之一以上)",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "7703",
-   "name": "銳澤",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "本公司及母公司朋億(股)公司與聖暉工程科技(股)公司， 受邀參加元大證券辦理之投資論壇",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "3663",
-   "name": "鑫科",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司處分有價證券",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "8086",
-   "name": "宏捷科",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "本公司受邀參加2026年元大證券第三季投資論壇",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "8431",
-   "name": "匯鑽科",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "本公司有價證券近期多次達公布注意交易資訊標準 ，故公告相關訊息，以利投資人區別暸解。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4542",
-   "name": "科嶠",
-   "date": "2026-09-07",
-   "type": "人事",
-   "title": "本公司115/09/07董事會重大決議事項",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4542",
-   "name": "科嶠",
-   "date": "2026-09-07",
-   "type": "人事",
-   "title": "公告本公司董事會決議發行國內第二次 無擔保轉換公司債暨國內第三次無擔保轉換 公司債案",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "1595",
-   "name": "川寶",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司調整配息率",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5015",
-   "name": "華祺",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "115年8月資金貸與對個別對象資金貸與限額誤植更正",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6020",
-   "name": "大展證",
-   "date": "2026-09-07",
-   "type": "併購",
-   "title": "公告本公司一一五年八月份合併營運情形",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "3713",
-   "name": "新晶投控",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "代重要子公司公告-頂晶科技股份有限公司115年8月 銀行融資額度使用情形及未來三個月現金收支預估情形",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6613",
-   "name": "朋億*",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "本公司與母公司聖暉工程科技(股)公司及子公司銳澤實業(股)公司，受邀參加元大證券舉辦之第三季投資論壇",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4416",
-   "name": "三圓",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司本週到期票據、應償還借款及利息等相關資訊",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4416",
-   "name": "三圓",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司普通股公司債到期還款計劃說明",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "7842",
-   "name": "天能綠電",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司庫藏股買回數量達已發行股份總數百分之二",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4416",
-   "name": "三圓",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司之關係人退票事宜",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4416",
-   "name": "三圓",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司關係人遭臺灣臺北地方法院支付命令事宜",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5347",
-   "name": "世界",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "本公司代重要子公司VisionPower Semiconductor Manufacturing Company Pte. Ltd.公告董事會決議辦理現金增資發行新股",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4568",
-   "name": "科際精密",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "(補充說明115/8/12公告)-代重要子公司 TAIKO INVESTMENT CO.,LTD.公告取消現金減資",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4568",
-   "name": "科際精密",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "(補充說明115/8/12公告-其他敘明事項)公告本公司取消現金增資 100%越南子公司Koge Micro Tech Vietnam,LLC",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4702",
-   "name": "中美實",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告取得有價證券",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5347",
-   "name": "世界",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "本公司代重要子公司VisionPower Semiconductor Manufacturing Company Pte. Ltd.公告現金增資基準日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4806",
-   "name": "桂田文創",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "更正公告本公司辦理減資資本變更登記完成(更正最後過戶日)",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4806",
-   "name": "桂田文創",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "更正公告本公司減資換股作業計畫(更正最後過戶日)",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "3230",
-   "name": "錦明",
-   "date": "2026-09-07",
-   "type": "人事",
-   "title": "本公司董事會修訂115年度員工認股權憑證發行 及認股辦法部分條文",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "1295",
-   "name": "生合",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司新任菌種研究所副所長",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "8091",
-   "name": "翔名",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告翔名股份有限公司國內第四次無擔保轉換公司債(簡稱：翔名四，代碼：80914)發行公司行使債券贖回權暨訂於115年10月27日終止櫃檯買賣等相關事宜。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "1785",
-   "name": "光洋科",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司註銷收回限制員工權利新股辦理變更登記完成",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5457",
-   "name": "宣德",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司註銷收回限制員工權利新股辦理更登記完成",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5364",
-   "name": "力麗店",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "代重要子公司愷森能源股份有限公司公告董事會決議辦理 現金增資案及增資基準日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "5364",
-   "name": "力麗店",
-   "date": "2026-09-07",
-   "type": "增減資",
-   "title": "公告本公司擬參與重要子公司愷森能源股份有限公司現金增資",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6111",
-   "name": "光聚晶電",
-   "date": "2026-09-07",
-   "type": "併購",
-   "title": "本公司重編民國一一四年第二季、第三季及年度合併財 務報告、以及一一四年度個體財務報告之董事會召開日期。",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6180",
-   "name": "橘子",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告本公司第15次買回庫藏股執行完畢及執行狀況",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4741",
-   "name": "泓瀚",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "公告受新竹市環保局罰鍰新台幣34萬元",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6620",
-   "name": "漢達",
-   "date": "2026-09-07",
-   "type": "人事",
-   "title": "公告本公司董事會決議買回庫藏股事宜",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6620",
-   "name": "漢達",
-   "date": "2026-09-07",
-   "type": "人事",
-   "title": "本公司董事會通過解除經理人競業禁止之限制案",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4745",
-   "name": "合富-KY",
-   "date": "2026-09-07",
-   "type": "其他",
-   "title": "代重要子公司合富（中國）醫療科技股份有限公司公告 參加2026年上海轄區上市公司集體接待日暨中報業績說明會",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "01010T",
-   "name": "",
-   "date": "2026-09-07",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.09872 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "1466",
-   "name": "",
-   "date": "2026-09-07",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.2 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "6533",
-   "name": "",
-   "date": "2026-09-07",
-   "type": "除權息",
-   "title": "除權息交易日",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "00400A",
-   "name": "",
-   "date": "2026-09-07",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.12 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
    "code": "4530",
