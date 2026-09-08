@@ -8303,7 +8303,7 @@ tick未解鎖，尚不可下結論）。完整見`US_MARATHON_STATE.md`第476輪
 
 ---
 
-### #63 借券費率異常飆升作為知情放空訊號（Securities Lending Fee Rate Spike as Informed Short-Demand Signal）（2026-09-09 hypothesis_queue排程新增，尚未開始第1關）
+### #63 借券費率異常飆升作為知情放空訊號（Securities Lending Fee Rate Spike as Informed Short-Demand Signal）（2026-09-09 hypothesis_queue排程新增；資料可行性已於第477輪查證完成＝可行；尚未開始第1關cheap gate）
 
 **依協定第1節「回顧已死假設共同模式」設計，避開本佇列所有已測過的
 機制大類（截至`#62`已列①~⑫，見`#60`/`#62`條目完整列表）。**
@@ -8327,11 +8327,48 @@ tick未解鎖，尚不可下結論）。完整見`US_MARATHON_STATE.md`第476輪
   預測該股未來報酬轉負」，事前方向假設為負）。
 - 判準：完整GATE_SEQUENCE 1~9關，同本佇列一貫標準。
 
-**資料可行性（尚未查證，下一輪待辦，不得跳關假設可行）**：候選端點
-TWSE openapi「借券」相關資料集（確切dataset名稱、頻率、是否逐檔、
-歷史深度皆未查證），需依`CLAUDE.md`「搜尋紀律：三來源查證」（官方
-端點/API文件、GitHub社群、其他供應商）查證後才能下「可行」或
-「資料不可及」結論。**本輪工作到此為止**（一輪一個有界工作單位，
-僅完成假設設計，未跑任何數字），下一輪從資料可行性查證開始，不跳關
-搶跑，不得假設資料存在就直接寫gate腳本。`is_holdout_consumed()`
-開工/收工前皆確認`False`，本輪零API呼叫。
+**資料可行性（2026-09-09馬拉松第477輪，TW軌，已完成三來源查證，結論：可行）**：
+
+1. **TWSE openapi（143個端點全掃）**：只有`/SBL/TWT96U`「上市上櫃股票
+   當日可借券賣出股數」，那是**餘量**（供給存量），不是**成交費率**，
+   openapi本身沒有本假設需要的欄位，此路不通。
+2. **TWSE官方網站rwd端點（非openapi，同`T86`/`t86`那種模式）**：官網
+   「借券資訊」頁`https://www.twse.com.tw/zh/page/trading/SBL/t13sa710.html`
+   的查詢表單`data-api="/lending/t13sa710"`，實測正確路徑為
+   `https://www.twse.com.tw/rwd/zh/lending/t13sa710?response=json&startDate=YYYYMMDD&endDate=YYYYMMDD`
+   （`date=`單參數會被忽略、預設今天，須用`startDate`/`endDate`區間）。
+   欄位（`fields`）：成交日期、**證券代號名稱**（逐檔）、交易方式
+   （定價/競價/議借）、成交數量(交易單位)、**成交費率**（實測數值如
+   1.50/2.00/0.01，即年利率%）、成交日收盤價、約定還券日期、約定借券
+   天數、費率異動。**逐日逐檔逐筆**（同一天同一股票可有多筆不同費率
+   的成交，非彙總）。實測`startDate=20260901&endDate=20260908`（一週）
+   回傳6,548筆；`startDate=20150101&endDate=20151231`（整年）回傳
+   70,637筆，**無明顯單次查詢筆數上限**（比`#62`block trade的
+   BFIAUU端點只能逐日查好查很多，回補批次可以用年為單位，不用像
+   `backfill_block_trade.py`那樣逐日）。歷史回溯實測涵蓋2012-01
+   （1,245筆）～2026-09（現在），完整覆蓋TRAIN(2015-2020)/VAL(2021-2024)。
+3. **FinMind文件（`https://finmind.github.io/tutor/TaiwanMarket/Chip/`）**：
+   確認有對應資料集`TaiwanStockSecuritiesLending`（借券成交明細），
+   欄位含`fee_rate`（成交費率），官方標註資料區間**2001-05-01~now**，
+   與TWSE官網rwd端點是同一份原始資料的下游整理版，交叉印證欄位語意
+   （`fee_rate`＝本假設需要的費率）與回溯深度。
+4. **付費資料商佐證**：TEJ等資料商將借券費率/籌碼資料列為付費商品項目
+   之一，反向佐證這份資料有實際需求與商業價值，但**我們走TWSE官方
+   rwd端點免費取得同一份原始資料，不採購**。
+
+**結論：可行，走TWSE官方rwd端點`www.twse.com.tw/rwd/zh/lending/t13sa710`
+（同`twse_t86_client.py`/`twse_block_trade_client.py`同一類，非openapi）**。
+主統計量頻率確認為**逐日逐筆**（不是週頻，事前假設的「若只有週頻則改用
+週頻」條款不適用）。`is_holdout_consumed()`開工/收工前皆確認`False`，
+本輪僅探測性查詢（單次請求測試不同日期範圍，共約10次請求，2秒節流，
+零寫入資料檔、零FinMind/SEC呼叫，探測用暫存檔案已刪除不留痕）。
+
+**下一輪待辦（不跳關）**：依`twse_t86_client.py`同款框架寫
+`twse_lending_fee_client.py`（含反爬蟲封鎖偵測、原子寫入快取、
+`response=json`＋`startDate`/`endDate`年度批次）與
+`backfill_lending_fee.py`（可重複執行的批次回補腳本），先回補
+TRAIN期（2015-2020）；「交易方式」欄位需先確認三種類型（定價/競價/
+議借）是否要分開處理或合併——**定價交易費率是官方公告固定值（目前
+年利率3.5%），不反映個股急迫程度，可能要排除或單獨分析，只有競價/
+議借才是市場出清價格**，這是設計gate腳本前必須先做的資料探索，
+不是本輪範圍。
