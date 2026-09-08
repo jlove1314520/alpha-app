@@ -1,5 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08T17:26+0800 hypothesis_queue排程接續 — 完成#60（台指選擇權/
+期貨結算到期日機械性效應）資料可行性查證：**確認可行，三來源查證**
+（官方PDF規格文件「第三個星期三」規則、`openapi.taifex.com.tw`近期快照
+驗證、本專案既有`continuous_contract.py`滾動偵測反推歷史結算日——**實際
+採用第三種**，因它是觀測到的真實歷史事實而非套用規則猜測，實測發現
+2000~2024共300個月裡7個月不是標準第三個星期三，用規則猜會全部算錯）。
+新增`fut_settlement_date_probe60.py`（可重複執行）與
+`data/fut_settlement_dates_derived_tx.csv`（300列，TRAIN 72個月/VAL 48個月
+零缺口）。零新增API呼叫、`is_holdout_consumed()`全程`False`。已更新
+`HYPOTHESIS_QUEUE.md`#60條目「狀態」段落。**本輪工作到此為止（一輪一個
+有界工作單位）**，下一輪從第1關cheap gate（事件研究：結算日前後窗口報酬
+vs隨機窗口null分布）開始，不跳關。
+
 ## 2026-09-08 hypothesis_queue排程接續（取鎖時鎖檔陳舊pid124660約30.1分鐘，
 已回收接手，上一輪疑似中途失敗）— 開工查證發現：上一輪其實已把#59第4關
 成本敏感度跑完（`min_variance_portfolio_gate59_costs.py`），並已由**另一條
