@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-08T11:00+08:00**
+**最後更新：2026-09-08T15:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 440 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 440 輪 · 2026-09-08T11:00+08:00 · US軌（取鎖乾淨，cycle`20260908-110037`）**。**本輪工作單位**：`CALIBRATION_PROBE.md`裁示清單剩餘項US軌`#47`（`f_us_low_vol`大型股分層重測，08-26原始100檔年代從未複驗）——確認宇宙規模未變（6,618檔active/5,566檔market_cap可用/三分位各約1,855檔），將`us_factor_ic_by_size.py`改`TIER="large"`、`SAMPLE_SIZE`30→90試跑，發現此腳本遠比預期慢（12/90即撞240秒逾時，約16秒/檔），且heavy-job-slot被TW backfill佔用無法改走`run_detached.py`，本輪**未取得任何結果、未產生輸出檔**，僅保留程式碼異動供下一輪投遞。`trial_registry.py --check`確認PASS（202列，無新判定）。詳見`US_MARATHON_STATE.md`/`REPORT.md`第440輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 448 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 448 輪 · 2026-09-08T15:00+08:00 · US軌（取鎖乾淨，cycle`20260908-150037`）**。**本輪工作單位**：收成round446投遞的`us_portfolio_gross_profitability_v1`正式N=100結果——TRAIN percentile=89.0、VAL percentile=2.0（alpha翻負），判定FAIL，登記`TRIALS_LEDGER.md`#209、更新`US_LEADS.md`#25。US軌`#20`/`#21`/`#22`/`#25`四個組合策略候選至此全數FAIL。`trial_registry.py --check`確認PASS（211列）。詳見`US_MARATHON_STATE.md`/`REPORT.md`第448輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。**計數器缺口補記**：本檔第441～447輪未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`，僅本檔頂部行漏更新，屬本節上方已記錄過的同款顯示層問題），本輪一次補齊到448；441～447輪摘要：441(TW)`#57`sanity三項PASS；442(US)`#47`large tier N=90投遞；443(TW)`#58`第2關VAL FAIL結案；444(US)`#47`結案FAIL；445(TW)新增`#59`最小變異數組合sanity PASS；446(US)`#52`中型股tier重跑（流程瑕疵記錄）+投遞`#25`N=100；447(TW)投遞`#59`第2關隨機控制組（job`cc7b`，尚在跑）。
 
 **上一輪（第439輪，供對照）** · 2026-09-08T10:30+08:00 · TW軌（取鎖乾淨，cycle`20260908-103037`）**。**本輪工作單位**：heavy-job-slot被`#57`回填job佔用，改做`PENDING_QUEUE.md`『資料一.4』長期未結驗收——`data/ticks/20260907.parquet`共1個檔案/146,846筆/20個標的核對通過，`simtrade`欄位試撮/真實成交分佈正確。`trial_registry.py --check`確認PASS（202列）。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第439輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
