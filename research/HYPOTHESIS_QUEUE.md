@@ -7657,3 +7657,43 @@ article()`，估計約74頁列表+數百篇文章，需要控制節流間隔，�
 `fut_settlement_event_gate60.py`/`cbc_decision_event_gate61.py`框架）。
 完整見`US_MARATHON_STATE.md`第462輪記錄、`REPORT.md`第462輪心跳、
 `sp500_index_changes_client.py`（新增，可重複執行）。
+
+**2026-09-09T00:30+0800 馬拉松第464輪（US軌）**——依round462交辦，
+建立`backfill_sp500_index_changes.py`並端到端smoke test驗證。
+**heavy-job-slot仍被TW軌job`95c8`佔用（running，已執行約37~41分鐘），
+本輪繼續不投遞新重度背景工作**。
+
+回補腳本設計：逐頁掃描`offset=0,50,100,...`直到**連續2頁真正回傳空**
+為止（不寫死74頁這個數字，避免之後新聞稿增加就漏掃），另加
+`MAX_OFFSET=20000`安全網防止端點行為異常時無限迴圈；已快取的列表頁/
+文章不佔批次額度也不觸發HTTP，比照`backfill_material_news.py`可續跑
+慣例。
+
+**smoke test**（前景執行`--batch-size 3`，非`run_detached`背景job——
+只是驗證管線、預期數分鐘內結束，且`press.spglobal.com`非MOPS端點，
+不與TW軌job搶算力/違反「一次只跑一個重度工作」規則）：3個新列表頁
+（offset 0/50/100，offset 0此前round462已快取直接沿用），符合關鍵字
+48篇（含round462已測試的3篇），新抓文章45篇，全數`fetch_and_parse_
+article()`成功落盤（無解析例外、無空表格意外）。累積快取：列表頁4、
+文章48。**驗證通過，管線可行**，`data/raw_sp_index_changes/`（已
+gitignore不進repo）目前累積進度約4/74頁（offset停在150）。
+
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）確認PASS
+（exit=0，222列，本輪無新判定，純資料管線建置非試驗）。
+`is_holdout_consumed()`開工/收工前皆確認`False`。全程零FinMind/
+SEC EDGAR歷史API呼叫，對`press.spglobal.com`發出約50+次請求（3個
+列表頁+45篇文章，皆為公開新聞稿頁面，無登入無驗證碼，同round460/462
+判定無公開速率上限文件，本輪節流1.5秒/次）。
+
+**下一輪US軌接手**：先查heavy-job-slot是否已空出（TW軌job`95c8`
+預估00:50前後完成）——若已空，用`run_detached.py submit --name
+sp500_index_changes_backfill_51us --timeout-min 60 -- python -u
+research/backfill_sp500_index_changes.py --batch-size 74`投遞全範圍
+背景回補（74頁全跑；`run_detached.py`工作目錄固定在`alpha-app`非
+`research`，指令需帶`research/`前綴，這是round459踩過的路徑陷阱）；
+若仍被佔用則比照本輪模式繼續小批次前景累積或查核TW軌job進度。
+backfill完成後才進入`#51-US`第1關cheap gate（生效日±N日報酬 vs
+隨機交易日null，比照`fut_settlement_event_gate60.py`/`cbc_decision_
+event_gate61.py`框架），不得跳關搶跑。完整見`US_MARATHON_STATE.md`
+第464輪記錄、`REPORT.md`第464輪心跳、`backfill_sp500_index_changes.py`
+（新增，可重複執行）。
