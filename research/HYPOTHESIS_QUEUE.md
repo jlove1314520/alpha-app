@@ -8189,3 +8189,28 @@ python -u research/backfill_block_trade.py --batch-size 800`
 `block_trade_gate62.py`看初步方向；仍未到則再投遞下一批，預估還需
 1~2批才能到VAL_END。本輪未跑任何訊號數字，不涉及`register_trial()`。
 `is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**(g) 首次跨入VAL期＋smoke test仍不足＋投遞下一批（2026-09-09T06:04+08:00
+hypothesis_queue排程接續）**：本輪首先有界輪詢（每60秒查一次，上限20次）
+job`20260909-052241-9b09`，該job於輪詢過程中完成（`finished`/`exit=0`，
+41.3分鐘），`data/raw_twse_block_trade/`累積到1600個parquet
+（2015-01-01~2021-02-17，全範圍2,609個工作日的61.3%），**首次跨過
+`TRAIN_END=2020-12-31`進入VAL期範圍**（約7週資料）。用
+`--max-events 500 --n-permutations 25`重跑`block_trade_gate62.py`
+smoke test，三個N值VAL期`sell-initiated n_val=0<20`仍全部跳過——
+**這是因為`--max-events 500`從全體約7.75萬筆候選事件抽樣，抽到的
+500筆聚合事件仍集中在資料量較大的早期年份，而非VAL期資料量本身
+為0**（VAL期已有約7週原始資料，但事件抽樣未涵蓋到，屬smoke test
+限制而非資料完全空白，特此區分，避免下一輪誤判VAL期毫無資料）。
+確認`is_holdout_consumed()`為`False`（`validation.holdout`模組，
+`TRAIN_END=2020-12-31`／`VAL_END=2024-12-31`）。heavy-job-slot
+空出後立即投遞下一批`run_detached.py submit --name
+block_trade_backfill_62tw --timeout-min 60 -- python -u
+research/backfill_block_trade.py --batch-size 800`（job
+`20260909-060428-cae6`），20秒後確認`running`且`watchdog_alive=True`，
+正常啟動，本輪收工不等待完成。**下一輪待辦**：查此job是否
+`finished`，累積天數（預估還需1~2批才能到2609/2609全範圍涵蓋
+VAL_END），到位後改用**不設`--max-events`上限**（或至少大幅提高，
+避免抽樣偏向早期年份）重跑`block_trade_gate62.py`才能真正檢驗VAL期
+sell-initiated方向，屆時若`n_val>=20`才進入正式`register_trial()`
+判定流程。本輪未跑任何訊號判定數字，不涉及`register_trial()`。

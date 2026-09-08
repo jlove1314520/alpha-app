@@ -1,5 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T06:04+0800 hypothesis_queue排程接續 — #62回補首次跨入VAL期，smoke test仍n_val=0（抽樣限制非資料空白），投遞下一批並確認正常啟動
+開工讀`CLAUDE.md`+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他常駐行程
+殘留，不動、不納入commit）。取鎖`marathon_lock.py acquire --name hypothesis_queue`：
+**`LOCK_ACQUIRED`（乾淨取得，非陳舊回收）**。查`HYPOTHESIS_QUEUE.md`「排隊順序總結」
+確認佇列#1~61全數結案，唯一未結案為#62（鉅額逐筆交易Block Trade跟隨訊號）。
+
+查上一輪投遞的job`20260909-052241-9b09`仍`running`（40.5分鐘），有界輪詢
+（60秒/次，上限20次）等待完成：job於輪詢中完成（`finished`/`exit=0`，41.3分鐘），
+`data/raw_twse_block_trade/`累積到1600個parquet（2015-01-01~2021-02-17，全範圍
+2,609個工作日的61.3%），**首次跨過`TRAIN_END=2020-12-31`進入VAL期範圍**。
+用`--max-events 500 --n-permutations 25`重跑`block_trade_gate62.py` smoke test，
+三個N值VAL期`sell-initiated n_val=0<20`仍全部跳過——查證後確認是**抽樣限制**
+（500筆抽樣事件集中在早期年份），不是VAL期資料完全空白（VAL期已有約7週原始
+資料）。`is_holdout_consumed()`開工/收工前皆確認`False`。heavy-job-slot空出後
+投遞下一批`run_detached.py submit --name block_trade_backfill_62tw --timeout-min
+60 -- python -u research/backfill_block_trade.py --batch-size 800`（job
+`20260909-060428-cae6`），20秒後確認`running`且`watchdog_alive=True`，正常啟動。
+本輪未跑任何訊號判定數字，不涉及`register_trial()`，已同步更新
+`HYPOTHESIS_QUEUE.md`#62條目「(g)」段落。**下一輪待辦**：查job
+`20260909-060428-cae6`是否`finished`，累積天數若已涵蓋足夠VAL期範圍，
+改用不設`--max-events`上限（或大幅提高）重跑`block_trade_gate62.py`才能真正
+檢驗VAL期方向；仍不足則再投遞下一批（預估還需1~2批才能到VAL_END）。
+本輪工作到此為止。
+
 ## 2026-09-09T05:22+0800 hypothesis_queue排程接續 — #62回補批次已完成，投遞下一批（800天）並確認正常啟動，本輪收工不等待
 開工讀`CLAUDE.md`+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
 `research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他常駐行程
