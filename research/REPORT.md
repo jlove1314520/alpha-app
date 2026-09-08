@@ -9,6 +9,12 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第452輪 · 2026-09-08T17:05+08:00 · US · 取鎖乾淨（cycle`20260908-170037`）· 依輪替選US（US 16:00 round450最舊/TW 16:30 round451最新，FUT依例外條款不選）· `run_detached.py status`確認heavy-job-slot已空（run=0）· 本輪工作單位＝依round450交辦，設計`#52-US`（SEC EDGAR 8-K事件反應速度）規格草案 · **內容**：寫進`HYPOTHESIS_QUEUE.md`新增段落——經濟機制為Item 2.02（財報公布）對應Post-Earnings-Announcement Drift文獻（Bernard & Thomas 1989起，underreaction機制）；PIT錨點明訂用`acceptanceDateTime`（精確到秒，UTC）而非`reportDate`（事件發生日，可能早filingDate達3天，用AAPL實例驗證）；交易日對齊規則（16:00 ET前後決定反應日是當天或次日）；便宜關卡設計（Item 2.02 family、r0/r_drift同號比例 vs 隨機非事件日配對控制組）事前綁定寫死 · `sec_edgar_client.py`新增`get_8k_events(cik, full_history=False)`（純新增函式，不改動任何既有函式，10-K/10-Q既有呼叫端零影響），用AAPL既有快取驗證`items`（如`"2.02,9.01"`）與`acceptanceDateTime`欄位確實可用，**零新增API呼叫** · 依協定「先寫規格，不先跑數字」（同TW`#52`round條目的紀律），本輪不跑任何回測/批次抓取，不涉及PASS/FAIL判定，未登記`TRIALS_LEDGER.md` · `trial_registry.py --check`確認PASS（exit=0，214列，本輪無新判定）· `is_holdout_consumed()`開工/收工前皆確認`False`· 詳見`US_MARATHON_STATE.md`第452輪記錄、`HYPOTHESIS_QUEUE.md` #52-US條目、`sec_edgar_client.py`（新增`get_8k_events()`）· 下一輪US軌接手：執行便宜關卡設計步驟1-4（Item 2.02唯一家族，樣本先用small tier前20-30檔），評估是否需要`run_detached.py submit`投遞（`full_history=True`分頁抓archive files可能超過5分鐘）
+
+---
+（**備註**：第451輪心跳先前被誤插在本檔更下方（約行1690一帶，非緊接在第450輪之上），本輪未搬動舊條目——依「只往下append、不覆寫、不刪除舊條目」規則，錯誤的歷史位置不回頭改，往前找`## 第451輪`即可找到；本輪只確保自己新增的第452輪插在正確位置。）
+
+---
 ## 第450輪 · 2026-09-08T16:00+08:00 · US · 取鎖乾淨（cycle`20260908-160037`）· 依輪替選US（US 15:00 round448最舊/TW 15:30 round449最新，FUT依例外條款不選）· heavy-job-slot被TW`#59`第2關job`822f`佔用（已跑30.1/100分鐘），本輪不投遞新重度工作 · 本輪工作單位＝依round448交辦，三來源查證美股是否有對應`MARATHON_PROTOCOL.md`0a節四條結構性優勢方向的資料源 · **結論**：(1) #52事件反應速度→🟢SEC EDGAR官方即時申報feed（metadata比RSS更新快約20秒），比MOPS更細，是US軌目前唯一有資料優勢佐證的新方向；(2) #51強制交易者事件→🟡FINRA空頭部位頻率太粗，但S&P/Russell指數重新平衡生效日官方提前公告、強迫被動基金交易，機制類似但效果未查證是否已被套利；(3) #50容量受限小型股→🔴美股逐筆tick資料查無全免費源（EODHD/Databento/Finazon皆付費），標待採購；(4) #49非本輪範圍 · 詳見`docs/DATA_SOURCE_MAP.md`新增段落（完整查證來源與連結）· 本輪非試驗，未登記`TRIALS_LEDGER.md` · `trial_registry.py --check`確認PASS（exit=0，212列，本輪無新判定）· `is_holdout_consumed()`開工/收工前皆確認`False`· 本輪零新增API呼叫（純WebSearch查證官方文件與商業資料商定價頁）· 詳見`US_MARATHON_STATE.md`第450輪記錄 · 下一輪US軌接手：優先設計#52（8-K申報時間戳vs股價反應）事件研究SPEC與cheap gate
 
 ---

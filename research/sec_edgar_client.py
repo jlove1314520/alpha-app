@@ -137,6 +137,65 @@ def get_archive_filings(cik: int, file_name: str) -> dict:
     return _cached_get(url, f"archive_{cache_key}")
 
 
+def get_8k_events(cik: int, full_history: bool = False) -> list[dict]:
+    """Return 8-K filings with the fields the #52-US event-reaction-speed
+    design (HYPOTHESIS_QUEUE.md #52-US, added 2026-09-08 marathon US-track
+    round) actually needs: `acceptanceDateTime` (second-precision, UTC,
+    when the filing became publicly retrievable -- this is the real PIT
+    anchor, NOT `filingDate` which is date-only and NOT `reportDate` which
+    is the date of the underlying event, observed up to 3 calendar days
+    earlier than filingDate for AAPL 5.02 filings, confirmed this round)
+    and `items` (comma-separated SEC item codes, e.g. "2.02,9.01" -- the
+    per-item classification this design needs to stratify by economic
+    mechanism, analogous to TW #52's MOPS-type grouping).
+
+    Deliberately a separate function from get_filing_dates() rather than a
+    forms=("8-K",) call into it: that function's _filings_to_records() only
+    keeps form/filingDate/reportDate/gap_days, dropping acceptanceDateTime
+    and items entirely -- those two fields are 8-K-specific in how they'll
+    be used (10-K/10-Q PIT work already has filing_pit() built around
+    filingDate/reportDate alone and doesn't need this). Reusing the same
+    _cached_get()-backed get_submissions()/get_archive_filings() plumbing,
+    so this costs zero extra HTTP requests for any CIK already fetched by
+    the existing 10-K/10-Q call path (same cache file, confirmed this round
+    against the AAPL cache already on disk from prior rounds).
+
+    Returns one dict per 8-K filing: {accessionNumber, filingDate,
+    reportDate, acceptanceDateTime (raw ISO-8601 UTC string, e.g.
+    "2026-04-20T21:29:51.000Z"), items (raw comma-separated string, not yet
+    split -- caller decides how to handle multi-item filings, see SPEC's
+    open question on primary-item assignment)}. Does not compute a trading
+    "reaction day" here -- that needs a market-calendar + ET-timezone
+    conversion this module has no reason to own (us_factors.py's AAPL-date
+    calendar-proxy convention is the natural place for that, per its own
+    docstring), so this function stays a thin, unopinionated data-access
+    layer, same spirit as get_filing_dates().
+    """
+    data = get_submissions(cik)
+
+    def _extract(block: dict) -> list[dict]:
+        n = len(block.get("form", []))
+        out = []
+        for i in range(n):
+            if block["form"][i] != "8-K":
+                continue
+            out.append({
+                "accessionNumber": block.get("accessionNumber", [None] * n)[i],
+                "filingDate": block.get("filingDate", [None] * n)[i],
+                "reportDate": block.get("reportDate", [None] * n)[i],
+                "acceptanceDateTime": block.get("acceptanceDateTime", [None] * n)[i],
+                "items": block.get("items", [None] * n)[i],
+            })
+        return out
+
+    out = _extract(data.get("filings", {}).get("recent", {}))
+    if full_history:
+        for archive in data.get("filings", {}).get("files", []):
+            archive_data = get_archive_filings(cik, archive["name"])
+            out.extend(_extract(archive_data))
+    return out
+
+
 def get_filing_dates(
     cik: int,
     forms: tuple[str, ...] = ("10-K", "10-Q"),

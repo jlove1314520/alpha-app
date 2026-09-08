@@ -5999,6 +5999,91 @@ MOPS查證（`#51`(d)段落列的(1)(2)(3)三個候選方向尚未測）；(iii)
 收工前皆確認`False`，本輪全程僅2次即時單次查詢（TWSE官方端點1次+猜測
 ajax探測1次），無批次抓取、無寫入任何歷史快取檔案。
 
+### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
+
+**背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
+資料源，且**沒有 TW #52 卡住的兩個問題**——(1) PIT時間戳精度：`submissions`
+API 的 `acceptanceDateTime` 欄位精確到秒（UTC），不是只有日期；(2) 歷史回溯：
+`filings.recent`＋`filings.files[]`archive分頁可回溯到申報人最早的EDGAR記錄
+（`sec_edgar_client.py`docstring已載明AAPL回溯至1994），不是只有即時快照。
+**這兩點差異就是US軌在這條假說上比TW軌更有機會的具體原因，不是空泛樂觀。**
+依協定「先寫規格，不先跑數字」，本輪只寫規格＋驗證欄位可行性，不跑任何
+回測或批次抓取。
+
+**經濟機制**：8-K Item 2.02（Results of Operations and Financial
+Condition，即財報/財測公布）對應的是文獻已大量記載的
+Post-Earnings-Announcement Drift（PEAD，Bernard & Thomas 1989 起）——市場
+對盈餘意外的反應是漸進而非瞬時完成，公告後數日至數週仍有同向漂移，
+機制解釋是投資人對公開資訊的**低估反應（underreaction）**，不是空泛的
+「市場有時候無效率」。其他item code家族（5.02人事異動、1.01/1.02重大合約、
+3.01下市通知）各自有不同機制假設，但**本規格第一階段只測 Item 2.02**——
+單一、文獻基礎最強的家族，其餘留待第一階段結果出來後再決定是否擴充
+（避免一次跨太多假說稀釋多重比較）。
+
+**資料來源與新增地基程式碼**：`sec_edgar_client.py`新增`get_8k_events(cik,
+full_history=False)`（本輪新增，純新增函式、不改動任何既有函式，10-K/10-Q
+既有呼叫端零影響），回傳每筆8-K的`accessionNumber`/`filingDate`/
+`reportDate`/`acceptanceDateTime`/`items`（原始逗號分隔字串，未拆分）。
+本輪用AAPL既有快取（零新增API呼叫）驗證：`filings.recent`103筆8-K，
+`items`欄位確實含`"2.02,9.01"`這類逗號分隔item code，`acceptanceDateTime`
+精確到秒（如`2026-04-20T21:29:51.000Z`）。**另外驗證了一個PIT细節**：
+`reportDate`（事件實際發生日）與`filingDate`（申報日）可以不同——AAPL一筆
+5.02（人事異動）filing的`reportDate=2026-04-17`但`filingDate=2026-04-20`，
+差3天——**確認PIT正確錨點必須是`acceptanceDateTime`，不是`reportDate`
+（那是事件日不是公開可得日）也不是單獨的`filingDate`（只有日期無時刻，
+無法判斷市場收盤前後）**。
+
+**PIT與交易日對齊規則（事前綁定，第一階段回測前不得回頭改）**：
+1. 把`acceptanceDateTime`（UTC）轉換成美東時間（ET，需處理EDT/EST夏令時
+   切換——2026-04-20T21:29:51Z在EDT期間即UTC-4，等於17:29:51 ET）。
+2. 若轉換後時刻 < 16:00 ET 且當天是交易日 → 「反應日」= 申報當天
+   （市場收盤前已公開，當天收盤價已可能反映）。
+3. 若轉換後時刻 ≥ 16:00 ET，或申報日非交易日 → 「反應日」= 下一個交易日。
+4. 交易日曆沿用`us_factors.py`既有慣例（AAPL的`date`欄位當日曆代理，
+   docstring已載明這是既有慣例、非本規格新發明）。
+
+**事件視窗與指標（第一階段，Item 2.02 only）**：
+- 觸發報酬 r0 = 反應日的日報酬（衡量市場當下反應強度/方向）。
+- 漂移報酬 r_drift = 反應日+1 至反應日+5（一週）累積報酬。
+- 假說方向：r0與r_drift同號（continuation/drift），而非反向（reversal）——
+  這是PEAD文獻的方向性預期，事前寫死，不得看到數字後才決定測哪個方向。
+- **暫不做大盤/產業別調整**（US軌尚無市場報酬序列可用，`us_factors.py`
+  docstring已載明這個既有缺口），第一階段用原始報酬，這是已知限制不是
+  疏忽，第一階段結果若進入深挖（1b）才需要補上市場調整。
+
+**便宜關卡設計（下一輪或未來某輪執行，本輪不跑）**：
+1. 樣本：沿用US軌既有分層樣本（如`us_factor_ic_by_size.py`已用過的
+   large/mid tier ticker清單，避免重新抽樣introduce新的樣本選擇問題）。
+2. 對每檔取CIK→`get_8k_events(full_history=True)`→篩`items`含`"2.02"`者
+   （多item filing如`"2.02,9.01"`視為屬於2.02家族，事前綁定的分類規則：
+   只要item清單包含2.02就算，不要求2.02是唯一item——理由是9.01通常是
+   財報附件本身，2.02+9.01是最常見的財報公布組合，排除它會排掉大部分
+   真正的財報事件）。
+3. 對每個事件算r0/r_drift（用`us_price_series()`既有價格載入，需計算
+   反應日在該檔股票交易日曆上的索引，非交易日/資料缺口的事件要跳過並
+   記錄跳過原因，不得靜默丟棄）。
+4. 控制組：同一批股票、同樣事件數量，但事件日改成該股票歷史上**隨機**
+   非8-K-事件的交易日（配對式，同`control_group_standard.py`精神），
+   比較r0與r_drift方向一致的比例（事件組 vs 控制組），依「控制組通過
+   標準升級」規則走`evaluate_vs_control()`，不自己另立門檻。
+5. **技術性提醒（可能跑超過5分鐘）**：`full_history=True`每檔CIK需要
+   分頁抓archive files（未快取的部分才會真的打API），90檔樣本估計是
+   一批新的HTTP請求量，執行前要先評估是否需要`run_detached.py submit`
+   投遞，不要在session裡硬等。
+
+**尚未查證/留白（誠實記錄，非本輪範圍）**：
+- 多item filing的「主要item」判斷規則（本規格用「含2.02即算」簡化，
+  未驗證SEC是否保證item清單有順序性代表觸發原因的主次）。
+- Item 2.02本身是否已被市場高度套利（PEAD是否在近年美股已顯著衰減，
+  文獻上有分歧），本規格不預設結論，交給便宜關卡的隨機對照組數字判斷。
+- 交易成本/滑價（第一階段cheap gate暫不需要，1b深挖才需要）。
+
+**下一輪US軌接手建議**：執行上述便宜關卡設計步驟1-4（Item 2.02唯一
+家族），樣本先用小規模（例如既有large tier前20-30檔，避免第一次跑就
+衝滿API額度），若正訊號（r0/r_drift同號比例顯著贏過控制組）才擴大樣本
+到full tier並考慮`run_detached.py`投遞。若FAIL，誠實記錄並評估是否要
+測其他item family（5.02/1.01等）或判定#52-US整體無edge。
+
 ### #49 隔夜 vs 日內拆解
 照既有設計繼續，不受轉向影響。
 
