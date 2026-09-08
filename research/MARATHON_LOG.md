@@ -1,5 +1,34 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T01:20+0800 hypothesis_queue排程接續 — 查核#52(TW)進度，
+發現AlphaMarathon TW軌round465已搶先做完gate1股票代號過濾+CAR檢定腳本
+並投遞正式job，本輪未重工只查核，因預算即將用盡提前收工。開工先讀協定+
+`CLAUDE.md`+`git pull`確認乾淨（僅`.live_watchlist.json`/
+`dev_queue_cycle.log`/`external_connectivity.jsonl`三個常駐服務殘留
+變更，不動、不納入本輪commit）。原預計依上則心跳「下一輪從#52第1關
+cheap gate正式CAR檢定開始」，但檢查`research/`發現`material_news_car_
+gate.py`已存在且已commit（`git log`顯示commit`ca08ddd`「馬拉松round465
+(TW)：#52事件反應速度gate1正式開始」，晚於本track上一則心跳的commit
+`8a7e6a3`）——AlphaMarathon TW軌已解決limit(2)股票代號過濾問題
+（`universe.py`過濾649,417→623,496筆事件、2,900→2,400檔）並實作gate1
+CAR事件研究，smoke test後投遞正式N=200全量job`20260909-011334-1783`
+（40分鐘timeout），詳見`HYPOTHESIS_QUEUE.md` #52條目(u)段落。**本輪
+未重複這份工作（會浪費預算且與TW軌重疊）**，改為查核job狀態，但
+`run_detached.py status`指令語法嘗試（`--job-id`/`--name`皆報
+unrecognized arguments）本輪未查出正確語法即遇預算即將用盡，未能確認
+job是否已`finished`。`is_holdout_consumed()`開工/收工前皆確認`False`，
+本輪零新增外部API呼叫（僅git/檔案查核+一次失敗的CLI語法嘗試）。**本輪
+工作到此為止（一輪一個有界工作單位，本輪因預算考量提前收工，未執行
+新的研究工作，僅查核+記錄）**，下一輪待辦：(1)查`python research/
+run_detached.py --help`確認`status`子指令正確語法（本輪兩次嘗試皆
+失敗，尚未找到正確用法）；(2)若job`20260909-011334-1783`已`finished`，
+讀`data/material_news_car_gate_result.json`取得正式N=200判定，PASS的
+類別先呼叫`register_trial()`登記才能寫進`TW_LEADS.md`，且要交叉檢查
+`control_percentile`是否仍然極端（>99）；(3)同步重新查證#50（`資料一`
+逐筆tick落地，本輪未查，狀態沿用前次2/20交易日）；(4)注意#52條目(u)
+段落已提醒「效果量級偏大暫不採信」——N=50時多類別PASS，改N=200後多數
+轉FAIL，判定必須以N=200正式結果為準，不得引用中規模數字。
+
 ## 2026-09-09T00:58+0800 hypothesis_queue排程接續 — #52(TW)背景回補job已
 完成99.9%（2607/2609），新增分類器+彙總統計，確認樣本量足夠支撐gate1
 開工先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`.live_watchlist.json`/
