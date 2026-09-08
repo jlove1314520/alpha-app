@@ -217,17 +217,64 @@ class Audit:
         })
 
 
-def check_a_price_sources(a, universe, ref, names, loc):
+def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
     """(a) 所有頁面的「現價」必須來自同一個真值。
 
     App 的規則是 live → quotes_tw → price_history 最後收盤。這裡把每一個會被讀到的
     檔案都跟官方收盤比一次，差超過 5% 就是違規——只要有一個檔案偏掉，某個頁面就會
     顯示跟其他頁面不一樣的價格。昇貿 6808 就是這樣被抓出來的（我們的檔案 66.8，
     官方 32.0，那份快照停在 2024-12-31 沒有更新）。
+
+    **2026-09-09 修正時間錯位（這道閘門自己在放狼來了）**：
+    原本拿「我們檔案裡的最後一筆」比「官方參考日的收盤」，但兩者常常不同天。
+    實測 2026-09-09：官方參考日是 09-07、我們的資料是 09-08，
+    於是 387 筆違規裡有 **381 筆只是隔日的正常漲跌**，違規率被灌到 8.33%，
+    冒煙 check 39 直接掛掉。
+
+    **只能拿同一天的價格比同一天的官方收盤。**
+    對得上日期就比，對不上就標「無法查核」——不是違規。
+    一個會對正常漲跌開火的閘門，比沒有閘門更糟：它會被學會忽略，
+    真的出事（像 6442 那次）時就沒有人看了。
     """
+    def _ref_day(c):
+        """**每檔用自己的參考日**，不用全域一個。
+
+        2026-09-09 實測發現的根因：官方參考真值**混了兩個日期**——
+        TWSE 的 STOCK_DAY_ALL 回 2026-09-07（1,232 檔）、
+        TPEx 的 mainboard_quotes 回 2026-09-08（881 檔）。
+        原本 `ref_date` 只取字典第一筆，全域當成 09-07，
+        於是所有上櫃股都拿我們 09-07 的價格去比官方 09-08 的收盤，
+        差的就是一天的漲跌——337 筆「違規」多數是這樣來的。
+        """
+        v = ref.get(c) or {}
+        return _roc_to_iso(v.get("date")) or (str(v.get("date") or "")[:10] or None)
+
     def from_hist(c):
         h = loc["price_hist"].get(c)
-        return h[-1].get("close") if h else None
+        if not h:
+            return None
+        day = _ref_day(c)
+        if day:
+            for row in reversed(h):
+                if str(row.get("date") or "")[:10] == day:
+                    return row.get("close")
+            return None          # 我們沒有那天的資料 → 無法查核，不是違規
+        return h[-1].get("close")
+
+    def _same_day(c):
+        """快照類檔案（沒有逐日結構）能不能跟這一檔的參考日對得起來。
+
+        用 price_history 的最後一天判斷：比參考日新，代表快照也已經前進到
+        下一個交易日，拿去比只會比出一天的漲跌。
+        """
+        day = _ref_day(c)
+        if not day:
+            return True
+        h = loc["price_hist"].get(c)
+        if not h:
+            return True
+        last = str((h[-1] or {}).get("date") or "")[:10]
+        return (not last) or last <= day
 
     files = {
         "quotes_all_tw.json": lambda c: (loc["quotes_all"].get(c) or {}).get("close"),
@@ -237,7 +284,13 @@ def check_a_price_sources(a, universe, ref, names, loc):
     }
     for code in universe:
         official = ref[code]["close"]
+        snapshot_ok = _same_day(code)
         for fname, getter in files.items():
+            # 快照類檔案（沒有逐日結構）在我們的資料已經跑到參考日之後時
+            # 無從比對——標無法查核，不算違規
+            if fname != "price_history.json" and not snapshot_ok:
+                a.note("a_price_source", unverifiable=1)
+                continue
             try:
                 ours = num(getter(code))
             except Exception:
@@ -651,7 +704,7 @@ def main():
             boards |= {r.get("code") for r in data.get("stocks", []) if r.get("code")}
 
     a = Audit()
-    check_a_price_sources(a, universe, ref, names, loc)
+    check_a_price_sources(a, universe, ref, names, loc, ref_date)
     check_a2_not_in_official(a, ref, names, loc, listed)
     check_a3_stale_price(a, ref, names, loc, boards, ref_date)
     check_b_entry_plan(a, universe, ref, names, loc)

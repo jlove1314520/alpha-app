@@ -6435,6 +6435,37 @@ case，訊號跟控制組max差距不小），初步方向與市場效率一致�
 `REPORT.md`第467輪心跳、`material_news_car_gate2_continuation.py`
 （新增，可重複執行）。
 
+**(x) gate2正式N=200全量結果已收成，#52-TW正式結案：FAIL（2026-09-09
+hypothesis_queue排程接續，查核TW軌投遞的job`20260909-030107-0bce`，
+非重跑；`run_detached.py status --json`顯示`expect_exists=false`為
+路徑相對/絕對不一致的誤報，實際`data/material_news_car_gate2_
+continuation_result.json`確實存在且job log印出「已存完整結果」，本輪
+已核實真實內容非空檔）**：4類全數FAIL，與round467的N=25 smoke test
+方向完全一致，不是小樣本雜訊：併購signal=0.0052<control_max=
+0.0112(percentile=94.5)、增減資signal=0.0000<control_max=0.0036
+(percentile=35.0)、財務signal=0.0020<control_max=0.0022(percentile=
+98.5)、人事signal=0.0018<control_max=0.0030(percentile=97.75)。四類
+VAL期訊號皆未嚴格大於全部400次控制組抽樣最大值，依`control_group_
+standard.py`2026-09-07升級標準（贏過平均或落在高百分位都不算通過），
+四項判準全數未過。已登記`TRIALS_LEDGER.md`#223（`trial_registry.py
+--check`確認PASS，exit=0，225列）、寫入`STRATEGY_GRAVEYARD.md`新增
+段落。**#52事件反應速度（台股版）正式結案：異常反應存在但不可交易
+（已price-in、無延續）**——gate1（#221）已扎實證明4類重大訊息公告
+確實觸發顯著大於隨機的異常反應幅度，但gate2證實反應後H=5交易日內沒有
+可預測的同向延續，賺不到這個訊號。不泛化成「重大訊息公告完全無效」
+——只測了H=5單一窗口的方向性延續假設，未測其他horizon（H=1/3/10）或
+反轉假設（over-reaction後是否存在反轉而非延續，經濟理由與延續假設
+相反，屬另一條獨立假設，未來若重探此方向應優先測反轉）。⑪事件反應
+速度大類（台股子測試）0勝1敗，美股版`#52-US`為獨立子條目分開判定
+（見下方章節）。`is_holdout_consumed()`開工/收工前皆確認`False`，
+本輪全程零新增外部API呼叫（僅查核job狀態+讀既有輸出檔+核實檔案
+真實內容）。**佇列#1~52（TW版本）至此全數結案，剩#50仍卡`資料一`
+逐筆tick落地（本輪重新查證：`research/data/ticks/`僅2/20交易日，
+2026-09-09當日尚未收盤入帳，距門檻仍遠），未解鎖。`#52-US`美股版
+獨立進度見下方章節（尚未結案）。依協定第1節，`#50`未解鎖前若
+`#52-US`也結案，下一輪需設計新假設軸`#62`，本輪因預算考量不在此輪
+內硬做，誠實留給下一輪。**
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
