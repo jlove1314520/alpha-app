@@ -2826,6 +2826,21 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 2026-08-27 新增（P1-1）：統一的頁面頂端診斷橫幅，取代「六個面板各喊一次連線
   // 失敗」——集中檢查各個資料檔案的新鮮度，一次列出哪些過期/缺失、原因分類、
   // 下次排程時間。個別面板本身維持簡潔的空狀態（不重複顯示落落長的錯誤訊息）。
+  // 2026-09-08（排程一.3）台股來源是否「還沒發布」而非「我們抓不到」。
+  // 判準：現在是交易日、已收盤、但還在證交所的發布空窗內。
+  // 空窗上界先取收盤後 4 小時（13:30→17:30）——這是**保守的暫定值**，
+  // `scripts/probe_twse_publish_time.py` 正在連續三個交易日實測真正的發布時刻，
+  // 量到之後改成實測值並同步調整 market.yml 的排程時間。
+  // 在量到之前**寧可說「尚未發布」也不要說「過舊」**：
+  // 前者最壞是晚一點才顯示正確狀態，後者是每天誣賴自己故障。
+  function isTwSourceNotYetPublished(){
+    try{
+      const z=_zonedParts(new Date(),'Asia/Taipei');
+      if(z.wd<1||z.wd>5)return false;                 // 假日本來就沒有
+      const mins=z.h*60+z.mi;
+      return mins>=13*60+30&&mins<17*60+30;           // 收盤後 4 小時內
+    }catch(e){console.warn('[isTwSourceNotYetPublished]',e);return false}
+  }
   // 2026-09-04（四修.四）：自選股報價「資料過舊」的判定抽成純函式，並納入即時源——
   // 台股只要Shioaji即時源新鮮（SSE連線中的記憶體推送、或20分鐘內的熱檔/冷檔），就不算過舊，
   // 即使Actions的quotes_tw.json沒落地；美股同理看IBKR源。這樣「資料過舊」跟「即時連線中」
@@ -2860,7 +2875,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const twFresh=isFreshForCalendar(
       MARKET_TW_CACHE&&MARKET_TW_CACHE.fetched_at?new Date(MARKET_TW_CACHE.fetched_at).getTime():null,
       'Asia/Taipei',TW_HOLIDAYS_2026,13,30,4*60);
-    if(twMAge==null||!twFresh)problems.push({name:'大盤指數/類股/三大法人',reason:twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）',schedule:'台股收盤後 14:10'});
+    // 2026-09-08（排程一.3）**「來源尚未發布」與「我們抓不到」是兩件事。**
+    // 實測 2026-09-08 15:05 打 TWSE T86 與 MI_MARGN 都回
+    // `stat='很抱歉，沒有符合條件的資料'`、total=0——**證交所根本還沒發布**，
+    // 而我們的排程訂在 14:10，永遠早於發布時間。
+    // 舊文案一律講「資料過舊」，等於把「證交所還沒發布」講成我方故障，
+    // 使用者看到的是「這個 App 壞了」。**已發布卻抓不到才叫過舊。**
+    const twSrcNotYet=isTwSourceNotYetPublished();
+    if(twMAge==null||!twFresh)problems.push({
+      name:'大盤指數/類股/三大法人',
+      reason:twSrcNotYet
+        ?'證交所今日資料尚未發布（實測收盤後 95 分鐘仍未提供，發布時間量測中）'
+        :(twMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）'),
+      schedule:twSrcNotYet?'待證交所發布後自動抓取':'台股收盤後 14:10'});
     const usMAge=marketDataAgeMin(MARKET_US_CACHE);
     // 美股 16:00 ET 收盤，同樣給 4 小時寬限
     const usFresh=isFreshForCalendar(
@@ -5931,7 +5958,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.1503';
+  const APP_VERSION='2026-09-08.1510';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
