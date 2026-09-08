@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T05:22+0800 hypothesis_queue排程接續 — #62回補批次已完成，投遞下一批（800天）並確認正常啟動，本輪收工不等待
+開工讀`CLAUDE.md`+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他常駐行程
+殘留，不動、不納入commit）。取鎖`marathon_lock.py acquire --name hypothesis_queue`：
+**`LOCK_ACQUIRED`（乾淨取得，非陳舊回收）**。查`HYPOTHESIS_QUEUE.md`「排隊順序總結」
+確認佇列#1~61全數結案，唯一未結案為#62（鉅額逐筆交易Block Trade跟隨訊號），現況
+沿用上一輪（04:53）判定，跳過重複讀取全文。
+
+查`run_detached.py status --last 10`：上一輪（04:53）觀察到仍在跑的job
+`20260909-043537-6457`（`block_trade_backfill_62tw`，`--batch-size 700`）本輪確認
+已`finished`/`exit=0`（38.7分鐘），非仍在跑，**上一輪判定「不重跑」的前提已不成立，
+本輪應接續投遞下一批**。查`data/raw_twse_block_trade/`累積800個parquet
+（2015-01-01~2018-01-24，全範圍2,609個工作日的30.7%），仍全部落在TRAIN期
+（TRAIN_END=2020-12-31），VAL期完全未覆蓋，不足以重跑`block_trade_gate62.py`
+做正式判定。heavy-job-slot確認空閒（`running=0`），投遞下一批
+`run_detached.py submit --name block_trade_backfill_62tw --timeout-min 60 --
+python -u research/backfill_block_trade.py --batch-size 800`（job
+`20260909-052241-9b09`，指令帶`research/`前綴、於`alpha-app`根目錄執行），
+sleep 20秒後確認`running`且`watchdog_alive=True`，非立即失敗，正常啟動中。
+`is_holdout_consumed()`開工/收工前皆確認`False`。本輪未跑任何訊號數字，不涉及
+`register_trial()`，已同步更新`HYPOTHESIS_QUEUE.md`#62條目「(f)回補接續」段落。
+**下一輪待辦**：查job`20260909-052241-9b09`是否`finished`，`data/raw_twse_block_trade/`
+累積天數若已跨過2020-12-31進入VAL期，重跑`block_trade_gate62.py`看初步方向；
+仍未到則再投遞下一批（預估還需1~2批才能到VAL_END），比照多輪接續慣例不強求
+一次做完。本輪工作到此為止。
+
 ## 2026-09-09T04:53+0800 hypothesis_queue排程接續 — 確認#62回補由TW軌背景job
 在跑，本輪不重複發送，僅記錄現況並收工
 開工讀協定+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/

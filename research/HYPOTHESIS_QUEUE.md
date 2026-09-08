@@ -8171,3 +8171,21 @@ job進度，累積天數涵蓋到VAL期後重跑`block_trade_gate62.py`看初步
 `backfill_day_trading_ratio.py`/`backfill_block_trade.py`(d)段落的
 「多輪接續不強求一次做完」先例。`is_holdout_consumed()`開工/收工前皆
 確認`False`。
+
+**(f) 回補接續（2026-09-09T05:22+08:00 hypothesis_queue排程接續）**：
+查核前一批job`20260909-043537-6457`（TW軌第472輪投遞）已`finished`/
+`exit=0`，`data/raw_twse_block_trade/`累積800個parquet
+（2015-01-01~2018-01-24，全範圍2,609個工作日的30.7%），仍全部落在
+TRAIN期（TRAIN_END=2020-12-31），VAL期完全未覆蓋，不足以重跑
+`block_trade_gate62.py`做正式判定，本輪純延續回補。heavy-job-slot
+確認空閒（`run_detached.py status`：running=0），投遞下一批`run_detached.py
+submit --name block_trade_backfill_62tw --timeout-min 60 --
+python -u research/backfill_block_trade.py --batch-size 800`
+（job`20260909-052241-9b09`，指令帶`research/`前綴、於`alpha-app`根目錄
+執行，依round459/468踩過的相對路徑陷阱），確認`watchdog_alive=True`
+正常在跑後本輪收工，不等待完成（比照#51-US round464/466同款「submit
+後不佔用session等待、下一輪查進度」模式）。**下一輪待辦沿用上方**：
+查此job是否`finished`，累積天數若已跨過2020-12-31進入VAL期，重跑
+`block_trade_gate62.py`看初步方向；仍未到則再投遞下一批，預估還需
+1~2批才能到VAL_END。本輪未跑任何訊號數字，不涉及`register_trial()`。
+`is_holdout_consumed()`開工/收工前皆確認`False`。
