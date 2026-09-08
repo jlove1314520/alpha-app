@@ -6402,18 +6402,33 @@ Cowork 的指示是「#56 必須明確區別於已 FAIL 的 #26，**若無法區
   `--timeout-min 30`接續投遞下一批`20260908-112207-fdef`（同一命令
   `backfill_day_trading_detail.py --batch-size 250`，detached背景
   執行、本輪不等待完成，剩餘僅148天，預估這批應能跑完）。
-- **狀態**：**資料源已確認可得，回填進行中（94.3%），尚未開跑
-  GATE_SEQUENCE第1關**。下一輪hypothesis_queue接手：先用
-  `run_detached.py status --last 5`/`log 20260908-112207-fdef`收成本輪
-  投遞的批次，若已跑完2,609天即可直接進入`#57`第1關sanity（比照
-  `#53`/`#54`/`#55`同一套`cross_sectional_*_gate5X.py`框架）；若仍未
-  跑完就再投遞下一批（`--batch-size 250`會自動跳過已快取日期，提交時
-  務必用`--cwd`指到`research/`絕對路徑，避免重蹈48ca的覆轍）。
+- **狀態（2026-09-08 馬拉松第441輪：回填100%完成，第1關sanity三項PASS）**：
+  `run_detached.py status`/`wait`收成最後一批`20260908-112207-fdef`
+  （`exit_code=0`，148天全數處理完），核對`data/raw_twse_day_trading_detail/`
+  實際檔案數確認**2,609/2,609＝100.0%，回填正式完成**。新增
+  `day_trading_ratio_dispersion_gate57.py`：分子`dt_value=day_trade_
+  sell_value+margin_offset_value`（沿用`#37`docstring既有「當沖賣出+
+  資券互抵」合併慣例），分母沿用`turnover_concentration_gate54.py::
+  _load_money_long()`同一批`Trading_money`快取（與#54同一分母），4碼
+  普通股過濾比照#55。抽樣核對2024-01-02 2330：dt_ratio=2.32%，量級合理。
+  **三項sanity皆PASS**：sanity1非退化（disp_std=0.0113、vel_std=0.197、
+  有效vel天數2,411）；sanity2危機窗口3個中2個（2020Q1、2022全年）
+  vel_pctile高於無條件基準；sanity3條件式前瞻20日TAIEX報酬，
+  level_pctile與vel_pctile兩版方向皆正確（高tertile報酬<低tertile報酬）。
+  與#53/#54/#55相關係數檢查：|corr_level|/|corr_vel|全數<0.7（最高0.226），
+  **確認非同家族，是獨立發現**。`data/day_trading_ratio_dispersion_
+  gate57.csv`已產生（2,431個有效交易日）。**這是sanity，非最終PASS/FAIL
+  判定**，比照#53/#54/#55先例暫不登記`trial_registry`，待第2關控制組出
+  結果才登記。下一輪TW軌接手：進第2關隨機控制組——比照
+  `cross_sectional_dispersion_gate53_control.py`同一套框架（3變體
+  circular_shift/block_shuffle_5/block_shuffle_20各N=100，曝險函數
+  `exposure_t=clip(1-pctile_{t-1},0,1)`固定映射，TRAIN/VAL分開判定），
+  新增`day_trading_ratio_dispersion_gate57_control.py`。
 
 ### 五條的執行順序（依資料就緒度，不依「哪條看起來最有希望」）
 
 1. ~~**#53**~~——**2026-09-08已結案：FAIL**（GATE_SEQUENCE第2關隨機控制組未過，見上方#53條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#194），移出此順序清單第一位。
 2. ~~**#54**~~——**2026-09-08已結案：FAIL**（第1關sanity危機窗口與前瞻報酬方向皆與事前綁定方向相反，見上方#54條目與`TRIALS_LEDGER.md`#195；與#53相關係數+0.05~+0.06，確認非同家族），移出此順序清單。
 3. ~~**#55**~~——**2026-09-08 hypothesis_queue排程接續已結案：FAIL**（第1關sanity，tertile前瞻報酬方向level/vel兩版皆與事前綁定方向相反，見上方#55條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#198；與#53/#54相關係數皆<0.7，確認非同家族），移出此順序清單。**#53/#54/#55三條全數結案，現在排隊第一是#57**。
-4. **#57**（逐檔當沖資料源已查證可得，回填進行中，2026-09-08已累積84.7%）——現在排隊第一，資料回填完成後才進第1關sanity。
+4. **#57**（逐檔當沖比重截面離散度速度）——**2026-09-08 round441：回填100%完成，第1關sanity三項皆PASS**（見上方#57條目），現在排隊第一，下一輪進第2關隨機控制組。
 5. ~~#56~~（撤案）
