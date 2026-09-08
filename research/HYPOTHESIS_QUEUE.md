@@ -7924,3 +7924,69 @@ real mean=-0.90%（方向正確），同樣**未過**（訊號0.0090未超過控
 結果下判定。`is_holdout_consumed()`開工/收工前皆確認`False`。本輪
 **未登記`TRIALS_LEDGER.md`**（協定第3節：僅完成PASS/FAIL/CHEAP_PASS/
 EXPERIMENTAL判定才登記，本輪是中途因外部額度限制中止，非判定）。
+
+**2026-09-09T02:30+0800 馬拉松第468輪（US軌）**——依round466交辦，`run_detached.py
+status`確認job`20260909-013149-9992`（全範圍backfill，74頁）已`finished`（exit=0，
+35.7分鐘，累積76個列表頁、645篇符合關鍵字文章），heavy-job-slot空出。**本輪工作
+單位＝進入`#51-US`第1關cheap gate**。
+
+**事前綁定（寫在`sp500_addition_runup_gate51us.py`模組docstring，跑出數字前定案）**：
+(1) 只測Addition不測Deletion——Deletion常見成因是被收購/破產下市，會踩到`CLAUDE.md`
+「下市股資料取得不等於正確」的yfinance低覆蓋污染雷，Addition公司必然仍活躍可交易，
+不受此雷影響，這是唯一的篩選理由。(2) 事件窗口＝公告日（`article_date_raw`）→生效日
+（`effective_date_raw`），CAR=close[生效日]/close[公告日]-1，事前方向假設為正（被動基金
+搶跑買進）。(3) **價格源改用`yf_price_client.fetch_yf_index()`**（yfinance，代碼原樣
+使用不加後綴），**不用`us_factors.us_price_series()`**——後者走FinMind `USStockPrice`，
+違反`CLAUDE.md`2026-09-08「禁止用台灣資料商作為美股宇宙或價格的主來源」裁示；本輪是
+發現既有`us_8k_pead_gate52.py`系列/`us_factor_ic_by_size.py`系列US軌試驗仍在用
+FinMind USStockPrice後，主動在新試驗改正，該既有試驗是否需要重工留給後續驗證帽/
+總司令判斷，本輪不擅自重跑。(4) 控制組沿用2026-09-07升級標準：`own_ticker_window`
+（同一檔股票自己歷史裡隨機抽等長度窗口）與`cross_ticker_window`（同一批Addition
+ticker池中隨機換一檔抽等長度窗口，排除「這批入選股票同期本來就在噴出」的偽陽性）
+兩個獨立變體，各N=200，通過門檻＝訊號嚴格大於全部400次抽樣最大值。(5) TRAIN/VAL依
+`validation.holdout`（TRAIN_END=2020-12-31/VAL_END=2024-12-31），判定看VAL。
+
+**smoke test**：`--max-events 12 --n-draws 5`與`--max-events 150 --n-draws 25`兩組
+驗證管線端到端正常（含skip原因統計、control_group_standard介面呼叫皆正確）。
+
+**正式全量job**：`run_detached.py submit --name sp500_addition_runup_gate51us
+--timeout-min 25`，job`20260909-023739-d4cd`，session內`wait --max-min 4`內即
+`finished`（實際遠快於25分鐘上限，因為只需下載約320檔ticker的yfinance歷史，非
+MOPS/SEC EDGAR這種有嚴格節流的來源）。
+
+**結果**：390筆Addition事件表中222筆可用（47無價格歷史/116超出價格涵蓋範圍/5生效日
+不晚於公告日）。TRAIN（2012-2020,n=25）mean_CAR=+11.59%嚴格大於控制組最大值5.36%
+（percentile 100.0，CHEAP_PASS，但n=25過小不足採信）；**VAL（2021-2024,n=197）
+mean_CAR=+1.56%，控制組百分位97.8，非常接近但未嚴格大於控制組最大值2.38%，
+判定FAIL**。方向與index-effect文獻（Harris & Gurel 1986等）完全一致，是模組docstring
+事前寫明「近二十年因套利搶跑而明顯減弱」已知風險下的誠實邊緣FAIL，不是管線問題。
+
+已登記`TRIALS_LEDGER.md` #222、`US_LEADS.md` #32、`STRATEGY_GRAVEYARD.md`新增段落、
+`data/signal_status.json`（`#51`整體結案，新增`51-us`子事件節點）。`trial_registry.py
+--check`確認PASS（exit=0，224列）。`is_holdout_consumed()`開工/收工前皆確認`False`。
+全程零FinMind/SEC EDGAR歷史API呼叫（僅yfinance每檔一次OHLCV下載，約320次請求）。
+
+**#51整體結案為FAIL**（台股三子事件2026-09-07已結案+美股Addition子測試本輪結案，
+美股Deletion子測試因下市股價格污染雷事前排除未測）。**下一輪US軌接手**：
+`MARATHON_PROTOCOL.md`0a節四條方向中，#49已結案FAIL、#50卡在前置tick依賴、
+#51本輪結案FAIL、#52台股IN_PROGRESS（gate2延續檢定）美股已結案FAIL——US軌
+四條新方向自身能做的部分已無剩餘工作單位，下一輪建議：(a)查核#52-TW gate2
+job進度（若heavy-job-slot空出可協助收成，雖屬TW軌工作但避免浪費輪次）、
+或(b)依`MARATHON_PROTOCOL.md`0a節誠實判斷點，盤點四條方向是否已全部結案
+到可以寫「無可驗證預測優勢」正式結論的程度（目前#50仍NOT_STARTED卡在前置
+依賴、#52-TW仍IN_PROGRESS，尚未到達可以下整體結論的時點，不得提早下結論）。
+完整見`TW_MARATHON_STATE.md`/`US_MARATHON_STATE.md`第468輪記錄、`REPORT.md`
+第468輪心跳、`sp500_addition_runup_gate51us.py`（新增，可重複執行）。
+
+**收工前發現，記錄供下一輪參考**：本輪commit前`git status`發現一個未追蹤、
+從未commit的草稿`research/sp500_index_changes_gate51us.py`（開工簡報當下就已
+存在於工作目錄，非本輪建立），內容是另一版#51-US cheap gate設計（事件錨點＝
+`effective_date`本身、pre/post窗口設計、限定S&P市值加權四指數排除道瓊價格加權
+指數），**價格源仍是`us_factors.us_price_series()`（FinMind USStockPrice）**——
+與本輪一開始踩到、後來主動改正的同一個問題（違反`CLAUDE.md`2026-09-08美股原生
+資料源裁示）。研判是`hypothesis_queue`獨立排程的在製品（同`TW_MARATHON_STATE.md`
+round467觀察到的並行現象），**本輪未觸碰/未刪除該檔案**（不是我的工作、可能仍
+在被其他行程使用）。若後續該草稿被執行並產生#51-US的新判定，登記前務必先核對
+其價格源是否已改正，否則不應採信其結果作為#51-US的權威判定——本輪`#222`
+（`sp500_addition_runup_gate51us.py`）已用合規的yfinance價格源產出正式判定，
+應以此為準。

@@ -2185,6 +2185,18 @@ Pledge Ratio — FAIL（2026-09-06，第1關cheap gate未過）
 - **原始記錄**：`TRIALS_LEDGER.md`#190、`HYPOTHESIS_QUEUE.md` #51條目(i)段落、`cb_conversion_price_reset_gate1.py`／`mops_cb_conversion_price_client.py`（新增，可重複執行）。回填30次MOPS查詢（2市場x15民國年），711檔股票，3078筆最終可用事件。
 
 
+## #51-US（美股版）：S&P指數Addition事件公告日→生效日CAR搶跑漲幅——2026-09-09結案：FAIL
+
+- **假設**：被動指數基金必須在生效日前追蹤買進新納入S&P成分股，公告日明顯早於生效日，事前綁定預期公告日→生效日CAR為正（搶跑買盤推升股價），文獻（Harris & Gurel 1986等index-effect）已大量研究但近二十年因套利搶跑明顯減弱甚至反轉。
+- **事前排除Deletion**：只測Addition，Deletion事件常見成因是被收購/破產下市，會踩到`CLAUDE.md`「下市股資料取得不等於正確」的yfinance低覆蓋污染雷，事前決定排除、非事後挑選。
+- **價格源修正**：本次改用`yf_price_client.fetch_yf_index()`（yfinance原生美股），不用`us_factors.us_price_series()`（FinMind `USStockPrice`）——後者違反`CLAUDE.md`2026-09-08「禁止用台灣資料商作為美股宇宙或價格的主來源」裁示。
+- **死因**：390筆Addition事件中222筆可用。TRAIN（2012-2020,n=25）mean_CAR=+11.59%嚴格大於控制組（own_ticker_window/cross_ticker_window兩變體，各N=200）最大值5.36%，CHEAP_PASS，但樣本量僅25筆過小不足採信。VAL（2021-2024,n=197）mean_CAR=+1.56%，控制組百分位97.8已非常接近門檻，但未達「嚴格大於控制組最大值2.38%」的2026-09-07升級標準，判定FAIL。
+- **不泛化聲明**：方向與index-effect文獻完全一致，是「近年套利搶跑減弱」已知風險下的誠實邊緣FAIL，不代表S&P指數效應在美股完全不存在，只是在嚴格控制組標準下、這個具體CAR窗口定義、這個樣本期間，不足以通過。
+- **附帶發現**：查證確認`us_8k_pead_gate52.py`/`us_8k_item502_gate52.py`/`us_8k_item101_gate52.py`（#29/#30/#31）與`us_factor_ic_by_size.py`系列既有US軌試驗，價格源皆走FinMind `USStockPrice`，與2026-09-08裁示牴觸（這些試驗結案早於裁示發布）。是否需要用yfinance重跑覆核，留給後續驗證帽輪次或總司令判斷，本輪未擅自重工。
+- **#51整體（台股三子事件＋美股Addition子測試）至此全數FAIL，正式結案**，移出排隊佇列；美股Deletion子測試因下市股價格污染雷未測，非跳關。
+- **原始記錄**：`TRIALS_LEDGER.md`#222、`HYPOTHESIS_QUEUE.md` #51-US條目、`US_LEADS.md` #32、`sp500_addition_runup_gate51us.py`／`sp500_index_changes_client.py`／`backfill_sp500_index_changes.py`（新增，可重複執行）。
+
+
 ## 【家族層級】橫斷面離散度速度（台股）——2026-09-08 建立，**2026-09-08 正式結案**
 
 > 2026-09-08 總司令裁示建立。這是**家族層級**條目，不是單一假設的死亡記錄；
