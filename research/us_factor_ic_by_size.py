@@ -54,9 +54,9 @@ from us_factors import US_FACTOR_COLUMNS, us_price_series
 from us_universe import universe as build_us_universe
 from validation import holdout
 
-TIER = "large"  # round 439 (2026-09-08): CALIBRATION_PROBE.md follow-up reruns #47 (large) and
-                # #52 (mid) at a larger sample size, same spirit as TW's factor_ic.SAMPLE_SIZE
-                # 100->300 bump (~3x) -- large: this round, mid: next US-track round
+TIER = "mid"  # round 446 (2026-09-08): #47 (large) done round444 (FAIL, TRIALS_LEDGER #203-205);
+              # this round does #52 (mid) at the same N=90 sample size, same spirit as TW's
+              # factor_ic.SAMPLE_SIZE 100->300 bump (~3x)
 SAMPLE_SIZE = 90
 SAMPLE_SEED = 20260826_3  # distinct from the round-95 large-cap run's seed (20260826_1) and the
                            # round-97 mid-cap run's seed (20260826_2) on purpose -- this is a
