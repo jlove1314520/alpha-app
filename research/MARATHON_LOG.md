@@ -1,5 +1,40 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T07:10+0800 hypothesis_queue排程接續 — 發現#62已被AlphaMarathon TW/US軌搶先結案，交叉驗證一致後修正排隊順序總結同步問題
+開工讀`CLAUDE.md`+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他常駐行程
+殘留，不動、不納入commit）。取鎖`marathon_lock.py acquire --name hypothesis_queue`：
+**`LOCK_ACQUIRED`（乾淨取得）**。查`HYPOTHESIS_QUEUE.md`「排隊順序總結」確認上一輪
+（06:04）留下的待辦：查上一輪投遞的回補job`20260909-060428-cae6`（batch-size 800）
+是否完成、資料涵蓋是否足夠VAL期範圍。有界輪詢（60秒/次，上限20次）等待中發現
+job仍在跑（27.8分鐘），但`data/raw_twse_block_trade/`已累積到2154個parquet
+（2015-01-01~2023-04-04），已遠超`TRAIN_END=2020-12-31`且VAL期涵蓋超過兩年，
+判定資料已足夠，改用**不設`--max-events`上限**重跑`block_trade_gate62.py
+--n-permutations 200`（依上一輪待辦指示），VAL期sell-initiated n_val=2477，
+N5/N10/N20百分位14.25/17.25/0.5，三值皆FAIL、方向與事前假設相反。**正要登記
+`register_trial()`時，`git status`發現`HYPOTHESIS_QUEUE.md`等檔案有其他行程的
+staged變更，`git log`確認AlphaMarathon TW軌（第475輪）與US軌（第476輪）已在
+本輪執行期間分別把`#62`台股版（`--n-permutations 200`不設`--max-events`，
+VAL期n_val=237，百分位0.8/7.8/0.8，`TRIALS_LEDGER.md`#224）與美股類比
+（三來源查證FINRA/SEC僅提供週彙總無逐筆方向資料，判「待採購」）都完整結案
+並push（commit`b4f969b5`/`535d8ad4`）。本輪自己的判定與其結論完全一致（三值
+皆FAIL、方向皆相反，僅資料量更大），**判定為重複試驗，不另外`register_trial()`**
+（同一假設同一gate非新試驗，`CLAUDE.md`鐵律「未經登記函式的判定一律無效」
+反向也適用——已有效登記過的不應重複灌水試驗計數）。查`HYPOTHESIS_QUEUE.md`
+「排隊順序總結」章節仍停留在「#49起未逐條同步」的舊狀態、未反映`#62`已結案，
+依協定第1節「條目本身已結案但總結區塊字樣沒同步更新」情況修正對齊，補一段
+交叉驗證記錄+下一輪待辦（設計#63或等待#50/#52解鎖）。本輪未新增
+`register_trial()`登記，`trial_registry.py --check`維持既有狀態非0需先確認。
+`is_holdout_consumed()`開工/收工前皆確認`False`。**下一輪待辦**：重新查證
+#50（tick累積，目前2/20）／#52前置依賴是否解鎖，若仍未解鎖則設計新假設軸
+#63，本輪因預算即將用盡未及設計，留給下一輪。**本輪教訓**：hypothesis_queue
+與AlphaMarathon TW/US軌雖用獨立具名鎖、理論上互不阻塞，但兩者操作同一份
+`HYPOTHESIS_QUEUE.md`／`block_trade_gate62.py`／同一批`block_trade_backfill_62tw`
+背景job，本輪確實發生「同一條假設被兩條軌道同時推進、其中一條後完成的
+判定變成重複工作」——非錯誤，只是效率浪費，記錄供未來參考（若要避免，
+需要在條目層級加一個「處理中」旗標讓另一軌看到就跳過，屬於流程優化提案，
+本輪不擅自實作，留待總司令裁示是否需要）。
+
 ## 2026-09-09T06:04+0800 hypothesis_queue排程接續 — #62回補首次跨入VAL期，smoke test仍n_val=0（抽樣限制非資料空白），投遞下一批並確認正常啟動
 開工讀`CLAUDE.md`+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
 `research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他常駐行程
