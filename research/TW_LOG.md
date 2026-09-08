@@ -2555,3 +2555,20 @@ log印出「已快取1500，待處理1109」，非再次立即失敗，處理中
 登記）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零FinMind/TWSE
 歷史資料API呼叫。完整見`HYPOTHESIS_QUEUE.md` #61條目、`TW_MARATHON_STATE.md`
 第455輪記錄、`REPORT.md`第455輪心跳。
+
+
+---
+
+## 第465輪 2026-09-09T01:00+08:00
+
+#52事件反應速度第1關cheap gate正式開始。解決已知限制(2)：`material_news_aggregate.py`
+新增`universe.py`官方宇宙過濾（649,417→623,496筆，保留96.0%，2,900→2,400檔代號）。
+新增`material_news_car_gate.py`（PIT依announce_time判斷盤後公告順延reaction_day、
+CAR窗口=[reaction_day,+1交易日]、control_group_standard.py 2026-09-07升級標準判定）。
+smoke test 4組通過，中規模N=50前景驗證8類中6類PASS但效果量級偏大暫不採信；已投遞
+正式N=200全量job`20260909-011334-1783`（`--timeout-min 40`），session內觀察到
+停復牌/訴訟兩類隨N增加轉為FAIL，證實小N易虛胖PASS，跟2026-09-07控制組標準
+升級的初衷一致。`trial_registry.py --check`確認PASS（exit=0，222列，本輪無新
+判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
+完整見`HYPOTHESIS_QUEUE.md` #52條目(u)段落、`TW_MARATHON_STATE.md`第465輪記錄、
+`REPORT.md`第465輪心跳。

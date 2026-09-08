@@ -6323,6 +6323,46 @@ TRAIN_END(2020-12-31)/VAL_END(2024-12-31)切分，輸出各類別TRAIN/VAL
 工作到此為止（一輪一個有界工作單位）**，下一輪從#52第1關cheap gate
 正式CAR檢定開始（先處理上述限制(2)的股票代號過濾），不跳關搶跑。
 
+**(u) 已解決限制(2)股票代號過濾+新增gate1腳本並投遞正式N=200全量job
+（2026-09-09馬拉松TW軌round465）**。`material_news_aggregate.py`新增
+`universe.py`官方存活者偏差處理宇宙清單過濾（649,417→623,496筆，保留
+96.0%，2,900→2,400檔代號，被排除的500檔多為陸股/興櫃/債券等MOPS特殊
+編碼，非普通股上市櫃代號）。新增`material_news_car_gate.py`實作(g)/(l)
+段落CAR事件研究：**PIT時間處理**——`announce_time`（HH:MM:SS）若
+<=13:30:00（收盤時間）視為當日可反應，reaction_day=事件曆日對應的
+（或之後最近的）交易日；若>13:30:00視為盤後公告，reaction_day順延一
+交易日；CAR窗口=[reaction_day, reaction_day+1交易日]，基準價=reaction_day
+前一交易日收盤（避免用到還沒發生的資訊）。**控制組依`control_group_
+standard.py`2026-09-07升級標準**：兩變體——matched_stock（只從該類別
+VAL期真有事件的股票抽同數量隨機非事件日）、unmatched_universe（從全部
+有快取價格股票抽相同數量隨機(股票,交易日)組合）——各N=200，通過門檻=
+訊號VAL期mean(|CAR|)嚴格大於全部400次控制組抽樣最大值（不是贏平均/
+90百分位）。**零新增API呼叫**：只讀本機已快取
+`TaiwanStockPrice__{id}__2010-01-01__2024-12-31.parquet`（命中1,796/
+2,400檔事件股票，沒命中的直接跳過不觸發`load_dev()`新fetch）。
+
+**smoke test+中規模前景驗證**：60檔/2類/N=5、150檔/3類/N=25（兩次，
+驗證permutation迴圈效能優化前後數值完全一致——原本每次permutation都
+重掃每檔股票~3700天list comprehension算valid_idx，8類×200次×~1800檔
+會慢到無法在40分鐘timeout內跑完，優化成事前算好valid_idx陣列存進
+`price_cache`，permutation迴圈只做抽樣）；全部1,796檔股票、8類、N=50
+前景執行3分鐘：8類中6類PASS（併購/增減資/財務/人事/處分資產/停復牌）。
+**效果量級偏大暫不採信**：VAL_mean|CAR|多數在4~12%量級，依協定「效果
+量級越誇張越應懷疑」原則不直接下結論，且N=50時停復牌/訴訟兩類PASS，
+改用正式N=200後（job內即時log觀察）已轉為FAIL——**證實「N越小控制組
+max越不極端、越容易虛胖PASS」**，這正是2026-09-07控制組標準升級要
+防的問題，本輪的中規模數字僅供參考不得引用為結論。
+
+已投遞正式全量job`20260909-011334-1783`（`run_detached.py submit
+--timeout-min 40`，全部1,796檔快取股票、8類、N=200），`is_holdout_
+consumed()`開工/收工前皆確認`False`，本輪全程零新增外部API呼叫。**本輪
+工作到此為止**，下一輪：查`run_detached.py status`確認job是否
+`finished`，讀`data/material_news_car_gate_result.json`取得正式N=200
+判定——PASS的類別先呼叫`register_trial()`登記才能寫進`TW_LEADS.md`，且
+要交叉檢查`control_percentile`是否仍然極端（>99）而非勉強壓線過關；
+若job`timeout`（40分鐘內未完成）則檢討是否需要進一步優化或縮減
+N=100。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應

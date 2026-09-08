@@ -20,6 +20,7 @@ import pandas as pd
 
 from material_news_classify import classify_material_news_type
 from validation import holdout
+import universe as universe_mod
 
 RAW_DIR = Path(__file__).parent / "data" / "raw_mops_material_news"
 OUT_PATH = Path(__file__).parent / "data" / "mops_material_news_events_classified.parquet"
@@ -55,6 +56,20 @@ def main() -> None:
     all_df = all_df.drop_duplicates(subset=dup_key).reset_index(drop=True)
     if before != len(all_df):
         print(f"  去重：{before} -> {len(all_df)}（重複{before - len(all_df)}筆，多半是同批次重跑的正常重疊）")
+
+    # 已知限制(2)解決：stock_id涉及2,900個不重複代號，明顯超過台股上市櫃公司總數，
+    # 用universe.py的官方存活者偏差處理宇宙清單過濾，只保留能對到TaiwanStockPrice
+    # 的普通股代號（含存續/下市），避免CAR計算時默默丟棄事件卻沒人發現。
+    uni_ids = set(universe_mod.universe()["stock_id"].unique())
+    n_before_filter = len(all_df)
+    n_stocks_before = all_df["stock_id"].nunique()
+    all_df = all_df[all_df["stock_id"].isin(uni_ids)].reset_index(drop=True)
+    n_stocks_after = all_df["stock_id"].nunique()
+    print(f"  官方宇宙過濾：{n_before_filter} -> {len(all_df)}筆"
+          f"（保留{100*len(all_df)/n_before_filter:.1f}%），"
+          f"股票代號{n_stocks_before} -> {n_stocks_after}"
+          f"（{n_stocks_before - n_stocks_after}個非官方宇宙代號被排除，"
+          f"可能是陸股/興櫃/債券等MOPS特殊編碼，非普通股上市櫃代號）")
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     all_df.to_parquet(OUT_PATH, index=False)
