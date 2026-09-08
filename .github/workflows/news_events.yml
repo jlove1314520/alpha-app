@@ -31,11 +31,18 @@ jobs:
         run: pip install requests certifi urllib3
       - name: 抓新聞與事件
         run: python .github/scripts/fetch_news_events.py
+      # 2026-09-09（題材驗證 v3.3）從 sitemap 收集連結。
+      # 為什麼要獨立一步而且要盡早收：sitemap 是**滾動窗口，只保留 6~7 天**，
+      # 實測 2026-09-01 以前的子 sitemap 一律 404。**今天沒收的連結明天就沒了。**
+      # 這一步只抓 sitemap（4 個請求）不抓內文，很輕，但不做就會永久流失。
+      - name: 從 sitemap 收集新聞連結
+        run: python .github/scripts/fetch_news_sitemap.py
+        continue-on-error: true
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/news.json data/events.json
+          git add data/news.json data/events.json data/news_urls.json
           if git diff --cached --quiet; then
             echo "沒有新的新聞或事件，不產生 commit"
           else
