@@ -1,6 +1,7 @@
 """#61 央行理監事會議決策事件 — 官方重貼現率變動歷史資料（人工查證，非程式化API）
 
-2026-09-08 馬拉松第455輪（TW軌）新增。
+2026-09-08 馬拉松第455輪（TW軌）新增；2026-09-08 hypothesis_queue排程接續
+擴充完整會議日期清單（子測試1所需，含持平會議）。
 
 **為什麼是手刻常數表，不是抓取程式**：中央銀行官網（cbc.gov.tw）的重貼現率
 時間數列頁面（`lp-640-1-1-20.html`）是前端渲染的分頁表格，沒有找到可直接
@@ -88,6 +89,52 @@ CBC_2020_ALL_MEETING_DATES: tuple[str, ...] = (
     "2020-12-17",  # 持平（同上）
 )
 
+# ---------------------------------------------------------------------------
+# 2026-09-08 hypothesis_queue排程接續新增：完整會議日期清單（含持平），
+# 子測試1（決策日本身，不分方向）所需。每年份來源為官方「XX年中央銀行
+# 理監事聯席會議預定日期」新聞稿/公告頁面（WebSearch找到URL後WebFetch人工
+# 核對逐日內容，非程式化API——理由同上方docstring）。**只記錄已用WebFetch
+# 實際核對過內容、非僅搜尋引擎摘要的年份**；2015/2016/2017（民國104/105/
+# 106年）搜尋引擎查無索引結果（可能需改查Wayback Machine或央行紙本檔案，
+# 本輪未查到，誠實留空，不得用「每季第三個週X」規則反推——同一份docstring
+# 已用2022-09-22（實際為第4個星期四而非規則宣稱的第3個）證偽這條規則）。
+#
+# 交叉驗證（跟上方RATE_CHANGES_2015_2024「已核對」欄位比對，全數一致，
+# 提高本清單可信度）：
+#   2022-03-17 / 2022-06-16 / 2022-09-22 / 2022-12-15 四筆會議日
+#     與RATE_CHANGES_2015_2024對應事件的meeting_date欄位完全相同；
+#   2023-03-23 對應RATE_CHANGES 2023-03-24生效事件的meeting_date="2023-03-23"；
+#   2024-03-21 對應RATE_CHANGES 2024-03-22生效事件的meeting_date="2024-03-21"。
+CBC_ALL_MEETING_DATES_BY_YEAR: dict[int, tuple[str, ...]] = {
+    # 來源：cp-432-62606-94141-1.html（107年中央銀行理監事聯席會議預定日期）
+    2018: ("2018-03-22", "2018-06-21", "2018-09-27", "2018-12-20"),
+    # 來源：cp-357-76003-AC942-1.html（108年中央銀行理監事聯席會議預定日期）
+    2019: ("2019-03-21", "2019-06-20", "2019-09-19", "2019-12-19"),
+    # 來源：見 CBC_2020_ALL_MEETING_DATES（cp-357-104855-1ddb0-1，109年）
+    2020: CBC_2020_ALL_MEETING_DATES,
+    # 來源：cp-357-124983-e3b18-1.html / cp-302-124983-e3b18-1.html（110年）
+    2021: ("2021-03-18", "2021-06-17", "2021-09-23", "2021-12-16"),
+    # 來源：cp-302-145029-a6f8e-1.html（111年中央銀行理監事聯席會議預定日期）
+    2022: ("2022-03-17", "2022-06-16", "2022-09-22", "2022-12-15"),
+    # 來源：cp-302-157143-9a658-1.html（112年中央銀行理監事聯席會議預定日期）
+    2023: ("2023-03-23", "2023-06-15", "2023-09-21", "2023-12-14"),
+    # 來源：cp-302-164967-e38c7-1.html（113年中央銀行理監事聯席會議預定日期）
+    2024: ("2024-03-21", "2024-06-13", "2024-09-19", "2024-12-19"),
+}
+
+# 已知缺口：2015/2016/2017（民國104/105/106年）尚未查到官方頁面，
+# 下一輪待辦內容見 HYPOTHESIS_QUEUE.md #61 條目最新狀態段落。
+MISSING_MEETING_YEARS: tuple[int, ...] = (2015, 2016, 2017)
+
+
+def get_all_meeting_dates(start: str = "2015-01-01", end: str = "2024-12-31") -> list[str]:
+    """回傳目前已核對過的完整會議日期清單（含持平），已知缺口見
+    MISSING_MEETING_YEARS——呼叫端不得假設回傳結果涵蓋2015-2017。"""
+    dates: list[str] = []
+    for year_dates in CBC_ALL_MEETING_DATES_BY_YEAR.values():
+        dates.extend(d for d in year_dates if start <= d <= end)
+    return sorted(dates)
+
 
 def get_rate_change_events(start: str = "2015-01-01", end: str = "2024-12-31") -> list[RateChangeEvent]:
     return [e for e in RATE_CHANGES_2015_2024 if start <= e.effective_date <= end]
@@ -101,3 +148,10 @@ if __name__ == "__main__":
     train = [e for e in events if e.effective_date <= "2020-12-31"]
     val = [e for e in events if e.effective_date >= "2021-01-01"]
     print(f"TRAIN(<=2020-12-31): {len(train)} 筆 / VAL(>=2021-01-01): {len(val)} 筆")
+
+    all_dates = get_all_meeting_dates()
+    print(f"\n完整會議日期（含持平）已核對年份: {sorted(CBC_ALL_MEETING_DATES_BY_YEAR.keys())}")
+    print(f"  共 {len(all_dates)} 場會議，尚缺年份: {MISSING_MEETING_YEARS}")
+    train_all = [d for d in all_dates if d <= "2020-12-31"]
+    val_all = [d for d in all_dates if d >= "2021-01-01"]
+    print(f"  TRAIN(<=2020-12-31): {len(train_all)} 場 / VAL(>=2021-01-01): {len(val_all)} 場")

@@ -1,5 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08T20:25+0800 hypothesis_queue排程接續 — 接續#61（央行理監事
+會議決策事件）子測試1完整會議日期清單補齊，逐年WebSearch+WebFetch官方
+「XX年中央銀行理監事聯席會議預定日期」公告，本輪新補齊2018/2019/2021/
+2022/2023/2024六個年份（加上原有2020共7年、28場會議），跟既有
+`RATE_CHANGES_2015_2024`表6筆`meeting_date`推算值逐一交叉核對完全一致。
+仍缺2015/2016/2017三年（搜尋引擎查無索引，非規則反推能解決，下一輪
+待改查Wayback Machine），完整內容見`HYPOTHESIS_QUEUE.md`#61條目新增
+段落與`cbc_policy_decision_data.py`（新增`CBC_ALL_MEETING_DATES_BY_YEAR`/
+`get_all_meeting_dates()`）。全程零FinMind/TWSE API呼叫，`is_holdout_
+consumed()`開工/收工前皆`False`。**本輪工作到此為止**，下一輪先試補齊
+2015-2017，仍查無則評估用「2018起可得樣本」探索性版本開始第1關cheap
+gate，不強行等100%補齊。
+
 ## 2026-09-08T19:57+0800 hypothesis_queue排程接續（取鎖時鎖檔陳舊pid131028
 約30.1分鐘，已回收接手，上一輪疑似中途失敗）— #60（台指選擇權/期貨結算
 到期日機械性效應）已於上一輪確認第1關cheap gate結案：FAIL（見
