@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第439輪 · 2026-09-08T10:30+08:00 · TW · 取鎖乾淨（cycle`20260908-103037`）· 依輪替選TW（TW 09:30 round437次舊/US 10:00 round438最新）· `run_detached.py status`確認heavy-job-slot佔用中（`20260908-102224-c3f5`『tw_backfill_day_trading_detail』running；另觀察到前兩批`c524`/`4ffe`皆以`timeout`收場但快取量持續成長1500→1743→1961，判斷是節流下批次變慢、非卡死，未採取行動）· 依協定heavy-job-slot忙時改做不需重算的工作，完成`PENDING_QUEUE.md`『資料一.4』長期未結驗收：`data/ticks/20260907.parquet`（第一個完整交易日）共1個檔案/146,846筆/20個標的/1,120,633 bytes；`2330`前5筆與最後5筆核對通過；額外驗證`simtrade`欄位在全天分佈正確區分試撮(393筆,開盤前/收盤前)與真實成交(5,799筆,09:00:09~13:30:00)· 同步更新`HYPOTHESIS_QUEUE.md`「資料源可用性對照」表（資料一累積1/20交易日，`#50`前置依賴尚未達標）· 本輪零新增API呼叫（純讀取本機parquet）· `trial_registry.py --check`確認PASS（202列，地基工作不進`TRIALS_LEDGER.md`）· `is_holdout_consumed()`皆`False` · 詳見`TW_MARATHON_STATE.md`第439輪記錄、`PENDING_QUEUE.md`『資料一.4』· 下一輪TW軌接手：`run_detached.py status`確認`#57`回填是否到100%，未到繼續等自走排程，到100%後進第1關sanity
+
+---
 ## 第438輪 · 2026-09-08T10:00+08:00 · US · 取鎖乾淨（cycle`20260908-100037`）· 依輪替選US（TW 09:30 round437最新/US 09:00 round436） · `run_detached.py status`確認heavy-job-slot佔用中（`20260908-095451-4ffe`『tw_backfill_day_trading_detail』running，`hypothesis_queue`自走排程投遞、非本track所為，觀察到進度偏慢：50/250約6分鐘、100/250約12.5分鐘） · 本輪工作單位＝嘗試投遞round436排定的`us_portfolio_gross_profitability_v1.py`正式N=100版本：先確認腳本經`load_quality_sample()`→`load_clean_universe_tickers()`→模組層級匯入`KNOWN_CONTAMINATED_TICKERS`，會在執行期自動吃到round436剛擴充的48檔黑名單，腳本本身不需修改 · `run_detached.py submit`如預期被拒絕（exit=3，heavy-job-slot忙）· 依協定不`--allow-concurrent`硬跑，改`run_detached.py wait --max-min 4`等滿4分鐘仍`STILL_RUNNING`，未再等待 · `trial_registry.py --check`確認PASS（202列，無新判定）· `is_holdout_consumed()`皆`False` · 本輪誠實記錄零新增API呼叫、零回測產出（資源競爭下的正確等待，非勉強找事做）· 詳見`US_MARATHON_STATE.md`第438輪記錄 · 下一輪US軌接手：`run_detached.py status`確認heavy-job-slot是否空出，空出後立刻投遞`us_portfolio_gross_profitability_v1.py`正式版
 
 ---
