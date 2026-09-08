@@ -1,5 +1,47 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T04:53+0800 hypothesis_queue排程接續 — 確認#62回補由TW軌背景job
+在跑，本輪不重複發送，僅記錄現況並收工
+開工讀協定+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他
+常駐行程殘留，不動、不納入commit）。取鎖`marathon_lock.py acquire --name
+hypothesis_queue`：**`LOCK_STALE`（held by 124476, 30.0分鐘無更新，已回收）**，
+上一輪疑似中途失敗未正常釋放鎖，記錄於此。查`HYPOTHESIS_QUEUE.md`「排隊
+順序總結」確認佇列#1~61全數結案，唯一未結案為#62（鉅額逐筆交易Block
+Trade跟隨訊號）；讀#62條目最新狀態發現**同機器`AlphaMarathon`TW軌第471/
+472輪已完成資料可行性查證（FEASIBLE）+`twse_block_trade_client.py`/
+`backfill_block_trade.py`/`block_trade_gate62.py`地基建置+smoke test**，
+且**目前有一個仍在跑的背景job**（`run_detached.py`啟動，job id
+`20260909-043537-6457`，`block_trade_backfill_62tw`，PID 135356確認存活，
+`--batch-size 700`）正在持續回補`data/raw_twse_block_trade/`：本輪查核時
+已從基準100累積到412個parquet檔（2015起，全範圍2,609個工作日），仍遠未
+涵蓋VAL期（約需累積到2021年附近，目前資料仍全部落在2015年上半年）。
+**判定：不重跑`backfill_block_trade.py`**——同時間並行發送第二輪TWSE
+`BFIAUU`請求會違反`CLAUDE.md`「資料源禮儀」節流原則、且可能與現有行程
+爭寫同一批快取檔案，屬不必要且有風險的重複工作，不是「接續往下跑」的
+正確詮釋。`is_holdout_consumed()`確認`False`。本輪未新增/修改
+`twse_block_trade_client.py`/`backfill_block_trade.py`/`block_trade_gate62.py`
+（三者git status顯示已由前輪commit，無待提交變更），未跑任何訊號數字，
+不涉及`register_trial()`，`HYPOTHESIS_QUEUE.md`#62條目現況描述準確、
+無需修正。**下一輪待辦**：先查`data/jobs/20260909-043537-6457.log`與
+`data/raw_twse_block_trade/`檔案數，若該job已完成或已推進到VAL期覆蓋，
+重跑`block_trade_gate62.py`看初步方向；若仍在TRAIN期範圍內，比照本輪
+判斷不重複發送、僅記錄現況即可收工，待多輪後由TW軌或本軌任一方接力
+回補完成。本輪工作到此為止。
+
+## 2026-09-09 hypothesis_queue排程接續 — #62（鉅額逐筆交易）啟動資料回補地基
+開工讀協定+`CLAUDE.md`、`git pull`乾淨、取鎖`LOCK_ACQUIRED`。查佇列確認
+#62已由TW軌馬拉松完成資料可行性查證（FEASIBLE，官方BFIAUU端點涵蓋
+2015~2024），本輪接續建置地基：新增`twse_block_trade_client.py`（單日
+BFIAUU抓取+atomic parquet快取，比照`twse_day_trading_client.py`同款
+反爬蟲偵測）與`backfill_block_trade.py`（比照`backfill_day_trading_ratio.py`
+同款可重複呼叫有界批次設計）。跑完第一批次100個交易日（2015-01-01起），
+`data/raw_twse_block_trade/`累積100個parquet檔（全範圍約2,500個工作日，
+進度4%），未撞到`TWSEBlockedError`。本輪未跑任何訊號數字，不涉及
+`register_trial()`。`is_holdout_consumed()`開工/收工前皆確認`False`。
+下一輪待辦：續跑`backfill_block_trade.py`直到涵蓋完整TRAIN/VAL窗口，
+回補完成後才進入方向代理設計+cheap gate。本輪工作到此為止。
+
 ## 2026-09-09 hypothesis_queue排程接續（上一輪鎖檔陳舊29.9分鐘，已回收接手）
 — 重新查核佇列：#49/#51/#52（TW+US）皆已結案FAIL、#50仍卡`資料一`逐筆
 tick落地外部依賴（本輪重新查證`research/data/ticks/`實際檔數仍2/20交易
