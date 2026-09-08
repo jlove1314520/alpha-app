@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T08:01:36.313321+08:00",
+  "fetched_at": "2026-09-08T08:16:46.053466+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -50,15 +50,14 @@
       "exchange": "SMART"
     },
     "^DJI": {
-      "last": 53414.25,
+      "last": null,
       "bid": null,
       "ask": null,
-      "close": 53686.1,
-      "change_pct": -0.5064,
-      "data_type": "YAHOO_DELAYED",
+      "close": null,
+      "change_pct": null,
+      "data_type": "REALTIME",
       "exchange": "CME",
-      "label": "道瓊工業指數",
-      "source": "yahoo_fallback"
+      "label": "道瓊工業指數"
     },
     "^GSPC": {
       "last": 7717.81,

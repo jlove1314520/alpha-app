@@ -1,69 +1,111 @@
-# DATA_SOURCE_MAP.md — 跨市場資料源原生性與查證紀錄
+# DATA_SOURCE_MAP.md — 資料源可行性地圖
 
-依 `CLAUDE.md`「各市場一律使用該市場的原生資料源」與「搜尋紀律：三來源查證」
-兩條規則建立。每一筆條目記錄：原生市場、為何在這個市場可信、查證過程用了
-哪些獨立來源。
+> 2026-09-08 建立（總司令裁示：查證結論要有固定登記處，**避免日後有人再提一次同一條路**）。
+> 這份檔案記「哪些路走得通、哪些走不通、為什麼」。
+> **看到某條路標 🔴，不要再重新評估一次，先看這裡的日期與理由。**
 
----
+## 🔴 走不通：櫃買中心「產業價值鏈資訊平台」（ic.tpex.org.tw）
 
-## 全市場現股當沖逐檔成交量值（TWSE TWTASU）
+**查證日：2026-09-08。詳見 `docs/TPEX_INDUSTRY_CHAIN_GATE.md`。**
 
-**查證日期：2026-09-08（馬拉松馬拉松第432輪，TW軌，`HYPOTHESIS_QUEUE.md` #57）**
+| 查證項 | 結果 |
+|---|---|
+| `ic.tpex.org.tw/robots.txt` | **302 Security Redirect、0 位元組，不存在** |
+| `www.tpex.org.tw/robots.txt` | **HTTP 200 但內容是 404 頁**（「200 不等於成功」的老陷阱） |
+| 使用條款 | **明文禁止爬蟲**（見下） |
+| TPEx 官方 OpenAPI（225 端點） | **無價值鏈端點** |
+| data.gov.tw | **無此資料集**，只有產業別（已有） |
 
-**背景**：`#57`（全市場當沖比重截面離散度速度）原本卡在「前置未備」——
-`HYPOTHESIS_QUEUE.md` #57 條目寫「本輪尚未查證逐檔當沖端點的實際路徑」，
-懷疑需要另找一個新的 TWSE 端點才能拿到「每檔股票」的當沖成交量值
-（而不是全市場加總）。
+條款原文：
+> 「禁止透過包括但不限於自動化裝置、指令碼、自動程式、**蜘蛛程式、爬蟲程式**
+> 或擷取程式等方式下載本網站之軟體或資料。」
 
-**結論：不需要新端點。已在用的 `TWTASU` 端點本來就是逐檔資料，只是
-`twse_day_trading_client.py::fetch_day_trading_ratio_day()`（`#37` 用）
-刻意只取最後一列「合計」、逐檔列在記憶體裡直接丟棄、從未落地存檔。**
+**間隔拉到 3 秒也不改變它被禁止——速率不是重點，「用程式下載」本身就是被禁的行為。**
 
-### 查證紀錄（四類來源查了三類）
+**唯一正途**：去信櫃買申請書面授權（條款寫「未經書面同意」不得重製，
+反過來說書面同意是存在的途徑）。需總司令具名申請，Claude 不能代辦。
 
-1. **官方端點直接查證（本輪實測）**：
-   `https://www.twse.com.tw/rwd/zh/afterTrading/TWTASU?date=20260904&response=json`
-   （2026-09-08 直接呼叫）回傳 `stat=OK`，`data` 陣列 **1332 列**，
-   第一列是個股列（例：`2330   台積電`，欄位依序為
-   `[當沖賣出成交數量, 當沖賣出成交金額, 資券互抵成交數量, 資券互抵成交金額]`），
-   最後一列才是 `合計`。往回測到 `date=20130102` 一樣有逐檔資料
-   （`stat=OK`，863 列），確認歷史涵蓋遠早於 `TRAIN_START=2015-01-01`。
+## 🔴 走不通：MOPS 公開查詢頁（mopsov.twse.com.tw）
 
-2. **官方 API 文件（openapi.twse.com.tw swagger，2026-09-08 查證）**：
-   `https://openapi.twse.com.tw/v1/swagger.json` 裡跟「沖銷」相關只有
-   3 個端點：`/exchangeReport/TWTB4U`（schema 只有
-   `Date`/`Code`/`Name`/`Suspension` 四欄，是「當沖資格標的清單」，
-   **不含量值**）、`/exchangeReport/TWTBAU1`、`/exchangeReport/TWTBAU2`
-   （暫停先賣後買公告，也不含量值）。**這確認了 `TWTB4U` 不是我們要的
-   端點**——名稱裡都有「當沖」容易搞混，但 `TWTB4U` 是資格清單、
-   `TWTASU` 才是成交量值。`TWTASU` 本身不在 openapi 的 swagger 清單裡
-   （它是 `www.twse.com.tw/rwd` 舊式端點，不是 openapi 新式端點），
-   所以官方 API 文件查不到它的 schema，只能靠直接呼叫驗證（見上第1點）。
+**查證日：2026-09-08。** 這是總司令【裁示二】指定的替代路徑之一，**同樣不可走**。
 
-3. **GitHub／社群實作查證**：`github.com/twjackysu/TWSEMCPServer`
-   （2026-09-08 clone 查證）的 `tools/trading/market.py` 明確把
-   `/exchangeReport/TWTB4U` 標記為 `get_daily_day_trading_targets`
-   （查詢「當日沖銷交易標的」資格清單），印證第 2 點的判斷——社群
-   實作也沒有人把 `TWTB4U` 當成量值端點在用。
+```
+GET https://mopsov.twse.com.tw/robots.txt   → HTTP 200
 
-4. **其他供應商**：FinMind 有 `TaiwanStockDayTrading` 資料集（本輪呼叫
-   免費層回傳 402 額度用盡，但錯誤訊息本身證明資料集存在，且
-   `twse_day_trading_client.py` 既有 docstring 記載「該端點免費層只從
-   2024-01-02 起有資料」）——印證這份資料本來就有人整理成商品在賣，
-   不是我們自己首創的資料維度，只是免費層歷史不夠長，所以 `#37`/`#57`
-   才選擇直接打 TWSE 官方原始端點。
+User-Agent: *
+Disallow: /
 
-### 對 #57 的影響
+User-Agent: bingbot
+Allow: /mops/web
+```
 
-- **不必等待任何新端點查證或回填風險評估**——資料源已確認可得。
-- **代價**：`#37` 既有回補（`backfill_day_trading_ratio.py`，
-  2015-01-01~VAL_END 約 2,609 個交易日）的原始逐檔 JSON 從未保存，
-  無法從已快取的彙總 parquet 反推回逐檔，必須重新呼叫一次 TWTASU
-  端點（新增 `twse_day_trading_client.py::fetch_day_trading_detail_day()`
-  ＋ `backfill_day_trading_detail.py`，獨立快取目錄
-  `data/raw_twse_day_trading_detail/`，跟 `#37` 的單列彙總快取不共用、
-  不互相影響）。
-- 回補已於本輪（第432輪）用 `run_detached.py` 投遞
-  （job `20260908-061051-6640`，`--batch-size 250`，同一套
-  `SLEEP_BETWEEN_CALLS=2.0秒/次` 節流），預期需要多輪馬拉松才能跑完
-  全部 2,609 個交易日（每批約 8~9 分鐘處理 250 天）。
+**除 bingbot 外，全站 `Disallow: /`。我們不是 bingbot，因此 MOPS 查詢頁不得程式取用。**
+
+（`mops.twse.com.tw/robots.txt` 回 404、`mopsfin.twse.com.tw/robots.txt` 回 404 的
+HTML 頁；但 `mopsov` 這台明確拒絕，而 `t05st03` 等查詢頁正是在 `mopsov` 上。）
+
+## 🟢 走得通：TWSE 主站（www.twse.com.tw）
+
+```
+GET https://www.twse.com.tw/robots.txt   → HTTP 200
+
+User-agent: Googlebot / Googlebot-News / OAI-SearchBot / GPTBot
+Allow: /
+
+User-agent: *
+Disallow: /epaper/
+Disallow: /FTSE/
+Allow: /
+```
+
+**除 `/epaper/` 與 `/FTSE/` 外全部允許**，且明列允許 GPTBot 等 AI 檢索器。
+我們既有的 `www.twse.com.tw/rwd/zh/fund/T86`（三大法人）**在允許範圍內，合規**。
+
+註：TWSE 主站是 SPA，著作權/使用條款頁面在無 JS 時只回 747B 空殼，
+無法以純 HTTP 取得條款全文——**已知限制，誠實記錄**。
+robots.txt 是目前能取得的最明確意思表示。
+
+## 🟢 走得通：TWSE／TPEx OpenAPI
+
+`https://openapi.twse.com.tw/v1/`（143 端點）、
+`https://www.tpex.org.tw/openapi/`（225 端點）。官方發布，設計上就是給程式讀的。
+
+**但要知道它們沒有什麼**（2026-09-08 全表掃描確認）：
+- ❌ 產業價值鏈上/中/下游分段
+- ❌ **主要商品或服務項目及其營業比重**（368 個端點全掃，沒有）
+  - `t187ap03_L`（上市公司基本資料，1,094 筆）只有**產業別**，無營業比重
+  - `t187ap01` 是「各營業別**人員數**」（券商員額），**名稱容易誤中關鍵字，不是營收結構**
+
+## 🔴 走不通：Stooq（已下市美股價格）
+
+**查證日：2026-09-08。詳見 `docs/US_PRICE_SOURCES.md`。**
+2026-03 起改 API key 制，key 需**人工過 CAPTCHA** 取得。資料本身免費無訂閱費。
+**程式解 CAPTCHA＝禁止；人親自到官網領 key＝合規**，待總司令決定是否領。
+
+## 🟡 未評估完：Alpha Vantage（已下市美股價格）
+
+`LISTING_STATUS` 免費可用（demo key 實測回 426 筆真 CSV 含 `delistingDate`）；
+價格序列需免費 key（填 email、**無 CAPTCHA**）。**待總司令決定是否領 key。**
+
+## 🔴 不採用：鉅亨網 RSS
+
+**查證日：2026-09-08（建置一.1）。** 兩個公開 RSS 路徑皆 404，
+唯一可通的是 `api.cnyes.com` 的**站台後端 API**，違反取得方式鐵律「不撈 App／站台後端」。
+日後若恢復公開 RSS 再加回。
+
+## 🔴 本階段不接：LongPort OpenAPI（長橋）
+
+**查證日：2026-09-07（Cowork）。總司令 2026-09-08 裁示本階段不開戶、不接入。**
+- 行情涵蓋港股／美股／A 股，**不涵蓋台股**——對我方最缺的台股軌零幫助。
+- 「免費」需分層：接口不另收開通費，但行情訂閱費在 App「行情商城」另計。
+- 須完成開戶＋開發者認證才取得 token。速率：行情每秒 10 次、並發 5。
+- 財報／估值／分析師評級屬**券商加工資料、無申報日可做 PIT 對齊**，
+  **回測一律以 SEC EDGAR XBRL companyfacts 為準，不得改用券商衍生資料。**
+- 僅在「App 要對外提供美股即時報價且本機 IBKR 無法修復」時才重新評估。
+
+## 🟢 既有可用：本 session 的 IBKR MCP 工具
+
+`get_price_snapshot`／`get_price_history`／`search_contracts`，
+可作為美股報價與歷史的**交叉驗證來源，不需額外開戶**。
+**限制**：對已下市美股 **0/4 覆蓋**（TWTR／SIVB／FRC／ATVI），
+AAPL 對照組正常，故為下市股特有限制而非工具問題。
