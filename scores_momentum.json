@@ -12,12 +12,12 @@
   "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json+data/company_info.json+data/quotes_all_tw.json+data/market_tw.json（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用。",
   "disclaimer": "⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。因子設計聚焦股價領先財報的題材動能（相對強度/量能突破/籌碼集中/族群齊漲度/產業資金流入），財報只當地雷排除用（financial_risk_flag），不計入加權總分；完全不計算PE/PEG估值，題材股本來就貴，用估值扣分等於自相矛盾。權重是初始設計值，不是回測最佳化結果，見weights_frozen_momentum.json的note欄位。",
   "delisted_filter": {
-   "applied_at": "2026-09-08T04:43:31.767016+08:00",
+   "applied_at": "2026-09-09T02:48:16.723275+08:00",
    "universe_file": "data/listed_universe.json",
    "stale_days": 30,
    "market_latest_date": "2026-09-07",
-   "removed": 16853,
-   "removed_ranked": 69,
+   "removed": 0,
+   "removed_ranked": 0,
    "note": "移除不在官方上市/上櫃名冊、或價格落後全市場最新交易日超過 30 天的代號（已下市、改組、長期停止交易或重整中）"
   }
  },
