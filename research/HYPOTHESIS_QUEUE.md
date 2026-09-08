@@ -6224,6 +6224,39 @@ watchlist.json`/`research/dev_queue_cycle.log`/
 #62（目前佇列#1~61全數結案，僅剩#50/#52兩項卡外部依賴，尚未達到
 「全部PASS/FAIL」的空佇列判定條件，本輪不強行設計#62）。
 
+**(r) 本輪查核：job健康推進中，覆核(q)「雙雙未解鎖才設計#62」條件不成立，
+不設計#62（2026-09-09T00:00+08:00 馬拉松第463輪TW軌）**。開工先跑
+`marathon_brief.py`並取鎖乾淨（cycle`20260909-000037`）。三軌時間戳：
+TW 23:00（round461，最舊）／US 23:30（round462，最新）——依輪替選TW
+（FUT依例外條款不選）。`run_detached.py status`確認`20260908-235353-95c8`
+（(q)段落hypothesis_queue排程重投的job，非本輪投遞）仍為`running`
+（已執行約9.2分鐘），本輪僅查核不重投，避免與hypothesis_queue排程
+並行對MOPS端點發request。`data/raw_mops_material_news/`實際落地
+快取檔數**1,812個parquet**（累積進度69.4%，job開工時1,658，9.2分鐘
+處理154天，約16.8天/分鐘，與(q)段落估算一致）；剩餘797天同速率估算
+約47分鐘可跑完，**在100分鐘timeout內可望完整跑完**——與(o)段落先前
+預期「會撞timeout」不同，因為(q)已重投一次、進度已推進到接近尾聲。
+**覆核(q)所寫「若下一輪#50/#52仍雙雙未解鎖，才設計#62」的條件**：
+`#52`job現況是`running`且預估很快跑完（非`timeout`、非長期卡死），
+判定這不是(q)原意所指的「未解鎖」——(q)的原意是job逾時/卡死才轉向
+#62，不是「job還在跑」就轉向，否則等於每次job還沒跑完就要新開一條
+假設軸，跟"不得無限期繼續換皮測試"精神矛盾；`#50`（`data/ticks/`）
+仍為2個parquet，對照20交易日門檻仍遠（2/20），沿用先前狀態。
+**判斷：本輪不設計#62**，因#52正健康推進、預估本輪之後1~2輪內即可
+完整跑完並進入cheap gate，過早跳去設計新假設軸反而浪費#52即將到手
+的成果。`git status`確認僅`.live_watchlist.json`/`dev_queue_cycle.log`/
+`external_connectivity.jsonl`三個其他常駐服務殘留變更，未觸碰。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）確認PASS
+（exit=0，222列，本輪無新判定）。`is_holdout_consumed()`開工/收工前
+皆確認`False`，本輪零新增API呼叫（僅查詢job狀態、檔案數與#50 ticks
+檔案數）。**本輪工作到此為止**，下一輪待辦：先查`20260908-235353-95c8`
+是否已`finished`（預估約00:50前後完成）——若已完成，2,600天全數
+落地，**直接進入#52第1關cheap gate**（8類`type`分類CAR檢定，規格
+見上方(g)/(l)段落，不得跳關搶跑）；若仍`running`未逾時則比照本則
+模式繼續單純查核記錄進度；若已`timeout`則直接重投同一指令（自動
+跳過已快取天數，不得從頭重跑）。完整見`TW_MARATHON_STATE.md`第463
+輪記錄、`REPORT.md`第463輪心跳。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
