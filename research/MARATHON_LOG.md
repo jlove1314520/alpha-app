@@ -1,5 +1,29 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T00:22+0800 hypothesis_queue排程接續 — #52(TW)背景回補job
+單純查核進度，不重投。取鎖時發現上一輪鎖檔陳舊（pid 131388，卡了約30
+分鐘後回收，非本輪造成，記錄但無法追查上一輪為何未正常釋放鎖）。開工
+先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`.live_watchlist.json`/
+`dev_queue_cycle.log`/`external_connectivity.jsonl`三個其他常駐服務
+殘留變更，未觸碰、未納入本輪commit）。`run_detached.py status`確認
+job`20260908-235353-95c8`仍`running`（已執行約28.0分鐘，timeout同前
+100分鐘），`data/raw_mops_material_news/`實際落地快取檔數**2,144個
+parquet**（累積進度82.2%，較上則(r)心跳記載的1,812再前進約332個，
+速率與先前估算一致，log顯示job內已處理450/951且僅一次502已被重試
+機制吞掉未阻斷），本輪不重投（避免與job本身並行對MOPS端點發request）。
+同步重新查證#50：`data/ticks/`仍為2個parquet，對照20交易日門檻仍遠
+（2/20），未解鎖，狀態沿用。`trial_registry.py --check`（
+`PYTHONIOENCODING=utf-8`）確認PASS（exit=0，222列，本輪無新判定）。
+`is_holdout_consumed()`開工/收工前皆確認`False`，本輪零新增API呼叫
+（僅查job狀態、快取檔案數、#50 ticks檔案數）。**本輪工作到此為止（一輪
+一個有界工作單位）**，下一輪待辦：先查`20260908-235353-95c8`是否已
+`finished`（依目前速率推算剩餘約28分鐘可跑完，預估00:50前後完成）——
+若已完成，2,600天全數落地，**直接進入#52第1關cheap gate**（8類
+`type`分類CAR檢定，規格見`HYPOTHESIS_QUEUE.md` #52條目(g)/(l)段落，
+不得跳關搶跑）；若仍`running`未逾時則比照本則模式繼續單純查核記錄
+進度；若已`timeout`則直接重投同一指令（自動跳過已快取天數）。完整見
+`HYPOTHESIS_QUEUE.md` #52條目(s)段落。
+
 ## 2026-09-08T23:54+0800 hypothesis_queue排程接續 — #52(TW)背景回補job
 `20260908-220215-b142`確認已逾時（`status=timeout`，執行滿100分鐘，
 watchdog `taskkill /T /F`收尾），依上一則心跳的既定下一步「逾時則重投
