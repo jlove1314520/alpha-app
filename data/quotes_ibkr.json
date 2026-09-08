@@ -1,49 +1,49 @@
 {
-  "fetched_at": "2026-09-08T17:11:44.651783+08:00",
+  "fetched_at": "2026-09-08T17:16:40.874588+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 318.54,
-      "bid": 318.38,
-      "ask": 318.58,
+      "last": 318.59,
+      "bid": 318.52,
+      "ask": 318.64,
       "close": 319.97,
-      "change_pct": -0.4469,
+      "change_pct": -0.4313,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 497.12,
-      "bid": 496.73,
-      "ask": 497.14,
+      "last": 496.52,
+      "bid": 496.09,
+      "ask": 496.53,
       "close": 499.7,
-      "change_pct": -0.5163,
+      "change_pct": -0.6364,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 230.49,
-      "bid": 230.37,
-      "ask": 230.55,
+      "last": 230.31,
+      "bid": 230.32,
+      "ask": 230.44,
       "close": 230.36,
-      "change_pct": 0.0564,
+      "change_pct": -0.0217,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 352.35,
-      "bid": 352.2,
-      "ask": 352.38,
+      "last": 352.33,
+      "bid": 352.15,
+      "ask": 352.39,
       "close": 354.08,
-      "change_pct": -0.4886,
+      "change_pct": -0.4942,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
       "last": 336.5,
-      "bid": 336.41,
-      "ask": 336.55,
+      "bid": 336.44,
+      "ask": 336.67,
       "close": 338.46,
       "change_pct": -0.5791,
       "data_type": "DELAYED",
@@ -61,14 +61,15 @@
       "source": "yahoo_fallback"
     },
     "^GSPC": {
-      "last": 7717.81,
+      "last": 7718.6,
       "bid": null,
       "ask": null,
-      "close": 7718.6,
-      "change_pct": -0.0102,
-      "data_type": "DELAYED",
+      "close": 7747.71,
+      "change_pct": -0.3757,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500"
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
     },
     "^IXIC": {
       "last": 26506.99,
