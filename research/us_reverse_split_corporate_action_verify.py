@@ -25,35 +25,37 @@ record.
    pattern as round433's scan) -- a reverse split filed *before* the price
    series starts or *after* it ends cannot be the cause of an in-window
    back-adjustment artifact.
-4. Classify:
-   - 0 in-window hits -> `no_reverse_split_found` (contamination NOT
-     confirmed; treat as a genuine decliner, do not blacklist).
-   - >=2 in-window hits -> `serial_reverse_split_confirmed` (a company
-     doing two or more reverse splits within the very window we're
-     measuring is the death-spiral-financing pattern the blacklist exists
-     to catch, independent of magnitude reconciliation -- legitimate
-     companies essentially never do this) -> ADD to blacklist.
-   - exactly 1 in-window hit -> `single_split_inconclusive`: fetch that
-     filing's primary document and regex for a declared ratio
-     ("N-for-1", "1-for-N", spelled-out small numbers "one"/"ten"/etc.)
-     to sanity-check order of magnitude against the observed
-     `max_over_last_ratio`. If the parsed ratio is within a factor of 3 of
-     the observed ratio, treat as `single_split_confirmed` (one real split
-     fully explains the observed magnitude) -> ADD to blacklist. Otherwise
-     leave as `single_split_inconclusive` -> do NOT blacklist (a single
-     split of unclear/mismatched magnitude is exactly the AMN-shaped case
-     this round exists to avoid mislabeling).
+4. **Require item 5.03** ("Amendments to Articles of Incorporation or
+   Bylaws" -- the SEC-mandated disclosure item for an executed change to
+   share structure) on at least one in-window hit before confirming.
+   A first version of this script used a cruder ">=2 raw phrase hits"
+   heuristic and it produced a confirmed false positive on the very first
+   run: `FCNCA` (First Citizens BancShares, a real, never-split, high
+   nominal-price bank stock -- round433's own manual false-positive
+   example) had 3 in-window "reverse stock split" hits, but all were items
+   1.01/7.01/8.01/9.01 -- boilerplate mentions of the phrase inside a
+   merger/securities agreement, not FCNCA's own stock being split. None
+   had item 5.03. Requiring 5.03 rules that class of false positive out at
+   the search-result level, with zero extra HTTP calls (item codes are
+   already in the search response), and needs no document fetch or
+   ratio-parsing to sanity-check magnitude.
+   - 0 in-window hits -> `no_reverse_split_found` (not confirmed).
+   - in-window hits but none carry item 5.03 -> `phrase_mentioned_no_item503_likely_boilerplate`
+     (not confirmed -- the FCNCA-shaped case).
+   - >=1 in-window hit carries item 5.03 -> `item503_reverse_split_confirmed`
+     (an actual executed change to share structure was filed inside the
+     price window) -> ADD to blacklist.
 
 Rate limiting: efts.sec.gov has no published hard ceiling (unlike
 data.sec.gov's documented ~10 req/sec); this script sleeps 0.4s between
-calls (well under 10/s) and only fetches a filing document for tickers that
-clear the >=1-hit gate, so worst case is 59 search calls + <=59 document
-fetches, ~1-2 minutes total. No retries/backoff added -- if SEC rate-limits
-us the run fails loudly (`raise_for_status`) rather than silently degrading.
+calls (well under 10/s), one search call per ticker, ~59 calls total,
+under a minute. No retries/backoff added -- if SEC rate-limits us a given
+ticker's row records `search_network_error`/`search_http_error` rather
+than crashing the whole run (a real timeout was hit and recovered from
+during development).
 """
 from __future__ import annotations
 
-import re
 import sys
 import time
 from pathlib import Path
@@ -64,24 +66,12 @@ import pandas as pd
 import requests
 
 from sec_edgar_client import HEADERS, get_cik_map
+from us_contamination_blacklist import KNOWN_CONTAMINATED_TICKERS
 from us_factors import us_price_series
 
 SCAN_CSV = Path(__file__).parent / "data" / "us_reverse_split_contamination_scan.csv"
 OUT_CSV = Path(__file__).parent / "data" / "us_reverse_split_corporate_action_verify.csv"
 SLEEP_SEC = 0.4
-RATIO_MATCH_TOLERANCE = 3.0  # single-split parsed ratio must be within 3x of observed to confirm
-
-_SPELLED = {
-    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
-    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "twelve": 12,
-    "fifteen": 15, "twenty": 20, "twenty-five": 25, "thirty": 30,
-    "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80,
-    "ninety": 90, "hundred": 100,
-}
-_RATIO_RE = re.compile(
-    r"(?:1|one)[\s-]*for[\s-]*(\d+|" + "|".join(_SPELLED) + r")\b",
-    re.IGNORECASE,
-)
 
 
 def _search_reverse_split_8k(cik: int) -> list[dict]:
@@ -100,34 +90,23 @@ def _search_reverse_split_8k(cik: int) -> list[dict]:
         doc_id = h["_id"].split(":")[-1]
         out.append({
             "file_date": src["file_date"],
+            "items": src.get("items", []),
             "url": f"https://www.sec.gov/Archives/edgar/data/{cik_str}/{adsh}/{doc_id}",
         })
     return out
 
 
-def _parse_ratio(text: str) -> float | None:
-    ratios = []
-    for m in _RATIO_RE.finditer(text):
-        tok = m.group(1).lower()
-        val = _SPELLED.get(tok)
-        if val is None:
-            try:
-                val = int(tok)
-            except ValueError:
-                continue
-        ratios.append(val)
-    if not ratios:
-        return None
-    # a filing can mention the ratio multiple times (title + body) -- take
-    # the largest as the declared ratio (smaller numbers are more likely to
-    # be incidental digits caught by the regex, e.g. share counts).
-    return float(max(ratios))
-
-
 def verify() -> pd.DataFrame:
     scan = pd.read_csv(SCAN_CSV)
+    # NOTE (fixed after a first pass got this wrong): `flagged_new_candidate`
+    # and `already_blacklisted` in the scan CSV are frozen at round433 scan
+    # time -- `already_blacklisted` only reflects the ORIGINAL 8-name list,
+    # not the 25-name list round433 itself grew to by its own end. Filtering
+    # on those stale columns re-includes the 17 round433 already added.
+    # Filter against the current `KNOWN_CONTAMINATED_TICKERS` instead.
     candidates = scan[
-        (scan["flagged_new_candidate"] == True) & (scan["already_blacklisted"] == False)  # noqa: E712
+        (scan["flagged_new_candidate"] == True)  # noqa: E712
+        & (~scan["ticker"].isin(KNOWN_CONTAMINATED_TICKERS))
     ].sort_values("max_over_last_ratio", ascending=False)
 
     cik_map = get_cik_map()
@@ -164,46 +143,39 @@ def verify() -> pd.DataFrame:
         time.sleep(SLEEP_SEC)
 
         in_window = [h for h in hits if px_start <= h["file_date"] <= px_end]
-        n_in_window = len(in_window)
+        # Item 5.03 ("Amendments to Articles of Incorporation or Bylaws") is
+        # the SEC-mandated disclosure item for an *executed* change to share
+        # structure (a reverse split changes authorized/outstanding shares
+        # and often par value). A bare phrase-count heuristic was tried
+        # first and produced a confirmed false positive: FCNCA (First
+        # Citizens BancShares, a real, never-split bank stock) had 3
+        # in-window hits, all items 1.01/7.01/8.01/9.01 -- boilerplate
+        # mentions of "reverse stock split" as a generic mechanism in a
+        # merger/securities agreement, not FCNCA's own stock being split.
+        # Requiring item 5.03 rules that class of false positive out.
+        item503_hits = [h for h in in_window if "5.03" in h.get("items", [])]
+        n_in_window, n_503 = len(in_window), len(item503_hits)
 
         result = {
             "ticker": ticker, "cik": int(cik),
             "observed_ratio": row["max_over_last_ratio"],
             "px_start": px_start, "px_end": px_end,
             "n_8k_hits_total": len(hits), "n_8k_hits_in_window": n_in_window,
+            "n_item503_hits_in_window": n_503,
         }
 
-        if n_in_window == 0:
+        if n_503 >= 1:
+            result["status"] = "item503_reverse_split_confirmed"
+            result["confirmed"] = True
+        elif n_in_window >= 1:
+            result["status"] = "phrase_mentioned_no_item503_likely_boilerplate"
+            result["confirmed"] = False
+        else:
             result["status"] = "no_reverse_split_found"
             result["confirmed"] = False
-        elif n_in_window >= 2:
-            result["status"] = "serial_reverse_split_confirmed"
-            result["confirmed"] = True
-        else:
-            doc_url = in_window[0]["url"]
-            try:
-                doc_r = requests.get(doc_url, headers=HEADERS, timeout=20)
-                doc_r.raise_for_status()
-                parsed_ratio = _parse_ratio(doc_r.text)
-            except requests.HTTPError as e:
-                parsed_ratio = None
-                result["doc_fetch_error"] = f"http_{e.response.status_code}"
-            except requests.RequestException as e:
-                parsed_ratio = None
-                result["doc_fetch_error"] = type(e).__name__
-            time.sleep(SLEEP_SEC)
-            result["parsed_split_ratio"] = parsed_ratio
-            if parsed_ratio is not None:
-                observed = row["max_over_last_ratio"]
-                match = (observed / RATIO_MATCH_TOLERANCE) <= parsed_ratio <= (observed * RATIO_MATCH_TOLERANCE)
-                result["status"] = "single_split_confirmed" if match else "single_split_inconclusive"
-                result["confirmed"] = bool(match)
-            else:
-                result["status"] = "single_split_inconclusive_unparsed"
-                result["confirmed"] = False
 
         rows.append(result)
-        print(f"  {ticker}: {result['status']} (in_window_hits={n_in_window})")
+        print(f"  {ticker}: {result['status']} (in_window={n_in_window}, item5.03={n_503})")
 
     return pd.DataFrame(rows)
 

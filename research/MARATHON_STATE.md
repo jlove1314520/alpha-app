@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-08T07:30+08:00**
+**最後更新：2026-09-08T09:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 435 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 435 輪 · 2026-09-08T07:30+08:00 · US軌（取鎖乾淨，cycle`20260908-073037`）**。**本輪工作單位**：round429/431/433/434反覆列出但延後的選項(2)——`f_us_gross_profitability`單獨Top-N長多構造（`#22`combo已FAIL的單因子對照組）。新增`us_portfolio_gross_profitability_v1.py`（逐字沿用`us_portfolio_multifactor_v1.py`引擎，只換成單因子z-score+`load_quality_sample()`宇宙）。heavy-job-slot仍被TW backfill佔用，本輪只跑n=3接線冒煙測試（確認可執行，universe=74檔），未投遞正式N=100版本，本輪無新判定、未登記`TRIALS_LEDGER.md`。`trial_registry.py --check`確認PASS（exit=0，202列）。TW軌本輪未選中原因同434輪：heavy-job-slot仍被`#57`回填job佔用。詳見`US_MARATHON_STATE.md`第435輪記錄、`US_LEADS.md`#25。`is_holdout_consumed()`開工/收工前皆確認`False`。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 436 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 436 輪 · 2026-09-08T09:00+08:00 · US軌（取鎖乾淨，cycle`20260908-090037`；上一輪cycle`20260908-083037`以`reason=ERROR`結束）**。**本輪工作單位**：收尾`#24`留下的59檔未確認候選之個股層級公司行動查證（round433/434「下一輪US軌接手(2)」）——開工發現前一次session已寫完`us_reverse_split_corporate_action_verify.py`並跑完SEC EDGAR查證但未commit，本輪核對正確性後補commit：59檔中23檔經SEC 8-K item 5.03確認為真實反向分割，`us_contamination_blacklist.py`黑名單25→48檔。本輪未新增API呼叫。屬地基工作，不進`TRIALS_LEDGER.md`，`trial_registry.py --check`確認PASS。TW軌本輪未選中原因：`#57`回填仍未到100%（`hypothesis_queue`自走排程續跑）。詳見`US_MARATHON_STATE.md`第436輪記錄、`US_LEADS.md`#26。`is_holdout_consumed()`開工/收工前皆確認`False`。
 
 **心跳缺口補記（第424～427輪）**：`REPORT.md`已有標記「第424～427輪」的內容，但當時的執行個體把心跳插入到檔案中段（約第1635行附近）而非規則要求的檔案最上方，且這份全局計數器當時未同步更新（同round405/408/422曾補齊過的同款缺口，這次缺口更大——連續4輪）。本輪（第428輪）已將計數器一次補齊到428；`REPORT.md`歷史錯位條目本身不回頭搬動（append-only精神，避免誤觸其他未完成的並行編輯），僅在此記錄這個已知的顯示層問題，供下次有餘裕時整理。第424～427輪內容摘要：424(TW)建立`data/signal_status.json`；425(US)`#20`/`#21`降級關閉為FAIL；426(TW)`#51`子事件1二元規格對照FAIL；427(US)新增`f_us_gross_profitability`因子，cheap gate CHEAP_PASS並投遞深挖job。
 

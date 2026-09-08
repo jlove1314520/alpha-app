@@ -46,17 +46,30 @@ below**, all with max in the thousands-to-billions range while trading at
 single/low-double-digit dollars now -- economically impossible without
 repeated reverse splits.
 
-**The other 59 flagged-but-unconfirmed candidates are NOT added here**
-(see `data/us_reverse_split_contamination_scan.csv`,
-`flagged_new_candidate=True` rows not in this frozenset) -- their ratios
-(5x-160x) are within the range a genuine, non-contaminated microcap can
-plausibly show through ordinary business deterioration (e.g. `AMN`/`IBCP`
--style names), and confirming them needs per-ticker corporate-action lookup
-this round did not do. Treat that 59-name list as a lead for a future round,
-not a finding.
+**Round-436 update (`us_reverse_split_corporate_action_verify.py`)**: did the
+per-ticker corporate-action lookup the round433 note above said was still
+missing, for all 59 flagged-but-unconfirmed candidates. Method: SEC EDGAR
+full-text search for "reverse stock split" filed by each ticker's CIK,
+restricted to 8-K filings whose file_date falls inside the price series
+window, **requiring SEC item 5.03** ("Amendments to Articles of
+Incorporation or Bylaws" -- the mandated disclosure item for an executed
+change to share structure). A first pass without the item-5.03 requirement
+(just counting in-window phrase hits) produced a confirmed false positive on
+`FCNCA` (a real, never-split bank stock whose hits were all boilerplate
+mentions of "reverse stock split" inside merger/securities-agreement items
+1.01/7.01/8.01/9.01, not its own stock being split) -- requiring 5.03 at the
+search-result level (item codes are already in the SEC full-text search
+response, zero extra HTTP calls) rules that class out, and correctly leaves
+`FCNCA` unconfirmed. Result: **23/59 confirmed** via >=1 in-window item-5.03
+filing, including `AMN` and `IBCP` -- the two names round433's docstring had
+cited as examples of "genuine business deterioration, not contamination";
+both turned out to have documented reverse splits inside their price window
+and are added below. The remaining 36 (24 `no_reverse_split_found` + 12
+`phrase_mentioned_no_item503_likely_boilerplate`) are still NOT added --
+full detail in `data/us_reverse_split_corporate_action_verify.csv`.
 
-This blacklist (now 25 names) is still a known-bad list, not a
-verified-clean guarantee for the remaining ~215 usable tickers.
+This blacklist (now 48 names) is still a known-bad list, not a
+verified-clean guarantee for the remaining tickers.
 """
 from __future__ import annotations
 
@@ -65,4 +78,8 @@ KNOWN_CONTAMINATED_TICKERS: frozenset[str] = frozenset({
     # round433 additions (see docstring above for the confirmation rule):
     "AIRI", "BDRX", "CISS", "COCP", "CPOP", "DARE", "EJH", "EPM", "GRCE",
     "NIKI", "NTRP", "RENX", "RMTI", "RVSN", "SMX", "TRAW", "TRNR",
+    # round436 additions (SEC 8-K item-5.03-confirmed, see docstring above):
+    "ATNM", "LRMR", "QTTB", "XOS", "PVLA", "IDN", "ELTX", "HHS", "CTOR",
+    "KLXE", "ONIT", "CRK", "ASUR", "STI", "OIS", "SRG", "TMC", "HPP",
+    "POWW", "IRON", "ILPT", "AMN", "IBCP",
 })
