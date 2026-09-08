@@ -7880,3 +7880,47 @@ python -u research/backfill_sp500_index_changes.py --batch-size 74`
 未逾時則比照本輪模式單純查核進度；若已`timeout`，腳本可斷點續傳，
 考慮加大`--timeout-min`重投而非從頭跑。完整見`US_MARATHON_STATE.md`
 第466輪記錄、`REPORT.md`第466輪心跳。
+
+**2026-09-09 hypothesis_queue排程接續**：backfill job`20260909-013149-9992`
+已於02:07:30確認`finished`/`exit=0`，`research/data/raw_sp_index_changes/`
+累積76個列表頁+645篇文章快取，涵蓋範圍完整（`fetch_listing_page`連續2頁
+真正回傳空才停）。新增`sp500_index_changes_gate51us.py`（第1關cheap gate，
+事件研究框架，個股橫斷面用`control_group_standard.evaluate_vs_control()`
+per-ticker配對抽樣控制組，比照`us_8k_pead_gate52.py`同款設計，完整事前
+綁定內容見腳本docstring：僅測`Addition`、僅四個市值加權指數(排除DJIA/
+DJTA)、PRE_WINDOW=5生效前壓力、POST_WINDOW=3生效後反轉、SAMPLE_SIZE=100
+先跑小樣本）。
+
+**過程中發現並修復`load_addition_events()`日期解析覆蓋率bug**（非結果
+導向調整——跟`#46`修`_listing_age_days()`bug同一種性質，修完解析器才跑
+統計檢定，不是看到數字後回頭調整）：初版`pd.to_datetime()`對本資料源
+常見的非標準格式（`"Sept."`縮寫非標準四字元月份、`"March 24,2025"`逗號
+後缺空白會被誤解析成年份0001）大量解析失敗，797筆候選事件裡409筆
+（51%！）被誤判為「無法解析」丟棄。修復後（正規化`Sept.`→`Sep`+逗號後
+補空白+`year<2000`防呆）候選事件數從387筆回升到**646筆**（去重後，
+591個獨立ticker）。
+
+**第一次試跑（修復前，SAMPLE_SIZE=100，仍有參考價值故保留記錄）**：
+89/100 ticker有價格資料，TRAIN僅6筆事件（樣本不足<10門檻，SKIP不判定）、
+VAL 48筆事件。VAL子測試(a)生效前5日：real mean=+4.15%（方向正確，符合
+事前預期），但**未過`control_group_standard`嚴格標準**（訊號0.0415未超過
+控制組最大值0.0501，雖然百分位達99.5）。VAL子測試(b)生效後3日反轉：
+real mean=-0.90%（方向正確），同樣**未過**（訊號0.0090未超過控制組最大值
+0.0298，百分位93.0）。**這次結果因TRAIN樣本量過小（僅6筆，不到10筆判定
+門檻，無法檢驗train/val同號一致性）不具結案效力**，僅供對照。
+
+**修復日期解析器後重跑，中途撞到FinMind額度上限，本輪工作到此為止**：
+處理第一批ticker時（`EXPI`）收到FinMind HTTP 402
+（`{"msg":"Requests reach the upper limit."}`），`finmind_client.py`已依
+既有斷路器機制自動封鎖`finmind`資料源2小時（見
+`data/rate_limit_state.json`），依`CLAUDE.md`取得方式鐵律「額度用完就
+誠實拒絕，不排隊、不重試、不換來源硬取」，**未嘗試繞過或切換來源**，
+直接中止本輪。**`#51-US`第1關cheap gate仍未結案**——646筆候選事件（修復
+後的完整版本）尚未跑完統計檢定，下一輪待2小時封鎖解除後，直接重跑
+`python research/sp500_index_changes_gate51us.py`（已快取的ticker價格
+會命中`load_dev()`本機parquet快取，不重複打API，只有新ticker才會消耗
+額度），若TRAIN期樣本量因為646筆candidate的完整覆蓋而回升到>=10，才能
+真正檢驗train/val同號一致性，不跳關直接用第一次試跑（TRAIN樣本不足）的
+結果下判定。`is_holdout_consumed()`開工/收工前皆確認`False`。本輪
+**未登記`TRIALS_LEDGER.md`**（協定第3節：僅完成PASS/FAIL/CHEAP_PASS/
+EXPERIMENTAL判定才登記，本輪是中途因外部額度限制中止，非判定）。

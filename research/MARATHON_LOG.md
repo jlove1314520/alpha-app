@@ -1,5 +1,20 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T02:xx+0800 hypothesis_queue排程接續 — #51-US（S&P/DJ指數納入
+事件研究）第1關cheap gate建置+試跑，中途撞FinMind額度上限中止，未結案。
+確認backfill job`20260909-013149-9992`已finished（76頁/645篇文章快取
+完整）。新增`sp500_index_changes_gate51us.py`（per-ticker配對抽樣控制組
+event study，事前綁定內容見腳本docstring）。過程中發現並修復
+`load_addition_events()`日期解析器覆蓋率bug（`"Sept."`非標準縮寫+逗號後
+缺空白誤解析成年份0001），候選事件從387回升到646筆（去重後591 ticker）。
+修復前試跑：TRAIN僅6筆（樣本不足未判定），VAL 48筆兩子測試方向皆正確
+（+4.15%/-0.90%）但未過`control_group_standard`嚴格標準（控制組最大值）。
+修復後重跑處理第一批ticker即收到FinMind HTTP 402，斷路器自動封鎖2小時，
+依鐵律不繞過、本輪中止。**`#51-US`仍未結案**，未登記`TRIALS_LEDGER.md`
+（無判定，非中途放棄判定）。完整見`HYPOTHESIS_QUEUE.md` #51-US章節本輪
+新增段落。下一輪：2小時封鎖解除後直接重跑腳本（已快取ticker免API），
+646筆完整候選若使TRAIN樣本回升至>=10即可正式判定。
+
 ## 2026-09-09T01:57+0800 hypothesis_queue排程接續 — 確認#52(TW) job已
 finished，讀取並登記官方N=200結果，未做新研究 — 8類中4類CHEAP_PASS
 （併購/增減資/財務/人事，control_percentile皆=100.0）、4類FAIL
