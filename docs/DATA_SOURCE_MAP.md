@@ -89,7 +89,19 @@ robots.txt 是目前能取得的最明確意思表示。
 **那個形式本身就在暗示已驗證，是誤導**。詳見 `docs/US_PRICE_SOURCES.md` 末段。
 **Stooq 維持 🔴，除非總司令另有指示，不再嘗試。**
 
-## 🟡 未評估完：Alpha Vantage（已下市美股價格）
+## 🟡 部分可用：Alpha Vantage（已實測，2026-09-08 key 已領）
+
+**交叉驗證 ✅**：AAPL 與 yfinance 共同 100 日，收盤**差異率 0.0000%**。
+**下市名冊 ✅**：`LISTING_STATUS` 免費可用，含 `delistingDate`。
+**下市股價格 🟡**：TWTR（末日 2022-10-28、53.70）與 ATVI（2023-10-13、94.42）**正確**；
+FRC 未收錄；**SIVB 是陷阱**——回傳的是破產後 OTC 空殼（0.006 美元、區間 2026 年），
+不含 2023-03 崩潰期，**直接用會注入假的 −99.99% 報酬**。
+**致命限制 ❌**：`outputsize=full` 與 `TIME_SERIES_DAILY_ADJUSTED` 皆為**付費**，
+免費層只給**近 100 個交易日**且**未除權息調整**。
+**100 天不足以回測**，故**未補起存活者偏誤缺口**，付費層標「待採購」。
+客戶端與額度紀律：`research/av_price_client.py`（每日 22 次硬上限，用完誠實拒絕）。
+
+## ~~🟡 未評估完：Alpha Vantage（已下市美股價格）~~
 
 `LISTING_STATUS` 免費可用（demo key 實測回 426 筆真 CSV 含 `delistingDate`）；
 價格序列需免費 key（填 email、**無 CAPTCHA**）。**待總司令決定是否領 key。**

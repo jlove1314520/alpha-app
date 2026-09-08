@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T14:16:43.704125+08:00",
+  "fetched_at": "2026-09-08T14:21:47.709911+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -61,26 +61,24 @@
       "source": "yahoo_fallback"
     },
     "^GSPC": {
-      "last": 7718.6,
+      "last": 7717.81,
       "bid": null,
       "ask": null,
-      "close": 7747.71,
-      "change_pct": -0.3757,
-      "data_type": "YAHOO_DELAYED",
+      "close": 7718.6,
+      "change_pct": -0.0102,
+      "data_type": "DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500",
-      "source": "yahoo_fallback"
+      "label": "S&P 500"
     },
     "^IXIC": {
-      "last": 26506.99,
+      "last": null,
       "bid": null,
       "ask": null,
-      "close": 26584.1,
-      "change_pct": -0.2901,
-      "data_type": "YAHOO_DELAYED",
+      "close": 26506.99,
+      "change_pct": null,
+      "data_type": "DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數",
-      "source": "yahoo_fallback"
+      "label": "那斯達克綜合指數"
     },
     "^SOX": {
       "last": 11735.263,
