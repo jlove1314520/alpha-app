@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-09T04:00+08:00**
+**最後更新：2026-09-09T04:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 471 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 471 輪 · 2026-09-09T04:00+08:00 · TW軌（取鎖乾淨，cycle`20260909-040037`）**。**本輪工作單位**：#50仍未解鎖（tick累積2/20交易日）、US軌自身無新工作，依`HYPOTHESIS_QUEUE.md`(x)段落建議設計新假設軸`#62`（鉅額逐筆交易Block Trade跟隨訊號）的資料可行性三來源查證，判定**可行FEASIBLE**（官方端點`www.twse.com.tw/rwd/zh/block/BFIAUU`實測涵蓋2015~2024、法規門檻已確認、GitHub/商業市場交叉印證），但無買賣方向標記需用相對收盤價偏離代理（未驗證的第二層假設），下一輪應只取「配對交易」子集設計cheap gate。本輪純可行性查證未跑訊號數字，`trial_registry.py --check`本輪無新判定。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第471輪記錄、`HYPOTHESIS_QUEUE.md` `#62`條目(a)(b)(c)段落。**計數器缺口補記**：本檔第459～464輪、第468～470輪未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`，僅本檔頂部行漏更新，同款顯示層問題，見round458同類註記），下一輪若有餘裕可回頭補齊，不影響`REPORT.md`本身的逐輪紀錄完整性。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 472 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 472 輪 · 2026-09-09T04:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-043037`）**。**本輪工作單位**：承接round471交辦，設計#62（Block Trade跟隨訊號）第1關cheap gate——承接工作目錄既有未提交的`twse_block_trade_client.py`/`backfill_block_trade.py`（round471順手寫但未commit的基礎設施）並沿用；投遞背景回補job（`block_trade_backfill_62tw`，job`20260909-043537-6457`）延續累積交易日；新增`block_trade_gate62.py`實作事前綁定規格（配對交易子集、vwap相對收盤價方向代理、N=5/10/20三值、matched_stock/unmatched_universe控制組N=200）；smoke test（500事件/N=25 permutation）確認管線正確執行無崩潰，但VAL期事件數為0（現有回補資料只到2015年初，全在TRAIN期），誠實記錄「等回補推進後才能判定」，未跑正式N=200、無PASS/FAIL登記。`trial_registry.py --check`本輪無新判定。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第472輪記錄、`HYPOTHESIS_QUEUE.md` `#62`條目。**計數器缺口補記**：本檔第459～464輪、第468～470輪未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`，僅本檔頂部行漏更新，同款顯示層問題，見round458同類註記），下一輪若有餘裕可回頭補齊，不影響`REPORT.md`本身的逐輪紀錄完整性。
 
 **上一輪（第439輪，供對照）** · 2026-09-08T10:30+08:00 · TW軌（取鎖乾淨，cycle`20260908-103037`）**。**本輪工作單位**：heavy-job-slot被`#57`回填job佔用，改做`PENDING_QUEUE.md`『資料一.4』長期未結驗收——`data/ticks/20260907.parquet`共1個檔案/146,846筆/20個標的核對通過，`simtrade`欄位試撮/真實成交分佈正確。`trial_registry.py --check`確認PASS（202列）。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第439輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
 

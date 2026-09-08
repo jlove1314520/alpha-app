@@ -8127,3 +8127,47 @@ gate（依既有IC gate框架比照`institutional_concentration_gate.py`/
 **(c) 下一輪待辦（更新）**：用交易別=配對交易子集，設計方向代理（相對收盤價偏離）與cheap gate
 （樣本內vs隨機控制組，N待第1關前定案，比照本佇列慣例N=200），事前綁定寫進新腳本docstring；
 本輪未跑任何訊號數字，純資料可行性查證，不涉及`register_trial()`。
+
+**(d) 資料回補啟動（2026-09-09 hypothesis_queue排程接續）**：新增
+`twse_block_trade_client.py`（`fetch_block_trade_day()`落地單日BFIAUU逐筆
+交易，比照`twse_day_trading_client.py`同款反爬蟲偵測+atomic parquet快取，
+新增`load_all_cached()`給下游gate腳本一次性讀回）與`backfill_block_trade.py`
+（比照`backfill_day_trading_ratio.py`同款可重複呼叫、有界批次設計，
+`SLEEP_BETWEEN_CALLS=2.0`秒沿用同一個`rwd`網域實測安全值）。本輪已跑完
+第一批次100個交易日（2015-01-01起，`--batch-size 100`），`data/raw_twse_block_trade/`
+已累積100個parquet檔（全範圍約2,500個工作日，進度4%），未撞到
+`TWSEBlockedError`，過程正常。**下一輪待辦**：續跑`backfill_block_trade.py`
+直到涵蓋2015-01-01~VAL_END（比照#37`backfill_day_trading_ratio.py`花了約
+十輪才回補完成的先例，本項預期也要多輪接續，不強求一次做完），回補完成後
+才進入設計方向代理（相對收盤價偏離）+cheap gate腳本。本輪未跑任何訊號
+數字，不涉及`register_trial()`。`is_holdout_consumed()`確認`False`。
+
+**(e) cheap gate腳本骨架＋smoke test（2026-09-09T04:30+08:00 馬拉松第472輪
+TW軌）**：承接(d)段落基礎設施（`twse_block_trade_client.py`／
+`backfill_block_trade.py`，確認為`hypothesis_queue`排程接續寫的既有檔案，
+品質良好且與(a)(b)查證結果一致，本輪commit入庫）。**新增`block_trade_gate62.py`**：
+事前綁定規格——只取`trade_type==配對交易`；同一(stock_id,date)多筆配對交易
+先用volume加權平均聚合成一列（避免同日多筆偽複製）；方向代理＝vwap相對
+事件日收盤價（vwap<close→sell-initiated，僅測sell方向未來N日市場調整報酬，
+事前假設為負，buy-initiated僅記錄對照不判定，避免#42/#43「等兩期都顯著才
+發現方向錯」教訓）；N測5/10/20三值各自獨立判定；控制組matched_stock/
+unmatched_universe兩變體N=200，比照`material_news_car_gate.py`框架，
+`_signed_ret()`直接reuse自`material_news_car_gate2_continuation.py`；依
+`control_group_standard.py`規則對「越小越好」指標（負向報酬）同步取負號
+後比較。同時投遞背景回補job延續累積（`block_trade_backfill_62tw`，
+job`20260909-043537-6457`，`--batch-size 700`；第一次submit因誤用
+相對路徑找不到檔案`exit=2`，`run_detached.py`的cmd是相對`alpha-app`
+根目錄執行非`research/`，改用`research/backfill_block_trade.py`後正常）。
+**smoke test**（`--max-events 500 --n-permutations 25`）：管線正確執行
+無崩潰——500筆聚合事件、90/117檔可用價格、386筆可判斷方向
+（sell=202/buy=184），但三個N值VAL期（2021-2024）事件數皆為0——現有
+回補資料只到2015年初（100/2500個交易日），全部落在TRAIN期，VAL期完全
+沒有覆蓋，跳過邏輯（`n_val<20`）正確觸發，**這是資料未就緒的誠實結果，
+不是管線bug**。**未跑正式N=200判定**：VAL期0事件統計檢定力為零，跑了
+也沒有意義，誠實記錄「等回補job推進到VAL期範圍才能判定」，不勉強硬跑，
+不涉及`register_trial()`。**下一輪待辦**：查`block_trade_backfill_62tw`
+job進度，累積天數涵蓋到VAL期後重跑`block_trade_gate62.py`看初步方向；
+全範圍約2,500個工作日、每批700天，預估還需2~3批才能到VAL_END，比照
+`backfill_day_trading_ratio.py`/`backfill_block_trade.py`(d)段落的
+「多輪接續不強求一次做完」先例。`is_holdout_consumed()`開工/收工前皆
+確認`False`。
