@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "purpose": "keyword → theme 對映規則（題材驗證 v2）。刻意獨立成檔而不埋在程式裡，讓總司令與 Cowork 可以直接稽核與擴充，改規則不用改程式。",
+  "why": "舊做法要求公司在 MOPS 自述『我屬於 XX 題材』，但公司從不這樣講。公司講的是產品、業務、客戶、擴產、接單。所以對映的左邊必須是『產品／業務名詞』，不是『題材名』。",
+  "match_note": "命中即視為該題材的素材。仍須搭配證據等級規則（A/C）才會上線；本檔只負責『這段文字在講哪個題材』。",
+  "generated_at": "2026-09-08",
+  "themes": {
+    "adv_package": {
+      "name": "先進封裝",
+      "keywords": ["先進封裝", "CoWoS", "SoIC", "InFO", "3D IC", "3DIC", "扇出", "Fan-Out", "chiplet", "小晶片", "異質整合", "2.5D封裝", "2.5D 封裝", "混合鍵合", "hybrid bonding", "TSV", "矽穿孔"]
+    },
+    "cowos": {
+      "name": "CoWoS",
+      "keywords": ["CoWoS", "中介層", "interposer", "2.5D封裝", "2.5D 封裝", "CoWoS-L", "CoWoS-S", "矽中介層"]
+    },
+    "glass_substrate": {
+      "name": "玻璃基板",
+      "keywords": ["玻璃基板", "玻璃載板", "TGV", "玻璃通孔", "glass substrate", "玻璃核心", "glass core"]
+    },
+    "pcb": {
+      "name": "PCB印刷電路板",
+      "keywords": ["印刷電路板", "PCB", "電路板", "多層板", "HDI板", "軟硬結合板"]
+    },
+    "ccl": {
+      "name": "CCL銅箔基板",
+      "keywords": ["銅箔基板", "CCL", "基板材料", "低損耗材料", "低介電", "Low Dk", "M8材料", "M9材料"]
+    },
+    "ic_design": {
+      "name": "IC設計",
+      "keywords": ["IC設計", "晶片設計", "fabless", "無廠半導體", "SoC設計", "自研晶片"]
+    },
+    "thermal": {
+      "name": "散熱",
+      "keywords": ["散熱", "熱管", "均熱片", "VC均熱板", "散熱模組", "3DVC", "均溫板", "風扇模組", "熱interface", "導熱"]
+    },
+    "liquid_cooling": {
+      "name": "水冷散熱",
+      "keywords": ["水冷", "液冷", "CDU", "冷卻液分配", "冷板", "cold plate", "浸沒式冷卻", "兩相流"]
+    },
+    "probe_card": {
+      "name": "探針卡",
+      "keywords": ["探針卡", "probe card", "針測", "垂直探針", "MEMS探針", "晶圓測試介面"]
+    },
+    "ai_server": {
+      "name": "AI伺服器",
+      "keywords": ["AI伺服器", "AI server", "GB200", "GB300", "NVL72", "HGX", "加速運算", "AI機櫃", "算力中心", "AI資料中心", "AIDC"]
+    },
+    "memory_ic": {
+      "name": "記憶體IC",
+      "keywords": ["DRAM", "NAND", "記憶體", "HBM", "HBM3", "HBM4", "高頻寬記憶體", "利基型記憶體"]
+    },
+    "foundry": {
+      "name": "晶圓代工",
+      "keywords": ["晶圓代工", "foundry", "先進製程", "2奈米", "3奈米", "5奈米", "N2", "N3", "特殊製程"]
+    },
+    "optical_module": {
+      "name": "光模組／光收發",
+      "keywords": ["光模組", "光收發", "800G", "1.6T", "光收發模組", "矽光模組", "OSFP", "QSFP"]
+    },
+    "cpo": {
+      "name": "CPO共同封裝光學",
+      "keywords": ["CPO", "共同封裝光學", "矽光子", "silicon photonics", "光電共封"]
+    },
+    "semi_equip": {
+      "name": "半導體設備",
+      "keywords": ["半導體設備", "前段設備", "後段設備", "機台", "曝光機", "蝕刻設備", "薄膜設備", "量測設備"]
+    },
+    "leo_satellite": {
+      "name": "低軌衛星",
+      "keywords": ["低軌衛星", "LEO衛星", "衛星通訊", "星鏈", "Starlink", "衛星地面站", "相位陣列天線"]
+    },
+    "energy_storage": {
+      "name": "儲能",
+      "keywords": ["儲能", "ESS", "電網儲能", "儲能櫃", "儲能系統", "AFC調頻", "電池儲能"]
+    },
+    "robot": {
+      "name": "機器人",
+      "keywords": ["機器人", "人形機器人", "協作機器人", "機械手臂", "humanoid", "服務型機器人"]
+    }
+  },
+  "sentence_patterns": {
+    "purpose": "C 級單篇證據需句型明確才採用（題材驗證 v2.3）。這些是『這家公司從事這個題材』的明確陳述樣態。",
+    "patterns": [
+      "{code}為{theme}概念股",
+      "{code}是{theme}概念股",
+      "{theme}概念股",
+      "{theme}族群",
+      "打入{theme}供應鏈",
+      "切入{theme}",
+      "搶進{theme}",
+      "布局{theme}",
+      "佈局{theme}",
+      "投入{theme}",
+      "取得{theme}訂單",
+      "{theme}產能",
+      "{theme}擴產",
+      "{theme}出貨"
+    ]
+  }
+}

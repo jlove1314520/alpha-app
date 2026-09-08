@@ -53,6 +53,19 @@ TWSE_REVENUE = "https://openapi.twse.com.tw/v1/opendata/t187ap05_L"
 RSS_FEEDS = [
     ("中央社財經", "https://feeds.feedburner.com/rsscna/finance"),
     ("Yahoo股市", "https://tw.stock.yahoo.com/rss?category=news"),
+    # 2026-09-08（題材萃取二）新增經濟日報三個分類。查證紀錄：
+    #   robots.txt 對 `User-agent: *` **零條 Disallow**（實測），
+    #   且 udn 主動提供 RSS 訂閱服務。
+    #   **但其著作權聲明比中央社/Yahoo 嚴格**：「除法令另有規定或事前經
+    #   聯合線上所屬網站之經營單位授權外，使用者不得擅自以下載、轉貼或
+    #   以他法重製聯合線上所屬網站的內容。」
+    #   我們的用法是**只存索引（標題／連結／日期）＋萃取事實**，
+    #   不重製全文；引用原句時只存必要的一句並附出處，
+    #   依總司令 2026-09-08 裁示「事實不受著作權保護、只存必要的一句、不轉載全文」。
+    #   完整條款紀錄見 docs/DATA_SOURCE_MAP.md。
+    ("經濟日報證券", "https://money.udn.com/rssfeed/news/1001/5590?ch=money"),
+    ("經濟日報產業", "https://money.udn.com/rssfeed/news/1001/5591?ch=money"),
+    ("經濟日報焦點", "https://money.udn.com/rssfeed/news/1001/5588?ch=money"),
 ]
 KEEP_DAYS = 90          # 事件保留 90 天：個股頁只顯示近 30 日，多留一些供研究端用
 NEWS_KEEP = 300         # 新聞只留最近 300 則，避免檔案無限長大
