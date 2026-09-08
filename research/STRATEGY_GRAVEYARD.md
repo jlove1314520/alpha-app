@@ -2289,3 +2289,41 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
 - **死因**：第1關cheap gate兩個子測試皆FAIL。(a)結算前3日報酬：TRAIN mean=-0.0098%，VAL mean=+0.2684%，**train/val正負號不一致**，VAL |mean| vs 500次隨機窗口雙尾null percentile僅56.0（門檻90.0）。(b)結算當日報酬：TRAIN mean=+0.1825%顯著（p=0.0284）但VAL mean=+0.1117%不顯著（p=0.4953），雖同號但percentile僅47.6（門檻90.0），TRAIN期的顯著性沒有在VAL期重現，判斷為noise。180個可用事件（300個歷史結算日中120個落在TAIEX價格快取起始日2010-01-01之前不可用，屬預期內的資料涵蓋邊界非異常）。
 - **不泛化聲明**：只測了PRE_WINDOW=3/POST_WINDOW=1這一組事前綁定的單點，依協定「不得看到FAIL後換N/M繼續測、避免變成事後選格子的多重比較」紀律，未掃描`HYPOTHESIS_QUEUE.md`#60條目原定的N/M網格即結案；不代表已窮盡所有窗口長度組合，但依既有紀律不應在同一組事前綁定之外另尋能過關的參數點。⑨大類（衍生性商品結算機械性效應）本次是本佇列第一次測試這個維度，唯一一條假設即FAIL，該大類至此0勝1敗結案。
 - **原始記錄**：`TRIALS_LEDGER.md`#213/#214、`HYPOTHESIS_QUEUE.md` #60條目、`fut_settlement_date_probe60.py`（hypothesis_queue排程新增，資料可行性查證）、`fut_settlement_event_gate60.py`（本輪新增，可重複執行）、`data/fut_settlement_dates_derived_tx.csv`。零新增API呼叫（複用既有TAIEX/TaiwanFuturesDaily快取）。
+
+## #52-US SEC EDGAR 8-K Item 2.02 事件反應速度（PEAD）—— 2026-09-08結案（小樣本先導）：FAIL（cheap gate，馬拉松第454輪US軌）
+
+- **假設**：8-K Item 2.02（財報公布）對應Post-Earnings-Announcement Drift文獻
+  （Bernard & Thomas 1989起，underreaction機制）——公告當日反應（r0）與其後
+  一週漂移報酬（r_drift）應同號（continuation，事前綁定方向，非reversal）。
+  round452已完成PIT/交易日對齊規則設計＋`get_8k_events()`地基程式碼，本輪
+  （round454）依round452交辦，首次執行cheap gate（small pilot規模）。
+- **測試**：`us_8k_pead_gate52.py`（新增，可重複執行），large tier N=25
+  （seed 20260908_52），22/25檔可用（3檔無`us_price_series()`歷史），
+  1004筆Item 2.02事件。控制組：同股票配對式重抽（排除真事件日±10交易日
+  緩衝避免污染），2組隨機種子各100 draws，走`evaluate_vs_control()`新標準
+  （嚴格贏控制組最大值或配對20/20全勝）。TRAIN/VAL依`validation.holdout`切分。
+- **結果**：TRAIN（n=730）same-sign比例=0.5068 vs 控制組max=0.5484（百分位
+  62.5，未過）；VAL（n=274）same-sign比例=0.5255 vs 控制組max=0.5686
+  （百分位83.5，未過）。兩期方向一致（皆正），非train/val正負號矛盾，是
+  量級不足——真實訊號比控制組雜訊高一些但沒有高到嚴格贏過控制組最高點。
+- **判定**：**FAIL（僅N=25小樣本先導這一次執行）**——round452規格本身
+  （PIT錨點、交易日對齊、r0/r_drift視窗定義）未被推翻，死的是「這組樣本
+  規模下能不能偵測到訊號」這個具體結果。
+- **誠實揭露限制**：(1) N=25屬小樣本，`CALIBRATION_PROBE.md`已證實類似
+  規模的cheap gate對「文獻等級」弱訊號（|IC|≈0.03等級）檢定力只有四~五成，
+  本次結果不排除同樣的檢定力不足問題，但依協定FAIL先誠實記錄，不在同一輪
+  內片面放大樣本重跑（會變成看到FAIL才加碼的多重比較）。(2) `get_cik()`
+  僅回傳ticker的**現況**映射，本輪抽樣意外發現一個具體例證：現況`XOM`
+  對應的CIK`2115436`（title「ExxonMobil Holdings Corp」）非傳統認知的
+  CIK 34088，可能是企業重組後的新法人實體，8-K歷史因而很短——這是
+  `sec_edgar_client.py`docstring早已記載的「ticker多對一時序」風險首次
+  在US軌實測中具體浮現（本輪樣本未抽中`XOM`，未影響本次結果，但未來擴大
+  樣本時必須逐檔核對，不能只信任ticker字面匹配）。(3) 只測了Item 2.02
+  單一item family，未測5.02/1.01等其他家族。
+- **下一步（留給下一輪判斷）**：(a) 判定此小樣本結果是否足以結案
+  #52-US整體，或 (b) 評估放大到full tier樣本重測（需先確認CIK歷史一致性
+  查核方式），或 (c) 换測其他item family。三選項皆未替下一輪預先決定，
+  依規則FAIL了先記錄換下一條，不在本輪內自行加測。
+- **原始記錄**：`TRIALS_LEDGER.md`#215/#216、`HYPOTHESIS_QUEUE.md` #52-US
+  條目、`us_8k_pead_gate52.py`（新增，可重複執行）。零新增付費/需登入API
+  呼叫（純SEC EDGAR公開JSON端點）。

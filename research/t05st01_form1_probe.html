@@ -1,0 +1,166 @@
+<form id="form1" name="form1" action="/mops/web/ajax_t05st01" onsubmit="return false;" method="post">
+<input type="hidden" id="subMenuID" value="[6,6001]">
+
+
+<table width="775" border="0" cellpadding="0" cellspacing="0" >
+<tr>
+	
+	<td class="bar01a" valign="top" width="6px"><div style="background: url(images/map2.gif) no-repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; height: 52px; width:6px;background-position:1px 0px;"></div></td>
+	
+	
+	<td class="bar01b" valign="top"><!--
+蝔�撘�閮剛��撣�:銝����
+蝔�撘����蝔�:query-26.htm
+靽格�寧�����:(��澆��=>镼踹����交��+���甈�+蝔�撘�閮剛��撣�)
+2016121211oliver:(T88K)靽格迤Safari��芸��摰����Bug
+2016030610edward:(T88K)蝘駁�文�砍�訾誨������撠�
+-->
+<!-- ��砍�訾誨���, 撟游漲, ���隞賬����交�������� -->
+		<input type="hidden" name="step" value="1">
+		<input type="hidden" name="firstin" value="ture">
+		<input type="hidden" name="off" value="1">
+		<input type="hidden" name="keyword4">
+		<input type="hidden" name="code1">
+		<input type="hidden" name="TYPEK2">
+		<input type="hidden" name="checkbtn">
+		<input type="hidden" name="queryName" value="co_id">
+		<input type="hidden" name="inpuType" value="co_id">
+
+		<table border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			<input type="hidden" name="TYPEK" value="all">
+			<td><div id="div4" style="background: url(images/map2.gif) no-repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; height: 11px; width:11px;background-position:-345px 0px;"></div></td><td>��砍�訾誨���<span style='color:red;'>���蝪∠迂</span></td>
+			<td><div id="search_bar1">
+				<div class="search">
+					<input name="co_id" type="text" class="textbox" id="co_id" value="" size="10" oninput="autoComplete(this.form , 'co_id' , 'auto-complete-data' , event);" onkeydown="{if(event.keyCode==13){document.getElementById('year').focus(); hideDiv2(this); return false;}else{chkKeyDown(document.form1 , this , 'auto-complete-data' , event);}}" onkeyUp="autoComplete(this.form , 'co_id' , 'auto-complete-data' , event);" onblur="setTimeout(function(){hideDiv('auto-complete-data');} , 200);" onClick="this.value='';document.getElementById('oldKeyWord').value='';hideDiv('auto-complete-data');" autocomplete="off"/> 
+				</div>
+			</div></td>
+<!--
+			<td><div id="search_bar1">
+				<div class="search">
+					<input type="button" value="隞������亥岷" onclick="showsh2('quicksearch9','showTable9');document.form1.step.value='4';action='/mops/web/ajax_quickpgm';ajax1(this.form,'quicksearch9');">
+				</div>
+			</div></td>
+-->
+			<td><div id="div4" style="background: url(images/map2.gif) no-repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; height: 11px; width:11px;background-position:-345px 0px;"></div></td><td>撟游漲</td>
+			<td><div id="search_bar1">
+				<div class="search">
+					<input name="year" type="text" class="textbox" id="year" value="" size="3" maxlength="3"> 
+				</div>
+			</div></td>
+			<td><div id="div4" style="background: url(images/map2.gif) no-repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; height: 11px; width:11px;background-position:-345px 0px;"></div></td><td>���隞�</td>
+			<td><div id="search_bar1">
+				<div class="search">
+					<select name="month" id="month">
+						<option value="">��典僑摨�</option>
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+					</select>
+				</div>
+			</div></td>
+			<td><div id="div4" style="background: url(images/map2.gif) no-repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; height: 11px; width:11px;background-position:-345px 0px;"></div></td><td>��交��</td>
+			<td><div id="search_bar1">
+				<div class="search">
+					<select name="b_date" id="day">
+						<option value=""></option>
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+						<option value="13">13</option>
+						<option value="14">14</option>
+						<option value="15">15</option>
+						<option value="16">16</option>
+						<option value="17">17</option>
+						<option value="18">18</option>
+						<option value="19">19</option>
+						<option value="20">20</option>
+						<option value="21">21</option>
+						<option value="22">22</option>
+						<option value="23">23</option>
+						<option value="24">24</option>
+						<option value="25">25</option>
+						<option value="26">26</option>
+						<option value="27">27</option>
+						<option value="28">28</option>
+						<option value="29">29</option>
+						<option value="30">30</option>
+						<option value="31">31</option>
+					</select> ~ <select name="e_date" id="day">
+						<option value=""></option>
+						<option value="01">1</option>
+						<option value="02">2</option>
+						<option value="03">3</option>
+						<option value="04">4</option>
+						<option value="05">5</option>
+						<option value="06">6</option>
+						<option value="07">7</option>
+						<option value="08">8</option>
+						<option value="09">9</option>
+						<option value="10">10</option>
+						<option value="11">11</option>
+						<option value="12">12</option>
+						<option value="13">13</option>
+						<option value="14">14</option>
+						<option value="15">15</option>
+						<option value="16">16</option>
+						<option value="17">17</option>
+						<option value="18">18</option>
+						<option value="19">19</option>
+						<option value="20">20</option>
+						<option value="21">21</option>
+						<option value="22">22</option>
+						<option value="23">23</option>
+						<option value="24">24</option>
+						<option value="25">25</option>
+						<option value="26">26</option>
+						<option value="27">27</option>
+						<option value="28">28</option>
+						<option value="29">29</option>
+						<option value="30">30</option>
+						<option value="31">31</option>
+					</select>
+				</div>
+			</div></td>
+		</tr>
+		</table>
+</td>
+	
+	<td align="right" class="bar01b">&nbsp;</td>
+	<td align="right" class="bar01b" valign="top">
+		<table border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td><div id="search_bar1">
+				<div class="search">
+				
+				
+				<input type="button" value=" ��亥岷 " onclick="javascript:doAction();ajax1(document.form1,'table01');"/>
+				</div>
+			</div></td>
+		</tr>
+		</table>
+	</td>
+	
+	<td class="bar01a" valign="top" width="6px"><div style="background: url(images/map2.gif) no-repeat scroll 0% 0%; -moz-background-clip: border; -moz-background-origin: padding; -moz-background-inline-policy: continuous; height: 52px; width:6px;background-position:-72px 0px;"></div></td>
+</tr>
+</table>
+</form>
