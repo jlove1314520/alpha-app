@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08T20:53+0800 hypothesis_queue排程接續 — 接續#61子測試1
+補齊2015-2017會議日期，本輪嘗試兩條路皆失敗，判定改走fallback：(1)
+WebSearch搜「104年/105年 理監事聯席會議預定日期 site:cbc.gov.tw」，
+搜尋引擎索引不到2015-2016年央行舊聞稿頁面（跟上輪確認的現象一致）；
+(2)嘗試WebFetch Wayback Machine快照`lp-357-1.html`列表頁想找舊年份
+連結，工具層直接回報「Claude Code is unable to fetch from
+web.archive.org」——這個網域被WebFetch工具封鎖，不是查證方法錯誤，是
+工具本身做不到，之前設想的「下一輪改查Wayback Machine」這條路徑本輪
+確認走不通，需在協定/假設條目誠實記錄這個新發現的限制。判定不再
+繼續加碼查證2015-2017（已嘗試三種獨立管道：WebSearch索引、WebFetch
+官方逐年頁面模式、WebFetch Wayback Machine，三者皆已窮盡），改採
+既有`#61`條目寫好的fallback：子測試1改用「2018起可得樣本」（TRAIN
+12場/VAL 16場，共28場會議，涵蓋2018-2024）做探索性版本，並在報告中
+明確標記「非完整涵蓋2015-2020」，不再等待100%補齊。本輪剩餘時間
+用於在`HYPOTHESIS_QUEUE.md`寫死這個決策與限制揭露，下一輪從子測試1
+探索性版cheap gate開始執行（若時間許可，子測試2樣本量小的限制不變，
+兩個子測試分開判定）。全程零FinMind/TWSE API呼叫，
+`is_holdout_consumed()`開工/收工前皆確認`False`。
+
 ## 2026-09-08T20:25+0800 hypothesis_queue排程接續 — 接續#61（央行理監事
 會議決策事件）子測試1完整會議日期清單補齊，逐年WebSearch+WebFetch官方
 「XX年中央銀行理監事聯席會議預定日期」公告，本輪新補齊2018/2019/2021/
