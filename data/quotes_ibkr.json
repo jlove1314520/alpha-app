@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T12:51:48.410186+08:00",
+  "fetched_at": "2026-09-08T13:02:11.361147+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -17,7 +17,7 @@
       "last": null,
       "bid": null,
       "ask": null,
-      "close": 499.7,
+      "close": null,
       "change_pct": null,
       "data_type": "DELAYED",
       "exchange": "SMART"
@@ -60,14 +60,15 @@
       "label": "道瓊工業指數"
     },
     "^GSPC": {
-      "last": 7717.81,
+      "last": 7718.6,
       "bid": null,
       "ask": null,
       "close": 7747.71,
-      "change_pct": -0.3859,
-      "data_type": "DELAYED",
+      "change_pct": -0.3757,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500"
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
     },
     "^IXIC": {
       "last": 26506.99,
@@ -81,15 +82,14 @@
       "source": "yahoo_fallback"
     },
     "^SOX": {
-      "last": 11735.263,
+      "last": null,
       "bid": null,
       "ask": null,
-      "close": 11352.1,
-      "change_pct": 3.3753,
-      "data_type": "YAHOO_DELAYED",
+      "close": 11735.26,
+      "change_pct": null,
+      "data_type": "DELAYED",
       "exchange": "PHLX",
-      "label": "費城半導體指數",
-      "source": "yahoo_fallback"
+      "label": "費城半導體指數"
     }
   }
 }
