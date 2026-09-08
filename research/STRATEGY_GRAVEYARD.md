@@ -2275,3 +2275,10 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
 - **死因**：TRAIN期PASS（真實訊號年化Sharpe+1.1747嚴格贏過200次控制組抽樣最大值+1.0512），但**VAL期FAIL**（真實訊號+1.5163沒有贏過控制組最大值+1.5389，控制組百分位99.0，但2026-09-07標準升級後「贏過平均/落在高百分位」不算通過，只有嚴格贏過最大值或配對式20/20全勝才算）。GATE_SEQUENCE規則要求TRAIN+VAL皆PASS才算過關，VAL未過即整體FAIL。
 - **不泛化聲明**：這是非常邊緣的FAIL（VAL百分位99.0，只差控制組最大值一點點），不代表反向波動度加權完全沒有風險調整後報酬的改善能力——sanity階段觀察到的invvol版本全期間total_return/sharpe/mdd皆優於buyhold版本方向正確，且TRAIN期已嚴格通過控制組檢定；死的是「這個具體實作（trailing 60日窗口/21日頻率/159檔樣本）在VAL期的邊際優勢小到跟隨機權重分配幾乎無法區分」，不是「風險平價這個經濟機制本身無效」。若未來有新的具體機制假說（例如不同的波動度估計窗口、或改用完整共變異數風險平價而非僅個股自身波動度），仍可視為獨立測試，不算換皮。
 - **原始記錄**：`TRIALS_LEDGER.md`#202、`HYPOTHESIS_QUEUE.md` #58條目、`inverse_vol_weighted_portfolio_gate58.py`／`inverse_vol_weighted_portfolio_gate58_control.py`（新增，可重複執行）、`data/inverse_vol_weighted_portfolio_gate58_daily_returns.csv`／`data/inverse_vol_weighted_portfolio_gate58_control_results.csv`（新增）。零新增API呼叫（複用#29/#58已快取個股parquet）。
+
+## #59 最小變異數投資組合建構（Minimum-Variance Portfolio Construction，共變異數矩陣版）——2026-09-08結案：FAIL（GATE_SEQUENCE第4關，hypothesis_queue排程接續）
+
+- **假設**：Ledoit-Wolf收縮估計trailing 60日共變異數矩陣、全域最小變異數封閉解、負權重裁剪為0後正規化，月頻（21交易日）再平衡，跟`#29`/`#58`共用同一批159檔PIT宇宙。第1關sanity PASS（三期波動度比值皆<1.0且優於#58）、第2關隨機控制組TRAIN/VAL皆嚴格通過、第3關參數高原13/13網格點滿分——是本佇列③portfolio construction類走最深、前3關表現最乾淨的一次。
+- **死因**：第4關成本/稅/滑價敏感度。TRAIN期在最寬鬆的1x成本情境下淨溢酬已轉負（buyhold+66.14% vs minvar淨+66.02%，淨溢酬-0.12%），2x/3x進一步惡化至-15.86%/-30.13%；VAL期1x/2x為正但3x轉負(-3.99%)。根因是換手率：每次拉回都要重新求解159x159共變異數矩陣得出全新目標權重，平均單次turnover=0.2107，約為`#29`固定拉回1/n版本(0.0332)的6.3倍。依GATE_SEQUENCE「TRAIN+VAL皆須PASS」同一把尺（比照#58判例），TRAIN未過即整體FAIL，未進第5關leave-one-out。
+- **不泛化聲明**：不代表「共變異數結構帶來的分散化效益不存在」——GATE2/GATE3已證明毛報酬層面確實優於#58（個股波動度加權，忽略相關性），死的是「月頻+全域無槓桿長倉限制+封閉解直接求解」這個具體構造的換手率成本，換手成本吃光了毛報酬優勢。未來若重測應優先考慮：(a)拉長COV_WINDOW或再平衡頻率降低換手、(b)在最佳化目標函數加入turnover懲罰項、(c)加入權重變動上限約束，而非直接否定整個「最小變異數/風險平價」機制家族。
+- **原始記錄**：`TRIALS_LEDGER.md`#212、`HYPOTHESIS_QUEUE.md` #59條目、`min_variance_portfolio_gate59.py`／`min_variance_portfolio_gate59_control.py`／`min_variance_portfolio_gate59_plateau.py`／`min_variance_portfolio_gate59_costs.py`（新增，可重複執行）、`data/min_variance_portfolio_gate59_costs_grid.csv`（新增）。零新增API呼叫（複用#29/#58已快取個股parquet）。
