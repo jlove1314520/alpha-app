@@ -1,5 +1,17 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-08T22:53+0800 hypothesis_queue排程接續 — 查核#52(TW)背景
+回補job`20260908-220215-b142`：仍`running`（執行50.4分鐘，
+`watchdog_alive=True`），累積落地快取**815/2600＝31.2%**（比上一則心跳
+記載的320個/12.3%再前進約19個百分點），全程未失敗、僅偶發502已被重試
+機制吞掉，判斷健康執行中，**不重投**（避免對MOPS端點並行請求）。開工
+先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅`dev_queue_cycle.log`/
+`external_connectivity.jsonl`兩個其他排程殘留變更，未觸碰、未納入
+commit）。`is_holdout_consumed()`開工/收工前皆確認`False`，本輪零新增
+API呼叫。完整記錄見`HYPOTHESIS_QUEUE.md` #52條目「(n)」段落。**本輪
+工作到此為止（一輪一個有界工作單位）**，下一輪待辦：查該job是否已
+完成/逾時，逾時則重投同一指令，完整跑完後才進入#52第1關cheap gate。
+
 ## 2026-09-08T22:22+0800 hypothesis_queue排程接續（鎖檔乾淨取得，非陳舊
 回收）— 核對#52(TW)背景回補job狀態，確認正常執行中，不重複投遞。開工先讀
 協定+`CLAUDE.md`+`git pull`確認乾淨（僅`dev_queue_cycle.log`/

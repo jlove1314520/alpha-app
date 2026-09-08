@@ -6119,6 +6119,22 @@ id與進度供下一輪查核。`is_holdout_consumed()`開工/收工前皆確認
 `requests.Session`本身就是循序處理，兩條平行job只會互相競爭同一個
 端點反而更容易撞到節流）。
 
+**(n) 本輪查核：job仍健康執行中，未逾時未失敗，不重投（2026-09-08
+hypothesis_queue排程接續）**：開工先讀協定+`CLAUDE.md`+`git pull`確認
+乾淨（僅`dev_queue_cycle.log`/`external_connectivity.jsonl`兩個其他
+排程殘留變更，未觸碰）。`run_detached.py status --last 5`確認
+`20260908-220215-b142`**仍為`running`**（已執行50.4分鐘，
+`watchdog_alive=True`），`log`顯示已處理至800/2600（偶發502已被重試
+機制吞掉），實際落地快取檔數**815個parquet**（累積進度31.2%，比上
+一則心跳記載的320個/12.3%再前進約19個百分點）。**本輪判斷：job健康
+執行中且未達100分鐘timeout，不重投、不等待**（等待完整跑完不符合
+「一輪一個有界工作單位」原則，job本身是detached背景執行，不受本次
+session結束影響，下一輪排程觸發時自然可再查核）。`is_holdout_
+consumed()`開工/收工前皆確認`False`，本輪零新增API呼叫（僅查詢job
+狀態與檔案數）。**本輪工作到此為止**，下一輪待辦：查`20260908-
+220215-b142`是否已完成/逾時，逾時則重投同一指令（自動跳過已快取
+天數），完整跑完後才進入#52第1關cheap gate。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
