@@ -1156,11 +1156,32 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>即時伺服器（Phase 1 冷熱分離）</h3>
       <div class="setting-row">
         <span>伺服器網址</span>
-        <div class="setting-input"><input id="set-live-url" type="url" placeholder="live.你的網域.com 或 192.168.x.x:8001" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+        <div class="setting-input"><input id="set-live-url" type="url" placeholder="貼上完整 ts.net 網址" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
+      <!-- 2026-09-08（連線五.1）網址完整檢視。踩到的事：Cowork 在給總司令的測試網址裡
+           用了 `tail4c7XXXX` 這種佔位符，總司令照字面貼上，DNS 查不到，整輪測試作廢。
+           而設定頁的輸入框只有 170px、又靠右對齊，**貼進去之後看不到尾巴**——
+           使用者根本無法自我檢查貼對沒有（包含有沒有誤帶 :8001）。
+           所以這裡把「目前實際生效的網址」完整攤開顯示，可換行、可一鍵複製。 -->
+      <div id="live-url-full" class="note" style="margin-top:6px;display:none"></div>
+      <!-- 2026-09-08（連線四.1）舊區網位址引導。總司令的手機在 4G 下顯示「連線逾時」，
+           根因不是網路也不是伺服器，是設定裡還留著 https://192.168.3.241:8001——
+           連線二.2 把伺服器改成純 HTTP、連線三.1 又把綁定改成 127.0.0.1 之後，
+           那個位址在**任何**網路下都不再服務。錯誤三分類本身運作正常，
+           它老實回報了「連不上」，但「連線逾時」這句話對使用者沒有指出**該做什麼**。
+           所以這裡不是再加一種錯誤訊息，是在**設定當下**就把舊值認出來。 -->
+      <div id="live-url-legacy-warn" style="display:none;margin-top:8px"></div>
       <div class="setting-row" style="margin-top:8px">
         <span>X-Alpha-Local-Token</span>
         <div class="setting-input"><input id="set-live-token" type="password" placeholder="伺服器啟動時印在終端機" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
+      </div>
+      <!-- 2026-09-08（連線四.2）現行架構說明。使用者不需要懂 Tailscale，
+           但需要知道「為什麼區網位址不能用了」與「哪個網址在哪裡能用」。 -->
+      <div class="note" style="margin-top:10px;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;line-height:1.6">
+        <b style="color:var(--ink-2)">目前架構</b><br>
+        伺服器只聽 <span class="num">127.0.0.1</span>（本機），對外由 <b>Tailscale Funnel</b> 轉進來。<br>
+        <b style="color:var(--ink-2)">區網直連已停用</b>——<span class="num">192.168.x.x:8001</span> 這類位址在任何網路下都連不到，那是舊版用法。<br>
+        請填 <span class="num">ts.net</span> 網址（<b>不用加 port</b>），它在<b>家中 WiFi、公司 WiFi、行動網路都能用</b>。
       </div>
       <!-- 2026-09-06（CF.3）Cloudflare Access 服務權杖，兩欄都是選填。
       區網直連或還沒接 Access 時留空即可，留空就完全不會送這兩個標頭。
@@ -3385,8 +3406,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       if(c&&cu){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
     }catch(e){console.warn('[loadStockInfo:cacheRead]',e);recordGlobalError('loadStockInfo:cacheRead',e)}
     try{
-      const [rTW,rUS]=await Promise.all([fetch(`${FM}?dataset=TaiwanStockInfo`),fetch(`${FM}?dataset=USStockInfo`)]);
-      const jTW=await rTW.json(),jUS=await rUS.json();
+      // 2026-09-08 兩個真缺陷一起修（實測抓到，不是預防性重構）：
+      // (1) **原本沒有逾時中止**。實測 FinMind 的 USStockInfo 端點掛住超過 45 秒
+      //     不回應（同一時間 TaiwanStockInfo 正常、curl 打同一個端點 0.49 秒就回），
+      //     這個 fetch 就一直懸著。後果不只是搜尋清單載不出來——連冒煙測試的
+      //     `waitUntil:'networkidle'` 都永遠等不到，整套測試無法執行。
+      // (2) **原本用 Promise.all**，違反 CLAUDE.md 明文規定
+      //     「多個獨立子任務平行執行時用 Promise.allSettled」。台股與美股清單是
+      //     兩件互相獨立的事，美股掛掉不該讓台股也拿不到。
+      const _fmInfo=(ds)=>{
+        const ac=new AbortController();
+        const timer=setTimeout(()=>ac.abort(),12000);
+        return fetch(`${FM}?dataset=${ds}`,{signal:ac.signal})
+          .then(r=>r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)))
+          .finally(()=>clearTimeout(timer));
+      };
+      const [sTW,sUS]=await Promise.allSettled([_fmInfo('TaiwanStockInfo'),_fmInfo('USStockInfo')]);
+      if(sTW.status==='rejected')console.warn('[loadStockInfo:TW]',sTW.reason);
+      if(sUS.status==='rejected')console.warn('[loadStockInfo:US]',sUS.reason);
+      const jTW=sTW.status==='fulfilled'?sTW.value:null;
+      const jUS=sUS.status==='fulfilled'?sUS.value:null;
       const dTW=(jTW&&jTW.data)||[],dUS=(jUS&&jUS.data)||[];
       const seen={};STOCKLIST=[];STOCKNAME={};
       for(const s of dTW){const id=s.stock_id;if(!id||seen[id])continue;
@@ -4902,6 +4941,72 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     return {url:v,note:(v===before?'':'已將網址整理為 '+v)};
   }
+  // 2026-09-08（連線四.1）舊區網位址偵測。判定條件照總司令指定：
+  // 私有網段（10./172.16-31./192.168.）或帶 :8001。
+  // 為什麼「:8001 也算」：即使有人填了 ts.net 卻手動加上 :8001，
+  // Funnel 對外只走 443，帶 port 一樣連不到——那也是同一個舊用法的殘留。
+  function legacyLiveUrlReason(url){
+    if(!url)return null;
+    let host='',port='';
+    try{const u=new URL(/^https?:\/\//i.test(url)?url:'https://'+url);host=u.hostname;port=u.port}
+    catch(e){return null}
+    if(/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(host))return 'private';
+    if(port==='8001')return 'port8001';
+    return null;
+  }
+  // 2026-09-08（連線五.1）把實際生效的網址完整顯示出來，可換行不截斷。
+  function renderLiveUrlFull(){
+    const box=document.getElementById('live-url-full');if(!box)return;
+    if(!LIVE.url){box.style.display='none';box.innerHTML='';return;}
+    box.style.display='';
+    box.innerHTML='<div style="display:flex;gap:8px;align-items:flex-start">'
+      +'<span style="color:var(--ink-4);flex-shrink:0">目前生效</span>'
+      +'<span class="num" id="live-url-full-text" style="flex:1;word-break:break-all;color:var(--ink-2);line-height:1.5">'
+      +String(LIVE.url).replace(/</g,'&lt;')+'</span>'
+      +'<button class="press" onclick="copyLiveUrl()" style="flex-shrink:0;font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--hairline);background:transparent;color:var(--accent);cursor:pointer">複製</button>'
+      +'</div>';
+  }
+  async function copyLiveUrl(){
+    try{
+      await navigator.clipboard.writeText(LIVE.url||'');
+      toast('已複製完整網址');
+    }catch(e){
+      // clipboard API 在非安全內容或權限被擋時會失敗——退回選取文字，
+      // 讓使用者自己長按複製，而不是靜默什麼都沒發生。
+      console.warn('[copyLiveUrl]',e);
+      try{
+        const el=document.getElementById('live-url-full-text');
+        if(el){const r=document.createRange();r.selectNodeContents(el);
+          const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}
+        toast('無法自動複製，已為你選取網址，請長按複製');
+      }catch(e2){console.warn('[copyLiveUrl:fallback]',e2);toast('複製失敗，請手動選取')}
+    }
+  }
+  function renderLegacyLiveWarn(){
+    const box=document.getElementById('live-url-legacy-warn');if(!box)return;
+    const reason=legacyLiveUrlReason(LIVE.url);
+    if(!reason){box.style.display='none';box.innerHTML='';return;}
+    const what=reason==='private'
+      ?'此為<b>舊版區網位址</b>'
+      :'此網址帶了 <span class="num">:8001</span>，那是<b>舊版區網用法</b>';
+    box.style.display='';
+    box.innerHTML='<div style="border:1px solid var(--gold);border-radius:8px;padding:9px 10px;background:rgba(212,168,75,.08)">'
+      +'<div style="font-size:12px;color:var(--ink-2);line-height:1.6">'
+      +'⚠ '+what+'，伺服器已改走 <b>Tailscale</b>，'
+      +'請改填 <span class="num">ts.net</span> 網址（<b>不需加 port</b>）。'
+      +'<br><span style="color:var(--ink-4)">這個位址在任何網路下都連不到，'
+      +'所以測試連線只會一直逾時——不是網路問題，是網址過期了。</span></div>'
+      +'<button class="press" onclick="clearLegacyLiveUrl()" style="margin-top:8px;font-size:11.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer">清除舊網址</button>'
+      +'</div>';
+  }
+  function clearLegacyLiveUrl(){
+    try{
+      localStorage.removeItem('alpha_live_url');
+      const u=document.getElementById('set-live-url');if(u)u.value='';
+      toast('已清除舊網址，請填入 ts.net 網址');
+    }catch(e){console.warn('[clearLegacyLiveUrl]',e);recordGlobalError('clearLegacyLiveUrl',e)}
+    loadLiveConfig();renderLiveStatus();
+  }
   function saveLiveConfig(){
     const u=document.getElementById('set-live-url'),t=document.getElementById('set-live-token');
     let changed=false;
@@ -4995,6 +5100,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const ci=document.getElementById('set-cf-access-id'),cs=document.getElementById('set-cf-access-secret');
     if(ci&&document.activeElement!==ci)ci.value=LIVE.cfId||'';
     if(cs&&document.activeElement!==cs)cs.value=LIVE.cfSecret||'';
+    _safeSync('renderLegacyLiveWarn',renderLegacyLiveWarn);  // 2026-09-08 連線四.1
+    _safeSync('renderLiveUrlFull',renderLiveUrlFull);        // 2026-09-08 連線五.1
   }
   // ── 2026-09-06（連線一.2）測試連線分兩段、錯誤分三類 ───────────────────────
   // 原本只打 /live/quotes，失敗一律顯示瀏覽器丟回來的原始訊息（iOS Safari 就是那句
@@ -5007,6 +5114,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function testLiveConnection(){
     loadLiveConfig();
     if(!LIVE.configured){toast('請先填伺服器網址與token');return}
+    // 2026-09-08（連線四.1）舊區網位址直接短路，不要讓使用者等 6 秒逾時。
+    // 逾時訊息老實但沒用——它說「連不上」，卻不說「這個網址已經廢了、該換成什麼」。
+    // 總司令在 4G 下就是卡在這裡：看到「連線逾時」自然去懷疑手機網路，
+    // 但問題根本不在網路。能在送出請求前就判斷出來的事，不該讓使用者等。
+    const _legacy=legacyLiveUrlReason(LIVE.url);
+    if(_legacy){
+      LIVE.lastError=(_legacy==='private'?'舊版區網位址':'網址帶了 :8001（舊版區網用法）')
+        +'，伺服器已改走 Tailscale。請改填 ts.net 網址（不需加 port）。'
+        +'區網直連已停用，此位址在任何網路下都連不到——不是網路問題。';
+      toast('舊版區網位址，請改填 ts.net 網址（不需加 port）');
+      renderLiveStatus();   // 這會一併畫出設定頁的引導方塊與「清除舊網址」按鈕
+      return;
+    }
     let health=null;
     try{
       const ac=new AbortController();const t=setTimeout(()=>ac.abort(),6000);
@@ -5042,12 +5162,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){
       const isHttps=/^https:/i.test(LIVE.url||'');
       const timeout=e.name==='AbortError';
-      LIVE.lastError=timeout?'連線逾時':'連不上伺服器';
-      toast(timeout
-        ? '① 連線逾時：伺服器可能沒在跑，或手機不在同一個網路'
+      // 2026-09-08（連線五.2）錯誤訊息一律附上**實際使用的完整網址**（token 不顯示）。
+      // 踩到的事：Cowork 給的測試網址裡有 `tail4c7XXXX` 佔位符，總司令照字面貼上，
+      // 錯誤訊息卻只說「連線逾時」——訊息本身沒錯，但使用者無從發現是自己貼錯了。
+      // 把用的網址原樣印出來，貼錯一眼就看得到。
+      LIVE.lastError=(timeout?'連線逾時':'連不上伺服器')+'（'+(LIVE.url||'未設定')+'）';
+      toast((timeout
+        ? '① 連線逾時：伺服器可能沒在跑，或網址有誤'
         : (isHttps
             ? '① 連不上：伺服器沒在跑，或這台手機還沒信任自簽憑證（設定→一般→關於→憑證信任設定）'
-            : '① 連不上：伺服器沒在跑，或網址/port 不對'));
+            : '① 連不上：伺服器沒在跑，或網址/port 不對'))
+        +'\n實際使用的網址：'+(LIVE.url||'未設定')
+        +'\n請逐字核對，尤其結尾與有無多帶 :8001');
       renderLiveStatus();return;
     }
     try{
@@ -5065,8 +5191,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         restartLiveStream();
       }
     }catch(e){
-      LIVE.lastError=e.name==='AbortError'?'逾時':(e.message||String(e));
-      toast('/health 通但 /live/quotes 失敗（'+LIVE.lastError+'）——多半是憑證或 CORS，不是伺服器沒開');
+      LIVE.lastError=(e.name==='AbortError'?'逾時':(e.message||String(e)))+'（'+(LIVE.url||'')+'）';
+      toast('/health 通但 /live/quotes 失敗（'+(e.name==='AbortError'?'逾時':(e.message||String(e)))+'）'
+        +'——多半是憑證或 CORS，不是伺服器沒開\n實際使用的網址：'+(LIVE.url||'未設定'));
     }
     renderLiveStatus();
   }
@@ -5617,7 +5744,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.0618';
+  const APP_VERSION='2026-09-08.1254';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
