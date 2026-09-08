@@ -139,8 +139,16 @@ def period_of(date_str: str) -> str:
     return "OUT_OF_RANGE"
 
 
-def process_ticker(ticker: str) -> tuple[list[EventRow], list[int], list[str], dict]:
-    """Returns (event_rows, eligible_control_indices, calendar, skip_reasons)."""
+def process_ticker(ticker: str, item_code: str = "2.02") -> tuple[list[EventRow], list[int], list[str], dict]:
+    """Returns (event_rows, eligible_control_indices, calendar, skip_reasons).
+
+    `item_code` parameterized (round455 US-track, for the #52-US "other item
+    family" branch of round454's three-way choice) so a second family (e.g.
+    5.02 executive departures) can reuse this exact PIT/reaction-day/control-
+    buffer machinery against the *same already-cached* get_8k_events() data
+    -- zero new API calls, since full_history=True submissions are cached
+    per-CIK regardless of which item family the caller filters for.
+    """
     skips: dict = {}
     cik = get_cik(ticker)
     if cik is None:
@@ -155,7 +163,7 @@ def process_ticker(ticker: str) -> tuple[list[EventRow], list[int], list[str], d
     n = len(calendar)
 
     events = get_8k_events(cik, full_history=True)
-    item_events = [e for e in events if e.get("items") and "2.02" in e["items"].split(",")]
+    item_events = [e for e in events if e.get("items") and item_code in e["items"].split(",")]
 
     rows: list[EventRow] = []
     seen_reaction_idx: set[int] = set()
@@ -211,13 +219,13 @@ def draw_control_proportion(events: list[EventRow], pools: dict[str, list[int]],
     return same / total if total else float("nan")
 
 
-def main() -> int:
+def main(item_code: str = "2.02", label: str = "Item 2.02 8-K PEAD") -> int:
     if holdout.is_holdout_consumed():
         print("ABORT: holdout already consumed, refusing to run")
         return 1
 
     tickers = sample_ids(SAMPLE_SIZE, SAMPLE_SEED)
-    print(f"=== #52-US cheap gate pilot: Item 2.02 8-K PEAD, tier={TIER}, "
+    print(f"=== #52-US cheap gate pilot: {label}, tier={TIER}, "
           f"N={len(tickers)} (seed={SAMPLE_SEED}) ===")
     print(f"tickers: {tickers}")
 
@@ -227,7 +235,7 @@ def main() -> int:
     skip_summary: dict = {}
     usable = 0
     for t in tickers:
-        rows, eligible, calendar, skips = process_ticker(t)
+        rows, eligible, calendar, skips = process_ticker(t, item_code=item_code)
         for k, v in skips.items():
             skip_summary[k] = skip_summary.get(k, 0) + v
         if rows or eligible:
@@ -237,10 +245,10 @@ def main() -> int:
             px = us_price_series(t)
             pools[t] = eligible
             closes_by_ticker[t] = px["adj_close"].tolist()
-        print(f"  {t}: {len(rows)} usable 2.02 events, {len(eligible)} eligible control days"
+        print(f"  {t}: {len(rows)} usable {item_code} events, {len(eligible)} eligible control days"
               + (f", skips={skips}" if skips else ""))
 
-    print(f"\n{usable}/{len(tickers)} tickers usable, {len(all_events)} total 2.02 events")
+    print(f"\n{usable}/{len(tickers)} tickers usable, {len(all_events)} total {item_code} events")
     print(f"skip reasons across all tickers: {skip_summary}")
 
     for period in ("TRAIN", "VAL"):
@@ -269,9 +277,10 @@ def main() -> int:
             signal_stat=signal_stat,
             control_draws=control_draws,
             selection_spec=(
-                f"事前綁定：#52-US round452規格，唯一測項Item 2.02，繼續性方向（PEAD），"
+                f"事前綁定：#52-US round452規格沿用同一套PIT/reaction-day/control-buffer機制，"
+                f"測項{item_code}（{label}），繼續性方向（drift underreaction），"
                 f"{period}期same-sign(r0,r_drift)比例，tier={TIER} N={SAMPLE_SIZE} seed={SAMPLE_SEED}，"
-                "此為該假說第一次也是唯一一次cheap gate執行，無多格選點"
+                "同一批tickers/事前綁定的控制組設計，僅item family不同，非事後選點"
             ),
         )
         print(f"  PASSES cheap gate: {verdict.passed}")
@@ -281,4 +290,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main("2.02", "Item 2.02 8-K PEAD"))

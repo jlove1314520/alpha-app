@@ -1657,3 +1657,18 @@ back-adjusted價格會被「未來」的反向分割回溯放大過去的名目�
 已寫入`TRIALS_LEDGER.md`#191、`US_LEADS.md`#23、`US_MARATHON_STATE.md`第427輪記錄（第421輪舊條目已搬到`US_STATE_ARCHIVE.md`保持只留最新3則）、`REPORT.md`第427輪心跳。
 
 **下一輪US軌接手**：收成job`20260907-054341-a450`（`run_detached.py status`／`log`），檢查SUMMARY段落印出的已知污染ticker清單，若TRAIN/VAL的random_control_percentile跟beta都通過、且5檔已知污染ticker沒有主導空頭腿，這會是US軌至今第一個真正跳脫`#20`/`#21`資料陷阱的候選；若重蹈覆轍，比照`#20`/`#21`已驗證有效的診斷方法論（leg分解/leave-extreme-out/持股名單查核）逐步收斂成因，誠實記錄FAIL/EXPERIMENTAL，不強行升格。完整見`US_LEADS.md`#23、`TRIALS_LEDGER.md`#191、`us_factors_quality.py`/`us_factor_ic_quality_clean_universe.py`/`deep_dive_f_us_gross_profitability.py`（三支新增，皆可重複執行）。
+
+
+## 第456輪 · 2026-09-08T20:30+08:00 · US · 取鎖乾淨（cycle`20260908-203037`），三軌時間戳US 19:30（round454，最舊）／TW 20:00（round455，最新）／FUT 09-06 12:00（round399，例外條款不選）——依輪替選US。`run_detached.py status`確認heavy-job-slot已空（run=0）。`git status`乾淨（僅例行探針log）。`trial_registry.py --check`（PYTHONIOENCODING=utf-8）確認PASS（exit=0，218列），`is_holdout_consumed()`為`False`後開始本輪工作。
+
+**本輪工作單位＝依round454交辦，執行三選一的選項(c)：換測其他item family（5.02）**。新增`us_8k_item502_gate52.py`：復用`us_8k_pead_gate52.py`同一套PIT錨點（`acceptanceDateTime`）/反應日對齊/控制緩衝機制，僅將`process_ticker()`/`main()`加`item_code`參數（round454原版行為確認不變——已重跑`us_8k_pead_gate52.py`原規格，TRAIN 62.5/VAL 83.5數字與round454完全一致，無回歸）。同一批22檔tickers（seed 20260908_52），复用round454已cached的`get_8k_events(full_history=True)`資料，**零新增API呼叫**，執行僅數秒，未動用`run_detached.py`。
+
+**經濟機制**：Item 5.02（董監事/高階主管異動）是非排程揭露，文獻（Fee & Hadlock 2004、Cziraki & Jenter 2020論forced turnover）指出這類壞消息underreaction可能比排程性財報公布（2.02）更明顯，判定為#52-US底下真正不同的經濟機制（非2.02換皮）。
+
+**結果**：484筆Item 5.02事件（TRAIN 356/VAL 128）。TRAIN same-sign(r0,r_drift)比例=0.5000（178/356）vs 控制組max=0.5856（百分位55.0，未過）；VAL同比例=0.4375（56/128）vs 控制組max=0.6068（百分位**8.0**，未過且方向與continuation假說相反）。TRAIN幾乎等於隨機，VAL不僅未過還反向，非量級不足的邊緣case，是乾淨的無edge結果，判**FAIL**。
+
+**誠實揭露**：`items`欄位無法分辨異動動機（例行退休vs被迫離職），本規格未做語意過濾即全部納入，若真實機制只存在被迫離職子集，混入例行退休可能稀釋訊號使結果偏向null——這是「無法排除」而非「已排除」的限制，已寫進程式docstring，不在本輪內另做語意過濾重測（避免看到FAIL後才加碼的多重比較）。
+
+已用`register_trial()`登記`TRIALS_LEDGER.md`#217/#218、`STRATEGY_GRAVEYARD.md`新增段落、`US_LEADS.md`#30、`HYPOTHESIS_QUEUE.md` #52-US條目補充。`trial_registry.py --check`（PYTHONIOENCODING=utf-8）確認PASS（exit=0，220列，最大編號#218）。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**#52-US整體盤點**：至此測過Item 2.02（PEAD，round454，#215/#216）與Item 5.02（管理層異動，本輪，#217/#218）兩個item family，皆FAIL。**下一輪US軌接手**：(a)判定兩個family皆FAIL已足以結案#52-US整體（無edge），或(b)再測1.01（重大協議）作第三個family確認後才下整體結論；若判斷結案，需同步更新`data/signal_status.json`（`MARATHON_PROTOCOL.md`0a節要求四條方向成績全部進去，含FAIL）。完整見`US_LEADS.md`#30、`TRIALS_LEDGER.md`#217/#218、`STRATEGY_GRAVEYARD.md`新增段落、`us_8k_item502_gate52.py`（新增，可重複執行）。

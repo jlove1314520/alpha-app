@@ -6141,6 +6141,30 @@ CIK歷史一致性，不能只信任ticker字面匹配。**下一輪US軌接手*
 放大到full tier重測、(c)换測其他item family（5.02/1.01）。三者皆未
 預先決定，留給下一輪依當時判斷選擇。
 
+**2026-09-08 馬拉松第456輪US軌執行結果（選項(c)，Item 5.02，FAIL）**：
+`us_8k_item502_gate52.py`（新增，復用`us_8k_pead_gate52.py`同一套PIT/
+反應日/控制緩衝機制，`process_ticker()`/`main()`加`item_code`參數，
+已重跑round454原規格確認TRAIN 62.5/VAL 83.5數字不變、無回歸）。同一批
+22檔tickers（seed 20260908_52，複用round454已cached的
+`get_8k_events(full_history=True)`，**零新增API呼叫**，執行僅數秒，
+未動用`run_detached.py`）。經濟機制：Item 5.02（董監事/高階主管異動）
+是非排程揭露，文獻（Fee & Hadlock 2004、Cziraki & Jenter 2020論forced
+turnover）指出這類壞消息underreaction可能比排程性財報公布（2.02）更
+明顯，非2.02換皮。**結果**：TRAIN（n=356）same-sign比例=0.5000 vs
+控制組max=0.5856（百分位55.0，未過）；VAL（n=128）same-sign比例=
+0.4375 vs 控制組max=0.6068（百分位**8.0**，未過且方向與continuation
+假說相反）。TRAIN幾乎等於隨機、VAL反向，非量級不足的邊緣case，判**FAIL**。
+已登記`TRIALS_LEDGER.md`#217/#218、`STRATEGY_GRAVEYARD.md`新增段落、
+`US_LEADS.md`#30。**誠實揭露**：`items`欄位無法分辨異動動機（例行退休
+vs被迫離職），未做語意過濾即全部納入，若真實機制只存在被迫離職子集，
+混入例行退休可能稀釋訊號使結果偏向null——這是「無法排除」而非「已排除」
+的限制。**#52-US至此Item 2.02與5.02兩個family皆FAIL。下一輪US軌接手**：
+(a)判定兩個family皆FAIL已足以結案#52-US整體（無edge），或(b)再測1.01
+（重大協議）作第三個family確認後才下整體結論。兩者皆未預先決定，留給
+下一輪依當時判斷選擇；若判斷結案，需同步更新`data/signal_status.json`
+（`MARATHON_PROTOCOL.md`0a節「四條方向的成績全部要進signal_status.json」
+的要求）。
+
 ### #49 隔夜 vs 日內拆解
 照既有設計繼續，不受轉向影響。
 

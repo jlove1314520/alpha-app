@@ -2324,6 +2324,41 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
   #52-US整體，或 (b) 評估放大到full tier樣本重測（需先確認CIK歷史一致性
   查核方式），或 (c) 换測其他item family。三選項皆未替下一輪預先決定，
   依規則FAIL了先記錄換下一條，不在本輪內自行加測。
+  **（後續：round456已依選項(c)測試Item 5.02，見下方新條目，同樣FAIL。）**
 - **原始記錄**：`TRIALS_LEDGER.md`#215/#216、`HYPOTHESIS_QUEUE.md` #52-US
   條目、`us_8k_pead_gate52.py`（新增，可重複執行）。零新增付費/需登入API
   呼叫（純SEC EDGAR公開JSON端點）。
+
+## #52-US SEC EDGAR 8-K Item 5.02 事件反應速度（管理層異動）—— 2026-09-08結案（小樣本先導）：FAIL（cheap gate，馬拉松第456輪US軌）
+
+- **假設**：8-K Item 5.02（董監事/高階主管異動）屬非排程的意外揭露，文獻
+  （如Fee & Hadlock 2004、Cziraki & Jenter 2020論forced turnover）指出這
+  類揭露常伴隨市場尚未充分消化的負面資訊，可能產生比Item 2.02（排程性
+  財報公布）更強的underreaction drift——與2.02不同經濟機制，非換皮測試。
+  方向事前綁定為continuation（r0與r_drift同號）。
+- **測試**：`us_8k_item502_gate52.py`（新增，可重複執行），復用
+  `us_8k_pead_gate52.py`同一套PIT錨點/交易日對齊/控制緩衝機制（僅
+  `process_ticker()`/`main()`加`item_code`參數，round454原版行為不變，
+  已重跑round454原規格確認TRAIN 62.5/VAL 83.5數字一致，無回歸）。同一批
+  22檔tickers（seed 20260908_52，複用round454已cached的
+  `get_8k_events(full_history=True)`，**零新增API呼叫**，執行僅數秒）。
+- **結果**：TRAIN（n=356）same-sign比例=0.5000（178/356）vs 控制組
+  max=0.5856（百分位55.0，未過）；VAL（n=128）same-sign比例=0.4375
+  （56/128）vs 控制組max=0.6068（百分位**8.0**，未過，且方向與
+  continuation假說相反）。兩期皆遠低於門檻90.0，VAL期甚至反向。
+- **判定**：**FAIL**——TRAIN幾乎等於隨機（0.5000），VAL不僅未過還反向，
+  無一致方向性訊號，非train/val量級不足的邊緣case，是乾淨的無edge結果。
+- **誠實揭露限制**：`items`欄位無法分辨異動動機（例行退休 vs 被迫離職），
+  本規格未做語意過濾即全部納入，若真實機制只存在於被迫離職子集，混入
+  例行退休會稀釋訊號使結果偏向null——這是本結果「無法排除」而非「已排除」
+  的一個限制，程式docstring已預先揭露，不在本輪內另做語意過濾重測（避免
+  看到FAIL後才加碼的多重比較）。
+- **#52-US整體盤點**：至此測過Item 2.02（PEAD，round454，#215/#216）與
+  Item 5.02（管理層異動，本輪，#217/#218）兩個item family，皆FAIL。
+  round454選項(a)/(b)/(c)三選一已完整走過(c)，(b)（CIK歷史一致性查核＋
+  full tier重測）因(c)已顯示同一批tickers在不同item family下皆呈現接近
+  隨機或反向的結果，優先權下修；下一輪可判斷(a)結案整體#52-US（兩個
+  family都FAIL，缺乏繼續深挖同一機制的證據），或視野擴大到1.01（重大
+  協議）作第三個family再確認一次才下整體結論。
+- **原始記錄**：`TRIALS_LEDGER.md`#217/#218、`HYPOTHESIS_QUEUE.md` #52-US
+  條目、`us_8k_item502_gate52.py`（新增，可重複執行）。零新增API呼叫。
