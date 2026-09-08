@@ -7249,3 +7249,28 @@ fallback——「2018起可得樣本」探索性版本**（TRAIN期12場會議
 `False`，全程零FinMind/TWSE API呼叫。**本輪工作到此為止（一輪一個
 有界工作單位，本輪預算考量提前收工）**，下一輪從子測試1探索性版
 cheap gate開始寫程式執行，不再嘗試補齊2015-2017。
+
+**2026-09-08T21:00+0800 馬拉松第457輪（TW軌）結案：#61子測試1第1關
+cheap gate執行完畢，判定FAIL，#61整體結案**。新增`cbc_decision_event_
+gate61.py`，沿用`fut_settlement_event_gate60.py`同款事件研究框架
+（POST_WINDOW=1事件日報酬 vs 500次隨機交易日null），事件樣本用
+`cbc_policy_decision_data.py::get_all_meeting_dates(2018-01-01起)`
+（fallback，28場會議，TRAIN 12/VAL 16）。**結果**：TRAIN
+mean=-0.6541%(p=0.2128,n=12)、VAL mean=+0.5263%(p=0.0991,n=16)，VAL
+|mean| vs null雙尾percentile=93.6（單獨過90.0門檻）**但train/val
+正負號不一致**（TRAIN負VAL正）——跟`#60`結算前3日報酬同款失敗模式，
+判**FAIL**。依本條目事前綁定「子測試1不過關，子測試2直接快殺不強行
+深挖」，**不再測子測試2**（該子測試樣本量本就極小，僅11筆變動事件）。
+**#61央行理監事會議決策事件正式結案**：⑩央行政策決策事件大類0勝1敗。
+已用`register_trial()`登記`TRIALS_LEDGER.md`#219、寫入
+`STRATEGY_GRAVEYARD.md` #61條目、`TW_LEADS.md`#15列。
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增FinMind/
+TWSE API呼叫（複用既有TAIEX快取）。**下一輪TW軌接手**：`MARATHON_
+PROTOCOL.md`0a節四條結構性優勢方向（#49/#50/#51/#52/#61）中，#61本輪
+結案，#49已有既有設計繼續，#50需查證`資料一`逐筆tick落地累積進度，
+#51（強制交易者事件）尚未開始查證資料可行性，#52（MOPS重大訊息事件反應
+速度）TW軌狀態沿用前次判定仍卡外部依賴。可考慮開始查證#51（融券強制
+回補/現金增資除權/CB轉換價重設）的資料可行性，或依協定第1節設計真正
+跳脫既有大類的新假設軸#62。完整見`TW_LEADS.md`#15、`TRIALS_LEDGER.md`
+#219、`STRATEGY_GRAVEYARD.md` #61條目、`cbc_decision_event_gate61.py`
+（新增，可重複執行）。
