@@ -7523,3 +7523,50 @@ client.py`（#52-TW）同款per-day/per-page快取parquet設計，建立
 近二十年因套利資金搶跑已明顯減弱甚至反轉，**測試前不預設會過**，
 只是誠實驗證我們的框架在這個機制上測不測得出東西。完整見
 `US_MARATHON_STATE.md`第460輪記錄、`REPORT.md`第460輪心跳。
+
+**2026-09-08T23:30+0800 馬拉松第462輪（US軌）**——依round460交辦，
+建立`sp500_index_changes_client.py`。**heavy-job-slot仍被TW軌job
+`b142`佔用（已執行92.9分鐘，接近100分鐘timeout），本輪繼續不投遞新
+重度工作**。
+
+**發現並修正round460的分頁誤判**：round460用`pagetemplate=rss`模板
+測`o=0~3680`皆回200，判定為「合法分頁」，但**本輪實測發現該RSS模板
+不管`o`/`l`給什麼值，一律回傳同樣的最新5篇**——只驗證了HTTP狀態碼，
+沒有比對不同offset的實際內容是否真的不同，是`CLAUDE.md`已知地雷
+（TWSE無效路徑回200+HTML的同一種陷阱，換了個網站）。**修正**：拿掉
+`pagetemplate=rss`，改用一般HTML列表頁（`index.php?s=2429&o=<offset>
+&l=<limit>`），實測不同`o`值真的回傳不重疊的內容，且首頁分頁連結
+本身就給出`o=3680`當最後一頁（佐證約3,680篇），`l=50`同樣有效
+（74頁可涵蓋全部，優於原估的368頁@l=10）。
+
+**關鍵字規則**（人工抽樣前200篇新聞稿標題得出，事前寫死）：標題含
+"Set to Join"（大小寫不敏感）且提到目標指數名稱（S&P 500/S&P 100/
+S&P MidCap 400/S&P SmallCap 600/Dow Jones Industrial Average/Dow
+Jones Transportation Average）之一。200篇抽樣中18篇符合（全部經
+`fetch_and_parse_article()`驗證確實含指數變更表格），未見"will
+replace"/"to Replace"措辭——不排除存在於未抽到的樣本，但**依鐵律不
+為了塞入更多樣本事後放寬關鍵字**，回補時若文章表格解析為空但標題像
+指數公告，記錄供人工複核。
+
+**小樣本端到端驗證**（非全範圍backfill，僅驗證管線可行性）：
+`fetch_listing_page(0)`回傳50筆列表，18筆符合關鍵字，抽測前3篇
+`fetch_and_parse_article()`皆成功解析出結構化表格（42列/2列/4列，
+欄位`effective_date_raw/index_name/action/company_name/ticker/
+gics_sector`），部分較舊公告的表格無`GICS Sector`欄（合併時該欄
+自動變NaN，非bug）。兩層快取（`LISTING_*.parquet`/`ARTICLE_*.parquet`）
+落在`data/raw_sp_index_changes/`（已gitignore，不進repo）。全程零
+FinMind/SEC EDGAR歷史資料API呼叫，僅對`press.spglobal.com`發出約10次
+測試性HTTP請求（同round460判定：無公開速率上限文件、非付費/登入
+資源）。`is_holdout_consumed()`開工/收工前皆確認`False`，本輪純
+資料管線建置，非試驗判定，不登記`TRIALS_LEDGER.md`。
+
+**下一輪US軌接手**：heavy-job-slot若已空出，用`run_detached.py
+submit`投遞全範圍backfill腳本（仿`backfill_material_news.py`寫法：
+迴圈`offset=0,50,100,...`直到某頁`fetch_listing_page()`回傳空為止，
+每頁套用`is_index_change_title()`過濾後逐篇呼叫`fetch_and_parse_
+article()`，估計約74頁列表+數百篇文章，需要控制節流間隔，比照
+`mops_material_news_client.py`呼叫端節流慣例）；backfill完成後才進入
+`#51-US`第1關cheap gate（生效日±N日報酬 vs 隨機交易日null，比照
+`fut_settlement_event_gate60.py`/`cbc_decision_event_gate61.py`框架）。
+完整見`US_MARATHON_STATE.md`第462輪記錄、`REPORT.md`第462輪心跳、
+`sp500_index_changes_client.py`（新增，可重複執行）。
