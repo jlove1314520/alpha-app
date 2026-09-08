@@ -1,63 +1,64 @@
 {
-  "fetched_at": "2026-09-08T16:21:47.799343+08:00",
+  "fetched_at": "2026-09-08T16:26:40.221506+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 318.76,
-      "bid": 318.4,
-      "ask": 318.81,
+      "last": 318.82,
+      "bid": 318.5,
+      "ask": 318.94,
       "close": 319.97,
-      "change_pct": -0.3782,
+      "change_pct": -0.3594,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 496.46,
-      "bid": 496.01,
-      "ask": 496.5,
+      "last": 496.84,
+      "bid": 496.46,
+      "ask": 497.0,
       "close": 499.7,
-      "change_pct": -0.6484,
+      "change_pct": -0.5723,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 230.78,
-      "bid": 230.6,
-      "ask": 230.8,
+      "last": 230.44,
+      "bid": 230.39,
+      "ask": 230.55,
       "close": 230.36,
-      "change_pct": 0.1823,
+      "change_pct": 0.0347,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 353.94,
+      "last": 353.31,
       "bid": 353.2,
-      "ask": 353.79,
+      "ask": 353.59,
       "close": 354.08,
-      "change_pct": -0.0395,
+      "change_pct": -0.2175,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 336.77,
+      "last": 336.7,
       "bid": 336.7,
-      "ask": 336.95,
+      "ask": 336.91,
       "close": 338.46,
-      "change_pct": -0.4993,
+      "change_pct": -0.52,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "^DJI": {
-      "last": null,
+      "last": 53414.25,
       "bid": null,
       "ask": null,
-      "close": null,
-      "change_pct": null,
-      "data_type": "REALTIME",
+      "close": 53686.1,
+      "change_pct": -0.5064,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CME",
-      "label": "道瓊工業指數"
+      "label": "道瓊工業指數",
+      "source": "yahoo_fallback"
     },
     "^GSPC": {
       "last": 7717.81,
