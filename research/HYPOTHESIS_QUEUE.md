@@ -7787,3 +7787,24 @@ backfill完成後才進入`#51-US`第1關cheap gate（生效日±N日報酬 vs
 event_gate61.py`框架），不得跳關搶跑。完整見`US_MARATHON_STATE.md`
 第464輪記錄、`REPORT.md`第464輪心跳、`backfill_sp500_index_changes.py`
 （新增，可重複執行）。
+
+---
+
+**第466輪新增**：heavy-job-slot已空出（TW軌job`1783`已`finished`），
+依round464交辦投遞全範圍背景回補。腳本無需修改，直接以`run_detached.py
+submit --name sp500_index_changes_backfill_51us --timeout-min 60 --
+python -u research/backfill_sp500_index_changes.py --batch-size 74`
+投遞（job`20260909-013149-9992`；省略`--expect`，因產出為動態offset
+命名的多檔parquet，非單一固定路徑，改以檔案數量佐證進度）。session內
+`wait --max-min 4`逾時仍`running`（60分鐘timeout內正常），查
+`data/raw_sp_index_changes/`確認持續前進、非卡死：4分鐘內列表頁4→12、
+文章48→121。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
+**下一輪US軌接手**：先查job`20260909-013149-9992`是否已`finished`
+（預估約02:30前後完成）——若已完成，讀取累積列表頁/文章數確認涵蓋
+約74頁全部年份範圍，即可進入`#51-US`第1關cheap gate（生效日±N日
+報酬 vs 隨機交易日null，比照`fut_settlement_event_gate60.py`/
+`cbc_decision_event_gate61.py`框架），不得跳關搶跑；若仍`running`
+未逾時則比照本輪模式單純查核進度；若已`timeout`，腳本可斷點續傳，
+考慮加大`--timeout-min`重投而非從頭跑。完整見`US_MARATHON_STATE.md`
+第466輪記錄、`REPORT.md`第466輪心跳。
