@@ -6094,6 +6094,31 @@ date_str)`需外部傳入`requests.Session`，session生命週期與過期重建
 直接重跑從快取斷點接續），完成後才回頭執行#52第1關cheap gate，不得
 跳關搶跑。
 
+**(m) 背景回補job已投遞並確認正常執行中（2026-09-08T22:22 hypothesis_
+queue排程接續）**：開工先讀協定+`CLAUDE.md`+`git pull`確認乾淨（僅
+`dev_queue_cycle.log`/`external_connectivity.jsonl`兩個其他排程殘留
+變更，未觸碰）。核對`run_detached.py status --last 5`發現job
+`20260908-220204-8f1b`因`--cwd`路徑疏失（指到repo根目錄而非
+`research/`，跟先前`48ca`/`c524`同一類疏失）2秒內失敗，同一輪11秒後
+以正確`--cwd`重投job`20260908-220215-b142`（`material_news_backfill_
+52tw`，`backfill_material_news.py --batch-size 2600`，timeout=100min），
+本輪核對確認**正常執行中**：log顯示已處理300/2600（偶發`502 Bad
+Gateway`已被重試機制吞掉未阻斷），實際落地快取檔數320個parquet（與
+log進度吻合），約15天/分鐘速率，**預估100分鐘timeout內跑不完全部
+2600天**（會在約1500天處被逾時中止，屬預期內、可續跑設計，非錯誤）。
+**本輪判斷：job既有正常執行中，不重複投遞**（避免同時對MOPS端點發出
+兩條並行請求，違反`CLAUDE.md`資料源禮儀節流原則），僅在此記錄job
+id與進度供下一輪查核。`is_holdout_consumed()`開工/收工前皆確認
+`False`，本輪零新增API呼叫（僅查詢job狀態與檔案數，未觸發新的MOPS
+請求）。**本輪工作到此為止（一輪一個有界工作單位）**，下一輪待辦：
+**先用`run_detached.py status --last 5`查`20260908-220215-b142`是否
+已完成或逾時**，若逾時中止則直接重投同一指令（會自動跳過已快取的
+320+天，非從頭開始）；若已完整跑完2600天則進入#52第1關cheap gate
+（8類`type`分類CAR檢定，事前已寫死規格，不得再拖延）。**不得無視
+既有job狀態盲目重投**，重複並行執行會浪費請求配額且無助於加速（單一
+`requests.Session`本身就是循序處理，兩條平行job只會互相競爭同一個
+端點反而更容易撞到節流）。
+
 ### #52-US 美股版：SEC EDGAR 8-K 事件反應速度（2026-09-08 馬拉松US軌round452新增，規格草案）
 
 **背景**：round450（US軌）三來源查證確認 SEC EDGAR 8-K 是 #52 在美股的對應
