@@ -8238,3 +8238,46 @@ job`20260909-060428-cae6`若仍在跑，讓它自然完成即可（累積更多�
 2/20未解鎖），依0a節「誠實判斷點」尚未到可下「無可驗證預測優勢」
 結論的時點（`#50`仍待tick累積），下一輪若TW/US軌皆無新方向可查證，
 應優先協助`#50`的tick累積查核或等待，而非倉促設計第⑬類新假說。
+
+**(i) 美股類比資料可行性查證（2026-09-09T06:30+08:00 馬拉松第476輪US軌，
+依round473「US軌接手」建議：TW `#62`gate1已結案，US是否有等價機制值得
+三來源查證）**：查證「美股有沒有免費、逐筆、可分方向（buyer/seller-
+initiated）的block trade資料，可比照台股BFIAUU端點複製`#62`方法論」。
+
+**三來源查證紀錄**（依`CLAUDE.md`「搜尋紀律：三來源查證」）：
+1. **官方網站**：FINRA `otc-transparency`／`market-transparency-reporting`
+   頁面（<https://www.finra.org/filing-reporting/otc-transparency>、
+   <https://www.finra.org/filing-reporting/market-transparency-reporting>）——
+   免費公開的是OTC ATS透明度資料，非逐筆。
+2. **官方API/文件**：FINRA Rule 4552明定ATS必須回報「**週彙總**」
+   (aggregate weekly volume/trade count) by security by ATS；`OTC-
+   Transparency-Data-File-Download-API-v04.pdf`與兩版User Guide（多次
+   WebSearch摘要交叉確認一致）：欄位為Symbol/Total Shares/Total Trades，
+   **顆粒度是symbol×week，無逐筆時間戳、無單筆金額、無買賣方發起方向**。
+3. **官方另一系統＋供應商佐證**：SEC MIDAS（<https://www.sec.gov/securities-topics/market-structure-analytics/midas-market-information-data-analytics-system>）
+   雖然逐筆蒐集consolidated tape（含trade size），但**SEC官網只開放彙總
+   指標與視覺化工具免費，原始逐筆資料只透過WRDS等付費學術管道釋出**；
+   反向佐證：Databento／Polygon.io／NYSE Daily TAQ均把「逐筆trade size
+   tick資料」當成商業付費產品在賣，證實免費逐筆管道不存在，不是查證
+   不夠仔細。
+
+**結論：美股沒有免費、逐筆、可分方向的block trade資料源，無法複製
+`#62`方法論（依賴單筆成交vwap相對收盤價判斷buyer/seller-initiated）。**
+依`CLAUDE.md`「取得方式鐵律」，此為付費牆資料，標記「**待採購**」——
+候選商業來源：Databento（equities tick data，per-GB計價）、Polygon.io
+（flat-rate訂閱，Stocks Trades API）、NYSE Daily TAQ（透過WRDS）。
+**本階段不採購、不找替代爬法、不嘗試用週彙總資料湊出一個變形訊號**
+（週彙總會失去`#62`核心機制所需的「單筆交易方向」資訊，硬做等同換一個
+完全不同的機制假說，不是同一條`#62`類比）。
+
+**這是資料可行性查證，非策略判定**：未跑任何訊號數字，不觸發
+`register_trial()`，不進`TRIALS_LEDGER.md`。`#62`美股類比正式歸類為
+「資料不可行」，與台股`#50`（tick累積中，未來可能解鎖）性質不同——
+`#50`是"尚未"，這條是"目前免費管道下不可行"。`is_holdout_consumed()`
+開工/收工前皆確認`False`。全程零FinMind/SEC EDGAR呼叫，僅WebSearch/
+WebFetch查證公開文件與官網頁面，零寫入資料檔。**下一輪US軌接手**：
+US軌四條0a方向（#49/#50/#51/#52-US）與本條`#62`美股類比皆已結案或
+卡依賴，若US軌再次被選中且TW軌仍無heavy-job-slot空出，建議依
+`MARATHON_PROTOCOL.md`0a節「誠實判斷點」評估：四條方向＋`#62`類比
+是否已到可以協助盤點「無可驗證預測優勢」整體結論的程度（仍卡在`#50`
+tick未解鎖，尚不可下結論）。完整見`US_MARATHON_STATE.md`第476輪記錄。
