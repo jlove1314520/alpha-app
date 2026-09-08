@@ -51,7 +51,7 @@ UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaResearch/1.0)"}
 # 白名單比黑名單安全：新增來源時必須明確決定，不會因為忘記排除而誤抓。
 BODY_ALLOWED = {"www.cna.com.tw", "tw.stock.yahoo.com"}
 REQ_INTERVAL = 2.0
-MAX_PER_RUN = 60          # 每輪上限，避免一次打太多；增量累積
+MAX_PER_RUN = 200          # 每輪上限，避免一次打太多；增量累積
 SENT_MAX = 160            # 單句保存長度上限
 
 _last = [0.0]

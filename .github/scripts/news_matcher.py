@@ -38,7 +38,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 # 這一條就擋掉了實測 5 筆假陽性裡的 4 筆。
 _UNIT_AFTER = "元年點億萬月日％%倍檔張股人次筆件坪度℃碼米噸台家"
 # 前面接這些也不是代號（例如「逾450點」「約2030」）
-_UNIT_BEFORE = "第約逾近超破漲跌至"
+_UNIT_BEFORE = "第約逾近超破漲跌至明今去前隔次來自於"
 
 # 通用詞黑名單：這些是合法公司簡稱，但同時是高頻常用詞，
 # 在新聞文字裡出現多半不是在講那家公司。寧缺勿錯。
@@ -97,19 +97,41 @@ def load_active_codes() -> set:
         return set()
 
 
+_BRACKETS_AFTER = ")）]】》」"
+_BRACKETS_BEFORE = "(（[【《「"
+
+
 def match_codes_by_number(text: str, active: set) -> set:
-    """規則 1：四位數代號，排除單位／年份／價格語境。"""
+    """規則 1：四位數代號，排除單位／年份／價格語境。
+
+    2026-09-09 補強：**括號包住的年份會穿過第一版的檢查。**
+    實測踩到「…預計可於今年第4季至明(2027)年起開始貢獻產能…」——
+    `2027` 後面緊鄰的是 `)` 不在單位字表裡，於是被當成大成鋼(2027)，
+    整句「南亞針對銅箔基板廠進行製程優化」被歸到大成鋼名下。
+
+    但**不能一律拒絕括號內的數字**——「台積電 (2330)」正是最標準的寫法。
+    差別在括號**外面**接的是什麼：`(2027)年` 是年份，`(2330)` 才是代號。
+    所以改成「跳過括號字元後再看單位字」。
+    """
     hits = set()
     for m in re.finditer(r"(?<!\d)(\d{4})(?!\d)", text or ""):
         code = m.group(1)
         if code not in active:
             continue
-        after = text[m.end():m.end() + 1]
-        before = text[max(0, m.start() - 1):m.start()]
+        # 往後跳過連續的右括號，再看下一個實體字元
+        i = m.end()
+        while i < len(text) and text[i] in _BRACKETS_AFTER:
+            i += 1
+        after = text[i:i + 1]
+        # 往前跳過連續的左括號，再看前一個實體字元
+        j = m.start()
+        while j > 0 and text[j - 1] in _BRACKETS_BEFORE:
+            j -= 1
+        before = text[max(0, j - 1):j]
         if after and after in _UNIT_AFTER:
-            continue                       # 2505元、2030年、450點
+            continue                       # 2505元、2030年、(2027)年
         if before and before in _UNIT_BEFORE:
-            continue                       # 逾450、約2030
+            continue                       # 逾450、約2030、明(2027)
         hits.add(code)
     return hits
 
