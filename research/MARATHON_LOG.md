@@ -1,5 +1,29 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T07:50+0800 hypothesis_queue排程接續（上一輪陳舊鎖已回收）— #63借券費率gate1腳本完成，全體資料25-draw初步結果三N值全PASS，已提交N=200正式跑批job待下一輪查收
+開工讀協定+`CLAUDE.md`+`CONSTITUTION.md`，`git pull`顯示已與origin/main同步
+（僅`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`為其他常駐服務殘留，未觸碰）。
+`marathon_lock.py acquire`回傳`LOCK_STALE`（上一輪29.9分鐘無更新，疑似
+中途卡住，已自動回收）。讀`HYPOTHESIS_QUEUE.md`確認佇列#1~62全結案，
+`#63`（借券費率異常飆升）資料已回補完成(2012-2024)但gate1腳本尚未寫，
+依協定接續。新增`lending_fee_gate63.py`（事前綁定規格見腳本docstring/
+`HYPOTHESIS_QUEUE.md` #63條目新段落），首次跑遇`groupby().apply()`對
+1M+筆效能問題（背景2分鐘無輸出），改寫向量化聚合後全體資料
+44.5秒跑完（`--n-permutations 25`）。**初步結果三個N值(5/10/20)全部
+表面PASS**（VAL期n_val均超過10,000，mean_post_ret皆為負且隨N遞增放大），
+是本佇列62條假設中首次在如此大樣本下三N同向過關的案例。**因25<
+GATE_SEQUENCE要求的≥100 draws門檻，此結果不構成正式判定**，未觸發
+`register_trial()`。已用`run_detached.py`提交正式`--n-permutations 200`
+跑批（job`20260909-075838-fe8a`，`lending_fee_gate63_full`，20分鐘
+timeout；先前誤用Bash工具`run_in_background`啟動的版本因無法確認能否
+存活過session結束已kill改提交detached job）。**下一輪待辦（不跳關）**：
+查job是否`finished`，讀`data/lending_fee_gate63_result.json`拿N=200
+正式結果，PASS才可`register_trial(verdict="CHEAP_PASS")`+寫`TW_LEADS.md`，
+FAIL則如實記錄「小draws數表面過關、大draws數現形」教訓。
+`trial_registry.py --check`本輪無新登記（純腳本開發+smoke
+test，不涉及判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。
+
 ## 2026-09-09 hypothesis_queue排程接續 — 確認佇列#1~62全數結案（僅#50卡tick前置依賴），新增#63借券費率假設軸
 開工讀協定+`CLAUDE.md`+`CONSTITUTION.md`，`git pull`乾淨（僅
 `data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/

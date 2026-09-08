@@ -8405,3 +8405,45 @@ EDGAR呼叫，13次TWSE官方rwd端點請求（2秒節流）。**下一輪待辦
 門檻（例如z≥2，需在寫gate腳本時事前綁定、不得測完再挑），事後H日
 （例如H=5/10）該股報酬是否顯著轉負，控制組沿用
 `control_group_standard.py`2026-09-07升級標準。
+
+**第479輪（2026-09-09T07:45+08:00，hypothesis_queue排程接續）gate1腳本
+完成＋smoke test＋初步結果（尚未正式register_trial）**：新增
+`lending_fee_gate63.py`，事前綁定規格見腳本docstring——trade_type僅取
+`競價`/`議借`（排除`定價`，經濟理由：定價是官方公告固定值不反映急迫
+程度）；(stock_id,date)volume加權聚合費率；z-score用**該股自己的借券
+交易序列**過去60次觀測（非日曆60天，`shift(1)`後rolling、
+`min_periods=20`，避免用當天自己的觀測污染基準）；事件＝`z>=2.0`；
+N=5/10/20三值；方向事前綁定為負（費率急升→知情放空延續）；控制組
+matched_stock+unmatched_universe兩變體，比照`block_trade_gate62.py`
+同款框架。**首次跑遇到效能問題並已修正**：原始`groupby().apply()`
+對1M+筆逐列跑Python函式會慢到無法在合理時間內完成（背景執行逾2分鐘
+無輸出），改寫成向量化`groupby().agg()`（`sum(fee*vol)/sum(vol)`）後，
+全體資料（1,090,178筆原始借券紀錄，過濾trade_type後）跑完僅需
+**44.5秒**（`--n-permutations 25`）。**smoke test**（`--max-stocks 50`）：
+z>=2.0事件145筆，管線正確執行無崩潰。**全體資料初步結果**
+（`--n-permutations 25`，注意：25<GATE_SEQUENCE第2關要求的≥100 draws
+門檻，**此結果僅供參考，不構成正式判定，不觸發`register_trial()`**）：
+z>=2.0事件共29,537筆（過濾trade_type+聚合後），可對應價格之事件
+22,603筆（852/1141檔有快取價格）。三個N值VAL期**全部表面PASS**：
+N5 n_val=10981/VAL_mean=-0.00333、N10 n_val=10929/VAL_mean=-0.00648、
+N20 n_val=10832/VAL_mean=-0.00895（三者皆為負，方向與事前假設吻合，
+且三個N遞增幅度單調放大，形態上不像雜訊）。**這是本佇列#1~62共62條
+假設中，第一次在如此大樣本數（n_val均超過10,000）下三個N值全部同向
+表面過關的案例**，值得認真走完整GATE_SEQUENCE，不能因為budget壓力
+草率judge。已依`run_detached.py`提交正式`--n-permutations 200`跑批
+（job`20260909-075838-fe8a`，`lending_fee_gate63_full`，timeout 20分鐘，
+比照`#62`(d)-(g)段落「submit後不佔用session等待、下一輪查進度」模式，
+先前用Bash工具`run_in_background`啟動的版本因不確定能否在session結束後
+存活、已改用`run_detached.py`正式提交）。**下一輪待辦（不跳關）**：
+查job`20260909-075838-fe8a`是否`finished`，讀`data/lending_fee_gate63_result.json`
+拿N=200正式結果，若三個N值仍全部PASS（依`control_group_standard.py`
+20/20或贏過控制組最大值標準），才可`register_trial(track="hypothesis_queue",
+verdict="CHEAP_PASS", ...)`登記進`TRIALS_LEDGER.md`並寫進`TW_LEADS.md`，
+接著才進第2關deep dive（依既有慣例：分組IC/leave-one-out等）；若N=200
+下有任何N值翻盤為FAIL，如實記錄「25個draws時表面過關、100+個draws時
+現形」這個教訓（比照`#5`資料佇列已記錄過的統計偽影家族思路）。
+`is_holdout_consumed()`開工/收工前皆確認`False`（`validation.holdout`模組
+確認）。本輪`git status`確認僅涉及本檔案+`lending_fee_gate63.py`新增，
+`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`為其他常駐服務殘留變更，未觸碰、
+未納入commit（跟開工時第一輪查核結果一致）。
