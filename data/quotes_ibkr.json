@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T16:01:40.845273+08:00",
+  "fetched_at": "2026-09-08T16:06:47.059396+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -61,14 +61,15 @@
       "source": "yahoo_fallback"
     },
     "^GSPC": {
-      "last": 7717.81,
+      "last": 7718.6,
       "bid": null,
       "ask": null,
-      "close": 7718.6,
-      "change_pct": -0.0102,
-      "data_type": "DELAYED",
+      "close": 7747.71,
+      "change_pct": -0.3757,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500"
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
     },
     "^IXIC": {
       "last": 26506.99,
