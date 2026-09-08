@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09 hypothesis_queue排程接續 — 確認佇列#1~62全數結案（僅#50卡tick前置依賴），新增#63借券費率假設軸
+開工讀協定+`CLAUDE.md`+`CONSTITUTION.md`，`git pull`乾淨（僅
+`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`為其他常駐行程殘留，未觸碰）。
+`marathon_lock.py acquire --name hypothesis_queue`：`LOCK_ACQUIRED`
+（乾淨取得）。通讀`HYPOTHESIS_QUEUE.md`確認截至#62，佇列#1~62全數
+已結案（PASS/FAIL），僅`#50`（容量受限小型股）仍卡前置依賴——重新
+查證`data/ticks/`實際檔案數仍為2個（`20260907.parquet`/
+`20260908.parquet`），對20交易日門檻仍遠（2/20），狀態沿用未解鎖。
+依協定第1節「佇列已空」分支，設計一條經濟機制上真正不同的新假設軸
+`#63`（借券費率異常飆升作為知情放空訊號，量測借券市場**價格**而非
+既有已死機制量測的**數量**維度，避開①~⑫已測機制大類），僅完成
+規格登記，未查資料可行性、未跑任何數字，比照`#50`/`#51`/`#52`初次
+登記慣例。`is_holdout_consumed()`確認`False`，本輪零API呼叫，未觸發
+`register_trial()`（無判定產生）。**本輪工作到此為止**，下一輪從`#63`
+資料可行性查證開始，或優先查核`#50`tick累積進度。
+
 ## 2026-09-09T07:10+0800 hypothesis_queue排程接續 — 發現#62已被AlphaMarathon TW/US軌搶先結案，交叉驗證一致後修正排隊順序總結同步問題
 開工讀`CLAUDE.md`+`research/CONSTITUTION.md`，`git pull`乾淨（`data/quotes_ibkr.json`/
 `research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`為其他常駐行程
