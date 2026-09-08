@@ -2247,3 +2247,38 @@ CDF/CCF深度查詢因跟round332同`(FULL_HISTORY_START, FULL_HISTORY_END)`參�
 **FUT軌盤點**：`MARATHON_PROTOCOL.md`第3節列出的期貨假說類別（多時間框架趨勢、突破、波動regime、均線、日內均值回歸、期現價差、三大法人期貨部位、未平倉量、隔夜vs日內、星期效應、盤別效應）至此全數至少測過一個變體，個股期貨橫斷面調查線（round341-358）也已結案（流動性/離散度不足），組合策略層級嘗試（round361/364/372/385）四種構造亦全部FAIL。**沒有清楚剩餘的「全新機制」候選**——下一輪若再輪到FUT，建議照round385(c)原意優先權重新排回TW/US軌，除非能想出真正跳脫這份清單的新假說（例如跨商品排列檢定的方法論設計，round338/352已列為未來方向但非本輪待辦）。
 
 `is_holdout_consumed()`開工/收工前皆確認`False`。零新增API呼叫，執行約10秒。完整見`FUT_LEADS.md`第399輪新增段落、`FUT_MARATHON_STATE.md`第399輪、`TRIALS_LEDGER.md`#159/#160、`fut_cheap_gate.py`（新增`hyp_daily_reversal_1d()`/`hyp_daily_continuation_1d()`）。
+
+---
+
+## 第453輪（TW軌接手，2026-09-08T19:00+08:00）：假設#60台指結算到期日機械性效應第1關cheap gate，FAIL
+
+依`MARATHON_PROTOCOL.md`0a節輪替規則本輪選TW軌（TW 16:30最舊/US 17:05最新），
+但工作內容延續`hypothesis_queue`排程已完成的#60（台指選擇權/期貨結算到期機械性效應）
+資料可行性查證，從第1關cheap gate開始執行。先補commit了`hypothesis_queue`遺留的
+`fut_settlement_date_probe60.py`與相關帳本更新（尚未提交），確認`trial_registry.py --check`
+PASS、`is_holdout_consumed()`為`False`後才開始本輪工作。
+
+新增`fut_settlement_event_gate60.py`：讀`data/fut_settlement_dates_derived_tx.csv`
+（300個2000~2024反推歷史TX結算日）與既有TAIEX日線快取，事前綁定PRE_WINDOW=3、
+POST_WINDOW=1（`HYPOTHESIS_QUEUE.md`#60條目N/M範圍內最保守單點）。180個可用事件
+（120個結算日落在TAIEX價格快取2010-01-01起始日之前不可用，屬預期內涵蓋邊界，
+非資料異常），TRAIN 132筆/VAL 48筆。
+
+結果：
+(a) 結算前3日報酬（到期前壓力假說）：TRAIN mean=-0.0098%(p=0.9456)，
+VAL mean=+0.2684%(p=0.4200)，train/val正負號不一致，VAL |mean| vs 500次隨機
+非結算日窗口雙尾null percentile=56.0（門檻90.0），FAIL。
+(b) 結算當日報酬（到期後鬆綁假說）：TRAIN mean=+0.1825%顯著(p=0.0284)，
+VAL mean=+0.1117%不顯著(p=0.4953)，同號但percentile=47.6（門檻90.0），FAIL。
+
+判讀：TRAIN期出現的到期日當日小幅正報酬顯著性沒有在VAL期重現，判斷為noise
+而非機械性效應。依協定「不得看到FAIL後換N/M繼續測、避免變成事後選格子的
+多重比較」紀律，不在同一組事前綁定之外另尋參數點，#60在此結案為FAIL。
+
+已用`register_trial()`登記`TRIALS_LEDGER.md`#213/#214，寫入`STRATEGY_GRAVEYARD.md`
+#60條目、`FUT_LEADS.md`#28列、`HYPOTHESIS_QUEUE.md`#60條目補充結案段落。
+⑨大類（衍生性商品結算機械性效應）本次是佇列第一次測試這個維度，唯一一條假設
+即FAIL，0勝1敗結案。佇列#1~60全數結案，剩#50/#52仍卡外部依賴（狀態沿用前次
+判定）。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
+（複用既有TAIEX/TaiwanFuturesDaily快取）。完整見`TW_MARATHON_STATE.md`第453輪、
+`TRIALS_LEDGER.md`#213/#214、`fut_settlement_event_gate60.py`（新增，可重複執行）。

@@ -6973,3 +6973,24 @@ consumed()`開工/收工前皆確認`False`，全程零新增API呼叫（`contin
 contract.py`複用既有`TaiwanFuturesDaily`快取）。**本輪工作到此為止（一輪
 一個有界工作單位）**，下一輪從第1關cheap gate開始（事件研究設計：結算日
 前後窗口報酬 vs 隨機窗口null分布），不跳關。
+
+**2026-09-08 馬拉松第453輪(TW)第1關cheap gate結果：FAIL，#60結案。**
+新增`fut_settlement_event_gate60.py`（可重複執行，複用既有TAIEX快取，零新增
+API呼叫）。事前綁定PRE_WINDOW=3、POST_WINDOW=1（範圍內最保守單點，未看結果
+前寫死），180個可用事件（300個歷史結算日中120個落在TAIEX價格快取
+`START_DATE=2010-01-01`之前不可用，屬預期內的資料涵蓋邊界，非資料異常）,
+TRAIN 132筆/VAL 48筆。
+(a) 結算前3日報酬（到期前壓力）：TRAIN mean=-0.0098%(p=0.9456)，
+VAL mean=+0.2684%(p=0.4200)，**train/val正負號不一致**，VAL |mean| vs
+500次隨機窗口雙尾null percentile=56.0（門檻90.0），FAIL。
+(b) 結算當日報酬（到期後鬆綁）：TRAIN mean=+0.1825%（p=0.0284，顯著）、
+VAL mean=+0.1117%（p=0.4953，不顯著），同號但percentile=47.6（門檻90.0），
+FAIL。
+已用`register_trial()`登記`TRIALS_LEDGER.md`#213/#214。**判讀**：兩個
+事前綁定的子測試在VAL期都沒有贏過隨機窗口null分布，TRAIN期出現的到期日
+當日小幅正報酬（p=0.0284）沒有在VAL期重現，判斷為noise而非機械性效應——
+依協定「不得看到FAIL後換N/M繼續測」的紀律（避免變成事後選格子的多重比較），
+**不在同一組事前綁定之外另尋N/M組合**，#60在此結案為FAIL。已寫入
+`STRATEGY_GRAVEYARD.md`#60條目、`FUT_LEADS.md`。⑨大類（衍生性商品結算
+機械性效應）測試結束，佇列#1~60全數結案，剩#50/#52仍卡外部依賴（狀態
+沿用前次判定）。
