@@ -2415,3 +2415,47 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
   對使用者公開）。
 - **原始記錄**：`TRIALS_LEDGER.md`#220、`HYPOTHESIS_QUEUE.md` #52-US
   條目、`us_8k_item101_gate52.py`（新增，可重複執行）。零新增API呼叫。
+
+## #52-TW MOPS 重大訊息事件反應速度 —— 2026-09-09結案（gate1 CHEAP_PASS + gate2 FAIL，整條假說結案）：FAIL（馬拉松第470輪US軌協助收成TW軌job）
+
+- **假設**：MOPS重大訊息公告（併購/增減資/財務/人事/處分資產/停復牌/訴訟/
+  法說會共8類）觸發的異常股價反應，是否可預測且可交易。拆成兩關：gate1測
+  「有沒有異常反應」，gate2測「異常反應是否延續到可交易」（PEAD式方向性
+  漂移檢定）。
+- **gate1結果（`TRIALS_LEDGER.md`#221）**：8類中4類CHEAP_PASS（併購/增減資/
+  財務/人事，`control_percentile`皆100.0，訊號嚴格大於全部400次控制組抽樣
+  最大值），4類FAIL（停復牌/訴訟/法說會/處分資產，N=200正式量後現形，
+  N=50小樣本曾虛胖PASS）。
+- **gate2結果（`TRIALS_LEDGER.md`#223，正式N=200全量job
+  `20260909-030107-0bce`）**：對gate1的4類PASS測「看到reaction_day+1初始
+  反應方向(car0，帶正負號)後才進場，接下來H=5交易日是否有可預測的同向
+  延續」，signal_stat=VAL期mean(sign(car0)*post_ret)，控制組2變體（
+  `sign_shuffle`／`random_window`）各N=200，通過門檻=嚴格大於全部400次
+  抽樣最大值（2026-09-07控制組標準升級）。**4類全數FAIL**：
+  併購signal=0.0052<control_max=0.0112(percentile=94.5)、
+  增減資signal=0.0000<control_max=0.0036(percentile=35.0)、
+  財務signal=0.0020<control_max=0.0022(percentile=98.5)、
+  人事signal=0.0018<control_max=0.0030(percentile=97.75)。與round467的
+  N=25 smoke test方向完全一致，非小樣本雜訊。
+- **判定**：**FAIL**——正式結論「異常反應存在但不可交易（已price-in、
+  無延續）」。gate1扎實證明這4類公告確實觸發顯著大於隨機的異常反應幅度，
+  但gate2證實反應後H=5交易日內沒有可預測的同向延續，賺不到這個訊號。
+- **誠實揭露限制**：不泛化成「重大訊息公告完全無效」——只測了H=5單一
+  窗口的方向性延續假設，未測其他horizon（H=1/3/10）或反轉假設
+  （over-reaction後是否存在反轉，經濟理由與延續假設相反，屬另一條獨立
+  假設，未來若重探此方向應優先測反轉，而非重測同一個延續假設換參數）。
+- **#52整體盤點**：台股版（本條目）與美股版（`#52-US`，上方三個item
+  family段落）皆FAIL，事件反應速度大類（0a節#52）兩市場合計0勝2敗結案。
+  已同步更新`build_signal_status.py`的`DIRECTIONS`常數並重跑產生
+  `data/signal_status.json`（0a節要求四條結構性優勢方向成績含FAIL全部
+  對使用者公開）。
+- **收成備註**：本輪的正式N=200 job由前一輪（第469輪TW軌）投遞，
+  結果讀取與`TRIALS_LEDGER.md`#223登記由獨立自動化排程`hypothesis_queue`
+  搶先完成（早於本輪馬拉松cycle）；本輪（第470輪，依輪替本應選US軌）
+  發現`data/signal_status.json`與本檔案皆未實際同步更新（HYPOTHESIS_QUEUE.md
+  文字紀錄聲稱「已寫入STRATEGY_GRAVEYARD.md新增段落」但檔案裡實際不存在，
+  研判是`hypothesis_queue`排程預算用完中斷），故本輪補寫本段落與
+  `data/signal_status.json`，非重跑試驗。
+- **原始記錄**：`TRIALS_LEDGER.md`#221/#223、`HYPOTHESIS_QUEUE.md` #52
+  條目(x)段落、`material_news_car_gate.py`／`material_news_car_gate2_
+  continuation.py`（皆可重複執行）。零新增API呼叫。

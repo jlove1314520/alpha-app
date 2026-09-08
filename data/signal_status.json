@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-09T02:41:55.610732+08:00",
+  "generated_at": "2026-09-09T03:34:49.095500+08:00",
   "note": "0a節（2026-09-07總司令裁示）四條新研究方向的公開成績，含FAIL——這是Alpha相對於一般籌碼工具的差異化：我們也告訴使用者「測過、沒用」。非投資建議；狀態值：NOT_STARTED/IN_PROGRESS/FAIL/EXPERIMENTAL/PASS。",
   "directions": [
     {
@@ -34,10 +34,10 @@
     },
     {
       "id": "51",
-      "name": "強制交易者事件（台股：融券強制回補／現金增資折價／CB轉換價重設；美股：S&P指數成分調整）",
+      "name": "強制交易者事件（融券強制回補／現金增資折價／CB轉換價重設）",
       "status": "FAIL",
-      "concluded_at": "2026-09-09",
-      "summary": "台股三個子事件（強制回補、現金增資折價、CB轉換價重設）與美股S&P指數Addition子測試皆FAIL，#51正式結案（美股Deletion子測試因下市股價格污染雷事前排除未測，非跳關）。不泛化為「事前已知日期的結構性交易者」這個機制大類完全無效——四個已測子事件涵蓋四種不同觸發事件＋四種不同構造，共同點僅止於經濟理由的抽象類比，不代表機制類別本身被推翻。",
+      "concluded_at": "2026-09-07",
+      "summary": "三個子事件（強制回補、現金增資折價、CB轉換價重設）皆FAIL，#51正式結案。不泛化為「事前已知日期的結構性交易者」這個機制大類完全無效——三個子事件測的是三種不同觸發事件＋三種不同構造（連續比例、二元對照、折價幅度、重設幅度），共同點僅止於經濟理由的抽象類比，不代表機制類別本身被推翻。",
       "sub_events": [
         {
           "id": "51-1",
@@ -87,40 +87,30 @@
               "STRATEGY_GRAVEYARD.md #51"
             ]
           }
-        },
-        {
-          "id": "51-us",
-          "name": "美股 S&P 指數成分調整（Addition事件公告日→生效日CAR搶跑漲幅）",
-          "status": "FAIL",
-          "concluded_at": "2026-09-09",
-          "summary": "僅測Addition（事前排除Deletion，避開被收購/破產下市股在yfinance低覆蓋率下的價格污染雷）。222筆可用事件，價格源改用yfinance原生美股資料（非違規的FinMind USStockPrice）。控制組own_ticker_window/cross_ticker_window兩變體各N=200：TRAIN（2012-2020,n=25）mean_CAR=+11.59%嚴格大於控制組最大值（CHEAP_PASS，但樣本量過小）；VAL（2021-2024,n=197）mean_CAR=+1.56%，百分位97.8但未嚴格大於控制組最大值2.38%（FAIL）。方向與index-effect文獻一致，是「近年套利搶跑減弱」已知風險下的誠實邊緣FAIL，非管線問題。",
-          "refs": {
-            "trials_ledger": [
-              "#222"
-            ],
-            "docs": [
-              "HYPOTHESIS_QUEUE.md #51-US",
-              "US_LEADS.md #32"
-            ]
-          }
         }
       ]
     },
     {
       "id": "52",
       "name": "事件反應速度（重大申報/訊息 T+0/T+1，依類型分群，台美股分開跑）",
-      "status": "IN_PROGRESS",
-      "note": "台股(MOPS)與美股(SEC EDGAR)是同一個經濟假說在兩個市場各自的資料源，各自獨立判定。",
+      "status": "FAIL",
+      "concluded_at": "2026-09-09",
+      "note": "台股(MOPS)與美股(SEC EDGAR)是同一個經濟假說在兩個市場各自的資料源，各自獨立判定，本輪兩者皆已結案，母層狀態依兩子事件皆FAIL標記FAIL。",
       "sub_events": [
         {
           "id": "52-tw",
           "name": "台股 MOPS 重大訊息",
-          "status": "IN_PROGRESS",
-          "summary": "2026-09-08 hypothesis_queue排程確認「不指定co_id+單日範圍」窄查詢可繞過MOPS內部筆數上限，回填只需逐日（非逐公司）查詢，成本比預期低三個數量級，欄位含精確到秒的發言時間。技術路徑已解決，下一步為寫正式回填客戶端，尚未跑cheap gate數字。",
+          "status": "FAIL",
+          "concluded_at": "2026-09-09",
+          "summary": "gate1（CAR事件研究，4類CHEAP_PASS：併購/增減資/財務/人事，control_percentile皆100.0，訊號嚴格大於全部400次控制組抽樣最大值）證實這4類重大訊息公告確實觸發顯著大於隨機的異常反應幅度。但gate2（PEAD式方向性延續檢定，看到reaction_day+1初始反應方向後，接下來H=5交易日是否有可預測的同向延續）4類全數FAIL：併購signal=0.0052<control_max=0.0112(percentile=94.5)、增減資signal=0.0000<control_max=0.0036(percentile=35.0)、財務signal=0.0020<control_max=0.0022(percentile=98.5)、人事signal=0.0018<control_max=0.0030(percentile=97.75)。正式結論：異常反應存在但不可交易（已price-in、無延續）。不泛化為「重大訊息公告完全無效」——只測了H=5單一窗口的方向性延續假設，未測其他horizon（H=1/3/10）或反轉假設（over-reaction後是否存在反轉，經濟理由與延續假設相反，屬另一條獨立假設，未來若重探此方向應優先測反轉）。",
           "refs": {
+            "trials_ledger": [
+              "#221",
+              "#223"
+            ],
             "docs": [
-              "HYPOTHESIS_QUEUE.md #52 (k)",
-              "MARATHON_LOG.md 2026-09-08T21:27"
+              "HYPOTHESIS_QUEUE.md #52 (x)",
+              "STRATEGY_GRAVEYARD.md #52"
             ]
           }
         },

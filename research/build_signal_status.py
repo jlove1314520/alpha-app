@@ -113,20 +113,35 @@ DIRECTIONS = [
     {
         "id": "52",
         "name": "事件反應速度（重大申報/訊息 T+0/T+1，依類型分群，台美股分開跑）",
-        "status": "IN_PROGRESS",
-        "note": "台股(MOPS)與美股(SEC EDGAR)是同一個經濟假說在兩個市場各自的資料源，各自獨立判定。",
+        "status": "FAIL",
+        "concluded_at": "2026-09-09",
+        "note": "台股(MOPS)與美股(SEC EDGAR)是同一個經濟假說在兩個市場各自的資料源，各自獨立判定，本輪兩者皆已結案，母層狀態依兩子事件皆FAIL標記FAIL。",
         "sub_events": [
             {
                 "id": "52-tw",
                 "name": "台股 MOPS 重大訊息",
-                "status": "IN_PROGRESS",
+                "status": "FAIL",
+                "concluded_at": "2026-09-09",
                 "summary": (
-                    "2026-09-08 hypothesis_queue排程確認「不指定co_id+單日範圍」窄查詢"
-                    "可繞過MOPS內部筆數上限，回填只需逐日（非逐公司）查詢，成本比預期低"
-                    "三個數量級，欄位含精確到秒的發言時間。技術路徑已解決，下一步為寫正式"
-                    "回填客戶端，尚未跑cheap gate數字。"
+                    "gate1（CAR事件研究，4類CHEAP_PASS：併購/增減資/財務/人事，"
+                    "control_percentile皆100.0，訊號嚴格大於全部400次控制組抽樣"
+                    "最大值）證實這4類重大訊息公告確實觸發顯著大於隨機的異常反應"
+                    "幅度。但gate2（PEAD式方向性延續檢定，看到reaction_day+1初始"
+                    "反應方向後，接下來H=5交易日是否有可預測的同向延續）4類全數"
+                    "FAIL：併購signal=0.0052<control_max=0.0112(percentile=94.5)、"
+                    "增減資signal=0.0000<control_max=0.0036(percentile=35.0)、"
+                    "財務signal=0.0020<control_max=0.0022(percentile=98.5)、"
+                    "人事signal=0.0018<control_max=0.0030(percentile=97.75)。"
+                    "正式結論：異常反應存在但不可交易（已price-in、無延續）。"
+                    "不泛化為「重大訊息公告完全無效」——只測了H=5單一窗口的"
+                    "方向性延續假設，未測其他horizon（H=1/3/10）或反轉假設"
+                    "（over-reaction後是否存在反轉，經濟理由與延續假設相反，"
+                    "屬另一條獨立假設，未來若重探此方向應優先測反轉）。"
                 ),
-                "refs": {"docs": ["HYPOTHESIS_QUEUE.md #52 (k)", "MARATHON_LOG.md 2026-09-08T21:27"]},
+                "refs": {
+                    "trials_ledger": ["#221", "#223"],
+                    "docs": ["HYPOTHESIS_QUEUE.md #52 (x)", "STRATEGY_GRAVEYARD.md #52"],
+                },
             },
             {
                 "id": "52-us",
