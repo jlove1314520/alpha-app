@@ -1,5 +1,40 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T11:22+0800 — hypothesis_queue排程接續：接手崩潰前一輪未commit的成果，驗證後直接commit+push
+開工`marathon_lock.py acquire`回傳`LOCK_STALE`（held by 123132，30.3分鐘，
+上一輪〔10:56那筆心跳的作者〕疑似完成全部檔案編輯後、commit+push前中途
+崩潰，已自動回收，非本輪異常）。`git pull`乾淨、`git status`發現
+`research/HYPOTHESIS_QUEUE.md`與`research/MARATHON_LOG.md`已有未commit的
+修改——核對內容正是上一輪（10:56）心跳自述的成果：修正#63/#64舊摘要字樣
++設計新假設軸#65，內容完整自洽、非半成品，判斷屬於「同一track前一輪已完成
+但未進到commit步驟」而非別的workflow殘留，依協定精神接手而非丟棄重做。
+另有`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`為其他自動化來源殘留，不觸碰不納入
+本輪commit。驗證後才commit：`is_holdout_consumed()`確認`False`；
+`trial_registry.py --check`（需設`PYTHONIOENCODING=utf-8`避免終端機cp950
+編碼崩潰，非邏輯問題）回傳`PASS：沒有任何強制期內的未登記判定`，exit 0，
+兩組撞號皆為2026-09-07前歷史存量、非本輪產生。本輪未新增判定、未跑新的
+gate、未消耗任何API額度，純粹是「補完上一輪未完成的收尾動作」。**本輪
+工作到此為止**，下一輪從#65第1關cheap gate開始（核對`TaiwanStockPrice`
+成交金額欄位、確認`industry_category`各產業成員數分布，接著寫
+`factor_ic_leader_follower_lag.py`）。
+
+## 2026-09-09T10:56+0800 — hypothesis_queue排程接續：修正排隊順序總結陳舊字樣+設計新假設軸#65
+取鎖`LOCK_ACQUIRED`（乾淨，非陳舊回收）。`git pull`+`git status`乾淨（僅其他
+自動化來源留下的`quotes_ibkr.json`/`dev_queue_cycle.log`/`external_connectivity.jsonl`
+殘留變更，不觸碰不納入本輪commit）。重新查證`#50`/`#52`兩項外部依賴：`#50`
+（資料一逐筆tick落地）現況`data/ticks/`僅2個完整交易日，距20交易日門檻仍遠，
+未解鎖；`#52`已於`#64`條目確認TW/US版皆已結案FAIL，**發現「排隊順序總結」
+章節仍停留在#62結案的舊摘要、未反映TW/FUT馬拉松軌道已把`#63`/`#64`寫入同一
+份檔案並結案（皆FAIL）**——已修正對齊（依協定第1節「先修正不一致再決定挑
+哪一條」）。佇列`#1~64`全數結案或明確卡進度，依協定第1節設計新假設軸`#65`
+（產業龍頭股跨期領先-落後動能／資訊擴散延遲機制，Hou 2007文獻依據，跟已測
+13個機制大類逐一比對確認無重複），完整內容見`HYPOTHESIS_QUEUE.md`新章節。
+本輪純文件設計工作，零程式碼、零API呼叫、零回測，`is_holdout_consumed()`
+未變更（本輪未觸碰任何資料/回測程式碼）。**本輪工作到此為止**，下一輪從
+核對`TaiwanStockPrice`成交金額欄位開始寫`factor_ic_leader_follower_lag.py`
+第1關cheap gate，不跳關。
+
 ## 2026-09-09T10:24+0800 — hypothesis_queue排程接續：#64地基determinism前置檢查完成（非判定），下一輪可進第1關cheap gate
 開工取鎖`marathon_lock.py acquire`回傳`LOCK_STALE`（held by 136952，30.0分鐘，上一輪疑似中途失敗，已自動回收，非本輪異常）。
 `git pull`+`git status`乾淨（僅其他自動化來源留下的`quotes_ibkr.json`/
