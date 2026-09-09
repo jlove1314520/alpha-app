@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-09T20:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 501 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 501 輪 · 2026-09-09T20:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-203037`）**。**本輪工作單位**：執行`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`第2步（該步驟明文寫「不需要新增外部API呼叫」，屬提案本身待核准的訂閱變更之外的準備工作）——新增`gate50_candidate_universe_screen.py`，用本機已快取的`TaiwanStockInfo`/`TaiwanStockPrice`（零API呼叫）篩出#50（容量受限小型股）候選代號：排除ETF/權證後母體2593檔，561檔近60個交易日均日成交值落在500萬~5,000萬NTD目標區間，輸出`data/gate50_candidate_universe.json`。**限制已如實揭露**：成交值資料上限到`VAL_END=2024-12-31`，非即時，執行前需重新確認；**未動`shioaji_quotes.py`或`.live_watchlist.json`，未執行任何訂閱變更**，提案本身仍待總司令核准。`trial_registry.py --check`exit=0 PASS（無新判定，基礎設施準備非統計判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第501輪記錄、`TW_MARATHON_STATE.md`第501輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 502 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 502 輪 · 2026-09-09T21:00+08:00 · US軌（取鎖乾淨，cycle`20260909-210036`）**。**本輪工作單位**：依round500建議採精簡確認（鎖/`run_detached`/`git log`/ticks進度/gate50回應），未重複整份四角度覆核——`run_detached running=0`；`git log`確認round501後僅自動排程commit；`data/ticks/`仍2/20；`PENDING_QUEUE.md`核對`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`仍無總司令回應；核對`build_signal_status.py`的17條`DIRECTIONS`對照`STRATEGY_GRAVEYARD.md`最新結案條目無遺漏（`#67`卡gate2、`#68`~`#79`尚未結案）。**結論：候選池連續16輪（487~502）維持同一狀態**，僅剩`#50`被動等待與`hypothesis_queue`自走排程被動維護。`trial_registry.py --check`exit=0 PASS（233列，無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第502輪記錄、`US_MARATHON_STATE.md`第502輪記錄。
 
 **上一輪（第500輪，供對照）** · 2026-09-09T20:00+08:00 · US軌（取鎖乾淨，cycle`20260909-200036`）**。**本輪工作單位**：核實US軌是否有round498之後遺漏的新工作單位，確認候選池連續14輪（487~500）維持同一狀態，US軌本地端無新可推進工作單位。`#50`gate50提案仍無總司令回應。詳見`REPORT.md`第500輪記錄、`US_MARATHON_STATE.md`第500輪記錄。
 
