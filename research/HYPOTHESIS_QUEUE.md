@@ -9164,3 +9164,17 @@ stash還原。執行`python backfill_odd_lot.py --batch-size 250`，本批次
 停止。下一輪待辦不變（繼續回補），預估還需約3輪達到全數回補。
 `is_holdout_consumed()`本輪開工/收工前確認皆為`False`。**本輪工作到此
 為止（一輪一個有界工作單位——一次批次回補）**。
+
+**狀態更新（2026-09-09T18:09 hypothesis_queue排程接續，回補進度第四輪）**：
+`git status`確認乾淨後（另有三個非本track殘留變更`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`，
+未觸碰、未納入本輪commit），取得具名鎖乾淨`LOCK_ACQUIRED`（非陳舊回收）。
+執行`python backfill_odd_lot.py --batch-size 250`，本批次250天中249天
+成功快取（其中19天無資料/官方無交易日，非錯誤），**1天
+（20220801）因暫時性DNS解析失敗（`NameResolutionError`，非TWSE封鎖，
+非官方端點問題）連續3次重試後放棄，未快取，會在下一輪批次自動重試**
+（腳本以「已快取檔案是否存在」判斷待辦清單，非本次錯誤不影響下一輪）。
+累積快取**701/1092（64.2% of全範圍）**，過程中無TWSE封鎖、無連續錯誤
+觸發提前停止。下一輪待辦不變（繼續回補，預估還需約2輪達到全數回補，
+其中1天需重試補齊）。`is_holdout_consumed()`本輪開工/收工前確認皆為
+`False`。**本輪工作到此為止（一輪一個有界工作單位——一次批次回補）**。
