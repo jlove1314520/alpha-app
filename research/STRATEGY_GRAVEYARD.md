@@ -2535,3 +2535,26 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
   `fut_basis_regime_gate64.py`（可重複執行）、
   `data/fut_basis_regime_gate64_result.json`。全程零新增API呼叫，複用
   `fut_basis_series.py`既有快取。
+
+### f_leader_follower_lag（產業龍頭股跨期領先-落後動能，股票/台股，2026-09-09
+hypothesis_queue排程接續FAIL）
+
+- **哪一關死的**：第1關cheap IC gate——train/val同號（皆為正，符合事前綁定
+  方向）但兩處都沒過：VAL期IC絕對值遠小於事前訂的0.02門檻，且贏過洗牌
+  null分布的百分位87.5未達90.0Bonferroni門檻。
+- **具體數字**：`factor_ic_leader_follower_lag.py`，300檔樣本、18+產業分組
+  （median每快照14組、每組中位數7名成員）、龍頭trailing 20日均成交金額
+  最大者、龍頭t期5日報酬廣播給族群成員、預測族群成員t+1期5日報酬。
+  TRAIN mean_ic=+0.0072/IR=+0.065(n=288日)、VAL mean_ic=+0.0094/IR=+0.091/
+  hit_rate=0.51(n=193日)、null_percentile=87.5(需>=90.0)、same_sign=True。
+- **這個死法能不能泛化**：不能泛化成「同產業龍頭-族群資訊擴散延遲這個
+  經濟機制在台股完全不存在」——只測了「成交金額最大」當關注度代理、
+  trailing 5日/次5日這組固定lag窗口、300檔樣本內分組（非全市場真龍頭）。
+  同號但強度貼近雜訊（IC僅+0.007~+0.009量級，比本佇列多數已過cheap gate
+  的因子小一個數量級以上），比較貼近Hou(2007)原文機制在台股（散戶占比
+  更高、但樣本內龍頭認定較粗糙）下訊號真的很弱，而非方向判斷錯誤。若
+  未來重測，應優先改善龍頭認定精確度（例如換全市場成交金額排名而非樣本
+  內排名）或改用分析師覆蓋度更直接的代理，而非直接放棄整個機制類別。
+- **原始記錄**：`TRIALS_LEDGER.md`#229、`HYPOTHESIS_QUEUE.md` #65條目、
+  `factor_ic_leader_follower_lag.py`（可重複執行，零新增API呼叫，完全
+  複用`factor_ic.py::load_sample_with_factors()`既有快取）。

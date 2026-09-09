@@ -1,5 +1,17 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T12:22+0800 — hypothesis_queue排程接續：#65（產業龍頭股跨期
+領先-落後動能）gate1跑完並結案FAIL——既有快取命中（`data/raw`已2488個
+`TaiwanStockPrice`快取檔），零新增API呼叫。TRAIN mean_ic=+0.0072/VAL
+mean_ic=+0.0094，同號但VAL期IC過小(<0.02門檻)+null_percentile=87.5未過
+90.0門檻，依快殺標準判FAIL，未進第2關。已登記`TRIALS_LEDGER.md`#229、
+更新`STRATEGY_GRAVEYARD.md`新增f_leader_follower_lag條目、
+`HYPOTHESIS_QUEUE.md`#65條目+排隊順序總結同步標記結案。`is_holdout_
+consumed()`確認False、`trial_registry.py --check`PASS。佇列#1~65全數
+結案，剩餘#50仍卡資料一逐筆tick落地（非本track範圍）。**本輪因預算
+考量，設計新假設軸#66留給下一輪**，下一輪從盤點已測14個機制大類開始
+設計第⑮類，不空轉。本輪工作到此為止。
+
 ## 2026-09-09T12:01+0800 — hypothesis_queue排程接續：#65地基完成+開跑gate1，執行未在本輪預算內跑完
 核對確認`Trading_money`欄位（`close*volume`）在既有`load_sample_with_factors()`
 快取（yfinance/FinMind兩條路徑）皆已存在，零新增API呼叫；查證300檔樣本內
