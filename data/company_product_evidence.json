@@ -1,0 +1,332 @@
+{
+ "meta": {
+  "generated_at": "2026-09-09T13:15:50.019405+08:00",
+  "scope": "七個缺口題材的 D 級候選（驗證既有候選，非發現新成員）",
+  "candidates": 38,
+  "evidence_level": "A（公司自述產品）",
+  "policy": "逐站查 robots.txt，被 Disallow 涵蓋者跳過並記錄原因；不繞、不用快取或鏡像。",
+  "throttle": "逐站間隔 2.0s、每家最多 3 頁",
+  "stats": {
+   "fetchable": 31,
+   "robots_blocked": 0,
+   "unreachable": 7,
+   "no_url": 0
+  }
+ },
+ "sites": [
+  {
+   "code": "1795",
+   "site": "http://www.lotuspharm.com.tw",
+   "status": "ok",
+   "pages": 0,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 403）"
+  },
+  {
+   "code": "2065",
+   "site": "https://www.shehfung.com/index.php?lang=cht",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 400）"
+  },
+  {
+   "code": "2308",
+   "site": "https://www.deltaww.com/zh-TW/index",
+   "status": "ok",
+   "pages": 3,
+   "hits": 1,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "2313",
+   "site": "https://www.compeq.com.tw",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（2 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "2317",
+   "site": "https://www.honhai.com/zh-tw",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "2330",
+   "site": "https://www.tsmc.com",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（12 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "2356",
+   "site": "https://www.inventec.com/",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（1 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "2367",
+   "site": "https://www.pcbut.com.tw",
+   "status": "unreachable",
+   "note": "robots 取得失敗（SSLError）"
+  },
+  {
+   "code": "2376",
+   "site": "http://www.gigabyte.com",
+   "status": "ok",
+   "pages": 0,
+   "hits": 0,
+   "note": "robots.txt 允許（19 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "2382",
+   "site": "https://www.quantatw.com",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "robots.txt 允許（0 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "2383",
+   "site": "http://www.emctw.com",
+   "status": "unreachable",
+   "note": "robots 取得失敗（ConnectionError）"
+  },
+  {
+   "code": "2421",
+   "site": "https://www.sunon.com",
+   "status": "unreachable",
+   "note": "robots 取得失敗（ConnectTimeout）"
+  },
+  {
+   "code": "2449",
+   "site": "https://www.kyec.com.tw",
+   "status": "fetch_error",
+   "note": "ReadTimeout"
+  },
+  {
+   "code": "3017",
+   "site": "https://www.avc.co",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "robots.txt 允許（29 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "3037",
+   "site": "https://www.unimicron.com",
+   "status": "unreachable",
+   "note": "robots 取得失敗（SSLError）"
+  },
+  {
+   "code": "3044",
+   "site": "https://www.tripod-tech.com",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（0 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "3131",
+   "site": "https://www.gptc.com.tw/",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（4 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "3231",
+   "site": "https://www.wistron.com",
+   "status": "ok",
+   "pages": 0,
+   "hits": 0,
+   "note": "robots.txt 允許（0 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "3324",
+   "site": "http://www.auras.com.tw",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "robots.txt 回 HTML（等於沒有）"
+  },
+  {
+   "code": "3374",
+   "site": "https://www.xintec.com.tw",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "3413",
+   "site": "http://www.foxsemicon.com.tw/",
+   "status": "unreachable",
+   "note": "robots 取得失敗（ConnectionError）"
+  },
+  {
+   "code": "3587",
+   "site": "http://www.ma-tek.com",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "robots.txt 允許（0 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "3653",
+   "site": "https://www.jentech.com.tw/zh",
+   "status": "ok",
+   "pages": 3,
+   "hits": 1,
+   "note": "無 robots.txt（HTTP 400）"
+  },
+  {
+   "code": "3711",
+   "site": "https://www.aseglobal.com",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "robots.txt 允許（4 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "5469",
+   "site": "http://tw.hannstarboard.com/",
+   "status": "unreachable",
+   "note": "robots 取得失敗（SSLError）"
+  },
+  {
+   "code": "6116",
+   "site": "https://www.hannstar.com",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "6147",
+   "site": "https://www.chipbond.com.tw",
+   "status": "fetch_error",
+   "note": "ConnectionError"
+  },
+  {
+   "code": "6187",
+   "site": "https://www.allring-tech.com.tw",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（6 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "6213",
+   "site": "https://www.iteqcorp.com",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（1 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "6223",
+   "site": "https://www.mpi.com.tw",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 允許（2 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "6230",
+   "site": "https://www.ccic.com.tw",
+   "status": "ok",
+   "pages": 2,
+   "hits": 0,
+   "note": "robots.txt 允許（1 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "6488",
+   "site": "http://www.sas-globalwafers.com",
+   "status": "unreachable",
+   "note": "robots 取得失敗（SSLError）"
+  },
+  {
+   "code": "6510",
+   "site": "https://www.chpt.com",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "6669",
+   "site": "https://www.wiwynn.com",
+   "status": "ok",
+   "pages": 2,
+   "hits": 0,
+   "note": "robots.txt 允許（8 條 Disallow 未涵蓋）"
+  },
+  {
+   "code": "8046",
+   "site": "https://www.nanyapcb.com.tw/nypcb/Chinese/index",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "8150",
+   "site": "https://www.chipmos.com",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "無 robots.txt（HTTP 404）"
+  },
+  {
+   "code": "8358",
+   "site": "http://www.co-tech.com",
+   "status": "ok",
+   "pages": 3,
+   "hits": 0,
+   "note": "robots.txt 回 HTML（等於沒有）"
+  },
+  {
+   "code": "8996",
+   "site": "https://www.kaori.com.tw/",
+   "status": "ok",
+   "pages": 1,
+   "hits": 0,
+   "note": "robots.txt 允許（12 條 Disallow 未涵蓋）"
+  }
+ ],
+ "evidence": [
+  {
+   "code": "2308",
+   "site": "https://www.deltaww.com/zh-TW/index",
+   "quotes": [
+    {
+     "theme_id": "thermal",
+     "matched": "散熱",
+     "pattern": "散熱解決方案",
+     "quote": "憑藉在電源管理與散熱解決方案領域的核心競爭力，我們已拓展至四大事業範疇，包括「電源及零組件」、「交通」、「自動化」與「基礎設施」 ，逐步實現永續AI、智慧製造與智慧城市的發展願景",
+     "url": "https://www.deltaww.com/zh-TW/index"
+    }
+   ]
+  },
+  {
+   "code": "3653",
+   "site": "https://www.jentech.com.tw/zh",
+   "quotes": [
+    {
+     "theme_id": "thermal",
+     "matched": "散熱",
+     "pattern": "散熱解決方案",
+     "quote": "--> 健策精密工業股份有限公司 top of page Search 創新驅動 成就製造 完美 極致 ​先進垂直整合散熱解決方案 What we do 在全球最具代表性的品牌背後，都有健策精密打造的關鍵解決方案",
+     "url": "https://www.jentech.com.tw/zh"
+    }
+   ]
+  }
+ ]
+}
