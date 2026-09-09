@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-09T17:30+08:00**
+**最後更新：2026-09-09T19:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 497 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 497 輪 · 2026-09-09T18:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-183037`）**。**本輪工作單位**：延續round496做法，核對`STRATEGY_GRAVEYARD.md`發現`#53`/`#54`/`#55`/`#57`/`#58`/`#59`/`#60`共7條已結案（皆FAIL）的hypothesis_queue假說從未寫進`build_signal_status.py`公開清單（`#56`因屬「撤案不測」性質不納入）。已比照`#61`/`#62`格式逐一補上，重跑後`directions`從10條增至17條，`git diff -b`確認僅新增區塊無其他變動。`#50`提案仍待核准，`data/ticks/`仍2/20。`trial_registry.py --check`exit=0 PASS（無新判定，只是補齊既有FAIL判定的公開曝光）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第497輪記錄、`TW_MARATHON_STATE.md`第497輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 499 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 499 輪 · 2026-09-09T19:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-193037`）**。**本輪工作單位**：對TW軌候選池做一次橫向收斂盤點（因子家族清單/`portfolio_multifactor_v2`/`CALIBRATION_PROBE`指令鏈/`#63`借券費率四個角度），確認皆已結案在案，13輪連續（487~499）無新工作單位，非疏漏。順帶補上round498（`66da4790`）漏更新的本計數器（心跳有寫進`REPORT.md`但計數器當時留在497）。`#50`提案仍待核准，`data/ticks/`仍2/20。`trial_registry.py --check`exit=0 PASS（無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第499輪記錄、`TW_MARATHON_STATE.md`第499輪記錄。
 
 **上一輪（第494輪，供對照）** · 2026-09-09T17:00+08:00 · US軌（取鎖乾淨，cycle`20260909-170036`）**。**本輪工作單位**：(1)核實`data/ticks/`當日`.tmp`非bug——讀`tick_recorder.py::compact_stale_days()`原始碼確認今天的檔案本設計成保持`.tmp`到隔天才壓縮，2/20進度正常。(2)核實US軌四項地基（`MARATHON_PROTOCOL.md`第5節(a)~(d)）是否全部落地——成本模型實地核對`validation/us_costs.py`確認檔案確實存在（`US_LOG.md`round68記錄非空頭承諾），四項皆已落地。三軌本輪仍無新工作單位，候選池已連續多輪（487~494）維持同一狀態（0a節四條方向＋`#61`~`#66`全數結案、全市場宇宙回補地基100%完結、US地基四項皆落地，僅剩`#50`tick累積2/20被動等待，見上方第495輪已指出這個「被動等待」框架本身有問題）。`hypothesis_queue`排程仍停在`#67`（盤中零股委託簿失衡度）地基建置完成、尚未跑第1關cheap gate，非本track範圍。`trial_registry.py --check`本輪未重跑（無新試驗需登記）。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`REPORT.md`第494輪記錄、`US_MARATHON_STATE.md`第494輪記錄。
 

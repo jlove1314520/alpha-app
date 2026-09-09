@@ -324,3 +324,18 @@
 4. **未動任何原始判定的統計結果本身**（IC/百分位/報酬數字皆未更動，只更正欄位文字跟稽核程式邏輯）——依`CLAUDE.md`「純bug修復」例外，不需要先提案即可直接做。三處修正後`--audit`乾淨PASS（0違規，18列全數已並列DSR或屬2026-09-07前存量不強制）。
 
 `trial_registry.py --check`exit=0 PASS（232列，撞號2組皆為歷史存量不回頭改寫，本輪未產生新判定，只是更正既有判定欄文字讓它跟已登記的帳本結論一致，不需要新的`register_trial()`呼叫）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫（純讀寫既有`.md`/`.py`檔案）。**下一輪任一軌接手**：`#50`tick累積仍是唯一活動候選（查`data/ticks/`是否已到3/20）；`hypothesis_queue`排程下一輪會從設計`#67`開始，非本馬拉松三軌工作範圍；候選池已連續多輪（487~491）皆無TW/US/FUT三軌自身可推進的新工作單位，若下一輪盤點仍是同樣狀態且找不到真正跳脫既有清單的新機制，應開始認真評估是否接近0a節「無可驗證預測優勢」提報門檻（`#50`本身未結案前嚴格說還不到）。完整見`candidate_report.py`（修正`audit()`函式）、`US_LEADS.md`（更正#23/#28判定欄）、`REPORT.md`第491輪心跳。
+
+---
+
+**第493輪（歸檔於round499）**——取鎖乾淨（cycle`20260909-163036`）。三軌時間戳：FUT 10:30（round484，最舊，但無新機制、依例外條款不選）／TW 15:30（round491，較舊）／US 16:00（round492，最新）——FUT跳過後依輪替選TW。開工查`run_detached.py status`：`running=0`；另用`Get-CimInstance Win32_Process`確認無`hypothesis_queue`/`odd_lot`相關背景行程在跑，無並行風險。**核實候選池現況不變**：0a節四條方向＋`#61`~`#66`全數結案，`data/ticks/`仍僅2個完整交易日parquet（`20260909`當日檔仍`.tmp`未finalize，較round492無變化）；`git log`確認`hypothesis_queue`排程已於本輪之前（commit`831874a9`）完成`#67`（盤中零股委託簿失衡度）三來源可行性查證＋地基建置（`twse_odd_lot_client.py`/`backfill_odd_lot.py`，pilot 30天驗證通過），尚未跑第1關cheap gate，非本馬拉松三軌工作範圍（依round487教訓，避免與該排程自己的下一輪重疊執行，本輪未碰`backfill_odd_lot.py`）。**本輪工作單位＝核實`CALIBRATION_PROBE.md`給馬拉松的操作指令是否已完整結案（誠實查證，非新假說）**：
+
+`CALIBRATION_PROBE.md`結論(乙)曾指示「下一輪TW軌第一個工作單位＝用300檔樣本重跑`portfolio_multifactor_v2`……接著依序重跑#77/#79/#91的cheap gate。US/FUT軌的#47/#52/#34同理各自重跑」。逐一核對`TRIALS_LEDGER.md`確認：
+
+1. `factor_ic.py::SAMPLE_SIZE`目前確實已是`300`（非探針前的100），修管線動作本身已落地。
+2. TW軌三項——`#79`（`f_inst_streak_days`，`TRIALS_LEDGER.md`#100，percentile 86.1仍未過90.0，維持FAIL）、`#77`（`f_rel_strength`產業中性版，#101，percentile從82.8驟降至41.9，維持FAIL）、`#91`（`revenue_trend_surprise_low_attention`，#106，低關注度組維持FAIL/高關注度組意外翻轉CHEAP_PASS但因TRAIN期IC幾乎為零、判定不列入候選）——**皆已於round340前後完整重跑並記錄**。
+3. US軌`#47`（`f_us_low_vol`大型股tier，#104，cheap-gate翻盤CHEAP_PASS但策略構造層維持FAIL不變）、`#52`（性質不同，死因是1b深挖非cheap-gate檢定力問題，已移出「待重跑」清單）**亦皆已結案**。
+4. FUT軌`#34`已由round328（#99）查證確認「同理各自重跑」對FUT軌不成立（無holdout安全的擴大樣本手段），維持FAIL，非「待重跑」項目。
+
+**結論：`CALIBRATION_PROBE.md`給馬拉松的操作指令鏈已100%執行完畢，不是「候選池以外的待辦」，是已結案項目**——此前TW/US_MARATHON_STATE只各自零散提到個別項目結案（#100/#101/#104/#106各自的心跳），未曾有一輪明確寫下「探針指令鏈全數結案」這個橫向總結，本輪補齊這個確認，避免未來輪次誤以為這條指令鏈還有殘留待辦。**未產生任何新判定**（未跑新的數字，純核對既有`TRIALS_LEDGER.md`記錄），依`CLAUDE.md`「純bug修復/查證」性質，不需先提案。
+
+`trial_registry.py --check`本輪未重跑（無新試驗需登記）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫（純讀既有`.md`/`.py`檔案）。**下一輪任一軌接手**：`#50`tick累積仍是唯一活動候選（查`data/ticks/`是否已到3/20）；若`hypothesis_queue`已推進`#67`cheap gate，核對其設計與結果是否符合「真正跳脫既有清單」標準即可；候選池已連續多輪（487~493）皆無TW/US/FUT三軌自身可推進的新工作單位，暫不需要提報0a節「無可驗證預測優勢」結論（`#50`本身未結案前嚴格說還不到）。完整見`TRIALS_LEDGER.md`#100/#101/#104/#106、`REPORT.md`第493輪心跳。
