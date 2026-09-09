@@ -323,3 +323,60 @@ Yahoo 效率低但**基數大 60 倍**，貢獻 95% 的證據量。
    冷門題材（探針卡、CCL）不保證達標。
 
 **這一段是「卡在哪一步」的誠實回報，不是「已完成」。**
+
+---
+
+## 🔴 題材五.3：IBKR 的 `get_company_themes` 不得用於題材庫（2026-09-09 查證）
+
+總司令：「IBKR MCP 的 `get_company_themes` / `get_company_connections`
+看起來正好是我們要的，但那是授權資料，進公開 App 等於散布。先查條款，
+**在我明確核准前不得寫進任何程式。**」
+
+**已查，未寫任何程式。結論：不可用於對外顯示的題材庫。**
+
+### 三個獨立佐證
+
+**佐證一：非專業訂閱者協議（Non-Professional Subscriber Agreement）**
+> Non-Professional Subscribers shall receive Market Data solely for their
+> **personal, non-business use** and **shall not furnish Market Data to any
+> other person or entity**.
+
+我方帳戶為個人非專業訂閱者。「不得提供給任何其他人或實體」直接涵蓋
+「放進公開 App 給人看」。
+
+**佐證二：市場資料協議的通用條款**
+> users will **not sell, market, retransmit, publish or redistribute** it in any way,
+> unless they have entered into appropriate written agreements with the relevant
+> market data providers.
+
+**佐證三：IBKR API 條款（最直接的一條）**
+> 「the use of the TWS API as a means of **disseminating information, including
+> market data or any other licensed or copyrighted information, to third parties
+> or non-registered IB customers is strictly prohibited** without prior written
+> approval of Interactive Brokers.」
+
+以及：
+> customers agree **not to reproduce, distribute, sell or commercially exploit
+> the Information** in any manner without written consent of IB.
+
+### 為什麼「只在內部用、不直接顯示」也不行
+
+有人會想：那我們用 IBKR 的題材資料在內部決定要發布哪些成員，不就沒有散布原始資料？
+
+**不行。** 如果 IBKR 說「台積電屬於 CoWoS 題材」，我們據此在 App 上發布
+「台積電屬於 CoWoS」，那**發布出去的正是他們的編纂成果本身**，
+只是把出處拿掉了——**這比直接引用更糟，不是更好**。
+
+這與總司令 2026-09-09 對籌碼K線的裁示是同一個判準：
+**不抄付費訂閱商品的編纂資料庫。** IBKR 的 themes 也是編纂資料庫，
+差別只在我們剛好有帳戶。
+
+### 那 IBKR MCP 還能用在哪
+
+CLAUDE.md 既有規則：**原始交易所資料不得對外轉售，衍生訊號可。**
+所以下列用途不受影響（且已在用）：
+- `get_price_snapshot` / `get_price_history`：**內部交叉驗證**我們自己抓的價格
+- `search_contracts`：確認代號存在性
+
+差別在於：**價格交叉驗證的產出是「我們的資料對不對」這個判斷**（衍生訊號），
+不是把 IBKR 的價格本身發布出去。題材歸屬則是**把他們的編纂結果原樣搬走**。
