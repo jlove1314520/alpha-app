@@ -8568,3 +8568,36 @@ API呼叫（僅讀既有結果檔+呼叫登記函式）。`git status`確認僅`
 gate62.py`慣例），N20因效果量最大最可能撐過高成本、N5最可能被成本吃掉，接著
 才是逐年一致性與leave-one-year-out，最後才進OOS/holdout討論（holdout在此之前
 不得觸碰）。
+
+**(m) gate4成本敏感度結果FAIL，#63整條假說結案（2026-09-09 第482輪TW軌接手，
+承接hypothesis_queue排程留下的未commit計算）**：開工發現`hypothesis_queue`
+07:51~08:00週期已完成gate4計算（新增`lending_fee_gate63_costs.py`、產出
+`data/lending_fee_gate63_costs_result.json`、呼叫`register_trial()`登記
+`TRIALS_LEDGER.md`**#227**），但該週期在完成登記後即被`Error: Exceeded USD
+budget (5)`中斷，`git add`已執行、commit未執行，狀態停在working tree（`git
+status`可見`TRIALS_LEDGER.md`/`TRIALS_REGISTRY.jsonl`為staged modified、
+`lending_fee_gate63_costs.py`為staged new file）。本輪核實：①`data/
+lending_fee_gate63_costs_result.json`數字與`TRIALS_LEDGER.md`#227描述逐項核對
+一致（N5：1x淨效益VAL=-0.35%，N10：1x=-0.04%，N20：1x=+0.21%/2x=-0.48%/
+3x=-1.16%）；②`trial_registry.py --check`確認`exit=0`PASS（229列，無撞號
+新增）；③成本模型本身（`round_trip_cost_pct()`買賣雙邊commission+tax+
+slippage，事前綁定為長倉降曝險單次進出模型，非放空）與腳本docstring所述
+一致，非事後調整。**結論：#63借券費率異常飆升整條假說在此結案，判定FAIL**——
+gate1（#225 CHEAP_PASS）與gate2參數高原（#226 CHEAP_PASS）雖然統計顯著性
+乾淨（贏過控制組全部400次抽樣最大值），但gate4顯示訊號的**絕對報酬幅度**
+不足以覆蓋交易成本：三個N值中僅N20在1x成本下勉強維持正值（+0.21%），
+2x/3x皆轉負；N5/N10在1x成本下已經轉負。這印證了`CLAUDE.md`研究紀律「指標
+順序：淨利+MDD→...→**統計顯著不保證訊號夠大能付得起交易成本**，這兩者是
+分開的問題」。**不泛化為「借券市場定價這個機制家族本身無效」**——只代表
+「z-score急升事件+單次進出的長倉降曝險應用方式」在本次事前綁定的成本模型下
+不可執行；若日後要測試「實際放空」版本（需另計借券成本，比照
+`short_round_trip_cost_pct()`），或改用不同的訊號閾值/持有期組合去換取更大
+絕對報酬幅度，須視為全新試驗另開登記，不可回頭調整本次已判FAIL的規格去
+硬救。**已寫入`STRATEGY_GRAVEYARD.md`**（死因分類：流程對，這條假設在目前
+規格下無可執行edge——不是流程錯，gate1/gate2的統計方法本身沒有問題，是
+gate4揭露訊號量級不足，這正是「復盤原則：流程重於盈虧」要求的誠實分類）。
+`TW_LEADS.md`#17已同步補充gate4結論。`is_holdout_consumed()`開工/收工前皆
+確認`False`。本輪零新增外部API呼叫（純核實既有結果檔+補齊文件），零新增
+計算（gate4計算本身是上一個週期做的，本輪只做核實與收尾文件）。**#63至此
+全部結案**，TW軌下一輪待辦：從`MARATHON_PROTOCOL.md` 0a節四條方向或第3節
+因子家族清單挑下一個尚未測過的新機制假說，不得換皮已FAIL的方向。

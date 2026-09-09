@@ -2490,3 +2490,25 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
   `backfill_block_trade.py`（皆可重複執行）。全程零新增FinMind/SEC EDGAR
   呼叫；`www.twse.com.tw`背景回補job本輪前累積約1600次請求（2秒/次節流，
   官方公開JSON端點）。
+
+### f_lending_fee_spike（借券費率異常飆升作為知情放空訊號，股票/台股，2026-09-09結案）
+
+- **哪一關死的**：成本/稅/滑價敏感度（GATE_SEQUENCE第4關）——第1關cheap gate
+  （三N值percentile皆100.0）跟第2關參數高原（Z_THRESH∈{1.5,2.0,2.5,3.0}共
+  12組全PASS）都乾淨通過，敗在扣除交易成本後訊號絕對報酬幅度不夠大。
+- **具體數字**：`round_trip_cost_pct()`1x round-trip成本率0.685%。VAL期淨
+  效益（避開損失-成本，正值代表划算）：N5於1x已轉負（−0.35%）；N10於1x已
+  轉負（−0.04%）；N20於1x勉強為正（+0.21%）但2x轉負（−0.48%）、3x更負
+  （−1.16%）。三個N值沒有一個能在2x成本下存活。
+- **這個死法能不能泛化**：**不能**泛化成「借券市場定價這個機制家族無效」——
+  統計顯著性本身乾淨（訊號嚴格大於全部400次控制組抽樣最大值），死因是
+  「事前綁定的應用方式」（z-score急升事件觸發單次長倉降曝險/剔除持股，
+  非實際放空）在此規格下絕對報酬幅度不足以覆蓋成本，不是方向錯或雜訊。
+  若改用實際放空版本（省下借券成本外的下檔保護價值可能不同，但要另計
+  借券費本身的成本）、或改用更大絕對報酬幅度的閾值/持有期組合，仍值得
+  當獨立新試驗另開登記測試，不可直接沿用本次判FAIL的規格結論。
+- **原始記錄**：`TRIALS_LEDGER.md`#225（gate1 CHEAP_PASS）/#226（gate2參數
+  高原CHEAP_PASS）/#227（gate4成本敏感度FAIL）、`HYPOTHESIS_QUEUE.md` #63
+  條目(m)段落、`lending_fee_gate63.py`／`lending_fee_gate63_param_plateau.py`／
+  `lending_fee_gate63_costs.py`（皆可重複執行）。全程零新增FinMind/SEC EDGAR
+  呼叫，全部走TWSE官方`www.twse.com.tw/rwd/zh/lending/t13sa710`端點。
