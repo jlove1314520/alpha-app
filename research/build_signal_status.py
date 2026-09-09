@@ -1,5 +1,7 @@
 """產生 data/signal_status.json——0a節（2026-09-07總司令裁示）要求的四條新研究方向
-（#49~#52）公開成績檔，含FAIL，供App將來對使用者揭露「我們測過、沒用」。
+（#49~#52）公開成績檔，含FAIL，供App將來對使用者揭露「我們測過、沒用」。實務上已
+擴及所有hypothesis_queue後續編號假說（#53起，比照#62先例），只要已在
+STRATEGY_GRAVEYARD.md/TRIALS_LEDGER.md正式結案即納入，不限於原始四條方向本身。
 
 資料來源是人工核對過的紀錄摘要，不是自動剖析 HYPOTHESIS_QUEUE.md/TRIALS_LEDGER.md
 （那兩份是敘事體，正則剖析容易斷章取義）。每次某條方向有新結果，就在下面
@@ -185,6 +187,150 @@ DIRECTIONS = [
             },
         ],
         "refs": {"docs": ["MARATHON_PROTOCOL.md 0a節 #52"]},
+    },
+    {
+        "id": "53",
+        "name": "全市場報酬離散度速度（Cross-Sectional Return Dispersion Velocity，regime overlay）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「市場總開關假設軸」regime overlay家族第1個"
+            "成員），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "截面報酬離散度異常偏高時降曝險（連續縮放）。第1關sanity通過，但"
+            "第2關隨機控制組（3變體N=100）：level/vel兩規格、TRAIN/VAL兩期共4項"
+            "判定全數未嚴格贏過控制組最大值（62~73百分位不算通過），FAIL。不"
+            "泛化為離散度訊號不存在——死的是f(z)=1-z這個固定線性映射建構。"
+        ),
+        "refs": {
+            "trials_ledger": ["#192", "#194"],
+            "docs": ["HYPOTHESIS_QUEUE.md #53", "STRATEGY_GRAVEYARD.md #53"],
+        },
+    },
+    {
+        "id": "54",
+        "name": "成交值集中度速度（Turnover Concentration Velocity，regime overlay）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「市場總開關假設軸」regime overlay家族第2個"
+            "成員），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "逐檔成交值占比HHI異常偏升時降曝險。第1關sanity兩項獨立檢定方向"
+            "皆與事前綁定相反（危機窗口僅1/3命中；高集中度組前瞻報酬反而"
+            "高於低集中度組），未進第2關即判FAIL。可能反映權值股領漲的多頭"
+            "慣性延續，而非參與面收窄的risk-off訊號，方向與原假設相反。"
+        ),
+        "refs": {
+            "trials_ledger": ["#195"],
+            "docs": ["HYPOTHESIS_QUEUE.md #54", "STRATEGY_GRAVEYARD.md #54"],
+        },
+    },
+    {
+        "id": "55",
+        "name": "三大法人買賣超截面離散度速度（Institutional Flow Dispersion Velocity，regime overlay）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「市場總開關假設軸」regime overlay家族第3個"
+            "成員），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "法人淨買超規模標準化後取截面標準差，異常偏升時降曝險。sanity1/2"
+            "皆PASS，但sanity3（tertile條件式前瞻報酬方向）level/vel兩版皆與"
+            "事前綁定方向相反，未進第2關即判FAIL。與#43（買賣超集中度HHI，"
+            "已FAIL）方向一致：法人資金集中在台股歷史樣本上系統性不是"
+            "risk-off訊號。"
+        ),
+        "refs": {
+            "trials_ledger": ["#198"],
+            "docs": ["HYPOTHESIS_QUEUE.md #55", "STRATEGY_GRAVEYARD.md #55"],
+        },
+    },
+    {
+        "id": "57",
+        "name": "全市場當沖比重截面離散度速度（Day-Trading Ratio Dispersion Velocity，regime overlay）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「市場總開關假設軸」regime overlay家族第4個"
+            "成員，#53～#57家族至此0勝5敗結案，#56撤案不計入），比照#62先例"
+            "一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "逐檔當沖成交值占比取截面標準差，異常偏升時降曝險。第1關sanity"
+            "三項皆PASS，但第2關隨機控制組（同#53框架）：level/vel兩規格、"
+            "TRAIN/VAL兩期共4項判定全數未嚴格贏過控制組最大值（44~99百分位"
+            "皆不算通過），FAIL，死法跟#53完全相同。"
+        ),
+        "refs": {
+            "trials_ledger": ["#201"],
+            "docs": ["HYPOTHESIS_QUEUE.md #57", "STRATEGY_GRAVEYARD.md #57"],
+        },
+    },
+    {
+        "id": "58",
+        "name": "反向波動度加權投資組合建構（Inverse-Volatility-Weighted Portfolio Construction）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「投資組合建構」機制家族第1個成員），比照"
+            "#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "以trailing 60日波動度倒數加權、月頻再平衡，vs等權buy-and-hold。"
+            "第1關sanity、TRAIN期控制組檢定皆PASS，但VAL期未嚴格贏過控制組"
+            "抽樣最大值（百分位99.0，邊緣FAIL）。不泛化為風險平價機制無效——"
+            "毛報酬方向正確，死的是VAL期邊際優勢小到跟隨機權重分配幾乎"
+            "無法區分。"
+        ),
+        "refs": {
+            "trials_ledger": ["#202"],
+            "docs": ["HYPOTHESIS_QUEUE.md #58", "STRATEGY_GRAVEYARD.md #58"],
+        },
+    },
+    {
+        "id": "59",
+        "name": "最小變異數投資組合建構（Minimum-Variance Portfolio Construction，共變異數矩陣版）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「投資組合建構」機制家族第2個成員），比照"
+            "#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "Ledoit-Wolf收縮估計共變異數矩陣、全域最小變異數封閉解、月頻"
+            "再平衡。前3關（sanity/控制組/參數高原）全部乾淨通過，敗在第4關"
+            "成本敏感度：換手率約為#58固定拉回版本的6.3倍，1x成本下TRAIN期"
+            "淨溢酬已轉負。不泛化為共變異數結構分散化效益不存在——死的是"
+            "封閉解求解帶來的高換手成本吃光毛報酬優勢。"
+        ),
+        "refs": {
+            "trials_ledger": ["#212"],
+            "docs": ["HYPOTHESIS_QUEUE.md #59", "STRATEGY_GRAVEYARD.md #59"],
+        },
+    },
+    {
+        "id": "60",
+        "name": "台指選擇權/期貨結算到期日機械性效應（Derivatives Settlement/Expiration Mechanical Effect）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬「衍生性商品結算機械性效應」機制，該大類"
+            "至此0勝1敗結案），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "TAIFEX台指期貨月合約結算日前後事件研究，事前綁定PRE_WINDOW=3/"
+            "POST_WINDOW=1。結算前3日報酬train/val正負號不一致；結算當日"
+            "報酬TRAIN顯著但VAL不顯著（百分位47.6），判定為noise，兩子測試"
+            "皆FAIL。只測了一組事前綁定的單點，未掃描其他窗口組合。"
+        ),
+        "refs": {
+            "trials_ledger": ["#213", "#214"],
+            "docs": ["HYPOTHESIS_QUEUE.md #60", "STRATEGY_GRAVEYARD.md #60"],
+        },
     },
     {
         "id": "61",
