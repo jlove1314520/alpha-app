@@ -1,5 +1,17 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T19:30+0800 — hypothesis_queue排程接續：`#67`盤中零股委託簿失衡度
+資料回補全數完成（1092/1092，100.0%，2020-10-26~2024-12-31），乾淨取得具名鎖
+`LOCK_ACQUIRED`。執行`python backfill_odd_lot.py --batch-size 250`處理剩餘141個
+交易日（其中7天無資料/官方無交易日，非錯誤），累積快取達全範圍100%。地基建置
+（三來源資料可行性查證+`twse_odd_lot_client.py`+`backfill_odd_lot.py`+全數回補）
+正式完工。本輪未進第1關cheap gate（下一輪從撰寫`odd_lot_imbalance_gate67.py`
+開始，先確認`factor_ic.py`框架能否直接掛載此自訂資料源），未產生PASS/FAIL判定，
+未登記`TRIALS_LEDGER.md`。同步修正`HYPOTHESIS_QUEUE.md`一處排隊順序總結舊字樣
+（原寫「#67留給下一輪設計」，已過時，補上最新狀態指引）。`is_holdout_consumed()`
+開工/收工前皆確認`False`。完整內容見`HYPOTHESIS_QUEUE.md` `### 67.`章節最新
+兩則狀態更新。本輪因預算考量在此收工。
+
 ## 2026-09-09T18:43+0800 — hypothesis_queue排程接續：取得具名鎖（`LOCK_STALE`
 回收，上一輪PID 144532、30.0分鐘未更新，判斷是崩潰/逾時中斷；重新查證確認
 上一輪僅完成第四輪回補記錄與commit，未及啟動下一輪批次即中斷，未造成任何
