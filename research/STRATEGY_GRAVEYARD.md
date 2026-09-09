@@ -2675,3 +2675,26 @@ portfolio層構造，股票/台股，2026-09-10 hypothesis_queue排程接續FAIL
 - **原始記錄**：`TRIALS_LEDGER.md`#234～#238、`FUT_LEADS.md` 2026-09-10 段落、
   `fut_classic_trend_gate_ext13.py`／`data/fut_classic_trend_gate_ext13_result.json`
   （皆可重複執行）。零新增 API 呼叫。
+
+### option_oi_pcr_gate69（台指選擇權買賣權比未平倉量口徑Open Interest PCR
+逆向情緒訊號，股票/台指衍生品，2026-09-10 hypothesis_queue排程接續FAIL）
+
+- **哪一關死的**：GATE_SEQUENCE第1關cheap gate（未進第2關以後）。
+- **具體數字**：`option_oi_pcr_gate.py`，FinMind`TaiwanOptionDaily`(TXO)
+  既有快取，`trading_session`==`position`（日盤）未平倉量Put/Call比率
+  predict次一交易日台股報酬。TRAIN(<=2020-12-31) n=1467，Pearson
+  r=+0.0508（p=0.0519）、null percentile=93.6；VAL(2020-12-31~2024-12-31)
+  n=970，Pearson r=+0.0395（p=0.2188）、null percentile=**79.0**（門檻
+  90.0）。四項判準：幅度非零✓、train/val同號✓、事前綁定方向為正兩期皆
+  正✓，但VAL贏過洗牌null未過（79.0<90.0）——第4項未過即判FAIL。
+- **這個死法能不能泛化**：不能泛化成「Put/Call比訊號完全無效」——TRAIN
+  期本身percentile=93.6接近門檻、p=0.0519邊緣顯著，只是VAL期訊號明顯
+  減弱，屬「訓練期邊緣訊號、驗證期未能穩定重現」，符合#69事前寫明的
+  先驗風險（現代機構化市場的簡單逆向訊號可能已被套利抹平）。與已FAIL的
+  `#31`（`option_pcr_gate.py`，成交量口徑，同樣FAIL但死於第2關以後具體
+  overlay構造）為同源資料但不同聚合口徑（未平倉量=存量，成交量=流量），
+  經濟意涵不同，本輪未計算兩者相關係數（#31已移出佇列非現役候選，同
+  家族查核非必要）。
+- **原始記錄**：`TRIALS_LEDGER.md`#239、`HYPOTHESIS_QUEUE.md` #69條目、
+  `option_oi_pcr_gate.py`（可重複執行，零新增API呼叫，全用`#31`留下的
+  既有parquet快取）。

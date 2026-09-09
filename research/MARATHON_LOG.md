@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T02:25+08:00 hypothesis_queue排程接續 — #69第1關cheap gate執行完畢，結案FAIL
+`git pull`+`git status`乾淨（僅`research/DEV_QUEUE_PROMPT.txt`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`
+非本track殘留變更，判斷是`dev_queue`來源，未觸碰、未納入本輪commit）。
+`marathon_lock.py acquire --name hypothesis_queue`回傳`LOCK_ACQUIRED`
+（非陳舊鎖）。承接上一輪已完成的三來源資料可行性查證，本輪撰寫並執行
+`option_oi_pcr_gate.py`（新增，可重複執行，零新增API呼叫，全用`#31`
+留下的既有`TaiwanOptionDaily`(TXO) parquet快取）：TRAIN(<=2020-12-31)
+n=1467，Pearson r=+0.0508(p=0.0519)、null percentile=93.6；
+VAL(2020-12-31~2024-12-31) n=970，Pearson r=+0.0395(p=0.2188)、null
+percentile=**79.0**（門檻90.0）。四項判準：幅度非零✓、train/val同號✓、
+事前綁定方向為正兩期皆正✓，VAL贏過null✗（79.0<90.0）——判定**FAIL**。
+已登記`TRIALS_LEDGER.md`#239（透過`trial_registry.register_trial()`，
+`--check`用`PYTHONIOENCODING=utf-8`重跑後exit 0，PASS，主控台cp950
+編碼印警告字元本身會crash但檔案內容UTF-8正確、稽核結果不受影響）、
+已寫`STRATEGY_GRAVEYARD.md`新條目、已同步`HYPOTHESIS_QUEUE.md` #69
+「最終判定」+「排隊順序總結」章節。**佇列#1~69全數結案，剩餘#50仍卡
+資料一逐筆tick落地（非本track範圍）。本輪因預算考量，設計新假設軸#70
+留給下一輪，不空轉、不倉促硬寫。**`is_holdout_consumed()`開工/收工前
+皆確認`False`。準備commit+push+釋放鎖後收工。
+
 ## 2026-09-10T09:xx+08:00 hypothesis_queue排程接續 — #69三來源資料可行性查證完成：可行
 `git pull`+`git status`乾淨（僅`index.html`/`research/.external_connectivity_state.json`/
 `research/DEV_QUEUE_PROMPT.txt`/`research/dev_queue_cycle.log`/
