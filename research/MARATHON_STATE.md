@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-09T15:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 490 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 490 輪 · 2026-09-09T15:00+08:00 · US軌（取鎖乾淨，cycle`20260909-150036`）**。**本輪工作單位**：核實候選池現況不變（0a節四條方向＋`#61`~`#65`全數結案，`#50`仍卡tick累積2/20），無新可測假說。回補`data/signal_status.json`遺漏的`#66`（美股年末稅損收割賣壓／一月效應，`TRIALS_LEDGER.md`#230 FAIL）——比照`#65`先例先在`STRATEGY_GRAVEYARD.md`新增`us_tax_loss_selling_gate66`條目，再於`build_signal_status.py`新增對應段落並重跑，`directions`清單共9條，`git diff -b`確認除新增段落外無其他內容被更動，`trial_registry.py --check`exit=0 PASS（232列，撞號2組皆歷史存量）。零新增API呼叫（純核對已結案文件+回補公開資料）。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`REPORT.md`第490輪記錄、`US_MARATHON_STATE.md`第490輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 491 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 491 輪 · 2026-09-09T15:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-153036`）**。**本輪工作單位**：核實候選池現況不變（0a節四條方向＋`#61`~`#66`全數結案，`#50`仍卡tick累積2/20），無新可測假說。改做跨軌基礎設施修復：`candidate_report.py --audit`舊版判定欄掃描邏輯會被說明文字裡提到的判定字樣誤導（實測`FUT_LEADS.md`#64一列被誤判），已改用表頭動態鎖定「判定」欄位＋同欄內取最早出現位置的關鍵字，修復後`--self-test`全過、`--audit`乾淨PASS；同時發現並更正US_LEADS.md兩筆判定欄未同步備註欄最終結論的過期列（#23/#28，皆應為FAIL，備註欄早已記錄但判定欄未跟著改）。未動任何原始統計數字，屬純bug修復。`trial_registry.py --check`exit=0 PASS（232列，撞號2組皆歷史存量，本輪未產生新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`REPORT.md`第491輪記錄、`TW_MARATHON_STATE.md`第491輪記錄。
 
 **上一輪（第489輪，供對照）** · 2026-09-09T13:00+08:00 · TW軌（取鎖乾淨，cycle`20260909-130036`）**。**本輪工作單位**：回補`data/signal_status.json`遺漏的`#65`（產業龍頭股跨期領先-落後動能，`TRIALS_LEDGER.md`#229 FAIL）——比照`#62`/`#63`/`#64`先例在`build_signal_status.py`新增對應段落並重跑，`git diff -b`確認除新增段落外無其他內容被更動，`trial_registry.py --check`exit=0 PASS（231列，撞號2組皆歷史存量）。零新增API呼叫。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`REPORT.md`第489輪記錄、`TW_MARATHON_STATE.md`第489輪記錄。
 

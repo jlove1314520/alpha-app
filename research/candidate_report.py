@@ -304,7 +304,16 @@ DSR_MENTION = re.compile(r"DSR|[Dd]eflated\s*Sharpe")
 
 
 def audit() -> dict:
-    """掃 LEADS：強制期內的候選判定必須並列 DSR（或明寫 DSR 為何算不出來）。"""
+    """掃 LEADS：強制期內的候選判定必須並列 DSR（或明寫 DSR 為何算不出來）。
+
+    **判定欄一律用表頭鎖定欄位位置**（2026-09-09 round491 修正，取代舊版
+    「從右往左掃全部欄位找關鍵字」）：舊版邏輯只要**任何欄位**（包含經濟解釋、
+    備註這種自由文字欄）出現 `CHEAP_PASS`/`PASS` 字樣就誤判，實測抓到
+    `FUT_LEADS.md` 一列經濟解釋欄寫「舊標準下會誤判CHEAP_PASS」（意思是在講
+    這個詞、不是判定本身是這個詞）被誤判成候選列，而真正的判定欄明明白白寫
+    `FAIL`。表頭「判定」欄位在哪一欄，用表頭動態找，不同檔案欄位數不保證一致
+    （`LEADS.md` 舊檔跟 `TW/US/FUT_LEADS.md` 欄位數不同）。
+    """
     violations: list[str] = []
     legacy: list[str] = []
     checked = 0
@@ -312,19 +321,28 @@ def audit() -> dict:
         path = RESEARCH / fname
         if not path.exists():
             continue
+        verdict_col: int | None = None
         for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
             if not line.startswith("|") or line.startswith("|---"):
                 continue
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
             if len(cells) < 4:
                 continue
-            # 判定欄：從右往左找第一個候選判定關鍵字；CHEAP_PASS 要先於 PASS 比對。
-            verdict = ""
-            for cell in reversed(cells):
-                hit = next((v for v in VALID_VERDICTS if v in cell), "")
-                if hit:
-                    verdict = hit
-                    break
+            if verdict_col is None:
+                # 表頭列（含「判定」字樣、且不是資料列）：鎖定欄位位置。
+                if "判定" in cells:
+                    verdict_col = cells.index("判定")
+                continue
+            if verdict_col >= len(cells):
+                continue  # 這列欄位數比表頭少，跳過（格式異常，不猜）
+            cell = cells[verdict_col]
+            # 判定欄本身也可能夾帶「提到別的判定字樣」的說明文字（例如
+            # FUT #64 那列：**FAIL**（...舊標準下會誤判CHEAP_PASS）——
+            # 真正判定字樣在最左邊，取「最早出現的位置」而非固定的關鍵字
+            # 檢查順序，避免 CHEAP_PASS 這種較長字串因為排在 tuple 前面
+            # 就搶先命中後面才出現的說明文字。
+            positions = [(cell.index(v), v) for v in VALID_VERDICTS if v in cell]
+            verdict = min(positions)[1] if positions else ""
             if verdict not in CANDIDATE_VERDICTS:
                 continue  # FAIL/ABANDONED/REFUTED 不是「報告候選」，不受這條規則管
             date = next((x for x in cells if re.fullmatch(r"\d{4}-\d{2}-\d{2}", x)), "")
