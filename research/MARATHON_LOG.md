@@ -1,5 +1,33 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：取鎖時發現
+`LOCK_STALE`（上一輪30.2分鐘未更新，回收接手）。開工先讀`HYPOTHESIS_QUEUE_PROTOCOL.md`
+＋`CLAUDE.md`（根目錄＋`alpha-app`）＋`research/CONSTITUTION.md`，`git pull`+`git status`
+確認乾淨（僅`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`
+兩個其他常駐排程殘留變更，未觸碰、未納入本輪commit）。逐段讀完`HYPOTHESIS_QUEUE.md`
+「排隊順序總結」＋#50~#67全部條目，核對現況：**#1~66全數結案（PASS/FAIL/撤案），
+#50仍卡`資料一`逐筆tick落地（非本track工作範圍，`data/ticks/`僅2個交易日），
+#67（盤中零股委託簿失衡度）現況＝第1關cheap gate已CHEAP_PASS（`TRIALS_LEDGER.md`
+#231）但帶重大統計但書（TRAIN僅3個快照、VAL邊緣過關），下一輪待辦是設計gate2
+（隨機控制組≥100 draws，需先決定用#30先例的完整portfolio回測、或比照#53~57的
+`control_group_standard.py`直接對訊號序列做隨機化控制組，兩者皆未見於現有#67
+腳本，需新設計）**。本輪因讀取超長佇列文件（9265行）耗用大部分預算，**本輪工作
+到此為止（一輪一個有界工作單位＝佇列現況盤點與核對，未發現排隊順序總結與條目
+本身不一致之處，無需修正），未寫任何新程式碼、未跑任何新測試、未產生PASS/FAIL
+判定**，避免在預算所剩無幾時倉促啟動新的gate2運算導致中途被預算中止、留下未
+commit的殘局（重演`(m)`段落round482踩過的教訓）。`is_holdout_consumed()`開工/
+收工前皆確認`False`（`python -c "from validation import holdout;
+print(holdout.is_holdout_consumed())"`回傳`False`）。`trial_registry.py --check`
+本輪無新判定，不涉及登記。**下一輪待辦（不跳關）**：設計`odd_lot_imbalance_
+gate67_control.py`——比照`inverse_vol_weighted_portfolio_gate58_control.py`/
+`min_variance_portfolio_gate59_control.py`同款「打散股票對應」控制組框架，
+建構依`f_odd_lot_imbalance`排序的long-only組合（依gate1確認的負向方向，做多
+低失衡度組），N>=100抽樣兩變體，統計量取TRAIN/VAL年化Sharpe，用
+`control_group_standard.py::evaluate_vs_control()`判定；因TRAIN樣本天生偏少
+（資料源2020-10-26才存在），下一輪設計時要在腳本docstring事前寫明這個已知
+統計限制如何處理（例如TRAIN期改用相對寬鬆的探索性標記，或誠實承認TRAIN期
+檢定力不足只看VAL），不得等看到數字後才決定。
+
 ## 2026-09-09T20:37+0800 — hypothesis_queue排程接續：取鎖時鎖檔陳舊（上一輪37.7分鐘未更新，疑似崩潰）已回收接手，補跑上一輪已起地基但未取得結果的`factor_ic_odd_lot_imbalance.py`（#67盤中零股委託簿失衡度，第1關cheap gate）。結果：CHEAP_PASS（248/300可用名，val percentile=90.7/門檻90.0，val_mean_ic=-0.0249，方向為負）但附重大統計但書——train僅3個快照（資料源自2020-10-26才可得的結構性限制），val亦僅邊緣過關，下一輪gate2設計前務必看`HYPOTHESIS_QUEUE.md`#67條目但書段落。已`register_trial()`登記`TRIALS_LEDGER.md`#231，`--check`確認EXIT_CODE=0。`is_holdout_consumed()`確認False。`git status`另發現`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`是DevQueue/連線健檢排程留下的非本輪殘留，本輪未觸碰、不納入commit。
 
 ## 2026-09-09T20:10+0800 — hypothesis_queue排程接續：LOCK_STALE回收（上一輪37.7分鐘未更新）接手。#67第1關cheap gate開工：確認factor_ic.py/factors.py框架可直接掛載自訂資料源（比照twse_t86_client.py per-date分組快取模式），新增twse_odd_lot_client.py::load_all_cached()/odd_lot_imbalance_daily()（VAL_END截斷）、factors.py::f_odd_lot_imbalance因子區塊、factor_ic_odd_lot_imbalance.py一行式模板。確認evaluate_factor()天然滿足#67方向未鎖死例外。已啟動python factor_ic_odd_lot_imbalance.py（SAMPLE_SIZE=300），因本輪預算耗盡背景執行尚未取得結果，未產生PASS/FAIL，未登記register_trial()。is_holdout_consumed()確認False。下一輪待辦：檢查執行結果並判定。
