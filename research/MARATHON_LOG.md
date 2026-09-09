@@ -1,5 +1,27 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T01:23+08:00 hypothesis_queue排程接續 — 佇列#1~68全數結案確認+修正排隊順序總結字樣同步問題+設計新假設#69
+取鎖時發現`LOCK_STALE`（PID 148908、28.6分鐘未更新，判斷是上一輪崩潰/逾時
+中斷，非仍在跑，安全接手回收）。`git pull`+`git status`確認乾淨（另有一筆
+非本track殘留變更`research/external_connectivity.jsonl`，疑似其他自動化
+來源留下，未觸碰、未納入本輪commit）。查證`HYPOTHESIS_QUEUE.md`確認
+`#67`（盤中零股委託簿失衡度）與`#68`（券資比軋空風險）皆已於上一輪
+（馬拉松第510輪代為執行`#68`cheap gate斷點）正式結案**FAIL**，但「排隊
+順序總結」章節文字仍停留在「#67排隊第一、尚未撰寫gate腳本」的過時狀態
+——正是`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節警告過的「條目本身已結案但
+排隊順序總結字樣沒同步更新」情況，本輪已修正對齊（見該檔案該段落）。
+確認佇列#1~68全數結案（#50仍卡`data/ticks/`2/20交易日、非本track範圍），
+依協定第1節設計新假設軸**#69（台指選擇權買賣權比Put/Call Ratio逆向情緒
+訊號）**——經濟機制為選擇權市場參與者情緒逆向指標，跟已測過的18個機制
+大類（含#64期貨基差期限結構）皆不同，完整經濟理由/事前綁定方向/已知
+風險見`HYPOTHESIS_QUEUE.md`新增`### 69.`章節，**下一輪開工前務必先完成
+三來源資料可行性查證（TAIFEX選擇權未平倉量官方端點/文件/社群交叉核對）
+才進地基建置，本輪僅完成設計，尚未開始第1關**。`is_holdout_consumed()`
+本輪開工/收工前皆確認`False`（`python -c "from validation import holdout;
+print(holdout.is_holdout_consumed())"`回傳`False`）。全程零新增外部API
+呼叫（純讀既有紀錄+設計文件）。**本輪工作到此為止（一輪一個有界工作
+單位）**，現在排隊第一。
+
 ## 2026-09-10T01:00+08:00 馬拉松第510輪 — 接手hypothesis_queue斷點：#68券資比第1關cheap gate執行完成，FAIL（方向證偽），並解除dev_queue連續~12小時的未提交阻塞
 開工發現`research/HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`/`factors.py`/新檔
 `factor_ic_short_margin_ratio.py`為hypothesis_queue排程於00:23那輪budget用盡
