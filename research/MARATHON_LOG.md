@@ -1,5 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T22:08+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
+取鎖乾淨`LOCK_ACQUIRED`（非陳舊回收）。`git pull`+`git status`確認乾淨（僅
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`兩個其他
+常駐排程殘留變更，未觸碰）。承接上一輪#67 gate2進度（TRAIN隨機控制組20/100），
+重新執行`python odd_lot_imbalance_portfolio_v1.py`（未設環境變數，用腳本預設
+`OLI_TIME_BUDGET_SECONDS=420`），本輪在420秒內部時間預算內完成清潔一輪
+（checkpoint接續機制正常，不重算已完成的20筆），**TRAIN隨機控制組進度推進至
+60/100（已checkpoint），VAL完全未開始，仍未做任何PASS/FAIL判定**。過程無錯誤、
+無TWSE封鎖跡象（本輪全程僅讀本地已快取的樣本+因子，零新增外部API呼叫）。
+`is_holdout_consumed()`開工/收工前皆確認`False`。**本輪工作到此為止（一輪一個
+有界工作單位——接續執行同一支checkpoint腳本一次）**。下一輪重跑同一支腳本
+即可自動從TRAIN 60/100接續。
+
 ## 2026-09-09T21:5x+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
 取鎖乾淨`LOCK_ACQUIRED`（非陳舊回收）。`git pull`+`git status`確認乾淨（僅
 `research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`兩個其他
