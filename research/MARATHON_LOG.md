@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T15:57+0800 — hypothesis_queue排程接續：補commit上一輪陳舊鎖檔
+（PID 53292）已完成但未提交的工作（#66 FAIL判定確認、排隊順序總結同步
+修正，已核對`trial_registry.py --check`PASS/`STRATEGY_GRAVEYARD.md`條目
+存在/`is_holdout_consumed()`為False，判定為同軌合法殘留、非其他track
+留下的變更），設計新假設軸#67（盤中零股交易比重當散戶情緒訊號，第⑯類
+機制，經濟理由/事前綁定定義/已知限制/資料可行性見`HYPOTHESIS_QUEUE.md`
+`### 67.`章節，資料可行性尚未核對，留給下一輪查證），本輪工作到此為止。
+`is_holdout_consumed()`確認為`False`。
+
+## 2026-09-09T15:32+0800 — hypothesis_queue排程接續：接手陳舊鎖檔（上一輪PID
+143096疑似崩潰，鎖檔119.8分鐘未更新已自動回收）。查證發現上一輪其實已完整
+跑完#66（美股稅損收割/一月效應）第1關cheap gate並判FAIL、已更新
+`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#230且已被其他track的commit
+一併帶入main（`trial_registry.py --check`PASS，非強制期未登記判定），僅
+`HYPOTHESIS_QUEUE.md`「排隊順序總結」章節文字未同步更新（仍寫「尚未開始
+第1關」），本輪已修正對齊。`is_holdout_consumed()`確認`False`。**本輪因
+預算即將用盡，設計新假設軸#67留給下一輪**，不倉促硬寫，本輪工作到此為止。
 
 ## 2026-09-09T12:57+0800 — hypothesis_queue排程接續：設計新假設軸#66（美股年末稅損
 收割賣壓／一月效應Tax-Loss Selling/January Effect），第⑮類機制
