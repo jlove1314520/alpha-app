@@ -1,5 +1,20 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T18:43+0800 — hypothesis_queue排程接續：取得具名鎖（`LOCK_STALE`
+回收，上一輪PID 144532、30.0分鐘未更新，判斷是崩潰/逾時中斷；重新查證確認
+上一輪僅完成第四輪回補記錄與commit，未及啟動下一輪批次即中斷，未造成任何
+資料損失，安全接手）。`git pull`+`git status`確認乾淨（另有三個非本track
+殘留變更`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`，未觸碰、未納入本輪commit）。延續
+#67回補：`python backfill_odd_lot.py --batch-size 250`，本批次250天全數
+成功快取（其中17天無資料/官方無交易日，非錯誤，此前20220801待重試的
+那一天本次已補齊），累積快取951/1092（87.1%），無TWSE封鎖、無連續錯誤
+觸發提前停止。尚未進第1關cheap gate（地基階段），本輪未產生PASS/FAIL
+判定，未登記TRIALS_LEDGER（比照無判定不登記慣例）。剩餘141個交易日，
+預估還需約1輪即可達到全數回補。完整內容見`HYPOTHESIS_QUEUE.md`
+`### 67.`章節最新「狀態更新」小節。`is_holdout_consumed()`開工/收工前
+確認皆為`False`。
+
 ## 2026-09-09T18:09+0800 — hypothesis_queue排程接續：取得具名鎖（乾淨
 `LOCK_ACQUIRED`，非陳舊回收）。`git status`確認乾淨（另有三個非本track
 殘留變更`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/

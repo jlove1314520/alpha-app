@@ -9178,3 +9178,18 @@ stash還原。執行`python backfill_odd_lot.py --batch-size 250`，本批次
 觸發提前停止。下一輪待辦不變（繼續回補，預估還需約2輪達到全數回補，
 其中1天需重試補齊）。`is_holdout_consumed()`本輪開工/收工前確認皆為
 `False`。**本輪工作到此為止（一輪一個有界工作單位——一次批次回補）**。
+
+**狀態更新（2026-09-09T18:43+08:00 hypothesis_queue排程接續，回補進度第五輪）**：
+`git pull`+`git status`確認乾淨（另有三個非本track殘留變更
+`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`，未觸碰、未納入本輪commit），
+取得具名鎖為`LOCK_STALE`回收（上一輪PID 144532、30.0分鐘未更新，判斷是
+崩潰/逾時中斷；重新查證確認上一輪僅完成第四輪回補記錄與commit，未及
+啟動第五輪批次即中斷，未造成任何資料損失，快取數維持在寫上一則更新時
+的701天，安全接手）。執行`python backfill_odd_lot.py --batch-size 250`，
+本批次250天全數成功快取（其中17天無資料/官方無交易日，非錯誤，此前
+20220801因DNS暫時性失敗待重試的那一天本次已補齊），累積快取
+**951/1092（87.1% of全範圍）**，過程中無TWSE封鎖、無連續錯誤觸發提前
+停止。下一輪待辦不變（繼續回補，剩餘141個交易日，預估還需約1輪即可
+達到全數回補）。`is_holdout_consumed()`本輪開工/收工前確認皆為`False`。
+**本輪工作到此為止（一輪一個有界工作單位——一次批次回補）**。
