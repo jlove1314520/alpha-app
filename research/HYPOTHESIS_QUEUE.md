@@ -8682,3 +8682,28 @@ basis」而非原始水位。3) 需排除`#60`已驗證的結算日前後窗口�
 跳關進cheap gate。`is_holdout_consumed()`開工/收工前皆確認`False`，
 全程零新增API呼叫（純讀既有記錄+設計文件）。**本輪工作到此為止（一輪
 一個有界工作單位）**。
+
+**地基驗證完成（2026-09-09 hypothesis_queue接續輪，仍未開始第1關cheap
+gate，本輪是determinism前置檢查，非判定）**：新增
+`fut_basis_settlement_alignment_probe64.py`，直接複用既有已驗證模組
+（`fut_basis_series.build_basis_series()`＋`fut_settlement_date_probe60.
+derive_settlement_dates()`），零重寫、零新增API呼叫。**核對結果**：#60
+反推出的7個非標準到期日（規則算不出來、只有滾動偵測反推得到）中，6/7天
+的`basis_pct`絕對值小於全樣本中位數（0.2530%）；對照隨機抽樣的7個一般
+交易日，非標準結算日|basis_pct|平均0.0978%，明顯小於一般交易日平均
+0.3583%（約3.7倍差距）——確認`continuous_contract.py`與`fut_basis_
+series.py`兩個模組的日期對齊一致、basis序列在結算日確實出現機械性收斂，
+不是日期錯位造成的假象。唯一例外2023-01-30（basis_pct=-0.2764%，略高於
+中位數但絕對值仍不大）不推翻整體結論，屬個別波動，不影響「地基可信」的
+判斷。完整輸出見`fut_basis_settlement_alignment_probe64_run.log`（新增，
+UTF-8編碼，可重複執行核對）。`is_holdout_consumed()`開工/收工前皆確認
+`False`。**這是determinism前置檢查通過、不是PASS/FAIL/CHEAP_PASS判定**，
+未登記進`TRIALS_LEDGER.md`（比照`#60`地基查證階段`fut_settlement_date_
+probe60.py`同樣不登記的先例——純資料可行性/地基驗證，非策略或因子判定）。
+下一輪：對齊完成，可以正式進第1關cheap gate——沿用`fut_cheap_gate.py`
+既有`_load_basis()`/`hyp_*`模式，新增`hyp_basis_regime`（或類似命名）：
+訊號＝`basis_pct`相對自身60日移動平均的偏離（如上方「具體假設定義」段落
+所述），預測目標＝**TAIEX現貨**未來N日報酬（不是期貨自身報酬——這點
+要在寫gate函式時特別注意，跟`#38`/`#43`已FAIL/EXPERIMENTAL的期貨自身
+timing機制不同，混淆會變成重測已死機制）。**本輪工作到此為止（一輪一個
+有界工作單位）**。

@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T10:24+0800 — hypothesis_queue排程接續：#64地基determinism前置檢查完成（非判定），下一輪可進第1關cheap gate
+開工取鎖`marathon_lock.py acquire`回傳`LOCK_STALE`（held by 136952，30.0分鐘，上一輪疑似中途失敗，已自動回收，非本輪異常）。
+`git pull`+`git status`乾淨（僅其他自動化來源留下的`quotes_ibkr.json`/
+`dev_queue_cycle.log`/`external_connectivity.jsonl`殘留變更，不觸碰不納入本輪
+commit）。承接上一輪（09:53）剛設計完成的假設軸#64（台指期貨基差/轉倉價差當市場
+regime訊號），依上一輪標記的下一步：新增`fut_basis_settlement_alignment_
+probe64.py`，直接複用既有已驗證模組（`fut_basis_series.build_basis_series()`＋
+`fut_settlement_date_probe60.derive_settlement_dates()`），零重寫零新增API呼叫，
+核對`#60`已驗證的7個非標準到期日附近basis是否機械性收斂。**結果：6/7天basis_pct
+絕對值小於全樣本中位數，非標準結算日|basis_pct|平均0.0978% vs 隨機一般交易日
+0.3583%（約3.7倍差距），確認`continuous_contract.py`與`fut_basis_series.py`
+兩模組日期對齊一致，地基可信**。這是determinism前置檢查，非PASS/FAIL/CHEAP_PASS
+判定，未登記`TRIALS_LEDGER.md`（比照`#60`地基查證階段同樣不登記的先例）。
+`is_holdout_consumed()`開工/收工前皆確認`False`。`HYPOTHESIS_QUEUE.md`#64條目
+已同步補上本輪結果與下一輪待辦（進第1關cheap gate，訊號預測目標是**TAIEX現貨**
+未來N日報酬，不是期貨自身報酬，避免跟已FAIL/EXPERIMENTAL的`#38`/`#43`期貨自身
+timing機制混淆）。本輪工作到此為止，一輪一個有界工作單位。
+
 ## 2026-09-09T09:53+0800 — hypothesis_queue排程接續：確認#63已FAIL結案（gate4成本敏感度未過），重新查證#50/#52外部依賴（#50仍卡tick累積2/20天；#52已查明其實TW/US皆已FAIL結案，非仍卡依賴，修正舊摘要誤植），依協定設計新假設軸#64（台指期貨基差/轉倉價差當市場情緒regime訊號，第⑬類機制，地基已現成零新增API）——結果：僅完成假設設計與可行性盤點，尚未開始第1關，佇列狀態已更新。
 
 ## 2026-09-09T09:xx+0800 hypothesis_queue排程接續（陳舊鎖檔回收後接手）— #63 gate2參數高原檢定收成並登記：12/12全PASS，CHEAP_PASS
