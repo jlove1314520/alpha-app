@@ -9308,3 +9308,24 @@ checkpoint機制正常接續（上次進度60/100完整存檔）。本次執行�
 覆核一致）。**本輪工作到此為止（一輪一個有界工作單位）**。下一輪重跑
 同一支腳本即可自動從TRAIN 80/100接續，預估還需約1輪完成TRAIN 100/100，
 再開始VALIDATION 0→100，現在排隊第一。
+
+**狀態更新（2026-09-10T00:xx+08:00 hypothesis_queue排程接續，TRAIN完成+
+VAL開跑）**：取得陳舊鎖檔（上一輪PID 143180、29.8分鐘未更新已回收；查證
+確認上一輪其實已把TRAIN推進到100/100完整存檔，只是心跳文字停在80/100
+未及更新即中斷，checkpoint本地檔本身未進git、比最後committed心跳文字更
+新，本輪以檔案內容為準，無資料損失，見`MARATHON_LOG.md`本輪心跳完整
+說明）。執行`OLI_TIME_BUDGET_SECONDS=420 python
+odd_lot_imbalance_portfolio_v1.py`，**TRAIN 100/100已確認完整**（真實
+訊號：報酬+4.93%、MDD-13.23%、alpha年化+0.71%不顯著p=0.898、beta=0.351、
+買進持有+9.52%、隨機對照組percentile=33.0——TRAIN期表現明顯不如買進
+持有且輸給多數隨機組合，呼應gate1cheap gate「邊緣過關」但書的疑慮），
+**VALIDATION真實訊號+成本敏感度已完成**（報酬+10.80% vs 買進持有
++61.94%、alpha年化-2.31%不顯著p=0.605、beta=0.300、成本1x/2x/3x皆待
+下方cost_returns完整3筆已存檔），**VALIDATION隨機控制組進度推進至
+40/100（已checkpoint；腳本console顯示曾算到46但因非10倍數未存檔，
+下次執行依既有設計會重算，非資料遺失），仍未做任何PASS/FAIL判定**。
+全程零新增外部API呼叫。`is_holdout_consumed()`開工/收工前皆確認
+`False`。**本輪工作到此為止（一輪一個有界工作單位）**。下一輪重跑同一支
+腳本即可自動從VALIDATION 40/100接續，預估還需約1~2輪完成VAL 100/100，
+之後才能依`return_pct>0`+`random_control_percentile>=90.0`判gate7
+PASS/FAIL，現在排隊第一。

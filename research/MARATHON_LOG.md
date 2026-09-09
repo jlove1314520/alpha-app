@@ -1,5 +1,28 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T00:xx+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
+`git pull`+`git status`確認乾淨，取得具名鎖為`LOCK_STALE`回收（上一輪PID
+143180、29.8分鐘未更新，判斷是崩潰/逾時中斷；重新查證發現該輪其實已把
+TRAIN隨機控制組跑到100/100完整並存進checkpoint，只是心跳文字（22:34那則）
+還停在80/100未及更新即中斷——**checkpoint檔本身沒有進git（本地快取），
+其真實進度比最後一次committed心跳文字更新**，本輪以讀checkpoint內容為準，
+非文字紀錄，未造成任何資料損失，安全接手）。承接#67 gate2進度，執行
+`OLI_TIME_BUDGET_SECONDS=420 python odd_lot_imbalance_portfolio_v1.py`，
+checkpoint機制正常接續（TRAIN 100/100不重算，直接開始VALIDATION）。本次
+420秒時間預算內完成VALIDATION真實訊號回測（報酬+10.80% vs 買進持有
++61.94%、alpha年化-2.31%不顯著p=0.605、beta=0.300）+成本1x/2x/3x敏感度，
+**VALIDATION隨機控制組進度推進至40/100（已checkpoint，過程中曾算到46但
+非10的倍數未存檔，依腳本既有設計下次會重算，非資料遺失），仍未做任何
+PASS/FAIL判定**。TRAIN本輪完整結果一併記錄：報酬+4.93%、MDD-13.23%、
+alpha年化+0.71%不顯著p=0.898、beta=0.351、買進持有+9.52%、隨機對照組
+percentile=33.0（TRAIN明顯跑輸買進持有且輸給多數隨機組合，呼應gate1
+「邊緣過關」但書，VAL期尚待random_control_percentile算出才能判gate7）。
+全程零新增外部API呼叫（純本地已快取樣本+因子重算回測）。
+`is_holdout_consumed()`開工/收工前皆確認`False`。**本輪工作到此為止（一輪
+一個有界工作單位）**。下一輪重跑同一支腳本即可自動從VALIDATION 40/100
+接續，預估還需約1~2輪完成VAL 100/100，之後才能依`return_pct>0`+
+`random_control_percentile>=90.0`判gate7 PASS/FAIL，現在排隊第一。
+
 ## 2026-09-09T22:34+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
 `git status`確認乾淨（另有三個非本track殘留變更`research/MARATHON_STATE.md`/
 `research/TW_MARATHON_STATE.md`/`research/TW_STATE_ARCHIVE.md`/
