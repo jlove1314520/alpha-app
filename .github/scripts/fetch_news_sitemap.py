@@ -52,28 +52,67 @@ def _get(url: str, timeout: int = 30) -> str:
     return r.text if r.status_code == 200 else ""
 
 
+def _load_prev_meta():
+    """讀上一輪的 meta，供排程健康度比對（排程一.三.2）。"""
+    try:
+        return json.loads(OUT.read_text(encoding="utf-8")).get("meta") or {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _parse_entries(xml: str) -> dict:
+    """把 sitemap 拆成 url → 發布時間（新聞一.1）。
+
+    **為什麼一定要現在撿**：sitemap 是 6~7 天滾動窗口，
+    每天約 1/7 的發布日期永久流失——今天不撿就沒了。
+    第一版只抓 `<loc>` 丟掉時間，導致 3,597 則的 published 全是空的。
+
+    兩種時間欄位都要看：
+    - `<news:publication_date>`：新聞 sitemap 專用，最準
+    - `<lastmod>`：一般 sitemap 的最後修改時間，次佳
+    """
+    out = {}
+    # 以 <url> 為單位切塊，才能把 loc 與同一塊裡的時間欄位配起來
+    for block in re.findall(r"<url>(.*?)</url>", xml, re.S):
+        m = re.search(r"<loc>(.*?)</loc>", block)
+        if not m:
+            continue
+        pub = (re.search(r"<news:publication_date>(.*?)</news:publication_date>", block)
+               or re.search(r"<lastmod>(.*?)</lastmod>", block))
+        out[m.group(1).strip()] = (pub.group(1).strip() if pub else None)
+    if not out:      # 有些 sitemap 不用 <url> 包，退回逐個 loc（此時拿不到時間）
+        for u in re.findall(r"<loc>(.*?)</loc>", xml):
+            out[u.strip()] = None
+    return out
+
+
 def collect() -> dict:
     urls: dict[str, dict] = {}
 
     # ── 中央社：單一 sitemap，涵蓋約 6 天 ──────────────────────────────
     t = _get("https://www.cna.com.tw/sitemap_fromRemote_cfp.xml")
-    cna_all = re.findall(r"<loc>(.*?)</loc>", t)
-    cna = [u for u in cna_all if any(w in u for w in CNA_WANTED)]
-    for u in cna:
-        urls[u] = {"url": u, "source": "中央社", "host": "www.cna.com.tw"}
-    print(f"  中央社 sitemap：全部 {len(cna_all)} 則，財經/產經 {len(cna)} 則")
+    cna_entries = _parse_entries(t)
+    cna = {u: p for u, p in cna_entries.items() if any(w in u for w in CNA_WANTED)}
+    for u, pub in cna.items():
+        urls[u] = {"url": u, "source": "中央社", "host": "www.cna.com.tw",
+                   "published": pub}
+    got = sum(1 for p in cna.values() if p)
+    print(f"  中央社 sitemap：全部 {len(cna_entries)} 則，財經/產經 {len(cna)} 則"
+          f"（其中 {got} 則有發布時間）")
 
     # ── Yahoo：index → 子 sitemap（每檔一天）──────────────────────────
     idx = _get("https://tw.stock.yahoo.com/news-sitemap-index.xml")
     subs = re.findall(r"<loc>(.*?)</loc>", idx)
     print(f"  Yahoo news-sitemap-index：{len(subs)} 個子檔（每檔一天）")
     for sub in subs:
-        s = _get(sub)
-        locs = re.findall(r"<loc>(.*?)</loc>", s)
+        entries = _parse_entries(_get(sub))
         day = re.search(r"(\d{4}-\d{2}-\d{2})", sub)
-        for u in locs:
-            urls[u] = {"url": u, "source": "Yahoo股市", "host": "tw.stock.yahoo.com"}
-        print(f"    {day.group(1) if day else sub[-24:]}：{len(locs)} 則")
+        got = sum(1 for p in entries.values() if p)
+        for u, pub in entries.items():
+            urls[u] = {"url": u, "source": "Yahoo股市", "host": "tw.stock.yahoo.com",
+                       "published": pub}
+        print(f"    {day.group(1) if day else sub[-24:]}：{len(entries)} 則"
+              f"（{got} 則有發布時間）")
 
     return urls
 
@@ -91,8 +130,39 @@ def main() -> int:
                      json.loads(OUT.read_text(encoding="utf-8")).get("urls", [])}
         except (OSError, json.JSONDecodeError):
             prior = {}
+    # 新聞一.2 回頭補：已收錄但缺 published 的，用當前 sitemap 補上。
+    # **掉出窗口的標 published_unknown，不瞎猜**——寧可標「不知道」，
+    # 也不要拿抓取日冒充發布日，那會讓 effective_from 系統性偏晚。
+    backfilled = still_unknown = 0
+    for u, rec in prior.items():
+        if rec.get("published"):
+            continue
+        pub = (urls.get(u) or {}).get("published")
+        if pub:
+            rec["published"] = pub
+            rec.pop("published_unknown", None)
+            backfilled += 1
+        else:
+            rec["published_unknown"] = True
+            still_unknown += 1
     new = {u: v for u, v in urls.items() if u not in prior}
     merged = list(prior.values()) + list(new.values())
+    print(f"  回頭補發布時間：補上 {backfilled} 則，"
+          f"已掉出窗口標 published_unknown {still_unknown} 則")
+
+    # 排程一.三.2 排程健康度：記錄與上一輪的間隔，供稽核判斷排程有無退化
+    prev_at = (_load_prev_meta() or {}).get("generated_at")
+    gap_min = None
+    if prev_at:
+        try:
+            gap_min = round(
+                (datetime.now(TZ) - datetime.fromisoformat(prev_at)).total_seconds() / 60)
+        except ValueError:
+            gap_min = None
+    hist = (_load_prev_meta() or {}).get("run_gaps_min") or []
+    if gap_min is not None:
+        hist = (hist + [gap_min])[-6:]      # 只留最近 6 次
+        print(f"  距上一輪 {gap_min} 分鐘（最近幾輪：{hist}）")
 
     doc = {
         "meta": {
@@ -101,6 +171,13 @@ def main() -> int:
             "history": "sitemap 是滾動窗口（6~7 天），舊日期 404，無法回補歷史。",
             "cna_filter": f"中央社只收 {CNA_WANTED}（財經/產經），其餘分類對題材無幫助。",
             "total": len(merged), "new_this_run": len(new),
+            "published_backfilled": backfilled,
+            "published_unknown": still_unknown,
+            # 排程健康度：cron 設 */30 但實測只跑到 15%（見 workflow 註解），
+            # 把間隔記下來讓稽核能自己看見退化，不用等總司令發現
+            "last_run_gap_min": gap_min,
+            "run_gaps_min": hist,
+            "schedule_degraded": bool(len(hist) >= 3 and all(g > 360 for g in hist[-3:])),
         },
         "urls": merged,
     }

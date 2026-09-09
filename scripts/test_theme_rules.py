@@ -67,6 +67,21 @@ def main() -> int:
     check("2030年 → 不得命中 2030",
           sorted(match_codes_by_number("資策會預估至2030年台灣產能", active)), [])
 
+    print("\n=== 題材六.4：Yahoo 版面雜訊必須產出 0 條題材句 ===")
+    from news_body_extract import split_sentences, is_frame_noise
+    noise = ("加入為 Google 偏好來源，將 Yahoo 設為首選來源，在 Google 上查看更多，"
+             "熱門股 台積電 聯發科 鴻海 廣達 散熱 記憶體")
+    sents = split_sentences(noise)
+    hits = [s for s in sents if pattern_hit(s, ["散熱", "記憶體"], PATTERNS)]
+    check("整段版面雜訊產出 0 條題材句", len(hits), 0,
+          f"切出 {len(sents)} 句，其中命中句型 {len(hits)} 句")
+    check("「加入為 Google 偏好來源」被判定為框架雜訊",
+          is_frame_noise("加入為 Google 偏好來源"), True)
+    check("「熱門股」側欄被判定為框架雜訊",
+          is_frame_noise("熱門股 台積電 聯發科 散熱"), True)
+    check("正常報導句不被誤判為雜訊",
+          is_frame_noise("晶圓代工廠台積電今日表示先進封裝產能將擴充"), False)
+
     print()
     if FAILED:
         print(f"✗ {len(FAILED)} 項失敗：{FAILED}")

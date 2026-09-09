@@ -53,8 +53,13 @@ UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaResearch/1.0)"}
 # 這兩家都在 robots.txt **主動宣告 sitemap**，是明確邀請索引的來源。
 BODY_ALLOWED = {"www.cna.com.tw", "tw.stock.yahoo.com"}
 REQ_INTERVAL = 2.0         # 逐則間隔（秒）
-MAX_PER_RUN = 200          # 每輪上限。**不要一次把 3,537 則全打過去**——
-                           # 增量累積，排程每 30 分鐘跑一次自然會補完。
+MAX_PER_RUN = 600          # 每輪上限（排程一.三.1：200 → 600）。
+                           # **不是為了更快，是為了吸收排程降級。**
+                           # 實測 cron */30 只跑到 15%（24 小時 7 次而非 48 次），
+                           # 200/輪 × 7 = 1,400/日，積壓要 2.3 天。
+                           # 改 600 → 4,200/日，不到一天清完。
+                           # 2 秒間隔 × 600 = 20 分鐘，遠低於 runner 上限，
+                           # **且完全不改變對來源站的請求速率**（仍是 2 秒一則）。
 MAX_RETRY = 2              # 單則失敗重試上限
 RETRY_BACKOFF = 5.0        # 重試間隔（秒）
 MAX_CONSECUTIVE_FAIL = 10  # 連續失敗這麼多則就停止本輪——
@@ -115,6 +120,7 @@ def fetch_body(url: str) -> str:
     # 這是「拿到資料不等於拿到正確的資料」的同一個形狀：
     # 58/60 的命中率看起來很成功，內容全是導覽湯。
     # 改成**先取文章容器再取 p**。找不到容器就誠實回空，不退回全頁抓。
+    html = strip_frame_blocks(html)      # 題材六.1：先剝版面區塊再取容器
     body_html = ""
     for pat in (r'<div[^>]*class="[^"]*paragraph[^"]*"[^>]*>(.*?)(?:<aside|<footer|</article)',
                 r"<article[^>]*>(.*?)</article>"):
@@ -128,6 +134,46 @@ def fetch_body(url: str) -> str:
     txt = " ".join(re.sub(r"<[^>]+>", "", p) for p in ps)
     txt = re.sub(r"&[a-z]+;", " ", txt)
     return re.sub(r"\s+", " ", txt).strip()
+
+
+# ── 題材六：版面雜訊黑名單 ──────────────────────────────────────────────
+# 實測 36 條題材句有 3 條（8.3%）是頁面框架文字，不是報導內容。
+# 3017 奇鋐那筆的引文整段都是版面雜訊——**答案碰巧對，但引文不能給使用者看**。
+# 更危險的是 Yahoo 側欄的「熱門股」清單：它把一堆不相干的股票名稱堆在一起，
+# 任意兩詞都會共現，**等於從後門繞過我們的關係方向要求**。
+# Yahoo 佔 779 篇裡的 621 篇，這個後門不堵，整批證據都不可信。
+FRAME_NOISE = (
+    "加入為 Google 偏好來源", "加入為Google偏好來源", "偏好來源",
+    "將 Yahoo 設為", "將Yahoo設為", "設為首選來源",
+    "在 Google 上查看更多", "在Google上查看更多",
+    "熱門股", "本網站資料僅供參考", "投資有風險", "免責聲明",
+    "版權所有", "轉載請註明", "追蹤我們", "訂閱電子報",
+    "更多相關新聞", "延伸閱讀", "看更多", "點我下載", "立即下載",
+)
+
+
+def strip_frame_blocks(html: str) -> str:
+    """萃取前先剝掉版面區塊（題材六.1）。
+
+    `<article>` 容器裡仍可能包著側欄與推薦區塊，光靠容器不夠。
+    這裡再剝一層：導覽、側欄、推薦、頁尾、免責聲明。
+    """
+    pat = (r"(?is)<(nav|aside|footer|header)[^>]*>.*?</\1>"
+           r"|(?is)<div[^>]*class=\"[^\"]*(sidebar|related|recommend|trending|"
+           r"hot-?stock|disclaimer|footer|promo)[^\"]*\"[^>]*>.*?</div>")
+    prev = None
+    out = html
+    for _ in range(3):          # 巢狀區塊要多剝幾輪
+        prev = out
+        out = re.sub(pat, " ", out)
+        if out == prev:
+            break
+    return out
+
+
+def is_frame_noise(sent: str) -> bool:
+    """整句含框架用語一律不採（題材六.2）。"""
+    return any(k in sent for k in FRAME_NOISE)
 
 
 def split_sentences(text: str) -> list:
@@ -144,6 +190,8 @@ def split_sentences(text: str) -> list:
             continue
         if len(s) > 60 and "，" not in s and "、" not in s:
             continue
+        if is_frame_noise(s):
+            continue          # 題材六.2：整句含框架用語一律不採
         out.append(s)
     return out
 

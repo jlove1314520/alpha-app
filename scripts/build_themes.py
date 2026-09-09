@@ -77,6 +77,20 @@ def _source_key(text: str) -> str:
     return hashlib.sha1(t.encode("utf-8")).hexdigest()[:16]
 
 
+def _earliest_pub(evidence, pub_by_url, fallback):
+    """證據中最早的新聞發布日（新聞一.3）。
+
+    取最早的那一筆，因為「這個歸屬從什麼時候起成立」該以**最早的證據**為準，
+    不是最晚的。取不到就回 fallback，**不猜**。
+    """
+    days = []
+    for e in evidence or []:
+        d = pub_by_url.get(e.get("url"))
+        if d:
+            days.append(d)
+    return min(days) if days else fallback
+
+
 def _load(p: Path, default=None):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
@@ -135,6 +149,15 @@ def main() -> int:
     # 2026-09-09（v3）內文題材句。這是唯一能表達「這家公司做這件事」的素材——
     # 標題只講漲跌與價格，題材詞彙全在內文（實測 300 則標題裡 11 個題材詞 0 次）。
     body_ev = (_load(D / "news_evidence.json", {}) or {}).get("evidence") or []
+    # 新聞一.3：effective_from 改用**新聞發布日**，不是抓取日。
+    # 抓取日會讓生效日系統性偏晚——同一則舊聞今天才抓到，
+    # 若記成今天生效，回測就會以為那個歸屬是今天才成立的。
+    # published_unknown 者維持用抓取日並在 membership 標記，不瞎猜。
+    pub_by_url = {}
+    for u in ((_load(D / "news_urls.json", {}) or {}).get("urls") or []):
+        p = u.get("published")
+        if p:
+            pub_by_url[u.get("url")] = str(p)[:10]
 
     try:
         from news_matcher import load_company_names, load_active_codes, match_article
@@ -257,7 +280,14 @@ def main() -> int:
                     "confidence": conf or "normal",
                     "weight": None,
                     "weight_note": "unknown（營收比重來源受條款封鎖，見 DATA_SOURCE_MAP）",
-                    "effective_from": prior_ms.get(key, {}).get("effective_from", today),
+                    # append_only：既有成員一律沿用舊生效日，禁止改寫歷史。
+                    # 新成員才用「證據中最早的新聞發布日」，取不到才退回今天。
+                    "effective_from": prior_ms.get(key, {}).get(
+                        "effective_from", _earliest_pub(evidence, pub_by_url, today)),
+                    "effective_from_basis": (
+                        "沿用既有值" if key in prior_ms
+                        else ("新聞發布日" if _earliest_pub(evidence, pub_by_url, None)
+                              else "抓取日（發布日不可得）")),
                     "evidence": evidence, "evidence_count": len(evidence),
                 })
             else:
