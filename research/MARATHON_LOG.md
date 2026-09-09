@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T21:5x+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
+取鎖乾淨`LOCK_ACQUIRED`（非陳舊回收）。`git pull`+`git status`確認乾淨（僅
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`兩個其他
+常駐排程殘留變更，未觸碰）。承接上一輪已定案的#67 gate2設計方向：新寫
+`odd_lot_imbalance_portfolio_v1.py`（逐字比照`f52w_high_portfolio_v1.py`月頻
+Top20單因子portfolio層構造，因IC為負改用composite升冪排序挑委託簿失衡度最低
+的股票做多；TRAIN/VAL採#67條目已寫定的自訂切分TRAIN=[2020-10-26,2022-12-31]/
+VAL=(2022-12-31,2024-12-31]，`VAL_END`物理邊界未變動）。執行
+`OLI_TIME_BUDGET_SECONDS=280 python odd_lot_imbalance_portfolio_v1.py`，本輪
+在280秒時間預算內完成TRAIN真實訊號回測（報酬+4.93% vs 買進持有+9.52%，
+alpha不顯著p=0.898）+成本1x/2x/3x敏感度（2x/3x皆轉負：-3.17%/-11.22%）+
+隨機控制組進度24/100（已checkpoint），**尚未跑完TRAIN 100筆、VAL完全未開始，
+未做任何PASS/FAIL/CHEAP_PASS判定**。初步數字（真實訊號報酬低於多筆隨機
+draws、成本2x起轉負）呼應上一輪已記錄的「邊緣統計但書」，但draws數太少
+不足以下結論，需要下一輪繼續執行同一支腳本（checkpoint自動接續，不重算
+已完成部分）才能判定。`is_holdout_consumed()`開工/收工前皆確認`False`。
+**本輪工作到此為止（一輪一個有界工作單位——新設計並起跑gate2腳本）**。
+
 ## 2026-09-09 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：取鎖時發現
 `LOCK_STALE`（上一輪30.2分鐘未更新，回收接手）。開工先讀`HYPOTHESIS_QUEUE_PROTOCOL.md`
 ＋`CLAUDE.md`（根目錄＋`alpha-app`）＋`research/CONSTITUTION.md`，`git pull`+`git status`

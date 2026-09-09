@@ -9263,3 +9263,21 @@ predict後續20日報酬下修，較貼近處分效應/追高乏力，非正回�
 draws）務必把此邊緣性質列入考量，不得因gate1顯示PASS就照單全收**。
 `is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
 （純本地快取，複用既有回補資料）。**本輪工作到此為止**。
+
+**gate2 portfolio層構造起跑（2026-09-09T21:5x+0800 hypothesis_queue排程
+接續）**：新寫`odd_lot_imbalance_portfolio_v1.py`（逐字比照
+`f52w_high_portfolio_v1.py`月頻Top20單因子構造，因IC為負改composite
+升冪排序，挑委託簿失衡度最低者做多；TRAIN/VAL用本條目上方「TRAIN/VAL
+切分需重新評估」段落事前寫定的自訂切分TRAIN=[2020-10-26,2022-12-31]/
+VAL=(2022-12-31,2024-12-31]，`VAL_END`物理邊界未變動）。執行
+`OLI_TIME_BUDGET_SECONDS=280 python odd_lot_imbalance_portfolio_v1.py`，
+280秒預算內完成TRAIN真實訊號（報酬+4.93% vs 買進持有+9.52%、alpha年化
++0.71%不顯著p=0.898、beta=0.351）+成本1x/2x/3x（+4.93%/-3.17%/-11.22%，
+2x起轉負）+隨機控制組進度24/100（已checkpoint，10筆之後真實最終權益
+1,049,258已低於多筆隨機draws，例如1,185,378/1,201,167/1,165,702），**尚未
+跑完TRAIN 100筆、VAL完全未開始，未做任何PASS/FAIL判定**。初步數字方向
+呼應gate1已記錄的邊緣統計但書（train訊號弱+成本敏感度差），但draws數
+太少不足以下結論。下一輪重跑同一支腳本
+（`python odd_lot_imbalance_portfolio_v1.py`）checkpoint會自動從TRAIN
+24/100接續，不重算已完成部分，現在排隊第一。
+`is_holdout_consumed()`開工/收工前皆確認`False`。**本輪工作到此為止**。
