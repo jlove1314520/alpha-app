@@ -1,5 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T17:32+0800 — hypothesis_queue排程接續：先取得陳舊鎖檔
+（上一輪PID 127496，30.0分鐘未更新已自動回收，判斷是崩潰/逾時中斷、
+非仍在跑，安全接手；查證確認該輪未及推進#67回補進度即中斷）。stash
+暫存三個其他自動化殘留變更（`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`，
+非本track產生，未觸碰、未納入本輪commit）後pull、pop stash還原。
+延續#67（盤中零股交易當散戶情緒訊號）地基建置：執行
+`python backfill_odd_lot.py --batch-size 250`，本批次250/250全數成功
+（16天無資料非錯誤），累積快取452/1092（41.4%），無TWSE封鎖、無連續
+錯誤。尚未進第1關cheap gate（地基階段），本輪未產生PASS/FAIL判定，
+未登記TRIALS_LEDGER（比照無判定不登記慣例）。完整內容見
+`HYPOTHESIS_QUEUE.md` `### 67.`章節最新「狀態更新」小節。
+
 ## 2026-09-09T16:30+0800 — hypothesis_queue排程接續：先取得陳舊鎖檔
 （上一輪PID 145036，29.9分鐘未更新已自動回收，判斷是崩潰/逾時中斷、
 非仍在跑，安全接手）。stash暫存三個其他自動化殘留變更（

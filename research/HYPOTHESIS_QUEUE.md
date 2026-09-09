@@ -9150,3 +9150,17 @@ train/val雙向皆測，何者顯著同號決定事前綁定方向，此為文�
 的唯一方向彈性例外），跑完才判CHEAP_PASS/FAIL，不跳關。
 `is_holdout_consumed()`開工/收工前皆確認`False`（本輪重新確認）。**本輪
 工作到此為止（一輪一個有界工作單位）**。
+
+**狀態更新（2026-09-09T17:32 hypothesis_queue排程接續，回補進度）**：
+本輪取得陳舊鎖檔（上一輪PID 127496、30.0分鐘未更新已自動回收，判斷是
+崩潰/逾時中斷，非仍在跑，安全接手；重新查證確認該輪未及推進回補進度即
+中斷，快取數維持在寫本#67章節pilot完成時的202天，非額外損失）。stash
+暫存三個其他自動化殘留變更（`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`，
+非本track產生，未觸碰、未納入本輪commit）後`git pull --rebase`、pop
+stash還原。執行`python backfill_odd_lot.py --batch-size 250`，本批次
+250/250全數成功（其中16天無資料/官方無交易日，非錯誤），累積快取
+**452/1092（41.4% of全範圍）**，過程中無TWSE封鎖、無連續錯誤觸發提前
+停止。下一輪待辦不變（繼續回補），預估還需約3輪達到全數回補。
+`is_holdout_consumed()`本輪開工/收工前確認皆為`False`。**本輪工作到此
+為止（一輪一個有界工作單位——一次批次回補）**。
