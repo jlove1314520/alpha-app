@@ -2623,3 +2623,27 @@ portfolio層構造，股票/台股，2026-09-10 hypothesis_queue排程接續FAIL
   #67條目、`odd_lot_imbalance_portfolio_v1.py`（可重複執行，checkpoint
   機制完整保留TRAIN 100/100+VAL 100/100兩期隨機控制組全部draws，
   零新增外部API呼叫，複用既有零股逐日快取）。
+
+## #68 券資比（Short-to-Margin Ratio）—— 2026-09-10結案：FAIL（第1關cheap IC gate，馬拉松第510輪，hypothesis_queue軌）
+
+- **假設**：`TaiwanStockMarginPurchaseShortSale`的ShortSaleTodayBalance/
+  MarginPurchaseTodayBalance（融券今日餘額/融資今日餘額），捕捉同一檔股票
+  放空籌碼相對做多槓桿籌碼的比值（多空分歧程度／軋空風險）。跟已FAIL的
+  #30（個股融資使用率，水位）、#36（個股融券使用率，水位）不同維度——這是
+  比值關係，屬第六類「資金結構失衡驅動」。事前綁定方向為正：券資比越高，
+  代表放空籌碼相對做多槓桿籌碼越多，若股價開始上漲，看空者被迫回補（軋空）
+  會放大且延續漲勢，預期未來報酬越好，因子值保留原始比例不取負號。
+- **死因**：第1關cheap IC gate。300檔樣本（248/300可用），standalone
+  bonferroni_n=1。train mean_ic=-0.0056（n=74期）、val mean_ic=-0.0548
+  （n=47期，hit_rate=0.64），null percentile=100.0（門檻90.0），train/val
+  同號，`evaluate_factor()`機械判準PASSES=True——**但train/val的IC皆為負，
+  與事前綁定的正向假設方向相反**，依腳本docstring事前寫明的規則（同號但
+  方向為負，即視為方向假設證偽，不因符合「同號」判準就宣稱通過）override
+  為FAIL，不採信機械判準。
+- **不泛化聲明**：只否證「原始比例、正向」這個具體構造；反向使用（券資比
+  越高預期報酬越差，例如解讀為做多籌碼相對稀缺、軋空風險已被市場定價、
+  後續反而回落）或其他變換（例如取對數、與歷史分位比較）未經測試，非本輪
+  判定範圍。
+- **原始記錄**：`TRIALS_LEDGER.md`#233、`HYPOTHESIS_QUEUE.md` #68條目、
+  `factors.py::_short_margin_ratio()`／`factor_ic_short_margin_ratio.py`
+  （皆可重複執行）。零新增API呼叫（複用既有300檔快取+既有融資融券資料）。

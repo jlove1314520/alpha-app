@@ -1,5 +1,25 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T01:00+08:00 馬拉松第510輪 — 接手hypothesis_queue斷點：#68券資比第1關cheap gate執行完成，FAIL（方向證偽），並解除dev_queue連續~12小時的未提交阻塞
+開工發現`research/HYPOTHESIS_QUEUE.md`/`MARATHON_LOG.md`/`factors.py`/新檔
+`factor_ic_short_margin_ratio.py`為hypothesis_queue排程於00:23那輪budget用盡
+前留下、尚未commit的斷點（因子掛載+cheap gate腳本已寫好但未執行）。
+`dev_queue_cycle.log`顯示其自身排程從09-09 13:31起連續多輪因偵測到工作目錄
+未提交變更而自我跳過（誤判為「互動視窗正在做事」，實為自己上一輪的殘留）。
+本輪執行`python factor_ic_short_margin_ratio.py`（改用`run_detached.py`受
+breakaway保護方式執行，避免直接前景執行途中被session超時砍掉變成無保護
+孤兒行程）：300檔樣本248/300可用，train mean_ic=-0.0056(n=74)、val
+mean_ic=-0.0548(n=47,hit_rate=0.64)，null percentile=100.0（門檻90.0），
+train/val同號，機械判準`evaluate_factor()`回傳PASSES=True——但IC方向皆為負，
+與腳本docstring事前綁定的正向假設相反，依事前寫明的override規則判**FAIL**
+（方向假設證偽，不採信機械同號判準）。已登記`TRIALS_LEDGER.md`#233、
+`STRATEGY_GRAVEYARD.md` #68、`HYPOTHESIS_QUEUE.md` #68條目補結案段落。
+`trial_registry.py --check` exit=0 PASS（235列）。`is_holdout_consumed()`
+開工/收工前皆確認`False`。零新增外部API呼叫（複用既有300檔快取+既有
+融資融券資料）。本輪一併commit所有累積的未提交變更，解除dev_queue阻塞。
+下一輪：hypothesis_queue依協定設計新假設軸#69；TW/US/FUT三軌候選池現況
+不變（仍卡`#50`tick累積2/20被動等待），依輪替下一輪選US軌。
+
 ## 2026-09-10T00:23+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
 `git pull`+`git status`確認乾淨（另有非本track殘留變更`research/dev_queue_cycle.log`/
 `research/external_connectivity.jsonl`，疑似其他自動化來源留下，未觸碰、未納入

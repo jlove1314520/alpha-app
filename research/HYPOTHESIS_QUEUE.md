@@ -9418,3 +9418,30 @@ predict後續N=20交易日報酬**顯著為正**（軋空風險使上漲被放�
 明確區隔），尚未開始第1關cheap gate。下一輪從撰寫
 `short_margin_ratio_gate68.py`（複用`factor_ic.py::load_sample_with_factors()`
 既有300檔快取樣本+既有融資融券資料）開始，不跳關，現在排隊第一。
+
+**因子掛載完成，cheap gate腳本已寫好，尚未執行（2026-09-10 hypothesis_queue
+排程接續）**：新增`_short_margin_ratio()`（`factors.py`，ShortSaleTodayBalance/
+MarginPurchaseTodayBalance，複用既有`TaiwanStockMarginPurchaseShortSale`快取，
+事前綁定方向為正、不取負號，跟`_margin_utilization()`/`_short_sale_utilization()`
+同款PIT/防呆設計），並在`prepare_factors()`掛載為`(cc) f_short_margin_ratio`
+區塊（沿用`_asof_join`模式，RuntimeError降級為NaN不影響其他因子）。新增
+`factor_ic_short_margin_ratio.py`（比照`factor_ic_margin_utilization.py`同款
+standalone single-factor cheap IC gate腳本，`bonferroni_n=1`）。**本輪因budget
+即將用盡，尚未執行`python factor_ic_short_margin_ratio.py`**，零新增API呼叫
+（純程式碼撰寫，未跑任何訊號數字，不涉及`register_trial()`）。
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`。**本輪工作到此為止（一輪
+一個有界工作單位）**，下一輪直接執行`python factor_ic_short_margin_ratio.py`
+（複用既有300檔快取樣本+既有融資融券快取，預期大部分ticker命中本機快取，
+應可在一輪內跑完），依`evaluate_factor()`回傳判CHEAP_PASS/FAIL，不跳關，
+現在排隊第一。
+
+**第1關cheap IC gate已執行，結案：FAIL（2026-09-10，馬拉松第510輪接手前一輪
+留下的斷點，`run_detached.py`受保護執行）**：300檔樣本248/300可用。
+train mean_ic=-0.0056 IR=-0.037（n=74期）、val mean_ic=-0.0548 IR=-0.376
+hit_rate=0.64（n=47期），null percentile=100.0（門檻90.0），train/val同號，
+`evaluate_factor()`機械判準PASSES=True。**但train/val的IC皆為負，與本條目
+事前綁定的正向方向假設相反**——依本條目上方已寫明的事前判準（同號但方向
+為負，視為方向假設證偽，不因符合「同號」判準宣稱通過），override機械
+判準為FAIL，不採信PASSES=True。已登記`TRIALS_LEDGER.md`#233、
+`STRATEGY_GRAVEYARD.md` #68。**佇列#1~68全數結案，剩餘#50（tick累積2/20）
+仍卡外部依賴，下一輪依協定第1節設計新假設軸#69，現在排隊第一，尚未開始。**

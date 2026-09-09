@@ -593,6 +593,42 @@ def _short_sale_utilization(stock_id: str, start_date: str) -> pd.DataFrame:
     return d[["pit_date", "short_sale_utilization"]].sort_values("pit_date").reset_index(drop=True)
 
 
+def _short_margin_ratio(stock_id: str, start_date: str) -> pd.DataFrame:
+    """`HYPOTHESIS_QUEUE.md` #68券資比（Short-to-Margin Ratio）：融券今日
+    餘額(`ShortSaleTodayBalance`) / 融資今日餘額(`MarginPurchaseTodayBalance`)，
+    捕捉的是**同一檔股票放空籌碼相對做多槓桿籌碼的比值**（多空分歧程度／
+    軋空風險），跟`_short_sale_utilization()`（#36，融券餘額相對融券限額，
+    測放空水位本身）不同維度——這是比值關係，不是使用率。
+
+    **事前綁定方向為正**：券資比越高，代表放空籌碼相對做多槓桿籌碼越多，
+    若股價開始上漲，看空者被迫回補（軋空）會放大且延續漲勢，預期未來報酬
+    越好——因子值保留原始比例、不取負號（跟`_margin_utilization()`/
+    `_short_sale_utilization()`同樣「原始方向即預期方向」設計），cheap
+    gate結果若同號但方向為負，視為方向假設證偽，不因符合「同號」判準就
+    宣稱通過。
+
+    **PIT安全性天然成立**：資料源`TaiwanStockMarginPurchaseShortSale`當日
+    盤後即公布，當日日期本身就是pit_date，不需要額外延遲假設。
+
+    2026-09-10 HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#68第1關起跑。
+    """
+    raw = load_dev("TaiwanStockMarginPurchaseShortSale", stock_id, start_date)
+    if raw.empty:
+        return pd.DataFrame(columns=["pit_date", "short_margin_ratio"])
+    needed = {"date", "ShortSaleTodayBalance", "MarginPurchaseTodayBalance"}
+    if not needed.issubset(raw.columns):
+        return pd.DataFrame(columns=["pit_date", "short_margin_ratio"])
+    d = raw[["date", "ShortSaleTodayBalance", "MarginPurchaseTodayBalance"]].copy()
+    d["ShortSaleTodayBalance"] = pd.to_numeric(d["ShortSaleTodayBalance"], errors="coerce")
+    d["MarginPurchaseTodayBalance"] = pd.to_numeric(d["MarginPurchaseTodayBalance"], errors="coerce")
+    d = d[d["MarginPurchaseTodayBalance"] > 0]
+    if d.empty:
+        return pd.DataFrame(columns=["pit_date", "short_margin_ratio"])
+    d["short_margin_ratio"] = d["ShortSaleTodayBalance"] / d["MarginPurchaseTodayBalance"]
+    d["pit_date"] = d["date"]
+    return d[["pit_date", "short_margin_ratio"]].sort_values("pit_date").reset_index(drop=True)
+
+
 @functools.lru_cache(maxsize=1)
 def _load_twse_listing_dates() -> dict[str, str]:
     """讀`build_twse_listing_dates.py`存的靜態對照表（公司代號->YYYYMMDD上市
@@ -947,6 +983,20 @@ def prepare_factors(
     except RuntimeError as e:
         print(f"    [factors] f_odd_lot_imbalance skipped for {stock_id}: {e}")
         d["f_odd_lot_imbalance"] = np.nan
+
+    # (cc) 券資比 Short-to-Margin Ratio (`HYPOTHESIS_QUEUE.md` #68，2026-09-10
+    # hypothesis_queue排程新增，佇列排隊第一起跑)。經濟理由：融券今日餘額/
+    # 融資今日餘額，捕捉同一檔股票放空籌碼相對做多槓桿籌碼的比值（多空分歧/
+    # 軋空風險），跟#30融資使用率（水位）、#36融券使用率（水位）皆不同——
+    # 這是比例關係，屬第六類「資金結構失衡驅動」。**事前綁定方向為正**：
+    # 因子不取負號，見`_short_margin_ratio()`docstring。資料源同樣是FinMind
+    # `TaiwanStockMarginPurchaseShortSale`，當日盤後公布即為PIT日期本身。
+    try:
+        sm_pit = _short_margin_ratio(stock_id, start_date)
+        d = _asof_join(d, sm_pit, "short_margin_ratio", "f_short_margin_ratio")
+    except RuntimeError as e:
+        print(f"    [factors] f_short_margin_ratio skipped for {stock_id}: {e}")
+        d["f_short_margin_ratio"] = np.nan
 
     return d
 
