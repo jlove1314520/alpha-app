@@ -2572,3 +2572,36 @@ smoke test 4組通過，中規模N=50前景驗證8類中6類PASS但效果量級�
 判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增API呼叫。
 完整見`HYPOTHESIS_QUEUE.md` #52條目(u)段落、`TW_MARATHON_STATE.md`第465輪記錄、
 `REPORT.md`第465輪心跳。
+
+
+---
+
+## 第495輪（2026-09-09T17:30+08:00，TW軌）
+
+**發現並提報一個架構性問題：`#50`（容量受限小型股）的tick累積樣本股票不在目標
+成交值區間。** 過去8輪（round487~494）心跳持續記錄「`#50`卡tick累積，2/20，
+被動等待」，語氣暗示只要再等18個交易日資料就會就緒可以直接進cheap gate。
+本輪實地核對`data/ticks/20260908.parquet`（零新增API呼叫，純讀本機快取）
+實際涵蓋的股票代號，發現訂閱清單來自`shioaji_quotes.py::DEFAULT_TW_WATCHLIST`
+（2330/2454/2317/1513/3231）加`.live_watchlist.json`（App使用者自選股，目前
+跟預設值完全相同）與固定訂閱指數/期貨——這份清單的設計目的是支援App即時
+報價畫面，從未對齊過`#50`要求的「日均成交值500萬～5,000萬新台幣」區間。
+用既有tick快取估算單日成交值（`sum(close×volume)`）：15檔全部落在明顯超出
+目標上限的大型/中型股範圍（最小的1513約2.1億元，超出上限4倍以上；最大的
+2330約638.7億元）。
+
+**問題本質**：成交值區間是由「訂閱了哪些代號」決定，不是由「訂閱了多久」
+決定——用現在這份清單，累積200個交易日一樣是0檔落在目標區間。已寫成
+`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`提報總司令：建議善用
+`MAX_DYNAMIC_SUBSCRIPTIONS=100`目前僅用5個的餘裕，加入一批專門為`#50`取樣、
+落在目標成交值區間的代號，但未直接執行——這牽涉常駐服務`shioaji_quotes.py`
+的訂閱名單變更（`CLAUDE.md`七之三常駐服務發布紀律＋外部API頻率上限風險，
+且可能與使用者實際自選股互動），依「提案先於執行」規則需先經核准。
+
+**未動任何生產程式碼或訂閱設定**，只新增`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`
+一份文件，並更新`TW_MARATHON_STATE.md`/`REPORT.md`本輪記錄。`trial_registry.py --check`
+本輪未重跑（無新試驗需登記，這是發現與提案，不是判定）。`is_holdout_consumed()`
+開工/收工前皆確認`False`。全程零新增外部API呼叫。
+
+完整見`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`、
+`TW_MARATHON_STATE.md`第495輪記錄、`REPORT.md`第495輪心跳。

@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第495輪 · 2026-09-09T17:30+08:00 · TW · 取鎖乾淨（cycle`20260909-173036`）· 依輪替選TW（FUT 10:30 round484最舊但依例外條款不選；TW 16:30 round493較舊/US 17:00 round494最新，故選TW）· 開工查`run_detached.py status`：`running=0`，`git log`確認round494後無新commit · **本輪工作單位＝發現並提報架構性問題：`#50`tick累積樣本股票不在目標成交值區間**——過去8輪（487~494）心跳暗示「等18個交易日就好」，本輪核對`data/ticks/20260908.parquet`實際涵蓋股票（零新增API呼叫）發現訂閱清單來自App即時報價用的`DEFAULT_TW_WATCHLIST`（2330台積電/2454聯發科/2317鴻海/1513中興電/3231緯創），15檔全部是大型/中型股，用既有tick估算單日成交值最小的1513也約2.1億元，遠超`#50`要求的500萬～5,000萬區間上限4倍以上——成交值區間由「訂閱了哪些代號」決定，不是由「訂閱了多久」決定，累積200個交易日一樣是0檔達標。已寫`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`提報：建議利用`MAX_DYNAMIC_SUBSCRIPTIONS=100`目前僅用5個的餘裕加入目標區間代號，但因牽涉常駐服務`shioaji_quotes.py`訂閱名單變更（`CLAUDE.md`外部API頻率上限風險＋常駐服務發布紀律）與可能影響使用者自選股，依「提案先於執行」規則未直接執行，待核准。`trial_registry.py --check`本輪未重跑（無新試驗）。`is_holdout_consumed()`皆確認`False`。全程零新增外部API呼叫 · 詳見`TW_MARATHON_STATE.md`第495輪記錄、`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`
+
+---
 ## 第494輪 · 2026-09-09T17:00+08:00 · US · 取鎖乾淨（cycle`20260909-170036`）· 依輪替選US（FUT 10:30 round484最舊但依例外條款不選；US 16:00 round492較舊/TW 16:30 round493最新，故選US）· 開工查`run_detached.py status`：`running=0` · 核實候選池現況不變：0a節四條方向＋`#61`~`#66`全數結案，`git log`確認round493後無新commit、`hypothesis_queue`仍停在`#67`地基建置完成、尚未跑cheap gate（非本track範圍）· **本輪工作單位＝(1)核實`data/ticks/`當日`.tmp`非bug**：讀`tick_recorder.py::compact_stale_days()`原始碼確認「今天的檔案本設計成保持`.tmp`到隔天才壓縮」，2/20進度正常。**(2)核實US軌四項地基（`MARATHON_PROTOCOL.md`第5節(a)~(d)）是否真的全部落地**：價格/宇宙/PIT三項已知存在，成本模型實地核對`validation/us_costs.py`確認**檔案確實存在**（`US_LOG.md`round68記錄非空頭承諾，`MARATHON_STATE.md`第335行「❌還沒做」是2026-08-25前的過期背景快照）。**結論：US軌本地端持續無可推進的新工作單位，候選池已連續多輪（487~494）維持同一狀態**，僅剩`#50`（tick累積2/20，被動等待）與`hypothesis_queue`自走排程被動維護。`trial_registry.py --check`本輪未重跑（無新試驗需登記）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。**下一輪任一軌接手**：查`data/ticks/`是否已到3/20；候選池已非常薄，暫不需要提報0a節「無可驗證預測優勢」結論（`#50`本身尚未結案，門檻未到）· 詳見`US_MARATHON_STATE.md`第494輪記錄
 
 ---
