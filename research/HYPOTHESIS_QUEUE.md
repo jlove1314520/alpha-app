@@ -8447,3 +8447,47 @@ verdict="CHEAP_PASS", ...)`登記進`TRIALS_LEDGER.md`並寫進`TW_LEADS.md`，
 `data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
 `research/external_connectivity.jsonl`為其他常駐服務殘留變更，未觸碰、
 未納入commit（跟開工時第一輪查核結果一致）。
+
+---
+
+**（j）US市場類比查證（2026-09-09馬拉松第479輪，US軌）**：TW軌`#63`
+gate1正式N=200job（`20260909-075838-fe8a`）跑批期間heavy-job-slot佔用，
+本輪三軌時間戳TW07:30最新／US06:30最舊（FUT依例外條款不選），依輪替選
+US；US軌0a節四條方向皆已結案/卡依賴，仿round476對`#62`的做法，查證
+「借券費率異常飆升」在美股是否有免費對應資料源可比照建立同構假設。
+
+三來源查證：
+1. **FINRA官方**（`finra.org/finra-data/browse-catalog/equity-short-interest`
+   ＋官方API`api.dapi.finra.org/api/EquityShortInterest/GetESI`）：僅
+   **雙週頻**放空部位（股數），**不含借券成交費率**，維度跟TW的`t13sa710`
+   （逐日逐筆成交費率）不同，此路不通。
+2. **IBKR官方**（`interactivebrokers.com/en/trading/short-securities-availability.php`
+   ＋開發者部落格eloquentcode.com確認TWS API genericTick`236`可查即時
+   shortable股數；同一文件確認**IBKR另有官方FTP站台**專門提供含
+   fee rate的shortability清單）：查得官方FTP路徑
+   `ftp://shortstock:@ftp3.interactivebrokers.com/usa.txt`（pipe分隔、
+   含逐檔即時費率），第三方社群（Portfolio123論壇）交叉確認同一路徑與
+   格式，**且該論壇貼文明確指出「FTP上沒有歷史資料，只有當下快照」**——
+   這點很關鍵：官方免費源存在，但只能取得「現在」，取不到用於回測的
+   歷史序列，這正是TEJ/S3 Partners/Markit Securities Finance把「借券
+   費率歷史」當付費商品賣的原因（間接佐證歷史資料本身有商業價值、
+   非公開）。
+3. **本機環境可行性實測**：`ftplib`連線`ftp3.interactivebrokers.com:21`
+   逾時、裸TCP socket連21埠同樣逾時（見`REPORT.md`第479輪心跳）——
+   **本機網路環境的outbound FTP埠（21）被防火牆封鎖**，即使該資料源本身
+   可行，這台機器目前連不上；這是基礎設施限制，不是資料不存在，依
+   `CLAUDE.md`取得方式鐵律不得為了繞過改用第三方鏡像（如`iborrowdesk.com`
+   ——查證確認它是把IBKR公開資料**已經爬好放著**的第三方站台，屬於鐵律
+   明文禁止的「下載別人已經爬好的鏡像資料」，即使只是拿來對照驗證也不用）。
+
+**結論：官方免費即時費率資料存在（IBKR FTP `usa.txt`），但（a）無歷史，
+只能靠自己逐日累積（比照`#50`tick累積模式，需要數月才夠回測樣本）；
+（b）本機21埠被防火牆擋住，連累積都做不到，需先解決網路連線問題。
+標記「待解決基礎設施依賴」，不進`TRIALS_LEDGER.md`（非策略判定），
+不比照`#62`美股類比標「待採購」——這裡的瓶頸不是要花錢，是連線埠被擋，
+性質不同。下一步（有網路能連上的環境/機器時）：寫一支比照`#50`
+`capture_ticks.py`精神的每日快照累積器（`ibkr_shortstock_snapshot.py`），
+單純append當日`usa.txt`到本地資料集，不需要IBKR Gateway/TWS登入
+（FTP帳號`shortstock`無密碼、非交易帳戶驗證），跟每週權杖失效的
+Gateway限制無關。本輪未寫程式碼（基礎設施先天不通，寫了也跑不動），
+純查證與記錄。
