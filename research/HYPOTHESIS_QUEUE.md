@@ -9329,3 +9329,18 @@ odd_lot_imbalance_portfolio_v1.py`，**TRAIN 100/100已確認完整**（真實
 腳本即可自動從VALIDATION 40/100接續，預估還需約1~2輪完成VAL 100/100，
 之後才能依`return_pct>0`+`random_control_percentile>=90.0`判gate7
 PASS/FAIL，現在排隊第一。
+
+**狀態更新（2026-09-09T23:38+08:00 hypothesis_queue排程接續，VAL隨機控制組
+續跑）**：`git pull`+`git status`確認乾淨（另有非本track殘留變更
+`data/news_evidence.json`/`data/themes.json`，疑似情報帽/新聞抓取流程留下，
+未觸碰、未納入本輪commit），取得具名鎖`LOCK_ACQUIRED`（非陳舊回收）。重新
+執行`python odd_lot_imbalance_portfolio_v1.py`（腳本預設
+`OLI_TIME_BUDGET_SECONDS=420`），checkpoint機制正常接續（TRAIN
+100/100不重算，直接從VALIDATION 40接續）。本次420秒時間預算內，
+**VALIDATION隨機控制組進度推進至84/100（已checkpoint），仍未做任何
+PASS/FAIL判定**。全程零新增外部API呼叫（純本地已快取樣本+因子重算
+回測），過程無TWSE封鎖跡象。`is_holdout_consumed()`本輪開工/收工前皆
+確認`False`。**本輪工作到此為止（一輪一個有界工作單位）**。下一輪重跑
+同一支腳本即可自動從VALIDATION 84/100接續，預估還需約1輪即可完成VAL
+100/100，之後才能依`return_pct>0`+`random_control_percentile>=90.0`判
+gate7 PASS/FAIL，現在排隊第一。

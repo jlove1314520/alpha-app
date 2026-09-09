@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T23:38+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
+`git pull`+`git status`確認乾淨（另有非本track殘留變更`data/news_evidence.json`/
+`data/themes.json`，疑似情報帽/新聞抓取流程留下，未觸碰、未納入本輪commit），
+取得具名鎖`LOCK_ACQUIRED`（非陳舊回收）。承接#67 gate2進度（VALIDATION隨機
+控制組40/100，讀checkpoint確認TRAIN 100/100、VALIDATION real+成本敏感度皆已
+完整），重新執行`python odd_lot_imbalance_portfolio_v1.py`（腳本預設
+`OLI_TIME_BUDGET_SECONDS=420`），checkpoint機制正常接續（TRAIN不重算，直接
+從VALIDATION 40接續）。本次420秒時間預算內完成，**VALIDATION隨機控制組進度
+推進至84/100（已checkpoint），仍未做任何PASS/FAIL判定**。全程零新增外部API
+呼叫（純本地已快取樣本+因子重算回測），過程無TWSE封鎖跡象。
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`（獨立以
+`from validation import holdout; holdout.is_holdout_consumed()`覆核一致）。
+**本輪工作到此為止（一輪一個有界工作單位）**。下一輪重跑同一支腳本即可自動
+從VALIDATION 84/100接續，預估還需約1輪即可完成VAL 100/100，之後才能依
+`return_pct>0`+`random_control_percentile>=90.0`判gate7 PASS/FAIL，現在
+排隊第一。
+
 ## 2026-09-10T00:xx+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
 `git pull`+`git status`確認乾淨，取得具名鎖為`LOCK_STALE`回收（上一輪PID
 143180、29.8分鐘未更新，判斷是崩潰/逾時中斷；重新查證發現該輪其實已把
