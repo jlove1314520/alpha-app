@@ -1336,10 +1336,89 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("43. 資料過舊判定走交易日曆（假日不誤報、真過舊照報）",
     calErrors.length === 0, calErrors.join("; ") || `${results.calendar_cases} 個情境全部符合`);
 
+  // 44.【2026-09-10新增（建置一.2）】估值區間卡必須真的算出東西，而且算法本身要正確。
+  // 這張卡取代了原本的「目標價…本輪尚未實作」佔位字。檢查三件事：
+  //   (a) 純函式單元檢查：近四季EPS必須拒絕「不連續」與「過期」的季報序列。
+  //       stock_detail.json 的季報歷史 2025Q1~2026Q1 是空的，直接取最後四筆會得到
+  //       橫跨兩年的假 TTM（2317 會算出 17.26、2603 會算出 67.88），生出離譜的估值。
+  //   (b) 百分位用線性內插，與 numpy.percentile 預設法一致。
+  //   (c) 實際開報告頁：卡片不得停在「載入中…」、不得出現 NaN/undefined、
+  //       不得殘留「尚未實作」；有算出區間時必須 p25 ≤ p50 ≤ p75 且都 > 0。
+  const valErrors = [];
+  let valInfo = "";
+  try {
+    const unit = await page.evaluate(() => {
+      const out = [];
+      const mk = (qs) => ({ financials: { quarters: qs } });
+      const y = new Date().getFullYear();
+      const ok = epsTtmFromDetail(mk([
+        { year: y - 1, quarter: 3, eps: 1 }, { year: y - 1, quarter: 4, eps: 2 },
+        { year: y, quarter: 1, eps: 3 }, { year: y, quarter: 2, eps: 4 }]), null);
+      if (!ok || Math.abs(ok.eps - 10) > 1e-9) out.push("連續四季應算出 EPS=10，實得 " + JSON.stringify(ok));
+      const gap = epsTtmFromDetail(mk([
+        { year: y - 2, quarter: 2, eps: 1 }, { year: y - 2, quarter: 3, eps: 2 },
+        { year: y - 2, quarter: 4, eps: 3 }, { year: y, quarter: 2, eps: 4 }]), null);
+      if (gap !== null) out.push("不連續季報應回 null，實得 " + JSON.stringify(gap));
+      const stale = epsTtmFromDetail(mk([
+        { year: y - 2, quarter: 1, eps: 1 }, { year: y - 2, quarter: 2, eps: 2 },
+        { year: y - 2, quarter: 3, eps: 3 }, { year: y - 2, quarter: 4, eps: 4 }]), null);
+      if (stale !== null) out.push("過期季報應回 null，實得 " + JSON.stringify(stale));
+      const nul = epsTtmFromDetail(mk([
+        { year: y - 1, quarter: 3, eps: 1 }, { year: y - 1, quarter: 4, eps: null },
+        { year: y, quarter: 1, eps: 3 }, { year: y, quarter: 2, eps: 4 }]), null);
+      if (nul !== null) out.push("含 null 的季報應回 null，實得 " + JSON.stringify(nul));
+      const p = [1, 2, 3, 4, 5];
+      if (Math.abs(percentileLinear(p, 0.25) - 2) > 1e-9) out.push("percentileLinear p25 應為 2");
+      if (Math.abs(percentileLinear(p, 0.5) - 3) > 1e-9) out.push("percentileLinear p50 應為 3");
+      if (Math.abs(percentileLinear([1, 2, 3, 4], 0.25) - 1.75) > 1e-9) out.push("percentileLinear 內插應為 1.75");
+      return out;
+    });
+    valErrors.push(...unit);
+
+    const codes = await page.evaluate(() => {
+      const c = typeof currentPicksCache === "function" ? currentPicksCache() : null;
+      return (c && c.stocks || []).filter(x => x.rank).slice(0, 12).map(x => x.code);
+    });
+    let withBand = 0, insufficient = 0;
+    for (const code of codes) {
+      await page.evaluate((c) => showReport(c), code);
+      let txt = "";
+      for (let i = 0; i < 60; i++) {           // 首檔要載 stock_detail.json，給足時間
+        await page.waitForTimeout(250);
+        txt = await page.evaluate(() => {
+          const el = document.getElementById("report-valuation-band");
+          return el ? el.innerText : "";
+        });
+        if (txt && !/載入中/.test(txt)) break;
+      }
+      if (!txt || /載入中/.test(txt)) { valErrors.push(`${code} 的估值區間卡停在「載入中…」`); continue; }
+      if (/NaN|undefined|Infinity/.test(txt)) valErrors.push(`${code} 的估值區間卡出現 NaN/undefined/Infinity`);
+      if (/尚未實作|下一輪/.test(txt)) valErrors.push(`${code} 的估值區間卡殘留佔位字`);
+      if (/樣本不足無法估算|不適用|只涵蓋台股|查不到這檔的產業分類/.test(txt)) { insufficient++; continue; }
+      const nums = await page.evaluate(() => {
+        const el = document.getElementById("report-valuation-band");
+        return [...el.querySelectorAll("div.num")].slice(0, 3)
+          .map(x => parseFloat(x.textContent.replace(/,/g, "")));
+      });
+      if (nums.length !== 3 || nums.some(v => !isFinite(v) || v <= 0)) {
+        valErrors.push(`${code} 的三個價位不是正數：${JSON.stringify(nums)}`);
+      } else if (!(nums[0] <= nums[1] + 1e-9 && nums[1] <= nums[2] + 1e-9)) {
+        valErrors.push(`${code} 的價位順序不對（應 p25≤p50≤p75）：${JSON.stringify(nums)}`);
+      } else withBand++;
+      if (!/樣本/.test(txt)) valErrors.push(`${code} 的估值區間卡沒有標示產業樣本數`);
+    }
+    if (!codes.length) valErrors.push("拿不到任何有排名的股票，無法測試");
+    valInfo = `${codes.length} 檔：算出區間 ${withBand} 檔、誠實顯示樣本/資料不足 ${insufficient} 檔`;
+  } catch (e) {
+    valErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("44. 估值區間卡（同產業PE百分位×近四季EPS）：算法單元檢查 + 實開報告頁不得停在載入中/出現NaN/殘留佔位字",
+    valErrors.length === 0, valErrors.join("; ") || valInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

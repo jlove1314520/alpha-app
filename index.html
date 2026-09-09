@@ -805,9 +805,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="report-events"><div class="note">載入中…</div></div>
     </div>
 
+    <!-- 2026-09-10（建置一.2）「目標價」改為「估值區間（非目標價）」。
+    總司令裁示：同產業本益比 25/50/75 百分位 × 近四季 EPS 得三個價位，附產業
+    樣本數與資料日期；EPS ≤0 或樣本 <8 檔顯示「同產業樣本不足無法估算」並列出
+    樣本數。台股沒有免費的分析師目標價資料源，所以這裡不是目標價，也不是預測，
+    只是「本益比移動到同業某個百分位時的換算價」。分批進場階梯不動。 -->
     <div class="card">
-      <h3>目標價 / 建議進場價 / 分批買入計畫</h3>
-      <div class="note" style="margin-bottom:10px">目標價：需要估值模型或機構目標價資料源，本輪尚未實作。</div>
+      <h3>估值區間（非目標價） / 建議進場價 / 分批買入計畫</h3>
+      <div id="report-valuation-band"><div class="note">載入中…</div></div>
       <div id="report-entry-plan"><div class="note">載入中…</div></div>
     </div>
 
@@ -4741,7 +4746,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 的 peg=null 讓 toFixed 拋錯），畫面上就會同時出現新股票的名字和舊股票的
     // 數字，而且完全沒有任何錯誤提示。清空之後最壞情況是顯示「載入中…」，
     // 不會是另一檔股票的價格。
-    ['report-factors','report-industry-tech','report-entry-plan','report-events'].forEach(id=>{
+    ['report-factors','report-industry-tech','report-entry-plan','report-events','report-valuation-band'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.innerHTML='<div class="note">載入中…</div>';
     });
     const opEl=document.getElementById('report-order-plan');if(opEl)opEl.innerHTML='';
@@ -4756,6 +4761,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('report-summary').textContent=row.summary||'';
     _safeSync('renderExtremeMoveWarning',()=>renderExtremeMoveWarning(row));  // 2026-09-05 新一.7
     _safeAsync('renderReportEvents',()=>renderReportEvents(row));  // 2026-09-08 建置一.1
+    _safeAsync('renderValuationBand',()=>renderValuationBand(row));  // 2026-09-10 建置一.2
     // 環形讀條：滿圈周長 251.2（r=40），offset 從滿圈（0分）動畫到對應總分的角度
     const ring=document.getElementById('report-ring');
     ring.style.strokeDashoffset='251.2';
@@ -5695,6 +5701,146 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   };
   // 近 30 日事件流。無事件時要**講清楚查了什麼**，不能只寫「無資料」——
   // 「沒查」跟「查了沒有」對使用者是完全不同的資訊。
+  // ── 2026-09-10（建置一.2）估值區間（非目標價）─────────────────────────────
+  // 總司令裁示：目標價卡改為「同產業本益比 25/50/75 百分位 × 近四季 EPS」，
+  // 附產業樣本數與資料日期；EPS ≤0 或樣本 <8 檔顯示「同產業樣本不足無法估算」
+  // 並列出樣本數。
+  //
+  // 這張卡刻意「不是目標價」：它只回答一個機械式問題——「如果這檔的本益比移動到
+  // 同產業的 25/50/75 百分位，用它近四季 EPS 換算出來的股價是多少」。沒有預測、
+  // 沒有機構評等（台股沒有免費的分析師目標價資料源，這點在因子說明裡已寫過）。
+  //
+  // 資料來源與回退鏈（CLAUDE.md 七、資料原則：主來源→備援→由已有欄位推導）：
+  //   本益比（每一檔）   主：data/fundamentals.json ratios.per（TWSE 每日本益比
+  //                         BWIBBU，官方定義即為「近四季 EPS」基準）
+  //                     備援：收盤價 ÷ 近四季 EPS（stock_detail 季報加總）
+  //   近四季 EPS（本檔） 主：data/stock_detail.json 連續四季 eps 加總
+  //                         （TWSE t187ap06_L_ci 綜合損益表-一般業）
+  //                     備援：收盤價 ÷ 官方本益比 回推（同樣是官方欄位的推導）
+  // 每個輸出都帶 source 標記並直接寫在畫面上，不做靜默降級。
+  const VALUATION_MIN_SAMPLE=8;      // 樣本 <8 檔一律不估（總司令裁示）
+  const VALUATION_EPS_MAX_LAG_Q=4;   // 近四季 EPS 的最新一季落後超過 4 季就視為過期
+  // ETF/ETN/受益證券/存託憑證沒有「同產業本益比」可言，直接不適用
+  const VALUATION_EXCLUDED_INDUSTRY=/ETF|ETN|受益證券|存託憑證|所有證券|指數投資證券/;
+
+  function _qIndex(y,q){return y*4+q}
+  function _currentQIndex(nowMs){
+    const z=_zonedParts(new Date(nowMs==null?Date.now():nowMs),'Asia/Taipei');
+    return z.y*4+Math.floor((z.m-1)/3)+1;
+  }
+  // 近四季 EPS：**必須是連續四季，而且不能過期**。
+  // 這兩個檢查不是防禦性程式碼潔癖，是實測踩出來的：data/stock_detail.json 的季報
+  // 歷史是 2026-08-27 一次性回補到 2024Q4，之後每日排程只補「當下最新那一季」，
+  // 中間 2025Q1~2026Q1 是空的。直接取陣列最後四筆的話：
+  //   2317 鴻海 會得到 2024Q2+2024Q3+2024Q4+2026Q2 = 17.26（橫跨兩年的假 TTM）
+  //   2603 長榮 會得到 67.88，用它換算出的中位數價 870 元 vs 現價 229 元
+  //   6223 旺矽 會得到 2024 整年的舊值（落後 6 季）
+  // 這種數字看起來完全正常，卻會生出離譜的估值區間。寧可顯示「資料不足」。
+  function epsTtmFromDetail(detail,nowMs){
+    const qs=((detail&&detail.financials)||{}).quarters||[];
+    if(qs.length<4)return null;
+    const last4=qs.slice(-4);
+    if(last4.some(x=>x.eps==null||!isFinite(x.eps)))return null;
+    const idx=last4.map(x=>_qIndex(x.year,x.quarter));
+    for(let i=1;i<4;i++)if(idx[i]!==idx[0]+i)return null;                // 不連續 → 不用
+    if(idx[3]<_currentQIndex(nowMs)-VALUATION_EPS_MAX_LAG_Q)return null; // 過期 → 不用
+    return {eps:last4.reduce((s,x)=>s+x.eps,0),
+            label:last4[0].year+'Q'+last4[0].quarter+'~'+last4[3].year+'Q'+last4[3].quarter};
+  }
+  // 單一代號的本益比（含回退鏈），拿不到就回 null，不猜、不填 0
+  function peValueFor(code,funds,detailStocks,quotes,nowMs){
+    const r=((funds[code]||{}).ratios)||{};
+    if(r.per!=null&&isFinite(r.per)&&r.per>0)return{pe:r.per,src:'twse',date:r.date||null};
+    const t=epsTtmFromDetail(detailStocks[code],nowMs);
+    const px=(quotes[code]||{}).close;
+    if(t&&t.eps>0&&px!=null&&px>0)return{pe:px/t.eps,src:'derived',date:(quotes[code]||{}).date||null};
+    return null;
+  }
+  // 線性內插百分位（等同 numpy.percentile 預設的 linear 法），輸入須已排序
+  function percentileLinear(sortedVals,p){
+    const n=sortedVals.length;
+    if(!n)return null;
+    if(n===1)return sortedVals[0];
+    const i=(n-1)*p,lo=Math.floor(i),hi=Math.min(lo+1,n-1),f=i-lo;
+    return sortedVals[lo]*(1-f)+sortedVals[hi]*f;
+  }
+  function _vbNum(v,d){return v==null||!isFinite(v)?'—':Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+
+  async function renderValuationBand(row){
+    const host=document.getElementById('report-valuation-band');if(!host)return;
+    const code=row.code;
+    const disclaimer='<div class="note" style="margin-top:8px">這不是目標價、也不是投資建議：'
+      +'台股沒有免費的分析師目標價／評等資料源，本卡只做機械換算——同產業本益比百分位 × 本檔近四季 EPS，'
+      +'不含任何對未來獲利的預測。本益比偏低本身也可能反映風險或衰退。</div>';
+    if(!/^\d{4,6}[A-Z]?$/.test(String(code))){
+      host.innerHTML='<div class="note">估值區間目前只涵蓋台股（同產業本益比來自 TWSE 每日本益比 BWIBBU）。此代號非台股，無同產業本益比樣本可比。</div>';
+      return;
+    }
+    const [,companies,quotes]=await Promise.all([loadFundamentals(code),loadCompanyInfo(),loadQuotesAllTw()]);
+    await loadStockDetail(code);
+    const funds=(FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.fundamentals)||{};
+    const detailStocks=(STOCK_DETAIL_CACHE&&STOCK_DETAIL_CACHE.stocks)||{};
+    const industry=(companies[code]&&companies[code].industry)||row.industry||null;
+    if(!industry){
+      host.innerHTML='<div class="note">查不到這檔的產業分類（data/company_info.json 無此代號），無法取同產業本益比樣本，因此不估算估值區間。</div>'+disclaimer;
+      return;
+    }
+    if(VALUATION_EXCLUDED_INDUSTRY.test(industry)){
+      host.innerHTML='<div class="note">「'+industry+'」屬 ETF／受益證券／存託憑證類，沒有同產業本益比可比，本益比法不適用，因此不估算。</div>'+disclaimer;
+      return;
+    }
+    // 同產業樣本
+    const peers=Object.keys(companies).filter(c=>companies[c]&&companies[c].industry===industry);
+    const vals=[];const srcCnt={twse:0,derived:0};const perDates=[];
+    for(const c of peers){
+      const v=peValueFor(c,funds,detailStocks,quotes,null);
+      if(!v)continue;
+      vals.push(v.pe);srcCnt[v.src]++;if(v.date)perDates.push(v.date);
+    }
+    vals.sort((a,b)=>a-b);
+    const n=vals.length;
+    const perDate=perDates.length?perDates.sort()[perDates.length-1]:null;
+    // 本檔近四季 EPS（主：季報加總；備援：現價 ÷ 官方本益比 回推）
+    const own=peValueFor(code,funds,detailStocks,quotes,null);
+    const px=(quotes[code]&&quotes[code].close)!=null?quotes[code].close:null;
+    const t=epsTtmFromDetail(detailStocks[code],null);
+    let eps=null,epsSrc='',epsNote='';
+    if(t){eps=t.eps;epsSrc='TWSE 季報加總（t187ap06_L_ci）';epsNote=t.label}
+    else if(own&&own.src==='twse'&&px!=null&&px>0&&own.pe>0){
+      eps=px/own.pe;epsSrc='由 TWSE 每日本益比與收盤價回推';epsNote='本益比 '+_vbNum(own.pe,2)+'、收盤 '+_vbNum(px,2);
+    }
+    const sampleLine='同產業「'+industry+'」有效樣本 <b>'+n+'</b> 檔'
+      +(n?'（TWSE 每日本益比 '+srcCnt.twse+' 檔＋收盤價÷近四季EPS 推導 '+srcCnt.derived+' 檔）':'')
+      +(perDate?'，本益比資料日 '+perDate:'')
+      +'。同產業成分共 '+peers.length+' 檔，其餘因本益比為負或缺值而未納入。';
+    // 不足以估算的三種情況：樣本不足、EPS 拿不到、EPS ≤ 0
+    if(n<VALUATION_MIN_SAMPLE||eps==null||eps<=0){
+      let why;
+      if(eps==null)why='拿不到本檔近四季 EPS（季報四季不連續或已過期，且無官方本益比可回推）';
+      else if(eps<=0)why='本檔近四季 EPS 為 '+_vbNum(eps,2)+' 元（≤0），本益比法不適用';
+      else why='同產業有效樣本只有 '+n+' 檔，未達 '+VALUATION_MIN_SAMPLE+' 檔門檻';
+      host.innerHTML='<div class="note"><b>同產業樣本不足無法估算</b>：'+why+'。<br>'+sampleLine+'</div>'+disclaimer;
+      return;
+    }
+    const p25=percentileLinear(vals,0.25),p50=percentileLinear(vals,0.5),p75=percentileLinear(vals,0.75);
+    // 本檔目前落在同業第幾百分位（嚴格小於的比例）
+    let rankPct=null;
+    if(own&&own.pe>0&&n>1){let below=0;for(const v of vals)if(v<own.pe)below++;rankPct=Math.round(below/n*100)}
+    const cells=[['25% 分位',p25],['中位數',p50],['75% 分位',p75]].map(function(a){
+      const lbl=a[0],pe=a[1];
+      return '<div style="flex:1;text-align:center;padding:8px 4px;border:1px solid var(--line);border-radius:10px">'
+        +'<div style="font-size:10px;color:var(--ink-4)">'+lbl+'</div>'
+        +'<div class="num" style="font-size:17px;font-weight:700;color:var(--ink-1);margin-top:2px">'+_vbNum(pe*eps,1)+'</div>'
+        +'<div style="font-size:9.5px;color:var(--ink-4)">本益比 '+_vbNum(pe,1)+'</div></div>';
+    }).join('');
+    host.innerHTML='<div style="display:flex;gap:7px;margin-bottom:8px">'+cells+'</div>'
+      +'<div class="note">現價 <b class="num">'+(px!=null?_vbNum(px,2):'—')+'</b>'
+      +(own?'，本檔本益比 <b class="num">'+_vbNum(own.pe,2)+'</b>（'+(own.src==='twse'?'TWSE 每日本益比':'收盤價÷近四季EPS 推導')+'）'
+            +(rankPct!=null?'，位於同業第 '+rankPct+' 百分位':''):'，本檔查無本益比')
+      +'。<br>近四季 EPS <b class="num">'+_vbNum(eps,2)+'</b> 元（'+epsSrc+(epsNote?'，'+epsNote:'')+'）。<br>'+sampleLine+'</div>'
+      +disclaimer;
+  }
+
   async function renderReportEvents(row){
     const host=document.getElementById('report-events');if(!host)return;
     const d=await ensureEvents();
@@ -5958,7 +6104,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-08.1510';
+  const APP_VERSION='2026-09-10.0157';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
