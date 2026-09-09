@@ -9,6 +9,10 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第505輪 · 2026-09-09T22:30+08:00 · TW · 取鎖乾淨（cycle`20260909-223036`）· 依輪替選TW（FUT 10:30 round484最舊但依例外條款不選；TW 21:30 round503較舊/US 22:00 round504最新，故選TW）· 開工查`run_detached.py status`：`running=0`；`git log`確認round504後僅自動排程commit（IBKR報價）與`hypothesis_queue`自走commit（`43c2dab6` `#67`gate2 TRAIN隨機控制組續跑至60/100）；`git status`僅`dev_queue_cycle.log`／`external_connectivity.jsonl`兩個自動化log在動，屬另一track自身產物，本輪未觸碰 · **依round500/502/504建議延續採精簡確認**：`data/ticks/`仍2/20（`20260909.parquet.tmp`未finalize，正常，較round503無變化）；`PENDING_QUEUE.md`核對確認`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`本身仍無總司令回應；`STRATEGY_GRAVEYARD.md`掃描`## #6x`/`## #7x`標題，確認最新結案仍為`#62`（2026-09-09），無`#68`~`#79`新結案。**結論：候選池連續19輪（487~505）維持同一狀態，TW軌本地端無新可推進工作單位**，僅剩`#50`（tick累積2/20，被動等待總司令對gate50提案的回應）與`hypothesis_queue`自走排程（`#67`gate2/`#68`起）的被動維護。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（233列，無新判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫 · 詳見`TW_MARATHON_STATE.md`第505輪記錄、`MARATHON_STATE.md`（輪次計數器505）
+
+---
+
 ## 第504輪 · 2026-09-09T22:00+08:00 · US · 取鎖乾淨（cycle`20260909-220036`）· 依輪替選US（FUT 10:30 round484最舊但依例外條款不選；US 21:00 round502較舊/TW 21:30 round503最新，故選US）· 開工查`run_detached.py status`：`running=0`；`git log`確認round503後僅自動排程commit（IBKR報價）；`git status`僅`research/dev_queue_cycle.log`／`research/external_connectivity.jsonl`兩個自動化log在動，屬`hypothesis_queue`自身產物，本輪未觸碰 · **依round500/502建議延續採精簡確認**：`data/ticks/`仍2/20（`20260909.parquet.tmp`未finalize，正常，較round502無變化）；`PENDING_QUEUE.md`核對確認`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`本身仍無總司令回應；`STRATEGY_GRAVEYARD.md`掃描`## #6x`/`## #7x`標題，確認最新結案為`#62`（2026-09-09），`#63`~`#69`無獨立`##`標題（`#63`/`#64`已透過`TRIALS_LEDGER.md`#227/#228登記結案，僅未補`##`標題格式，屬既有文件記錄落差非本輪新發現），無`#68`~`#79`新結案。**結論：候選池連續18輪（487~504）維持同一狀態，US軌本地端無新可推進工作單位**，僅剩`#50`（tick累積2/20，被動等待總司令對gate50提案的回應）與`hypothesis_queue`自走排程（`#67`gate2/`#68`起）的被動維護。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（233列，無新判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫 · 詳見`US_MARATHON_STATE.md`第504輪記錄、`MARATHON_STATE.md`（輪次計數器504）
 
 ---
