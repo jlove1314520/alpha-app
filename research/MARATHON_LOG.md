@@ -1,5 +1,10 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T20:37+0800 — hypothesis_queue排程接續：取鎖時鎖檔陳舊（上一輪37.7分鐘未更新，疑似崩潰）已回收接手，補跑上一輪已起地基但未取得結果的`factor_ic_odd_lot_imbalance.py`（#67盤中零股委託簿失衡度，第1關cheap gate）。結果：CHEAP_PASS（248/300可用名，val percentile=90.7/門檻90.0，val_mean_ic=-0.0249，方向為負）但附重大統計但書——train僅3個快照（資料源自2020-10-26才可得的結構性限制），val亦僅邊緣過關，下一輪gate2設計前務必看`HYPOTHESIS_QUEUE.md`#67條目但書段落。已`register_trial()`登記`TRIALS_LEDGER.md`#231，`--check`確認EXIT_CODE=0。`is_holdout_consumed()`確認False。`git status`另發現`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`是DevQueue/連線健檢排程留下的非本輪殘留，本輪未觸碰、不納入commit。
+
+## 2026-09-09T20:10+0800 — hypothesis_queue排程接續：LOCK_STALE回收（上一輪37.7分鐘未更新）接手。#67第1關cheap gate開工：確認factor_ic.py/factors.py框架可直接掛載自訂資料源（比照twse_t86_client.py per-date分組快取模式），新增twse_odd_lot_client.py::load_all_cached()/odd_lot_imbalance_daily()（VAL_END截斷）、factors.py::f_odd_lot_imbalance因子區塊、factor_ic_odd_lot_imbalance.py一行式模板。確認evaluate_factor()天然滿足#67方向未鎖死例外。已啟動python factor_ic_odd_lot_imbalance.py（SAMPLE_SIZE=300），因本輪預算耗盡背景執行尚未取得結果，未產生PASS/FAIL，未登記register_trial()。is_holdout_consumed()確認False。下一輪待辦：檢查執行結果並判定。
+
+
 ## 2026-09-09T19:30+0800 — hypothesis_queue排程接續：`#67`盤中零股委託簿失衡度
 資料回補全數完成（1092/1092，100.0%，2020-10-26~2024-12-31），乾淨取得具名鎖
 `LOCK_ACQUIRED`。執行`python backfill_odd_lot.py --batch-size 250`處理剩餘141個

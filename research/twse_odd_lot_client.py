@@ -49,6 +49,7 @@ import time
 import uuid
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -185,3 +186,71 @@ def cached_date_range() -> tuple[str | None, str | None, int]:
         return None, None, 0
     dates = [f.stem.replace("TWTC7U_", "") for f in files]
     return min(dates), max(dates), len(files)
+
+
+def load_all_cached() -> pd.DataFrame:
+    """把DATA_DIR底下所有TWTC7U_*.parquet讀進來併成一份完整DataFrame，附加
+    計算好的`imbalance`欄位（收盤前零股委託簿失衡度，見本檔案docstring
+    「操作化修正」段落：`(last_bid_qty-last_ask_qty)/(last_bid_qty+last_ask_qty)`，
+    分母為0時回傳NaN，不除以零）。2026-09-09 hypothesis_queue排程接續新增，
+    `HYPOTHESIS_QUEUE.md` #67第1關cheap gate用。"""
+    files = sorted(DATA_DIR.glob("TWTC7U_*.parquet"))
+    if not files:
+        return pd.DataFrame(columns=_COLS + ["imbalance"])
+    frames = [_atomic_read_parquet(f) for f in files]
+    frames = [f for f in frames if not f.empty]
+    if not frames:
+        return pd.DataFrame(columns=_COLS + ["imbalance"])
+    combined = pd.concat(frames, ignore_index=True)
+    denom = combined["last_bid_qty"] + combined["last_ask_qty"]
+    combined["imbalance"] = np.where(
+        denom > 0, (combined["last_bid_qty"] - combined["last_ask_qty"]) / denom, np.nan
+    )
+    return combined
+
+
+_ODD_LOT_GROUPED_CACHE: dict[str, pd.DataFrame] | None = None
+_ODD_LOT_GROUPED_CACHE_KEY: tuple[int, float] | None = None
+
+
+def _load_all_odd_lot_grouped() -> dict[str, pd.DataFrame]:
+    """跟`twse_t86_client.py::_load_all_t86_grouped()`同一套process內快取
+    模式（理由同該函式docstring——避免`load_sample_with_factors()`逐股票
+    呼叫時每次都重新掃描讀取全部1092個parquet檔）：依`code`分組快取在這個
+    process的記憶體裡。快取有效性用「檔案數量+最新mtime」當key判斷。"""
+    global _ODD_LOT_GROUPED_CACHE, _ODD_LOT_GROUPED_CACHE_KEY
+    files = sorted(DATA_DIR.glob("TWTC7U_*.parquet"))
+    if not files:
+        return {}
+    key = (len(files), max(p.stat().st_mtime for p in files))
+    if _ODD_LOT_GROUPED_CACHE is not None and _ODD_LOT_GROUPED_CACHE_KEY == key:
+        return _ODD_LOT_GROUPED_CACHE
+    combined = load_all_cached()
+    if combined.empty:
+        _ODD_LOT_GROUPED_CACHE = {}
+        _ODD_LOT_GROUPED_CACHE_KEY = key
+        return _ODD_LOT_GROUPED_CACHE
+    grouped = {code: g for code, g in combined.groupby("code", sort=False)}
+    _ODD_LOT_GROUPED_CACHE = grouped
+    _ODD_LOT_GROUPED_CACHE_KEY = key
+    return grouped
+
+
+def odd_lot_imbalance_daily(stock_id: str, start_date: str, end_date: str | None = None) -> pd.DataFrame:
+    """Per-stock時間序列，收盤前零股委託簿失衡度。跟
+    `twse_t86_client.py::institutional_daily_net_t86()`同一套語意：只回傳
+    已快取的日期，不自行補抓；`end_date`一律截斷在`VAL_END`（holdout聖域
+    邊界，物理隔離，不靠人記得）。回傳欄位：date, imbalance。"""
+    from validation.holdout import VAL_END
+
+    effective_end = end_date if (end_date and end_date <= VAL_END) else VAL_END
+    empty = pd.DataFrame(columns=["date", "imbalance"])
+    grouped = _load_all_odd_lot_grouped()
+    g = grouped.get(stock_id)
+    if g is None or g.empty:
+        return empty
+    sub = g[(g["date"] >= start_date) & (g["date"] <= effective_end)]
+    if sub.empty:
+        return empty
+    out = sub[["date", "imbalance"]].dropna(subset=["imbalance"]).sort_values("date").reset_index(drop=True)
+    return out

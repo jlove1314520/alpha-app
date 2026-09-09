@@ -9223,3 +9223,43 @@ cross-sectional IC + 洗牌null測試腳本，比照`day_trading_ratio_gate.py`
 /`block_trade_gate62.py`那種獨立設計先例，不強行套用不適用的模板）。
 本輪因預算考量在回補完成後即收工，未著手撰寫gate腳本本身。
 **本輪工作到此為止（一輪一個有界工作單位——一次批次回補）**。
+
+**狀態更新（2026-09-09T20:xx+08:00 hypothesis_queue排程接續，第1關cheap
+gate開工）**：**確認`factor_ic.py`/`factors.py`框架可直接掛載此自訂
+資料源**——比照`twse_t86_client.py::institutional_daily_net_t86()`同一套
+模式，在`twse_odd_lot_client.py`新增`_load_all_odd_lot_grouped()`/
+`load_all_cached()`（含計算好的`imbalance`欄位）與
+`odd_lot_imbalance_daily(stock_id,start_date,end_date=None)`（`end_date`
+截斷在`VAL_END`聖域邊界）。在`factors.py::prepare_factors()`新增
+`f_odd_lot_imbalance`因子區塊（`_asof_join`掛載，跟`f_margin_utilization`
+同一段式），寫`factor_ic_odd_lot_imbalance.py`一行式模板。**確認
+`evaluate_factor()`本身不預設方向**（只檢查train/val同號+贏過洗牌null），
+天然滿足#67「方向未預先鎖死」的唯一允許例外。已啟動`python
+factor_ic_odd_lot_imbalance.py`（SAMPLE_SIZE=300檔），**因本輪預算已
+耗盡，測試在背景執行尚未取得結果，本輪未產生PASS/FAIL/CHEAP_PASS判定，
+未呼叫`register_trial()`**。`is_holdout_consumed()`開工/收工前皆確認
+`False`。**下一輪待辦**：檢查此腳本執行結果（地基已完工，只是等結果，
+不need重寫），依`evaluate_factor()`回傳判定CHEAP_PASS/FAIL。**本輪工作
+到此為止**。
+
+**第1關cheap gate最終判定（2026-09-09T20:2x+0800 hypothesis_queue排程
+接續，取鎖時發現陳舊鎖檔37.7分鐘未更新已回收接手，補跑上一輪未完成的
+背景測試並結案）**：`python factor_ic_odd_lot_imbalance.py`跑完（248/300
+可用名，121個非重疊20交易日快照，2015-01-01~2024-12-31）。結果：
+train mean_ic=-0.0430 IR=-0.281（**n僅3個快照**，因TWTC7U資料自
+2020-10-26才可得、TRAIN_END=2020-12-31，train窗口實際僅約2個月）；
+val mean_ic=-0.0249 IR=-0.303 hit_rate=0.64（n=47快照）；null
+percentile=90.7（門檻90.0）；same_sign=True。方向為負（零股買賣超偏高
+predict後續20日報酬下修，較貼近處分效應/追高乏力，非正回饋續漲），依
+此事前綁定往後方向。判**CHEAP_PASS**（已用`register_trial()`登記為
+`TRIALS_LEDGER.md`#231，`--check`確認`EXIT_CODE=0`）。
+
+**重大統計但書（下一輪gate2設計前必看）**：same_sign確認建立在train僅
+3個快照上，統計上無法有效區分真訊號與雜訊；val percentile=90.7距門檻
+僅0.7個百分點、val_mean_ic=0.0249僅微幅高於0.02下限，兩者皆屬邊緣過關
+而非穩健過關。此為#67因子的結構性限制（資料源2020-10-26才存在，非
+實作瑕疵可補救），依CONSTITUTION.md「事前綁定通過標準」原則不追加
+事後門檻，如實登記CHEAP_PASS，但**下一輪gate2（隨機控制組≥100
+draws）務必把此邊緣性質列入考量，不得因gate1顯示PASS就照單全收**。
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
+（純本地快取，複用既有回補資料）。**本輪工作到此為止**。

@@ -930,6 +930,24 @@ def prepare_factors(
     # FinMind呼叫（純本地json查表）。
     d["f_listing_age_days"] = _listing_age_days(stock_id, d["date"])
 
+    # (bb) 盤中零股委託簿失衡度 Odd-Lot Order Book Imbalance (`HYPOTHESIS_
+    # QUEUE.md` #67，2026-09-09 hypothesis_queue排程接續新增，佇列排隊第一
+    # 起跑)。經濟理由：零股（不足1張）交易人結構性偏向資金規模小的散戶，
+    # 跟三大法人/融資融券戶是不同投資人母體（本佇列第16種正交機制，完整
+    # 排除清單見#67條目）。**方向未預先鎖死**：文獻對散戶交易predict方向
+    # 存在分歧（處分效應predict反轉 vs 正回饋交易predict續漲），train/val
+    # 何者顯著同號決定事前綁定方向，此為#67條目明文允許的唯一方向彈性
+    # 例外，決定過程見`factor_ic_odd_lot_imbalance.py`。資料源TWSE官方
+    # TWTC7U（`twse_odd_lot_client.py`），當日盤後即公布即為PIT日期本身，
+    # 2020-10-26起可得（晚於標準universe起點，早於此日期一律NaN，非bug）。
+    try:
+        from twse_odd_lot_client import odd_lot_imbalance_daily
+        odd_lot_pit = odd_lot_imbalance_daily(stock_id, start_date).rename(columns={"date": "pit_date"})
+        d = _asof_join(d, odd_lot_pit, "imbalance", "f_odd_lot_imbalance")
+    except RuntimeError as e:
+        print(f"    [factors] f_odd_lot_imbalance skipped for {stock_id}: {e}")
+        d["f_odd_lot_imbalance"] = np.nan
+
     return d
 
 
