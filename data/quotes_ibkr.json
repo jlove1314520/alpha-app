@@ -1,64 +1,63 @@
 {
-  "fetched_at": "2026-09-09T20:06:41.798127+08:00",
+  "fetched_at": "2026-09-09T20:11:49.288059+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 315.66,
-      "bid": 315.4,
-      "ask": 315.66,
+      "last": 315.31,
+      "bid": 315.28,
+      "ask": 315.4,
       "close": 316.22,
-      "change_pct": -0.1771,
+      "change_pct": -0.2878,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 494.12,
-      "bid": 493.73,
-      "ask": 494.5,
+      "last": 494.0,
+      "bid": 493.9,
+      "ask": 494.44,
       "close": 493.95,
-      "change_pct": 0.0344,
+      "change_pct": 0.0101,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 225.3,
-      "bid": 225.17,
-      "ask": 225.3,
+      "last": 224.92,
+      "bid": 224.86,
+      "ask": 224.94,
       "close": 225.73,
-      "change_pct": -0.1905,
+      "change_pct": -0.3588,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 365.59,
-      "bid": 365.4,
-      "ask": 365.63,
+      "last": 364.81,
+      "bid": 364.71,
+      "ask": 364.97,
       "close": 368.16,
-      "change_pct": -0.6981,
+      "change_pct": -0.9099,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 331.02,
-      "bid": 331.02,
-      "ask": 331.24,
+      "last": 330.7,
+      "bid": 330.64,
+      "ask": 330.71,
       "close": 338.36,
-      "change_pct": -2.1693,
+      "change_pct": -2.2639,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "^DJI": {
-      "last": 52786.07,
+      "last": null,
       "bid": null,
       "ask": null,
-      "close": 53414.2,
-      "change_pct": -1.176,
-      "data_type": "YAHOO_DELAYED",
+      "close": null,
+      "change_pct": null,
+      "data_type": "REALTIME",
       "exchange": "CME",
-      "label": "道瓊工業指數",
-      "source": "yahoo_fallback"
+      "label": "道瓊工業指數"
     },
     "^GSPC": {
       "last": 7673.52,
@@ -72,15 +71,14 @@
       "source": "yahoo_fallback"
     },
     "^IXIC": {
-      "last": 26421.412,
+      "last": null,
       "bid": null,
       "ask": null,
-      "close": 26506.99,
-      "change_pct": -0.3229,
-      "data_type": "YAHOO_DELAYED",
+      "close": 26421.41,
+      "change_pct": null,
+      "data_type": "DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數",
-      "source": "yahoo_fallback"
+      "label": "那斯達克綜合指數"
     },
     "^SOX": {
       "last": 11887.869,
