@@ -8492,6 +8492,27 @@ US；US軌0a節四條方向皆已結案/卡依賴，仿round476對`#62`的做法
 Gateway限制無關。本輪未寫程式碼（基礎設施先天不通，寫了也跑不動），
 純查證與記錄。
 
+**（j-續）二次盡職查證，確認無其他合法路徑（2026-09-09馬拉松第483輪，
+US軌）**：本輪重新檢視是否有(j)段落未涵蓋的替代路徑，避免下一輪誤以為
+只查過FTP一條路就判定基礎設施依賴無解。①**重新核實TWS API genericTick
+`236`**：WebSearch官方文件（FinanceFeeds公告＋`interactivebrokers.github.io/
+tws-api/tick_types.html`）確認genericTick`236`回傳的是**可借股數
+（shortable shares count），不含費率**——跟(j)段落既有結論完全一致，本輪
+只是獨立複驗一次，非新發現，**這條路已確定無法取代FTP的費率資料**。
+②WebSearch「IBKR Web API/Client Portal REST 借券費率端點」，未找到任何
+官方文件明確記載費率REST端點。③`WebFetch`直接嘗試IBKR官方網頁
+`interactivebrokers.com/en/trading/short-securities-availability.php`看
+是否有HTTPS（非FTP）的資料下載連結——**回應`HTTP 403 Forbidden`**，依
+`CLAUDE.md`取得方式鐵律「禁止偽造Referer/UA假裝瀏覽器以通過封鎖」，
+**未進一步嘗試繞過**，此路徑到此為止。**結論：round479「FTP埠21被
+防火牆擋、無其他免費合法路徑」的判定經本輪二次查證維持不變，沒有找到
+新路徑**。`#63`美股類比持續標記「待解決基礎設施依賴」，非本輪或後續
+馬拉松輪次可在現有環境限制下解決；若未來使用者提供其他網路環境（能連
+21埠的機器）或改用IBKR Web API OAuth（`C:\alpha\CLAUDE.md`已知待評估項目，
+需總司令核准的架構決策，非馬拉松自主範圍），才有機會重新推進。本輪未寫
+任何程式碼，純二次查證。`trial_registry.py --check`本輪無新判定（非策略
+判定，比照(j)段落先例不進`TRIALS_LEDGER.md`）。
+
 ---
 
 **(k) 2026-09-09 馬拉松第480輪（TW軌）——gate1 cheap gate正式N=200全量結果：三個N值全部CHEAP_PASS**。
