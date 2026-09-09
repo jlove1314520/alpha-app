@@ -9,6 +9,9 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第496輪 · 2026-09-09T18:00+08:00 · US · 取鎖乾淨（cycle`20260909-180036`）· 依輪替選US（FUT 10:30 round484最舊但依例外條款不選；US 17:00 round494較舊/TW 17:30 round495最新，故選US）· 開工查`run_detached.py status`：`running=0`，`git log`確認round495後僅`hypothesis_queue`排程自走commit（#67進度202→452/1092），非本track範圍 · **本輪工作單位＝`candidate_report.py --audit`稽核（0違規）後比照round490/491核對`build_signal_status.py`是否有遺漏方向**：發現`#61`（央行理監事會議決策事件，round457已在`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#219判定FAIL）從未寫進`build_signal_status.py`公開清單——0a節文字多次提及「#61~#66全數結案」但`ids`實際只有49/50/51/52/62/63/64/65/66共9條，漏了61。已比照`#62`格式新增`#61`段落並重跑`build_signal_status.py`（10條方向），`git diff -b`確認僅新增區塊無其他變動。`data/ticks/`仍2/20（`20260909.parquet.tmp`未finalize，正常），`#50`提案仍待核准。`trial_registry.py --check`exit=0 PASS（本輪未產生新判定，只是補齊既有FAIL判定的公開曝光，不需要新的`register_trial()`呼叫）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫 · 詳見`US_MARATHON_STATE.md`第496輪記錄、`build_signal_status.py`（新增`id=61`段落）、`data/signal_status.json`（本輪新增`61`一條）
+
+---
 ## 第495輪 · 2026-09-09T17:30+08:00 · TW · 取鎖乾淨（cycle`20260909-173036`）· 依輪替選TW（FUT 10:30 round484最舊但依例外條款不選；TW 16:30 round493較舊/US 17:00 round494最新，故選TW）· 開工查`run_detached.py status`：`running=0`，`git log`確認round494後無新commit · **本輪工作單位＝發現並提報架構性問題：`#50`tick累積樣本股票不在目標成交值區間**——過去8輪（487~494）心跳暗示「等18個交易日就好」，本輪核對`data/ticks/20260908.parquet`實際涵蓋股票（零新增API呼叫）發現訂閱清單來自App即時報價用的`DEFAULT_TW_WATCHLIST`（2330台積電/2454聯發科/2317鴻海/1513中興電/3231緯創），15檔全部是大型/中型股，用既有tick估算單日成交值最小的1513也約2.1億元，遠超`#50`要求的500萬～5,000萬區間上限4倍以上——成交值區間由「訂閱了哪些代號」決定，不是由「訂閱了多久」決定，累積200個交易日一樣是0檔達標。已寫`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`提報：建議利用`MAX_DYNAMIC_SUBSCRIPTIONS=100`目前僅用5個的餘裕加入目標區間代號，但因牽涉常駐服務`shioaji_quotes.py`訂閱名單變更（`CLAUDE.md`外部API頻率上限風險＋常駐服務發布紀律）與可能影響使用者自選股，依「提案先於執行」規則未直接執行，待核准。`trial_registry.py --check`本輪未重跑（無新試驗）。`is_holdout_consumed()`皆確認`False`。全程零新增外部API呼叫 · 詳見`TW_MARATHON_STATE.md`第495輪記錄、`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`
 
 ---

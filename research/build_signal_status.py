@@ -187,6 +187,28 @@ DIRECTIONS = [
         "refs": {"docs": ["MARATHON_PROTOCOL.md 0a節 #52"]},
     },
     {
+        "id": "61",
+        "name": "央行理監事會議決策事件（重貼現率變動）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-08",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md第⑩類「央行政策決策事件」"
+            "機制），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "訊號=重貼現率變動事件後TAIEX後續報酬，第1關cheap gate：TRAIN"
+            "(2018-2020,12場)mean=-0.6541%(p=0.2128)、VAL(2021-2024,16場)"
+            "mean=+0.5263%(p=0.0991)，train/val正負號不一致（TRAIN負VAL正），"
+            "即使VAL單獨對500次隨機交易日null的雙尾percentile=93.6過90.0門檻，"
+            "依同一把尺（#60判例）train/val方向不一致即整體FAIL。事前綁定子測試1"
+            "不過關即快殺，未再測子測試2（決策方向分組，樣本量極小僅11筆）。"
+        ),
+        "refs": {
+            "trials_ledger": ["#219"],
+            "docs": ["HYPOTHESIS_QUEUE.md #61", "STRATEGY_GRAVEYARD.md #61", "TW_LEADS.md #15"],
+        },
+    },
+    {
         "id": "62",
         "name": "鉅額逐筆交易（Block Trade，配對交易子集）跟隨訊號——資訊不對稱/知情大額交易類",
         "status": "FAIL",
