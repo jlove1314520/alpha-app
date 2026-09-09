@@ -1,5 +1,27 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T16:30+0800 — hypothesis_queue排程接續：先取得陳舊鎖檔
+（上一輪PID 145036，29.9分鐘未更新已自動回收，判斷是崩潰/逾時中斷、
+非仍在跑，安全接手）。stash暫存三個其他自動化殘留變更（
+`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`，非本track產生，未觸碰、未納入
+本輪commit）後pull、pop stash還原。為#67（盤中零股交易當散戶情緒訊號）
+做地基：完成`CLAUDE.md`「三來源查證」紀律確認TWSE官方端點
+（`www.twse.com.tw/rwd/zh/afterTrading/TWTC7U`，官方文件+GitHub社群
+雙重佐證）免費可行、涵蓋2020-10-26至今，但發現重大限制——端點無官方
+買賣方向拆分，原始「淨額」定義無法直接算，需tick分類（同`#62`，卡
+`#50`未解鎖依賴）；跑任何數字前已將訊號操作化修正為「收盤前零股委託簿
+失衡度」（同一經濟機制換一個資料可及的代理變數）。另發現資料起點晚於
+標準`TRAIN_END`，事前綁定本假設專用TRAIN/VAL切分（2020-10-26~2022-
+12-31 / 2022-12-31~2024-12-31，未動`VAL_END`聖域邊界）。新增
+`twse_odd_lot_client.py`/`backfill_odd_lot.py`（含反爬蟲偵測+atomic
+parquet快取，同`#57`模式），pilot跑30天回補全數成功（0天無資料，抽查
+末日1103檔/1088檔委託簿資料完整），確認腳本可正常接續。完整內容見
+`HYPOTHESIS_QUEUE.md` `### 67.`章節「狀態」小節與排隊順序總結同步更新。
+本輪未跑cheap gate、未產生PASS/FAIL判定，故未呼叫`register_trial()`。
+`is_holdout_consumed()`開工/收工前皆確認`False`。**本輪工作到此為止**，
+下一輪從繼續`python backfill_odd_lot.py --batch-size 250`回補歷史開始。
+
 ## 2026-09-09T15:57+0800 — hypothesis_queue排程接續：補commit上一輪陳舊鎖檔
 （PID 53292）已完成但未提交的工作（#66 FAIL判定確認、排隊順序總結同步
 修正，已核對`trial_registry.py --check`PASS/`STRATEGY_GRAVEYARD.md`條目
