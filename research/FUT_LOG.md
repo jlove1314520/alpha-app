@@ -2304,3 +2304,16 @@ equity=4.1425 vs 合併400次抽樣最大值12.2143，未過新標準（percenti
 `False`，全程零新增API呼叫（複用`fut_basis_series.py`既有快取）。完整見
 `FUT_MARATHON_STATE.md`第484輪、`TRIALS_LEDGER.md`#228、
 `fut_basis_regime_gate64.py`（新增，可重複執行）。
+
+
+## 2026-09-10（開發佇列 外部一改.3，非馬拉松輪次）
+
+戴研究帽。工作單位＝`PENDING_QUEUE.md` 外部一改.3「期貨軌：海龜／Donchian 完整版／
+Keltner／波動度突破／CTA 多時間框架，台指期為主」的第 1 關 cheap gate。
+新增 `fut_classic_trend_gate_ext13.py`（可重複執行）：五個機制的規格與控制組設計
+**寫在跑數字之前**（模組 docstring 即為事前綁定規格，`selection_spec` 雜湊留存）。
+五條全部 FAIL，已 `register_trial()` 登記 `TRIALS_LEDGER.md`#234～#238，
+並寫入 `STRATEGY_GRAVEYARD.md` 與 `FUT_LEADS.md`。
+**依 `CLAUDE.md` 馬拉松停下規則，FAIL 只記錄不停下**——本輪不提請任何候選、
+不宣告任何機制有效。`is_holdout_consumed()` 開工/收工前皆 `False`，零新增 API 呼叫。
+執行紀錄：`fut_classic_trend_gate_ext13_run.log`。

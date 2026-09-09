@@ -1,0 +1,65 @@
+TX 連續合約：2000-01-04 00:00:00 ~ 2024-12-31 00:00:00，共 6185 個交易日
+
+=== fut_turtle_system1_20_10 ===
+  n_days=6184  平均曝險=0.500
+  real_terminal_equity=1.4494（+44.9%，未計成本）  年化Sharpe=0.179  MDD=-36.8%
+  控制組最大值 full=13.0298 block=6.9132  中位數=1.2577
+  passed=False  百分位=57.5（記錄用，非通過依據）
+  reason=未過：訊號 1.4494 沒有超過控制組最大值 13.0298（控制組平均 1.6344，訊號百分位 57.5）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）
+
+=== fut_donchian_full_55_20 ===
+  n_days=6184  平均曝險=0.415
+  real_terminal_equity=1.6232（+62.3%，未計成本）  年化Sharpe=0.215  MDD=-28.7%
+  控制組最大值 full=6.8593 block=10.5159  中位數=1.5404
+  passed=False  百分位=54.0（記錄用，非通過依據）
+  reason=未過：訊號 1.6232 沒有超過控制組最大值 10.5159（控制組平均 1.9068，訊號百分位 54.0）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）
+
+=== fut_keltner_breakout_20_2atr ===
+  n_days=6184  平均曝險=0.597
+  real_terminal_equity=2.1929（+119.3%，未計成本）  年化Sharpe=0.266  MDD=-49.2%
+  控制組最大值 full=18.2962 block=8.3491  中位數=1.0953
+  passed=False  百分位=78.8（記錄用，非通過依據）
+  reason=未過：訊號 2.1929 沒有超過控制組最大值 18.2962（控制組平均 1.5453，訊號百分位 78.8）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）
+
+=== fut_vol_breakout_0p5atr ===
+  n_days=6184  平均曝險=0.997
+  real_terminal_equity=0.1675（-83.3%，未計成本）  年化Sharpe=-0.203  MDD=-86.5%
+  控制組最大值 full=45.2538 block=12.0009  中位數=0.8380
+  passed=False  百分位=7.0（記錄用，非通過依據）
+  reason=未過：訊號 0.1675 沒有超過控制組最大值 45.2538（控制組平均 1.6368，訊號百分位 7.0）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）
+
+=== fut_cta_multi_tf_voltarget ===
+  n_days=6184  平均曝險=0.572
+  real_terminal_equity=2.7023（+170.2%，未計成本）  年化Sharpe=0.405  MDD=-25.8%
+  控制組最大值 full=9.3988 block=9.6825  中位數=1.8474
+  passed=False  百分位=73.0（記錄用，非通過依據）
+  reason=未過：訊號 2.7023 沒有超過控制組最大值 9.6825（控制組平均 2.2401，訊號百分位 73.0）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）
+
+=== 部位序列相關係數（|r|>0.7 視為同家族，只能算一個獨立發現）===
+  fut_turtle_system1_20_10 vs fut_donchian_full_55_20: r=+0.746  ← 同家族
+  fut_turtle_system1_20_10 vs fut_keltner_breakout_20_2atr: r=+0.840  ← 同家族
+  fut_turtle_system1_20_10 vs fut_vol_breakout_0p5atr: r=+0.198
+  fut_turtle_system1_20_10 vs fut_cta_multi_tf_voltarget: r=+0.686
+  fut_turtle_system1_20_10 vs 既有 hyp_trend_multi_tf(10/20/60 多數決): r=+0.702  ← 同家族
+  fut_turtle_system1_20_10 vs 既有 hyp_donchian_breakout(20 收盤通道): r=+0.745  ← 同家族
+  fut_donchian_full_55_20 vs fut_keltner_breakout_20_2atr: r=+0.644
+  fut_donchian_full_55_20 vs fut_vol_breakout_0p5atr: r=+0.110
+  fut_donchian_full_55_20 vs fut_cta_multi_tf_voltarget: r=+0.718  ← 同家族
+  fut_donchian_full_55_20 vs 既有 hyp_trend_multi_tf(10/20/60 多數決): r=+0.580
+  fut_donchian_full_55_20 vs 既有 hyp_donchian_breakout(20 收盤通道): r=+0.609
+  fut_keltner_breakout_20_2atr vs fut_vol_breakout_0p5atr: r=+0.234
+  fut_keltner_breakout_20_2atr vs fut_cta_multi_tf_voltarget: r=+0.659
+  fut_keltner_breakout_20_2atr vs 既有 hyp_trend_multi_tf(10/20/60 多數決): r=+0.745  ← 同家族
+  fut_keltner_breakout_20_2atr vs 既有 hyp_donchian_breakout(20 收盤通道): r=+0.749  ← 同家族
+  fut_vol_breakout_0p5atr vs fut_cta_multi_tf_voltarget: r=+0.209
+  fut_vol_breakout_0p5atr vs 既有 hyp_trend_multi_tf(10/20/60 多數決): r=+0.306
+  fut_vol_breakout_0p5atr vs 既有 hyp_donchian_breakout(20 收盤通道): r=+0.145
+  fut_cta_multi_tf_voltarget vs 既有 hyp_trend_multi_tf(10/20/60 多數決): r=+0.739  ← 同家族
+  fut_cta_multi_tf_voltarget vs 既有 hyp_donchian_breakout(20 收盤通道): r=+0.640
+已登記 TRIALS_LEDGER #234：fut_turtle_system1_20_10 → FAIL
+已登記 TRIALS_LEDGER #235：fut_donchian_full_55_20 → FAIL
+已登記 TRIALS_LEDGER #236：fut_keltner_breakout_20_2atr → FAIL
+已登記 TRIALS_LEDGER #237：fut_vol_breakout_0p5atr → FAIL
+已登記 TRIALS_LEDGER #238：fut_cta_multi_tf_voltarget → FAIL
+
+寫入 C:\alpha\alpha-app\research\data\fut_classic_trend_gate_ext13_result.json
