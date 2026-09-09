@@ -477,4 +477,15 @@ curl ".../data?dataset=TaiwanStockMonthRevenue&data_id=2330&start_date=2025-06-0
 - **現況：月營收/財報歷史回補仍然 100% 依賴 FinMind**，額度用盡期間這兩類資料無法新增（`factors.py`/`backfill_universe.py` 已加降級處理，額度用盡時跳過但不讓整批/整檔失敗，等額度恢復會自動補上，不需要额外動作）。
 - **一個有價值的副產品**：`t187ap05_L`/`t187ap06_L_ci` 這種「全市場最新快照、一次呼叫」的特性，非常適合 `generate_scores_v2.py` 的即時算分需求（只需要「今天」這一期的值，不需要歷史），但這輪沒有實作進去（見 `generate_scores_v2.py` 2026-08-26 條目，即時路徑目前仍是 FinMind 主、額度用盡就該檔股票的財報/營收類因子留空，不是致命缺口，但下一輪可以考慮接上這兩個端點當 fallback，減少即時算分被 FinMind 額度卡住的機率）。
 
+## 美股價格源：FinMind→yfinance 過渡現況（2026-09-09 馬拉松第498輪 US 軌記錄，收斂 round468 `US_LEADS.md` #32 留下的開放問題）
+
+**背景**：`CLAUDE.md`「各市場一律使用該市場的原生資料源」（2026-09-08 總司令裁示）明訂「禁止用台灣資料商作為美股宇宙或價格的主來源」。round468（`US_LEADS.md` #32）查證發現：round454-464 寫的 4 支美股事件研究/因子腳本（`us_8k_pead_gate52.py`／`us_8k_item502_gate52.py`／`us_8k_item101_gate52.py`／`us_factor_ic_by_size.py` 系列）價格源走的是 `us_factors.us_price_series()`（即 FinMind `USStockPrice`），牴觸這條裁示，但這些試驗結案時間早於裁示發布，round468 當時把「是否值得用 yfinance 重跑覆核」留給後續判斷，此後 round469~497 共約 30 輪都沒有人接手做這個判斷——本輪（round498）核對後正式收斂，不留給下一輪重複發現同一個問題。
+
+**判斷：不需要重跑，理由如下（誠實記錄判斷依據，不是迴避）：**
+1. **這 4 支腳本的判定全部是 FAIL**（`#29`/`#30`/`#31` 事件研究、`us_factor_ic_by_size.py` 系列規模分層重測），且已完整登記進 `TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`。資料源偏誤的風險方向是「可能把一個真訊號用有問題的資料錯殺成 FAIL」，但這件事本身不會造成錯誤部署（我們不會因為誤判 FAIL 而拿真錢冒險）——跟「把 FAIL 誤判成 PASS」比，優先度低很多。
+2. **`f_us_low_vol` 乾淨宇宙版（`US_LEADS.md` #21，同樣先用 FinMind）已被完整深挖到根因**：round392-434 一路排查（隨機控制組/逐年拆解/leave-extreme-out/short leg 持股/借券檢查/黑名單汙染）最終在 round423 查證確認 **yfinance 對這批股票同樣是 back-adjusted**（非 FinMind 獨有限制），round434 確認異常量級的真正成因是「反向分割微型股在 `adj_close` 回溯膨脹歷史名目價格」——**换成 yfinance 不會解決這個已知污染源**，這是目前免費資料源的共同限制，不是 FinMind 特有的可修正偏誤。
+3. 沒有任何一個依賴 `us_price_series()` 的候選目前處於「CHEAP_PASS/PASS/EXPERIMENTAL 待決」狀態——受影響的試驗全部已經有明確結案（FAIL），不存在「資料源錯誤導致目前還掛著的假陽性候選」這種風險。
+
+**現行規範（2026-09-09 起，新試驗一律適用）**：任何新增的美股價格因子/事件研究，價格序列一律走 `yf_price_client.py::fetch_yf_adjusted()`（個股）或 `fetch_yf_index()`（指數/大盤基準），不得再新增使用 `us_factors.us_price_series()`（FinMind `USStockPrice`）當主來源；`us_price_series()` 保留供歷史比對／已結案試驗的可重現性引用，不刪除。此規範同 `CLAUDE.md`「各市場一律使用該市場的原生資料源」表格美股列的字面要求，本節只是把它套用到既有 US 軌試驗清單上的具體判斷紀錄下來。
+
 **宇宙覆蓋率結果（見 `TW_MARATHON_STATE.md` 最新數字）**：改用 yfinance 為主要價格來源後，`backfill_universe.py` 不再受 FinMind 額度牽制，單批次（無需等待 FinMind 額度恢復）就能大幅推進覆蓋率——2026-08-26 這輪從 60.0% 推進到本文件寫下當下的最新數字（見 `TW_MARATHON_STATE.md`），細節數字以那份文件為準（覆寫式，反映當下最新狀態）。
