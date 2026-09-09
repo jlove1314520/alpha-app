@@ -277,6 +277,31 @@ DIRECTIONS = [
             "docs": ["HYPOTHESIS_QUEUE.md #65", "STRATEGY_GRAVEYARD.md f_leader_follower_lag", "TW_LEADS.md"],
         },
     },
+    {
+        "id": "66",
+        "name": "美股年末稅損收割賣壓／一月效應（Tax-Loss Selling / January Effect）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-09",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md第⑮類「稅務動機機械性"
+            "交易」機制，此機制台股不適用——台灣個人證券交易資本利得無需"
+            "課稅，只能測美股），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "199/200檔clean universe，排序變數改用YTD(1~10月)報酬避免套套"
+            "邏輯，比較losers組(bottom decile)與對照組在12月(賣壓期)與次年"
+            "1月(反轉期)報酬差，vs洗牌null。4項判準(TRAIN/VAL x 12月/1月)"
+            "僅TRAIN次年1月單項過關(percentile=100.0)：12月賣壓期TRAIN="
+            "40.6方向對未過門檻，VAL=10.2方向相反；次年1月反轉期VAL="
+            "87.4方向對但些微未過90.0門檻。依事前綁定4項皆須過關判FAIL，"
+            "不因VAL僅些微差距放寬。不泛化為一月效應完全不存在——反轉窗口"
+            "方向兩期一致且TRAIN顯著，死的主要是12月賣壓這一半機制。"
+        ),
+        "refs": {
+            "trials_ledger": ["#230"],
+            "docs": ["HYPOTHESIS_QUEUE.md #66", "STRATEGY_GRAVEYARD.md us_tax_loss_selling_gate66"],
+        },
+    },
 ]
 
 

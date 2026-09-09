@@ -2558,3 +2558,31 @@ hypothesis_queue排程接續FAIL）
 - **原始記錄**：`TRIALS_LEDGER.md`#229、`HYPOTHESIS_QUEUE.md` #65條目、
   `factor_ic_leader_follower_lag.py`（可重複執行，零新增API呼叫，完全
   複用`factor_ic.py::load_sample_with_factors()`既有快取）。
+
+### us_tax_loss_selling_gate66（美股年末稅損收割賣壓／一月效應，股票/美股，
+2026-09-09 hypothesis_queue排程接續FAIL）
+
+- **哪一關死的**：第1關cheap gate——事前綁定「12月賣壓期＋次年1月反轉期，
+  TRAIN/VAL各自需過洗牌null百分位>=90.0且方向一致」共4項判準，僅1/4項
+  過關，判FAIL。
+- **具體數字**：`us_tax_loss_selling_gate66.py`，199/200檔clean universe
+  可用、總事件數3371（TRAIN年份1990~2020/2802筆、VAL年份2021~2023/
+  569筆）。排序變數改用YTD(1~10月)報酬（避免12月報酬同時當排序與測試
+  窗口造成套套邏輯，此澄清在跑數字前已寫進腳本docstring）。
+  (a) 12月賣壓期：TRAIN percentile=40.6（方向對但未過門檻）、
+  **VAL percentile=10.2（方向相反，losers組12月反而贏對照組+0.32%）**；
+  (b) 次年1月反轉期：TRAIN percentile=100.0 CHEAP_PASS、
+  VAL percentile=87.4（方向對但些微未過90.0門檻）。
+- **這個死法能不能泛化**：不能泛化成「一月效應／稅損收割假說完全不存在」
+  ——反轉窗口（次年1月）訊號方向兩期一致且TRAIN顯著，死的主要是「12月
+  賣壓」這一半機制在近百年美股樣本上未能證實，尤其VAL期方向相反。文獻
+  本就記載現代市場（尤其2000年後）效應已明顯減弱，此結果與先驗預期
+  方向一致（見經濟機制段落）。未測小型股子樣本分組（文獻記載效應集中
+  在小型股，若未來重測應優先做這個deep_dive，本輪因第1關已判FAIL、
+  不符合「第1關過關才做deep_dive」的協定順序，故未執行）。**沿用既有
+  存活者偏誤但書**：yfinance對已下市股0%覆蓋，本假設選「今年跌最多」
+  的股票正是最可能下市/除牌的族群，若真正的年度最大輸家已下市而從
+  宇宙/價格源消失，會系統性低估losers組真實跌幅與後續效應強度。
+- **原始記錄**：`TRIALS_LEDGER.md`#230、`HYPOTHESIS_QUEUE.md` #66條目、
+  `us_tax_loss_selling_gate66.py`（可重複執行，零新增API呼叫，複用
+  `us_universe_pit.py`survivorship-free宇宙與既有美股價格快取）。
