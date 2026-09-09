@@ -1,5 +1,32 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T00:23+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
+`git pull`+`git status`確認乾淨（另有非本track殘留變更`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`，疑似其他自動化來源留下，未觸碰、未納入
+本輪commit）。取得具名鎖為`LOCK_STALE`回收（PID 135132、30.1分鐘未更新，判斷
+是崩潰/逾時中斷）。**重新查證發現該輪其實已把#67 gate2全部做完並寫好結案文字，
+只是還沒commit+push就中斷**——工作目錄裡`HYPOTHESIS_QUEUE.md`/
+`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`/`TRIALS_REGISTRY.jsonl`/
+`odd_lot_imbalance_portfolio_v1_run.log`皆有未commit的完整修改：VALIDATION
+隨機控制組100/100跑完，TRAIN真實報酬+4.93% vs 買進持有+9.52%（percentile=
+33.0）、VAL真實報酬+10.80% vs 買進持有+61.94%（percentile=13.0），兩期alpha
+皆不顯著（p=0.898/0.605）、beta皆為正曝險，依GATE_SEQUENCE第2關快殺標準判
+**FAIL**，已登記`TRIALS_LEDGER.md`#232（`register_trial()`寫入，
+`row_sha256=da7b6c092523a7e2`）並寫入`STRATEGY_GRAVEYARD.md`
+`odd_lot_imbalance_portfolio_v1_gate67`條目。該輪也已依協定第1節在佇列#67
+結案後設計好新假設**#68（券資比Short-to-Margin Ratio當軋空風險訊號）**，
+尚未開始第1關。**本輪核對過這份未commit工作的完整性**：`python
+trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）回`EXIT_CODE=0`，
+撞號`2組`為2026-09-07前既有歷史存量非本輪新增；`odd_lot_imbalance_
+portfolio_v1_run.log`尾端數字（雖因終端機cp950編碼顯示為亂碼，用UTF-8
+重新讀取後）與`TRIALS_LEDGER.md`#232所記完全一致；`is_holdout_consumed()`
+（獨立以`from validation.holdout import is_holdout_consumed`覆核）確認
+`False`。判定這份未commit的工作是完整且一致的，**本輪的工作單位就是把它
+commit+push**，不重跑、不覆寫、不另起新工作（避免跟已完成的判定產生
+衝突或浪費運算）。下一輪從#68（`short_margin_ratio_gate68.py`第1關cheap
+gate）開始，複用`factor_ic.py::load_sample_with_factors()`既有300檔快取
+樣本+既有融資融券資料，不跳關。
+
 ## 2026-09-09T23:38+08:00 hypothesis_queue排程接續（Windows排程器喚醒，無人值守）：
 `git pull`+`git status`確認乾淨（另有非本track殘留變更`data/news_evidence.json`/
 `data/themes.json`，疑似情報帽/新聞抓取流程留下，未觸碰、未納入本輪commit），

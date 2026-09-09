@@ -2586,3 +2586,40 @@ hypothesis_queue排程接續FAIL）
 - **原始記錄**：`TRIALS_LEDGER.md`#230、`HYPOTHESIS_QUEUE.md` #66條目、
   `us_tax_loss_selling_gate66.py`（可重複執行，零新增API呼叫，複用
   `us_universe_pit.py`survivorship-free宇宙與既有美股價格快取）。
+
+
+### odd_lot_imbalance_portfolio_v1_gate67（盤中零股交易比重Odd-Lot Imbalance
+portfolio層構造，股票/台股，2026-09-10 hypothesis_queue排程接續FAIL）
+
+- **哪一關死的**：GATE_SEQUENCE第2關隨機控制組（N=100，TRAIN+VAL皆完整
+  跑完100 draws，非稀疏抽樣）。
+- **具體數字**：`odd_lot_imbalance_portfolio_v1.py`，因子IC為負改升冪排序，
+  月頻挑委託簿失衡度最低TOP20做多，TRAIN=[2020-10-26,2022-12-31]/
+  VAL=(2023-01-01,2024-12-31]（VAL_END物理邊界未變動，僅內部切分起點依
+  TWTC7U資料自2020-10-26才可得這個限制調整）。
+  TRAIN：真實報酬+4.93%（MDD-13.23%）vs 買進持有+9.52%，隨機控制組
+  percentile=**33.0**（門檻90.0），alpha年化+0.71%不顯著p=0.898、
+  beta=+0.351；
+  VAL：真實報酬+10.80%（MDD-7.88%）vs 買進持有+61.94%，隨機控制組
+  percentile=**13.0**（門檻90.0），alpha年化-2.31%不顯著p=0.605、
+  beta=+0.300。
+  兩期percentile皆遠低於90.0門檻且低於50，兩期alpha皆不顯著、beta皆為
+  正曝險，屬決定性未過而非邊緣未過。
+- **這個死法能不能泛化**：不能泛化成「零股委託簿失衡度這個訊號完全
+  無效」——第1關cheap gate的時序相關性（`TRIALS_LEDGER.md`#231）依然
+  CHEAP_PASS，方向（失衡度高預測後續報酬下修）未被推翻，死的是「升冪
+  排序、月頻、純多方向、TOP20固定持股數」這個具體portfolio構造。
+  第1關cheap gate當時已附「邊緣過關」但書（train僅3個快照、val
+  percentile=90.7距門檻僅0.7個百分點、val_mean_ic=0.0249僅微幅高於0.02
+  下限），本次第2關決定性未過呼應了那個但書的疑慮——**訊號強度不等於
+  構造穩健性**是這次最值得記住的教訓，跟#34銅金比案例（第1關訊號很強
+  但第5關leave-one-out死於單一年份貢獻）是同一類警示的不同版本。若
+  未來重測，應優先評估是否有結構性理由改善事件密度（例如放寬持有天數
+  或改用連續曝險力道而非二元TOP20切換），而非直接放棄整個機制類別；
+  但鑑於資料源本身2020-10-26才存在（TRAIN窗口僅約2年、VAL僅2年），
+  樣本量天生受限這個限制無法用工程手段解決。
+- **原始記錄**：`TRIALS_LEDGER.md`#231（gate1 CHEAP_PASS）、
+  `TRIALS_LEDGER.md`#232（gate2 FAIL，本則）、`HYPOTHESIS_QUEUE.md`
+  #67條目、`odd_lot_imbalance_portfolio_v1.py`（可重複執行，checkpoint
+  機制完整保留TRAIN 100/100+VAL 100/100兩期隨機控制組全部draws，
+  零新增外部API呼叫，複用既有零股逐日快取）。

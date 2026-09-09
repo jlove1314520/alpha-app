@@ -9,13 +9,17 @@ Loading sample + factors (cached)...
   alpha(年化)=+0.71%  beta=+0.351  p=0.8983  顯著為正=False
   買進持有大盤=+9.52%  隨機對照組(N=100)中位數=+7.33%  percentile=33.0
   成本1x/2x/3x: +4.93% / -3.17% / -11.22%
-  [VALIDATION] 隨機控制組進度 40/100，接續執行...
-  [VALIDATION] 隨機控制組進度 50/100
-  [VALIDATION] 隨機控制組進度 60/100
-  [VALIDATION] 隨機控制組進度 70/100
-  [VALIDATION] 隨機控制組進度 80/100
-  [VALIDATION] 時間預算已到，隨機控制組進度 84/100，已checkpoint，下次執行接續
+  [VALIDATION] 隨機控制組進度 90/100，接續執行...
+  [VALIDATION] 隨機控制組進度 100/100
 
-**本次420.0秒時間預算內未跑完（卡在VALIDATION），進度已存進C:\alpha\alpha-app\research\data\odd_lot_imbalance_portfolio_v1_checkpoint.json，不做任何PASS/FAIL判定。重新執行`python odd_lot_imbalance_portfolio_v1.py`會自動從中斷處接續，不會重算已完成的label/隨機控制組筆數。**
+--- VALIDATION (2023-01-01..2024-12-31) ---
+  報酬=+10.80%  MDD=-7.88%  Sortino=0.644  Sharpe=0.708  trades=407
+  alpha(年化)=-2.31%  beta=+0.300  p=0.6050  顯著為正=False
+  買進持有大盤=+61.94%  隨機對照組(N=100)中位數=+19.38%  percentile=13.0
+  成本1x/2x/3x: +10.80% / +3.86% / -3.10%
 
-holdout check (after): is_holdout_consumed() -> False (OK)
+已存 data/odd_lot_imbalance_portfolio_v1_results.csv
+
+第7關判定：FAIL（VAL期本身要單獨過關：報酬為正 且 隨機控制組percentile>=90.0）
+
+**第7關樣本外未過，直接結案FAIL，不進第8/9關**
