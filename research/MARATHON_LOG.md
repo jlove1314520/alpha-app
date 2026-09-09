@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T08:23+0800 hypothesis_queue排程接續 — 查收#63借券費率gate63正式N=200 job（20260909-075838-fe8a）結果：三N值皆PASS(percentile=100.0)，已用`trial_registry.register_trial()`登記`TRIALS_LEDGER.md`#225（CHEAP_PASS），並用`candidate_report.py::report_candidate()`寫入`TW_LEADS.md`#17（DSR因非portfolio層無法計算，已標註不得提請審核，僅代表gate1通過）。`candidate_report.py --audit`確認本次新增列無違規（既有2筆US_LEADS.md違規為存量問題，非本輪產生，未觸碰）。下一輪待辦：#63第2關deep dive（比照#30分組IC/leave-one-out慣例）；並重新查證#50（逐筆tick累積，本輪確認`research/data/ticks/`仍2/20交易日）/#52（新聞事件管線）依賴是否解鎖。本輪session預算已近用盡，未進一步展開deep dive，一輪一個有界工作單位。
+
 ## 2026-09-09T07:50+0800 hypothesis_queue排程接續（上一輪陳舊鎖已回收）— #63借券費率gate1腳本完成，全體資料25-draw初步結果三N值全PASS，已提交N=200正式跑批job待下一輪查收
 開工讀協定+`CLAUDE.md`+`CONSTITUTION.md`，`git pull`顯示已與origin/main同步
 （僅`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`/
