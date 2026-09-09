@@ -1,5 +1,27 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T09:xx+08:00 hypothesis_queue排程接續 — #69三來源資料可行性查證完成：可行
+`git pull`+`git status`乾淨（僅`index.html`/`research/.external_connectivity_state.json`/
+`research/DEV_QUEUE_PROMPT.txt`/`research/dev_queue_cycle.log`/
+`research/external_connectivity.jsonl`＋未追蹤`research/.devqueue.lock`
+等非本track殘留變更，判斷是`dev_queue`來源，未觸碰、未納入本輪commit）。
+`marathon_lock.py acquire --name hypothesis_queue`回傳`LOCK_ACQUIRED`（非
+陳舊鎖）。依協定完成`#69`（台指選擇權Put/Call未平倉量比逆向情緒訊號）
+要求的三來源資料可行性查證：①**官方端點**——複用`#31`已快取的
+`TaiwanOptionDaily`(TXO) 2015-2024全期間本機parquet（**零新增API呼叫**），
+確認`open_interest`欄位存在且`trading_session=='position'`（日盤）
+73.8%非零、`after_market`（夜盤）100%為零，跟`FUT_STATE_ARCHIVE.md`已
+記錄的`TaiwanFuturesDaily`同一欄位模式完全一致；②**官方API文件**
+（finmind.github.io衍生性金融商品頁）欄位定義吻合；③**GitHub/社群**
+（`github.com/FinMind/FinMind`官方repo在維護中）。結論：**可行，零新增
+資料工程**，直接複用`#31``load_dev`逐年抓取+`trading_session=='position'`
+過濾邏輯，只需把聚合口徑從volume換成open_interest。完整記錄見
+`HYPOTHESIS_QUEUE.md`#69條目最新段落。`is_holdout_consumed()`開工/收工
+前皆`False`。本輪未執行任何gate腳本、未產生判定，**不涉及
+`register_trial()`**（比照`fut_probe_settlement_oi.py`等地基探測先例，
+不算假說測試）。下一輪直接開始寫`option_oi_pcr_gate.py`第1關cheap gate，
+現在排隊第一。
+
 ## 2026-09-10T01:23+08:00 hypothesis_queue排程接續 — 佇列#1~68全數結案確認+修正排隊順序總結字樣同步問題+設計新假設#69
 取鎖時發現`LOCK_STALE`（PID 148908、28.6分鐘未更新，判斷是上一輪崩潰/逾時
 中斷，非仍在跑，安全接手回收）。`git pull`+`git status`確認乾淨（另有一筆

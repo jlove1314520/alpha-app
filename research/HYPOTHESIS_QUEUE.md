@@ -9532,3 +9532,30 @@ reaction），則高比值後續應predict指數反彈（逆向指標）；比�
 不可及」並判定FAIL，不硬做替代爬法。`is_holdout_consumed()`本輪開工/
 收工前皆確認`False`，全程零新增API呼叫（純設計文件+讀既有紀錄）。
 **本輪工作到此為止（一輪一個有界工作單位）**，現在排隊第一。
+
+**三來源資料可行性查證已完成，結案：可行（2026-09-10 hypothesis_queue
+排程接續，零新增API呼叫）**：
+1. **官方端點（最強證據，直接查證既有快取）**——`#31`（`option_pcr_gate.py`）
+   已在2015-2024年全期間抓過FinMind`TaiwanOptionDaily`(data_id=TXO)並
+   完整快取在`research/data/raw/`（15個parquet檔涵蓋2015-01-01~2024-12-31），
+   本輪**零新增API呼叫**、只讀本機快取，確認欄位含`open_interest`
+   （497,428列樣本，2024年一年份）：`trading_session=='position'`
+   （日盤）73.8%非零（184,824/250,326），`trading_session=='after_market'`
+   （夜盤）100%為零（0/247,102）——**跟`FUT_STATE_ARCHIVE.md`已記錄的
+   `TaiwanFuturesDaily`（期貨）`open_interest`/`settlement_price`只在
+   `position` session才有值的結論完全一致**，同一套過濾規則可直接複用
+   （`trading_session=='position'`），不必重新摸索。
+2. **官方API文件**——`https://finmind.github.io/tutor/TaiwanMarket/Derivative/`
+   明確列出`TaiwanOptionDaily`欄位含`open_interest`（未平倉合約），
+   跟快取欄位名完全吻合，交叉驗證一致。
+3. **GitHub/社群**——`https://github.com/FinMind/FinMind`（官方repo）
+   確認為現行維護中的開放資料專案。
+
+**結論：可行，且零新增資料工程**——直接複用`#31`已建立的`load_dev`
+逐年抓取模式（`option_pcr_gate.py::build_pcr_series()`同款框架），
+只需把聚合口徑從`volume`改成`open_interest`、且必須篩`trading_session
+=='position'`（跟`#31`只用日盤成交量是同一個篩選條件，不需新邏輯）。
+下一輪直接開始寫`option_oi_pcr_gate.py`（第1關cheap gate，比照
+`#31`同款時序相關性框架，事前綁定方向為正——見上方假設定義），不跳關。
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`。**本輪工作到此為止
+（一輪一個有界工作單位，budget將近用盡）**，現在排隊第一。
