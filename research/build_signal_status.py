@@ -252,6 +252,31 @@ DIRECTIONS = [
             "docs": ["HYPOTHESIS_QUEUE.md #64", "STRATEGY_GRAVEYARD.md fut_basis_regime_gate64", "FUT_LEADS.md #29"],
         },
     },
+    {
+        "id": "65",
+        "name": "產業龍頭股跨期領先-落後動能（Hou 2007資訊擴散機制）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-09",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md第⑭類「同產業龍頭-族群"
+            "資訊擴散延遲」機制，經濟機制與已FAIL的#11同期橫斷面相對強度明確"
+            "不同），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "300檔樣本、依trailing 20日均成交金額分產業選龍頭，龍頭t期5日報酬"
+            "廣播給族群成員、預測族群成員t+1期5日報酬。TRAIN mean_ic=+0.0072/"
+            "IR=+0.065(n=288日)、VAL mean_ic=+0.0094/IR=+0.091/hit_rate=0.51"
+            "(n=193日)，train/val同號（符合事前綁定方向）但VAL |IC|遠小於"
+            "事前訂的0.02門檻，且null_percentile=87.5未過90.0，FAIL。不泛化"
+            "為「同產業龍頭-族群資訊擴散延遲」機制完全不存在——只測了「成交"
+            "金額最大」當關注度代理、trailing 5日/次5日固定lag窗口、樣本內"
+            "（非全市場）龍頭認定，訊號量級貼近雜訊而非方向判斷錯誤。"
+        ),
+        "refs": {
+            "trials_ledger": ["#229"],
+            "docs": ["HYPOTHESIS_QUEUE.md #65", "STRATEGY_GRAVEYARD.md f_leader_follower_lag", "TW_LEADS.md"],
+        },
+    },
 ]
 
 
