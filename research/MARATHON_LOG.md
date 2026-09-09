@@ -1,5 +1,26 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T02:55+08:00 hypothesis_queue排程接續 — 設計新假設#70（選擇權波動度偏斜），本輪工作到此為止
+`git pull`+`git status`乾淨（僅`research/DEV_QUEUE_PROMPT.txt`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`
+非本track殘留變更，判斷是`dev_queue`來源，未觸碰、未納入本輪commit）。
+`marathon_lock.py acquire --name hypothesis_queue`回傳`LOCK_ACQUIRED`
+（非陳舊鎖）。上一輪已將`#69`（TXO買賣權未平倉量比）結案FAIL，佇列
+#1~69全數結案，`#50`（逐筆tick落地）仍卡`data/ticks/`僅2/20交易日、
+非本track範圍。依協定第1節設計新假設軸`#70`（選擇權波動度偏斜
+Volatility Skew／尾部風險避險需求訊號，第⑱類機制，跟已測17類皆
+不同，尤其與同源TXO選擇權訊號`#31`成交量PCR、`#35`ATM層級VRP、
+`#69`未平倉量PCR三者維度差異已在條目內明確寫清楚），本輪已用零新增
+API呼叫查證既有`TaiwanOptionDaily`(TXO) parquet快取欄位齊全
+（`strike_price`/`call_put`/`close`/`contract_date`/
+`settlement_price`皆有），初步確認資料本身可行，但IV反推方法與
+無風險利率來源仍需下一輪完成完整三來源查證才能開始寫cheap gate。
+已同步`HYPOTHESIS_QUEUE.md`新增`### 70.`完整章節與「排隊順序總結」
+指標段落。`is_holdout_consumed()`本輪開工/收工前皆確認`False`，全程
+零新增API呼叫（純設計文件+讀既有紀錄+讀本機parquet schema）。本輪
+無新判定（PASS/FAIL），不需登記`TRIALS_LEDGER.md`。**本輪工作到此
+為止，下一輪從`#70`三來源資料可行性查證開始，不跳關。**
+
 ## 2026-09-10T02:25+08:00 hypothesis_queue排程接續 — #69第1關cheap gate執行完畢，結案FAIL
 `git pull`+`git status`乾淨（僅`research/DEV_QUEUE_PROMPT.txt`/
 `research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`
