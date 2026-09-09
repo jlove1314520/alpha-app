@@ -38,15 +38,15 @@ DIRECTIONS = [
     },
     {
         "id": "51",
-        "name": "強制交易者事件（融券強制回補／現金增資折價／CB轉換價重設）",
+        "name": "強制交易者事件（台股：融券強制回補／現金增資折價／CB轉換價重設；美股：S&P指數成分調整）",
         "status": "FAIL",
-        "concluded_at": "2026-09-07",
+        "concluded_at": "2026-09-09",
         "summary": (
-            "三個子事件（強制回補、現金增資折價、CB轉換價重設）皆FAIL，#51正式"
-            "結案。不泛化為「事前已知日期的結構性交易者」這個機制大類完全無效——"
-            "三個子事件測的是三種不同觸發事件＋三種不同構造（連續比例、二元對照、"
-            "折價幅度、重設幅度），共同點僅止於經濟理由的抽象類比，不代表機制"
-            "類別本身被推翻。"
+            "台股三個子事件（強制回補、現金增資折價、CB轉換價重設）與美股S&P指數"
+            "Addition子測試皆FAIL，#51正式結案（美股Deletion子測試因下市股價格污染雷"
+            "事前排除未測，非跳關）。不泛化為「事前已知日期的結構性交易者」這個機制"
+            "大類完全無效——四個已測子事件涵蓋四種不同觸發事件＋四種不同構造，共同點"
+            "僅止於經濟理由的抽象類比，不代表機制類別本身被推翻。"
         ),
         "sub_events": [
             {
@@ -108,6 +108,26 @@ DIRECTIONS = [
                     "docs": ["HYPOTHESIS_QUEUE.md #51(i)", "STRATEGY_GRAVEYARD.md #51"],
                 },
             },
+            {
+                "id": "51-us",
+                "name": "美股 S&P 指數成分調整（Addition事件公告日→生效日CAR搶跑漲幅）",
+                "status": "FAIL",
+                "concluded_at": "2026-09-09",
+                "summary": (
+                    "僅測Addition（事前排除Deletion，避開被收購/破產下市股在yfinance"
+                    "低覆蓋率下的價格污染雷）。222筆可用事件，價格源改用yfinance原生"
+                    "美股資料（非違規的FinMind USStockPrice）。控制組own_ticker_window/"
+                    "cross_ticker_window兩變體各N=200：TRAIN（2012-2020,n=25）"
+                    "mean_CAR=+11.59%嚴格大於控制組最大值（CHEAP_PASS，但樣本量過小）；"
+                    "VAL（2021-2024,n=197）mean_CAR=+1.56%，百分位97.8但未嚴格大於"
+                    "控制組最大值2.38%（FAIL）。方向與index-effect文獻一致，是"
+                    "「近年套利搶跑減弱」已知風險下的誠實邊緣FAIL，非管線問題。"
+                ),
+                "refs": {
+                    "trials_ledger": ["#222"],
+                    "docs": ["HYPOTHESIS_QUEUE.md #51-US", "US_LEADS.md #32"],
+                },
+            },
         ],
     },
     {
@@ -165,6 +185,26 @@ DIRECTIONS = [
             },
         ],
         "refs": {"docs": ["MARATHON_PROTOCOL.md 0a節 #52"]},
+    },
+    {
+        "id": "62",
+        "name": "鉅額逐筆交易（Block Trade，配對交易子集）跟隨訊號——資訊不對稱/知情大額交易類",
+        "status": "FAIL",
+        "concluded_at": "2026-09-09",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md第⑫類「知情大額交易跟隨」機制），"
+            "round475已直接寫入本檔公開，本輪一併沿用避免遺失。"
+        ),
+        "summary": (
+            "事前假設賣方發起鉅額配對交易後有賣壓延續（資訊不對稱下知情交易者領先"
+            "市場），VAL期(2021-2024)n_val=237筆事件（N=5/10/20交易日三個窗口皆同），"
+            "三個窗口方向一致朝反方向、百分位皆<10（非邊緣case），FAIL。研判賣方較"
+            "可能是機構調節部位或反映流動性溢價而非知情交易。"
+        ),
+        "refs": {
+            "trials_ledger": ["#224"],
+            "docs": ["HYPOTHESIS_QUEUE.md #62", "STRATEGY_GRAVEYARD.md #62", "TW_LEADS.md #16"],
+        },
     },
 ]
 

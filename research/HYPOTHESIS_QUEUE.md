@@ -8546,3 +8546,25 @@ percentile皆100.0，無邊緣case）。但**gate1只是六關中的第一關**�
 零新增外部API呼叫（純讀既有快取），`is_holdout_consumed()`開工/收工前皆確認
 `False`。完整見`TRIALS_LEDGER.md`#225、`TW_LEADS.md`#17、`REPORT.md`第480輪心跳、
 `lending_fee_gate63.py`（可重複執行）。
+
+**(l) gate2參數高原檢定結果已收成並登記，CHEAP_PASS（2026-09-09 hypothesis_queue
+排程接續，鎖檔陳舊回收後接手）**：開工發現`lending_fee_gate63_param_plateau.py`
+與其結果檔`data/lending_fee_gate63_param_plateau_result.json`已存在（含job
+`20260909-083631-1d75`已完成執行，13.8分鐘，exit=0），推測是上一輪陳舊鎖檔被回收
+前已完成計算但未及登記/commit就中斷。本輪核實結果檔內容真實非空後直接登記：
+**4個Z_THRESH值{1.5,2.0,2.5,3.0} x 3個N值{5,10,20}=12組全數PASS，
+control_percentile全部=100.0**（訊號嚴格大於全部400次控制組抽樣最大值），本佇列
+#1~63中首次出現無任一格FAIL的乾淨參數高原，依`CLAUDE.md`「參數高原：±30%一整片
+都好」標準，事前綁定的Z_THRESH=2.0不是孤立巧合點。已呼叫`register_trial()`登記
+`TRIALS_LEDGER.md`**#226**（`trial_registry.py --check`確認PASS，exit=0，228列），
+`TW_LEADS.md`#17已同步補充此段更新。**誠實揭露**：這只是gate2（第2關深挖第1步，
+本佇列「下一輪待辦」清單的第1項），距離「可部署候選」仍有成本敏感度/逐年一致性
+（全歷史2012-2024逐年拆分，非僅VAL那幾年）/leave-one-year-out要走，不因這關漂亮
+放寬後續標準。`is_holdout_consumed()`開工/收工前皆確認`False`，本輪零新增外部
+API呼叫（僅讀既有結果檔+呼叫登記函式）。`git status`確認僅`data/quotes_ibkr.json`/
+`research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`三個其他
+常駐服務殘留變更，未觸碰、未納入本輪commit。**本輪工作到此為止（一輪一個有界
+工作單位）**，下一輪待辦：成本敏感度測試（1x/2x/3x交易成本，比照`block_trade_
+gate62.py`慣例），N20因效果量最大最可能撐過高成本、N5最可能被成本吃掉，接著
+才是逐年一致性與leave-one-year-out，最後才進OOS/holdout討論（holdout在此之前
+不得觸碰）。
