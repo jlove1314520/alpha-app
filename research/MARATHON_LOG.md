@@ -1,5 +1,19 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-09T12:01+0800 — hypothesis_queue排程接續：#65地基完成+開跑gate1，執行未在本輪預算內跑完
+核對確認`Trading_money`欄位（`close*volume`）在既有`load_sample_with_factors()`
+快取（yfinance/FinMind兩條路徑）皆已存在，零新增API呼叫；查證300檔樣本內
+產業成員數分布（18個產業成員數>=5，共204檔可用；25個產業>=3，共227檔），
+確認MIN_GROUP_SIZE=5門檻可行。新增`factor_ic_leader_follower_lag.py`（比照
+`factor_ic_sector_neutral_rel_strength.py`#11同款框架，改為跨個股lag結構：
+每產業內trailing 20日均成交金額最大者當龍頭，龍頭trailing 5日報酬廣播給
+族群成員，預測族群成員次5日報酬）。背景執行gate1，但300檔從零計算因子
+（含三大法人/月營收/EPS等多個PIT資料源逐檔查詢）耗時超過本輪預算，收工前
+仍在跑、未產出PASS/FAIL數字——**誠實記錄未完成，不臆測結果**。已確認
+`is_holdout_consumed()`為`False`。**本輪工作到此為止**，下一輪重跑
+`factor_ic_leader_follower_lag.py`即可（已跑過的部分會進入既有快取，
+重跑應更快），跑完才判CHEAP_PASS/FAIL，不得跳關。
+
 ## 2026-09-09T11:22+0800 — hypothesis_queue排程接續：接手崩潰前一輪未commit的成果，驗證後直接commit+push
 開工`marathon_lock.py acquire`回傳`LOCK_STALE`（held by 123132，30.3分鐘，
 上一輪〔10:56那筆心跳的作者〕疑似完成全部檔案編輯後、commit+push前中途

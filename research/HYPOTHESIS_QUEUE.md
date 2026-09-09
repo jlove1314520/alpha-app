@@ -8842,3 +8842,13 @@ FinMind`TaiwanStockInfo`），可直接複用做產業分類；「成交金額�
 `is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
 （純設計文件+讀既有紀錄）。**本輪工作到此為止（一輪一個有界工作
 單位）**。
+
+**狀態更新（2026-09-09T12:01+0800 hypothesis_queue排程接續）**：完成
+`Trading_money`欄位可行性核對（既有快取已含，零新增API呼叫）+300檔樣本
+產業成員數分布查證（18個產業>=5成員/204檔可用），新增
+`factor_ic_leader_follower_lag.py`（第1關cheap gate腳本，比照`#11`
+`factor_ic_sector_neutral_rel_strength.py`同款框架，改跨個股lag結構）。
+背景執行gate1，但300檔從零算因子（含逐檔PIT資料源查詢）耗時超過本輪
+預算，收工前仍在跑、**尚未產出數字，不臆測PASS/FAIL**。下一輪重跑
+即可（已算過的部分會進快取），跑完才判定，完整見`MARATHON_LOG.md`本輪
+心跳。仍未開始判定，現在排隊第一。
