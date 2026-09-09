@@ -13,3 +13,27 @@ Loading sample + factors (cached)...
 **本次280.0秒時間預算內未跑完（卡在TRAIN），進度已存進C:\alpha\alpha-app\research\data\odd_lot_imbalance_portfolio_v1_checkpoint.json，不做任何PASS/FAIL判定。重新執行`python odd_lot_imbalance_portfolio_v1.py`會自動從中斷處接續，不會重算已完成的label/隨機控制組筆數。**
 
 holdout check (after): is_holdout_consumed() -> False (OK)
+Loading sample + factors (cached)...
+  248/300 usable names
+
+========== 第2/7關 train/val樣本外+隨機控制組（月頻/Top20/單因子零股委託簿失衡度反向策略，可續跑checkpoint，本次預算420.0秒）==========
+  本假設專用切分：TRAIN=[2020-10-26,2022-12-31]  VAL=(2023-01-01,2024-12-31]（VAL_END未變動，只調整內部分界點，見模組docstring）
+  [TRAIN] 隨機控制組進度 60/100，接續執行...
+  [TRAIN] 隨機控制組進度 70/100
+  [TRAIN] 隨機控制組進度 80/100
+  [TRAIN] 隨機控制組進度 90/100
+  [TRAIN] 隨機控制組進度 100/100
+
+--- TRAIN (2020-10-26..2022-12-31) ---
+  報酬=+4.93%  MDD=-13.23%  Sortino=0.245  Sharpe=0.271  trades=474
+  alpha(年化)=+0.71%  beta=+0.351  p=0.8983  顯著為正=False
+  買進持有大盤=+9.52%  隨機對照組(N=100)中位數=+7.33%  percentile=33.0
+  成本1x/2x/3x: +4.93% / -3.17% / -11.22%
+  [VALIDATION] 計算真實訊號回測...
+  [VALIDATION] 計算成本敏感度 2x/3x...
+  [VALIDATION] 隨機控制組進度 0/100，接續執行...
+  [VALIDATION] 時間預算已到，隨機控制組進度 0/100，已checkpoint，下次執行接續
+
+**本次420.0秒時間預算內未跑完（卡在VALIDATION），進度已存進C:\alpha\alpha-app\research\data\odd_lot_imbalance_portfolio_v1_checkpoint.json，不做任何PASS/FAIL判定。重新執行`python odd_lot_imbalance_portfolio_v1.py`會自動從中斷處接續，不會重算已完成的label/隨機控制組筆數。**
+
+holdout check (after): is_holdout_consumed() -> False (OK)

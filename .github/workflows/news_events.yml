@@ -41,8 +41,14 @@ jobs:
       # 2026-09-09（題材四）**題材庫接上排程。**
       # 在此之前 news_body_extract.py 與 build_themes.py 都不在任何 workflow 裡，
       # 題材庫只有人工跑才會動——跟「題材要常常更新」正好相反。
-      # 額度計算：MAX_PER_RUN=200 × 每 30 分鐘 = 每日約 9,600 則，
-      # 遠大於兩家 sitemap 每日新增量，積壓的約 3,200 則可在 8 小時內消化完。
+      # **額度計算已更正（2026-09-09，排程一.二 實測）。**
+      # 原本我寫「MAX_PER_RUN=200 × 每 30 分鐘 = 每日約 9,600 則」——**錯了 7 倍**。
+      # 用 gh run list 實測過去 24 小時：**只觸發 7 次，不是 48 次（達成率 15%）**，
+      # 實際間隔 130~320 分鐘。10 次執行全部 success，沒有任何 failure/cancelled，
+      # 所以不是工作流壞掉，是 **GitHub 對 */30 這類高頻排程的降級行為**
+      # （官方文件載明 schedule 是 best-effort，尖峰時會延遲甚至丟棄；
+      # 這個 repo 還同時掛著 quotes/market/audit 與馬拉松推送）。
+      # 真實吞吐：7 次/日 × 200 = 1,400 則/日，積壓 3,240 則約需 2.3 天。
       # 斷點續跑：已抓過的 URL 記在 news_evidence.json，每輪自動跳過。
       - name: 萃取新聞內文的題材句
         run: python .github/scripts/news_body_extract.py
