@@ -206,6 +206,52 @@ DIRECTIONS = [
             "docs": ["HYPOTHESIS_QUEUE.md #62", "STRATEGY_GRAVEYARD.md #62", "TW_LEADS.md #16"],
         },
     },
+    {
+        "id": "63",
+        "name": "借券費率異常飆升作為知情放空訊號（台股）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-09",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md第⑫類「借券費率知情放空」"
+            "機制），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "第1關cheap gate（三N值percentile皆100.0）跟第2關參數高原"
+            "（Z_THRESH∈{1.5,2.0,2.5,3.0}共12組全PASS）都乾淨通過，敗在第4關"
+            "成本敏感度：round-trip成本1x下N5/N10已轉負、N20勉強為正但2x/3x"
+            "皆轉負，三個N值沒有一個能在2x成本下存活。不泛化為「借券市場定價"
+            "機制無效」——統計顯著性乾淨，死因是本次事前綁定的應用方式（單次"
+            "降曝險而非實際放空）絕對報酬幅度不足以覆蓋成本，不是方向錯或雜訊。"
+        ),
+        "refs": {
+            "trials_ledger": ["#225", "#226", "#227"],
+            "docs": ["HYPOTHESIS_QUEUE.md #63", "STRATEGY_GRAVEYARD.md f_lending_fee_spike"],
+        },
+    },
+    {
+        "id": "64",
+        "name": "台指期貨基差regime訊號預測TAIEX現貨報酬",
+        "status": "FAIL",
+        "concluded_at": "2026-09-09",
+        "note": (
+            "非0a節四條方向之一（期貨軌「除非有全新機制假說」例外條款觸發，"
+            "屬HYPOTHESIS_QUEUE.md第⑬類「期貨定價期限結構」機制），比照#62"
+            "先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "訊號=sign(basis相對60日trailing均值偏離)逐日換倉，目標=TAIEX現貨"
+            "次日報酬，全歷史(2000-2024,n=6125)累積+314.3%，但用2026-09-07"
+            "升級後的新版控制組標準（嚴格贏過控制組抽樣最大值，非90百分位）"
+            "檢定，合併400次抽樣percentile=97.0仍未過關（block_shuffle_20d"
+            "變體最大值12.2143高於真實訊號4.1425），FAIL。不泛化為「basis對"
+            "TAIEX現貨完全無預測力」——只代表本次具體規格（60日窗/逐日換倉）"
+            "不夠格，也是新控制組標準上線後第一個「舊標準會誤判過關」的實例。"
+        ),
+        "refs": {
+            "trials_ledger": ["#228"],
+            "docs": ["HYPOTHESIS_QUEUE.md #64", "STRATEGY_GRAVEYARD.md fut_basis_regime_gate64", "FUT_LEADS.md #29"],
+        },
+    },
 ]
 
 
