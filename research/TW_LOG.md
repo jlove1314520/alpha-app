@@ -2605,3 +2605,23 @@ smoke test 4組通過，中規模N=50前景驗證8類中6類PASS但效果量級�
 
 完整見`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`、
 `TW_MARATHON_STATE.md`第495輪記錄、`REPORT.md`第495輪心跳。
+
+---
+
+## 2026-09-09T20:30+08:00 — 馬拉松第501輪：完成#50提案第2步——候選代號清單準備（純基礎設施，非統計試驗）
+
+取鎖乾淨（cycle`20260909-203037`）。依輪替選TW（FUT依例外條款不選；TW 19:30 round499較舊/US 20:00 round500最新）。
+
+`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`第2步寫明「用既有（免費、已在用）的日成交量資料篩出候選代號清單，這一步不需要新增外部API呼叫」——本輪執行這一步。新增`gate50_candidate_universe_screen.py`：
+
+1. `universe.py::active_stock_ids()`讀`data/raw/TaiwanStockInfo__ALL__2000-01-01__latest.parquet`（既有快取，零API呼叫）取上市中股票，排除ETF（`00`開頭代號、`industry_category`含"ETF"）與6碼數字權證。
+2. 對每檔讀`data/raw/TaiwanStockPrice__{stock_id}__2010-01-01__2024-12-31.parquet`（本機已有2488檔快取，零API呼叫），取近60個交易日FinMind既有欄位`Trading_money`（日成交值，NTD）均值——用既有欄位而非自算`close×volume`，避免單位換算誤差（提案原文提到±1000倍不確定性正是這個問題）。
+3. 篩500萬~5,000萬NTD區間，排除近60日有成交量掛零（停牌）的代號。
+
+結果：排除ETF/權證後母體2593檔；794檔無本機價格快取（跳過，不觸發新fetch）；226檔近60日資料不足/停牌（跳過）；**561檔落在目標區間**，輸出`data/gate50_candidate_universe.json`（`stock_id`/`stock_name`/`industry_category`/`avg_daily_turnover_ntd`/`as_of_last_date`，依成交值排序）。抽查最小值（`6221`約506萬）與最大值（`2597`約4,943萬）均落在區間內，門檻正確。
+
+限制已寫進腳本docstring：(1)成交值資料本機快取上限`VAL_END=2024-12-31`，非即時，執行前需重新用當下資料確認；(2)這只是候選清單準備，**未動`shioaji_quotes.py`、未動`.live_watchlist.json`、未執行任何訂閱變更**，提案本身要核准的部分完全沒動。
+
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。
+
+完整見`gate50_candidate_universe_screen.py`（新增，可重複執行）、`data/gate50_candidate_universe.json`（新增）、`TW_MARATHON_STATE.md`第501輪記錄、`REPORT.md`第501輪心跳、`MARATHON_STATE.md`（輪次計數器501）。
