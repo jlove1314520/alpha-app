@@ -2,11 +2,11 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-09T22:30+08:00**
+**最後更新：2026-09-09T23:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 505 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 505 輪 · 2026-09-09T22:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-223036`）**。**本輪工作單位**：依round500/502/504建議延續採精簡確認（鎖/`run_detached`/`git log`/ticks進度/gate50回應/`STRATEGY_GRAVEYARD.md`新結案掃描）——`run_detached running=0`；`git log`確認round504後僅自動排程commit（IBKR報價）與`hypothesis_queue`自走commit（`#67`gate2）；`data/ticks/`仍2/20（`20260909.parquet.tmp`未finalize）；`PENDING_QUEUE.md`核對`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`仍無總司令回應；`STRATEGY_GRAVEYARD.md`掃描確認最新結案仍為`#62`，無`#68`~`#79`新結案。**結論：候選池連續19輪（487~505）維持同一狀態**，僅剩`#50`被動等待與`hypothesis_queue`自走排程被動維護。`trial_registry.py --check`exit=0 PASS（233列，無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第505輪記錄、`TW_MARATHON_STATE.md`第505輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 506 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 506 輪 · 2026-09-09T23:00+08:00 · US軌（取鎖乾淨，cycle`20260909-230036`）**。**本輪工作單位**：依round500/502/504建議延續採精簡確認（鎖/`run_detached`/`git log`/ticks進度/gate50回應/`STRATEGY_GRAVEYARD.md`新結案掃描），額外核實`CALIBRATION_PROBE.md`300檔重跑指令鏈確認早於本輪已100%執行完畢（round327/331/334/337）——`run_detached running=0`；`git log`確認round505後僅自動排程commit（IBKR報價）；`data/ticks/`仍2/20（`20260909.parquet.tmp`未finalize）；`PENDING_QUEUE.md`核對`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`仍無總司令回應；`STRATEGY_GRAVEYARD.md`掃描確認最新結案仍為`#62`，無`#68`~`#79`新結案。**結論：候選池連續20輪（487~506）維持同一狀態**，僅剩`#50`被動等待與`hypothesis_queue`自走排程被動維護。`trial_registry.py --check`exit=0 PASS（233列，無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第506輪記錄、`US_MARATHON_STATE.md`第506輪記錄。
 
-**上一輪（第500輪，供對照）** · 2026-09-09T20:00+08:00 · US軌（取鎖乾淨，cycle`20260909-200036`）**。**本輪工作單位**：核實US軌是否有round498之後遺漏的新工作單位，確認候選池連續14輪（487~500）維持同一狀態，US軌本地端無新可推進工作單位。`#50`gate50提案仍無總司令回應。詳見`REPORT.md`第500輪記錄、`US_MARATHON_STATE.md`第500輪記錄。
+**上一輪（第505輪，供對照）** · 2026-09-09T22:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-223036`）**。**本輪工作單位**：依round500/502/504建議延續採精簡確認，確認候選池連續19輪（487~505）維持同一狀態，TW軌本地端無新可推進工作單位。`#50`gate50提案仍無總司令回應。詳見`REPORT.md`第505輪記錄、`TW_MARATHON_STATE.md`第505輪記錄。
 
 **再上一輪（第499輪，供對照）** · 2026-09-09T19:30+08:00 · TW軌（取鎖乾淨，cycle`20260909-193037`）**。**本輪工作單位**：對TW軌候選池做一次橫向收斂盤點（因子家族清單/`portfolio_multifactor_v2`/`CALIBRATION_PROBE`指令鏈/`#63`借券費率四個角度），確認皆已結案在案，13輪連續（487~499）無新工作單位，非疏漏。順帶補上round498（`66da4790`）漏更新的本計數器（心跳有寫進`REPORT.md`但計數器當時留在497）。`#50`提案仍待核准，`data/ticks/`仍2/20。`trial_registry.py --check`exit=0 PASS（無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。詳見`REPORT.md`第499輪記錄、`TW_MARATHON_STATE.md`第499輪記錄。
 
