@@ -1,5 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+
+## 2026-09-09T12:57+0800 — hypothesis_queue排程接續：設計新假設軸#66（美股年末稅損
+收割賣壓／一月效應Tax-Loss Selling/January Effect），第⑮類機制
+（稅務動機機械性交易）——確認#1~65全數結案、#50仍卡資料一逐筆tick落地
+（未解鎖、非本track範圍），盤點已測14個機制大類後設計本假設，經濟
+理由/事前綁定定義/已知限制（含存活者偏誤但書+此機制台股不適用的
+說明）/資料可行性已寫入`HYPOTHESIS_QUEUE.md`新增`### 66.`章節與
+排隊順序總結，本輪僅設計、未寫程式碼、未跑任何測試，`is_holdout_
+consumed()`確認False，零新增API呼叫。現在排隊第一，下一輪從核對
+`us_universe_pit.py`宇宙涵蓋年份+既有美股價格快取開始寫
+`us_tax_loss_selling_gate66.py`跑第1關cheap gate，不跳關。本輪
+工作到此為止。
+
 ## 2026-09-09T12:22+0800 — hypothesis_queue排程接續：#65（產業龍頭股跨期
 領先-落後動能）gate1跑完並結案FAIL——既有快取命中（`data/raw`已2488個
 `TaiwanStockPrice`快取檔），零新增API呼叫。TRAIN mean_ic=+0.0072/VAL
