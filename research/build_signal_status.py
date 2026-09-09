@@ -470,6 +470,80 @@ DIRECTIONS = [
             "docs": ["HYPOTHESIS_QUEUE.md #66", "STRATEGY_GRAVEYARD.md us_tax_loss_selling_gate66"],
         },
     },
+    {
+        "id": "67",
+        "name": "盤中零股交易比重（Odd-Lot Imbalance）portfolio層構造",
+        "status": "FAIL",
+        "concluded_at": "2026-09-10",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md後續新增類別，零股委託簿"
+            "失衡度訊號），比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "第1關cheap gate時序相關性CHEAP_PASS（邊緣過關，train僅3個快照、"
+            "val percentile=90.7、val_mean_ic=0.0249），但第2關隨機控制組"
+            "（N=100，TRAIN+VAL皆完整100 draws）決定性未過：升冪排序月頻挑"
+            "失衡度最低TOP20做多，TRAIN真實報酬+4.93% vs 買進持有+9.52%、"
+            "percentile=33.0；VAL真實報酬+10.80% vs 買進持有+61.94%、"
+            "percentile=13.0（門檻90.0），兩期alpha皆不顯著、beta皆為正曝險。"
+            "不泛化為訊號完全無效——死的是「升冪排序、月頻、純多方向、TOP20"
+            "固定持股數」這個具體portfolio構造，訊號方向本身未被推翻。"
+        ),
+        "refs": {
+            "trials_ledger": ["#231", "#232"],
+            "docs": ["HYPOTHESIS_QUEUE.md #67", "STRATEGY_GRAVEYARD.md odd_lot_imbalance_portfolio_v1_gate67"],
+        },
+    },
+    {
+        "id": "68",
+        "name": "券資比（Short-to-Margin Ratio）",
+        "status": "FAIL",
+        "concluded_at": "2026-09-10",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md「資金結構失衡驅動」類別，"
+            "融券今日餘額/融資今日餘額比值），比照#62先例一併寫入本檔公開，"
+            "避免遺失。"
+        ),
+        "summary": (
+            "300檔樣本（248/300可用）第1關cheap IC gate：train mean_ic=-0.0056"
+            "（n=74期）、val mean_ic=-0.0548（n=47期，hit_rate=0.64），null"
+            "percentile=100.0（門檻90.0以上），train/val同號，機械判準本應"
+            "PASS，但train/val的IC皆為負，與事前綁定「券資比越高、預期報酬"
+            "越好」的正向假設方向相反，依腳本事前寫明規則override為FAIL，"
+            "不因符合「同號」判準就宣稱通過。不泛化為只否證「原始比例、"
+            "正向」這個具體構造，反向使用或其他變換未經測試。"
+        ),
+        "refs": {
+            "trials_ledger": ["#233"],
+            "docs": ["HYPOTHESIS_QUEUE.md #68", "STRATEGY_GRAVEYARD.md #68"],
+        },
+    },
+    {
+        "id": "69",
+        "name": "台指選擇權未平倉量Put/Call比逆向情緒訊號",
+        "status": "FAIL",
+        "concluded_at": "2026-09-10",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md衍生品情緒訊號類別，"
+            "未平倉量口徑，與已FAIL的#31成交量口徑同源不同聚合），比照#62"
+            "先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "TXO日盤未平倉量Put/Call比預測次一交易日台股報酬。TRAIN"
+            "(<=2020-12-31) n=1467，Pearson r=+0.0508（p=0.0519），null"
+            "percentile=93.6；VAL(2020-12-31~2024-12-31) n=970，"
+            "r=+0.0395（p=0.2188），null percentile=79.0（門檻90.0）。"
+            "幅度非零、train/val同號、事前綁定方向皆正三項判準通過，但VAL"
+            "贏過洗牌null未過（79.0<90.0），第4項未過即判FAIL。不泛化為"
+            "訊號完全無效——TRAIN期percentile=93.6接近門檻、p=0.0519邊緣"
+            "顯著，只是VAL期訊號明顯減弱，屬訓練期邊緣訊號、驗證期未能"
+            "穩定重現。"
+        ),
+        "refs": {
+            "trials_ledger": ["#239"],
+            "docs": ["HYPOTHESIS_QUEUE.md #69", "STRATEGY_GRAVEYARD.md option_oi_pcr_gate69"],
+        },
+    },
 ]
 
 
