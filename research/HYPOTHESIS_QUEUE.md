@@ -9293,3 +9293,18 @@ checkpoint），VAL完全未開始，仍未做任何PASS/FAIL判定**。全程�
 再開始VALIDATION 0→100，之後才能依`return_pct>0`+
 `random_control_percentile>=90.0`判gate7 PASS/FAIL，現在排隊第一。
 `is_holdout_consumed()`開工/收工前皆確認`False`。**本輪工作到此為止**。
+
+**狀態更新（2026-09-09T22:34+08:00 hypothesis_queue排程接續，gate2 TRAIN
+隨機控制組續跑第三輪）**：`git status`確認乾淨（另有非本track殘留變更，
+未觸碰），取得具名鎖`LOCK_ACQUIRED`（非陳舊回收）。重新執行`python
+odd_lot_imbalance_portfolio_v1.py`（腳本預設`OLI_TIME_BUDGET_SECONDS=420`），
+checkpoint機制正常接續（上次進度60/100完整存檔）。本次執行的stdout因
+背景化未能完整落地到`odd_lot_imbalance_portfolio_v1_run.log`（環境層面的
+輸出擷取問題，非腳本本身錯誤），改以直接讀checkpoint JSON核對進度作為
+本輪證據：**TRAIN隨機控制組進度推進至80/100（已checkpoint），VAL完全
+未開始，仍未做任何PASS/FAIL判定**。全程零新增外部API呼叫（純本地已快取
+樣本+因子重算回測）。`is_holdout_consumed()`本輪開工/收工前皆確認`False`
+（獨立以`from validation import holdout; holdout.is_holdout_consumed()`
+覆核一致）。**本輪工作到此為止（一輪一個有界工作單位）**。下一輪重跑
+同一支腳本即可自動從TRAIN 80/100接續，預估還需約1輪完成TRAIN 100/100，
+再開始VALIDATION 0→100，現在排隊第一。
