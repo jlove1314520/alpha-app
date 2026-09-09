@@ -8707,3 +8707,29 @@ probe60.py`同樣不登記的先例——純資料可行性/地基驗證，非�
 要在寫gate函式時特別注意，跟`#38`/`#43`已FAIL/EXPERIMENTAL的期貨自身
 timing機制不同，混淆會變成重測已死機制）。**本輪工作到此為止（一輪一個
 有界工作單位）**。
+
+**第1關cheap gate結果（2026-09-09 馬拉松第484輪，FUT track，接續上方地基工作）**：
+新增`fut_basis_regime_gate64.py`，訊號`position=sign(basis_pct-60日trailing均值)`
+（direct sign，逐日換倉），目標`=TAIEX現貨spot_close.pct_change()`（非期貨自身
+報酬，如上方設計所述）。依`MARATHON_PROTOCOL.md`第2節2026-09-07控制組標準升級，
+改用`control_group_standard.py::evaluate_vs_control()`判定（不用舊版
+`fut_cheap_gate.py::_permutation_test()`的90百分位門檻），控制組兩變體
+（`full_shuffle`完全打散順序／`block_shuffle_20d`以20交易日為區塊打散順序）各
+N=200抽樣。**結果：real_terminal_equity=4.1425（+314.3%累積，2000-2024全歷史，
+n=6125），control_percentile=97.0，但未過新標準「嚴格贏過控制組最大值」的門檻
+（block_shuffle_20d變體最大值12.2143>4.1425），判FAIL**。**這正是控制組標準升級
+要防的具體案例**：舊90百分位門檻下97.0會被誤判CHEAP_PASS，新標準下誠實判FAIL。
+不泛化為「basis regime預測現貨報酬」這個經濟機制完全無效——只代表本次事前綁定
+的具體規格（WINDOW=60/direct sign/逐日換倉）未達新標準；若日後要重測，須換一個
+真正不同的構造（例如不同持有期N、或分regime測試危機期vs平靜期），須視為全新
+試驗另開登記，不可回頭調整本次已判FAIL的規格去硬救。已用`register_trial()`登記
+`TRIALS_LEDGER.md`#228（track=`hypothesis_queue`）。**`#64`台指期貨基差regime訊號
+於此正式結案：FAIL**。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增
+API呼叫（純讀`fut_basis_series.py`既有快取）。完整見`FUT_MARATHON_STATE.md`第484輪
+記錄、`STRATEGY_GRAVEYARD.md`新增條目、`FUT_LEADS.md`新增列、
+`fut_basis_regime_gate64.py`（新增，可重複執行）、
+`data/fut_basis_regime_gate64_result.json`（新增）。**下一輪任一軌接手**：
+`MARATHON_PROTOCOL.md`0a節四條方向+`#61`/`#62`/`#63`/`#64`全部結案或卡`#50`依賴，
+候選池已非常薄，下一輪應優先查證`#50`（`data/ticks/`累積進度）是否已解鎖20交易日
+門檻；若仍卡著且找不到其他真正跳脫既有清單的新機制，需評估是否達到0a節
+「無可驗證預測優勢」正式結論的提報門檻。

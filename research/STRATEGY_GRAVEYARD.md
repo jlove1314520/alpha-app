@@ -2512,3 +2512,26 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
   條目(m)段落、`lending_fee_gate63.py`／`lending_fee_gate63_param_plateau.py`／
   `lending_fee_gate63_costs.py`（皆可重複執行）。全程零新增FinMind/SEC EDGAR
   呼叫，全部走TWSE官方`www.twse.com.tw/rwd/zh/lending/t13sa710`端點。
+
+### fut_basis_regime_gate64（台指期貨基差regime預測TAIEX現貨報酬，期貨，2026-09-09第484輪FAIL）
+
+- **哪一關死的**：第1關cheap gate（新版`control_group_standard.py`標準，
+  2026-09-07升級後）——依舊版90百分位門檻本會被誤判CHEAP_PASS，新標準下
+  誠實判FAIL。
+- **具體數字**：訊號`=sign(basis_pct-60日trailing均值)`逐日換倉，目標=TAIEX
+  現貨次日報酬，全歷史(2000-2024,n=6125)real_terminal_equity=4.1425
+  （+314.3%累積）。控制組`full_shuffle`（完全打散順序）與`block_shuffle_20d`
+  （20日區塊打散）各N=200，合併400次抽樣percentile=97.0（贏過平均/中位數），
+  但**未過新標準的「嚴格贏過最大值」門檻**——`block_shuffle_20d`變體最大值
+  12.2143明顯高於真實訊號的4.1425。
+- **這個死法能不能泛化**：**不能**泛化成「basis對TAIEX現貨完全沒有預測力」
+  ——只代表本次事前綁定的具體規格（WINDOW=60/direct sign/逐日單日換倉）
+  在新的嚴格控制組標準下不夠格；跟同一個basis資料源但預測期貨自身報酬的
+  `fut_basis_carry`(#35→#37 FAIL)/`fut_basis_change_momentum_5d`(#36 FAIL)/
+  `fut_basis_mean_reversion_60d`(#38/#43 EXPERIMENTAL)是不同的預測目標，
+  不是同一機制換皮。這也是控制組標準升級後第一個「舊標準會誤判過關、新
+  標準誠實判死」的具體實例，印證了升級的必要性。
+- **原始記錄**：`TRIALS_LEDGER.md`#228、`HYPOTHESIS_QUEUE.md` #64條目、
+  `fut_basis_regime_gate64.py`（可重複執行）、
+  `data/fut_basis_regime_gate64_result.json`。全程零新增API呼叫，複用
+  `fut_basis_series.py`既有快取。

@@ -2,9 +2,9 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-09T05:30+08:00**
+**最後更新：2026-09-09T10:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 483 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 483 輪 · 2026-09-09T10:00+08:00 · US軌（取鎖乾淨，cycle`20260909-100037`）**。**本輪工作單位**：對round479「#63借券費率美股類比卡防火牆」結論做二次盡職查證（複驗TWS API genericTick`236`只回傳股數不含費率、查證IBKR Web API無費率端點、WebFetch官方頁面遭403未繞過），確認無其他合法路徑，round479判定維持不變。同時核實US軌0a節四條方向現況：`#49`/`#51`(四子事件)/`#52`(52-tw/52-us)全部`FAIL`，僅`#50`（容量受限小型股，tick累積2/20）未結案，0a四條方向已收斂至此單一未結案項目。`trial_registry.py --check`確認exit=0 PASS。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`US_MARATHON_STATE.md`/`REPORT.md`第483輪記錄、`HYPOTHESIS_QUEUE.md` `#63`(j-續)段落。**計數器缺口補記**：本檔第459～464輪、第468～473輪、第481輪（US軌，signal_status.json靜默資料遺失修復）未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`/對應軌state檔，僅本檔頂部行漏更新，同款顯示層問題，見round458同類註記），下一輪若有餘裕可回頭補齊，不影響`REPORT.md`本身的逐輪紀錄完整性。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 484 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 484 輪 · 2026-09-09T10:30+08:00 · FUT軌（取鎖乾淨，cycle`20260909-103037`）**。**本輪工作單位**：輪替本應選TW，但TW/US(round482/483)自身皆已收斂到「0a節四條方向+#61/#62/#63皆結案，僅剩#50卡tick被動等待」無新工作單位；`HYPOTHESIS_QUEUE.md`#64（台指期貨基差regime訊號）已由排程完成地基determinism前置檢查，觸發FUT軌例外條款，改選FUT執行第1關cheap gate（`fut_basis_regime_gate64.py`，訊號=sign(basis_pct-60日trailing均值)，目標=TAIEX現貨次日報酬）。依2026-09-07控制組標準升級改用`control_group_standard.py::evaluate_vs_control()`，結果real_terminal_equity=4.1425未過合併400次抽樣最大值12.2143（percentile=97.0，舊門檻會誤判過關），判FAIL，`#64`正式結案。已`register_trial()`登記`TRIALS_LEDGER.md`#228，`trial_registry.py --check`確認exit=0 PASS。`is_holdout_consumed()`開工/收工前皆確認`False`。詳見`FUT_MARATHON_STATE.md`/`REPORT.md`第484輪記錄、`HYPOTHESIS_QUEUE.md` `#64`條目。**計數器缺口補記**：本檔第459～464輪、第468～473輪、第481輪（US軌，signal_status.json靜默資料遺失修復）未同步更新此計數器（各輪心跳仍正確寫進`REPORT.md`/對應軌state檔，僅本檔頂部行漏更新，同款顯示層問題，見round458同類註記），下一輪若有餘裕可回頭補齊，不影響`REPORT.md`本身的逐輪紀錄完整性。
 
 **上一輪（第439輪，供對照）** · 2026-09-08T10:30+08:00 · TW軌（取鎖乾淨，cycle`20260908-103037`）**。**本輪工作單位**：heavy-job-slot被`#57`回填job佔用，改做`PENDING_QUEUE.md`『資料一.4』長期未結驗收——`data/ticks/20260907.parquet`共1個檔案/146,846筆/20個標的核對通過，`simtrade`欄位試撮/真實成交分佈正確。`trial_registry.py --check`確認PASS（202列）。詳見`TW_MARATHON_STATE.md`/`REPORT.md`第439輪記錄。`is_holdout_consumed()`開工/收工前皆確認`False`。
 

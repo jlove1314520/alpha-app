@@ -2282,3 +2282,25 @@ VAL mean=+0.1117%不顯著(p=0.4953)，同號但percentile=47.6（門檻90.0）�
 判定）。`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
 （複用既有TAIEX/TaiwanFuturesDaily快取）。完整見`TW_MARATHON_STATE.md`第453輪、
 `TRIALS_LEDGER.md`#213/#214、`fut_settlement_event_gate60.py`（新增，可重複執行）。
+
+## 第484輪（2026-09-09T10:30+08:00，FUT）
+
+取鎖乾淨（cycle`20260909-103037`）。三軌時間戳輪替本應選TW（09:30，較US
+10:00更舊），但TW/US兩軌自身狀態（round482/483）皆已收斂到「0a節四條方向+
+#61/#62/#63皆結案，僅剩#50卡tick累積被動等待」，無新工作單位；`HYPOTHESIS_
+QUEUE.md`#64（台指期貨基差regime訊號）已由`hypothesis_queue`排程完成地基
+determinism前置檢查，下一步明確可進第1關cheap gate，觸發FUT軌「除非有全新
+機制假說」例外條款，本輪改選FUT track。新增`fut_basis_regime_gate64.py`：
+訊號=sign(basis_pct-60日trailing均值)，direct sign逐日換倉，目標=TAIEX現貨
+次日報酬（非期貨自身報酬，跳脫`#35`/`#36`/`#38`已死家族）。依控制組標準
+升級（2026-09-07）改用`control_group_standard.py::evaluate_vs_control()`，
+兩控制組變體（full_shuffle/block_shuffle_20d）各N=200。結果：real_terminal_
+equity=4.1425 vs 合併400次抽樣最大值12.2143，未過新標準（percentile=97.0，
+若用舊90百分位門檻會誤判CHEAP_PASS），判FAIL。已`register_trial()`登記
+`TRIALS_LEDGER.md`#228（track=hypothesis_queue，比照#62/#63先例），
+`trial_registry.py --check`（UTF-8 console）確認exit=0 PASS。已寫入
+`STRATEGY_GRAVEYARD.md`、`FUT_LEADS.md`#29、`HYPOTHESIS_QUEUE.md` #64條目
+結案段落。`#64`正式結案：FAIL。`is_holdout_consumed()`開工/收工前皆確認
+`False`，全程零新增API呼叫（複用`fut_basis_series.py`既有快取）。完整見
+`FUT_MARATHON_STATE.md`第484輪、`TRIALS_LEDGER.md`#228、
+`fut_basis_regime_gate64.py`（新增，可重複執行）。
