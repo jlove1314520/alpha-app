@@ -1,13 +1,11 @@
 {
-  "fetched_at": "2026-09-08T23:31:24+00:00",
+  "fetched_at": "2026-09-09T13:38:37+00:00",
   "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
     "close": 47105.78,
     "change_pct": 0.47,
     "sparkline": [
-      45120.72,
-      45518.07,
       46021.48,
       45811.01,
       45857.27,
@@ -25,11 +23,11 @@
       46164.72,
       45857.66,
       46551.13,
-      47326.27
+      47326.27,
+      47105.78,
+      47183.36
     ],
     "sparkline_60d": [
-      44169.04,
-      45396.99,
       45809.19,
       45877.39,
       46465.2,
@@ -87,7 +85,9 @@
       46164.72,
       45857.66,
       46551.13,
-      47326.27
+      47326.27,
+      47105.78,
+      47183.36
     ]
   },
   "sectors": [
@@ -278,17 +278,18 @@
     }
   ],
   "tpex": {
-    "date": "20260908",
-    "close": 407.19,
-    "change": -2.14,
-    "change_pct": -0.5228055603058658,
+    "date": "20260909",
+    "close": 408.09,
+    "change": 0.9,
+    "change_pct": 0.22102703897443457,
     "sparkline": [
       410.77,
       406.96,
       395.25,
       402.48,
       409.33,
-      407.19
+      407.19,
+      408.09
     ]
   },
   "tx_futures": {
@@ -334,20 +335,13 @@
     }
   },
   "institutional": {
-    "date": "20260908",
-    "foreign_net_lots": -12766.7,
-    "trust_net_lots": 44436.9,
-    "dealer_net_lots": -337115.1,
-    "total_net_lots": -305444.9
+    "date": "20260909",
+    "foreign_net_lots": 430240.6,
+    "trust_net_lots": 36932.3,
+    "dealer_net_lots": -504622.9,
+    "total_net_lots": -37449.9
   },
   "institutional_history": [
-    {
-      "date": "20260826",
-      "foreign_net_lots": 418477.1,
-      "trust_net_lots": 8660.6,
-      "dealer_net_lots": -26282.0,
-      "total_net_lots": 400855.8
-    },
     {
       "date": "20260827",
       "foreign_net_lots": 404547.7,
@@ -410,6 +404,13 @@
       "trust_net_lots": 44436.9,
       "dealer_net_lots": -337115.1,
       "total_net_lots": -305444.9
+    },
+    {
+      "date": "20260909",
+      "foreign_net_lots": 430240.6,
+      "trust_net_lots": 36932.3,
+      "dealer_net_lots": -504622.9,
+      "total_net_lots": -37449.9
     }
   ]
 }
