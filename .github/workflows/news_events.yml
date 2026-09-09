@@ -38,11 +38,23 @@ jobs:
       - name: 從 sitemap 收集新聞連結
         run: python .github/scripts/fetch_news_sitemap.py
         continue-on-error: true
+      # 2026-09-09（題材四）**題材庫接上排程。**
+      # 在此之前 news_body_extract.py 與 build_themes.py 都不在任何 workflow 裡，
+      # 題材庫只有人工跑才會動——跟「題材要常常更新」正好相反。
+      # 額度計算：MAX_PER_RUN=200 × 每 30 分鐘 = 每日約 9,600 則，
+      # 遠大於兩家 sitemap 每日新增量，積壓的約 3,200 則可在 8 小時內消化完。
+      # 斷點續跑：已抓過的 URL 記在 news_evidence.json，每輪自動跳過。
+      - name: 萃取新聞內文的題材句
+        run: python .github/scripts/news_body_extract.py
+        continue-on-error: true
+      - name: 重建題材庫
+        run: python scripts/build_themes.py
+        continue-on-error: true
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/news.json data/events.json data/news_urls.json
+          git add data/news.json data/events.json data/news_urls.json data/news_evidence.json data/themes.json
           if git diff --cached --quiet; then
             echo "沒有新的新聞或事件，不產生 commit"
           else
