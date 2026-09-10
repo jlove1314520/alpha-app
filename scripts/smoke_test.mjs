@@ -1415,10 +1415,41 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("44. 估值區間卡（同產業PE百分位×近四季EPS）：算法單元檢查 + 實開報告頁不得停在載入中/出現NaN/殘留佔位字",
     valErrors.length === 0, valErrors.join("; ") || valInfo);
 
+  // 45.【2026-09-10新增，建置一.4驗收】個股頁（#scr-stock，五個分頁：總覽/營收/
+  // 財報/籌碼/AI）不得殘留「尚未實作/下一輪/本輪」這幾個字——CLAUDE.md原話講清楚
+  // 這條是「等功能做出來後自然歸零的檢查，不是叫你刪字」：建置一.1（新聞/事件）／
+  // 建置一.2（估值區間）／建置一.3（美股類股/ADR）三張卡陸續做出真實資料後，這幾
+  // 個字理應已經從個股頁消失。用真實開頁+切分頁掃innerText驗證（不是grep原始碼——
+  // grep會抓到程式註解，那不是使用者實際看到的畫面）。刻意不擋「功能建置中」這類
+  // 誠實揭露用語（AI個股簡報/券商報告雷達分頁目前仍是這種誠實空狀態，不在本次
+  // 建置一範圍內，不該被這條檢查誤判）。
+  const stockPagePlaceholderErrors = [];
+  const PLACEHOLDER_RE = /尚未實作|下一輪|本輪/;
+  const PLACEHOLDER_CODES = ["2330", "2603", "AAPL"];
+  try {
+    for (const code of PLACEHOLDER_CODES) {
+      await page.evaluate((c) => window.openStock(c), code);
+      await page.waitForTimeout(1200);
+      for (const sub of ["ov", "rev", "fin", "chip", "ai"]) {
+        await page.evaluate((s) => {
+          document.querySelector(`#stock-tabs button[data-sub="${s}"]`)?.click();
+        }, sub);
+        await page.waitForTimeout(600);
+        const txt = await page.evaluate(() => document.getElementById("scr-stock")?.innerText || "");
+        const m = txt.match(PLACEHOLDER_RE);
+        if (m) stockPagePlaceholderErrors.push(`${code} 的「${sub}」分頁出現佔位字「${m[0]}」`);
+      }
+    }
+  } catch (e) {
+    stockPagePlaceholderErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("45. 個股頁（總覽/營收/財報/籌碼/AI五分頁）不得殘留「尚未實作/下一輪/本輪」佔位字",
+    stockPagePlaceholderErrors.length === 0, stockPagePlaceholderErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
