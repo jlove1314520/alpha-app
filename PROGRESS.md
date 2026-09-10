@@ -1,3 +1,40 @@
+## 2026-09-10（馬拉松自走・交辦優先）題材三：規則檔關鍵詞從70題材擴充到81題材（目標123，批次二）
+
+戴**情報帽**。開工先讀`PENDING_QUEUE.md`最上方紀錄，兩條阻塞項（S4U排程註冊、
+claude CLI非互動驗證）維持阻塞、題材七維持未拆解，往下第一條可執行的未開始
+交辦項是【題材三】標記的「剩餘53個題材下一批」。
+
+**做了什麼**：為車用（`ev`電動車／`auto_electronics`車用電子／`adas`先進駕駛
+輔助／`charging`充電樁／`battery`電池／`motor`馬達／`auto_parts`汽車零組件，
+共7個）與自動化（`reducer`減速機／`machine_tool`工具機／`factory_auto`自動化
+設備／`drone`無人機，共4個）合計11個題材補上關鍵詞，沿用批次一風格（具體
+產品名、業界慣用縮寫、英文原文）。`data/seed/theme_keywords.json`題材數
+70→81/123。**剩餘42個題材（生技5、能源6、傳產8、金融5、航運4、軟體5、
+其他3、總經曝險類5＋高股息1）留待下一批**。
+
+**驗證**：
+1. `python scripts/build_themes.py`重跑——本次新增11個題材對「已驗證成員數」
+   淨影響為**0**（驗證題材數、A/C級成員數與批次一完全相同：6題材/A0/C14）。
+   誠實結果：當前300則新聞素材池對這批新詞完全沒有命中，沒有靠擴大關鍵詞
+   硬做出新驗證數。
+2. `python scripts/test_theme_rules.py`全部通過，無回歸（本次未修改比對邏輯，
+   只新增資料）。
+
+**冒煙測試**：未動`index.html`或共用腳本，依CLAUDE.md僅要求該類異動才跑
+`smoke_test.mjs`；本次改動範圍是`data/seed/theme_keywords.json`（規則檔）僅由
+`scripts/build_themes.py`讀取，已用該腳本本身與其單元測試驗證。
+
+**影響檔案**：`data/seed/theme_keywords.json`（70→81題材關鍵詞）、
+`data/themes.json`（重新生成，meta數字如上）、`PENDING_QUEUE.md`（記錄本輪
+進度）、`PROGRESS.md`（本節）。
+
+**下一步**：剩餘42個題材分批補齊，總經曝險類題材（`china_exposure`／
+`tariff_benefit`／`taiwan_reshoring`／`india_expansion`／`sea_expansion`／
+`high_dividend`／`asset_play`）下一輪要先想清楚是否適用同一套「產品詞→題材」
+規則，或需要另一套「營收地區別／殖利率篩選」邏輯，不要硬套產品詞框架。
+
+---
+
 ## 2026-09-10（馬拉松自走・交辦優先）題材三：規則檔關鍵詞從18題材擴充到70題材（目標123，批次一）
 
 戴**情報帽**（`data/seed/theme_keywords.json` 屬情報/題材庫範疇）。本輪開工先查
