@@ -1,3 +1,39 @@
+## 2026-09-10（開發佇列自走）健檢.四：scores補company_info產業別（查證發現底層早已修好，補smoke回歸防線）
+
+戴**開發帽**。依權威清單，本輪做**健檢.四**（2026-09-06原始指示「所屬
+產業『—』＝scores沒接company_info產業別」）。
+
+**查證結果（重要）**：底層資料修法**其實已經在更早的時間點做完了**
+——`research/generate_scores_live.py`（321/436/694行）、
+`generate_scores_momentum.py`、`generate_scores_future.py` 三份產生
+scores的腳本都已經從 `data/company_info.json` 併回 `industry` 欄位，
+程式碼裡的日期註解顯示這是2026-08-27（首次接上）到2026-09-05（
+`backfill_company_industry.py`把缺漏從603檔補到90檔）陸續做的，
+**早於這條健檢.四條目被總司令登記的2026-09-06**。本機實測三份
+`scores*.json`在市個股industry覆蓋率目前**皆為95.4%**
+（scores.json 1883/1973、scores_momentum.json 1884/1974、
+scores_future.json 1875/1965），達成原始指示的95%門檻。
+
+**做了什麼**：既然資料端已達標，本輪只補上：
+1. **驗證**：選股報告頁實開2883（原始指示裡「710張三大法人、月營收
+   年增觸頂」的範例個股，凱基金）——`#report-industry`正確顯示
+   「金融保險」而不是「—」，`index.html`所屬產業欄位（4860/4890行）
+   正常讀到值。
+2. **smoke新增check 46**：三份選股榜單在市個股`row.industry`覆蓋率
+   ≥95%的機器可查回歸防線——原本沒有這條檢查，如果哪天排程壞掉讓
+   覆蓋率悄悄掉回0，不會有任何測試抓到。
+
+**驗證**：`node scripts/smoke_test.mjs`：46項僅既有紅燈check 39 FAIL，
+其餘全過，含新check 46（三份榜單皆95.4%，PASS）。
+
+**改了哪些檔案**：`scripts/smoke_test.mjs`（新增check 46）、
+`PENDING_QUEUE.md`（健檢.四標記完成並記錄查證過程）。
+
+**下一步**：依權威清單，下一項是**健檢.五**（美股IBKR即時報價自09/02
+卡住，查排程／gateway／腳本log回報根因）。
+
+---
+
 ## 2026-09-10（開發佇列自走）建置一.4：【建置一】三張卡驗收（events.json/佔位字歸零/真實資料截圖）
 
 戴**開發帽**。接續上一輪建置一.3，依權威清單做下一項**建置一.4**——

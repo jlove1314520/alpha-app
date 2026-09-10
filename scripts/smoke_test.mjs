@@ -1446,10 +1446,49 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("45. 個股頁（總覽/營收/財報/籌碼/AI五分頁）不得殘留「尚未實作/下一輪/本輪」佔位字",
     stockPagePlaceholderErrors.length === 0, stockPagePlaceholderErrors.join("; "));
 
+  // 46.【2026-09-10新增，健檢.四驗收】三份選股榜單（scores/scores_momentum/
+  // scores_future）裡，官方在市名冊內的股票，row.industry 覆蓋率必須≥95%——
+  // 個股頁「所屬產業」欄位（index.html「所屬產業」/report-industry）本來就有
+  // 讀row.industry，健檢.四要修的是「來源缺」：generate_scores_*.py 要從
+  // data/company_info.json 把 industry 併回每一列。這條檢查驗資料端，不是
+  // UI端（UI端讀不讀得到值完全取決於這裡算出的覆蓋率）。
+  const industryErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const uniRes = await fetch("data/listed_universe.json?t=" + Date.now());
+      if (!uniRes.ok) return { error: "listed_universe.json HTTP " + uniRes.status };
+      const active = new Set((await uniRes.json()).active || []);
+      if (active.size < 1000) return { error: `在市名冊只有 ${active.size} 檔，明顯不完整` };
+      const perBoard = {};
+      for (const f of ["scores.json", "scores_momentum.json", "scores_future.json"]) {
+        const res = await fetch(f + "?t=" + Date.now());
+        if (!res.ok) { perBoard[f] = { error: "HTTP " + res.status }; continue; }
+        const rows = ((await res.json()).stocks || []).filter(x => active.has(x.code));
+        const withInd = rows.filter(x => x.industry).length;
+        perBoard[f] = { total: rows.length, withInd, pct: rows.length ? withInd / rows.length * 100 : 0 };
+      }
+      return { perBoard };
+    });
+    if (r.error) industryErrors.push(r.error);
+    else {
+      for (const [f, v] of Object.entries(r.perBoard)) {
+        if (v.error) { industryErrors.push(`${f}: ${v.error}`); continue; }
+        if (v.total === 0) { industryErrors.push(`${f}: 在市個股列數為0，無法計算覆蓋率`); continue; }
+        if (v.pct < 95) industryErrors.push(`${f} industry覆蓋率 ${v.pct.toFixed(1)}%<95%（${v.withInd}/${v.total}）`);
+      }
+      results.industry_coverage = r.perBoard;
+    }
+  } catch (e) {
+    industryErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("46. 三份選股榜單在市個股 row.industry 覆蓋率 ≥95%（健檢.四）",
+    industryErrors.length === 0, industryErrors.join("; ") ||
+    Object.entries(results.industry_coverage || {}).map(([f, v]) => `${f}=${v.pct.toFixed(1)}%`).join("、"));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
