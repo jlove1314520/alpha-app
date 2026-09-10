@@ -485,6 +485,24 @@ Cybex 是加密市場，沒有這幾樣東西。台股有，而且每一樣都�
 - 只有使用者本人能建立解鎖旗標，任何自動化流程都不得建立。
 - 第一個 30 天只看執行品質（對帳、滑價、成交率、可靠度、kill 演練），不看損益。
 
+### 外部策略匯入紀律（2026-09-08 總司令裁示【外部策略三】，2026-09-10 落地）
+
+抄名家已發表策略（PEAD、Piotroski、CANSLIM、海龜法則這類）也是一次搜尋，成本
+必須被看見，不能因為「這是別人發表過的」就當成不佔搜尋次數的免費資訊。
+
+- **每匯入一條外部策略即為一次（或多次）試驗**，必須呼叫
+  `research/trial_registry.py` 的 `register_trial()` 登記進 `TRIALS_LEDGER.md`，
+  並重跑 `research/selection_bias_ledger.py` 更新 `SELECTION_BIAS_LEDGER.md`
+  的全體與分軌 N、Bonferroni 門檻。
+- **單批匯入上限 8 條**，超過需總司令核准，不得自行拆批迴避這個上限。
+- 跨軌測到同一個概念（|r|>0.7 或明顯同一機制換了市場代號，例如
+  `f_low_vol`／`f_us_low_vol`），依既有同家族規則只能算一個獨立發現，
+  見 `research/SELECTION_BIAS_LEDGER.md` 第 4 節「跨軌重複因子」。
+- 每條外部策略在 `data/signal_status.json` 標註來源與「公開後衰減」風險
+  （引用 McLean & Pontiff 2016：策略一旦發表，樣本外報酬平均衰減約
+  1/3～1/2），App 顯示該策略時一併揭露，不得只顯示回測數字不揭露來源與
+  衰減風險。詳見 `docs/EXTERNAL_STRATEGY_SOURCES.md`。
+
 ## 八、安全紅線
 - 自動下單只做介面、只產生下單計畫，絕不串接真實下單 API
 - 所有分數/訊號/報告標示「非投資建議」
