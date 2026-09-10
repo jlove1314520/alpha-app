@@ -1212,6 +1212,38 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   `TRIALS_LEDGER.md`／`STRATEGY_GRAVEYARD.md`／`TW_LEADS.md`裡任何一個已通過舊版第2關
   （單純Buy&Hold）的既有候選——那需要先盤點候選清單、逐一補跑equity curve算MDD才能呼叫
   這個gate，是下一輪獨立的工作量，不在本項範圍內。）
+- [x] **深讀二.3** 批次重評既有「已通過第2關」候選是否也通過第8關被動基準對照
+  （2026-09-10補登為正式佇列項並隨即完成盤點：範圍是`TRIALS_LEDGER.md`／
+  `STRATEGY_GRAVEYARD.md`／`LEADS.md`／`TW_LEADS.md`四份帳本，逐一找出「型態＝
+  策略（非因子IC）、TW市場、且曾宣稱總報酬贏過買進持有大盤」的列。
+  **稽核結論：目前沒有存活候選需要真的呼叫`evaluate_gate8()`重評**——查到的
+  三個曾經在名目總報酬上贏過買進持有的候選，全部已經因為跟gate 8無關的
+  更嚴格檢定被判死，不受本項規則的「不追溯竄改歷史判定的最終結論」條款保護
+  （已FAIL的候選不需要為了gate 8改判成PASS）：
+  1. `weinstein_stage2_v2`——VAL總報酬+56.72%贏買進持有+54.58%，但拆解後
+     beta貢獻占比過半、純alpha對隨機控制組percentile僅55.0（未過
+     GATE_SEQUENCE第2關單測門檻90.0），`STRATEGY_GRAVEYARD.md`已FAIL結案。
+  2. `portfolio_multifactor_v2`（A/B、IC加權、季頻）——VAL報酬+68.33%/+68.42%
+     雙雙贏過買進持有+54.58%且MDD遠優（−8.4%~−8.7% vs −31.6%），但alpha
+     顯著性p=0.053起，換更大樣本（300檔）後p惡化到0.53、獨立樣本外複驗後
+     0.56——訊號隨樣本擴大單調消失，`STRATEGY_GRAVEYARD.md`已整併結案為FAIL。
+  3. `pead_portfolio_v1`——VAL總報酬+54.65%與買進持有+54.58%僅差+0.07pp
+     （practically持平非顯著贏過），beta+0.570顯示報酬主要來自市場曝險，
+     alpha不顯著(p=0.4809)，已FAIL結案。
+  `score_topn_v1`（EXPERIMENTAL標籤）與`weinstein_stage2_unbiased`
+  （EXPERIMENTAL標籤但條目內文已有明確「否決」段落）兩者本身宣稱的是**輸給**
+  買進持有或已被否決，不屬於「已通過第2關」，故不在本項排查範圍內，維持
+  原標籤不動（標籤與內文不一致是另一個獨立的帳本整潔度問題，不在本項範圍，
+  未動`LEADS.md`本體文字）。
+  **範圍界線（誠實揭露）**：本項是文件稽核結論，不是新的程式碼或新的回測
+  計算——現有帳本裡沒有材料可供`evaluate_gate8()`真的執行一次（需要的候選
+  MDD/報酬數字雖然都有記錄，但候選本身已死，重跑没有意義）。若未來
+  `portfolio_multifactor_v2`家族或其他TW策略出現新的、尚未被FAIL的候選且
+  宣稱贏過買進持有，屆時才是`evaluate_gate8()`真正第一次被非self-test呼叫
+  的時機。US／FUT市場尚無passive benchmark引擎（僅TW的0050版本已建），
+  不在本項範圍內。
+  `node scripts/smoke_test.mjs`：43/44 PASS（#39既有已知紅燈與本項無關）。
+  純文件稽核，未動任何程式碼或`index.html`。）
 - [x] **深讀三** 新增四道關卡寫進 CLAUDE.md 與 MARATHON_PROTOCOL（相鄰頻率一致性／被動基準／absorbing state／資料源起點探測）
   （2026-09-10 完成：`CLAUDE.md`「通過六關」節後新增「新增四道關卡（第7～10關）」，
   完整寫入四關定義、判讀規則、已知落地案例（第7關score_longshort_v1、第10關#53～#57
@@ -1478,6 +1510,7 @@ Cybex.債務5
 深讀三
 深讀二.1
 深讀二.2
+深讀二.3
 深讀一.1
 深讀一.2
 深讀一.3 [產品]
