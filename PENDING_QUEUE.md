@@ -1180,7 +1180,24 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   也踩到下一項【深讀四.2】的放空腿硬規則，留給那一輪處理，不在本次結案理由
   裡重複計入。驗證：`node scripts/smoke_test.mjs` 43/44 PASS（#39 既有已知問題
   無關）。純文件變更，未動任何程式碼或資料檔。）
-- [ ] **深讀四.2** 放空腿硬規則：借券成本與可借量未接入前，含放空的回測一律標「資料缺陷，不得採信」
+- [x] **深讀四.2** 放空腿硬規則：借券成本與可借量未接入前，含放空的回測一律標「資料缺陷，不得採信」
+  （2026-09-10 完成，範圍已誠實限定：①**規則正式成文**——`CLAUDE.md` ⑩節新增「放空腿硬規則」
+  段落，寫清楚判準（`research/validation/costs.py`／`us_costs.py` 的 `BORROW_FEE_ANNUAL_PCT`／
+  `BORROW_FEE_TIERS_USD` 都還是寫死假設值、未建模可借量與強制回補，只要維持這個狀態規則就持續
+  適用）與適用範圍（不限台股，美股同受約束）——這填補了 `research/HYPOTHESIS_QUEUE.md:6869`
+  早就假設存在、但實際上 `CLAUDE.md` 裡還沒寫的缺口。②**已標記的具體候選**：`research/LEADS.md`
+  的 `score_longshort_v1`（週/月頻，與深讀四.1同一候選，補上第二個獨立死因）與
+  `f_rel_strength_regime_switch`（多頭regime下的多空腳）、`research/TW_LEADS.md` 對應列，
+  皆已加註「資料缺陷，不得採信」但書，不影響原有FAIL判定，僅補齊誠實揭露。③**已查證但確認
+  不需要動的**：`f_lending_fee_spike`(#63)已在gate4成本敏感度FAIL整條結案、`pair_trading_v1`
+  (#16)已在gate2FAIL且原始記錄已自行揭露未做真實放空P&L，兩者皆已死於其他理由，此規則不影響
+  結論。**誠實揭露的範圍限制（未做，非疏漏）**：透過 `grep short_round_trip_cost_pct` 找到
+  US軌還有 `f_us_low_vol`／`f_us_value_bm`(deep_dive組合)／`pair_trading_backtest_v1.py`
+  等多個腳本也計算過真實放空腳成本，橫跨 `US_LEADS.md`／`TRIALS_LEDGER.md` 數十列，其中部分
+  歷史判定可能是PASS/CHEAP_PASS——**這些尚未逐列覆核**，屬於比這次裁示原文範圍（score_
+  longshort_v1所在的同一批裁示）更大規模的全面稽核，需要獨立的查證輪次才能負責任地逐列處理，
+  已如實記錄不假裝完成。建議：若總司令要求，開一個新項目「US軌放空腿資料缺陷全面稽核」專門處理。
+  驗證：`node scripts/smoke_test.mjs` 43/44 PASS（#39 既有已知問題無關）。）
 - [ ] **深讀四.3** 新機制優先連續曝險縮放；控制組須為「同縮放幅度、訊號內容無意義」版本
 - [x] **深讀四.4** data_audit.py 自查：有幾道恆等式是「稽核內部重播引擎」形狀，全部判無效重寫
   （2026-09-10 完成：逐條檢視 `scripts/data_audit.py` 七項恆等式，找到 **2 道**符合

@@ -1,3 +1,49 @@
+## 2026-09-10（深讀四.2）放空腿硬規則正式成文＋標記已知違規候選
+
+戴**驗證帽**。依 PENDING_QUEUE 權威清單，本輪應做「放空腿硬規則：借券成本與可借量
+未接入前，含放空的回測一律標『資料缺陷，不得採信』」（Cybex 深讀補充裁示【裁示四】
+第 2 點：「借券成本與可借量限制未接入前，任何含放空的回測數字一律標『資料缺陷，
+不得採信』，不得寫進候選清單。手冊明列這是會偽裝成強策略的資料缺陷」）。
+
+**① 規則正式成文**：`CLAUDE.md` ⑩節「借券成本與可借量」新增「放空腿硬規則」段落，
+把判準寫死——`research/validation/costs.py`（台股 `BORROW_FEE_ANNUAL_PCT` 固定
+2%/年）與 `research/validation/us_costs.py`（美股 `BORROW_FEE_TIERS_USD` 按股價
+分級）目前**都還是寫死的假設值，不是查真實出借行情得到的數字**，且兩者都完全沒有
+建模可借量／強制回補風險，只要維持這個狀態這條規則就持續適用。這填補了
+`research/HYPOTHESIS_QUEUE.md:6869` 早就假設存在（「接入前一律照 `CLAUDE.md` 標
+『資料缺陷，不得採信』」）、但 `CLAUDE.md` 裡實際還沒寫的缺口。**適用範圍不限台股**，
+美股同受約束。
+
+**② 已標記的具體候選**：`research/LEADS.md` 的 `score_longshort_v1`（週/月頻，跟
+深讀四.1同一候選，補上第二個獨立死因）與 `f_rel_strength_regime_switch`（多頭
+regime下的多空腳），以及 `research/TW_LEADS.md` 對應列，都已加註「資料缺陷，不得
+採信」但書——不改變原有的 FAIL 判定，只補齊誠實揭露：這些候選的空頭腳報酬本身
+用的是假設成本，不是真實可執行成本。
+
+**③ 已查證但確認不需要動的**：透過 `grep -rl short_round_trip_cost_pct research/`
+先列出全部曾經計算過真實放空腳成本的腳本，逐一核對現況——`f_lending_fee_spike`
+（#63）已在 gate4 成本敏感度 FAIL 整條結案、`pair_trading_v1`（#16）已在 gate2 FAIL
+且原始記錄本身已自行揭露「未做真正的多空P&L回測」，兩者都已死於其他理由，這條規則
+不影響結論。
+
+**誠實揭露的範圍限制（刻意未做，不是疏漏）**：同一次 grep 還找到美股軌
+`f_us_low_vol`／`f_us_value_bm`（deep_dive 組合）／`pair_trading_backtest_v1.py`
+等多個腳本也計算過真實放空腳成本，橫跨 `US_LEADS.md`／`TRIALS_LEDGER.md` 數十列，
+其中部分歷史判定可能是 PASS／CHEAP_PASS——**這些尚未逐列覆核**。這是比本次裁示
+原文範圍（`score_longshort_v1` 所在的同一批裁示）大得多的全面稽核，需要獨立查證
+輪次才能負責任地逐列處理完，不是在這一項裡順手就能做完的規模，已如實記錄而非
+假裝完成。已在 `PENDING_QUEUE.md` 建議：若總司令要求，可另開一個「US 軌放空腿
+資料缺陷全面稽核」項目專門處理。
+
+**影響檔案**：`CLAUDE.md`、`research/LEADS.md`、`research/TW_LEADS.md`、
+`PENDING_QUEUE.md`（純文件修改，未動任何程式碼或資料檔）。冒煙測試 43/44 PASS，
+1 FAIL（#39，既有已知問題，與本項改動無關）。
+
+**下一步**：依權威清單，下一項為 **深讀四.3**（新機制優先連續曝險縮放；控制組須
+為「同縮放幅度、訊號內容無意義」版本）。
+
+---
+
 ## 2026-09-10（深讀四.1）score_longshort_v1 依相鄰頻率一致性關卡結案，不再掛 PENDING
 
 戴**驗證帽**。依 PENDING_QUEUE 權威清單，本輪應做「`score_longshort_v1` 依關卡 7
