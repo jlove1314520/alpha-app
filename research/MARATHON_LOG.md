@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T13:57+0800 hypothesis_queue排程接續 — #70地基建置(b)完成：新增`bs_iv_solver.py`（Black-Scholes反推IV函式），兩層交叉驗證皆PASS，(c)(d)留給下一輪
+`git pull`+`git status`乾淨（除他軌殘留檔`data/audit_report.json`/
+`data/quotes_ibkr.json`/`research/dev_queue_cycle.log`等，未觸碰未納入
+commit）。`marathon_lock.py acquire`回傳`LOCK_ACQUIRED`（乾淨取得，非
+陳舊回收）。接續#70地基建置(b)：新增`bs_iv_solver.py`（Black-Scholes
+正向定價+Brent法反推IV），兩層交叉驗證皆PASS——(1)Hull教科書經典例題
+（S0=42,K=40,r=10%,T=0.5,sigma=20%→call=4.7594，與教科書公認值4.76
+誤差<0.01，反推收斂回sigma=0.20誤差3.70e-13）；(2)round-trip網格
+核心範圍（僅測方向正確的OTM組合，覆蓋#70實際操作區間）864組全數通過，
+延伸壓力測試（刻意涵蓋#70不會用到的深度ITM/OTM極端區間）1008組中93組
+（9.2%）反推失敗，已用獨立診斷確認是浮點數精度極限（ill-posed，非
+程式bug），誠實記錄不影響PASS結論。過程中發現核心範圍最初版本誤把
+ITM方向也納入測試導致9筆假性失敗，已修正為只測OTM方向（#70實際會呼叫
+`implied_vol()`的唯一情境），非事後放寬容忍度掩蓋問題。(c)改用
+`settlement_price`、(d)組裝OTM put/call配對+skew時序留給下一輪，本輪
+因「一輪一個有界工作單位」原則優先確保(b)完整記錄與交叉驗證嚴謹性。
+`is_holdout_consumed()`本輪開工/收工前皆`False`，全程零API呼叫（純
+數學/數值方法）。詳見`HYPOTHESIS_QUEUE.md` #70條目最新段落。
+
 ## 2026-09-10 hypothesis_queue排程接續 — #70地基建置(a)完成：新增`cbc_rf_rate_client.py`無風險利率代理值client，(b)(c)(d)留給下一輪
 `git pull`+`git status`乾淨（除他軌殘留檔`data/audit_report.json`等，
 未觸碰未納入commit）。`marathon_lock.py acquire`回傳`LOCK_ACQUIRED`（乾淨

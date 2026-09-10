@@ -381,3 +381,7 @@
 ---
 
 **第509輪（原文保留，供對照）**——取鎖乾淨（cycle`20260910-003037`）。三軌時間戳：FUT 10:30（round484，最舊，但無新機制、依例外條款不選）／TW 23:31（round507，較舊）／US 00:02（round508，最新）——FUT跳過後依輪替選TW。開工查`run_detached.py status`：`running=0`；`git log`確認round508後僅自動排程commit（IBKR報價）與`hypothesis_queue`自走commit（`38bfe0ca` `#67`結案FAIL＋新增`#68`：接手陳舊鎖檔回收未commit工作）；`git status`僅`dev_queue_cycle.log`／`external_connectivity.jsonl`兩個自動化log在動，屬另一track自身產物，本輪未觸碰。**結論：候選池連續23輪（487~509）維持同一狀態，TW軌本地端無新可推進工作單位**，僅剩`#50`（tick累積2/20，被動等待總司令對gate50提案的回應）與`hypothesis_queue`自走排程（現在`#67`已結案FAIL、`#68`起）的被動維護。完整見`REPORT.md`第509輪心跳。
+
+---
+
+**第512輪（原文保留，供對照）**——取鎖乾淨（cycle`20260910-020037`）。三軌時間戳：FUT 10:30（round484，最舊，但無新機制、依例外條款不選）／TW 00:30（round509，較舊）／US 01:33（round511，最新）——FUT跳過後依輪替選TW。開工查`run_detached.py status`：`running=0`；`git log`確認round511後新增`hypothesis_queue`自走commit（`f5b8b839` `#69`三來源資料可行性查證完成）與一筆互動session commit（`fbf3491c` 建置一.2目標價卡改估值區間，屬App開發track非本馬拉松範圍）；`git status`僅`DEV_QUEUE_PROMPT.txt`／`dev_queue_cycle.log`／`external_connectivity.jsonl`三個自動化檔案在動，屬`hypothesis_queue`自身產物，本輪未觸碰。**額外驗證round511 dev_queue修法效果**：`tail dev_queue_cycle.log`確認`240b1b6d`commit後01:46:02那輪起不再出現「本輪跳過」，改為正常`LOCK_ACQUIRED`＋`PROMPT_READY`，**修法確認有效**，`#69`即為解除阻塞後第一個產出。**結論：候選池連續24輪（487~512）維持同一狀態，TW軌本地端無新可推進工作單位**，僅剩`#50`（tick累積2/20，被動等待總司令對gate50提案的回應）。完整見`REPORT.md`第512輪心跳。
