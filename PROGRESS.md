@@ -1,3 +1,85 @@
+## 2026-09-10（重開機復原盤點）AlphaData cp950修正確認生效＋DevQueue自走死結解除＋深讀一.1收尾
+
+戴**維運帽**。總司令台北18:0x重開機後，照交辦逐項盤點復原狀況。
+
+**一、快速復原盤點**：
+1. 十個`Alpha*`排程工作全部`Status=Ready`／`LastResult=0`，且重開機後（19:0x
+   之後）都已真的重跑過一輪（非只是狀態顯示就緒）。
+2. **alpha.db重點驗**：`daily_price`／`inst_trades`／`valuation`三表`max(date)`
+   均已推進到**2026-09-10**（不是08-21，也超過原本問的09-09/09-10門檻）。
+   `run.log`確認：09-08、09-09兩輪仍卡在cp950編碼錯誤（`UnicodeEncodeError:
+   'cp950' codec can't encode character '・'`），**09-10這一輪（15:30，
+   重開機前）完全乾淨無編碼錯誤**，確認cp950修正已生效。唯一非致命的失敗是
+   FinMind `TaiwanStockTotalMarginPurchaseShortSale`回402（付費牆），屬既有
+   已知限制、不影響其他資料。
+3. **AlphaTwsePublishProbe**：今天T86（三大法人）發布窗在16:15首次轉為
+   `ok:true`（16404筆），16:15~17:30連續5次取樣都正常——今天這一天的樣本
+   已收到。**額外發現**：重開機後17:37~19:00共5輪探測輸出全部空白（python
+   子行程被靜默吞掉，無錯誤訊息），19:09手動重跑與直接呼叫`run-twse-probe.ps1`
+   都恢復正常——判斷是重開機後系統穩定前的暫時性問題（跟下面DevQueue死結
+   同一個時間窗，疑似同一批`Alpha*`背景工作在登入觸發器同時搶起來，造成
+   資源競爭），已自行恢復，未進一步深追根因，先記錄在案供下次重開機比對。
+
+**二、DevQueue.修——發現「上輪已交辦」其實已完成八成，但卡在一個新死結**：
+定位`run-dev-queue-cycle.ps1`第34~68行：原本的「工作目錄有未提交變更就跳過」
+判定，**已經在今天12:42被改成白名單式**（`$machineWritten`正則清單：`data/`
+全部、`research/*.log`、`research/*.jsonl`、`research/.*`隱藏狀態檔、
+`DEV_QUEUE_PROMPT.txt`），理由與交辦原文一致，且沿用`marathon_lock.py`做真正
+互斥（`.devqueue.lock`）、`dev_queue_runner.py`保留`NEEDS_USER`/`IRREVERSIBLE`
+判斷不變——**這部分不需要重做**。`dev_queue_cycle.log`證實今天13:31、14:16
+兩輪確實dispatch了PENDING項目並跑完（`外部一改.4`21分鐘、`Cybex.債務5`
+41.9分鐘，均`reason=OK`），互動視窗持鎖時（`工作目錄有N個未提交變更`）也確認
+正確讓開——白名單機制本身驗收通過。
+
+**新發現的死結**：15:01之後連續多輪`reason=ERROR exit=1`，查`dev_cycles/`
+下的jsonl逐一確認：15:16~17:16那八輪全部是同一個原因——**`claude -p`
+五小時用量上限被打到**（`You've hit your session limit · resets 5:20pm`），
+`total_cost_usd:0`、非佇列或程式bug。17:20額度重置後17:31那輪恢復正常執行
+（`深讀一.1`，14.6分鐘），**但被18:0x的重開機直接砍掉**（`exit=-1073741510`）；
+17:47下一輪撞到重開機後短暫的`python.exe`存取被拒；17:56再一輪重新開始
+`深讀一.1`，寫出`research/shadow_ledger.py`＋改了`update_strategy_
+performance.py`＋實際跑出3本影子帳本jsonl，**但收尾前撞上重開機後網路
+還沒穩定**（`API Error: Can't reach the API server (ENOTFOUND)`），整個
+`claude -p`行程中止，**留下未commit的變更就死掉**。而白名單機制認得
+`update_strategy_performance.py`不是機器寫的檔案，於是18:16起連續4輪
+（55分鐘）持續判定「有人正在中途」而跳過——**但實際上沒有人在中途，是
+背景輪次自己死掉留下的殘局，變成自走佇列自己把自己鎖死的新死結**（跟
+交辦原文描述的舊死結是同一種形狀，只是觸發原因從「背景寫手永遠弄髒
+工作目錄」換成「一輪被中斷的自走行程留下未commit變更」）。
+
+**當場解除死結**：檢查`research/shadow_ledger.py`內容（純本機檔案操作、
+不碰網路、append-only+SHA256雜湊鏈設計，符合`深讀一.1`原始規格），跑
+`python shadow_ledger.py verify`與重跑`update_strategy_performance.py`
+確認三本帳本（`future_board`／`momentum_board`／`value_board_v2`）雜湊鏈
+完整、同日重跑不重複append（幂等）——工作本身是對的、只是沒machine到
+commit這一步，於是就地補完收尾（見下方`深讀一.1`收工記錄），把
+`PENDING_QUEUE.md`該行標`[x]`並commit，工作目錄恢復乾淨，死結解除。
+
+**深讀一.1（影子帳本）本身的完成記錄見`PENDING_QUEUE.md`該行**，此處不重複。
+
+**驗證**：`dev_queue_cycle.log`13:31／14:16兩輪`OK`日誌為證；
+`dev_cycles/20260910-160102.jsonl`等8個檔證實rate limit非bug；
+`20260910-175611.jsonl`尾端證實ENOTFOUND中斷；`shadow_ledger.py verify`
+與`update_strategy_performance.py`重跑輸出見上。**尚未做**：白名單機制對
+「同一輪自己中斷留下的殘局」沒有自動清理能力（本次是人工介入清掉），
+若日後想自動化，可以考慮讓`run-dev-queue-cycle.ps1`在偵測到非機器寫檔案
+變更時，額外檢查該變更是否來自**上一輪自己的cycle_id**（例如比對
+`data/dev_cycles/`最新jsonl的mtime與dirty檔案的mtime是否同一個時間窗），
+是的話視為「殘局」而非「有人在中途」，自動提示或標記，而不是永遠讓開；
+這是一個新的獨立小改動，本輪先用人工判斷解除，未動手實作，留給下一輪
+評估要不要做。
+
+**影響檔案**：`research/shadow_ledger.py`（新增）、
+`research/shadow_ledgers/*.jsonl`（新增，3檔）、
+`research/update_strategy_performance.py`（整合影子帳本append）、
+`PENDING_QUEUE.md`（深讀一.1標`[x]`＋收工記錄）、`PROGRESS.md`（本節）。
+
+**下一步**：交辦佇列（`PENDING_QUEUE.md`）其餘未開始項照佇列順序讓背景
+自走消化：停擺二、InteractiveToken A、題材七、題材三批次二起、實測八九十。
+不再插新的自走研究，遵守交辦優先於自走鐵律。
+
+---
+
 ## 2026-09-10（馬拉松自走・交辦優先）題材三：規則檔關鍵詞從70題材擴充到81題材（目標123，批次二）
 
 戴**情報帽**。開工先讀`PENDING_QUEUE.md`最上方紀錄，兩條阻塞項（S4U排程註冊、

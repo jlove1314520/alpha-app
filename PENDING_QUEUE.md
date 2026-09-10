@@ -1216,7 +1216,22 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 > 【裁示五】真錢閘門先建好（我們正走向群益真錢）
 > 比照 Cybex RUNBOOK：四道獨立屏障（旗標檔內容逐字正確且只有總司令能建立／憑證檔名帶 mainnet 且過長度檢查／DRY_RUN 硬編碼為獨立變更／白名單＋金額上限），外加「憑證只有在旗標檔存在時才載入」。kill 條件分兩級：halt_new 只擋新單、既有部位出場照常；halt 連調整都停。第一個 30 天只看執行品質五題（對帳 30/30、中位滑價 ≤ 回測假設 2 倍、成交率 ≥95%、零非預期停擺、kill 演練過一次），不看損益。滑價拆 vs_signal_bp 與 slippage_bp 兩段記，手續費另計，台股多記成交時段與是否為撮合。
 
-- [ ] **深讀一.1** 影子帳本：每個候選機制一本，每日更新、append-only、可稽核
+- [x] **深讀一.1** 影子帳本：每個候選機制一本，每日更新、append-only、可稽核
+  （2026-09-10 完成，接續一輪因重開機後DNS暫時失聯（`API Error: Can't reach the
+  API server (ENOTFOUND)`）而中斷、留下未commit變更的自走輪次，總司令重開機復原
+  盤點時發現並驗完收尾）：新增`research/shadow_ledger.py`——每個機制一個
+  `research/shadow_ledgers/<mechanism_id>.jsonl`，物理上只用`open(path,"a")`
+  append（程式碼裡沒有任何「讀出全部→改一筆→整份寫回」的路徑），每筆帶
+  `prev_hash`＋SHA256雜湊鏈，`verify_ledger()`重算全鏈比對，竄改或斷鏈即抓到；
+  日期必須嚴格遞增，回填過去日期丟`AppendOnlyViolation`，同日重跑幂等（回傳
+  None不重複寫）。接進`update_strategy_performance.py`：每次寫`strategy_
+  performance.json`後，額外把當天那筆append進對應機制的影子帳本，失敗只警告
+  不中斷主要輸出（獨立try/except，理由見檔內註解）。
+  驗證：`python shadow_ledger.py verify`與`update_strategy_performance.py`收尾
+  自帶的稽核都印出`[PASS] future_board/momentum_board/value_board_v2`三本雜湊鏈
+  完整（各1筆，2026-09-09~2026-09-09）；重跑`update_strategy_performance.py`
+  確認同日不重複append（仍各1筆，未變成2筆）。純research新增、未動`index.html`，
+  不需要跑`smoke_test.mjs`。
 - [ ] **深讀一.2** 候選生命週期改為 train+val → 六關 → 影子帳本前向觀察；holdout 只留給最終定案版
 - [x] **深讀一.3** 影子帳本狀態顯示在 App（起始日、累積報酬、MDD、交易數）
   （2026-09-10 完成，但有但書：**深讀一.1／一.2 獨立的「影子帳本」基礎設施本身尚未

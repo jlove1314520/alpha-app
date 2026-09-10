@@ -42,6 +42,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from validation.costs import round_trip_cost_pct  # noqa: E402
+import shadow_ledger  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
@@ -195,10 +196,29 @@ def main():
         print(f"  {strategy_id}: forward_return={new_state['forward_return_todate_pct']:+.2f}%  "
               f"trading_days={new_state['trading_days_count']}  持股數={len(new_state['holdings'])}")
 
+        # 深讀一.1（2026-09-10新增）：除了寫進上面這份「整份JSON每天重寫」的
+        # strategy_performance.json（App顯示用），額外把今天這一筆append進
+        # 這個機制自己的影子帳本（字面意義append-only+雜湊鏈可稽核，見
+        # shadow_ledger.py檔頭）。失敗不能擋掉主要輸出（App要看的是
+        # strategy_performance.json），所以獨立try/except、只警告不中斷。
+        try:
+            todays_entry = new_state["ledger"][-1]
+            written = shadow_ledger.append_entry(strategy_id, today, todays_entry)
+            if written is not None:
+                print(f"    影子帳本：已append seq={written['seq']}")
+        except shadow_ledger.AppendOnlyViolation as e:
+            print(f"    警告：影子帳本append被拒絕（{e}），strategy_performance.json仍照常更新")
+        except Exception as e:  # noqa: BLE001 — 影子帳本是輔助稽核設施，不能讓它的bug擋掉主要輸出
+            print(f"    警告：影子帳本寫入失敗（{type(e).__name__}: {e}），strategy_performance.json仍照常更新")
+
     existing["generated_at"] = _now_iso()
     existing["as_of_trading_date"] = today
     PERF_PATH.write_text(json.dumps(existing, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {PERF_PATH}")
+
+    print("\n影子帳本雜湊鏈稽核：")
+    for mechanism_id, (ok, detail, n) in shadow_ledger.verify_all().items():
+        print(f"  [{'PASS' if ok else 'FAIL'}] {mechanism_id}: {detail}")
 
 
 if __name__ == "__main__":
