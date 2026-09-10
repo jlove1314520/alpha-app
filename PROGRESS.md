@@ -1,3 +1,100 @@
+## 2026-09-10（停擺三＋停擺四＋停擺一收尾）本機管線可觀測性補完
+
+戴**維運帽**。
+
+### 停擺一.收尾：兩輪數字，根因確認不是限流
+
+總司令要求「用數字說話，不要再用『應該好了』」。
+
+| 輪次 | 時間 | HTTP 狀態碼 | 連線例外 | 解析例外 | 200但沒容器 |
+|---|---|---|---|---|---|
+| 第一輪 | 13:22 | **200 × 200**，403/429 各 0 | ConnectionError 8、ReadTimeout 1 | **0** | **0** |
+| 第二輪 | 14:41 | **200 × 200**，403/429 各 0 | **0** | **0** | **0** |
+
+兩輪合計 400 次請求**全部 HTTP 200，沒有出現半個 403/429**。
+依總司令的判準——「解析例外歸零、200 正常，代表根因確實只是 re.PatternError」
+——**判定成立**。第一輪那 9 次連線例外是零星抖動（重試後都成功，所以 200 次
+嘗試全是 200），第二輪連抖動都沒有。
+
+`news_evidence.json`：**779 → 1,179 篇**（停擺前 779，兩輪各 +200），
+含題材句 31 → 40 篇。待抓 2,916 → 2,716 則。
+`members_C` 9 → 13、`themes_with_verified_member` 4 → 6、`members_A` 維持 0。
+
+GitHub Actions 的 `news_events.yml` 每 30 分鐘跑同一支並 commit `news_urls.json`，
+所以下一輪雲端結果會帶來**獨立於本機**的第三組數字。
+
+### 停擺三：根因比原判斷多一層
+
+原判斷是「兩個本機寫手互相覆蓋」。實際查下去多一層：
+**`data_audit.py` 不是每晚本機跑，它是由 GitHub Actions 在雲端跑再 commit 回來。**
+它整檔 `write_text` 重寫，而雲端那份檔案裡本來就沒有 `local_task_health`，
+本機 `git pull` 之後這個 key 就整個消失。所以「repo 裡是 null」與
+「本機自檢確實跑過」**兩件事都是真的**，不衝突。
+
+修法照總司令指定：`data_audit.py` 改成讀出 → 只覆蓋自己負責的 key → 寫回。
+`check_external_connectivity.py` 本來就是 read-modify-write，已確認。
+
+**驗收**（總司令指定：連跑一次稽核 + 一次連通性檢查後兩者同時存在）：
+
+```
+稽核結果          generated_at = 14:28:25  violation_rate = 0.12535
+local_task_health checked_at   = 14:28:15  alert = False
+→ 兩者同時存在　通過
+```
+
+**誠實揭露一個殘留限制**：`local_task_health` 從不 commit，所以雲端那份檔案裡
+沒有這個 key 可以保留；本機 pull 到雲端版本時它仍會**暫時**消失，
+但下一輪連通性檢查（最多 5 分鐘）就補回來。
+這次修正保證的是「同一台機器上兩個寫手不互相洗掉」，不是「跨機器永不消失」。
+
+### 停擺四：一張表，而且是自檢的設定來源
+
+`alpha.db` 空轉 20 天才被發現，缺的不是某一個修正，是**一張完整清單**。新增：
+
+- `data/seed/pipeline_registry.json` —— **單一事實來源**（12 條產出）
+- `scripts/pipeline_freshness.py` —— 共用判定邏輯
+- `scripts/pipeline_inventory.py` —— 印給人看的清點表
+
+停擺自檢與 `STATUS.json` 的 `local_pipeline_health` **都改讀同一份登錄檔**
+（總司令指示三）。要新增或調整監控對象改登錄檔，不改程式——
+否則遲早出現「清點表上有、自檢沒監控」的漏洞。
+
+**關鍵設計：凡是產出檔內部帶日期的，一律看資料層時間戳，不看 mtime。**
+`alpha.db` 就是最好的例子——它每天都被連線寫入所以 mtime 天天更新，
+但 `daily_price` 的 `max(date)` 停在 2026-08-21。**只看 mtime 的檢查會給它一個
+漂亮的綠勾**，那正是這 20 天沒人發現的原因。
+
+清點結果（14:30）：12 條產出中**只有 `alpha.db` 停擺**（20.6 天，
+`daily_price`／`inst_trades`／`valuation` 都停在 08-21、`taifex_large` 停在 08-19），
+其餘 11 條全在預期新鮮度內。等今天 15:30 那輪驗收。
+
+`STATUS.json` 原本只涵蓋 GitHub Actions 的 workflow（`schedule_health`），
+本機那一半完全不在視野裡——這也是 20 天沒被發現的結構性原因之一。
+已在 `generate_status_json.py` 補上 `local_pipeline_health`。
+
+### 重開機裁示：A 類尚未執行，卡在提權
+
+總司令的分類（A 資料命脈走 S4U／B 研究維持 InteractiveToken）已寫進
+`docs/LOCAL_SCHEDULED_TASKS.md` 第一節。腳本 `C:\alpha\convert-tasks-to-s4u.ps1`
+已備妥：逐一備份原始 XML → 改 S4U → **實際跑一次** → 檢查產出檔時間戳真的有動
+→ **沒產出的當場還原成 InteractiveToken 並列為失敗**，不留半殘管線。
+語法檢查通過、非提權防護實測會擋下並回 exit 1。
+
+**但尚未執行**：S4U 註冊需要「以批次工作登入」權限，非提權階段實測
+`Access is denied`。這台的 `user` 帳號已在 Administrators 群組，只差一次 UAC 同意。
+**沒有自行彈 UAC**，等總司令決定。
+
+**影響檔案**：`scripts/data_audit.py`、`scripts/check_external_connectivity.py`、
+`scripts/pipeline_freshness.py`（新）、`scripts/pipeline_inventory.py`（新）、
+`data/seed/pipeline_registry.json`（新）、`generate_status_json.py`、
+`data/STATUS.json`、`data/audit_report.json`、`docs/LOCAL_SCHEDULED_TASKS.md`、
+`BACKLOG.md`、`PENDING_QUEUE.md`、`C:\alpha\convert-tasks-to-s4u.ps1`（repo 外）。
+
+**冒煙測試**：未跑。本輪未動 `index.html` 或任何 PWA 共用區塊。
+
+**下一步**：A 類 S4U（等提權）、`claude` CLI 非互動驗證（B 類前提）、
+【題材七】【題材三】【實測.八九十】依 `PENDING_QUEUE.md` 順序。
+
 ## 2026-09-10（深讀四.2）放空腿硬規則正式成文＋標記已知違規候選
 
 戴**驗證帽**。依 PENDING_QUEUE 權威清單，本輪應做「放空腿硬規則：借券成本與可借量
@@ -870,7 +967,7 @@ HOLDOUT   = (2024-12-31, today]   ← 沒有結束日，每天長大
 - **美股報價全部是 `DELAYED`**（paper 帳戶無即時訂閱）。App 上「美股即時報價」
   名不副實，實際是延遲資料。
 - **IBKR Gateway 每週日 01:00 ET 權杖失效，必須人工重新登入**（官方文件）。
-  這是排程之外的**第二個斷點，而且每週固定發生**。已寫進 `C:lpha\CLAUDE.md`
+  這是排程之外的**第二個斷點，而且每週固定發生**。已寫進 `C:\alpha\CLAUDE.md`
   頻率上限清單，含對應流程與「沒有合規自動化解法」的誠實揭露
   （IBeam 那類方案是代填認證，不採用；正解是 IBKR Web API OAuth，未評估）。
 - **`AlphaShioajiQuotes`（台股版）有同一個電池缺陷**
@@ -2295,7 +2392,7 @@ Shioaji 合約的 `limit_up`／`limit_down`，那需要 live server 連得上；
 因為「反覆違規會停權」，改採硬性預算：每日 240 次（官方 270，留 30 次餘裕）、
 10 秒 40 次（官方 50，留 10 次餘裕），**額度用完就誠實拒絕，不排隊、不重試**
 ——排隊只是把違規往後推。目前用量在 live server 的 `/health` 的 `kbars_usage`
-看得到。這份限制已寫進 `C:lpha\CLAUDE.md` 新增的「外部 API 頻率上限清單」。
+看得到。這份限制已寫進 `C:\alpha\CLAUDE.md` 新增的「外部 API 頻率上限清單」。
 
 ### 補.2 常駐行程：啟動與新增訂閱時先補當日基底
 tick 聚合只能從「開始訂閱那一刻」算起，所以 09:15 才啟動的行程、或 09:20 才被加進
