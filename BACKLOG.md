@@ -17,6 +17,29 @@
 
 ---
 
+## ✅ 2026-09-10（維運帽）本機管線可觀測性：停擺三／停擺四完成，單一登錄檔上線
+
+**停擺三（audit_report.json 互相覆蓋）**：根因比原判斷多一層——`data_audit.py`
+是由 **GitHub Actions 在雲端**跑再 commit 回來，整檔覆蓋把
+`local_task_health` 洗掉，本機 `git pull` 之後就消失。已改成
+「讀出現有 JSON → 只覆蓋自己的 key → 寫回」。
+驗收（總司令指定）：連跑一次稽核＋一次連通性檢查後，兩者同時存在 → **通過**。
+
+**停擺四（本機管線清點）**：新增單一事實來源 `data/seed/pipeline_registry.json`，
+判定邏輯抽成 `scripts/pipeline_freshness.py`，清點表
+`scripts/pipeline_inventory.py`。停擺自檢與 `STATUS.json` 的
+`local_pipeline_health` 都改讀同一份，**表上有的自檢一定也在監控**。
+關鍵設計：凡是檔案內部帶日期的一律看**資料層時間戳**，不看 mtime——
+`alpha.db` 就是 mtime 天天更新但 `max(date)` 停在 2026-08-21。
+清點結果：12 條產出中只有 `alpha.db` 停擺（20.6 天），其餘全在預期新鮮度內。
+
+**重開機裁示（A 類 S4U）** ⚠️：腳本 `C:\alpha\convert-tasks-to-s4u.ps1` 已備妥、
+語法與非提權防護測試通過，**但 S4U 註冊需要系統管理員提權**
+（實測非提權 `Access is denied`），**尚未執行故標 ⚠️**。
+B 類的 `claude` CLI 非互動驗證另立待辦，未開始。
+
+冒煙測試：未跑。本輪未動 `index.html` 或任何 PWA 共用區塊。
+
 ## ✅ 2026-09-05（維運帽）馬拉松基礎設施修穩A~F：四條驗收全通過、挖礦已恢復
 
 見`PROGRESS.md`同日條目與`research/PROPOSAL_2026-09-05_marathon_process_hardening.md`第四節。
@@ -87,7 +110,7 @@ cdnjs未收錄，改jsdelivr釘死5.2.1。未做：美股IBKR 1分K（501，等�
    佇列，這才是真正秒級；使用者說「不用現在做」。
 6. **`.github/workflows/quotes.yml`/`market.yml`待補commit**：改動內容見PROGRESS.md
    2026-09-04條目，需有workflow scope的PAT。
-7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:lpha
+7. ✅ **`alpha_live_server.py`掛常駐排程**（2026-09-04上午完成）：`C:\alpha
 un-alpha-live-server-cycle.ps1`
    （PID檔＋port 8001 LISTENING雙重判斷的啟動器，UTF-8 BOM）＋`run-alpha-live-server-hidden.vbs`，
    排程任務`AlphaLiveServer`每5分鐘檢查、沒在跑就啟動（RunLevel Limited）。開機觸發的

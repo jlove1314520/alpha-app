@@ -10,30 +10,59 @@
 
 ## 一、最重要的一句話：所有工作都要「使用者登入」才會跑
 
-十個 Alpha* 工作的執行身分全部是 `InteractiveToken`
+十個 Alpha* 工作原本的執行身分全部是 `InteractiveToken`
 （工作排程器 UI 上的「只有使用者登入時才執行」）。
 
 意思是：**電腦開機後如果停在鎖定畫面沒有人登入，一個都不會跑。**
-這不是設定錯誤可以修掉的東西——`InteractiveToken` 在定義上就需要一個
-互動式登入工作階段才能取得權杖，加「系統啟動時」的觸發器也沒有用，
-因為觸發時根本沒有可用的權杖。
+加「系統啟動時」的觸發器也沒有用——`InteractiveToken` 在定義上就需要一個
+互動式登入工作階段才能取得權杖，觸發時根本沒有可用的權杖。
 
-所以重開機後的第一件事永遠是：**登入 Windows 桌面。** 登入之後：
+### 總司令裁示（2026-09-10）：分兩類，不一刀切
 
-- 有登入觸發器的工作會在 1–5 分鐘內自己補跑（見下表）
-- 其餘工作會在下一個時間點跑，且因為都已開啟「錯過排程就儘快啟動」
-  （`StartWhenAvailable`），錯過的那一輪會自動補
+先前提的兩條路（全機改執行身分／開啟自動登入）**都被否決**，理由如下：
 
-若想連「沒人登入也要跑」都做到，只有兩條路，兩條都有代價，**尚未採用**：
+- 全機改執行身分：`claude` CLI 在沒有互動式工作階段時能不能跑**未驗證**，
+  不能拿三個研究工作去賭。
+- 自動登入：這台是**真錢帳戶機器**，開機即解鎖與既有的連線安全強化自相矛盾。
 
-1. 把執行身分改成「不論使用者是否登入都執行」（要存密碼或用 S4U）。
-   風險：`AlphaMarathon` / `AlphaDevQueue` / `AlphaHypothesisQueue`
-   要啟動 `claude` CLI，沒有互動式工作階段時能不能正常跑**未驗證**。
-2. 開啟 Windows 自動登入。風險：等於這台機器開機即解鎖。
+改採分類處理：
 
-要改哪一條請總司令裁示，不要自行決定。
+| 類別 | 工作 | 執行身分 | 理由 |
+|---|---|---|---|
+| **A（資料命脈）** | `AlphaLiveServer`／`AlphaShioajiQuotes`／`AlphaIbkrQuotes`／`AlphaConnectivity`／`AlphaTwsePublishProbe`／`AlphaData` | **S4U**（不論登入都執行，**不存密碼**） | 人不在時 App 要活著、tick 不能斷。資料一斷就是**永久損失**，補不回來 |
+| **B（研究）** | `AlphaMarathon`／`AlphaDevQueue`／`AlphaHypothesisQueue` | 維持 `InteractiveToken` | 都要啟動 `claude` CLI。研究中斷只是暫停、**無資料損失**，登入後可補跑 |
 
----
+**S4U 是什麼**：Windows 的「服務帳戶登入」，讓工作以該使用者身分在 session 0
+執行，**不需要儲存密碼**。這是三個選項裡唯一不引入新祕密、也不放寬機器鎖定的做法。
+
+### 怎麼套用（需要一次系統管理員提權）
+
+註冊 S4U 工作需要「以批次工作登入」權限，非提權階段做不到（實測 `Access is denied`）。
+這台機器的 `user` 帳號**已經在 Administrators 群組裡**，所以只差一次 UAC 同意。
+
+在**系統管理員** PowerShell 裡跑：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1
+```
+
+那支腳本會逐一：備份原始設定 → 改成 S4U → **實際跑一次** → 檢查產出檔時間戳
+**真的有動**。**沒有產出的一律當場還原成 `InteractiveToken` 並列為失敗**，
+不留半殘的管線。全部還原：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1 -Revert
+```
+
+**未知數要誠實講**：Shioaji 與 IBKR 的登入在非互動階段能不能完成，**沒人驗過**。
+腳本的逐一實測就是為了當場問出答案，而不是改完宣告完成。
+`AlphaData` 刻意不試跑——在非 15:30 的時間跑會把不完整的當日資料寫進 `alpha.db`，
+它的驗收是下一次 15:30 排程。
+
+### B 類的待辦（不要沒驗證就改）
+
+另立一條待辦：**單獨驗證 `claude` CLI 在非互動階段能否啟動**。
+驗證通過才談要不要把 B 類也改過去。見 `PENDING_QUEUE.md`。
 
 ## 二、工作清單
 
@@ -77,20 +106,27 @@ Get-ScheduledTask -TaskName "Alpha*" | Get-ScheduledTaskInfo |
 ### 第 2 段：有沒有真的產出（**這一段才是重點**）
 
 「狀態＝就緒」和「上次結果＝0」都可以在什麼事都沒做的情況下成立。
-只有檔案時間戳騙不了人。
+只有產出騙不了人。
 
 ```powershell
-python C:\alpha\alpha-app\scripts\check_external_connectivity.py
+python C:\alpha\alpha-app\scripts\pipeline_inventory.py
 ```
 
-這支會同時做兩件事：對外連通性，以及**比對每個常駐工作產出檔的修改時間**，
-超過預期間隔 3 倍就告警，並寫進 `data/audit_report.json` 的 `local_task_health`。
+印出十條管線各自「最後一次真正產出是什麼時候」，超過預期新鮮度的會列在最後，
+離開碼 1 代表有停擺。
 
-只想看結果不想重跑：
+**這張表看的是資料層的時間戳，不是檔案修改時間。**
+差別就是 `alpha.db` 那一條：它每天都被連線寫入，**mtime 天天更新**，
+但 `daily_price` 的 `max(date)` 停在 2026-08-21——整整 20 天沒人發現。
+只看 mtime 的檢查會給它一個漂亮的綠勾。
 
-```powershell
-python -c "import json;d=json.load(open(r'C:\alpha\alpha-app\data\audit_report.json',encoding='utf-8'))['local_task_health'];print(d['checked_at'],'alert=',d['alert']);[print(' ',t['task'],t['status'],t.get('age_min','')) for t in d['tasks']]"
-```
+同一份判定每 5 分鐘會自動跑一次（`AlphaConnectivity`），
+結果寫進 `data/audit_report.json` 的 `local_task_health`，
+也會進 `data/STATUS.json` 的 `local_pipeline_health`。
+
+**三個地方讀的是同一份設定**：`data/seed/pipeline_registry.json`。
+要新增或調整監控對象，改那一份，不要改程式——
+否則遲早出現「清點表上有、自檢沒監控」的漏洞。
 
 ### 第 3 段：兩個排程管不到的斷點
 
@@ -121,4 +157,9 @@ Test-NetConnection -ComputerName 127.0.0.1 -Port 4001 -InformationLevel Quiet
 | 重開機後 `AlphaHypothesisQueue` 停了 9 小時 | 沒有登入觸發器，且沒開「錯過就補跑」 | 加登入觸發器（延遲 3 分）＋ `StartWhenAvailable=true` |
 | 停擺完全看不見 | 沒有任何「產出有沒有在動」的檢查 | `check_external_connectivity.py` 加 `local_task_health` 自檢（見第 2 段） |
 
-**尚未解決、需要總司令裁示**：第一節那個「沒人登入就一個都不會跑」的結構性限制。
+**待辦**：
+
+1. **A 類六個工作改 S4U** ——腳本已備妥（`C:\alpha\convert-tasks-to-s4u.ps1`），
+   需要總司令用系統管理員 PowerShell 跑一次（見第一節）。**尚未執行**。
+2. **驗證 `claude` CLI 在非互動階段能否啟動** ——這是 B 類要不要跟進的前提，
+   沒驗證前不動 B 類。

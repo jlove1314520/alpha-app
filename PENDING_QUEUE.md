@@ -14,6 +14,89 @@
 
 ---
 
+## 2026-09-10 總司令裁示（第二批：三件收尾 ＋ 重開機裁示，原文登記）
+
+> **登記時間**：2026-09-10 14:40（台北）。
+> 【停擺三】【停擺四】【重開機裁示】本輪處理；【停擺一.收尾】驗證中。
+
+原文如下：
+
+---
+
+本機已恢復。先把三件驗證收尾，再處理裁示與佇列。
+
+【停擺一.收尾】證明數字真的動了（不是只有本機測試通過）
+1. 等 Actions 或本機下一輪萃取跑完，回報 news_urls.json 的
+   extract_diag 完整數字（四類：HTTP狀態碼分布／連線例外／解析例外／
+   200但找不到容器），以及 news_evidence.json 從 779 長到幾篇。
+2. 若 extract_diag 顯示大量 403/429，那才是真的有限流，另議；
+   若是解析例外歸零、200 正常，代表根因確實只是 re.PatternError。
+   用數字說話，不要再用「應該好了」。
+
+【停擺三】audit_report.json 兩個寫手互相覆蓋（甲乙丙的乙）
+現在 repo 裡 local_task_health 是 null，但你說自檢跑過。查
+check_external_connectivity.py 與每晚 data_audit.py 是不是都整檔
+重寫 data/audit_report.json，後者把前者的 local_task_health 洗掉。
+修法：兩者都改成「讀出現有 JSON → 只更新自己那個 key → 寫回」，
+不要整檔覆蓋。驗收：連跑一次稽核 + 一次連通性檢查後，
+local_task_health 與稽核結果同時存在。
+
+【停擺四】清點本機所有管線，找出還在靜默死的（丙）
+alpha.db 空轉 20 天才被發現，代表我們沒有本機管線的完整清單。
+1. 把 LOCAL_SCHEDULED_TASKS.md 的十個工作，逐一列出「產出檔 +
+   該檔目前的 max(date) 或最後修改時間 + 預期新鮮度」。
+2. 任何產出檔的最新資料距今超過預期間隔的，全部列出來，
+   不要只修 alpha.db 這一個。我要看到一張「每條管線最後一次
+   真正產出是什麼時候」的表。
+3. 這張表就是停擺自檢的設定來源——自檢監控的清單要跟這張表一致。
+
+【重開機裁示】InteractiveToken —— 我的裁示是「分兩類，不要一刀切」
+你列的兩條路（改執行身分 / 自動登入）都是全機一刀切，我都不採。
+理由：claude CLI（Marathon/DevQueue/HypothesisQueue）沒有互動式
+工作階段能不能跑「未驗證」，這三個不要動；而自動登入等於這台
+真錢帳戶機器開機即解鎖，跟我們做過的連線安全強化自相矛盾，否決。
+
+分兩類：
+A. 不需要 claude CLI 的資料管線 —— AlphaLiveServer / AlphaShioajiQuotes
+   / AlphaIbkrQuotes / AlphaConnectivity / AlphaTwsePublishProbe /
+   AlphaData：改成「不論登入都執行」。**優先用 S4U（不存密碼）**，
+   S4U 不行再考慮存密碼（存的話講清楚存在哪、風險是什麼，
+   密碼絕不進 repo）。這些是「我人不在時 App 要活著、tick 不能斷」
+   的命脈，值得讓它們撐過重開機。
+   ⚠️ 先各跑一次驗證「非互動階段下真的能產出」再宣告完成——
+      Shioaji/IBKR 登入會不會需要互動式桌面是未知數，逐一實測。
+B. 需要 claude CLI 的三個研究工作 —— 維持 InteractiveToken。
+   研究中斷只是暫停、無資料損失，可以等登入補跑。
+   但要另立一條待辦：**單獨驗證 claude CLI 在非互動階段能否啟動**，
+   驗證過了才談要不要把 B 類也改過去。不要沒驗證就改。
+
+做完 A 類回報：哪幾個改成 S4U 成功、哪幾個實測非互動下仍能產出。
+
+【題材七／題材三／實測.八九十】維持 PENDING_QUEUE 原文，順序不變
+
+---
+
+**本次完成度**（2026-09-10 14:40）：
+
+- 【停擺三】✅ 完成。根因比「兩個本機寫手」多一層：`data_audit.py` 是由
+  **GitHub Actions 在雲端**跑再 commit 回來，整檔覆蓋把 `local_task_health`
+  洗掉，本機 `git pull` 之後就消失。已改成讀出→只覆蓋自己的 key→寫回。
+  驗收通過：稽核結果與 `local_task_health` 同時存在。
+- 【停擺四】✅ 完成。新增 `data/seed/pipeline_registry.json`（單一事實來源）、
+  `scripts/pipeline_freshness.py`（共用判定）、`scripts/pipeline_inventory.py`
+  （清點表）。停擺自檢與 `STATUS.json` 的 `local_pipeline_health` 都改讀同一份。
+  清點結果：12 條產出中 **只有 `alpha.db` 停擺**（20.6 天）。
+- 【重開機裁示】⚠️ 腳本已備妥並通過語法與非提權防護測試，
+  **但 S4U 註冊需要系統管理員提權**（實測非提權 `Access is denied`），
+  尚未執行。B 類的 `claude` CLI 非互動驗證另立待辦，未開始。
+- 【停擺一.收尾】🔄 本機第二輪驗證中；Actions 每 30 分鐘一輪，會有獨立的雲端數字。
+
+**新增待辦（B 類前提）**：單獨驗證 `claude` CLI 在非互動工作階段能否啟動。
+驗證通過才談要不要把 `AlphaMarathon`／`AlphaDevQueue`／`AlphaHypothesisQueue`
+也改成 S4U。**不要沒驗證就改。**
+
+---
+
 ## 2026-09-10 總司令裁示：重開機復原 ＋ 任務佇列（原文登記）
 
 > **登記時間**：2026-09-10 13:00（台北）。

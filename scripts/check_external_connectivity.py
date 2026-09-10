@@ -185,60 +185,26 @@ def _trim_log() -> None:
 #
 # 門檻是預期間隔的 3 倍（總司令指定）：容忍單次延遲與一次重試，
 # 但連續錯過三個週期就一定是真的停了。
-WATCHED_TASKS = [
-    # (工作名稱, 預期間隔分鐘, 產出檔相對 ROOT 的路徑, 只在這個時段內檢查或 None)
-    ("AlphaLiveServer",      1,    "research/alpha_live_server_cycle.log", None),
-    ("AlphaShioajiQuotes",   2,    "research/shioaji_quotes_cycle.log",    None),
-    ("AlphaIbkrQuotes",      5,    "research/ibkr_quotes_cycle.log",       None),
-    ("AlphaDevQueue",        15,   "research/dev_queue_cycle.log",         None),
-    ("AlphaMarathon",        30,   "research/marathon_cycle.log",          None),
-    ("AlphaHypothesisQueue", 30,   "research/hypothesis_queue_cycle.log",  None),
-    # 探針只在收盤後的發布觀察窗跑，窗外沒產出是正常的，不能算停擺。
-    ("AlphaTwsePublishProbe", 15,  "research/twse_probe.log",              (13, 20)),
-]
-STALL_FACTOR = 3
+# 監控清單**不寫在這裡**。2026-09-10（停擺四.3）總司令指示：
+# 清點表與自檢必須讀同一份設定，否則遲早出現「表上有、自檢沒監控」的漏洞。
+# 單一事實來源：data/seed/pipeline_registry.json
+# 判定邏輯：scripts/pipeline_freshness.py（清點表 scripts/pipeline_inventory.py
+# 呼叫的是同一支）。要新增／調整監控對象，改登錄檔，不要改這裡。
+sys.path.insert(0, str(ROOT / "scripts"))
 
 
 def check_local_tasks(now: datetime) -> tuple[list[dict], list[str]]:
-    """比對每個常駐工作的產出檔時間戳，回傳 (逐項結果, 停擺告警文字)。
+    """比對每條管線產出的新鮮度，回傳 (逐項結果, 停擺告警文字)。
 
     這支自己絕不能因為檢查失敗而崩潰——它是監測器，
     監測器死掉比被監測的東西死掉更糟（見本檔開頭 cp950 那段教訓）。
-    所以每一項都各自 try，單項出錯只標記成 unknown，不影響其他項。
     """
-    rows: list[dict] = []
-    stalled: list[str] = []
-    for name, interval_min, rel, window in WATCHED_TASKS:
-        row = {"task": name, "expected_interval_min": interval_min, "artifact": rel}
-        try:
-            if window is not None and not (window[0] <= now.hour < window[1]):
-                row.update(status="skipped", reason=f"觀察窗 {window[0]}:00-{window[1]}:00 之外")
-                rows.append(row)
-                continue
-            f = ROOT / rel
-            if not f.exists():
-                row.update(status="missing", reason="產出檔不存在")
-                rows.append(row)
-                stalled.append(f"{name}：產出檔 {rel} 根本不存在")
-                continue
-            mtime = datetime.fromtimestamp(f.stat().st_mtime, TZ)
-            age_min = (now - mtime).total_seconds() / 60.0
-            limit = interval_min * STALL_FACTOR
-            row.update(
-                status="stalled" if age_min > limit else "ok",
-                last_output=mtime.isoformat(),
-                age_min=round(age_min, 1),
-                stall_limit_min=limit,
-            )
-            if age_min > limit:
-                stalled.append(
-                    f"{name}：{rel} 已 {age_min:.0f} 分鐘沒有新產出"
-                    f"（預期每 {interval_min} 分鐘，門檻 {limit} 分鐘）"
-                )
-        except Exception as e:  # noqa: BLE001
-            row.update(status="unknown", reason=f"{type(e).__name__}: {e}")
-        rows.append(row)
-    return rows, stalled
+    try:
+        from pipeline_freshness import evaluate
+        return evaluate(now)
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 管線新鮮度檢查載入失敗（{type(e).__name__}: {e}），本輪跳過停擺自檢")
+        return [], []
 
 
 def publish_task_health(now: datetime, rows: list[dict], stalled: list[str]) -> None:
@@ -255,7 +221,7 @@ def publish_task_health(now: datetime, rows: list[dict], stalled: list[str]) -> 
             return
         doc["local_task_health"] = {
             "checked_at": now.isoformat(),
-            "stall_factor": STALL_FACTOR,
+            "registry": "data/seed/pipeline_registry.json",
             "alert": bool(stalled),
             "stalled_count": len(stalled),
             "stalled": stalled,

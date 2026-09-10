@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-10T14:25:34.858718+08:00",
-  "duration_sec": 6.1,
+  "generated_at": "2026-09-10T14:28:25.903027+08:00",
+  "duration_sec": 3.7,
   "reference": {
     "twse": {
       "ok": true,
@@ -14761,74 +14761,157 @@
     "violation_rate 只計「一致性」類（顯示的數字與官方對不起來）；季報斷層/過期屬於「完整度」類，另計 completeness_gap_rate，由稽核.二（覆蓋率補齊）負責收斂。"
   ],
   "local_task_health": {
-    "checked_at": "2026-09-10T14:27:02.691236+08:00",
-    "stall_factor": 3,
-    "alert": false,
-    "stalled_count": 0,
-    "stalled": [],
+    "checked_at": "2026-09-10T14:37:02.815465+08:00",
+    "registry": "data/seed/pipeline_registry.json",
+    "alert": true,
+    "stalled_count": 1,
+    "stalled": [
+      "AlphaData：C:/alpha/alpha-data/alpha.db 已 29677 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；各表 max(date)：daily_price=2026-08-21、inst_trades=2026-08-21、valuation=2026-08-21、taifex_large=20260819）"
+    ],
     "tasks": [
       {
         "task": "AlphaLiveServer",
-        "expected_interval_min": 1,
+        "purpose": "App 即時報價伺服器（聽 127.0.0.1:8001，對外靠 Tailscale Funnel）",
         "artifact": "research/alpha_live_server_cycle.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:27:02.618823+08:00",
-        "age_min": 0.0,
-        "stall_limit_min": 3
+        "expected_interval_min": 1,
+        "freshness": "mtime",
+        "source": "檔案修改時間",
+        "last_output": "2026-09-10T14:37:02.816791+08:00",
+        "age_min": -0.0,
+        "stall_limit_min": 3,
+        "status": "ok"
       },
       {
         "task": "AlphaShioajiQuotes",
-        "expected_interval_min": 2,
+        "purpose": "永豐 Shioaji 盤中逐筆常駐程式的啟動器",
         "artifact": "research/shioaji_quotes_cycle.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:27:07.715683+08:00",
+        "expected_interval_min": 2,
+        "freshness": "mtime",
+        "source": "檔案修改時間",
+        "last_output": "2026-09-10T14:37:07.875289+08:00",
         "age_min": -0.1,
-        "stall_limit_min": 6
+        "stall_limit_min": 6,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaShioajiQuotes",
+        "purpose": "Shioaji 報價快照（設計上只在 13:30 收盤寫一次，盤中走 UDP 推播）",
+        "artifact": "data/quotes_sinopac.json",
+        "expected_interval_min": 1440,
+        "freshness": "json_field",
+        "source": "JSON 欄位 checked_at",
+        "last_output": "2026-09-10T13:47:02.578053+08:00",
+        "age_min": 50.0,
+        "stall_limit_min": 4320,
+        "status": "ok"
       },
       {
         "task": "AlphaIbkrQuotes",
-        "expected_interval_min": 5,
+        "purpose": "美股報價（IBKR Gateway）",
         "artifact": "research/ibkr_quotes_cycle.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:26:05.477983+08:00",
+        "expected_interval_min": 5,
+        "freshness": "mtime",
+        "source": "檔案修改時間",
+        "last_output": "2026-09-10T14:36:06.238177+08:00",
+        "age_min": 0.9,
+        "stall_limit_min": 15,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaIbkrQuotes",
+        "purpose": "IBKR 報價快照",
+        "artifact": "data/quotes_ibkr.json",
+        "expected_interval_min": 5,
+        "freshness": "json_field",
+        "source": "JSON 欄位 fetched_at",
+        "last_output": "2026-09-10T14:36:05.715580+08:00",
         "age_min": 1.0,
-        "stall_limit_min": 15
+        "stall_limit_min": 15,
+        "status": "ok"
       },
       {
-        "task": "AlphaDevQueue",
-        "expected_interval_min": 15,
-        "artifact": "research/dev_queue_cycle.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:16:03.147801+08:00",
-        "age_min": 11.0,
-        "stall_limit_min": 45
-      },
-      {
-        "task": "AlphaMarathon",
-        "expected_interval_min": 30,
-        "artifact": "research/marathon_cycle.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:04:20.357476+08:00",
-        "age_min": 22.7,
-        "stall_limit_min": 90
-      },
-      {
-        "task": "AlphaHypothesisQueue",
-        "expected_interval_min": 30,
-        "artifact": "research/hypothesis_queue_cycle.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:21:02.369440+08:00",
-        "age_min": 6.0,
-        "stall_limit_min": 90
+        "task": "AlphaConnectivity",
+        "purpose": "對外連通性監測 ＋ 常駐工作停擺自檢",
+        "artifact": "research/external_connectivity.jsonl",
+        "expected_interval_min": 5,
+        "freshness": "jsonl_last_field",
+        "source": "JSONL 末筆 ts",
+        "last_output": "2026-09-10T14:32:02.752827+08:00",
+        "age_min": 5.0,
+        "stall_limit_min": 15,
+        "status": "ok"
       },
       {
         "task": "AlphaTwsePublishProbe",
+        "purpose": "實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間",
+        "artifact": "research/twse_publish_probe.jsonl",
         "expected_interval_min": 15,
-        "artifact": "research/twse_probe.log",
-        "status": "ok",
-        "last_output": "2026-09-10T14:15:03.309237+08:00",
-        "age_min": 12.0,
-        "stall_limit_min": 45
+        "freshness": "jsonl_last_field",
+        "source": "JSONL 末筆 ts",
+        "last_output": "2026-09-10T14:30:02.785689+08:00",
+        "age_min": 7.0,
+        "stall_limit_min": 45,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaDevQueue",
+        "purpose": "開發任務佇列自走輪次",
+        "artifact": "research/dev_queue_cycle.log",
+        "expected_interval_min": 15,
+        "freshness": "mtime",
+        "source": "檔案修改時間",
+        "last_output": "2026-09-10T14:34:00.252270+08:00",
+        "age_min": 3.0,
+        "stall_limit_min": 45,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaMarathon",
+        "purpose": "研究馬拉松自走輪次",
+        "artifact": "research/marathon_cycle.log",
+        "expected_interval_min": 30,
+        "freshness": "mtime",
+        "source": "檔案修改時間",
+        "last_output": "2026-09-10T14:34:06.783627+08:00",
+        "age_min": 2.9,
+        "stall_limit_min": 90,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaHypothesisQueue",
+        "purpose": "假設佇列自走輪次",
+        "artifact": "research/hypothesis_queue_cycle.log",
+        "expected_interval_min": 30,
+        "freshness": "mtime",
+        "source": "檔案修改時間",
+        "last_output": "2026-09-10T14:32:30.741679+08:00",
+        "age_min": 4.5,
+        "stall_limit_min": 90,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaData",
+        "purpose": "alpha-data 每日六大類資料入庫（台股價量／估值／三大法人／期貨）",
+        "artifact": "C:/alpha/alpha-data/alpha.db",
+        "expected_interval_min": 1440,
+        "freshness": "sqlite_max_date",
+        "source": "各表 max(date)：daily_price=2026-08-21、inst_trades=2026-08-21、valuation=2026-08-21、taifex_large=20260819",
+        "last_output": "2026-08-21T00:00:00+08:00",
+        "age_min": 29677.0,
+        "stall_limit_min": 4320,
+        "status": "stalled"
+      },
+      {
+        "task": "AlphaDepCheck",
+        "purpose": "相依套件安全性更新檢查",
+        "artifact": "data/dependency_status.json",
+        "expected_interval_min": 10080,
+        "freshness": "json_field",
+        "source": "JSON 欄位 generated_at",
+        "last_output": "2026-09-10T12:44:48.576354+08:00",
+        "age_min": 112.2,
+        "stall_limit_min": 30240,
+        "status": "ok"
       }
     ],
     "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。判定依據是產出檔的修改時間，不是排程器回報的狀態——狀態顯示成功但什麼都沒產出正是要抓的情況。"

@@ -1,0 +1,109 @@
+{
+  "purpose": "本機十個排程管線的單一事實來源（2026-09-10 停擺四）。這一份同時餵給兩個地方：scripts/pipeline_inventory.py 印出的清點表，以及 scripts/check_external_connectivity.py 的停擺自檢。兩者讀同一份，才不會出現「表上有、自檢沒監控」的漏洞——alpha.db 空轉 20 天才被發現，就是因為沒有這份清單。",
+  "why_data_level": "freshness 有兩種：mtime 只證明檔案被寫過，不證明內容是新的。alpha.db 的 mtime 天天更新（每天都有連線去寫），但 daily_price 的 max(date) 停在 2026-08-21——這正是靜默停擺的典型形狀。所以凡是檔案內部帶有日期/時間戳的，一律用資料層的值判定，不用 mtime。",
+  "stall_factor": 3,
+  "stall_factor_note": "判定門檻＝預期間隔 × 這個倍數。容忍單次延遲與一次重試，但連續錯過三個週期就一定是真的停了。",
+  "pipelines": [
+    {
+      "task": "AlphaLiveServer",
+      "purpose": "App 即時報價伺服器（聽 127.0.0.1:8001，對外靠 Tailscale Funnel）",
+      "interval_min": 1,
+      "artifact": "research/alpha_live_server_cycle.log",
+      "freshness": "mtime",
+      "note": "純執行日誌，沒有資料層時間戳，只能看 mtime。真正的健康檢查是 /health。"
+    },
+    {
+      "task": "AlphaShioajiQuotes",
+      "purpose": "永豐 Shioaji 盤中逐筆常駐程式的啟動器",
+      "interval_min": 2,
+      "artifact": "research/shioaji_quotes_cycle.log",
+      "freshness": "mtime"
+    },
+    {
+      "task": "AlphaShioajiQuotes",
+      "purpose": "Shioaji 報價快照（設計上只在 13:30 收盤寫一次，盤中走 UDP 推播）",
+      "interval_min": 1440,
+      "artifact": "data/quotes_sinopac.json",
+      "freshness": "json_field",
+      "field": "checked_at",
+      "note": "盤中不更新是正常的，所以間隔按日計，不是按分鐘。"
+    },
+    {
+      "task": "AlphaIbkrQuotes",
+      "purpose": "美股報價（IBKR Gateway）",
+      "interval_min": 5,
+      "artifact": "research/ibkr_quotes_cycle.log",
+      "freshness": "mtime"
+    },
+    {
+      "task": "AlphaIbkrQuotes",
+      "purpose": "IBKR 報價快照",
+      "interval_min": 5,
+      "artifact": "data/quotes_ibkr.json",
+      "freshness": "json_field",
+      "field": "fetched_at",
+      "note": "connected=false 時仍會寫入失敗狀態，所以這一項新鮮不代表拿得到報價——Gateway 是否登入要看 external_connectivity 的 ibkr_gateway。"
+    },
+    {
+      "task": "AlphaConnectivity",
+      "purpose": "對外連通性監測 ＋ 常駐工作停擺自檢",
+      "interval_min": 5,
+      "artifact": "research/external_connectivity.jsonl",
+      "freshness": "jsonl_last_field",
+      "field": "ts"
+    },
+    {
+      "task": "AlphaTwsePublishProbe",
+      "purpose": "實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間",
+      "interval_min": 15,
+      "artifact": "research/twse_publish_probe.jsonl",
+      "freshness": "jsonl_last_field",
+      "field": "ts",
+      "window_hours": [13, 20],
+      "note": "只在收盤後的發布觀察窗跑，窗外沒產出是正常的。"
+    },
+    {
+      "task": "AlphaDevQueue",
+      "purpose": "開發任務佇列自走輪次",
+      "interval_min": 15,
+      "artifact": "research/dev_queue_cycle.log",
+      "freshness": "mtime"
+    },
+    {
+      "task": "AlphaMarathon",
+      "purpose": "研究馬拉松自走輪次",
+      "interval_min": 30,
+      "artifact": "research/marathon_cycle.log",
+      "freshness": "mtime"
+    },
+    {
+      "task": "AlphaHypothesisQueue",
+      "purpose": "假設佇列自走輪次",
+      "interval_min": 30,
+      "artifact": "research/hypothesis_queue_cycle.log",
+      "freshness": "mtime"
+    },
+    {
+      "task": "AlphaData",
+      "purpose": "alpha-data 每日六大類資料入庫（台股價量／估值／三大法人／期貨）",
+      "interval_min": 1440,
+      "artifact": "C:/alpha/alpha-data/alpha.db",
+      "freshness": "sqlite_max_date",
+      "tables": [
+        {"table": "daily_price", "column": "date"},
+        {"table": "inst_trades", "column": "date"},
+        {"table": "valuation", "column": "date"},
+        {"table": "taifex_large", "column": "date"}
+      ],
+      "note": "**這一條就是 stall 自檢存在的理由。** mtime 天天更新但 max(date) 停在 2026-08-21，整整 20 天沒人發現。門檻 3 天剛好涵蓋週末。"
+    },
+    {
+      "task": "AlphaDepCheck",
+      "purpose": "相依套件安全性更新檢查",
+      "interval_min": 10080,
+      "artifact": "data/dependency_status.json",
+      "freshness": "json_field",
+      "field": "generated_at"
+    }
+  ]
+}

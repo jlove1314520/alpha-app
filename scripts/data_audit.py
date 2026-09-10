@@ -58,6 +58,35 @@ from urllib3.util.ssl_ import create_urllib3_context
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 OUT = DATA / "audit_report.json"
+
+
+def _merge_into_report(report: dict) -> None:
+    """把本次稽核結果併進 audit_report.json，保留其他寫手的 key（停擺三）。
+
+    這份檔案有兩個寫手：這支（每晚／GitHub Actions）與
+    check_external_connectivity.py（每 5 分鐘，寫 local_task_health）。
+    兩邊都整檔重寫的話，後寫的一定洗掉先寫的。
+
+    **誠實揭露一個殘留限制**：Actions 是在雲端跑這支再 commit 回來，
+    而 local_task_health 只存在本機工作目錄、從不 commit，
+    所以雲端那份檔案裡本來就沒有這個 key 可以保留。
+    本機 `git pull` 到雲端版本時，local_task_health 仍會暫時消失，
+    但下一輪連通性檢查（最多 5 分鐘）就會補回來。
+    這支的修正保證的是「同一台機器上兩個寫手不互相洗掉」。
+    """
+    keep = {}
+    try:
+        if OUT.exists():
+            prev = json.loads(OUT.read_text(encoding="utf-8"))
+            if isinstance(prev, dict):
+                keep = {k: v for k, v in prev.items() if k not in report}
+    except Exception as e:  # noqa: BLE001
+        print("  ! 讀取既有 audit_report.json 失敗（" + type(e).__name__ + "），本次不保留外部 key")
+    merged = dict(report)
+    merged.update(keep)
+    OUT.write_text(json.dumps(merged, ensure_ascii=False, indent=1), encoding="utf-8")
+    if keep:
+        print("  （保留其他寫手的 key：" + "、".join(sorted(keep)) + "）")
 TZ = timezone(timedelta(hours=8))
 
 TWSE_STOCK_DAY_ALL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
@@ -706,7 +735,13 @@ def main():
             "「完整度」類，另計 completeness_gap_rate，由稽核.二（覆蓋率補齊）負責收斂。",
         ],
     }
-    OUT.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
+    # 2026-09-10（停擺三）**不要整檔覆蓋**。
+    # audit_report.json 不只有稽核結果：check_external_connectivity.py 每 5 分鐘
+    # 會把常駐工作的停擺自檢寫進同一份檔案的 local_task_health。
+    # 這支原本直接 write_text 整份報告，等於把別人的 key 洗掉——
+    # 實測 2026-09-10 14:25 那輪跑完，local_task_health 整個消失。
+    # 改成：先讀出現有的檔，只覆蓋這支自己負責的 key，其餘原封不動帶著走。
+    _merge_into_report(report)
 
     print("")
     print("稽核完成：" + str(len(universe)) + " 檔")

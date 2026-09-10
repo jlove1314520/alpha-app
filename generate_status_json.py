@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -857,6 +858,47 @@ def build_rate_limit_status() -> dict:
     }
 
 
+def build_local_pipeline_health() -> dict:
+    """本機十條管線的新鮮度（2026-09-10 停擺四）。
+
+    **為什麼 schedule_health 不夠**：那一段看的是 GitHub Actions 的 workflow，
+    跑在雲端。本機排程（Shioaji 逐筆、IBKR 報價、即時伺服器、alpha-data 入庫）
+    完全不在它的視野裡——`alpha.db` 從 2026-08-21 起沒進過資料、整整 20 天沒人
+    發現，就是因為 STATUS.json 這份「單一事實來源」根本沒有涵蓋本機那一半。
+
+    判定沿用 `scripts/pipeline_freshness.py`，設定沿用
+    `data/seed/pipeline_registry.json`——跟每 5 分鐘的停擺自檢、跟
+    `scripts/pipeline_inventory.py` 的清點表是同一份，不會各說各話。
+
+    這支在 GitHub Actions 上也會被呼叫到，而雲端 runner 上沒有這些本機產出檔，
+    所以整段包在 try 裡：拿不到就誠實標 unavailable，不要讓 STATUS.json 生不出來。
+    """
+    try:
+        sys.path.insert(0, str(REPO_ROOT / "scripts"))
+        from pipeline_freshness import evaluate
+        rows, stalled = evaluate()
+        return {
+            "checked_at": datetime.now(TW_TZ).isoformat(),
+            "registry": "data/seed/pipeline_registry.json",
+            "any_stalled": bool(stalled),
+            "stalled": stalled,
+            "pipelines": rows,
+            "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**"
+                    "（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，"
+                    "alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。"
+                    "這份與 data/audit_report.json 的 local_task_health、"
+                    "scripts/pipeline_inventory.py 讀同一份登錄檔。",
+        }
+    except Exception as e:  # noqa: BLE001
+        return {
+            "checked_at": datetime.now(TW_TZ).isoformat(),
+            "status": "unavailable",
+            "reason": f"{type(e).__name__}: {e}",
+            "note": "在沒有本機產出檔的環境（例如 GitHub Actions runner）跑這支時，"
+                    "這一段必然取不到值，屬預期行為，不是故障。",
+        }
+
+
 def main():
     payload = {
         "updated_at": datetime.now(TW_TZ).isoformat(),
@@ -864,6 +906,7 @@ def main():
         "data_files": build_data_files(),
         "workflows": build_workflows(),
         "schedule_health": build_schedule_health(),  # 2026-09-03（P0三-三.1）排程錯過時窗判定
+        "local_pipeline_health": build_local_pipeline_health(),  # 2026-09-10（停擺四）本機管線
         "app_data_sources": APP_DATA_SOURCES,
         "field_fallback_chains": FIELD_FALLBACK_CHAINS,
         "rate_limit_status": build_rate_limit_status(),
