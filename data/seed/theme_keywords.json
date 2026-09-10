@@ -3,79 +3,714 @@
   "purpose": "keyword → theme 對映規則（題材驗證 v2）。刻意獨立成檔而不埋在程式裡，讓總司令與 Cowork 可以直接稽核與擴充，改規則不用改程式。",
   "why": "舊做法要求公司在 MOPS 自述『我屬於 XX 題材』，但公司從不這樣講。公司講的是產品、業務、客戶、擴產、接單。所以對映的左邊必須是『產品／業務名詞』，不是『題材名』。",
   "match_note": "命中即視為該題材的素材。仍須搭配證據等級規則（A/C）才會上線；本檔只負責『這段文字在講哪個題材』。",
-  "generated_at": "2026-09-08",
+  "generated_at": "2026-09-08；2026-09-10 題材三批次一擴充（電子/半導體供應鏈群，18→70）",
   "themes": {
     "adv_package": {
       "name": "先進封裝",
-      "keywords": ["先進封裝", "CoWoS", "SoIC", "InFO", "3D IC", "3DIC", "扇出", "Fan-Out", "chiplet", "小晶片", "異質整合", "2.5D封裝", "2.5D 封裝", "混合鍵合", "hybrid bonding", "TSV", "矽穿孔"]
+      "keywords": [
+        "先進封裝",
+        "CoWoS",
+        "SoIC",
+        "InFO",
+        "3D IC",
+        "3DIC",
+        "扇出",
+        "Fan-Out",
+        "chiplet",
+        "小晶片",
+        "異質整合",
+        "2.5D封裝",
+        "2.5D 封裝",
+        "混合鍵合",
+        "hybrid bonding",
+        "TSV",
+        "矽穿孔"
+      ]
     },
     "cowos": {
       "name": "CoWoS",
-      "keywords": ["CoWoS", "中介層", "interposer", "2.5D封裝", "2.5D 封裝", "CoWoS-L", "CoWoS-S", "矽中介層"]
+      "keywords": [
+        "CoWoS",
+        "中介層",
+        "interposer",
+        "2.5D封裝",
+        "2.5D 封裝",
+        "CoWoS-L",
+        "CoWoS-S",
+        "矽中介層"
+      ]
     },
     "glass_substrate": {
       "name": "玻璃基板",
-      "keywords": ["玻璃基板", "玻璃載板", "TGV", "玻璃通孔", "glass substrate", "玻璃核心", "glass core"]
+      "keywords": [
+        "玻璃基板",
+        "玻璃載板",
+        "TGV",
+        "玻璃通孔",
+        "glass substrate",
+        "玻璃核心",
+        "glass core"
+      ]
     },
     "pcb": {
       "name": "PCB印刷電路板",
-      "keywords": ["印刷電路板", "PCB", "電路板", "多層板", "HDI板", "軟硬結合板"]
+      "keywords": [
+        "印刷電路板",
+        "PCB",
+        "電路板",
+        "多層板",
+        "HDI板",
+        "軟硬結合板"
+      ]
     },
     "ccl": {
       "name": "CCL銅箔基板",
-      "keywords": ["銅箔基板", "CCL", "基板材料", "低損耗材料", "低介電", "Low Dk", "M8材料", "M9材料"]
+      "keywords": [
+        "銅箔基板",
+        "CCL",
+        "基板材料",
+        "低損耗材料",
+        "低介電",
+        "Low Dk",
+        "M8材料",
+        "M9材料"
+      ]
     },
     "ic_design": {
       "name": "IC設計",
-      "keywords": ["IC設計", "晶片設計", "fabless", "無廠半導體", "SoC設計", "自研晶片"]
+      "keywords": [
+        "IC設計",
+        "晶片設計",
+        "fabless",
+        "無廠半導體",
+        "SoC設計",
+        "自研晶片"
+      ]
     },
     "thermal": {
       "name": "散熱",
-      "keywords": ["散熱", "熱管", "均熱片", "VC均熱板", "散熱模組", "3DVC", "均溫板", "風扇模組", "熱interface", "導熱"]
+      "keywords": [
+        "散熱",
+        "熱管",
+        "均熱片",
+        "VC均熱板",
+        "散熱模組",
+        "3DVC",
+        "均溫板",
+        "風扇模組",
+        "熱interface",
+        "導熱"
+      ]
     },
     "liquid_cooling": {
       "name": "水冷散熱",
-      "keywords": ["水冷", "液冷", "CDU", "冷卻液分配", "冷板", "cold plate", "浸沒式冷卻", "兩相流"]
+      "keywords": [
+        "水冷",
+        "液冷",
+        "CDU",
+        "冷卻液分配",
+        "冷板",
+        "cold plate",
+        "浸沒式冷卻",
+        "兩相流"
+      ]
     },
     "probe_card": {
       "name": "探針卡",
-      "keywords": ["探針卡", "probe card", "針測", "垂直探針", "MEMS探針", "晶圓測試介面"]
+      "keywords": [
+        "探針卡",
+        "probe card",
+        "針測",
+        "垂直探針",
+        "MEMS探針",
+        "晶圓測試介面"
+      ]
     },
     "ai_server": {
       "name": "AI伺服器",
-      "keywords": ["AI伺服器", "AI server", "GB200", "GB300", "NVL72", "HGX", "加速運算", "AI機櫃", "算力中心", "AI資料中心", "AIDC"]
+      "keywords": [
+        "AI伺服器",
+        "AI server",
+        "GB200",
+        "GB300",
+        "NVL72",
+        "HGX",
+        "加速運算",
+        "AI機櫃",
+        "算力中心",
+        "AI資料中心",
+        "AIDC"
+      ]
     },
     "memory_ic": {
       "name": "記憶體IC",
-      "keywords": ["DRAM", "NAND", "記憶體", "HBM", "HBM3", "HBM4", "高頻寬記憶體", "利基型記憶體"]
+      "keywords": [
+        "DRAM",
+        "NAND",
+        "記憶體",
+        "HBM",
+        "HBM3",
+        "HBM4",
+        "高頻寬記憶體",
+        "利基型記憶體"
+      ]
     },
     "foundry": {
       "name": "晶圓代工",
-      "keywords": ["晶圓代工", "foundry", "先進製程", "2奈米", "3奈米", "5奈米", "N2", "N3", "特殊製程"]
+      "keywords": [
+        "晶圓代工",
+        "foundry",
+        "先進製程",
+        "2奈米",
+        "3奈米",
+        "5奈米",
+        "N2",
+        "N3",
+        "特殊製程"
+      ]
     },
     "optical_module": {
       "name": "光模組／光收發",
-      "keywords": ["光模組", "光收發", "800G", "1.6T", "光收發模組", "矽光模組", "OSFP", "QSFP"]
+      "keywords": [
+        "光模組",
+        "光收發",
+        "800G",
+        "1.6T",
+        "光收發模組",
+        "矽光模組",
+        "OSFP",
+        "QSFP"
+      ]
     },
     "cpo": {
       "name": "CPO共同封裝光學",
-      "keywords": ["CPO", "共同封裝光學", "矽光子", "silicon photonics", "光電共封"]
+      "keywords": [
+        "CPO",
+        "共同封裝光學",
+        "矽光子",
+        "silicon photonics",
+        "光電共封"
+      ]
     },
     "semi_equip": {
       "name": "半導體設備",
-      "keywords": ["半導體設備", "前段設備", "後段設備", "機台", "曝光機", "蝕刻設備", "薄膜設備", "量測設備"]
+      "keywords": [
+        "半導體設備",
+        "前段設備",
+        "後段設備",
+        "機台",
+        "曝光機",
+        "蝕刻設備",
+        "薄膜設備",
+        "量測設備"
+      ]
     },
     "leo_satellite": {
       "name": "低軌衛星",
-      "keywords": ["低軌衛星", "LEO衛星", "衛星通訊", "星鏈", "Starlink", "衛星地面站", "相位陣列天線"]
+      "keywords": [
+        "低軌衛星",
+        "LEO衛星",
+        "衛星通訊",
+        "星鏈",
+        "Starlink",
+        "衛星地面站",
+        "相位陣列天線"
+      ]
     },
     "energy_storage": {
       "name": "儲能",
-      "keywords": ["儲能", "ESS", "電網儲能", "儲能櫃", "儲能系統", "AFC調頻", "電池儲能"]
+      "keywords": [
+        "儲能",
+        "ESS",
+        "電網儲能",
+        "儲能櫃",
+        "儲能系統",
+        "AFC調頻",
+        "電池儲能"
+      ]
     },
     "robot": {
       "name": "機器人",
-      "keywords": ["機器人", "人形機器人", "協作機器人", "機械手臂", "humanoid", "服務型機器人"]
+      "keywords": [
+        "機器人",
+        "人形機器人",
+        "協作機器人",
+        "機械手臂",
+        "humanoid",
+        "服務型機器人"
+      ]
+    },
+    "ip_silicon": {
+      "name": "矽智財IP",
+      "keywords": [
+        "矽智財",
+        "IP授權",
+        "ARM架構",
+        "RISC-V",
+        "處理器IP",
+        "介面IP",
+        "矽智慧財產"
+      ]
+    },
+    "asic_service": {
+      "name": "ASIC設計服務",
+      "keywords": [
+        "ASIC",
+        "設計服務",
+        "客製化晶片",
+        "客製化ASIC",
+        "客製晶片",
+        "NRE"
+      ]
+    },
+    "ai_chip": {
+      "name": "AI晶片",
+      "keywords": [
+        "AI晶片",
+        "AI加速器",
+        "NPU",
+        "TPU",
+        "推論晶片",
+        "訓練晶片",
+        "AI運算晶片"
+      ]
+    },
+    "power_ic": {
+      "name": "電源管理IC",
+      "keywords": [
+        "電源管理IC",
+        "PMIC",
+        "DC-DC",
+        "電源IC",
+        "電源晶片",
+        "電源管理晶片"
+      ]
+    },
+    "analog_ic": {
+      "name": "類比IC",
+      "keywords": [
+        "類比IC",
+        "混合訊號IC",
+        "類比晶片",
+        "類比積體電路"
+      ]
+    },
+    "mcu": {
+      "name": "微控制器MCU",
+      "keywords": [
+        "MCU",
+        "微控制器",
+        "微控制晶片"
+      ]
+    },
+    "compound_semi": {
+      "name": "化合物半導體",
+      "keywords": [
+        "化合物半導體",
+        "GaN",
+        "SiC",
+        "氮化鎵",
+        "碳化矽",
+        "磊晶片"
+      ]
+    },
+    "silicon_wafer": {
+      "name": "矽晶圓",
+      "keywords": [
+        "矽晶圓",
+        "晶圓",
+        "矽晶片",
+        "磊晶"
+      ]
+    },
+    "ic_test": {
+      "name": "IC測試",
+      "keywords": [
+        "IC測試",
+        "測試代工",
+        "final test",
+        "晶圓測試",
+        "晶圓針測"
+      ]
+    },
+    "ic_package": {
+      "name": "IC封裝",
+      "keywords": [
+        "IC封裝",
+        "封測",
+        "打線封裝",
+        "覆晶封裝",
+        "封裝代工"
+      ]
+    },
+    "test_socket": {
+      "name": "測試介面暨連接矽膠",
+      "keywords": [
+        "測試座",
+        "test socket",
+        "測試介面",
+        "burn-in",
+        "老化測試",
+        "測試連接器"
+      ]
+    },
+    "leadframe": {
+      "name": "導線架",
+      "keywords": [
+        "導線架",
+        "leadframe",
+        "銅導線架"
+      ]
+    },
+    "semi_parts": {
+      "name": "設備零組件",
+      "keywords": [
+        "設備零組件",
+        "半導體設備零件",
+        "腔體",
+        "石英製品",
+        "精密機械零組件"
+      ]
+    },
+    "photomask": {
+      "name": "光罩",
+      "keywords": [
+        "光罩",
+        "photomask"
+      ]
+    },
+    "photoresist": {
+      "name": "光阻與特殊化學",
+      "keywords": [
+        "光阻",
+        "光阻劑",
+        "特用化學品",
+        "電子化學品"
+      ]
+    },
+    "specialty_gas": {
+      "name": "特殊氣體",
+      "keywords": [
+        "特殊氣體",
+        "電子特殊氣體",
+        "高純度氣體"
+      ]
+    },
+    "cmp_target": {
+      "name": "CMP拋光液與靶材",
+      "keywords": [
+        "CMP",
+        "研磨液",
+        "拋光液",
+        "靶材",
+        "濺鍍靶材",
+        "拋光墊"
+      ]
+    },
+    "hdi": {
+      "name": "HDI高密度板",
+      "keywords": [
+        "HDI",
+        "高密度連接板",
+        "高密度電路板"
+      ]
+    },
+    "fpc": {
+      "name": "軟板FPC",
+      "keywords": [
+        "軟板",
+        "FPC",
+        "軟性電路板",
+        "軟硬結合板"
+      ]
+    },
+    "ic_substrate": {
+      "name": "IC載板",
+      "keywords": [
+        "IC載板",
+        "封裝載板",
+        "substrate",
+        "BT載板"
+      ]
+    },
+    "abf_substrate": {
+      "name": "ABF載板",
+      "keywords": [
+        "ABF載板",
+        "ABF",
+        "ABF基板"
+      ]
+    },
+    "copper_foil": {
+      "name": "銅箔",
+      "keywords": [
+        "銅箔",
+        "電解銅箔",
+        "極薄銅箔"
+      ]
+    },
+    "glass_fabric": {
+      "name": "玻璃纖維布",
+      "keywords": [
+        "玻璃纖維布",
+        "玻纖布",
+        "電子紗",
+        "低介電玻纖布"
+      ]
+    },
+    "drill_bit": {
+      "name": "鑽針",
+      "keywords": [
+        "鑽針",
+        "微鑽針",
+        "PCB鑽針"
+      ]
+    },
+    "server_odm": {
+      "name": "伺服器代工",
+      "keywords": [
+        "伺服器代工",
+        "伺服器ODM",
+        "伺服器組裝",
+        "機櫃系統整合"
+      ]
+    },
+    "server_chassis": {
+      "name": "伺服器機殼",
+      "keywords": [
+        "伺服器機殼",
+        "伺服器機構件",
+        "伺服器機箱",
+        "伺服器鈑金"
+      ]
+    },
+    "psu": {
+      "name": "電源供應器",
+      "keywords": [
+        "電源供應器",
+        "PSU",
+        "伺服器電源",
+        "電源模組"
+      ]
+    },
+    "bbu": {
+      "name": "BBU電池備援",
+      "keywords": [
+        "BBU",
+        "電池備援",
+        "備援電源模組",
+        "不斷電備援"
+      ]
+    },
+    "busbar": {
+      "name": "匯流排／母線",
+      "keywords": [
+        "匯流排",
+        "busbar",
+        "母線",
+        "銅排"
+      ]
+    },
+    "switch": {
+      "name": "交換器Switch",
+      "keywords": [
+        "交換器",
+        "switch晶片",
+        "網路交換器",
+        "乙太網路交換器"
+      ]
+    },
+    "hs_connector": {
+      "name": "高速連接器",
+      "keywords": [
+        "高速連接器",
+        "高速訊號連接器",
+        "224G連接器",
+        "背板連接器"
+      ]
+    },
+    "hs_cable": {
+      "name": "高速線材",
+      "keywords": [
+        "高速線",
+        "DAC線纜",
+        "銅纜",
+        "主動式線纜",
+        "AEC線纜"
+      ]
+    },
+    "retimer": {
+      "name": "PCIe Retimer/Redriver",
+      "keywords": [
+        "retimer",
+        "redriver",
+        "PCIe訊號調節",
+        "訊號重定時"
+      ]
+    },
+    "bmc": {
+      "name": "BMC管理晶片",
+      "keywords": [
+        "BMC",
+        "基板管理控制器",
+        "伺服器管理晶片"
+      ]
+    },
+    "panel": {
+      "name": "面板",
+      "keywords": [
+        "面板",
+        "LCD面板",
+        "顯示面板",
+        "液晶面板"
+      ]
+    },
+    "driver_ic": {
+      "name": "驅動IC",
+      "keywords": [
+        "驅動IC",
+        "面板驅動IC",
+        "顯示驅動晶片"
+      ]
+    },
+    "polarizer": {
+      "name": "偏光板",
+      "keywords": [
+        "偏光板",
+        "偏光片",
+        "偏光膜"
+      ]
+    },
+    "backlight": {
+      "name": "背光模組",
+      "keywords": [
+        "背光模組",
+        "BLU",
+        "導光板",
+        "背光源"
+      ]
+    },
+    "led": {
+      "name": "LED",
+      "keywords": [
+        "LED",
+        "發光二極體",
+        "LED晶粒",
+        "LED封裝"
+      ]
+    },
+    "miniled": {
+      "name": "Mini LED",
+      "keywords": [
+        "Mini LED",
+        "次毫米發光二極體",
+        "MiniLED背光"
+      ]
+    },
+    "microled": {
+      "name": "Micro LED",
+      "keywords": [
+        "Micro LED",
+        "微發光二極體",
+        "巨量轉移"
+      ]
+    },
+    "optical_lens": {
+      "name": "光學鏡頭",
+      "keywords": [
+        "光學鏡頭",
+        "鏡頭模組",
+        "車用鏡頭",
+        "手機鏡頭"
+      ]
+    },
+    "cis": {
+      "name": "CMOS影像感測器",
+      "keywords": [
+        "CIS",
+        "影像感測器",
+        "CMOS影像感測器",
+        "感光元件"
+      ]
+    },
+    "aoi": {
+      "name": "自動光學檢測AOI",
+      "keywords": [
+        "AOI",
+        "自動光學檢測",
+        "檢測設備",
+        "瑕疵檢測"
+      ]
+    },
+    "mlcc": {
+      "name": "MLCC積層陶瓷電容",
+      "keywords": [
+        "MLCC",
+        "積層陶瓷電容",
+        "陶瓷電容"
+      ]
+    },
+    "resistor_inductor": {
+      "name": "電阻電感",
+      "keywords": [
+        "電阻",
+        "電感",
+        "被動元件",
+        "阻性元件"
+      ]
+    },
+    "connector": {
+      "name": "連接器",
+      "keywords": [
+        "連接器",
+        "端子",
+        "連接器端子"
+      ]
+    },
+    "chassis": {
+      "name": "機構機殼",
+      "keywords": [
+        "精密機構",
+        "鈑金機構",
+        "機構製造",
+        "機構代工"
+      ]
+    },
+    "network_equip": {
+      "name": "網通設備",
+      "keywords": [
+        "網通設備",
+        "路由器",
+        "數據機",
+        "無線基地台"
+      ]
+    },
+    "wifi": {
+      "name": "WiFi",
+      "keywords": [
+        "WiFi",
+        "WiFi7",
+        "WiFi6E",
+        "無線網路晶片"
+      ]
+    },
+    "optical_comm": {
+      "name": "光通訊",
+      "keywords": [
+        "光通訊",
+        "光纖通訊",
+        "PON",
+        "光纖網路"
+      ]
+    },
+    "telecom": {
+      "name": "電信服務",
+      "keywords": [
+        "電信服務",
+        "5G專網",
+        "行動通訊服務",
+        "電信營運"
+      ]
     }
   },
   "sentence_patterns": {
@@ -95,7 +730,6 @@
       "{theme}產能",
       "{theme}擴產",
       "{theme}出貨",
-
       "{theme}廠",
       "{theme}大廠",
       "{theme}龍頭",
