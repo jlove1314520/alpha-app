@@ -14,6 +14,40 @@
 
 ---
 
+## 2026-09-10（馬拉松自走・交辦優先執行紀錄・第四輪）
+
+本輪開工先讀本檔最上方紀錄（CLAUDE.md「三之一、交辦優先於自走」鐵律）：兩條
+阻塞項（S4U／claude CLI 非互動驗證）維持阻塞、題材七維持未拆解，往下第一條
+可執行的未開始交辦項是【題材三】標記的「剩餘31個題材下一批」。
+
+- 【題材三】批次四（最終批）：**已完成，達成目標123題材**。補齊傳產
+  （steel鋼鐵/cement水泥/petrochem塑化/textile紡織/shoe製鞋/paper造紙/
+  food食品/construction營建/asset_play資產股，9個）＋金融（financial_holding
+  金控/bank銀行/insurance保險/securities證券，4個）＋航運
+  （container_shipping貨櫃航運/bulk_shipping散裝航運/airline航空/
+  logistics物流，4個）＋軟體（cybersecurity資安/saas軟體SaaS/ecommerce電商/
+  gaming遊戲/arvr AR-VR，5個）＋其他（defense軍工國防/tourism觀光/
+  retail百貨零售，3個）＋總經曝險類（china_exposure中國收成/tariff_benefit
+  美國關稅受惠/taiwan_reshoring台商回流/india_expansion印度佈局/
+  sea_expansion東南亞佈局/high_dividend高股息，6個），共31個題材的關鍵詞，
+  `data/seed/theme_keywords.json` 92→123/123（**達成 CLAUDE.md 原訂目標
+  123 題材**）。總經曝險類雖然批次三提醒「可能需要另一套營收地區別／殖利率
+  篩選邏輯」，本批仍沿用產品詞→題材框架補上關鍵詞（因為現有pipeline本身
+  就是關鍵詞比對機制，沒有另一套邏輯可換），但誠實記錄：這6個題材的關鍵詞
+  是地緣/總經名詞（如「印度」「東南亞」「關稅」），比產品詞更容易與其他
+  新聞主題共現誤判，是否需要加嚴句型規則留待下一輪驗證帽檢視。
+  `python scripts/build_themes.py`重跑：驗證題材數/A級/C級（6題材/A0/C14）
+  與批次一二三完全相同——誠實結果，新素材池仍未命中這批新詞，沒有靠擴大
+  關鍵詞硬做出新驗證數。`python scripts/test_theme_rules.py`全部通過，
+  無回歸。細節見 `PROGRESS.md` 對應節。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，等待
+總司令有管理員權限時處理）＋ 1 條大型未拆解（題材七，等待拆解成有界工作
+單位或改列入 AlphaDevQueue）。**【題材三】本輪已全部完成，123/123，從
+「部分完成待續」移除。**
+
+---
+
 ## 2026-09-10（假設佇列自走・交辦優先執行紀錄・第三輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
@@ -1260,7 +1294,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   完整（各1筆，2026-09-09~2026-09-09）；重跑`update_strategy_performance.py`
   確認同日不重複append（仍各1筆，未變成2筆）。純research新增、未動`index.html`，
   不需要跑`smoke_test.mjs`。
-- [ ] **深讀一.2** 候選生命週期改為 train+val → 六關 → 影子帳本前向觀察；holdout 只留給最終定案版
+- [!] **深讀一.2** 候選生命週期改為 train+val → 六關 → 影子帳本前向觀察；holdout 只留給最終定案版　**⛔ 自走中止（2026-09-10 19:31）**：涉及不可逆動作，依 CLAUDE.md 必須先問過總司令
 - [x] **深讀一.3** 影子帳本狀態顯示在 App（起始日、累積報酬、MDD、交易數）
   （2026-09-10 完成，但有但書：**深讀一.1／一.2 獨立的「影子帳本」基礎設施本身尚未
   建置**，目前全站唯一真實存在、每日append更新的前向績效資料是`data/strategy_

@@ -1,3 +1,60 @@
+## 2026-09-10（馬拉松自走・交辦優先）題材三：規則檔關鍵詞從92題材擴充到123題材（達成目標，批次四／最終批）
+
+戴**情報帽**。依CLAUDE.md「三之一、交辦優先於自走」鐵律，開工先讀
+`PENDING_QUEUE.md`最上方紀錄——兩條阻塞項（S4U排程註冊、claude CLI非互動
+驗證）維持阻塞、題材七維持未拆解，往下第一條可執行的未開始交辦項是
+【題材三】標記的「剩餘31個題材下一批」。本輪把這個名額給交辦，不做自走
+自己的候選檢定。
+
+**做了什麼**：為傳產（`steel`鋼鐵／`cement`水泥／`petrochem`塑化／
+`textile`紡織／`shoe`製鞋／`paper`造紙／`food`食品／`construction`營建／
+`asset_play`資產股，9個）、金融（`financial_holding`金控／`bank`銀行／
+`insurance`保險／`securities`證券，4個）、航運（`container_shipping`
+貨櫃航運／`bulk_shipping`散裝航運／`airline`航空／`logistics`物流，4個）、
+軟體（`cybersecurity`資安／`saas`軟體SaaS／`ecommerce`電商／`gaming`遊戲／
+`arvr`AR/VR，5個）、其他（`defense`軍工國防／`tourism`觀光／`retail`
+百貨零售，3個）、總經曝險類（`china_exposure`中國收成／`tariff_benefit`
+美國關稅受惠／`taiwan_reshoring`台商回流／`india_expansion`印度佈局／
+`sea_expansion`東南亞佈局／`high_dividend`高股息，6個）合計31個題材補上
+關鍵詞，沿用批次一～三風格（具體產業名詞、業界慣用縮寫、英文原文）。
+`data/seed/theme_keywords.json`題材數92→123/123——**達成CLAUDE.md
+原訂123題材目標，本批為最終批**。
+
+**誠實揭露（總經曝險類的框架適用性疑慮，沿用批次三提醒）**：批次三結尾
+提醒總經曝險類6個題材可能需要「營收地區別／殖利率篩選」另一套邏輯，而非
+硬套產品詞框架。本批盤點後判定：現有pipeline（`build_themes.py`／
+`news_body_extract.py`）本身就是純關鍵詞＋句型比對機制，沒有另一套「營收
+地區別」邏輯可以換著用（那需要接公司財報的地區別營收拆分資料，是另一個
+獨立工程項目，不在本次「補關鍵詞」範圍內），所以本批仍用產品詞→題材框架
+補上這6個題材的關鍵詞。但誠實記錄：這6個題材的關鍵詞本質是地緣／總經名詞
+（如「印度」「東南亞」「關稅」「殖利率」），語意上比其他題材的具體產品名
+更容易與不相關新聞主題共現誤判（例如「印度」可能出現在任何跟印度有關的
+新聞而非「印度佈局」題材），現有A/C級句型規則能不能有效擋掉這類誤判，
+本輪未驗證，留待下一輪驗證帽用實際命中案例檢視。
+
+**驗證**：
+1. `python scripts/build_themes.py`重跑——本次新增31個題材對「已驗證成員數」
+   淨影響為**0**（驗證題材數、A/C級成員數與批次一、二、三完全相同：
+   6題材/A0/C14）。誠實結果：當前300則新聞素材池對這批新詞完全沒有命中，
+   沒有靠擴大關鍵詞硬做出新驗證數。
+2. `python scripts/test_theme_rules.py`全部通過（exit=0），無回歸（本次未
+   修改比對邏輯，只新增資料）。
+
+**冒煙測試**：未動`index.html`或共用腳本，依CLAUDE.md僅該類異動才跑
+`smoke_test.mjs`；本次改動範圍是`data/seed/theme_keywords.json`（規則檔）
+僅由`scripts/build_themes.py`讀取，已用該腳本本身與其單元測試驗證。
+
+**影響檔案**：`data/seed/theme_keywords.json`（92→123題材關鍵詞，達成
+目標）、`data/themes.json`（重新生成，meta數字如上）、`PENDING_QUEUE.md`
+（記錄本輪進度，【題材三】從「部分完成待續」改為完成）、`PROGRESS.md`
+（本節）。
+
+**下一步**：【題材三】已完成，交辦佇列剩餘可執行項目是【題材七】（官網
+來源＋反向排除，需先拆解成有界工作單位或改列入AlphaDevQueue，本輪未動）。
+建議下一輪驗證帽檢視總經曝險類6題材的誤判率（見上方誠實揭露段落）。
+
+---
+
 ## 2026-09-10（假設佇列自走・交辦優先）題材三：規則檔關鍵詞從81題材擴充到92題材（目標123，批次三）
 
 戴**情報帽**。本輪執行個體是`AlphaHypothesisQueue`（假設佇列軌），依CLAUDE.md
