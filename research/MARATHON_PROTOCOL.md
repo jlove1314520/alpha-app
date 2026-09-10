@@ -318,12 +318,18 @@ Cybex 第 101／140 輪的 meta 定律：binary on/off 閘門（訊號過門檻�
    （週/雙週/月）」。兩者都要做，不能互相取代。判斷用**已有的訓練/驗證期報酬**
    即可下結論，通常不需要新開一次回測（見 `LEADS.md` 的 `score_longshort_v1`
    案例，直接用既有數字判雜訊）。
-2. **第 8 關（被動基準對照）**：`PENDING_QUEUE.md` 深讀二.1／二.2 完成前這關
-   **無法真正生效**，馬拉松跑到需要判定第 2 關（贏過 Buy & Hold）的候選時，
-   繼續用舊版單純買進持有比較，**不要因為第 8 關已經寫進文件就誤以為它已經
-   在跑**——被動基準建好、`score_longonly_v1` 系列的候選正式成為對照組來源
-   之後，這關才切換成強制項，屆時要回頭把所有「已通過第 2 關」的候選重新過
-   一次第 8 關（因為兩者的比較基準不同，第 2 關過不代表第 8 關會過）。
+2. **第 8 關（被動基準對照）**：`PENDING_QUEUE.md` 深讀二.1（2026-09-10 完成，
+   `research/passive_benchmark_tw_v1.py`）／二.2（2026-09-10 完成，
+   `research/validation/passive_benchmark_gate.py` 的 `evaluate_gate8()`）
+   已建好，**這關對「新開的」候選正式切換成強制項**——新機制要判第 2 關時，
+   改呼叫 `evaluate_gate8(phase=..., candidate_name=..., candidate_return_pct=...,
+   candidate_mdd_pct=...)`（用法同 `control_group_standard.evaluate_vs_control()`，
+   `from validation.passive_benchmark_gate import evaluate_gate8`），不要再各自寫
+   一套 buy-and-hold 比較。**尚未做到、誠實揭露**：`TRIALS_LEDGER.md`／
+   `STRATEGY_GRAVEYARD.md`／`LEADS.md`／`TW_LEADS.md`裡任何一個「已通過第2關」
+   的既有候選都**還沒有**回頭重新跑過第 8 關（因為兩者的比較基準不同，第 2 關過
+   不代表第 8 關會過）——那是獨立一輪的工作量，登記在 `PENDING_QUEUE.md`
+   深讀二.3，未完成前不得宣稱任何既有候選「通過第 8 關」。
 3. **第 9 關（absorbing state 檢查）**：目前佇列裡還沒有機制用「策略自己的
    績效狀態」當輸入（熔斷/停損/回撤保護這類），所以這關**還沒有實際案例
    可以驗證檢查方法本身有沒有抓到過真問題**——下一個設計這類機制的假設，

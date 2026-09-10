@@ -1199,7 +1199,19 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   未動`index.html`，`node scripts/smoke_test.mjs`確認不受影響（純research新增）。
   **下一步（深讀二.2）**：把這個引擎接進既有主動候選判定流程，成為第2關升級版強制
   對照組——本項只完成引擎本身，尚未回頭重評任何既有候選。）
-- [ ] **深讀二.2** 被動基準成為每個主動候選的強制對照組（六關第 2 關升級版）
+- [x] **深讀二.2** 被動基準成為每個主動候選的強制對照組（六關第 2 關升級版）
+  （2026-09-10 馬拉松第521輪TW軌完成：新增`research/validation/passive_benchmark_gate.py`
+  ——`evaluate_gate8()`讀`passive_benchmark_tw_v1_result.json`（找不到就拋錯，拒絕用假的
+  /預設基準列矇混），用`match_by_risk()`在被動基準12個w網格點裡找MDD最接近候選的那一點
+  （最近鄰匹配非連續內插，網格間距對應MDD落差約1.5~2個百分點，已知限制寫在docstring），
+  再比較候選報酬是否贏過該點的被動基準報酬，回傳完整比較明細（w/報酬/MDD/Sortino皆附上，
+  不折疊成單一bool，符合「復盤看流程不只看盈虧」——TRAIN/VAL分開判，不平均模糊掉）。
+  7項self-test全PASS（含對真實結果檔跑極端高/低報酬各一次，驗證非自我循環）。
+  純新增檔案，未動`index.html`，不影響冒煙測試。
+  **尚未做到的部分（誠實揭露，登記為深讀二.3）**：只完成gate函式本身，尚未回頭批次重評
+  `TRIALS_LEDGER.md`／`STRATEGY_GRAVEYARD.md`／`TW_LEADS.md`裡任何一個已通過舊版第2關
+  （單純Buy&Hold）的既有候選——那需要先盤點候選清單、逐一補跑equity curve算MDD才能呼叫
+  這個gate，是下一輪獨立的工作量，不在本項範圍內。）
 - [x] **深讀三** 新增四道關卡寫進 CLAUDE.md 與 MARATHON_PROTOCOL（相鄰頻率一致性／被動基準／absorbing state／資料源起點探測）
   （2026-09-10 完成：`CLAUDE.md`「通過六關」節後新增「新增四道關卡（第7～10關）」，
   完整寫入四關定義、判讀規則、已知落地案例（第7關score_longshort_v1、第10關#53～#57
