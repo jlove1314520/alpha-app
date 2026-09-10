@@ -1,3 +1,36 @@
+## 2026-09-10（外部三.2）EXTERNAL_STRATEGY_SOURCES.md＋signal_status 標註來源與衰減風險
+
+戴**驗證帽**。落地【外部策略三】裁示第 2 點：新增
+`docs/EXTERNAL_STRATEGY_SOURCES.md`，登記至今測過的全部 17 條外部/名家策略
+（TW 8 條：PEAD/SUE、Piotroski F-score、Sloan 應計、Novy-Marx 毛利率、
+殘差動量、52 週高點、Weinstein 第二階段、BAB；US 4 條：低波動、12 個月動量、
+短期反轉、價值 BM；FUT 5 條：外部一改.3 剛做完的海龜/Donchian/Keltner/
+波動度突破/CTA 多時間框架），每條附原始文獻引用、現況狀態、帳本編號，
+並寫入 McLean & Pontiff (2016) 公開後衰減風險的通用說明。
+
+`research/build_signal_status.py` 新增 `EXTERNAL_STRATEGIES` 清單，重跑後
+`data/signal_status.json` 多出 `external_strategies`（17 條精簡版）與
+`external_strategies_note`（衰減風險基準）兩個欄位。
+
+**誠實揭露一個缺口**：查了 `index.html` 全檔，`signal_status` 零命中——
+「App 上顯示時一併揭露」這句裁示的資料層已經做了，**UI 顯示完全沒串接**，
+不只是這次外部策略新增的缺口，是這個檔案從一開始（0a節四條方向）就沒有
+被 App 讀取過。動 `index.html` 屬開發帽檔案，依帽子規則本項（債務帽）
+不能越權做，已在 `docs/EXTERNAL_STRATEGY_SOURCES.md` 與 `PENDING_QUEUE.md`
+如實記錄，需要另開一個開發帽項目才能把這批資料真的顯示到畫面上。
+
+**影響檔案**：`docs/EXTERNAL_STRATEGY_SOURCES.md`（新增）、
+`research/build_signal_status.py`、`data/signal_status.json`。
+冒煙測試 43/44 PASS，1 FAIL（#39，與前兩項記錄的既有無關問題相同，
+數字未變）。
+
+**下一步**：依權威清單，外部一改／外部三系列全部做完，下一項為
+【外部二改】（抄新策略首批 8 條：美股 CANSLIM/SEPA/Darvas box、期貨 3、
+台股 2，先寫 SPEC 再實作）——這是規模較大的新開發，先報再動手前應評估
+是否需拆更小批次。
+
+---
+
 ## 2026-09-10（外部三.1）CLAUDE.md 寫入外部策略匯入紀律
 
 戴**維運帽**（文件紀律）。落地 2026-09-08【外部策略三】原裁示第 1 點：

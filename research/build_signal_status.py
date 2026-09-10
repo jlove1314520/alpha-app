@@ -547,6 +547,50 @@ DIRECTIONS = [
 ]
 
 
+# 2026-09-08 總司令裁示【外部策略三】第2點：每條外部（名家）策略須標來源與
+# 「公開後衰減」風險。精簡版放這裡供 App 顯示用；完整文獻細節、citation、
+# 同家族揭露見 `docs/EXTERNAL_STRATEGY_SOURCES.md`——那份是來源真相，這裡是
+# 展示摘要，兩邊都要更新，不得只改一邊。
+EXTERNAL_STRATEGIES = [
+    {"name": "PEAD／SUE（盈餘意外延續）", "track": "TW", "code": "f_eps_surprise／f_revenue_surprise",
+     "source": "Foster, Olsen & Shevlin (1984)；Bernard & Thomas (1989)",
+     "status": "MIXED（f_eps_surprise 通過分母校正，f_revenue_surprise 降級FAIL）"},
+    {"name": "Piotroski F-score", "track": "TW", "code": "piotroski_fscore",
+     "source": "Piotroski (2000), Journal of Accounting Research", "status": "FAIL"},
+    {"name": "Sloan 應計項目異常", "track": "TW", "code": "f_accruals",
+     "source": "Sloan (1996), The Accounting Review", "status": "已測"},
+    {"name": "Novy-Marx 毛利率溢酬", "track": "TW", "code": "f_gross_profitability",
+     "source": "Novy-Marx (2013), Journal of Financial Economics", "status": "降級FAIL"},
+    {"name": "殘差動量 Residual Momentum", "track": "TW", "code": "f_residual_momentum",
+     "source": "Blitz, Huij & Martens (2011), Journal of Empirical Finance", "status": "FAIL"},
+    {"name": "52週高點接近度", "track": "TW", "code": "f_52w_high_prox",
+     "source": "George & Hwang (2004), The Journal of Finance", "status": "FAIL"},
+    {"name": "Weinstein 第二階段 Stage Analysis", "track": "TW", "code": "weinstein_stage2",
+     "source": "Weinstein (1988), Secrets for Profiting in Bull and Bear Markets", "status": "FAIL"},
+    {"name": "BAB Betting Against Beta", "track": "TW", "code": "factor_ic_bab",
+     "source": "Frazzini & Pedersen (2014), Journal of Financial Economics", "status": "已測"},
+    {"name": "低波動異常", "track": "US", "code": "f_us_low_vol",
+     "source": "Ang, Hodrick, Xing & Zhang (2006), The Journal of Finance", "status": "通過"},
+    {"name": "12個月動量", "track": "US", "code": "f_us_momentum_12m",
+     "source": "Jegadeesh & Titman (1993), The Journal of Finance", "status": "已測"},
+    {"name": "短期反轉", "track": "US", "code": "f_us_reversal_1m",
+     "source": "Jegadeesh (1990), The Journal of Finance", "status": "FAIL"},
+    {"name": "帳面市值比（價值）", "track": "US", "code": "f_us_value_bm",
+     "source": "Fama & French (1992), The Journal of Finance", "status": "已測"},
+    {"name": "海龜法則 System 1（20/10突破）", "track": "FUT", "code": "fut_turtle_system1_20_10",
+     "source": "Dennis, R.；整理見 Faith (2007), Way of the Turtle", "status": "FAIL（百分位57.5）",
+     "family": "家族A（與Donchian/Keltner/CTA多時間框架同家族，5筆算2個獨立發現）"},
+    {"name": "Donchian 通道完整版（55/20）", "track": "FUT", "code": "fut_donchian_full_55_20",
+     "source": "Donchian, R. D.（1960年代）", "status": "FAIL（百分位54.0）", "family": "家族A"},
+    {"name": "Keltner 通道突破（EMA20±2ATR10）", "track": "FUT", "code": "fut_keltner_breakout_20_2atr",
+     "source": "Keltner (1960), How to Make Money in Commodities", "status": "FAIL（百分位78.8）", "family": "家族A"},
+    {"name": "波動度突破（0.5×ATR20）", "track": "FUT", "code": "fut_vol_breakout_0p5atr",
+     "source": "業界通用規則，無單一起源論文", "status": "FAIL（百分位7.0）", "family": "獨立"},
+    {"name": "CTA多時間框架趨勢＋波動度目標", "track": "FUT", "code": "fut_cta_multi_tf_voltarget",
+     "source": "業界系統化CTA常見構造，無單一起源論文", "status": "FAIL（百分位73.0）", "family": "家族A"},
+]
+
+
 def build():
     doc = {
         "schema_version": 1,
@@ -557,11 +601,21 @@ def build():
             "非投資建議；狀態值：NOT_STARTED/IN_PROGRESS/FAIL/EXPERIMENTAL/PASS。"
         ),
         "directions": DIRECTIONS,
+        "external_strategies_note": (
+            "2026-09-08總司令裁示【外部策略三】第2點：每條外部（名家）已發表策略"
+            "皆標來源與『公開後衰減』風險——McLean & Pontiff (2016, Journal of "
+            "Finance) 實證發現異常報酬因子發表後樣本外報酬平均衰減約1/3~1/2，"
+            "不分市場、不分因子類型皆適用，這是所有下列項目共同的基準風險。"
+            "完整文獻細節見 docs/EXTERNAL_STRATEGY_SOURCES.md。"
+            "已知限制：App（index.html）目前尚未讀取本檔案顯示，UI串接待開發帽"
+            "另開項目，本欄位目前只做到資料層標註。"
+        ),
+        "external_strategies": EXTERNAL_STRATEGIES,
     }
     out_path = "../data/signal_status.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=False, indent=2)
-    print(f"寫入 {out_path}，共 {len(DIRECTIONS)} 條方向")
+    print(f"寫入 {out_path}，共 {len(DIRECTIONS)} 條方向、{len(EXTERNAL_STRATEGIES)} 條外部策略")
 
 
 if __name__ == "__main__":
