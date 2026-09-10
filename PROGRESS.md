@@ -1,3 +1,41 @@
+## 2026-09-10（開發佇列自走）深讀二.2 收尾：與馬拉松TW軌並行完成，補文件交叉引用
+
+戴**開發帽**。開發佇列自走輪次（無人值守），依 `PENDING_QUEUE.md` 權威執行順序
+取到下一項 `深讀二.2`（被動基準成為每個主動候選的強制對照組，六關第2關升級版）。
+
+**發現的情況（誠實記錄，不是我一個人做完的）**：開工後查`research/dev_queue_cycle.log`
+發現這一項在16:16~17:31之間被同一支自走腳本連續派工4次、每次都`reason=ERROR
+exit=1`，研判是先前幾輪執行到一半就中斷，留下未commit的`research/validation/
+passive_benchmark_gate.py`（`evaluate_gate8()`）在工作目錄。本輪工作到一半時，
+**TW馬拉松（`HYPOTHESIS_QUEUE.md`那套獨立排程系統）第521輪同時也選中了這個
+未commit成果**，補上`PENDING_QUEUE.md`深讀二.2完成註記並commit+push（
+`fc75210c` 馬拉松第521輪(TW)：收尾深讀二.2被動基準第8關gate函式）——這次commit
+的說明文字明確寫「CLAUDE.md/MARATHON_PROTOCOL.md的對應狀態更新原本已在工作目錄
+但未commit，一併收進本次」，代表它正確地把本輪同時在做的`CLAUDE.md`／
+`research/MARATHON_PROTOCOL.md`文件更新一併收進去，沒有互相覆蓋遺失。
+
+**本輪確認/驗證的部分**：
+- `python research/validation/passive_benchmark_gate.py --self-test`：7項全PASS
+  （最近鄰w匹配正確性、贏/輸判定、空控制組拋錯、結果檔不存在拋錯、對真實結果檔
+  極端高/低報酬各一次驗證非自我循環）。
+- `CLAUDE.md`「新增四道關卡」第8關狀態、`research/MARATHON_PROTOCOL.md`3e節第2點：
+  已更新為「對新開候選正式生效」，並清楚寫明尚未做到批次重評既有候選（深讀二.3）。
+- `node scripts/smoke_test.mjs`：**43/44 PASS**，唯一FAIL是既有已知紅燈#39資料
+  一致性稽核閘門（一致性違規率12.53%>1%），與本項無關（純research/文件變更，
+  未動`index.html`）。
+
+**尚未做到（登記為深讀二.3，已在ORDER清單與時間軸區塊列出）**：只有`evaluate_
+gate8()`這個判定函式本身完成，尚未回頭批次重評`TRIALS_LEDGER.md`／
+`STRATEGY_GRAVEYARD.md`／`LEADS.md`／`TW_LEADS.md`裡任何一個已宣稱「通過第2關」
+的既有候選——那需要先盤點候選清單、逐一補跑候選自己的equity curve算出MDD，
+是下一輪獨立工作量。
+
+**影響檔案**：`CLAUDE.md`、`research/MARATHON_PROTOCOL.md`（本輪新增，經
+`fc75210c`收錄）、`research/validation/passive_benchmark_gate.py`、
+`PENDING_QUEUE.md`（皆由`fc75210c`收錄並push）；本次commit只補`PROGRESS.md`。
+
+---
+
 ## 2026-09-10（開發佇列自走）深讀一.3：策略監控台明細補上MDD／交易數
 
 戴**開發帽**。開發佇列自走輪次（無人值守），依 `PENDING_QUEUE.md` 權威執行順序
