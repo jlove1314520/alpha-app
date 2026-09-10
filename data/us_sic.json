@@ -1,0 +1,61 @@
+{
+  "fetched_at": "2026-09-10T12:53:52+00:00",
+  "source": "SEC EDGAR company_tickers.json（ticker→CIK）+ submissions/CIK{cik}.json（sic/sicDescription），官方免金鑰",
+  "tickers": {
+    "NVDA": {
+      "cik": 1045810,
+      "sic": "3674",
+      "sic_description": "Semiconductors & Related Devices",
+      "entity_name": "NVIDIA CORP"
+    },
+    "AAPL": {
+      "cik": 320193,
+      "sic": "3571",
+      "sic_description": "Electronic Computers",
+      "entity_name": "Apple Inc."
+    },
+    "MSFT": {
+      "cik": 789019,
+      "sic": "7372",
+      "sic_description": "Services-Prepackaged Software",
+      "entity_name": "MICROSOFT CORP"
+    },
+    "TSM": {
+      "cik": 1046179,
+      "sic": "3674",
+      "sic_description": "Semiconductors & Related Devices",
+      "entity_name": "TAIWAN SEMICONDUCTOR MANUFACTURING CO LTD"
+    },
+    "GOOGL": {
+      "cik": 1652044,
+      "sic": "7370",
+      "sic_description": "Services-Computer Programming, Data Processing, Etc.",
+      "entity_name": "Alphabet Inc."
+    },
+    "AMZN": {
+      "cik": 1018724,
+      "sic": "5961",
+      "sic_description": "Retail-Catalog & Mail-Order Houses",
+      "entity_name": "AMAZON COM INC"
+    },
+    "UMC": {
+      "cik": 1033767,
+      "sic": "3674",
+      "sic_description": "Semiconductors & Related Devices",
+      "entity_name": "UNITED MICROELECTRONICS CORP"
+    },
+    "ASX": {
+      "cik": 1122411,
+      "sic": "3674",
+      "sic_description": "Semiconductors & Related Devices",
+      "entity_name": "ASE Technology Holding Co., Ltd."
+    },
+    "CHT": {
+      "cik": 1132924,
+      "sic": "4812",
+      "sic_description": "Radiotelephone Communications",
+      "entity_name": "CHUNGHWA TELECOM CO LTD"
+    }
+  },
+  "errors": []
+}

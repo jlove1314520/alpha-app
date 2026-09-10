@@ -1744,7 +1744,31 @@ ORDER-END
 - [x] **建置一.1** **已完成**：`.github/scripts/fetch_news_events.py` → events.json 1,210 筆／news.json 70 則（只存索引不存全文）。資料源全部官方實測 200；鉅亨查三路徑後不採用（唯一可通的是站台後端 API，違反取得方式鐵律）。「題材判斷」卡改為「近期事件與題材」：月營收年增＋法人連續天數＋近 30 日事件流，無事件時明列已查四類。✅ `.github/workflows/news_events.yml` 已於 e9c88a8 推上遠端（每 30 分鐘），**先前說「PAT 無 workflow scope」是錯的**。
 - [x] **建置一.2** **已完成**：目標價卡改為「估值區間（非目標價）」。同產業本益比 25/50/75 百分位 × 本檔近四季 EPS 得三個價位，卡片直接寫出產業樣本數、本益比資料日、EPS 來源與季別區間、本檔在同業的百分位。樣本 <8 檔或 EPS ≤0 或拿不到 EPS 時顯示「同產業樣本不足無法估算」並列出樣本數，分批進場階梯不動。回退鏈：本益比 主=TWSE 每日本益比(BWIBBU)／備援=收盤價÷近四季EPS；近四季EPS 主=stock_detail 連續四季加總／備援=收盤價÷官方本益比回推，每項都標來源。**過程抓到一個會生出離譜估值的真缺陷**：stock_detail 季報歷史 2025Q1~2026Q1 是空的，直接取最後四筆會得到橫跨兩年的假 TTM（2317=17.26、2603=67.88、6223 落後 6 季），已加「必須連續四季且不得落後逾 4 季」硬檢查，不合就退回官方本益比回推。證據：Python 獨立重算與畫面逐字吻合（2330 樣本 169 檔、1,599.6／2,472.8／5,019.8、同業第 49 百分位；2603 樣本 31 檔、234.8／313.5／486.9、第 23 百分位）；冒煙新增 check 44（EPS 連續性/過期/null 拒絕、百分位線性內插、實開 12 檔報告頁）PASS。
 - [ ] **稽核.三（CC 2026-09-10 自提，非總司令指令，先登記不自行執行）** 冒煙 check 39 目前是紅的，**而且是既有紅燈、不是本輪造成的**：`data/audit_report.json`（2026-09-09 03:25 產生，commit ccefd588 訊息已載明「確認 check 39 紅燈是真問題不是誤報」）記錄一致性違規率 8.33%（176／2,113 檔、1,434 筆）＋程式碼層級違規 2 筆，門檻是 1%。本輪的 建置一.2 未動任何 `data/` 檔（`git status` 可證），在 HEAD 版的同一份檔案上跑同一道閘門結果相同（`gate_pass=false`）。**這代表現在只要有人跑冒煙測試就會看到一個紅燈，時間一久會被當成背景雜訊而失去警示作用。**待總司令排序：要先查這 1,434 筆違規的分佈與根因，還是先把它降級為「已知並登記」以免掩蓋新問題。
-- [ ] **建置一.3** 美股類股（SEC SIC 對映）／ADR 溢價卡（TSM、UMC、ASX、CHT）
+- [x] **建置一.3** **已完成**：美股類股卡改用 SEC EDGAR 官方 SIC 對映（`.github/scripts/fetch_us_sic.py`，
+  company_tickers.json 找 CIK → submissions/CIK{cik}.json 取 sic/sicDescription，免金鑰，跑在
+  `market.yml`），寫 `data/us_sic.json`；本機實測 9 檔全部成功（NVDA 3674 半導體、AAPL 3571 電腦、
+  MSFT 7372 軟體服務、TSM/UMC/ASX 3674 半導體、GOOGL 7370 資料處理服務、AMZN 5961 型錄零售、
+  CHT 4812 無線電話通信）。ADR 溢價卡（`.github/scripts/compute_adr_premium.py`，純計算零額外請求，
+  跑在 `quotes.yml`，寫 `data/adr_premium.json`）：溢價 ％＝（quotes_us價×fx匯率÷ADR比率）相對
+  quotes_tw價的差幅。ADR 比率寫死並附三來源查證（TSM 1:5／UMC 1:5／ASX 1:2／CHT 1:10，SEC EDGAR
+  20-F為主，逐一 CIK 附在腳本 docstring）；本機實測 TSM 可算出 premium=+11.83%（quotes_us美股報價
+  169.67→435.36美元、fx 31.467、2330現價2450），UMC/ASX/CHT 誠實顯示「美股報價缺失」——這三檔
+  ADR 是本輪才加進 `fetch_quotes_us.py` 的 `US_TICKERS`（NVDA/AAPL/MSFT/TSM/GOOGL/AMZN/UMC/ASX/CHT
+  共9檔），要等下次 `quotes.yml`（10分鐘一次，需 GitHub Secrets 的 `FINNHUB_API_KEY`，本機沒有這把
+  key 沒辦法本機驗證這三檔）排程跑過才會有真報價，App端已用結構化 errors[]（含ticker/reason）
+  誠實顯示缺漏原因，不是靜默空白。`index.html` 移除舊版「尚未實作」佔位字，改為兩張真實卡片
+  （`loadMarketUsSector()`／`loadMarketAdrPremium()`，各自 try/catch＋Promise.allSettled 隔離，
+  失敗不拖垮已渲染的美股指數卡）；美股類股名稱改用 SEC EDGAR 自己的 `entity_name`（跟 SIC 同一個
+  CIK 來源，乾淨簡短），沒有改用既有 `nameOf()`（FinMind USStockInfo）是因為實測 ASX 那筆名稱會夾帶
+  一長串股權說明文字，SEC 版本明顯乾淨。設定頁「資料新鮮度」補上 `data/us_sic.json`／
+  `data/adr_premium.json` 兩筆監控項。**冒煙測試**：`node scripts/smoke_test.mjs` 44 項僅 check 39
+  FAIL（既有紅燈，見上方「稽核.三」條目，`git diff --stat data/audit_report.json` 確認該檔在本輪
+  開工前就已是修改狀態，非本輪造成），其餘全過，含 check 3/4/5/12（分頁切換、面板有內容、美股面板
+  切換不拋錯、全程無累積 uncaught error）。額外用 Playwright 手動腳本直接檢查
+  `#us-sector-rows`／`#adr-rows` 的 innerHTML，確認兩張卡渲染出真實數字而非卡在「載入中」。
+  已知限制誠實揭露：ADR比率為寫死常數，未來若存託機構調整比率不會自動反映，需人工核對官方公告後
+  改常數（見腳本 docstring）；SIC/ADR溢價目前只涵蓋 TSM/UMC/ASX/CHT 四檔（使用者原話指定範圍），
+  未擴及其他台股ADR。
 - [ ] **建置一.4** 驗收：三張卡截圖＋events.json 筆數與最新時間＋smoke 新增佔位字歸零檢查
 
 ---

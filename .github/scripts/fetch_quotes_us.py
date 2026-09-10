@@ -34,7 +34,9 @@ OUT_PATH = REPO_ROOT / "data" / "quotes_us.json"
 
 # 跟 alpha-data/config.py 的 US_TICKERS 保持一致（兩個獨立 repo，這裡沒有 import
 # 路徑可以直接重用，用複製一份常數 + 註解交代來源的方式，不是遺漏同步）。
-US_TICKERS = ["NVDA", "AAPL", "MSFT", "TSM", "GOOGL", "AMZN"]
+# 2026-09-10（建置一.3）新增 UMC/ASX/CHT 三檔台股ADR，給美股類股/ADR溢價卡用
+# （見 fetch_us_sic.py／compute_adr_premium.py），跟既有六檔共用同一份Finnhub抓取。
+US_TICKERS = ["NVDA", "AAPL", "MSFT", "TSM", "GOOGL", "AMZN", "UMC", "ASX", "CHT"]
 
 FINNHUB_URL = "https://finnhub.io/api/v1/quote"  # 2026-08-26 修正：原本寫成 v2，Finnhub
 # 沒有 v2/quote 這個端點——實測 v2 回傳 HTTP 200 但內容是一個 HTML 頁面（不是 JSON），

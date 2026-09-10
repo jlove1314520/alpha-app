@@ -620,8 +620,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：yfinance，GitHub Actions 排程抓取</div>
       </div>
       <div class="card">
-        <h3>美股類股 / ADR</h3>
-        <div class="note">尚未實作——需要美股類股分類與 ADR 溢價資料源，這輪只做了台股/期貨兩軌，下一輪再補。</div>
+        <h3>美股類股（SEC SIC 分類）</h3>
+        <div id="us-sector-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="us-sector-datatime"></div>
+        <div class="note">類股來源：SEC EDGAR company_tickers.json + submissions（官方SIC產業分類，免金鑰），GitHub Actions 排程抓取；股價同美股即時報價（Finnhub）</div>
+      </div>
+      <div class="card">
+        <h3>台股 ADR 溢價（TSM/UMC/ASX/CHT）</h3>
+        <div class="facts" id="adr-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="adr-datatime"></div>
+        <div class="note">溢價 ％ ＝（美股ADR價 × 美元/台幣匯率 ÷ ADR比率）相對台股現價的差幅；ADR比率為固定值（換股結構才會變），各檔來源見卡片內個股說明</div>
       </div>
     </div>
 
@@ -1571,6 +1579,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 2026-08-25 新增：盤中近即時報價（GitHub Actions 排程抓，見 .github/workflows/quotes.yml）。
   // FinMind 免費版只有盤後日線，畫面顯示「盤中」卻只能給前一日收盤價會誤導使用者。
   let INTRADAY_TW=null,INTRADAY_US=null,INTRADAY_IBKR=null,INTRADAY_SINOPAC=null;
+  // 2026-09-10（建置一.3）美股類股（SEC SIC）／ADR溢價，見 loadMarketUsSector()／
+  // loadMarketAdrPremium()。跟上面幾個INTRADAY_*同樣的「全域快取+各自fetch」風格。
+  let US_SIC_CACHE=null,ADR_PREMIUM_CACHE=null;
   function intradayAgeMin(data){
     if(!data||!data.fetched_at)return null;
     return (Date.now()-new Date(data.fetched_at).getTime())/60000;
@@ -3391,6 +3402,72 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const usIdx=await loadUsIndexes();
     el.innerHTML=usIdx.map(r=>r.html).join('');
     document.getElementById('us-idx-datatime').textContent=fmtMarketDataTime(MARKET_US_CACHE);
+    // 2026-09-10（建置一.3）美股類股/ADR溢價各自獨立try/catch（用allSettled，
+    // 不用all）——其中一張卡失敗不能拖垮已經渲染好的美股指數，見CLAUDE.md
+    // 「App穩定性與錯誤隔離原則」。
+    const subResults=await Promise.allSettled([loadMarketUsSector(),loadMarketAdrPremium()]);
+    const subLabels=['loadMarketUsSector','loadMarketAdrPremium'];
+    subResults.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+subLabels[i]+']',r.reason);recordGlobalError(subLabels[i],r.reason)}});
+  }
+  // ── 2026-09-10（建置一.3）美股類股（SEC SIC對映）／ADR溢價 ──
+  async function loadUsSicAdrFiles(force){
+    if(force||!US_SIC_CACHE){
+      try{const r=await fetch('data/us_sic.json?t='+Date.now());if(r.ok)US_SIC_CACHE=await r.json()}catch(e){console.warn('[loadUsSicAdrFiles:sic]',e);recordGlobalError('loadUsSicAdrFiles:sic',e)}
+    }
+    if(force||!ADR_PREMIUM_CACHE){
+      try{const r=await fetch('data/adr_premium.json?t='+Date.now());if(r.ok)ADR_PREMIUM_CACHE=await r.json()}catch(e){console.warn('[loadUsSicAdrFiles:adr]',e);recordGlobalError('loadUsSicAdrFiles:adr',e)}
+    }
+  }
+  function usSectorRowHtml(ticker,sicInfo,quote){
+    // 2026-09-10：優先用SEC EDGAR自己回傳的entity_name（跟SIC同一個CIK來源，
+    // 短且乾淨）；STOCKNAME_US（FinMind USStockInfo）少數ADR名稱會夾帶完整
+    // 股權說明（例如ASX會變成一長串「American Depositary Shares (each
+    // representing Two Common Shares)」），沒有SIC資料時才退回nameOf()。
+    const nm=(sicInfo&&sicInfo.entity_name)||nameOf(ticker);
+    const label=nm&&nm!==ticker?`${ticker}（${nm}）`:ticker;
+    const sector=sicInfo&&sicInfo.sic_description?`${sicInfo.sic_description}（SIC ${sicInfo.sic}）`:'尚無SIC資料（排程抓取中或該檔查無對映）';
+    if(!quote||quote.price==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${sector}</span></div><div class="px"><b>—</b><span>查無報價</span></div></div>`;
+    const pct=quote.change_pct;const cls=pct==null?'':(pct>=0?'pos':'neg');
+    const pctTxt=pct==null?'—':`${pct>=0?'+':''}${pct.toFixed(2)}%`;
+    return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${sector}</span></div><div class="px"><b>$${nf(quote.price)}</b><span class="${cls}">${pctTxt}</span></div></div>`;
+  }
+  async function loadMarketUsSector(){
+    const el=document.getElementById('us-sector-rows');if(!el)return;
+    if(!INTRADAY_US)await loadIntradayQuotes();
+    await loadUsSicAdrFiles();
+    const sicMap=(US_SIC_CACHE&&US_SIC_CACHE.tickers)||{};
+    const quotes=(INTRADAY_US&&INTRADAY_US.quotes)||{};
+    const tickers=Array.from(new Set([...Object.keys(sicMap),...Object.keys(quotes)]));
+    if(!tickers.length){el.innerHTML='<div class="note">尚無資料（SEC SIC 對映與美股報價都還沒抓到）</div>';document.getElementById('us-sector-datatime').textContent='';return}
+    // 同產業（SIC說明）排在一起，查無SIC的排最後
+    const rows=tickers.map(tk=>({tk,sic:sicMap[tk],q:quotes[tk]}))
+      .sort((a,b)=>{
+        const sa=(a.sic&&a.sic.sic_description)||'￿',sb=(b.sic&&b.sic.sic_description)||'￿';
+        return sa===sb?a.tk.localeCompare(b.tk):sa.localeCompare(sb);
+      });
+    el.innerHTML=rows.map(r=>usSectorRowHtml(r.tk,r.sic,r.q)).join('');
+    const sicTime=US_SIC_CACHE&&US_SIC_CACHE.fetched_at?fmtTzMMDDHHMM(new Date(US_SIC_CACHE.fetched_at),'Asia/Taipei'):'查無資料';
+    document.getElementById('us-sector-datatime').textContent=`SIC資料時間 ${sicTime}（GitHub Actions 排程）；股價 ${fmtMarketDataTime(INTRADAY_US)}`;
+  }
+  function adrRowHtml(ticker,row,errReason){
+    const nm=row?nameOf(row.tw_code):'';
+    const label=nm?`${ticker}（${nm}${row?row.tw_code:''}）`:ticker;
+    if(!row)return `<div class="f"><span>${label}</span><b style="font-weight:400;font-size:12px;color:var(--ink-3)">${errReason||'查無資料'}</b></div>`;
+    const cls=row.premium_pct>=0?'pos':'neg';
+    const pctTxt=`${row.premium_pct>=0?'+':''}${row.premium_pct.toFixed(2)}%`;
+    return `<div class="f"><span>${label}</span><b class="${cls}" title="ADR比率1:${row.ratio}／${row.source}">${pctTxt}</b></div>`;
+  }
+  async function loadMarketAdrPremium(){
+    const el=document.getElementById('adr-rows');if(!el)return;
+    await loadUsSicAdrFiles();
+    const data=ADR_PREMIUM_CACHE;
+    const order=['TSM','UMC','ASX','CHT'];
+    if(!data){el.innerHTML=order.map(tk=>adrRowHtml(tk,null,'查無資料（尚未排程抓取或抓取失敗）')).join('');document.getElementById('adr-datatime').textContent='';return}
+    const errByTk={};(data.errors||[]).forEach(e=>{if(e&&e.ticker)errByTk[e.ticker]=e.reason});
+    el.innerHTML=order.map(tk=>adrRowHtml(tk,data.rows&&data.rows[tk],errByTk[tk])).join('');
+    document.getElementById('adr-datatime').textContent=data.computed_at
+      ?`計算時間 ${fmtTzMMDDHHMM(new Date(data.computed_at),'Asia/Taipei')}（依當下quotes_us/quotes_tw/fx計算，ADR比率為固定值）`
+      :'查無計算時間';
   }
   const FUT_CONTRACTS=[{id:'TX',label:'台指期近月'},{id:'MTX',label:'小型台指期近月'},{id:'TE',label:'電子期近月'},{id:'TF',label:'金融期近月'}];
   async function loadMarketFUT(){
@@ -5631,6 +5708,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     {label:'美股盤中報價（GitHub Actions）',file:'data/quotes_us.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
     {label:'台股大盤/類股/三大法人',file:'data/market_tw.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
     {label:'美股四大指數',file:'data/market_us.json',kind:'daily',tz:'UTC',run:[21,30],grace:3},
+    {label:'美股類股SIC對映',file:'data/us_sic.json',kind:'daily',tz:'UTC',run:[21,30],grace:3},
+    {label:'台股ADR溢價',file:'data/adr_premium.json',kind:'intraday',tz:'America/New_York',open:[9,30],close:[16,0]},
     {label:'匯率 USD/TWD',file:'data/fx.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
     {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
     {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
@@ -6131,7 +6210,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-10.1509';
+  const APP_VERSION='2026-09-10.2059';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

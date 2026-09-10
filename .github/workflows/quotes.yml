@@ -71,6 +71,10 @@ jobs:
         run: python .github/scripts/fetch_quotes_us.py
         continue-on-error: true  # 美股這步沒設金鑰時會失敗，不要讓它擋住台股那份已經抓到的資料被 commit
 
+      - name: 計算ADR溢價（quotes_us×fx÷ADR比率 對 quotes_tw，純計算零額外請求，建置一.3）
+        run: python .github/scripts/compute_adr_premium.py
+        continue-on-error: true  # 上面任一份報價還沒抓到時這步會誠實記缺漏，不擋其他步驟
+
       - name: Commit 報價 JSON（有變動才 commit）
         if: always()  # 2026-08-26 新增：前面兩步不管誰失敗（即使兩個都失敗），只要有任何一份
         # 檔案真的寫出來了就要 commit——沒有這行，前面任一步驟(continue-on-error標成failure)

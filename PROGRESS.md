@@ -1,3 +1,74 @@
+## 2026-09-10（開發佇列自走）建置一.3：美股類股（SEC SIC對映）／ADR溢價卡做出真實資料
+
+戴**開發帽**。依`PENDING_QUEUE.md`「執行順序（權威清單）」取件，本輪做
+**建置一.3**——把 `market-us-panel` 裡「尚未實作」的「美股類股/ADR」佔位卡
+換成兩張真實資料卡。
+
+**做了什麼**：
+1. **美股類股卡**：新增 `.github/scripts/fetch_us_sic.py`，用 SEC EDGAR
+   官方端點（`company_tickers.json` 查 CIK → `submissions/CIK{cik}.json`
+   取 `sic`/`sicDescription`，免金鑰）幫 9 檔美股（既有 NVDA/AAPL/MSFT/
+   TSM/GOOGL/AMZN + 本輪新增 UMC/ASX/CHT）對映產業分類，寫
+   `data/us_sic.json`，排在 `market.yml`（SIC 幾乎不變，不需要塞進10分鐘
+   一次的高頻迴圈）。本機實測 9/9 檔成功（例：TSM/UMC/ASX 都落在
+   SIC 3674 半導體、CHT 落在 SIC 4812 無線電話通信）。
+2. **ADR溢價卡**：新增 `.github/scripts/compute_adr_premium.py`，純計算
+   （零額外請求，讀既有 `quotes_us.json`×`fx.json`÷ADR比率 對
+   `quotes_tw.json`），排在 `quotes.yml`（10分鐘一次，貼近即時）。ADR
+   比率寫死並附三來源查證（TSM 1:5、UMC 1:5、ASX 1:2、CHT 1:10，主要
+   來源 SEC EDGAR 20-F 各檔CIK，逐一列在腳本 docstring）。本機實測 TSM
+   算出溢價 +11.83%；UMC/ASX/CHT 因為是本輪才加進
+   `fetch_quotes_us.py`的`US_TICKERS`，本機沒有`FINNHUB_API_KEY`
+   （放在GitHub Secrets）沒辦法本機驗證這三檔的真報價，App端用結構化
+   `errors[]`誠實顯示「美股報價缺失」，等下次排程（含金鑰）跑過會自動
+   補上，不是靜默空白。
+3. **`index.html`**：拿掉舊版「尚未實作」佔位字，改成 `loadMarketUsSector()`
+   （類股卡）／`loadMarketAdrPremium()`（ADR溢價卡），各自 try/catch＋
+   跟既有 `loadUsIndexes()` 用 `Promise.allSettled` 隔離（一張卡失敗不拖垮
+   已經渲染好的美股指數卡，見CLAUDE.md「App穩定性與錯誤隔離原則」）。
+   類股卡的公司名稱改用 SEC EDGAR 自己回傳的 `entity_name`（跟SIC同一個
+   CIK來源，短且乾淨）而不是既有 `nameOf()`（FinMind USStockInfo）——實測
+   踩到 ASX 那筆 FinMind 名稱會夾帶一整串「American Depositary Shares
+   (each representing Two Common Shares)」股權說明，SEC版本明顯乾淨
+   （"ASE Technology Holding Co., Ltd."）。設定頁「資料新鮮度」補上
+   `data/us_sic.json`（daily）／`data/adr_premium.json`（intraday）兩筆
+   監控項。
+
+**驗證**：
+- `node scripts/smoke_test.mjs`：44項僅 **check 39 FAIL**，且是既有紅燈——
+  `git diff --stat data/audit_report.json` 確認該檔在本輪開工前（`git status`
+  快照）就已是修改狀態，跟本輪動的檔案（`index.html`/`.github/*`/
+  `data/us_sic.json`/`data/adr_premium.json`）完全不重疊，屬於背景排程
+  （`audit.yml`）獨立更新，跟前一輪「建置一.2」記錄的同一個既有問題
+  （見 `PENDING_QUEUE.md`「稽核.三」條目）。其餘含 check 3（六分頁切換）、
+  4（主要面板有內容）、5（市場頁三個市場切換不拋錯）、12（全程無累積
+  uncaught error）全過。
+- 另用 Playwright 臨時腳本（測完即刪）直接呼叫 `go('market')`+
+  `setMarketToggle('market','US')`，讀 `#us-sector-rows`／`#adr-rows` 的
+  `innerHTML`，確認兩張卡渲染出真實數字（美股價格/漲跌%/SIC分類/ADR溢價%）
+  而不是卡在「載入中」。
+
+**已知限制誠實揭露**：
+- ADR比率是寫死常數，若未來存託機構調整比率不會自動反映，需人工核對
+  官方公告後改常數（SEC沒有「即時回傳目前比率」的官方端點）。
+- SIC/ADR溢價目前只做 TSM/UMC/ASX/CHT 四檔（使用者原話指定範圍），
+  未擴及其他台股ADR（例如中鋼/日月光以外可能存在的其他ADR）。
+- UMC/ASX/CHT 三檔的美股報價要等下次排程跑過才會出現，此刻是誠實的
+  「缺漏」狀態，不是bug。
+
+**改了哪些檔案**：`.github/scripts/fetch_us_sic.py`（新增）、
+`.github/scripts/compute_adr_premium.py`（新增）、
+`.github/scripts/fetch_quotes_us.py`（US_TICKERS加UMC/ASX/CHT）、
+`.github/workflows/market.yml`（加一步+commit清單加`data/us_sic.json`）、
+`.github/workflows/quotes.yml`（加一步計算ADR溢價）、
+`index.html`（美股市場頁兩張新卡+設定頁資料新鮮度）、`PENDING_QUEUE.md`
+（建置一.3標記完成）。
+
+**下一步**：依權威清單，下一項是 **建置一.4**（三張卡截圖驗收＋
+events.json筆數與最新時間＋smoke新增佔位字歸零檢查）。
+
+---
+
 ## 2026-09-10（馬拉松自走・交辦優先）題材三：規則檔關鍵詞從92題材擴充到123題材（達成目標，批次四／最終批）
 
 戴**情報帽**。依CLAUDE.md「三之一、交辦優先於自走」鐵律，開工先讀
