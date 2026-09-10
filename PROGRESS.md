@@ -1,3 +1,107 @@
+## 2026-09-10（假設佇列自走・交辦優先）題材三：規則檔關鍵詞從81題材擴充到92題材（目標123，批次三）
+
+戴**情報帽**。本輪執行個體是`AlphaHypothesisQueue`（假設佇列軌），依CLAUDE.md
+「三之一、交辦優先於自走」鐵律，開工先讀`PENDING_QUEUE.md`最上方紀錄——兩條
+阻塞項（S4U排程註冊、claude CLI非互動驗證）維持阻塞、題材七維持未拆解，
+往下第一條可執行的未開始交辦項是【題材三】標記的「剩餘42個題材下一批」。
+本輪把這個名額給交辦，不做假設佇列自己的候選假設檢定。
+
+**做了什麼**：為生技（`cdmo`委託製造／`new_drug`新藥開發／`generic_drug`學名藥／
+`medical_device`醫療器材／`diagnostics`檢測試劑，共5個）與綠能（`solar`太陽能／
+`wind`風力發電／`hydrogen`氫能／`grid`重電電網／`cable`電線電纜／`carbon`碳權
+環保，共6個）合計11個題材補上關鍵詞，沿用批次一、二風格（具體產品名、業界
+慣用縮寫、英文原文）。`data/seed/theme_keywords.json`題材數81→92/123。
+**剩餘31個題材（傳產9、金融4、航運4、軟體5、其他3、總經曝險類6）留待下一批**。
+
+**驗證**：
+1. `python scripts/build_themes.py`重跑——本次新增11個題材對「已驗證成員數」
+   淨影響為**0**（驗證題材數、A/C級成員數與批次一、二完全相同：6題材/A0/C14）。
+   誠實結果：當前300則新聞素材池對這批新詞完全沒有命中，沒有靠擴大關鍵詞
+   硬做出新驗證數。
+2. `python scripts/test_theme_rules.py`全部通過（exit=0），無回歸（本次未修改
+   比對邏輯，只新增資料）。
+
+**冒煙測試**：未動`index.html`或共用腳本，依CLAUDE.md僅要求該類異動才跑
+`smoke_test.mjs`；本次改動範圍是`data/seed/theme_keywords.json`（規則檔）僅由
+`scripts/build_themes.py`讀取，已用該腳本本身與其單元測試驗證。
+
+**副線觀察（未動，記錄供下一批參考）**：核對`data/seed/seed_themes.json`的
+`members`欄位時發現少數股票代號疑似編碼/OCR損壞（例：`new_drug`題材裡的
+`"6胡"`、`securities`／`logistics`題材裡的`"2income"`、`saas`題材裡的
+`"6path"`）——這些不是合法四碼股票代號。本輪範圍是`theme_keywords.json`
+關鍵詞，不是`seed_themes.json`的members清單，未動手修，但下一批處理傳產／
+金融／航運時若用到這些members驗證，要注意這幾筆本身就是壞資料，不是規則
+沒寫對。
+
+**影響檔案**：`data/seed/theme_keywords.json`（81→92題材關鍵詞）、
+`data/themes.json`（重新生成，meta數字如上）、`PENDING_QUEUE.md`（記錄本輪
+進度）、`PROGRESS.md`（本節）。
+
+**下一步**：剩餘31個題材分批補齊，總經曝險類題材（`china_exposure`／
+`tariff_benefit`／`taiwan_reshoring`／`india_expansion`／`sea_expansion`／
+`high_dividend`）下一輪要先想清楚是否適用同一套「產品詞→題材」規則，或需要
+另一套「營收地區別／殖利率篩選」邏輯，不要硬套產品詞框架（此提醒沿用批次二
+結論，本輪仍未處理到這組）。
+
+---
+
+## 2026-09-10（開發佇列自走）源頭一.2a：千張大戶（TDCC集保股權分散表）週更管線上線
+
+戴**開發帽**。開發佇列權威清單取到的下一項，`PENDING_QUEUE.md`「源頭一.2a」原話：
+「千張大戶：集保 `getOD.ashx?id=1-5` 週五 20:00 一次 → `research/data/tdcc/` 累積
+→ `data/holders.json`」。
+
+**做了什麼**：
+1. 新增 `scripts/fetch_tdcc_holders.py`：打 TDCC 官方開放資料端點
+   `https://opendata.tdcc.com.tw/getOD.ashx?id=1-5`（免金鑰、免驗證碼），驗證回應
+   首行等於預期 CSV 表頭才收下（不能只看 HTTP 200，同款地雷防線），存進
+   `research/data/tdcc/{資料日期}.csv`（`.gitignore` 的 `research/data/` 規則已涵蓋，
+   本機累積不進 git，因為這支端點只回傳「最新一週快照」不是時間序列 API，要靠每週
+   呼叫＋本機累積自己組出歷史），再掃全部累積檔重建 `data/holders.json`（欄位：
+   `big_holder_ratio`≥1000張比例＝TDCC持股分級15級佔比、`small_holder_ratio`≤1張
+   比例＝1級佔比、`week_change_pct`週變化、`streak_weeks`連續增減週數、`history`
+   最近12週明細）。
+2. 註冊 Windows 排程 `AlphaTdccHolders`（每週五20:00，仿 `AlphaDepCheck` 樣板：
+   `LogonType=Interactive`／`RunLevel=Limited`），動作內容仿
+   `run-ibkr-quotes-cycle.ps1`：跑完 python 腳本後只對 `data/holders.json` 這個
+   路徑做 `git add`/`git commit`/`git pull --no-rebase`/`git push`（路徑範圍限定，
+   不會誤吃其他排程留下的髒檔案），已登記進 `docs/LOCAL_SCHEDULED_TASKS.md`
+   工作清單表。`Get-ScheduledTask`實測`NextRunTime=2026/9/11 20:00`（明天週五）。
+
+**實測證據**：
+- 首次執行：成功抓到 2026-09-04 這週快照（4,051 檔、68,867 列），存進
+  `research/data/tdcc/20260904.csv`，`holders.json` 產出 4,051 檔、1.79MB。
+- 2330 台積電：≥1000張比例=84.74%、≤1張比例=1.12%，合計列（level 17）占比=
+  100.00%（內部完整性檢查：4,051 檔全數無偏離，證明解析欄位對應正確）。
+- 用竄改過的第二週假資料（`2330`大戶比例84.74%→84.78%）驗證週變化/連續增減週數
+  計算邏輯：`week_change_pct=0.04`、`streak_weeks=1`，符合預期；驗證完已刪除，
+  正式檔只保留真實的 2026-09-04 這一週。
+- 第二次原樣重跑驗證冪等：偵測到同一資料日期（20260904 已有存檔）不會重複寫檔，
+  也不會憑空產生假的第二週。
+- `node scripts/smoke_test.mjs`：1~38、40~44 全數 PASS，僅第39項（資料一致性稽核，
+  265 檔違規）維持既有紅燈——這項與本次改動無關（`holders.json`不在該稽核涵蓋範圍），
+  且是既有已知問題（`ccefd588`commit已確認「check 39 紅燈是真問題不是誤報」，非本輪
+  引入），未動`data/audit_report.json`（不越權碰維運帽擁有的檔案）。
+
+**誠實限制**：
+1. TDCC 沒有歷史查詢端點，只能往前累積，無法回補過去週別，第一週的
+   `week_change_pct`/`streak_weeks`皆為`null`/`0`，要等下週五排程真的跑過才有第一筆
+   週對週資料。
+2. 與集保結算所官網 <https://www.tdcc.com.tw/portal/zh/smWeb/qryStock> 的人工比對
+   （源頭一.7驗收項目要求）**尚未做**——查過該頁面，是表單送出查詢、非直接可 GET，
+   本輪環境無法操作瀏覽器表單完成這步，留給有瀏覽器操作能力的一輪或總司令。
+3. 個股頁籌碼卡**尚未接上**這份`holders.json`（那是下一步`源頭一.3`），目前只是
+   資料層產出，App 畫面還看不到「千張大戶」欄位。
+
+**影響檔案**：新增 `scripts/fetch_tdcc_holders.py`、`data/holders.json`；
+修改 `docs/LOCAL_SCHEDULED_TASKS.md`、`PENDING_QUEUE.md`；系統面新增 Windows
+排程工作 `AlphaTdccHolders`。
+
+**下一步**：依權威清單，`源頭一.2a`完成後接續處理清單中下一個未勾選項目
+（`金流一.1`／`金流一.2` 等，見 `PENDING_QUEUE.md`「執行順序（權威清單）」）。
+
+---
+
 ## 2026-09-10（重開機復原盤點）AlphaData cp950修正確認生效＋DevQueue自走死結解除＋深讀一.1收尾
 
 戴**維運帽**。總司令台北18:0x重開機後，照交辦逐項盤點復原狀況。
