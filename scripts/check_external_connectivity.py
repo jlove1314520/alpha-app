@@ -166,6 +166,109 @@ def _trim_log() -> None:
         print(f"  ! 修剪 log 失敗（{type(e).__name__}），不影響本次檢查")
 
 
+# ---------------------------------------------------------------------------
+# 常駐工作停擺自檢（2026-09-10 總司令指示二.5）
+#
+# 為什麼加這一段：2026-09-10 重開機後查出三件事，共同點都是
+# 「排程狀態顯示成功、實際上什麼都沒產出」，從外面完全看不出來——
+#   * AlphaTwsePublishProbe 的觸發器是 2026-09-08 的一次性 TimeTrigger，
+#     跑完那天就永久失效，之後兩天一個樣本都沒收，狀態一直是「就緒」。
+#   * AlphaDepCheck 每週固定 0x80070002（找不到 python），壞了至少三週。
+#   * AlphaData 每天在第一行 print 就 UnicodeEncodeError 崩潰，
+#     alpha.db 從 2026-08-21 起就沒再進過任何一筆資料。
+# 對外連通性監測解決的是「網路通不通」，但以上三個網路全通、
+# 一樣靜默停擺。所以要有一個「產出有沒有在動」的檢查。
+#
+# 判定方式刻意選最笨但騙不了人的一種：看**產出檔的修改時間**。
+# 「狀態=就緒」「LastTaskResult=0」都可以在什麼事都沒做的情況下成立，
+# 檔案時間戳不行——沒寫就是沒寫。
+#
+# 門檻是預期間隔的 3 倍（總司令指定）：容忍單次延遲與一次重試，
+# 但連續錯過三個週期就一定是真的停了。
+WATCHED_TASKS = [
+    # (工作名稱, 預期間隔分鐘, 產出檔相對 ROOT 的路徑, 只在這個時段內檢查或 None)
+    ("AlphaLiveServer",      1,    "research/alpha_live_server_cycle.log", None),
+    ("AlphaShioajiQuotes",   2,    "research/shioaji_quotes_cycle.log",    None),
+    ("AlphaIbkrQuotes",      5,    "research/ibkr_quotes_cycle.log",       None),
+    ("AlphaDevQueue",        15,   "research/dev_queue_cycle.log",         None),
+    ("AlphaMarathon",        30,   "research/marathon_cycle.log",          None),
+    ("AlphaHypothesisQueue", 30,   "research/hypothesis_queue_cycle.log",  None),
+    # 探針只在收盤後的發布觀察窗跑，窗外沒產出是正常的，不能算停擺。
+    ("AlphaTwsePublishProbe", 15,  "research/twse_probe.log",              (13, 20)),
+]
+STALL_FACTOR = 3
+
+
+def check_local_tasks(now: datetime) -> tuple[list[dict], list[str]]:
+    """比對每個常駐工作的產出檔時間戳，回傳 (逐項結果, 停擺告警文字)。
+
+    這支自己絕不能因為檢查失敗而崩潰——它是監測器，
+    監測器死掉比被監測的東西死掉更糟（見本檔開頭 cp950 那段教訓）。
+    所以每一項都各自 try，單項出錯只標記成 unknown，不影響其他項。
+    """
+    rows: list[dict] = []
+    stalled: list[str] = []
+    for name, interval_min, rel, window in WATCHED_TASKS:
+        row = {"task": name, "expected_interval_min": interval_min, "artifact": rel}
+        try:
+            if window is not None and not (window[0] <= now.hour < window[1]):
+                row.update(status="skipped", reason=f"觀察窗 {window[0]}:00-{window[1]}:00 之外")
+                rows.append(row)
+                continue
+            f = ROOT / rel
+            if not f.exists():
+                row.update(status="missing", reason="產出檔不存在")
+                rows.append(row)
+                stalled.append(f"{name}：產出檔 {rel} 根本不存在")
+                continue
+            mtime = datetime.fromtimestamp(f.stat().st_mtime, TZ)
+            age_min = (now - mtime).total_seconds() / 60.0
+            limit = interval_min * STALL_FACTOR
+            row.update(
+                status="stalled" if age_min > limit else "ok",
+                last_output=mtime.isoformat(),
+                age_min=round(age_min, 1),
+                stall_limit_min=limit,
+            )
+            if age_min > limit:
+                stalled.append(
+                    f"{name}：{rel} 已 {age_min:.0f} 分鐘沒有新產出"
+                    f"（預期每 {interval_min} 分鐘，門檻 {limit} 分鐘）"
+                )
+        except Exception as e:  # noqa: BLE001
+            row.update(status="unknown", reason=f"{type(e).__name__}: {e}")
+        rows.append(row)
+    return rows, stalled
+
+
+def publish_task_health(now: datetime, rows: list[dict], stalled: list[str]) -> None:
+    """把自檢結果併進 data/audit_report.json 的 local_task_health（總司令指定的位置）。
+
+    刻意用「讀出來、只改這一個 key、再寫回去」而不是整份重寫：
+    audit_report.json 的其他內容是每晚的資料稽核產生的，不能被這支蓋掉。
+    最壞情況是跟稽核那支同時寫、這次的合併被覆蓋，5 分鐘後下一輪就補回來。
+    """
+    path = ROOT / "data" / "audit_report.json"
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+        if not isinstance(doc, dict):
+            return
+        doc["local_task_health"] = {
+            "checked_at": now.isoformat(),
+            "stall_factor": STALL_FACTOR,
+            "alert": bool(stalled),
+            "stalled_count": len(stalled),
+            "stalled": stalled,
+            "tasks": rows,
+            "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。"
+                    "判定依據是產出檔的修改時間，不是排程器回報的狀態——"
+                    "狀態顯示成功但什麼都沒產出正是要抓的情況。",
+        }
+        path.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 寫入 local_task_health 失敗（{type(e).__name__}: {e}），不影響本次連通性檢查")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--quiet", action="store_true", help="只有告警才輸出")
@@ -187,6 +290,13 @@ def main() -> int:
         record["results"][name] = {"ok": ok, "detail": detail, "fail_streak": streak}
         if streak >= ALERT_AFTER:
             alerts.append((name, streak, detail))
+
+    # 常駐工作停擺自檢：跟對外連通性一起做，因為兩者都是「本機到底還活著嗎」。
+    task_rows, task_stalls = check_local_tasks(now)
+    publish_task_health(now, task_rows, task_stalls)
+    record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
+    for msg in task_stalls:
+        alerts.append(("local_task_stall", 1, msg))
 
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with LOG.open("a", encoding="utf-8") as f:

@@ -1,3 +1,79 @@
+## 2026-09-10（重開機復原）排程沒壞，壞的是三個「狀態顯示成功但沒產出」的靜默故障
+
+戴**維運帽**。總司令回報「本機在 03:26 之後全部停擺」，要求盤點重啟並找出
+重開機沒自動恢復的原因。
+
+**先講與前提不同的地方**：排程器本身沒有停。十個 Alpha* 工作在使用者
+12:26 登入後就自動恢復了，`quotes_ibkr.json` 12:31 還在更新、Shioaji 常駐
+程式 12:27 已重新登入訂閱、live server `/health` 在本機 `127.0.0.1:8001`
+回 `{"ok":true}`、Tailscale Funnel 正常代理（**本機自己確認，沒有拿總司令
+那邊的結果當證據**）。03:26–12:26 那九小時是整台機器關機，不是排程失效。
+
+**但查下去發現三個更嚴重的問題，共同點是「排程狀態一路顯示成功、實際上
+什麼都沒產出」，從外面完全看不見**：
+
+1. **`AlphaTwsePublishProbe` 的觸發器是 2026-09-08 的一次性 `TimeTrigger`**，
+   跑完那天就永久失效，`NextRunTime` 是空白，狀態卻一直顯示「就緒」。
+   實測.十一 兩天一個樣本都沒收到，今天 16:00 那個樣本本來也不會發生。
+   → 改成 `CalendarTrigger` 每日 13:30 起每 15 分鐘共 6.5 小時，加登入觸發器。
+   已實跑驗證有寫入 `research/twse_probe.log`，`NextRunTime` = 今天 13:30。
+2. **`alpha.db` 從 2026-08-21 起就沒有再進過任何一筆資料**（`daily_price` /
+   `inst_trades` / `valuation` 三張表的 `max(date)` 都停在 08-21）。
+   根因：`run_daily.py` 的輸出被重導到 `run.log` 時，第一行 print 裡的
+   `・`（U+30FB）在 cp950 下 `UnicodeEncodeError`，**整支在第一檔股票就崩潰**，
+   每天如此，連續約 20 天。`run.log` 從第 7 行起全是同一個錯。
+   → 工作動作加 `set PYTHONIOENCODING=utf-8`。**沒有動 `run_daily.py` 原始碼**
+   （`alpha-data` 的解析邏輯是凍結區）。盤中沒有硬跑管線以免灌進不完整的
+   當日資料，隔離驗證了那行 print 重導後不再拋錯，真正的驗收是今天 15:30 那輪。
+3. **`AlphaDepCheck` 每週固定 `0x80070002`（找不到檔案）**，壞了至少三週。
+   根因是執行檔寫成裸的 `python`，排程器不會走 PATH 找。
+   → 改走 `powershell.exe` 包裝，與其他九個工作一致。已實跑驗證結果 0，
+   且 12:44:48 真的寫出 `data/dependency_status.json`。
+
+**另外兩個修正**：
+
+4. `AlphaDevQueue` 的「工作目錄乾淨才動手」守衛用的是檔名黑名單，而機器
+   自動寫的檔案只會愈來愈多——實測同時有 7 個永遠是髒的
+   （`data/quotes_ibkr.json`、`connectivity_check.log`、`twse_probe.log`、
+   `twse_publish_probe.jsonl`、`.external_connectivity_state.json`、
+   `.live_watchlist.json`、`DEV_QUEUE_PROMPT.txt`），黑名單只擋掉其中 2 個，
+   於是**每一輪都判髒跳過、而且 exit 0**，排程狀態一路顯示成功。
+   → 改成白名單：先認定哪些路徑是機器寫的，其餘才算人為改動。
+   已用真實 `git status` 驗證，並做反向對照——真人改的 `index.html` 仍會擋。
+5. `AlphaHypothesisQueue` 重開機後停了 9 小時（沒有登入觸發器、也沒開
+   「錯過就補跑」）。→ 加登入觸發器（延遲 3 分）＋ `StartWhenAvailable=true`，
+   12:51 已自行恢復並開始跑。同時補齊 `AlphaConnectivity`／`AlphaMarathon`
+   的登入觸發器與 `AlphaData` 的 `StartWhenAvailable`。
+
+**新增停擺自檢（總司令指示二.5）**：`scripts/check_external_connectivity.py`
+每 5 分鐘比對七個常駐工作**產出檔的修改時間**，超過預期間隔 3 倍就告警，
+寫進 `data/audit_report.json` 的 `local_task_health`。刻意不看排程器回報的
+狀態——「狀態＝就緒」「LastTaskResult＝0」都可以在什麼事都沒做時成立，
+檔案時間戳不行。這道自檢**上線第一次跑就抓到 `AlphaHypothesisQueue`
+已 565 分鐘沒產出**，也就是上面第 5 點。
+
+**尚未解決、需要總司令裁示**：十個工作的執行身分全部是 `InteractiveToken`，
+**電腦開機後如果停在鎖定畫面沒有人登入，一個都不會跑**。這不是加「系統啟動時」
+觸發器能修的（觸發時沒有互動式權杖）。兩條解法各有代價，寫在
+`docs/LOCAL_SCHEDULED_TASKS.md` 第一節，等裁示，沒有自行決定。
+
+**影響檔案**：`docs/LOCAL_SCHEDULED_TASKS.md`（新增，重開機自檢手冊）、
+`scripts/check_external_connectivity.py`、`PENDING_QUEUE.md`（【登記零】）、
+`C:\alpha\run-twse-probe.ps1`、`C:\alpha\run-dev-queue-cycle.ps1`（後兩者在
+repo 外，不進版控）、五個排程工作的設定（`schtasks /Create /XML /F` 重新註冊）。
+
+**冒煙測試**：未跑。本次沒有動 `index.html` 或任何 PWA 共用區塊，
+改的是本機排程腳本與監測腳本。
+
+**下一步**：回到任務佇列——【停擺一】新聞萃取為什麼 0 則、【題材八】A 級
+句型與反向排除，其餘依 `PENDING_QUEUE.md` 順序。**這些本輪一條都還沒開始。**
+
+**卡住的問題**：IBKR Gateway 四個 API 埠（4001/4002/7496/7497）全關，
+連續失敗 6 次，美股報價目前拿不到資料。依 `CLAUDE.md` 的 IBKR 章節，
+每週日 01:00 ET 權杖失效需**人工登入一次**，自動化救不了，要請總司令處理。
+另外 `AlphaHypothesisQueue` 03:21 那輪的失敗訊息是
+`Error: Exceeded USD budget (5)`，是預算上限不是程式錯誤，一併回報。
+
 ## 2026-09-10（外部一改.3）名家趨勢跟隨機制在台指期上重測：五條全數第1關就 FAIL
 
 戴**研究帽**。把五個**公開發表過**的系統化趨勢跟隨機制搬到台指期（TX）連續合約
