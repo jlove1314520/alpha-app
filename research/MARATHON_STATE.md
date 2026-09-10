@@ -4,7 +4,7 @@
 
 **最後更新：2026-09-10T03:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 514 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 514 輪 · 2026-09-10T03:00+08:00 · TW軌（取鎖乾淨，cycle`20260910-030037`）**。**本輪工作單位**：依round513建議依輪替選TW軌。例行精簡確認（`run_detached.py status`running=0；`git log`確認round513後僅自動排程commit與`hypothesis_queue`自走commit`c03197d0`；`gate50`提案`PENDING_QUEUE.md`全文搜尋仍無回應；`data/ticks/`仍2/20）之外，**逐一核實`CALIBRATION_PROBE.md`裁示的300檔重跑複驗清單是否真的全數結案**：確認TW`#77`/`#79`/`#91`、US`#47`/`#52`、FUT`#34`皆已在先前輪次複驗結案，**清單本身無遺漏**——候選池連續26輪維持同一狀態是真的做完了，不是漏做。`trial_registry.py --check`exit=0 PASS（241列，本輪未產生新試驗判定，屬完整性複核非新判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。**下一輪**：`#50`gate50提案仍待總司令回應；依輪替下一輪建議選US軌。詳見`REPORT.md`第514輪記錄、`TW_MARATHON_STATE.md`第514輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 515 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 515 輪 · 2026-09-10T12:30+08:00 · US軌（取鎖乾淨，cycle`20260910-123037`）**。**本輪工作單位**：依round514建議依輪替選US軌。例行精簡確認（`run_detached.py status`running=0；`git log`確認round514後僅自動排程commit；`gate50`提案`PENDING_QUEUE.md`全文搜尋仍無總司令回應，僅`hypothesis_queue`自走中止記錄；`STRATEGY_GRAVEYARD.md`最新結案仍為`#68`，無新結案）。**唯一實質變化**：`data/ticks/`累積進度從2/20推進到3/20（`20260909.parquet`已finalize）。候選池連續27輪維持同一狀態，`trial_registry.py --check`exit=0 PASS（241列，本輪未產生新試驗判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。**下一輪**：`#50`gate50提案仍待總司令回應；依輪替下一輪建議選TW軌。詳見`REPORT.md`第515輪記錄、`US_MARATHON_STATE.md`第515輪記錄。
 
 **上一輪（第513輪，供對照）** · 2026-09-10T02:30+08:00 · US軌（取鎖乾淨，cycle`20260910-023038`）**。**本輪工作單位**：依輪替選US軌，例行精簡確認之外，發現並回補`data/signal_status.json`遺漏的`#67`/`#68`/`#69`三筆。詳見`REPORT.md`第513輪記錄、`US_MARATHON_STATE.md`第513輪記錄。
 
