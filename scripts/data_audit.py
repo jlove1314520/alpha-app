@@ -16,6 +16,29 @@ PROGRESS.md 的證據鏈：報告頁 renderReport() 在 `peg=null` 上拋 TypeEr
 **輸出**：`data/audit_report.json`（違規總數、違規率、分項統計、前 20 筆、完整清單）。
 違規率 >1% 時冒煙測試會 FAIL（見 scripts/smoke_test.mjs 的資料稽核檢查）。
 
+**2026-09-10（深讀四.4）自查結果：兩道恆等式判無效並刪除，不是重寫成別的形式**——
+Cybex 第 448 輪的教訓是「稽核自己重播引擎邏輯，再拿重播結果跟自己比對」會製造
+看起來在稽核、實際上不可能抓到真 bug 的假象。逐條檢查後這裡有兩道正是這個形狀：
+1. 舊 `check_b_entry_plan`：比對的是「用 price_history 最後收盤 ×{1.00,0.96,0.92}
+   自己重算出來的分批進場價」，但 App 的分批進場計畫已在 `fc8e418b`
+   （2026-09-06 11:16，比這支腳本自己的 `b7857813` 01:37 晚了不到 10 小時）
+   改成技術層級階梯（MA5/MA10/MA20/前波低點/ATR 回撤），不再是固定
+   ±4%/±8%——這道檢查從那之後比對的公式跟畫面上的東西完全對不上，
+   而且即使公式對得上，它比對的也只是「自己重算的衍生建議價」，不是使用者
+   在 App 上看得到的原始數字；base price 的正確性已由 `check_a_price_source`
+   完整覆蓋。連續跑了 2,111 次、0 次違規，正是「不可能抓到真 bug」的具體證據。
+2. 舊 `check_d_market_cap`：計算 `官方收盤 × 推算股數` 只判斷「> 0」，
+   但 App 從未在任何頁面顯示個股市值（全文檢索 `index.html` 對
+   `市值`/`marketCap` 為 0 命中），這道恆等式的兩端根本沒有一端是使用者
+   看得到的數字；且在正常資料下 `官方收盤>0` 與 `推算股數>0` 皆為既有
+   前置過濾條件保證成立，`cap>0` 在數學上幾乎恆真——連續跑了 1,084 次、
+   0 次違規，是同一種「恆真檢查」假象。
+兩者都已刪除（含只服務它們的 `fetch_shares()`/`TOL_ENTRY_PLAN`/`TOL_MARKET_CAP`），
+不是隨便找個新公式湊一個看起來像的重寫——這個資料範疇目前沒有「使用者在畫面上
+看得到的市值/分批進場衍生價」可以拿來當恆等式的另一端，誠實的結論是「這裡不該
+有這道檢查」，而不是硬造一個。若未來 App 真的顯示市值或固定公式的分批進場價，
+才需要重新設計對應的恆等式。
+
 用法：`python scripts/data_audit.py`
 """
 from __future__ import annotations
@@ -38,15 +61,12 @@ OUT = DATA / "audit_report.json"
 TZ = timezone(timedelta(hours=8))
 
 TWSE_STOCK_DAY_ALL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
-TWSE_COMPANY = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
 TPEX_QUOTES = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
 UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaDataAudit/1.0)"}
 
 # 總司令定的容許值
 TOL_PRICE_SOURCE = 0.05      # (a) 各檔案現價彼此/與官方差異
-TOL_ENTRY_PLAN = 0.30        # (b) 建議進場價 vs 現價
 TOL_RANGE_BREAK = 0.05       # (c) 允許當日突破 20 日高低點的幅度
-TOL_MARKET_CAP = 0.05        # (d) 市值 ≈ 現價 × 股數
 TOL_PE = 0.10                # (e) 本益比 = 現價 / EPS
 
 
@@ -162,29 +182,6 @@ def fetch_reference(sess) -> tuple[dict, dict]:
         meta["tpex"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
     return ref, meta
-
-
-def fetch_shares(sess) -> tuple[dict, dict]:
-    """上市公司流通股數 ≈ 實收資本額 / 每股面額（t187ap03_L）。上櫃無對應免費端點。"""
-    shares, meta = {}, {}
-    try:
-        rows = sess.get(TWSE_COMPANY, timeout=90).json()
-        for r in rows:
-            code = str(r.get("公司代號", "")).strip()
-            cap = num(r.get("實收資本額"))
-            par = 10.0
-            m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*元", str(r.get("普通股每股面額", "")))
-            if m:
-                p = num(m.group(1))
-                if p:
-                    par = p
-            if is_stock_code(code) and cap and par:
-                shares[code] = cap / par
-        meta = {"ok": True, "rows": len(rows), "usable": len(shares),
-                "note": "股數由「實收資本額 / 每股面額」推算，不扣庫藏股、不含特別股，本身是近似值"}
-    except Exception as e:
-        meta = {"ok": False, "error": f"{type(e).__name__}: {e}"}
-    return shares, meta
 
 
 # ──────────────────────────── 七項恆等式檢查 ────────────────────────────
@@ -419,36 +416,6 @@ def check_a2_not_in_official(a, ref, names, loc, official_only):
                 " 個已下市代號，屬正常歷史保留，不列違規")
 
 
-def check_b_entry_plan(a, universe, ref, names, loc):
-    """(b) 建議進場價/分批價必須在現價 ±30% 內。
-
-    App 的分批價 = 該檔最後收盤 × {1.00, 0.96, 0.92}，價格來自 FinMind。這裡拿
-    price_history 最後收盤（跟 FinMind 同樣是日線收盤，是同一個量）當代表算三檔
-    進場價，任何一檔落在官方現價 ±30% 外就是違規——總司令看到的 32 vs 1755
-    就會在這裡被攔下來。
-    """
-    for code in universe:
-        official = ref[code]["close"]
-        hist = loc["price_hist"].get(code)
-        if not hist:
-            a.note("b_entry_plan", unverifiable=1)
-            continue
-        base = num(hist[-1].get("close"))
-        if base is None:
-            a.note("b_entry_plan", unverifiable=1)
-            continue
-        a.note("b_entry_plan", checked=1)
-        worst, worst_px = None, None
-        for mult in (1.00, 0.96, 0.92):
-            d = rel_diff(base * mult, official)
-            if d is not None and (worst is None or d > worst):
-                worst, worst_px = d, round(base * mult, 2)
-        if worst is not None and worst > TOL_ENTRY_PLAN:
-            a.hit("b_entry_plan", code, names.get(code, ""),
-                  "依此價算出的分批進場價偏離現價超過 30%", worst_px, official, worst,
-                  "price_history.json")
-
-
 def check_c_range(a, universe, ref, names, loc):
     """(c) 20 日低點 ≤ 現價 ≤ 20 日高點（允許當日突破 5%）。"""
     for code in universe:
@@ -467,27 +434,6 @@ def check_c_range(a, universe, ref, names, loc):
         elif official > hi * (1 + TOL_RANGE_BREAK):
             a.hit("c_range", code, names.get(code, ""), "現價高於 20 日高點超過 5%",
                   round(hi, 2), official, abs(official / hi - 1), "sparklines.json")
-
-
-def check_d_market_cap(a, universe, ref, names, shares):
-    """(d) 市值 ≈ 現價 × 流通股數（誤差 <5%）。
-
-    誠實揭露：股數是用「實收資本額 / 每股面額」推算（TWSE t187ap03_L 的實收資本額、
-    TPEx quotes 的 Capitals），沒有扣庫藏股、沒有處理特別股，本身就是近似值。所以
-    這一項比對的是「股數資料是否跟官方資本額對得起來」，抓的是資料錯置與單位錯誤，
-    不是精算市值——這一點在報告裡也會標明，不假裝它是精確查核。
-    """
-    for code in universe:
-        official = ref[code]["close"]
-        n = shares.get(code)
-        if not n:
-            a.note("d_market_cap", unverifiable=1)
-            continue
-        a.note("d_market_cap", checked=1)
-        cap = official * n
-        if cap <= 0:
-            a.hit("d_market_cap", code, names.get(code, ""), "推算市值 ≤ 0（股數或價格資料有誤）",
-                  cap, official, None, "t187ap03_L / TPEx Capitals")
 
 
 def check_e_pe(a, universe, ref, names, loc):
@@ -658,10 +604,8 @@ def main():
 
     print("抓官方參考真值…")
     ref, ref_meta = fetch_reference(sess)
-    shares, shares_meta = fetch_shares(sess)
     for k, v in ref_meta.items():
         print("  " + k + ": " + json.dumps(v, ensure_ascii=False))
-    print("  shares: " + json.dumps(shares_meta, ensure_ascii=False))
 
     if not ref:
         print("！完全拿不到官方參考值，稽核無法進行（不寫報告，避免留下一份看起來全過的假報告）")
@@ -707,9 +651,7 @@ def main():
     check_a_price_sources(a, universe, ref, names, loc, ref_date)
     check_a2_not_in_official(a, ref, names, loc, listed)
     check_a3_stale_price(a, ref, names, loc, boards, ref_date)
-    check_b_entry_plan(a, universe, ref, names, loc)
     check_c_range(a, universe, ref, names, loc)
-    check_d_market_cap(a, universe, ref, names, shares)
     check_e_pe(a, universe, ref, names, loc)
     check_f_null_as_number(a, loc)
     check_g_comma_parsing(a)
@@ -719,9 +661,10 @@ def main():
     # 兩個指標分開算，因為它們是兩種不同的故障，混在一起會看不出重點：
     #   一致性違規 = 我們顯示的數字跟官方對不起來（總司令這次抓到的那一類，要擋 commit）
     #   完整度缺口 = 官方有、我們沒有或資料有斷層（屬於「稽核.二 覆蓋率補齊」的範圍）
+    # （2026-09-10 深讀四.4：原本的 b_entry_plan／d_market_cap 兩項已判無效並刪除，
+    #  理由見檔頭說明，不在 CONSISTENCY 集合裡。）
     CONSISTENCY = {"a_price_source", "a2_not_in_official", "a3_stale_price",
-                   "b_entry_plan", "c_range",
-                   "d_market_cap", "e_pe", "f_null_as_number", "g_comma_parsing"}
+                   "c_range", "e_pe", "f_null_as_number", "g_comma_parsing"}
     COMPLETENESS = {"e_quarters_gap", "e_quarters_stale"}
     bad_codes = {v["code"] for v in a.violations
                  if v["check"] in CONSISTENCY and v["code"] not in ("-", "")}
@@ -737,7 +680,7 @@ def main():
     report = {
         "generated_at": started.isoformat(),
         "duration_sec": round((datetime.now(TZ) - started).total_seconds(), 1),
-        "reference": {**ref_meta, "shares": shares_meta},
+        "reference": ref_meta,
         "universe": len(universe),
         "reference_date": ref_date,
         "listed_universe_size": len(listed),
@@ -754,7 +697,9 @@ def main():
         "violations": a.violations,
         "notes": [
             "違規率分母＝官方今日有收盤價的普通股/ETF 檔數；分子＝身上至少一條違規的股票檔數。",
-            "(d) 市值檢查的股數由實收資本額/面額推算，不扣庫藏股、不含特別股，屬近似查核。",
+            "2026-09-10（深讀四.4）：原本的(b)分批進場價、(d)市值兩項恆等式已判無效並刪除"
+            "（比對的是使用者在App上看不到的自算衍生值、或幾乎恆真而不可能抓到真bug），"
+            "理由見 scripts/data_audit.py 檔頭說明。",
             "(f)(g) 是程式碼層級檢查，不綁定個股，計入 code_free_violations，"
             "有任何一筆就視同閘門不通過。",
             "violation_rate 只計「一致性」類（顯示的數字與官方對不起來）；季報斷層/過期屬於"
