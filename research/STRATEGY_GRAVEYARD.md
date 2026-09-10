@@ -2698,3 +2698,23 @@ portfolio層構造，股票/台股，2026-09-10 hypothesis_queue排程接續FAIL
 - **原始記錄**：`TRIALS_LEDGER.md`#239、`HYPOTHESIS_QUEUE.md` #69條目、
   `option_oi_pcr_gate.py`（可重複執行，零新增API呼叫，全用`#31`留下的
   既有parquet快取）。
+
+## #70 選擇權波動度偏斜（Volatility Skew）— FAIL（2026-09-10）
+
+**假設**：put_iv-call_iv（OTM put減OTM call隱含波動度）與後續台股N=5/N=20
+交易日報酬呈負向IC（skew越陡代表下檔避險需求越濃，後續報酬越差，比照
+Xing et al. 2010原文獻方向）。
+
+**死因**：TRAIN/VAL正負號相反，且TRAIN期方向與事前綁定完全相反並高度
+顯著（N=5 TRAIN r=+0.1914 p=0.0000 percentile=100.0；N=20 TRAIN r=+0.3425
+p=0.0000 percentile=100.0），VAL期方向雖轉負（N=5 r=-0.0458 percentile=
+83.6未過門檻；N=20 r=-0.1823 percentile=100.0），但依「不給方向彈性」
+鐵律，train/val不同號即直接判FAIL，不因VAL單期好看而放行。
+
+**不泛化聲明**：不泛化成「選擇權市場資訊對台股完全無效」——本佇列同源
+TXO選擇權訊號中`#31`（成交量PCR）曾CHEAP_PASS，`#35`（VRP）、`#69`
+（未平倉量PCR）FAIL但未出現方向反轉，`#70`是唯一出現train/val系統性
+方向反轉的，死的是「put_iv−call_iv水位＋固定5%名目OTM距離」這個具體
+構造，未測其他OTM距離口徑或25-delta動態篩選。
+
+**詳細數字**：見`TRIALS_LEDGER.md`#241、`HYPOTHESIS_QUEUE.md` #70條目。

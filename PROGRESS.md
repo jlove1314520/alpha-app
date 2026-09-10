@@ -95,6 +95,23 @@ local_task_health checked_at   = 14:28:15  alert = False
 **下一步**：A 類 S4U（等提權）、`claude` CLI 非互動驗證（B 類前提）、
 【題材七】【題材三】【實測.八九十】依 `PENDING_QUEUE.md` 順序。
 
+## 2026-09-10（深讀二.1）台股被動基準候選：0050真實權重漂移誠實引擎
+
+戴**研究帽**。新增 `research/passive_benchmark_tw_v1.py`：固定小倉位持有0050，真實
+權重漂移（再平衡之間不動）＋月頻再平衡照實收成本，掃w∈[0.08,0.30]共12點。6項
+self-test全PASS，實跑2009~2024共3919個交易日，TRAIN/VAL兩期報酬皆隨w平滑單調遞增、
+Sortino穩定無斷崖，構成乾淨參數高原。登記`TRIALS_LEDGER.md`#240（EXPERIMENTAL，
+基礎設施非alpha候選），`TW_LEADS.md`新增#18，`trial_registry.py --check`PASS。
+
+誠實揭露：現金0%利率為保守簡化、0050資料僅自2009起（非2003上市日）、尚未holdout
+測試。純新增research腳本，未動App，冒煙測試不受影響。
+
+**下一步（深讀二.2）**：把這個引擎接進既有主動候選判定流程成為強制對照組。
+
+**下一步**：依權威清單，下一項為 **深讀二.2**。因本輪預算即將用盡，本輪到此為止。
+
+---
+
 ## 2026-09-10（深讀三）新增四道關卡（第7～10關）寫進 CLAUDE.md 與 MARATHON_PROTOCOL，順帶抓到編號歧義
 
 戴**驗證帽**。依 PENDING_QUEUE 權威清單，本輪應做「新增四道關卡寫進 CLAUDE.md 與

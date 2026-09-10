@@ -1,5 +1,42 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T14:56+08:00 — hypothesis_queue排程接續：#70選擇權波動度偏斜cheap gate結案FAIL（train/val方向反轉），設計新假設#71（减資公告事件效應）— 佇列#1~70全數結案，#71尚未開始第1關
+
+## 2026-09-10T14:31+0800 hypothesis_queue排程接續 — 修正#69/#70編號順序不一致並完成#70地基建置(c)(d)：`option_skew_gate.py`，2428/2428交易日100%成功組出skew時序，尚未進cheap gate
+`git pull`+`git status`乾淨（除他軌殘留檔`data/audit_report.json`/
+`data/quotes_ibkr.json`/`data/dependency_status.json`/`research/.live_
+watchlist.json`/幾支連線探測log等，未觸碰未納入commit）。
+`marathon_lock.py acquire`回傳**`LOCK_STALE`**（上一輪PID 29728持有
+30.1分鐘後被回收）——**上一輪疑似未正常收工**，本輪額外先做了佇列
+現況核對才開始工作。
+
+**發現並修正一處實質不一致**：`HYPOTHESIS_QUEUE.md`檔案已達774KB
+（超過256KB單次讀取上限），核對「排隊順序總結」/檔案末端收尾文字時
+發現`### 69`（台指選擇權買賣權比PCR-OI，已結案FAIL，`TRIALS_LEDGER.md`
+#239）條目物理位置排在`### 70`（選擇權波動度偏斜，已完成地基建置
+(a)(b)、當時尚未結案）**之後**，但`#69`收尾文字卻寫「設計新假設軸
+#70留給下一輪」——研判是建立`#69`的那一輪只讀到檔案截斷片段、沒看到
+`#70`已存在所致，且該輪也沒有留下對應心跳（本檔案在#70(b)完成的
+13:57條目之後、直到本輪之前完全沒有任何#69相關心跳，違反第2節硬性
+心跳規則，但已成既成事實無法回溯補寫，僅記錄於此）。已在
+`HYPOTHESIS_QUEUE.md`兩處插入訂正說明（`#70`區塊內＋檔案末端），
+`TRIALS_LEDGER.md`#239本身判定有效不重做，純粹是編號/順序標示問題。
+
+**接續完成`#70`地基建置(c)(d)**：新增`option_skew_gate.py`（可重複
+執行，全用既有快取，零新增API呼叫）。(c)全面改用`settlement_price`
+取代`close`當OTM合約市價輸入；(d)組裝逐日OTM put/call配對IV與skew
+時序（近月合約選取複用`vrp_gate.py`、OTM履約價選取規則
+`TARGET_OTM_PCT=0.05`/`OTM_BAND=(0.0,0.15]`對齊`bs_iv_solver.py`
+round-trip已驗證範圍，事前寫入docstring）。**結果**：候選交易日2428
+天，**全數2428天成功組出skew（100%成功率，零跳過）**，涵蓋
+2015-01-05~2024-12-30。skew(put_iv−call_iv) mean=+0.0671、
+median=+0.0628、std=0.0348，skew為正比例99.3%，兩項moneyness sanity
+檢查皆`True`。**這只是描述統計，尚未進cheap gate**（skew vs後續報酬
+相關性檢定），不構成任何PASS/FAIL判定。`data/option_skew_series.csv`
+已存（gitignored）。`is_holdout_consumed()`本輪開工/收工前皆確認
+`False`。**本輪工作到此為止（一輪一個有界工作單位），下一輪直接寫
+cheap gate腳本（比照`#31`/`#69`同款時序相關性框架），不跳關。**
+
 ## 2026-09-10T13:57+0800 hypothesis_queue排程接續 — #70地基建置(b)完成：新增`bs_iv_solver.py`（Black-Scholes反推IV函式），兩層交叉驗證皆PASS，(c)(d)留給下一輪
 `git pull`+`git status`乾淨（除他軌殘留檔`data/audit_report.json`/
 `data/quotes_ibkr.json`/`research/dev_queue_cycle.log`等，未觸碰未納入
