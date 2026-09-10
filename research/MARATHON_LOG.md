@@ -1,5 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T12:54+08:00 hypothesis_queue排程接續 — 搶救陳舊鎖檔遺留成果（#70三來源可行性查證），本輪工作到此為止
+`git pull`+`git status`：`research/HYPOTHESIS_QUEUE.md`本身有未提交變更
+（+47行），其餘`data/audit_report.json`/`data/dependency_status.json`/
+`data/quotes_ibkr.json`/`research/.external_connectivity_state.json`/
+`research/.live_watchlist.json`/`research/DEV_QUEUE_PROMPT.txt`/幾支
+log/probe檔/`scripts/check_external_connectivity.py`為其他自動化
+（`dev_queue`/`ibkr_quotes`/`connectivity_check`）殘留，未觸碰、未納入
+本輪commit。`marathon_lock.py acquire`回傳**`LOCK_STALE`**（PID 15380，
+570.3分鐘/約9.5小時未更新，判定上一輪中途當掉），本輪回收鎖檔接續。
+比對`HYPOTHESIS_QUEUE.md`未提交diff內容，確認是上一輪（PID 15380）已經
+完整寫好的`#70`（選擇權波動度偏斜）三來源資料可行性查證結論（TAIFEX
+`settlement_price`定義查證、`data.gov.tw` A13Rate.csv無風險利率來源
+確認可行且已實測GET 200、GitHub找到`py_vollib`可交叉驗證），結論是
+「可行，無阻斷點」，只是在寫完這段之後、commit之前當掉——內容本身完整
+自洽、有明確收尾句「本輪工作到此為止，現在排隊第一，下一輪從地基建置
+(a)~(d)開始，不跳關進cheap gate」，判定為合法應保留的研究成果，非
+可疑或衝突內容，予以保留並提交（不算「別人的東西」，是本track自己
+上一輪的未完成產出）。`排隊順序總結`/條目自身狀態核對一致，無需修正
+不同步問題。`is_holdout_consumed()`確認`False`。**本輪因搶救動作已
+消耗大部分預算，未進一步執行地基建置(a)~(d)（Black-Scholes反推IV
+函式撰寫+風險利率回補腳本+skew時序組裝屬於需要仔細交叉驗證的工程
+任務，寧可留給預算充足的下一輪，不倉促硬做），下一輪直接從地基建置
+(a)~(d)開始，不跳關。**全程零新增API呼叫、零程式碼變更，只確認並
+保留既有文字內容。
+
 ## 2026-09-10T02:55+08:00 hypothesis_queue排程接續 — 設計新假設#70（選擇權波動度偏斜），本輪工作到此為止
 `git pull`+`git status`乾淨（僅`research/DEV_QUEUE_PROMPT.txt`/
 `research/dev_queue_cycle.log`/`research/external_connectivity.jsonl`

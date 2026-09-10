@@ -9591,6 +9591,53 @@ consumed()`本輪開工/收工前皆確認`False`，全程零新增API呼叫（�
 文件+讀既有紀錄+讀取本機parquet schema）。**本輪工作到此為止（一輪
 一個有界工作單位），現在排隊第一。**
 
+**2026-09-10 hypothesis_queue排程接續：完整三來源資料可行性查證已完成，
+確認全部可行，未發現任何「資料不可及」阻斷點**：
+1. **官方端點/文件**——`TAIFEX`官方頁（`taifex.com.tw/cht/5/optSetPrice`）
+   確認`settlement_price`（結算價）定義：正常情況下等於當日最後一筆
+   成交價（跟`close`同義），但**收盤前15分鐘內無成交或最後成交價「顯
+   不合理」時，改由交易所內部方式決定**（公開頁未揭露詳細公式，客服
+   電話0800-075-566可追問但本輪未撥打，非免費公開資料，不列入依賴）。
+   **這對已知風險第3點（深度價外合約流動性稀疏）是關鍵發現**：
+   `settlement_price`比`close`更適合當OTM合約的IV反推輸入，因為它在
+   無成交時有交易所主動介入機制，`close`則是單純陳舊掛單價無任何調整
+   ——下一輪應優先用`settlement_price`而非`close`。FinMind官方文件
+   （`finmind.github.io/tutor/TaiwanMarket/Derivative/`）未進一步說明
+   兩者差異，此點以TAIFEX官方頁為準。
+2. **無風險利率來源**——`data.gov.tw`資料集#10359（中央銀行「五大銀行
+   存放款利率歷史月資料」，`datasetId=10359`）確認：免費、CSV直接下載
+   （`https://www.cbc.gov.tw/public/data/OpenData/A13Rate.csv`，本輪
+   實測GET回200、260KB內容、UTF-8編碼），含「定存利率-一個月-固定/
+   機動」等短天期定存利率欄位，涵蓋**民國90年1月(2001-01)至今**、
+   月頻、五家銀行分別列示（下一輪需決定取平均或固定挑一家，作為
+   實作細節留待地基建置輪處理）。**已知工程小問題**：`www.cbc.gov.tw`
+   憑證鏈本輪實測觸發`CERTIFICATE_VERIFY_FAILED: Missing Subject Key
+   Identifier`（`requests`預設SSL驗證失敗，非TWSE已知那種問題，是
+   另一種憑證鏈缺陷），本輪僅用`verify=False`做單次診斷確認資料本身
+   可達（不是要拿來當正式做法），下一輪撰寫正式資料回補腳本時需查證
+   更妥當的處理方式（例如指定受信任CA bundle或改用`certifi`更新版，
+   而非長期停用SSL驗證），這是工程課題不是資料可行性問題，不影響
+   「可行」的結論。1個月期短天期定存利率與選擇權距到期天數
+   （事前綁定[10,45]天，比照`#35`VRP精神）在天期上相符，是合理近似。
+3. **GitHub/社群**——搜尋未找到他人專門用FinMind/TAIFEX資料計算TXO
+   skew的公開範例，但找到`py_vollib`（MIT授權，業界常用Black-Scholes-
+   Merton隱含波動度反推函式庫，本機尚未安裝，`scipy`已可用可自行實作
+   Newton-Raphson/Brent法數值解），可用於交叉驗證下一輪自製IV反推
+   函式的正確性（已知風險第1點要求的「不能寫完程式碼看數字順眼就直接
+   信」）；另確認risk reversal/skew是選擇權文獻標準概念（非本專案
+   自創定義）。
+
+**結論：三來源查證全數完成，無阻斷點，可行性確認為「可行」。** 下一輪
+（地基建置輪）待辦：(a)撰寫`A13Rate.csv`月頻定存利率回補/快取腳本
+（含SSL驗證妥善處理，不得長期`verify=False`）、(b)撰寫Black-Scholes
+反推IV函式並用已知教科書案例交叉驗證（可參考`py_vollib`公開原始碼
+的實作邏輯，不需要真的安裝套件）、(c)改用`settlement_price`而非
+`close`當OTM合約市價輸入、(d)組裝逐日OTM put/call配對+skew指標時序，
+完成後才進cheap gate。本輪全程零新增API呼叫落地資料（僅2次一次性
+metadata/CSV探測請求確認可行性，未回補任何歷史資料），`is_holdout_
+consumed()`收工前確認仍為`False`。**本輪工作到此為止，現在排隊第一，
+下一輪從地基建置(a)~(d)開始，不跳關進cheap gate。**
+
 ### 69. 台指選擇權買賣權比（Put/Call Ratio）逆向情緒訊號（2026-09-10
 hypothesis_queue排程新增，尚未開始第1關）
 
