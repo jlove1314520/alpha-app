@@ -2,15 +2,13 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-10T03:00+08:00**
+**最後更新：2026-09-10T13:00+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 515 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 515 輪 · 2026-09-10T12:30+08:00 · US軌（取鎖乾淨，cycle`20260910-123037`）**。**本輪工作單位**：依round514建議依輪替選US軌。例行精簡確認（`run_detached.py status`running=0；`git log`確認round514後僅自動排程commit；`gate50`提案`PENDING_QUEUE.md`全文搜尋仍無總司令回應，僅`hypothesis_queue`自走中止記錄；`STRATEGY_GRAVEYARD.md`最新結案仍為`#68`，無新結案）。**唯一實質變化**：`data/ticks/`累積進度從2/20推進到3/20（`20260909.parquet`已finalize）。候選池連續27輪維持同一狀態，`trial_registry.py --check`exit=0 PASS（241列，本輪未產生新試驗判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。**下一輪**：`#50`gate50提案仍待總司令回應；依輪替下一輪建議選TW軌。詳見`REPORT.md`第515輪記錄、`US_MARATHON_STATE.md`第515輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 516 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 516 輪 · 2026-09-10T13:00+08:00 · TW軌（取鎖乾淨，cycle`20260910-130037`）**。**本輪工作單位**：依round515建議依輪替選TW軌。例行精簡確認（`run_detached.py status`running=0；`git log`確認round515後僅一筆互動session維運commit`d9b67653`修排程靜默故障，非本馬拉松範圍；`gate50`提案`PENDING_QUEUE.md`全文搜尋仍無總司令回應；`STRATEGY_GRAVEYARD.md`最新結案仍為`#68`，無新結案）。**唯一實質變化**：`data/ticks/`累積進度維持3/20（`20260910/`原始目錄新出現，正在累積中，尚未finalize）。候選池連續28輪維持同一狀態，`trial_registry.py --check`exit=0 PASS（241列，本輪未產生新試驗判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。**下一輪**：`#50`gate50提案仍待總司令回應；依輪替下一輪建議選US軌。詳見`REPORT.md`第516輪記錄、`TW_MARATHON_STATE.md`第516輪記錄。
 
-**上一輪（第513輪，供對照）** · 2026-09-10T02:30+08:00 · US軌（取鎖乾淨，cycle`20260910-023038`）**。**本輪工作單位**：依輪替選US軌，例行精簡確認之外，發現並回補`data/signal_status.json`遺漏的`#67`/`#68`/`#69`三筆。詳見`REPORT.md`第513輪記錄、`US_MARATHON_STATE.md`第513輪記錄。
+**上一輪（第515輪，供對照）** · 2026-09-10T12:30+08:00 · US軌（取鎖乾淨，cycle`20260910-123037`）**。**本輪工作單位**：依輪替選US軌，例行精簡確認，`data/ticks/`累積進度從2/20推進到3/20。詳見`REPORT.md`第515輪記錄、`US_MARATHON_STATE.md`第515輪記錄。
 
-**再上一輪（第511輪，供對照）** · 2026-09-10T01:33+08:00 · US軌（取鎖乾淨，cycle`20260910-013037`）**。**本輪工作單位**：依輪替選US軌，例行精簡確認之外，額外挖出並修掉`run-dev-queue-cycle.ps1`第29行「cycle start」寫log時機在git髒檢查之前造成自我鎖死的bug，修法：`git status --porcelain`過濾條件新增排除`dev_queue_cycle.log`／`external_connectivity.jsonl`兩個自動化log。屬純bug修復，依`CLAUDE.md`例外條款可直接做。此修法解除`hypothesis_queue`自走`#69`的啟動阻塞（round512已驗證生效）。詳見`REPORT.md`第511輪記錄、`US_MARATHON_STATE.md`第511輪記錄、`C:\alpha\run-dev-queue-cycle.ps1`（修改）。
-
-**上一輪（第510輪，供對照）** · 2026-09-10T01:00+08:00 · hypothesis_queue軌（取鎖乾淨，cycle`20260910-010037`）**。**本輪工作單位**：依輪替原應選US軌，但開工發現`hypothesis_queue`自走排程00:23那輪budget用盡前留下的未提交斷點（`#68`券資比因子已掛載、cheap gate腳本已寫好未執行），且其自身`dev_queue_cycle.log`已連續多輪誤判工作目錄髒污而自我跳過近12小時，改為接手此更急迫的工作單位。執行`factor_ic_short_margin_ratio.py`（改用`run_detached.py`受保護方式執行），結果：train mean_ic=-0.0056、val mean_ic=-0.0548，null percentile=100.0，train/val同號但方向皆為負（與事前綁定的正向假設相反），依腳本docstring事前寫明的override規則判**FAIL**，不採信機械`evaluate_factor()`的PASSES=True。已登記`TRIALS_LEDGER.md`#233、`STRATEGY_GRAVEYARD.md` #68、`HYPOTHESIS_QUEUE.md` #68條目結案。詳見`REPORT.md`第510輪記錄、`HYPOTHESIS_QUEUE.md` #68條目、`STRATEGY_GRAVEYARD.md` #68。
+**再上一輪（第513輪，供對照）** · 2026-09-10T02:30+08:00 · US軌（取鎖乾淨，cycle`20260910-023038`）**。**本輪工作單位**：依輪替選US軌，例行精簡確認之外，發現並回補`data/signal_status.json`遺漏的`#67`/`#68`/`#69`三筆。詳見`REPORT.md`第513輪記錄、`US_MARATHON_STATE.md`第513輪記錄。
 
 **再上一輪（第509輪，供對照）** · 2026-09-10T00:30+08:00 · TW軌（取鎖乾淨，cycle`20260910-003037`）**。**本輪工作單位**：依round500/502/504/506/507/508建議延續採精簡確認，確認候選池連續23輪（487~509）維持同一狀態。`#50`gate50提案仍無總司令回應。詳見`REPORT.md`第509輪記錄、`TW_MARATHON_STATE.md`第509輪記錄。
 

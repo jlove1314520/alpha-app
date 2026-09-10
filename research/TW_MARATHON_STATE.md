@@ -4,7 +4,11 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
-**最後更新：2026-09-10T03:00+08:00（馬拉松第514輪）**——取鎖乾淨（cycle`20260910-030037`）。三軌時間戳：FUT 10:30（round484，最舊，依例外條款不選）／TW 02:02（round512，較舊）／US 02:30（round513，最新）——依round513建議依輪替選TW。開工查`run_detached.py status`：`running=0`；`git log`確認round513後僅自動排程commit（IBKR報價）與`hypothesis_queue`自走commit（`c03197d0` 佇列#1~69全數結案，設計新假設#70：選擇權波動度偏斜/尾部避險需求訊號）；`git status`僅`DEV_QUEUE_PROMPT.txt`／`dev_queue_cycle.log`／`external_connectivity.jsonl`三個自動化檔案在動，屬`hypothesis_queue`自身產物，本輪未觸碰。
+**最後更新：2026-09-10T13:00+08:00（馬拉松第516輪）**——取鎖乾淨（cycle`20260910-130037`）。三軌時間戳：FUT 10:30（round484，最舊，依例外條款不選——無新機制候選）／TW 03:00（round514，較舊）／US 12:30（round515，最新）——依round515建議依輪替選TW。開工查`run_detached.py status`：`running=0`（60筆歷史紀錄，最新一筆`20260910-010718-3549`已於round510前finished，無新增）；`git log`確認round515之後僅一筆互動session維運commit`d9b67653`（修排程器三個靜默故障：`AlphaTwsePublishProbe`一次性觸發器過期、`run_daily.py`因cp950編碼連續20天崩潰、`AlphaDepCheck`未走PATH，皆屬App維運track非本馬拉松範圍，未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區）；`git status`僅`DEV_QUEUE_PROMPT.txt`／`dev_queue_cycle.log`／`external_connectivity.jsonl`／`connectivity_check.log`／`twse_probe.log`／`twse_publish_probe.jsonl`等自動化log在動，屬`hypothesis_queue`與探針排程自身產物，本輪未觸碰。**依round500~515建議延續採精簡確認**：`data/ticks/`維持**3/20**（`20260907`/`20260908`/`20260909`已finalize，`20260910/`原始目錄新出現正在累積中，距`#50`要求的20日仍差17日）；`PENDING_QUEUE.md`全文搜尋`gate50`仍無總司令回應；`STRATEGY_GRAVEYARD.md`掃描`## #6x`/`## #7x`標題，確認最新結案仍為`#68`（2026-09-10，round510結案），無新結案。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（241列，撞號2組皆為歷史存量不回頭改寫，本輪未產生新試驗判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫（純讀既有`.md`檔案與`git log`/`git status`/`ls`）。**結論：候選池連續28輪（487~516）維持同一狀態，TW軌本地端無新可推進工作單位**，僅剩`#50`（tick累積3/20，被動等待總司令對gate50提案的回應）。**下一輪任一軌接手**：`#50`gate50提案仍待總司令回應，核准前`#50`本身仍視為未結案；依輪替下一輪建議選US軌。完整見`REPORT.md`第516輪心跳。
+
+---
+
+**上一則保留（第514輪，供對照）**——取鎖乾淨（cycle`20260910-030037`）。三軌時間戳：FUT 10:30（round484，最舊，依例外條款不選）／TW 02:02（round512，較舊）／US 02:30（round513，最新）——依round513建議依輪替選TW。開工查`run_detached.py status`：`running=0`；`git log`確認round513後僅自動排程commit（IBKR報價）與`hypothesis_queue`自走commit（`c03197d0` 佇列#1~69全數結案，設計新假設#70：選擇權波動度偏斜/尾部避險需求訊號）；`git status`僅`DEV_QUEUE_PROMPT.txt`／`dev_queue_cycle.log`／`external_connectivity.jsonl`三個自動化檔案在動，屬`hypothesis_queue`自身產物，本輪未觸碰。
 
 **本輪額外查證：逐一核實`CALIBRATION_PROBE.md`裁示的300檔重跑複驗清單是否真的全數結案（先前幾輪的state只重複「連續N輪無新工作」的結論，沒有明寫這份清單本身的完整性）**：grep `TRIALS_LEDGER.md`確認TW`#77`（round334，percentile 41.9確定FAIL）、`#79`（round153/#100，percentile 86.1確定FAIL）、`#91`（round106，整體維持FAIL，高關注度組衍生觀察未列入候選）皆已複驗結案；US`#47`（round104，cheap-gate層翻盤CHEAP_PASS但策略層維持FAIL因#41深挖死因不同）、`#52`（性質不同，死因非cheap-gate檢定力問題，已移出待重跑清單）皆已處理；FUT`#34`（round328，查證後判定「無holdout安全的擴大樣本手段」不適用300檔重跑手法，維持FAIL）。**結論：`CALIBRATION_PROBE.md`整份操作指令清單無遺漏項目，候選池連續26輪（487~514）維持同一狀態並非漏做，是真的做完了。**
 
@@ -16,8 +20,4 @@
 
 ---
 
-**上一則保留（第509輪，供對照）**——取鎖乾淨（cycle`20260910-003037`）。三軌時間戳：FUT 10:30（round484，最舊，但無新機制、依例外條款不選）／TW 23:31（round507，較舊）／US 00:02（round508，最新）——FUT跳過後依輪替選TW。開工查`run_detached.py status`：`running=0`；`git log`確認round508後僅自動排程commit（IBKR報價）與`hypothesis_queue`自走commit（`38bfe0ca` `#67`結案FAIL＋新增`#68`：接手陳舊鎖檔回收未commit工作）；`git status`僅`dev_queue_cycle.log`／`external_connectivity.jsonl`兩個自動化log在動，屬另一track自身產物，本輪未觸碰。**結論：候選池連續23輪（487~509）維持同一狀態，TW軌本地端無新可推進工作單位**，僅剩`#50`（tick累積2/20，被動等待總司令對gate50提案的回應）與`hypothesis_queue`自走排程（現在`#67`已結案FAIL、`#68`起）的被動維護。完整見`REPORT.md`第509輪心跳。
-
----
-
-（第430/432/437/439/441/443/445/447/449/451/453/455/457/459/461/463/465/467/469/470/471/472/474/475/477/478/480/482/485/487/489/491/493/495/497/499/501/503/505/507輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+（第430/432/437/439/441/443/445/447/449/451/453/455/457/459/461/463/465/467/469/470/471/472/474/475/477/478/480/482/485/487/489/491/493/495/497/499/501/503/505/507/509輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
