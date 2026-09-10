@@ -1,5 +1,24 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T23:56+0800 — hypothesis_queue排程接續（乾淨取鎖）：#71減資公告事件效應
+資料工程階段接續——(1)發現並修正`capital_reduction_verify.py`/
+`capital_reduction_gap_screen.py`兩支腳本混用簡體字「减」（違反`CLAUDE.md`
+語言鐵律，且是真實bug：Windows主控台cp950編碼無法印出簡體字，上一輪最後的
+彙整print已因此拋`UnicodeEncodeError`崩潰，雖然checkpoint與輸出JSON在崩潰前
+已成功寫入，未遺失資料），已全部改回繁體「減」並確認語法+執行不再崩潰。
+(2)補上`ReasonforCapitalReduction`欄位英文/中文同義詞正規化
+（`Making up losses`→`彌補虧損`、`Cash refund`→`現金減資`，上一輪心跳已預告
+需要），新增`reason_raw`保留原文、`reason`存正規化後值，`by_reason`統計正確
+合併（143/79，不再拆成四桶）。(3)嘗試續跑逐檔驗證：FinMind於本輪仍在402
+節流冷卻中（`rate_limit_state.json`顯示剩餘約118.6分鐘），腳本正確依斷路器
+規則立即停止、未重試未換來源，累積查詢維持302/805（37.5%），本輪新查0檔——
+**這是正確行為，不是失敗**。`is_holdout_consumed()`確認`False`。無PASS/FAIL/
+CHEAP_PASS判定，未呼叫`register_trial()`（純資料工程輪次，跟前幾輪同一慣例）。
+（附註：本輪開工先讀`PENDING_QUEUE.md`，交辦佇列僅剩2條被阻塞項（S4U排程/
+claude CLI非互動驗證，需總司令管理員權限）+1條未拆解大型項（題材七），皆非
+本track可執行範圍，本輪工作單位全數投入#71自走軌道。下一輪：FinMind冷卻解除
+後（約台北時間01:53後）繼續逐檔驗證剩餘503檔。）
+
 ## 2026-09-10T23:35+0800 — hypothesis_queue排程接續（鎖檔陳舊回收，上一輪PID 32864疑似未正常收工，29.8分鐘後被本輪回收）：#71减資公告事件效應資料工程階段完成兩步——(1)`capital_reduction_gap_screen.py`價格跳空候選偵測，修正一個真實資料品質bug（`Trading_Volume==0`零成交日被誤判成假跳空，首次執行149,030筆假候選，修正過濾後正式產出3,490筆候選/805檔股票）；(2)`capital_reduction_verify.py`逐檔驗證（checkpoint可續跑），本輪跑完283/805檔（35%），140檔確認曾減資、220筆事件、187筆（85%）成功匹配到跳空候選（驗證跳空閾值recall合理）。意外發現`ReasonforCapitalReduction`欄位英文/中文同義詞並存（`Making up losses`=`彌補虧損`、`Cash refund`=`現金減資`），下一輪彙整前需正規化。**本輪順手修正本檔案本身的格式錯誤**（上兩則心跳被插在header上方、且彼此時間順序顛倒，本輪已修正回「header在最上、entry依時間新到舊排列」的正確格式）。（附註：本輪開工先讀`PENDING_QUEUE.md`，交辦佇列僅剩2條被阻塞項（S4U排程/claude CLI非互動驗證，需總司令管理員權限）+1條未拆解大型項（題材七），皆非本track可執行範圍，本輪工作單位全數投入#71自走軌道。）
 
 ## 2026-09-10T20:26+0800 — hypothesis_queue排程接續（鎖檔陳舊回收，上一輪PID 21980正常）：#71减資公告事件效應三來源資料可行性查證結案——(1)MOPS無減資專屬彙總頁，`t05sr01_1`是重大訊息通用詳情頁；本專案`events.json`管線的`t187ap04_L`實測確認為當日快照無歷史查詢能力；(2)GitHub/社群搜到`twsouvenir.github.io`減資日曆但非官方授權來源且資料深度未確認，判定不足採信。**三來源鐵律皆查證完畢，全市場歷年减資清單不可及**，判定改走「由已有欄位推導」路徑（價格序列跳空偵測縮小候選範圍），下一輪從該腳本開始。交辦佇列還剩0條未開始可執行項（2條阻塞需admin＋1條題材七未拆解，皆非本track範圍）。budget將盡，本輪收工。

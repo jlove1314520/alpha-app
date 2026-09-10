@@ -1,23 +1,22 @@
 {
   "generated_at_note": "hypothesis_queue #71 candidate verify, 2026-09-10 接續",
   "candidate_universe_size": 805,
-  "stocks_queried_total": 283,
-  "stocks_queried_this_round": 141,
+  "stocks_queried_total": 302,
+  "stocks_queried_this_round": 0,
   "stocks_query_errors": 0,
-  "stocks_with_reduction_data": 140,
-  "reduction_events_total": 220,
-  "reduction_events_matched_to_gap_candidate": 187,
+  "stocks_with_reduction_data": 142,
+  "reduction_events_total": 222,
+  "reduction_events_matched_to_gap_candidate": 188,
   "reduction_events_by_reason": {
-    "Making up losses": 93,
-    "彌補虧損": 49,
-    "Cash refund": 65,
-    "現金減資": 13
+    "彌補虧損": 143,
+    "現金減資": 79
   },
   "reduction_events": [
     {
       "stock_id": "1316",
       "reduction_date": "2017-01-24",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1316",
@@ -32,13 +31,15 @@
     {
       "stock_id": "1316",
       "reduction_date": "2022-10-31",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1333",
       "reduction_date": "2016-10-17",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -54,7 +55,8 @@
     {
       "stock_id": "1413",
       "reduction_date": "2014-11-28",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1413",
@@ -69,7 +71,8 @@
     {
       "stock_id": "1418",
       "reduction_date": "2017-11-27",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1418",
@@ -84,14 +87,16 @@
     {
       "stock_id": "1423",
       "reduction_date": "2018-10-29",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1423",
       "reduction_date": "2023-10-23",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1423",
@@ -106,7 +111,8 @@
     {
       "stock_id": "1432",
       "reduction_date": "2020-09-21",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1432",
@@ -121,7 +127,8 @@
     {
       "stock_id": "1436",
       "reduction_date": "2012-08-06",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1436",
@@ -136,7 +143,8 @@
     {
       "stock_id": "1438",
       "reduction_date": "2021-03-29",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1438",
@@ -151,7 +159,8 @@
     {
       "stock_id": "1441",
       "reduction_date": "2017-04-26",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1441",
@@ -166,7 +175,8 @@
     {
       "stock_id": "1441",
       "reduction_date": "2023-08-29",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1441",
@@ -181,7 +191,8 @@
     {
       "stock_id": "1443",
       "reduction_date": "2011-09-22",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1443",
@@ -196,28 +207,32 @@
     {
       "stock_id": "1451",
       "reduction_date": "2011-08-25",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1451",
       "reduction_date": "2012-08-20",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1451",
       "reduction_date": "2013-08-19",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1451",
       "reduction_date": "2017-10-11",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1451",
@@ -232,7 +247,8 @@
     {
       "stock_id": "1456",
       "reduction_date": "2014-01-13",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1456",
@@ -247,7 +263,8 @@
     {
       "stock_id": "1456",
       "reduction_date": "2016-02-02",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1456",
@@ -262,7 +279,8 @@
     {
       "stock_id": "1460",
       "reduction_date": "2021-07-07",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1460",
@@ -277,7 +295,8 @@
     {
       "stock_id": "1471",
       "reduction_date": "2018-01-22",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1471",
@@ -292,7 +311,8 @@
     {
       "stock_id": "1472",
       "reduction_date": "2011-11-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1472",
@@ -307,7 +327,8 @@
     {
       "stock_id": "1472",
       "reduction_date": "2017-10-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1472",
@@ -322,7 +343,8 @@
     {
       "stock_id": "1472",
       "reduction_date": "2021-10-18",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1472",
@@ -337,7 +359,8 @@
     {
       "stock_id": "1512",
       "reduction_date": "2023-03-13",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1512",
@@ -352,7 +375,8 @@
     {
       "stock_id": "1527",
       "reduction_date": "2015-11-09",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1527",
@@ -367,7 +391,8 @@
     {
       "stock_id": "1529",
       "reduction_date": "2018-12-22",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1529",
@@ -382,7 +407,8 @@
     {
       "stock_id": "1538",
       "reduction_date": "2014-11-10",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1538",
@@ -397,7 +423,8 @@
     {
       "stock_id": "1538",
       "reduction_date": "2018-09-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1538",
@@ -412,7 +439,8 @@
     {
       "stock_id": "1538",
       "reduction_date": "2020-11-16",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1538",
@@ -427,7 +455,8 @@
     {
       "stock_id": "1538",
       "reduction_date": "2023-12-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1538",
@@ -442,7 +471,8 @@
     {
       "stock_id": "1538",
       "reduction_date": "2024-12-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "1538",
@@ -457,7 +487,8 @@
     {
       "stock_id": "1582",
       "reduction_date": "2018-11-05",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1582",
@@ -472,14 +503,16 @@
     {
       "stock_id": "1603",
       "reduction_date": "2015-12-01",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1603",
       "reduction_date": "2016-12-09",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1603",
@@ -494,14 +527,16 @@
     {
       "stock_id": "1604",
       "reduction_date": "2018-12-11",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "1614",
       "reduction_date": "2013-10-18",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1614",
@@ -516,7 +551,8 @@
     {
       "stock_id": "1737",
       "reduction_date": "2013-12-30",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "1737",
@@ -531,14 +567,16 @@
     {
       "stock_id": "1776",
       "reduction_date": "2023-10-11",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2006",
       "reduction_date": "2021-12-06",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2006",
@@ -553,7 +591,8 @@
     {
       "stock_id": "2017",
       "reduction_date": "2015-12-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2017",
@@ -568,7 +607,8 @@
     {
       "stock_id": "2022",
       "reduction_date": "2018-08-27",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2022",
@@ -583,7 +623,8 @@
     {
       "stock_id": "2022",
       "reduction_date": "2023-08-28",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2022",
@@ -598,7 +639,8 @@
     {
       "stock_id": "2028",
       "reduction_date": "2016-11-07",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2028",
@@ -613,7 +655,8 @@
     {
       "stock_id": "2109",
       "reduction_date": "2013-12-27",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2109",
@@ -628,7 +671,8 @@
     {
       "stock_id": "2109",
       "reduction_date": "2021-03-29",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2109",
@@ -643,7 +687,8 @@
     {
       "stock_id": "2201",
       "reduction_date": "2020-10-19",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2201",
@@ -658,7 +703,8 @@
     {
       "stock_id": "2204",
       "reduction_date": "2019-10-07",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2204",
@@ -673,7 +719,8 @@
     {
       "stock_id": "2323",
       "reduction_date": "2015-09-17",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2323",
@@ -688,7 +735,8 @@
     {
       "stock_id": "2323",
       "reduction_date": "2019-09-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2323",
@@ -703,21 +751,24 @@
     {
       "stock_id": "2323",
       "reduction_date": "2022-10-24",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2327",
       "reduction_date": "2013-09-18",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2327",
       "reduction_date": "2014-10-09",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2327",
@@ -732,7 +783,8 @@
     {
       "stock_id": "2327",
       "reduction_date": "2016-08-15",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2327",
@@ -747,7 +799,8 @@
     {
       "stock_id": "2327",
       "reduction_date": "2017-08-18",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2327",
@@ -762,7 +815,8 @@
     {
       "stock_id": "2327",
       "reduction_date": "2022-10-31",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2327",
@@ -777,7 +831,8 @@
     {
       "stock_id": "2329",
       "reduction_date": "2018-12-03",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2329",
@@ -792,14 +847,16 @@
     {
       "stock_id": "2331",
       "reduction_date": "2013-11-25",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2331",
       "reduction_date": "2014-10-20",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2331",
@@ -814,7 +871,8 @@
     {
       "stock_id": "2337",
       "reduction_date": "2017-08-28",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2337",
@@ -829,14 +887,16 @@
     {
       "stock_id": "2340",
       "reduction_date": "2017-10-06",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2340",
       "reduction_date": "2019-09-23",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2340",
@@ -851,7 +911,8 @@
     {
       "stock_id": "2348",
       "reduction_date": "2011-03-01",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2348",
@@ -866,7 +927,8 @@
     {
       "stock_id": "2348",
       "reduction_date": "2012-12-28",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2348",
@@ -881,7 +943,8 @@
     {
       "stock_id": "2349",
       "reduction_date": "2016-09-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2349",
@@ -896,7 +959,8 @@
     {
       "stock_id": "2349",
       "reduction_date": "2018-09-17",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2349",
@@ -911,7 +975,8 @@
     {
       "stock_id": "2349",
       "reduction_date": "2020-10-12",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2349",
@@ -926,7 +991,8 @@
     {
       "stock_id": "2358",
       "reduction_date": "2016-10-31",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2358",
@@ -941,7 +1007,8 @@
     {
       "stock_id": "2364",
       "reduction_date": "2012-10-29",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2364",
@@ -956,7 +1023,8 @@
     {
       "stock_id": "2364",
       "reduction_date": "2016-10-07",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2364",
@@ -971,7 +1039,8 @@
     {
       "stock_id": "2364",
       "reduction_date": "2021-10-08",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2364",
@@ -986,7 +1055,8 @@
     {
       "stock_id": "2371",
       "reduction_date": "2011-04-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2371",
@@ -1001,7 +1071,8 @@
     {
       "stock_id": "2373",
       "reduction_date": "2017-09-07",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2373",
@@ -1016,7 +1087,8 @@
     {
       "stock_id": "2374",
       "reduction_date": "2015-11-17",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2374",
@@ -1031,7 +1103,8 @@
     {
       "stock_id": "2375",
       "reduction_date": "2013-10-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2375",
@@ -1046,21 +1119,24 @@
     {
       "stock_id": "2375",
       "reduction_date": "2014-11-14",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2375",
       "reduction_date": "2015-09-18",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2375",
       "reduction_date": "2020-08-17",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2375",
@@ -1075,7 +1151,8 @@
     {
       "stock_id": "2375",
       "reduction_date": "2022-09-12",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2375",
@@ -1090,7 +1167,8 @@
     {
       "stock_id": "2380",
       "reduction_date": "2019-10-07",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2380",
@@ -1105,7 +1183,8 @@
     {
       "stock_id": "2388",
       "reduction_date": "2012-10-04",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2388",
@@ -1120,7 +1199,8 @@
     {
       "stock_id": "2404",
       "reduction_date": "2018-12-10",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2404",
@@ -1135,7 +1215,8 @@
     {
       "stock_id": "2406",
       "reduction_date": "2019-12-02",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2406",
@@ -1150,7 +1231,8 @@
     {
       "stock_id": "2412",
       "reduction_date": "2011-01-25",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2412",
@@ -1165,7 +1247,8 @@
     {
       "stock_id": "2415",
       "reduction_date": "2017-09-08",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2415",
@@ -1180,7 +1263,8 @@
     {
       "stock_id": "2424",
       "reduction_date": "2011-04-15",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2424",
@@ -1195,7 +1279,8 @@
     {
       "stock_id": "2424",
       "reduction_date": "2020-12-21",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2424",
@@ -1210,7 +1295,8 @@
     {
       "stock_id": "2429",
       "reduction_date": "2013-03-13",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2429",
@@ -1225,7 +1311,8 @@
     {
       "stock_id": "2429",
       "reduction_date": "2019-01-02",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2429",
@@ -1240,7 +1327,8 @@
     {
       "stock_id": "2434",
       "reduction_date": "2015-04-16",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2434",
@@ -1255,7 +1343,8 @@
     {
       "stock_id": "2434",
       "reduction_date": "2017-09-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2434",
@@ -1270,7 +1359,8 @@
     {
       "stock_id": "2434",
       "reduction_date": "2020-09-15",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2434",
@@ -1285,7 +1375,8 @@
     {
       "stock_id": "2443",
       "reduction_date": "2013-10-17",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2443",
@@ -1300,7 +1391,8 @@
     {
       "stock_id": "2444",
       "reduction_date": "2014-11-04",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2444",
@@ -1315,21 +1407,24 @@
     {
       "stock_id": "2456",
       "reduction_date": "2013-10-18",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2456",
       "reduction_date": "2014-09-29",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2456",
       "reduction_date": "2018-10-12",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2456",
@@ -1344,7 +1439,8 @@
     {
       "stock_id": "2458",
       "reduction_date": "2018-10-22",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2458",
@@ -1359,7 +1455,8 @@
     {
       "stock_id": "2465",
       "reduction_date": "2011-10-25",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2465",
@@ -1374,7 +1471,8 @@
     {
       "stock_id": "2465",
       "reduction_date": "2017-10-23",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2465",
@@ -1389,14 +1487,16 @@
     {
       "stock_id": "2478",
       "reduction_date": "2016-10-21",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2478",
       "reduction_date": "2019-10-07",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2478",
@@ -1411,7 +1511,8 @@
     {
       "stock_id": "2480",
       "reduction_date": "2017-09-05",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2480",
@@ -1426,7 +1527,8 @@
     {
       "stock_id": "2496",
       "reduction_date": "2016-09-10",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2496",
@@ -1441,7 +1543,8 @@
     {
       "stock_id": "2505",
       "reduction_date": "2021-01-04",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2505",
@@ -1456,7 +1559,8 @@
     {
       "stock_id": "2534",
       "reduction_date": "2019-12-16",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2534",
@@ -1471,14 +1575,16 @@
     {
       "stock_id": "2534",
       "reduction_date": "2020-12-14",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2542",
       "reduction_date": "2012-11-12",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2542",
@@ -1493,7 +1599,8 @@
     {
       "stock_id": "2603",
       "reduction_date": "2022-09-19",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "2603",
@@ -1508,7 +1615,8 @@
     {
       "stock_id": "2609",
       "reduction_date": "2017-05-04",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2609",
@@ -1523,7 +1631,8 @@
     {
       "stock_id": "2614",
       "reduction_date": "2013-11-12",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2614",
@@ -1538,28 +1647,32 @@
     {
       "stock_id": "2614",
       "reduction_date": "2018-07-23",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2614",
       "reduction_date": "2021-09-13",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2614",
       "reduction_date": "2022-08-22",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "2614",
       "reduction_date": "2023-08-28",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2614",
@@ -1574,6 +1687,7 @@
     {
       "stock_id": "2641",
       "reduction_date": "2018-08-22",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1589,6 +1703,7 @@
     {
       "stock_id": "2719",
       "reduction_date": "2019-10-21",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1604,6 +1719,7 @@
     {
       "stock_id": "2719",
       "reduction_date": "2020-12-31",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1619,6 +1735,7 @@
     {
       "stock_id": "2719",
       "reduction_date": "2022-08-01",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1634,6 +1751,7 @@
     {
       "stock_id": "2724",
       "reduction_date": "2022-01-10",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1649,6 +1767,7 @@
     {
       "stock_id": "2726",
       "reduction_date": "2023-11-06",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1664,7 +1783,8 @@
     {
       "stock_id": "2816",
       "reduction_date": "2012-10-30",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2816",
@@ -1679,7 +1799,8 @@
     {
       "stock_id": "2837",
       "reduction_date": "2013-03-01",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "2837",
@@ -1694,7 +1815,8 @@
     {
       "stock_id": "3015",
       "reduction_date": "2015-10-26",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3015",
@@ -1709,7 +1831,8 @@
     {
       "stock_id": "3018",
       "reduction_date": "2011-01-27",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3018",
@@ -1724,7 +1847,8 @@
     {
       "stock_id": "3018",
       "reduction_date": "2023-11-27",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3018",
@@ -1739,14 +1863,16 @@
     {
       "stock_id": "3022",
       "reduction_date": "2018-09-17",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "3022",
       "reduction_date": "2019-09-06",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3022",
@@ -1761,7 +1887,8 @@
     {
       "stock_id": "3026",
       "reduction_date": "2013-11-01",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3026",
@@ -1776,7 +1903,8 @@
     {
       "stock_id": "3026",
       "reduction_date": "2017-10-30",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3026",
@@ -1791,7 +1919,8 @@
     {
       "stock_id": "3035",
       "reduction_date": "2015-09-25",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3035",
@@ -1806,14 +1935,16 @@
     {
       "stock_id": "3040",
       "reduction_date": "2013-10-15",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "3040",
       "reduction_date": "2015-01-23",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3040",
@@ -1828,7 +1959,8 @@
     {
       "stock_id": "3041",
       "reduction_date": "2019-11-04",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3041",
@@ -1843,7 +1975,8 @@
     {
       "stock_id": "3041",
       "reduction_date": "2024-11-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3041",
@@ -1858,7 +1991,8 @@
     {
       "stock_id": "3043",
       "reduction_date": "2022-12-19",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3043",
@@ -1873,7 +2007,8 @@
     {
       "stock_id": "3046",
       "reduction_date": "2014-10-09",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3046",
@@ -1888,7 +2023,8 @@
     {
       "stock_id": "3046",
       "reduction_date": "2017-12-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3046",
@@ -1903,7 +2039,8 @@
     {
       "stock_id": "3049",
       "reduction_date": "2015-10-08",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3049",
@@ -1918,7 +2055,8 @@
     {
       "stock_id": "3057",
       "reduction_date": "2020-09-28",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3057",
@@ -1933,7 +2071,8 @@
     {
       "stock_id": "3059",
       "reduction_date": "2014-10-24",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3059",
@@ -1948,6 +2087,7 @@
     {
       "stock_id": "3066",
       "reduction_date": "2014-12-01",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -1963,6 +2103,7 @@
     {
       "stock_id": "3067",
       "reduction_date": "2021-12-07",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [],
       "matched": false
@@ -1970,6 +2111,7 @@
     {
       "stock_id": "3071",
       "reduction_date": "2013-10-07",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
@@ -1977,6 +2119,7 @@
     {
       "stock_id": "3071",
       "reduction_date": "2017-08-30",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [],
       "matched": false
@@ -1984,6 +2127,7 @@
     {
       "stock_id": "3071",
       "reduction_date": "2017-11-27",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -1999,6 +2143,7 @@
     {
       "stock_id": "3071",
       "reduction_date": "2019-10-07",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
@@ -2006,6 +2151,7 @@
     {
       "stock_id": "3073",
       "reduction_date": "2013-10-07",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2021,6 +2167,7 @@
     {
       "stock_id": "3073",
       "reduction_date": "2020-01-13",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2036,6 +2183,7 @@
     {
       "stock_id": "3085",
       "reduction_date": "2020-07-06",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2051,6 +2199,7 @@
     {
       "stock_id": "3085",
       "reduction_date": "2023-02-13",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2066,6 +2215,7 @@
     {
       "stock_id": "3089",
       "reduction_date": "2018-03-12",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2081,6 +2231,7 @@
     {
       "stock_id": "3105",
       "reduction_date": "2015-08-28",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
@@ -2088,6 +2239,7 @@
     {
       "stock_id": "3105",
       "reduction_date": "2016-09-23",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2103,6 +2255,7 @@
     {
       "stock_id": "3141",
       "reduction_date": "2015-12-31",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2118,6 +2271,7 @@
     {
       "stock_id": "3162",
       "reduction_date": "2021-07-05",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2133,6 +2287,7 @@
     {
       "stock_id": "3171",
       "reduction_date": "2024-10-07",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2148,6 +2303,7 @@
     {
       "stock_id": "3188",
       "reduction_date": "2018-09-03",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2163,6 +2319,7 @@
     {
       "stock_id": "3207",
       "reduction_date": "2018-11-12",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2178,6 +2335,7 @@
     {
       "stock_id": "3219",
       "reduction_date": "2018-12-24",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [],
       "matched": false
@@ -2185,6 +2343,7 @@
     {
       "stock_id": "3224",
       "reduction_date": "2014-01-06",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2200,7 +2359,8 @@
     {
       "stock_id": "3229",
       "reduction_date": "2022-01-10",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3229",
@@ -2215,6 +2375,7 @@
     {
       "stock_id": "3252",
       "reduction_date": "2013-02-06",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2230,6 +2391,7 @@
     {
       "stock_id": "3259",
       "reduction_date": "2020-10-05",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2245,6 +2407,7 @@
     {
       "stock_id": "3259",
       "reduction_date": "2023-08-28",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2260,6 +2423,7 @@
     {
       "stock_id": "3288",
       "reduction_date": "2018-12-24",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2275,6 +2439,7 @@
     {
       "stock_id": "3288",
       "reduction_date": "2022-09-26",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2290,7 +2455,8 @@
     {
       "stock_id": "3308",
       "reduction_date": "2022-01-06",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3308",
@@ -2305,20 +2471,23 @@
     {
       "stock_id": "3308",
       "reduction_date": "2023-12-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "3308",
       "reduction_date": "2024-04-01",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
     },
     {
       "stock_id": "3310",
       "reduction_date": "2016-10-20",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
@@ -2326,6 +2495,7 @@
     {
       "stock_id": "3310",
       "reduction_date": "2017-11-14",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2341,6 +2511,7 @@
     {
       "stock_id": "3310",
       "reduction_date": "2018-10-11",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [],
       "matched": false
@@ -2348,7 +2519,8 @@
     {
       "stock_id": "3311",
       "reduction_date": "2019-09-23",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3311",
@@ -2363,7 +2535,8 @@
     {
       "stock_id": "3312",
       "reduction_date": "2018-04-10",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3312",
@@ -2378,7 +2551,8 @@
     {
       "stock_id": "3321",
       "reduction_date": "2019-11-18",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3321",
@@ -2393,7 +2567,8 @@
     {
       "stock_id": "3321",
       "reduction_date": "2023-08-31",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3321",
@@ -2408,6 +2583,7 @@
     {
       "stock_id": "3372",
       "reduction_date": "2019-10-07",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2423,7 +2599,8 @@
     {
       "stock_id": "3383",
       "reduction_date": "2019-11-04",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3383",
@@ -2438,6 +2615,7 @@
     {
       "stock_id": "3431",
       "reduction_date": "2014-12-15",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2453,7 +2631,8 @@
     {
       "stock_id": "3432",
       "reduction_date": "2024-01-22",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3432",
@@ -2468,6 +2647,7 @@
     {
       "stock_id": "3434",
       "reduction_date": "2015-11-17",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2483,6 +2663,7 @@
     {
       "stock_id": "3438",
       "reduction_date": "2020-09-14",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2498,6 +2679,7 @@
     {
       "stock_id": "3452",
       "reduction_date": "2018-12-10",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2513,6 +2695,7 @@
     {
       "stock_id": "3465",
       "reduction_date": "2015-03-13",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2528,6 +2711,7 @@
     {
       "stock_id": "3465",
       "reduction_date": "2016-11-29",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2543,6 +2727,7 @@
     {
       "stock_id": "3498",
       "reduction_date": "2018-10-15",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2558,6 +2743,7 @@
     {
       "stock_id": "3516",
       "reduction_date": "2017-11-13",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2573,6 +2759,7 @@
     {
       "stock_id": "3520",
       "reduction_date": "2019-01-02",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2588,6 +2775,7 @@
     {
       "stock_id": "3522",
       "reduction_date": "2022-08-26",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2603,6 +2791,7 @@
     {
       "stock_id": "3523",
       "reduction_date": "2018-09-03",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2618,6 +2807,7 @@
     {
       "stock_id": "3523",
       "reduction_date": "2021-11-29",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2633,6 +2823,7 @@
     {
       "stock_id": "3526",
       "reduction_date": "2021-03-29",
+      "reason_raw": "現金減資",
       "reason": "現金減資",
       "matched_gap_candidates": [
         {
@@ -2648,7 +2839,8 @@
     {
       "stock_id": "3532",
       "reduction_date": "2018-09-25",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3532",
@@ -2663,7 +2855,8 @@
     {
       "stock_id": "3536",
       "reduction_date": "2011-10-20",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3536",
@@ -2678,7 +2871,8 @@
     {
       "stock_id": "3536",
       "reduction_date": "2015-03-20",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3536",
@@ -2693,7 +2887,8 @@
     {
       "stock_id": "3545",
       "reduction_date": "2015-12-15",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3545",
@@ -2708,7 +2903,8 @@
     {
       "stock_id": "3545",
       "reduction_date": "2020-10-26",
-      "reason": "Cash refund",
+      "reason_raw": "Cash refund",
+      "reason": "現金減資",
       "matched_gap_candidates": [
         {
           "stock_id": "3545",
@@ -2723,6 +2919,7 @@
     {
       "stock_id": "3555",
       "reduction_date": "2014-09-15",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2738,6 +2935,7 @@
     {
       "stock_id": "3555",
       "reduction_date": "2015-09-21",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2753,6 +2951,7 @@
     {
       "stock_id": "3555",
       "reduction_date": "2016-09-30",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2768,6 +2967,7 @@
     {
       "stock_id": "3555",
       "reduction_date": "2021-10-06",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2783,7 +2983,8 @@
     {
       "stock_id": "3557",
       "reduction_date": "2016-12-02",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3557",
@@ -2798,7 +2999,8 @@
     {
       "stock_id": "3557",
       "reduction_date": "2017-10-16",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3557",
@@ -2813,7 +3015,8 @@
     {
       "stock_id": "3557",
       "reduction_date": "2020-01-20",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3557",
@@ -2828,6 +3031,7 @@
     {
       "stock_id": "3562",
       "reduction_date": "2016-10-17",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2843,7 +3047,8 @@
     {
       "stock_id": "3576",
       "reduction_date": "2021-08-09",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3576",
@@ -2858,6 +3063,7 @@
     {
       "stock_id": "3580",
       "reduction_date": "2017-10-30",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2873,7 +3079,8 @@
     {
       "stock_id": "3593",
       "reduction_date": "2018-10-29",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3593",
@@ -2888,6 +3095,7 @@
     {
       "stock_id": "3629",
       "reduction_date": "2014-11-07",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2903,6 +3111,7 @@
     {
       "stock_id": "3629",
       "reduction_date": "2015-11-27",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2918,6 +3127,7 @@
     {
       "stock_id": "3629",
       "reduction_date": "2018-04-03",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2933,6 +3143,7 @@
     {
       "stock_id": "3632",
       "reduction_date": "2020-10-19",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -2948,7 +3159,8 @@
     {
       "stock_id": "3682",
       "reduction_date": "2020-01-20",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3682",
@@ -2963,7 +3175,8 @@
     {
       "stock_id": "3686",
       "reduction_date": "2019-11-25",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3686",
@@ -2978,7 +3191,8 @@
     {
       "stock_id": "3686",
       "reduction_date": "2022-10-11",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3686",
@@ -2993,7 +3207,8 @@
     {
       "stock_id": "3701",
       "reduction_date": "2018-11-12",
-      "reason": "Making up losses",
+      "reason_raw": "Making up losses",
+      "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
           "stock_id": "3701",
@@ -3008,6 +3223,7 @@
     {
       "stock_id": "4109",
       "reduction_date": "2019-03-29",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -3023,6 +3239,7 @@
     {
       "stock_id": "4131",
       "reduction_date": "2015-01-30",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -3038,6 +3255,7 @@
     {
       "stock_id": "4131",
       "reduction_date": "2022-01-10",
+      "reason_raw": "彌補虧損",
       "reason": "彌補虧損",
       "matched_gap_candidates": [
         {
@@ -3046,6 +3264,30 @@
           "prev_close": 6.5,
           "close": 16.9,
           "pct_change": 1.6
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "4153",
+      "reduction_date": "2020-10-19",
+      "reason_raw": "現金減資",
+      "reason": "現金減資",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "4192",
+      "reduction_date": "2023-07-10",
+      "reason_raw": "彌補虧損",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "4192",
+          "date": "2023-07-10",
+          "prev_close": 17.8,
+          "close": 60.5,
+          "pct_change": 2.3989
         }
       ],
       "matched": true

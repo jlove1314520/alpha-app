@@ -1,22 +1,22 @@
-"""`HYPOTHESIS_QUEUE.md` #71 台股减資事件研究：候選逐檔驗證腳本（第二步）。
+"""`HYPOTHESIS_QUEUE.md` #71 台股減資事件研究：候選逐檔驗證腳本（第二步）。
 
 背景見`capital_reduction_gap_screen.py`docstring——上一步用價格跳空偵測
 產出`data/capital_reduction_gap_candidates.json`（3,490筆候選、涉805檔
 股票），這是**高recall低precision**的候選產生器（已知會混入股票分割、
-面額變動、資料品質問題等非减資跳空）。本腳本是`#71`判定「全市場歷年
+面額變動、資料品質問題等非減資跳空）。本腳本是`#71`判定「全市場歷年
 減資公司清單不可及，必須改用由已有欄位推導」段落規劃的下一輪待辦
 (2)：對候選清單裡的每一檔股票，逐檔呼叫FinMind
 `TaiwanStockCapitalReductionReferencePrice`（唯一已確認欄位含
-`ReasonforCapitalReduction`能區分現金减資/彌補虧損减資的資料集），
-用「這檔股票是否真的有减資紀錄、且减資參考價日期是否接近候選跳空日」
-交叉驗證，把候選從「跳空事件」精煉成「已驗證的减資事件」。
+`ReasonforCapitalReduction`能區分現金減資/彌補虧損減資的資料集），
+用「這檔股票是否真的有減資紀錄、且減資參考價日期是否接近候選跳空日」
+交叉驗證，把候選從「跳空事件」精煉成「已驗證的減資事件」。
 
 **checkpoint可續跑機制**（比照`short_sale_utilization_portfolio_v1.py`/
 `margin_utilization_regime_portfolio_v1.py`同一套模式，理由同—805檔
 股票逐檔查詢在FinMind跨process節流3秒/次下，單輪417秒時間預算內只能
 處理約140檔，必須能跨輪接續，不能每輪從頭來過）：checkpoint記錄
 「已查詢過的stock_id → 該檔FinMind回傳的原始列（可能為空list代表
-真的沒有减資紀錄，區別於『還沒查過』）」，每次執行先讀checkpoint，
+真的沒有減資紀錄，區別於『還沒查過』）」，每次執行先讀checkpoint，
 只查詢還沒查過的stock_id，時間預算到就存檔收工。
 
 **零風險保證**：`TaiwanStockCapitalReductionReferencePrice`資料集含
@@ -25,15 +25,15 @@ docstring），且本腳本只讀取`data/capital_reduction_gap_candidates.json`
 （上一輪已產出，不重算）與呼叫`load_dev()`，不涉及任何holdout解鎖路徑。
 
 **交叉比對邏輯（事前綁定，避免看到數字才決定判準）**：
-- 一檔股票若FinMind回傳非空的减資參考價列，視為「該股票確實曾減資」。
-- 對每一筆减資參考價列，找候選清單裡同一檔股票、日期在
-  [减資參考價日期-3, 减資參考價日期+3]（含）交易日窗口內的候選跳空
+- 一檔股票若FinMind回傳非空的減資參考價列，視為「該股票確實曾減資」。
+- 對每一筆減資參考價列，找候選清單裡同一檔股票、日期在
+  [減資參考價日期-3, 減資參考價日期+3]（含）交易日窗口內的候選跳空
   事件視為「匹配」——減資參考價的`date`欄位語意是「恢復買賣日」
   （`#71`已查證確認，非公告日），跳空偵測抓的正是「復牌當日相對停牌前
   最後交易日」的價格斷點，兩者理論上應為同一天或極接近，±3個交易日
   是保守容錯（跨週末/國定假日/資料來源記錄方式微小差異）。
-- 未匹配到任何候選跳空事件的减資參考價列，仍記錄下來（可能代表跳空
-  閾值0.15過於嚴格漏掉了小比例减資，或减資恢復買賣日剛好落在
+- 未匹配到任何候選跳空事件的減資參考價列，仍記錄下來（可能代表跳空
+  閾值0.15過於嚴格漏掉了小比例減資，或減資恢復買賣日剛好落在
   `Trading_Volume==0`被過濾掉的日子），但**不計入「已驗證候選」**，
   留給下一輪評估閾值是否需要調整。
 
@@ -60,6 +60,21 @@ OUT_PATH = Path(__file__).parent.parent / "data" / "capital_reduction_verified.j
 MATCH_WINDOW_DAYS = 3  # 交易日窗口，見docstring交叉比對邏輯
 TIME_BUDGET_SECONDS = float(os.environ.get("CRV_TIME_BUDGET_SECONDS", "420"))
 
+# FinMind `ReasonforCapitalReduction`欄位英文/中文同義詞並存（2026-09-10發現，
+# 上一輪心跳記錄「下一輪彙整前需正規化」）：同一原因換了語言就被`by_reason`
+# 統計成兩個桶，低估集中度。這裡只做「已確認的同義詞」映射，不臆測其他值——
+# 遇到映射表沒有的原因字串，保留原文，不強行歸類。
+REASON_NORMALIZE_MAP = {
+    "Making up losses": "彌補虧損",
+    "Cash refund": "現金減資",
+}
+
+
+def _normalize_reason(raw: str | None) -> str | None:
+    if raw is None:
+        return None
+    return REASON_NORMALIZE_MAP.get(raw, raw)
+
 
 def _load_checkpoint() -> dict:
     if CHECKPOINT_PATH.exists():
@@ -82,7 +97,7 @@ def _candidate_universe() -> tuple[list[str], dict[str, list[dict]]]:
 
 
 def _date_within_window(a: str, b: str, window: int) -> bool:
-    """粗略天數差（非交易日曆精確版，但候選/减資日期皆為YYYY-MM-DD字串，
+    """粗略天數差（非交易日曆精確版，但候選/減資日期皆為YYYY-MM-DD字串，
     用曆日差近似交易日窗口——`window=3`已預留跨週末容錯，曆日/交易日
     誤差在此容錯範圍內可忽略，不需要引入完整交易日曆增加複雜度）。"""
     from datetime import date
@@ -140,10 +155,12 @@ def main() -> None:
                 c for c in cand_events
                 if _date_within_window(c["date"], reduction_date, MATCH_WINDOW_DAYS)
             ]
+            raw_reason = r.get("ReasonforCapitalReduction")
             verified_stocks.append({
                 "stock_id": stock_id,
                 "reduction_date": reduction_date,
-                "reason": r.get("ReasonforCapitalReduction"),
+                "reason_raw": raw_reason,
+                "reason": _normalize_reason(raw_reason),
                 "matched_gap_candidates": matched,
                 "matched": bool(matched),
             })
@@ -173,7 +190,7 @@ def main() -> None:
     OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"\n累積查詢：{n_queried}/{len(universe)} 檔（本輪新查{n_this_round}、失敗{n_errors}）")
-    print(f"有减資紀錄：{n_with_data} 檔，共{len(verified_stocks)}筆减資事件")
+    print(f"有減資紀錄：{n_with_data} 檔，共{len(verified_stocks)}筆減資事件")
     print(f"依原因分布：{by_reason}")
     print(f"與跳空候選匹配：{n_matched}/{len(verified_stocks)}")
     print(f"輸出：{OUT_PATH}")
