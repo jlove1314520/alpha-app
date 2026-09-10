@@ -1,34 +1,63 @@
 {
-  "computed_at": "2026-09-10T12:54:00+00:00",
+  "computed_at": "2026-09-10T16:34:05+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
       "ratio": 5,
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
-      "us_price": 435.36,
-      "us_quote_time": 1788984000,
+      "us_price": 429.88,
+      "us_quote_time": 1789058008,
       "tw_price": 2450.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260910",
       "fx_rate": 31.467,
       "fx_date": "2026-09-10",
-      "implied_tw_price": 2739.895,
-      "premium_pct": 11.832
+      "implied_tw_price": 2705.407,
+      "premium_pct": 10.425
+    },
+    "UMC": {
+      "tw_code": "2303",
+      "ratio": 5,
+      "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
+      "us_price": 22.08,
+      "us_quote_time": 1789058004,
+      "tw_price": 142.5,
+      "tw_quote_time": "13:30:00",
+      "tw_quote_date": "20260910",
+      "fx_rate": 31.467,
+      "fx_date": "2026-09-10",
+      "implied_tw_price": 138.958,
+      "premium_pct": -2.485
+    },
+    "ASX": {
+      "tw_code": "3711",
+      "ratio": 2,
+      "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
+      "us_price": 39.81,
+      "us_quote_time": 1789058027,
+      "tw_price": 650.0,
+      "tw_quote_time": "13:30:00",
+      "tw_quote_date": "20260910",
+      "fx_rate": 31.467,
+      "fx_date": "2026-09-10",
+      "implied_tw_price": 626.351,
+      "premium_pct": -3.638
+    },
+    "CHT": {
+      "tw_code": "2412",
+      "ratio": 10,
+      "source": "SEC EDGAR 20-F CIK 1132924；1 ADS＝10股普通股",
+      "us_price": 44.57,
+      "us_quote_time": 1789058012,
+      "tw_price": 139.5,
+      "tw_quote_time": "13:30:00",
+      "tw_quote_date": "20260910",
+      "fx_rate": 31.467,
+      "fx_date": "2026-09-10",
+      "implied_tw_price": 140.248,
+      "premium_pct": 0.537
     }
   },
-  "errors": [
-    {
-      "ticker": "UMC",
-      "reason": "美股報價缺失（data/quotes_us.json 未涵蓋此檔或尚未抓到）"
-    },
-    {
-      "ticker": "ASX",
-      "reason": "美股報價缺失（data/quotes_us.json 未涵蓋此檔或尚未抓到）"
-    },
-    {
-      "ticker": "CHT",
-      "reason": "美股報價缺失（data/quotes_us.json 未涵蓋此檔或尚未抓到）"
-    }
-  ]
+  "errors": []
 }
