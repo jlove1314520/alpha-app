@@ -134,6 +134,66 @@ def pattern_hit(text: str, theme_kw: list, patterns: list) -> str | None:
     return None
 
 
+# ── 題材八（2026-09-10 總司令裁示）：公司名稱片段反向排除 ──────────────
+# **為什麼加這個**：A 級原本只做裸的子字串比對，實測產出的兩筆 A 級證據
+# 理由全是錯的，只是答案碰巧對：
+#   1216 統一 → 食品：命中的是「代子公司上海易統**食品**貿易有限公司」，
+#                     那是一則租賃公告，「食品」二字來自**子公司的名字**。
+#   2881 富邦金 → 金控：同病，命中的是公司債發行公告裡的公司名稱。
+# 照這個寫法遲早會產出「代子公司XX**光電**公告…」→ 母公司被標成光電。
+# 公司名稱裡的字**不描述任何業務事實**，它只是名字。
+COMPANY_SUFFIX = ("股份有限公司", "有限公司", "控股公司", "公司",
+                  "企業", "實業", "貿易", "投資", "控股")
+# 一段公司名稱：中英數字組成、以上面任一後綴結尾。長度上限避免整句被吃掉。
+_COMPANY_RE = re.compile(
+    r"[一-鿿A-Za-z0-9()（）]{1,20}?(?:" + "|".join(COMPANY_SUFFIX) + ")")
+
+
+def company_name_spans(text: str) -> list:
+    """回傳文字中所有「公司名稱片段」的 (起, 迄) 區間。"""
+    return [m.span() for m in _COMPANY_RE.finditer(text or "")]
+
+
+def kw_outside_company_name(text: str, kw: str) -> bool:
+    """關鍵詞是否**至少有一次**出現在公司名稱片段之外。
+
+    只要有一次落在名稱外，就代表這個詞不只是名字的一部分，可以繼續判斷；
+    若每一次出現都被包在公司名稱裡，那就純粹是撞名，一律不採。
+    """
+    if not text or not kw:
+        return False
+    spans = company_name_spans(text)
+    start = 0
+    while True:
+        i = text.find(kw, start)
+        if i < 0:
+            return False
+        j = i + len(kw)
+        if not any(a <= i and j <= b for a, b in spans):
+            return True
+        start = i + 1
+
+
+def evidence_keyword(text: str, kws: list, patterns: list):
+    """A 級與標題層共用的把關：回傳 (命中的關鍵詞, 命中的句型) 或 (None, None)。
+
+    兩道關卡缺一不可——
+      (1) **句型要求**：光是出現關鍵詞不算，要有「打入…供應鏈」「…擴產」
+          這類明確陳述關係的句型（與 C 級同一把尺，題材八.1）。
+      (2) **公司名稱反向排除**：關鍵詞若每一次都出現在公司名稱片段裡，
+          那是撞名不是事實（題材八.2）。
+    """
+    for kw in kws:
+        if kw not in (text or ""):
+            continue
+        if not kw_outside_company_name(text, kw):
+            continue
+        frag = pattern_hit(text, [kw], patterns)
+        if frag:
+            return kw, frag
+    return None, None
+
+
 def main() -> int:
     seed = _load(SEED)
     if not seed:
@@ -198,10 +258,12 @@ def main() -> int:
             # ── A 級：公司自身公告描述產品／業務／擴產／接單 ──────────────
             for e in ev_by_code.get(code, []):
                 title = e.get("title", "") or ""
-                hit = next((k for k in kws if k in title), None)
+                # 題材八.1／.2：不再是裸的子字串比對。要有明確句型，
+                # 且關鍵詞不能只出現在公司名稱片段裡（詳見 evidence_keyword）。
+                hit, frag = evidence_keyword(title, kws, patterns)
                 if hit:
                     level = "A"
-                    evidence.append({"level": "A", "matched": hit,
+                    evidence.append({"level": "A", "matched": hit, "pattern": frag,
                                      "type": e.get("type"), "date": e.get("date"),
                                      "url": e.get("url"), "quote": title[:140]})
                     if len(evidence) >= 3:
@@ -242,10 +304,12 @@ def main() -> int:
                 for n, codes, txt in news_hits:
                     if code not in codes:
                         continue
-                    hit = next((k for k in kws if k in txt), None)
+                    # 題材八.2：公司名稱反向排除同樣適用標題路徑——
+                    # 「代子公司○○食品貿易有限公司」裡的「食品」是名字不是事實，
+                    # 這件事跟證據等級無關，哪一條路徑進來都不該採。
+                    hit, frag = evidence_keyword(txt, kws, patterns)
                     if not hit:
                         continue
-                    frag = pattern_hit(txt, kws, patterns)
                     # 2026-09-09（題材二.3）**關係方向要求同樣適用標題路徑。**
                     # 只修內文路徑不夠——實測 2330→光罩 就是從這條進來的，
                     # 句型欄位是 None（純共現），靠「兩個網域」就過關了。

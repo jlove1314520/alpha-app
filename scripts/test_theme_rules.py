@@ -83,6 +83,49 @@ def main() -> int:
           is_frame_noise("晶圓代工廠台積電今日表示先進封裝產能將擴充"), False)
 
     print()
+    print("=== 題材八：A 級也要句型與反向排除（2026-09-10 總司令驗收案例）===")
+    from build_themes import (evidence_keyword, kw_outside_company_name,
+                              company_name_spans, load_patterns)
+    pats = load_patterns()
+
+    # 總司令原文指定的兩個反例。兩者「答案碰巧對，理由是錯的」——
+    # 命中的都是子公司名稱裡的字，而那是租賃公告與公司債發行公告。
+    bad1 = "代子公司上海易統食品貿易有限公司公告取得使用權資產"
+    check("「代子公司上海易統食品貿易有限公司公告取得使用權資產」不得命中食品",
+          evidence_keyword(bad1, ["食品"], pats), (None, None),
+          "「食品」只出現在子公司名稱裡，那是名字不是業務事實")
+    bad2 = "富邦金控代子公司富邦證券公告發行115年度第二次無擔保 普通公司債"
+    check("「富邦金控代子公司富邦證券公告發行…公司債」不得命中金控",
+          evidence_keyword(bad2, ["金控"], pats), (None, None),
+          "「金控」出現在公司名稱片段中")
+
+    # 正面案例：真正描述產品／擴產／接單的公告要照樣命中，
+    # 否則這道防線就是把所有東西一起擋掉，那不叫修好。
+    good1 = "本公司CoWoS產能擴充計畫說明"
+    check("「CoWoS產能」應命中（真正描述產能）",
+          evidence_keyword(good1, ["CoWoS"], pats)[0], "CoWoS")
+    good2 = "本公司打入散熱供應鏈並取得客戶認證"
+    check("「打入散熱供應鏈」應命中（真正描述接單）",
+          evidence_keyword(good2, ["散熱"], pats)[0], "散熱")
+    # 關鍵詞同時出現在公司名稱裡**與**名稱外時，名稱外那次算數
+    good3 = "台灣食品股份有限公司公告食品產能擴產"
+    check("關鍵詞在公司名稱外也出現過一次時仍應命中",
+          evidence_keyword(good3, ["食品"], pats)[0], "食品",
+          "只有「每一次出現都在名稱裡」才該擋")
+
+    # 輔助函式本身的行為（壞掉時比整條規則好定位）
+    check("「食品」在「上海易統食品貿易有限公司」中被判定為公司名稱片段",
+          kw_outside_company_name("代子公司上海易統食品貿易有限公司公告", "食品"), False)
+    check("「食品」在「食品產能擴產」中不算公司名稱片段",
+          kw_outside_company_name("食品產能擴產", "食品"), True)
+    check("公司名稱片段偵測得到至少一段",
+          len(company_name_spans(bad1)) >= 1, True)
+
+    # 純共現（有公司名稱以外的關鍵詞、但沒有句型）仍要擋——題材八.1
+    check("純共現無句型不得命中（A 級比照 C 級）",
+          evidence_keyword("台積電攜ASML開發12吋光罩", ["光罩"], pats), (None, None))
+
+    print()
     if FAILED:
         print(f"✗ {len(FAILED)} 項失敗：{FAILED}")
         return 1
