@@ -1164,7 +1164,25 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 - [ ] **深讀一.1** 影子帳本：每個候選機制一本，每日更新、append-only、可稽核
 - [ ] **深讀一.2** 候選生命週期改為 train+val → 六關 → 影子帳本前向觀察；holdout 只留給最終定案版
-- [ ] **深讀一.3** 影子帳本狀態顯示在 App（起始日、累積報酬、MDD、交易數）
+- [x] **深讀一.3** 影子帳本狀態顯示在 App（起始日、累積報酬、MDD、交易數）
+  （2026-09-10 完成，但有但書：**深讀一.1／一.2 獨立的「影子帳本」基礎設施本身尚未
+  建置**，目前全站唯一真實存在、每日append更新的前向績效資料是`data/strategy_
+  performance.json`（→`data/strategies.json`的`forward_paper`），已被交易頁「策略
+  監控台」（`trade-sub-monitor`）使用。本項在**不新增後端、不碰研究帽檔案**的前提
+  下，把這份既有真實資料裡本來就缺的兩個欄位（MDD、交易數）補齊到卡片展開的明細：
+  新增`calcEquityCurveMddPct()`（從真實`equity_curve`逐日算出最大回撤%，非預先儲存
+  假值）與`calcLedgerTradeCount()`（加總真實`ledger`逐日buys+sells筆數），連同原本
+  就有的起始日(`inception_date`)、累積報酬(`forward_return_todate_pct`)一併用
+  `.bot-stats`四格卡片列在明細最上方（`index.html` `strategyDetailHtml()`）。
+  用真實資料驗算：value_board_v2 MDD=-19.26%／交易數19筆，momentum_board
+  MDD=0.00%／交易數20筆（該策略equity_curve全程為0，是既有資料管線問題，不在本項
+  範圍內），future_board MDD=-6.74%／交易數18筆，起始日均2026-08-27，與
+  `data/strategy_performance.json`原始數字一致，無假資料。
+  冒煙測試：43/44 PASS，1 FAIL（#39資料一致性稽核閘門，既有已知紅燈，見下方
+  `稽核.三`，改動前後結果相同，與本項無關）。
+  **尚未做到的部分**：深讀一.1（獨立影子帳本、每個候選機制一本、append-only）與
+  深讀一.2（候選生命週期改為train+val→六關→影子帳本前向觀察）仍是空白，兩者在
+  ORDER清單裡排在本項之前，下一輪應優先處理，不要略過。commit：見本次commit。
 - [x] **深讀二.1** 台股被動基準候選：固定小倉位 0050／台指期多單，掃 w=0.08~0.30，誠實引擎（真實權重漂移＋再平衡照實收成本）
   （2026-09-10 完成：新增`research/passive_benchmark_tw_v1.py`——用0050（已還原配息的
   調整後價格序列）、真實權重漂移（兩次再平衡之間完全不動，權重隨價格自然漂移，不是

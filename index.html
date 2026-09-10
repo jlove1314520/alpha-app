@@ -2319,6 +2319,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function spark(cl,up){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
     return `<svg class="spark" width="64" height="26" viewBox="0 0 64 26" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2"/></svg>`}
+  // 2026-09-10（深讀一.3）影子帳本狀態要秀MDD／交易數，但後端equity_curve/ledger
+  // 沒有現成欄位，兩個都用前端從真實cum_return_pct序列/逐日買賣明細算出來，不補假值。
+  function calcEquityCurveMddPct(curve){
+    if(!curve||curve.length<1)return null;
+    let peak=0,mdd=0; // cum_return_pct=0視為起點淨值基準100
+    for(const p of curve){
+      const v=p.cum_return_pct;
+      if(v==null)continue;
+      if(v>peak)peak=v;
+      const dd=(1+v/100)/(1+peak/100)*100-100;
+      if(dd<mdd)mdd=dd;
+    }
+    return mdd;
+  }
+  function calcLedgerTradeCount(ledger){
+    if(!ledger||!ledger.length)return 0;
+    return ledger.reduce((n,e)=>n+(e.buys||[]).length+(e.sells||[]).length,0);
+  }
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
   // 否則退回既有近20日日線並標「20日」。標籤永遠顯示，使用者一眼分得出是今日還是20日。
   const LIVE_KB={};  // code -> {at, closes:[...], lastT}
@@ -4005,6 +4023,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const fp=s.forward_paper;
     let html='';
     if(fp){
+      const fpMdd=calcEquityCurveMddPct(fp.equity_curve);
+      const fpTrades=calcLedgerTradeCount(fp.ledger);
+      const fpRet=fp.forward_return_todate_pct;
+      html+=`<div class="bot-stats" style="margin-bottom:8px">
+        <div class="s"><span>起始日</span><b>${fp.inception_date||'—'}</b></div>
+        <div class="s"><span>累積報酬</span><b class="${(fpRet||0)>=0?'pos':'neg'}">${fpRet!=null?(fpRet>=0?'+':'')+fpRet.toFixed(2)+'%':'—'}</b></div>
+        <div class="s"><span>MDD</span><b>${fpMdd!=null?fpMdd.toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>交易數</span><b>${fpTrades}</b></div>
+      </div>`;
       html+=`<div class="note" style="margin-bottom:8px">前向模擬起始：${fp.inception_date||'—'} · 累積交易日：${fp.trading_days_count??'—'}天`
            +`${fp.sample_sufficient?'':'（未達20天樣本門檻，數字仍在累積中）'}</div>`;
       if(fp.ledger&&fp.ledger.length){
@@ -6104,7 +6131,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-10.0157';
+  const APP_VERSION='2026-09-10.1509';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
