@@ -76,9 +76,23 @@ def required_percentile(n: int) -> float:
 
 # ── 帳本解析 ───────────────────────────────────────────────────────────────
 FACTOR_RE = re.compile(r"`([^`]+)`")
-
-
+# hypothesis_queue 馬拉松輪次的「登記來源」備註固定含這幾個反引號詞
+# （`trial_registry.register_trial()`、`HYPOTHESIS_QUEUE.md`、`evaluate_factor()`…），
+# 這些是工具/文件名不是因子名。FACTOR_RE 若原樣取「第一個反引號詞」會把它們誤判成
+# 因子概念，害多筆彼此無關的列被判成「跨軌重複因子」（實測：曾誤報
+# `hypothesis_queue.md`／`trial_registry.register_trial` 為跨軌重複，2026-09-10 查出）。
+FACTOR_JUNK_RE = re.compile(r"\.md$|register_trial|evaluate_factor|is_holdout_consumed", re.IGNORECASE)
 TRACK_RE = re.compile(r"^(TW|US|FUT)$")
+
+
+def _pick_factor(blob: str, fallback: str) -> str:
+    """挑反引號詞當因子名，跳過檔名/函式呼叫這類工具字串（見 FACTOR_JUNK_RE）。"""
+    for m in FACTOR_RE.finditer(blob):
+        cand = m.group(1)
+        if FACTOR_JUNK_RE.search(cand) or "(" in cand or ")" in cand:
+            continue
+        return cand
+    return fallback
 
 
 def parse() -> list[dict]:
@@ -94,6 +108,15 @@ def parse() -> list[dict]:
             continue
         c = [x.strip() for x in line.split("|")]
         if len(c) < 6 or not re.match(r"^\d+$", c[1]):
+            continue
+        # 2026-08-25 FDR重新評分對照表（見 TRIALS_LEDGER.md 該節）第二欄是
+        # `#2` 這種試驗編號引用、不是日期——它是把「上面已登記試驗」重算一次
+        # 判定，不是新試驗。之前沒濾掉它：那 33 列的第一欄剛好也是 1~33 的
+        # 連續整數（表格的「排名」欄，不是試驗編號），會通過 `c[1]` 的數字檢查、
+        # 混進試驗列一起算 N，且跟真正的試驗 #1~#33 撞號。
+        # 判準比照 `trial_registry.py parse_ledger()`：真試驗列的日期欄必須是
+        # YYYY-MM-DD；FDR 對照表列不是，直接跳過，不算進 N。
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", c[2]):
             continue
         blob = " ".join(c)
         # 軌別：只認 TW/US/FUT，在前幾欄裡找；找不到就標「未分軌」而不是硬取某一欄
@@ -122,12 +145,15 @@ def parse() -> list[dict]:
                 verdict = "PASS"; break
         pm = re.search(r"(\d+(?:\.\d+)?)\s*百分位", blob)
         nm = re.search(r"n=(\d+)", blob)
-        fm = FACTOR_RE.search(blob)
         date = next((x for x in c[2:5] if re.match(r"^\d{4}-\d{2}-\d{2}$", x)), "")
-        name = next((x for x in c[3:7] if len(x) > 6 and not TRACK_RE.match(x)), c[-2][:70])
+        # "hypothesis_queue" 是馬拉松輪次拿來標記軌別欄位的固定字面值（非因子名），
+        # 排除它才不會讓一堆彼此無關的候選都以同一個假因子名「撞名」。
+        name = next((x for x in c[3:7]
+                     if len(x) > 6 and not TRACK_RE.match(x)
+                     and x.strip().lower() != "hypothesis_queue"), c[-2][:70])
         rows.append({
             "id": int(c[1]), "date": date, "track": track,
-            "name": name[:70], "factor": fm.group(1) if fm else name[:40],
+            "name": name[:70], "factor": _pick_factor(blob, name[:40]),
             "verdict": verdict, "verdict_raw": blob[-90:],
             "percentile": float(pm.group(1)) if pm else None,
             "claimed_n": int(nm.group(1)) if nm else None,
