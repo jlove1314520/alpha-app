@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10T17:22+0800 — hypothesis_queue排程接續：#71减資公告事件效應三來源資料可行性查證進行中（僅完成部分，未結案）——確認FinMind有`TaiwanStockCapitalReductionReferencePrice`資料集但未確認能否區分現金/彌補虧損兩種原因、未查證MOPS原生端點與GitHub/社群，下一輪從實際打一次FinMind端點確認欄位開始，不跳關。全程零新增FinMind/MOPS API呼叫（僅WebSearch兩次）。
+
 ## 2026-09-10T14:56+08:00 — hypothesis_queue排程接續：#70選擇權波動度偏斜cheap gate結案FAIL（train/val方向反轉），設計新假設#71（减資公告事件效應）— 佇列#1~70全數結案，#71尚未開始第1關
 
 ## 2026-09-10T14:31+0800 hypothesis_queue排程接續 — 修正#69/#70編號順序不一致並完成#70地基建置(c)(d)：`option_skew_gate.py`，2428/2428交易日100%成功組出skew時序，尚未進cheap gate
