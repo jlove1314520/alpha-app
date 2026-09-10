@@ -10165,3 +10165,70 @@ data_id='2409'另計1次，共4次個股查詢+1次遭拒的全市場嘗試）+2
 API呼叫、零觸及任何holdout路徑）。**本輪工作到此為止（一輪一個
 有界工作單位），現在排隊第一，下一輪從價格跳空候選偵測腳本開始
 開始，不跳關進地基建置。**
+
+**(1)價格跳空候選偵測腳本：已完成並執行（2026-09-10 hypothesis_queue
+排程接續，鎖檔陳舊回收接手——上一輪PID 32864疑似未正常收工，29.8分鐘
+後被本輪回收，前段紀錄已核對確認完整無缺失）**：
+
+新增`capital_reduction_gap_screen.py`（零新增API呼叫，完全複用
+`data/raw/`既有`TaiwanStockPrice`/`TaiwanStockDividend`2010-01-01~
+2024-12-31快取交集，1,808檔股票）。**首次執行踩到一個真實資料品質
+bug並已修正**：FinMind對`Trading_Volume==0`（無成交但非停牌）的日子
+回傳`close=0.0`，未過濾會把全市場常見的零成交日誤判成±100%/+inf%假
+跳空（第一次執行產出149,030筆候選，人工核對後確認全部是這個bug，非
+真實現象）；修法：計算報酬率前先過濾`Trading_Volume>0`且`close>0`的
+列。修正後正式執行：`stocks_scanned=1808`、`stocks_scan_errors=0`、
+**候選跳空事件3,490筆，涉805檔股票**（依年份分布見
+`data/capital_reduction_gap_candidates.json`的`candidates_by_year`，
+2020/2021兩年明顯偏高，459/382筆，待下一輪交叉驗證後看是否與該年度
+減資公告確實較多或閾值/資料品質另有原因）。
+
+**(2)逐檔驗證腳本：已完成並跑完第一批（本輪，checkpoint可續跑，
+805檔中已查283檔=35%）**：
+
+新增`capital_reduction_verify.py`——對候選清單805檔逐檔呼叫FinMind
+`TaiwanStockCapitalReductionReferencePrice`，checkpoint存於
+`research/data/capital_reduction_verify_checkpoint.json`（比照
+`short_sale_utilization_portfolio_v1.py`同一套checkpoint模式，
+`CRV_TIME_BUDGET_SECONDS`預設420秒/輪，跨process 3秒節流下約140檔/輪，
+下一輪從283繼續，不必重查）。**本輪連跑兩批（第一批因主控台cp950
+編碼印出中文字串時`UnicodeEncodeError`崩潰，但checkpoint與輸出檔已在
+崩潰前寫入完成，僅收工print失敗，142檔查詢結果無流失；下一輪起改用
+`PYTHONIOENCODING=utf-8`前綴避免重複踩這個坑）**，累積查詢283/805檔：
+
+- **140檔確認曾減資，共220筆减資事件**，與價格跳空候選交叉比對
+  （±3日窗口）：**187/220（85%）成功匹配到跳空候選**——這是對
+  `capital_reduction_gap_screen.py`偵測邏輯的一個實測驗證：跳空
+  閾值0.15確實抓到了絕大多數真實减資事件，候選產生器的recall看起來
+  是合理的，不是隨便設的閾值在瞎猜。
+- **意外發現（資料品質，下一輪彙整時必須處理）**：`ReasonforCapitalReduction`
+  欄位值**同時存在英文與中文兩種語意相同的版本**——`{'Making up losses':
+  93, '彌補虧損': 49, 'Cash refund': 65, '現金減資': 13}`——FinMind
+  在不同年份/批次的記錄用了不同語言標記同一個分類，**下一輪彙整最終
+  「現金减資」vs「彌補虧損减資」兩組統計前，必須先做語意正規化
+  （`Making up losses`＝`彌補虧損`、`Cash refund`＝`現金減資`），
+  否則會把同一個經濟類別誤判成兩個不同類別，人為稀釋樣本數並低估
+  真實分組筆數**——這正是`CLAUDE.md`已知地雷「同一個經濟量正負號
+  只能記一次」原則的又一個具體案例，只是這次不是正負號、是同義詞
+  未正規化。
+- 累積輸出：`data/capital_reduction_verified.json`（每次執行都重新
+  彙整目前checkpoint累積的全部結果，不只彙整本輪新查的，欄位含
+  `reduction_events_by_reason`原始未正規化分布、`matched_gap_candidates`
+  逐筆列出匹配到的跳空候選）。
+
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`（本輪283次
+`TaiwanStockCapitalReductionReferencePrice`個股查詢，皆走`load_dev()`
+holdout-safe路徑，零觸及holdout；`capital_reduction_gap_screen.py`
+零新增API呼叫，純快取複用）。**判定：尚未結案，僅完成資料工程階段
+（候選產生+35%驗證進度），連cheap gate（第1關sanity）都還沒開始跑
+——樣本數與方向性判斷要等驗證跑完全部805檔、且已修正原因欄位語意
+正規化之後才有意義，現在下任何統計結論都為時過早。**
+
+**本輪工作到此為止（一輪一個有界工作單位），現在排隊第一，下一輪
+待辦（依序，不跳關）**：(a) 用`PYTHONIOENCODING=utf-8 python
+capital_reduction_verify.py`繼續查完剩餘522檔（約需3-4輪7分鐘批次）；
+(b) 全部查完後，在彙整程式碼裡加`ReasonforCapitalReduction`語意
+正規化（英文/中文同義詞合併），才能得出可信的「现金减资組 vs 彌補
+虧損減資組」事件數；(c) 樣本數確認足夠支撐統計檢定力後（依`#71`
+原始已知風險第1點門檻，個位數/年會判「觀測層級就無訊號」快殺），才
+進入`buyback_car_gate.py`同款CAR框架計算，跑第1關sanity。

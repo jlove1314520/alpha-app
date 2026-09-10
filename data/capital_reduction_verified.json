@@ -1,0 +1,3054 @@
+{
+  "generated_at_note": "hypothesis_queue #71 candidate verify, 2026-09-10 接續",
+  "candidate_universe_size": 805,
+  "stocks_queried_total": 283,
+  "stocks_queried_this_round": 141,
+  "stocks_query_errors": 0,
+  "stocks_with_reduction_data": 140,
+  "reduction_events_total": 220,
+  "reduction_events_matched_to_gap_candidate": 187,
+  "reduction_events_by_reason": {
+    "Making up losses": 93,
+    "彌補虧損": 49,
+    "Cash refund": 65,
+    "現金減資": 13
+  },
+  "reduction_events": [
+    {
+      "stock_id": "1316",
+      "reduction_date": "2017-01-24",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1316",
+          "date": "2017-01-24",
+          "prev_close": 11.4,
+          "close": 18.5,
+          "pct_change": 0.6228
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1316",
+      "reduction_date": "2022-10-31",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1333",
+      "reduction_date": "2016-10-17",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1333",
+          "date": "2016-10-17",
+          "prev_close": 2.97,
+          "close": 4.47,
+          "pct_change": 0.5051
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1413",
+      "reduction_date": "2014-11-28",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1413",
+          "date": "2014-11-28",
+          "prev_close": 3.4,
+          "close": 5.46,
+          "pct_change": 0.6059
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1418",
+      "reduction_date": "2017-11-27",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1418",
+          "date": "2017-11-28",
+          "prev_close": 4.6,
+          "close": 11.1,
+          "pct_change": 1.413
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1423",
+      "reduction_date": "2018-10-29",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1423",
+      "reduction_date": "2023-10-23",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1423",
+          "date": "2023-10-23",
+          "prev_close": 23.7,
+          "close": 29.55,
+          "pct_change": 0.2468
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1432",
+      "reduction_date": "2020-09-21",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1432",
+          "date": "2020-09-21",
+          "prev_close": 9.38,
+          "close": 19.35,
+          "pct_change": 1.0629
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1436",
+      "reduction_date": "2012-08-06",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1436",
+          "date": "2012-08-06",
+          "prev_close": 14.2,
+          "close": 35.45,
+          "pct_change": 1.4965
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1438",
+      "reduction_date": "2021-03-29",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1438",
+          "date": "2021-03-29",
+          "prev_close": 12.6,
+          "close": 25.9,
+          "pct_change": 1.0556
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1441",
+      "reduction_date": "2017-04-26",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1441",
+          "date": "2017-04-26",
+          "prev_close": 7.1,
+          "close": 9.73,
+          "pct_change": 0.3704
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1441",
+      "reduction_date": "2023-08-29",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1441",
+          "date": "2023-08-29",
+          "prev_close": 7.64,
+          "close": 12.6,
+          "pct_change": 0.6492
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1443",
+      "reduction_date": "2011-09-22",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1443",
+          "date": "2011-09-22",
+          "prev_close": 3.24,
+          "close": 6.5,
+          "pct_change": 1.0062
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1451",
+      "reduction_date": "2011-08-25",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1451",
+      "reduction_date": "2012-08-20",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1451",
+      "reduction_date": "2013-08-19",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1451",
+      "reduction_date": "2017-10-11",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1451",
+          "date": "2017-10-11",
+          "prev_close": 23.15,
+          "close": 33.35,
+          "pct_change": 0.4406
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1456",
+      "reduction_date": "2014-01-13",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1456",
+          "date": "2014-01-13",
+          "prev_close": 3.4,
+          "close": 9.09,
+          "pct_change": 1.6735
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1456",
+      "reduction_date": "2016-02-02",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1456",
+          "date": "2016-02-02",
+          "prev_close": 4.41,
+          "close": 9.03,
+          "pct_change": 1.0476
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1460",
+      "reduction_date": "2021-07-07",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1460",
+          "date": "2021-07-07",
+          "prev_close": 10.45,
+          "close": 14.1,
+          "pct_change": 0.3493
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1471",
+      "reduction_date": "2018-01-22",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1471",
+          "date": "2018-01-22",
+          "prev_close": 5.73,
+          "close": 8.72,
+          "pct_change": 0.5218
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1472",
+      "reduction_date": "2011-11-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1472",
+          "date": "2011-11-30",
+          "prev_close": 7.3,
+          "close": 9.98,
+          "pct_change": 0.3671
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1472",
+      "reduction_date": "2017-10-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1472",
+          "date": "2017-10-30",
+          "prev_close": 21.05,
+          "close": 40.5,
+          "pct_change": 0.924
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1472",
+      "reduction_date": "2021-10-18",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1472",
+          "date": "2021-10-18",
+          "prev_close": 10.2,
+          "close": 32.3,
+          "pct_change": 2.1667
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1512",
+      "reduction_date": "2023-03-13",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1512",
+          "date": "2023-03-13",
+          "prev_close": 5.8,
+          "close": 16.0,
+          "pct_change": 1.7586
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1527",
+      "reduction_date": "2015-11-09",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1527",
+          "date": "2015-11-09",
+          "prev_close": 59.2,
+          "close": 68.9,
+          "pct_change": 0.1639
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1529",
+      "reduction_date": "2018-12-22",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1529",
+          "date": "2018-12-24",
+          "prev_close": 2.36,
+          "close": 22.5,
+          "pct_change": 8.5339
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1538",
+      "reduction_date": "2014-11-10",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1538",
+          "date": "2014-11-10",
+          "prev_close": 6.02,
+          "close": 12.65,
+          "pct_change": 1.1013
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1538",
+      "reduction_date": "2018-09-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1538",
+          "date": "2018-09-11",
+          "prev_close": 4.01,
+          "close": 5.34,
+          "pct_change": 0.3317
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1538",
+      "reduction_date": "2020-11-16",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1538",
+          "date": "2020-11-16",
+          "prev_close": 3.21,
+          "close": 7.67,
+          "pct_change": 1.3894
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1538",
+      "reduction_date": "2023-12-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1538",
+          "date": "2023-12-11",
+          "prev_close": 12.4,
+          "close": 18.45,
+          "pct_change": 0.4879
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1538",
+      "reduction_date": "2024-12-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1538",
+          "date": "2024-12-31",
+          "prev_close": 17.35,
+          "close": 28.2,
+          "pct_change": 0.6254
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1582",
+      "reduction_date": "2018-11-05",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1582",
+          "date": "2018-11-05",
+          "prev_close": 51.3,
+          "close": 64.3,
+          "pct_change": 0.2534
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1603",
+      "reduction_date": "2015-12-01",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1603",
+      "reduction_date": "2016-12-09",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1603",
+          "date": "2016-12-09",
+          "prev_close": 17.4,
+          "close": 22.0,
+          "pct_change": 0.2644
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1604",
+      "reduction_date": "2018-12-11",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "1614",
+      "reduction_date": "2013-10-18",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1614",
+          "date": "2013-10-18",
+          "prev_close": 33.15,
+          "close": 39.8,
+          "pct_change": 0.2006
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1737",
+      "reduction_date": "2013-12-30",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "1737",
+          "date": "2013-12-30",
+          "prev_close": 23.5,
+          "close": 30.75,
+          "pct_change": 0.3085
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "1776",
+      "reduction_date": "2023-10-11",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2006",
+      "reduction_date": "2021-12-06",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2006",
+          "date": "2021-12-06",
+          "prev_close": 43.6,
+          "close": 59.6,
+          "pct_change": 0.367
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2017",
+      "reduction_date": "2015-12-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2017",
+          "date": "2015-12-30",
+          "prev_close": 5.25,
+          "close": 6.28,
+          "pct_change": 0.1962
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2022",
+      "reduction_date": "2018-08-27",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2022",
+          "date": "2018-08-27",
+          "prev_close": 6.5,
+          "close": 9.22,
+          "pct_change": 0.4185
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2022",
+      "reduction_date": "2023-08-28",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2022",
+          "date": "2023-08-28",
+          "prev_close": 9.99,
+          "close": 12.8,
+          "pct_change": 0.2813
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2028",
+      "reduction_date": "2016-11-07",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2028",
+          "date": "2016-11-07",
+          "prev_close": 1.68,
+          "close": 2.81,
+          "pct_change": 0.6726
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2109",
+      "reduction_date": "2013-12-27",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2109",
+          "date": "2013-12-27",
+          "prev_close": 14.9,
+          "close": 20.35,
+          "pct_change": 0.3658
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2109",
+      "reduction_date": "2021-03-29",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2109",
+          "date": "2021-03-29",
+          "prev_close": 13.7,
+          "close": 17.9,
+          "pct_change": 0.3066
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2201",
+      "reduction_date": "2020-10-19",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2201",
+          "date": "2020-10-19",
+          "prev_close": 23.95,
+          "close": 38.0,
+          "pct_change": 0.5866
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2204",
+      "reduction_date": "2019-10-07",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2204",
+          "date": "2019-10-07",
+          "prev_close": 24.65,
+          "close": 44.8,
+          "pct_change": 0.8174
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2323",
+      "reduction_date": "2015-09-17",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2323",
+          "date": "2015-09-17",
+          "prev_close": 2.63,
+          "close": 3.32,
+          "pct_change": 0.2624
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2323",
+      "reduction_date": "2019-09-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2323",
+          "date": "2019-10-01",
+          "prev_close": 8.3,
+          "close": 11.25,
+          "pct_change": 0.3554
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2323",
+      "reduction_date": "2022-10-24",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2327",
+      "reduction_date": "2013-09-18",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2327",
+      "reduction_date": "2014-10-09",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2327",
+          "date": "2014-10-09",
+          "prev_close": 22.05,
+          "close": 48.15,
+          "pct_change": 1.1837
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2327",
+      "reduction_date": "2016-08-15",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2327",
+          "date": "2016-08-15",
+          "prev_close": 54.8,
+          "close": 67.6,
+          "pct_change": 0.2336
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2327",
+      "reduction_date": "2017-08-18",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2327",
+          "date": "2017-08-18",
+          "prev_close": 120.5,
+          "close": 177.0,
+          "pct_change": 0.4689
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2327",
+      "reduction_date": "2022-10-31",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2327",
+          "date": "2022-10-31",
+          "prev_close": 268.0,
+          "close": 367.0,
+          "pct_change": 0.3694
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2329",
+      "reduction_date": "2018-12-03",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2329",
+          "date": "2018-12-03",
+          "prev_close": 7.35,
+          "close": 11.75,
+          "pct_change": 0.5986
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2331",
+      "reduction_date": "2013-11-25",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2331",
+      "reduction_date": "2014-10-20",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2331",
+          "date": "2014-10-20",
+          "prev_close": 21.15,
+          "close": 24.4,
+          "pct_change": 0.1537
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2337",
+      "reduction_date": "2017-08-28",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2337",
+          "date": "2017-08-28",
+          "prev_close": 16.55,
+          "close": 37.0,
+          "pct_change": 1.2356
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2340",
+      "reduction_date": "2017-10-06",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2340",
+      "reduction_date": "2019-09-23",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2340",
+          "date": "2019-09-23",
+          "prev_close": 22.9,
+          "close": 26.6,
+          "pct_change": 0.1616
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2348",
+      "reduction_date": "2011-03-01",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2348",
+          "date": "2011-03-01",
+          "prev_close": 2.49,
+          "close": 7.47,
+          "pct_change": 2.0
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2348",
+      "reduction_date": "2012-12-28",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2348",
+          "date": "2012-12-28",
+          "prev_close": 2.8,
+          "close": 28.65,
+          "pct_change": 9.2321
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2349",
+      "reduction_date": "2016-09-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2349",
+          "date": "2016-09-30",
+          "prev_close": 4.1,
+          "close": 6.37,
+          "pct_change": 0.5537
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2349",
+      "reduction_date": "2018-09-17",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2349",
+          "date": "2018-09-17",
+          "prev_close": 10.75,
+          "close": 13.35,
+          "pct_change": 0.2419
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2349",
+      "reduction_date": "2020-10-12",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2349",
+          "date": "2020-10-12",
+          "prev_close": 5.53,
+          "close": 10.8,
+          "pct_change": 0.953
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2358",
+      "reduction_date": "2016-10-31",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2358",
+          "date": "2016-10-31",
+          "prev_close": 7.51,
+          "close": 14.1,
+          "pct_change": 0.8775
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2364",
+      "reduction_date": "2012-10-29",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2364",
+          "date": "2012-10-29",
+          "prev_close": 2.08,
+          "close": 2.6,
+          "pct_change": 0.25
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2364",
+      "reduction_date": "2016-10-07",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2364",
+          "date": "2016-10-07",
+          "prev_close": 1.55,
+          "close": 2.97,
+          "pct_change": 0.9161
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2364",
+      "reduction_date": "2021-10-08",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2364",
+          "date": "2021-10-08",
+          "prev_close": 3.04,
+          "close": 21.65,
+          "pct_change": 6.1217
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2371",
+      "reduction_date": "2011-04-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2371",
+          "date": "2011-04-11",
+          "prev_close": 6.75,
+          "close": 16.5,
+          "pct_change": 1.4444
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2373",
+      "reduction_date": "2017-09-07",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2373",
+          "date": "2017-09-07",
+          "prev_close": 59.2,
+          "close": 81.0,
+          "pct_change": 0.3682
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2374",
+      "reduction_date": "2015-11-17",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2374",
+          "date": "2015-11-17",
+          "prev_close": 18.65,
+          "close": 24.3,
+          "pct_change": 0.3029
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2375",
+      "reduction_date": "2013-10-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2375",
+          "date": "2013-10-11",
+          "prev_close": 6.86,
+          "close": 9.29,
+          "pct_change": 0.3542
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2375",
+      "reduction_date": "2014-11-14",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2375",
+      "reduction_date": "2015-09-18",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2375",
+      "reduction_date": "2020-08-17",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2375",
+          "date": "2020-08-17",
+          "prev_close": 34.55,
+          "close": 48.0,
+          "pct_change": 0.3893
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2375",
+      "reduction_date": "2022-09-12",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2375",
+          "date": "2022-09-12",
+          "prev_close": 58.3,
+          "close": 67.2,
+          "pct_change": 0.1527
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2380",
+      "reduction_date": "2019-10-07",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2380",
+          "date": "2019-10-07",
+          "prev_close": 3.37,
+          "close": 4.38,
+          "pct_change": 0.2997
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2388",
+      "reduction_date": "2012-10-04",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2388",
+          "date": "2012-10-04",
+          "prev_close": 10.7,
+          "close": 19.95,
+          "pct_change": 0.8645
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2404",
+      "reduction_date": "2018-12-10",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2404",
+          "date": "2018-12-10",
+          "prev_close": 63.9,
+          "close": 78.8,
+          "pct_change": 0.2332
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2406",
+      "reduction_date": "2019-12-02",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2406",
+          "date": "2019-12-02",
+          "prev_close": 7.55,
+          "close": 11.5,
+          "pct_change": 0.5232
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2412",
+      "reduction_date": "2011-01-25",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2412",
+          "date": "2011-01-25",
+          "prev_close": 73.1,
+          "close": 89.2,
+          "pct_change": 0.2202
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2415",
+      "reduction_date": "2017-09-08",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2415",
+          "date": "2017-09-08",
+          "prev_close": 27.15,
+          "close": 32.45,
+          "pct_change": 0.1952
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2424",
+      "reduction_date": "2011-04-15",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2424",
+          "date": "2011-04-15",
+          "prev_close": 16.6,
+          "close": 20.6,
+          "pct_change": 0.241
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2424",
+      "reduction_date": "2020-12-21",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2424",
+          "date": "2020-12-21",
+          "prev_close": 18.2,
+          "close": 33.35,
+          "pct_change": 0.8324
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2429",
+      "reduction_date": "2013-03-13",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2429",
+          "date": "2013-03-13",
+          "prev_close": 6.98,
+          "close": 44.0,
+          "pct_change": 5.3037
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2429",
+      "reduction_date": "2019-01-02",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2429",
+          "date": "2019-01-02",
+          "prev_close": 11.7,
+          "close": 15.0,
+          "pct_change": 0.2821
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2434",
+      "reduction_date": "2015-04-16",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2434",
+          "date": "2015-04-16",
+          "prev_close": 7.03,
+          "close": 10.0,
+          "pct_change": 0.4225
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2434",
+      "reduction_date": "2017-09-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2434",
+          "date": "2017-09-30",
+          "prev_close": 6.85,
+          "close": 10.15,
+          "pct_change": 0.4818
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2434",
+      "reduction_date": "2020-09-15",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2434",
+          "date": "2020-09-15",
+          "prev_close": 6.11,
+          "close": 25.35,
+          "pct_change": 3.1489
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2443",
+      "reduction_date": "2013-10-17",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2443",
+          "date": "2013-10-17",
+          "prev_close": 2.6,
+          "close": 6.0,
+          "pct_change": 1.3077
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2444",
+      "reduction_date": "2014-11-04",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2444",
+          "date": "2014-11-04",
+          "prev_close": 8.89,
+          "close": 15.0,
+          "pct_change": 0.6873
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2456",
+      "reduction_date": "2013-10-18",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2456",
+      "reduction_date": "2014-09-29",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2456",
+      "reduction_date": "2018-10-12",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2456",
+          "date": "2018-10-12",
+          "prev_close": 87.4,
+          "close": 107.0,
+          "pct_change": 0.2243
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2458",
+      "reduction_date": "2018-10-22",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2458",
+          "date": "2018-10-22",
+          "prev_close": 43.25,
+          "close": 52.3,
+          "pct_change": 0.2092
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2465",
+      "reduction_date": "2011-10-25",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2465",
+          "date": "2011-10-25",
+          "prev_close": 3.78,
+          "close": 5.76,
+          "pct_change": 0.5238
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2465",
+      "reduction_date": "2017-10-23",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2465",
+          "date": "2017-10-23",
+          "prev_close": 8.22,
+          "close": 18.05,
+          "pct_change": 1.1959
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2478",
+      "reduction_date": "2016-10-21",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2478",
+      "reduction_date": "2019-10-07",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2478",
+          "date": "2019-10-07",
+          "prev_close": 35.8,
+          "close": 48.8,
+          "pct_change": 0.3631
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2480",
+      "reduction_date": "2017-09-05",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2480",
+          "date": "2017-09-05",
+          "prev_close": 30.1,
+          "close": 35.7,
+          "pct_change": 0.186
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2496",
+      "reduction_date": "2016-09-10",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2496",
+          "date": "2016-09-10",
+          "prev_close": 16.3,
+          "close": 101.5,
+          "pct_change": 5.227
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2505",
+      "reduction_date": "2021-01-04",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2505",
+          "date": "2021-01-04",
+          "prev_close": 25.2,
+          "close": 38.05,
+          "pct_change": 0.5099
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2534",
+      "reduction_date": "2019-12-16",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2534",
+          "date": "2019-12-16",
+          "prev_close": 22.35,
+          "close": 25.9,
+          "pct_change": 0.1588
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2534",
+      "reduction_date": "2020-12-14",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2542",
+      "reduction_date": "2012-11-12",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2542",
+          "date": "2012-11-12",
+          "prev_close": 42.55,
+          "close": 54.2,
+          "pct_change": 0.2738
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2603",
+      "reduction_date": "2022-09-19",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2603",
+          "date": "2022-09-19",
+          "prev_close": 80.8,
+          "close": 169.0,
+          "pct_change": 1.0916
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2609",
+      "reduction_date": "2017-05-04",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2609",
+          "date": "2017-05-04",
+          "prev_close": 6.15,
+          "close": 13.3,
+          "pct_change": 1.1626
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2614",
+      "reduction_date": "2013-11-12",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2614",
+          "date": "2013-11-12",
+          "prev_close": 4.85,
+          "close": 10.55,
+          "pct_change": 1.1753
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2614",
+      "reduction_date": "2018-07-23",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2614",
+      "reduction_date": "2021-09-13",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2614",
+      "reduction_date": "2022-08-22",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "2614",
+      "reduction_date": "2023-08-28",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2614",
+          "date": "2023-08-28",
+          "prev_close": 14.9,
+          "close": 21.35,
+          "pct_change": 0.4329
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2641",
+      "reduction_date": "2018-08-22",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2641",
+          "date": "2018-08-22",
+          "prev_close": 7.43,
+          "close": 8.99,
+          "pct_change": 0.21
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2719",
+      "reduction_date": "2019-10-21",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2719",
+          "date": "2019-10-21",
+          "prev_close": 3.87,
+          "close": 7.88,
+          "pct_change": 1.0362
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2719",
+      "reduction_date": "2020-12-31",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2719",
+          "date": "2020-12-31",
+          "prev_close": 8.0,
+          "close": 9.85,
+          "pct_change": 0.2312
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2719",
+      "reduction_date": "2022-08-01",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2719",
+          "date": "2022-08-01",
+          "prev_close": 14.0,
+          "close": 23.25,
+          "pct_change": 0.6607
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2724",
+      "reduction_date": "2022-01-10",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2724",
+          "date": "2022-01-10",
+          "prev_close": 8.9,
+          "close": 17.8,
+          "pct_change": 1.0
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2726",
+      "reduction_date": "2023-11-06",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2726",
+          "date": "2023-11-06",
+          "prev_close": 22.0,
+          "close": 31.5,
+          "pct_change": 0.4318
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2816",
+      "reduction_date": "2012-10-30",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2816",
+          "date": "2012-10-30",
+          "prev_close": 11.55,
+          "close": 14.0,
+          "pct_change": 0.2121
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "2837",
+      "reduction_date": "2013-03-01",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "2837",
+          "date": "2013-03-01",
+          "prev_close": 11.6,
+          "close": 20.2,
+          "pct_change": 0.7414
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3015",
+      "reduction_date": "2015-10-26",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3015",
+          "date": "2015-10-26",
+          "prev_close": 18.55,
+          "close": 21.4,
+          "pct_change": 0.1536
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3018",
+      "reduction_date": "2011-01-27",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3018",
+          "date": "2011-01-27",
+          "prev_close": 17.5,
+          "close": 20.9,
+          "pct_change": 0.1943
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3018",
+      "reduction_date": "2023-11-27",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3018",
+          "date": "2023-11-27",
+          "prev_close": 7.32,
+          "close": 13.45,
+          "pct_change": 0.8374
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3022",
+      "reduction_date": "2018-09-17",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3022",
+      "reduction_date": "2019-09-06",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3022",
+          "date": "2019-09-06",
+          "prev_close": 36.0,
+          "close": 52.5,
+          "pct_change": 0.4583
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3026",
+      "reduction_date": "2013-11-01",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3026",
+          "date": "2013-11-01",
+          "prev_close": 28.95,
+          "close": 38.0,
+          "pct_change": 0.3126
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3026",
+      "reduction_date": "2017-10-30",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3026",
+          "date": "2017-10-30",
+          "prev_close": 44.95,
+          "close": 58.1,
+          "pct_change": 0.2925
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3035",
+      "reduction_date": "2015-09-25",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3035",
+          "date": "2015-09-25",
+          "prev_close": 29.05,
+          "close": 40.5,
+          "pct_change": 0.3941
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3040",
+      "reduction_date": "2013-10-15",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3040",
+      "reduction_date": "2015-01-23",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3040",
+          "date": "2015-01-23",
+          "prev_close": 31.9,
+          "close": 44.0,
+          "pct_change": 0.3793
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3041",
+      "reduction_date": "2019-11-04",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3041",
+          "date": "2019-11-04",
+          "prev_close": 12.75,
+          "close": 20.75,
+          "pct_change": 0.6275
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3041",
+      "reduction_date": "2024-11-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3041",
+          "date": "2024-11-11",
+          "prev_close": 19.75,
+          "close": 30.0,
+          "pct_change": 0.519
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3043",
+      "reduction_date": "2022-12-19",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3043",
+          "date": "2022-12-19",
+          "prev_close": 6.64,
+          "close": 30.9,
+          "pct_change": 3.6536
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3046",
+      "reduction_date": "2014-10-09",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3046",
+          "date": "2014-10-09",
+          "prev_close": 5.6,
+          "close": 7.65,
+          "pct_change": 0.3661
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3046",
+      "reduction_date": "2017-12-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3046",
+          "date": "2017-12-11",
+          "prev_close": 5.4,
+          "close": 16.2,
+          "pct_change": 2.0
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3049",
+      "reduction_date": "2015-10-08",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3049",
+          "date": "2015-10-08",
+          "prev_close": 3.3,
+          "close": 5.6,
+          "pct_change": 0.697
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3057",
+      "reduction_date": "2020-09-28",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3057",
+          "date": "2020-09-28",
+          "prev_close": 6.78,
+          "close": 11.85,
+          "pct_change": 0.7478
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3059",
+      "reduction_date": "2014-10-24",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3059",
+          "date": "2014-10-24",
+          "prev_close": 24.45,
+          "close": 28.5,
+          "pct_change": 0.1656
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3066",
+      "reduction_date": "2014-12-01",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3066",
+          "date": "2014-12-01",
+          "prev_close": 5.52,
+          "close": 9.34,
+          "pct_change": 0.692
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3067",
+      "reduction_date": "2021-12-07",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3071",
+      "reduction_date": "2013-10-07",
+      "reason": "現金減資",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3071",
+      "reduction_date": "2017-08-30",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3071",
+      "reduction_date": "2017-11-27",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3071",
+          "date": "2017-11-27",
+          "prev_close": 22.25,
+          "close": 26.2,
+          "pct_change": 0.1775
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3071",
+      "reduction_date": "2019-10-07",
+      "reason": "現金減資",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3073",
+      "reduction_date": "2013-10-07",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3073",
+          "date": "2013-10-07",
+          "prev_close": 6.35,
+          "close": 15.1,
+          "pct_change": 1.378
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3073",
+      "reduction_date": "2020-01-13",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3073",
+          "date": "2020-01-13",
+          "prev_close": 5.2,
+          "close": 8.83,
+          "pct_change": 0.6981
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3085",
+      "reduction_date": "2020-07-06",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3085",
+          "date": "2020-07-06",
+          "prev_close": 1.98,
+          "close": 7.21,
+          "pct_change": 2.6414
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3085",
+      "reduction_date": "2023-02-13",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3085",
+          "date": "2023-02-13",
+          "prev_close": 11.0,
+          "close": 22.1,
+          "pct_change": 1.0091
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3089",
+      "reduction_date": "2018-03-12",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3089",
+          "date": "2018-03-12",
+          "prev_close": 5.23,
+          "close": 12.8,
+          "pct_change": 1.4474
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3105",
+      "reduction_date": "2015-08-28",
+      "reason": "現金減資",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3105",
+      "reduction_date": "2016-09-23",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3105",
+          "date": "2016-09-23",
+          "prev_close": 59.0,
+          "close": 81.2,
+          "pct_change": 0.3763
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3141",
+      "reduction_date": "2015-12-31",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3141",
+          "date": "2015-12-31",
+          "prev_close": 19.3,
+          "close": 25.85,
+          "pct_change": 0.3394
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3162",
+      "reduction_date": "2021-07-05",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3162",
+          "date": "2021-07-05",
+          "prev_close": 27.0,
+          "close": 49.05,
+          "pct_change": 0.8167
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3171",
+      "reduction_date": "2024-10-07",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3171",
+          "date": "2024-10-07",
+          "prev_close": 26.5,
+          "close": 41.9,
+          "pct_change": 0.5811
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3188",
+      "reduction_date": "2018-09-03",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3188",
+          "date": "2018-09-03",
+          "prev_close": 17.05,
+          "close": 20.7,
+          "pct_change": 0.2141
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3207",
+      "reduction_date": "2018-11-12",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3207",
+          "date": "2018-11-12",
+          "prev_close": 10.5,
+          "close": 12.35,
+          "pct_change": 0.1762
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3219",
+      "reduction_date": "2018-12-24",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3224",
+      "reduction_date": "2014-01-06",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3224",
+          "date": "2014-01-06",
+          "prev_close": 19.8,
+          "close": 29.65,
+          "pct_change": 0.4975
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3229",
+      "reduction_date": "2022-01-10",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3229",
+          "date": "2022-01-10",
+          "prev_close": 6.5,
+          "close": 17.0,
+          "pct_change": 1.6154
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3252",
+      "reduction_date": "2013-02-06",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3252",
+          "date": "2013-02-06",
+          "prev_close": 13.55,
+          "close": 25.35,
+          "pct_change": 0.8708
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3259",
+      "reduction_date": "2020-10-05",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3259",
+          "date": "2020-10-05",
+          "prev_close": 20.55,
+          "close": 27.8,
+          "pct_change": 0.3528
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3259",
+      "reduction_date": "2023-08-28",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3259",
+          "date": "2023-08-28",
+          "prev_close": 21.05,
+          "close": 29.15,
+          "pct_change": 0.3848
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3288",
+      "reduction_date": "2018-12-24",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3288",
+          "date": "2018-12-24",
+          "prev_close": 4.4,
+          "close": 10.15,
+          "pct_change": 1.3068
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3288",
+      "reduction_date": "2022-09-26",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3288",
+          "date": "2022-09-26",
+          "prev_close": 15.0,
+          "close": 20.4,
+          "pct_change": 0.36
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3308",
+      "reduction_date": "2022-01-06",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3308",
+          "date": "2022-01-06",
+          "prev_close": 12.1,
+          "close": 16.6,
+          "pct_change": 0.3719
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3308",
+      "reduction_date": "2023-12-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3308",
+      "reduction_date": "2024-04-01",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3310",
+      "reduction_date": "2016-10-20",
+      "reason": "現金減資",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3310",
+      "reduction_date": "2017-11-14",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3310",
+          "date": "2017-11-14",
+          "prev_close": 23.55,
+          "close": 27.65,
+          "pct_change": 0.1741
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3310",
+      "reduction_date": "2018-10-11",
+      "reason": "現金減資",
+      "matched_gap_candidates": [],
+      "matched": false
+    },
+    {
+      "stock_id": "3311",
+      "reduction_date": "2019-09-23",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3311",
+          "date": "2019-09-23",
+          "prev_close": 14.5,
+          "close": 23.3,
+          "pct_change": 0.6069
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3312",
+      "reduction_date": "2018-04-10",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3312",
+          "date": "2018-04-10",
+          "prev_close": 6.54,
+          "close": 8.22,
+          "pct_change": 0.2569
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3321",
+      "reduction_date": "2019-11-18",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3321",
+          "date": "2019-11-18",
+          "prev_close": 11.7,
+          "close": 14.65,
+          "pct_change": 0.2521
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3321",
+      "reduction_date": "2023-08-31",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3321",
+          "date": "2023-08-31",
+          "prev_close": 6.52,
+          "close": 14.25,
+          "pct_change": 1.1856
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3372",
+      "reduction_date": "2019-10-07",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3372",
+          "date": "2019-10-07",
+          "prev_close": 3.7,
+          "close": 8.4,
+          "pct_change": 1.2703
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3383",
+      "reduction_date": "2019-11-04",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3383",
+          "date": "2019-11-04",
+          "prev_close": 1.02,
+          "close": 4.13,
+          "pct_change": 3.049
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3431",
+      "reduction_date": "2014-12-15",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3431",
+          "date": "2014-12-15",
+          "prev_close": 11.35,
+          "close": 20.45,
+          "pct_change": 0.8018
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3432",
+      "reduction_date": "2024-01-22",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3432",
+          "date": "2024-01-22",
+          "prev_close": 10.65,
+          "close": 17.75,
+          "pct_change": 0.6667
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3434",
+      "reduction_date": "2015-11-17",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3434",
+          "date": "2015-11-17",
+          "prev_close": 9.01,
+          "close": 14.0,
+          "pct_change": 0.5538
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3438",
+      "reduction_date": "2020-09-14",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3438",
+          "date": "2020-09-14",
+          "prev_close": 30.2,
+          "close": 38.0,
+          "pct_change": 0.2583
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3452",
+      "reduction_date": "2018-12-10",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3452",
+          "date": "2018-12-10",
+          "prev_close": 2.91,
+          "close": 6.39,
+          "pct_change": 1.1959
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3465",
+      "reduction_date": "2015-03-13",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3465",
+          "date": "2015-03-13",
+          "prev_close": 4.82,
+          "close": 7.91,
+          "pct_change": 0.6411
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3465",
+      "reduction_date": "2016-11-29",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3465",
+          "date": "2016-11-29",
+          "prev_close": 5.55,
+          "close": 10.6,
+          "pct_change": 0.9099
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3498",
+      "reduction_date": "2018-10-15",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3498",
+          "date": "2018-10-15",
+          "prev_close": 31.1,
+          "close": 36.15,
+          "pct_change": 0.1624
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3516",
+      "reduction_date": "2017-11-13",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3516",
+          "date": "2017-11-13",
+          "prev_close": 11.0,
+          "close": 14.35,
+          "pct_change": 0.3045
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3520",
+      "reduction_date": "2019-01-02",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3520",
+          "date": "2019-01-02",
+          "prev_close": 5.53,
+          "close": 10.55,
+          "pct_change": 0.9078
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3522",
+      "reduction_date": "2022-08-26",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3522",
+          "date": "2022-08-26",
+          "prev_close": 9.33,
+          "close": 14.05,
+          "pct_change": 0.5059
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3523",
+      "reduction_date": "2018-09-03",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3523",
+          "date": "2018-09-03",
+          "prev_close": 6.3,
+          "close": 12.05,
+          "pct_change": 0.9127
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3523",
+      "reduction_date": "2021-11-29",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3523",
+          "date": "2021-11-29",
+          "prev_close": 7.34,
+          "close": 13.3,
+          "pct_change": 0.812
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3526",
+      "reduction_date": "2021-03-29",
+      "reason": "現金減資",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3526",
+          "date": "2021-03-29",
+          "prev_close": 127.0,
+          "close": 168.0,
+          "pct_change": 0.3228
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3532",
+      "reduction_date": "2018-09-25",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3532",
+          "date": "2018-09-25",
+          "prev_close": 79.3,
+          "close": 163.0,
+          "pct_change": 1.0555
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3536",
+      "reduction_date": "2011-10-20",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3536",
+          "date": "2011-10-20",
+          "prev_close": 4.88,
+          "close": 8.67,
+          "pct_change": 0.7766
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3536",
+      "reduction_date": "2015-03-20",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3536",
+          "date": "2015-03-20",
+          "prev_close": 6.58,
+          "close": 12.15,
+          "pct_change": 0.8465
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3545",
+      "reduction_date": "2015-12-15",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3545",
+          "date": "2015-12-15",
+          "prev_close": 27.35,
+          "close": 34.0,
+          "pct_change": 0.2431
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3545",
+      "reduction_date": "2020-10-26",
+      "reason": "Cash refund",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3545",
+          "date": "2020-10-26",
+          "prev_close": 33.5,
+          "close": 47.0,
+          "pct_change": 0.403
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3555",
+      "reduction_date": "2014-09-15",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3555",
+          "date": "2014-09-15",
+          "prev_close": 7.47,
+          "close": 11.25,
+          "pct_change": 0.506
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3555",
+      "reduction_date": "2015-09-21",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3555",
+          "date": "2015-09-21",
+          "prev_close": 3.07,
+          "close": 8.97,
+          "pct_change": 1.9218
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3555",
+      "reduction_date": "2016-09-30",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3555",
+          "date": "2016-09-30",
+          "prev_close": 31.55,
+          "close": 60.0,
+          "pct_change": 0.9017
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3555",
+      "reduction_date": "2021-10-06",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3555",
+          "date": "2021-10-06",
+          "prev_close": 30.1,
+          "close": 42.5,
+          "pct_change": 0.412
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3557",
+      "reduction_date": "2016-12-02",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3557",
+          "date": "2016-12-02",
+          "prev_close": 4.8,
+          "close": 6.67,
+          "pct_change": 0.3896
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3557",
+      "reduction_date": "2017-10-16",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3557",
+          "date": "2017-10-16",
+          "prev_close": 6.65,
+          "close": 13.2,
+          "pct_change": 0.985
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3557",
+      "reduction_date": "2020-01-20",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3557",
+          "date": "2020-01-20",
+          "prev_close": 38.05,
+          "close": 50.0,
+          "pct_change": 0.3141
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3562",
+      "reduction_date": "2016-10-17",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3562",
+          "date": "2016-10-17",
+          "prev_close": 3.1,
+          "close": 12.1,
+          "pct_change": 2.9032
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3576",
+      "reduction_date": "2021-08-09",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3576",
+          "date": "2021-08-09",
+          "prev_close": 12.1,
+          "close": 20.65,
+          "pct_change": 0.7066
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3580",
+      "reduction_date": "2017-10-30",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3580",
+          "date": "2017-10-30",
+          "prev_close": 37.2,
+          "close": 76.1,
+          "pct_change": 1.0457
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3593",
+      "reduction_date": "2018-10-29",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3593",
+          "date": "2018-10-29",
+          "prev_close": 6.58,
+          "close": 10.6,
+          "pct_change": 0.6109
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3629",
+      "reduction_date": "2014-11-07",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3629",
+          "date": "2014-11-07",
+          "prev_close": 2.87,
+          "close": 4.9,
+          "pct_change": 0.7073
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3629",
+      "reduction_date": "2015-11-27",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3629",
+          "date": "2015-11-27",
+          "prev_close": 8.5,
+          "close": 19.4,
+          "pct_change": 1.2824
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3629",
+      "reduction_date": "2018-04-03",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3629",
+          "date": "2018-04-03",
+          "prev_close": 22.1,
+          "close": 33.7,
+          "pct_change": 0.5249
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3632",
+      "reduction_date": "2020-10-19",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3632",
+          "date": "2020-10-19",
+          "prev_close": 8.5,
+          "close": 11.2,
+          "pct_change": 0.3176
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3682",
+      "reduction_date": "2020-01-20",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3682",
+          "date": "2020-01-20",
+          "prev_close": 6.95,
+          "close": 9.61,
+          "pct_change": 0.3827
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3686",
+      "reduction_date": "2019-11-25",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3686",
+          "date": "2019-11-25",
+          "prev_close": 1.67,
+          "close": 5.09,
+          "pct_change": 2.0479
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3686",
+      "reduction_date": "2022-10-11",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3686",
+          "date": "2022-10-11",
+          "prev_close": 10.0,
+          "close": 13.35,
+          "pct_change": 0.335
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "3701",
+      "reduction_date": "2018-11-12",
+      "reason": "Making up losses",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "3701",
+          "date": "2018-11-12",
+          "prev_close": 6.21,
+          "close": 12.75,
+          "pct_change": 1.0531
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "4109",
+      "reduction_date": "2019-03-29",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "4109",
+          "date": "2019-03-29",
+          "prev_close": 17.45,
+          "close": 22.6,
+          "pct_change": 0.2951
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "4131",
+      "reduction_date": "2015-01-30",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "4131",
+          "date": "2015-01-30",
+          "prev_close": 9.95,
+          "close": 11.7,
+          "pct_change": 0.1759
+        }
+      ],
+      "matched": true
+    },
+    {
+      "stock_id": "4131",
+      "reduction_date": "2022-01-10",
+      "reason": "彌補虧損",
+      "matched_gap_candidates": [
+        {
+          "stock_id": "4131",
+          "date": "2022-01-10",
+          "prev_close": 6.5,
+          "close": 16.9,
+          "pct_change": 1.6
+        }
+      ],
+      "matched": true
+    }
+  ]
+}
