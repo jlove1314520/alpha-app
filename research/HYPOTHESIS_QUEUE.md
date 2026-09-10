@@ -9638,6 +9638,29 @@ metadata/CSV探測請求確認可行性，未回補任何歷史資料），`is_h
 consumed()`收工前確認仍為`False`。**本輪工作到此為止，現在排隊第一，
 下一輪從地基建置(a)~(d)開始，不跳關進cheap gate。**
 
+**2026-09-10 hypothesis_queue排程接續（地基建置(a)已完成，(b)(c)(d)
+留給下一輪）**：新增`cbc_rf_rate_client.py`（無風險利率代理值client，
+可重複執行）。實測結果：`A13Rate.csv`一次性抓取成功（HTTP 200，
+260563 bytes，`utf-8-sig`正確解碼，已存快取
+`data/raw_cbc_rf_rate/A13Rate_monthly.parquet`），SSL問題已用正確修法
+解決（只關閉`ssl.VERIFY_X509_STRICT`這一個較嚴格旗標，主機名稱驗證與
+CA信任鏈驗證維持開啟，**不是`verify=False`**，完整理由見腳本docstring
+「SSL已知問題與正確修法」段落，符合`CLAUDE.md`SSL驗證妥善處理要求）。
+月頻無風險利率代理序列共308筆（2001-01~2026-08），**TRAIN期
+（<=2020-12-31）涵蓋240個月、VAL期（2021-01~2024-12）涵蓋48個月，
+兩期完整無缺口**。取六家銀行「定存利率-一個月-固定」算術平均，
+`rf_rate_for_date()`測試通過（2022-06-15→0.725%，數字落在合理區間）。
+**下一輪待辦(b)(c)(d)**：(b)撰寫Black-Scholes反推IV函式（Newton-
+Raphson或Brent數值解）並用教科書已知案例交叉驗證正確性；(c)改用
+`settlement_price`而非`close`當OTM合約市價輸入（TAIFEX官方頁查證
+結論見上方段落）；(d)組裝逐日OTM put/call配對+skew指標時序，串接
+本輪(a)完成的`rf_rate_for_date()`當Black-Scholes無風險利率輸入。
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`，全程零新增
+FinMind API呼叫（僅1次一次性CSV抓取，非FinMind端點、不受FinMind
+頻率上限約束）。**本輪工作到此為止（一輪一個有界工作單位，本輪因
+預算考量優先確保(a)完整記錄而非倉促硬做(b)(c)(d)），現在排隊第一，
+下一輪從(b)開始，不跳過交叉驗證直接信任反推結果。**
+
 ### 69. 台指選擇權買賣權比（Put/Call Ratio）逆向情緒訊號（2026-09-10
 hypothesis_queue排程新增，尚未開始第1關）
 

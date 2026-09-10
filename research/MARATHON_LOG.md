@@ -1,5 +1,17 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-10 hypothesis_queue排程接續 — #70地基建置(a)完成：新增`cbc_rf_rate_client.py`無風險利率代理值client，(b)(c)(d)留給下一輪
+`git pull`+`git status`乾淨（除他軌殘留檔`data/audit_report.json`等，
+未觸碰未納入commit）。`marathon_lock.py acquire`回傳`LOCK_ACQUIRED`（乾淨
+取得，非陳舊回收）。接續#70地基建置，完成(a)：`cbc_rf_rate_client.py`
+實測成功抓取央行A13Rate.csv（HTTP 200，SSL用正確修法「只關閉
+`ssl.VERIFY_X509_STRICT`」而非`verify=False`），月頻無風險利率代理序列
+308筆完整涵蓋TRAIN(240月)/VAL(48月)兩期無缺口。(b)Black-Scholes反推IV
+函式+教科書案例交叉驗證、(c)改用`settlement_price`、(d)組裝OTM put/call
+配對留給下一輪，本輪因預算考量優先確保(a)完整記錄。`is_holdout_
+consumed()`本輪開工/收工前皆`False`。詳見`HYPOTHESIS_QUEUE.md` #70條目
+最新段落。
+
 ## 2026-09-10T12:54+08:00 hypothesis_queue排程接續 — 搶救陳舊鎖檔遺留成果（#70三來源可行性查證），本輪工作到此為止
 `git pull`+`git status`：`research/HYPOTHESIS_QUEUE.md`本身有未提交變更
 （+47行），其餘`data/audit_report.json`/`data/dependency_status.json`/
