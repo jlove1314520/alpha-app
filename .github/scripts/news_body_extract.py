@@ -53,7 +53,12 @@ UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaResearch/1.0)"}
 # 這兩家都在 robots.txt **主動宣告 sitemap**，是明確邀請索引的來源。
 BODY_ALLOWED = {"www.cna.com.tw", "tw.stock.yahoo.com"}
 REQ_INTERVAL = 2.0         # 逐則間隔（秒）
-MAX_PER_RUN = 600          # 每輪上限（排程一.三.1：200 → 600）。
+MAX_PER_RUN = 200          # 每輪上限。2026-09-10 總司令裁示【停擺一】.4：
+                           # 根因未明前 600 只是放大風險，先退回 200。
+                           # 根因後來查明是 strip_frame_blocks 的 re.PatternError
+                           # （見該函式註解），與速率無關。要再調回 600 之前，
+                           # 請先用下面 extract_diag 的數字確認積壓真的是速率問題。
+                           # 以下為當初調到 600 的原註（排程一.三.1），保留備查：
                            # **不是為了更快，是為了吸收排程降級。**
                            # 實測 cron */30 只跑到 15%（24 小時 7 次而非 48 次），
                            # 200/輪 × 7 = 1,400/日，積壓要 2.3 天。
@@ -67,6 +72,22 @@ MAX_CONSECUTIVE_FAIL = 10  # 連續失敗這麼多則就停止本輪——
 SENT_MAX = 160             # 單句保存長度上限
 
 _last = [0.0]
+
+# ── 每輪診斷計數（總司令 2026-09-10 指示【停擺一】.1）────────────────────
+# **為什麼要有這個**：這支的每一種失敗最後都變成同一個空字串——
+# HTTP 4xx／5xx、連線例外、剝版面時的正規表示式例外、找不到文章容器，
+# 外觀完全一樣，再加上 MAX_CONSECUTIVE_FAIL 提早中止，
+# 根因被壓成一句「連續失敗，停止本輪」。
+# 2026-09-09 那次就是這樣：真正的原因是 strip_frame_blocks 拋 re.PatternError，
+# 但看起來像被 Yahoo 限流，白白停了 20 小時、Actions 空跑 6 輪。
+# 所以每一輪都要把「分別各發生幾次」寫進 news_urls.json 的 meta.extract_diag，
+# 下次再停就直接看數字分辨，不必再猜。
+DIAG: dict = {}
+
+
+def _diag(key: str) -> None:
+    DIAG[key] = DIAG.get(key, 0) + 1
+
 
 # 句型規則（來自 theme_keywords.json，與 build_themes.py 共用同一份規則檔）
 def _load_patterns() -> list:
@@ -99,11 +120,13 @@ def fetch_body(url: str) -> str:
         _last[0] = time.time()
         try:
             r = requests.get(url, timeout=25, headers=UA)
-        except Exception:                        # noqa: BLE001
+        except Exception as e:                   # noqa: BLE001
+            _diag(f"exc:{type(e).__name__}")
             if attempt > MAX_RETRY:
                 return ""
             time.sleep(RETRY_BACKOFF)
             continue
+        _diag(str(r.status_code))
         if r.status_code == 200:
             html = r.text
             break
@@ -112,6 +135,7 @@ def fetch_body(url: str) -> str:
             return ""
         time.sleep(RETRY_BACKOFF)
     if not html:
+        _diag("empty_html")
         return ""
     # 2026-09-09 修正：**第一版抓全頁的 <p> 是錯的**，會把側欄「相關新聞」的
     # 連結文字一起抓進來。實測抽驗立刻露餡——「中方不證實女警西藏土石流失聯…
@@ -120,7 +144,15 @@ def fetch_body(url: str) -> str:
     # 這是「拿到資料不等於拿到正確的資料」的同一個形狀：
     # 58/60 的命中率看起來很成功，內容全是導覽湯。
     # 改成**先取文章容器再取 p**。找不到容器就誠實回空，不退回全頁抓。
-    html = strip_frame_blocks(html)      # 題材六.1：先剝版面區塊再取容器
+    # 剝版面這一步以前**不在任何 try 裡**，一拋例外就直接冒到主迴圈被算成
+    # 「這一則抓失敗」，連續 10 則整輪中止——2026-09-09 的 20 小時空轉就是這樣。
+    # 現在單獨接住並記進診斷：解析壞掉是解析壞掉，不要偽裝成抓不到。
+    try:
+        html = strip_frame_blocks(html)  # 題材六.1：先剝版面區塊再取容器
+    except Exception as e:  # noqa: BLE001
+        _diag(f"exc:strip_frame_blocks:{type(e).__name__}")
+        print(f"  ! strip_frame_blocks 失敗 {type(e).__name__}: {e}")
+        return ""
     body_html = ""
     for pat in (r'<div[^>]*class="[^"]*paragraph[^"]*"[^>]*>(.*?)(?:<aside|<footer|</article)',
                 r"<article[^>]*>(.*?)</article>"):
@@ -129,7 +161,8 @@ def fetch_body(url: str) -> str:
             body_html = m.group(1)
             break
     if not body_html:
-        return ""
+        _diag("no_article_container")   # 抓到了 200 但找不到文章容器＝版型變了，
+        return ""                        # 跟被擋、跟斷網是完全不同的問題
     ps = re.findall(r"<p[^>]*>(.*?)</p>", body_html, re.S)
     txt = " ".join(re.sub(r"<[^>]+>", "", p) for p in ps)
     txt = re.sub(r"&[a-z]+;", " ", txt)
@@ -158,8 +191,15 @@ def strip_frame_blocks(html: str) -> str:
     `<article>` 容器裡仍可能包著側欄與推薦區塊，光靠容器不夠。
     這裡再剝一層：導覽、側欄、推薦、頁尾、免責聲明。
     """
+    # 2026-09-10 根因修正：原本第二個分支前面又寫了一次 `(?is)`。
+    # Python 3.11 起「不在表達式開頭的全域旗標」是**錯誤**不是警告，
+    # 這支在 3.12（Actions）／3.13（本機）上**每一次呼叫都拋 re.PatternError**。
+    # 而這個呼叫在 fetch_body 的 try/except 之外，例外直接冒到主迴圈，
+    # 被算成「這一則抓失敗」，連續 10 則就觸發 MAX_CONSECUTIVE_FAIL 中止整輪，
+    # 於是 28eefa9 之後每一輪都萃取 0 則，**外觀跟被限流一模一樣**。
+    # 旗標只保留在最前面那一個。
     pat = (r"(?is)<(nav|aside|footer|header)[^>]*>.*?</\1>"
-           r"|(?is)<div[^>]*class=\"[^\"]*(sidebar|related|recommend|trending|"
+           r"|<div[^>]*class=\"[^\"]*(sidebar|related|recommend|trending|"
            r"hot-?stock|disclaimer|footer|promo)[^\"]*\"[^>]*>.*?</div>")
     prev = None
     out = html
@@ -194,6 +234,38 @@ def split_sentences(text: str) -> list:
             continue          # 題材六.2：整句含框架用語一律不採
         out.append(s)
     return out
+
+
+def _publish_diag(todo_total: int, fetched: int, hit_articles: int) -> None:
+    """把本輪診斷寫進 news_urls.json 的 meta.extract_diag（總司令指定的位置）。
+
+    只改 meta 這一個 key，其餘（urls 清單、sitemap 那邊寫的欄位）原封不動——
+    這支不是 news_urls.json 的擁有者，只是借它的 meta 放診斷。
+
+    這裡自己絕不能拋例外：它是診斷，診斷失敗不該把真正跑成功的一輪弄成失敗。
+    """
+    src = D / "news_urls.json"
+    try:
+        doc = json.loads(src.read_text(encoding="utf-8"))
+        if not isinstance(doc, dict) or "meta" not in doc:
+            return
+        doc["meta"]["extract_diag"] = {
+            "at": datetime.now(TZ).isoformat(),
+            "max_per_run": MAX_PER_RUN,
+            "todo_total": todo_total,
+            "attempted": fetched,
+            "with_theme_quote": hit_articles,
+            "counts": dict(sorted(DIAG.items())),
+            "note": "counts 的鍵：HTTP 狀態碼（\"200\"/\"403\"/\"429\"…）、"
+                    "exc:<例外類別> 是連線層例外、"
+                    "exc:strip_frame_blocks:<例外類別> 是剝版面時的解析例外、"
+                    "no_article_container 是拿到 200 但版型比對不到文章容器、"
+                    "empty_html 是重試用盡仍無內容。"
+                    "四者是完全不同的問題，不要再混成一句「連續失敗」。",
+        }
+        src.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 寫入 extract_diag 失敗（{type(e).__name__}: {e}），不影響本輪萃取結果")
 
 
 def main() -> int:
@@ -304,6 +376,8 @@ def main() -> int:
         "evidence": out,
     }
     OUT.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    _publish_diag(len(todo), fetched, hit_articles)
+    print(f"  本輪診斷 extract_diag：{json.dumps(DIAG, ensure_ascii=False, sort_keys=True)}")
     print(f"  本輪抓取 {fetched} 則，其中 {hit_articles} 則含題材句")
     print(f"  累計 {len(out)} 則，含題材句 {doc['meta']['articles_with_theme_quote']} 則")
     print(f"  → {OUT.relative_to(ROOT)}")
