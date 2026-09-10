@@ -18,17 +18,32 @@
 往下做——「結束該輪」不等於「從此卡在這一項」，那會變成總司令說的空轉。
 
 用法：
-    python scripts/dev_queue_runner.py next          # 印出下一個待辦（給人看的）
-    python scripts/dev_queue_runner.py prompt        # 產生本輪提示詞到 research/DEV_QUEUE_PROMPT.txt
-    python scripts/dev_queue_runner.py block "原因"  # 把目前這一項標成阻塞並寫入原因
-    python scripts/dev_queue_runner.py fail          # 記一次失敗（連兩次會自動 block）
-    python scripts/dev_queue_runner.py ok            # 清掉該項的失敗計數
+    python scripts/dev_queue_runner.py next            # 印出下一個待辦（給人看的）
+    python scripts/dev_queue_runner.py check_collision # 這一輪該不該讓路（見下方說明）
+    python scripts/dev_queue_runner.py prompt          # 產生本輪提示詞到 research/DEV_QUEUE_PROMPT.txt
+    python scripts/dev_queue_runner.py block "原因"    # 把目前這一項標成阻塞並寫入原因
+    python scripts/dev_queue_runner.py fail            # 記一次失敗（連兩次會自動 block）
+    python scripts/dev_queue_runner.py ok              # 清掉該項的失敗計數
+
+**碰撞防呆（check_collision，2026-09-10 重開機復原.第二輪新增）**
+以前 wrapper（`run-dev-queue-cycle.ps1`）自己用「工作目錄乾不乾淨」判斷
+該不該讓路，先後踩過兩種死結：(1) 機器寫檔案（data/*.json、各種.log/.jsonl）
+永遠讓樹是髒的 → 改白名單排除；(2) 白名單排除機器寫檔後，一輪自走行程中途
+被中斷（rate limit／重開機／斷網）留下的**真實但沒人在管的殘局檔案**，
+會被永遠誤判成「有人正在中途」而卡死到有人手動介入。`check_collision()`
+兩層都查：別的自走軌道（marathon／hypothesis_queue）的鎖是否新鮮＝真的在跑；
+排除機器寫檔後剩下的未提交變更，是否有檔案在最近`COLLISION_RECENCY_MINUTES`
+分鐘內被改過＝有人（含互動視窗）現在真的在動手。兩者都沒有，就判定剩下的
+髒是陳舊殘局，不再阻擋。判斷邏輯全部在這支檔案，`run-dev-queue-cycle.ps1`
+只呼叫、不自己判斷，方便版本控制與稽核。
 """
 from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -38,6 +53,93 @@ STATE = ROOT / "research" / "data" / "dev_queue_state.json"
 PROMPT_OUT = ROOT / "research" / "DEV_QUEUE_PROMPT.txt"
 TZ = timezone(timedelta(hours=8))
 MAX_CONSECUTIVE_FAILS = 2
+
+sys.path.insert(0, str(ROOT / "research"))
+import marathon_lock  # noqa: E402 -- 同目錄下的鎖工具，重用它的鎖檔格式與陳舊門檻判斷
+
+# 2026-09-10（重開機復原.第二輪，總司令裁示「修機制不是手收尾」）：
+# 舊版防呆（曾經在 run-dev-queue-cycle.ps1 裡）是「工作目錄乾淨才動手」，
+# 12:42 那次改成白名單排除機器寫檔，但當天 15:01/18:16/21:46 三次證明白名單
+# 不夠——**一輪自走行程中途被中斷（rate limit／重開機／斷網）會留下未commit
+# 的真實檔案改動**，那個檔案不在白名單裡（例如 research/update_strategy_
+# performance.py、.github/scripts/news_body_extract.py），於是自走佇列永遠
+# 把「已經沒有人在動的殘局」誤判成「有人正在中途」，卡死到有人手動介入為止。
+# 總司令裁示要用鎖當碰撞訊號，不要看樹髒不髒。新設計兩層都要通過才放行：
+#   1) marathon／hypothesis_queue 這兩條**其他**自走軌道目前是否持有新鮮的鎖
+#      （用它們各自的陳舊門檻判斷，不是我自己編一個）——這條抓「另一個自走
+#      行程現在真的在跑」，跟devqueue自己的.devqueue.lock是同一套機制、只是
+#      檢查別人的鎖不是自己的。
+#   2) 排除機器寫檔案後，剩下的未提交變更裡，有沒有檔案是「最近
+#      COLLISION_RECENCY_MINUTES 分鐘內」被改過——這條抓「有人（含互動視窗）
+#      現在真的在手動改東西」，不需要那個人另外去搶一把鎖才算數。
+#      超過這個時間還沒人碰的未提交變更，判定為某條軌道中斷後留下的殘局，
+#      不再視為碰撞訊號——這正是舊版永遠卡死的根因：從來沒有「多舊算陳舊」
+#      這個概念，任何一個字元的差異都無限期擋住整條自走線。
+COLLISION_RECENCY_MINUTES = 20  # 略大於devqueue自己15分鐘的排程間隔，留一點餘裕
+OTHER_TRACKS = ("marathon", "hypothesis_queue")  # devqueue自己的鎖由wrapper另外處理，不在這裡查
+MACHINE_WRITTEN = [
+    re.compile(r"^data/"),                    # 全部是排程產生的資料檔
+    re.compile(r"^research/[^/]+\.log$"),     # 各 cycle 的執行日誌
+    re.compile(r"^research/[^/]+\.jsonl$"),   # append-only 觀測紀錄
+    re.compile(r"^research/\.[^/]+$"),        # .pid / .lock / .*_state.json 等隱藏狀態檔
+    re.compile(r"^research/DEV_QUEUE_PROMPT\.txt$"),  # 本專案每輪重寫的提示檔
+]
+
+
+def _other_track_lock_reason() -> str | None:
+    """有沒有『別人』（marathon／hypothesis_queue）的鎖現在是新鮮的。"""
+    for name in OTHER_TRACKS:
+        lock_path = marathon_lock._lock_path(name)
+        if not lock_path.exists():
+            continue
+        _pid, ts, cycle_id = marathon_lock._read_lock(lock_path)
+        if ts == 0:
+            continue
+        age_min = (time.time() - ts) / 60.0
+        if age_min < marathon_lock._stale_minutes_for(name):
+            return f"{name}軌道的鎖仍新鮮（cycle_id={cycle_id}，{age_min:.1f}分鐘前取得），判定它正在跑，本輪讓路"
+    return None
+
+
+def _recent_real_dirty_reason() -> str | None:
+    """排除機器寫檔後，剩下的未提交變更裡有沒有『最近』被改過的檔案。"""
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(ROOT), "status", "--porcelain"],
+            capture_output=True, text=True, check=True, encoding="utf-8",
+        ).stdout
+    except (subprocess.CalledProcessError, OSError) as e:
+        return f"git status 執行失敗（{e}），保守起見本輪讓路"
+    now = time.time()
+    hits = []
+    for line in out.splitlines():
+        if not line or line.startswith("??"):  # untracked 不算，跟白名單邏輯一致
+            continue
+        path = line[3:]  # porcelain 是「2碼狀態+1空格+路徑」
+        if any(p.match(path) for p in MACHINE_WRITTEN):
+            continue
+        try:
+            age_min = (now - (ROOT / path).stat().st_mtime) / 60.0
+        except OSError:
+            continue  # 檔案已被刪除等邊界情況，不當成碰撞訊號
+        if age_min < COLLISION_RECENCY_MINUTES:
+            hits.append(f"{path}（{age_min:.1f}分鐘前）")
+    if hits:
+        return f"有非機器寫入的檔案在最近{COLLISION_RECENCY_MINUTES}分鐘內被改動：{'、'.join(hits)}，判定有人正在中途，本輪讓路"
+    return None
+
+
+def check_collision() -> int:
+    """給 wrapper 呼叫的唯一入口。exit 0＝可以繼續，exit 1＝本輪該讓路。
+
+    判斷邏輯全部在這支檔案裡（版本控制、可稽核），wrapper 只負責呼叫與印 log。
+    """
+    reason = _other_track_lock_reason() or _recent_real_dirty_reason()
+    if reason:
+        print(f"YIELD: {reason}")
+        return 1
+    print("PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案")
+    return 0
 
 # 需要總司令親自操作的關鍵字。寧可誤判成「要停」也不要讓無人值守的行程去點登入、
 # 花錢、或宣稱自己做完了一件它根本做不到的事。
@@ -255,6 +357,8 @@ def main() -> int:
         return 0
     if cmd == "prompt":
         return build_prompt()
+    if cmd == "check_collision":
+        return check_collision()
     if cmd == "block":
         return mark_blocked(sys.argv[2] if len(sys.argv) > 2 else "未說明原因")
     if cmd in ("ok", "fail"):
