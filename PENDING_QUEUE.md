@@ -1167,7 +1167,18 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [ ] **深讀一.3** 影子帳本狀態顯示在 App（起始日、累積報酬、MDD、交易數）
 - [ ] **深讀二.1** 台股被動基準候選：固定小倉位 0050／台指期多單，掃 w=0.08~0.30，誠實引擎（真實權重漂移＋再平衡照實收成本）
 - [ ] **深讀二.2** 被動基準成為每個主動候選的強制對照組（六關第 2 關升級版）
-- [ ] **深讀三** 新增四道關卡寫進 CLAUDE.md 與 MARATHON_PROTOCOL（相鄰頻率一致性／被動基準／absorbing state／資料源起點探測）
+- [x] **深讀三** 新增四道關卡寫進 CLAUDE.md 與 MARATHON_PROTOCOL（相鄰頻率一致性／被動基準／absorbing state／資料源起點探測）
+  （2026-09-10 完成：`CLAUDE.md`「通過六關」節後新增「新增四道關卡（第7～10關）」，
+  完整寫入四關定義、判讀規則、已知落地案例（第7關score_longshort_v1、第10關#53～#57
+  地基探測）與尚未生效的說明（第8關被動基準要等深讀二.1/二.2建好才真正生效，目前
+  仍用舊版Buy&Hold）。`research/MARATHON_PROTOCOL.md`新增`3e`節，補操作面注意事項
+  （尤其第7關跟3c節相位敏感度是兩件不同的事、第8關現況、第9關目前無案例可驗證）。
+  **順帶抓到一個編號歧義並修正**：`research/HYPOTHESIS_QUEUE.md`本身已有一套獨立的
+  「GATE_SEQUENCE」1~9關（sanity/隨機控制組/.../下檔保護），跟這裡新增的「六關系列
+  第7~10關」編號剛好重疊但內容完全不同（GATE_SEQUENCE第7關＝樣本外，這裡第7關＝
+  相鄰頻率一致性）——已在`CLAUDE.md`加一段「編號消歧」，講清楚提到關卡編號時要先
+  講是哪套系統，不得單寫「第X關」。驗證：`node scripts/smoke_test.mjs`43/44 PASS
+  （#39既有已知問題無關）。純文件修改。）
 - [x] **深讀四.1** score_longshort_v1 依關卡 7 重評並更新 LEADS.md，不再掛 PENDING
   （2026-09-10 完成：`research/LEADS.md` 的 `score_longshort_v1`（週頻/月頻）兩列
   判定從 `PENDING（放空可行性＋券源確認後再議）` 改為 **`FAIL（相鄰頻率一致性未過，
