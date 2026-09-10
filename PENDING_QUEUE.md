@@ -1159,7 +1159,17 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   **限制誠實揭露**：這一輪只建立判定函式與規則，**既有關卡腳本尚未改成呼叫它**，
   舊的百分位門檻仍散在各 `*_gate*.py`／`deep_dive_*.py` 裡；改接是下一步（會動到既有判定，
   屬研究結論層級變更，依「提案先於執行」先報總司令）。
-- [ ] **Cybex.債務5** 相位敏感度：週/月頻換股回測平移相位重跑，回報跨相位全距
+- [x] **Cybex.債務5** 相位敏感度：週/月頻換股回測平移相位重跑，回報跨相位全距
+  （2026-09-10 複核確認：`research/phase_sensitivity.py` 對既有 5 個月頻 portfolio
+  層候選（#17/#4/#3/#36/#30，皆 N=21 交易日）已於前次馬拉松輪次（commit
+  `899b9ce1`／`e9c88a88`）完整跑完 TRAIN＋VALIDATION 共 210 個相位格子（5×2×21），
+  checkpoint 無殘缺、`--self-test` 4 類判定全 PASS。報告見
+  `research/PHASE_SENSITIVITY.md`：跨相位全距最大者為 `margin_utilization_regime_
+  portfolio_v1`（#30，TRAIN return_pct 全距 33.55pp、VALIDATION 全距 54.06pp），
+  其餘 4 個候選全距約 16～75pp 不等，逐格數字見 `research/data/
+  phase_sensitivity_grid.csv`。本輪只補標記，未變動任何計算，因程式碼與資料
+  皆與前次提交時一致（`git status` 乾淨）。本項工作已完整存在，PENDING_QUEUE
+  之前漏勾。）
 - [ ] **Cybex.#53** 全市場報酬離散度速度（水位版 vs 速度版對照）
 - [ ] **Cybex.#54** 成交值集中度速度
 - [ ] **Cybex.#55** 三大法人買賣超廣度速度（廣度＝家數占比非金額）

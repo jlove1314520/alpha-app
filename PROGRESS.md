@@ -1,3 +1,39 @@
+## 2026-09-10（Cybex.債務5）相位敏感度複核：工作已完成於前次輪次，補標記
+
+戴**驗證帽**。依 PENDING_QUEUE 權威清單，本輪應做「相位敏感度：週/月頻換股
+回測平移相位重跑，回報跨相位全距」。查證後發現**這項工作在前次馬拉松輪次
+（commit `899b9ce1`／`e9c88a88`）已經完整做完並提交**，只是 `PENDING_QUEUE.md`
+的核取方塊沒有跟著勾上——本輪不重跑，只做查證與補標記。
+
+**查證內容**：`research/phase_sensitivity.py --self-test` 重新執行，4 類判定
+（相位換股日集合正確性、phase=0 與不設 phase 行為一致、N 個相位互不相同、
+全距計算的邊界條件）全部 PASS。`research/data/phase_sensitivity_checkpoint.json`
+確認 5 個既有月頻 portfolio 層候選（`f52w_high_portfolio_v1` #17、
+`dividend_yield_portfolio_v1` #4、`pead_portfolio_v1` #3、
+`short_sale_utilization_portfolio_v1` #36、
+`margin_utilization_regime_portfolio_v1` #30，皆 N=21 交易日換股）
+TRAIN＋VALIDATION 共 210 個相位格子（5×2×21）全部完成、無殘缺。
+`git status` 對這些檔案顯示乾淨，確認與前次提交時內容一致，本輪未變動任何
+計算結果。
+
+**跨相位全距結論**（詳見 `research/PHASE_SENSITIVITY.md`）：全距最大者為
+`margin_utilization_regime_portfolio_v1`（#30，TRAIN return_pct 全距
+33.55pp、VALIDATION 全距 54.06pp），其餘 4 個候選 TRAIN/VALIDATION 全距
+約在 16～75pp 之間，**沒有任何一個候選整片相位都站得住**——依判讀規則
+（事前寫死於 `PHASE_SENSITIVITY.md`），單一相位的數字皆不可單獨採信，
+主張任何一個候選有 edge 前必須先解釋這個全距。逐格數字見
+`research/data/phase_sensitivity_grid.csv`。
+
+**影響檔案**：`PENDING_QUEUE.md`（Cybex.債務5 補勾＋查證備註）。
+未變動任何 `research/*.py` 或資料檔。
+
+**冒煙測試**：43/44 PASS，1 FAIL（#39 資料一致性稽核閘門，一致性違規率
+12.65%＞1%）——與本項改動無關，是既有已知問題（見前幾項記錄，數字未變）。
+
+**下一步**：依權威清單，下一項為 **深讀四.4**。
+
+---
+
 ## 2026-09-10（外部二改）SPEC 完成美股3+台股2，期貨3條發現與外部一改.3疑似重複裁示，中止待總司令裁示
 
 戴**研究帽**。依權威清單做到【外部二改】：抄新策略首批 8 條，先寫 SPEC。
