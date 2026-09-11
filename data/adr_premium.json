@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-09-11T21:44:55+00:00",
+  "computed_at": "2026-09-11T23:32:35+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
@@ -11,10 +11,10 @@
       "tw_price": 2410.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
-      "fx_rate": 31.606,
+      "fx_rate": 31.627,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 2738.597,
-      "premium_pct": 13.635
+      "implied_tw_price": 2740.416,
+      "premium_pct": 13.71
     },
     "UMC": {
       "tw_code": "2303",
@@ -25,24 +25,10 @@
       "tw_price": 140.5,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
-      "fx_rate": 31.606,
+      "fx_rate": 31.627,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 143.112,
-      "premium_pct": 1.859
-    },
-    "ASX": {
-      "tw_code": "3711",
-      "ratio": 2,
-      "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
-      "us_price": 39.47,
-      "us_quote_time": 1789156800,
-      "tw_price": 618.0,
-      "tw_quote_time": "13:30:00",
-      "tw_quote_date": "20260911",
-      "fx_rate": 31.606,
-      "fx_date": "2026-09-11",
-      "implied_tw_price": 623.744,
-      "premium_pct": 0.93
+      "implied_tw_price": 143.207,
+      "premium_pct": 1.927
     },
     "CHT": {
       "tw_code": "2412",
@@ -53,11 +39,16 @@
       "tw_price": 140.5,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
-      "fx_rate": 31.606,
+      "fx_rate": 31.627,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 141.753,
-      "premium_pct": 0.892
+      "implied_tw_price": 141.847,
+      "premium_pct": 0.959
     }
   },
-  "errors": []
+  "errors": [
+    {
+      "ticker": "ASX",
+      "reason": "台股 3711 報價缺失"
+    }
+  ]
 }
