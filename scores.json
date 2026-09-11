@@ -1,7 +1,7 @@
 {
   "meta": {
     "engine_version": "scoring-live-json",
-    "generated_at": "2026-09-11T21:28:45.798507+08:00",
+    "generated_at": "2026-09-11T22:34:20.175473+08:00",
     "data_asof": "2026-09-11",
     "market": "TW",
     "universe_size": 1973,
@@ -12,7 +12,7 @@
     "disclaimer": "非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。2026-08-27改版：不再用coverage<0.5排除股票，全市場都進榜——總分跟「資料完整度」(coverage)是兩件事，高分低完整度不代表可信，請一併參考每檔的coverage數值跟missing_factors清單。analyst/catalyst兩項全市場沒有資料源、technical用未還原權息的收盤價（除權息前後會失真）、revenue_momentum未做規模分層——已依coverage規則重新分配權重，不會把沒資料當成0分，細節見generate_scores_live.py檔頭的已知限制說明。",
     "coverage_collapse_warning": false,
     "prior_run_stock_count": 1973,
-    "prior_run_avg_coverage": 0.729
+    "prior_run_avg_coverage": 0.73
   },
   "weights": {
     "earnings_growth": 0.18,
