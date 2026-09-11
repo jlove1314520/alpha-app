@@ -1,62 +1,62 @@
 {
-  "computed_at": "2026-09-11T16:38:10+00:00",
+  "computed_at": "2026-09-11T19:16:08+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
       "ratio": 5,
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
-      "us_price": 432.45,
-      "us_quote_time": 1789144656,
+      "us_price": 431.76,
+      "us_quote_time": 1789154136,
       "tw_price": 2410.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
       "fx_rate": 31.606,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 2733.603,
-      "premium_pct": 13.428
+      "implied_tw_price": 2729.241,
+      "premium_pct": 13.247
     },
     "UMC": {
       "tw_code": "2303",
       "ratio": 5,
       "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
-      "us_price": 22.59,
-      "us_quote_time": 1789144655,
+      "us_price": 22.52,
+      "us_quote_time": 1789154135,
       "tw_price": 140.5,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
       "fx_rate": 31.606,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 142.796,
-      "premium_pct": 1.634
+      "implied_tw_price": 142.353,
+      "premium_pct": 1.319
     },
     "ASX": {
       "tw_code": "3711",
       "ratio": 2,
       "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
-      "us_price": 39.51,
-      "us_quote_time": 1789144649,
+      "us_price": 39.46,
+      "us_quote_time": 1789154135,
       "tw_price": 618.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
       "fx_rate": 31.606,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 624.377,
-      "premium_pct": 1.032
+      "implied_tw_price": 623.586,
+      "premium_pct": 0.904
     },
     "CHT": {
       "tw_code": "2412",
       "ratio": 10,
       "source": "SEC EDGAR 20-F CIK 1132924；1 ADS＝10股普通股",
-      "us_price": 44.74,
-      "us_quote_time": 1789144562,
+      "us_price": 44.77,
+      "us_quote_time": 1789154136,
       "tw_price": 140.5,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260911",
       "fx_rate": 31.606,
       "fx_date": "2026-09-11",
-      "implied_tw_price": 141.405,
-      "premium_pct": 0.644
+      "implied_tw_price": 141.5,
+      "premium_pct": 0.712
     }
   },
   "errors": []
