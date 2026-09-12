@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-12T12:55:01.925346+08:00",
+ "fetched_at": "2026-09-12T17:00:26.178747+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
@@ -9,9 +9,8 @@
    "kept": 94
   },
   "tpex_mops": {
-   "ok": true,
-   "rows": 46,
-   "kept": 46
+   "ok": false,
+   "error": "SSLError: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/mopsfin_t187ap04_O (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1010)')))"
   },
   "twse_revenue": {
    "ok": true,
@@ -11825,6 +11824,60 @@
    "yoy_pct": 91.07038120062421
   },
   {
+   "code": "2062",
+   "name": "",
+   "date": "2026-09-10",
+   "type": "除權息",
+   "title": "除權息交易日（現金 1 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "4912",
+   "name": "",
+   "date": "2026-09-10",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.8005 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "5906",
+   "name": "",
+   "date": "2026-09-10",
+   "type": "除權息",
+   "title": "除權息交易日（現金 0.2 元、股票 0.05）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "6504",
+   "name": "",
+   "date": "2026-09-10",
+   "type": "除權息",
+   "title": "除權息交易日（現金 1 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "9802",
+   "name": "",
+   "date": "2026-09-10",
+   "type": "除權息",
+   "title": "除權息交易日（現金 3.1 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "9906",
+   "name": "",
+   "date": "2026-09-10",
+   "type": "除權息",
+   "title": "除權息交易日（股票 0.008486）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
    "code": "6617",
    "name": "共信-KY",
    "date": "2026-09-10",
@@ -12237,60 +12290,6 @@
    "title": "公告本公司115年8月份銀行融資額度使用情形及未來三個月 之現金收支預估情形",
    "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "2062",
-   "name": "",
-   "date": "2026-09-10",
-   "type": "除權息",
-   "title": "除權息交易日（現金 1 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "4912",
-   "name": "",
-   "date": "2026-09-10",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.8005 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "5906",
-   "name": "",
-   "date": "2026-09-10",
-   "type": "除權息",
-   "title": "除權息交易日（現金 0.2 元、股票 0.05）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "6504",
-   "name": "",
-   "date": "2026-09-10",
-   "type": "除權息",
-   "title": "除權息交易日（現金 1 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "9802",
-   "name": "",
-   "date": "2026-09-10",
-   "type": "除權息",
-   "title": "除權息交易日（現金 3.1 元）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
-  },
-  {
-   "code": "9906",
-   "name": "",
-   "date": "2026-09-10",
-   "type": "除權息",
-   "title": "除權息交易日（股票 0.008486）",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
    "code": "6949",
