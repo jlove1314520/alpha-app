@@ -1,3 +1,76 @@
+## 2026-09-15（無人值守開發佇列自走）深讀五：真錢閘門四道屏障＋兩級kill＋30天執行品質五題＋滑價分段記錄
+
+依`PENDING_QUEUE.md`「執行順序（權威清單）」取件，本輪做**深讀五**（總司令
+2026-09-07【裁示五】原話全文，PENDING_QUEUE已完整轉錄）。
+
+**移植原則**：依總司令 2026-09-07 授權，參考
+`C:\Users\user\cybex_knowledge_export\RUNBOOK_first_real_money.md`
+（Cybex加密貨幣真錢上線手冊）的**判斷結構**，不沿用其參數——$1,500／
+$300／6筆等數字是加密市場上訂的，本輪完全不搬過來，本輪產物裡任何具體
+金額一律留白（`secrets/mainnet_limits.json`不存在，欄位待總司令裁示），
+不是我自己填的數字。
+
+**現況誠實揭露（先講清楚，避免誤讀成「即將真錢上線」）**：
+`C:\alpha\CLAUDE.md`記錄現況是群益／國泰台股目前沒有合適的下單API，
+Shioaji（永豐）目前只有`research/shioaji_order_server.py`的模擬環境
+（`SIMULATION_MODE=True`寫死，從未送過真實測試單）。本輪做的是**規則先
+立好**，不是任何送單流程真的接進來——目前沒有任何程式碼呼叫這裡新增的
+函式去真的下單。
+
+**新增三支程式碼＋一份手冊**：
+
+1. `research/mainnet_gate.py`——四道獨立屏障：①旗標檔
+   `secrets/MAINNET_ENABLE`內容需逐字等於`i_understand_this_uses_real_
+   money=yes`，只有總司令能建立；②主網憑證檔`secrets/shioaji_mainnet_
+   config.txt`檔名須含`mainnet`字樣（物理上跟模擬用的`.env`分開）且過
+   長度防呆門檻；③`DRY_RUN`常數寫死`True`，改成`False`是獨立的一次變更，
+   不接受任何參數/環境變數覆蓋；④白名單＋金額上限讀
+   `secrets/mainnet_limits.json`，**刻意不在程式碼裡寫死任何金額或標的**
+   （那是總司令的風險決策不是工程判斷），設定檔不存在或格式不對一律
+   fail-closed。外加「憑證只有旗標檔存在時才載入」——`load_mainnet_
+   credentials()`函式內部順序保證：屏障1沒過，連`.read_text()`都不會
+   呼叫到憑證檔，不是「讀了但忽略」。兩級kill switch：`halt_new`只擋
+   新單既有部位出場照常、`halt`連調整都停，各自有獨立函式
+   `is_new_order_allowed()`/`is_existing_position_action_allowed()`。
+   **25項自我測試全PASS**（暫存目錄執行，完全沒有碰過真實`secrets/`）。
+2. `research/execution_logs.py`——五本append-only證據帳本：滑價（拆
+   `slippage_bp`相對送單參考價／`vs_signal_bp`相對訊號價含決策到成交
+   整段漂移，手續費`fee_twd`另計，台股加`session`開盤集合競價/盤中逐筆
+   撮合/收盤集合競價與由此推導的`is_call_auction`）、下單嘗試（算成交
+   率用）、每日對帳、停擺、kill演練。仿`shadow_ledger.py`同一精神——只用
+   `open(path,"a")`寫入、每行帶SHA256雜湊鏈防竄改。**自我測試含刻意竄改
+   一筆payload後驗證`verify_chain()`真的能抓到的案例，全PASS**。
+3. `research/execution_quality_scorecard.py`——把裁示五「30天只看執行
+   品質五題（對帳30/30、中位滑價≤回測假設2倍、成交率≥95%、零非預期
+   停擺、kill演練過一次）不看損益」變成可執行的計分函式，不只是文件裡
+   一句話（比照`candidate_report.py`「規則變成可執行閘門」同一精神）。
+   第2題門檻＝`research/validation/costs.py`既有`DEFAULT_SLIPPAGE_BPS`
+   （5.0bp）的2倍＝10bp，比較的是`vs_signal_bp`中位數。**跑在真實資料
+   上目前五題全部是`INSUFFICIENT_DATA`**——這是誠實反映尚無真錢紀錄，
+   不是bug，**沒有為了讓它顯示PASS而塞入任何假資料**。
+4. `research/RUNBOOK_first_real_money.md`——操作手冊，含上面現況誠實
+   揭露段落、Go/No-Go檢查清單（多數項目現況標「不適用（阻塞）」，因為
+   還沒有可用下單API）、每日對帳SOP、kill條件表、滑價記錄格式表、版本
+   紀錄。
+
+**驗證**：`python research/mainnet_gate.py --self-test`、`python research/
+execution_logs.py --self-test`、`python research/execution_quality_
+scorecard.py --self-test` 三支全PASS；`node scripts/smoke_test.mjs`
+43/44 PASS（#39資料一致性稽核閘門既有已知紅燈，本輪未動`index.html`與
+任何資料檔，與本項無關）。純新增四個檔案，未動任何既有程式碼。
+
+**安全確認**：**沒有建立`secrets/MAINNET_ENABLE`或任何其他旗標/憑證/
+限制檔**，`mainnet_gate.evaluate_gate().enabled`在真實環境下維持`False`，
+本輪不構成任何真錢啟用風險。commit 前執行`git status`確認只有四個新增
+檔案，未動`secrets/`目錄本身。
+
+**下一步**：待有可用券商下單API（永豐正式環境或其他）時，送單流程接進來
+第一步要呼叫這裡的`can_submit_real_order()`與`check_order_against_
+limits()`，而不是繞過它。金額與標的白名單需要總司令另外裁示才能建立
+`secrets/mainnet_limits.json`。繼續依權威清單下一項：**轉向.四**。
+
+---
+
 ## 2026-09-15（無人值守假設佇列自走・第八輪）題材七待辦4延伸：123題材全面跨行業誤判掃描＋更正上一輪一個事實錯誤
 
 戴**研究帽**（新增診斷腳本，純本地計算不打網路請求）。依`CLAUDE.md`「三之一、

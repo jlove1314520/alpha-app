@@ -1611,7 +1611,30 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   `b_entry_plan`/`d_market_cap`兩個死標籤（不影響功能，因為只在`by_check`真的有該鍵
   時才會被查表用到），因屬開發帽檔案、依帽子規則本項（驗證帽）不越權清，留給下一個
   開發帽輪次順手清掉。）
-- [ ] **深讀五** 真錢閘門四道屏障＋兩級 kill＋30 天執行品質五題＋滑價分段記錄
+- [x] **深讀五** 真錢閘門四道屏障＋兩級 kill＋30 天執行品質五題＋滑價分段記錄
+  （2026-09-15 完成：**移植原則**——依總司令 2026-09-07 授權，拿Cybex
+  `RUNBOOK_first_real_money.md`的判斷結構、不拿參數（$1,500等數字不沿用）。
+  新增三支程式碼＋一份手冊：①`research/mainnet_gate.py`——四道獨立屏障
+  （旗標檔`secrets/MAINNET_ENABLE`內容逐字比對且只有總司令能建立／憑證檔
+  `secrets/shioaji_mainnet_config.txt`檔名含mainnet且過長度防呆／`DRY_RUN`
+  寫死True且改動需獨立下令／白名單+金額上限讀`secrets/mainnet_limits.json`，
+  刻意不寫死任何金額，設定檔不存在一律fail-closed）＋兩級kill switch
+  （`halt_new`只擋新單既有部位出場照常、`halt`連調整都停）；「憑證只有
+  旗標檔存在才載入」用函式呼叫順序物理保證，不是讀了忽略。25項自我測試
+  全PASS。②`research/execution_logs.py`——滑價（`slippage_bp`/`vs_signal_bp`
+  兩段式+台股`session`/`is_call_auction`欄位）、下單嘗試、對帳、停擺、
+  kill演練五本append-only帳本，仿`shadow_ledger.py`同精神加雜湊鏈防竄改，
+  自我測試含竄改偵測案例全PASS。③`research/execution_quality_scorecard.py`
+  ——30天五題（對帳30/30、中位vs_signal_bp≤回測假設2倍即10bp、成交率≥95%、
+  零非預期停擺、kill演練過一次）自動計分，第2題門檻讀`research/validation/
+  costs.py`既有的`DEFAULT_SLIPPAGE_BPS`。④`research/RUNBOOK_first_real_
+  money.md`——操作手冊，含現況誠實揭露（群益/國泰台股無下單API、Shioaji
+  僅模擬環境，本項是規則先行不是即將上線）與Go/No-Go清單。**跑在真實
+  資料上五題目前全部`INSUFFICIENT_DATA`（誠實反映尚無真錢紀錄，非bug，
+  不得塞假資料湊PASS）。**驗證：三支`--self-test`全PASS、`node scripts/
+  smoke_test.mjs`43/44 PASS（#39既有已知紅燈，未動`index.html`與任何
+  資料檔，與本項無關）。純新增檔案，未動任何既有程式碼。**未建立任何
+  旗標檔**，閘門保持disabled狀態，不構成真錢啟用風險。）
 
 ---
 
