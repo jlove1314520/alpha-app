@@ -1,5 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-15T05:02+0800 — hypothesis_queue排程接續（陳舊鎖回收）：#71減資公告事件效應
+開工先讀`PENDING_QUEUE.md`：最新一輪（2026-09-10第四輪）記錄【題材三】已
+全部完成123/123，剩餘僅2條被阻塞項（S4U排程/claude CLI非互動驗證，需總司令
+管理員權限）+1條大型未拆解項（題材七），皆非本輪可執行範圍，交辦佇列視為
+已清空，進入自走。取`hypothesis_queue`鎖時發現PID 115752持有陳舊鎖（約30分鐘
+未更新）已回收。`git status`發現大量已staged但未commit的變更，核對後確認是
+今日（2026-09-15）連續數輪（PID 21980/32864/18420/115752）逐檔驗證
+`capital_reduction_verify.py`累積推進到443/805、但每輪都只做到
+`checkpoint`寫檔+`git add`就未正常收工（未commit/push/release lock）——
+逐字核對已staged的`HYPOTHESIS_QUEUE.md`內容與checkpoint數字（443）完全
+一致，判定是完整無缺失的工作成果、只欠最後三步，非資料流失。本輪接續執行
+`PYTHONIOENCODING=utf-8 python capital_reduction_verify.py`一批（420秒
+預算），累積查詢**584/805檔**（本輪新查141、失敗0），减資事件223檔/337筆，
+依已正規化原因分布`{'彌補虧損': 236, '現金減資': 101}`，與跳空候選匹配
+288/337（85.5%），跟前幾輪283/443檔進度點的匹配率（85%/85.6%）高度一致。
+`is_holdout_consumed()`確認`False`。無PASS/FAIL/CHEAP_PASS判定（尚未進
+第1關cheap gate），未呼叫`register_trial()`（純資料工程輪次）。本輪連同
+今天前幾輪的staged殘留變更一起彙整成一次commit收尾（限定與#71相關的檔案，
+其餘無關的殘留staged變更——如`data/audit_report.json`／
+`research/DEV_QUEUE_PROMPT.txt`／`research/dev_queue_cycle.log`等——判定
+非本track產生，未觸碰、未納入本次commit）。下一輪：繼續逐檔驗證剩餘221檔，
+估計1-2輪可查完；額外提醒下一輪驗證帽檢視是否需調整`marathon_lock.py`陳舊
+門檻（連續多輪都在收工前就被下一次觸發判陳舊回收，可能是7分鐘批次+收工
+動作總耗時逼近25分鐘陳舊門檻，非邏輯錯誤但值得留意）。
+
 ## 2026-09-10T23:56+0800 — hypothesis_queue排程接續（乾淨取鎖）：#71減資公告事件效應
 資料工程階段接續——(1)發現並修正`capital_reduction_verify.py`/
 `capital_reduction_gap_screen.py`兩支腳本混用簡體字「减」（違反`CLAUDE.md`

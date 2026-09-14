@@ -1,3 +1,46 @@
+## 2026-09-15（假設佇列自走・第七輪，交辦優先）【題材七】待辦3補齊5/5家負對照組＋抓到一個真實bug
+
+戴**研究帽**。依總司令「交辦優先於自走」裁示，開工先讀`PENDING_QUEUE.md`，
+判定【題材七】仍有部分完成待續的交辦項——上一輪（假設佇列第六輪／馬拉松
+第529輪）已把負對照組跑到3/5家，本輪做剩下的2家，把待辦3補齊。
+
+**做了什麼**：新增5530龍巖（生命服務業/殯葬）、3130一零四（人力資源服務業，
+104人力銀行）2家負對照組，兩者在123個題材清單裡都查無對應題材，是比
+1216統一/2542興富發/2603長榮（本業本身已是123題材之一）更乾淨的負對照組。
+`data/company_official_domains_seed.json`補上這2家的官方網域（5530官方
+網域用WebFetch實測確認為`lyls.com.tw`，集團首頁`lungyengroup.com.tw`會302
+轉址過去；3130企業官網`corp.104.com.tw`是JS渲染SPA，WebFetch靜態抓取
+只拿得到公司名稱，改用WebSearch交叉確認來源）。
+
+**過程中抓到一個真實bug（比補齊5/5家這件事本身更重要）**：先用原本的
+naive substring比對測5530的句子，誤命中『petrochem石化』題材關鍵詞「EG」——
+但那不是石化業務，是句子裡英文字「**Leg**acy」剛好包含子字串「eg」
+（不分大小寫比對）。這證實短英文縮寫關鍵詞（EG/IC/PP這類2~3字母縮寫）
+用naive substring比對，遇到句子裡任何含相同字母組合的英文借詞都會產生
+假警報，而且聚合統計不會告訴你命中原因是詞界誤判。修法：
+`research/theme_official_site_negative_control.py`新增`_keyword_hits()`，
+純ASCII字母/數字組成的關鍵詞改用詞界正則`(?<![a-z0-9])kw(?![a-z0-9])`比對，
+純中文關鍵詞維持substring（中文無詞界問題）。**這個修法只影響本檔案自己
+的測試迴圈**，不影響任何正式管線——待辦1的正式管線目前還沒建，
+`theme_keywords.json`目前唯一的消費者就是這支測試腳本本身。
+
+**驗證**：`python research/theme_official_site_negative_control.py`5家全部
+OK，跨題材意外命中數皆為0；`python research/theme_official_site_matcher.py`
+重跑既有三筆單元測試（旺矽正例、京元電兩個反例）全部OK，無回歸。
+
+**仍未做**：待辦1正式管線（company_info.json補官網欄位本體）、待辦2（259家
+D級候選全量抓取）、待辦4（v2正向供應語意詞清單擴充驗證，目前只驗證3句）。
+另外本輪發現的短縮寫關鍵詞詞界問題，123個題材裡還有多少個類似風險的短
+縮寫關鍵詞需要一次全面掃描才能回答，留給待辦4擴大範疇時一併處理，本輪
+不擴大。
+
+影響檔案：`data/company_official_domains_seed.json`、
+`research/theme_official_site_negative_control.py`、
+`research/theme_official_site_matcher.py`（僅main區塊待辦說明文字）、
+`PENDING_QUEUE.md`（狀態更新）。
+
+---
+
 ## 2026-09-15（開發佇列自走）健檢.五：IBKR即時報價自09/10再次斷線，根因查明，需總司令親自重新登入IB Gateway，判定阻塞
 
 戴**開發帽**。依權威清單，本輪做**健檢.五**（美股IBKR即時報價自09/02卡住，
