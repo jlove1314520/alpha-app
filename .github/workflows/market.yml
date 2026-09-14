@@ -77,6 +77,9 @@ jobs:
       - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，僅分母用FinMind）
         run: python .github/scripts/update_margin_maintenance.py
         continue-on-error: true
+      - name: 更新外資及陸資持股比率（TWSE官方MI_QFIIS，免金鑰，源頭二.3第1名）
+        run: python .github/scripts/fetch_foreign_holding.py
+        continue-on-error: true
       - name: 更新個股OHLCV價量歷史（TWSE STOCK_DAY_ALL/TPEx tpex_mainboard_quotes，累積式寫回，免金鑰）
         run: python .github/scripts/update_price_history.py
         continue-on-error: true

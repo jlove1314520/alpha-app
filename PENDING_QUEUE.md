@@ -2371,6 +2371,16 @@ ORDER-END
   的請求），已呼叫`python scripts/dev_queue_runner.py block`。）
 - [!] **源頭二.2** 每個端點各打一次最小請求，記錄真實樣本 3 列與延遲；被拒者標「不可程式存取」並列替代路徑，不得繞　**⛔ 自走中止（2026-09-15 07:02）**：源頭二.1盤點時發現：docs/DATA_SOURCE_MAP.md已判定mopsov.twse.com.tw（MOPS查詢頁AJAX後端）robots.txt為除bingbot外全站Disallow，但四支已在跑且已回填真實資料到生產功能的程式（mops_insider_holdings_client.py董監持股/mops_buyback_client.py庫藏股/mops_cb_conversion_price_client.py可轉債轉換/mops_material_news_client.py重大訊息，其中重大訊息一支下游接了整套material_news_car_gate*.py事件研究）直接違反此結論，原始碼裡完全沒提到這個疑慮。三支建立於發現robots.txt問題之前（09-06~09-07），重大訊息那支建立於09-08 22:01（同日但晚於08:19記錄該問題的時間）。需要總司令裁示：(a)要不要保留已收集的資料、(b)要不要去信MOPS申請書面授權、(c)要不要停用這四支程式改找替代來源、(d)是否核准繼續源頭二.2對其他資料源的實測。詳細盤點見docs/FIRST_HAND_SOURCES.md最上方【重大發現】段落。本輪不擅自處理（不刪資料不停用程式），只誠實記錄並停下。
 - [ ] **源頭二.3** 依「機構用途強度 × 接入成本」排前 10 名先接入，每接一個進 `data/` 與 `STATUS.json`，前端有顯示位置與資料日期
+  **進行中（2026-09-15開發佇列自走）**：排序表已建（見`docs/FIRST_HAND_SOURCES.md`
+  「源頭二.3：接入優先順序」，明確排除卡在robots.txt合規裁示中的MOPS候選），
+  **第1名（外資持股比率MI_QFIIS）已完成**：新增`.github/scripts/fetch_foreign_holding.py`
+  （TWSE官方端點，實測踩到`selectType`必須是`ALLBUT0999`不是`ALL`才有資料，
+  已寫進腳本docstring避免重踩），掛`market.yml`每日排程，輸出`data/foreign_holding.json`
+  （本機實測1362檔、資料日2026-09-14）；`data/STATUS.json`已加`describe_foreign_holding()`
+  解析器與`APP_DATA_SOURCES`條目；個股頁「籌碼」分頁新增「外資持股比率」卡
+  （`fh-ratio`/`fh-can-invest`/`fh-note`），Playwright實測2330顯示69.23%/30.76%、
+  無頁面錯誤。`node scripts/smoke_test.mjs`45/46 PASS（僅#39既有已知紅燈，
+  與本次改動無關，同`ccefd588`既有結論）。**第2~10名留待後續輪次**，見排名表。
 - [ ] **源頭二.4** 新增排程全部列入 CLAUDE.md 頻率清單，附官方上限或實測安全值
 - [ ] **源頭二.5** 驗收：表格截圖、前 10 名清單與理由、每接入一個回報一個
 

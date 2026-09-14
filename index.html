@@ -961,6 +961,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" id="mg-note">來源：TWSE MI_MARGN（GitHub Actions 排程）</div>
         <div class="note" id="mg-maint" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">估算融資維持率：—</div>
       </div>
+      <!-- 2026-09-15（源頭二.3第1名）外資持股比率，TWSE官方MI_QFIIS。 -->
+      <div class="card">
+        <h3>外資持股比率</h3>
+        <div class="facts">
+          <div class="f"><span>外資及陸資持股比率</span><b id="fh-ratio">—</b></div>
+          <div class="f"><span>外資及陸資尚可投資比率</span><b id="fh-can-invest">—</b></div>
+        </div>
+        <div class="note" id="fh-note">來源：TWSE MI_QFIIS（GitHub Actions 排程）</div>
+      </div>
     </div>
 
     <div class="subscreen" id="sub-ai">
@@ -3762,6 +3771,34 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }else{setTxt('mg-maint','估算融資維持率：—（融資餘額為0或無足夠股價資料）')}
   }
 
+  // 2026-09-15（源頭二.3第1名）外資持股比率，TWSE官方MI_QFIIS，
+  // .github/scripts/fetch_foreign_holding.py每日排程產生 data/foreign_holding.json。
+  // 跟loadStockDetail同一種「內存快取+fetch失敗不外溢」寫法。
+  let FOREIGN_HOLDING_CACHE=null;
+  async function loadForeignHoldingCache(){
+    if(FOREIGN_HOLDING_CACHE)return FOREIGN_HOLDING_CACHE;
+    try{const r=await fetch('data/foreign_holding.json?t='+Date.now());if(r.ok)FOREIGN_HOLDING_CACHE=await r.json()}
+    catch(e){console.warn('[loadForeignHoldingCache]',e);recordGlobalError('loadForeignHoldingCache',e)}
+    return FOREIGN_HOLDING_CACHE||{stocks:{}};
+  }
+  async function loadForeignHoldingChip(code){
+    try{
+      const d=await loadForeignHoldingCache();
+      const e=d.stocks&&d.stocks[code];
+      if(!e||e.foreign_holding_ratio==null){
+        setTxt('fh-ratio','—');setTxt('fh-can-invest','—');
+        setTxt('fh-note',fmEmptyMsg('查無外資持股資料'));
+        return;
+      }
+      setTxt('fh-ratio',e.foreign_holding_ratio+'%');
+      setTxt('fh-can-invest',e.foreign_can_invest_ratio!=null?e.foreign_can_invest_ratio+'%':'—');
+      setTxt('fh-note',`資料日 ${e.date} · 來源：TWSE MI_QFIIS（GitHub Actions 排程）`);
+    }catch(e){
+      console.warn('[loadForeignHoldingChip]',e);recordGlobalError('loadForeignHoldingChip',e);
+      setTxt('fh-note','載入失敗');
+    }
+  }
+
   // 2026-08-27 架構修正：EPS/毛利率/營益率/ROE改讀 data/stock_detail.json（見
   // update_stock_financials.py，TWSE官方t187ap06_L_ci綜合損益表+t187ap07_L_ci
   // 資產負債表，累積式寫回），不再對FinMind打FinancialStatements/BalanceSheet。
@@ -3985,6 +4022,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       }
     }
     loadMarginChip(code,px);
+    _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     if(px.length){
       // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
       // 流動性門檻是完全獨立的另一件事：不管跟自己比是熱是冷，成交值絕對數字太低（單日<3000萬）
@@ -6210,7 +6248,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-10.2059';
+  const APP_VERSION='2026-09-15.0727';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

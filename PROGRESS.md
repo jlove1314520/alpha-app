@@ -1,3 +1,49 @@
+## 2026-09-15（開發佇列自走）源頭二.3第1名：接入外資持股比率（TWSE MI_QFIIS），排出前10名接入優先順序表
+
+本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。`PENDING_QUEUE.md`頂端
+「執行順序（權威清單）」下一項是源頭二.3，其前一項源頭二.2已被上一輪標成
+`[!]`阻塞（MOPS `mopsov.twse.com.tw` robots.txt衝突，待總司令裁示），本輪
+確認阻塞機制設計是「跳過該項往下做」，不是整條佇列停擺，故繼續往下做二.3。
+
+**做了什麼**：
+1. 依「機構用途強度×接入成本」排出前10名候選（見`docs/FIRST_HAND_SOURCES.md`
+   新增「源頭二.3：接入優先順序」一節），**明確排除**落在robots.txt合規裁示
+   中的MOPS候選（#9內部人轉讓/#13私募/#10/#11/#12/#15）——這些若單看用途
+   強度會排很前面，但接入與否卡在總司令尚未裁示的合規問題，不適合本輪自行
+   排入候選池。
+2. **完成第1名**：外資持股比率（TWSE官方`MI_QFIIS`）。新增
+   `.github/scripts/fetch_foreign_holding.py`，掛進`market.yml`每日排程（跟
+   `update_margin_maintenance.py`同一批）。**實測踩到的地雷**：`selectType`
+   參數用`ALL`回傳0筆，必須是`ALLBUT0999`才有1362檔逐股資料（已寫進腳本
+   docstring）。輸出`data/foreign_holding.json`，本機實測2330（台積電）
+   外資持股比率69.23%、尚可投資比率30.76%（資料日2026-09-14）。
+3. `data/STATUS.json`：`generate_status_json.py`新增`describe_foreign_holding()`
+   解析器＋`STALE_HOURS`＋`APP_DATA_SOURCES`條目，重跑腳本確認新檔正確出現
+   （`status:"ok"`、`records:1362`）。
+4. 前端：個股頁「籌碼」分頁新增「外資持股比率」卡（`fh-ratio`/`fh-can-invest`/
+   `fh-note`三個欄位），JS用獨立`try/catch`（`loadForeignHoldingCache`/
+   `loadForeignHoldingChip`）+ `_safeAsync`包裹，符合「錯誤隔離」鐵律，失敗
+   不影響融資融券等其他卡片。
+
+**驗證**：
+- `node scripts/smoke_test.mjs`：45/46 PASS，僅#39既有已知紅燈（資料一致性
+  稽核，`ccefd588`已確認是真問題非本輪引入，與本次改動無關）。
+- 用Playwright實際開啟`http://localhost:8792/index.html`個股頁2330籌碼分頁，
+  確認`#fh-ratio`顯示「69.23%」、`#fh-can-invest`顯示「30.76%」、`#fh-note`
+  顯示「資料日 20260914 · 來源：TWSE MI_QFIIS（GitHub Actions 排程）」，
+  頁面無uncaught error。
+
+**尚未做（誠實記錄，不誇大進度）**：排名表第2~10名（SEC Form 4／CFTC COT／
+FRED擴充／借券賣出／SEC 13F／央行外匯牌告／BLS／財政部海關／經濟部工業生產）
+留待後續開發佇列輪次逐一接入，每接一個各自獨立commit；`PENDING_QUEUE.md`
+「源頭二.3」維持未勾選（部分完成，不是全部10項都做完，不得標`[x]`）。
+`源頭二.4`（新增排程列入CLAUDE.md頻率清單）本輪未做——這條endpoint的呼叫
+模式（一天一次、全市場單一請求）已落在CLAUDE.md既有「TWSE/TPEx OpenAPI」
+條目的既有規範內，但總司令原話要求「所有新增排程」都要列進去，留給下一輪
+或源頭二.4本身的輪次處理，不在本次commit夾帶處理。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第九輪）題材七 待辦4：v2詞庫擴充驗證從3句擴大到5句，發現兩個誠實記錄的規則缺口
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀`PENDING_QUEUE.md`最上方紀錄：
