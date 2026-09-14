@@ -14,6 +14,38 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第八輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄：兩條阻塞項
+（S4U／claude CLI非互動驗證）維持阻塞、【題材七】上一輪（無人值守自走）
+留下的是待辦2（259家D級候選抓官網內容管線）、待辦4（v2詞庫擴充＋123題材
+全面跨行業誤判掃描）未做。待辦2需要對259家逐一打網路請求，規模超出一個
+有界工作單位；待辦4的「123題材全面跨行業誤判掃描」延伸範疇是純本地
+計算，本輪判定可收斂，做這一半。
+
+- 【題材七】待辦4延伸範疇完成：新增`research/theme_keyword_ambiguity_
+  scan.py`，靜態掃描123題材關鍵詞找到7個跨題材重複字串、51個短ASCII
+  縮寫關鍵詞（38個題材）；對`data/news_evidence.json`496句真實內文引言+
+  `data/news.json`300則標題共796則語料實測「裸substring vs 詞界正則」，
+  找到2筆不一致案例，但用複製自`build_themes.py evidence_keyword()`的
+  完整判定邏輯重跑後0筆能通過——驗證生產管線句型關卡目前有效。**過程中
+  發現並更正上一輪一個事實錯誤**（非新bug，是文件陳述錯誤）：
+  `theme_official_site_negative_control.py`docstring原寫「theme_keywords.
+  json唯一消費者是測試腳本本身」不成立，實際是`scripts/build_themes.py`
+  的`KWMAP`在正式消費，已在該檔案與`theme_official_site_matcher.py`
+  main區塊補上更正段落（保留原文不刪改）。`python research/theme_
+  official_site_matcher.py`與`python research/theme_official_site_
+  negative_control.py`重跑皆無回歸。細節見`PROGRESS.md`對應節。**仍未做**：
+  待辦2（259家抓取，規模超出一個有界工作單位）、待辦4本身的v2詞庫擴充
+  驗證（目前只驗證3句）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2仍未做；
+待辦4本身的v2詞庫擴充驗證仍未做，下一輪繼續；待辦1／待辦3／待辦4延伸
+範疇已完成）。
+
+---
+
 ## 2026-09-15（無人值守自走・交辦優先執行紀錄）
 
 開工先讀本檔最上方紀錄：兩條阻塞項（S4U／claude CLI非互動驗證）維持阻塞、

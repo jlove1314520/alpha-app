@@ -1,3 +1,63 @@
+## 2026-09-15（無人值守假設佇列自走・第八輪）題材七待辦4延伸：123題材全面跨行業誤判掃描＋更正上一輪一個事實錯誤
+
+戴**研究帽**（新增診斷腳本，純本地計算不打網路請求）。依`CLAUDE.md`「三之一、
+交辦優先於自走」鐵律，開工先讀`PENDING_QUEUE.md`最上方：兩條阻塞項（S4U／
+claude CLI非互動驗證）維持阻塞、【題材七】上一輪（假設佇列第七輪）留下
+待辦2（259家D級候選抓官網內容管線）、待辦4（v2詞庫擴充＋123題材全面跨
+行業誤判掃描）未做。**判定**：待辦2需要對259家公司實際打網路請求抓官網
+內容，規模與工具呼叫成本遠超一個有界工作單位；待辦4的「123題材全面跨
+行業誤判掃描」延伸範疇是純本地靜態分析＋既有語料實測，不需網路請求，
+可收斂在本輪，故本輪做待辦4這一半。
+
+**做了什麼**：新增`research/theme_keyword_ambiguity_scan.py`，三項掃描：
+1. 靜態掃描123個題材的關鍵詞清單，找出完全相同字串被2個以上不同題材同時
+   使用的情況——發現7個：「2.5D封裝」（adv_package/cowos）、「CoWoS」
+   （同上）、「無人機」（defense/drone）、「車用鏡頭」（adas/optical_lens）、
+   「軟硬結合板」（fpc/pcb）、「銅纜」（cable/hs_cable）。這些詞注定會讓
+   同一句話同時命中兩個題材，需人工複查是否為刻意設計（例如cowos本來就是
+   adv_package的子類別，同時命中可能合理）。
+2. 靜態掃描純ASCII、長度≤3的短縮寫關鍵詞（上一輪「EG-in-Legacy」那類風險
+   的理論清單）——發現51個，分布在38個題材（ABF/TSV/NPU/HBM/PCB/CIS/GaN
+   /SiC等半導體慣用縮寫）。
+3. **實測驗證**：把這51個短縮寫關鍵詞用「裸substring比對」與「詞界正則
+   比對」兩種方法，同時套用在`data/news_evidence.json`的496句真實內文
+   引言與`data/news.json`的300則標題（共796則）上，找到2筆「裸substring
+   命中但詞界比對不命中」的真實案例（LED命中iPhone報導裡的「Duo」附近
+   文字、MR命中「MRO」報導），但**額外用複製自`build_themes.py`
+   `evidence_keyword()`的完整判定邏輯（公司名稱排除+句型片段literal比對）
+   重跑這2筆，結果0筆能通過**——驗證了生產管線的句型關卡目前確實有效，
+   短縮寫詞的理論風險在現有語料裡沒有真的造成A/C級誤判。
+
+**過程中發現並更正上一輪一個事實錯誤（不是新bug，是文件陳述錯誤）**：
+`theme_official_site_negative_control.py`docstring原寫「theme_keywords.json
+目前唯一的消費者就是這個測試腳本本身」——**查證後這句話不成立**：
+`scripts/build_themes.py`第48行`KWMAP`與`build_keyword_map()`（101~113行）
+會直接讀取這份規則檔餵給正式的新聞題材A/C級證據判定管線，這才是真正在跑
+的正式消費者。上一輪把「題材七待辦1那條還沒建的官網抓取管線」誤等同於
+「theme_keywords.json的唯一消費者」。已在`theme_official_site_negative_
+control.py`與`theme_official_site_matcher.py`main區塊補上更正段落（保留
+原文，不刪改歷史記錄，只附加更正）。好消息是查證後發現這個消費者的實際
+風險比想像中小（見上面第3點的實測結果）。
+
+**驗證**：`python research/theme_official_site_matcher.py`與
+`python research/theme_official_site_negative_control.py`重跑皆與更正前
+輸出一致，無回歸；`python research/theme_keyword_ambiguity_scan.py`正常
+執行並印出完整報告。三支腳本皆不涉及`index.html`或任何前端變更，未跑
+`node scripts/smoke_test.mjs`（本輪未動App）。
+
+**仍未做**：待辦2（259家D級候選抓官網內容管線，規模超出一個有界工作
+單位，下一輪繼續評估如何拆解）；待辦4本身標註的「v2正向供應語意詞清單
+需要更多真實案例擴充驗證」（目前只驗證3句）；語料池目前僅796則規模尚小，
+`data/news_evidence.json`/`data/news.json`持續累積後應重跑本掃描複查；
+7個跨題材重複關鍵詞需人工複查是否為刻意設計，本輪未逐一判定。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2仍未做；
+待辦1／待辦3已完成；待辦4延伸範疇本輪已完成，待辦4本身的v2詞庫擴充驗證
+仍未做）。
+
+---
+
 ## 2026-09-15（無人值守開發佇列自走）Cybex.引擎完成（結案FAIL）＋補勾#53/#54/#55/#57四項既有結案的PENDING_QUEUE遺漏
 
 戴**驗證帽**（設計並執行控制組對照，判定PASS/FAIL，不宣告策略有效性）。
