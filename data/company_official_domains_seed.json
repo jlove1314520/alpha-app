@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "purpose": "題材七官網來源比對——公司官方網址人工種子清單，非259家D級候選全量",
+    "note": "這不是company_info.json的正式官網欄位管線（那個管線尚未建，見research/theme_official_site_matcher.py main區塊待辦1）。這裡只先手動核實少數已在單元測試/驗收案例中出現、或屬於眾所皆知大型股的公司官網主網域，供research/theme_official_site_matcher.py下一步擴大負對照組測試時直接引用，不必每次現查。",
+    "source": "公司官網首頁自行核對（人工確認網域，非爬蟲取得，未涵蓋259家D級候選）",
+    "generated_at": "2026-09-15",
+    "coverage": "8家，涵蓋2個驗收案例正例反例＋3個計畫中的負對照組候選（食品/營建/航運各一）",
+    "warning": "此清單不得直接當成259家全量抓取管線的替代品；下一輪若要擴大負對照組或正式接管線，仍需按research/theme_official_site_matcher.py待辦清單逐步做"
+  },
+  "companies": {
+    "2330": {"name": "台積電", "official_domain": "tsmc.com", "note": "驗收用大型股，未涉入題材七正反例測試"},
+    "2317": {"name": "鴻海", "official_domain": "foxconn.com", "note": "驗收用大型股，未涉入題材七正反例測試"},
+    "6223": {"name": "旺矽", "official_domain": "mpi.com.tw", "note": "題材七驗收案例正例：探針卡供應商，已用於單元測試"},
+    "2449": {"name": "京元電", "official_domain": "kyec.com.tw", "note": "題材七驗收案例反例：測試代工廠，自製探針卡供內部使用，不得標成探針卡供應商，已用於單元測試"},
+    "1216": {"name": "統一", "official_domain": "uni-president.com.tw", "note": "計畫中負對照組候選：食品業，與七大題材（探針卡等半導體供應鏈題材）無關"},
+    "2542": {"name": "興富發", "official_domain": "sunfar.com.tw", "note": "計畫中負對照組候選：營建業，與七大題材無關"},
+    "2603": {"name": "長榮", "official_domain": "evergreen-marine.com", "note": "計畫中負對照組候選：航運業，與七大題材無關"}
+  }
+}
