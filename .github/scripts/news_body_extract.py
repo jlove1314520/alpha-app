@@ -30,6 +30,7 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import unquote
 
 import requests
 
@@ -216,6 +217,46 @@ def is_frame_noise(sent: str) -> bool:
     return any(k in sent for k in FRAME_NOISE)
 
 
+# ── 停擺二：待抓佇列排優先序 ────────────────────────────────────────────
+# 2026-09-10 總司令裁示：「公告-XX月營收」類降最低。
+# 這類標題是每檔上市櫃公司每月固定公告，內文是制式財務數字，
+# 不含題材句型（供應鏈/打入/出貨這類敘述），優先抓它們等於把抓取額度
+# 花在題材命中率最低的那批。Yahoo 的 URL 路徑本身就是標題的
+# URL-encode 版本（CNA 是純數字流水號，無法用同一招判斷，維持原優先序）。
+LOW_PRIORITY_TITLE_RE = re.compile(r"公告.*(合併?營收|月營收)")
+
+
+def _title_from_url(url: str) -> str:
+    """Yahoo 網址路徑段本身就是標題（URL-encode），解回可讀文字供排序判斷用。
+
+    只用來分類優先序，不當成正式標題儲存——正式標題仍以萃取內文比對為準。
+    """
+    try:
+        seg = url.rsplit("/", 1)[-1]
+        seg = seg.split("?", 1)[0]
+        if seg.endswith(".html"):
+            seg = seg[: -len(".html")]
+        return unquote(seg)
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def is_low_priority(n: dict) -> bool:
+    """判斷這則是不是「公告-XX月營收」類制式財報公告。"""
+    return bool(LOW_PRIORITY_TITLE_RE.search(_title_from_url(n.get("url") or "")))
+
+
+def prioritize(todo: list) -> tuple:
+    """穩定分兩批：一般則在前、月營收公告類在後，各自維持原有相對順序。
+
+    回傳 (排序後清單, 降優先數量)，供主流程接續使用與回報。
+    """
+    high, low = [], []
+    for n in todo:
+        (low if is_low_priority(n) else high).append(n)
+    return high + low, len(low)
+
+
 def split_sentences(text: str) -> list:
     """切句，並擋掉「導覽湯」。
 
@@ -236,7 +277,8 @@ def split_sentences(text: str) -> list:
     return out
 
 
-def _publish_diag(todo_total: int, fetched: int, hit_articles: int) -> None:
+def _publish_diag(todo_total: int, fetched: int, hit_articles: int,
+                   low_priority_n: int = 0) -> None:
     """把本輪診斷寫進 news_urls.json 的 meta.extract_diag（總司令指定的位置）。
 
     只改 meta 這一個 key，其餘（urls 清單、sitemap 那邊寫的欄位）原封不動——
@@ -255,13 +297,17 @@ def _publish_diag(todo_total: int, fetched: int, hit_articles: int) -> None:
             "todo_total": todo_total,
             "attempted": fetched,
             "with_theme_quote": hit_articles,
+            "low_priority_deferred": low_priority_n,
             "counts": dict(sorted(DIAG.items())),
             "note": "counts 的鍵：HTTP 狀態碼（\"200\"/\"403\"/\"429\"…）、"
                     "exc:<例外類別> 是連線層例外、"
                     "exc:strip_frame_blocks:<例外類別> 是剝版面時的解析例外、"
                     "no_article_container 是拿到 200 但版型比對不到文章容器、"
                     "empty_html 是重試用盡仍無內容。"
-                    "四者是完全不同的問題，不要再混成一句「連續失敗」。",
+                    "四者是完全不同的問題，不要再混成一句「連續失敗」。"
+                    "low_priority_deferred（停擺二，2026-09-10）是本輪 todo 佇列裡"
+                    "「公告-XX月營收」制式公告類的則數，已排到 todo 最後面，"
+                    "只要 todo_total 減去它仍大於 MAX_PER_RUN，本輪就不會抓到任何一則。",
         }
         src.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
     except Exception as e:  # noqa: BLE001
@@ -303,7 +349,9 @@ def main() -> int:
     todo = [n for n in news
             if any(h in (n.get("url") or "") for h in BODY_ALLOWED)
             and n.get("url") not in prior]
-    print(f"新聞 {len(news)} 則｜白名單內未抓過的 {len(todo)} 則｜本輪上限 {MAX_PER_RUN}")
+    todo, low_priority_n = prioritize(todo)
+    print(f"新聞 {len(news)} 則｜白名單內未抓過的 {len(todo)} 則｜本輪上限 {MAX_PER_RUN}"
+          f"｜其中「公告-XX月營收」類降優先 {low_priority_n} 則（排到最後）")
 
     out = list(prior.values())
     fetched = hit_articles = 0
@@ -376,7 +424,7 @@ def main() -> int:
         "evidence": out,
     }
     OUT.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    _publish_diag(len(todo), fetched, hit_articles)
+    _publish_diag(len(todo), fetched, hit_articles, low_priority_n)
     print(f"  本輪診斷 extract_diag：{json.dumps(DIAG, ensure_ascii=False, sort_keys=True)}")
     print(f"  本輪抓取 {fetched} 則，其中 {hit_articles} 則含題材句")
     print(f"  累計 {len(out)} 則，含題材句 {doc['meta']['articles_with_theme_quote']} 則")

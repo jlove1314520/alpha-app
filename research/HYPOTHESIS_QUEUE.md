@@ -10232,3 +10232,38 @@ capital_reduction_verify.py`繼續查完剩餘522檔（約需3-4輪7分鐘批次
 虧損減資組」事件數；(c) 樣本數確認足夠支撐統計檢定力後（依`#71`
 原始已知風險第1點門檻，個位數/年會判「觀測層級就無訊號」快殺），才
 進入`buyback_car_gate.py`同款CAR框架計算，跑第1關sanity。
+
+**(2)逐檔驗證腳本：本輪接續（2026-09-15 hypothesis_queue排程接續，
+鎖檔陳舊回收接手——上一輪PID 18420疑似未正常收工，約6031分鐘（約4.2天）
+後被本輪回收，前段紀錄已核對確認完整無缺失，checkpoint記錄的302/805
+與前次心跳記錄的283/805不一致，判定是上一輪跑到一半即崩潰或被中斷、
+checkpoint仍有多寫入19檔但心跳沒同步更新，非資料流失）**：
+
+`PYTHONIOENCODING=utf-8 python capital_reduction_verify.py`跑完一批
+（420秒時間預算），累積查詢**443/805檔**（本輪新查141、失敗0）。
+**副線查證：上一輪心跳記錄的「英文/中文同義詞未正規化」問題，開工前
+`git status`確認乾淨後發現已被上一輪留下的commit修好**——
+`capital_reduction_verify.py`已新增`REASON_NORMALIZE_MAP`
+（`Making up losses`→`彌補虧損`、`Cash refund`→`現金減資`），本輪
+執行後`reduction_events_by_reason`正確輸出`{'彌補虧損': 189,
+'現金減資': 88}`兩個canonical中文鍵，不再分裂成四個同義詞桶。**本輪
+另澄清一件事**：終端機直接用cp950 console印出這個JSON會顯示成亂碼
+（`�������l`等），這只是Windows console cp950編碼顯示問題，用
+`PYTHONIOENCODING=utf-8`重新讀取後確認`data/capital_reduction_verified.json`
+檔案本體的UTF-8內容完全正確——記錄這件事是因為第一眼看到亂碼容易
+誤判成資料寫壞，浪費時間排查一個不存在的bug。
+
+累積277筆減資事件與跳空候選匹配237/277（85.6%），跟上一輪283檔時
+187/220（85%）的匹配率一致，顯示`capital_reduction_gap_screen.py`
+的偵測邏輯在樣本擴大後recall仍穩定。
+
+`is_holdout_consumed()`本輪開工/收工前皆確認`False`（本輪僅141次
+`TaiwanStockCapitalReductionReferencePrice`個股查詢，皆走`load_dev()`
+holdout-safe路徑，零觸及holdout）。**判定：尚未結案，僅推進資料工程
+階段（443/805＝55%驗證進度），仍未開始第1關cheap gate**。**本輪工作
+到此為止（一輪一個有界工作單位），現在排隊第一，下一輪待辦不變（依序，
+不跳關）**：(a) 用`PYTHONIOENCODING=utf-8 python
+capital_reduction_verify.py`繼續查完剩餘362檔（約需2-3輪7分鐘批次）；
+(b) 全部查完後，用已正規化的兩組分別跑`buyback_car_gate.py`同款CAR
+框架第1關sanity；(c) 若樣本數在拆成現金减資/彌補虧損减資兩組後任一組
+低於個位數/年，依原始已知風險第1點門檻快殺，不硬做統計檢定。

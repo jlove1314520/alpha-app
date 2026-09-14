@@ -14761,13 +14761,11 @@
     "violation_rate 只計「一致性」類（顯示的數字與官方對不起來）；季報斷層/過期屬於「完整度」類，另計 completeness_gap_rate，由稽核.二（覆蓋率補齊）負責收斂。"
   ],
   "local_task_health": {
-    "checked_at": "2026-09-10T14:37:02.815465+08:00",
+    "checked_at": "2026-09-10T17:47:03.204528+08:00",
     "registry": "data/seed/pipeline_registry.json",
-    "alert": true,
-    "stalled_count": 1,
-    "stalled": [
-      "AlphaData：C:/alpha/alpha-data/alpha.db 已 29677 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；各表 max(date)：daily_price=2026-08-21、inst_trades=2026-08-21、valuation=2026-08-21、taifex_large=20260819）"
-    ],
+    "alert": false,
+    "stalled_count": 0,
+    "stalled": [],
     "tasks": [
       {
         "task": "AlphaLiveServer",
@@ -14776,8 +14774,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-10T14:37:02.816791+08:00",
-        "age_min": -0.0,
+        "last_output": "2026-09-10T17:47:10.907268+08:00",
+        "age_min": -0.1,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -14788,8 +14786,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-10T14:37:07.875289+08:00",
-        "age_min": -0.1,
+        "last_output": "2026-09-10T17:45:07.823099+08:00",
+        "age_min": 1.9,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -14801,7 +14799,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-10T13:47:02.578053+08:00",
-        "age_min": 50.0,
+        "age_min": 240.0,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -14812,8 +14810,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-10T14:36:06.238177+08:00",
-        "age_min": 0.9,
+        "last_output": "2026-09-10T17:41:10.296734+08:00",
+        "age_min": 5.9,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -14824,8 +14822,8 @@
         "expected_interval_min": 5,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-10T14:36:05.715580+08:00",
-        "age_min": 1.0,
+        "last_output": "2026-09-10T17:41:05.556753+08:00",
+        "age_min": 6.0,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -14836,7 +14834,7 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-10T14:32:02.752827+08:00",
+        "last_output": "2026-09-10T17:42:02.751611+08:00",
         "age_min": 5.0,
         "stall_limit_min": 15,
         "status": "ok"
@@ -14848,8 +14846,8 @@
         "expected_interval_min": 15,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-10T14:30:02.785689+08:00",
-        "age_min": 7.0,
+        "last_output": "2026-09-10T17:30:02.777314+08:00",
+        "age_min": 17.0,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -14860,8 +14858,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-10T14:34:00.252270+08:00",
-        "age_min": 3.0,
+        "last_output": "2026-09-10T17:47:13.118709+08:00",
+        "age_min": -0.2,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -14872,8 +14870,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-10T14:34:06.783627+08:00",
-        "age_min": 2.9,
+        "last_output": "2026-09-10T17:37:12.923917+08:00",
+        "age_min": 9.8,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -14884,8 +14882,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-10T14:32:30.741679+08:00",
-        "age_min": 4.5,
+        "last_output": "2026-09-10T17:23:14.493097+08:00",
+        "age_min": 23.8,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -14895,11 +14893,11 @@
         "artifact": "C:/alpha/alpha-data/alpha.db",
         "expected_interval_min": 1440,
         "freshness": "sqlite_max_date",
-        "source": "各表 max(date)：daily_price=2026-08-21、inst_trades=2026-08-21、valuation=2026-08-21、taifex_large=20260819",
-        "last_output": "2026-08-21T00:00:00+08:00",
-        "age_min": 29677.0,
+        "source": "各表 max(date)：daily_price=2026-09-10、inst_trades=2026-09-10、valuation=2026-09-10、taifex_large=20260909",
+        "last_output": "2026-09-10T00:00:00+08:00",
+        "age_min": 1067.1,
         "stall_limit_min": 4320,
-        "status": "stalled"
+        "status": "ok"
       },
       {
         "task": "AlphaDepCheck",
@@ -14909,7 +14907,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-10T12:44:48.576354+08:00",
-        "age_min": 112.2,
+        "age_min": 302.2,
         "stall_limit_min": 30240,
         "status": "ok"
       }
