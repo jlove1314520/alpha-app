@@ -1,3 +1,49 @@
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十輪）題材七待辦2起步：官網抓取批次管線建成並實跑第一批10檔
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀`PENDING_QUEUE.md`最上方：
+兩條阻塞項（S4U／claude CLI非互動驗證）維持阻塞、【題材七】上一輪（假設
+佇列第九輪）留下待辦2（259家D級候選抓官網管線，規模超出一個有界工作
+單位）與待辦4（v2詞庫驗證樣本仍小）。本輪判定「先把待辦2的批次管線建好
+並小批試跑」是可收斂的下一步，比照題材三既有的分批慣例。
+
+- 新增`research/theme_official_site_pipeline.py`：可重複呼叫、每次只吃
+  一個批次（`--batch-size`/`--offset`/`--codes`）的抓取管線。只用`theme_
+  official_site_matcher.py`的`classify_sentence_v1_original`（PENDING_
+  QUEUE.md原文四條規則），不用v2（第九輪已發現v2詞庫覆蓋不足、需更多
+  案例才能判斷會不會引入反效果，還沒準備好接生產管線）。輸出寫到獨立的
+  `data/theme_official_site_evidence_draft.json`，明標`status:"draft_
+  unreviewed"`——**刻意不寫進`data/themes.json`**，因為批次結果分佈還
+  沒人工抽查過，符合`CLAUDE.md`「做與判分離」帽子規則：這一輪負責「做」
+  （抓取+套規則），是否正式採用留給下一輪或使用者查核後決定。
+- 節流與禮儀比新聞內文管線更保守（259個未知節流政策的第三方官網，非
+  已知友善白名單來源）：逐站間隔3秒（新聞內文2秒）、逾時10秒、只重試1次
+  （新聞內文重試2次）。JS渲染偵測純用「可見文字長度」啟發式，**不裝
+  無頭瀏覽器**（PENDING_QUEUE.md原文明講）。
+- 先確認259家D級候選在`company_info.json`皆已有`official_website`（題材
+  七待辦1早已100%覆蓋，此為額外驗證，非重做）。
+- 實跑第一批10檔（排序最前10檔：1101/1102/1103/1210/1216/1229/1231/
+  1301/1303/1308）：**發現並修正一個真實bug**——`official_website`欄位
+  刻意保留MOPS原始字串不改寫（`build_company_official_websites.py`設計
+  如此，是正確的可追溯性設計，不應改資料源），但部分來源資料本身沒有
+  scheme（例如`www.acc.com.tw`缺`http(s)://`前綴），導致`requests`直接
+  拋`MissingSchema`（首次跑10檔時3檔踩到）。修法是在**消費端**（本管線）
+  新增`_ensure_scheme()`，缺scheme一律補`https://`，不動資料源本身。
+  修復後重新驗證3檔中2檔成功取得（1231仍合法失敗於對方網站自己的SSL
+  憑證問題，非本管線bug）。
+- 最終累計10/259檔：6檔`fetched`（其中3檔有題材關鍵詞命中，共6筆
+  `a_level_hits`）、2檔`exc_SSLError`（對方網站憑證問題，非我方可控）、
+  1檔`http_403`（對方主動擋非標準UA——依`CLAUDE.md`取得方式鐵律不偽造
+  UA繞過，誠實記錄跳過）、1檔`blocked_js_render`（依規則不裝無頭瀏覽器）。
+  失敗原因分布合理，皆為對方端限制，非管線本身的錯誤（MissingSchema
+  bug已修復並驗證）。
+- **仍未做**：待辦2剩餘249檔（下一輪或之後可用`--offset 10`等參數分批
+  續跑，不強求一次做完，比照題材三分批慣例）；待辦4驗證樣本擴充（目前
+  仍5句，與待辦2無依賴關係，可獨立由任一輪繼續）；`theme_official_site_
+  evidence_draft.json`累積出的`a_level_hits`候選尚未人工抽查，不得直接
+  視為題材七的正式證據來源。
+
+---
+
 ## 2026-09-15（開發佇列自走）源頭二.3第1名：接入外資持股比率（TWSE MI_QFIIS），排出前10名接入優先順序表
 
 本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。`PENDING_QUEUE.md`頂端

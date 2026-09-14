@@ -14,6 +14,45 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄：兩條阻塞項
+（S4U／claude CLI非互動驗證）維持阻塞、【題材七】上一輪（假設佇列第九輪）
+留下的是待辦2（259家D級候選抓官網內容管線，規模超出一個有界工作單位）、
+待辦4驗證樣本仍小。本輪判定待辦2的「先把管線本身建出來、小批試跑」是
+可收斂的下一步（比照題材三「分批做、每批20個」的既有慣例，先建好可重複
+呼叫的批次工具，不強求一次做完259家）。
+
+- 【題材七】待辦2起步：新增`research/theme_official_site_pipeline.py`——
+  可重複呼叫的批次抓取管線（`--batch-size`/`--offset`/`--codes`），只用
+  `classify_sentence_v1_original`（v1規則，v2仍待更多案例驗證未達生產
+  標準），輸出寫到獨立的`data/theme_official_site_evidence_draft.json`並
+  明標`status:"draft_unreviewed"`——**刻意不寫進`themes.json`**，因為259家
+  批次跑出來的結果分佈還沒人工抽查過，符合`CLAUDE.md`「做與判分離」帽子
+  規則。確認259家D級候選在`company_info.json`皆已有`official_website`
+  （題材七待辦1早已100%覆蓋這259檔，此為額外驗證）。實跑第一批10檔
+  （代號1101~1308排序最前10檔）：**發現並修正一個真實bug**——`company_
+  info.json`的`official_website`刻意保留MOPS原始字串不改寫（見
+  `build_company_official_websites.py`），部分來源資料本身缺scheme
+  （例如`www.acc.com.tw`無`http(s)://`前綴），`requests`直接拋
+  `MissingSchema`；修法是在**消費端**（本管線，非資料源本身）補
+  `_ensure_scheme()`正規化，不動資料源的「保留原始值」設計。修復前3檔
+  MissingSchema、修復後重跑2檔成功取得（1231仍合法失敗於對方網站自身
+  SSL憑證問題，非本管線bug）。最終累計10/259檔：6檔fetched（3檔有
+  keyword命中、共6筆a_level_hits）、2檔`exc_SSLError`（對方網站憑證
+  問題）、1檔`http_403`（對方主動擋非標準UA，依取得方式鐵律不偽造UA
+  繞過，誠實記錄跳過）、1檔`blocked_js_render`（依規則不裝無頭瀏覽器）。
+  細節見`PROGRESS.md`對應節。**仍未做**：待辦2剩餘249檔（可用
+  `--offset 10`等參數分批續跑，下一輪或之後接續即可）、待辦4驗證樣本
+  擴充（目前仍5句，與待辦2無關聯依賴，可獨立於任一輪繼續）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2管線
+已建好並驗證可用，259檔中僅完成10檔，剩249檔待分批續跑；待辦4驗證樣本
+仍待擴充，下一輪可續；待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第九輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄：兩條阻塞項

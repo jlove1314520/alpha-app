@@ -1,0 +1,257 @@
+{
+  "generated_at": "2026-09-15T07:27:13.544393+08:00",
+  "rule_version": "v1_original",
+  "status": "draft_unreviewed",
+  "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
+  "batch_codes": [
+    "1102",
+    "1103",
+    "1231"
+  ],
+  "results": [
+    {
+      "code": "1101",
+      "name": "台泥",
+      "url": "https://www.tccgroupholdings.com/tw/",
+      "themes": [
+        "cement",
+        "high_dividend"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "1102",
+      "name": "亞泥",
+      "url": "www.acc.com.tw",
+      "themes": [
+        "cement"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "亞洲水泥 English 電子商務 亞泥中國 搜尋... 亞洲水泥股份有限公司 電子商務 ENGLISH 全站檢索 企業永續發展 亞泥ESG官方網站 亮點摘要 利害人關係專區 關於亞泥 公司簡介及沿革 組織架構 經營團隊 內部稽核 公司治理 董事 股東會及董事會之重要決議 公司治理架構及公司章程 作業程序 公司法規 關",
+          "keyword": "水泥",
+          "a_level": false
+        },
+        {
+          "sentence": "六度蟬聯「亞洲最佳企業雇主獎」 打造幸福職場 2026/08/17 more... Quarry 亞泥新城山礦場 安全即時監控系統 more... IR 投資人專區 股東專區 公司年報 財務資訊 法說活動與簡報 聯絡投資人關係 EP 環保建設 ISO-14001環境管理 空氣污染防治 礦場植生綠化 環保節能成果 亞泥生",
+          "keyword": "水泥",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "1103",
+      "name": "嘉泥",
+      "url": "www.chcgroup.com.tw",
+      "themes": [
+        "cement"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "1210",
+      "name": "大成",
+      "url": "http://www.dachan.com",
+      "themes": [
+        "food"
+      ],
+      "status": "fetched",
+      "sentence_count": 12,
+      "keyword_hits": 5,
+      "a_level_hits": 4,
+      "hits": [
+        {
+          "sentence": "大成長城企業股份有限公司 ﻿ 關於大成 企業文化 業務範疇 企業沿革 影片中心 聯絡我們 最新消息 集團新聞 封面故事 前瞻大成 投資大成 公司治理 財務訊息 股東專欄 利害關係人專區 永續報告書 品牌總覽 溯源中心 安心雞 鹿野土雞 人力資源 認識公司 了解工作 菁英招募 公司實習 福利制度 大成安心購 繁體中文 简",
+          "keyword": "食品",
+          "a_level": true
+        },
+        {
+          "sentence": "了解更多 雞本享受 歡聚時光每一刻 「雞本享受」為大成旗下最知名的雞肉加工食品品牌之一，致力於雞肉商品的研發與創新，推出各式美味又安心的高優質產品。",
+          "keyword": "食品",
+          "a_level": true
+        },
+        {
+          "sentence": "了解更多 鹿野土雞 歡聚時光每一刻 「雞本享受」為大成旗下最知名的雞肉加工食品品牌之一，致力於雞肉商品的研發與創新，推出各式美味又安心的高優質產品。",
+          "keyword": "食品",
+          "a_level": true
+        },
+        {
+          "sentence": "農糧、肉品、食品、餐飲服務、東南亞及東亞六大事業群，邀請您一起來共創未來。",
+          "keyword": "食品",
+          "a_level": true
+        },
+        {
+          "sentence": "MORE 企業社會責任 社會公益、環境保護、永續發展 ﻿ 大成安心購 全站搜尋 關於大成 企業文化 業務範疇 企業沿革 影片中心 聯絡我們 最新消息 集團新聞 封面故事 前瞻大成 投資大成 公司治理 財務訊息 股東專欄 利害關係人專區 永續報告書 品牌總覽 動物營養 油品 麵粉 蛋品 肉品 冷凍食品 常溫食品 海產 餐",
+          "keyword": "冷凍食品",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "1216",
+      "name": "統一",
+      "url": "https://www.uni-president.com.tw",
+      "themes": [
+        "food",
+        "china_exposure"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "1229",
+      "name": "聯華",
+      "url": "https://www.lhicholdings.com/",
+      "themes": [
+        "food"
+      ],
+      "status": "fetched",
+      "sentence_count": 7,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "詳細介紹 創立於1952年，深耕台灣超過半世紀，專營麵粉及義大利麵兩大事業，為台灣最大之麵粉供應商。",
+          "keyword": "麵粉",
+          "a_level": false
+        },
+        {
+          "sentence": "連至官網 更多 轉投資事業 新聞中心 財務新聞 聯華實業控股115年08月營收報告 2026/09/10 財務新聞 聯華實業控股115年07月營收報告 2026/08/10 財務新聞 聯華實業控股115年06月營收報告 2026/07/10 公司新聞 【重大訊息】聯華-本公司受邀參加統一證券舉辦之線上法人說明會 202",
+          "keyword": "食品",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "1231",
+      "name": "聯華食",
+      "url": "www.lianhwa.com.tw",
+      "themes": [
+        "food"
+      ],
+      "status": "fetched",
+      "sentence_count": 16,
+      "keyword_hits": 13,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "聯華食品官方網站 ! 提示訊息 OK X 此網址不支援彈跳視窗，請改用其他方式 聯華食品官方網站 本公司發現有不明人士假冒本公司名義舉辦各類活動，特此提醒您提高警覺，謹慎辨識資訊是否由本公司官方帳號發布。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "聯華E購網 English 供應商專區 聯華食品 使命與願景 企業文化 企業里程碑 事業版圖 旗下品牌 鮮食事業部 地理位置 企業永續 永續消息與活動 ESG永續專區 菁英招募 福利生活 人才發展 實習計畫 校園徵才 徵選流程 加入我們 投資人專區 財務資訊 董事會及功能性委員會 股東服務專區 公司治理 內部稽核組織及",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "重要訊息 2026-07-07 聯華食品官方聲明 本公司積極配合衛福部與相關單位調查與作業，第一時間已完成問題油品更換為合規油品，並啟動疑慮商品預防下架，目前本公司生產商品均合法合規。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "2026-07-02 聯華食品聲明稿 針對供應商通知油品不符法規事件，本公司於第一時間啟動內部清查，並立即停止使用相關油品、完成供應商更換，同時主動通報衛生局，並配合主管機關辦理相關作業。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "聯華食品旗下寶咔咔攜手靖娟基金會，呼籲大眾共同關注兒少交通安全議題，期盼透過企業力量串聯來自社會的善意，陪伴孩子們安心成長、平安回家。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "秘密電話亭藏驚喜，聽見孩子真摯的告白 今年母親節前夕，聯華食品旗下品牌「滿天星」攜手安得烈慈善協會，邀請「第六屆柔韌母親」獲獎家庭，走進臺北市立天文館進行寓教於樂的探索之旅，更為這些家庭準備了一連串專屬的暖心驚喜。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "2026-04-12 聯華食品攜手創世基金會【40守護・愛永續園遊會】 為嘉義擴院出一份力，助弱勢植物人回「嘉」安養 聯華食品攜手創世基金會「40守護・愛永續園遊會」，捐贈旗下萬歲牌產品528袋於義賣活動使用，並將義賣所得全數捐贈予創世基金會，用以支持嘉義院擴院。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "2026-04-01 盼將溫暖傳遞給更多孩子 聯華食品捐贈近千箱滿天星餅乾陪伴孩童歡度兒童節 聯華食品捐贈萬包滿天星陪伴孩子們歡度兒童節！",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "盼透過企業力量讓更多孩子在這個屬於他們的節日綻放出快樂的笑容… 2025-12-12 聯華食品基隆廠榮獲 114 年度「健康職場標竿獎銅獎」 積極守護勞動力 打造永續健康職場 聯華食品基隆廠榮獲「健康職場標竿獎銅獎」殊榮 ，於114年12月10日參與授獎，以實際行動建構健康的職場環境，期許成為食品產業的健康標竿。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "永續經營 誠信正直 ． 食安第一 客戶放心 ． 重視人才 創新培育 ． 社會共榮 創意無限 ． 環保節能 持續不懈 了解更多 聯華食品 Recruit 邀請你加入我們的行列！",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "聯華食品， 致力於提供美味、安全與創新的食品， 已成為消費者信賴的品牌。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "我們深信，員工是公司最寶貴的資產， 致力打造充滿活力與成長機會的工作環境， 誠摯邀請你加入聯華食品的大家庭。",
+          "keyword": "食品",
+          "a_level": false
+        },
+        {
+          "sentence": "前往聯華食品安心履歷 宅配訂購及諮詢專線 02-2555-3161 服務時間 週一~週五 9:00~18:00 (例假日休) 連絡我們 LINE ID @155guizs 聯華食品工業股份有限公司版權所有 ©2015 LianHwa Foods Corp. 食品業者登錄字號：A-107569627-00000-0 分享",
+          "keyword": "食品",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "1301",
+      "name": "台塑",
+      "url": "http://www.fpc.com.tw",
+      "themes": [
+        "petrochem",
+        "china_exposure"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "1303",
+      "name": "南亞",
+      "url": "http://www.npc.com.tw",
+      "themes": [
+        "petrochem"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "1308",
+      "name": "亞聚",
+      "url": "https://www.apc.com.tw/",
+      "themes": [
+        "petrochem"
+      ],
+      "status": "fetched",
+      "sentence_count": 11,
+      "keyword_hits": 2,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "亞洲聚合股份有限公司 首頁 | 繁體 | 简体 | English | 聯絡我們 關於亞聚 產品資訊 公司治理暨投資人服務專區 永續發展專區 人力資源 115/08/25 16:05 代關聯企業福建古雷石化有限公司公告變更財務報表簽... 代關聯企業福建古雷石化有限公司公告變更財務報表簽證會計師 日期時間： 115/0",
+          "keyword": "石化",
+          "a_level": true
+        },
+        {
+          "sentence": "10.公司通知或接獲通知終止之日期:115/08/25 11.最近二年度已申報或即將編製之財務報告是否曾經會計師調整或提出內 部控制重大改進事項之建議: 無 12.公司對上開調整或建議事項有無不同意見(若有不同意見，請詳細說明每 一事項之性質、公司原處理方法與最後處理結果暨繼任會計師對各該事 項之書面意見): 無 13",
+          "keyword": "石化",
+          "a_level": true
+        }
+      ]
+    }
+  ],
+  "total_codes_covered": 10,
+  "total_candidates": 259
+}
