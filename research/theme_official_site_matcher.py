@@ -170,15 +170,45 @@ if __name__ == "__main__":
             official_domains={"kyec.com.tw"},
             expect=False,
         ),
+        # 2026-09-15（假設佇列自走第九輪）新增：v2詞庫擴充驗證，用WebFetch實際
+        # 讀取大立光(3008,largan.com.tw)官網首頁取得。這兩句**不是驗收案例**，
+        # 是拿來實測v1/v2對真實供應商語氣句子的行為，expect欄位記錄的是「目前
+        # 程式碼實際輸出」，不是「應該要輸出什麼」——詳見main區塊結論列印的
+        # 兩個誠實記錄的缺口，不在本輪動手修正詞庫（避免無查核就擴大清單）。
+        dict(
+            name="大立光(3008) 真實供應商語氣句一：無POSITIVE_SUPPLY_WORDS命中詞",
+            url="https://www.largan.com.tw/tw",
+            sentence="自1987年創立以來，大立光一直致力於卓越的技術研發與精密光學塑膠鏡頭的製造，成為全球最大手機鏡頭廠之一。",
+            official_domains={"largan.com.tw"},
+            expect_v1=True,
+            expect_v2=False,
+        ),
+        dict(
+            name="大立光(3008) 真實供應商語氣句二：含反向排除詞「應用於」",
+            url="https://www.largan.com.tw/tw",
+            sentence="我們的產品廣泛應用於手機、平板、筆電、汽車等多元領域，為行動科技提供卓越的影像體驗。",
+            official_domains={"largan.com.tw"},
+            expect_v1=False,
+            expect_v2=False,
+        ),
     ]
+
+    # 驗收案例（前3條）用單一expect欄位；新增的v2詞庫驗證案例（後2條）v1/v2
+    # 預期不同，改用expect_v1/expect_v2。統一補齊expect_v1/expect_v2方便下面
+    # 迴圈一致處理，同時保留舊有expect欄位供驗收案例段落沿用。
+    for c in cases:
+        if "expect_v1" not in c:
+            c["expect_v1"] = c["expect"]
+        if "expect_v2" not in c:
+            c["expect_v2"] = c["expect"]
 
     print("=== v1（PENDING_QUEUE.md 原版規則）===")
     v1_pass = True
     for c in cases:
         got = classify_sentence_v1_original(c["url"], c["sentence"], c["official_domains"])
-        ok = got == c["expect"]
+        ok = got == c["expect_v1"]
         v1_pass = v1_pass and ok
-        print(f"[{'OK' if ok else 'FAIL'}] {c['name']}: 判定={got} 預期={c['expect']}")
+        print(f"[{'OK' if ok else 'FAIL'}] {c['name']}: 判定={got} 預期={c['expect_v1']}")
 
     print()
     print("=== v2（本輪新增：加正向供應語意 + 內部自用排除）===")
@@ -187,9 +217,9 @@ if __name__ == "__main__":
         got = classify_sentence_v2_with_positive_signal(
             c["url"], c["sentence"], c["official_domains"]
         )
-        ok = got == c["expect"]
+        ok = got == c["expect_v2"]
         v2_pass = v2_pass and ok
-        print(f"[{'OK' if ok else 'FAIL'}] {c['name']}: 判定={got} 預期={c['expect']}")
+        print(f"[{'OK' if ok else 'FAIL'}] {c['name']}: 判定={got} 預期={c['expect_v2']}")
 
     print()
     print(f"結論：v1 通過驗收案例＝{v1_pass}（預期 False，證實原版規則有漏洞）")
@@ -222,4 +252,23 @@ if __name__ == "__main__":
     print("     但0筆通過build_themes.py完整A/C級判定關卡（句型比對關卡已擋下）。")
     print("     仍缺：語料池僅796則規模尚小，語料池擴大後應重跑複查；7個跨題材重複")
     print("     關鍵詞需人工複查是否為刻意設計。")
-    print("  4. v2 的正向供應語意詞清單需要用更多真實案例擴充驗證，目前只驗證了 3 句")
+    print("  4.【2026-09-15假設佇列第九輪部分完成】v2的正向供應語意詞清單擴充驗證：")
+    print("     用WebFetch實際讀取大立光(3008,largan.com.tw)官網首頁，新增2句真實")
+    print("     供應商語氣句子（見cases清單），驗證從3句擴大到5句。**發現兩個誠實")
+    print("     記錄、本輪未動手修的缺口**（先驗證、不隨手改詞庫，避免無查核擴張）：")
+    print("     (a) 句一「...精密光學塑膠鏡頭的製造，成為全球最大手機鏡頭廠之一」")
+    print("     不含任何POSITIVE_SUPPLY_WORDS（供應/出貨/銷售/外銷/接單/營收占比/")
+    print("     主力產品/主要產品/領導廠商/解決方案供應/量產出貨），v2判False，")
+    print("     但這是真實供應商在描述自己產品——v2比v1更嚴格但詞庫覆蓋不足時會把")
+    print("     真陽性擋掉（型態：「致力於...製造，成為...廠商/廠」這種泛用敘述")
+    print("     句型，目前詞庫只收窄義動詞，沒收廣義「製造/廠」）。")
+    print("     (b) 句二「我們的產品廣泛應用於手機、平板...」含反向排除詞「應用於」，")
+    print("     v1/v2皆判False。但這句文法上是公司在描述**自己產品**的應用範圍")
+    print("     （賣家語氣），跟REVERSE_EXCLUSION_WORDS原意想擋的「被應用於/採用」")
+    print("     （買家語氣）是同一個詞、不同語法角色，PENDING_QUEUE.md原版四條規則")
+    print("     本身就有這個歧義，不是v2新引入的錯誤。")
+    print("     兩個發現都只記錄不動手修，因為：擴大POSITIVE_SUPPLY_WORDS或改動")
+    print("     REVERSE_EXCLUSION_WORDS都需要更多真實案例才能判斷新詞會不會引入")
+    print("     反效果（過寬），且反向排除清單是PENDING_QUEUE.md原文四條規則本身，")
+    print("     改動它屬於規則層級變更，留給下一輪或總司令裁示。目前仍只驗證5句，")
+    print("     距離「更多真實案例」的目標仍有距離，下一輪可視情況再擴充。")
