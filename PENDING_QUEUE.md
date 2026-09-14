@@ -1666,7 +1666,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 - [x] **Cybex.#56** ~~融資餘額成長率離散度~~ **已撤案，不測**（2026-09-07 依 Cowork.更正1 的條件判定：MI_MARGN 是全市場加總無逐檔、與已 FAIL 的 #26 三維度只變一個；逐檔替代來源僅 250 檔且已由 #30 挖過並 FAIL。復活條件見 `research/HYPOTHESIS_QUEUE.md` #56 節）
 - [x] **Cybex.#57** ~~全市場當沖比重速度~~ **已結案：FAIL**（2026-09-08，補勾非新工作）。逐檔當沖來源三來源查證後完成回填，GATE_SEQUENCE第2關隨機控制組四項判定全數未過，見`STRATEGY_GRAVEYARD.md`／`TRIALS_LEDGER.md`#201。**#53/#54/#55/#57四條全數FAIL、#56撤案，「市場總開關假設軸」家族正式結案：0勝5敗**（`research/HYPOTHESIS_QUEUE.md` 7218~7226行）。
 - [x] **Cybex.引擎** ~~三個 on-window 引擎改動（進場/出場延遲確認、總開關重開確認期）~~ **已完成：結案FAIL**（2026-09-15 開發佇列自走輪）。新增`research/timing_overlay_engine.py`（`apply_confirmed_switch()`，threshold=0.5/entry_delay=3/exit_delay=3/reopen_cooldown=5，事前固定不掃描，5項自測全過）套用於`#53`（唯一走到控制組關卡才落敗、其餘#54/#55/#57死在更早sanity），重跑同一套`control_group_standard.evaluate_vs_control()`控制組框架：level/vel兩規格×TRAIN/VAL共4項判定全數FAIL（詳見`research/HYPOTHESIS_QUEUE.md`「Cybex.引擎」條目、`STRATEGY_GRAVEYARD.md`同名條目、`TRIALS_LEDGER.md`#242）。**結論**：執行時機降噪未能救回#53，確認死因是percentile線性映射構造本身對雜訊敏感，不是翻轉頻率問題——這對下一項`Cybex.beta`是重要提醒：若沿用同一套映射構造會面臨同一個已證實缺陷。
-- [ ] **Cybex.beta** score_longonly_v1 擇時版本（對照組：同曝險買進持有＋隨機同頻率開關，六關）
+- [!] **Cybex.beta** score_longonly_v1 擇時版本（對照組：同曝險買進持有＋隨機同頻率開關，六關）　**⛔ 自走中止（2026-09-15 06:25）**：Cybex.beta（score_longonly_v1擇時版本）原話指定用「上述總開關」做擇時，但同一輪剛完成的Cybex.引擎已證實那個總開關構造（f(z)=1-z percentile線性映射）就算加了進場/出場延遲確認+重開冷卻期，仍4/4輸給隨機控制組（TRIALS_LEDGER#242）——不是執行時機問題，是映射構造本身對雜訊敏感。繼續照原話用同一構造等於明知會輸還硬做；換一個不同的映射/訊號構造方法，是需要總司令裁示的架構選擇（alpha-app/CLAUDE.md「提案先於執行」：做法有多種選擇需要判斷取捨時應先提案，不得自行判斷已交辦）。需要總司令裁示：(a)是否核准改用其他映射構造(需再提具體方案)、(b)是否仍要用已知會輸的構造跑完六關只為留紀錄、或(c)跳過Cybex.beta先做佇列其他項目。
 
 ---
 
