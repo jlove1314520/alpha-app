@@ -40,6 +40,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -306,8 +307,10 @@ def build_prompt() -> int:
     fails = st.get(key, {}).get("fails", 0)
     prev = f"\n注意：這一項已經連續失敗 {fails} 次。再失敗一次就會被標成阻塞交給總司令，" \
            f"所以這一輪先把「為什麼失敗」查清楚再動手。\n" if fails else ""
+    cycle_id = os.environ.get("ALPHA_CYCLE_ID", "unknown")
 
     prompt = f"""全程繁體中文。你是 Alpha 專案的開發佇列自走輪次（無人值守，沒有人在旁邊看）。
+這一輪的 cycle_id 是 `{cycle_id}`（這是實際值，不是佔位符，直接照抄）。
 
 ## 這一輪要做的事
 `C:\\alpha\\alpha-app\\PENDING_QUEUE.md` 頂端「執行順序（權威清單）」取到的下一項：
@@ -325,6 +328,10 @@ commit**，不要把好幾項混在同一個 commit 裡。
    最後一步必須重啟服務並跑四步驗證（重啟→比對 build sha→OPTIONS 預檢→stale_process=false）。
 4. 做完一項就把 PENDING_QUEUE 那一行從 `- [ ]` 改成 `- [x]` 並補上做了什麼、證據是什麼。
 5. 更新 `PROGRESS.md`（最新的寫最上面），然後 commit + push。
+6. **每個 commit 訊息最後一行加 `DevQueue-Cycle: {cycle_id}`**（2026-09-15 總司令
+   交辦：這樣他從 `dev_queue_cycle.log` 看到 cycle_id 就能直接對回是哪個 commit
+   做的，不用去猜時間戳）——本輪做好幾項、好幾個 commit 的話，每個都要加這行，
+   不是只加在最後一個。
 
 ## 遇到這三種情況立刻停，不要硬做
 - 需要總司令親自操作（登入、實機測試、花錢、要他裁示）
