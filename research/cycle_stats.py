@@ -11,6 +11,9 @@
   read_bytes_by_tool  {Read: x, Bash: y, Grep: z, ...}
   biggest_reads 前5大單筆 tool_result（工具、檔案/指令、位元組）
   usage         input/cache_creation/cache_read/output tokens
+  seven_day_utilization / five_hour_utilization
+                帳號用量（來自 rate_limit_event，2026-09-15 額度感知節流新增，
+                供 quota_throttle.py 判斷是否接近週限額；沒出現過就是 None）
 --write-last 會把結果併入 research/data/marathon_cycle_last.json（ps1 呼叫時用）。
 """
 from __future__ import annotations
@@ -26,7 +29,14 @@ LAST_PATH = RESEARCH / "data" / "marathon_cycle_last.json"
 def analyze(path: Path) -> dict:
     out = {"reason": "UNKNOWN", "cost_usd": None, "num_turns": None, "duration_min": None,
            "read_bytes": 0, "read_bytes_by_tool": {}, "biggest_reads": [], "usage": None, "subtype": None,
-           "events": 0, "tool_uses": 0}
+           "events": 0, "tool_uses": 0,
+           # 2026-09-15（額度感知節流，總司令交辦）新增：帳號用量，來自
+           # rate_limit_event，供 quota_throttle.py 判斷是否接近週限額。
+           # 「這一輪有沒有真的產出」不用這支檔案判斷（commit本身每輪都會
+           # 發生，連純登記STATE.md都算一次commit，無法用來分辨有沒有實質
+           # 進度）——quota_throttle.py 改用 TRIALS_REGISTRY.jsonl 有沒有
+           # 在時間窗內被更新來判斷，見該檔案註解。
+           "seven_day_utilization": None, "five_hour_utilization": None}
     pending: dict[str, tuple[str, str]] = {}  # tool_use_id -> (tool name, short input)
     reads: list[tuple[int, str, str]] = []
     if not path.exists():
@@ -42,7 +52,15 @@ def analyze(path: Path) -> dict:
             continue
         out["events"] += 1
         t = d.get("type")
-        if t == "assistant":
+        if t == "rate_limit_event":
+            windows = ((d.get("rate_limit_info") or {}).get("unifiedWindows") or {})
+            sd = windows.get("seven_day", {}).get("utilization")
+            fh = windows.get("five_hour", {}).get("utilization")
+            if sd is not None:
+                out["seven_day_utilization"] = sd
+            if fh is not None:
+                out["five_hour_utilization"] = fh
+        elif t == "assistant":
             for c in d.get("message", {}).get("content", []):
                 if c.get("type") == "tool_use":
                     out["tool_uses"] += 1
