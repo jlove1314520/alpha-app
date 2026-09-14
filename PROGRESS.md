@@ -1,3 +1,27 @@
+## 2026-09-15（無人值守開發佇列自走）金流一.2完成：上櫃三大法人回補≥250個交易日
+
+戴**維運帽**（純資料回補，沿用既有可中斷續跑腳本，不涉策略判斷）。
+依`PENDING_QUEUE.md`「執行順序（權威清單）」取件，本輪項目為**金流一.2**。
+
+**做了什麼**：`research/backfill_tpex_3insti.py`與`research/tpex_3insti_client.py`
+（呼叫`www.tpex.org.tw/www/zh-tw/insti/dailyTrade`官方端點）在先前輪次已寫好且
+已回補179天，本輪只需執行`python research/backfill_tpex_3insti.py --batch-size 300`
+續跑：待補111個交易日全數成功（其中4天為非交易日的正常空回應，照設計快取成空
+DataFrame不重打），累積快取**290個檔案**（2025-08-11～2026-09-15），其中有實際
+資料的交易日**270天**，超過目標250天。過程中沒有觸發`TPExBlockedError`（反爬蟲
+封鎖偵測），全程遵守速率限制（間隔2秒/次、單批300次上限）。
+
+**驗證**：`node scripts/smoke_test.mjs` 45/46 PASS。唯一FAIL是既有、與本項無關的
+`#39 資料一致性稽核閘門`（違規率12.53%），`PROGRESS.md`多次先前commit（含
+2026-09-14前）已記錄同一數字，本項只新增`research/data/raw_tpex_3insti/`底下的
+parquet快取檔（該資料依`tpex_3insti_client.py`檔頭說明只餵`data/sector_flow.json`，
+不接入任何回測/因子loader，也不在被稽核的JSON範圍內），未改動任何被稽核檔案。
+
+**下一步**：`PENDING_QUEUE.md`已將該行從`- [ ]`改成`- [x]`並附證據。依權威清單
+順序，下一項是**建置一.2 [產品]**。
+
+---
+
 ## 2026-09-15（無人值守自走・交辦優先執行紀錄）【題材七】待辦1完成：company_info.json補官方網址欄位
 
 戴**研究帽**。依總司令「交辦優先於自走」裁示，開工先讀`PENDING_QUEUE.md`，
