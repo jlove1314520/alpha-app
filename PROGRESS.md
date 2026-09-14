@@ -1,3 +1,49 @@
+## 2026-09-15（無人值守自走・交辦優先執行紀錄）【題材七】待辦1完成：company_info.json補官方網址欄位
+
+戴**研究帽**。依總司令「交辦優先於自走」裁示，開工先讀`PENDING_QUEUE.md`，
+判定【題材七】仍有部分完成待續交辦——待辦3已於上一輪（假設佇列第七輪）
+完成5/5家，本輪做待辦1：把公司官方網址正式補進`company_info.json`（先前
+只有7家人工核實種子清單，覆蓋率遠不到259家D級候選規模）。
+
+**做了什麼**：新增`research/build_company_official_websites.py`，改用**官方
+公開端點**（符合「取得方式鐵律」，不爬蟲）：
+- 上市：TWSE openapi `t187ap03_L`（1094檔有網址）
+- 上櫃：TPEx openapi `mopsfin_t187ap03_O`（891檔有網址）
+- 興櫃：TPEx openapi `mopsfin_t187ap03_R`（363檔有網址）
+
+三來源公司代號互不重疊（已實測驗證），直接合併寫入`company_info.json`
+每檔的`official_website`（原始網址）、`official_domain`（正規化裸網域，
+去scheme/去開頭www.，供`theme_official_site_matcher.py`的`official_domains`
+參數直接用）、`official_website_source`（標記來源）三個新欄位。
+3137檔中**2342檔**補上網址（74.6%），其餘795檔多為ETF/債券/已下市證券，
+MOPS基本資料本來就沒有這欄，誠實留空、不瞎猜。
+
+**過程中修一個真bug**：MOPS上櫃資料裡有2筆網址用全形冒號（`http：//...`），
+`urlparse`直接丟`ValueError`把整支程式炸掉；已在`normalize_domain()`加
+全形冒號/全形空白正規化，其餘解析失敗一律誠實回`None`跳過，不放寬邏輯
+掩蓋問題。
+
+**驗證**：與既有`data/company_official_domains_seed.json`9家人工核實種子
+比對，7家完全一致（tsmc.com/mpi.com.tw/kyec.com.tw/uni-president.com.tw/
+highwealth.com.tw/evergreen-marine.com/lyls.com.tw），2家網域字面不同但
+非錯誤（2317鴻海MOPS登記honhai.com、種子清單用消費品牌站foxconn.com；
+3130一零四MOPS登記corp.104.com.tw、種子清單用104人力銀行消費站
+104.com.tw——皆同集團不同官方網域，保留MOPS官方登記值，未覆寫種子清單）。
+`python research/theme_official_site_matcher.py`、
+`python research/theme_official_site_negative_control.py`重跑既有單元
+測試全部OK（旺矽正例、京元電兩反例、5家負對照組跨題材命中皆0），無回歸。
+
+**仍未做**：待辦2（259家D級候選全量抓取官網內容，這是「抓網址」跟「抓
+內容判定證據」的差異，待辦1解決前者，待辦2解決後者，兩者不可互相取代）、
+待辦4（v2正向供應語意詞清單擴充驗證＋123題材全面跨行業誤判掃描）。
+
+影響檔案：新增`research/build_company_official_websites.py`；更新
+`data/company_info.json`（2342檔新增三欄位＋meta記錄）、
+`research/theme_official_site_matcher.py`（僅main區塊待辦說明文字）、
+`PENDING_QUEUE.md`（狀態更新）。
+
+---
+
 ## 2026-09-15（假設佇列自走・第七輪，交辦優先）【題材七】待辦3補齊5/5家負對照組＋抓到一個真實bug
 
 戴**研究帽**。依總司令「交辦優先於自走」裁示，開工先讀`PENDING_QUEUE.md`，

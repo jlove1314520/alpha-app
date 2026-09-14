@@ -14,6 +14,35 @@
 
 ---
 
+## 2026-09-15（無人值守自走・交辦優先執行紀錄）
+
+開工先讀本檔最上方紀錄：兩條阻塞項（S4U／claude CLI非互動驗證）維持阻塞、
+【題材七】上一輪（假設佇列第七輪）留下的是待辦1（company_info.json補官網
+欄位）、待辦2（259家抓取）、待辦4（v2詞庫擴充）三項未做（待辦3已完成5/5家）。
+本輪判定待辦1是可收斂在一個有界工作單位內的下一步。
+
+- 【題材七】待辦1完成：新增`research/build_company_official_websites.py`，
+  用TWSE `t187ap03_L`（上市）／TPEx `mopsfin_t187ap03_O`（上櫃）／
+  `mopsfin_t187ap03_R`（興櫃）三個官方開放資料端點（符合取得方式鐵律，
+  非爬蟲），把`official_website`／`official_domain`／`official_website_source`
+  三欄位補進`data/company_info.json`，3137檔中2342檔（74.6%）補上官網
+  （其餘為ETF/債券/已下市證券，MOPS本來就沒有這欄，誠實留空）。過程中
+  修正一個真bug：MOPS上櫃資料2筆網址用全形冒號，`urlparse`會直接拋
+  `ValueError`，已修正正規化函式處理已知的來源端資料品質問題，其餘解析
+  失敗一律誠實回None。與既有9家人工核實種子清單比對，7家完全一致、2家
+  網域字面不同但非錯誤（同集團不同官方網域，保留MOPS官方登記值）。
+  `python research/theme_official_site_matcher.py`與
+  `python research/theme_official_site_negative_control.py`皆正常執行，
+  既有單元測試與5家負對照組無回歸。細節見`PROGRESS.md`對應節。**仍未做**：
+  待辦2（259家D級候選抓官網內容管線）、待辦4（v2詞庫擴充＋123題材全面
+  跨行業誤判掃描）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，等待
+總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2、待辦4仍
+未做，下一輪繼續；待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第七輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄：兩條阻塞項
