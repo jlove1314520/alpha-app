@@ -4,16 +4,17 @@
     "note": "這不是company_info.json的正式官網欄位管線（那個管線尚未建，見research/theme_official_site_matcher.py main區塊待辦1）。這裡只先手動核實少數已在單元測試/驗收案例中出現、或屬於眾所皆知大型股的公司官網主網域，供research/theme_official_site_matcher.py下一步擴大負對照組測試時直接引用，不必每次現查。",
     "source": "公司官網首頁自行核對（人工確認網域，非爬蟲取得，未涵蓋259家D級候選）",
     "generated_at": "2026-09-15",
-    "coverage": "8家，涵蓋2個驗收案例正例反例＋3個計畫中的負對照組候選（食品/營建/航運各一）",
-    "warning": "此清單不得直接當成259家全量抓取管線的替代品；下一輪若要擴大負對照組或正式接管線，仍需按research/theme_official_site_matcher.py待辦清單逐步做"
+    "coverage": "7家，涵蓋2個驗收案例正例反例＋3個計畫中的負對照組候選（食品/營建/航運各一）",
+    "warning": "此清單不得直接當成259家全量抓取管線的替代品；下一輪若要擴大負對照組或正式接管線，仍需按research/theme_official_site_matcher.py待辦清單逐步做",
+    "correction_2026-09-15": "本輪（負對照組實測）發現2542興富發原記錄的official_domain『sunfar.com.tw』是錯的——WebFetch該網域回傳SSL憑證錯誤，WebSearch三方交叉查證（1111人力銀行/維基百科/興富發官網搜尋結果）確認sunfar.com.tw實際是『順發3C』（3C零售商，與興富發建設無任何關係），興富發官方網域是highwealth.com.tw（另有集團站highwealthgroup.com.tw）。已更正，記錄此教訓：本清單的『人工核對』步驟在上一輪只核對過網域字面像不像公司名稱簡稱，沒有實際打開網站確認內容，這次是實測才抓到的錯誤，往後同類種子清單建立時應以實際能載入且內容相符的頁面為準，不能只憑網域字面猜測。"
   },
   "companies": {
     "2330": {"name": "台積電", "official_domain": "tsmc.com", "note": "驗收用大型股，未涉入題材七正反例測試"},
     "2317": {"name": "鴻海", "official_domain": "foxconn.com", "note": "驗收用大型股，未涉入題材七正反例測試"},
     "6223": {"name": "旺矽", "official_domain": "mpi.com.tw", "note": "題材七驗收案例正例：探針卡供應商，已用於單元測試"},
     "2449": {"name": "京元電", "official_domain": "kyec.com.tw", "note": "題材七驗收案例反例：測試代工廠，自製探針卡供內部使用，不得標成探針卡供應商，已用於單元測試"},
-    "1216": {"name": "統一", "official_domain": "uni-president.com.tw", "note": "計畫中負對照組候選：食品業，與七大題材（探針卡等半導體供應鏈題材）無關"},
-    "2542": {"name": "興富發", "official_domain": "sunfar.com.tw", "note": "計畫中負對照組候選：營建業，與七大題材無關"},
-    "2603": {"name": "長榮", "official_domain": "evergreen-marine.com", "note": "計畫中負對照組候選：航運業，與七大題材無關"}
+    "1216": {"name": "統一", "official_domain": "uni-president.com.tw", "note": "計畫中負對照組候選：食品業，與七大題材（探針卡等半導體供應鏈題材）無關。2026-09-15已跑負對照組實測，見theme_official_site_negative_control.py"},
+    "2542": {"name": "興富發", "official_domain": "highwealth.com.tw", "note": "計畫中負對照組候選：營建業，與七大題材無關。official_domain於2026-09-15更正（原sunfar.com.tw是誤植，實為無關第三方公司順發3C，見meta.correction_2026-09-15）"},
+    "2603": {"name": "長榮", "official_domain": "evergreen-marine.com", "note": "計畫中負對照組候選：航運業，與七大題材無關。2026-09-15已跑負對照組實測，見theme_official_site_negative_control.py"}
   }
 }

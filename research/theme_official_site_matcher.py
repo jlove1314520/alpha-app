@@ -106,6 +106,15 @@ def classify_sentence_v1_original(
     """PENDING_QUEUE.md 原版四條規則（1,2,4 併入呼叫端，這裡只做 1+2+3）。
 
     回傳 True＝判定為 A 級證據（會被 build_themes.py 採用）。
+
+    **使用前提（2026-09-15 負對照組實測發現，接管線時務必遵守）**：
+    這個函式**不做關鍵詞比對**，只判斷「這個來源夠不夠格當A級證據」，
+    不判斷「這句話講的是不是這個題材」。呼叫端必須先用題材關鍵詞
+    （`data/seed/theme_keywords.json`）比對過這句話確實含某題材的關鍵詞，
+    才呼叫這個函式問「這個來源可信嗎」。如果對任何官網句子（不管有沒有
+    先做關鍵詞比對）直接呼叫這個函式，任何一句官網文字都會被判成A級證據
+    （見`theme_official_site_negative_control.py`實測：長榮官網一句完全
+    不含任何題材關鍵詞的句子，直接呼叫本函式仍回傳True）。
     """
     if not host_matches_official(url, official_domains):
         return False
@@ -188,7 +197,13 @@ if __name__ == "__main__":
     print()
     print("下一輪待辦（本輪未做，範圍超出一個有界工作單位）：")
     print("  1. company_info.json 補公司官方網址欄位（來源：MOPS t187ap03_L 或公司年報）")
+    print("     ——已有7家人工核實種子清單data/company_official_domains_seed.json可先參考")
     print("  2. 抓取管線：對 259 家 D 級候選逐一抓官網頁面（含 7 家連不上重試、")
     print("     3017 這類 JS 渲染站記 blocked_js_render 跳過，不裝無頭瀏覽器）")
-    print("  3. 負對照組：5 家明確與七大題材無關的公司（食品/營建/航運）跑 v2，期望命中 0")
+    print("  3. 【2026-09-15已完成3/5家】負對照組見theme_official_site_negative_control.py：")
+    print("     1216統一/2542興富發/2603長榮跑123題材關鍵詞，跨題材意外命中=0（PASS）。")
+    print("     過程中發現並更正一個真實bug（種子清單2542的official_domain原誤植為")
+    print("     無關第三方公司『順發3C』的網域）；並確認classify_sentence_v1/v2的")
+    print("     使用前提（呼叫端須先做關鍵詞比對，這兩個函式本身不做），已記錄進函式")
+    print("     docstring。仍缺：另外2家負對照組、更嚴謹的跨行業關鍵詞誤判掃描。")
     print("  4. v2 的正向供應語意詞清單需要用更多真實案例擴充驗證，目前只驗證了 3 句")
