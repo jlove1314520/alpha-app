@@ -1762,7 +1762,23 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 
 - [ ] **轉向.二** 新假設 #50／#51／#52 規格與資料可行性查證（#49 照既有設計續跑）
 - [x] **轉向.三** 誠實判斷點寫進 MARATHON_PROTOCOL（2026-09-07 完成）
-- [ ] **轉向.四** 每條新假設成績（含 FAIL）進 `data/signal_status.json`（與源頭一.4 同一份檔）
+- [x] **轉向.四** 每條新假設成績（含 FAIL）進 `data/signal_status.json`（與源頭一.4 同一份檔）
+  （2026-09-15完成：**現況查核**——`research/build_signal_status.py`「每次
+  有新結果就手動新增一筆再重跑」這個機制本身自2026-09-07裁示後就已經是
+  持續在做的標準做法（#49~#69共20條方向皆已收錄），本項真正欠缺的是
+  比對`STRATEGY_GRAVEYARD.md`/`HYPOTHESIS_QUEUE.md`後找到的**一個遺漏**：
+  `#70`（選擇權波動度偏斜Volatility Skew，2026-09-10已FAIL結案，
+  `TRIALS_LEDGER.md`#241）沒有被收進`data/signal_status.json`（該檔案
+  `generated_at`是2026-09-10T13:44，早於#70結案時間，是單純的時序遺漏）。
+  已補上該條目（含死因/不泛化聲明/refs，格式比照既有條目），重跑
+  `build_signal_status.py`後方向數20→21。查核`#71`（減資公告事件效應，
+  2026-09-10新增）現況仍是「尚未開始第1關」，沒有成績可記，依規則不需要
+  現在建立條目（跟`#50`那種「有明確blocked_by原因」的NOT_STARTED不同，
+  #71只是排隊中，尚無結果）。驗證：`python -c "import json;..."`確認
+  JSON合法且含21條方向、id含'70'；`node scripts/smoke_test.mjs`43/44 PASS
+  （#39既有已知紅燈，與本項無關）。**下一次hypothesis_queue馬拉松輪次
+  產生新結果時，比照本項機制繼續append，不需要每次都額外開一個PENDING_
+  QUEUE項目來提醒，這已是常規動作。**）
 
 ---
 

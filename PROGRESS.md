@@ -1,3 +1,39 @@
+## 2026-09-15（無人值守開發佇列自走）轉向.四：補#70進signal_status.json，確認「新假設成績含FAIL都要公開」機制持續運作
+
+依`PENDING_QUEUE.md`權威清單取件，深讀五做完後的下一項是**轉向.四**
+（總司令2026-09-07【0a節】裁示原話第四點：「每一條新假設的成績（含FAIL）
+都要進signal_status.json，將來在App上對使用者公開」）。
+
+**查核結果**：這個機制本身不是空白——`research/build_signal_status.py`
+「有新結果就手動append再重跑」的做法自2026-09-07起已持續執行了20條方向
+（#49~#69）。比對`STRATEGY_GRAVEYARD.md`/`HYPOTHESIS_QUEUE.md`後找到
+**一個真正的遺漏**：`#70`（選擇權波動度偏斜Volatility Skew）已於
+2026-09-10 FAIL結案（`TRIALS_LEDGER.md`#241：TRAIN期方向與事前綁定完全
+相反且高度顯著、VAL期雖轉負但train/val正負號不一致，依「不給方向彈性」
+鐵律判FAIL），但`data/signal_status.json`的`generated_at`（2026-09-10
+13:44）早於#70結案時間，這是單純的時序遺漏，不是機制失效。
+
+**做了什麼**：在`build_signal_status.py`的`DIRECTIONS`新增`#70`條目
+（狀態FAIL、死因、不泛化聲明——同源TXO選擇權訊號中#31曾CHEAP_PASS、
+#35/#69皆FAIL但方向未反轉，#70是唯一出現train/val系統性方向反轉的，
+死的是「put_iv−call_iv水位＋固定5%名目OTM距離」這個具體構造——、refs
+指向`TRIALS_LEDGER.md`#241與`STRATEGY_GRAVEYARD.md` #70），重跑腳本後
+`data/signal_status.json`方向數20→21。
+
+**順帶查核`#71`**（減資公告事件效應，2026-09-10新增）現況是「尚未開始
+第1關」，沒有成績可記，依規則不需要現在建立條目（跟`#50`那種有明確
+`blocked_by`原因的`NOT_STARTED`不同，#71只是排隊中）。
+
+**驗證**：`python -c "import json；..."`確認JSON合法、21條方向、含id
+`'70'`；`node scripts/smoke_test.mjs` 43/44 PASS（#39資料一致性稽核閘門
+既有已知紅燈，與本項無關）。純資料檔+腳本小幅新增，未動`index.html`。
+
+**下一步**：往後hypothesis_queue馬拉松每產生新結果時，比照這個機制繼續
+append，這已是常規動作，不需要每次都另開PENDING_QUEUE項目提醒。繼續依
+權威清單下一項：**源頭二.1**。
+
+---
+
 ## 2026-09-15（無人值守開發佇列自走）深讀五：真錢閘門四道屏障＋兩級kill＋30天執行品質五題＋滑價分段記錄
 
 依`PENDING_QUEUE.md`「執行順序（權威清單）」取件，本輪做**深讀五**（總司令

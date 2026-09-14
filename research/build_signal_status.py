@@ -544,6 +544,37 @@ DIRECTIONS = [
             "docs": ["HYPOTHESIS_QUEUE.md #69", "STRATEGY_GRAVEYARD.md option_oi_pcr_gate69"],
         },
     },
+    {
+        "id": "70",
+        "name": "選擇權波動度偏斜（Volatility Skew）／尾部風險避險需求訊號",
+        "status": "FAIL",
+        "concluded_at": "2026-09-10",
+        "note": (
+            "非0a節四條方向之一（屬HYPOTHESIS_QUEUE.md第⑱類機制，與已測的"
+            "同源TXO選擇權訊號#31成交量PCR/#35 ATM層級VRP/#69未平倉量PCR"
+            "皆不同——本假設測價外賣權相對價外買權的隱含波動度價差），"
+            "比照#62先例一併寫入本檔公開，避免遺失。"
+        ),
+        "summary": (
+            "訊號=put_iv-call_iv（OTM put減OTM call隱含波動度），事前綁定"
+            "skew越陡代表下檔避險需求越濃、後續報酬應越差（負向IC，比照"
+            "Xing et al. 2010原文獻方向）。TRAIN期方向與事前綁定完全相反"
+            "且高度顯著（N=5 r=+0.1914 p=0.0000 percentile=100.0；N=20 "
+            "r=+0.3425 p=0.0000 percentile=100.0），VAL期方向雖轉負"
+            "（N=5 r=-0.0458 percentile=83.6未過門檻；N=20 r=-0.1823 "
+            "percentile=100.0），但train/val正負號相反，依「不給方向"
+            "彈性」鐵律直接判FAIL，不因VAL單期好看而放行。不泛化為"
+            "「選擇權市場資訊對台股完全無效」——同源TXO訊號中#31曾"
+            "CHEAP_PASS、#35/#69皆FAIL但未出現方向反轉，#70是唯一出現"
+            "train/val系統性方向反轉的，死的是「put_iv−call_iv水位＋"
+            "固定5%名目OTM距離」這個具體構造，未測其他OTM距離口徑或"
+            "25-delta動態篩選。"
+        ),
+        "refs": {
+            "trials_ledger": ["#241"],
+            "docs": ["HYPOTHESIS_QUEUE.md #70", "STRATEGY_GRAVEYARD.md #70"],
+        },
+    },
 ]
 
 
