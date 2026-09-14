@@ -1660,12 +1660,12 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   phase_sensitivity_grid.csv`。本輪只補標記，未變動任何計算，因程式碼與資料
   皆與前次提交時一致（`git status` 乾淨）。本項工作已完整存在，PENDING_QUEUE
   之前漏勾。）
-- [ ] **Cybex.#53** 全市場報酬離散度速度（水位版 vs 速度版對照）
-- [ ] **Cybex.#54** 成交值集中度速度
-- [ ] **Cybex.#55** 三大法人買賣超廣度速度（廣度＝家數占比非金額）
+- [x] **Cybex.#53** ~~全市場報酬離散度速度（水位版 vs 速度版對照）~~ **已結案：FAIL**（2026-09-08，本項核對時發現`research/HYPOTHESIS_QUEUE.md`早已結案但本清單未同步勾選，此為補勾非新工作）。GATE_SEQUENCE 第2關隨機控制組未過（level/vel兩規格 TRAIN/VAL 皆未嚴格贏過 circular_shift/block_shuffle 控制組最大值），見`STRATEGY_GRAVEYARD.md`／`TRIALS_LEDGER.md`#194。
+- [x] **Cybex.#54** ~~成交值集中度速度~~ **已結案：FAIL**（2026-09-08，補勾非新工作）。第1關sanity危機窗口與前瞻報酬方向皆與事前綁定方向相反，見`TRIALS_LEDGER.md`#195；與#53相關係數+0.05~+0.06，確認非同家族。
+- [x] **Cybex.#55** ~~三大法人買賣超廣度速度（廣度＝家數占比非金額）~~ **已結案：FAIL**（2026-09-08，補勾非新工作）。第1關sanity，tertile前瞻報酬方向level/vel兩版皆與事前綁定方向相反，見`STRATEGY_GRAVEYARD.md`／`TRIALS_LEDGER.md`#198；與#53/#54相關係數皆<0.7。
 - [x] **Cybex.#56** ~~融資餘額成長率離散度~~ **已撤案，不測**（2026-09-07 依 Cowork.更正1 的條件判定：MI_MARGN 是全市場加總無逐檔、與已 FAIL 的 #26 三維度只變一個；逐檔替代來源僅 250 檔且已由 #30 挖過並 FAIL。復活條件見 `research/HYPOTHESIS_QUEUE.md` #56 節）
-- [ ] **Cybex.#57** 全市場當沖比重速度　**規格已重寫，前置未備**：TWTASU 快取只有全市場加總無逐檔，開跑前要先完成逐檔當沖來源的三來源查證與回填（見 `research/HYPOTHESIS_QUEUE.md` #57 節）
-- [ ] **Cybex.引擎** 三個 on-window 引擎改動（進場/出場延遲確認、總開關重開確認期）
+- [x] **Cybex.#57** ~~全市場當沖比重速度~~ **已結案：FAIL**（2026-09-08，補勾非新工作）。逐檔當沖來源三來源查證後完成回填，GATE_SEQUENCE第2關隨機控制組四項判定全數未過，見`STRATEGY_GRAVEYARD.md`／`TRIALS_LEDGER.md`#201。**#53/#54/#55/#57四條全數FAIL、#56撤案，「市場總開關假設軸」家族正式結案：0勝5敗**（`research/HYPOTHESIS_QUEUE.md` 7218~7226行）。
+- [x] **Cybex.引擎** ~~三個 on-window 引擎改動（進場/出場延遲確認、總開關重開確認期）~~ **已完成：結案FAIL**（2026-09-15 開發佇列自走輪）。新增`research/timing_overlay_engine.py`（`apply_confirmed_switch()`，threshold=0.5/entry_delay=3/exit_delay=3/reopen_cooldown=5，事前固定不掃描，5項自測全過）套用於`#53`（唯一走到控制組關卡才落敗、其餘#54/#55/#57死在更早sanity），重跑同一套`control_group_standard.evaluate_vs_control()`控制組框架：level/vel兩規格×TRAIN/VAL共4項判定全數FAIL（詳見`research/HYPOTHESIS_QUEUE.md`「Cybex.引擎」條目、`STRATEGY_GRAVEYARD.md`同名條目、`TRIALS_LEDGER.md`#242）。**結論**：執行時機降噪未能救回#53，確認死因是percentile線性映射構造本身對雜訊敏感，不是翻轉頻率問題——這對下一項`Cybex.beta`是重要提醒：若沿用同一套映射構造會面臨同一個已證實缺陷。
 - [ ] **Cybex.beta** score_longonly_v1 擇時版本（對照組：同曝險買進持有＋隨機同頻率開關，六關）
 
 ---

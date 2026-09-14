@@ -2280,6 +2280,14 @@ corr_vel=+0.134、#55與#54相關係數corr_level=+0.029/corr_vel=+0.148、#57
 - **家族結論**：**至此`#53～#57`「市場總開關假設軸」家族全數結案：0勝5敗**（#56撤案不計入勝負）。完整家族層級總結見上方「【家族層級】橫斷面離散度速度（台股）」條目，本輪已同步更新為正式結案狀態。
 - **原始記錄**：`TRIALS_LEDGER.md`#201、`HYPOTHESIS_QUEUE.md` #57條目、`day_trading_ratio_dispersion_gate57.py`／`day_trading_ratio_dispersion_gate57_control.py`（新增，可重複執行）、`data/day_trading_ratio_dispersion_gate57.csv`／`data/day_trading_ratio_dispersion_gate57_control_results.csv`（新增）。零新增API呼叫（複用#57第1關sanity既有快取與計算結果）。
 
+## Cybex.引擎：三個on-window執行時機改動套用於#53——2026-09-15結案：FAIL（GATE_SEQUENCE第2關，開發佇列自走輪）
+
+- **假設**：#53「全市場報酬離散度速度」死於控制組，但死法可能是「翻轉太頻繁被雜訊主導」而非訊號構造本身無效；用進場延遲確認（entry_delay=3交易日）、出場延遲確認（exit_delay=3交易日）、總開關重新開啟冷卻期（reopen_cooldown=5交易日）三個執行時機機制降噪，測試是否能讓#53重新贏過控制組。三個參數皆為事前固定的保守小值，不掃描（`research/timing_overlay_engine.py::apply_confirmed_switch()`）。
+- **死因**：GATE_SEQUENCE第2關隨機控制組（完全比照#53既有框架，控制組每次抽樣同步套用同一個延遲確認轉換）。level規格：TRAIN年化Sharpe+0.5580未過控制組最大值+1.5006（percentile=87.3）、VAL+0.7360未過+1.3997（percentile=57.3）。vel規格：TRAIN+0.3780未過+1.4185（percentile=60.0）、VAL+0.7220未過+1.6601（percentile=74.3）。四項判定全數未過。
+- **結論（比#53本身更進一步的診斷）**：執行時機層面的降噪沒有改變結果，說明#53的失敗根因是`f(z)=1-z`percentile線性映射構造本身對雜訊敏感，不是「翻轉太頻繁」這個可以用延遲確認修補的執行層問題——這是兩個不同層次的缺陷，此結果排除了「換個執行方式就能救回#53」的可能性。
+- **對Cybex.beta的參考意義**：`Cybex.beta`（score_longonly_v1擇時版本）若沿用同一套`f(z)=1-z`percentile映射構造做曝險縮放，會面臨同一個已證實的缺陷，應優先評估換一個對雜訊不敏感的映射方式。
+- **原始記錄**：`TRIALS_LEDGER.md`#242、`HYPOTHESIS_QUEUE.md`「Cybex.引擎」條目、`research/timing_overlay_engine.py`（新增，含5項自測）、`research/cybex_engine_on53.py`（新增，可重複執行）、`research/data/cybex_engine_on53_results.csv`（新增）。零新增API呼叫（複用#53既有快取與計算結果）。
+
 ## #58 反向波動度加權投資組合建構（Inverse-Volatility-Weighted Portfolio Construction）——2026-09-08結案：FAIL（GATE_SEQUENCE第2關，馬拉松第443輪TW軌）
 
 - **假設**：`w_{i,t}=(1/σ_{i,t})/Σ_j(1/σ_{j,t})`（`σ`為trailing 60日日報酬標準差），月頻（21交易日）再平衡，跟`#29`共用同一批159檔PIT宇宙（2015-2020）與同一個t0等權重buy-and-hold基準操作化。第1關sanity已PASS（三個期間波動度比值invvol/buyhold皆<1.0：TRAIN 0.7903/VAL 0.7175/FULL 0.7555，加權確實降低組合波動度，前提成立）。

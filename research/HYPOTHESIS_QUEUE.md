@@ -7225,6 +7225,54 @@ Cowork 的指示是「#56 必須明確區別於已 FAIL 的 #26，**若無法區
 
 **#53/#54/#55/#57四條全數FAIL、#56撤案，#53～#57「市場總開關假設軸」家族正式結案：0勝5敗。佇列#1~57全數結案，設計新假設軸#58（見下方新章節）。#58第1關sanity PASS（非最終判定），第2關隨機控制組已於2026-09-08馬拉松第443輪TW軌完成：TRAIN PASS/VAL FAIL，GATE_SEQUENCE要求兩期皆PASS，**#58結案：FAIL**（完整數字見下方#58條目結案段落與`STRATEGY_GRAVEYARD.md`）。佇列#1~58全數結案，下一輪需要判斷新假設方向。**
 
+### Cybex.引擎（三個on-window執行時機改動套用於#53）——2026-09-15 開發佇列自走輪，結案：FAIL
+
+`PENDING_QUEUE.md`【2026-09-07 Cowork 更正一】原話要求「另外補測三個on-window
+引擎改動（Cybex三個都通過，成本極低）：進場延遲確認、出場延遲確認、總開關
+重新開啟確認期」。原始Cybex（加密貨幣）程式碼與確切參數本機查無（已查
+`C:\Users\user\cybex_knowledge_export\`全部檔案，只有移植手冊摘要提及方向，
+沒有這三個機制的原始程式碼與參數），依「拿判斷方法，不拿參數」移植原則
+（`CLAUDE.md`七之三），本輪自行設計一套語意清楚的版本：`research/
+timing_overlay_engine.py::apply_confirmed_switch()`，把連續曝險用固定門檻
+0.5二值化成on/off「總開關」狀態機，entry_delay=3／exit_delay=3個交易日
+才確認切換，off之後reopen_cooldown=5個交易日內強制鎖住不得重開（三個參數
+皆為PENDING_QUEUE原話「成本極低」語境下的保守小值，不掃描、不依資料調整）。
+5項自測（全程on/off、單日雜訊不觸發、連續3天確認觸發、重開冷卻期時序）
+全過，冷卻期是固定天數倒數、不依賴策略績效，`CLAUDE.md`新增第9關
+「absorbing state檢查」自動滿足（結構上必定解除，非聚合統計層面才看得出的
+假保護）。
+
+**受測對象只選#53**：#53～#57「市場總開關假設軸」五條裡，只有#53走到
+GATE_SEQUENCE第2關才落敗（`TRIALS_LEDGER.md`#194），#54/#55/#57死在更早的
+第1關sanity（方向性在sanity就已經反過來），對已經死在sanity的訊號補執行
+時機機制沒有意義，唯一有機會被「降噪/減少翻轉」救回來的只有#53。
+
+**方法論**：完全複用`cross_sectional_dispersion_gate53_control.py`的資料
+（`build_exposure_frame()`）、統計量（年化Sharpe）、TRAIN/VAL切分、控制組
+框架（`control_group_standard.evaluate_vs_control`，circular_shift／
+block_shuffle_5／block_shuffle_20三變體、各N=100）——唯一差異是曝險序列
+先經`apply_confirmed_switch()`轉換，且**控制組每次抽樣都重新套用同一個
+轉換**（比較的是「引擎機制+真實時序對齊」vs「引擎機制+打亂時序對齊」，
+不是引擎機制本身有沒有效果——`research/cybex_engine_on53.py`）。
+
+**結果（誠實FAIL，四項判定全數未過）**：
+- level: TRAIN真實年化Sharpe+0.5580未過控制組最大值+1.5006（percentile=87.3）；
+  VAL+0.7360未過+1.3997（percentile=57.3）。
+- vel: TRAIN+0.3780未過+1.4185（percentile=60.0）；VAL+0.7220未過+1.6601
+  （percentile=74.3）。
+
+**結論**：三個on-window執行時機改動（降噪、減少開關翻轉頻率）沒有改變#53
+在控制組面前的落敗結果——說明#53的失敗根因是`f(z)=1-z`percentile線性映射
+構造本身對雜訊敏感，不是「翻轉太頻繁被雜訊主導」這個執行時機層面的問題，
+兩者是不同層次的缺陷，加執行時機濾網修不了訊號構造本身的缺陷。這與
+`STRATEGY_GRAVEYARD.md`「#53～#57死於同一個具體構造」的既有診斷一致，屬於
+獨立驗證而非重複發現。已用`trial_registry.register_trial()`登記為#242，
+`--check`確認`violations=[]`。完整數字見`research/data/
+cybex_engine_on53_results.csv`。**Cybex.beta（score_longonly_v1擇時版本）
+若要沿用同一套`f(z)=1-z`percentile映射構造，會面臨同一個已證實的缺陷，
+下一輪處理Cybex.beta時應優先評估換一個對雜訊不敏感的映射方式，而非直接
+套用已知會輸給控制組的構造。**
+
 ---
 
 ## #58 反向波動度加權投資組合建構（Inverse-Volatility-Weighted Portfolio Construction）

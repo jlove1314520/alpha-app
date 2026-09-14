@@ -1,3 +1,50 @@
+## 2026-09-15（無人值守開發佇列自走）Cybex.引擎完成（結案FAIL）＋補勾#53/#54/#55/#57四項既有結案的PENDING_QUEUE遺漏
+
+戴**驗證帽**（設計並執行控制組對照，判定PASS/FAIL，不宣告策略有效性）。
+依`PENDING_QUEUE.md`權威清單，`scripts/dev_queue_runner.py next`原本取到
+**Cybex.#53**，核對後發現這是**PENDING_QUEUE.md未同步的舊帳**——
+`research/HYPOTHESIS_QUEUE.md`早已記載#53/#54/#55/#57四條在2026-09-08全數
+結案FAIL（#56撤案），只是`PENDING_QUEUE.md`checklist忘記勾選。先補勾這四行
+（附結案摘要與出處連結），讓runner往下走到真正未完成的下一項：**Cybex.引擎**
+（三個on-window執行時機改動：進場/出場延遲確認、總開關重新開啟確認期）。
+
+**做了什麼**：原始Cybex（加密貨幣）程式碼查無這三個機制的實作與參數（已查
+`C:\Users\user\cybex_knowledge_export\`全部檔案），依「拿判斷方法，不拿參數」
+移植原則自行設計語意清楚的版本：新增`research/timing_overlay_engine.py`
+（`apply_confirmed_switch()`：固定門檻0.5把連續曝險二值化成on/off總開關，
+entry_delay=3／exit_delay=3交易日才確認切換，off後reopen_cooldown=5交易日
+內強制鎖住不得重開，三參數皆固定不掃描），5項自測（全程on/off、單日雜訊
+不觸發、連續3天確認觸發、重開冷卻期時序）全過。冷卻期是固定天數倒數，
+不依賴策略績效，`CLAUDE.md`第9關「absorbing state檢查」結構上自動滿足。
+
+只挑`#53`當受測對象（#53～#57家族裡唯一走到控制組關卡才落敗的，其餘死在更早
+sanity，補執行時機機制對已死在sanity的訊號沒有意義）。新增
+`research/cybex_engine_on53.py`：完全複用#53既有的資料/統計量/TRAIN-VAL切分/
+控制組框架，唯一差異是曝險序列先經延遲確認轉換，且**控制組每次抽樣同步套用
+同一轉換**（比較「引擎機制+真實時序」vs「引擎機制+打亂時序」，不是比機制
+本身）。
+
+**結果（誠實FAIL）**：level規格TRAIN年化Sharpe+0.5580未過控制組最大值+1.5006
+（percentile=87.3）、VAL+0.7360未過+1.3997（percentile=57.3）；vel規格
+TRAIN+0.3780未過+1.4185（percentile=60.0）、VAL+0.7220未過+1.6601
+（percentile=74.3）。四項判定全數未過。**結論**：執行時機降噪沒能救回#53，
+確認死因是`f(z)=1-z`percentile線性映射構造本身對雜訊敏感，不是翻轉頻率
+問題——這對下一項`Cybex.beta`（score_longonly_v1擇時版本）是重要提醒：
+若沿用同一套映射構造會撞上同一個已證實的缺陷。
+
+已用`trial_registry.register_trial()`登記為`TRIALS_LEDGER.md`#242，
+`--check`確認`violations=[]`；`STRATEGY_GRAVEYARD.md`新增同名條目；
+`research/HYPOTHESIS_QUEUE.md`新增「Cybex.引擎」小節記錄完整方法論與數字。
+
+**驗證**：`node scripts/smoke_test.mjs` 45/46 PASS（唯一FAIL為既有無關的
+#39，本項未動任何被稽核JSON）。
+
+**下一步**：`PENDING_QUEUE.md`已勾選。依權威清單，下一項是**Cybex.beta**
+（score_longonly_v1擇時版本，對照組同曝險買進持有＋隨機同頻率開關，六關）——
+本輪已在文件留下提醒：不建議直接沿用`f(z)=1-z`percentile映射。
+
+---
+
 ## 2026-09-15（無人值守開發佇列自走）金流一.2完成：上櫃三大法人回補≥250個交易日
 
 戴**維運帽**（純資料回補，沿用既有可中斷續跑腳本，不涉策略判斷）。
