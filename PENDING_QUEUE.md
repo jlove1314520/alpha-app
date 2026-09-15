@@ -76,7 +76,26 @@
   `data_audit.py`回報`a_price_source`（765筆）／`violation_rate`
   （32.95%）／`unverifiable`（3,972筆）的新數字。**在generated_at真的
   跳動之前不算完成**，本輪不得也未宣稱完成，需下一輪或使用者確認排程
-  跑過後才能回報。
+  跑過後才能回報。**2026-09-15夜間交辦優先輪追加發現並修復一個阻塞此項的
+  獨立bug**：查`gh run list`發現f94445b3推送後market.yml排程連續兩次
+  （09-15 14:16 UTC、09-14 23:55 UTC）以`cannot rebase: You have unstaged
+  changes`失敗——根因是commit步驟`git add -A`的檔名允許清單本身就漏了
+  三個既有腳本的輸出檔：`data/sector_flow.json`（`scripts/build_sector_
+  flow.py`）、`data/institutional_history.json`（`.github/scripts/
+  accumulate_institutional.py`）、`data/securities_lending_sell.json`
+  （`.github/scripts/fetch_securities_lending_sell.py`）；這三個檔案平時
+  被排程寫入工作目錄卻從未被`git add`，一旦遇到跟`quotes.yml`/
+  `AlphaMarathon`並發推送而觸發既有的fetch+rebase重試邏輯，重試會因為
+  「還有未加入暫存區的修改」而失敗，把原本設計成可自動復原的race
+  condition變成每次都硬失敗——不只擋住sparklines這一項，是擋住整條
+  market.yml管線任何一次跟其他寫入者撞期的commit。已逐一核對這29支
+  排程腳本的實際輸出路徑（不只信任變數名，讀`OUT_PATH`/`OUT`賦值那一行）
+  確認就是這三個缺漏、沒有第四個，補進`.github/workflows/market.yml`的
+  `git add -A`清單（commit待補hash）。**這是純bug修復（明確壞掉、可重現、
+  已找到根因），依CLAUDE.md「例外可直接做」條款直接修，不算新架構變更，
+  未另外提案。**下一次排程（台北05:30美股批次或下次台股班次）若再遇到
+  並發推送，應該能成功rebase並過關；`generated_at`是否真的跳動仍要等
+  那次實際跑完才能回報，不因為修了這個bug就直接標✅。
 - **三** ✅ 確認為前一輪（`index.html`commit`83df3be4`）已完成的既有功能，
   本輪grep核對仍在（`SPARKLINES_ASOF`／`tier:'history'`相關行仍存在），
   未發現退化，無需重做。
