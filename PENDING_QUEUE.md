@@ -14,6 +14,56 @@
 
 ---
 
+## 2026-09-16 總司令裁示【market.yml停擺31小時／雲端監控缺口／撞軌統一／成本表後續】四項（原文登記）
+
+總司令原話：
+
+> 一、【最高優先】market.yml 連續錯過三個班次，整條每日資料線停了 31 小時
+> 證據：最後一次「自動更新大盤…」commit 是 09-14 16:28 UTC；
+> market_tw.json fetched_at 09-14 16:27 UTC；fundamentals.json 與
+> price_history.json 都停在 09-15 00:28 台北。09-15 17:00／18:30、
+> 09-16 05:30 三個班次全部沒有產出。
+> 1. 用 gh run list --workflow=market.yml --limit 20 查實際觸發與結論
+>    （新 PAT 已有 Actions: Read）。分辨三件事：
+>    (a) 根本沒觸發（Actions 排程降級，跟 news_events 15% 同一病）
+>    (b) 觸發了但失敗（貼出失敗步驟與錯誤）
+>    (c) 跑完但 commit 步驟失敗（09-15 15:03 那個 push race 是否仍在發生）
+> 2. **不要猜，用 gh 的實際輸出說話。**
+> 3. 修好後確認：market_tw / fundamentals / price_history / sparklines
+>    四個檔案的時間戳全部跳到當日。
+>    **sparklines 的輸入是 price_history，price_history 不動 sparklines 就不會動。**
+>
+> 二、【結構性缺口】停擺自檢只看本機，雲端 Actions 完全沒監控
+> pipeline_registry.json 現有 13 條全是本機 Alpha* 工作，
+> market.yml／quotes.yml／news_events.yml／audit.yml 一條都沒有。
+> 我們為了 alpha.db 空轉 20 天蓋了自檢，但只蓋了一半身體，
+> 而另一半此刻正在無聲停擺 31 小時。
+> 1. 把四條雲端 workflow 的關鍵產出檔納入 pipeline_registry
+>    （market_tw.json／quotes_tw.json／news.json／audit_report.json 等），
+>    標明預期更新頻率。
+> 2. 判定一律看**資料層時間戳**，不看 mtime（沿用停擺四的正確設計）。
+> 3. 超過預期間隔 3 倍就在 local_task_health 亮燈，跟本機同一套。
+> 4. 回報：納入後立刻跑一次，現在有幾條是紅的。
+>
+> 三、【裁示】檢定力一 vs #74 撞軌
+> DevQueue 判定 track 不符而阻塞，hypothesis_queue 卻同時在跑 #74。
+> **裁示：統一由 hypothesis_queue 單軌執行，DevQueue 那條以「重複項」結案。**
+> 理由跟轉向.二 同一條：兩條線做同一件事只會互相覆蓋。
+> PENDING_QUEUE 兩處條目都要標註交叉指向，不要只改一處。
+>
+> 四、成本表後續（承一.2 的客觀阻塞）
+> t20 回填率 0.0%（0/940），最早快照 08-27 距今約 14 個交易日。
+> 1. 算出第一筆 t20 預計哪一天可回填，寫進 PENDING 讓它到期自動觸發。
+> 2. t20 一有資料就把「我們vs0050」的主窗口切到 t20，t5 降為參考並標
+>    「成本吃重」。
+> 3. **在切換之前，不准用 t5 的難看數字下任何「選股引擎無效」的結論**
+>    —— 那張表已經證明 t5 需要 27.8~41.4% 年化毛 alpha，
+>    那個門檻本身就不合理。
+
+**執行狀態**：本輪開工，逐項處理中，詳見下方各條目完成後的更新。
+
+---
+
 ## 2026-09-15 總司令裁示【持有期與成本結構重新檢視】五項（原文登記）
 
 總司令原話：
