@@ -1,3 +1,30 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-194602）附加修復：`run-ibkr-quotes-cycle.ps1`發現的既有commit洪水bug（非本輪新增，趁改同一段順手修）
+
+戴**維運帽**（獨立於下方週六.五的開發帽工作，補charged在同一輪回報）。
+上一則週六.五工作讓`ibkr_quotes.py`新增寫`positions_ibkr.json`/
+`balance_ibkr.json`，改`C:\alpha\run-ibkr-quotes-cycle.ps1`讓排程也commit這
+兩份新檔時，實測發現`git show HEAD:path`比對邏輯對這兩份新檔案的Chinese
+`error`欄位每次都拋`ConvertFrom-Json`例外（PowerShell 5.1的`[Console]::
+OutputEncoding`預設是系統代碼頁不是UTF-8，把UTF-8多位元組字元解成亂碼）。
+
+往`ibkr_quotes_cycle.log`歷史紀錄回查才發現：**這個bug早就存在，`quotes_
+ibkr.json`原本的比對邏輯一樣會踩到同一個問題**（只是因為它只比對`.quotes`
+子物件的`last`/`change_pct`數值欄位，沒有比對含中文的`.error`欄位，才在
+「有連線」狀態下沒暴露），只要IB Gateway斷線（`error`欄位有中文文字）就會
+每輪都「compare failed」進而每輪都commit——這正是2026-09-08「commit洪水」
+事故（那次是時間戳，這次是編碼）的同一種形狀，且已經默默發生了一段時間
+（`ibkr_quotes_cycle.log`可查到連續多輪`compare failed`紀錄）。
+
+**修法**：在腳本開頭加`[Console]::OutputEncoding = [System.Text.Encoding]::
+UTF8`，讓後續所有外部命令（`git show`）的擷取都用UTF-8解碼。修完實測：
+同樣的斷線狀態下重跑一次，log印出「No quote value changed (only fetched_at
+moved): skipping commit」，正確判斷未變動、不再誤觸發commit。
+
+**影響檔案**：`C:\alpha\run-ibkr-quotes-cycle.ps1`（不在alpha-app git repo
+內，是本機排程腳本，無commit）。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-194602）「週六.五」live server新增/live/positions與/live/balance，首頁總資產卡吃真數字
 
 戴**開發帽**。PENDING_QUEUE權威清單下一項：券商唯讀部位/餘額經live server，
