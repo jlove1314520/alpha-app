@@ -21705,12 +21705,12 @@
     "2026-09-15（稽核二.三）e_pe 降級為 informational_only_checks：官方 BWIBBU_ALL 本益比未公開計算基礎（合併/個別、TTM窗口定義皆未載明），跟我方用 stock_detail.json 近四季EPS自行推算的值不保證同一把尺，繼續記錄差異供查閱但不計入 violation_rate/gate_pass。同一次修正了 hit() 呼叫時 ours/official 標籤反向的bug（原本把官方值標成ours、推算值標成official，順序寫反）。"
   ],
   "local_task_health": {
-    "checked_at": "2026-09-16T00:37:29.810231+08:00",
+    "checked_at": "2026-09-16T07:52:02.276096+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "alert": true,
     "stalled_count": 1,
     "stalled": [
-      "AlphaMarketSparklines：data/sparklines.json 已 14670 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；JSON 欄位 meta.generated_at）"
+      "AlphaMarketSparklines：data/sparklines.json 已 15105 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；JSON 欄位 meta.generated_at）"
     ],
     "tasks": [
       {
@@ -21720,8 +21720,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-16T00:37:02.561016+08:00",
-        "age_min": 0.5,
+        "last_output": "2026-09-16T07:52:02.170429+08:00",
+        "age_min": 0.0,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -21732,8 +21732,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-16T00:37:06.735434+08:00",
-        "age_min": 0.4,
+        "last_output": "2026-09-16T07:51:07.494326+08:00",
+        "age_min": 0.9,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -21745,7 +21745,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-15T13:47:02.361362+08:00",
-        "age_min": 650.5,
+        "age_min": 1085.0,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -21756,8 +21756,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-16T00:36:42.364549+08:00",
-        "age_min": 0.8,
+        "last_output": "2026-09-16T07:51:49.051491+08:00",
+        "age_min": 0.2,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -21768,8 +21768,8 @@
         "expected_interval_min": 5,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-16T00:36:36.654396+08:00",
-        "age_min": 0.9,
+        "last_output": "2026-09-16T07:51:37.256239+08:00",
+        "age_min": 0.4,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -21780,8 +21780,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-16T00:37:02.630975+08:00",
-        "age_min": 0.5,
+        "last_output": "2026-09-16T07:48:01.369108+08:00",
+        "age_min": 4.0,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -21801,8 +21801,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-16T00:31:02.620603+08:00",
-        "age_min": 6.5,
+        "last_output": "2026-09-16T07:46:02.001348+08:00",
+        "age_min": 6.0,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -21813,8 +21813,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-16T00:30:36.830034+08:00",
-        "age_min": 6.9,
+        "last_output": "2026-09-16T07:30:37.012150+08:00",
+        "age_min": 21.4,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -21825,8 +21825,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-16T00:21:01.755538+08:00",
-        "age_min": 16.5,
+        "last_output": "2026-09-16T07:51:02.062356+08:00",
+        "age_min": 1.0,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -21838,7 +21838,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-09-15、inst_trades=2026-09-15、valuation=2026-09-15、taifex_large=20260910",
         "last_output": "2026-09-15T00:00:00+08:00",
-        "age_min": 1477.5,
+        "age_min": 1912.0,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -21850,7 +21850,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 2437.4,
+        "age_min": 2872.0,
         "stall_limit_min": 30240,
         "status": "ok"
       },
@@ -21862,9 +21862,81 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-09-05T20:07:28.368191+08:00",
-        "age_min": 14670.0,
+        "age_min": 15104.6,
         "stall_limit_min": 4320,
         "status": "stalled"
+      },
+      {
+        "task": "AlphaMarketTW",
+        "purpose": "大盤/類股/三大法人/期貨/美股指數（GitHub Actions市場資料主管線，market.yml）",
+        "artifact": "data/market_tw.json",
+        "expected_interval_min": 1440,
+        "freshness": "json_field",
+        "source": "JSON 欄位 fetched_at",
+        "last_output": "2026-09-14T16:27:39+00:00",
+        "age_min": 1884.4,
+        "stall_limit_min": 4320,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaFundamentals",
+        "purpose": "個股基本面（PER/PBR/殖利率/月營收，market.yml）",
+        "artifact": "data/fundamentals.json",
+        "expected_interval_min": 1440,
+        "freshness": "json_field",
+        "source": "JSON 欄位 meta.generated_at",
+        "last_output": "2026-09-15T00:28:06.070804+08:00",
+        "age_min": 1883.9,
+        "stall_limit_min": 4320,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaPriceHistory",
+        "purpose": "個股OHLCV價量歷史（market.yml，是sparklines的上游輸入——price_history不動sparklines就不會動）",
+        "artifact": "data/price_history.json",
+        "expected_interval_min": 1440,
+        "freshness": "json_field",
+        "source": "JSON 欄位 meta.generated_at",
+        "last_output": "2026-09-15T00:28:30.614190+08:00",
+        "age_min": 1883.5,
+        "stall_limit_min": 4320,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaQuotesTW",
+        "purpose": "台股即時報價（GitHub Actions，quotes.yml，App自選股/四層回退鏈第二層依賴）",
+        "artifact": "data/quotes_tw.json",
+        "expected_interval_min": 60,
+        "freshness": "json_field",
+        "source": "JSON 欄位 fetched_at",
+        "last_output": "2026-09-15T22:56:35+00:00",
+        "age_min": 55.5,
+        "stall_limit_min": 180,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaNewsEvents",
+        "purpose": "新聞/事件（GitHub Actions，news_events.yml，App「近期事件與題材」分頁依賴）",
+        "artifact": "data/news.json",
+        "expected_interval_min": 30,
+        "freshness": "json_field",
+        "source": "JSON 欄位 fetched_at",
+        "last_output": "2026-09-16T07:01:47.756613+08:00",
+        "age_min": 50.2,
+        "stall_limit_min": 90,
+        "status": "ok"
+      },
+      {
+        "task": "AlphaDataAudit",
+        "purpose": "資料一致性稽核（GitHub Actions，audit.yml，data_audit.py每日產出audit_report.json頂層欄位，跟local_task_health是同一份檔案的不同區塊）",
+        "artifact": "data/audit_report.json",
+        "expected_interval_min": 1440,
+        "freshness": "json_field",
+        "source": "JSON 欄位 generated_at",
+        "last_output": "2026-09-15T23:00:01.418991+08:00",
+        "age_min": 532.0,
+        "stall_limit_min": 4320,
+        "status": "ok"
       }
     ],
     "connectivity_alerts": [],

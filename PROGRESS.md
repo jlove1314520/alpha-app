@@ -1,3 +1,57 @@
+## 2026-09-16（market.yml停擺31小時根因修復／雲端管線監控補洞／撞軌統一／t20到期提醒）
+
+戴**維運帽**。總司令裁示四項（原文已登記`PENDING_QUEUE.md`），本輪逐項
+完成，用`gh`實際輸出查證，不猜測。
+
+**一、market.yml停擺31小時根因**：`gh run list --workflow=market.yml
+--limit 20`確認排程**確實有觸發**（非(a)降級），09-15 23:34/15:09/14:16
+三個班次`gh run view --log-failed`顯示**全部是(c)：29個抓資料步驟全部
+成功（含sparklines產生步驟），只有最後「Commit 市場資料JSON」失敗**，
+錯誤都是`error: cannot rebase: You have unstaged changes`。**根因查明**：
+`scripts/build_sector_flow.py::_update_queue_countdown()`每輪都會改寫
+`PENDING_QUEUE.md`的金流一倒數行，但`PENDING_QUEUE.md`不在market.yml
+commit步驟的`git add`allowlist裡，導致每次跑完都留下一份已修改未commit
+的追蹤檔案——平常push一次成功時看不出來，一旦跟其他寫入者（quotes.yml/
+AlphaMarathon/互動session）撞在一起需要`git rebase`重試就必然失敗，不是
+真的合併衝突。已逐一核對market.yml呼叫的全部29支腳本輸出路徑確認這是
+唯一漏掉的追蹤檔案，修法：把`PENDING_QUEUE.md`加進allowlist（commit
+`5ab1aaa2`）。**驗證待辦**：今日17:00/18:30台北排程跑過後才能確認四個
+檔案時間戳全部跳到當日，本輪誠實維持未完成。
+
+**二、雲端workflow監控補洞**：`pipeline_registry.json`此前13條全是本機
+Alpha*工作，新增6條雲端條目（`AlphaMarketTW`/`AlphaFundamentals`/
+`AlphaPriceHistory`/`AlphaQuotesTW`/`AlphaNewsEvents`/`AlphaDataAudit`，
+連同前一輪的`AlphaMarketSparklines`共7條），全部用資料層時間戳判定
+（`fetched_at`/`meta.generated_at`），沿用「間隔×3倍」同一套公式。實測
+`check_external_connectivity.py`後`local_task_health`現在共監控19條，
+目前1條紅燈（`AlphaMarketSparklines`，非本輪新增造成）。**誠實揭露一個
+限制**：`market_tw`等3條沿用`AlphaData`既有慣例（3天門檻含週末緩衝），
+這代表這次31小時的停擺用這套公式要撐到72小時才會亮紅燈，不會比總司令
+肉眼發現更快——若要更即時抓到「連續錯過N個班次」，需要以「班次數」為
+單位設計更緊的門檻，這是架構層新設計，按規則不能自己直接動，已回報
+待總司令裁示是否追加此提案。
+
+**三、檢定力一 vs #74 撞軌統一**：依總司令裁示「統一由hypothesis_queue
+單軌執行，DevQueue那條以『重複項』結案」，`PENDING_QUEUE.md`「檢定力一」
+條目標記結案並交叉指向`HYPOTHESIS_QUEUE.md` #74，#74章節同步加入交叉
+指向段落，兩處互相指向。
+
+**四、成本表後續**：算出`picks_ledger.json`最早快照（08-27）的t20預計
+可回填日期＝**2026-09-24**（週末排除法，且該區間`TW_HOLIDAYS_2026`剛好
+無國定假日，與真正交易日曆算法一致），已寫進`PENDING_QUEUE.md`獨立
+到期提醒章節，含到期後的具體切換步驟（`build_benchmark_comparison.py`
+的`HOLD_WINDOW`改`t20`、t5降級為參考）。並明確記錄「在切換之前不得用
+t5的難看數字下『選股引擎無效』結論」的禁令，長期有效。
+
+**影響檔案**：`.github/workflows/market.yml`、
+`data/seed/pipeline_registry.json`、`PENDING_QUEUE.md`、
+`research/HYPOTHESIS_QUEUE.md`、`PROGRESS.md`（本節）。
+
+**下一步**：今日17:00/18:30台北排程跑過後驗證一.3；2026-09-24查核t20
+回填並視情況切換主窗口。
+
+---
+
 ## 2026-09-16（DevQueue自走，cycle 20260916-004602）檢定力一：判定track不符、標記阻塞
 
 戴**維運帽**（判斷本輪該不該做，不是實際去做統計工作）。依`PENDING_QUEUE.md`

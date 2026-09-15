@@ -209,6 +209,60 @@
         },
         "removable": null
       }
+    },
+    {
+      "task": "AlphaMarketTW",
+      "purpose": "大盤/類股/三大法人/期貨/美股指數（GitHub Actions市場資料主管線，market.yml）",
+      "interval_min": 1440,
+      "artifact": "data/market_tw.json",
+      "freshness": "json_field",
+      "field": "fetched_at",
+      "note": "2026-09-16（總司令裁示【結構性缺口】二.1新增，market.yml停擺31小時事件教訓）：pipeline_registry此前13條全是本機Alpha*工作，雲端Actions（market.yml/quotes.yml/news_events.yml/audit.yml）完全沒被監控，等同只蓋了一半身體。跟AlphaData/AlphaMarketSparklines同一套既有慣例：interval_min=1440×stall_factor=3=3天門檻，近似3個交易日含週末緩衝。market.yml平日跑3次（17:00/18:30台北+05:30次日），這是其中最核心的大盤/類股/三大法人產出。"
+    },
+    {
+      "task": "AlphaFundamentals",
+      "purpose": "個股基本面（PER/PBR/殖利率/月營收，market.yml）",
+      "interval_min": 1440,
+      "artifact": "data/fundamentals.json",
+      "freshness": "json_field",
+      "field": "meta.generated_at",
+      "note": "同AlphaMarketTW條目慣例與理由，market.yml同一輪產出。"
+    },
+    {
+      "task": "AlphaPriceHistory",
+      "purpose": "個股OHLCV價量歷史（market.yml，是sparklines的上游輸入——price_history不動sparklines就不會動）",
+      "interval_min": 1440,
+      "artifact": "data/price_history.json",
+      "freshness": "json_field",
+      "field": "meta.generated_at",
+      "note": "同AlphaMarketTW條目慣例與理由，market.yml同一輪產出。這條停擺會連帶讓AlphaMarketSparklines一起停擺（上下游關係），兩條同時亮燈時應優先查這條的根因。"
+    },
+    {
+      "task": "AlphaQuotesTW",
+      "purpose": "台股即時報價（GitHub Actions，quotes.yml，App自選股/四層回退鏈第二層依賴）",
+      "interval_min": 60,
+      "artifact": "data/quotes_tw.json",
+      "freshness": "json_field",
+      "field": "fetched_at",
+      "note": "2026-09-16新增。quotes.yml實際排程是每10分鐘一次但集中在盤中/美股時段（UTC 0-5、8-23，週二~週六0-1時額外覆蓋），平日UTC 6-7時（台北14:00-16:00）刻意沒有排程（台股已收盤、美股未開盤的空窗）——這裡沒有用window_hours排除這個空窗，而是刻意選擇較寬鬆的interval_min=60（×stall_factor=3=180分鐘/3小時門檻），寬鬆到足以涵蓋這個約2小時的已知空窗但仍能抓到真正的多小時停擺，避免對這個正常空窗狼來了。"
+    },
+    {
+      "task": "AlphaNewsEvents",
+      "purpose": "新聞/事件（GitHub Actions，news_events.yml，App「近期事件與題材」分頁依賴）",
+      "interval_min": 30,
+      "artifact": "data/news.json",
+      "freshness": "json_field",
+      "field": "fetched_at",
+      "note": "2026-09-16新增。news_events.yml排程是全天候每30分鐘一次（無平日/盤中限制），interval_min=30×stall_factor=3=90分鐘門檻。總司令原話點名這條workflow「Actions排程降級」曾經發生過（15%降級病史），列為雲端監控四條之一。"
+    },
+    {
+      "task": "AlphaDataAudit",
+      "purpose": "資料一致性稽核（GitHub Actions，audit.yml，data_audit.py每日產出audit_report.json頂層欄位，跟local_task_health是同一份檔案的不同區塊）",
+      "interval_min": 1440,
+      "artifact": "data/audit_report.json",
+      "freshness": "json_field",
+      "field": "generated_at",
+      "note": "2026-09-16新增。audit.yml排程平日23:20台北一次，interval_min=1440×stall_factor=3=3天門檻同AlphaData慣例。**注意**：本條監控的是`audit_report.json`頂層的`generated_at`（data_audit.py每晚稽核寫入），跟`local_task_health`區塊自己的`checked_at`（check_external_connectivity.py每5分鐘更新）是同一份檔案裡的兩個不同欄位，不要混淆——這條停擺不影響local_task_health本身持續更新，但代表稽核數字（a_price_source/violation_rate等）是舊的。"
     }
   ],
   "github_pat_expiry": {

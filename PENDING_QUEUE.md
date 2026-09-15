@@ -60,7 +60,85 @@
 >    —— 那張表已經證明 t5 需要 27.8~41.4% 年化毛 alpha，
 >    那個門檻本身就不合理。
 
-**執行狀態**：本輪開工，逐項處理中，詳見下方各條目完成後的更新。
+**執行狀態**：
+
+- **一.1** ✅ **已完成，非猜測，用`gh run view --log-failed`實際輸出判定**：
+  `gh run list --workflow=market.yml --limit 20`顯示排程**確實有觸發**
+  （排除(a)根本沒觸發），三個班次
+  （09-15 23:34/15:09/14:16）**全部是(c)：跑完但commit步驟失敗**——
+  所有29個抓資料步驟全部✓成功（含sparklines產生步驟本身），只有最後
+  「Commit 市場資料JSON」這一步失敗，錯誤都是**`error: cannot rebase:
+  You have unstaged changes`**（`exit code 128`）。
+- **一.2** ✅ **根因已查明並修復**：`scripts/build_sector_flow.py::
+  _update_queue_countdown()`每輪都會改寫`PENDING_QUEUE.md`的金流一倒數行，
+  但`PENDING_QUEUE.md`不在market.yml commit步驟的`git add`allowlist裡，
+  導致每次跑完都留下一份已修改未commit的追蹤檔案——平常push一次成功時
+  不會發現，一旦跟其他寫入者（quotes.yml/AlphaMarathon/互動session）
+  撞在一起需要`git rebase`重試，就必然因為工作目錄不乾淨而失敗，**不是
+  真的合併衝突**。已逐一核對market.yml呼叫的全部29支腳本輸出路徑，確認
+  這是唯一漏掉的追蹤檔案。修法：把`PENDING_QUEUE.md`加進allowlist，
+  commit `5ab1aaa2`已推送。
+- **一.3** 🔲 **待今日排程驗證**：`market_tw`/`fundamentals`/
+  `price_history`/`sparklines`四個檔案時間戳是否全部跳到當日，需等今日
+  （2026-09-16）17:00或18:30台北排程實際跑過一次後才能確認，在此之前
+  不宣稱修復生效。
+- **二.1/二.2/二.3** ✅ **已完成**：`pipeline_registry.json`新增6條雲端
+  workflow監控（`AlphaMarketTW`/`AlphaFundamentals`/`AlphaPriceHistory`/
+  `AlphaQuotesTW`/`AlphaNewsEvents`/`AlphaDataAudit`，連同前一輪已有的
+  `AlphaMarketSparklines`共7條雲端條目），全部用**資料層時間戳**判定
+  （`fetched_at`或`meta.generated_at`，不用mtime），沿用「間隔×3倍」
+  同一套公式。**已知限制，誠實揭露**：`market_tw`/`fundamentals`/
+  `price_history`三條沿用`AlphaData`既有慣例（`interval_min=1440`，
+  近似3個交易日含週末緩衝），這個週末安全的門檻代表**這次31小時的
+  停擺，用這套公式要撐到72小時才會亮紅燈**，不會比總司令自己肉眼發現
+  更快——如果要更快抓到「連續錯過N個排定班次」這種中途停擺，需要另外
+  設計以「班次數」而非「日曆時間」為單位的更緊門檻（比照
+  `check_stale_user_visible_blocks.py`的交易日模型），這是架構層的新
+  設計，按「提案先於執行」規則不能我自己直接動，先如實回報這個限制，
+  是否要追加這個提案待總司令裁示。
+- **二.4** ✅ **已完成，實測回報**：納入後立刻跑一次
+  `scripts/check_external_connectivity.py`，`local_task_health`現在
+  共監控**19條**（本機13條＋雲端新增6條）。**目前1條紅燈**：
+  `AlphaMarketSparklines`（沿用前一輪已知的10.5天舊資料，非本輪新增的
+  6條雲端項目造成），新增的6條雲端項目目前全部在門檻內顯示綠燈（見一.3
+  的誠實揭露，`market_tw`等3條31.3小時的停擺尚未達72小時門檻）。
+- **三** ✅ **已完成**：`PENDING_QUEUE.md`「檢定力一」條目標記結案並
+  交叉指向`HYPOTHESIS_QUEUE.md` #74；`HYPOTHESIS_QUEUE.md` #74章節同步
+  加入交叉指向`PENDING_QUEUE.md`「檢定力一」結案記錄的段落，兩處互相
+  指向，不只改一處。往後DevQueue的ORDER清單不再接續此工作。
+- **四.1** ✅ **已完成**：算出`picks_ledger.json`最早快照（08-27）的t20
+  預計可回填日期＝**2026-09-24**（週末排除法計算，且08-27~09-24這段
+  區間`TW_HOLIDAYS_2026`剛好沒有國定假日落在其中，週末排除法在這個
+  區間跟真正交易日曆算法結果一致，非巧合誤差）。已寫進下方的獨立到期
+  提醒（見「五、t20回填到期提醒」新條目），到期後應主動查核。
+- **四.2/四.3** ✅ **已知會，寫入規則**：t20一有資料就把「我們vs0050」
+  主窗口切到t20、t5降為參考並標「成本吃重」；**在切換之前不得用t5的
+  難看數字下任何「選股引擎無效」結論**——`research/breakeven_alpha_
+  table.json`已證明t5需要27.8%~41.4%年化毛alpha才能打平0050，這個
+  門檻本身就不合理，t5的難看數字主要反映的是周轉成本結構而非選股能力，
+  兩者在t20資料出來前無法區分。此規則同時寫入下方新條目，供t20到期
+  當天的執行者直接查閱依循。
+
+## t20回填到期提醒（2026-09-16新增，四.1計算結果，任何session/自走讀到本檔
+且當下日期≥下述到期日應主動查核）
+
+**到期日：2026-09-24**（`picks_ledger.json`最早快照08-27起算20個交易日，
+週末排除法計算；08-27~09-24區間`index.html::TW_HOLIDAYS_2026`剛好沒有
+國定假日落在其中，週末排除法在這個區間跟真正交易日曆算法結果一致）。
+
+**到期後要做什麼（不需要總司令重新下裁示，直接依此執行）**：
+1. 查`data/picks_ledger.json`最早幾筆快照的`picks[].returns.t20.return_pct`
+   是否已回填（`update_picks_ledger_returns.py`是market.yml既有排程步驟，
+   應會自動回填，這裡只是查核+觸發後續動作，不需要另外開發回填邏輯）。
+2. 一旦t20回填率>0%，把`.github/scripts/build_benchmark_comparison.py`的
+   `HOLD_WINDOW`從`"t5"`改成`"t20"`（同時保留一份t5的資料/顯示，降級為
+   「參考、成本吃重」標示，不是整個刪掉），連帶`index.html`「我們vs0050」
+   卡片的主顯示窗口同步切換，改動屬於「已明確交辦」（本次裁示四.2已具體
+   指定做法），依CLAUDE.md可直接做，不需要再走提案流程，但仍要跑冒煙
+   測試並在PROGRESS.md記錄。
+3. **在完成第2步切換之前，不准用t5現有的難看數字（27.8%~41.4%年化毛
+   alpha門檻）下任何「選股引擎無效」的結論**——總司令原話明確禁止，
+   這條規則本身沒有到期日，長期有效直到t20切換完成為止。
 
 ---
 
@@ -4092,7 +4170,17 @@ ORDER-END
   「MM/DD收盤 $價格」而非裸數字（commit `83df3be4`），使用者看得出來是
   舊資料，但底層資料本身仍過期，這條阻塞不能因為應急UI標示做了就視為
   已解決。
-- [!] **檢定力一** 量測六道閘門的統計檢定力（偽陰性率）——總司令原話　**⛔ 自走中止（2026-09-16 00:48）**：此項屬於研究與驗證帽（research/），已在HYPOTHESIS_QUEUE.md #74獨立追蹤且已有實質進度：synthetic_power_curve_gate74.py已寫成並試跑Sharpe=0.5單種子，六關mini pipeline技術上可行，但發現base序列未去均值化、母體Sharpe自帶1.1057（疑似存活者偏誤），偏離量測目標，下一輪待去均值化修正後重跑，排程接續者是AlphaHypothesisQueue而非AlphaDevQueue。依CLAUDE.md九、帽子規則『越權禁止』——research/因子回測程式碼與紀錄歸屬研究與驗證帽，DevQueue不應代為執行這類統計檢定力量測研究工作。PENDING_QUEUE此行『尚未開始寫程式碼』的敘述已過時，實際狀態以HYPOTHESIS_QUEUE.md #74為準。此為ORDER清單機械式取件未區分track導致派錯track，不是需要總司令登入/花錢/不可逆操作，也不是重試失敗，而是需要總司令裁示：是否要把研究類項目移出DevQueue的ORDER清單，避免下次自走再次派錯track。
+- [x] **檢定力一** ⚠ **下面這段已過時，2026-09-16總司令裁示【裁示】撞軌結案：
+  「統一由hypothesis_queue單軌執行，DevQueue那條以『重複項』結案」**——
+  本條目（DevQueue track）與`HYPOTHESIS_QUEUE.md`**#74**是同一件工作被兩條
+  自走軌道重複派工，理由跟「轉向.二」同一條：兩條線做同一件事只會互相
+  覆蓋。**現行狀態以`HYPOTHESIS_QUEUE.md` #74為唯一權威來源，本條目
+  正式結案不再由DevQueue接續**，往後DevQueue的ORDER清單取件邏輯若再
+  遇到research/類工作，應直接判定不屬於本track而跳過，不需要每次都
+  走到「自走中止待總司令裁示」這一步（下方⛔記錄的判斷過程本身是對的，
+  只是需要總司令這次明確拍板才能真正結案，不能靠自走自己判定跳關）。
+
+  量測六道閘門的統計檢定力（偽陰性率）——總司令原話　**⛔ 自走中止（2026-09-16 00:48）**：此項屬於研究與驗證帽（research/），已在HYPOTHESIS_QUEUE.md #74獨立追蹤且已有實質進度：synthetic_power_curve_gate74.py已寫成並試跑Sharpe=0.5單種子，六關mini pipeline技術上可行，但發現base序列未去均值化、母體Sharpe自帶1.1057（疑似存活者偏誤），偏離量測目標，下一輪待去均值化修正後重跑，排程接續者是AlphaHypothesisQueue而非AlphaDevQueue。依CLAUDE.md九、帽子規則『越權禁止』——research/因子回測程式碼與紀錄歸屬研究與驗證帽，DevQueue不應代為執行這類統計檢定力量測研究工作。PENDING_QUEUE此行『尚未開始寫程式碼』的敘述已過時，實際狀態以HYPOTHESIS_QUEUE.md #74為準。此為ORDER清單機械式取件未區分track導致派錯track，不是需要總司令登入/花錢/不可逆操作，也不是重試失敗，而是需要總司令裁示：是否要把研究類項目移出DevQueue的ORDER清單，避免下次自走再次派錯track。
   「這是先做不可的一條」，已寫成獨立章節登記為`HYPOTHESIS_QUEUE.md`
   **#74**（合成已知強度訊號混入真實報酬，餵進六關，畫出訊號強度vs
   通過率的檢定力曲線；Sharpe 0.3/0.5/0.8三檔強度下各關通過率），尚未
