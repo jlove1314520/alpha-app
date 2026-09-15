@@ -741,6 +741,7 @@ async def live_kbars(code: str, x_alpha_local_token: str | None = Header(default
             _kbars_backfilled[code] = today   # 先記再查：查失敗也不重試，避免反覆打 API
             queried = await _kbars_via_daemon(code)
             if queried and queried.get("bars"):
+                _kbars_backfill_cache[code] = queried["bars"]   # 存起來供今天後續請求持續合併
                 before = len(mem_bars)
                 mem_bars = _merge_bars(mem_bars, queried["bars"])
                 backfill_note = (f"偵測到{reason}，已補查 api.kbars() 合併"
@@ -749,6 +750,13 @@ async def live_kbars(code: str, x_alpha_local_token: str | None = Header(default
             else:
                 backfill_note = f"偵測到{reason}，但補查沒有拿到資料（額度用盡或常駐行程沒回應）"
                 print(f"  [kbars補齊] {code} {backfill_note}", flush=True)
+        elif reason and _kbars_backfilled.get(code) == today and code in _kbars_backfill_cache:
+            # 今天稍早已經補過、現在仍然需要補（早段歷史還沒被tick聚合覆蓋）：
+            # 用快取的歷史bars持續合併，不必也不應該再打API（官方盤中kbars上限
+            # 270次/日，重複補一次就燒一次額度，而且歷史不會變）。
+            before = len(mem_bars)
+            mem_bars = _merge_bars(mem_bars, _kbars_backfill_cache[code])
+            backfill_note = f"沿用今天稍早已補查的api.kbars()結果合併（{before} → {len(mem_bars)} 根，未重打API）"
     if mem_bars:
         return {
             "code": code, "mode": KBARS_MODE,
@@ -883,6 +891,10 @@ KBARS_CACHE_SEC = 60.0          # 總司令指定：查詢結果快取 60 秒
 KBARS_OPEN_HHMM = "09:01"
 KBARS_MAX_GAP_MIN = 3
 _kbars_backfilled: dict[str, str] = {}   # code -> 已補過的交易日
+# 2026-09-15（實測二補.3驗收發現）：補過一次之後，合併結果原本只回在觸發那一次的
+# response裡、沒有持久化，導致同一天後續每一次請求又打回純tick聚合（早段歷史消失）。
+# 這裡把查到的歷史bars快取起來，之後同一天每次請求都拿快取合併，不必再打API。
+_kbars_backfill_cache: dict[str, list[dict]] = {}   # code -> 當天api.kbars()查到的歷史bars
 
 
 def _bar_minute(b: dict) -> str | None:
