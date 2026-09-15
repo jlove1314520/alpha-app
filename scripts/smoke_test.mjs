@@ -55,6 +55,9 @@
 //     任何一個「—」。
 // 12. 整個測試過程（含8/9/11/13/14/15/16/17/18/19/20/21新增的重整/
 //     reload/手勢/時區/防線操作）結束後仍無累積的uncaught error。
+// 47/48.【2026-09-15新增，金流一.6驗收】data/sector_flow.json 兩條資料一致性
+//     稽核：47每個產業合計＝成分股加總（容差1股）；48 meta.date必須等於
+//     data/institutional_history.json（T86來源）的最新日期。
 
 import { chromium } from "@playwright/test";
 
@@ -1485,10 +1488,99 @@ async function runSmokeTest(baseUrl, headless = true) {
     industryErrors.length === 0, industryErrors.join("; ") ||
     Object.entries(results.industry_coverage || {}).map(([f, v]) => `${f}=${v.pct.toFixed(1)}%`).join("、"));
 
+  // 47.【2026-09-15新增，金流一.6驗收】sector_flow.json 每個產業合計必須等於
+  // 成分股加總（容差1股=0.001張）。build_sector_flow.py 把 sectors[產業].net_Xd_lots
+  // 算成 sum(stocks_out[c].net_Xd.total_lots for c in 該產業)，理論上是恆等式；
+  // 這裡不重播 build_sector_flow.py 的算法，只用 stocks 物件（成分股逐檔資料，
+  // 使用者在 index.html 產業金流卡點開成分股排行時實際看到的同一批數字）重新
+  // 加總，跟 sectors 物件（產業總計，使用者在同一張卡看到的標題數字）比對——
+  // 兩端都是頁面/檔案上直接看得到的數字，符合稽核恆等式鐵律。逐一掃描每個
+  // 已知視窗（meta.windows_usable），不是只挑一個。
+  const sectorSumErrors = [];
+  let sectorSumInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const res = await fetch("data/sector_flow.json?t=" + Date.now());
+      if (!res.ok) return { error: "sector_flow.json HTTP " + res.status };
+      const d = await res.json();
+      const sectors = d.sectors || {};
+      const stocks = d.stocks || {};
+      const windows = (d.meta && d.meta.windows_usable) || [];
+      if (!windows.length) return { error: "meta.windows_usable 是空的，無視窗可驗" };
+      const bad = [];
+      let checked = 0;
+      for (const [ind, agg] of Object.entries(sectors)) {
+        for (const w of windows) {
+          const lotsKey = `net_${w}d_lots`;
+          if (!(lotsKey in agg)) continue;
+          let sum = 0;
+          for (const s of Object.values(stocks)) {
+            if (s.industry !== ind) continue;
+            const nw = s[`net_${w}d`];
+            sum += (nw && typeof nw.total_lots === "number") ? nw.total_lots : 0;
+          }
+          checked++;
+          const diff = Math.abs(sum - agg[lotsKey]);
+          if (diff > 0.001) {
+            bad.push(`${ind}/${w}日：產業合計${agg[lotsKey]}張 vs 成分股加總${sum.toFixed(3)}張，差${diff.toFixed(3)}張`);
+          }
+        }
+      }
+      return { bad, checked, sectorCount: Object.keys(sectors).length, windows };
+    });
+    if (r.error) sectorSumErrors.push(r.error);
+    else {
+      sectorSumErrors.push(...r.bad);
+      sectorSumInfo = `${r.sectorCount} 個產業 × 視窗${JSON.stringify(r.windows)}，共驗 ${r.checked} 組，全部一致`;
+    }
+  } catch (e) {
+    sectorSumErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("47. sector_flow.json 每個產業合計＝成分股加總（容差1股）",
+    sectorSumErrors.length === 0, sectorSumErrors.join("; ") || sectorSumInfo);
+
+  // 48.【2026-09-15新增，金流一.6驗收】sector_flow.json 的 meta.date 必須等於
+  // T86 最新日期。「T86最新日期」取 data/institutional_history.json（金流一.1
+  // 規格明載：這支檔案是「每日管線既有呼叫」把 T86／TPEx 三大法人歷史累積
+  // 出來的來源，見 sector_flow.json meta.source），也就是它 dates 陣列的最後
+  // 一筆——不重新實作 build_sector_flow.py 內部的覆蓋率篩選邏輯（那是產生
+  // 端的演算法，稽核不能自己重播演算法），只驗兩份檔案上「日期」這個欄位
+  // 彼此對得上，這是使用者/協作者都能直接在檔案裡看到的兩個數字。
+  const t86DateErrors = [];
+  let t86DateInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const [flowRes, histRes] = await Promise.all([
+        fetch("data/sector_flow.json?t=" + Date.now()),
+        fetch("data/institutional_history.json?t=" + Date.now()),
+      ]);
+      if (!flowRes.ok) return { error: "sector_flow.json HTTP " + flowRes.status };
+      if (!histRes.ok) return { error: "institutional_history.json HTTP " + histRes.status };
+      const flow = await flowRes.json();
+      const hist = await histRes.json();
+      const flowDate = flow.meta && flow.meta.date;
+      const dates = hist.dates || [];
+      const t86Latest = dates.length ? dates[dates.length - 1] : null;
+      return { flowDate, t86Latest };
+    });
+    if (r.error) t86DateErrors.push(r.error);
+    else if (!r.flowDate) t86DateErrors.push("sector_flow.json 缺 meta.date 欄位");
+    else if (!r.t86Latest) t86DateErrors.push("institutional_history.json 的 dates 陣列是空的，無法比對");
+    else if (r.flowDate !== r.t86Latest) {
+      t86DateErrors.push(`sector_flow.json meta.date=${r.flowDate} ≠ institutional_history.json 最新日期=${r.t86Latest}`);
+    } else {
+      t86DateInfo = `兩者皆為 ${r.flowDate}`;
+    }
+  } catch (e) {
+    t86DateErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("48. sector_flow.json 的 date 必須等於 T86（institutional_history.json）最新日期",
+    t86DateErrors.length === 0, t86DateErrors.join("; ") || t86DateInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

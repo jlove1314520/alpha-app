@@ -2530,8 +2530,27 @@ ORDER-END
     使用者會以為快好了。** 已加 `MIN_DATE_COVERAGE=0.5` 覆蓋門檻過濾。
   - ⬜ **未做**：首頁自選股異常小點（需 60 日 z 分數，還差 55 個交易日）。
 - [!] **金流一.4** 評分引擎籌碼因子說明改引用 sector_flow 實際欄位（權重不動、不宣稱預測力）　**⛔ 自走中止（2026-09-15 12:33）**：金流一.4原指令要「籌碼因子（14%）的說明文字改為引用sector_flow.json的實際欄位（連續天數、5/20日加速度、異常z分數）」，但查證發現：14%權重的籌碼因子是research/weights_frozen.json的chips（generate_scores_live.py），其數值raw_inst_flow完全來自stock_detail.json的institutional.history（近5日三大法人買賣超張數滾動），與sector_flow.json（連續天數/加速度/z分數，個股層在stocks物件）是兩條完全獨立的計算管線，彼此不重疊。純改說明文字會變成描述一個沒有真的被算出來、也沒有顯示在頁面上的數字（違反本專案稽核恆等式鐵律「兩端都必須是使用者實際看得到的數字，不准自己決定算法」）；若要讓文字真的對得上，等於要把chips因子的計算公式從institutional.history改成引用sector_flow.json的個股層欄位——這是評分引擎已上線因子的公式變更，不是文字微調，且chips是14%權重、直接影響scores.json排名，屬於「新的架構/參數變更」，依CLAUDE.md提案先於執行鐵律該停下來問，不該由開發佇列自走輪次自行判斷改哪個方向。三個選項留給總司令裁示：(a)只改公式不改文字定位為新方向，改用sector_flow.json個股層欄位重算chips因子（需研究帽走驗證流程，不是開發帽能做的文字工作）；(b)維持現有institutional.history計算，只把說明文字改得更準確描述『這是institutional.history算的，不是sector_flow.json』（等於否定原指令的『改引用』字面意思）；(c)本項降級：把「改引用sector_flow.json」的範圍收斂到市場頁/個股頁那些本來就有讀sector_flow.json的UI文案（index.html的產業金流地圖卡6369-6371行、籌碼徽章3828-3831行——這兩處查證已經寫得夠精確，可能只需微調用詞），評分引擎本身的chips因子維持現狀不動。
-- [ ] **金流一.5** HYPOTHESIS_QUEUE **#42**（原 #41，2026-09-06 總司令裁示改號，避免與已排程的 #41 撞號）產業金流加速度輪動效應，三關流程檢驗
-- [ ] **金流一.6** 驗收：smoke 兩項新檢查＋三張截圖＋回補進度回報
+- [!] **金流一.5** HYPOTHESIS_QUEUE **#42**（原 #41，2026-09-06 總司令裁示改號，避免與已排程的 #41 撞號）產業金流加速度輪動效應，三關流程檢驗　**⛔ 自走中止（2026-09-15 12:46）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
+- [x] **金流一.6** **已完成**：`scripts/smoke_test.mjs` 新增 #47/#48 兩項資料一致性檢查——
+  #47「sector_flow.json 每個產業合計＝成分股加總（容差1股）」：實測 40 個產業×視窗[1,5]
+  共驗 80 組全部一致；#48「sector_flow.json 的 date 必須等於 T86（institutional_history.json）
+  最新日期」：實測兩者皆為 20260907。兩項都用檔案上實際看得到的數字互相稽核，不重播
+  build_sector_flow.py 的演算法。截圖三張存於 repo 根目錄（未進版控，一次性驗收證據，
+  跟既有 `kbars_open_check.png` 同慣例）：`sector_flow_1_market_card.png`（市場頁產業金流卡，
+  依規格改用長條圖，理由見金流一.3——20日加速度/累計尚未累積足夠交易日，硬畫散點圖會是
+  假資料）、`sector_flow_2_sector_expand.png`（展開半導體業成分股買超前10/賣超前10排行）、
+  `sector_flow_3_stock_2330_chips.png`（2330 個股頁籌碼分頁三大法人買賣超）。截圖腳本
+  `scripts/sector_flow_screenshots.mjs`（已進版控，可重跑）。回補進度：
+  `research/data/raw_tpex_3insti/` 現況 290 個檔案（20250806~20260915，隨每日排程滾動
+  往前推進）、其中有實際資料的交易日 270 天，仍超過金流一.2 訂的 250 天目標，狀態與
+  金流一.2 完成時一致（290 檔／270 交易日），無需再補。冒煙測試 48/49 PASS（唯一 FAIL
+  是既有、與本項無關的 #39 資料一致性稽核閘門，違規率 12.53%，多次先前 commit 已記錄
+  同一數字）。**發現（未在本項範圍內處理，留待另案）**：`data/institutional_history.json`
+  與 `data/sector_flow.json` 自 2026-09-08 起未再被 `market.yml` 的
+  `accumulate_institutional.py`／`build_sector_flow.py` 更新過（git log 只有初次那筆
+  commit），代表金流一.1 規格要求的「每日與 stock_detail 同一批跑」目前並未真的每天發生；
+  #48 這次驗到的是兩份檔案彼此內部一致（都停在 20260907），不代表資料是新鮮的——這是
+  一個獨立的排程/維運問題，不屬於「驗收 smoke 檢查是否正確」的範圍，先如實記錄。
 
 ---
 
