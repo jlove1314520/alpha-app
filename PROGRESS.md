@@ -1,3 +1,49 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-121601）實測二補.3：盤中真實驗證，順帶抓到並修好一個backfill不持久化的bug
+
+`PENDING_QUEUE.md`權威清單下一項是「實測二補.3」（原標記「阻塞中，等週一開盤」）。
+今天是週二12:16，台股盤中（09:00–13:30）仍在交易時段，且發現`shioaji_quotes.py`
+常駐行程當天11:43才自然重啟（上一輪「三支常駐服務launcher python路徑bug」修復
+後的正常重啟），符合驗收腳本`scripts/kbars_open_check.mjs`原本規劃的「晚啟動」
+測試前提，遂直接執行驗證而非續等下週一。
+
+**驗證過程中發現真bug**：先手動查`/live/kbars?code=2330`，發現第一根停在`11:40`
+（daemon重啟時間）而非要求的`≤09:01`，且`backfill:null`。追查`alpha_live_server.
+py`的`_needs_kbars_backfill()`邏輯：偵測到需要補時會查一次`api.kbars()`並合併，
+但合併結果只回在觸發那一次的HTTP response裡、沒有存下來；`_kbars_backfilled
+[code]`當天已標記「補過」，導致同一天後續每一次`/live/kbars`請求都跳過重查，
+卻又拿不到歷史資料，第一根就永遠停在daemon啟動那一刻，直到收盤都不會恢復。
+這正是實測二補.3要驗收的那個場景（早啟動代號的曲線必須從開盤起算），且是
+一個明確、範圍侷限的bug，依CLAUDE.md「純bug修復可直接做」例外，未先提案
+即直接修復。
+
+**修法**：新增`_kbars_backfill_cache: dict[str, list[dict]]`，把查到的歷史bars
+存起來；之後同一天只要偵測到「仍然需要補」，就用快取合併，不必重打
+`api.kbars()`（保住270次/日官方額度），但每次請求都會拿到完整合併結果，
+不會再遺漏。Commit `6a2fa099`。
+
+**依CLAUDE.md「七之二、常駐服務發布紀律」完成四步驗證**：
+1. 重啟`alpha_live_server.py`（舊PID 31576 kill，排程1分鐘內自動拉起新PID 116808）
+2. `/health`帶token回`"build":"655b552"`，與`git rev-parse --short HEAD`
+   （`655b5526`）一致
+3. OPTIONS預檢同時含`access-control-allow-origin: https://jlove1314520.
+   github.io`與`access-control-allow-credentials: true`
+4. `/health`的`"stale_process":false`
+
+重啟後重新`POST /subscribe`把測試用的冷門股`6158`加回去（App自己開著的分頁
+會用localStorage自選股覆蓋動態訂閱清單，這是預期行為不是bug，觀察到後直接
+重新訂閱即可）。最終正式跑`node scripts/kbars_open_check.mjs`：**全部PASS**——
+早啟動的`2330`與12:20才動態加入的冷門股`6158`，第一根都是`09:01`、最大缺口
+1分鐘、當日`api.kbars()`呼叫10次（自訂上限240、官方盤中上限270），截圖存於
+本機`kbars_open_check.png`（未入repo）。
+
+冒煙測試：`node scripts/smoke_test.mjs`全過，僅剩已知的第39項FAIL（資料一致性
+稽核閘門，`稽核.三`已於前一輪標記阻塞交還總司令裁示，非本輪引入、非本輪範圍）。
+
+改了哪些檔案：`research/alpha_live_server.py`（bug修復，commit `6a2fa099`）、
+`PENDING_QUEUE.md`／本檔（本次收尾commit）。`PENDING_QUEUE.md`已將實測二補.3
+從`- [ ]`改為`- [x]`並附完整證據。下一項（依`dev_queue_runner.py next`）是
+「金流一.4　評分引擎籌碼因子說明改引用sector_flow實際欄位」。
+
 ## 2026-09-15（假設佇列自走・第十四輪）題材七待辦2續跑第六批（offset=90），累計110/259
 
 依「交辦優先於自走」鐵律，接續`PENDING_QUEUE.md`上一輪留下的可執行交辦
