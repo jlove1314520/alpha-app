@@ -502,6 +502,22 @@ def describe_industrial_production(path: Path) -> dict:
     }
 
 
+def describe_signal_status(path: Path) -> dict:
+    """data/signal_status.json（2026-09-15新增，開發佇列源頭一.4）——研究帽每條
+    假說的公開成績單（含FAIL），來源是`research/build_signal_status.py`人工彙整
+    `TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`，不是自動剖析。App設定頁「訊號
+    誠實度」卡讀這份檔案畫三態徽章（已驗證/未驗證/實測無效）。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    dirs = d.get("directions", [])
+    exts = d.get("external_strategies", [])
+    return {
+        "generated_at": d.get("generated_at"),
+        "records": len(dirs) + len(exts),
+        "source": "research/build_signal_status.py（人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，非自動剖析，非排程）",
+        "detail": f"研究方向={len(dirs)}條 外部策略={len(exts)}條",
+    }
+
+
 DESCRIBERS = {
     "quotes_tw.json": describe_quotes,
     "quotes_us.json": describe_quotes,
@@ -531,6 +547,7 @@ DESCRIBERS = {
     "bls_macro.json": describe_bls_macro,
     "customs_trade.json": describe_customs_trade,
     "industrial_production.json": describe_industrial_production,
+    "signal_status.json": describe_signal_status,
 }
 
 
@@ -882,6 +899,7 @@ APP_DATA_SOURCES = [
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},
     {"panel": "交易頁·大盤融資維持率", "source": "data/margin_maintenance.json（2026-08-27起改排程：分子TWSE官方MI_MARGN/STOCK_DAY_ALL，分母仍FinMind，見known_limitations）"},
     {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "無（尚無交易紀錄，誠實佔位）"},
+    {"panel": "設定頁·訊號誠實度（三態徽章：已驗證/未驗證/實測無效）", "source": "data/signal_status.json（research/build_signal_status.py人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，2026-09-15開發佇列源頭一.4接上個股頁外的App UI）"},
 ]
 
 # 2026-08-27新增（使用者要求）：每個關鍵欄位的「主來源→備援→推導→標示不可得」

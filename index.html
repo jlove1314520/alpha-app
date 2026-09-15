@@ -1366,6 +1366,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">資料時間：<b id="sec-tm">--:--</b>。統計視窗 24 小時，來源 IP 只顯示到 /24 網段。需要即時伺服器連線才讀得到。</div>
     </div>
 
+    <!-- 2026-09-15（開發佇列源頭一.4）訊號誠實三態徽章：把研究帽的成績單（含FAIL）
+    攤給使用者看，資料來自 research/build_signal_status.py 人工整理
+    TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md 產生的 data/signal_status.json，是
+    人工彙整快照、不是即時計算——這是 Alpha 對籌碼K線類產品的差異化：連「測過、
+    沒用」都公開，不是只秀漂亮的。 -->
+    <div class="card">
+      <h3>訊號誠實度 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'signal-status-tm',async()=>{await loadSignalStatus(true)})">重新整理</span></h3>
+      <div class="note" id="signal-status-summary">檢查中…</div>
+      <div id="signal-status-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">資料時間：<b id="signal-status-tm">--:--</b>。三態：<b style="color:var(--up)">已驗證</b>＝通過完整驗證關卡（PASS）；<b style="color:var(--ink-3)">未驗證</b>＝尚在排隊或測試中；<b style="color:var(--warn)">實測無效</b>＝測過但FAIL結案。涵蓋自走研究的每一條方向與匯入的外部（名家）已發表策略，非投資建議。</div>
+    </div>
+
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
@@ -5425,6 +5437,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
+    _safeAsync('loadSignalStatus',()=>loadSignalStatus(false));  // 2026-09-15 開發佇列源頭一.4
     _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
   }
 
@@ -6536,6 +6549,54 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       list.innerHTML='';
     }
   }
+  // 2026-09-15（開發佇列源頭一.4）讀 data/signal_status.json 並呈現三態徽章。
+  // 該檔是 research/build_signal_status.py 人工彙整 TRIALS_LEDGER.md/
+  // STRATEGY_GRAVEYARD.md 的結果快照，不是本頁即時運算——讀不到就誠實說讀不到，
+  // 不要顯示成空白（那會讓人以為「還沒有任何結果」而不是「檔案抓取失敗」）。
+  let SIGNAL_STATUS_CACHE=null;
+  function _signalTriState(status){
+    const s=String(status||'').toUpperCase();
+    if(s.indexOf('FAIL')>=0)return'實測無效';
+    if(s==='PASS'||s.indexOf('通過')>=0)return'已驗證';
+    return'未驗證';  // NOT_STARTED / IN_PROGRESS / EXPERIMENTAL / 已測 / MIXED 等一律歸未驗證，寧可保守不誇大
+  }
+  function _signalTriColor(tri){
+    return tri==='已驗證'?'var(--up)':(tri==='實測無效'?'var(--warn)':'var(--ink-3)');
+  }
+  async function loadSignalStatus(force){
+    const sum=document.getElementById('signal-status-summary'),list=document.getElementById('signal-status-list');
+    if(!sum||!list)return;
+    try{
+      if(force||!SIGNAL_STATUS_CACHE){
+        const r=await fetch('data/signal_status.json?t='+Date.now());
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        SIGNAL_STATUS_CACHE=await r.json();
+      }
+      const d=SIGNAL_STATUS_CACHE;
+      const dirs=Array.isArray(d.directions)?d.directions:[];
+      const exts=Array.isArray(d.external_strategies)?d.external_strategies:[];
+      const all=dirs.map(x=>({name:x.name,tri:_signalTriState(x.status),detail:x.summary||x.note||''}))
+        .concat(exts.map(x=>({name:x.name,tri:_signalTriState(x.status),detail:x.source||''})));
+      const counts={'已驗證':0,'未驗證':0,'實測無效':0};
+      all.forEach(x=>{counts[x.tri]=(counts[x.tri]||0)+1});
+      sum.innerHTML=`研究方向 <b class="num">${nf(dirs.length)}</b> 條＋外部策略 <b class="num">${nf(exts.length)}</b> 條 ｜ `
+        +`<b style="color:var(--up)">已驗證 ${counts['已驗證']}</b>／`
+        +`<b style="color:var(--ink-3)">未驗證 ${counts['未驗證']}</b>／`
+        +`<b style="color:var(--warn)">實測無效 ${counts['實測無效']}</b>`;
+      const rows=all.map(x=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-top:1px solid var(--hairline)">`
+        +`<span style="flex-shrink:0;background:${_signalTriColor(x.tri)};color:#1a1005;font-size:9.5px;padding:2px 7px;border-radius:10px;font-weight:700;white-space:nowrap">${x.tri}</span>`
+        +`<div style="flex:1;min-width:0"><div style="font-size:11.5px;color:var(--ink-2)">${x.name||''}</div>`
+        +(x.detail?`<div style="font-size:10px;color:var(--ink-4);margin-top:2px">${x.detail}</div>`:'')
+        +'</div></div>').join('');
+      list.innerHTML=`<details><summary style="font-size:11.5px;color:var(--ink-3);cursor:pointer">展開全部 ${all.length} 條</summary>${rows}</details>`;
+      const tm=document.getElementById('signal-status-tm');
+      if(tm&&d.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.generated_at),'Asia/Taipei');
+    }catch(e){
+      console.warn('[loadSignalStatus]',e);recordGlobalError('loadSignalStatus',e);
+      sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到訊號成績單</b>（'+e.message+'）。代表 research/build_signal_status.py 尚未產生 data/signal_status.json，或排程沒有落地——這本身就是需要處理的狀況，不是「沒有結果」。';
+      list.innerHTML='';
+    }
+  }
   async function loadDataFreshness(){
     const list=document.getElementById('data-freshness-list');if(!list)return;
     const now=new Date();
@@ -6586,7 +6647,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1507';
+  const APP_VERSION='2026-09-15.1538';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -2807,7 +2807,32 @@ ORDER-END
   更新panel描述），`python generate_status_json.py`重跑成功。冒煙測試：
   `node scripts/smoke_test.mjs` 48項僅既有紅燈check 39 FAIL，其餘全過，
   含check 45（個股頁五分頁無殘留佔位字）。
-- [ ] **源頭一.4** 訊號三態徽章＋`data/signal_status.json`（來源 TRIALS_LEDGER＋STRATEGY_GRAVEYARD）
+- [x] **源頭一.4** **已完成（2026-09-15 開發佇列cycle_id=20260915-153103）**：`data/
+  signal_status.json`資料層本身在`轉向.四`就已建好並持續維護（本輪未動），本項
+  真正欠缺的是**App UI從未讀取顯示**（`build_signal_status.py`檔內註解也如實
+  寫著「已知限制：App目前尚未讀取本檔案顯示」）。本輪補上：
+  1. `index.html`設定頁新增「訊號誠實度」卡（比照既有「資料健康」/「安全」卡
+     同款版型：摘要行＋可展開明細列＋重新整理按鈕），新增`loadSignalStatus()`
+     loader（`_safeAsync`包起來、`fetch`失敗有專屬錯誤訊息、`recordGlobalError`
+     記錄，符合錯誤隔離鐵律），掛進`hydrateSettings()`。
+  2. 三態徽章判定邏輯`_signalTriState()`：`status`含"FAIL"→實測無效；
+     `status`為"PASS"或含"通過"→已驗證；其餘（NOT_STARTED/IN_PROGRESS/
+     EXPERIMENTAL/已測/MIXED等）一律歸未驗證，寧可保守不誇大既有研究進度。
+  3. `generate_status_json.py`補上`describe_signal_status()`解析器並註冊進
+     `DESCRIBERS`，修正`data/STATUS.json`原本「沒有對應的解析器」的error列；
+     `PANEL_SOURCES`新增一筆「設定頁·訊號誠實度」對應說明。重跑
+     `python generate_status_json.py`確認`signal_status.json`那筆變成
+     `status=ok records=38`（21條研究方向+17條外部策略）。
+  **驗證**：用Playwright實開設定頁，`#signal-status-summary`顯示真實數字
+  「研究方向 21 條＋外部策略 17 條 ｜ 已驗證 1／未驗證 5／實測無效 32」，展開
+  明細列有正確徽章顏色與文字，`pageerror`為空陣列。冒煙測試
+  `node scripts/smoke_test.mjs`：48項僅既有紅燈check 39 FAIL（既有基準，跟
+  本項改動的檔案無關），其餘全過。**誠實揭露範圍**：`data/signal_status.json`
+  本身仍是人工彙整快照（`build_signal_status.py`docstring已明載），不是自動
+  剖析`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`，本項只接上顯示層，未改變
+  資料產生方式；三態判定只讀`directions`頂層`status`與`external_strategies`
+  的`status`文字，未展開`sub_events`（例如#51/#52內部子事件），這是刻意簡化
+  避免明細列過長，母層狀態已反映整體結論。
 - [x] **源頭一.5** 佇列清理：籌碼K線開發者入口已劃掉（2026-09-06 已完成，見「零之二」區塊，理由 CMoney 無對外 API）
 - [ ] **源頭一.6** 推播先提案不做：iOS PWA Web Push 現況與三方案成本，回報等裁示
 - [ ] **源頭一.7** 驗收：DATA_SOURCE_MAP 逐格截圖、holders.json 覆蓋檔數、2330 千張大戶人工核對、signal_status 三態筆數

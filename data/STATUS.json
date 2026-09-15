@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-15T15:06:30.538283+08:00",
-  "latest_commit": "855c9022",
+  "updated_at": "2026-09-15T15:35:08.812482+08:00",
+  "latest_commit": "164d4bd0",
   "data_files": [
     {
       "path": "data/adr_premium.json",
@@ -276,7 +276,7 @@
     },
     {
       "path": "data/quotes_ibkr.json",
-      "generated_at": "2026-09-15T15:06:04.355829+08:00",
+      "generated_at": "2026-09-15T15:31:05.458810+08:00",
       "records": 0,
       "source": "research/ibkr_quotes.py（本機IB Gateway paper帳戶，非GitHub Actions排程）",
       "detail": "connected=False account_type=None error=連線失敗（IB Gateway可能沒開，或port/防火牆設定不對）：ConnectionRefusedError: [WinError 1225] 遠端電腦拒絕網路連線。 有報價數=0/0",
@@ -332,11 +332,11 @@
     },
     {
       "path": "data/signal_status.json",
-      "generated_at": null,
-      "records": null,
-      "source": "未知（generate_status_json.py 沒有對應的解析器，需要補上）",
-      "detail": "",
-      "status": "error"
+      "generated_at": "2026-09-15T06:47:16.808662+08:00",
+      "records": 38,
+      "source": "research/build_signal_status.py（人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，非自動剖析，非排程）",
+      "detail": "研究方向=21條 外部策略=17條",
+      "status": "ok"
     },
     {
       "path": "data/sparklines.json",
@@ -469,7 +469,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-15T15:06:41+08:00",
+    "checked_at": "2026-09-15T15:35:20+08:00",
     "any_overdue": true,
     "overdue_names": [
       "美股四大指數（market.yml 21:30 UTC）"
@@ -511,7 +511,7 @@
         "file": "data/quotes_ibkr.json",
         "owner": "本機排程",
         "status": "ok",
-        "last_data_at": "2026-09-15T15:06+08:00",
+        "last_data_at": "2026-09-15T15:31+08:00",
         "expected_at_or_after": "2026-09-15T03:30+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "只有使用者這台機器開著IB Gateway才會更新"
@@ -589,7 +589,7 @@
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-09-15T15:06:43.571690+08:00",
+    "checked_at": "2026-09-15T15:35:22.081364+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "any_stalled": false,
     "stalled": [],
@@ -601,8 +601,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T15:06:02.060921+08:00",
-        "age_min": 0.7,
+        "last_output": "2026-09-15T15:35:02.473451+08:00",
+        "age_min": 0.3,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -613,8 +613,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T15:05:07.477770+08:00",
-        "age_min": 1.6,
+        "last_output": "2026-09-15T15:35:07.619376+08:00",
+        "age_min": 0.2,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -626,7 +626,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-15T13:47:02.361362+08:00",
-        "age_min": 79.7,
+        "age_min": 108.3,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -637,8 +637,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T15:06:04.709219+08:00",
-        "age_min": 0.6,
+        "last_output": "2026-09-15T15:31:05.815583+08:00",
+        "age_min": 4.3,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -649,8 +649,8 @@
         "expected_interval_min": 5,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-15T15:06:04.355829+08:00",
-        "age_min": 0.7,
+        "last_output": "2026-09-15T15:31:05.458810+08:00",
+        "age_min": 4.3,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -661,8 +661,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-15T15:02:02.643450+08:00",
-        "age_min": 4.7,
+        "last_output": "2026-09-15T15:32:01.826322+08:00",
+        "age_min": 3.3,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -673,8 +673,8 @@
         "expected_interval_min": 15,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-15T15:00:02.775920+08:00",
-        "age_min": 6.7,
+        "last_output": "2026-09-15T15:30:02.721618+08:00",
+        "age_min": 5.3,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -685,8 +685,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T14:35:46.372891+08:00",
-        "age_min": 31.0,
+        "last_output": "2026-09-15T15:31:03.791675+08:00",
+        "age_min": 4.3,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -697,8 +697,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T15:00:37.659800+08:00",
-        "age_min": 6.1,
+        "last_output": "2026-09-15T15:30:37.611627+08:00",
+        "age_min": 4.7,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -709,8 +709,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T14:54:59.539534+08:00",
-        "age_min": 11.7,
+        "last_output": "2026-09-15T15:21:02.504714+08:00",
+        "age_min": 14.3,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -720,9 +720,9 @@
         "artifact": "C:/alpha/alpha-data/alpha.db",
         "expected_interval_min": 1440,
         "freshness": "sqlite_max_date",
-        "source": "各表 max(date)：daily_price=2026-09-14、inst_trades=2026-09-14、valuation=2026-09-14、taifex_large=20260910",
-        "last_output": "2026-09-14T00:00:00+08:00",
-        "age_min": 2346.7,
+        "source": "各表 max(date)：daily_price=2026-09-15、inst_trades=2026-09-15、valuation=2026-09-15、taifex_large=20260910",
+        "last_output": "2026-09-15T00:00:00+08:00",
+        "age_min": 935.4,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -734,7 +734,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 1866.7,
+        "age_min": 1895.3,
         "stall_limit_min": 30240,
         "status": "ok"
       }
@@ -885,6 +885,10 @@
     {
       "panel": "日誌頁·本週損益/AI週覆盤/交易紀錄",
       "source": "無（尚無交易紀錄，誠實佔位）"
+    },
+    {
+      "panel": "設定頁·訊號誠實度（三態徽章：已驗證/未驗證/實測無效）",
+      "source": "data/signal_status.json（research/build_signal_status.py人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，2026-09-15開發佇列源頭一.4接上個股頁外的App UI）"
     }
   ],
   "field_fallback_chains": [

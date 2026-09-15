@@ -1,3 +1,40 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）源頭一.4：訊號誠實三態徽章接上App設定頁
+
+`PENDING_QUEUE.md`權威清單下一項：源頭一.4「訊號三態徽章＋`data/
+signal_status.json`」。本輪戴**開發帽**。
+
+`data/signal_status.json`資料層在更早的`轉向.四`就已建好並持續維護，本輪
+未動它；真正欠缺的是**App從未讀取顯示**——`research/build_signal_status.py`
+docstring原本就寫著「已知限制：App目前尚未讀取本檔案顯示，UI串接待開發帽
+另開項目」，本輪就是那個「另開項目」：
+
+1. `index.html`設定頁新增「訊號誠實度」卡，比照既有「資料健康」／「安全」卡
+   同款版型（摘要行＋可展開明細列＋重新整理按鈕），新增`loadSignalStatus()`
+   loader：`_safeAsync`包起來、fetch失敗有專屬錯誤訊息、`recordGlobalError`
+   記錄失敗，掛進`hydrateSettings()`。
+2. 三態判定`_signalTriState()`：`status`含"FAIL"→**實測無效**；`status`為
+   "PASS"或含"通過"→**已驗證**；其餘（NOT_STARTED/IN_PROGRESS/EXPERIMENTAL/
+   已測/MIXED等）一律歸**未驗證**，寧可保守不誇大既有研究進度。
+3. `generate_status_json.py`補上`describe_signal_status()`解析器並註冊進
+   `DESCRIBERS`，修正`data/STATUS.json`原本那筆「沒有對應的解析器」的
+   error；`PANEL_SOURCES`新增對應說明。重跑後`signal_status.json`那筆變成
+   `status=ok records=38`。
+
+**驗證**：Playwright實開設定頁，`#signal-status-summary`顯示真實數字
+「研究方向 21 條＋外部策略 17 條 ｜ 已驗證 1／未驗證 5／實測無效 32」，展開
+明細列徽章顏色/文字正確，`pageerror`為空陣列。冒煙測試
+`node scripts/smoke_test.mjs`：48項僅既有紅燈check 39 FAIL（既有基準、跟
+本項無關），其餘全過。
+
+**誠實揭露範圍**：`signal_status.json`本身仍是人工彙整快照，不是自動剖析
+`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`，本項只接上顯示層；三態判定只讀
+`directions`頂層`status`，未展開`sub_events`（例如#51/#52內部子事件），
+母層狀態已反映整體結論，是刻意簡化避免明細列過長。
+
+影響檔案：`index.html`、`generate_status_json.py`、`data/STATUS.json`、
+`PENDING_QUEUE.md`、本檔。下一項：`PENDING_QUEUE.md`權威清單源頭一.6（推播
+方案提案，先不做）／源頭一.7（驗收）。
+
 ## 2026-09-15（假設佇列自走・第十五輪）題材七待辦2續跑第七批（offset=110），累計130/259
 
 依「交辦優先於自走」鐵律，接續`PENDING_QUEUE.md`上一輪（第十四輪）留下
