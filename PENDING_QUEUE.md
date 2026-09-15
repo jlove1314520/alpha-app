@@ -2781,7 +2781,32 @@ ORDER-END
   源」的範圍內，本輪不擅自新增（避免無交辦擅自加功能）。冒煙測試：本項
   未動任何程式碼，`node scripts/smoke_test.mjs`維持前一項驗證過的48項僅
   既有紅燈check 39 FAIL基準不變。
-- [ ] **源頭一.3** 個股頁籌碼卡新增「千張大戶（週更 MM-DD）」與「借券賣出」兩列，所有數字標資料日期
+- [x] **源頭一.3** **已完成（2026-09-15 開發佇列cycle_id=20260915-143102）**：個股頁
+  籌碼分頁新增兩張卡（沿用既有「每個資料源一張card」的既有慣例，跟外資持股
+  比率／可借券賣出股數同一種排版，不是塞進單一card的兩行）：
+  1. **千張大戶（集保）**：≥1000張持股比例／≤1張（零股）持股比例／週變化／
+     連續增減週數，資料源`data/holders.json`（`源頭一.2a`已建好的資料，本輪
+     只是接上UI）。
+  2. **借券賣出（當日成交量）**：借券賣出／借券還券，資料源`data/
+     securities_lending_sell.json`（`源頭一.2b`本輪稍早新建的資料）。
+  新增`loadTdccHoldersChip()`/`loadSblSellChip()`兩個loader（比照既有
+  `loadShortLendingChip()`同款try/catch＋`recordGlobalError`錯誤隔離），
+  掛進`_safeAsync`呼叫鏈；美股路徑補上對應的重置預設值＋「僅適用台股」
+  說明文字。**修一個過程中抓到的bug**：`tdcc-week-chg`第一版誤用
+  `fmEmptyMsg()`包裝「僅一週資料，無週變化」這個訊息，但`fmEmptyMsg()`
+  是專門判斷「FinMind呼叫失敗」的旗標，跟這裡「holders.json抓取成功、
+  只是資料本身還沒有第二週可比較」是完全不同的情境——用Playwright實際
+  開頁面測試2330時抓到畫面顯示「連線失敗，請重試」這個誤導訊息（明明
+  資料抓取成功），已改用純文字修正，不再借用不相關的旗標。
+  **驗證**：用Playwright實開2330（台股）確認兩張卡都畫出真實數字
+  （千張大戶84.74%／1.12%／0週；借券賣出318,000股／還券26,000股，
+  跟`源頭一.2b`稍早本機驗證的原始資料一致）；實開AAPL（美股）確認四個
+  欄位正確重置為「—」且顯示「僅適用台股」說明，無`pageerror`。
+  `generate_status_json.py`的panel來源清單同步更新（拿掉「尚未接上個股
+  頁UI」的舊字樣，`securities_lending_sell.json`跟`holders.json`各自
+  更新panel描述），`python generate_status_json.py`重跑成功。冒煙測試：
+  `node scripts/smoke_test.mjs` 48項僅既有紅燈check 39 FAIL，其餘全過，
+  含check 45（個股頁五分頁無殘留佔位字）。
 - [ ] **源頭一.4** 訊號三態徽章＋`data/signal_status.json`（來源 TRIALS_LEDGER＋STRATEGY_GRAVEYARD）
 - [x] **源頭一.5** 佇列清理：籌碼K線開發者入口已劃掉（2026-09-06 已完成，見「零之二」區塊，理由 CMoney 無對外 API）
 - [ ] **源頭一.6** 推播先提案不做：iOS PWA Web Push 現況與三方案成本，回報等裁示

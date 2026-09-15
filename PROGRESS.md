@@ -19,6 +19,44 @@ commit僅含`data/theme_official_site_evidence_draft.json`／
 （dev_queue／connectivity check／IBKR quotes）留下的未commit異動，避免
 越權混入。
 
+## 2026-09-15（開發佇列自走 cycle_id=20260915-143102）源頭一.3：個股頁籌碼分頁接上千張大戶＋借券賣出兩張卡
+
+`PENDING_QUEUE.md`權威清單下一項是「源頭一.3　個股頁籌碼卡新增『千張大戶
+（週更MM-DD）』與『借券賣出』兩列」。本輪戴**開發帽**。
+
+沿用既有「每個資料源一張card」的排版慣例（跟外資持股比率／可借券賣出
+股數同一種樣式），新增兩張card：
+1. **千張大戶（集保）**：≥1000張／≤1張持股比例、週變化、連續增減週數，
+   讀`data/holders.json`（`源頭一.2a`已建好的資料，本輪只是接上UI）。
+2. **借券賣出（當日成交量）**：借券賣出／借券還券，讀`data/
+   securities_lending_sell.json`（`源頭一.2b`本輪稍早新建的資料）。
+
+新增`loadTdccHoldersChip()`/`loadSblSellChip()`兩個loader，比照既有
+`loadShortLendingChip()`同款try/catch＋`recordGlobalError`錯誤隔離，
+掛進`_safeAsync`呼叫鏈；美股路徑補上對應重置值與「僅適用台股」文字。
+
+**過程抓到一個bug並修掉**：用Playwright實開2330測試時，`tdcc-week-chg`
+畫面顯示「連線失敗，請重試（重新整理或稍後再試）」，但實際上`holders.json`
+抓取成功（旁邊`tdcc-big-ratio`等欄位都有正確數字）。根因是第一版程式碼
+誤用`fmEmptyMsg()`包裝「僅一週資料，無週變化」——`fmEmptyMsg()`是專門
+判斷「FinMind呼叫失敗」全域旗標的函式，這裡的情境是完全不相關的「資料
+抓到了，只是還沒累積到第二週可比較」，不該借用那個旗標。已改用純文字，
+重新驗證後畫面正確顯示「僅一週資料，無週變化」。
+
+**驗證**：Playwright實開2330，確認兩張卡畫出真實數字——千張大戶
+84.74%／1.12%／0週，借券賣出318,000股／還券26,000股（跟`源頭一.2b`
+本機驗證的原始資料一致）；實開AAPL確認四個欄位正確重置為「—」且顯示
+「僅適用台股」，過程無`pageerror`。
+
+`generate_status_json.py`的panel來源清單同步更新（`securities_lending_
+sell.json`拿掉「尚未接上個股頁UI」的舊字樣；`holders.json`新增panel
+描述），`python generate_status_json.py`重跑成功。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 48項僅既有紅燈check 39 FAIL
+（跟本項無關），其餘全過，含check 45（個股頁五分頁無殘留佔位字）。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-143102）源頭一.2c：當沖比重——查證後確認無需新增，沿用既有TWTASU
 
 `PENDING_QUEUE.md`權威清單下一項是「源頭一.2c　當沖比重：沿用既有

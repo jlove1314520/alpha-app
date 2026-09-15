@@ -1008,6 +1008,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         </div>
         <div class="note" id="sbl-note">來源：TWSE SBL/TWT96U（GitHub Actions 排程）</div>
       </div>
+      <!-- 2026-09-15（源頭一.3）千張大戶，集保opendata.tdcc.com.tw，僅適用台股，每週五20:00更新。 -->
+      <div class="card">
+        <h3>千張大戶（集保）</h3>
+        <div class="facts">
+          <div class="f"><span>≥1000張持股比例</span><b id="tdcc-big-ratio">—</b></div>
+          <div class="f"><span>≤1張（零股）持股比例</span><b id="tdcc-small-ratio">—</b></div>
+          <div class="f"><span>週變化</span><b id="tdcc-week-chg">—</b></div>
+          <div class="f"><span>連續增減週數</span><b id="tdcc-streak">—</b></div>
+        </div>
+        <div class="note" id="tdcc-note">來源：集保結算所（每週五 20:00 排程）</div>
+      </div>
+      <!-- 2026-09-15（源頭一.3）借券賣出當日成交量，TWSE官方TWT93U＋TPEx官方tpex_short_sell，僅適用台股。 -->
+      <div class="card">
+        <h3>借券賣出（當日成交量）</h3>
+        <div class="facts">
+          <div class="f"><span>借券賣出</span><b id="sbl-sell-volume">—</b></div>
+          <div class="f"><span>借券還券</span><b id="sbl-sell-return">—</b></div>
+        </div>
+        <div class="note" id="sbl-sell-note">來源：TWSE TWT93U／TPEx tpex_short_sell（GitHub Actions 排程）</div>
+      </div>
       <!-- 2026-09-15（源頭二.3第2名）內部人交易，SEC EDGAR官方Form 4，僅適用美股。 -->
       <div class="card">
         <h3>內部人交易（Form 4）</h3>
@@ -3978,6 +3998,65 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
+  // 2026-09-15（源頭一.3）千張大戶（集保opendata.tdcc.com.tw），僅適用台股，每週五20:00更新。
+  let TDCC_HOLDERS_CACHE=null;
+  async function loadTdccHoldersChip(code){
+    try{
+      if(!TDCC_HOLDERS_CACHE){
+        try{const r=await fetch('data/holders.json?t='+Date.now());if(r.ok)TDCC_HOLDERS_CACHE=await r.json()}
+        catch(e){console.warn('[loadTdccHoldersChip:fetch]',e);recordGlobalError('loadTdccHoldersChip:fetch',e)}
+      }
+      const rec=TDCC_HOLDERS_CACHE&&TDCC_HOLDERS_CACHE.stocks&&TDCC_HOLDERS_CACHE.stocks[code];
+      if(!rec){
+        setTxt('tdcc-big-ratio',fmEmptyMsg('查無資料'));
+        setTxt('tdcc-small-ratio','—');setTxt('tdcc-week-chg','—');setTxt('tdcc-streak','—');
+        setTxt('tdcc-note','來源：集保結算所（每週五 20:00 排程）');
+        return;
+      }
+      setTxt('tdcc-big-ratio',rec.big_holder_ratio!=null?rec.big_holder_ratio.toFixed(2)+'%':'—');
+      setTxt('tdcc-small-ratio',rec.small_holder_ratio!=null?rec.small_holder_ratio.toFixed(2)+'%':'—');
+      setTxt('tdcc-week-chg',rec.week_change_pct!=null?((rec.week_change_pct>=0?'+':'')+rec.week_change_pct.toFixed(2)+'%'):'僅一週資料，無週變化');
+      setTxt('tdcc-streak',rec.streak_weeks!=null?rec.streak_weeks+' 週':'—');
+      setTxt('tdcc-note',`資料日 ${rec.date||'—'} · 來源：集保結算所（每週五 20:00 排程）`);
+    }catch(e){
+      console.warn('[loadTdccHoldersChip]',e);recordGlobalError('loadTdccHoldersChip',e);
+      setTxt('tdcc-note','載入失敗');
+    }
+  }
+
+  // 2026-09-15（源頭一.3）借券賣出當日成交量，TWSE官方TWT93U＋TPEx官方tpex_short_sell。
+  // 注意：跟loadShortLendingChip（可借額度）是不同的資料，這裡是「今天實際借出去賣了多少」。
+  let SBL_SELL_CACHE=null;
+  async function loadSblSellChip(code){
+    try{
+      if(!SBL_SELL_CACHE){
+        try{const r=await fetch('data/securities_lending_sell.json?t='+Date.now());if(r.ok)SBL_SELL_CACHE=await r.json()}
+        catch(e){console.warn('[loadSblSellChip:fetch]',e);recordGlobalError('loadSblSellChip:fetch',e)}
+      }
+      const d=SBL_SELL_CACHE;
+      const tw=d&&d.twse&&d.twse[code];
+      const otc=d&&d.tpex&&d.tpex[code];
+      if(!tw&&!otc){
+        setTxt('sbl-sell-volume',fmEmptyMsg('查無資料'));
+        setTxt('sbl-sell-return','—');
+        setTxt('sbl-sell-note','來源：TWSE TWT93U／TPEx tpex_short_sell（GitHub Actions 排程）');
+        return;
+      }
+      if(tw){
+        setTxt('sbl-sell-volume',nf(tw.sbl_sell)+' 股');
+        setTxt('sbl-sell-return',nf(tw.sbl_return)+' 股');
+        setTxt('sbl-sell-note',`資料日 ${d.twse_date||'—'} · 上市（TWSE TWT93U）· 多數股票非0視為正常`);
+      }else{
+        setTxt('sbl-sell-volume',nf(otc.sbl_sell_volume)+' 股');
+        setTxt('sbl-sell-return',fmEmptyMsg('TPEx端點無此欄位'));
+        setTxt('sbl-sell-note',`資料日 ${d.tpex_date||'—'} · 上櫃（TPEx tpex_short_sell）`);
+      }
+    }catch(e){
+      console.warn('[loadSblSellChip]',e);recordGlobalError('loadSblSellChip',e);
+      setTxt('sbl-sell-note','載入失敗');
+    }
+  }
+
   // 2026-09-15（源頭二.3第2名）內部人交易，SEC EDGAR官方Form 4，
   // .github/scripts/fetch_us_insider_trading.py每日排程產生 data/us_insider_trading.json。
   // 僅適用美股（台股走loadForeignHoldingChip那張卡，兩者互斥顯示）。
@@ -4208,6 +4287,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       setTxt('fh-note','美股無此資料（僅適用台股，外資持股比率為TWSE官方統計）');
       setTxt('sbl-available','—');
       setTxt('sbl-note','美股無此資料（僅適用台股，可借券賣出股數為TWSE官方統計）');
+      setTxt('tdcc-big-ratio','—');setTxt('tdcc-small-ratio','—');setTxt('tdcc-week-chg','—');setTxt('tdcc-streak','—');
+      setTxt('tdcc-note','美股無此資料（僅適用台股，千張大戶為集保結算所官方統計）');
+      setTxt('sbl-sell-volume','—');setTxt('sbl-sell-return','—');
+      setTxt('sbl-sell-note','美股無此資料（僅適用台股，借券賣出成交量為TWSE/TPEx官方統計）');
       _safeAsync('loadInsiderTradingChip',()=>loadInsiderTradingChip(code));
       _safeAsync('loadUs13fChip',()=>loadUs13fChip(code));
       loadFinancialsUS(code);
@@ -4276,6 +4359,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
     setUs13fNA('台股無此資料（僅適用美股，機構持倉為SEC Form 13F申報）');  // 2026-09-15 源頭二.3第6名
     _safeAsync('loadShortLendingChip',()=>loadShortLendingChip(code));  // 2026-09-15 源頭二.3第5名
+    _safeAsync('loadTdccHoldersChip',()=>loadTdccHoldersChip(code));  // 2026-09-15 源頭一.3
+    _safeAsync('loadSblSellChip',()=>loadSblSellChip(code));  // 2026-09-15 源頭一.3
     if(px.length){
       // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
       // 流動性門檻是完全獨立的另一件事：不管跟自己比是熱是冷，成交值絕對數字太低（單日<3000萬）
@@ -6501,7 +6586,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1015';
+  const APP_VERSION='2026-09-15.1507';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
