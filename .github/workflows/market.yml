@@ -177,10 +177,22 @@ jobs:
         # 整批白丟——這正是為什麼共用的斷路器狀態檔長期只看得到"finmind"這個
         # key，TWSE系列的登記每次都在這裡被push race吃掉。修法同quotes.yml：
         # push前fetch+rebase同步最新，失敗重試最多5次。
+        # 2026-09-16（總司令裁示【market.yml停擺31小時】根因修復）：這裡的allowlist
+        # 原本漏了PENDING_QUEUE.md——`scripts/build_sector_flow.py::_update_queue_
+        # countdown()`每輪都會改寫PENDING_QUEUE.md的金流一倒數行，但那個檔案不在
+        # 這個allowlist裡，導致每次跑完都留下一份「已修改、未commit」的追蹤檔案。
+        # 平常push一次就成功時看不出問題；一旦跟其他寫入者（quotes.yml/
+        # AlphaMarathon/使用者互動session）撞在一起需要重試，下面的`git rebase`
+        # 就會因為工作目錄不乾淨而直接失敗（"cannot rebase: You have unstaged
+        # changes"），不是真的合併衝突，是這個allowlist本身的疏漏——2026-09-15
+        # 23:34/15:09/14:16三個班次連續失敗、資料線停擺31小時，實測（`gh run view
+        # --log-failed`）證實正是這個根因，不是臆測。修法：把PENDING_QUEUE.md也
+        # 納入allowlist，讓它跟著這次commit一起進去，工作目錄回到乾淨狀態，
+        # rebase重試才能正常運作。
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json PENDING_QUEUE.md
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do
