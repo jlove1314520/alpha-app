@@ -252,11 +252,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .glass-tip b.hd{display:block;font-size:13.5px;margin-bottom:6px;color:var(--accent)}
   .glass-tip .row{display:flex;justify-content:space-between;gap:16px;padding:2px 0;color:var(--ink-2)}
   .glass-tip .row span{color:var(--ink-3)}
-  .div-bars{display:flex;align-items:center;gap:6px;height:110px}
-  .div-bars .db{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:center;position:relative}
-  .div-bars .db .u,.div-bars .db .dn{width:100%;max-width:22px;border-radius:4px}
-  .div-bars .db .u{background:var(--up);align-self:center}
+  .div-bars{display:flex;align-items:stretch;gap:6px;height:110px}
+  .div-bars .db{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;position:relative}
+  .div-bars .db .bar-zone{flex:1;display:flex;flex-direction:column;width:100%}
+  .div-bars .db .up-zone{flex:1;display:flex;align-items:flex-end;justify-content:center}
+  .div-bars .db .dn-zone{flex:1;display:flex;align-items:flex-start;justify-content:center;border-top:1px solid var(--hairline)}
+  .div-bars .db .u,.div-bars .db .dn{width:100%;max-width:22px;border-radius:4px;min-height:2px}
+  .div-bars .db .u{background:var(--up)}
   .div-bars .db .dn{background:var(--down)}
+  .div-bars .db em{display:block;flex:0 0 auto;margin-top:4px}
   .legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
   .legend .li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-2)}
   .legend .sw{width:10px;height:10px;border-radius:3px}
@@ -3416,6 +3420,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     renderMainstreamChips();
   }
 
+  // 2026-09-15（週六.三／稽核二.五）零基線柱狀圖：正值柱從共用基線往上長、負值柱
+  // 從同一條基線往下長，取代舊版「單一bar在盒子裡置中」（那樣正負值都各自往兩邊
+  // 對稱長，視覺上沒有共用基線，容易誤讀漲跌幅度）。.up-zone/.dn-zone各佔一半高度，
+  // 兩者交界（.dn-zone的border-top）就是基線，同一列的每一欄交界y座標理論上相同。
+  function divBarHTML(label,v,mx){
+    const h=Math.max(15,Math.abs(v)/mx*100).toFixed(0);
+    const up=v>=0?`<i class="u" style="height:${h}%"></i>`:'';
+    const dn=v<0?`<i class="dn" style="height:${h}%"></i>`:'';
+    return `<div class="db"><div class="bar-zone"><div class="up-zone">${up}</div><div class="dn-zone">${dn}</div></div><em style="font-size:9px;color:var(--ink-3)">${label}</em></div>`;
+  }
+
   // 2026-08-26 架構修正：改讀 market_tw.json 的 institutional_history（TWSE T86
   // 全市場逐日加總，見 fetch_market_tw.py）。**單位是「淨買賣張數」不是金額**——
   // T86 只給股數沒有逐股價格，換算成金額需要每股價格加權，這裡沒有那個資料，
@@ -3428,7 +3443,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!history.length){el.innerHTML='<div class="note">查無資料</div>';return}
     const nets=history.map(h=>({date:h.date,net:h.total_net_lots}));
     const mx=Math.max(...nets.map(n=>Math.abs(n.net)))||1;
-    el.innerHTML=nets.map(n=>`<div class="db"><i class="${n.net>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(n.net)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${n.date.slice(4,6)}/${n.date.slice(6,8)}</em></div>`).join('');
+    el.innerHTML=nets.map(n=>divBarHTML(n.date.slice(4,6)+'/'+n.date.slice(6,8),n.net,mx)).join('');
     const todayNet=nets[nets.length-1].net;
     const te=document.getElementById('inst-today');
     te.textContent=(todayNet>=0?'+':'')+Math.round(todayNet)+' 張';te.style.color=todayNet>=0?'var(--up)':'var(--down)';
@@ -4486,7 +4501,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       setChipLots('chip-foreign',inst.foreign);setChipLots('chip-trust',inst.trust);setChipLots('chip-dealer',inst.dealer);setChipLots('chip-total',inst.total);
       setTxt('chip-note',`最新 ${inst.date} · TWSE T86（GitHub Actions 排程）`);
       const mx=Math.max(...inst.series.map(s=>Math.abs(s.v)))||1;
-      document.getElementById('chip-bars').innerHTML=inst.series.map(s=>`<div class="db"><i class="${s.v>=0?'u':'dn'}" style="height:${Math.max(8,Math.abs(s.v)/mx*80).toFixed(0)}%"></i><em style="font-size:9px;color:var(--ink-3);margin-top:4px">${s.date.slice(5)}</em></div>`).join('');
+      document.getElementById('chip-bars').innerHTML=inst.series.map(s=>divBarHTML(s.date.slice(5),s.v,mx)).join('');
       _safeSync('renderChipTrend',()=>renderChipTrend(code,inst,px));
       _safeAsync('renderChipBadges',()=>renderChipBadges(code));  // 2026-09-08 金流一.3
     }else{['chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'—'));
@@ -6829,7 +6844,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1750';
+  const APP_VERSION='2026-09-15.1822';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

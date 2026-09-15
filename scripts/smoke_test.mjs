@@ -1577,10 +1577,67 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("48. sector_flow.json 的 date 必須等於 T86（institutional_history.json）最新日期",
     t86DateErrors.length === 0, t86DateErrors.join("; ") || t86DateInfo);
 
+  // 49.【2026-09-15新增，週六.三／稽核二.五】三大法人柱狀圖零基線：正值柱要從
+  // 共用基線往上長、負值柱從同一條基線往下長，不是舊版「單一bar在盒子裡置中」
+  // （那樣正負值視覺上各自往兩邊對稱伸展，沒有共用基線，容易誤讀漲跌幅度）。
+  // 用getBoundingClientRect直接量畫面上的像素座標（不重播render邏輯），
+  // 斷言：(a) 每一欄.up-zone底邊與.dn-zone頂邊的y座標相等（=該欄自己的基線）；
+  // (b) 所有欄位的基線y座標彼此相等（=全圖共用同一條基線，不是各欄自己置中）；
+  // (c) 正值柱（.u）底邊y＝基線y、負值柱（.dn）頂邊y＝基線y（原始P0裁示原文
+  // 「正值柱底y必須等於基線y」的字面斷言)。
+  const barBaselineErrors = [];
+  let barBaselineInfo = "";
+  try {
+    await page.evaluate(() => window.go("market"));
+    await page.waitForTimeout(500);
+    await page.evaluate(() => window.go("chips-market"));
+    await page.waitForTimeout(1000);
+    const r = await page.evaluate(() => {
+      const cols = Array.from(document.querySelectorAll("#inst-bars .db"));
+      if (!cols.length) return { error: "#inst-bars 沒有任何柱狀欄位（可能仍在載入中或查無資料）" };
+      const baselines = [];
+      const bad = [];
+      for (const col of cols) {
+        const upZone = col.querySelector(".up-zone");
+        const dnZone = col.querySelector(".dn-zone");
+        if (!upZone || !dnZone) { bad.push("欄位缺少.up-zone或.dn-zone"); continue; }
+        const upRect = upZone.getBoundingClientRect();
+        const dnRect = dnZone.getBoundingClientRect();
+        const baselineY = upRect.bottom;
+        if (Math.abs(dnRect.top - baselineY) > 1) {
+          bad.push(`.up-zone底邊y=${upRect.bottom.toFixed(1)} 與 .dn-zone頂邊y=${dnRect.top.toFixed(1)} 不相等`);
+        }
+        baselines.push(baselineY);
+        const bar = col.querySelector(".u, .dn");
+        if (bar) {
+          const barRect = bar.getBoundingClientRect();
+          const barIsUp = bar.classList.contains("u");
+          const barEdge = barIsUp ? barRect.bottom : barRect.top;
+          if (Math.abs(barEdge - baselineY) > 1) {
+            bad.push(`${barIsUp ? "正值柱底" : "負值柱頂"}y=${barEdge.toFixed(1)} ≠ 基線y=${baselineY.toFixed(1)}`);
+          }
+        }
+      }
+      const baselineSpread = baselines.length ? Math.max(...baselines) - Math.min(...baselines) : 0;
+      if (baselineSpread > 1) bad.push(`各欄基線y座標不一致，最大差${baselineSpread.toFixed(1)}px（應共用同一條基線）`);
+      return { bad, colCount: cols.length, baselineSpread };
+    });
+    if (r.error) barBaselineErrors.push(r.error);
+    else {
+      barBaselineErrors.push(...r.bad);
+      barBaselineInfo = `${r.colCount}欄，基線y座標最大差${r.baselineSpread.toFixed(1)}px`;
+    }
+    await page.evaluate(() => window.go("market"));
+  } catch (e) {
+    barBaselineErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("49. 三大法人柱狀圖零基線：正值柱底/負值柱頂皆等於共用基線y座標",
+    barBaselineErrors.length === 0, barBaselineErrors.join("; ") || barBaselineInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
