@@ -1,6 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
-## 2026-09-15T19:55:02+08:00 (hypothesis_queue排程接續，第十七輪) — 接手PENDING_QUEUE交辦：題材七待辦2第九批（offset=150），累計170/259，本輪fetched=14/20、新增a_level命中1檔（3653）
+## 2026-09-15T21:54:38+08:00 (hypothesis_queue排程接續，第十八輪) — 接手PENDING_QUEUE交辦：題材七待辦2第十批（offset=170），累計190/259，本輪fetched=14/20、新增a_level命中1檔（4991）
+
+開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需
+總司令權限）維持阻塞；上一輪（假設佇列第十七輪）留下的可執行項是題材七
+待辦2續跑第十批（`--offset 170`）。取具名鎖`research/.hypothesis_queue.lock`
+時發現陳舊鎖（PID 119724，120.5分鐘未更新，疑似上一輪未正常收工），
+已回收（`LOCK_STALE`→`LOCK_ACQUIRED`）。`git pull`一次成功（`Already up
+to date`），`git status`確認有其他自動化來源（AlphaDevQueue的稽核.六
+條目、connectivity probe、IBKR quotes等）留下的殘留變更，不觸碰、
+不納入commit（`git add -p`只挑自己這輪的hunk）。
+
+跑`theme_official_site_pipeline.py --batch-size 20 --offset 170`（排序第
+171~190檔）：`fetched=14/20`、`exc_SSLError`=4、`blocked_js_render`=2，
+合計20筆自洽。獨立重新驗證（不信任腳本自身輸出文字，直接讀JSON）：
+`data/theme_official_site_evidence_draft.json`的`results`陣列共190筆、
+190個代號互不重複、`status`分布`fetched=113/exc_SSLError=28/
+blocked_js_render=26/exc_ConnectTimeout=10/http_403=9/
+exc_ConnectionError=2/exc_ReadTimeout=1/http_500=1`合計190，與批次進度
+一致；頂層`status`欄位仍為`draft_unreviewed`。`a_level_hits`非空候選由
+累計20筆增至**21筆**（新增4991台驊-KY，與腳本輸出「a_level_hits合計=1」
+一致）。另跑`theme_official_site_negative_control.py`（獨立捕捉Python
+exit code=0，非終端機管線遮蔽）：5家負對照組全數PASS、0個誤命中，確認
+無回歸。累計**190/259**檔。**仍未做**：待辦2剩餘69檔（下一輪可用
+`--offset 190`續跑）、待辦4驗證樣本擴充（仍5句，與待辦2無依賴，可獨立
+續做）；待辦1／待辦3已完成（沿用前幾輪紀錄）。
 
 開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需
 總司令權限）維持阻塞；上一輪（假設佇列第十六輪）留下的可執行項是題材七
@@ -4198,3 +4222,6 @@ atomic write修法（`c97ac0f`）之後建置的全新快取，背景執行中
 
 背景執行中，預估耗時跟上一輪相近（factor prep~20分鐘+約6~7小時的
 draws），會持續更新這裡。
+
+## 2026-09-15T22:00+08:00 — 馬拉松第540輪（US軌）
+取鎖乾淨（cycle`20260915-220036`）。交辦優先於自走鐵律檢查：無本馬拉松三軌可執行未開始項（深讀一.2/工廠一/工廠四/檢定力一均已指定交由hypothesis_queue或dev_queue接續），回落自走，依輪替選US。核實`CALIBRATION_PROBE.md`清單（TW#77/#79/#91、US#47/#52、FUT#34）已全數複驗完畢；0a節四方向僅#50卡阻塞，未達「無可驗證預測優勢」提報門檻。`trial_registry.py --check` exit=0 PASS（245列）。`is_holdout_consumed()`=False。零新增API呼叫。發現`dev_queue`軌獨立新開「regime擇時／下檔保護overlay」研究線（`REGIME_OVERLAY_PROTOCOL.md`，第一個訊號TRAIN測試FAIL），不佔用本馬拉松輪次，本輪未介入。下一輪建議選TW軌。詳見`REPORT.md`第540輪、`US_MARATHON_STATE.md`第540輪、`MARATHON_STATE.md`（計數器540）。
