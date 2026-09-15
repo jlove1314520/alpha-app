@@ -1,3 +1,44 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-191602）「三」免費第一手資料管線補上SEC 8-K（美股半邊），並修正題材因子過期文案
+
+戴**開發帽**。權威執行順序清單「三 免費第一手資料管線」原本標`[ ]`，實查發現
+台股半邊（MOPS重大訊息/月營收/除權息/RSS新聞）早在2026-09-08就建好並排進
+`news_events.yml`每30分鐘排程（`data/events.json`實測6353筆事件），只是
+checkbox一直沒打勾；唯一真的缺的是美股半邊「SEC 8-K」。
+
+**本輪新增**：
+- `.github/scripts/fetch_us_8k.py`——SEC EDGAR官方Form 8-K（`browse-edgar`
+  atom feed，免金鑰），沿用`us_sic.json`既有ticker→CIK對映，只存索引（Item
+  條號+SEC官方說明文字+申報連結，不額外抓全文）。本機實測：9檔追蹤標的抓到
+  38筆（AAPL 4／NVDA 9／MSFT 5／GOOGL 10／AMZN 10／TSM・UMC・ASX・CHT均0筆
+  ——後四檔為外國私人發行人依規定改申報Form 6-K，0筆是正常狀態非抓取失敗，
+  已寫進docstring誠實揭露）。
+- 接進`market.yml`（排在`fetch_us_insider_trading.py`之後一步，git add清單
+  加`data/us_events.json`）。
+- `index.html`新增個股頁「重大訊息（8-K）」卡（僅美股頁顯示，`loadUs8kChip()`
+  ＋`setUs8kNA()`，台股頁顯示「僅適用美股」誠實NA文案，架構對齊既有
+  `loadInsiderTradingChip`/`loadUs13fChip`兩張卡的寫法）。
+- 修正`FACTOR_MISSING_REASON.catalyst`過期文案：原寫「事件資料管線建置中，
+  尚未產出data/events.json」，但該檔案2026-09-08起就已存在且有6353筆事件，
+  改為真實原因（這檔沒事件，不是管線沒建好）。
+
+**誠實揭露未完成子項**：「法說會PDF連結」未做——查證TWSE openapi swagger
+（143個端點，關鍵字搜尋僅命中ESG揭露彙總表，非法說會排程）確認官方OpenAPI
+無此端點，但僅查了1個來源，未達CLAUDE.md「三來源查證」門檻，不下「查不到」
+結論，留待下一輪續查MOPS官方法說會頁面（t100sb02_1）是否可程式化取得、
+ToS是否允許。目前「法說會」事件仍靠既有MOPS重大訊息標題關鍵字分類覆蓋
+（非本輪新增），只是沒有PDF連結，功能可用但不完整。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 50項中49項PASS，僅#39（資料
+一致性稽核閘門，一致性違規率36.70%）既有已知紅燈，是`e_pe`檢查標籤方向的
+方法論落差、待總司令裁示，與本輪異動檔案（`fetch_us_8k.py`／`market.yml`／
+`index.html`兩處UI文案）無關，歷次多輪均沿用同一個已知紅燈判斷可以commit。
+
+**PENDING_QUEUE狀態**：權威清單「三」／「新三」兩個重複條目均改標`[x]`並附
+完整證據與未完成子項的誠實記錄。下一輪起自走runner續做權威清單下一項
+（`零之二`已於2026-09-06劃掉，接續看`二`／`四`阻塞狀態或往下一項推進）。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-190102）稽核.五：群益API查文件完成＋GPU/記憶體確認完成，兩者的下一步都停下等總司令
 
 戴**維運帽**。權威執行順序清單做完`稽核.四`後，下一項是「稽核.五 其餘佇列照序」。

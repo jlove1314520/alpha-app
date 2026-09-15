@@ -1054,6 +1054,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="facts" id="f13-rows"><div class="note">—</div></div>
         <div class="note" id="f13-note">來源：SEC EDGAR Form 13F-HR（GitHub Actions 排程）</div>
       </div>
+      <!-- 2026-09-15（PENDING_QUEUE「三」免費第一手資料管線・美股半邊）重大訊息，
+           SEC EDGAR官方Form 8-K，只存索引（Item條號+官方說明+連結），僅適用美股。 -->
+      <div class="card">
+        <h3>重大訊息（8-K）</h3>
+        <div id="us8k-table"><div class="note">—</div></div>
+        <div class="note" id="us8k-note">來源：SEC EDGAR Form 8-K（GitHub Actions 排程）</div>
+      </div>
     </div>
 
     <div class="subscreen" id="sub-ai">
@@ -4239,6 +4246,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
+  // 2026-09-15（PENDING_QUEUE「三」美股半邊）重大訊息，SEC EDGAR官方Form 8-K，
+  // .github/scripts/fetch_us_8k.py每日排程產生 data/us_events.json，僅適用美股。
+  let US_8K_CACHE=null;
+  function setUs8kNA(msg){
+    setTxt('us8k-note',msg);
+    document.getElementById('us8k-table').innerHTML='<div class="note">'+msg+'</div>';
+  }
+  async function loadUs8kChip(code){
+    try{
+      if(!US_8K_CACHE){
+        try{const r=await fetch('data/us_events.json?t='+Date.now());if(r.ok)US_8K_CACHE=await r.json()}
+        catch(e){console.warn('[loadUs8kChip:fetch]',e);recordGlobalError('loadUs8kChip:fetch',e)}
+      }
+      const d=US_8K_CACHE||{};
+      const e=d.tickers&&d.tickers[code];
+      const filings=e&&e.filings;
+      if(!filings||!filings.length){
+        setUs8kNA(fmEmptyMsg('查無8-K申報資料（近'+(d.keep_days||180)+'天）'));
+        return;
+      }
+      const rows=filings.slice(0,5).map(f=>{
+        const items=(f.items&&f.items.length)?f.items.join('；'):'（無Item條號說明）';
+        return `<div class="f" style="align-items:flex-start"><span>${f.filed_at||'—'}${f.filing_type&&f.filing_type!=='8-K'?'（'+f.filing_type+'）':''}</span><b style="text-align:right;max-width:70%"><a href="${f.url}" target="_blank" rel="noopener">${items}</a></b></div>`;
+      }).join('');
+      document.getElementById('us8k-table').innerHTML=`<div class="facts">${rows}</div>`;
+      setTxt('us8k-note',`近${filings.length}筆申報 · 來源：SEC EDGAR Form 8-K（GitHub Actions 排程，只存索引不存全文）`);
+    }catch(e){
+      console.warn('[loadUs8kChip]',e);recordGlobalError('loadUs8kChip',e);
+      setUs8kNA('載入失敗');
+    }
+  }
+
   // 2026-08-27 架構修正：EPS/毛利率/營益率/ROE改讀 data/stock_detail.json（見
   // update_stock_financials.py，TWSE官方t187ap06_L_ci綜合損益表+t187ap07_L_ci
   // 資產負債表，累積式寫回），不再對FinMind打FinancialStatements/BalanceSheet。
@@ -4410,6 +4449,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       setTxt('sbl-sell-note','美股無此資料（僅適用台股，借券賣出成交量為TWSE/TPEx官方統計）');
       _safeAsync('loadInsiderTradingChip',()=>loadInsiderTradingChip(code));
       _safeAsync('loadUs13fChip',()=>loadUs13fChip(code));
+      _safeAsync('loadUs8kChip',()=>loadUs8kChip(code));
       loadFinancialsUS(code);
       return;
     }
@@ -4475,6 +4515,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
     setUs13fNA('台股無此資料（僅適用美股，機構持倉為SEC Form 13F申報）');  // 2026-09-15 源頭二.3第6名
+    setUs8kNA('台股無此資料（僅適用美股，重大訊息請看「題材判斷」卡的MOPS重大訊息）');  // 2026-09-15 PENDING_QUEUE「三」美股半邊
     _safeAsync('loadShortLendingChip',()=>loadShortLendingChip(code));  // 2026-09-15 源頭二.3第5名
     _safeAsync('loadTdccHoldersChip',()=>loadTdccHoldersChip(code));  // 2026-09-15 源頭一.3
     _safeAsync('loadSblSellChip',()=>loadSblSellChip(code));  // 2026-09-15 源頭一.3
@@ -5274,7 +5315,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     technical:'這檔在 data/price_history.json 的價量歷史不足（至少要 6 個交易日才能算最短的均線與 RSI）。',
     valuation_adj:'這檔在 data/fundamentals.json 沒有本益比／股價淨值比（來源：TWSE BWIBBU_ALL／TPEx tpex_mainboard_peratio_analysis）。',
     analyst:'這檔沒有三大法人買賣紀錄可推算機構行為（本因子是法人實際買賣行為，不是分析師目標價——台股沒有免費的目標價／評等資料源）。',
-    catalyst:'事件資料管線（MOPS 重大訊息／法說會／月營收公布／除權息）建置中，尚未產出 data/events.json。',
+    catalyst:'這檔近期在 data/events.json 沒有事件紀錄（來源：MOPS重大訊息／TWSE月營收公布／除權息，每30分鐘排程更新，見PENDING_QUEUE「三」）。',
   };
   let EXTREME_MOVE_ACTIVE=false;
   function factorRowHtml(key){
@@ -6849,7 +6890,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1832';
+  const APP_VERSION='2026-09-15.1924';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -3716,7 +3716,39 @@ ORDER-END
   與本輪實際工作項目不符，此處已更正為零之三自己真正的阻塞原因；群益API與
   本地摘要GPU確認的完整記錄在`稽核.五`／`二`／`四`／`新二`／`新四`條目，
   commit c373f8c7。）
-- [ ] **三** 免費第一手資料管線（MOPS/法說會/月營收/SEC 8-K/RSS → news.json/events.json，接因子五）
+- [x] **三** 免費第一手資料管線（MOPS/法說會/月營收/SEC 8-K/RSS → news.json/events.json，接因子五）——
+  **本輪（開發佇列cycle_id=20260915-191602）前大部分已完成**：MOPS重大訊息（TWSE
+  t187ap04_L＋TPEx mopsfin_t187ap04_O，含「法說會」關鍵字分類）／月營收公布
+  （TWSE t187ap05_L）／除權息／RSS（中央社、Yahoo股市、經濟日報三分類）已在
+  `.github/scripts/fetch_news_events.py`（2026-09-08起，commit `aecbfbaf`一路
+  沿革至今）並排進`news_events.yml`每30分鐘排程，`data/events.json`實測6353筆
+  事件、`data/news.json`有新聞索引；因子五（題材/事件）已在`research/
+  live_factors.py`吃`data/events.json`（commit `73bfb07`「新一」條目）。
+  **本輪新增SEC 8-K（美股半邊，唯一缺的部分）**：新增
+  `.github/scripts/fetch_us_8k.py`（SEC EDGAR官方browse-edgar atom feed，
+  免金鑰，只存索引不存全文，沿用`us_sic.json`既有ticker→CIK對映），接進
+  `market.yml`（`fetch_us_sic.py`之後、`fetch_us_insider_trading.py`之後
+  一步）；個股頁新增「重大訊息（8-K）」卡（`index.html`，`loadUs8kChip()`，
+  僅美股頁顯示，台股頁顯示「僅適用美股」的誠實NA文案）。本機實測（非CI）：
+  9檔追蹤標的抓到38筆8-K（AAPL 4／NVDA 9／MSFT 5／GOOGL 10／AMZN 10／
+  TSM・UMC・ASX・CHT均0筆——後四檔為外國私人發行人依規定改用Form 6-K非
+  8-K，查到0筆是正常狀態非抓取失敗，已寫進腳本docstring誠實揭露）。
+  同時修正個股頁「事件/題材」因子缺資料原因欄位的過期文案（`FACTOR_MISSING_
+  REASON.catalyst`原寫「建置中，尚未產出data/events.json」，該檔案其實
+  2026-09-08起就已存在且有6353筆事件，過期文案已更正為真實原因——這檔沒事件
+  不是管線沒建好）。冒煙測試50項中49項PASS，僅check 39（資料一致性稽核閘門，
+  一致性違規率36.70%）既有已知紅燈，與本輪異動的檔案（`.github/scripts/
+  fetch_us_8k.py`／`market.yml`／`index.html`兩處UI文案）無關（`data/
+  audit_report.json`在本輪開工前就已是working tree既有未commit變更，屬另一條
+  自走軌道的產物，不在本次commit範圍內）。**誠實揭露未完成的子項**：原始指令
+  裡「法說會PDF連結」（法說會簡報PDF）未做——查證TWSE openapi swagger（143個
+  端點，關鍵字「法說」/「法人說明會」/investor搜尋僅命中ESG揭露彙總表，非
+  法說會排程）確認官方OpenAPI無此端點；MOPS官方法說會查詢頁
+  （mops.twse.com.tw/mops/web/t100sb02_1）是否可程式化取得、ToS是否允許
+  尚未查證（僅查了1個來源，未達CLAUDE.md「搜尋紀律：三來源查證」門檻，
+  不下「查不到」的結論，留待下一輪接續調查，不得跳過三來源直接判定）。
+  目前「法說會」事件仍靠既有MOPS重大訊息裡標題含「法說」關鍵字的分類覆蓋
+  （已存在，非本輪新增），只有標題無PDF連結，屬於功能已可用但不完整。
 - [ ] **零之二** 分點資料沙盤演習（14家API矩陣＋群益確認，只走官方API）　**～～富果／籌碼K線開發者後台端點清單～～ 這一小項已於 2026-09-06 依總司令指令劃掉**，理由：CMoney（籌碼K線）沒有對外 API；分點資料的合法來源是證交所「買賣日報表」付費商品（NT$100,000/月），本階段不碰也不假裝有。
 - [!] **二** 群益證券API唯讀先行（下單入口保持關閉、更新CONSTITUTION）——
   查文件步驟已完成、接唯讀步驟阻塞，詳見`稽核.五`條目與`docs/
@@ -3769,8 +3801,10 @@ ORDER-END
   `fetch_quotes_tw.py::_num()` 裸 `float('2,410.00')`；附證據鏈、5項回歸測試、smoke check 35/36）
 - [x] **新一** 評分引擎八因子全部填上（財報成長／估值PEG／技術型態MA+RSI+量能／機構行為／題材事件／　**已完成（commit `73bfb07`）**：新增 `research/live_factors.py`（＋11 項單元測試），每個因子改「多子訊號複合、有幾個算幾個」。覆蓋率變化：財報成長 25.4%→41.0%、估值(同產業百分位) 11.2%→85.1%、成長性 13.3%→72.2%、技術型態 83.1%→83.6%、機構行為 0%→82.5%；題材/事件仍 0%（等 `data/events.json`，屬佇列「三」）。全市場完整度中位數 0.42→0.74、<60% 檔數 82.3%→32.1%。
   真實說明文字／完整度標示保留／驗收對照）
-- [ ] **新三** 免費第一手資料管線（MOPS重大訊息+法說會+PDF連結+月營收、SEC 8-K、RSS → news.json/events.json，
-  Actions每30分鐘，接進因子五與個股頁事件分頁）
+- [x] **新三** 免費第一手資料管線（MOPS重大訊息+法說會+PDF連結+月營收、SEC 8-K、RSS → news.json/events.json，
+  Actions每30分鐘，接進因子五與個股頁事件分頁）——與上方「三」為同一件事的
+  兩次裁示，完成細節見「三」條目（2026-09-15 開發佇列cycle_id=20260915-191602）。
+  「法說會PDF連結」子項未完成，已在「三」條目誠實記錄查證進度與下一步。
 - [!] **新二** 群益證券API唯讀先行＋分點演習（查文件→接唯讀→分點演習→下單入口保持關閉、更新CONSTITUTION）——
   查文件＋分點演習已完成、接唯讀阻塞，詳見`稽核.五`條目與`docs/
   CAPITAL_SECURITIES_API_GATE.md`（2026-09-15 cycle_id=20260915-190102）

@@ -61,6 +61,9 @@ jobs:
       - name: 更新美股內部人交易（SEC EDGAR官方Form 4，免金鑰，源頭二.3第2名）
         run: python .github/scripts/fetch_us_insider_trading.py
         continue-on-error: true
+      - name: 更新美股重大訊息（SEC EDGAR官方Form 8-K，免金鑰，PENDING_QUEUE「三」美股半邊）
+        run: python .github/scripts/fetch_us_8k.py
+        continue-on-error: true
       - name: 更新CFTC COT部位報告（美股大盤情緒指標，免金鑰，源頭二.3第3名）
         run: python .github/scripts/fetch_cftc_cot.py
         continue-on-error: true
@@ -165,7 +168,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do
