@@ -2056,9 +2056,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(sp&&sp.length){
       const last=sp[sp.length-1],prev=sp.length>1?sp[sp.length-2]:null;
       if(last!=null&&isFinite(last)){
+        // 2026-09-15：asof 改用 SPARKLINES_ASOF（見 ensureSparklines()），不再是
+        // 寫死的 null——這一層是四層回退鏈的最後一層，理論上最容易過期，卻是
+        // 唯一從來不標日期的一層，跟財報過期的處理原則不一致（財報過期至少
+        // 標「XXXXQn」，這裡過去完全沒有任何標示）。
         return {price:last,change:prev!=null?last-prev:null,
                 change_pct:prev?((last-prev)/prev*100):null,prev_close:prev,
-                sparkline:sp,source:'sparklines',tier:'history',asof:null};
+                sparkline:sp,source:'sparklines',tier:'history',asof:SPARKLINES_ASOF};
       }
     }
     return null;
@@ -2235,6 +2239,24 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const z=_zonedParts(dateObj,tz);
     if(z.wd===0||z.wd===6)return false;            // 週末
     return !holidays.has(_ymd(z));
+  }
+  // 2026-09-15（sparklines凍結事件，總司令裁示）：算「dateStr這天」到「今天」之間
+  // 經過了幾個交易日（週末/假日不算），給resolveQuote()的history層（sparklines
+  // 最後一道回退）判斷是不是已經過期太久，過期太久要把日期直接寫進價格文字，
+  // 不能讓使用者以為是當前價。dateStr格式YYYY-MM-DD，抓不到就回傳null（呼叫端
+  // 視為「不確定新舊，保守當作可能過期」還是「不過期」由呼叫端自己決定，這裡
+  // 只負責算數字）。
+  function tradingDaysSince(dateStr,tz,holidays){
+    if(!dateStr||dateStr.length<10)return null;
+    const y=+dateStr.slice(0,4),m=+dateStr.slice(5,7),d=+dateStr.slice(8,10);
+    if(!y||!m||!d)return null;
+    const start=new Date(Date.UTC(y,m-1,d,4,0,0));  // 台北中午前後，避免UTC轉換跨到前一天
+    const now=new Date();
+    let n=0;
+    for(let cursor=new Date(start.getTime()+864e5);cursor<=now;cursor=new Date(cursor.getTime()+864e5)){
+      if(isTradingDay(cursor,tz,holidays))n++;
+    }
+    return n;
   }
   // 回傳「最近一個應該已經收盤的交易日」的 Date（該日當地收盤時間）。
   // 今天是交易日但還沒收盤時，要往前找到前一個交易日——否則盤中會誤判成過舊。
@@ -2543,14 +2565,20 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 由 build_sparklines.py 從 price_history.json 切出（零額外網路請求）。取代舊的「逐檔打
   // TWSE STOCK_DAY」：舊法只有清單內的上市股有線、上櫃股完全沒有、一次抓不完還會被限流打斷。
   // 現在任何頁面、任何新加入的自選股，只要在全市場歷史裡就立刻有線。
-  let SPARKLINES=null,SPARKLINES_AT=0;
+  let SPARKLINES=null,SPARKLINES_AT=0,SPARKLINES_ASOF=null;
   async function ensureSparklines(){
     if(SPARKLINES&&Date.now()-SPARKLINES_AT<10*60*1000)return SPARKLINES;
     try{
       const r=await fetch('data/sparklines.json?t='+Math.floor(Date.now()/60000));
       if(!r.ok)throw new Error('HTTP '+r.status);
       const d=await r.json();
-      SPARKLINES=d.sparklines||{};SPARKLINES_AT=Date.now();
+      // 2026-09-15（總司令裁示，sparklines凍結事件）：這份檔案整批共用同一個
+      // data_asof（build_sparklines.py每次整批重切，不是逐檔各自的時間戳），
+      // 之前只取.sparklines丟掉.meta，害resolveQuote()第四層(history)永遠回傳
+      // asof:null——sparklines.json卡在09-05不更新那十天，使用者看到的舊價格
+      // 完全沒有任何日期標示，跟看到當天的價格長得一模一樣。現在存下來，
+      // resolveQuote()才能誠實標出「這個數字是哪天的」。
+      SPARKLINES=d.sparklines||{};SPARKLINES_ASOF=(d.meta&&d.meta.data_asof)||null;SPARKLINES_AT=Date.now();
     }catch(e){console.warn('[ensureSparklines]',e);recordGlobalError('ensureSparklines',e);if(!SPARKLINES)SPARKLINES={}}
     return SPARKLINES;
   }
@@ -2774,6 +2802,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const chg=q.change??0;
       const pct=q.change_pct??0;
       const cls=chg>=0?'u':'d';
+      // 2026-09-15（sparklines凍結事件，總司令裁示「過期可以用，但不准假裝是當前的」）：
+      // 四層回退鏈走到最後一層(history/sparklines)時，若資料已經超過3個交易日沒更新，
+      // 價格數字本身要直接標日期，不能只靠可展開的小字說明——那個說明預設收合，
+      // 使用者不點開根本看不到。跟財報過期同一套原則（見live_factors.py新鮮度檢查）。
+      const histStaleDays=(q.tier==='history')?tradingDaysSince(q.asof,'Asia/Taipei',TW_HOLIDAYS_2026):null;
+      const priceIsStale=(histStaleDays!=null&&histStaleDays>3);
+      const priceLabel=priceIsStale
+        ?`${q.asof?String(q.asof).slice(5).replace('-','/'):'?'}收盤 ${us?'$':''}${nf(price)}`
+        :`${us?'$':''}${nf(price)}`;
       // 2026-09-04 P0產品.一：來源/新鮮度文字收進可展開的說明，列上只留一顆彩色小點
       // 每一層講自己的話：不能把「三天前的歷史收盤」講成「已收盤（Actions排程最後一筆）」
       const srcText=iq?`${intradayTagHtml(iq,us)||'· 近即時（Actions排程）'}`
@@ -2820,7 +2857,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // data-flash-code/data-flash-value：給盤中快速輪詢(fastPollTick())用來判斷
       // 「這次重繪後的價格」跟「上次輪詢看到的價格」是否不同，不同才閃爍，見
       // flashPriceEls()。這裡只是標記資料，平常渲染不受影響。
-      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}">${us?'$':''}${nf(price)}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}"${priceIsStale?' style="font-size:.85em"':''}>${priceLabel}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
       if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
       // 2026-09-04 P0產品.一：可展開的來源說明（預設收合；smoke test仍能在DOM裡讀到「今日收盤」「即時(tick)」等字樣）
@@ -7253,7 +7290,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2127';
+  const APP_VERSION='2026-09-15.2217';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
