@@ -1,5 +1,25 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-15T14:53:46+08:00 (hypothesis_queue排程接續，第十五輪) — 接手PENDING_QUEUE交辦：題材七待辦2第七批（offset=110），累計130/259，本輪fetched=13/20、新增a_level命中2檔（2912／3131）
+
+開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需
+總司令權限）維持阻塞；上一輪（第十四輪）留下的可執行項是待辦2續跑第七批。
+取具名鎖`LOCK_ACQUIRED`（非陳舊）。`git pull`第一次遇到暫時性DNS/連線
+失敗（`Could not resolve host`），重試一次即成功，非鎖檔或repo問題。
+
+跑`theme_official_site_pipeline.py --batch-size 20 --offset 110`：
+`fetched=13/20`、`blocked_js_render`=4、`exc_SSLError`=3。獨立重新驗證
+輸出檔（不信任腳本自身print文字）：`data/theme_official_site_evidence_
+draft.json`累計130筆、130個代號互不重複、status分布
+`fetched=73/exc_SSLError=21/blocked_js_render=20/exc_ConnectTimeout=8/
+http_403=7/exc_ReadTimeout=1`合計130自洽；`a_level_hits`候選由15筆增至
+17筆（新增2912／3131，各自2筆命中，合計4筆與腳本輸出一致）。另跑
+`theme_official_site_negative_control.py`確認exit code 0、5家負對照組
+全數PASS，無回歸。累計**130/259**檔，剩129檔待續跑（下一輪可用
+`--offset 130`）。`a_level_hits`累計17筆仍全數`status:"draft_unreviewed"`
+未經人工抽查，不得視為正式證據來源。待辦4驗證樣本擴充（仍5句）與
+本輪無依賴，可獨立續做。
+
 ## 2026-09-15T (hypothesis_queue排程接續，第十四輪) — 接手PENDING_QUEUE交辦：題材七待辦2第六批（offset=90），累計110/259，本輪fetched=6/20、新增a_level命中3檔（2707／2739／2884）
 
 開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需

@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T12:25:50.636078+08:00",
+  "generated_at": "2026-09-15T14:53:27.152080+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "2607",
-    "2609",
-    "2610",
-    "2615",
-    "2617",
-    "2618",
-    "2634",
-    "2637",
-    "2707",
-    "2731",
-    "2739",
-    "2801",
-    "2812",
-    "2834",
-    "2855",
-    "2881",
-    "2882",
-    "2884",
-    "2886",
-    "2891"
+    "2892",
+    "2903",
+    "2912",
+    "2915",
+    "3006",
+    "3008",
+    "3013",
+    "3014",
+    "3017",
+    "3023",
+    "3029",
+    "3034",
+    "3035",
+    "3037",
+    "3044",
+    "3045",
+    "3047",
+    "3049",
+    "3081",
+    "3131"
   ],
   "results": [
     {
@@ -4468,8 +4468,373 @@
         "financial_holding"
       ],
       "status": "exc_SSLError"
+    },
+    {
+      "code": "2892",
+      "name": "第一金",
+      "url": "www.firstholding.com.tw",
+      "themes": [
+        "financial_holding"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "第一金控 English 集團成員 第一銀行 第一金證券 第一金投信 第一金人壽 第一金AMC 第一創投 第一管顧 First Commercial Bank (U.S.A.) 第一金投顧 第一金和昇證券 第一金私募股權 一銀租賃 一銀國際融資租賃 一銀融資租賃(廈門) 一銀租賃(成都) 菁英招募 關於我們 公司簡介 ",
+          "keyword": "金控",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2903",
+      "name": "遠百",
+      "url": "https://www.feds.com.tw",
+      "themes": [
+        "retail"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2912",
+      "name": "統一超",
+      "url": "http://www.7-11.com.tw",
+      "themes": [
+        "ecommerce",
+        "retail"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 2,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "7-ELEVEN ENGLISH Products&Services 日本語 商品・サービス 简体中文 产品与服务 繁體中文 產品與服務 한국어 상품 및 서비스 ภาษาไทย สินค้าและบริการ Việt Nam Sản phẩm & Dịch vụ Bahasa Indonesia Produk da",
+          "keyword": "零售",
+          "a_level": true
+        },
+        {
+          "sentence": "B 0 0 0 0 0 1 ( 0 1 ) 聯合服務中心 專線電話：0800-008711 食品業登錄字號(A-122555003-00000-0) 加盟 │ 常見問題 │ 聯絡我們 │ 關於我們 │ 利害關係人 │ 個資告知條款 │ 統一超商永續發展 UNI-President Chain Store Corpora",
+          "keyword": "超商",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2915",
+      "name": "潤泰全",
+      "url": "w8.ruentex.com.tw/",
+      "themes": [
+        "retail"
+      ],
+      "status": "fetched",
+      "sentence_count": 3,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "潤泰全球 潤泰全球 潤泰全球 公司簡介 經營團隊與組織 產品與服務 品牌零售事業 紡織國貿事業(服飾用布) 成衣貿易事業(成衣團服) 量販事業 活動訊息 企業永續 企業永續 誠信企業 打造友善職場 推動永續環境 社會參與及社區關懷 利害關係人專區 永續報告書 投資人關係 財務資訊 股東專區 股東會資訊 股價資訊 股利資",
+          "keyword": "零售",
+          "a_level": false
+        },
+        {
+          "sentence": "Nautica 2026 秋冬系列發表 GETAWAY STATE OF MIND 以義大利旅途 […] Categories 活動訊息 2026-08-04 2026-08-21 RT005646 2026 Mid-Autumn Collection《月滿茶香》 2026 Mid-Autumn Collection ",
+          "keyword": "零售",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3006",
+      "name": "晶豪科",
+      "url": "www.esmt.com.tw",
+      "themes": [
+        "memory_ic"
+      ],
+      "status": "fetched",
+      "sentence_count": 25,
+      "keyword_hits": 3,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "晶豪科技 - ESMT 晶豪科技,ESMT 產品專區 產品應用 支援中心 關於晶豪 企業永續 人力資源 Memory Mixed Signal IC Wireless Connectivity BLDC Motor Driver Application Sensor and Mixed-Signal Processin",
+          "keyword": "DRAM",
+          "a_level": false
+        },
+        {
+          "sentence": "BLDC Motor Driver Application BLDC Motor Driver Application 直流無刷馬達驅動應用 Sensor and Mixed-Signal Processing IC Sensor and Mixed-Signal Processing IC 感測器混合信號處理晶片 O",
+          "keyword": "DRAM",
+          "a_level": false
+        },
+        {
+          "sentence": "您即將登出 取消 登出 產品專區 產品應用 支援中心 關於晶豪 企業永續 人力資源 會員專區 隱私權政策 晶豪科技教育基金會 晶豪 104 人才招募 產品專區 返回 總覽 Memory aiPIM™ DRAM LPDRAM PSRAM NOR Flash NAND Flash Multi-chip Memory Kno",
+          "keyword": "DRAM",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3008",
+      "name": "大立光",
+      "url": "www.largan.com.tw",
+      "themes": [
+        "optical_lens",
+        "adas",
+        "arvr"
+      ],
+      "status": "fetched",
+      "sentence_count": 8,
+      "keyword_hits": 4,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "大立光電股份有限公司 繁中 簡中 EN 大立光集團 公司簡介 公司沿革 產品與服務 手機鏡頭 音圈馬達 影像鏡頭模組 睡眠健康監測 車用鏡頭 隱形眼鏡 碳化矽晶體 美麗健康 鈮酸鈦負極材料 光纖雷射及太空通訊 CPO應用 專利許可與標示 投資人關係 公司概況 財務資訊 股東資訊 公司治理 利害關係人 人才招募 福利制度",
+          "keyword": "車用鏡頭",
+          "a_level": false
+        },
+        {
+          "sentence": "View More RELATED COMPANIES 關係 企業 星歐光學 隱形眼鏡 大立美 美麗健康事業 大陽科技 音圈馬達 大根光學工業 車用鏡頭 台灣應用晶體 碳化矽晶體 萊凌科技 光纖雷射及太空通訊技術 萬溢能源材料 鈮酸鈦負極材料 大立雲康科技 醫療及睡眠監測 SERVICES 我們的 產品 車用電子 行動",
+          "keyword": "車用鏡頭",
+          "a_level": false
+        },
+        {
+          "sentence": "View More CAREERS 我們正在尋找與我們一起工作的人。",
+          "keyword": "AR",
+          "a_level": false
+        },
+        {
+          "sentence": "[email protected] 大立光集團 公司簡介 公司沿革 產品與服務 手機鏡頭 音圈馬達 影像鏡頭模組 睡眠健康監測 車用鏡頭 隱形眼鏡 碳化矽晶體 美麗健康 鈮酸鈦負極材料 光纖雷射及太空通訊 CPO應用 專利許可與標示 投資人關係 公司概況 財務資訊 股東資訊 公司治理 利害關係人 ESG企業永續 ESG",
+          "keyword": "車用鏡頭",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3013",
+      "name": "晟銘電",
+      "url": "http://www.uneec.com/",
+      "themes": [
+        "server_chassis",
+        "chassis"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3014",
+      "name": "聯陽",
+      "url": "www.ite.com.tw",
+      "themes": [
+        "ic_design",
+        "power_ic",
+        "analog_ic",
+        "driver_ic"
+      ],
+      "status": "fetched",
+      "sentence_count": 82,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3017",
+      "name": "奇鋐",
+      "url": "https://www.avc.co",
+      "themes": [
+        "ai_server",
+        "thermal",
+        "liquid_cooling"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3023",
+      "name": "信邦",
+      "url": "www.sinbon.com",
+      "themes": [
+        "hs_connector",
+        "connector"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3029",
+      "name": "零壹",
+      "url": "www.zerone.com.tw",
+      "themes": [
+        "cybersecurity",
+        "saas"
+      ],
+      "status": "fetched",
+      "sentence_count": 8,
+      "keyword_hits": 4,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "首頁 | 零壹科技 Zerone｜企業 IT 現代化的最佳夥伴 關於零壹 集團企業 公司概述 經營團隊 大事紀 解決方案 產品服務 代理品牌 共同供應契約採購 自有品牌 AOD 整合服務 零壹資安保母 雲端服務網 課程活動 最新消息 登入 TW 繁體中文 EN 關於零壹 解決方案 產品服務 課程活動 最新消息 登入 T",
+          "keyword": "雲端服務",
+          "a_level": false
+        },
+        {
+          "sentence": "聯絡我們 了解更多 解決方案 Solutions 驅動未來的科技實踐 零壹科技以專業實力整合全球領先品牌與顧問團隊，從基礎架構、雲端治理、資安韌性到AI應用，打造一站式IT解決方案，助力企業加速數位轉型與永續成長。",
+          "keyword": "資安",
+          "a_level": false
+        },
+        {
+          "sentence": "了解更多 IT基建 AI化 打造現代企業的數位地基 雲運算與服務 從部署到優化的雲端成長夥伴 資安韌性 從防護走向營運韌性 人工智慧應用 驅動資料價值與智慧決策 課程與活動 經銷商 實體 VMware教育訓練 VCF 9.1實戰：安裝&升級說明 2026/09/15 (二) 10:00 - 16:30 報名截止 實體 ",
+          "keyword": "資安",
+          "a_level": false
+        },
+        {
+          "sentence": "從 SIEM、資安到 Observability，一次看懂 Splunk 了解更多 TrendAI™榮登CyberGym代理式AI資安評測第一名 了解更多 AI數位轉型，決勝在整合 零壹沈柏延提出企業AI落地四大關鍵決策 了解更多 查看更多消息 共創永續 · 點亮未來 從減碳行動到多元共融，零壹科技以科技實踐責任，以行",
+          "keyword": "資安",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3034",
+      "name": "聯詠",
+      "url": "www.novatek.com.tw",
+      "themes": [
+        "ic_design",
+        "driver_ic",
+        "cis"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3035",
+      "name": "智原",
+      "url": "www.faraday-tech.com",
+      "themes": [
+        "ai_chip"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3037",
+      "name": "欣興",
+      "url": "www.unimicron.com",
+      "themes": [
+        "pcb",
+        "hdi",
+        "ic_substrate",
+        "abf_substrate",
+        "glass_substrate"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "3044",
+      "name": "健鼎",
+      "url": "www.tripod-tech.com",
+      "themes": [
+        "pcb",
+        "fpc"
+      ],
+      "status": "fetched",
+      "sentence_count": 23,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "健鼎科技 繁體中文 English 繁體中文 產品與技術 產品介紹 以應用類別區分 以技術類別區分 技術研發 研發項目 全球製造 印刷電路板事業部 工業自動化事業部 創新事業部 其他服務 其它類別服務 投資人 財務資訊 財務報告 公開資訊觀測站 股東服務 股東會資訊 股利及股價 主要股東名單 股務作業 投資人專區 投資",
+          "keyword": "印刷電路板",
+          "a_level": false
+        },
+        {
+          "sentence": "More + 行動電話 行動電話 行動電話，又稱「手提式電話機」或「手提電話」，簡稱「手機」，是可以在較大範圍內使用的可攜式電話，與固... More + 硬碟 硬碟 硬碟（Hard Disk Drive，簡稱HDD）是電腦上使用堅硬的旋轉碟片為基礎的非揮發性記憶體 More + 記憶體模組 記憶體模組 是一種裝有記憶",
+          "keyword": "印刷電路板",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3045",
+      "name": "台灣大",
+      "url": "www.taiwanmobile.com",
+      "themes": [
+        "telecom"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "3047",
+      "name": "訊舟",
+      "url": "www.edimax.com",
+      "themes": [
+        "ecommerce"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3049",
+      "name": "精金",
+      "url": "https://www.hannstouch.com/tw",
+      "themes": [
+        "backlight"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3081",
+      "name": "聯亞",
+      "url": "https://www.lmoc.com.tw/",
+      "themes": [
+        "ic_design"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3131",
+      "name": "弘塑",
+      "url": "https://www.gptc.com.tw/",
+      "themes": [
+        "adv_package",
+        "semi_equip",
+        "photomask"
+      ],
+      "status": "fetched",
+      "sentence_count": 7,
+      "keyword_hits": 3,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "弘塑科技 企業介紹 關於弘塑 公司沿革 公司治理 永續經營 專利證書 關係企業 產品介紹 單晶圓旋轉設備 批次式酸槽設備 複合式製程設備 應用領域 先進構裝 IC前段製程 光電產業 技術專欄 先進構裝 IC前段製程 光電產業 新聞中心 人力資源 經營理念 訓練發展 薪酬福利 人才招募 弘塑生活 投資人專區 投資人專區 ",
+          "keyword": "先進封裝",
+          "a_level": false
+        },
+        {
+          "sentence": "包括多種類金屬蝕刻液、粗化液、環保型去光阻液、奈米雙晶銅電鍍添加液等產品 more 半導體製造所需的檢驗、量測設備，包括應用超聲波、紅外光、可見光、UV到X-ray波段的設備，以及化合物半導體生產設備及材料代理。",
+          "keyword": "量測設備",
+          "a_level": true
+        },
+        {
+          "sentence": "包括多種類金屬蝕刻液、粗化液、環保型去光阻液、奈米雙晶銅電鍍添加液等產品 半導體製造所需的檢驗、量測設備，包括應用超聲波、紅外光、可見光、UV到X-ray波段的設備，以及化合物半導體生產設備及材料代理。",
+          "keyword": "量測設備",
+          "a_level": true
+        }
+      ]
     }
   ],
-  "total_codes_covered": 110,
+  "total_codes_covered": 130,
   "total_candidates": 259
 }

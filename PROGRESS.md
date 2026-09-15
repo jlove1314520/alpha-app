@@ -1,3 +1,24 @@
+## 2026-09-15（假設佇列自走・第十五輪）題材七待辦2續跑第七批（offset=110），累計130/259
+
+依「交辦優先於自走」鐵律，接續`PENDING_QUEUE.md`上一輪（第十四輪）留下
+的可執行交辦項：官網來源第七批抓取。取具名鎖`LOCK_ACQUIRED`（非陳舊）。
+`git pull`第一次遇暫時性DNS失敗，重試一次即成功，非repo問題。跑
+`theme_official_site_pipeline.py --batch-size 20 --offset 110`：
+`fetched=13/20`、`blocked_js_render`=4、`exc_SSLError`=3。獨立重新驗證
+輸出檔（不信任腳本print文字）：`data/theme_official_site_evidence_
+draft.json`累計130筆、130個代號互不重複、status分布
+`fetched=73/exc_SSLError=21/blocked_js_render=20/exc_ConnectTimeout=8/
+http_403=7/exc_ReadTimeout=1`合計130自洽；`a_level_hits`候選由15筆增至
+17筆（新增2912／3131，各自2筆命中，合計4筆與腳本輸出一致），仍全數
+`status:"draft_unreviewed"`未經人工抽查。另跑
+`theme_official_site_negative_control.py`（exit code 0）：5家負對照組
+全數PASS、0個誤命中，確認無回歸。累計**130/259**檔，剩129檔待分批續跑
+（下一輪可用`--offset 130`）；待辦4驗證樣本仍待擴充（不影響待辦2進度）。
+commit僅含`data/theme_official_site_evidence_draft.json`／
+`PENDING_QUEUE.md`／`research/MARATHON_LOG.md`／本檔，不含其他排程軌道
+（dev_queue／connectivity check／IBKR quotes）留下的未commit異動，避免
+越權混入。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-143102）源頭一.1：`docs/DATA_SOURCE_MAP.md`籌碼K線10項功能全拆解
 
 `PENDING_QUEUE.md`權威清單（回退到檔案順序，因ORDER清單裡的項目皆已完成/

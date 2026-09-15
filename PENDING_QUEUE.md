@@ -14,6 +14,37 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十五輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
+「三之一、交辦優先於自走」鐵律）：兩條阻塞項（S4U／claude CLI非互動驗證）
+維持阻塞；【題材七】上一輪（假設佇列第十四輪）留下的可執行項是待辦2
+續跑第七批（`--offset 110`）。取具名鎖`research/.hypothesis_queue.lock`
+`LOCK_ACQUIRED`（非陳舊回收）。`git pull`第一次遇暫時性DNS解析失敗
+（`Could not resolve host: github.com`），重試一次即成功，判斷為短暫
+網路波動，非鎖檔或repo問題。
+
+- 【題材七】待辦2續跑第七批：跑`--batch-size 20 --offset 110`（排序第
+  111~130檔）：`fetched=13/20`、`blocked_js_render`=4、`exc_SSLError`=3，
+  合計20筆自洽。獨立重新驗證（不信任腳本自身輸出文字）：`data/
+  theme_official_site_evidence_draft.json`的`results`陣列共130筆、130個
+  代號互不重複、`status`分布`fetched=73/exc_SSLError=21/blocked_js_
+  render=20/exc_ConnectTimeout=8/http_403=7/exc_ReadTimeout=1`合計130，
+  與批次進度一致。`a_level_hits`非空候選由累計15筆增至**17筆**（新增
+  2912／3131，各自2筆命中，合計4筆與腳本輸出一致），仍全數
+  `status:"draft_unreviewed"`未經人工抽查。另跑`theme_official_site_
+  negative_control.py`（exit code 0）：5家負對照組全數PASS、0個誤命中，
+  確認無回歸。累計**130/259**檔。**仍未做**：待辦2剩餘129檔（下一輪可用
+  `--offset 130`續跑）、待辦4驗證樣本擴充（仍5句，與待辦2無依賴，可獨立
+  續做）；待辦1／待辦3已完成（沿用前幾輪紀錄）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+130/259檔，剩129檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十四輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
