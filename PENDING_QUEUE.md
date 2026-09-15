@@ -2635,7 +2635,24 @@ ORDER-END
   `docs/FIRST_HAND_SOURCES.md`總結分佈段落一個既有疏漏：#28 CFTC COT
   （源頭二.3第3名，先前已接入）先前一直被漏列在🟢已整合分類、仍停留在
   ⚪未查證分類，本次一併移正。
-  **第9~10名留待後續輪次**，見排名表。
+  **第9名（財政部海關進出口貿易統計）已完成（2026-09-15開發佇列自走接續，
+  同輪，cycle_id 20260915-094601）**：三來源查證確認
+  `https://opendata.customs.gov.tw/data/6053/csv.csv`（`data.gov.tw`
+  資料集#6053）存在且可程式存取（①資料集頁面②WebFetch確認CSV網址、
+  更新頻率每1月③實測`curl`/`requests`皆200、合法CSV，回溯至民國103年
+  1月即西元2014-01共150個月）。新增
+  `.github/scripts/fetch_customs_trade.py`，沿用`fetch_fx.py`已驗證的
+  SSL修法（`opendata.customs.gov.tw`憑證鏈同樣缺Subject Key
+  Identifier，只關閉`ssl.VERIFY_X509_STRICT`）；出入超（貿易順逆差）
+  YoY為本管線自行計算，缺同月資料時誠實記null。本機實測：最新資料月
+  2026-06，出口2356.6億元（YoY+48.0%）、進口1972.4億元（YoY+60.1%）、
+  出入超+384.2億元（順差）。`generate_status_json.py`新增
+  `describe_customs_trade()`與`APP_DATA_SOURCES`條目；市場頁台股分頁
+  新增「全國進出口貿易統計」卡（`customs-trade-rows`/
+  `customs-trade-datatime`），Playwright實測正確顯示上述三項數字與
+  資料月「2026-06」、無頁面錯誤。`node scripts/smoke_test.mjs`45/46
+  PASS（僅#39既有已知紅燈，與本次改動無關）。
+  **第10名留待後續輪次**，見排名表。
 - [ ] **源頭二.4** 新增排程全部列入 CLAUDE.md 頻率清單，附官方上限或實測安全值
 - [ ] **源頭二.5** 驗收：表格截圖、前 10 名清單與理由、每接入一個回報一個
 

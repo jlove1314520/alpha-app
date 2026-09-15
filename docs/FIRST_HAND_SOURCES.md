@@ -255,14 +255,17 @@ Allow: /mops/web
 | 官方是否允許程式存取 | 無結構化端點可測 |
 | 對應機構用途 | 指數成分股調整（如台灣50季度調整）事前/事後公告 |
 
-### 19. 財政部海關進出口統計
+### 19. 財政部海關進出口統計 —— 已接入（2026-09-15，源頭二.3第9名）
 
 | 欄位 | 內容 |
 |---|---|
 | 機構 | 財政部關務署 |
-| 我們現況 | **⚪ 未查證**（repo內僅出現在任務清單原文，無任何查證紀錄） |
-| 對應機構用途 | 台灣對外貿易月度統計，總經領先指標 |
-| 後續 | 源頭二.2實測，候選：`web02.mof.gov.tw`或財政部資料開放平台 |
+| 端點 | `https://opendata.customs.gov.tw/data/6053/csv.csv`（`data.gov.tw`資料集#6053「海關進出口貿易統計」，官方CSV，免金鑰，`.github/scripts/fetch_customs_trade.py`） |
+| 我們現況 | 🟢 **已整合（2026-09-15）**——三來源查證：①`data.gov.tw`資料集#6053頁面（WebSearch找到）②WebFetch該頁確認CSV下載網址、提供機關、更新頻率（每1月）③實測`curl`/`requests`皆200、合法CSV，回溯至民國103年1月（西元2014-01）150個月 |
+| 官方是否允許程式存取 | 🟢（官方開放資料平台，政府資料開放授權條款第1版） |
+| 對應機構用途 | 台灣對外貿易月度統計（出口總值/進口總值/出入超），總經領先指標 |
+| 已知SSL陷阱 | 跟`www.cbc.gov.tw`同一類問題——`opendata.customs.gov.tw`憑證鏈中繼CA缺Subject Key Identifier，`requests`預設驗證會拋`CERTIFICATE_VERIFY_FAILED`，修法沿用同一個只關閉`ssl.VERIFY_X509_STRICT`旗標的做法 |
+| 已知限制 | 官方每月更新，資料通常落後1個月，非即時；YoY為本管線自行計算，非官方原始欄位 |
 
 ### 20. 經濟部工業生產統計與外銷訂單
 
@@ -402,15 +405,16 @@ Allow: /mops/web
 | `ftp.nasdaqtrader.com` | 🟢 官方匿名FTP | 既有 | #27 |
 | `publicreporting.cftc.gov` | 🟢 官方Socrata公開資料入口，設計上供程式讀取 | 2026-09-15 | #28 |
 | `api.bls.gov` | 🟢 官方Public Data API v2，設計上供程式讀取，未註冊金鑰即可用 | 2026-09-15 | #25 |
+| `opendata.customs.gov.tw` | 🟢 官方開放資料平台CSV | 2026-09-15 | #19 |
 
 ---
 
 ## 總結：現況分佈
 
-- **🟢 已整合且合規**：#4外資持股比率(2026-09-15新增)、#7當沖、#8鉅額交易、#17集保、#21利率＋外匯(外匯2026-09-15新增)、#22 SEC EDGAR、#25 BLS總經(2026-09-15新增)、#27(b) Nasdaq threshold list、#28 CFTC COT(2026-09-15新增，先前漏更新本段落) ——9項
+- **🟢 已整合且合規**：#4外資持股比率(2026-09-15新增)、#7當沖、#8鉅額交易、#17集保、#19財政部海關(2026-09-15新增)、#21利率＋外匯(外匯2026-09-15新增)、#22 SEC EDGAR、#25 BLS總經(2026-09-15新增)、#27(b) Nasdaq threshold list、#28 CFTC COT(2026-09-15新增，先前漏更新本段落) ——10項
 - **🟡 已整合但有保留**（非直連官方/僅涵蓋部分/合規存疑）：#2/#3三大法人期貨選擇權(經FinMind)、#5借券(查證中)、#9內部人轉讓(未確認可行)、#10/#11/#12/#15（robots.txt衝突，見重大發現）、#16月營收(經FinMind)、#24 FRED(僅單序列)、#27(a)FINRA(粒度太粗) ——約10項
 - **🔴 已查證不可行**：#1大額交易人(免費層無)、#6處置注意股(無歷史)、#14簡報PDF、#18指數成分股調整 ——4項
-- **⚪ 完全未查證**：#13私募、#14法說會音檔、#19財政部海關、#20經濟部工業生產、#23 EDGAR全文檢索、#26 Census、#27暗池 ——約7項
+- **⚪ 完全未查證**：#13私募、#14法說會音檔、#20經濟部工業生產、#23 EDGAR全文檢索、#26 Census、#27暗池 ——約6項
 
 ---
 
@@ -434,16 +438,17 @@ Allow: /mops/web
 | 6 | #22a SEC 13F（機構持倉季報） | 4 | 4（🟢host，但季度大檔需聚合邏輯） | **已接入極小子集（2026-09-15，僅波克夏一家申報人，見22c）** |
 | 7 | #21 外匯官方牌告（取代yfinance） | 2 | 1（🟢同host的A13Rate.csv姊妹端點） | **已完成（2026-09-15）** |
 | 8 | #25 BLS總經（就業/CPI） | 3 | 2（標準政府API，免金鑰） | **已完成（2026-09-15）** |
-| 9 | #19 財政部海關進出口統計 | 3 | 3（⚪host未驗證，需先測robots.txt+端點） | 待接入 |
+| 9 | #19 財政部海關進出口統計 | 3 | 3（🟢host已驗證，官方CSV免金鑰） | **已完成（2026-09-15）** |
 | 10 | #20 經濟部工業生產與外銷訂單 | 3 | 3（⚪host未驗證，同上） | 待接入 |
 
-**2026-09-15開發佇列自走完成第1、2、3、5、6、7、8名**（見上方#4條目與
+**2026-09-15開發佇列自走完成第1、2、3、5、6、7、8、9名**（見上方#4條目與
 `.github/scripts/fetch_foreign_holding.py`；#22b條目與
 `.github/scripts/fetch_us_insider_trading.py`；#28條目與
 `.github/scripts/fetch_cftc_cot.py`；#5條目與
 `.github/scripts/fetch_short_lending_available.py`；#22c條目與
 `.github/scripts/fetch_us_13f_holdings.py`；#21條目與
-`.github/scripts/fetch_fx.py`；#25條目與`.github/scripts/fetch_bls_macro.py`）。
+`.github/scripts/fetch_fx.py`；#25條目與`.github/scripts/fetch_bls_macro.py`；
+#19條目與`.github/scripts/fetch_customs_trade.py`）。
 
 **第4名（FRED擴充）本輪跳過，原因記錄如下，不是遺漏**：`research/
 fred_yield_curve_gate.py`目前的金鑰讀取方式是`C:\alpha\alpha-data\
@@ -459,7 +464,7 @@ fred_key.txt.txt`（本機檔案，docstring稱「凍結區檔案」），只在
 本機排程執行（比照`quotes_ibkr.json`/`quotes_sinopac.json`模式）——兩種
 做法各有取捨，一併留給總司令裁示。
 
-第9~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
+第10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
 排名表的「現況」欄與本檔案對應條目，不在同一輪一次做完（單輪時間有限，且
 CLAUDE.md「四之二」要求每項都要有實測證據才能標完成，逐項慢慢做比一次宣稱
 10項都好更誠實）。

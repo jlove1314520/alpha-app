@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-15T09:56:32.496826+08:00",
-  "latest_commit": "92d23a41",
+  "updated_at": "2026-09-15T10:06:10.936224+08:00",
+  "latest_commit": "3bac6976",
   "data_files": [
     {
       "path": "data/adr_premium.json",
@@ -73,6 +73,14 @@
       "source": "未知（generate_status_json.py 沒有對應的解析器，需要補上）",
       "detail": "",
       "status": "error"
+    },
+    {
+      "path": "data/customs_trade.json",
+      "generated_at": "2026-09-15T02:03:00+00:00",
+      "records": 1,
+      "source": "財政部關務署官方開放資料（data.gov.tw #6053，海關進出口貿易統計），免金鑰",
+      "detail": "latest_date=2026-06 export_total=2356625115.0 import_total=1972449590.0 trade_balance=384175525.0 errors=[]",
+      "status": "ok"
     },
     {
       "path": "data/dependency_status.json",
@@ -445,7 +453,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-15T09:56:42+08:00",
+    "checked_at": "2026-09-15T10:06:21+08:00",
     "any_overdue": true,
     "overdue_names": [
       "台股盤中報價（GitHub Actions quotes.yml）",
@@ -460,7 +468,7 @@
         "owner": "GitHub Actions",
         "status": "overdue",
         "last_data_at": "2026-09-15T08:56+08:00",
-        "expected_at_or_after": "2026-09-15T09:26+08:00",
+        "expected_at_or_after": "2026-09-15T09:36+08:00",
         "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"
       },
@@ -470,7 +478,7 @@
         "owner": "本機排程AlphaShioajiQuotes",
         "status": "overdue",
         "last_data_at": "2026-09-14T13:45+08:00",
-        "expected_at_or_after": "2026-09-15T09:26+08:00",
+        "expected_at_or_after": "2026-09-15T09:36+08:00",
         "rule": "盤中：資料不得超過30分鐘未更新",
         "note": "只有使用者這台機器開機且排程在跑才會更新；乙.1冷熱分離上線後盤中不再push，只在收盤後commit一次"
       },
@@ -567,11 +575,11 @@
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-09-15T09:56:44.904239+08:00",
+    "checked_at": "2026-09-15T10:06:23.620067+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "any_stalled": true,
     "stalled": [
-      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 141 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
+      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 150 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
     ],
     "pipelines": [
       {
@@ -581,8 +589,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:56:01.847673+08:00",
-        "age_min": 0.7,
+        "last_output": "2026-09-15T10:06:01.940303+08:00",
+        "age_min": 0.4,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -593,8 +601,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:55:07.747392+08:00",
-        "age_min": 1.6,
+        "last_output": "2026-09-15T10:05:07.880064+08:00",
+        "age_min": 1.3,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -606,7 +614,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-14T13:47:02.680141+08:00",
-        "age_min": 1209.7,
+        "age_min": 1219.3,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -617,8 +625,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:56:03.122555+08:00",
-        "age_min": 0.7,
+        "last_output": "2026-09-15T10:06:03.145166+08:00",
+        "age_min": 0.3,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -630,7 +638,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-09-15T07:36:04.472829+08:00",
-        "age_min": 140.7,
+        "age_min": 150.3,
         "stall_limit_min": 15,
         "status": "stalled"
       },
@@ -641,8 +649,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-15T09:52:02.267490+08:00",
-        "age_min": 4.7,
+        "last_output": "2026-09-15T10:02:02.078342+08:00",
+        "age_min": 4.4,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -662,8 +670,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:53:09.039057+08:00",
-        "age_min": 3.6,
+        "last_output": "2026-09-15T10:01:55.067785+08:00",
+        "age_min": 4.5,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -674,8 +682,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:30:37.502114+08:00",
-        "age_min": 26.1,
+        "last_output": "2026-09-15T10:05:43.527351+08:00",
+        "age_min": 0.7,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -687,7 +695,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-09-15T09:51:02.777108+08:00",
-        "age_min": 5.7,
+        "age_min": 15.3,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -699,7 +707,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-09-14、inst_trades=2026-09-14、valuation=2026-09-14、taifex_large=20260910",
         "last_output": "2026-09-14T00:00:00+08:00",
-        "age_min": 2036.7,
+        "age_min": 2046.4,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -711,7 +719,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 1556.7,
+        "age_min": 1566.3,
         "stall_limit_min": 30240,
         "status": "ok"
       }
@@ -826,6 +834,10 @@
     {
       "panel": "市場頁·美股·美國總經指標（失業率/CPI年增率/非農就業）",
       "source": "data/bls_macro.json（BLS官方Public Data API v2，2026-09-15新增，源頭二.3第8名，未註冊金鑰即可用；CPI年增率為本管線自行計算，非BLS原始欄位）"
+    },
+    {
+      "panel": "市場頁·台股·全國進出口貿易統計",
+      "source": "data/customs_trade.json（財政部關務署官方開放資料data.gov.tw#6053，2026-09-15新增，源頭二.3第9名，免金鑰；YoY為本管線自行計算，非官方原始欄位）"
     },
     {
       "panel": "個股頁·AI·個股簡報/券商報告雷達",

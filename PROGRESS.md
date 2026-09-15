@@ -1,3 +1,35 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-094601，續）源頭二.3第9名：接入財政部關務署海關進出口貿易統計
+
+同一輪cycle繼續做排名表第9名：財政部海關進出口統計（原先標⚪未查證，本輪查證後成功接入，優先序因此前移至第7~9名這批已完成群）。
+
+- **查證**：三來源確認`https://opendata.customs.gov.tw/data/6053/csv.csv`
+  可程式存取——①`data.gov.tw`資料集#6053頁面（WebSearch找到）②WebFetch
+  該頁確認CSV下載網址、提供機關（財政部關務署）、更新頻率（每1月）
+  ③實測`curl`與`requests`皆200、合法CSV（`utf-8-sig`含BOM），回溯至
+  民國103年1月（西元2014-01）共150個月。
+- **改動**：新增`.github/scripts/fetch_customs_trade.py`。年度欄位是
+  民國年，換算西元年（+1911）；出入超YoY為本管線自算，缺同月資料時
+  誠實記null不湊近似月份。踩到跟`fetch_fx.py`同一類SSL陷阱
+  （`opendata.customs.gov.tw`憑證鏈缺Subject Key Identifier），沿用
+  同一個只關閉`ssl.VERIFY_X509_STRICT`旗標的修法，未重複踩坑。
+  `market.yml`新增排程步驟，commit檔名清單補上`data/customs_trade.json`。
+- **實測**：最新資料月2026-06，出口2356.6億元（YoY+48.0%）、進口
+  1972.4億元（YoY+60.1%）、出入超+384.2億元（順差）。
+  `generate_status_json.py`新增`describe_customs_trade()`與
+  `APP_DATA_SOURCES`條目。
+- **前端**：市場頁台股分頁新增「全國進出口貿易統計」卡，Playwright
+  實測正確顯示上述三項數字與資料月「2026-06（財政部關務署官方每月
+  更新）」，無頁面錯誤。
+- **文件**：`docs/FIRST_HAND_SOURCES.md` #19條目、排名表第9名、host表、
+  總結分佈段落皆已更新。
+- **冒煙測試**：`node scripts/smoke_test.mjs` 45/46 PASS，僅#39既有已知
+  紅燈，與本次改動無關。
+- **下一步**：排名表第10名（經濟部工業生產與外銷訂單）留待後續輪次，
+  host未驗證，需先測robots.txt+端點；至此源頭二.3前10名候選僅剩第10名
+  與先前跳過的第4名（FRED，待總司令裁示是否上傳GitHub Secrets）未完成。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-094601，續）源頭二.3第8名：接入BLS美國總經指標（失業率/CPI年增率/非農就業）
 
 同一輪cycle繼續做排名表第8名：BLS總經（就業/CPI）。

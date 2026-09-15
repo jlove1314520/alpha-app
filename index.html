@@ -605,6 +605,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：TWSE T86 全市場加總 + 融資餘額（GitHub Actions 排程）</div>
       </div>
 
+      <!-- 2026-09-15（源頭二.3第9名）全國進出口貿易統計，財政部關務署官方開放資料免金鑰。 -->
+      <div class="card">
+        <h3>全國進出口貿易統計</h3>
+        <div class="facts" id="customs-trade-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="customs-trade-datatime"></div>
+        <div class="note">來源：財政部關務署官方開放資料（data.gov.tw#6053），GitHub Actions 排程；官方每月更新，資料通常落後1個月，YoY為本App自算，僅供參考非投資建議</div>
+      </div>
+
       <div class="card ai-card" style="opacity:.7">
         <div class="ai-tag">✦ AI 盤勢解讀</div>
         <div class="note">功能建置中 · 尚未接上真實新聞與訊號分析，暫不顯示具體市場判斷內容</div>
@@ -3608,13 +3616,37 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
     // 2026-09-08（金流一.3）產業金流併入同一批 allSettled——它自己有 try/catch，
     // 掛了只影響自己那張卡，不會拖垮其他面板（錯誤隔離原則）。
-    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow()]);
-    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow'];
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade()]);
+    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
     if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
     if(MKT_STATE.market==='FUT')_safeAsync('loadMarketFUT',loadMarketFUT);
     stampUpdated('market');
     updateDiagBanner();
+  }
+  // 2026-09-15（源頭二.3第9名）全國進出口貿易統計，market-tw-panel卡片。
+  let CUSTOMS_TRADE_CACHE=null;
+  async function loadCustomsTrade(){
+    const el=document.getElementById('customs-trade-rows');if(!el)return;
+    if(!CUSTOMS_TRADE_CACHE){
+      try{const r=await fetch('data/customs_trade.json?t='+Date.now());if(r.ok)CUSTOMS_TRADE_CACHE=await r.json()}
+      catch(e){console.warn('[loadCustomsTrade]',e);recordGlobalError('loadCustomsTrade',e)}
+    }
+    const d=CUSTOMS_TRADE_CACHE;
+    if(!d||!d.latest){
+      el.innerHTML='<div class="note">查無資料</div>';
+      document.getElementById('customs-trade-datatime').textContent='';
+      return;
+    }
+    const toYi=v=>(v/1e6).toFixed(1)+'億元'; // 原始單位新臺幣千元，除以1,000,000換算成億元
+    const yoy=d.yoy;
+    const balCls=d.latest.trade_balance>=0?'pos':'neg';
+    el.innerHTML=[
+      `<div class="f"><span>出口總值</span><b>${toYi(d.latest.export_total)}${yoy&&yoy.export_yoy_pct!=null?`（YoY ${yoy.export_yoy_pct>=0?'+':''}${yoy.export_yoy_pct.toFixed(1)}%）`:''}</b></div>`,
+      `<div class="f"><span>進口總值</span><b>${toYi(d.latest.import_total)}${yoy&&yoy.import_yoy_pct!=null?`（YoY ${yoy.import_yoy_pct>=0?'+':''}${yoy.import_yoy_pct.toFixed(1)}%）`:''}</b></div>`,
+      `<div class="f"><span>出入超（貿易${d.latest.trade_balance>=0?'順':'逆'}差）</span><b class="${balCls}">${d.latest.trade_balance>=0?'+':''}${toYi(d.latest.trade_balance)}</b></div>`,
+    ].join('');
+    document.getElementById('customs-trade-datatime').textContent=`資料月 ${d.latest.date}（財政部關務署官方每月更新）`;
   }
 
   // ── 左滑刪除 ──
@@ -6439,7 +6471,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1001';
+  const APP_VERSION='2026-09-15.1006';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
