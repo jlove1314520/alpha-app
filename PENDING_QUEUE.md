@@ -4076,11 +4076,36 @@ ORDER-END
   零放空，寫進`CLAUDE.md`「八、安全紅線」，是結構上不可能爆倉，不是
   風控參數設嚴——理由（總司令原話）：風控參數要靠程式正確執行，這兩週
   已證明程式經常不正確執行。
-- [ ] **工廠四** 工廠穩定性可量測化——MTBF（各管線平均無故障時間）與每週
-  人工介入次數兩個數字做成儀表板，每週記錄。總司令已給這兩週的真實
-  起點數字：4天額度停擺、3次重開機全停、IBKR死6天、alpha.db空轉20天。
-  **現在難看是應該的，正因為難看才該量**——用來證明工廠有沒有變好，
-  不能只憑感覺。尚未開始，排進DevQueue佇列（見上方ORDER清單）。
+- [x] **工廠四** 工廠穩定性可量測化——**已完成並實測**（`DevQueue-Cycle:
+  20260916-003102`）。兩個數字：
+  1. **MTBF**：`pipeline_fault_ledger.py` 新增 `fault_history.event_log`
+     （每節點保留最近30筆故障事件時間戳，邊緣觸發時append，不回填），
+     新腳本`scripts/factory_stability.py`用相鄰事件間隔平均算MTBF，
+     **少於2筆事件一律回報「資料不足」，不強算**。
+  2. **每週人工介入次數**：精確定義為「`dev_queue_runner.py`判定需要
+     總司令介入、在本檔標記『⛔ 自走中止』的次數，依ISO週分組」——
+     如實揭露這不等於「總司令實際介入次數」，且只涵蓋DevQueue一條
+     自走軌道（馬拉松/假設佇列沒有等價阻塞標記機制，未計入）。
+  總司令給的兩週前起點數字（4天額度停擺/3次重開機全停/IBKR死6天/
+  alpha.db空轉20天）登記為`baseline_incidents_pre_ledger`，明確標示
+  「人工回溯記錄、非本系統自動量測」，跟上面兩個自動算的數字分開
+  陳列，不混算「進步了多少」。
+
+  輸出：`data/factory_stability.json`（每次執行覆蓋的最新快照）＋
+  `data/factory_stability_history.jsonl`（append-only，同一ISO週只留
+  一筆，累積出週趨勢）。掛勾進`check_external_connectivity.py`（每5
+  分鐘自動更新，包try/except不影響本體）。
+
+  **實測**：單元測試驗證`event_log`邊緣觸發正確累積（模擬兩次故障間隔
+  10小時，MTBF算出10.0小時，見commit）；實跑`python scripts/
+  factory_stability.py`：目前13個節點中12個「資料不足：尚無故障事件」、
+  1個（AlphaMarketSparklines）「僅1筆故障事件…不強算」——**這是誠實的
+  現況**，健康帳從2026-09-15才開始累積，現在本來就算不出有意義的MTBF；
+  每週DevQueue阻塞：2026-W37共4次、2026-W38（進行中）6次。
+  `node scripts/smoke_test.mjs`：50項中49項PASS，僅#39（一致性違規率
+  32.95%）FAIL——**此為既有、已追蹤的問題**（`sparklines.json`過期，
+  見本檔「零」／【sparklines解凍】條目，跟本次變更無關，未被本次改動
+  引入或加重）。
 - [~] **【產品·基準對比】我們vs0050主圖** ——**已算出真實數字（誠實版，
   難看），App圖表本身尚未做，只做了計算與驗證這一半**：
   `data/picks_ledger.json`47筆snapshot（2026-08-27~2026-09-15，value/

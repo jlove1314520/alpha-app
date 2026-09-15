@@ -17,6 +17,13 @@
 **這支只做累積計數，不做「移除」判斷**：`removable` 欄位是人工判斷欄位，
 這支只讀不寫，累積的 count/last_fault_at/fault_types 是給人（或未來的
 判斷邏輯）看的數據，不在這支裡面自動下結論。
+
+**`event_log`（2026-09-16 工廠四新增）**：每個節點新增一個有上限的故障
+事件時間戳陣列（保留最近 `EVENT_LOG_MAX` 筆），供 `scripts/factory_stability.py`
+算真正的 MTBF（故障間隔平均）用——`count`/`last_fault_at` 只夠回答「累積
+故障幾次、最近一次何時」，答不出「間隔多久」，而 MTBF 的定義就是間隔。
+只在新事件觸發時 append，不做任何回填（回填等於編造沒有精確時間戳的
+歷史事件，違反誠實原則）。
 """
 from __future__ import annotations
 
@@ -30,6 +37,8 @@ STATE = ROOT / "research" / ".pipeline_fault_state.json"
 
 # 自檢亮燈只把這兩種狀態算進 stalled 清單（見 pipeline_freshness.evaluate）
 FAULT_STATUSES = {"stalled", "missing"}
+# event_log 只保留最近幾筆，這是診斷用的滾動窗口，不需要無限累積
+EVENT_LOG_MAX = 30
 
 
 def _load_state() -> dict:
@@ -80,6 +89,9 @@ def update_fault_history(rows: list[dict], now: datetime) -> list[str]:
             fh["last_fault_at"] = now.isoformat()
             types = fh.setdefault("fault_types", {})
             types[status] = int(types.get(status, 0)) + 1
+            log = fh.setdefault("event_log", [])
+            log.append(now.isoformat())
+            del log[:-EVENT_LOG_MAX]
             changed = True
             new_faults.append(f'{row.get("task")}（{row.get("artifact")}）：{status}')
 

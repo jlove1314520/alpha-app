@@ -223,6 +223,19 @@ def update_pipeline_fault_ledger(rows: list[dict], now: datetime) -> None:
         print(f"  ! 鏈路節點健康帳更新失敗（{type(e).__name__}: {e}），本輪跳過，不影響停擺自檢本身")
 
 
+def update_factory_stability(now: datetime) -> None:
+    """2026-09-16（總司令交辦【工廠四】）：算 MTBF 與每週 DevQueue 自走阻塞次數，
+    寫 data/factory_stability.json（最新快照）與 data/factory_stability_history.jsonl
+    （每週一筆的趨勢記錄）。同樣包一層 try/except，監測器本體不能因為這個
+    儀表板寫檔失敗而整輪崩潰。
+    """
+    try:
+        from factory_stability import run as run_factory_stability
+        run_factory_stability(now)
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 工廠穩定性儀表板更新失敗（{type(e).__name__}: {e}），本輪跳過，不影響停擺自檢本身")
+
+
 def check_stale_user_visible_blocks() -> list[str]:
     """2026-09-15（總司令裁示【防重演】，sparklines凍結事件教訓）：
     PENDING_QUEUE.md 裡標記【使用者可見】的阻塞項，超過3個交易日沒處理
@@ -328,6 +341,9 @@ def main() -> int:
     # 2026-09-15【工廠一】：每次自檢亮燈（stalled/missing）就把事件累積進
     # 每個節點的健康帳，長期用來回答「哪個節點最脆弱、哪個能拿掉」。
     update_pipeline_fault_ledger(task_rows, now)
+    # 2026-09-16【工廠四】：MTBF與每週人工介入次數儀表板，讀的是上面剛更新的
+    # 健康帳，所以要排在 update_pipeline_fault_ledger() 之後。
+    update_factory_stability(now)
     # 2026-09-15【防重演】：PENDING_QUEUE.md裡【使用者可見】標記的阻塞項也併進
     # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
     # 教總司令看第三個地方。

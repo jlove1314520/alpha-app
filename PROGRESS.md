@@ -1,3 +1,60 @@
+## 2026-09-16（DevQueue自走，cycle 20260916-003102）工廠四：工廠穩定性儀表板（MTBF＋每週人工介入次數）
+
+戴**維運帽**。依`PENDING_QUEUE.md`權威執行順序取件到【工廠四】：把「工廠
+有沒有變好」從感覺變成可以查的數字。
+
+**做了什麼**：
+1. `scripts/pipeline_fault_ledger.py`新增`fault_history.event_log`——
+   每節點保留最近30筆故障事件時間戳（邊緣觸發append，不回填歷史，回填
+   等於編造沒有精確時間戳的事件）。
+2. 新增`scripts/factory_stability.py`：
+   - MTBF＝相鄰故障事件間隔平均，**少於2筆事件一律回報「資料不足」**，
+     不用1個時間點硬湊一個看似精確的數字。
+   - 每週人工介入次數精確定義為「`dev_queue_runner.py`判定需要總司令
+     介入、標記『⛔ 自走中止』的次數，依ISO週分組」——如實揭露這不等於
+     「總司令實際介入次數」，且只涵蓋DevQueue一條自走軌道（馬拉松／
+     假設佇列沒有等價阻塞標記機制，未計入，會低估真正介入頻率）。
+   - 總司令給的兩週前起點數字（4天額度停擺／3次重開機全停／IBKR死
+     6天／alpha.db空轉20天）登記為`baseline_incidents_pre_ledger`，
+     明確標示「人工回溯記錄、非本系統自動量測」，跟自動算出來的兩個
+     數字分開陳列，不混算「進步了多少」（量測方法不同，不可直接比較）。
+   - 輸出`data/factory_stability.json`（每次覆蓋的最新快照）＋
+     `data/factory_stability_history.jsonl`（append-only，同一ISO週
+     只留一筆，累積出週趨勢，滿足「每週記錄」）。
+3. 掛勾進`scripts/check_external_connectivity.py`（每5分鐘自動更新，
+   包try/except，寫檔失敗不影響監測器本體，跟既有`update_pipeline_
+   fault_ledger()`同一套防呆模式）。
+
+**驗證**：
+- 單元測試：手動模擬兩次故障事件（間隔10小時），確認`event_log`正確
+  累積兩筆時間戳、`factory_stability.compute_pipeline_mtbf()`算出
+  MTBF=10.0小時，間隔平均邏輯正確。
+- 實跑`python scripts/factory_stability.py`：13個節點中12個「資料不足：
+  尚無故障事件」、1個（AlphaMarketSparklines）「僅1筆故障事件…不強算」
+  ——**這是誠實現況，不是bug**：健康帳從2026-09-15才開始累積，現在
+  本來就算不出有意義的MTBF；每週DevQueue阻塞：2026-W37共4次、
+  2026-W38（進行中）6次。
+- 實跑`python scripts/check_external_connectivity.py --quiet`：正常
+  執行完成，`data/factory_stability.json`／`_history.jsonl`正確產出，
+  未影響既有告警邏輯（唯一告警是既有已知的sparklines過期，跟本次
+  變更無關）。
+- `node scripts/smoke_test.mjs`：50項中49項PASS，僅#39（一致性違規率
+  32.95%）FAIL——**此為既有、已在`PENDING_QUEUE.md`「零」／【sparklines
+  解凍】條目追蹤中的問題**（`sparklines.json`過期），跟本次變更無關，
+  未被本次改動引入或加重。
+
+**影響檔案**：`scripts/pipeline_fault_ledger.py`、`scripts/factory_
+stability.py`（新增）、`scripts/check_external_connectivity.py`、
+`data/factory_stability.json`（新增）、`data/factory_stability_
+history.jsonl`（新增）、`PENDING_QUEUE.md`（【工廠四】標記完成）。
+
+**下一步**：依權威執行順序，ORDER清單已無下一項（工廠四是清單最後一項），
+接下來排程會回退到「清單裡沒列到的項目，依檔案原有順序處理」（見
+`dev_queue_runner.py::_explicit_order()`說明）。MTBF數字要累積到多筆
+故障事件（至少2筆）才會開始有意義，屬於「時間換數據」，非本輪能加速。
+
+---
+
 ## 2026-09-16（持有期與成本結構重新檢視·一.1/一.3完成）打平0050所需毛alpha算出來了，t5窗口要贏27.8%~41.4%年化alpha
 
 戴**驗證帽**。總司令裁示【持有期與成本結構重新檢視】五項（原文已登記
