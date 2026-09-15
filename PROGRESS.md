@@ -19,6 +19,61 @@ commit僅含`data/theme_official_site_evidence_draft.json`／
 （dev_queue／connectivity check／IBKR quotes）留下的未commit異動，避免
 越權混入。
 
+## 2026-09-15（開發佇列自走 cycle_id=20260915-143102）源頭一.2b：借券賣出當日成交量接入（新資料源，非UI）
+
+`PENDING_QUEUE.md`權威清單下一項是「源頭一.2b　借券賣出：查TWSE/TPEx官方
+端點文件，確認免費可得後接入」。本輪戴**開發帽**（新增資料管線腳本＋排程
+註冊）。
+
+**先釐清跟既有資料的差異**：`data/short_lending_available.json`（源頭二.3
+第5名，`fetch_short_lending_available.py`）是TWSE `SBL/TWT96U`「**當日可
+借券賣出股數**」（借券供給水位），本項要接的是「**借券賣出當日成交量**」
+（已經借出去賣了多少）——兩者經濟意涵完全不同，容易混淆。
+
+**新查到的端點**：
+- **TWSE**：`www.twse.com.tw/rwd/zh/marginTrading/TWT93U`（不在
+  `openapi.twse.com.tw`的143個端點清單裡，是`www.twse.com.tw/rwd`主站
+  家族的端點，跟T86/MI_QFIIS同一組，robots.txt允許範圍已涵蓋）。官方標題
+  「信用額度總量管制餘額表」，`fields`有15欄且「前日餘額」重複出現兩次
+  （代表兩個不同信用管制群組），**踩到地雷**：JSON轉dict時重複key後者會
+  覆蓋前者，改用index位置對應才拿到正確值。第二組（index 8~13）的
+  `當日賣出`就是借券賣出成交量。用台積電2330（2026-09-14資料）驗證餘額
+  勾稽恆等式：前日餘額(16,244,514)−當日還券(26,000)+當日賣出(318,000)
+  +當日調整(0)＝當日餘額(16,536,514)，數字兜得起來，判定資料可信。
+- **TPEx**：openapi `/tpex_short_sell`（「上櫃當日融券賣出與借券賣出成交
+  量值」），欄位`SBLVolume`/`SBLAmount`就是要的借券賣出量值。
+
+**誠實更正一個錯誤假設**：原本（源頭一.1）猜測TWSE「信用額度總量管制」
+只適用少數觸發管制的個股、多數股票應為0，**本輪實測推翻這個假設**——
+1,301檔裡有813檔（62%）當日借券賣出非零，涵蓋範圍比表名暗示的廣得多。
+已在腳本docstring與`DATA_SOURCE_MAP.md`同步更正，不讓錯誤假設留在文件裡。
+
+**PIT查詢能力**：TWT93U支援`date=YYYYMMDD`參數，本機實測`date=20260910`
+正常回傳歷史資料（非只有當日快照），代表**未來可望回補歷史**，但本輪只做
+每日快照接入，未做全歷史回補深度測試（那是另一個工作單位，避免一輪塞
+兩種性質的工作）。TPEx `tpex_short_sell`未見支援歷史查詢參數，僅回傳最新
+交易日快照。
+
+**落地**：新增`.github/scripts/fetch_securities_lending_sell.py`（沿用
+`fetch_foreign_holding.py`同款節流狀態機`data/rate_limit_state.json`），
+輸出`data/securities_lending_sell.json`；掛進`market.yml`（跟`short_
+lending_available.json`同一批排程）；`generate_status_json.py`三處註冊
+（`MONITOR`門檻72小時、`describe_securities_lending_sell()`、`SOURCES`
+panel清單，並標註「資料層已接、UI尚未顯示」）。本機`python generate_
+status_json.py`實測輸出`securities_lending_sell.json`：records=2307、
+detail="TWSE=1301檔(資料日20260914) TPEx=1006檔(資料日1150914)
+errors=[]"，STATUS.json產出正確。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 48項僅既有紅燈check 39 FAIL
+（跟本項改動的檔案完全無關，本項未動`index.html`），其餘全過。
+
+**誠實揭露範圍邊界**：資料層已接，**個股頁UI尚未顯示這兩列**（那是
+源頭一.3「個股頁籌碼卡新增『千張大戶』與『借券賣出』兩列」的工作，本輪
+不越權去動`index.html`）；TWSE勾稽邏輯只驗證2330一檔，未逐檔驗證全部
+1,301檔的數字正確性；TWT93U歷史回補深度只測過回溯5天，未測更早的可用性。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-143102）源頭一.1：`docs/DATA_SOURCE_MAP.md`籌碼K線10項功能全拆解
 
 `PENDING_QUEUE.md`權威清單（回退到檔案順序，因ORDER清單裡的項目皆已完成/

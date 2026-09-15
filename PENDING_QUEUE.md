@@ -2737,7 +2737,27 @@ ORDER-END
   未動 `data/audit_report.json`）。
   **待辦（下一項 源頭一.3 才做）**：個股頁籌碼卡尚未接上這份 `holders.json`，目前只是
   資料層產出，App 畫面還看不到。
-- [ ] **源頭一.2b** 借券賣出：查 TWSE/TPEx 官方端點文件，確認免費可得後接入
+- [x] **源頭一.2b** **已完成（2026-09-15 開發佇列cycle_id=20260915-143102）**：借券賣出
+  當日成交量（跟只有可借額度的`short_lending_available.json`／源頭二.3第5名是
+  兩件不同的事，不可混為一談）。新查到TWSE`www.twse.com.tw/rwd/zh/
+  marginTrading/TWT93U`（不在openapi清單裡，主站rwd家族，官方標題「信用額度
+  總量管制餘額表」，欄位分兩組、第二組`當日賣出`即借券賣出成交量，同名
+  「前日餘額」出現兩次是已知地雷，用index而非欄位名稱對應）；TPEx openapi
+  `/tpex_short_sell`（`SBLVolume`/`SBLAmount`）。用台積電2330（2026-09-14）
+  驗證TWSE餘額勾稽恆等式成立（前日餘額−當日還券+當日賣出+當日調整＝當日
+  餘額），判定資料可信；`date=`歷史查詢參數本機實測可用（`date=20260910`
+  正常回傳）。新增`.github/scripts/fetch_securities_lending_sell.py`→
+  `data/securities_lending_sell.json`，掛`market.yml`排程（跟`short_lending_
+  available.json`同一批）。本機實測：TWSE 1,301檔（813檔/62%當日借券賣出
+  非零，**如實更正**先前源頭一.1猜測「只有觸發總量管制名單子集才非零」的
+  假設，實測結果推翻此假設）、TPEx 1,006檔。已在`generate_status_json.py`
+  註冊監控門檻/describe函式/panel來源清單三處，`python generate_status_json.py`
+  實測輸出正確（`records=2307`）。**誠實揭露範圍**：資料層已接，**個股頁UI
+  尚未顯示**（那是源頭一.3的工作，本項不越權去動`index.html`）；TWSE只驗證
+  一檔（2330）的勾稽邏輯，未逐檔驗證全部1,301檔；TWT93U歷史深度只測過
+  回溯5天，未測全歷史回補可行性。冒煙測試：`node scripts/smoke_test.mjs`
+  48項僅既有紅燈check 39 FAIL（跟本項改動的檔案無關，本項未動`index.html`），
+  其餘全過。
 - [ ] **源頭一.2c** 當沖比重：沿用既有 TWTASU
 - [ ] **源頭一.3** 個股頁籌碼卡新增「千張大戶（週更 MM-DD）」與「借券賣出」兩列，所有數字標資料日期
 - [ ] **源頭一.4** 訊號三態徽章＋`data/signal_status.json`（來源 TRIALS_LEDGER＋STRATEGY_GRAVEYARD）

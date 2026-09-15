@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-15T10:15:01.286801+08:00",
-  "latest_commit": "34c33c96",
+  "updated_at": "2026-09-15T14:53:10.926386+08:00",
+  "latest_commit": "20b6ee81",
   "data_files": [
     {
       "path": "data/adr_premium.json",
@@ -276,7 +276,7 @@
     },
     {
       "path": "data/quotes_ibkr.json",
-      "generated_at": "2026-09-15T07:36:04.472829+08:00",
+      "generated_at": "2026-09-15T14:51:04.936579+08:00",
       "records": 0,
       "source": "research/ibkr_quotes.py（本機IB Gateway paper帳戶，非GitHub Actions排程）",
       "detail": "connected=False account_type=None error=連線失敗（IB Gateway可能沒開，或port/防火牆設定不對）：ConnectionRefusedError: [WinError 1225] 遠端電腦拒絕網路連線。 有報價數=0/0",
@@ -284,15 +284,15 @@
     },
     {
       "path": "data/quotes_sinopac.json",
-      "generated_at": "2026-09-14T13:45:42.746039+08:00",
-      "records": 48,
+      "generated_at": "2026-09-15T13:45:14.164423+08:00",
+      "records": 49,
       "source": "research/shioaji_quotes.py（本機Sinopac Shioaji模擬環境，非GitHub Actions排程）",
-      "detail": "connected=False market_status=closed error=None 有報價數=48/48",
+      "detail": "connected=False market_status=closed error=None 有報價數=49/49",
       "status": "ok"
     },
     {
       "path": "data/quotes_tw.json",
-      "generated_at": "2026-09-15T00:56:07+00:00",
+      "generated_at": "2026-09-15T06:01:22+00:00",
       "records": 240,
       "source": "TWSE MIS（mis.twse.com.tw，證交所公開即時行情端點）",
       "detail": "queried=240 matched=240 trading_window=False",
@@ -300,7 +300,7 @@
     },
     {
       "path": "data/quotes_us.json",
-      "generated_at": "2026-09-15T00:56:12+00:00",
+      "generated_at": "2026-09-15T06:01:26+00:00",
       "records": 9,
       "source": "Finnhub /quote（免費額度，regular quote）+ yfinance Ticker.info（extended_hours：pre/post market，2026-08-27新增）",
       "detail": "queried=9 matched=9 trading_window=False market_session=closed extended_hours_matched=9",
@@ -313,6 +313,14 @@
       "source": "未知（generate_status_json.py 沒有對應的解析器，需要補上）",
       "detail": "",
       "status": "error"
+    },
+    {
+      "path": "data/securities_lending_sell.json",
+      "generated_at": "2026-09-15T06:52:36+00:00",
+      "records": 2307,
+      "source": "TWSE官方rwd/zh/marginTrading/TWT93U「信用額度總量管制餘額表」借券信用管制群組＋TPEx官方openapi tpex_short_sell「上櫃當日融券賣出與借券賣出成交量值」，皆免金鑰",
+      "detail": "TWSE=1301檔(資料日20260914) TPEx=1006檔(資料日1150914) errors=[]",
+      "status": "ok"
     },
     {
       "path": "data/short_lending_available.json",
@@ -451,21 +459,19 @@
       "file": ".github/workflows/quotes.yml",
       "name": "盤中近即時報價（台股+美股）",
       "schedule": "盤中每10分鐘：台股09:00-13:30、美股13:30-21:00(左右)，週一至週五",
-      "last_run": "2026-09-15T00:55:42Z",
+      "last_run": "2026-09-15T06:00:48Z",
       "last_status": "success",
       "today_runs": {
         "date_tw": "2026-09-15",
-        "total": 1,
-        "success": 1
+        "total": 3,
+        "success": 3
       }
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-15T10:15:12+08:00",
+    "checked_at": "2026-09-15T14:53:22+08:00",
     "any_overdue": true,
     "overdue_names": [
-      "台股盤中報價（GitHub Actions quotes.yml）",
-      "台股逐筆tick（本機Shioaji）",
       "美股四大指數（market.yml 21:30 UTC）"
     ],
     "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
@@ -474,20 +480,20 @@
         "name": "台股盤中報價（GitHub Actions quotes.yml）",
         "file": "data/quotes_tw.json",
         "owner": "GitHub Actions",
-        "status": "overdue",
-        "last_data_at": "2026-09-15T08:56+08:00",
-        "expected_at_or_after": "2026-09-15T09:45+08:00",
-        "rule": "盤中：資料不得超過30分鐘未更新",
+        "status": "ok",
+        "last_data_at": "2026-09-15T14:01+08:00",
+        "expected_at_or_after": "2026-09-15T13:00+08:00",
+        "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘；盤中超過30分鐘沒落地=異常"
       },
       {
         "name": "台股逐筆tick（本機Shioaji）",
         "file": "data/quotes_sinopac.json",
         "owner": "本機排程AlphaShioajiQuotes",
-        "status": "overdue",
-        "last_data_at": "2026-09-14T13:45+08:00",
-        "expected_at_or_after": "2026-09-15T09:45+08:00",
-        "rule": "盤中：資料不得超過30分鐘未更新",
+        "status": "ok",
+        "last_data_at": "2026-09-15T13:45+08:00",
+        "expected_at_or_after": "2026-09-15T13:00+08:00",
+        "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "只有使用者這台機器開機且排程在跑才會更新；乙.1冷熱分離上線後盤中不再push，只在收盤後commit一次"
       },
       {
@@ -495,7 +501,7 @@
         "file": "data/quotes_us.json",
         "owner": "GitHub Actions",
         "status": "ok",
-        "last_data_at": "2026-09-15T08:56+08:00",
+        "last_data_at": "2026-09-15T14:01+08:00",
         "expected_at_or_after": "2026-09-15T03:30+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "每10分鐘（美東正常盤）；盤前盤後另有extended_hours欄位"
@@ -505,7 +511,7 @@
         "file": "data/quotes_ibkr.json",
         "owner": "本機排程",
         "status": "ok",
-        "last_data_at": "2026-09-15T07:36+08:00",
+        "last_data_at": "2026-09-15T14:51+08:00",
         "expected_at_or_after": "2026-09-15T03:30+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "只有使用者這台機器開著IB Gateway才會更新"
@@ -583,12 +589,10 @@
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-09-15T10:15:14.194263+08:00",
+    "checked_at": "2026-09-15T14:53:24.220757+08:00",
     "registry": "data/seed/pipeline_registry.json",
-    "any_stalled": true,
-    "stalled": [
-      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 159 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
-    ],
+    "any_stalled": false,
+    "stalled": [],
     "pipelines": [
       {
         "task": "AlphaLiveServer",
@@ -597,8 +601,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T10:15:01.905187+08:00",
-        "age_min": 0.2,
+        "last_output": "2026-09-15T14:53:02.508683+08:00",
+        "age_min": 0.4,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -609,8 +613,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T10:15:07.801939+08:00",
-        "age_min": 0.1,
+        "last_output": "2026-09-15T14:53:07.935168+08:00",
+        "age_min": 0.3,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -621,8 +625,8 @@
         "expected_interval_min": 1440,
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
-        "last_output": "2026-09-14T13:47:02.680141+08:00",
-        "age_min": 1228.2,
+        "last_output": "2026-09-15T13:47:02.361362+08:00",
+        "age_min": 66.4,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -633,8 +637,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T10:11:03.488168+08:00",
-        "age_min": 4.2,
+        "last_output": "2026-09-15T14:51:05.320047+08:00",
+        "age_min": 2.3,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -645,10 +649,10 @@
         "expected_interval_min": 5,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-15T07:36:04.472829+08:00",
-        "age_min": 159.2,
+        "last_output": "2026-09-15T14:51:04.936579+08:00",
+        "age_min": 2.3,
         "stall_limit_min": 15,
-        "status": "stalled"
+        "status": "ok"
       },
       {
         "task": "AlphaConnectivity",
@@ -657,8 +661,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-15T10:12:02.091594+08:00",
-        "age_min": 3.2,
+        "last_output": "2026-09-15T14:52:02.454592+08:00",
+        "age_min": 1.4,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -668,8 +672,11 @@
         "artifact": "research/twse_publish_probe.jsonl",
         "expected_interval_min": 15,
         "freshness": "jsonl_last_field",
-        "status": "skipped",
-        "reason": "觀察窗 13:00-20:00 之外，沒產出是正常的"
+        "source": "JSONL 末筆 ts",
+        "last_output": "2026-09-15T14:45:03.200706+08:00",
+        "age_min": 8.4,
+        "stall_limit_min": 45,
+        "status": "ok"
       },
       {
         "task": "AlphaDevQueue",
@@ -678,8 +685,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T10:06:59.420693+08:00",
-        "age_min": 8.2,
+        "last_output": "2026-09-15T14:35:46.372891+08:00",
+        "age_min": 17.6,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -690,8 +697,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T10:05:43.527351+08:00",
-        "age_min": 9.5,
+        "last_output": "2026-09-15T14:37:18.531163+08:00",
+        "age_min": 16.1,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -702,8 +709,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:51:02.777108+08:00",
-        "age_min": 24.2,
+        "last_output": "2026-09-15T14:51:02.949073+08:00",
+        "age_min": 2.4,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -715,7 +722,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-09-14、inst_trades=2026-09-14、valuation=2026-09-14、taifex_large=20260910",
         "last_output": "2026-09-14T00:00:00+08:00",
-        "age_min": 2055.2,
+        "age_min": 2333.4,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -727,7 +734,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 1575.2,
+        "age_min": 1853.3,
         "stall_limit_min": 30240,
         "status": "ok"
       }
@@ -834,6 +841,10 @@
     {
       "panel": "個股頁·籌碼·可借券賣出股數（僅台股）",
       "source": "data/short_lending_available.json（TWSE官方SBL/TWT96U，2026-09-15新增，源頭二.3第5名，免金鑰；僅可借額度，非借券費率、非已借部位）"
+    },
+    {
+      "panel": "個股頁·籌碼·借券賣出當日成交量（台股，尚未接上個股頁UI，見源頭一.3）",
+      "source": "data/securities_lending_sell.json（TWSE官方TWT93U＋TPEx官方tpex_short_sell，2026-09-15新增，源頭一.2b，免金鑰；資料層已接，UI尚未顯示）"
     },
     {
       "panel": "個股頁·籌碼·機構持倉（僅美股，僅波克夏海瑟威）",
@@ -965,6 +976,12 @@
         "blocked_at": null
       },
       "twse_mi_qfiis": {
+        "blocked": false,
+        "blocked_remaining_min": null,
+        "block_reason": null,
+        "blocked_at": null
+      },
+      "twse_twt93u": {
         "blocked": false,
         "blocked_remaining_min": null,
         "block_reason": null,

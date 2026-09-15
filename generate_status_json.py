@@ -55,6 +55,7 @@ STALE_HOURS = {
     "data/us_insider_trading.json": 72,  # 跟us_sic.json同一批market.yml排程產生，門檻一致（源頭二.3第2名，2026-09-15新增）
     "data/cftc_cot.json": 72,  # 跟us_sic.json同一批market.yml排程產生（fetched_at每日更新，即使COT報告本身內容每週才變一次）（源頭二.3第3名，2026-09-15新增）
     "data/short_lending_available.json": 72,  # 跟stock_detail.json同一批market.yml排程產生，門檻一致（源頭二.3第5名，2026-09-15新增）
+    "data/securities_lending_sell.json": 72,  # 跟short_lending_available.json同一批market.yml排程產生，門檻一致（源頭一.2b，2026-09-15新增）
     "data/us_13f_holdings.json": 72,  # 跟us_sic.json同一批market.yml排程產生（13F本身季度才變一次，fetched_at每日更新）（源頭二.3第6名，2026-09-15新增）
     "data/bls_macro.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第8名，2026-09-15新增）
     "data/customs_trade.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第9名，2026-09-15新增）
@@ -427,6 +428,22 @@ def describe_short_lending_available(path: Path) -> dict:
     }
 
 
+def describe_securities_lending_sell(path: Path) -> dict:
+    """data/securities_lending_sell.json（2026-09-15新增，源頭一.2b）——借券賣出
+    當日「成交」量（跟只有可借額度的short_lending_available.json不同），TWSE官方
+    TWT93U＋TPEx官方tpex_short_sell，`.github/scripts/
+    fetch_securities_lending_sell.py`每日排程產生。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    twse = d.get("twse", {})
+    tpex = d.get("tpex", {})
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": len(twse) + len(tpex),
+        "source": d.get("source"),
+        "detail": f"TWSE={len(twse)}檔(資料日{d.get('twse_date')}) TPEx={len(tpex)}檔(資料日{d.get('tpex_date')}) errors={d.get('errors')}",
+    }
+
+
 def describe_us_13f_holdings(path: Path) -> dict:
     """data/us_13f_holdings.json（2026-09-15新增，源頭二.3第6名）——SEC EDGAR
     官方Form 13F-HR，僅追蹤波克夏海瑟威一家申報人（未做CUSIP對映/全市場
@@ -509,6 +526,7 @@ DESCRIBERS = {
     "us_insider_trading.json": describe_us_insider_trading,
     "cftc_cot.json": describe_cftc_cot,
     "short_lending_available.json": describe_short_lending_available,
+    "securities_lending_sell.json": describe_securities_lending_sell,
     "us_13f_holdings.json": describe_us_13f_holdings,
     "bls_macro.json": describe_bls_macro,
     "customs_trade.json": describe_customs_trade,
@@ -853,6 +871,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·籌碼·內部人交易（僅美股）", "source": "data/us_insider_trading.json（SEC EDGAR官方Form 4，2026-09-15新增，源頭二.3第2名，免金鑰）"},
     {"panel": "市場頁·美股·CFTC投機客淨部位", "source": "data/cftc_cot.json（CFTC官方Public Reporting Environment，2026-09-15新增，源頭二.3第3名，免金鑰；每週才更新一次資料日，僅美股大盤情緒指標，不含台指期）"},
     {"panel": "個股頁·籌碼·可借券賣出股數（僅台股）", "source": "data/short_lending_available.json（TWSE官方SBL/TWT96U，2026-09-15新增，源頭二.3第5名，免金鑰；僅可借額度，非借券費率、非已借部位）"},
+    {"panel": "個股頁·籌碼·借券賣出當日成交量（台股，尚未接上個股頁UI，見源頭一.3）", "source": "data/securities_lending_sell.json（TWSE官方TWT93U＋TPEx官方tpex_short_sell，2026-09-15新增，源頭一.2b，免金鑰；資料層已接，UI尚未顯示）"},
     {"panel": "個股頁·籌碼·機構持倉（僅美股，僅波克夏海瑟威）", "source": "data/us_13f_holdings.json（SEC EDGAR官方Form 13F-HR，2026-09-15新增，源頭二.3第6名，免金鑰；僅追蹤波克夏一家申報人，未做CUSIP對映或全市場13F整合）"},
     {"panel": "市場頁·美股·美國總經指標（失業率/CPI年增率/非農就業）", "source": "data/bls_macro.json（BLS官方Public Data API v2，2026-09-15新增，源頭二.3第8名，未註冊金鑰即可用；CPI年增率為本管線自行計算，非BLS原始欄位）"},
     {"panel": "市場頁·台股·全國進出口貿易統計", "source": "data/customs_trade.json（財政部關務署官方開放資料data.gov.tw#6053，2026-09-15新增，源頭二.3第9名，免金鑰；YoY為本管線自行計算，非官方原始欄位）"},

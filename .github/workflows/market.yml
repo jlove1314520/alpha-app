@@ -67,6 +67,9 @@ jobs:
       - name: 更新可借券賣出股數（TWSE官方SBL/TWT96U，免金鑰，源頭二.3第5名）
         run: python .github/scripts/fetch_short_lending_available.py
         continue-on-error: true
+      - name: 更新借券賣出當日成交量（TWSE官方TWT93U＋TPEx官方tpex_short_sell，免金鑰，源頭一.2b）
+        run: python .github/scripts/fetch_securities_lending_sell.py
+        continue-on-error: true
       - name: 更新SEC 13F機構持倉（僅追蹤波克夏海瑟威，免金鑰，源頭二.3第6名）
         run: python .github/scripts/fetch_us_13f_holdings.py
         continue-on-error: true
