@@ -12,14 +12,25 @@ C:\\alpha\\alpha-data\\compute_margin_maintenance.py 的手動、無排程狀態
 用的是同一組，這裡是自成一體的獨立複製，不跨目錄 import，同 `fetch_market_tw.py`
 等既有慣例）。
 
-**已知限制，誠實揭露，不是隱藏**：分母（全市場融資金額，即銀行/證金公司實際
-貸出去的錢）目前沒有對應的 TWSE openapi 端點可以直接拿到——TWSE 只公布逐股
-「融資餘額(張)」，沒有公布全市場加總的「融資金額(元)」。這裡仍然使用 FinMind
-`TaiwanStockTotalMarginPurchaseShortSale`（免token）當分母來源，是這支腳本
-唯一保留的 FinMind 依賴，風險遠低於之前逐股迴圈打 FinMind：**這裡一天只呼叫
-一次、抓的是全市場單一加總數字，不是逐股歷史**，額度耗盡機率低很多。如果這
-唯一一次呼叫還是失敗，腳本會誠實跳過今天這筆（不寫入錯誤或猜測值），讓
-history 停在最後一筆有效資料，App 的診斷橫幅會偵測到超過3天沒更新並提示。
+**分母改用 TWSE 官方端點，拔掉最後一個 FinMind 依賴（2026-09-15，「週六.四」
+／「其餘」條目）**：原本以為 TWSE 沒有公布全市場加總的「融資金額(元)」，只有
+逐股「融資餘額(張)」（`openapi.twse.com.tw/v1/exchangeReport/MI_MARGN`），
+所以退而用 FinMind `TaiwanStockTotalMarginPurchaseShortSale` 當分母。
+2026-09-15 重新查證發現：**這個判斷只查了 openapi.twse.com.tw 這一個端點
+家族，沒查 www.twse.com.tw/rwd 這個端點家族**（跟 `fetch_market_tw.py` 的
+T86 三大法人是同一個網站家族，本專案已有先例）。實測
+`https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?response=json&date=YYYYMMDD&selectType=ALL`
+的 `tables[0]`（標題「信用交易統計」）就有一列「融資金額(仟元)」，其「今日
+餘額」欄位就是我們要的全市場融資金額——2026-09-11 實測值 587,871,180(仟元)
+×1000＝587,871,180,000(元)，跟改版前 `data/margin_maintenance.json` 同一天
+（2026-09-11）的 FinMind 舊值 587,871,180,000(元) 完全吻合，確認是同一個
+統計口徑，不是巧合。
+
+跟 `T86_URL` 同一個網站家族，套用同一套風險控管：只抓「今天」一天（不回補
+歷史）、獨立的 rate-limit 來源鍵（`twse_margn_rwd`，不跟 `twse_openapi` 共用
+節流額度）、帶 `Referer`/`User-Agent`（同 `fetch_market_tw.py::
+fetch_institutional_aggregate()` 的既有慣例）。**FinMind 呼叫已完全移除**，
+這支腳本現在零 FinMind 依賴。
 """
 from __future__ import annotations
 
@@ -41,17 +52,18 @@ TSE_LIST_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"  # 上市公
 # 補stock_detail.json的個股「融資融券」分頁資料，**不**併入大盤融資維持率
 # 分子/分母的計算（那個公式是TWSE市場專屬定義，不擴大範圍，維持原設計）。
 TPEX_MARGIN_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_margin_balance"
-FINMIND_URL = (
-    "https://api.finmindtrade.com/api/v4/data"
-    "?dataset=TaiwanStockTotalMarginPurchaseShortSale&start_date={start}"
-)
+# 2026-09-15（週六.四／其餘）全市場融資金額分母，取代原本的FinMind依賴。
+# 跟T86_URL（fetch_market_tw.py）同一個www.twse.com.tw/rwd網站家族，同樣的
+# 反爬蟲風險考量：只抓「今天」一天、獨立rate-limit來源鍵、帶Referer/UA。
+MARGIN_MONEY_RWD_URL = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN"
 HISTORY_DAYS_KEEP = 60
 
 # 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
-# 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
-# 邏輯——跨repo/跨目錄不import是既有慣例）。FinMind那一路刻意用跟
-# finmind_client.py同一個source key "finmind"，讓兩邊互相看得到對方的封鎖
-# 狀態，不會各自為政。
+# 跟其他.github/scripts/*.py同一套schema/同一份共用狀態檔data/rate_limit_
+# state.json，各自複製一份邏輯——跨repo/跨目錄不import是既有慣例）。
+# 2026-09-15：本檔已拔掉FinMind依賴（見模組docstring），source key改用
+# "twse_openapi"（既有）/"tpex_openapi"（既有）/"twse_margn_rwd"（新增，
+# www.twse.com.tw/rwd家族獨立額度，不跟openapi家族共用），不再有"finmind"。
 RATE_LIMIT_STATE_PATH = REPO_ROOT / "data" / "rate_limit_state.json"
 RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
 RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
@@ -207,17 +219,63 @@ def fetch_close_by_stock() -> dict[str, float]:
     return out
 
 
-def fetch_market_margin_money() -> tuple[str, float]:
-    start = (datetime.now(TW_TZ).date() - timedelta(days=10)).isoformat()
-    r = _get_retry(FINMIND_URL.format(start=start), "finmind", timeout=30)
+MARGIN_MONEY_LOOKBACK_DAYS = 5  # 假日/尚未發布時往回找，同FinMind舊版10天窗口的精神但範圍更小
+
+
+def _fetch_margin_money_for_date(date_str: str, headers: dict) -> tuple[str, float] | None:
+    """單日查詢，查無資料（假日/尚未發布）回 None，HTTP異常一律往上拋。"""
+    _rate_limit_wait_or_raise("twse_margn_rwd")
+    r = requests.get(MARGIN_MONEY_RWD_URL, params={
+        "response": "json", "date": date_str, "selectType": "ALL",
+    }, headers=headers, timeout=20)
+    if r.status_code in (402, 403, 428, 429):
+        _rate_limit_record_block("twse_margn_rwd", r.status_code, r.text[:200])
+        raise RuntimeError(f"twse_margn_rwd回應HTTP {r.status_code}，已標記封鎖2小時：{r.text[:200]}")
     r.raise_for_status()
-    data = r.json()
-    rows = data.get("data", [])
-    money_rows = [row for row in rows if row.get("name") == "MarginPurchaseMoney"]
-    if not money_rows:
-        raise RuntimeError("FinMind 沒有回傳 MarginPurchaseMoney（額度用盡或資料集異常）")
-    last = money_rows[-1]
-    return last["date"], last["TodayBalance"]
+    body = r.json()
+    if body.get("stat") != "OK" or not body.get("tables"):
+        return None
+    table = body["tables"][0]
+    fields = table.get("fields", [])
+    try:
+        today_idx = fields.index("今日餘額")
+    except ValueError:
+        raise RuntimeError(f"TWSE信用交易統計回應欄位變了，找不到「今日餘額」：{fields}")
+    money_row = next((row for row in table.get("data", []) if row and row[0] == "融資金額(仟元)"), None)
+    if money_row is None:
+        raise RuntimeError(f"TWSE信用交易統計回應裡找不到「融資金額(仟元)」列：{table.get('data')}")
+    money_thousand = _num(money_row[today_idx])
+    if money_thousand is None:
+        raise RuntimeError(f"「融資金額(仟元)」今日餘額解析失敗：{money_row}")
+    raw_date = body["date"]  # "20260914" 格式，轉成跟其他欄位一致的ISO格式
+    iso_date = f"{raw_date[:4]}-{raw_date[4:6]}-{raw_date[6:8]}"
+    return iso_date, int(round(money_thousand * 1000))
+
+
+def fetch_market_margin_money() -> tuple[str, float]:
+    """全市場融資金額（分母），改用TWSE官方www.twse.com.tw/rwd端點（見模組
+    docstring 2026-09-15更新說明）。跟T86一樣「只抓今天」會在假日/當日尚未
+    發布時直接失敗，比舊版FinMind（抓近10天取最後一筆）更容易誤報
+    data_incomplete，所以往回找最多`MARGIN_MONEY_LOOKBACK_DAYS`天、取第一個
+    有資料的日期，維持舊版的容錯精神（範圍縮小到5天，避免真的連續多天無
+    資料時還一直往回掃）。"""
+    headers = {
+        "Referer": "https://www.twse.com.tw/zh/trading/margin/mi-margn.html",
+        "User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)",
+    }
+    last_err = None
+    for back in range(MARGIN_MONEY_LOOKBACK_DAYS + 1):
+        date_str = (datetime.now(TW_TZ).date() - timedelta(days=back)).strftime("%Y%m%d")
+        try:
+            result = _fetch_margin_money_for_date(date_str, headers)
+        except Exception as e:
+            last_err = e
+            break  # HTTP層級異常（含封鎖）不繼續往回試，避免額外觸發風險
+        if result is not None:
+            return result
+    if last_err:
+        raise last_err
+    raise RuntimeError(f"TWSE信用交易統計近{MARGIN_MONEY_LOOKBACK_DAYS + 1}天都查無資料")
 
 
 def merge_stock_detail_margin(per_stock: dict[str, dict], tpex_codes: set[str] | None = None) -> None:
@@ -280,26 +338,26 @@ def main():
     merge_stock_detail_margin(margin_per_stock_detail, tpex_codes)
 
     today = datetime.now(TW_TZ).date().isoformat()
-    # 2026-08-27 修正（使用者要求）：分母（FinMind全市場融資金額）失敗時，改成
+    # 2026-08-27 修正（使用者要求）：分母（全市場融資金額）失敗時，改成
     # 寫入一筆「今天有資料，但不完整」的明確記錄（ratio_pct=None、
     # data_incomplete=True），不再直接跳過不寫——舊行為的問題是：跳過之後
     # history最後一筆仍是幾天前「看起來正常」的百分比，畫面上的日期雖然沒動，
     # 但一個正常大小的數字很容易被誤讀成「今天的維持率就是這樣」。現在即使
     # 分母失敗，也讓App知道「今天嘗試過，但這個數字不可信」，不是靜默沿用舊值。
     try:
-        fm_date, margin_money = fetch_market_margin_money()
+        money_date, margin_money = fetch_market_margin_money()
         data_incomplete = False
         incomplete_reason = None
     except Exception as e:
-        print(f"分母（FinMind全市場融資金額）取得失敗：{e}")
-        fm_date, margin_money = None, None
+        print(f"分母（TWSE全市場融資金額）取得失敗：{e}")
+        money_date, margin_money = None, None
         data_incomplete = True
-        incomplete_reason = f"FinMind全市場融資金額取得失敗：{e}"
+        incomplete_reason = f"TWSE全市場融資金額取得失敗：{e}"
 
     ratio = collateral_value / margin_money * 100 if margin_money else None
     record = {
         "date": today,
-        "finmind_margin_money_date": fm_date,
+        "margin_money_date": money_date,
         "collateral_value": round(collateral_value) if collateral_value else None,
         "margin_money": margin_money,
         "matched_stocks": matched,
@@ -309,7 +367,7 @@ def main():
         # 2026-09-03（P0三-三.3）：這個檔案頂層是list（App/舊解析器都依賴這個形狀，不改），
         # 時間戳與來源改寫進每一筆record，最後一筆的generated_at就是整份檔案的產生時間。
         "generated_at": datetime.now(TW_TZ).isoformat(),
-        "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+        "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
     }
     print(f"維持率估算：{record['ratio_pct']}%" if not data_incomplete else f"資料不完整：{incomplete_reason}")
 

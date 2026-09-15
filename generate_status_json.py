@@ -123,7 +123,7 @@ def describe_margin_maintenance(path: Path) -> dict:
         "generated_at": last.get("generated_at") or last.get("date"),
         "records": len(rows),
         "source": last.get("source") or "2026-08-27起改排程：TWSE官方MI_MARGN(逐股融資餘額)+STOCK_DAY_ALL(逐股收盤價)算擔保品市值；"
-                  "分母(全市場融資金額)仍用FinMind（唯一保留依賴，一天只呼叫一次，風險低）",
+                  "分母(全市場融資金額)2026-09-15起改TWSE官方www.twse.com.tw/rwd信用交易統計端點，零FinMind依賴",
         "detail": f"ratio_pct={last.get('ratio_pct')} matched_stocks={last.get('matched_stocks')}（原本是alpha-data獨立目錄手動產生，"
                   "已改掛進market.yml排程，見update_margin_maintenance.py）",
     }
@@ -897,7 +897,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},
-    {"panel": "交易頁·大盤融資維持率", "source": "data/margin_maintenance.json（2026-08-27起改排程：分子TWSE官方MI_MARGN/STOCK_DAY_ALL，分母仍FinMind，見known_limitations）"},
+    {"panel": "交易頁·大盤融資維持率", "source": "data/margin_maintenance.json（2026-08-27起改排程：分子TWSE官方MI_MARGN/STOCK_DAY_ALL；分母2026-09-15起也改TWSE官方www.twse.com.tw/rwd信用交易統計，零FinMind依賴）"},
     {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "無（尚無交易紀錄，誠實佔位）"},
     {"panel": "設定頁·訊號誠實度（三態徽章：已驗證/未驗證/實測無效）", "source": "data/signal_status.json（research/build_signal_status.py人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，2026-09-15開發佇列源頭一.4接上個股頁外的App UI）"},
 ]
@@ -979,7 +979,6 @@ TODO = [
     {"item": "個股走勢圖(價格歷史)脫離FinMind", "priority": "P2", "blocker": "可行，跟sparkline同一個TWSE STOCK_DAY端點（TW）/yfinance（US），只是要決定涵蓋範圍跟歷史長度，尚未實作"},
     {"item": "主流題材chips 脫離FinMind", "priority": "P2", "blocker": "MI_INDEX有類股價格/漲跌%但無成交值，尚未找到TWSE官方逐類股成交值端點；跟使用者要求的「題材生命週期」功能設計高度相關，建議合併處理"},
     {"item": "期貨籌碼(三大法人期貨部位) 脫離FinMind", "priority": "P2", "blocker": "探測過TAIFEX openapi常見端點命名，只找到「大額交易人」資料(跟三大法人分類不同)，需人工查閱TAIFEX網站確認"},
-    {"item": "大盤融資維持率的分母(全市場融資金額)仍依賴FinMind", "priority": "P1", "blocker": "TWSE/TPEx官方均無對應端點，只有逐股融資餘額(張)；已完成：該次呼叫失敗時明確寫入data_incomplete=true，App顯示「資料不完整」而非沿用舊值"},
     {"item": "score_live.py的earnings_growth因子沒有PER反推EPS的備援", "priority": "P2", "blocker": "研究端的_eps_yoy_derived_from_per()備援需要「約一年前的PER快照」，但fundamentals.json的ratios只存最新一筆、沒有retained歷史序列，需要另開一份PER歷史累積檔才能補上這條備援"},
     {"item": "generate_scores_live.py沒有規模分層排名", "priority": "P2", "blocker": "revenue_momentum沒有per股票的每日成交量/市值資料可以分層，是刻意的範圍縮減；technical因子已於2026-08-27接上data/price_history.json解決"},
     {"item": "generate_scores_live.py的technical因子(MA60)仍用未還原權息的close", "priority": "P2", "blocker": "2026-08-27已為題材動能榜的relative_strength因子修好還原權息(price_history.json新增adj_close欄位，見known_limitations)，但generate_scores_live.py的technical因子還沒改用adj_close，MA60在除權息當天前後仍會有跳空失真——欄位已存在，只是還沒切過去，是可以直接補的一層"},
@@ -991,7 +990,7 @@ TODO = [
 KNOWN_LIMITATIONS = [
     "【策略層面，最重要】2026-08-27新增題材動能榜（scores_momentum.json）+未來性濾網（scores_future.json），跟價值成長榜（scores.json）三榜並列——三榜都尚未經過組合策略回測驗證，App固定顯示「本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤」，見TODO的B16項目。權重是專家判斷的初始設計值（weights_frozen_momentum.json/weights_frozen_future.json），不是回測最佳化結果。",
     "2026-08-27修正P0 bug（使用者回報）：題材動能榜relative_strength因子改用還原權息收盤價（price_history.json新增adj_close欄位）——來源雙軌：一次性回補讀research端FinMind TaiwanStockDividend本機快取（research/build_price_history.py），之後每日排程改讀TWSE官方rwd/zh/exRight/TWT48U除權息預告表累積事件、回溯調整（.github/scripts/update_price_history.py，見data/ex_dividend_events.json）——刻意不在每日排程呼叫FinMind，維持JSON-only架構原則。已知殘留限制：(1)TWT48U只回傳未來約5週的事件預告，不支援歷史查詢，故涵蓋率隨每天累積逐步提高，剛上線這幾週少數個股可能還沒回溯到；(2)實測發現少數股票(如2420/2227/6216/8442等8檔)的research端FinMind快取已經停在很久以前(2024-12-31)，導致「除權息日前一筆可用資料」距離超過10天，判定無法安全定錨調整係數，這類事件會被跳過(adj_close退回等於close，不會比修正前更差)並記錄skip_reason，不會靜默套用錯誤係數。",
-    "margin_maintenance.json：分母（全市場融資金額）仍用FinMind單一輕量呼叫（一天一次、抓全市場加總非逐股歷史），若失敗當天會明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
+    "margin_maintenance.json：分母（全市場融資金額）2026-09-15起改用TWSE官方www.twse.com.tw/rwd信用交易統計端點（同T86網站家族），拔掉最後一個FinMind依賴；單日查無資料時往回找最多5天取最新可用值，若5天內都失敗才明確寫入data_incomplete=true，App顯示「資料不完整」，不會沿用舊值假裝正常。",
     "stock_detail.json：財報(EPS/毛利率/ROE)只涵蓋TWSE上市「一般業」，金融控股/證券/保險等特殊產業分類、以及全部上櫃(TPEx)股票查不到（TPEx其實有對應端點，只是還沒接，見todo）。"
     "三大法人/融資融券2026-08-27（P1-新）已補上TPEx上櫃股票（tpex_3insti_daily_trading/tpex_mainboard_margin_balance）："
     "三大法人涵蓋檔數1,083→1,990檔、融資融券1,063→1,983檔，scores.json全市場平均coverage 0.341→0.376（chips因子權重14%受益最多）。"

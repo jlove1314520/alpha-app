@@ -1,3 +1,37 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-191602）「週六.四／其餘」融資維持率分母拔掉最後一個FinMind依賴
+
+戴**開發帽**。`scripts/dev_queue_runner.py next` 判定下一項是「其餘」（三大法人
+柱狀圖零基線／融資維持率分母改MI_MARGN／週末標頭休市／移除未上線推播開關／
+唯讀持倉餘額經live server），逐項核對後發現其中4項已在更早的cycle完成，只有
+「融資維持率分母改MI_MARGN」（週六.四）真的還沒做。
+
+**發現與修復**：`.github/scripts/update_margin_maintenance.py` 原本的判斷
+「TWSE沒有公布全市場加總的融資金額(元)，只有逐股融資餘額(張)」只查了
+`openapi.twse.com.tw`這一個端點家族。重新查證發現
+`www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN?selectType=ALL`（跟
+`fetch_market_tw.py`的T86三大法人同一個網站家族，本專案已有先例）會回傳
+「信用交易統計」表，其中「融資金額(仟元)」列的「今日餘額」就是要的全市場
+融資金額——實測2026-09-11值587,871,180(仟元)×1000與改版前FinMind同一天舊值
+完全吻合，確認同一統計口徑。
+
+**改動**：`fetch_market_margin_money()`改打TWSE官方端點，沿用T86同款風控
+（獨立rate-limit來源鍵`twse_margn_rwd`、Referer/UA、只抓當天不回補歷史），
+新增往回最多5天的容錯視窗（今日未發布時取最近可用日，維持舊版FinMind
+10天窗口的容錯精神但範圍縮小）；實測今日(09-15)尚未發布、成功退回09-14
+資料，算出`ratio_pct=183.15%`（前值184.79%，同量級）。同步更新
+`market.yml`步驟說明、`generate_status_json.py`三處硬編碼字串（面板描述/
+已知限制/待辦清單）並重跑產生乾淨的`data/STATUS.json`。此腳本現在**零
+FinMind依賴**。
+
+**冒煙測試**：50項49項PASS，#39既有已知紅燈與本輪無關。
+
+**PENDING_QUEUE狀態**：「週六.四」改標`[x]`；「其餘」／「新五其餘」改標
+`[~]`（5項中4項完成，僅「唯讀持倉餘額經live server」未做，屬獨立工作量）；
+順手補打勾「週六.一」（早期已修復的千元股問題重複條目，本輪冒煙測試check
+35重新驗證仍成立）。`dev_queue_runner.py next`現在正確指向「週六.五」。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-191602）「零之二」分點資料14家券商API矩陣完成
 
 戴**研究帽**。權威執行順序清單「三」完成後，`scripts/dev_queue_runner.py next`

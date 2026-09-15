@@ -3127,8 +3127,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const fundAgeMin=fundGenAt?(Date.now()-new Date(fundGenAt).getTime())/60000:null;
     if(fundAgeMin==null||fundAgeMin>3*24*60)problems.push({name:'個股基本面（月營收/PER/PBR）',reason:fundAgeMin==null?'無資料或缺少更新時間戳':'資料可能過期（超過3天未更新）',schedule:'台股收盤後 14:10'});
     // 2026-08-27 新增：大盤融資維持率改排程累積更新後，超過3天沒新的一天就代表
-    // update_margin_maintenance.py 連續失敗（常見原因：分母那唯一一次FinMind呼叫
-    // 額度用盡），提醒使用者畫面上那個數字可能不是最新的，不要誤以為永遠有效。
+    // update_margin_maintenance.py 連續失敗（常見原因：TWSE信用交易統計www.twse.
+    // com.tw/rwd端點當天尚未發布、2026-09-15起分母已改TWSE官方端點，不再是FinMind
+    // 額度問題），提醒使用者畫面上那個數字可能不是最新的，不要誤以為永遠有效。
     let marginHistory=[];
     try{const r=await fetch('data/margin_maintenance.json?t='+Date.now());if(r.ok)marginHistory=await r.json()}catch(e){console.warn('[updateDiagBanner:margin]',e);recordGlobalError('updateDiagBanner:margin',e)}
     const marginLast=Array.isArray(marginHistory)&&marginHistory.length?marginHistory[marginHistory.length-1]:null;
@@ -6890,7 +6891,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1924';
+  const APP_VERSION='2026-09-15.1941';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
