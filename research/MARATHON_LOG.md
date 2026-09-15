@@ -1,6 +1,18 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
-## 2026-09-15T10:25+0800（hypothesis_queue排程接續）— 接手PENDING_QUEUE交辦：題材七待辦2第五批（offset=70），累計90/259，本輪fetched=13/20、新增a_level命中2檔（2408／2454）
+## 2026-09-15T (hypothesis_queue排程接續，第十四輪) — 接手PENDING_QUEUE交辦：題材七待辦2第六批（offset=90），累計110/259，本輪fetched=6/20、新增a_level命中3檔（2707／2739／2884）
+
+開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需
+總司令權限）維持阻塞；上一輪（第十三輪）留下的可執行項是待辦2續跑第六批。
+取具名鎖（`.hypothesis_queue.lock`原本不存在，非陳舊回收）。
+
+跑`theme_official_site_pipeline.py --batch-size 20 --offset 90`：
+`fetched=6/20`、`blocked_js_render`=5、`exc_SSLError`=5、
+`exc_ConnectTimeout`=3、`http_403`=1。獨立重新驗證輸出檔（不信任腳本
+自身print文字）：`data/theme_official_site_evidence_draft.json`累計110筆、
+110個代號互不重複、status分布合計=110自洽；`a_level_hits`候選由12筆增至
+15筆。另跑`theme_official_site_negative_control.py`確認exit code 0、5家
+負對照組全數PASS，無回歸。累計**110/259**檔，剩149檔待續跑。
 
 開工先讀`PENDING_QUEUE.md`：2條永久阻塞（S4U／claude CLI非互動驗證，需
 總司令權限）維持阻塞；【題材七】待辦2上一輪（第十二輪）留下的可執行項

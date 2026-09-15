@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T10:23:54.887162+08:00",
+  "generated_at": "2026-09-15T12:25:50.636078+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "2408",
-    "2409",
-    "2412",
-    "2419",
-    "2421",
-    "2449",
-    "2454",
-    "2455",
-    "2474",
-    "2481",
-    "2492",
-    "2506",
-    "2542",
-    "2545",
-    "2547",
-    "2597",
-    "2601",
-    "2603",
-    "2605",
-    "2606"
+    "2607",
+    "2609",
+    "2610",
+    "2615",
+    "2617",
+    "2618",
+    "2634",
+    "2637",
+    "2707",
+    "2731",
+    "2739",
+    "2801",
+    "2812",
+    "2834",
+    "2855",
+    "2881",
+    "2882",
+    "2884",
+    "2886",
+    "2891"
   ],
   "results": [
     {
@@ -4166,8 +4166,310 @@
           "a_level": false
         }
       ]
+    },
+    {
+      "code": "2607",
+      "name": "榮運",
+      "url": "www.evergreen-eitc.com.tw",
+      "themes": [
+        "wind",
+        "logistics"
+      ],
+      "status": "fetched",
+      "sentence_count": 21,
+      "keyword_hits": 5,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "我已閱讀並同意本條款聲明 跳到主導覽列 跳到主內文 跳到頁尾 EN TW 最新消息 人才招募專區 整合服務平台 員工專區 聯絡我們 常見問題 關於我們 服務項目 公司治理 投資人服務 企業永續 Challenge, Innovation & Teamwork. THE EVERGREEN SPIRIT 公司簡介 公司組",
+          "keyword": "物流",
+          "a_level": false
+        },
+        {
+          "sentence": "大園物流園區 鄰近桃園國際機場，距離台北港約15 公里，交通便利，擁有容納長達16 公尺的40呎貨櫃車行駛至各樓層的大型車道，提升進出貨便利性。",
+          "keyword": "物流",
+          "a_level": false
+        },
+        {
+          "sentence": "大園物流園區 鄰近桃園國際機場，距離台北港約15 公里，交通便利，擁有容納長達16 公尺的40呎貨櫃車行駛至各樓層的大型車道，提升進出貨便利性。",
+          "keyword": "物流",
+          "a_level": false
+        },
+        {
+          "sentence": "資產活化 善用既有資源，將有效提升資產使用效率，同時為客戶提供更全面的物流解決方案。",
+          "keyword": "物流",
+          "a_level": false
+        },
+        {
+          "sentence": "TOP Contact Us Join Us 關於我們 公司簡介 公司組織圖 經營團隊 資訊安全專區 人才招募專區 主要客戶群 AEO優質企業 資產出租、標售及採購公告 認證與榮耀 服務項目 內陸貨櫃場 內陸貨櫃運輸 台中港貨櫃場 長榮巴士 大小型車維修及車輛檢驗業務 長榮加油站及附設洗車場 大園物流園區 查詢總覽 公",
+          "keyword": "物流",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2609",
+      "name": "陽明",
+      "url": "http://www.yangming.com/",
+      "themes": [
+        "container_shipping"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2610",
+      "name": "華航",
+      "url": "http://www.china-airlines.com",
+      "themes": [
+        "airline"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "首頁 - 中華航空 跳至主要內容 跳至主導航 跳至頁尾 請搜尋... 繁體中文 登入/註冊 訂位購票 我的行程 網路報到 航班動態 預訂行程 購票資訊 探索最佳票價 票價產品介紹 更改機票與退費 加購服務 加購選位 加購行李 加購高鐵 歐洲鐵路 機場接駁巴士 碳抵換 航班資訊 航班動態 全球航點 航班時刻表 精選優惠 ",
+          "keyword": "航空",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2615",
+      "name": "萬海",
+      "url": "http://tw.wanhai.com/",
+      "themes": [
+        "container_shipping"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2617",
+      "name": "台航",
+      "url": "http://www.taiwanline.com.tw",
+      "themes": [
+        "bulk_shipping"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2618",
+      "name": "長榮航",
+      "url": "www.evaair.com",
+      "themes": [
+        "airline"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "2634",
+      "name": "漢翔",
+      "url": "www.aidc.com.tw",
+      "themes": [
+        "drone",
+        "defense"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "漢翔航空工業股份有限公司 漢翔航空股份有限公司 首頁 | 網站導覽 | 聯絡我們 | English 漢翔(2634)股價 認識漢翔 民用航空 軍用業務 發動機事業 維修航電 飛航與科技服務 經銷業務 投資人專區 永續發展 安全管理 認識漢翔 公司沿革 經營團隊 組織圖 業務領域 使命、願景與經營理念 誠信經營政策 地",
+          "keyword": "無人機",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2637",
+      "name": "慧洋-KY",
+      "url": "www.wisdomlines.com.tw",
+      "themes": [
+        "wind",
+        "bulk_shipping"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2707",
+      "name": "晶華",
+      "url": "https://www.silkshotelgroup.com/tw/",
+      "themes": [
+        "tourism"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 1,
+      "hits": [
+        {
+          "sentence": "全球著名豪華酒店和度假村 | 晶華國際酒店集團 EN 繁 日 簡 立即訂房 立即訂房 關於我們 酒店事業 餐飲管理 物業管理 企業發展 永續發展 投資人關係 利害關係人 工作機會 聯絡我們 EN 繁 日 簡 立即訂房 立即訂房 關於我們 酒店事業 餐飲管理 物業管理 企業發展 永續發展 投資人關係 利害關係人 工作機會",
+          "keyword": "訂房",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2731",
+      "name": "雄獅",
+      "url": "http://www.liontravel.com",
+      "themes": [
+        "tourism"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2739",
+      "name": "寒舍",
+      "url": "http://www.mhh-group.com",
+      "themes": [
+        "tourism"
+      ],
+      "status": "fetched",
+      "sentence_count": 5,
+      "keyword_hits": 4,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "寒舍集團 2026-09-15 AT 12:23 GMT+8 SHARE PRICE 關於我們 公司歷史 聯絡我們 投資人專區 公司資訊 財務資訊 公司治理 股東專欄 利害關係人 利害關係人 寒舍永續 永續藍圖 永續報告書 永續行動 寒舍餐旅 台北喜來登大飯店 台北寒舍艾美酒店 礁溪寒沐酒店 寒居酒店 寒舍生活App ",
+          "keyword": "飯店",
+          "a_level": true
+        },
+        {
+          "sentence": "寒舍集團旗下目前擁有台北喜來登大飯店、台北寒舍艾美酒店、礁溪寒沐酒店、寒居酒店與台北艾麗酒店。",
+          "keyword": "飯店",
+          "a_level": false
+        },
+        {
+          "sentence": "寒舍集團旗下目前擁有台北喜來登大飯店、台北寒舍艾美酒店、礁溪寒沐酒店、寒居酒店與台北艾麗酒店。",
+          "keyword": "飯店",
+          "a_level": false
+        },
+        {
+          "sentence": "寒舍集團 104 選單 關於我們 投資人專區 利害關係人 寒舍永續 寒舍餐旅 寒舍生活App 相關企業 酒店發展 最新消息 語言 EN | 繁中 營業據點 台北喜來登大飯店 +886 2 2321 5511 sheraton@sheratongrandtaipei.com 台北寒舍艾美酒店 +886 2 6622 80",
+          "keyword": "飯店",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2801",
+      "name": "彰銀",
+      "url": "www.bankchb.com",
+      "themes": [
+        "bank"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2812",
+      "name": "台中銀",
+      "url": "http://www.tcbbank.com.tw",
+      "themes": [
+        "bank"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2834",
+      "name": "臺企銀",
+      "url": "http://www.tbb.com.tw",
+      "themes": [
+        "bank"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2855",
+      "name": "統一證",
+      "url": "https://www.pscnet.com.tw/",
+      "themes": [
+        "securities"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2881",
+      "name": "富邦金",
+      "url": "www.fubon.com",
+      "themes": [
+        "financial_holding",
+        "insurance"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2882",
+      "name": "國泰金",
+      "url": "www.cathayholdings.com",
+      "themes": [
+        "financial_holding",
+        "insurance",
+        "high_dividend"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2884",
+      "name": "玉山金",
+      "url": "https://www.esunfhc.com",
+      "themes": [
+        "financial_holding",
+        "securities"
+      ],
+      "status": "fetched",
+      "sentence_count": 28,
+      "keyword_hits": 5,
+      "a_level_hits": 5,
+      "hits": [
+        {
+          "sentence": "玉山金控 E.SUN FHC - 玉山金控 讀取中 ::: 菁英招募 企業版圖 聯繫我們 EN 玉山銀行官方網站 關於玉山 品牌故事 經營團隊 子公司簡介 玉山大事紀 喜悅與榮光 投資人關係 公司資訊 基本資料 公司年報 信用評等 重大訊息公告 財務資訊 營運摘要 每月營收資訊 財務報告 申報證交所資料 股東服務 股東",
+          "keyword": "金控",
+          "a_level": true
+        },
+        {
+          "sentence": "了解更多 榮耀與肯定 5度榮獲國家品質獎 台灣企業唯一 連續11年入選 DJSI道瓊永續指數 連續四年獲Forbes評選為 「全球最佳銀行」 台灣銀行業第1名 12度榮獲《The Asset》 「亞洲企業傑出管理獎」 最高榮譽白金獎 MSCI ESG AAA評級 連續5年金融業最高評級 榮獲天下雜誌 「人才永續獎」、「",
+          "keyword": "金控",
+          "a_level": true
+        },
+        {
+          "sentence": "三商壽結合玉山金控資源，將持續推動更多公益關懷行動，陪伴需要支持的家庭，實踐企業對社會的長期承諾，讓每一次陪伴都成為重新出發的力量。",
+          "keyword": "金控",
+          "a_level": true
+        },
+        {
+          "sentence": "玉山金控黃男州董事長認為，台灣運動的競爭力有賴於人才的持續成長，而人才的培育必須從年輕世代開始長期扎根，特別是在青年、青少年時期更是至關重要，所以玉山除了力挺棒球、推動玉山盃全國青棒錦標賽之外，玉山也攜手中華民國排球協會與射箭協會，推動全台唯一青年/青少年國手選拔賽–玉山莒光盃排球國手選拔賽及玉山射箭國手選拔賽，期望為",
+          "keyword": "金控",
+          "a_level": true
+        },
+        {
+          "sentence": "::: 與我們聯繫 24小時服務專線 0800-30-1313 02-2182-1313 聯繫客服 玉山事業群 玉山銀行 玉山證券 玉山創投 玉山投信 玉山投顧 玉山志工 玉山文教 三商美邦人壽 玉山社群 玉山 招財納福喵喵 ESUN CHANNEL 瀏覽器建議 隱私權保護措施 顧客資料保密措施聲明 連結政策 盡職治理",
+          "keyword": "證券",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2886",
+      "name": "兆豐金",
+      "url": "www.megaholdings.com.tw",
+      "themes": [
+        "financial_holding"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2891",
+      "name": "中信金",
+      "url": "https://www.ctbcholding.com",
+      "themes": [
+        "financial_holding"
+      ],
+      "status": "exc_SSLError"
     }
   ],
-  "total_codes_covered": 90,
+  "total_codes_covered": 110,
   "total_candidates": 259
 }

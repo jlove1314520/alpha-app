@@ -1,3 +1,19 @@
+## 2026-09-15（假設佇列自走・第十四輪）題材七待辦2續跑第六批（offset=90），累計110/259
+
+依「交辦優先於自走」鐵律，接續`PENDING_QUEUE.md`上一輪留下的可執行交辦
+項：官網來源第六批抓取。跑`theme_official_site_pipeline.py --batch-size
+20 --offset 90`：`fetched=6/20`、`blocked_js_render`=5、`exc_SSLError`=5、
+`exc_ConnectTimeout`=3、`http_403`=1。獨立重新驗證輸出檔（不信任腳本
+print文字）：`data/theme_official_site_evidence_draft.json`累計110筆、
+110個代號互不重複、status分布合計自洽；`a_level_hits`候選由12筆增至15筆
+（新增2707／2739／2884），仍全數`status:"draft_unreviewed"`未經人工抽查。
+另跑`theme_official_site_negative_control.py`（exit code 0）：5家負對照組
+全數PASS、0個誤命中，確認無回歸。累計**110/259**檔，剩149檔待分批續跑；
+待辦4驗證樣本仍待擴充（不影響待辦2進度）。commit僅含
+`data/theme_official_site_evidence_draft.json`／`PENDING_QUEUE.md`／
+`research/MARATHON_LOG.md`／本檔，不含其他排程軌道（dev_queue／
+connectivity check／IBKR quotes）留下的未commit異動，避免越權混入。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-120101）稽核.三：需總司令裁示，標記阻塞交還
 
 `PENDING_QUEUE.md`權威清單下一個未勾選項目是「稽核.三（CC 2026-09-10自提，

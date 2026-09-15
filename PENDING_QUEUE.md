@@ -14,6 +14,36 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十四輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
+「三之一、交辦優先於自走」鐵律）：兩條阻塞項（S4U／claude CLI非互動驗證）
+維持阻塞；【題材七】上一輪（假設佇列第十三輪）留下的可執行項是待辦2
+續跑第六批（`--offset 90`）。取具名鎖`research/.hypothesis_queue.lock`
+（原本不存在，非陳舊回收）。
+
+- 【題材七】待辦2續跑第六批：`beautifulsoup4`已就緒。跑`--batch-size 20
+  --offset 90`（排序第91~110檔）：`fetched=6/20`、`blocked_js_render`=5、
+  `exc_SSLError`=5、`exc_ConnectTimeout`=3、`http_403`=1，合計20筆自洽。
+  獨立重新驗證（不信任腳本自身輸出文字）：`data/theme_official_site_
+  evidence_draft.json`的`results`陣列共110筆、110個代號互不重複、
+  `status`分布`fetched=60/exc_SSLError=18/blocked_js_render=16/
+  exc_ConnectTimeout=8/http_403=7/exc_ReadTimeout=1`合計110，與批次
+  進度一致。`a_level_hits`非空候選由累計12筆增至**15筆**（新增2707／
+  2739／2884），仍全數`status:"draft_unreviewed"`未經人工抽查。另跑
+  `theme_official_site_negative_control.py`（exit code 0）：5家負對照組
+  全數PASS、0個誤命中，確認無回歸。累計**110/259**檔。**仍未做**：
+  待辦2剩餘149檔（下一輪可用`--offset 110`續跑）、待辦4驗證樣本擴充
+  （仍5句，與待辦2無依賴，可獨立續做）；待辦1／待辦3已完成（沿用前
+  幾輪紀錄）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+110/259檔，剩149檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id 20260915-113102 意外發現：三支常駐服務
 launcher全數受同一個python路徑bug影響，已修復）
 
@@ -2384,7 +2414,7 @@ ORDER-END
 
 - [x] **實測二補.1** **已完成**：`_needs_kbars_backfill()` 偵測開頭晚於 09:01 或 >3 分鐘缺口，`_merge_bars()` 合併時同分鐘以 tick 聚合為準，每檔每日只補一次。單元測試 7 項全 PASS。
 - [x] **實測二補.2** **已完成**：`TickState.seed_kbars()` 只填沒有的分鐘；啟動時對固定清單、新增動態訂閱時對該代號各查一次。實跑確認路徑正常（週日回報「今日尚無 1 分K」而非報錯）。
-- [ ] **實測二補.3** **阻塞中（等週一開盤）**：收盤時段沒有當日 K 可比對，無法驗證。腳本已備妥 `scripts/kbars_open_check.mjs`（檔頭含 09:15 啟動／09:20 加冷門股／09:30 執行步驟），會檢查首根 ≤09:01、最大缺口 ≤3 分鐘、當日 kbars 次數並自動截圖。
+- [x] **實測二補.3** **已完成（2026-09-15週二盤中實測，非原訂週一，因常駐行程當天11:43才自然重啟、盤中12:16仍在交易時段，符合腳本驗收前提）**：跑`node scripts/kbars_open_check.mjs`時發現真bug——`_needs_kbars_backfill()`偵測到需要補（早啟動的2330第一根停在daemon重啟時間11:40，晚於09:01）並成功查了api.kbars()，但合併結果只回在觸發那一次的HTTP response裡、沒有持久化；`_kbars_backfilled[code]`當天已記錄「補過」，導致同一天後續每次請求都繞過重查，卻又拿不到歷史，第一根長期停在11:40。修法：新增`_kbars_backfill_cache`把查到的歷史bars存起來，之後同一天每次「仍然需要補」的請求都用快取合併，不必重打API（commit 6a2fa099）。修完重啟alpha_live_server.py（PID 116808）並完成四步驗證：build sha `655b552`與`git rev-parse --short HEAD`一致、OPTIONS預檢同時含精確Origin與`allow-credentials: true`、`/health`的`stale_process=false`。重啟後重新POST `/subscribe`加回6158（App自身會用localStorage自選股覆蓋動態訂閱清單，屬預期行為非bug）。最終正式跑`kbars_open_check.mjs`全部PASS：2330（早啟動）與6158（12:20才動態加入的冷門股）第一根都是09:01、最大缺口1分鐘、當日api.kbars()呼叫10次（自訂上限240、官方上限270），截圖存於`kbars_open_check.png`（未入repo，本機檔案）。
 - [x] **實測二補.4** **已完成**：官方中英文兩版查證一致（10 秒 50 次合計、盤中 kbars 270 次/日、ticks 10 次/日、超限暫停一分鐘且反覆違規停權、流量超額回空值）。實作硬性預算 240 次/日與 10 秒 40 次，`/health` 揭露 `kbars_usage`；已寫進 CLAUDE.md 新增的「外部 API 頻率上限清單」。
 
 ---
