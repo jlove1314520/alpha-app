@@ -58,6 +58,7 @@ STALE_HOURS = {
     "data/us_13f_holdings.json": 72,  # 跟us_sic.json同一批market.yml排程產生（13F本身季度才變一次，fetched_at每日更新）（源頭二.3第6名，2026-09-15新增）
     "data/bls_macro.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第8名，2026-09-15新增）
     "data/customs_trade.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第9名，2026-09-15新增）
+    "data/industrial_production.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第10名，2026-09-15新增）
 }
 
 
@@ -469,6 +470,21 @@ def describe_customs_trade(path: Path) -> dict:
     }
 
 
+def describe_industrial_production(path: Path) -> dict:
+    """data/industrial_production.json（2026-09-15新增，源頭二.3第10名）——
+    經濟部官方開放資料（data.gov.tw #6607，免金鑰），全體工業生產指數，
+    `.github/scripts/fetch_industrial_production.py`每日排程產生（資料本身
+    月頻）。刻意縮小範圍：僅生產指數，外銷訂單未接入（見腳本docstring）。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    latest = d.get("latest") or {}
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": 1 if latest else 0,
+        "source": d.get("source"),
+        "detail": f"latest_date={latest.get('date')} value={latest.get('value')} yoy_pct={d.get('yoy_pct')} known_gap={d.get('known_gap')} errors={d.get('errors')}",
+    }
+
+
 DESCRIBERS = {
     "quotes_tw.json": describe_quotes,
     "quotes_us.json": describe_quotes,
@@ -496,6 +512,7 @@ DESCRIBERS = {
     "us_13f_holdings.json": describe_us_13f_holdings,
     "bls_macro.json": describe_bls_macro,
     "customs_trade.json": describe_customs_trade,
+    "industrial_production.json": describe_industrial_production,
 }
 
 
@@ -839,6 +856,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·籌碼·機構持倉（僅美股，僅波克夏海瑟威）", "source": "data/us_13f_holdings.json（SEC EDGAR官方Form 13F-HR，2026-09-15新增，源頭二.3第6名，免金鑰；僅追蹤波克夏一家申報人，未做CUSIP對映或全市場13F整合）"},
     {"panel": "市場頁·美股·美國總經指標（失業率/CPI年增率/非農就業）", "source": "data/bls_macro.json（BLS官方Public Data API v2，2026-09-15新增，源頭二.3第8名，未註冊金鑰即可用；CPI年增率為本管線自行計算，非BLS原始欄位）"},
     {"panel": "市場頁·台股·全國進出口貿易統計", "source": "data/customs_trade.json（財政部關務署官方開放資料data.gov.tw#6053，2026-09-15新增，源頭二.3第9名，免金鑰；YoY為本管線自行計算，非官方原始欄位）"},
+    {"panel": "市場頁·台股·工業生產指數", "source": "data/industrial_production.json（經濟部官方開放資料data.gov.tw#6607，2026-09-15新增，源頭二.3第10名，免金鑰；僅生產指數，外銷訂單未接入，見已知缺口說明；YoY/MoM為本管線自行計算）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},

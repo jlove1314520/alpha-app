@@ -613,6 +613,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：財政部關務署官方開放資料（data.gov.tw#6053），GitHub Actions 排程；官方每月更新，資料通常落後1個月，YoY為本App自算，僅供參考非投資建議</div>
       </div>
 
+      <!-- 2026-09-15（源頭二.3第10名）工業生產指數，經濟部官方開放資料免金鑰。僅生產指數，外銷訂單未接入。 -->
+      <div class="card">
+        <h3>工業生產指數</h3>
+        <div class="facts" id="ip-index-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="ip-index-datatime"></div>
+        <div class="note">來源：經濟部官方開放資料（data.gov.tw#6607），GitHub Actions 排程；官方每月更新，資料通常落後1~2個月，MoM/YoY為本App自算；僅涵蓋工業生產指數，外銷訂單金額尚未接入，僅供參考非投資建議</div>
+      </div>
+
       <div class="card ai-card" style="opacity:.7">
         <div class="ai-tag">✦ AI 盤勢解讀</div>
         <div class="note">功能建置中 · 尚未接上真實新聞與訊號分析，暫不顯示具體市場判斷內容</div>
@@ -3616,8 +3624,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
     // 2026-09-08（金流一.3）產業金流併入同一批 allSettled——它自己有 try/catch，
     // 掛了只影響自己那張卡，不會拖垮其他面板（錯誤隔離原則）。
-    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade()]);
-    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade'];
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction()]);
+    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
     if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
     if(MKT_STATE.market==='FUT')_safeAsync('loadMarketFUT',loadMarketFUT);
@@ -3647,6 +3655,28 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       `<div class="f"><span>出入超（貿易${d.latest.trade_balance>=0?'順':'逆'}差）</span><b class="${balCls}">${d.latest.trade_balance>=0?'+':''}${toYi(d.latest.trade_balance)}</b></div>`,
     ].join('');
     document.getElementById('customs-trade-datatime').textContent=`資料月 ${d.latest.date}（財政部關務署官方每月更新）`;
+  }
+  // 2026-09-15（源頭二.3第10名）工業生產指數，market-tw-panel卡片。僅生產指數，外銷訂單未接入。
+  let IP_INDEX_CACHE=null;
+  async function loadIndustrialProduction(){
+    const el=document.getElementById('ip-index-rows');if(!el)return;
+    if(!IP_INDEX_CACHE){
+      try{const r=await fetch('data/industrial_production.json?t='+Date.now());if(r.ok)IP_INDEX_CACHE=await r.json()}
+      catch(e){console.warn('[loadIndustrialProduction]',e);recordGlobalError('loadIndustrialProduction',e)}
+    }
+    const d=IP_INDEX_CACHE;
+    if(!d||!d.latest){
+      el.innerHTML='<div class="note">查無資料</div>';
+      document.getElementById('ip-index-datatime').textContent='';
+      return;
+    }
+    const mom=d.latest.change_mom_pct,yoy=d.yoy_pct;
+    el.innerHTML=[
+      `<div class="f"><span>生產指數（${d.latest.base_period}）</span><b>${d.latest.value.toFixed(2)}</b></div>`,
+      `<div class="f"><span>月增(MoM)</span><b class="${mom==null?'':(mom>=0?'pos':'neg')}">${mom!=null?(mom>=0?'+':'')+mom.toFixed(1)+'%':'資料不足'}</b></div>`,
+      `<div class="f"><span>年增(YoY)</span><b class="${yoy==null?'':(yoy>=0?'pos':'neg')}">${yoy!=null?(yoy>=0?'+':'')+yoy.toFixed(1)+'%':'資料不足'}</b></div>`,
+    ].join('');
+    document.getElementById('ip-index-datatime').textContent=`資料月 ${d.latest.date}（經濟部官方每月更新，僅生產指數未含外銷訂單）`;
   }
 
   // ── 左滑刪除 ──
@@ -6471,7 +6501,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1006';
+  const APP_VERSION='2026-09-15.1015';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
