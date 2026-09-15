@@ -1,5 +1,27 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-16T00:51:55+08:00 (hypothesis_queue排程接續，第二十輪) — #74接續：完成去均值化修正+單種子重驗，base自身Sharpe歸零確認，GATE3/GATE6顯示真訊號Sharpe=0.5下仍可能被本佇列現有關卡誤殺，未擴大至完整網格
+
+開工先讀`PENDING_QUEUE.md`：確認今日（2026-09-16）17:00/18:30台北排程尚未
+到時間（此刻僅00:51），該時間閘門待辦不可執行；S4U／claude CLI兩條永久
+阻塞維持阻塞；判定本輪無可執行的「未開始」交辦項，回自走。`git pull`
+成功（`Already up to date`），`git status`確認多筆其他自動化來源殘留
+變更（DevQueue、connectivity probe、IBKR quotes等），未觸碰。取具名鎖
+`hypothesis_queue`乾淨成功（`LOCK_ACQUIRED`，非陳舊回收）。
+
+依協定挑下一條未結案假設：`#74`（閘門統計檢定力量測）沿用上一輪
+（第十九輪）留下的明確待辦——「下一輪從去均值化修正開始，不跳關」。
+在`synthetic_power_curve_gate74.py`把注入前的`base`改為`base_raw -
+base_raw.mean()`，重跑Sharpe=0.5單種子驗證：`base_raw`母體Sharpe仍
+1.1057（未動上游）、去均值化後`base`母體Sharpe降至0.0000（修正生效）、
+GATE1/4/5 PASS、GATE2單種子percentile=100.0（PASS，但這次是真陽性非
+偽陽性）、GATE3種子高原FAIL（5種子pass_rate=0.4）、GATE6逐年一致性
+FAIL（7/10=70%）。完整判讀寫進`HYPOTHESIS_QUEUE.md`#74後續章節：GATE3/
+GATE6的FAIL初步暗示真實Sharpe=0.5訊號可能被本佇列現有關卡誤判，但5個
+種子樣本太小不足下結論。**is_holdout_consumed()開工/收工前皆False。**
+依協定「一輪只做一個有界工作單位」，未擴大到完整`{0.3,0.5,0.8}×多種子`
+網格，現在排隊第一，下一輪從網格跑法開始，不跳關。
+
 ## 2026-09-15T22:57:20+08:00 (hypothesis_queue排程接續，第十九輪) — #74閘門統計檢定力量測待辦(a)(b)(c)完成：pipeline技術可行，但發現base序列存活者偏誤汙染Sharpe量測，需修正才能進正式網格
 
 開工讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證）維持

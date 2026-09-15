@@ -180,12 +180,21 @@ def run_pilot(target_sharpe: float, seed: int, n_random: int = 100) -> dict:
     if panel.shape[1] < 30:
         raise RuntimeError(f"panel只有{panel.shape[1]}檔，過少無法可靠測試")
 
-    base = panel.pct_change().mean(axis=1).dropna()
-    base = holdout.train_val_only(base.to_frame("ret"))["ret"] \
-        if hasattr(holdout, "train_val_only") else base[base.index <= pd.Timestamp(holdout.VAL_END)]
-    print(f"base(等權重日報酬,TRAIN+VAL)：{len(base)}筆，"
-          f"{base.index[0].date()}..{base.index[-1].date()}，"
-          f"母體Sharpe(未注入)={annualized_sharpe(base):.4f}")
+    base_raw = panel.pct_change().mean(axis=1).dropna()
+    base_raw = holdout.train_val_only(base_raw.to_frame("ret"))["ret"] \
+        if hasattr(holdout, "train_val_only") else base_raw[base_raw.index <= pd.Timestamp(holdout.VAL_END)]
+    print(f"base_raw(等權重日報酬,TRAIN+VAL)：{len(base_raw)}筆，"
+          f"{base_raw.index[0].date()}..{base_raw.index[-1].date()}，"
+          f"母體Sharpe(去均值化前)={annualized_sharpe(base_raw):.4f}")
+
+    # 去均值化修正（2026-09-15上一輪發現：base_raw自己Sharpe=1.1057，疑似
+    # 存活者偏誤⑦造成人為膨脹，遠大於注入的目標強度，導致GATE2判定幾乎完全
+    # 由base_raw自己的既有優勢決定，不是被注入的epsilon分量）。只減去均值，
+    # 保留真實的波動/自相關/厚尾結構，讓epsilon成為母體Sharpe的唯一來源，
+    # 忠實操作化「在真實報酬序列上疊加一個Sharpe=S的訊號」。
+    base = base_raw - base_raw.mean()
+    print(f"base(去均值化後，用於注入)：母體Sharpe={annualized_sharpe(base):.4f}"
+          f"（應接近0，殘留非零純屬樣本抖動，非母體效應）")
 
     combined = inject_synthetic_alpha(base, target_sharpe, seed)
     print(f"注入後combined年化樣本Sharpe={annualized_sharpe(combined):.4f}"
@@ -205,7 +214,12 @@ def run_pilot(target_sharpe: float, seed: int, n_random: int = 100) -> dict:
     all_passed = all(g["passed"] for g in gates)
     print(f"\n=== 單次試跑(Sharpe={target_sharpe}, seed={seed}) 六關綜合：",
           "全PASS" if all_passed else "至少一關FAIL", "===")
-    return {"target_sharpe": target_sharpe, "seed": seed, "gates": gates, "all_passed": all_passed}
+    return {
+        "target_sharpe": target_sharpe, "seed": seed, "gates": gates, "all_passed": all_passed,
+        "base_raw_sharpe": annualized_sharpe(base_raw),
+        "base_demeaned_sharpe": annualized_sharpe(base),
+        "demean_applied": True,
+    }
 
 
 if __name__ == "__main__":
