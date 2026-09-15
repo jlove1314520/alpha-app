@@ -33,6 +33,74 @@
 
 ---
 
+## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第6名：接入SEC 13F機構持倉（僅波克夏海瑟威），並修正影響前四項的market.yml commit清單bug
+
+本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。做完第5名（可借券賣出
+股數）commit+push後，繼續做排名表第6名：SEC 13F機構持倉季報。
+
+**做了什麼**：
+1. 查證13F接入的核心困難：13F資訊表XML只有`nameOfIssuer`（發行人名稱）與
+   `cusip`，沒有ticker欄位，要做「全市場13F整合」（誰持有哪些股票）需要
+   CUSIP↔ticker對映表（商業資料，非免費公開），規模遠超一輪工作單位——
+   跟排名表原本標註的「接入成本4」吻合。
+2. **刻意大幅縮小範圍**：只追蹤波克夏海瑟威一家申報人（CIK 1067983，最
+   知名、最被公開關注的13F申報人），用真實XML內容手動核對後的
+   `ISSUER_NAME_MAP`（5檔：APPLE INC/ALPHABET INC/MICROSOFT CORP/NVIDIA
+   CORP/AMAZON COM INC）做精確比對，不做模糊字串相似度、不猜CUSIP對映。
+3. **實測踩到並修正兩個真實地雷**（誠實記錄，過程包含一次自我抓包）：
+   - 地雷一：同一發行人（例如ALPHABET INC）在資訊表裡拆成多筆`infoTable`
+     列（分屬不同子公司/被授權管理人各自持有的區塊，SEC combination
+     filing的標準格式），第一版程式碼用dict直接覆寫，只留下「最後一筆」
+     的數字——實測GOOGL單一列顯示value=235億美元，若照此宣告會嚴重
+     失真；改成加總全部符合的列後，正確總值變成377億美元（5筆合計
+     105,979,600股，含Class A+C兩種CUSIP）。AAPL同樣從單一列改成加總
+     12筆共227,917,808股。
+   - 地雷二：`value`欄位命名容易讓人套用13F紙本申報年代「單位是千美元」
+     的舊慣例，但2026-09-15實測用`value/shares`反推隱含每股價格驗證——
+     AAPL約$289.36/股、GOOGL約$356.33/股，都是合理股價量級，代表這份
+     XML技術檔的`value`其實是「整數美元」不是「千美元」；若照舊慣例誤乘
+     1000，AAPL會變成每股近29萬美元的荒謬數字。已將欄位命名從
+     `value_thousands_usd`改為`value_usd`並在docstring寫死避免重踩。
+4. 新增`.github/scripts/fetch_us_13f_holdings.py`，本機實測：波克夏最新
+   13F（申報日2026-08-14，共89筆持股）命中追蹤清單2檔——AAPL
+   227,917,808股（申報市值約US$65,950M）、GOOGL（合併Class A+C）
+   105,979,600股（申報市值約US$37,764M），其餘7檔（MSFT/NVDA/TSM/AMZN/
+   UMC/ASX/CHT）這一期確實沒有部位，是誠實的「沒有」不是抓取失敗
+   （AMZN在`ISSUER_NAME_MAP`裡但這期波克夏未持有）。
+5. `data/STATUS.json`新增`describe_us_13f_holdings()`解析器＋
+   `STALE_HOURS`＋`APP_DATA_SOURCES`條目。
+6. 前端：個股頁「籌碼」分頁新增「機構持倉（13F·僅波克夏海瑟威）」卡
+   （僅美股顯示，台股顯示互斥文案），JS用獨立`try/catch`+`_safeAsync`。
+   Playwright實測AAPL正確顯示持股明細、TSM正確顯示「波克夏海瑟威最新
+   13F未列此檔部位」（誠實表達沒有，不是錯誤訊息）、台股2330正確顯示
+   互斥文案，皆無頁面錯誤。
+
+**本輪同時發現並修正一個影響前四個已接入項目的真實bug（不是本項獨有）**：
+檢查`.github/workflows/market.yml`時發現，commit步驟裡的`git add -A`
+後面接的其實是**寫死的檔名清單**，不是萬用字元展開——今天稍早新增的
+`data/foreign_holding.json`／`data/us_insider_trading.json`／
+`data/cftc_cot.json`／`data/short_lending_available.json`四個資料檔
+都**不在這份清單裡**。這代表即使GitHub Actions排程每天成功執行這些
+fetch腳本、產生新的一天資料，`git add`根本不會把它們納入暫存區，
+`git commit`也就不會有任何變動可提交——**App實際讀到的資料會永遠卡在
+本輪手動commit push的這一份，排程執行了但形同沒有持久化任何新資料**，
+是一個從第一項（外資持股比率）就存在、直到本輪才被發現的系統性缺口。
+已把五個新資料檔（含本項`us_13f_holdings.json`）全部補進`git add`清單，
+修正是本次commit的一部分，之後這五個排程都會被正確納入每日commit。
+
+**驗證**：`node scripts/smoke_test.mjs`45/46 PASS（僅#39既有已知紅燈，
+與本次改動無關）。
+
+**驗收證據**：`data/us_13f_holdings.json`（`fetched_at`/`filers.*.holdings`
+欄位）、`data/STATUS.json`對應條目、`.github/workflows/market.yml`
+commit步驟的git add清單、smoke_test實際輸出、Playwright實測輸出（見上）。
+
+**尚未做**：排名表第7~10名（央行外匯牌照／BLS／財政部海關／經濟部工業
+生產）留待後續輪次；第4名FRED擴充留待總司令裁示；13F全市場整合（CUSIP
+對映）與擴充追蹤申報人清單，皆是獨立的較大投入，本輪未評估是否值得做。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第5名：接入「可借券賣出股數」（借券供給子集），第4名FRED擴充因需GitHub Secrets裁示跳過
 
 本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。做完第3名（CFTC COT）

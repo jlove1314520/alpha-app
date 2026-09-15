@@ -991,6 +991,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div id="insider-table"><div class="note">—</div></div>
         <div class="note" id="insider-note">來源：SEC EDGAR Form 4（GitHub Actions 排程）</div>
       </div>
+      <!-- 2026-09-15（源頭二.3第6名）機構持倉，SEC EDGAR官方Form 13F，僅追蹤波克夏海瑟威一家申報人，僅適用美股。 -->
+      <div class="card">
+        <h3>機構持倉（13F · 僅波克夏海瑟威）</h3>
+        <div class="facts" id="f13-rows"><div class="note">—</div></div>
+        <div class="note" id="f13-note">來源：SEC EDGAR Form 13F-HR（GitHub Actions 排程）</div>
+      </div>
     </div>
 
     <div class="subscreen" id="sub-ai">
@@ -3911,6 +3917,34 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
+  // 2026-09-15（源頭二.3第6名）機構持倉，SEC EDGAR官方Form 13F，僅追蹤波克夏
+  // 海瑟威一家申報人（未做CUSIP對映/全市場13F整合），僅適用美股。
+  let US_13F_CACHE=null;
+  function setUs13fNA(msg){
+    setTxt('f13-note',msg);
+    document.getElementById('f13-rows').innerHTML='<div class="note">'+msg+'</div>';
+  }
+  async function loadUs13fChip(code){
+    try{
+      if(!US_13F_CACHE){
+        try{const r=await fetch('data/us_13f_holdings.json?t='+Date.now());if(r.ok)US_13F_CACHE=await r.json()}
+        catch(e){console.warn('[loadUs13fChip:fetch]',e);recordGlobalError('loadUs13fChip:fetch',e)}
+      }
+      const filer=US_13F_CACHE&&US_13F_CACHE.filers&&US_13F_CACHE.filers.berkshire_hathaway;
+      if(!filer){setUs13fNA(fmEmptyMsg('查無13F資料'));return}
+      const h=filer.holdings&&filer.holdings[code];
+      if(!h){
+        setUs13fNA(`波克夏海瑟威最新13F（申報日${filer.filed_at||'—'}）未列此檔部位`);
+        return;
+      }
+      document.getElementById('f13-rows').innerHTML=`<div class="f"><span>波克夏海瑟威</span><b>${nf(h.shares)}股（申報市值約US$${nf(Math.round(h.value_usd/1e6))}M）</b></div>`;
+      setTxt('f13-note',`申報日 ${filer.filed_at||'—'} · 來源：SEC EDGAR Form 13F-HR（GitHub Actions 排程，僅追蹤波克夏一家申報人）`);
+    }catch(e){
+      console.warn('[loadUs13fChip]',e);recordGlobalError('loadUs13fChip',e);
+      setUs13fNA('載入失敗');
+    }
+  }
+
   // 2026-08-27 架構修正：EPS/毛利率/營益率/ROE改讀 data/stock_detail.json（見
   // update_stock_financials.py，TWSE官方t187ap06_L_ci綜合損益表+t187ap07_L_ci
   // 資產負債表，累積式寫回），不再對FinMind打FinancialStatements/BalanceSheet。
@@ -4077,6 +4111,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       setTxt('sbl-available','—');
       setTxt('sbl-note','美股無此資料（僅適用台股，可借券賣出股數為TWSE官方統計）');
       _safeAsync('loadInsiderTradingChip',()=>loadInsiderTradingChip(code));
+      _safeAsync('loadUs13fChip',()=>loadUs13fChip(code));
       loadFinancialsUS(code);
       return;
     }
@@ -4141,6 +4176,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadMarginChip(code,px);
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
+    setUs13fNA('台股無此資料（僅適用美股，機構持倉為SEC Form 13F申報）');  // 2026-09-15 源頭二.3第6名
     _safeAsync('loadShortLendingChip',()=>loadShortLendingChip(code));  // 2026-09-15 源頭二.3第5名
     if(px.length){
       // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
@@ -6367,7 +6403,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.0919';
+  const APP_VERSION='2026-09-15.0933';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

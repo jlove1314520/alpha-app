@@ -294,10 +294,10 @@ Allow: /mops/web
 |---|---|
 | 機構 | U.S. Securities and Exchange Commission |
 | 端點 | `https://www.sec.gov/files/company_tickers.json`（ticker↔CIK對照）、`https://data.sec.gov/submissions/CIK{cik}.json`（申報清單）、XBRL companyfacts（`research/DATA.md:193-343`大量查證） |
-| 我們現況 | 🟢 **已整合，但僅部分表別**。已用於下市查證、PIT財報（companyfacts）、filer category、**8-K事件研究**（`us_8k_item101_gate52.py`／`us_8k_item502_gate52.py`／`us_8k_pead_gate52.py`，假設`#52-us`已FAIL）。**Form 4（內部人交易）已接入**（2026-09-15，源頭二.3第2名，見下方22b）；**13F／S-1未見專門查證或使用** |
+| 我們現況 | 🟢 **已整合，但僅部分表別**。已用於下市查證、PIT財報（companyfacts）、filer category、**8-K事件研究**（`us_8k_item101_gate52.py`／`us_8k_item502_gate52.py`／`us_8k_pead_gate52.py`，假設`#52-us`已FAIL）。**Form 4（內部人交易）已接入**（2026-09-15，源頭二.3第2名，見下方22b）；**13F（機構持倉）已接入極小子集**（2026-09-15，源頭二.3第6名，見下方22c）；**S-1未見專門查證或使用** |
 | 官方是否允許程式存取 | 🟢（SEC EDGAR公開API，設計上供程式讀取，需帶識別性User-Agent） |
 | 對應機構用途 | 上市公司法定揭露文件全表 |
-| 待辦 | 13F（機構持倉季報）、S-1（IPO招股書）未查證，皆有研究價值 |
+| 待辦 | S-1（IPO招股書）未查證，有研究價值；13F全市場整合（CUSIP對映）仍待評估是否值得投入 |
 
 ### 22b. SEC EDGAR Form 4（內部人交易）—— 已接入（2026-09-15，源頭二.3第2名）
 
@@ -311,6 +311,16 @@ Allow: /mops/web
 | 官方是否允許程式存取 | 🟢 |
 | 對應機構用途 | 內部人買賣常被視為對公司前景信心的訊號，是機構投資人常態監控指標 |
 | 我們現況 | 🟢 **已接入**。`.github/scripts/fetch_us_insider_trading.py`，輸出`data/us_insider_trading.json`，個股頁「籌碼」分頁新增「內部人交易」卡（僅美股顯示）。2026-09-15實測：9檔（沿用`us_sic.json`的CIK對映）、AAPL/NVDA/MSFT/TSM/GOOGL/AMZN/UMC/ASX/CHT，共取得約100+筆真實交易（例：AAPL SVP Jennifer Newstead 2026-09-08賣出1438股@317.23）。**誠實限制**：UMC/ASX/CHT為台股ADR，外國私人發行人多數豁免Section 16申報，查到0~少數筆是正常狀態非抓取失敗；極舊申報（accession開頭`9999999997`）目錄裡沒有.xml檔，已知並記錄跳過原因。 |
+
+### 22c. SEC EDGAR Form 13F-HR（機構持倉季報）—— 已接入極小子集（2026-09-15，源頭二.3第6名）
+
+| 欄位 | 內容 |
+|---|---|
+| 機構 | U.S. Securities and Exchange Commission |
+| 端點 | `browse-edgar?action=getcompany&CIK={cik}&type=13F-HR&output=atom`（列出申報）→ `Archives/edgar/data/{cik}/{accession}/index.json`（找資訊表xml，**地雷**：目錄裡有`primary_doc.xml`封面頁跟另一個數字檔名的資訊表本體，要用內容含`informationTable`判斷，不能猜檔名）→ 資訊表xml（逐筆`nameOfIssuer`/`cusip`/`value`/`shares`） |
+| 官方是否允許程式存取 | 🟢 |
+| 對應機構用途 | 機構投資人常態關注「聰明錢在買什麼」，13F是唯一能看到大型機構持股變化的公開揭露 |
+| 我們現況 | 🟢 **已接入，但刻意大幅縮小範圍，不是全市場13F整合**。13F沒有ticker欄位只有`nameOfIssuer`/`cusip`，全市場整合需要CUSIP↔ticker對映表（商業資料，非免費公開），規模遠超一輪工作單位，故**本輪只追蹤波克夏海瑟威一家申報人**（CIK 1067983，最知名、最被公開關注的13F申報人），比對其持股`nameOfIssuer`是否精確命中`ISSUER_NAME_MAP`裡手動核對過的5檔ticker（AAPL/GOOGL/MSFT/NVDA/AMZN）。`.github/scripts/fetch_us_13f_holdings.py`，輸出`data/us_13f_holdings.json`，個股頁「籌碼」分頁新增「機構持倉（13F·僅波克夏海瑟威）」卡（僅美股顯示）。2026-09-15實測：最新13F（申報日2026-08-14，共89筆持股）命中2檔——AAPL 227,917,808股（申報市值約US$65,950M）、GOOGL（合併Class A+C）105,979,600股（申報市值約US$37,764M），其餘7檔追蹤清單這一期確實沒有部位，非抓取失敗。**已踩過並修正的兩個地雷**：(1) 同一發行人常拆成多筆infoTable列（不同子公司/被授權管理人各自持有的區塊，SEC combination filing標準格式，非重複列），必須全部加總才是真實總持股，只取一列會嚴重低估或算出不合理數字；(2) `value`欄位2026-09-15實測是「整數美元」，不是13F紙本申報年代慣例的「千美元」（用value/shares反推隱含股價驗證：AAPL約$289/股、GOOGL約$356/股，皆為合理量級，若照千美元慣例誤乘1000會得到天文數字）。 |
 
 ### 23. EDGAR full-text search
 
@@ -413,17 +423,18 @@ Allow: /mops/web
 | 3 | #28 CFTC COT部位報告 | 4 | 2（🟢公開CSV/Excel，格式穩定） | **已完成（2026-09-15）** |
 | 4 | #24 FRED擴充（VIX/失業率/CPI等） | 3 | 1（🟢已有client+key，加序列而已） | 待接入 |
 | 5 | #5 借券賣出餘額 | 4 | 3（🟢host，但正確端點仍待鎖定） | **已接入子集（2026-09-15，僅可借額度，非借券費率）** |
-| 6 | #22a SEC 13F（機構持倉季報） | 4 | 4（🟢host，但季度大檔需聚合邏輯） | 待接入 |
+| 6 | #22a SEC 13F（機構持倉季報） | 4 | 4（🟢host，但季度大檔需聚合邏輯） | **已接入極小子集（2026-09-15，僅波克夏一家申報人，見22c）** |
 | 7 | #21 外匯官方牌告（取代yfinance） | 2 | 1（🟢同host的A13Rate.csv姊妹端點） | 待接入 |
 | 8 | #25 BLS總經（就業/CPI） | 3 | 2（標準政府API，需申請/免申請key待查） | 待接入 |
 | 9 | #19 財政部海關進出口統計 | 3 | 3（⚪host未驗證，需先測robots.txt+端點） | 待接入 |
 | 10 | #20 經濟部工業生產與外銷訂單 | 3 | 3（⚪host未驗證，同上） | 待接入 |
 
-**2026-09-15開發佇列自走完成第1、2、3、5名**（見上方#4條目與
+**2026-09-15開發佇列自走完成第1、2、3、5、6名**（見上方#4條目與
 `.github/scripts/fetch_foreign_holding.py`；#22b條目與
 `.github/scripts/fetch_us_insider_trading.py`；#28條目與
 `.github/scripts/fetch_cftc_cot.py`；#5條目與
-`.github/scripts/fetch_short_lending_available.py`）。
+`.github/scripts/fetch_short_lending_available.py`；#22c條目與
+`.github/scripts/fetch_us_13f_holdings.py`）。
 
 **第4名（FRED擴充）本輪跳過，原因記錄如下，不是遺漏**：`research/
 fred_yield_curve_gate.py`目前的金鑰讀取方式是`C:\alpha\alpha-data\
@@ -439,7 +450,7 @@ fred_key.txt.txt`（本機檔案，docstring稱「凍結區檔案」），只在
 本機排程執行（比照`quotes_ibkr.json`/`quotes_sinopac.json`模式）——兩種
 做法各有取捨，一併留給總司令裁示。
 
-第6~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
+第7~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
 排名表的「現況」欄與本檔案對應條目，不在同一輪一次做完（單輪時間有限，且
 CLAUDE.md「四之二」要求每項都要有實測證據才能標完成，逐項慢慢做比一次宣稱
 10項都好更誠實）。

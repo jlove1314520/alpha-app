@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-15T09:13:53.096600+08:00",
-  "latest_commit": "b7dd6113",
+  "updated_at": "2026-09-15T09:26:59.800945+08:00",
+  "latest_commit": "b8962a28",
   "data_files": [
     {
       "path": "data/adr_premium.json",
@@ -355,6 +355,14 @@
       "status": "error"
     },
     {
+      "path": "data/us_13f_holdings.json",
+      "generated_at": "2026-09-15T01:26:59+00:00",
+      "records": 2,
+      "source": "SEC EDGAR官方Form 13F-HR（browse-edgar atom feed + 資訊表XML），免金鑰",
+      "detail": "申報人=['berkshire_hathaway'] 命中追蹤清單檔數=2 errors=[]",
+      "status": "ok"
+    },
+    {
       "path": "data/us_financials.json",
       "generated_at": null,
       "records": null,
@@ -429,7 +437,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-15T09:14:03+08:00",
+    "checked_at": "2026-09-15T09:27:10+08:00",
     "any_overdue": true,
     "overdue_names": [
       "美股四大指數（market.yml 21:30 UTC）"
@@ -549,11 +557,11 @@
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-09-15T09:14:05.414910+08:00",
+    "checked_at": "2026-09-15T09:27:12.867984+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "any_stalled": true,
     "stalled": [
-      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 98 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
+      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 111 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
     ],
     "pipelines": [
       {
@@ -563,8 +571,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:14:02.405523+08:00",
-        "age_min": 0.1,
+        "last_output": "2026-09-15T09:27:02.477855+08:00",
+        "age_min": 0.2,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -575,8 +583,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:13:07.430631+08:00",
-        "age_min": 1.0,
+        "last_output": "2026-09-15T09:27:02.301278+08:00",
+        "age_min": 0.2,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -588,7 +596,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-14T13:47:02.680141+08:00",
-        "age_min": 1167.0,
+        "age_min": 1180.2,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -599,8 +607,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:11:02.716300+08:00",
-        "age_min": 3.0,
+        "last_output": "2026-09-15T09:26:02.794457+08:00",
+        "age_min": 1.2,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -612,7 +620,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-09-15T07:36:04.472829+08:00",
-        "age_min": 98.0,
+        "age_min": 111.1,
         "stall_limit_min": 15,
         "status": "stalled"
       },
@@ -623,8 +631,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-15T09:12:02.078587+08:00",
-        "age_min": 2.1,
+        "last_output": "2026-09-15T09:22:02.129709+08:00",
+        "age_min": 5.2,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -644,8 +652,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:04:01.836668+08:00",
-        "age_min": 10.1,
+        "last_output": "2026-09-15T09:26:12.571679+08:00",
+        "age_min": 1.0,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -657,7 +665,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-09-15T09:04:13.625802+08:00",
-        "age_min": 9.9,
+        "age_min": 23.0,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -668,8 +676,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T08:51:02.408994+08:00",
-        "age_min": 23.1,
+        "last_output": "2026-09-15T09:26:19.983480+08:00",
+        "age_min": 0.9,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -681,7 +689,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-09-14、inst_trades=2026-09-14、valuation=2026-09-14、taifex_large=20260910",
         "last_output": "2026-09-14T00:00:00+08:00",
-        "age_min": 1994.1,
+        "age_min": 2007.2,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -693,7 +701,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 1514.0,
+        "age_min": 1527.2,
         "stall_limit_min": 30240,
         "status": "ok"
       }
@@ -800,6 +808,10 @@
     {
       "panel": "個股頁·籌碼·可借券賣出股數（僅台股）",
       "source": "data/short_lending_available.json（TWSE官方SBL/TWT96U，2026-09-15新增，源頭二.3第5名，免金鑰；僅可借額度，非借券費率、非已借部位）"
+    },
+    {
+      "panel": "個股頁·籌碼·機構持倉（僅美股，僅波克夏海瑟威）",
+      "source": "data/us_13f_holdings.json（SEC EDGAR官方Form 13F-HR，2026-09-15新增，源頭二.3第6名，免金鑰；僅追蹤波克夏一家申報人，未做CUSIP對映或全市場13F整合）"
     },
     {
       "panel": "個股頁·AI·個股簡報/券商報告雷達",
