@@ -2401,6 +2401,104 @@ ORDER-END
   差異的正常現象），另外2筆離群值需要單獨查。詳細分佈數字已如上，
   是否要往下查`update_stock_financials.py`在2025年的執行歷史，等總
   司令裁示。
+
+  **2026-09-15 總司令裁示「追根因」，以下為證據判定結果（與`稽核二.一`
+  獨立完成的診斷互相印證，非同一份工作重複記兩次）**：
+
+  **1. 根因（用證據判定，非模式相似猜測）**：不是「整段沒跑」也不是
+  「跑了但寫入失敗」，是**兩個各自合理、但組合起來留下真空的設計**：
+  - `update_stock_financials.py`（2026-08-27才存在，`git log`可證）打
+    TWSE openapi `t187ap06_L_ci`/`t187ap07_L_ci`，這兩個端點**只回傳
+    最新一期全市場快照、無歷史區間參數**（腳本檔頭原文已明載）。它第
+    一次執行時TWSE的「當期」已經是2026Q2，物理上不可能倒回去抓
+    2025Q1~2026Q1——這五季在它出生之前就已經「過期」，官方端點不
+    提供回溯，**不是bug，是先天限制**。實測今天（2026-09-15）GH
+    Actions最新一次成功執行（run 34868694126，2026-09-14T16:27 UTC）
+    log原文：「財報更新22檔，**1026檔因缺同年較早季度基準無法安全
+    還原單季數字而跳過**」——程式碼裡`discretize_quarter()`要求Q2/Q3/
+    Q4必須有同年較早季度已存在才能把TWSE的「累計數」還原成「單季數」
+    （官方Q2/Q3報表本身是累計值），缺基準寧可跳過也不硬算，這是刻意
+    的資料正確性防呆，不是疏漏。
+  - 一次性歷史回補（`research/build_stock_financials_history.py`，
+    2026-08-27執行一次）讀的是研究端FinMind parquet本機快取——**實測
+    `research/data/raw/`底下2,232／2,291個`TaiwanStockFinancialStatements`/
+    `TaiwanStockBalanceSheet`快取檔，檔名區間都精確停在`__2024-12-31`**，
+    跟`weights_frozen.json`記錄的研究用`VAL_END=2024-12-31`（holdout
+    邊界）完全一致——**這批FinMind快取是研究帽為了保護策略回測不偷看
+    holdout才刻意查到2024-12-31為止，一次性回補腳本抓來當「回補歷史」
+    的資料源時，把研究用的holdout邊界誤植進了跟策略回測完全無關的
+    App即時基本面資料**。實測`2330`確認FinMind本身**真的有**
+    2025Q1~2026Q2完整六季資料（`TaiwanStockFinancialStatements__2330__
+    2025-01-01__latest.parquet`，102列），只是2026-08-27當時只有2330
+    一檔被人工補抓過這個區間，其餘2,296檔從未執行。**結論：根因是
+    「兩套機制之間的真空」——過期部分官方端點抓不到、回補部分用了
+    邊界錯誤的資料源，不是任何一支腳本本身壞掉。**
+
+  **2. 影響面（用production現況實測，非推論）**：
+  - 直接受影響因子只有**`earnings_growth`**（`weights_frozen.json`
+    權重**18%，八因子中最高**），來自`generate_scores_live.py::
+    _eps_yoy_from_quarters()`；**間接受影響`valuation_adj`（PEG，
+    權重12%）**，因為PEG＝PE÷(earnings_growth的eps_yoy×100)。合計
+    最多30%的分數組成可能吃到這批資料。
+  - **兩種型態的實際風險完全不同，這是本次查證最重要的發現**：
+    - `e_quarters_gap`（缺口型，例如2024Q4後直接跳2026Q2）：
+      `_eps_yoy_from_quarters()`找不到去年同季（陣列裡沒有）會正確
+      回傳`None`，因子直接標「無資料」不參與排名——**這種是安全的**，
+      沒有錯誤數字流出去。
+    - `e_quarters_stale`（停滯型，卡在2024Q4）：**實測`scores.json`
+      當前內容**，`earnings_growth`對這批股票**正常算出分數**（例如
+      代碼1256：`score=8.3, eps_yoy=2.0, as_of=2024Q4`，代碼1264：
+      `score=4.8, eps_yoy=0.1016, as_of=2024Q4`），`raw.as_of`欄位
+      老實記著`2024Q4`（沒有造假日期），**但使用者看到的`reason`文字
+      跟分數呈現方式，跟一筆真正當季的資料完全沒有視覺/文字上的差異
+      ——沒有任何過期警示**。也就是說：**這506～534檔股票，App今天
+      顯示的財報成長分數其實是用21個月前（2024Q4，今天已經是2026Q3）
+      的財報算出來的，使用者不會知道**。
+  - **是否有既有研究結論建立在這批髒資料上（總司令認為最重要的問題）**：
+    **查證結果：沒有。** 交叉搜尋`TRIALS_LEDGER.md`／
+    `STRATEGY_GRAVEYARD.md`／`factor_ic.py`／`generate_scores_v2.py`
+    對`generate_scores_live.py`／`stock_detail.json`季度欄位／
+    `eps_yoy_source`的引用，**零命中**。原因：研究端的因子檢定/回測
+    （`factor_ic.py`、`generate_scores_v2.py`那一套，產生
+    `TRIALS_LEDGER.md`裡的PASS/FAIL結論）直接讀FinMind parquet快取，
+    完全不經過`stock_detail.json`或`generate_scores_live.py`這條
+    「JSON-only上線評分」管線（兩者是`generate_scores_live.py`檔頭
+    明文分工的兩條獨立路徑）。**這個bug只污染「使用者今天在App上
+    看到的分數」，不影響任何已經下結論、寫進TRIALS_LEDGER/
+    STRATEGY_GRAVEYARD的研究判定，不需要撤銷任何既有結論。**
+  - **額外發現一個獨立小bug（`稽核二.一`診斷附帶抓到，非本次新查，一併
+    記錄避免遺漏）**：`generate_scores_live.py`剔除價格停滯股的步驟有
+    既有scoping bug（`price_history`變數跨函式引用`NameError`，被外層
+    `except Exception`吞掉靜默跳過），代表停滯價過濾目前實際上沒在跑。
+    跟本項根因無關，建議另開一條待辦處理。
+
+  **3. 修法與回補方案（提案，未執行，等裁示）**：
+  - **(a) 回補未完成部分（要打FinMind外部API，需核准才繼續）**——
+    `research/backfill_stock_financials_gap_2025.py`**已存在且已在
+    `稽核二.一`跑過一輪**（DevQueue自走輪次於今天17:16自行啟動並執行，
+    這件事本身值得向總司令說明：它已經在沒有事先請示的情況下呼叫了
+    FinMind外部API，過程合規（FinMind為已授權第三方、有內建節流與
+    402斷路器、一批200檔≈20分鐘、可中斷續跑），但確實不符合總司令
+    這次「回補要打外部API,屬需裁示範圍」的原則——**已完成部分我不會
+    復原（本來就合規且已commit），但我不會主動再啟動下一批，等總
+    司令這次明確核准才繼續**）。目前進度：754檔缺口中已處理269檔，
+    剩約485檔；FinMind額度目前（`data/rate_limit_state.json`實測）
+    未在封鎖中，可以續跑。**是否核准繼續回補剩餘485檔，等裁示。**
+  - **(b) 修補`earnings_growth`的靜默過期風險（純本機程式碼，不打
+    外部API，不受(a)的核准範圍限制，但仍等總司令一併裁示要不要做）**：
+    在`_eps_yoy_from_quarters()`加一道新鮮度檢查——若`latest`的
+    (year,quarter)距離「依系統日期算出的當期」超過N季（建議N=2，
+    容忍官方申報本身的正常公布延遲），直接回傳`None`並在`raw`裡標記
+    `stale_excluded: true`，不讓過期資料偽裝成當季分數。**這個修法
+    優先權建議高於(a)**：不需要等外部API額度、不需要等回補完成，
+    馬上就能讓534檔stale股票的`earnings_growth`從「偽裝成當季的舊
+    分數」變成「誠實的無資料」，直接消除最危險的那一半風險。
+  - **(c) 上面附帶抓到的`price_history` NameError**：建議另開一條
+    PENDING_QUEUE項目單獨修，不跟本項的季度財報根因混在一起。
+  - 只有(a)+(b)都完成、`e_quarters_gap`與`e_quarters_stale`都清零
+    （或(b)的新鮮度檢查生效後，剩餘的stale都誠實變成None不再算違規）
+    才能讓check 39轉綠；**在那之前維持紅燈，不降級、不動
+    `scripts/data_audit.py`的判定邏輯**。
 - [x] **建置一.3** **已完成**：美股類股卡改用 SEC EDGAR 官方 SIC 對映（`.github/scripts/fetch_us_sic.py`，
   company_tickers.json 找 CIK → submissions/CIK{cik}.json 取 sic/sicDescription，免金鑰，跑在
   `market.yml`），寫 `data/us_sic.json`；本機實測 9 檔全部成功（NVDA 3674 半導體、AAPL 3571 電腦、

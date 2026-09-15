@@ -1,3 +1,76 @@
+## 2026-09-15（總司令交辦：稽核.三追根因）根因確認＋影響面查證（無研究結論受污染）＋修法提案未執行
+
+戴**驗證帽**。總司令本輪最高優先指令：查`e_quarters_gap`/`e_quarters_stale`
+（佔1,447筆違規76%）根因，要用證據不要用模式相似猜測；評估實際影響哪些
+因子/評分，有沒有既有研究結論建立在髒資料上（若有要撤銷）；提修法與回補
+方案先報不做（回補要打外部API屬需裁示範圍）；修完前check 39維持紅燈。
+
+**根因（證據鏈完整，非推測）**：用`gh run list`+`gh run view --log`實測
+GitHub Actions真實執行紀錄（`update_stock_financials.py`最新成功run
+34868694126，2026-09-14T16:27 UTC）拿到第一手證據：log原文「財報更新22檔，
+**1026檔因缺同年較早季度基準無法安全還原單季數字而跳過**」——不是腳本沒跑
+或寫入失敗，是`discretize_quarter()`的資料正確性防呆（TWSE官方Q2/Q3/Q4
+報表是累計數，需要同年較早季度才能安全還原成單季，缺基準寧可跳過不硬
+算）遇上兩個先天缺口：(1)`update_stock_financials.py`2026-08-27才存在，
+出生時TWSE「當期」已是2026Q2，物理上抓不到之前過期的2025Q1~2026Q1五季
+（openapi只給最新一期快照，無歷史區間參數）；(2)一次性歷史回補
+（`build_stock_financials_history.py`）用的FinMind parquet快取，**實測
+`research/data/raw/`底下2,232/2,291個快取檔案名精確停在`__2024-12-31`**，
+與`weights_frozen.json`的研究用`VAL_END=2024-12-31`（holdout邊界）完全
+吻合——**研究帽為保護策略回測不偷看holdout而刻意查到的邊界，被誤植進了
+跟策略回測無關的App即時基本面資料**，只有2330一檔在後續被人工補抓過
+2025年之後的資料（`research/data/raw/TaiwanStockFinancialStatements__
+2330__2025-01-01__latest.parquet`實測確認FinMind本身真的有2025Q1~2026Q2
+完整六季），其餘2,296檔從未執行。根因是「兩套機制間的真空」，不是任一
+腳本本身壞掉。
+
+**影響面（production現況實測，非推論）**：直接受影響僅`earnings_growth`
+因子（`weights_frozen.json`權重**18%，八因子最高**），間接影響`valuation_
+adj`（PEG，12%）。**兩種型態風險完全不同**：`e_quarters_gap`（缺口型）
+`_eps_yoy_from_quarters()`找不到基準正確回傳`None`，因子誠實標無資料，
+**安全**；`e_quarters_stale`（停滯型）**實測`scores.json`當前內容**，
+確認`earnings_growth`對這批股票正常算出分數（例：代碼1256 `score=8.3
+eps_yoy=2.0 as_of=2024Q4`），`raw.as_of`老實記著`2024Q4`但使用者看到的
+`reason`文字跟真正當季資料**沒有任何過期警示**——**534檔股票今天顯示的
+成長分數其實是21個月前（2024Q4，今天2026Q3）的資料**。**是否有既有研究
+結論建立在這批髒資料上**：交叉搜尋`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.
+md`/`factor_ic.py`/`generate_scores_v2.py`對這條JSON-only上線評分管線
+（`generate_scores_live.py`/`stock_detail.json`季度欄位）的引用，**零
+命中**——研究端回測直接讀FinMind parquet，完全不經過這條管線（`generate_
+scores_live.py`檔頭本就明文兩條路徑分工）。**結論：此bug只污染使用者
+今天在App上看到的分數，不影響任何已下結論的研究判定，不需要撤銷任何
+既有結論。**額外記錄一個附帶發現（`稽核二.一`診斷抓到）：`generate_
+scores_live.py`剔除價格停滯股步驟有既有`price_history`變數scoping bug
+被`except Exception`吞掉靜默失效，與本項根因無關，建議另開項目處理。
+
+**修法與回補方案（提案，未執行）**：(a)剩餘485檔缺口回補需要繼續打
+FinMind——**誠實揭露**：`research/backfill_stock_financials_gap_2025.py`
+已存在，且DevQueue自走輪次（cycle_id=20260915-171602）今天已自行啟動
+執行過一輪（269/754檔），這已經在未經事先請示的情況下呼叫了外部API
+（過程合規：FinMind授權第三方、有節流與斷路器、可中斷續跑），不符合
+總司令這次「回補要打外部API屬需裁示範圍」的原則——已完成部分不復原
+（合規且已commit），但未經核准不會啟動下一批；(b)修補`earnings_growth`
+靜默過期風險（純本機程式碼、不打外部API）：在`_eps_yoy_from_quarters()`
+加新鮮度檢查，超過N季（建議2）直接回傳`None`並標`stale_excluded:true`，
+**建議優先權高於(a)**，不需等額度或回補完成就能立即消除534檔的靜默
+過期風險；(c)`price_history` NameError建議另開項目。**check 39在(a)(b)
+都完成前維持紅燈，未動`scripts/data_audit.py`判定邏輯。**
+
+**驗證**：`gh run list --repo jlove1314520/alpha-app --workflow=market.yml`
++`gh run view --log`為第一手GH Actions執行證據（非本機猜測）；
+`research/data/raw/`檔名`__2024-12-31`分佈用`ls`+`sed`實際統計2,232/2,291；
+`scores.json`當前內容直接讀取確認代碼1256/1264/1336/1570/1580五檔的
+`earnings_growth.raw.as_of`皆為`2024Q4`且分數正常產出；研究結論無污染
+的結論來自對四份研究權威檔案的關鍵字交叉搜尋零命中。
+
+**影響檔案**：`PENDING_QUEUE.md`稽核.三該行新增完整根因/影響/修法記錄
+（未動任何程式碼或資料檔）、`PROGRESS.md`（本節）。
+
+**下一步**：等總司令對(a)回補剩餘485檔、(b)新鮮度檢查修法兩項裁示
+（可分別准駁，不互相綁定）；(c)是否另開price_history bug項目。
+
+---
+
 ## 2026-09-15 18:02（開發佇列自走，cycle_id=20260915-171602）稽核二.四完成：稽核每晚排程落地（AlphaDataAudit）
 
 戴**維運帽**。接續權威清單稽核二.四：稽核每晚排程＋設定頁資料健康＋
