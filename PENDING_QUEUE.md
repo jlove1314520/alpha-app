@@ -3552,7 +3552,30 @@ ORDER-END
 > 五、其餘佇列項目照序繼續（柱狀圖零基線、融資維持率分母、休市標籤、群益唯讀、分點演習、產業價值鏈、新聞管線、本地摘要）。每完成一項回報一項附證據。
 
 - [x] **稽核.一** **已完成**：6442 的 32 根因＝報告頁 `peg=null` 讓 renderReport 中途拋錯、上一檔（6808，收盤 32.0）的分批進場價留在畫面上（三個數字逐一吻合，已用 Playwright 重現）。四層防線：缺值安全格式化、REPORT_SEQ 世代守衛、面板 _safeSync 隔離＋進場清空、canonicalPrice ±30% 恆等式。`scripts/data_audit.py` 七類恆等式已產出首份全市場報告（2104 檔、一致性違規率 0.05%、通過 1% 門檻；完整度缺口 52.33% 歸稽核.二）。過程另抓到 **161 檔已下市股票還在選股榜上**（未來成長榜第 1 名是造假下市的康友-KY 6452），新增 build_listed_universe.py / prune_delisted.py 並在 generate_scores_live.py 加同一道過濾。設定頁新增「資料健康」區；冒煙測試新增 39/40/41 三道閘門，39 項全 PASS。✅ `.github/workflows/audit.yml` 已於 e9c88a8 推上遠端，**先前說「PAT 無 workflow scope」是錯的**。
-- [ ] **稽核.二** data/coverage.json 八因子覆蓋率儀表板＋補齊「抓取失敗/解析失敗」兩類
+- [x] **稽核.二** **已完成（2026-09-15開發佇列cycle_id=20260915-184602）**：
+  這一行是稽核.二整項的統稱總覽，實質交付已分散在下方「稽核二.一～五」子項；
+  本輪逐項核對現況並補上這一行本身缺的最後一塊：
+  (1) 「data/coverage.json八因子覆蓋率儀表板」——已於`稽核二.二`（cycle
+  20260915-171602）交付，`research/build_coverage_dashboard.py`產出、設定頁
+  已顯示，本輪重跑一次確認仍可正常產出（1974檔全市場，八因子覆蓋率46.7%~
+  99.9%不等），無需重新設計。
+  (2) 「補齊抓取失敗/解析失敗兩類」——原始指令的四類缺漏原因（新上市／官方
+  無資料／抓取失敗／解析失敗）已被`稽核二.二`有意識地改用更精確的R1~R4
+  分類取代（見`build_coverage_dashboard.py`檔頭理由），但「抓取失敗」的
+  已知系統性根因（季報斷層754檔，排程只抓最新一期，屬於`稽核二.一`負責
+  的獨立進行中項目，本輪未重複動作，剩485檔待FinMind解封後續跑）與
+  「解析失敗」則分別核對：**解析失敗這一類本輪找到並修好一筆真實案例**——
+  `scripts/data_audit.py`的`g_comma_parsing`靜態掃描抓到
+  `research/mops_cb_conversion_price_client.py:148-149`兩處直接
+  `float(old_price)`/`float(new_price)`未去千分位逗號（CLAUDE.md已知地雷
+  「凡用float()直接轉TWSE/TPEx字串的一律改為去逗號解析」），已修正為
+  `float(str(x).replace(",", ""))`。重跑`scripts/data_audit.py`驗證：
+  `g_comma_parsing`違規2→0、`code_free_violations`2→0、`total_violations`
+  2142→2140；`violation_rate`維持36.7%不變（773檔，與這項無關，是既有
+  `e_pe`/`a_price_source`方法論落差紅燈，見`稽核二.三`待總司令裁示）。
+  重跑`research/build_coverage_dashboard.py`確認coverage.json仍正常產出
+  （數字不變，此修正不影響覆蓋率統計本身）。冒煙測試47/48 PASS（僅#39
+  既有已知紅燈，與稽核.一～四各輪一致）。
 - [ ] **稽核.三** 自建全市場資料庫（每日append累積10類官方資料集）
 - [x] **稽核.四** **已完成（2026-09-15 開發佇列cycle_id=20260915-153103，同CF.6）**：
   `research/alpha_live_server.py`新增`GET/POST /settings`（token驗證），存

@@ -1,3 +1,35 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-184602）稽核.二收尾：解析失敗一筆真實案例修好、覆蓋率儀表板重驗
+
+戴**驗證帽**。`PENDING_QUEUE.md`權威執行順序清單取到下一項「稽核.二
+data/coverage.json八因子覆蓋率儀表板＋補齊「抓取失敗/解析失敗」兩類」。
+
+**查現況**：這一行是總覽性質，實質交付早已分散在下方`稽核二.一～五`
+子項（`稽核二.二`已於cycle 171602交付`research/build_coverage_dashboard.py`
+與`data/coverage.json`，設定頁也已顯示），本輪先重跑一次dashboard確認
+仍正常，不重新設計。
+
+**做了什麼**：原始指令要「抓取失敗/解析失敗」兩類今天全部補齊。「抓取
+失敗」的已知系統性根因（季報斷層）是`稽核二.一`的獨立進行中項目，本輪
+不重複動作。「解析失敗」這一類重跑`scripts/data_audit.py`後找到一筆真實
+案例：`research/mops_cb_conversion_price_client.py:148-149`兩處直接
+`float(old_price)`/`float(new_price)`未去千分位逗號解析（CLAUDE.md已知
+地雷：「凡用float()直接轉TWSE/TPEx字串的一律改為去逗號解析」），已修正
+為`float(str(x).replace(",", ""))`。
+
+**證據**：重跑`scripts/data_audit.py`：`g_comma_parsing`違規2→0、
+`code_free_violations`2→0、`total_violations`2142→2140；`violation_rate`
+維持36.7%（773檔）不變，與這項無關，是既有`e_pe`/`a_price_source`方法論
+落差紅燈（`稽核二.三`待總司令裁示，非本輪範圍）。重跑
+`research/build_coverage_dashboard.py`確認`data/coverage.json`仍正常產出
+（八因子覆蓋率46.7%~99.9%，數字與cycle 171602一致，此修正不影響覆蓋率
+統計本身）。`node scripts/smoke_test.mjs`：47/48 PASS，僅#39既有已知紅燈
+（與稽核二.一～四各輪一致，非本輪造成）。
+
+**下一步**：`PENDING_QUEUE.md`執行順序清單下一項是「稽核.三 自建全市場
+資料庫（每日append累積10類官方資料集）」。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-181602）週六.六後半：移除「盤前AI日報」推播開關
 
 戴**開發帽**。續完成`週六.六`（前半已在上一個commit完成），做完整個項目才

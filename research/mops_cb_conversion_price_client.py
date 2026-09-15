@@ -145,8 +145,8 @@ def _parse_conversion_price_section(html: str) -> list[dict]:
                 "announcement_date": ann_date,
                 "seq_no": seq_no.strip(),
                 "effective_date": eff_date,
-                "old_price": float(old_price) if old_price else None,
-                "new_price": float(new_price) if new_price else None,
+                "old_price": float(str(old_price).replace(",", "")) if old_price else None,
+                "new_price": float(str(new_price).replace(",", "")) if new_price else None,
                 "description": desc_text.strip(),
             }
         )
