@@ -404,6 +404,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .toast{position:absolute;left:50%;transform:translateX(-50%) translateY(-8px);top:calc(env(safe-area-inset-top) + 52px);background:var(--surface-3);border:1px solid var(--hairline);color:var(--ink);font-size:13px;border-radius:11px;padding:10px 16px;opacity:0;transition:.3s;z-index:60;pointer-events:none;white-space:nowrap}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .note{font-size:10.5px;color:var(--ink-3);margin-top:8px}
+  /* 2026-09-15 P0產品.四（全站一致性）骨架屏：取代「載入中…」純文字，讓等待期間
+     畫面形狀跟載入完成後接近，減少「畫面跳一下」的感覺。純CSS，不含任何假資料。 */
+  @keyframes skel-shimmer{0%{background-position:-120% 0}100%{background-position:120% 0}}
+  .skel-line{height:12px;border-radius:6px;margin:6px 0;background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:skel-shimmer 1.4s ease-in-out infinite}
+  .skel-line.w60{width:60%}.skel-line.w40{width:40%}.skel-line.w80{width:80%}.skel-line.w30{width:30%}
+  .skel-block{border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.05) 75%);background-size:200% 100%;animation:skel-shimmer 1.4s ease-in-out infinite}
   /* 2026-09-04 P0產品.一 首頁重排版 */
   [hidden]{display:none!important}
   .status-strip{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:6px 10px;margin-bottom:10px;font-size:11px;color:var(--ink-2)}
@@ -515,7 +521,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>自選股 <span class="more" onclick="editWL()">管理 →</span></h3>
-      <div id="wl-list"><div class="note">載入即時報價…</div></div>
+      <div id="wl-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
       <!-- 2026-08-27新增（P2-新，盤前盤後）：只在畫面上真的顯示了盤前/盤後價格時
            才出現，不是固定貼一段沒人看的警語。 -->
       <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格僅供參考</div>
@@ -534,7 +540,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>大盤速覽</h3>
-      <div class="idx-strip" id="home-idx-rows"><div class="note">載入中…</div></div>
+      <div class="idx-strip" id="home-idx-rows"><div class="skel-block" style="height:52px;width:100%"></div></div>
       <div class="note" id="home-idx-datatime"></div>
     </div>
 
@@ -2403,6 +2409,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   const FM_TTL=3*60*1000; // localStorage 快取有效期：3 分鐘，過期後才重新打 FinMind
   const _d=n=>new Date(Date.now()-n*864e5).toISOString().slice(0,10);
   const nf=n=>n==null||isNaN(n)?'—':Number(n).toLocaleString();
+  // 2026-09-15（P0產品.四）骨架屏共用函式：n行、每行寬度輪流取樣，取代純文字「載入中…」。
+  const SKEL_WIDTHS=['w80','w60','w40','w30'];
+  function skeletonHtml(n){
+    n=n||3;
+    let out='';
+    for(let i=0;i<n;i++)out+=`<div class="skel-line ${SKEL_WIDTHS[i%SKEL_WIDTHS.length]}"></div>`;
+    return out;
+  }
+  function skeletonBlockHtml(height){return `<div class="skel-block" style="height:${height||160}px"></div>`}
+  // 自選股/選股榜這類「一列一列」的清單專用骨架，形狀比純文字更接近載入完成後的樣子。
+  function skeletonRowsHtml(n){
+    n=n||3;
+    let out='';
+    for(let i=0;i<n;i++)out+=`<div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div>`;
+    return out;
+  }
   // 2026-09-06（P0 稽核.一）缺值安全的數字格式化。
   // 起因：光聖 6442 的 valuation_adj.raw.peg 是 null，報告頁直接寫 peg.toFixed(2)，
   // 整個 renderReport() 在中途拋 TypeError 死掉——名稱已經換成「光聖 6442」但
@@ -3057,7 +3079,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('sector-mask').classList.add('open');
       document.getElementById('sector-sheet').classList.add('open');
       if(!industries){listEl.innerHTML='<div class="note">此類股暫無對應的產業分類資料。</div>';return}
-      listEl.innerHTML='<div class="note">載入中…</div>';
+      listEl.innerHTML=skeletonRowsHtml(5);  // 2026-09-15 P0產品.四：骨架屏取代純文字「載入中」
       const [companies,quotes]=await Promise.all([loadCompanyInfo(),loadQuotesAllTw()]);
       const codes=Object.keys(companies).filter(c=>industries.includes(companies[c].industry));
       if(!codes.length){listEl.innerHTML='<div class="note">查無成分股資料。</div>';return}
@@ -4479,10 +4501,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('sub-ov').classList.add('active');
     setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
-    document.getElementById('rev-chart-amt').innerHTML='<div class="note">載入中…</div>';
+    document.getElementById('rev-chart-amt').innerHTML=skeletonBlockHtml(120);
     document.getElementById('rev-chart-yoy').innerHTML='';document.getElementById('rev-chart-labels').innerHTML='';
-    document.getElementById('trend-chart').innerHTML='<div class="note">載入中…</div>';
-    document.getElementById('stock-reason-card').innerHTML='<div class="note">載入中…</div>';  // 2026-09-15 P0產品.二，避免殘留上一檔的選股理由
+    document.getElementById('trend-chart').innerHTML=skeletonBlockHtml(220);  // 2026-09-15 P0產品.四：骨架屏取代純文字「載入中」，形狀貼近圖表區塊
+    document.getElementById('stock-reason-card').innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.二/四，避免殘留上一檔的選股理由
     if(us){
       const [px]=await Promise.all([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes()]);
       if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢
@@ -5224,7 +5246,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const cfg=_picksBoardConfig();
     if(cfg.cacheGet()&&!forceReload){renderPicks(cfg.cacheGet());stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
-    listEl.innerHTML='<div class="note">載入中…</div>';
+    listEl.innerHTML=skeletonRowsHtml(6);  // 2026-09-15 P0產品.四：骨架屏取代純文字「載入中」
     try{
       const res=await fetch(cfg.file+'?_='+Date.now());
       if(!res.ok)throw new Error('HTTP '+res.status);
@@ -5533,7 +5555,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 數字，而且完全沒有任何錯誤提示。清空之後最壞情況是顯示「載入中…」，
     // 不會是另一檔股票的價格。
     ['report-factors','report-industry-tech','report-entry-plan','report-events','report-valuation-band'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.innerHTML='<div class="note">載入中…</div>';
+      const el=document.getElementById(id);if(el)el.innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.四：骨架屏
     });
     const opEl=document.getElementById('report-order-plan');if(opEl)opEl.innerHTML='';
     ENTRY_PLAN_CACHE=null;
@@ -7231,7 +7253,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2053';
+  const APP_VERSION='2026-09-15.2100';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
