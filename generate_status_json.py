@@ -53,6 +53,7 @@ STALE_HOURS = {
     "data/quotes_sinopac.json": 168,  # 同上，只有使用者本機排程在跑+永豐模擬環境服務時段內才會更新
     "data/foreign_holding.json": 72,  # 跟stock_detail.json同一批market.yml排程產生，門檻一致（源頭二.3第1名，2026-09-15新增）
     "data/us_insider_trading.json": 72,  # 跟us_sic.json同一批market.yml排程產生，門檻一致（源頭二.3第2名，2026-09-15新增）
+    "data/cftc_cot.json": 72,  # 跟us_sic.json同一批market.yml排程產生（fetched_at每日更新，即使COT報告本身內容每週才變一次）（源頭二.3第3名，2026-09-15新增）
 }
 
 
@@ -390,6 +391,21 @@ def describe_us_insider_trading(path: Path) -> dict:
     }
 
 
+def describe_cftc_cot(path: Path) -> dict:
+    """data/cftc_cot.json（2026-09-15新增，源頭二.3第3名）——CFTC官方COT部位
+    報告（美股大盤情緒指標），`.github/scripts/fetch_cftc_cot.py`每日排程產生
+    （資料本身每週才更新一次，非每日排程失敗）。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    contracts = d.get("contracts", {})
+    latest_dates = [c["history"][-1]["date"] for c in contracts.values() if c.get("history")]
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": sum(len(c.get("history") or []) for c in contracts.values()),
+        "source": d.get("source"),
+        "detail": f"合約={list(contracts.keys())} 最新資料日={max(latest_dates) if latest_dates else '—'} errors={d.get('errors')}",
+    }
+
+
 DESCRIBERS = {
     "quotes_tw.json": describe_quotes,
     "quotes_us.json": describe_quotes,
@@ -412,6 +428,7 @@ DESCRIBERS = {
     "strategy_performance.json": describe_strategy_performance,
     "foreign_holding.json": describe_foreign_holding,
     "us_insider_trading.json": describe_us_insider_trading,
+    "cftc_cot.json": describe_cftc_cot,
 }
 
 
@@ -750,6 +767,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·籌碼·融資融券", "source": "data/stock_detail.json（TWSE MI_MARGN，跟大盤融資維持率共用同一次呼叫，2026-08-27起不再打FinMind；涵蓋全部上市公司含金融股；估算融資維持率為App自算，非官方資料）"},
     {"panel": "個股頁·籌碼·外資持股比率", "source": "data/foreign_holding.json（TWSE官方MI_QFIIS，2026-09-15新增，源頭二.3第1名，免金鑰）"},
     {"panel": "個股頁·籌碼·內部人交易（僅美股）", "source": "data/us_insider_trading.json（SEC EDGAR官方Form 4，2026-09-15新增，源頭二.3第2名，免金鑰）"},
+    {"panel": "市場頁·美股·CFTC投機客淨部位", "source": "data/cftc_cot.json（CFTC官方Public Reporting Environment，2026-09-15新增，源頭二.3第3名，免金鑰；每週才更新一次資料日，僅美股大盤情緒指標，不含台指期）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},

@@ -356,13 +356,18 @@ Allow: /mops/web
 | 對應機構用途 | 融券部位監控、防止過度放空 |
 | 待辦 | **暗池（dark pool/ATS）成交量資料完全未查證** |
 
-### 28. CFTC COT 部位報告
+### 28. CFTC COT 部位報告 —— 已接入（2026-09-15，源頭二.3第3名）
 
 | 欄位 | 內容 |
 |---|---|
 | 機構 | Commodity Futures Trading Commission |
-| 我們現況 | **⚪ 完全未查證** |
+| 端點 | `https://publicreporting.cftc.gov/resource/6dca-aqww.json`（CFTC自己的Socrata Public Reporting Environment，Legacy Futures Only報告，官方公開資料入口非第三方鏡像） |
+| 欄位 | 各合約每週非商業(投機客)/商業(避險者)多空部位、未平倉量；本專案取`noncomm_positions_long_all`/`short_all`算淨部位 |
+| 更新頻率 | 官方每週五公布，資料日固定為前一週二（`report_date_as_yyyy_mm_dd`） |
+| 歷史可回溯到哪年 | 本輪只取每合約最近12週（`HISTORY_WEEKS`），未做歷史回補 |
+| 官方是否允許程式存取 | 🟢（Socrata SODA API，設計上供程式讀取，免金鑰） |
 | 對應機構用途 | 期貨市場各類交易者（商業/非商業）部位周報，市場情緒指標 |
+| 我們現況 | 🟢 **已接入，僅美股情緒指標**（CFTC只涵蓋美國期貨市場，不含TAIFEX台指期）。`.github/scripts/fetch_cftc_cot.py`，追蹤三檔：S&P 500 Consolidated（代碼`13874+`）、NASDAQ-100 Consolidated（代碼`20974+`）、VIX FUTURES（代碼`1170E1`），輸出`data/cftc_cot.json`，市場頁美股分頁新增「CFTC投機客淨部位」卡。2026-09-15實測資料日2026-09-08：S&P500淨部位-93,933（較上週-4,562）、NASDAQ-100淨部位+20,704（較上週-6,373）、VIX期貨淨部位-94,829（較上週-10,644）。**已踩過的地雷**：`$where`參數裡的`%`萬用字元不可自己手動加`%25`，會被`requests`二次編碼成`%2525`導致完全比對不到任何列，讓`requests`自己編碼即可。 |
 
 ---
 
@@ -404,7 +409,7 @@ Allow: /mops/web
 |---|---|---|---|---|
 | 1 | #4 外資持股比率(MI_QFIIS) | 5 | 1（🟢host、已知端點家族） | **已完成本輪（2026-09-15）** |
 | 2 | #22b SEC Form 4（內部人交易） | 5 | 3（🟢host、需解析XML/申報結構） | **已完成（2026-09-15）** |
-| 3 | #28 CFTC COT部位報告 | 4 | 2（🟢公開CSV/Excel，格式穩定） | 待接入 |
+| 3 | #28 CFTC COT部位報告 | 4 | 2（🟢公開CSV/Excel，格式穩定） | **已完成（2026-09-15）** |
 | 4 | #24 FRED擴充（VIX/失業率/CPI等） | 3 | 1（🟢已有client+key，加序列而已） | 待接入 |
 | 5 | #5 借券賣出餘額 | 4 | 3（🟢host，但正確端點仍待鎖定） | 待接入 |
 | 6 | #22a SEC 13F（機構持倉季報） | 4 | 4（🟢host，但季度大檔需聚合邏輯） | 待接入 |
@@ -413,10 +418,11 @@ Allow: /mops/web
 | 9 | #19 財政部海關進出口統計 | 3 | 3（⚪host未驗證，需先測robots.txt+端點） | 待接入 |
 | 10 | #20 經濟部工業生產與外銷訂單 | 3 | 3（⚪host未驗證，同上） | 待接入 |
 
-**本輪（2026-09-15開發佇列自走）完成第1、2名**（見上方#4條目與
+**2026-09-15開發佇列自走完成第1~3名**（見上方#4條目與
 `.github/scripts/fetch_foreign_holding.py`；#22b條目與
-`.github/scripts/fetch_us_insider_trading.py`）。
-第3~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
+`.github/scripts/fetch_us_insider_trading.py`；#28條目與
+`.github/scripts/fetch_cftc_cot.py`）。
+第4~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
 排名表的「現況」欄與本檔案對應條目，不在同一輪一次做完（單輪時間有限，且
 CLAUDE.md「四之二」要求每項都要有實測證據才能標完成，逐項慢慢做比一次宣稱
 10項都好更誠實）。

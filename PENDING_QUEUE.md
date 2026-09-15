@@ -2495,7 +2495,23 @@ ORDER-END
   賣出1,438股@$317.23等真實交易，無頁面錯誤。`node scripts/smoke_test.mjs`
   45/46 PASS（僅#39既有已知紅燈，一致性違規率12.53%與本次改動前相同，屬
   P0資料一致性稽核既有未解決問題，與內部人交易新增功能無關）。
-  **第3~10名留待後續輪次**，見排名表。
+  **第3名（CFTC COT部位報告，僅美股情緒指標）已完成（2026-09-15開發佇列自走
+  接續，同輪）**：新增`.github/scripts/fetch_cftc_cot.py`，資料源CFTC官方
+  Socrata Public Reporting Environment（`publicreporting.cftc.gov`，Legacy
+  Futures Only報告，免金鑰）。追蹤三檔美股情緒相關合約：S&P 500
+  Consolidated（`13874+`）、NASDAQ-100 Consolidated（`20974+`）、VIX
+  FUTURES（`1170E1`）——CFTC只涵蓋美國期貨市場，不含TAIFEX台指期，故僅
+  適用美股情緒判斷。**實測踩到的地雷**：Socrata `$where` 的 `%` 萬用字元
+  不可手動加`%25`，會被`requests`二次編碼成`%2525`導致查詢完全比對不到
+  任何列，已寫進腳本docstring避免重踩。本機實測資料日2026-09-08：S&P500
+  淨部位-93,933（較上週-4,562）、NASDAQ-100淨部位+20,704（較上週-6,373）、
+  VIX期貨淨部位-94,829（較上週-10,644），皆為三來源都查得到的真實公開
+  資料（CFTC官方端點本身即公開資料，非需三來源查證的「找不到」結論）。
+  `data/STATUS.json`已加`describe_cftc_cot()`解析器與`APP_DATA_SOURCES`
+  條目；市場頁美股分頁新增「CFTC投機客淨部位」卡，Playwright實測三檔皆
+  正確顯示淨部位與較上週變化、資料日標註「CFTC每週二資料，當週五公布」，
+  無頁面錯誤。`node scripts/smoke_test.mjs`45/46 PASS（僅#39既有已知紅燈，
+  與本次改動無關）。**第4~10名留待後續輪次**，見排名表。
 - [ ] **源頭二.4** 新增排程全部列入 CLAUDE.md 頻率清單，附官方上限或實測安全值
 - [ ] **源頭二.5** 驗收：表格截圖、前 10 名清單與理由、每接入一個回報一個
 

@@ -631,6 +631,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" id="adr-datatime"></div>
         <div class="note">溢價 ％ ＝（美股ADR價 × 美元/台幣匯率 ÷ ADR比率）相對台股現價的差幅；ADR比率為固定值（換股結構才會變），各檔來源見卡片內個股說明</div>
       </div>
+      <!-- 2026-09-15（源頭二.3第3名）CFTC COT投機客淨部位，美股大盤情緒指標。 -->
+      <div class="card">
+        <h3>CFTC 投機客淨部位（美股情緒指標）</h3>
+        <div class="facts" id="cftc-cot-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="cftc-cot-datatime"></div>
+        <div class="note">來源：CFTC官方Public Reporting（Legacy Futures Only），GitHub Actions 排程；淨部位＝非商業(投機客)多單－空單，正值偏多、負值偏空，每週二資料、當週五公布，僅供參考非投資建議</div>
+      </div>
     </div>
 
     <!-- 期貨 -->
@@ -3420,9 +3427,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 2026-09-10（建置一.3）美股類股/ADR溢價各自獨立try/catch（用allSettled，
     // 不用all）——其中一張卡失敗不能拖垮已經渲染好的美股指數，見CLAUDE.md
     // 「App穩定性與錯誤隔離原則」。
-    const subResults=await Promise.allSettled([loadMarketUsSector(),loadMarketAdrPremium()]);
-    const subLabels=['loadMarketUsSector','loadMarketAdrPremium'];
+    const subResults=await Promise.allSettled([loadMarketUsSector(),loadMarketAdrPremium(),loadMarketCftcCot()]);
+    const subLabels=['loadMarketUsSector','loadMarketAdrPremium','loadMarketCftcCot'];
     subResults.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+subLabels[i]+']',r.reason);recordGlobalError(subLabels[i],r.reason)}});
+  }
+  // 2026-09-15（源頭二.3第3名）CFTC COT投機客淨部位，market-us-panel卡片。
+  let CFTC_COT_CACHE=null;
+  async function loadMarketCftcCot(){
+    const el=document.getElementById('cftc-cot-rows');if(!el)return;
+    if(!CFTC_COT_CACHE){
+      try{const r=await fetch('data/cftc_cot.json?t='+Date.now());if(r.ok)CFTC_COT_CACHE=await r.json()}
+      catch(e){console.warn('[loadMarketCftcCot]',e);recordGlobalError('loadMarketCftcCot',e)}
+    }
+    const d=CFTC_COT_CACHE;
+    const contracts=[['sp500','S&P 500'],['nasdaq100','NASDAQ-100'],['vix','VIX期貨']];
+    if(!d||!d.contracts){
+      el.innerHTML=contracts.map(([,label])=>`<div class="f"><span>${label}</span><b style="font-weight:400;font-size:12px;color:var(--ink-3)">查無資料</b></div>`).join('');
+      document.getElementById('cftc-cot-datatime').textContent='';
+      return;
+    }
+    let latestDate=null;
+    el.innerHTML=contracts.map(([key,label])=>{
+      const c=d.contracts[key];const hist=c&&c.history;
+      if(!hist||!hist.length)return `<div class="f"><span>${label}</span><b style="font-weight:400;font-size:12px;color:var(--ink-3)">查無資料</b></div>`;
+      const last=hist[hist.length-1];
+      if(!latestDate||last.date>latestDate)latestDate=last.date;
+      const prev=hist.length>1?hist[hist.length-2]:null;
+      const chg=prev?last.net-prev.net:null;
+      const cls=last.net>=0?'pos':'neg';
+      const chgTxt=chg==null?'':`（較上週${chg>=0?'+':''}${nf(chg)}）`;
+      return `<div class="f"><span>${label}</span><b class="${cls}">${last.net>=0?'+':''}${nf(last.net)}${chgTxt}</b></div>`;
+    }).join('');
+    document.getElementById('cftc-cot-datatime').textContent=latestDate?`資料日 ${latestDate}（CFTC每週二資料，當週五公布）`:'';
   }
   // ── 2026-09-10（建置一.3）美股類股（SEC SIC對映）／ADR溢價 ──
   async function loadUsSicAdrFiles(force){
@@ -6295,7 +6331,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.0858';
+  const APP_VERSION='2026-09-15.0908';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

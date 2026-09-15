@@ -1,3 +1,52 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第3名：接入CFTC COT部位報告（僅美股情緒指標）
+
+本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。做完第2名（SEC Form 4）
+commit+push後，依`PENDING_QUEUE.md`「一次做一項，做完接著做下一項」的指示，
+繼續做排名表第3名：CFTC COT部位報告。
+
+**做了什麼**：
+1. 查證CFTC官方資料源：`publicreporting.cftc.gov`是CFTC自己的Socrata Public
+   Reporting Environment（官方公開資料入口，非第三方鏡像），`resource/
+   6dca-aqww.json`是Legacy Futures Only報告，免金鑰、SODA API設計上供程式
+   讀取。用python requests實測連線成功（curl在本機Git Bash環境DNS解析失敗，
+   改用python requests確認是本機shell環境問題非端點本身不可用）。
+2. **踩到一個地雷並修正**：`$where`參數的`%`萬用字元手動加`%25`會被
+   `requests`二次編碼成`%2525`，導致query完全比對不到任何列（回200但空
+   陣列）；改成直接寫`%`字面值讓`requests`自己編碼一次才正確，已寫進
+   `fetch_cftc_cot.py` docstring避免重踩。
+3. 決定追蹤範圍：CFTC只涵蓋美國期貨市場（不含TAIFEX台指期），故本項僅
+   適用美股情緒判斷，非台美股通用。選定三檔跟美股大盤最相關的合約：
+   S&P 500 Consolidated（代碼`13874+`，CME官方合併標準+微型E-mini後的
+   總計口徑）、NASDAQ-100 Consolidated（`20974+`，同邏輯）、VIX FUTURES
+   （`1170E1`，波動率情緒輔助指標）。淨部位＝非商業(投機客)多單－空單，
+   每合約取最近12週歷史。
+4. 新增`.github/scripts/fetch_cftc_cot.py`，掛`market.yml`（美股批次，
+   `fetch_us_insider_trading.py`之後執行）。本機實測資料日2026-09-08：
+   S&P500淨部位-93,933（較上週-4,562）、NASDAQ-100淨部位+20,704（較上週
+   -6,373）、VIX期貨淨部位-94,829（較上週-10,644），皆為真實公開資料。
+5. `data/STATUS.json`：新增`describe_cftc_cot()`解析器＋`STALE_HOURS`＋
+   `APP_DATA_SOURCES`條目，重跑`generate_status_json.py`確認正確產生。
+6. 前端：市場頁美股分頁新增「CFTC投機客淨部位」卡（`cftc-cot-rows`/
+   `cftc-cot-datatime`），JS用獨立`try/catch`+`Promise.allSettled`（加進
+   既有`loadMarketUS`的`subResults`清單，跟`loadMarketUsSector`/
+   `loadMarketAdrPremium`同一批，符合「錯誤隔離」鐵律，任一失敗不拖垮
+   其他卡片）。Playwright實測三檔皆正確顯示淨部位＋較上週變化，資料日
+   正確標「2026-09-08（CFTC每週二資料，當週五公布）」，無頁面錯誤。
+
+**驗證**：`node scripts/smoke_test.mjs`45/46 PASS（僅#39既有已知紅燈，
+一致性違規率12.53%與本次改動前相同，同`ccefd588`既有結論，與CFTC新增
+功能無關）。
+
+**驗收證據**（CLAUDE.md「四之二」機器可查紀錄）：`data/cftc_cot.json`
+（`fetched_at`/`contracts.*.history`欄位）、`data/STATUS.json`對應條目、
+`node scripts/smoke_test.mjs`實際輸出、Playwright實測輸出（見上）。
+
+**尚未做**：排名表第4~10名（FRED擴充／借券賣出／SEC 13F／央行外匯牌照／
+BLS／財政部海關／經濟部工業生產）留待後續輪次逐一接入，各自獨立commit；
+`源頭二.4`（新增排程列入CLAUDE.md頻率清單）本輪未做，理由同上一輪。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第2名：接入SEC EDGAR Form 4內部人交易（僅美股）
 
 本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。`PENDING_QUEUE.md`頂端
