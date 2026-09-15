@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-15T09:03:28.860667+08:00",
-  "latest_commit": "f48f7333",
+  "updated_at": "2026-09-15T09:13:53.096600+08:00",
+  "latest_commit": "b7dd6113",
   "data_files": [
     {
       "path": "data/adr_premium.json",
@@ -291,6 +291,14 @@
       "status": "error"
     },
     {
+      "path": "data/short_lending_available.json",
+      "generated_at": "2026-09-15T01:12:11+00:00",
+      "records": 2095,
+      "source": "TWSE官方openapi SBL/TWT96U「上市上櫃股票當日可借券賣出股數」，免金鑰",
+      "detail": "上市=1237檔 上櫃=858檔",
+      "status": "ok"
+    },
+    {
       "path": "data/signal_status.json",
       "generated_at": null,
       "records": null,
@@ -421,7 +429,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-09-15T09:03:42+08:00",
+    "checked_at": "2026-09-15T09:14:03+08:00",
     "any_overdue": true,
     "overdue_names": [
       "美股四大指數（market.yml 21:30 UTC）"
@@ -541,11 +549,11 @@
     ]
   },
   "local_pipeline_health": {
-    "checked_at": "2026-09-15T09:03:43.965197+08:00",
+    "checked_at": "2026-09-15T09:14:05.414910+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "any_stalled": true,
     "stalled": [
-      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 88 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
+      "AlphaIbkrQuotes：data/quotes_ibkr.json 已 98 分鐘沒有新產出（預期每 5 分鐘，門檻 15 分鐘；JSON 欄位 fetched_at）"
     ],
     "pipelines": [
       {
@@ -555,8 +563,8 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:03:02.317611+08:00",
-        "age_min": 0.7,
+        "last_output": "2026-09-15T09:14:02.405523+08:00",
+        "age_min": 0.1,
         "stall_limit_min": 3,
         "status": "ok"
       },
@@ -567,8 +575,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:03:07.310602+08:00",
-        "age_min": 0.6,
+        "last_output": "2026-09-15T09:13:07.430631+08:00",
+        "age_min": 1.0,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -580,7 +588,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-14T13:47:02.680141+08:00",
-        "age_min": 1156.7,
+        "age_min": 1167.0,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -591,8 +599,8 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:01:02.641019+08:00",
-        "age_min": 2.7,
+        "last_output": "2026-09-15T09:11:02.716300+08:00",
+        "age_min": 3.0,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -604,7 +612,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-09-15T07:36:04.472829+08:00",
-        "age_min": 87.7,
+        "age_min": 98.0,
         "stall_limit_min": 15,
         "status": "stalled"
       },
@@ -615,8 +623,8 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-15T09:02:02.063910+08:00",
-        "age_min": 1.7,
+        "last_output": "2026-09-15T09:12:02.078587+08:00",
+        "age_min": 2.1,
         "stall_limit_min": 15,
         "status": "ok"
       },
@@ -636,8 +644,8 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T08:58:59.392639+08:00",
-        "age_min": 4.7,
+        "last_output": "2026-09-15T09:04:01.836668+08:00",
+        "age_min": 10.1,
         "stall_limit_min": 45,
         "status": "ok"
       },
@@ -648,8 +656,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-15T09:00:37.478465+08:00",
-        "age_min": 3.1,
+        "last_output": "2026-09-15T09:04:13.625802+08:00",
+        "age_min": 9.9,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -661,7 +669,7 @@
         "freshness": "mtime",
         "source": "檔案修改時間",
         "last_output": "2026-09-15T08:51:02.408994+08:00",
-        "age_min": 12.7,
+        "age_min": 23.1,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -673,7 +681,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-09-14、inst_trades=2026-09-14、valuation=2026-09-14、taifex_large=20260910",
         "last_output": "2026-09-14T00:00:00+08:00",
-        "age_min": 1983.7,
+        "age_min": 1994.1,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -685,7 +693,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 1503.7,
+        "age_min": 1514.0,
         "stall_limit_min": 30240,
         "status": "ok"
       }
@@ -788,6 +796,10 @@
     {
       "panel": "市場頁·美股·CFTC投機客淨部位",
       "source": "data/cftc_cot.json（CFTC官方Public Reporting Environment，2026-09-15新增，源頭二.3第3名，免金鑰；每週才更新一次資料日，僅美股大盤情緒指標，不含台指期）"
+    },
+    {
+      "panel": "個股頁·籌碼·可借券賣出股數（僅台股）",
+      "source": "data/short_lending_available.json（TWSE官方SBL/TWT96U，2026-09-15新增，源頭二.3第5名，免金鑰；僅可借額度，非借券費率、非已借部位）"
     },
     {
       "panel": "個股頁·AI·個股簡報/券商報告雷達",

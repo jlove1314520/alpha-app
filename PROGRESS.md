@@ -1,3 +1,61 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第5名：接入「可借券賣出股數」（借券供給子集），第4名FRED擴充因需GitHub Secrets裁示跳過
+
+本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。做完第3名（CFTC COT）
+commit+push後，依「一次做一項，做完接著做下一項」指示，檢查排名表第4名
+（FRED擴充）。
+
+**第4名判定為需要總司令裁示，本輪跳過（非遺漏）**：現有`research/
+fred_yield_curve_gate.py`的金鑰讀取方式是本機檔案`C:\alpha\alpha-data\
+fred_key.txt.txt`（docstring自稱「凍結區檔案」），只在本機手動跑研究腳本
+時使用過，從未進過任何GitHub Actions workflow。要讓FRED擴充序列比照
+其他源頭二.3項目走`market.yml`每日排程，必須把這把金鑰上傳GitHub Actions
+Secrets——這是把一把刻意標記「凍結」、目前只存在本機的憑證移到雲端CI的
+信任邊界，屬於`PENDING_QUEUE.md`「開發佇列」規範的停下條件第1類「需要
+總司令親自操作／需要核准的裁示」，不是自走流程能自行判斷該不該做的事。
+**已跳過，未阻塞整條佇列**（比照既有「阻塞機制是跳過往下做，不是卡住
+整條」的結論），改做第5名。
+
+**做了什麼（第5名）**：
+1. 查證：TWSE openapi完整swagger目錄（`https://openapi.twse.com.tw/v1/
+   swagger.json`）裡搜尋「借券」關鍵字，**唯一**命中的端點是`/SBL/
+   TWT96U`；候選`exchangeReport/TWT93U`實測回200+HTML（已知「無效路徑
+   回HTML」地雷，非合法端點）。
+2. `/SBL/TWT96U`官方欄位定義是「上市上櫃股票**當日可借券賣出股數**」——
+   這是**借券供給水位（可借額度）**，跟`PENDING_QUEUE.md`原始標籤「借券
+   賣出餘額」（已借券賣出的未平倉部位）語意不同，`docs/FIRST_HAND_
+   SOURCES.md` #5先前查證已記錄「是餘量非成交費率」，本次進一步確認是
+   「可借額度」非「已借部位」。**誠實只接入這個真實存在的端點，不誇大
+   成原始標籤講的那個概念**。
+3. **實測發現一個真實地雷**：該端點回傳1237列，每列同時有`TWSECode`/
+   `TWSEAvailableVolume`（上市）與`GRETAICode`/`GRETAIAvailableVolume`
+   （上櫃）四欄，但**同一列的上市代號跟上櫃代號完全不是同一家公司**
+   （例如某列`TWSECode=00400A`卻`GRETAICode=00411A`）——這是把上市/
+   上櫃兩個長度不同的獨立陣列用index位置硬湊成同一列JSON，不是關聯式
+   資料。新增`.github/scripts/fetch_short_lending_available.py`時已在
+   消費端拆成`twse`/`otc`兩個獨立字典，不跨清單對應，並寫進docstring
+   避免後續重踩。
+4. 本機實測：上市1237檔、上櫃858檔，2330可借6,619,228股，皆為真實資料。
+5. `data/STATUS.json`新增`describe_short_lending_available()`解析器＋
+   `STALE_HOURS`＋`APP_DATA_SOURCES`條目。
+6. 前端：個股頁「籌碼」分頁新增「可借券賣出股數」卡（僅台股顯示，美股
+   顯示互斥文案），JS用獨立`try/catch`+`_safeAsync`。Playwright實測台股
+   2330顯示「6,619,228股」（含「僅可借額度，非借券費率、非已借部位」
+   誠實限制文案）、美股AAPL顯示「美股無此資料」，皆無頁面錯誤。
+
+**驗證**：`node scripts/smoke_test.mjs`45/46 PASS（僅#39既有已知紅燈，
+與本次改動無關）。
+
+**驗收證據**：`data/short_lending_available.json`（`fetched_at`/`twse`/
+`otc`欄位）、`data/STATUS.json`對應條目、smoke_test實際輸出、Playwright
+實測輸出（見上）。
+
+**尚未做**：排名表第6~10名（SEC 13F／央行外匯牌照／BLS／財政部海關／
+經濟部工業生產）留待後續輪次；第4名FRED擴充留待總司令裁示是否同意把
+金鑰上傳GitHub Secrets（或改走本機排程模式）；借券費率（成本面）仍完全
+未接入，CLAUDE.md「借券成本與可借量硬規則」的資料缺陷未解除。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第3名：接入CFTC COT部位報告（僅美股情緒指標）
 
 本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。做完第2名（SEC Form 4）

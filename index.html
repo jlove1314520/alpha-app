@@ -977,6 +977,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         </div>
         <div class="note" id="fh-note">來源：TWSE MI_QFIIS（GitHub Actions 排程）</div>
       </div>
+      <!-- 2026-09-15（源頭二.3第5名）可借券賣出股數，TWSE官方SBL/TWT96U，僅適用台股。 -->
+      <div class="card">
+        <h3>可借券賣出股數</h3>
+        <div class="facts">
+          <div class="f"><span>當日可借券賣出股數</span><b id="sbl-available">—</b></div>
+        </div>
+        <div class="note" id="sbl-note">來源：TWSE SBL/TWT96U（GitHub Actions 排程）</div>
+      </div>
       <!-- 2026-09-15（源頭二.3第2名）內部人交易，SEC EDGAR官方Form 4，僅適用美股。 -->
       <div class="card">
         <h3>內部人交易（Form 4）</h3>
@@ -3841,6 +3849,31 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
+  // 2026-09-15（源頭二.3第5名）可借券賣出股數，TWSE官方SBL/TWT96U，僅適用台股。
+  // 注意：只有「可借額度」，不是借券費率、不是已借部位（見fetch腳本docstring）。
+  let SHORT_LENDING_CACHE=null;
+  async function loadShortLendingChip(code){
+    try{
+      if(!SHORT_LENDING_CACHE){
+        try{const r=await fetch('data/short_lending_available.json?t='+Date.now());if(r.ok)SHORT_LENDING_CACHE=await r.json()}
+        catch(e){console.warn('[loadShortLendingChip:fetch]',e);recordGlobalError('loadShortLendingChip:fetch',e)}
+      }
+      const d=SHORT_LENDING_CACHE;
+      const twseVol=d&&d.twse&&d.twse[code];
+      const vol=twseVol!=null?twseVol:(d&&d.otc&&d.otc[code]);
+      if(vol==null){
+        setTxt('sbl-available',fmEmptyMsg('查無資料'));
+        setTxt('sbl-note','來源：TWSE SBL/TWT96U（GitHub Actions 排程）');
+        return;
+      }
+      setTxt('sbl-available',nf(vol)+' 股');
+      setTxt('sbl-note',`僅可借額度，非借券費率、非已借部位 · 來源：TWSE SBL/TWT96U（GitHub Actions 排程）`);
+    }catch(e){
+      console.warn('[loadShortLendingChip]',e);recordGlobalError('loadShortLendingChip',e);
+      setTxt('sbl-note','載入失敗');
+    }
+  }
+
   // 2026-09-15（源頭二.3第2名）內部人交易，SEC EDGAR官方Form 4，
   // .github/scripts/fetch_us_insider_trading.py每日排程產生 data/us_insider_trading.json。
   // 僅適用美股（台股走loadForeignHoldingChip那張卡，兩者互斥顯示）。
@@ -4041,6 +4074,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
       setTxt('fh-ratio','—');setTxt('fh-can-invest','—');
       setTxt('fh-note','美股無此資料（僅適用台股，外資持股比率為TWSE官方統計）');
+      setTxt('sbl-available','—');
+      setTxt('sbl-note','美股無此資料（僅適用台股，可借券賣出股數為TWSE官方統計）');
       _safeAsync('loadInsiderTradingChip',()=>loadInsiderTradingChip(code));
       loadFinancialsUS(code);
       return;
@@ -4106,6 +4141,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadMarginChip(code,px);
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
+    _safeAsync('loadShortLendingChip',()=>loadShortLendingChip(code));  // 2026-09-15 源頭二.3第5名
     if(px.length){
       // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
       // 流動性門檻是完全獨立的另一件事：不管跟自己比是熱是冷，成交值絕對數字太低（單日<3000萬）
@@ -6331,7 +6367,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.0908';
+  const APP_VERSION='2026-09-15.0919';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

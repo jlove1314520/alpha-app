@@ -64,6 +64,9 @@ jobs:
       - name: 更新CFTC COT部位報告（美股大盤情緒指標，免金鑰，源頭二.3第3名）
         run: python .github/scripts/fetch_cftc_cot.py
         continue-on-error: true
+      - name: 更新可借券賣出股數（TWSE官方SBL/TWT96U，免金鑰，源頭二.3第5名）
+        run: python .github/scripts/fetch_short_lending_available.py
+        continue-on-error: true
       - name: 更新個股月營收/PER/PBR/殖利率（TWSE官方openapi，累積式寫回，免金鑰）
         run: python .github/scripts/update_fundamentals_daily.py
         continue-on-error: true

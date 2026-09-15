@@ -114,15 +114,16 @@ Allow: /mops/web
 | 官方是否允許程式存取 | 🟢（`www.twse.com.tw`主站範圍內，同T86/MI_MARGN/TWTASU/BFIAUU家族） |
 | 對應機構用途 | 個股外資持股水位監控（外資是否加碼/減碼） |
 
-### 5. 借券賣出餘額
+### 5. 借券賣出餘額 —— 已接入「可借券賣出股數」子集（2026-09-15，源頭二.3第5名）
 
 | 欄位 | 內容 |
 |---|---|
 | 機構 | TWSE／TPEx |
-| 候選端點 | TWSE openapi `/SBL/TWT96U`（查證結論：是「餘量」非「成交費率」）、`exchangeReport/TWT93U`（`BACKLOG.md:125`記錄的候選）；TPEx openapi `/tpex_margin_sbl`、`/tpex_short_sell`（`research/tpex_openapi_scan_c51.txt`列出，未逐一測試） |
-| 我們現況 | 🟡 **查證中，未整合**。`HYPOTHESIS_QUEUE.md:8455-8462`已查過`/SBL/TWT96U`但發現欄位語意不是我們要的。`PENDING_QUEUE.md`「源頭一.2b」仍是`- [ ]`未完成：「查TWSE/TPEx官方借券端點文件，確認免費可得後接入」。 |
-| 官方是否允許程式存取 | TWSE/TPEx openapi本身🟢允許（見下方「共通結論」），但尚未鎖定正確端點 |
-| 對應機構用途 | 融券市場活動監控、借券成本推估 |
+| 端點 | TWSE openapi `/SBL/TWT96U`——2026-09-15查證：這是TWSE swagger完整目錄裡**唯一**含「借券」關鍵字的端點（`exchangeReport/TWT93U`實測回200+HTML，是已知「無效路徑回HTML」地雷，非合法端點）。官方欄位定義是「上市上櫃股票**當日可借券賣出股數**」，語意是**借券供給水位（可借額度）**，不是「已借券賣出的未平倉部位」也不是「借券費率」——原始標籤「借券賣出餘額」跟這個端點的真實語意有落差，已誠實標註不誇大。 |
+| **已知地雷（本次接入實測發現）** | 回傳的1237列同時有`TWSECode`/`TWSEAvailableVolume`（上市）與`GRETAICode`/`GRETAIAvailableVolume`（上櫃）四欄，但**同一列的上市代號跟上櫃代號不是同一家公司**（例如某列`TWSECode=00400A`、`GRETAICode=00411A`）——這是把兩個長度不同的獨立陣列用index位置硬湊成同一列JSON，不是關聯式資料，取用時必須拆成兩個獨立清單處理，不可逐列對應。 |
+| 官方是否允許程式存取 | 🟢（TWSE openapi，設計上供程式讀取，免金鑰） |
+| 對應機構用途 | 借券供給水位監控（融券市場活動的其中一個面向） |
+| 我們現況 | 🟢 **已接入子集，誠實標示範圍**。`.github/scripts/fetch_short_lending_available.py`，輸出`data/short_lending_available.json`，個股頁「籌碼」分頁新增「可借券賣出股數」卡（僅台股顯示）。2026-09-15實測：上市1237檔、上櫃858檔，2330可借6,619,228股。**誠實限制**：CLAUDE.md「借券成本與可借量硬規則」提到的兩項缺口（成本／可借量）本項只補上「可借額度」這一部分，**借券費率仍完全未接入**（各券商議定，無公開統一費率），不得因為這項接入就視為該硬規則的資料缺陷已解除。 |
 
 ### 6. 處置股與注意股公告
 
@@ -411,18 +412,34 @@ Allow: /mops/web
 | 2 | #22b SEC Form 4（內部人交易） | 5 | 3（🟢host、需解析XML/申報結構） | **已完成（2026-09-15）** |
 | 3 | #28 CFTC COT部位報告 | 4 | 2（🟢公開CSV/Excel，格式穩定） | **已完成（2026-09-15）** |
 | 4 | #24 FRED擴充（VIX/失業率/CPI等） | 3 | 1（🟢已有client+key，加序列而已） | 待接入 |
-| 5 | #5 借券賣出餘額 | 4 | 3（🟢host，但正確端點仍待鎖定） | 待接入 |
+| 5 | #5 借券賣出餘額 | 4 | 3（🟢host，但正確端點仍待鎖定） | **已接入子集（2026-09-15，僅可借額度，非借券費率）** |
 | 6 | #22a SEC 13F（機構持倉季報） | 4 | 4（🟢host，但季度大檔需聚合邏輯） | 待接入 |
 | 7 | #21 外匯官方牌告（取代yfinance） | 2 | 1（🟢同host的A13Rate.csv姊妹端點） | 待接入 |
 | 8 | #25 BLS總經（就業/CPI） | 3 | 2（標準政府API，需申請/免申請key待查） | 待接入 |
 | 9 | #19 財政部海關進出口統計 | 3 | 3（⚪host未驗證，需先測robots.txt+端點） | 待接入 |
 | 10 | #20 經濟部工業生產與外銷訂單 | 3 | 3（⚪host未驗證，同上） | 待接入 |
 
-**2026-09-15開發佇列自走完成第1~3名**（見上方#4條目與
+**2026-09-15開發佇列自走完成第1、2、3、5名**（見上方#4條目與
 `.github/scripts/fetch_foreign_holding.py`；#22b條目與
 `.github/scripts/fetch_us_insider_trading.py`；#28條目與
-`.github/scripts/fetch_cftc_cot.py`）。
-第4~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
+`.github/scripts/fetch_cftc_cot.py`；#5條目與
+`.github/scripts/fetch_short_lending_available.py`）。
+
+**第4名（FRED擴充）本輪跳過，原因記錄如下，不是遺漏**：`research/
+fred_yield_curve_gate.py`目前的金鑰讀取方式是`C:\alpha\alpha-data\
+fred_key.txt.txt`（本機檔案，docstring稱「凍結區檔案」），只在**本機手動
+執行研究腳本**時使用，從未進過任何GitHub Actions workflow。若要讓FRED
+擴充序列比照其他源頭二.3項目走`market.yml`每日排程自動更新，必須把這把
+金鑰加進GitHub Actions Secrets（`secrets.FRED_API_KEY`）——這是把一把
+目前只存在本機、刻意標記「凍結」的憑證，移到雲端CI的信任邊界，屬於
+`PENDING_QUEUE.md`「開發佇列」停下條件第1類「需要總司令親自操作／
+需要核准的裁示」，不是自走流程能自行判斷該不該做的事。本輪先跳過，
+改做接入成本較低、無憑證疑慮的第5名（借券），第4名留待總司令裁示
+「是否同意把FRED金鑰上傳GitHub Secrets給CI排程使用」後再繼續，或改為
+本機排程執行（比照`quotes_ibkr.json`/`quotes_sinopac.json`模式）——兩種
+做法各有取捨，一併留給總司令裁示。
+
+第6~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
 排名表的「現況」欄與本檔案對應條目，不在同一輪一次做完（單輪時間有限，且
 CLAUDE.md「四之二」要求每項都要有實測證據才能標完成，逐項慢慢做比一次宣稱
 10項都好更誠實）。
