@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "generated_at": "2026-09-16T00:32:12.239753+08:00",
+    "question": "不同持有期下，我方需要多少毛alpha（相對0050的超額原始報酬）才能在扣成本後打平0050買進持有",
+    "primary_metric": "breakeven_annual_alpha_pct_geometric（複利精確版，判定門檻用這個，不是simple版）",
+    "cost_model_source": "research/validation/costs.py::round_trip_cost_pct()（CONSTITUTION.md欽定真實摩擦模組，含0.1425%×2手續費＋0.3%證交稅＋預設5bps×2滑價）",
+    "discount_scenarios_note": "1.0x/0.6x/0.3x為示意折扣級距，非查證群益/國泰實際公告費率",
+    "benchmark_0050_assumption": "主判定基準＝真buy-and-hold、年化成本≈0（一次性0.385%攤銷到長期趨近於0）；表內另附「若比照我方節奏換手」的參考值，僅供對照，非判定用",
+    "known_honest_gap": "App上線中的「我們vs0050」卡片（.github/scripts/build_benchmark_comparison.py）用的0.585%單趟成本不含滑價，比本表含滑價版本更樂觀——代表卡片上的落後幅度换算成真實摩擦後只會更難看",
+    "trading_days_per_year_assumption": 252
+  },
+  "holding_periods": [
+    {
+      "window": "t5",
+      "holding_days": 5,
+      "trades_per_year": 50.4,
+      "scenarios": [
+        {
+          "discount_label": "無折扣(1.0x)",
+          "commission_discount": 1.0,
+          "roundtrip_cost_pct_no_slippage": 0.585,
+          "roundtrip_cost_pct_with_slippage": 0.685,
+          "breakeven_per_trade_alpha_pct": 0.685,
+          "breakeven_annual_alpha_pct_simple": 34.52,
+          "breakeven_annual_alpha_pct_geometric": 41.4
+        },
+        {
+          "discount_label": "6折(0.6x)",
+          "commission_discount": 0.6,
+          "roundtrip_cost_pct_no_slippage": 0.471,
+          "roundtrip_cost_pct_with_slippage": 0.571,
+          "breakeven_per_trade_alpha_pct": 0.571,
+          "breakeven_annual_alpha_pct_simple": 28.78,
+          "breakeven_annual_alpha_pct_geometric": 33.46
+        },
+        {
+          "discount_label": "3折(0.3x)",
+          "commission_discount": 0.3,
+          "roundtrip_cost_pct_no_slippage": 0.3855,
+          "roundtrip_cost_pct_with_slippage": 0.4855,
+          "breakeven_per_trade_alpha_pct": 0.4855,
+          "breakeven_annual_alpha_pct_simple": 24.47,
+          "breakeven_annual_alpha_pct_geometric": 27.8
+        }
+      ],
+      "benchmark_0050_same_cadence_annual_cost_pct_reference_only": 19.4
+    },
+    {
+      "window": "t20",
+      "holding_days": 20,
+      "trades_per_year": 12.6,
+      "scenarios": [
+        {
+          "discount_label": "無折扣(1.0x)",
+          "commission_discount": 1.0,
+          "roundtrip_cost_pct_no_slippage": 0.585,
+          "roundtrip_cost_pct_with_slippage": 0.685,
+          "breakeven_per_trade_alpha_pct": 0.685,
+          "breakeven_annual_alpha_pct_simple": 8.63,
+          "breakeven_annual_alpha_pct_geometric": 9.05
+        },
+        {
+          "discount_label": "6折(0.6x)",
+          "commission_discount": 0.6,
+          "roundtrip_cost_pct_no_slippage": 0.471,
+          "roundtrip_cost_pct_with_slippage": 0.571,
+          "breakeven_per_trade_alpha_pct": 0.571,
+          "breakeven_annual_alpha_pct_simple": 7.19,
+          "breakeven_annual_alpha_pct_geometric": 7.48
+        },
+        {
+          "discount_label": "3折(0.3x)",
+          "commission_discount": 0.3,
+          "roundtrip_cost_pct_no_slippage": 0.3855,
+          "roundtrip_cost_pct_with_slippage": 0.4855,
+          "breakeven_per_trade_alpha_pct": 0.4855,
+          "breakeven_annual_alpha_pct_simple": 6.12,
+          "breakeven_annual_alpha_pct_geometric": 6.32
+        }
+      ],
+      "benchmark_0050_same_cadence_annual_cost_pct_reference_only": 4.85
+    },
+    {
+      "window": "t60",
+      "holding_days": 60,
+      "trades_per_year": 4.2,
+      "scenarios": [
+        {
+          "discount_label": "無折扣(1.0x)",
+          "commission_discount": 1.0,
+          "roundtrip_cost_pct_no_slippage": 0.585,
+          "roundtrip_cost_pct_with_slippage": 0.685,
+          "breakeven_per_trade_alpha_pct": 0.685,
+          "breakeven_annual_alpha_pct_simple": 2.88,
+          "breakeven_annual_alpha_pct_geometric": 2.93
+        },
+        {
+          "discount_label": "6折(0.6x)",
+          "commission_discount": 0.6,
+          "roundtrip_cost_pct_no_slippage": 0.471,
+          "roundtrip_cost_pct_with_slippage": 0.571,
+          "breakeven_per_trade_alpha_pct": 0.571,
+          "breakeven_annual_alpha_pct_simple": 2.4,
+          "breakeven_annual_alpha_pct_geometric": 2.43
+        },
+        {
+          "discount_label": "3折(0.3x)",
+          "commission_discount": 0.3,
+          "roundtrip_cost_pct_no_slippage": 0.3855,
+          "roundtrip_cost_pct_with_slippage": 0.4855,
+          "breakeven_per_trade_alpha_pct": 0.4855,
+          "breakeven_annual_alpha_pct_simple": 2.04,
+          "breakeven_annual_alpha_pct_geometric": 2.07
+        }
+      ],
+      "benchmark_0050_same_cadence_annual_cost_pct_reference_only": 1.62
+    },
+    {
+      "window": "t120",
+      "holding_days": 120,
+      "trades_per_year": 2.1,
+      "scenarios": [
+        {
+          "discount_label": "無折扣(1.0x)",
+          "commission_discount": 1.0,
+          "roundtrip_cost_pct_no_slippage": 0.585,
+          "roundtrip_cost_pct_with_slippage": 0.685,
+          "breakeven_per_trade_alpha_pct": 0.685,
+          "breakeven_annual_alpha_pct_simple": 1.44,
+          "breakeven_annual_alpha_pct_geometric": 1.45
+        },
+        {
+          "discount_label": "6折(0.6x)",
+          "commission_discount": 0.6,
+          "roundtrip_cost_pct_no_slippage": 0.471,
+          "roundtrip_cost_pct_with_slippage": 0.571,
+          "breakeven_per_trade_alpha_pct": 0.571,
+          "breakeven_annual_alpha_pct_simple": 1.2,
+          "breakeven_annual_alpha_pct_geometric": 1.21
+        },
+        {
+          "discount_label": "3折(0.3x)",
+          "commission_discount": 0.3,
+          "roundtrip_cost_pct_no_slippage": 0.3855,
+          "roundtrip_cost_pct_with_slippage": 0.4855,
+          "breakeven_per_trade_alpha_pct": 0.4855,
+          "breakeven_annual_alpha_pct_simple": 1.02,
+          "breakeven_annual_alpha_pct_geometric": 1.03
+        }
+      ],
+      "benchmark_0050_same_cadence_annual_cost_pct_reference_only": 0.81
+    }
+  ]
+}

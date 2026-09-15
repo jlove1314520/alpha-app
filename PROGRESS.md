@@ -1,3 +1,49 @@
+## 2026-09-16（持有期與成本結構重新檢視·一.1/一.3完成）打平0050所需毛alpha算出來了，t5窗口要贏27.8%~41.4%年化alpha
+
+戴**驗證帽**。總司令裁示【持有期與成本結構重新檢視】五項（原文已登記
+`PENDING_QUEUE.md`），本輪完成一.1與一.3，一.2確認客觀阻塞維持現狀。
+
+**一.1：打平0050所需毛alpha計算表**。新增
+`research/validation/breakeven_alpha_table.py`，成本模型直接呼叫既有
+`research/validation/costs.py::round_trip_cost_pct()`（`CONSTITUTION.md`
+欽定真實摩擦模組，含滑價），不重寫成本公式。輸出
+`research/breakeven_alpha_table.json`，t5/t20/t60/t120四個持有期×三個
+示意折扣級距(1.0x/0.6x/0.3x)，兩種年化算法都印（simple線性近似＝總司令
+自己心算的版本；geometric複利精確版＝判定門檻，數字比simple版更高、
+更保守）。**結果**：t5窗口一年要贏出27.8%~41.4%毛alpha才可能打平0050，
+t20降到6.3%~9.1%，t60降到2.1%~2.9%，t120只要1.0%~1.5%。**兩個誠實
+揭露**：折扣級距是示意值非查證群益/國泰實際費率；本表含滑價比App上線
+「我們vs0050」卡片用的0.585%（不含滑價）更保守——代表卡片上三榜全輸
+的差距換算真實摩擦後只會更難看。
+
+**一.3：成本敏感度升格為SPEC前置關卡**。`research/MARATHON_PROTOCOL.md`
+新增「1a-0. 成本敏感度前置關卡」（插在1a便宜關卡之前）、
+`research/HYPOTHESIS_QUEUE.md`的`GATE_SEQUENCE`新增「0. 成本前置關卡」
+（插在第1關sanity之前），兩處都引用上述`breakeven_alpha_table.json`的
+geometric門檻值：保守毛alpha估計<門檻50%直接判死不進gate1，50%~100%
+可進關但要標示對成本假設敏感，≥100%正常走完整關卡。**不取代既有第4關
+成本敏感度1x/2x/3x**，只是提早擋掉連保守估計都撐不住成本的機制，省
+便宜關卡與深挖階段的算力。
+
+**一.2：查證後維持阻塞**。`picks_ledger.json`現況`t20`回填率0.0%
+（0/940）、`t60`/`t120`同樣0.0%，只有`t5`28.2%（265/940）——t20目前
+完全沒有可用資料，無法切換主評估窗口，維持`t5`為現行顯示窗口。
+
+**二～五**：均為知會/待辦記錄，未變更任何功能行為（sparklines驗收待
+今日17:00台北排程跑過後查核；#74繼續現有方向；我們vs0050卡維持現狀；
+TW_HOLIDAYS_2026 TDZ bug維持不修，已記入PENDING）。
+
+**影響檔案**：`research/validation/breakeven_alpha_table.py`（新增）、
+`research/breakeven_alpha_table.json`（新增，計算結果）、
+`research/MARATHON_PROTOCOL.md`、`research/HYPOTHESIS_QUEUE.md`、
+`PENDING_QUEUE.md`（裁示原文＋執行狀態）、`PROGRESS.md`（本節）。
+
+**下一步**：t20樣本累積後驗證「拉長持有期是否真的只是把成本門檻降低、
+而毛報酬本身沒有隨之顯著衰減」這個一.1結論欄位提出的待驗證假設；今日
+17:00/18:30台北排程跑過後執行sparklines驗收（二）。
+
+---
+
 ## 2026-09-15（DevQueue自走，cycle 20260915-231602）工廠一：鏈路節點健康帳
 
 戴**開發帽**。DevQueue自走輪次，依`PENDING_QUEUE.md`權威執行順序取件到
