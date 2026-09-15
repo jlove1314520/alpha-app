@@ -47,6 +47,12 @@ DevQueue 交辦線（見 `dev_queue_runner.py`）與盤中資料管線的額度�
         # 假設佇列跑完之後呼叫，沒有 jsonl（純文字模式跑 claude -p），不取用量，
         # 只判斷 TRIALS_REGISTRY.jsonl 這段時間窗內有沒有新增
 START/END 都是 ISO 時間字串（wrapper 自己記的 cycle 開始/結束時間）。
+
+**每日用量日誌**（2026-09-15，省額度第一步觀察期）：`should_run()` 每次
+被呼叫都會記一筆決定（skip_signal／skip_interval／run），跨日時自動把
+前一天的累計寫成一行 append 進 `research/quota_usage_daily.log`——
+不用另外跑聚合腳本，這份 log 本身就是「一天一行」的歷史，供總司令一週後
+判斷要不要做第二步（換模型）。
 """
 from __future__ import annotations
 
@@ -127,6 +133,34 @@ SIGNAL_SOURCES: dict[str, list[Path]] = {
 }
 
 
+USAGE_LOG_PATH = RESEARCH / "quota_usage_daily.log"
+
+
+def _record_daily(track: str, decision: str) -> None:
+    """2026-09-15（總司令交辦，省額度第一步觀察期）：每天一行記錄
+    「跳過幾輪／實際呼叫claude幾次」，供一週後判斷要不要做第二步（換模型）。
+    `decision` 是 'skip_signal'（純Python訊號比對跳過，連claude都沒叫）／
+    'skip_interval'（間隔未到跳過）／'run'（真的叫了claude -p）三選一。
+    跨日時把前一天的累計寫成一行append進log，再歸零重算今天的——這樣log
+    檔本身就是「一天一行」的歷史，不用另外寫聚合腳本。"""
+    state = _load_state()
+    track_state = state.setdefault(track, {})
+    today = _now().strftime("%Y-%m-%d")
+    daily = track_state.setdefault("daily", {"date": today, "skip_signal": 0, "skip_interval": 0, "run": 0})
+    if daily.get("date") != today:
+        # 換日了：把昨天的累計寫進log，今天從0開始算
+        old = daily
+        line = (f"{old.get('date')} {track}: skip_signal={old.get('skip_signal', 0)} "
+                f"skip_interval={old.get('skip_interval', 0)} run={old.get('run', 0)}")
+        with USAGE_LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+        daily = {"date": today, "skip_signal": 0, "skip_interval": 0, "run": 0}
+    daily[decision] = daily.get(decision, 0) + 1
+    track_state["daily"] = daily
+    state[track] = track_state
+    _save_state(state)
+
+
 def _signal_hash(track: str) -> str:
     h = hashlib.sha256()
     for p in SIGNAL_SOURCES.get(track, []):
@@ -156,6 +190,7 @@ def should_run(track: str) -> int:
             print(f"SKIP: 純Python訊號比對——自上次判定候選池空轉以來，"
                   f"PENDING_QUEUE.md/{track}相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，"
                   f"沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫")
+            _record_daily(track, "skip_signal")
             return 1
         # 訊號有變化：記下這次看到的雜湊，讓真正跑的這一輪（或下一次skip判斷）用最新值比對
         track_state["last_signal_hash"] = current_hash
@@ -170,11 +205,13 @@ def should_run(track: str) -> int:
             mode = "節流中" if throttled else "正常頻率"
             print(f"SKIP: {mode}，距上次實跑{elapsed_min:.1f}分鐘 < {interval}分鐘門檻"
                   + (f"（{reason}）" if throttled else ""))
+            _record_daily(track, "skip_interval")
             return 1
     if throttled:
         print(f"RUN（節流狀態，但已達{interval}分鐘門檻，本輪照跑）：{reason}")
     else:
         print("RUN: 未達節流條件，正常頻率")
+    _record_daily(track, "run")
     return 0
 
 
