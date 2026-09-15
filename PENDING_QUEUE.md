@@ -3835,6 +3835,16 @@ ORDER-END
   `AlphaData`模式）每日跑`build_sparklines.py`；(c) 先查App端「近期
   事件與題材」以外的走勢線UI實際讀哪個檔案，確認使用者影響範圍後再選
   (a)或(b)。
+
+  ⛔（2026-09-15）【使用者可見】sparklines.json過期直接影響使用者在App
+  上看到的20日走勢線與四層回退鏈最後一層的個股報價，這條的存活狀態要
+  被`scripts/check_stale_user_visible_blocks.py`【防重演】自檢持續監控，
+  超過3個交易日沒解除（PAT重新產生＋market.yml驗證通過）就會在
+  `local_task_health`亮燈。**已完成的應急措施**：`index.html::resolveQuote()`
+  的history層現在會標示實際資料日期，超過3個交易日就把價格文字換成
+  「MM/DD收盤 $價格」而非裸數字（commit `83df3be4`），使用者看得出來是
+  舊資料，但底層資料本身仍過期，這條阻塞不能因為應急UI標示做了就視為
+  已解決。
 - [ ] **檢定力一** 量測六道閘門的統計檢定力（偽陰性率）——總司令原話
   「這是先做不可的一條」，已寫成獨立章節登記為`HYPOTHESIS_QUEUE.md`
   **#74**（合成已知強度訊號混入真實報酬，餵進六關，畫出訊號強度vs

@@ -207,6 +207,22 @@ def check_local_tasks(now: datetime) -> tuple[list[dict], list[str]]:
         return [], []
 
 
+def check_stale_user_visible_blocks() -> list[str]:
+    """2026-09-15（總司令裁示【防重演】，sparklines凍結事件教訓）：
+    PENDING_QUEUE.md 裡標記【使用者可見】的阻塞項，超過3個交易日沒處理
+    就當一項停擺告警——「零」條目10天前就誠實記錄過market.yml PAT
+    缺workflow scope這件事，但只有文字沒有機制提醒，一停就是10天沒人
+    跟進。同樣包一層 try/except，這支監測器不能因為掃描失敗而整輪崩潰。
+    """
+    try:
+        from check_stale_user_visible_blocks import get_alerts
+        return [f"【使用者可見】阻塞已{days}個交易日未處理：{text}"
+                for text, days in get_alerts()]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 使用者可見阻塞掃描失敗（{type(e).__name__}: {e}），本輪跳過這項自檢")
+        return []
+
+
 def publish_task_health(now: datetime, rows: list[dict], stalled: list[str],
                          conn_alerts: list[tuple[str, int, str]] | None = None) -> None:
     """把自檢結果併進 data/audit_report.json 的 local_task_health（總司令指定的位置）。
@@ -278,6 +294,10 @@ def main() -> int:
 
     # 常駐工作停擺自檢：跟對外連通性一起做，因為兩者都是「本機到底還活著嗎」。
     task_rows, task_stalls = check_local_tasks(now)
+    # 2026-09-15【防重演】：PENDING_QUEUE.md裡【使用者可見】標記的阻塞項也併進
+    # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
+    # 教總司令看第三個地方。
+    task_stalls = task_stalls + check_stale_user_visible_blocks()
     publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:
