@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T14:53:27.152080+08:00",
+  "generated_at": "2026-09-15T17:24:23.119653+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "2892",
-    "2903",
-    "2912",
-    "2915",
-    "3006",
-    "3008",
-    "3013",
-    "3014",
-    "3017",
-    "3023",
-    "3029",
-    "3034",
-    "3035",
-    "3037",
-    "3044",
-    "3045",
-    "3047",
-    "3049",
-    "3081",
-    "3131"
+    "3189",
+    "3211",
+    "3231",
+    "3234",
+    "3260",
+    "3293",
+    "3324",
+    "3374",
+    "3406",
+    "3413",
+    "3443",
+    "3450",
+    "3481",
+    "3529",
+    "3532",
+    "3535",
+    "3546",
+    "3576",
+    "3583",
+    "3587"
   ],
   "results": [
     {
@@ -4833,8 +4833,409 @@
           "a_level": true
         }
       ]
+    },
+    {
+      "code": "3189",
+      "name": "景碩",
+      "url": "www.kinsus.com.tw",
+      "themes": [
+        "ic_substrate"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "Home About Us About Us Our Vision Management Team Global Locations Milestones Newsroom Corporate Commitments Products Products Products Overview SiP PBGA FCCSP ",
+          "keyword": "substrate",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3211",
+      "name": "順達",
+      "url": "www.dynapack.com.tw",
+      "themes": [
+        "bbu",
+        "battery",
+        "energy_storage"
+      ],
+      "status": "fetched",
+      "sentence_count": 3,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "順達科技股份有限公司 Close 首頁 關於順達 + 經營理念 企業沿革 營業概況 經營團隊 公司組織 經理人資訊 順達地圖 海內外分公司 品質管理 政策 • 精神 • 組織 品質進程 認證 • 歷程 CIP 專欄 隱私權政策 產品介紹 + 資訊產品電池方案 可攜式裝置電池方案 儲能/備用電源電池方案 伺服器備用電源電",
+          "keyword": "電池模組",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3231",
+      "name": "緯創",
+      "url": "www.wistron.com",
+      "themes": [
+        "ai_server",
+        "server_odm",
+        "switch"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "3234",
+      "name": "光環",
+      "url": "http://www.truelight.com.tw",
+      "themes": [
+        "optical_module",
+        "cpo",
+        "optical_comm",
+        "leo_satellite"
+      ],
+      "status": "fetched",
+      "sentence_count": 13,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "光環科技｜引領矽光子與光通訊技術的創新先鋒 關於光環 關於光環 組織與經營團隊 里程碑 製造流程 品質與環安 產品服務 OPTICAL COMMUNICATION CONSUMER OEM ARTIFICIAL INTELLIGENCE 企業永續 經營者的話 永續治理 綠色營運 員工與社會共融 利害關係人 下載專區 投",
+          "keyword": "光纖通訊",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3260",
+      "name": "威剛",
+      "url": "www.adata.com",
+      "themes": [
+        "ic_test"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3293",
+      "name": "鈊象",
+      "url": "www.igs.com.tw",
+      "themes": [
+        "gaming"
+      ],
+      "status": "fetched",
+      "sentence_count": 15,
+      "keyword_hits": 13,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "鈊象電子股份有限公司 鈊象電子股份有限公司 關於鈊象 About IGS 公司願景與使命 經營理念 經營方針 公司簡介 公司里程碑 營業事業內容 主要產品資訊 資通安全管理 智權政策及目標 最新訊息 News & Events 人才招募 活動訊息 最新消息 所有訊息 遊戲資訊&合作夥伴 Business 商用機台 行動",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "願景： 成為全球育樂產業領導廠商 貼近市場與消費者，持續投入先進遊戲技術研發，培育國際性遊戲人才，帶動產業的蓬發展，累積研發實力和市場經驗，成為世界級的育樂產業領導廠商。",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "0 year 成立時間 0 up 商用機台 0 up 行動遊戲 了解鈊象更多 News 最新消息 27 2023/11 《鈊象電子》獻上經典與創新遊戲饗宴 點燃2023漫畫博覽會熱潮 27 2023/11 鈊象奧特曼VR系列 奪原創遊戲優勝 31 2022/12 臺科大攜手傑出校友 催生百萬青創明日之星 Investo",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "明星3缺1 行動遊戲 《明星3缺1》麻將、撲克、拉霸機，通通都在《明星3缺1》！",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "台灣NO.1休閒遊戲－免費下載、一點即玩、遊戲豐富！",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "遊戲 官網 瀏覽 影片 金猴爺老虎機 行動遊戲 多款經典老虎機玩法，還有最熱門的社交捕魚街機-海王2。",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "如同置身真實賭場般的氛圍，是絕對不能錯過的經典遊戲！",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "遊戲 官網 瀏覽 影片 狂野飆車9 DX PLUS 商用機台 首創超跑對摩托跨機玩法 85吋4台跨屏巨幕演出 遊戲 官網 瀏覽 影片 狂野飆車 閃電摩托DX 商用機台 頂級品牌授權，真實體感，點燃摩托激情！",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "遊戲 官網 瀏覽 影片 唯舞獨尊 行動遊戲 《唯舞獨尊》不僅是一般的線上音樂跳舞遊戲， 更是一款結合時尚流行趨勢及結交好友的娛樂平台。",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "這將是一款以時尚，前衛，流行，個性為一體的全新遊戲。",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "遊戲 官網 瀏覽 影片 機甲英雄-機鬥勇者 商用機台 機器人對戰兒童卡牌遊戲，每次都可以得到一張卡牌，自由搭配牌組決定機甲和駕駛員。",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "遊戲 官網 瀏覽 影片 撞球好手-勝者為王 行動遊戲 『撞球好手』專為喜好撞球的玩家量身打造，最真實物理碰撞的模擬技術，並營造出在撞球俱樂部的超High氛圍，喜好休閒撞球的您，絕對不可錯過！",
+          "keyword": "遊戲",
+          "a_level": false
+        },
+        {
+          "sentence": "遊戲 官網 瀏覽 影片 瀏覽更多遊戲&合作夥伴 最新消息 鈊象好生活 加入鈊象 職涯發展 Recruit 人才招募 人才是鈊象最重視的資產，擁有寬敞舒適的辦公環境，提供專業的設備，希望能提昇整體研發品質 配合亮麗的營運績效表現，我們提供優秀同仁優渥的福利制度，歡迎對遊戲有滿腔熱血的您一同加入 關於我們 公司願景與使命 ",
+          "keyword": "遊戲",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3324",
+      "name": "雙鴻",
+      "url": "http://www.auras.com.tw",
+      "themes": [
+        "cmp_target",
+        "thermal",
+        "liquid_cooling"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3374",
+      "name": "精材",
+      "url": "www.xintec.com.tw",
+      "themes": [
+        "foundry",
+        "adv_package",
+        "cowos",
+        "cpo"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3406",
+      "name": "玉晶光",
+      "url": "https://www.gseo.com/tw",
+      "themes": [
+        "optical_lens"
+      ],
+      "status": "fetched",
+      "sentence_count": 6,
+      "keyword_hits": 5,
+      "a_level_hits": 4,
+      "hits": [
+        {
+          "sentence": "玉晶光電 玉晶光電 Loading... 產品介紹 光通訊與共同封裝光學 人形機器人鏡頭 工業AI鏡頭 醫療鏡頭 AR 智慧眼鏡 車載鏡頭 手機鏡頭 集團介紹 關於玉晶 誠信反貪腐承諾 環安衛政策 人力資源 菁英招募 職缺列表 投資人專區 公司治理 企業永續 聯絡我們 EN 產品介紹 - 光通訊與共同封裝光學 - 人形",
+          "keyword": "手機鏡頭",
+          "a_level": true
+        },
+        {
+          "sentence": "玉晶一直致力於光學技術的創新和最先進的光學鏡頭產品開發。",
+          "keyword": "光學鏡頭",
+          "a_level": true
+        },
+        {
+          "sentence": "產品應用領域包含光通訊與共同封裝光學、手機鏡頭、車載鏡頭、機器人鏡頭、醫療鏡頭和虛擬實境光學系統。",
+          "keyword": "手機鏡頭",
+          "a_level": true
+        },
+        {
+          "sentence": "了解更多 光通訊與共同封裝光學 高精密度光學元件 人形機器人鏡頭 目標光學技術在人形機器人中的多重應用 工業AI鏡頭 用於機器人視覺 醫療鏡頭 廣泛應用於醫療及健康領域 AR 智慧眼鏡 觀影成像及景物追蹤相機 車載鏡頭 ADAS/LIDAR 鏡頭鏡片 手機鏡頭 手機相機鏡頭和感測光學元件 焦距 14 mm 800 mm",
+          "keyword": "手機鏡頭",
+          "a_level": false
+        },
+        {
+          "sentence": "創造屬於自己的風格 了解更多 產品介紹 光通訊與共同封裝光學 人形機器人鏡頭 工業AI鏡頭 醫療鏡頭 AR 智慧眼鏡 車載鏡頭 手機鏡頭 集團介紹 關於玉晶 誠信反貪腐承諾 環安衛政策 人力資源 菁英招募 職缺列表 投資人專區 企業永續 聯絡我們 Copyright © Genius Electronic Optica",
+          "keyword": "手機鏡頭",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "3413",
+      "name": "京鼎",
+      "url": "http://www.foxsemicon.com.tw/",
+      "themes": [
+        "semi_equip",
+        "semi_parts",
+        "glass_substrate",
+        "aoi"
+      ],
+      "status": "exc_ConnectionError"
+    },
+    {
+      "code": "3443",
+      "name": "創意",
+      "url": "www.guc-asic.com",
+      "themes": [
+        "ic_design",
+        "ip_silicon",
+        "asic_service",
+        "ai_chip"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "3450",
+      "name": "聯鈞",
+      "url": "http://www.elaser.com.tw",
+      "themes": [
+        "optical_module",
+        "optical_comm"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3481",
+      "name": "群創",
+      "url": "http://www.innolux.com",
+      "themes": [
+        "panel"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3529",
+      "name": "力旺",
+      "url": "https://www.ememory.com.tw",
+      "themes": [
+        "ic_design",
+        "ip_silicon",
+        "power_ic"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3532",
+      "name": "台勝科",
+      "url": "www.fstech.com.tw",
+      "themes": [
+        "silicon_wafer"
+      ],
+      "status": "exc_ConnectionError"
+    },
+    {
+      "code": "3535",
+      "name": "晶彩科",
+      "url": "http://www.favite.com",
+      "themes": [
+        "resistor_inductor"
+      ],
+      "status": "fetched",
+      "sentence_count": 85,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3546",
+      "name": "宇峻",
+      "url": "https://www.uj.com.tw/",
+      "themes": [
+        "gaming"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "3576",
+      "name": "聯合再生",
+      "url": "http://www.urecorp.com",
+      "themes": [
+        "solar"
+      ],
+      "status": "fetched",
+      "sentence_count": 29,
+      "keyword_hits": 8,
+      "a_level_hits": 7,
+      "hits": [
+        {
+          "sentence": "聯合再生能源 公司簡介 旗下事業體 太陽能事業 太陽能系統事業 儲能系統事業 能源SOLUTION 應用領域 太陽能系統事業 儲能系統事業 產品介紹 太陽能模組產品 雙玻模組 全黑模組 單玻模組 企業永續 投資人專區 公司治理 公司概況 股權架構 組織架構 董事會 審計委員會 薪資報酬委員會 董事會及功能性委員會資料 ",
+          "keyword": "太陽能",
+          "a_level": true
+        },
+        {
+          "sentence": "聯合再生能源提供受國際、國家級標章認證的高轉換率、高效能太陽能模組產品，更透過垂直整合太陽能產業鏈，為客戶提供從建置、維運、儲能到售電的Total Solution一條龍服務。",
+          "keyword": "太陽能",
+          "a_level": false
+        },
+        {
+          "sentence": "VIEW MORE INTEGRATED ENERGY SOLUTIONS 全方位能源解決方案 聯合再生能源提供從太陽能製造、系統建置、儲能整合到客製化能源方案的一站式服務，橫跨發電、儲能與應用端，打造因地制宜、靈活高效的能源解決方案。",
+          "keyword": "太陽能",
+          "a_level": true
+        },
+        {
+          "sentence": "01 太陽能事業 太陽能電池 太陽能模組 產品銷售與服務 02 太陽能系統事業 案場開發 案場建置 案場維運 03 儲能系統事業 儲能商品銷售 儲能案場建置 04 能源Solution 客製化需求因應 特殊專案合作 VIEW MORE SOLAR POWER ISUSTAINABLE URBAN DEVELOPMENT",
+          "keyword": "太陽能電池",
+          "a_level": true
+        },
+        {
+          "sentence": "VIEW MORE 交通運輸業 科技產業 醫療與公共服務 農業與漁業 GREEN CITY INDUSTRIAL CHAIN 以發展再生能源的使命推動綠城產業鏈 聯合再生在三合一後徹底轉型，培植發展儲能系統產品及氫能機車為主的新事業，太陽能事業以模組品牌及系統業務為主的商業模式。",
+          "keyword": "太陽能",
+          "a_level": true
+        },
+        {
+          "sentence": "2018年聯合再生的模組市占率約50%為台灣第一，並完成台灣最大單一案場彰濱太陽光電100MW的模組出貨。",
+          "keyword": "太陽光電",
+          "a_level": true
+        },
+        {
+          "sentence": "VIEW MORE 500 + 全球電站實績 500MW 230 + 全台公標案 230MW 13 + 連續十三年榮獲 經濟部金能獎 VERIFICATION & CERTIFICATION 檢驗認證 聯合再生，提供您最好的選擇 VIEW MORE ENERGY FOCUS 能源焦點｜第一手資訊 VIEW MORE 財",
+          "keyword": "電站",
+          "a_level": true
+        },
+        {
+          "sentence": "2025/04/05 財務資訊 聯合再生能源志工社寒中送暖，響應第32屆【寒士吃飽 30活動】 2025/04/05 INVESTORS 投資人專區 SUSTAINABILITY 企業永續 公司簡介 旗下事業體 太陽能事業 太陽能系統事業 儲能系統事業 能源SOLUTION 應用領域 太陽能系統事業 儲能系統事業 產品",
+          "keyword": "太陽能",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "3583",
+      "name": "辛耘",
+      "url": "www.scientech.com.tw/zh-hant",
+      "themes": [
+        "drill_bit"
+      ],
+      "status": "fetched",
+      "sentence_count": 21,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3587",
+      "name": "閎康",
+      "url": "http://www.ma-tek.com",
+      "themes": [
+        "probe_card",
+        "test_socket"
+      ],
+      "status": "fetched",
+      "sentence_count": 33,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
     }
   ],
-  "total_codes_covered": 130,
+  "total_codes_covered": 150,
   "total_candidates": 259
 }

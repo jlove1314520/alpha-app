@@ -14,6 +14,39 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十六輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
+「三之一、交辦優先於自走」鐵律）：兩條阻塞項（S4U／claude CLI非互動驗證）
+維持阻塞；【題材七】上一輪（假設佇列第十五輪）留下的可執行項是待辦2
+續跑第八批（`--offset 130`）。取具名鎖`research/.hypothesis_queue.lock`
+時發現陳舊鎖（PID 124048，150.6分鐘未更新，疑似上一輪未正常收工），
+已回收（`LOCK_STALE`→`LOCK_ACQUIRED`）。`git pull`第一次遇暫時性DNS
+解析失敗（`Could not resolve host: github.com`），`nslookup`/`ping`
+確認DNS本身正常，重試兩次後成功，判斷為短暫網路波動。
+
+- 【題材七】待辦2續跑第八批：跑`--batch-size 20 --offset 130`（排序第
+  131~150檔）：`fetched=12/20`、`blocked_js_render`=4、
+  `exc_ConnectionError`=2、`http_403`=1、`exc_SSLError`=1，合計20筆
+  自洽。獨立重新驗證（不信任腳本自身輸出文字）：`data/
+  theme_official_site_evidence_draft.json`的`results`陣列共150筆、150個
+  代號互不重複、`status`分布`fetched=85/blocked_js_render=24/
+  exc_SSLError=22/http_403=8/exc_ConnectTimeout=8/exc_ConnectionError=2/
+  exc_ReadTimeout=1`合計150，與批次進度一致。`a_level_hits`非空候選由
+  累計17筆增至**19筆**（新增3406／3576，各自4筆／7筆命中，與腳本輸出
+  一致），仍全數`status:"draft_unreviewed"`未經人工抽查。另跑
+  `theme_official_site_negative_control.py`（exit code 0）：5家負對照組
+  全數PASS、0個誤命中，確認無回歸。累計**150/259**檔。**仍未做**：待辦2
+  剩餘109檔（下一輪可用`--offset 150`續跑）、待辦4驗證樣本擴充（仍5句，
+  與待辦2無依賴，可獨立續做）；待辦1／待辦3已完成（沿用前幾輪紀錄）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+150/259檔，剩109檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十五輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
@@ -2601,7 +2634,7 @@ ORDER-END
     使用者會以為快好了。** 已加 `MIN_DATE_COVERAGE=0.5` 覆蓋門檻過濾。
   - ⬜ **未做**：首頁自選股異常小點（需 60 日 z 分數，還差 55 個交易日）。
 - [x] **金流一.4** 評分引擎籌碼因子說明改引用 sector_flow 實際欄位（權重不動、不宣稱預測力）　**2026-09-15 總司令更正裁示**：原指令前提錯了，自走行程當時擋下來是對的。更正後範圍：**不動公式、不動權重**，只確認說明文字誠實對上實際算法——chips因子既然取自`stock_detail.json`的`institutional.history`，文字就該寫`institutional.history`，不要硬指向`sector_flow.json`；讓`sector_flow`真的接進因子屬另一件架構變更，不在本項範圍，不順手做。**逐一查證現況（`generate_scores_live.py`43行docstring／498行使用者可見說明、`index.html`5245行空狀態文案、`docs/Alpha_評分引擎_10分制設計小抄.md`），全部已經正確描述`institutional.history`/T86＋MI_MARGN這條真實計算路徑，找不到任何一處把chips因子誤指向`sector_flow.json`**——原指令要求的「改引用」從未被執行（自走行程正確地在動手前就停下），現況本來就沒有需要修正的錯誤文字，本項確認後結案，不需要改動任何檔案。
-- [ ] **金流一.5** HYPOTHESIS_QUEUE **#73**（原#42撞號已更正，2026-09-15總司令裁示）產業金流加速度輪動效應，三關流程檢驗　**已解除阻塞**：`#73`獨立章節已寫進`HYPOTHESIS_QUEUE.md`（事前綁定假設定義、與已死假設區別、PIT產業分類風險已標注），尚未執行Gate 1，交由`AlphaHypothesisQueue`排程接續，見該檔案`#73`條目「下一輪」小節。
+- [!] **金流一.5** HYPOTHESIS_QUEUE **#73**（原#42撞號已更正，2026-09-15總司令裁示）產業金流加速度輪動效應，三關流程檢驗　**已解除阻塞**：`#73`獨立章節已寫進`HYPOTHESIS_QUEUE.md`（事前綁定假設定義、與已死假設區別、PIT產業分類風險已標注），尚未執行Gate 1，交由`AlphaHypothesisQueue`排程接續，見該檔案`#73`條目「下一輪」小節。　**⛔ 自走中止（2026-09-15 16:16）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
 - [x] **金流一.6** **已完成**：`scripts/smoke_test.mjs` 新增 #47/#48 兩項資料一致性檢查——
   #47「sector_flow.json 每個產業合計＝成分股加總（容差1股）」：實測 40 個產業×視窗[1,5]
   共驗 80 組全部一致；#48「sector_flow.json 的 date 必須等於 T86（institutional_history.json）
