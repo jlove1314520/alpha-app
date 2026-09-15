@@ -1,3 +1,40 @@
+## 2026-09-15（稽核.六）a_price_source根因：sparklines.json因PAT無workflow scope，10天沒排程更新
+
+戴**驗證帽**。總司令交辦：a_price_source是最大單項稽核違規（765筆，
+checked 4,452／unverifiable 3,972=89%），比稽核.三的季報問題還大，
+比照稽核.三做法——先分佈再判定，不直接修不直接降級。
+
+**分佈**：652/765（85%）集中在`sparklines.json`單一來源；diff_pct中位數
+8.06%多為5-15%邊界值，但有一筆2570%離群值；方向嚴重不對稱（582筆我方>
+官方，76%）。
+
+**根因（證據鏈完整）**：`data/sparklines.json`的`meta.generated_at`停在
+**2026-09-05T20:07**，其資料來源`price_history.json`每天都在正常更新
+（`generated_at`2026-09-15）。`git log`確認`sparklines.json`自建立
+commit（`412154e3`）後再沒被commit過，且`.github/workflows/*.yml`完全
+沒有`build_sparklines`。回頭查`PENDING_QUEUE.md`「零」條目**當時自己的
+完成記錄就誠實寫過**：「⚠ market.yml的新步驟留在working tree（PAT無
+workflow scope）」——`build_sparklines.py`要掛進每日排程這個動作，
+從功能剛做出來那天（09-05）就因為GitHub PAT沒有`workflow`這個OAuth
+權限範圍、推不上去而卡住，卡了10天沒人跟進。這完整解釋了三個觀察：
+只有sparklines.json受影響（其餘三檔各自有獨立仍在運作的排程）、diff
+量級對應10個交易日正常波動、方向偏斜對應這段期間大盤偏弱。
+
+**判定**：不是像e_pe那樣的方法論/基礎不同問題，是**真的資料不一致**
+——sparklines.json客觀上就是過期10天的舊資料，App使用者這段期間看到
+的全市場走勢線很可能也讀到這份過期資料（實際UI讀取路徑本輪未查證，
+列為下一步）。2570%那筆離群值屬另一種性質（可能單位/小數點錯誤），
+不與其餘10天波動混為一談。
+
+**依指示只報不修不降級**，三個修法方向（(a)換有workflow scope的PAT
+(b)改本機排程 (c)先查App端UI實際讀取路徑）留給總司令裁示，完整記錄見
+`PENDING_QUEUE.md`稽核.六條目。
+
+**影響檔案**：`PENDING_QUEUE.md`（新增稽核.六條目）、`PROGRESS.md`
+（本節）。未改動任何程式碼或資料檔。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-211602）P0產品.四：全站一致性，收尾完成並勾選
 
 戴**開發帽**。接續上一輪cycle_id=20260915-203102留下的「部分完成，誠實不勾選」
