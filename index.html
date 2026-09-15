@@ -930,6 +930,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" id="kn-liquidity-flag"></div>
         <div class="note">量能突破倍數＝今日成交值 ÷ 近20日均量（動能訊號，非流動性門檻）；流動性門檻另計：今日成交值絕對值 &lt; NT$3000萬才標示量能不足</div>
       </div>
+      <!-- 2026-09-15（P0產品.二）選股理由：scores.json既有因子拆解成貢獻方向＋全市場百分位＋
+           同產業比較，零外部資料（同產業比較純在瀏覽器端用已載入的scores.json算，不加新資料源）。
+           美股與樣本外個股（低流動性/資料不足未進榜）誠實顯示原因，不硬湊。 -->
+      <div class="card">
+        <h3>選股理由 <span style="font-size:9.5px;color:var(--ink-4);font-weight:400">因子貢獻拆解</span></h3>
+        <div id="stock-reason-card"><div class="note">載入中…</div></div>
+        <div class="note" style="margin-top:8px;color:#c9524a;font-weight:600">⚠ 本卡為資料排序拆解，尚未經過組合策略回測驗證，不代表能贏大盤，非投資建議。</div>
+      </div>
     </div>
 
     <div class="subscreen" id="sub-rev">
@@ -4403,6 +4411,40 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     window.addEventListener('mouseup',onEnd);
   }
 
+  // 2026-09-15（P0產品.二）個股頁「選股理由」卡：獨立於選股頁的hydratePicks流程，
+  // 讓使用者從自選股/搜尋直接進個股頁也看得到（不必先去逛過選股頁才會有cache）。
+  // 只讀scores.json（價值成長榜，六因子這輪擴充成八因子的既有資料），不打任何新端點。
+  async function ensureValueScores(){
+    if(PICKS_CACHE)return PICKS_CACHE;
+    try{
+      const res=await fetch('scores.json?_='+Date.now());
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      PICKS_CACHE=await res.json();
+    }catch(e){console.warn('[ensureValueScores]',e);recordGlobalError('ensureValueScores',e)}
+    return PICKS_CACHE;
+  }
+  async function renderStockReasonCard(code){
+    const host=document.getElementById('stock-reason-card');if(!host)return;
+    if(isUS(code)){host.innerHTML='<div class="note">美股暫無選股理由（因子評分目前僅涵蓋台股，見 scores.json meta.market:"TW"）</div>';return}
+    host.innerHTML='<div class="note">載入中…</div>';
+    const cache=await ensureValueScores();
+    if(currentCode!==code)return;  // await期間已切到別檔，作廢（同renderReport的世代守衛精神，避免A檔理由畫到B檔頁面）
+    if(!cache){host.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進 repo，不是即時計算。</div>';return}
+    const row=(cache.stocks||[]).find(r=>r.code===code);
+    if(!row){host.innerHTML='<div class="note">這檔不在選股評分樣本內（可能資料完整度不足或流動性不足未進榜，樣本涵蓋 '+(cache.stocks||[]).length+' 檔，非全市場逐檔掃描）。</div>';return}
+    const boardCfg=BOARD_CONFIG.value;
+    const weights=cache.weights||{};
+    const allRows=cache.stocks||[];
+    host.innerHTML=`<div class="note" style="margin-bottom:6px">${buildReasonSummary(row,boardCfg)}</div>`
+      +boardCfg.factorOrder.map(k=>factorContribRowHtml(k,row,boardCfg.factorLabels,weights,allRows)).join('');
+  }
+  // 選股榜每列展開/收合（不離開排行榜頁），跟點整列導去完整報告頁分開——點展開箭頭
+  // 才切換這個detail區塊，點列的其他地方仍導去showReport()看完整版（含分批進場計畫）。
+  function togglePickDetail(id){
+    const el=document.getElementById(id);if(!el)return;
+    el.style.display=el.style.display==='none'?'':'none';
+  }
+
   async function openStock(code){
     if(typeof code!=='string')code=currentCode;
     currentCode=code;
@@ -4416,6 +4458,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('rev-chart-amt').innerHTML='<div class="note">載入中…</div>';
     document.getElementById('rev-chart-yoy').innerHTML='';document.getElementById('rev-chart-labels').innerHTML='';
     document.getElementById('trend-chart').innerHTML='<div class="note">載入中…</div>';
+    document.getElementById('stock-reason-card').innerHTML='<div class="note">載入中…</div>';  // 2026-09-15 P0產品.二，避免殘留上一檔的選股理由
     if(us){
       const [px]=await Promise.all([fm('USStockPrice',code,_d(35)),ensureIbkrQuotes()]);
       if(currentCode!==code)return;  // 2026-09-06：await 期間已切到別檔，作廢
@@ -4462,6 +4505,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       _safeAsync('loadUs13fChip',()=>loadUs13fChip(code));
       _safeAsync('loadUs8kChip',()=>loadUs8kChip(code));
       loadFinancialsUS(code);
+      _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
       return;
     }
     setTxt('eps-bars-title','季度獲利（EPS · 元）');
@@ -4523,6 +4567,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       }
     }
     loadMarginChip(code,px);
+    _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
     setUs13fNA('台股無此資料（僅適用美股，機構持倉為SEC Form 13F申報）');  // 2026-09-15 源頭二.3第6名
@@ -5233,7 +5278,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(Math.abs(v)>=1e4)return (v/1e4).toFixed(0)+'萬';
     return v.toFixed(0);
   }
-  function pickRowHtml(r){
+  function pickRowHtml(r,allRows){
     // 2026-08-27修正（P1-新，使用者裁示「選股改為全市場+資料完整度，不要用
     // 門檻排除」）：coverage不再是伺服器端排除條件，這裡改成「視覺弱化」——
     // 低完整度的卡片降低整體不透明度+加註「資料稀疏」，但仍然完整顯示，
@@ -5241,8 +5286,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const lowCov=r.coverage<0.5;
     const lowLiq=(r.flags||[]).includes('流動性不足');
     const topPick=r.rank===1;
-    const labelsForBoard=BOARD_CONFIG[PICKS_BOARD].factorLabels;
+    const boardCfg=BOARD_CONFIG[PICKS_BOARD];
+    const labelsForBoard=boardCfg.factorLabels;
     const missingLabels=(r.missing_factors||[]).map(k=>labelsForBoard[k]||k);
+    // 2026-09-15（P0產品.二）選股榜每列可展開：點展開箭頭才切換下面這塊因子拆解，
+    // 不影響點列其他地方導去showReport()看完整報告（含分批進場計畫）的既有行為。
+    const detailId='pick-detail-'+PICKS_BOARD+'-'+r.code;
+    const weights=(boardCfg.cacheGet()&&boardCfg.cacheGet().weights)||{};
     return `
     <div class="row press rise" style="flex-direction:column;align-items:stretch;gap:8px;cursor:pointer;background:var(--card-grad);border:1px solid ${topPick?'rgba(216,176,112,.3)':'var(--hairline)'};border-radius:16px;padding:14px;margin-bottom:10px;opacity:${lowCov?0.62:1}" onclick="showReport('${r.code}')">
       <div style="display:flex;align-items:center;gap:12px">
@@ -5253,8 +5303,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
           <div style="font-size:10px;color:var(--ink-4);margin-top:2px">近20日均成交值 ${fmtLiquidity(r.liquidity_20d)}元 · 資料完整度 ${Math.round(r.coverage*100)}%</div>
         </div>
         <div style="text-align:right;flex-shrink:0"><div class="num" style="font-size:20px;font-weight:700;color:${scoreColor(r.total_score)}">${r.total_score.toFixed(1)}</div><div style="font-size:9px;color:var(--ink-4)">/ 10</div></div>
+        <button type="button" class="press" style="flex-shrink:0;background:none;border:none;color:var(--ink-3);font-size:16px;padding:2px 6px;line-height:1" onclick="event.stopPropagation();togglePickDetail('${detailId}')" aria-label="展開選股理由">⌄</button>
       </div>
       <div class="meter" style="height:5px;margin-top:0"><i style="width:${(r.total_score*10).toFixed(0)}%;background:${barFill(r.coverage)}"></i></div>
+      <div id="${detailId}" style="display:none" onclick="event.stopPropagation()">
+        <div class="note" style="margin:8px 0 4px">${buildReasonSummary(r,boardCfg)}</div>
+        ${boardCfg.factorOrder.map(k=>factorContribRowHtml(k,r,labelsForBoard,weights,allRows||[])).join('')}
+      </div>
     </div>`;
   }
   function renderPicks(json){
@@ -5278,7 +5333,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 這裡的排行榜清單只顯示有 rank 的。
     const ranked=allRows.filter(r=>r.rank!=null);
     const filtered=(PICKS_INDUSTRY?ranked.filter(r=>r.industry===PICKS_INDUSTRY):ranked).slice(0,PICKS_TOP_N);
-    listEl.innerHTML=filtered.map(pickRowHtml).join('');
+    listEl.innerHTML=filtered.map(r=>pickRowHtml(r,allRows)).join('');
   }
   function onPicksToggleChange(){
     const mkt=MKT_STATE.picks;
@@ -5303,7 +5358,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       resEl.innerHTML=`<div class="note" style="padding:14px 2px">查無「${q}」的評分資料——可能不在這輪抽樣樣本內，或資料完整度不足（&lt;50%）沒有計算。樣本涵蓋 ${rows.length} 檔，非全市場逐檔掃描。</div>`;
       return;
     }
-    resEl.innerHTML=`<div class="card" style="margin-top:2px"><h3>搜尋結果</h3>${hits.map(pickRowHtml).join('')}</div>`;
+    resEl.innerHTML=`<div class="card" style="margin-top:2px"><h3>搜尋結果</h3>${hits.map(r=>pickRowHtml(r,rows)).join('')}</div>`;
   }
 
   // ── 個股研究報告頁 ──
@@ -5329,13 +5384,27 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     catalyst:'這檔近期在 data/events.json 沒有事件紀錄（來源：MOPS重大訊息／TWSE月營收公布／除權息，每30分鐘排程更新，見PENDING_QUEUE「三」）。',
   };
   let EXTREME_MOVE_ACTIVE=false;
-  function factorRowHtml(key){
-    const boardCfg=BOARD_CONFIG[REPORT_CACHE_BOARD];
-    const cache=boardCfg.cacheGet();
-    const labels=boardCfg.factorLabels;
-    const weights=(cache&&cache.weights)||{};
+  // ══════ 2026-09-15（P0產品.二）選股理由：因子貢獻＋百分位＋同產業比較 ══════
+  // 三個進入點（個股頁總覽分頁選股理由卡／選股榜每列展開／個股研究報告頁既有因子清單）
+  // 共用同一套計算與渲染，避免三份各自維護、彼此不一致。「同產業比較」純粹用目前
+  // 已經載入瀏覽器的同一份 scores.json 在前端算百分位排名，不加任何新資料源/新後端
+  // 端點（零外部資料）。
+  // 樣本太小的產業（<5檔可比）不給百分位——2、3檔互比的「百分位」看起來精確但其實
+  // 沒有統計意義，寧可不顯示也不要給一個假精確的數字。
+  function industryPercentileFor(allRows,industry,factorKey,score){
+    if(!industry||!allRows||!allRows.length)return null;
+    const vals=allRows.filter(r=>r.industry===industry&&r.factors&&r.factors[factorKey]&&typeof r.factors[factorKey].score==='number').map(r=>r.factors[factorKey].score);
+    if(vals.length<5)return null;
+    const n=vals.length;
+    const countLE=vals.filter(v=>v<=score).length;
+    return {pct:countLE/n,n};
+  }
+  // percentile 0.99 → 全市場前 1%，跟既有 reason 文字（research/generate_scores_live.py
+  // 產生的「居全市場前 X%」）用同一套換算，避免同一頁出現兩種不同口徑的百分位說法。
+  function pctLabel(p){return Math.max(1,Math.round((1-p)*100))+'%'}
+  function factorContribRowHtml(key,row,labels,weights,allRows){
     const weightPct=Math.round((weights[key]||0)*100);
-    const f=REPORT_CACHE.factors&&REPORT_CACHE.factors[key];
+    const f=row.factors&&row.factors[key];
     if(!f){
       // 這輪缺資料的類別（價值成長榜的analyst/catalyst，見score_v2.py說明；
       // 題材動能榜/未來性濾網的任何因子也可能因為個股資料不足而缺）：誠實
@@ -5351,11 +5420,50 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="fr-reason" style="color:var(--ink-4)">${reasonTxt}</div>
       </div>`;
     }
+    // 貢獻方向：以5分（滿分10）為中性基準，>5拉高總分、<5拉低總分，用置中的雙向長條
+    // 呈現（金色往右=拉高，灰色往左=拉低），跟單純0~10絕對分數的長條圖分開表達「貢獻」。
+    const dirUp=f.score>=5;
+    const mag=Math.min(50,Math.abs(f.score-5)/5*50);
+    const dirTag=f.score>5.2?'<span style="color:var(--gold);font-weight:600">▲ 拉高總分</span>'
+      :f.score<4.8?'<span style="color:var(--ink-3)">▼ 拉低總分</span>'
+      :'<span style="color:var(--ink-4)">· 中性</span>';
+    const pctBadge=typeof f.percentile==='number'
+      ?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">全市場前${pctLabel(f.percentile)}</span>`:'';
+    const ip=industryPercentileFor(allRows,row.industry,key,f.score);
+    const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)前${pctLabel(ip.pct)}</span>`:'';
     return `<div class="factor-row">
       <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
-      <div class="meter" style="height:5px"><i class="bar-fill" style="width:${(f.score*10).toFixed(0)}%;background:var(--gold-grad)"></i></div>
+      <div style="position:relative;height:8px;border-radius:999px;background:var(--surface-3);margin-top:6px;overflow:hidden">
+        <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.15)"></div>
+        <div class="bar-fill" style="position:absolute;top:0;bottom:0;${dirUp?`left:50%;width:${mag}%`:`right:50%;width:${mag}%`};background:${dirUp?'var(--gold-grad)':'rgba(138,133,123,.55)'};border-radius:999px"></div>
+      </div>
+      <div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:4px">${dirTag}${pctBadge}${indBadge}</div>
       <div class="fr-reason">${f.reason||''}</div>
     </div>`;
+  }
+  // 規則式一句話摘要：取百分位最高的1~2個因子＋（若明顯偏弱）百分位最低的因子，
+  // 例如「毛利率 78 百分位、動能 91 百分位，但估值偏貴」這種格式（總司令原話範例）。
+  // 跟 scores.json 既有的 row.summary（伺服器端只挑單一最突出因子）分開，這裡是
+  // 前端另外算的、專門給「選股理由」卡用的版本，不動 research/ 產生腳本。
+  function buildReasonSummary(row,boardCfg){
+    const order=boardCfg.factorOrder,labels=boardCfg.factorLabels;
+    const avail=order.map(k=>({key:k,f:row.factors&&row.factors[k]})).filter(x=>x.f&&typeof x.f.percentile==='number');
+    if(!avail.length)return row.summary||'這檔目前所有因子皆無資料，無法拆解選股理由。';
+    const sorted=[...avail].sort((a,b)=>b.f.percentile-a.f.percentile);
+    const pct=p=>Math.round(p*100);
+    const top=sorted.slice(0,Math.min(2,sorted.length));
+    const topTxt=top.map(x=>`${labels[x.key]} ${pct(x.f.percentile)}百分位`).join('、');
+    const worst=sorted[sorted.length-1];
+    const worstIsTop=top.some(x=>x.key===worst.key);
+    if(!worstIsTop&&pct(worst.f.percentile)<50)return `${topTxt}，但${labels[worst.key]}偏弱（${pct(worst.f.percentile)}百分位）。`;
+    return `${topTxt}，各因子表現相對均衡。`;
+  }
+  function factorRowHtml(key){
+    const boardCfg=BOARD_CONFIG[REPORT_CACHE_BOARD];
+    const cache=boardCfg.cacheGet();
+    const weights=(cache&&cache.weights)||{};
+    const allRows=(cache&&cache.stocks)||[];
+    return factorContribRowHtml(key,REPORT_CACHE,boardCfg.factorLabels,weights,allRows);
   }
   // ── 2026-09-05（新一.7）極端走勢防呆 ────────────────────────────────
   // 60日漲幅 >80%、或營收年增觸到評分引擎的 ±200% 硬上限，代表這檔已經走完一大段、或成長率是
@@ -6976,7 +7084,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2006';
+  const APP_VERSION='2026-09-15.2042';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
