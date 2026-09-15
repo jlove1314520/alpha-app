@@ -98,6 +98,16 @@ LOG_PATH = Path(__file__).parent / "backfill_stock_financials_gap_2025.log.json"
 
 BACKFILL_START = "2025-01-01"
 
+# 2026-09-15（總司令裁示「核准附三條件」）節流/上限/停損常數集中寫在這裡，
+# 比照 .github/scripts/news_body_extract.py 的既有慣例（REQ_INTERVAL/
+# MAX_PER_RUN/MAX_CONSECUTIVE_FAIL 同款命名），不靠隱含在 finmind_client
+# 共用節流狀態裡的行為當唯一防線——這支腳本自己也要能在合理範圍內停手。
+MAX_PER_RUN = 200          # 每輪處理上限（income+balance各一次請求=400次/輪，
+                           # 跟finmind_client內建3秒節流換算約20分鐘/輪，可分批跨cycle續跑）
+MAX_CONSECUTIVE_FAIL = 15  # 連續失敗這麼多檔（income+balance任一失敗都算）就停止本輪，
+                           # 不硬跑到底——通常代表額度已被finmind_client的402斷路器攔下，
+                           # 繼續跑只會全部落在err、浪費時間也不會拿到資料
+
 
 def find_gap_codes() -> list[str]:
     """跟scripts/data_audit.py check_e_pe()的e_quarters_gap判定邏輯一致
@@ -156,20 +166,29 @@ def _save_log(log: dict) -> None:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--batch-size", type=int, default=200)
-    ap.add_argument("--offset", type=int, default=0)
+    ap.add_argument("--max-per-run", type=int, default=MAX_PER_RUN,
+                    help="本輪處理上限，預設用模組常數 MAX_PER_RUN")
     args = ap.parse_args()
 
+    # 2026-09-15改用find_gap_codes()即時掃描決定這一輪要處理誰，不再用
+    # --offset這種「假設上一輪處理了前N筆」的位置式續跑——上一輪log.json
+    # 曾被同working directory另一自走行程刪除過一次（見檔頭2026-09-15
+    # 17:16 cycle記錄），offset會失真；即時掃描data/stock_detail.json現況
+    # 才是「已回補的不重打」的真正保證：已經merge進去、不再是gap的股票，
+    # find_gap_codes()自然不會再回傳它。
     codes = find_gap_codes()
     total = len(codes)
-    batch = codes[args.offset:args.offset + args.batch_size]
-    print(f"季報斷層(gap)總計 {total} 檔，本批處理第 {args.offset+1}~{args.offset+len(batch)} 檔（{len(batch)} 檔）")
+    batch = codes[:args.max_per_run]
+    print(f"季報斷層(gap)即時掃描結果：{total} 檔仍缺口，本輪處理前 {len(batch)} 檔")
 
     log = _load_log()
     results = log.setdefault("results", {})
     ok_income = ok_balance = err_count = 0
+    consecutive_fail = 0
+    processed = 0
     for i, code in enumerate(batch, 1):
         entry = results.setdefault(code, {})
+        code_failed = False
         try:
             df = finmind_client._fetch("TaiwanStockFinancialStatements", code, BACKFILL_START, None)
             entry["income_rows"] = int(len(df))
@@ -178,6 +197,7 @@ def main():
         except Exception as e:
             entry["income_status"] = f"error: {e}"[:300]
             err_count += 1
+            code_failed = True
         try:
             df = finmind_client._fetch("TaiwanStockBalanceSheet", code, BACKFILL_START, None)
             entry["balance_rows"] = int(len(df))
@@ -186,15 +206,21 @@ def main():
         except Exception as e:
             entry["balance_status"] = f"error: {e}"[:300]
             err_count += 1
+            code_failed = True
+        processed = i
+        consecutive_fail = consecutive_fail + 1 if code_failed else 0
         if i % 10 == 0 or i == len(batch):
             print(f"  進度 {i}/{len(batch)}（{code}）：income_ok={ok_income} balance_ok={ok_balance} err={err_count}")
             _save_log(log)  # 每10檔存一次進度，中斷不會全部遺失
+        if consecutive_fail >= MAX_CONSECUTIVE_FAIL:
+            print(f"  連續失敗達 {consecutive_fail} 檔（門檻 {MAX_CONSECUTIVE_FAIL}），"
+                  f"研判額度已被斷路器攔下，停止本輪，不繼續硬跑")
+            break
 
     _save_log(log)
-    print(f"本批完成：income成功 {ok_income}/{len(batch)}、balance成功 {ok_balance}/{len(batch)}、"
-          f"錯誤 {err_count} 筆。累計已處理 {min(args.offset+len(batch), total)}/{total} 檔。")
-    if args.offset + len(batch) < total:
-        print(f"尚未處理完，下一批用 --offset {args.offset+len(batch)}")
+    print(f"本批完成：income成功 {ok_income}/{processed}、balance成功 {ok_balance}/{processed}、"
+          f"錯誤 {err_count} 筆。即時掃描剩餘缺口（含本輪未觸及與未成功的）需下一輪重新"
+          f"呼叫 find_gap_codes() 確認，不假設本輪處理的都成功merge。")
 
 
 if __name__ == "__main__":
