@@ -69,6 +69,43 @@ Allow: /mops/web
 
 ---
 
+**2026-09-15 總司令裁示（推翻上面「不停用」那版，這版是最終決定）**：
+
+> 總司令原話：「立刻停掉那四支程式（董監持股／庫藏股／可轉債轉換／重大訊息）
+> 對 mopsov.twse.com.tw 的存取。理由：我們已為同一條紅線放棄 ic.tpex、分點
+> 資料、驗證碼繞道，自己記錄的紅線不能自己踩。」
+
+**已執行**：四支程式（`mops_insider_holdings_client.py`／`mops_buyback_client.py`／
+`mops_cb_conversion_price_client.py`／`mops_material_news_client.py`）各自的
+實際發request函式（`_fetch_html()`／`fetch_conversion_price_events()`／
+`fetch_material_news_day()`，皆在cache-miss才會走到的位置）都已加上硬性
+`PermissionError`防呆，物理上不可能再打`mopsov.twse.com.tw`，直到有合規
+替代方案或總司令另行核准。**已快取的parquet檔案不受影響、不刪除**——
+guard插在cache-check之後，讀已快取資料完全不受影響。
+
+**合規替代查證結果**（本輪用TWSE openapi官方swagger規格檔`https://
+openapi.twse.com.tw/v1/swagger.json`實測查證，不是猜測）：
+
+| 程式 | 對應項目 | 現有快取量 | 下游用途 | 合規替代 | App現況 |
+|---|---|---|---|---|---|
+| `mops_insider_holdings_client.py` | #10 董監持股 | 901個parquet | `insider_holdings_pilot_ic.py`（第1關可行性IC查證） | **🔴 查無**——TWSE openapi只有ESG揭露裡的「前10大股東持股情形」（`t187ap46_L_18`），是股東不是董監事，且只有前10名不是全體彙總，非同一資料 | 未接入任何App面板，純研究用，**不受影響** |
+| `mops_buyback_client.py` | #11 庫藏股 | 41個parquet（回溯至2015年） | `buyback_car_gate.py`（事件研究CAR gate） | **🔴 查無**——TWSE openapi資產負債表端點（`t187ap07_X_*`）只把「庫藏股」當資產負債表上的**加總金額科目**，不是逐筆買回公告事件 | 未接入任何App面板，純研究用，**不受影響** |
+| `mops_cb_conversion_price_client.py` | #12 可轉債轉換 | 30個parquet（僅單一市場×年月組合，尚未真正開始多年份回填） | `cb_conversion_price_reset_gate1.py` | **🔴 查無**——swagger規格檔搜尋「轉換公司債」無任何對應端點 | 未接入任何App面板，純研究用，**不受影響**（且這條本來就還沒真正開跑，停用代價最小） |
+| `mops_material_news_client.py` | #15 重大訊息 | 2,607個parquet | `material_news_classify.py`／`material_news_car_gate*.py`（題材驗證與新聞事件研究的資料基礎） | **🟢 已有，而且已經在production用**——`openapi.twse.com.tw/v1/opendata/t187ap04_L`（TWSE）＋`www.tpex.org.tw/openapi/v1/mopsfin_t187ap04_O`（TPEx），`.github/scripts/fetch_news_events.py`每30分鐘排程已在用，供App「近期事件與題材」卡使用。**限制**：這兩個官方端點是**當日快照，無歷史區間查詢參數**，只能從排程上線那天（2026-09-08）開始往前累積，補不回更早的歷史 | App面板走的本來就是這條合規端點，**不受影響**；受影響的只有研究端想拿更深歷史回測，這部分現在資料深度被鎖在2026-09-08之後 |
+
+**結論**：四支程式全部**沒有App面板依賴**，都是純研究/因子可行性查證用途，
+停用不影響任何使用者看得到的功能。#15（重大訊息）App端本來就走合規的
+`t187ap04_L`／`mopsfin_t187ap04_O`，唯一實質損失是研究端拿不到2026-09-08
+之前的歷史深度做事件研究；#10/#11/#12 目前查無任何官方替代，這三項的
+候選研究（董監持股IC查證、庫藏股CAR gate、可轉債轉換價重置gate）**在
+找到合規替代或總司令核准書面申請之前，維持用已快取的既有資料做結案，
+不再擴充樣本**。
+
+**已同步更新**：`docs/DATA_SOURCE_MAP.md`「🔴 走不通：MOPS 公開查詢頁」節
+加註本次裁示與執行結果；`PENDING_QUEUE.md`源頭二.2該行更新為已依裁示執行。
+
+---
+
 ## 台灣
 
 ### 1. 期交所大額交易人未沖銷部位
@@ -172,7 +209,7 @@ Allow: /mops/web
 |---|---|
 | 機構 | MOPS |
 | 端點 | `POST https://mopsov.twse.com.tw/mops/web/ajax_stapap1`（`research/mops_insider_holdings_client.py`） |
-| 我們現況 | 🔴/🟡 **已整合（含pilot IC驗證），但落在`mopsov.twse.com.tw`robots.txt「除bingbot外全站Disallow」的衝突裡**，見本檔案最上方【重大發現】 |
+| 我們現況 | 🔴 **2026-09-15 總司令裁示已停用存取**（`mops_insider_holdings_client.py::_fetch_html()`已加`PermissionError`硬性防呆），既有901個parquet快取保留可讀，不再新增。查無TWSE openapi合規替代（僅ESG揭露「前10大股東」，非同一資料），見本檔案最上方【重大發現】 |
 | 格式 | JSON（AJAX回應） |
 | 官方是否允許程式存取 | **🔴 依robots.txt判定不允許**（見上方重大發現） |
 | 對應機構用途 | 董監事持股比例揭露，防公司派掏空/內線 |
@@ -183,7 +220,7 @@ Allow: /mops/web
 |---|---|
 | 機構 | MOPS |
 | 端點 | `POST https://mopsov.twse.com.tw/mops/web/ajax_t35sc09`（`research/mops_buyback_client.py`），回溯至2015年 |
-| 我們現況 | 🔴/🟡 **已整合**（`buyback_car_gate.py`已用於庫藏股事件研究），同樣落在robots.txt衝突裡 |
+| 我們現況 | 🔴 **2026-09-15 總司令裁示已停用存取**（`mops_buyback_client.py::_fetch_html()`已加`PermissionError`硬性防呆），既有41個parquet快取保留可讀，不再新增。查無TWSE openapi合規替代（資產負債表只把庫藏股當彙總金額科目，非逐筆公告），見本檔案最上方【重大發現】 |
 | 官方是否允許程式存取 | **🔴 依robots.txt判定不允許** |
 | 對應機構用途 | 公司買回自家股份公告，市場信心訊號 |
 
@@ -193,7 +230,7 @@ Allow: /mops/web
 |---|---|
 | 機構 | MOPS |
 | 端點 | 兩段式AJAX：`GET .../t108sb08_1_q2`→`POST .../ajax_t108sb08_1_q2`→`POST .../ajax_t108sb08_1`（`research/mops_cb_conversion_price_client.py`） |
-| 我們現況 | 🔴/🟡 **已整合但僅驗證單一(市場,年月)組合，未做多年份回填**，同樣落在robots.txt衝突裡 |
+| 我們現況 | 🔴 **2026-09-15 總司令裁示已停用存取**（`mops_cb_conversion_price_client.py::fetch_conversion_price_events()`已加`PermissionError`硬性防呆），既有30個parquet快取（僅單一市場×年月組合，本來就還沒真正開始多年份回填）保留可讀，不再新增。查無TWSE openapi合規替代，見本檔案最上方【重大發現】 |
 | 官方是否允許程式存取 | **🔴 依robots.txt判定不允許** |
 | 對應機構用途 | 可轉債轉換價格調整揭露 |
 
@@ -220,7 +257,7 @@ Allow: /mops/web
 |---|---|
 | 機構 | MOPS |
 | 端點 | `FORM_URL=https://mopsov.twse.com.tw/mops/web/t05st01`、`AJAX_URL=.../ajax_t05st01`（`research/mops_material_news_client.py`，需先GET表單頁拿`jcsession`cookie） |
-| 我們現況 | 🔴/🟡 **已整合，且是四支衝突程式中最重要的一支**——供`material_news_classify.py`、`material_news_car_gate*.py`一系列事件研究使用，是題材驗證與新聞事件管線的資料基礎之一 |
+| 我們現況 | 🔴 **2026-09-15 總司令裁示已停用存取**（`mops_material_news_client.py::fetch_material_news_day()`已加`PermissionError`硬性防呆），既有2,607個parquet快取保留可讀，不再新增。**App面板不受影響**——`.github/scripts/fetch_news_events.py`早就走合規的`openapi.twse.com.tw/v1/opendata/t187ap04_L`＋`mopsfin_t187ap04_O`，只是那條合規端點是當日快照無歷史區間，補不回2026-09-08之前的深度，見本檔案最上方【重大發現】 |
 | 官方是否允許程式存取 | **🔴 依robots.txt判定不允許**，且此檔建立時間（09-08 22:01）**晚於或同日**`DATA_SOURCE_MAP.md`記錄該衝突的時間（09-08 08:19），影響範圍比其他三支更需要優先釐清 |
 | 對應機構用途 | 上市櫃公司重大訊息即時揭露 |
 

@@ -1,3 +1,90 @@
+## 2026-09-15（總司令五條裁示執行）MOPS合規停用＋#73註冊＋稽核.三分佈分析＋三項administrative結案
+
+戴**維運＋研究帽**。總司令五條裁示逐一執行：
+
+**一、MOPS合規停用（源頭二.2最終裁示）**：立刻停用`mops_insider_holdings_
+client.py`／`mops_buyback_client.py`／`mops_cb_conversion_price_client.py`／
+`mops_material_news_client.py`四支程式對`mopsov.twse.com.tw`的存取——理由
+（總司令原話）：「我們已為同一條紅線放棄ic.tpex、分點資料、驗證碼繞道，
+自己記錄的紅線不能自己踩。」四支程式各自的實際發request函式（cache-miss
+才會走到的位置）都加上硬性`PermissionError`防呆，已用非快取輸入實測
+四支全部正確拋錯、不再打網路；既有快取（901／41／30／2,607個parquet）
+保留不刪。**合規替代查證**（用TWSE openapi官方swagger規格檔
+`https://openapi.twse.com.tw/v1/swagger.json`實測，非猜測）：#10董監持股／
+#11庫藏股／#12可轉債轉換查無官方對應端點；#15重大訊息**已有合規替代且
+早就在production用**——`.github/scripts/fetch_news_events.py`走
+`openapi.twse.com.tw/v1/opendata/t187ap04_L`＋`mopsfin_t187ap04_O`，App「近期
+事件與題材」卡本來就吃這條，不受影響，只有研究端拿不到2026-09-08前的
+歷史深度做事件研究。**四支程式皆未接入任何App面板**，停用不影響使用者
+看得到的功能。完整記錄與逐支影響評估寫進`docs/FIRST_HAND_SOURCES.md`
+最上方【重大發現】（含新增的"2026-09-15總司令裁示"小節）與
+`docs/DATA_SOURCE_MAP.md`「MOPS」節；`PENDING_QUEUE.md`源頭二.2該行
+標`[x]`並記錄執行結果。
+
+**二、金流一.4更正查證**：總司令更正原指令（不動公式/權重，只確認說明
+文字誠實）後逐一查證`generate_scores_live.py`43/498行、`index.html`5245行、
+`docs/Alpha_評分引擎_10分制設計小抄.md`——**全部已經正確描述
+`institutional.history`這條真實計算路徑，找不到任何一處誤指向
+`sector_flow.json`**。原指令要求的「改引用」從未被執行（自走行程當時
+正確地在動手前就停下），現況本來就沒有錯誤文字需要修正，本項確認後
+結案，未改動任何檔案。
+
+**三、研究.b／金流一.5：HYPOTHESIS_QUEUE #73註冊**：原`#42`（原`#41`）
+撞號問題（`#42`已被主線佇列用於另一個已結案假設『個股間平均成對相關
+係數』），總司令裁示改用`#73`。已在`research/HYPOTHESIS_QUEUE.md`寫成
+獨立章節：事前綁定假設定義（月頻配置產業金流加速度前20%產業，資料源
+改用`research/data/raw_twse_t86/`歷史回溯聚合，不用即時累積的
+`sector_flow.json`——那份只有個位數交易日深度無法回測）、與`#29`/`#58`/
+`#53`~`#57`等既有假設的區別（排除換皮疑慮）、**明確標注PIT產業分類風險**
+（`company_info.json`若無歷史版本，用今天的產業別回測過去會有存活者
+偏誤⑦的變體，Gate 1前必須先查清楚）、資料可行性待驗清單。**誠實狀態**：
+本輪僅完成假設設計與地基可行性初步確認，**尚未執行Gate 1，不宣稱任何
+PASS/FAIL**，已解除阻塞交給`AlphaHypothesisQueue`排程接續。`轉向.二`
+依裁示以「重複項」結案（`AlphaHypothesisQueue`單線處理#50/#51/#52，
+PENDING_QUEUE不重複追蹤）；`外部一改.2`／gate50更新tick進度7/20，維持
+阻塞被動等待，並註記往後不必每輪重複回報。
+
+**四、稽核.三（check 39一致性違規）分佈分析**（總司令：「這步便宜」，
+直接讀`data/audit_report.json`當前快照完成，不需要新程式）：
+- **1,105／1,447筆（76%）集中在兩種季度財報問題**：`e_quarters_gap`
+  （599筆）與`e_quarters_stale`（506筆），且**幾乎所有受影響股票的
+  缺口/停滯模式完全相同**（590/599筆缺口都是「2024Q4後直接跳2026Q2」，
+  506/506筆停滯都是「卡在2024Q4，官方已到2026Q3」）——這不是1,105個
+  獨立問題，是**極可能單一系統性根因**（懷疑對象：
+  `.github/scripts/update_stock_financials.py`／`market.yml`排程，2025
+  全年到2026Q1這段期間疑似大規模沒有成功更新）。
+- 剩餘273筆（19%）`a_price_source`（`sparklines.json`/`quotes_tw.json`
+  跟官方價格不一致）：多數是5~10%邊界值（可能是時點差異的正常現象），
+  但有2筆離群值（最大2614%，明顯資料損毀）需要另外處理。
+- 分佈與建議已寫進`PENDING_QUEUE.md`稽核.三該行，**是否要往下查
+  `update_stock_financials.py`根因，等總司令裁示**（本輪只做分佈，未
+  擅自往下查根因或改判定）。
+
+**五、健檢.五**：確認仍正確維持`[!]`阻塞，等總司令重登IB Gateway，
+未空轉重試，未碰。DevQueue自走線本輪未受干擾，繼續依佇列順序消化
+（`PROGRESS.md`本節之前的CF.6/稽核.四即為DevQueue本輪期間自己完成
+並commit的項目，`DevQueue-Cycle`標記機制運作正常）。
+
+**驗證**：四支MOPS client用非快取輸入實測皆正確拋`PermissionError`且
+不再連網（見上）；TWSE openapi swagger規格檔為2026-09-15當次實測查證，
+非沿用舊結論；稽核.三分佈數字直接來自`data/audit_report.json`當前快照
+的`by_check`/`violations`欄位機器讀取，非人工估算。
+
+**影響檔案**：`research/mops_insider_holdings_client.py`／
+`mops_buyback_client.py`／`mops_cb_conversion_price_client.py`／
+`mops_material_news_client.py`（各加`PermissionError`防呆）、
+`docs/FIRST_HAND_SOURCES.md`／`docs/DATA_SOURCE_MAP.md`（MOPS裁示記錄）、
+`research/HYPOTHESIS_QUEUE.md`（新增#73獨立章節）、`PENDING_QUEUE.md`
+（源頭二.2／金流一.4／金流一.5／研究.b／轉向.二／外部一改.2／稽核.三
+七行更新）、`PROGRESS.md`（本節）。
+
+**下一步**：等總司令對稽核.三根因調查方向、`#73`後續執行（交給
+`AlphaHypothesisQueue`自走）、以及是否要進一步排查
+`update_stock_financials.py`2025年執行歷史做裁示。DevQueue繼續照佇列
+順序自動消化其餘項目。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）CF.6／稽核.四：live server新增/settings端點，多裝置設定同步
 
 `dev_queue_runner.py next`接著指向`CF.6`（同`稽核.四`），總司令原話已給

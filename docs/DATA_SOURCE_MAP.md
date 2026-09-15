@@ -95,6 +95,15 @@ Allow: /mops/web
 （`mops.twse.com.tw/robots.txt` 回 404、`mopsfin.twse.com.tw/robots.txt` 回 404 的
 HTML 頁；但 `mopsov` 這台明確拒絕，而 `t05st03` 等查詢頁正是在 `mopsov` 上。）
 
+**2026-09-15 後續**：源頭二.1盤點時發現有四支既有生產程式（董監持股/庫藏股/
+可轉債轉換/重大訊息）直接違反上述結論，已回填真實資料在跑。總司令裁示
+「立刻停掉那四支程式對 mopsov.twse.com.tw 的存取，我們已為同一條紅線放棄
+ic.tpex、分點資料、驗證碼繞道，自己記錄的紅線不能自己踩」，已執行——四支
+程式各自的發request函式加上硬性`PermissionError`防呆，既有快取保留不刪。
+合規替代查證結果與四支程式逐一的影響評估，見 `docs/FIRST_HAND_SOURCES.md`
+最上方【重大發現】完整記錄（含2026-09-15當次TWSE openapi swagger規格檔
+實測查證）。
+
 ## 🟢 走得通：TWSE 主站（www.twse.com.tw）
 
 ```

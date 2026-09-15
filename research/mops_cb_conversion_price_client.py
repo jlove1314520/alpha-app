@@ -165,6 +165,18 @@ def fetch_conversion_price_events(typek: str, year: str, month: str = "", use_ca
     if use_cache and cache_path.exists():
         return pd.read_parquet(cache_path)
 
+    # 2026-09-15（總司令裁示，源頭二.2 MOPS 合規）：mopsov.twse.com.tw 的
+    # robots.txt 對除 bingbot 外的所有 UA 全站 Disallow（見
+    # docs/DATA_SOURCE_MAP.md「MOPS 合規」節）——本專案已對同一條紅線放棄過
+    # ic.tpex、分點資料、驗證碼繞道，不能自己記錄的紅線自己踩，立即停用對這
+    # 個端點的新存取，直到有合規替代方案或總司令另行核准。已快取的 parquet
+    # 檔案不受影響（上面 use_cache 命中時不會走到這裡）。
+    raise PermissionError(
+        "MOPS mopsov.twse.com.tw 存取已依 2026-09-15 總司令裁示停用"
+        "（robots.txt 對非 bingbot UA 全站 Disallow）。"
+        "如需恢復，需先有合規替代方案或總司令另行核准，見 docs/DATA_SOURCE_MAP.md。"
+    )
+
     session = requests.Session()
     last_err = None
     for attempt in range(MAX_RETRIES):
