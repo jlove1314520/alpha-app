@@ -1,5 +1,40 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-15T22:57:20+08:00 (hypothesis_queue排程接續，第十九輪) — #74閘門統計檢定力量測待辦(a)(b)(c)完成：pipeline技術可行，但發現base序列存活者偏誤汙染Sharpe量測，需修正才能進正式網格
+
+開工讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證）維持
+阻塞；題材七續跑為上一輪（第十八輪）已處理項目，本輪判定無新的「未開始」
+交辦項，回自走。取具名鎖`research/.hypothesis_queue.lock`時發現陳舊鎖
+（PID 127956，59.1分鐘未更新），已回收（`LOCK_STALE`→`LOCK_ACQUIRED`）。
+`git pull`成功（`Already up to date`），`git status`確認多筆其他自動化
+來源殘留變更（DevQueue稽核、connectivity probe、IBKR quotes等），不觸碰。
+
+依`HYPOTHESIS_QUEUE_PROTOCOL.md`挑下一條未結案假設：`#74`（閘門統計檢定力
+量測，總司令2026-09-15裁示「先做不可的一條」，優先於任何新假設設計）
+上一輪僅完成規格轉寫，本輪接續其待辦(a)(b)(c)：
+(a) 查證`GATE_SEQUENCE`各關現況——**沒有**任何一關已封裝成通用可重複
+呼叫函式，每個假設各自bespoke實作、跟自己的panel資料結構綁死；可重用
+的只有`validation/control_group.py::run_control_group()`跟
+`validation/costs.py::round_trip_cost_pct()`兩個底層元件。
+(b) 新寫`synthetic_power_curve_gate74.py`（通用注入+六關mini pipeline，
+複用既有300檔快取panel，零新增API呼叫，設計理由見腳本docstring）。
+(c) 單次試跑（Sharpe=0.5，seed=20260915）：六關全數成功執行（GATE1~6
+分別PASS/PASS/FAIL/PASS/PASS/PASS），**技術上證明pipeline機制可行**——
+但同時發現`base`（真實歷史等權重日報酬，未注入）母體Sharpe高達1.1057，
+不合理偏高，極可能是本專案已知存活者偏誤⑦（300檔樣本用今天名冊回測
+過去）汙染，導致`combined=base+epsilon`的GATE2判定幾乎完全由base自身
+優勢決定、不是被注入的Sharpe=0.5訊號本身，偏離#74量測目標。完整發現、
+修正方向（下一輪先把base去均值化再注入）已寫入
+`HYPOTHESIS_QUEUE.md`#74條目。`is_holdout_consumed()`開工/收工前皆
+`False`。**#74仍未結案，不宣稱任何正式檢定力數字**，現在排隊第一，
+下一輪從base去均值化修正開始，不跳關。
+
+**交辦佇列還剩幾條未開始**：2條被阻塞（S4U／claude CLI非互動驗證，等待
+總司令有管理員權限時處理），題材七續跑非本輪track範圍（歸屬另一條自走
+排程AlphaMarathon或其他，本輪未處理）。
+
+---
+
 ## 2026-09-15T21:54:38+08:00 (hypothesis_queue排程接續，第十八輪) — 接手PENDING_QUEUE交辦：題材七待辦2第十批（offset=170），累計190/259，本輪fetched=14/20、新增a_level命中1檔（4991）
 
 開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需

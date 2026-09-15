@@ -10612,13 +10612,53 @@ DevQueue軌處理，跟本項不同track）之後、優先於任何新假設設�
 不佔用假設編號的統計檢定力消耗（不算進`trial_registry`的多重比較N），
 但方法本身要登記在案供稽核。
 
-**狀態**：本輪僅完成規格轉寫（總司令原話→可執行任務定義），**尚未
-開始寫程式碼、未執行任何合成訊號模擬，不宣稱任何檢定力數字**。下一輪
-`hypothesis_queue`排程接續：(a)先查`GATE_SEQUENCE`各關現有實作是否已
-封裝成可重複呼叫的函式（能不能直接餵合成資料進去而不用重寫），(b)設計
-訊號合成的具體注入方式（哪個資產池、哪個期間、疊加方式），(c)先跑
-Sharpe 0.5單一強度、單一隨機種子的一次性試跑驗證整條pipeline可行，
-確認可行再擴大到完整的強度×種子網格。
+**狀態（2026-09-15 hypothesis_queue排程接續，完成待辦(a)(b)(c)，仍未
+結案、不宣稱任何正式檢定力數字，僅為可行性試跑+方法論修正）**：
+
+**(a) 查證結果**：`GATE_SEQUENCE`各關**沒有**任何一關已封裝成通用可重複
+呼叫的函式——現況是每個假設各自複製貼上一份bespoke實作（`validation/`
+目錄下約90支`*_gate*.py`），資料結構跟該假設自己的panel/simulate()綁死
+（例如`equal_weight_rebalance_leave_one_out_v1.py`直接讀`train["buyhold_ret"]`/
+`train["rebal_ret"]`兩個寫死的欄位名）。**可重用的只有底層基礎元件**：
+`validation/control_group.py::run_control_group()`（隨機控制組percentile
+計算，`evaluate_fn`seam天生通用）跟`validation/costs.py::
+round_trip_cost_pct()`（成本模型，純函式）。sanity/leave-one-out/逐年
+一致性/參數高原這四關目前完全沒有通用版本。
+
+**(b)+新腳本**：新寫`synthetic_power_curve_gate74.py`（通用注入+六關mini
+pipeline，不依賴任何單一既有假設腳本的內部資料結構，複用
+`equal_weight_rebalance_sanity.py`的300檔快取panel，零新增API呼叫）。
+注入方法：`combined_t = base_t + epsilon_t`，`epsilon_t~iid N(mu,sigma^2)`，
+`sigma`取base序列實際標準差、`mu`校準使epsilon_t母體年化Sharpe=目標值。
+完整設計理由、GATE2隨機控制組null定義（同樣sigma但mu=0）見腳本docstring。
+
+**(c) 單次試跑結果（Sharpe=0.5，seed=20260915，`is_holdout_consumed()`
+開工/收工前皆`False`）**：六關全數成功執行完畢（GATE1 sanity PASS、GATE2
+隨機控制PASS(percentile=100.0)、GATE3種子高原FAIL(5種子pass_rate=0.4)、
+GATE4成本敏感度PASS(1x/2x/3x皆正)、GATE5 leave-one-out PASS、GATE6逐年
+一致性PASS(9/10年正報酬)）——**技術上證明整條pipeline機制可行**，這是
+(c)要驗證的唯一目標，已達成。
+
+**但試跑同時暴露一個方法論缺陷，必須修正才能進入正式強度×種子網格**：
+`base`序列（真實歷史等權重日報酬，未注入任何合成訊號）本身母體Sharpe
+高達**1.1057**——這數字高到不合理（真實市場年化Sharpe通常0.3~0.7），
+極可能是本專案已知揭露的存活者偏誤⑦（300檔樣本宇宙用今天的名冊回測過去，
+系統性排除已下市股票）造成base本身就帶著人為膨脹的正報酬。後果：
+`combined = base + epsilon`裡base自己的Sharpe(1.1)遠大於注入的目標強度
+(0.5)，**GATE2的判定幾乎完全由base自己的既有優勢決定，不是被注入的
+epsilon分量**——這樣量出來的「通過率」測的是「base本身夠不夠強」，
+不是「六關能不能偵測出Sharpe=0.5的訊號」，偏離了#74的量測目標。
+
+**下一輪修正方向（依序，不跳關）**：(a) 注入前先把`base`去均值化
+（`base_demeaned = base - base.mean()`），讓base本身淨貢獻年化Sharpe≈0、
+只保留其真實的波動/自相關/厚尾結構，讓注入的`epsilon`成為母體Sharpe的
+唯一來源，這樣才是忠實操作化「在真實報酬序列上疊加一個Sharpe=S的訊號」
+（總司令原話），而不是「疊加在一個自己就帶存活者偏誤正報酬的序列上」；
+(b) 用修正後的設計重跑Sharpe=0.5單一種子驗證，確認GATE2百分位數字回到
+合理範圍（不再是先驗地100.0）；(c) 通過驗證後才擴大到完整
+Sharpe∈{0.3,0.5,0.8}×多種子網格，正式產出檢定力曲線。**本輪工作到
+此為止（一輪一個有界工作單位），現在排隊第一，下一輪從去均值化修正
+開始，不跳關。**
   就悄悄停在中間不结案。
 
 **資料可行性**：`research/data/raw_twse_t86/`歷史深度2012-05起（金流一
