@@ -5557,7 +5557,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const el=document.getElementById('home-status-summary'),dot=document.getElementById('home-status-dot');if(!el||!dot)return;
     const zTw=zonedNow('Asia/Taipei');const twOpen=zTw.wd>=1&&zTw.wd<=5&&(zTw.h*60+zTw.mi)>=540&&(zTw.h*60+zTw.mi)<810;
     const usSess=usMarketSession(zonedNow('America/New_York'));
-    const twTxt='台股'+(twOpen?'盤中':'已收盤'),usTxt='美股'+({pre:'盤前',regular:'盤中',post:'盤後',closed:'休市'}[usSess]||'休市');
+    // 2026-09-15（週六.六／稽核二.五）週末/國定假日跟「交易日已收盤」是兩種不同狀態，
+    // 不該共用「已收盤」這個字——已收盤暗示「今天有開、現在收了」，週末/假日根本沒開盤。
+    // 沿用既有交易日曆isTradingDay()/TW_HOLIDAYS_2026（健檢.一同一份），不新增假日表。
+    const twTradingDay=isTradingDay(new Date(),'Asia/Taipei',TW_HOLIDAYS_2026);
+    const twTxt='台股'+(twOpen?'盤中':(twTradingDay?'已收盤':'休市')),usTxt='美股'+({pre:'盤前',regular:'盤中',post:'盤後',closed:'休市'}[usSess]||'休市');
     let liveTxt,cls;
     if(LIVE.connected){liveTxt=LIVE.streamMode==='tick-push'?'即時逐筆':'即時連線';cls='g'}
     else if(LIVE.configured){liveTxt='離線（最後收盤 '+lastCloseLabel()+'）';cls='y'}
@@ -6844,7 +6848,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1822';
+  const APP_VERSION='2026-09-15.1826';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

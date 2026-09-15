@@ -1634,10 +1634,49 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("49. 三大法人柱狀圖零基線：正值柱底/負值柱頂皆等於共用基線y座標",
     barBaselineErrors.length === 0, barBaselineErrors.join("; ") || barBaselineInfo);
 
+  // 50.【2026-09-15新增，週六.六／稽核二.五】首頁狀態列文案：週末/國定假日要顯示
+  // 「休市」而不是「已收盤」——已收盤暗示「今天有開、現在收了」，週末/假日根本沒
+  // 開盤，是不同的狀態。`renderHomeStatusSummary()`內部直接呼叫`new Date()`（真實
+  // 的「現在」），無法從外部注入測試時間，所以改為直接單元測試驅動這段文案的
+  // `isTradingDay()`（跟健檢.一「資料過舊」判斷同一份函式與同一份TW_HOLIDAYS_2026
+  // 假日表，不是另外造一套邏輯），涵蓋週六/週日/國定假日（2026-09-25，剛好是
+  // 星期五但落在假日表——驗證「純看星期幾」不夠、真的有查假日表）三種「休市」情境
+  // 與兩種一般交易日情境。
+  const closedLabelErrors = [];
+  let closedLabelInfo = "";
+  try {
+    const r = await page.evaluate(() => {
+      if (typeof isTradingDay !== "function") return { error: "isTradingDay 不存在" };
+      if (typeof TW_HOLIDAYS_2026 === "undefined") return { error: "TW_HOLIDAYS_2026 不存在" };
+      const cases = [
+        ["2026-09-19T10:00:00+08:00", false, "週六"],
+        ["2026-09-20T10:00:00+08:00", false, "週日"],
+        ["2026-09-25T10:00:00+08:00", false, "國定假日（教師節，星期五）"],
+        ["2026-09-15T10:00:00+08:00", true, "週二交易日"],
+        ["2026-09-18T10:00:00+08:00", true, "週五交易日"],
+      ];
+      const bad = [];
+      for (const [iso, expected, label] of cases) {
+        const got = isTradingDay(new Date(iso), "Asia/Taipei", TW_HOLIDAYS_2026);
+        if (got !== expected) bad.push(`${label}(${iso})：isTradingDay判定${got}，預期${expected}（會讓首頁狀態列文案錯誤）`);
+      }
+      return { bad, n: cases.length };
+    });
+    if (r.error) closedLabelErrors.push(r.error);
+    else {
+      closedLabelErrors.push(...r.bad);
+      closedLabelInfo = `${r.n} 個情境全部符合`;
+    }
+  } catch (e) {
+    closedLabelErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("50. 首頁狀態列「休市」vs「已收盤」文案：isTradingDay()正確區分週末/國定假日與一般交易日",
+    closedLabelErrors.length === 0, closedLabelErrors.join("; ") || closedLabelInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
