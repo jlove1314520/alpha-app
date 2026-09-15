@@ -99,6 +99,10 @@ from datetime import datetime, timedelta, timezone
 REPO_ROOT = Path(__file__).resolve().parent.parent
 QUOTES_SINOPAC_PATH = REPO_ROOT / "data" / "quotes_sinopac.json"
 QUOTES_IBKR_PATH = REPO_ROOT / "data" / "quotes_ibkr.json"
+# 2026-09-15（週六.五）ibkr_quotes.py 每輪順手查的部位/餘額快照（唯讀，跟報價
+# 用同一份冷檔模式：連不上/非paper帳戶時整份標connected:false，不留舊資料）。
+POSITIONS_IBKR_PATH = REPO_ROOT / "data" / "positions_ibkr.json"
+BALANCE_IBKR_PATH = REPO_ROOT / "data" / "balance_ibkr.json"
 TOKEN_PATH = Path(__file__).parent / ".alpha_live_token"  # gitignored，見.gitignore
 # 熱檔（shioaji_quotes.py常駐行程每秒最多寫一次，gitignored）。環境變數可覆寫，
 # 給測試指到暫存檔用，避免測試把假資料寫進正式熱檔。
@@ -559,6 +563,16 @@ class _TickIngress(asyncio.DatagramProtocol):
             if fut is not None and not fut.done():
                 fut.set_result(msg)
             return
+        # 2026-09-15（週六.五）positions/balance 查詢的回覆，跟 kbars_reply 同一個道理：
+        # 不是 tick，不進 MEM，只是喚醒等待中的 Future。
+        if msg.get("event") in ("positions_reply", "balance_reply"):
+            if msg.get("t") != LOCAL_TOKEN:
+                MEM.rejected += 1
+                return
+            fut = _account_pending.pop(str(msg.get("req_id")), None)
+            if fut is not None and not fut.done():
+                fut.set_result(msg)
+            return
         if MEM.apply(msg) and MEM.cond is not None:
             asyncio.get_event_loop().create_task(_notify_all())
 
@@ -796,6 +810,33 @@ async def live_kbars(code: str, x_alpha_local_token: str | None = Header(default
     }
 
 
+@app.get("/live/positions")
+async def live_positions(x_alpha_local_token: str | None = Header(default=None)):
+    """券商唯讀部位（2026-09-15週六.五）。**只讀，程式碼裡沒有任何下單/改單呼叫**。
+
+    Shioaji：向 shioaji_quotes.py 常駐行程查 `list_positions()`（模擬環境，見該腳本
+    `sj.Shioaji(simulation=True)`），走既有 kbars 查詢那條 UDP 通道，非交易時段/
+    常駐行程沒在跑時誠實回 available:false，不猜、不留舊資料。
+    IBKR：讀 `data/positions_ibkr.json`（`ibkr_quotes.py` 每輪順手查的冷檔，
+    paper 帳戶，見該腳本 `readonly=True`＋DU開頭帳號檢查）。
+    """
+    _check_token(x_alpha_local_token)
+    sinopac = await _account_via_daemon("positions")
+    ibkr = _read_json_safe(POSITIONS_IBKR_PATH)
+    return {"sinopac": sinopac, "ibkr": ibkr, "generated_at": datetime.now(TW_TZ).isoformat()}
+
+
+@app.get("/live/balance")
+async def live_balance(x_alpha_local_token: str | None = Header(default=None)):
+    """券商唯讀帳戶餘額（2026-09-15週六.五）。**只讀，不含任何下單能力**，來源與
+    /live/positions 相同（Shioaji `account_balance()` 走UDP查常駐行程；IBKR讀
+    `ibkr_quotes.py`寫的冷檔）。"""
+    _check_token(x_alpha_local_token)
+    sinopac = await _account_via_daemon("balance")
+    ibkr = _read_json_safe(BALANCE_IBKR_PATH)
+    return {"sinopac": sinopac, "ibkr": ibkr, "generated_at": datetime.now(TW_TZ).isoformat()}
+
+
 def _sse_frame(snapshot: dict, mode: str) -> str:
     event = dict(snapshot)
     event["mode"] = mode
@@ -948,6 +989,13 @@ def _merge_bars(agg: list[dict], queried: list[dict]) -> list[dict]:
 _kbars_pending: dict[str, asyncio.Future] = {}
 _kbars_cache: dict[str, tuple[float, dict]] = {}
 _kbars_sock = None
+# 2026-09-15（週六.五）positions/balance 走同一條 UDP 通道、同一個 socket，只是
+# op 換成 "positions"/"balance"，不帶 code。req_id 各自獨立的 pending 表，
+# 跟 kbars 的完全分開，避免兩種查詢互搶對方的 Future。
+_account_pending: dict[str, asyncio.Future] = {}
+_account_cache: dict[str, tuple[float, dict]] = {}  # "positions"/"balance" -> (取得時間, 結果)
+ACCOUNT_QUERY_CACHE_SEC = 10.0
+ACCOUNT_QUERY_TIMEOUT_SEC = 8.0
 
 
 def _kbars_request(code: str, req_id: str) -> bool:
@@ -964,6 +1012,61 @@ def _kbars_request(code: str, req_id: str) -> bool:
     except OSError as e:
         print(f"  [kbars查詢] 送出失敗 {code}：{type(e).__name__}: {e}", flush=True)
         return False
+
+
+def _account_request(op: str, req_id: str) -> bool:
+    """把 positions/balance 查詢送給常駐行程，沿用同一個 kbars socket 與同一個
+    UDP 目的地（shioaji_quotes.py 的帳戶查詢服務跟 kbars 服務是同一支）。"""
+    global _kbars_sock
+    try:
+        if _kbars_sock is None:
+            import socket
+            _kbars_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            _kbars_sock.setblocking(False)
+        msg = {"t": LOCAL_TOKEN, "op": op, "req_id": req_id}
+        _kbars_sock.sendto(json.dumps(msg).encode("utf-8"), KBARS_REQ_ADDR)
+        return True
+    except OSError as e:
+        print(f"  [帳戶查詢] {op} 送出失敗：{type(e).__name__}: {e}", flush=True)
+        return False
+
+
+async def _account_via_daemon(op: str) -> dict:
+    """向 shioaji_quotes.py 常駐行程查 positions/balance。回傳一律是 dict，
+    用 `available` 欄位誠實標示查得到與否，呼叫端不用另外處理 None。
+
+    **前置檢查**：先看熱檔/記憶體新鮮度判斷常駐行程有沒有在跑——沒在跑（非交易
+    時段是常態）就直接回 unavailable，不送 UDP 也不等 8 秒逾時，避免 App 首頁
+    每次載入都卡在一個註定拿不到回應的等待上。"""
+    _, hot_status = _hot_state()
+    if not MEM.fresh() and hot_status != "hot-file":
+        return {"available": False,
+                "reason": "常駐行程（shioaji_quotes.py）沒有新鮮資料，可能是非交易時段沒在跑，"
+                          "或今天尚未啟動——帳戶查詢需要一個已登入的 Shioaji session",
+                "hot_file_status": hot_status}
+    now = time.time()
+    hit = _account_cache.get(op)
+    if hit and now - hit[0] < ACCOUNT_QUERY_CACHE_SEC:
+        return hit[1]
+    req_id = secrets.token_hex(8)
+    loop = asyncio.get_event_loop()
+    fut: asyncio.Future = loop.create_future()
+    _account_pending[req_id] = fut
+    if not _account_request(op, req_id):
+        _account_pending.pop(req_id, None)
+        return {"available": False, "reason": "無法送出查詢（UDP socket 建立失敗）"}
+    try:
+        msg = await asyncio.wait_for(fut, timeout=ACCOUNT_QUERY_TIMEOUT_SEC)
+    except asyncio.TimeoutError:
+        _account_pending.pop(req_id, None)
+        print(f"  [帳戶查詢] {op} 逾時（{ACCOUNT_QUERY_TIMEOUT_SEC}秒）：常駐行程可能沒開或正在忙", flush=True)
+        return {"available": False, "reason": f"逾時（{ACCOUNT_QUERY_TIMEOUT_SEC}秒）沒有回應"}
+    if msg.get("error"):
+        return {"available": False, "reason": msg["error"]}
+    key = "positions" if op == "positions" else "balance"
+    result = {"available": True, key: msg.get(key), "generated_at": msg.get("ts")}
+    _account_cache[op] = (now, result)
+    return result
 
 
 WATCHLIST_PATH = Path(os.environ.get("ALPHA_LIVE_WATCHLIST_PATH")

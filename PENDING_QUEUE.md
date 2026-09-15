@@ -3949,7 +3949,62 @@ ORDER-END
   `generate_status_json.py`三處硬編碼字串（面板描述/已知限制/待辦清單）
   並重跑產生乾淨的`data/STATUS.json`，不留FinMind殘留文字。冒煙測試50項
   49項PASS（#39既有已知紅燈與本輪無關）。此腳本現在**零FinMind依賴**。
-- [ ] **週六.五** live server新增/live/positions與/live/balance（唯讀、驗token），首頁總資產卡吃真數字
+- [x] **週六.五** live server新增/live/positions與/live/balance（唯讀、驗token），首頁總資產卡吃真數字——
+  **本輪（開發佇列cycle_id=20260915-194602）完成**：**Shioaji側**——`shioaji_quotes.py`
+  既有的loopback UDP查詢服務（原本只服務kbars，2026-09-06實測.二.1）擴充兩個新op
+  `"positions"`（`api.list_positions(api.stock_account)`）與`"balance"`
+  （`api.account_balance()`），函式改名`_start_kbars_service`→`_start_query_service`
+  （唯一呼叫點同步更新）；新增`_json_safe()`遞迴序列化函式，因為Shioaji的
+  `AccountBalance.status`欄位是pybind編譯的`FetchStatus`類別，`isinstance(v,str)`
+  誤判為True（pybind11 enum有跟str比較的機制但不是真的str子類別）、但json.dumps
+  的C加速器用`PyUnicode_Check`嚴格型別檢查兩者對不上，**改用`type(v) is str`
+  嚴格比對＋`json.dumps`試探性序列化**才真正修好（過程見下方「除錯歷程」）。
+  **alpha_live_server.py側**——新增`GET /live/positions`／`GET /live/balance`兩個
+  端點，一律`_check_token()`驗token；新增`_account_via_daemon(op)`：**先查熱檔/
+  記憶體新鮮度**，常駐行程沒在跑（非交易時段是常態）就立刻誠實回
+  `available:false`，不送UDP也不用等8秒逾時，避免App首頁每次載入都卡在一個
+  註定拿不到回應的等待上；IBKR部分讀新增的`data/positions_ibkr.json`／
+  `data/balance_ibkr.json`冷檔。**ibkr_quotes.py側**——新增`_fetch_positions()`
+  （`ib.positions()`）／`_fetch_balance()`（`ib.accountSummary()`只留
+  NetLiquidation/TotalCashValue/BuyingPower/GrossPositionValue四個tag），跟既有
+  quotes寫入同一輪、同一條已驗證的paper連線（不另開連線）；`_write_failure()`
+  改成同時把quotes/positions/balance三份JSON都標`connected:false`（原本只標
+  quotes一份，三份資料共用同一個連線/paper帳戶檢查，沒理由只有quotes誠實）。
+  **前端**——`index.html`首頁CTA旁新增`#home-asset-card`，三種畫面狀態：(1)未設定
+  即時伺服器維持原CTA不動 (2)已設定但兩邊都查無資料→CTA文案換成「帳戶資料暫時
+  無法取得」過渡說明（不能誤導成「尚未串接」）(3)至少一邊有真數字→顯示總資產卡，
+  Shioaji現金(`acc_balance`)+持股市值(quantity×last_price概算)、IBKR用
+  `NetLiquidation`（IBKR官方已算好的淨值，比自己重算持股市值可靠）經`FX_RATE`
+  換算NTD，走既有`data-ntd`/`renderCcyAmounts()`幣別切換機制；卡片明白標註
+  「概算，非交易確認、非投資建議；永豐為模擬環境、IBKR為paper帳戶，皆無真實
+  資金」。**除錯歷程（誠實記錄，不是一次到位）**：第一版`_json_safe`用
+  `isinstance(v,(bool,int,float,str))`判斷「已是基本型別免轉換」，用真實
+  `sj.FetchStatus.Fetched`值實測時UDP回覆仍在`push_raw()`內部拋
+  `TypeError: Object of type FetchStatus is not JSON serializable`；逐層排查
+  （先確認daemon是新版、非快取殘留、唯一定義）後用最小重現腳本鎖定成因是
+  isinstance對str的判斷跟C層`PyUnicode_Check`不一致，改用`type(v) is str`
+  精確型別比對＋`json.dumps`試探性序列化後才修好，修完立即用同一支重現腳本
+  驗證通過才回頭端到端重測。**端到端驗證（非模擬）**：Shioaji用
+  `ALPHA_SHIOAJI_FORCE_RUN=1`強制在非交易時段跑`shioaji_quotes.py`（模擬環境，
+  `sj.Shioaji(simulation=True)`，無真實資金，此為既有測試手法非本輪新開先例，
+  見該腳本docstring「實測.二.1」）：`GET /live/positions`回
+  `{"sinopac":{"available":true,"positions":[]},...}`、`GET /live/balance`回
+  `{"sinopac":{"available":true,"balance":{"acc_balance":0.0,...,"status":
+  "FetchStatus.Fetched"}},...}`（模擬帳戶零部位零餘額，符合預期，非造假）；
+  驗完手動終止測試行程並清掉殘留`.shioaji_stream.pid`（強制關閉不會跑到
+  `finally`裡的`api.logout()`，PID檔需手動清，模擬環境無風險）。IBKR因
+  Gateway本輪未開，`ibkr_quotes.py`走既有連線失敗誠實路徑，`positions_ibkr.json`
+  ／`balance_ibkr.json`皆正確寫入`connected:false`，跟`quotes_ibkr.json`三份
+  一致（此為ConnectionRefusedError真實觸發的路徑，非模擬）；**IBKR部位/餘額
+  的「有真數字」情境本輪未驗證到，因Gateway未開機——已實作但未於本機端到端
+  驗證，Gateway開機後首次成功輪次需複查`NetLiquidation`等tag名稱是否跟
+  paper帳戶實際回傳一致**。alpha_live_server.py四步驗證：重啟（PID
+  126472→128516）→`/health`帶token確認`build=08c5363`（=`git rev-parse
+  --short HEAD`）且`stale_process:false`→OPTIONS預檢同時見
+  `access-control-allow-origin: https://jlove1314520.github.io`與
+  `access-control-allow-credentials: true`→四步皆過。冒煙測試50項中49項PASS
+  （#39一致性稽核既有已知紅燈，與本項無關，PENDING_QUEUE前幾輪週六.三/週六.四
+  已記錄同一條紅燈）。
 - [x] **週六.六** 小修：週末標頭「休市」、移除未上線的AI日報推播開關——
   **已完成（2026-09-15開發佇列cycle_id=20260915-181602）**：
   **前半**：首頁細狀態列（`renderHomeStatusSummary()`）原本只看`twOpen`

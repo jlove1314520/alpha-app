@@ -141,10 +141,20 @@ MAX_DYNAMIC_SUBSCRIPTIONS = 100
 # 安全性：只綁 127.0.0.1，而且一律驗 token（跟 tick-push 用同一份）。
 # 併發：api.kbars() 在獨立執行緒呼叫，用一把鎖序列化，避免同時多個查詢打進去；
 # 另外對同一代號做 60 秒行程內快取，重複查不會重複打 API（Shioaji 有流量上限）。
+#
+# 2026-09-15（週六.五）同一個 UDP 服務多兩個 op："positions"（list_positions）、
+# "balance"（account_balance）——理由跟 kbars 完全一樣：只有這支常駐行程手上有
+# 已登入的 Shioaji session，live server 沒有、也不准另開第二條連線去查帳戶。
+# **這兩個 op 純查詢、不含任何下單/改單呼叫**，程式碼裡找不到 place_order 之類的
+# import 或函式呼叫。list_positions/account_balance 不在官方「10 秒 50 次」那個
+# 限流家族（ticks/kbars/snapshots/credit_enquires/short_stock_sources，見
+# C:\alpha\CLAUDE.md 外部 API 頻率上限清單），但保守起見仍加一層行程內快取，
+# 避免 App 每次重整首頁就重複打帳戶查詢。
 KBARS_REQ_HOST = "127.0.0.1"
 KBARS_REQ_PORT = int(os.environ.get("ALPHA_KBARS_REQ_PORT") or 8003)
 KBARS_QUERY_CACHE_SEC = 60.0
 KBARS_MAX_BARS = 300  # 一個交易日最多 270 根 1 分K，留點餘裕；UDP 單封包要塞得下
+ACCOUNT_QUERY_CACHE_SEC = 10.0  # positions/balance 的行程內快取秒數
 
 
 # ── 2026-09-06（實測.二.補.4）api.kbars() 的官方流量限制 ─────────────────────
@@ -167,7 +177,7 @@ KBARS_DAILY_BUDGET = 240
 KBARS_RATE_WINDOW_SEC = 10.0
 KBARS_RATE_MAX = 40
 _kbars_budget = {"day": None, "count": 0, "window": []}
-# _start_kbars_service() 內部才拿得到 api，主迴圈要用 seed_baseline 只能透過這個 ref。
+# _start_query_service() 內部才拿得到 api，主迴圈要用 seed_baseline 只能透過這個 ref。
 # 用 dict 而不是全域變數，是為了讓「服務沒啟動時」的判斷單純：fn 是 None 就跳過。
 _seed_baseline_ref: dict = {"fn": None}
 _kbars_budget_lock = threading.Lock()
@@ -252,12 +262,62 @@ def _kbars_to_bars(kb) -> list[dict]:
             for r in _kbars_rows(kb)]
 
 
-def _start_kbars_service(api, state) -> None:
-    """開一個 daemon 執行緒回應 kbars 查詢。任何失敗都只記 log，不能影響串流。"""
+def _json_safe(v):
+    """遞迴把值轉成一定能 json.dumps 的形狀。
+
+    2026-09-15 實測踩到：`AccountBalance.dict()`裡的`status`欄位是Shioaji自己的
+    `FetchStatus`（pybind編譯出來的內建類別，不是Python Enum，`json.dumps`直接
+    拋`TypeError: Object of type FetchStatus is not JSON serializable`，UDP回覆
+    整包送不出去、App端只會看到逾時，看不出真正原因）。這裡不假設哪些欄位可能
+    是這種類型，統一遞迴檢查：基本型別/None照傳，dict/list遞迴處理，其餘一律
+    `str()`——寧可欄位變成字串也不要整包序列化失敗。
+
+    **踩過的第二個坑**：一開始用`isinstance(v, str)`判斷「已經是字串了，不用轉」，
+    結果`FetchStatus`實例`isinstance(v, str)`回傳`True`（pybind11 enum本身有跟
+    str比較的機制，但`type(v).__mro__`裡沒有`str`），json.dumps的C加速器用的是
+    嚴格的`PyUnicode_Check`（不是Python層的isinstance語意），兩者對不上——
+    isinstance判斷「是字串」放行了，C層還是判「不是」照樣拋錯。改用
+    `type(v) is str`嚴格型別比對，不能再用isinstance，這條規則對其他型別
+    （bool/int/float）理論上也可能有同樣的陷阱，一併改掉。"""
+    if v is None or type(v) in (bool, int, float, str):
+        return v
+    if isinstance(v, dict):
+        return {k: _json_safe(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [_json_safe(x) for x in v]
+    try:
+        json.dumps(v)
+        return v
+    except TypeError:
+        return str(v)
+
+
+def _serialize_position(p) -> dict:
+    """把 Shioaji StockPosition/FuturePosition 物件轉成可 json.dumps 的 dict。
+
+    Shioaji 的這些物件是 pybind 編譯出來的內建類別（非 dataclass/pydantic），
+    但都有一個 `.dict()` 方法——優先用它，拿不到再退回逐欄位手動取值，
+    寧可欄位不全也不要整包查詢失敗。"""
+    try:
+        return _json_safe(dict(p.dict()))
+    except Exception:  # noqa: BLE001
+        out = {}
+        for name in ("code", "direction", "quantity", "price", "last_price", "pnl",
+                     "yd_quantity", "cond", "id"):
+            v = getattr(p, name, None)
+            if v is not None:
+                out[name] = _json_safe(v)
+        return out
+
+
+def _start_query_service(api, state) -> None:
+    """開一個 daemon 執行緒回應帳戶查詢：kbars（既有）/positions/balance（2026-09-15
+    週六.五新增）。任何失敗都只記 log，不能影響串流。"""
     import socket
 
     lock = threading.Lock()
     cache: dict[str, tuple[float, list[dict], str]] = {}  # code -> (取得時間, bars, 交易日)
+    account_cache: dict[str, tuple[float, object]] = {}  # "positions"/"balance" -> (取得時間, 結果)
 
     try:
         token = LIVE_TOKEN_PATH.read_text(encoding="utf-8").strip() if LIVE_TOKEN_PATH.exists() else None
@@ -295,6 +355,40 @@ def _start_kbars_service(api, state) -> None:
             return 0, f"{type(e).__name__}: {e}"
 
     _seed_baseline_ref["fn"] = seed_baseline
+
+    def _query_positions() -> tuple[list[dict] | None, str | None]:
+        """回傳 (positions, 錯誤訊息)。查不到就誠實回 None＋原因，不塞空清單假裝成功。"""
+        now = time.time()
+        with lock:
+            hit = account_cache.get("positions")
+            if hit and now - hit[0] < ACCOUNT_QUERY_CACHE_SEC:
+                return hit[1], None
+        try:
+            with lock:
+                raw = api.list_positions(api.stock_account)
+            positions = [_serialize_position(p) for p in (raw or [])]
+            with lock:
+                account_cache["positions"] = (now, positions)
+            return positions, None
+        except Exception as e:  # noqa: BLE001
+            return None, f"{type(e).__name__}: {e}"
+
+    def _query_balance() -> tuple[dict | None, str | None]:
+        """回傳 (balance, 錯誤訊息)。"""
+        now = time.time()
+        with lock:
+            hit = account_cache.get("balance")
+            if hit and now - hit[0] < ACCOUNT_QUERY_CACHE_SEC:
+                return hit[1], None
+        try:
+            with lock:
+                raw = api.account_balance()
+            balance = _json_safe(dict(raw.dict())) if raw is not None else None
+            with lock:
+                account_cache["balance"] = (now, balance)
+            return balance, None
+        except Exception as e:  # noqa: BLE001
+            return None, f"{type(e).__name__}: {e}"
 
     def _query(code: str) -> tuple[list[dict], str, str | None]:
         """回傳 (bars, 交易日, 錯誤訊息)。查不到就誠實回空清單＋原因。"""
@@ -341,24 +435,45 @@ def _start_kbars_service(api, state) -> None:
                 msg = json.loads(data.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
                 continue
-            if msg.get("t") != token or msg.get("op") != "kbars":
+            if msg.get("t") != token:
                 continue
-            code = str(msg.get("code") or "").strip()
+            op = msg.get("op")
             req_id = msg.get("req_id")
-            bars, day, err = _query(code)
-            reply = {"t": token, "event": "kbars_reply", "req_id": req_id,
-                     "code": code, "bars": bars, "trade_date": day, "error": err,
-                     "kbars_calls_today": kbars_calls_today(),
-                     "kbars_daily_budget": KBARS_DAILY_BUDGET,
-                     "ts": datetime.now(TW_TZ).isoformat()}
-            try:
-                state.push_raw(reply)
-            except Exception as e:  # noqa: BLE001
-                print(f"  [kbars服務] 回覆失敗 {code}：{type(e).__name__}: {e}", flush=True)
+            if op == "kbars":
+                code = str(msg.get("code") or "").strip()
+                bars, day, err = _query(code)
+                reply = {"t": token, "event": "kbars_reply", "req_id": req_id,
+                         "code": code, "bars": bars, "trade_date": day, "error": err,
+                         "kbars_calls_today": kbars_calls_today(),
+                         "kbars_daily_budget": KBARS_DAILY_BUDGET,
+                         "ts": datetime.now(TW_TZ).isoformat()}
+                try:
+                    state.push_raw(reply)
+                except Exception as e:  # noqa: BLE001
+                    print(f"  [kbars服務] 回覆失敗 {code}：{type(e).__name__}: {e}", flush=True)
+            elif op == "positions":
+                positions, err = _query_positions()
+                reply = {"t": token, "event": "positions_reply", "req_id": req_id,
+                         "positions": positions, "error": err,
+                         "ts": datetime.now(TW_TZ).isoformat()}
+                try:
+                    state.push_raw(reply)
+                except Exception as e:  # noqa: BLE001
+                    print(f"  [帳戶查詢服務] positions 回覆失敗：{type(e).__name__}: {e}", flush=True)
+            elif op == "balance":
+                balance, err = _query_balance()
+                reply = {"t": token, "event": "balance_reply", "req_id": req_id,
+                         "balance": balance, "error": err,
+                         "ts": datetime.now(TW_TZ).isoformat()}
+                try:
+                    state.push_raw(reply)
+                except Exception as e:  # noqa: BLE001
+                    print(f"  [帳戶查詢服務] balance 回覆失敗：{type(e).__name__}: {e}", flush=True)
 
-    threading.Thread(target=_serve, daemon=True, name="kbars-service").start()
-    print(f"  [kbars服務] 監聽 udp://{KBARS_REQ_HOST}:{KBARS_REQ_PORT}"
-          f"（只聽loopback、驗token、同一條連線查詢、{int(KBARS_QUERY_CACHE_SEC)}秒快取）", flush=True)
+    threading.Thread(target=_serve, daemon=True, name="account-query-service").start()
+    print(f"  [帳戶查詢服務] 監聽 udp://{KBARS_REQ_HOST}:{KBARS_REQ_PORT}"
+          f"（只聽loopback、驗token、同一條連線查詢：kbars/{int(KBARS_QUERY_CACHE_SEC)}秒快取、"
+          f"positions+balance/{int(ACCOUNT_QUERY_CACHE_SEC)}秒快取）", flush=True)
 DYNAMIC_POLL_SEC = 5.0  # 每 5 秒看一次清單有沒有變，加自選股後幾秒內就會有 tick
 
 
@@ -1323,7 +1438,7 @@ def run_stream_daemon() -> None:
         api.set_on_bidask_fop_v1_callback(on_bidask_fop)
         api.set_on_quote_idx_v1_callback(on_quote_idx)
 
-        _start_kbars_service(api, state)  # 2026-09-06（實測.二.1）同一條連線上的 kbars 查詢服務
+        _start_query_service(api, state)  # 2026-09-06（實測.二.1）+2026-09-15（週六.五）同一條連線上的 kbars/positions/balance 查詢服務
 
         # 2026-09-06（實測.二.補.2）啟動時先把當日已經走過的 1 分K 補成基底。
         # 沒有這一步的話，09:15 才啟動的行程畫出來的曲線會從 09:15 開始，看起來像

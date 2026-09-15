@@ -76,6 +76,10 @@ from ib_async import IB, Index, Stock
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = REPO_ROOT / "data" / "quotes_ibkr.json"
+# 2026-09-15（週六.五）部位/餘額唯讀快照，跟quotes同一份冷檔模式——每輪順手查，
+# 連不上/非paper帳戶時整份標connected:false，不留舊資料（見_write_all_failure()）。
+POSITIONS_OUT_PATH = REPO_ROOT / "data" / "positions_ibkr.json"
+BALANCE_OUT_PATH = REPO_ROOT / "data" / "balance_ibkr.json"
 TW_TZ = timezone(timedelta(hours=8))
 
 IB_HOST = "127.0.0.1"
@@ -104,16 +108,21 @@ _CURRENT_MKT_DATA_TYPE = 1  # 全域追蹤目前連線設定的市場數據類�
 
 
 def _write_failure(reason: str) -> None:
-    """連線/帳戶檢查失敗時統一走這裡——整份JSON標失敗，不留舊報價、不塞假資料。"""
-    payload = {
-        "fetched_at": datetime.now(TW_TZ).isoformat(),
-        "connected": False,
-        "error": reason,
-        "quotes": {},
-    }
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"寫入失敗狀態到 {OUT_PATH}：{reason}")
+    """連線/帳戶檢查失敗時統一走這裡——整份JSON標失敗，不留舊報價、不塞假資料。
+
+    2026-09-15（週六.五）改成同時把positions_ibkr.json／balance_ibkr.json也標
+    成失敗：這三份檔案共用同一個連線/paper帳戶檢查，連線那一關沒過，後面三種
+    資料通通拿不到，沒有理由只讓quotes誠實、部位/餘額卻留著上一輪的舊資料。"""
+    now_iso = datetime.now(TW_TZ).isoformat()
+    _write_json_failure(OUT_PATH, {"connected": False, "error": reason, "quotes": {}, "fetched_at": now_iso})
+    _write_json_failure(POSITIONS_OUT_PATH, {"connected": False, "error": reason, "positions": [], "fetched_at": now_iso})
+    _write_json_failure(BALANCE_OUT_PATH, {"connected": False, "error": reason, "balance": {}, "fetched_at": now_iso})
+    print(f"寫入失敗狀態（quotes/positions/balance 三份皆標 connected:false）：{reason}")
+
+
+def _write_json_failure(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def _qualify_us_stock(ib: IB, symbol: str):
@@ -233,6 +242,50 @@ def _fetch_yahoo_index_quote(yahoo_symbol: str) -> dict | None:
         return None
 
 
+def _fetch_positions(ib: IB) -> tuple[list[dict] | None, str | None]:
+    """IBKR唯讀部位（2026-09-15週六.五）。回傳(positions, 錯誤訊息)。
+
+    `ib.positions()` 是既有連線上的唯讀查詢，不觸發任何下單——這支腳本本身
+    連線時就已經傳`readonly=True`（見main()），Gateway端會直接拒絕任何下單呼叫，
+    這裡再加一層：程式碼裡完全沒有import或呼叫任何下單函式。"""
+    try:
+        positions = ib.positions()
+    except Exception as e:
+        return None, f"{type(e).__name__}: {e}"
+    out = []
+    for p in positions:
+        c = p.contract
+        out.append({
+            "account": p.account,
+            "symbol": getattr(c, "symbol", None),
+            "sec_type": getattr(c, "secType", None),
+            "currency": getattr(c, "currency", None),
+            "exchange": getattr(c, "exchange", None),
+            "position": p.position,
+            "avg_cost": p.avgCost,
+        })
+    return out, None
+
+
+# 2026-09-15（週六.五）只挑首頁總資產卡用得到的欄位，不整包accountSummary()都塞進JSON——
+# 那份清單有幾十個tag（含很多option/margin細節，這個paper帳戶多半用不到），只留
+# 總資產相關的四個，欄位意義查IBKR官方Account Summary Tags文件。
+BALANCE_TAGS_WANTED = {"NetLiquidation", "TotalCashValue", "BuyingPower", "GrossPositionValue"}
+
+
+def _fetch_balance(ib: IB, account: str) -> tuple[dict | None, str | None]:
+    """IBKR唯讀帳戶餘額（2026-09-15週六.五）。回傳(balance, 錯誤訊息)。"""
+    try:
+        summary = ib.accountSummary(account)
+    except Exception as e:
+        return None, f"{type(e).__name__}: {e}"
+    out = {}
+    for v in summary:
+        if v.tag in BALANCE_TAGS_WANTED:
+            out[v.tag] = {"value": v.value, "currency": v.currency}
+    return out, None
+
+
 def main():
     ib = IB()
     try:
@@ -305,6 +358,25 @@ def main():
         OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
         OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"寫入 {OUT_PATH}：{len(quotes)} 檔報價")
+
+        # 2026-09-15（週六.五）同一條已驗證的paper連線，順手查部位/餘額——不另開
+        # 連線（IBKR一個clientId同時開多條連線容易衝突，見模組docstring既有原則）。
+        fetched_at = datetime.now(TW_TZ).isoformat()
+        positions, pos_err = _fetch_positions(ib)
+        _write_json_failure(POSITIONS_OUT_PATH, {
+            "fetched_at": fetched_at, "connected": pos_err is None, "account_type": "paper",
+            "error": pos_err, "positions": positions or [],
+        })
+        print(f"寫入 {POSITIONS_OUT_PATH}：{len(positions or [])} 筆部位" if pos_err is None
+              else f"部位查詢失敗，誠實標connected:false：{pos_err}")
+
+        balance, bal_err = _fetch_balance(ib, accounts[0])
+        _write_json_failure(BALANCE_OUT_PATH, {
+            "fetched_at": fetched_at, "connected": bal_err is None, "account_type": "paper",
+            "error": bal_err, "balance": balance or {},
+        })
+        print(f"寫入 {BALANCE_OUT_PATH}：{list((balance or {}).keys())}" if bal_err is None
+              else f"餘額查詢失敗，誠實標connected:false：{bal_err}")
     finally:
         ib.disconnect()
 

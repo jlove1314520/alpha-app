@@ -538,7 +538,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="home-idx-datatime"></div>
     </div>
 
+    <!-- 2026-09-15（開發佇列自走，週六.五）總資產卡：/live/positions＋/live/balance
+         有真數字才顯示；沒設定即時伺服器維持原本CTA；設定了但查無資料（非交易
+         時段/常駐行程沒在跑）顯示第三種過渡文案，不誤導成「尚未串接」。 -->
     <div class="cta-line" id="home-broker-cta" onclick="go('settings')">串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span></div>
+    <div class="card" id="home-asset-card" hidden>
+      <h3>總資產（唯讀） <span class="more" onclick="go('settings')">設定 →</span></h3>
+      <div class="num" id="home-asset-total" data-ntd="0" style="font-size:22px;font-weight:700"></div>
+      <div class="note" id="home-asset-detail" style="margin-top:6px;line-height:1.7"></div>
+      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，非交易確認、非投資建議；永豐為模擬環境、IBKR為paper帳戶，皆無真實資金</div>
+    </div>
 
     <div class="card ai-card" id="home-ai-card" hidden>
       <div class="ai-tag">✦ AI 盤前日報</div>
@@ -2671,6 +2680,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
     _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
+    _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -5883,6 +5893,81 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const ac=new AbortController();const t=setTimeout(()=>ac.abort(),timeoutMs||4000);
     try{return await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal})}finally{clearTimeout(t)}
   }
+  // ── 2026-09-15（開發佇列自走，週六.五）首頁總資產卡 ──────────────────────────
+  // 券商唯讀資料經live server：/live/positions（Shioaji list_positions+IBKR部位）、
+  // /live/balance（Shioaji account_balance+IBKR帳戶摘要），見
+  // research/alpha_live_server.py。三種畫面狀態：
+  //   1. 沒設定即時伺服器 → 維持原本「串接券商帳戶→」CTA（既有行為不動）。
+  //   2. 有設定但兩個broker都查無資料（非交易時段/常駐行程沒在跑/Gateway沒開）
+  //      → CTA文案換成過渡說明，不能繼續講「尚未串接」（其實已經串了，只是
+  //      暫時查不到），也不能假裝有數字。
+  //   3. 至少一個broker有真數字 → 顯示總資產卡，換算成NTD用data-ntd交給既有
+  //      renderCcyAmounts()（見「幣別切換」那節）畫成NT$/US$。
+  // Shioaji的account_balance()只回現金餘額（acc_balance），不含持股市值，這裡
+  // 用positions的quantity×last_price自己加總——這是概算（沒有計入手續費/稅），
+  // 卡片文字與note已誠實標「概算，非交易確認」。IBKR用NetLiquidation（IBKR官方
+  // 算好的帳戶淨值，含現金+持股市值，比自己重算可靠），USD需要FX_RATE才能併入
+  // NTD總額，匯率沒有時該部分誠實跳過並在detail說明，不用舊匯率硬湊。
+  async function loadHomeBrokerCard(){
+    const cta=document.getElementById('home-broker-cta');
+    const card=document.getElementById('home-asset-card');
+    if(!cta||!card)return;
+    const CTA_DEFAULT_HTML='串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span>';
+    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;return}
+    let posR=null,balR=null;
+    try{
+      const [rp,rb]=await Promise.all([liveFetch('/live/positions',9000),liveFetch('/live/balance',9000)]);
+      if(rp&&rp.ok)posR=await rp.json();
+      if(rb&&rb.ok)balR=await rb.json();
+    }catch(e){console.warn('[loadHomeBrokerCard]',e);recordGlobalError('loadHomeBrokerCard',e)}
+    const sinoBal=balR&&balR.sinopac&&balR.sinopac.available?balR.sinopac.balance:null;
+    const sinoPos=posR&&posR.sinopac&&posR.sinopac.available?(posR.sinopac.positions||[]):null;
+    const ibkrBal=balR&&balR.ibkr&&balR.ibkr.connected?balR.ibkr.balance:null;
+    if(!sinoBal&&!ibkrBal){
+      // 已設定即時伺服器，但這次兩邊都查無帳戶資料——跟「完全沒串接」是不同狀態，
+      // 文案要誠實反映，不能沿用原本「串接券商帳戶→」（使用者其實已經填過設定）。
+      cta.style.display='';card.hidden=true;
+      cta.innerHTML='帳戶資料暫時無法取得 →<span>永豐（非交易時段常駐行程未啟動）／IBKR（Gateway未連線），設定頁可查詳情</span>';
+      return;
+    }
+    let totalNtd=0;const lines=[];
+    if(sinoBal){
+      const cash=Number(sinoBal.acc_balance)||0;
+      let posVal=0,posN=0;
+      if(sinoPos&&sinoPos.length){
+        for(const p of sinoPos){
+          const qty=Number(p.quantity)||0,lp=Number(p.last_price)||0;
+          if(qty&&lp){posVal+=qty*lp;posN++}
+        }
+      }
+      totalNtd+=cash+posVal;
+      lines.push(`永豐（模擬）現金 <b class="num" data-ntd="${cash}"></b>`);
+      if(posN)lines.push(`永豐（模擬）持股市值(估) <b class="num" data-ntd="${posVal}"></b>（${posN}檔）`);
+    }else{
+      lines.push('永豐（模擬）：暫無資料（'+((balR&&balR.sinopac&&balR.sinopac.reason)||'常駐行程未啟動')+'）');
+    }
+    if(ibkrBal){
+      const netLiqRaw=ibkrBal.NetLiquidation;
+      if(netLiqRaw&&netLiqRaw.value!=null){
+        const usd=Number(netLiqRaw.value)||0;
+        if(FX_RATE){
+          const ntd=usd*FX_RATE;
+          totalNtd+=ntd;
+          lines.push(`IBKR（paper）淨值 US$${usd.toLocaleString(undefined,{maximumFractionDigits:2})} <b class="num" data-ntd="${ntd}"></b>`);
+        }else{
+          lines.push(`IBKR（paper）淨值 US$${usd.toLocaleString(undefined,{maximumFractionDigits:2})}（匯率未更新，未併入總額）`);
+        }
+      }else{
+        lines.push('IBKR（paper）：已連線但查無淨值欄位');
+      }
+    }else{
+      lines.push('IBKR（paper）：暫無資料（'+((balR&&balR.ibkr&&balR.ibkr.error)||'Gateway未連線')+'）');
+    }
+    document.getElementById('home-asset-total').dataset.ntd=String(totalNtd);
+    document.getElementById('home-asset-detail').innerHTML=lines.join('<br>');
+    cta.style.display='none';card.hidden=false;
+    renderCcyAmounts();
+  }
   // ── 2026-09-06（實測.一.3）把自選股清單推給常駐行程 ────────────────────────
   // Shioaji 的訂閱清單原本寫死在 shioaji_quotes.py（5 檔），Python 讀不到瀏覽器的
   // localStorage，所以使用者自己加的股票永遠拿不到 tick。改成每次自選股變動就把
@@ -6891,7 +6976,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1941';
+  const APP_VERSION='2026-09-15.2006';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -1,3 +1,55 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-194602）「週六.五」live server新增/live/positions與/live/balance，首頁總資產卡吃真數字
+
+戴**開發帽**。PENDING_QUEUE權威清單下一項：券商唯讀部位/餘額經live server，
+首頁總資產卡改吃真數字（原話：「五、券商唯讀資料經 live server：新增
+/live/positions 與 /live/balance（Shioaji list_positions/account_balance、
+IBKR 部位），一律驗 token、唯讀、不含任何下單能力」）。
+
+**Shioaji側**：`shioaji_quotes.py`既有的loopback UDP查詢服務（原本只服務
+kbars）擴充`"positions"`（`list_positions`）／`"balance"`（`account_balance`）
+兩個op，函式改名`_start_kbars_service`→`_start_query_service`。**除錯歷程**：
+第一版序列化用`isinstance(v,(bool,int,float,str))`判斷免轉換，用真實
+`sj.FetchStatus.Fetched`實測時UDP回覆仍拋`TypeError: Object of type
+FetchStatus is not JSON serializable`——查出`FetchStatus`（Shioaji帳戶狀態
+用的pybind類別）`isinstance(v,str)`誤判為`True`，但json.dumps的C加速器用
+`PyUnicode_Check`嚴格型別檢查、兩者對不上，改用`type(v) is str`精確比對＋
+`json.dumps`試探性序列化才真正修好，修完用最小重現腳本驗證通過才回頭端到端
+重測。
+
+**alpha_live_server.py側**：新增`GET /live/positions`／`GET /live/balance`，
+一律`_check_token()`驗token；`_account_via_daemon(op)`**先查熱檔/記憶體
+新鮮度**，常駐行程沒在跑（非交易時段常態）立刻誠實回`available:false`，
+不送UDP也不等8秒逾時；IBKR部分讀新增的`data/positions_ibkr.json`／
+`data/balance_ibkr.json`冷檔。
+
+**ibkr_quotes.py側**：新增`_fetch_positions()`（`ib.positions()`）／
+`_fetch_balance()`（`ib.accountSummary()`只留NetLiquidation/TotalCashValue/
+BuyingPower/GrossPositionValue四個tag），跟既有quotes同一輪、同一條已驗證的
+paper連線；`_write_failure()`改成quotes/positions/balance三份JSON同時標
+`connected:false`（原本只標quotes一份）。
+
+**前端**：`index.html`首頁CTA旁新增`#home-asset-card`，三種狀態：未設定即時
+伺服器維持原CTA／已設定但查無資料時CTA文案換過渡說明／有真數字時顯示卡片
+（Shioaji現金+持股市值概算、IBKR用NetLiquidation經FX_RATE換算NTD，走既有
+`data-ntd`/`renderCcyAmounts()`幣別切換機制），卡片明白標「概算，非交易確認、
+非投資建議；永豐為模擬環境、IBKR為paper帳戶，皆無真實資金」。
+
+**端到端驗證**：Shioaji用`ALPHA_SHIOAJI_FORCE_RUN=1`強制在非交易時段跑常駐
+行程（模擬環境`sj.Shioaji(simulation=True)`，既有測試手法非本輪新開先例），
+`/live/positions`／`/live/balance`皆回真實資料（模擬帳戶零部位零餘額，符合
+預期）；IBKR因Gateway本輪未開，走既有連線失敗誠實路徑，三份JSON一致標
+`connected:false`——**IBKR「有真數字」情境本輪未驗證到，已實作但未端到端
+驗證，Gateway開機後需複查NetLiquidation等tag名稱**。`alpha_live_server.py`
+四步驗證：重啟→`/health`確認`build=08c5363`且`stale_process:false`→OPTIONS
+預檢見`allow-origin`與`allow-credentials:true`→四步皆過。
+
+**冒煙測試**：50項49項PASS，#39一致性稽核既有已知紅燈與本項無關（前幾輪已
+記錄同一條紅燈）。
+
+**PENDING_QUEUE狀態**：「週六.五」改標`[x]`，詳細除錯歷程與驗證證據見該條目。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-191602）「週六.四／其餘」融資維持率分母拔掉最後一個FinMind依賴
 
 戴**開發帽**。`scripts/dev_queue_runner.py next` 判定下一項是「其餘」（三大法人
