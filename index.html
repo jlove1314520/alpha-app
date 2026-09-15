@@ -903,6 +903,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <button data-sub="rev">營收</button>
       <button data-sub="fin">財報</button>
       <button data-sub="chip">籌碼</button>
+      <button data-sub="events">事件</button>
+      <button data-sub="tech">技術型態</button>
       <button data-sub="ai">AI</button>
     </div>
 
@@ -1077,6 +1079,28 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <h3>重大訊息（8-K）</h3>
         <div id="us8k-table"><div class="note">—</div></div>
         <div class="note" id="us8k-note">來源：SEC EDGAR Form 8-K（GitHub Actions 排程）</div>
+      </div>
+    </div>
+
+    <!-- 2026-09-15（P0產品.三）事件分頁框架：先接已有資料（除權息/月營收公布/MOPS重大訊息），
+         框架階段不做「事件影響判斷」——只誠實列出「發生了什麼、什麼時候」。 -->
+    <div class="subscreen" id="sub-events">
+      <div class="card">
+        <h3>事件時間軸（近 30 日）</h3>
+        <div id="stock-events-list"><div class="note">載入中…</div></div>
+        <div class="note" style="margin-top:8px">來源：MOPS 上市/上櫃重大訊息、TWSE 月營收公布、除權息（每 30 分鐘排程更新）；美股目前僅涵蓋 SEC Form 8-K（見「籌碼」分頁「重大訊息（8-K）」卡），除權息/財報日事件尚未接入。</div>
+      </div>
+    </div>
+
+    <!-- 2026-09-15（P0產品.三）技術型態分頁框架：MA/成交量開關疊加，型態辨識（頭肩頂、
+         三角收斂等）留待P2，這裡刻意不做——避免用未經驗證的規則暗示「這是買賣訊號」。 -->
+    <div class="subscreen" id="sub-tech">
+      <div class="card">
+        <div class="note" style="background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:10px;color:var(--warn);font-weight:600">⚠ 描述性技術指標，非預測，不構成買賣訊號；型態辨識（頭肩頂/三角收斂等）留待後續版本。</div>
+        <h3 style="display:flex;justify-content:space-between;align-items:center"><span>K線＋均線／成交量</span></h3>
+        <div id="tech-toggle-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+        <div id="tech-chart"><div class="note">載入中…</div></div>
+        <div class="note" style="margin-top:6px">MA＝收盤價移動平均線；成交量長條圖以漲跌色區分。資料沿用「總覽」分頁同一份日線價量，非額外資料源。</div>
       </div>
     </div>
 
@@ -4617,6 +4641,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       b.classList.add('on');
       document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
       document.getElementById('sub-'+b.dataset.sub).classList.add('active');
+      // 2026-09-15（P0產品.三）事件/技術型態兩個分頁改成點到才載入：事件分頁隱藏時
+      // 容器是display:none，技術型態分頁的lightweight-charts在寬度0的容器建圖表會
+      // 尺寸算錯，兩者都不適合跟其他分頁一樣在openStock()就直接畫。
+      if(b.dataset.sub==='events')_safeAsync('renderStockEventsTab',()=>renderStockEventsTab(currentCode));
+      if(b.dataset.sub==='tech')_safeAsync('renderTechChartTab',()=>renderTechChartTab(currentCode));
     });
   });
 
@@ -6380,7 +6409,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // ══════ 2026-09-03深夜（乙.5）個股頁走勢圖：TradingView lightweight-charts ══════
   // 日線=既有FinMind資料（沿用）；1分K=本機/live/kbars（shioaji_quotes.py用tick聚合，非api.kbars），
   // 串流每個事件帶kbars_last→series.update()。函式庫載不到（離線/CDN故障）→退回既有SVG折線。
-  const STOCK_CHART={chart:null,series:null,mode:'daily',userPickedMode:false,code:null,us:false,daily:[],intraday:[],dailyNote:''};
+  const STOCK_CHART={chart:null,series:null,mode:'daily',userPickedMode:false,code:null,us:false,daily:[],intraday:[],dailyNote:'',rawRows:[]};
   function _cssVar(n,fb){try{return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||fb}catch(e){return fb}}
   function lwcAvailable(){return typeof window.LightweightCharts!=='undefined'&&typeof window.LightweightCharts.createChart==='function'&&!!window.LightweightCharts.CandlestickSeries}
   function _destroyStockChart(){if(STOCK_CHART.chart){try{STOCK_CHART.chart.remove()}catch(e){console.warn('[destroyStockChart]',e)}}STOCK_CHART.chart=null;STOCK_CHART.series=null;STOCK_CHART.costLine=null}
@@ -6390,6 +6419,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const el=document.getElementById('trend-chart');if(!el)return;
     if(STOCK_CHART.code!==code){STOCK_CHART.userPickedMode=false;STOCK_CHART.mode='daily'}
     STOCK_CHART.code=code;STOCK_CHART.us=us;
+    STOCK_CHART.rawRows=rows||[];  // 2026-09-15 P0產品.三：保留原始列（含成交量），技術型態分頁疊加成交量長條要用，不用再多打一次fm()
     STOCK_CHART.daily=(rows||[]).map(r=>us?{time:r.date,open:r.Open,high:r.High,low:r.Low,close:r.Close}:{time:r.date,open:r.open,high:r.max,low:r.min,close:r.close})
       .filter(x=>x.time&&x.close!=null&&x.open!=null&&x.high!=null&&x.low!=null);
     // 2026-09-06（實測.二.2）判定改成「查得到當日1分K」而不是「串流有推過這一檔」。
@@ -6463,6 +6493,95 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(k==='intraday'){loadIntradayBars(STOCK_CHART.code)}
     else if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});STOCK_CHART.series.setData(STOCK_CHART.daily);STOCK_CHART.chart.timeScale().fitContent();setTxt('trend-note',STOCK_CHART.dailyNote||'')}
     renderTrendModeToggle(true);
+  }
+  // ══════ 2026-09-15（P0產品.三）技術型態分頁：MA/成交量開關疊加 ══════
+  // 刻意不做型態辨識（頭肩頂/三角收斂等，留待P2）——這裡只是「把既有價量資料換一種
+  // 描述方式呈現」，不新增資料源，也不暗示任何買賣訊號。價量資料沿用「總覽」分頁
+  // renderStockChart()已經抓好的STOCK_CHART.rawRows/daily，不再多打一次fm()。
+  const TECH_MA_PERIODS=[5,10,20,60];
+  const TECH_MA_COLOR={5:'#e9c98f',10:'#7aa2f7',20:'#bb9af7',60:'#9ece6a'};
+  let TECH_TOGGLES={ma5:true,ma10:true,ma20:false,ma60:false,vol:true};
+  const TECH_CHART={chart:null,candleSeries:null,volSeries:null,maSeries:{},code:null,closes:[],dates:[],volumes:[]};
+  function destroyTechChart(){
+    if(TECH_CHART.chart){try{TECH_CHART.chart.remove()}catch(e){console.warn('[destroyTechChart]',e)}}
+    TECH_CHART.chart=null;TECH_CHART.candleSeries=null;TECH_CHART.volSeries=null;TECH_CHART.maSeries={};TECH_CHART.code=null;
+  }
+  // 簡單移動平均，period-1筆之前沒有值（不外插、不用較短窗口湊數，缺就是缺）。
+  function smaSeries(closes,dates,period){
+    const out=[];
+    for(let i=period-1;i<closes.length;i++){
+      let sum=0;for(let j=i-period+1;j<=i;j++)sum+=closes[j];
+      out.push({time:dates[i],value:sum/period});
+    }
+    return out;
+  }
+  function renderTechChips(){
+    const el=document.getElementById('tech-toggle-chips');if(!el)return;
+    const mk=(key,label)=>chip(label,!!TECH_TOGGLES[key],`toggleTechIndicator('${key}')`);
+    el.innerHTML=[mk('ma5','MA5'),mk('ma10','MA10'),mk('ma20','MA20'),mk('ma60','MA60'),mk('vol','成交量')].join('');
+  }
+  function toggleTechIndicator(key){
+    TECH_TOGGLES[key]=!TECH_TOGGLES[key];
+    renderTechChips();
+    _safeSync('applyTechIndicators',applyTechIndicators);
+  }
+  function applyTechIndicators(){
+    if(!TECH_CHART.chart)return;
+    const LWC=window.LightweightCharts;
+    TECH_MA_PERIODS.forEach(p=>{
+      const key='ma'+p;
+      const want=TECH_TOGGLES[key];
+      if(want&&!TECH_CHART.maSeries[key]){
+        TECH_CHART.maSeries[key]=TECH_CHART.chart.addSeries(LWC.LineSeries,{color:TECH_MA_COLOR[p],lineWidth:1.5,priceLineVisible:false,lastValueVisible:false});
+        TECH_CHART.maSeries[key].setData(smaSeries(TECH_CHART.closes,TECH_CHART.dates,p));
+      }else if(!want&&TECH_CHART.maSeries[key]){
+        try{TECH_CHART.chart.removeSeries(TECH_CHART.maSeries[key])}catch(e){console.warn('[applyTechIndicators:removeMA]',e)}
+        delete TECH_CHART.maSeries[key];
+      }
+    });
+    if(TECH_TOGGLES.vol&&!TECH_CHART.volSeries){
+      TECH_CHART.volSeries=TECH_CHART.chart.addSeries(LWC.HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'tech-vol'});
+      TECH_CHART.chart.priceScale('tech-vol').applyOptions({scaleMargins:{top:0.82,bottom:0}});
+      TECH_CHART.volSeries.setData(TECH_CHART.volumes);
+    }else if(!TECH_TOGGLES.vol&&TECH_CHART.volSeries){
+      try{TECH_CHART.chart.removeSeries(TECH_CHART.volSeries)}catch(e){console.warn('[applyTechIndicators:removeVol]',e)}
+      TECH_CHART.volSeries=null;
+    }
+  }
+  async function renderTechChartTab(code){
+    const el=document.getElementById('tech-chart');if(!el)return;
+    renderTechChips();
+    if(TECH_CHART.chart&&TECH_CHART.code===code)return;  // 同一檔已經畫過，切回這個分頁不用重建
+    const us=isUS(code);
+    const rows=(STOCK_CHART.code===code?STOCK_CHART.rawRows:[])||[];
+    const daily=rows.map(r=>us
+      ?{time:r.date,open:r.Open,high:r.High,low:r.Low,close:r.Close,volume:r.Volume}
+      :{time:r.date,open:r.open,high:r.max,low:r.min,close:r.close,volume:r.Trading_Volume})
+      .filter(x=>x.time&&x.close!=null&&x.open!=null&&x.high!=null&&x.low!=null);
+    if(!daily.length){
+      destroyTechChart();
+      el.innerHTML='<div class="note">查無足夠的日線價量資料可畫技術指標（需先在「總覽」分頁載入過這一檔的走勢圖）。</div>';
+      return;
+    }
+    if(!lwcAvailable()){
+      destroyTechChart();
+      el.innerHTML='<div class="note">圖表函式庫（lightweight-charts）未載入，暫無法顯示K線疊加均線/成交量。</div>';
+      return;
+    }
+    destroyTechChart();el.innerHTML='';el.style.height='300px';
+    const LWC=window.LightweightCharts;
+    const chart=LWC.createChart(el,{width:el.clientWidth||320,height:300,
+      layout:{background:{type:'solid',color:'transparent'},textColor:_cssVar('--ink-3','#9aa0a6')},
+      grid:{vertLines:{color:'rgba(128,128,128,.12)'},horzLines:{color:'rgba(128,128,128,.12)'}},
+      rightPriceScale:{borderVisible:false},timeScale:{borderVisible:false},handleScroll:{vertTouchDrag:false}});
+    const up=_cssVar('--up','#ff5257'),down=_cssVar('--down','#24c98a');
+    const candle=chart.addSeries(LWC.CandlestickSeries,{upColor:up,downColor:down,borderVisible:false,wickUpColor:up,wickDownColor:down});
+    candle.setData(daily.map(x=>({time:x.time,open:x.open,high:x.high,low:x.low,close:x.close})));
+    TECH_CHART.chart=chart;TECH_CHART.candleSeries=candle;TECH_CHART.code=code;
+    TECH_CHART.closes=daily.map(x=>x.close);TECH_CHART.dates=daily.map(x=>x.time);
+    TECH_CHART.volumes=daily.map(x=>({time:x.time,value:x.volume||0,color:x.close>=x.open?up:down}));
+    applyTechIndicators();
+    chart.timeScale().fitContent();
   }
   function liveUpdateStockPage(){
     const code=currentCode;if(!code||CURRENT_TAB!=='stock')return;
@@ -6738,14 +6857,31 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       +disclaimer;
   }
 
+  // 2026-09-15（P0產品.三）把「篩近N日事件」與「事件列表HTML」抽成共用函式——
+  // 個股研究報告頁（renderReportEvents）跟個股頁新分頁（renderStockEventsTab）
+  // 都要顯示同一份 data/events.json，抽出來才不會兩份各自維護、慢慢長歪。
+  function recentEventsFor(d,code,days){
+    const cutoff=(()=>{const t=new Date(Date.now()-days*864e5);const z=_zonedParts(t,'Asia/Taipei');
+      return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`})();
+    return (d.events||[]).filter(e=>e.code===code&&String(e.date)>=cutoff)
+      .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  }
+  function eventsRowsHtml(mine,limit){
+    return mine.slice(0,limit).map(e=>{
+      const c=EVENT_TYPE_COLOR[e.type]||'var(--ink-3)';
+      const t=(e.title||'').replace(/</g,'&lt;');
+      return `<div style="display:flex;gap:9px;align-items:flex-start">
+        <span class="num" style="font-size:10px;color:var(--ink-4);min-width:38px;padding-top:2px">${String(e.date).slice(5)}</span>
+        <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${e.type}</span>
+        <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5">${e.url?`<a href="${e.url}" target="_blank" rel="noopener" style="color:inherit">${t}</a>`:t}</span>
+      </div>`;
+    }).join('');
+  }
   async function renderReportEvents(row){
     const host=document.getElementById('report-events');if(!host)return;
     const d=await ensureEvents();
     const code=row.code;
-    const cutoff=(()=>{const t=new Date(Date.now()-30*864e5);const z=_zonedParts(t,'Asia/Taipei');
-      return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`})();
-    const mine=(d.events||[]).filter(e=>e.code===code&&String(e.date)>=cutoff)
-      .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const mine=recentEventsFor(d,code,30);
 
     // 上方三個數字：月營收年增、法人連續天數——都取自已經算好的因子 raw，不重算
     const f=row.factors||{};
@@ -6768,18 +6904,29 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       return;
     }
     host.innerHTML=factsHtml
-      +'<div style="display:flex;flex-direction:column;gap:9px">'
-      +mine.slice(0,12).map(e=>{
-        const c=EVENT_TYPE_COLOR[e.type]||'var(--ink-3)';
-        const t=(e.title||'').replace(/</g,'&lt;');
-        return `<div style="display:flex;gap:9px;align-items:flex-start">
-          <span class="num" style="font-size:10px;color:var(--ink-4);min-width:38px;padding-top:2px">${String(e.date).slice(5)}</span>
-          <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${e.type}</span>
-          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5">${e.url?`<a href="${e.url}" target="_blank" rel="noopener" style="color:inherit">${t}</a>`:t}</span>
-        </div>`;
-      }).join('')
-      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(mine,12)+'</div>'
       +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆${mine.length>12?'，只顯示最近 12 筆':''}。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
+  }
+  // 個股頁「事件」分頁（P0產品.三框架）：跟上面研究報告頁的事件卡是同一份資料，
+  // 差別是這裡不需要scores.json的row（總覽/搜尋進來的股票未必在評分樣本內），
+  // 而且空狀態要用總司令裁示的「尚未 X｜原因｜下一步」一行格式。
+  async function renderStockEventsTab(code){
+    const host=document.getElementById('stock-events-list');if(!host)return;
+    if(isUS(code)){
+      host.innerHTML='<div class="note">尚未串接美股除權息／財報日／月營收事件｜此框架目前僅接了台股資料源（MOPS重大訊息／TWSE月營收／除權息）｜美股重大訊息可看「籌碼」分頁的「重大訊息（8-K）」卡</div>';
+      return;
+    }
+    host.innerHTML='<div class="note">載入中…</div>';
+    const d=await ensureEvents();
+    if(currentCode!==code)return;  // await期間已切到別檔，作廢
+    const mine=recentEventsFor(d,code,30);
+    if(!mine.length){
+      host.innerHTML='<div class="note">尚未偵測到近30日事件｜已查MOPS上市/上櫃重大訊息、TWSE月營收公布、除權息三類官方資料，此代號近30日無相符紀錄｜可等下一輪排程（每30分鐘更新）或近期營收公布日後再回來查看'
+        +(d.fetched_at?`（資料時間 ${fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei')}）`:'')+'</div>';
+      return;
+    }
+    host.innerHTML='<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(mine,20)+'</div>'
+      +`<div class="note" style="margin-top:8px">近 30 日共 ${mine.length} 筆${mine.length>20?'，只顯示最近 20 筆':''}。資料來源：MOPS 重大訊息／TWSE 月營收／除權息，只存索引不存全文，點標題看原文。</div>`;
   }
   // ── 2026-09-08（金流一.3）產業金流 ────────────────────────────────────────
   // data/sector_flow.json 由 scripts/build_sector_flow.py 產生（零額外請求）。
@@ -7084,7 +7231,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2042';
+  const APP_VERSION='2026-09-15.2053';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

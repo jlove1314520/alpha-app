@@ -1,3 +1,45 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-203102）P0產品.三：個股頁「事件」「技術型態」分頁框架
+
+戴**開發帽**。接續同一輪cycle已完成的P0產品.二，依權威清單做下一項`P0產品.三`：
+「個股頁新增事件/技術型態兩個分頁框架——事件分頁先接除權息/財報日/月營收公布日；
+技術型態分頁先放MA/成交量指標開關，型態辨識留P2，頂端固定標『描述性，非預測』」。
+
+**做了什麼**（僅改`index.html`）：
+1. `#stock-tabs`新增「事件」「技術型態」兩個分頁按鈕，對應新增`#sub-events`／
+   `#sub-tech`兩個subscreen（插在既有「籌碼」分頁與「AI」分頁之間）。
+2. **事件分頁**：把研究報告頁既有`renderReportEvents()`裡「篩近N日事件」「事件列表
+   HTML」兩段抽成共用函式`recentEventsFor()`/`eventsRowsHtml()`，新的
+   `renderStockEventsTab()`用同一份`data/events.json`（MOPS重大訊息/TWSE月營收公布/
+   除權息），不重新設計一套資料流。美股尚未接該資料源，誠實顯示「尚未串接...框架
+   目前僅接了台股資料源」並指向既有8-K卡；空狀態格式改用總司令原話規定的「尚未X｜
+   原因｜下一步」一行寫法。
+3. **技術型態分頁**：頂端固定紅字banner「描述性技術指標，非預測，不構成買賣訊號；
+   型態辨識...留待後續版本」。新增`TECH_CHART`狀態物件＋`renderTechChartTab()`／
+   `applyTechIndicators()`／`smaSeries()`：lightweight-charts K線疊加MA5/10/20/60
+   （各自獨立LineSeries，可個別開關）與成交量（HistogramSeries，獨立priceScaleId
+   `tech-vol`避免跟K線價格軸互相擠壓），開關chip沿用既有`chip()`元件。型態辨識
+   （頭肩頂/三角收斂等）刻意留白給P2，不做任何未經驗證的猜測性規則。
+4. 兩個分頁改成「點到分頁按鈕才載入」——事件/技術型態容器在未選中時是
+   `display:none`，若跟其他分頁一樣在`openStock()`就直接畫lightweight-charts，
+   容器寬度會算成0；改成tab click時才呼叫`renderStockEventsTab()`/
+   `renderTechChartTab()`，此時容器已經是`display:block`，尺寸正確。技術型態分頁
+   沿用「總覽」分頁`renderStockChart()`已經抓好的日線價量（新增`STOCK_CHART.rawRows`
+   保留含成交量的原始列），不多打一次FinMind請求。
+
+**驗證**：`node scripts/smoke_test.mjs` 49/50 PASS（僅#39既有已知紅燈，理由同上一則
+P0產品.二紀錄——本輪`git status`確認唯一改動檔案仍是`index.html`，未動`data/`）。
+另寫一支臨時Playwright腳本（驗完即刪，不留在repo）驗證：開2330點「事件」分頁看到
+真實MOPS重大訊息/月營收/除權息事件列表；點「技術型態」分頁確認`<canvas>`真的畫出來、
+5個指標開關chip都在；切換MA20開/MA5關後`TECH_CHART.maSeries`狀態正確增減；切到AAPL
+兩個分頁都誠實顯示「尚未串接」訊息而非空白或報錯；全程`page.on('pageerror'/'console
+error')`零筆。
+
+**改了哪些檔案**：`index.html`、`PENDING_QUEUE.md`（勾選P0產品.三）、本檔案。
+**下一步**：依權威清單接續`P0產品.四`（全站一致性：骨架屏、每頁資料日期單一處、
+空狀態文案統一格式）。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-203102）P0產品.二：選股理由（因子貢獻拆解＋百分位＋同產業比較＋規則式摘要）
 
 戴**開發帽**。依`PENDING_QUEUE.md`權威清單接手`P0產品.二`（總司令2026-09-04核准、
