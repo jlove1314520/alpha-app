@@ -1,3 +1,55 @@
+## 2026-09-15（開發佇列自走cycle_id=20260915-214602）regime擇時overlay協定＋第一個訊號TRAIN測試FAIL
+
+戴**研究帽**。做`PENDING_QUEUE.md`執行順序清單第一項【一】：
+
+**新增`research/REGIME_OVERLAY_PROTOCOL.md`**：把2026-09-04總司令「研究賽道
+轉向」原話正式寫成協定＋規格書，門檻在看任何結果前鎖定（MDD縮小≥35%／上檔
+捕捉率≥75%／6個歷史危機視窗≥5個改善）。順帶訂正`HYPOTHESIS_QUEUE.md`#10
+（2026-09-02）對原始指示的誤讀——「overlay套用在被動部位本身」不是等未來
+選股候選出現的sanity佔位,原話「overlay若連被動指數都保護不了,就保護不了
+任何東西」講的就是要正式判定的候選。
+
+**誠實查證資料覆蓋度**（`CLAUDE.md`七之三第10關「資料源歷史起點探測」）：
+TAIEX資料起點2010-01-04，原始指示6個危機視窗（2008/2011/2015/2018/2020/
+2022）裡，2008早於資料起點完全無資料（連holdout都測不了）、2022落在VAL期
+（>TRAIN_END 2020-12-31）不可用於TRAIN判斷——TRAIN期實際只能測4個視窗。
+本協定不自行把「5/6」「4/6」換算成新比例門檻，如實回報4個視窗的結果，換算
+爭議留待總司令裁示。
+
+**第一個訊號「TAIEX 200MA趨勢濾網」（binary曝險1.00/0.50）TRAIN期正式
+測試結果：FAIL**（`research/regime_overlay_trend_filter_gate.py`）。毛
+報酬MDD縮小28.8%（看起來接近35%門檻），但套用`validation/costs.py`真實
+切換成本後淨縮小只剩1.8%——年化切換8.4次、年化成本≈2.888%，幾乎吃掉基底
+CAGR（6.10%）本身。上檔捕捉率78.9%（過關）。危機視窗4/4改善（2011歐債/
+2015中國股災/2018Q4貿易戰/2020Q1新冠），但不影響判死（MDD門檻已FAIL）。
+控制組(a)隨機開關排列法n=300百分位=100（過關）；控制組(b)延遲1週後MDD
+反而惡化為-37.84%（比基底更差,疑似前視偏誤殘留）；控制組(d)參數高原25格
+（MA窗口±30%×空頭曝險水位±30%）**0/25**過關，排除單點運氣。**關鍵教訓**：
+效果量級誇張時（毛報酬看起來接近門檻）正該懷疑，本協定第一版沒有在主線
+內建真實成本才會有這個誤導性的毛數字，下一個候選（波動度regime/融資餘額/
+回撤斷路器）開發時要從第一版就把成本接進主結果路徑。
+
+**不泛化聲明**：死的是「binary二元曝險切換+純價格趨勢」這個具體構造，不是
+「regime擇時」整個方向。已登記`TRIALS_LEDGER.md`#243、記入
+`STRATEGY_GRAVEYARD.md`、更新`HYPOTHESIS_QUEUE.md`#10條目連結新結果。
+
+**影響檔案**：新增`research/REGIME_OVERLAY_PROTOCOL.md`、
+`research/regime_overlay_trend_filter_gate.py`；編輯
+`research/STRATEGY_GRAVEYARD.md`、`research/HYPOTHESIS_QUEUE.md`、
+`research/TRIALS_LEDGER.md`、`research/TRIALS_REGISTRY.jsonl`、
+`PENDING_QUEUE.md`（項目「一」標`[x]`）。
+
+**驗證**：`node scripts/smoke_test.mjs` 50項47 PASS/1 FAIL——#39資料一致
+性稽核既有紅燈（`data/audit_report.json`為背景排程並行修改，`git status`
+顯示本輪只動`research/`檔案，跟本項目無關，沿用`稽核.三`既有判例)。
+
+**下一步**：`PENDING_QUEUE.md`執行順序清單第二項【二】FUT軌配合（同一套
+overlay協定套用在期貨曝險），待總司令對「4視窗換算方式」與「overlay定位
+訂正」有無異議後接續；候選3（已實現波動度regime）/候選4（融資餘額）/
+候選5（回撤斷路器）仍待開發，見協定文件第9節。
+
+---
+
 ## 2026-09-15（總司令連續五則交辦）我們vs0050誠實數字＋檢定力一/深讀一.2解鎖＋工廠一~四
 
 戴**研究＋維運帽**。逐項處理：
