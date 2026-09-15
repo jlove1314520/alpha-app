@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T08:24:58.737546+08:00",
+  "generated_at": "2026-09-15T09:24:22.377699+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "1789",
-    "1795",
-    "1802",
-    "1806",
-    "1904",
-    "1907",
-    "1909",
-    "2002",
-    "2014",
-    "2015",
-    "2023",
-    "2027",
-    "2049",
-    "2059",
-    "2062",
-    "2065",
-    "2211",
-    "2231",
-    "2303",
-    "2308"
+    "2313",
+    "2314",
+    "2317",
+    "2327",
+    "2330",
+    "2337",
+    "2338",
+    "2344",
+    "2345",
+    "2354",
+    "2356",
+    "2367",
+    "2369",
+    "2375",
+    "2376",
+    "2379",
+    "2382",
+    "2383",
+    "2393",
+    "2401"
   ],
   "results": [
     {
@@ -3505,8 +3505,307 @@
       "keyword_hits": 0,
       "a_level_hits": 0,
       "hits": []
+    },
+    {
+      "code": "2313",
+      "name": "華通",
+      "url": "www.compeq.com.tw",
+      "themes": [
+        "pcb",
+        "hdi",
+        "psu",
+        "hs_connector",
+        "hs_cable",
+        "connector"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "華通電腦股份有限公司 回首頁 │ 網站地圖 │ 聯絡我們 ENGLISH 關於華通 關於華通 經營理念 榮譽與肯定 最新消息 企業社會責任 責任與挑戰 華通綠色承諾 華通永續報告書 CSR相關證照 華通與員工 供應商管理 道德政策 產品介紹 印刷電路板簡介 產品種類 製程能力 投資人專區 財務業務 股東會 股利及股價查",
+          "keyword": "印刷電路板",
+          "a_level": false
+        },
+        {
+          "sentence": "Jul 11 華通電腦股份有限公司 7/11 三班制大夜班作息公告 Jul 11 華通電腦股份有限公司 7/10 二班制夜班作息公告 Jul 11 華通電腦股份有限公司 7/11 三班制小夜班作息公告 高密度電路板 表面黏著技術 軟性電路板 軟硬複合板 高層次板 獲得”RBA”銀牌認證(... 獲得”RBA”銀牌認證(",
+          "keyword": "高密度電路板",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2314",
+      "name": "台揚",
+      "url": "https://www.mtigroup.com/zh-tw",
+      "themes": [
+        "leo_satellite"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2317",
+      "name": "鴻海",
+      "url": "https://www.honhai.com/zh-tw",
+      "themes": [
+        "ai_server",
+        "server_odm",
+        "ev",
+        "auto_electronics",
+        "arvr",
+        "china_exposure",
+        "tariff_benefit",
+        "taiwan_reshoring",
+        "india_expansion",
+        "sea_expansion"
+      ],
+      "status": "fetched",
+      "sentence_count": 12,
+      "keyword_hits": 3,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "首頁 - 鴻海科技集團 關於鴻海 集團簡介 願景宗旨與核心價值 集團概述 創辦人 董事長 集團大事紀 營運據點 全球版圖 關聯企業 集團行為準則暨責任標準 勞權維護 員工福利措施 工作環境與員工人身安全 退休制度與其實施情形 檔案中心 服務與產品 服務與產品 3+3+3=∞ 焦點動態 產業與技術佈局 研發與技術 專利與",
+          "keyword": "電動車",
+          "a_level": false
+        },
+        {
+          "sentence": "2026/08/12 鴻海精密工業股份有限公司公告2026年07月自結合併營收 2026/08/05 鴻海精密工業股份有限公司公告2026年07月自結合併營收 2026/08/05 研發與技術 鴻海科技集團是科技服務的領先者，以智慧為核心，積極投入「電動車、數位健康、機器人」三大新興產業，以及「人工智慧、半導體、新世代",
+          "keyword": "電動車",
+          "a_level": true
+        },
+        {
+          "sentence": "了解更多 智能電動車 智能電動車 鴻海研究院 半導體 企業社會責任 股東會活動 投資人關係行事曆 鴻海教育基金會 YouTube 頻道 i SEE夢想家 人才招募 竭誠歡迎懷抱夢想與熱情的人才加入，在鴻海這個世界舞台上，創造價值、實現夢想 了解更多 236新北市土城區自由街2號 +886-2-2268-3466 關於鴻",
+          "keyword": "電動車",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2327",
+      "name": "國巨*",
+      "url": "WWW.YAGEO.COM",
+      "themes": [
+        "mlcc"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2330",
+      "name": "台積電",
+      "url": "https://www.tsmc.com",
+      "themes": [
+        "ai_chip",
+        "foundry",
+        "adv_package",
+        "cowos",
+        "photomask",
+        "cpo",
+        "glass_substrate"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 1,
+      "hits": [
+        {
+          "sentence": "Taiwan Semiconductor Manufacturing Company Limited Skip to main content English 繁中 简中 日本語 Dedicated IC Foundry Dedicated IC Foundry Technology Overview Logic Te",
+          "keyword": "3D IC",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2337",
+      "name": "旺宏",
+      "url": "http://www.macronix.com",
+      "themes": [
+        "memory_ic"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2338",
+      "name": "光罩",
+      "url": "http://www.tmcnet.com.tw",
+      "themes": [
+        "aoi"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2344",
+      "name": "華邦電",
+      "url": "WWW.WINBOND.COM",
+      "themes": [
+        "memory_ic"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2345",
+      "name": "智邦",
+      "url": "http://www.accton.com",
+      "themes": [
+        "switch",
+        "network_equip",
+        "wifi"
+      ],
+      "status": "exc_ReadTimeout"
+    },
+    {
+      "code": "2354",
+      "name": "鴻準",
+      "url": "www.foxconntech.com.tw",
+      "themes": [
+        "chassis",
+        "india_expansion"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2356",
+      "name": "英業達",
+      "url": "https://www.inventec.com/",
+      "themes": [
+        "ai_server",
+        "server_odm"
+      ],
+      "status": "fetched",
+      "sentence_count": 6,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2367",
+      "name": "燿華",
+      "url": "https://www.pcbut.com.tw",
+      "themes": [
+        "leadframe",
+        "pcb"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2369",
+      "name": "菱生",
+      "url": "https://www.lingsen.com.tw",
+      "themes": [
+        "ic_package"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2375",
+      "name": "凱美",
+      "url": "http://jamicon.teapo.com",
+      "themes": [
+        "mlcc",
+        "resistor_inductor"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2376",
+      "name": "技嘉",
+      "url": "http://www.gigabyte.com",
+      "themes": [
+        "ai_server",
+        "server_odm"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "2379",
+      "name": "瑞昱",
+      "url": "www.realtek.com",
+      "themes": [
+        "ic_design",
+        "retimer"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2382",
+      "name": "廣達",
+      "url": "www.quantatw.com",
+      "themes": [
+        "ai_server",
+        "server_odm",
+        "tariff_benefit",
+        "taiwan_reshoring",
+        "india_expansion",
+        "sea_expansion"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2383",
+      "name": "台光電",
+      "url": "http://www.emctw.com",
+      "themes": [
+        "pcb",
+        "ccl"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2393",
+      "name": "億光",
+      "url": "www.everlight.com",
+      "themes": [
+        "backlight",
+        "led",
+        "miniled",
+        "microled"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "Index | LED產業的領導廠商 | 億光電子 TAIWAN ASIA EUROPE CHINA KOREA JAPAN AFRICA PACIFIC NORTH AMERICA SOUTH AMERICA Choose your country / region Select your language Asia",
+          "keyword": "LED",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2401",
+      "name": "凌陽",
+      "url": "www.sunplus.com",
+      "themes": [
+        "ic_design",
+        "power_ic",
+        "analog_ic",
+        "mcu"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
     }
   ],
-  "total_codes_covered": 50,
+  "total_codes_covered": 70,
   "total_candidates": 259
 }

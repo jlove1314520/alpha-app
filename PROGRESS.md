@@ -1,3 +1,38 @@
+## 2026-09-15（假設佇列自走・第十二輪）接手PENDING_QUEUE交辦，題材七待辦2第四批，累計70/259
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀`PENDING_QUEUE.md`最上方紀錄
+（CLAUDE.md「三之一、交辦優先於自走」鐵律）：兩條阻塞項（S4U／claude CLI
+非互動驗證）維持阻塞（本執行個體無管理員權限，無法自行解除）；【題材七】
+上一輪（無人值守馬拉松自走第十一輪）留下的可執行項是待辦2續跑第四批
+（累計50/259檔）與待辦4驗證樣本仍小。取具名鎖`hypothesis_queue`成功
+（無陳舊鎖檔需回收）。本輪判定續跑待辦2下一批是可收斂的下一步，交辦
+名額給此項，未跑#72起自走假設研究。
+
+- 【題材七】待辦2續跑第四批：確認`beautifulsoup4`環境已就緒（前輪已裝，
+  本輪`import bs4`直接可用，無需重裝）。跑`theme_official_site_pipeline.py
+  --batch-size 20 --offset 50`（排序第51~70檔，代號2313~2401區段）：
+  fetched=10/20、`exc_ConnectTimeout`=3、`blocked_js_render`=3、
+  `exc_SSLError`=2、`exc_ReadTimeout`=1、`http_403`=1，本批`a_level_hits`
+  合計3筆命中（新增2317、2330兩檔）。累計70/259檔，`a_level_hits`項目數
+  累計8筆（涵蓋1210/1308/1616/1720/2014/2049/2317/2330）。失敗原因分布
+  合理（皆對方端限制或連線逾時，非管線bug）。重跑
+  `theme_official_site_matcher.py`與`theme_official_site_negative_
+  control.py`：兩者輸出與前一輪基線一致（v1既有已知漏洞案例仍如預期判
+  False──那是驗證v2修法用的既有已知限制，非本輪回歸；negative_control
+  5家負對照組跨題材意外命中仍為0，PASS），皆`exit code 0`，確認未引入
+  回歸。
+- **仍未做**：待辦2剩餘189檔（下一輪可用`--offset 70`續跑）、待辦4
+  驗證樣本擴充（仍5句，與待辦2無依賴，可獨立續做）；累積的
+  `a_level_hits`候選仍`status:"draft_unreviewed"`，尚未人工抽查，
+  不得視為正式證據來源。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+70/259檔，剩189檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第5名：接入「可借券賣出股數」（借券供給子集），第4名FRED擴充因需GitHub Secrets裁示跳過
 
 本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。做完第3名（CFTC COT）
