@@ -44,6 +44,41 @@ schema_note）、`PENDING_QUEUE.md`（階段一二三進度記錄）、`PROGRESS
 
 ---
 
+## 2026-09-15（開發佇列自走cycle_id=20260915-214602）FUT軌配合regime overlay同一套門檻測試，同樣FAIL但明顯更接近門檻
+
+戴**研究帽**。接續同一輪做`PENDING_QUEUE.md`執行順序清單第二項【二】：
+同一套`REGIME_OVERLAY_PROTOCOL.md`鎖定門檻（不重新訂,只換標的）套用在
+TX連續合約，成本模型改用期貨慣例（`ROUND_TRIP_COST_BPS_1X=5.0`）。
+
+**結果：FAIL（MDD縮小28.1%<35%門檻），但明顯比同一機制在股票軌的結果
+（1.8%）更接近門檻**（`research/regime_overlay_trend_filter_gate_fut.py`，
+TRAIN期2000-01-04~2020-12-31,n=5214天）。三個關鍵差異：①成本不是主因
+——年化成本僅0.167%（期貨稅制遠低於股票證交稅），毛/淨MDD縮小幾乎相同
+（28.5%/28.1%）；②危機視窗5/5改善——TX資料起點2000-01-04早於股票軌
+TAIEX的2010-01-04，涵蓋2008金融海嘯/2011歐債/2015中國股災/2018Q4貿易
+戰/2020Q1新冠，比股票軌能測的4個視窗更接近原始「6視窗」設計；③控制組
+(b)延遲1週後MDD仍縮小23.8%，**方向一致無翻轉**（股票軌翻轉為疑似前視
+偏誤，這裡沒有這個疑慮，訊號本身更可信）。控制組(d)參數高原25格僅
+4/25過35%門檻，且集中在`bear_exposure≤0.425`角落（曝險越低MDD機械性
+越小，不是參數穩健的證據），不構成「一整片都好」，故在鎖定的基準參數
+點（MA=200,bear_exposure=0.50）仍判FAIL，不因這個角落自行改判過關。
+
+**下一步需總司令核准**：是否開新一輪用`bear_exposure=0.35`當FUT軌新的
+鎖定參數點重測——這是新的參數點、新的一輪測試，不是本次結果的事後
+參數優化，依「門檻TRAIN先訂死」原則不能自行判定過關。
+
+**影響檔案**：新增`research/regime_overlay_trend_filter_gate_fut.py`；
+編輯`research/STRATEGY_GRAVEYARD.md`、`research/REGIME_OVERLAY_PROTOCOL.md`
+（新增第9節）、`research/HYPOTHESIS_QUEUE.md`、`research/TRIALS_LEDGER.md`、
+`research/TRIALS_REGISTRY.jsonl`、`research/FUT_LOG.md`、`PENDING_QUEUE.md`
+（項目「二」標`[x]`）。
+
+**驗證**：本項目只動`research/`檔案（未動App/index.html），沿用上一項
+已跑過的`node scripts/smoke_test.mjs`（50項47 PASS/1 FAIL，#39為既有
+背景紅燈，跟本項目無關）。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-214602）regime擇時overlay協定＋第一個訊號TRAIN測試FAIL
 
 戴**研究帽**。做`PENDING_QUEUE.md`執行順序清單第一項【一】：

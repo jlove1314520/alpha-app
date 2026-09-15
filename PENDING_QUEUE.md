@@ -4579,7 +4579,26 @@ ORDER-END
   （見`REGIME_OVERLAY_PROTOCOL.md`第9節）。冒煙測試50項47 PASS/1 FAIL
   （#39資料一致性稽核既有紅燈，`data/audit_report.json`為背景排程並行
   修改，本輪只動`research/`檔案，跟本項目無關）。
-- [ ] **二** FUT軌改測同一套regime overlay對期貨曝險的下檔保護
+- [x] **二** FUT軌改測同一套regime overlay對期貨曝險的下檔保護——**已完成**
+  （2026-09-15開發佇列自走cycle_id=20260915-214602）：新增
+  `research/regime_overlay_trend_filter_gate_fut.py`，同一套
+  `REGIME_OVERLAY_PROTOCOL.md`鎖定門檻（不重新訂,只換標的）套用在TX
+  連續合約，成本模型改用期貨慣例（`ROUND_TRIP_COST_BPS_1X=5.0`，期交稅
+  主導,沿用股票0.3%證交稅會嚴重高估期貨成本）。結果**FAIL**（TRAIN期
+  2000-01-04~2020-12-31,n=5214天，MDD縮小28.1%<35%門檻），但明顯比同一
+  機制在股票軌的結果（1.8%）更接近門檻：成本不是主因（年化成本僅
+  0.167%）、危機視窗5/5改善（TX資料起點2000-01-04早於股票軌,涵蓋2008/
+  2011/2015/2018/2020,比股票軌4個更接近原始6視窗設計）、控制組(b)延遲
+  1週後方向一致無翻轉（股票軌翻轉為疑似前視偏誤,這裡沒有這個疑慮）。
+  控制組(d)參數高原僅4/25過關且集中在`bear_exposure≤0.425`角落（曝險
+  越低MDD機械性越小,非參數穩健證據），不構成「一整片都好」，仍判FAIL。
+  已登記`TRIALS_LEDGER.md`#244、記入`STRATEGY_GRAVEYARD.md`「TX連續
+  合約200MA趨勢濾網」條目、`REGIME_OVERLAY_PROTOCOL.md`第9節、
+  `HYPOTHESIS_QUEUE.md`#10條目、`FUT_LOG.md`2026-09-15條目。**下一步
+  需總司令核准**：是否開新一輪用`bear_exposure=0.35`當FUT軌新的鎖定
+  參數點重測（不是本次結果的事後參數優化，是全新一輪，依「門檻TRAIN
+  先訂死」原則不能自行改判）。冒煙測試同上一項（本項目只動`research/`
+  檔案，未動App/index.html）。
 
 ---
 

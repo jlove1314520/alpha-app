@@ -2317,3 +2317,24 @@ Keltner／波動度突破／CTA 多時間框架，台指期為主」的第 1 關
 **依 `CLAUDE.md` 馬拉松停下規則，FAIL 只記錄不停下**——本輪不提請任何候選、
 不宣告任何機制有效。`is_holdout_consumed()` 開工/收工前皆 `False`，零新增 API 呼叫。
 執行紀錄：`fut_classic_trend_gate_ext13_run.log`。
+
+
+## 2026-09-15（開發佇列 PENDING_QUEUE「二」，非馬拉松輪次）
+
+戴研究帽。工作單位＝`PENDING_QUEUE.md`「二」FUT軌配合：同一套
+`REGIME_OVERLAY_PROTOCOL.md`鎖定門檻套用在TX連續合約（不重新訂門檻，
+只換標的，成本模型改用期貨慣例`ROUND_TRIP_COST_BPS_1X=5.0`）。新增
+`regime_overlay_trend_filter_gate_fut.py`。結果**FAIL**（TRAIN期
+2000-01-04~2020-12-31,n=5214天，MDD縮小28.1%<35%門檻），但明顯比同一
+機制在股票軌的結果（1.8%）更接近門檻，且危機視窗5/5改善（TX資料起點
+2000-01-04早於股票軌的2010-01-04，涵蓋2008/2011/2015/2018/2020共5個
+TRAIN可測視窗）、控制組(b)延遲1週後方向一致無翻轉（股票軌翻轉為疑似
+前視偏誤）、成本不是FAIL主因（年化成本僅0.167%，期貨稅制遠低於股票
+證交稅）。控制組(d)參數高原僅4/25過關且集中在`bear_exposure≤0.425`
+角落，不構成「一整片都好」，故仍判FAIL而非CANDIDATE。已
+`register_trial()`登記`TRIALS_LEDGER.md`#244，寫入
+`STRATEGY_GRAVEYARD.md`、`REGIME_OVERLAY_PROTOCOL.md`第9節、
+`HYPOTHESIS_QUEUE.md`#10條目。**下一步需總司令核准**：是否開新一輪
+用`bear_exposure=0.35`當新的鎖定參數點重測（不是本次結果的事後參數
+優化，是全新一輪）。`is_holdout_consumed()`開工/收工前皆`False`，
+零新增API呼叫（全用`continuous_contract.py`既有本機快取）。
