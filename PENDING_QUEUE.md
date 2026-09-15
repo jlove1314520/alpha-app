@@ -2660,7 +2660,25 @@ ORDER-END
 競品一的第 2 項「持股事件聚合頁（我的持股事件卡）」不在這一版指令裡，
 **保留在下方單獨列出**，不因為換版而遺失（原則：中斷可以，遺失不行）。
 
-- [ ] **源頭一.1** `docs/DATA_SOURCE_MAP.md` 九大功能逐項對應官方免費源／端點／頻率／PIT／現況，分點與主力成本標付費牆並附證交所條款連結
+- [x] **源頭一.1** **已完成（2026-09-15 開發佇列cycle_id=20260915-143102）**：`docs/DATA_SOURCE_MAP.md`
+  新增「籌碼K線功能全拆解」章節，逐項對應指令列出的10項功能（三大法人/主力/
+  大戶散戶/分點進出/主力成本/融資融券/借券/當沖/集中度/事件新聞——指令文字寫
+  「九大功能」但實際列舉10項，如實列出全部10項不強行湊數）。分點/主力/主力
+  成本/集中度四項共用同一個上游限制（分點逐檔買賣明細無免費可程式化源），已
+  用`WebFetch`實測`eshop.twse.com.tw/zh/category/main/5`核實付費商品實際價格
+  為「不含權證NT$80,000/月／含權證NT$100,000/月」（原本記憶只有概略NT$100,000
+  這個數字，本輪用官方頁面核實出兩個價位）；`bsr.twse.com.tw/bshtm/`免費但
+  需人工CAPTCHA的既有裁示（總司令2026-09-06原話）照實引用，不重新查證。
+  新查兩項：借券（TWSE`SBL/TWT96U`可借額度＋TPEx`tpex_margin_sbl`/`tpex_
+  short_sell`餘額與成交量值）、當沖逐檔（TWSE openapi`exchangeReport/TWTB4U`、
+  TPEx`tpex_intraday_trading_statistics`）——用`curl`直接呼叫`openapi.twse.
+  com.tw/v1/swagger.json`與`www.tpex.org.tw/openapi/swagger.json`（143＋225
+  端點）以關鍵字比對摘要文字找到，**只確認端點存在與摘要文字，未實際呼叫核對
+  回傳欄位與歷史深度**（刻意範圍控制，逐端點資料品質查證留給源頭一.2b／
+  源頭一.2c）。三大法人/大戶散戶/融資融券/事件新聞四項直接引用既有已驗證
+  紀錄（T86／TDCC／MI_MARGN／events.json）。**冒煙測試**：`node scripts/
+  smoke_test.mjs` 48項僅既有紅燈check 39 FAIL（跟本項改動的`docs/`檔案完全
+  無關，本項未動`index.html`或`data/`任何檔案），其餘全過。
 - [x] **源頭一.2a** **已完成（2026-09-10，開發佇列自走）**：新增 `scripts/fetch_tdcc_holders.py`，打
   `https://opendata.tdcc.com.tw/getOD.ashx?id=1-5`（TDCC 官方免費、免金鑰、免驗證碼），驗證回應首行等於
   預期表頭才收（複用「不能只看狀態碼」的既有防線），存進 `research/data/tdcc/{資料日期}.csv`（已加進
