@@ -207,28 +207,43 @@ def check_local_tasks(now: datetime) -> tuple[list[dict], list[str]]:
         return [], []
 
 
-def publish_task_health(now: datetime, rows: list[dict], stalled: list[str]) -> None:
+def publish_task_health(now: datetime, rows: list[dict], stalled: list[str],
+                         conn_alerts: list[tuple[str, int, str]] | None = None) -> None:
     """把自檢結果併進 data/audit_report.json 的 local_task_health（總司令指定的位置）。
 
     刻意用「讀出來、只改這一個 key、再寫回去」而不是整份重寫：
     audit_report.json 的其他內容是每晚的資料稽核產生的，不能被這支蓋掉。
     最壞情況是跟稽核那支同時寫、這次的合併被覆蓋，5 分鐘後下一輪就補回來。
+
+    **2026-09-15（總司令交辦）新增 `conn_alerts`**：修之前這裡只收
+    `check_local_tasks()`（產出檔mtime新鮮度）的結果，`main()`另外算出的
+    `internet`/`tailscale`/`ibkr_gateway` 連續失敗告警（`fail_streak` >=
+    `ALERT_AFTER`）只被印到stdout/log，從沒進過`local_task_health`——
+    這正是IBKR Gateway斷線6天才被總司令發現的根因：偵測機制本身其實有跑
+    （streak有在累計、alert條件也有觸發），只是沒有接到任何人會主動看的
+    地方。現在把這批告警併進`stalled`/`alert`，跟產出檔停擺用同一套亮燈
+    機制，不用另外教總司令看第二個地方。
     """
     path = ROOT / "data" / "audit_report.json"
     try:
         doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
         if not isinstance(doc, dict):
             return
+        conn_stall_msgs = [f"{name}: 連續失敗{streak}次（{detail}）" for name, streak, detail in (conn_alerts or [])]
+        all_stalled = stalled + conn_stall_msgs
         doc["local_task_health"] = {
             "checked_at": now.isoformat(),
             "registry": "data/seed/pipeline_registry.json",
-            "alert": bool(stalled),
-            "stalled_count": len(stalled),
-            "stalled": stalled,
+            "alert": bool(all_stalled),
+            "stalled_count": len(all_stalled),
+            "stalled": all_stalled,
             "tasks": rows,
+            "connectivity_alerts": conn_stall_msgs,
             "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。"
-                    "判定依據是產出檔的修改時間，不是排程器回報的狀態——"
-                    "狀態顯示成功但什麼都沒產出正是要抓的情況。",
+                    "產出檔停擺依據修改時間判定；connectivity_alerts 額外納入"
+                    "internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的"
+                    "連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，"
+                    "IBKR斷線6天才被發現就是這個缺口）。",
         }
         path.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception as e:  # noqa: BLE001
@@ -257,9 +272,13 @@ def main() -> int:
         if streak >= ALERT_AFTER:
             alerts.append((name, streak, detail))
 
+    conn_alerts = list(alerts)  # 這裡先存一份快照：只含internet/tailscale/ibkr_gateway，
+    # 不含下面task_stalls——task_stalls已經是publish_task_health()自己的stalled參數，
+    # 兩邊都塞會在local_task_health.stalled裡重複列一次。
+
     # 常駐工作停擺自檢：跟對外連通性一起做，因為兩者都是「本機到底還活著嗎」。
     task_rows, task_stalls = check_local_tasks(now)
-    publish_task_health(now, task_rows, task_stalls)
+    publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:
         alerts.append(("local_task_stall", 1, msg))

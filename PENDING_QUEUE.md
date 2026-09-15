@@ -2657,7 +2657,7 @@ ORDER-END
   industry覆蓋率≥95%的機器可查回歸防線，避免未來哪個排程壞掉又讓
   覆蓋率悄悄掉回0而沒人發現）。冒煙測試46項僅既有紅燈check 39 FAIL，
   其餘全過（含新check 46三份榜單皆95.4%）。
-- [!] **健檢.五** 美股 IBKR 即時報價自 09/02 卡住：查排程／gateway／腳本 log，回報根因與修法或阻塞原因　**⛔ 自走中止（2026-09-15 06:05）**：查明根因＝IB Gateway應用程式現在沒有在跑（`Get-Process`查無`ibgateway`/`tws`/`java`任何行程，4001/4002/7496/7497四個API埠`Test-NetConnection`全部不通），需總司令親自雙擊開啟並登入，才能恢復連線；`AlphaIbkrQuotes`排程本身正常運作（每5分鐘準時執行、`research/ibkr_quotes_cycle.log`與`data/quotes_ibkr.json`827筆commit歷史皆證實排程未停過，也未再犯09-08那次「排程根本沒註冊」的錯，且誠實寫入失敗狀態、無靜默降級）。連線自2026-09-10 03:26:37（最後一筆`connected:true`）起連續5天、逾800次排程執行全部是`ConnectionRefusedError`；PC上次開機時間`2026-09-10 17:46:11`，之後Gateway未被人工重新開啟登入。符合CLAUDE.md已記錄的「IBKR每週日01:00 ET權杖失效，須人工重新登入，無合規自動化解法」已知限制，屬開發佇列停下三條件第一條（需總司令親自操作：登入），詳細診斷過程見`PROGRESS.md`「2026-09-15 健檢.五」條目。
+- [x] **健檢.五** 美股 IBKR 即時報價自 09/02 卡住：查排程／gateway／腳本 log，回報根因與修法或阻塞原因　**2026-09-15 總司令下班後重登IB Gateway，已完成**：實測`data/quotes_ibkr.json`確認`connected:true`，9檔（AAPL/MSFT/NVDA/TSLA/GOOGL+4大指數）皆有真實bid/ask或報價，`check_ibkr()`實測API埠4002開啟。順帶新增：`quotes_ibkr.json`的`connected=false`連續失敗（`ALERT_AFTER=2`次≈10分鐘）現已接進`local_task_health.connectivity_alerts`（見下方【工廠一】關聯條目），這是上次死6天才被發現的根因缺口，已補上。　**⛔ 自走中止（2026-09-15 06:05，歷史記錄保留）**：查明根因＝IB Gateway應用程式現在沒有在跑（`Get-Process`查無`ibgateway`/`tws`/`java`任何行程，4001/4002/7496/7497四個API埠`Test-NetConnection`全部不通），需總司令親自雙擊開啟並登入，才能恢復連線；`AlphaIbkrQuotes`排程本身正常運作（每5分鐘準時執行、`research/ibkr_quotes_cycle.log`與`data/quotes_ibkr.json`827筆commit歷史皆證實排程未停過，也未再犯09-08那次「排程根本沒註冊」的錯，且誠實寫入失敗狀態、無靜默降級）。連線自2026-09-10 03:26:37（最後一筆`connected:true`）起連續5天、逾800次排程執行全部是`ConnectionRefusedError`；PC上次開機時間`2026-09-10 17:46:11`，之後Gateway未被人工重新開啟登入。符合CLAUDE.md已記錄的「IBKR每週日01:00 ET權杖失效，須人工重新登入，無合規自動化解法」已知限制，屬開發佇列停下三條件第一條（需總司令親自操作：登入），詳細診斷過程見`PROGRESS.md`「2026-09-15 健檢.五」條目。
 
 ---
 
