@@ -50,6 +50,7 @@ START/END 都是 ISO 時間字串（wrapper 自己記的 cycle 開始/結束時�
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -59,6 +60,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent  # C:\alpha\alpha-app
 RESEARCH = Path(__file__).resolve().parent
 STATE_PATH = RESEARCH / "data" / "quota_throttle_state.json"
+TRIALS_REGISTRY = RESEARCH / "TRIALS_REGISTRY.jsonl"
 TZ = timezone(timedelta(hours=8))
 
 SEVEN_DAY_THROTTLE = 0.90          # 帳號週用量達 90% 視為「接近週限額」
@@ -90,13 +92,76 @@ def _is_throttled(state: dict, track: str) -> tuple[bool, str]:
         return True, f"帳號週用量已達{util:.0%}（門檻{SEVEN_DAY_THROTTLE:.0%}），節流保留額度給交辦與資料管線"
     n = state.get(track, {}).get("consecutive_no_progress", 0)
     if n >= NO_PROGRESS_THRESHOLD:
-        return True, f"{track}連續{n}輪沒有真的commit過東西，判定候選池空轉，節流"
+        return True, f"{track}連續{n}輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流"
     return False, ""
+
+
+# 2026-09-15（總司令交辦「先砍不必要的LLM呼叫，再談換模型」）：候選池連續
+# 空轉時，即使到了節流後的120分鐘間隔，也不該每次都重新叫一次claude -p去
+# 「重新確認一次還是沒有新東西」——那正是燒掉4天額度的元凶（馬拉松連續39輪
+# 0新工作單位，每輪仍是一次完整的claude -p呼叫）。這裡加一層更便宜的純
+# Python訊號比對：只在consecutive_no_progress>0（已經確認過至少一輪沒進度）
+# 時才啟用，比對「這一輪」跟「記錄在案、上次判定沒進度時」這些外部檔案的
+# 內容雜湊是否完全相同——完全沒變就代表沒有任何新資訊值得再花一次claude
+# 呼叫去重新判斷，直接跳過，連一輪都不叫；只要有任何一個來源變了（不管是
+# PENDING_QUEUE.md有新裁示、TRIALS_REGISTRY.jsonl有新登記、還是data/ticks/
+# 被動累積了新的一天），才放行讓claude真的跑一輪去判斷這個變化算不算數。
+# 刻意排除各軌自己每輪都會寫的敘述性狀態檔（MARATHON_STATE.md／
+# HYPOTHESIS_QUEUE.md 的最新輪次段落）——這兩份檔案不管有沒有實質進度，
+# 每輪都會被自己的 claude -p session 更新一次（寫進輪次計數器/心得），
+# 拿它們當訊號來源等於訊號永遠顯示「有變化」，這支模組就永遠不會觸發
+# 跳過，回到跟先前 record_cycle() 用「有沒有commit」當訊號同一種錯誤
+# （見 _made_progress 的檔頭說明）。只留「不是這個軌道自己在寫」的來源：
+# PENDING_QUEUE.md（人／DevQueue寫）、TRIALS_REGISTRY.jsonl（只在真的
+# 登記新試驗時才變，兩軌通用）、data/ticks/（排程被動累積，不是LLM寫的）。
+SIGNAL_SOURCES: dict[str, list[Path]] = {
+    "marathon": [
+        ROOT / "PENDING_QUEUE.md",
+        TRIALS_REGISTRY,
+        RESEARCH / "data" / "ticks",
+    ],
+    "hypothesis_queue": [
+        ROOT / "PENDING_QUEUE.md",
+        TRIALS_REGISTRY,
+    ],
+}
+
+
+def _signal_hash(track: str) -> str:
+    h = hashlib.sha256()
+    for p in SIGNAL_SOURCES.get(track, []):
+        try:
+            if p.is_dir():
+                entries = sorted((f.name, f.stat().st_mtime, f.stat().st_size) for f in p.iterdir())
+                h.update(repr(entries).encode("utf-8"))
+            elif p.exists():
+                h.update(p.read_bytes())
+        except OSError:
+            continue  # 讀不到就跳過這個來源，不讓單一檔案問題擋住整個判斷
+    return h.hexdigest()
 
 
 def should_run(track: str) -> int:
     state = _load_state()
     throttled, reason = _is_throttled(state, track)
+    track_state = state.get(track, {})
+
+    # 純Python的「有沒有新訊號」快篩——只有已經確認過至少一輪沒進度時才啟用
+    # （見上方模組層級註解），比連calude都不叫更便宜，不佔用should_run的
+    # 30/120分鐘間隔判斷，是額外疊加的一層。
+    if track_state.get("consecutive_no_progress", 0) > 0:
+        current_hash = _signal_hash(track)
+        last_hash = track_state.get("last_signal_hash")
+        if last_hash is not None and current_hash == last_hash:
+            print(f"SKIP: 純Python訊號比對——自上次判定候選池空轉以來，"
+                  f"PENDING_QUEUE.md/{track}相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，"
+                  f"沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫")
+            return 1
+        # 訊號有變化：記下這次看到的雜湊，讓真正跑的這一輪（或下一次skip判斷）用最新值比對
+        track_state["last_signal_hash"] = current_hash
+        state[track] = track_state
+        _save_state(state)
+
     interval = THROTTLED_INTERVAL_MINUTES if throttled else NORMAL_INTERVAL_MINUTES
     last_at = state.get(track, {}).get("last_actual_run_at")
     if last_at:
@@ -111,9 +176,6 @@ def should_run(track: str) -> int:
     else:
         print("RUN: 未達節流條件，正常頻率")
     return 0
-
-
-TRIALS_REGISTRY = ROOT / "research" / "TRIALS_REGISTRY.jsonl"
 
 
 def _git(args: list[str]) -> str:
