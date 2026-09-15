@@ -52,6 +52,7 @@ STALE_HOURS = {
     "data/quotes_ibkr.json": 168,  # 只有使用者本機開著IB Gateway+排程在跑才會更新，機器關機/週末沒開很正常，門檻比照strategies.json放寬到一週
     "data/quotes_sinopac.json": 168,  # 同上，只有使用者本機排程在跑+永豐模擬環境服務時段內才會更新
     "data/foreign_holding.json": 72,  # 跟stock_detail.json同一批market.yml排程產生，門檻一致（源頭二.3第1名，2026-09-15新增）
+    "data/us_insider_trading.json": 72,  # 跟us_sic.json同一批market.yml排程產生，門檻一致（源頭二.3第2名，2026-09-15新增）
 }
 
 
@@ -374,6 +375,21 @@ def describe_foreign_holding(path: Path) -> dict:
     }
 
 
+def describe_us_insider_trading(path: Path) -> dict:
+    """data/us_insider_trading.json（2026-09-15新增，源頭二.3第2名）——SEC EDGAR
+    官方Form 4（內部人交易），`.github/scripts/fetch_us_insider_trading.py`
+    每日排程產生，跟us_sic.json同一批market.yml步驟（讀它的CIK對映）。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    tickers = d.get("tickers", {})
+    total_txns = sum(len(v.get("transactions") or []) for v in tickers.values())
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": total_txns,
+        "source": d.get("source"),
+        "detail": f"檔數={len(tickers)} 交易筆數={total_txns} errors={d.get('errors')}",
+    }
+
+
 DESCRIBERS = {
     "quotes_tw.json": describe_quotes,
     "quotes_us.json": describe_quotes,
@@ -395,6 +411,7 @@ DESCRIBERS = {
     "strategies.json": describe_strategies,
     "strategy_performance.json": describe_strategy_performance,
     "foreign_holding.json": describe_foreign_holding,
+    "us_insider_trading.json": describe_us_insider_trading,
 }
 
 
@@ -732,6 +749,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·籌碼·三大法人買賣超", "source": "data/stock_detail.json（TWSE T86，跟market_tw.json共用同一次呼叫，2026-08-27起不再打FinMind；涵蓋全部上市公司含金融股，2026-08-27修正過度篩選的bug）"},
     {"panel": "個股頁·籌碼·融資融券", "source": "data/stock_detail.json（TWSE MI_MARGN，跟大盤融資維持率共用同一次呼叫，2026-08-27起不再打FinMind；涵蓋全部上市公司含金融股；估算融資維持率為App自算，非官方資料）"},
     {"panel": "個股頁·籌碼·外資持股比率", "source": "data/foreign_holding.json（TWSE官方MI_QFIIS，2026-09-15新增，源頭二.3第1名，免金鑰）"},
+    {"panel": "個股頁·籌碼·內部人交易（僅美股）", "source": "data/us_insider_trading.json（SEC EDGAR官方Form 4，2026-09-15新增，源頭二.3第2名，免金鑰）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},

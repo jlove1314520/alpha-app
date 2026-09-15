@@ -970,6 +970,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         </div>
         <div class="note" id="fh-note">來源：TWSE MI_QFIIS（GitHub Actions 排程）</div>
       </div>
+      <!-- 2026-09-15（源頭二.3第2名）內部人交易，SEC EDGAR官方Form 4，僅適用美股。 -->
+      <div class="card">
+        <h3>內部人交易（Form 4）</h3>
+        <div id="insider-table"><div class="note">—</div></div>
+        <div class="note" id="insider-note">來源：SEC EDGAR Form 4（GitHub Actions 排程）</div>
+      </div>
     </div>
 
     <div class="subscreen" id="sub-ai">
@@ -3799,6 +3805,43 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
+  // 2026-09-15（源頭二.3第2名）內部人交易，SEC EDGAR官方Form 4，
+  // .github/scripts/fetch_us_insider_trading.py每日排程產生 data/us_insider_trading.json。
+  // 僅適用美股（台股走loadForeignHoldingChip那張卡，兩者互斥顯示）。
+  let INSIDER_TRADING_CACHE=null;
+  async function loadInsiderTradingCache(){
+    if(INSIDER_TRADING_CACHE)return INSIDER_TRADING_CACHE;
+    try{const r=await fetch('data/us_insider_trading.json?t='+Date.now());if(r.ok)INSIDER_TRADING_CACHE=await r.json()}
+    catch(e){console.warn('[loadInsiderTradingCache]',e);recordGlobalError('loadInsiderTradingCache',e)}
+    return INSIDER_TRADING_CACHE||{tickers:{}};
+  }
+  function setInsiderTradingNA(msg){
+    setTxt('insider-note',msg);
+    document.getElementById('insider-table').innerHTML='<div class="note">'+msg+'</div>';
+  }
+  async function loadInsiderTradingChip(code){
+    try{
+      const d=await loadInsiderTradingCache();
+      const e=d.tickers&&d.tickers[code];
+      const txns=e&&e.transactions;
+      if(!txns||!txns.length){
+        setInsiderTradingNA(fmEmptyMsg('查無內部人交易資料'));
+        return;
+      }
+      const rows=txns.slice(0,5).map(t=>{
+        const shares=t.shares!=null?nf(t.shares):'—';
+        const price=t.price!=null?'$'+nf(t.price):'—';
+        const cls=t.code==='P'?'pos':(t.code==='S'?'neg':'');
+        return `<div class="f"><span>${t.transaction_date||'—'} ${t.reporting_owner||''}${t.title?'（'+t.title+'）':''}</span><b class="${cls}">${t.code_label||t.code||'—'} ${shares}股 @ ${price}</b></div>`;
+      }).join('');
+      document.getElementById('insider-table').innerHTML=`<div class="facts">${rows}</div>`;
+      setTxt('insider-note',`近${txns.length}筆申報（買${e.buy_count||0}/賣${e.sell_count||0}）· 來源：SEC EDGAR Form 4（GitHub Actions 排程）`);
+    }catch(e){
+      console.warn('[loadInsiderTradingChip]',e);recordGlobalError('loadInsiderTradingChip',e);
+      setInsiderTradingNA('載入失敗');
+    }
+  }
+
   // 2026-08-27 架構修正：EPS/毛利率/營益率/ROE改讀 data/stock_detail.json（見
   // update_stock_financials.py，TWSE官方t187ap06_L_ci綜合損益表+t187ap07_L_ci
   // 資產負債表，累積式寫回），不再對FinMind打FinancialStatements/BalanceSheet。
@@ -3960,6 +4003,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
       setTxt('mg-short-ratio','券資比：—');setTxt('mg-note','美股暫無融資融券資料（僅適用台股）');setTxt('mg-maint','估算融資維持率：—');
       document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
+      setTxt('fh-ratio','—');setTxt('fh-can-invest','—');
+      setTxt('fh-note','美股無此資料（僅適用台股，外資持股比率為TWSE官方統計）');
+      _safeAsync('loadInsiderTradingChip',()=>loadInsiderTradingChip(code));
       loadFinancialsUS(code);
       return;
     }
@@ -4023,6 +4069,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     loadMarginChip(code,px);
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
+    setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
     if(px.length){
       // 量能突破倍數：相對自身20日均量的動能訊號（可以＜1，只是「比平常冷」，不等於「不流動」）。
       // 流動性門檻是完全獨立的另一件事：不管跟自己比是熱是冷，成交值絕對數字太低（單日<3000萬）
@@ -6248,7 +6295,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.0727';
+  const APP_VERSION='2026-09-15.0858';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -293,10 +293,23 @@ Allow: /mops/web
 |---|---|
 | 機構 | U.S. Securities and Exchange Commission |
 | 端點 | `https://www.sec.gov/files/company_tickers.json`（ticker↔CIK對照）、`https://data.sec.gov/submissions/CIK{cik}.json`（申報清單）、XBRL companyfacts（`research/DATA.md:193-343`大量查證） |
-| 我們現況 | 🟢 **已整合，但僅部分表別**。已用於下市查證、PIT財報（companyfacts）、filer category、**8-K事件研究**（`us_8k_item101_gate52.py`／`us_8k_item502_gate52.py`／`us_8k_pead_gate52.py`，假設`#52-us`已FAIL）。**13F／Form 4／S-1未見專門查證或使用** |
+| 我們現況 | 🟢 **已整合，但僅部分表別**。已用於下市查證、PIT財報（companyfacts）、filer category、**8-K事件研究**（`us_8k_item101_gate52.py`／`us_8k_item502_gate52.py`／`us_8k_pead_gate52.py`，假設`#52-us`已FAIL）。**Form 4（內部人交易）已接入**（2026-09-15，源頭二.3第2名，見下方22b）；**13F／S-1未見專門查證或使用** |
 | 官方是否允許程式存取 | 🟢（SEC EDGAR公開API，設計上供程式讀取，需帶識別性User-Agent） |
 | 對應機構用途 | 上市公司法定揭露文件全表 |
-| 待辦 | 13F（機構持倉季報）、Form 4（內部人交易）、S-1（IPO招股書）未查證，皆有研究價值 |
+| 待辦 | 13F（機構持倉季報）、S-1（IPO招股書）未查證，皆有研究價值 |
+
+### 22b. SEC EDGAR Form 4（內部人交易）—— 已接入（2026-09-15，源頭二.3第2名）
+
+| 欄位 | 內容 |
+|---|---|
+| 機構 | U.S. Securities and Exchange Commission |
+| 端點 | `browse-edgar?action=getcompany&CIK={cik}&type=4&output=atom`（列出申報）→ `Archives/edgar/data/{cik}/{accession}/index.json`（找xml檔名）→ 申報xml（逐筆交易結構化資料） |
+| 欄位 | 申報人姓名/職稱、交易日期、交易代碼（P買進/S賣出/A獎酬/M履約等）、股數、每股價格、交易後持股 |
+| 更新頻率 | 每日（跟`market.yml`美股班次同批） |
+| 歷史可回溯到哪年 | 依申報人而異，本輪只取每檔最近8筆申報（不做歷史回補） |
+| 官方是否允許程式存取 | 🟢 |
+| 對應機構用途 | 內部人買賣常被視為對公司前景信心的訊號，是機構投資人常態監控指標 |
+| 我們現況 | 🟢 **已接入**。`.github/scripts/fetch_us_insider_trading.py`，輸出`data/us_insider_trading.json`，個股頁「籌碼」分頁新增「內部人交易」卡（僅美股顯示）。2026-09-15實測：9檔（沿用`us_sic.json`的CIK對映）、AAPL/NVDA/MSFT/TSM/GOOGL/AMZN/UMC/ASX/CHT，共取得約100+筆真實交易（例：AAPL SVP Jennifer Newstead 2026-09-08賣出1438股@317.23）。**誠實限制**：UMC/ASX/CHT為台股ADR，外國私人發行人多數豁免Section 16申報，查到0~少數筆是正常狀態非抓取失敗；極舊申報（accession開頭`9999999997`）目錄裡沒有.xml檔，已知並記錄跳過原因。 |
 
 ### 23. EDGAR full-text search
 
@@ -390,7 +403,7 @@ Allow: /mops/web
 | 排名 | 項目 | 用途強度 | 接入成本 | 現況 |
 |---|---|---|---|---|
 | 1 | #4 外資持股比率(MI_QFIIS) | 5 | 1（🟢host、已知端點家族） | **已完成本輪（2026-09-15）** |
-| 2 | #22b SEC Form 4（內部人交易） | 5 | 3（🟢host、需解析XML/申報結構） | 待接入 |
+| 2 | #22b SEC Form 4（內部人交易） | 5 | 3（🟢host、需解析XML/申報結構） | **已完成（2026-09-15）** |
 | 3 | #28 CFTC COT部位報告 | 4 | 2（🟢公開CSV/Excel，格式穩定） | 待接入 |
 | 4 | #24 FRED擴充（VIX/失業率/CPI等） | 3 | 1（🟢已有client+key，加序列而已） | 待接入 |
 | 5 | #5 借券賣出餘額 | 4 | 3（🟢host，但正確端點仍待鎖定） | 待接入 |
@@ -400,8 +413,10 @@ Allow: /mops/web
 | 9 | #19 財政部海關進出口統計 | 3 | 3（⚪host未驗證，需先測robots.txt+端點） | 待接入 |
 | 10 | #20 經濟部工業生產與外銷訂單 | 3 | 3（⚪host未驗證，同上） | 待接入 |
 
-**本輪只完成第1名**（見上方#4條目與`.github/scripts/fetch_foreign_holding.py`）。
-第2~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
+**本輪（2026-09-15開發佇列自走）完成第1、2名**（見上方#4條目與
+`.github/scripts/fetch_foreign_holding.py`；#22b條目與
+`.github/scripts/fetch_us_insider_trading.py`）。
+第3~10名留給後續開發佇列輪次，每接入一個各自獨立commit，接入後回頭更新這份
 排名表的「現況」欄與本檔案對應條目，不在同一輪一次做完（單輪時間有限，且
 CLAUDE.md「四之二」要求每項都要有實測證據才能標完成，逐項慢慢做比一次宣稱
 10項都好更誠實）。

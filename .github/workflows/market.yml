@@ -58,6 +58,9 @@ jobs:
       - name: 更新美股類股SIC對映（SEC EDGAR官方company_tickers/submissions，免金鑰，建置一.3）
         run: python .github/scripts/fetch_us_sic.py
         continue-on-error: true
+      - name: 更新美股內部人交易（SEC EDGAR官方Form 4，免金鑰，源頭二.3第2名）
+        run: python .github/scripts/fetch_us_insider_trading.py
+        continue-on-error: true
       - name: 更新個股月營收/PER/PBR/殖利率（TWSE官方openapi，累積式寫回，免金鑰）
         run: python .github/scripts/update_fundamentals_daily.py
         continue-on-error: true

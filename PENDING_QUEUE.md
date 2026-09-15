@@ -2478,7 +2478,24 @@ ORDER-END
   解析器與`APP_DATA_SOURCES`條目；個股頁「籌碼」分頁新增「外資持股比率」卡
   （`fh-ratio`/`fh-can-invest`/`fh-note`），Playwright實測2330顯示69.23%/30.76%、
   無頁面錯誤。`node scripts/smoke_test.mjs`45/46 PASS（僅#39既有已知紅燈，
-  與本次改動無關，同`ccefd588`既有結論）。**第2~10名留待後續輪次**，見排名表。
+  與本次改動無關，同`ccefd588`既有結論）。
+  **第2名（SEC EDGAR Form 4內部人交易，僅美股）已完成（2026-09-15開發佇列自走
+  接續）**：新增`.github/scripts/fetch_us_insider_trading.py`，沿用`us_sic.json`
+  既有CIK對映（同批`market.yml`排程，`fetch_us_sic.py`之後執行，零額外請求去
+  重打company_tickers.json），解析`browse-edgar` atom feed→申報目錄→XML三段式
+  端點；**實測踩到CLAUDE.md已知地雷**：`accession`開頭`9999999997`的極舊申報
+  目錄裡沒有`.xml`檔（UMC 2筆、CHT 3筆），已依規則跳過並記錄原因、不整份失敗。
+  本機實測（PYTHONIOENCODING=utf-8重跑一次取得較完整資料）：9檔（AAPL/NVDA/
+  MSFT/TSM/GOOGL/AMZN/UMC/ASX/CHT）、共104筆真實交易，僅AMZN/UMC/CHT各有
+  已知原因的錯誤（極舊申報缺xml，非管線bug）。`data/STATUS.json`已加
+  `describe_us_insider_trading()`解析器與`APP_DATA_SOURCES`條目（重跑
+  `generate_status_json.py`確認`records:104`、`status:"ok"`）；個股頁「籌碼」
+  分頁新增「內部人交易」卡（僅美股顯示，台股顯示「台股無此資料」互斥文案），
+  Playwright實測AAPL顯示近13筆申報（買0/賣6），列出SVP Newstead 2026-09-08
+  賣出1,438股@$317.23等真實交易，無頁面錯誤。`node scripts/smoke_test.mjs`
+  45/46 PASS（僅#39既有已知紅燈，一致性違規率12.53%與本次改動前相同，屬
+  P0資料一致性稽核既有未解決問題，與內部人交易新增功能無關）。
+  **第3~10名留待後續輪次**，見排名表。
 - [ ] **源頭二.4** 新增排程全部列入 CLAUDE.md 頻率清單，附官方上限或實測安全值
 - [ ] **源頭二.5** 驗收：表格截圖、前 10 名清單與理由、每接入一個回報一個
 

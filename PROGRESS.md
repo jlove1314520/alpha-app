@@ -1,3 +1,51 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-084602）源頭二.3第2名：接入SEC EDGAR Form 4內部人交易（僅美股）
+
+本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。`PENDING_QUEUE.md`頂端
+「執行順序（權威清單）」下一項是**源頭二.3**（依「機構用途強度×接入成本」排前
+10名先接入）。開工檢查發現：工作目錄裡已存在**上一次開發佇列輪次未commit就
+中斷**的完整實作（`.github/scripts/fetch_us_insider_trading.py`、
+`data/us_insider_trading.json`、`index.html`/`generate_status_json.py`/
+`docs/FIRST_HAND_SOURCES.md`/`market.yml`相關異動皆已存在但未進版控），本輪
+先逐項驗證這份既有實作是否正確、補強後再commit，不是重做。
+
+**驗證與補強內容**：
+1. 讀過`fetch_us_insider_trading.py`全文：三段式端點（列出Form4申報atom feed→
+   申報目錄index.json找xml檔名→解析xml結構化交易資料）設計合理，沿用
+   `us_sic.json`既有CIK對映零額外請求；**已內建CLAUDE.md記載的已知地雷**——
+   `accession`開頭`9999999997`的極舊申報目錄裡沒有`.xml`檔只有`.txt`，程式碼
+   已正確判斷並記錄「目錄裡找不到.xml檔」跳過，不整份失敗、不亂猜格式解析。
+2. 既有資料是本機Windows終端機因cp950編碼中斷前的舊資料（MSFT/TSM兩檔因
+   `print()`踩到`UnicodeEncodeError`而中斷、留在0筆交易+逾時錯誤狀態）——這是
+   本機Windows Big5主控台特有的顯示問題（GitHub Actions實際跑在`ubuntu-latest`
+   預設UTF-8，不會發生），不是腳本邏輯bug，比照專案裡其他`.github/scripts/*.py`
+   一致的既有慣例（皆未特別處理，因為只在CI環境跑）。用
+   `PYTHONIOENCODING=utf-8 python .github/scripts/fetch_us_insider_trading.py`
+   重跑一次取得更完整資料：9檔（AAPL/NVDA/MSFT/TSM/GOOGL/AMZN/UMC/ASX/CHT）、
+   共104筆真實交易，僅AMZN(1)/UMC(2)/CHT(3)有錯誤（皆為極舊申報缺xml的已知
+   情況，外國私人發行人UMC/ASX/CHT多數豁免Section 16申報，少量申報屬正常）。
+3. 重跑`generate_status_json.py`：`data/STATUS.json`正確產生
+   `describe_us_insider_trading()`條目（`records:104`、`status:"ok"`）。
+4. 用Playwright實際開啟`http://localhost:8792/index.html`，開AAPL個股頁籌碼
+   分頁，確認`#insider-table`顯示近13筆申報明細（例：SVP Jennifer Newstead
+   2026-09-08賣出1,438股@$317.23），`#insider-note`顯示「近13筆申報（買0/賣6）
+   ·來源：SEC EDGAR Form 4（GitHub Actions排程）」，無頁面錯誤；台股個股頁
+   確認顯示互斥文案「台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）」。
+5. `node scripts/smoke_test.mjs`：45/46 PASS，僅#39（資料一致性稽核，一致性
+   違規率12.53%）既有已知紅燈，與本次新增功能無關（該問題是P0資料一致性稽核
+   既有未解決項目，多次先前commit已記錄同一結論）。
+
+**驗收證據**（依CLAUDE.md「四之二」機器可查紀錄）：`data/us_insider_trading.json`
+（`fetched_at`/`errors`欄位）、`data/STATUS.json`對應條目、
+`node scripts/smoke_test.mjs`實際輸出、Playwright實測輸出（見上）。
+
+**尚未做**：排名表第3~10名（CFTC COT／FRED擴充／借券賣出／SEC 13F／央行外匯
+牌告／BLS／財政部海關／經濟部工業生產）留待後續輪次逐一接入，各自獨立commit；
+`源頭二.4`（新增排程列入CLAUDE.md頻率清單）本輪未做，理由同上一輪（此端點呼叫
+模式已落在CLAUDE.md既有SEC EDGAR條目規範內，但總司令原話要求逐條列出，留待
+`源頭二.4`本身的輪次或下一輪處理）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十一輪）題材七待辦2續跑：官網抓取第三批20檔，累計50/259
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀`PENDING_QUEUE.md`最上方
