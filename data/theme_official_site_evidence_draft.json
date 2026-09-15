@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T08:02:46.838829+08:00",
+  "generated_at": "2026-09-15T08:24:58.737546+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "1326",
-    "1402",
-    "1414",
-    "1417",
-    "1476",
-    "1503",
-    "1513",
-    "1519",
-    "1521",
-    "1522",
-    "1560",
-    "1597",
-    "1605",
-    "1608",
-    "1611",
-    "1616",
-    "1707",
-    "1712",
-    "1720",
-    "1723"
+    "1789",
+    "1795",
+    "1802",
+    "1806",
+    "1904",
+    "1907",
+    "1909",
+    "2002",
+    "2014",
+    "2015",
+    "2023",
+    "2027",
+    "2049",
+    "2059",
+    "2062",
+    "2065",
+    "2211",
+    "2231",
+    "2303",
+    "2308"
   ],
   "results": [
     {
@@ -3196,8 +3196,317 @@
           "a_level": false
         }
       ]
+    },
+    {
+      "code": "1789",
+      "name": "神隆",
+      "url": "https://www.scinopharm.com/tw",
+      "themes": [
+        "photoresist"
+      ],
+      "status": "fetched",
+      "sentence_count": 45,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "1795",
+      "name": "美時",
+      "url": "http://www.lotuspharm.com.tw",
+      "themes": [
+        "ccl",
+        "cdmo",
+        "generic_drug"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "1802",
+      "name": "台玻",
+      "url": "www.taiwanglass.com",
+      "themes": [
+        "glass_fabric"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "1806",
+      "name": "冠軍",
+      "url": "http://group.champion.com.tw",
+      "themes": [
+        "glass_fabric"
+      ],
+      "status": "fetched",
+      "sentence_count": 32,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "1904",
+      "name": "正隆",
+      "url": "www.clc.com.tw",
+      "themes": [
+        "paper"
+      ],
+      "status": "fetched",
+      "sentence_count": 3,
+      "keyword_hits": 3,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "正隆股份有限公司 正隆 各產品專屬網頁 下載中心 Language EN 中文 關於正隆 產品服務 投資人關係 企業永續發展 人力資源 新聞中心 聯絡資訊 搜尋 EN 中文 返回 公司簡介 理念願景 重要政策 發展歷程 基本資料 營業概況 公司組織 經營團隊 企業榮耀 營運據點 工業用紙 業務介紹 產品介紹 業務連絡 ",
+          "keyword": "紙器",
+          "a_level": false
+        },
+        {
+          "sentence": "正隆3R PLUS永續轉型獲新北企業精典獎最高榮譽 MORE 工業用紙 正隆集團工業用紙年產能超過220萬噸，為台灣最大工業用紙領導公司，生產據點位... MORE 紙器 正隆集團為亞洲領先工紙紙器一貫化產銷公司，於台灣、中國大陸、越南等地設有紙... MORE 農用紙膜 強調「自然永續」，正隆延伸造紙本業技術跨域農業",
+          "keyword": "文化用紙",
+          "a_level": false
+        },
+        {
+          "sentence": "與... MORE 永續正隆 重視地球永續， 提供高品質產品與服務 身為全方位包裝服務公司，我們致力於提供多樣化的產品， 並以堅持永續經營、善用資源的方式，促進生活品質和所在地區居民和社區的健康發展 MORE 新北市板橋區220民生路一段一號 電話： +886-2-2222-5131 傳真：+886-2-2222-61",
+          "keyword": "紙器",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "1907",
+      "name": "永豐餘",
+      "url": "www.yfy.com",
+      "themes": [
+        "paper"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "1909",
+      "name": "榮成",
+      "url": "https://www.longchenpaper.com",
+      "themes": [
+        "paper"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2002",
+      "name": "中鋼",
+      "url": "http://www.csc.com.tw",
+      "themes": [
+        "steel"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2014",
+      "name": "中鴻",
+      "url": "http://www.chsteel.com.tw",
+      "themes": [
+        "steel"
+      ],
+      "status": "fetched",
+      "sentence_count": 4,
+      "keyword_hits": 4,
+      "a_level_hits": 3,
+      "hits": [
+        {
+          "sentence": "中鴻鋼鐵股份有限公司 Competence Honesty Service 能力、誠信、服務 更多資訊 中鴻經營理念 靈活迎變、開發利基 精實效率、創造價值 更多資訊 堅持正派經營，努力打造成為一個 持續發展、值得信賴 樂於交往的鋼鐵公司 更多資訊 其他搜索结果 最新消息 掌握中鴻最新資訊，為您傳遞第一手訊息，提供完整",
+          "keyword": "鋼鐵",
+          "a_level": true
+        },
+        {
+          "sentence": "03 Nov 2017 中鴻公司與梓官區公所舉辦聯合淨灘活動維護海洋環境 為落實「樂於交往」的公司願景，親近廠區鄰近社區及體現企業社會責任，十月二十八日(週六)上午中鴻公司與梓官區公所.... 19 Oct 2017 中鴻鋼鐵2017年9月份財務資訊 本公司自行結算2017年9月份之合併營業收入為3,674佰萬元，熱軋",
+          "keyword": "熱軋",
+          "a_level": true
+        },
+        {
+          "sentence": "18 Oct 2017 中鴻公司榮獲高雄市好人好事代表 中 鴻公司長期持續致力於參與公益活動，本次獲高雄市政府社會局推薦，當選高雄市表揚好人好事運動協會主辦之106年高雄市.... 13 Sep 2017 中鴻鋼鐵2017年8月份財務資訊 本 公司自行結算2017年8月份之合併營業收入為3,389佰萬元，熱軋機產量17",
+          "keyword": "熱軋",
+          "a_level": false
+        },
+        {
+          "sentence": "如需了解更多細節請點選 中鴻鋼鐵股份有限公司官方網站隱私權政策。",
+          "keyword": "鋼鐵",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2015",
+      "name": "豐興",
+      "url": "www.fenghsin.com.tw",
+      "themes": [
+        "steel"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "豐興鋼鐵股份有限公司 Menu 公司簡介 基本資料 公司沿革 董事簡歷 經營團隊 公司組織 榮譽評鑑 公司位置 產品介紹 產品介紹 角鋼 槽鋼 扁鋼 圓棒鋼 方鋼 鋼筋 生產流程 生產流程 煉鋼一廠 煉鋼二廠 鋼筋工廠 條線工廠 型鋼工廠 利害關係人專區 股東服務 員工權益 申訴管道 溝通管道 個人資料保護政策 公司治",
+          "keyword": "鋼筋",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2023",
+      "name": "燁輝",
+      "url": "http://www.yiehphui.com.tw",
+      "themes": [
+        "steel"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2027",
+      "name": "大成鋼",
+      "url": "www.tachen.com.tw",
+      "themes": [
+        "steel"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2049",
+      "name": "上銀",
+      "url": "http://www.hiwin.tw",
+      "themes": [
+        "robot",
+        "reducer",
+        "machine_tool",
+        "factory_auto",
+        "drone",
+        "defense",
+        "taiwan_reshoring"
+      ],
+      "status": "fetched",
+      "sentence_count": 8,
+      "keyword_hits": 4,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "上銀科技 | HIWIN | 全世界傳動控制產品與系統科技產品的專業製造者 站內搜尋 關於上銀 公司介紹 重要紀事 國際認證 金典榮耀 全球據點 公司位址 精彩活動 HIWIN大使 產業解方 產品介紹 滾珠螺桿 滾珠花鍵 線性滑軌 單軸機器人 軸承 DATORKER ® 諧波減速機 多軸機器人 末端效應器 Torque",
+          "keyword": "諧波減速機",
+          "a_level": false
+        },
+        {
+          "sentence": "上銀科技本案受理專線：02-27815301 / 公關信箱： [email protected] Date of Issue: January 13, 2026 HIWIN Technologies Corp. has recently become aware of fraudulent activities inv",
+          "keyword": "諧波減速機",
+          "a_level": true
+        },
+        {
+          "sentence": "台新新光金控串聯政策、金融與產業，共創企業永續成長新解方 2026/8/26 第18屆「上銀智慧機器手實作競賽」圓滿落幕 得獎名單揭曉 2026/8/25 副總統參觀「台灣機器人與智慧自動化展」及「台北國際自動化工業大展」 2026/8/24 上銀卓文恒把傳動零件推進Physical AI！",
+          "keyword": "機器人",
+          "a_level": true
+        },
+        {
+          "sentence": "機器人訂單看到明年 人形機器人、CPO同步送樣 2026/8/20 上銀科技蟬聯六屆 榮獲 「機器人智動系統優質獎 ARSI」 2026/8/20 機器人與智慧自動化展暨自動化工業展 精銳盡出 2026/8/20 上銀集團以「驅動實體AI時代」為主題登場TAIROS 查看更多 2026/8/18 · FOCUS NEW",
+          "keyword": "諧波減速機",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2059",
+      "name": "川湖",
+      "url": "http://www.kingslide.com",
+      "themes": [
+        "robot"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2062",
+      "name": "橋椿",
+      "url": "http://www.sunspring.com.tw",
+      "themes": [
+        "copper_foil"
+      ],
+      "status": "fetched",
+      "sentence_count": 6,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2065",
+      "name": "世豐",
+      "url": "https://www.shehfung.com/index.php?lang=cht",
+      "themes": [
+        "ccl",
+        "copper_foil"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2211",
+      "name": "長榮鋼",
+      "url": "http://www.evergreennet.com",
+      "themes": [
+        "auto_parts"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2231",
+      "name": "為升",
+      "url": "http://www.cubelec.com",
+      "themes": [
+        "ev",
+        "auto_electronics",
+        "adas",
+        "auto_parts",
+        "tariff_benefit"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "2303",
+      "name": "聯電",
+      "url": "WWW.UMC.COM",
+      "themes": [
+        "foundry",
+        "high_dividend"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "2308",
+      "name": "台達電",
+      "url": "https://www.deltaww.com/zh-TW/index",
+      "themes": [
+        "ai_server",
+        "psu",
+        "hs_connector",
+        "connector",
+        "ev",
+        "auto_electronics",
+        "charging",
+        "motor"
+      ],
+      "status": "fetched",
+      "sentence_count": 3,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
     }
   ],
-  "total_codes_covered": 30,
+  "total_codes_covered": 50,
   "total_candidates": 259
 }

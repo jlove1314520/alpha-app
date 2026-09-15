@@ -1,5 +1,89 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-15T08:25+0800（hypothesis_queue排程接續）— 陳舊鎖回收（PID 117604，30.3分鐘）＋接手PENDING_QUEUE交辦：題材七待辦2第三批，累計50/259
+
+取具名鎖時發現上一輪（本檔下一筆條目，#71減資公告事件工作）留下的鎖檔
+陳舊，已自動回收並接手。**下一筆條目本身尚未commit過**（工作內容真實
+有效——修正一個「暫時性環境錯誤被永久記錄成查過但沒資料」的checkpoint
+污染bug——本輪一併帶入這次commit，不丟棄，比照既有先例`f6ed0936`搶救
+陳舊鎖遺留成果的做法），已核對`data/capital_reduction_verified.json`
+diff僅`stocks_queried_this_round`從141還原為0一行，與該條目敘述一致。
+
+本輪依CLAUDE.md「三之一、交辦優先於自走」鐵律，開工先讀
+`PENDING_QUEUE.md`：2條永久阻塞（S4U／claude CLI非互動驗證，需總司令
+權限）維持阻塞；【題材七】待辦2（259家官網抓取）累計30/259、剩229檔為
+可執行交辦項，本輪名額給交辦，未觸碰#71（留給下一輪自走接續，待辦
+清單見下方被搶救的條目本身）。
+
+執行：`python research/theme_official_site_pipeline.py --batch-size 20
+--offset 30`（排序第31~50檔）：fetched=11/20，`a_level_hits`本批新增
+2筆（2014／2049），累計50/259檔、`a_level_hits`累計10筆。重跑
+`theme_official_site_matcher.py`／`theme_official_site_negative_
+control.py`確認既有5家負對照組與單元測試無回歸。詳見`PROGRESS.md`與
+`PENDING_QUEUE.md`對應節。
+
+**交辦佇列還剩幾條未開始**：2條被阻塞（S4U／claude CLI非互動驗證，等待
+總司令有管理員權限時處理）＋1條部分完成待續（題材七：待辦2剩209檔，
+待辦4驗證樣本仍小）。**另有#71（非交辦，屬自走佇列）待下一輪接續，
+下一步見下方條目本身的待辦清單，環境套件消失的提醒仍然有效**。
+
+## 2026-09-15T (hypothesis_queue排程接續) — #71減資公告事件效應：發現並修正環境bug，checkpoint回退至584/805 — 尚未結案
+
+本輪PENDING_QUEUE.md檢查：2條永久阻塞（S4U/claude CLI驗證，需總司令權限）+
+1條假設佇列自走本身的延續工作，無新可執行交辦項，進入自走。取hypothesis_queue
+鎖成功（LOCK_ACQUIRED）。git status發現非本輪殘留變更（其他排程/workflow），
+未觸碰。
+
+續跑下一批時發現**這台機器的Python環境套件全部
+消失**（Package            Version
+------------------ -----------
+beautifulsoup4     4.15.0
+certifi            2026.6.17
+charset-normalizer 3.5.1
+idna               3.19
+numpy              2.5.3
+pandas             3.0.5
+pip                26.2.1
+pyarrow            25.0.1
+python-dateutil    2.9.0.post0
+requests           2.34.2
+scipy              1.18.1
+six                1.17.0
+soupsieve          2.9.2
+typing_extensions  4.16.0
+tzdata             2026.4
+urllib3            2.7.0只剩pip本身，pandas/requests/numpy/scipy/pyarrow全無）——
+這不是本輪造成的，是環境本身的問題。已補裝pandas/requests(鎖版本2.34.2)/
+numpy/scipy。**補裝pyarrow之前先跑了一批查詢**，導致141檔因讀取
+缺pyarrow引擎而查詢失敗，但腳本的錯誤處理會把失敗結果寫進
+checkpoint且視為「已查過」，不會被下一輪重試——**這是一個真實bug：暫時性
+環境錯誤被永久記錄成「查過但沒資料」，會系統性低估真實减資事件數**。
+
+發現後立即處理：補裝pyarrow確認可用；手動從checkpoint移除這141筆帶
+字樣error的錯誤記錄（
+584→725→**還原回584**）；同步修正
+的回584（避免對外顯示假的725進度）。**本輪淨效果：
+進度沒有推進（仍584/805），但避免了141檔資料被錯誤污染成永久失敗**——
+誠實記錄成本大於編一個好看的進度數字。
+
+本輪未新增任何查詢（唯一一次查詢因環境bug全部失敗
+且已還原），確認。無PASS/FAIL/CHEAP_PASS判定。**判定：尚未結案，
+進度維持584/805（72.5%），仍未開始第1關cheap gate**。
+
+**本輪工作到此為止（一輪一個有界工作單位，且本輪環境修復已佔用大部分
+預算），現在排隊第一，下一輪待辦不變（依序，不跳關）**：(a) 確認pyarrow
+已在環境內（本輪已裝，若下一輪執行個體是全新機器狀態需重裝）後用
+繼續查完剩餘
+221檔；(b) 全部查完後，用已正規化的兩組分別跑同款
+CAR框架第1關sanity；(c) 若樣本數在拆成現金减資/彌補虧損减資兩組後任一組
+低於個位數/年，依原始已知風險第1點門檻快殺，不硬做統計檢定。**額外提醒
+下一輪**：這台機器的Python環境套件會消失（本輪實測整個site-packages幾乎
+清空），若下一輪一開始就import失敗，先當作環境問題補裝，不要當成程式碼
+bug去改程式碼。
+
+**交辦佇列還剩幾條未開始**：2條被阻塞（S4U／claude CLI非互動驗證，等待
+總司令有管理員權限時處理）＋1條部分完成待續（題材七，非本軌範圍）。
+
 ## 2026-09-15T05:02+0800 — hypothesis_queue排程接續（陳舊鎖回收）：#71減資公告事件效應
 開工先讀`PENDING_QUEUE.md`：最新一輪（2026-09-10第四輪）記錄【題材三】已
 全部完成123/123，剩餘僅2條被阻塞項（S4U排程/claude CLI非互動驗證，需總司令
