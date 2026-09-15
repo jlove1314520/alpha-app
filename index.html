@@ -1366,6 +1366,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
     </div>
 
+    <!-- 2026-09-15（稽核二.二）八因子覆蓋率儀表板：資料健康卡看的是「全市場恆等式
+    對不對」，這裡看的是另一個維度——「八個評分因子，每一個在全市場算得出來的比例
+    有多少、算不出來的原因是什麼」。資料來自 research/build_coverage_dashboard.py，
+    刻意重用 generate_scores_live.py 同一套原始資料，跟資料健康卡的
+    completeness_gap（季報斷層/過期）互相對照，不是另一套獨立算法。 -->
+    <div class="card">
+      <h3>八因子覆蓋率 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'coverage-tm',async()=>{await loadCoverage(true)})">重新整理</span></h3>
+      <div class="note" id="coverage-summary">檢查中…</div>
+      <div id="coverage-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">資料時間：<b id="coverage-tm">--:--</b>。缺漏原因固定四類：個股完全無此類原始資料／個股有資料但數量或期數不足／全市場此因子系統性缺資料源／其他（資料足夠但計算仍失敗）。跟上方「資料健康」卡的完整度缺口是同一個資料缺口在不同因子上的體現，可互相對照，不是兩套獨立數字。</div>
+    </div>
+
     <!-- 2026-09-06（連線三.5）安全小卡：服務已經公開到網際網路，最怕的不是被攻擊，
     是被攻擊了自己不知道。這裡把過去 24 小時的外部流量、驗證失敗、被限速擋掉的次數
     攤出來，讓總司令一眼看得到。 -->
@@ -5513,6 +5525,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
+    _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
     _safeAsync('loadSignalStatus',()=>loadSignalStatus(false));  // 2026-09-15 開發佇列源頭一.4
     _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
@@ -6642,6 +6655,41 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       list.innerHTML='';
     }
   }
+  // 2026-09-15（稽核二.二）讀 data/coverage.json：八因子×全市場覆蓋率儀表板。
+  // 資料來自 research/build_coverage_dashboard.py，重用 generate_scores_live.py
+  // 同一套原始資料，不是另外重新設計。
+  let COVERAGE_CACHE=null;
+  async function loadCoverage(force){
+    const sum=document.getElementById('coverage-summary'),list=document.getElementById('coverage-list');
+    if(!sum||!list)return;
+    try{
+      if(force||!COVERAGE_CACHE){
+        const r=await fetch('data/coverage.json?t='+Date.now());
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        COVERAGE_CACHE=await r.json();
+      }
+      const d=COVERAGE_CACHE,factors=d.factors||{};
+      const keys=Object.keys(factors);
+      const avgCov=keys.length?keys.reduce((s,k)=>s+(factors[k].coverage_pct||0),0)/keys.length:null;
+      sum.innerHTML=`全市場 <b class="num">${nf(d.meta&&d.meta.universe_size)}</b> 檔 ｜ 八因子平均覆蓋率 `
+        +`<b class="num">${avgCov!=null?(avgCov*100).toFixed(1)+'%':'—'}</b>`;
+      const rows=keys.map(k=>{
+        const v=factors[k]||{};
+        const pct=(v.coverage_pct!=null)?(v.coverage_pct*100).toFixed(1)+'%':'—';
+        const low=(v.coverage_pct!=null)&&v.coverage_pct<0.6;
+        const reasons=Object.entries(v.missing_reason_breakdown||{}).map(([r,c])=>r+' '+nf(c)+'檔').join('、');
+        return `<div class="f"><span>${v.label||k}</span><b class="num" style="color:${low?'var(--warn)':'var(--ink-2)'}">${pct}</b></div>`
+          +(v.missing_count?`<div style="font-size:10.5px;color:var(--ink-4);margin:-2px 0 4px">缺 ${nf(v.missing_count)} 檔：${reasons}</div>`:'');
+      }).join('');
+      list.innerHTML=`<div class="facts">${rows}</div>`;
+      const tm=document.getElementById('coverage-tm');
+      if(tm&&d.meta&&d.meta.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.meta.generated_at),'Asia/Taipei');
+    }catch(e){
+      console.warn('[loadCoverage]',e);recordGlobalError('loadCoverage',e);
+      sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到覆蓋率儀表板</b>（'+e.message+'）。代表 research/build_coverage_dashboard.py 尚未產生 data/coverage.json，或排程沒有落地。';
+      list.innerHTML='';
+    }
+  }
   // 2026-09-06（連線三.5）讀 /security。沒設定即時伺服器時誠實說「讀不到」，
   // 不要顯示成一片綠色的「安全無虞」——那比沒有更危險。
   let SECURITY_CACHE=null;
@@ -6781,7 +6829,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1607';
+  const APP_VERSION='2026-09-15.1750';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

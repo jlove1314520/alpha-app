@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "generated_at": "2026-09-15T09:47:14.491830+00:00",
+    "universe_size": 1974,
+    "reason_categories": {
+      "R1": "個股完全無此類原始資料",
+      "R2": "個股有資料但數量/期數不足以計算",
+      "R3": "全市場此因子系統性缺資料源",
+      "R4": "其他（資料足夠但計算仍失敗，如虧損股/樣本不足）"
+    },
+    "source": "research/build_coverage_dashboard.py，重用generate_scores_live.py::build_rows()同一套原始資料（不重新設計算法），與data/audit_report.json的completeness_gap（e_quarters_gap/e_quarters_stale）互相對照。",
+    "note": "本表是「同一因子跨全市場」的覆蓋率；scores.json每檔的coverage欄位是「同一檔跨八因子」的完整度，兩者是不同維度，不要混用比較。"
+  },
+  "factors": {
+    "earnings_growth": {
+      "label": "財報成長",
+      "coverage_pct": 0.4666,
+      "covered_count": 921,
+      "missing_count": 1053,
+      "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 219,
+        "個股有資料但數量/期數不足以計算": 834
+      }
+    },
+    "revenue_momentum": {
+      "label": "營收動能",
+      "coverage_pct": 0.882,
+      "covered_count": 1741,
+      "missing_count": 233,
+      "missing_reason_breakdown": {
+        "個股有資料但數量/期數不足以計算": 233
+      }
+    },
+    "growth_quality": {
+      "label": "成長性/未來性",
+      "coverage_pct": 0.7199,
+      "covered_count": 1421,
+      "missing_count": 553,
+      "missing_reason_breakdown": {
+        "個股有資料但數量/期數不足以計算": 553
+      }
+    },
+    "chips": {
+      "label": "籌碼",
+      "coverage_pct": 0.9843,
+      "covered_count": 1943,
+      "missing_count": 31,
+      "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 31
+      }
+    },
+    "valuation_adj": {
+      "label": "估值(成長調整)",
+      "coverage_pct": 0.9985,
+      "covered_count": 1971,
+      "missing_count": 3,
+      "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 3
+      }
+    },
+    "technical": {
+      "label": "技術型態",
+      "coverage_pct": 0.8126,
+      "covered_count": 1604,
+      "missing_count": 370,
+      "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 1,
+        "個股有資料但數量/期數不足以計算": 369
+      }
+    },
+    "analyst": {
+      "label": "機構行為",
+      "coverage_pct": 0.9843,
+      "covered_count": 1943,
+      "missing_count": 31,
+      "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 31
+      }
+    },
+    "catalyst": {
+      "label": "題材/事件",
+      "coverage_pct": 0.0,
+      "covered_count": 0,
+      "missing_count": 1974,
+      "missing_reason_breakdown": {
+        "個股完全無此類原始資料": 1974
+      }
+    }
+  }
+}
