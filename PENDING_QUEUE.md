@@ -1690,7 +1690,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 > 【順帶】回報三軌資源配比建議並附理由，先報不改，等總司令裁示。
 
 - [!] **外部一改.1** **暫停中（2026-09-08 總司令裁示）**：在壞宇宙上重測名家策略只會得到不可信的結論。順序必須是先修宇宙（資料源一）再重測。等資料源一.4 完成後解除暫停。
-- [!] **外部一改.2** [研究] 台股軌：容量受限小型股宇宙重驗，滑價用自有 tick，須小型股組顯著優於大型股組　**⛔ 自走中止（2026-09-10 02:07）**：外部一改.2 需要用自有 tick 估滑價，但 research/data/ticks 只有 2 個已 finalize 的交易日（20260907/20260908，20260909 仍是 .tmp 未收尾），距離 #50 要求的 20 日還差 18 日，屬被動等待排程累積的外部依賴；且同一條線的 PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md 仍在等總司令裁示（tick 宇宙與回測宇宙不匹配該怎麼處理），未經核准不得自行選一種處理方式。硬做等於用 2 天 tick 去宣稱滑價估計成立，會違反資料原則。
+- [!] **外部一改.2** [研究] 台股軌：容量受限小型股宇宙重驗，滑價用自有 tick，須小型股組顯著優於大型股組　**⛔ 自走中止（2026-09-10 02:07）**：外部一改.2 需要用自有 tick 估滑價，屬被動等待排程累積 tick（`data/ticks/`）與 gate50 三條件釐清（`PROPOSAL_2026-09-09_gate50_tick_universe_mismatch.md`）兩個外部依賴，未經核准不得自行選一種處理方式。**2026-09-15 總司令裁示：目前累積7/20，維持阻塞被動等待，之後每輪不必再重複回報tick累積進度**（累積到20或gate50裁示下來才需要回報，中途不用），減少STATE.md重複記錄零資訊量的同一句話。
 - [x] **外部一改.3** **已完成（第1關 cheap gate，五條全數 FAIL）**：新增 `research/fut_classic_trend_gate_ext13.py`，五個名家機制照原文獻規則寫死參數（不掃參數、不挑格子），TX 日盤連續合約全歷史 2000-2024（6,185 交易日），判定用 2026-09-07 升級後的控制組標準（full_shuffle／block_shuffle_20d 各 N=200，門檻＝合併最大值）。結果：海龜 System1(20/10) 終值 1.4494／百分位 57.5；Donchian 完整版(55/20) 1.6232／54.0；Keltner(EMA20±2ATR10) 2.1929／78.8；波動度突破(0.5ATR20) 0.1675（−83.3%）／7.0；CTA 多時間框架＋15% 波動度目標 2.7023／73.0——**全部未過**。已 `register_trial()` 登記 TRIALS_LEDGER #234～#238，`trial_registry.py --check` exit=0；已寫入 STRATEGY_GRAVEYARD／FUT_LEADS／FUT_LOG。**同家族揭露**：四條趨勢突破彼此 r=+0.64～+0.84 且與既有 hyp_trend_multi_tf／hyp_donchian_breakout r≈+0.70～+0.75，**獨立發現數是 2 不是 5**（另一個是與所有機制 r≤0.234 的波動度突破）。已知偏離：只有日 K，突破與 2N 停損以收盤價判定（方向上對趨勢跟隨有利，非保守偏差）；曝險上限 1.0 不做槓桿。零新增 API 呼叫，holdout 全程未動用。
 - [x] **外部一改.4** **已完成**：三軌現況——US（一改.1）暫停中、TW（一改.2）已中止（tick 資料不足），本輪僅 FUT（一改.3）有新試驗，5 筆已於 #234～#238 登記，`trial_registry.py --check` exit=0 PASS。重跑 `selection_bias_ledger.py` 回報新 N 與門檻：**全體 241**（99.9793 百分位，原 219）／FUT 43（99.8837）／TW 76（99.9342）／US 65（99.9231）／未分軌 57（99.9123）。過程中揪出並修正 `selection_bias_ledger.py` 兩個 bug（非本項原先預期範圍，但直接影響本項要回報的 N，故一併修）：(1) `FACTOR_RE` 誤把備註欄的 `` `trial_registry.register_trial()` ``／`` `HYPOTHESIS_QUEUE.md` `` 當因子名，害跨軌重複因子誤報 3 個（其中 2 個是假的）；(2) `parse()` 沒排除 2026-08-25 FDR 重新評分對照表（33 列，第二欄是 `#2` 這種試驗編號引用不是日期），跟真試驗編號 1～33 撞號、多算 33 筆，N 從錯誤的 274 修回 241，與 `trial_registry.py` 的權威計數一致。**跨軌同概念**：修正後僅剩 1 個真實重複 `low_vol`（TW `f_low_vol` × US `f_us_low_vol`，屬既有已知重複非新發現）；外部一改.3 的 5 個期貨機制未與既有 TW/US 任何概念撞名，其內部同家族分組（四個突破類機制 r=0.64～0.84，5 筆算 2 個獨立發現）已在 #234～#238 登記時完成，本輪未變。冒煙測試 43/44 PASS，1 FAIL（#39 資料一致性稽核閘門，與本項改動的 `research/*` 檔案無關，為既有已知問題，見 commit `ccefd588`「確認 check 39 紅燈是真問題不是誤報」，屬另一條待辦，非本項範圍，故仍照做並如實回報）。影響檔案：`research/selection_bias_ledger.py`、`research/SELECTION_BIAS_LEDGER.md`、`research/data/selection_bias_ledger.json`、`research/TRIALS_LEDGER.md`（開頭累積總數行）。
 - [!] **外部二改** [研究] 抄新策略首批 8 條（美股 3／期貨 3／台股 2），先寫 SPEC 再實作　**⛔ 自走中止（2026-09-10 13:49）**：已完成美股3條(CANSLIM/SEPA/Darvas box)+台股2條(投信季底作帳/融券軋空)的SPEC，寫在research/EXTERNAL_STRATEGY_TWO_SPEC.md，尚未實作。期貨3條「見上」有歧義未寫：原話指向的清單(海龜/Donchian/Keltner/波動度突破/CTA多時間框架)已在外部一改.3(2026-09-10)全部測完，二改期貨3條疑似與一改.3重複裁示，不擅自認定解讀後就實作，待總司令一句話：期貨部分算一改.3已完成免做，或另挑3個新機制。
@@ -2142,7 +2142,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 >
 > 四、每一條新假設的成績（含 FAIL）都要進 signal_status.json，將來在 App 上對使用者公開——這是我們對籌碼K線那類產品的核心差異化。
 
-- [!] **轉向.二** 新假設 #50／#51／#52 規格與資料可行性查證（#49 照既有設計續跑）　**⛔ 自走中止（2026-09-15 11:51）**：轉向.二（#50/#51/#52規格與資料可行性查證）是研究帽工作，且已經在被獨立的AlphaHypothesisQueue自走track用HYPOTHESIS_QUEUE.md自己的協定積極處理中（該檔已有數千行針對#50/#51/#52的查證進度、#50卡tick資料累積未滿20交易日、#51三個子事件兩個FAIL一個待續、#52卡建置一.1前置依賴），本輪(開發佇列/維運+開發帽)若在此重新設計規格，會與正在跑的研究track重複或衝突判定，不符合CLAUDE.md帽子規則的越權禁止。建議：這條PENDING_QUEUE項目應該由HYPOTHESIS_QUEUE track依其自身協定收斂後回頭勾選，或請總司令重新裁示這條是否該從開發佇列的權威清單移除、改成純粹參照HYPOTHESIS_QUEUE.md的進度。
+- [x] **轉向.二** 新假設 #50／#51／#52 規格與資料可行性查證（#49 照既有設計續跑）　**2026-09-15 總司令裁示：同意以「重複項」結案**——本項與`AlphaHypothesisQueue`自走track正在依`HYPOTHESIS_QUEUE.md`自己的協定積極處理中的#50/#51/#52是同一件工作，不要兩條線做同一件事，改由`AlphaHypothesisQueue`單線處理，本條PENDING_QUEUE項目不再重複追蹤，進度直接看`HYPOTHESIS_QUEUE.md`。
 - [x] **轉向.三** 誠實判斷點寫進 MARATHON_PROTOCOL（2026-09-07 完成）
 - [x] **轉向.四** 每條新假設成績（含 FAIL）進 `data/signal_status.json`（與源頭一.4 同一份檔）
   （2026-09-15完成：**現況查核**——`research/build_signal_status.py`「每次
@@ -2560,7 +2560,7 @@ ORDER-END
     倒數也跟著樂觀（20 日說還需 11 天，實際 15 天）。**一個樂觀的倒數比沒有倒數更糟，
     使用者會以為快好了。** 已加 `MIN_DATE_COVERAGE=0.5` 覆蓋門檻過濾。
   - ⬜ **未做**：首頁自選股異常小點（需 60 日 z 分數，還差 55 個交易日）。
-- [!] **金流一.4** 評分引擎籌碼因子說明改引用 sector_flow 實際欄位（權重不動、不宣稱預測力）　**⛔ 自走中止（2026-09-15 12:33）**：金流一.4原指令要「籌碼因子（14%）的說明文字改為引用sector_flow.json的實際欄位（連續天數、5/20日加速度、異常z分數）」，但查證發現：14%權重的籌碼因子是research/weights_frozen.json的chips（generate_scores_live.py），其數值raw_inst_flow完全來自stock_detail.json的institutional.history（近5日三大法人買賣超張數滾動），與sector_flow.json（連續天數/加速度/z分數，個股層在stocks物件）是兩條完全獨立的計算管線，彼此不重疊。純改說明文字會變成描述一個沒有真的被算出來、也沒有顯示在頁面上的數字（違反本專案稽核恆等式鐵律「兩端都必須是使用者實際看得到的數字，不准自己決定算法」）；若要讓文字真的對得上，等於要把chips因子的計算公式從institutional.history改成引用sector_flow.json的個股層欄位——這是評分引擎已上線因子的公式變更，不是文字微調，且chips是14%權重、直接影響scores.json排名，屬於「新的架構/參數變更」，依CLAUDE.md提案先於執行鐵律該停下來問，不該由開發佇列自走輪次自行判斷改哪個方向。三個選項留給總司令裁示：(a)只改公式不改文字定位為新方向，改用sector_flow.json個股層欄位重算chips因子（需研究帽走驗證流程，不是開發帽能做的文字工作）；(b)維持現有institutional.history計算，只把說明文字改得更準確描述『這是institutional.history算的，不是sector_flow.json』（等於否定原指令的『改引用』字面意思）；(c)本項降級：把「改引用sector_flow.json」的範圍收斂到市場頁/個股頁那些本來就有讀sector_flow.json的UI文案（index.html的產業金流地圖卡6369-6371行、籌碼徽章3828-3831行——這兩處查證已經寫得夠精確，可能只需微調用詞），評分引擎本身的chips因子維持現狀不動。
+- [x] **金流一.4** 評分引擎籌碼因子說明改引用 sector_flow 實際欄位（權重不動、不宣稱預測力）　**2026-09-15 總司令更正裁示**：原指令前提錯了，自走行程當時擋下來是對的。更正後範圍：**不動公式、不動權重**，只確認說明文字誠實對上實際算法——chips因子既然取自`stock_detail.json`的`institutional.history`，文字就該寫`institutional.history`，不要硬指向`sector_flow.json`；讓`sector_flow`真的接進因子屬另一件架構變更，不在本項範圍，不順手做。**逐一查證現況（`generate_scores_live.py`43行docstring／498行使用者可見說明、`index.html`5245行空狀態文案、`docs/Alpha_評分引擎_10分制設計小抄.md`），全部已經正確描述`institutional.history`/T86＋MI_MARGN這條真實計算路徑，找不到任何一處把chips因子誤指向`sector_flow.json`**——原指令要求的「改引用」從未被執行（自走行程正確地在動手前就停下），現況本來就沒有需要修正的錯誤文字，本項確認後結案，不需要改動任何檔案。
 - [!] **金流一.5** HYPOTHESIS_QUEUE **#42**（原 #41，2026-09-06 總司令裁示改號，避免與已排程的 #41 撞號）產業金流加速度輪動效應，三關流程檢驗　**⛔ 自走中止（2026-09-15 12:46）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
 - [x] **金流一.6** **已完成**：`scripts/smoke_test.mjs` 新增 #47/#48 兩項資料一致性檢查——
   #47「sector_flow.json 每個產業合計＝成分股加總（容差1股）」：實測 40 個產業×視窗[1,5]
@@ -2974,7 +2974,7 @@ ORDER-END
   純文件新增未動`index.html`或任何資料檔，與本項無關）。**本輪結束後
   不繼續做源頭二.2**（避免在同一個未解決的合規問題上疊加更多對這台主機
   的請求），已呼叫`python scripts/dev_queue_runner.py block`。）
-- [!] **源頭二.2** 每個端點各打一次最小請求，記錄真實樣本 3 列與延遲；被拒者標「不可程式存取」並列替代路徑，不得繞　**⛔ 自走中止（2026-09-15 07:02）**：源頭二.1盤點時發現：docs/DATA_SOURCE_MAP.md已判定mopsov.twse.com.tw（MOPS查詢頁AJAX後端）robots.txt為除bingbot外全站Disallow，但四支已在跑且已回填真實資料到生產功能的程式（mops_insider_holdings_client.py董監持股/mops_buyback_client.py庫藏股/mops_cb_conversion_price_client.py可轉債轉換/mops_material_news_client.py重大訊息，其中重大訊息一支下游接了整套material_news_car_gate*.py事件研究）直接違反此結論，原始碼裡完全沒提到這個疑慮。三支建立於發現robots.txt問題之前（09-06~09-07），重大訊息那支建立於09-08 22:01（同日但晚於08:19記錄該問題的時間）。需要總司令裁示：(a)要不要保留已收集的資料、(b)要不要去信MOPS申請書面授權、(c)要不要停用這四支程式改找替代來源、(d)是否核准繼續源頭二.2對其他資料源的實測。詳細盤點見docs/FIRST_HAND_SOURCES.md最上方【重大發現】段落。本輪不擅自處理（不刪資料不停用程式），只誠實記錄並停下。
+- [x] **源頭二.2（MOPS合規部分）** 每個端點各打一次最小請求，記錄真實樣本 3 列與延遲；被拒者標「不可程式存取」並列替代路徑，不得繞　**2026-09-15 總司令裁示已執行**：對(a)(b)(c)三個選項裁示為(c)——立刻停用四支程式（`mops_insider_holdings_client.py`董監持股／`mops_buyback_client.py`庫藏股／`mops_cb_conversion_price_client.py`可轉債轉換／`mops_material_news_client.py`重大訊息）對`mopsov.twse.com.tw`的存取，理由：已為同一條紅線放棄ic.tpex／分點資料／驗證碼繞道，自己記錄的紅線不能自己踩。已執行：四支程式各自發request的函式加`PermissionError`硬性防呆，既有快取（901／41／30／2,607個parquet）保留不刪、不再新增。合規替代查證：#10/#11/#12查無TWSE openapi對應端點；#15（重大訊息）App面板本來就走合規的`openapi.twse.com.tw/v1/opendata/t187ap04_L`＋`mopsfin_t187ap04_O`，不受影響，只有研究端拿不到2026-09-08前的歷史深度。四支皆未接入任何App面板，停用不影響使用者看得到的功能。完整記錄見`docs/FIRST_HAND_SOURCES.md`最上方【重大發現】、`docs/DATA_SOURCE_MAP.md`「MOPS」節。**(d)是否核准繼續源頭二.2對其他資料源的實測維持未裁示，等總司令另外指示才恢復**。
 - [x] **源頭二.3** 依「機構用途強度 × 接入成本」排前 10 名先接入，每接一個進 `data/` 與 `STATUS.json`，前端有顯示位置與資料日期
   （2026-09-15開發佇列自走cycle_id 20260915-110102補記勾選）：排名表前10名
   已全數處理——8項完整/子集接入（#1/2/3/5/6/7/8/9/10）、#4 FRED待總司令
@@ -3217,7 +3217,10 @@ ORDER-END
 - [x] **CF.3** **已完成**：`docs/cloudflare_tunnel_setup.md`。查出 Access 預檢必 403（瀏覽器不在 OPTIONS 帶 cookie）需開 Bypass OPTIONS，且 iOS Safari 會擋 github.io→新網域的跨站 cookie，因此建議改走 Access 服務權杖；App 已加兩個選填欄位。
 - [x] **CF.4** **已完成**：`normalizeLiveUrl()` 自動補 scheme／去尾斜線與路徑（私有 IP 補 http），存檔後自動 `testLiveConnection()`。
 - [x] **CF.5** **已評估未執行**：技術可行、cookie 與 CORS 會簡單很多，但換來源會讓已安裝的 PWA 失效且 localStorage（自選股/設定）全部不見。建議等 /settings 多裝置同步上線後再搬。
-- [ ] **CF.6** /settings 多裝置同步（同稽核.四）
+- [x] **CF.6** **已完成（2026-09-15 開發佇列cycle_id=20260915-153103）**：與
+  「稽核.四」同一項，完整記錄寫在稽核.四條目（`GET/POST /settings`端點、
+  存放路徑刻意選`research/data/`避免風控參數進公開repo、App端拉取/推送
+  時機、常駐服務發布紀律四步驗證結果），此處不重複貼一份。
 
 ---
 
@@ -3282,7 +3285,28 @@ ORDER-END
 - [x] **稽核.一** **已完成**：6442 的 32 根因＝報告頁 `peg=null` 讓 renderReport 中途拋錯、上一檔（6808，收盤 32.0）的分批進場價留在畫面上（三個數字逐一吻合，已用 Playwright 重現）。四層防線：缺值安全格式化、REPORT_SEQ 世代守衛、面板 _safeSync 隔離＋進場清空、canonicalPrice ±30% 恆等式。`scripts/data_audit.py` 七類恆等式已產出首份全市場報告（2104 檔、一致性違規率 0.05%、通過 1% 門檻；完整度缺口 52.33% 歸稽核.二）。過程另抓到 **161 檔已下市股票還在選股榜上**（未來成長榜第 1 名是造假下市的康友-KY 6452），新增 build_listed_universe.py / prune_delisted.py 並在 generate_scores_live.py 加同一道過濾。設定頁新增「資料健康」區；冒煙測試新增 39/40/41 三道閘門，39 項全 PASS。✅ `.github/workflows/audit.yml` 已於 e9c88a8 推上遠端，**先前說「PAT 無 workflow scope」是錯的**。
 - [ ] **稽核.二** data/coverage.json 八因子覆蓋率儀表板＋補齊「抓取失敗/解析失敗」兩類
 - [ ] **稽核.三** 自建全市場資料庫（每日append累積10類官方資料集）
-- [ ] **稽核.四** live server /settings 端點多裝置同步
+- [x] **稽核.四** **已完成（2026-09-15 開發佇列cycle_id=20260915-153103，同CF.6）**：
+  `research/alpha_live_server.py`新增`GET/POST /settings`（token驗證），存
+  `watchlist`／`currency`／`risk_control`三項。**刻意的安全設計決定**：存檔
+  路徑選`research/data/user_settings.json`（`.gitignore`既有`research/data/`
+  規則已排除，不進公開repo），不是仿照`WATCHLIST_PATH`那樣放在`research/`
+  直接底下——風控參數（每日虧損上限NT$等）比自選股更能反映使用者財務資訊，
+  不應該進git歷史（沿路發現既有`.live_watchlist.json`其實已經被commit進repo，
+  內容是預設5檔沒有敏感性，本項不去動它，不屬本項範圍的「順手重構」）。
+  衝突解法：App比較`updated_at`時間戳，新的贏，伺服器只存最後一次收到的版本
+  （單使用者少裝置場景不需要欄位級合併）。
+  App端（`index.html`）：`pullSettingsOnce()`在啟動連上即時伺服器後拉一次、
+  `pushSettingsSoon()`（800ms debounce，同`pushWatchlistSoon()`既有手法）在
+  自選股新增/刪除（3處）／幣別切換(`setCcy`)／風控參數儲存(`saveRiskControl`)
+  時推送；沒設定即時伺服器時整組靜靜跳過，不影響既有純localStorage行為。
+  **驗證（常駐服務發布紀律四步）**：commit後`taskkill`舊行程（PID 116808）→
+  排程1分鐘內自動拉起→比對`/health`的`build`與`git rev-parse --short HEAD`
+  相同→OPTIONS預檢含`access-control-allow-credentials: true`→`stale_process:
+  false`。另外用`curl`直接測`GET/POST /settings`本機驗證存讀正確（POST後
+  GET拿回同一份`updated_at`與內容）。冒煙測試48項僅既有紅燈check 39 FAIL，
+  其餘全過。**已知限制**：目前是單一整份覆蓋（沒有欄位級合併），兩台裝置在
+  伺服器離線期間各自改了不同欄位，其中一份會被覆蓋蓋掉——這在單使用者
+  場景是可接受的取捨，多使用者/常態離線編輯情境需要重新設計。詳見CF.6。
 - [ ] **稽核.五** 其餘佇列照序
 
 ---

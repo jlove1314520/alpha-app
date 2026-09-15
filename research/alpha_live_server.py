@@ -1032,6 +1032,45 @@ async def get_subscribe(x_alpha_local_token: str | None = Header(default=None)):
     return doc
 
 
+# 2026-09-15（CF.6／稽核.四，總司令原話：「live server 新增 /settings 端點
+# (token 驗證)，儲存自選股、幣別、風控參數；App 啟動時拉取、變更時推送，讓任何
+# 裝置設定一致」）。刻意放在 research/data/（.gitignore 既有規則排除，不進公開
+# repo）而不是像 WATCHLIST_PATH 那樣放在 research/ 直接底下——風控參數（每日
+# 虧損上限金額等）比自選股更能反映使用者的財務資訊，不應該進 git 歷史。
+USER_SETTINGS_PATH = Path(os.environ.get("ALPHA_USER_SETTINGS_PATH")
+                          or (Path(__file__).parent / "data" / "user_settings.json"))
+ALLOWED_SETTINGS_KEYS = {"watchlist", "currency", "risk_control"}
+
+
+@app.get("/settings")
+async def get_settings(x_alpha_local_token: str | None = Header(default=None)):
+    """回傳目前存的跨裝置設定快照。沒存過就 exists=false，前端不覆蓋本機值——
+    第一支裝置的本機值就是目前唯一版本，不能被「空的伺服器狀態」蓋掉。"""
+    _check_token(x_alpha_local_token)
+    doc = _read_json_safe(USER_SETTINGS_PATH)
+    if not doc:
+        return {"ok": True, "exists": False, "settings": None, "updated_at": None}
+    return {"ok": True, "exists": True, "settings": doc.get("settings"), "updated_at": doc.get("updated_at")}
+
+
+@app.post("/settings")
+async def post_settings(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    """接收單一裝置推上來的設定並整份覆蓋存檔。衝突解法是「App端比較
+    updated_at，新的贏」，伺服器這邊只負責存最後一次收到的版本——單使用者
+    少裝置場景不需要欄位級合併，先用最簡單、使用者能理解的規則。"""
+    _check_token(x_alpha_local_token)
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="需要JSON物件")
+    settings = {k: v for k, v in payload.items() if k in ALLOWED_SETTINGS_KEYS}
+    doc = {"updated_at": datetime.now(TW_TZ).isoformat(), "settings": settings}
+    try:
+        USER_SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        USER_SETTINGS_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"寫入設定失敗：{e}") from e
+    return {"ok": True, "updated_at": doc["updated_at"], "settings": settings}
+
+
 async def _kbars_via_daemon(code: str) -> dict | None:
     """向常駐行程查當日 1 分K。查得到回結果 dict，查不到回 None（讓呼叫端走既有的 404）。
 

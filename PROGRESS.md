@@ -1,3 +1,29 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）CF.6／稽核.四：live server新增/settings端點，多裝置設定同步
+
+`dev_queue_runner.py next`接著指向`CF.6`（同`稽核.四`），總司令原話已給
+具體做法：「live server新增/settings端點(token驗證)，儲存自選股、幣別、
+風控參數；App啟動時拉取、變更時推送」——屬於「已交辦」不需要另外提案。
+
+`research/alpha_live_server.py`新增`GET/POST /settings`（沿用既有
+`_check_token()`）。**安全設計決定**：存檔路徑選`research/data/
+user_settings.json`（`.gitignore`既有規則排除，不進公開repo），不是仿照
+`WATCHLIST_PATH`放在`research/`直接底下——風控參數比自選股更能反映使用者
+財務資訊。過程中發現既有`.live_watchlist.json`其實已經被commit進repo（內容
+是預設5檔無敏感性），本項不去動它，避免越權「順手重構」。衝突解法：App比較
+`updated_at`，新的贏，伺服器只存最後一次收到的版本。
+
+`index.html`新增`pullSettingsOnce()`（啟動連上即時伺服器後拉一次）／
+`pushSettingsSoon()`（800ms debounce，掛進自選股新增/刪除3處、幣別切換、
+風控參數儲存），沒設定即時伺服器時整組靜靜跳過。
+
+**常駐服務發布紀律四步驗證**：commit後`taskkill`舊行程（PID 116808）→排程
+自動拉起新行程→`/health`的`build`與`git rev-parse --short HEAD`比對相同→
+OPTIONS預檢含`access-control-allow-credentials: true`→`stale_process:
+false`。另用curl直接測`GET/POST /settings`本機驗證存讀正確。冒煙測試48項
+僅既有紅燈check 39 FAIL，其餘全過。**已知限制**：整份覆蓋非欄位級合併，
+已寫入PENDING_QUEUE.md誠實揭露。影響檔案：`research/alpha_live_server.py`、
+`index.html`、`PENDING_QUEUE.md`、本檔。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）首頁新增「我的持股事件」卡（承接自競品一）
 
 `PENDING_QUEUE.md`權威清單源頭一.7完成後，`dev_queue_runner.py next`指向

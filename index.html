@@ -3809,7 +3809,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function confirmDelete(code){
     const nm=nameOf(code);
     document.getElementById('cf-msg').innerHTML=`確定要從自選股移除<br><b style="font-size:16px">${nm}（${code}）</b>嗎？`;
-    cfAction=()=>{WL=WL.filter(x=>x!==code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();hydrateHome()};
+    cfAction=()=>{WL=WL.filter(x=>x!==code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();pushSettingsSoon();hydrateHome()};
     document.getElementById('confirm').classList.add('open');
     document.getElementById('cmask').classList.add('open');
   }
@@ -3912,7 +3912,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     box.innerHTML=res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${s.name}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${s.ind}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('');
   }
   function pickStock(code){
-    if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();toast('已加入 '+nameOf(code))}
+    if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();pushSettingsSoon();toast('已加入 '+nameOf(code))}
     else{toast('已在自選股中')}
     doSearch();hydrateHome();
   }
@@ -4964,7 +4964,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       maxPosition:Number(document.getElementById('rc-max-position').value)||0,
       maxHoldings:Number(document.getElementById('rc-max-holdings').value)||0,
     };
-    localStorage.setItem('alpha_rc',JSON.stringify(rc));
+    localStorage.setItem('alpha_rc',JSON.stringify(rc));pushSettingsSoon();
     // 2026-08-28修正（P0-a）：同上，改用fmtTzHHMM()明確指定Asia/Taipei。
     setTxt('rc-saved-note','已儲存 · '+fmtTzHHMM(new Date(),'Asia/Taipei'));
     toast('風控參數已儲存');
@@ -5490,7 +5490,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const row=REPORT_CACHE;if(!row)return;
     if(WL.includes(row.code)){WL=WL.filter(x=>x!==row.code);toast('已從觀察清單移除')}
     else{WL.push(row.code);toast('已加入觀察清單')}
-    localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();
+    localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();pushSettingsSoon();
     updateReportWatchBtn(row.code);
   }
   function generateOrderPlan(){
@@ -5838,6 +5838,63 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // 伺服器沒開是常態，不記進診斷橫幅（會淹掉真正的程式錯誤）；
       // 只在主控台留一行，需要時查得到。
       console.warn('[pushWatchlist] 推送自選股清單失敗（不影響顯示，回退鏈仍有價格）：',e.message||e);
+    }
+  }
+  // ── 2026-09-15（CF.6／稽核.四）多裝置設定同步 ───────────────────────────────
+  // 總司令原話：「live server 新增 /settings 端點(token 驗證)，儲存自選股、
+  // 幣別、風控參數；App 啟動時拉取、變更時推送，讓任何裝置設定一致」。
+  // 衝突解法：比較 updated_at，新的贏——單使用者少裝置場景不需要欄位級合併。
+  // 沒設定即時伺服器、或伺服器沒開時，這裡靜靜跳過（跟 pushWatchlist 同款
+  // 「伺服器沒開是常態」處理），不影響 localStorage-only 的既有行為。
+  let SETTINGS_PUSH_TIMER=null,SETTINGS_PULLED_ONCE=false;
+  function _collectLocalSettings(){
+    return {watchlist:WL,currency:CCY,risk_control:readRC()};
+  }
+  function _applyServerSettings(s){
+    if(!s||typeof s!=='object')return;
+    if(Array.isArray(s.watchlist)){WL=s.watchlist;localStorage.setItem('alpha_wl',JSON.stringify(WL))}
+    if(typeof s.currency==='string'){CCY=s.currency;localStorage.setItem('alpha_ccy',CCY)}
+    if(s.risk_control&&typeof s.risk_control==='object')localStorage.setItem('alpha_rc',JSON.stringify(s.risk_control));
+  }
+  async function pullSettingsOnce(){
+    if(SETTINGS_PULLED_ONCE)return;  // 每個App session只在啟動時拉一次
+    if(!LIVE.configured||!LIVE.url)return;
+    SETTINGS_PULLED_ONCE=true;
+    try{
+      const r=await liveFetch('/settings',5000);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      if(!d.exists)return;  // 伺服器還沒存過任何裝置的設定，本機值就是唯一版本，不覆蓋
+      const localAt=localStorage.getItem('alpha_settings_synced_at');
+      if(!localAt||new Date(d.updated_at)>new Date(localAt)){
+        _applyServerSettings(d.settings);
+        localStorage.setItem('alpha_settings_synced_at',d.updated_at);
+        if(CURRENT_TAB==='home')_safeAsync('hydrateHome:afterSettingsSync',hydrateHome);
+        toast('已從其他裝置同步設定');
+      }
+    }catch(e){
+      console.warn('[pullSettingsOnce] 拉取跨裝置設定失敗（不影響顯示，沿用本機值）：',e.message||e);
+    }
+  }
+  function pushSettingsSoon(){
+    if(SETTINGS_PUSH_TIMER)clearTimeout(SETTINGS_PUSH_TIMER);
+    SETTINGS_PUSH_TIMER=setTimeout(()=>{_safeAsync('pushSettings',pushSettings)},800);
+  }
+  async function pushSettings(){
+    if(!LIVE.configured||!LIVE.url)return;
+    try{
+      const ac=new AbortController();const t=setTimeout(()=>ac.abort(),5000);
+      const r=await fetch(LIVE.url+'/settings',{
+        method:'POST',
+        headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),
+        body:JSON.stringify(_collectLocalSettings()),
+        cache:'no-store',credentials:'include',signal:ac.signal});
+      clearTimeout(t);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      if(d.updated_at)localStorage.setItem('alpha_settings_synced_at',d.updated_at);
+    }catch(e){
+      console.warn('[pushSettings] 推送設定失敗（不影響顯示，本機值仍有效）：',e.message||e);
     }
   }
   function lastCloseLabel(){
@@ -6724,7 +6781,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1557';
+  const APP_VERSION='2026-09-15.1607';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -6825,7 +6882,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   function setCcy(key){
     if(key==='USD'&&!FX_RATE){toast('匯率未更新，暫時無法切換至美元');return}
-    CCY=key;localStorage.setItem('alpha_ccy',key);
+    CCY=key;localStorage.setItem('alpha_ccy',key);pushSettingsSoon();
     renderCcyToggles();renderCcyAmounts();
   }
 
@@ -6854,7 +6911,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 使用者會看到一次沒必要的「連不上」再自己好起來，那種閃爍比慢一點更糟。
   // 發現本身有 2 秒逾時且並行，最壞情況只多等 2 秒。
   _safeAsync('discoverLiveEndpoint',()=>discoverLiveEndpoint()
-    .then(()=>{loadLiveConfig();renderLiveStatus();return startLiveStream()}));
+    .then(()=>{loadLiveConfig();renderLiveStatus();return startLiveStream()})
+    .then(()=>pullSettingsOnce()));  // 2026-09-15（CF.6／稽核.四）連上即時伺服器後拉一次跨裝置設定
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)})}
 </script>
 </body>
