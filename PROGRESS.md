@@ -1,3 +1,22 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）首頁新增「我的持股事件」卡（承接自競品一）
+
+`PENDING_QUEUE.md`權威清單源頭一.7完成後，`dev_queue_runner.py next`指向
+的下一項是承接自競品一、標註「未被本版指令涵蓋，保留」的舊項：首頁「我的
+持股事件」卡。既然自走runner判定它是目前排隊順位最前的可執行項，本輪就
+接手做掉，不當成永久排除項。
+
+範圍：`codes = 自選股(WL) ∪ 紙上持倉`，「紙上持倉」取
+`data/strategy_performance.json`各策略目前`holdings`（交易頁「策略監控台」
+既有用的同一份mark-to-market資料，非新造）。事件來源沿用既有`ensureEvents()`
+（跟個股頁「近期事件與題材」卡同一份`data/events.json`快取，不重打）＋
+`data/news.json`裡`codes`已命中的新聞（誠實揭露300篇僅34篇命中代號的覆蓋率
+限制），合併依時間排序取最近20筆，點一列呼叫既有`openStock(code)`跳個股頁；
+無事件時整張卡隱藏。
+
+驗證：Playwright實測卡片顯示真實資料（2330除權息／2408法說會等），點擊後
+`#sh-name`正確變成「台積電」，`pageerror`為空。冒煙測試48項僅既有紅燈check
+39 FAIL，其餘全過。影響檔案：`index.html`、`PENDING_QUEUE.md`、本檔。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）源頭一.7：驗收（DATA_SOURCE_MAP截圖／holders覆蓋數／2330人工核對／signal_status三態筆數）
 
 `PENDING_QUEUE.md`權威清單源頭一.7，純驗證性質，本輪未修改任何程式碼。

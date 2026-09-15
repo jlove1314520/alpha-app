@@ -518,6 +518,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
     </div>
 
+    <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與紙上
+    持倉（策略監控台各策略目前holdings）的events.json/news.json依時間排一條流，
+    點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
+    這張是已發生事件/新聞的回顧流，範圍也不同（含台股）。無事件時整張卡隱藏
+    （比照home-ai-card的既有做法），不畫空狀態佔位。 -->
+    <div class="card" id="home-my-events-card" hidden>
+      <h3>我的持股事件</h3>
+      <div id="my-holdings-events"></div>
+    </div>
+
     <div class="card">
       <h3>大盤速覽</h3>
       <div class="idx-strip" id="home-idx-rows"><div class="note">載入中…</div></div>
@@ -2636,6 +2646,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(runId!==HYDRATE_HOME_SEQ)return;
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
+    _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -2871,6 +2882,72 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){
       console.warn('[loadTodayEvents]',e);recordGlobalError('loadTodayEvents',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
+  }
+  // 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：codes＝自選股(WL)
+  // ∪ 紙上持倉（data/strategy_performance.json各策略目前holdings，交易頁「策略
+  // 監控台」用的同一份mark-to-market資料），事件來源沿用ensureEvents()（跟個股頁
+  // 「近期事件與題材」卡同一份data/events.json、同一個快取，不重打）＋news.json裡
+  // 已命中股票代號的新聞，兩者合併依時間排一條流，點一列跳個股頁。
+  let NEWS_CACHE=null,NEWS_AT=0;
+  async function ensureNews(){
+    if(NEWS_CACHE&&Date.now()-NEWS_AT<10*60*1000)return NEWS_CACHE;
+    try{
+      const r=await fetch('data/news.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      NEWS_CACHE=await r.json();NEWS_AT=Date.now();
+    }catch(e){
+      console.warn('[ensureNews]',e);recordGlobalError('ensureNews',e);
+      if(!NEWS_CACHE)NEWS_CACHE={news:[]};
+    }
+    return NEWS_CACHE;
+  }
+  async function loadMyHoldingsEvents(){
+    const card=document.getElementById('home-my-events-card'),el=document.getElementById('my-holdings-events');
+    if(!el)return;
+    try{
+      const codes=new Set(WL);
+      try{
+        const r=await fetch('data/strategy_performance.json?t='+Date.now());
+        if(r.ok){
+          const perf=await r.json();
+          Object.values(perf.strategies||{}).forEach(s=>(s.holdings||[]).forEach(c=>codes.add(c)));
+        }
+      }catch(e){console.warn('[loadMyHoldingsEvents:perf]',e);recordGlobalError('loadMyHoldingsEvents:perf',e)}
+      if(!codes.size){card.hidden=true;return}
+      const [evDoc,newsDoc]=await Promise.all([ensureEvents(),ensureNews()]);
+      const items=[];
+      (evDoc.events||[]).forEach(e=>{
+        if(!codes.has(e.code))return;
+        const ts=Date.parse(e.date);
+        if(!isNaN(ts))items.push({ts,dateTxt:String(e.date).slice(5),code:e.code,title:e.title,kind:e.type||'事件',url:e.url});
+      });
+      (newsDoc.news||[]).forEach(n=>{
+        const ts=Date.parse(n.published);
+        if(isNaN(ts))return;
+        (n.codes||[]).forEach(c=>{
+          if(!codes.has(c))return;
+          items.push({ts,dateTxt:new Date(ts).toISOString().slice(5,10),code:c,title:n.title,kind:'新聞',url:n.url});
+        });
+      });
+      items.sort((a,b)=>b.ts-a.ts);
+      const top=items.slice(0,20);
+      if(!top.length){card.hidden=true;return}
+      card.hidden=false;
+      el.innerHTML=top.map(it=>{
+        const c=EVENT_TYPE_COLOR[it.kind]||'var(--ink-3)';
+        const t=(it.title||'').replace(/</g,'&lt;');
+        return `<div style="display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--hairline);cursor:pointer" onclick="openStock('${it.code}')">
+          <span class="num" style="font-size:10px;color:var(--ink-4);min-width:32px;padding-top:2px">${it.dateTxt}</span>
+          <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${it.kind}</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${it.code}</b> ${nameOf(it.code)||''}・${t}</span>
+        </div>`;
+      }).join('')
+        +`<div class="note" style="margin-top:8px">涵蓋自選股與紙上持倉（策略監控台各策略目前holdings）共 ${codes.size} 檔代號，共 ${items.length} 筆事件/新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
+    }catch(e){
+      console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
+      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+      if(card)card.hidden=true;
     }
   }
   // 類股指數名稱（market_tw.json的sectors[].name，官方28+類，2026-08-27實測
@@ -6647,7 +6724,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1538';
+  const APP_VERSION='2026-09-15.1557';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

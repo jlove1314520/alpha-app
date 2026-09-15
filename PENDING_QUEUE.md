@@ -2911,7 +2911,23 @@ ORDER-END
      或含"通過"→已驗證、其餘→未驗證）。
   **本項純驗證，未修改任何程式碼**，過程中產生的截圖為一次性驗證用（未存入
   repo，驗證完即刪除，證據已寫入本條目文字）。
-- [ ] **（承接自競品一，未被本版指令涵蓋，保留）** 首頁「我的持股事件」卡：自選股與紙上持倉的 events/news 依時間排一條流，點開跳個股頁
+- [x] **（承接自競品一，未被本版指令涵蓋，保留）** **已完成（2026-09-15 開發佇列
+  cycle_id=20260915-153103）**：首頁新增「我的持股事件」卡（`home-my-events-
+  card`）。範圍定義：`codes = 自選股(WL) ∪ 紙上持倉`，「紙上持倉」取
+  `data/strategy_performance.json`各策略（`value_board_v2`等3個策略）目前
+  `holdings`陣列——這份資料本來就是交易頁「策略監控台」用的同一份mark-to-
+  market持倉，不是新造資料源。事件來源：`data/events.json`（沿用既有
+  `ensureEvents()`快取，跟個股頁「近期事件與題材」卡同一份，不重打）＋
+  `data/news.json`裡`codes`欄位已命中的新聞（300篇裡僅34篇有命中代號，
+  卡片文案誠實揭露這個覆蓋率限制），兩者合併依時間新到舊排序，取最近20筆，
+  點一列呼叫既有`openStock(code)`跳個股頁。無事件時整張卡`hidden`（比照
+  `home-ai-card`既有做法），不畫空狀態佔位。
+  **驗證**：Playwright實測卡片`hidden=false`且顯示真實資料（2330除權息交易日
+  現金7元／2408南亞科UBS法說會等），點擊列後`#sh-name`正確變成「台積電」
+  （確認`openStock('2330')`被觸發），`pageerror`為空陣列。冒煙測試
+  `node scripts/smoke_test.mjs`：48項僅既有紅燈check 39 FAIL（既有基準，
+  跟本項無關），其餘全過。影響檔案：`index.html`（新增卡片HTML＋
+  `loadMyHoldingsEvents()`／`ensureNews()`兩個函式＋掛進`hydrateHome()`）。
 
 ---
 
