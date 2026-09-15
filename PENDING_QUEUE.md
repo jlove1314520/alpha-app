@@ -3958,14 +3958,25 @@ ORDER-END
   通過率的檢定力曲線；Sharpe 0.3/0.5/0.8三檔強度下各關通過率），尚未
   開始寫程式碼，交由`AlphaHypothesisQueue`排程接續，優先權高於佇列中
   其他新假設。
-- [ ] **工廠一** 鏈路節點健康帳——擴充`data/seed/pipeline_registry.json`：
-  每個節點加「歷史故障次數／最近故障時間／故障型態／是否可移除」欄位，
-  每次`scripts/check_external_connectivity.py`停擺自檢亮燈就自動+1。
-  目的：用數據回答「哪個節點最脆弱、哪個能拿掉」。**與健檢.五新增的
-  `connectivity_alerts`機制相關但不同**：`connectivity_alerts`是「現在
-  健不健康」的即時亮燈，這條是「累積歷史故障統計」的長期健康帳，兩者
-  都寫進`local_task_health`但欄位不同，實作時注意不要互相覆蓋。尚未
-  開始，排進DevQueue佇列（見上方ORDER清單）。
+- [x] **工廠一** 鏈路節點健康帳——**已完成並實測**（`DevQueue-Cycle:
+  20260915-231602`）：`data/seed/pipeline_registry.json`每個節點新增
+  `fault_history`欄位（`count`歷史故障次數／`last_fault_at`最近故障
+  時間／`fault_types`故障型態分類計數／`removable`是否可移除，人工判斷
+  欄位、累積數據不足前一律`null`）。新增`scripts/pipeline_fault_ledger.py`
+  做「邊緣觸發」計數——同一次停擺持續多輪只在狀態從正常/未知變成
+  stalled/missing的那一刻算一次故障事件，不會因為`check_external_
+  connectivity.py`每5分鐘跑一次就把「停了多久」誤算成「停過幾次」；
+  上一輪狀態存`research/.pipeline_fault_state.json`（比照既有
+  `.external_connectivity_state.json`前例，同樣track進git）。
+  `check_external_connectivity.py`在`check_local_tasks()`後呼叫
+  `update_pipeline_fault_ledger()`（包一層try/except，監測器本體
+  不因健康帳寫檔失敗而崩潰）；`pipeline_inventory.py`同步顯示累積
+  故障數（文字表格＋`--json`輸出）。**實測**：手動跑兩次
+  `check_external_connectivity.py`，第一次對正在停擺的
+  `AlphaMarketSparklines`（`data/sparklines.json`，見「零」條目已知
+  的10天過期問題）正確新增一筆`count:1／fault_types:{"stalled":1}`；
+  第二次確認邊緣觸發生效，count未重複累加仍為1。與健檢.五的
+  `connectivity_alerts`（即時亮燈）維持獨立欄位，未互相覆蓋。
 - [x] **工廠二** 參數上限閘門（新增第11關）——**已完成**：任何新機制自由
   參數>5個必須在SPEC裡說明理由，且每多一個參數要計入多重比較懲罰。已寫入
   `CLAUDE.md`七之三「新增五道關卡（第7~11關）」節（這是CLAUDE.md自己的

@@ -1,8 +1,9 @@
 {
-  "purpose": "本機十個排程管線的單一事實來源（2026-09-10 停擺四）。這一份同時餵給兩個地方：scripts/pipeline_inventory.py 印出的清點表，以及 scripts/check_external_connectivity.py 的停擺自檢。兩者讀同一份，才不會出現「表上有、自檢沒監控」的漏洞——alpha.db 空轉 20 天才被發現，就是因為沒有這份清單。",
+  "purpose": "本機十個排程管線的單一事實來源（2026-09-10 停擺四）。這一份同時餵給兩個地方：scripts/pipeline_inventory.py 印出的清點表，以及 scripts/check_external_connectivity.py 的停擺自檢。兩者讀同一份，才不會出現「表上有、自檢沒監控」的漏洞——alpha.db 空轉 20 天才被發現，就是因為沒有這份清單。2026-09-15（工廠一）起，同一份也承載每個節點的累積故障帳（見 fault_history_note）。",
   "why_data_level": "freshness 有兩種：mtime 只證明檔案被寫過，不證明內容是新的。alpha.db 的 mtime 天天更新（每天都有連線去寫），但 daily_price 的 max(date) 停在 2026-08-21——這正是靜默停擺的典型形狀。所以凡是檔案內部帶有日期/時間戳的，一律用資料層的值判定，不用 mtime。",
   "stall_factor": 3,
   "stall_factor_note": "判定門檻＝預期間隔 × 這個倍數。容忍單次延遲與一次重試，但連續錯過三個週期就一定是真的停了。",
+  "fault_history_note": "2026-09-15（工廠一）新增每個節點的 fault_history 欄位：count=累積故障事件數、last_fault_at=最近一次故障時間、fault_types=依故障型態(stalled/missing)分類計數、removable=是否可移除（人工判斷欄位，非自動計算，累積數據不足前一律 null）。由 scripts/pipeline_fault_ledger.py 在 scripts/check_external_connectivity.py 每輪停擺自檢後呼叫，採「邊緣觸發」計數——同一次停擺持續多輪只在『從正常/未知變成停擺』那一刻算一次故障事件，不會因為停擺持續了幾小時就被 5 分鐘一次的檢查重複灌爆次數（狀態變化紀錄存在 research/.pipeline_fault_state.json）。所有節點的 count 從本次擴充當下（2026-09-15）歸零起算——之前已發生過的事故（AlphaData 20天空轉、AlphaDepCheck 連續數週 0x80070002、AlphaTwsePublishProbe 一次性觸發器失效等）只有文字記錄在 PROGRESS.md/CLAUDE.md，沒有逐筆事件時間戳可回溯，不杜撰精確次數去回填，如實從 0 開始累計。",
   "pipelines": [
     {
       "task": "AlphaLiveServer",
@@ -10,14 +11,26 @@
       "interval_min": 1,
       "artifact": "research/alpha_live_server_cycle.log",
       "freshness": "mtime",
-      "note": "純執行日誌，沒有資料層時間戳，只能看 mtime。真正的健康檢查是 /health。"
+      "note": "純執行日誌，沒有資料層時間戳，只能看 mtime。真正的健康檢查是 /health。",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaShioajiQuotes",
       "purpose": "永豐 Shioaji 盤中逐筆常駐程式的啟動器",
       "interval_min": 2,
       "artifact": "research/shioaji_quotes_cycle.log",
-      "freshness": "mtime"
+      "freshness": "mtime",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaShioajiQuotes",
@@ -26,14 +39,26 @@
       "artifact": "data/quotes_sinopac.json",
       "freshness": "json_field",
       "field": "checked_at",
-      "note": "盤中不更新是正常的，所以間隔按日計，不是按分鐘。"
+      "note": "盤中不更新是正常的，所以間隔按日計，不是按分鐘。",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaIbkrQuotes",
       "purpose": "美股報價（IBKR Gateway）",
       "interval_min": 5,
       "artifact": "research/ibkr_quotes_cycle.log",
-      "freshness": "mtime"
+      "freshness": "mtime",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaIbkrQuotes",
@@ -42,7 +67,13 @@
       "artifact": "data/quotes_ibkr.json",
       "freshness": "json_field",
       "field": "fetched_at",
-      "note": "connected=false 時仍會寫入失敗狀態，所以這一項新鮮不代表拿得到報價——Gateway 是否登入要看 external_connectivity 的 ibkr_gateway。"
+      "note": "connected=false 時仍會寫入失敗狀態，所以這一項新鮮不代表拿得到報價——Gateway 是否登入要看 external_connectivity 的 ibkr_gateway。",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaConnectivity",
@@ -50,7 +81,13 @@
       "interval_min": 5,
       "artifact": "research/external_connectivity.jsonl",
       "freshness": "jsonl_last_field",
-      "field": "ts"
+      "field": "ts",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaTwsePublishProbe",
@@ -63,28 +100,52 @@
         13,
         20
       ],
-      "note": "只在收盤後的發布觀察窗跑，窗外沒產出是正常的。"
+      "note": "只在收盤後的發布觀察窗跑，窗外沒產出是正常的。",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaDevQueue",
       "purpose": "開發任務佇列自走輪次",
       "interval_min": 15,
       "artifact": "research/dev_queue_cycle.log",
-      "freshness": "mtime"
+      "freshness": "mtime",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaMarathon",
       "purpose": "研究馬拉松自走輪次",
       "interval_min": 30,
       "artifact": "research/marathon_cycle.log",
-      "freshness": "mtime"
+      "freshness": "mtime",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaHypothesisQueue",
       "purpose": "假設佇列自走輪次",
       "interval_min": 30,
       "artifact": "research/hypothesis_queue_cycle.log",
-      "freshness": "mtime"
+      "freshness": "mtime",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaData",
@@ -110,7 +171,13 @@
           "column": "date"
         }
       ],
-      "note": "**這一條就是 stall 自檢存在的理由。** mtime 天天更新但 max(date) 停在 2026-08-21，整整 20 天沒人發現。門檻 3 天剛好涵蓋週末。"
+      "note": "**這一條就是 stall 自檢存在的理由。** mtime 天天更新但 max(date) 停在 2026-08-21，整整 20 天沒人發現。門檻 3 天剛好涵蓋週末。",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaDepCheck",
@@ -118,7 +185,13 @@
       "interval_min": 10080,
       "artifact": "data/dependency_status.json",
       "freshness": "json_field",
-      "field": "generated_at"
+      "field": "generated_at",
+      "fault_history": {
+        "count": 0,
+        "last_fault_at": null,
+        "fault_types": {},
+        "removable": null
+      }
     },
     {
       "task": "AlphaMarketSparklines",
@@ -127,7 +200,15 @@
       "artifact": "data/sparklines.json",
       "freshness": "json_field",
       "field": "meta.generated_at",
-      "note": "2026-09-15（sparklines凍結事件解封，防重演四.1）新增。跟 AlphaData 條目同一套既有慣例：interval_min=1440 × stall_factor=3 = 3 天門檻，用日曆天數近似總司令指定的「3個交易日」（含週末緩衝）。這支腳本掛在 market.yml 排程（平日最多跑3次：17:00/18:30台北 + 05:30次日美股批次），本檔案凍結10天沒人發現正是本條要防的事件本身。"
+      "note": "2026-09-15（sparklines凍結事件解封，防重演四.1）新增。跟 AlphaData 條目同一套既有慣例：interval_min=1440 × stall_factor=3 = 3 天門檻，用日曆天數近似總司令指定的「3個交易日」（含週末緩衝）。這支腳本掛在 market.yml 排程（平日最多跑3次：17:00/18:30台北 + 05:30次日美股批次），本檔案凍結10天沒人發現正是本條要防的事件本身。",
+      "fault_history": {
+        "count": 1,
+        "last_fault_at": "2026-09-15T23:19:02.706775+08:00",
+        "fault_types": {
+          "stalled": 1
+        },
+        "removable": null
+      }
     }
   ],
   "github_pat_expiry": {

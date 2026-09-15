@@ -20,6 +20,9 @@ from datetime import datetime, timedelta, timezone
 
 from pipeline_freshness import evaluate, load_registry
 
+# 2026-09-15【工廠一】：key 跟 pipeline_fault_ledger._key() 用同一套規則
+# （task+artifact 才唯一，task 名稱本身會重複）。
+
 TZ = timezone(timedelta(hours=8))
 
 for _s in (sys.stdout, sys.stderr):
@@ -60,13 +63,17 @@ def main() -> int:
 
     now = datetime.now(TZ)
     rows, stalled = evaluate(now)
+    reg = load_registry()
+    fault_by_key = {f'{p.get("task", "")}::{p.get("artifact", "")}': p.get("fault_history", {})
+                     for p in reg.get("pipelines", [])}
+    for r in rows:
+        r["fault_history"] = fault_by_key.get(f'{r["task"]}::{r["artifact"]}', {})
 
     if a.json:
         print(json.dumps({"checked_at": now.isoformat(), "stalled": stalled,
                           "pipelines": rows}, ensure_ascii=False, indent=1))
         return 1 if stalled else 0
 
-    reg = load_registry()
     print("=" * 96)
     print(f"  本機管線清點　{now.strftime('%Y-%m-%d %H:%M:%S')}　"
           f"（停擺門檻＝預期間隔 × {reg.get('stall_factor', 3)}）")
@@ -78,6 +85,10 @@ def main() -> int:
               f"{r['artifact']:<44}{_expect(r):<9}{_age(r)}")
         if r["status"] in ("stalled", "missing", "unknown") and r.get("source"):
             print(f"      └ {r['source']}")
+        fh = r.get("fault_history") or {}
+        if fh.get("count"):
+            types = "、".join(f"{k}×{v}" for k, v in (fh.get("fault_types") or {}).items())
+            print(f"      └ 累積故障 {fh['count']} 次（{types}），最近一次 {fh.get('last_fault_at', '?')}")
 
     print()
     if stalled:

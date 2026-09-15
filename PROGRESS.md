@@ -1,3 +1,57 @@
+## 2026-09-15（DevQueue自走，cycle 20260915-231602）工廠一：鏈路節點健康帳
+
+戴**開發帽**。DevQueue自走輪次，依`PENDING_QUEUE.md`權威執行順序取件到
+【工廠一】：`data/seed/pipeline_registry.json`擴充鏈路節點健康帳。
+
+**做了什麼**：每個節點（12條管線）新增`fault_history`欄位：`count`（歷史
+故障次數）／`last_fault_at`（最近故障時間）／`fault_types`（依stalled／
+missing分類計數）／`removable`（是否可移除，人工判斷欄位，非自動計算，
+累積數據不足前一律`null`）。新增`scripts/pipeline_fault_ledger.py`實作
+「邊緣觸發」計數邏輯——同一次停擺持續好幾輪（`check_external_
+connectivity.py`每5分鐘跑一次）只在狀態**從正常/未知變成stalled/missing
+的那一刻**算一次故障事件，不會把「停了多久」誤算成「停過幾次」，這兩個
+是完全不同的問題，後者才是判斷「這個節點能不能拿掉」該看的數據。上一輪
+狀態存`research/.pipeline_fault_state.json`（比照既有
+`research/.external_connectivity_state.json`前例，同樣track進git）。
+
+`check_external_connectivity.py`在`check_local_tasks()`後呼叫新增的
+`update_pipeline_fault_ledger()`，包一層try/except（監測器本體不能因
+健康帳寫檔失敗而整輪崩潰，沿用既有慣例）。`pipeline_inventory.py`同步
+顯示累積故障數（文字表格每列補一行「累積故障N次」，`--json`輸出也帶
+`fault_history`），讓「哪個節點最脆弱」這個問題能直接從清點表讀出來，
+不用另開一個工具。
+
+**歷史資料誠實揭露**：所有節點的`count`從本次擴充當下（2026-09-15）歸零
+起算——之前已發生過的事故（AlphaData 20天空轉、AlphaDepCheck連續數週
+0x80070002、AlphaTwsePublishProbe一次性觸發器失效等）只有文字記錄在
+PROGRESS.md/CLAUDE.md，沒有逐筆事件時間戳可回溯，不杜撰精確次數去回填。
+
+**實測**：手動連跑兩次`check_external_connectivity.py`——第一次對正在
+停擺的`AlphaMarketSparklines`（`data/sparklines.json`，即「零」條目已知
+的10天過期問題，本輪未修、僅驗證健康帳機制本身）正確新增一筆
+`count:1／last_fault_at/fault_types:{"stalled":1}`；第二次確認邊緣觸發
+生效，count未重複累加、仍為1（`git diff`比對`pipeline_registry.json`
+確認）。`pipeline_inventory.py`文字表與`--json`輸出都正確顯示新欄位。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 49/50 PASS，1 FAIL（#39
+資料一致性稽核閘門，一致性違規率32.95%）——`git status`確認
+`data/audit_report.json`本輪未修改（是既有排程產生的既存狀態，
+與sparklines「零」條目同一個已登記在案的既有紅燈，等待總司令裁示修法
+方向），本輪完全未動`index.html`，與此次Python/JSON變更無關。
+
+**影響檔案**：`data/seed/pipeline_registry.json`（新增`fault_history`
+欄位）、`scripts/pipeline_fault_ledger.py`（新增）、
+`scripts/check_external_connectivity.py`（新增
+`update_pipeline_fault_ledger()`並掛進`main()`）、
+`scripts/pipeline_inventory.py`（顯示累積故障數）、
+`research/.pipeline_fault_state.json`（新增，狀態持久化）、
+`PENDING_QUEUE.md`（【工廠一】標記完成）。
+
+**下一步**：依權威執行順序，下一項是【工廠四】工廠穩定性可量測化（MTBF
+與每週人工介入次數儀表板）。
+
+---
+
 ## 2026-09-15（sparklines解凍）新PAT實測可推workflow，market.yml排程補回，二.1/二.2誠實維持未完成
 
 戴**維運帽**。總司令換上含`Workflows: Read and write`scope的新fine-grained

@@ -207,6 +207,22 @@ def check_local_tasks(now: datetime) -> tuple[list[dict], list[str]]:
         return [], []
 
 
+def update_pipeline_fault_ledger(rows: list[dict], now: datetime) -> None:
+    """2026-09-15（總司令交辦【工廠一】）：把這一輪的停擺/缺檔狀態累積進
+    `data/seed/pipeline_registry.json` 每個節點的 fault_history（次數／最近
+    時間／型態），目的是用數據回答「哪個節點最脆弱、哪個能拿掉」。
+    邊緣觸發計數邏輯在 scripts/pipeline_fault_ledger.py，這裡只負責呼叫並
+    吞掉例外——監測器本體不能因為健康帳寫檔失敗而整輪崩潰。
+    """
+    try:
+        from pipeline_fault_ledger import update_fault_history
+        new_faults = update_fault_history(rows, now)
+        for msg in new_faults:
+            print(f"  + 鏈路節點健康帳：新增一筆故障事件 {msg}")
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 鏈路節點健康帳更新失敗（{type(e).__name__}: {e}），本輪跳過，不影響停擺自檢本身")
+
+
 def check_stale_user_visible_blocks() -> list[str]:
     """2026-09-15（總司令裁示【防重演】，sparklines凍結事件教訓）：
     PENDING_QUEUE.md 裡標記【使用者可見】的阻塞項，超過3個交易日沒處理
@@ -309,6 +325,9 @@ def main() -> int:
 
     # 常駐工作停擺自檢：跟對外連通性一起做，因為兩者都是「本機到底還活著嗎」。
     task_rows, task_stalls = check_local_tasks(now)
+    # 2026-09-15【工廠一】：每次自檢亮燈（stalled/missing）就把事件累積進
+    # 每個節點的健康帳，長期用來回答「哪個節點最脆弱、哪個能拿掉」。
+    update_pipeline_fault_ledger(task_rows, now)
     # 2026-09-15【防重演】：PENDING_QUEUE.md裡【使用者可見】標記的阻塞項也併進
     # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
     # 教總司令看第三個地方。
