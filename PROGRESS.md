@@ -1,3 +1,36 @@
+## 2026-09-15 18:02（開發佇列自走，cycle_id=20260915-171602）稽核二.四完成：稽核每晚排程落地（AlphaDataAudit）
+
+戴**維運帽**。接續權威清單稽核二.四：稽核每晚排程＋設定頁資料健康＋
+smoke FAIL條件（後兩塊已在稽核.一完成，只缺排程本身沒有落地）。
+
+**做法**：用`Register-ScheduledTask`新增Windows排程`AlphaDataAudit`，
+每天23:00（收盤後，且晚於`AlphaData`/GitHub Actions等其他每日資料
+排程，確保稽核跑的時候當天資料已經到齊）跑`scripts\data_audit.py`，
+沿用既有`AlphaTdccHolders`任務的command pattern：跑完把log寫進
+`research\data_audit_cycle.log`，`git add data\audit_report.json`，
+有變動才commit（訊息「稽核每晚排程自動更新data/audit_report.json」），
+push失敗重試5次（跟其他排程一致，處理偶發DNS/網路波動）。
+
+**驗收（不只是註冊，實際跑過一次）**：`Start-ScheduledTask`手動觸發，
+等到`State`回`Ready`，`Get-ScheduledTaskInfo`確認`LastTaskResult=0`
+（成功）；`git log`看到新commit`cd6dedda`；`git log origin/main`確認
+遠端也有這個commit（不是只在本機，是真的push成功）。`research\
+data_audit_cycle.log`加進`.gitignore`（跟既有`*_cycle.log`慣例一致，
+避免每晚一筆新增內容的log檔污染git diff）。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 47/48 PASS，僅#39既有已知
+紅燈（跟前三項記錄同一個原因）。
+
+**影響**：新增Windows排程任務`AlphaDataAudit`（系統設定，非repo檔案）、
+`.gitignore`。**commit**：`.gitignore`異動待下方一併提交；`cd6dedda`
+是排程自己跑出來的稽核結果commit（非本次手動commit，是驗收證據）。
+
+**下一步**：接續權威清單下一項**稽核二.五**（其餘佇列照序：多裝置
+/settings、自建資料庫每日累積、柱狀圖零基線、融資維持率分母、休市
+標籤、群益唯讀、分點演習、產業價值鏈、新聞管線、本地摘要）。
+
+---
+
 ## 2026-09-15（開發佇列自走，cycle_id=20260915-171602）稽核二.三查證完成（未修改程式碼，寫成提案等總司令裁示）
 
 戴**驗證帽**。接續權威清單稽核二.三（鑫永洋6241本益比22.64 vs 35.64根因

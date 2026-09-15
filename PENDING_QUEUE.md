@@ -3388,7 +3388,17 @@ ORDER-END
   『違規』持續污染`violation_rate`（目前36.7%裡有很大一塊其實是這個
   問題，不是真的資料錯）；(c) 若要深入到底哪邊基礎更準，需要另開研究
   項目對照MOPS官方個別/合併財報EPS，工作量較大。
-- [ ] **稽核二.四** 稽核每晚排程＋設定頁資料健康＋smoke FAIL 條件（設定頁與 smoke 已於稽核.一完成，缺排程落地）
+- [x] **稽核二.四** **已完成（2026-09-15開發佇列cycle_id=20260915-171602）**：
+  新增Windows排程任務`AlphaDataAudit`（`Register-ScheduledTask`），每天
+  23:00跑`scripts\data_audit.py`，成功則`git add data\audit_report.json`
+  並在有變動時commit+push（重試5次，同`AlphaTdccHolders`既有排程慣例）。
+  **已手動觸發驗證一次**（`Start-ScheduledTask`）：`LastTaskResult=0`，
+  產出commit`cd6dedda`「稽核每晚排程自動更新data/audit_report.json」，
+  `git log origin/main`確認已成功push到遠端（非只是本機commit）。log
+  寫入`research/data_audit_cycle.log`並加進`.gitignore`（跟既有
+  `*_cycle.log`慣例一致）。設定頁「資料健康」卡與smoke test的
+  gate_pass/違規率>1%條件已在稽核.一完成，本項只補排程落地這一塊，
+  三塊合起來才算完整達成原始指令。
 - [ ] **稽核二.五** 其餘佇列照序
 
 ---
