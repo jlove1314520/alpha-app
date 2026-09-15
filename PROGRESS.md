@@ -1,3 +1,26 @@
+## 2026-09-15（無人值守馬拉松自走・交辦優先執行紀錄・第十一輪）題材七待辦2續跑：官網抓取第二批20檔，累計30/259
+
+本輪開工先讀`PENDING_QUEUE.md`最上方（CLAUDE.md「交辦優先於自走」鐵律）：
+兩條阻塞項（S4U／claude CLI非互動驗證）維持阻塞，皆需總司令本人有管理員
+權限，非本執行個體可解；【題材七】上一輪（假設佇列第十輪）留下可執行項是
+待辦2（259家官網抓取管線，剩249檔）。
+
+- 執行環境檢查：`pip show beautifulsoup4`回`Package(s) not found`，本機
+  這次喚醒的執行環境缺`theme_official_site_pipeline.py`既有相依套件
+  （上一輪的環境有裝，非本輪新增）。`pip install beautifulsoup4`補齊——
+  這是延續已核准任務所需的環境還原，不是新架構決策。
+- 跑`python research/theme_official_site_pipeline.py --batch-size 20
+  --offset 10`（排序第11~30檔，代號1326~1723）：`fetched=14/20`、
+  `http_403=2`、`blocked_js_render=2`、`exc_SSLError=2`，失敗原因分布
+  合理（皆對方端限制：403擋UA、JS渲染、SSL憑證問題，依`CLAUDE.md`取得
+  方式鐵律不偽造UA、不裝無頭瀏覽器繞過）。本批新增`a_level_hits`2筆。
+- 累計進度：30/259檔已跑過，`a_level_hits`累計8筆（皆仍`status:
+  "draft_unreviewed"`，未人工抽查，不得視為題材七正式證據）。
+- **仍未做**：待辦2剩餘229檔（下一輪可用`--offset 30`續跑）、待辦4
+  驗證樣本擴充（仍5句，與待辦2無依賴關係，可獨立續做）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十輪）題材七待辦2起步：官網抓取批次管線建成並實跑第一批10檔
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀`PENDING_QUEUE.md`最上方：
