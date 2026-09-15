@@ -3299,14 +3299,21 @@ ORDER-END
   `pushSettingsSoon()`（800ms debounce，同`pushWatchlistSoon()`既有手法）在
   自選股新增/刪除（3處）／幣別切換(`setCcy`)／風控參數儲存(`saveRiskControl`)
   時推送；沒設定即時伺服器時整組靜靜跳過，不影響既有純localStorage行為。
-  **驗證（常駐服務發布紀律四步）**：commit後`taskkill`舊行程（PID 116808）→
-  排程1分鐘內自動拉起→比對`/health`的`build`與`git rev-parse --short HEAD`
-  相同→OPTIONS預檢含`access-control-allow-credentials: true`→`stale_process:
-  false`。另外用`curl`直接測`GET/POST /settings`本機驗證存讀正確（POST後
-  GET拿回同一份`updated_at`與內容）。冒煙測試48項僅既有紅燈check 39 FAIL，
-  其餘全過。**已知限制**：目前是單一整份覆蓋（沒有欄位級合併），兩台裝置在
-  伺服器離線期間各自改了不同欄位，其中一份會被覆蓋蓋掉——這在單使用者
-  場景是可接受的取捨，多使用者/常態離線編輯情境需要重新設計。詳見CF.6。
+  **驗證（常駐服務發布紀律四步，實測輸出）**：commit（805458d5）後`taskkill`
+  舊行程兩輪（第一輪重啟時HEAD正好被另一條自走track的IBKR自動commit卡在
+  中間一個舊commit，故重啟第二輪）→排程自動拉起新行程（PID 126472）→
+  `/health`回`build=805458d`與`git rev-parse --short HEAD`（805458d5）比對
+  相同→OPTIONS預檢回應含`access-control-allow-credentials: true`與
+  `access-control-allow-origin: https://jlove1314520.github.io`→`stale_
+  process: false`。另用Python `requests`直接測`POST /settings`（存入測試值）
+  →`GET /settings`拿回同一份`updated_at`與內容，確認存讀正確；**測試完立即
+  刪除**`research/data/user_settings.json`（本機檔、不進git），避免測試用的
+  假watchlist透過`pullSettingsOnce()`蓋掉使用者手機上真實的自選股——刪除後
+  重新GET確認回到`exists:false`乾淨狀態。冒煙測試48項僅既有紅燈check 39
+  FAIL，其餘全過。**已知限制**：目前是單一整份覆蓋（沒有欄位級合併），兩台
+  裝置在伺服器離線期間各自改了不同欄位，其中一份會被覆蓋蓋掉——這在單
+  使用者場景是可接受的取捨，多使用者/常態離線編輯情境需要重新設計。
+  詳見CF.6。
 - [ ] **稽核.五** 其餘佇列照序
 
 ---
