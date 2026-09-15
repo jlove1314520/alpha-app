@@ -587,14 +587,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div id="market-tw-panel">
       <div class="card">
         <h3>大盤指數</h3>
-        <div id="idx-rows"><div class="note">載入中…</div></div>
+        <div id="idx-rows"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" id="idx-datatime"></div>
         <div class="note">來源：TWSE/TPEx 官方開放資料，GitHub Actions 排程抓取</div>
       </div>
 
       <div class="card">
         <h3>類股表現（今日漲跌幅）</h3>
-        <div class="heat" id="heat-grid"><div class="note">載入中…</div></div>
+        <div class="heat" id="heat-grid"><div class="skel-block" style="height:140px"></div></div>
         <div class="legend">
           <div class="li"><span class="sw" style="background:#8f2f2f"></span>漲</div>
           <div class="li"><span class="sw" style="background:#383835"></span>平</div>
@@ -617,7 +617,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="card">
         <h3>產業金流 <span style="font-size:9.5px;color:var(--ink-4);font-weight:400">法人行為（描述性資訊，非預測訊號）</span></h3>
         <div class="mkt-toggle" id="flow-toggle" style="margin-bottom:10px"></div>
-        <div id="sector-flow-body"><div class="note">載入中…</div></div>
+        <div id="sector-flow-body"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" id="sector-flow-note"></div>
       </div>
 
@@ -637,7 +637,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <!-- 2026-09-15（源頭二.3第9名）全國進出口貿易統計，財政部關務署官方開放資料免金鑰。 -->
       <div class="card">
         <h3>全國進出口貿易統計</h3>
-        <div class="facts" id="customs-trade-rows"><div class="note">載入中…</div></div>
+        <div class="facts" id="customs-trade-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
         <div class="note" id="customs-trade-datatime"></div>
         <div class="note">來源：財政部關務署官方開放資料（data.gov.tw#6053），GitHub Actions 排程；官方每月更新，資料通常落後1個月，YoY為本App自算，僅供參考非投資建議</div>
       </div>
@@ -645,7 +645,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <!-- 2026-09-15（源頭二.3第10名）工業生產指數，經濟部官方開放資料免金鑰。僅生產指數，外銷訂單未接入。 -->
       <div class="card">
         <h3>工業生產指數</h3>
-        <div class="facts" id="ip-index-rows"><div class="note">載入中…</div></div>
+        <div class="facts" id="ip-index-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
         <div class="note" id="ip-index-datatime"></div>
         <div class="note">來源：經濟部官方開放資料（data.gov.tw#6607），GitHub Actions 排程；官方每月更新，資料通常落後1~2個月，MoM/YoY為本App自算；僅涵蓋工業生產指數，外銷訂單金額尚未接入，僅供參考非投資建議</div>
       </div>
@@ -660,33 +660,33 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div id="market-us-panel" style="display:none">
       <div class="card">
         <h3>美股指數</h3>
-        <div id="us-idx-rows"><div class="note">載入中…</div></div>
+        <div id="us-idx-rows"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" id="us-idx-datatime"></div>
         <div class="note">來源：yfinance，GitHub Actions 排程抓取</div>
       </div>
       <div class="card">
         <h3>美股類股（SEC SIC 分類）</h3>
-        <div id="us-sector-rows"><div class="note">載入中…</div></div>
+        <div id="us-sector-rows"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" id="us-sector-datatime"></div>
         <div class="note">類股來源：SEC EDGAR company_tickers.json + submissions（官方SIC產業分類，免金鑰），GitHub Actions 排程抓取；股價同美股即時報價（Finnhub）</div>
       </div>
       <div class="card">
         <h3>台股 ADR 溢價（TSM/UMC/ASX/CHT）</h3>
-        <div class="facts" id="adr-rows"><div class="note">載入中…</div></div>
+        <div class="facts" id="adr-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
         <div class="note" id="adr-datatime"></div>
         <div class="note">溢價 ％ ＝（美股ADR價 × 美元/台幣匯率 ÷ ADR比率）相對台股現價的差幅；ADR比率為固定值（換股結構才會變），各檔來源見卡片內個股說明</div>
       </div>
       <!-- 2026-09-15（源頭二.3第3名）CFTC COT投機客淨部位，美股大盤情緒指標。 -->
       <div class="card">
         <h3>CFTC 投機客淨部位（美股情緒指標）</h3>
-        <div class="facts" id="cftc-cot-rows"><div class="note">載入中…</div></div>
+        <div class="facts" id="cftc-cot-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
         <div class="note" id="cftc-cot-datatime"></div>
         <div class="note">來源：CFTC官方Public Reporting（Legacy Futures Only），GitHub Actions 排程；淨部位＝非商業(投機客)多單－空單，正值偏多、負值偏空，每週二資料、當週五公布，僅供參考非投資建議</div>
       </div>
       <!-- 2026-09-15（源頭二.3第8名）美國總經指標，BLS官方Public Data API v2免金鑰。 -->
       <div class="card">
         <h3>美國總經指標（BLS）</h3>
-        <div class="facts" id="bls-macro-rows"><div class="note">載入中…</div></div>
+        <div class="facts" id="bls-macro-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
         <div class="note" id="bls-macro-datatime"></div>
         <div class="note">來源：BLS官方Public Data API v2（未註冊金鑰），GitHub Actions 排程；月頻統計常有一個月落後，CPI年增率為本App自算（最新月指數÷12個月前同月指數－1），僅供參考非投資建議</div>
       </div>
@@ -696,7 +696,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div id="market-fut-panel" style="display:none">
       <div class="card">
         <h3>期貨報價（近月）</h3>
-        <div id="fut-quote-rows"><div class="note">載入中…</div></div>
+        <div id="fut-quote-rows"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" id="fut-quote-datatime"></div>
         <div class="note">來源：TAIFEX 官方開放資料，GitHub Actions 排程抓取</div>
       </div>
@@ -729,7 +729,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>三大法人買賣超（近日 · 淨買賣張數）</h3>
-      <div class="div-bars" id="inst-bars"><div class="note">載入中…</div></div>
+      <div class="div-bars" id="inst-bars"><div class="skel-block" style="height:100px"></div></div>
       <div class="legend">
         <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
         <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
@@ -741,7 +741,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>大盤融資維持率</h3>
-      <div id="margin-summary"><div class="note">載入中…</div></div>
+      <div id="margin-summary"><div class="skel-line w80"></div><div class="skel-line w60"></div></div>
       <div id="margin-chart"></div>
       <div class="legend">
         <div class="li"><span class="sw" style="background:var(--warn)"></span>&lt;160% 注意</div>
@@ -789,7 +789,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
         <span class="press refresh-btn" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
       </div>
-      <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="note">載入中…</div></div>
+      <div id="mainstream-chips" style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;padding-bottom:4px"><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div></div>
       <div class="note" style="margin-top:2px">⚠ 動能/主流本質是擁擠交易，資金集中太久、漲幅過大容易反轉——不是「資金正在流入」就代表可以追高</div>
     </div>
 
@@ -799,7 +799,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card" id="picks-list-card" style="margin-top:10px">
       <h3>綜合評分排行<span class="press refresh-btn" id="picks-refresh" onclick="refreshTap(this,null,async()=>{fmClearCache();await hydratePicks(true)})">重新整理</span></h3>
       <div class="note" style="margin-bottom:8px">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
-      <div id="picks-list"><div class="note">載入中…</div></div>
+      <div id="picks-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
       <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價） · 點列可看完整評分報告</div>
     </div>
 
@@ -869,7 +869,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     加上月營收年增與法人連續買賣天數。 -->
     <div class="card">
       <h3>近期事件與題材 <span style="font-size:9.5px;color:var(--ink-4);font-weight:400">法人行為與公告事實，非預測訊號</span></h3>
-      <div id="report-events"><div class="note">載入中…</div></div>
+      <div id="report-events"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
     </div>
 
     <!-- 2026-09-10（建置一.2）「目標價」改為「估值區間（非目標價）」。
@@ -879,8 +879,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     只是「本益比移動到同業某個百分位時的換算價」。分批進場階梯不動。 -->
     <div class="card">
       <h3>估值區間（非目標價） / 建議進場價 / 分批買入計畫</h3>
-      <div id="report-valuation-band"><div class="note">載入中…</div></div>
-      <div id="report-entry-plan"><div class="note">載入中…</div></div>
+      <div id="report-valuation-band"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
+      <div id="report-entry-plan"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
     </div>
 
     <div class="card" style="background:linear-gradient(155deg, rgba(216,176,112,.12), rgba(20,19,15,.6));border-color:rgba(216,176,112,.25)">
@@ -917,7 +917,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="subscreen active" id="sub-ov">
       <div class="card">
         <h3 style="display:flex;justify-content:space-between;align-items:center"><span>走勢</span><span class="mkt-toggle" id="trend-mode-toggle" style="padding:2px"></span></h3>
-        <div id="trend-chart"><div class="note">載入中…</div></div>
+        <div id="trend-chart"><div class="skel-block" style="height:220px"></div></div>
         <div class="note" id="trend-note">來源：FinMind 日收盤價</div>
       </div>
       <div class="card">
@@ -943,7 +943,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            美股與樣本外個股（低流動性/資料不足未進榜）誠實顯示原因，不硬湊。 -->
       <div class="card">
         <h3>選股理由 <span style="font-size:9.5px;color:var(--ink-4);font-weight:400">因子貢獻拆解</span></h3>
-        <div id="stock-reason-card"><div class="note">載入中…</div></div>
+        <div id="stock-reason-card"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
         <div class="note" style="margin-top:8px;color:#c9524a;font-weight:600">⚠ 本卡為資料排序拆解，尚未經過組合策略回測驗證，不代表能贏大盤，非投資建議。</div>
       </div>
     </div>
@@ -952,7 +952,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="card">
         <h3>月營收（近 8 月 · 億元）</h3>
         <div class="rev-chart-wrap" id="rev-chart-wrap">
-          <div class="rev-chart-amt" id="rev-chart-amt"><div class="note">載入中…</div></div>
+          <div class="rev-chart-amt" id="rev-chart-amt"><div class="skel-block" style="height:120px"></div></div>
           <div class="rev-chart-yoy" id="rev-chart-yoy"><div class="rc-zero"></div></div>
           <div class="rev-chart-labels" id="rev-chart-labels"></div>
         </div>
@@ -968,7 +968,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="subscreen" id="sub-fin">
       <div class="card">
         <h3 id="eps-bars-title">季度獲利（EPS · 元）</h3>
-        <div class="bars" id="eps-bars"><div class="note">載入中…</div></div>
+        <div class="bars" id="eps-bars"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
         <div class="baseline"></div>
       </div>
       <div class="card">
@@ -996,7 +996,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
       <div class="card">
         <h3>外資買賣超（近 5 日 · 張）</h3>
-        <div class="div-bars" id="chip-bars"><div class="note">載入中…</div></div>
+        <div class="div-bars" id="chip-bars"><div class="skel-block" style="height:100px"></div></div>
         <div class="legend">
           <div class="li"><span class="sw" style="background:var(--up)"></span>買超</div>
           <div class="li"><span class="sw" style="background:var(--down)"></span>賣超</div>
@@ -1013,7 +1013,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
              累積（近60交易日的T86落在holdout不能回補），沒有就不顯示，
              不用短視窗湊一個看起來像那麼回事的數字。 -->
         <div id="chip-badges" style="margin-bottom:8px"></div>
-        <div id="chip-trend-table"><div class="note">載入中…</div></div>
+        <div id="chip-trend-table"><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div><div style="padding:8px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w60"></div></div></div>
         <div class="note" id="chip-trend-note" style="margin-top:6px"></div>
         <div class="note" id="chip-cost-note" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">外資估算成本：—</div>
         <div class="note" id="chip-disclaimer" style="margin-top:8px;color:var(--ink-3)">非投資建議。籌碼訊號屬擁擠且有爭議的方法：跟著大戶不等於獲利，大戶也可能正在出貨；這些數字尚未經 signal_ledger 校準「能否預測扣成本後報酬」。</div>
@@ -1093,7 +1093,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="subscreen" id="sub-events">
       <div class="card">
         <h3>事件時間軸（近 30 日）</h3>
-        <div id="stock-events-list"><div class="note">載入中…</div></div>
+        <div id="stock-events-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
         <div class="note" style="margin-top:8px">來源：MOPS 上市/上櫃重大訊息、TWSE 月營收公布、除權息（每 30 分鐘排程更新）；美股目前僅涵蓋 SEC Form 8-K（見「籌碼」分頁「重大訊息（8-K）」卡），除權息/財報日事件尚未接入。</div>
       </div>
     </div>
@@ -1105,7 +1105,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" style="background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:10px;color:var(--warn);font-weight:600">⚠ 描述性技術指標，非預測，不構成買賣訊號；型態辨識（頭肩頂/三角收斂等）留待後續版本。</div>
         <h3 style="display:flex;justify-content:space-between;align-items:center"><span>K線＋均線／成交量</span></h3>
         <div id="tech-toggle-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
-        <div id="tech-chart"><div class="note">載入中…</div></div>
+        <div id="tech-chart"><div class="skel-block" style="height:220px"></div></div>
         <div class="note" style="margin-top:6px">MA＝收盤價移動平均線；成交量長條圖以漲跌色區分。資料沿用「總覽」分頁同一份日線價量，非額外資料源。</div>
       </div>
     </div>
@@ -1201,7 +1201,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="subscreen" id="trade-sub-strategy">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 紙上模擬，非真實交易，非投資建議</div>
-      <div id="strategy-list"><div class="note">載入中…</div></div>
+      <div id="strategy-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
     </div>
 
     <!-- 2026-08-29新增：策略監控台——不是「已上架紙上交易」（上面strategy-list那個
@@ -1211,7 +1211,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     這裡不寫死任何策略清單或數字。 -->
     <div class="subscreen" id="trade-sub-monitor">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 研究參考用途，非投資建議；狀態100%由腳本從真實檔案推導</div>
-      <div id="strategy-monitor-list"><div class="note">載入中…</div></div>
+      <div id="strategy-monitor-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
     </div>
 
     <!-- 2026-09-01新增：選股成績單——三榜(價值成長/題材動能/未來性)Top20每日快照
@@ -1219,7 +1219,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     任何數字；沒有足夠樣本就誠實標「樣本還太少，需累積」，不得補假數字湊版面。 -->
     <div class="subscreen" id="trade-sub-picks">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 前向紙上追蹤，非回測，非投資建議；只計算已經過去的交易日，嚴禁事後補建</div>
-      <div id="picks-report-list"><div class="note">載入中…</div></div>
+      <div id="picks-report-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
     </div>
   </section>
 
@@ -3487,7 +3487,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   async function loadMainstreamIndustries(){
     const el=document.getElementById('mainstream-chips');if(!el)return;
-    el.innerHTML='<div class="note">載入中…</div>';
+    el.innerHTML='<div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div><div class="skel-block" style="height:26px;width:70px;border-radius:14px;flex:0 0 auto"></div>';  // 2026-09-15 P0產品.四：骨架屏
     const results=await Promise.all(HEAT_CATS.map(fetchIndustryFlow));
     MAINSTREAM_CACHE=results.filter(r=>r.inflow!=null&&r.inflow>0).sort((a,b)=>b.inflow-a.inflow).slice(0,5);
     renderMainstreamChips();
@@ -4472,7 +4472,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function renderStockReasonCard(code){
     const host=document.getElementById('stock-reason-card');if(!host)return;
     if(isUS(code)){host.innerHTML='<div class="note">美股暫無選股理由（因子評分目前僅涵蓋台股，見 scores.json meta.market:"TW"）</div>';return}
-    host.innerHTML='<div class="note">載入中…</div>';
+    host.innerHTML=skeletonHtml(4);  // 2026-09-15 P0產品.四：骨架屏
     const cache=await ensureValueScores();
     if(currentCode!==code)return;  // await期間已切到別檔，作廢（同renderReport的世代守衛精神，避免A檔理由畫到B檔頁面）
     if(!cache){host.innerHTML='<div class="note">尚未產生 scores.json，或載入失敗。此清單由 research/generate_scores_v2.py 在本機/排程產生後 commit 進 repo，不是即時計算。</div>';return}
@@ -4538,7 +4538,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       _safeAsync('renderChipBadges',()=>renderChipBadges(code));  // 2026-09-08 金流一.3
       ['mg-balance','mg-balance-chg','mg-short','mg-ratio'].forEach(id=>setTxt(id,'—'));
       setTxt('mg-short-ratio','券資比：—');setTxt('mg-note','美股暫無融資融券資料（僅適用台股）');setTxt('mg-maint','估算融資維持率：—');
-      document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
+      document.getElementById('eps-bars').innerHTML=skeletonHtml(3);  // 2026-09-15 P0產品.四：骨架屏
       setTxt('fh-ratio','—');setTxt('fh-can-invest','—');
       setTxt('fh-note','美股無此資料（僅適用台股，外資持股比率為TWSE官方統計）');
       setTxt('sbl-available','—');
@@ -4557,7 +4557,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     setTxt('eps-bars-title','季度獲利（EPS · 元）');
     setTxt('fin-roe-lbl','ROE（近四季）');
     setTxt('fin-fcf-lbl','自由現金流（最新季）');
-    document.getElementById('eps-bars').innerHTML='<div class="note">載入中…</div>';
+    document.getElementById('eps-bars').innerHTML=skeletonHtml(3);  // 2026-09-15 P0產品.四：骨架屏
     // 2026-08-27 架構修正：PER/PBR/殖利率、月營收改讀 data/fundamentals.json
     // （見 build_fundamentals_json.py），不再對 FinMind 打 TaiwanStockPER／
     // TaiwanStockMonthRevenue——這兩個資料集目前沒有排程自動更新（TWSE官方開放
@@ -5623,7 +5623,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 2026-09-05（新一.7）：極端走勢時完全不顯示分批買入計畫——這種價位下給出「現價/-4%/-8%」
     // 三檔進場價，看起來就像在建議承接，但實際上追高風險已經顯著升高。頂端的警示列會說明原因。
     const cta0=document.querySelector('#scr-report .buy-cta');if(cta0)cta0.style.display='';
-    planEl.innerHTML='<div class="note">載入中…</div>';
+    planEl.innerHTML=skeletonHtml(3);  // 2026-09-15 P0產品.四：骨架屏
     try{
       const usCode=isUS(row.code);
       const px=await fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70));
@@ -6938,7 +6938,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       host.innerHTML='<div class="note">尚未串接美股除權息／財報日／月營收事件｜此框架目前僅接了台股資料源（MOPS重大訊息／TWSE月營收／除權息）｜美股重大訊息可看「籌碼」分頁的「重大訊息（8-K）」卡</div>';
       return;
     }
-    host.innerHTML='<div class="note">載入中…</div>';
+    host.innerHTML=skeletonRowsHtml(3);  // 2026-09-15 P0產品.四：骨架屏
     const d=await ensureEvents();
     if(currentCode!==code)return;  // await期間已切到別檔，作廢
     const mine=recentEventsFor(d,code,30);
@@ -7253,7 +7253,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2100';
+  const APP_VERSION='2026-09-15.2127';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
