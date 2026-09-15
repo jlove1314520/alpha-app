@@ -1,3 +1,41 @@
+## 2026-09-16（DevQueue自走，cycle 20260916-004602）檢定力一：判定track不符、標記阻塞
+
+戴**維運帽**（判斷本輪該不該做，不是實際去做統計工作）。依`PENDING_QUEUE.md`
+權威執行順序（ORDER-BEGIN/END清單已全數完成，回退到檔案順序）取到下一項
+【檢定力一】。
+
+**查證發現**：這項的PENDING_QUEUE文字寫著「尚未開始寫程式碼，交由
+`AlphaHypothesisQueue`排程接續」——但查`research/HYPOTHESIS_QUEUE.md` #74
+發現這句話已經過時：`synthetic_power_curve_gate74.py`已經寫成並試跑過
+（Sharpe=0.5單種子，六關mini pipeline技術上證明可行），且已發現一個方法論
+缺陷（base序列未去均值化、母體Sharpe自帶1.1057疑似存活者偏誤）並訂出下一步
+（去均值化修正後重跑）。這件事本身正在被`AlphaHypothesisQueue`track正常
+推進，不是卡住。
+
+**判斷**：依`CLAUDE.md`「九、帽子規則」檔案歸屬——`research/`（因子/策略/
+回測程式碼與紀錄）屬於**研究與驗證帽**，不是**開發帽**（DevQueue自己的
+`index.html`/`scripts/smoke_test.*`）。這是「六關統計檢定力」這種研究方法論
+工作，DevQueue代為執行屬於越權。`PENDING_QUEUE.md`頂端的ORDER清單是機械式
+依序取件，沒有區分track，才會把一個明確標註「交由AlphaHypothesisQueue排程
+接續」的項目派給DevQueue，這是清單設計上的落差，不是DevQueue能自行判斷該不
+該做的空間。
+
+**做了什麼**：用`python scripts/dev_queue_runner.py block "..."`把此項標記
+`- [!]`並寫入詳細阻塞理由（帽子越權＋PENDING_QUEUE敘述已過時＋需要總司令
+裁示是否要把研究類項目移出DevQueue的ORDER清單）。**沒有**去改動
+`research/`底下任何統計/驗證程式碼——那不是這一輪該做的事。
+
+**驗證**：`node scripts/smoke_test.mjs`：47/48 PASS，僅既有紅燈check 39
+（一致性違規率32.95%，`sparklines.json`過期問題，PENDING_QUEUE`稽核.三`
+已追蹤多輪的既有問題，本輪未動任何`data/`檔案，與本次改動無關）。本輪
+只改了`PENDING_QUEUE.md`一個檔案。
+
+**下一步**：等總司令裁示ORDER清單是否要排除研究類項目；`AlphaHypothesisQueue`
+繼續依#74既定的「去均值化修正→重跑Sharpe=0.5驗證→擴大到完整強度×種子網格」
+往下走，不受本次DevQueue阻塞影響。
+
+---
+
 ## 2026-09-16（DevQueue自走，cycle 20260916-003102）工廠四：工廠穩定性儀表板（MTBF＋每週人工介入次數）
 
 戴**維運帽**。依`PENDING_QUEUE.md`權威執行順序取件到【工廠四】：把「工廠
