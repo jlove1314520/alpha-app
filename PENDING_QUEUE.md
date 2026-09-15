@@ -2834,7 +2834,44 @@ ORDER-END
   的`status`文字，未展開`sub_events`（例如#51/#52內部子事件），這是刻意簡化
   避免明細列過長，母層狀態已反映整體結論。
 - [x] **源頭一.5** 佇列清理：籌碼K線開發者入口已劃掉（2026-09-06 已完成，見「零之二」區塊，理由 CMoney 無對外 API）
-- [ ] **源頭一.6** 推播先提案不做：iOS PWA Web Push 現況與三方案成本，回報等裁示
+- [x] **源頭一.6** **提案已交付，未實作，等待總司令裁示（2026-09-15 開發佇列cycle_id=
+  20260915-153103）**：iOS PWA Web Push 現況與三方案成本。三來源查證（官方文件＋
+  GitHub社群＋其他供應商官網）：
+  1. **官方文件**`webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/`
+     （Apple WebKit官方部落格，2023-05-02發布）：iOS/iPadOS **16.4起**支援Web
+     Push，但**限定已加到主畫面的PWA**（單純Safari分頁打開不算，且使用者要在
+     App內主動觸發、明確同意通知授權）。技術面走標準W3C協定：manifest＋
+     service worker處理`push`事件＋`PushManager.subscribe()`帶VAPID公鑰；蘋果
+     底層轉APNs，但開發者不需要蘋果開發者帳號或APNs憑證。**已知限制**：
+     `webkit.org/blog/16535/meet-declarative-web-push/`與近期報導顯示（a）
+     靜默推播不支援，每次push都必須顯示可見通知，否則iOS會撤銷訂閱；
+     （b）2026年因歐盟DMA合規變更，歐盟地區PWA改回Safari分頁開啟不支援
+     push——跟我們的台灣使用者無關，僅如實記錄非疏漏。
+  2. **官方供應商定價頁**`firebase.google.com/pricing`（2026查證）：FCM在
+     Spark／Blaze方案**皆完全免費、無用量上限**（官方明確標「No-cost」）。
+     `onesignal.com/pricing`（2026查證）：OneSignal Free方案原本無限制，
+     **2026-09-01（新戶）／10-01（舊戶）起對「行動推播/App內訊息」通道新增
+     1,000 MAU上限**，但**Web Push不受此次限制影響**（官方原文：web push
+     維持既有Free方案上限＝無限訂閱者、單次發送上限1萬人）——我們是PWA
+     Web Push、不是原生App推播，這個新上限不適用。
+  3. **GitHub社群範例**`github.com/magicbell-io/webpush-ios-template`：示範
+     manifest+service worker+VAPID訂閱流程與MagicBell後端串接，證實前端
+     實作模式（manifest/SW/VAPID）跨後端供應商是同一套，只有後端發送邏輯
+     不同。
+  **三方案成本比較**（單使用者量體，三方案成本皆為$0）：
+  - **方案A 自架VAPID**（`web-push`等價庫）：$0，掛在既有常駐服務
+    （`alpha_live_server.py`同機器）即可，不需新增第三方帳號，但要自己寫
+    訂閱清單持久化＋過期/失敗清理，目前無現成程式碼。
+  - **方案B Firebase Cloud Messaging**：$0（官方無用量上限），但多一個
+    Google第三方依賴，需建立Firebase專案（一次性Google帳號設定），裝置
+    token會經過Google伺服器。
+  - **方案C OneSignal**：$0（Web Push通道不受2026新MAU上限影響），開發
+    最快、有現成Dashboard，但功能包裝是黑盒、供應商鎖定風險最高（本次
+    Free方案規則變動就是實例，雖然這次沒影響到Web Push通道）。
+  **研究帽建議**（僅供參考，不代表決定）：方案A——Alpha現有架構已習慣PC
+  本機常駐服務，不想再新增雲端第三方帳號依賴，且單使用者規模用不到
+  OneSignal的多人管理介面。**本項只完成查證與提案，未動任何程式碼**，
+  是否開工、選哪個方案，等總司令裁示。
 - [ ] **源頭一.7** 驗收：DATA_SOURCE_MAP 逐格截圖、holders.json 覆蓋檔數、2330 千張大戶人工核對、signal_status 三態筆數
 - [ ] **（承接自競品一，未被本版指令涵蓋，保留）** 首頁「我的持股事件」卡：自選股與紙上持倉的 events/news 依時間排一條流，點開跳個股頁
 

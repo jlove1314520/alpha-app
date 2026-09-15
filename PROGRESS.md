@@ -1,3 +1,30 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）源頭一.6：iOS PWA Web Push提案（先報不做，等裁示）
+
+`PENDING_QUEUE.md`權威清單源頭一.4完成後接著做源頭一.6。本項指令原話
+就是「先提案不做…回報等裁示」，屬於CLAUDE.md「三個停下條件」之一（需要
+總司令裁示），所以本輪**只完成查證與提案，未動任何程式碼**。
+
+三來源查證：①官方文件`webkit.org/blog/13878`（Apple WebKit部落格，iOS/
+iPadOS 16.4起支援PWA Web Push，限已加到主畫面者，靜默推播不支援，2026年
+歐盟DMA合規變更使歐盟PWA改回Safari分頁不支援push，跟台灣使用者無關但
+如實記錄）；②官方供應商定價頁`firebase.google.com/pricing`（FCM完全免費
+無用量上限）與`onesignal.com/pricing`（2026-09/10起對「行動推播」通道新增
+1,000 MAU上限，但**Web Push通道不受影響**，我們是PWA Web Push故不受限）；
+③GitHub社群範例`magicbell-io/webpush-ios-template`（示範manifest+service
+worker+VAPID訂閱流程，證實前端實作模式跨後端供應商共通）。
+
+三方案（自架VAPID／Firebase Cloud Messaging／OneSignal）成本皆為$0（單
+使用者規模），差異在於「自己掌控/需自寫訂閱清單管理」vs「開發快/多一個
+第三方雲端依賴」。研究帽建議方案A（自架，理由：Alpha已有PC本機常駐服務
+習慣、單使用者用不到OneSignal的多人管理介面），但**僅供參考，不代表
+決定**，是否開工、選哪個方案，等總司令裁示。完整查證細節與方案比較已
+寫入`PENDING_QUEUE.md`源頭一.6條目。
+
+冒煙測試（本項未動任何程式碼，重跑確認無回歸）：48項僅既有紅燈check 39
+FAIL（既有基準），其餘全過。影響檔案：`PENDING_QUEUE.md`、本檔。下一項：
+`PENDING_QUEUE.md`權威清單源頭一.7（驗收：DATA_SOURCE_MAP逐格截圖、
+holders.json覆蓋檔數、2330千張大戶人工核對、signal_status三態筆數）。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-153103）源頭一.4：訊號誠實三態徽章接上App設定頁
 
 `PENDING_QUEUE.md`權威清單下一項：源頭一.4「訊號三態徽章＋`data/
