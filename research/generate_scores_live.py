@@ -675,6 +675,17 @@ def main():
         for sid, row in ranked.iterrows():
             present = [k for k in score_v2.FACTOR_DEFS if pd.notna(row.get(f"{k}_score"))]
             missing = [k for k in score_v2.FACTOR_DEFS if k not in present]
+            # 2026-09-15（總司令裁示，稽核.三修法(b)）：missing_factors只是一串key名，
+            # 看不出「為什麼」缺——這裡額外標註有明確原因的缺項（目前只有
+            # earnings_growth的過期排除，其餘因子的None仍是單純資料不足，不硬湊理由）。
+            missing_notes: dict[str, str] = {}
+            if "earnings_growth" in missing:
+                eg_c = row.get("eg_components") or {}
+                if eg_c.get("stale_excluded"):
+                    missing_notes["earnings_growth"] = (
+                        f"財報資料過期（最新 {eg_c.get('as_of')}，落後現在 "
+                        f"{eg_c.get('stale_quarters_behind')} 季），未列入計分"
+                    )
             factors_obj = {
                 k: {
                     "score": round(float(row[f"{k}_score"]), 1),
@@ -696,6 +707,7 @@ def main():
                 "total_score": round(float(row["total_score"]), 1),
                 "coverage": round(float(row["coverage"]), 2),
                 "missing_factors": missing,
+                "missing_factor_notes": missing_notes,
                 "liquidity_20d": _r(row.get("liquidity_20d")),
                 "data_asof": as_of,
                 "summary": _summary(row, present),

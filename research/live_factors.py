@@ -52,6 +52,24 @@ def _mean(vals: list[float]) -> float | None:
     return sum(vals) / len(vals) if vals else None
 
 
+# 2026-09-15（總司令裁示，稽核.三修法(b)，紅線不是選配）：財報資料超過
+# STALE_QUARTERS_THRESHOLD 季（建議2季≈6個月，容忍官方申報本身的正常
+# 公布延遲）即視為過期，寧可少一個因子分數，也不准把過期資料當成當季呈現。
+# 根因見PENDING_QUEUE.md稽核.三條目：一次性歷史回補誤用了研究帽holdout
+# 邊界（VAL_END=2024-12-31）的FinMind快取，導致約534檔股票的`quarters`
+# 停在2024Q4，`earnings_growth()`原本沒有新鮮度檢查，會拿21個月前的資料
+# 算出「看起來像當季」的EPS年增分數，使用者完全看不出來已經過期。
+STALE_QUARTERS_THRESHOLD = 2
+
+
+def _quarters_behind(latest_year: int, latest_quarter: int, now: datetime | None = None) -> int:
+    """`latest`落後「現在」幾季（現在的季度用系統日期換算，不是資料裡的任何欄位——
+    這條檢查故意不信任資料本身宣稱多新，只信任牆上的時鐘）。"""
+    n = now or datetime.now(TW_TZ)
+    cur_q = (n.year, (n.month - 1) // 3 + 1)
+    return (cur_q[0] * 4 + cur_q[1]) - (latest_year * 4 + latest_quarter)
+
+
 # ─────────────────────────────── 財報成長 ───────────────────────────────
 def earnings_growth(quarters: list[dict] | None) -> tuple[float | None, dict]:
     """EPS年增、營收年增、毛利率年變化(百分點)、營益率年變化(百分點) 的平均。
@@ -59,6 +77,11 @@ def earnings_growth(quarters: list[dict] | None) -> tuple[float | None, dict]:
     只要 4 個子訊號有任何一個算得出來就給值（原本必須有 EPS 年增才給，
     害財報覆蓋 1944 檔的資料只換到 589 檔有分數）。年變化都是「最新一季 vs 去年同季」。
     毛利率/營益率是百分點差，除以 100 讓量級跟年增率可比後再平均。
+
+    **新鮮度檢查優先於一切**（2026-09-15新增）：`latest`落後現在超過
+    `STALE_QUARTERS_THRESHOLD`季，直接回傳`(None, comp)`並標記
+    `stale_excluded=True`——不計算任何子訊號，寧可少一個因子分數也不要
+    把過期資料偽裝成當季。
     """
     comp: dict[str, float | None] = {"eps_yoy": None, "revenue_yoy": None,
                                      "gross_margin_yoy_pp": None, "op_margin_yoy_pp": None}
@@ -69,6 +92,12 @@ def earnings_growth(quarters: list[dict] | None) -> tuple[float | None, dict]:
         return None, comp
     rows.sort(key=lambda q: (q["year"], q["quarter"]))
     latest = rows[-1]
+    behind = _quarters_behind(latest["year"], latest["quarter"])
+    if behind > STALE_QUARTERS_THRESHOLD:
+        comp["as_of"] = f"{latest['year']}Q{latest['quarter']}"
+        comp["stale_excluded"] = True
+        comp["stale_quarters_behind"] = behind
+        return None, comp
     prior = next((q for q in rows if q["year"] == latest["year"] - 1 and q["quarter"] == latest["quarter"]), None)
     if prior is None:
         return None, comp
