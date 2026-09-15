@@ -110,6 +110,12 @@ jobs:
       - name: 更新個股OHLCV價量歷史（TWSE STOCK_DAY_ALL/TPEx tpex_mainboard_quotes，累積式寫回，免金鑰）
         run: python .github/scripts/update_price_history.py
         continue-on-error: true
+      # 2026-09-15（sparklines凍結事件解封）：從price_history.json切出全市場走勢線，
+      # 零額外網路請求。這一步2026-09-05功能剛做出來那天本來就該掛在這裡，
+      # 卡了十天沒推上去是因為當時的PAT沒有workflow scope，見PENDING_QUEUE.md稽核.六。
+      - name: 產生全市場走勢線sparklines.json（從price_history切出，零額外請求）
+        run: python .github/scripts/build_sparklines.py
+        continue-on-error: true
       - name: 更新追蹤美股標的財報行事曆（yfinance，免金鑰）
         run: python .github/scripts/fetch_earnings_calendar.py
         continue-on-error: true
@@ -144,6 +150,12 @@ jobs:
       - name: 回填前瞻選股台帳的T+N報酬（只算已發生的日子，嚴禁事後改既有快照）
         run: python .github/scripts/update_picks_ledger_returns.py
         continue-on-error: true
+      # 2026-09-15新增（我們vs0050主圖【階段三】）：只讀picks_ledger.json實際回填
+      # 紀錄+price_history.json計算，零額外網路請求，放在returns回填之後才能吃到
+      # 當次剛回填的t5/t20/t60/t120。
+      - name: 產生我們vs0050基準對比資料（picks_ledger實際紀錄，非重算回測）
+        run: python .github/scripts/build_benchmark_comparison.py
+        continue-on-error: true
       # 2026-08-29新增（策略監控台升級，使用者原話「forward paper嚴禁事後
       # 補建，只能逐日往前累積」）：三榜都產生完之後，逐日mark-to-market
       # 累積前向紙上模擬（不是回測，是真的每天用當天收盤價往前滾），
@@ -168,7 +180,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do
