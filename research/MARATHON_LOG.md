@@ -4260,3 +4260,5 @@ draws），會持續更新這裡。
 
 ## 2026-09-15T22:00+08:00 — 馬拉松第540輪（US軌）
 取鎖乾淨（cycle`20260915-220036`）。交辦優先於自走鐵律檢查：無本馬拉松三軌可執行未開始項（深讀一.2/工廠一/工廠四/檢定力一均已指定交由hypothesis_queue或dev_queue接續），回落自走，依輪替選US。核實`CALIBRATION_PROBE.md`清單（TW#77/#79/#91、US#47/#52、FUT#34）已全數複驗完畢；0a節四方向僅#50卡阻塞，未達「無可驗證預測優勢」提報門檻。`trial_registry.py --check` exit=0 PASS（245列）。`is_holdout_consumed()`=False。零新增API呼叫。發現`dev_queue`軌獨立新開「regime擇時／下檔保護overlay」研究線（`REGIME_OVERLAY_PROTOCOL.md`，第一個訊號TRAIN測試FAIL），不佔用本馬拉松輪次，本輪未介入。下一輪建議選TW軌。詳見`REPORT.md`第540輪、`US_MARATHON_STATE.md`第540輪、`MARATHON_STATE.md`（計數器540）。
+
+**補記：commit完但push失敗**（git push兩次皆，DNS/網路問題，非程式碼問題）。commit ef1ea290已在本機，下次有網路時的排程會自動Already up to date.+推送接續。
