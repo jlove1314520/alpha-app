@@ -1,3 +1,42 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-094601）源頭二.3第7名：接入央行外匯局官方牌告匯率，取代yfinance為主來源
+
+本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。讀`PENDING_QUEUE.md`
+「執行順序（權威清單）」，接續前一輪（cycle_id=20260915-084602）做到的
+源頭二.3第6名，繼續排名表第7名：外匯官方牌告（取代yfinance）。
+
+- **查證**：三來源確認`https://www.cbc.gov.tw/public/data/OpenData/外匯局/
+  FTDOpenData015.csv`（`A13Rate.csv`同host姊妹端點）存在且可程式存取——
+  ①`data.gov.tw`資料集#7232頁面（WebSearch找到）②WebFetch該頁確認CSV/API
+  網址、更新頻率（每日）、回溯年份（2008-01-02起）③`curl`與Python
+  `requests`各自實測200、內容為合法CSV（表頭`日期,NTD/USD`，最新一筆
+  `20260914,31.688`）。
+- **改動**：`.github/scripts/fetch_fx.py`主來源從yfinance`TWD=X`改為
+  央行端點，yfinance降為備援（央行端點失敗才用），維持CLAUDE.md「每個
+  關鍵欄位要有回退鏈，禁止單點依賴」原則。沿用`research/
+  cbc_rf_rate_client.py`已驗證過的SSL修法——`www.cbc.gov.tw`憑證鏈中繼CA
+  缺Subject Key Identifier擴充欄位，`requests`預設驗證會拋
+  `CERTIFICATE_VERIFY_FAILED`，只關閉`ssl.VERIFY_X509_STRICT`這一個旗標
+  （非`verify=False`，主機名稱與CA信任鏈驗證維持開啟）。
+- **實測**：正常路徑`data/fx.json`寫入`rate=31.688 date=2026-09-14
+  source=央行外匯局官方牌告匯率（FTDOpenData015…）`；刻意打壞央行URL
+  驗證fallback正確觸發`source=yfinance TWD=X（央行端點失敗時備援）`。
+  `generate_status_json.py`的`describe_fx()`與`APP_DATA_SOURCES`條目
+  同步更新反映新主來源，重跑後`data/STATUS.json`確認`source`欄位正確。
+- **前端顯示**：`fx.json`本來就有顯示位置（今日頁/交易頁/設定頁NT$↔US$
+  幣別切換的`renderFxNote()`，顯示「匯率 31.69（2026/09/14）」含資料
+  日期），schema不變（`usd_twd.rate`/`date`），沿用既有顯示位置未新增UI。
+- **文件**：`docs/FIRST_HAND_SOURCES.md`#21條目、優先順序排名表第7名、
+  總結分佈段落（#21從🟡移入🟢）皆已更新；`PENDING_QUEUE.md`源頭二.3條目
+  補上第7名完成記錄。
+- **冒煙測試**：`node scripts/smoke_test.mjs` 45/46 PASS，僅#39既有已知
+  紅燈（一致性違規率12.53%，`git diff`確認`data/audit_report.json`非本次
+  改動觸發，本次未動任何被稽核的scores/price類JSON，與先前多次commit
+  記錄的同一數字一致）。
+- **下一步**：排名表第8名（BLS總經）、第9名（財政部海關進出口）、
+  第10名（經濟部工業生產與外銷訂單）留待後續輪次，逐項各自commit。
+
+---
+
 ## 2026-09-15（假設佇列自走・第十二輪）接手PENDING_QUEUE交辦，題材七待辦2第四批，累計70/259
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀`PENDING_QUEUE.md`最上方紀錄

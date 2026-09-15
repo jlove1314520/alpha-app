@@ -2594,7 +2594,28 @@ ORDER-END
   App讀到的會是本輪手動commit的那份資料永久卡住不更新。已把五個新資料檔
   （含本項`us_13f_holdings.json`）全部補進清單，這個修正是本次commit的
   一部分。
-  **第7~10名留待後續輪次**，見排名表。
+  **第7名（外匯官方牌告，取代yfinance）已完成（2026-09-15開發佇列自走接續，
+  cycle_id 20260915-094601）**：新增央行外匯局官方牌告匯率端點
+  `https://www.cbc.gov.tw/public/data/OpenData/外匯局/FTDOpenData015.csv`
+  （`A13Rate.csv`同host姊妹端點，`data.gov.tw`資料集#7232，官方每日更新、
+  回溯至2008-01-02，三來源查證：①`data.gov.tw`資料集頁②WebFetch該頁確認
+  CSV/API網址③實測`curl`/Python `requests`皆回200、內容為合法CSV）。
+  修改`.github/scripts/fetch_fx.py`：主來源改打央行端點，yfinance`TWD=X`
+  降為備援（沿用`research/cbc_rf_rate_client.py`已驗證的SSL修法——只關閉
+  `ssl.VERIFY_X509_STRICT`旗標，非`verify=False`；`www.cbc.gov.tw`憑證鏈
+  中繼CA缺Subject Key Identifier擴充欄位是已知陷阱，`requests`預設驗證
+  會拋`CERTIFICATE_VERIFY_FAILED`）。本機實測：央行端點成功時
+  `data/fx.json`寫入`rate=31.688 date=2026-09-14
+  source=央行外匯局官方牌告匯率（FTDOpenData015…）`；刻意打壞URL驗證
+  fallback正確觸發，寫入`source=yfinance TWD=X（央行端點失敗時備援）`。
+  `generate_status_json.py`的`describe_fx()`與`APP_DATA_SOURCES`條目同步
+  更新為反映新主來源。**前端顯示位置**：`fx.json`本來就已有顯示位置
+  （今日頁/交易頁/設定頁NT$↔US$幣別切換的`renderFxNote()`，顯示格式
+  「匯率 31.69（2026/09/14）」含資料日期），schema不變（`usd_twd.rate`/
+  `date`），故沿用既有顯示位置，未新增UI。`node scripts/smoke_test.mjs`
+  45/46 PASS（僅#39既有已知紅燈，`git diff`確認`data/audit_report.json`
+  非本次改動、本次未動任何被稽核的scores/price類JSON）。
+  **第8~10名留待後續輪次**，見排名表。
 - [ ] **源頭二.4** 新增排程全部列入 CLAUDE.md 頻率清單，附官方上限或實測安全值
 - [ ] **源頭二.5** 驗收：表格截圖、前 10 名清單與理由、每接入一個回報一個
 

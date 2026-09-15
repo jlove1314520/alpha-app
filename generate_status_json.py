@@ -131,7 +131,7 @@ def describe_fx(path: Path) -> dict:
     return {
         "generated_at": d.get("fetched_at"),
         "records": 1 if usd else 0,
-        "source": "yfinance TWD=X",
+        "source": usd.get("source") or "央行外匯局官方牌告匯率（FTDOpenData015），yfinance TWD=X為備援",
         "detail": f"rate={usd.get('rate')} date={usd.get('date')} errors={d.get('errors')}",
     }
 
@@ -784,7 +784,7 @@ APP_DATA_SOURCES = [
     {"panel": "今日頁·自選股財報行事曆徽章（僅美股，21天內才顯示）", "source": "data/earnings_calendar.json（yfinance get_calendar()，2026-08-27新增）"},
     {"panel": "今日頁·自選股sparkline走勢", "source": "data/quotes_tw.json（TWSE STOCK_DAY，僅上市股票；上櫃約24檔查不到，見known_limitations）+ data/quotes_us.json（yfinance），2026-08-27起不再打FinMind"},
     {"panel": "選股頁·價值成長榜/題材動能榜/未來性濾網（2026-08-27新增三榜切換）", "source": "scores.json（generate_scores_live.py，財報導向）+ scores_momentum.json（generate_scores_momentum.py，題材動能導向）+ scores_future.json（generate_scores_future.py，未來性(a)類因子：法人籌碼行為+毛利率品質+產能利用率代理）——三榜物理分離、因子/權重各自版本控管，回測前都固定顯示「本榜為資料排序，尚未經過組合策略回測驗證」"},
-    {"panel": "今日頁·匯率", "source": "data/fx.json（yfinance TWD=X，2026-08-27起不再打FinMind）"},
+    {"panel": "今日頁·匯率", "source": "data/fx.json（2026-09-15起主來源改為央行外匯局官方牌告匯率FTDOpenData015，yfinance TWD=X降為備援；2026-08-27起不再打FinMind）"},
     {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},
     {"panel": "今日頁·總資產/已實現損益", "source": "無（尚未串接券商，誠實佔位）"},
     {"panel": "市場頁·大盤指數（含sparkline）", "source": "data/market_tw.json + data/market_us.json"},

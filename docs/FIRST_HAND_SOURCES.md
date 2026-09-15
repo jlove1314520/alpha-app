@@ -273,16 +273,18 @@ Allow: /mops/web
 | 對應機構用途 | 工業生產指數、外銷訂單金額，總經領先指標 |
 | 後續 | 源頭二.2實測經濟部統計處官網開放資料 |
 
-### 21. 央行外匯與利率
+### 21. 央行外匯與利率 —— 外匯已接入（2026-09-15，源頭二.3第7名）
 
 | 欄位 | 內容 |
 |---|---|
 | 機構 | 中央銀行 |
 | 利率端點 | `https://www.cbc.gov.tw/public/data/OpenData/A13Rate.csv`（官方、免費、CSV，`research/cbc_rf_rate_client.py`），另有`cbc_policy_decision_data.py`／`cbc_decision_event_gate61.py`（假設`#61`已FAIL，見`data/signal_status.json`） |
+| 外匯端點 | `https://www.cbc.gov.tw/public/data/OpenData/外匯局/FTDOpenData015.csv`（`A13Rate.csv`的姊妹端點，同一台主機、同一種免金鑰CSV格式；`data.gov.tw`資料集#7232「新臺幣兌換美元銀行間收盤匯率」，官方每日更新，回溯至2008-01-02，`.github/scripts/fetch_fx.py`） |
 | 我們現況（利率） | 🟢 **已整合** |
-| 我們現況（外匯） | 🟡 **未走央行官方牌告匯率**——App端`fx.json`改用yfinance`TWD=X`（`.github/scripts/fetch_fx.py`，因FinMind額度問題改的），研究端`fx_twd_gate.py`用FinMind`TaiwanExchangeRate`，兩者皆非央行官方 |
-| 官方是否允許程式存取 | 利率🟢；外匯官方牌告未查證 |
+| 我們現況（外匯） | 🟢 **已整合（2026-09-15）**——`fetch_fx.py`主來源改打央行`FTDOpenData015.csv`（銀行間每日收盤即期匯率），yfinance`TWD=X`降為備援（央行端點失敗才用，維持回退鏈不單點依賴）；`fx_twd_gate.py`（研究端）仍用FinMind`TaiwanExchangeRate`，未同步改動（研究腳本非本輪範圍，一致性列為已知缺口） |
+| 官方是否允許程式存取 | 利率🟢；外匯🟢（同host、CSV直接下載、無robots.txt限制、`requests`實測200） |
 | 對應機構用途 | 貨幣政策（重貼現率）、官方匯率牌告 |
+| 已知SSL陷阱 | 央行憑證鏈中繼CA缺`Subject Key Identifier`擴充欄位，`requests`預設驗證會拋`CERTIFICATE_VERIFY_FAILED`；修法為只關閉`ssl.VERIFY_X509_STRICT`旗標（沿用`cbc_rf_rate_client.py`已驗證的做法，非`verify=False`） |
 
 ---
 
@@ -399,8 +401,8 @@ Allow: /mops/web
 
 ## 總結：現況分佈
 
-- **🟢 已整合且合規**：#4外資持股比率(2026-09-15新增)、#7當沖、#8鉅額交易、#17集保、#21利率、#22 SEC EDGAR、#27(b) Nasdaq threshold list ——7項
-- **🟡 已整合但有保留**（非直連官方/僅涵蓋部分/合規存疑）：#2/#3三大法人期貨選擇權(經FinMind)、#5借券(查證中)、#9內部人轉讓(未確認可行)、#10/#11/#12/#15（robots.txt衝突，見重大發現）、#16月營收(經FinMind)、#21外匯(非央行)、#24 FRED(僅單序列)、#27(a)FINRA(粒度太粗) ——約11項
+- **🟢 已整合且合規**：#4外資持股比率(2026-09-15新增)、#7當沖、#8鉅額交易、#17集保、#21利率＋外匯(外匯2026-09-15新增)、#22 SEC EDGAR、#27(b) Nasdaq threshold list ——7項
+- **🟡 已整合但有保留**（非直連官方/僅涵蓋部分/合規存疑）：#2/#3三大法人期貨選擇權(經FinMind)、#5借券(查證中)、#9內部人轉讓(未確認可行)、#10/#11/#12/#15（robots.txt衝突，見重大發現）、#16月營收(經FinMind)、#24 FRED(僅單序列)、#27(a)FINRA(粒度太粗) ——約10項
 - **🔴 已查證不可行**：#1大額交易人(免費層無)、#6處置注意股(無歷史)、#14簡報PDF、#18指數成分股調整 ——4項
 - **⚪ 完全未查證**：#13私募、#14法說會音檔、#19財政部海關、#20經濟部工業生產、#23 EDGAR全文檢索、#25 BLS、#26 Census、#27暗池、#28 CFTC COT ——約9項
 
@@ -424,17 +426,18 @@ Allow: /mops/web
 | 4 | #24 FRED擴充（VIX/失業率/CPI等） | 3 | 1（🟢已有client+key，加序列而已） | 待接入 |
 | 5 | #5 借券賣出餘額 | 4 | 3（🟢host，但正確端點仍待鎖定） | **已接入子集（2026-09-15，僅可借額度，非借券費率）** |
 | 6 | #22a SEC 13F（機構持倉季報） | 4 | 4（🟢host，但季度大檔需聚合邏輯） | **已接入極小子集（2026-09-15，僅波克夏一家申報人，見22c）** |
-| 7 | #21 外匯官方牌告（取代yfinance） | 2 | 1（🟢同host的A13Rate.csv姊妹端點） | 待接入 |
+| 7 | #21 外匯官方牌告（取代yfinance） | 2 | 1（🟢同host的A13Rate.csv姊妹端點） | **已完成（2026-09-15）** |
 | 8 | #25 BLS總經（就業/CPI） | 3 | 2（標準政府API，需申請/免申請key待查） | 待接入 |
 | 9 | #19 財政部海關進出口統計 | 3 | 3（⚪host未驗證，需先測robots.txt+端點） | 待接入 |
 | 10 | #20 經濟部工業生產與外銷訂單 | 3 | 3（⚪host未驗證，同上） | 待接入 |
 
-**2026-09-15開發佇列自走完成第1、2、3、5、6名**（見上方#4條目與
+**2026-09-15開發佇列自走完成第1、2、3、5、6、7名**（見上方#4條目與
 `.github/scripts/fetch_foreign_holding.py`；#22b條目與
 `.github/scripts/fetch_us_insider_trading.py`；#28條目與
 `.github/scripts/fetch_cftc_cot.py`；#5條目與
 `.github/scripts/fetch_short_lending_available.py`；#22c條目與
-`.github/scripts/fetch_us_13f_holdings.py`）。
+`.github/scripts/fetch_us_13f_holdings.py`；#21條目與
+`.github/scripts/fetch_fx.py`）。
 
 **第4名（FRED擴充）本輪跳過，原因記錄如下，不是遺漏**：`research/
 fred_yield_curve_gate.py`目前的金鑰讀取方式是`C:\alpha\alpha-data\
