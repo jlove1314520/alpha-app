@@ -1,3 +1,61 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-113102）實測.十1分K畸形棒防護正式實作＋意外發現並修復三支常駐服務的python路徑crash bug
+
+**主線：實測.十**（1分K出現畸形長條）。前一輪（cycle_id 20260915-110102）
+查證後判定「可能仍未修，不blind實作」，留給下一輪先設計門檻＋盤中實測。
+本輪接手：
+
+- **門檻設計**：不用ATR倍數（機率性、會隨行情變動），改用**台股漲跌幅
+  ±10%法定限制**（留0.5個百分點取整緩衝）——這是唯一數學上確定、不會
+  誤殺真實劇烈行情的門檻，任何合法成交都不可能超出前收±10%，超出必為
+  壞tick。`research/shioaji_quotes.py`新增`_tick_price_is_plausible()`，
+  `TickState.add_tick()`加`prev_close`參數，不合理的tick整筆排除、不進
+  1分K聚合，並用`kbars_rejected_ticks`熱檔欄位留診斷可見度。STK/FOP兩種
+  tick都接上，指數handler刻意不接（指數無交易所保證的漲跌幅上限，附
+  程式碼註解說明是刻意排除）。
+- **單元測試**：`research/kbars_gap_test.py`新增4個測試（邊界值/畸形棒
+  被排除/合法漲停附近行情不被誤殺/無比對基準時放行），連同既有7個共
+  11個全過，`exit code 0`。
+- **真實盤中部署驗證**（不是紙上談兵）：改完code後重啟`AlphaShioajiQuotes`
+  常駐行程（見下方意外發現），確認新daemon的`.live_state_sinopac.json`
+  出現`kbars_rejected_ticks:{}`（今天尚未真的遇到畸形tick，誠實空狀態），
+  持續觀察約40秒，2330/2454/3231多檔正常累積1分K、無誤判。誠實揭露：
+  原始bug是8天前單一次截圖的偶發事件，這次部署觀察期間沒有真的等到一次
+  真實畸形tick發生，「邏輯真的攔到過一次真實案例」尚未被觀察到，但邊界
+  情況已用單元測試涵蓋。細節見`PENDING_QUEUE.md`實測.十條目。
+
+**意外發現（不在原計畫內，查證實測.十時挖到的獨立P0）**：查`.live_state_
+sinopac.json`發現卡在昨天13:46收盤時的狀態，盤中完全沒有更新，一查發現
+`AlphaShioajiQuotes`／`AlphaIbkrQuotes`排程**每一輪都在crash**：`research/
+shioaji_stream_stderr.log`是`ModuleNotFoundError: No module named
+'shioaji'`，`research/ibkr_quotes_cycle.log`是`ModuleNotFoundError: No
+module named 'ib_async'`。根因：`C:\alpha\run-shioaji-quotes-cycle.ps1`／
+`run-ibkr-quotes-cycle.ps1`／`run-alpha-live-server-cycle.ps1`（**三支都在
+git repo外，這次修改不會出現在commit裡**）都寫死`$pythonExe = "python"`，
+這台機器PATH上`python`先解析到`C:\Program Files\Python313\python.exe`
+（一個套件都沒裝的空白安裝），實際套件（shioaji/fastapi/ib_async等）
+只裝在Microsoft Store版Python。`AlphaLiveServer`目前活著的行程沒事
+（09-10啟動的舊行程還在跑），但一旦重啟會踩到同一顆雷，一併修掉。三支
+都改成寫死完整路徑，修完手動重啟shioaji daemon驗證：不再crash、
+`updated_at`與`market_status=open`即時更新、多檔1分K正常累積。細節見
+`PENDING_QUEUE.md`新增獨立條目（開頭「這不是PENDING_QUEUE既有項目」）。
+
+**冒煙測試**：`node scripts/smoke_test.mjs`45/46 PASS，唯一FAIL是check 39
+（資料一致性稽核閘門，一致性違規率12.53%>1%）——這是**已登記在案的既有
+紅燈**（`PENDING_QUEUE.md`「稽核.三」，2026-09-10即已記錄，`data/
+audit_report.json`在本輪開始前就已是修改狀態，`git status`可證非本輪
+造成），依既有先例（`建置一.2`同樣遇過、同樣查證後判定非本輪造成而
+繼續commit）處理，不影響本輪commit範圍（本輪未動任何`data/`稽核相關
+檔案）。
+
+**改了哪些檔案**：`research/shioaji_quotes.py`、`research/kbars_gap_test.py`
+（皆已commit）；`C:\alpha\run-{shioaji-quotes,ibkr-quotes,alpha-live-server}
+-cycle.ps1`（repo外，未commit，純本機修復，總司令換機器/重灌需要重新套用）。
+
+**下一步**：`PENDING_QUEUE.md`「執行順序（權威清單）」目前已無更早的未勾選
+項目，實測.十一亦已於前一輪補記完成，實測系列五筆全部收斂；下一輪回到
+ORDER清單本體（源頭二五個子項皆已完成後的檔案原有順序）繼續找下一個未
+勾選項目。
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十三輪）題材七待辦2：接手前一輪崩潰但已跑完的第五批，驗證後補commit，累計90/259
 
 `PENDING_QUEUE.md`三之一鐵律：本輪開工先讀該檔，發現具名鎖陳舊（PID

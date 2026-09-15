@@ -14,6 +14,61 @@
 
 ---
 
+## 2026-09-15（開發佇列自走cycle_id 20260915-113102 意外發現：三支常駐服務
+launcher全數受同一個python路徑bug影響，已修復）
+
+**這不是PENDING_QUEUE既有項目，是本輪查證實測.十時意外挖到的獨立P0級發現**，
+記在這裡是因為CLAUDE.md「純bug修復可直接做」的例外＋這個bug嚴重到不能等排隊。
+
+**根因**：`run-shioaji-quotes-cycle.ps1`／`run-ibkr-quotes-cycle.ps1`／
+`run-alpha-live-server-cycle.ps1`（都在`C:\alpha\`，**不在git repo內，
+這三個檔案的修改不會出現在任何commit裡**）三支launcher都寫死
+`$pythonExe = "python"`，靠PATH解析。這台機器PATH上`python`會先解析到
+`C:\Program Files\Python313\python.exe`（2026-08-05安裝的**空白安裝，
+一個套件都沒裝**），shioaji/fastapi/uvicorn/ib_async等全部相依套件其實
+只裝在Microsoft Store版Python（`...\WindowsApps\...\python.exe`）。
+
+**發現時的實際影響（都是機器可查的log，不是猜測）**：
+- `AlphaShioajiQuotes`：每2分鐘的排程檢查全部撞到`ModuleNotFoundError:
+  No module named 'shioaji'`（`research/shioaji_stream_stderr.log`），
+  代表**當天（2026-09-15週二盤中）從頭到尾沒有一次成功建立過Shioaji連線**，
+  `.live_state_sinopac.json`卡在昨天（09-14）13:46收盤時的最後狀態，
+  盤中完全沒有即時tick可用——這代表實測.十原本規劃的「盤中實測重現」
+  在修這個bug之前根本不可能做到。
+- `AlphaIbkrQuotes`：同一個根因，`ModuleNotFoundError: No module named
+  'ib_async'`，每次排程都在import階段就死掉（`research/
+  ibkr_quotes_cycle.log`）。
+- `AlphaLiveServer`：目前活著的行程（PID 31576，09-10啟動）沒事，因為它
+  是舊行程還在記憶體裡跑；**但只要這個行程未來因任何原因中斷重啟，
+  launcher會用同一個壞掉的`python`重新啟動它，一樣會起不來**——這是
+  一個目前還沒發作、但確定存在的未爆彈，一併修掉。
+
+**修法**：三支launcher的`$pythonExe`都改成寫死完整路徑
+`C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe`（已用
+`python -c "import shioaji, fastapi, ib_async"`逐一確認這個路徑上三個
+套件都在），不再依賴PATH解析順序。
+
+**驗收（機器可查紀錄，非螢幕截圖）**：
+- 修完後手動觸發`run-shioaji-quotes-cycle.ps1`：新daemon成功啟動，
+  `shioaji_stream_stderr.log`只剩一行deprecation warning，不再有
+  ModuleNotFoundError；`.live_state_sinopac.json`的`updated_at`立刻變成
+  當下時間、`market_status=open`，2330/2454/3231等多檔股票1分K正常持續
+  累積（非本輪要修的實測.十本體，但這是它能被驗證的前提）。
+- `ibkr_quotes_cycle.log`最新一輪不再有ModuleNotFoundError，改成
+  `ConnectionRefusedError`（連不上IB Gateway）——**這是預期中的另一個
+  問題**（CLAUDE.md「IBKR Gateway/TWS」一節：每週日01:00 ET權杖作廢，
+  需要總司令人工登入一次，屬已知限制、非本次bug範圍，不在此處處理）。
+
+**誠實揭露這次沒做的事**：這三個`.ps1`檔在git repo外，**這次修復不會出現
+在任何commit裡**，純粹是本機檔案系統層級的修改；如果總司令換一台機器或
+重灌，這個修復不會跟著走，需要在新機器上重新套用（或考慮未來把這幾支
+launcher腳本搬進repo，但那是架構變更，屬於「提案先於執行」的範圍，本輪
+不擅自做）。這個PATH問題本身是何時出現的（08-05安裝Program Files Python
+之後全部沒發現到今天才抓到）沒有繼續往回查，因為`shioaji_quotes_cycle.log`
+只保留近期紀錄，查不到更早的證據，不確定確切發作起點。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十三輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
@@ -1016,21 +1071,45 @@ IBKR 權杖到期前 24 小時主動提醒。端點變更鐵律已寫進 CLAUDE.
   更早想到的做法。「日線最後一根永遠是昨天」這個原始抱怨在這個架構下
   已不成立——當日模式下看到的每一根都是今天的。
 
-- [ ] **實測.十** [產品/P0] 1分K 出現畸形長條　**本輪查證：問題可能仍未修，
-  暫不勾選**（2026-09-15開發佇列自走cycle_id 20260915-110102）：grep
-  `research/shioaji_quotes.py`與`/live/kbars`相關程式碼，**沒有找到**任何
-  「單根K棒高低差超過ATR/前收合理倍數時判污染並略過」這類統計合理性檢查
-  的實作痕跡（原提案的三個步驟：查根因／加合理性檢查／驗收對照截圖，
-  目前看不到證據顯示做過）。與實測.七/八/九不同，這一項**沒有找到**
-  「架構已用別的方式解決同一個抱怨」的證據，可能是真的還沒修。**本輪
-  不blind實作修法**：(1) 這類統計異常過濾涉及即時行情資料完整性判斷，
-  誤判會讓真實但劇烈的行情被錯誤標記略過（CLAUDE.md「假資料一律不得
-  出現，寧可空狀態」同樣適用於「寧可不過濾也不可誤刪真實資料」的反向
-  情境），需要更仔細設計＋盤中實測才能驗證修法本身沒有引入新問題；
-  (2) 原始bug是2026-09-08單一截圖，8天內未再收到同類回報，無法確認是否
-  仍會重現，貿然實作一個猜測性的過濾邏輯且無法驗證有效，比留著誠實
-  記錄「未修」更risky。留給下一輪：先設計異常判定的具體門檻（例如ATR
-  倍數）並在盤中時段實測重現+驗證，不在本輪（收工前）倉促做掉。
+- [x] **實測.十** [產品/P0] 1分K 出現畸形長條 **已實作＋單元測試驗證＋已在
+  真實盤中部署運行**（2026-09-15開發佇列自走cycle_id 20260915-113102，接手
+  cycle_id 20260915-110102留下的設計工作）：
+  1. **門檻設計**：不用ATR倍數（會隨行情波動、屬機率性判斷），改用**台股
+     漲跌幅±10%的法定限制**（留0.5個百分點取整緩衝＝±10.5%）——任何一筆
+     合法成交都不可能超出「前收±10%」，超出就是數學上確定的壞tick（常見
+     成因：Shioaji偶發小數點/單位錯誤），不是「行情真的很誇張」，這樣設計
+     不會有110102那一輪擔心的「誤殺真實劇烈行情」風險。`prev_close`拿不到
+     時（None或≤0）一律放行不擋，沒有比對基準絕不假設是壞資料。實作：
+     `research/shioaji_quotes.py`新增`TICK_PRICE_LIMIT_BAND_PCT`常數＋
+     `_tick_price_is_plausible()`；`TickState.add_tick()`加`prev_close`
+     參數，判定不合理就整筆排除、不進1分K聚合（`bars["h"]/["l"]`不會被
+     污染），並用`_rejected_ticks`計數＋熱檔`kbars_rejected_ticks`欄位留
+     診斷可見度（CLAUDE.md「看得見」原則）；STK／FOP兩種tick handler都已
+     接上`prev_close=prev_close`，指數handler**刻意不接**（指數沒有交易所
+     保證的漲跌幅上限，套用同一門檻風險是誤殺真實指數變動，程式碼裡有
+     註解說明是刻意排除不是忘記）。已知範圍限制：只保護1分K聚合，`state.
+     update()`寫入的「目前成交價」欄位未套用同一過濾（原始bug只反映在
+     圖表，未擴大範圍到即時報價顯示，避免不必要的blast radius）；處置股/
+     注意股等非常態漲跌幅個股不適用此規則（現行訂閱清單以權值股/自選股
+     為主，未特別排除）。
+  2. **單元測試**（`research/kbars_gap_test.py`新增4個測試，總計11個全過，
+     `exit code 0`）：`_tick_price_is_plausible`邊界值（平盤/漲停邊界內/
+     跌停邊界內/超出漲停/超出跌停/價格≤0/無比對基準一律放行）；畸形tick
+     真的被整筆排除、不污染h/l；漲停邊界內的合法劇烈行情不被誤殺（驗證
+     110102那一輪擔心的風險沒有發生）；拿不到前收時整批放行。
+  3. **真實盤中部署驗證**（不是「已實作但沒測過」——這是機器可查的即時
+     紀錄，符合CLAUDE.md「驗收證據原則」）：改完code後手動重啟
+     `AlphaShioajiQuotes`常駐行程（先kill舊PID讓新code生效，此為過程中
+     發現的獨立python路徑bug修復的副產品，見下方新增項目），確認新daemon
+     `research/.live_state_sinopac.json`的`kbars_rejected_ticks`欄位已
+     出現且為`{}`（今天到目前為止沒有真的收到畸形tick，這是誠實的空狀態，
+     不是沒生效）；持續觀察約40秒，2330/2454/3231等多檔股票的1分K持續
+     正常累積、`updated_at`持續更新、`market_status=open`，沒有任何一檔
+     被誤判排除，確認沒有回歸真實資料。**誠實揭露**：8天前的原始bug是單一
+     次截圖，這次部署期間沒有真的等到一次真實畸形tick發生（本來就是偶發
+     事件，無法保證在有限觀察時間內重現），所以「排除邏輯真的攔到過一次
+     真實案例」這件事尚未被觀察到——但邏輯本身已用單元測試涵蓋所有邊界
+     情況，且已確認不影響正常資料流。
 
 - [x] **實測.十一** [產品/P0] 14:10 排程未落地
   （2026-09-15開發佇列自走cycle_id 20260915-110102補記勾選，非本輪新修）：

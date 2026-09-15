@@ -595,6 +595,43 @@ def _write_market_closed() -> None:
     print("非交易時段（週一至五08:30-13:45外），不登入永豐，保留最後一次盤中資料，market_status=closed（狀態剛轉換，寫入一次）")
 
 
+# ── 2026-09-15（實測.十）1分K畸形長條的統計合理性檢查 ─────────────────────────
+# 背景：2026-09-08總司令截圖回報過一次「1分K出現畸形長條」，原提案是「污染棒
+# 跳過不畫，不要硬畫」。2026-09-15開發佇列自走前一輪（cycle_id 20260915-110102）
+# grep過這支檔案，確認**當時完全沒有**任何合理性檢查，而且明講「誤判會讓真實
+# 但劇烈的行情被錯誤標記略過」的風險，主動選擇不blind實作，留給下一輪先設計
+# 具體門檻。這裡是那個「下一輪」。
+#
+# 門檻選擇：不用ATR倍數這種統計性、會隨行情波動的門檻，改用**台股漲跌幅
+# ±10%的法定限制**（TWSE現行一般股票漲跌停規則）——這是唯一在數學上
+# 確定、不會誤殺真實劇烈行情的門檻：不論當天多震盪，任何一筆合法成交都
+# 不可能超出「前一交易日收盤價 ±10%」這個區間，超出就代表這筆tick本身
+# 是壞資料（常見成因：Shioaji偶發的小數點/單位錯誤tick），而不是「行情
+# 真的很誇張」。留0.5個百分點當取整緩衝（漲跌停價依「升降單位」取整，
+# 理論上不會超過±10%但保留一點空間避免邊界誤殺）。
+# 誠實揭露這個檢查覆蓋不到的情況：處置股、注意股等非常態漲跌幅限制的
+# 個股不適用此規則（依現行制度極少數，且本管線目前訂閱清單以權值股/
+# 自選股為主，尚未特別排除，若未來訂閱到處置股需要重新檢視）。
+# `prev_close`拿不到時（None或<=0）一律放行、不擋——CLAUDE.md「寧可不
+# 過濾也不可誤刪真實資料」在這裡的具體實作：沒有比對基準時絕不假設它是壞資料。
+TICK_PRICE_LIMIT_BAND_PCT = 0.105
+
+
+def _tick_price_is_plausible(price: float | None, prev_close: float | None) -> bool:
+    """單筆tick的價格是否落在「前收±10%（留0.5pp緩衝）」的法定可能區間內。
+
+    回傳False代表這筆tick在數學上不可能是真實成交，應該被排除在1分K聚合
+    之外（不是「看起來像離群值」的機率性判斷，是exchange規則保證的確定性
+    判斷）。"""
+    if price is None or price <= 0:
+        return False
+    if prev_close is None or prev_close <= 0:
+        return True  # 沒有比對基準，不擋——避免誤刪真實資料
+    lo = prev_close * (1 - TICK_PRICE_LIMIT_BAND_PCT)
+    hi = prev_close * (1 + TICK_PRICE_LIMIT_BAND_PCT)
+    return lo <= price <= hi
+
+
 class TickState:
     """執行緒安全的最新報價快照。Shioaji的tick/bidask/quote callback在
     背景執行緒觸發（不是主執行緒），主執行緒的常駐迴圈定期讀出目前累積的
@@ -617,6 +654,9 @@ class TickState:
         self._push_token: str | None = None
         self._push_disabled_reason: str | None = None
         self.push_count = 0
+        # 2026-09-15（實測.十）畸形棒防護：per-key累計被拒絕的tick數，
+        # 只用於診斷可見度（寫進熱檔），不影響任何既有欄位的行為。
+        self._rejected_ticks: dict[str, int] = {}
 
     def update(self, key: str, patch: dict) -> None:
         with self._lock:
@@ -638,11 +678,23 @@ class TickState:
             q = self._quotes.get(key) or {}
             return q.get("bid"), q.get("ask")
 
-    def add_tick(self, key: str, price, volume, ts) -> None:
+    def add_tick(self, key: str, price, volume, ts, prev_close=None) -> None:
         """用已收到的一筆tick更新當日1分K（O/H/L/C/V）。`ts`是tick.datetime
         （Shioaji給的是台北時間、naive datetime）；沒有就用現在時間。指數quote
-        沒有成交量，呼叫端傳0。"""
-        if price is None:
+        沒有成交量，呼叫端傳0。
+
+        `prev_close`（2026-09-15新增，實測.十）：呼叫端算好的前收價，用來擋
+        數學上不可能的壞tick（見`_tick_price_is_plausible()`docstring）。拿不到
+        就傳None，這裡會直接放行——沒有比對基準時絕不假設它是壞資料。"""
+        if not _tick_price_is_plausible(price, prev_close):
+            with self._lock:
+                self._rejected_ticks[key] = self._rejected_ticks.get(key, 0) + 1
+                n = self._rejected_ticks[key]
+            # 只在1/10/100這幾個里程碑印log，不洗log（同一支股票不太可能持續一直收到壞tick）
+            if n in (1, 10, 100):
+                print(f"  [畸形tick已排除x{n}] {key}: price={price} 前收={prev_close}"
+                      f"（超出±{TICK_PRICE_LIMIT_BAND_PCT*100:.1f}%法定漲跌幅區間，判定為壞資料，不計入1分K）",
+                      flush=True)
             return
         if ts is None:
             ts = datetime.now(TW_TZ).replace(tzinfo=None)
@@ -665,6 +717,11 @@ class TickState:
                 bar["l"] = min(bar["l"], price)
                 bar["c"] = price
                 bar["v"] += vol
+
+    def rejected_ticks_snapshot(self) -> dict[str, int]:
+        """診斷用：目前累計每檔被判定為壞資料而排除的tick數（見`add_tick`）。"""
+        with self._lock:
+            return dict(self._rejected_ticks)
 
     def seed_kbars(self, key: str, rows: list[dict]) -> int:
         """把 api.kbars() 查來的當日 1 分K 當基底塞進聚合表。
@@ -770,6 +827,9 @@ class TickState:
                 "kbars_mode": "tick-aggregated-1m",
                 "quotes": self.snapshot(),
                 "kbars": self.kbars_snapshot(),
+                # 2026-09-15（實測.十）畸形棒防護的可見度：每檔累計被判定為壞
+                # 資料而排除的tick數，空dict代表今天完全沒有觸發過。
+                "kbars_rejected_ticks": self.rejected_ticks_snapshot(),
             }
             tmp = self.live_state_path.with_suffix(".json.tmp")
             tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
@@ -847,7 +907,7 @@ def _make_tick_stk_handler(state: TickState, key: str, label: str | None):
             if label:
                 patch["label"] = label
             state.update(key, patch)
-            state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
+            state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None), prev_close=prev_close)
             state.push_tick(key)  # 2026-09-04 tick-push：先推（最低延遲），再寫熱檔備援
             _record_tick(state, key, tick)  # 2026-09-07 資料一.1：推完才落地，落地不佔推送延遲
             state.maybe_write_live_state()
@@ -894,7 +954,7 @@ def _make_tick_fop_handler(state: TickState, key: str, label: str | None):
             if label:
                 patch["label"] = label
             state.update(key, patch)
-            state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None))
+            state.add_tick(key, last, getattr(tick, "volume", None), getattr(tick, "datetime", None), prev_close=prev_close)
             state.push_tick(key)
             _record_tick(state, key, tick)  # 2026-09-07 資料一.1：期貨逐筆也落地
             state.maybe_write_live_state()
@@ -936,6 +996,10 @@ def _make_quote_idx_handler(state: TickState, key: str, label: str | None):
             if label:
                 patch["label"] = label
             state.update(key, patch)
+            # 2026-09-15（實測.十）刻意不傳prev_close：指數不是實際成交的股票，
+            # 沒有交易所規則保證的±10%法定漲跌幅上限（指數是成分股加權計算出來的
+            # 值，理論上可以有更大的變動），套用同一個確定性門檻風險是誤殺真實
+            # 指數變動，不是忘記加。
             state.add_tick(key, last, 0, getattr(quote, "datetime", None))  # 指數沒有成交量
             state.push_tick(key)
             state.maybe_write_live_state()

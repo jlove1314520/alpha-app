@@ -84,6 +84,59 @@ def test_kbars_daily_budget():
     print("test_kbars_daily_budget PASS")
 
 
+def test_tick_price_plausibility_basic():
+    """2026-09-15（實測.十）：前收±10%（留0.5pp緩衝）是唯一的判斷依據。"""
+    assert sq._tick_price_is_plausible(100.0, 100.0)          # 平盤
+    assert sq._tick_price_is_plausible(109.9, 100.0)          # 漲停邊界內
+    assert sq._tick_price_is_plausible(90.1, 100.0)           # 跌停邊界內
+    assert not sq._tick_price_is_plausible(111.0, 100.0)      # 超過漲停
+    assert not sq._tick_price_is_plausible(89.0, 100.0)       # 超過跌停
+    assert not sq._tick_price_is_plausible(0, 100.0)          # 不可能的價格
+    assert not sq._tick_price_is_plausible(None, 100.0)
+    assert sq._tick_price_is_plausible(99999.0, None)         # 沒有比對基準：不擋
+    print("test_tick_price_plausibility_basic PASS")
+
+
+def test_add_tick_rejects_malformed_bar():
+    """畸形棒不進聚合表：整根被排除，而不是硬把離譜的high/low畫進去。"""
+    state = sq.TickState()
+    ts = sq.datetime(2026, 9, 15, 9, 30)
+    state.add_tick("2330", 500.0, 1000, ts, prev_close=500.0)
+    # 這筆是壞tick（超出漲停），不應該把h拉高到5000
+    state.add_tick("2330", 5000.0, 1000, ts, prev_close=500.0)
+    state.add_tick("2330", 501.0, 1000, ts, prev_close=500.0)
+    bars = state.kbars_snapshot()["2330"]
+    assert len(bars) == 1
+    assert bars[0]["h"] == 501.0, f"畸形tick污染了high：{bars[0]}"
+    assert bars[0]["l"] == 500.0, f"畸形tick污染了low：{bars[0]}"
+    rejected = state.rejected_ticks_snapshot()
+    assert rejected.get("2330") == 1, rejected
+    print("test_add_tick_rejects_malformed_bar PASS")
+
+
+def test_add_tick_accepts_legal_extreme_move():
+    """漲停邊界內的真實劇烈行情不能被誤殺（CLAUDE.md：寧可不過濾也不可誤刪真實資料）。"""
+    state = sq.TickState()
+    ts = sq.datetime(2026, 9, 15, 9, 30)
+    state.add_tick("2454", 100.0, 100, ts, prev_close=100.0)
+    state.add_tick("2454", 109.9, 200, ts, prev_close=100.0)  # 接近漲停但合法
+    bars = state.kbars_snapshot()["2454"]
+    assert bars[0]["h"] == 109.9, f"合法漲停附近的行情被誤殺：{bars[0]}"
+    assert state.rejected_ticks_snapshot() == {}
+    print("test_add_tick_accepts_legal_extreme_move PASS")
+
+
+def test_add_tick_passes_through_without_prev_close():
+    """拿不到前收時整批放行，不假設是壞資料。"""
+    state = sq.TickState()
+    ts = sq.datetime(2026, 9, 15, 9, 30)
+    state.add_tick("IDX_IX0001", 99999.0, 0, ts, prev_close=None)
+    bars = state.kbars_snapshot()["IDX_IX0001"]
+    assert bars[0]["c"] == 99999.0
+    assert state.rejected_ticks_snapshot() == {}
+    print("test_add_tick_passes_through_without_prev_close PASS")
+
+
 def test_kbars_rate_limit():
     """10 秒視窗額度用完也要擋（官方超過會暫停服務一分鐘、反覆違規停權）。"""
     import time
@@ -107,7 +160,10 @@ if __name__ == "__main__":
     for fn in (test_needs_backfill_late_start, test_no_backfill_when_from_open,
                test_gap_detection_threshold, test_merge_prefers_tick,
                test_merge_result_is_sorted, test_kbars_daily_budget,
-               test_kbars_rate_limit):
+               test_kbars_rate_limit, test_tick_price_plausibility_basic,
+               test_add_tick_rejects_malformed_bar,
+               test_add_tick_accepts_legal_extreme_move,
+               test_add_tick_passes_through_without_prev_close):
         try:
             fn()
         except AssertionError as e:
