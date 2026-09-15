@@ -1,3 +1,27 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-121601）金流一.4：查證後發現指令前提與現況不符，標記阻塞交還
+
+`PENDING_QUEUE.md`權威清單下一項是「金流一.4　評分引擎籌碼因子說明改引用
+sector_flow實際欄位」。原始指令原話：「籌碼因子（14%）的說明文字改為引用
+sector_flow.json的實際欄位（連續天數、5/20日加速度、異常z分數），權重不動；
+不得宣稱預測力。」
+
+**查證後發現前提不成立**：14%權重的籌碼因子是`research/weights_frozen.json`
+的`chips`（`generate_scores_live.py`），數值`raw_inst_flow`完全來自
+`stock_detail.json`的`institutional.history`（近5日三大法人買賣超張數滾動）；
+`sector_flow.json`的連續天數／5-20日加速度／異常z分數是完全獨立的另一條計算
+管線（個股層在`stocks`物件，供`index.html`的籌碼徽章`renderChipBadges`使用），
+兩者互不重疊。純改說明文字會變成描述一個沒有真的被算出來、也沒有顯示在
+頁面上的數字，違反本專案稽核恆等式鐵律；若要文字真的對得上，等於要把`chips`
+因子的計算公式從`institutional.history`改成`sector_flow.json`的個股層欄位——
+這是已上線、14%權重、直接影響`scores.json`排名的因子公式變更，不是文字微調，
+依CLAUDE.md「提案先於執行」鐵律不該由開發佇列自走輪次自行判斷改哪個方向。
+
+用`Explore`子代理獨立查證程式碼位置與`sector_flow.json`實際欄位結構後，
+用`python scripts/dev_queue_runner.py block`標記阻塞（`- [!]`），把三個
+選項（改公式／只改文字承認落差／範圍收斂到已經對得上的UI文案）留給總司令
+裁示，原因全文已寫入`PENDING_QUEUE.md`該條目。**未執行任何程式碼變更**，
+本輪唯一動作是查證與標記阻塞。commit僅含`PENDING_QUEUE.md`與本檔。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-121601）實測二補.3：盤中真實驗證，順帶抓到並修好一個backfill不持久化的bug
 
 `PENDING_QUEUE.md`權威清單下一項是「實測二補.3」（原標記「阻塞中，等週一開盤」）。
