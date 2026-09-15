@@ -526,9 +526,17 @@ def check_e_pe(a, universe, ref, names, loc):
         implied = official / ttm
         d = rel_diff(per, implied)
         if d is not None and d > TOL_PE:
+            # 2026-09-15（總司令裁示，稽核二.三）修正標籤反向：`per` 是
+            # fundamentals.json 的 ratios.per，直接來自 TWSE/TPEx 官方
+            # BWIBBU_ALL/tpex_mainboard_peratio_analysis 端點（`.github/
+            # scripts/update_fundamentals_daily.py` 可證），是「official」；
+            # `implied` 是我方用 stock_detail.json 近四季 EPS 自己推算的
+            # 值，是「ours」。原本呼叫把兩者順序寫反了，`hit()`
+            # 簽名是 (ours, official)，之前傳成 (per, implied) 剛好對調。
             a.hit("e_pe", code, names.get(code, ""),
-                  "fundamentals 的本益比與「現價 / 近四季EPS」對不起來",
-                  per, round(implied, 2), d, "fundamentals.json + stock_detail.json")
+                  "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，"
+                  "見下方e_pe informational說明，本檢查不計入violation_rate）",
+                  round(implied, 2), per, d, "stock_detail.json（推算） vs fundamentals.json（官方）")
 
 
 def check_f_null_as_number(a, loc):
@@ -692,8 +700,19 @@ def main():
     #   完整度缺口 = 官方有、我們沒有或資料有斷層（屬於「稽核.二 覆蓋率補齊」的範圍）
     # （2026-09-10 深讀四.4：原本的 b_entry_plan／d_market_cap 兩項已判無效並刪除，
     #  理由見檔頭說明，不在 CONSISTENCY 集合裡。）
+    # 2026-09-15（總司令裁示，稽核二.三）e_pe 從 CONSISTENCY 移到獨立的
+    # INFORMATIONAL：查證 TWSE openapi swagger 規格檔，BWIBBU_ALL 的
+    # PEratio 欄位官方完全沒有公開計算基礎（合併vs個別、TTM窗口定義等
+    # 一概未載明），而我方 implied PE 是用 stock_detail.json（TWSE
+    # t187ap06_L_ci 綜合損益表-一般業）近四季 EPS 自行推算——兩者 EPS
+    # 基礎不保證相同，直接比較不是同一把尺，硬性當「一致性違規」計入
+    # violation_rate 會誤導資料品質判斷。降級為 informational：繼續記錄
+    # 差異供人工查閱（`by_check.e_pe`/`violations` 仍看得到），但不計入
+    # violation_rate/gate_pass。查證過程見 docs/DATA_SOURCE_MAP.md（若之後
+    # 找到官方基礎說明文件，可以改回同基礎比較再重新計入）。
     CONSISTENCY = {"a_price_source", "a2_not_in_official", "a3_stale_price",
-                   "c_range", "e_pe", "f_null_as_number", "g_comma_parsing"}
+                   "c_range", "f_null_as_number", "g_comma_parsing"}
+    INFORMATIONAL = {"e_pe"}
     COMPLETENESS = {"e_quarters_gap", "e_quarters_stale"}
     bad_codes = {v["code"] for v in a.violations
                  if v["check"] in CONSISTENCY and v["code"] not in ("-", "")}
@@ -720,6 +739,7 @@ def main():
         "violation_rate": round(rate, 5),
         "violation_rate_gate": 0.01,
         "gate_pass": rate <= 0.01 and not code_free,
+        "informational_only_checks": sorted(INFORMATIONAL),
         "total_violations": len(a.violations),
         "by_check": a.stats,
         "top_20": sorted(a.violations, key=sev)[:20],
@@ -733,6 +753,11 @@ def main():
             "有任何一筆就視同閘門不通過。",
             "violation_rate 只計「一致性」類（顯示的數字與官方對不起來）；季報斷層/過期屬於"
             "「完整度」類，另計 completeness_gap_rate，由稽核.二（覆蓋率補齊）負責收斂。",
+            "2026-09-15（稽核二.三）e_pe 降級為 informational_only_checks：官方 BWIBBU_ALL "
+            "本益比未公開計算基礎（合併/個別、TTM窗口定義皆未載明），跟我方用 stock_detail.json "
+            "近四季EPS自行推算的值不保證同一把尺，繼續記錄差異供查閱但不計入 violation_rate/"
+            "gate_pass。同一次修正了 hit() 呼叫時 ours/official 標籤反向的bug（原本把官方值"
+            "標成ours、推算值標成official，順序寫反）。",
         ],
     }
     # 2026-09-10（停擺三）**不要整檔覆蓋**。
