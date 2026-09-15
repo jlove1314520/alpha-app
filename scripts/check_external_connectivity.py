@@ -223,6 +223,21 @@ def check_stale_user_visible_blocks() -> list[str]:
         return []
 
 
+def check_pat_expiry_alerts() -> list[str]:
+    """2026-09-15（總司令裁示【防重演】之二）：GitHub PAT 剩餘天數 ≤14 天就告警。
+    只讀 pipeline_registry.json 的 github_pat_expiry.expires_at 做日期算術，
+    **不打 gh api、不碰 token**——到期日是 `python scripts/check_pat_expiry.py
+    --refresh` 手動更新的，這裡只是每輪讀那個已存的日期。同樣包一層
+    try/except，監測器不能因為這項失敗而整輪崩潰。
+    """
+    try:
+        from check_pat_expiry import get_alerts
+        return [msg for msg, _remaining in get_alerts()]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! PAT 到期日檢查失敗（{type(e).__name__}: {e}），本輪跳過這項自檢")
+        return []
+
+
 def publish_task_health(now: datetime, rows: list[dict], stalled: list[str],
                          conn_alerts: list[tuple[str, int, str]] | None = None) -> None:
     """把自檢結果併進 data/audit_report.json 的 local_task_health（總司令指定的位置）。
@@ -297,7 +312,7 @@ def main() -> int:
     # 2026-09-15【防重演】：PENDING_QUEUE.md裡【使用者可見】標記的阻塞項也併進
     # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
     # 教總司令看第三個地方。
-    task_stalls = task_stalls + check_stale_user_visible_blocks()
+    task_stalls = task_stalls + check_stale_user_visible_blocks() + check_pat_expiry_alerts()
     publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:

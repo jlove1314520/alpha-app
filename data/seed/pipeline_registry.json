@@ -59,7 +59,10 @@
       "artifact": "research/twse_publish_probe.jsonl",
       "freshness": "jsonl_last_field",
       "field": "ts",
-      "window_hours": [13, 20],
+      "window_hours": [
+        13,
+        20
+      ],
       "note": "只在收盤後的發布觀察窗跑，窗外沒產出是正常的。"
     },
     {
@@ -90,10 +93,22 @@
       "artifact": "C:/alpha/alpha-data/alpha.db",
       "freshness": "sqlite_max_date",
       "tables": [
-        {"table": "daily_price", "column": "date"},
-        {"table": "inst_trades", "column": "date"},
-        {"table": "valuation", "column": "date"},
-        {"table": "taifex_large", "column": "date"}
+        {
+          "table": "daily_price",
+          "column": "date"
+        },
+        {
+          "table": "inst_trades",
+          "column": "date"
+        },
+        {
+          "table": "valuation",
+          "column": "date"
+        },
+        {
+          "table": "taifex_large",
+          "column": "date"
+        }
       ],
       "note": "**這一條就是 stall 自檢存在的理由。** mtime 天天更新但 max(date) 停在 2026-08-21，整整 20 天沒人發現。門檻 3 天剛好涵蓋週末。"
     },
@@ -104,6 +119,21 @@
       "artifact": "data/dependency_status.json",
       "freshness": "json_field",
       "field": "generated_at"
+    },
+    {
+      "task": "AlphaMarketSparklines",
+      "purpose": "全市場走勢線（自選股/搜尋頁 sparklines 圖，從 price_history 切出，零額外網路請求）",
+      "interval_min": 1440,
+      "artifact": "data/sparklines.json",
+      "freshness": "json_field",
+      "field": "meta.generated_at",
+      "note": "2026-09-15（sparklines凍結事件解封，防重演四.1）新增。跟 AlphaData 條目同一套既有慣例：interval_min=1440 × stall_factor=3 = 3 天門檻，用日曆天數近似總司令指定的「3個交易日」（含週末緩衝）。這支腳本掛在 market.yml 排程（平日最多跑3次：17:00/18:30台北 + 05:30次日美股批次），本檔案凍結10天沒人發現正是本條要防的事件本身。"
     }
-  ]
+  ],
+  "github_pat_expiry": {
+    "expires_at": "2026-12-14",
+    "recorded_at": "2026-09-15T22:59:00.362352+08:00",
+    "alert_threshold_days": 14,
+    "note": "只存日期，不存 token 本身（2026-09-15 總司令裁示，鐵律）。來源：`gh api -i user` 回應表頭 Github-Authentication-Token-Expiration。PAT 換新後要手動重跑 `python scripts/check_pat_expiry.py --refresh` 更新這裡——沒有排程自動打這支，避免白耗 API 額度。"
+  }
 }

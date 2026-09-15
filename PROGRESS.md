@@ -1,3 +1,54 @@
+## 2026-09-15（sparklines解凍）新PAT實測可推workflow，market.yml排程補回，二.1/二.2誠實維持未完成
+
+戴**維運帽**。總司令換上含`Workflows: Read and write`scope的新fine-grained
+PAT，裁示【sparklines解凍】四大項（原文已補登`PENDING_QUEUE.md`）。
+
+**一、實際驗證推送**：空commit推送測試（commit`dc4f1728`）未再出現
+workflow scope拒絕錯誤；`market.yml`補回`build_sparklines.py`產生步驟
+（commit`f94445b3`），推送成功。**同時查出一個獨立bug**：commit步驟的
+`git add`檔案允許清單本來就漏了`data/sparklines.json`與
+`data/benchmark_comparison.json`，就算產生步驟本身成功也不會被commit，
+一併修正。`gh run list`驗證可用；額外嘗試`gh workflow run`手動觸發想
+加速驗證，得到**實際錯誤**`HTTP 403: Resource not accessible by
+personal access token`——新PAT只有`Actions: Read`沒有`Actions: Write`，
+如實回報、未繞道，需等自然排程（17:00／18:30台北或05:30次日美股批次）。
+
+**二、確認sparklines真的恢復**：🔲**誠實維持未完成**——`generated_at`
+真的跳離`2026-09-05 20:07`之前，`data_audit.py`重跑與`a_price_source`
+765筆/32.95%/3,972筆這三個數字，都不在本輪回報範圍內。等排程實跑過一輪
+後續報。
+
+**三、過渡期誠實標示**：確認前一輪（commit`83df3be4`）已完成的
+`resolveQuote()`sparklines回退層資料日期標示仍在，未退化，無需重做。
+
+**四、防重演**：`data/seed/pipeline_registry.json`新增`AlphaMarketSparklines`
+條目監控`meta.generated_at`（比照既有`AlphaData`條目的`interval_min=1440`
+×`stall_factor=3`＝3天門檻慣例，近似3個交易日）；已實測`check_external_
+connectivity.py`目前正確亮燈（因為sparklines.json確實還是舊資料，排程
+真的跑過一次後會自動轉綠）。新增`scripts/check_pat_expiry.py`，**只存
+到期日、不存token**（來源`gh api -i user`回應表頭`Github-Authentication-
+Token-Expiration`），已手動`--refresh`記錄`github_pat_expiry.expires_at
+= 2026-12-14`（剩約91天，未達≤14天告警門檻），併入`local_task_health`
+同一套亮燈機制。
+
+**冒煙測試**：本輪未動`index.html`，沿用前一輪50項結果（僅既有check 39
+未過，無新增回歸）。
+
+**影響檔案**：`.github/workflows/market.yml`、
+`data/seed/pipeline_registry.json`、`scripts/check_external_
+connectivity.py`（新增`check_pat_expiry_alerts()`）、
+`scripts/check_pat_expiry.py`（新增）、`PENDING_QUEUE.md`（補登裁示原文
+＋執行狀態）、`PROGRESS.md`（本節）。
+
+**下一步**：等`market.yml`下一次自然排程（今日17:00／18:30或明日05:30）
+跑過後，確認`sparklines.json``generated_at`真的跳動，重跑`data_audit.py`
+回報`a_price_source`三個數字的新結果，這一步在此之前不得宣稱完成。
+
+**流程自省**：本條裁示依規定應在動工前就寫進`PENDING_QUEUE.md`並commit，
+實際是做完後才補登，已在`PENDING_QUEUE.md`對應條目開頭誠實記錄這次疏失。
+
+---
+
 ## 2026-09-15（我們vs0050·階段三完成）三榜全部落後0050，App主圖上線並Playwright驗收
 
 戴**開發帽**。總司令裁示「階段一、二已完成，接著畫圖」，已完成階段三並
