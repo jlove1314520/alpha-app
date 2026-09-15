@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "generated_at": "2026-09-15T22:23:29.996002+08:00",
+    "source": "data/picks_ledger.json（實際回填紀錄，非重算回測）+ data/price_history.json（0050，TWSE STOCK_DAY_ALL）",
+    "hold_window": "t5",
+    "assumption_note": "等權重買進Top20、持有5個交易日、依序串接複利（非同時持有多批重疊部位的完整投資組合模型）、已扣成本（股票0.1425%×2手續費+0.3%證交稅、0050 ETF 0.1425%×2手續費+0.1%證交稅）",
+    "sample_sufficient_trading_days": 60,
+    "benchmark": "0050"
+  },
+  "boards": {
+    "value": {
+      "n_comparable_snapshots": 5,
+      "sample_insufficient": true,
+      "ours_curve": [
+        {
+          "date": "2026-08-27",
+          "raw_return_pct": -1.0875,
+          "cost_pct": 0.585,
+          "net_return_pct": -1.6725,
+          "n_picks": 19,
+          "nav": 98.3275,
+          "cum_return_pct": -1.6725,
+          "drawdown_pct": -1.6725
+        },
+        {
+          "date": "2026-08-28",
+          "raw_return_pct": -1.8502,
+          "cost_pct": 0.585,
+          "net_return_pct": -2.4352,
+          "n_picks": 19,
+          "nav": 95.933,
+          "cum_return_pct": -4.067,
+          "drawdown_pct": -4.067
+        },
+        {
+          "date": "2026-08-31",
+          "raw_return_pct": -1.483,
+          "cost_pct": 0.585,
+          "net_return_pct": -2.068,
+          "n_picks": 19,
+          "nav": 93.9491,
+          "cum_return_pct": -6.0509,
+          "drawdown_pct": -6.0509
+        },
+        {
+          "date": "2026-09-02",
+          "raw_return_pct": -1.2881,
+          "cost_pct": 0.585,
+          "net_return_pct": -1.8731,
+          "n_picks": 19,
+          "nav": 92.1894,
+          "cum_return_pct": -7.8106,
+          "drawdown_pct": -7.8106
+        },
+        {
+          "date": "2026-09-03",
+          "raw_return_pct": -6.1073,
+          "cost_pct": 0.585,
+          "net_return_pct": -6.6923,
+          "n_picks": 19,
+          "nav": 86.0198,
+          "cum_return_pct": -13.9802,
+          "drawdown_pct": -13.9802
+        }
+      ],
+      "benchmark_curve": [
+        {
+          "date": "2026-08-27",
+          "raw_return_pct": 1.7445,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.3595,
+          "nav": 101.3595,
+          "cum_return_pct": 1.3595,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-08-28",
+          "raw_return_pct": 2.5245,
+          "cost_pct": 0.385,
+          "net_return_pct": 2.1395,
+          "nav": 103.5281,
+          "cum_return_pct": 3.5281,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-08-31",
+          "raw_return_pct": 3.2,
+          "cost_pct": 0.385,
+          "net_return_pct": 2.815,
+          "nav": 106.4424,
+          "cum_return_pct": 6.4424,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-02",
+          "raw_return_pct": 2.2004,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.8154,
+          "nav": 108.3748,
+          "cum_return_pct": 8.3748,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-03",
+          "raw_return_pct": 1.4124,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.0274,
+          "nav": 109.4882,
+          "cum_return_pct": 9.4882,
+          "drawdown_pct": 0.0
+        }
+      ],
+      "cum_return_pct_ours": -13.9802,
+      "cum_return_pct_benchmark": 9.4882,
+      "gap_pp": -23.4684,
+      "mdd_pct_ours": -13.9802,
+      "calmar_ours": -5.5854
+    },
+    "momentum": {
+      "n_comparable_snapshots": 4,
+      "sample_insufficient": true,
+      "ours_curve": [
+        {
+          "date": "2026-08-28",
+          "raw_return_pct": -0.2773,
+          "cost_pct": 0.585,
+          "net_return_pct": -0.8623,
+          "n_picks": 20,
+          "nav": 99.1377,
+          "cum_return_pct": -0.8623,
+          "drawdown_pct": -0.8623
+        },
+        {
+          "date": "2026-08-31",
+          "raw_return_pct": -1.6012,
+          "cost_pct": 0.585,
+          "net_return_pct": -2.1862,
+          "n_picks": 20,
+          "nav": 96.9704,
+          "cum_return_pct": -3.0296,
+          "drawdown_pct": -3.0296
+        },
+        {
+          "date": "2026-09-02",
+          "raw_return_pct": -2.0054,
+          "cost_pct": 0.585,
+          "net_return_pct": -2.5904,
+          "n_picks": 20,
+          "nav": 94.4584,
+          "cum_return_pct": -5.5416,
+          "drawdown_pct": -5.5416
+        },
+        {
+          "date": "2026-09-03",
+          "raw_return_pct": -4.7852,
+          "cost_pct": 0.585,
+          "net_return_pct": -5.3702,
+          "n_picks": 20,
+          "nav": 89.3858,
+          "cum_return_pct": -10.6142,
+          "drawdown_pct": -10.6142
+        }
+      ],
+      "benchmark_curve": [
+        {
+          "date": "2026-08-28",
+          "raw_return_pct": 2.5245,
+          "cost_pct": 0.385,
+          "net_return_pct": 2.1395,
+          "nav": 102.1395,
+          "cum_return_pct": 2.1395,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-08-31",
+          "raw_return_pct": 3.2,
+          "cost_pct": 0.385,
+          "net_return_pct": 2.815,
+          "nav": 105.0147,
+          "cum_return_pct": 5.0147,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-02",
+          "raw_return_pct": 2.2004,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.8154,
+          "nav": 106.9212,
+          "cum_return_pct": 6.9212,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-03",
+          "raw_return_pct": 1.4124,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.0274,
+          "nav": 108.0197,
+          "cum_return_pct": 8.0197,
+          "drawdown_pct": 0.0
+        }
+      ],
+      "cum_return_pct_ours": -10.6142,
+      "cum_return_pct_benchmark": 8.0197,
+      "gap_pp": -18.6339,
+      "mdd_pct_ours": -10.6142,
+      "calmar_ours": -7.13
+    },
+    "future": {
+      "n_comparable_snapshots": 5,
+      "sample_insufficient": true,
+      "ours_curve": [
+        {
+          "date": "2026-08-27",
+          "raw_return_pct": 0.9826,
+          "cost_pct": 0.585,
+          "net_return_pct": 0.3976,
+          "n_picks": 18,
+          "nav": 100.3976,
+          "cum_return_pct": 0.3976,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-08-28",
+          "raw_return_pct": -1.2793,
+          "cost_pct": 0.585,
+          "net_return_pct": -1.8643,
+          "n_picks": 18,
+          "nav": 98.5259,
+          "cum_return_pct": -1.4741,
+          "drawdown_pct": -1.8643
+        },
+        {
+          "date": "2026-08-31",
+          "raw_return_pct": 2.7188,
+          "cost_pct": 0.585,
+          "net_return_pct": 2.1338,
+          "n_picks": 18,
+          "nav": 100.6282,
+          "cum_return_pct": 0.6282,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-02",
+          "raw_return_pct": -0.4522,
+          "cost_pct": 0.585,
+          "net_return_pct": -1.0372,
+          "n_picks": 18,
+          "nav": 99.5845,
+          "cum_return_pct": -0.4155,
+          "drawdown_pct": -1.0372
+        },
+        {
+          "date": "2026-09-03",
+          "raw_return_pct": -1.5195,
+          "cost_pct": 0.585,
+          "net_return_pct": -2.1045,
+          "n_picks": 18,
+          "nav": 97.4888,
+          "cum_return_pct": -2.5112,
+          "drawdown_pct": -3.1199
+        }
+      ],
+      "benchmark_curve": [
+        {
+          "date": "2026-08-27",
+          "raw_return_pct": 1.7445,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.3595,
+          "nav": 101.3595,
+          "cum_return_pct": 1.3595,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-08-28",
+          "raw_return_pct": 2.5245,
+          "cost_pct": 0.385,
+          "net_return_pct": 2.1395,
+          "nav": 103.5281,
+          "cum_return_pct": 3.5281,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-08-31",
+          "raw_return_pct": 3.2,
+          "cost_pct": 0.385,
+          "net_return_pct": 2.815,
+          "nav": 106.4424,
+          "cum_return_pct": 6.4424,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-02",
+          "raw_return_pct": 2.2004,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.8154,
+          "nav": 108.3748,
+          "cum_return_pct": 8.3748,
+          "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-03",
+          "raw_return_pct": 1.4124,
+          "cost_pct": 0.385,
+          "net_return_pct": 1.0274,
+          "nav": 109.4882,
+          "cum_return_pct": 9.4882,
+          "drawdown_pct": 0.0
+        }
+      ],
+      "cum_return_pct_ours": -2.5112,
+      "cum_return_pct_benchmark": 9.4882,
+      "gap_pp": -11.9994,
+      "mdd_pct_ours": -3.1199,
+      "calmar_ours": -7.2482
+    }
+  }
+}

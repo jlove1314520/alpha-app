@@ -528,6 +528,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
     </div>
 
+    <!-- 2026-09-15（總司令三階段裁示【產品·基準對比】）我們Top20 vs 0050——資料嚴格取自
+    data/benchmark_comparison.json（.github/scripts/build_benchmark_comparison.py只讀
+    picks_ledger.json實際回填紀錄計算，不重算回測）。三榜（估值/動能/未來）各自分開，
+    不合成總分；樣本<60個交易日時結論欄位強制顯示「資料累積中」，不顯示任何結論性文字
+    ——這條規則在renderBenchmarkComparison()裡用JS硬性判斷，不是靠自律不亂寫。 -->
+    <div class="card" id="benchmark-comparison-card">
+      <h3>我們 vs 0050 <span class="more" id="bc-range-toggle"></span></h3>
+      <div id="bc-board-tabs" style="display:flex;gap:6px;margin-bottom:8px"></div>
+      <div id="bc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
+    </div>
+
     <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與紙上
     持倉（策略監控台各策略目前holdings）的events.json/news.json依時間排一條流，
     點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
@@ -2540,6 +2551,102 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function spark(cl,up){if(cl.length<2)return '';const mn=Math.min(...cl),mx=Math.max(...cl),rg=(mx-mn)||1;
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
     return `<svg class="spark" width="64" height="26" viewBox="0 0 64 26" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2"/></svg>`}
+
+  // ══════ 我們 vs 0050（2026-09-15 總司令三階段裁示【產品·基準對比】）══════
+  // 資料只讀 data/benchmark_comparison.json（build_benchmark_comparison.py用
+  // picks_ledger.json實際回填紀錄算出，不在前端重算回測）。三榜各自獨立，
+  // 用tab切換而不是四條線疊在同一張圖——三榜邏輯不同（估值/動能/未來），
+  // 疊在一起會互相掩蓋，且各榜可比對的snapshot數量不同（x軸對不齊），tab
+  // 切換比硬擠在同一張圖誠實。
+  let BENCHMARK_COMPARISON=null,BC_BOARD='value',BC_RANGE='all';
+  const BC_BOARD_LABEL={value:'估值榜',momentum:'動能榜',future:'未來榜'};
+  const BC_RANGE_LABEL={'1m':'近一月','3m':'近三月',all:'全部歷史'};
+  async function loadBenchmarkComparison(){
+    if(BENCHMARK_COMPARISON)return BENCHMARK_COMPARISON;
+    try{
+      const r=await fetch('data/benchmark_comparison.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      BENCHMARK_COMPARISON=await r.json();
+    }catch(e){console.warn('[loadBenchmarkComparison]',e);recordGlobalError('loadBenchmarkComparison',e);BENCHMARK_COMPARISON=null}
+    return BENCHMARK_COMPARISON;
+  }
+  // 依時間切換範圍過濾曲線（近一月/近三月用「最後N筆」近似，因為curve的x軸
+  // 是snapshot序列不是嚴格日曆天，樣本本來就少，近似對這個資料量級足夠）。
+  function bcFilterRange(curve,rangeKey){
+    if(!curve||!curve.length)return curve||[];
+    if(rangeKey==='all')return curve;
+    const n=rangeKey==='1m'?Math.min(curve.length,22):Math.min(curve.length,66);
+    return curve.slice(-n);
+  }
+  function bcDualLineSvg(oursCurve,benchCurve){
+    const W=320,H=140,pad=4;
+    if(!oursCurve.length||!benchCurve.length)
+      return `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--ink-3)" font-size="11">尚無可比對資料</text></svg>`;
+    const allVals=[...oursCurve.map(p=>p.cum_return_pct),...benchCurve.map(p=>p.cum_return_pct),0];
+    const mn=Math.min(...allVals),mx=Math.max(...allVals),rg=(mx-mn)||1;
+    const toPts=(curve)=>curve.map((p,i)=>{
+      const x=pad+(curve.length>1?i/(curve.length-1):0)*(W-2*pad);
+      const y=pad+(1-(p.cum_return_pct-mn)/rg)*(H-2*pad);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const zeroY=(pad+(1-(0-mn)/rg)*(H-2*pad)).toFixed(1);
+    return `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <line x1="${pad}" y1="${zeroY}" x2="${W-pad}" y2="${zeroY}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>
+      <polyline points="${toPts(benchCurve)}" fill="none" stroke="var(--ink-3)" stroke-width="2"/>
+      <polyline points="${toPts(oursCurve)}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+    </svg>`;
+  }
+  function renderBenchmarkComparison(){
+    const tabsEl=document.getElementById('bc-board-tabs');
+    const bodyEl=document.getElementById('bc-body');
+    const rangeEl=document.getElementById('bc-range-toggle');
+    if(!tabsEl||!bodyEl)return;
+    const data=BENCHMARK_COMPARISON;
+    if(!data||!data.boards){
+      bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">基準對比資料尚未產生</div>';
+      return;
+    }
+    tabsEl.innerHTML=Object.keys(BC_BOARD_LABEL).map(b=>
+      `<span class="press" style="padding:4px 10px;border-radius:14px;font-size:11px;border:1px solid ${b===BC_BOARD?'var(--accent)':'var(--hairline)'};color:${b===BC_BOARD?'var(--accent)':'var(--ink-2)'};cursor:pointer" onclick="BC_BOARD='${b}';renderBenchmarkComparison()">${BC_BOARD_LABEL[b]}</span>`
+    ).join('');
+    rangeEl.innerHTML=Object.keys(BC_RANGE_LABEL).map(r=>
+      `<span class="press" style="padding:2px 6px;font-size:10px;color:${r===BC_RANGE?'var(--accent)':'var(--ink-3)'};cursor:pointer" onclick="BC_RANGE='${r}';renderBenchmarkComparison()">${BC_RANGE_LABEL[r]}</span>`
+    ).join(' · ');
+
+    const b=data.boards[BC_BOARD];
+    if(!b){bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">此榜尚無資料</div>';return}
+    const oursCurve=bcFilterRange(b.ours_curve,BC_RANGE);
+    const benchCurve=bcFilterRange(b.benchmark_curve,BC_RANGE);
+    // 2026-09-15 總司令原話：有效樣本<60個交易日時，結論欄位一律「資料累積中」，
+    // 不得顯示任何結論性文字（不准寫「領先大盤」「表現優異」這類）——這裡用旗標
+    // 硬擋，不靠自律。曲線仍然照畫（讓使用者看得到在累積）。
+    const insufficient=b.sample_insufficient;
+    const gapTxt=b.gap_pp!=null?`${b.gap_pp>=0?'+':''}${b.gap_pp.toFixed(2)}pp`:'—';
+    const mddTxt=b.mdd_pct_ours!=null?`${b.mdd_pct_ours.toFixed(2)}%`:'—';
+    const calmarTxt=b.calmar_ours!=null?b.calmar_ours.toFixed(2):'—';
+    const conclusion=insufficient
+      ?`<div class="note" style="color:var(--warn);font-weight:600">樣本僅 ${b.n_comparable_snapshots} 個交易日，不足以判斷優劣——資料累積中</div>`
+      :`<div class="note" style="color:${(b.gap_pp||0)>=0?'var(--good)':'var(--critical)'};font-weight:600">累積報酬${(b.gap_pp||0)>=0?'領先':'落後'}0050 ${Math.abs(b.gap_pp||0).toFixed(2)}個百分點</div>`;
+    bodyEl.innerHTML=`
+      <div class="bot-stats" style="margin-bottom:8px">
+        <div class="s"><span>vs 0050 差距</span><b class="${(b.gap_pp||0)>=0?'pos':'neg'}">${gapTxt}</b></div>
+        <div class="s"><span>最大回撤</span><b>${mddTxt}</b></div>
+        <div class="s"><span>Calmar Ratio</span><b>${calmarTxt}</b></div>
+      </div>
+      ${conclusion}
+      <div style="margin-top:8px">${bcDualLineSvg(oursCurve,benchCurve)}</div>
+      <div class="note" style="margin-top:4px;font-size:10px">
+        <span style="color:var(--accent)">━</span> 我們（${BC_BOARD_LABEL[BC_BOARD]}Top20）
+        <span style="color:var(--ink-3)">━</span> 0050
+        樣本：${b.n_comparable_snapshots}個可比對交易日
+      </div>
+      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">
+        資料來源：picks_ledger.json 實際回填紀錄（非重算回測）。持有假設：等權重買進Top20，
+        持有5個交易日（t5，t20/t60/t120尚未到期），依序串接複利（非同時持有多批重疊部位的
+        完整投資組合模型）。已扣成本：我方手續費0.1425%×2+證交稅0.3%；0050手續費0.1425%×2+
+        ETF證交稅0.1%。${data.meta&&data.meta.generated_at?'計算時間：'+String(data.meta.generated_at).slice(0,16).replace('T',' '):''}
+      </div>`;
+  }
   // 2026-09-10（深讀一.3）影子帳本狀態要秀MDD／交易數，但後端equity_curve/ledger
   // 沒有現成欄位，兩個都用前端從真實cum_return_pct序列/逐日買賣明細算出來，不補假值。
   function calcEquityCurveMddPct(curve){
@@ -2763,6 +2870,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadTodayEvents',loadTodayEvents);
     _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
+    _safeAsync('loadBenchmarkComparison',async()=>{await loadBenchmarkComparison();renderBenchmarkComparison()});  // 2026-09-15 我們vs0050主圖
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -7290,7 +7398,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2217';
+  const APP_VERSION='2026-09-15.2233';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
