@@ -56,6 +56,7 @@ STALE_HOURS = {
     "data/cftc_cot.json": 72,  # 跟us_sic.json同一批market.yml排程產生（fetched_at每日更新，即使COT報告本身內容每週才變一次）（源頭二.3第3名，2026-09-15新增）
     "data/short_lending_available.json": 72,  # 跟stock_detail.json同一批market.yml排程產生，門檻一致（源頭二.3第5名，2026-09-15新增）
     "data/us_13f_holdings.json": 72,  # 跟us_sic.json同一批market.yml排程產生（13F本身季度才變一次，fetched_at每日更新）（源頭二.3第6名，2026-09-15新增）
+    "data/bls_macro.json": 72,  # 跟us_sic.json同一批market.yml排程產生，月頻統計、門檻沿用同批其他源頭二.3項目（源頭二.3第8名，2026-09-15新增）
 }
 
 
@@ -439,6 +440,20 @@ def describe_us_13f_holdings(path: Path) -> dict:
     }
 
 
+def describe_bls_macro(path: Path) -> dict:
+    """data/bls_macro.json（2026-09-15新增，源頭二.3第8名）——美國勞工統計局
+    官方Public Data API v2（免金鑰），失業率/CPI年增率/非農就業人數三個序列，
+    `.github/scripts/fetch_bls_macro.py`每日排程產生。"""
+    d = json.loads(path.read_text(encoding="utf-8"))
+    series = d.get("series", {})
+    return {
+        "generated_at": d.get("fetched_at"),
+        "records": len(series),
+        "source": d.get("source"),
+        "detail": f"序列={ {k: v.get('latest_value') for k, v in series.items()} } errors={d.get('errors')}",
+    }
+
+
 DESCRIBERS = {
     "quotes_tw.json": describe_quotes,
     "quotes_us.json": describe_quotes,
@@ -464,6 +479,7 @@ DESCRIBERS = {
     "cftc_cot.json": describe_cftc_cot,
     "short_lending_available.json": describe_short_lending_available,
     "us_13f_holdings.json": describe_us_13f_holdings,
+    "bls_macro.json": describe_bls_macro,
 }
 
 
@@ -805,6 +821,7 @@ APP_DATA_SOURCES = [
     {"panel": "市場頁·美股·CFTC投機客淨部位", "source": "data/cftc_cot.json（CFTC官方Public Reporting Environment，2026-09-15新增，源頭二.3第3名，免金鑰；每週才更新一次資料日，僅美股大盤情緒指標，不含台指期）"},
     {"panel": "個股頁·籌碼·可借券賣出股數（僅台股）", "source": "data/short_lending_available.json（TWSE官方SBL/TWT96U，2026-09-15新增，源頭二.3第5名，免金鑰；僅可借額度，非借券費率、非已借部位）"},
     {"panel": "個股頁·籌碼·機構持倉（僅美股，僅波克夏海瑟威）", "source": "data/us_13f_holdings.json（SEC EDGAR官方Form 13F-HR，2026-09-15新增，源頭二.3第6名，免金鑰；僅追蹤波克夏一家申報人，未做CUSIP對映或全市場13F整合）"},
+    {"panel": "市場頁·美股·美國總經指標（失業率/CPI年增率/非農就業）", "source": "data/bls_macro.json（BLS官方Public Data API v2，2026-09-15新增，源頭二.3第8名，未註冊金鑰即可用；CPI年增率為本管線自行計算，非BLS原始欄位）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
     {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},

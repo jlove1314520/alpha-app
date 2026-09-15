@@ -638,6 +638,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" id="cftc-cot-datatime"></div>
         <div class="note">來源：CFTC官方Public Reporting（Legacy Futures Only），GitHub Actions 排程；淨部位＝非商業(投機客)多單－空單，正值偏多、負值偏空，每週二資料、當週五公布，僅供參考非投資建議</div>
       </div>
+      <!-- 2026-09-15（源頭二.3第8名）美國總經指標，BLS官方Public Data API v2免金鑰。 -->
+      <div class="card">
+        <h3>美國總經指標（BLS）</h3>
+        <div class="facts" id="bls-macro-rows"><div class="note">載入中…</div></div>
+        <div class="note" id="bls-macro-datatime"></div>
+        <div class="note">來源：BLS官方Public Data API v2（未註冊金鑰），GitHub Actions 排程；月頻統計常有一個月落後，CPI年增率為本App自算（最新月指數÷12個月前同月指數－1），僅供參考非投資建議</div>
+      </div>
     </div>
 
     <!-- 期貨 -->
@@ -3441,9 +3448,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 2026-09-10（建置一.3）美股類股/ADR溢價各自獨立try/catch（用allSettled，
     // 不用all）——其中一張卡失敗不能拖垮已經渲染好的美股指數，見CLAUDE.md
     // 「App穩定性與錯誤隔離原則」。
-    const subResults=await Promise.allSettled([loadMarketUsSector(),loadMarketAdrPremium(),loadMarketCftcCot()]);
-    const subLabels=['loadMarketUsSector','loadMarketAdrPremium','loadMarketCftcCot'];
+    const subResults=await Promise.allSettled([loadMarketUsSector(),loadMarketAdrPremium(),loadMarketCftcCot(),loadMarketBlsMacro()]);
+    const subLabels=['loadMarketUsSector','loadMarketAdrPremium','loadMarketCftcCot','loadMarketBlsMacro'];
     subResults.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+subLabels[i]+']',r.reason);recordGlobalError(subLabels[i],r.reason)}});
+  }
+  // 2026-09-15（源頭二.3第8名）美國總經指標（BLS），market-us-panel卡片。
+  let BLS_MACRO_CACHE=null;
+  async function loadMarketBlsMacro(){
+    const el=document.getElementById('bls-macro-rows');if(!el)return;
+    if(!BLS_MACRO_CACHE){
+      try{const r=await fetch('data/bls_macro.json?t='+Date.now());if(r.ok)BLS_MACRO_CACHE=await r.json()}
+      catch(e){console.warn('[loadMarketBlsMacro]',e);recordGlobalError('loadMarketBlsMacro',e)}
+    }
+    const d=BLS_MACRO_CACHE;
+    const rows=[['unemployment_rate','失業率'],['cpi_u','CPI年增率'],['nonfarm_payrolls','非農就業(月增)']];
+    if(!d||!d.series){
+      el.innerHTML=rows.map(([,label])=>`<div class="f"><span>${label}</span><b style="font-weight:400;font-size:12px;color:var(--ink-3)">查無資料</b></div>`).join('');
+      document.getElementById('bls-macro-datatime').textContent='';
+      return;
+    }
+    let latestDate=null;
+    el.innerHTML=rows.map(([key,label])=>{
+      const s=d.series[key];
+      if(!s||s.latest_value==null)return `<div class="f"><span>${label}</span><b style="font-weight:400;font-size:12px;color:var(--ink-3)">查無資料</b></div>`;
+      if(!latestDate||s.latest_date>latestDate)latestDate=s.latest_date;
+      let valTxt;
+      if(key==='unemployment_rate')valTxt=s.latest_value.toFixed(1)+'%'+(s.change_mom!=null?`（${s.change_mom>=0?'+':''}${s.change_mom.toFixed(1)}pp）`:'');
+      else if(key==='cpi_u')valTxt=s.yoy_pct!=null?(s.yoy_pct>=0?'+':'')+s.yoy_pct.toFixed(1)+'%':'資料不足無法計算';
+      else valTxt=s.change_mom!=null?(s.change_mom>=0?'+':'')+nf(Math.round(s.change_mom))+'千人':'—';
+      const cls=key==='unemployment_rate'?(s.change_mom>0?'neg':(s.change_mom<0?'pos':'')):(key==='cpi_u'?(s.yoy_pct>3?'neg':''):(s.change_mom>=0?'pos':'neg'));
+      return `<div class="f"><span>${label}</span><b class="${cls}">${valTxt}</b></div>`;
+    }).join('');
+    document.getElementById('bls-macro-datatime').textContent=latestDate?`資料日 ${latestDate}（BLS官方月頻統計）`:'';
   }
   // 2026-09-15（源頭二.3第3名）CFTC COT投機客淨部位，market-us-panel卡片。
   let CFTC_COT_CACHE=null;
@@ -6403,7 +6439,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.0933';
+  const APP_VERSION='2026-09-15.1001';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

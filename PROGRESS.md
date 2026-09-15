@@ -1,3 +1,37 @@
+## 2026-09-15（開發佇列自走 cycle_id=20260915-094601，續）源頭二.3第8名：接入BLS美國總經指標（失業率/CPI年增率/非農就業）
+
+同一輪cycle繼續做排名表第8名：BLS總經（就業/CPI）。
+
+- **查證**：BLS Public Data API v2未註冊金鑰即可用——①官方API文件
+  `https://www.bls.gov/developers/api_signature_v2.htm`（WebFetch確認
+  v1/v2差異、回應結構）②WebSearch多篇第三方整合文件交叉確認「無金鑰
+  約25次/日、註冊後500次/日」③實測`curl`三個series id
+  （`LNS14000000`失業率／`CUUR0000SA0`CPI-U／`CES0000000001`非農就業
+  人數）皆回`REQUEST_SUCCEEDED`、200、回溯約32個月。本管線每日僅呼叫
+  3次，遠低於免金鑰限額，**不需要申請/上傳API金鑰**，避免了第4名FRED
+  卡住的「憑證要不要上傳GitHub Secrets」裁示問題。
+- **改動**：新增`.github/scripts/fetch_bls_macro.py`，三個序列各自獨立
+  try/except、失敗不拖累其他序列。CPI年增率為本管線自行計算（最新月
+  指數÷12個月前同月指數－1），缺同月資料時誠實記null、不用鄰近月份
+  湊數。`market.yml`新增排程步驟，commit檔名清單補上`data/bls_macro.json`
+  （記取第6名條目發現的「git add -A後面接明確檔名清單，忘記加就永遠不會
+  被commit」教訓）。
+- **實測**：`data/bls_macro.json`寫入失業率4.1%（月增+0.0pp）、CPI年增
+  +3.4%、非農就業月增+162千人，資料日2026-08。`generate_status_json.py`
+  新增`describe_bls_macro()`與`APP_DATA_SOURCES`條目。
+- **前端**：市場頁美股分頁新增「美國總經指標（BLS）」卡，Playwright
+  實測三列皆正確顯示真實數字與資料日「2026-08（BLS官方月頻統計）」，
+  無頁面錯誤。
+- **文件**：`docs/FIRST_HAND_SOURCES.md` #25條目、排名表第8名、host表、
+  總結分佈段落皆更新；順帶修正一個既有疏漏——#28 CFTC COT（第3名，
+  先前輪次已接入）一直漏列在🟢分類、還停留在⚪未查證，本次一併移正。
+- **冒煙測試**：`node scripts/smoke_test.mjs` 45/46 PASS，僅#39既有已知
+  紅燈，與本次改動無關。
+- **下一步**：排名表第9名（財政部海關進出口）、第10名（經濟部工業生產
+  與外銷訂單）留待後續輪次，兩者host皆未驗證，需先測robots.txt+端點。
+
+---
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-094601）源頭二.3第7名：接入央行外匯局官方牌告匯率，取代yfinance為主來源
 
 本輪執行個體是開發佇列自走（`dev_queue_runner.py`）。讀`PENDING_QUEUE.md`

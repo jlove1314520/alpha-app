@@ -2615,7 +2615,27 @@ ORDER-END
   `date`），故沿用既有顯示位置，未新增UI。`node scripts/smoke_test.mjs`
   45/46 PASS（僅#39既有已知紅燈，`git diff`確認`data/audit_report.json`
   非本次改動、本次未動任何被稽核的scores/price類JSON）。
-  **第8~10名留待後續輪次**，見排名表。
+  **第8名（BLS美國總經指標：失業率/CPI年增率/非農就業）已完成（2026-09-15
+  開發佇列自走接續，同輪，cycle_id 20260915-094601）**：查證確認BLS
+  Public Data API v2（`https://api.bls.gov/publicAPI/v2/timeseries/data/
+  {series_id}`）未註冊金鑰即可用（三來源：①BLS官方API文件②WebSearch多篇
+  第三方整合文件交叉確認免金鑰限額約25次/日③實測三個series id
+  `LNS14000000`失業率／`CUUR0000SA0`CPI-U／`CES0000000001`非農就業人數
+  皆回200、`REQUEST_SUCCEEDED`，回溯約32個月），本管線每日僅呼叫3次，
+  遠低於免金鑰限額，**不需要申請/上傳API金鑰**。新增
+  `.github/scripts/fetch_bls_macro.py`，CPI年增率為本管線自行計算（最新
+  月指數÷12個月前同月指數－1，缺同月資料時誠實記null不湊近似月份）。
+  本機實測：`data/bls_macro.json`寫入失業率4.1%（月增+0.0pp）、CPI年增
+  +3.4%、非農就業月增+162千人，資料日2026-08。`generate_status_json.py`
+  新增`describe_bls_macro()`與`APP_DATA_SOURCES`條目；市場頁美股分頁新增
+  「美國總經指標（BLS）」卡（`bls-macro-rows`/`bls-macro-datatime`），
+  Playwright實測三列皆正確顯示真實數字（失業率4.1%/CPI年增+3.4%/非農
+  +162千人）、資料日「2026-08」、無頁面錯誤。`node scripts/smoke_test.mjs`
+  45/46 PASS（僅#39既有已知紅燈，與本次改動無關）。順帶修正
+  `docs/FIRST_HAND_SOURCES.md`總結分佈段落一個既有疏漏：#28 CFTC COT
+  （源頭二.3第3名，先前已接入）先前一直被漏列在🟢已整合分類、仍停留在
+  ⚪未查證分類，本次一併移正。
+  **第9~10名留待後續輪次**，見排名表。
 - [ ] **源頭二.4** 新增排程全部列入 CLAUDE.md 頻率清單，附官方上限或實測安全值
 - [ ] **源頭二.5** 驗收：表格截圖、前 10 名清單與理由、每接入一個回報一個
 
