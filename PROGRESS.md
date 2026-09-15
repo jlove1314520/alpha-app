@@ -1,3 +1,81 @@
+## 2026-09-15 17:16（開發佇列自走，cycle_id=20260915-171602）稽核二.一部分完成：季報斷層回補269/754檔＋重跑稽核＋重算八因子
+
+戴**維運＋研究帽**。做PENDING_QUEUE權威清單稽核二.一（季報斷層根因＋MOPS回補
+五季＋重跑稽核＋重算八因子）。
+
+**根因**（詳見`research/backfill_stock_financials_gap_2025.py`檔頭）：
+`.github/scripts/update_stock_financials.py`每日排程只打TWSE openapi
+`t187ap06_L_ci`/`t187ap07_L_ci`「最新一期全市場快照」端點，2026-08-27才
+開始跑，抓不到已經過期的2025Q1~2026Q1五季（官方端點無歷史區間查詢）；
+`research/build_stock_financials_history.py`（2026-08-27一次性歷史回補）
+讀本機FinMind parquet快取，但實際只對2330一檔手動測過，其餘2296檔的
+快取從未真正抓過歷史區間。
+
+**為何改用FinMind而非MOPS官方查詢頁**：`mopsov.twse.com.tw/robots.txt`
+對非bingbot一律`Disallow: /`，且總司令已裁示同一條紅線不能自己踩（見上方
+MOPS合規停用紀錄）。FinMind是已授權整理MOPS申報資料的第三方服務，且是
+`build_stock_financials_history.py`已在用、稽核.二已接受的同一資料源。
+
+**進度（誠實記錄，未完成）**：季報斷層（`e_quarters_gap`定義：近四季序列
+不連續）總計754檔，本輪逐檔打FinMind `TaiwanStockFinancialStatements`+
+`TaiwanStockBalanceSheet`（`start_date=2025-01-01`），累計回補**269檔**
+（承接上一輪120檔，本輪新增149檔），merge進`data/stock_detail.json`
+（19037→19044檔，19044檔有資料，88檔補進更多季度歷史）。**剩餘約485檔
+未做**：FinMind免費層於2026-09-15 17:18:54 UTC回HTTP402「額度已滿」，
+`data/rate_limit_state.json`記錄`blocked_until`約2小時後解封；依CLAUDE.md
+「取得方式鐵律」（額度用完誠實拒絕，不重試不排隊）本輪到此為止，留給
+下一輪，且下一輪要用腳本內`find_gap_codes()`重新掃描`data/
+stock_detail.json`現況決定要跑哪些，不要沿用log.json的累計進度（原因見
+下方風險記錄）。
+
+**重跑稽核**（`scripts/data_audit.py`）：`e_quarters_gap` 593→517檔、
+`e_quarters_stale` 506→534檔（部分「斷層」在補齊後變成「已連續但整體過舊」，
+是正確的分類位移，不是新退化）；`completeness_gap_stocks`（gap+stale合計）
+1099→1051檔，完整度缺口率52.18%→49.91%。`stocks_with_violation`773檔
+（36.7%）維持不變——這個總違規股數主要由`a_price_source`（764違規）主導，
+跟季報斷層是不同check，本次改動預期不影響。
+
+**重算八因子**（`research/generate_scores_live.py`）：`avg_coverage`
+0.730→0.747；因子覆蓋率<60%檔數382→343（-39檔，-1.98個百分點）；覆蓋率
+中位數維持0.74不變（88檔的改善占全市場1973檔比例太小，不足以推動中位數）。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 47/48 PASS，僅#39（資料一致性
+稽核閘門，違規率36.7%>1%門檻）未過——**這是既有已知紅燈**（過去幾輪
+紀錄同樣標注"僅#39既有已知紅燈"），本次改動前後`stocks_with_violation`
+數字完全相同，確認非本次造成或惡化。
+
+**額外發現（記錄供總司令知悉，本輪未修，避免範圍外順手重構）**：
+1. `research/generate_scores_live.py`剔除價格停滯股的步驟有既有scoping
+   bug：`price_history`變數在`compute_scores_live()`函式內賦值，卻在
+   `main()`裡被引用，跨函式作用域必定`NameError`，目前被外層
+   `except Exception`吞掉靜默跳過（印一行警告）。不影響本次回報的數字，
+   但代表「停止顯示已停止交易的舊價股票」這道過濾目前完全沒在跑，建議
+   另開一項修。
+2. **本機同時跑devqueue/marathon/hypothesis_queue/ibkr_quotes等多條自走
+   軌道，共享同一個working directory C:\alpha\alpha-app，只各自鎖自己
+   的track（`.devqueue.lock`/`.hypothesis_queue.lock`等），不互相排斥
+   檔案系統層級的寫入**。本輪實測踩到兩次：(a) 第一次merge完成但尚未
+   commit時，`data/stock_detail.json`的改動被reset回HEAD舊值（改用
+   「merge完成立刻commit」降低視窗，第二次重跑後成功鎖住）；(b) 未追蹤
+   的`research/backfill_stock_financials_gap_2025.py`與其log檔，在
+   uncommitted狀態下被整份刪除（已重新寫回並commit）。兩次事故的確切
+   兇手未查證到（檢查過`run-dev-queue-cycle.ps1`/`run-ibkr-quotes-cycle.
+   ps1`/`scripts/dev_queue_runner.py`，皆未見git reset/clean/checkout
+   類操作），但風險本身（多軌道共用同一working directory、未commit/
+   未追蹤的檔案完全沒有保護）是真實存在且已發生兩次的，建議另開一項
+   評估要不要幫每條軌道加隔離（例如各自獨立的git worktree）。
+
+**影響檔案**：`data/stock_detail.json`、`data/audit_report.json`、
+`scores.json`、`research/backfill_stock_financials_gap_2025.py`（新增）。
+**commit**：`7a4893cc`（stock_detail.json回補）、`e3f1fdff`（稽核+分數
+重算+腳本補回）。
+
+**下一步**：等FinMind 2小時封鎖解除後續跑剩餘約485檔（`稽核二.一`留在
+PENDING_QUEUE標`[~]`部分完成，不標`[x]`）；接續權威清單下一項**稽核二.二**
+（`data/coverage.json`八因子覆蓋率儀表板）。
+
+---
+
 ## 2026-09-15（總司令五條裁示執行）MOPS合規停用＋#73註冊＋稽核.三分佈分析＋三項administrative結案
 
 戴**維運＋研究帽**。總司令五條裁示逐一執行：

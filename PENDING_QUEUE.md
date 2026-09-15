@@ -3316,7 +3316,38 @@ ORDER-END
 >
 > 五、其餘佇列照序：多裝置 /settings、自建資料庫每日累積、柱狀圖零基線、融資維持率分母、休市標籤、群益唯讀、分點演習、產業價值鏈、新聞管線、本地摘要。每完成一項回報一項附證據。
 
-- [ ] **稽核二.一** 季報斷層根因＋MOPS 回補五季＋重跑稽核＋重算八因子回報完整度變化
+- [~] **稽核二.一** **部分完成（2026-09-15開發佇列cycle_id=20260915-171602）**：
+  根因（詳見`research/backfill_stock_financials_gap_2025.py`檔頭）：
+  `.github/scripts/update_stock_financials.py`每日排程只打TWSE「最新一期」
+  快照端點，2026-08-27才開始跑，抓不到已經過期的2025Q1~2026Q1五季；
+  `research/build_stock_financials_history.py`歷史回補先前只對2330一檔
+  手動測過，其餘2296檔從未執行。決定改用FinMind回補（已授權第三方、
+  MOPS官方查詢頁robots.txt對非bingbot一律Disallow，不繞驗證/機器人
+  封鎖）。**季報斷層總計754檔，本輪累計回補269檔（120+149）**，已merge
+  進`data/stock_detail.json`並commit（19037→19044檔，88檔補進更多季度
+  歷史）。**剩餘約485檔未完成**：FinMind免費層於2026-09-15 17:18:54 UTC
+  回HTTP402額度已滿，`data/rate_limit_state.json`記錄`blocked_until`
+  約2小時後解封，依CLAUDE.md「取得方式鐵律」不重試不排隊，留給下一輪
+  （先確認`blocked_until`已過，用腳本內`find_gap_codes()`重新掃描現況
+  續跑，不要用`--offset`舊值，因為log.json進度檔在本輪執行期間曾被
+  同working directory另一自走行程刪除過一次，累計數字已不可信任，
+  以`data/stock_detail.json`現況重新掃描才準）。重跑稽核：`e_quarters_gap`
+  593→517、`e_quarters_stale`506→534（部分斷層轉為已連續但過舊，屬正確
+  分類位移非退化），completeness_gap_stocks（gap+stale）1099→1051
+  （52.18%→49.91%）。重算八因子：avg_coverage 0.730→0.747，<60%檔數
+  382→343（-39檔），中位數維持0.74不變。冒煙測試47/48 PASS，僅#39
+  （既有已知紅燈，違規率36.7%主要由a_price_source主導，與本項無關）
+  未過。**額外發現（記錄供總司令知悉，未修）**：(1)
+  `research/generate_scores_live.py`在剔除價格停滯股的步驟有既有scoping
+  bug（`price_history`變數跨函式引用導致NameError，被外層`except
+  Exception`吞掉靜默跳過），不影響本次數字但代表停滯價過濾目前沒在跑，
+  建議另開項目修；(2) 本機同時跑devqueue/marathon/hypothesis_queue/
+  ibkr_quotes等多條自走軌道共享同一個working directory，本輪uncommitted
+  的`data/stock_detail.json`改動與未追蹤的`.py`/log檔案都各被外部行程
+  波及過一次（改動被reset回HEAD舊值、檔案被刪除），已改用「merge完成
+  立刻commit」降低風險並記錄在script檔頭，但風險本身（多軌道共用同一
+  working directory、untracked檔案無保護）未解決，建議另開項目評估要不要
+  幫每條軌道加隔離。
 - [ ] **稽核二.二** data/coverage.json 八因子覆蓋率儀表板＋設定頁顯示，與 completeness_gap 對得起來
 - [ ] **稽核二.三** 鑫永洋 6241 本益比 22.64 vs 35.64 根因與全市場一致性
 - [ ] **稽核二.四** 稽核每晚排程＋設定頁資料健康＋smoke FAIL 條件（設定頁與 smoke 已於稽核.一完成，缺排程落地）
