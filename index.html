@@ -1225,10 +1225,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>通知偏好</h3>
-      <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>盤前 AI 日報</b><span>每日開盤前推播</span></div>
-        <div class="switch" id="notif-daily" onclick="toggleNotif(this,'daily')"></div>
-      </div>
+      <!-- 2026-09-15（週六.六後半／稽核二.五）「盤前AI日報」功能本身仍是示範資料
+           （見CLAUDE.md「尚為示範資料」清單），功能未上線前不該先給一個看起來
+           能開關的推播選項讓使用者誤以為已經在運作，移除本行；功能真的做出來
+           時再加回。重大事件/自選股價格警示底層資料（events.json／即時報價）
+           已是真實資料，開關保留（雖然推播機制本身三者都還沒做，見下方note）。 -->
       <div class="bot-top" style="padding:6px 0">
         <div class="nm"><b>重大事件提醒</b><span>財報／CPI 等日曆事件</span></div>
         <div class="switch" id="notif-event" onclick="toggleNotif(this,'event')"></div>
@@ -4997,7 +4998,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     toast('風控參數已儲存');
   }
 
-  const NOTIF_DEFAULT={daily:true,event:true,price:false};
+  const NOTIF_DEFAULT={event:true,price:false};
   function readNotif(){try{const s=localStorage.getItem('alpha_notif');return s?{...NOTIF_DEFAULT,...JSON.parse(s)}:{...NOTIF_DEFAULT}}catch(e){console.warn('[readNotif]',e);recordGlobalError('readNotif',e);return{...NOTIF_DEFAULT}}}
   function loadNotif(){
     const n=readNotif();
@@ -6848,7 +6849,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.1826';
+  const APP_VERSION='2026-09-15.1832';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
