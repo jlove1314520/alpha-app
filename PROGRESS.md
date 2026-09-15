@@ -1,3 +1,25 @@
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十三輪）題材七待辦2：接手前一輪崩潰但已跑完的第五批，驗證後補commit，累計90/259
+
+`PENDING_QUEUE.md`三之一鐵律：本輪開工先讀該檔，發現具名鎖陳舊（PID
+116884，61.7分鐘，該行程已不存在），回收後接手。`git status`發現9個
+未commit的殘留檔案，其中`data/theme_official_site_evidence_draft.json`
+與`research/MARATHON_LOG.md`是前一個崩潰的執行個體已經真的跑完
+`--offset 70`第五批抓取、寫好心跳，只是沒走到commit就中斷；其餘7個殘留
+檔案（`data/audit_report.json`等）明顯來自其他排程軌道，本輪不觸碰。
+
+沒有直接信任前一輪留下的文字，獨立重新驗證：讀評估檔實際內容確認
+90個代號互不重複、`outcome`分布加總=90自洽、`a_level_hits`候選12檔
+與心跳文字一致；親自重跑`theme_official_site_matcher.py`與
+`theme_official_site_negative_control.py`，兩者皆`exit code 0`，
+`negative_control` 5/5家負對照組全數PASS。確認無回歸、資料未被污染
+後，決定**採用這批已對外部網站真實抓取過的成果並補commit**，不重做
+（重做等於對同一批20個網站重複打擾，違反資料源禮儀）。
+
+累計90/259檔，`a_level_hits`累計12筆，皆`status:"draft_unreviewed"`
+未經人工抽查。仍未做：待辦2剩餘169檔（下一輪`--offset 90`續跑）、
+待辦4驗證樣本擴充（仍5句）。細節見`PENDING_QUEUE.md`第十三輪紀錄與
+`research/MARATHON_LOG.md`對應心跳。
+
 ## 2026-09-15（開發佇列自走 cycle_id=20260915-110102）清理實測.七/八/九/十/十一四筆8天前的P0舊帳
 
 `PENDING_QUEUE.md`「執行順序（權威清單）」ORDER清單至此已全部完成（源頭二

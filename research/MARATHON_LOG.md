@@ -1,6 +1,38 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
-## 2026-09-15T08:25+0800（hypothesis_queue排程接續）— 陳舊鎖回收（PID 117604，30.3分鐘）＋接手PENDING_QUEUE交辦：題材七待辦2第三批，累計50/259
+## 2026-09-15T10:25+0800（hypothesis_queue排程接續）— 接手PENDING_QUEUE交辦：題材七待辦2第五批（offset=70），累計90/259，本輪fetched=13/20、新增a_level命中2檔（2408／2454）
+
+開工先讀`PENDING_QUEUE.md`：2條永久阻塞（S4U／claude CLI非互動驗證，需
+總司令權限）維持阻塞；【題材七】待辦2上一輪（第十二輪）留下的可執行項
+是續跑第五批。取鎖`LOCK_ACQUIRED`（非陳舊）。`git stash -u`保留其他排程
+留下的殘留變更（`data/audit_report.json`等7檔）、`git pull --rebase`已是
+最新、`git stash pop`還原，未觸碰非本輪產生的變更。
+
+**發現一個紀律缺口**：本檔上一筆條目（08:25）內容其實是**第十一輪**
+（第三批，累計50/259）的心跳，**第十二輪（第四批，累計70/259）的心跳
+從未寫入本檔**——`PENDING_QUEUE.md`第十二輪紀錄確有寫「累計70/259」且
+已commit（`git log`可查），但對應心跳缺漏，違反本協定「不管這輪做了
+什麼都要留這一筆」的硬性規則。**本行一併記錄補註，不虛構第十二輪的
+精確數字**（只引用`PENDING_QUEUE.md`第十二輪紀錄裡已寫的內容），下一輪
+如再發現類似缺漏，優先檢查是不是心跳插入點被其他自動化覆寫。
+
+- 【題材七】待辦2續跑第五批：`beautifulsoup4`已就緒。跑`--batch-size 20
+  --offset 70`（排序第71~90檔）：`fetched=13/20`、`exc_SSLError`=4、
+  `blocked_js_render`=3。以`data/theme_official_site_evidence_draft.json`
+  實際內容覆核（不信任列印訊息，直接讀檔算）：累計`total_codes_
+  covered=90`，累計`a_level_hits`>0的代號共12檔（本批新增2408／2454
+  兩檔，先前10檔累計自第十一輪起）。重跑`theme_official_site_matcher.py`
+  （單元測試OK=9／FAIL=1，FAIL屬v1已知規則缺口，設計預期內，非回歸）與
+  `theme_official_site_negative_control.py`（5/5家負對照組全數PASS，
+  0 FAIL）：兩者exit code皆0，確認未引入回歸。**仍未做**：待辦2剩餘
+  169檔（下一輪可用`--offset 90`續跑）、待辦4驗證樣本擴充（仍5句，與
+  待辦2無依賴，可獨立續做）；累積的`a_level_hits`候選仍
+  `status:"draft_unreviewed"`，尚未人工抽查，不得視為正式證據來源。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+90/259檔，剩169檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
 
 取具名鎖時發現上一輪（本檔下一筆條目，#71減資公告事件工作）留下的鎖檔
 陳舊，已自動回收並接手。**下一筆條目本身尚未commit過**（工作內容真實

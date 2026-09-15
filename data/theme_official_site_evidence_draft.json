@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T09:24:22.377699+08:00",
+  "generated_at": "2026-09-15T10:23:54.887162+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "2313",
-    "2314",
-    "2317",
-    "2327",
-    "2330",
-    "2337",
-    "2338",
-    "2344",
-    "2345",
-    "2354",
-    "2356",
-    "2367",
-    "2369",
-    "2375",
-    "2376",
-    "2379",
-    "2382",
-    "2383",
-    "2393",
-    "2401"
+    "2408",
+    "2409",
+    "2412",
+    "2419",
+    "2421",
+    "2449",
+    "2454",
+    "2455",
+    "2474",
+    "2481",
+    "2492",
+    "2506",
+    "2542",
+    "2545",
+    "2547",
+    "2597",
+    "2601",
+    "2603",
+    "2605",
+    "2606"
   ],
   "results": [
     {
@@ -3804,8 +3804,370 @@
       "keyword_hits": 0,
       "a_level_hits": 0,
       "hits": []
+    },
+    {
+      "code": "2408",
+      "name": "南亞科",
+      "url": "https://www.nanya.com",
+      "themes": [
+        "memory_ic"
+      ],
+      "status": "fetched",
+      "sentence_count": 2,
+      "keyword_hits": 1,
+      "a_level_hits": 1,
+      "hits": [
+        {
+          "sentence": "Nanya Investor Relations About Corporate Sustainability Jobs Products Standard DRAM DDR5 DDR4 DDR3 DDR3L DDR2 Low Power DRAM LPDDR5/5X LPDDR4/4X LPDDR3 LPDDR2 K",
+          "keyword": "DRAM",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2409",
+      "name": "友達",
+      "url": "www.auo.com",
+      "themes": [
+        "panel",
+        "microled",
+        "arvr"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2412",
+      "name": "中華電",
+      "url": "https://www.cht.com.tw",
+      "themes": [
+        "telecom",
+        "china_exposure",
+        "high_dividend"
+      ],
+      "status": "fetched",
+      "sentence_count": 5,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "猜你喜歡 4G $ 299 起 立即了解 猜你喜歡 Apple專區 立即了解 猜你喜歡 搭商品 立即了解 找更多 > 推薦速率 500M $ 999 起 立即了解 熱門速率 100M $ 699 起 立即了解 速在必行 限時促銷價 立即了解 速在有禮 搭3C家電 立即了解 找更多 > YouTube Premium 最",
+          "keyword": "電信服務",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2419",
+      "name": "仲琦",
+      "url": "http://www.hitrontech.com",
+      "themes": [
+        "network_equip",
+        "leo_satellite"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2421",
+      "name": "建準",
+      "url": "www.sunon.com",
+      "themes": [
+        "server_chassis",
+        "thermal",
+        "liquid_cooling",
+        "busbar",
+        "chassis"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2449",
+      "name": "京元電子",
+      "url": "www.kyec.com.tw",
+      "themes": [
+        "ic_test",
+        "ic_package",
+        "adv_package",
+        "cowos"
+      ],
+      "status": "fetched",
+      "sentence_count": 4,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "our service 了解我們的服務 測試服務 技術創新 設備研發能力 video 專業半導體IC測試 京元電子集團，主要從事半導體產品之測試業務，為全球最大的專業測試廠。",
+          "keyword": "IC測試",
+          "a_level": false
+        },
+        {
+          "sentence": "主要服務項目包括：晶圓針測、IC成品測試及預燒測試 觀看形象影片 產品與服務 測試服務 技術創新 設備研發能力 測試解決方案 消費性電子產品 邏輯/混合訊號產品測試 無線射頻元件測試 系統整合晶片測試 微機電系統(MEMS)測試 測試技術支援 投資人關係 企業永續ESG 人力資源 關於京元 京元政策 法律聲明 隱私權政",
+          "keyword": "晶圓針測",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2454",
+      "name": "聯發科",
+      "url": "http://www.mediatek.com",
+      "themes": [
+        "ic_design",
+        "ai_chip",
+        "bmc",
+        "cis",
+        "wifi",
+        "adas"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 1,
+      "hits": [
+        {
+          "sentence": "MediaTek | Home Page Products Smartphone MediaTek Dimensity 5G MediaTek Helio 4G Smart Home Smart TVs Audio Voice Assistant Devices BLU-RAY, DVD, STB, ODD Netwo",
+          "keyword": "NPU",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2455",
+      "name": "全新",
+      "url": "http://www.vpec.com.tw",
+      "themes": [
+        "compound_semi",
+        "leo_satellite"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2474",
+      "name": "可成",
+      "url": "www.catcher-group.com",
+      "themes": [
+        "optical_lens"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2481",
+      "name": "強茂",
+      "url": "www.panjit.com.tw",
+      "themes": [
+        "led",
+        "miniled"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2492",
+      "name": "華新科",
+      "url": "www.passivecomponent.com",
+      "themes": [
+        "mlcc",
+        "resistor_inductor"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2506",
+      "name": "太設",
+      "url": "www.pacific-group.com.tw",
+      "themes": [
+        "asset_play"
+      ],
+      "status": "fetched",
+      "sentence_count": 4,
+      "keyword_hits": 2,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "太平洋建設股份有限公司 | Pacific Construction Co., Ltd. 員工專區 繁體中文 英語 關於太設 公司沿革 經營理念與策略 公司組織 經營團隊 公司福利 關係企業 最新消息 最新活動訊息 房地工程 房屋租售 工程實績 都市更新專區 最新消息 都更理念 都更計畫 都更問答 都更幫助 聯絡方式 ",
+          "keyword": "都更",
+          "a_level": false
+        },
+        {
+          "sentence": "法人說明會 財務報告書 關於太設 公司沿革 經營理念與策略 公司組織 經營團隊 公司福利 關係企業 最新消息 最新活動訊息 房地工程 房屋租售 工程實績 品質與創新 品質 創新 都市更新專區 最新消息 都更理念 都更計畫 都更問答 都更幫助 聯絡方式 投資人專區 每月營收統計 財務報告書 法人說明會 公司規章 董事會決",
+          "keyword": "都更",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2542",
+      "name": "興富發",
+      "url": "http://www.highwealth.com.tw/",
+      "themes": [
+        "construction"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2545",
+      "name": "皇翔",
+      "url": "www.hhe.com.tw",
+      "themes": [
+        "construction"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "皇翔建設股份有限公司 皇翔建設股份有限公司 關於皇翔 關於皇翔 關係企業 新聞中心 活動訊息 熱銷建案 熱銷建案 歷年經典 租賃專區 捷運聯開 都市更新 投資人專區 公司基本資料 股東專區 公司治理 聯絡我們 公司資訊 預約鑑賞 人才招募 >利害關係人 線上報修 EN 中文 聯絡我們 EN 熱銷建案 更多建案 ASTE",
+          "keyword": "建案",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2547",
+      "name": "日勝生",
+      "url": "https://www.radium.com.tw",
+      "themes": [
+        "asset_play"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "2597",
+      "name": "潤弘",
+      "url": "https://www.rtc.com.tw",
+      "themes": [
+        "construction"
+      ],
+      "status": "fetched",
+      "sentence_count": 13,
+      "keyword_hits": 5,
+      "a_level_hits": 3,
+      "hits": [
+        {
+          "sentence": "查看更多 創研工藝 多螺箍筋 柱多螺箍筋是潤弘精密獨創的箍筋工法，獲世界七國專利，自2003年發明起，至今已普遍應用於預鑄工程，為國內營建自動化指標技術之一，有別於傳統柱箍筋仰賴大量人力綁紮，多螺箍筋以機械加工成型（多螺箍加工短片），藉由組立架可將柱箍筋正確、快速組裝完成（多螺箍組立架）。",
+          "keyword": "營建",
+          "a_level": false
+        },
+        {
+          "sentence": "查看更多 以人為本 以客為尊 創新研發、團隊整合 潤弘精密集結優秀的設計、規劃、施工與專案管理人才，擁有甲級營造廠資格，對於預鑄生產、專業機電部門等，從規劃設計、營建施工或統包都能充分掌握。",
+          "keyword": "營建",
+          "a_level": false
+        },
+        {
+          "sentence": "為台灣少數能將營建工程所有環節完整結合的專業營造公司。",
+          "keyword": "營建",
+          "a_level": true
+        },
+        {
+          "sentence": "潤弘精密工程憑藉預鑄工法與品質控管，深耕營造領域。",
+          "keyword": "營造",
+          "a_level": true
+        },
+        {
+          "sentence": "投資人專區 本專區彙整歷年編製之股東會年報與營造報告書，展現透明完善的公司治理、健全之財務結構與營運實績，以利股東及各界投資人即時掌握企業發展動向。",
+          "keyword": "營造",
+          "a_level": true
+        }
+      ]
+    },
+    {
+      "code": "2601",
+      "name": "益航",
+      "url": "www.firsteam.com.tw",
+      "themes": [
+        "logistics"
+      ],
+      "status": "blocked_js_render"
+    },
+    {
+      "code": "2603",
+      "name": "長榮",
+      "url": "www.evergreen-marine.com",
+      "themes": [
+        "container_shipping",
+        "high_dividend"
+      ],
+      "status": "fetched",
+      "sentence_count": 11,
+      "keyword_hits": 4,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "EVERGREEN MARINE CORP. 關於我們 關於我們 公司簡介 重要紀事 公司組織與經營團隊 榮耀肯定/參與平台/認證 交通/聯絡方式 聯絡我們 長榮海運支持綠色燃料專案 政策 資訊安全政策 人權政策 職場不法侵害預防 職場霸凌防治 工作場所性騷擾防治 誠信經營守則 誠信經營作業程序及行為指南 遵循誠信經營",
+          "keyword": "股利政策",
+          "a_level": false
+        },
+        {
+          "sentence": "為發展綠色航運順應世界趨勢，長榮海運設定船隊二氧化碳減排目標，以 2008 年為基準，計畫於 2030 年將碳排強度降低 70%。",
+          "keyword": "長榮海運",
+          "a_level": false
+        },
+        {
+          "sentence": "並期望在 2050 年以前達成淨零碳排的目標，作為長榮海運應對全球氣候變化的核心價值。",
+          "keyword": "長榮海運",
+          "a_level": false
+        },
+        {
+          "sentence": "找據點 網站使用條款 , 版權 , 隱私聲明 , Cookie 聲明 for Evergreen Marine Website. | Copyright© 1999-2026, All Rights Reserved by Evergreen Marine Corp. (Taiwan) Ltd. 長榮海運網站使用 Co",
+          "keyword": "長榮海運",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "2605",
+      "name": "新興",
+      "url": "http://www.snc.com.tw/",
+      "themes": [
+        "logistics"
+      ],
+      "status": "fetched",
+      "sentence_count": 22,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "2606",
+      "name": "裕民",
+      "url": "http://www.uming.com.tw",
+      "themes": [
+        "bulk_shipping"
+      ],
+      "status": "fetched",
+      "sentence_count": 18,
+      "keyword_hits": 3,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "繼續 取消 我們的服務 航運 船員管理 船舶管理 船隊介紹 船隊概況 礦砂輪 油輪 海岬型 巴拿馬極限型 極限靈便型 水泥專用船 液化天然氣運輸船 海洋風電運維母船 人員運輸船 永續經營 節能船舶 客製化船舶 優化解決方案 船舶安全管理平台 投資人關係 公司治理 公司治理架構 重要公司制度及運作 公司章程及規章 公司稽",
+          "keyword": "散裝船",
+          "a_level": true
+        },
+        {
+          "sentence": "航運 船員管理 船舶管理 散裝船平均船齡6.4年 裕智輪為裕民航運第二艘超大型礦砂散裝船， 承運裕民與全球五大鐵礦石生產商之一的巴西淡水河谷 Vale International SA of Switzerland公司簽訂的25年鐵礦石長期運送合約。",
+          "keyword": "散裝船",
+          "a_level": true
+        },
+        {
+          "sentence": "船員管理 相關新聞 九月 01, 2026 裕民航運攜手國立臺灣大學 深化新造船審圖與技術決策能力 閱讀更多 八月 17, 2026 裕民航運六度榮獲《HR Asia》亞洲最佳企業僱主獎 再摘「人才躍升獎」 展現人才永續競爭力 閱讀更多 八月 07, 2026 裕民航運深耕永續社區 舉辦「夜訪飛鼠」生態之旅 閱讀更多 ",
+          "keyword": "BDI",
+          "a_level": false
+        }
+      ]
     }
   ],
-  "total_codes_covered": 70,
+  "total_codes_covered": 90,
   "total_candidates": 259
 }

@@ -14,6 +14,61 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十三輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
+「三之一、交辦優先於自走」鐵律）：兩條阻塞項（S4U／claude CLI非互動驗證）
+維持阻塞。取具名鎖時發現鎖檔陳舊（PID 116884，61.7分鐘，遠超25分鐘門檻，
+確認該PID已不存在，非並行衝突），已自動回收。
+
+**發現一批未commit的殘留工作**：`git status`顯示工作目錄有9個檔案未
+commit，其中`data/theme_official_site_evidence_draft.json`與
+`research/MARATHON_LOG.md`的變更內容顯示是上一個（已崩潰的）
+`hypothesis_queue`執行個體已經完整跑完「待辦2第五批（`--offset 70`）」
+且已寫好心跳文字，但**沒有走到commit這一步就中斷**（其餘7檔殘留變更
+——`data/audit_report.json`／`data/rate_limit_state.json`／
+`research/.external_connectivity_state.json`／
+`research/DEV_QUEUE_PROMPT.txt`／`research/connectivity_check.log`／
+`research/dev_queue_cycle.log`／`research/external_connectivity.jsonl`
+——經比對明顯來自其他排程軌道，本輪**不觸碰、不納入commit**）。
+
+**沒有直接信任前一輪留下的文字，獨立重新驗證**：
+1. 讀`data/theme_official_site_evidence_draft.json`實際內容（不信任
+   log文字轉述）：`total_codes_covered=90`、`results`陣列90筆、90個
+   代號**互不重複**、`outcome`分布`fetched=54／exc_SSLError=13／
+   blocked_js_render=11／http_403=6／exc_ConnectTimeout=5／
+   exc_ReadTimeout=1`合計90，數字自洽。`a_level_hits`非空的候選共
+   **12檔**（1210/1308/1616/1720/2014/2049/2317/2330/2408/2454/
+   2597/2606），與前一輪心跳文字聲稱的「累計12檔」一致。
+2. 親自重跑`theme_official_site_matcher.py`：`exit code 0`。
+3. 親自重跑`theme_official_site_negative_control.py`：`exit code 0`，
+   5家負對照組全數PASS、0個誤命中。
+兩者結果與前一輪聲稱的基線一致，**確認無回歸，且評估這批抓取本身沒有
+被污染**——因為抓取行為已對20個外部網站真實發生過（消耗了對方的節流
+額度），若判定為不可信而整批丟棄重跑，等於對同一批網站重複打擾，不
+符合資料源禮儀。故決定**採用這批已驗證的成果並補commit**，而非重做。
+
+- 【題材七】待辦2實質進度（延續前一輪已完成的抓取，本輪負責驗證+補
+  commit）：第五批`--offset 70 --batch-size 20`（排序第71~90檔），
+  `fetched=13/20`、`exc_SSLError`=4、`blocked_js_render`=3，本批
+  `a_level_hits`新增2檔（2408／2454）。累計**90/259**檔，`a_level_
+  hits`累計12筆，皆`status:"draft_unreviewed"`未經人工抽查，不得視
+  為正式證據來源。**仍未做**：待辦2剩餘169檔（下一輪可用`--offset 90`
+  續跑）、待辦4驗證樣本擴充（仍5句，與待辦2無依賴，可獨立續做）；
+  待辦1／待辦3已完成（沿用前幾輪紀錄）。
+
+**紀律缺口記錄（沿用前一個執行個體已發現、本輪確認屬實）**：本檔
+第十二輪紀錄（累計70/259）確有commit（`git log` `b8962a28`可查），
+但對應的`research/MARATHON_LOG.md`心跳當時漏寫——已在本輪commit的
+`MARATHON_LOG.md`變更裡一併補記說明，不虛構第十二輪的精確數字。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+90/259檔，剩169檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十二輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
