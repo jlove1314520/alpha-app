@@ -1,3 +1,61 @@
+## 2026-09-15 17:50（開發佇列自走，cycle_id=20260915-171602）稽核二.二完成：八因子覆蓋率儀表板 data/coverage.json＋設定頁顯示
+
+戴**研究＋開發帽**。接續稽核二.一做權威清單下一項：稽核二.二
+（`data/coverage.json`八因子覆蓋率儀表板＋設定頁顯示，與`completeness_
+gap`對得起來）。
+
+**設計**：新增`research/build_coverage_dashboard.py`，刻意**重用**
+`generate_scores_live.py::build_rows()`產出的同一套原始資料（不重新
+設計一套算法或另開資料源）。第一次執行時發現`build_rows()`回傳的是
+`fundamentals∪stock_detail∪price_history`三個JSON檔出現過的所有代碼
+聯集（18834檔，含大量已下市/非現役代碼），跟稽核報告講的「全市場」
+（2106檔）完全不是同一個分母——套上跟`generate_scores_live.py::main()`
+一致的`listed_universe.json`在市過濾後才是1974檔，跟`data_audit.py`的
+`universe`同一個定義，這一步過濾是這次設計裡最重要的修正，沒套的話
+覆蓋率會全部被算成6~10%這種明顯錯誤的數字。
+
+**缺漏原因四分類**（8個因子共用同一套固定分類，不是每因子各自發明）：
+R1個股完全無此類原始資料、R2個股有資料但數量/期數不足、R3全市場此
+因子系統性缺資料源、R4其他（資料足夠但計算仍失敗，如虧損股）。分類
+依據直接檢查各因子的原始來源欄位（quarters/月營收/institutional/
+price_history/events.json）是否存在、筆數是否足夠，不是拿score是
+None就隨便歸類的黑箱推論。
+
+**結果**（1974檔全市場）：earnings_growth覆蓋46.7%（缺1053檔：
+R1=219、R2=834）、revenue_momentum 88.2%（缺233，全R2）、
+growth_quality 72.0%（缺553，全R2）、chips 98.4%（缺31，全R1）、
+valuation_adj 99.9%（缺3，全R1）、technical 81.3%（缺370：R1=1、
+R2=369）、analyst 98.4%（缺31，全R1）、catalyst 0.0%（缺1974，全R1，
+即`data/events.json`檔案存在但目前沒有任何個股有事件記錄）。
+
+**跟completeness_gap互相對照**：earnings_growth缺1053檔（R1+R2）跟
+稽核報告的`e_quarters_gap`(517)+`e_quarters_stale`(534)=1051檔量級
+一致，差異2檔來自兩者計算需求略有不同（一個要算EPS YoY至少5季、一個
+要算PE的近四季）但根因是同一個——季度財報資料不足，這正是稽核二.一
+正在處理的缺口。
+
+**額外發現（記錄，未修，跟本項無關）**：generate_scores_live.py檔頭
+舊disclaimer寫「analyst/catalyst兩項全市場沒有資料源」，但實測analyst
+（機構行為，讀institutional）覆蓋率98.4%——這份disclaimer文字看起來是
+analyst因子改用「機構行為」代理指標之後沒同步更新，是文件過期，不是
+本次改動造成，建議另開一項核對並更正。
+
+**設定頁**：`index.html`新增「八因子覆蓋率」卡（放在既有「資料健康」
+卡之後），讀`data/coverage.json`，逐因子顯示覆蓋率%（<60%標黃）與缺漏
+原因分佈，說明文字明講跟資料健康卡是「同一個資料缺口的不同因子體現」，
+避免使用者誤以為是兩套互相矛盾的數字。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 47/48 PASS，僅#39既有已知
+紅燈（與稽核二.一記錄同一個原因，違規773檔不變，非本次造成）。
+
+**影響檔案**：`index.html`、`research/build_coverage_dashboard.py`
+（新增）、`data/coverage.json`（新增）。**commit**：`2aaa8d72`。
+
+**下一步**：接續權威清單下一項**稽核二.三**（鑫永洋6241本益比22.64 vs
+35.64根因與全市場一致性）。
+
+---
+
 ## 2026-09-15 17:16（開發佇列自走，cycle_id=20260915-171602）稽核二.一部分完成：季報斷層回補269/754檔＋重跑稽核＋重算八因子
 
 戴**維運＋研究帽**。做PENDING_QUEUE權威清單稽核二.一（季報斷層根因＋MOPS回補

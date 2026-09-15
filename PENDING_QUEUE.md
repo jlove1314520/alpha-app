@@ -3348,7 +3348,18 @@ ORDER-END
   立刻commit」降低風險並記錄在script檔頭，但風險本身（多軌道共用同一
   working directory、untracked檔案無保護）未解決，建議另開項目評估要不要
   幫每條軌道加隔離。
-- [ ] **稽核二.二** data/coverage.json 八因子覆蓋率儀表板＋設定頁顯示，與 completeness_gap 對得起來
+- [x] **稽核二.二** **已完成（2026-09-15開發佇列cycle_id=20260915-171602，commit
+  2aaa8d72）**：新增`research/build_coverage_dashboard.py`，重用
+  `generate_scores_live.py::build_rows()`同一套原始資料（套`listed_
+  universe.json`在市過濾，跟`data_audit.py`同一個「全市場」定義，1974檔），
+  對8個評分因子分別算覆蓋率%、缺漏檔數，缺漏原因固定四類（R1個股完全無
+  資料/R2個股資料不足/R3全市場系統性缺資料源/R4其他計算限制），寫入
+  `data/coverage.json`。跟`completeness_gap`對照：`earnings_growth`缺
+  1053檔（R1=219+R2=834）與`e_quarters_gap+e_quarters_stale`合計1051檔
+  量級一致（根因同一個季度資料缺口，兩者計算需求略有不同故非100%相等）。
+  設定頁新增「八因子覆蓋率」卡（`index.html`，放在「資料健康」卡之後），
+  讀`data/coverage.json`逐因子顯示。冒煙測試47/48 PASS（僅#39既有已知
+  紅燈，違規773檔不變）。
 - [ ] **稽核二.三** 鑫永洋 6241 本益比 22.64 vs 35.64 根因與全市場一致性
 - [ ] **稽核二.四** 稽核每晚排程＋設定頁資料健康＋smoke FAIL 條件（設定頁與 smoke 已於稽核.一完成，缺排程落地）
 - [ ] **稽核二.五** 其餘佇列照序
