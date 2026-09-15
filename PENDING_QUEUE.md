@@ -2081,7 +2081,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
 >
 > 四、每一條新假設的成績（含 FAIL）都要進 signal_status.json，將來在 App 上對使用者公開——這是我們對籌碼K線那類產品的核心差異化。
 
-- [ ] **轉向.二** 新假設 #50／#51／#52 規格與資料可行性查證（#49 照既有設計續跑）
+- [!] **轉向.二** 新假設 #50／#51／#52 規格與資料可行性查證（#49 照既有設計續跑）　**⛔ 自走中止（2026-09-15 11:51）**：轉向.二（#50/#51/#52規格與資料可行性查證）是研究帽工作，且已經在被獨立的AlphaHypothesisQueue自走track用HYPOTHESIS_QUEUE.md自己的協定積極處理中（該檔已有數千行針對#50/#51/#52的查證進度、#50卡tick資料累積未滿20交易日、#51三個子事件兩個FAIL一個待續、#52卡建置一.1前置依賴），本輪(開發佇列/維運+開發帽)若在此重新設計規格，會與正在跑的研究track重複或衝突判定，不符合CLAUDE.md帽子規則的越權禁止。建議：這條PENDING_QUEUE項目應該由HYPOTHESIS_QUEUE track依其自身協定收斂後回頭勾選，或請總司令重新裁示這條是否該從開發佇列的權威清單移除、改成純粹參照HYPOTHESIS_QUEUE.md的進度。
 - [x] **轉向.三** 誠實判斷點寫進 MARATHON_PROTOCOL（2026-09-07 完成）
 - [x] **轉向.四** 每條新假設成績（含 FAIL）進 `data/signal_status.json`（與源頭一.4 同一份檔）
   （2026-09-15完成：**現況查核**——`research/build_signal_status.py`「每次
