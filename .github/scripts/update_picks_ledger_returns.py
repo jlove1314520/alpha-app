@@ -175,12 +175,23 @@ def main():
 
     filled = 0
     skipped_stale_or_missing = 0
+    skipped_entry_stale = 0
     for snap in ledger["snapshots"]:
         anchor = snap["snapshot_date"]
         for pick in snap["picks"]:
             entry_price = pick.get("close_price")
             if entry_price is None:
                 continue  # 進場價本身缺失（price_stale快照時就記過），任何期別都算不出報酬率，不硬猜
+            if pick.get("price_stale"):
+                # 2026-09-15（總司令裁示，補上docstring早就講但程式碼沒做到的缺口）：
+                # build_picks_ledger.py 記錄的 price_stale=true 代表進場價本身在快照
+                # 當下就已經是舊資料（不是回填端找不到出場價那種「stale」，是進場價
+                # 這一端就不可靠）——用這種進場價算出來的報酬率，分子分母有一邊是
+                # 錯的，不能默默當成有效值繼續往下算。整批跳過，不進 filled 也不進
+                # skipped_stale_or_missing（那個計數器語意是「出場價缺失」，混在一起
+                # 會讓兩種不同原因的資料缺口分不清楚）。
+                skipped_entry_stale += 1
+                continue
             for window_key, n in RETURN_WINDOWS.items():
                 if pick["returns"].get(window_key) is not None:
                     continue  # 已經回填過，鐵律：永遠不再更動
@@ -211,10 +222,12 @@ def main():
         ledger["meta"]["generated_at"] = ledger["meta"]["last_returns_backfill_at"]  # 2026-09-03（P0三-三.3）回填也算一次寫入
         LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
         print(f"回填完成：本輪新填 {filled} 個(snapshot, code, tN)欄位"
-              f"（另有{skipped_stale_or_missing}個因價格資料過期/缺失跳過，留null等下次）")
+              f"（另有{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
+              f"{skipped_entry_stale}個因進場價本身price_stale=true跳過，留null等下次）")
     else:
         print(f"本輪沒有任何欄位可回填（還沒到任何交易日門檻，或資料尚未到位；"
-              f"{skipped_stale_or_missing}個因價格資料過期/缺失跳過）")
+              f"{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
+              f"{skipped_entry_stale}個因進場價本身price_stale=true跳過）")
 
 
 if __name__ == "__main__":

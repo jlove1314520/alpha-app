@@ -1,3 +1,49 @@
+## 2026-09-15（我們vs0050·階段一完成、階段二確認既有管線已足、階段三依規則暫緩）
+
+戴**開發＋驗證帽**。三階段裁示原文已於前一輪commit登記，本輪執行。
+
+**階段一**：`update_picks_ledger_returns.py`查證後**不是骨架**——
+2026-09-01已完整實作並掛進`market.yml`，`picks_ledger.json`的
+`meta.schema_note`寫「骨架」是忘了更新的過期文字，已修正。逐項核對
+總司令三個規則（基準日用`snapshot_date`／交易日曆非日曆日／append-only）
+皆已符合，**唯一真缺的是`price_stale`進場價守門**——原本只檢查
+`close_price is None`，沒檢查`price_stale=true`，已修正並獨立計數
+`skipped_entry_stale`。實測940筆pick中31筆`price_stale=true`，目前都
+還沒被回填過（修正前無已知污染）。
+
+**回填現況**：t5 265/940已填（28.2%），t20/t60/t120皆0/940——符合總
+司令原話預期「大部分還不能填」（台帳僅累積約16個交易日，t20需要20個）。
+距t20全面可填約還需4個交易日。
+
+**額外發現**：交易日曆代理股2330（同時也是0050的benchmark來源）的
+`price_history.json`停在09-11，落後今天4天；2,839檔裡1,384檔（含2330/
+0050）卡在09-11，另987檔已到09-14——非全面停擺，另開項目查根因。
+
+**階段二**：**不需要新寫抓取程式**——`update_price_history.py`本來就用
+TWSE `STOCK_DAY_ALL`全市場端點（0050是上市ETF，本來就含在裡面），官方
+來源這條已滿足。`adj_close`目前11筆全等於`close`，查證是除权息調整
+機制存在但這個短窗口內沒有0050的除权息事件（未100%排除調整邏輯本身
+問題，誠實揭露）。覆蓋度目前只到09-11，跟階段一發現的同一個管線缺口
+是同一件事，缺口補上後會自動跟上。
+
+**階段三**：依總司令原話「前置沒做完不准畫圖」，覆蓋期間硬性條件（蓋住
+全部快照日到09-15）目前不成立，本輪不開始畫圖，等階段二缺口自然補上
+再繼續。
+
+**驗證**：`update_picks_ledger_returns.py`實跑一次確認無新增回填（預期
+內，尚未到下一個交易日門檻）、`price_stale`檢查邏輯用既有31筆stale
+entry資料驗證不會被誤填。
+
+**影響檔案**：`.github/scripts/update_picks_ledger_returns.py`（新增
+price_stale守門）、`.github/scripts/build_picks_ledger.py`（修正過期
+schema_note）、`PENDING_QUEUE.md`（階段一二三進度記錄）、`PROGRESS.md`
+（本節）。
+
+**下一步**：等price_history.json的2330/0050停滯缺口自然補上（或另開
+項目查根因加速），階段二覆蓋度條件成立後才進階段三畫圖。
+
+---
+
 ## 2026-09-15（開發佇列自走cycle_id=20260915-214602）regime擇時overlay協定＋第一個訊號TRAIN測試FAIL
 
 戴**研究帽**。做`PENDING_QUEUE.md`執行順序清單第一項【一】：

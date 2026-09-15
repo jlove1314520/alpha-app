@@ -122,9 +122,10 @@ def main():
     ledger["meta"]["schema_note"] = (
         "前瞻選股台帳（非回測）：每個snapshot是三榜其中一榜在某個data_asof的"
         "Top20快照，寫入後不可回頭修改內容（見already_snapshotted()）。"
-        "returns.t5/t20/t60/t120由update_picks_ledger_returns.py（骨架，"
-        "2026-08-28新增）在對應的未來交易日回填，回填前恆為null——App顯示"
-        "時null代表「還沒到回填時間點」，不是資料遺失。"
+        "returns.t5/t20/t60/t120由update_picks_ledger_returns.py（2026-08-28"
+        "骨架新增，2026-09-01完整實作並掛進market.yml每日排程，2026-09-15"
+        "補上price_stale進場價守門，不再是骨架）在對應的未來交易日回填，"
+        "回填前恆為null——App顯示時null代表「還沒到回填時間點」，不是資料遺失。"
     )
 
     quotes = _load_json(QUOTES_ALL_TW_PATH).get("quotes", {})
