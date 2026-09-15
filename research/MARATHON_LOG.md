@@ -1,6 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
-## 2026-09-15T17:25:03+08:00 (hypothesis_queue排程接續，第十六輪) — 接手PENDING_QUEUE交辦：題材七待辦2第八批（offset=130），累計150/259，本輪fetched=12/20、新增a_level命中2檔（3406／3576）
+## 2026-09-15T19:55:02+08:00 (hypothesis_queue排程接續，第十七輪) — 接手PENDING_QUEUE交辦：題材七待辦2第九批（offset=150），累計170/259，本輪fetched=14/20、新增a_level命中1檔（3653）
+
+開工先讀`PENDING_QUEUE.md`：兩條永久阻塞（S4U／claude CLI非互動驗證，需
+總司令權限）維持阻塞；上一輪（假設佇列第十六輪）留下的可執行項是題材七
+待辦2續跑第九批（`--offset 150`）。取具名鎖`research/.hypothesis_queue.lock`
+時發現陳舊鎖（PID 122912，149.6分鐘未更新，疑似上一輪未正常收工），
+已回收（`LOCK_STALE`→`LOCK_ACQUIRED`）。`git pull`一次成功（`Already up
+to date`），`git status`確認有其他自動化來源（IBKR quotes／connectivity
+probe等）留下的殘留變更，不觸碰、不納入commit。
+
+跑`theme_official_site_pipeline.py --batch-size 20 --offset 150`（排序第
+151~170檔）：`fetched=14/20`、`exc_ConnectTimeout`=2、`exc_SSLError`=2、
+`http_403`=1、`http_500`=1，合計20筆自洽。獨立重新驗證（不信任腳本自身
+輸出文字）：`data/theme_official_site_evidence_draft.json`的`results`
+陣列共170筆、170個代號互不重複、`status`分布`fetched=99/exc_SSLError=24/
+blocked_js_render=24/exc_ConnectTimeout=10/http_403=9/
+exc_ConnectionError=2/exc_ReadTimeout=1/http_500=1`合計170，與批次進度
+一致。`a_level_hits`非空候選由累計19筆增至**20筆**（新增3653，1筆命中
+與腳本輸出「a_level_hits合計=2」一致——該筆命中數本身為2，非新增候選
+數），全數仍`status:"draft_unreviewed"`未經人工抽查。另跑
+`theme_official_site_negative_control.py`（Python exit code=0，正確捕捉
+確認非終端機管線遮蔽）：5家負對照組全數PASS、0個誤命中，確認無回歸。
+累計**170/259**檔。**仍未做**：待辦2剩餘89檔（下一輪可用`--offset 170`
+續跑）、待辦4驗證樣本擴充（仍5句，與待辦2無依賴，可獨立續做）；待辦1／
+待辦3已完成（沿用前幾輪紀錄）。
 
 取具名鎖`hypothesis_queue`時發現陳舊鎖（PID 124048，150.6分鐘未更新，
 疑似上一輪未正常收工），已回收。`git pull`第一次遇暫時性DNS解析失敗

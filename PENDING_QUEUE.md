@@ -14,6 +14,41 @@
 
 ---
 
+## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十七輪）
+
+本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md
+「三之一、交辦優先於自走」鐵律）：兩條阻塞項（S4U／claude CLI非互動驗證）
+維持阻塞；【題材七】上一輪（假設佇列第十六輪）留下的可執行項是待辦2
+續跑第九批（`--offset 150`）。取具名鎖`research/.hypothesis_queue.lock`
+時發現陳舊鎖（PID 122912，149.6分鐘未更新，疑似上一輪未正常收工），
+已回收（`LOCK_STALE`→`LOCK_ACQUIRED`）。`git pull`一次即成功
+（`Already up to date`），`git status`確認有其他自動化來源（IBKR
+quotes／connectivity probe等）留下的殘留變更，不觸碰、不納入commit。
+
+- 【題材七】待辦2續跑第九批：跑`--batch-size 20 --offset 150`（排序第
+  151~170檔）：`fetched=14/20`、`exc_ConnectTimeout`=2、
+  `exc_SSLError`=2、`http_403`=1、`http_500`=1，合計20筆自洽。獨立
+  重新驗證（不信任腳本自身輸出文字）：`data/
+  theme_official_site_evidence_draft.json`的`results`陣列共170筆、170個
+  代號互不重複、`status`分布`fetched=99/exc_SSLError=24/
+  blocked_js_render=24/exc_ConnectTimeout=10/http_403=9/
+  exc_ConnectionError=2/exc_ReadTimeout=1/http_500=1`合計170，與批次
+  進度一致。`a_level_hits`非空候選由累計19筆增至**20筆**（新增3653，
+  與腳本輸出「a_level_hits合計=2」一致——該數字是命中句數，非新增候選
+  數），仍全數`status:"draft_unreviewed"`未經人工抽查。另跑
+  `theme_official_site_negative_control.py`（獨立捕捉Python exit
+  code=0，非終端機管線遮蔽）：5家負對照組全數PASS、0個誤命中，確認無
+  回歸。累計**170/259**檔。**仍未做**：待辦2剩餘89檔（下一輪可用
+  `--offset 170`續跑）、待辦4驗證樣本擴充（仍5句，與待辦2無依賴，可
+  獨立續做）；待辦1／待辦3已完成（沿用前幾輪紀錄）。
+
+**交辦佇列還剩幾條未開始**：2 條被阻塞（S4U／claude CLI 非互動驗證，
+等待總司令有管理員權限時處理）＋ 1 條部分完成待續（題材七：待辦2累計
+170/259檔，剩89檔待分批續跑；待辦4驗證樣本仍待擴充，下一輪可續；
+待辦1／待辦3已完成）。
+
+---
+
 ## 2026-09-15（假設佇列自走・交辦優先執行紀錄・第十六輪）
 
 本輪執行個體是`AlphaHypothesisQueue`。開工先讀本檔最上方紀錄（CLAUDE.md

@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-09-15T17:24:23.119653+08:00",
+  "generated_at": "2026-09-15T19:54:32.390762+08:00",
   "rule_version": "v1_original",
   "status": "draft_unreviewed",
   "note": "本檔案由 theme_official_site_pipeline.py 產生，只用 v1 規則（host+path+反向排除），尚未經人工抽查，不是 data/themes.json的正式來源。a_level_hits>0 的候選在正式採用前，建議至少抽查幾筆 sentence 是否真的講對題材。",
   "batch_codes": [
-    "3189",
-    "3211",
-    "3231",
-    "3234",
-    "3260",
-    "3293",
-    "3324",
-    "3374",
-    "3406",
-    "3413",
-    "3443",
-    "3450",
-    "3481",
-    "3529",
-    "3532",
-    "3535",
-    "3546",
-    "3576",
-    "3583",
-    "3587"
+    "3653",
+    "3661",
+    "3665",
+    "3679",
+    "3680",
+    "3704",
+    "3706",
+    "3707",
+    "3711",
+    "3714",
+    "4104",
+    "4126",
+    "4147",
+    "4174",
+    "4438",
+    "4707",
+    "4726",
+    "4735",
+    "4746",
+    "4763"
   ],
   "results": [
     {
@@ -5234,8 +5234,295 @@
       "keyword_hits": 0,
       "a_level_hits": 0,
       "hits": []
+    },
+    {
+      "code": "3653",
+      "name": "健策",
+      "url": "https://www.jentech.com.tw/zh",
+      "themes": [
+        "thermal"
+      ],
+      "status": "fetched",
+      "sentence_count": 24,
+      "keyword_hits": 4,
+      "a_level_hits": 2,
+      "hits": [
+        {
+          "sentence": "健策精密工業股份有限公司 top of page 公司簡介 公司沿革 價值與使命 組織架構 全球據點 最新消息 產品方案 垂直整合解決方案 散熱需求解決方案_封裝面 +均熱片 +剛性加強環Stiffener +VC 均熱片 VC Lid +微流道均熱\u0000片 Microchannel Lid 散熱需求解決方案_系統面 +氣",
+          "keyword": "散熱模組",
+          "a_level": false
+        },
+        {
+          "sentence": "Precision精密工藝 Scale規模實力 Global Reach全球佈局. Prototype to High-Volume Manufacturing Global Scale, Unmatched Value. Concept to production, fully integrated design, ",
+          "keyword": "散熱",
+          "a_level": true
+        },
+        {
+          "sentence": "縮短交期．降低總成本（TCO） 營運效率最佳化 End-to-end in-house manufacturing Full vertical integration ensures total quality control across the entire lifecycle, from raw material",
+          "keyword": "散熱",
+          "a_level": true
+        },
+        {
+          "sentence": "健策精密榮獲「AMD 最佳服務獎」 News Jentech Honored with TSMC’s 2025 “Excellence in Production Support” Award news Jentech has been listed on the ‘FTSE4Good TIP Taiwan ESG I",
+          "keyword": "散熱模組",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3661",
+      "name": "世芯-KY",
+      "url": "www.alchip.com",
+      "themes": [
+        "ic_design",
+        "asic_service",
+        "ai_chip",
+        "retimer"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "Alchip Technologies ASIC Turnkey Solutions ASIC Design Services SoC Frontend Design Physical Backend Design Low Power Solutions High Performance Solutions Desig",
+          "keyword": "ASIC",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "3665",
+      "name": "貿聯-KY",
+      "url": "http://www.bizlinktech.com",
+      "themes": [
+        "busbar",
+        "hs_connector",
+        "hs_cable",
+        "connector",
+        "auto_electronics"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3679",
+      "name": "新至陞",
+      "url": "www.nishoku.com.tw",
+      "themes": [
+        "ic_test",
+        "factory_auto"
+      ],
+      "status": "fetched",
+      "sentence_count": 3,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3680",
+      "name": "家登",
+      "url": "http://www.gudeng.com",
+      "themes": [
+        "semi_parts",
+        "aoi"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "3704",
+      "name": "合勤控",
+      "url": "http://www.zyxelgroup.com",
+      "themes": [
+        "network_equip",
+        "wifi"
+      ],
+      "status": "http_403"
+    },
+    {
+      "code": "3706",
+      "name": "神達",
+      "url": "www.mitac.com",
+      "themes": [
+        "psu"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3707",
+      "name": "漢磊",
+      "url": "https://www.episil.com",
+      "themes": [
+        "compound_semi"
+      ],
+      "status": "http_500"
+    },
+    {
+      "code": "3711",
+      "name": "日月光投控",
+      "url": "www.aseglobal.com",
+      "themes": [
+        "ic_package",
+        "adv_package",
+        "cowos"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "3714",
+      "name": "富采",
+      "url": "http://www.ennostar.com",
+      "themes": [
+        "led",
+        "miniled",
+        "microled"
+      ],
+      "status": "exc_ConnectTimeout"
+    },
+    {
+      "code": "4104",
+      "name": "佳醫",
+      "url": "www.excelsiormedical.com.tw",
+      "themes": [
+        "generic_drug",
+        "diagnostics"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4126",
+      "name": "太醫",
+      "url": "http://www.pahsco.com.tw",
+      "themes": [
+        "medical_device"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4147",
+      "name": "中裕",
+      "url": "https://www.taimedbiologics.com",
+      "themes": [
+        "new_drug"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 1,
+      "a_level_hits": 0,
+      "hits": [
+        {
+          "sentence": "Taimed Biologics This site uses cookies. For more information, please see our Privacy Policy Agree About About TaiMed Leadership Board Our Science Pipeline & Pr",
+          "keyword": "新藥",
+          "a_level": false
+        }
+      ]
+    },
+    {
+      "code": "4174",
+      "name": "浩鼎",
+      "url": "https://www.obipharma.com",
+      "themes": [
+        "new_drug"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4438",
+      "name": "廣越",
+      "url": "http://www.qve.com.tw",
+      "themes": [
+        "textile"
+      ],
+      "status": "exc_SSLError"
+    },
+    {
+      "code": "4707",
+      "name": "磐亞",
+      "url": "http://www.pacc.com.tw",
+      "themes": [
+        "photoresist"
+      ],
+      "status": "fetched",
+      "sentence_count": 3,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4726",
+      "name": "永昕",
+      "url": "https://www.mycenax.com",
+      "themes": [
+        "diagnostics"
+      ],
+      "status": "fetched",
+      "sentence_count": 17,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4735",
+      "name": "豪展",
+      "url": "http://www.avita.com.tw",
+      "themes": [
+        "medical_device"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4746",
+      "name": "台耀",
+      "url": "www.formosalab.com",
+      "themes": [
+        "new_drug",
+        "generic_drug"
+      ],
+      "status": "fetched",
+      "sentence_count": 1,
+      "keyword_hits": 0,
+      "a_level_hits": 0,
+      "hits": []
+    },
+    {
+      "code": "4763",
+      "name": "材料*-KY",
+      "url": "www.acetekgroup.com",
+      "themes": [
+        "photoresist",
+        "specialty_gas",
+        "cmp_target"
+      ],
+      "status": "exc_SSLError"
     }
   ],
-  "total_codes_covered": 150,
+  "total_codes_covered": 170,
   "total_candidates": 259
 }
