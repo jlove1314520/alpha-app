@@ -71,6 +71,7 @@ powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1 -Reve
 | `AlphaLiveServer` | App 即時報價伺服器（聽 127.0.0.1:8001，對外靠 Tailscale Funnel） | 每 1 分鐘 ＋ 登入時 | `research/alpha_live_server_cycle.log` |
 | `AlphaShioajiQuotes` | 永豐 Shioaji 盤中逐筆常駐程式的啟動器 | 每 2 分鐘 ＋ 登入時 | `research/shioaji_quotes_cycle.log` |
 | `AlphaIbkrQuotes` | 美股報價（IBKR Gateway） | 每 5 分鐘 ＋ 登入時 | `research/ibkr_quotes_cycle.log`、`data/quotes_ibkr.json` |
+| `AlphaIbkrGateway`（**2026-09-17新增，尚待註冊**，見下方說明） | 確保 IB Gateway 程式本身有開著（不能自動輸入帳密，只負責把程式打開等在登入畫面） | 每 15 分鐘 ＋ 登入時（延遲 1 分） | `research/ibkr_gateway_cycle.log` |
 | `AlphaConnectivity` | 對外連通性監測 ＋ 常駐工作停擺自檢 | 每 5 分鐘 ＋ 登入時（延遲 1 分） | `research/external_connectivity.jsonl`、`data/audit_report.json` 的 `local_task_health` |
 | `AlphaTwsePublishProbe` | 實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間 | **每日** 13:30 起每 15 分鐘、共 6.5 小時 ＋ 登入時（延遲 2 分） | `research/twse_probe.log`、`research/twse_publish_probe.jsonl` |
 | `AlphaDevQueue` | 開發任務佇列自走輪次 | 每 15 分鐘 ＋ 登入時 | `research/dev_queue_cycle.log` |
@@ -164,3 +165,41 @@ Test-NetConnection -ComputerName 127.0.0.1 -Port 4001 -InformationLevel Quiet
    需要總司令用系統管理員 PowerShell 跑一次（見第一節）。**尚未執行**。
 2. **驗證 `claude` CLI 在非互動階段能否啟動** ——這是 B 類要不要跟進的前提，
    沒驗證前不動 B 類。
+
+## 五、`AlphaIbkrGateway`（2026-09-17新增，尚待總司令親自註冊）
+
+**起因**：2026-09-16 09:44 Windows Update 強制重開機把 IB Gateway 行程
+砍掉，且**從未被重新啟動過**——查證發現原本完全沒有任何排程負責「把
+Gateway這個程式打開」這件事，`AlphaIbkrQuotes`只負責向一個假設已經在
+跑的Gateway要報價，Gateway自己死了它也無能為力。這支新工作只補「把
+程式打開，讓它至少停在登入畫面等密碼」這一步，**不會自動輸入帳密**
+（那是IBC的範疇，是否要上IBC是另一個待總司令裁示的獨立決策，見
+`PENDING_QUEUE.md`）。
+
+**檔案**：
+- `C:\alpha\run-ibkr-gateway-cycle.ps1` —— 檢查`ibgateway`行程存不存在，
+  不存在就用`Start-Process`打開`D:\IBKR Gateway\ibgateway\ibgateway.exe`
+  （路徑取自該程式自己的開始功能表捷徑，不是猜的）。
+- `C:\alpha\run-ibkr-gateway-hidden.vbs` —— 沿用既有慣例，用`wscript.exe`
+  隱藏執行上面那支`.ps1`避免排程觸發時彈出主控台視窗。
+- `C:\alpha\register-ibkr-gateway-task.ps1` —— 註冊排程本身的腳本。
+
+**⛔ 尚待總司令親自執行的原因（已知的環境限制，不是猜測）**：實測這個
+自動化session的PowerShell雖然`whoami`顯示是`user`帳號（在
+Administrators群組裡），但`Register-ScheduledTask`與`schtasks /create`
+**兩種方式都回`Access is denied`**——`whoami /groups`顯示
+`BUILTIN\Administrators`是「Group used for deny only」，這個session的
+token被UAC過濾掉了管理員權限，即使是註冊`InteractiveToken`（非S4U）
+的新工作也建不起來（既有的`AlphaMarathon`等工作能跑，是因為它們是
+**先前某次有互動桌面權限的操作**建立的，不是這次的環境限制矛盾）。
+
+**總司令需要做的事**（跟`convert-tasks-to-s4u.ps1`那次一樣，開一個你
+自己的PowerShell視窗跑）：
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\alpha\register-ibkr-gateway-task.ps1
+```
+跑完後用`Get-ScheduledTask -TaskName AlphaIbkrGateway | Get-ScheduledTaskInfo`
+確認註冊成功，觸發器會在15分鐘內或下次登入時跑一次，可以去看
+`research\ibkr_gateway_cycle.log`跟桌面上有沒有跳出Gateway登入視窗
+來驗證。如果`register-ibkr-gateway-task.ps1`本身也回`Access is
+denied`，代表連你自己的PowerShell也需要「以系統管理員身分執行」。
