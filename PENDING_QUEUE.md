@@ -55,13 +55,47 @@
 - **一** ✅ **已知會，無動作**：省額度第二步（換模型）暫緩，維持每日記錄
   跳過/呼叫次數，等帳號週用量爬到60~70%再重新評估。此為裁示本身，非
   待辦動作。
-- **二** 🔲 待做：quota_throttle.py補實作quota_usage_daily.log真正落地
-  （目前只有09-16一行且缺hypothesis_queue，疑似部分機制或手動觸發，非
-  完整機制運作），並確認納入對應commit allowlist/機器寫檔白名單。
-- **三** 🔲 待做：查gh run list --workflow=audit.yml，查AlphaDataAudit
-  新判準（昨日剛上線的班次數/interval×3邏輯，audit.yml未被列入
-  shift_profile，仍用舊interval×3判準）有沒有亮燈，查根因後回報稽核
-  重跑後的新數字。
+- **二** ✅ **已查明：機制本身2026-09-15上線時就已寫好，不是這次才補實作**——
+  `_record_daily()`本來就有跨日flush邏輯，第一行遲遲沒出現單純是因為要等
+  第一次「跨日」才觸發。09-16→09-17跨日時已實測寫出
+  `2026-09-16 marathon: skip_signal=16 skip_interval=1 run=4`一行，內容
+  與`quota_throttle_state.json`的累計計數器對得起來（驗證通過）。
+  `hypothesis_queue`那行尚未出現——查`quota_throttle_state.json`，
+  `hypothesis_queue.daily.date`仍是`2026-09-16`（還沒跨日flush），
+  `last_actual_run_at`是09-16 23:33，距查核當下（09-17 00:2x）約47分鐘
+  未見新呼叫，略超過正常30分鐘週期，尚未到需要另開故障調查的程度，記錄
+  在案供之後對照。**「加進commit allowlist」的實際落地方式**：這個檔案
+  沒有像market.yml那種寫死在workflow裡的git add清單——marathon／
+  hypothesis_queue兩軌的commit是each輪`claude -p`session自己依
+  「收工序」規則做的，不是腳本層級固定清單，所以真正的修法是把這個檔案
+  第一次`git add`進版控變成tracked（已完成），之後異動會被兩軌例行
+  commit自然帶到；`scripts/dev_queue_runner.py::MACHINE_WRITTEN`的
+  `^research/[^/]+\.log$`regex已涵蓋它，不需要額外改collision白名單。
+  quota_throttle.py檔頭已補記這段說明。
+- **三** ✅ **已完成，根因查明並修復**：`gh run list --workflow=audit.yml
+  --limit 10`顯示**過去6次觸發全部failure**（非只有兩晚）。
+  `gh run view --log-failed`實際輸出：`build_listed_universe.py`第一步
+  `ImportError: cannot import name 'TWSE_COMPANY' from 'data_audit'`——
+  根因是2026-09-10 commit`52ab79a7`清理data_audit.py兩道無效恆等式時，
+  誤刪只看起來「服務已刪除check_d_market_cap」的`TWSE_COMPANY`常數，
+  卻沒發現`build_listed_universe.py`也從這支檔案import它（維護掛牌名冊
+  用，跟市值稽核無關）——跨檔案耦合、單一檔案視角誤刪，audit.yml自
+  09-10起每次觸發都在第一步就ImportError，後續步驟全部沒機會執行。
+  已修復（commit`a22e59e6`，恢復常數本身，不恢復已合理刪除的死碼）。
+  **AlphaDataAudit新判準沒亮燈的原因**：確認是**新判準沒生效**——
+  09-16那次班次數轉換原裁示只點名market.yml/quotes.yml/news_events.yml
+  三支，AlphaDataAudit被漏掉，停留在interval×3=3天門檻，兩個交易日
+  的停擺還不到3天不會亮燈。已補上`shift_profile=audit_yml`（commit
+  `30be6946`），用本次真實停擺窗口驗證missed=2會正確亮燈。本機重跑三步驟
+  （build_listed_universe.py/prune_delisted.py/data_audit.py，PAT無
+  workflow dispatch權限無法直接觸發雲端驗證，改本機跑同一套腳本）確認
+  全部成功，**新舊數字對比**：a_price_source違規765→17、無法查核
+  3,972→1,876、violation_rate 32.95%→0.85%（大幅改善主因是market.yml
+  31小時停擺與sparklines凍結同期造成的資料過期已於09-16修復，非稽核
+  邏輯改變判準）。今晚23:20排程會自然觸發，屆時再核對雲端結果一致。
+  **副帶發現**：`AlphaQuotesTW`／`AlphaNewsEvents`兩條班次數監控目前
+  持續亮著（quotes約20班/news約7班未達標），比昨天查到時更嚴重，這是
+  獨立、尚未查根因的真實問題，不在本次四項範圍內，如實記錄待後續查。
 - **四** 🔲 待做：稽核.三(a) FinMind額度恢復後續跑，維持原三條件（屬
   research/資料回補範圍，非本session直接動工，交自走track接續）。
 

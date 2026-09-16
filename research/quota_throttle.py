@@ -53,6 +53,18 @@ START/END 都是 ISO 時間字串（wrapper 自己記的 cycle 開始/結束時�
 前一天的累計寫成一行 append 進 `research/quota_usage_daily.log`——
 不用另外跑聚合腳本，這份 log 本身就是「一天一行」的歷史，供總司令一週後
 判斷要不要做第二步（換模型）。
+
+**2026-09-17（總司令裁示【接上最後一哩】）補記**：這支機制本身在
+2026-09-15上線當下就已經寫好（不是這次才補實作），第一行遲遲沒出現
+單純是因為要等第一次「跨日」才會觸發flush（見上方`_record_daily()`），
+2026-09-16→09-17跨日時已實測寫出`marathon`那行。**這個檔案沒有像
+market.yml那種寫死在workflow裡的`git add`清單**——marathon／
+hypothesis_queue兩軌沒有腳本層級的固定commit步驟，是each輪`claude -p`
+session自己依CLAUDE.md「收工序」規則commit，所以真正的「加進清單」動作
+是：把這個檔案第一次`git add`進版控變成tracked（已於2026-09-17完成），
+之後它的異動會被這兩軌各自收工時的例行commit自然帶到，不需要另外維護
+一份逐檔清單——跟`scripts/dev_queue_runner.py::MACHINE_WRITTEN`的
+regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。
 """
 from __future__ import annotations
 
