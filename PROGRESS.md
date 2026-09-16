@@ -1,3 +1,48 @@
+## 2026-09-16（續）（班次數監控門檻／market.yml驗收確認／PENDING_QUEUE登記四項裁示）
+
+戴**維運帽**。總司令裁示四項（原文登記於`PENDING_QUEUE.md`「班次數門檻」段），
+本輪完成一、二兩項，三、四待續。
+
+**一、班次數門檻取代間隔×3倍**：`scripts/pipeline_freshness.py`新增
+`shift_profile`欄位支援，實際的應跑班次計算呼叫
+`scripts/expected_shift_calendar.py::count_missed_shifts()`——**這支模組
+是另一個並行工作的session（非本session可辨識的peer，來源不明，推測是
+Cowork）在本session動工的同時獨立寫好的**，比本session原本打算寫的簡化版
+更精確（尤其quotes.yml：實測`fetch_quotes_tw.py`不論是否在交易時段都會
+無條件寫`fetched_at`，所以應跑班次要用quotes.yml整條workflow的cron換算，
+不能只算台股盤中窗口，本session原本的簡化版會漏掉這點），已整合採用、
+不重複維護兩份班次表。`data/seed/pipeline_registry.json`：
+`AlphaMarketTW`/`AlphaFundamentals`/`AlphaPriceHistory`/`AlphaMarketSparklines`
+四條`shift_profile=market_yml`連續錯過2班即亮燈；`AlphaQuotesTW`
+`shift_profile=quotes_yml`門檻3班（約30分鐘）；`AlphaNewsEvents`
+`shift_profile=news_events_yml`門檻3班（約90分鐘，與舊制數字相同，因
+news_events.yml排程本身不分平假日）。`python scripts/expected_shift_
+calendar.py --replay-2026-09-outage`回放本次31小時停擺，驗證09-15 18:30
+（第2班）missed=2即亮燈，通過。**誠實揭露**：`gh run list`實測顯示GitHub
+Actions排程觸發本身常態性延遲（40分鐘~10小時不等），只要資料在下一班
+到期前補上就不算missed、一般延遲不會誤報，但連續兩班都被GitHub延遲到
+超過各自下一班到期時間時理論上仍可能誤報，這是本次判準對「GitHub排程
+延遲」這個獨立風險的殘留暴露。**額外發現（副作用）**：新判準上線後
+`AlphaQuotesTW`當下實測顯示已連續錯過16個應跑班次（約2.7小時無新產出），
+是新監控立刻抓到的一個疑似真實停擺，舊制（180分鐘門檻）當下不會亮燈，
+本身不在本次四項交辦範圍內，先如實記錄。
+
+**二、market.yml修法驗收**：`gh run list --workflow=market.yml --limit 10`
+確認09-16 14:08:24Z／15:07:01Z兩次`schedule`觸發皆`success`（09-15三次
+`failure`之後首兩次成功）；`market_tw.json`/`fundamentals.json`/
+`price_history.json`/`sparklines.json`四個檔案的資料層時間戳皆已跳到
+2026-09-16當日（約23:07~23:10台北）。5ab1aaa2那次allowlist修法確認生效，
+沒有用猜的，兩個獨立來源（`gh run list`＋四個JSON實際欄位）互相印證。
+
+**三、四待續**：三（機器寫檔清單稽核）、四（節流實際數字回報）本輪尚未開始。
+
+**影響檔案**：`scripts/pipeline_freshness.py`、`scripts/expected_shift_
+calendar.py`（新檔）、`data/seed/pipeline_registry.json`、
+`PENDING_QUEUE.md`。冒煙測試：`--replay-2026-09-outage`＋
+`python scripts/pipeline_inventory.py`皆正常輸出，無crash。
+
+---
+
 ## 2026-09-16（market.yml停擺31小時根因修復／雲端管線監控補洞／撞軌統一／t20到期提醒）
 
 戴**維運帽**。總司令裁示四項（原文已登記`PENDING_QUEUE.md`），本輪逐項

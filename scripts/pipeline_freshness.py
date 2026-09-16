@@ -27,9 +27,30 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from expected_shift_calendar import count_missed_shifts
+
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "data" / "seed" / "pipeline_registry.json"
 TZ = timezone(timedelta(hours=8))
+
+# ---------------------------------------------------------------------------
+# 班次數門檻（2026-09-16 總司令裁示【班次數】）
+#
+# 背景：「間隔×3倍」對每天固定跑幾班的雲端管線（market.yml 三班次）會把
+# 「連續錯過2個應跑班次」跟「假日/週末」混在一起容忍到72小時——2026-09-15
+# 那次31小時停擺，用這套公式要撐到72小時才會亮紅燈，比總司令自己肉眼發現
+# 更慢。裁示是「不加新架構，改判準」：不是重寫一套排程系統，只是把「以時間
+# 長度為單位」的門檻換成「以應跑班次數為單位」，且班次要不要跑用交易日曆
+# （週末＋國定假日）判定，避免把「本來就不該跑」的假日算成停擺。
+#
+# 應跑班次的精確計算（逐一對照各 workflow 實際 cron）交給
+# scripts/expected_shift_calendar.py（count_missed_shifts()），這裡不重複
+# 一份簡化版——兩份平行維護遲早分岔，本檔只負責讀 shift_profile 設定、呼叫
+# 那支、把結果併進既有的 rows/stalled 輸出格式。
+#
+# 沒有設定 shift_profile 的管線（本機常駐/連續型任務，如 IBKR/Shioaji 報價、
+# alpha.db）維持原本「間隔×stall_factor」判定不變——那些任務不是「一天固定
+# 幾班」的形狀，班次計數對它們沒有意義，勉強套用才是真的在加架構。
 
 
 def load_registry() -> dict:
@@ -146,6 +167,24 @@ def evaluate(now: datetime | None = None) -> tuple[list[dict], list[str]]:
                 rows.append(row)
                 continue
             age = (now - last).total_seconds() / 60.0
+            profile_name = spec.get("shift_profile")
+            if profile_name:
+                missed, shift_labels = count_missed_shifts(profile_name, last, now)
+                threshold = spec.get("missed_shift_threshold", 2)
+                row.update(
+                    last_output=last.isoformat(), age_min=round(age, 1),
+                    shift_profile=profile_name, missed_shifts=missed,
+                    missed_shift_threshold=threshold,
+                    latest_due_shift=shift_labels[-1] if shift_labels else None,
+                    status="stalled" if missed >= threshold else "ok",
+                )
+                if missed >= threshold:
+                    stalled.append(
+                        f'{spec["task"]}：{spec["artifact"]} 已連續錯過 {missed} 個應跑班次'
+                        f'（門檻 {threshold} 班，最近應跑 '
+                        f'{shift_labels[-1] if shift_labels else "?"}；{how}）')
+                rows.append(row)
+                continue
             limit = spec["interval_min"] * factor
             row.update(last_output=last.isoformat(), age_min=round(age, 1),
                        stall_limit_min=limit,

@@ -54,8 +54,39 @@
 
 **執行狀態**：
 
-- **一** 🔲 待做：改market.yml/quotes.yml/news_events.yml監控判準為「連續N個應跑班次無新產出」，交易日曆判定應跑班次，回放31小時停擺驗證第2班亮燈。
-- **二** 🔲 待驗收：今日2026-09-16台北17:00排程尚未到（開工查核時15:23），需等17:00後才能查四檔時間戳；沒跳動前不宣稱修復生效。
+- **一** ✅ **已完成，回放測試通過**：改用「連續N個應跑班次無新產出」取代「間隔×3倍」。
+  發現另一個session（非本session，ListAgents查證不是research-e4那個peer，來源不明——
+  可能是Cowork）**同時在做同一件事**，已先建好`scripts/expected_shift_calendar.py`
+  （market_yml/quotes_yml/news_events_yml三個精確對照各自實際cron的班次算式，比
+  本session原本寫的簡化版更準——尤其quotes_yml：實測`fetch_quotes_tw.py`不管
+  trading_window是否為真都會無條件寫入`fetched_at`，所以quotes.yml的應跑班次
+  要用**整條workflow的cron**換算而非只算台股盤中09:00-13:30，本session原本的
+  簡化版會漏掉這點）。已整合採用該模組，`scripts/pipeline_freshness.py`
+  改呼叫`count_missed_shifts()`不重複維護第二份班次表。
+  門檻：market.yml連續錯過2班、quotes.yml/news_events.yml各3班（quotes約30分鐘、
+  news約90分鐘，news因排程本身不分平假日，換算後門檻與舊制間隔×3相同，非行為
+  變更）。`python scripts/expected_shift_calendar.py --replay-2026-09-outage`
+  回放本次31小時停擺：09-15 18:30（第2班）missed=2即亮燈，驗證通過（詳細輸出見
+  PROGRESS.md）。**誠實揭露風險**：`gh run list --workflow=market.yml`實測顯示
+  GitHub Actions排程觸發本身常態性延遲（觀察到40分鐘~10小時不等，非本次修法
+  能解決的另一層問題）——只要單一shift的資料最終在**下一個應跑班次到期前**
+  補上就不算missed，所以一般延遲不會誤報，但若連續兩班都被GitHub排程延遲到
+  超過各自下一班的到期時間，理論上仍可能觸發假警報，這是「班次數」判準本身
+  對「GitHub排程延遲」這個獨立風險的殘留暴露，非本次修法範圍內能解決，如實
+  記錄供後續觀察。**額外發現（副作用，非本次交辦範圍）**：新判準跑出來後，
+  `AlphaQuotesTW`（`data/quotes_tw.json`）當下實測顯示已連續錯過16個應跑班次
+  （約2.7小時無新產出，門檻3班/30分鐘），這是新監控上線後立刻抓到的一個真實
+  疑似停擺，舊制（間隔60分×3=180分鐘門檻）當下不會亮燈——**這條本身未列入
+  本次四項交辦範圍，先如實記錄，是否要另開一條裁示查根因待總司令決定**。
+- **二** ✅ **已驗收，四檔時間戳全部跳到當日**：開工查核時因bash環境TZ解析
+  異常誤判成15:23台北（實際上已是23:3x台北，`date -u`／python epoch雙重確認），
+  修正後直接查`gh run list --workflow=market.yml --limit 10`：09-16 14:08:24Z
+  與15:07:01Z兩次`schedule`觸發皆`success`（09-15三次`failure`之後的首兩次
+  成功）。`market_tw.json`/`fundamentals.json`/`price_history.json`/
+  `sparklines.json`四個檔案的資料層時間戳（`fetched_at`/`meta.generated_at`）
+  皆已跳到2026-09-16當日（約23:07~23:10台北）。**沒有用猜的**，兩個獨立來源
+  （`gh run list`實際輸出＋四個JSON檔案的實際欄位值）互相印證。5ab1aaa2那次
+  allowlist修法確認生效。
 - **三** 🔲 待做：全面稽核本機+雲端排程腳本的「每輪改寫repo追蹤檔」是否都在對應allowlist/白名單內，找第三個案例；寫進CLAUDE.md。
 - **四** 🔲 待做：回報過去24小時馬拉松/假設佇列跳過輪數與實際claude呼叫次數。
 
