@@ -57,13 +57,29 @@
 
 **執行狀態**：
 
-- **一** 🔲 待做：查證DU開頭模擬帳戶帳密是否與實盤帳戶獨立，列≥3個獨立
-  來源，只查證不動手裝IBC。
-- **二** 🔲 待做：做成AlphaIbkrGateway排程，登入觸發器，沿用
-  LOCAL_SCHEDULED_TASKS.md既有模式，把Gateway加進開機自動啟動。
-- **三** 🔲 待做：data_audit.py加最小自檢（能否import/讀到必要常數，
-  失敗寫進audit_report固定欄位），CLAUDE.md記一筆「監控工具自己也要被
-  監控」。
+- **一** 🔲 查證中（已交給背景agent，「查完回報不要先動手裝」，完成後
+  回報，不會自行安裝IBC）：查證DU開頭模擬帳戶帳密是否與實盤帳戶獨立，
+  列≥3個獨立來源。
+- **二** ✅ **已完成腳本，尚待總司令親自註冊排程（環境權限限制）**：
+  `C:\alpha\run-ibkr-gateway-cycle.ps1`（檢查ibgateway行程、不存在就
+  Start-Process啟動，路徑取自程式自己的開始功能表捷徑）、
+  `run-ibkr-gateway-hidden.vbs`、`register-ibkr-gateway-task.ps1`
+  三支檔案已建好（commit`0836ccda`）。**本session的PowerShell無法
+  直接註冊**：`Register-ScheduledTask`與`schtasks /create`都回
+  `Access is denied`——`whoami /groups`顯示Administrators是「deny
+  only」，這個session的token被UAC過濾掉管理員權限，即使是
+  InteractiveToken（非S4U）也建不起新工作。已在
+  `docs/LOCAL_SCHEDULED_TASKS.md`第五節記錄完整說明，總司令需要開自己
+  的PowerShell跑
+  `powershell -ExecutionPolicy Bypass -File C:\alpha\register-ibkr-gateway-task.ps1`
+  完成註冊（若還是Access is denied，代表要「以系統管理員身分執行」）。
+- **三** ✅ **已完成**：新增`scripts/audit_preflight.py`（極簡、只用
+  標準函式庫、subprocess試import，結果寫進`audit_report.json`固定的
+  `self_check`欄位，永遠exit 0不擋流程），已插入`audit.yml`第一步，
+  同時把「Commit稽核結果」步驟改成`if: always()`（否則前面步驟失敗時
+  連自檢欄位都進不了repo）。本機模擬當初的TWSE_COMPANY誤刪情境測試過
+  preflight能正確抓到並回報，之後已還原（commit`76f5d8e7`）。
+  CLAUDE.md新增第十一節「監控工具自己也要被監控」。
 - **四** ✅ **已查證，查不出確定的外部原因，誠實記錄「原因不明，已自行
   恢復」**：**先更正一個數字**——上一輪回報的「13+小時零觸發」是當時
   只查得到部分資料的低估，重新用`gh run list --json createdAt`精確比對
