@@ -64,8 +64,31 @@
 - **三** 🔲 待做：data_audit.py加最小自檢（能否import/讀到必要常數，
   失敗寫進audit_report固定欄位），CLAUDE.md記一筆「監控工具自己也要被
   監控」。
-- **四** 🔲 待做：查GitHub端quotes.yml/news_events.yml同時13小時零觸發
-  的線索，查不出就誠實記錄「原因不明，已自行恢復」，不編理由。
+- **四** ✅ **已查證，查不出確定的外部原因，誠實記錄「原因不明，已自行
+  恢復」**：**先更正一個數字**——上一輪回報的「13+小時零觸發」是當時
+  只查得到部分資料的低估，重新用`gh run list --json createdAt`精確比對
+  後，quotes.yml實際空窗是09-16 12:54:00Z→17:21:21Z（約4小時27分）、
+  news_events.yml是12:42:13Z→17:27:12Z（約4小時45分）——兩者幾乎是
+  同一個時間窗，仍然是真停擺、仍然是同時發生，只是實際時長比上一輪
+  的估計短。已查過三個方向：(1)`gh api repos/.../actions/workflows`
+  確認四支workflow都是`active`（沒被GitHub自動停用）；(2)repo本身
+  `visibility=public`/`archived=false`/`disabled=false`，且public repo
+  的Actions分鐘數理論上不受用量上限影響，排除額度用盡；(3)
+  `githubstatus.com`的incidents列表裡09-16全天沒有任何「Actions」
+  component的公開事件紀錄（最近的Actions相關事件是09-14
+  「Larger Runner Jobs...slow to start」，時間對不上）。**排除
+  concurrency queue理論**：quotes.yml與market.yml共用
+  `repo-push-main`並發群組，但market.yml在同一窗口內（14:08/15:07
+  UTC）照常成功執行，代表不是這個群組被卡住；news_events.yml用
+  獨立的`news-events`並發群組，跟quotes.yml完全無關，卻幾乎同時
+  停又同時恢復，排除「某一支workflow卡住連帶拖累」的解釋。**共同點
+  只有一個**：quotes.yml與news_events.yml都是高頻排程（quotes.yml
+  每10分鐘、news_events.yml每30分鐘），market.yml只有一天3班——這
+  跟已知的「news_events排程降級15%」背景現象方向一致（GitHub對高頻
+  cron的排程優先權疑似低於低頻排程），但這只是相關性觀察，不是確定
+  的根因，**沒有查到能證實的官方說法，如實記錄「原因不明，已自行
+  恢復」，不編理由**。持續監控：若同款「高頻排程同時停、低頻排程
+  不受影響」的型態再發生，才升級為系統性問題去查。
 - **五** ✅ **已知會，標準說明**：完整度缺口49.91%仍在，gate轉綠不代表
   這件事消失（沿用上一輪已回報的結論，本輪僅記錄裁示原文）。
 
