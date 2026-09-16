@@ -103,7 +103,31 @@
   本次範圍）：`audit.yml`的commit步驟沒有push失敗重試迴圈，屬於「多個
   寫入者同時推main」這個更廣風險類別的另一個缺口，跟allowlist遺漏不是
   同一種問題，先記錄，是否補齊待另行評估。
-- **四** 🔲 待做：回報過去24小時馬拉松/假設佇列跳過輪數與實際claude呼叫次數。
+- **四** ✅ **已完成，回報過去24小時（2026-09-15 23:00～09-16 23:33台北）
+  實際數字**：節流機制`research/quota_throttle.py`（2026-09-15
+  07:56台北首次commit`5d49bddf`上線，已在運作，非規劃中）由
+  `run-marathon-cycle.ps1`第39-42行／`run-hypothesis-queue-cycle.ps1`
+  第22-24行每次排程觸發第一步呼叫`quota_throttle.py should_run --track
+  <marathon|hypothesis_queue>`，回傳非0直接`exit 0`不啟動`claude -p`。
+  兩層節流：便宜層（`_signal_hash`比對候選池內容雜湊，連python判斷都
+  跳過，log標記`skip_signal`）＋間隔層（帳號週用量≥90%或連續5輪
+  `TRIALS_REGISTRY.jsonl`無新增，間隔拉長到120分鐘，log標記
+  `skip_interval`）。**AlphaMarathon**：跳過18輪（16次skip_signal+2次
+  skip_interval），實際呼叫claude 4次（09-16 01:00/08:00/09:00/23:26）。
+  **AlphaHypothesisQueue**：跳過18輪，實際呼叫claude 4次（09-15
+  23:51、09-16 00:51/07:51/23:24）。查證依據：`research/marathon_cycle.log`
+  第3494～3564行、`research/hypothesis_queue_cycle.log`第2820～2900行
+  （每輪明文印`quota_throttle: SKIP/RUN`，非猜測），交叉核對
+  `research/data/quota_throttle_state.json`累計計數器吻合（含1次窗口
+  邊界口徑差異，已對齊）。帳號7日用量32%，遠低於90%門檻，代表這次節流
+  主要是「候選池連續空轉」條件在起作用，不是額度緊迫逼出來的。**規模感**：
+  不節流的話兩軌合計一天應觸發96次，實際24小時只呼叫claude共8次，避免
+  約88次呼叫（減少約91%）。**誠實揭露**：`research/quota_usage_daily.log`
+  （設計上跨日彙總用）目前不存在，原因未查（`research/data/`整個目錄不
+  受版控，可能與近日重開機/額度停擺事件有關），已用原始log逐行手算取代，
+  非猜測但少了本該有的每日彙總對照，這是否要補查待總司令決定是否列入
+  下一輪維運工作。**這組數字是否要進行「第二步（換模型）」，交由總司令
+  依此判斷，本session不代為決定**。
 
 ---
 
