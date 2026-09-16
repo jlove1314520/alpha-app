@@ -87,7 +87,22 @@
   皆已跳到2026-09-16當日（約23:07~23:10台北）。**沒有用猜的**，兩個獨立來源
   （`gh run list`實際輸出＋四個JSON檔案的實際欄位值）互相印證。5ab1aaa2那次
   allowlist修法確認生效。
-- **三** 🔲 待做：全面稽核本機+雲端排程腳本的「每輪改寫repo追蹤檔」是否都在對應allowlist/白名單內，找第三個案例；寫進CLAUDE.md。
+- **三** ✅ **已完成，稽核結論：沒有第三個**：逐一核對market.yml（29支
+  腳本輸出路徑）/quotes.yml（3支）/news_events.yml（4支）/audit.yml（3支）
+  呼叫的全部腳本實際寫入路徑，對照各自commit步驟的`git add`allowlist——
+  `market.yml`的`PENDING_QUEUE.md`缺口已於`5ab1aaa2`修復；`quotes.yml`用
+  `git add -A data/`（目錄前綴，結構上不會漏）且3支腳本確認只寫`data/`
+  底下；`news_events.yml`/`audit.yml`的明確列名清單分別與各自腳本實際
+  輸出一一對應，無遺漏。本機端`scripts/dev_queue_runner.py::
+  check_collision()`（DevQueue自走的碰撞偵測，第一次事故的發生處）已在
+  2026-09-10因同一類bug被重新設計成regex前綴白名單（`MACHINE_WRITTEN`：
+  `^data/`／`research/*.log`／`research/*.jsonl`／`research/.*`／
+  `research/DEV_QUEUE_PROMPT.txt`）＋20分鐘新鮮度自癒視窗，不是純逐檔
+  清單，結構上比market.yml當初那版更耐得住「新增一個輸出檔忘記加清單」
+  這類疏漏。已把這個模式與規則寫進`CLAUDE.md`第十節。**副帶發現**（非
+  本次範圍）：`audit.yml`的commit步驟沒有push失敗重試迴圈，屬於「多個
+  寫入者同時推main」這個更廣風險類別的另一個缺口，跟allowlist遺漏不是
+  同一種問題，先記錄，是否補齊待另行評估。
 - **四** 🔲 待做：回報過去24小時馬拉松/假設佇列跳過輪數與實際claude呼叫次數。
 
 ---

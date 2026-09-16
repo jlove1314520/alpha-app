@@ -689,3 +689,57 @@ Cybex 是加密市場，沒有這幾樣東西。台股有，而且每一樣都�
 - `research/`（因子/策略/回測程式碼與紀錄）= 研究與驗證
 - `signal_ledger`（`data/signal_ledger.json`）= 情報
 - `compliance/` = 法遵
+
+## 十、排程腳本「會改寫的檔案」必須進對應清單（2026-09-16 總司令裁示【模式記錄】）
+
+**「機器自己寫的檔案沒進清單」已發作兩次**：
+1. DevQueue 舊版「工作目錄髒就跳過」——沒有機器寫檔白名單，任何排程本身
+   的正常寫入都被誤判成「有人在中途」，自動交辦線永遠不跑。
+2. market.yml 的 commit allowlist 漏了 `PENDING_QUEUE.md`——
+   `scripts/build_sector_flow.py::_update_queue_countdown()` 每輪都會改寫
+   這個檔案，但它不在 `git add` 的明確清單裡，導致工作目錄永遠留著一份
+   已修改未 commit 的追蹤檔，一旦跟其他寫入者撞在一起需要 `git rebase`
+   重試就必然失敗（`cannot rebase: You have unstaged changes`），停擺
+   31 小時才被總司令肉眼發現（詳見 `PENDING_QUEUE.md` 對應段落與
+   `PROGRESS.md` 2026-09-16 記錄）。
+
+兩次的共同形狀：**排程每輪自己會改寫某個 repo 內的追蹤檔，但那個檔沒被
+納入「該讀到它的清單」**——市場端是 workflow 的 `git add` allowlist，
+本機端是碰撞偵測的機器寫檔白名單。
+
+**規則（無例外）**：
+1. 新增任何「排程步驟會改寫 repo 內既有追蹤檔」的程式碼時（不只是新增
+   自己專屬的輸出檔，包含**順手改寫別人擁有的共用追蹤檔**，例如
+   `PENDING_QUEUE.md`、`data/rate_limit_state.json` 這類多個排程都會碰的
+   檔案），**同一個 commit 裡必須同步確認**：
+   - 雲端 workflow（`.github/workflows/*.yml`）：該檔是否已在對應 job 的
+     `git add` 明確清單裡，或該 job 本來就用 `git add -A <目錄>/` 這種
+     目錄前綴方式（結構上不會漏，見下方②）。
+   - 本機自走（`run-*.ps1` 呼叫的 collision 判斷，目前在
+     `scripts/dev_queue_runner.py::MACHINE_WRITTEN`）：該檔的路徑樣式是否
+     已被涵蓋。
+2. 在 commit／PR 訊息裡註明「這個 commit 新增了會改寫 X 檔案的排程步驟，
+   已確認 X 在 Y 的 allowlist/白名單裡」——不是做完就算，要留下可稽核的
+   一句話，讓下一個人不用重新翻程式碼去確認這件事有沒有被想過。
+3. **兩種修法優先順序**：能用「目錄前綴 `git add -A data/`」或「路徑樣式
+   regex 白名單＋新鮮度時間窗」這種結構性、自動涵蓋新檔案的方式，優先於
+   逐檔列名的明確清單——逐檔列名清單每次新增輸出檔都要記得手動加一行，
+   這正是兩次事故共同的脆弱點。`quotes.yml`（`git add -A data/`）與
+   `scripts/dev_queue_runner.py::MACHINE_WRITTEN`（regex 前綴＋20分鐘新鮮度
+   自癒視窗，2026-09-10 從純白名單改版而來）是這個方向已驗證可行的範例；
+   `market.yml`／`news_events.yml`／`audit.yml` 因為要精確控制「只 commit
+   這次真的有變動的檔案」，維持逐檔列名，這是刻意的取捨，不是疏漏——但
+   代價就是每次新增輸出檔都要記得手動加，第1點的稽核步驟就是在補這個
+   代價。
+4. **2026-09-16 全面稽核結果（供之後對照，非永久不變的事實）**：稽核
+   `market.yml`／`quotes.yml`／`news_events.yml`／`audit.yml` 四支 workflow
+   呼叫的全部腳本輸出路徑，以及 `scripts/dev_queue_runner.py::
+   MACHINE_WRITTEN` 涵蓋範圍，確認**沒有第三個遺漏**（`market.yml` 的
+   `PENDING_QUEUE.md` 缺口已於 commit `5ab1aaa2` 修復；`quotes.yml`
+   三支腳本皆只寫在 `data/` 底下，被 `-A data/` 結構性涵蓋；
+   `news_events.yml`／`audit.yml` 的明確列名清單分別與各自呼叫腳本的實際
+   輸出檔案一一對應）。**副帶發現**（非本次修法範圍，如實記錄）：
+   `audit.yml` 的 commit 步驟沒有 push 失敗重試迴圈（`market.yml`／
+   `quotes.yml` 有、`news_events.yml` 用 `git pull --rebase --autostash`
+   達到類似效果），屬於「多個寫入者同時推 main」這個更廣風險類別下的另一個
+   缺口，跟本節「allowlist 遺漏」不是同一種問題，是否要補齊待另行評估。
