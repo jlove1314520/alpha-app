@@ -78,6 +78,31 @@ def market_yml_expected_shifts(since: datetime, until: datetime) -> list[datetim
     return sorted(out)
 
 
+def audit_yml_expected_shifts(since: datetime, until: datetime) -> list[datetime]:
+    """audit.yml 一班：交易日 23:20（Asia/Taipei），對照 cron `20 15 * * 1-5`。
+
+    2026-09-17（總司令裁示【停擺】查核追加）：AlphaDataAudit 原本沒被納入
+    2026-09-16那次班次數轉換（原裁示只點名market.yml/quotes.yml/
+    news_events.yml），仍停留在「間隔1440分×3=3天」判準，導致這次
+    data_audit.py 因 TWSE_COMPANY ImportError 連續兩個交易日（09-16/09-17）
+    跑不出任何結果時，舊判準要等到第3天才會亮燈——這正是總司令這次抓到
+    的落差。補上這個 profile，跟其他三支workflow用同一套機制、同一個
+    模組，不是另外發明一套。
+    """
+    out: list[datetime] = []
+    if since is None or until is None or since >= until:
+        return out
+    d = since.date() - timedelta(days=1)
+    end_d = until.date() + timedelta(days=1)
+    while d <= end_d:
+        if is_tw_trading_day(d):
+            ts = _tp(d, 23, 20)
+            if since < ts <= until:
+                out.append(ts)
+        d += timedelta(days=1)
+    return sorted(out)
+
+
 _ALL_10MIN = {0, 10, 20, 30, 40, 50}
 
 
@@ -140,6 +165,7 @@ EXPECTED_SHIFT_FUNCS = {
     "market_yml": market_yml_expected_shifts,
     "quotes_yml": quotes_yml_expected_shifts,
     "news_events_yml": news_events_yml_expected_shifts,
+    "audit_yml": audit_yml_expected_shifts,
 }
 
 

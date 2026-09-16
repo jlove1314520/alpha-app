@@ -84,14 +84,15 @@
       "field": "fetched_at",
       "note": "connected=false 時仍會寫入失敗狀態，所以這一項新鮮不代表拿得到報價——Gateway 是否登入要看 external_connectivity 的 ibkr_gateway。",
       "fault_history": {
-        "count": 1,
-        "last_fault_at": "2026-09-16T09:57:02.491380+08:00",
+        "count": 2,
+        "last_fault_at": "2026-09-17T00:12:02.514126+08:00",
         "fault_types": {
-          "stalled": 1
+          "stalled": 2
         },
         "removable": null,
         "event_log": [
-          "2026-09-16T09:57:02.491380+08:00"
+          "2026-09-16T09:57:02.491380+08:00",
+          "2026-09-17T00:12:02.514126+08:00"
         ]
       }
     },
@@ -103,10 +104,15 @@
       "freshness": "jsonl_last_field",
       "field": "ts",
       "fault_history": {
-        "count": 0,
-        "last_fault_at": null,
-        "fault_types": {},
-        "removable": null
+        "count": 1,
+        "last_fault_at": "2026-09-17T00:12:02.514126+08:00",
+        "fault_types": {
+          "stalled": 1
+        },
+        "removable": null,
+        "event_log": [
+          "2026-09-17T00:12:02.514126+08:00"
+        ]
       }
     },
     {
@@ -296,15 +302,16 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。quotes.yml實際排程是每10分鐘一次但集中在盤中/美股時段（UTC 0-5、8-23，週二~週六0-1時額外覆蓋），平日UTC 6-7時（台北14:00-16:00）刻意沒有排程（台股已收盤、美股未開盤的空窗）。舊制用寬鬆的interval_min=60（×stall_factor=3=180分鐘）容忍這個已知空窗。同日【班次數】裁示：改用shift_profile=quotes_tw_10min（只以台股盤中09:00-13:30、交易日曆判定的班次為單位，14:00-16:00空窗不在班次表內，天然不會誤報），連續錯過3班（30分鐘）即亮燈，比舊制180分鐘更敏感也不受假日日曆誤導。",
       "fault_history": {
-        "count": 2,
-        "last_fault_at": "2026-09-16T23:37:02.499032+08:00",
+        "count": 3,
+        "last_fault_at": "2026-09-17T00:12:02.514126+08:00",
         "fault_types": {
-          "stalled": 2
+          "stalled": 3
         },
         "removable": null,
         "event_log": [
           "2026-09-16T11:57:01.688491+08:00",
-          "2026-09-16T23:37:02.499032+08:00"
+          "2026-09-16T23:37:02.499032+08:00",
+          "2026-09-17T00:12:02.514126+08:00"
         ]
       }
     },
@@ -319,14 +326,15 @@
       "missed_shift_threshold": 3,
       "note": "2026-09-16新增。news_events.yml排程是全天候每30分鐘一次（無平日/盤中限制），interval_min=30×stall_factor=3=90分鐘門檻。總司令原話點名這條workflow「Actions排程降級」曾經發生過（15%降級病史），列為雲端監控四條之一。同日【班次數】裁示：改用shift_profile=news_30min（shift_requires_trading_day=false，因排程本身全年無休不分平假日），連續錯過3班即亮燈——換算後門檻仍是90分鐘，與舊制數字相同，這條本來就沒有「假日誤報」的問題（cron不分平假日），改用班次計數只是統一判準表達方式，不是行為變更。",
       "fault_history": {
-        "count": 1,
-        "last_fault_at": "2026-09-16T08:32:02.369697+08:00",
+        "count": 2,
+        "last_fault_at": "2026-09-17T00:12:02.514126+08:00",
         "fault_types": {
-          "stalled": 1
+          "stalled": 2
         },
         "removable": null,
         "event_log": [
-          "2026-09-16T08:32:02.369697+08:00"
+          "2026-09-16T08:32:02.369697+08:00",
+          "2026-09-17T00:12:02.514126+08:00"
         ]
       }
     },
@@ -337,7 +345,9 @@
       "artifact": "data/audit_report.json",
       "freshness": "json_field",
       "field": "generated_at",
-      "note": "2026-09-16新增。audit.yml排程平日23:20台北一次，interval_min=1440×stall_factor=3=3天門檻同AlphaData慣例。**注意**：本條監控的是`audit_report.json`頂層的`generated_at`（data_audit.py每晚稽核寫入），跟`local_task_health`區塊自己的`checked_at`（check_external_connectivity.py每5分鐘更新）是同一份檔案裡的兩個不同欄位，不要混淆——這條停擺不影響local_task_health本身持續更新，但代表稽核數字（a_price_source/violation_rate等）是舊的。"
+      "shift_profile": "audit_yml",
+      "missed_shift_threshold": 2,
+      "note": "2026-09-16新增，2026-09-17（總司令裁示【停擺】查核）補上shift_profile：原本沒被納入前一天的班次數轉換，停留在interval×3=3天門檻，導致data_audit.py因TWSE_COMPANY ImportError連續兩個交易日（09-16/09-17）沒有產出時舊判準沒亮燈（要等第3天）——這正是總司令這次抓到的落差，已修復ImportError（見同日commit）並補上shift_profile=audit_yml，交易日連續錯過2班（2天）即亮燈。**注意**：本條監控的是`audit_report.json`頂層的`generated_at`（data_audit.py每晚稽核寫入），跟`local_task_health`區塊自己的`checked_at`（check_external_connectivity.py每5分鐘更新）是同一份檔案裡的兩個不同欄位，不要混淆。"
     }
   ],
   "github_pat_expiry": {
