@@ -39,6 +39,14 @@ jobs:
       - name: 安裝相依
         run: pip install requests certifi urllib3
 
+      # 2026-09-17（總司令裁示【記一筆】：監控工具自己也要被監控）：
+      # audit.yml曾因data_audit.py誤刪一個常數，讓build_listed_universe.py
+      # 第一步就ImportError，連續一週全滅卻沒有留下任何紀錄（GitHub Actions
+      # 的log沒人會天天去查）。這支只做import體檢，把結果寫進
+      # audit_report.json固定的self_check欄位，永遠exit 0（不擋流程）。
+      - name: 稽核管線自檢（import/常數體檢，結果寫進audit_report.json）
+        run: python scripts/audit_preflight.py
+
       - name: 更新官方在市名冊
         run: python scripts/build_listed_universe.py
 
@@ -53,7 +61,14 @@ jobs:
         continue-on-error: true
         run: python scripts/data_audit.py
 
+      # 2026-09-17 改成 if: always()：上面「更新官方在市名冊」／「剔除
+      # 榜單」兩步沒有continue-on-error，一旦失敗會直接中止job，這個
+      # commit步驟原本因此永遠不會執行——連自檢步驟寫好的self_check欄位
+      # 都進不了repo，等於白做。改成always()後，就算後面步驟真的掛了，
+      # 至少自檢欄位（跟已經commit過的既有報告內容）能落地，不是繼續
+      # 沉默停擺。
       - name: Commit 稽核結果
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
