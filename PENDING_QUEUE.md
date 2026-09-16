@@ -14,6 +14,61 @@
 
 ---
 
+## 2026-09-17（續）總司令裁示【gate_pass真實性查核／新警報器誤報查核／IBKR兩天掉線查根因／稽核.三(a)回補】四項（原文登記）
+
+總司令原話：
+
+> 一、【最優先】gate_pass 轉綠的真實性 —— 在查清楚之前我不採信這個綠燈
+> 現況：total_violations 1,076 筆裡有 1,055 筆（98%）是 e_quarters_stale(537)
+> ＋e_quarters_gap(518)，跟 09-15 相比一筆沒少甚至多了 4 筆；
+> 但 stocks_with_violation 只算 18 檔，violation_rate 因此 0.851% 而 gate 轉綠。
+> 而 informational_only_checks 裡只有 e_pe，季報兩項並未被標成 informational。
+> 1. 說明清楚：violation_rate 的分子分母各自怎麼算？季報那 1,055 筆
+>    在哪一步被排除在 stocks_with_violation 之外？是刻意設計還是計分 bug？
+> 2. **這個排除是什麼時候、哪一個 commit 引入的？** 用 git log -S 查。
+>    如果是這幾天改稽核時順手改的，那就是「把紅燈降級掩蓋問題」，
+>    必須回復並重新評估。
+> 3. 若確認是刻意設計（例如季報缺漏歸類為 completeness 而非 consistency），
+>    那就要在 audit_report 與冒煙輸出上**同時顯示兩個率**：
+>    consistency_violation_rate 與 completeness_gap_rate，
+>    不准讓一個綠燈遮住另一個還沒解決的問題。
+> 4. 季報回補 (a) 仍卡 FinMind 額度、一筆未補，這件事不因 gate 轉綠而消失。
+>
+> 二、【驗監控】新警報器第一次響，先確認它響得對
+> 1. AlphaNewsEvents「錯過 7 班」：news_events 排程降級到 15% 是我們早就
+>    實測過的常態。判定是否把「降級」誤判成「停擺」？
+>    若是，門檻要按實測達成率調整，不是按名目 cron。
+> 2. AlphaQuotesTW「錯過 20 班」：quotes.yml 的 8-23 UTC 那條是為美股排的，
+>    台股盤中是 01:00-05:30 UTC。確認 fetch_quotes_tw.py 在美股時段
+>    到底會不會更新 quotes_tw.json。若不會，那些班次不該算「應跑」。
+> 3. 回報：三條裡哪幾條是真停擺、哪幾條是誤報，並修正判定。
+>    **一個會誤報的警報器，幾天後就會被當成背景雜訊 —— 那正是
+>    check 39 紅燈掛太久的老問題，不要重蹈。**
+>
+> 三、【IBKR】兩天就掉，查自動重啟設定是否生效
+> 總司令 09-15 重登，09-17 四個埠又全關。IBKR 是每週重驗，兩天就掉不正常。
+> 1. 查 IB Gateway 的「自動重啟」設定是否真的生效（總司令已改為 11:00 AM）。
+> 2. 查 09-16 11:00 那次自動重啟後，埠有沒有恢復？若重啟後就掉，
+>    代表自動重啟會讓 API 埠關閉需要人工介入——那要另想辦法。
+> 3. 回報根因，再決定要不要上 IBC。
+>
+> 四、稽核.三 (a) 季報回補：FinMind 額度恢復後續跑，維持原三條件。
+
+**執行狀態**：
+
+- **一** 🔲 待做：說明violation_rate分子分母算法、用git log -S查
+  stocks_with_violation排除季報違規是哪個commit引入的、若為bug要回復、
+  若為設計要同時顯示consistency_violation_rate與completeness_gap_rate。
+- **二** 🔲 待做：查AlphaNewsEvents「降級15%常態」是否被誤判成停擺、
+  查fetch_quotes_tw.py在美股時段是否真的會更新quotes_tw.json，據實修正
+  判定，回報哪幾條真停擺哪幾條誤報。
+- **三** 🔲 待做：查IB Gateway自動重啟設定（已改11:00 AM）是否生效、
+  09-16 11:00重啟後埠有沒有恢復，回報根因。
+- **四** 🔲 待做：稽核.三(a) FinMind額度恢復後續跑，維持原三條件（屬
+  research/資料回補範圍，交自走track接續）。
+
+---
+
 ## 2026-09-17 總司令裁示【省額度第二步先不做／quota_usage_daily.log補實作／audit.yml停擺查核／稽核.三(a)回補】四項（原文登記）
 
 總司令原話：
