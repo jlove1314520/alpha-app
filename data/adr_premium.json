@@ -1,51 +1,41 @@
 {
-  "computed_at": "2026-09-16T12:54:31+00:00",
+  "computed_at": "2026-09-16T17:21:57+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
       "ratio": 5,
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
-      "us_price": 413.75,
-      "us_quote_time": 1789502400,
+      "us_price": 417.52,
+      "us_quote_time": 1789579299,
       "tw_price": 2380.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260916",
-      "fx_rate": 31.688,
-      "fx_date": "2026-09-14",
-      "implied_tw_price": 2622.182,
-      "premium_pct": 10.176
-    },
-    "UMC": {
-      "tw_code": "2303",
-      "ratio": 5,
-      "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
-      "us_price": 21.61,
-      "us_quote_time": 1789502400,
-      "tw_price": 142.0,
-      "tw_quote_time": "13:30:00",
-      "tw_quote_date": "20260916",
-      "fx_rate": 31.688,
-      "fx_date": "2026-09-14",
-      "implied_tw_price": 136.956,
-      "premium_pct": -3.552
+      "fx_rate": 31.888,
+      "fx_date": "2026-09-16",
+      "implied_tw_price": 2662.776,
+      "premium_pct": 11.881
     },
     "CHT": {
       "tw_code": "2412",
       "ratio": 10,
       "source": "SEC EDGAR 20-F CIK 1132924；1 ADS＝10股普通股",
-      "us_price": 45.37,
-      "us_quote_time": 1789502400,
+      "us_price": 45.52,
+      "us_quote_time": 1789579252,
       "tw_price": 143.5,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260916",
-      "fx_rate": 31.688,
-      "fx_date": "2026-09-14",
-      "implied_tw_price": 143.768,
-      "premium_pct": 0.187
+      "fx_rate": 31.888,
+      "fx_date": "2026-09-16",
+      "implied_tw_price": 145.154,
+      "premium_pct": 1.153
     }
   },
   "errors": [
+    {
+      "ticker": "UMC",
+      "reason": "台股 2303 報價缺失"
+    },
     {
       "ticker": "ASX",
       "reason": "台股 3711 報價缺失"
