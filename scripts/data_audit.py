@@ -90,6 +90,11 @@ def _merge_into_report(report: dict) -> None:
 TZ = timezone(timedelta(hours=8))
 
 TWSE_STOCK_DAY_ALL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+# 2026-09-10（深讀四.4）曾被當成「只服務已刪除的check_d_market_cap」誤刪，
+# 但scripts/build_listed_universe.py也從這支檔案import這個常數（維護掛牌
+# 名冊用，跟市值稽核無關），少了它會讓audit.yml第一步就ImportError，整條
+# 稽核連續多個交易日跑不出任何結果（2026-09-17總司令裁示【停擺】查出）。
+TWSE_COMPANY = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
 TPEX_QUOTES = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
 UA = {"User-Agent": "Mozilla/5.0 (compatible; AlphaDataAudit/1.0)"}
 

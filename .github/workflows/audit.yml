@@ -6,12 +6,14 @@
 #       但線上跑不需要依賴那條 workaround）。
 #   2. 稽核結果要 commit 進 repo 給 App 的設定頁「資料健康」讀，本來就要在 CI 落地。
 #
-# ⚠️ 這個檔案目前**還沒有 commit**：這台機器的 PAT 沒有 workflow scope，push 帶
-#    .github/workflows/ 的變更會被 GitHub 拒絕。請總司令用有 workflow 權限的權杖
-#    把它 commit 上去，排程才會真的開始跑。在那之前可以本機手動執行：
-#      python scripts/build_listed_universe.py
-#      python scripts/prune_delisted.py
-#      python scripts/data_audit.py
+# 2026-09-17：上面那則「還沒 commit」的舊警語已過時刪除——這支排程已在跑
+# （`gh run list --workflow=audit.yml` 有實際歷史紀錄），只是 2026-09-10
+# `52ab79a7` 誤刪 `scripts/data_audit.py::TWSE_COMPANY` 常數導致第一步
+# `build_listed_universe.py` ImportError，整條稽核連續多個交易日跑不出
+# 任何結果，已於同日修復（見 PENDING_QUEUE.md【停擺】段落）。本機手動測試：
+#   python scripts/build_listed_universe.py
+#   python scripts/prune_delisted.py
+#   python scripts/data_audit.py
 name: 資料一致性稽核
 
 on:
