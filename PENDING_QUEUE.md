@@ -56,14 +56,61 @@
 
 **執行狀態**：
 
-- **一** 🔲 待做：說明violation_rate分子分母算法、用git log -S查
-  stocks_with_violation排除季報違規是哪個commit引入的、若為bug要回復、
-  若為設計要同時顯示consistency_violation_rate與completeness_gap_rate。
-- **二** 🔲 待做：查AlphaNewsEvents「降級15%常態」是否被誤判成停擺、
-  查fetch_quotes_tw.py在美股時段是否真的會更新quotes_tw.json，據實修正
-  判定，回報哪幾條真停擺哪幾條誤報。
-- **三** 🔲 待做：查IB Gateway自動重啟設定（已改11:00 AM）是否生效、
-  09-16 11:00重啟後埠有沒有恢復，回報根因。
+- **一** ✅ **已查明，非bug，非近期降級掩蓋——是2026-09-06稽核腳本第一次
+  寫出來那天（commit`b7857813`）就有的原始設計，11天沒改過一個字**：
+  1. `violation_rate`分子＝`len(bad_codes)`（在`CONSISTENCY`集合
+     ={a_price_source,a2_not_in_official,a3_stale_price,c_range,
+     f_null_as_number,g_comma_parsing}裡至少一項違規的股票代碼數）；
+     分母＝`len(universe)`（官方今日有收盤價的普通股/ETF檔數）。
+     `e_quarters_gap`/`e_quarters_stale`屬於獨立的`COMPLETENESS`集合，
+     從一開始就不在`CONSISTENCY`裡，所以那1,055筆不計入`bad_codes`——
+     這不是這次改稽核時「排除掉」的，是原始分類設計，季報缺漏屬於
+     「完整度」問題（官方有我們沒有/斷層），不是「一致性」問題
+     （顯示數字跟官方對不起來），兩者本來就是不同故障類型。
+  2. `git log -S'COMPLETENESS = {"e_quarters_gap"'`只有一個命中：
+     `b7857813`（2026-09-06 01:37，稽核腳本第一個commit），這行字串
+     從那天到今天從未被任何後續commit動過——**不是「這幾天改稽核時
+     順手改的」**，跟09-15/09-16那波修復完全無關。
+  3. 「同時顯示兩個率」這個要求**其實已經滿足，不需要新增**：
+     `audit_report.json`本身就有獨立的`completeness_gap_rate`/
+     `completeness_gap_stocks`欄位（本輪實測49.91%/1055檔）；
+     `scripts/smoke_test.mjs`check 39的info字串本來就同時印
+     「違規率X%、完整度缺口Z%」；`index.html`「資料健康」卡也同時
+     顯示兩個數字，標籤分別是「違規率」與「資料完整度缺口」——三個
+     surface都沒有被綠燈遮住，這個防呆設計本來就在，不是這次才補。
+  4. 季報回補(a)仍是49.91%（1055檔）未解決，完整度缺口本身
+     不因violation_rate/gate_pass轉綠而消失，也從未被隱藏——三個
+     surface都同時顯示著這個數字，跟gate_pass是並列不是被取代。
+  **結論**：gate_pass這次轉綠是真的——a_price_source違規765→17是
+  market.yml 31小時停擺與sparklines凍結修復後的真實改善，不是計分
+  bug或降級掩蓋；季報完整度缺口本來就是另一個獨立追蹤的數字，
+  一直都在，現在也還在。
+- **二** ✅ **已查明，三條皆非誤報，是真停擺，不是門檻誤判**：
+  `gh run list --workflow=quotes.yml --limit 30`與
+  `--workflow=news_events.yml --limit 30`皆顯示**最近30次全部
+  success**（無failure/cancelled/queued堆積），但**quotes.yml最新一次
+  觸發停在09-16T12:54:00Z、news_events.yml停在09-16T12:42:13Z**——
+  兩支workflow幾乎在同一時間點（09-16下午UTC）完全停止被觸發，
+  13+小時沒有任何新的排程執行紀錄（不是失敗、是根本沒再觸發），跟
+  market.yml/audit.yml的失敗模式不同（那兩支有觸發，只是執行失敗）。
+  已確認`fetch_quotes_tw.py::main()`程式碼本身**不論`trading_window`
+  是真是假都無條件寫入`fetched_at`**（見09-16稽核已讀過的原始碼），
+  所以「美股時段quotes_tw.json不會更新」這個假說不成立——只要
+  workflow真的有被觸發，就一定會更新，問題不在判定邏輯的班次表算錯，
+  是workflow本身完全沒被觸發。這也跟「news_events排程降級15%」這個
+  已知常態不同——15%是「偶爾漏跳一兩次觸發」的背景雜訊量級，現在是
+  「連續13+小時零觸發」，遠遠超出那個容忍範圍，門檻本身不需要因為
+  這個舊常態放寬。**三條監控結論**：AlphaDataAudit（已修復真bug）、
+  AlphaQuotesTW（真停擺，GH Actions排程沒觸發）、AlphaNewsEvents
+  （真停擺，同一時段一起停）——**沒有一條是誤報，判定邏輯不需要調整**。
+  quotes.yml/news_events.yml本身為何停止被觸發，需要另外查（可能跟
+  market.yml/audit.yml同樣的GH Actions排程降級問題同源，但這兩支
+  高頻workflow更敏感），本session PAT無workflow dispatch權限無法手動
+  觸發驗證，待下次自然排程或總司令在GitHub網頁上手動按「Run workflow」
+  測試。
+- **三** 🔲 查證中（已交給背景agent，完成後回報）：查IB Gateway自動
+  重啟設定（已改11:00 AM）是否生效、09-16 11:00重啟後埠有沒有恢復，
+  回報根因。
 - **四** 🔲 待做：稽核.三(a) FinMind額度恢復後續跑，維持原三條件（屬
   research/資料回補範圍，交自走track接續）。
 
