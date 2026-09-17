@@ -69,6 +69,22 @@ STAT_PAT = re.compile(r"百分位|percentile|p\s*[=<>]|IC\s*=|Sharpe|z\s*=|n\s*=
 # 強制化從這天起生效；更早的列是存量債務，只報不擋（見模組說明）。
 ENFORCE_FROM = "2026-09-07"
 
+# 2026-09-18（總司令裁示【研究層·#74續：先證明量尺是對的，再談關卡】第3點）：
+# TRIALS_REGISTRY.jsonl 58筆裡FAIL 47筆，只有#213/#214兩筆明確記著卡在哪一關，
+# 「GATE6誤殺過去N條」這類結論在補完前沒有數字支撐。新增failed_gates(list)
+# 登記欄位，強制化從這天起生效（同ENFORCE_FROM的軟性rollout模式，不追溯
+# 舊列、只擋新登記）。值域見FAILED_GATES_VOCAB：GATE_SEQUENCE六關（gate1~6，
+# 對應sanity/隨機控制組/參數高原/成本敏感度/leave-one-out/逐年一致性，見
+# HYPOTHESIS_QUEUE.md模組說明）、cheap_gate_precheck（第1關前的「樣本數/
+# 同號/方向/null percentile」四項合併篩選，跟GATE1 sanity是不同東西，見
+# TRIALS_REGISTRY.jsonl多數FAIL列實際卡在這一關而非正式GATE_SEQUENCE）、
+# unknown（考據不出來時的誠實標記，不得用推測填）。
+FAILED_GATES_ENFORCE_FROM = "2026-09-18"
+FAILED_GATES_VOCAB = (
+    "gate1", "gate2", "gate3", "gate4", "gate5", "gate6",
+    "cheap_gate_precheck", "unknown",
+)
+
 
 @dataclass
 class LedgerRow:
@@ -149,6 +165,7 @@ def register_trial(
     n_obs: int | None = None,
     skew: float | None = None,
     kurtosis: float | None = None,
+    failed_gates: list[str] | None = None,
     dry_run: bool = False,
 ) -> tuple[int, str]:
     """登記一筆試驗。回傳 (編號, 寫進帳本的那一列)。
@@ -163,9 +180,25 @@ def register_trial(
     沒給這四個，`candidate_report.report_candidate()` 就算不出 DSR，那筆候選一律
     「不得提請審核」（債務2.3 記錄的「DSR 算不出來」根因就是這四欄從來沒被記過）。
 
+    `failed_gates`（2026-09-18新增）：`verdict="FAIL"` 時應填，是哪一關/哪些關卡
+    判掉這筆試驗的列表，值域見 `FAILED_GATES_VOCAB`（`FAILED_GATES_ENFORCE_FROM`
+    起強制，之前的存量只報不擋，見 `check()`）。考據不出來就填 `["unknown"]`，
+    不得省略也不得用推測填一個看起來合理的關卡。
+
     驗證失敗一律 `raise ValueError`，**不會寫任何檔案**：寧可讓那一輪的腳本當場爆掉，
     也不要靜默寫進一筆殘缺的登記（`CLAUDE.md` 七、資料原則：禁止靜默記 None）。
     """
+    if failed_gates is not None:
+        bad = [g for g in failed_gates if g not in FAILED_GATES_VOCAB]
+        if bad:
+            raise ValueError(f"登記被拒：`failed_gates` 含不在值域的項目 {bad}，"
+                              f"合法值見 FAILED_GATES_VOCAB={FAILED_GATES_VOCAB}")
+    if (verdict == "FAIL" and failed_gates is None
+            and (date or datetime.now(TZ).strftime("%Y-%m-%d")) >= FAILED_GATES_ENFORCE_FROM):
+        raise ValueError(
+            f"登記被拒：{FAILED_GATES_ENFORCE_FROM} 起，verdict=FAIL 必須填 `failed_gates`"
+            "（考據不出來就填 [\"unknown\"]，不得省略）——見總司令裁示【#74續：先證明量尺是對的】第3點"
+        )
     if track not in VALID_TRACKS:
         raise ValueError(f"登記被拒：軌道 `{track}` 不在值域 {VALID_TRACKS}")
     if verdict not in VALID_VERDICTS:
@@ -212,7 +245,8 @@ def register_trial(
         raise ValueError(f"登記被拒：日期格式錯誤 `{stamp}`")
 
     tid = next_trial_id(None if dry_run and not LEDGER.exists() else parse_ledger())
-    notes_full = f"{notes_c}（登記來源：`trial_registry.register_trial()`，{round_tag}）"
+    gates_tag = f"，failed_gates={failed_gates}" if failed_gates is not None else ""
+    notes_full = f"{notes_c}（登記來源：`trial_registry.register_trial()`，{round_tag}{gates_tag}）"
     row = f"| {tid} | {stamp} | {track} | {name_c} | {design_c} | {result_c} | **{verdict}** | {notes_full} |"
 
     if dry_run:
@@ -232,6 +266,7 @@ def register_trial(
         "result": result_c, "verdict": verdict, "notes": notes_full,
         "round": round_no, "round_note": round_note or None,
         "dsr_inputs": dsr_inputs,
+        "failed_gates": failed_gates,
         "registered_at": datetime.now(TZ).isoformat(timespec="seconds"),
         "row_sha256": hashlib.sha256(row.encode("utf-8")).hexdigest()[:16],
     }
@@ -303,17 +338,29 @@ def check() -> dict:
             (violations if date >= ENFORCE_FROM else legacy_unregistered).append(item)
 
     recs = registry_records()
+
+    # 2026-09-18新增：failed_gates覆蓋率稽核。強制期起缺failed_gates的FAIL列
+    # 算violation；強制期前的存量缺口只報不擋（同ENFORCE_FROM既有模式）。
+    fail_recs = [r for r in recs if r.get("verdict") == "FAIL"]
+    fail_missing_gates = [r for r in fail_recs if not r.get("failed_gates")]
+    gates_violations = [f"#{r['id']} ({r.get('date','')}) verdict=FAIL 但沒有 failed_gates"
+                         for r in fail_missing_gates if r.get("date", "") >= FAILED_GATES_ENFORCE_FROM]
+    gates_legacy_gap = [r["id"] for r in fail_missing_gates if r.get("date", "") < FAILED_GATES_ENFORCE_FROM]
+
     return {
         "ledger_rows": len(trials),
         "fdr_rows": len(rows) - len(trials),
         "max_id": max(ledger_ids) if ledger_ids else 0,
         "duplicate_ids": {str(k): v for k, v in sorted(dup_ids.items())},
         "leads_rows_checked": checked,
-        "violations": violations,
+        "violations": violations + gates_violations,
         "legacy_unregistered": legacy_unregistered,
         "structured_records": len(recs),
         "structured_first_id": recs[0]["id"] if recs else None,
         "enforce_from": ENFORCE_FROM,
+        "fail_count": len(fail_recs),
+        "fail_missing_failed_gates_legacy": gates_legacy_gap,
+        "failed_gates_enforce_from": FAILED_GATES_ENFORCE_FROM,
     }
 
 
@@ -327,6 +374,9 @@ def _print_check(res: dict) -> int:
         print(f"⚠ 撞號 {len(res['duplicate_ids'])} 組（歷史存量，不回頭改寫）：{res['duplicate_ids']}")
     print(f"LEADS 帶判定的列：{res['leads_rows_checked']} 列；"
           f"存量未引用帳本：{len(res['legacy_unregistered'])} 列（{res['enforce_from']} 之前，只報不擋）")
+    print(f"FAIL 判定：{res['fail_count']} 筆；缺 failed_gates 的存量（"
+          f"{res['failed_gates_enforce_from']} 之前，只報不擋）：{len(res['fail_missing_failed_gates_legacy'])} 筆"
+          + (f"（{res['fail_missing_failed_gates_legacy']}）" if res['fail_missing_failed_gates_legacy'] else ""))
     if res["violations"]:
         print(f"\n✗ FAIL：{len(res['violations'])} 筆 {res['enforce_from']} 起的判定沒有有效帳本登記——"
               "依 `CLAUDE.md` 七之三，這些判定一律無效：")
@@ -361,8 +411,11 @@ def _self_test() -> int:
         fails.append(f"判定解析錯（從右往左）：{[r.verdict for r in trial_rows(rows)]}")
 
     def expect_reject(label: str, **kw) -> None:
+        # failed_gates 預設帶合法值，讓這裡的測試案例測的還是各自原本要測的
+        # 那個拒絕條件，不會被2026-09-18新增的failed_gates強制檢查先攔截。
         base = dict(track="TW", name="n", design="d", result="99.0 百分位",
-                    verdict="FAIL", notes="x", round_no=1, dry_run=True)
+                    verdict="FAIL", notes="x", round_no=1, dry_run=True,
+                    failed_gates=["unknown"])
         base.update(kw)
         try:
             register_trial(**base)
@@ -380,17 +433,24 @@ def _self_test() -> int:
     expect_reject("DSR 四輸入缺 kurtosis", sharpe=0.1, n_obs=100, skew=0.0)
     expect_reject("DSR n_obs 不合法", sharpe=0.1, n_obs=1, skew=0.0, kurtosis=3.0)
     expect_reject("DSR kurtosis 不合法", sharpe=0.1, n_obs=100, skew=0.0, kurtosis=0.0)
+    # 2026-09-18新增：failed_gates本身的兩條拒絕條件。
+    expect_reject("FAIL沒填failed_gates（強制期內）", failed_gates=None)
+    expect_reject("failed_gates含不在值域的值", failed_gates=["gate99"])
     _, row_dsr = register_trial(track="TW", name="n", design="d", result="99.0 百分位",
                                 verdict="FAIL", notes="x", round_no=1, dry_run=True,
-                                sharpe=0.1234, n_obs=1000, skew=-0.5, kurtosis=4.2)
+                                sharpe=0.1234, n_obs=1000, skew=-0.5, kurtosis=4.2,
+                                failed_gates=["gate4"])
     if "Sharpe=0.1234" not in row_dsr or "T=1000" not in row_dsr:
         fails.append(f"DSR 四輸入沒寫進帳本列：{row_dsr}")
 
     tid, row = register_trial(track="TW", name="n", design="d", result="99.0 百分位",
                               verdict="FAIL", notes="x", round_no=None,
-                              round_note="非馬拉松輪次（自我測試）", dry_run=True)
+                              round_note="非馬拉松輪次（自我測試）", dry_run=True,
+                              failed_gates=["gate2", "gate6"])
     if "非馬拉松輪次" not in row or "**FAIL**" not in row:
         fails.append(f"列格式錯：{row}")
+    if "failed_gates=['gate2', 'gate6']" not in row:
+        fails.append(f"failed_gates沒寫進帳本列notes：{row}")
     if tid <= 0:
         fails.append(f"編號不合法：{tid}")
     try:
