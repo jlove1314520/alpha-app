@@ -73,9 +73,27 @@
 
 **執行狀態**：
 
-- **1** 🔲 待做：update_price_history.py加硬閘門偵測twse/tpex分支日期不一致，
-  寫mixed_date_warning到meta；build_quotes_all_tw/build_sparklines讀到
-  落後日期的個股一律不輸出現價；驗收擋掉幾檔。
+- **1** ✅ **已完成（commit `c09c3f51`，同日稍早由另一輪自走完成，這輪
+  補寫狀態並重新驗證，未重做）**：`update_price_history.py`新增
+  twse/tpex分支payload日期比對，不同就寫`meta.mixed_date_warning=
+  {twse_date,tpex_date,delta_days}`；`quotes_all_tw.json`快照與
+  `build_sparklines.py`的`sparklines.json`都改成先求「當日最大日期」，
+  最後一筆落後這個日期的股票一律不輸出現價/走勢線（寧可空狀態），
+  各自記錄`stale_excluded_codes`/`skipped_stale`。**驗收（這輪重新用
+  現有09-16資料跑一次確認，非猜測，未重複commit）**：
+  `max_date=2026-09-16`，全市場2839檔中**994檔保留輸出現價**
+  （＝TPEx當天那批）、**1845檔被排除**（含TWSE落後那1365檔＋更早停滯
+  的212檔＋其他零星落後代碼），跟commit訊息回報的`build_sparklines.py`
+  實測數字（994/1845）完全一致，代表`quotes_all_tw.json`與
+  `sparklines.json`兩邊的排除邏輯數字互相吻合。**尚未做到**：
+  `data/price_history.json`／`data/quotes_all_tw.json`本身要等下一次
+  `market.yml`實際跑`update_price_history.py`（含即時TWSE/TPEx網路請求）
+  才會把新欄位（`mixed_date_warning`／`stale_excluded_codes`）寫進
+  committed檔案——目前這兩個檔案仍是09-16 15:10 UTC的舊版（無這些新
+  欄位），`sparklines.json`則已經在commit時手動重跑過並且committed
+  （`generated_at`已是09-17）。App端呈現：這輪同樣未開瀏覽器肉眼確認，
+  依既有多層報價回退鏈設計，落後代碼消失後會自動嘗試其他層，全部無
+  資料才顯示既有「無報價」狀態，如實揭露。
 - **2** 🔲 待做：修正probe_twse_publish_time.py改探測管線實際使用的
   openapi.twse.com.tw端點（保留舊端點對照），交易日15:00~隔日10:00每30分鐘
   一輪連測三個交易日，記錄payload Date欄位值，結果出來前不調整cron。
