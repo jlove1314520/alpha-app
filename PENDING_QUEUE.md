@@ -305,6 +305,29 @@
   merge進`data/stock_detail.json`並commit，再重跑`data_audit.py`看
   completeness_gap是否下降，才算這個交辦項真正完成。
 
+  **2026-09-17（下一輪自走・本輪接手）已完成本輪動作**：
+  1. `run_detached.py status`確認job`20260917-080553-0248`為
+     `finished exit=0`（150/165成功、15檔因FinMind 402斷路器中止，
+     `blocked_until`早已過期）。
+  2. 重跑`backfill_stock_financials_gap_2025.py --max-per-run 200`
+     （新job`20260917-140219-e036`）：前150檔命中parquet快取秒過，
+     後50檔為新請求，本批**200/200全數成功、0錯誤**。
+  3. `build_stock_financials_history.py`把parquet快取merge進
+     `data/stock_detail.json`（19044筆有資料，0筆新增股票，純補季度
+     欄位）。
+  4. 重跑`data_audit.py`：**完整度缺口 49.91%（1055檔）→ 42.15%
+     （889檔）**，其中`e_quarters_gap`從518降到352（**進度來自這裡**），
+     `e_quarters_stale`維持537未變（這批只補「缺口」類，`stale`類是
+     另一個獨立問題，尚未處理）；`violation_rate`同時從0.851%降到
+     0.346%（73檔，`a_price_source`降到144）。
+  5. 即時重掃`find_gap_codes()`：**剩餘448檔缺口**（比本輪開始時的
+     647檔減少199檔，跟本批200筆扣掉1筆重複計算大致吻合）。
+  **狀態**：仍未完成（448檔待補），**下一輪接手時**重複同一套流程
+  （submit backfill --max-per-run 200 → build_stock_financials_history.py
+  merge → commit → 重跑data_audit.py驗收），預估還需約2~3輪才能把
+  448檔全部清空，FinMind額度若中途再被402擋下，如實記錄剩餘檔數、
+  不硬跑。
+
 ---
 
 ## 2026-09-17 總司令裁示【省額度第二步先不做／quota_usage_daily.log補實作／audit.yml停擺查核／稽核.三(a)回補】四項（原文登記）
