@@ -77,7 +77,8 @@
 
 **執行狀態**：
 
-- **四.1修正版(a)顯示層** ✅ **已完成（commit待補）**：
+- **四.1修正版(a)顯示層** ✅ **已完成（commit `293393cb`，2026-09-17本輪自走
+  補記，先前漏寫hash）**：
   `update_price_history.py`／`build_sparklines.py`不再排除is_stale股票，
   全部照常輸出，每筆帶`as_of`，落後大盤當日最大日期的額外帶`is_stale`/
   `stale_days`（`quotes_all_tw.json`）或記進`stale_dates`（`sparklines.json`，
@@ -95,7 +96,8 @@
   「35.50（09/15收盤）」的格式精神一致（日期＋收盤字樣，不叫現價，
   無漲跌%），字面順序是「日期收盤 價格」不是「價格（日期收盤）」，
   取現有`priceIsStale`機制既有格式，未另造新格式。
-- **四.1修正版(b)計算層** ✅ **已完成（commit待補）**：`data_audit.py`
+- **四.1修正版(b)計算層** ✅ **已完成（commit `293393cb`，2026-09-17本輪
+  自走補記）**：`data_audit.py`
   `check_a_price_sources()`的`quotes_all_tw.json`/`sparklines.json`兩個
   getter改成is_stale時回`None`（原本迴圈邏輯本來就會把getter回None算成
   `unverifiable`不算違規，不需要另外改流程）。`meta.mixed_date_warning`
@@ -112,7 +114,8 @@
 - **四.3** ✅ **已完成（commit `96a66dfe`，這份新裁示送達前已完成，查證後確認符合原指令
   意旨——唯一偏離：用`relative_strength_align_stats`彙總統計取代逐檔`missing_factor_notes`，
   理由已寫在PENDING_QUEUE續3條目第3項，此次不重做，除非總司令另有意見）**。
-- **四.4** ✅ **已完成（commit待補）**：`data_audit.py`新增
+- **四.4** ✅ **已完成（commit `293393cb`，2026-09-17本輪自走補記）**：
+  `data_audit.py`新增
   `check_a4_mixed_date()`，全市場（universe=官方今日有收盤價的普通股/ETF，
   非選股榜單）比對每檔`price_history.json`最後一筆日期與當日最大日期，
   落後≥1交易日即計入，獨立寫進report頂層`a4_mixed_date`欄位（不進
@@ -272,7 +275,7 @@ cron是`09:00Z`/`10:30Z`/`21:30Z`（週一至五）。把30筆createdAt轉成台
   `STOCK_DAY_ALL_OPENAPI`的`payload_date=2026-09-16`（查詢日09-17，證實
   23:10前後仍落後一天，跟稽核.四原始發現一致），但樣本數還不到「連測三個
   交易日」的要求，需要排程視窗調整後才能累積足夠樣本下結論。
-- **3** ✅ **已完成（這輪，commit待補）**：
+- **3** ✅ **已完成（commit `293393cb`，2026-09-17本輪自走補記）**：
   `.github/scripts/fetch_market_tw.py`的`fetch_taiex_sparkline()`／
   `fetch_taiex_sparkline_60d()`改回傳`(values, dates)`，`main()`寫入
   `market_tw.json`的`taiex.sparkline_dates`／`taiex.sparkline_60d_dates`
@@ -301,9 +304,11 @@ cron是`09:00Z`/`10:30Z`/`21:30Z`（週一至五）。把30筆createdAt轉成台
   （無日期欄位）；`_relative_strength_leg()`的date-vs-position修正邏輯本身
   已通過本機驗證可正確運作，下一次排程跑完後這個因子的實際輸出會自動套用
   新邏輯，不需要額外動作。
-- **4** 🔲 待做：data_audit.py新增獨立a4_mixed_date檢查，全市場比對落後
-  ≥1交易日，獨立mixed_date_rate不混進violation_rate；驗收用09-16資料跑
-  應接近1365/2359。
+- **4** ✅ **已完成（狀態補正，2026-09-17本輪自走）**：此條原標🔲待做，
+  已過時——同一件事已在後續【續4】裁示的「四.4」項下完成，見上方
+  commit `293393cb`（`data_audit.py::check_a4_mixed_date()`，
+  `mixed_date_rate`58.42%→58.04%，獨立欄位不混進`violation_rate`），
+  不再重做。
 - **5** ✅ **單句回報（2026-09-17續4查證）**：與round544一致，
   `e_quarters_gap`維持352（round544批次200/200已成功、剩448檔待下一輪，
   本輪未執行新回補動作，不在稽核.四.1修正版範圍內）。
@@ -628,6 +633,25 @@ cron是`09:00Z`/`10:30Z`/`21:30Z`（週一至五）。把30筆createdAt轉成台
   merge → commit → 重跑data_audit.py驗收），預估還需約2~3輪才能把
   448檔全部清空，FinMind額度若中途再被402擋下，如實記錄剩餘檔數、
   不硬跑。
+
+  **2026-09-17（本輪自走，交辦優先輪）已完成本輪動作**：
+  1. 發現上一輪遺留一個已完成但未merge的job
+     `20260917-142156-fb11`（`financials_gap_backfill_20260917c`）：
+     income_ok=101/116、balance_ok=101/116、err=30（連續失敗15次觸發
+     斷路器中止，非FinMind額度用盡——`rate_limit_state.json`的
+     `blocked_until`08:32 UTC已早於本輪開始時間15:31 UTC）。
+  2. `build_stock_financials_history.py` merge進`stock_detail.json`
+     （19044筆，0筆新增股票，純補季度欄位）。
+  3. 重跑`data_audit.py`：**完整度缺口42.15%（889檔）→38.44%（808檔）**，
+     `e_quarters_gap`352→274，`violation_rate`維持低檔（0.9%，19檔）。
+     commit`509011ba`（僅`data/stock_detail.json`＋`data/audit_report.json`
+     兩檔，未夾帶其他機器排程順手改寫的檔案）。
+  4. 即時重掃`find_gap_codes()`：**剩餘350檔缺口**。
+  5. 已投遞下一批`run_detached.py submit`（job_id=`20260917-233807-3e8a`，
+     `--max-per-run 200`），**未在本輪等待**（依協定超過5分鐘的工作
+     投遞後由下一輪收成）。**下一輪接手時**：先`status`確認
+     `20260917-233807-3e8a`是否`finished`，再重複同一套merge→commit→
+     驗收流程，預估還需1~2輪清空剩餘350檔。
 
 ---
 
