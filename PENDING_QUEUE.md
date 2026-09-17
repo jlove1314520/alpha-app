@@ -82,6 +82,40 @@
   **建議**：總司令自己登入IBKR帳戶管理頁面看一眼這個模擬帳戶的密碼
   設定狀態，這是唯一能100%確認的方式，本session/背景agent都無法代查
   （需要登入）。是否要直接上IBC，留給總司令依此裁示。
+
+  **2026-09-17（續3）補充查證，結論比上面更精確、且部分修正方向**：
+  上面因interactivebrokers.com主站403而只能引用搜尋引擎摘要，這輪改查
+  `ibkrguides.com`（IBKR官方另一個文件網域，非鏡像，未被擋）成功直接
+  WebFetch讀到原文，內容比先前的摘要片段更完整、也更關鍵：
+  1. `https://www.ibkrguides.com/clientportal/aboutpapertradingaccounts.htm`
+     原文：「Existing account holders with a paper trading account can
+     log into TWS with their production account credentials and select
+     either a production or paper trading account.」——**一般個人戶
+     （非顧問/仲介/避險基金/管理員/推薦人、非印度或日本居民——本專案
+     使用者屬於一般個人戶）預設可以用「正式帳戶密碼」登入Gateway/TWS，
+     再用交易模式切換鈕選模擬或正式**。緊接著同一份文件的例外條款：
+     「Advisors, Brokers, ... and residents of India and Japan will
+     still have to log in to their paper trading accounts with their
+     paper trading account credentials」——**強制使用獨立模擬帳密的
+     只有這幾類使用者，一般個人戶不在裡面**。
+  2. 本機實測交叉比對：`D:\IBKR Gateway\ibgateway\jts.ini`裡確實有
+     獨立的`tradingMode=p`欄位（與帳號欄位分開，帳號欄位本身沒有存在
+     設定檔裡），這跟官方文件描述的機制（帳號與交易模式是兩個分開的
+     東西）完全吻合，是本機的直接行為證據，不是文件摘要。
+  3. `launcher.log`第168/175行刻意不印出登入時輸入的userName
+     （`"WARNING: Received twslaunch.jauthentication.P with userName
+     NOT PRINTED in it"`，這是IBKR自己的隱私設計，不是log遺漏），
+     **本機無法從任何檔案回推使用者目前登入時打的是U開頭正式帳號還是
+     DU開頭模擬帳號**——這是唯一總司令親自才能回答、查證方法用盡的點。
+  **結論修正**：「獨不獨立」不是IBKR架構強制二選一的答案，而是**取決於
+  總司令目前登入Gateway視窗時，帳號欄位打的是哪一組**：若已經是打
+  DU開頭的獨立帳密，IBC落地的就不是正式帳戶密碼本身（但重設模擬密碼
+  仍需要用正式帳戶登入Client Portal，兩者的「控制權」根源上仍是同一人，
+  跟「完全無關的另一組帳號」還是有差別）；若目前是打U開頭正式帳號、
+  靠交易模式切換到模擬，那IBC存的就是正式帳戶密碼本身，等同總司令
+  原本設想的「共用」情境、風險等級如原裁示所述需要回報後再裁示。
+  **唯一未決問題，需要總司令直接回答**：現在登入Gateway視窗時，
+  帳號欄位打的是U開頭還是DU開頭？回答後即可依原裁示的二擇一直接判定。
 - **二** ✅ **已完成腳本，尚待總司令親自註冊排程（環境權限限制）**：
   `C:\alpha\run-ibkr-gateway-cycle.ps1`（檢查ibgateway行程、不存在就
   Start-Process啟動，路徑取自程式自己的開始功能表捷徑）、
@@ -249,8 +283,27 @@
   真正的解方不是調整11:00AM這個數字，是幫Gateway設定「開機/登入後
   自動啟動」（或上IBC，IBC可同時處理登入對話框與開機自動啟動）——這個
   發現讓IBC的必要性更明確，是否要上IBC屬於決策，交總司令裁示。
-- **四** 🔲 待做：稽核.三(a) FinMind額度恢復後續跑，維持原三條件（屬
-  research/資料回補範圍，交自走track接續）。
+- **四** ⏳ **2026-09-17（本輪自走）已接手執行中**：確認`data/
+  rate_limit_state.json`的`blocked_until`（2026-09-10 17:54 UTC）早已
+  過期，`last_request_at`（2026-09-14 21:01 UTC）證實封鎖後確實有成功
+  請求，非封鎖中誤判。`find_gap_codes()`即時掃描現況：647檔仍缺口（比
+  2026-09-15當時的517筆多，研判是季度自然推進+部分stale轉gap，非退化）。
+  依既有三條件（節流/上限/停損常數已寫在腳本檔頭、可中斷續跑、回報
+  覆蓋率變化）用`run_detached.py submit`投遞背景工作（job_id=
+  `20260917-080553-0248`，`--max-per-run 200`，逐10檔存一次進度）。
+  **已知風險，如實記錄**：`run_detached.py`回報`breakaway=False`（這台
+  機器的session這次沒有取得Job物件breakaway權限，跟IBKR排程註冊踩到的
+  UAC過濾是同一類環境限制），若本session在工作完成前結束，這個背景
+  行程可能被一併砍掉——**但不會遺失進度**：`finmind_client._fetch()`
+  每筆成功就立刻寫入`research/data/raw/*.parquet`快取（原子寫入），
+  下一輪重跑同一支腳本時已抓過的(code,dataset)組合會命中快取秒回，
+  不會重打API。**下一輪接手時**：先`python research/run_detached.py
+  status`看這個job是`finished`還是提早死亡；不論哪種，都重跑
+  `python research/backfill_stock_financials_gap_2025.py --max-per-run
+  200`（快取會讓已完成的部分秒過），跑完後執行
+  `python research/build_stock_financials_history.py`把parquet快取
+  merge進`data/stock_detail.json`並commit，再重跑`data_audit.py`看
+  completeness_gap是否下降，才算這個交辦項真正完成。
 
 ---
 
@@ -336,8 +389,8 @@
   **副帶發現**：`AlphaQuotesTW`／`AlphaNewsEvents`兩條班次數監控目前
   持續亮著（quotes約20班/news約7班未達標），比昨天查到時更嚴重，這是
   獨立、尚未查根因的真實問題，不在本次四項範圍內，如實記錄待後續查。
-- **四** 🔲 待做：稽核.三(a) FinMind額度恢復後續跑，維持原三條件（屬
-  research/資料回補範圍，非本session直接動工，交自走track接續）。
+- **四** ⏳ **已由2026-09-17稍晚的自走輪次接手，詳見上方「2026-09-17
+  （續2）」條目「四」的完整記錄（job_id=20260917-080553-0248）**。
 
 ---
 
@@ -522,10 +575,13 @@
   真的合併衝突**。已逐一核對market.yml呼叫的全部29支腳本輸出路徑，確認
   這是唯一漏掉的追蹤檔案。修法：把`PENDING_QUEUE.md`加進allowlist，
   commit `5ab1aaa2`已推送。
-- **一.3** 🔲 **待今日排程驗證**：`market_tw`/`fundamentals`/
-  `price_history`/`sparklines`四個檔案時間戳是否全部跳到當日，需等今日
-  （2026-09-16）17:00或18:30台北排程實際跑過一次後才能確認，在此之前
-  不宣稱修復生效。
+- **一.3** ✅ **2026-09-17（本輪自走）已驗證，四個檔案時間戳全部跳到
+  09-16當日**：`market_tw`（2026-09-16T15:07:38Z＝台北23:07）、
+  `fundamentals`（2026-09-16T23:09:46+08:00）、`price_history`
+  （2026-09-16T23:10:09+08:00）、`sparklines`（2026-09-16T23:10:11
+  +08:00）——四者時間相鄰、集中在18:30台北班次附近，證實`一.2`的
+  `PENDING_QUEUE.md`allowlist修法生效，market.yml排程恢復正常commit，
+  不再卡在`cannot rebase: You have unstaged changes`。
 - **二.1/二.2/二.3** ✅ **已完成**：`pipeline_registry.json`新增6條雲端
   workflow監控（`AlphaMarketTW`/`AlphaFundamentals`/`AlphaPriceHistory`/
   `AlphaQuotesTW`/`AlphaNewsEvents`/`AlphaDataAudit`，連同前一輪已有的
@@ -657,14 +713,10 @@
   保守毛alpha估計<門檻50%直接判死不進gate1，50%~100%可進關但要標示
   對成本假設敏感，≥100%正常走完整關卡。**不取代既有第4關成本敏感度
   1x/2x/3x**，只是提早擋掉連保守估計都撐不住成本的機制，省算力。
-- **二** 🔲 待辦（**今日**2026-09-16 17:00／18:30台北排程跑過後）：確認
-  `sparklines.json`的`generated_at`是否跳離09-05，並重跑`data_audit.py`
-  回報三個數字（765筆／32.95%／3,972筆的新值）。**在此之前不得回報
-  完成**，沿用前一則【sparklines解凍】條目二.1/二.2的既有阻塞狀態，本條
-  不重複另開。總司令2026-09-15稍晚追加裁示「後續再繼續接著把排程還沒
-  做的部分都做完」——本項是目前佇列裡唯一「純被動等待外部排程時間到」
-  的項目，下一次有session（互動式或自走）讀到本檔案、且當下時間已過
-  今日17:00台北，應主動執行這一步查核，不需要總司令再開口提醒。
+- **二** ✅ **2026-09-17（本輪自走）已完成，數字已回報**：詳見下方
+  【sparklines解凍】條目「二.1／二.2」的完整記錄——`generated_at`已
+  跳離09-05，`a_price_source`/`violation_rate`/`unverifiable`三個數字
+  都已用兩個時間點誠實並列回報，不重複另寫一份。
 - **三** ✅ 已知會：無新動作，`AlphaHypothesisQueue`第74關繼續依既有方向
   執行（先修base序列存活者偏誤，再談檢定力量測）。
 - **四** ✅ 已知會：「我們vs0050」卡維持現狀，本輪未調整任何區間/基準/
@@ -733,12 +785,24 @@
   只有`Actions: Read`、沒有`Actions: Write`，無法手動觸發，需等自然排程
   （台北時間17:00／18:30，或05:30次日美股批次）。依總司令指示「若失敗，
   回報實際錯誤訊息，不要自行猜測或繞道」，如實回報，**未嘗試任何繞道**。
-- **二.1／二.2** 🔲 尚未開始，誠實維持未完成：待`market.yml`排程**實際
-  跑過一次**後，才能確認`generated_at`跳離`2026-09-05 20:07`並重跑
-  `data_audit.py`回報`a_price_source`（765筆）／`violation_rate`
-  （32.95%）／`unverifiable`（3,972筆）的新數字。**在generated_at真的
-  跳動之前不算完成**，本輪不得也未宣稱完成，需下一輪或使用者確認排程
-  跑過後才能回報。**2026-09-15夜間交辦優先輪追加發現並修復一個阻塞此項的
+- **二.1／二.2** ✅ **2026-09-17（本輪自走）已完成，`generated_at`確認
+  跳動**：`data/sparklines.json`的`meta.generated_at`現在是
+  `2026-09-16T23:10:11+08:00`（不再卡在09-05 20:07），證實market.yml
+  排程已實際跑過並成功產出。**重跑`data_audit.py`兩次，數字誠實並列
+  （有波動，不挑好看的單一數字）**：
+  - 09-17 02:56（`AlphaDataAudit`排程既有跑過的結果）：`a_price_source`
+    違規29筆、`violation_rate`1.419%、`unverifiable`1,879筆。
+  - 09-17 08:10（本輪手動重跑，最新現況）：`a_price_source`違規124筆、
+    `violation_rate`2.987%、`unverifiable`3,094筆。
+  兩次都遠低於裁示原文引用的舊值（765筆／32.95%／3,972筆），確認
+  sparklines解凍後`a_price_source`大幅改善；**同一天內兩次快照差異
+  不小（29→124），研判是資料新鮮度隨當天時間推移自然波動**（上次
+  market.yml排程是09-16 23:10，本次查核時間09-17 08:10已過去9小時，
+  可能有更多股票的「近期價格」判定跨過新鮮度門檻）——**這是誠實記錄
+  的觀察，不是下結論的根因分析**，若總司令需要確認是否為正常日內波動
+  或另有問題，需要另立項目追蹤同一天內多個時間點的數字。`gate_pass`
+  仍是`false`（2.99%>1%門檻），跟裁示原文預期一致（沒有宣稱「已通過
+  gate」）。**2026-09-15夜間交辦優先輪追加發現並修復一個阻塞此項的
   獨立bug**：查`gh run list`發現f94445b3推送後market.yml排程連續兩次
   （09-15 14:16 UTC、09-14 23:55 UTC）以`cannot rebase: You have unstaged
   changes`失敗——根因是commit步驟`git add -A`的檔名允許清單本身就漏了
