@@ -1,5 +1,42 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-17T23:xx（hypothesis_queue排程接續，第二十一輪，續#74）— 完成{0.3,0.5,0.8}×5種子=15次網格跑法，重大發現：GATE6逐年一致性對真訊號pass_rate=0（可能是偽陰性關卡）
+
+開工先讀`PENDING_QUEUE.md`最上層條目（2026-09-17續4，稽核.四.1修正版+
+四.3+四.4+四.5）：全部四項已✅完成且已commit（`293393cb`），交辦佇列
+本輪無未開始項，回自走。取具名鎖`hypothesis_queue`乾淨成功（`LOCK_ACQUIRED`）。
+
+依協定接續`#74`（閘門統計檢定力量測），上一輪（第二十輪）留下明確待辦
+「下一輪從網格跑法開始，不跳關」。新增`synthetic_power_curve_gate74_grid.py`
+（沿用既有`run_pilot()`去均值化修正版，不改動已驗證正確的pilot腳本本身），
+跑{0.3,0.5,0.8}三個目標Sharpe×5種子(20260915~20260919)=15次試跑，統計各
+強度下GATE1~6個別通過率：
+
+- Sharpe=0.3：gate1=1.0／gate2=0.6／gate3=0.6／gate4=0.0／gate5=0.6／**gate6=0.0**
+- Sharpe=0.5：gate1=1.0／gate2=1.0／gate3=0.8／gate4=0.4／gate5=1.0／**gate6=0.0**
+- Sharpe=0.8：gate1=1.0／gate2=1.0／gate3=1.0／gate4=0.4／gate5=1.0／**gate6=0.0**
+
+**重大發現**：GATE6（逐年一致性，門檻≥5/6≈83.3%正報酬年）對三個強度、
+共15次試跑**全數FAIL（pass_rate恆為0）**，即使是Sharpe=0.8這種明顯強
+訊號也過不了——這暗示GATE6本身統計檢定力極低，對本佇列過去69條假設的
+FAIL判定裡，有可能存在被GATE6誤殺的真訊號（偽陰性），需要下一輪深入
+分析（例如GATE6門檻本身是否對10年期、單一時間序列樣本不切實際嚴苛）。
+GATE4（成本敏感度）在Sharpe=0.5/0.8時pass_rate也僅0.4，同樣可能偏嚴格，
+但證據強度不如GATE6（GATE6是三個強度都0.0，GATE4至少隨強度上升沒有
+惡化）。
+
+is_holdout_consumed()開工/收工前皆`False`。本輪為「一個有界工作單位」
+（15次試跑的網格跑法），**未做**：GATE6/GATE4是否需要調整門檻本身的
+判斷（那是「新的架構/參數變更」，依CLAUDE.md「提案先於執行」需先提案
+給總司令，不可自走逕行修改本佇列既有關卡的通過門檻）；`TRIALS_LEDGER.md`
+登記與`HYPOTHESIS_QUEUE.md`#74條目本輪詳細狀態同步（受限本輪額度提前
+結束，下一輪`hypothesis_queue`排程接續時優先處理，含把上述GATE6發現
+寫成正式提案段落）。原始資料存`data/synthetic_power_curve_gate74_grid.json`
+（gitignored）。現在排隊第一仍是`#74`，下一輪從「登記本輪結果進
+TRIALS_LEDGER + 同步HYPOTHESIS_QUEUE.md#74狀態 + 就GATE6發現寫提案」
+開始，不跳關、不擴大網格。
+
+
 ## 2026-09-16T00:51:55+08:00 (hypothesis_queue排程接續，第二十輪) — #74接續：完成去均值化修正+單種子重驗，base自身Sharpe歸零確認，GATE3/GATE6顯示真訊號Sharpe=0.5下仍可能被本佇列現有關卡誤殺，未擴大至完整網格
 
 開工先讀`PENDING_QUEUE.md`：確認今日（2026-09-16）17:00/18:30台北排程尚未
