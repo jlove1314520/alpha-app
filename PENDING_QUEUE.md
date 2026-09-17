@@ -14,6 +14,84 @@
 
 ---
 
+## 2026-09-17（續3）總司令裁示【稽核.四：price_history上市/上櫃差一個交易日】四項＋兩件單句回報（原文登記）
+
+總司令原話：
+
+> 稽核.四（最優先，資料正確性）—— price_history 上市/上櫃差一個交易日
+>
+> 根因已由 Cowork 在 repo 檔案上直接驗明，不需要你重查，也不要用推測改寫：
+>   data/price_history.json meta: twse_updated_count=1365 / tpex_updated_count=994
+>   對應 last_date: 1365 檔=2026-09-15、994 檔=2026-09-16、212 檔=2024-12-31
+>   往前兩版同款（c7aab05、5d14b86），證明是長期狀態不是偶發。
+>   update_price_history.py L168/L193 的 date 取自 API payload，我們沒寫錯，
+>   是 openapi.twse.com.tw 的 STOCK_DAY_ALL 在台北 23:10 仍回前一交易日。
+>
+> 四件事，依序做，每一件都要有證據不要有形容詞：
+>
+> 1.【先封鎖，再修】混日期禁止外流
+>    在 update_price_history.py 寫回後加一道硬閘門：
+>    計算 twse 分支與 tpex 分支各自的 payload 日期，若兩者不相等，
+>    則把 meta 寫入 mixed_date_warning = {twse_date, tpex_date, delta_days}，
+>    並且 build_quotes_all_tw / build_sparklines 讀到這個欄位時，
+>    對「日期落後於當日最大日期」的個股一律不輸出現價（寧可空狀態並標原因），
+>    不准把落後一天的收盤當現價顯示。
+>    驗收：用現有這份 09-16 的資料跑一次，回報被擋掉幾檔、App 上呈現什麼。
+>
+> 2.【量清楚，不要猜】STOCK_DAY_ALL 到底幾點發布
+>    probe_twse_publish_time.py 目前探測的是 www.twse.com.tw/rwd/...，
+>    跟管線用的 openapi.twse.com.tw/v1/... 是不同主機——43 輪全白做。
+>    把探測端點改成「管線實際用的那一支」，並同時保留舊的做對照，
+>    每輪記錄 payload 裡的 Date 欄位值（不是 HTTP 成功與否）。
+>    交易日 15:00~隔日 10:00 每 30 分鐘一輪，連測三個交易日。
+>    在拿到實測結果之前，不准調整 market.yml 的 cron，也不准說「應該是幾點」。
+>
+> 3.【研究層，這條最重要】相對強弱的基準序列沒有日期
+>    market_tw.json 的 taiex.sparkline / sparkline_60d 只有數字沒有日期，
+>    generate_scores_momentum.py L133 _relative_strength 用位置索引對齊，
+>    所以 1365 檔上市股是拿 09-15 的自己比 09-16 的大盤。
+>    (a) 讓大盤 sparkline 同步輸出 sparkline_dates（與數值等長）；
+>    (b) _relative_strength 改成「以日期交集對齊」，對不齊就回 None
+>        並寫進 missing_factor_notes 說明原因，不准用位置硬湊；
+>    (c) 回報：修正前後，relative_strength 有值的檔數各是多少、
+>        前 50 名選股名單變動幾檔。這個數字我要看到。
+>
+> 4.【稽核，補上盲點】差一天目前是隱形的
+>    check_a3_stale_price 的 limit_days=10 讓「落後一個交易日」永遠不會被抓到，
+>    落後因此溢出到 a_price_source，而 a_price_source 只在價差≥5% 才響——
+>    等於「安靜的日子是綠燈、波動的日子是紅燈」，同一份錯誤資料兩種顏色。
+>    新增一條獨立檢查 a4_mixed_date：
+>    全市場（不只選股榜單）比對每檔 last_date 與當日最大 last_date，
+>    落後 ≥1 個交易日即計入，單獨出一個 mixed_date_rate，
+>    不要混進 violation_rate，也不要藏進 informational_only_checks。
+>    驗收：用 09-16 那份資料跑，mixed_date_rate 應該接近 1365/2359。
+>
+> 另外兩件只需要一句話回報現況，不要展開：
+> - 稽核.三(a) 季報回補：FinMind 額度目前補到第幾檔、e_quarters_gap 從 518 降到多少。
+> - 那 212 檔停在 2024-12-31 的代號：是否已全部不在 listed_universe，
+>   若是，從 price_history 移除並記錄移除清單；若否，列出還在名冊的那幾檔。
+
+**執行狀態**：
+
+- **1** 🔲 待做：update_price_history.py加硬閘門偵測twse/tpex分支日期不一致，
+  寫mixed_date_warning到meta；build_quotes_all_tw/build_sparklines讀到
+  落後日期的個股一律不輸出現價；驗收擋掉幾檔。
+- **2** 🔲 待做：修正probe_twse_publish_time.py改探測管線實際使用的
+  openapi.twse.com.tw端點（保留舊端點對照），交易日15:00~隔日10:00每30分鐘
+  一輪連測三個交易日，記錄payload Date欄位值，結果出來前不調整cron。
+- **3** 🔲 待做：market_tw.json的taiex sparkline同步輸出sparkline_dates；
+  _relative_strength改用日期交集對齊；回報修正前後relative_strength有值
+  檔數、前50名選股變動幾檔。
+- **4** 🔲 待做：data_audit.py新增獨立a4_mixed_date檢查，全市場比對落後
+  ≥1交易日，獨立mixed_date_rate不混進violation_rate；驗收用09-16資料跑
+  應接近1365/2359。
+- **5** 🔲 待做（單句回報）：稽核.三(a)季報回補FinMind補到第幾檔、
+  e_quarters_gap從518降到多少。
+- **6** 🔲 待做（單句回報）：212檔停在2024-12-31的代號是否已不在
+  listed_universe，是則移除並記錄清單，否則列出還在名冊的代號。
+
+---
+
 ## 2026-09-17（續2）總司令裁示【IBC先查證再決定／Gateway開機自動啟動／稽核自監控／quotes+news同時停觸發謎團／稽核.三(a)回補】五項（原文登記）
 
 總司令原話：
