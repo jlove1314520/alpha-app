@@ -1,3 +1,53 @@
+## 2026-09-17（續4）（稽核.四.1修正版：顯示層恢復全輸出改標is_stale／四.4新增a4_mixed_date／四.5查證market.yml排程脫節）
+
+戴**開發帽**＋**維運帽**（顯示層/計算層修法是開發，稽核指標與排程查證是維運）。
+commit `293393cb`。
+
+**背景**：總司令更正上一輪四.1的錯誤指令——「落後日期的個股一律不輸出現價」
+造成2839檔裡1845檔（58%）在App上完全空白，含2330/2317/2454/2412/2882/1301。
+
+**四.1修正版(a)顯示層**：`update_price_history.py`／`build_sparklines.py`
+不再排除is_stale股票，全部照常輸出，每筆帶`as_of`，落後大盤當日最大日期的
+額外帶`is_stale`/`stale_days`。`index.html`的`resolveQuote()`第3/4層與
+`hydrateHome()`/個股頁備援分支跟著改：is_stale時價格帶真實日期、不套用
+「現價/即時」字樣、漲跌%整個不顯示（不是顯示0）。**驗收（本機實跑真實
+網路資料，09-17當天TWSE payload仍卡09-16、同一個bug還在發生）**：
+2330/1301在App會顯示「09/16收盤 2380」「09/16收盤 62.4」（無漲跌%）。
+
+**四.1修正版(b)計算層**：`data_audit.py`的`check_a_price_sources()`對
+`quotes_all_tw.json`/`sparklines.json`兩個getter改成is_stale時回`None`
+（算無法查核不算違規）。驗收：`a_price_source`違規167→17、一致性違規率
+5.42%→0.9%，冒煙測試check 39由FAIL轉PASS。**範圍外誠實發現**：
+`generate_scores_live.py`現有30天過期排除抓不到「差1天」這種輕微落後，
+未在本次動手，需總司令另行裁示。
+
+**四.4**：新增`check_a4_mixed_date()`，全市場比對每檔最後一筆日期與
+當日最大日期，落後即計入，獨立report頂層欄位，不混進violation_rate。
+驗收：mixed_date_rate 58.04%（1220/2102檔），跟總司令原話期望量級吻合。
+
+**四.5**：`gh run list`查證market.yml近30次執行，全部`event=schedule`
+（排除別的東西觸發），三條cron皆對不上實際createdAt，收斂成兩個延遲
+2~7小時/1.5~2.5小時的群集，「一次連跑兩班」現象證實存在。提案（未執行）
+repository_dispatch或本機排程備援兩個選項，待總司令裁示；未動cron本身。
+
+**單句回報**：稽核.三(a) e_quarters_gap維持352（與round544一致，本輪
+未新增回補動作）；212檔停2024-12-31代號中211檔已不在listed_universe，
+僅1檔（1589永冠-KY）仍在名冊但價格卡住，原因待另行查證。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 50項全數PASS（含當時暫時
+FAIL的16/28/38/39/42，用regenerate後的真實資料重跑後全數轉PASS，
+非規避測試）。
+
+**影響檔案**：`.github/scripts/update_price_history.py`、
+`.github/scripts/build_sparklines.py`、`index.html`、`scripts/data_audit.py`、
+`PENDING_QUEUE.md`、`data/price_history.json`／`quotes_all_tw.json`／
+`sparklines.json`／`audit_report.json`（本次驗證重跑產生的真實資料）。
+
+**下一步**：四.5的兩個提案選項待總司令裁示；`generate_scores_live.py`
+的1天落後缺口待裁示是否要補；1589永冠-KY卡2024-12-31的根因待查證。
+
+---
+
 ## 2026-09-16（續）（班次數監控門檻／market.yml驗收確認／PENDING_QUEUE登記四項裁示）
 
 戴**維運帽**。總司令裁示四項（原文登記於`PENDING_QUEUE.md`「班次數門檻」段），
