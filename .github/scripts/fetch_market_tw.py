@@ -182,26 +182,40 @@ def fetch_mi_index() -> tuple[dict | None, list[dict]]:
     return headline, sectors
 
 
-def fetch_taiex_sparkline() -> list[float]:
+def fetch_taiex_sparkline() -> tuple[list[float], list[str]]:
     """MI_INDEX 只給當天單一數字，沒有歷史區間——近20日收盤序列改用 yfinance
     `^TWII`（實測驗證過跟 MI_INDEX 同一天的收盤值一致，例如 2026-08-25 兩邊都是
     45169.46），只用來畫App的sparkline走勢線，headline的close/change_pct仍然
-    以MI_INDEX為準（見上面fetch_mi_index），這裡不覆蓋。"""
+    以MI_INDEX為準（見上面fetch_mi_index），這裡不覆蓋。
+
+    **2026-09-17（總司令裁示【稽核.四.3】）新增日期輸出**：原本只回傳數值，
+    `research/generate_scores_momentum.py::_relative_strength()`只能用位置
+    索引對齊個股價格序列，遇到個股資料落後大盤（混日期bug）時會算出「拿
+    昨天的自己比今天的大盤」這種錯誤比較。改回傳(values, dates)，dates跟
+    values等長、一一對應（yfinance history()的DatetimeIndex本身就是交易日
+    日期，直接轉ISO字串，不用另外查）。"""
     h = yf.Ticker("^TWII").history(period="1mo")
     if h.empty:
-        return []
-    return [round(float(c), 2) for c in h["Close"].tail(20).tolist()]
+        return [], []
+    tail = h.tail(20)
+    values = [round(float(c), 2) for c in tail["Close"].tolist()]
+    dates = [d.strftime("%Y-%m-%d") for d in tail.index]
+    return values, dates
 
 
-def fetch_taiex_sparkline_60d() -> list[float]:
+def fetch_taiex_sparkline_60d() -> tuple[list[float], list[str]]:
     """2026-08-27新增（題材動能榜，relative_strength因子需要近60日大盤收盤序列，
     原本的 fetch_taiex_sparkline() 只留20天給App畫圖用，這裡改用period='3mo'
     抓足夠天數，跟上面那支各自獨立、不互相影響——不是修改既有sparkline的長度，
-    是新增一個給評分引擎用的較長版本，避免動到App現有的sparkline顯示範圍。"""
+    是新增一個給評分引擎用的較長版本，避免動到App現有的sparkline顯示範圍。
+    2026-09-17同步補上日期輸出，理由同fetch_taiex_sparkline()。"""
     h = yf.Ticker("^TWII").history(period="3mo")
     if h.empty:
-        return []
-    return [round(float(c), 2) for c in h["Close"].tail(60).tolist()]
+        return [], []
+    tail = h.tail(60)
+    values = [round(float(c), 2) for c in tail["Close"].tolist()]
+    dates = [d.strftime("%Y-%m-%d") for d in tail.index]
+    return values, dates
 
 
 def fetch_tpex_index() -> dict | None:
@@ -391,12 +405,12 @@ def main():
 
     if out.get("taiex"):
         try:
-            out["taiex"]["sparkline"] = fetch_taiex_sparkline()
+            out["taiex"]["sparkline"], out["taiex"]["sparkline_dates"] = fetch_taiex_sparkline()
         except Exception as e:
             print(f"TAIEX sparkline(^TWII) 失敗：{e}")
             out["errors"].append(f"taiex_sparkline: {e}")
         try:
-            out["taiex"]["sparkline_60d"] = fetch_taiex_sparkline_60d()
+            out["taiex"]["sparkline_60d"], out["taiex"]["sparkline_60d_dates"] = fetch_taiex_sparkline_60d()
         except Exception as e:
             print(f"TAIEX sparkline_60d(^TWII) 失敗：{e}")
             out["errors"].append(f"taiex_sparkline_60d: {e}")

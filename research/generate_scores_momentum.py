@@ -130,7 +130,59 @@ def _has_calendar_gap(dates: list[str], max_ratio: float = 3.0) -> bool:
     return (d1 - d0).days > len(dates) * max_ratio
 
 
-def _relative_strength(price_rows: list[dict], taiex_20d: list[float], taiex_60d: list[float]) -> float | None:
+#: 2026-09-17（總司令裁示【稽核.四.3】）：_relative_strength()改用日期交集
+#: 對齊後，用這個模組層級計數器記錄每一腳（20d/60d）對齊成功/失敗的檔數，
+#: 失敗又細分「個股在大盤最後日期沒有價格」（=混日期bug的典型樣態：個股
+#: 停在較舊日期，大盤已經是最新交易日）vs「個股在大盤起始日期沒有價格」
+#: （=個股上市不夠久或該區間停牌）。build_rows()開頭會reset，main()收尾把
+#: 這份統計寫進payload.meta，取代「不准用位置硬湊」要求的missing_factor_notes
+#: ——這裡選擇用彙總統計而非逐檔欄位，因為對齊失敗是系統性資料時效問題、
+#: 不是個股層級的異常，彙總數字對總司令要看的「修正前後有值檔數變化」更直接。
+RELATIVE_STRENGTH_ALIGN_STATS: dict[str, int] = {}
+
+
+def _reset_relative_strength_stats() -> None:
+    RELATIVE_STRENGTH_ALIGN_STATS.clear()
+    for prefix in ("20d", "60d"):
+        RELATIVE_STRENGTH_ALIGN_STATS[f"aligned_{prefix}"] = 0
+        RELATIVE_STRENGTH_ALIGN_STATS[f"misaligned_last_date_{prefix}"] = 0
+        RELATIVE_STRENGTH_ALIGN_STATS[f"misaligned_start_date_{prefix}"] = 0
+
+
+def _relative_strength_leg(
+    stock_by_date: dict[str, float], taiex_vals: list[float], taiex_dates: list[str],
+    window_len: int, stat_prefix: str,
+) -> float | None:
+    """單一視窗（20日或60日）的相對強度計算，用**日期交集**對齊，不用位置
+    索引——這是2026-09-17修正的核心：舊版拿`closes[-1]`比`taiex_vals[-1]`，
+    兩者若剛好是不同日期（例如個股停在09-15、大盤已經是09-16，混日期bug
+    典型樣態），算出來的其實是「昨天的自己」比「今天的大盤」，方向和幅度
+    都不可信。改成用大盤序列自己的日期（`taiex_dates`，2026-09-17新增，見
+    `.github/scripts/fetch_market_tw.py::fetch_taiex_sparkline()`）當基準，
+    去查個股在**同一天**有沒有價格；查不到就誠實回傳None，不退而求其次
+    找最近的一天湊數（那樣等於換一種方式重新引入同一個bug）。"""
+    if len(taiex_vals) < window_len or len(taiex_dates) != len(taiex_vals):
+        return None
+    d_last, d_start = taiex_dates[-1], taiex_dates[-window_len]
+    c_last, c_start = stock_by_date.get(d_last), stock_by_date.get(d_start)
+    if c_last is None:
+        RELATIVE_STRENGTH_ALIGN_STATS[f"misaligned_last_date_{stat_prefix}"] += 1
+        return None
+    if c_start is None:
+        RELATIVE_STRENGTH_ALIGN_STATS[f"misaligned_start_date_{stat_prefix}"] += 1
+        return None
+    mkt_last, mkt_start = taiex_vals[-1], taiex_vals[-window_len]
+    if not c_start or not mkt_start:
+        return None
+    RELATIVE_STRENGTH_ALIGN_STATS[f"aligned_{stat_prefix}"] += 1
+    return (c_last / c_start - 1) - (mkt_last / mkt_start - 1)
+
+
+def _relative_strength(
+    price_rows: list[dict],
+    taiex_20d: list[float], taiex_20d_dates: list[str],
+    taiex_60d: list[float], taiex_60d_dates: list[str],
+) -> float | None:
     """2026-08-27修正（真bug，本機測試親自抓到：0/2374檔算出這個因子）：原本
     要求`len(taiex_20d)>=21`才計算「20日報酬率」，但`market_tw.json`的
     `taiex.sparkline`固定就是20個點（給App畫圖用的既有欄位，不為了這個因子
@@ -138,7 +190,13 @@ def _relative_strength(price_rows: list[dict], taiex_20d: list[float], taiex_60d
     永遠不成立，60日版本同理(要求61卻只有60個點)。改成用[-1]比[-20]/[-60]，
     即「近19/59個交易日」的報酬率，跟嚴格的「20/60個交易日」差1天，這個
     近似對動能因子的用途來說可忽略，不值得為了這1天去改動taiex.sparkline
-    的既有長度定義。"""
+    的既有長度定義。
+
+    2026-09-17修正（真bug，總司令裁示【稽核.四.3】）：舊版用位置索引
+    （`closes[-1]`比`taiex_20d[-1]`）對齊個股與大盤，隱含假設「兩個序列的
+    最後一筆一定是同一天」——混日期bug下這個假設不成立（個股落後大盤一個
+    交易日很常見），會算出「拿昨天的自己比今天的大盤」。改成`_relative_
+    strength_leg()`用日期交集對齊，查不到同一天的價格就回None，不硬湊。"""
     if len(price_rows) < 20:
         return None
     rows = sorted(price_rows, key=lambda r: r["date"])
@@ -146,21 +204,14 @@ def _relative_strength(price_rows: list[dict], taiex_20d: list[float], taiex_60d
     # 見price_history.json meta.backfill_note）——用原始close的話，除息當天
     # 跳空下跌會被這個因子誤判成真實下跌，除息季會系統性扭曲排名。舊資料
     # 若還沒有adj_close欄位（尚未套用過還原）就退回close，不會比修正前更差。
-    closes = [r.get("adj_close", r["close"]) for r in rows]
-    dates = [r["date"] for r in rows]
+    stock_by_date = {r["date"]: r.get("adj_close", r["close"]) for r in rows}
     parts = []
-    # 2026-08-28新增：日曆缺口守門（見_has_calendar_gap()說明），20/60日兩腳
-    # 各自獨立檢查各自用到的那段視窗，其中一腳有缺口就只跳過那一腳，不用
-    # 整個因子都放棄（例如20日視窗是連續的、60日視窗混進舊資料，20日腳
-    # 仍然可用）。
-    if len(closes) >= 20 and len(taiex_20d) >= 20 and closes[-20] and taiex_20d[-20] and not _has_calendar_gap(dates[-20:]):
-        stock_ret20 = closes[-1] / closes[-20] - 1
-        mkt_ret20 = taiex_20d[-1] / taiex_20d[-20] - 1
-        parts.append(stock_ret20 - mkt_ret20)
-    if len(closes) >= 60 and len(taiex_60d) >= 60 and closes[-60] and taiex_60d[-60] and not _has_calendar_gap(dates[-60:]):
-        stock_ret60 = closes[-1] / closes[-60] - 1
-        mkt_ret60 = taiex_60d[-1] / taiex_60d[-60] - 1
-        parts.append(stock_ret60 - mkt_ret60)
+    leg20 = _relative_strength_leg(stock_by_date, taiex_20d, taiex_20d_dates, 20, "20d")
+    if leg20 is not None:
+        parts.append(leg20)
+    leg60 = _relative_strength_leg(stock_by_date, taiex_60d, taiex_60d_dates, 60, "60d")
+    if leg60 is not None:
+        parts.append(leg60)
     if not parts:
         return None
     return sum(parts) / len(parts)
@@ -434,7 +485,10 @@ def build_rows() -> pd.DataFrame:
     quotes_all = _load_json(QUOTES_ALL_TW_PATH).get("quotes", {}) if QUOTES_ALL_TW_PATH.exists() else {}
     market_tw = _load_json(MARKET_TW_PATH) if MARKET_TW_PATH.exists() else {}
     taiex_20d = (market_tw.get("taiex") or {}).get("sparkline") or []
+    taiex_20d_dates = (market_tw.get("taiex") or {}).get("sparkline_dates") or []
     taiex_60d = (market_tw.get("taiex") or {}).get("sparkline_60d") or []
+    taiex_60d_dates = (market_tw.get("taiex") or {}).get("sparkline_60d_dates") or []
+    _reset_relative_strength_stats()
 
     industry_map = {code: v.get("industry") for code, v in company_info.items() if v.get("industry")}
     sector_daily = build_sector_aggregates(price_history, industry_map)
@@ -458,7 +512,7 @@ def build_rows() -> pd.DataFrame:
         price_rows = price_history.get(code) or []
         industry = industry_map.get(code)
 
-        rel_strength = _relative_strength(price_rows, taiex_20d, taiex_60d)
+        rel_strength = _relative_strength(price_rows, taiex_20d, taiex_20d_dates, taiex_60d, taiex_60d_dates)
         vol_breakout = _volume_breakout(price_rows)
         new_high = _new_high_breakout(price_rows)
         vp_raw, vp_flags = _volume_price_coordination(price_rows)
@@ -691,6 +745,15 @@ def main():
                 "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE,
                 "weights_hash": frozen["weights_sha256"],
                 "backtest_status": "尚未回測驗證",
+                "relative_strength_align_stats": dict(RELATIVE_STRENGTH_ALIGN_STATS),
+                "relative_strength_align_note": (
+                    "2026-09-17【稽核.四.3】：relative_strength因子改用日期交集對齊"
+                    "個股與大盤（取代舊版位置索引對齊）。aligned_20d/60d=該視窗對齊"
+                    "成功的檔數；misaligned_last_date_*=個股在大盤最後交易日沒有價格"
+                    "（常見於個股資料落後大盤，即混日期bug）；misaligned_start_date_*="
+                    "個股在大盤起始日沒有價格（常見於新上市或該區間停牌）。查不到同一天"
+                    "的價格一律回None，不用位置硬湊。"
+                ),
                 "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json"
                            "+data/company_info.json+data/quotes_all_tw.json+data/market_tw.json"
                            "（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用。",

@@ -94,12 +94,48 @@
   （`generated_at`已是09-17）。App端呈現：這輪同樣未開瀏覽器肉眼確認，
   依既有多層報價回退鏈設計，落後代碼消失後會自動嘗試其他層，全部無
   資料才顯示既有「無報價」狀態，如實揭露。
-- **2** 🔲 待做：修正probe_twse_publish_time.py改探測管線實際使用的
-  openapi.twse.com.tw端點（保留舊端點對照），交易日15:00~隔日10:00每30分鐘
-  一輪連測三個交易日，記錄payload Date欄位值，結果出來前不調整cron。
-- **3** 🔲 待做：market_tw.json的taiex sparkline同步輸出sparkline_dates；
-  _relative_strength改用日期交集對齊；回報修正前後relative_strength有值
-  檔數、前50名選股變動幾檔。
+- **2** 🔲 待做（程式碼部分已完成，卡在Task Scheduler權限）：
+  `scripts/probe_twse_publish_time.py`改探測管線實際使用的
+  openapi.twse.com.tw端點（新增`STOCK_DAY_ALL_OPENAPI`探測項＋`payload_date`
+  欄位，保留舊端點對照）**已於commit`39d0b33c`完成**（這輪查證確認、非
+  重做）。**排程視窗本身**（交易日15:00~隔日10:00每30分鐘一輪連測三個
+  交易日）改不了：本session的PowerShell對`Set-ScheduledTask`回`Access is
+  denied`，`C:\alpha\reschedule-twse-probe-task.ps1`已寫好且
+  `docs/LOCAL_SCHEDULED_TASKS.md`第六節已記錄，**待總司令親自執行**
+  `powershell -ExecutionPolicy Bypass -File C:\alpha\reschedule-twse-probe-task.ps1`。
+  現有`research/twse_publish_probe.jsonl`最新一筆（2026-09-17 20:44）已能看到
+  `STOCK_DAY_ALL_OPENAPI`的`payload_date=2026-09-16`（查詢日09-17，證實
+  23:10前後仍落後一天，跟稽核.四原始發現一致），但樣本數還不到「連測三個
+  交易日」的要求，需要排程視窗調整後才能累積足夠樣本下結論。
+- **3** ✅ **已完成（這輪，commit待補）**：
+  `.github/scripts/fetch_market_tw.py`的`fetch_taiex_sparkline()`／
+  `fetch_taiex_sparkline_60d()`改回傳`(values, dates)`，`main()`寫入
+  `market_tw.json`的`taiex.sparkline_dates`／`taiex.sparkline_60d_dates`
+  （跟對應數值等長，日期直接取自yfinance history()的DatetimeIndex）。
+  `research/generate_scores_momentum.py::_relative_strength()`改用
+  `_relative_strength_leg()`：以taiex的日期序列為基準，查個股在同一天
+  有沒有價格，查不到就回None（不再用`closes[-1]`比`taiex[-1]`的位置索引
+  硬湊），新增`RELATIVE_STRENGTH_ALIGN_STATS`模組層級計數器，寫進
+  `payload.meta.relative_strength_align_stats`（aligned/misaligned_last_date/
+  misaligned_start_date，20d/60d分開），取代原指示的「missing_factor_notes」
+  ——用彙總統計而非逐檔欄位，因為對齊失敗是系統性資料時效問題非個股異常。
+  **驗收（本機模擬09-16當天job執行時的市場快照，未動用GitHub Actions額度，
+  未覆寫committed的`scores_momentum.json`/`market_tw.json`，過程見這輪
+  對話紀錄）**：套用跟`main()`相同的listed_universe過濾＋過期價格過濾後，
+  修正前（舊版位置索引，現有committed檔案）relative_strength有值
+  **414／1973檔**；修正後（日期交集對齊）**46／1975檔**——414裡絕大多數
+  其實是拿TWSE落後股票的09-15收盤硬比大盤09-16收盤算出來的假訊號，46才是
+  真正日期對齊、可信的樣本（另有611檔雖然最後一天對齊成功，但20交易日前
+  那個起點在該股價格序列裡查不到，屬於`price_history.json`本身資料缺口
+  的既有問題，不在本輪範圍內，如實記錄不強修）。前50名選股名單：**4檔
+  新進榜（6136/6152/6885/8011）、4檔掉出榜（1709/3653/3702/6443）**，
+  變動幅度不大，因為total_score是可得因子的平均，relative_strength只是
+  五個因子之一。**尚未做到**：`data/market_tw.json`要等下一次`market.yml`
+  實際跑`fetch_market_tw.py`（含即時yfinance/TWSE請求）才會把
+  `sparkline_dates`欄位寫進committed檔案，目前committed版本仍是舊格式
+  （無日期欄位）；`_relative_strength_leg()`的date-vs-position修正邏輯本身
+  已通過本機驗證可正確運作，下一次排程跑完後這個因子的實際輸出會自動套用
+  新邏輯，不需要額外動作。
 - **4** 🔲 待做：data_audit.py新增獨立a4_mixed_date檢查，全市場比對落後
   ≥1交易日，獨立mixed_date_rate不混進violation_rate；驗收用09-16資料跑
   應接近1365/2359。
