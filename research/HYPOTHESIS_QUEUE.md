@@ -10904,3 +10904,46 @@ gate2（隨機控制組），從未有候選走到需要gate6判定逐年一致�
 裁示後才能重跑網格產出真正忠實的檢定力數字；`TRIALS_FAILED_GATES_BACKFILL.jsonl`
 已是`failed_gates`唯一權威補登記來源，之後新FAIL一律經`register_trial()`
 直接帶`failed_gates`，不需要再補登。
+
+**階段一.3（2026-09-18，總司令裁示【研究方向重構】，A軌）：47筆FAIL的
+「死於檢定力不足」重新分類**——`research/reclassify_underpowered.py`，
+輸出`research/UNDERPOWERED_RECLASSIFICATION.jsonl`（append-only補登記，
+不改寫`TRIALS_REGISTRY.jsonl`）。
+
+**方法侷限，先誠實講**：47筆裡只有10筆是乾淨的「Pearson/Spearman IC+n」
+格式，可以用Fisher z近似算出封閉形式的MDE_IC=(z0.975+z0.80)/sqrt(n-3)；
+其餘36筆是「訊號vs模擬隨機控制組percentile」這種經驗分布比對，沒有
+封閉形式SE，要嚴謹算檢定力需要比照`#74`注入式量測方法（另一個獨立
+工作量），**本輪標記`not_assessed_needs_simulation`，不是判定它們
+不是underpowered**，不能因為只做了10/47就宣稱「其餘37筆已排除
+underpowered可能性」。
+
+**判準（三項同時滿足才標UNDERPOWERED）**：(1)方向與事前綁定方向一致
+（原文明寫「同號」「符合預測方向」「same_sign=True」）；(2)非
+train/val內部矛盾（不是那種「train正val負」的期間內部不一致）；
+(3)實測|IC|<該期樣本數算出的MDE_IC。
+
+**結果（10筆逐一核對，原文引用見腳本內`source_quote`）**：
+
+| 編號 | 名稱 | VAL IC | n | MDE_IC | 方向一致 | 結果 |
+|---|---|---|---|---|---|---|
+| #187 | #51子事件2現金增資折價 | -0.2289 | 40 | 0.4606 | 是 | **UNDERPOWERED** |
+| #190 | cb_conversion_price_reset | +0.0430 | 1047 | 0.0867 | 否(方向相反) | FAIL維持 |
+| #203 | f_us_low_vol大型股N=90 | +0.0255 | 49 | 0.4131 | 否(train/val正負號相反) | FAIL維持 |
+| #204 | f_us_momentum_12m大型股N=90 | -0.0186 | 49 | 0.4131 | 無法確認(保守排除) | FAIL維持 |
+| #205 | f_us_reversal_1m大型股N=90 | +0.0166 | 49 | 0.4131 | 無法確認(保守排除) | FAIL維持 |
+| #207 | f_us_momentum_12m中型股N=90 | +0.0143 | 49 | 0.4131 | 無法確認(保守排除) | FAIL維持 |
+| #208 | f_us_reversal_1m中型股N=90 | +0.0066 | 49 | 0.4131 | 無法確認(保守排除) | FAIL維持 |
+| #229 | #65產業龍頭股跨期領先-落後動能 | +0.0094 | 193 | 0.2032 | 是(same_sign=True明文) | **UNDERPOWERED** |
+| #233 | short_margin_ratio_gate68 | -0.0548 | 47 | 0.4224 | 否(方向與假設相反) | FAIL維持 |
+| #239 | option_oi_pcr_gate69 | +0.0395 | 970 | 0.0901 | 是(符合事前綁定方向明文) | **UNDERPOWERED** |
+
+**結論：47筆FAIL裡，3筆(#187/#229/#239)重新分類為UNDERPOWERED，列入
+候選重測清單**（下一輪若有更長樣本/更大宇宙，優先重測這三個，理由是
+方向正確、只是樣本數不夠看清楚，不是新點子，是把測不準的東西重新
+測準——完全對應總司令原話「這份清單很可能是我們最便宜的alpha來源」）；
+7筆維持FAIL（明確方向錯誤或期間內部矛盾，更多資料不會改變這個結論）；
+**36筆標記not_assessed_needs_simulation，是誠實的「未評估」，不是
+「已排除」**，若要完整回答總司令的問題，下一步需要對percentile類
+cheap gate建立`#74`式的注入式檢定力量測工具，是階段一之後的獨立
+待辦，本輪未做。
