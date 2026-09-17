@@ -472,30 +472,39 @@ def main():
     # （32MB+），不適合每次client-side抓整份只為了取最新一天。這裡從剛更新
     # 的prices取每檔最後兩筆算出這個輕量快照，單獨寫一個小檔。
     #
-    # 2026-09-17（總司令裁示【稽核.四.1】先封鎖，再修）：「當日最大日期」
-    # 先掃一輪求出來，這不限於這次twse/tpex混日期事件——任何一檔股票的
-    # 最後一筆比「今天大盤其他股票都已經有的那個日期」還舊（不管差1天還是
-    # 差好幾個月，見那212檔停在2024-12-31的已知案例），都不該被當成「現價」
-    # 顯示，寧可這個快照裡沒有這一檔，也不要顯示一個使用者以為是今天、
-    # 其實是舊資料的價格。
+    # 2026-09-17（總司令裁示【稽核.四.1修正版】(a)顯示層）：上一版在這裡把
+    # 落後大盤最新日期的股票整檔排除，實測後果是2839檔裡1845檔（58%）在App
+    # 上完全空白（含2330/2317/2454/2412/2882/1301），總司令親自更正：
+    # 「一個標著『09-15收盤』的舊價，比一片空白有用得多；藏起來不叫誠實」。
+    # 改成全部照常輸出，只是落後的那些額外標is_stale/stale_days/as_of，
+    # 讓下游（index.html）決定要不要顯示、怎麼顯示——這裡不再做「要不要給」
+    # 的判斷，只誠實標記「這是不是最新的」。change_pct在is_stale時仍照算
+    # （是這檔股票自己前後兩個交易日的真實漲跌，不是跟別檔比出來的假訊號），
+    # 是否顯示交給前端；但quotes_all_tw.json本身的欄位語意保持單純，change_pct
+    # 一律照算，is_stale旗標另外標，不混在一起。
     max_date = max((rows[-1]["date"] for rows in prices.values() if rows), default=None)
     snapshot = {}
-    stale_excluded = []
+    stale_count = 0
     for code, rows in prices.items():
         if not rows:
             continue
         last = rows[-1]
-        if max_date and last["date"] < max_date:
-            stale_excluded.append(code)
-            continue
+        is_stale = bool(max_date and last["date"] < max_date)
         prev = rows[-2] if len(rows) >= 2 else None
         change_pct = None
         if prev and prev.get("close") not in (None, 0):
             change_pct = round((last["close"] - prev["close"]) / prev["close"] * 100, 2)
-        snapshot[code] = {
-            "date": last["date"], "close": last["close"],
+        entry = {
+            "date": last["date"], "as_of": last["date"], "close": last["close"],
             "change_pct": change_pct, "turnover": last.get("turnover"),
         }
+        if is_stale:
+            stale_count += 1
+            entry["is_stale"] = True
+            d_max = datetime.strptime(max_date, "%Y-%m-%d")
+            d_last = datetime.strptime(last["date"], "%Y-%m-%d")
+            entry["stale_days"] = (d_max - d_last).days
+        snapshot[code] = entry
     # 2026-09-06（實測.一.2）：top-level 補 fetched_at 與 source。
     # App 端的報價回退鏈把這一份當第三層，要判斷「這個價格有多舊」就得知道抓取時間；
     # 其他報價檔（quotes_tw.json / quotes_us.json）的欄位名就是 fetched_at/source，
@@ -503,8 +512,8 @@ def main():
     # 既有讀 meta 的程式（build_picks_ledger.py 等）不受影響。
     now_iso = datetime.now(TW_TZ).isoformat()
     src_label = "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（經 data/price_history.json 衍生）"
-    print(f"quotes_all_tw快照：{len(snapshot)} 檔輸出現價，{len(stale_excluded)} 檔因最後一筆"
-          f"日期落後大盤最新日期（{max_date}）被排除，不輸出現價")
+    print(f"quotes_all_tw快照：{len(snapshot)} 檔輸出現價（含{stale_count}檔標is_stale，"
+          f"最後一筆日期落後大盤最新日期{max_date}）")
     SNAPSHOT_PATH.write_text(json.dumps({
         "fetched_at": now_iso,
         "source": src_label,
@@ -513,11 +522,10 @@ def main():
                  "note": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），"
                          "供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。",
                  "data_asof": max_date,
-                 "stale_excluded_count": len(stale_excluded),
-                 "stale_excluded_note": "最後一筆日期落後大盤當日最大日期的股票不輸出現價"
-                                        "（寧可空狀態，不顯示落後日期的收盤當現價），"
-                                        "codes見stale_excluded_codes。"},
-        "stale_excluded_codes": stale_excluded,
+                 "stale_count": stale_count,
+                 "stale_note": "2026-09-17（稽核.四.1修正版）：不再排除落後股票，全部照常輸出，"
+                               "改標每筆的as_of/is_stale/stale_days，前端決定顯示方式，"
+                               "不得把is_stale=true的close當『現價』顯示。"},
         "quotes": snapshot,
     }, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {SNAPSHOT_PATH}：{len(snapshot)} 檔輕量快照")

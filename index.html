@@ -2048,9 +2048,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!us){
       const a=QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes?QUOTES_ALL_TW_CACHE.quotes[code]:null;
       if(a&&a.close!=null){
-        // quotes_all_tw 只存收盤與漲跌%，前收由這兩個反推（漲跌% 是相對前收算的）。
-        // change_pct 為 -100 代表前收是 0，那是壞資料，不反推。
-        const pct=(typeof a.change_pct==='number'&&isFinite(a.change_pct)&&a.change_pct!==-100)?a.change_pct:null;
+        // 2026-09-17（稽核.四.1修正版(a)）：a.is_stale=true代表這筆的as_of落後大盤
+        // 當日最大日期（例如TWSE payload還沒更新），change_pct是這檔自己前後兩個
+        // 交易日的真實漲跌沒有錯，但拿「舊日期的漲跌」當「今天的漲跌」顯示會誤導，
+        // 這裡直接回null，交給呼叫端（hydrateHome等）決定要不要顯示日期標籤。
+        const isStale=a.is_stale===true;
+        const pct=(!isStale&&typeof a.change_pct==='number'&&isFinite(a.change_pct)&&a.change_pct!==-100)?a.change_pct:null;
         // 前收優先用 sparklines 的倒數第二點（那是真實收盤價），只有查不到時才用
         // change_pct 反推。反推會有誤差：change_pct 只存到小數第二位，反推出來的
         // 前收可能差一點點，而漲跌停價是拿前收乘 1.1 再取整的，差一點就可能整檔
@@ -2059,7 +2062,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const prevExact=(sp0&&sp0.length>=2)?sp0[sp0.length-2]:null;
         const prev=(prevExact!=null&&isFinite(prevExact))?prevExact:(pct!=null?a.close/(1+pct/100):null);
         return {price:a.close,change:prev!=null?a.close-prev:null,change_pct:pct,
-                prev_close:prev,source:'quotes_all_tw',tier:'all',asof:a.date||null};
+                prev_close:prev,source:'quotes_all_tw',tier:'all',asof:a.date||a.as_of||null,
+                is_stale:isStale,stale_days:a.stale_days||null};
       }
     }
 
@@ -2071,9 +2075,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         // 寫死的 null——這一層是四層回退鏈的最後一層，理論上最容易過期，卻是
         // 唯一從來不標日期的一層，跟財報過期的處理原則不一致（財報過期至少
         // 標「XXXXQn」，這裡過去完全沒有任何標示）。
-        return {price:last,change:prev!=null?last-prev:null,
-                change_pct:prev?((last-prev)/prev*100):null,prev_close:prev,
-                sparkline:sp,source:'sparklines',tier:'history',asof:SPARKLINES_ASOF};
+        // 2026-09-17（稽核.四.1修正版(a)）：個別代號如果在SPARKLINES_STALE_DATES
+        // 裡有紀錄，代表它最後一筆的實際日期比SPARKLINES_ASOF還舊（大盤當日
+        // 最大日期），asof要用那個真實日期，change_pct（舊日期算出來的漲跌）
+        // 不顯示，交給is_stale標記讓呼叫端決定畫法。
+        const staleAsof=SPARKLINES_STALE_DATES[code];
+        const isStale=!!staleAsof;
+        return {price:last,change:isStale?null:(prev!=null?last-prev:null),
+                change_pct:isStale?null:(prev?((last-prev)/prev*100):null),prev_close:prev,
+                sparkline:sp,source:'sparklines',tier:'history',asof:staleAsof||SPARKLINES_ASOF,
+                is_stale:isStale};
       }
     }
     return null;
@@ -2672,7 +2683,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 由 build_sparklines.py 從 price_history.json 切出（零額外網路請求）。取代舊的「逐檔打
   // TWSE STOCK_DAY」：舊法只有清單內的上市股有線、上櫃股完全沒有、一次抓不完還會被限流打斷。
   // 現在任何頁面、任何新加入的自選股，只要在全市場歷史裡就立刻有線。
-  let SPARKLINES=null,SPARKLINES_AT=0,SPARKLINES_ASOF=null;
+  let SPARKLINES=null,SPARKLINES_AT=0,SPARKLINES_ASOF=null,SPARKLINES_STALE_DATES={};
   async function ensureSparklines(){
     if(SPARKLINES&&Date.now()-SPARKLINES_AT<10*60*1000)return SPARKLINES;
     try{
@@ -2685,7 +2696,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // asof:null——sparklines.json卡在09-05不更新那十天，使用者看到的舊價格
       // 完全沒有任何日期標示，跟看到當天的價格長得一模一樣。現在存下來，
       // resolveQuote()才能誠實標出「這個數字是哪天的」。
-      SPARKLINES=d.sparklines||{};SPARKLINES_ASOF=(d.meta&&d.meta.data_asof)||null;SPARKLINES_AT=Date.now();
+      // 2026-09-17（稽核.四.1修正版(a)）：新增stale_dates——build_sparklines.py
+      // 不再整批排除落後大盤最大日期的股票，改逐檔記在這裡（code→實際最後一天
+      // 日期），沒出現代表跟data_asof同一天。
+      SPARKLINES=d.sparklines||{};SPARKLINES_ASOF=(d.meta&&d.meta.data_asof)||null;
+      SPARKLINES_STALE_DATES=d.stale_dates||{};SPARKLINES_AT=Date.now();
     }catch(e){console.warn('[ensureSparklines]',e);recordGlobalError('ensureSparklines',e);if(!SPARKLINES)SPARKLINES={}}
     return SPARKLINES;
   }
@@ -2914,11 +2929,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // 四層回退鏈走到最後一層(history/sparklines)時，若資料已經超過3個交易日沒更新，
       // 價格數字本身要直接標日期，不能只靠可展開的小字說明——那個說明預設收合，
       // 使用者不點開根本看不到。跟財報過期同一套原則（見live_factors.py新鮮度檢查）。
+      // 2026-09-17（稽核.四.1修正版(a)）：加上q.is_stale——這是資料層（quotes_all_tw/
+      // sparklines）自己標的「落後大盤當日最大日期」旗標，即使只差1天也算（不是
+      // 上面那個3個交易日的寬鬆門檻），總司令原話「不准把落後一天的收盤當現價顯示」，
+      // 兩個條件任一成立就視為過期，不得只用「即時/現價」字樣呈現。
       const histStaleDays=(q.tier==='history')?tradingDaysSince(q.asof,'Asia/Taipei',TW_HOLIDAYS_2026):null;
-      const priceIsStale=(histStaleDays!=null&&histStaleDays>3);
+      const priceIsStale=(histStaleDays!=null&&histStaleDays>3)||q.is_stale===true;
       const priceLabel=priceIsStale
         ?`${q.asof?String(q.asof).slice(5).replace('-','/'):'?'}收盤 ${us?'$':''}${nf(price)}`
         :`${us?'$':''}${nf(price)}`;
+      // 總司令原話：「漲跌% 若是拿舊日期算出來的，一律不顯示（不是顯示0，是不顯示）」。
+      const pctTagHtml=priceIsStale?'':`<span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span>`;
       // 2026-09-04 P0產品.一：來源/新鮮度文字收進可展開的說明，列上只留一顆彩色小點
       // 每一層講自己的話：不能把「三天前的歷史收盤」講成「已收盤（Actions排程最後一筆）」
       const srcText=iq?`${intradayTagHtml(iq,us)||'· 近即時（Actions排程）'}`
@@ -2965,7 +2986,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // data-flash-code/data-flash-value：給盤中快速輪詢(fastPollTick())用來判斷
       // 「這次重繪後的價格」跟「上次輪詢看到的價格」是否不同，不同才閃爍，見
       // flashPriceEls()。這裡只是標記資料，平常渲染不受影響。
-      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}"${priceIsStale?' style="font-size:.85em"':''}>${priceLabel}</b><span class="chg-tag ${cls}">${chg>=0?'+':''}${pct.toFixed(2)}%</span></div>`;
+      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}"${priceIsStale?' style="font-size:.85em"':''}>${priceLabel}</b>${pctTagHtml}</div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
       if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
       // 2026-09-04 P0產品.一：可展開的來源說明（預設收合；smoke test仍能在DOM裡讀到「今日收盤」「即時(tick)」等字樣）
@@ -4746,12 +4767,19 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const fb=resolveQuote(code,false);
       if(fb&&fb.price!=null){
         const chg=fb.change??0,pct=fb.change_pct??0,cls=chg>=0?'pos':'neg';
-        const pe=document.getElementById('sh-price');pe.textContent=nf(fb.price);pe.className=cls;
-        const ce=document.getElementById('sh-chg');ce.textContent=`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;ce.className=cls;
+        const pe=document.getElementById('sh-price');
+        // 2026-09-17（稽核.四.1修正版(a)）：fb.is_stale=true代表as_of落後大盤當日
+        // 最大日期，不得標「現價」——價格數字本身直接帶真實日期，漲跌%不顯示
+        // （那是拿舊日期算出來的，顯示出來會誤導成「今天的漲跌」）。
+        pe.textContent=fb.is_stale?`${fb.asof?String(fb.asof).slice(5).replace('-','/'):'?'}收盤 ${nf(fb.price)}`:nf(fb.price);
+        pe.className=cls;
+        const ce=document.getElementById('sh-chg');
+        ce.textContent=fb.is_stale?'':`${chg>=0?'+':''}${(+chg).toFixed(1)}（${pct>=0?'+':''}${pct.toFixed(2)}%）`;
+        ce.className=cls;
         _safeSync('applyLimitBadge:fallback',()=>applyLimitBadge(code,fb.price,fb.prev_close,null));
         const sp=fb.sparkline||sparkFor(code);
         if(sp&&sp.length>=2)renderStockChart(code,sp.map(c=>({close:c})),false);
-        setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}　FinMind 本次無資料`);
+        setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}${fb.is_stale?'　⚠ 落後大盤當日最新日期，非現價':''}　FinMind 本次無資料`);
       }else{
         setTxt('sh-price','—');setTxt('sh-chg','無報價（'+noQuoteReason(code,false)+'）');
         document.getElementById('trend-chart').innerHTML='<div class="note">無報價（'+noQuoteReason(code,false)+'）</div>';
@@ -7398,7 +7426,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-15.2233';
+  const APP_VERSION='2026-09-17.2317';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

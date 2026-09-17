@@ -307,11 +307,29 @@ def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
         last = str((h[-1] or {}).get("date") or "")[:10]
         return (not last) or last <= day
 
+    def _quotes_all_close(c):
+        # 2026-09-17（總司令裁示【稽核.四.1修正版】(b)計算層）：quotes_all_tw.json
+        # 不再整批排除is_stale=true的股票（見update_price_history.py），這裡改為
+        # 主動略過——這一筆本來就是舊日期的收盤，拿它跟「今天」的官方收盤比，
+        # 差的只是正常的一天漲跌，不是「來源不一致」，計入violations會製造假警報
+        # （總司令原話「那是過期不是來源錯，混在一起就是同一份錯誤資料兩種顏色」）。
+        rec = loc["quotes_all"].get(c) or {}
+        if rec.get("is_stale"):
+            return None
+        return rec.get("close")
+
+    def _sparklines_close(c):
+        # 同上，sparklines.json改成落後大盤當日最大日期的代號記在stale_dates，
+        # 命中就當「無法查核」處理，不當違規。
+        if c in loc.get("sparks_stale_dates", {}):
+            return None
+        return (loc["sparks"].get(c) or [None])[-1]
+
     files = {
-        "quotes_all_tw.json": lambda c: (loc["quotes_all"].get(c) or {}).get("close"),
+        "quotes_all_tw.json": _quotes_all_close,
         "quotes_tw.json": lambda c: (loc["quotes_tw"].get(c) or {}).get("price"),
         "price_history.json": from_hist,
-        "sparklines.json": lambda c: (loc["sparks"].get(c) or [None])[-1],
+        "sparklines.json": _sparklines_close,
     }
     for code in universe:
         official = ref[code]["close"]
@@ -391,6 +409,50 @@ def check_a3_stale_price(a, ref, names, loc, boards, ref_date):
             a.hit("a3_stale_price", code, names.get(code, ""),
                   "這一檔在選股榜單上，但本地價格已落後官方最新交易日 " + str(lag) + " 天",
                   str(asof), ref_date, None, "quotes_all_tw.json / price_history.json")
+
+
+def check_a4_mixed_date(universe, loc):
+    """(a 補充，2026-09-17 總司令裁示【稽核.四.4】) 全市場「差一天」盲點。
+
+    a3_stale_price 的 limit_days=10 只抓「落後很久」的股票，且只掃選股榜單
+    （boards），a_price_source 只在價差 >=5% 才響——兩者合起來的結果是：
+    「落後一個交易日」這件事本身，從來沒有任何一條檢查真的盯著它看
+    （安靜的日子沒有5%的價差就不會被a_price_source抓到，波動的日子才會，
+    等於「安靜的日子是綠燈、波動的日子是紅燈」，總司令原話「同一份錯誤
+    資料兩種顏色」）。
+
+    這裡獨立算一個 mixed_date_rate：全市場（不限選股榜單）比對每一檔
+    price_history.json 最後一筆日期跟「當日最大日期」，只要落後 >=1
+    個交易日就算一筆——**刻意不設 limit_days 門檻、刻意不看價差**，
+    因為要抓的正是「差一天但價差剛好很小所以沒人發現」這個盲點本身。
+    這個指標刻意不寫進 a.violations / a.stats，不混進 violation_rate，
+    也不進 informational_only_checks，是完全獨立的一個 report 頂層欄位。
+    """
+    price_hist = loc["price_hist"]
+    max_date = max((rows[-1]["date"] for rows in price_hist.values() if rows), default=None)
+    mixed = []
+    checked = 0
+    for code in universe:
+        rows = price_hist.get(code)
+        if not rows:
+            continue
+        last_date = rows[-1].get("date")
+        if not last_date or not max_date:
+            continue
+        checked += 1
+        if last_date < max_date:
+            mixed.append(code)
+    rate = (len(mixed) / checked) if checked else 0.0
+    return {
+        "max_date": max_date,
+        "checked": checked,
+        "mixed_date_count": len(mixed),
+        "mixed_date_rate": round(rate, 5),
+        "mixed_date_codes_sample": sorted(mixed)[:50],
+        "note": "全市場（universe=官方今日有收盤價的普通股/ETF）比對price_history.json每檔最後一筆"
+                "日期與當日最大日期，落後>=1個交易日即計入，不設價差門檻。刻意獨立於"
+                "violation_rate/informational_only_checks之外，見check_a4_mixed_date()docstring。",
+    }
 
 
 def check_a2_not_in_official(a, ref, names, loc, official_only):
@@ -661,6 +723,9 @@ def main():
         "quotes_tw": (load_json(DATA / "quotes_tw.json") or {}).get("quotes", {}),
         "price_hist": (load_json(DATA / "price_history.json") or {}).get("prices", {}),
         "sparks": (load_json(DATA / "sparklines.json") or {}).get("sparklines", {}),
+        # 2026-09-17（稽核.四.1修正版(b)）：sparklines.json新增的stale_dates，
+        # 供_sparklines_close()判斷該代號的走勢線最後一點是不是落後日期。
+        "sparks_stale_dates": (load_json(DATA / "sparklines.json") or {}).get("stale_dates", {}),
         "fundamentals": (load_json(DATA / "fundamentals.json") or {}).get("fundamentals", {}),
         "stock_detail": (load_json(DATA / "stock_detail.json") or {}).get("stocks", {}),
     }
@@ -693,6 +758,7 @@ def main():
     check_a_price_sources(a, universe, ref, names, loc, ref_date)
     check_a2_not_in_official(a, ref, names, loc, listed)
     check_a3_stale_price(a, ref, names, loc, boards, ref_date)
+    a4_mixed_date = check_a4_mixed_date(universe, loc)
     check_c_range(a, universe, ref, names, loc)
     check_e_pe(a, universe, ref, names, loc)
     check_f_null_as_number(a, loc)
@@ -745,6 +811,10 @@ def main():
         "violation_rate_gate": 0.01,
         "gate_pass": rate <= 0.01 and not code_free,
         "informational_only_checks": sorted(INFORMATIONAL),
+        # 2026-09-17（總司令裁示【稽核.四.4】）：獨立頂層欄位，刻意不混進
+        # violation_rate 也不進 informational_only_checks，見
+        # check_a4_mixed_date() docstring。
+        "a4_mixed_date": a4_mixed_date,
         "total_violations": len(a.violations),
         "by_check": a.stats,
         "top_20": sorted(a.violations, key=sev)[:20],
@@ -780,6 +850,10 @@ def main():
           ("通過" if (rate <= 0.01 and not code_free) else "不通過"))
     print("  完整度缺口 " + str(round(gap_rate * 100, 2)) + "%（" + str(len(gap_codes)) +
           " 檔，季報斷層/過期，歸稽核.二處理）")
+    print("  a4_mixed_date（差一天盲點，獨立指標）：" +
+          str(round(a4_mixed_date["mixed_date_rate"] * 100, 2)) + "%（" +
+          str(a4_mixed_date["mixed_date_count"]) + "/" + str(a4_mixed_date["checked"]) +
+          " 檔，當日最大日期 " + str(a4_mixed_date["max_date"]) + "）")
     for k, v in sorted(a.stats.items()):
         print("  " + k + ": 檢查 " + str(v["checked"]) + "、違規 " + str(v["violations"]) +
               "、無法查核 " + str(v["unverifiable"]))

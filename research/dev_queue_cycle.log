@@ -3180,3 +3180,605 @@ lock: LOCK_ACQUIRED (cycle 20260915-054601)
 prompt: PROMPT_READY: 健檢.五（產品類） (exit=0)
 finally: released .devqueue.lock (cycle_id=20260915-054601)
 ===== DevQueue cycle end: 2026-09-15 05:56:13 cycle_id=20260915-054601 reason=OK exit=0 duration_min=10.2 =====
+
+===== DevQueue cycle start: 2026-09-17 00:46:01 cycle_id=20260917-004601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-004601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-004601)
+===== DevQueue cycle end: 2026-09-17 00:46:01 cycle_id=20260917-004601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 01:01:01 cycle_id=20260917-010101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-010101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-010101)
+===== DevQueue cycle end: 2026-09-17 01:01:02 cycle_id=20260917-010101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 01:16:01 cycle_id=20260917-011601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-011601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-011601)
+===== DevQueue cycle end: 2026-09-17 01:16:02 cycle_id=20260917-011601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 01:31:02 cycle_id=20260917-013102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-013102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-013102)
+===== DevQueue cycle end: 2026-09-17 01:31:02 cycle_id=20260917-013102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 01:46:02 cycle_id=20260917-014602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-014602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-014602)
+===== DevQueue cycle end: 2026-09-17 01:46:02 cycle_id=20260917-014602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 02:01:01 cycle_id=20260917-020101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-020101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-020101)
+===== DevQueue cycle end: 2026-09-17 02:01:01 cycle_id=20260917-020101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 02:16:01 cycle_id=20260917-021601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-021601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-021601)
+===== DevQueue cycle end: 2026-09-17 02:16:02 cycle_id=20260917-021601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 02:31:02 cycle_id=20260917-023102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-023102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-023102)
+===== DevQueue cycle end: 2026-09-17 02:31:02 cycle_id=20260917-023102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 02:46:01 cycle_id=20260917-024601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-024601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-024601)
+===== DevQueue cycle end: 2026-09-17 02:46:02 cycle_id=20260917-024601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 03:01:01 cycle_id=20260917-030101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-030101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-030101)
+===== DevQueue cycle end: 2026-09-17 03:01:02 cycle_id=20260917-030101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 03:16:02 cycle_id=20260917-031602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-031602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-031602)
+===== DevQueue cycle end: 2026-09-17 03:16:02 cycle_id=20260917-031602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 03:31:02 cycle_id=20260917-033102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-033102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-033102)
+===== DevQueue cycle end: 2026-09-17 03:31:02 cycle_id=20260917-033102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 03:46:01 cycle_id=20260917-034601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-034601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-034601)
+===== DevQueue cycle end: 2026-09-17 03:46:01 cycle_id=20260917-034601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 04:01:02 cycle_id=20260917-040102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-040102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-040102)
+===== DevQueue cycle end: 2026-09-17 04:01:02 cycle_id=20260917-040102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 04:16:02 cycle_id=20260917-041602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-041602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-041602)
+===== DevQueue cycle end: 2026-09-17 04:16:02 cycle_id=20260917-041602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 04:31:01 cycle_id=20260917-043101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-043101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-043101)
+===== DevQueue cycle end: 2026-09-17 04:31:02 cycle_id=20260917-043101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 04:46:02 cycle_id=20260917-044602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-044602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-044602)
+===== DevQueue cycle end: 2026-09-17 04:46:02 cycle_id=20260917-044602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 05:01:01 cycle_id=20260917-050101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-050101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-050101)
+===== DevQueue cycle end: 2026-09-17 05:01:02 cycle_id=20260917-050101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 05:16:01 cycle_id=20260917-051601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-051601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-051601)
+===== DevQueue cycle end: 2026-09-17 05:16:02 cycle_id=20260917-051601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 05:31:01 cycle_id=20260917-053101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-053101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-053101)
+===== DevQueue cycle end: 2026-09-17 05:31:02 cycle_id=20260917-053101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 05:46:01 cycle_id=20260917-054601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-054601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-054601)
+===== DevQueue cycle end: 2026-09-17 05:46:02 cycle_id=20260917-054601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 06:01:02 cycle_id=20260917-060102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-060102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-060102)
+===== DevQueue cycle end: 2026-09-17 06:01:02 cycle_id=20260917-060102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 06:16:01 cycle_id=20260917-061601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-061601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-061601)
+===== DevQueue cycle end: 2026-09-17 06:16:02 cycle_id=20260917-061601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 06:31:01 cycle_id=20260917-063101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-063101)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-063101)
+===== DevQueue cycle end: 2026-09-17 06:31:02 cycle_id=20260917-063101 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 06:46:02 cycle_id=20260917-064602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-064602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-064602)
+===== DevQueue cycle end: 2026-09-17 06:46:02 cycle_id=20260917-064602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 07:01:02 cycle_id=20260917-070102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-070102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-070102)
+===== DevQueue cycle end: 2026-09-17 07:01:02 cycle_id=20260917-070102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 07:16:02 cycle_id=20260917-071602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-071602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-071602)
+===== DevQueue cycle end: 2026-09-17 07:16:02 cycle_id=20260917-071602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 07:31:02 cycle_id=20260917-073102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-073102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-073102)
+===== DevQueue cycle end: 2026-09-17 07:31:02 cycle_id=20260917-073102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 07:46:01 cycle_id=20260917-074601 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-074601)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-074601)
+===== DevQueue cycle end: 2026-09-17 07:46:02 cycle_id=20260917-074601 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 08:01:02 cycle_id=20260917-080102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-080102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-080102)
+===== DevQueue cycle end: 2026-09-17 08:01:02 cycle_id=20260917-080102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 08:16:02 cycle_id=20260917-081602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-081602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-081602)
+===== DevQueue cycle end: 2026-09-17 08:16:02 cycle_id=20260917-081602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 08:31:02 cycle_id=20260917-083102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-083102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-083102)
+===== DevQueue cycle end: 2026-09-17 08:31:02 cycle_id=20260917-083102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 08:46:02 cycle_id=20260917-084602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-084602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-084602)
+===== DevQueue cycle end: 2026-09-17 08:46:02 cycle_id=20260917-084602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 09:01:02 cycle_id=20260917-090102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-090102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-090102)
+===== DevQueue cycle end: 2026-09-17 09:01:02 cycle_id=20260917-090102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 09:16:02 cycle_id=20260917-091602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-091602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-091602)
+===== DevQueue cycle end: 2026-09-17 09:16:02 cycle_id=20260917-091602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 09:31:02 cycle_id=20260917-093102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-093102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-093102)
+===== DevQueue cycle end: 2026-09-17 09:31:02 cycle_id=20260917-093102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 09:46:02 cycle_id=20260917-094602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-094602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-094602)
+===== DevQueue cycle end: 2026-09-17 09:46:02 cycle_id=20260917-094602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 10:01:02 cycle_id=20260917-100102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-100102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-100102)
+===== DevQueue cycle end: 2026-09-17 10:01:02 cycle_id=20260917-100102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 10:16:02 cycle_id=20260917-101602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-101602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-101602)
+===== DevQueue cycle end: 2026-09-17 10:16:02 cycle_id=20260917-101602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 10:31:02 cycle_id=20260917-103102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-103102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-103102)
+===== DevQueue cycle end: 2026-09-17 10:31:02 cycle_id=20260917-103102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 10:46:02 cycle_id=20260917-104602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-104602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-104602)
+===== DevQueue cycle end: 2026-09-17 10:46:02 cycle_id=20260917-104602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 11:01:02 cycle_id=20260917-110102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-110102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-110102)
+===== DevQueue cycle end: 2026-09-17 11:01:02 cycle_id=20260917-110102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 11:16:02 cycle_id=20260917-111602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-111602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-111602)
+===== DevQueue cycle end: 2026-09-17 11:16:02 cycle_id=20260917-111602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 11:31:02 cycle_id=20260917-113102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-113102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-113102)
+===== DevQueue cycle end: 2026-09-17 11:31:02 cycle_id=20260917-113102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 11:46:02 cycle_id=20260917-114602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-114602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-114602)
+===== DevQueue cycle end: 2026-09-17 11:46:02 cycle_id=20260917-114602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 12:01:02 cycle_id=20260917-120102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-120102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-120102)
+===== DevQueue cycle end: 2026-09-17 12:01:02 cycle_id=20260917-120102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 12:16:02 cycle_id=20260917-121602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-121602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-121602)
+===== DevQueue cycle end: 2026-09-17 12:16:02 cycle_id=20260917-121602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 12:31:02 cycle_id=20260917-123102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-123102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-123102)
+===== DevQueue cycle end: 2026-09-17 12:31:02 cycle_id=20260917-123102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 12:46:02 cycle_id=20260917-124602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-124602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-124602)
+===== DevQueue cycle end: 2026-09-17 12:46:02 cycle_id=20260917-124602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 13:01:02 cycle_id=20260917-130102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-130102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-130102)
+===== DevQueue cycle end: 2026-09-17 13:01:02 cycle_id=20260917-130102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 13:16:02 cycle_id=20260917-131602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-131602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-131602)
+===== DevQueue cycle end: 2026-09-17 13:16:02 cycle_id=20260917-131602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 13:31:02 cycle_id=20260917-133102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-133102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-133102)
+===== DevQueue cycle end: 2026-09-17 13:31:02 cycle_id=20260917-133102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 13:46:02 cycle_id=20260917-134602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-134602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-134602)
+===== DevQueue cycle end: 2026-09-17 13:46:02 cycle_id=20260917-134602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 14:01:02 cycle_id=20260917-140102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-140102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-140102)
+===== DevQueue cycle end: 2026-09-17 14:01:02 cycle_id=20260917-140102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 14:16:02 cycle_id=20260917-141602 =====
+check_collision: YIELD: marathon軌道的鎖仍新鮮（cycle_id=20260917-140036，13.8分鐘前取得），判定它正在跑，本輪讓路
+
+===== DevQueue cycle start: 2026-09-17 14:31:02 cycle_id=20260917-143102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/backfill_stock_financials_gap_2025.log.json（0.1分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-09-17 14:46:02 cycle_id=20260917-144602 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/backfill_stock_financials_gap_2025.log.json（14.0分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-09-17 15:01:02 cycle_id=20260917-150102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-150102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-150102)
+===== DevQueue cycle end: 2026-09-17 15:01:02 cycle_id=20260917-150102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 15:16:02 cycle_id=20260917-151602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-151602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-151602)
+===== DevQueue cycle end: 2026-09-17 15:16:02 cycle_id=20260917-151602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 15:31:02 cycle_id=20260917-153102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-153102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-153102)
+===== DevQueue cycle end: 2026-09-17 15:31:02 cycle_id=20260917-153102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 15:46:02 cycle_id=20260917-154602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-154602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-154602)
+===== DevQueue cycle end: 2026-09-17 15:46:02 cycle_id=20260917-154602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 16:01:02 cycle_id=20260917-160102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-160102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-160102)
+===== DevQueue cycle end: 2026-09-17 16:01:02 cycle_id=20260917-160102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 16:16:02 cycle_id=20260917-161602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-161602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-161602)
+===== DevQueue cycle end: 2026-09-17 16:16:02 cycle_id=20260917-161602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 16:31:02 cycle_id=20260917-163102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-163102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-163102)
+===== DevQueue cycle end: 2026-09-17 16:31:02 cycle_id=20260917-163102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 16:46:02 cycle_id=20260917-164602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-164602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-164602)
+===== DevQueue cycle end: 2026-09-17 16:46:02 cycle_id=20260917-164602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 17:01:02 cycle_id=20260917-170102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-170102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-170102)
+===== DevQueue cycle end: 2026-09-17 17:01:03 cycle_id=20260917-170102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 17:16:02 cycle_id=20260917-171602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-171602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-171602)
+===== DevQueue cycle end: 2026-09-17 17:16:02 cycle_id=20260917-171602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 17:31:02 cycle_id=20260917-173102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-173102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-173102)
+===== DevQueue cycle end: 2026-09-17 17:31:02 cycle_id=20260917-173102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 17:46:02 cycle_id=20260917-174602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-174602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-174602)
+===== DevQueue cycle end: 2026-09-17 17:46:02 cycle_id=20260917-174602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 18:01:02 cycle_id=20260917-180102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-180102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-180102)
+===== DevQueue cycle end: 2026-09-17 18:01:02 cycle_id=20260917-180102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 18:16:02 cycle_id=20260917-181602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-181602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-181602)
+===== DevQueue cycle end: 2026-09-17 18:16:02 cycle_id=20260917-181602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 18:31:02 cycle_id=20260917-183102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-183102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-183102)
+===== DevQueue cycle end: 2026-09-17 18:31:03 cycle_id=20260917-183102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 18:46:02 cycle_id=20260917-184602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-184602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-184602)
+===== DevQueue cycle end: 2026-09-17 18:46:02 cycle_id=20260917-184602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 19:01:02 cycle_id=20260917-190102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-190102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-190102)
+===== DevQueue cycle end: 2026-09-17 19:01:03 cycle_id=20260917-190102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 19:16:02 cycle_id=20260917-191602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-191602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-191602)
+===== DevQueue cycle end: 2026-09-17 19:16:03 cycle_id=20260917-191602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 19:31:02 cycle_id=20260917-193102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-193102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-193102)
+===== DevQueue cycle end: 2026-09-17 19:31:02 cycle_id=20260917-193102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 19:46:02 cycle_id=20260917-194602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-194602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-194602)
+===== DevQueue cycle end: 2026-09-17 19:46:02 cycle_id=20260917-194602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 20:01:02 cycle_id=20260917-200102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-200102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-200102)
+===== DevQueue cycle end: 2026-09-17 20:01:02 cycle_id=20260917-200102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 20:16:02 cycle_id=20260917-201602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-201602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-201602)
+===== DevQueue cycle end: 2026-09-17 20:16:02 cycle_id=20260917-201602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 20:31:02 cycle_id=20260917-203102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-203102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-203102)
+===== DevQueue cycle end: 2026-09-17 20:31:02 cycle_id=20260917-203102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 20:46:02 cycle_id=20260917-204602 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：docs/LOCAL_SCHEDULED_TASKS.md（0.0分鐘前）、research/backfill_stock_financials_gap_2025.log.json（2.9分鐘前）、scripts/probe_twse_publish_time.py（1.2分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-09-17 21:01:02 cycle_id=20260917-210102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/backfill_stock_financials_gap_2025.log.json（6.4分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-09-17 21:16:02 cycle_id=20260917-211602 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：research/backfill_stock_financials_gap_2025.log.json（8.1分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-09-17 21:31:02 cycle_id=20260917-213102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-213102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-213102)
+===== DevQueue cycle end: 2026-09-17 21:31:02 cycle_id=20260917-213102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 21:46:02 cycle_id=20260917-214602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-214602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-214602)
+===== DevQueue cycle end: 2026-09-17 21:46:02 cycle_id=20260917-214602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 22:01:02 cycle_id=20260917-220102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-220102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-220102)
+===== DevQueue cycle end: 2026-09-17 22:01:02 cycle_id=20260917-220102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 22:16:02 cycle_id=20260917-221602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-221602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-221602)
+===== DevQueue cycle end: 2026-09-17 22:16:02 cycle_id=20260917-221602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 22:31:02 cycle_id=20260917-223102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-223102)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-223102)
+===== DevQueue cycle end: 2026-09-17 22:31:02 cycle_id=20260917-223102 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 22:46:02 cycle_id=20260917-224602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260917-224602)
+prompt: NO_PENDING_ITEM (exit=3)
+finally: released .devqueue.lock (cycle_id=20260917-224602)
+===== DevQueue cycle end: 2026-09-17 22:46:02 cycle_id=20260917-224602 reason=QUEUE_EMPTY exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-17 23:16:02 cycle_id=20260917-231602 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：.github/scripts/build_sparklines.py（11.2分鐘前）、.github/scripts/update_price_history.py（11.2分鐘前）、index.html（11.2分鐘前）、research/backfill_stock_financials_gap_2025.log.json（11.2分鐘前）、scripts/data_audit.py（11.2分鐘前），判定有人正在中途，本輪讓路
