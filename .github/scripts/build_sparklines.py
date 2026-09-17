@@ -37,12 +37,22 @@ def main() -> None:
     doc = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8"))
     prices = doc.get("prices") or {}
 
+    # 2026-09-17（總司令裁示【稽核.四.1】先封鎖，再修）：先掃一輪求出「當日
+    # 最大日期」——這是實際發生過的真事件（09-16 TWSE payload停在09-15、
+    # TPEx已經是09-16），若照舊直接切每檔最後20筆，TWSE那1365檔的走勢線
+    # 最右邊那個點會是「昨天」的收盤，卻跟TPEx那994檔「今天」的收盤混在
+    # 同一份輸出裡，使用者看不出兩者其實不是同一天。
+    latest_date = max((rows[-1]["date"] for rows in prices.values() if rows), default=None)
+
     out: dict[str, list[float]] = {}
-    latest_date = None
     skipped_too_short = 0
+    skipped_stale = 0
     for code, rows in prices.items():
         if not rows:
             skipped_too_short += 1
+            continue
+        if latest_date and rows[-1].get("date") != latest_date:
+            skipped_stale += 1
             continue
         closes = []
         for r in rows[-SPARK_DAYS:]:
@@ -53,9 +63,6 @@ def main() -> None:
             skipped_too_short += 1
             continue
         out[code] = closes
-        d = rows[-1].get("date")
-        if d and (latest_date is None or d > latest_date):
-            latest_date = d
 
     payload = {
         "meta": {
@@ -65,16 +72,20 @@ def main() -> None:
             "days": SPARK_DAYS,
             "stocks": len(out),
             "skipped_too_short": skipped_too_short,
+            "skipped_stale": skipped_stale,
             "data_asof": latest_date,
             "note": "每檔最多 20 個收盤價，由舊到新，原始收盤價（未還原權息）。App 所有頁面的走勢線都讀這個檔，"
                     "不再逐檔打 STOCK_DAY——新加入的自選股只要在全市場歷史裡就立刻有線。",
+            "skipped_stale_note": "最後一筆日期落後當日最大日期（例如TWSE/TPEx兩個來源payload"
+                                  "日期對不上時，較舊的那一邊）的股票不輸出走勢線，寧可空狀態，"
+                                  "不把落後日期的收盤當今天顯示。",
         },
         "sparklines": out,
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     size_kb = OUT_PATH.stat().st_size / 1024
     print(f"寫入 {OUT_PATH}：{len(out)} 檔走勢線（{size_kb:.0f} KB），資料日期 {latest_date}，"
-          f"略過 {skipped_too_short} 檔（歷史不足2筆）")
+          f"略過 {skipped_too_short} 檔（歷史不足2筆）、{skipped_stale} 檔（日期落後最大日期）")
 
 
 if __name__ == "__main__":

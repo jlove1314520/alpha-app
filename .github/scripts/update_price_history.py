@@ -393,6 +393,17 @@ def main():
         errors.append(f"price_twse: {e}")
         today_iso = datetime.now(TW_TZ).strftime("%Y-%m-%d")
 
+    # 2026-09-17（總司令裁示【稽核.四.1】先封鎖，再修）：twse/tpex是兩個獨立
+    # 請求，openapi.twse.com.tw的STOCK_DAY_ALL實測會在台北23:10仍回前一個
+    # 交易日（發布時間比想像中晚），tpex_mainboard_quotes卻已經是當天——
+    # 兩邊payload日期對不上時，若照舊直接merge，下游（quotes_all_tw.json
+    # 現價快照／sparklines.json）會把「昨天的收盤」當「今天的現價」顯示，
+    # 使用者看不出這個落差。這裡只負責偵測並把兩邊各自的payload日期記進
+    # meta，供下游決定要不要相信；不在這裡猜「應該用哪一天」或硬改資料，
+    # 那是下游依落後與否各自決定要不要輸出現價的事。twse_payload_date取自
+    # 上面已經抓到的today_iso（twse抓取失敗時為None，代表這次比對做不了）。
+    twse_payload_date = today_iso if twse else None
+
     try:
         ledger = load_ex_dividend_ledger()
         announcements = fetch_ex_dividend_announcements()
@@ -412,14 +423,34 @@ def main():
             prices[code] = merge_rows(prices.get(code), latest)
         twse_updated = len(twse)
 
+    tpex_payload_date = None
     try:
         tpex = fetch_tpex()
+        tpex_payload_date = next(iter(tpex.values()))["date"] if tpex else None
         for code, latest in tpex.items():
             prices[code] = merge_rows(prices.get(code), latest)
         tpex_updated = len(tpex)
     except Exception as e:
         print(f"價量(TPEx) 更新失敗：{e}")
         errors.append(f"price_tpex: {e}")
+
+    # 2026-09-17（總司令裁示【稽核.四.1】）：兩邊payload都抓到才能比較；任一邊
+    # 失敗（本輪errors已有記錄）就不做這個比較，避免用「抓不到」誤判成「日期
+    # 不同」。相等或任一邊缺席都清掉舊的警告——警告只反映「這一輪」的狀態，
+    # 不該讓上一輪的警告卡住不放（那樣下游會一直以為在停擺）。
+    if twse_payload_date and tpex_payload_date and twse_payload_date != tpex_payload_date:
+        d1 = datetime.strptime(twse_payload_date, "%Y-%m-%d")
+        d2 = datetime.strptime(tpex_payload_date, "%Y-%m-%d")
+        mixed_date_warning = {
+            "twse_date": twse_payload_date,
+            "tpex_date": tpex_payload_date,
+            "delta_days": abs((d2 - d1).days),
+        }
+        print(f"⚠ 混日期：TWSE payload日期={twse_payload_date}，TPEx payload日期={tpex_payload_date}"
+              f"（差{mixed_date_warning['delta_days']}天）——下游build_sparklines.py/本腳本自己的"
+              "quotes_all_tw.json快照會對落後的那一邊停止輸出現價")
+    else:
+        mixed_date_warning = None
 
     payload.setdefault("meta", {})
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
@@ -429,6 +460,7 @@ def main():
     payload["meta"]["errors"] = errors
     payload["meta"]["ex_dividend_events_added"] = ex_div_added
     payload["meta"]["ex_dividend_events_applied"] = ex_div_applied
+    payload["meta"]["mixed_date_warning"] = mixed_date_warning
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {OUT_PATH}：TWSE {twse_updated} 檔+TPEx {tpex_updated} 檔（合計 {len(prices)} 檔有資料），"
           f"除權息事件本輪新增 {ex_div_added} 筆、套用回溯調整 {ex_div_applied} 筆")
@@ -439,11 +471,23 @@ def main():
     # 一天的收盤價/漲跌%/成交值」，但price_history.json整份90天歷史太大
     # （32MB+），不適合每次client-side抓整份只為了取最新一天。這裡從剛更新
     # 的prices取每檔最後兩筆算出這個輕量快照，單獨寫一個小檔。
+    #
+    # 2026-09-17（總司令裁示【稽核.四.1】先封鎖，再修）：「當日最大日期」
+    # 先掃一輪求出來，這不限於這次twse/tpex混日期事件——任何一檔股票的
+    # 最後一筆比「今天大盤其他股票都已經有的那個日期」還舊（不管差1天還是
+    # 差好幾個月，見那212檔停在2024-12-31的已知案例），都不該被當成「現價」
+    # 顯示，寧可這個快照裡沒有這一檔，也不要顯示一個使用者以為是今天、
+    # 其實是舊資料的價格。
+    max_date = max((rows[-1]["date"] for rows in prices.values() if rows), default=None)
     snapshot = {}
+    stale_excluded = []
     for code, rows in prices.items():
         if not rows:
             continue
         last = rows[-1]
+        if max_date and last["date"] < max_date:
+            stale_excluded.append(code)
+            continue
         prev = rows[-2] if len(rows) >= 2 else None
         change_pct = None
         if prev and prev.get("close") not in (None, 0):
@@ -459,13 +503,21 @@ def main():
     # 既有讀 meta 的程式（build_picks_ledger.py 等）不受影響。
     now_iso = datetime.now(TW_TZ).isoformat()
     src_label = "TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes（經 data/price_history.json 衍生）"
+    print(f"quotes_all_tw快照：{len(snapshot)} 檔輸出現價，{len(stale_excluded)} 檔因最後一筆"
+          f"日期落後大盤最新日期（{max_date}）被排除，不輸出現價")
     SNAPSHOT_PATH.write_text(json.dumps({
         "fetched_at": now_iso,
         "source": src_label,
         "meta": {"generated_at": datetime.now(TW_TZ).isoformat(),
                  "source": "從data/price_history.json衍生（TWSE STOCK_DAY_ALL + TPEx tpex_mainboard_quotes）",  # 2026-09-03（P0三-三.3）
                  "note": "從data/price_history.json每檔最後兩筆算出的輕量快照（收盤/漲跌%/成交值），"
-                         "供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。"},
+                         "供類股成分股清單等只需要「今天」資料的功能用，不用載入整份90天歷史。",
+                 "data_asof": max_date,
+                 "stale_excluded_count": len(stale_excluded),
+                 "stale_excluded_note": "最後一筆日期落後大盤當日最大日期的股票不輸出現價"
+                                        "（寧可空狀態，不顯示落後日期的收盤當現價），"
+                                        "codes見stale_excluded_codes。"},
+        "stale_excluded_codes": stale_excluded,
         "quotes": snapshot,
     }, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {SNAPSHOT_PATH}：{len(snapshot)} 檔輕量快照")
