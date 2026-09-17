@@ -203,3 +203,26 @@ powershell -ExecutionPolicy Bypass -File C:\alpha\register-ibkr-gateway-task.ps1
 `research\ibkr_gateway_cycle.log`跟桌面上有沒有跳出Gateway登入視窗
 來驗證。如果`register-ibkr-gateway-task.ps1`本身也回`Access is
 denied`，代表連你自己的PowerShell也需要「以系統管理員身分執行」。
+
+## 六、`AlphaTwsePublishProbe` 排程視窗調整（2026-09-17，稽核.四.2）
+
+**起因**：`稽核.四`查出`data/price_history.json`上市/上櫃差一個交易日的
+根因後，總司令要求實測`openapi.twse.com.tw`（管線實際用的主機）的
+`STOCK_DAY_ALL`到底幾點發布——但既有排程視窗只到20:00，實測發現
+**23:10 payload還停在前一個交易日**，舊視窗量不到。裁示改成交易日
+15:00~隔日10:00每30分鐘一輪，連測三個交易日。
+
+`scripts/probe_twse_publish_time.py`本身已經改好（新增
+`STOCK_DAY_ALL_OPENAPI`探測項、記錄`payload_date`），**排程視窗本身**
+（`AlphaTwsePublishProbe`工作的觸發器）需要調整，跟`AlphaIbkrGateway`
+同一個環境限制：`C:\alpha\reschedule-twse-probe-task.ps1`已寫好，
+但本session的PowerShell對`Set-ScheduledTask`一樣回`Access is denied`，
+**待總司令親自跑**：
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\alpha\reschedule-twse-probe-task.ps1
+```
+跑完後用`Get-ScheduledTask -TaskName AlphaTwsePublishProbe |
+Select-Object -ExpandProperty Triggers`確認`StartBoundary`是15:00、
+`Repetition`間隔30分鐘、時長19小時。**在拿到至少三個交易日的實測結果
+之前，不要調整`market.yml`的cron，也不要猜發布時間是幾點**（總司令
+原話明令，見`PENDING_QUEUE.md`）。
