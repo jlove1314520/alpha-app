@@ -185,7 +185,11 @@ def find_next() -> tuple[int, str] | None:
     """回傳 (行號, 該行文字)，找不到回 None。只認 `- [ ]` 開頭、跳過 `- [!]`。
 
     優先依頂端的權威順序清單取件；清單裡的項目都做完（或都被標成阻塞）之後，
-    再回到檔案順序處理剩下的。
+    再回到檔案順序處理剩下的。**`[研究]` 類項目一律跳過**（2026-09-18新增，
+    見下方迴圈內註解）——這支只服務 DevQueue（開發帽），研究類工作交給
+    marathon／hypothesis_queue 讀同一份檔案自己接手，回 None 不代表沒有
+    任何待辦，只代表「沒有輪到 DevQueue 做的」，呼叫端要用
+    `_has_any_pending_line()` 分辨這兩種情況。
     """
     lines = _lines()
     pending = [(i, ln) for i, ln in enumerate(lines) if ln.startswith("- [ ]")]
@@ -202,8 +206,7 @@ def find_next() -> tuple[int, str] | None:
         st = _load_state()
         recent = st.get("_recent_classes", [])
         need_product = len(recent) >= 2 and all(x == "債務" for x in recent[-2:])
-        ordered = [(k.replace("[產品]", "").strip(), "產品" if "[產品]" in k else "債務")
-                   for k in order_entries]
+        ordered = [_entry_key_class(k) for k in order_entries]
         if need_product:
             for key, cls in ordered:
                 if cls == "產品" and key in by_key:
@@ -212,18 +215,41 @@ def find_next() -> tuple[int, str] | None:
             # 永遠不會出現的產品項（那會變成另一種卡住）
             st["_recent_classes"] = []
             _save_state(st)
-        for key, _cls in ordered:
+        for key, cls in ordered:
+            # 2026-09-18（總司令裁示【改為多軌並行】的落地）：[研究]類項目屬於
+            # marathon／hypothesis_queue軌，不是DevQueue（開發帽）的工作——見
+            # CLAUDE.md九、帽子規則「越權禁止」。過去曾經因為ORDER清單機械式
+            # 取件不分track，把#74這類研究工作錯派給DevQueue（見PENDING_QUEUE.md
+            # 2026-09-16該筆⛔記錄），這裡直接跳過，讓它留給對的track去讀
+            # PENDING_QUEUE.md（那些track是`claude -p`提示詞讀全文判斷，不靠
+            # 這支腳本的機械式解析，所以跳過不影響它們看得到這一項）。
+            if cls == "研究":
+                continue
             if key in by_key:
                 return by_key[key]
-    return pending[0]
+    # 走到這裡代表：沒有ORDER清單、或清單裡沒有一項能在pending裡對上——
+    # 兩種情況都退回檔案順序，但一樣要濾掉[研究]類項目（用item_class()判斷，
+    # 邏輯與上面ordered分支一致，只是這裡沒有現成的cls可用）。
+    non_research = [(i, ln) for i, ln in pending if item_class(ln) != "研究"]
+    return non_research[0] if non_research else None
+
+
+def _entry_key_class(entry: str) -> tuple[str, str]:
+    """把 ORDER-BEGIN 清單裡一行拆成 (項目編號key, 類別)。類別看 [產品]/[研究] 標記，都沒有就是債務。"""
+    if "[研究]" in entry:
+        return entry.replace("[研究]", "").strip(), "研究"
+    if "[產品]" in entry:
+        return entry.replace("[產品]", "").strip(), "產品"
+    return entry.strip(), "債務"
 
 
 def item_class(text: str) -> str:
-    """這一項是債務還是產品。以 ORDER 清單的標記為準，清單沒有就當債務。"""
+    """這一項是債務、產品還是研究。以 ORDER 清單的標記為準，清單沒有就當債務。"""
     key = item_key(text)
     for entry in _explicit_order():
-        if entry.replace("[產品]", "").strip() == key:
-            return "產品" if "[產品]" in entry else "債務"
+        entry_key, cls = _entry_key_class(entry)
+        if entry_key == key:
+            return cls
     return "債務"
 
 
@@ -283,12 +309,55 @@ def record(result: str) -> int:
     return 0
 
 
+# 2026-09-18（總司令裁示【最優先·修理自走系統】）矛盾偵測：find_next()回None
+# 不代表「真的沒事做」——2026-09-08~09-18這段期間PENDING_QUEUE.md累積209筆
+# 用散文+🔲記錄的裁示，但「- [ ]」開頭的行數是0，導致DevQueue每輪誤判成
+# QUEUE_EMPTY安靜睡回去，實際上待辦一直都在，只是換了個機器認不得的格式。
+STALE_STATUS_MARKERS = re.compile(r"🔲|進行中|未開始")
+
+
+def _has_any_pending_line() -> bool:
+    """檔案裡是否還有任何「- [ ]」開頭的行，不分產品/債務/研究。"""
+    return any(ln.startswith("- [ ]") for ln in _lines())
+
+
+def _stale_status_markers_present() -> bool:
+    """檔案原文（不只是「- [ ]」那幾行）裡是否還留著🔲／進行中／未開始這類散文狀態字樣。"""
+    return bool(STALE_STATUS_MARKERS.search(QUEUE.read_text(encoding="utf-8")))
+
+
+def _record_format_mismatch(detail: str) -> None:
+    st = _load_state()
+    st["_format_mismatch"] = {"detected_at": datetime.now(TZ).isoformat(), "detail": detail}
+    _save_state(st)
+
+
+def _clear_format_mismatch() -> None:
+    st = _load_state()
+    if st.pop("_format_mismatch", None) is not None:
+        _save_state(st)
+
+
 def build_prompt() -> int:
     nxt = find_next()
     if nxt is None:
         PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")
+        if _has_any_pending_line():
+            # 還有「- [ ]」項目，只是全部是[研究]類（不歸DevQueue管）——這是
+            # 正常讓路，不是矛盾。清掉舊的mismatch旗標（狀態已經自癒）。
+            _clear_format_mismatch()
+            print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類，留給"
+                  "marathon／hypothesis_queue軌")
+            return 3
+        if _stale_status_markers_present():
+            detail = "find_next()回None但檔案仍有🔲/進行中/未開始字樣，判定為格式不符而非真的做完"
+            _record_format_mismatch(detail)
+            print(f"QUEUE_FORMAT_MISMATCH: {detail}")
+            return 4
+        _clear_format_mismatch()
         print("NO_PENDING_ITEM")
         return 3
+    _clear_format_mismatch()
     _, text = nxt
     key = item_key(text)
     clean = re.sub(r"^- \[ \]\s*", "", text).strip()

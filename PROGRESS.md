@@ -1,3 +1,69 @@
+## 2026-09-18（續2）（修理自走系統：DevQueue從09-08起看不到任何交辦＋檢定力前置關卡規則更正）
+
+戴**維運帽**（修DevQueue這支自走機制本身，不是研究/開發功能）。總司令
+裁示【最優先·修理自走系統】＋【更正】檢定力前置關卡方向反了，已登記
+進`PENDING_QUEUE.md`（續5）。
+
+**根因（Cowork驗明）**：`scripts/dev_queue_runner.py::find_next()`只認
+`- [ ]`開頭的行，但`PENDING_QUEUE.md`從09-08起新裁示全部改成散文+
+🔲狀態記號，`- [ ]`行數變成0，DevQueue每15分鐘醒來看到空佇列、記一行
+QUEUE_EMPTY、睡回去——待辦其實一直都在，只是換了機器認不得的格式。
+
+**四件事全部完成**：
+1. 為現有真正未完成的裁示（重構.A2/B/C/D + 二bcd/三 + E1）補
+   `- [ ]`索引行，散文原文照留不動，兩者並存。**誠實澄清**：重構.A2
+   總司令原話寫「階段一.2尚未做」但查證後階段一.2本身已完成，真正
+   待裁示的是GATE6去均值化bug的兩個修正提案，索引項文字已改記正確
+   現況而非照抄可能過時的字面。
+2. `PENDING_QUEUE.md`「執行順序（權威清單）」新增六個`重構.*` [研究]
+   項與一個`重構.E1`（債務）排最前面；65個舊項目去重查證後，39個
+   確認完成移除，其餘26個查不到明確完成標記或本身已阻塞，保留在
+   後面（不代表確認未完成，只是誠實標「未逐筆重新查證」）。
+3. `scripts/dev_queue_runner.py`新增`item_class()`/`find_next()`認得
+   `[研究]`標記並跳過（解決2026-09-16那筆⛔紀錄留下的懸案：研究類
+   項目留在ORDER清單裡但DevQueue自己跳過，不整個移除）；新增矛盾
+   偵測——`find_next()`回`None`時分三種情況：還有`[研究]`類待辦
+   （正常讓路）／完全沒有`- [ ]`但檔案仍有🔲等字樣（`QUEUE_FORMAT_
+   MISMATCH`，新exit code 4，寫入`dev_queue_state.json`）／真的沒事做。
+   `C:\alpha\run-dev-queue-cycle.ps1`對應新增exit 4的reason對照。
+   **半成品誠實記錄**：`scripts/check_external_connectivity.py`讀取
+   `_format_mismatch`旗標、併進`local_task_health`告警的函式還沒寫，
+   已補`重構.E1`索引避免消失。
+4. `C:\alpha\run-dev-queue-cycle.ps1`的`finally`區塊新增只
+   `git add research/dev_queue_cycle.log`（不用`-A`）+ 有變化才commit
+   +`git pull --rebase --autostash`+`git push`，仿`news_events.yml`
+   既有寫法。**這支腳本不在`alpha-app`這個git repo裡**（在`C:\alpha\`
+   根目錄），無法用本次commit留存證據，如實記錄本輪確實編輯過它。
+
+**檢定力前置關卡規則更正**：`research/MARATHON_PROTOCOL.md`「1a-0b」
+節第4點標⚠️過時，新增「1a-0b修正」小節明文禁止「改用更短持有期規避
+MDE>3倍損益兩平線的門檻」，唯一被接受的路徑是「重新設計構造壓低TE」
+或「延長樣本」。原規則的缺陷：損益兩平線隨換倉頻率遞增，換更短持有
+期會把門檻一起拉高而非把MDE壓低，等於換一把更鬆的尺，這正是階段一.1
+把我們推向月頻（經濟上更難達成alpha）而不是季頻（總司令真正想要的
+量級）的根因。同一節把C軌（`重構.C`）的TE≤2.5%硬性設計約束與反推
+數字（TE5%→MDE≈6.7%不足／2.5%→3.4%接近／2.2%→2.95%剛好覆蓋t60）
+寫入，供之後真正動筆寫SPEC時直接引用。**只改規則文字，不重跑任何
+既有回測、不重新裁決已有判定**。
+
+**驗證**：`python -m py_compile scripts/dev_queue_runner.py`通過；
+PowerShell Parser對`run-dev-queue-cycle.ps1`語法檢查通過；用暫存
+copy跑三種情境（全研究類/純mismatch/真的做完）確認`build_prompt()`
+分別回exit 3/4/3且訊息正確；`python scripts/dev_queue_runner.py next`
+實測正確找到`重構.E1`（略過六個`[研究]`項）。**未驗證**：實際排程
+跑一輪`run-dev-queue-cycle.ps1`看commit是否真的落地（本輪工作目錄
+本身不乾淨會被`check_collision()`正確擋下，需等下一個乾淨輪次）。
+
+**影響檔案**：`PENDING_QUEUE.md`、`scripts/dev_queue_runner.py`、
+`research/MARATHON_PROTOCOL.md`、`C:\alpha\run-dev-queue-cycle.ps1`
+（不在本repo）。
+
+**下一步（已排進PENDING_QUEUE的機器索引）**：重構.E1（接上
+local_task_health告警）優先，其餘六項`[研究]`交給marathon／
+hypothesis_queue軌接續。
+
+---
+
 ## 2026-09-18（續）（研究方向重構階段一完成：power_budget.py／47筆FAIL重分類／regimes_tw.py）
 
 戴**驗證帽**。commit `2f0e02f1`、`8d7a0fc8`。總司令裁示研究方向重構
