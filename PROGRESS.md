@@ -1,3 +1,48 @@
+## 2026-09-18（續）（研究方向重構階段一完成：power_budget.py／47筆FAIL重分類／regimes_tw.py）
+
+戴**驗證帽**。commit `2f0e02f1`、`8d7a0fc8`。總司令裁示研究方向重構
+（「全力找alpha，目標明確化為贏過0050」）＋後續多軌並行/牛熊制度驗證
+裁示，已登記進`PENDING_QUEUE.md`。index.html/資料管線功能開發即刻停止
+（本輪未動`index.html`任何功能性程式碼）。
+
+**階段一.1（檢定力預算，最高優先）**：新增`research/power_budget.py`
+（`min_detectable_alpha()`/`required_years()`/`realized_tracking_error()`）。
+實測既有`A_4pass`/`B_plus_value_pe`共12組VAL期構造：**全部6組季頻(t60)
+構造MDE(80%檢定力)15.45%~23.50%，超過3x損益兩平線(8.79%)**，依新增的
+`MARATHON_PROTOCOL.md`1a-0b前置關卡規則以後不准開跑；6組月頻(t20)構造
+MDE 11.84%~15.50%低於3x損益兩平線(27.15%)，可以開跑。用平均TE(11.5%)
+反推：現有3.85年VAL樣本要偵測t60的2.93%毛alpha需要約**121年**資料。
+
+**階段一.2（#74 GATE6）**：確認已在更早一輪完成，本輪查證無需重做。
+
+**階段一.3（47筆FAIL重分類）**：`research/reclassify_underpowered.py`
+用Fisher z近似對10筆乾淨IC+n格式逐一核對，**3筆(#187/#229/#239)方向
+正確但樣本不足，重分類UNDERPOWERED列入候選重測清單**；7筆方向錯誤/
+期間矛盾維持FAIL；36筆（percentile類測試無封閉形式power公式）誠實
+標記not_assessed_needs_simulation。
+
+**牛熊制度驗證(二.a)**：新增`research/regimes_tw.py`，從TAIEX
+2000-2024實際序列算台股多空窗口（峰谷法）。**過程中抓到並修正一個
+自己的bug**：第一版「須回到原始高點才算收復」的定義會把2008/2011/
+2015/2018Q4全部吞進同一段長達17年的空頭，改用trough起算反彈+20%的
+對稱版本後正確算出10段空頭，含2008(-56%)/2011(-27%)/2015(-26%)/
+2020(-29%)/2022(-32%)。已寫進`REGIME_CONDITIONS.md`鎖定。
+
+**影響檔案**：`research/power_budget.py`、`research/power_budget_table.json`、
+`research/regimes_tw.py`、`research/reclassify_underpowered.py`、
+`research/UNDERPOWERED_RECLASSIFICATION.jsonl`、
+`research/MARATHON_PROTOCOL.md`（新增1a-0b節）、
+`research/REGIME_CONDITIONS.md`、`research/HYPOTHESIS_QUEUE.md`、
+`PENDING_QUEUE.md`。
+
+**尚未做（下一輪待續，已在PENDING_QUEUE.md列隊）**：牛熊制度二(b)(c)(d)
+規則（分制度表強制項/INSUFFICIENT_REGIME/空頭段beta拆解）尚未寫進
+MARATHON_PROTOCOL.md；TradingView定位限制尚未寫進CLAUDE.md；
+`research/IDEA_INTAKE.md`骨架尚未建立；B軌(multibagger歸因分解)、
+C軌(core_tilt SPEC，總司令要求SPEC先給總司令看才回測)皆尚未開始。
+
+---
+
 ## 2026-09-18（#74續／稽核.五／稽核.四.5後續：研究層量測bug證實＋季報資料bug發現）
 
 戴**驗證帽**（#74是對既有GATE_SEQUENCE本身做元分析）＋**研究帽**（稽核.五
