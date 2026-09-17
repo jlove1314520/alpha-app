@@ -1,6 +1,24 @@
 {
-  "connected": false,
-  "error": "連線失敗（IB Gateway可能沒開，或port/防火牆設定不對）：ConnectionRefusedError: [WinError 1225] 遠端電腦拒絕網路連線。",
-  "balance": {},
-  "fetched_at": "2026-09-16T23:24:27.802296+08:00"
+  "fetched_at": "2026-09-17T22:51:39.915140+08:00",
+  "connected": true,
+  "account_type": "paper",
+  "error": null,
+  "balance": {
+    "BuyingPower": {
+      "value": "4079230.00",
+      "currency": "USD"
+    },
+    "GrossPositionValue": {
+      "value": "0.00",
+      "currency": "USD"
+    },
+    "NetLiquidation": {
+      "value": "1021124.02",
+      "currency": "USD"
+    },
+    "TotalCashValue": {
+      "value": "1019807.50",
+      "currency": "USD"
+    }
+  }
 }
