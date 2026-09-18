@@ -4334,3 +4334,16 @@ lock: LOCK_ACQUIRED (cycle 20260919-041602)
 prompt: Traceback (most recent call last):   File "C:\alpha\alpha-app\scripts\dev_queue_runner.py", line 558, in <module>     sys.exit(main())              ~~~~^^   File "C:\alpha\alpha-app\scripts\dev_queue_runner.py", line 546, in main     return build_prompt()   File "C:\alpha\alpha-app\scripts\dev_queue_runner.py", line 445, in build_prompt     print(f"QUEUE_FORMAT_MISMATCH: {detail}")     ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ UnicodeEncodeError: 'cp950' codec can't encode character '\U0001f532' in position 44: illegal multibyte sequence (exit=1)
 finally: released .devqueue.lock (cycle_id=20260919-041602)
 ===== DevQueue cycle end: 2026-09-19 04:16:03 cycle_id=20260919-041602 reason=PROMPT_ERROR exit= duration_min=0 =====
+
+===== DevQueue cycle start: 2026-09-19 04:31:02 cycle_id=20260919-043102 =====
+check_collision: YIELD: marathon軌道的鎖仍新鮮（cycle_id=20260919-043037，0.1分鐘前取得），判定它正在跑，本輪讓路
+
+===== DevQueue cycle start: 2026-09-19 04:46:02 cycle_id=20260919-044602 =====
+check_collision: YIELD: hypothesis_queue軌道的鎖仍新鮮（cycle_id=unknown，23.8分鐘前取得），判定它正在跑，本輪讓路
+
+===== DevQueue cycle start: 2026-09-19 05:01:02 cycle_id=20260919-050102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20260919-050102)
+prompt: Traceback (most recent call last):   File "C:\alpha\alpha-app\scripts\dev_queue_runner.py", line 558, in <module>     sys.exit(main())              ~~~~^^   File "C:\alpha\alpha-app\scripts\dev_queue_runner.py", line 546, in main     return build_prompt()   File "C:\alpha\alpha-app\scripts\dev_queue_runner.py", line 445, in build_prompt     print(f"QUEUE_FORMAT_MISMATCH: {detail}")     ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ UnicodeEncodeError: 'cp950' codec can't encode character '\U0001f532' in position 44: illegal multibyte sequence (exit=1)
+finally: released .devqueue.lock (cycle_id=20260919-050102)
+===== DevQueue cycle end: 2026-09-19 05:01:02 cycle_id=20260919-050102 reason=PROMPT_ERROR exit= duration_min=0 =====
