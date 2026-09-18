@@ -77,6 +77,31 @@ status`/`log 20260918-222452-21ae`收成，預期產出覆寫`research/
 multibagger_raw/run_summary.json`。開工/收工前`is_holdout_consumed()`
 皆`False`，未動凍結區檔案。
 
+**進度更新（馬拉松第551輪，2026-09-18 22:31，修正投遞路徑bug並重投遞）**：
+收成`job_id=20260918-222452-21ae`發現**立即failed**（`run_detached.py
+status`顯示耗時0.0min、exit=2）。`run_detached.py log 20260918-222452-21ae`
+顯示根因：`python: can't open file
+'C:\alpha\alpha-app\multibagger_attribution.py': [Errno 2] No such file
+or directory`——上一輪（22:24）的投遞指令漏了`research/`路徑前綴。
+`run_detached.py`的預設`cwd`是repo根目錄（`REPO_ROOT = RESEARCH_DIR.
+parent`），不是`research/`；對照前兩次成功的job（`20260918-170334-11f1`
+與`20260918-193308-c1c6`）在`data/jobs.json`裡的紀錄，`cmd`都是
+`['python', '-u', 'research/multibagger_attribution.py']`，本次寫成
+`['python', 'multibagger_attribution.py']`少了路徑前綴也少了`-u`旗標。
+純屬投遞指令的路徑bug，不影響腳本本身邏輯（打散順序的修復
+`sample.sample(frac=1.0, random_state=SAMPLE_SEED)`確認仍在檔案第437行，
+未被動過），依CLAUDE.md「提案先於執行」例外條款（純bug修復）直接修正、
+不需另外提案。已用正確路徑重新投遞：
+`run_detached.py submit --name multibagger_attribution_stratified_150_v2
+--timeout-min 40 -- python -u research/multibagger_attribution.py`，
+`job_id=20260918-223142-cdd8`。開工後2.1分鐘查`run_detached.py status`
+確認`watchdog_alive=True`且未立即crash，確認修復生效、正常執行中。
+下一輪用`run_detached.py status`/`log 20260918-223142-cdd8`收成，
+預期產出覆寫`research/multibagger_raw/run_summary.json`。開工/收工前
+`is_holdout_consumed()`皆`False`，未動凍結區檔案，全程零新增FinMind
+API呼叫（本輪僅讀`data/jobs.json`與`rate_limit_state.json`既有紀錄、
+投遞job本身不消耗額度，額度消耗發生在job執行期間，非本輪session內）。
+
 ## 上一輪（馬拉松第548輪，2026-09-18 19:33，FinMind解封後接續）做了什麼
 
 **對應「下一輪待做」第1、2點。**

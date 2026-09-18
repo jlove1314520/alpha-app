@@ -694,6 +694,20 @@ Cowork原話：
   `20260918-222452-21ae`（打散順序的修復仍在，規模不變），下一輪收成。
   詳見`research/MULTIBAGGER_ATTRIBUTION.md`「進度更新（hypothesis_queue
   自走，2026-09-18 22:24）」小節。
+  **進度更新（馬拉松第551輪，2026-09-18 22:30，修正投遞bug並重投遞）**：
+  收成`job_id=20260918-222452-21ae`發現**立即failed（exit=2，耗時0.0min）**——
+  `run_detached.py log`顯示`python: can't open file
+  'C:\alpha\alpha-app\multibagger_attribution.py'`：上一輪投遞指令漏了
+  `research/`路徑前綴（`run_detached.py`的預設cwd是repo根目錄
+  `C:\alpha\alpha-app`，不是`research/`，對照前兩次成功的job記錄
+  `cmd=['python','-u','research/multibagger_attribution.py']`可確認），
+  屬於純bug修復（明確壞掉、非重新設計），依CLAUDE.md「提案先於執行」
+  例外條款直接修正不需先提案。已用正確路徑重新投遞
+  `job_id=20260918-223142-cdd8`（name=
+  `multibagger_attribution_stratified_150_v2`，timeout=40分鐘），開工後
+  2.1分鐘查`run_detached.py status`確認`watchdog_alive=True`、未立即
+  crash，確認bug已修復、正常執行中。下一輪用`run_detached.py status`/
+  `log 20260918-223142-cdd8`收成。
 - [x] **重構.C** [研究] ✅**v1 SPEC已核准附三處必改，本輪（互動視窗CC，
   2026-09-18）三處全部改完，v2已產出，依總司令原話「三處改完才劃掉」
   改標`[x]`**——基準相對傾斜（core_tilt）SPEC——年化追蹤誤差≤2.5%為

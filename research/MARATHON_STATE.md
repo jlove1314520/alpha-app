@@ -2,9 +2,16 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
-**最後更新：2026-09-18T21:30+08:00**
+**最後更新：2026-09-18T22:30+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 550 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 550 輪 · 2026-09-18T21:30+08:00 · 交辦（查核阻塞狀態，本輪無新工作單位）軌**。**本輪執行**：查`PENDING_QUEUE.md`機器索引三條`- [ ]`——`重構.A2`／`重構.C`待總司令、`重構.B`待FinMind額度（`blocked_until`21:49:34+08:00，開工時仍差16~18分鐘，依規則不在session內等待）——**三條本輪皆不可執行**。回落查核TW/US/FUT自走：確認`CALIBRATION_PROBE.md`清單（TW #77/#79/#91、US #47/#52、FUT #34）先前輪次已全數複驗完畢，非本輪待辦；`data/ticks/`累積進度9/20（較round543多推進2天，未達20不需逐輪回報）；`trial_registry.py --check`exit=0 PASS（246列，無新判定）。**誠實記錄「查核完畢、無新工作單位」，未做重複性重跑**。詳見`REPORT.md`第550輪記錄。
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 551 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 551 輪 · 2026-09-18T22:30+08:00 · 交辦（重構.B 修正投遞路徑bug並重投遞）軌**。**本輪執行**：開工先讀`PENDING_QUEUE.md`，`重構.B`前一輪（hypothesis_queue自走22:24）投遞的job_id=`20260918-222452-21ae`收成時發現**立即failed**（`run_detached.py log`顯示`can't open file 'C:\alpha\alpha-app\multibagger_attribution.py'`）——根因是投遞指令漏了`research/`路徑前綴（`run_detached.py`預設`cwd`是repo根目錄，對照前兩次成功job的`cmd`皆含`research/`前綴可確認）。純bug修復（明確壞掉、非重新設計），依CLAUDE.md例外條款直接修正：用正確路徑重新投遞`job_id=20260918-223142-cdd8`（`python -u research/multibagger_attribution.py`），開工後2.1分鐘確認`watchdog_alive=True`、正常執行中，未立即crash。已同步更新`PENDING_QUEUE.md`重構.B條目與`research/MULTIBAGGER_ATTRIBUTION.md`。`重構.A2`（待總司令裁示GATE6修正提案）、既完成的`重構.C`（v2 SPEC已產出）本輪未變動。`trial_registry.py --check`未重跑（本輪純bug修復＋重投遞，無新試驗判定）。`is_holdout_consumed()`開工前確認`False`，未動凍結區檔案。**下一輪收成**`job_id=20260918-223142-cdd8`（預計18~40分鐘內完成）。詳見`REPORT.md`第551輪記錄。
+
+<details>
+<summary>上一輪（第550輪）記錄，收合保留</summary>
+
+**2026-09-18T21:30+08:00 · 第550輪 · 交辦（查核阻塞狀態，本輪無新工作單位）軌**：查`PENDING_QUEUE.md`機器索引三條`- [ ]`——`重構.A2`／`重構.C`待總司令、`重構.B`待FinMind額度（`blocked_until`21:49:34+08:00，開工時仍差16~18分鐘，依規則不在session內等待）——三條本輪皆不可執行。回落查核TW/US/FUT自走：確認`CALIBRATION_PROBE.md`清單先前輪次已全數複驗完畢，非本輪待辦；`data/ticks/`累積進度9/20；`trial_registry.py --check`exit=0 PASS（246列，無新判定）。誠實記錄「查核完畢、無新工作單位」，未做重複性重跑。詳見`REPORT.md`第550輪記錄。
+
+</details>
 
 <details>
 <summary>上一輪（第549輪）記錄，收合保留</summary>
