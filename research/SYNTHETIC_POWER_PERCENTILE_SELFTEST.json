@@ -1,0 +1,42 @@
+{
+  "self_test_at": "2026-09-18T20:29:24+08:00",
+  "null_setup": "N(0,1), n=500, seed=20260918",
+  "threshold_percentile": 90.0,
+  "bootstrap_threshold_value": 1.2762627532441315,
+  "normal_approx_threshold_value": 1.304963699625482,
+  "effect_sizes": [
+    0.0,
+    0.2,
+    0.5,
+    0.8,
+    1.2,
+    2.0,
+    3.0
+  ],
+  "bootstrap_detection_rates": {
+    "0.0": 0.1,
+    "0.2": 0.146,
+    "0.5": 0.228,
+    "0.8": 0.328,
+    "1.2": 0.484,
+    "2.0": 0.782,
+    "3.0": 0.962
+  },
+  "normal_approx_detection_rates": {
+    "0.0": 0.10000000000000009,
+    "0.2": 0.14002930213360476,
+    "0.5": 0.21824268099227262,
+    "0.8": 0.3170029556423182,
+    "1.2": 0.4707564911183242,
+    "2.0": 0.7679422916678421,
+    "3.0": 0.9589743866324928
+  },
+  "max_abs_diff_bootstrap_vs_approx": 0.014057708332157914,
+  "checks": {
+    "effect_zero_near_10pct": true,
+    "monotonic_increasing": true,
+    "high_effect_near_100pct": true,
+    "bootstrap_approx_agree": true
+  },
+  "all_checks_pass": true
+}

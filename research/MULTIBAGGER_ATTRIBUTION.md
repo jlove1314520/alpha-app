@@ -59,6 +59,24 @@ timezone found`警告），幾乎每一檔都要fallback到FinMind，也因此�
 2. 拿到乾淨數字後才回到「下一輪待做」第3點，評估要不要放大到全宇宙——
    這是需要總司令核准的決策，本輪不自行執行。
 
+**進度更新（hypothesis_queue自走，2026-09-18 22:24）**：查證
+`data/rate_limit_state.json`確認FinMind額度已解除——`blocked_until`
+為2026-09-18T13:49:34 UTC（=21:49:34+08:00），而`last_request_at`是
+2026-09-18T14:05:15 UTC（=22:05:15+08:00，晚於blocked_until，且
+`block_reason`欄位停留在舊的402訊息未更新，代表這之後的請求已成功、
+沒有再次被擋）。確認`run_detached.py status --last 3`顯示上一個
+分層抽樣job（`20260918-193308-c1c6`）已完成且無job在跑，`multibagger_
+attribution.py`第437行`sample.sample(frac=1.0, random_state=SAMPLE_SEED)`
+打散順序的修復確認仍在檔案中。已重新投遞乾淨版本：
+`run_detached.py submit --name multibagger_attribution_stratified_150_
+shuffled --timeout-min 40 -- python multibagger_attribution.py`，
+job_id=`20260918-222452-21ae`（`SAMPLE_PER_STRATUM`環境變數未設定，
+沿用預設值150，跟前一次規模相同，只有處理順序已打散）。session內
+未等待逾時（依規則不在session內等待背景job），下一輪用`run_detached.py
+status`/`log 20260918-222452-21ae`收成，預期產出覆寫`research/
+multibagger_raw/run_summary.json`。開工/收工前`is_holdout_consumed()`
+皆`False`，未動凍結區檔案。
+
 ## 上一輪（馬拉松第548輪，2026-09-18 19:33，FinMind解封後接續）做了什麼
 
 **對應「下一輪待做」第1、2點。**

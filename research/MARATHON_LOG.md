@@ -1,5 +1,27 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-18（hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）— #74續：建置「percentile-vs-隨機控制組」類測試的通用注入式檢定力工具，合成常態null自我驗證PASS
+
+依#74「階段一.3」status標記的下一步待辦——`reclassify_underpowered.py`
+docstring明文36筆`not_assessed_needs_simulation`候選需要「比照#74
+`synthetic_power_curve_gate74.py`的做法」建一個通用工具，本輪新增
+`research/synthetic_power_percentile_gate.py`：`bootstrap_detection_power()`
+（有完整null draws時用bootstrap-shift）＋`normal_approx_detection_power()`
+（只有摘要統計時的常態近似備援），並用合成常態null（N(0,1),n=500,
+seed=20260918）自我驗證：`effect_zero_near_10pct`／`monotonic_increasing`／
+`high_effect_near_100pct`／`bootstrap_approx_agree`四項檢查全數PASS（輸出
+見`research/SYNTHETIC_POWER_PERCENTILE_SELFTEST.json`）。
+
+**誠實記錄範圍**：本輪僅完成方法論建置＋合成null自我驗證，**尚未套用到
+36筆真實候選**——需要逐一確認每筆候選當初的`random_metrics`原始陣列是否
+還有快取，沒有快取則需重跑該候選當初的資料管線重新產生null分布，是遠
+大於本輪「一個有界工作單位」的工作量，留給下一輪hypothesis_queue接續。
+#74本身（選項A逐年demean vs 選項B市場中性基準的正式網格重跑）仍待總司令
+裁示，本輪未動該部分。`is_holdout_consumed()`開工/收工前皆確認`False`，
+本輪零外部API呼叫（純本機蒙地卡羅計算）。
+
+---
+
 ## 2026-09-18（總司令直接交辦，互動session執行，非馬拉松固定輪次編號）— #74續：證實GATE6 pass_rate=0是量測方法bug（demean不完整）非門檻本身太嚴；47筆FAIL補registry，0筆卡在gate5/6
 
 總司令裁示【研究層·#74續：先證明量尺是對的，再談關卡】，Cowork覆核第

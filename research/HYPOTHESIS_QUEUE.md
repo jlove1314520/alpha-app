@@ -10947,3 +10947,12 @@ train/val內部矛盾（不是那種「train正val負」的期間內部不一致
 「已排除」**，若要完整回答總司令的問題，下一步需要對percentile類
 cheap gate建立`#74`式的注入式檢定力量測工具，是階段一之後的獨立
 待辦，本輪未做。
+
+**#74續（2026-09-18 hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）**：
+依上方「階段一.3」標記的獨立待辦，新增`synthetic_power_percentile_gate.py`
+（通用注入式檢定力工具，`bootstrap_detection_power()`+`normal_approx_
+detection_power()`兩種模式），用合成常態null（N(0,1),n=500,seed=20260918）
+自我驗證四項檢查全PASS（`SYNTHETIC_POWER_PERCENTILE_SELFTEST.json`）。
+**尚未套用到36筆真實候選**（需逐一確認null draws快取是否存在，沒有則需
+重跑資料管線，工作量遠超本輪範圍，留下一輪）；#74本身選項A/B網格重跑
+仍待總司令裁示。`is_holdout_consumed()`本輪開工/收工前皆`False`。

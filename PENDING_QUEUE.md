@@ -688,6 +688,12 @@ Cowork原話：
   待做第3點）依然是需要總司令核准的放大決策，目前連可信的分層數字都
   還沒有，尚未到能提案裁決的階段**。完整記錄見
   `research/MULTIBAGGER_ATTRIBUTION.md`最上方⚠️小節。
+  **進度更新（hypothesis_queue自走，2026-09-18 22:24）**：確認FinMind
+  額度已解除（`rate_limit_state.json`顯示22:05:15已有請求成功、
+  blocked_until 21:49:34已過），已重新投遞乾淨版分層抽樣job_id=
+  `20260918-222452-21ae`（打散順序的修復仍在，規模不變），下一輪收成。
+  詳見`research/MULTIBAGGER_ATTRIBUTION.md`「進度更新（hypothesis_queue
+  自走，2026-09-18 22:24）」小節。
 - [x] **重構.C** [研究] ✅**v1 SPEC已核准附三處必改，本輪（互動視窗CC，
   2026-09-18）三處全部改完，v2已產出，依總司令原話「三處改完才劃掉」
   改標`[x]`**——基準相對傾斜（core_tilt）SPEC——年化追蹤誤差≤2.5%為
