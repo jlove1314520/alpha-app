@@ -9444,17 +9444,18 @@
     "2026-09-15（稽核二.三）e_pe 降級為 informational_only_checks：官方 BWIBBU_ALL 本益比未公開計算基礎（合併/個別、TTM窗口定義皆未載明），跟我方用 stock_detail.json 近四季EPS自行推算的值不保證同一把尺，繼續記錄差異供查閱但不計入 violation_rate/gate_pass。同一次修正了 hit() 呼叫時 ours/official 標籤反向的bug（原本把官方值標成ours、推算值標成official，順序寫反）。"
   ],
   "local_task_health": {
-    "checked_at": "2026-09-18T22:22:02.126193+08:00",
+    "checked_at": "2026-09-19T01:37:02.393368+08:00",
     "registry": "data/seed/pipeline_registry.json",
     "alert": true,
-    "stalled_count": 6,
+    "stalled_count": 7,
     "stalled": [
       "AlphaMarketSparklines：data/sparklines.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-09-18 18:30；JSON 欄位 meta.generated_at）",
       "AlphaMarketTW：data/market_tw.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-09-18 18:30；JSON 欄位 fetched_at）",
       "AlphaFundamentals：data/fundamentals.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-09-18 18:30；JSON 欄位 meta.generated_at）",
       "AlphaPriceHistory：data/price_history.json 已連續錯過 2 個應跑班次（門檻 2 班，最近應跑 2026-09-18 18:30；JSON 欄位 meta.generated_at）",
-      "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 12 個應跑班次（門檻 3 班，最近應跑 2026-09-18 22:20；JSON 欄位 fetched_at）",
-      "AlphaNewsEvents：data/news.json 已連續錯過 5 個應跑班次（門檻 3 班，最近應跑 2026-09-18 22:00；JSON 欄位 fetched_at）"
+      "AlphaQuotesTW：data/quotes_tw.json 已連續錯過 6 個應跑班次（門檻 3 班，最近應跑 2026-09-19 01:30；JSON 欄位 fetched_at）",
+      "AlphaNewsEvents：data/news.json 已連續錯過 4 個應跑班次（門檻 3 班，最近應跑 2026-09-19 01:30；JSON 欄位 fetched_at）",
+      "DevQueue 佇列格式不符（自 2026-09-19T01:31:02.695326+08:00 起未解除）：find_next()回None但檔案仍有🔲/進行中/未開始字樣，判定為格式不符而非真的做完"
     ],
     "tasks": [
       {
@@ -9464,7 +9465,7 @@
         "expected_interval_min": 1,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-18T22:22:01.904002+08:00",
+        "last_output": "2026-09-19T01:37:02.383442+08:00",
         "age_min": 0.0,
         "stall_limit_min": 3,
         "status": "ok"
@@ -9476,8 +9477,8 @@
         "expected_interval_min": 2,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-18T22:21:07.327657+08:00",
-        "age_min": 0.9,
+        "last_output": "2026-09-19T01:37:07.120899+08:00",
+        "age_min": -0.1,
         "stall_limit_min": 6,
         "status": "ok"
       },
@@ -9489,7 +9490,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 checked_at",
         "last_output": "2026-09-18T13:47:02.280267+08:00",
-        "age_min": 515.0,
+        "age_min": 710.0,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -9500,7 +9501,7 @@
         "expected_interval_min": 5,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-18T22:21:46.540864+08:00",
+        "last_output": "2026-09-19T01:36:41.962429+08:00",
         "age_min": 0.3,
         "stall_limit_min": 15,
         "status": "ok"
@@ -9512,7 +9513,7 @@
         "expected_interval_min": 5,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-18T22:21:36.227077+08:00",
+        "last_output": "2026-09-19T01:36:36.794960+08:00",
         "age_min": 0.4,
         "stall_limit_min": 15,
         "status": "ok"
@@ -9524,7 +9525,7 @@
         "expected_interval_min": 5,
         "freshness": "jsonl_last_field",
         "source": "JSONL 末筆 ts",
-        "last_output": "2026-09-18T22:17:02.213908+08:00",
+        "last_output": "2026-09-19T01:32:02.389855+08:00",
         "age_min": 5.0,
         "stall_limit_min": 15,
         "status": "ok"
@@ -9545,7 +9546,7 @@
         "expected_interval_min": 15,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-18T22:16:02.412079+08:00",
+        "last_output": "2026-09-19T01:31:02.745025+08:00",
         "age_min": 6.0,
         "stall_limit_min": 45,
         "status": "ok"
@@ -9557,8 +9558,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-18T22:00:37.362198+08:00",
-        "age_min": 21.4,
+        "last_output": "2026-09-19T01:30:37.646593+08:00",
+        "age_min": 6.4,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -9569,8 +9570,8 @@
         "expected_interval_min": 30,
         "freshness": "mtime",
         "source": "檔案修改時間",
-        "last_output": "2026-09-18T22:21:02.335980+08:00",
-        "age_min": 1.0,
+        "last_output": "2026-09-19T01:28:18.632990+08:00",
+        "age_min": 8.7,
         "stall_limit_min": 90,
         "status": "ok"
       },
@@ -9582,7 +9583,7 @@
         "freshness": "sqlite_max_date",
         "source": "各表 max(date)：daily_price=2026-09-18、inst_trades=2026-09-18、valuation=2026-09-18、taifex_large=20260910",
         "last_output": "2026-09-18T00:00:00+08:00",
-        "age_min": 1342.0,
+        "age_min": 1537.0,
         "stall_limit_min": 4320,
         "status": "ok"
       },
@@ -9594,7 +9595,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-14T08:00:03.315425+08:00",
-        "age_min": 6622.0,
+        "age_min": 6817.0,
         "stall_limit_min": 30240,
         "status": "ok"
       },
@@ -9606,7 +9607,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-09-18T07:39:05.294291+08:00",
-        "age_min": 882.9,
+        "age_min": 1078.0,
         "shift_profile": "market_yml",
         "missed_shifts": 2,
         "missed_shift_threshold": 2,
@@ -9621,7 +9622,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
         "last_output": "2026-09-17T23:36:13+00:00",
-        "age_min": 885.8,
+        "age_min": 1080.8,
         "shift_profile": "market_yml",
         "missed_shifts": 2,
         "missed_shift_threshold": 2,
@@ -9636,7 +9637,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-09-18T07:38:35.681281+08:00",
-        "age_min": 883.4,
+        "age_min": 1078.4,
         "shift_profile": "market_yml",
         "missed_shifts": 2,
         "missed_shift_threshold": 2,
@@ -9651,7 +9652,7 @@
         "freshness": "json_field",
         "source": "JSON 欄位 meta.generated_at",
         "last_output": "2026-09-18T07:39:02.356635+08:00",
-        "age_min": 883.0,
+        "age_min": 1078.0,
         "shift_profile": "market_yml",
         "missed_shifts": 2,
         "missed_shift_threshold": 2,
@@ -9665,12 +9666,12 @@
         "expected_interval_min": 60,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-18T12:25:42+00:00",
-        "age_min": 116.3,
+        "last_output": "2026-09-18T16:35:13+00:00",
+        "age_min": 61.8,
         "shift_profile": "quotes_yml",
-        "missed_shifts": 12,
+        "missed_shifts": 6,
         "missed_shift_threshold": 3,
-        "latest_due_shift": "2026-09-18 22:20",
+        "latest_due_shift": "2026-09-19 01:30",
         "status": "stalled"
       },
       {
@@ -9680,12 +9681,12 @@
         "expected_interval_min": 30,
         "freshness": "json_field",
         "source": "JSON 欄位 fetched_at",
-        "last_output": "2026-09-18T19:36:20.041681+08:00",
-        "age_min": 165.7,
+        "last_output": "2026-09-18T23:48:56.632822+08:00",
+        "age_min": 108.1,
         "shift_profile": "news_events_yml",
-        "missed_shifts": 5,
+        "missed_shifts": 4,
         "missed_shift_threshold": 3,
-        "latest_due_shift": "2026-09-18 22:00",
+        "latest_due_shift": "2026-09-19 01:30",
         "status": "stalled"
       },
       {
@@ -9696,11 +9697,11 @@
         "freshness": "json_field",
         "source": "JSON 欄位 generated_at",
         "last_output": "2026-09-18T03:06:33.704189+08:00",
-        "age_min": 1155.5,
+        "age_min": 1350.5,
         "shift_profile": "audit_yml",
-        "missed_shifts": 0,
+        "missed_shifts": 1,
         "missed_shift_threshold": 2,
-        "latest_due_shift": null,
+        "latest_due_shift": "2026-09-18 23:20",
         "status": "ok"
       }
     ],

@@ -1310,13 +1310,42 @@ Cowork原話：
   查證、不動腳本。
 - [!] **稽核.三(a)** 季報回補續跑（38.44%→目標0）。**分支**：FinMind
   額度擋住→標BLOCKED附解除時間，換下一項；解除後自動接續，不需請示。
-  　**⛔ 自走中止（2026-09-18 23:08）**：FinMind額度已封鎖（`data/
-  rate_limit_state.json`：`block_reason`=HTTP 402 Requests reach the
-  upper limit，`blocked_at`=2026-09-18T14:42:46+00:00，`blocked_until`
-  =2026-09-18T16:42:46+00:00＝台北2026-09-19 00:42:46）。這是真實查證
-  過的既有狀態（非本輪造成），依分支指示標BLOCKED附解除時間，換下一項；
-  解除後（台北00:43之後）由下一輪自走自動接續`research/
-  backfill_stock_financials_gap_2025.py`，不需請示。**驗證現況**：
+  　**已於2026-09-19 01:32接續（馬拉松自走cycle`20260919-013037`）**：
+  確認`data/rate_limit_state.json`已無`blocked_until`欄位（原封鎖
+  台北00:42:46已過），`find_gap_codes()`即時掃描仍有**350檔**缺口
+  （較上次結束時的350檔未變，因上次連續失敗15檔即停手未實際回補）。
+  第一次投遞`job_id=20260919-013209-f86a`踩到跟round551同款bug（在
+  `research/`目錄下呼叫`run_detached.py`，相對路徑`cwd`卻是repo根目錄，
+  `backfill_stock_financials_gap_2025.py`找不到檔案，0.0min exit=2）——
+  屬純bug重複發生，已用正確路徑`research/backfill_stock_financials_
+  gap_2025.py`重新投遞`job_id=20260919-013225-2a20`（`--max-per-run
+  200`），**已收成完畢（3.9min，exit=0）**：income成功41/55、balance
+  成功40/55（前40檔全過，第50檔附近開始連續失敗19檔，觸發本腳本自帶
+  `MAX_CONSECUTIVE_FAIL=15`停損），`data/rate_limit_state.json`確認
+  已再次被FinMind封鎖（`blocked_at`=2026-09-18T17:36:14+00:00，
+  `blocked_until`=2026-09-18T19:36:14+00:00＝**台北2026-09-19
+  03:36:14**），依既有分支標BLOCKED，下一輪（台北03:37後）自動接續
+  `find_gap_codes()`重新即時掃描（本輪未merge回`data/stock_detail.
+  json`，仍要跑`build_stock_financials_history.py`才會真正併入，
+  下一輪一併確認）。**額外發現（本輪意外收穫，非計畫內工作）**：
+  排查`稽核.三(a)`阻塞原因時，順手用`gh run list --workflow=market.yml`
+  查證market.yml最新兩班（2026-09-18 13:32/14:35 UTC）**都失敗**，
+  跟f94445b3/5ab1aaa2同一種「`git rebase`因工作目錄不乾淨而失敗」
+  的bug第三次發作——這次根因是`research/update_strategy_performance.py`
+  每輪append的`research/shadow_ledgers/*.jsonl`三個檔案（已被git追蹤）
+  不在market.yml的commit allowlist裡。屬純bug修復（CLAUDE.md「提案
+  先於執行」例外條款），已直接修好：`.github/workflows/market.yml`
+  加入`research/shadow_ledgers/`目錄前綴（不逐檔列名，未來新增
+  mechanism_id不需要再手動加一行）。連帶造成的本機監控亮燈（
+  `AlphaMarketSparklines`/`AlphaMarketTW`/`AlphaFundamentals`/
+  `AlphaPriceHistory`四條stalled）預期下一班（台北排程）成功後自動
+  解除，非本輪額外要做的事。詳見`.github/workflows/market.yml`
+  commit步驟上方新增的2026-09-19註解。**驗證待辦**：market.yml cron下一班是`30 21 * * 1-5`
+  （UTC 21:30＝台北隔日05:30，美股班次），要確認那班commit成功、
+  `local_task_health`四條stalled解除，才算完整驗證，本輪commit後暫
+  無法立即觀察到那班結果，留給05:30台北之後的自走輪次用
+  `gh run list --workflow=market.yml`確認。**驗證現況**（此段為2026-09-18 23:08舊記錄，保留
+  供對照，非本輪重新查證）：
   `data/audit_report.json`（2026-09-18T03:06生成）`completeness_gap_rate`
   仍為0.3844，跟本項標題「38.44%」完全吻合，確認這是真實未完成的
   進行中任務，不是重複交辦。

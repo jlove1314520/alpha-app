@@ -189,10 +189,24 @@ jobs:
         # --log-failed`）證實正是這個根因，不是臆測。修法：把PENDING_QUEUE.md也
         # 納入allowlist，讓它跟著這次commit一起進去，工作目錄回到乾淨狀態，
         # rebase重試才能正常運作。
+        # 2026-09-19（馬拉松自走輪次，同一種bug第三次發作，純bug修復直接改）：
+        # `research/update_strategy_performance.py`每輪都會呼叫`shadow_ledger.
+        # append_entry()`，把新的一筆append進`research/shadow_ledgers/{value_
+        # board_v2,momentum_board,future_board}.jsonl`（三個檔案已被git追蹤，
+        # 見`git ls-files`），但這三個檔案同樣不在allowlist裡——跟PENDING_QUEUE.md
+        # 那次是同一種疏漏形狀（CLAUDE.md第十節「排程腳本會改寫的檔案必須進對應
+        # 清單」）。實測`gh run view --log-failed`：2026-09-18 13:32/14:35 UTC
+        # 兩個班次都在`git rebase origin/main`那步報`cannot rebase: You have
+        # unstaged changes`後失敗，連帶讓`data/sparklines.json`等33個檔案整批
+        # 停擺（`AlphaMarketSparklines`/`AlphaMarketTW`/`AlphaFundamentals`/
+        # `AlphaPriceHistory`四條本機監控同時亮燈stalled）。改用**目錄前綴**
+        # `research/shadow_ledgers/`而非逐檔列名——`shadow_ledger.py`是每個
+        # mechanism_id動態產生一個新檔案，未來新增策略機制時不需要再手動加
+        # 一行到這個allowlist，結構性涵蓋，避免同一種bug第四次發作。
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json PENDING_QUEUE.md
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json PENDING_QUEUE.md research/shadow_ledgers/
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do
