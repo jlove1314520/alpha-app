@@ -3194,3 +3194,11 @@ Error: Exceeded USD budget (5)
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
 
 quota_throttle: SKIP: 正常頻率，距上次實跑25.5分鐘 < 30分鐘門檻
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Hypothesis-queue cycle start: 2026-09-19 04:21:02 =====
+[mcp-sdk] SEP-2352: stored OAuth credential has no 'issuer' stamp (pre-upgrade storage or provider not round-tripping the value). SEP-2352 isolation is inactive for this read; ensure your provider round-trips the issuer field.
+Error: Exceeded USD budget (5)
+===== Hypothesis-queue cycle end: 2026-09-19 04:25:12 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
