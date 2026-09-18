@@ -114,14 +114,30 @@ def _now() -> datetime:
     return datetime.now(TZ)
 
 
+def _pending_queue_has_undone_items() -> bool:
+    """2026-09-18（總司令裁示【改為連續自走】五、節流規則修正）：
+    「候選池連續N輪無進度」這個訊號是設計來偵測「假設池跑完了」，不是
+    「交辦做完了」——PENDING_QUEUE.md還有`- [ ]`項目時，代表總司令有
+    交辦還沒人做，不能拿候選池空轉當節流理由，那是把兩件事搞混。"""
+    try:
+        return any(ln.startswith("- [ ]") for ln in
+                   (ROOT / "PENDING_QUEUE.md").read_text(encoding="utf-8").splitlines())
+    except OSError:
+        return False  # 讀不到就保守假設沒有待辦，退回原本的候選池空轉判斷
+
+
 def _is_throttled(state: dict, track: str) -> tuple[bool, str]:
     account = state.get("account", {})
     util = account.get("seven_day_utilization")
     if util is not None and util >= SEVEN_DAY_THROTTLE:
         return True, f"帳號週用量已達{util:.0%}（門檻{SEVEN_DAY_THROTTLE:.0%}），節流保留額度給交辦與資料管線"
+    if _pending_queue_has_undone_items():
+        return False, ""
     n = state.get(track, {}).get("consecutive_no_progress", 0)
     if n >= NO_PROGRESS_THRESHOLD:
-        return True, f"{track}連續{n}輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流"
+        return True, (f"{track}連續{n}輪TRIALS_REGISTRY.jsonl／PROGRESS_HEARTBEAT.jsonl"
+                       f"都沒有新增過東西，且PENDING_QUEUE.md也沒有待辦交辦項，"
+                       f"判定候選池空轉，節流")
     return False, ""
 
 
