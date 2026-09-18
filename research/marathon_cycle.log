@@ -3752,3 +3752,9 @@ quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning:
 quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/marathon相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
 
 quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/marathon相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
+
+quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：marathon連續11輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流
+
+===== Marathon cycle start: 2026-09-18 17:30:37 cycle_id=20260918-173037 =====
+quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 RECORDED marathon: made_progress=False consecutive_no_progress=12 seven_day_utilization=0.5
+===== Marathon cycle end: 2026-09-18 17:33:28 cycle_id=20260918-173037 reason=OK cost_usd=1.2937189999999998 read_kb=161.8 turns=30 duration_min=2.81 =====
