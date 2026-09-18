@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-09-18T21:37:55+00:00",
+  "computed_at": "2026-09-18T23:34:30+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
@@ -11,10 +11,10 @@
       "tw_price": 2460.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260918",
-      "fx_rate": 31.881,
-      "fx_date": "2026-09-17",
-      "implied_tw_price": 2771.543,
-      "premium_pct": 12.664
+      "fx_rate": 31.808,
+      "fx_date": "2026-09-18",
+      "implied_tw_price": 2765.197,
+      "premium_pct": 12.406
     },
     "UMC": {
       "tw_code": "2303",
@@ -25,10 +25,10 @@
       "tw_price": 156.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260918",
-      "fx_rate": 31.881,
-      "fx_date": "2026-09-17",
-      "implied_tw_price": 156.918,
-      "premium_pct": 0.589
+      "fx_rate": 31.808,
+      "fx_date": "2026-09-18",
+      "implied_tw_price": 156.559,
+      "premium_pct": 0.358
     },
     "ASX": {
       "tw_code": "3711",
@@ -39,10 +39,10 @@
       "tw_price": 638.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260918",
-      "fx_rate": 31.881,
-      "fx_date": "2026-09-17",
-      "implied_tw_price": 663.603,
-      "premium_pct": 4.013
+      "fx_rate": 31.808,
+      "fx_date": "2026-09-18",
+      "implied_tw_price": 662.084,
+      "premium_pct": 3.775
     },
     "CHT": {
       "tw_code": "2412",
@@ -53,10 +53,10 @@
       "tw_price": 145.5,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260918",
-      "fx_rate": 31.881,
-      "fx_date": "2026-09-17",
-      "implied_tw_price": 146.334,
-      "premium_pct": 0.573
+      "fx_rate": 31.808,
+      "fx_date": "2026-09-18",
+      "implied_tw_price": 145.999,
+      "premium_pct": 0.343
     }
   },
   "errors": []
