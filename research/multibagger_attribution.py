@@ -423,6 +423,18 @@ def main() -> None:
     normal_stock = uni[uni["stock_id"].str.match(r"^\d{4}$")].reset_index(drop=True)
     n_excluded = len(uni) - len(normal_stock)
     sample, strata_info = stratified_sample(normal_stock, SAMPLE_PER_STRATUM, SAMPLE_SEED)
+    # 2026-09-18（馬拉松，收成job=20260918-193308-c1c6後發現的bug）：
+    # stratified_sample()回傳的sample是active全部在前、delisted全部在後
+    # （pd.concat保留strata插入順序），若FinMind額度在跑到一半耗盡，後半段
+    # （幾乎全是delisted，因為delisted多半要fallback到FinMind）會系統性
+    # 集中吃到fetch_error，把「時間點運氣」偽裝成「delisted本身覆蓋率低」。
+    # 實測：這次150+150跑出delisted skip 84.7% vs active 12.7%，且
+    # data/rate_limit_state.json記錄額度剛好在本次執行的倒數第2分鐘
+    # （19:49:33）被打到402——時間點與延後處理的delisted批次重疊，這個
+    # 結果不能排除混雜，不得引用為結論。修法：用同一組固定種子打散
+    # 處理順序（不改變抽樣組成/population_weight，只改變處理次序），讓
+    # 額度耗盡（如果發生）平均分攤到兩組，不再系統性偏向後處理的那組。
+    sample = sample.sample(frac=1.0, random_state=SAMPLE_SEED).reset_index(drop=True)
     print(f"[multibagger] 分層抽樣驗證輪：{len(sample)} 檔（宇宙總數 {len(uni)} 檔，"
           f"過濾非4位數字普通股代號 {n_excluded} 檔，每層上限{SAMPLE_PER_STRATUM}檔，"
           f"隨機種子={SAMPLE_SEED}）")
