@@ -51,7 +51,7 @@ from multibagger_attribution import (
     _monthly_last, _eps_ttm_series, _asof_value, process_stock, stratified_sample,
 )
 from multibagger_five_questions import (
-    CONTROL_GROUP_STRIDE_MONTHS, _all_windows, _weighted_rate,
+    CONTROL_GROUP_STRIDE_MONTHS, _all_windows, _weighted_rate, _process_stock_all_windows,
 )
 
 RAW_DIR = OUT_DIR
@@ -83,12 +83,18 @@ def _load_skip_lists() -> dict[str, list[str]]:
 
 
 def _finmind_blocked() -> tuple[bool, float]:
-    """回傳(是否封鎖中, 剩餘分鐘數)。查不到狀態檔視為未封鎖（保守：寧可
-    嘗試被finmind_client自己的封鎖邏輯攔下，不自己臆測封鎖狀態不存在。"""
+    """回傳(是否封鎖中, 剩餘分鐘數)。查不到狀態檔／檔案正被其他排程行程
+    同時寫入而暫時解析失敗，都視為未封鎖（保守：寧可嘗試被finmind_client
+    自己的封鎖邏輯攔下，不自己臆測封鎖狀態不存在——這個檔案是多個排程
+    共用、沒有檔案鎖的機器寫檔，讀到寫一半的瞬間屬於預期內的競態，不是
+    真正的資料損毀，不應該讓本腳本整個崩潰）。"""
     if not RATE_LIMIT_STATE.exists():
         return False, 0.0
-    with open(RATE_LIMIT_STATE, encoding="utf-8") as f:
-        d = json.load(f)
+    try:
+        with open(RATE_LIMIT_STATE, encoding="utf-8") as f:
+            d = json.load(f)
+    except json.JSONDecodeError:
+        return False, 0.0
     fm = d.get("sources", {}).get("finmind", {})
     bu = fm.get("blocked_until")
     now = time.time()
@@ -138,21 +144,57 @@ def _retry_fetch_error(fetch_error_ids: list[str], delist_map: dict[str, str]) -
 # ★一.2/四：股票層級底表（同時餵Q1股票層級與Q5最壞情況敏感度分析）
 # ---------------------------------------------------------------------------
 
-def _build_stock_level_base() -> tuple[pd.DataFrame, dict]:
+def _load_strata_info() -> dict:
+    with open(RAW_DIR / "five_questions_result.json", encoding="utf-8") as f:
+        prior = json.load(f)
+    return prior["sample_strata_info"]
+
+
+def _build_combined_windows_with_recovered(recovered_delisted_ids: list[str]) -> pd.DataFrame:
+    """★一.1後續：把重抓成功的delisted股票併入全窗口對照組資料集，補上
+    population_weight/outcome/is_delisted欄位（跟`multibagger_five_
+    questions.py::main()`同一套邏輯），回傳合併後的完整df並落地成
+    `all_windows_stride6m_recovered.csv`（gitignored，可重現）。population_
+    weight是抽樣設計權重（母體佔比/抽樣佔比），不隨每一層實際成功抓到
+    幾檔而變動，所以新併入的股票沿用同一個delisted層權重即可，不需要
+    重新計算整批權重。"""
+    from multibagger_attribution import MOONSHOT_THRESHOLD, CONTROL_THRESHOLD
+
+    base = pd.read_csv(RAW_DIR / "all_windows_stride6m.csv")
+    strata_info = _load_strata_info()
+    pop_weight = {k: v["population_weight"] for k, v in strata_info.items()}
+
+    new_rows = []
+    for sid in recovered_delisted_ids:
+        new_rows.extend(_process_stock_all_windows(sid, "delisted"))
+    new_df = pd.DataFrame(new_rows)
+    if not new_df.empty:
+        new_df["population_weight"] = pop_weight["delisted"]
+        new_df["outcome"] = np.select(
+            [new_df["window_return"] >= MOONSHOT_THRESHOLD, new_df["window_return"] < CONTROL_THRESHOLD],
+            ["moonshot", "control"], default="middle",
+        )
+        new_df["is_delisted"] = 1.0
+
+    combined = pd.concat([base, new_df], ignore_index=True) if not new_df.empty else base
+    combined.to_csv(RAW_DIR / "all_windows_stride6m_recovered.csv", index=False)
+    return combined
+
+
+def _build_stock_level_base(windows_df: pd.DataFrame | None = None) -> tuple[pd.DataFrame, dict]:
     """每檔「ok」股票一列：status、規模代理（該股票所有窗口avg_trading_
     money_20d_pre的中位數，作為單一股票層級規模proxy）、has_moonshot
     （該股票在樣本觀察窗內是否至少一次outcome=="moonshot"）、
-    population_weight。回傳(df, strata_info)。
+    population_weight。回傳(df, strata_info)。`windows_df`可傳入合併過
+    重抓股票的版本，預設讀原始`all_windows_stride6m.csv`。
 
     [自行裁量] 規模代理用「該股票所有窗口的中位數」而非單一時間點，因為
     同一檔股票在不同時間點liquidity會變動，中位數是對「這檔股票在觀察期
     內的典型規模」較穩健的代表值，且跟Q4/Q5原本window層級用的欄位
     （avg_trading_money_20d_pre）同源，語意上一致。
     """
-    df = pd.read_csv(RAW_DIR / "all_windows_stride6m.csv")
-    with open(RAW_DIR / "five_questions_result.json", encoding="utf-8") as f:
-        prior = json.load(f)
-    strata_info = prior["sample_strata_info"]
+    df = windows_df if windows_df is not None else pd.read_csv(RAW_DIR / "all_windows_stride6m.csv")
+    strata_info = _load_strata_info()
     pop_weight = {k: v["population_weight"] for k, v in strata_info.items()}
 
     g = df.groupby("stock_id", as_index=False).agg(
@@ -405,14 +447,25 @@ def main() -> None:
     retry_result = _retry_fetch_error(skip_lists["fetch_error"], delist_map)
     print(f"[v2] fetch_error重抓結果：{json.dumps(retry_result, ensure_ascii=False)}")
 
-    stock_df, strata_info = _build_stock_level_base()
-    # worst-case清單＝所有原本78檔未納入的，扣掉這次重抓成功恢復的（若重抓
-    # 有恢復，代表那些股票其實有起飛/未起飛的真實資料，但本輪未重跑完整
-    # episode/window管線把它們併入stock_df——保守起見，沒併入的一律仍計入
-    # worst-case清單，這只會讓worst-case界線更保守，不會製造假陽性。
+    recovered_ids = retry_result.get("recovered_stock_ids", [])
+    if recovered_ids:
+        # 重抓成功的股票併入全窗口對照組資料集（重跑_process_stock_all_windows
+        # 補上control-group窗口，不是只有process_stock()的episode資料），
+        # 讓stock_df/Q1都反映補齊後的下市股樣本，不是只把它們從worst-case
+        # 清單移除卻不提供真實資料。
+        windows_df = _build_combined_windows_with_recovered(recovered_ids)
+        print(f"[v2] {len(recovered_ids)}檔重抓成功已併入全窗口資料集，"
+              f"新增{len(windows_df) - 5035}個窗口，總窗口數={len(windows_df)}")
+    else:
+        windows_df = pd.read_csv(RAW_DIR / "all_windows_stride6m.csv")
+
+    stock_df, strata_info = _build_stock_level_base(windows_df)
+    # worst-case清單＝所有原本78檔未納入的，扣掉這次重抓成功恢復的——恢復的
+    # 已經用真實資料併入stock_df，不再需要當成phantom計入worst-case。
     all_78 = skip_lists["fetch_error"] + skip_lists["no_data_found"] + skip_lists["price_too_short"]
-    recovered = set(retry_result.get("recovered_stock_ids", []))
+    recovered = set(recovered_ids)
     unresolved = [sid for sid in all_78 if sid not in recovered]
+    print(f"[v2] 重抓後仍未解決的delisted股票數：{len(unresolved)}（原78檔）")
     q5_sensitivity = _q5_worst_case_sensitivity(stock_df, strata_info, unresolved)
     print(f"[v2] Q5 worst-case：original best={q5_sensitivity['best_percentile_original']}, "
           f"worst_case best={q5_sensitivity['best_percentile_worst_case']}, "
@@ -433,7 +486,7 @@ def main() -> None:
     print(f"[v2] 兩套分解都有值的episode數={len(both_valid)}（交集，用於比對一致性）")
 
     print("[v2] ===== 四：Q1改成股票層級 =====")
-    q1_stock_level = _q1_stock_level(pd.read_csv(RAW_DIR / "all_windows_stride6m.csv").assign(
+    q1_stock_level = _q1_stock_level(windows_df.assign(
         population_weight=lambda d: d["status"].map(
             {k: v["population_weight"] for k, v in strata_info.items()}).astype(float)
     ))
@@ -444,6 +497,8 @@ def main() -> None:
         "star1_delisted_undercount": {
             "skip_lists": skip_lists,
             "retry_fetch_error_result": retry_result,
+            "n_recovered_integrated_into_windows": len(recovered_ids),
+            "n_total_windows_after_recovery": len(windows_df),
             "unresolved_stock_ids_used_in_worst_case": unresolved,
             "q5_sensitivity": q5_sensitivity,
         },
