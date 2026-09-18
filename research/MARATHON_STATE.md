@@ -2,9 +2,18 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
+**最後更新：2026-09-19T03:31+08:00**
+
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 555 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 555 輪 · 2026-09-19T03:31+08:00 · US（候選池空轉，交辦佇列已清空）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認全文0條`- [ ]`、22條`- [!]`全數blocked，`data/rate_limit_state.json`確認FinMind`blocked_until`台北03:36:14尚未到（開工03:31，差約4~5分鐘），非本輪可處理範圍。回落自走，依round554建議依輪替選US。核對`run_detached.py status`／`git log`／`STRATEGY_GRAVEYARD.md`／`research/data/ticks/`（10/20，與round554相同）／`trial_registry.py --check`（246列PASS，與round554相同）／`is_holdout_consumed()`（False），確認TW/US/FUT三軌自身候選池狀態與round487~554時實質相同（連續約67輪無新工作單位），僅剩`#50`被動等待tick累積與總司令對gate50提案的回應。本輪未產生新試驗判定，未動凍結區。詳見`REPORT.md`第555輪記錄、`US_MARATHON_STATE.md`第555輪。
+
+<details>
+<summary>上一輪（第554輪）記錄，收合保留</summary>
+
 **最後更新：2026-09-19T02:33+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 554 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 554 輪 · 2026-09-19T02:33+08:00 · TW（候選池空轉，交辦佇列已清空）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認全文0條`- [ ]`、22條`- [!]`全數blocked，`data/rate_limit_state.json`確認FinMind`blocked_until`台北03:36:14尚未到（開工02:33），非本輪可處理範圍。回落自走，依round552建議依輪替選TW。核對`run_detached.py status`／`git log`／`STRATEGY_GRAVEYARD.md`／`research/data/ticks/`（10/20，與round552相同）／`trial_registry.py --check`（246列PASS，與round552相同）／`is_holdout_consumed()`（False），確認TW/US/FUT三軌自身候選池狀態與round487~552時實質相同（連續約66輪無新工作單位），僅剩`#50`被動等待tick累積與總司令對gate50提案的回應。本輪未產生新試驗判定，未動凍結區。詳見`REPORT.md`第554輪記錄、`TW_MARATHON_STATE.md`第554輪。
+**第 554 輪 · 2026-09-19T02:33+08:00 · TW 軌**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認0條`- [ ]`、22條`- [!]`全數blocked；FinMind封鎖至台北03:36:14，本輪開工02:33尚未解封，非本輪可處理。交辦佇列無可執行未開始項，回落自走，依輪替選TW。核實：`data/ticks/`累積10/20；`STRATEGY_GRAVEYARD.md`本三軌最新結案仍`#68`，無新結案；0a節四方向僅`#50`卡阻塞未結案。`trial_registry.py --check`exit=0 PASS（246列）。`is_holdout_consumed()`確認`False`，未動凍結區檔案。**結論：候選池連續約66輪無新工作單位，僅`#50`被動等待**。詳見`REPORT.md`第554輪記錄、`TW_MARATHON_STATE.md`。
+
+</details>
 
 <details>
 <summary>上一輪（第553輪）記錄，收合保留</summary>
