@@ -189,12 +189,31 @@ def run_pilot(target_sharpe: float, seed: int, n_random: int = 100) -> dict:
 
     # 去均值化修正（2026-09-15上一輪發現：base_raw自己Sharpe=1.1057，疑似
     # 存活者偏誤⑦造成人為膨脹，遠大於注入的目標強度，導致GATE2判定幾乎完全
-    # 由base_raw自己的既有優勢決定，不是被注入的epsilon分量）。只減去均值，
-    # 保留真實的波動/自相關/厚尾結構，讓epsilon成為母體Sharpe的唯一來源，
-    # 忠實操作化「在真實報酬序列上疊加一個Sharpe=S的訊號」。
-    base = base_raw - base_raw.mean()
-    print(f"base(去均值化後，用於注入)：母體Sharpe={annualized_sharpe(base):.4f}"
+    # 由base_raw自己的既有優勢決定，不是被注入的epsilon分量）。
+    #
+    # 2026-09-18（#74續，PENDING_QUEUE.md「重構.A2」[自行裁量]採用選項A）：
+    # 上一版只減去「整段10年單一純量平均值」，經Cowork覆核+直接量測證實
+    # 不完整——`base_demeaned`逐年總報酬仍完整保留2015/2018/2022這三個
+    # 真實市場空頭年份的原始跌幅(-16.7%~-19.3%)，10年只剩5年正報酬(50%)，
+    # 直接推算理論GATE6通過率≈1.07%，跟實測15次全0(即pass_rate=0)吻合
+    # （見HYPOTHESIS_QUEUE.md「#74續」章節逐年數字與推算）。整段單一純量
+    # demean只讓「10年加總的整體平均」歸零，不影響年度層級的系統性正負，
+    # 不是忠實操作化「在真實序列上疊加一個Sharpe=S的訊號」這句話——會讓
+    # GATE6量到的是「市場有沒有壞年份」而不是「注入訊號本身能不能穩定
+    # 跨年為正」。改為逐年分別demean（保留年度內的波動/自相關結構，
+    # 只清掉年度間的系統性正負），較貼近總司令原始裁示「在真實歷史報酬
+    # 序列上疊加」的精神（HYPOTHESIS_QUEUE.md「#74續」選項A/B比較，A已
+    # 由該輪標註「建議優先選A」）。這是可還原的技術選擇（換函式内部
+    # 計算方式，不改任何關卡門檻數字、不影響GATE1~6判定邏輯本身），
+    # 依CLAUDE.md零之一節「不確定但可還原→自行裁量、繼續做」處理，
+    # 不停下請示；選項B（改用市場中性合成基準）留待若選項A結果仍
+    # 不合理時再考慮。
+    base = base_raw.groupby(base_raw.index.year).transform(lambda x: x - x.mean())
+    print(f"base(逐年去均值化後，用於注入)：母體Sharpe={annualized_sharpe(base):.4f}"
           f"（應接近0，殘留非零純屬樣本抖動，非母體效應）")
+    base_yearly_check = base.groupby(base.index.year).sum()
+    print(f"base逐年總報酬檢查（驗證逐年demean確實生效，全部應接近0）："
+          f"{ {int(y): round(float(v), 6) for y, v in base_yearly_check.items()} }")
 
     combined = inject_synthetic_alpha(base, target_sharpe, seed)
     print(f"注入後combined年化樣本Sharpe={annualized_sharpe(combined):.4f}"
@@ -219,6 +238,7 @@ def run_pilot(target_sharpe: float, seed: int, n_random: int = 100) -> dict:
         "base_raw_sharpe": annualized_sharpe(base_raw),
         "base_demeaned_sharpe": annualized_sharpe(base),
         "demean_applied": True,
+        "demean_method": "per_year",  # 2026-09-18改版，取代舊版"whole_period"單一純量demean
     }
 
 
