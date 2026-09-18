@@ -166,6 +166,41 @@ def _lines() -> list[str]:
     return QUEUE.read_text(encoding="utf-8").splitlines()
 
 
+# 2026-09-18（Cowork【重構.B收成前必修】順手修）：舊標記是裸字
+# "ORDER-BEGIN"/"ORDER-END"，會被裁示原文引用/執行記錄裡的同一串文字
+# 撞到——實測當時檔案裡已經有4次"ORDER-BEGIN"、1次"ORDER-END"，
+# split("ORDER-BEGIN", 1)取第一次出現，解析出3578筆垃圾項目，真正的
+# 清單完全讀不到，只是「垃圾對不上by_key就退回檔案順序」這個既有防呆
+# 沒讓它出事，權威排序清單本身早就是死的。改用HTML註解格式**且要求
+# 必須整行只有這個標記**（用`ln.strip() == marker`比對，不是`in`子字串
+# 比對）——這支撐得住連自己都不小心中招的情況：登記這次裁示原文時，
+# 因為裁示原文本身就示範了`<!-- ORDER-BEGIN -->`這串文字當例子、加上
+# 執行記錄裡也提到它，檔案裡一度又出現了3次`<!-- ORDER-BEGIN -->`
+# 子字串（2次在散文/引言裡、1次是真正的標記），若只做子字串計數會
+# 對自己的修復觸發假警報。改成「整行只有標記本身」才算數之後，
+# 散文裡提到這個字串（不管在引言、程式碼區塊說明或反引號裡）都不會
+# 被誤判，只有真正獨立成行的標記才算——這比要求「以後寫文件時永遠
+# 記得不要完整拼出這串字」更可靠，因為後者已經連續失守兩次。
+ORDER_BEGIN_MARKER = "<!-- ORDER-BEGIN -->"
+ORDER_END_MARKER = "<!-- ORDER-END -->"
+
+
+def _order_marker_line_indices(marker: str, lines: list[str]) -> list[int]:
+    """回傳哪幾行「整行去除頭尾空白後」剛好等於marker本身，不含在其他文字裡的提及。"""
+    return [i for i, ln in enumerate(lines) if ln.strip() == marker]
+
+
+def _order_marker_ambiguity() -> str | None:
+    """標記各自以獨立行出現的次數是否不是「剛好一組」。回傳問題描述，沒問題回None。"""
+    lines = _lines()
+    n_begin = len(_order_marker_line_indices(ORDER_BEGIN_MARKER, lines))
+    n_end = len(_order_marker_line_indices(ORDER_END_MARKER, lines))
+    if n_begin == 1 and n_end == 1:
+        return None
+    return (f"{ORDER_BEGIN_MARKER}以獨立行出現{n_begin}次、"
+            f"{ORDER_END_MARKER}以獨立行出現{n_end}次，預期各恰好1次")
+
+
 def _explicit_order() -> list[str]:
     """讀 PENDING_QUEUE 頂端 ORDER-BEGIN/ORDER-END 之間的權威執行順序。
 
@@ -173,12 +208,24 @@ def _explicit_order() -> list[str]:
     問題——大檔搬動容易改壞，而且會讓「原話全文」的區塊失去時間脈絡。改成在頂端維護
     一份項目編號清單，要調順序只改那份清單。清單不存在時就回退到檔案順序，
     所以這個機制壞掉最多是回到舊行為，不會讓 runner 停擺。
+
+    2026-09-18新增：只認「整行剛好等於標記」的行（見`_order_marker_line_indices()`），
+    不是子字串比對，散文提及不會誤觸。標記出現不只一組時，不能默默選一個將就
+    用——取「最後一個開始標記」+「開始標記之後第一個結束標記」只是雙重防呆的
+    第二層，第一層是呼叫端（`build_prompt()`）要用`_order_marker_ambiguity()`
+    檢查並記`QUEUE_ORDER_MARKER_AMBIGUOUS`，不是這支函式自己默默決定用哪一組。
     """
-    txt = QUEUE.read_text(encoding="utf-8")
-    if "ORDER-BEGIN" not in txt or "ORDER-END" not in txt:
+    lines = _lines()
+    begins = _order_marker_line_indices(ORDER_BEGIN_MARKER, lines)
+    ends = _order_marker_line_indices(ORDER_END_MARKER, lines)
+    if not begins or not ends:
         return []
-    body = txt.split("ORDER-BEGIN", 1)[1].split("ORDER-END", 1)[0]
-    return [ln.strip() for ln in body.splitlines() if ln.strip()]
+    begin_idx = begins[-1]
+    end_candidates = [e for e in ends if e > begin_idx]
+    if not end_candidates:
+        return []
+    end_idx = end_candidates[0]
+    return [ln.strip() for ln in lines[begin_idx + 1:end_idx] if ln.strip()]
 
 
 def find_next() -> tuple[int, str] | None:
@@ -356,6 +403,17 @@ def get_format_mismatch_alerts() -> list[str]:
 
 
 def build_prompt() -> int:
+    # 2026-09-18（Cowork【重構.B收成前必修】順手修）：這道自檢要在find_next()
+    # 之前跑——標記不只一組時，即使find_next()剛好因為既有防呆（垃圾對不上
+    # by_key就退回檔案順序）矇對答案，權威排序清單本身仍是壞的，不能因為
+    # 這次矇對就放行，必須整輪不派工、等標記修好。
+    ambiguity = _order_marker_ambiguity()
+    if ambiguity:
+        detail = f"QUEUE_ORDER_MARKER_AMBIGUOUS: {ambiguity}"
+        _record_format_mismatch(detail)
+        PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")
+        print(detail)
+        return 5
     nxt = find_next()
     if nxt is None:
         PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")

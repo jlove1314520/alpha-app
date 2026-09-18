@@ -1,3 +1,57 @@
+## 2026-09-18（續4）（Cowork【重構.B收成前必修】三項研究bug修復＋順手修ORDER-BEGIN清單失效）
+
+戴**驗證帽**（多空歸因研究的正確性修復）+ **維運帽**（ORDER-BEGIN標記
+解析bug）。Cowork裁示已登記進`PENDING_QUEUE.md`（續6）。
+
+**重構.B三項修復**（`research/multibagger_attribution.py`）：
+1. **事件去重疊**：`_find_moonshot_windows()`舊版每個滿足12個月窗報酬
+   >=100%的月份都各算一筆，一次上漲的整段連續期間被重複計數（20檔驗證
+   17檔跑進核心計算卻產生198窗口，11.6筆/檔）。改成episode式：上升緣
+   偵測+12個月冷卻+保留`episode_length_months`/`peak_return`。**驗收**
+   （同組20檔`SAMPLE_SEED=42`重跑）：episode數198→**39**，掉最多三檔
+   `2436`（31→5）/`6538`（25→2）/`2504`（22→5），各自
+   episode_length_months列在`MULTIBAGGER_ATTRIBUTION.md`。
+2. **起漲前特徵基準**：`_pre_window_features()`asof日期改成episode起點
+   前一個月月底，新增`feature_asof_date`欄位；同時發現並修正一個連帶
+   bug——歸因分解用的`eps_start`/`close_start`要維持在`window_start`
+   當天，不能隨features新asof日期一起偏移。`MULTIBAGGER_ATTRIBUTION.md`
+   檔頭補上總司令要求的「PIT-safe不等於沒有前視」段落。
+3. **存活者偏誤skip率表**：新增`_survivorship_skip_breakdown()`（active/
+   delisted總檔數/成功/skip率/skip_reason分布+two-proportion z檢定），
+   顯著時印粗體警告。20檔樣本delisted組n=2<5，z檢定誠實回傳無法檢定。
+
+**300檔尚未重跑**：三項修復已在20檔驗證方向正確，但既有300檔
+job_id=`20260918-140419-49bf`是舊程式碼結果，已由上一輪判定「未過半、
+存活者偏誤阻塞、不放大」，這個阻塞不因本輪修復而解除，重跑300檔是
+下一步（視TW已下市股價格來源查證進度決定是否值得先做）。
+
+**順手修ORDER-BEGIN清單失效**（`scripts/dev_queue_runner.py`）：
+`PENDING_QUEUE.md`裡裸字"ORDER-BEGIN"當時出現4次（含裁示原文引用與
+執行記錄），`_explicit_order()`舊版`split("ORDER-BEGIN",1)`取第一次
+出現，解析出3547筆垃圾項目（實測驗證），真正的權威排序清單完全讀
+不到，只是「垃圾對不上by_key就退回檔案順序」這個既有防呆沒讓它出事。
+改成`<!-- ORDER-BEGIN -->`/`<!-- ORDER-END -->`HTML註解標記，且比對
+邏輯要求「整行剛好等於標記」（`ln.strip()==marker`）而非子字串比對——
+這一步是修復過程中自己中招才加的：第一版只用子字串計數，登記這次
+裁示原文時，因為原文本身示範了這串標記文字當範例，反而讓檔案裡多出
+3個子字串命中，觸發假警報，改成「整行比對」後散文提及不再誤判。
+新增`_order_marker_ambiguity()`自檢，`build_prompt()`在`find_next()`
+之前執行，標記數量不對就印`QUEUE_ORDER_MARKER_AMBIGUOUS`、寫入
+`_format_mismatch`、回傳新exit code 5、不派工這一輪。
+`run-dev-queue-cycle.ps1`（不在本repo）同步新增exit 5對照。
+
+**驗證**：`python -m py_compile`兩支腳本皆通過；20檔煙霧測試實測跑通
+（episode數/status_breakdown皆正確輸出）；用暫存copy驗證標記假警報
+情境（散文提及不觸發）與真矛盾情境（真的重複兩組標記，正確觸發）；
+用舊邏輯對照重算確認3547筆垃圾/新邏輯33筆真實項目。
+
+**影響檔案**：`research/multibagger_attribution.py`、
+`research/MULTIBAGGER_ATTRIBUTION.md`、`PENDING_QUEUE.md`、
+`scripts/dev_queue_runner.py`、`C:\alpha\run-dev-queue-cycle.ps1`
+（不在本repo）。
+
+---
+
 ## 2026-09-18（續3，DevQueue自走，cycle 20260918-080101）補上矛盾偵測最後一段：`_format_mismatch`旗標接進`local_task_health`
 
 戴**維運帽**（接續續2留下的半成品`重構.E1`，純接線工作，不改判斷邏輯）。

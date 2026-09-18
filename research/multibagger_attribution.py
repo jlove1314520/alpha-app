@@ -42,6 +42,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 from adjust import adjusted_price_series
 from pit import quarterly_pit, month_revenue_pit
@@ -69,15 +70,58 @@ def _monthly_last(price: pd.DataFrame) -> pd.DataFrame:
 
 
 def _find_moonshot_windows(monthly: pd.DataFrame) -> pd.DataFrame:
-    """回傳每個滿足 12個月窗報酬>=100% 的月份（窗口結束月），含窗口報酬。"""
+    """回傳「episode」（同一次上漲只算一筆事件），不是舊版的「window」。
+
+    2026-09-18（Cowork【重構.B收成前必修】1修正）：舊版回傳每一個滿足
+    12個月窗報酬>=100%的月份，一次上漲的整段持續期間（可能長達一兩年）
+    每個月都各算一筆，20檔煙霧測試量到17檔跑進核心計算卻產生198個窗口
+    （11.6筆/檔），會把起飛率灌水約一個數量級，且失敗案例不會產生連續
+    窗口、成功案例會，等於分子被放大、分母沒有對應放大，是系統性偏誤
+    不是噪音。
+
+    規則：
+    1. 上升緣偵測——只在「上個月不符合、這個月符合」時記一筆事件，該筆
+       事件的 month_end/window_start/window_return 一律取「上升緣當月」
+       的數值（這樣起漲前特徵才是真的在起漲前，不是漲勢中段）。
+    2. 記完一筆後強制冷卻 WINDOW_MONTHS 個月：下一次上升緣要落在冷卻期
+       結束之後才允許再記一筆，防止「達標→短暫拉回→立刻又達標」被算成
+       兩次獨立事件。冷卻期從本筆事件的上升緣月份起算。
+    3. 不丟掉「這次上漲維持了多久」這個資訊，額外記錄
+       episode_length_months（達標連續了幾個月）與 peak_return（連續期間
+       內最高的12個月滾動報酬），只是不重複計數成多筆事件。
+    """
+    cols = ["month_end", "window_start", "window_return",
+            "episode_length_months", "peak_return", "window_start_idx"]
     if len(monthly) < WINDOW_MONTHS + 1:
-        return pd.DataFrame(columns=["month_end", "window_start", "window_return"])
+        return pd.DataFrame(columns=cols)
     adj = monthly["adj_close"].to_numpy()
     ret = adj[WINDOW_MONTHS:] / adj[:-WINDOW_MONTHS] - 1.0
     ends = monthly["month_end"].to_numpy()[WINDOW_MONTHS:]
     starts = monthly["month_end"].to_numpy()[:-WINDOW_MONTHS]
     mask = ret >= MOONSHOT_THRESHOLD
-    return pd.DataFrame({"month_end": ends[mask], "window_start": starts[mask], "window_return": ret[mask]})
+
+    episodes = []
+    n = len(mask)
+    prev_true = False
+    cooldown_until = -1  # 上升緣的索引 < 這個值就不得再記一筆
+    i = 0
+    while i < n:
+        is_rising_edge = bool(mask[i]) and not prev_true
+        if is_rising_edge and i >= cooldown_until:
+            j = i
+            while j + 1 < n and mask[j + 1]:
+                j += 1
+            episodes.append({
+                "month_end": ends[i], "window_start": starts[i],
+                "window_return": float(ret[i]),
+                "episode_length_months": int(j - i + 1),
+                "peak_return": float(ret[i:j + 1].max()),
+                "window_start_idx": i,  # 對應monthly裡的列位置，供特徵取值定位用
+            })
+            cooldown_until = i + WINDOW_MONTHS
+        prev_true = bool(mask[i])
+        i += 1
+    return pd.DataFrame(episodes, columns=cols)
 
 
 def _eps_ttm_series(stock_id: str) -> pd.DataFrame:
@@ -102,10 +146,32 @@ def _asof_value(pit_df: pd.DataFrame, value_col: str, as_of_date: pd.Timestamp) 
 
 
 def _pre_window_features(price: pd.DataFrame, eps_ttm: pd.DataFrame, rev: pd.DataFrame,
-                          window_start: pd.Timestamp) -> dict:
-    """起漲前一季（window_start 當天可得的最新資料）PIT-safe 特徵。第3題。"""
-    eps0 = _asof_value(eps_ttm, "eps_ttm", window_start)
-    eps_prior = eps_ttm[pd.to_datetime(eps_ttm["pit_date"]) <= window_start]
+                          monthly: pd.DataFrame, window_start_idx: int) -> dict:
+    """起漲前特徵，第3題。
+
+    2026-09-18（Cowork【重構.B收成前必修】2修正）：舊版直接用`window_start`
+    當asof日期。去重疊之後`window_start`本身已經是正確的episode起點
+    （不再是漲勢中段），但為了不踩「window_start當月的價格本身就是12個月
+    報酬計算的分母」這條邊界、也為了讓「起漲前」在語意上更保守，特徵基準
+    一律改成 **episode起點（window_start）的前一個月月底**，並用
+    `feature_asof_date`欄位明文記錄實際取值日，方便事後稽核「這個特徵
+    是哪一天算出來的」。`window_start_idx`是`_find_moonshot_windows()`
+    回傳的、window_start在`monthly`裡的列位置，往前一列就是「前一個月
+    月底」；index==0（資料一開始就達標，前面沒有更早的月份可取）時只能
+    退回用window_start本身，這是資料邊界的誠實例外，不是bug。
+
+    **PIT-safe不等於沒有前視，這是兩件事**：這裡每個數值查詢本身都用
+    `_asof_value()`嚴格限制pit_date<=asof日期，是PIT-safe的；但如果
+    asof日期這個「事件標記」本身選錯了（例如舊版誤用漲勢中段的月份），
+    PIT-safe的查詢一樣會忠實地回傳「那個錯誤時間點當下可得的資料」，
+    產生的特徵仍然是前視污染的——PIT-safe只保證「不會看到asof日期之後
+    才公布的資料」，不保證asof日期本身選對了。
+    """
+    asof_idx = max(window_start_idx - 1, 0)
+    asof_date = pd.Timestamp(monthly.iloc[asof_idx]["month_end"])
+
+    eps0 = _asof_value(eps_ttm, "eps_ttm", asof_date)
+    eps_prior = eps_ttm[pd.to_datetime(eps_ttm["pit_date"]) <= asof_date]
     eps_yoy = np.nan
     if len(eps_prior) >= 5 and eps0 not in (np.nan,):
         eps_1y_ago = float(eps_prior.iloc[-5]["eps_ttm"]) if len(eps_prior) >= 5 else np.nan
@@ -113,12 +179,12 @@ def _pre_window_features(price: pd.DataFrame, eps_ttm: pd.DataFrame, rev: pd.Dat
             eps_yoy = eps0 / eps_1y_ago - 1.0
     rev_yoy = np.nan
     if not rev.empty and "revenue" in rev.columns:
-        rv = rev[pd.to_datetime(rev["pit_date"]) <= window_start].sort_values("pit_date")
+        rv = rev[pd.to_datetime(rev["pit_date"]) <= asof_date].sort_values("pit_date")
         if len(rv) >= 4:
             rev_yoy = np.nan  # 月營收YoY另有現成因子，這裡小樣本輪先留白，不杜撰
     d = price.copy()
     d["date"] = pd.to_datetime(d["date"])
-    pre = d[d["date"] <= window_start].sort_values("date")
+    pre = d[d["date"] <= asof_date].sort_values("date")
     ret_250d = np.nan
     if len(pre) > 250:
         p_now = pre["adj_close"].iloc[-1]
@@ -132,6 +198,7 @@ def _pre_window_features(price: pd.DataFrame, eps_ttm: pd.DataFrame, rev: pd.Dat
     if "Trading_money" in pre.columns and len(pre) >= 20:
         liq20 = float(pre["Trading_money"].tail(20).mean())
     return {
+        "feature_asof_date": str(asof_date.date()),
         "eps_ttm_pre": eps0, "eps_yoy_pre": eps_yoy, "pe_pre": pe0,
         "ret_250d_pre": ret_250d, "avg_trading_money_20d_pre": liq20,
     }
@@ -151,9 +218,14 @@ def process_stock(stock_id: str, status: str, delist_date) -> dict:
 
         moonshot_rows = []
         for _, w in windows.iterrows():
-            feat = _pre_window_features(price, eps_ttm, rev, pd.Timestamp(w["window_start"]))
+            # 2026-09-18修正：feat（起漲前描述性特徵）現在錨定在window_start
+            # 「前一個月月底」，跟這裡歸因分解要用的「window_start當月」
+            # eps_start/close_start是兩件事、兩個不同的asof日期，不能共用
+            # 同一個值——分解用的eps_start必須跟close_start同一天，否則
+            # log_eps_contrib會摻進一個月的時間差雜訊。
+            feat = _pre_window_features(price, eps_ttm, rev, monthly, int(w["window_start_idx"]))
             eps_end = _asof_value(eps_ttm, "eps_ttm", pd.Timestamp(w["month_end"]))
-            eps_start = feat["eps_ttm_pre"]
+            eps_start = _asof_value(eps_ttm, "eps_ttm", pd.Timestamp(w["window_start"]))
             close_end = float(monthly.loc[monthly["month_end"] == w["month_end"], "close"].iloc[0])
             close_start_row = price[pd.to_datetime(price["date"]) <= pd.Timestamp(w["window_start"])]
             close_start = float(close_start_row["close"].iloc[-1]) if len(close_start_row) else np.nan
@@ -168,6 +240,8 @@ def process_stock(stock_id: str, status: str, delist_date) -> dict:
                 "stock_id": stock_id, "month_end": str(w["month_end"])[:10],
                 "window_start": str(w["window_start"])[:10],
                 "window_return_total": float(w["window_return"]),
+                "episode_length_months": int(w["episode_length_months"]),
+                "peak_return": float(w["peak_return"]),
                 "log_eps_contrib": log_eps_contrib, "log_pe_contrib": log_pe_contrib,
                 "log_residual_dividend_and_other": residual,
                 **feat,
@@ -184,6 +258,53 @@ def process_stock(stock_id: str, status: str, delist_date) -> dict:
 
 
 SAMPLE_SEED = 42  # 固定種子，確保每次重跑抽到同一組樣本（可重現）
+
+
+def _two_proportion_ztest(skip_a: int, n_a: int, skip_b: int, n_b: int) -> tuple[float | None, float | None]:
+    """兩樣本skip率的pooled proportion z檢定，回傳(z, 雙尾p值)。
+    任一組n<5時回傳(None, None)，誠實標「樣本太小無法檢定」而非硬算一個
+    不穩定的p值。"""
+    if n_a < 5 or n_b < 5:
+        return None, None
+    p_a, p_b = skip_a / n_a, skip_b / n_b
+    p_pool = (skip_a + skip_b) / (n_a + n_b)
+    se = (p_pool * (1 - p_pool) * (1 / n_a + 1 / n_b)) ** 0.5
+    if se == 0:
+        return None, None
+    z = (p_b - p_a) / se
+    p_value = float(2 * (1 - stats.norm.cdf(abs(z))))
+    return float(z), p_value
+
+
+def _survivorship_skip_breakdown(sample: pd.DataFrame, results: list[dict], errors: list[dict]) -> dict:
+    """2026-09-18（Cowork【重構.B收成前必修】3）：active/delisted兩組各自的
+    總檔數/成功/skip率/skip_reason分布，外加active vs delisted skip率的
+    顯著性檢定——這個數字比任何起飛率/命中率結論都重要，因為它決定命中率
+    要打幾折，五題裡沒回答這個之前不准把任何數字寫進結論。"""
+    breakdown = {}
+    for status_val in sorted(sample["status"].unique()):
+        total = int((sample["status"] == status_val).sum())
+        ok_n = sum(1 for r in results if r["status"] == status_val)
+        skip_n = sum(1 for e in errors if e["status"] == status_val)
+        reasons: dict[str, int] = {}
+        for e in errors:
+            if e["status"] == status_val:
+                reasons[e["skip_reason"]] = reasons.get(e["skip_reason"], 0) + 1
+        breakdown[status_val] = {
+            "total": total, "ok": ok_n, "skip": skip_n,
+            "skip_rate_pct": round(100.0 * skip_n / total, 1) if total else None,
+            "skip_reason_distribution": reasons,
+        }
+    if "active" in breakdown and "delisted" in breakdown:
+        a, d = breakdown["active"], breakdown["delisted"]
+        z, p = _two_proportion_ztest(a["skip"], a["total"], d["skip"], d["total"])
+        breakdown["_active_vs_delisted_test"] = {
+            "method": "two-proportion pooled z-test（雙尾）",
+            "z": z, "p_value": p,
+            "delisted_skip_rate_significantly_higher":
+                (p is not None and p < 0.05 and d["skip_rate_pct"] > a["skip_rate_pct"]),
+        }
+    return breakdown
 
 
 def main() -> None:
@@ -228,6 +349,8 @@ def main() -> None:
             hit = moonshot_df.loc[moonshot_df["year"] == y, "stock_id"].nunique()
             yearly_base_rate[int(y)] = {"n_moonshot_stocks": int(hit), "n_sample_universe": len(has_data_stocks)}
 
+    status_breakdown = _survivorship_skip_breakdown(sample, results, errors)
+
     moonshot_df.to_csv(OUT_DIR / "moonshot_windows_sample.csv", index=False)
     with open(OUT_DIR / "run_summary.json", "w", encoding="utf-8") as f:
         json.dump({
@@ -235,11 +358,20 @@ def main() -> None:
             "n_moonshot_windows_total": len(all_moonshot),
             "n_moonshot_stocks_total": moonshot_df["stock_id"].nunique() if not moonshot_df.empty else 0,
             "yearly_base_rate": yearly_base_rate,
+            "status_breakdown": status_breakdown,
             "skip_reasons_sample": [e["skip_reason"] for e in errors[:10]],
         }, f, ensure_ascii=False, indent=2)
 
     print(f"[multibagger] 完成：ok={len(results)} skip={len(errors)} moonshot窗口={len(all_moonshot)}")
     print(f"[multibagger] 逐年基準機率（小樣本）：{json.dumps(yearly_base_rate, ensure_ascii=False)}")
+    print(f"[multibagger] 存活者偏誤skip率分解：{json.dumps(status_breakdown, ensure_ascii=False)}")
+    test = status_breakdown.get("_active_vs_delisted_test", {})
+    if test.get("delisted_skip_rate_significantly_higher"):
+        a, d = status_breakdown["active"], status_breakdown["delisted"]
+        print(f"[multibagger] ⚠️⚠️⚠️ 本研究的存活者偏誤僅部分緩解：delisted股skip率"
+              f"{d['skip_rate_pct']}% 顯著高於active股{a['skip_rate_pct']}%"
+              f"（two-proportion z-test p={test['p_value']:.4g}），下市股實際納入率僅"
+              f"{100 - d['skip_rate_pct']:.1f}%。不得只說「宇宙含下市股」就當作已解決。")
 
 
 if __name__ == "__main__":

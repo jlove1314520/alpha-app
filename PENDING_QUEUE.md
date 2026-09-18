@@ -14,6 +14,105 @@
 
 ---
 
+## 2026-09-18（續6）Cowork裁示【重構.B收成前必修】三個會讓核心數字失真的
+問題＋【順手修】ORDER-BEGIN清單已失效（原文登記）
+
+Cowork原話：
+
+> 【重構.B 收成前必修】三個會讓核心數字失真的問題
+>
+> 300檔背景工作(job_id=20260918-140419-49bf)先讓它跑完，但**在修好下面三項之前，
+> 不准把任何數字寫進 MULTIBAGGER_ATTRIBUTION.md 當結論**，
+> 也不准回報起飛率或命中率。管線正確性已驗證，這三項是定義正確性。
+>
+> 1. 事件去重疊（最重要）
+>    _find_moonshot_windows() 目前回傳每一個 12 個月滾動報酬 >=100% 的月份，
+>    一次上漲被記成最多 12 筆。證據：17 檔 → 198 窗口 = 11.6 筆/檔。
+>    後果：起飛率灌水約一個數量級；Q4 命中率被系統性高估
+>         （失敗案例不會產生連續窗口，成功案例會，分子放大分母不放大）。
+>    改成「episode」而非「window」：
+>    (a) 用上升緣偵測——只在「上個月不符合、這個月符合」時記一筆事件；
+>    (b) 記完一筆後強制冷卻 WINDOW_MONTHS 個月才允許記下一筆；
+>    (c) 每筆 episode 額外記錄 episode_length_months 與 peak_return，
+>        不要把「跑很久」這個資訊丟掉，只是不再重複計數。
+>    驗收：同一組 20 檔重跑，回報 episode 數（預期會從 198 掉到 20 上下），
+>    並列出掉最多的那三檔各自的 episode_length_months。
+>
+> 2. 起漲前特徵要真的是起漲前
+>    目前 _pre_window_features() 取 window_start 當基準，但重疊窗口的
+>    window_start 已經是漲勢開始後第 N 個月——那些樣本是「漲到一半」不是
+>    「起漲前」，混進去會讓特徵看起來極度有預測力，那是事後諸葛。
+>    去重疊後，特徵基準一律改成 **episode 起點的前一個月月底**，
+>    並新增欄位 feature_asof_date 明文記錄取值日，方便事後稽核。
+>    在 MULTIBAGGER_ATTRIBUTION.md 檔頭寫一段話：
+>    **「每個數值都是 PIT-safe 的，但事件標記方式若錯誤，仍會造成系統性
+>    前視污染——PIT-safe 不等於沒有前視，這是兩件事。」**
+>
+> 3. 存活者偏誤從後門回來的檢查
+>    process_stock() 的 `len(price) < 260 → skip_reason=price_too_short`，
+>    而下市股正是最可能沒有完整價格序列的一群（美股已實測 7.1% 無來源）。
+>    回報一張表：active / delisted 兩組各自的
+>      總檔數 / 成功處理 / skip 率 / 各 skip_reason 的分布。
+>    **若 delisted 的 skip 率顯著高於 active，必須在報告最上方用粗體標明
+>    「本研究的存活者偏誤僅部分緩解，下市股實際納入率 X%」，
+>    不得只說「宇宙含下市股」就算數。**
+>    這個數字比任何結論都重要，因為它決定命中率要打幾折。
+>
+> 【順手修·Cowork 自己捅的】ORDER-BEGIN 清單已失效
+> PENDING_QUEUE.md 裡 "ORDER-BEGIN" 出現三次：第42行（Cowork上一則指令的
+> 引文）、第96行（執行記錄）、第4017行（真正的清單）。
+> _explicit_order() 用 split("ORDER-BEGIN", 1) 取第一個，實測解析出 3578 筆
+> 垃圾項目，真正的清單完全讀不到。目前靠「垃圾對不上 by_key 就退回檔案順序」
+> 沒出事，但那份權威排序清單現在是死的。
+> 改法（選最不脆弱的）：把標記改成不會出現在散文裡的形式，
+> 例如 <!-- ORDER-BEGIN --> / <!-- ORDER-END --> HTML 註解，
+> 並在 _explicit_order() 改用「最後一個」出現位置或明確的註解標記比對。
+> 同時在 runner 啟動時加一道自檢：若檔案中標記出現超過一組，
+> 印 QUEUE_ORDER_MARKER_AMBIGUOUS 並寫進 _format_mismatch 旗標。
+
+**執行狀態**：✅ **四項全部完成（本輪，互動視窗CC）**：
+
+- **1（事件去重疊）** ✅：`research/multibagger_attribution.py::
+  _find_moonshot_windows()`改成episode式（上升緣偵測+12個月冷卻+
+  `episode_length_months`/`peak_return`）。**驗收（同組20檔`SAMPLE_SEED=42`
+  重跑）**：episode數198→**39**（不是「20上下」，但同一量級的骤降，
+  17檔平均2.3筆/episode）。掉最多三檔：`2436`（31→5，
+  episode_length_months=[1,1,3,4,10]）、`6538`（25→2，[19,6]）、
+  `2504`（22→5，[4,2,2,3,5]）。詳見`research/MULTIBAGGER_ATTRIBUTION.md`
+  新增小節。
+- **2（起漲前特徵基準）** ✅：`_pre_window_features()`asof日期改成
+  episode起點前一個月月底，新增`feature_asof_date`欄位；同時修正一個
+  連帶發現的bug——歸因分解用的`eps_start`/`close_start`維持在
+  `window_start`當天，不隨features新asof日期一起偏移，避免摻進一個月
+  時間差雜訊。`MULTIBAGGER_ATTRIBUTION.md`檔頭已加總司令要求的那段
+  「PIT-safe不等於沒有前視」原文。
+- **3（存活者偏誤skip率表）** ✅：新增`_survivorship_skip_breakdown()`
+  （active/delisted總檔數/成功/skip率/skip_reason分布＋two-proportion
+  z檢定），`run_summary.json`新增`status_breakdown`欄位，顯著時印粗體
+  警告。20檔樣本delisted組n=2<5，z檢定誠實回傳無法檢定，這張表要等
+  300檔重跑才有統計意義。
+- **【順手修】ORDER-BEGIN矛盾** ✅：`PENDING_QUEUE.md`真正的清單標記
+  改成`<!-- ORDER-BEGIN -->`/`<!-- ORDER-END -->`（HTML註解，不會被
+  裁示原文的散文引用撞到）；`scripts/dev_queue_runner.py::
+  _explicit_order()`同步改用新標記＋`rfind`取最後一次出現位置（雙重
+  防呆）；新增`_order_marker_ambiguity()`自檢，`build_prompt()`在
+  `find_next()`之前執行，標記數量不對就印`QUEUE_ORDER_MARKER_AMBIGUOUS`、
+  寫入`_format_mismatch`、直接回傳新exit code 5，不派工這一輪（即使
+  `find_next()`原本靠既有防呆矇對答案也不放行）。**實測修復前後對比**：
+  用舊版`split("ORDER-BEGIN",1)`邏輯對照本次改動前的檔案內容重算，
+  會解析出3547筆垃圾（比Cowork原話「3578筆」略有出入，因為檔案內容
+  在這之間又有變動，量級一致）；修好後正確解析出33筆真實項目。
+  `run-dev-queue-cycle.ps1`（不在本repo）同步新增exit 5的reason對照。
+
+**300檔重跑（尚未做，如實記錄）**：三項修復已在20檔樣本驗證方向正確，
+但尚未拿300檔重新收成——`job_id=20260918-140419-49bf`是舊程式碼跑的，
+其結果已由上一輪判定「未過半、存活者偏誤阻塞、不放大」結案，這個阻塞
+點不因本輪三項修復而解除（三項修復不改變skip率，只改變episode計數與
+特徵取值方式）。下一輪視「查證已下市TW股票歷史價格來源」這個既有阻塞
+點的進度，決定是否值得先拿300檔重跑三項修復後的數字。
+
+---
+
 ## 2026-09-18（續5）總司令裁示【最優先·修理自走系統】DevQueue格式不符＋
 【更正】檢定力前置關卡方向反了（原文登記）
 
@@ -168,6 +267,14 @@
   股票歷史價格來源（建`docs/TW_DELISTED_PRICE_SOURCES.md`，三來源查證）
   才能重跑驗證，詳細記錄與下一步見
   `research/MULTIBAGGER_ATTRIBUTION.md`「下一輪待做」。
+  **進度更新（互動視窗CC，2026-09-18續6，Cowork收成前必修三項）**：
+  事件去重疊（episode化，20檔驗證198→39筆窗口）、起漲前特徵基準修正
+  （anchor改成episode起點前一個月月底+`feature_asof_date`）、存活者
+  偏誤skip率分解表（active/delisted+z檢定）三項全部修復完成，
+  上述`n_ok=126`/`n_skipped=174`與300檔job的其他數字**是修復前的舊
+  程式碼跑出來的，本次修復不改變skip率但會改變episode計數，300檔
+  尚待用新程式碼重跑**才能拿到真正可信的數字；「查證已下市TW股票歷史
+  價格來源」這個阻塞依然存在、未解除。
   原始要求：五題全答：基準機率逐年含空頭年／EPS-PE-股數三項歸因分解／
   起漲前PIT-safe特徵／對照組起飛率-平庸率-下市率表／市值門檻邊際效果，
   全程TRAIN+VAL、PIT-safe、不生選股規則，見續3裁示原文。
@@ -4015,7 +4122,20 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
 「原話全文」的區塊失去時間脈絡。清單裡沒列到的項目，排在清單全部完成之後，
 依檔案原有順序處理。
 
-ORDER-BEGIN
+**2026-09-18（Cowork【重構.B收成前必修】順手修）標記格式改成HTML註解**：
+舊版用裸字「ORDER-BEGIN」/「ORDER-END」當標記，`_explicit_order()`用
+`split("ORDER-BEGIN", 1)`取第一次出現——但裁示原文引用、執行記錄裡提到
+這兩個字時也會被算進去（實測當時已出現4次「ORDER-BEGIN」、1次
+「ORDER-END」，解析出3578筆垃圾項目，真正的清單完全讀不到，只是因為
+「垃圾對不上by_key就退回檔案順序」這個既有防呆沒讓它出事）。改用把
+`ORDER-BEGIN`／`ORDER-END`包進HTML註解語法（`<`+`!--`+空格+關鍵字+
+空格+`--`+`>`，這裡刻意不拼出完整字串，避免這段說明文字自己又製造
+出第二組一模一樣的標記）這種不會自然出現在裁示原文散文裡的格式，
+`_explicit_order()`同步改用這組標記＋取「最後一次」出現位置（雙重
+防呆），並在標記出現超過一組時印`QUEUE_ORDER_MARKER_AMBIGUOUS`寫進
+`_format_mismatch`旗標，不再依賴「垃圾湊巧對不上」這種運氣。
+
+<!-- ORDER-BEGIN -->
 重構.E1
 重構.二bcd [研究]
 重構.三 [研究]
@@ -4049,7 +4169,7 @@ Cybex.beta
 源頭二.3
 源頭二.4
 源頭二.5
-ORDER-END
+<!-- ORDER-END -->
 
 **2026-09-18（續5）清單重整說明**：舊清單65個去重項目裡，39個已確認
 完成（Cybex.債務1~4、Cowork.債務2.1~2.4、建置一.1~4、資料源一.1/一.2/
