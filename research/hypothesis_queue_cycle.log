@@ -3098,3 +3098,10 @@ quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning:
 quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/hypothesis_queue相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
 
 quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/hypothesis_queue相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
+
+quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：hypothesis_queue連續12輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流
+
+===== Hypothesis-queue cycle start: 2026-09-18 17:21:02 =====
+Error: Exceeded USD budget (5)
+===== Hypothesis-queue cycle end: 2026-09-18 17:27:31 =====
+quota_throttle: C:\alpha\alpha-app\research\quota_throttle.py:67: SyntaxWarning: invalid escape sequence '\.'   regex前綴規則（`^research/[^/]+\.log$`已涵蓋這個檔案）是同一套精神。 RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=13
