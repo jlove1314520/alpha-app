@@ -183,11 +183,25 @@ def process_stock(stock_id: str, status: str, delist_date) -> dict:
         return {"stock_id": stock_id, "status": status, "skip_reason": f"error: {e}"}
 
 
+SAMPLE_SEED = 42  # 固定種子，確保每次重跑抽到同一組樣本（可重現）
+
+
 def main() -> None:
     OUT_DIR.mkdir(exist_ok=True)
     uni = universe()
-    sample = uni.sort_values("stock_id").head(SAMPLE_SIZE).reset_index(drop=True)
-    print(f"[multibagger] 小樣本驗證輪：{len(sample)} 檔（宇宙總數 {len(uni)} 檔）")
+    # 只留 4 位純數字代號（普通股票）：上一輪 bug 是依字母排序取前 N 檔，
+    # 系統性抽到 00400A～00405A 這類 ETF 連結型代號（無真實 EPS/股價資料）。
+    # universe() 本身的 is_warrant 過濾只擋 6 位純數字權證，不擋這種帶字母
+    # 尾碼的 ETF 代號，所以這裡另外用「4位純數字」白名單過濾，不動共用的
+    # universe.py（避免影響其他呼叫者）。
+    normal_stock = uni[uni["stock_id"].str.match(r"^\d{4}$")].reset_index(drop=True)
+    n_excluded = len(uni) - len(normal_stock)
+    if len(normal_stock) > SAMPLE_SIZE:
+        sample = normal_stock.sample(n=SAMPLE_SIZE, random_state=SAMPLE_SEED).reset_index(drop=True)
+    else:
+        sample = normal_stock.reset_index(drop=True)
+    print(f"[multibagger] 小樣本驗證輪：{len(sample)} 檔（宇宙總數 {len(uni)} 檔，"
+          f"過濾非4位數字普通股代號 {n_excluded} 檔，隨機種子={SAMPLE_SEED}）")
 
     results = []
     errors = []

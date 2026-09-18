@@ -156,12 +156,17 @@
 - [ ] **重構.A2** [研究] `research/HYPOTHESIS_QUEUE.md`「#74續」章節裡
   GATE6去均值化bug的兩個修正提案，待總司令看過裁示要採用哪個（不是
   「階段一.2尚未做」——階段一.2本身已完成，見上方執行狀態說明）。
-- [ ] **重構.B** [研究] 飆股歸因分解——**進度更新（hypothesis_queue自走，
-  2026-09-18）**：`research/multibagger_attribution.py` 骨架已建（見
-  `research/MULTIBAGGER_ATTRIBUTION.md` 詳細記錄），6檔煙霧測試證明
-  程式跑得通、錯誤隔離有效，**但抽樣邏輯有bug（抽到ETF代號非普通股，
-  0檔真正跑進核心計算），五題數字全部尚未產出，不得引用**。下一輪
-  待做：修抽樣→重跑煙霧測試→300檔→全宇宙，見上述md檔「下一輪待做」。
+- [ ] **重構.B** [研究] 飆股歸因分解——**進度更新（馬拉松自走第546輪，
+  2026-09-18，接續上一輪hypothesis_queue）**：抽樣bug已修正（過濾4位
+  純數字代號＋固定種子隨機抽樣，取代舊版字母排序取前N檔），**20檔
+  煙霧測試驗證通過：17/20真正跑進`process_stock()`核心計算，產出198個
+  moonshot窗口**（20檔數字僅供驗證管線正確性，不得引用為結論）。已依
+  裁示原文建議樣本量投遞300檔背景工作（`run_detached.py`
+  job_id=`20260918-140419-49bf`，session內等4分鐘未完成，已脫離session
+  背景執行）。**下一輪待做**：先收成300檔（`run_detached.py status`／
+  `log 20260918-140419-49bf`，確認`research/multibagger_raw/
+  run_summary.json`），驗證通過才放大全宇宙，見
+  `research/MULTIBAGGER_ATTRIBUTION.md`「下一輪待做」。
   原始要求：五題全答：基準機率逐年含空頭年／EPS-PE-股數三項歸因分解／
   起漲前PIT-safe特徵／對照組起飛率-平庸率-下市率表／市值門檻邊際效果，
   全程TRAIN+VAL、PIT-safe、不生選股規則，見續3裁示原文。
