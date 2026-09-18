@@ -267,6 +267,24 @@ def check_pat_expiry_alerts() -> list[str]:
         return []
 
 
+def check_devqueue_format_mismatch_alerts() -> list[str]:
+    """2026-09-18（重構.E1）：`dev_queue_runner.py` 偵測到 `PENDING_QUEUE.md` 散文
+    裁示跟「- [ ]」機器可讀格式對不上時，會把 `_format_mismatch` 旗標寫進
+    `research/data/dev_queue_state.json`，但這個旗標本輪之前只印在
+    `dev_queue_cycle.log` 裡，沒人盯著看就等於沒告警——這是矛盾偵測機制
+    （見 `dev_queue_runner.py` 2026-09-18 總司令裁示【最優先·修理自走系統】）
+    唯一還沒接上 `local_task_health` 亮燈機制的最後一段。仿 `check_pat_expiry_alerts()`
+    同一套寫法：委派給 `dev_queue_runner.get_format_mismatch_alerts()`，這裡只包一層
+    try/except，監測器不能因為這項失敗而整輪崩潰。
+    """
+    try:
+        from dev_queue_runner import get_format_mismatch_alerts
+        return get_format_mismatch_alerts()
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! DevQueue佇列格式不符旗標檢查失敗（{type(e).__name__}: {e}），本輪跳過這項自檢")
+        return []
+
+
 def publish_task_health(now: datetime, rows: list[dict], stalled: list[str],
                          conn_alerts: list[tuple[str, int, str]] | None = None) -> None:
     """把自檢結果併進 data/audit_report.json 的 local_task_health（總司令指定的位置）。
@@ -347,7 +365,8 @@ def main() -> int:
     # 2026-09-15【防重演】：PENDING_QUEUE.md裡【使用者可見】標記的阻塞項也併進
     # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
     # 教總司令看第三個地方。
-    task_stalls = task_stalls + check_stale_user_visible_blocks() + check_pat_expiry_alerts()
+    task_stalls = (task_stalls + check_stale_user_visible_blocks() + check_pat_expiry_alerts()
+                   + check_devqueue_format_mismatch_alerts())
     publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:

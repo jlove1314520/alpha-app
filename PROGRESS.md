@@ -1,3 +1,44 @@
+## 2026-09-18（續3，DevQueue自走，cycle 20260918-080101）補上矛盾偵測最後一段：`_format_mismatch`旗標接進`local_task_health`
+
+戴**維運帽**（接續續2留下的半成品`重構.E1`，純接線工作，不改判斷邏輯）。
+執行`PENDING_QUEUE.md`「執行順序（權威清單）」第一項`重構.E1`。
+
+**做了什麼**：
+1. `scripts/dev_queue_runner.py`新增`get_format_mismatch_alerts()`：讀
+   `research/data/dev_queue_state.json`的`_format_mismatch`旗標（`build_prompt()`
+   偵測到`QUEUE_FORMAT_MISMATCH`時寫入），有旗標就回傳一則告警文字，不清
+   旗標（清除邏輯仍由`build_prompt()`自己管，不重複）。
+2. `scripts/check_external_connectivity.py`新增
+   `check_devqueue_format_mismatch_alerts()`：仿既有`check_pat_expiry_alerts()`
+   同一套try/except委派寫法，呼叫上面那個函式，監測器不因這項失敗而整輪
+   崩潰；併進`main()`的`task_stalls`，最終寫進`data/audit_report.json`的
+   `local_task_health.stalled`。
+3. `PENDING_QUEUE.md`「機器索引」區`重構.E1`標`- [x]`並補完成說明。
+
+**驗證（已跑，非空談）**：
+- 單元測試：暫時把`_format_mismatch`旗標寫進
+  `research/data/dev_queue_state.json`（備份→注入→呼叫`check_devqueue_
+  format_mismatch_alerts()`→還原→`git diff`確認乾淨），回傳
+  `['DevQueue 佇列格式不符（自 2026-09-18T08:00:00+08:00 起未解除）：測試用假旗標']`；
+  無旗標時回傳`[]`，兩種狀態都對。
+- 整合跑一次`python scripts/check_external_connectivity.py`：正常執行、
+  無例外，印出既有的`AlphaQuotesTW`停擺告警（跟本項無關的既有紅燈，
+  data/quotes_tw.json連續7班沒更新，另行追蹤，不在本項範圍）。
+- `node scripts/smoke_test.mjs`：50項中49項PASS，僅**#39資料一致性稽核
+  閘門FAIL（一致性違規率1.14%>1%，24檔）**——`git diff`確認`data/
+  audit_report.json`的`generated_at`是2026-09-18T03:06（當晚`data_audit.py`
+  排程跑的，早於本輪任何操作），本項未動`data/`任何資料生成程式碼，
+  是既有已知紅燈（見本檔多輪先前記錄，例如「一致性違規率12.53%」「36.70%」
+  等同類但書），與本次純接線改動無關。
+
+**這是本輪矛盾偵測機制（09-18裁示【最優先·修理自走系統】）最後一段**：
+`QUEUE_FORMAT_MISMATCH`現在會真的讓`local_task_health.stalled`亮燈，
+不用再等人翻`dev_queue_cycle.log`。
+
+**下一步**：權威清單接續項目全是`[研究]`標記（重構.二bcd/三已被馬拉松
+軌完成、A2/B/C/D待研究軌處理），DevQueue自己跳過，讓路給
+marathon／hypothesis_queue軌。
+
 ## 2026-09-18（續2）（修理自走系統：DevQueue從09-08起看不到任何交辦＋檢定力前置關卡規則更正）
 
 戴**維運帽**（修DevQueue這支自走機制本身，不是研究/開發功能）。總司令

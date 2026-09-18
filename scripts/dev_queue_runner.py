@@ -338,6 +338,23 @@ def _clear_format_mismatch() -> None:
         _save_state(st)
 
 
+def get_format_mismatch_alerts() -> list[str]:
+    """給 `check_external_connectivity.py` 呼叫（2026-09-18 重構.E1）：
+    `_format_mismatch` 旗標存在時回傳一則告警文字，讓它併進 `local_task_health`
+    的 `stalled` 清單、真的能讓 `AlphaDevQueue` 亮燈，不再只印在
+    `dev_queue_cycle.log` 裡等人翻。這支只讀狀態檔，不清旗標——旗標的生命週期
+    完全由 `build_prompt()` 自己管理（判定成真的做完／讓路給[研究]類時會呼叫
+    `_clear_format_mismatch()` 清掉，這裡不重複那份邏輯）。
+    """
+    st = _load_state()
+    info = st.get("_format_mismatch")
+    if not info:
+        return []
+    detected_at = info.get("detected_at", "未知時間")
+    detail = info.get("detail", "（無詳細訊息）")
+    return [f"DevQueue 佇列格式不符（自 {detected_at} 起未解除）：{detail}"]
+
+
 def build_prompt() -> int:
     nxt = find_next()
     if nxt is None:
