@@ -1,30 +1,30 @@
 {
-  "fetched_at": "2026-09-18T17:01:37.561142+08:00",
+  "fetched_at": "2026-09-18T17:06:38.235615+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 336.36,
-      "bid": 336.28,
-      "ask": 336.41,
+      "last": 336.47,
+      "bid": 336.25,
+      "ask": 336.47,
       "close": 337.0,
-      "change_pct": -0.1899,
+      "change_pct": -0.1573,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 497.9,
-      "bid": 497.85,
-      "ask": 498.35,
+      "last": 497.92,
+      "bid": 497.98,
+      "ask": 498.69,
       "close": 497.75,
-      "change_pct": 0.0301,
+      "change_pct": 0.0342,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
       "last": 221.57,
-      "bid": 221.49,
+      "bid": 221.48,
       "ask": 221.57,
       "close": 219.34,
       "change_pct": 1.0167,
@@ -32,20 +32,20 @@
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 368.96,
-      "bid": 368.87,
-      "ask": 369.01,
+      "last": 369.09,
+      "bid": 369.0,
+      "ask": 369.09,
       "close": 366.2,
-      "change_pct": 0.7537,
+      "change_pct": 0.7892,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 354.57,
-      "bid": 354.55,
-      "ask": 354.71,
+      "last": 355.07,
+      "bid": 354.89,
+      "ask": 355.08,
       "close": 347.33,
-      "change_pct": 2.0845,
+      "change_pct": 2.2284,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -71,14 +71,15 @@
       "label": "S&P 500"
     },
     "^IXIC": {
-      "last": 26418.3,
+      "last": 26418.299,
       "bid": null,
       "ask": null,
-      "close": 26418.3,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 25978.424,
+      "change_pct": 1.6932,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數"
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
     },
     "^SOX": {
       "last": 11599.492,
