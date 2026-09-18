@@ -1152,8 +1152,16 @@ Cowork原話：
   skip率在打散後仍顯著高於active→那才是真訊號，在報告標明「存活者
   偏誤僅部分緩解，下市股實際納入率X%」後**繼續答五題**；不再顯著→
   直接答五題。兩種情況都不停。
-- [ ] **重構.A3** [研究] 47筆FAIL補`failed_gates`欄位+UNDERPOWERED
-  重分類。**分支**：全程自走，考據不出來的標unknown，不要停。
+- [x] **重構.A3** ✅[自行裁量]查核後標記完成——47筆FAIL補`failed_gates`
+  欄位+UNDERPOWERED重分類這兩件事**其實已經做完並commit過**（本條目
+  之前一直沒同步標成✅，屬於「腦與手讀兩份不同文件」的舊債）：
+  commit `f7bf4ff0`（47筆補`research/TRIALS_FAILED_GATES_BACKFILL.jsonl`，
+  0筆卡gate5/6）+ commit `8d7a0fc8`（用Fisher z近似MDE逐筆核對，
+  3筆#187/#229/#239確認UNDERPOWERED，寫進
+  `research/UNDERPOWERED_RECLASSIFICATION.jsonl`，其餘36筆無封閉形式SE
+  誠實標`not_assessed_needs_simulation`）。兩支輸出檔都已存在且行數
+  對得上（47/47）。2026-09-18自走（AlphaHypothesisQueue）查核確認，
+  無新增改動，只補標記。
 - [x] **稽核.五** ✅**[自行裁量]判定為已完成，不重做**——e_pe 19.5%
   不一致查證（抽10檔含1506/2329，列我方近四季EPS四個季度值與來源
   日期、官方PER計算基準日，判斷「基準不同」還是「我們EPS拼錯」）。
