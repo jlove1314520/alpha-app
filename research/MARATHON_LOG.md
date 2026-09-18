@@ -1,5 +1,17 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-19（hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）— 校正PENDING_QUEUE.md重構.B與已完成重構.B2(commit d393e259)不同步
+
+開工先讀PENDING_QUEUE.md：只有一條`- [ ]`未開始交辦項（重構.B，飆股歸因
+分解），依規則名額給交辦。查證發現該項最後進度停在「下一輪收成job_id=
+20260918-223142-cdd8」，但該job其實已在2026-09-18 23:48:56（commit
+`d393e259`）由「重構.B2」完整收成並答完五題——判定為「腦與手不同步」，
+本輪修正：重構.B標記完成，指向B2既有產出，未重跑任何回測、未新增
+TRIALS_REGISTRY紀錄（描述性研究豁免）。重新確認holdout未消費、腳本
+確實只用<=VAL_END。修正後佇列`- [ ]`項為0，`- [!]`阻塞項約21條逐一
+檢查均未到解除條件（全數需總司令親自操作/裁示或仍在等資料累積），
+本輪工作單位到此為止。
+
 ## 2026-09-18（hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）— #74續：建置「percentile-vs-隨機控制組」類測試的通用注入式檢定力工具，合成常態null自我驗證PASS
 
 依#74「階段一.3」status標記的下一步待辦——`reclassify_underpowered.py`

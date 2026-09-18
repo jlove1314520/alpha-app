@@ -932,8 +932,28 @@ Cowork原話：
   GATE1~6任何門檻數字、未動holdout。完整記錄見
   `research/HYPOTHESIS_QUEUE.md`「#74續（2026-09-18 馬拉松自走輪次…
   執行選項A）」章節。
-- [ ] **重構.B** [研究] 飆股歸因分解——**進度更新（AlphaHypothesisQueue
-  自走，2026-09-18，收成300檔並驗證）**：300檔背景工作已收成
+- [x] **重構.B** [研究] ✅**已完成（hypothesis_queue自走，2026-09-19，
+  校正「腦與手」不同步）**——本行下方一路累積的進度更新，最後一筆停在
+  「下一輪用`run_detached.py status`/`log 20260918-223142-cdd8`收成」，
+  但`job_id=20260918-223142-cdd8`其實已在**2026-09-18 23:48:56（commit
+  `d393e259`）由「重構.B2」條目收成並完整答完五題**——本項目原始要求
+  （五題全答：基準機率逐年含空頭年／EPS-PE-股數三項歸因分解／起漲前
+  PIT-safe特徵／對照組起飛率-平庸率-下市率表／市值門檻邊際效果，全程
+  TRAIN+VAL、PIT-safe、不生選股規則）與B2完成的工作內容逐項對應，
+  判定為同一件事，**本項目至此標記完成，不重做**。已重新確認：
+  ①holdout未消費（`is_holdout_consumed()==False`）②`multibagger_
+  attribution.py`docstring明文只用`<=VAL_END`、不碰holdout③五題結論
+  已寫入`research/MULTIBAGGER_ATTRIBUTION.md`最上方章節，含存活者偏誤
+  僅部分緩解（delisted skip 52.0% vs active 12.7%，p=3.28e-13，下市股
+  實際納入率48.0%）的誠實揭露④確實未生成任何選股規則。**新的開放
+  問題（不屬於本項目範圍，需總司令另行裁示，不自行執行）**：是否要
+  將300檔分層抽樣結果放大到全宇宙重跑、或是否要往選股規則化推進——
+  這兩者B2完成時已明確標註「待裁示後再排」，維持原判斷，本次校正
+  不新增裁示。依`CLAUDE.md`「七之三」描述性研究性質，不寫
+  `TRIALS_REGISTRY.jsonl`（沿用重構.B/C/D整批既有豁免）。
+  **原始進度記錄（保留稽核軌跡，下面這段已是歷史，現況見上方）**：
+  ~~進度更新（AlphaHypothesisQueue
+  自走，2026-09-18，收成300檔並驗證）~~：300檔背景工作已收成
   （job_id=`20260918-140419-49bf`，`finished`/`exit_code=0`）：
   `n_ok=126`／`n_skipped=174`（**42%成功，未過半**）。查證log發現174筆
   skip中208行`possibly delisted`錯誤，係yfinance＋FinMind兩個價格來源
