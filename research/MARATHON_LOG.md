@@ -1,5 +1,23 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-19（hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）— 設計新假設軸#75（美股SEC Form 4內部人交易），完成資料源歷史起點探測
+
+開工先讀`PENDING_QUEUE.md`：`- [ ]`未開始交辦項0條，`- [!]`阻塞項22條
+逐一比對本輪與今日前一輪記錄，解除條件均未到（總司令親自操作/裁示或
+資料累積），轉入自走。`HYPOTHESIS_QUEUE.md`頭號未結案項#74主要待辦已於
+上一輪清空（GATE4/GATE6雙元分析完成），依協定第1節設計新假設軸#75：
+美股SEC EDGAR Form 4內部人交易informed trading訊號，跟已死的`#41`
+（台股MOPS內部人持股轉讓）真正不同維度（申報時機/宇宙規模/文獻脈絡皆
+不同，`#41`死因是45檔樣本太小，不代表機制被推翻）。依`CLAUDE.md`七之三
+第10關「資料源歷史起點探測」，實測SEC官方`data.sec.gov/submissions/
+CIK0000320193.json`（AAPL，2次請求）確認Form 4歷史可回溯至2003-03-21
+（與Sarbanes-Oxley 2003年強制2營業日電子申報法規時間點吻合），早於
+`VAL_END=2024-12-31`，通過起點門檻，可開發完整SPEC。完整記錄見
+`HYPOTHESIS_QUEUE.md`「#75」新章節。**本輪工作到此為止**（一輪一個
+有界工作單位，地基探測完成，下一輪待辦：三來源查證補齊+批次歷史回補
+腳本+第1關cheap gate）。未修改GATE1~6任何門檻、未新增TRIALS_REGISTRY列
+（地基探測非正式判定）、`is_holdout_consumed()`開工/收工前皆`False`。
+
 ## 2026-09-19（hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）— #74續：GATE4元分析，證實低通過率主因是借用的月頻換手假設而非判準bug
 
 開工先讀PENDING_QUEUE.md：無任何`- [ ]`未開始交辦項，`- [!]`阻塞項22條
