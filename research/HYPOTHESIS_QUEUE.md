@@ -11177,3 +11177,43 @@ Point-in-Time申報層級資料，非市場報價）——本輪對AAPL（CIK 00
 `CLAUDE.md`七之三第10關「資料源歷史起點探測」本身不算進統計檢定力消耗
 的既有慣例）、對SEC EDGAR僅發出2次請求（AAPL單一CIK，`submissions`與
 `-001`分頁各一次），遠低於官方10 req/秒門檻。
+
+**#75續（2026-09-19 hypothesis_queue排程接續，AlphaHypothesisQueue無人值守，
+完成上一輪「尚未做到1」三來源查證補齊）**：
+
+依上一輪「尚未做到1」補第二個獨立來源（不是「找不到」型結論，是正面
+確認資料起點，但比照本專案一貫的查證紀律仍留存查證軌跡）。查得SEC官方
+規則發布文件兩份：
+- <https://www.sec.gov/rules/2003/05/mandated-electronic-filing-and-web-site-posting-forms-3-4-and-5>
+  （SEC官方2003-05-07 Release：Section 403 Sarbanes-Oxley強制Form 3/4/5
+  電子申報，**2003-06-30**起生效，早於此日期允許自願提前採用電子申報）
+- <https://www.federalregister.gov/documents/2003/05/13/03-11824/mandated-electronic-filing-and-web-site-posting-for-forms-3-4-and-5>
+  （聯邦公報同一規則正式刊登版，日期一致）
+
+**跟上一輪EDGAR資料本身查得的AAPL最早Form 4申報日2003-03-21交叉核對**：
+2003-03-21早於官方強制生效日2003-06-30約3個月，**與規則本身「允許自願
+提前採用」的敘述吻合，不是資料矛盾**——蘋果公司很可能是提前自願電子
+申報的公司之一，這正好解釋為何實測起點略早於強制生效日。三個獨立來源
+（①SEC官方`data.sec.gov`申報資料本身②SEC官方規則發布文件③聯邦公報
+正式刊登版）方向一致，「尚未做到1」完成，資料源歷史起點2003年區間
+（保守取強制生效日2003-06-30為穩健下界，個別公司可能更早）確認早於
+`VAL_END`與其他假設慣用train起點，**維持上一輪判定：通過第10關，可
+開發完整SPEC**。
+
+**本輪決定（尚未做到2的「決定」部分，比照`#41`漸進擴大手法先定起點，
+不含實際批次抓取）**：pilot樣本起點取**15檔**（與`#41`起點一致，非
+巧合——兩者都是內部人交易類假設，用同一套漸進擴大節奏可直接類比通過/
+未過門檻時的下一步是擴大到25→35→45檔，不是本輪自創新節奏）。15檔
+需橫跨`us_universe_pit.json`不同規模分層（大型股/中型股各取部分，
+避免地雷⑦存活者偏誤重新引入——**不得只選現在還活著的知名大公司**，
+需混入至少幾檔已下市但落在train/val視窗內的公司驗證管線本身能處理
+下市股CIK）。**下一輪待辦（不跳關）**：從`us_universe_pit.json`按此
+規則實際挑出15檔CIK清單，寫批次歷史抓取腳本（`fetch_us_insider_
+trading.py::parse_form4_xml()`可複用解析邏輯，但需另寫抓取迴圈，
+不能沿用`MAX_FILINGS_PER_TICKER=8`限制），對每個請求間隔sleep 0.2秒
+（沿用SEC EDGAR頻率上限清單既有實作）。
+
+**遵守「不准做的事」**：本輪**未**呼叫`validation/holdout.py`任何解鎖
+函式（開工/收工前`is_holdout_consumed()`皆`False`）、**未**新增
+`TRIALS_REGISTRY.jsonl`列（同上一輪理由，地基工程非正式判定）、對外
+部僅發出WebSearch查證（非SEC EDGAR API呼叫，不計入頻率預算）。
