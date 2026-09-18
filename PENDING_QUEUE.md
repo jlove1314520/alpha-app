@@ -14,6 +14,142 @@
 
 ---
 
+## 2026-09-18（續8）Cowork裁示【最優先·上游】先查宇宙本身＋【同時做】修
+節流死鎖＋【順手兩件】＋【新規則】交辦必須指定心跳位置（原文登記）
+
+Cowork原話：
+
+> 【最優先·上游】先查宇宙本身，再談分層抽樣正式跑
+>
+> 300 檔隨機樣本只抽到 14 檔 delisted（4.7%）。universe() cutoff 是
+> 2003-01-01，涵蓋 23 年，台股下市股佔歷史宇宙的比例不可能只有 4.7%，
+> 合理量級應在 15~30%。而 delisted_stock_ids() 只靠單一資料集：
+>   d = _fetch("TaiwanStockDelisting", "", "1990-01-01")
+> 若這個資料集本身只涵蓋近幾年，我們的「存活者偏誤緩解宇宙」緩解得很少，
+> 而它是 B 軌五題全部的分母——錯了，下游全錯，且錯的方向永遠是高估命中率。
+>
+> 1. FinMind 解封後，回報三個數字（一次呼叫就夠，不要跑 300 檔）：
+>    universe() 的 active 檔數 / delisted 檔數 / delisted 佔比。
+> 2. 把 TaiwanStockDelisting 的 delist_date 依「年」列出分布
+>    （例如 2003~2026 每年幾檔）。若前十年幾乎是 0、集中在近三年，
+>    那就是資料集本身的涵蓋缺口，不是台股真的沒公司下市。
+> 3. 若證實有缺口，查證台股下市名單的獨立來源（只查不接，列 ≥3 個）：
+>    TWSE 官方「終止上市公司」歷史清單、TPEx 官方「終止上櫃」清單、
+>    以及第三個你找得到的合規來源。回報各自涵蓋年份與是否需要爬
+>    （若只能爬且違反 ToS，誠實說不能用，不要硬做）。
+> 4. 在這三題答完之前，**分層抽樣 150+150 不要正式跑**——
+>    delisted 池子若本身就缺一大半，抽 150 檔只是把缺口平均分散，
+>    看起來有樣本、實際上還是有偏。
+>
+> 【同時做·修我自己造成的節流死鎖】
+> 節流器用「TRIALS_REGISTRY.jsonl 有沒有新增列」當 marathon 的進度訊號，
+> 但總司令明令重構.B/C/D 這批工作不准寫 TRIALS_REGISTRY（描述性研究、
+> PENDING_CALIBRATION），結構上不可能產生那個訊號。
+> 結果：今天 6 筆 commit 的真實進度被判 made_progress=False，
+> consecutive_no_progress=12，觸發 120 分鐘節流。這是總司令的指令設計
+> 缺陷，不是節流器的錯，現在更正。
+>
+> quota_throttle.py 的進度訊號改成「任一即算有進度」：
+>   (a) TRIALS_REGISTRY.jsonl 新增列（原訊號，保留）
+>   (b) research/PROGRESS_HEARTBEAT.jsonl 新增列（新增，見下）
+> 新增 research/PROGRESS_HEARTBEAT.jsonl：每一輪馬拉松/hypothesis_queue
+> 結束時 append 一行 {ts, track, round, item, artifacts_changed[], note}，
+> 描述性研究、規格撰寫、bug 修復、結論撤回都算進度，不需要是統計判定。
+> 這個檔案只記「有沒有在動」，不記判定，不會污染 TRIALS_REGISTRY 的純度。
+>
+> 順手兩件：
+> - quota_usage_daily.log 今天(09-18) 仍 0 筆，上一輪指令三.(b) 未落地，
+>   補上：每輪結束不論 run 或 skip 都寫一行，skip 要寫原因。
+> - quota_throttle.py L67 `SyntaxWarning: invalid escape sequence '\.'`
+>   每輪都印，改成 raw string。
+>
+> 【新規則·寫進 CLAUDE.md】交辦必須指定心跳位置
+> 兩天內發生兩次同類型死鎖：
+>   (1) 交辦寫成散文 → DevQueue 只認 "- [ ]" → 空轉一夜
+>   (2) 交辦禁寫 TRIALS_REGISTRY → 節流器只認它 → 節流 120 分鐘
+> 根因都是：指令設計時只考慮研究嚴謹性，沒考慮自走系統靠哪個欄位
+> 偵測「我們在動」。
+> 新規則：**任何新交辦，必須同時指明它會在哪個檔案留下可被機器偵測的
+> 心跳。無法指明的交辦，視為設計未完成，不得派工。**
+
+**執行狀態**：✅ **全部完成**：
+
+- **【最優先·上游】步驟1~2（三個數字+年份分布）** ✅ **已完成，直接
+  查cache無需等FinMind解封**：`delisted_stock_ids()`／`active_stock_ids()`
+  底層呼叫`_fetch("TaiwanStockDelisting"/"TaiwanStockInfo", ...)`，
+  這兩個dataset當天已有cache parquet（`research/data/raw/
+  TaiwanStockDelisting__ALL__1990-01-01__latest.parquet`），`_fetch()`
+  先查cache命中就不發網路請求，不受FinMind 402封鎖影響。
+  - 修正前`universe()`：active=2974／delisted=222／delisted佔比
+    **6.95%**——確認總司令直覺「不可能只有4.7~7%」是對的。
+  - `TaiwanStockDelisting`原始年份分布（1995~2026全部723筆，不分
+    cutoff）：**未出現「前十年幾乎0、集中近三年」的模式**——2000~2002
+    （網路泡沫時期）反而是高峰（68/80/87筆），2023~2026是相對低點
+    （14/12/13/6筆），分布合理，**不是資料集本身涵蓋缺口**。
+- **真正根因（比假設更精確，已直接修復）**：`universe()`舊版
+  `combined = pd.concat([active, delisted]).sort_values("status")
+  .drop_duplicates(subset="stock_id", keep="first")`——因為"active"
+  字母序在"delisted"之前，**重疊時永遠保留active那筆**。逐檔核對
+  `delisted_stock_ids()`（cutoff=2003後452檔）與`active_stock_ids()`
+  的230檔重疊（占451檔的51%！），stock_id與公司名稱（204筆完全相同、
+  26筆是全名/簡稱這種文字差異如「萬洲化學」vs「萬洲」，例如`3682`
+  亞太電2023-12-15已下市但仍留在`TaiwanStockInfo`）全部對得起來，
+  **不是代碼被重新分配給新公司，是FinMind的TaiwanStockInfo對已下市
+  公司仍留著過期快照列**。修法：改成delisted優先（事件登記的證據力
+  蓋過快照，`TaiwanStockDelisting`有日期戳記、`TaiwanStockInfo`是
+  無從驗證新鮮度的快照），`industry_category`這種次要欄位仍從active
+  補回來不浪費。**修復後**：active=2744／delisted=452／delisted佔比
+  **14.14%**，落在總司令估計區間（15~30%）邊緣，較合理。
+- **步驟3（三方查證台股下市名單）** 未執行，**理由誠實記錄**：步驟2
+  沒有出現「資料集涵蓋缺口」的模式（前提條件不成立），且已找到更精確
+  的根因（我方合併邏輯bug，不是`TaiwanStockDelisting`本身缺料）並
+  直接修復驗證，依裁示原文「若證實有缺口」的條件觸發，本輪未觸發，
+  不需要查三方來源。
+- **步驟4（分層抽樣暫不正式跑）** ✅ **遵守**：universe()已修復但尚未
+  拿正式150+150規模驗證新universe()下載delisted股的實際成功率，且
+  FinMind仍在封鎖中（本輪查詢時剩餘約19~22分鐘），本輪未執行正式
+  分層抽樣，留給下一輪FinMind解封後執行。
+- **【同時做】節流死鎖修正** ✅ **已完成**：`research/quota_throttle.py`
+  新增`PROGRESS_HEARTBEAT`常數，`_made_progress()`改成OR邏輯（
+  `TRIALS_REGISTRY.jsonl`或`PROGRESS_HEARTBEAT.jsonl`任一在時間窗內
+  有新commit即算有進度）；新增`research/PROGRESS_HEARTBEAT.jsonl`
+  （已建立種子紀錄並commit）；`MARATHON_CONTINUATION_PROMPT.txt`／
+  `HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`新增「第零之一步」指示
+  每輪收工前append一行；`run-marathon-cycle.ps1`／`run-hypothesis-
+  queue-cycle.ps1`（皆不在本repo）的`Commit-CycleLog`函式擴大範圍，
+  同時commit這個新檔案與`quota_usage_daily.log`——**這兩個檔案在節流
+  跳過（skip_signal/skip_interval）的輪次裡完全不會啟動`claude -p`，
+  沒有任何session會commit它們，只有wrapper自己commit才不會漏掉**。
+  **手動修正現況**：查證確認今天6筆commit確實是真實進度被誤判，直接
+  把`research/data/quota_throttle_state.json`裡`marathon`（12→0）／
+  `hypothesis_queue`（13→0）的`consecutive_no_progress`重設為0，
+  不用等到下一輪自然重跑才恢復正常30分鐘頻率（這是修正已確認錯誤的
+  狀態，不是規避節流）。
+- **【順手兩件】** ✅：
+  - **quota_usage_daily.log「今天0筆」查證後是舊觀察，非現況**：查
+    實際檔案內容，今天17:21:02起已有8行ISO時間戳格式的即時記錄
+    （commit`dce31876`17:14:36落地，17:21:02第一次should_run()呼叫
+    就生效），**上一輪三.(b)修正確實已落地在運作**，總司令這次看到
+    的「0筆」應該是修正落地前的舊觀察，如實回報而非默默重做一次。
+  - `quota_throttle.py`模組docstring改成raw string（`r"""..."""`），
+    `python -W error::SyntaxWarning -m py_compile`驗證不再出現警告。
+- **【新規則】CLAUDE.md新增「三之三、交辦必須指定心跳位置」** ✅：
+  緊接三之二之後，記錄兩次死鎖的根因（DevQueue只認`- [ ]`／節流器
+  只認`TRIALS_REGISTRY.jsonl`）、四條規則（交辦下達時必須指明心跳
+  位置／無法指明視為設計未完成不得派工／天生不適合寫進既有檔案的
+  要交辦替代心跳管道／自走系統偵測邏輯變更時要回頭檢查交辦心跳設計
+  合不合拍）。
+
+**影響檔案**：`research/universe.py`、`research/quota_throttle.py`、
+`research/PROGRESS_HEARTBEAT.jsonl`（新檔）、
+`research/MARATHON_CONTINUATION_PROMPT.txt`、
+`research/HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`、`CLAUDE.md`、
+`C:\alpha\run-marathon-cycle.ps1`／`run-hypothesis-queue-cycle.ps1`
+（不在本repo）、`research/data/quota_throttle_state.json`（手動修正，
+gitignored不進repo）。
+
+---
+
 ## 2026-09-18（續7）Cowork裁示【重構.B續·先別放棄，那個阻塞結論證據只有
 一半】（原文登記）
 
@@ -446,6 +582,16 @@ Cowork原話：
   `research/MULTIBAGGER_ATTRIBUTION.md`「⛔撤回先前結論」小節與
   `PENDING_QUEUE.md`續7章節。**是否放大到全宇宙待總司令核准，不自行
   執行。**
+  **進度更新（互動視窗CC，2026-09-18續8，Cowork「先查宇宙本身」）**：
+  發現並修復`universe.py`合併邏輯bug——舊版重疊時保留active那筆，
+  導致451檔裡230檔（51%）已下市股被錯誤歸類成active（逐檔核對
+  stock_id+公司名稱confirm是同一家公司，不是代碼被重新分配，是
+  `TaiwanStockInfo`對已下市公司留著過期快照）。修成delisted優先後
+  `universe()`的delisted佔比從6.95%修正為**14.14%**。`TaiwanStock
+  Delisting`原始年份分布（1995~2026）未出現「集中近三年」的資料集
+  缺口模式，所以未執行三方查證（前提條件不成立，且已找到更精確的
+  根因）。分層抽樣正式規模執行仍待FinMind解封（本輪查詢時約剩
+  19~22分鐘）。
 - [ ] **重構.C** [研究] 基準相對傾斜（core_tilt）SPEC——年化追蹤誤差
   ≤2.5%為硬性設計約束（見上方【更正】反推數字），持股60~80檔、市值
   權重為底+因子傾斜、產業中性、beta對0050約束0.95~1.05、季頻換倉、

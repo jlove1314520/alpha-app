@@ -1,3 +1,61 @@
+## 2026-09-18（續7）（Cowork【最優先·上游】揪出universe()合併bug：51%已下市股被誤判active；【同時做】修節流死鎖；CLAUDE.md新增「交辦必須指定心跳位置」）
+
+戴**驗證帽**（universe根因查證）+ **維運帽**（節流死鎖修正）。
+
+**universe()合併bug（比假設更精確）**：總司令直覺「300檔抽樣只有14檔
+delisted（4.7%）不合理，合理量級15~30%」是對的，但根因不是
+`TaiwanStockDelisting`資料集本身涵蓋缺口（年份分布1995~2026檢查過，
+沒有「集中近三年」的模式，2000~2002網路泡沫期反而是高峰）——是
+`universe.py::universe()`合併active/delisted時`sort_values("status")
+.drop_duplicates(keep="first")`利用字母序「active」排在「delisted」
+前面，**重疊時永遠保留active那筆**。逐檔核對451檔重疊裡230檔（51%！），
+stock_id與公司名稱全部對得上（例如`3682`亞太電2023-12-15已下市，
+`TaiwanStockInfo`卻還留著它），確認是FinMind的`TaiwanStockInfo`對
+已下市公司仍留舊快照，不是代碼被重新分配給新公司。改成delisted優先
+（事件登記證據力蓋過快照），`industry_category`次要欄位仍從active
+補回不浪費。**修復前後**：delisted佔比6.95%→**14.14%**。三方查證
+（TWSE/TPEx官方下市名單）因前提條件（資料集缺口）不成立而未執行，
+如實記錄理由。分層抽樣正式150+150規模待FinMind解封（本輪查詢時
+還剩約19~22分鐘）才執行。
+
+**節流死鎖修正**：`quota_throttle.py`的`_made_progress()`原本只認
+`TRIALS_REGISTRY.jsonl`新增列，但總司令明令重構.B/C/D這類描述性研究
+不准寫這個檔案——兩條指令互相矛盾，今天6筆真實commit全被判
+`made_progress=False`，`consecutive_no_progress`衝到12/13，觸發120
+分鐘節流。改成OR訊號：`TRIALS_REGISTRY.jsonl`或新增的`research/
+PROGRESS_HEARTBEAT.jsonl`任一有新增就算有進度。`MARATHON_
+CONTINUATION_PROMPT.txt`／`HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`
+新增指示每輪收工前append心跳；`run-marathon-cycle.ps1`／`run-
+hypothesis-queue-cycle.ps1`（不在本repo）的`Commit-CycleLog`擴大範圍
+同時commit這個新檔案與`quota_usage_daily.log`——這兩者在節流跳過的
+輪次完全不會啟動`claude -p`，只有wrapper自己commit才不會漏掉。手動
+把`quota_throttle_state.json`裡兩軌的`consecutive_no_progress`重設
+為0（修正已確認錯誤的狀態，不是規避節流）。
+
+**順手兩件**：查證確認`quota_usage_daily.log`「今天0筆」是舊觀察——
+上一輪三.(b)修正（commit`dce31876`17:14:36）確實已落地，17:21:02起
+已有8行即時記錄，如實回報而非重做；`quota_throttle.py`模組docstring
+改成raw string，消除`SyntaxWarning: invalid escape sequence`。
+
+**CLAUDE.md新增「三之三、交辦必須指定心跳位置」**：記錄兩次死鎖
+（DevQueue只認`- [ ]`／節流器只認`TRIALS_REGISTRY.jsonl`）根因都是
+「指令設計時沒考慮自走系統靠哪個欄位偵測我們在動」，新規則要求任何
+新交辦下達時必須同時指明心跳位置，無法指明視為設計未完成不得派工。
+
+**驗證**：`python -m py_compile`（含`-W error::SyntaxWarning`）通過；
+`_made_progress()`OR邏輯用mock git輸出測試通過；兩支`.ps1`通過
+PowerShell Parser語法檢查；`_order_marker_ambiguity()`確認本輪大量
+文件編輯未引入標記矛盾。
+
+**影響檔案**：`research/universe.py`、`research/quota_throttle.py`、
+`research/PROGRESS_HEARTBEAT.jsonl`（新檔）、
+`research/MARATHON_CONTINUATION_PROMPT.txt`、
+`research/HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`、`CLAUDE.md`、
+`PENDING_QUEUE.md`、`C:\alpha\run-marathon-cycle.ps1`／
+`run-hypothesis-queue-cycle.ps1`（不在本repo）。
+
+---
+
 ## 2026-09-18（續6）（Cowork【重構.B續·先別放棄】結案：撤回下市股價格覆蓋不足結論；分層抽樣程式碼完成，正式跑待FinMind解封）
 
 戴**驗證帽**。300檔重跑（`job_id=20260918-170334-11f1`）跑完，

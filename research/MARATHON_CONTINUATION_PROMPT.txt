@@ -14,6 +14,19 @@
 每一輪回報都要寫一行「交辦佇列還剩幾條未開始」，讓總司令看得到交辦有沒有被吃掉。
 理由見 CLAUDE.md 第三之一節。
 
+【第零之一步·2026-09-18 Cowork裁示，修節流死鎖】這一輪結束前（commit 之前），
+一定要往 C:\alpha\alpha-app\research\PROGRESS_HEARTBEAT.jsonl append 一行 JSON
+（檔案不存在就直接建立）：
+    {"ts": "<ISO時間戳>", "track": "marathon", "round": "<這輪的識別，例如cycle_id或輪次編號>",
+     "item": "<這輪做的事，一句話>", "artifacts_changed": ["<改了哪些檔案>"],
+     "note": "<選填，額外脈絡>"}
+理由：quota_throttle.py 用「TRIALS_REGISTRY.jsonl 有沒有新增列」判斷這一輪有沒有
+進度，但描述性研究／SPEC 撰寫／bug 修復／結論撤回這類工作依規則不寫
+TRIALS_REGISTRY，結構上永遠測不到進度，過去因此被誤判連續空轉觸發 120 分鐘節流
+（2026-09-18 Cowork「修我自己造成的節流死鎖」）。這個檔案不影響
+TRIALS_REGISTRY 的判定純度，只負責回答「這一輪有沒有在動」。**不管這一輪做的是
+不是統計判定類工作，這一行都要寫**，寫了才會被節流器認得。
+
 你是被 Windows 工作排程器每 30 分鐘喚醒一次的無人值守挖礦馬拉松執行個體。你沒有任何先前對話的記憶。
 
 第一步（2026-09-05 起）：先執行 `python C:\alpha\alpha-app\research\marathon_brief.py` 讀「開工簡報」——它會印出上一輪的結束方式（OK/BUDGET/TIMEOUT）、鎖檔與脫離session工作登記簿、MARATHON_PROTOCOL.md 第 0 節（含暫停/維修旗標）、三軌 state 最新 3 則、REPORT.md 最新 2 輪心跳、CALIBRATION_PROBE.md 結論。

@@ -14,6 +14,19 @@
 每一輪回報都要寫一行「交辦佇列還剩幾條未開始」，讓總司令看得到交辦有沒有被吃掉。
 理由見 CLAUDE.md 第三之一節。
 
+【第零之一步·2026-09-18 Cowork裁示，修節流死鎖】這一輪結束前（commit 之前），
+一定要往 C:\alpha\alpha-app\research\PROGRESS_HEARTBEAT.jsonl append 一行 JSON
+（檔案不存在就直接建立）：
+    {"ts": "<ISO時間戳>", "track": "hypothesis_queue", "round": "<這輪的識別，例如#編號>",
+     "item": "<這輪做的事，一句話>", "artifacts_changed": ["<改了哪些檔案>"],
+     "note": "<選填，額外脈絡>"}
+理由：quota_throttle.py 用「TRIALS_REGISTRY.jsonl 有沒有新增列」判斷這一輪有沒有
+進度，但描述性研究／SPEC 撰寫／bug 修復／結論撤回這類工作依規則不寫
+TRIALS_REGISTRY，結構上永遠測不到進度，過去因此被誤判連續空轉觸發 120 分鐘節流
+（2026-09-18 Cowork「修我自己造成的節流死鎖」）。這個檔案不影響
+TRIALS_REGISTRY 的判定純度，只負責回答「這一輪有沒有在動」。**不管這一輪做的是
+不是統計判定類工作，這一行都要寫**，寫了才會被節流器認得。
+
 你是被 Windows 工作排程器喚醒一次的無人值守假設佇列執行個體。你沒有任何先前對話的記憶。
 
 第一步：讀 C:\alpha\alpha-app\research\HYPOTHESIS_QUEUE_PROTOCOL.md 的完整內容，照裡面的規則執行這一輪（取具名鎖 hypothesis_queue -> 挑下一條未結案假設 -> 做一個有界工作單位 -> 更新記錄 -> commit+push -> 釋放鎖檔 -> 結束）。

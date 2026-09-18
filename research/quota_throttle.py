@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""額度感知節流（2026-09-15 總司令交辦）。
+r"""額度感知節流（2026-09-15 總司令交辦）。
 
 **背景**：自走引擎（馬拉松／假設佇列）在候選池枯竭時仍照原頻率（30分鐘一輪）
 空轉——2026-09-15 實測 `MARATHON_STATE.md` 記錄「候選池連續39輪（487~526）
@@ -79,6 +79,17 @@ ROOT = Path(__file__).resolve().parent.parent  # C:\alpha\alpha-app
 RESEARCH = Path(__file__).resolve().parent
 STATE_PATH = RESEARCH / "data" / "quota_throttle_state.json"
 TRIALS_REGISTRY = RESEARCH / "TRIALS_REGISTRY.jsonl"
+# 2026-09-18（Cowork「修我自己造成的節流死鎖」）：_made_progress()原本只認
+# TRIALS_REGISTRY.jsonl有沒有新增列，但總司令另外明令重構.B/C/D這批工作
+# （描述性研究/PENDING_CALIBRATION）不准寫TRIALS_REGISTRY——這是總司令自己
+# 兩條指令彼此矛盾造成的死鎖，不是節流器判斷錯，但節流器要負責修好它：
+# 今天6筆真實commit全部被判made_progress=False，consecutive_no_progress
+# 衝到12/13，觸發120分鐘節流。改成OR訊號：TRIALS_REGISTRY.jsonl或這個
+# 新檔案，任一有新增就算有進度。這個檔案只記「有沒有在動」不記統計判定，
+# 不會污染TRIALS_REGISTRY的純度。各輪`claude -p` session要在收工前自己
+# append一行（見MARATHON_CONTINUATION_PROMPT.txt／HYPOTHESIS_QUEUE_
+# CONTINUATION_PROMPT.txt新增的第零之一步），quota_throttle.py只負責檢查。
+PROGRESS_HEARTBEAT = RESEARCH / "PROGRESS_HEARTBEAT.jsonl"
 TZ = timezone(timedelta(hours=8))
 
 SEVEN_DAY_THROTTLE = 0.90          # 帳號週用量達 90% 視為「接近週限額」
@@ -272,9 +283,16 @@ def _git(args: list[str]) -> str:
 
 
 def _made_progress(start_s: str, end_s: str) -> bool:
-    """這段時間窗內，TRIALS_REGISTRY.jsonl 有沒有被 commit 新增過任何一行。"""
-    log = _git(["log", f"--since={start_s}", f"--until={end_s}", "--oneline", "--", str(TRIALS_REGISTRY.relative_to(ROOT))])
-    return bool(log.strip())
+    """這段時間窗內，TRIALS_REGISTRY.jsonl **或** PROGRESS_HEARTBEAT.jsonl
+    有沒有被 commit 新增過任何一行（任一即算有進度，2026-09-18修正——原本
+    只認TRIALS_REGISTRY，但總司令明令重構.B/C/D這類描述性研究不准寫
+    TRIALS_REGISTRY，結構上不可能產生那個訊號，兩條指令互相矛盾造成
+    節流死鎖，見PROGRESS_HEARTBEAT定義處的說明）。"""
+    for path in (TRIALS_REGISTRY, PROGRESS_HEARTBEAT):
+        log = _git(["log", f"--since={start_s}", f"--until={end_s}", "--oneline", "--", str(path.relative_to(ROOT))])
+        if log.strip():
+            return True
+    return False
 
 
 def record_cycle(track: str, window: str, jsonl_path: str | None) -> int:

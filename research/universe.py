@@ -72,7 +72,28 @@ def universe(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
     active = active_stock_ids().assign(status="active", delist_date=pd.NaT)
     delisted = delisted_stock_ids(cutoff).assign(status="delisted", industry_category=None)
     cols = ["stock_id", "stock_name", "industry_category", "status", "delist_date"]
-    combined = pd.concat([active[cols], delisted[cols]], ignore_index=True)
-    # defensive: if a stock_id somehow appears in both, keep the 'active' row
-    combined = combined.sort_values("status").drop_duplicates(subset="stock_id", keep="first")
+
+    # 2026-09-18（Cowork【最優先·上游】查證發現，取代原本「重疊時保留active」
+    # 的防呆邏輯，那個邏輯本身就是bug）：TaiwanStockInfo（active_stock_ids()
+    # 的來源）對已經下市的公司常常仍留著舊資料列，不是可靠的「目前真的還在
+    # 上市」訊號——實測`delisted_stock_ids()`回傳452檔（cutoff=2003-01-01），
+    # 但舊版combined邏輯偏好active，導致其中230檔（51%！）被錯誤歸類成
+    # active，只剩222檔留在delisted。逐檔核對這230檔，stock_id與公司名稱
+    # （含全名/簡稱這種文字差異，例如「萬洲化學」vs「萬洲」，共26筆屬於
+    # 這種文字差異，其餘204筆名稱完全相同）全部對得起來，不是代碼被重新
+    # 分配給新公司的合法情境，是TaiwanStockInfo資料過期的殘留列。
+    # `TaiwanStockDelisting`是有日期戳記的下市事件登記，`TaiwanStockInfo`
+    # 是「目前」快照且無從驗證是否過期——事件登記的證據力應該蓋過快照，
+    # 所以改成delisted優先（concat時delisted排在active前面，drop_duplicates
+    # keep="first"留delisted那筆），不是「重疊時保留active」。
+    combined = pd.concat([delisted[cols], active[cols]], ignore_index=True)
+    combined = combined.drop_duplicates(subset="stock_id", keep="first")
+    # 上面delisted優先的判斷會讓這230檔的industry_category變成None（delisted
+    # 資料源本身沒有這個欄位），但active_stock_ids()其實留著這些股票下市前
+    # 最後一次快照的真實產業分類——status判斷交給delisted優先（正確），
+    # industry_category這種不影響存活者偏誤判斷的次要欄位就從active補回來，
+    # 不浪費本來就是對的資訊。
+    industry_lookup = active.set_index("stock_id")["industry_category"]
+    missing = combined["industry_category"].isna() & combined["stock_id"].isin(industry_lookup.index)
+    combined.loc[missing, "industry_category"] = combined.loc[missing, "stock_id"].map(industry_lookup)
     return combined.reset_index(drop=True)
