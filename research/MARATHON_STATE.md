@@ -2,9 +2,18 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
+**最後更新：2026-09-19T01:40+08:00**
+
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 553 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 553 輪 · 2026-09-19T01:40+08:00 · 交辦（稽核.三(a)接續＋意外查出market.yml根因bug並修復）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認22條`- [!]`裡`稽核.三(a)`的FinMind封鎖時間已過（`blocked_until`台北00:42:46 vs 開工時01:31），依既有分支自動接續：即時掃描仍350檔缺口，投遞`backfill_stock_financials_gap_2025.py`job（第一次踩相對路徑bug已修正重投遞，`job_id=20260919-013225-2a20`），收成income 41/55、balance 40/55成功後再次撞額度，新解除時間台北03:36，已標BLOCKED。**意外發現並直接修復**：排查FinMind阻塞時用`gh run list --workflow=market.yml`查出最新兩班（09-18 13:32/14:35 UTC）都失敗，根因是`research/update_strategy_performance.py`每輪append的`research/shadow_ledgers/*.jsonl`三個已受git追蹤的檔案不在market.yml commit allowlist裡——跟`f94445b3`/`5ab1aaa2`同一種bug第三次發作，純bug修復直接補上（用目錄前綴`research/shadow_ledgers/`結構性涵蓋，避免第四次發作）。commit`d941d820`已push。`is_holdout_consumed()`確認`False`，未動凍結區檔案，未產生候選判定不需trial_registry登記。**驗證待辦**：market.yml下一班（cron`30 21 * * 1-5`＝台北隔日05:30）要確認commit成功、`local_task_health`四條stalled（AlphaMarketSparklines/AlphaMarketTW/AlphaFundamentals/AlphaPriceHistory）解除，留給05:30後的輪次確認。TW/US/FUT三軌自走部分本輪未觸碰（交辦佔用本輪全部時間），依輪替下一輪建議選TW軌（US round552已跑，TW round543仍最舊）。詳見`REPORT.md`第553輪記錄、`PENDING_QUEUE.md`稽核.三(a)條目。
+
+<details>
+<summary>上一輪（第552輪）記錄，收合保留</summary>
+
 **最後更新：2026-09-19T00:34+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 552 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 552 輪 · 2026-09-19T00:34+08:00 · US 軌**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認0條`- [ ]`、22條`- [!]`全數blocked（多數待總司令、其餘為資料累積型阻塞）；FinMind因402封鎖至台北00:42:46，本輪開工00:31尚未解封，稽核.三(a)/1.2兩項留給下一輪自動接續，本輪不等待。交辦佇列無可執行未開始項，回落自走，依輪替選US。核實：`data/ticks/`累積10/20（距20日差10日）；`STRATEGY_GRAVEYARD.md`本三軌最新結案仍`#68`，無新結案；0a節四方向僅`#50`卡阻塞未結案；`CALIBRATION_PROBE.md`複驗清單與`factor_ic.py::SAMPLE_SIZE=300`現況核對與round550一致。`trial_registry.py --check`exit=0 PASS（246列）。`is_holdout_consumed()`確認`False`，未動凍結區檔案。**結論：候選池連續約65輪無新工作單位，僅`#50`被動等待**。詳見`REPORT.md`第552輪記錄、`US_MARATHON_STATE.md`。
+**第 552 輪 · 2026-09-19T00:34+08:00 · US 軌**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認0條`- [ ]`、22條`- [!]`全數blocked（多數待總司令、其餘為資料累積型阻塞）；FinMind因402封鎖至台北00:42:46，本輪開工00:31尚未解封，稽核.三(a)/1.2兩項留給下一輪自動接續，本輪不等待。交辦佇列無可執行未開始項，回落自走，依輪替選US。核實：`data/ticks/`累積10/20（距20日差10日）；`STRATEGY_GRAVEYARD.md`本三軌最新結案仍`#68`，無新結案；0a節四方向僅`#50`卡阻塞未結案；`CALIBRATION_PROBE.md`複驗清單與`factor_ic.py::SAMPLE_SIZE=300`現況核對與round550一致。`trial_registry.py --check`exit=0 PASS（246列）。`is_holdout_consumed()`確認`False`，未動凍結區檔案。**結論：候選池連續約65輪無新工作單位，僅`#50`被動等待**。詳見`REPORT.md`第552輪記錄、`US_MARATHON_STATE.md`。
+
+</details>
 
 <details>
 <summary>上一輪（第551輪）記錄，收合保留</summary>
