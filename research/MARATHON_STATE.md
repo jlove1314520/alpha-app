@@ -2,9 +2,18 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
+**最後更新：2026-09-19T02:33+08:00**
+
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 554 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 554 輪 · 2026-09-19T02:33+08:00 · TW（候選池空轉，交辦佇列已清空）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認全文0條`- [ ]`、22條`- [!]`全數blocked，`data/rate_limit_state.json`確認FinMind`blocked_until`台北03:36:14尚未到（開工02:33），非本輪可處理範圍。回落自走，依round552建議依輪替選TW。核對`run_detached.py status`／`git log`／`STRATEGY_GRAVEYARD.md`／`research/data/ticks/`（10/20，與round552相同）／`trial_registry.py --check`（246列PASS，與round552相同）／`is_holdout_consumed()`（False），確認TW/US/FUT三軌自身候選池狀態與round487~552時實質相同（連續約66輪無新工作單位），僅剩`#50`被動等待tick累積與總司令對gate50提案的回應。本輪未產生新試驗判定，未動凍結區。詳見`REPORT.md`第554輪記錄、`TW_MARATHON_STATE.md`第554輪。
+
+<details>
+<summary>上一輪（第553輪）記錄，收合保留</summary>
+
 **最後更新：2026-09-19T01:40+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 553 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 553 輪 · 2026-09-19T01:40+08:00 · 交辦（稽核.三(a)接續＋意外查出market.yml根因bug並修復）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認22條`- [!]`裡`稽核.三(a)`的FinMind封鎖時間已過（`blocked_until`台北00:42:46 vs 開工時01:31），依既有分支自動接續：即時掃描仍350檔缺口，投遞`backfill_stock_financials_gap_2025.py`job（第一次踩相對路徑bug已修正重投遞，`job_id=20260919-013225-2a20`），收成income 41/55、balance 40/55成功後再次撞額度，新解除時間台北03:36，已標BLOCKED。**意外發現並直接修復**：排查FinMind阻塞時用`gh run list --workflow=market.yml`查出最新兩班（09-18 13:32/14:35 UTC）都失敗，根因是`research/update_strategy_performance.py`每輪append的`research/shadow_ledgers/*.jsonl`三個已受git追蹤的檔案不在market.yml commit allowlist裡——跟`f94445b3`/`5ab1aaa2`同一種bug第三次發作，純bug修復直接補上（用目錄前綴`research/shadow_ledgers/`結構性涵蓋，避免第四次發作）。commit`d941d820`已push。`is_holdout_consumed()`確認`False`，未動凍結區檔案，未產生候選判定不需trial_registry登記。**驗證待辦**：market.yml下一班（cron`30 21 * * 1-5`＝台北隔日05:30）要確認commit成功、`local_task_health`四條stalled（AlphaMarketSparklines/AlphaMarketTW/AlphaFundamentals/AlphaPriceHistory）解除，留給05:30後的輪次確認。TW/US/FUT三軌自走部分本輪未觸碰（交辦佔用本輪全部時間），依輪替下一輪建議選TW軌（US round552已跑，TW round543仍最舊）。詳見`REPORT.md`第553輪記錄、`PENDING_QUEUE.md`稽核.三(a)條目。
+**第 553 輪 · 2026-09-19T01:40+08:00 · 交辦（稽核.三(a)接續＋意外查出market.yml根因bug並修復）**。**本輪執行**：FinMind封鎖解除後接續稽核.三(a)回補（income 41/55、balance 40/55成功後再度撞額度，新解除時間台北03:36，已標BLOCKED）。**意外發現並直接修復**：`gh run list --workflow=market.yml`查出最新兩班失敗，根因是`research/update_strategy_performance.py`每輪append的`research/shadow_ledgers/*.jsonl`不在commit allowlist裡（跟`f94445b3`/`5ab1aaa2`同一種bug第三次發作），已用目錄前綴`research/shadow_ledgers/`結構性修復。commit`d941d820`已push。`is_holdout_consumed()`確認`False`，未動凍結區檔案。TW/US/FUT三軌自走部分本輪未觸碰（交辦佔用本輪全部時間）。詳見`REPORT.md`第553輪記錄、`PENDING_QUEUE.md`稽核.三(a)條目。
+
+</details>
 
 <details>
 <summary>上一輪（第552輪）記錄，收合保留</summary>
