@@ -1,3 +1,12 @@
 2026-09-16 marathon: skip_signal=16 skip_interval=1 run=4
 2026-09-17 marathon: skip_signal=36 skip_interval=8 run=4
 2026-09-17 hypothesis_queue: skip_signal=39 skip_interval=5 run=4
+2026-09-18T17:21:02.210290+08:00 hypothesis_queue: run（節流狀態但已達門檻，hypothesis_queue連續12輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流）
+2026-09-18T17:30:37.448325+08:00 marathon: run（節流狀態但已達門檻，marathon連續11輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流）
+2026-09-18T17:51:02.234308+08:00 hypothesis_queue: skip_interval（節流中，距上次實跑23.5分鐘<120分鐘門檻，hypothesis_queue連續13輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流）
+2026-09-18T18:00:37.321429+08:00 marathon: skip_interval（節流中，距上次實跑27.1分鐘<120分鐘門檻，marathon連續12輪TRIALS_REGISTRY.jsonl沒有新增過東西，判定候選池空轉，節流）
+2026-09-18T18:21:02.256687+08:00 hypothesis_queue: skip_signal（訊號未變，連claude都沒叫）
+2026-09-18T18:30:37.267785+08:00 marathon: skip_signal（訊號未變，連claude都沒叫）
+2026-09-18T18:51:02.234250+08:00 hypothesis_queue: skip_signal（訊號未變，連claude都沒叫）
+2026-09-18T19:00:37.432874+08:00 marathon: skip_signal（訊號未變，連claude都沒叫）
+2026-09-18T19:21:02.289682+08:00 hypothesis_queue: run（正常頻率）
