@@ -1,49 +1,49 @@
 {
-  "fetched_at": "2026-09-18T18:06:38.075029+08:00",
+  "fetched_at": "2026-09-18T18:11:38.603581+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 336.1,
+      "last": 336.0,
       "bid": 336.0,
-      "ask": 336.19,
+      "ask": 336.17,
       "close": 337.0,
-      "change_pct": -0.2671,
+      "change_pct": -0.2967,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 497.42,
+      "last": 497.25,
       "bid": 497.1,
       "ask": 497.45,
       "close": 497.75,
-      "change_pct": -0.0663,
+      "change_pct": -0.1005,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 220.75,
-      "bid": 220.73,
-      "ask": 220.79,
+      "last": 220.68,
+      "bid": 220.68,
+      "ask": 220.74,
       "close": 219.34,
-      "change_pct": 0.6428,
+      "change_pct": 0.6109,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 368.09,
-      "bid": 368.0,
-      "ask": 368.2,
+      "last": 368.07,
+      "bid": 368.01,
+      "ask": 368.23,
       "close": 366.2,
-      "change_pct": 0.5161,
+      "change_pct": 0.5106,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
       "last": 354.05,
-      "bid": 354.0,
-      "ask": 354.18,
+      "bid": 354.08,
+      "ask": 354.28,
       "close": 347.33,
       "change_pct": 1.9348,
       "data_type": "DELAYED",
@@ -71,14 +71,15 @@
       "label": "S&P 500"
     },
     "^IXIC": {
-      "last": 26418.3,
+      "last": 26418.299,
       "bid": null,
       "ask": null,
-      "close": 26418.3,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 25978.424,
+      "change_pct": 1.6932,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數"
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
     },
     "^SOX": {
       "last": 11599.492,
