@@ -66,6 +66,54 @@ DevQueue或研究軌自動接續稽核.三(a)季報回補；DevQueue若再次啟
 
 ---
 
+## 2026-09-18（續11）（改為連續自走：白名單停下條件+修正122次候選池空轉真根因；市值重建改用TWSE直接股數，34檔兩法差異仍未過P90門檻）
+
+戴**維運帽**（自走系統政策）+**研究帽**（市值重建）。兩個總司令裁示
+一次處理（【改為連續自走】+【市值重建—先查一件事】），已登記進
+`PENDING_QUEUE.md`（續11、續12）。
+
+**改為連續自走**：`CLAUDE.md`新增「零之一、停下條件改為白名單」七條，
+取代預設停下。**找到122次候選池空轉的真正根因**：
+`MARATHON_CONTINUATION_PROMPT.txt`/`HYPOTHESIS_QUEUE_CONTINUATION_
+PROMPT.txt`舊版明文寫「挑最前面那一條做完就結束這一輪」——不是候選池
+真的空轉，是每輪本來就設計成只做一項。已更正為連續做到不能再做為止。
+`research/quota_throttle.py`新增`_pending_queue_has_undone_items()`，
+佇列有`- [ ]`項目時不節流。12項常備backlog灌入PENDING_QUEUE，其中
+重構.C1/C2/C3判定與既有工作重疊、[自行裁量]標記完成不重做。**順手
+修正一個自己造成的真bug**：`run-marathon-cycle.ps1`等三支wrapper的
+`Commit-CycleLog`用`git commit -m msg`不帶pathspec，會commit整個
+暫存區不是只有目標檔案——實測`711a021d`意外吃進6個不相干檔案，已
+改成`-- <明確路徑>`限制範圍。**驗證（活的）**：本輪工作期間DevQueue/
+marathon/hypothesis_queue三軌確實在背景並行處理稽核.五/稽核.四.3/
+實測.八九十/重構.B2等交辦項，且DevQueue的`acbc6ac6`commit正確地
+只包含它自己改的內容，沒有再發生類似711a021d的問題。
+
+**市值重建（總司令追加裁示）**：用詞「誤差」全面改成「兩法差異」
+（這份驗證沒有獨立真值）。十分鐘查證找到TWSE `t187ap03_L`的
+`已發行普通股數`直接欄位+真實面額，取代「股本÷10」假設——矽力-KY
+面額實際2.5元非10元、成信實業「無面額」，直接解釋v2的120%落差。
+重跑34檔：中位數4.75%（達標）、**P90 18.28%（不達標，門檻12%）**，
+AND判定未核准。金融股差異從v2的9~10%擴大到v3的18~21%——不是新問題，
+是路徑2更準確後揭露路徑1真正的偏差幅度（v2的路徑2本身也有誤差，
+恰好部分抵銷）。最大10檔差異與根因、市值分位表、產業表已更新進
+`research/CORE_TILT_SPEC.md`第2.1.2節。`core_tilt_backtest.py`依總
+司令原話「我再裁示」明確保留為決策點，未動筆。
+
+**驗證**：`python -m py_compile`所有Python檔通過；PowerShell Parser
+對三支wrapper語法檢查通過；`_order_marker_ambiguity()`確認大量編輯
+未引入標記矛盾；`_pending_queue_has_undone_items()`/`_is_throttled()`
+實測正確；`implied_market_cap_validation.py`實測34/34成功。
+
+**影響檔案**：`CLAUDE.md`、`PENDING_QUEUE.md`、
+`research/quota_throttle.py`、`scripts/dev_queue_runner.py`、
+`research/MARATHON_CONTINUATION_PROMPT.txt`、`research/HYPOTHESIS_
+QUEUE_CONTINUATION_PROMPT.txt`、`research/CORE_TILT_SPEC.md`、
+`research/implied_market_cap_validation.py`、`C:\alpha\run-marathon-
+cycle.ps1`／`run-hypothesis-queue-cycle.ps1`／`run-dev-queue-cycle.ps1`
+（不在本repo）。
+
+---
+
 ## 2026-09-18（續9）（CORE_TILT_SPEC.md v2→v3：市值重建34檔誤差結構驗證，揪出金融股9~10%系統性偏差+面額非10元個股20~120%誤差兩個根因）
 
 戴**研究帽**（SPEC修訂+資料驗證腳本，非回測，未寫`core_tilt_

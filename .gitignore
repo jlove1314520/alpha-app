@@ -9,6 +9,14 @@ research/data/
 research/data/ticks/
 research/.marathon.lock
 research/.hypothesis_queue.lock
+# 2026-09-18（順手修，本輪意外發現的真gap）：DevQueue自己的鎖檔一直沒
+# 被加進來——跟上面兩個軌道的鎖檔同樣性質（排程行程寫的暫態狀態檔，
+# 依CLAUDE.md第十節「排程腳本會改寫的檔案必須進對應清單」的精神，
+# scripts/dev_queue_runner.py::MACHINE_WRITTEN已經有regex涵蓋
+# `research/.devqueue.lock`（`^research/\.[^/]+$`），但.gitignore本身
+# 一直漏了這一行，代表若有人不小心`git add -A`會把這個鎖檔意外commit
+# 進去。
+research/.devqueue.lock
 # 2026-09-18（Cowork【重構.B續·先別放棄】三，馬拉松軌能見度）：這兩個
 # cycle log被排除在版控之外，是「今天六筆commit全是馬拉松軌做的，但它
 # 的運作狀態從repo完全看不見」這個盲點的直接根因——local_task_health的
