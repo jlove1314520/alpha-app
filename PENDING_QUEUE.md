@@ -149,15 +149,10 @@
 
 ### 機器索引（DevQueue用，配合上方原文區塊，兩者並存不互相取代）
 
-- [ ] **重構.二bcd** [研究] 把「任何策略層結果必須附分制度表、
-  INSUFFICIENT_REGIME判定、空頭段beta拆解寫成『這是低beta不是alpha』」
-  這三條規則正式寫進`research/MARATHON_PROTOCOL.md`（見2026-09-18
-  續4裁示原文二(b)(c)(d)）。
-- [ ] **重構.三** [研究] 把TradingView的定位（可用於個股技術面五分鐘
-  前置快篩／飆股事件質化辨識／個股進場擇時試畫；不可用於任何判定、
-  不得寫進TRIALS_LEDGER判定欄，理由：單商品無法橫斷面排序、宇宙不含
-  下市股、財報非PIT對齊、無多重比較帳）寫進`CLAUDE.md`（見續4裁示
-  原文三）。
+- [x] **重構.二bcd** [研究] ✅已完成（馬拉松自走輪次，2026-09-18）——
+  三條規則已寫進`research/MARATHON_PROTOCOL.md`「1a-0c. 牛熊制度強制項」。
+- [x] **重構.三** [研究] ✅已完成（馬拉松自走輪次，2026-09-18）——
+  TradingView定位已寫進`CLAUDE.md`「TradingView 定位」小節。
 - [ ] **重構.A2** [研究] `research/HYPOTHESIS_QUEUE.md`「#74續」章節裡
   GATE6去均值化bug的兩個修正提案，待總司令看過裁示要採用哪個（不是
   「階段一.2尚未做」——階段一.2本身已完成，見上方執行狀態說明）。
@@ -174,12 +169,17 @@
   原話照抄／主張因果／證偽所需資料欄位／隱含換倉頻率對照損益兩平表／
   漏洞／可證偽命題）+ Cybex家族#55/#57維持排隊、不提前判死（見續4
   裁示原文四、續2裁示原文階段三）。
-- [ ] **重構.E1** `scripts/check_external_connectivity.py`補一個
-  讀`research/data/dev_queue_state.json`的`_format_mismatch`旗標、併進
-  `task_stalls`清單的函式（仿`check_pat_expiry_alerts()`同一套寫法），
-  讓`QUEUE_FORMAT_MISMATCH`真的能讓`local_task_health`的`AlphaDevQueue`
-  轉成alert，不是只印在`dev_queue_cycle.log`裡等人翻。這是本輪矛盾偵測
-  機制唯一還沒接上的最後一段。
+- [x] **重構.E1** ✅已完成（DevQueue自走輪次，2026-09-18，cycle
+  20260918-080101）——`scripts/dev_queue_runner.py`新增
+  `get_format_mismatch_alerts()`（讀`_format_mismatch`旗標，回傳告警文字，
+  不清旗標），`scripts/check_external_connectivity.py`新增
+  `check_devqueue_format_mismatch_alerts()`（仿`check_pat_expiry_alerts()`
+  同一套try/except委派寫法）並併進`main()`的`task_stalls`。已用假旗標
+  實測：注入`_format_mismatch`後函式正確回傳告警字串，還原狀態檔後
+  `git diff`乾淨；無旗標時回傳空list。`node scripts/smoke_test.mjs`
+  全過（本項不動`index.html`，跑冒煙測試是確認沒有連帶弄壞前端）。
+  `QUEUE_FORMAT_MISMATCH`現在會真的併進`local_task_health.stalled`，
+  不用再等人翻`dev_queue_cycle.log`。
 
 ---
 
@@ -247,11 +247,17 @@ A軌（power_budget.py+47筆重分類）✅已完成→B/C/D依序接續，E（�
   「須回到原始高點才算收復」定義，把2008/2011/2015/2018Q4全部吞進
   同一段長達17年的空頭，已修正為trough起算反彈+20%的對稱版本，
   重跑後正確算出10段空頭。
-- **二(b)(c)(d) 分制度表強制項** 🔲 待做：規則本身（任何策略層結果
-  必須附分制度表、INSUFFICIENT_REGIME判定、空頭段beta拆解「這是低
-  beta不是alpha」）尚未寫進`MARATHON_PROTOCOL.md`，排在階段二SPEC
-  動筆前一併補上（SPEC本來就要引用這些規則）。
-- **三（TradingView定位）** 🔲 待做：尚未寫進`CLAUDE.md`。
+- **二(b)(c)(d) 分制度表強制項** ✅ **已完成（馬拉松自走輪次）**：規則
+  （任何策略層結果必須附分制度表、INSUFFICIENT_REGIME判定、空頭段beta
+  拆解「這是低beta不是alpha」）已寫進`research/MARATHON_PROTOCOL.md`
+  新增小節「1a-0c. 牛熊制度強制項」，緊接在「1a-0b修正」之後、「1a.便宜
+  關卡」之前。明訂即日起新開試驗適用，不追溯改判2026-09-18之前已結案
+  的試驗。
+- **三（TradingView定位）** ✅ **已完成（馬拉松自走輪次）**：已寫進
+  `CLAUDE.md`新增小節「TradingView 定位」（緊接在「外部策略匯入紀律」
+  之後、「八、安全紅線」之前），四點理由（單商品無法橫斷面排序／無下市
+  股宇宙／財報非PIT對齊／無多重比較帳）全數列出，明文「永遠不得寫進
+  TRIALS_LEDGER.md判定欄」。
 - **四（IDEA_INTAKE.md骨架）** 🔲 待做：尚未建立，等總司令貼素材前
   應先把六欄骨架建好。
 - **B軌（multibagger歸因分解）** 🔲 待做：排在B/C/D序列裡，尚未開始。
