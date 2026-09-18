@@ -29,7 +29,8 @@ holdout 不碰——沿用 adjust.adjusted_price_series()/pit.py 既有的 load_
   產生資料的地方，不是在稽核裡調算法讓它通過」的精神，這裡選擇誠實
   只交兩項嚴格恆等式，並把「股數變化」列為待下一輪補資料源後再拆的
   已知缺口，不是忽略。
-- 這是小樣本驗證輪（SAMPLE_SIZE 檔），不是全宇宙——照裁示原文「先跑
+- 這是小樣本驗證輪（active/delisted各SAMPLE_PER_STRATUM檔，2026-09-18
+  改為分層抽樣，見stratified_sample()），不是全宇宙——照裁示原文「先跑
   一個小樣本驗證管線正確，再放全宇宙，不要一次賭全量」執行，全宇宙是
   下一輪的工作。
 """
@@ -52,10 +53,15 @@ MOONSHOT_THRESHOLD = 1.0  # 12個月還原權息報酬 >= 100%
 CONTROL_THRESHOLD = 0.20  # 對照組上限：後續12個月報酬 < 20%
 WINDOW_MONTHS = 12
 PRE_WINDOW_MONTHS = 12  # 起漲前特徵觀察窗（含"起漲前250日報酬"另計）
-SAMPLE_SIZE = 300  # 小樣本驗證輪，見裁示原文（首次跑管線時可用環境變數
-# MULTIBAGGER_SMOKE_SIZE 覆蓋成更小的數字，先確認程式碼邏輯正確再放大）
+# 2026-09-18（Cowork【重構.B續·先別放棄】二）：改成分層抽樣（active/
+# delisted各抽SAMPLE_PER_STRATUM檔），取代舊版對母體單純隨機抽樣的
+# SAMPLE_SIZE——原因見stratified_sample()docstring。環境變數
+# MULTIBAGGER_SMOKE_SIZE沿用同一個名字但語意變成「每層抽幾檔」
+# （例如設10代表active 10檔+delisted 10檔=20檔），先確認程式碼邏輯
+# 正確再放大到正式的150。
+SAMPLE_PER_STRATUM = 150
 import os
-SAMPLE_SIZE = int(os.environ.get("MULTIBAGGER_SMOKE_SIZE", SAMPLE_SIZE))
+SAMPLE_PER_STRATUM = int(os.environ.get("MULTIBAGGER_SMOKE_SIZE", SAMPLE_PER_STRATUM))
 OUT_DIR = Path(__file__).parent / "multibagger_raw"  # gitignored，見下方 main()
 
 
@@ -369,6 +375,43 @@ def _survivorship_skip_breakdown(sample: pd.DataFrame, results: list[dict], erro
     return breakdown
 
 
+def stratified_sample(normal_stock: pd.DataFrame, per_stratum: int, seed: int) -> tuple[pd.DataFrame, dict]:
+    """2026-09-18（Cowork【重構.B續·先別放棄】二）：active/delisted各抽
+    `per_stratum`檔（同一固定種子），不是對母體單純隨機抽樣。
+
+    **為什麼要分層**：母體裡delisted只佔約7%，300檔單純隨機抽樣期望值只有
+    約21~22檔delisted（實測跑出14檔），而五題裡的Q4對照組（特徵相似但
+    沒起飛、含下市）正是整份研究的靈魂，那一格永遠湊不出足夠樣本。
+
+    **分層之後基準機率要用權重還原**：分層樣本裡delisted被人為過抽（例如
+    分層後可能佔50%，母體只有7.32%），任何要推回「母體」層級的統計量
+    （例如第1題的逐年基準機率）必須乘以`population_weight`欄位（母體
+    佔比/分層樣本佔比）加權平均，不能直接拿分層樣本的比例當母體比例
+    ——這裡只負責回傳分層資訊與權重，加權計算由呼叫端在需要時自行套用，
+    這支只保證資訊「不遺失」，不擅自在這裡就把權重套用到本來就是描述性
+    的中間輸出。
+    """
+    strata = {}
+    for status_val in ("active", "delisted"):
+        pool = normal_stock[normal_stock["status"] == status_val]
+        n_pick = min(per_stratum, len(pool))
+        strata[status_val] = pool.sample(n=n_pick, random_state=seed).reset_index(drop=True) if n_pick else pool
+    sample = pd.concat(list(strata.values()), ignore_index=True)
+    pop_total = len(normal_stock)
+    info = {}
+    for status_val, picked in strata.items():
+        pop_n = int((normal_stock["status"] == status_val).sum())
+        info[status_val] = {
+            "population_n": pop_n,
+            "population_pct": round(100.0 * pop_n / pop_total, 2) if pop_total else None,
+            "sample_n": len(picked),
+            "sample_pct": round(100.0 * len(picked) / len(sample), 2) if len(sample) else None,
+            "population_weight": round((pop_n / pop_total) / (len(picked) / len(sample)), 4)
+                                 if pop_total and len(sample) and len(picked) else None,
+        }
+    return sample, info
+
+
 def main() -> None:
     OUT_DIR.mkdir(exist_ok=True)
     uni = universe()
@@ -379,12 +422,12 @@ def main() -> None:
     # universe.py（避免影響其他呼叫者）。
     normal_stock = uni[uni["stock_id"].str.match(r"^\d{4}$")].reset_index(drop=True)
     n_excluded = len(uni) - len(normal_stock)
-    if len(normal_stock) > SAMPLE_SIZE:
-        sample = normal_stock.sample(n=SAMPLE_SIZE, random_state=SAMPLE_SEED).reset_index(drop=True)
-    else:
-        sample = normal_stock.reset_index(drop=True)
-    print(f"[multibagger] 小樣本驗證輪：{len(sample)} 檔（宇宙總數 {len(uni)} 檔，"
-          f"過濾非4位數字普通股代號 {n_excluded} 檔，隨機種子={SAMPLE_SEED}）")
+    sample, strata_info = stratified_sample(normal_stock, SAMPLE_PER_STRATUM, SAMPLE_SEED)
+    print(f"[multibagger] 分層抽樣驗證輪：{len(sample)} 檔（宇宙總數 {len(uni)} 檔，"
+          f"過濾非4位數字普通股代號 {n_excluded} 檔，每層上限{SAMPLE_PER_STRATUM}檔，"
+          f"隨機種子={SAMPLE_SEED}）")
+    print(f"[multibagger] 分層資訊（母體比例 vs 樣本比例，之後算母體層級統計量"
+          f"要用population_weight加權還原）：{json.dumps(strata_info, ensure_ascii=False)}")
 
     results = []
     errors = []
@@ -418,9 +461,15 @@ def main() -> None:
     with open(OUT_DIR / "run_summary.json", "w", encoding="utf-8") as f:
         json.dump({
             "sample_size": len(sample), "n_ok": len(results), "n_skipped": len(errors),
+            "sampling_method": "stratified（active/delisted各抽樣，見strata_info），"
+                                "2026-09-18之前是單純隨機抽樣，兩者不可直接比較成功率",
+            "strata_info": strata_info,
             "n_moonshot_windows_total": len(all_moonshot),
             "n_moonshot_stocks_total": moonshot_df["stock_id"].nunique() if not moonshot_df.empty else 0,
             "yearly_base_rate": yearly_base_rate,
+            "yearly_base_rate_caveat": "分層抽樣後delisted被人為過抽，這個表**未依population_weight"
+                                        "加權還原**，不能直接當母體逐年基準機率使用——只是描述性中間"
+                                        "產出，見strata_info的population_weight欄位。",
             "status_breakdown": status_breakdown,
             "skip_reason_category_summary": skip_category_summary,
             "skip_reasons_full": [{"stock_id": e["stock_id"], "status": e["status"],
