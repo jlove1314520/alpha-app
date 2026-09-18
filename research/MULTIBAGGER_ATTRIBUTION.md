@@ -2,6 +2,31 @@
 
 對應 `PENDING_QUEUE.md`「重構.B」／2026-09-18（續3）總司令裁示。
 
+## 本輪（馬拉松第548輪，2026-09-18 19:33，FinMind解封後接續）做了什麼
+
+**對應「下一輪待做」第1、2點。**
+
+1. **完成1.2（4檔delisted `no_data_found`代號手動逐一驗證）**：FinMind
+   額度已於19:18:53解封，用`load_dev("TaiwanStockPrice", sid,
+   "2000-01-01")`逐檔查詢`8710`／`3001`／`2398`／`1422`，**四檔全部
+   回空（0列），且都沒有拋出`RuntimeError`**（`finmind_client.py`的
+   `_rate_limit_wait_or_raise()`在封鎖冷卻中會直接raise，不會回空，
+   所以「回空且無例外」可排除是額度問題偽裝成無資料）。**結論：這4檔
+   在FinMind確實查無資料，`no_data_found`分類成立，不是fetch_error誤判**。
+   查證紀錄至此完整（3種可能結果——有列數/回空/RuntimeError——本輪
+   實測4檔全部落在「回空」這一類）。
+2. **投遞正式規模150+150分層抽樣工作**：`SAMPLE_PER_STRATUM`環境變數
+   未設定（沿用程式碼預設值150），`run_detached.py submit --name
+   multibagger_attribution_stratified_150 --timeout-min 40`，
+   job_id=`20260918-193308-c1c6`，session內等待逾時仍在背景執行
+   （已脫離session），下一輪用`run_detached.py status`/`log
+   20260918-193308-c1c6`收成，預期產出覆寫
+   `research/multibagger_raw/run_summary.json`。
+3. 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區；
+   `validation/holdout.py::is_holdout_consumed()`開工前確認`False`；
+   本輪僅4次單檔FinMind查詢（額度剛解封，刻意輕量），未觸發新的
+   額度封鎖。
+
 **⚠️ PIT-safe不等於沒有前視，這是兩件事**（2026-09-18 Cowork【重構.B收成
 前必修】裁示）：本檔案裡每一個特徵數值都是用`_asof_value()`嚴格限制
 `pit_date <= asof日期`查出來的，這個查詢本身永遠是PIT-safe的。但如果
@@ -214,17 +239,13 @@ job_id=`20260918-140419-49bf`是用舊程式碼跑的，其
 「原本判定阻塞的理由不夠格」，見最上方⛔小節。下面改記查證後真正該做
 的事。**
 
-1. **FinMind額度恢復後（預計2026-09-18 19:18:53+08:00）補做1.2**：
-   5檔delisted `no_data_found`代號（`8710`／`3001`／`2398`／
-   `1422`，只有4檔，見上方⛔小節說明）用`load_dev("TaiwanStockPrice",
-   sid, "2000-01-01")`單檔逐一驗證，三種結果（有列數/回空/
-   RuntimeError）分開記錄，補齊查證紀錄（非撤回結論的前提，是補充
-   文件）。
-2. **FinMind額度恢復後，跑一次正式規模的分層抽樣**（`SAMPLE_PER_
-   STRATUM=150`，active+delisted各150檔，程式碼已完成見下方「本輪」
-   小節，`MULTIBAGGER_SMOKE_SIZE`環境變數尚未清空前跑會用到覆蓋值，
-   正式跑不要設這個環境變數）——此刻FinMind封鎖中不能跑，跑了只會讓
-   delisted樣本大量落在`fetch_error`，結果不可信。
+1. ~~**FinMind額度恢復後（預計2026-09-18 19:18:53+08:00）補做1.2**~~
+   **已完成（第548輪，見上方「本輪」小節）**：4檔全部回空、無例外，
+   `no_data_found`分類確認成立。
+2. ~~**FinMind額度恢復後，跑一次正式規模的分層抽樣**~~
+   **已投遞（第548輪）**：job_id=`20260918-193308-c1c6`，**下一輪先
+   收成這個工作**（`run_detached.py status`/`log`），確認`n_ok`/
+   `n_skipped`與strata_info後才進行下一點。
 3. **用分層抽樣結果評估要不要放大到全宇宙**：SPEC原文「多數股票真正
    跑進核心計算」門檻——本輪隨機抽樣重跑已達85%成功率（255/300），
    遠超過半數，**這本身已經是通過訊號**，但因為那次抽樣不是分層的
