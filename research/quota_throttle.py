@@ -148,29 +148,65 @@ SIGNAL_SOURCES: dict[str, list[Path]] = {
 USAGE_LOG_PATH = RESEARCH / "quota_usage_daily.log"
 
 
-def _record_daily(track: str, decision: str) -> None:
-    """2026-09-15（總司令交辦，省額度第一步觀察期）：每天一行記錄
-    「跳過幾輪／實際呼叫claude幾次」，供一週後判斷要不要做第二步（換模型）。
-    `decision` 是 'skip_signal'（純Python訊號比對跳過，連claude都沒叫）／
-    'skip_interval'（間隔未到跳過）／'run'（真的叫了claude -p）三選一。
-    跨日時把前一天的累計寫成一行append進log，再歸零重算今天的——這樣log
-    檔本身就是「一天一行」的歷史，不用另外寫聚合腳本。"""
+def _record_daily(track: str, decision: str, detail: str = "") -> None:
+    """2026-09-15（總司令交辦，省額度第一步觀察期）：記錄「跳過幾輪／實際
+    呼叫claude幾次」，供一週後判斷要不要做第二步（換模型）。`decision` 是
+    'skip_signal'（純Python訊號比對跳過，連claude都沒叫）／'skip_interval'
+    （間隔未到跳過）／'run'（真的叫了claude -p）三選一。
+
+    2026-09-18（Cowork【重構.B續·先別放棄】三.b修正）：舊版只在跨日時才把
+    累計寫成一行append進log，代表「今天」永遠是0筆，同一天內完全看不出
+    這一輪剛剛做了什麼決定——這正是總司令昨天在DevQueue踩到的同一種盲點
+    搬了家：監控本身的資料要等到事後（跨日）才會出現，事發當下（例如
+    停擺100分鐘）什麼都看不到。改成**每次呼叫都立刻append一行**（含時間
+    戳、track、decision、detail），不再等到跨日才寫；`quota_throttle_
+    state.json`裡的當日累計計數器保留（`skip_signal`/`skip_interval`/
+    `run`三個數字），供之後想要「一天一行摘要」時用`--summary`模式重新
+    聚合，不用另外重新設計資料結構。"""
     state = _load_state()
     track_state = state.setdefault(track, {})
     today = _now().strftime("%Y-%m-%d")
     daily = track_state.setdefault("daily", {"date": today, "skip_signal": 0, "skip_interval": 0, "run": 0})
     if daily.get("date") != today:
-        # 換日了：把昨天的累計寫進log，今天從0開始算
-        old = daily
-        line = (f"{old.get('date')} {track}: skip_signal={old.get('skip_signal', 0)} "
-                f"skip_interval={old.get('skip_interval', 0)} run={old.get('run', 0)}")
-        with USAGE_LOG_PATH.open("a", encoding="utf-8") as f:
-            f.write(line + "\n")
         daily = {"date": today, "skip_signal": 0, "skip_interval": 0, "run": 0}
     daily[decision] = daily.get(decision, 0) + 1
     track_state["daily"] = daily
     state[track] = track_state
     _save_state(state)
+    line = f"{_now().isoformat()} {track}: {decision}" + (f"（{detail}）" if detail else "")
+    with USAGE_LOG_PATH.open("a", encoding="utf-8") as f:
+        f.write(line + "\n")
+
+
+def daily_summary(track: str | None = None) -> list[str]:
+    """把`quota_usage_daily.log`裡逐行記錄的decision，依日期＋track聚合成
+    「一天一行」的摘要（2026-09-18新增，補回舊版跨日flush格式被拆成逐行
+    記錄後失去的那個檢視方式，供總司令一週後想看趨勢時用）。純讀取，
+    不寫檔。"""
+    if not USAGE_LOG_PATH.exists():
+        return []
+    counts: dict[tuple[str, str], dict[str, int]] = {}
+    for line in USAGE_LOG_PATH.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            ts_part, rest = line.split(" ", 1)
+            trk, decision_part = rest.split(": ", 1)
+            trk = trk.rstrip(":").strip()
+            decision = decision_part.split("（", 1)[0].strip()
+            date = ts_part[:10]
+        except ValueError:
+            continue  # 格式對不上的行（例如舊版跨日摘要行）直接跳過，不讓聚合中斷
+        if track and trk != track:
+            continue
+        key = (date, trk)
+        counts.setdefault(key, {"skip_signal": 0, "skip_interval": 0, "run": 0})
+        if decision in counts[key]:
+            counts[key][decision] += 1
+    out = []
+    for (date, trk), c in sorted(counts.items()):
+        out.append(f"{date} {trk}: skip_signal={c['skip_signal']} skip_interval={c['skip_interval']} run={c['run']}")
+    return out
 
 
 def _signal_hash(track: str) -> str:
@@ -202,7 +238,7 @@ def should_run(track: str) -> int:
             print(f"SKIP: 純Python訊號比對——自上次判定候選池空轉以來，"
                   f"PENDING_QUEUE.md/{track}相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，"
                   f"沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫")
-            _record_daily(track, "skip_signal")
+            _record_daily(track, "skip_signal", "訊號未變，連claude都沒叫")
             return 1
         # 訊號有變化：記下這次看到的雜湊，讓真正跑的這一輪（或下一次skip判斷）用最新值比對
         track_state["last_signal_hash"] = current_hash
@@ -217,13 +253,16 @@ def should_run(track: str) -> int:
             mode = "節流中" if throttled else "正常頻率"
             print(f"SKIP: {mode}，距上次實跑{elapsed_min:.1f}分鐘 < {interval}分鐘門檻"
                   + (f"（{reason}）" if throttled else ""))
-            _record_daily(track, "skip_interval")
+            _record_daily(track, "skip_interval",
+                          f"{mode}，距上次實跑{elapsed_min:.1f}分鐘<{interval}分鐘門檻"
+                          + (f"，{reason}" if throttled else ""))
             return 1
     if throttled:
         print(f"RUN（節流狀態，但已達{interval}分鐘門檻，本輪照跑）：{reason}")
+        _record_daily(track, "run", f"節流狀態但已達門檻，{reason}")
     else:
         print("RUN: 未達節流條件，正常頻率")
-    _record_daily(track, "run")
+        _record_daily(track, "run", "正常頻率")
     return 0
 
 
@@ -289,6 +328,11 @@ def main() -> int:
             print("usage: quota_throttle.py record --track <marathon|hypothesis_queue> --window START,END [--jsonl <path>]")
             return 2
         return record_cycle(track, window, _opt("--jsonl"))
+    if cmd == "summary":
+        # 給人手動查「一天一行」摘要用，2026-09-18新增，見daily_summary()
+        for line in daily_summary(track):
+            print(line)
+        return 0
     print(__doc__)
     return 1
 

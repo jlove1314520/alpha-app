@@ -14,6 +14,149 @@
 
 ---
 
+## 2026-09-18（續7）Cowork裁示【重構.B續·先別放棄，那個阻塞結論證據只有
+一半】（原文登記）
+
+Cowork原話：
+
+> 一、把「下市股沒有價格來源」這個結論查實，再決定要不要認它
+>    目前結論「yfinance＋FinMind 覆蓋率雙雙不足」引用的證據是
+>    208 行 `possibly delisted; no timezone found`——那是 yfinance 的
+>    錯誤訊息，FinMind 那一半完全沒有證據。
+>    而 adjust.py L153 確實有 FinMind 備援，finmind_client._fetch() 的
+>    docstring 自己寫著「Raises RuntimeError if every retry fails —
+>    callers should not silently treat a fetch failure as no data
+>    (that was the App's old bug pattern)」，且 _throttle() 在冷卻中
+>    直接 RuntimeError 不發請求。
+>    而 process_stock() 是 `except Exception as e: skip_reason=f"error: {e}"`
+>    ——三種完全不同的狀況被收斂成同一個 skip。
+>
+>    1. 把既有 job 輸出的 174 筆 skip_reason 字串做完整分類統計，
+>       至少要分出這四類，各給檔數與佔比：
+>       (a) price_too_short（有資料但長度不足）
+>       (b) FinMind 回空（真的沒有這檔）
+>       (c) error: RuntimeError ...額度/402/冷卻（**這是節流不是覆蓋**）
+>       (d) 其他
+>    2. 從 (b) 類裡挑 5 檔已下市代號，在 FinMind 額度可用時
+>       **單檔逐一**直接呼叫 load_dev("TaiwanStockPrice", sid, "2000-01-01")，
+>       三種結果分開記錄：有列數／回空／RuntimeError。
+>       這 5 檔的結果就是判定依據，不要再用聚合統計推論。
+>    3. 只有當 (b) 佔壓倒性多數、且第 2 步 5 檔實測也都回空，
+>       才可以維持「台股下市股價格覆蓋不足」這個阻塞結論。
+>       否則必須撤回它，改記「先前結論證據不足，已撤回」。
+>    4. 不論結論如何，process_stock() 的 except 要改：
+>       區分「資料不存在」與「取用失敗」，分開計數、分開報告。
+>       理由直接引 finmind_client._fetch() 自己的 docstring——
+>       研究管線不該重蹈 App 的老 bug。
+>
+> 二、抽樣改成分層（Cowork 上一輪的設計疏漏，現在更正）
+>    300 檔隨機抽樣只會抽到二三十檔 delisted，而 Q4 對照組
+>    （特徵相似但沒起飛、含下市）正是整份研究的靈魂，那一格永遠湊不出樣本。
+>    改成分層抽樣：active 與 delisted **各抽一半**（各 150 檔，同一固定種子），
+>    並在報告裡明文寫出分層比例與它跟母體真實比例的差距
+>    （之後算基準機率時要用權重還原，不能直接拿分層樣本當母體比例）。
+>
+> 三、馬拉松軌的能見度（跟昨天 DevQueue 同一個盲點，搬了家）
+>    repo 裡只有 dev_queue_cycle.log 與 tdcc_holders_cycle.log，
+>    馬拉松／hypothesis_queue 的 cycle log 不存在，
+>    quota_usage_daily.log 今天(09-18) 0 筆。
+>    今天六筆 commit 全是馬拉松軌做的，但它的運作狀態從 repo 完全看不見——
+>    停 100 分鐘時無法分辨「在想」「被節流」「死了」。
+>    照 DevQueue 昨天那套做同樣的事：
+>    (a) 馬拉松與 hypothesis_queue 每輪結束自己 commit 自己的 cycle log
+>        （只 commit 該檔，沿用 allowlist，不要 git add -A）；
+>    (b) 每輪結束時無論 run 或 skip 都寫一行進 quota_usage_daily.log，
+>        skip 要寫原因（skip_signal / skip_interval / 額度冷卻）；
+>    (c) pipeline_registry 加這兩條，納入 local_task_health 的班次監控。
+>
+> 四、順序
+>    一 → 三 可以同時做（不同檔案）。二 等一的結論出來再動，
+>    因為若下市股價格真的拿不到，分層抽樣只會抽到更多空殼。
+
+**執行狀態**：
+
+- **三（馬拉松軌能見度）** ✅ **已完成**：
+  - **根因查證**：`research/marathon_cycle.log`／`research/
+    hypothesis_queue_cycle.log`兩個檔案原本就被`.gitignore`明確排除
+    （原第12~13行），這才是「repo端完全看不見運作狀態」的直接原因——
+    `local_task_health`本身的mtime新鮮度監控其實正常運作（實測
+    `data/audit_report.json`目前`AlphaMarathon`/`AlphaHypothesisQueue`
+    兩條都是`status: ok`），但只有「新不新鮮」的布林值，看不到「這段
+    安靜期做了什麼決定」的log內容本身。
+  - (a) `.gitignore`移除這兩行排除規則；`C:\alpha\run-marathon-cycle.ps1`
+    與`C:\alpha\run-hypothesis-queue-cycle.ps1`（皆不在本repo）各自新增
+    `Commit-CycleLog`函式，在「節流跳過提早退出」與「正常跑完」兩個
+    出口都會呼叫，只commit自己的cycle log（不用`git add -A`），失敗
+    不影響其他收尾動作。**副帶發現並修正**：`run-hypothesis-queue-
+    cycle.ps1`原本沒有UTF-8 BOM（另外兩支`run-marathon-cycle.ps1`／
+    `run-dev-queue-cycle.ps1`都有），中文註解在部分PowerShell解析路徑
+    下有壞檔風險，已一併補上BOM並重新驗證語法通過。
+  - (b) `research/quota_throttle.py::_record_daily()`原本只在跨日時
+    把累計寫成一行append進`quota_usage_daily.log`，代表「今天」永遠
+    是0筆——跟總司令原話「quota_usage_daily.log今天0筆」完全吻合，
+    根因不是沒寫，是寫的時機設計成「只在明天才看得到今天」。改成
+    **每次`should_run()`決策都立刻append一行**（含時間戳/track/
+    decision/detail，detail會寫節流原因或"訊號未變"），新增
+    `daily_summary()`把逐行記錄重新聚合成「一天一行」格式（供想看
+    趨勢時用`quota_throttle.py summary`），原本的當日累計計數器保留
+    在`quota_throttle_state.json`不變。
+  - (c) **查證後確認已完成，不需新增**：`data/seed/pipeline_registry.json`
+    的`AlphaMarathon`/`AlphaHypothesisQueue`兩條本來就存在
+    （`artifact`分別指向這兩個cycle log、`freshness: mtime`），本輪
+    (a)把log檔本身納入版控後，這兩條監控會自然開始反映真實內容而不只是
+    「檔案存在與否」，不需要另外新增設定。
+  - **驗證**：兩支`.ps1`都通過PowerShell Parser語法檢查；
+    `quota_throttle.py`用暫存state/log檔測試三種decision（run/
+    skip_interval/skip_signal）確認立即寫入且`daily_summary()`正確
+    聚合；`python -m py_compile research/quota_throttle.py`通過
+    （唯一警告是第67行docstring既有的`\.`跳脫序列，本輪未新增未修改
+    這段文字，不在本輪範圍）。
+
+- **一（FinMind覆蓋率結論查實）** 🔲 **部分完成，300檔重跑進行中**：
+  - **1.4（process_stock()例外分類）** ✅ **已完成**：改成三分——
+    `price.empty`→`no_data_found`（真的沒有這檔）、`len(price)<260`→
+    `price_too_short`（有資料但太短，不再跟no_data_found混在一起）、
+    `except RuntimeError`→`fetch_error: ...`（額度/冷卻/HTTP層級問題，
+    直接引用`finmind_client.py::_fetch()`docstring的區分）、
+    `except Exception`→`error: ...`（管線本身未預期的bug）。新增
+    `_skip_category()`/`_skip_reason_category_summary()`把174筆
+    （或重跑後的新總數）依這四類分別給檔數/佔比/範例stock_id
+    （含delisted範例，供1.2挑檔用），`run_summary.json`新增
+    `skip_reason_category_summary`欄位、`skip_reasons_full`
+    （原本只存前10筆樣本，現在存全部，含stock_id/status/skip_reason）。
+    20檔煙霧測試驗證分類正確運作（`no_data_found`/`price_too_short`
+    正確分開，不再混淆）。
+  - **1.1（既有174筆分類統計）** 🔲 **進行中，非既有174筆，是重跑
+    300檔的新統計**：既有job（`20260918-140419-49bf`）的174筆skip
+    只留存`skip_reasons_sample`前10筆與log裡yfinance的208行警告，
+    **完整174筆的個別分類已經無法從既有輸出重建**（誠實記錄這個
+    資料缺口，不是藏起來）。已用本輪剛修好的分類程式碼重新提交300檔
+    背景工作（`job_id=20260918-170334-11f1`，同一組`SAMPLE_SEED=42`
+    樣本），跑完後的`skip_reason_category_summary`就是這一步要的四類
+    統計——**與嚴格意義的「既有174筆」不完全是同一批**（同一天但不同
+    時刻的yfinance/FinMind查詢結果，理論上可能有極小差異），但這是
+    在原始174筆個別分類資料已不存在的情況下，最忠實的替代方案，會
+    在本節結案時明確標註這個方法論差異。**中途觀察到的重要訊號**：
+    這次重跑進度過半時ok/skip比例（174 ok/26 skip @ 200筆進度）遠優於
+    上一輪最終比例（126 ok/174 skip @ 300筆），初步方向支持總司令的
+    懷疑——舊174筆skip裡有顯著比例可能是(c)額度/冷卻類的暫時性問題，
+    而非(b)真的沒有資料，但**這只是進行中觀察，不是結論**，正式結論
+    待完整跑完的分類統計出爐才下。
+  - **1.2（5檔delisted手動驗證）** 🔲 **待做**：等1.1的300檔重跑完成、
+    從`skip_reason_category_summary`的`no_data_found`類別挑出5檔
+    delisted代號後才能執行，尚未開始。
+  - **1.3（維持或撤回阻塞結論）** 🔲 **待做**：等1.1、1.2都有結果才能
+    下判斷，尚未執行。
+
+- **二（分層抽樣）** 🔲 **依裁示原文暫不動**：等一的結論出來才動，
+  遵守裁示不提前處理。
+
+**300檔重跑背景工作**：`job_id=20260918-170334-11f1`，
+`python research/run_detached.py status`／`log 20260918-170334-11f1`
+可查進度，預期總耗時比照上次約15分鐘，下一輪收成。
+
+---
+
 ## 2026-09-18（續6）Cowork裁示【重構.B收成前必修】三個會讓核心數字失真的
 問題＋【順手修】ORDER-BEGIN清單已失效（原文登記）
 

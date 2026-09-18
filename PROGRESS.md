@@ -1,3 +1,59 @@
+## 2026-09-18（續5）（Cowork【重構.B續·先別放棄】三：馬拉松/hypothesis_queue能見度補齊；一：process_stock()例外分類修正，300檔重跑進行中）
+
+戴**維運帽**（三，能見度）+ **驗證帽**（一.4，錯誤分類修正）。
+
+**根因查證**：`research/marathon_cycle.log`／`hypothesis_queue_cycle.log`
+兩個檔案原本被`.gitignore`明確排除（原第12~13行），這是「repo端完全
+看不見馬拉松運作狀態」的直接原因——`local_task_health`的mtime新鮮度
+監控本身正常（實測`AlphaMarathon`/`AlphaHypothesisQueue`兩條都是
+`status: ok`），差的是log內容本身沒進repo，只有新鮮度布林值。
+
+**三.a**：`.gitignore`移除排除規則；`C:\alpha\run-marathon-cycle.ps1`／
+`run-hypothesis-queue-cycle.ps1`（皆不在本repo）各自新增`Commit-
+CycleLog`函式，節流跳過與正常跑完兩個出口都會呼叫，只commit自己的
+cycle log。**副帶發現**：`run-hypothesis-queue-cycle.ps1`原本沒有
+UTF-8 BOM（另兩支都有），已修正並重新驗證語法。
+
+**三.b**：`research/quota_throttle.py::_record_daily()`原本只在跨日
+時把累計寫成一行append進`quota_usage_daily.log`——這正是總司令說「今天
+0筆」的根因，不是沒寫，是設計成「只在明天才看得到今天」。改成每次
+`should_run()`決策立刻append一行（含時間戳/track/decision/detail），
+新增`daily_summary()`把逐行記錄重新聚合回「一天一行」格式（`quota_
+throttle.py summary`可查）。
+
+**三.c**：查證`pipeline_registry.json`已有`AlphaMarathon`/
+`AlphaHypothesisQueue`兩條監控，不需新增。
+
+**一.4**：`research/multibagger_attribution.py::process_stock()`的
+`except Exception`改成三分——`no_data_found`（真的沒有這檔）/
+`price_too_short`（有資料但太短）/`fetch_error: ...`（RuntimeError，
+額度/冷卻/HTTP問題）/`error: ...`（其他未預期bug），直接引用
+`finmind_client.py::_fetch()`docstring的區分（「不該把fetch失敗當成
+沒有資料，這是App的老bug」）。新增`_skip_category()`/`_skip_reason_
+category_summary()`統計四類佔比+範例stock_id。
+
+**一.1~1.3尚未完成（如實記錄）**：既有300檔job（`20260918-140419-
+49bf`）的174筆skip只留存前10筆樣本，完整分類已無法從既有輸出重建。
+用本輪修好的分類邏輯重新提交300檔背景工作（`job_id=20260918-
+170334-11f1`），跑完後才能真正回答「(b)FinMind回空 vs (c)節流」各佔
+多少比例。**中途觀察**（進度200/300時ok/skip=174/26，遠優於上次最終
+126/174）初步支持總司令的懷疑，但這只是觀察不是結論。5檔delisted手動
+驗證與最終「維持/撤回」判斷都要等這次重跑完成才能做。
+
+**二（分層抽樣）**：依裁示原文順序，等一的結論出來才動，本輪未觸碰。
+
+**驗證**：兩支`.ps1`通過PowerShell Parser語法檢查；`quota_throttle.py`
+用暫存state/log測試三種decision確認立即寫入且聚合正確；
+`python -m py_compile`兩支腳本皆通過；`multibagger_attribution.py`
+20檔煙霧測試確認`no_data_found`/`price_too_short`正確分開。
+
+**影響檔案**：`.gitignore`、`C:\alpha\run-marathon-cycle.ps1`、
+`C:\alpha\run-hypothesis-queue-cycle.ps1`（後兩者不在本repo）、
+`research/quota_throttle.py`、`research/multibagger_attribution.py`、
+`PENDING_QUEUE.md`。
+
+---
+
 ## 2026-09-18（續4）（Cowork【重構.B收成前必修】三項研究bug修復＋順手修ORDER-BEGIN清單失效）
 
 戴**驗證帽**（多空歸因研究的正確性修復）+ **維運帽**（ORDER-BEGIN標記

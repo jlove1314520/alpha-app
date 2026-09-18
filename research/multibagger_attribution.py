@@ -206,10 +206,28 @@ def _pre_window_features(price: pd.DataFrame, eps_ttm: pd.DataFrame, rev: pd.Dat
 
 def process_stock(stock_id: str, status: str, delist_date) -> dict:
     """單檔股票的完整處理，任何一步失敗只回傳空殼＋錯誤標記，不外溢中斷其他股票
-    （沿用 CLAUDE.md「錯誤隔離原則」，此處等價於逐檔 try/except）。"""
+    （沿用 CLAUDE.md「錯誤隔離原則」，此處等價於逐檔 try/except）。
+
+    2026-09-18（Cowork【重構.B續·先別放棄】一.4修正）：舊版`except Exception`
+    把三種完全不同的狀況收斂成同一個`skip_reason`字串——`adjusted_price_
+    series()`回空（yfinance＋FinMind都真的查無此檔，"沒有資料"）、回傳的
+    資料筆數不足260天（"資料不足"）、`finmind_client.py::_fetch()`拋出
+    `RuntimeError`（額度/冷卻/HTTP錯誤，"問不到"不是"問了沒有"——這是
+    `_fetch()`自己docstring寫明的區分：「Raises RuntimeError if every
+    retry fails -- callers should not silently treat a fetch failure as
+    no data (that was the App's old bug pattern)」，研究管線不該重蹈這個
+    老bug）。現在分開記錄：
+    - `no_data_found`：兩個價格源都回空，真的查無此檔
+    - `price_too_short`：有資料但筆數<260天
+    - `fetch_error: ...`：`RuntimeError`（額度/冷卻/HTTP層級問題，不代表
+      「沒有這檔資料」，只代表「這次問不到」）
+    - `error: ...`：其他未預期例外（管線本身的bug）
+    """
     try:
         price = adjusted_price_series(stock_id)
-        if price.empty or len(price) < 260:
+        if price.empty:
+            return {"stock_id": stock_id, "status": status, "skip_reason": "no_data_found"}
+        if len(price) < 260:
             return {"stock_id": stock_id, "status": status, "skip_reason": "price_too_short"}
         monthly = _monthly_last(price)
         windows = _find_moonshot_windows(monthly)
@@ -253,6 +271,11 @@ def process_stock(stock_id: str, status: str, delist_date) -> dict:
             "n_months": len(monthly), "n_moonshot_windows": len(windows),
             "moonshot_rows": moonshot_rows,
         }
+    except RuntimeError as e:
+        # finmind_client.py的_fetch()/_rate_limit_wait_or_raise()專門用RuntimeError
+        # 表達「這次問不到」（額度用盡/冷卻中/HTTP 4xx等）——這不是「沒有這檔資料」，
+        # 是「這次沒辦法問」，兩者混在一起會讓存活者偏誤的判定失真（見上方docstring）。
+        return {"stock_id": stock_id, "status": status, "skip_reason": f"fetch_error: {e}"}
     except Exception as e:  # noqa: BLE001 -- 逐檔隔離，見上方 docstring
         return {"stock_id": stock_id, "status": status, "skip_reason": f"error: {e}"}
 
@@ -276,11 +299,49 @@ def _two_proportion_ztest(skip_a: int, n_a: int, skip_b: int, n_b: int) -> tuple
     return float(z), p_value
 
 
+def _skip_category(skip_reason: str) -> str:
+    """把完整skip_reason字串（可能帶落落長的錯誤訊息）正規化成四類之一，
+    供分類統計用——`skip_reason_distribution`裡放的是這個，完整原始訊息
+    另外保留在`errors`本身，不會丟失，只是分類統計不會被錯誤訊息的
+    細節文字打散成幾百個各出現1次的key。"""
+    if skip_reason == "no_data_found":
+        return "no_data_found"
+    if skip_reason == "price_too_short":
+        return "price_too_short"
+    if skip_reason.startswith("fetch_error:"):
+        return "fetch_error"
+    return "other_error"
+
+
+def _skip_reason_category_summary(errors: list[dict], n_examples: int = 5) -> dict:
+    """2026-09-18（Cowork【重構.B續·先別放棄】一.1）：全體174筆skip（不分
+    active/delisted）依四類分別給檔數、佔比，外加每類的stock_id範例
+    （供一.2挑delisted代號逐一驗證用，不用另外重新掃一次）。"""
+    total = len(errors)
+    by_cat: dict[str, list[dict]] = {}
+    for e in errors:
+        by_cat.setdefault(_skip_category(e["skip_reason"]), []).append(e)
+    summary = {}
+    for cat, items in sorted(by_cat.items(), key=lambda kv: -len(kv[1])):
+        summary[cat] = {
+            "count": len(items),
+            "pct_of_all_skips": round(100.0 * len(items) / total, 1) if total else None,
+            "example_stock_ids": [it["stock_id"] for it in items[:n_examples]],
+            "example_delisted_stock_ids": [it["stock_id"] for it in items if it["status"] == "delisted"][:n_examples],
+        }
+    return summary
+
+
 def _survivorship_skip_breakdown(sample: pd.DataFrame, results: list[dict], errors: list[dict]) -> dict:
     """2026-09-18（Cowork【重構.B收成前必修】3）：active/delisted兩組各自的
     總檔數/成功/skip率/skip_reason分布，外加active vs delisted skip率的
     顯著性檢定——這個數字比任何起飛率/命中率結論都重要，因為它決定命中率
-    要打幾折，五題裡沒回答這個之前不准把任何數字寫進結論。"""
+    要打幾折，五題裡沒回答這個之前不准把任何數字寫進結論。
+
+    2026-09-18（續·先別放棄）：`skip_reason_distribution`改用`_skip_category()`
+    正規化過的四類當key，不是原始完整錯誤訊息字串（後者每筆RuntimeError
+    訊息細節不同，會被打散成幾十個各出現1次的key，看不出類別佔比）。
+    """
     breakdown = {}
     for status_val in sorted(sample["status"].unique()):
         total = int((sample["status"] == status_val).sum())
@@ -289,7 +350,8 @@ def _survivorship_skip_breakdown(sample: pd.DataFrame, results: list[dict], erro
         reasons: dict[str, int] = {}
         for e in errors:
             if e["status"] == status_val:
-                reasons[e["skip_reason"]] = reasons.get(e["skip_reason"], 0) + 1
+                cat = _skip_category(e["skip_reason"])
+                reasons[cat] = reasons.get(cat, 0) + 1
         breakdown[status_val] = {
             "total": total, "ok": ok_n, "skip": skip_n,
             "skip_rate_pct": round(100.0 * skip_n / total, 1) if total else None,
@@ -350,6 +412,7 @@ def main() -> None:
             yearly_base_rate[int(y)] = {"n_moonshot_stocks": int(hit), "n_sample_universe": len(has_data_stocks)}
 
     status_breakdown = _survivorship_skip_breakdown(sample, results, errors)
+    skip_category_summary = _skip_reason_category_summary(errors)
 
     moonshot_df.to_csv(OUT_DIR / "moonshot_windows_sample.csv", index=False)
     with open(OUT_DIR / "run_summary.json", "w", encoding="utf-8") as f:
@@ -359,12 +422,16 @@ def main() -> None:
             "n_moonshot_stocks_total": moonshot_df["stock_id"].nunique() if not moonshot_df.empty else 0,
             "yearly_base_rate": yearly_base_rate,
             "status_breakdown": status_breakdown,
-            "skip_reasons_sample": [e["skip_reason"] for e in errors[:10]],
+            "skip_reason_category_summary": skip_category_summary,
+            "skip_reasons_full": [{"stock_id": e["stock_id"], "status": e["status"],
+                                    "skip_reason": e["skip_reason"]} for e in errors],
         }, f, ensure_ascii=False, indent=2)
 
     print(f"[multibagger] 完成：ok={len(results)} skip={len(errors)} moonshot窗口={len(all_moonshot)}")
     print(f"[multibagger] 逐年基準機率（小樣本）：{json.dumps(yearly_base_rate, ensure_ascii=False)}")
     print(f"[multibagger] 存活者偏誤skip率分解：{json.dumps(status_breakdown, ensure_ascii=False)}")
+    print(f"[multibagger] skip原因四類分佈（全體{len(errors)}筆）："
+          f"{json.dumps(skip_category_summary, ensure_ascii=False)}")
     test = status_breakdown.get("_active_vs_delisted_test", {})
     if test.get("delisted_skip_rate_significantly_higher"):
         a, d = status_breakdown["active"], status_breakdown["delisted"]

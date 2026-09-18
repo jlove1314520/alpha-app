@@ -9,8 +9,14 @@ research/data/
 research/data/ticks/
 research/.marathon.lock
 research/.hypothesis_queue.lock
-research/marathon_cycle.log
-research/hypothesis_queue_cycle.log
+# 2026-09-18（Cowork【重構.B續·先別放棄】三，馬拉松軌能見度）：這兩個
+# cycle log被排除在版控之外，是「今天六筆commit全是馬拉松軌做的，但它
+# 的運作狀態從repo完全看不見」這個盲點的直接根因——local_task_health的
+# mtime新鮮度監控本來就正常運作（本機端看得到「最近有沒有更新」），但
+# 判斷「這段安靜期是在想／被節流／死了」需要log內容本身，不是只有一個
+# 新鮮度布林值。跟昨天research/dev_queue_cycle.log同一個修法：改成兩軌
+# 各自每輪結束自己commit（見run-marathon-cycle.ps1/run-hypothesis-queue-
+# cycle.ps1），沿用allowlist只commit這個檔，不要git add -A。
 research/ibkr_quotes_cycle.log
 research/ibkr_gateway_cycle.log
 research/.ibkr_order_token
