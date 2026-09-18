@@ -2,9 +2,18 @@
 
 **這份檔案永遠只描述「現在」，會被覆寫，不是 append-only。** 換 session／換機器／換 agent 接手 Phase 2（自動下單引擎）研究工作時，**先讀這份**，再視需要去查 `REPORT.md`（細節動作記錄）、`STRATEGY_LOG.md`（里程碑敘事）、`LEADS.md`（策略候選）、`FACTORS.md`（因子登記簿）。
 
+**最後更新：2026-09-19T04:33+08:00**
+
+**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 556 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 556 輪 · 2026-09-19T04:33+08:00 · US（找到真正未做過的工作單位，非空轉）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認全文0條`- [ ]`、22條`- [!]`全數blocked（與round554/555核對一致），FinMind已於台北03:36:14解封（非本三軌範圍，稽核.三(a)由DevQueue/interactive負責）。回落自走，依round555建議選TW，但先重讀`CALIBRATION_PROBE.md`指定的複驗清單（TW#77/#79/#91、US#47/#52、FUT#34）逐項核對是否真的「全數複驗完畢」——**發現round554/555的這句話不精確**：`TRIALS_LEDGER.md` #203/#206確認US`#47`（大型股tier N=90）已複驗FAIL、`#52`（中型股tier N=90）已複驗**CHEAP_PASS**（percentile 100.0），但round446自己記錄的「下一步」（1b策略構造深挖）從未執行，70輪來沒有任何一輪做這件事，被前面連續67輪的「候選池空轉」結論誤蓋掉。**本輪工作單位＝補做這個遺漏的深挖**：新增`deep_dive_f_us_low_vol_mid_tier_n90.py`（沿用`us_factor_ic_by_size.py`現行TIER=mid/SAMPLE_SIZE=90/SAMPLE_SEED=20260826_3同一批81檔樣本，1b構造：十分位多空、100次配對式隨機控制組、成本1x/2x/3x、beta/alpha），因100次×2期×3成本規模超過5分鐘門檻，依`MARATHON_PROTOCOL.md`0b節改用`run_detached.py submit`投遞（job`20260919-043305-3dca`，timeout 40分鐘），session內等4分鐘仍`STILL_RUNNING`，**下一輪用`run_detached.py status`／`log 20260919-043305-3dca`收成，收成後務必`register_trial()`登記`TRIALS_LEDGER.md`並更新`US_LEADS.md`**（不論PASS/FAIL）。`trial_registry.py --check`本輪執行前後皆exit=0 PASS（246列，未新增試驗判定，因結果尚未產出）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區。詳見`REPORT.md`第556輪記錄、`US_MARATHON_STATE.md`第556輪。
+
+<details>
+<summary>上一輪（第555輪）記錄，收合保留</summary>
+
 **最後更新：2026-09-19T03:31+08:00**
 
-**馬拉松全局輪次計數器（2026-08-23 新增，使用者要求）：目前累積 555 輪（含補記的第405輪，見下方缺口說明）。最新一輪：第 555 輪 · 2026-09-19T03:31+08:00 · US（候選池空轉，交辦佇列已清空）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認全文0條`- [ ]`、22條`- [!]`全數blocked，`data/rate_limit_state.json`確認FinMind`blocked_until`台北03:36:14尚未到（開工03:31，差約4~5分鐘），非本輪可處理範圍。回落自走，依round554建議依輪替選US。核對`run_detached.py status`／`git log`／`STRATEGY_GRAVEYARD.md`／`research/data/ticks/`（10/20，與round554相同）／`trial_registry.py --check`（246列PASS，與round554相同）／`is_holdout_consumed()`（False），確認TW/US/FUT三軌自身候選池狀態與round487~554時實質相同（連續約67輪無新工作單位），僅剩`#50`被動等待tick累積與總司令對gate50提案的回應。本輪未產生新試驗判定，未動凍結區。詳見`REPORT.md`第555輪記錄、`US_MARATHON_STATE.md`第555輪。
+**第 555 輪 · 2026-09-19T03:31+08:00 · US（候選池空轉，交辦佇列已清空）**。**本輪執行**：開工讀`PENDING_QUEUE.md`確認全文0條`- [ ]`、22條`- [!]`全數blocked，`data/rate_limit_state.json`確認FinMind`blocked_until`台北03:36:14尚未到（開工03:31，差約4~5分鐘），非本輪可處理範圍。回落自走，依round554建議依輪替選US。核對`run_detached.py status`／`git log`／`STRATEGY_GRAVEYARD.md`／`research/data/ticks/`（10/20，與round554相同）／`trial_registry.py --check`（246列PASS，與round554相同）／`is_holdout_consumed()`（False），確認TW/US/FUT三軌自身候選池狀態與round487~554時實質相同（連續約67輪無新工作單位），僅剩`#50`被動等待tick累積與總司令對gate50提案的回應。**⚠️ round556已更正**：這個「連續約67輪無新工作單位」的結論本身不精確，`CALIBRATION_PROBE.md`複驗清單裡US`#52`的1b深挖從未執行，見round556記錄。詳見`REPORT.md`第555輪記錄、`US_MARATHON_STATE.md`第555輪。
+
+</details>
 
 <details>
 <summary>上一輪（第554輪）記錄，收合保留</summary>
