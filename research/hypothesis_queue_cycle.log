@@ -3139,3 +3139,6 @@ quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉�
 quota_throttle: RUN: 未達節流條件，正常頻率
 
 ===== Hypothesis-queue cycle start: 2026-09-18 22:21:02 =====
+Error: Exceeded USD budget (5)
+===== Hypothesis-queue cycle end: 2026-09-18 22:26:09 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
