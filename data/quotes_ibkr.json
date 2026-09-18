@@ -1,51 +1,51 @@
 {
-  "fetched_at": "2026-09-18T20:06:37.109145+08:00",
+  "fetched_at": "2026-09-18T20:11:37.819939+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 337.29,
-      "bid": 337.2,
-      "ask": 337.3,
+      "last": 337.2,
+      "bid": 337.19,
+      "ask": 337.33,
       "close": 337.0,
-      "change_pct": 0.0861,
+      "change_pct": 0.0593,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 497.55,
-      "bid": 497.45,
-      "ask": 497.55,
+      "last": 497.25,
+      "bid": 497.25,
+      "ask": 497.4,
       "close": 497.75,
-      "change_pct": -0.0402,
+      "change_pct": -0.1005,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 219.93,
-      "bid": 219.83,
-      "ask": 219.95,
+      "last": 219.84,
+      "bid": 219.84,
+      "ask": 219.93,
       "close": 219.34,
-      "change_pct": 0.269,
+      "change_pct": 0.228,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 368.48,
-      "bid": 368.48,
-      "ask": 368.58,
+      "last": 368.38,
+      "bid": 368.22,
+      "ask": 368.41,
       "close": 366.2,
-      "change_pct": 0.6226,
+      "change_pct": 0.5953,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 355.51,
-      "bid": 355.45,
-      "ask": 355.53,
+      "last": 355.73,
+      "bid": 355.73,
+      "ask": 355.8,
       "close": 347.33,
-      "change_pct": 2.3551,
+      "change_pct": 2.4184,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -71,14 +71,15 @@
       "label": "S&P 500"
     },
     "^IXIC": {
-      "last": 26418.3,
+      "last": 26418.299,
       "bid": null,
       "ask": null,
-      "close": 26418.3,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 25978.424,
+      "change_pct": 1.6932,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數"
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
     },
     "^SOX": {
       "last": 11599.492,
