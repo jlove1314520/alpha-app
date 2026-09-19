@@ -125,6 +125,19 @@ shift），但對抓「保護機制本身其實是靠著未來資訊才顯得有
   隨時間漂移，不能只看VAL期報酬數字轉強就誤判為訊號變強。
 - **原始記錄**：`TRIALS_LEDGER.md`#39/#41，`deep_dive_f_us_low_vol.py`。
 
+**2026-09-19更新（第557輪，家族正式結案）**：中型股tier（`TIER="mid"`）
+的1b深挖同樣FAIL——cheap gate層N=30小樣本版（`TRIALS_LEDGER.md`#52
+CHEAP_PASS）與N=90重跑版（#206 CHEAP_PASS，`CALIBRATION_PROBE.md`裁示
+的最終複驗）都在簡單多空IC檢定過關，但兩次深挖（N=30版`TRIALS_LEDGER.md`
+#68、N=90版本輪新增#245）TRAIN期percentile皆僅8~25（連隨機控制組中位數
+都沒贏過），跟不分層版死法完全同款：cheap gate能過、策略構造層（十分位
+多空、隨機控制組）一測就現形。至此`f_us_low_vol`在不分層、小型股tier
+（#13）、中型股tier（N=30版#68／N=90版#245）三個樣本組合的1b深挖皆已
+跑完皆FAIL，大型股tier cheap gate本身未過未進深挖——**因子家族全部
+tier/樣本規模組合已窮盡，正式結案，不再開新變體**。原始記錄：
+`TRIALS_LEDGER.md`#206/#245，`US_LEADS.md`#28/#33，
+`deep_dive_f_us_low_vol_mid_tier_n90.py`。
+
 ### f_us_value_bm／f_us_low_vol 乾淨宇宙版本（US軌，round382-425，
 9輪短腿診斷鏈整併結案，2026-09-07 FAIL）
 
