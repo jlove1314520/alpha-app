@@ -145,10 +145,38 @@ def main():
     market_df = prepare_market_data(market_raw)
     print(f"market_df: {len(market_df)}天")
 
-    ids = sample_universe_ids(SAMPLE_SIZE)
-    print(f"樣本宇宙: {len(ids)}檔，開始載入價格+補amt...")
+    # 記憶體設計（2026-09-20修復：300檔全量跑第一版把每檔股票「全部1592個
+    # 表達式×全部交易日」都以float64留在記憶體，實測單一Python行程private
+    # memory衝到約19GB，把使用者機器的31GB實體記憶體幾乎耗盡到只剩1.26GB
+    # 可用——這是真正發生過的事故，不是理論風險，已在互動視窗裡把那個
+    # 行程手動kill掉）。**修法**：cross-sectional IC分析真正需要的只有
+    # 每個snapshot的as_of/fwd兩個日期的值，不需要整個歷史序列常駐記憶體。
+    # 所以先把兩個horizon全部的snapshot算出來，取as_of∪fwd日期聯集，
+    # 每檔股票算完1592個表達式後**立刻reindex到這個聯集日期、丟掉其餘
+    # 全部歷史列**，把每檔股票的常駐大小從「全部交易日×1592欄」壓到
+    # 「約300個日期×1592欄」，實測記憶體壓力從19GB降到可控範圍。
+    needed_dates: set[pd.Timestamp] = set()
+    snapshots_by_horizon: dict[int, list[tuple[pd.Timestamp, pd.Timestamp]]] = {}
+    for horizon in HORIZONS:
+        calendar = sorted(market_df["date"].unique())
+        snaps = build_snapshots(calendar, calendar[0], calendar[-1], horizon=horizon)
+        snaps = [(pd.Timestamp(a), pd.Timestamp(f)) for a, f in snaps]
+        snapshots_by_horizon[horizon] = snaps
+        for a, f in snaps:
+            needed_dates.add(a)
+            needed_dates.add(f)
+    needed_dates_idx = pd.DatetimeIndex(sorted(needed_dates))
+    print(f"snapshot所需的聯集日期數：{len(needed_dates_idx)}"
+          f"（遠小於全部交易日，這是記憶體壓縮的關鍵）")
 
-    atom_data: dict[str, pd.DataFrame] = {}
+    ids = sample_universe_ids(SAMPLE_SIZE)
+    print(f"樣本宇宙: {len(ids)}檔，開始載入價格+補amt+算表達式（逐檔立即"
+          f"壓縮到所需日期，不常駐全歷史）...")
+
+    expr_names: list[str] | None = None
+    indexed_exprs: dict[str, pd.DataFrame] = {}
+    indexed_close: dict[str, pd.Series] = {}
+    n_loaded = 0
     for i, sid in enumerate(ids):
         try:
             from adjust import adjusted_price_series
@@ -158,54 +186,45 @@ def main():
         if px.empty or len(px) < 260:
             continue
         px = _merge_amt(px, sid)
-        atom_data[sid] = build_atom_df(px)
-        if (i + 1) % 50 == 0:
-            print(f"  {i+1}/{len(ids)}（可用{len(atom_data)}檔）")
-    print(f"可用股票: {len(atom_data)}/{len(ids)}")
-
-    print("計算全部depth-1表達式...")
-    expr_by_stock: dict[str, dict[str, pd.Series]] = {}
-    for i, (sid, df) in enumerate(atom_data.items()):
+        df = build_atom_df(px)
         try:
-            expr_by_stock[sid] = compute_all_expressions(df)
+            exprs = compute_all_expressions(df)
         except Exception as e:  # noqa: BLE001 -- 描述性掃描，單檔算子出錯不中斷整批
             print(f"  [警告] {sid}計算表達式失敗，跳過：{e}")
             continue
-        if (i + 1) % 50 == 0:
-            print(f"  {i+1}/{len(atom_data)}")
+        if expr_names is None:
+            expr_names = list(exprs.keys())
 
-    n_expressions = len(next(iter(expr_by_stock.values())))
-    print(f"每檔股票的表達式數：{n_expressions}（事前登記應為1592，"
-          f"960+72+560=1592，若不符表示分類算子/原子/窗口計數有誤）")
-
-    # 效能設計：先把每檔股票的表達式值+收盤價用date重新索引成dict of
-    # DataFrame，之後每個snapshot只需要一次DataFrame.corrwith()（向量化
-    # 跨1592欄同時算Spearman IC），不要對每個表達式各自迴圈——原本逐一
-    # expression×snapshot×stock三層迴圈量級太大（1592×~110×250≈4400萬
-    # 次），改成「每個snapshot組一次橫斷面表格」把最內層迴圈向量化掉。
-    expr_names = list(next(iter(expr_by_stock.values())).keys())
-    indexed_exprs: dict[str, pd.DataFrame] = {}
-    indexed_close: dict[str, pd.Series] = {}
-    for sid, exprs in expr_by_stock.items():
-        df = atom_data[sid]
         dates = pd.DatetimeIndex(df["date"])
         wide = pd.DataFrame(exprs)
         wide.index = dates
-        indexed_exprs[sid] = wide[~wide.index.duplicated(keep="first")]
+        wide = wide[~wide.index.duplicated(keep="first")]
         close_s = pd.Series(df["c"].values, index=dates)
-        indexed_close[sid] = close_s[~close_s.index.duplicated(keep="first")]
+        close_s = close_s[~close_s.index.duplicated(keep="first")]
+        # 立刻壓縮到所需日期聯集——這一步做完，wide/close_s的大版本就可以
+        # 被垃圾回收，只有壓縮後的小版本留在indexed_exprs/indexed_close裡。
+        indexed_exprs[sid] = wide.reindex(needed_dates_idx.intersection(wide.index))
+        indexed_close[sid] = close_s.reindex(needed_dates_idx.intersection(close_s.index))
+        del df, exprs, wide, close_s, px
+
+        n_loaded += 1
+        if (i + 1) % 50 == 0:
+            print(f"  {i+1}/{len(ids)}（可用{n_loaded}檔）")
+    print(f"可用股票: {n_loaded}/{len(ids)}")
+
+    n_expressions = len(expr_names) if expr_names else 0
+    print(f"每檔股票的表達式數：{n_expressions}（事前登記應為1592，"
+          f"960+72+560=1592，若不符表示分類算子/原子/窗口計數有誤）")
 
     results = []
     for horizon in HORIZONS:
-        # market_df["date"]是純字串（`load_dev()`既有慣例，不是Timestamp，
-        # 跟`core_tilt_backtest.py`同一個型別慣例），build_snapshots()本來
-        # 就是設計吃字串list，不需要（也不能）呼叫.date()。
-        calendar = sorted(market_df["date"].unique())
-        snapshots = build_snapshots(calendar, calendar[0], calendar[-1], horizon=horizon)
-        snapshots = [(pd.Timestamp(a), pd.Timestamp(f)) for a, f in snapshots]
+        # snapshot序列已在檔案開頭統一算好（見needed_dates_idx那段的說明），
+        # 這裡直接取用，不重算，維持跟原本一致的行為。
+        snapshots = snapshots_by_horizon[horizon]
         print(f"horizon={horizon}日: {len(snapshots)}個snapshot")
 
         train_ic_rows, val_ic_rows = [], []
+        all_ic_rows_by_date: dict[pd.Timestamp, pd.Series] = {}
         for si, (as_of, fwd) in enumerate(snapshots):
             cross_rows = {}
             ret_map = {}
@@ -224,12 +243,23 @@ def main():
             cross_df = pd.DataFrame(cross_rows).T  # index=stock_id, columns=expr_names
             ret_s = pd.Series(ret_map)
             ic_row = cross_df.corrwith(ret_s, method="spearman")
+            all_ic_rows_by_date[as_of] = ic_row  # 快取逐snapshot IC，供年份/牛熊段拆解重跑用，不需要重載300檔資料
             if as_of <= pd.Timestamp(holdout.TRAIN_END):
                 train_ic_rows.append(ic_row)
             elif as_of <= pd.Timestamp(holdout.VAL_END):
                 val_ic_rows.append(ic_row)
             if (si + 1) % 10 == 0:
                 print(f"  horizon={horizon} snapshot {si+1}/{len(snapshots)}")
+
+        # 快取逐snapshot IC矩陣（index=as_of時間戳，columns=expr_names），
+        # 讓「分年份/分牛熊段穩定度」這類事後聚合分析可以直接讀這份快取
+        # 重算，不需要重跑300檔資料載入+depth-1表達式計算（那才是本腳本
+        # 真正耗時的部分，聚合方式本身只是輕量的groupby）。
+        if all_ic_rows_by_date:
+            snap_df = pd.DataFrame(all_ic_rows_by_date).T.sort_index()
+            snap_cache_path = Path(__file__).parent / f"atom_ic_snapshots_h{horizon}.parquet"
+            snap_df.to_parquet(snap_cache_path)
+            print(f"已存逐snapshot IC快取：{snap_cache_path}（{len(snap_df)}個snapshot×{len(snap_df.columns)}表達式）")
 
         train_ic_df = pd.DataFrame(train_ic_rows) if train_ic_rows else pd.DataFrame(columns=expr_names)
         val_ic_df = pd.DataFrame(val_ic_rows) if val_ic_rows else pd.DataFrame(columns=expr_names)
@@ -257,5 +287,82 @@ def main():
     return res_df
 
 
+# 危機視窗清單，來源：`REGIME_OVERLAY_PROTOCOL.md`第2節（總司令原始指示的
+# 6個歷史危機視窗，2008因早於資料起點2010-01-04完全沒有資料排除）。
+# 用來把每個snapshot的as_of日期標成「熊市段」或「其餘（常態/牛市）」，
+# 這是本專案既有的規範，不是本輪新發明的regime定義。
+CRISIS_WINDOWS = [
+    ("2011歐債危機", "2011-07-01", "2011-12-31"),
+    ("2015中國股災", "2015-06-01", "2015-09-30"),
+    ("2018Q4貿易戰", "2018-10-01", "2018-12-31"),
+    ("2020Q1新冠崩盤", "2020-02-01", "2020-04-30"),
+    ("2022全年空頭", "2022-01-01", "2022-12-31"),
+]
+
+
+def _label_regime(as_of: pd.Timestamp) -> str:
+    for name, start, end in CRISIS_WINDOWS:
+        if pd.Timestamp(start) <= as_of <= pd.Timestamp(end):
+            return name
+    return "常態/牛市"
+
+
+def aggregate_by_year_and_regime() -> pd.DataFrame:
+    """讀`main()`已經存好的逐snapshot IC快取（`atom_ic_snapshots_h{horizon}
+    .parquet`），對每個表達式分年份與分牛熊段算平均IC與同號穩定度，不需要
+    重新載入300檔股票資料——這是原子.二規格要求的「分年份與分牛熊段的
+    穩定度」最後一步，`main()`本身只算了TRAIN/VAL兩段聚合，這支函式補上
+    更細的顆粒度。"""
+    rows = []
+    for horizon in HORIZONS:
+        cache_path = Path(__file__).parent / f"atom_ic_snapshots_h{horizon}.parquet"
+        if not cache_path.exists():
+            print(f"[警告] 找不到{cache_path}，horizon={horizon}無法拆解，"
+                  f"需先跑一次`python atom_ic_map.py`產生快取")
+            continue
+        snap_df = pd.read_parquet(cache_path)
+        snap_df.index = pd.to_datetime(snap_df.index)
+        years = snap_df.index.year
+        regimes = pd.Series([_label_regime(ts) for ts in snap_df.index], index=snap_df.index)
+
+        for expr_name in snap_df.columns:
+            s = snap_df[expr_name]
+            by_year = s.groupby(years).mean(numeric_only=True)
+            by_year_n = s.groupby(years).count()
+            by_regime = s.groupby(regimes).mean(numeric_only=True)
+            by_regime_n = s.groupby(regimes).count()
+            year_signs = np.sign(by_year.dropna())
+            year_signs = year_signs[year_signs != 0]
+            year_same_sign_rate = (float((year_signs == year_signs.mode().iloc[0]).mean())
+                                    if len(year_signs) else np.nan)
+            crisis_regimes = [n for n, _, _ in CRISIS_WINDOWS]
+            crisis_vals = by_regime.reindex(crisis_regimes).dropna()
+            crisis_signs = np.sign(crisis_vals)
+            crisis_signs = crisis_signs[crisis_signs != 0]
+            crisis_same_sign = bool(crisis_signs.nunique() <= 1) if len(crisis_signs) else False
+            rows.append({
+                "expression": expr_name, "horizon": horizon,
+                "by_year_ic": {int(y): (None if pd.isna(v) else float(v)) for y, v in by_year.items()},
+                "by_year_n": {int(y): int(n) for y, n in by_year_n.items()},
+                "year_same_sign_rate": (None if pd.isna(year_same_sign_rate) else year_same_sign_rate),
+                "by_regime_ic": {k: (None if pd.isna(v) else float(v)) for k, v in by_regime.items()},
+                "by_regime_n": {k: int(n) for k, n in by_regime_n.items()},
+                "n_crisis_windows_with_data": int(len(crisis_vals)),
+                "crisis_windows_same_sign": crisis_same_sign,
+            })
+
+    out_df = pd.DataFrame(rows)
+    out_path = Path(__file__).parent / "atom_ic_map_year_regime.json"
+    out_df.to_json(out_path, orient="records", force_ascii=False, indent=2)
+    print(f"已存：{out_path}（{len(out_df)}列＝表達式×horizon，"
+          f"含分年份/分牛熊段IC與同號穩定度）")
+    return out_df
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if "--aggregate-only" in sys.argv:
+        aggregate_by_year_and_regime()
+    else:
+        main()
+        aggregate_by_year_and_regime()
