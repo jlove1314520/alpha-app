@@ -11589,3 +11589,14 @@ Form 4結構性缺席不因換來源而消失；DERA 2006~2008早期資料品質
 **[自行裁量]**：不以現有快取硬跑第1關；下一輪(c2)擴充價格覆蓋——對「有買入的發行人」按事前綁定順序（先依買入月數多寡，不看後續報酬）以yfinance補抓美股日線（免費、不花錢；受市快取寫進`research/data/`不進repo；分批、節流、429停損），ticker對不上或已下市者一律標「無價格」計入覆蓋缺口，不得剔除後宣稱全宇宙。存活者偏誤但書：已下市股7.1%無價格來源，仍適用。若yfinance覆蓋仍低於約50%的買方月，改以「覆蓋不足、僅前向/子樣本」結論收尾，不硬判PASS/FAIL。
 **本輪為地基工程，未寫TRIALS_REGISTRY（`trial_registry.py --check`通過）、未做任何判定，`is_holdout_consumed()`=False。**
 **下一輪待辦（不跳關）**：(c2)分批補價格並重量覆蓋率；覆蓋足夠才跑cross-sectional IC＋洗牌null（方向為正、n_buyers與net_usd同家族只算一個獨立發現）。
+
+
+---
+
+**#75續8（2026-09-20 04:35 hypothesis_queue排程接續，無人值守，「#75續7下一輪待辦(c2)」前半：yfinance補價格）**：
+新增`insider_dera_price_fetch.py`（可續跑、分批、限流停損）／`insider_dera_price_coverage2.py`，以yfinance（免費、不花錢）補抓「有買入發行人」的美股日線調整收盤價（截止2025-01-01不含，不碰holdout區間），輸出寫`research/data/dera_insider/prices/`（gitignore涵蓋）與`insider_dera_price_fetch_status.json`。
+**事前綁定**：抓取順序＝各ticker買入月數由多到少（不看報酬）；抓不到者記none計入缺口；每檔記first/last日期，覆蓋只計「買入月落在價格區間內」者（防ticker沿用/OTC空殼污染）。
+**結果**：本輪處理3,600檔（全14,306個可抓ticker中買入月數最多者），ok=1,796、none=1,804（none多為已下市/ticker對不上，yfinance回「possibly delisted」）。以買入發行人月為單位：已處理佔67.4%、有價格佔35.9%、**買入月落在價格區間內佔33.7%**；每月有價格買方家數中位206（最少105、最多689），逐年由2006的19%升至2023的50%（早年覆蓋低＝下市者多，**存活者偏誤方向：漏掉的正是買入後崩盤者，會讓內部人買入訊號偏樂觀**）。
+**[自行裁量]**：不在本輪硬跑第1關；剩餘約10,700個買入月數少的ticker續抓成本低（約2分鐘/720檔、無費用），先抓完再依事前綁定的約50%門檻決定：≥50%→跑cross-sectional IC＋洗牌null（方向為正、n_buyers與net_usd同家族只算一個獨立發現）；<50%→以「覆蓋不足、僅子樣本結論（附存活者偏誤但書：已下市股無價格來源）」收尾，不硬判PASS/FAIL。
+**本輪為地基工程，未寫TRIALS_REGISTRY（`trial_registry.py --check`通過）、未讀報酬、未做判定，`is_holdout_consumed()`=False。**
+**下一輪待辦（不跳關）**：(c2續)重跑`insider_dera_price_fetch.py`（每次720檔）直到處理完，再跑`insider_dera_price_coverage2.py`重量覆蓋率，依上述門檻決定是否進第1關。
