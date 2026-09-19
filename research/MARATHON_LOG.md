@@ -1,5 +1,10 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+
+## 2026-09-19T16:30+0800 (hypothesis_queue排程) — 交辦優先：零件.零 因子池盤點 — 描述性盤點，無回測無判定；現行有效3訊號/2獨立成分(<6)，結論『因子庫不足，應造新因子』
+
+產出`research/FACTOR_POOL_INVENTORY.md`。靜態核對（未做執行期載入）；`core_tilt_backtest.py`不存在，實際載入路徑為factors.py→score.py。發現矛盾：`f_revenue_surprise`在FACTORS.md 2026-09-07已降級FAIL(校正後)，但CORE_TILT_SPEC/score.py仍沿用，未擅改，待總司令裁示。[自行裁量]見檔尾。交辦佇列還剩未開始`- [ ]`：6條（零股失衡度.連續曝險版重測、資料源.fx_twd_gate統一改央行源、深讀一.2、金流一.5、…）；holdout未動。
+
 ## 2026-09-19T15:25+0800 (hypothesis_queue排程) — 交辦優先：資料源.外銷訂單彙總三來源查證 — 未找到可程式取用來源，標BLOCKED（無回測、無判定）
 
 moea.gov.tw頁面WebFetch 403；data.gov.tw搜尋頁為JS動態渲染取不到；線索：『按地區分』外銷訂單資料集加總可得總額，缺官方URL。已停用data.gov.tw前端JSON介面（等同私有後端API）與猜路徑探測。解除條件寫在PENDING_QUEUE該條目。holdout_consumed=False。交辦佇列還剩未開始`- [ ]`5條（借券費率.放大閾值重測、零股失衡度.連續曝險版重測、fx_twd_gate統一改央行源、深讀一.2、金流一.5）；本輪因額度預算節制收工，未連續往下做。
