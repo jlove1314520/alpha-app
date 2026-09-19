@@ -1620,6 +1620,7 @@ Cowork原話：
   `data/audit_report.json`（2026-09-18T03:06生成）`completeness_gap_rate`
   仍為0.3844，跟本項標題「38.44%」完全吻合，確認這是真實未完成的
   進行中任務，不是重複交辦。
+  　**2026-09-19 11:17 馬拉松第559輪進度（維運帽）**：FinMind封鎖已解，09:21批200檔與11:01批皆成功（err=0），已merge進`data/stock_detail.json`（75檔補進更多季度），`find_gap_codes()`缺口**350→179檔**；再投遞job`20260919-110815-d4cf`（179檔）running中，下一輪收成後需再跑`research/build_stock_financials_history.py`合併，然後重新`find_gap_codes()`；仍未清零，維持`- [!]`（阻塞原因已變為「job執行中/待merge」，非FinMind額度）。
 - [x] **稽核.四.3** ✅**[自行裁量]判定為已完成，不重做**——這條是續11
   灌入常備backlog時的重複交辦：本檔第1515~1579行「2026-09-17（續4）」
   章節裡幾乎逐字相同的裁示（market_tw taiex補sparkline_dates、
