@@ -11217,3 +11217,59 @@ trading.py::parse_form4_xml()`可複用解析邏輯，但需另寫抓取迴圈�
 函式（開工/收工前`is_holdout_consumed()`皆`False`）、**未**新增
 `TRIALS_REGISTRY.jsonl`列（同上一輪理由，地基工程非正式判定）、對外
 部僅發出WebSearch查證（非SEC EDGAR API呼叫，不計入頻率預算）。
+
+---
+
+**重構.A5（2026-09-19，DevQueue自走輪次，`PENDING_QUEUE.md`「重構.A5」，
+`重構.A4`查核時發現後排入）：GATE6檢定力補測`n_years=6`/`n_years=4`，
+重分類3筆對應舊FAIL**——沿用`#74`（`synthetic_power_curve_gate74.py`，
+`重構.A2`已修好逐年demean bug版）同一套方法，新增
+`gate6_power_curve_scoped_years.py`把`base_raw`依`validation.holdout.
+TRAIN_END`/`VAL_END`切成`train6`（2015-2020，6年）與`val4`
+（2021-2024，4年）兩段各自重跑{0.3,0.5,0.8}×5種子網格，理由：既有
+`n_years=10`（TRAIN+VAL合併）網格不能直接套用在只用單一期的3筆舊假設
+上，年數與門檻（`ratio>=5/6`固定不變，但換算成整數要求：n=6時需
+>=5/6正、n=4時等同要求4/4零容錯）都不同。
+
+**結果**：`train6`：強度0.3/0.5/0.8下GATE6理論通過率40%/60%/60%；
+`val4`：20%/40%/60%。三者在強度0.5下皆<80%檢定力慣例門檻。
+
+新增`reclassify_underpowered_gate6.py`（跟`reclassify_underpowered.py`
+是不同統計檢定族——後者用Fisher z近似算IC類MDE，這裡GATE6的「經驗分布
+比對」沒有封閉形式SE，改用模擬檢定力；判準口徑相同精神：強度0.5下
+理論通過率<80%即標UNDERPOWERED，不是FAIL_CONFIRMED），對`重構.A4`
+發現的3筆範圍外GATE6 FAIL（`TRIALS_LEDGER.md`#86`f_52w_high_prox`
+TRAIN 4/6正、#114`equal_weight_rebalance_gate6_yearly`TRAIN 4/6正、
+#184`overnight_intraday_gate6_consistency`VAL 3/4正，三筆`source_quote`
+逐字核對`TRIALS_LEDGER.md`原文無誤）逐一判定：
+
+| amends_id | 名稱 | scope | power@0.5 | 結果 |
+|---|---|---|---|---|
+| 86 | #17 f_52w_high_prox | train6 | 60% | **UNDERPOWERED** |
+| 114 | #29 equal_weight_rebalance_gate6_yearly | train6 | 60% | **UNDERPOWERED** |
+| 184 | #49 overnight_intraday_gate6_consistency | val4 | 40% | **UNDERPOWERED** |
+
+**結論：3筆全部重分類為UNDERPOWERED**（原判準4/6=66.7%或3/4=75.0%
+表面上未達>=83.3%門檻，但在這個`n_years`/門檻組合下，即使真有中等
+強度（強度0.5，`重構.A2`既有報告慣用代表值）的效果，用這個檢定去測
+也僅有40~60%機率測得出來——FAIL結果不能排除中等強度真實效果存在），
+0筆維持FAIL_CONFIRMED。輸出`research/UNDERPOWERED_RECLASSIFICATION_
+GATE6.jsonl`（比照`UNDERPOWERED_RECLASSIFICATION.jsonl`的append-only
+精神，**刻意獨立成新檔案**而非併入同一個檔案——後者由
+`reclassify_underpowered.py::main()`整檔`write_text()`覆寫，若混寫
+會被下次重跑無聲砍掉，屬於本輪事先排除的地雷）。
+
+**驗證**：`python reclassify_underpowered_gate6.py`原地重跑一次，
+`power@0.5`三個數字（60%/60%/40%）與已產出的JSONL逐位元一致
+（僅`reclassified_at`時間戳不同，屬預期內的非決定性欄位），確認
+可重複執行、非一次性巧合。全程複用`equal_weight_rebalance_sanity.py`
+既有300檔本機快取（`factor_ic.SAMPLE_SIZE=300`/`SAMPLE_SEED=20260822`，
+與#107/#108/`重構.A2`同一份），零新增外部API呼叫。`is_holdout_
+consumed()`兩支腳本開工/收工前皆確認`False`。**未修改**`GATE1~6`任何
+既有門檻數字（`ratio>=5/6`常數本身完全未動，只是把它套用在不同
+`n_years`分段上量測理論通過率）、**未**呼叫任何holdout解鎖函式。
+
+**下一輪待辦（本輪未做，範圍外）**：這3筆UNDERPOWERED是否要正式排入
+候選重測清單（比照`階段一.3`的3筆IC類UNDERPOWERED做法），需要總司令
+裁示或下一輪自行裁量決定重測優先序——本輪僅完成「重新分類」這一步，
+不涉及是否/如何重測。
