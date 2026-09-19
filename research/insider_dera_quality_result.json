@@ -1,0 +1,1216 @@
+{
+ "total_rows": 3335146,
+ "rows_filing_after_VAL_END": 0,
+ "duplicate_rows_same_key": 82975,
+ "form_counts": {
+  "4": 3240860,
+  "4/A": 67723,
+  "5": 25229,
+  "5/A": 1334
+ },
+ "extreme": {
+  "price_gt_10000": 3285,
+  "price_lt_0.01_pos": 0,
+  "notional_gt_1e9": 2730
+ },
+ "issuer_ciks": 15117,
+ "ciks_with_multiple_tickers": 4620,
+ "ciks_with_no_ticker": 228,
+ "multi_ticker_examples": {
+  "2098": [
+   "ACU",
+   "acu"
+  ],
+  "2186": [
+   "(RWC)",
+   "BKTI",
+   "RWC"
+  ],
+  "3116": [
+   "AKN",
+   "AKRX"
+  ],
+  "3197": [
+   "CECE",
+   "CECO",
+   "[CECE]",
+   "cece"
+  ],
+  "3453": [
+   "ALEX",
+   "AXB",
+   "MATX"
+  ],
+  "3545": [
+   "ALCO",
+   "Alco",
+   "alco"
+  ],
+  "3570": [
+   "LNG",
+   "lng"
+  ],
+  "3952": [
+   "ADG",
+   "ADGI"
+  ]
+ },
+ "ciks_in_universe": 4926,
+ "row_cov_in_universe": 0.5564799861835134,
+ "notional_cov_in_universe": 0.4125933259491739,
+ "row_cov_by_filing_year": {
+  "2006": 0.4068,
+  "2007": 0.4171,
+  "2008": 0.4291,
+  "2009": 0.4256,
+  "2010": 0.4436,
+  "2011": 0.4771,
+  "2012": 0.4893,
+  "2013": 0.5131,
+  "2014": 0.5265,
+  "2015": 0.5703,
+  "2016": 0.6246,
+  "2017": 0.6673,
+  "2018": 0.7191,
+  "2019": 0.7611,
+  "2020": 0.7919,
+  "2021": 0.8449,
+  "2022": 0.8539,
+  "2023": 0.874,
+  "2024": 0.9409
+ },
+ "rows_by_filing_year": {
+  "2006": 396192,
+  "2007": 519179,
+  "2008": 369465,
+  "2009": 160318,
+  "2010": 158459,
+  "2011": 143874,
+  "2012": 142519,
+  "2013": 132517,
+  "2014": 129801,
+  "2015": 122858,
+  "2016": 106340,
+  "2017": 107105,
+  "2018": 122846,
+  "2019": 114377,
+  "2020": 125241,
+  "2021": 161634,
+  "2022": 107351,
+  "2023": 99504,
+  "2024": 115566
+ },
+ "top_uncovered_ciks_by_rows": [
+  [
+   1288776,
+   [
+    "GOOG"
+   ]
+  ],
+  [
+   4447,
+   [
+    "AHC",
+    "HES"
+   ]
+  ],
+  [
+   51548,
+   [
+    "ISCA, ISCB"
+   ]
+  ],
+  [
+   1130866,
+   [
+    "HITT"
+   ]
+  ],
+  [
+   1357525,
+   [
+    "OMTR"
+   ]
+  ],
+  [
+   1100270,
+   [
+    "KKD"
+   ]
+  ],
+  [
+   77551,
+   [
+    "ABI",
+    "ABI/CRA"
+   ]
+  ],
+  [
+   1111559,
+   [
+    "TRAD"
+   ]
+  ],
+  [
+   1312073,
+   [
+    "(PAY)",
+    "PAY"
+   ]
+  ],
+  [
+   1090403,
+   [
+    "CHSI",
+    "HLEX"
+   ]
+  ],
+  [
+   1174746,
+   [
+    "ICE"
+   ]
+  ],
+  [
+   1353209,
+   [
+    "LOOP"
+   ]
+  ],
+  [
+   949536,
+   [
+    "HTV"
+   ]
+  ],
+  [
+   1076405,
+   [
+    "PBG"
+   ]
+  ],
+  [
+   1008817,
+   [
+    "SAPE"
+   ]
+  ]
+ ],
+ "universe_ciks_with_conflicting_status": 103,
+ "universe_conflict_examples": {
+  "1089113": [
+   [
+    "HSBC",
+    "active"
+   ],
+   [
+    "HBCYF",
+    "delisted"
+   ]
+  ],
+  "895421": [
+   [
+    "MS",
+    "active"
+   ],
+   [
+    "MS-PK",
+    "active"
+   ],
+   [
+    "MS-PE",
+    "active"
+   ],
+   [
+    "MS-PQ",
+    "active"
+   ],
+   [
+    "MS-PL",
+    "active"
+   ],
+   [
+    "MS-PO",
+    "active"
+   ],
+   [
+    "MS-PP",
+    "active"
+   ],
+   [
+    "MS-PF",
+    "active"
+   ],
+   [
+    "MS-PI",
+    "active"
+   ],
+   [
+    "MS-PA",
+    "delisted"
+   ]
+  ],
+  "1306965": [
+   [
+    "SHEL",
+    "active"
+   ],
+   [
+    "RYDAF",
+    "delisted"
+   ]
+  ],
+  "891478": [
+   [
+    "SAN",
+    "active"
+   ],
+   [
+    "BCDRF",
+    "delisted"
+   ]
+  ],
+  "732717": [
+   [
+    "T",
+    "active"
+   ],
+   [
+    "TBB",
+    "active"
+   ],
+   [
+    "T-PA",
+    "active"
+   ],
+   [
+    "T-PC",
+    "delisted"
+   ]
+  ],
+  "1045609": [
+   [
+    "PLD",
+    "active"
+   ],
+   [
+    "PLDGP",
+    "delisted"
+   ]
+  ]
+ },
+ "per_quarter": {
+  "2006q1": {
+   "rows": 102332,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0029414064026892857,
+   "price_missing_or_le0": 0.007886096235781574,
+   "shares_missing_or_le0": 0.0017492084587421334,
+   "lag_negative": 0.0002149865144822734,
+   "lag_gt_30d": 0.04555759684165266,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2006-03-31"
+  },
+  "2006q2": {
+   "rows": 101033,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.002147813090772322,
+   "price_missing_or_le0": 0.0059188581948472286,
+   "shares_missing_or_le0": 0.00161333425712391,
+   "lag_negative": 0.0005047855651123891,
+   "lag_gt_30d": 0.028663901893440757,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2006-06-30"
+  },
+  "2006q3": {
+   "rows": 89456,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0032306385262028258,
+   "price_missing_or_le0": 0.0047285816490788765,
+   "shares_missing_or_le0": 0.0013414416025755679,
+   "lag_negative": 0.00019003756036487212,
+   "lag_gt_30d": 0.025029064568055804,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2006-09-29"
+  },
+  "2006q4": {
+   "rows": 103371,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0022249954049007943,
+   "price_missing_or_le0": 0.004730533708680385,
+   "shares_missing_or_le0": 0.0015284751042361979,
+   "lag_negative": 0.000154782289036577,
+   "lag_gt_30d": 0.025316578150545124,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2006-12-29"
+  },
+  "2007q1": {
+   "rows": 117795,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0016299503374506558,
+   "price_missing_or_le0": 0.006562247973173734,
+   "shares_missing_or_le0": 0.001383759921898213,
+   "lag_negative": 0.00042446623371110827,
+   "lag_gt_30d": 0.03085020586612335,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2007-03-30"
+  },
+  "2007q2": {
+   "rows": 123579,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0020553653937966806,
+   "price_missing_or_le0": 0.005801956643118977,
+   "shares_missing_or_le0": 0.0019097095784882546,
+   "lag_negative": 7.28279076542131e-05,
+   "lag_gt_30d": 0.028079204395568828,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2007-06-29"
+  },
+  "2007q3": {
+   "rows": 136568,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0014717942709858824,
+   "price_missing_or_le0": 0.004525218206314803,
+   "shares_missing_or_le0": 0.001552340226114463,
+   "lag_negative": 0.00020502606760002342,
+   "lag_gt_30d": 0.04597709565930525,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2007-09-28"
+  },
+  "2007q4": {
+   "rows": 141237,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0015151836983226775,
+   "price_missing_or_le0": 0.004637594964492307,
+   "shares_missing_or_le0": 0.002138249892025461,
+   "lag_negative": 0.00014160595311426893,
+   "lag_gt_30d": 0.02050454201094614,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2007-12-31"
+  },
+  "2008q1": {
+   "rows": 120164,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0012066841982623748,
+   "price_missing_or_le0": 0.004685263473253221,
+   "shares_missing_or_le0": 0.0014313771179388169,
+   "lag_negative": 0.0002912685995805732,
+   "lag_gt_30d": 0.03253054159315602,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2008-03-31"
+  },
+  "2008q2": {
+   "rows": 132016,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0008256574960610835,
+   "price_missing_or_le0": 0.0037040964731547693,
+   "shares_missing_or_le0": 0.001022603320809599,
+   "lag_negative": 0.00010604775178766211,
+   "lag_gt_30d": 0.020073324445521755,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2008-06-30"
+  },
+  "2008q3": {
+   "rows": 65671,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.002527751975757945,
+   "price_missing_or_le0": 0.005984376665499231,
+   "shares_missing_or_le0": 0.0017816083202631299,
+   "lag_negative": 0.00030454843081421023,
+   "lag_gt_30d": 0.034033287143487995,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2008-09-30"
+  },
+  "2008q4": {
+   "rows": 51614,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0022474522416398653,
+   "price_missing_or_le0": 0.009377300732359437,
+   "shares_missing_or_le0": 0.001898709652419886,
+   "lag_negative": 0.0004068663540899756,
+   "lag_gt_30d": 0.03014685937923819,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2008-12-31"
+  },
+  "2009q1": {
+   "rows": 38969,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0030793707819035646,
+   "price_missing_or_le0": 0.013626215709923272,
+   "shares_missing_or_le0": 0.0038235520541969256,
+   "lag_negative": 0.00020529138546023762,
+   "lag_gt_30d": 0.14852831738048192,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2009-03-31"
+  },
+  "2009q2": {
+   "rows": 36510,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.002766365379348124,
+   "price_missing_or_le0": 0.010216379074226239,
+   "shares_missing_or_le0": 0.0021911804984935633,
+   "lag_negative": 5.477951246233908e-05,
+   "lag_gt_30d": 0.05291700903861955,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2009-06-30"
+  },
+  "2009q3": {
+   "rows": 42712,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001662296310170444,
+   "price_missing_or_le0": 0.008381719423112943,
+   "shares_missing_or_le0": 0.0011472185802584754,
+   "lag_negative": 0.00028095148904289194,
+   "lag_gt_30d": 0.0360554410938378,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2009-09-30"
+  },
+  "2009q4": {
+   "rows": 42127,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001780330904170722,
+   "price_missing_or_le0": 0.01139411778669262,
+   "shares_missing_or_le0": 0.0021363970850048664,
+   "lag_negative": 0.00011868872694471479,
+   "lag_gt_30d": 0.030835331260236902,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2009-12-31"
+  },
+  "2010q1": {
+   "rows": 42131,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0022074007263060452,
+   "price_missing_or_le0": 0.011179416581614489,
+   "shares_missing_or_le0": 0.001566542450926871,
+   "lag_negative": 0.00037976786689136266,
+   "lag_gt_30d": 0.07020958439154067,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2010-03-31"
+  },
+  "2010q2": {
+   "rows": 42305,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0021746838435173148,
+   "price_missing_or_le0": 0.008533270299019029,
+   "shares_missing_or_le0": 0.0012291691289445692,
+   "lag_negative": 0.00033093015010046093,
+   "lag_gt_30d": 0.049686798250797776,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2010-06-30"
+  },
+  "2010q3": {
+   "rows": 32077,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0025875237709262087,
+   "price_missing_or_le0": 0.007388471490476042,
+   "shares_missing_or_le0": 0.0012469994076752813,
+   "lag_negative": 0.0005299747482619946,
+   "lag_gt_30d": 0.03560183308912928,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2010-09-30"
+  },
+  "2010q4": {
+   "rows": 41946,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0017164926333857818,
+   "price_missing_or_le0": 0.00863014351785629,
+   "shares_missing_or_le0": 0.0015257712296762504,
+   "lag_negative": 0.00026224193010060555,
+   "lag_gt_30d": 0.030420063891670242,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2010-12-30"
+  },
+  "2011q1": {
+   "rows": 41536,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0018056625577812018,
+   "price_missing_or_le0": 0.009678351309707242,
+   "shares_missing_or_le0": 0.0015167565485362095,
+   "lag_negative": 0.0016130585516178737,
+   "lag_gt_30d": 0.1104343220338983,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2011-03-31"
+  },
+  "2011q2": {
+   "rows": 38658,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0015779398830772415,
+   "price_missing_or_le0": 0.006777381137151431,
+   "shares_missing_or_le0": 0.0007243002741993895,
+   "lag_negative": 0.000750168141135082,
+   "lag_gt_30d": 0.06466966733923121,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2011-06-30"
+  },
+  "2011q3": {
+   "rows": 31831,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001382300273318463,
+   "price_missing_or_le0": 0.007948226571581164,
+   "shares_missing_or_le0": 0.0018535390028588483,
+   "lag_negative": 3.1415915302692346e-05,
+   "lag_gt_30d": 0.03672520498884735,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2011-09-30"
+  },
+  "2011q4": {
+   "rows": 31849,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001193130082577161,
+   "price_missing_or_le0": 0.010267198342177148,
+   "shares_missing_or_le0": 0.001098935602373701,
+   "lag_negative": 6.279632013564006e-05,
+   "lag_gt_30d": 0.030832993186599267,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2011-12-30"
+  },
+  "2012q1": {
+   "rows": 36233,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0023183285954792594,
+   "price_missing_or_le0": 0.010625672729279938,
+   "shares_missing_or_le0": 0.002097535395909806,
+   "lag_negative": 0.00035878894930036154,
+   "lag_gt_30d": 0.059338172384290566,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2012-03-30"
+  },
+  "2012q2": {
+   "rows": 31093,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.002379956903483099,
+   "price_missing_or_le0": 0.008876596018396424,
+   "shares_missing_or_le0": 0.002637249541697488,
+   "lag_negative": 0.000353777377544785,
+   "lag_gt_30d": 0.05621844144984402,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2012-06-29"
+  },
+  "2012q3": {
+   "rows": 33060,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0009679370840895341,
+   "price_missing_or_le0": 0.007108287961282517,
+   "shares_missing_or_le0": 0.0016938898971566847,
+   "lag_negative": 0.00012099213551119177,
+   "lag_gt_30d": 0.03221415607985481,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2012-09-28"
+  },
+  "2012q4": {
+   "rows": 42133,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.000830702774547267,
+   "price_missing_or_le0": 0.00512662283720599,
+   "shares_missing_or_le0": 0.0009968433294567204,
+   "lag_negative": 0.00023734364987064771,
+   "lag_gt_30d": 0.02342581824223293,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2012-12-31"
+  },
+  "2013q1": {
+   "rows": 33887,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0012984330274146427,
+   "price_missing_or_le0": 0.010977661049960162,
+   "shares_missing_or_le0": 0.0018886298580576622,
+   "lag_negative": 0.0004131377814501136,
+   "lag_gt_30d": 0.06837430282999381,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2013-03-29"
+  },
+  "2013q2": {
+   "rows": 33580,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0008040500297796307,
+   "price_missing_or_le0": 0.007653365098272781,
+   "shares_missing_or_le0": 0.002173913043478261,
+   "lag_negative": 0.0001488981536628946,
+   "lag_gt_30d": 0.04189994044073853,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2013-06-28"
+  },
+  "2013q3": {
+   "rows": 31372,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001434400102001785,
+   "price_missing_or_le0": 0.006183858217518806,
+   "shares_missing_or_le0": 0.0010200178503123804,
+   "lag_negative": 9.562667346678567e-05,
+   "lag_gt_30d": 0.03181180670661737,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2013-09-30"
+  },
+  "2013q4": {
+   "rows": 33678,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0011877189856879862,
+   "price_missing_or_le0": 0.006740305243779322,
+   "shares_missing_or_le0": 0.0013955698081833839,
+   "lag_negative": 0.00014846487321099828,
+   "lag_gt_30d": 0.021824336362016746,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2013-12-31"
+  },
+  "2014q1": {
+   "rows": 34853,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001864975755315181,
+   "price_missing_or_le0": 0.006742604653831808,
+   "shares_missing_or_le0": 0.0010329096490976387,
+   "lag_negative": 0.00011476773878862652,
+   "lag_gt_30d": 0.052305396952916534,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2014-03-31"
+  },
+  "2014q2": {
+   "rows": 31296,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0011822597137014315,
+   "price_missing_or_le0": 0.007476993865030675,
+   "shares_missing_or_le0": 0.001437883435582822,
+   "lag_negative": 0.00015976482617586913,
+   "lag_gt_30d": 0.033454754601226995,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2014-06-30"
+  },
+  "2014q3": {
+   "rows": 30086,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0009971415276208203,
+   "price_missing_or_le0": 0.006115801369407698,
+   "shares_missing_or_le0": 0.0012962839859070663,
+   "lag_negative": 0.00013295220368277603,
+   "lag_gt_30d": 0.06913514591504354,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2014-09-30"
+  },
+  "2014q4": {
+   "rows": 33566,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.000685217184055294,
+   "price_missing_or_le0": 0.010129297503426086,
+   "shares_missing_or_le0": 0.0013406423166299232,
+   "lag_negative": 0.00011916820592265983,
+   "lag_gt_30d": 0.03563129357087529,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2014-12-31"
+  },
+  "2015q1": {
+   "rows": 33054,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0012403945059599444,
+   "price_missing_or_le0": 0.014491438252556423,
+   "shares_missing_or_le0": 0.0013311550795667695,
+   "lag_negative": 0.0002722817208204756,
+   "lag_gt_30d": 0.07508924789738004,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2015-03-31"
+  },
+  "2015q2": {
+   "rows": 29341,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0012269520466241777,
+   "price_missing_or_le0": 0.015030162571146177,
+   "shares_missing_or_le0": 0.0019426740738216148,
+   "lag_negative": 0.00010224600388534815,
+   "lag_gt_30d": 0.04399986367199482,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2015-06-30"
+  },
+  "2015q3": {
+   "rows": 30203,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0011588252822567295,
+   "price_missing_or_le0": 0.00814488626957587,
+   "shares_missing_or_le0": 0.001887229745389531,
+   "lag_negative": 3.31092937787637e-05,
+   "lag_gt_30d": 0.03506274211171076,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2015-09-30"
+  },
+  "2015q4": {
+   "rows": 30260,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001487111698612029,
+   "price_missing_or_le0": 0.013978849966953073,
+   "shares_missing_or_le0": 0.0030733641771315268,
+   "lag_negative": 0.0001982815598149372,
+   "lag_gt_30d": 0.029874421678783875,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2015-12-31"
+  },
+  "2016q1": {
+   "rows": 28039,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001890224330396947,
+   "price_missing_or_le0": 0.012090302792538964,
+   "shares_missing_or_le0": 0.002282535040479332,
+   "lag_negative": 0.00039231071008238524,
+   "lag_gt_30d": 0.06380398730339884,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2016-03-31"
+  },
+  "2016q2": {
+   "rows": 25174,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0011519822038611265,
+   "price_missing_or_le0": 0.012433463096845952,
+   "shares_missing_or_le0": 0.004449034718360213,
+   "lag_negative": 0.00015889409708429332,
+   "lag_gt_30d": 0.03996186541669977,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2016-06-30"
+  },
+  "2016q3": {
+   "rows": 25767,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0007761865952574999,
+   "price_missing_or_le0": 0.010594947025264874,
+   "shares_missing_or_le0": 0.002677843753638375,
+   "lag_negative": 7.761865952574999e-05,
+   "lag_gt_30d": 0.024682733729188496,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2016-09-30"
+  },
+  "2016q4": {
+   "rows": 27360,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0008771929824561404,
+   "price_missing_or_le0": 0.0077850877192982455,
+   "shares_missing_or_le0": 0.001388888888888889,
+   "lag_negative": 0.00010964912280701755,
+   "lag_gt_30d": 0.04236111111111111,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2016-12-30"
+  },
+  "2017q1": {
+   "rows": 29444,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0008151066431191414,
+   "price_missing_or_le0": 0.008694470859937508,
+   "shares_missing_or_le0": 0.0008830321967124032,
+   "lag_negative": 0.00013585110718652356,
+   "lag_gt_30d": 0.062185844314631165,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2017-03-31"
+  },
+  "2017q2": {
+   "rows": 28300,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0016254416961130741,
+   "price_missing_or_le0": 0.013957597173144876,
+   "shares_missing_or_le0": 0.0010954063604240282,
+   "lag_negative": 0.00010600706713780919,
+   "lag_gt_30d": 0.023321554770318022,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2017-06-30"
+  },
+  "2017q3": {
+   "rows": 23385,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0016249732734658969,
+   "price_missing_or_le0": 0.013641223006200557,
+   "shares_missing_or_le0": 0.003207184092366902,
+   "lag_negative": 4.276245456489202e-05,
+   "lag_gt_30d": 0.02176608937353004,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2017-09-29"
+  },
+  "2017q4": {
+   "rows": 25976,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0013089005235602095,
+   "price_missing_or_le0": 0.008623344625808438,
+   "shares_missing_or_le0": 0.0018093624884508777,
+   "lag_negative": 7.69941484447182e-05,
+   "lag_gt_30d": 0.02533107483831229,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2017-12-29"
+  },
+  "2018q1": {
+   "rows": 29018,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0012750706458060513,
+   "price_missing_or_le0": 0.008994417258253498,
+   "shares_missing_or_le0": 0.0011716865393893445,
+   "lag_negative": 0.0003101523192501206,
+   "lag_gt_30d": 0.06654490316355366,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2018-03-30"
+  },
+  "2018q2": {
+   "rows": 27576,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0015230635335073978,
+   "price_missing_or_le0": 0.010987815491731941,
+   "shares_missing_or_le0": 0.004134029590948651,
+   "lag_negative": 0.0002175805047867711,
+   "lag_gt_30d": 0.04659849144183348,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2018-06-29"
+  },
+  "2018q3": {
+   "rows": 27113,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0015490724006933943,
+   "price_missing_or_le0": 0.00826171947036477,
+   "shares_missing_or_le0": 0.0031350274775937743,
+   "lag_negative": 0.00011064802862095673,
+   "lag_gt_30d": 0.02242466713384723,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2018-09-28"
+  },
+  "2018q4": {
+   "rows": 39139,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0010730984440072563,
+   "price_missing_or_le0": 0.009990035514448504,
+   "shares_missing_or_le0": 0.005723191701372033,
+   "lag_negative": 0.0,
+   "lag_gt_30d": 0.015840977030583306,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2018-12-31"
+  },
+  "2019q1": {
+   "rows": 32514,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0013532632096942855,
+   "price_missing_or_le0": 0.0071661438149720124,
+   "shares_missing_or_le0": 0.002337454634926493,
+   "lag_negative": 0.00012302392815402596,
+   "lag_gt_30d": 0.05083963830965123,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2019-03-29"
+  },
+  "2019q2": {
+   "rows": 29874,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0014393787239740242,
+   "price_missing_or_le0": 0.008669746267657494,
+   "shares_missing_or_le0": 0.0034812880765883376,
+   "lag_negative": 0.0001338956952533976,
+   "lag_gt_30d": 0.032536653946575615,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2019-06-28"
+  },
+  "2019q3": {
+   "rows": 27008,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001518068720379147,
+   "price_missing_or_le0": 0.01195941943127962,
+   "shares_missing_or_le0": 0.0024437203791469195,
+   "lag_negative": 0.0,
+   "lag_gt_30d": 0.034730450236966824,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2019-09-30"
+  },
+  "2019q4": {
+   "rows": 24981,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.003642768504063088,
+   "price_missing_or_le0": 0.013049917937632601,
+   "shares_missing_or_le0": 0.002121612425443337,
+   "lag_negative": 4.0030423121572394e-05,
+   "lag_gt_30d": 0.02405828429606501,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2019-12-31"
+  },
+  "2020q1": {
+   "rows": 31482,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.00298583317451242,
+   "price_missing_or_le0": 0.008290451686678102,
+   "shares_missing_or_le0": 0.0017152658662092624,
+   "lag_negative": 9.52925481227368e-05,
+   "lag_gt_30d": 0.03582999809414904,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2020-03-31"
+  },
+  "2020q2": {
+   "rows": 28341,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0016230902226456372,
+   "price_missing_or_le0": 0.00906813450478106,
+   "shares_missing_or_le0": 0.001658374792703151,
+   "lag_negative": 0.0001411382802300554,
+   "lag_gt_30d": 0.026533996683250415,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2020-06-30"
+  },
+  "2020q3": {
+   "rows": 29891,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0005018232912916931,
+   "price_missing_or_le0": 0.006055334381586431,
+   "shares_missing_or_le0": 0.002174567595597337,
+   "lag_negative": 3.345488608611288e-05,
+   "lag_gt_30d": 0.03071158542705162,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2020-09-30"
+  },
+  "2020q4": {
+   "rows": 35527,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0007318377571987503,
+   "price_missing_or_le0": 0.006220620936189377,
+   "shares_missing_or_le0": 0.0011540518478903368,
+   "lag_negative": 2.814760604610578e-05,
+   "lag_gt_30d": 0.023728431896867172,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2020-12-31"
+  },
+  "2021q1": {
+   "rows": 43056,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0016490152359717577,
+   "price_missing_or_le0": 0.005225752508361204,
+   "shares_missing_or_le0": 0.0011845039018952062,
+   "lag_negative": 0.00011612783351913786,
+   "lag_gt_30d": 0.03911185432924563,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2021-03-31"
+  },
+  "2021q2": {
+   "rows": 39414,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001141726290150708,
+   "price_missing_or_le0": 0.005353427716039986,
+   "shares_missing_or_le0": 0.0009387527274572487,
+   "lag_negative": 2.5371695336682396e-05,
+   "lag_gt_30d": 0.02265692393565738,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2021-06-30"
+  },
+  "2021q3": {
+   "rows": 38878,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0015690107515818714,
+   "price_missing_or_le0": 0.004887082668861567,
+   "shares_missing_or_le0": 0.0003858223159627553,
+   "lag_negative": 0.0001543289263851021,
+   "lag_gt_30d": 0.03130305056844488,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2021-09-30"
+  },
+  "2021q4": {
+   "rows": 40286,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0014893511393536216,
+   "price_missing_or_le0": 0.004070893114233232,
+   "shares_missing_or_le0": 0.00044680534180608646,
+   "lag_negative": 0.00012411259494613514,
+   "lag_gt_30d": 0.021148786178821426,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2021-12-30"
+  },
+  "2022q1": {
+   "rows": 30446,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0014123365959403534,
+   "price_missing_or_le0": 0.0067332326085528475,
+   "shares_missing_or_le0": 0.0007554358536425146,
+   "lag_negative": 3.284503711489194e-05,
+   "lag_gt_30d": 0.040235170465742626,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2022-03-31"
+  },
+  "2022q2": {
+   "rows": 25969,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0019253725595902806,
+   "price_missing_or_le0": 0.0075474604335939,
+   "shares_missing_or_le0": 0.000693134121452501,
+   "lag_negative": 3.850745119180561e-05,
+   "lag_gt_30d": 0.022719396203165314,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2022-06-30"
+  },
+  "2022q3": {
+   "rows": 23995,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0025838716399249843,
+   "price_missing_or_le0": 0.006418003750781413,
+   "shares_missing_or_le0": 0.0012919358199624921,
+   "lag_negative": 8.335069806209627e-05,
+   "lag_gt_30d": 0.030006251302354656,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2022-09-30"
+  },
+  "2022q4": {
+   "rows": 26941,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.001855907353104933,
+   "price_missing_or_le0": 0.007126684235922943,
+   "shares_missing_or_le0": 0.001187780705987157,
+   "lag_negative": 3.711814706209866e-05,
+   "lag_gt_30d": 0.020080917560595376,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2022-12-30"
+  },
+  "2023q1": {
+   "rows": 26797,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0010822106952270776,
+   "price_missing_or_le0": 0.00791133335821174,
+   "shares_missing_or_le0": 0.0005970817628839049,
+   "lag_negative": 7.463522036048811e-05,
+   "lag_gt_30d": 0.049781691980445575,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2023-03-31"
+  },
+  "2023q2": {
+   "rows": 24020,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0021232306411323896,
+   "price_missing_or_le0": 0.014196502914238135,
+   "shares_missing_or_le0": 0.0009159034138218152,
+   "lag_negative": 4.1631973355537055e-05,
+   "lag_gt_30d": 0.04895920066611158,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2023-06-30"
+  },
+  "2023q3": {
+   "rows": 23437,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0010666894227076844,
+   "price_missing_or_le0": 0.04761701582967103,
+   "shares_missing_or_le0": 0.0016213679225156802,
+   "lag_negative": 4.266757690830738e-05,
+   "lag_gt_30d": 0.05619319878824081,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2023-09-29"
+  },
+  "2023q4": {
+   "rows": 25250,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0011485148514851485,
+   "price_missing_or_le0": 0.042732673267326736,
+   "shares_missing_or_le0": 0.0012673267326732674,
+   "lag_negative": 0.00015841584158415842,
+   "lag_gt_30d": 0.05611881188118812,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2023-12-29"
+  },
+  "2024q1": {
+   "rows": 33145,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0014481822295972244,
+   "price_missing_or_le0": 0.014693015537788505,
+   "shares_missing_or_le0": 0.0006034092623321768,
+   "lag_negative": 0.00018102277869965305,
+   "lag_gt_30d": 0.04806154774475788,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2024-03-29"
+  },
+  "2024q2": {
+   "rows": 25681,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0018690860947782406,
+   "price_missing_or_le0": 0.006269226276235349,
+   "shares_missing_or_le0": 0.001557571745648534,
+   "lag_negative": 0.00019469646820606675,
+   "lag_gt_30d": 0.014096024298119233,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2024-06-28"
+  },
+  "2024q3": {
+   "rows": 26191,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0014126990187468978,
+   "price_missing_or_le0": 0.0033217517467832463,
+   "shares_missing_or_le0": 0.0014126990187468978,
+   "lag_negative": 3.818105456072697e-05,
+   "lag_gt_30d": 0.01385972280554389,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2024-09-30"
+  },
+  "2024q4": {
+   "rows": 30549,
+   "filing_date_bad": 0.0,
+   "trans_date_bad": 0.0,
+   "ticker_missing": 0.0029460866149464793,
+   "price_missing_or_le0": 0.006383187665717372,
+   "shares_missing_or_le0": 0.002520540770565321,
+   "lag_negative": 3.2734295721627547e-05,
+   "lag_gt_30d": 0.04284919309961046,
+   "acq_disp_bad": 0.0,
+   "max_filing_date": "2024-12-31"
+  }
+ }
+}
