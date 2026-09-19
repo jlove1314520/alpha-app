@@ -1,3 +1,27 @@
+## 2026-09-19（馬拉松自走，重構.A5）補測n_years相符的GATE6檢定力——3條範圍外舊假設全部重分類為UNDERPOWERED
+
+戴**驗證帽**。承接`重構.A4`發現的3筆範圍外GATE6 FAIL（`#17`/`#29`
+TRAIN期n_years=6、`#49`VAL期n_years=4，跟`重構.A2`已測的`n_years=10`
+網格不同）。新增`research/gate6_power_curve_scoped_years.py`（複用
+`synthetic_power_curve_gate74.py`全部既有函式，不改任何門檻）分別重跑
+`n_years=6`與`n_years=4`的強度{0.3,0.5,0.8}×5種子網格（實測8秒，未超
+5分鐘門檻）。**結果**：train6通過率40%/60%/60%、val4通過率20%/40%/60%
+——強度0.5（中等強度代表值）下兩個窗口通過率都遠低於80%統計檢定力
+慣例門檻，代表FAIL不能排除中等強度真實效果存在。新增`research/
+reclassify_underpowered_gate6.py`（判準：強度0.5通過率<80%→
+UNDERPOWERED），對`#17`/`#29`/`#49`逐筆判定，**三筆全部重分類為
+UNDERPOWERED**，寫入新檔`research/UNDERPOWERED_RECLASSIFICATION_
+GATE6.jsonl`（刻意獨立於既有`UNDERPOWERED_RECLASSIFICATION.jsonl`，
+避免被`reclassify_underpowered.py`下次整檔覆寫時無聲砍掉）。**誠實
+澄清**：UNDERPOWERED不等於「這3個機制真的有效」，只代表現有的FAIL
+證據不足以排除中等強度真實效果，若要真正判定需要更長樣本外年數或
+非二元逐年一致性檢定，這兩者都需總司令裁示是否投入。`is_holdout_
+consumed()`開工/收工前皆確認`False`，零新增API呼叫。[自行裁量]完成
+此項後`PENDING_QUEUE.md`回到0條`- [ ]`（22條`- [!]`BLOCKED仍>=5條
+佇列深度下限），本輪選擇不強行灌注更多填充項目，理由：22>=5已滿足
+規則字面門檻，且本輪已完成`重構.B4`/`重構.A4`/`重構.A5`三項紮實研究
+工作，避免為湊數而製造未經充分構思的新交辦項。
+
 ## 2026-09-19（馬拉松自走，重構.A4）GATE6修好後重查舊FAIL——指定範圍內0條需重分類，但發現3條範圍外的GATE6 FAIL需另排n_years相符的檢定力重跑
 
 戴**驗證帽**。依指定範圍（`research/TRIALS_FAILED_GATES_BACKFILL.jsonl`，

@@ -1110,22 +1110,35 @@ Cowork原話：
   誠實回答「這3筆是否被誤殺」，屬於一個新的、有界的工作單位，不是重構
   .A4指定範圍內可以順手做完的事，已排入下方機器索引新增`重構.A5`供
   後續輪次接手（[自走補入]，來源：本輪查核發現，非總司令原文指定）。
-- [ ] **重構.A5** [研究] [自走補入，來源：重構.A4查核時發現，2026-09-19]
-  重構.A4查到3筆最終判定為GATE6（逐年一致性）FAIL、但用的`n_years`
-  跟重構.A2已測的檢定力網格（`n_years=10`，TRAIN+VAL合併）不同的舊
-  假設：`#17 f_52w_high_prox`（TRAIN 6年4/6正）、`#29 equal_weight_
-  rebalance`（TRAIN 6年4/6正）、`#49 overnight_intraday`（VAL 4年
-  3/4正）。用`synthetic_power_curve_gate74.py`同一套方法（強度網格
-  {0.3,0.5,0.8}×5種子，`gate6_yearly_consistency()`不動），改把
-  `base_raw`限縮到只涵蓋對應窗口（`n_years=6`用TRAIN期2015-2020、
-  `n_years=4`用VAL期2021-2024，各自重跑一次網格，共2組而非3組，因
-  `#17`跟`#29`同樣是TRAIN 6年可共用同一組`n_years=6`結果），量出這兩種
-  年數/門檻組合下的GATE6理論通過率。若某強度下通過率仍然很低（例如
-  比照現有10年期網格類似的量級），代表4/6或3/4這種結果在小樣本下本來
-  就很常見，即使真有效果也常被誤殺，3筆應標`UNDERPOWERED`重評；若通過
-  率已經不低，維持原FAIL判定，誠實記錄「小樣本不是唯一解釋」。跑一次
-  完整網格若預估超過5分鐘，依協定用`run_detached.py submit`投遞、下一
-  輪收成，不要在session裡等。
+- [x] **重構.A5** [研究] ✅已完成（馬拉松自走，2026-09-19）——新增
+  `research/gate6_power_curve_scoped_years.py`（複用`synthetic_power_
+  curve_gate74.py`全部既有函式，不改任何既有關卡門檻數字），把
+  `base_raw`限縮到`#17`/`#29`用的TRAIN期（2015-2020，n_years=6）與
+  `#49`用的VAL期（2021-2024，n_years=4）各自重跑強度{0.3,0.5,0.8}×5
+  種子網格（實測僅8秒，未超過5分鐘門檻，未使用`run_detached.py`）。
+  **結果**：train6（n=6，門檻>=5/6）通過率＝40%/60%/60%（強度
+  0.3/0.5/0.8）；val4（n=4，門檻>=5/6換算成4/4零容錯）通過率更低＝
+  20%/40%/60%。**兩個窗口在強度0.5（中等強度，沿用`重構.A2`報告慣用
+  代表值）下通過率都遠低於80%統計檢定力慣例門檻**，代表即使真的存在
+  中等強度效果，這兩種`n_years`/門檻組合本來就常測不出來——FAIL不能
+  排除真實效果存在。新增`research/reclassify_underpowered_gate6.py`
+  （判準：強度0.5通過率<80%→UNDERPOWERED，跟`reclassify_underpowered.py`
+  的MDE判準同一種精神的不同操作化，因GATE6是經驗分布比對無封閉形式SE），
+  對`#17`（id86）/`#29`（id114）/`#49`（id184）逐筆判定，**三筆全部
+  重分類為UNDERPOWERED**（power@0.5分別60%/60%/40%，皆<80%），寫入
+  新檔`research/UNDERPOWERED_RECLASSIFICATION_GATE6.jsonl`（[自行裁量]
+  刻意用獨立檔名而非併入既有`UNDERPOWERED_RECLASSIFICATION.jsonl`——
+  後者由`reclassify_underpowered.py`整檔覆寫`write_text()`產生，併入
+  會被下次重跑那支IC類腳本無聲砍掉）。**舊判定/新判定對照**：
+  `#17`（TRAIN 4/6正，未達5/6）FAIL→UNDERPOWERED；`#29`（TRAIN 4/6正）
+  FAIL→UNDERPOWERED；`#49`（VAL 3/4正，未達4/4）FAIL→UNDERPOWERED。
+  **不代表這3個機制真的有效**——UNDERPOWERED只是「這次的FAIL證據不足
+  以排除中等強度真實效果」，若要真正判定，需要更長的樣本外年數（超出
+  本輪範圍）或改用非二元逐年一致性的檢定方式，兩者都需總司令裁示是否
+  值得投入。`is_holdout_consumed()`開工/收工前皆確認`False`，零新增
+  API呼叫（複用既有300檔快取）。依`CLAUDE.md`「零之一」白名單，本輪
+  無不可逆動作，未觸及holdout，繼續完成，不停下請示。
+- [x] **重構.二bcd** [研究] ✅已完成（馬拉松自走輪次，2026-09-18）——
   三條規則已寫進`research/MARATHON_PROTOCOL.md`「1a-0c. 牛熊制度強制項」。
 - [x] **重構.三** [研究] ✅已完成（馬拉松自走輪次，2026-09-18）——
   TradingView定位已寫進`CLAUDE.md`「TradingView 定位」小節。
