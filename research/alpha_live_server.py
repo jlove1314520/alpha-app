@@ -94,7 +94,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 
 import os
+import sys
 from datetime import datetime, timedelta, timezone
+
+# 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】一.3全repo
+# 掃描）：本檔print()裡有⚠(U+26A0)，Windows主控台cp950編不出來會讓行程
+# 崩潰（跟dev_queue_runner.py的🔲同一種故障，見該檔同段說明），常駐服務
+# 崩潰的代價更高（直接斷線），一併補上。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 QUOTES_SINOPAC_PATH = REPO_ROOT / "data" / "quotes_sinopac.json"

@@ -47,6 +47,17 @@ from multibagger_attribution import (
     stratified_sample,
 )
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有⚠
+# (U+26A0)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明。import multibagger_attribution
+# 時它自己也會做同樣的reconfigure，這裡重複寫一次是刻意的防禦——不依賴
+# 「剛好import了某個順手也做了這件事的模組」這種隱性耦合。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 CONTROL_GROUP_STRIDE_MONTHS = 6  # 已知限制：< WINDOW_MONTHS=12，相鄰抽樣窗口仍部分重疊，非完全獨立樣本
 
 

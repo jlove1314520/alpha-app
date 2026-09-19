@@ -39,6 +39,15 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有
+# 🚫/✓(U+26D4/2713)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明——這支是排程常跑的腳本，優先修。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "data" / "seed" / "pipeline_registry.json"
 QUEUE = ROOT / "PENDING_QUEUE.md"

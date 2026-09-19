@@ -159,15 +159,29 @@ def _is_throttled(state: dict, track: str) -> tuple[bool, str]:
 # （見 _made_progress 的檔頭說明）。只留「不是這個軌道自己在寫」的來源：
 # PENDING_QUEUE.md（人／DevQueue寫）、TRIALS_REGISTRY.jsonl（只在真的
 # 登記新試驗時才變，兩軌通用）、data/ticks/（排程被動累積，不是LLM寫的）。
+#
+# 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】二）：
+# 這裡漏了PROGRESS_HEARTBEAT.jsonl——上面2026-09-18的修法只改了
+# _made_progress()（跑完一輪之後用來判斷consecutive_no_progress要不要
+# 歸零），但節流其實是兩層：_made_progress()決定「這輪算不算有進度」，
+# 這裡的SIGNAL_SOURCES／_signal_hash()是更前面一關的純Python快篩，決定
+# 「連claude -p都不叫」。PROGRESS_HEARTBEAT明明每輪都在寫（04:38還有一筆
+# 心跳)，但這關的雜湊比對看不到它，判定「沒有新資訊」，於是連claude都
+# 不叫——兩層只修好一層，跟【重構.B收成前必修】ORDER-BEGIN那次「只改
+# 一半」同一種形狀。修法：兩個track都加進來，跟_made_progress()涵蓋範圍
+# 對齊（不只是重構.B/C/D這類禁寫TRIALS_REGISTRY的工作在寫，兩軌本來就
+# 都可能只有heartbeat沒有TRIALS登記的輪次）。
 SIGNAL_SOURCES: dict[str, list[Path]] = {
     "marathon": [
         ROOT / "PENDING_QUEUE.md",
         TRIALS_REGISTRY,
+        PROGRESS_HEARTBEAT,
         RESEARCH / "data" / "ticks",
     ],
     "hypothesis_queue": [
         ROOT / "PENDING_QUEUE.md",
         TRIALS_REGISTRY,
+        PROGRESS_HEARTBEAT,
     ],
 }
 

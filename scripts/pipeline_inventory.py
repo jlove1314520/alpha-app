@@ -20,6 +20,15 @@ from datetime import datetime, timedelta, timezone
 
 from pipeline_freshness import evaluate, load_registry
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有
+# ⚠/✓(U+26A0/2713)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 # 2026-09-15【工廠一】：key 跟 pipeline_fault_ledger._key() 用同一套規則
 # （task+artifact 才唯一，task 名稱本身會重複）。
 

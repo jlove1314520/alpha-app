@@ -56,6 +56,19 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】一）：Windows
+# 主控台預設cp950編不出🔲（U+1F532）這類emoji，本檔`STALE_STATUS_MARKERS`
+# 偵測到它時會print含這個字的字串，UnicodeEncodeError會讓整支runner崩潰、
+# exit=1，`run-dev-queue-cycle.ps1`收到非預期退出碼變成crash-loop（每輪
+# 重跑又再次崩潰）。跟`scripts/probe_twse_publish_time.py`已驗證過的同一套
+# 修法：強制stdout/stderr用utf-8、編不出的字元用replace頂替，不讓輸出編碼
+# 問題有機會變成整支腳本的當機原因。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 ROOT = Path(__file__).resolve().parent.parent
 QUEUE = ROOT / "PENDING_QUEUE.md"
 STATE = ROOT / "research" / "data" / "dev_queue_state.json"
@@ -384,8 +397,36 @@ def _has_any_pending_line() -> bool:
 
 
 def _stale_status_markers_present() -> bool:
-    """檔案原文（不只是「- [ ]」那幾行）裡是否還留著🔲／進行中／未開始這類散文狀態字樣。"""
+    """檔案原文（不只是「- [ ]」那幾行）裡是否還留著🔲／進行中／未開始這類散文狀態字樣。
+
+    2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】三，發現
+    這支自己也踩到新硬規則要防的那種故障）：這支2026-09-18才新增，設計
+    時假設「檔案裡幾乎沒有`- [x]`/`- [!]`，卻大量出現🔲/進行中/未開始」
+    才代表真的漏抓。但實測（2026-09-19，檔案已成長到8千多行）這個假設已
+    失效——`進行中`／`未開始`是極常見的中文敘述用詞（例如「佇列還剩幾條
+    未開始」這種例行回報句型），單純字串比對在歷史行文裡永遠會撞到，
+    跟`- [ ]`格式有沒有被正確使用完全無關。實測全檔含這三個字樣的比對
+    命中68次，扣掉附近有「已完成/✅/已於commit」等解決字樣的38次，剩下
+    30次逐一核對**全部是歷史敘述或既有裁示的引文，沒有一個是真的漏抓**。
+    這個函式本身回傳值因此不再可信（見`build_prompt()`呼叫端如何處理），
+    保留字串比對邏輯本身只是留給未來設計更精準版本時參考，不代表現在
+    這個True/False有直接拿來當警報的資格。
+    """
     return bool(STALE_STATUS_MARKERS.search(QUEUE.read_text(encoding="utf-8")))
+
+
+def _checkbox_convention_actively_used() -> bool:
+    """`- [x]`／`- [!]`兩種收尾標記加總是否有一定數量——用來判斷「機器可讀
+    checkbox格式現在到底有沒有在用」，這是`_stale_status_markers_present()`
+    當年（2026-09-18）想偵測的真正問題（「近期裁示全部繞過checkbox格式」），
+    比直接對散文字串比對可靠很多：checkbox格式只要還在被積極使用，散文
+    裡出現🔲/進行中/未開始這幾個字就高機率只是歷史敘述，不是真的漏抓。
+    門檻5是保守值，不是精算出來的——當年出事時是「0個- [ ]、209個- [x]」
+    這種checkbox本身有在長期使用、只是新裁示沒跟上格式的狀況，5遠低於
+    209，寧可門檻低一點也不要漏抓真正的格式崩壞（checkbox整個沒人用）。
+    """
+    n = sum(1 for ln in _lines() if ln.startswith("- [x]") or ln.startswith("- [!]"))
+    return n >= 5
 
 
 def _record_format_mismatch(detail: str) -> None:
@@ -417,17 +458,45 @@ def get_format_mismatch_alerts() -> list[str]:
     return [f"DevQueue 佇列格式不符（自 {detected_at} 起未解除）：{detail}"]
 
 
+def _safe_print(msg: str) -> None:
+    """任何print()都可能因主控台編碼問題丟例外（2026-09-19教訓：cp950印不出
+    🔲讓整支runner崩潰、crash-loop三小時）。這支保證「印一行訊息」這件事
+    本身不會拋例外中斷呼叫端——先試正常print()（模組頂端已reconfigure成
+    utf-8，正常情況這裡就會成功），失敗就退化印ASCII安全版本，兩次都失敗
+    也吞掉，絕不讓輸出動作本身變成流程中斷的原因。"""
+    try:
+        print(msg)
+    except Exception:  # noqa: BLE001
+        try:
+            print(msg.encode("ascii", errors="backslashreplace").decode("ascii"))
+        except Exception:  # noqa: BLE001
+            pass
+
+
 def build_prompt() -> int:
-    # 2026-09-18（Cowork【重構.B收成前必修】順手修）：這道自檢要在find_next()
-    # 之前跑——標記不只一組時，即使find_next()剛好因為既有防呆（垃圾對不上
-    # by_key就退回檔案順序）矇對答案，權威排序清單本身仍是壞的，不能因為
-    # 這次矇對就放行，必須整輪不派工、等標記修好。
-    ambiguity = _order_marker_ambiguity()
+    # 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】一.2）：
+    # 這整段矛盾偵測（含2026-09-18加的ORDER-BEGIN檢查）包一層try/except——
+    # 新硬規則「任何偵測器/守門員自身失敗只能降級成一行警告，絕不得讓被
+    # 監控的流程非零退出或中斷」（見CLAUDE.md對應章節）。這裡"crash"指的是
+    # 偵測邏輯本身丟出未預期例外（例如未來又有別的編碼/正規表達式/檔案IO
+    # 問題），不是「偵測到真的矛盾」這種設計內的return 4/5——那些是正常
+    # 工作結果，不是本規則要防的對象。偵測失敗一律fail open（當成沒偵測到
+    # 問題），因為「這輪漏抓一次矛盾」永遠比「DevQueue整支崩潰3小時」代價低。
+    ambiguity = None
+    try:
+        ambiguity = _order_marker_ambiguity()
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: order_marker_ambiguity check failed "
+                     f"({type(e).__name__}), treating as no ambiguity this round")
     if ambiguity:
-        detail = f"QUEUE_ORDER_MARKER_AMBIGUOUS: {ambiguity}"
-        _record_format_mismatch(detail)
-        PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")
-        print(detail)
+        try:
+            detail = f"QUEUE_ORDER_MARKER_AMBIGUOUS: {ambiguity}"
+            _record_format_mismatch(detail)
+            PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")
+            _safe_print(detail)
+        except Exception as e:  # noqa: BLE001
+            _safe_print(f"WARN_DETECTOR_CRASHED: reporting order marker ambiguity "
+                         f"failed ({type(e).__name__})")
         return 5
     nxt = find_next()
     if nxt is None:
@@ -436,16 +505,45 @@ def build_prompt() -> int:
             # 還有「- [ ]」項目，只是全部是[研究]類（不歸DevQueue管）——這是
             # 正常讓路，不是矛盾。清掉舊的mismatch旗標（狀態已經自癒）。
             _clear_format_mismatch()
-            print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類，留給"
-                  "marathon／hypothesis_queue軌")
+            _safe_print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類，留給"
+                         "marathon／hypothesis_queue軌")
             return 3
-        if _stale_status_markers_present():
-            detail = "find_next()回None但檔案仍有🔲/進行中/未開始字樣，判定為格式不符而非真的做完"
-            _record_format_mismatch(detail)
-            print(f"QUEUE_FORMAT_MISMATCH: {detail}")
+        stale = False
+        try:
+            stale = _stale_status_markers_present()
+        except Exception as e:  # noqa: BLE001
+            _safe_print(f"WARN_DETECTOR_CRASHED: stale_status_markers check failed "
+                         f"({type(e).__name__}), treating as false this round")
+        # 2026-09-19：只有「散文裡有這些字樣」還不夠，還要checkbox格式本身
+        # 不活躍（見_checkbox_convention_actively_used()docstring）兩者同時
+        # 成立，才判定為真的格式崩壞——單靠字串比對已證實在長檔案裡100%
+        # 假陽性（歷史敘述永遠會撞到「進行中」「未開始」這幾個常用詞）。
+        # 只有stale=True但checkbox格式仍活躍時，降級成資訊性紀錄，不觸發
+        # 會進local_task_health的alert，避免「偵測器自己一直在喊狼來了」
+        # 反而蓋掉真正的格式崩壞警報（跟新硬規則同一種精神：偵測器不可靠
+        # 時寧可少報，不能讓它的雜訊癱瘓下游判斷）。
+        convention_active = True
+        try:
+            convention_active = _checkbox_convention_actively_used()
+        except Exception as e:  # noqa: BLE001
+            _safe_print(f"WARN_DETECTOR_CRASHED: checkbox_convention check failed "
+                         f"({type(e).__name__}), treating as active this round")
+        if stale and not convention_active:
+            try:
+                detail = ("find_next()回None但檔案仍有🔲/進行中/未開始字樣、且"
+                           "checkbox格式(- [x]/- [!])本身用量過低，判定為格式不符而非真的做完")
+                _record_format_mismatch(detail)
+                _safe_print(f"QUEUE_FORMAT_MISMATCH: {detail}")
+            except Exception as e:  # noqa: BLE001
+                _safe_print(f"WARN_DETECTOR_CRASHED: reporting format mismatch "
+                             f"failed ({type(e).__name__})")
             return 4
+        if stale:
+            _safe_print("INFO: 散文裡仍有🔲/進行中/未開始字樣，但checkbox格式本身"
+                         "活躍使用中，判定為歷史敘述殘留，不觸發格式不符警報"
+                         "（2026-09-19修法，見_stale_status_markers_present()docstring）")
         _clear_format_mismatch()
-        print("NO_PENDING_ITEM")
+        _safe_print("NO_PENDING_ITEM")
         return 3
     _clear_format_mismatch()
     _, text = nxt

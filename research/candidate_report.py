@@ -48,6 +48,15 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有✓/✗
+# (U+2713/2717)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 # 同目錄模組。`norm_cdf`/`expected_max_sharpe` 不重寫一份——同一個經濟量正負號
 # 只能記一次（`CLAUDE.md` 七之三工程紀律），兩份實作遲早會漂移。
 try:

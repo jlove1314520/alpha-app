@@ -50,6 +50,15 @@ from equal_weight_rebalance_sanity import (
 from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, sample_universe_ids
 from validation import holdout
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有✓
+# (U+2713)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 GRID = sorted(set(range(5, 81, 5)) | {21})  # 5,10,...,80交易日+原21天參數點，共17點
 ANCHOR_FREQ = 21  # 第1/2關已驗證的原始參數點，必須落在高原內
 PLATEAU_HIT_RATE_THRESHOLD = 0.70

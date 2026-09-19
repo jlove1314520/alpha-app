@@ -45,6 +45,15 @@ import sys
 from dataclasses import dataclass, asdict
 from typing import Mapping, Sequence
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有✓/✗
+# (U+2713/2717)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 # 抽樣次數下限：低於這個數，「最大值」本身就沒有意義（3 次抽樣的最大值太容易被贏）。
 MIN_DRAWS_PER_VARIANT = 20
 # 控制組參數變體下限（裁示：控制組自身參數必須掃過）

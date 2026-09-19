@@ -1,3 +1,79 @@
+## 2026-09-19（馬拉松自走，重構.B4）Q5撤回後補測其他起漲前特徵——4個候選特徵全部不能替代size_proxy，誠實結論是「目前沒有可用的穩健起漲前分組規則」
+
+戴**研究帽**。承接`PENDING_QUEUE.md`「重構.B4」交辦（重構.B3已把Q5「小型股
+分位最佳」撤回）。新增`research/multibagger_b4_feature_robustness.py`，
+沿用既有股票層級聚合＋worst-case phantom機制，對`size_proxy`（基準對照）／
+`eps_yoy_pre`／`pe_pre`／`ret_250d_pre`四個特徵做原始vs worst-case（32檔
+未解決delisted股票的LOW/HIGH extreme sentinel）比較。**結果**：`size_proxy`
+（重現重構.B3已知結果）與`pe_pre`都有原始資料裡的非平凡interior最佳切點，
+但都被worst-case推翻（`pe_pre`最佳分位40%比值123.8→worst-case後崩到100%
+比值9.7，同一種「小樣本極端比值不穩健」故障模式）；`eps_yoy_pre`／
+`ret_250d_pre`在worst-case下「看似穩健」（最佳分位維持100%），但誠實揭露
+這是退化結果——這兩個特徵的比值在原始資料裡本來就隨累計分位單調遞增，
+根本不存在一個interior最佳切點可以被推翻，「穩健」只是因為沒有結論好推翻。
+**四個候選特徵沒有一個同時滿足「非平凡切點」+「通過worst-case」**，誠實
+結論記在`PENDING_QUEUE.md`「重構.B4」條目，完整表格見
+`research/multibagger_raw/b4_feature_robustness_result.json`。依描述性研究
+性質沿用重構.B/C/D整批既有豁免，不寫`TRIALS_REGISTRY.jsonl`。冒煙測試：
+腳本可獨立執行、`size_proxy`分支數字與重構.B3既有JSON逐位元相符（確認
+泛化程式碼正確），未涉及App/index.html，無需跑`smoke_test.mjs`。
+
+## 2026-09-19（互動視窗CC，最優先·三個總司令自己造成的故障）DevQueue crash-loop三小時、節流雙層漏一層、新硬規則寫進CLAUDE.md——全repo掃描修好20支腳本+2個關聯bug
+
+戴**維運帽**（跨`scripts/`／`research/`／`CLAUDE.md`，這輪是修基礎設施
+故障，不是研究或產品功能）。對應`PENDING_QUEUE.md`「2026-09-19【最優先·
+三個都是總司令自己造成的故障】」條目原文，四項全部完成。
+
+**★一 DevQueue crash-loop（每15分鐘死一次，已死3小時）**：根因是
+`scripts/dev_queue_runner.py`的`_stale_status_markers_present()`偵測到
+🔲（U+1F532）要`print()`出來時，Windows主控台預設`cp950`編碼編不出這個
+字元，`UnicodeEncodeError`讓整支runner崩潰、exit=1，`run-dev-queue-
+cycle.ps1`收到非預期退出碼陷入crash-loop。修法：①模組頂端加
+`sys.stdout/stderr.reconfigure(encoding="utf-8", errors="replace")`
+（跟`probe_twse_publish_time.py`同一套）②`build_prompt()`矛盾偵測整段
+包try/except，新增`_safe_print()`輔助函式，任何例外降級成一行ASCII
+警告並fail open，不再讓例外中斷流程③全repo掃描：先抓「同一行同時有
+`print(`與cp950編不出的emoji」查到18支腳本，逐一核對是真的印到主控台
+（不是docstring/JSON資料）後補上reconfigure；再用更廣的「檔案任何位置
+含風險字元+有print()+目前沒reconfigure」查到11支候選，逐一核對後2支
+（`equal_weight_rebalance_plateau_v1.py`、**真錢閘門`mainnet_gate.py`**）
+確認是真實風險一併修好，其餘9支核對後確認風險字元只在docstring/JSON
+不會被print()印到主控台，不需要改。合計修復20支腳本。用
+`PYTHONIOENCODING=cp950`模擬真實crash環境端到端驗證確認`dev_queue_
+runner.py prompt`不再崩潰。**[自行裁量]額外發現並修復一個關聯bug**：
+`_stale_status_markers_present()`本身在`PENDING_QUEUE.md`成長到8千多行
+後已經變成對任何歷史敘述都會誤判的假陽性產生器（實測：全檔68次字串
+比對命中，逐一核對後沒有一次是真的漏抓，包含當下0 pending的真實狀態
+本身也被誤判成`QUEUE_FORMAT_MISMATCH`）。新增`_checkbox_convention_
+actively_used()`交叉驗證，只有「散文有舊字樣」且「checkbox格式本身
+不活躍」兩者同時成立才真的觸發格式不符警報，否則降級成資訊性紀錄。
+
+**★二 節流快篩沒修到（marathon/hypothesis_queue從04:39起連claude都不
+叫）**：`research/quota_throttle.py`的`SIGNAL_SOURCES`（`_signal_hash()`
+用來判斷「有沒有新資訊值得叫claude」的純Python快篩來源）漏了
+`PROGRESS_HEARTBEAT.jsonl`——2026-09-18的修法只改了`_made_progress()`
+（跑完一輪後用來判斷`consecutive_no_progress`要不要歸零），但節流其實
+兩層，`SIGNAL_SOURCES`是更前面一關，沒修到，導致heartbeat一直在寫但
+雜湊不變，快篩判定「沒新資訊」，連claude -p都不叫。修法：兩個track都
+加入`PROGRESS_HEARTBEAT`，並確認全檔只有這兩處判斷「有無進度」，沒有
+第三處。已實測修法前後兩個track的`_signal_hash()`確實不同，下一輪
+`should_run()`會正確判定訊號有變化。
+
+**★三 新硬規則**：`CLAUDE.md`新增「十二、守門員自己的失敗只能降級成
+警告，不得中斷被監控的流程」，列出四次同形狀故障（DevQueue格式/節流
+矛盾指令/ORDER-BEGIN保留字撞到/emoji編碼崩潰）、規則本文（寧可漏抓不可
+癱瘓）、既有機制追溯體檢要求、新守門員上線前的強制驗收（人工製造守門員
+自己壞掉的情境）、偵測邏輯精準度定期複核（用★一發現的假陽性案例當實例）。
+
+**★四 佇列補件**：`[自行裁量]`目前`- [ ]`0項+`- [!]`22項字面上已≥8，
+但這不是總司令要的意思——22項全部BLOCKED代表三軌完全沒有可執行項，
+改成補「真正可執行的`- [ ]`」到≥8項。已排入總司令指定的三項：**重構.C5
+查核後發現其實已經做完**（P90=18.28%不過、最大10檔差異已回報，卡在
+等總司令裁示降標準或換路線，標BLOCKED不算新交辦）、**重構.B4／重構.A4**
+查核後確認是真正未做過的新工作，正常排進佇列（`- [ ]`，`[研究]`類，
+留給marathon/hypothesis_queue接手）。其餘補件持續進行中，詳見
+`PENDING_QUEUE.md`對應章節最新狀態。
+
 ## 2026-09-19（互動視窗CC，重構.B3續）額度解除後補跑fetch_error重抓，46/60檔恢復並併入完整管線，Q5worst-case用新資料重算——結論仍是撤回，但數字更新
 
 戴**研究與驗證帽**。承接下方「2026-09-19（重構.B3）」條目——當時60檔

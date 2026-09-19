@@ -56,6 +56,16 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# 2026-09-19（總司令裁示【最優先】一.3全repo掃描）：本檔print()裡有⚠
+# (U+26A0)，Windows主控台cp950編不出來會讓行程崩潰，見
+# `scripts/dev_queue_runner.py`同段說明——這支是真錢閘門，自己崩潰導致
+# 判斷結果印不出來的代價極高，優先修。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:  # noqa: BLE001
+        pass
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SECRETS_DIR = REPO_ROOT / "secrets"
 TW_TZ = timezone(timedelta(hours=8))
