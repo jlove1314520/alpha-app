@@ -2338,3 +2338,6 @@ TRAIN可測視窗）、控制組(b)延遲1週後方向一致無翻轉（股票�
 用`bear_exposure=0.35`當新的鎖定參數點重測（不是本次結果的事後參數
 優化，是全新一輪）。`is_holdout_consumed()`開工/收工前皆`False`，
 零新增API呼叫（全用`continuous_contract.py`既有本機快取）。
+
+## 2026-09-19T14:10+08:00 FUT · fut_basis_mean_reversion_60d regime/年代分段複驗（馬拉松，驗證帽）
+交辦「FUT.basis均值回歸regime複驗」。腳本`fut_basis_mr60_regime_robustness.py`（判準事前寫死），只用<=VAL_END本機快取、零新API。結果：逐年為正76%、單年最大佔比20.5%、多空regime皆正→原判定確認穩健，EXPERIMENTAL不變。附註：年代年化毛報酬38.9%→24.9%→11.4%→7.1%衰減，2019~2024約+5%。`is_holdout_consumed()`前後皆False。
