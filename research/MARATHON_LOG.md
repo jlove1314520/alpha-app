@@ -1,6 +1,10 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 
+## 2026-09-20 02:05 — marathon 讓位：原子.二年份/牛熊拆解重跑中（PID 95748 `atom_ic_map.py` 自 01:24 起跑、互動視窗持有） — 無判定、未動研究檔、未登記TRIALS
+
+交辦佇列 `- [ ]` 0條、`- [!]` 22條左右，阻塞條件逐項看過皆未解除（原子.三依賴原子.二拆解結果；金流一.4 法人歷史僅12日、20日視窗需再8個交易日；資料源一.3 要總司令領 key；稽核.三(a) 剩8檔推測結構性缺季，上一輪已處理）。`research/atom_ic_map.py` 有未提交擴充（逐snapshot IC快取＋`aggregate_by_year_and_regime()`）且行程佔6GB仍在跑（尚無 `atom_ic_snapshots_h*.parquet` 產出），為避免撞檔與誤 commit 他人變更，本輪僅記心跳。**下一輪**：若行程結束且 `atom_ic_map_year_regime.json` 已產出，由互動視窗補記 `ATOM_IC_MAP.md` 並解除原子.三阻塞；否則續讓位。等待總司令審閱：0件（`AWAITING_REVIEW.md` 等待中0列）。交辦佇列還剩0條未開始。
+
 ## 2026-09-20 01:25 — hypothesis_queue #75續5(a)：DERA內部人交易批次檔資料品質＋CIK→宇宙對應核對 — 資料本身乾淨，但PIT宇宙對2006~2023歷史覆蓋不足（列覆蓋41%→94%），(b)前須先處理；無績效判定、未登記TRIALS（⚠️ commit 6a799334 已完成但 push 失敗：Could not resolve host: github.com，重試3次仍失敗；下一輪先 git push）
 
 交辦佇列 `- [ ]` 開工時0條（全為`- [!]`，阻塞條件逐項看過未解除）；本輪名額給自走候選池 #75 接續。
