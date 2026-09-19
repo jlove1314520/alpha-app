@@ -3966,3 +3966,5 @@ TIMEOUT after 25 min -> taskkill /T /F pid=87596
 quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0.79
 finally: lock belongs to cycle_id=20260919-210142-m (not 20260919-210037) -- left alone
 ===== Marathon cycle end: 2026-09-19 21:25:39 cycle_id=20260919-210037 reason=TIMEOUT cost_usd= read_kb=73.6 turns= duration_min= =====
+
+quota_throttle: SKIP: 正常頻率，距上次實跑4.9分鐘 < 30分鐘門檻
