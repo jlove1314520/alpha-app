@@ -2625,3 +2625,7 @@ smoke test 4組通過，中規模N=50前景驗證8類中6類PASS但效果量級�
 `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（無新判定）。`is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫。
 
 完整見`gate50_candidate_universe_screen.py`（新增，可重複執行）、`data/gate50_candidate_universe.json`（新增）、`TW_MARATHON_STATE.md`第501輪記錄、`REPORT.md`第501輪心跳、`MARATHON_STATE.md`（輪次計數器501）。
+
+## 2026-09-19 第564輪（TW，驗證帽）借券費率.放大閾值重測
+
+`lending_fee_gate_v2_longhold.py`（新增，可重複執行，事前綁定規格在檔頭）：Z∈{2,3,4}×N∈{40,60}共6格、同股票事件冷卻期=N、多頭剔除持股單次round-trip成本（不含借券、不放空）。結果6格0通過：gate1在Z=2/3四格PASS、Z=4兩格FAIL；3x成本淨效益全轉負；毛避開損失N40→N60飽和（約1.2~1.5%）。已登記`TRIALS_LEDGER.md`#264~#269、`STRATEGY_GRAVEYARD.md`「f_lending_fee_spike v2」。`trial_registry.py --check` PASS。零新增外部API呼叫。

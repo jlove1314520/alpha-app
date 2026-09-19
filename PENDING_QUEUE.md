@@ -1368,7 +1368,7 @@ Cowork原話：
   `PENDING_QUEUE.md`第6621行）——這是「彙總已核准接入的既有資料集」，
   不是「探測新資料源」，data.gov.tw存取權限已透過工業生產指數確立，
   可直接動工。
-- [ ] **借券費率.放大閾值重測** [研究] [自走補入，來源：`research/
+- [x] **借券費率.放大閾值重測** [研究] ✅已完成（結果FAIL，驗證帽輪次2026-09-19第564輪，見`research/STRATEGY_GRAVEYARD.md`「f_lending_fee_spike v2」、`TRIALS_LEDGER.md`#264~#269：6格0通過，3x成本全轉負，毛幅度N40→N60飽和約1.3%） [自走補入，來源：`research/
   STRATEGY_GRAVEYARD.md`第2563~2566行「lending_fee_gate63」條目明確
   建議「改用更大絕對報酬幅度的閾值/持有期組合，仍值得當獨立新試驗
   另開登記測試」]——`lending_fee_gate63`原死因是gate1/gate2乾淨過關但
