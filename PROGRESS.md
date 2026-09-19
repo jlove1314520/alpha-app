@@ -1,3 +1,23 @@
+## 2026-09-19（馬拉松自走，重構.A4）GATE6修好後重查舊FAIL——指定範圍內0條需重分類，但發現3條範圍外的GATE6 FAIL需另排n_years相符的檢定力重跑
+
+戴**驗證帽**。依指定範圍（`research/TRIALS_FAILED_GATES_BACKFILL.jsonl`，
+明確指示不需重新逐筆翻`TRIALS_LEDGER.md`）查核：47筆記錄的`failed_gates`
+欄位僅有`cheap_gate_precheck`/`gate1`/`gate2`/`gate4`/
+`universe_contamination_check`/`other_protocol`六種，**0筆含gate5/gate6**，
+複核`重構.A3`（commit`f7bf4ff0`）原始結論一致。原因：這份backfill檔案是
+cheap-gate家族（IC層級，GATE_SEQUENCE第1/2/4關）的歧義回填，跟portfolio
+層級GATE6（逐年一致性）在不同階段、不同腳本，從未重疊。**依指定範圍，
+本項工作到此完成（0條需重分類）**。[自行裁量]額外用`grep`快速核對
+`TRIALS_LEDGER.md`（非逐筆翻閱），誠實揭露3筆範圍外但相關的GATE6 FAIL：
+`#17 f_52w_high_prox`／`#29 equal_weight_rebalance`（皆TRAIN 6年4/6正）、
+`#49 overnight_intraday`（VAL 4年3/4正）——這3筆本來就寫得明確、從未被
+歸類為「歧義待補」，故從一開始就不在backfill範圍內。是否該用重構.A2的
+修正量尺重新評估未執行：既有檢定力網格是`n_years=10`（TRAIN+VAL合併），
+跟這3筆的`n_years=6`/`n_years=4`不同，需另跑一次相符年數的模擬網格才能
+誠實回答，已排入`PENDING_QUEUE.md`新增`重構.A5`供後續輪次接手。冒煙
+測試：本輪為文件查核與交叉比對，未改動任何程式邏輯或App，無需跑
+`smoke_test.mjs`。
+
 ## 2026-09-19（馬拉松自走，重構.B4）Q5撤回後補測其他起漲前特徵——4個候選特徵全部不能替代size_proxy，誠實結論是「目前沒有可用的穩健起漲前分組規則」
 
 戴**研究帽**。承接`PENDING_QUEUE.md`「重構.B4」交辦（重構.B3已把Q5「小型股

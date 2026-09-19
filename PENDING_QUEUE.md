@@ -1081,15 +1081,51 @@ Cowork原話：
   `research/multibagger_raw/b4_feature_robustness_result.json`。依
   `CLAUDE.md`「七之三」描述性研究性質，沿用重構.B/C/D整批既有豁免，
   不寫`TRIALS_REGISTRY.jsonl`。
-- [ ] **重構.A4** [研究] [自走補入，來源：總司令2026-09-19原文指定]
-  GATE6修好後（重構.A2，`synthetic_power_curve_gate74.py::run_pilot()`
-  已修正逐年demean bug），回頭用修正後的GATE6量尺，重新檢視過去因GATE6
-  FAIL而結案的舊假設（`research/TRIALS_FAILED_GATES_BACKFILL.jsonl`裡
-  `failed_gates`含GATE6的那些列，重構.A3已把47筆FAIL的`failed_gates`
-  欄位與UNDERPOWERED重分類補齊，這裡直接可用，不需要重新逐筆翻
-  `TRIALS_LEDGER.md`），回報有多少條在新量尺下從FAIL改判為
-  UNDERPOWERED或值得重測，附每條的舊判定/新判定對照。
-- [x] **重構.二bcd** [研究] ✅已完成（馬拉松自走輪次，2026-09-18）——
+- [x] **重構.A4** [研究] ✅已完成（馬拉松自走，2026-09-19）——**依指定
+  範圍（`research/TRIALS_FAILED_GATES_BACKFILL.jsonl`，明確指示「不需要
+  重新逐筆翻`TRIALS_LEDGER.md`」）查核，答案是0條**：實測該檔47筆記錄
+  的`failed_gates`欄位值僅有`{cheap_gate_precheck, gate1, gate2, gate4,
+  universe_contamination_check, other_protocol}`六種，**沒有任何一筆含
+  gate5或gate6**——直接複核`重構.A3`commit`f7bf4ff0`的原始結論「0筆卡
+  gate5/6」一致，非本輪新發現，只是確認。原因：這份backfill檔案本身的
+  性質是「原本`failed_gates`欄位有歧義／缺漏，需要人工逐筆讀原文回填」
+  的**cheap-gate家族（GATE_SEQUENCE第1/2/4關）**IC層級試驗，跟portfolio
+  層級的GATE6（逐年一致性）測試在不同階段、走不同腳本，沒有重疊。
+  **依指定範圍，本項應完成的工作到此為止（0條候選需要重分類）。**
+
+  **[自行裁量]誠實揭露一個範圍外但相關的發現，不隱藏**：直接用
+  `grep "第6關\|逐年一致性\|GATE6" TRIALS_LEDGER.md`（不是重新逐筆翻閱，
+  是單一命令快速核對）找到3筆**最終判定就是GATE6 FAIL**、但因為原始
+  文字本來就寫得夠明確、從未被歸類為「歧義待補」，所以從一開始就**不在**
+  這份backfill檔案的處理範圍內：`#17 f_52w_high_prox`（id86，TRAIN
+  2015-2020共6年僅4年正報酬，未達≥5/6）、`#29 equal_weight_rebalance`
+  （id114，同樣TRAIN 6年4年正）、`#49 overnight_intraday`（id184，VAL
+  2021-2024共4年3年正，未達≥5/6換算成N=4即4/4的零容錯門檻）。**這3筆
+  是否該用重構.A2修好的量尺重新評估，本輪未執行、留待總司令裁示是否
+  要做**，理由：重構.A2目前跑出的檢定力數字（強度0.3/0.5/0.8下GATE6
+  通過率0%/40%/60%）是用`n_years=10`（TRAIN+VAL合併期）算的，但這3筆
+  各自用的是`n_years=6`（僅TRAIN）或`n_years=4`（僅VAL），**門檻與樣本
+  年數都不同，不能直接套用既有10年期的檢定力數字，必須另外用相符的
+  `n_years`重跑一次`synthetic_power_curve_gate74.py`的模擬網格**才能
+  誠實回答「這3筆是否被誤殺」，屬於一個新的、有界的工作單位，不是重構
+  .A4指定範圍內可以順手做完的事，已排入下方機器索引新增`重構.A5`供
+  後續輪次接手（[自走補入]，來源：本輪查核發現，非總司令原文指定）。
+- [ ] **重構.A5** [研究] [自走補入，來源：重構.A4查核時發現，2026-09-19]
+  重構.A4查到3筆最終判定為GATE6（逐年一致性）FAIL、但用的`n_years`
+  跟重構.A2已測的檢定力網格（`n_years=10`，TRAIN+VAL合併）不同的舊
+  假設：`#17 f_52w_high_prox`（TRAIN 6年4/6正）、`#29 equal_weight_
+  rebalance`（TRAIN 6年4/6正）、`#49 overnight_intraday`（VAL 4年
+  3/4正）。用`synthetic_power_curve_gate74.py`同一套方法（強度網格
+  {0.3,0.5,0.8}×5種子，`gate6_yearly_consistency()`不動），改把
+  `base_raw`限縮到只涵蓋對應窗口（`n_years=6`用TRAIN期2015-2020、
+  `n_years=4`用VAL期2021-2024，各自重跑一次網格，共2組而非3組，因
+  `#17`跟`#29`同樣是TRAIN 6年可共用同一組`n_years=6`結果），量出這兩種
+  年數/門檻組合下的GATE6理論通過率。若某強度下通過率仍然很低（例如
+  比照現有10年期網格類似的量級），代表4/6或3/4這種結果在小樣本下本來
+  就很常見，即使真有效果也常被誤殺，3筆應標`UNDERPOWERED`重評；若通過
+  率已經不低，維持原FAIL判定，誠實記錄「小樣本不是唯一解釋」。跑一次
+  完整網格若預估超過5分鐘，依協定用`run_detached.py submit`投遞、下一
+  輪收成，不要在session裡等。
   三條規則已寫進`research/MARATHON_PROTOCOL.md`「1a-0c. 牛熊制度強制項」。
 - [x] **重構.三** [研究] ✅已完成（馬拉松自走輪次，2026-09-18）——
   TradingView定位已寫進`CLAUDE.md`「TradingView 定位」小節。
