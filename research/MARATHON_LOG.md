@@ -1,7 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 
-## 2026-09-20 01:25 — hypothesis_queue #75續5(a)：DERA內部人交易批次檔資料品質＋CIK→宇宙對應核對 — 資料本身乾淨，但PIT宇宙對2006~2023歷史覆蓋不足（列覆蓋41%→94%），(b)前須先處理；無績效判定、未登記TRIALS
+## 2026-09-20 01:25 — hypothesis_queue #75續5(a)：DERA內部人交易批次檔資料品質＋CIK→宇宙對應核對 — 資料本身乾淨，但PIT宇宙對2006~2023歷史覆蓋不足（列覆蓋41%→94%），(b)前須先處理；無績效判定、未登記TRIALS（⚠️ commit 6a799334 已完成但 push 失敗：Could not resolve host: github.com，重試3次仍失敗；下一輪先 git push）
 
 交辦佇列 `- [ ]` 開工時0條（全為`- [!]`，阻塞條件逐項看過未解除）；本輪名額給自走候選池 #75 接續。
 做法：`insider_dera_quality_check.py`（新，只讀`research/data/dera_insider/`76季CSV＋`us_universe_pit.json`，輸出`insider_dera_quality_result.json`）。
