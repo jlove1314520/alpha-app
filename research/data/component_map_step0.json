@@ -1,0 +1,42 @@
+{
+  "n_loaded": 203,
+  "n_snapshots": 133,
+  "coverage_median": {
+    "eps_family": 0.873015873015873,
+    "revenue_surprise": 0.8319327731092437,
+    "low_vol": 0.9717514124293786,
+    "rev_accel": 0.0,
+    "quality_roe_stability": 0.0,
+    "rel_strength": 0.0,
+    "ma_breakout": 0.0
+  },
+  "dropped_coverage": [
+    "rev_accel",
+    "quality_roe_stability",
+    "rel_strength",
+    "ma_breakout"
+  ],
+  "rank_corr": {
+    "eps_family|revenue_surprise": 0.19295779991657186,
+    "eps_family|low_vol": -0.07388150738951323,
+    "revenue_surprise|low_vol": -0.08184029902521356
+  },
+  "dropped_family": [],
+  "pool_final": [
+    "eps_family",
+    "revenue_surprise",
+    "low_vol"
+  ],
+  "n_universe_ok_159": 132,
+  "universe_rule": "use_159",
+  "ic_n_snapshots": {
+    "eps_family": 111,
+    "revenue_surprise": 103,
+    "low_vol": 124
+  },
+  "ic_weights_train_abs": {
+    "eps_family": 0.04462288318539499,
+    "revenue_surprise": 0.047270629829711044,
+    "low_vol": 0.07257067337815676
+  }
+}

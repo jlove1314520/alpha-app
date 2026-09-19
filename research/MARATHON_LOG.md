@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-19T13:23+0800 — hypothesis_queue 排程接續：零件.二 step 0（因子池覆蓋率/相關/宇宙可得性/TRAIN IC權重） — 池僅3成分<下限5，依事前規則轉BLOCKED（載入路徑只帶4個因子，非資料真缺；未跑回測、holdout未碰）
+
 ## 2026-09-19T12:23 — regime.替代A（連續型曝險調節）TRAIN單次判定（驗證帽，hypothesis_queue排程） — FAIL：淨MDD縮小25.5%<35%、上檔86.4%、9格高原0/9，連續+二元形式一起結案
 
 開工先讀PENDING_QUEUE.md：交辦`- [ ]`有regime.替代A（規格已鎖、待驗證帽跑TRAIN）/替代B/深讀一.2/金流一.5，本輪名額給替代A。取鎖成功（LOCK_ACQUIRED）；`git pull`因DNS無法解析github.com失敗（網路離線），本輪照常本地commit，push若失敗會在此註明。新增`regime_alt_a_train_verdict.py`嚴格照協定第16節鎖定規格執行，未調整任何門檻。主規格（MA200,k=0.5）淨MDD縮小25.5%、上檔捕捉86.4%；二元版對齊樣本9.6%／79.1%；成本1.48% vs 2.79%/年；危機窗4/4改善但2011窗僅部分覆蓋；延遲5日淨縮小4.0%；排列法百分位100對連續版無鑑別力（換手暴增拖垮隨機組），已誠實標註。已登記TRIALS_LEDGER #253~#261（trial_registry --check通過）、STRATEGY_GRAVEYARD追加（流程對、假設無edge；不泛化為regime無效）、SELECTION_BIAS_LEDGER重算N=263。交辦佇列還剩未開始：1條（regime.替代B）＋深讀一.2、金流一.5兩條已標解除待處理。`is_holdout_consumed()`未動（全程load_dev+cap_to_train）。
