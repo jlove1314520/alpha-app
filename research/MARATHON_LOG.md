@@ -1,6 +1,10 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 
+## 2026-09-19 21:30 — hypothesis_queue #73第5輪：FinMind額度恢復，補齊270檔缺價格（ok=64 fail=0，剩0）、重跑聚合，覆蓋率大幅改善 — 無判定、未登記TRIALS
+
+列可用率2012年72.2%→94.7%、2024年68.7%→92.4%；|股數|加權可用98.6%→96.9~98.8%（各年）；缺收盤逐年僅0~22列（2019年102列）；近零占比7.12%（全）/6.72%（核心，不變）。Gate 1 sanity前置已備齊，下一輪由驗證帽輪次執行（做與判分離）。`is_holdout_consumed()`開工/收工皆False。交辦佇列還剩：未開始`- [ ]`1條（金流一.5/#73，進行中）。
+
 ## 2026-09-19T20:35+0800 (hypothesis_queue排程) — 交辦優先：深讀一.2 候選生命週期落地（shadow_ledger.register_candidate＋三份協定文件） — 基礎設施/文件，無回測無判定
 
 #73因FinMind額度冷卻至約21:05故本輪不重試，改做另一條`- [ ]`交辦深讀一.2。新增register_candidate（自測7項PASS、既有三帳本verify PASS），規則寫進HYPOTHESIS_QUEUE.md/MARATHON_PROTOCOL.md 1d/HYPOTHESIS_QUEUE_PROTOCOL.md。`is_holdout_consumed()`=False，未登記TRIALS。交辦佇列還剩：未開始`- [ ]`1條（金流一.5/#73，等額度）。
