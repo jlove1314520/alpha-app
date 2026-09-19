@@ -1,3 +1,72 @@
+## 2026-09-20 01:06（互動視窗CC，【緊急·合規】mopsov破口止血＋根因修復）
+
+戴**合規止血帽**（P0，優先於所有研究）。2026-09-19~20發生真實違規事件：
+自走DevQueue軌接手佇列項目「研究.a續」執行(a)時，寫了新腳本
+`research/material_disclosure_order_win_count.py`直接對
+`mopsov.twse.com.tw`（robots.txt全站`Disallow: /`）發出100次POST
+請求，繞過了2026-09-15已對四支既有MOPS client生效的`PermissionError`
+防呆（防呆綁在腳本層，新腳本沒繼承到）；一併發現更早（2026-09-06~09
+Gate 10查證階段）的`material_disclosure_order_win_probe.py`也有同一
+根因的真實請求，屬更早一次違規。
+
+**改了什麼**：
+1. 兩支違規腳本加`PermissionError`停用；違規取得的
+   `material_disclosure_order_win_count.json`加`_COMPLIANCE_WARNING`
+   鍵標註不得用於判定/發布，資料保留不刪（作違規證據）。
+2. 根因修復從腳本層移到網域層：新增`research/net_guard.py`
+   （monkeypatch `requests.Session.request`，黑名單網域命中即在送出
+   請求前拋錯）＋`research/test_net_guard.py`（用`socket.create_
+   connection`monkeypatch實測真的沒有發出網路連線）。回填進10支既有
+   腳本（4支既有MOPS client＋2支本次違規腳本＋合規.三額外掃到的4支
+   歷史探查腳本：`buyback_announcement_probe.py`／`mops_insider_
+   holdings_probe.py`／`mops_material_news_probe.py`／`forced_
+   trader_events_probe.py`）。**誠實揭露限制**：這不是全機器層級防呆，
+   只保護「有import net_guard」的Python行程；完整方案需要改Python
+   系統級`sitecustomize`，blast radius超出本repo，本輪未做。
+3. `scripts/audit_preflight.py`新增`scan_domain_blocklist_strings()`
+   靜態掃描（掃repo全部`.py`找硬寫黑名單網域字串），寫進
+   `data/audit_report.json` `domain_blocklist_scan`欄位；
+   `scripts/check_external_connectivity.py`新增
+   `check_domain_blocklist_alerts()`轉`local_task_health`告警，跟
+   `audit.yml`既有排程共用（不需另外接CI）。
+4. 合規替代來源查證（#72解除條件，四路徑）：TWSE openapi 144端點與
+   TPEx官方openapi用官方swagger規格檔重新確認`t187ap04_L`/`mopsfin_
+   t187ap04_O`皆snapshot-only無查詢參數；公開資訊觀測站無非mopsov的
+   替代入口；自有news pipeline僅前向累積約12天深度。四條結論與
+   2026-09-15既有查證一致，**#72判FAIL結案**（`TRIALS_LEDGER.md`
+   #284），根因寫「合規來源存在但深度不足」不是「因子無效」。
+5. `research/MARATHON_PROTOCOL.md`第10關（資料源歷史起點探測）新增
+   最後一步：找到可行路徑後必須先核對網域是否在黑名單裡，這是`#72`
+   事故教訓的流程補強。
+6. 同時完成前一輪未落地的兩項：`research/AWAITING_REVIEW.md`建立、
+   `MARATHON_PROTOCOL.md`新增「1a-0e」深挖輪次卡關回報規則（連續3輪
+   無實質判定須回報卡在哪/還要幾輪/值不值得）。
+7. 佇列補件：逐一核對常備backlog/REPORT/LEADS/GRAVEYARD/HYPOTHESIS_
+   QUEUE後只找到1個非重複候選（`研究.a續`，即#72，現已FAIL結案），
+   佇列再次見底（`- [ ]`=0），已誠實記錄找不到更多合規候選，非隨便
+   湊數。
+
+**為什麼**：規則寫在`CLAUDE.md`/`docs/DATA_SOURCE_MAP.md`裡，但沒有
+機器在檢查「新腳本有沒有不小心打到黑名單網域」，這次就是這樣破的——
+跟`CLAUDE.md`既有「監控工具自己也要被監控」同一種教訓。
+
+**驗證**：`research/test_net_guard.py`全過（4個黑名單網域在建立連線前
+被攔截，白名單網域不誤判）；`scripts/audit_preflight.py`實測跑出55處
+命中/6處剩餘unguarded（皆人工核對為docstring歷史記錄非活碼）；
+`dev_queue_runner.py::_order_marker_ambiguity()`/`_explicit_order()`/
+`get_format_mismatch_alerts()`對`PENDING_QUEUE.md`跑過確認64個key
+無重複、無格式不符；全部本輪修改的`.py`檔`py_compile`過。未動
+`index.html`故未跑冒煙測試。
+
+**影響範圍**：僅資料取得合規性，不影響任何已發布判定——#72本身尚在
+Gate 10查證階段，未進入任何統計判定。
+
+**下一步**：`research/atom_ic_map.py`300檔全量跑仍在背景執行中（已
+超過80分鐘，CPU持續100%非卡死，只是規模比15檔smoke test大很多），
+跑完後寫`ATOM_IC_MAP.md`、登記原子.二的TRIALS_LEDGER條目、接原子.三
+或誠實回報「日K原子層找不到穩定素材」。**卡住**：無，純粹等待運算
+完成。
+
 ## 2026-09-19 20:35（hypothesis_queue排程，研究帽，交辦優先：深讀一.2）
 
 **改了什麼**：候選生命週期改為 train+val → 六關 → 影子帳本前向觀察，holdout只留最終定案版。`research/shadow_ledger.py`新增`register_candidate()`（缺證據/holdout被碰/重複登記皆拒絕）；規則寫進`HYPOTHESIS_QUEUE.md`、`MARATHON_PROTOCOL.md`(1d)、`HYPOTHESIS_QUEUE_PROTOCOL.md`。

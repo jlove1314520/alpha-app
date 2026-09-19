@@ -27,6 +27,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -35,6 +36,66 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "audit_report.json"
 TZ = timezone(timedelta(hours=8))
+
+# ── 合規.三（2026-09-20總司令裁示【緊急·合規】）：黑名單網域靜態掃描 ──
+# 背景：2026-09-19一支新腳本（`material_disclosure_order_win_count.py`）
+# 對robots.txt全站Disallow的`mopsov.twse.com.tw`發出100次請求，繞過了
+# 「防呆綁在既有四支client上」的舊機制。合規.二把防呆改成網域層
+# （`research/net_guard.py`），這裡是第二道防線：**規則寫在CLAUDE.md/
+# net_guard.py，但沒有機器在檢查『新腳本是否真的import了net_guard』**，
+# 這支掃描補上這個盲點——commit/稽核時就能看到，不用等下一次真的打出去
+# 才發現。
+#
+# 刻意用「讀net_guard.py原始碼文字、regex抓DOMAIN_BLOCKLIST裡的字串」
+# 取得黑名單，不`import net_guard`——沿用本檔開頭說的設計原則：自我檢查
+# 不依賴被檢查對象本身是否還能正常import。
+
+
+def _load_blocklisted_domains() -> list[str]:
+    ng_path = ROOT / "research" / "net_guard.py"
+    try:
+        text = ng_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    m = re.search(r"DOMAIN_BLOCKLIST[^=]*=\s*frozenset\(\{(.*?)\}\)", text, re.S)
+    if not m:
+        return []
+    return re.findall(r'"([a-zA-Z0-9_.-]+\.[a-zA-Z]{2,})"', m.group(1))
+
+
+def scan_domain_blocklist_strings() -> dict:
+    """掃repo全部.py（排除net_guard.py/test_net_guard.py本身——那裡定義／
+    測試黑名單字串是預期行為，不是違規），找出任何硬寫黑名單網域字串的
+    檔案與行號。同一個檔案若有`import net_guard`，視為「已知情況，已掛
+    網域層防呆」（guarded=True，仍列出但不算unguarded）；沒有的視為
+    `unguarded`（可能是完全沒接防呆的新腳本，這是要抓的重點）。"""
+    domains = _load_blocklisted_domains()
+    exempt_files = {"net_guard.py", "test_net_guard.py"}
+    hits: list[dict] = []
+    for py_file in sorted(ROOT.rglob("*.py")):
+        if py_file.name in exempt_files:
+            continue
+        if any(part in {".git", "node_modules", "__pycache__"} for part in py_file.parts):
+            continue
+        try:
+            text = py_file.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        if not any(d in text for d in domains):
+            continue
+        guarded = "import net_guard" in text
+        rel = py_file.relative_to(ROOT).as_posix()
+        for lineno, line in enumerate(text.splitlines(), start=1):
+            for d in domains:
+                if d in line:
+                    hits.append({"file": rel, "line": lineno, "domain": d, "guarded": guarded})
+    unguarded = [h for h in hits if not h["guarded"]]
+    return {
+        "domains": domains,
+        "hits": hits,
+        "unguarded_count": len(unguarded),
+        "unguarded": unguarded,
+    }
 
 CHECKS = [
     ("build_listed_universe.py 所需 import/常數",
@@ -79,6 +140,22 @@ def main() -> int:
                 "audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，"
                 "這個欄位就是補這個盲點。",
     }
+
+    domain_scan = scan_domain_blocklist_strings()
+    doc["domain_blocklist_scan"] = {
+        "checked_at": now.isoformat(),
+        "domains": domain_scan["domains"],
+        "hit_count": len(domain_scan["hits"]),
+        "unguarded_count": domain_scan["unguarded_count"],
+        "unguarded": domain_scan["unguarded"],
+        "hits": domain_scan["hits"],
+        "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串"
+                "（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。"
+                "unguarded=True代表該檔案提到黑名單網域卻沒有`import "
+                "net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，"
+                "由check_external_connectivity.py轉成local_task_health告警。",
+    }
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -86,6 +163,9 @@ def main() -> int:
         print(("OK " if r["ok"] else "FAIL ") + r["label"] + (f"：{r['error']}" if not r["ok"] else ""))
     if not all_ok:
         print("::error::稽核管線自檢失敗，後面步驟可能會 ImportError")
+    if domain_scan["unguarded_count"]:
+        print(f"::warning::合規.三發現 {domain_scan['unguarded_count']} 處硬寫黑名單網域"
+              f"且未import net_guard，見 data/audit_report.json domain_blocklist_scan 欄位")
     return 0  # 自檢本身不擋住 workflow——就算真的壞了，也要讓後面步驟照跑，
     # 該失敗的地方自然會失敗，這支只負責留下紀錄。
 

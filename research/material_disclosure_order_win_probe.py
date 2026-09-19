@@ -42,6 +42,9 @@ import time
 
 import requests
 
+import net_guard  # 2026-09-20合規.二：網域層防呆疊加在既有腳本層防呆上（belt-and-suspenders）
+net_guard.install()
+
 URL = "https://mopsov.twse.com.tw/mops/web/ajax_t51sb10"
 REFERER = "https://mopsov.twse.com.tw/mops/web/t51sb10_q1"
 HEADERS = {
@@ -55,6 +58,17 @@ KEYWORD = "得標"  # 對應classify()既有「重大訂單」分類規則之一
 
 
 def query(kind: str, keyword: str, year: str) -> str:
+    # 【緊急·合規】2026-09-20總司令裁示：本探查腳本對mopsov.twse.com.tw
+    # 發出過真實請求（robots.txt為`Disallow: /`，僅bingbot可存取），
+    # 屬同一根因（防呆綁在既有client上，探查腳本沒繼承到）的違規事件，
+    # 一併停用，見PENDING_QUEUE.md違規記錄與`net_guard.py`（根因修復：
+    # 防呆已從腳本層移到網域層）。
+    raise PermissionError(
+        "MOPS mopsov.twse.com.tw 存取已依 2026-09-15 總司令裁示停用"
+        "（robots.txt 對非 bingbot UA 全站 Disallow）。本探查腳本曾發出"
+        "真實請求，屬違規事件（見PENDING_QUEUE.md），已於2026-09-20停用。"
+        "如需恢復，需先有合規替代方案或總司令另行核准。"
+    )
     payload = {
         "step": "1", "firstin": "true", "id": "", "key": "", "TYPEK": "", "Stp": "4", "go": "false",
         "r1": "1", "KIND": kind, "CODE": "", "keyWord": keyword, "Condition2": "1", "keyWord2": "",

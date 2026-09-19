@@ -49,6 +49,9 @@ import glob
 import pandas as pd
 import requests
 
+import net_guard  # 2026-09-20合規.三發現：舊探查腳本沒接防呆，補上（belt-and-suspenders）
+net_guard.install()
+
 
 def probe_bfi84u_snapshot_only() -> None:
     print("=== TWSE openapi BFI84U（集中市場停資停券預告表）===")

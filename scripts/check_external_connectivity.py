@@ -295,6 +295,32 @@ def check_devqueue_format_mismatch_alerts() -> list[str]:
         return []
 
 
+def check_domain_blocklist_alerts() -> list[str]:
+    """2026-09-20（合規.三，總司令裁示【緊急·合規】）：讀`audit_preflight.py`
+    寫進`data/audit_report.json`的`domain_blocklist_scan`欄位，把
+    `unguarded`（硬寫黑名單網域卻沒`import net_guard`的檔案）轉成
+    `local_task_health`告警——這是2026-09-19 mopsov違規事件（新腳本繞過
+    舊防呆）後補上的「規則寫在CLAUDE.md/net_guard.py，但有機器在檢查」
+    機制。只讀檔案不重新掃描（掃描本身由`audit_preflight.py`在稽核管線
+    跑，這裡是每5分鐘的健康檢查，不重複做重的repo-wide掃描）。
+    """
+    try:
+        path = ROOT / "data" / "audit_report.json"
+        if not path.exists():
+            return []
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        scan = doc.get("domain_blocklist_scan") or {}
+        unguarded = scan.get("unguarded") or []
+        if not unguarded:
+            return []
+        files = sorted({h["file"] for h in unguarded if isinstance(h, dict) and "file" in h})
+        return [f"合規.三：{f} 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）"
+                for f in files]
+    except Exception as e:  # noqa: BLE001
+        print(f"  ! 黑名單網域告警檢查失敗（{type(e).__name__}: {e}），本輪跳過這項自檢")
+        return []
+
+
 def publish_task_health(now: datetime, rows: list[dict], stalled: list[str],
                          conn_alerts: list[tuple[str, int, str]] | None = None) -> None:
     """把自檢結果併進 data/audit_report.json 的 local_task_health（總司令指定的位置）。
@@ -376,7 +402,7 @@ def main() -> int:
     # 同一批stalled清單——跟產出檔停擺/連通性告警用同一套亮燈機制，不用另外
     # 教總司令看第三個地方。
     task_stalls = (task_stalls + check_stale_user_visible_blocks() + check_pat_expiry_alerts()
-                   + check_devqueue_format_mismatch_alerts())
+                   + check_devqueue_format_mismatch_alerts() + check_domain_blocklist_alerts())
     publish_task_health(now, task_rows, task_stalls, conn_alerts)
     record["local_tasks"] = {"stalled": task_stalls, "checked": len(task_rows)}
     for msg in task_stalls:

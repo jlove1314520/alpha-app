@@ -104,6 +104,36 @@ ic.tpex、分點資料、驗證碼繞道，自己記錄的紅線不能自己踩�
 最上方【重大發現】完整記錄（含2026-09-15當次TWSE openapi swagger規格檔
 實測查證）。
 
+**2026-09-19~20 破口實際發生**：`HYPOTHESIS_QUEUE.md` #72（重大訂單/
+得標公告效應）查證階段找到`mopsov.twse.com.tw/mops/web/t51sb10_q1`
+（重大訊息主旨全文檢索，支援關鍵字＋歷史年度區間查詢，回溯至2015年）
+時，**沒有同步核對這個功能落在哪個網域上**，2026-09-19~20因此新寫了
+兩支腳本（`research/material_disclosure_order_win_probe.py`探查階段、
+`research/material_disclosure_order_win_count.py`正式估算，共約100+次
+請求）直接對`mopsov`發出真實請求，繞過了本節上方2026-09-15已對四支
+既有client生效的`PermissionError`防呆（防呆綁在腳本層，新腳本沒繼承
+到）。總司令裁示【緊急·合規】要求根因修復從腳本層移到網域層：
+- **新增`research/net_guard.py`**：monkeypatch `requests.Session.
+  request`，命中黑名單網域（`mopsov.twse.com.tw`／`doc.twse.com.tw`／
+  `ic.tpex.org.tw`／`bsr.twse.com.tw`）就在送出前拋`PermissionError`
+  子類，不管哪支腳本呼叫。已回填進10支既有腳本（4支既有MOPS client＋
+  2支本次違規腳本＋4支合規.三額外掃到的歷史探查腳本）。**已知限制**：
+  只保護「有import net_guard」的行程，不是全機器層級防呆（那需要改
+  Python系統級`sitecustomize`，blast radius超出本repo，本輪未做）。
+- **`scripts/audit_preflight.py`新增靜態掃描**：掃repo全部`.py`找硬寫
+  黑名單網域字串，寫進`data/audit_report.json`
+  `domain_blocklist_scan`欄位，`scripts/check_external_connectivity.py`
+  轉`local_task_health`告警——這是「規則寫在文件裡但沒有機器檢查」
+  這個舊盲點的補強。
+- **本次順帶查證#72是否有合規替代來源（合規.四，`TRIALS_LEDGER.md`
+  #284）**：官方合規端點（`t187ap04_L`/`mopsfin_t187ap04_O`，見上方
+  「🔴走不通：MOPS公開查詢頁」段落）用官方swagger規格檔重新確認**完全
+  沒有查詢參數**，是snapshot-only；`t51sb10`是**唯一**支援歷史區間
+  查詢的介面，但它就在`mopsov`上，合規上走不通。**結論：#72沒有合規
+  的方式能取得2015-2024歷史深度的重大訊息資料，判FAIL**，詳見
+  `HYPOTHESIS_QUEUE.md` #72條目、`STRATEGY_GRAVEYARD.md`對應段落。
+  違規事件完整記錄見`PENDING_QUEUE.md`「違規事件記錄」節。
+
 ## 🟢 走得通：TWSE 主站（www.twse.com.tw）
 
 ```

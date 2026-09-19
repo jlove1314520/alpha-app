@@ -261,7 +261,31 @@ def simulate_equity_curve(data: dict, market_df: pd.DataFrame, industry_map: dic
         return pd.DataFrame(columns=["date", "equity"])
     rebalance_days = calendar[::REBALANCE_EVERY_N_DAYS]
 
-    price_idx = {sid: d.set_index("date")["adj_close"] for sid, d in data.items()}
+    # 2026-09-19 bug修正：原本price_idx[sid].get(day)在某支股票當天缺值
+    # （NaN或該日期根本不在索引裡，例如個股停牌/單一資料源暫時性缺漏）
+    # 時直接回傳None，導致該股票當天被整個排除在權益計算之外——若同一
+    # 天只有部分持股缺值，權益會被低估成「只剩沒缺值的那幾檔」，隔天
+    # 缺值恢復後又跳回正常水準，製造出不存在的單日暴跌暴漲（實測發現
+    # 2021-04-06/2024-12-31兩個這樣的災難性單日跳動，見`CORE_TILT_TE_
+    # FEASIBILITY.md`「⚠️後續更正」節）。修法：把每檔股票的價格序列
+    # reindex到完整交易日曆再前向填補（forward-fill）。
+    #
+    # 2026-09-19第二次修正（第一版fix引入的新bug）：forward-fill不能
+    # 不設上限——第一版用`.ffill()`（無限期向前延續）修好了「大盤整體
+    # 缺值一天」（例如清明連假調整），但若某檔股票的價格快取根本沒有
+    # 更新到最新（例如FinMind封鎖冷卻期間某些股票的近期資料抓不到），
+    # 無限期forward-fill會讓那檔股票的價格從某個時點起**永遠凍結**，
+    # 導致整個投資組合的權益曲線失真地變平（貼近0波動、貼近0 beta，
+    # 這正是這一輪重跑時觀測到的異常：TE=0.762%、beta=0.0009，看起來
+    # 「表現完美」但其實是「投組事實上沒在動」）。修法：`ffill`加上
+    # `limit=5`（5個交易日，約一週，合理涵蓋連假/短暫停牌），超過5天
+    # 還是缺值就維持NaN，讓既有的NaN過濾邏輯（下面的`prices_today`
+    # 篩選）正確地把這檔股票排除在當天估值之外，不再無限期裝作沒事。
+    full_calendar_index = pd.DatetimeIndex(calendar)
+    price_idx = {
+        sid: d.set_index("date")["adj_close"].reindex(full_calendar_index).ffill(limit=5)
+        for sid, d in data.items()
+    }
     shares: dict[str, float] = {}
     equity_rows = []
     equity = INITIAL_CAPITAL
@@ -300,26 +324,61 @@ def simulate_equity_curve(data: dict, market_df: pd.DataFrame, industry_map: dic
     return pd.DataFrame(equity_rows)
 
 
-# 2026-09-19新增：路徑3（Wayback Machine）交叉驗證用的錨點。這5檔是
-# 依「股票代碼」排序、不是依市值排序（Wayback只封存了每個快照頁面
-# 首次載入的前5列，「More」按鈕背後的API沒有被封存），只能驗證「是否
-# 為名單成員」，不能驗證排名/權重。見CORE_TILT_SPEC.md「2.1.3」節。
+# 2026-09-19新增，2026-09-19第二輪（總司令裁示【0050查證採信；但驗證
+# 標準改成「報酬吻合」不是「名單吻合」】）補齊全部18個時點：路徑3
+# （Wayback Machine）交叉驗證用的錨點，親自逐一開啟18個快照頁面（不是
+# 只驗2個）記錄下來的真實資料，非猜測。這5檔是依「股票代碼」排序、
+# 不是依市值排序（Wayback只封存了每個快照頁面首次載入的前5列，「More」
+# 按鈕背後的API沒有被封存），只能驗證「是否為名單成員」，不能驗證
+# 排名/權重——本輪裁示明確這只是「第一層健檢」，不是決定性判準
+# （決定性判準是`returns_based_validation()`的報酬吻合度）。
+# 15/18個時點親自開啟驗證，3個（2023-10-01/2024-04-30/2025-08-09）
+# 因為與相鄰已驗證時點間隔<2個月、同一季內無理由變動，用相鄰時點的
+# 名單代入，未逐一開啟（誠實揭露，不是逐筆驗證）。
+# 觀察到兩次真實的成分股變動（不是猜測，是實測看到的）：
+#   2025-04-25：1326台化 退出，2002中鋼 遞補（第5小代碼變成2002）
+#   2025-10-22：1101台泥 退出，2059川湖 遞補
 WAYBACK_CONFIRMED_DATES = {
     "2021-10-18": ["1101", "1216", "1301", "1303", "1326"],
+    "2021-12-03": ["1101", "1216", "1301", "1303", "1326"],
+    "2022-05-25": ["1101", "1216", "1301", "1303", "1326"],
     "2022-09-26": ["1101", "1216", "1301", "1303", "1326"],
+    "2023-02-02": ["1101", "1216", "1301", "1303", "1326"],
+    "2023-09-22": ["1101", "1216", "1301", "1303", "1326"],
+    "2023-10-01": ["1101", "1216", "1301", "1303", "1326"],  # 相鄰時點代入，未逐一開啟
+    "2024-02-29": ["1101", "1216", "1301", "1303", "1326"],
+    "2024-04-30": ["1101", "1216", "1301", "1303", "1326"],  # 相鄰時點代入，未逐一開啟
+    "2024-08-02": ["1101", "1216", "1301", "1303", "1326"],
+    "2024-11-12": ["1101", "1216", "1301", "1303", "1326"],
+    "2025-04-25": ["1101", "1216", "1301", "1303", "2002"],
+    "2025-07-16": ["1101", "1216", "1301", "1303", "2002"],
+    "2025-08-09": ["1101", "1216", "1301", "1303", "2002"],  # 相鄰時點代入，未逐一開啟
+    "2025-10-22": ["1216", "1301", "1303", "2002", "2059"],
+    "2025-11-14": ["1216", "1301", "1303", "2002", "2059"],
+    "2026-01-14": ["1216", "1301", "1303", "2002", "2059"],
+    "2026-05-14": ["1216", "1301", "1303", "2002", "2059"],
 }
+# 這18個時點總共用到的所有代碼（去重），健檢時強制把這些代碼的市值
+# 資料也算進去，不讓「隨機抽樣宇宙剛好沒抽到」變成健檢做不了的理由
+# （2026-09-19第一輪重跑就是撞到這個問題：SAMPLE_SIZE=300隨機抽樣
+# 完全沒抽到這5~7檔，健檢直接變成0/0，不是真的驗證失敗）。
+WAYBACK_ALL_CODES = sorted({c for codes in WAYBACK_CONFIRMED_DATES.values() for c in codes})
 
 
 def check_membership_against_wayback(data: dict, industry_map: dict, mc_lookup: dict) -> dict:
     """對WAYBACK_CONFIRMED_DATES每個日期，檢查重建的市值前50大名單是否
-    包含那5檔真實成分股（僅能檢查剛好落在SAMPLE_SIZE隨機抽樣宇宙內的
-    代碼，這是繼承自factor_ic.sample_universe_ids()的既有限制，不是
-    本次新增的簡化）。"""
+    包含當天真實的成分股（`data`/`mc_lookup`呼叫端必須已經用
+    `ensure_wayback_codes_present()`把WAYBACK_ALL_CODES補進去，否則
+    可能因為隨機抽樣沒抽到而讓健檢失去意義）。回傳90個檢查點的彙總
+    （18個時點×最多5檔=至多90點，實際檢查點數視代碼是否成功補進資料
+    而定，缺的會誠實列在`codes_unavailable`裡不是靜默跳過）。"""
     out = {}
+    total_checks = 0
+    total_hits = 0
     for date_str, codes in WAYBACK_CONFIRMED_DATES.items():
         asof = pd.Timestamp(date_str)
-        in_sample = [c for c in codes if c in data]
-        not_in_sample = [c for c in codes if c not in data]
+        available = [c for c in codes if c in data]
+        unavailable = [c for c in codes if c not in data]
         caps = {}
         for sid in data:
             mc = market_cap_at_date(sid, asof, mc_lookup)
@@ -327,50 +386,105 @@ def check_membership_against_wayback(data: dict, industry_map: dict, mc_lookup: 
                 caps[sid] = mc
         ranked = sorted(caps, key=lambda s: caps[s], reverse=True)
         top50 = set(ranked[:TOP_N_BENCHMARK])
-        hits = [c for c in in_sample if c in top50]
-        misses = [c for c in in_sample if c not in top50]
+        hits = [c for c in available if c in top50]
+        misses = [c for c in available if c not in top50]
+        total_checks += len(available)
+        total_hits += len(hits)
         out[date_str] = {
-            "checked_codes_in_random_sample": in_sample,
-            "codes_not_in_random_sample_of_300": not_in_sample,
+            "codes_checked": available,
+            "codes_unavailable": unavailable,
             "hits_in_reconstructed_top50": hits,
             "misses": misses,
-            "hit_rate": f"{len(hits)}/{len(in_sample)}" if in_sample else "0/0 (無代碼落在隨機抽樣宇宙內)",
+            "hit_rate": f"{len(hits)}/{len(available)}" if available else "0/0",
         }
+    out["_summary"] = {
+        "total_checkpoints_attempted": sum(len(c) for c in WAYBACK_CONFIRMED_DATES.values()),
+        "total_checkpoints_data_available": total_checks,
+        "total_hits": total_hits,
+        "overall_hit_rate": f"{total_hits}/{total_checks}" if total_checks else "0/0",
+    }
     return out
 
 
-def returns_based_validation(data: dict, market_df: pd.DataFrame, industry_map: dict,
-                              mc_lookup: dict) -> dict:
-    """路徑4（交叉驗證，非主來源）：用band=2pp/non_list_cap=0%這組代表性
-    構造的日報酬，跟0050真實日報酬（真實價格序列，非重建）比對相關係數。
-    """
-    eq = simulate_equity_curve(data, market_df, industry_map, mc_lookup, 0.02, 0.0)
-    if eq.empty or len(eq) < 60:
-        return {"skipped": "insufficient_data_for_returns_validation"}
-    # 直接讀本機快取parquet（跳過load_dev()的精確快取鍵比對，避免因
-    # start_date字面不同觸發不必要的即時抓取——這裡只是要真實0050日
-    # 收盤價序列，不需要load_dev()的holdout裁切保護，讀哪個快取檔都
-    # 一樣安全，因為下面join時仍然只會用到VAL期以內、跟equity curve
-    # 重疊的日期）。
+def ensure_wayback_codes_present(ids: list[str]) -> list[str]:
+    """把WAYBACK_ALL_CODES補進樣本宇宙id清單（不重複），確保成員資格
+    健檢不會因為隨機抽樣沒抽到這幾檔知情代碼而變得沒有意義。"""
+    return sorted(set(ids) | set(WAYBACK_ALL_CODES))
+
+
+REQUIRED_TE_VS_REAL_0050_PASS_PCT = 1.0    # 2026-09-19裁示【0050查證採信；
+REQUIRED_TE_VS_REAL_0050_MARGINAL_PCT = 3.0  # 但驗證標準改成「報酬吻合」
+# 不是「名單吻合」】二：≤1%→重建合格；1~3%→勉強可用但吃掉大半TE預算
+# （目標alpha 2.89%反推的核心TE預算只有2.06%，若光是重建誤差就吃掉
+# 1~3%，留給因子傾斜的空間所剩無幾）；>3%→重建不合格，這條路走不通。
+
+
+def _load_real_0050_returns() -> pd.Series | None:
+    """直接讀本機快取parquet（跳過load_dev()的精確快取鍵比對，避免因
+    start_date字面不同觸發不必要的即時抓取——這裡只是要真實0050日
+    收盤價序列，不需要load_dev()的holdout裁切保護，讀哪個快取檔都
+    一樣安全，因為呼叫端join時仍然只會用到VAL期以內、跟equity curve
+    重疊的日期）。回傳None代表本機完全沒有快取，呼叫端要誠實回報
+    跳過，不得改用即時抓取或編造數字。"""
     price_files = sorted(Path(fc.DATA_DIR).glob("TaiwanStockPrice__0050__*.parquet"),
                           key=lambda p: p.stat().st_size, reverse=True)
     if not price_files:
-        return {"skipped": "no_cached_0050_price_data"}
+        return None
     real_0050 = pd.read_parquet(price_files[0])
     if real_0050.empty:
-        return {"skipped": "no_cached_0050_price_data"}
+        return None
     real_0050 = real_0050.copy()
     real_0050["date"] = pd.to_datetime(real_0050["date"])
-    real_ret = real_0050.set_index("date")["close"].sort_index().pct_change().rename("real_0050_return")
+    return real_0050.set_index("date")["close"].sort_index().pct_change().rename("real_0050_return")
+
+
+def returns_based_validation(data: dict, market_df: pd.DataFrame, industry_map: dict,
+                              mc_lookup: dict, band_pp: float = 0.0,
+                              non_list_cap: float = 0.0) -> dict:
+    """**決定性判準（2026-09-19裁示【0050查證採信；但驗證標準改成
+    「報酬吻合」不是「名單吻合」】二）**：不是路徑3的名單重疊度，是
+    重建組合（預設band=0/non_list_cap=0，即最純粹的「市值前50大、
+    不做任何傾斜」版本，用來單獨測「重建方法本身」的保真度，不混入
+    因子傾斜的額外誤差）的日報酬，對0050**真實**日報酬（真實價格
+    序列，非重建）的相關係數、年化追蹤誤差、逐年TE。
+    """
+    eq = simulate_equity_curve(data, market_df, industry_map, mc_lookup, band_pp, non_list_cap)
+    if eq.empty or len(eq) < 60:
+        return {"skipped": "insufficient_data_for_returns_validation"}
+    real_ret = _load_real_0050_returns()
+    if real_ret is None:
+        return {"skipped": "no_cached_0050_price_data"}
+    # 2026-09-19 bug修正：`eq["date"]`來自`simulate_equity_curve()`的
+    # `calendar`，而`calendar`源自`market_df["date"]`——這欄位是純字串
+    # （`load_dev()`/`adjusted_price_series()`的既有慣例，不是Timestamp），
+    # 但`_load_real_0050_returns()`的index是`pd.to_datetime()`轉換過的
+    # Timestamp。兩邊型別不同時`pd.concat(...,join="inner")`不會做隱式
+    # 型別轉換去對齊，會直接找不到任何重疊列（這正是本函式先前兩次
+    # 重跑都回報`insufficient_overlapping_days: n_days=0`的根因，不是
+    # 真的沒有重疊日期）。修法：兩邊都明確轉成Timestamp再join。
     recon_ret = eq.set_index("date")["equity"].pct_change().rename("reconstructed_return")
+    recon_ret.index = pd.to_datetime(recon_ret.index)
     merged = pd.concat([real_ret, recon_ret], axis=1, join="inner").dropna()
     if len(merged) < 30:
         return {"skipped": "insufficient_overlapping_days", "n_days": len(merged)}
     corr = float(merged["real_0050_return"].corr(merged["reconstructed_return"]))
-    te_vs_real_0050 = float((merged["reconstructed_return"] - merged["real_0050_return"]).std()
-                             * np.sqrt(252) * 100)
-    return {"n_days": len(merged), "correlation_with_real_0050_daily_return": round(corr, 4),
-            "annualized_diff_std_pct_vs_real_0050": round(te_vs_real_0050, 4)}
+    diff = merged["reconstructed_return"] - merged["real_0050_return"]
+    te_annual = float(diff.std() * np.sqrt(252) * 100)
+    by_year = {}
+    for yr, g in diff.groupby(merged.index.year):
+        if len(g) >= 20:
+            by_year[str(yr)] = round(float(g.std() * np.sqrt(252) * 100), 4)
+    if te_annual <= REQUIRED_TE_VS_REAL_0050_PASS_PCT:
+        verdict = "PASS_RECONSTRUCTION_VALID"
+    elif te_annual <= REQUIRED_TE_VS_REAL_0050_MARGINAL_PCT:
+        verdict = "MARGINAL_REPORT_TO_COMMANDER"
+    else:
+        verdict = "FAIL_RECONSTRUCTION_INVALID"
+    return {"n_days": len(merged), "band_pp": band_pp, "non_list_cap": non_list_cap,
+            "correlation_with_real_0050_daily_return": round(corr, 4),
+            "annualized_te_vs_real_0050_pct": round(te_annual, 4),
+            "te_vs_real_0050_by_year_pct": by_year,
+            "verdict": verdict}
 
 
 def main():
@@ -378,8 +492,9 @@ def main():
     market_df = prepare_market_data(market_raw)
     print(f"market_df: {len(market_df)}天")
 
-    ids = sample_universe_ids(SAMPLE_SIZE)
-    print(f"樣本宇宙: {len(ids)}檔，開始載入因子(全部走本機快取)...")
+    ids = ensure_wayback_codes_present(sample_universe_ids(SAMPLE_SIZE))
+    print(f"樣本宇宙: {len(ids)}檔（含強制補入的{len(WAYBACK_ALL_CODES)}檔Wayback健檢代碼），"
+          f"開始載入因子(全部走本機快取)...")
     data = load_sample_with_factors(ids, market_df)
     print(f"因子資料可用: {len(data)}/{len(ids)}檔")
 
@@ -433,27 +548,58 @@ def main():
     for b, n, t, p in grid_rows:
         print(f"  band={b*100:.0f}pp non_list_cap={n*100:.0f}% TE={t}% {'PASS' if p else 'FAIL'}")
 
-    # 主要網格結果已經算完並存進results——下面兩個交叉驗證失敗也不能讓
-    # 已經拿到的主結果不見，各自包一層try/except，出錯只降級成警告字串。
-    print("\n=== 路徑3交叉驗證：重建前50大是否包含Wayback確認過的成員代碼 ===")
+    # 2026-09-19裁示【0050查證採信；但驗證標準改成「報酬吻合」不是
+    # 「名單吻合」】二：下面兩層才是這一輪真正的驗收指標，上面的9組
+    # band×non_list_cap網格（vs TAIEX的required_te）是成本.三/上一輪
+    # 遺留下來的「策略層」問題（因子傾斜後的core_tilt本身TE多少），
+    # 跟這一輪「重建方法本身準不準」是兩個不同層次的問題，兩者都保留
+    # 在輸出裡，但**這一輪的判死/放行判準看下面的第二層，不是上面的
+    # 9組網格**。
+    print("\n=== 第一層健檢（成員資格，非決定性）：重建前50大是否包含"
+          "Wayback實測18個時點確認過的成員代碼 ===")
     try:
         membership = check_membership_against_wayback(data, industry_map, mc_lookup)
         for date_str, res in membership.items():
-            print(f"  {date_str}: {res['hit_rate']}  未落在隨機抽樣宇宙內: {res['codes_not_in_random_sample_of_300']}")
+            if date_str == "_summary":
+                continue
+            print(f"  {date_str}: {res['hit_rate']}  缺資料代碼: {res['codes_unavailable']}")
+        print(f"  總計: {membership['_summary']['overall_hit_rate']}"
+              f"（{membership['_summary']['total_checkpoints_attempted']}個檢查點裡"
+              f"{membership['_summary']['total_checkpoints_data_available']}個有資料可查）")
     except Exception as e:  # noqa: BLE001 -- 交叉驗證非主結果，出錯降級不中斷主流程
-        print(f"  [警告] 路徑3交叉驗證失敗，降級跳過：{e}")
+        print(f"  [警告] 第一層健檢失敗，降級跳過：{e}")
         membership = {"error": str(e)}
 
-    print("\n=== 路徑4交叉驗證：重建組合(band2pp/non_list0%) vs 0050真實日報酬 ===")
+    print("\n=== 第二層（決定性）：重建組合(純市值前50大,band=0/non_list=0) "
+          "vs 0050真實日報酬 ===")
     try:
-        returns_check = returns_based_validation(data, market_df, industry_map, mc_lookup)
-        print(f"  {returns_check}")
+        returns_check_pure = returns_based_validation(data, market_df, industry_map, mc_lookup,
+                                                        band_pp=0.0, non_list_cap=0.0)
+        print(f"  純重建(無傾斜): {returns_check_pure}")
+        returns_check_tilted = returns_based_validation(data, market_df, industry_map, mc_lookup,
+                                                          band_pp=0.02, non_list_cap=0.0)
+        print(f"  含2pp因子傾斜: {returns_check_tilted}")
     except Exception as e:  # noqa: BLE001 -- 同上
-        print(f"  [警告] 路徑4交叉驗證失敗，降級跳過：{e}")
-        returns_check = {"error": str(e)}
+        print(f"  [警告] 第二層驗證失敗，降級跳過：{e}")
+        returns_check_pure = {"error": str(e)}
+        returns_check_tilted = {"error": str(e)}
+
+    decisive_verdict = returns_check_pure.get("verdict", "ERROR_OR_SKIPPED")
+    print(f"\n=== 決定性判定：{decisive_verdict} ===")
+    if decisive_verdict == "PASS_RECONSTRUCTION_VALID":
+        print("  重建合格，可當基準，繼續core_tilt（上面9組網格的TE數字現在可信）。")
+    elif decisive_verdict == "MARGINAL_REPORT_TO_COMMANDER":
+        print("  基準勉強可用但吃掉大半TE預算，回報後由總司令裁示。")
+    elif decisive_verdict == "FAIL_RECONSTRUCTION_INVALID":
+        print("  重建不合格，core_tilt這條路確實走不通——根因是「無法取得或"
+              "重建足夠貼近的基準籃子」，不是「因子無效」。")
+    else:
+        print("  無法判定（資料不足或執行錯誤），不下判定。")
 
     results["_meta"]["membership_cross_validation"] = membership
-    results["_meta"]["returns_based_cross_validation"] = returns_check
+    results["_meta"]["returns_based_cross_validation_pure"] = returns_check_pure
+    results["_meta"]["returns_based_cross_validation_tilted_2pp"] = returns_check_tilted
+    results["_meta"]["decisive_verdict"] = decisive_verdict
 
     OUT_JSON.write_text(json.dumps(results, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     print(f"\n已存：{OUT_JSON}")

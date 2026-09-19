@@ -51,6 +51,220 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
 
 ---
 
+## 2026-09-20【緊急·合規】mopsov 破口已實際發生，先止血再檢討（原文登記）
+
+> 一、立即停止並記錄（本輪第一件事，優先於所有研究）
+>    research/material_disclosure_order_win_count.py（commit a4937c5）
+>    直接 POST https://mopsov.twse.com.tw/mops/web/ajax_t51sb10 共 100 次
+>    （5關鍵字 × 2市場 × 10年度），已執行完畢並產出
+>    material_disclosure_order_win_count.json。
+>    該網域 robots.txt 為 Disallow: /（僅 bingbot），
+>    2026-09-15 已硬性停用四支 MOPS client 並加 PermissionError。
+>    1. 立刻停用這支腳本（加 PermissionError，比照既有四支的做法）
+>    2. **已抓到的 json 不刪**（刪了就沒有證據），但在檔頭標註
+>       「本檔資料取自被禁止爬取的網域，不得用於任何判定或發布，
+>        僅作為違規事件的證據保留」，並在 PENDING_QUEUE 記一筆違規事件
+>    3. #72 這條線標 BLOCKED，解除條件是「找到合規的重大訊息來源」
+>
+> 二、根因修復：防呆從【腳本層】移到【網域層】
+>    現行防呆綁在既有四支 client 上，所以任何新腳本都能繞過。
+>    新增 research/net_guard.py：
+>      - 維護一份網域黑名單（mopsov.twse.com.tw、doc.twse.com.tw、
+>        ic.tpex.org.tw，以及 CLAUDE.md 既有禁爬清單的全部項目）
+>      - 用 requests 的 session hook 或 monkeypatch，
+>        **任何 requests 呼叫只要目標網域在黑名單就 raise PermissionError**，
+>        不管是哪支腳本、不管是誰寫的
+>      - 在 research/ 與 .github/scripts/ 的共用 import 路徑掛上它，
+>        讓新腳本預設就受保護，不需要作者記得
+>    驗收：寫一支故意打黑名單網域的測試腳本，確認它被擋下且不發出請求。
+>
+> 三、合規自檢納入既有的 audit_preflight
+>    audit_preflight.py 新增一項：掃描 repo 全部 .py，
+>    找出任何硬寫黑名單網域的字串，列出檔案與行號。
+>    發現就寫進 audit_report 的固定欄位並在 local_task_health 轉 alert。
+>    理由沿用「監控工具自己也要被監控」——
+>    這次的教訓是：**規則寫在 CLAUDE.md 裡，但沒有任何機器在檢查它。**
+>
+> 四、找合規的替代來源（#72 的解除條件）
+>    重大訊息的合規來源，逐一查證並回報實際看到什麼：
+>    1. TWSE openapi 有沒有重大訊息端點（144 個端點重新核對）
+>    2. TPEx 官方 openapi 同上
+>    3. 公開資訊觀測站是否有非 mopsov 的合規入口
+>    4. 我們自己的 news pipeline（已在跑）能不能涵蓋重大訊息
+>    四條查完才可下「無合規來源」的結論，且要走「重建」而非只是「直接下載」
+>    （這是 09-19 才立的規矩，這次要用上）。
+>
+> 五、上一輪未落地的：AWAITING_REVIEW.md 仍未建立，一併補上
+
+**接續【總司令 2026-09-20 裁示·整晚連續自走】合規止血優先，佇列灌滿，全程不等裁示**：
+授權整晚連續執行，除七條白名單停下條件外一律繼續（花錢／不可逆／需總司令
+本人裝置或帳號／解鎖holdout／真錢下單／改既有已驗證關卡門檻／法遵疑慮／
+佇列真的空了），P0合規四項優先於所有研究，之後依序做「進行中·可能被中斷」
+（原子.二/原子.三）→「既有待辦」（core_tilt.重建驗證、流程.一/二、稽核.三(a)、
+天條一.1、regime.替代B、分K.零/一、#75、借券費率/零股失衡度BLOCKED重判）→
+佇列補到20項。完整原文見互動記錄，此處摘要執行狀態如下。
+
+**執行狀態**
+
+- **一（mopsov破口止血）** ✅已完成：
+  - `research/material_disclosure_order_win_count.py`加`PermissionError`
+    停用（比照既有四支client寫法）。
+  - `research/material_disclosure_order_win_count.json`加
+    `_COMPLIANCE_WARNING`鍵標註取自被禁網域、不得用於判定/發布、僅作
+    違規證據保留，原始資料完全保留不刪。
+  - #72（`研究.a續`）已標`- [!]` BLOCKED，解除條件見上方條目本體。
+  - **一併發現並處理**：`research/material_disclosure_order_win_probe.py`
+    （commit `d3dc3492`，#72原始Gate 10查證階段的探查腳本）同樣對
+    mopsov發出過真實請求，屬同一根因的**更早一次違規事件**（本次裁示
+    只點名了`_count.py`那支，但探查階段的`_probe.py`同樣繞過了防呆），
+    一併加`PermissionError`停用，不隱瞞不僅處理裁示明確點名的那一支。
+  - 違規事件記錄：見下方「違規事件記錄」節。
+  - 心跳：`research/PROGRESS_HEARTBEAT.jsonl`本輪已記錄。
+- **二（防呆從腳本層移到網域層）** ✅已完成，**但有誠實揭露的限制**：
+  新增`research/net_guard.py`，`install()`monkeypatch
+  `requests.Session.request`，黑名單網域（`mopsov.twse.com.tw`／
+  `doc.twse.com.tw`／`ic.tpex.org.tw`／`bsr.twse.com.tw`，來源
+  `docs/DATA_SOURCE_MAP.md`裡明確標🔴且理由是robots.txt禁止或ToS明文
+  禁止爬蟲或需人工解驗證碼的網域）命中即在**送出請求前**拋
+  `BlockedDomainError`（`PermissionError`子類）。已寫
+  `research/test_net_guard.py`用`socket.create_connection`
+  monkeypatch實測「真的沒有發出任何網路連線」（不是只靠讀程式碼推論），
+  4個黑名單網域全過、白名單與前綴巧合網域不誤判。**已回填進6支既有
+  程式**（4支既有MOPS client＋2支本次違規腳本）當第二層防呆
+  （belt-and-suspenders，跟各自既有的手寫`PermissionError`並存）。
+  **限制（分支：monkeypatch有副作用→改用session層，本項選擇的正是
+  session層級的monkeypatch本身，不是更激進的全機器sitecustomize）**：
+  這支模組**不是全機器/全域防呆**——只保護「有`import net_guard`」的
+  Python行程，無法讓「完全沒import這支模組的全新腳本」自動受保護。要
+  做到那樣需要在Python系統級`sitecustomize.py`或使用者級site-packages
+  掛全域monkeypatch，但那會影響**這台機器上所有跟requests有關的
+  Python行程**（不限本專案），blast radius超出repo範圍且難以追蹤/
+  回復，屬於需要總司令確認的機器層級變更，本輪自走權限下不自行決定
+  （對應白名單第3條「需總司令本人裝置」精神的保守解讀）。**因此實際
+  雙重防線是**：net_guard讓「有記得import」的腳本得到防呆，
+  `audit_preflight.py`的靜態掃描（合規.三）在稽核時抓出「完全沒import
+  net_guard卻硬寫黑名單網域字串」的新腳本——兩層合起來才是完整防呆，
+  這是誠實的能力邊界，不是偷懶。
+- **三（audit_preflight靜態掃描）** ✅已完成：`scripts/audit_
+  preflight.py`新增`scan_domain_blocklist_strings()`，掃repo全部`.py`
+  （排除`net_guard.py`/`test_net_guard.py`本身），黑名單清單用regex從
+  `net_guard.py`原始碼文字抓取（不import，沿用本檔案既有「自我檢查不
+  依賴被檢查對象」設計原則），寫進`data/audit_report.json`
+  `domain_blocklist_scan`固定欄位（`hits`/`unguarded`/`unguarded_
+  count`）。`scripts/check_external_connectivity.py`新增
+  `check_domain_blocklist_alerts()`（跟既有
+  `check_devqueue_format_mismatch_alerts()`同一種寫法），讀該欄位轉成
+  `local_task_health`告警。**實測結果**：跑出55處命中，21處初始
+  unguarded；逐一人工核對後，15處是本輪新補net_guard的4支既有探查
+  腳本（見下），補完降到6處；**剩餘6處人工核對確認皆為文件性質**
+  （docstring裡說明「為什麼不用這個網域、改用XX」的歷史查證記錄，
+  實際`requests`呼叫目標是別的合規網域，不是真的會打黑名單網域的
+  活碼）：`research/backfill_stock_financials_gap_2025.py`（說明改用
+  FinMind的原因）、`research/irb130_pledge_probe.py`（記錄查證過程
+  最終改用`siis.twse.com.tw`）、`scripts/extract_company_products.py`
+  （說明改逐站查官網的原因）、`scripts/probe_news_sources.py`（判讀
+  規則範例）。**這個掃描機制刻意保守（寧可多報docstring也不漏掉真的
+  活碼），未來每次告警仍需人工核對是文件性質還是真的未防護的活碼**，
+  這點寫進機制本身的note欄位供下一輪執行者參考。
+  - **一併發現並處理的4支歷史探查腳本**（合規.三掃描意外抓到，裁示
+    原文沒有點名，但同一根因不應該漏掉）：`research/buyback_
+    announcement_probe.py`、`research/mops_insider_holdings_probe.py`、
+    `research/mops_material_news_probe.py`、`research/forced_trader_
+    events_probe.py`——四支皆有對mopsov發出真實請求的活碼且無任何
+    防呆，已補`import net_guard`。**這些屬於歷史遺留的查證階段腳本**
+    （多數在2026-09-06~09完成查證任務後未再執行），沒有證據顯示它們
+    在2026-09-15防呆生效後被重新執行過，但既然合規.三掃到了就一併
+    處理，不因為裁示原文只點名一支就縮小處理範圍。
+- **四（合規替代來源查證）** ✅已完成：四條路徑（TWSE openapi 144端點／
+  TPEx官方openapi／公開資訊觀測站非mopsov入口／自有news pipeline）
+  皆已用官方swagger規格檔實測核對，結論與2026-09-15 Gate 10既有查證
+  一致——合規端點存在但snapshot-only無查詢參數，唯一有歷史深度的
+  `t51sb10`僅存在於已排除的mopsov網域。#72判**FAIL**結案（`TRIALS_
+  LEDGER.md`#284），詳見`research/HYPOTHESIS_QUEUE.md` #72條目、
+  `research/STRATEGY_GRAVEYARD.md`對應段落、`docs/DATA_SOURCE_MAP.md`
+  新增段落。
+- **五（AWAITING_REVIEW.md）** ✅本輪稍早（原子.一審閱通過那一輪）已
+  建立，本次確認仍存在、格式正確，未受影響。
+
+**違規事件記錄**（依總司令裁示一.2要求登記）：
+
+| 項目 | 內容 |
+|---|---|
+| 發生時間 | 2026-09-20 00:30:36（commit `a4937c5`時間戳），另有更早一次2026-09-06~09（commit `d3dc3492`附帶的探查階段） |
+| 腳本 | `research/material_disclosure_order_win_count.py`（本次裁示點名）；`research/material_disclosure_order_win_probe.py`（本輪一併發現的更早探查階段違規） |
+| 目標網域 | `mopsov.twse.com.tw`（robots.txt全站`Disallow: /`，僅bingbot例外，2026-09-08已查證） |
+| 請求數 | `_count.py`：100次POST（5關鍵字×2市場×10年度）；`_probe.py`：探查階段少量請求（未精確計數，屬查證性質非批次回補） |
+| 如何發生 | 2026-09-15的防呆（四支既有MOPS client逐支手寫`PermissionError`）綁在「已知的四支程式」上，2026-09-19~09-20新寫的腳本沒有繼承到這個防呆，直接對同一個已知被禁網域發出請求；根因是防呆機制本身設計在腳本層而非網域層，任何新腳本都能繞過 |
+| 止血 | 兩支腳本皆已加`PermissionError`停用；已抓到的json資料標註合規警告後保留不刪，僅作違規證據 |
+| 根因修復 | `research/net_guard.py`網域層防呆＋`audit_preflight.py`靜態掃描（見上方執行狀態二、三） |
+| 影響範圍 | 僅限資料取得合規性，不影響任何已發布的策略判定或決策（#72本身尚在Gate 10查證階段，未進入任何統計判定，不涉及任何已採信的結論） |
+
+---
+
+## 2026-09-19【裁示】原子.一審閱通過（補三個算子）＋#73設上限＋補等待審閱的可見度（原文登記）
+
+> ═══ 一、原子.一 審閱通過 ═══
+> 品質超過規格要求，特別記一筆：「0 vs NaN」的區分做得對。
+> range=0 回 0（事實：今天真的沒波動）、close_loc 除零回 NaN（無定義），
+> 這兩者的差別大部分資料管線是無腦 fillna(0) 一把抓，而那是假訊號的
+> 頭號來源。這個判斷是你自己想到的，不在規格裡。
+>
+> 但補三個，補完直接接原子.二，不用再等我：
+> (a) 新增 op_mul(x, y)（逐元素相乘）——上漲量 = sign(delta(c,1)) × v
+> (b) 新增 op_decay_linear(s, n)（線性衰減加權平均）——權重w_i∝(n−i)，i=0最近
+> (c) 新增基準原子 bench_o/h/l/c/v，0050與TAIEX各一套（前綴b50_/btx_）——
+>     op_ts_corr簽名收兩個Series，但ATOMS裡沒有大盤，relative_strength
+>     整個家族在原子層缺席。0050價格用既有adjusted_price_series("0050")，
+>     真實序列非重建。三個都要有單元測試，沿用四情境（停牌/鎖死/除零/NaN）。
+>
+> ═══ 二、原子.二 開跑，不用再等審閱 ═══
+> 補完三個算子直接接。事前登記搜尋空間大小，輸出ATOM_IC_MAP.md，
+> 禁止報告「最佳素材」，只出零件層級的IC分布。全部計入selection_bias_
+> ledger的N，跑完回報新N與門檻。
+>
+> ═══ 三、#73 設上限（上一輪裁示未進佇列，這次補上）═══
+> 六輪commit全部「無判定、N不變」，前四輪卡在補資料。實測月換手85%，
+> 年化成本拖累約5.69%，自己落在50~100%成本敏感帶。給2輪上限：這2輪內
+> 必須產出「Gate 1以外的實質統計判定」，產不出來就標BLOCKED回報卡在哪。
+> 補資料的輪次不計入這2輪，但要另外統計「補資料共幾輪vs測試共幾輪」
+> 寫進報告——補資料的輪次比測試多，本身就是訊號。
+>
+> ═══ 四、流程補強：等待審閱要可見（這是Cowork的損失）═══
+> 原子.一09:24完成、照規矩停下等審閱，但寫在PENDING_QUEUE第424行敘述裡；
+> Cowork每輪只讀commit log，看不到「等待中」這個狀態，結果一個做好的
+> 東西躺了14小時，期間六輪跑去做#73。新規則（寫進CLAUDE.md與收工回報
+> 格式）：每輪收工回報的第一行，必須是「等待總司令審閱：N件」，N>0時
+> 逐條列出項目名稱與等待多久。N=0也要明寫「等待審閱：0件」，不得省略。
+> 並且新增一個 **[訊息在此中斷，未收到後續內容，未自行猜測補完]**
+
+**執行狀態**
+
+- **一（原子.一審閱通過＋補三個算子）** ✅已完成：`ATOM_LIBRARY.py`/
+  `.md`新增`op_mul`、`op_decay_linear`、10個基準原子(b50_/btx_各5)，
+  三者皆有涵蓋停牌/鎖死/除零/NaN四情境的單元測試，自我測試全過
+  （24個原子、19個算子）。審閱通過的稱許已記入`ATOM_LIBRARY.md`。
+- **二（原子.二 depth-1 IC地圖）** 🔄事前登記✅已完成、腳本✅已完成
+  並修好2個實測發現的bug（欄位schema分歧、日期格式）、15檔smoke test
+  ✅通過（3184列=1592表達式×2horizon，數字正確）；300檔全量執行中，
+  結果與`ATOM_IC_MAP.md`待補記。搜尋空間：(A)10個窗口算子×24個原子×
+  4個窗口=960、(B)3個純量算子×24個原子=72、(C)ts_corr(股票原子,基準
+  原子,n)=14×10×4=560，合計1592個表達式×2個horizon=**3184個測試**，
+  已明確排除mul/ratio的原子×原子全排列(留給原子.三，因為總司令原文
+  mul範例本身是深度2用法)。
+- **三（#73設上限）** ✅已完成但發現已自然解除：#73（金流一.5）在裁示
+  抵達前後的下一輪（第8輪，馬拉松自走）已產出真正的Gate 2判定
+  （TRAIN百分位96.0過、VAL百分位61.4未過，判FAIL），已登記
+  `TRIALS_LEDGER.md`#282、`STRATEGY_GRAVEYARD.md`。全程8輪中3輪補
+  資料(37.5%)，在2輪上限額度內產出實質判定，不需要動用BLOCKED。
+  規則本身仍寫進`HYPOTHESIS_QUEUE.md`#73條目供未來類似情況參考。
+- **四（等待審閱可見度）** ✅已完成：`CLAUDE.md`第五節新增「收工回報
+  第一行必須是等待總司令審閱：N件」規則。**訊息末尾「並且新增一個」
+  後中斷，未收到完整內容，未自行猜測補完，待總司令補充。**
+
+**附帶完成（本輪同時處理的上一輪未竟事項）**：`core_tilt`decisive驗證
+（0050查證標準改成報酬吻合）除錯完成，最終判死，見下方「0050成分股.一」
+與「安全邊際.三」條目更新。
+
 ## 2026-09-19【裁示】core_tilt TE不可行的根因是SPEC寫錯，先修SPEC再判死（原文登記）
 
 > 【裁示】core_tilt TE 不可行的根因是 SPEC 寫錯，先修 SPEC 再判死
@@ -1727,17 +1941,23 @@ Cowork原話：
   `CONSTITUTION.md`、`lending_fee_gate63_costs.py`、`lending_fee_
   gate_v2_longhold.py`。長持有期家族6格重跑4/6過（未達5格門檻，維持
   結案）。`TRIALS_LEDGER.md`#279。
-- [!] **0050成分股.一**（四路徑查證＋core_tilt選股邏輯重寫）[研究]
-  BLOCKED：查證部分✅已完成（互動視窗CC親自執行，四條路徑逐條實測，
-  詳見`CORE_TILT_SPEC.md`「2.1.3」節與上方執行狀態摘要）；選股邏輯
-  重寫✅已完成且是站得住的設計更正；但❗**TE重跑數字不採信**——
-  發現兩個災難性單日暴跌暴漲（2021-04-06/2024-12-31）疑似換股邊界
-  條件計算異常，且執行期間FinMind封鎖冷卻污染因子資料完整度，完整
-  細節見`research/CORE_TILT_TE_FEASIBILITY.md`「⚠️後續更正」節。
-  **預計解除時間**：需要(a)定位並修好那兩個異常日的根因(b)等FinMind
-  封鎖解除或改用完全走本機快取的乾淨樣本重跑(c)修正成員資格交叉驗證
-  的抽樣設計(強制納入已知5檔真實代碼)(d)乾淨重跑後才能登記真正的
-  TRIALS_LEDGER結果。不因為程式已經改完就急著下判定。
+- [x] **0050成分股.一**（四路徑查證＋core_tilt選股邏輯重寫＋decisive
+  驗證）[研究] ✅已完成並結案：查證部分（四條路徑逐條實測，詳見
+  `CORE_TILT_SPEC.md`「2.1.3」節）、選股邏輯重寫（先市值前50大出發、
+  保留全部只調權重，站得住的設計更正）、decisive驗證三者皆完成。
+  除錯找到並修好兩個真實bug：(1) `simulate_equity_curve()`對缺值
+  股票原本無限期forward-fill凍結價格，改為`limit=5`天有界版；
+  (2) `returns_based_validation()`日期join的Timestamp/字串型別不
+  一致，導致先前誤報「0天重疊」（不是真的沒有重疊）。**乾淨重跑
+  decisive結果**：重建組合(純市值前50大) vs 0050真實日報酬，相關
+  係數0.0102（幾乎零相關）、年化TE 20.47%（逐年皆遠高於3%門檻），
+  **落入>3%分支，判死**。根因是「無法取得或重建足夠貼近的基準籃子」
+  （306檔隨機抽樣宇宙僅146檔有市值代理，抽樣涵蓋率不足以捕捉真正
+  的權值股結構），不是因子無效或選股/傾斜邏輯設計錯誤。已登記
+  `TRIALS_LEDGER.md`#283、寫入`STRATEGY_GRAVEYARD.md`「core_tilt」
+  條目。**附帶重要發現**：舊策略層判準（vs TAIEX的CAPM殘差TE）同批
+  網格顯示TE=0.762%看似達標但beta=0.0009，是偽陽性——印證了總司令
+  這次「改用報酬吻合而非策略層TE」裁示的必要性。
 - [x] **安全邊際.三**（TE重新校準，舊版「先選股後加權」構造的FAIL，
   `TRIALS_LEDGER.md`#280，已確認有效不受本次污染影響）[研究] ✅已完成
   （research fork建置
@@ -1892,20 +2112,30 @@ Cowork原話：
   回報：可載入N個/待修N個/已死N個，以及修復成本排序。**分支**：可修
   到≥6個→視需要決定是否值得重啟任何策略層組合搜尋；修不到→誠實回報
   「因子庫不足以支撐組合搜尋」，正確動作是造新因子而非搜舊組合。
-- [x] **原子.一** [研究] ✅已完成（互動視窗CC，2026-09-19）——見下方
-  「原子.一完成」條目的完整結果。**依總司令明確要求「原子.一做完先
-  回報，總司令看過再跑原子.二」，原子.二/三本輪不動工**。
-- [ ] **原子.二** [研究] ✅已解除阻塞（2026-09-19總司令裁示【0050查證
-  採信；但驗證標準改成「報酬吻合」不是「名單吻合」】四明確給出go-ahead：
-  「原子.一建庫已完成，可以接」）——depth-1表達式（算子(原子,n)）IC
-  地圖，描述性掃描，事前算出空間大小並登記，全部計入
-  `selection_bias_ledger.py`的N。禁止在這階段報告「最佳素材」或
-  據此組任何策略，只出地圖。**分支**：有素材IC顯著且分牛熊段皆同號
-  →進原子.三；全部不穩定→誠實回報「日K原子層找不到穩定素材」。
-  **併入範圍（總司令原文『零件.零續』的正確動作，不當獨立項目）**：
-  既有因子池只有3訊號/2獨立成分（見`COMPONENT_INVENTORY.md`），正確
-  動作是「造新因子」，原子層本身就是造因子的機器，所以「補因子池」
-  這件事併進本項一起做，不要另開一個「零件.零續」的獨立佇列項目。
+- [x] **原子.一** [研究] ✅**審閱通過**（2026-09-19總司令裁示【原子.一
+  審閱通過（補三個算子）＋#73設上限＋補等待審閱的可見度】一：「品質
+  超過規格要求...『0 vs NaN』的區分做得對...這個判斷是你自己想到的，
+  不在規格裡」）——見下方「原子.一完成」條目的完整結果。審閱通過後
+  補三個算子/原子（`op_mul`、`op_decay_linear`、10個基準原子b50_/
+  btx_），三者皆有四情境單元測試，`ATOM_LIBRARY.py`自我測試全過
+  （24個原子、19個算子）。補完後**直接接原子.二，不再等審閱**。
+- [x] **原子.二** [研究] 🔄查證與腳本✅已完成，全量執行中——事前登記
+  搜尋空間：(A)10個窗口算子×24個原子×4個窗口=960、(B)3個純量算子×
+  24個原子=72、(C)ts_corr(股票原子,基準原子,n)=14×10×4=560，合計
+  1592個表達式×2個horizon=**3184個測試**（計入`selection_bias_
+  ledger.py`的N，見下方N更新記錄）。**明確排除mul/ratio的原子×原子
+  全排列**：總司令原文mul範例（`sign(delta(c,1))×v`）本身是深度2
+  用法（先算深度1子表達式再乘），不是「兩個原始原子直接相乘」，
+  留給原子.三用已存活的深度1素材去組。腳本`research/atom_ic_map.py`
+  ✅已完成，過程中修好2個實測發現的bug（FinMind/yfinance兩條路徑
+  欄位schema不同、日期格式不一致），15檔smoke test通過（3184列數字
+  正確）。300檔全量執行結果與`ATOM_IC_MAP.md`（**只出IC分布，禁止
+  報告最佳素材**）待補記。**併入範圍（總司令原文『零件.零續』的正確
+  動作，不當獨立項目）**：既有因子池只有3訊號/2獨立成分（見
+  `COMPONENT_INVENTORY.md`），正確動作是「造新因子」，原子層本身就
+  是造因子的機器，所以「補因子池」併進本項一起做，不另開獨立項目。
+  **分支**：有素材IC顯著且分牛熊段皆同號→進原子.三；全部不穩定→
+  誠實回報「日K原子層找不到穩定素材」。
 - [!] **原子.三** [研究] BLOCKED：依賴原子.二完成（間接依賴原子.一
   審閱通過）。depth-2/3組合（只用原子.二存活的素材），深度上限3，
   事前宣告搜尋空間大小，搜尋只在TRAIN。六道控制全部適用，**第六條
@@ -2695,6 +2925,48 @@ Cowork原話：
   `HYPOTHESIS_QUEUE.md`同步記載「#53～#57『市場總開關假設軸』家族
   全數結案」。本輪查核確認無新增改動，不重跑，只補標記（跟`重構.A3`
   同一種「腦與手讀兩份不同文件」的舊債）。
+- [x] **研究.a續**（#72重大訂單/得標公告效應）[研究] ✅已結案：**FAIL**
+  （2026-09-20總司令裁示【緊急·合規】合規.四四路徑查證後結案，見下方
+  「⚠️違規事件」段落後的最終狀態）。原內容：Gate 10
+  已確認`t51sb10`（MOPS重大訊息主旨全文檢索）可行、歷史回溯至2015年，
+  `research/material_disclosure_order_win_probe.py`已驗證單關鍵字
+  「得標」查詢可行但樣本量偏少（約11~15筆/年/市場）。**做X→分支**：
+  (a)用`Condition2='或含'`合併`classify()`既有「重大訂單」四個關鍵字
+  （接單/訂單/得標/簽約/合作備忘）重新查詢，估算2015-2024全市場
+  （sii+otc）實際筆數→若樣本量足夠（非個位數/年），(b)寫正式回補
+  腳本（比照`backfill_buyback_announcement.py`節流設計，含checkpoint
+  可續跑）累積歷史庫→(c)複用`buyback_car_gate.py`同款CAR框架跑第1關
+  sanity（事前綁定方向為正，比較對象為隨機日期控制組）；若合併後
+  樣本仍過少，依快殺標準「觀測層級樣本不足」直接判FAIL，不硬做統計
+  檢定。[自走補入，來源：`research/HYPOTHESIS_QUEUE.md` #72條目
+  （10407~10533行）「下一輪待辦（依序，不跳關）」段落，2026-09-15
+  寫下後查核`HYPOTHESIS_QUEUE.md`全文（含#73/#74/#75三個後續條目）
+  與`MARATHON_LOG.md`皆無任何後續輪次接續過#72的(a)(b)(c)(d)，
+  `hypothesis_queue`軌自己轉去做#73/#74/#75，#72被晾在原地，
+  非重複交辦]
+
+  **⚠️違規事件（本項執行(a)時發生，詳見下方「違規事件記錄」節）**：
+  自走DevQueue軌接手本項的(a)後，寫了新腳本
+  `research/material_disclosure_order_win_count.py`（commit`a4937c5`），
+  對`mopsov.twse.com.tw`（robots.txt全站`Disallow: /`，僅bingbot例外）
+  發出100次POST請求取得逐年筆數估算，繞過了2026-09-15已對四支既有
+  MOPS client生效的`PermissionError`防呆（防呆綁在腳本層，新腳本沒
+  繼承到）。
+
+  **最終狀態（合規.四四路徑查證完成，`TRIALS_LEDGER.md`#284）**：
+  TWSE openapi 144端點、TPEx官方openapi、公開資訊觀測站非mopsov入口、
+  自有news pipeline四條路徑皆已查完（用官方swagger規格檔`https://
+  openapi.twse.com.tw/v1/swagger.json`與`https://www.tpex.org.tw/
+  openapi/swagger.json`實測確認`t187ap04_L`/`mopsfin_t187ap04_O`兩個
+  合規端點**完全沒有宣告任何查詢參數**，是snapshot-only），四條路徑
+  結論與2026-09-15 Gate 10既有查證完全一致：**合規來源存在但只能
+  前向累積（無法回溯2015-2024），唯一有歷史深度的`t51sb10`路徑僅
+  存在於已被永久排除的mopsov網域**。**#72判FAIL結案**，根因寫「合規
+  資料源歷史深度不足」不是「因子無效」，完整見`HYPOTHESIS_QUEUE.md`
+  #72條目與`STRATEGY_GRAVEYARD.md`對應段落。
+  **2026-09-20 進度（hypothesis_queue）**：(a)已完成——五關鍵字×上市/上櫃×2015-2024共約900筆（上界，約90筆/年，非個位數），
+  分支轉(b)寫正式回補腳本；注意「簽約」佔45%語意最廣、需過濾/去重，有效事件<約300筆則依快殺標準判FAIL。詳見
+  `research/MARATHON_LOG.md` 2026-09-20 00:30 與 `research/material_disclosure_order_win_count.json`。本條保持 `- [ ]`（(b)(c)未做）。
 
 ---
 
@@ -6610,6 +6882,7 @@ Cybex.beta
 源頭二.3
 源頭二.4
 源頭二.5
+研究.a續
 <!-- ORDER-END -->
 
 **2026-09-18（續5）清單重整說明**：舊清單65個去重項目裡，39個已確認

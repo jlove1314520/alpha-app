@@ -38,6 +38,9 @@ import time
 
 import requests
 
+import net_guard  # 2026-09-20合規.三發現：舊探查腳本沒接防呆，補上（belt-and-suspenders）
+net_guard.install()
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "

@@ -18,6 +18,9 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
+import net_guard  # 2026-09-20合規.三發現：舊探查腳本沒接防呆，補上（belt-and-suspenders）
+net_guard.install()
+
 URL = "https://mopsov.twse.com.tw/mops/web/ajax_t35sc09"
 REFERER = "https://mopsov.twse.com.tw/mops/web/t35sc09"
 HEADERS = {

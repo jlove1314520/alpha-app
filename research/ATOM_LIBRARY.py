@@ -36,6 +36,16 @@ true_range/vwap)加總是**14個，不是15個**。本檔案如實只實作這14
 而不只是`gap`/`true_range`內部用到的中間量），需要總司令指出是哪一個，
 不由本模組自行猜測填補。
 
+**2026-09-19總司令裁示【原子.一審閱通過】補三件**（原子.一審閱通過，
+品質達標，補完直接接原子.二不需再等審閱）：(a) `op_mul`（逐元素相乘，
+既有算子只有除法沒有乘法，組不出量價配合表達式）；(b) `op_decay_linear`
+（線性衰減加權平均，`ts_mean`等權缺了「近重遠輕」這類表達式，權重
+`w_i∝(n−i)`事前寫死）；(c) 10個基準原子`b50_o/h/l/c/v`（0050）與
+`btx_o/h/l/c/v`（TAIEX），補上`relative_strength`家族在原子層的缺席
+（`op_ts_corr`簽名收兩個Series，缺大盤序列就組不出這整個家族，而這
+既是既有因子之一，也是天條二對標0050的核心）。補完後原子總數
+14+10=**24個**，算子總數17+2=**19個**。
+
 用法：
     python research/ATOM_LIBRARY.py --self-test   # 跑全部單元測試
 """
@@ -143,6 +153,132 @@ ATOMS = {
 
 
 # =============================================================================
+# 基準原子（2026-09-19總司令裁示【原子.一審閱通過】補件(c)，10個：
+# b50_o/h/l/c/v（0050）＋ btx_o/h/l/c/v（TAIEX），最重要的一項補件）。
+#
+# **理由**：`op_ts_corr`簽名收兩個Series，但`ATOMS`裡原本沒有大盤，
+# 導致`relative_strength`這整個家族在原子層缺席——那既是既有因子之一，
+# 也是天條二（對標0050）的核心。
+#
+# **合約差異（跟前面14個既有atom不同，明確寫出來）**：既有14個atom的
+# `df`參數不需要日期資訊（純粹依賴列順序=時間順序）。基準原子需要把
+# 大盤序列**對齊**到個股自己的交易日曆（個股停牌/當天未成交時，大盤
+# 不會跟著停牌，兩邊的日期集合不會完全一致），所以基準原子要求`df`
+# 額外帶一個`"date"`欄位（既有14個atom不需要，呼叫端在建構個股`df`時
+# 本來就會有日期欄位，這不是新增負擔，是本來就存在的資料，只是既有
+# 14個atom沒有用到）。對齊方式：把大盤序列reindex到個股的date、
+# forward-fill缺值——理由跟`core_tilt_backtest.py`2026-09-19的bug
+# 修正同一個道理：個股交易日曆上有、大盤當天剛好缺值（或反過來）時，
+# 用大盤最近一個已知值延續，不能讓「兩邊日期沒對齊」偽裝成「大盤當天
+# 憑空消失變成0」。個股日期早於大盤資料第一筆可用日期時，正確答案是
+# NaN（真的不知道），不是0、也不能往前外插。
+#
+# **資料源**：0050用`adjust.adjusted_price_series("0050")`（真實序列，
+# 非重建，跟本專案其他地方引用0050的方式一致）；TAIEX用`finmind_client.
+# load_dev("TaiwanStockPrice","TAIEX",...)`（本專案既有的TAIEX讀取
+# 慣例，見`strategies/weinstein_stage2.py::prepare_market_data`），
+# TAIEX是指數本身不是個股，無除權息調整可言，用原始值就是正確值，
+# 不需要adjusted版本。兩者都經`validation.holdout`既有機制裁切在
+# VAL_END之前，不碰HOLDOUT，且都在**首次被呼叫時才真正抓取**（lazy、
+# module級快取只抓一次），不在import本模組時就發出任何請求。
+# =============================================================================
+
+_BENCHMARK_CACHE: dict[str, pd.DataFrame] = {}
+
+
+def _load_benchmark_0050() -> pd.DataFrame:
+    if "0050" not in _BENCHMARK_CACHE:
+        from adjust import adjusted_price_series
+        raw = adjusted_price_series("0050")
+        out = pd.DataFrame({
+            "date": pd.to_datetime(raw["date"]),
+            "o": raw["adj_open"].astype(float), "h": raw["adj_high"].astype(float),
+            "l": raw["adj_low"].astype(float), "c": raw["adj_close"].astype(float),
+            "v": raw["volume"].astype(float),
+        }).sort_values("date").reset_index(drop=True)
+        _BENCHMARK_CACHE["0050"] = out
+    return _BENCHMARK_CACHE["0050"]
+
+
+def _load_benchmark_taiex() -> pd.DataFrame:
+    if "TAIEX" not in _BENCHMARK_CACHE:
+        from finmind_client import load_dev
+        # start_date="2000-01-01"刻意對齊本專案其他地方已經快取過的
+        # TAIEX抓取範圍（`load_dev()`的快取鍵含start_date字面值，選一個
+        # 沒被快取過的日期會逼出一次不必要的即時抓取）。
+        raw = load_dev("TaiwanStockPrice", "TAIEX", "2000-01-01")
+        out = pd.DataFrame({
+            "date": pd.to_datetime(raw["date"]),
+            "o": raw["open"].astype(float), "h": raw["max"].astype(float),
+            "l": raw["min"].astype(float), "c": raw["close"].astype(float),
+            "v": raw["Trading_Volume"].astype(float),
+        }).sort_values("date").reset_index(drop=True)
+        _BENCHMARK_CACHE["TAIEX"] = out
+    return _BENCHMARK_CACHE["TAIEX"]
+
+
+def _align_benchmark_field(df: pd.DataFrame, loader, field: str) -> pd.Series:
+    if "date" not in df.columns:
+        raise ValueError(
+            "基準原子要求df必須帶'date'欄位才能對齊到大盤日曆——既有14個atom"
+            "不需要date是因為它們純粹用列順序，這個合約差異已寫在本節檔頭"
+        )
+    bench = loader()
+    dates = pd.to_datetime(df["date"])
+    aligned = bench.set_index("date")[field].reindex(dates).ffill()
+    return pd.Series(aligned.values, index=df.index)
+
+
+def atom_b50_o(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_0050, "o")
+
+
+def atom_b50_h(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_0050, "h")
+
+
+def atom_b50_l(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_0050, "l")
+
+
+def atom_b50_c(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_0050, "c")
+
+
+def atom_b50_v(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_0050, "v")
+
+
+def atom_btx_o(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_taiex, "o")
+
+
+def atom_btx_h(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_taiex, "h")
+
+
+def atom_btx_l(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_taiex, "l")
+
+
+def atom_btx_c(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_taiex, "c")
+
+
+def atom_btx_v(df: pd.DataFrame) -> pd.Series:
+    return _align_benchmark_field(df, _load_benchmark_taiex, "v")
+
+
+BENCHMARK_ATOMS = {
+    "b50_o": atom_b50_o, "b50_h": atom_b50_h, "b50_l": atom_b50_l,
+    "b50_c": atom_b50_c, "b50_v": atom_b50_v,
+    "btx_o": atom_btx_o, "btx_h": atom_btx_h, "btx_l": atom_btx_l,
+    "btx_c": atom_btx_c, "btx_v": atom_btx_v,
+}
+ATOMS.update(BENCHMARK_ATOMS)
+
+
+# =============================================================================
 # 算子（Operators）
 # =============================================================================
 
@@ -204,10 +340,28 @@ def op_ts_argmax(s: pd.Series, n: int) -> pd.Series:
     return s.rolling(n, min_periods=n).apply(_argmax_pos, raw=True)
 
 
+def op_decay_linear(s: pd.Series, n: int) -> pd.Series:
+    """線性衰減加權平均（2026-09-19總司令裁示【原子.一審閱通過】補件(b)）。
+    理由：`ts_mean`是等權，缺了會少掉一整類「近重遠輕」的表達式。
+    **權重定義事前寫死（總司令原文）**：`w_i ∝ (n−i)`，i=0是最近一期
+    ──即最近一天權重最高(=n)、最舊一天權重最低(=1)，線性遞減，
+    normalize後總和為1。n<1的視同ALLOWED_WINDOWS值域外用法，呼叫端
+    責任（同本模組其餘窗口算子的既有慣例，本函式不重複檢查）。"""
+    weights = np.arange(1, n + 1, dtype=float)  # 索引0(窗口最舊)→1，索引n-1(窗口最新)→n
+    weights = weights / weights.sum()
+
+    def _weighted(window: np.ndarray) -> float:
+        if np.any(np.isnan(window)):
+            return np.nan  # 任一期缺值就不硬湊，NaN傳播，理由同op_mul
+        return float(np.dot(window, weights))
+
+    return s.rolling(n, min_periods=n).apply(_weighted, raw=True)
+
+
 TS_OPERATORS = {
     "delay": op_delay, "delta": op_delta, "ts_mean": op_ts_mean, "ts_std": op_ts_std,
     "ts_max": op_ts_max, "ts_min": op_ts_min, "ts_rank": op_ts_rank, "ts_sum": op_ts_sum,
-    "ts_corr": op_ts_corr, "ts_argmax": op_ts_argmax,
+    "ts_corr": op_ts_corr, "ts_argmax": op_ts_argmax, "decay_linear": op_decay_linear,
 }
 
 
@@ -267,7 +421,18 @@ def op_ratio(x: pd.Series, y: pd.Series) -> pd.Series:
     return result.where(y != 0, np.nan)
 
 
-SCALAR_OPERATORS = {"sign": op_sign, "abs": op_abs, "log1p": op_log1p, "ratio": op_ratio}
+def op_mul(x: pd.Series, y: pd.Series) -> pd.Series:
+    """逐元素相乘（2026-09-19總司令裁示【原子.一審閱通過】補件(a)）。
+    理由：既有算子只有`ratio`(除法)沒有乘法，組不出最基本的量價配合
+    表達式（例：上漲量 = sign(delta(c,1)) × v）。**NaN傳播是IEEE754
+    標準行為，不特別處理**——任一邊是NaN，結果就是NaN（即使另一邊是
+    0也一樣，`0 × NaN = NaN`不是`0`，這是「不知道」不是「確定是零」，
+    跟本模組其餘算子一貫的NaN語意一致）。"""
+    return x * y
+
+
+SCALAR_OPERATORS = {"sign": op_sign, "abs": op_abs, "log1p": op_log1p, "ratio": op_ratio,
+                     "mul": op_mul}
 
 ALL_OPERATORS = {**TS_OPERATORS, **CROSS_SECTIONAL_OPERATORS, **SCALAR_OPERATORS}
 
@@ -382,6 +547,66 @@ def self_test() -> int:
     check("op_log1p邊界(x=-1時log(0)=-inf)", np.isneginf(op_log1p(pd.Series([-1.0])).iloc[0]))
     check("op_log1p邊界(x<-1時為NaN)", pd.isna(op_log1p(pd.Series([-2.0])).iloc[0]))
 
+    # ---- 2026-09-19補件(a) op_mul：4情境（停牌/鎖死/除零/NaN） ----
+    mul_normal = op_mul(pd.Series([2.0, 3.0, -4.0]), pd.Series([5.0, 0.5, 2.0]))
+    check("op_mul正常值", list(mul_normal) == [10.0, 1.5, -8.0])
+    halted_v = pd.Series([1000.0, 0.0, 1000.0])  # 停牌日成交量為0
+    sign_delta = pd.Series([1.0, -1.0, 1.0])
+    check("op_mul停牌日(量=0)結果為0非NaN", op_mul(sign_delta, halted_v).iloc[1] == 0.0)
+    locked = pd.Series([10.0, 10.0, 10.0])  # 鎖死：連續相同值
+    check("op_mul鎖死值(常數×常數)正常值", (op_mul(locked, locked) == 100.0).all())
+    check("op_mul除零情境(0×NaN=NaN非0)",
+          pd.isna(op_mul(pd.Series([0.0]), pd.Series([np.nan])).iloc[0]))
+    check("op_mulNaN傳播(任一邊NaN則NaN)",
+          pd.isna(op_mul(pd.Series([np.nan, 2.0]), pd.Series([3.0, 4.0])).iloc[0])
+          and op_mul(pd.Series([np.nan, 2.0]), pd.Series([3.0, 4.0])).iloc[1] == 8.0)
+
+    # ---- 2026-09-19補件(b) op_decay_linear：4情境（停牌/鎖死/除零/NaN） ----
+    ramp = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])  # 遞增序列，權重w_i∝(n-i)，i=0最近
+    dl5 = op_decay_linear(ramp, 5)
+    # n=5窗口[1,2,3,4,5]，weights=[1,2,3,4,5]/15（索引0=最舊=1，索引4=最新=5）
+    expected_dl5 = (1*1 + 2*2 + 3*3 + 4*4 + 5*5) / 15.0
+    check("op_decay_linear(n=5)正常值(近重遠輕)", abs(dl5.iloc[4] - expected_dl5) < 1e-9)
+    check("op_decay_linear前4筆為NaN(min_periods)", dl5.iloc[:4].isna().all())
+    dl_locked = op_decay_linear(pd.Series([7.0, 7.0, 7.0, 7.0, 7.0]), 5)
+    check("op_decay_linear鎖死值(常數序列)結果等於該常數(非除零壞掉)",
+          abs(dl_locked.iloc[4] - 7.0) < 1e-9)
+    halted_price = pd.Series([10.0, 10.0, np.nan, 10.0, 10.0])  # 停牌日價格NaN
+    dl_halted = op_decay_linear(halted_price, 5)
+    check("op_decay_linear停牌日(窗口含NaN)整個窗口回NaN不硬湊",
+          pd.isna(dl_halted.iloc[4]))
+    check("op_decay_linear(n=1)退化情況：窗口只有自己，加權平均等於自身",
+          abs(op_decay_linear(ramp, 1).iloc[0] - 1.0) < 1e-9)
+
+    # ---- 2026-09-19補件(c) 基準原子：4情境（停牌/鎖死/除零/NaN），
+    # 用假loader注入合成資料，不打真實資料源，保持self-test快速且確定性 ----
+    fake_bench = pd.DataFrame({
+        "date": pd.to_datetime(["2024-01-02", "2024-01-03", "2024-01-05"]),  # 2024-01-04缺值(停牌/假日)
+        "o": [100.0, 101.0, 103.0], "h": [102.0, 102.0, 104.0],
+        "l": [99.0, 100.0, 102.0], "c": [101.0, 101.0, 103.0], "v": [1e6, 1.1e6, 1.2e6],
+    })
+    def _fake_loader() -> pd.DataFrame:
+        return fake_bench
+    stock_df_aligned = pd.DataFrame({"date": pd.to_datetime(
+        ["2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"])})  # 個股在01-04有交易但大盤缺值
+    aligned_c = _align_benchmark_field(stock_df_aligned, _fake_loader, "c")
+    check("基準原子對齊：個股日曆有但大盤缺值的日子forward-fill延續前值(非0/NaN)",
+          abs(aligned_c.iloc[2] - 101.0) < 1e-9)  # 01-04用01-03的收盤值101延續
+    check("基準原子對齊：正常重疊日期給出正確值",
+          abs(aligned_c.iloc[0] - 101.0) < 1e-9 and abs(aligned_c.iloc[3] - 103.0) < 1e-9)
+    stock_df_before = pd.DataFrame({"date": pd.to_datetime(["2023-12-31", "2024-01-02"])})
+    aligned_before = _align_benchmark_field(stock_df_before, _fake_loader, "c")
+    check("基準原子對齊：個股日期早於大盤資料起點回NaN(不外插)",
+          pd.isna(aligned_before.iloc[0]))
+    try:
+        _align_benchmark_field(pd.DataFrame({"o": [1.0]}), _fake_loader, "o")
+        check("基準原子缺date欄位應丟出ValueError", False)
+    except ValueError:
+        check("基準原子缺date欄位應丟出ValueError", True)
+    check("ATOMS字典含全部10個基準原子",
+          all(k in ATOMS for k in ("b50_o", "b50_h", "b50_l", "b50_c", "b50_v",
+                                     "btx_o", "btx_h", "btx_l", "btx_c", "btx_v")))
+
     if failures:
         print(f"[FAIL] {len(failures)}項未過：{failures}")
         return 1
@@ -389,8 +614,9 @@ def self_test() -> int:
     n_ops = len(ALL_OPERATORS)
     print(f"[PASS] ATOM_LIBRARY.py 自我測試全部通過（{n_atoms}個原子、{n_ops}個算子，"
           f"含NaN/除零/停牌/漲跌停鎖死情境）")
-    print(f"[誠實揭露] 原子數={n_atoms}（總司令原文估計15個，逐字列出的定義只有14個，"
-          f"見檔頭說明，未自行湊數）")
+    print(f"[誠實揭露] 原子數={n_atoms}＝原版14個（總司令原文估計15個，逐字列出的定義"
+          f"只有14個，未自行湊數）＋2026-09-19審閱通過後補的10個基準原子(b50_/btx_各5)。"
+          f"算子數={n_ops}＝原版17個＋補的2個(mul/decay_linear)。")
     return 0
 
 

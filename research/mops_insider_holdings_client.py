@@ -37,6 +37,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
+import net_guard  # 2026-09-20合規.二：網域層防呆疊加在既有腳本層防呆上（belt-and-suspenders）
+net_guard.install()
+
 DATA_DIR = Path(__file__).parent / "data" / "raw_mops_insider"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
