@@ -11567,3 +11567,14 @@ Form 4結構性缺席不因換來源而消失；DERA 2006~2008早期資料品質
 **[自行裁量]**：不換資料源；(b)以DERA自身issuer_cik為主鍵，不依賴宇宙檔對回；補2006~2023的Form 25（約3.5GB下載）標為待提案、不自行動工。存活者偏誤但書仍適用。
 **本輪未寫TRIALS_REGISTRY、未算IC/訊號、未做判定，`is_holdout_consumed()`=False。**
 **下一輪待辦（不跳關）**：(b)發行人×月淨買入金額序列（含去重/截尾規則）；(c)第1關cheap gate，事前綁定方向為正。
+
+
+---
+
+**#75續6（2026-09-20 02:23 hypothesis_queue排程接續，無人值守，「#75續5下一輪待辦(b)」完成）**：
+新增`insider_dera_issuer_month.py`／`insider_dera_issuer_month_result.json`，把DERA 3,335,146列P/S交易聚合成「發行人×月」序列（輸出`research/data/dera_insider/issuer_month_net.csv`，gitignore涵蓋不進repo）。
+**事前綁定規則（寫在腳本docstring，在看任何報酬前定死）**：①PIT月份鍵用申報日不用交易日；②去重：同一經濟交易(owner_cik,trans_date,code,shares,price,acq_disp)跨accession（原申報vs 4/A修正）只留最早申報者，同accession內相同列視為真實分批成交保留；③剔除price缺失/<=0、名目>1e9；④輸出buy_usd/sell_usd/net_usd/n_buyers/n_sellers/n_trades。
+**結果**：去重剔73,234列（2.2%）、壞價23,247列、名目>1e9共2,453列，餘3,236,212列；383,843個發行人×月、14,407個發行人、2006-01~2024-12；有買入的發行人月148,777個；每月有買入發行人中位616家、最少237家（逐年均值2006=837→2013=566→2024=447，買方家數隨年下降，第1關逐年一致性須留意樣本量隨年份變化）。**樣本量足夠進第1關**（每月橫斷面>=237家買方，遠高於`#41`的45檔）。
+**已知限制誠實揭露**：①同accession內相同列保留是刻意選擇，若日後發現造成重複計量須在(c)前以敏感度分析處理，不得依報酬結果回頭改規則；②聚合單位是DERA自身issuer_cik，**價格/市值尚未接**——(c)需把issuer_cik對到報酬序列，宇宙對應覆蓋不足（見續5）與存活者偏誤但書（已下市股7.1%無價格來源）都仍適用；③10b5-1計畫無法從DERA欄位辨識，賣出訊號按原設計打折、優先用買入訊號。
+**本輪為地基工程，未寫TRIALS_REGISTRY、未算IC/訊號、未做判定，`is_holdout_consumed()`=False（本輪未碰價格/報酬資料，零外部請求）。**
+**下一輪待辦（不跳關）**：(c)第1關cheap gate前先解決「issuer_cik→價格」對應：優先查既有yfinance價格快取能用ticker對回多少發行人、覆蓋不足的部分如何誠實標示；對得上者才跑cross-sectional IC＋洗牌null（事前綁定方向為正、訊號＝n_buyers與net_usd兩個，同家族只算一個獨立發現）。
