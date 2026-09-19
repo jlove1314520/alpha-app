@@ -407,6 +407,17 @@ FAIL/PASS判定維持原樣，但若總司令或稽核發現某個已通過的�
 本身是否可信，後者關乎機制是否符合第一大投資原則，都要先確認才進入
 真正的因子/策略判定。
 
+### 1d. 候選生命週期：六關後進影子帳本前向觀察（深讀一.2，2026-09-19落地）
+
+新候選走 train+val 開發 → 六關（GATE_SEQUENCE 第1~7關＋第9關）→ 通過者呼叫
+`research/shadow_ledger.py::register_candidate(mechanism_id, date, gate_evidence)` 登記
+（`gate_evidence`必含`gates_passed`、`evidence`〔例如TRIALS_LEDGER編號〕、
+`holdout_touched=False`，缺任一項拒絕；同一機制只能登記一次，登記日即前向起點）→ 之後
+每日由前向紙上流程 append，**由測試當下尚不存在的資料定生死**。holdout 保留給最終定案版，
+不作為每個候選的主要裁判。這一步是「通過完整GATE_SEQUENCE、準備進forward-paper」，依
+「提案先於執行」屬於**要停下提案給總司令**的時機：登記影子帳本本身是紙上可逆動作，
+可以直接做，但要**部署／改真錢一律不在此範圍**。FAIL 的候選不登記。
+
 ### 1a. 便宜關卡：測試一個新因子/策略假說（最常見的工作單位）
 
 1. 從對應軌的 state 檔案的「下一步」章節挑一個候選假說（如果清單空了，見第 4 節「假說怎麼來」）。

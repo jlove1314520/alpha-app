@@ -1,3 +1,10 @@
+## 2026-09-19 20:35（hypothesis_queue排程，研究帽，交辦優先：深讀一.2）
+
+**改了什麼**：候選生命週期改為 train+val → 六關 → 影子帳本前向觀察，holdout只留最終定案版。`research/shadow_ledger.py`新增`register_candidate()`（缺證據/holdout被碰/重複登記皆拒絕）；規則寫進`HYPOTHESIS_QUEUE.md`、`MARATHON_PROTOCOL.md`(1d)、`HYPOTHESIS_QUEUE_PROTOCOL.md`。
+**為什麼**：69個判定全來自歷史回測、零筆樣本外，前向紙上資料是回測給不了的新證據（總司令2026-09-15【解鎖】）。
+**驗證**：暫存目錄自測全PASS、`shadow_ledger.py verify`三本既有帳本PASS；未動index.html故未跑冒煙測試。
+**下一步**：#73等FinMind額度（約21:05後）重跑`backfill_gate73_prices.py 60`→Gate 1 sanity。**卡住**：無。
+
 ## 2026-09-19 19:40（互動視窗CC＋research fork，【裁示】core_tilt TE不可行的根因是SPEC寫錯，先修SPEC再判死＋【裁示】0050成分股查證不足重做）
 
 戴**研究與驗證帽**。這輪有兩個緊密相連的裁示：先是總司令指出上一輪

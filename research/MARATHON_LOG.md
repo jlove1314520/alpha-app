@@ -1,6 +1,10 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 
+## 2026-09-19T20:35+0800 (hypothesis_queue排程) — 交辦優先：深讀一.2 候選生命週期落地（shadow_ledger.register_candidate＋三份協定文件） — 基礎設施/文件，無回測無判定
+
+#73因FinMind額度冷卻至約21:05故本輪不重試，改做另一條`- [ ]`交辦深讀一.2。新增register_candidate（自測7項PASS、既有三帳本verify PASS），規則寫進HYPOTHESIS_QUEUE.md/MARATHON_PROTOCOL.md 1d/HYPOTHESIS_QUEUE_PROTOCOL.md。`is_holdout_consumed()`=False，未登記TRIALS。交辦佇列還剩：未開始`- [ ]`1條（金流一.5/#73，等額度）。
+
 ## 2026-09-19 19:23 — hypothesis_queue #73第3輪：補270檔價格首檔撞FinMind 402(冷卻約102分)即停損、0檔補成；MA20近零改「尺度標準化差值」事前綁定寫入SPEC — 無判定、未登記TRIALS；交辦佇列未開始項2條（深讀一.2、金流一.5，皆有進度）
 
 ## 2026-09-19T18:50+0800 (hypothesis_queue排程) — 交辦優先：金流一.5/#73地基查證(a) — 無回測無判定；T86僅上市2012-05~2024-12、產業分類無PIT(7.1%無標籤)，母體修正為上市股

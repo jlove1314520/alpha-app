@@ -72,6 +72,15 @@
   單位，做完就收工讓下一次觸發接續，不要在單次無人值守呼叫裡硬做到天荒地老**
   （`--max-budget-usd` 是預算煞車，但流程設計上本來就該分批）。
 
+**候選生命週期（深讀一.2，2026-09-19新增）**：假設走完 GATE_SEQUENCE 第1~7關＋第9關
+全數通過時，**不是直接判定案，也不是動用holdout**——呼叫
+`research/shadow_ledger.py::register_candidate()` 登記進影子帳本（紙上、append-only、
+起點不可改），改由前向資料定生死（第8關）；holdout 只留給最終定案版。登記後把
+`MARATHON_LOG.md` 心跳與 `HYPOTHESIS_QUEUE.md` 該條目「狀態」寫成「六關通過，影子帳本前向
+觀察中（起點YYYY-MM-DD）」。**這是「通過完整GATE_SEQUENCE」情境，依鐵律要在回報裡明確
+標出、交總司令知悉部署決策**；登記本身可直接做（紙上可逆）。任一關FAIL則照舊進
+`STRATEGY_GRAVEYARD.md`，不登記。
+
 **GATE_SEQUENCE（完整援用 `HYPOTHESIS_QUEUE.md` 最上面的定義，不得跳關）**：
 1. sanity → 2. 隨機控制組（≥100 draws）→ 3. 參數密集高原 → 4. 成本/稅/滑價
 敏感度(1x/2x/3x) → 5. leave-one-out → 6. 逐年一致性≥5/6 → 7. 樣本外

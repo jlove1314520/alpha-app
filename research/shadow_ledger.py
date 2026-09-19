@@ -108,6 +108,31 @@ def append_entry(mechanism_id: str, date: str, payload: dict) -> dict | None:
     return record
 
 
+def register_candidate(mechanism_id: str, date: str, gate_evidence: dict) -> dict:
+    """候選生命週期入口（深讀一.2，2026-09-19）：通過 train+val 六關後，
+    在這本帳本寫下第 1 筆「登記」紀錄，此後才逐日 append 前向績效。
+
+    只准登記一次（帳本已有任何紀錄就丟`AppendOnlyViolation`，不靜默略過）——
+    登記日就是前向觀察的起點，事後不准改起點。`gate_evidence`要寫清楚過了哪幾關、
+    證據檔在哪（例如`{"gates_passed":[1,...,7,9],"evidence":"TRIALS_LEDGER#N",
+    "holdout_touched":False}`），缺`gates_passed`/`evidence`就拒絕登記，
+    避免「沒過關的東西被登記進去、看起來像有在前向驗證」。
+    holdout仍只留給最終定案版，登記本身不碰holdout（`holdout_touched`必須為False）。
+    """
+    for key in ("gates_passed", "evidence"):
+        if not gate_evidence.get(key):
+            raise ValueError(f"{mechanism_id}: 登記缺少 gate_evidence['{key}']，拒絕登記")
+    if gate_evidence.get("holdout_touched") is not False:
+        raise ValueError(f"{mechanism_id}: gate_evidence['holdout_touched']必須明確為False")
+    if _read_lines(mechanism_id):
+        raise AppendOnlyViolation(f"{mechanism_id}: 帳本已有紀錄，候選只能登記一次（起點不可改）")
+    payload = {"entry_type": "registration", "lifecycle_stage": "forward_shadow",
+               "forward_start_after": date, **gate_evidence}
+    rec = append_entry(mechanism_id, date, payload)
+    assert rec is not None
+    return rec
+
+
 def verify_ledger(mechanism_id: str) -> tuple[bool, str, int]:
     """重算整條雜湊鏈，回傳(是否通過, 說明, 筆數)。不信任檔案內容本身，
     每一筆的hash都從payload+prev_hash重新算一次比對。"""

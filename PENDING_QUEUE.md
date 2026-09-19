@@ -6169,7 +6169,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   完整（各1筆，2026-09-09~2026-09-09）；重跑`update_strategy_performance.py`
   確認同日不重複append（仍各1筆，未變成2筆）。純research新增、未動`index.html`，
   不需要跑`smoke_test.mjs`。
-- [ ] **深讀一.2** [研究] [BLOCKED分流.已解除，2026-09-19總司令裁示【裁示】四查核]
+- [x] **深讀一.2** [研究] [BLOCKED分流.已解除，2026-09-19總司令裁示【裁示】四查核]
   候選生命週期改為 train+val → 六關 → 影子帳本前向觀察；holdout 只留給最終定案版。
   **2026-09-15 總司令裁示【解鎖】，已解除阻塞排進佇列**：原話——「我們69個判定全部來自歷史回測，零筆樣本外資料。影子帳本是紙上的、零成本的，但能收集回測給不了的東西。『部署是新一輪數據收集的起點』這句對我們成立，只是我們的『部署』是紙上部署，不是真錢。」**不是holdout解鎖**（原阻塞理由「涉及不可逆動作」誤判——影子帳本前向觀察是紙上、零成本、可逆，不動用`validation/holdout.py`的`VAL_END`/`HOLDOUT_LOCK`，跟稽核.三發現的「holdout邊界誤植」是不同方向的風險，這裡沒有偷看holdout，是把「六關過關後」的候選轉去前向紙上觀察而非直接判定案，屬原本規格範圍內的執行順序調整，非新的不可逆動作），交給`AlphaHypothesisQueue`接續執行。
   **[自行裁量]轉回`- [ ]`，原「⛔自走中止：需要總司令親自操作」是誤判**：本行文字本身
@@ -6181,6 +6181,7 @@ un-alpha-live-server-cycle.ps1`加`$env:ALPHA_LIVE_SERVER_HTTPS="1"`（常駐/�
   `AlphaHypothesisQueue`接續執行才是本行實際要傳達的狀態。此規則性假陽性已同步
   記錄在下方「BLOCKED分流總結」，未修改`dev_queue_runner.py`本身（風險：正則是
   安全閘門的一部分，倉促收緊可能引入假陰性，留給總司令裁示是否值得投入修正）。
+  **【完成 2026-09-19 20:3x hypothesis_queue排程】** 候選生命週期（train+val→六關→影子帳本前向觀察，holdout留最終定案版）已落地：(1)`research/shadow_ledger.py`新增`register_candidate(mechanism_id,date,gate_evidence)`，缺`gates_passed`/`evidence`或`holdout_touched`非False即拒絕、同機制只能登記一次（起點不可改）；暫存目錄自測7項全PASS（正常登記／空gates／holdout=True／缺evidence各拒絕／重複登記拒絕／登記後逐日append／雜湊鏈verify），既有三本帳本`verify`仍PASS。(2)規則寫進`HYPOTHESIS_QUEUE.md`（GATE_SEQUENCE後）、`MARATHON_PROTOCOL.md`新增1d、`HYPOTHESIS_QUEUE_PROTOCOL.md`第2節。未動`index.html`、未動holdout（`is_holdout_consumed()`=False）、無統計判定故未登記TRIALS。`[自行裁量]`：登記通過六關＝第1~7關＋第9關（第8關前向paper本身即影子帳本觀察），登記視為紙上可逆動作可直接做，但「通過完整GATE_SEQUENCE」情境仍須回報總司令知悉部署決策。心跳：本行標`[x]`＋`research/PROGRESS_HEARTBEAT.jsonl`。
 - [x] **深讀一.3** 影子帳本狀態顯示在 App（起始日、累積報酬、MDD、交易數）
   （2026-09-10 完成，但有但書：**深讀一.1／一.2 獨立的「影子帳本」基礎設施本身尚未
   建置**，目前全站唯一真實存在、每日append更新的前向績效資料是`data/strategy_
