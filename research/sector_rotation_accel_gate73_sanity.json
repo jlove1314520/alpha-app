@@ -1,0 +1,80 @@
+{
+ "note": "Gate 1 sanity；無回測、無績效比較、未登記TRIALS",
+ "val_end_cap": "2024-12-31",
+ "dates": [
+  "2012-05-02",
+  "2024-12-31"
+ ],
+ "sectors": 32,
+ "S1_units": {
+  "sampled_stocks": 40,
+  "matched_rows": 104179,
+  "abs_net_over_volume_median": 0.10714,
+  "abs_net_over_volume_p99": 0.6248,
+  "rows_abs_net_gt_volume": 0,
+  "rows_abs_net_gt_volume_frac": 0.0,
+  "close_over_vwap_median": 0.9995,
+  "close_over_vwap_p01_p99": [
+   0.975,
+   1.023
+  ],
+  "note": "單位若是『張』(1張=1000股)，abs_net/volume 中位數會低約1000倍且 close/vwap 不受影響；若 |net|>volume 比例極低且中位數在 1e-3~1e-1 量級，判定單位為『股』，與 Trading_Volume（股）一致。"
+ },
+ "S2_no_lookahead": {
+  "sampled_dates": 25,
+  "max_abs_diff_trunc_vs_full": 0.0,
+  "pass": true
+ },
+ "S3_monthly_top20": {
+  "rebalance_months": 149,
+  "first_reb": "2012-08-01",
+  "last_reb": "2024-12-02",
+  "n_valid_sectors_min_med_max": [
+   32,
+   32.0,
+   32
+  ],
+  "n_selected_sectors_min_med_max": [
+   6,
+   6.0,
+   6
+  ],
+  "selected_stocks_static_min_med_max": [
+   120,
+   334.0,
+   927
+  ],
+  "month_to_month_jaccard_mean_median": [
+   0.088,
+   0.091
+  ],
+  "fully_replaced_months_frac": 0.372,
+  "distinct_sectors_ever_selected": 32,
+  "top5_sector_selection_share": 0.191,
+  "selection_count_by_sector_top8": {
+   "紡織纖維": 37,
+   "數位雲端": 34,
+   "塑膠工業": 34,
+   "食品工業": 33,
+   "電機機械": 33,
+   "橡膠工業": 32,
+   "化學生技醫療": 32,
+   "汽車工業": 31
+  },
+  "sectors_never_selected": []
+ },
+ "S4_direction": {
+  "valid_cells": 97088,
+  "sign_agree_frac": 1.0
+ },
+ "S5_all_vs_core": {
+  "months": 149,
+  "jaccard_mean": 0.74,
+  "jaccard_median": 0.714,
+  "frac_months_jaccard_ge_0.5": 0.98
+ },
+ "nan_check": {
+  "accel_valid_frac": 0.9809,
+  "inf_cells": 0
+ }
+}
