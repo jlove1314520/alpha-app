@@ -1,3 +1,65 @@
+## 2026-09-19（互動視窗CC，【裁示】regime overlay家族結案＋換機制形式＋FUT選B＋BLOCKED分流＋佇列深度提高）
+
+戴**研究與驗證帽**（跨`STRATEGY_GRAVEYARD.md`/`REGIME_OVERLAY_PROTOCOL.md`
+/`PENDING_QUEUE.md`/`scripts/dev_queue_runner.py`）。對應總司令原文五項
+裁示，逐項完成，摘要：
+
+**一（家族結案）**：`STRATEGY_GRAVEYARD.md`新增機制類別層級條目「門檻
+觸發式二元降曝險overlay（台股）」，整併股票軌候選2(`#243`)/3/1/4/5共五個
+FAIL構造，寫明共同死因是機制形式的結構天花板（成本量級下降曝險必然
+犧牲約三成五上檔），明文「不泛化為regime概念在台股無效」，禁止再測
+第六個門檻式二元變體。
+
+**二（換機制形式）**：新增`regime.替代A`（連續型曝險調節，取代二元門檻）
+與`regime.替代B`（regime用在選股權重而非總曝險）兩個`- [ ]`研究項目，
+各自含完整規格鎖定要求、必報表、分支邏輯。替代A已被馬拉松自走輪次取走
+並鎖定規格（`REGIME_OVERLAY_PROTOCOL.md`新增章節，改號為第16節避免跟
+本輪FUT網格章節撞號），尚未跑判定。
+
+**三（FUT選B）**：總司令否決單點0.35重測（提案自己揭露0.35是看過`#244`
+結果後選定），改成事前網格`{0.25,0.35,0.45}`（MA=200固定），先在協定
+第15節鎖定規格並commit（`52f3d23b`）才執行。新增
+`research/regime_overlay_fut_bear_grid.py`（複用`regime_overlay_trend_
+filter_gate_fut.py`全部既有函式）。**結果**：三格MDD縮小/上檔捕捉呈
+單調效率前緣（0.25:37.1%/67.4%、0.35:37.5%/71.7%、0.45:31.2%/76.1%），
+沒有一格同時通過MDD縮小≥35%與上檔捕捉≥75%兩個門檻，判定**FAIL_ALL_
+THREE**（三格都同時卡在權衡上，不是參數懸崖），三格登記`TRIALS_LEDGER.md`
+#250~252，`selection_bias_ledger.py`重跑後FUT分軌N=47、全體N=254。
+FUT軌regime overlay併入一的機制類別結案，`STRATEGY_GRAVEYARD.md`
+`#244`條目同步補上「⚠️續」小節。
+
+**四（BLOCKED分流）**：22條`- [!]`逐條檢查解除條件——**已解除2條**
+（`深讀一.2`／`金流一.5`轉回`- [ ]`）：診斷出`dev_queue_runner.py::
+NEEDS_USER`正則對「裁示」這個詞的字面比對存在假陽性，只要一個項目的
+描述文字裡**提到**過去某次「總司令裁示」（歷史引用，不是這個項目本身
+需要裁示），就會被誤判成「這一項需要總司令親自操作」——兩個項目的
+文字自己都寫著「已解除阻塞」卻同時被貼上這個誤判標籤，自相矛盾。
+另外`研究.c`同一種假陽性（觸發詞是「不得用...**付費**源」裡的「付費」，
+語意是禁止不是需求，方向剛好相反），已更正阻塞原因文字但維持阻塞
+（真正原因是tick累積，現況10/20個交易日）。**額外查核後標記完成1條**
+（`稽核.六`——交辦範圍明文「只報不修」，報告本體已完整交付，繼續掛
+BLOCKED會混淆「沒寫完」與「寫完了等下一步裁示」兩種狀態，移至`- [x]`）。
+**移入新增「封存」區2條**（`二`／`四`確認是`新二`／`新四`的重複條目，
+同一個`稽核.五`狀態被兩次裁示各自建了一次）。**其餘16條維持`- [!]`**，
+逐一補上預計解除時間（例如`稽核.三(a)`FinMind額度將於2026-09-19
+13:23解除）或明確解除條件（例如需總司令本人操作/裁示的，列出具體
+待選項）。未修改`NEEDS_USER`正則本身（安全閘門，倉促收緊有引入假
+陰性的風險，留待總司令另行裁示是否值得投入修正，已在受影響條目裡
+記錄風險說明）。
+
+**五（佇列深度）**：門檻從5項提高到12項、補件目標從補滿5項改成一次
+補到20項，`[自行裁量]`把計數基準明確化為「只算真正可動手的`- [ ]`，
+不含`- [!]`」（阻塞項不會被消化，若算進門檻會讓規則在BLOCKED項目
+堆積時形同虛設）——同步更新`PENDING_QUEUE.md`前言規則第3點與
+`scripts/dev_queue_runner.py`提示詞模板的對應段落。補件執行中，另
+起一個agent做候選搜尋，結果與最終補件清單待補記。
+
+修改檔案：`research/STRATEGY_GRAVEYARD.md`、`research/REGIME_OVERLAY_
+PROTOCOL.md`、`research/regime_overlay_fut_bear_grid.py`（新增）、
+`research/TRIALS_LEDGER.md`／`TRIALS_REGISTRY.jsonl`／`SELECTION_
+BIAS_LEDGER.md`、`PENDING_QUEUE.md`、`scripts/dev_queue_runner.py`。
+`is_holdout_consumed()`全程確認`False`，零新增API呼叫（TX本機快取）。
+
 ## 2026-09-19 10:12（馬拉松自走，regime.候選5/3/1/4＋FUT提案）regime overlay協定四個候選全FAIL
 
 戴研究＋驗證帽。**改了什麼**：每個候選先把規格寫進`research/REGIME_OVERLAY_PROTOCOL.md`第11~14節並commit（看結果前鎖定），再新增4支單次TRAIN判定腳本（`regime_overlay_drawdown_breaker_gate.py`／`_realized_vol_gate.py`／`_breadth_gate.py`／`_margin_growth_gate.py`，重用`regime_overlay_trend_filter_gate.py`的成本主路徑與控制組），結果登記`TRIALS_LEDGER.md` #246~#249、墓園各一條。**結果**：候選5回撤斷路器準吸收態FAIL（TRIPPED占比71.1%、最長719交易日）；候選3波動度regime成本前置關卡未過（年12.9次切換，毛36.9%→淨0.0%）；候選1市場廣度水位淨−12.6%（存活者偏誤但書）；候選4融資成長率毛效果即為零（與#26同死因）。4個候選高原皆未達「一整片都好」。**FUT提案**：`research/PROPOSAL_2026-09-19_fut_regime_overlay_bear035.md`，寫完即停，待總司令裁示。**為什麼**：`PENDING_QUEUE.md`交辦，`REGIME_OVERLAY_PROTOCOL.md`第10節待辦。**影響**：純研究，不動App、不動資料源、未碰holdout（`is_holdout_consumed()`=False）。**下一步**：等總司令裁示FUT提案(A/B/C)；佇列0條`- [ ]`，22條`- [!]`皆等外部條件。**卡住**：無新增。冒煙測試：本輪未動`index.html`／共用腳本，不適用。
