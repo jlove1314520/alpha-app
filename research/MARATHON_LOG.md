@@ -1,5 +1,9 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-19T15:25+0800 (hypothesis_queue排程) — 交辦優先：資料源.外銷訂單彙總三來源查證 — 未找到可程式取用來源，標BLOCKED（無回測、無判定）
+
+moea.gov.tw頁面WebFetch 403；data.gov.tw搜尋頁為JS動態渲染取不到；線索：『按地區分』外銷訂單資料集加總可得總額，缺官方URL。已停用data.gov.tw前端JSON介面（等同私有後端API）與猜路徑探測。解除條件寫在PENDING_QUEUE該條目。holdout_consumed=False。交辦佇列還剩未開始`- [ ]`5條（借券費率.放大閾值重測、零股失衡度.連續曝險版重測、fx_twd_gate統一改央行源、深讀一.2、金流一.5）；本輪因額度預算節制收工，未連續往下做。
+
 ## 2026-09-19T14:22+08:00 (hypothesis_queue排程) — 交辦優先：regime.替代B寫規格鎖定（協定第18節）— 未跑回測，無判定；載體core_tilt(C4)阻塞，標BLOCKED
 
 查核發現v2已有regime_weighted（已死）→規格事前綁定三處差異、不足則判換皮。交辦佇列還剩：未開始`- [ ]`7條（深讀一.2、金流一.5、重構.減資、外銷訂單、借券費率、零股失衡度、fx_twd_gate）。holdout未動。
