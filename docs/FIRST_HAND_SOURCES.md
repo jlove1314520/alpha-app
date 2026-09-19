@@ -324,7 +324,7 @@ openapi.twse.com.tw/v1/swagger.json`實測查證，不是猜測）：
 | 利率端點 | `https://www.cbc.gov.tw/public/data/OpenData/A13Rate.csv`（官方、免費、CSV，`research/cbc_rf_rate_client.py`），另有`cbc_policy_decision_data.py`／`cbc_decision_event_gate61.py`（假設`#61`已FAIL，見`data/signal_status.json`） |
 | 外匯端點 | `https://www.cbc.gov.tw/public/data/OpenData/外匯局/FTDOpenData015.csv`（`A13Rate.csv`的姊妹端點，同一台主機、同一種免金鑰CSV格式；`data.gov.tw`資料集#7232「新臺幣兌換美元銀行間收盤匯率」，官方每日更新，回溯至2008-01-02，`.github/scripts/fetch_fx.py`） |
 | 我們現況（利率） | 🟢 **已整合** |
-| 我們現況（外匯） | 🟢 **已整合（2026-09-15）**——`fetch_fx.py`主來源改打央行`FTDOpenData015.csv`（銀行間每日收盤即期匯率），yfinance`TWD=X`降為備援（央行端點失敗才用，維持回退鏈不單點依賴）；`fx_twd_gate.py`（研究端）仍用FinMind`TaiwanExchangeRate`，未同步改動（研究腳本非本輪範圍，一致性列為已知缺口） |
+| 我們現況（外匯） | 🟢 **已整合（2026-09-15）**——`fetch_fx.py`主來源改打央行`FTDOpenData015.csv`（銀行間每日收盤即期匯率），yfinance`TWD=X`降為備援（央行端點失敗才用，維持回退鏈不單點依賴）；`fx_twd_gate.py`（研究端）仍用FinMind`TaiwanExchangeRate`（刻意不改，2026-09-19量測：與央行源20日變動率相關0.9954，因#32口徑事前綁定且被他腳本沿用，不追溯換源；新開匯率假設可直接用央行源，見`research/fx_source_consistency_check.py`與`PENDING_QUEUE.md`「資料源.fx_twd_gate統一改央行源」） |
 | 官方是否允許程式存取 | 利率🟢；外匯🟢（同host、CSV直接下載、無robots.txt限制、`requests`實測200） |
 | 對應機構用途 | 貨幣政策（重貼現率）、官方匯率牌告 |
 | 已知SSL陷阱 | 央行憑證鏈中繼CA缺`Subject Key Identifier`擴充欄位，`requests`預設驗證會拋`CERTIFICATE_VERIFY_FAILED`；修法為只關閉`ssl.VERIFY_X509_STRICT`旗標（沿用`cbc_rf_rate_client.py`已驗證的做法，非`verify=False`） |
