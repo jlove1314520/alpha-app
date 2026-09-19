@@ -1,6 +1,11 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 
+## 2026-09-19T17:37+0800 (hypothesis_queue排程) — #75續4：SEC DERA內部人交易批次檔76季下載完成 — 地基工程，無回測無判定
+
+新增`insider_dera_download.py`；2006q1~2024q4共76季/3,335,146列P/S交易，最大申報日2024-12-31=VAL_END，holdout未動(False)。取代逐筆抓XML(吞吐量不可行)。下一輪：抽樣核對早期資料品質→發行人×月聚合→第1關cheap gate。交辦佇列還剩未開始`- [ ]`3條（深讀一.2、金流一.5、fx_twd_gate）；`[自行裁量]`本輪接續#75地基而非先開#73，理由：#75續3已把DERA下載列為明確下一步且不需外部裁示，#73 Gate1需大量歷史聚合，留給下一輪。
+
+
 ## 2026-09-19T16:30+0800 (hypothesis_queue排程) — 交辦優先：零件.零 因子池盤點 — 描述性盤點，無回測無判定；現行有效3訊號/2獨立成分(<6)，結論『因子庫不足，應造新因子』
 
 產出`research/FACTOR_POOL_INVENTORY.md`。靜態核對（未做執行期載入）；`core_tilt_backtest.py`不存在，實際載入路徑為factors.py→score.py。發現矛盾：`f_revenue_surprise`在FACTORS.md 2026-09-07已降級FAIL(校正後)，但CORE_TILT_SPEC/score.py仍沿用，未擅改，待總司令裁示。[自行裁量]見檔尾。交辦佇列還剩未開始`- [ ]`：6條（零股失衡度.連續曝險版重測、資料源.fx_twd_gate統一改央行源、深讀一.2、金流一.5、…）；holdout未動。

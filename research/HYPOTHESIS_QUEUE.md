@@ -11328,3 +11328,23 @@ consumed()`兩支腳本開工/收工前皆確認`False`。**未修改**`GATE1~6`
 **已知限制誠實揭露**：官方批次檔的股票代號欄位是申報當時的issuer ticker，需用CIK對回宇宙；銀行股
 （FRC/SBNY）在Form 4資料源結構性缺席的問題不因換來源而消失。
 
+
+
+---
+
+**#75續4（2026-09-19T17:37+0800 hypothesis_queue排程接續，無人值守，「#75續3下一輪待辦(a)」完成）**：
+新增`insider_dera_download.py`，分季下載SEC DERA「Insider Transactions Data Sets」批次檔
+（2006q1~2024q4共76季，每季1請求、季間sleep 3秒，遠低於SEC官方10 req/秒上限），只保留
+非衍生證券交易列中`TRANS_CODE in {P,S}`並併入SUBMISSION（申報日/發行人CIK/ticker）與
+REPORTINGOWNER（申報人身分），輸出精簡CSV至`research/data/dera_insider/`（406MB，
+`research/data/`已被.gitignore涵蓋，不進repo）；原始zip解析後立即刪除。
+**結果**：76/76季成功、0失敗，共3,335,146列P/S交易；最大申報日2024-12-31（=VAL_END），
+未下載2025以後任何季度。`is_holdout_consumed()`=False（開工/收工皆確認）。
+`[自行裁量]`：(1)輸出只留P/S、多申報人只留第一位（欄位僅供分群，不當訊號）；(2)起點2006q1
+（DERA官方起點，取代上輪估的2005-01）。
+**本輪為地基工程，未寫TRIALS_REGISTRY、未算IC/訊號、未做任何判定。**
+**已知限制誠實揭露**：ticker為申報當時發行人代號，需用issuer_cik對回宇宙；銀行股（FRC/SBNY）
+Form 4結構性缺席不因換來源而消失；DERA 2006~2008早期資料品質（欄位缺漏/交易日期格式）尚未抽樣核對。
+**下一輪待辦（不跳關）**：(a)抽樣核對早期季度資料品質與CIK→ticker→宇宙對應；(b)聚合成
+「發行人×月」淨買入金額序列（PIT：只用申報日<=決策日之資料）；(c)進第1關cheap gate（IC+洗牌null），
+事前綁定方向為正（內部人淨買入→後續超額報酬）。
