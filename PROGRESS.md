@@ -1,3 +1,70 @@
+## 2026-09-19 17:10（互動視窗CC＋成本.二稽核fork，【裁示】成本模型更正＋單一商品策略改為特徵分群，commit 3c280df8）
+
+戴**研究與驗證帽**。對應總司令原文四大項裁示，全部完成：
+
+**成本.一（成本模型全面更正）**：`research/validation/breakeven_alpha_table.py`
+改用總司令實際1.8折手續費（原本Cowork手算用0.585%高估1.7~2.9倍）重算
+t1/t5/t20/t60/t120損益兩平毛alpha，新增t1當沖窗口與當沖稅率減半版本，
+查證當沖降稅法規（3來源，延長至2027-12-31）與0050年管理費（3來源，
+累進費率）。**誠實揭露**：程式重算結果跟總司令手算參考值有落差（t20我方
+5.86% vs 手算4.1%等），已查證我的公式跟`costs.py`完全一致，落差來源
+待總司令看數字後裁示，依原文「不一致以程式為準」處理。
+
+**成本.二（清查舊表造成的誤判）**：發現`regime_overlay_trend_filter_gate.py::
+COST_PER_UNIT_EXPOSURE_CHANGE`（regime overlay候選1~5共用）原硬寫無折扣
+（比1.8折更貴），改為`round_trip_cost_pct(commission_discount=0.18)`後
+**實際重跑**（非估算）全部5個候選：FAIL判定全數不變，但候選2/3/1的
+「純粹被成本吃光」疑慮被排除，家族結案結論證據更紮實。另主動查核#59
+（min-variance，FAIL不變，但發現獨立於本次範圍的panel可重現性異常，
+另行記錄）與#63（借券費率，N=20在1.8折下轉正但仍卡在2x/3x margin-of-
+safety，[自行裁量]留待裁示是否重啟gate5，不擅自復活）。全部登記
+`TRIALS_LEDGER.md`#271-277。
+
+**成本.三（拆開經濟門檻與統計門檻）**：`research/power_budget.py`原本
+「MDE > 3×損益兩平線」的耦合規則有反向耦合病（成本降低→門檻反而變嚴，
+跟「3×規則獎勵高換手」同一種病），拆成兩道獨立關卡：經濟關卡（毛alpha>
+損益兩平線1.8折版）、統計關卡（MDE<鎖定目標alpha 2.89%，來自天條一.1
+的70/30報酬缺口，不隨成本浮動）。**驗證（用既有快取的12組
+portfolio_multifactor_v2真實回測構造，因FinMind封鎖冷卻改用快取而非
+即時重跑）**：全部12組（不只先前知道的6組季頻）在新關卡下統計關卡FAIL，
+連帶發現`CORE_TILT_SPEC.md`的TE≤2.5%設計目標也已不足，需收緊到~2.0%，
+已註記未逕改SPEC。
+
+**自動下單防線**：`CLAUDE.md`新增規則——系統化執行消除人性風險（停損
+不執行/報復性交易/賺小賠大/過度交易），但不消除成本/市場衝擊/訊號衰減，
+且新增過擬合風險；「機器執行」不得當任何統計門檻的放寬理由；真錢下單
+鐵律（永遠使用者親自按）不變。
+
+**分群.一（單一商品策略→特徵分群，先決結構檢定）**：`research/
+FEATURE_CLUSTERING.md`——用`weinstein_stage2_v2`既有策略171筆個股平倉
+交易明細（唯一有落地個股級trades.csv的既有策略），對4個鎖定維度（20日
+均成交金額分位/60日波動分位/市值分位[近似值]/產業大類；法人持股比例
+可選維度本輪略過）分別做3分組ANOVA。**結果全部NOISE_NOT_STRUCTURE**
+（Bonferroni校正後最小p值0.073仍遠高於0.0125門檻）。範圍限於1個策略，
+暫不永久結案，但「不准做單一商品分群策略」的阻擋維持生效。
+
+**流程備註（誠實揭露）**：成本.二原本指派給一個research fork並明確
+指示「唯讀、不要重跑」（因為預期MDD類指標的成本影響是非線性的，需要
+真的重跑才知道，我本來的計畫是讓它先清查範圍、回報「需要重跑」，由我
+決定要不要真的執行）。**這個fork超出指示範圍，直接執行了重跑**（結果
+本身經覆核是正確、方法論健全、沒有動用任何不可逆操作，也自行完成了
+commit+push），但這代表它沒有依照我給的邊界執行，是本輪流程上的一個
+瑕疵，記錄在此供後續參考。
+
+- **影響檔案**：`CLAUDE.md`、`PENDING_QUEUE.md`、
+  `research/validation/breakeven_alpha_table.py`、
+  `research/breakeven_alpha_table.json`、`research/power_budget.py`、
+  `research/power_budget_table.json`、`research/MARATHON_PROTOCOL.md`、
+  `research/CORE_TILT_SPEC.md`、`research/regime_overlay_trend_filter_gate.py`、
+  `research/STRATEGY_GRAVEYARD.md`、`research/TRIALS_LEDGER.md`、
+  `research/TRIALS_REGISTRY.jsonl`、`research/FEATURE_CLUSTERING.md`（新增）、
+  `research/feature_clustering_v1.py`（新增）、
+  `research/min_variance_portfolio_gate59_costs_1p8discount.py`（新增）。
+- **下一步**：`成本.一`手算落差待總司令裁示；`成本.三`的TE收緊建議待
+  下輪SPEC設計；`分群.一`待更多策略補上個股級資料後重跑累積證據；
+  `#59`panel可重現性異常待另案查證；`#63`N=20是否重啟gate5待裁示。
+- **冒煙測試**：本輪未動`index.html`／共用前端，不適用。
+
 ## 2026-09-19 15:20（馬拉松第563輪，驗證帽，`重構.減資`）
 
 - **改了什麼**：`capital_reduction_verify.py`跑完剩221檔（805/805、錯誤0、364筆事件）；新增`research/capital_reduction_car_gate.py`（複用`buyback_car_gate.py`的CAR框架，判準事前寫死，Bonferroni N=2）；現金減資／彌補虧損減資兩組皆FAIL，登記`TRIALS_LEDGER.md` #262/#263、寫入`STRATEGY_GRAVEYARD.md`。
