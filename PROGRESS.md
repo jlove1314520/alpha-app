@@ -1,3 +1,7 @@
+## 2026-09-19 10:12（馬拉松自走，regime.候選5/3/1/4＋FUT提案）regime overlay協定四個候選全FAIL
+
+戴研究＋驗證帽。**改了什麼**：每個候選先把規格寫進`research/REGIME_OVERLAY_PROTOCOL.md`第11~14節並commit（看結果前鎖定），再新增4支單次TRAIN判定腳本（`regime_overlay_drawdown_breaker_gate.py`／`_realized_vol_gate.py`／`_breadth_gate.py`／`_margin_growth_gate.py`，重用`regime_overlay_trend_filter_gate.py`的成本主路徑與控制組），結果登記`TRIALS_LEDGER.md` #246~#249、墓園各一條。**結果**：候選5回撤斷路器準吸收態FAIL（TRIPPED占比71.1%、最長719交易日）；候選3波動度regime成本前置關卡未過（年12.9次切換，毛36.9%→淨0.0%）；候選1市場廣度水位淨−12.6%（存活者偏誤但書）；候選4融資成長率毛效果即為零（與#26同死因）。4個候選高原皆未達「一整片都好」。**FUT提案**：`research/PROPOSAL_2026-09-19_fut_regime_overlay_bear035.md`，寫完即停，待總司令裁示。**為什麼**：`PENDING_QUEUE.md`交辦，`REGIME_OVERLAY_PROTOCOL.md`第10節待辦。**影響**：純研究，不動App、不動資料源、未碰holdout（`is_holdout_consumed()`=False）。**下一步**：等總司令裁示FUT提案(A/B/C)；佇列0條`- [ ]`，22條`- [!]`皆等外部條件。**卡住**：無新增。冒煙測試：本輪未動`index.html`／共用腳本，不適用。
+
 ## 2026-09-19（馬拉松自走，重構.A5）補測n_years相符的GATE6檢定力——3條範圍外舊假設全部重分類為UNDERPOWERED
 
 戴**驗證帽**。承接`重構.A4`發現的3筆範圍外GATE6 FAIL（`#17`/`#29`
