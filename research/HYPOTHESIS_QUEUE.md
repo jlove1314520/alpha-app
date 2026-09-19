@@ -11298,3 +11298,33 @@ consumed()`兩支腳本開工/收工前皆確認`False`。**未修改**`GATE1~6`
 候選重測清單（比照`階段一.3`的3筆IC類UNDERPOWERED做法），需要總司令
 裁示或下一輪自行裁量決定重測優先序——本輪僅完成「重新分類」這一步，
 不涉及是否/如何重測。
+
+---
+
+**#75續3（2026-09-19 11:45 hypothesis_queue排程接續，無人值守，「下一輪待辦(b)」逐筆解析XML的可行性實測）**：
+新增`insider_trading_form4_parse.py`（複用`fetch_us_insider_trading.py::parse_form4_xml()`，
+分批續跑、進度靠輸出JSONL內已處理accession、暫時性503/逾時不記入已處理下批重試），窗口
+事前綁定為`2005-01-01~VAL_END(2024-12-31)`，SIVB截斷至2023-03-31，FRC無資料不計。**本輪為地基
+工程，未寫TRIALS_REGISTRY、未算任何IC/訊號、未碰holdout（`is_holdout_consumed()`=False）。**
+
+實測發現（下一輪必須處理，不是已解決）：
+1. **起點修正**：上一輪保守取2003-06-30，但2003-06~2004申報實測抓到的檔案`txns=[]`且大量503
+   （原因未查證），改從2005-01-01起（2005/08/10/13/16/20年AAPL各抽1筆皆可解析出交易列）。
+2. **`index.json`目錄路線對「自行申報」的舊申報（accession前綴=公司自身CIK，如F/JPM/JNJ/INTC
+   2005年）常回503且延遲約10秒**；改走`https://www.sec.gov/Archives/edgar/data/{cik}/{accession}.txt`
+   完整申報檔單一請求（內含`<ownershipDocument>`XML），少一次請求且該類申報實測可用。
+3. **吞吐量不可行**：改.txt路線後8分鐘僅成功49筆、暫時性503/逾時33筆，全窗口29,064筆保守估
+   需數十小時以上，逐筆抓取路線不適合作為本假設的主資料路線。
+4. **更佳替代（已HEAD驗證存在，尚未下載）**：SEC官方DERA「Insider Transactions Data Sets」
+   季度批次檔，例如`https://www.sec.gov/files/structureddata/data/insider-transactions-data-sets/2020q1_form345.zip`
+   （HTTP 200，約13.9MB／季，官方結構化TSV，涵蓋Form 3/4/5交易列）。2006起約80季×~14MB≈1.1GB，
+   一次性下載、免逐筆抓XML、不受503影響。**這屬新資料架構（儲存位置/是否進repo/是否只保留P/S欄位）
+   的選擇，依零之一節屬「可還原的技術選擇」→ 下一輪`[自行裁量]`：只下載到`research/data/`並在
+   解析後僅保留P/S代碼交易的精簡CSV，原始zip不進repo。**
+
+**下一輪待辦（不跳關）**：(a) 分季下載官方批次檔（每次請求sleep，已確認無公布次數上限故保守
+每季間隔數秒）、只保留P/S交易列與必要欄位（含申報日、CIK、內部人身分）；(b) 三來源查證規則
+用不到（這裡是取得方式改進，不是「找不到」型結論）；(c) 進第1關cheap gate（IC+洗牌null）。
+**已知限制誠實揭露**：官方批次檔的股票代號欄位是申報當時的issuer ticker，需用CIK對回宇宙；銀行股
+（FRC/SBNY）在Form 4資料源結構性缺席的問題不因換來源而消失。
+

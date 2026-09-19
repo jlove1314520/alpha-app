@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-19 11:45 — #75 Form 4逐筆XML解析可行性實測（新增insider_trading_form4_parse.py，窗口改2005起、改走.txt單請求路線） — 逐筆路線吞吐量不可行(8分鐘49筆)，發現SEC官方DERA季度批次檔(2020q1_form345.zip HTTP200)為更佳路線；地基工程未判定、holdout未動，下一輪自行裁量改抓批次檔
+
 ## 2026-09-19 10:23 — #75 pilot 15檔Form 4歷史索引抓取（3.3萬筆）完成 — 地基工程，發現銀行股(FRC/SBNY)EDGAR缺席與SIVB空殼污染；holdout未動，下一輪解析XML
 
 ## 2026-09-19T09:23:35 — hypothesis_queue排程接續：#75寫pilot 15檔CIK清單與批次歷史抓取腳本（未執行） — 地基工程完成，下一輪待跑抓取+第1關cheap gate
