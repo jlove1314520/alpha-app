@@ -1,3 +1,71 @@
+## 2026-09-19 18:10（互動視窗CC＋research fork，【裁示】#63邊緣案例＋安全邊際倍數重新錨定）
+
+戴**研究與驗證帽**。對應總司令原文四大項裁示，全部完成：
+
+**一（#63 N=20理由改寫）**：`STRATEGY_GRAVEYARD.md`「f_lending_fee_
+spike」條目新增「⚠️再追加」小節，理由從「未過機械倍數安全邊際」改寫為
+總司令要求的立場——這個構造只在成本估計精確時才為正，樣本量N=20又極小，
+是最脆弱的一類候選。**誠實揭露一個附帶發現**：總司令裁示原文自己舉的
+範例成本數字（保守0.5350%/最壞0.6350%）內部混用了當沖稅率(0.15%)與
+一般交易稅率(0.3%)——用跟#63實際交易型態一致的`daytrade=False`重算出
+內部一致版本（基準0.4513%/保守0.6850%/最壞0.7850%）取代，重跑後N20在
+最壞情境下VAL仍正(+0.11%)但TRAIN轉負(-0.02%)，比原文預期更弱，反而是
+裁示理由更強的證據。
+
+**二（2x/3x機械倍數廢止＋全面重跑）**：新增`research/validation/
+margin_of_safety.py`（三個錨定情境：基準1.8折／保守無折扣／最壞無折扣+
+雙倍滑價，全部呼叫`round_trip_cost_pct()`現算不硬寫），`CONSTITUTION.md`
+第1節第2點更新註記，`lending_fee_gate63_costs.py`與`lending_fee_gate_
+v2_longhold.py`永久改用新模組。逐條清查歷史上所有出現過2x/3x字樣的
+FAIL項目，找到唯一另一個死因確實是成本（非其他關卡）的家族：`f_lending_
+fee_spike v2`長持有期版6格，重跑後**4/6格通過（舊機械3x規則下是0/6），
+兩個主格皆PASS**，但未達事前綁定「至少5格」門檻，維持不晉級深挖——
+不擅自放寬門檻去湊過關，誠實記錄「非常接近但未過，唯二未過格敗在
+gate1不是成本」。
+
+**三（TE重新校準，本輪最重要的發現）**：`成本.三`發現12組既有構造
+（`portfolio_multifactor_v2`）在統計關卡全FAIL，但那些構造都不是
+`CORE_TILT_SPEC.md`設計的市值加權機制——`core_tilt_backtest.py`此前
+從未被實際建置。本輪派research fork實際建置並執行：反推所需TE=
+2.0631%（目標alpha2.89%，n_years=4）；實測市值加權+因子傾斜+主動權重
+帶構造，9組holdings×band網格**全數FAIL**，最佳一組（40檔/2pp band）
+實測TE 11.87%，仍是門檻的5.75倍，band參數幾乎不影響結果，beta系統性
+偏高(1.35~1.42)。**根因不是參數，是選股邏輯**：本次因缺乏0050真實
+成分股名單，選股用「先按因子分排序選前N檔、才在其中做市值加權」，
+不是SPEC真正想測的「維持接近0050成分股名單、只做小幅權重傾斜」——
+這是本次具體實作的FAIL，不是對core_tilt整條路線的最終判決，真正答案
+要等0050成分股精確重建完成後才測得出來。**誠實依總司令原文判斷邏輯
+回報**：「用組合構造贏0050」這條路在目前樣本長度與這個構造方式下無法
+被證明，該換方法（先解決0050成分股重建）不是繼續調band/holdings參數。
+
+**四（Cowork錯誤登記，供日後檢討）**：2026-09-19當天Cowork連續兩個
+成本模型錯誤——(1)手續費折數本身算漏（真錯，但幅度僅10~30%，不是
+1.7~2.9倍）；(2)更嚴重的：手算漏掉滑價0.1%，把t60損益兩平線算成
+1.1%（程式重算後正確值1.92%），並據此宣稱是「最大一筆損失」——誇大
+自己的錯誤幅度，差點讓總司令去挖一個空的坑。已寫進`CLAUDE.md`第八節
+成為既有規則：任何人提出的數字，CC程式重算驗證前不得當裁示依據。
+
+**流程備註**：本輪TE驗證（三）派給research fork時明確授權「直接執行、
+不是唯讀」（吸取上一輪fork超出唯讀指示範圍的教訓，這次改成一開始就
+明確授權執行），fork完成後自行註冊了`TRIALS_LEDGER.md`#280，互動視窗
+CC覆核時發現自己稍早也獨立算出並註冊了同一個發現（#281，時間差
+在fork回報延遲期間產生），判斷內容重複後刪除自己的重複登記，保留
+fork先註冊的#280——這是本輪唯一的流程小插曲，記錄供參考。
+
+- **影響檔案**：`CLAUDE.md`、`PENDING_QUEUE.md`、`research/CONSTITUTION.md`、
+  `research/CORE_TILT_SPEC.md`、`research/STRATEGY_GRAVEYARD.md`、
+  `research/TRIALS_LEDGER.md`、`research/TRIALS_REGISTRY.jsonl`、
+  `research/lending_fee_gate63_costs.py`、`research/lending_fee_gate_
+  v2_longhold.py`、`research/validation/margin_of_safety.py`（新增）、
+  `research/core_tilt_backtest.py`（新增）、
+  `research/CORE_TILT_TE_FEASIBILITY.md`（新增）、
+  `research/core_tilt_backtest_result.json`（新增）。
+- **下一步**：0050成分股精確重建（`CORE_TILT_SPEC.md`2.1節既有缺口）
+  是解鎖`core_tilt`路線真正可行性答案的關鍵前置工作，值得排進佇列；
+  `f_lending_fee_spike v2`長持有期版兩個gate1邊緣格（Z4.0）是否值得
+  另開複驗，待總司令裁示。
+- **冒煙測試**：本輪未動`index.html`／共用前端，不適用。
+
 ## 2026-09-19 17:10（互動視窗CC＋成本.二稽核fork，【裁示】成本模型更正＋單一商品策略改為特徵分群，commit 3c280df8）
 
 戴**研究與驗證帽**。對應總司令原文四大項裁示，全部完成：

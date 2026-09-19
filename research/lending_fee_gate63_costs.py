@@ -1,5 +1,13 @@
 """`HYPOTHESIS_QUEUE.md` #63 借券費率異常飆升作為知情放空訊號 — 第4關
-成本/稅/滑價敏感度（1x/2x/3x）。
+成本/稅/滑價敏感度。
+
+**2026-09-19安全邊際重新錨定（總司令裁示【#63邊緣案例＋安全邊際倍數
+重新錨定】二）**：原本的「1x/2x/3x機械倍數」規則已廢止（1.8折下2x已經
+比無折扣情境還貴，3x是不存在的情境），改用`validation.margin_of_safety`
+的三個錨定情境（基準1.8折／保守無折扣／最壞無折扣+雙倍滑價），判準改為
+「必須在最壞情境下淨效益仍為正」。舊版`round_trip_1x = costmod.
+round_trip_cost_pct()`（全部參數用預設值，等於「無折扣」而非總司令實際
+1.8折，是`成本.二`稽核抓到的同一種污染）已移除，不再殘留。
 
 背景：gate1（`lending_fee_gate63.py`）三個N值全部CHEAP_PASS（percentile皆
 100.0），gate2參數高原（`lending_fee_gate63_param_plateau.py`）12/12組全數
@@ -18,19 +26,17 @@ securities tax+slippage，買賣雙邊各一次）：把訊號解讀成「偵測
 `short_round_trip_cost_pct(holding_days=N)`並另開一條試驗登記，不可與本次
 結果混為一談。
 
-**淨效益定義**：`net_benefit_i = -post_ret_i - cost_pct(mult)`。
+**淨效益定義**：`net_benefit_i = -post_ret_i - cost_pct`。
 `post_ret_i`是gate1既有定義的市場調整超額報酬（個股-TAIEX同期），事前假設
 方向為負，`-post_ret_i`即「避開該股後，相對繼續持有該股所省下的損失」
-（正值＝真的避開了損失）。`cost_pct(mult) = round_trip_cost_pct() * mult`，
-`mult`取1/2/3（跟`equal_weight_rebalance_costs_v1.py`/
-`min_variance_portfolio_gate59_costs.py`同一種「整筆round-trip乘上倍數」
-慣例，不是只放大slippage那一項）。
+（正值＝真的避開了損失）。`cost_pct`取自`validation.margin_of_safety.
+margin_of_safety_scenarios(daytrade=False)`的三個錨定情境（基準1.8折／
+保守無折扣／最壞無折扣+雙倍滑價，本構造是「賣掉剔除持股+換回大盤曝險」
+的一般交易，非現股當沖，`daytrade=False`）。
 
 **判定路徑（本關不查隨機控制組，只問「扣完成本後還剩不剩」）**：
-VAL期`mean(net_benefit)`在1x/2x/3x是否維持為正。任一值轉負皆誠實列出，
-不由本腳本自動判PASS/FAIL總結論——是否值得投入第5關（leave-one-out）由
-下一輪人工/排程判讀決定，比照`min_variance_portfolio_gate59_costs.py`
-同一種「不自動下最終結論」慣例。
+VAL期`mean(net_benefit)`在三個情境下是否維持為正，**判準＝最壞情境
+是否仍為正**（取代舊的「必須撐過2x/3x」）。任一情境轉負皆誠實列出。
 
 **零新增API呼叫**：完全複用`lending_fee_gate63.py`已有的事件建構與價格快取
 邏輯（`_build_zscore_events`/`_load_price_map`/`_signed_ret`），只多算一次
@@ -52,12 +58,11 @@ import numpy as np
 import pandas as pd
 
 import material_news_car_gate as car_gate1
-import validation.costs as costmod
 from lending_fee_gate63 import N_LIST, _build_zscore_events, _load_price_map
 from material_news_car_gate2_continuation import _signed_ret
 from validation import holdout
+from validation.margin_of_safety import WORST_CASE_KEY, margin_of_safety_scenarios
 
-COST_MULTIPLIERS = (1, 2, 3)
 OUT_JSON = Path(__file__).parent / "data" / "lending_fee_gate63_costs_result.json"
 
 
@@ -68,9 +73,10 @@ def main():
 
     assert holdout.is_holdout_consumed() is False, "holdout已消耗，禁止繼續（協定第3節第1項）"
 
-    print("=== 假設#63 借券費率異常飆升 第4關成本/稅/滑價敏感度（1x/2x/3x） ===")
-    round_trip_1x = costmod.round_trip_cost_pct()
-    print(f"1x round-trip成本率（commission+tax+slippage，買賣雙邊）：{round_trip_1x:.4%}")
+    print("=== 假設#63 借券費率異常飆升 第4關成本/稅/滑價敏感度（安全邊際三情境） ===")
+    scenarios = margin_of_safety_scenarios(daytrade=False)
+    for name, cost_pct in scenarios.items():
+        print(f"{name}：{cost_pct:.4%}")
 
     ev = _build_zscore_events(max_stocks=args.max_stocks)
     print(f"z-score急升事件（已按stock_id+date聚合、逐股z-score）：{len(ev)}筆")
@@ -109,7 +115,7 @@ def main():
     holdout.assert_no_holdout_leakage(ev_df, date_col="date", context="lending_fee_gate63_costs events (priced)")
 
     results = {}
-    any_negative_at_1x = False
+    any_negative_at_worst_case = False
     for n_days in N_LIST:
         ev_val = ev_df[(ev_df["date"] > holdout.TRAIN_END) & (ev_df["date"] <= holdout.VAL_END)]
         ev_train = ev_df[ev_df["date"] <= holdout.TRAIN_END]
@@ -143,37 +149,36 @@ def main():
 
         per_n = {"n_val_usable": n_val, "n_train": len(train_rets),
                  "gross_avoided_loss_val": gross_val, "gross_avoided_loss_train": gross_train,
-                 "by_multiplier": {}}
-        for mult in COST_MULTIPLIERS:
-            cost_pct = round_trip_1x * mult
+                 "by_scenario": {}}
+        for name, cost_pct in scenarios.items():
             net_val = float((-val_arr - cost_pct).mean())
             net_train = float((-train_arr - cost_pct).mean()) if train_arr.size else None
             neg_mark_val = "  <-- 淨效益轉負" if net_val < 0 else ""
-            if mult == 1 and net_val < 0:
-                any_negative_at_1x = True
-            print(f"  {mult}x成本({cost_pct:.4%}): 淨效益 VAL={net_val:+.4%}{neg_mark_val}"
+            if name == WORST_CASE_KEY and net_val < 0:
+                any_negative_at_worst_case = True
+            print(f"  {name}({cost_pct:.4%}): 淨效益 VAL={net_val:+.4%}{neg_mark_val}"
                   + (f"  TRAIN={net_train:+.4%}" if net_train is not None else ""))
-            per_n["by_multiplier"][str(mult)] = {
+            per_n["by_scenario"][name] = {
                 "cost_pct": cost_pct, "net_benefit_val": net_val, "net_benefit_train": net_train,
             }
         results[f"N{n_days}"] = per_n
 
     print("\n=== 第4關結論 ===")
-    if any_negative_at_1x:
+    if any_negative_at_worst_case:
         print(
-            "**至少一個N值在1x成本下淨效益已轉負**——即使gate1/gate2的統計顯著性"
-            "（贏過隨機控制組）成立，單筆事件的訊號強度（絕對報酬幅度）不足以"
-            "覆蓋一次round-trip交易成本，依誠實記錄鐵律不隱瞞。這跟湊統計顯著性"
-            "是兩回事：'贏隨機控制組'只證明訊號不是雜訊，不保證訊號夠大能付得起"
-            "交易成本。是否仍值得繼續投入第5關（leave-one-out）以後，由下一輪"
-            "人工/排程判讀決定，本腳本不自動下PASS/FAIL。"
+            "**至少一個N值在最壞情境（無折扣+雙倍滑價）下淨效益已轉負**——即使"
+            "gate1/gate2的統計顯著性（贏過隨機控制組）成立，單筆事件的訊號強度"
+            "（絕對報酬幅度）不足以覆蓋最壞情境的交易成本，依誠實記錄鐵律不隱瞞。"
+            "這跟湊統計顯著性是兩回事：'贏隨機控制組'只證明訊號不是雜訊，不保證"
+            "訊號夠大能付得起交易成本。是否仍值得繼續投入第5關（leave-one-out）"
+            "以後，由下一輪人工/排程判讀決定，本腳本不自動下PASS/FAIL。"
         )
     else:
         print(
-            "全部N值在1x/2x/3x成本下淨效益皆維持為正，訊號強度足以覆蓋"
-            "round-trip交易成本（此為長倉『降曝險/剔除持股』單次進出成本模型，"
-            "非放空——若未來要測放空版本須另計借券成本並另開試驗登記）。"
-            "不代表最終PASS——仍待逐年一致性（全歷史2012-2024）/"
+            "全部N值在三個安全邊際情境（基準/保守/最壞）下淨效益皆維持為正，"
+            "訊號強度足以覆蓋最壞情境的交易成本（此為長倉『降曝險/剔除持股』"
+            "單次進出成本模型，非放空——若未來要測放空版本須另計借券成本並"
+            "另開試驗登記）。不代表最終PASS——仍待逐年一致性（全歷史2012-2024）/"
             "leave-one-year-out/樣本外/前向paper/下檔保護。"
         )
 

@@ -32,20 +32,26 @@ Z只是當作鄰近格的高原檢查，不預期它放大幅度。
    （matched_stock+unmatched_universe各200，control_group_standard.py）。
    n_val<20跳過。VAL窗口內price已在`_load_price_map`層截斷於VAL_END，i+N需在
    截斷後價格內（不會外插到holdout）。
-5. **成本（gate4）**：沿用`round_trip_cost_pct()`（commission+tax+slippage，買賣
-   雙邊各一次），把訊號解讀為「事件日剔除該股、換回大盤曝險」的單次進出；
-   **不含借券成本、不做放空**（CLAUDE.md⑩放空腿硬規則：借券成本/可借量未接入真實
-   資料前，含放空腿數字一律不得採信，本試驗刻意排除）。淨效益=−post_ret−cost×mult，
-   mult∈{1,2,3}，VAL與TRAIN皆報。
-6. **格點通過條件（事前綁定）**：gate1控制組PASS **且** VAL淨效益在1x/2x/3x皆>0
-   **且** TRAIN淨效益在1x>0（方向一致性）。**整體晉級深挖條件**：兩個主格
+5. **成本（gate4，2026-09-19總司令裁示【#63邊緣案例＋安全邊際倍數重新
+   錨定】二，已取代原本1x/2x/3x機械倍數）**：沿用`validation.margin_of_
+   safety.margin_of_safety_scenarios(daytrade=False)`三個錨定情境
+   （基準1.8折／保守無折扣／最壞無折扣+雙倍滑價），把訊號解讀為「事件日
+   剔除該股、換回大盤曝險」的單次進出；**不含借券成本、不做放空**
+   （CLAUDE.md⑩放空腿硬規則：借券成本/可借量未接入真實資料前，含放空腿
+   數字一律不得採信，本試驗刻意排除）。淨效益=−post_ret−cost_pct，
+   VAL與TRAIN皆報。
+6. **格點通過條件（事前綁定，2026-09-19已更新判準）**：gate1控制組PASS
+   **且** VAL淨效益在最壞情境（無折扣+雙倍滑價）下>0 **且** TRAIN淨效益
+   在基準情境（1.8折）下>0（方向一致性）。**整體晉級深挖條件**：兩個主格
    （Z=2.0,N=40）與（Z=2.0,N=60）**都**通過，且6格中至少5格通過（高原）。不滿足
    即整條「長持有期降曝險版」結案，寫`STRATEGY_GRAVEYARD.md`，不再另開第三種
    持有期/閾值變體。
-7. **成本前置關卡（協定1a-0）**：單次round-trip 0.685%。保守毛alpha估計取
-   已登記的**N20實測平均避開損失0.89%**（不外插到N40/N60，即不假設線性增長）。
-   0.89%/0.685%=130% ≥100% → 前置關卡視為通過（3x成本2.055%則為不通過，
-   這正是第6點要求3x也活著時最可能的死點，SPEC明寫：本機制對成本高度敏感）。
+7. **成本前置關卡（協定1a-0）**：單次round-trip基準情境0.4513%（1.8折）。保守毛
+   alpha估計取已登記的**N20實測平均避開損失0.89%**（不外插到N40/N60，即不假設
+   線性增長）。0.89%/0.4513%=197% ≥100% → 前置關卡視為通過（最壞情境0.7850%
+   則為0.89%/0.7850%=113%，仍通過，比舊版3x成本2.055%的判斷寬鬆許多——這正是
+   本次安全邊際重新錨定要解決的問題：機械3x倍數的懲罰力道遠超過任何合理最壞
+   情境）。
 8. **檢定力（協定1a-0b）**：本腳本另報依「股票」分群的cluster-robust標準誤與t值
    （事件同股票內相依），供判讀「贏控制組」與「有統計意義」是否一致。
 
@@ -67,15 +73,14 @@ import numpy as np
 import pandas as pd
 
 import material_news_car_gate as car_gate1
-import validation.costs as costmod
 import lending_fee_gate63 as lf
 from control_group_standard import evaluate_vs_control
 from material_news_car_gate2_continuation import _signed_ret
 from validation import holdout
+from validation.margin_of_safety import BASELINE_KEY, WORST_CASE_KEY, margin_of_safety_scenarios
 
 Z_LIST = [2.0, 3.0, 4.0]
 N_LIST = [40, 60]
-COST_MULTIPLIERS = (1, 2, 3)
 N_PERMUTATIONS_DEFAULT = 200
 PERM_SEED = 20260919
 OUT_JSON = Path(__file__).parent / "data" / "lending_fee_gate_v2_longhold_result.json"
@@ -150,11 +155,12 @@ def main():
     ev_df = pd.DataFrame(rows)
     holdout.assert_no_holdout_leakage(ev_df, date_col="date", context="lending_v2 events (priced)")
 
-    round_trip_1x = costmod.round_trip_cost_pct()
-    print(f"1x round-trip成本率：{round_trip_1x:.4%}")
+    scenarios = margin_of_safety_scenarios(daytrade=False)
+    for name, cost_pct in scenarios.items():
+        print(f"{name}：{cost_pct:.4%}")
 
     rng = np.random.RandomState(PERM_SEED)
-    results: dict = {"_meta": {"round_trip_1x": round_trip_1x, "perm_seed": PERM_SEED,
+    results: dict = {"_meta": {"margin_of_safety_scenarios": scenarios, "perm_seed": PERM_SEED,
                                "n_permutations": args.n_permutations}}
 
     for n_days in N_LIST:
@@ -252,17 +258,15 @@ def main():
                                 f"檔頭SPEC，不依結果回頭調整。"),
             )
 
-            by_mult = {}
-            all_pos = True
-            for m in COST_MULTIPLIERS:
-                c = round_trip_1x * m
+            by_scenario = {}
+            for name, c in scenarios.items():
                 nv = float((-val_arr - c).mean())
                 nt = float((-tr_arr - c).mean()) if tr_arr.size else None
-                by_mult[str(m)] = {"cost_pct": c, "net_val": nv, "net_train": nt}
-                if nv <= 0:
-                    all_pos = False
-            train_1x_ok = bool(by_mult["1"]["net_train"] is not None and by_mult["1"]["net_train"] > 0)
-            point_pass = bool(verdict.passed and all_pos and train_1x_ok)
+                by_scenario[name] = {"cost_pct": c, "net_val": nv, "net_train": nt}
+            worst_case_val_positive = bool(by_scenario[WORST_CASE_KEY]["net_val"] > 0)
+            baseline_train_ok = bool(by_scenario[BASELINE_KEY]["net_train"] is not None
+                                      and by_scenario[BASELINE_KEY]["net_train"] > 0)
+            point_pass = bool(verdict.passed and worst_case_val_positive and baseline_train_ok)
             results[key] = {
                 "z": z, "n_days": n_days, "n_train": n_tr, "n_val": n_val,
                 "n_stocks_val": len(val_by),
@@ -272,14 +276,14 @@ def main():
                 "gate1_passed": verdict.passed, "gate1_reason": verdict.reason,
                 "control_max_negated": verdict.control_max, "control_percentile": verdict.control_percentile,
                 "selection_sha256": verdict.selection_sha256, "n_draws_total": verdict.n_draws_total,
-                "by_multiplier": by_mult, "net_val_positive_all_mult": all_pos,
-                "train_net_1x_positive": train_1x_ok, "point_pass": point_pass,
+                "by_scenario": by_scenario, "worst_case_val_positive": worst_case_val_positive,
+                "baseline_train_positive": baseline_train_ok, "point_pass": point_pass,
             }
             print(f"  gate1={'PASS' if verdict.passed else 'FAIL'}  VAL平均={signal_stat:+.4%} "
                   f"cluster t={t:.2f}  TRAIN平均={results[key]['train_mean_post_ret']}")
-            for m in COST_MULTIPLIERS:
-                print(f"  {m}x成本({round_trip_1x*m:.3%}) 淨效益 VAL={by_mult[str(m)]['net_val']:+.4%} "
-                      f"TRAIN={by_mult[str(m)]['net_train']}")
+            for name, c in scenarios.items():
+                print(f"  {name}({c:.4%}) 淨效益 VAL={by_scenario[name]['net_val']:+.4%} "
+                      f"TRAIN={by_scenario[name]['net_train']}")
             print(f"  格點判定：{'PASS' if point_pass else 'FAIL'}")
 
     pts = {k: v for k, v in results.items() if k.startswith("Z") and "point_pass" in v}
