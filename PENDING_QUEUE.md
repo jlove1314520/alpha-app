@@ -7105,6 +7105,7 @@ Cybex.beta
   846/1114檔、|股數|加權可用率2012年82.7%→2024年79.1%，缺價格268檔98.5%仍在市（回補未到，
   非存活者偏誤）；MA20近零占比7.11%（需事前決定比值/差值處理法）。無判定、未登記TRIALS。
   下一輪：補268檔價格（backfill，看額度）→Gate 1 sanity（驗證帽）。細節見HYPOTHESIS_QUEUE #73「第2輪」段。
+  **進度（2026-09-19 19:23 hypothesis_queue排程，仍為 `- [ ]`）**：#73第3輪——補270檔價格首檔撞FinMind 402(冷卻約102分鐘)，依禮儀停損、0檔補成（`research/backfill_gate73_prices.py`已寫好可重跑）；MA20近零處理法`[自行裁量]`事前綁定為「尺度標準化差值(MA5−MA20)/S」，取代比值（見HYPOTHESIS_QUEUE #73第3輪）。下一輪：額度恢復→重跑backfill→確認覆蓋率→Gate 1 sanity。
 - [x] **金流一.6** **已完成**：`scripts/smoke_test.mjs` 新增 #47/#48 兩項資料一致性檢查——
   #47「sector_flow.json 每個產業合計＝成分股加總（容差1股）」：實測 40 個產業×視窗[1,5]
   共驗 80 組全部一致；#48「sector_flow.json 的 date 必須等於 T86（institutional_history.json）
