@@ -1,3 +1,13 @@
+## 2026-09-19 15:20（馬拉松第563輪，驗證帽，`重構.減資`）
+
+- **改了什麼**：`capital_reduction_verify.py`跑完剩221檔（805/805、錯誤0、364筆事件）；新增`research/capital_reduction_car_gate.py`（複用`buyback_car_gate.py`的CAR框架，判準事前寫死，Bonferroni N=2）；現金減資／彌補虧損減資兩組皆FAIL，登記`TRIALS_LEDGER.md` #262/#263、寫入`STRATEGY_GRAVEYARD.md`。
+- **為什麼**：交辦佇列最前的`重構.減資`（接續#71），依分支(a)(b)(c)推進。
+- **數字**：現金組VAL n=25、mean_CAR −5.93%(方向與事前綁定的正向相反)、控制組百分位0.0；彌補虧損組TRAIN/VAL不同號、百分位7.5。不接受事後反轉方向。
+- **限制**：拿不到公告日，t0=恢復買賣日，只測事後漂移。
+- **影響檔案**：`data/capital_reduction_verified.json`、`research/`（腳本、帳本、墓園、REPORT、STATE）、`PENDING_QUEUE.md`。
+- **下一步**：佇列還剩5條`- [ ]`（外銷訂單彙總、借券費率放大閾值重測、零股失衡度連續曝險、fx_twd_gate改央行源、深讀一.2／金流一.5另計）。
+- **冒煙測試**：本輪未動`index.html`／共用前端，不適用。
+
 ## 2026-09-19（互動視窗CC，【裁示】regime overlay家族結案＋換機制形式＋FUT選B＋BLOCKED分流＋佇列深度提高）
 
 戴**研究與驗證帽**（跨`STRATEGY_GRAVEYARD.md`/`REGIME_OVERLAY_PROTOCOL.md`
