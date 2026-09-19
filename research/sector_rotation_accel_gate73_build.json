@@ -1,0 +1,452 @@
+{
+ "note": "階段(b)聚合腳本產出；純量測，無 Gate 判定，未登記 TRIALS",
+ "val_end_cap": "2024-12-31",
+ "t86_rows_4digit": 2634638,
+ "t86_dates": [
+  "2012-05-02",
+  "2024-12-31"
+ ],
+ "t86_stocks": 1114,
+ "price_cache_stocks_for_t86": 846,
+ "industry_labeled_stocks_for_t86": 1026,
+ "sectors": 32,
+ "sector_days": 3093,
+ "core_stocks": 725,
+ "coverage_by_year": {
+  "2012": {
+   "rows": 125846,
+   "rows_usable": 90809,
+   "rows_frac": 0.7216,
+   "abs_shares_frac_usable": 0.8269,
+   "rows_missing_close": 29730,
+   "rows_missing_sector_only": 5307
+  },
+  "2013": {
+   "rows": 183104,
+   "rows_usable": 131426,
+   "rows_frac": 0.7178,
+   "abs_shares_frac_usable": 0.8348,
+   "rows_missing_close": 43860,
+   "rows_missing_sector_only": 7818
+  },
+  "2014": {
+   "rows": 197429,
+   "rows_usable": 141649,
+   "rows_frac": 0.7175,
+   "abs_shares_frac_usable": 0.8342,
+   "rows_missing_close": 47353,
+   "rows_missing_sector_only": 8427
+  },
+  "2015": {
+   "rows": 196981,
+   "rows_usable": 140644,
+   "rows_frac": 0.714,
+   "abs_shares_frac_usable": 0.8382,
+   "rows_missing_close": 47757,
+   "rows_missing_sector_only": 8580
+  },
+  "2016": {
+   "rows": 190068,
+   "rows_usable": 135007,
+   "rows_frac": 0.7103,
+   "abs_shares_frac_usable": 0.8384,
+   "rows_missing_close": 47046,
+   "rows_missing_sector_only": 8015
+  },
+  "2017": {
+   "rows": 193654,
+   "rows_usable": 137128,
+   "rows_frac": 0.7081,
+   "abs_shares_frac_usable": 0.8241,
+   "rows_missing_close": 48350,
+   "rows_missing_sector_only": 8176
+  },
+  "2018": {
+   "rows": 200799,
+   "rows_usable": 141636,
+   "rows_frac": 0.7054,
+   "abs_shares_frac_usable": 0.817,
+   "rows_missing_close": 49630,
+   "rows_missing_sector_only": 9533
+  },
+  "2019": {
+   "rows": 202065,
+   "rows_usable": 141971,
+   "rows_frac": 0.7026,
+   "abs_shares_frac_usable": 0.8142,
+   "rows_missing_close": 50537,
+   "rows_missing_sector_only": 9557
+  },
+  "2020": {
+   "rows": 220469,
+   "rows_usable": 153831,
+   "rows_frac": 0.6977,
+   "abs_shares_frac_usable": 0.8065,
+   "rows_missing_close": 55542,
+   "rows_missing_sector_only": 11096
+  },
+  "2021": {
+   "rows": 224644,
+   "rows_usable": 156055,
+   "rows_frac": 0.6947,
+   "abs_shares_frac_usable": 0.8052,
+   "rows_missing_close": 57384,
+   "rows_missing_sector_only": 11205
+  },
+  "2022": {
+   "rows": 229721,
+   "rows_usable": 158918,
+   "rows_frac": 0.6918,
+   "abs_shares_frac_usable": 0.805,
+   "rows_missing_close": 58926,
+   "rows_missing_sector_only": 11877
+  },
+  "2023": {
+   "rows": 227631,
+   "rows_usable": 157335,
+   "rows_frac": 0.6912,
+   "abs_shares_frac_usable": 0.795,
+   "rows_missing_close": 58215,
+   "rows_missing_sector_only": 12081
+  },
+  "2024": {
+   "rows": 242227,
+   "rows_usable": 166365,
+   "rows_frac": 0.6868,
+   "abs_shares_frac_usable": 0.7909,
+   "rows_missing_close": 61919,
+   "rows_missing_sector_only": 13943
+  }
+ },
+ "near_zero_all": {
+  "total_valid_sector_days": 97088,
+  "total_near_zero_days": 6899,
+  "near_zero_frac_overall": 0.0711,
+  "per_sector": {
+   "光電業": {
+    "valid_days": 3034,
+    "near_zero_days": 203,
+    "near_zero_frac": 0.0669
+   },
+   "其他": {
+    "valid_days": 3034,
+    "near_zero_days": 187,
+    "near_zero_frac": 0.0616
+   },
+   "其他電子業": {
+    "valid_days": 3034,
+    "near_zero_days": 186,
+    "near_zero_frac": 0.0613
+   },
+   "化學生技醫療": {
+    "valid_days": 3034,
+    "near_zero_days": 424,
+    "near_zero_frac": 0.1397
+   },
+   "半導體業": {
+    "valid_days": 3034,
+    "near_zero_days": 181,
+    "near_zero_frac": 0.0597
+   },
+   "塑膠工業": {
+    "valid_days": 3034,
+    "near_zero_days": 180,
+    "near_zero_frac": 0.0593
+   },
+   "居家生活": {
+    "valid_days": 3034,
+    "near_zero_days": 144,
+    "near_zero_frac": 0.0475
+   },
+   "建材營造": {
+    "valid_days": 3034,
+    "near_zero_days": 225,
+    "near_zero_frac": 0.0742
+   },
+   "數位雲端": {
+    "valid_days": 3034,
+    "near_zero_days": 169,
+    "near_zero_frac": 0.0557
+   },
+   "橡膠工業": {
+    "valid_days": 3034,
+    "near_zero_days": 189,
+    "near_zero_frac": 0.0623
+   },
+   "水泥工業": {
+    "valid_days": 3034,
+    "near_zero_days": 126,
+    "near_zero_frac": 0.0415
+   },
+   "汽車工業": {
+    "valid_days": 3034,
+    "near_zero_days": 250,
+    "near_zero_frac": 0.0824
+   },
+   "油電燃氣業": {
+    "valid_days": 3034,
+    "near_zero_days": 170,
+    "near_zero_frac": 0.056
+   },
+   "玻璃陶瓷": {
+    "valid_days": 3034,
+    "near_zero_days": 273,
+    "near_zero_frac": 0.09
+   },
+   "紡織纖維": {
+    "valid_days": 3034,
+    "near_zero_days": 178,
+    "near_zero_frac": 0.0587
+   },
+   "綠能環保": {
+    "valid_days": 3034,
+    "near_zero_days": 194,
+    "near_zero_frac": 0.0639
+   },
+   "航運業": {
+    "valid_days": 3034,
+    "near_zero_days": 204,
+    "near_zero_frac": 0.0672
+   },
+   "觀光餐旅": {
+    "valid_days": 3034,
+    "near_zero_days": 210,
+    "near_zero_frac": 0.0692
+   },
+   "貿易百貨": {
+    "valid_days": 3034,
+    "near_zero_days": 208,
+    "near_zero_frac": 0.0686
+   },
+   "資訊服務業": {
+    "valid_days": 3034,
+    "near_zero_days": 279,
+    "near_zero_frac": 0.092
+   },
+   "通信網路業": {
+    "valid_days": 3034,
+    "near_zero_days": 171,
+    "near_zero_frac": 0.0564
+   },
+   "造紙工業": {
+    "valid_days": 3034,
+    "near_zero_days": 283,
+    "near_zero_frac": 0.0933
+   },
+   "運動休閒": {
+    "valid_days": 3034,
+    "near_zero_days": 218,
+    "near_zero_frac": 0.0719
+   },
+   "金融保險": {
+    "valid_days": 3034,
+    "near_zero_days": 161,
+    "near_zero_frac": 0.0531
+   },
+   "鋼鐵工業": {
+    "valid_days": 3034,
+    "near_zero_days": 219,
+    "near_zero_frac": 0.0722
+   },
+   "電器電纜": {
+    "valid_days": 3034,
+    "near_zero_days": 255,
+    "near_zero_frac": 0.084
+   },
+   "電子工業": {
+    "valid_days": 3034,
+    "near_zero_days": 314,
+    "near_zero_frac": 0.1035
+   },
+   "電子通路業": {
+    "valid_days": 3034,
+    "near_zero_days": 222,
+    "near_zero_frac": 0.0732
+   },
+   "電子零組件業": {
+    "valid_days": 3034,
+    "near_zero_days": 213,
+    "near_zero_frac": 0.0702
+   },
+   "電機機械": {
+    "valid_days": 3034,
+    "near_zero_days": 272,
+    "near_zero_frac": 0.0897
+   },
+   "電腦及週邊設備業": {
+    "valid_days": 3034,
+    "near_zero_days": 148,
+    "near_zero_frac": 0.0488
+   },
+   "食品工業": {
+    "valid_days": 3034,
+    "near_zero_days": 243,
+    "near_zero_frac": 0.0801
+   }
+  },
+  "ma5_available": true
+ },
+ "near_zero_core": {
+  "total_valid_sector_days": 91020,
+  "total_near_zero_days": 6231,
+  "near_zero_frac_overall": 0.0685,
+  "per_sector": {
+   "光電業": {
+    "valid_days": 3034,
+    "near_zero_days": 218,
+    "near_zero_frac": 0.0719
+   },
+   "其他": {
+    "valid_days": 3034,
+    "near_zero_days": 180,
+    "near_zero_frac": 0.0593
+   },
+   "其他電子業": {
+    "valid_days": 3034,
+    "near_zero_days": 196,
+    "near_zero_frac": 0.0646
+   },
+   "半導體業": {
+    "valid_days": 3034,
+    "near_zero_days": 188,
+    "near_zero_frac": 0.062
+   },
+   "塑膠工業": {
+    "valid_days": 3034,
+    "near_zero_days": 178,
+    "near_zero_frac": 0.0587
+   },
+   "居家生活": {
+    "valid_days": 3034,
+    "near_zero_days": 222,
+    "near_zero_frac": 0.0732
+   },
+   "建材營造": {
+    "valid_days": 3034,
+    "near_zero_days": 212,
+    "near_zero_frac": 0.0699
+   },
+   "橡膠工業": {
+    "valid_days": 3034,
+    "near_zero_days": 193,
+    "near_zero_frac": 0.0636
+   },
+   "水泥工業": {
+    "valid_days": 3034,
+    "near_zero_days": 126,
+    "near_zero_frac": 0.0415
+   },
+   "汽車工業": {
+    "valid_days": 3034,
+    "near_zero_days": 253,
+    "near_zero_frac": 0.0834
+   },
+   "油電燃氣業": {
+    "valid_days": 3034,
+    "near_zero_days": 170,
+    "near_zero_frac": 0.056
+   },
+   "玻璃陶瓷": {
+    "valid_days": 3034,
+    "near_zero_days": 273,
+    "near_zero_frac": 0.09
+   },
+   "紡織纖維": {
+    "valid_days": 3034,
+    "near_zero_days": 177,
+    "near_zero_frac": 0.0583
+   },
+   "綠能環保": {
+    "valid_days": 3034,
+    "near_zero_days": 156,
+    "near_zero_frac": 0.0514
+   },
+   "航運業": {
+    "valid_days": 3034,
+    "near_zero_days": 233,
+    "near_zero_frac": 0.0768
+   },
+   "觀光餐旅": {
+    "valid_days": 3034,
+    "near_zero_days": 197,
+    "near_zero_frac": 0.0649
+   },
+   "貿易百貨": {
+    "valid_days": 3034,
+    "near_zero_days": 211,
+    "near_zero_frac": 0.0695
+   },
+   "資訊服務業": {
+    "valid_days": 3034,
+    "near_zero_days": 240,
+    "near_zero_frac": 0.0791
+   },
+   "通信網路業": {
+    "valid_days": 3034,
+    "near_zero_days": 168,
+    "near_zero_frac": 0.0554
+   },
+   "造紙工業": {
+    "valid_days": 3034,
+    "near_zero_days": 292,
+    "near_zero_frac": 0.0962
+   },
+   "運動休閒": {
+    "valid_days": 3034,
+    "near_zero_days": 197,
+    "near_zero_frac": 0.0649
+   },
+   "金融保險": {
+    "valid_days": 3034,
+    "near_zero_days": 167,
+    "near_zero_frac": 0.055
+   },
+   "鋼鐵工業": {
+    "valid_days": 3034,
+    "near_zero_days": 232,
+    "near_zero_frac": 0.0765
+   },
+   "電器電纜": {
+    "valid_days": 3034,
+    "near_zero_days": 253,
+    "near_zero_frac": 0.0834
+   },
+   "電子工業": {
+    "valid_days": 3034,
+    "near_zero_days": 277,
+    "near_zero_frac": 0.0913
+   },
+   "電子通路業": {
+    "valid_days": 3034,
+    "near_zero_days": 220,
+    "near_zero_frac": 0.0725
+   },
+   "電子零組件業": {
+    "valid_days": 3034,
+    "near_zero_days": 191,
+    "near_zero_frac": 0.063
+   },
+   "電機機械": {
+    "valid_days": 3034,
+    "near_zero_days": 214,
+    "near_zero_frac": 0.0705
+   },
+   "電腦及週邊設備業": {
+    "valid_days": 3034,
+    "near_zero_days": 154,
+    "near_zero_frac": 0.0508
+   },
+   "食品工業": {
+    "valid_days": 3034,
+    "near_zero_days": 243,
+    "near_zero_frac": 0.0801
+   }
+  },
+  "ma5_available": true
+ },
+ "params": {
+  "NEAR_ZERO_FRAC": 0.05,
+  "SCALE_WINDOW": 120,
+  "SCALE_MIN_PERIODS": 60
+ }
+}
