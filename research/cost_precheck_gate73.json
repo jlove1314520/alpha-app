@@ -1,0 +1,39 @@
+{
+ "note": "第0關成本前置；無績效判定、未登記TRIALS",
+ "rebalances": 148,
+ "years": 12.25,
+ "rebalances_per_year": 12.09,
+ "one_way_turnover_mean": 0.8502,
+ "one_way_turnover_median": 0.8333,
+ "one_way_turnover_p10_p90": [
+  0.6667,
+  1.0
+ ],
+ "table_t20_trades_per_year": 12.6,
+ "scenarios": [
+  {
+   "commission_discount": 0.18,
+   "roundtrip_cost_pct": 0.4513,
+   "annual_cost_drag_pct_actual_turnover": 4.54,
+   "table_t20_breakeven_geometric_pct(全換倉假設)": 5.86
+  },
+  {
+   "commission_discount": 1.0,
+   "roundtrip_cost_pct": 0.685,
+   "annual_cost_drag_pct_actual_turnover": 6.816,
+   "table_t20_breakeven_geometric_pct(全換倉假設)": 9.05
+  },
+  {
+   "commission_discount": 0.6,
+   "roundtrip_cost_pct": 0.571,
+   "annual_cost_drag_pct_actual_turnover": 5.712,
+   "table_t20_breakeven_geometric_pct(全換倉假設)": 7.48
+  },
+  {
+   "commission_discount": 0.3,
+   "roundtrip_cost_pct": 0.4855,
+   "annual_cost_drag_pct_actual_turnover": 4.876,
+   "table_t20_breakeven_geometric_pct(全換倉假設)": 6.32
+  }
+ ]
+}
