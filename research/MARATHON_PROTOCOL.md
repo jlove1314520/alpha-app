@@ -266,6 +266,82 @@ simple版；文中另引9.05%為t20單一情境數字，兩者量級一致)遠�
     SPEC撰寫時必須在文件裡明講「這條規則是為了壓低TE到多少」，不能只是
     照抄`PORTFOLIO_STRATEGY_SPEC.md`的格式卻沒有對應到這個數字目標。
 
+### 1a-0b再修正（成本.三，2026-09-19總司令裁示【成本模型更正】，取代
+上方「MDE > 3×損益兩平線」這個判準本身，1~3步驟與延長樣本年數的既有
+路徑不變，只換掉第4'/5'點的門檻公式）
+
+**背景**：上面4'/5'點的「3倍損益兩平線」判準本身就是總司令自陳的
+「跟先前發現的3×規則獎勵高換手是同一種病」——不是換倉頻率本身的問題，
+是**經濟門檻（損益兩平線）跟統計門檻（MDE夠不夠格偵測）綁在同一個數字
+上，而兩者對「成本降低」的反應方向相反**：成本降低（`成本.一`已把手續費
+折數從查證錯誤的偏高值更正為1.8折實際折數）→損益兩平線降低→3倍門檻
+反而變嚴，結構上會逼出「成本修正得越準，反而越難通過檢查」這種倒果為因
+的結果。
+
+**修正（見`power_budget.py`程式碼實作，`gate_economic_verdict`／
+`gate_statistical_verdict`兩個獨立欄位）**：拆成兩道獨立關卡，都過
+（`OK_TO_RUN`）才准開跑：
+1. **經濟關卡**：預期/實測毛alpha必須 > 該換倉頻率的損益兩平線
+   （`breakeven_alpha_table.json`「1.8折」情境，即`成本.一`更正後的
+   真實折數，不是保守的無折扣1.0x假設）。
+2. **統計關卡**：`mde_80pct_power_alpha_pct`必須 < `LOCKED_TARGET_
+   ALPHA_PCT`（**鎖定值2.89%，來自`天條一.1`70/30固定股債配置的實測
+   報酬缺口，見`CORE_TILT_SPEC.md`「0之1」節，不隨成本浮動**）——統計
+   關卡問的是「這把尺測不測得到我們真正在乎的效果量」，這個效果量是
+   投資上的機會成本（放棄選股、改用固定配置要犧牲多少報酬），不是
+   交易成本，兩者沒有理由綁在同一個數字上。
+
+**對C軌（core_tilt SPEC）TE設計目標的連帶影響（重要，需同步更新）**：
+上面5'點用舊的「3×t60損益兩平線=8.79%」反推出TE≤2.5%（給出MDE≈3.4%，
+「接近但未過」8.79%）——**這個推導鏈已經失效**，新的判準是MDE<2.89%
+（鎖定值，不是t60損益兩平線的倍數）。用`power_budget.py::
+min_detectable_alpha()`在同一個n_years=4（原12組構造分析用的VAL期
+年數）反推：TE=2.5%給出MDE≈3.50%（**FAIL**，高於2.89%門檻）；TE=2.2%
+給出MDE≈3.08%（**仍FAIL**）；**TE需要壓到約2.0%~2.06%才能讓MDE<2.89%
+（PASS）**。**`CORE_TILT_SPEC.md`「0.」節的TE≤2.5%設計約束比新門檻
+寬鬆，需要收緊到約2.0%，已在該檔案「0之1」節旁註記，正式改寫該SPEC
+的TE數字待總司令核准或下一輪設計階段處理，本次修正只更新判準公式本身，
+不逕自重寫已核准的SPEC文字**。
+
+**驗證（2026-09-19，對12組既有真實回測構造套用新兩道關卡，見下）**：
+原本要重跑`power_budget.py`（會連FinMind即時抓取因子資料）驗證新邏輯，
+但當下FinMind處於封鎖冷卻中（HTTP 402，約118分鐘），依「資料源禮儀」
+規則不重試搶跑；改用2026-09-18已快取的`power_budget_table.json`
+（12組`portfolio_multifactor_v2`真實回測構造，`realized_alpha_ann_pct`／
+`mde_80pct_power_alpha_pct`都是實測產出，非重算/編造）直接套用新公式，
+結果如下：
+
+| factor | weight | cadence | window | realized alpha | MDE(80%) | 損益兩平(1.8折) | 經濟關卡 | 統計關卡 | 新判定 | 舊判定(3x規則) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| A_4pass | equal | monthly | t20 | 10.96% | 13.50% | 5.86% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | OK_TO_RUN |
+| A_4pass | equal | quarterly | t60 | 4.75% | 15.45% | 1.92% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | UNDERPOWERED_BLOCK |
+| A_4pass | ic_weighted | monthly | t20 | 10.43% | 13.25% | 5.86% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | OK_TO_RUN |
+| A_4pass | ic_weighted | quarterly | t60 | 10.60% | 23.50% | 1.92% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | UNDERPOWERED_BLOCK |
+| A_4pass | regime_weighted | monthly | t20 | 9.28% | 12.16% | 5.86% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | OK_TO_RUN |
+| A_4pass | regime_weighted | quarterly | t60 | 5.95% | 18.29% | 1.92% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | UNDERPOWERED_BLOCK |
+| B_plus_value_pe | equal | monthly | t20 | 10.83% | 14.99% | 5.86% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | OK_TO_RUN |
+| B_plus_value_pe | equal | quarterly | t60 | 6.92% | 19.94% | 1.92% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | UNDERPOWERED_BLOCK |
+| B_plus_value_pe | ic_weighted | monthly | t20 | 10.67% | 12.23% | 5.86% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | OK_TO_RUN |
+| B_plus_value_pe | ic_weighted | quarterly | t60 | 4.80% | 20.81% | 1.92% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | UNDERPOWERED_BLOCK |
+| B_plus_value_pe | regime_weighted | monthly | t20 | 9.49% | 11.84% | 5.86% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | OK_TO_RUN |
+| B_plus_value_pe | regime_weighted | quarterly | t60 | 11.63% | 21.06% | 1.92% | PASS | FAIL | **STATISTICAL_GATE_FAIL** | UNDERPOWERED_BLOCK |
+
+**誠實結論（重要，不能軟化）**：新兩道關卡邏輯本身運作正常（經濟關卡
+單獨判、統計關卡單獨判、兩者不再互相污染），但套到真實資料後發現一個
+比原先設想更嚴重的問題——**不是只有先前標記的6組季頻構造
+`UNDERPOWERED_BLOCK`，是全部12組（含先前被舊3×規則誤判為`OK_TO_RUN`
+的6組月頻構造）在新的鎖定目標（MDE<2.89%）下全部FAIL統計關卡**。
+原因：這12組構造的年化TE落在9.45%~約13%之間（遠高於`CORE_TILT_SPEC`
+設計目標2.5%甚至新收緊值2.0%），代入`min_detectable_alpha()`後MDE
+落在11.84%~23.50%，離2.89%門檻有4~8倍的差距，不是靠拉長樣本年數
+（`required_years()`反推需要n_years高達84年等級）能解決的，是**這批
+構造本身的訊噪比不夠格偵測我們鎖定的效果量**，不是統計檢定力不足的
+邊緣案例。**這批12組構造全部需要移交`成本.二`清查程序重新判定**（是否
+仍該標記為不可信/需要重新設計降低TE的構造，而非直接沿用舊`OK_TO_RUN`
+判定去使用其訊號）；`power_budget.py`本體待FinMind解除封鎖後再跑一次
+即時版本存證，但預期主結論（12組全部統計關卡FAIL）不會因為換一批
+最新股價資料而改變，因為問題出在TE量級而非某次抓取的樣本雜訊。
+
 ### 1a-0c. 牛熊制度強制項（2026-09-18 總司令裁示【改為多軌並行＋牛熊制度驗證】
 二(b)(c)(d)，即`重構.二bcd`）
 

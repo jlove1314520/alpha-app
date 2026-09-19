@@ -1,20 +1,91 @@
 {
   "meta": {
-    "generated_at": "2026-09-16T00:32:12.239753+08:00",
+    "generated_at": "2026-09-19T16:39:25.026825+08:00",
+    "correction_note": "2026-09-19總司令裁示【成本模型更正】：舊表最低只測3折，總司令實際手續費1.8折，舊表成本高估1.7~2.9倍，曾用於否決方向的判定需回頭複核，見PENDING_QUEUE.md「成本.二」條目",
     "question": "不同持有期下，我方需要多少毛alpha（相對0050的超額原始報酬）才能在扣成本後打平0050買進持有",
-    "primary_metric": "breakeven_annual_alpha_pct_geometric（複利精確版，判定門檻用這個，不是simple版）",
-    "cost_model_source": "research/validation/costs.py::round_trip_cost_pct()（CONSTITUTION.md欽定真實摩擦模組，含0.1425%×2手續費＋0.3%證交稅＋預設5bps×2滑價）",
-    "discount_scenarios_note": "1.0x/0.6x/0.3x為示意折扣級距，非查證群益/國泰實際公告費率",
+    "primary_metric": "breakeven_annual_alpha_pct_geometric（複利精確版，判定門檻用這個，不是simple版），折扣情境用「1.8折(0.18x)＝實際折數」那一列，不是無折扣(1.0x)",
+    "cost_model_source": "research/validation/costs.py::round_trip_cost_pct()（CONSTITUTION.md欽定真實摩擦模組，含0.1425%×2手續費＋證交稅(波段0.3%/當沖0.15%)＋預設5bps×2滑價）",
+    "discount_scenarios_note": "1.8折(0.18x)是總司令查證過的實際折數，為主要判定情境；1.0x/0.6x/0.3x為示意折扣級距對照，非查證群益/國泰實際公告費率",
+    "daytrade_tax_halving_sources": [
+      "財政部賦稅署：https://www.dot.gov.tw/singlehtml/ch26?cntId=fde9d7d1546d4df8a4db96bf23e2f57c",
+      "財政部全球資訊網：https://www.mof.gov.tw/singlehtml/384fb3077bb349ea973e7fc6f13b6974?cntId=163515032583410f91d2fab867e3b113",
+      "自由財經：https://ec.ltn.com.tw/article/breakingnews/4911648"
+    ],
+    "daytrade_tax_halving_expiry": "2027-12-31（民國116年12月31日，2025-01-02總統修正公布延長，屆時未再修法延長則當沖稅率回升至與波段相同的0.3%）",
+    "benchmark_0050_annual_expense_ratio_pct_reference_only": 0.18,
+    "benchmark_0050_annual_expense_ratio_sources": [
+      "鉅亨網(2026,引述元大投信2025-01-23經金管會核准公開說明書修正)：https://news.cnyes.com/news/id/6479632",
+      "MoneyDJ理財網即時費率頁面：https://www.moneydj.com/ETF/X/Basic/Basic0004.xdjhtm?etfid=0050.tw",
+      "聯合新聞網(2026-04)：https://udn.com/news/story/123006/9438602"
+    ],
+    "benchmark_0050_annual_expense_ratio_note": "採用累進費率，隨基金規模成長持續下降，三來源快照0.18%~0.22%不一致是時間點差異非查證錯誤；此數字僅供記錄，不代入下方breakeven計算（理由見檔頭說明：真實0050價格序列已內含此費用，重複扣會低估基準門檻）",
     "benchmark_0050_assumption": "主判定基準＝真buy-and-hold、年化成本≈0（一次性0.385%攤銷到長期趨近於0）；表內另附「若比照我方節奏換手」的參考值，僅供對照，非判定用",
     "known_honest_gap": "App上線中的「我們vs0050」卡片（.github/scripts/build_benchmark_comparison.py）用的0.585%單趟成本不含滑價，比本表含滑價版本更樂觀——代表卡片上的落後幅度换算成真實摩擦後只會更難看",
     "trading_days_per_year_assumption": 252
   },
   "holding_periods": [
     {
+      "window": "t1",
+      "holding_days": 1,
+      "daytrade": true,
+      "securities_tx_tax_pct": 0.15,
+      "trades_per_year": 252.0,
+      "scenarios": [
+        {
+          "discount_label": "1.8折(0.18x)＝實際折數",
+          "commission_discount": 0.18,
+          "roundtrip_cost_pct_no_slippage": 0.2013,
+          "roundtrip_cost_pct_with_slippage": 0.3013,
+          "breakeven_per_trade_alpha_pct": 0.3013,
+          "breakeven_annual_alpha_pct_simple": 75.93,
+          "breakeven_annual_alpha_pct_geometric": 113.92
+        },
+        {
+          "discount_label": "無折扣(1.0x)",
+          "commission_discount": 1.0,
+          "roundtrip_cost_pct_no_slippage": 0.435,
+          "roundtrip_cost_pct_with_slippage": 0.535,
+          "breakeven_per_trade_alpha_pct": 0.535,
+          "breakeven_annual_alpha_pct_simple": 134.82,
+          "breakeven_annual_alpha_pct_geometric": 286.44
+        },
+        {
+          "discount_label": "6折(0.6x)",
+          "commission_discount": 0.6,
+          "roundtrip_cost_pct_no_slippage": 0.321,
+          "roundtrip_cost_pct_with_slippage": 0.421,
+          "breakeven_per_trade_alpha_pct": 0.421,
+          "breakeven_annual_alpha_pct_simple": 106.09,
+          "breakeven_annual_alpha_pct_geometric": 189.55
+        },
+        {
+          "discount_label": "3折(0.3x)",
+          "commission_discount": 0.3,
+          "roundtrip_cost_pct_no_slippage": 0.2355,
+          "roundtrip_cost_pct_with_slippage": 0.3355,
+          "breakeven_per_trade_alpha_pct": 0.3355,
+          "breakeven_annual_alpha_pct_simple": 84.55,
+          "breakeven_annual_alpha_pct_geometric": 133.24
+        }
+      ],
+      "benchmark_0050_same_cadence_annual_cost_pct_reference_only": 97.02
+    },
+    {
       "window": "t5",
       "holding_days": 5,
+      "daytrade": false,
+      "securities_tx_tax_pct": 0.3,
       "trades_per_year": 50.4,
       "scenarios": [
+        {
+          "discount_label": "1.8折(0.18x)＝實際折數",
+          "commission_discount": 0.18,
+          "roundtrip_cost_pct_no_slippage": 0.3513,
+          "roundtrip_cost_pct_with_slippage": 0.4513,
+          "breakeven_per_trade_alpha_pct": 0.4513,
+          "breakeven_annual_alpha_pct_simple": 22.75,
+          "breakeven_annual_alpha_pct_geometric": 25.6
+        },
         {
           "discount_label": "無折扣(1.0x)",
           "commission_discount": 1.0,
@@ -48,8 +119,19 @@
     {
       "window": "t20",
       "holding_days": 20,
+      "daytrade": false,
+      "securities_tx_tax_pct": 0.3,
       "trades_per_year": 12.6,
       "scenarios": [
+        {
+          "discount_label": "1.8折(0.18x)＝實際折數",
+          "commission_discount": 0.18,
+          "roundtrip_cost_pct_no_slippage": 0.3513,
+          "roundtrip_cost_pct_with_slippage": 0.4513,
+          "breakeven_per_trade_alpha_pct": 0.4513,
+          "breakeven_annual_alpha_pct_simple": 5.69,
+          "breakeven_annual_alpha_pct_geometric": 5.86
+        },
         {
           "discount_label": "無折扣(1.0x)",
           "commission_discount": 1.0,
@@ -83,8 +165,19 @@
     {
       "window": "t60",
       "holding_days": 60,
+      "daytrade": false,
+      "securities_tx_tax_pct": 0.3,
       "trades_per_year": 4.2,
       "scenarios": [
+        {
+          "discount_label": "1.8折(0.18x)＝實際折數",
+          "commission_discount": 0.18,
+          "roundtrip_cost_pct_no_slippage": 0.3513,
+          "roundtrip_cost_pct_with_slippage": 0.4513,
+          "breakeven_per_trade_alpha_pct": 0.4513,
+          "breakeven_annual_alpha_pct_simple": 1.9,
+          "breakeven_annual_alpha_pct_geometric": 1.92
+        },
         {
           "discount_label": "無折扣(1.0x)",
           "commission_discount": 1.0,
@@ -118,8 +211,19 @@
     {
       "window": "t120",
       "holding_days": 120,
+      "daytrade": false,
+      "securities_tx_tax_pct": 0.3,
       "trades_per_year": 2.1,
       "scenarios": [
+        {
+          "discount_label": "1.8折(0.18x)＝實際折數",
+          "commission_discount": 0.18,
+          "roundtrip_cost_pct_no_slippage": 0.3513,
+          "roundtrip_cost_pct_with_slippage": 0.4513,
+          "breakeven_per_trade_alpha_pct": 0.4513,
+          "breakeven_annual_alpha_pct_simple": 0.95,
+          "breakeven_annual_alpha_pct_geometric": 0.95
+        },
         {
           "discount_label": "無折扣(1.0x)",
           "commission_discount": 1.0,

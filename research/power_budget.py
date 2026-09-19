@@ -28,15 +28,36 @@
   ——`portfolio_backtest_v2.py::alpha_significance()`本身沒有回傳這個
   數字，這裡不改那支檔案，另外算一次同樣的迴歸，維持只讀不改的原則）。
 
-**新前置關卡規則**（已寫進 `MARATHON_PROTOCOL.md` 1a-0b，跟既有 1a-0
-成本敏感度前置關卡並列，同一節精神：「先算檢定力再花算力，不要反過來」）：
+**⚠️ 2026-09-19總司令裁示【成本模型更正】成本.三：拆開經濟門檻與統計
+門檻的錯誤耦合，取代下面這段舊規則**——舊規則「MDE>3×損益兩平線就不准
+開跑」把經濟關卡（毛alpha要贏過損益兩平線）跟統計關卡（檢定力夠不夠）
+綁在同一個數字上，但兩者對「成本降低」的反應方向相反：成本降低→
+損益兩平線降低→3倍門檻反而變嚴，這正是總司令原話點名的「跟先前發現
+的3×規則獎勵高換手是同一種病」。**新規則（見`gate_economic_verdict`／
+`gate_statistical_verdict`兩個獨立欄位）**：
+1. **經濟關卡**：預期（或已實測）毛alpha必須 > 該換倉頻率的損益兩平線
+   （用`breakeven_alpha_table.json`新表「1.8折(0.18x)＝實際折數」情境，
+   不是無折扣1.0x——這是總司令查證過的實際折數，經濟關卡問的是「真實
+   世界能不能打平」，就該用真實世界的成本）。
+2. **統計關卡**：`mde_80pct_power_alpha_pct`必須 < `LOCKED_TARGET_
+   ALPHA_PCT`（鎖定目標alpha，由`天條一.1`固定股債比實測反推、寫進
+   `CORE_TILT_SPEC.md`「0之1」節，**不隨成本浮動**——統計關卡問的是
+   「這把尺測不測得到我們真正在乎的效果量」，這個效果量是投資上的
+   機會成本，不是交易成本，兩者沒有理由綁在一起）。
+兩道都過（`OK_TO_RUN`）才准開跑，任一不過就標明是哪一道
+（`ECONOMIC_GATE_FAIL`/`STATISTICAL_GATE_FAIL`/`BOTH_GATES_FAIL`）。
+**這是新增/更正的前置檢查，不是放寬任何既有事後判定門檻**——原本通過
+的PASS/CHEAP_PASS不受影響，既有FAIL判定本身也不因此撤銷（那是
+`成本.二`清查工作，不在這支腳本改，見`PENDING_QUEUE.md`對應條目）。
+
+<details><summary>舊規則原文（2026-09-18版本，保留供稽核，已被上面取代）</summary>
+
 任何策略層試驗開跑前，先用該構造既有的（或同類構造的）年化追蹤誤差、
 樣本年數算出 `mde_80pct_power_alpha_pct`；若這個數字 > 該換倉頻率
 `breakeven_alpha_table.json` 損益兩平線(geometric版)的 3 倍，這個試驗
-**結構上只能產生無法解讀的 FAIL**，不准開跑。**這是新增的前置檢查，
-不是放寬任何既有事後判定門檻**——原本通過的 PASS/CHEAP_PASS 不受影響，
-既有 FAIL 判定本身也不因此撤銷（那是第 3 步 UNDERPOWERED 重新分類的
-工作，不在這支腳本改）。
+**結構上只能產生無法解讀的 FAIL**，不准開跑。
+
+</details>
 
 跑法：`python research/power_budget.py`（(b) 對既有 portfolio 構造實測，
 複用 `portfolio_backtest_v2.py::run_one()` 現成的快速掃描模式——
@@ -65,6 +86,17 @@ TRADING_DAYS_PER_YEAR = 252
 
 Z_SIG = norm.ppf(1 - 0.05 / 2)     # ≈1.96，p<0.05雙尾顯著性門檻
 Z_POWER_80 = norm.ppf(0.80)        # ≈0.8416，80%檢定力
+
+# 2026-09-19總司令裁示【成本模型更正】成本.三：統計關卡鎖定目標，不隨
+# 成本浮動。數字來源：research/survival_constraint_allocation_test.py
+# （天條一.1）70/30固定股債配置的實測報酬缺口，見CORE_TILT_SPEC.md
+# 「0之1.選股alpha目標值」節——取70/30（margin較厚的版本）而非85/15
+# （margin僅0.75pp、數學上代價更小但樣本外風險較高的版本）當鎖定目標，
+# 若總司令後續裁示改用85/15當目標，這裡要同步改成1.41。
+LOCKED_TARGET_ALPHA_PCT = 2.89
+# 經濟關卡用的折扣情境：總司令查證過的實際折數，不是無折扣的保守假設
+# （舊版本用「無折扣(1.0x)」，2026-09-19成本.三更正為實際折數）。
+ECONOMIC_GATE_DISCOUNT_LABEL_PREFIX = "1.8折"
 
 
 def min_detectable_alpha(annual_tracking_error_pct: float, n_years: float) -> dict:
@@ -171,18 +203,35 @@ def measure_existing_constructs() -> list[dict]:
                 window = cadence_to_window.get(cadence_name)
                 geo_breakeven = None
                 if window and window in breakeven_by_window:
-                    # 無折扣(1.0x)情境當保守基準（跟breakeven_alpha_table.py的判定精神一致：
-                    # 不假設已查證到的折扣費率，用最保守的1.0x當預設）
+                    # 2026-09-19成本.三更正：改用「1.8折」實際折數情境（總司令查證過
+                    # 的真實折數），不是無折扣(1.0x)的保守假設——經濟關卡問的是
+                    # 「真實世界能不能打平」，該用真實世界的成本，不是刻意悲觀的假設。
                     for sc in breakeven_by_window[window]["scenarios"]:
-                        if sc["discount_label"].startswith("無折扣"):
+                        if sc["discount_label"].startswith(ECONOMIC_GATE_DISCOUNT_LABEL_PREFIX):
                             geo_breakeven = sc["breakeven_annual_alpha_pct_geometric"]
                             break
 
-                gate_verdict = None
-                if geo_breakeven is not None and mda["mde_80pct_power_alpha_pct"] == mda["mde_80pct_power_alpha_pct"]:
-                    threshold_3x = geo_breakeven * 3
-                    gate_verdict = ("UNDERPOWERED_BLOCK" if mda["mde_80pct_power_alpha_pct"] > threshold_3x
-                                     else "OK_TO_RUN")
+                # 經濟關卡：實測毛alpha是否 > 該頻率損益兩平線（1.8折版）。
+                gate_economic_verdict = None
+                if geo_breakeven is not None:
+                    gate_economic_verdict = "PASS" if r["alpha_ann_pct"] > geo_breakeven else "FAIL"
+
+                # 統計關卡：MDE是否 < 鎖定目標alpha（不隨成本浮動，見上方常數說明）。
+                gate_statistical_verdict = None
+                mde = mda["mde_80pct_power_alpha_pct"]
+                if mde == mde:  # not NaN
+                    gate_statistical_verdict = "PASS" if mde < LOCKED_TARGET_ALPHA_PCT else "FAIL"
+
+                if gate_economic_verdict is None or gate_statistical_verdict is None:
+                    gate_verdict = "INSUFFICIENT_DATA"
+                elif gate_economic_verdict == "PASS" and gate_statistical_verdict == "PASS":
+                    gate_verdict = "OK_TO_RUN"
+                elif gate_economic_verdict == "FAIL" and gate_statistical_verdict == "FAIL":
+                    gate_verdict = "BOTH_GATES_FAIL"
+                elif gate_economic_verdict == "FAIL":
+                    gate_verdict = "ECONOMIC_GATE_FAIL"
+                else:
+                    gate_verdict = "STATISTICAL_GATE_FAIL"
 
                 row = {
                     "factor_version": factor_version, "weight_mode": weight_mode,
@@ -190,8 +239,10 @@ def measure_existing_constructs() -> list[dict]:
                     "realized_alpha_pvalue": r["alpha_pvalue"],
                     **te, **mda,
                     "breakeven_window": window,
-                    "breakeven_geometric_1x_pct": geo_breakeven,
-                    "breakeven_3x_pct": round(geo_breakeven * 3, 4) if geo_breakeven is not None else None,
+                    "breakeven_geometric_1_8x_pct": geo_breakeven,
+                    "locked_target_alpha_pct": LOCKED_TARGET_ALPHA_PCT,
+                    "gate_economic_verdict": gate_economic_verdict,
+                    "gate_statistical_verdict": gate_statistical_verdict,
                     "gate_1a_0b_verdict": gate_verdict,
                 }
                 rows.append(row)
@@ -199,7 +250,9 @@ def measure_existing_constructs() -> list[dict]:
                       f"realized_alpha={r['alpha_ann_pct']:+.2f}%(p={r['alpha_pvalue']:.3f})  "
                       f"TE={te['annual_te_pct']:.2f}%  n_years={te.get('n_years')}  "
                       f"MDE(80%power)={mda['mde_80pct_power_alpha_pct']:.2f}%  "
-                      f"3x損益兩平={row['breakeven_3x_pct']}%  → {gate_verdict}")
+                      f"損益兩平線(1.8折)={geo_breakeven}%  經濟關卡={gate_economic_verdict}  "
+                      f"鎖定目標={LOCKED_TARGET_ALPHA_PCT}%  統計關卡={gate_statistical_verdict}  "
+                      f"→ {gate_verdict}")
 
     print(f"\nis_holdout_consumed()收工前檢查：{holdout.is_holdout_consumed()}")
     assert not holdout.is_holdout_consumed(), "holdout已解鎖，中止"

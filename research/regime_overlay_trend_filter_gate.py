@@ -19,7 +19,7 @@ from factor_ic import START_DATE
 from finmind_client import load_dev
 from strategies.weinstein_stage2 import prepare_market_data, MARKET_MA_WINDOW
 from validation import holdout
-from validation.costs import COMMISSION_RATE, SECURITIES_TX_TAX_NORMAL, DEFAULT_SLIPPAGE_BPS
+from validation.costs import round_trip_cost_pct
 
 BULL_EXPOSURE = 1.00
 BEAR_EXPOSURE = 0.50
@@ -45,10 +45,15 @@ def build_exposure(market_df: pd.DataFrame, ma_window: int = MARKET_MA_WINDOW,
     return d
 
 
-COST_PER_UNIT_EXPOSURE_CHANGE = (
-    COMMISSION_RATE * 2 + SECURITIES_TX_TAX_NORMAL + (DEFAULT_SLIPPAGE_BPS / 10_000) * 2
-)  # 換一次曝險水位(0->1或1->0視為滿額買賣)的全額摩擦成本，`CONSTITUTION.md`要求
-   # 任何回測數字上報前都要先過成本模組，這裡不留"gross"版本當最終結果。
+COST_PER_UNIT_EXPOSURE_CHANGE = round_trip_cost_pct(commission_discount=0.18)
+# 換一次曝險水位(0->1或1->0視為滿額買賣)的全額摩擦成本，`CONSTITUTION.md`要求
+# 任何回測數字上報前都要先過成本模組，這裡不留"gross"版本當最終結果。
+# 2026-09-19 成本.二更正：舊版硬寫COMMISSION_RATE*2（即1.0折/無折扣）+稅+滑價，
+# 完全沒有折數參數，比總司令實際1.8折的手續費更貴。改用costs.py的
+# round_trip_cost_pct(commission_discount=0.18)，0.685%→0.4513%/次切換。
+# 本檔案為regime.候選1/2/3/4/5＋FUT版共用的成本常數來源（其餘四支透過
+# `from regime_overlay_trend_filter_gate import ... COST_PER_UNIT_EXPOSURE_CHANGE`
+# 匯入），改這裡即全部生效，不需逐檔修改。
 
 
 def apply_overlay(d: pd.DataFrame, extra_lag_days: int = 0, apply_costs: bool = True) -> pd.DataFrame:
