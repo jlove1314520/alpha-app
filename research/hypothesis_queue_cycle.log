@@ -3412,3 +3412,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 **鈭方齒雿?? 1 璇??**嚗?瘚?.5嚗?73嚗?銝甇交 21:05 敺?頝?`backfill_gate73_prices.py 60`嚗?朣?澆???Gate 1 sanity??
 ===== Hypothesis-queue cycle end: 2026-09-19 20:23:47 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑27.2分鐘 < 30分鐘門檻
