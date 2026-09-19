@@ -49,6 +49,28 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
 排進下方機器索引，不需要從這裡取用）——下一次佇列見底、且下面三個
 備援來源也補不出東西時，才會真的用到白名單第7條「佇列真的空了」。
 
+**2026-09-20 05:0x 馬拉松第576輪（維運帽）補件盤點【自走補入】**：`- [ ]`=0（<12下限），
+逐一掃描三個備援來源後，**真正可動手且不踩阻塞的只有下列1項**，其餘皆已結案或被
+放空腿資料缺陷／外部依賴擋住，如實記錄，不硬湊數量：
+- **#75(c2續)** [自走補入，來源：`HYPOTHESIS_QUEUE.md`#75續8「下一輪待辦」]：重跑
+  `research/insider_dera_price_fetch.py`（每次720檔、yfinance免費、可續跑）直到處理完
+  剩餘約10,700個ticker，再跑`insider_dera_price_coverage2.py`重量覆蓋率；≥50%→跑
+  cross-sectional IC＋洗牌null（方向為正），<50%→以「覆蓋不足、僅子樣本結論（附存活者
+  偏誤但書）」收尾。**心跳位置**：`research/insider_dera_price_fetch_status.json`＋
+  `research/PROGRESS_HEARTBEAT.jsonl`。**歸屬hypothesis_queue軌**（避免兩軌同時寫
+  同一個status檔，馬拉松軌不動它）。
+- 已掃過但**不補入**的來源：`STRATEGY_GRAVEYARD.md`#52-US 8-K PEAD「下一步(a)(b)(c)」
+  （(c)已於round456執行，同樣FAIL，依規則不在FAIL後加碼）；「融券使用率放空腿」
+  方向（需`backtest/engine.py`支援放空＋真實借券資料，仍是放空腿資料缺陷，見
+  alpha-app/CLAUDE.md偽影⑩）；#72重大訊息（已FAIL結案，#284）。
+- **`稽核.三(a)`解除時程查證（本輪新發現，非上述補件）**：`audit.yml`的cron是
+  `20 15 * * 1-5`（UTC，**僅週一至週五**），2026-09-19是週六、09-20週日，所以
+  `data/audit_report.json`（generated_at 2026-09-19T02:33+08，`completeness_gap_rate`
+  0.38359）停在09-18那班**不是壞掉**；下一班是**2026-09-21（週一）UTC 15:20後**，
+  之後那份報告的缺口率才能驗證「剩8檔量級」。另註：audit.yml近6班全部conclusion=
+  failure，是workflow最後一步`exit 1`刻意在「稽核紅燈」時失敗（先commit+push報告
+  再exit 1，日誌可證），**不是workflow本身崩潰**，不需修。
+
 ---
 
 ## 2026-09-20【緊急·合規】mopsov 破口已實際發生，先止血再檢討（原文登記）
