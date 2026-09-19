@@ -1,0 +1,115 @@
+{
+ "note": "Gate 2 配對式隨機控制組；判準事前寫死於腳本docstring",
+ "n_draws": 500,
+ "seed": 73,
+ "months_total": 148,
+ "date_range": [
+  "2012-08-01",
+  "2024-11-01"
+ ],
+ "k_median": 6,
+ "stock_coverage": {
+  "universe_ids": 2014,
+  "yf_missing": 519,
+  "yf_missing_frac": 0.2577
+ },
+ "TRAIN": {
+  "months": 101,
+  "signal_mean_monthly_pct": 1.3983,
+  "control_median_pct": 1.1604,
+  "control_p95_pct": 1.3831,
+  "control_max_pct": 1.5128,
+  "diff_vs_median_pct": 0.2379,
+  "percentile": 96.0,
+  "signal_annualized_geo_pct": 16.86,
+  "control_median_annualized_geo_pct": 13.66
+ },
+ "VAL": {
+  "months": 47,
+  "signal_mean_monthly_pct": 1.3782,
+  "control_median_pct": 1.3238,
+  "control_p95_pct": 1.7015,
+  "control_max_pct": 2.0491,
+  "diff_vs_median_pct": 0.0544,
+  "percentile": 61.4,
+  "signal_annualized_geo_pct": 16.51,
+  "control_median_annualized_geo_pct": 15.72
+ },
+ "FULL": {
+  "months": 148,
+  "signal_mean_monthly_pct": 1.3919,
+  "control_median_pct": 1.2118,
+  "control_p95_pct": 1.3964,
+  "control_max_pct": 1.5343,
+  "diff_vs_median_pct": 0.1802,
+  "percentile": 94.8,
+  "signal_annualized_geo_pct": 16.75,
+  "control_median_annualized_geo_pct": 14.31
+ },
+ "signal_net_annualized_geo_pct_0.18折_參考": {
+  "TRAIN": 13.41,
+  "VAL": 12.99
+ },
+ "by_year_geo_return": {
+  "2012": {
+   "signal_pct": 10.08,
+   "control_median_pct": 7.23
+  },
+  "2013": {
+   "signal_pct": 35.39,
+   "control_median_pct": 30.86
+  },
+  "2014": {
+   "signal_pct": 16.69,
+   "control_median_pct": 9.02
+  },
+  "2015": {
+   "signal_pct": -4.97,
+   "control_median_pct": -6.32
+  },
+  "2016": {
+   "signal_pct": 13.35,
+   "control_median_pct": 13.51
+  },
+  "2017": {
+   "signal_pct": 20.31,
+   "control_median_pct": 24.35
+  },
+  "2018": {
+   "signal_pct": -5.35,
+   "control_median_pct": -6.65
+  },
+  "2019": {
+   "signal_pct": 23.37,
+   "control_median_pct": 21.62
+  },
+  "2020": {
+   "signal_pct": 40.98,
+   "control_median_pct": 26.64
+  },
+  "2021": {
+   "signal_pct": 34.1,
+   "control_median_pct": 28.75
+  },
+  "2022": {
+   "signal_pct": -2.88,
+   "control_median_pct": -6.26
+  },
+  "2023": {
+   "signal_pct": 27.56,
+   "control_median_pct": 29.29
+  },
+  "2024": {
+   "signal_pct": 9.53,
+   "control_median_pct": 12.75
+  }
+ },
+ "years_signal_beats_control_median": 9,
+ "years_total": 13,
+ "criteria": {
+  "pct_ge95_both": false,
+  "same_sign_positive": true,
+  "val_months_ge30": true
+ },
+ "verdict": "FAIL"
+}
