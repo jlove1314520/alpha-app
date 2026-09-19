@@ -2232,6 +2232,15 @@ Cowork原話：
   借量未接入真實資料前含放空腿的回測一律不得採信）。沿用既有
   `lending_fee_gate63.py`/`lending_fee_gate63_param_plateau.py`/
   `lending_fee_gate63_costs.py`框架。
+
+  **⚠️2026-09-19後續更新（安全邊際重新錨定後6格全部重跑，本條目上方
+  文字用的「3x成本全轉負」是舊機械倍數判準下的結果，已過時）**：改用
+  三個錨定情境（基準1.8折／保守無折扣／最壞無折扣+雙倍滑價）＋判準改
+  「VAL最壞情境淨效益>0且TRAIN基準情境淨效益>0」後，**4/6格轉為
+  PASS**（舊機械3x規則下是0/6），但依家族事前綁定「至少5格通過」門檻，
+  4/6仍未達標，**維持不晉級深挖的結案判定不變**，未擅自放寬門檻或另開
+  新格點去湊過關。完整數字見`STRATEGY_GRAVEYARD.md`「f_lending_fee_
+  spike v2」「⚠️追加」段落、`TRIALS_LEDGER.md`#279。
 - [x] **零股失衡度.連續曝險版重測** [研究] ✅結案（馬拉松自走，研究帽，2026-09-19：檢定力前置關卡STATISTICAL_GATE_FAIL，依協定1a-0b修正4'不准開跑，未跑回測、未登記試驗；MDE 9.9~15.8% vs 鎖定目標2.89%，詳見`research/ODD_LOT_CONTINUOUS_POWER_PRECHECK.md`，含解除條件與`[自行裁量]`） [自走補入，來源：`research/
   STRATEGY_GRAVEYARD.md`第2646~2675行「odd_lot_imbalance_portfolio_v1_
   gate67」條目明確建議「優先評估是否有結構性理由改善事件密度」]——原
