@@ -1,5 +1,9 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-19 10:23 — #75 pilot 15檔Form 4歷史索引抓取（3.3萬筆）完成 — 地基工程，發現銀行股(FRC/SBNY)EDGAR缺席與SIVB空殼污染；holdout未動，下一輪解析XML
+
+## 2026-09-19T09:23:35 — hypothesis_queue排程接續：#75寫pilot 15檔CIK清單與批次歷史抓取腳本（未執行） — 地基工程完成，下一輪待跑抓取+第1關cheap gate
+
 ## 2026-09-19T03:24+08:00（hypothesis_queue排程接續，AlphaHypothesisQueue無人值守）— #75三來源查證補齊+決定pilot樣本起點15檔
 
 開工先讀`PENDING_QUEUE.md`：`- [ ]`未開始交辦項0條，`- [!]`阻塞項約22條，

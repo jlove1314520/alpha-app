@@ -11218,6 +11218,31 @@ trading.py::parse_form4_xml()`可複用解析邏輯，但需另寫抓取迴圈�
 `TRIALS_REGISTRY.jsonl`列（同上一輪理由，地基工程非正式判定）、對外
 部僅發出WebSearch查證（非SEC EDGAR API呼叫，不計入頻率預算）。
 
+**#75續2（2026-09-19 10:23 hypothesis_queue排程接續，無人值守，完成「尚未做到2」前半：
+pilot 15檔Form 4申報索引批次抓取）**：執行`insider_trading_historical_fetch.py`
+（SEC EDGAR `data.sec.gov/submissions`，每請求sleep 0.2秒，遠低於10 req/秒），
+輸出`research/data/insider_trading_historical.csv`（33,492筆索引，僅
+accession+申報日，**尚未解析XML內容、尚未算任何訊號/IC**，屬地基工程，
+未寫TRIALS_REGISTRY、未碰holdout，`is_holdout_consumed()`=False）。
+
+三個資料發現（下一輪設計時必須處理，不是已解決）：
+1. **FRC=0筆、SBNY只到2017-11-03**：兩者為銀行（非銀行控股公司），
+   Form 4改向FDIC等銀行監管機關申報而非SEC EDGAR——**這類公司在EDGAR
+   Form 4宇宙結構性缺席**，等於2023年倒閉的銀行股在此資料源不可見，
+   是新型態的存活者偏誤來源（宇宙看似含下市股，內部人資料卻沒有）。
+   宇宙選取與結論必須附此但書，不得把FRC/SBNY當有效樣本計入。
+2. **SIVB最新申報到2024-11-12**：SVB破產後空殼（CLAUDE.md「下市股
+   取得不等於正確」同型）——2023-03後的申報不可用，須依宇宙檔
+   `delisted_at`截斷，否則污染。
+3. XOM/F/ATVI/JNJ等最早申報早於2003（1997~2002）：屬自願或紙本轉電子
+   過渡期，回測起點仍應保守用2003-06-30（SEC強制生效日，見上一輪查證）。
+
+**下一輪待辦（不跳關）**：(a) 依上列三點決定pilot有效樣本（13檔有效，剔除
+FRC，SBNY截斷至2017，SIVB截斷至delisted_at）；(b) 複用
+`fetch_us_insider_trading.py::parse_form4_xml()`對索引逐筆抓XML解析P/S交易
+（請求量約3.3萬次×0.2秒≈2小時，需分批續跑並寫進度檔，勿單輪硬跑）；
+(c) 才進第1關cheap gate（IC+洗牌null）。
+
 ---
 
 **重構.A5（2026-09-19，DevQueue自走輪次，`PENDING_QUEUE.md`「重構.A5」，
