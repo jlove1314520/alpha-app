@@ -10814,6 +10814,13 @@ Gate 1 sanity的第一步必須實測：(a)`raw_twse_t86/`實際回溯天數是�
 **下一輪**：21:05後重跑`python research/backfill_gate73_prices.py 60`（先看是否再撞402，撞了就記錄再等）→補齊後重跑
 `sector_rotation_accel_gate73.py`確認覆蓋率→(c)Gate 1 sanity（驗證帽輪次，做與判分離）。
 
+**#73第5輪（馬拉松排程 cycle`20260919-210142`，研究帽，`is_holdout_consumed()`未動；無回測、無Gate判定、未登記TRIALS，不佔N）**：
+額度冷卻過（21:05:44）後以`run_detached.py`投遞`backfill_gate73_prices.py`三批（60＋60＋150檔），**270檔缺的`TaiwanStockPrice`原始收盤全部補齊
+（ok=270 fail=0，全程未再撞402）**；`raw/TaiwanStockPrice__*.parquet`由2708檔增加。已投遞重跑`sector_rotation_accel_gate73.py`
+（job`20260919-212458-96b1`，產出`sector_rotation_accel_gate73_build.json`）確認新覆蓋率。
+**下一輪**：收成重跑結果、確認覆蓋率（預期可用列占比顯著高於72.2%/68.7%；若仍有缺口，量化剩餘缺價格檔數與原因）→(c)Gate 1 sanity
+（驗證帽輪次，做與判分離；改用「尺度標準化差值(MA5−MA20)/S」訊號）。
+
 **#73下一輪（依序，不跳關）**：(b)寫`sector_rotation_accel_gate73.py`——讀
 `raw_twse_t86/`（限4碼普通股）、乘當日實際收盤價得est_amount、依靜態產業
 分類聚合成產業級日序列、算`MA5/MA20`（MA20近零改差值並記錄改用天數）。
