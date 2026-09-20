@@ -7020,7 +7020,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   標「覆蓋不足」不進IC地圖→(b)存貨/應收在金融業整欄NaN屬預期，記錄即可。
   **不呼叫任何新API**（純讀本機快取）。[自走補入，來源：原子.四已知限制(4)；
   原子.五的前置檢查；心跳＝`FIN_ATOM_COVERAGE.md`產出＋`PROGRESS_HEARTBEAT.jsonl`]
-- [!] **財報原子.補快取** [債務] （2026-09-20 20:0x 馬拉松第583輪：`rate_limit_state.json` blocked_until=台北19:29:54已過，解除阻塞轉回`- [ ]`，續批投遞中）針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]　**⛔ 自走中止（2026-09-20 21:31）**：FinMind 20:22台北再度402，rate_limit_state.json blocked_until=22:22:23台北；本輪21:31仍在封鎖內，回補腳本（研究/backfill_fin_atom_cache.py）待22:22後續跑，remaining_pairs=2815（BS/CF已補300次請求）
+- [ ] **財報原子.補快取** [債務] （2026-09-20 22:2x DevQueue 213101：`rate_limit_state.json` blocked_until=22:22:23已過→解除阻塞轉回`- [ ]`；FinMind免費層實測約300次請求/小時即402，故改小批次：`--batch-size 50`（約90次請求）並與借券回補錯開同一小時的額度） （2026-09-20 20:0x 馬拉松第583輪：`rate_limit_state.json` blocked_until=台北19:29:54已過，解除阻塞轉回`- [ ]`，續批投遞中）針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]　**⛔ 自走中止（2026-09-20 21:31）**：FinMind 20:22台北再度402，rate_limit_state.json blocked_until=22:22:23台北；本輪21:31仍在封鎖內，回補腳本（研究/backfill_fin_atom_cache.py）待22:22後續跑，remaining_pairs=2815（BS/CF已補300次請求）
   **進度（DevQueue 171601）**：回補腳本`research/backfill_fin_atom_cache.py`已寫，第1批200檔/361次請求以job 20260920-172100-0300背景執行中（status檔`research/data/backfill_fin_atom_cache_status.json`），續批直接重跑同指令（已抓的命中快取）；遇402即停。**2026-09-20 17:30第1批結果**：361次請求中成功178次，第179次遇FinMind 402（`rate_limit_state.json`封鎖至**台北2026-09-20 19:29:54**）→依分支(b)標BLOCKED。首批按字典序先打到00xx ETF/債券代碼（無財報回空），僅使資產負債表快取者665→680檔、現金流量表407不變；已修腳本改為4位數個股代碼優先（未驗證新排序的實際覆蓋增量）。**解除條件**：`blocked_until`已過（≥19:30台北）→轉回`- [ ]`，續跑`python research/run_detached.py submit --name backfill_fin_atom_cache_bN --timeout-min 45 --expect research/data/backfill_fin_atom_cache_status.json -- python -u research/backfill_fin_atom_cache.py --batch-size 200`。
 - [x] **regime.替代B.規格修訂** [研究] [自走補入，來源：`regime.替代B`阻塞條目的解除條件(b)，2026-09-20 DevQueue 171601判定]：`財報PIT.三`（295檔，修正臂VAL最小p=0.083）與`財報PIT.四`（80檔，同格p=0.174~0.290）都顯示eps_family/revenue_surprise在修正PIT後無殘存訊號→`regime.替代B`阻塞條目的分支(b)成立：規格第18節「多頭期加重eps_family」映射失去經濟意義。做X→在`REGIME_OVERLAY_PROTOCOL.md`新增第18節修訂版（看結果前寫下、不得看結果改）：以修正PIT後**仍未被判死**的因子重寫「多頭/空頭期加重哪個因子」的經濟映射（先列`FACTORS.md`/`TRIALS_LEDGER.md`裡目前無PIT前視污染且非同家族已死者，含`f_low_vol`；逐一寫映射理由）→(a)找得出≥2個無污染且有經濟理由可區分多空的因子→鎖規格後由驗證帽輪次照原分支跑（登記試驗）；(b)找不出→依原分支以「無可用映射、未經檢驗」結案`regime.替代B`（注意：不得寫成「regime概念在台股股票軌窮盡」，替代A與B都沒有被有效檢驗）。心跳＝`REGIME_OVERLAY_PROTOCOL.md`新增節＋`PROGRESS_HEARTBEAT.jsonl`。
   **結案（DevQueue cycle 20260920-171601，分支(b)）**：`REGIME_OVERLAY_PROTOCOL.md`新增第19節——盤點`FACTORS.md`：曾PASS的4因子中eps_growth/eps_surprise/revenue_surprise已FAIL（#287~#289＋財報PIT.三/四），僅`f_low_vol`（純價格）有效，value_pb/pe/roe_stability校正後即FAIL→無≥2個有效因子、映射無從建立→第18節作廢為「無可用映射、未經檢驗」，不登記試驗、不跑回測；明確更正「窮盡」措辭（替代B是缺因子而暫停，非檢驗後失敗）。重啟條件：出現≥2個通過完整關卡、相互獨立的新因子。[自行裁量：採分支(b)結案而非硬找映射，理由＝只有1個有效因子，任何映射都是拿無效因子湊數。]
@@ -7055,7 +7055,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   （`run_detached.py`）→聚合→`register_trial`登記，詳見規格第8節第2~5步。此項維持`- [ ]`。
   **進度（DevQueue 213101，研究帽）**：`research/chip_atom_ic_map.py`已完成（仿fin_atom：snapshot＝`build_snapshots`自2010首個交易日、不重疊；每(表達式,snapshot)有效配對<30記NaN；n_snap<8標樣本不足；只讀本機快取；`--tier B`在SBL未回補時拒跑，exit 2）。15檔smoke：因<30檔全部snapshot被跳過（符合規格第4節入樣規則，非bug）；40檔驗證：183/61個snapshot有IC（20/60日）、134列結果、峰值private commit 6.5GB→**定位為`chip_atom_library.load_t86_by_stock`整批concat 3,455檔的瞬時峰值**（1.3GB穩態），逐檔先濾4位數代號後**峰值1.83GB、結果與修正前逐列完全相同**（134列`==`）。[自行裁量]：此修正只改記憶體不改語意，屬實作缺陷修復，規格未動；`--self-test`ALL PASS。Tier A全量以job `20260920-215052-3740`背景執行（`--allow-concurrent`，理由：SLB回補為3秒間隔I/O不吃CPU）；輸出`research/chip_atom_ic_map_result_A.json`＋`chip_atom_ic_snapshots_A_h{20,60}.parquet`。**剩下**：聚合腳本（分年/牛熊K/樸素基準/共線分群，規格第5~6節）→`CHIP_ATOM_IC_MAP.md`→`register_trial`登記（先登記再宣稱判定）→重跑`selection_bias_ledger.py`。此項維持`- [ ]`。
   **結案（DevQueue cycle 20260920-213101，研究帽計算＋驗證帽判定，分支(b)）**：Tier A全量job `20260920-215052-3740`（22:15完成，exit 0，峰值1.8GB，392檔可用、有T86者198檔）→`chip_atom_ic_map_aggregate.py`聚合→`CHIP_ATOM_IC_MAP.md`。**判定FAIL（規格第7節分支b）**：20日K>=4有67個、全窗同號4個 vs 樸素期望6.69（低於期望），Poisson-binomial p=0.913；60日43個、1個 vs 4.06，p=0.986；高階篩選通過0（期望上界0.33/0.21）。已`register_trial`登記**#317**（`--check`PASS）、重跑`selection_bias_ledger.py`、寫`STRATEGY_GRAVEYARD.md`。**Tier B（借券賣出餘額族22個表達式）記「未檢驗」不記FAIL**，待`籌碼原子.補借券快取`回補達U的60%後另立試驗登記。**[自行裁量]**：(1)規格「單尾二項、按K混合不混K」採Poisson-binomial精確檢定並另列各K二項p（聚合腳本寫成時尚未看結果）；(2)補做規格第2節要求的下市檔數統計：U中價格末筆<2024-06有23檔、融資融券22檔（`chip_atom_universe_delist_stat.json`）。**分支後續**：(b)→不進depth-2/3；出借總量（`籌碼原子.補出借總量快取`）併入須另開登記，且在depth-1整體FAIL下優先序低。心跳＝`CHIP_ATOM_IC_MAP.md`＋TRIALS_REGISTRY #317＋`PROGRESS_HEARTBEAT.jsonl`。
-- [!] **籌碼原子.補借券快取** [債務] [自走補入，來源：`ATOM_CHIP_IC_MAP_SPEC.md`第9節]：回補　**⛔ 自走中止（2026-09-20 21:31）**：同屬FinMind回補，共用rate_limit_state.json封鎖至22:22:23台北（20:22再度402）；22:22後與財報原子.補快取一併續跑（批次≤200檔、遇402即停）
+- [ ] **籌碼原子.補借券快取** [債務] （2026-09-20 22:2x DevQueue 213101：封鎖解除→轉回`- [ ]`；新增`research/backfill_sbl_cache.py`，第1批100檔以job `20260920-222346-480a`背景執行（status檔`research/data/backfill_sbl_cache_status.json`，含`coverage_of_U`）；續批同指令重跑，已有快取者跳過；覆蓋達U的60%(≥236檔)才觸發Tier B另立登記） [自走補入，來源：`ATOM_CHIP_IC_MAP_SPEC.md`第9節]：回補　**⛔ 自走中止（2026-09-20 21:31）**：同屬FinMind回補，共用rate_limit_state.json封鎖至22:22:23台北（20:22再度402）；22:22後與財報原子.補快取一併續跑（批次≤200檔、遇402即停）
   `TaiwanDailyShortSaleBalances`（宇宙U約391檔，每檔1次請求，`load_dev`寫入快取，起點
   2010-01-01）。**先對照`CLAUDE.md`「FinMind免費層」額度**，批次≤200檔、遇402即停標`- [!]`
   並記`blocked_until`；沿用`backfill_fin_atom_cache.py`樣式（`run_detached.py submit`）。
@@ -7082,6 +7082,47 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
 - [x] **稽核.六續五.BLAS執行緒數對commit與速度的取捨量測** [債務] [自走補入，來源：稽核.六續四結案發現]：`INCIDENTS.md`稽核.六續四顯示每支Python行程光import numpy+scipy就吃約1.64GB commit（實體僅~140MB），而機器commit剩餘僅8.4GB/50GB。做X→量測（只量不改任何既有腳本/排程）：以`load_sample_with_factors`25檔＋`prepare_market_data`這條代表性負載，比較`OPENBLAS_NUM_THREADS`＝預設(24)／4／1三種的(i)private commit峰值、(ii)WorkingSet峰值、(iii)wall-clock秒數，各跑3次取中位數，結果寫`research/MEM_BLAS_THREADS.md`。分支：(a)threads=1的wall-clock增幅<20%且commit降≥1GB→在該檔寫「建議在`run-*.ps1`啟動器與`mem_guard.install()`前設環境變數」的提案，**但不自行改啟動器/排程（動排程需另案提案）**；(b)增幅≥20%→記錄取捨、維持現況；(c)結果與推論（BLAS預配置commit）不符→修正`INCIDENTS.md`該節推論。心跳＝`research/MEM_BLAS_THREADS.md`＋`PROGRESS_HEARTBEAT.jsonl`。
   **結案（DevQueue cycle 20260920-171601，分支(a)）**：`mem_blas_threads_bench.py`＋`MEM_BLAS_THREADS.md`（25檔載入負載、3設定×3次中位數）：commit峰值 預設2,958MB／4執行緒1,245MB／1執行緒918MB；WorkingSet不變(~910~950MB)；wall-clock 57.2s／58.0s(+1%)／60.6s(+6%)。推論成立。**提案（未執行）**：啟動器與批次入口設`OPENBLAS/OMP/MKL_NUM_THREADS=4`可省~1.7GB commit/行程；動`run-*.ps1`屬排程變更，依「提案先於執行」留待總司令核准（本項只量不改）。[自行裁量：建議值選4而非1。]
 
+- [ ] **原子.五B** [研究] **【優先序高，修depth-1閘門設計缺陷】**
+  2026-09-20總司令裁示【depth-1閘門設計缺陷要修；p=0.053作廢要正式
+  處理】一：原子.五（財報depth-1）判FAIL的閘門規則隱含「好的複合
+  因子一定由好的單一素材組成」，但本專案自己的PASS因子（如
+  `f_eps_surprise`）反例證明資訊在【差異】不在【水準】。規則已修
+  （見`research/ATOM_LIBRARY.md`「深度組合的閘門規則：通道A／
+  通道B」新章節）：通道A（depth-1顯著才准組）維持，新增通道B
+  （事前鎖定的結構型算子`surprise`/`accel`/`zscore_ts`/`spread`
+  不受depth-1閘門限制，可直接套在任何財報原子上組depth-2/3）。
+  本項用通道B重掃財報家族：對11個財報原子各套四個結構型算子，
+  組成depth-2/3表達式，事前登記空間大小，走與原子.五完全相同的
+  判定流程（牛熊段同號比例必須與樸素機率基準並列，比照原子.二/
+  原子.五抓到決定性數字的方法；`surprise()`的預期模型必須事前
+  綁定，例如季節性隨機漫步＝上一期同季值，不得看過IC後才選）。
+  **這一輪的意義**：如果通道B也FAIL，「財報家族無效」才是站得住
+  的結論；現在的原子.五FAIL只證明了「財報的水準與成長無效」，
+  範圍不能外推。做X→分支：通道B有存活素材（依`ATOM_FIN_IC_MAP_
+  SPEC.md`第7節同款判準：五窗全同號比例對6.25%基準p<0.01且高於
+  基準、通過者分群後≥2個獨立族、Tier A成立）→進深挖（比照原子.三
+  的六道控制，尤其第六條經濟機制寫不出來就砍）；通道B也FAIL→
+  財報家族正式結案，且結論可以外推成「財報depth-2/3以內、這11個
+  原子+這套算子庫皆無效」，接原子.六（已在跑，不受影響）。
+  [自走補入，來源：總司令裁示【depth-1閘門設計缺陷要修；p=0.053
+  作廢要正式處理】一原文]
+  **進度（馬拉松第584輪，研究帽，2026-09-20 22:4x）——計算層完成，判定留給驗證帽輪次**：
+  `research/ATOM_FIN_CHANNEL_B_SPEC.md`（事前登記：132表達式＝Tier A 45＋Tier B 87，×2 horizon＝264測試，
+  與原子.五零重疊、自由參數0）；`fin_atom_ic_map_b.py`（薄包裝重用原子.五機制）；Tier A 204/206檔、
+  Tier B 567/568檔跑完（jobs 20260920-223456-b4d5／-223547-bdd9，皆exit=0，holdout未動）；
+  聚合腳本`fin_atom_ic_map_b_analyze.py`→`fin_atom_ic_map_b_family.json`。**機械結果（尚未登記、未下判定）**：
+  Tier A K=5僅**4個獨立族**（37/45表達式因depth-2/3需12~16季歷史而缺2011窗）：20日0/4（p=1.0）、
+  60日1/4（p=0.228、×2=0.455）→按SPEC第4節機械執行＝分支(b) FAIL；篩選通過族數1（期望上界0.022，同一族無法達≥2獨立族）。
+  Tier B（K=4，基準12.5%）：兩horizon皆1/13（p=0.82），僅輔助。
+  **必讀誠實揭露（SPEC第6節，看過結果後附註）**：K=5母體僅4族＝檢定力極低，FAIL**不能外推成「財報depth-2/3以內皆無效」**
+  （原裁示分支(b)那句外推在此檢定力下不成立，只能寫「此檢定力下未見訊號」）；Tier B宇宙跑時為568檔（非原子.五的407，
+  回補新增非空快取）；任何替代規則（併入K=4等）＝改判定門檻，屬白名單第5條需總司令裁示，且用已看過結果選規則就非事前登記。
+  **下一步（驗證帽輪次，本項維持`- [ ]`直到做完）**：①用`fin_atom_ic_map_b_family.json`寫`FIN_ATOM_CHANNEL_B.md`
+  （含K分布、族層級檢定、群層級描述，不列表達式名）；②`register_trial()`登記（描述性地圖類，比照#316，名目測試數264，
+  判定FAIL但結論限縮為檢定力不足）＋`trial_registry.py --check`＋重跑`selection_bias_ledger.py`；③`STRATEGY_GRAVEYARD.md`
+  記「流程對但檢定力不足」；④心跳。**[自行裁量]**：不自行改K規則、不重跑換規則；「是否核准以更大Tier A宇宙（等回補）另立新SPEC重測」
+  留總司令下次讀時裁示（不阻塞，繼續原子.六B線）。
+
 ## 執行順序（權威清單，2026-09-07 轉向裁示重排；**自走 runner 依這份取件**）
 
 `scripts/dev_queue_runner.py` 讀這份清單，依序找第一個仍為 `- [ ]` 的項目來做。
@@ -7104,6 +7145,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
 
 <!-- ORDER-BEGIN -->
 財報PIT.二
+原子.五B [研究]
 零件.零 [研究]
 原子.一 [研究]
 原子.二 [研究]

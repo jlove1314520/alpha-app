@@ -1,0 +1,1752 @@
+{
+ "tier": "B",
+ "n_stocks_used": 567,
+ "n_stocks_requested": 568,
+ "fail": {
+  "no_price": 1,
+  "no_frame": 0
+ },
+ "n_snapshots": 60,
+ "results": [
+  {
+   "expression": "surprise_naive(roa)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.08135913424848759,
+   "val_mean_ic": 0.0815772074085638,
+   "n_snap_train": 20,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(roa)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.08917118414164396,
+   "val_mean_ic": 0.0678721678147088,
+   "n_snap_train": 18,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(roa)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.08300737698957923,
+   "val_mean_ic": 0.07304353721621762,
+   "n_snap_train": 24,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(roa)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.07585998615053166,
+   "val_mean_ic": 0.059327653794986064,
+   "n_snap_train": 26,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(roe)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.059731311050627525,
+   "val_mean_ic": 0.07572564325210551,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(roe)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.09250861199204737,
+   "val_mean_ic": 0.06452183652180994,
+   "n_snap_train": 18,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(roe)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.07237334771575964,
+   "val_mean_ic": 0.07147865823240047,
+   "n_snap_train": 24,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(roe)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.06836669285927602,
+   "val_mean_ic": 0.05471404893267153,
+   "n_snap_train": 25,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(asset_turnover)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.017087323780813138,
+   "val_mean_ic": 0.02433560287598733,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(asset_turnover)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.010462871274086481,
+   "val_mean_ic": 0.046376041295329,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(asset_turnover)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.039934139752049874,
+   "val_mean_ic": 0.042586898757849226,
+   "n_snap_train": 25,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(asset_turnover)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.03701198142190415,
+   "val_mean_ic": 0.041023998082519886,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.009320760853971434,
+   "val_mean_ic": -0.030723512733862937,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.015471664821191973,
+   "val_mean_ic": -0.037543973744278515,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.03478576134036032,
+   "val_mean_ic": -0.03219874612200027,
+   "n_snap_train": 25,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.018368890060037748,
+   "val_mean_ic": -0.03596898145057857,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.025622528175921328,
+   "val_mean_ic": 0.01833573233551354,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.01972840709183163,
+   "val_mean_ic": -0.01440942939708158,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.01601780281494869,
+   "val_mean_ic": 0.011866733549603315,
+   "n_snap_train": 25,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "accel(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.018787048363058265,
+   "val_mean_ic": -0.025378327926265168,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(earnings_quality)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.01892630917735828,
+   "val_mean_ic": 0.007063091659890292,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(earnings_quality)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.005996323254040074,
+   "val_mean_ic": 0.007301700954329604,
+   "n_snap_train": 18,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "zscore8(earnings_quality)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.0038138616960143217,
+   "val_mean_ic": 0.009307081031195702,
+   "n_snap_train": 23,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "accel(earnings_quality)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.030138986733151327,
+   "val_mean_ic": -0.007356973413963949,
+   "n_snap_train": 25,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.002110411143132226,
+   "val_mean_ic": 0.021586956460447122,
+   "n_snap_train": 24,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.003568540041706954,
+   "val_mean_ic": 0.027769307204259037,
+   "n_snap_train": 23,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.004952299249460816,
+   "val_mean_ic": 0.009311900039146297,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.009442993546639288,
+   "val_mean_ic": 0.01440480050458652,
+   "n_snap_train": 29,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(equity_ratio)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.020069459854823144,
+   "val_mean_ic": 0.017420197162589305,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(equity_ratio)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.0004478577622011849,
+   "val_mean_ic": 0.013636386518122899,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(equity_ratio)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.015802383979368846,
+   "val_mean_ic": 0.01818242558910669,
+   "n_snap_train": 25,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(equity_ratio)",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.014505020456123443,
+   "val_mean_ic": 0.030197558350616667,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_naive(yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.009635940701647059,
+   "val_mean_ic": 0.06841000384463403,
+   "n_snap_train": 19,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.006969195375877281,
+   "val_mean_ic": 0.039055624884645423,
+   "n_snap_train": 18,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.007961664191107849,
+   "val_mean_ic": 0.06216301233237116,
+   "n_snap_train": 23,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.005700184387908615,
+   "val_mean_ic": 0.01950325527867619,
+   "n_snap_train": 17,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.02840056526369096,
+   "val_mean_ic": 0.051183910078254305,
+   "n_snap_train": 16,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.0013712449895336924,
+   "val_mean_ic": 0.032396257185182256,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_naive(yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.0020351430683261795,
+   "val_mean_ic": 0.02015303530924758,
+   "n_snap_train": 17,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.029998920614438165,
+   "val_mean_ic": 0.057577689226829085,
+   "n_snap_train": 16,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.00658570430744186,
+   "val_mean_ic": 0.03143708721956366,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_naive(yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.007924156472365105,
+   "val_mean_ic": 0.0076239442264396245,
+   "n_snap_train": 17,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.01728597326949842,
+   "val_mean_ic": 0.014238541120534222,
+   "n_snap_train": 16,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.02063427706426963,
+   "val_mean_ic": 0.011885768558596393,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_naive(yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.003940561378931128,
+   "val_mean_ic": 0.01201408017983185,
+   "n_snap_train": 17,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.004188598108819006,
+   "val_mean_ic": 0.009008218853291184,
+   "n_snap_train": 16,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.009583394135425347,
+   "val_mean_ic": 0.0390925627459433,
+   "n_snap_train": 21,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.018405100558493773,
+   "val_mean_ic": -0.016906234279245272,
+   "n_snap_train": 30,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.018523834603073015,
+   "val_mean_ic": 0.029370545820873173,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.019091025058214636,
+   "val_mean_ic": 0.008861401785111498,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.01333884962111446,
+   "val_mean_ic": 0.028764535988522928,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.016851176825153354,
+   "val_mean_ic": -0.00792908947759691,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.011488876485936198,
+   "val_mean_ic": 0.03307521453937119,
+   "n_snap_train": 30,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.07412761154419863,
+   "val_mean_ic": 0.08944155587581704,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.055122168745359766,
+   "val_mean_ic": 0.08516282878759568,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.05249327355473857,
+   "val_mean_ic": 0.07932978681203758,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.05430005496560348,
+   "val_mean_ic": 0.075417781841917,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.01776419909131539,
+   "val_mean_ic": 0.0011417487405492258,
+   "n_snap_train": 30,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.07192030808858084,
+   "val_mean_ic": 0.07877382081030242,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.06956054980324171,
+   "val_mean_ic": 0.07202281445418487,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.05650256680380434,
+   "val_mean_ic": 0.06731242741181137,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.06091439522906663,
+   "val_mean_ic": 0.06231843599574806,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.004521947864033523,
+   "val_mean_ic": 0.033362721849352836,
+   "n_snap_train": 30,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.04845467756416966,
+   "val_mean_ic": 0.07880481324805773,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.05074603220637236,
+   "val_mean_ic": 0.07821537874034257,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.04773561535223339,
+   "val_mean_ic": 0.07371511543238465,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.04814920701123194,
+   "val_mean_ic": 0.07270484706900415,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(ocf))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.004239032430184362,
+   "val_mean_ic": 0.04086865362903803,
+   "n_snap_train": 26,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.06652909001564529,
+   "val_mean_ic": 0.09056493326244215,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.052467245199543384,
+   "val_mean_ic": 0.08538414327512506,
+   "n_snap_train": 26,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.04554537403277103,
+   "val_mean_ic": 0.07915847332851521,
+   "n_snap_train": 26,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.04835528565084995,
+   "val_mean_ic": 0.074395698291878,
+   "n_snap_train": 26,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(shares))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.027508335763978375,
+   "val_mean_ic": 0.01731724763568588,
+   "n_snap_train": 26,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.017330328372559805,
+   "val_mean_ic": 0.024267139155332233,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.03400792898385421,
+   "val_mean_ic": 0.02051359888871615,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.028546341331731954,
+   "val_mean_ic": 0.0200705181870324,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.03492455287342855,
+   "val_mean_ic": 0.01985130124963149,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.006158436895116764,
+   "val_mean_ic": -0.009900463785222486,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.0067329699317106384,
+   "val_mean_ic": -0.015800133468176998,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.001143503354453197,
+   "val_mean_ic": 0.002454037261459388,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.005312758726154836,
+   "val_mean_ic": -0.023843445013769775,
+   "n_snap_train": 27,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(total_assets),yoy(equity))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.022229053497803814,
+   "val_mean_ic": -0.021074141272572892,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(total_assets),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.01650938445880636,
+   "val_mean_ic": 0.000508718519719939,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(total_assets),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.001187539330698677,
+   "val_mean_ic": -0.026172426411120487,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(equity),yoy(inventory))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": 0.004119264294795673,
+   "val_mean_ic": 0.006667466161241808,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(equity),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.019031232127734086,
+   "val_mean_ic": -0.010830307664029495,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(inventory),yoy(receivable))",
+   "tier": "B",
+   "horizon": 20,
+   "train_mean_ic": -0.0065165916826381565,
+   "val_mean_ic": -0.024736513038600347,
+   "n_snap_train": 28,
+   "n_snap_val": 16,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(roa)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07357104209995098,
+   "val_mean_ic": 0.04579224137621887,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(roa)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06893715436587662,
+   "val_mean_ic": 0.05680650995093029,
+   "n_snap_train": 19,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(roa)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.08617326324280954,
+   "val_mean_ic": 0.06376998697339768,
+   "n_snap_train": 24,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(roa)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06485823662645399,
+   "val_mean_ic": 0.04917343933142028,
+   "n_snap_train": 26,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(roe)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07380092314024919,
+   "val_mean_ic": 0.04190511390000919,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(roe)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07534695218576479,
+   "val_mean_ic": 0.05308719877957932,
+   "n_snap_train": 19,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(roe)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.08187617171677282,
+   "val_mean_ic": 0.06286228567319213,
+   "n_snap_train": 24,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(roe)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06621776624076393,
+   "val_mean_ic": 0.04634532469935945,
+   "n_snap_train": 26,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(asset_turnover)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.034759507137096246,
+   "val_mean_ic": 0.0010317829171600037,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(asset_turnover)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02379142271813284,
+   "val_mean_ic": 0.06086867245051528,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(asset_turnover)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.04971882019662901,
+   "val_mean_ic": 0.026025462445451796,
+   "n_snap_train": 25,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(asset_turnover)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02157062304252842,
+   "val_mean_ic": 0.057211812802256366,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.03543000298947548,
+   "val_mean_ic": -0.02310552962878044,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.03377717204425296,
+   "val_mean_ic": -0.04424558097754464,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.049278402220465665,
+   "val_mean_ic": -0.038499891127727885,
+   "n_snap_train": 25,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(inventory_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.013754297986583662,
+   "val_mean_ic": -0.03643633317060687,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.0173996391017702,
+   "val_mean_ic": 0.019626730661971858,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.027744717658651774,
+   "val_mean_ic": -0.031118911891003756,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.018049462882366803,
+   "val_mean_ic": 0.007741822970947982,
+   "n_snap_train": 25,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "accel(receivable_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.020267201741430946,
+   "val_mean_ic": -0.034571053976643985,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(earnings_quality)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.007290941174590404,
+   "val_mean_ic": 0.022904648266505106,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(earnings_quality)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02440017038343909,
+   "val_mean_ic": 0.017010656518246705,
+   "n_snap_train": 19,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(earnings_quality)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.0012950499498626835,
+   "val_mean_ic": 0.006460108366066989,
+   "n_snap_train": 24,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(earnings_quality)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.021518797825991292,
+   "val_mean_ic": -0.014806320962259093,
+   "n_snap_train": 26,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.023263962224760917,
+   "val_mean_ic": 0.02420880385738373,
+   "n_snap_train": 24,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.03225029684182581,
+   "val_mean_ic": 0.029337972190121808,
+   "n_snap_train": 23,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.021239637140862765,
+   "val_mean_ic": 0.013364298261336902,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(ocf_to_rev)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02059594322044645,
+   "val_mean_ic": 0.0007091184134378957,
+   "n_snap_train": 30,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(equity_ratio)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02295947735032943,
+   "val_mean_ic": 0.002584679539089063,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(equity_ratio)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.009595466466193516,
+   "val_mean_ic": 0.003908457717613783,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(equity_ratio)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.023383413908432137,
+   "val_mean_ic": 0.003660999456212761,
+   "n_snap_train": 25,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "accel(equity_ratio)",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.00036558498429990055,
+   "val_mean_ic": 0.012209483684436556,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_naive(yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.0150425881346621,
+   "val_mean_ic": 0.019469659833595734,
+   "n_snap_train": 20,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02892197614531797,
+   "val_mean_ic": 0.0018324173592435822,
+   "n_snap_train": 19,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.019193519891021322,
+   "val_mean_ic": 0.04685155844100183,
+   "n_snap_train": 24,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.009692807036420396,
+   "val_mean_ic": -0.023777597881646618,
+   "n_snap_train": 17,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.015733721102857177,
+   "val_mean_ic": 0.02120324986251006,
+   "n_snap_train": 16,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.011191077263969068,
+   "val_mean_ic": 0.002417385110483407,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.001753733140417048,
+   "val_mean_ic": -0.01475737049596281,
+   "n_snap_train": 17,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.027472183179005634,
+   "val_mean_ic": 0.014430706745876381,
+   "n_snap_train": 16,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.01723804935102602,
+   "val_mean_ic": -0.0005948266374220435,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_naive(yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.016393331889841902,
+   "val_mean_ic": -0.014270383697618771,
+   "n_snap_train": 17,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_drift(yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.0017307285640111231,
+   "val_mean_ic": 0.018104949206069386,
+   "n_snap_train": 16,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.022898394589882482,
+   "val_mean_ic": -0.0061877706465836785,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "surprise_naive(yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.0064822412425143035,
+   "val_mean_ic": -0.015892953628745862,
+   "n_snap_train": 17,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "surprise_drift(yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.0005632552361444936,
+   "val_mean_ic": -0.004217305269993686,
+   "n_snap_train": 16,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "zscore8(yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.009141690066267059,
+   "val_mean_ic": 0.015534533350555168,
+   "n_snap_train": 21,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.02284353486437007,
+   "val_mean_ic": -0.00979659505303434,
+   "n_snap_train": 31,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.024431601482547537,
+   "val_mean_ic": 0.009345226352954481,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.021094676076901724,
+   "val_mean_ic": -0.003952288693808043,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.027554679961690996,
+   "val_mean_ic": 0.019941874036124123,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(revenue),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.013363457702316938,
+   "val_mean_ic": -0.007097127657252036,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.02272642597254791,
+   "val_mean_ic": 0.010522070416031992,
+   "n_snap_train": 31,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07746139542579686,
+   "val_mean_ic": 0.06159522269343011,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07598779405356973,
+   "val_mean_ic": 0.062419491188409094,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07496738094986513,
+   "val_mean_ic": 0.05698558766091358,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(eps),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06986143464789069,
+   "val_mean_ic": 0.04575910844459319,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.01012121121219599,
+   "val_mean_ic": -0.008110125301110662,
+   "n_snap_train": 31,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06850382267860465,
+   "val_mean_ic": 0.03772943140351778,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.0737268353085063,
+   "val_mean_ic": 0.032814874725236996,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06426059358450924,
+   "val_mean_ic": 0.03725334872450137,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(gross_profit),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06067029562781726,
+   "val_mean_ic": 0.025796039049229672,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.013353253166384934,
+   "val_mean_ic": 0.01246162471405659,
+   "n_snap_train": 31,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07885109833581935,
+   "val_mean_ic": 0.05960611588941669,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.08067409137010832,
+   "val_mean_ic": 0.06343216970793396,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.08210269315299097,
+   "val_mean_ic": 0.05872477906899941,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(op_income),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.0718234855986257,
+   "val_mean_ic": 0.05427212502414349,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(ocf))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.012945231636869637,
+   "val_mean_ic": 0.008215473925932781,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07824245282359811,
+   "val_mean_ic": 0.06126288832060752,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07714574662045767,
+   "val_mean_ic": 0.05953846056590131,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.07375092942927133,
+   "val_mean_ic": 0.05597715110018576,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(net_income),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.06776830312413401,
+   "val_mean_ic": 0.04315586878613303,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(shares))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.03310337833292476,
+   "val_mean_ic": 0.010289597275607099,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.03427255263984217,
+   "val_mean_ic": 0.013866109187441123,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.04060198288129665,
+   "val_mean_ic": 0.020560584953367305,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.041440303537999525,
+   "val_mean_ic": 0.020253323572263785,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(ocf),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.039158695377114736,
+   "val_mean_ic": 0.013607727833322569,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(total_assets))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.006189901031394019,
+   "val_mean_ic": 0.011388486060547738,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.0055112378721480434,
+   "val_mean_ic": 0.011514346944873724,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": false
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.009615775979084277,
+   "val_mean_ic": 0.030341494109491073,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(shares),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.016309474792048348,
+   "val_mean_ic": -0.005916891640931086,
+   "n_snap_train": 27,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(total_assets),yoy(equity))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.00845461471577751,
+   "val_mean_ic": -0.004194441513342787,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(total_assets),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.00970004677290835,
+   "val_mean_ic": 0.02014745610680437,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(total_assets),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.011951887274429463,
+   "val_mean_ic": -0.016913751460291063,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(equity),yoy(inventory))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": 0.00998724553680766,
+   "val_mean_ic": 0.02109661826016388,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(equity),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.012010785091276054,
+   "val_mean_ic": -0.008537028453184303,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  },
+  {
+   "expression": "spread(yoy(inventory),yoy(receivable))",
+   "tier": "B",
+   "horizon": 60,
+   "train_mean_ic": -0.018442659407117385,
+   "val_mean_ic": -0.024585548737005244,
+   "n_snap_train": 28,
+   "n_snap_val": 15,
+   "same_sign": true
+  }
+ ]
+}
