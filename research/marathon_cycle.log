@@ -4092,3 +4092,11 @@ quota_throttle: SKIP: 節流中，距上次實跑50.2分鐘 < 120分鐘門檻（
 quota_throttle: SKIP: 節流中，距上次實跑80.2分鐘 < 120分鐘門檻（帳號週用量已達94%（門檻90%），節流保留額度給交辦與資料管線）
 
 quota_throttle: SKIP: 節流中，距上次實跑110.2分鐘 < 120分鐘門檻（帳號週用量已達94%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達94%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Marathon cycle start: 2026-09-20 15:00:37 cycle_id=20260920-150037 =====
+TIMEOUT after 25 min -> taskkill /T /F pid=98068
+quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0.94
+finally: lock belongs to cycle_id=20260920-150052 (not 20260920-150037) -- left alone
+===== Marathon cycle end: 2026-09-20 15:25:39 cycle_id=20260920-150037 reason=TIMEOUT cost_usd= read_kb=111.7 turns= duration_min= =====
