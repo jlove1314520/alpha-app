@@ -7047,8 +7047,12 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   本機即可、Tier B 22需SBL回補）；全部籌碼原子lag1日（收盤後才公布，PIT必要條件）。
   **[自行裁量]**：(1)宇宙用融資融券快取∩價格392檔而非另抽300；(2)交辦寫「借券餘額」，實得為
   「借券賣出餘額」，出借總量另立查證項；(3)Tier B未回補時記「未檢驗」不記FAIL。
-  **剩下**：實作`chip_atom_library.py`／`chip_atom_ic_map.py`→smoke→Tier A全量→聚合→登記，
-  詳見規格第8節。此項維持`- [ ]`。
+  **同輪續做（20:1x）**：`research/chip_atom_library.py`已完成（載入T86/融資融券/SBL本機快取、
+  全籌碼欄＋分母v一起lag1、缺列NaN不補0、89個表達式登記＋斷言A=67/B=22、宇宙U=392檔斷言）；
+  `--self-test`ALL PASS（含lag1手算、nf手算、2330真實資料89表達式皆有值）。規格補記第10節：
+  抽樣核對T86覆蓋（上市≈98~100%、上櫃0%，約半數U股票是上櫃→三大法人族實際約200檔量級）。
+  **剩下**：`chip_atom_ic_map.py`（仿`fin_atom_ic_map.py`）→15檔smoke→30檔記憶體驗證→Tier A全量
+  （`run_detached.py`）→聚合→`register_trial`登記，詳見規格第8節第2~5步。此項維持`- [ ]`。
 - [ ] **籌碼原子.補借券快取** [債務] [自走補入，來源：`ATOM_CHIP_IC_MAP_SPEC.md`第9節]：回補
   `TaiwanDailyShortSaleBalances`（宇宙U約391檔，每檔1次請求，`load_dev`寫入快取，起點
   2010-01-01）。**先對照`CLAUDE.md`「FinMind免費層」額度**，批次≤200檔、遇402即停標`- [!]`
