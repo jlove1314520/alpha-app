@@ -7082,7 +7082,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
 - [x] **稽核.六續五.BLAS執行緒數對commit與速度的取捨量測** [債務] [自走補入，來源：稽核.六續四結案發現]：`INCIDENTS.md`稽核.六續四顯示每支Python行程光import numpy+scipy就吃約1.64GB commit（實體僅~140MB），而機器commit剩餘僅8.4GB/50GB。做X→量測（只量不改任何既有腳本/排程）：以`load_sample_with_factors`25檔＋`prepare_market_data`這條代表性負載，比較`OPENBLAS_NUM_THREADS`＝預設(24)／4／1三種的(i)private commit峰值、(ii)WorkingSet峰值、(iii)wall-clock秒數，各跑3次取中位數，結果寫`research/MEM_BLAS_THREADS.md`。分支：(a)threads=1的wall-clock增幅<20%且commit降≥1GB→在該檔寫「建議在`run-*.ps1`啟動器與`mem_guard.install()`前設環境變數」的提案，**但不自行改啟動器/排程（動排程需另案提案）**；(b)增幅≥20%→記錄取捨、維持現況；(c)結果與推論（BLAS預配置commit）不符→修正`INCIDENTS.md`該節推論。心跳＝`research/MEM_BLAS_THREADS.md`＋`PROGRESS_HEARTBEAT.jsonl`。
   **結案（DevQueue cycle 20260920-171601，分支(a)）**：`mem_blas_threads_bench.py`＋`MEM_BLAS_THREADS.md`（25檔載入負載、3設定×3次中位數）：commit峰值 預設2,958MB／4執行緒1,245MB／1執行緒918MB；WorkingSet不變(~910~950MB)；wall-clock 57.2s／58.0s(+1%)／60.6s(+6%)。推論成立。**提案（未執行）**：啟動器與批次入口設`OPENBLAS/OMP/MKL_NUM_THREADS=4`可省~1.7GB commit/行程；動`run-*.ps1`屬排程變更，依「提案先於執行」留待總司令核准（本項只量不改）。[自行裁量：建議值選4而非1。]
 
-- [ ] **原子.五B** [研究] **【優先序高，修depth-1閘門設計缺陷】**
+- [x] **原子.五B** [研究] **【優先序高，修depth-1閘門設計缺陷】** 【✅完成 2026-09-21 01:1x 馬拉松驗證帽輪次：判定FAIL(分支b)、結論限縮為「檢定力不足」，TRIALS_LEDGER #320、`FIN_ATOM_CHANNEL_B.md`、`STRATEGY_GRAVEYARD.md`已寫；`trial_registry.py --check` PASS；selection_bias_ledger已重跑(N=322)。**「財報depth-2/3以內皆無效」外推不成立**，待總司令裁示是否待Tier A回補擴大後另立新SPEC重測（[自行裁量]，不阻塞）】
   2026-09-20總司令裁示【depth-1閘門設計缺陷要修；p=0.053作廢要正式
   處理】一：原子.五（財報depth-1）判FAIL的閘門規則隱含「好的複合
   因子一定由好的單一素材組成」，但本專案自己的PASS因子（如
