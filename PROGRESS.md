@@ -1,3 +1,11 @@
+## 2026-09-20 18:0x（DevQueue cycle 20260920-171601，驗證帽，`財報PIT.四`結案）
+
+**做了什麼**：上輪（154601）失敗原因＝腳本已commit、job 20260920-163914-3073已跑完（13.6分鐘、exit 0、80檔、48列），但輪次在收成前逾時60分鐘被殺；本輪**沒有重跑，只收成**。新增`research/pit4_summarize_register.py`＋`PIT4_RERUN_RESULT.md`，補登記修正臂12個參數點`TRIALS_REGISTRY`#304~#315（登記時序瑕疵已於腳本檔頭與每筆design誠實註記；legacy臂不另計N）。
+
+**結果（分支(a)）**：legacy臂A_4pass/ic_weighted/季頻VAL alpha=+8.75%、p=0.168（原+10.40%/p=0.053；判準p∈[0.03,0.08]不符），B_plus同格+7.67%/p=0.288→舊數字不可重現、前視貢獻不可量化，不再追。兩臂12格VAL平均差僅+0.32pp、方向不一致。`[自行裁量]`：月頻兩格修正臂p=0.049/0.052（legacy臂0.081/0.089）屬12取1未校正、非預先指定格，不觸發分支(c)，仍FAIL。LEADS/GRAVEYARD已補記。
+
+**證據**：`python research/pit4_summarize_register.py`輸出即`PIT4_RERUN_RESULT.md`；`run_detached.py status`可見job 3073 finished。**冒煙**：`node scripts/smoke_test.mjs` 49/50，唯一FAIL為#39資料稽核閘門既有紅燈（違規率5.59%），本次只動research/與文件。
+
 ## 2026-09-20 17:4x（DevQueue cycle 20260920-154601，債務帽，`稽核.六續二`：ORDER標籤一致性偵測）
 
 **做了什麼**：`scripts/dev_queue_runner.py`新增`order_tag_mismatches()`／`_report_order_tag_mismatches()`，`build_prompt()`開頭呼叫，偵測兩種派工錯配（ORDER條目類別≠項目行類別；項目行標[研究]卻不在ORDER清單）。起因：本輪`原子.六`（[研究]）因ORDER清單漏標籤被派給DevQueue（已手動補標籤）。**遵守CLAUDE.md十二節**：偵測器自身失敗只印`WARN_DETECTOR_CRASHED`、不影響主流程；只報不改檔。**驗收**：現況0筆；刻意造3種不一致全抓到；`_lines`丟RuntimeError/UnicodeEncodeError時wrapper正常返回；`py_compile -W error`通過。**冒煙**：未動index.html，沿用49/50（#39既有紅燈）。**影響檔案**：`scripts/dev_queue_runner.py`、`PENDING_QUEUE.md`、`PROGRESS_HEARTBEAT.jsonl`。
