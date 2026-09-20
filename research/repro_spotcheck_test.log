@@ -1,0 +1,181 @@
+{
+ "n_sampled": 10,
+ "n_candidates_pool": 104,
+ "n_could_not_verify": 3,
+ "n_verifiable": 7,
+ "n_reproduced": 7,
+ "reproduction_rate_among_verifiable": 1.0,
+ "results": [
+  {
+   "trial_id": 101,
+   "module": "factor_ic_sector_neutral_rel_strength",
+   "old_numbers_sample": [
+    -0.0113,
+    -0.107,
+    -0.0065,
+    -0.074,
+    0.49
+   ],
+   "status": "COULD_NOT_VERIFY",
+   "reason": "重跑超過90秒未完成（可能需要即時資料/長時間運算，非本抽查範圍）"
+  },
+  {
+   "trial_id": 28,
+   "module": "fut_cheap_gate",
+   "old_numbers_sample": [
+    42.5,
+    90.0,
+    -2.2,
+    5.3
+   ],
+   "new_numbers_sample": [
+    0.7761,
+    -22.4,
+    0.4226,
+    71.0,
+    90.0
+   ],
+   "status": "REPRODUCED"
+  },
+  {
+   "trial_id": 17,
+   "module": "deep_dive_f_quality_roe_stability",
+   "old_numbers_sample": [
+    100.0,
+    0.01,
+    0.05,
+    9.5
+   ],
+   "status": "COULD_NOT_VERIFY",
+   "reason": "重跑超過90秒未完成（可能需要即時資料/長時間運算，非本抽查範圍）"
+  },
+  {
+   "trial_id": 142,
+   "module": "margin_debt_level_train_val_heterogeneity",
+   "old_numbers_sample": [
+    0.7172,
+    0.0001,
+    0.5162,
+    0.0002,
+    0.3845
+   ],
+   "new_numbers_sample": [
+    0.117,
+    0.0612,
+    0.4567,
+    0.0,
+    4.9
+   ],
+   "status": "REPRODUCED"
+  },
+  {
+   "trial_id": 282,
+   "module": "sector_rotation_accel_gate73_gate2",
+   "old_numbers_sample": [
+    1.398,
+    1.16,
+    96.0,
+    1.378,
+    1.324
+   ],
+   "new_numbers_sample": [
+    0.2428,
+    1.4126,
+    1.1654,
+    1.3861,
+    1.5065
+   ],
+   "status": "REPRODUCED"
+  },
+  {
+   "trial_id": 291,
+   "module": "piotroski_fscore_gate_v1",
+   "old_numbers_sample": [
+    6.26,
+    0.2672,
+    75.87,
+    12.38,
+    0.1441
+   ],
+   "status": "COULD_NOT_VERIFY",
+   "reason": "重跑超過90秒未完成（可能需要即時資料/長時間運算，非本抽查範圍）"
+  },
+  {
+   "trial_id": 54,
+   "module": "us_factor_ic_by_size",
+   "old_numbers_sample": [
+    0.0913,
+    0.299,
+    0.0345,
+    0.161,
+    0.53
+   ],
+   "new_numbers_sample": [
+    0.0323,
+    0.161,
+    0.0904,
+    0.401,
+    0.59
+   ],
+   "status": "REPRODUCED"
+  },
+  {
+   "trial_id": 31,
+   "module": "fut_recheck_inst_momentum_highres",
+   "old_numbers_sample": [
+    97.8,
+    99.68,
+    96.5,
+    97.8,
+    99.68
+   ],
+   "new_numbers_sample": [
+    2.1086,
+    110.9,
+    0.8378,
+    97.4,
+    90.0
+   ],
+   "status": "REPRODUCED"
+  },
+  {
+   "trial_id": 27,
+   "module": "fut_cheap_gate",
+   "old_numbers_sample": [
+    96.5,
+    95.0,
+    99.63,
+    150.2,
+    0.7
+   ],
+   "new_numbers_sample": [
+    0.7761,
+    -22.4,
+    0.4226,
+    71.0,
+    90.0
+   ],
+   "status": "REPRODUCED"
+  },
+  {
+   "trial_id": 127,
+   "module": "vrp_gate",
+   "old_numbers_sample": [
+    0.0119,
+    1.19,
+    0.0201,
+    2.01,
+    74.0
+   ],
+   "new_numbers_sample": [
+    0.0119,
+    0.0201,
+    0.74,
+    0.0004,
+    0.0
+   ],
+   "status": "REPRODUCED"
+  }
+ ],
+ "scope_caveat": "重現率的分母只有「可以安全重跑並比對數字」的抽樣子集，COULD_NOT_VERIFY的筆數另外報告、不算進分母也不算進分子——這個數字回答的是「有辦法重跑的那些，跑出來還一樣嗎」，不是「TRIALS_LEDGER裡所有結果有多少比例可信」，兩者不能混為一談。"
+}

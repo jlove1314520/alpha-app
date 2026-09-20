@@ -150,10 +150,16 @@ def run_reproducibility_check() -> dict:
     掛進每日audit（`audit.yml`一天一次，非高頻），呼叫`research/
     reproducibility_check.py`批次試import`TRIALS_LEDGER.md`提到的
     全部腳本，抓出新的dangling import。逾時給5分鐘（180支腳本×10秒
-    子行程逾時的最壞情況遠低於這個預算，正常情況幾分鐘內完成）。"""
+    子行程逾時的最壞情況遠低於這個預算，正常情況幾分鐘內完成）。
+    **`--skip-rerun`**：這裡刻意跳過2026-09-20新增的「結果重現抽查」
+    （隨機抽10筆實際重跑比對數字，每筆逾時90秒，最壞情況再加15分鐘），
+    daily audit只做輕量的import層級檢查；結果重現抽查成本較高、且每次
+    抽樣結果不同，適合當人工觸發的稽核工具（`python research/
+    reproducibility_check.py`不加旗標即可跑完整版），不適合綁進每日
+    自動排程無限期重複跑。"""
     try:
         p = subprocess.run(
-            [sys.executable, "research/reproducibility_check.py"],
+            [sys.executable, "research/reproducibility_check.py", "--skip-rerun"],
             cwd=ROOT, capture_output=True, text=True, timeout=300,
         )
         result_path = ROOT / "research" / "reproducibility_check_result.json"

@@ -133,12 +133,31 @@ def parse() -> list[dict]:
         # 不能掃整列——第二版就是這樣寫，結果備註裡提到別筆的 FAIL 就把這一筆也判成
         # FAIL，害「撐住」數字從 4 掉到 0。判定欄通常是倒數第二欄（最後一欄是備註），
         # 但欄數不固定，所以從右往左找第一個含關鍵字的欄最穩。
+        # 2026-09-20總司令裁示【depth-1閘門設計缺陷要修；p=0.053作廢要
+        # 正式處理】二後修好的既有bug：這個清單原本只認CHEAP_PASS/
+        # EXPERIMENTAL/FAIL/PASS四種，`trial_registry.py::VALID_VERDICTS`
+        # 其實還有IRREPRODUCIBLE/VIOLATES_SURVIVAL/ABANDONED/REFUTED/
+        # 未結案五種完全沒被辨識——實測發現：新登記的IRREPRODUCIBLE列
+        # （#319）因為「備註」欄裡剛好用散文提到另一筆的「FAIL」判定，
+        # 從右往左掃到備註欄就先比對到FAIL、根本沒掃到再往左一欄真正的
+        # 判定欄，被誤判成FAIL。往後任何VIOLATES_SURVIVAL（天條一）等
+        # 列都有同樣風險，一併修好，不只修IRREPRODUCIBLE這一個。
         verdict = "OTHER"
         for cell in reversed(c[2:]):
             if "CHEAP_PASS" in cell:
                 verdict = "CHEAP_PASS"; break
             if "EXPERIMENTAL" in cell:
                 verdict = "EXPERIMENTAL"; break
+            if "IRREPRODUCIBLE" in cell:
+                verdict = "IRREPRODUCIBLE"; break
+            if "VIOLATES_SURVIVAL" in cell:
+                verdict = "VIOLATES_SURVIVAL"; break
+            if "ABANDONED" in cell:
+                verdict = "ABANDONED"; break
+            if "REFUTED" in cell:
+                verdict = "REFUTED"; break
+            if "未結案" in cell:
+                verdict = "未結案"; break
             if "FAIL" in cell:
                 verdict = "FAIL"; break
             if "PASS" in cell:
@@ -187,6 +206,18 @@ def main() -> int:
     for r in rows:
         by_track[r["track"]].append(r)
     n_track = {t: len(v) for t, v in sorted(by_track.items())}
+
+    # ── 有效N vs 總N（2026-09-20總司令裁示【depth-1閘門設計缺陷要修；
+    # p=0.053作廢要正式處理】二）：IRREPRODUCIBLE的列（登記過的數值結果，
+    # 用現有程式碼/資料重跑對不上，見`trial_registry.py::VALID_VERDICTS`
+    # 註解）**仍計入總N**（`n_all`，Bonferroni門檻分母不變——它確實佔用過
+    # 一次試驗名額，把它從分母拿掉等於讓其他候選的門檻變鬆，方向錯誤）；
+    # 但不得被算進「有多少筆撐得住/佐證了什麼」這類**評估證據可信度**的
+    # 統計——`n_valid`是給這類用途的分母，本檔案目前只在第1節報告這兩個
+    # 數字讓使用者自己看差異，不強改下面既有的`survived`/`degraded`邏輯
+    # （那本來就已經是逐列核對，不是靠N做粗略篩選）。
+    irreproducible_rows = [r for r in rows if r["verdict"] == "IRREPRODUCIBLE"]
+    n_valid = n_all - len(irreproducible_rows)
 
     # ── 分母自查（債務二.2）──────────────────────────────────────────────
     # 每一筆宣稱做過校正的列：當時用的分母 vs 現在的正確分母，結論是否還站得住
@@ -242,10 +273,18 @@ def main() -> int:
     L.append("")
     L.append("| 口徑 | N | Bonferroni 門檻（α=0.05 單邊） |")
     L.append("|---|---:|---:|")
-    L.append(f"| **全體** | {n_all} | {required_percentile(n_all):.4f} 百分位 |")
+    L.append(f"| **全體（總N，含IRREPRODUCIBLE）** | {n_all} | {required_percentile(n_all):.4f} 百分位 |")
+    L.append(f"| **有效N（排除IRREPRODUCIBLE，{len(irreproducible_rows)}筆）** | {n_valid} | "
+             f"{required_percentile(n_valid):.4f} 百分位 |")
     for t, n in n_track.items():
         L.append(f"| 分軌 {t} | {n} | {required_percentile(n):.4f} 百分位 |")
     L.append("")
+    if irreproducible_rows:
+        L.append("**IRREPRODUCIBLE列表**（登記過的數值結果，用現有程式碼/資料重跑對不上，"
+                  "仍計入總N但不作為任何評估的可信證據）：")
+        for r in sorted(irreproducible_rows, key=lambda x: x["id"]):
+            L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
+        L.append("")
     L.append("## 2. 分母自查（債務二.2）")
     L.append("")
     L.append("每一筆宣稱「通過多重比較校正」的判定，當時實際用的分母是多少、")

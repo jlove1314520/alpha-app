@@ -72,9 +72,16 @@ VALID_TRACKS = ("TW", "US", "FUT", "hypothesis_queue", "跨市場")
 # 不是推翻候選本身）與「未結案」（多關卡假說跑到一半，誠實記錄不硬給判定）。
 # 順序有意義：`CHEAP_PASS` 必須排在 `PASS` 前面，否則字串比對會把 CHEAP_PASS 讀成 PASS。
 VALID_VERDICTS = ("CHEAP_PASS", "PASS", "FAIL", "EXPERIMENTAL", "ABANDONED", "REFUTED", "未結案",
-                   "VIOLATES_SURVIVAL")  # 2026-09-19天條一：MDD>50%，跟FAIL語意不同（機制有
+                   "VIOLATES_SURVIVAL",  # 2026-09-19天條一：MDD>50%，跟FAIL語意不同（機制有
                    # alpha但活不過歷史空頭段，補救方向是降曝險/縮部位，不是換選股邏輯），
                    # 見MARATHON_PROTOCOL.md「1a-0d.生存門檻」
+                   "IRREPRODUCIBLE")  # 2026-09-20總司令裁示【depth-1閘門設計缺陷要修；
+                   # p=0.053作廢要正式處理】二：登記過的數值結果，用現有程式碼/資料重跑
+                   # 對不上（跟FAIL不同語意——FAIL是「測過、沒過關」，IRREPRODUCIBLE是
+                   # 「連測出來的數字本身都對不上，不知道當初的判定基礎還在不在」）。
+                   # 這類列仍計入selection_bias_ledger的「總N」（畢竟真的佔用過一次試驗
+                   # 名額），但排除在「有效N」之外（不能拿一個對不上的數字去佐證任何
+                   # PASS/FAIL的信賴區間），見selection_bias_ledger.py::main()的n_valid。
 # 至少要有一個可比較的統計量，否則這一筆對多重比較校正毫無用處
 # （債務1 的教訓：73 筆標記通過裡只有 9 筆留下足以重評的統計量）。
 STAT_PAT = re.compile(r"百分位|percentile|p\s*[=<>]|IC\s*=|Sharpe|z\s*=|n\s*=\s*\d+")

@@ -28,7 +28,8 @@
 
 | 原子來源 | 本機/取得方式 | 歷史起點（實測） | 覆蓋 | 備註 |
 |---|---|---|---|---|
-| 三大法人買賣超（T86） | `research/data/raw_twse_t86/`逐日全市場parquet（無需任何API） | **2012-05-02**（2010-01～2012-04的檔案存在但0列，為空殼；2011整年無檔） | 每日約746（2012）→1,008（2024）證券，含ETF/權證；只有**上市**，`TPEX3INSTI`快取只有2025-08起、落在VAL_END之後，**不得使用** | 欄位：foreign_net／trust_net／dealer_net／total_net（股）；自營商＝三大法人−外資−投信（既有規則） |
+| 三大法人買賣超（T86，上市） | `research/data/raw_twse_t86/`逐日全市場parquet（無需任何API） | **2012-05-02**（2010-01～2012-04的檔案存在但0列，為空殼；2011整年無檔） | 每日約746（2012）→1,008（2024）證券，含ETF/權證；只有**上市**，`TPEX3INSTI`快取只有2025-08起、落在VAL_END之後，**不得使用** | 欄位：foreign_net／trust_net／dealer_net／total_net（股）；自營商＝三大法人−外資−投信（既有規則） |
+| 三大法人買賣超（上櫃，2026-09-20新增查證） | `research/data/raw_tpex_3insti/`逐日parquet，`tpex_3insti_client.py`官方`dailyTrade`端點（非FinMind，已驗證支援任意歷史日期）；歷史回補中，見`research/backfill_tpex_3insti_history.py`（`籌碼原子.補上櫃三大法人歷史`） | **實測約2018-08-01**（2010/2012/2015/2018-01-02/2018-07-01五個探測點皆空表，2018-08-01起有真實資料483列）——**比T86晚約6年**，是這個官方端點本身的資料深度限制，不是回補腳本的問題 | 尚在回補中，覆蓋率待統計 | **這條路徑存在且已驗證可行，跟FinMind的`TPEX3INSTI`（完全不能用，落在VAL_END之後）是不同的資料源**——本表原先「上櫃0%」的結論需要更新為「上櫃可補，但只能補到2018年中之後，2018年中以前上櫃股在三大法人族依然是缺值」 |
 | 個股融資融券 | `research/data/raw/TaiwanStockMarginPurchaseShortSale__<id>__2010-01-01__2024-12-31.parquet`（FinMind快取，無需新API） | **2010-01-04**（2330實測每年239~251列） | 4位數代號411檔（與價格快取交集**392檔**）；另有ETF/空殼檔 | 欄位含MarginPurchaseTodayBalance／MarginPurchaseLimit／ShortSaleTodayBalance |
 | 借券賣出餘額（SBL） | FinMind `TaiwanDailyShortSaleBalances`；**本機只有2330一檔**（本輪探測1次請求，已快取） | **2010-01-04**（2330，逐年中位數皆非零，2010~2024） | 尚未回補 | 欄位：SBLShortSalesCurrentDayBalance／SBLShortSalesShortSales。**這是「借券賣出餘額」（放空方），不是「借券餘額」（出借總量）** |
 | 成交量／成交值 | `ATOM_LIBRARY.atom_v`／`atom_amt`（既有價量原子） | 2010起 | 同價格宇宙 | 用作正規化分母，不當獨立原子計數 |
