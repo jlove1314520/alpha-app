@@ -442,3 +442,5 @@
 **第539輪（歸檔）**——取鎖乾淨（cycle`20260915-193037`）。依round538建議依輪替選TW。**核實現狀**：0a節四條方向中`#49`/`#51`/`#52`全數已FAIL結案，僅`#50`仍卡阻塞。`trial_registry.py --check`exit=0 PASS（244列）。`is_holdout_consumed()`確認`False`。**結論**：候選池狀態與round487~538時實質相同，僅剩`#50`被動等待。完整見`REPORT.md`第539輪心跳。
 
 **上一則保留（第541輪，供對照）**——取鎖乾淨（cycle`20260916-010037`）。依round540建議依輪替選TW。**核實現狀**：`research/data/ticks/`已finalize7個交易日，距20日仍差13日；0a節四條方向中`#49`/`#51`/`#52`全數已FAIL結案，僅`#50`仍卡阻塞。`trial_registry.py --check`exit=0 PASS（246列）。`is_holdout_consumed()`確認`False`。**結論**：候選池狀態與round487~540時實質相同，僅剩`#50`被動等待。完整見`REPORT.md`第541輪心跳。
+
+**最後更新：2026-09-19T22:10+08:00（馬拉松第570輪）**——取鎖`LOCK_STALE`（上一輪TIMEOUT被砍，非卡死）。戴驗證帽做`金流一.5`/#73 Gate 1 sanity：單位(股)/無未來函數/月頻前20%(選6/32產業)/全宇宙vs核心(Jaccard 0.74)全PASS，S4為恆等式僅證未寫反；觀察月間選中產業Jaccard 0.088≈隨機(0.103)、37%月份全換，換手近整體換倉。無判定、N不變。下一步：補第0關成本前置（讀最新`breakeven_alpha_table.json`並用程式重算換手）→通過才寫Gate 2隨機控制組(≥100 draws配對式)。詳見`REPORT.md`第570輪、`HYPOTHESIS_QUEUE.md`#73第6輪。

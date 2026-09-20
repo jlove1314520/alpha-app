@@ -2629,3 +2629,6 @@ smoke test 4組通過，中規模N=50前景驗證8類中6類PASS但效果量級�
 ## 2026-09-19 第564輪（TW，驗證帽）借券費率.放大閾值重測
 
 `lending_fee_gate_v2_longhold.py`（新增，可重複執行，事前綁定規格在檔頭）：Z∈{2,3,4}×N∈{40,60}共6格、同股票事件冷卻期=N、多頭剔除持股單次round-trip成本（不含借券、不放空）。結果6格0通過：gate1在Z=2/3四格PASS、Z=4兩格FAIL；3x成本淨效益全轉負；毛避開損失N40→N60飽和（約1.2~1.5%）。已登記`TRIALS_LEDGER.md`#264~#269、`STRATEGY_GRAVEYARD.md`「f_lending_fee_spike v2」。`trial_registry.py --check` PASS。零新增外部API呼叫。
+
+## 2026-09-20T17:50+08:00 · 馬拉松第582輪 · 研究帽 · 原子.五計算層
+取鎖`LOCK_STALE`（上一輪TIMEOUT被砍，非卡死）。戴研究帽做`原子.五`計算層：新增`fin_atom_ic_map.py`（145表達式、斷言=SPEC）、`fin_atom_ic_map_aggregate.py`；15檔smoke→30檔記憶體驗證(private峰值1867MB=import基線內)→Tier A(204檔)/Tier B(407檔，須以列數>0判宇宙，size口徑會誤算549)全量跑完，holdout未動。聚合初步：Tier A 60日五窗全同號6/26(p=0.0046)、20日3/26(p=0.22)，但57式僅14~17獨立族→p高估，**未下判定**；族層級規則已預寫進`PENDING_QUEUE.md`原子.五進度。下一輪(驗證帽)：族層級重算→`FIN_ATOM_IC_MAP.md`→`register_trial()`登記290測試→依SPEC§7判定。另發現`補快取`第1批178檔全空表(ETF)。
