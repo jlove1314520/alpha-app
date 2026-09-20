@@ -1,3 +1,9 @@
+## 2026-09-20 17:2x（DevQueue cycle 20260920-154601，驗證帽，`財報PIT.三`結案）
+
+**做了什麼**：發現`pit3_rerun_v2_corrected.py`已被較早輪次跑完（15:03~15:25，job 20260920-150342-4659，exit 0）但沒先登記、也沒收成——**本輪沒有重跑，只做收成**：新增`pit3_summarize_register.py`／`PIT3_RERUN_RESULT.md`，補登記修正臂12個參數點`TRIALS_REGISTRY`#292~#303（時序瑕疵誠實註記），重跑`selection_bias_ledger.py`（N=305）。**結果**：修正臂VAL alpha p最小0.083、無任何一組p<0.06、alpha全正但不顯著；legacy臂VAL最小p=0.170。**判定**：灰色帶，[自行裁量]歸交辦分支(a)→LEADS.md「p=0.053接近顯著」改標「證據作廢」、GRAVEYARD補記「流程對但因子失效」。**無法量化前視貢獻**：legacy臂也重現不出舊快照數字（可能來源未驗證），且p=0.053原本出自80檔樣本，已補`財報PIT.四`。
+
+**冒煙**：只動research/文件與腳本，未動index.html；沿用49/50（#39既有紅燈）。**下一步**：`財報PIT.四`（80檔樣本雙臂重跑）。
+
 ## 2026-09-20 16:5x（DevQueue cycle 20260920-154601，債務帽，`財報原子.shares交叉驗證`結案）
 
 **做了什麼**：新增`research/fin_atom_shares_check.py`（純讀快取、種子固定、判定口徑事前寫在檔頭）＋`FIN_ATOM_SHARES_CHECK.md`。(1)`shares`（淨利/EPS）對照`OrdinaryShare`÷10：入樣150檔／5,702股票-季度，**差異中位數0.65%<2%→維持現行定義**（P75=2.36%、P90=7.54%，尾端來自增減資/庫藏股/面額非10元）。(2)`ocf`兩個FinMind type重疊期**4,642/4,642逐期相等**（407檔，原本只驗過2330）。**未動`FIN_ATOM_LIBRARY.py`任何定義**。誠實揭露：量到的是「加權平均vs期末股數」兩種口徑差距，非shares的絕對誤差。

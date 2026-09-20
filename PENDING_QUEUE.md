@@ -7001,7 +7001,9 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   **立即回報，不得等到本輪結束才說**；若只是研究端的既有結論標註，
   依序補but書即可，不需要緊急回報。[自走補入，來源：`research/
   FACTORS.md`「⛔⛔2026-09-20重大更正」段落「下一步」小節]
-- [ ] **財報PIT.三** [驗證] 以修正後`quarterly_pit()`重跑`portfolio_backtest_v2_bigsample.py`（A_4pass，季頻優先、月頻其次）並把`IC_WEIGHTS`/`REGIME_IC_WEIGHTS_TREND`改用修正後val IC重算，量化「p=0.053的alpha有多少來自Q4前視」。**先用`register_trial()`登記再跑**，>5分鐘用`run_detached.py submit`。做X→(a)修正後alpha p>0.1或alpha轉負→LEADS.md該列改標「證據作廢」，墓園記「流程對但因子失效」；(b)仍p<0.06→仍是FAIL，但標注「不依賴前視的alpha殘存」並回報為新線索，不得逕稱通過；(c)FinMind 402冷卻→標`- [!]`換下一項。心跳＝`TRIALS_REGISTRY.jsonl`新增列＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：財報PIT.二(b)結論]
+- [x] **財報PIT.三** [驗證] ✅2026-09-20 16:5x 完成（見尾端「結案」）以修正後`quarterly_pit()`重跑`portfolio_backtest_v2_bigsample.py`（A_4pass，季頻優先、月頻其次）並把`IC_WEIGHTS`/`REGIME_IC_WEIGHTS_TREND`改用修正後val IC重算，量化「p=0.053的alpha有多少來自Q4前視」。**先用`register_trial()`登記再跑**，>5分鐘用`run_detached.py submit`。做X→(a)修正後alpha p>0.1或alpha轉負→LEADS.md該列改標「證據作廢」，墓園記「流程對但因子失效」；(b)仍p<0.06→仍是FAIL，但標注「不依賴前視的alpha殘存」並回報為新線索，不得逕稱通過；(c)FinMind 402冷卻→標`- [!]`換下一項。心跳＝`TRIALS_REGISTRY.jsonl`新增列＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：財報PIT.二(b)結論]
+  **結案（DevQueue cycle 20260920-154601）**：`pit3_rerun_v2_corrected.py`（設計凍結於檔頭）其實已由較早輪次在15:03~15:25跑完（job 20260920-150342-4659，exit 0，48列＝2臂×6權重模式×2頻率×TRAIN/VAL，295/300檔）但**未先register_trial、也未收成**；本輪只做收成，沒重跑。新增`pit3_summarize_register.py`＋`PIT3_RERUN_RESULT.md`，並補登記修正臂12個參數點`TRIALS_REGISTRY`#292~#303（登記時序瑕疵已於腳本檔頭與每筆design欄誠實註記；legacy臂為同參數點對照複本，不另計N）。**結果**：修正臂VAL alpha p最小0.083（ic_weighted_train_only/月頻）、原設計對應組合（ic_weighted寫死常數/月頻）p=0.0998、無任何一組p<0.06、48列alpha全為正但皆不顯著；legacy臂VAL最小p=0.170。**判定**：不觸發(b)；落在(a)(p>0.1)與(b)(p<0.06)灰色帶，[自行裁量]歸(a)側（理由：原判讀依據是p≈0.053，修正後最好0.083且12取1未校正）→LEADS.md該列改標「證據作廢」、GRAVEYARD補記「流程對但因子失效」。**未能量化「前視貢獻多少」**：legacy臂連舊快照都重現不出（equal/月頻/TRAIN舊p=0.0089 vs legacy臂0.256，可能來源如09-19成本模型更正等**未驗證**），且p=0.053原本出自80檔樣本非295檔bigsample，已補`財報PIT.四`。
+- [ ] **財報PIT.四** [驗證] 以80檔驗證樣本（原p=0.053的樣本：A_4pass與B_plus_value_pe、IC加權、季頻）直接重跑`portfolio_backtest_v2.py`，比較PIT修正前後（同`pit3_rerun_v2_corrected.py`的monkeypatch雙臂設計：legacy臂＝把`pit.statutory_quarterly_pit_date`改回期末+45日），並先確認legacy臂能否重現原+10.40%/+10.26%、p=0.053；**先用`register_trial()`登記再跑**，>5分鐘用`run_detached.py submit`。做X→(a)legacy臂重現不出原數字→記錄「舊數字不可重現」不再追（同財報PIT.三結論，量化前視貢獻不可行）；(b)重現得出且修正臂p>0.10→前視貢獻可量化，寫進LEADS/GRAVEYARD；(c)重現得出且修正臂仍p<0.06→標「不依賴前視的alpha殘存」但仍FAIL不得稱通過。心跳＝`TRIALS_REGISTRY.jsonl`新增列＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：財報PIT.三結案「前視貢獻未被直接量化」]
 - [x] **財報原子.覆蓋率** [債務] ✅2026-09-20 完成（marathon研究帽）：產出`research/FIN_ATOM_COVERAGE.md`＋`research/fin_atom_coverage.py`（可重跑，純讀快取未呼叫API）。實際入統計1851檔（交辦寫的3,600是快取檔案數，非股票數）。結果：revenue/eps/gross_profit/op_income/net_income/shares≥75%可用；**total_assets/equity/inventory/receivable/ocf全體覆蓋僅20~31%→分支(a)標「覆蓋不足」**，主因是資產負債表/現金流表本機缺檔（限有快取者75~85%）；`net_income`/`shares`起點2013Q1是type定義造成（IFRS母公司歸屬淨利）非缺資料；金融業存貨/應收全NaN屬預期（分支b）。**已知修正**：初版金融業關鍵字漏抓「金融保險」類別，已核對TaiwanStockInfo實際類別名後修正。下面是原文： 對`research/data/raw`快取中全部
   `TaiwanStockFinancialStatements`股票（約3,600檔）跑`load_quarter_frame`，統計每個
   原子的非NaN比例、金融業/下市股的缺失型態、最早可用期別，輸出
@@ -7118,7 +7120,7 @@ Cybex.beta
 財報PIT.一
 財報原子.覆蓋率
 財報原子.shares交叉驗證
-原子.六
+原子.六 [研究]
 <!-- ORDER-END -->
 
 **2026-09-18（續5）清單重整說明**：舊清單65個去重項目裡，39個已確認

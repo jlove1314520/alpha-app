@@ -1864,6 +1864,7 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   out_bigsample.py`/`deep_dive_loo_no_low_vol_independent_sample.py`
   （皆可重複執行）。子版本`portfolio_multifactor_v2_loo_no_low_vol`
   詳細死因見上方獨立條目。
+- **2026-09-20補記（財報PIT.三，流程對但因子失效）**：Q4前視修正後（`TRIALS_REGISTRY`#292~#303，295檔bigsample，`PIT3_RERUN_RESULT.md`），修正臂VAL最小alpha p=0.083、12組無一p<0.06，「p=0.053接近顯著」證據作廢；死因分類＝**流程對、但因子（f_eps_growth/f_eps_surprise/f_revenue_surprise，見#287~#289）修正PIT後失效**，非流程錯誤。前視貢獻未被直接量化（原p=0.053出自80檔樣本，見`財報PIT.四`）。
 
 ### 內部人（董監事/大股東/經理人）持股轉讓 Insider Holdings Transfer
 （`HYPOTHESIS_QUEUE.md` #41，informed trading信號，股票，TW軌，
