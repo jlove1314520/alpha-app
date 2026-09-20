@@ -33,6 +33,8 @@ VALIDATION/monthly名目上p<0.05（p=0.0489）的子版本。但round346只跑�
 零新增API呼叫（全部讀取本機快取：yfinance價格快取＋FinMind財報/月營收快取）。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import sys
 import time

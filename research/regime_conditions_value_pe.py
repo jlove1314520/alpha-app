@@ -26,6 +26,8 @@
 一貫的分工原則）。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, SNAPSHOT_START, START_DATE, build_snapshots, load_sample_with_factors, sample_universe_ids
 from finmind_client import load_dev

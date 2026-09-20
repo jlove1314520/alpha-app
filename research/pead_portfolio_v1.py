@@ -28,6 +28,8 @@ PEAD家族因子（SUE：盈餘意外+營收意外），是一個獨立、範圍
 表現最好的加權方式而誤判過關）。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import sys
 from pathlib import Path

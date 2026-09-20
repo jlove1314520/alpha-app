@@ -29,6 +29,8 @@ TRAIN-only IC顯示三個成分的訊號強度並不平均：`eps_family` 0.0392
 零新增API呼叫（全部讀取本機快取：yfinance價格快取＋FinMind財報/月營收快取）。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import sys
 from pathlib import Path

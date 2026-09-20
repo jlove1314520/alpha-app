@@ -6910,13 +6910,14 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   **[進度2026-09-20 17:24]** 第1個工作單位完成：事前登記規格`research/ATOM_FIN_IC_MAP_SPEC.md`
   （145表達式×2horizon＝290測試；Tier A/B兩層宇宙；判定規則事前綁定）。**尚待**：寫
   `fin_atom_ic_map.py`→15檔smoke→30檔記憶體驗證→Tier A→Tier B全量→登記→FIN_ATOM_IC_MAP.md。本項維持`- [ ]`。
-- [ ] **分K.零** [研究] 分K可行性實測（沿用既有Shioaji連線，不准開
+- [!] **分K.零** [研究] 分K可行性實測（沿用既有Shioaji連線，不准開
   第二條）。回報四個數字：`api.kbars()`最多回溯多久／涵蓋哪些標的
   （上市/上櫃/ETF/已下市各試3檔）／速率限制（全市場2年要多久）／
   停牌與漲跌停時的表現。分支：回溯≥5年→分K.一/二/三全開；1~2年→
   只做分K.一/二；<1年→只做分K.一。**不要因為結論可能不好看就不量。**
   [自走補入，來源：09-20【總司令裁示·整晚連續自走】既有待辦清單，
   非新交辦]
+  **⛔ 自走中止（2026-09-20 17:25，DevQueue 171601）**：shioaji_quotes.py常駐行程目前未執行（data/quotes_tw.json停在09-19 12:02，程序清單只有alpha_live_server.py），量api.kbars()需要永豐Shioaji登入（總司令的帳號/憑證），且交辦明定不准開第二條連線；解除條件：總司令啟動shioaji_quotes.py常駐行程後，可經alpha_live_server的kbars查詢服務（需X-Alpha-Local-Token）在每日240次預算內量測
 - [x] **稽核.六** [債務] ✅2026-09-20 16:3x 完成（見本項尾端「結案」段）記憶體風險實證（`research/INCIDENTS.md`事件001
   後續，本輪嘗試實測`factor_ic.py`/`core_tilt_backtest.py`的記憶體
   量級但腳本執行逾時未跑完，`INCIDENTS.md`已誠實標「風險未實證」不
@@ -7018,6 +7019,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   **不呼叫任何新API**（純讀本機快取）。[自走補入，來源：原子.四已知限制(4)；
   原子.五的前置檢查；心跳＝`FIN_ATOM_COVERAGE.md`產出＋`PROGRESS_HEARTBEAT.jsonl`]
 - [ ] **財報原子.補快取** [債務] 針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]
+  **進度（DevQueue 171601）**：回補腳本`research/backfill_fin_atom_cache.py`已寫，第1批200檔/361次請求以job 20260920-172100-0300背景執行中（status檔`research/data/backfill_fin_atom_cache_status.json`），續批直接重跑同指令（已抓的命中快取）；遇402即停。維持`- [ ]`直到覆蓋補齊或402。
 - [x] **regime.替代B.規格修訂** [研究] [自走補入，來源：`regime.替代B`阻塞條目的解除條件(b)，2026-09-20 DevQueue 171601判定]：`財報PIT.三`（295檔，修正臂VAL最小p=0.083）與`財報PIT.四`（80檔，同格p=0.174~0.290）都顯示eps_family/revenue_surprise在修正PIT後無殘存訊號→`regime.替代B`阻塞條目的分支(b)成立：規格第18節「多頭期加重eps_family」映射失去經濟意義。做X→在`REGIME_OVERLAY_PROTOCOL.md`新增第18節修訂版（看結果前寫下、不得看結果改）：以修正PIT後**仍未被判死**的因子重寫「多頭/空頭期加重哪個因子」的經濟映射（先列`FACTORS.md`/`TRIALS_LEDGER.md`裡目前無PIT前視污染且非同家族已死者，含`f_low_vol`；逐一寫映射理由）→(a)找得出≥2個無污染且有經濟理由可區分多空的因子→鎖規格後由驗證帽輪次照原分支跑（登記試驗）；(b)找不出→依原分支以「無可用映射、未經檢驗」結案`regime.替代B`（注意：不得寫成「regime概念在台股股票軌窮盡」，替代A與B都沒有被有效檢驗）。心跳＝`REGIME_OVERLAY_PROTOCOL.md`新增節＋`PROGRESS_HEARTBEAT.jsonl`。
   **結案（DevQueue cycle 20260920-171601，分支(b)）**：`REGIME_OVERLAY_PROTOCOL.md`新增第19節——盤點`FACTORS.md`：曾PASS的4因子中eps_growth/eps_surprise/revenue_surprise已FAIL（#287~#289＋財報PIT.三/四），僅`f_low_vol`（純價格）有效，value_pb/pe/roe_stability校正後即FAIL→無≥2個有效因子、映射無從建立→第18節作廢為「無可用映射、未經檢驗」，不登記試驗、不跑回測；明確更正「窮盡」措辭（替代B是缺因子而暫停，非檢驗後失敗）。重啟條件：出現≥2個通過完整關卡、相互獨立的新因子。[自行裁量：採分支(b)結案而非硬找映射，理由＝只有1個有效因子，任何映射都是拿無效因子湊數。]
 - [ ] **財報原子.補快取.收尾重評** [債務] [自走補入，來源：`財報原子.補快取`(a)分支後續]：待`財報原子.補快取`各批跑完或全被402擋下後，重跑`python research/fin_atom_coverage.py`更新`FIN_ATOM_COVERAGE.md`。做X→(a)資產負債表/現金流量表相關原子「有快取者」口徑之外的全體覆蓋率≥60%→在`原子.五`條目補記「覆蓋不足已解除」，原子.五規格不必限縮宇宙；(b)仍<60%→在`原子.五`補記實際可用宇宙檔數（三張表皆有快取者）與存活者偏誤方向（下市代理覆蓋更低），規格須事前寫明限縮。心跳＝`FIN_ATOM_COVERAGE.md`更新＋`PROGRESS_HEARTBEAT.jsonl`。
@@ -7035,7 +7037,8 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   採信）**。[自走補入，來源：原子.五分支文字「接籌碼原子家族（原子.六，屆時另行登記）」；
   心跳＝規格檔＋`PROGRESS_HEARTBEAT.jsonl`]
 
-- [ ] **稽核.六續一.mem_guard推廣** [債務] `research/`底下呼叫`load_sample_with_factors`／`load_safe_sample`的62支腳本，目前59支沒有`mem_guard.install()`（實查：`grep -L mem_guard`）。做X→(a)逐支在import區塊後加`import mem_guard; mem_guard.install()`（沿用`core_tilt_backtest.py`第79~80行的寫法與註解精神），一支一支改、不動其他邏輯；(b)改完跑`python -m py_compile`全數通過＋抽3支實際`--help`/import不報錯；(c)遇到「import時就有副作用、加了會影響排程」的腳本（`run-*.ps1`會呼叫者）→跳過並記名單，不硬改。心跳＝`git diff --stat`＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：`INCIDENTS.md`事件001預防措施1「記憶體安全閥推廣」；稽核.六實測後3.2~3.5GB雖低於5GB但仍高於3GB安全閥緩衝]
+- [x] **稽核.六續一.mem_guard推廣** [債務] `research/`底下呼叫`load_sample_with_factors`／`load_safe_sample`的62支腳本，目前59支沒有`mem_guard.install()`（實查：`grep -L mem_guard`）。做X→(a)逐支在import區塊後加`import mem_guard; mem_guard.install()`（沿用`core_tilt_backtest.py`第79~80行的寫法與註解精神），一支一支改、不動其他邏輯；(b)改完跑`python -m py_compile`全數通過＋抽3支實際`--help`/import不報錯；(c)遇到「import時就有副作用、加了會影響排程」的腳本（`run-*.ps1`會呼叫者）→跳過並記名單，不硬改。心跳＝`git diff --stat`＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：`INCIDENTS.md`事件001預防措施1「記憶體安全閥推廣」；稽核.六實測後3.2~3.5GB雖低於5GB但仍高於3GB安全閥緩衝]
+  **結案（DevQueue cycle 20260920-171601）**：實查62支呼叫`load_sample_with_factors`/`load_safe_sample`者，59支缺mem_guard；以AST在docstring/`__future__`之後插入`import mem_guard`＋`mem_guard.install()`（保留各檔原換行風格），**實際掛上51支**（清單`research/data/mem_guard_rollout_list.txt`，gitignore）。(c)跳過並記名單：**被排程/其他模組import的函式庫7支**——score.py、score_v2.py、twse_odd_lot_client.py、twse_t86_client.py、us_factors.py、us_factor_ic.py、power_budget.py（掛上會讓import它們的常駐/排程行程在可用記憶體<3GB時被終止，影響面超出本項）；另**mem_probe_scale.py**含別的session未提交改動，已掛上但未納入本次commit（留在工作樹，待該session一併提交）。驗收：52支`py_compile`全過；3支(factor_correlation/check_idio_vol_low_vol_overlap/deep_dive_f_value_pb)實跑25秒無ImportError（進入長時間載入）；`mem_guard.install()`回True。[自行裁量：函式庫類跳過，理由同(c)]。
 - [x] **稽核.六續二.ORDER標籤一致性偵測** [債務] ✅2026-09-20 17:3x 完成：`scripts/dev_queue_runner.py`新增`order_tag_mismatches()`（偵測ORDER條目類別≠項目行類別、以及項目行標[研究]卻不在ORDER清單）與`_report_order_tag_mismatches()`（try/except包住、fail open，`build_prompt()`開頭呼叫，只印`WARN_ORDER_TAG_MISMATCH`不改檔不影響回傳碼）。驗收：現況0筆不一致；刻意造出的3種不一致全被抓到；偵測器自己壞掉（`_lines`丟RuntimeError／UnicodeEncodeError）時wrapper只印`WARN_DETECTOR_CRASHED`並正常返回；`python -W error -m py_compile`通過。本輪發現`PENDING_QUEUE.md`權威清單裡`原子.六`沒帶`[研究]`標籤、但項目行本身是`[研究]`，導致`dev_queue_runner.find_next()`把研究項目派給DevQueue（已手動補標籤）。做X→(a)在`scripts/dev_queue_runner.py`加一個偵測函式（清單條目標籤 vs 對應`- [ ]`項目行標籤不一致就印警告），**必須遵守`CLAUDE.md`十二節：偵測器自身失敗只降級成警告、絕不中斷主流程（try/except包住＋fail open）**，並用「刻意餵壞格式/讀不到檔」驗收它不會讓`find_next()`崩潰；(b)不自動改檔，只報。心跳＝`dev_queue_runner.py`函式＋驗收輸出寫進`PROGRESS.md`。[自走補入，來源：本輪財報原子/原子.六派工錯配事件]
 - [ ] **稽核.六續三.其他process內快取實測** [債務] `ATOM_LIBRARY.py`與`twse_odd_lot_client.py`有同型`_GROUPED_CACHE`（後者本輪僅依列數估算<0.5GB，未實測private memory）。做X→(a)以`mem_probe_t86.py`同樣手法實測兩者載入後private增量；(b)增量>1GB→比照T86加過濾/縮欄；≤1GB→`INCIDENTS.md`升級為「已實測低風險」。[自走補入，來源：`INCIDENTS.md`稽核.六(b)修復記錄「同型快取查核」]
 - [ ] **稽核.六續四.factor_ic基線拆解** [債務] `factor_ic`載入前的基線private memory約1.7GB（`mem_probe_factor_ic.py`：載入TAIEX＋`sample_universe_ids`後），但只`import`基礎套件的`mem_probe_t86.py`基線僅840MB，中間約0.8GB來源未拆解。做X→(a)逐步量測`import factor_ic`／`prepare_market_data(TAIEX)`／`sample_universe_ids()`（含`build_universe()`）各自的增量；(b)若某一步>300MB且可延遲載入→列為優化候選（**不在本項動手改**，只出數字，改動另列）；(c)全部<300MB→記「基線是正常import成本」結案。[自走補入，來源：稽核.六(b)實測數字中的未解釋部分]

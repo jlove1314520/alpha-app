@@ -41,6 +41,8 @@ Bonferroni門檻、same_sign判準）完全比照`factor_ic_sector_neutral_rel_s
 2026-09-09 由`HYPOTHESIS_QUEUE_PROTOCOL.md`自動排程接續，佇列#65第1關起跑。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import random
 import sys

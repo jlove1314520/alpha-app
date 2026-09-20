@@ -39,6 +39,8 @@ portfolio_v1.py`已驗證有效的checkpoint模式（`CHECKPOINT_PATH`落盤+
 進度，不看運氣。舊行程已終止（未產出任何部分結果，沒有進度可繼承）。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import json
 import os

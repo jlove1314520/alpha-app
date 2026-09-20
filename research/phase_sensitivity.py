@@ -27,6 +27,8 @@ holdout 紀律：資料一律走 `finmind_client.load_dev()`（硬性截在 VAL_
 每個回測結束後對 trades 跑 `assert_no_holdout_leakage`。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import argparse
 import json

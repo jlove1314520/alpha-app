@@ -2,6 +2,8 @@
 沒有任何print flush出來，tasklist確認python.exe已不在執行中，無crash traceback
 可查）。改用300檔子樣本（跟factor_ic.py::SAMPLE_SIZE的300對齊，也是可控時間
 內能跑完的規模），用-u unbuffered執行以利即時監控是否又中途消失。"""
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))

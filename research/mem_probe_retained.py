@@ -1,4 +1,6 @@
 """稽核.六(b)：拆解 load_sample_with_factors 每檔的常駐記憶體是「回傳資料本身」還是「快取/碎片」。"""
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 import sys, io, contextlib, gc
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 exec(open("mem_probe_factor_ic.py", encoding="utf-8").read().split("import factor_ic as F")[0])

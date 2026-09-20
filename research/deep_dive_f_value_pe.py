@@ -30,6 +30,8 @@ stock (2330) spot check" (TaiwanStockPER shares the same disclosure-timing
 mechanism as TaiwanStockPBR), NOT independently, directly verified.
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import random
 import sys

@@ -17,6 +17,8 @@ factor-out同屬「抗過度擬合控制」，是複合分數若通過這關chea
 2026-09-03由HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#27第1關起跑。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import sys
 from pathlib import Path

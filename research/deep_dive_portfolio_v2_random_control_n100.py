@@ -16,6 +16,8 @@ train-only嚴格樣本外這兩個更高成本選項的裁示。這輪(第197輪
 main()同一批資料）。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import sys
 from pathlib import Path

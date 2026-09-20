@@ -1,5 +1,7 @@
 """稽核.六 (a)：以小樣本量測 factor_ic.load_sample_with_factors 的 private memory 成長。
 只讀取快取/經 VAL_END 截斷路徑，不碰 holdout。用 ctypes 讀 Windows PrivateUsage。"""
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 import ctypes, sys, json, io, contextlib
 from ctypes import wintypes
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")

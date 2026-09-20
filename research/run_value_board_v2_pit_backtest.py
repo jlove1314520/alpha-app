@@ -77,6 +77,8 @@ todo P0/B16，最高優先」，取代先前的機制驗證跑）**：
   不因為跑完就拿掉，這是使用者本輪明確的鐵律。
 """
 from __future__ import annotations
+import mem_guard  # 稽核.六續一（2026-09-20）：全市場/多檔全歷史載入的記憶體安全閥，可用記憶體<3GB即終止本行程（見mem_guard.py/INCIDENTS.md事件001）
+mem_guard.install()
 
 import json
 import os
