@@ -4966,3 +4966,13 @@ lock: LOCK_ACQUIRED (cycle 20260921-023101)
 prompt: PROMPT_READY: 鞎∪??.鋆翰???萄?憿? (exit=0)
 finally: released .devqueue.lock (cycle_id=20260921-023101)
 ===== DevQueue cycle end: 2026-09-21 02:49:08 cycle_id=20260921-023101 reason=OK exit=0 duration_min=18.1 =====
+
+===== DevQueue cycle start: 2026-09-21 03:01:01 cycle_id=20260921-030101 =====
+check_collision: YIELD: ??璈撖怠??獢?餈?0???扯◤?孵?嚗esearch/backfill_stock_financials_gap_2025.log.json嚗?6.7?????esearch/mem_probe_core_tilt.json嚗?6.7?????esearch/mem_probe_scale.json嚗?6.7?????esearch/mem_probe_scale.py嚗?6.7?????esearch/sector_rotation_accel_gate73_gate2.json嚗?6.7????嚗摰?鈭箸迤?其葉???祈憚霈楝
+
+===== DevQueue cycle start: 2026-09-21 03:16:01 cycle_id=20260921-031601 =====
+check_collision: PROCEED: 瘝??嗡?頠???銝哨?銋???餈◤?孵???璈撖怠瑼?
+lock: LOCK_ACQUIRED (cycle 20260921-031601)
+prompt: PROMPT_READY: 鞎∪??.鋆翰???萄?憿? (exit=0)
+finally: released .devqueue.lock (cycle_id=20260921-031601)
+===== DevQueue cycle end: 2026-09-21 03:16:10 cycle_id=20260921-031601 reason=ERROR exit=1 duration_min=0.1 =====
