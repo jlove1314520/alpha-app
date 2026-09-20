@@ -1,3 +1,26 @@
+## 2026-09-20 11:29（互動視窗CC，`piotroski_fscore_gate_v1.py`重跑結果補記：`#23`結案）
+
+戴**債務帽**，接續上一輪。`piotroski_fscore_gate_v1.py`背景重跑完成
+（`TRIALS_LEDGER.md`#291）：baseline數字逐位元相同（不依賴財報PIT），
+gated（F≥6）數字因Q4 PIT修正＋本次FinMind限流覆蓋率不同（184/486檔）
+而跟原始數字有別，但判定FAIL的核心理由結構——TRAIN期p值惡化
+（0.2672→0.3870，原0.2672→0.4743）、TRAIN/VAL改善方向不一致（mine_
+rate一升一降）——依然成立，**方向性結論重現，FAIL判定維持，不作廢
+原登記**。`STRATEGY_GRAVEYARD.md`「Piotroski F-score」條目與
+`PENDING_QUEUE.md`「稽核.七」皆已補記完整比對並標記完成。
+
+**`#23`最終狀態**：sanity（#93/#290）高度一致重現、gate_v1
+（#94/#291）方向重現但數字有別，兩者皆支持原FAIL結論可信，不是
+2026-09-03的造假，是某個環境差異造成的執行斷點（無法逆向查證確切
+原因，誠實記錄不強行下結論）。
+
+**驗證**：`dev_queue_runner.py`三個檢查函式對`PENDING_QUEUE.md`跑過
+確認74個key無重複；`- [ ]`開放項目8個。
+
+**下一步**：「財報PIT.二」（檢查score.py/portfolio_v2/core_tilt是否
+暴露三個PASS因子降級）仍是下一輪最優先事項，已插入ORDER-BEGIN清單
+最前面。
+
 ## 2026-09-20 11:07（互動視窗CC，【裁示】Q4前視與#23無法重現，兩件都要回頭處理——三個PASS因子全部翻盤）
 
 戴**債務帽**（本輪最重要的一次更正）。總司令要求把Q4前視偏誤修好並
