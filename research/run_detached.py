@@ -39,6 +39,12 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+try:  # 2026-09-20：`log`印出含≤等字元時cp950主控台會UnicodeEncodeError崩潰；降級不影響主流程（CLAUDE.md第十二節）
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:  # noqa: BLE001
+    pass
+
 RESEARCH_DIR = Path(__file__).resolve().parent
 REPO_ROOT = RESEARCH_DIR.parent
 JOBS_PATH = RESEARCH_DIR / "data" / "jobs.json"
