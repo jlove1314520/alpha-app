@@ -474,6 +474,54 @@ def _safe_print(msg: str) -> None:
             pass
 
 
+_LINE_TAG = re.compile(r"^- \[ \]\s*\*\*[^*]+\*\*\s*\[(研究|產品|債務|驗證)\]")
+
+
+def _line_class(text: str) -> str | None:
+    """項目行自己在`**編號**`後面標的類別（[研究]/[產品]，[債務]/[驗證]/沒標都歸債務類，
+    跟`_entry_key_class`只認研究/產品的口徑一致）。項目行根本沒標籤回None（不做比對）。"""
+    m = _LINE_TAG.match(text)
+    if not m:
+        return None
+    return m.group(1) if m.group(1) in ("研究", "產品") else "債務"
+
+
+def order_tag_mismatches() -> list[str]:
+    """2026-09-20（稽核.六續二）：找出「ORDER清單條目的類別 ≠ 項目行自己標的類別」以及
+    「項目行標[研究]但根本不在ORDER清單（會被item_class當債務派給DevQueue）」兩種情形。
+    起因：`原子.六`項目行是[研究]、ORDER清單條目卻沒帶[研究]，find_next()因此把研究項目派給了
+    DevQueue（已手動補標籤）。只報不改檔。"""
+    lines = _lines()
+    order = {}
+    for entry in _explicit_order():
+        key, cls = _entry_key_class(entry)
+        order[key] = cls
+    out = []
+    for ln in lines:
+        if not ln.startswith("- [ ]"):
+            continue
+        line_cls = _line_class(ln)
+        if line_cls is None:
+            continue
+        key = item_key(ln)
+        if key in order:
+            if order[key] != line_cls:
+                out.append(f"{key}: ORDER清單標{order[key]}、項目行標{line_cls}")
+        elif line_cls == "研究":
+            out.append(f"{key}: 項目行標研究但不在ORDER清單（item_class會當債務派給DevQueue）")
+    return out
+
+
+def _report_order_tag_mismatches() -> None:
+    """守門員自身失敗只降級成警告（CLAUDE.md十二節）：偵測到不一致只印WARN，
+    偵測邏輯本身丟例外也只印WARN_DETECTOR_CRASHED，絕不影響build_prompt的回傳碼。"""
+    try:
+        for m in order_tag_mismatches():
+            _safe_print(f"WARN_ORDER_TAG_MISMATCH: {m}")
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: order_tag_mismatches failed ({type(e).__name__}), skipped this round")
+
+
 def build_prompt() -> int:
     # 2026-09-19（總司令裁示【最優先·三個都是總司令自己造成的故障】一.2）：
     # 這整段矛盾偵測（含2026-09-18加的ORDER-BEGIN檢查）包一層try/except——
@@ -499,6 +547,7 @@ def build_prompt() -> int:
             _safe_print(f"WARN_DETECTOR_CRASHED: reporting order marker ambiguity "
                          f"failed ({type(e).__name__})")
         return 5
+    _report_order_tag_mismatches()
     nxt = find_next()
     if nxt is None:
         PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")

@@ -83,6 +83,8 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
 
 ---
 
+**2026-09-20 17:xx DevQueue(cycle 20260920-154601)補件盤點【自走補入】**：`- [ ]`剩5項(<12下限)，本輪補入4項稽核.六續一~四（來源：`INCIDENTS.md`預防措施1與本輪實測後的未解釋數字），`- [ ]`=9，**仍<12，未硬湊**：掃`REPORT.md`/`LEADS.md`/`STRATEGY_GRAVEYARD.md`/`HYPOTHESIS_QUEUE.md`的「下一步/待辦/排隊中」，多為已結案輪次流水帳、被放空腿資料缺陷/法遵擋住、或屬hypothesis_queue/marathon軌（[研究]類DevQueue依規不派）。補不出時依白名單第7條屬允許狀態。
+
 ## 2026-09-20【緊急·合規】mopsov 破口已實際發生，先止血再檢討（原文登記）
 
 > 一、立即停止並記錄（本輪第一件事，優先於所有研究）
@@ -7025,6 +7027,11 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   餘額的表達式若要做多空組合，受「放空腿硬規則」約束（借券成本未接真實資料前不得
   採信）**。[自走補入，來源：原子.五分支文字「接籌碼原子家族（原子.六，屆時另行登記）」；
   心跳＝規格檔＋`PROGRESS_HEARTBEAT.jsonl`]
+
+- [ ] **稽核.六續一.mem_guard推廣** [債務] `research/`底下呼叫`load_sample_with_factors`／`load_safe_sample`的62支腳本，目前59支沒有`mem_guard.install()`（實查：`grep -L mem_guard`）。做X→(a)逐支在import區塊後加`import mem_guard; mem_guard.install()`（沿用`core_tilt_backtest.py`第79~80行的寫法與註解精神），一支一支改、不動其他邏輯；(b)改完跑`python -m py_compile`全數通過＋抽3支實際`--help`/import不報錯；(c)遇到「import時就有副作用、加了會影響排程」的腳本（`run-*.ps1`會呼叫者）→跳過並記名單，不硬改。心跳＝`git diff --stat`＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：`INCIDENTS.md`事件001預防措施1「記憶體安全閥推廣」；稽核.六實測後3.2~3.5GB雖低於5GB但仍高於3GB安全閥緩衝]
+- [x] **稽核.六續二.ORDER標籤一致性偵測** [債務] ✅2026-09-20 17:3x 完成：`scripts/dev_queue_runner.py`新增`order_tag_mismatches()`（偵測ORDER條目類別≠項目行類別、以及項目行標[研究]卻不在ORDER清單）與`_report_order_tag_mismatches()`（try/except包住、fail open，`build_prompt()`開頭呼叫，只印`WARN_ORDER_TAG_MISMATCH`不改檔不影響回傳碼）。驗收：現況0筆不一致；刻意造出的3種不一致全被抓到；偵測器自己壞掉（`_lines`丟RuntimeError／UnicodeEncodeError）時wrapper只印`WARN_DETECTOR_CRASHED`並正常返回；`python -W error -m py_compile`通過。本輪發現`PENDING_QUEUE.md`權威清單裡`原子.六`沒帶`[研究]`標籤、但項目行本身是`[研究]`，導致`dev_queue_runner.find_next()`把研究項目派給DevQueue（已手動補標籤）。做X→(a)在`scripts/dev_queue_runner.py`加一個偵測函式（清單條目標籤 vs 對應`- [ ]`項目行標籤不一致就印警告），**必須遵守`CLAUDE.md`十二節：偵測器自身失敗只降級成警告、絕不中斷主流程（try/except包住＋fail open）**，並用「刻意餵壞格式/讀不到檔」驗收它不會讓`find_next()`崩潰；(b)不自動改檔，只報。心跳＝`dev_queue_runner.py`函式＋驗收輸出寫進`PROGRESS.md`。[自走補入，來源：本輪財報原子/原子.六派工錯配事件]
+- [ ] **稽核.六續三.其他process內快取實測** [債務] `ATOM_LIBRARY.py`與`twse_odd_lot_client.py`有同型`_GROUPED_CACHE`（後者本輪僅依列數估算<0.5GB，未實測private memory）。做X→(a)以`mem_probe_t86.py`同樣手法實測兩者載入後private增量；(b)增量>1GB→比照T86加過濾/縮欄；≤1GB→`INCIDENTS.md`升級為「已實測低風險」。[自走補入，來源：`INCIDENTS.md`稽核.六(b)修復記錄「同型快取查核」]
+- [ ] **稽核.六續四.factor_ic基線拆解** [債務] `factor_ic`載入前的基線private memory約1.7GB（`mem_probe_factor_ic.py`：載入TAIEX＋`sample_universe_ids`後），但只`import`基礎套件的`mem_probe_t86.py`基線僅840MB，中間約0.8GB來源未拆解。做X→(a)逐步量測`import factor_ic`／`prepare_market_data(TAIEX)`／`sample_universe_ids()`（含`build_universe()`）各自的增量；(b)若某一步>300MB且可延遲載入→列為優化候選（**不在本項動手改**，只出數字，改動另列）；(c)全部<300MB→記「基線是正常import成本」結案。[自走補入，來源：稽核.六(b)實測數字中的未解釋部分]
 
 ## 執行順序（權威清單，2026-09-07 轉向裁示重排；**自走 runner 依這份取件**）
 
