@@ -1,3 +1,13 @@
+## 2026-09-20 21:4x（DevQueue cycle 20260920-213101，研究帽，`籌碼原子.出借總量查證`）
+
+**等待總司令審閱：0件**（`research/AWAITING_REVIEW.md`等待中表格0列，本輪未動）。
+
+1. **`財報原子.補快取`⛔BLOCKED**：`data/rate_limit_state.json`顯示FinMind在20:22台北又402（上次解除後第2批300次請求成功、第301次遇402，remaining_pairs=2815），`blocked_until`=22:22:23台北，本輪21:31仍在封鎖內；佇列條目「19:29已過」的敘述已過時，已改標`- [!]`。22:22後續跑`python research/backfill_fin_atom_cache.py --batch-size 200`。
+2. **`籌碼原子.補借券快取`⛔BLOCKED**：同屬FinMind、共用同一封鎖至22:22:23。
+3. **`籌碼原子.出借總量查證`✅（分支a）**：三來源查證（TWSE借券資訊頁／TWSE與TPEx openapi swagger／FinMind資料表清單）＋實測官方端點`rwd/zh/lending/TWT72U`（約8次請求、間隔3秒）：2010-01-04有321檔、2012-01-04有879檔（2330=164,755,000股）、2006僅35檔，只有上市。產出：`docs/FIRST_HAND_SOURCES.md` 5b、規格第11節（看過結果前，未跑任何IC）、新立`籌碼原子.補出借總量快取`。**[自行裁量]**：TPEx網頁版未查，只宣稱openapi清單內沒有。
+
+**冒煙**：本輪只動文件（docs/、研究規格、PENDING_QUEUE、PROGRESS），未動`index.html`／常駐服務；未跑`smoke_test.mjs`（無程式變更）。
+
 ## 2026-09-20 18:0x~19:5x（DevQueue cycle 20260920-171601，債務帽／驗證帽／研究帽，一輪連續做多項）
 
 **等待總司令審閱：0件**（`research/AWAITING_REVIEW.md`等待中表格0列）。佇列：本輪開工`- [ ]`=7（<12下限）；補件後可動手`- [ ]`只剩`原子.五`／`原子.六`（[研究]，歸馬拉松軌，DevQueue不取）——DevQueue可取項目已清空。
