@@ -3593,3 +3593,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 **?啣??酉**嚗?- 撌乩?璅寞?憭折??亦??芸???銝??芣?鈭方??湛???蝣堆?銋?蝝 commit??- ??畾?霈?? `git rebase` ?湔?梢嚗活 origin 瘝????湔 `git push` ??嚗ommit 4f52d61d嚗?- ??撌脤??整?
 ===== Hypothesis-queue cycle end: 2026-09-20 09:54:27 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 節流中，距上次實跑26.6分鐘 < 120分鐘門檻（帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線）
