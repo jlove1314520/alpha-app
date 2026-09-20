@@ -3729,3 +3729,10 @@ quota_throttle: SKIP: 節流中，距上次實跑58.7分鐘 < 120分鐘門檻（
 quota_throttle: SKIP: 節流中，距上次實跑88.7分鐘 < 120分鐘門檻（帳號週用量已達99%（門檻90%），節流保留額度給交辦與資料管線）
 
 quota_throttle: SKIP: 節流中，距上次實跑118.7分鐘 < 120分鐘門檻（帳號週用量已達99%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達99%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Hypothesis-queue cycle start: 2026-09-21 03:21:02 =====
+You've hit your weekly limit 繚 resets Sep 22, 4am (Asia/Taipei)
+===== Hypothesis-queue cycle end: 2026-09-21 03:21:06 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
