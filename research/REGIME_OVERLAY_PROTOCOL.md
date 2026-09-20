@@ -579,3 +579,25 @@ SPEC第10節。
 **登記：** 驗證輪次跑完用`trial_registry.register_trial()`登記主規格1筆＋
 高原2格＋反向映射1筆（共4筆）、更新`SELECTION_BIAS_LEDGER.md`；本輪為規格輪，
 尚未登記任何判定。holdout全程不碰；價格口徑同CORE_TILT_SPEC。
+
+## 19. 替代B規格修訂：可用因子盤點與結案（2026-09-20，DevQueue cycle 20260920-171601，
+研究帽；純文件盤點，未跑任何回測，未看任何報酬／IC結果之後才決定）
+
+**觸發**：第18節映射「牛市加重`eps_family`、熊市加重`low_vol`」的前提是`eps_family`、
+`revenue_surprise`為有效因子。`財報PIT.三`（295檔，修正臂VAL alpha最小p=0.083）與`財報PIT.四`
+（80檔，同格p=0.174~0.290）以及`FACTORS.md`「重大更正」（#287~#289：`f_eps_growth`／`f_eps_surprise`／
+`f_revenue_surprise`修正Q4前視後皆FAIL）已證明這三個因子失去PASS。
+
+**盤點（來源`FACTORS.md`各表，逐項核對）**：歷史上曾PASS的因子只有4個——`f_eps_growth`、`f_eps_surprise`、
+`f_revenue_surprise`、`f_low_vol`。前三者已FAIL（見上）；`f_low_vol`（−60日報酬標準差）純價格計算、不依賴財報PIT，
+不受Q4前視影響，仍有效。`f_value_pb`／`f_value_pe`／`f_quality_roe_stability`在Bonferroni校正後即FAIL（`FACTORS.md`
+第94~97列），`f_rev_accel`／`f_foreign_streak`／`f_inst_flow`／`f_rel_strength`／`f_ma_breakout`皆FAIL。
+**無污染且有效的因子＝1個（`f_low_vol`）**。
+
+**判定（依`regime.替代B.規格修訂`分支(b)）**：「依regime切換因子權重」至少需要**兩個**有效且經濟性質相反的因子
+（防禦 vs 成長）才有可切換的對象；目前只剩一個，映射無從建立。→ 第18節**作廢為「無可用映射、未經檢驗」**，
+不進驗證輪、不登記試驗（沒有跑任何東西）。
+**明確不得寫成**「regime概念在台股股票軌窮盡」：替代A（連續曝險）確實FAIL，但替代B是**因為前提因子消失而沒被檢驗**，
+不是檢驗後失敗；第18節「這是窮盡的最後一條」的措辭在此更正為「本路線因缺因子而暫停，非窮盡」。
+**重啟條件**：出現≥2個通過完整關卡且相互獨立（|r|<0.7）、經濟性質可區分多空的新因子（例如原子系列或其他PIT修正後仍存活的因子）
+時，再開第20節重寫映射（仍須看結果前鎖定）。
