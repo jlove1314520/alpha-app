@@ -62,10 +62,14 @@ def load_t86_by_stock() -> dict[str, pd.DataFrame]:
         d = pd.read_parquet(f)
         if d.empty:
             continue
-        parts.append(d)
+        # 逐檔先濾4位數代號（2026-09-20 記憶體修正：整批concat 3,455檔含權證/ETF字串列，
+        # 瞬時峰值private commit實測6.5GB；逐檔先濾後語意不變、峰值大降）
+        d = d[d["stock_id"].astype(str).str.fullmatch(r"\d{4}")]
+        if not d.empty:
+            parts.append(d)
     t = pd.concat(parts, ignore_index=True)
     t["date"] = pd.to_datetime(t["date"])
-    t = t[(t["date"] <= VAL_END) & t["stock_id"].astype(str).str.fullmatch(r"\d{4}")]
+    t = t[t["date"] <= VAL_END]
     t = t.rename(columns={"foreign_net": "foreign", "trust_net": "trust",
                           "dealer_net": "dealer", "total_net": "total"})
     t = t[["date", "stock_id", "foreign", "trust", "dealer", "total"]]

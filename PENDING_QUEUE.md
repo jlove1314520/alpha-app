@@ -7053,6 +7053,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   抽樣核對T86覆蓋（上市≈98~100%、上櫃0%，約半數U股票是上櫃→三大法人族實際約200檔量級）。
   **剩下**：`chip_atom_ic_map.py`（仿`fin_atom_ic_map.py`）→15檔smoke→30檔記憶體驗證→Tier A全量
   （`run_detached.py`）→聚合→`register_trial`登記，詳見規格第8節第2~5步。此項維持`- [ ]`。
+  **進度（DevQueue 213101，研究帽）**：`research/chip_atom_ic_map.py`已完成（仿fin_atom：snapshot＝`build_snapshots`自2010首個交易日、不重疊；每(表達式,snapshot)有效配對<30記NaN；n_snap<8標樣本不足；只讀本機快取；`--tier B`在SBL未回補時拒跑，exit 2）。15檔smoke：因<30檔全部snapshot被跳過（符合規格第4節入樣規則，非bug）；40檔驗證：183/61個snapshot有IC（20/60日）、134列結果、峰值private commit 6.5GB→**定位為`chip_atom_library.load_t86_by_stock`整批concat 3,455檔的瞬時峰值**（1.3GB穩態），逐檔先濾4位數代號後**峰值1.83GB、結果與修正前逐列完全相同**（134列`==`）。[自行裁量]：此修正只改記憶體不改語意，屬實作缺陷修復，規格未動；`--self-test`ALL PASS。Tier A全量以job `20260920-215052-3740`背景執行（`--allow-concurrent`，理由：SLB回補為3秒間隔I/O不吃CPU）；輸出`research/chip_atom_ic_map_result_A.json`＋`chip_atom_ic_snapshots_A_h{20,60}.parquet`。**剩下**：聚合腳本（分年/牛熊K/樸素基準/共線分群，規格第5~6節）→`CHIP_ATOM_IC_MAP.md`→`register_trial`登記（先登記再宣稱判定）→重跑`selection_bias_ledger.py`。此項維持`- [ ]`。
 - [!] **籌碼原子.補借券快取** [債務] [自走補入，來源：`ATOM_CHIP_IC_MAP_SPEC.md`第9節]：回補　**⛔ 自走中止（2026-09-20 21:31）**：同屬FinMind回補，共用rate_limit_state.json封鎖至22:22:23台北（20:22再度402）；22:22後與財報原子.補快取一併續跑（批次≤200檔、遇402即停）
   `TaiwanDailyShortSaleBalances`（宇宙U約391檔，每檔1次請求，`load_dev`寫入快取，起點
   2010-01-01）。**先對照`CLAUDE.md`「FinMind免費層」額度**，批次≤200檔、遇402即停標`- [!]`
