@@ -2343,7 +2343,7 @@ Cowork原話：
   已登記`TRIALS_LEDGER.md` #253~#261、寫入`STRATEGY_GRAVEYARD.md`、`SELECTION_BIAS_LEDGER.md`已更新（N=263）。
   `[自行裁量]`：連續版樣本起點2011-10-27（warm-up較長）→並排比較二元版另外對齊同樣本；failed_gates登記用`gate1`（詞彙表最接近）。
   **下一條：`regime.替代B`（本輪不連續開做，因一輪一帽：驗證帽已用，替代B需研究帽寫規格，留給下一輪）。**
-- [ ] **regime.替代B** [研究] regime用在選股權重而非總曝險——總曝險
+- [!] **regime.替代B** [研究] **2026-09-20 marathon再度BLOCKED（自行裁量）**：規格第18節的3成分含`eps_family`（`f_eps_growth`+`f_eps_surprise`）與`revenue_surprise`，這兩個成分於本日因Q4 PIT前視修正失去PASS（`財報PIT.一`，#287~#289）；載體`core_tilt_backtest.py`的選股訊號也取自含前視的A_4pass。此刻依規格第18節開跑，等於用已知失真的因子值做「多頭期加重eps_family」的相對比較，結論無法解讀。**解除條件**：`財報PIT.三`（以修正後PIT重跑）出結果後，由驗證帽輪次判斷：(a)eps_family在修正後仍有殘存訊號→照規格第18節跑；(b)訊號消失→規格第18節的「多頭期加重eps_family」映射失去經濟意義，改寫映射（另開規格修訂、不得看結果改）或依分支「沒改善」結案。以下原文： regime用在選股權重而非總曝險——總曝險
   永遠100%，不同regime下切換因子權重（例如空頭期加重`f_low_vol`、多頭
   期加重`eps_family`），假設regime的價值改由「選對因子」實現，不靠降
   曝險。**這條跟core_tilt天然相容，可共用資格池與成本模型**，先寫規格
@@ -6898,6 +6898,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   分支：建完直接接原子.五，不用等審閱（但收工回報第一行仍要寫
   「等待審閱：N件」）。
 - [ ] **原子.五** [研究] 財報depth-1素材IC地圖——規格完全比照原子.二：
+  **⚠️2026-09-20前置資訊（財報原子.覆蓋率）**：total_assets/equity/inventory/receivable/ocf全體覆蓋僅20~31%（本機缺檔），`net_income`/`shares`樣本起點須≥2013Q1；規格須事前寫明「宇宙限縮為三張表皆有快取者（約400檔量級）」或先做`財報原子.補快取`，並揭露限縮的存活者偏誤方向（下市代理覆蓋更低）。詳見`research/FIN_ATOM_COVERAGE.md`。
   事前登記空間大小、禁止報告「最佳素材」、只出零件層級IC分布、必須
   做分年份與分牛熊段拆解、全數計入`selection_bias_ledger`的N。**牛熊
   段同號比例必須與樸素機率基準並列呈現**（原子.二就是這樣抓到「5.03%
@@ -6961,7 +6962,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   3. **下一步（原規劃的「回頭檢查組合構造」，接續進行中）**：見下方
      `財報PIT.二`（`score.py`/`portfolio_multifactor_v2`/`core_tilt`
      系列受影響評估）。
-- [ ] **財報PIT.二** [債務] **【優先序最高，建議下一輪第一件事】**
+- [x] **財報PIT.二** [債務] ✅2026-09-20 完成（(a)12:2x hypothesis_queue、(b)(c)本輪marathon）：(b)`portfolio_multifactor_v2`：因子值來自`load_sample_with_factors()`→`quarterly_pit()`含Q4前視，IC加權常數為修正前IC；程式重算IC加權占比eps/rev/low_vol 36.6%/18.4%/44.9%→7.7%/11.6%/80.7%[待重跑驗證]，組合實質塌縮成f_low_vol單因子；「p=0.053接近顯著」不得再引用，已在`LEADS.md`該列後加但書；(c)`CORE_TILT_SPEC.md`§1、`CORE_TILT_TE_FEASIBILITY.md`、`COMPONENT_INVENTORY.md`皆已加但書（判死結論不變）。**未動任何判定，無新試驗登記**；以修正後PIT重跑v2的量化工作拆成`財報PIT.三`。下面是原文： **【優先序最高，建議下一輪第一件事】**
   **2026-09-20 12:2x 進度（hypothesis_queue，(a)查證完成、(b)(c)未重算）**：
   (a) 對外可見功能查證：App選股頁`scores.json`（`generate_scores_live.py`/`generate_scores_v2.py`）
       的`earnings_growth`＝「最新季 vs 去年同季」EPS年增率的**即時展示計算**，走`stock_detail.json`，
@@ -6993,13 +6994,15 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   **立即回報，不得等到本輪結束才說**；若只是研究端的既有結論標註，
   依序補but書即可，不需要緊急回報。[自走補入，來源：`research/
   FACTORS.md`「⛔⛔2026-09-20重大更正」段落「下一步」小節]
-- [ ] **財報原子.覆蓋率** [債務] 對`research/data/raw`快取中全部
+- [ ] **財報PIT.三** [驗證] 以修正後`quarterly_pit()`重跑`portfolio_backtest_v2_bigsample.py`（A_4pass，季頻優先、月頻其次）並把`IC_WEIGHTS`/`REGIME_IC_WEIGHTS_TREND`改用修正後val IC重算，量化「p=0.053的alpha有多少來自Q4前視」。**先用`register_trial()`登記再跑**，>5分鐘用`run_detached.py submit`。做X→(a)修正後alpha p>0.1或alpha轉負→LEADS.md該列改標「證據作廢」，墓園記「流程對但因子失效」；(b)仍p<0.06→仍是FAIL，但標注「不依賴前視的alpha殘存」並回報為新線索，不得逕稱通過；(c)FinMind 402冷卻→標`- [!]`換下一項。心跳＝`TRIALS_REGISTRY.jsonl`新增列＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：財報PIT.二(b)結論]
+- [x] **財報原子.覆蓋率** [債務] ✅2026-09-20 完成（marathon研究帽）：產出`research/FIN_ATOM_COVERAGE.md`＋`research/fin_atom_coverage.py`（可重跑，純讀快取未呼叫API）。實際入統計1851檔（交辦寫的3,600是快取檔案數，非股票數）。結果：revenue/eps/gross_profit/op_income/net_income/shares≥75%可用；**total_assets/equity/inventory/receivable/ocf全體覆蓋僅20~31%→分支(a)標「覆蓋不足」**，主因是資產負債表/現金流表本機缺檔（限有快取者75~85%）；`net_income`/`shares`起點2013Q1是type定義造成（IFRS母公司歸屬淨利）非缺資料；金融業存貨/應收全NaN屬預期（分支b）。**已知修正**：初版金融業關鍵字漏抓「金融保險」類別，已核對TaiwanStockInfo實際類別名後修正。下面是原文： 對`research/data/raw`快取中全部
   `TaiwanStockFinancialStatements`股票（約3,600檔）跑`load_quarter_frame`，統計每個
   原子的非NaN比例、金融業/下市股的缺失型態、最早可用期別，輸出
   `research/FIN_ATOM_COVERAGE.md`。做X→(a)覆蓋率<60%的原子→原子.五對該原子
   標「覆蓋不足」不進IC地圖→(b)存貨/應收在金融業整欄NaN屬預期，記錄即可。
   **不呼叫任何新API**（純讀本機快取）。[自走補入，來源：原子.四已知限制(4)；
   原子.五的前置檢查；心跳＝`FIN_ATOM_COVERAGE.md`產出＋`PROGRESS_HEARTBEAT.jsonl`]
+- [ ] **財報原子.補快取** [債務] 針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]
 - [ ] **財報原子.shares交叉驗證** [債務] `shares`（淨利/EPS反推）對照資產負債表
   `OrdinaryShare`／`CapitalStock`÷面額，抽樣200檔量化差異分布，並驗證`ocf`兩個
   FinMind type在重疊期是否逐期相等（目前只驗過2330）。分支：差異中位數<2%→

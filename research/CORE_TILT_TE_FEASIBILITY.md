@@ -30,7 +30,7 @@ fork執行）補上這個空缺。
 **方法（`core_tilt_backtest.py`，可重複執行）**：
 
 - **股票池與選股**：沿用`portfolio_backtest_v2.py::compute_composite_
-  at_date()`的A_4pass因子版本（已驗證訊號），對資格池股票依綜合分
+  at_date()`的A_4pass因子版本（**⛔2026-09-20但書：「已驗證訊號」已過時**——其中eps_family/revenue_surprise因Q4 PIT前視修正失去PASS，見`FACTORS.md`重大更正；本文TE可行性結論[持股數/主動權重帶所需TE]屬構造面推導，不依賴因子IC強度，判死結論不變，但「選股訊號有效」這個前提不再成立），對資格池股票依綜合分
   排序取前`holdings`檔——**這是實作上的一個重要簡化，見下方限制**。
 - **市值代理（誠實揭露，非精確市值）**：`market_cap_i(t) ≈ PBR_i(t) ×
   Equity_i(t)`（PBR來自`TaiwanStockPER`快取，Equity來自
