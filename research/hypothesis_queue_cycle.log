@@ -3610,3 +3610,5 @@ quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）�
   - ?極??`git pull` ??DNS 憭望?瘝???雿撠曄? fetch ??push 甇?虜??  - rebase ?極雿邦?之???祈憚?????渲◤??嚗?瘝１???瑼?嚗ommit ?芸 `PENDING_QUEUE.md`?MARATHON_LOG.md`?PROGRESS_HEARTBEAT.jsonl`??  - `trial_registry.py --check` ????
 ===== Hypothesis-queue cycle end: 2026-09-20 12:22:38 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 節流中，距上次實跑28.4分鐘 < 120分鐘門檻（帳號週用量已達94%（門檻90%），節流保留額度給交辦與資料管線）
