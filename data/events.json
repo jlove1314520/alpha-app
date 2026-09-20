@@ -1,12 +1,12 @@
 {
- "fetched_at": "2026-09-21T04:18:58.222759+08:00",
+ "fetched_at": "2026-09-21T06:36:10.043183+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 5,
-   "kept": 5
+   "rows": 3,
+   "kept": 3
   },
   "tpex_mops": {
    "ok": true,
@@ -24,7 +24,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 10200,
+ "count": 10203,
  "events": [
   {
    "code": "4552",
@@ -189,9 +189,18 @@
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-09-20",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
    "code": "1721",
    "name": "國慶科技",
-   "date": "2026-09-19",
+   "date": "2026-09-20",
    "type": "其他",
    "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
    "source": "TWSE 重大訊息",
@@ -200,36 +209,9 @@
   {
    "code": "2072",
    "name": "世紀風電",
-   "date": "2026-09-19",
+   "date": "2026-09-20",
    "type": "其他",
    "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6949",
-   "name": "沛爾生醫*-創",
-   "date": "2026-09-19",
-   "type": "其他",
-   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "3432",
-   "name": "台端",
-   "date": "2026-09-19",
-   "type": "其他",
-   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "2347",
-   "name": "聯強",
-   "date": "2026-09-19",
-   "type": "其他",
-   "title": "(補充115/8/19公告)代子公司PEER DEVELOPMENTS LTD.公告處份TD SYNNEX CORP.股票",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
@@ -285,6 +267,51 @@
    "type": "其他",
    "title": "本公司接獲客戶反映疑似個資外洩情事",
    "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1721",
+   "name": "國慶科技",
+   "date": "2026-09-19",
+   "type": "其他",
+   "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2072",
+   "name": "世紀風電",
+   "date": "2026-09-19",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-09-19",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-09-19",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2347",
+   "name": "聯強",
+   "date": "2026-09-19",
+   "type": "其他",
+   "title": "(補充115/8/19公告)代子公司PEER DEVELOPMENTS LTD.公告處份TD SYNNEX CORP.股票",
+   "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
   {
