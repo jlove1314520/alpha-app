@@ -58,7 +58,17 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
   cross-sectional IC＋洗牌null（方向為正），<50%→以「覆蓋不足、僅子樣本結論（附存活者
   偏誤但書）」收尾。**心跳位置**：`research/insider_dera_price_fetch_status.json`＋
   `research/PROGRESS_HEARTBEAT.jsonl`。**歸屬hypothesis_queue軌**（避免兩軌同時寫
-  同一個status檔，馬拉松軌不動它）。
+  同一個status檔，馬拉松軌不動它）。**2026-09-20 09:4x狀態更新**：(c2續)已完成
+  （14,306檔全抓完，覆蓋判定與2018+子樣本G0-a/b/c皆已走完，見#75續9~續13）。
+- **#75(h)** [自走補入，來源：`HYPOTHESIS_QUEUE.md`#75續13「下一輪待辦(h)」，2026-09-20
+  hypothesis_queue軌]：第1關cheap IC gate——用`research/data/dera_insider/panel_opt.csv`／
+  `panel_pes.csv`（`insider_dera_panel.py`已產出，gitignore）做(i)(ii)雙版本、train/val
+  切分、percentile≥90且train/val同號；試驗登記只准`register_trial()`；DSR附V來源但書。
+  **心跳位置**：`research/PROGRESS_HEARTBEAT.jsonl`＋`TRIALS_REGISTRY.jsonl`。**歸屬
+  hypothesis_queue軌**，不寫成`- [ ]`以免DevQueue搶做。
+- **補件誠實說明（本輪未重掃三個備援來源）**：`- [ ]`仍為0（<12下限）；上一輪(576)剛掃過
+  三個來源、結論是只有#75可補，本輪僅補入(h)一項，**未硬湊到20項**。真正補不出東西時
+  依白名單第7條屬於允許狀態，但這句只是記錄，是否需要總司令另給新研究方向由總司令判斷。
 - 已掃過但**不補入**的來源：`STRATEGY_GRAVEYARD.md`#52-US 8-K PEAD「下一步(a)(b)(c)」
   （(c)已於round456執行，同樣FAIL，依規則不在FAIL後加碼）；「融券使用率放空腿」
   方向（需`backtest/engine.py`支援放空＋真實借券資料，仍是放空腿資料缺陷，見
