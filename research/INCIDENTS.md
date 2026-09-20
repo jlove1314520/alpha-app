@@ -201,3 +201,25 @@ Win32_OperatingSystem).FreePhysicalMemory"`輪詢、低於門檻就
 
 **結案狀態**：`research/mem_guard.py`與`research/test_mem_guard.py`
 已完成並通過驗收，本事件已修復。
+
+## 稽核.六續四：factor_ic基線1.7GB拆解（2026-09-20，DevQueue cycle 20260920-171601，債務帽）
+
+腳本`research/mem_probe_baseline.py`（逐步量測private memory＝Windows `PrivateUsage`，即**commit charge**）＋
+補充對照（同一支header另量WorkingSet）。**只出數字，不改任何程式**（依交辦分支(b)）。
+
+| 步驟 | private（commit）MB | 增量 | WorkingSet（實體）MB |
+|---|---|---|---|
+| python+ctypes起點 | 10 | +10 | 21 |
+| `import numpy, pandas` | 832 | **+822** | 84 |
+| `import scipy.stats` | 1,654 | **+822** | 139 |
+| `import pyarrow` / `finmind_client` / `factor_ic` | 1,654→1,658 | +4 | — |
+| `build_universe()` / `sample_universe_ids(300)` / `load_dev(TAIEX)` / `prepare_market_data` | →1,706 | +31/+4/+13/+0 | — |
+
+**發現**：基線1.7GB幾乎全是`import numpy+pandas`與`import scipy.stats`兩步各+822MB，且**這不是實體記憶體**——
+WorkingSet只有84MB／139MB。對照實驗：設`OPENBLAS_NUM_THREADS=OMP_NUM_THREADS=MKL_NUM_THREADS=1`後，
+同樣兩步private只剩56MB／102MB。最可能原因（**推論，未逐一驗證**）：本機24邏輯核心，OpenBLAS依核心數為每條執行緒預先
+提交（commit）緩衝區，numpy與scipy各載入一套BLAS，故各+822MB commit。因此此前`稽核.六`「固定成本3.4GB」等private數字
+**是commit charge，高估實體記憶體用量**；`mem_guard`看的是可用**實體**記憶體，量測口徑正確。
+**但commit本身有上限**：同時量測時系統commit上限50.0GB、剩餘8.4GB（實體RAM 31.4GB、剩餘9.9GB）——多支Python行程並行時，
+每支光import就吃約1.6GB commit，commit先於實體記憶體耗盡的可能性不能排除（單一時點快照，非趨勢）。
+判定：某一步>300MB且可延遲/縮減（以限制BLAS執行緒數）→**列為優化候選，本項不動手改**，改動另列`稽核.六續五`。
