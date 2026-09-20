@@ -33,7 +33,10 @@ MAX_CONSECUTIVE_FAIL = 8
 
 def missing_pairs() -> list[tuple[str, str]]:
     have = {p.name for p in RAW.glob("*" + SUFFIX)}
-    codes = sorted(n.split("__")[1] for n in have if n.startswith("TaiwanStockFinancialStatements__"))
+    # 4位數純數字（一般個股）優先：首批實測(job 20260920-172100-0300)按字典序先打到00xx ETF/債券代碼，
+    # 178次成功請求僅使有資產負債表快取者+15檔（這類代碼多半無財報、回空）
+    codes = sorted((n.split("__")[1] for n in have if n.startswith("TaiwanStockFinancialStatements__")),
+                   key=lambda c: (not (len(c) == 4 and c.isdigit()), c))
     return [(c, ds) for c in codes for ds in DATASETS if f"{ds}__{c}{SUFFIX}" not in have]
 
 
