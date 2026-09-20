@@ -95,9 +95,45 @@ as_of/fwd兩個日期的值，不需要整檔股票的完整歷史常駐記憶�
 | 腳本 | 風險評估 | 處理狀態 |
 |---|---|---|
 | `research/atom_ic_map.py` | 已修復（本事件的主角） | ✅已修復並驗證 |
-| `research/factor_ic.py` | **2026-09-20 15:00 已實測（稽核.六(a)，`research/mem_probe_factor_ic.py`／`mem_probe_fixed_cost.py`／`mem_probe_trace.py`，結果 `mem_probe_factor_ic.json`）**：Python 啟動＋TAIEX 基準 1,701MB；**第一次 `prepare_factors()` 一次性 +3,402MB（固定成本，與檔數無關；tracemalloc 顯示為 pandas groupby/take 在大型 frame 上的配置，尚未定位到 `factors.py` 具體行）**；之後邊際成本約 8～17MB/檔（10→20檔 +155MB／9檔、20→30檔 +64MB／8檔，單檔步進 −143~+54MB 雜訊大）。**外推 300 檔 ≈ 1.7+3.4+(2.4~5.1)＝約 7.5~10GB private，超過 5GB 門檻→PENDING_QUEUE 稽核.六(b)觸發**。⚠️簡單線性外推（138MB/檔×300＝41GB）是錯的，因為忽略了固定成本，勿引用。限制：樣本僅 26 檔可用、資料走快取、邊際估計僅兩段區間，峰值可能更高 | 🔴**已實證超過5GB門檻**（非低風險）；`mem_guard.py`防禦性措施維持；(b)重構（不常駐全歷史、先定位3.4GB固定成本來源）待做 |
-| `research/core_tilt_backtest.py` | 同時處理多檔股票的完整歷史做投組回測，股票數上限通常是50~300檔，具體欄位數與記憶體量級同樣未實測 | 🟡風險未實證，同上，`mem_guard.py`已回填 |
+| `research/factor_ic.py` | **2026-09-20 15:00 已實測（稽核.六(a)，`research/mem_probe_factor_ic.py`／`mem_probe_fixed_cost.py`／`mem_probe_trace.py`，結果 `mem_probe_factor_ic.json`）**：Python 啟動＋TAIEX 基準 1,701MB；**第一次 `prepare_factors()` 一次性 +3,402MB（固定成本，與檔數無關；tracemalloc 顯示為 pandas groupby/take 在大型 frame 上的配置，尚未定位到 `factors.py` 具體行）**；之後邊際成本約 8～17MB/檔（10→20檔 +155MB／9檔、20→30檔 +64MB／8檔，單檔步進 −143~+54MB 雜訊大）。**外推 300 檔 ≈ 1.7+3.4+(2.4~5.1)＝約 7.5~10GB private，超過 5GB 門檻→PENDING_QUEUE 稽核.六(b)觸發**。⚠️簡單線性外推（138MB/檔×300＝41GB）是錯的，因為忽略了固定成本，勿引用。限制：樣本僅 26 檔可用、資料走快取、邊際估計僅兩段區間，峰值可能更高 | 🔴**已實證超過5GB門檻**（非低風險）；`mem_guard.py`防禦性措施維持；(b)重構（不常駐全歷史、先定位3.4GB固定成本來源）待做 → **2026-09-20 16:xx 已修（見下方「稽核.六(b)修復記錄」），現況🟡實測全量300檔約3.25GB private，低於5GB門檻、略高於3GB** |
+| `research/core_tilt_backtest.py` | **2026-09-20 16:30 已實測（稽核.六(a)，`research/mem_probe_core_tilt.py`，結果`mem_probe_core_tilt.json`）**：在T86快取修復後，以暫存輸出路徑（不覆蓋研究輸出檔）跑完整`main()`（300檔宇宙載入因子＋9組band×non_list_cap網格模擬＋第一/二層健檢，全程約1,057秒），每2秒取樣process private memory：**整個`main()`峰值3,474MB、結束時3,195MB**（起點1,659MB）。也就是載入階段之後的網格模擬只在因子載入的常駐量上增加約0.2GB，沒有新的膨脹路徑 | 🟡**已實測、可控**（峰值約3.5GB，低於5GB門檻、略高於3GB，不標🟢）；`mem_guard.py`維持 |
 | `.github/scripts/fetch_*.py`系列 | 全市場單日快照型抓取（逐日/逐檔落盤parquet，不會把全部股票全部歷史一次性讀進記憶體） | 🟢低風險，既有設計本來就是流式處理 |
+
+**稽核.六(b)修復記錄（2026-09-20，`factor_ic.py`的3.4GB固定成本）**：
+- **根因（實測二分，`mem_probe_helpers.py`逐個`factors.py` helper量測）**：
+  `_institutional_daily_net()`第一次呼叫單獨就 +4,716MB／38秒，其餘13個
+  helper合計 <10MB。追進去是`twse_t86_client._load_all_t86_grouped()`——
+  把全部3,455個`T86_*.parquet`讀成一個process內dict快取，T86歷史共
+  **28.2M列、80,917個代碼**，其中約9成是6碼權證／牛熊證（`071161`、
+  `07620P`等），因子研究宇宙完全用不到，卻讓快取常駐約4.8GB（穩態，
+  非只是瞬間峰值；`mem_probe_t86.py`：載入後 private 840→5,601MB）。
+  先前「tracemalloc只指到pandas groupby/take」的描述就是這個快取的建構。
+- **修法**：`_load_all_t86_grouped()`逐檔讀入後立刻過濾，只留普通股／ETF
+  （長度≤5，或`00`開頭的槓桿/反向ETF，見`_researchable_mask()`），其餘
+  不進快取。**行為變更（誠實揭露）**：對權證類6碼代碼呼叫
+  `institutional_daily_net_t86()`現在回空表（原本回實際資料）；repo內
+  唯一呼叫端是`factors.py::_institutional_daily_net()`，因子宇宙不含這類代碼。
+- **驗證**：(1)快取列數 28.2M→2.93M、代碼 80,917→1,353、穩態 private
+  +4,761MB→+704MB；(2)8個代碼（2330/0050/00886/00715L/1101/8069/00878/
+  2317）修法前後`institutional_daily_net_t86(id,"2010-01-01")`輸出用
+  `DataFrame.equals`比對**全部逐位相同**（含6碼ETF 00715L、以及查無資料
+  的代碼）。
+- **重新量測（`mem_probe_scale.py`，同一process 25檔一批連續載入，實測
+  不外推）**：baseline 1,703MB；25/50/75/100/125/150/…/300檔請求
+  （可用23/41/62/80/100/124/…/240檔）private=2,929／3,074／3,197／
+  3,169／3,175／3,123／…／**3,247MB**。斜率在約75檔後趨平（先前小樣本
+  10→30檔量到的「每檔8~22MB邊際成本」是碎片/首批暖機造成的假斜率，
+  **不可據以線性外推**——本次教訓：外推結論必須用更大樣本實測驗證）。
+  `tracemalloc`證實20檔載入後仍存活的Python配置只有17MB（=回傳資料本身），
+  pyarrow pool已排除（`release_unused()`僅回收14MB）。
+- **風險分級**：`factor_ic`全量300檔實測 **約3.25GB private（含1.7GB
+  Python+專案import基線）**，低於5GB門檻（(b)已處理）、略高於3GB（未達
+  (c)「已實證低風險」標準）→ 標🟡「已實測、可控」，不標🟢。[自行裁量：
+  分級用實測數字，不因修好就美化。]
+- **同型快取查核**：`twse_odd_lot_client.py`的process內快取（與T86同一套
+  設計）以列數估算：1,092檔×每檔約1,235列≈1.35M列、磁碟84MB（T86修前是
+  28.2M列／315MB），估計常駐<0.5GB。**是「依列數估算」，沒有像T86那樣
+  實測private memory**，標🟢低風險（估計）。
 
 **結案狀態**：本次事件已止血並修復，`atom_ic_map.py`本身的風險已
 解除；其餘腳本的風險評估是描述性的，不代表要求立即重構，只是留下

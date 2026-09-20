@@ -196,6 +196,15 @@ _T86_GROUPED_CACHE: dict[str, pd.DataFrame] | None = None
 _T86_GROUPED_CACHE_KEY: tuple[int, float] | None = None
 
 
+def _researchable_mask(stock_ids: pd.Series) -> pd.Series:
+    """保留「普通股／ETF」代碼：長度<=5（一般股4碼、ETF 5碼如00878），或
+    以`00`開頭的6碼（槓桿/反向ETF如00715L、00637L）。其餘（權證、牛熊證、
+    ETN等6碼代碼）不進process內快取——對這些代碼呼叫
+    `institutional_daily_net_t86()`會回傳空表（先前會回傳實際資料，但
+    repo內沒有任何呼叫端查詢這類代碼，因子研究宇宙也不含它們）。"""
+    return (stock_ids.str.len() <= 5) | stock_ids.str.startswith("00")
+
+
 def _load_all_t86_grouped() -> dict[str, pd.DataFrame]:
     """把DATA_DIR底下所有T86_*.parquet讀進來一次、依stock_id分組快取在
     這個process的記憶體裡，同一個process內重複查詢不同股票時只查dict，
@@ -225,6 +234,14 @@ def _load_all_t86_grouped() -> dict[str, pd.DataFrame]:
     frames = []
     for p in files:
         day = _atomic_read_parquet(p)
+        if day.empty:
+            continue
+        # 2026-09-20稽核.六(b)：逐檔就先丟掉權證／牛熊證等長代碼列。實測
+        # T86全歷史28.2M列、80,917個代碼，其中約9成是6碼權證（如071161、
+        # 07620P），因子研究完全用不到，卻讓這個cache常駐約4.8GB（單一
+        # process第一次prepare_factors的3.4GB「固定成本」根因，見
+        # INCIDENTS.md事件001）。保留規則見`_researchable_mask()`。
+        day = day[_researchable_mask(day["stock_id"])]
         if not day.empty:
             frames.append(day)
     if not frames:

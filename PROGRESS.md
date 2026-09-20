@@ -1,3 +1,13 @@
+## 2026-09-20 16:3x（DevQueue cycle 20260920-154601，債務帽，`稽核.六`結案：記憶體風險實測＋T86快取修復）
+
+**做了什麼**：(1)逐個`factors.py` helper量測，定位`factor_ic`第一次`prepare_factors`的3.4GB「固定成本」——根因是`twse_t86_client._load_all_t86_grouped()`把T86全歷史28.2M列／80,917個代碼（約9成是權證）全讀進process內快取，穩態常駐約4.8GB。(2)修法：讀檔時即濾掉權證類長代碼，只留普通股／ETF（`_researchable_mask()`），列數→2.93M、穩態+4,761→+704MB。(3)重新實測：`factor_ic`全量300檔private **3,247MB**（先前7.5~10GB的外推是小樣本假斜率，已在`INCIDENTS.md`更正）；`core_tilt_backtest.py`完整`main()`峰值**3,474MB**。兩者<5GB門檻、略>3GB，標🟡「已實測、可控」，不套(c)的「已實證低風險」。
+
+**證據**：修法前後8個代碼（2330/0050/00886/00715L/1101/8069/00878/2317）`institutional_daily_net_t86()`輸出`DataFrame.equals`全部逐位相同；量測腳本與結果檔皆在`research/mem_probe_*.py|json`。**行為變更**：權證代碼查詢改回空表（repo內唯一呼叫端`factors.py`不受影響）。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 49/50，唯一FAIL是#39資料稽核閘門（一致性違規率5.59%>1%），是`稽核.三`已知既有紅燈；本次只改`research/`下Python、未動`index.html`／`data/`。**[自行裁量]**：以此為由仍commit（前例見本檔2026-09-19記錄），若總司令認為#39紅燈應擋commit可推翻。
+
+**影響檔案**：`research/twse_t86_client.py`、`research/INCIDENTS.md`、`PENDING_QUEUE.md`、新增`research/mem_probe_*`。**下一步**：無新增；`twse_odd_lot_client`同型快取依列數估算<0.5GB（估計，未實測）。
+
 ## 2026-09-20 11:29（互動視窗CC，`piotroski_fscore_gate_v1.py`重跑結果補記：`#23`結案）
 
 戴**債務帽**，接續上一輪。`piotroski_fscore_gate_v1.py`背景重跑完成

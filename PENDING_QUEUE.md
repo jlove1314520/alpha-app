@@ -6912,7 +6912,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   只做分K.一/二；<1年→只做分K.一。**不要因為結論可能不好看就不量。**
   [自走補入，來源：09-20【總司令裁示·整晚連續自走】既有待辦清單，
   非新交辦]
-- [ ] **稽核.六** [債務] 記憶體風險實證（`research/INCIDENTS.md`事件001
+- [x] **稽核.六** [債務] ✅2026-09-20 16:3x 完成（見本項尾端「結案」段）記憶體風險實證（`research/INCIDENTS.md`事件001
   後續，本輪嘗試實測`factor_ic.py`/`core_tilt_backtest.py`的記憶體
   量級但腳本執行逾時未跑完，`INCIDENTS.md`已誠實標「風險未實證」不
   宣稱低風險）。做X→分支：(a)用10~30檔小樣本分別測`factor_ic.py::
@@ -6929,6 +6929,12 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   的實際量測與風險分級**，本項仍維持`- [ ]`未結案。[自走補入，來源：
   `research/INCIDENTS.md`事件001「已盤點的高風險腳本清單」]
   **2026-09-20 15:00 (a)已做（factor_ic部分）**：實測結果見`INCIDENTS.md`事件001表格factor_ic列——固定成本3.4GB（第一次`prepare_factors`）＋邊際8~17MB/檔，外推300檔約7.5~10GB>5GB→**(b)觸發**。下一步：(1)定位3.4GB來源（tracemalloc只指到pandas groupby/take，需從`factors.py`逐因子函式二分）；(2)`core_tilt_backtest.py`尚未量測；(3)(b)重構後再量一次。維持`- [ ]`。[自行裁量：先只量factor_ic，因預算有限]
+  **結案（2026-09-20 16:3x，DevQueue cycle 20260920-154601）**：
+  (1) 定位3.4GB固定成本：逐個`factors.py` helper量測（`research/mem_probe_helpers.py`），`_institutional_daily_net`單獨+4,716MB，其餘<10MB；根因是`twse_t86_client._load_all_t86_grouped()`把T86全歷史28.2M列／80,917個代碼（約9成是權證）讀成process內dict，穩態常駐約4.8GB。
+  (2) **(b)重構已做**：讀檔時即濾掉權證類長代碼，只留普通股／ETF（`_researchable_mask()`），列數28.2M→2.93M、穩態+4,761→+704MB；8個代碼前後輸出`DataFrame.equals`逐位相同。行為變更（權證代碼查詢改回空表）已在`INCIDENTS.md`揭露，repo內唯一呼叫端是`factors.py`。
+  (3) 重新量測：`factor_ic`全量300檔（可用240檔）實測private **3,247MB**（`mem_probe_scale.py`，同process 25檔一批連續載入，斜率約75檔後趨平；先前小樣本外推7.5~10GB是假斜率，已更正）；`core_tilt_backtest.py`完整`main()`實測**峰值3,474MB**（`mem_probe_core_tilt.py`，約17.6分鐘）。兩者均<5GB門檻、略>3GB，故**不套(c)「已實證低風險」**，`INCIDENTS.md`標🟡「已實測、可控」。`twse_odd_lot_client`同型快取依列數估算<0.5GB（估計，未實測）。
+  [自行裁量：分級用實測數字不美化；T86過濾規則(len<=5或00開頭)是我選的，寫進docstring可推翻。]
+  冒煙測試：49/50，唯一FAIL為#39資料稽核閘門（一致性違規率5.59%，已知既有紅燈，見稽核.三；本次只改research/下Python，未動index.html/data，與之無關）。
 - [x] **稽核.七** [債務] ✅**已完成：#23已重跑，兩支腳本結果皆確認
   維持原判定**（2026-09-20總司令裁示【Q4前視與#23無法重現】二明確
   要求重跑，不得自行裁量選邊，已照辦）。
