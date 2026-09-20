@@ -6,7 +6,12 @@
 2. **`籌碼原子.補借券快取`⛔BLOCKED**：同屬FinMind、共用同一封鎖至22:22:23。
 3. **`籌碼原子.出借總量查證`✅（分支a）**：三來源查證（TWSE借券資訊頁／TWSE與TPEx openapi swagger／FinMind資料表清單）＋實測官方端點`rwd/zh/lending/TWT72U`（約8次請求、間隔3秒）：2010-01-04有321檔、2012-01-04有879檔（2330=164,755,000股）、2006僅35檔，只有上市。產出：`docs/FIRST_HAND_SOURCES.md` 5b、規格第11節（看過結果前，未跑任何IC）、新立`籌碼原子.補出借總量快取`。**[自行裁量]**：TPEx網頁版未查，只宣稱openapi清單內沒有。
 
-**冒煙**：本輪只動文件（docs/、研究規格、PENDING_QUEUE、PROGRESS），未動`index.html`／常駐服務；未跑`smoke_test.mjs`（無程式變更）。
+4. **`籌碼原子.補出借總量快取`（債務帽，進行中）**：新增`research/twse_slb_client.py`＋`backfill_twse_slb.py`（非FinMind，一次請求＝一日全市場，3秒間隔、連續3次封鎖/非JSON即停）；小測2330=164,755,000股與手動查證一致。第1批800日以job `20260920-213625-7481`背景執行（22:2x已約456檔，約5秒/日）；約需5批，續批指令寫在佇列項目。此項維持`- [ ]`。
+5. **`原子.六`Tier A（研究帽計算＋驗證帽判定）✅判FAIL**：新增`chip_atom_ic_map.py`（計算層）與`chip_atom_ic_map_aggregate.py`（聚合，只聚合不判定）。**新發現/修正**：`chip_atom_library.load_t86_by_stock`整批concat 3,455檔的瞬時峰值private commit 6.5GB，逐檔先濾4位數代號後降到1.83GB，40檔結果逐列完全相同（134列`==`）。Tier A全量job `20260920-215052-3740`（392檔，22:15完成exit 0）。**結果**：20日K>=4有67個、全窗同號4個 vs 樸素期望6.69（低於期望）p=0.913；60日43個、1個 vs 4.06，p=0.986；高階篩選通過0。判定FAIL（規格第7節分支b），登記TRIALS_REGISTRY **#317**（`--check`PASS）、`SELECTION_BIAS_LEDGER.md`重跑、`STRATEGY_GRAVEYARD.md`新增條目（含不泛化聲明）。Tier B（借券賣出餘額族）記「未檢驗」不記FAIL。**[自行裁量]**：Poisson-binomial解讀規格「按K混合不混K」（聚合腳本寫成時尚未看結果）；補做下市檔數統計（U中價格末筆<2024-06有23檔、融資融券22檔）。`CHIP_ATOM_IC_MAP.md`為機器產生報告。
+6. **順手修**：`run_detached.py`的`log`指令在cp950主控台印出`≤`會UnicodeEncodeError崩潰（實際發生於本輪），已加stdout/stderr reconfigure降級（CLAUDE.md第十二節）。
+7. **佇列深度**：`- [ ]`可動手項只剩1~2項（<12下限）；三個備援來源（常備backlog／REPORT-LEADS-GRAVEYARD／HYPOTHESIS_QUEUE）前幾輪已掃過並記錄補不出東西，本輪未硬湊，屬白名單第7條允許狀態，是否給新研究方向由總司令判斷。
+
+**冒煙**：`node scripts/smoke_test.mjs` 47通過＋1 FAIL（#39資料稽核閘門，違規率5.59%與2筆`float()`掃描器誤報）——**與上一輪171601記錄的失敗完全相同，是既有問題、非本輪造成**（本輪未動`index.html`／`data/audit_report.json`／常駐服務，只動research/、docs/、佇列、進度文件）。
 
 ## 2026-09-20 18:0x~19:5x（DevQueue cycle 20260920-171601，債務帽／驗證帽／研究帽，一輪連續做多項）
 
