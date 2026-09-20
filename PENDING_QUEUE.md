@@ -6962,6 +6962,17 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
      `財報PIT.二`（`score.py`/`portfolio_multifactor_v2`/`core_tilt`
      系列受影響評估）。
 - [ ] **財報PIT.二** [債務] **【優先序最高，建議下一輪第一件事】**
+  **2026-09-20 12:2x 進度（hypothesis_queue，(a)查證完成、(b)(c)未重算）**：
+  (a) 對外可見功能查證：App選股頁`scores.json`（`generate_scores_live.py`/`generate_scores_v2.py`）
+      的`earnings_growth`＝「最新季 vs 去年同季」EPS年增率的**即時展示計算**，走`stock_detail.json`，
+      不經`quarterly_pit()`，不依賴`f_eps_growth`等三因子的PASS狀態；`scores.json` meta
+      `backtest_status=None`，且docstring明講與`factor_ic.py`驗證管線分工、disclaimer為「排序參考非分析」，
+      並未宣稱經統計驗證。`data/strategies.json`裡也查無`multifactor`/`eps`/`core_tilt`相關策略項
+      標為已驗證。**結論：無現行對外功能直接暴露在降級之下，不需緊急回報**。
+      唯一建議（低優先、未動）：選股頁`earnings_growth`/`revenue_momentum`旁可考慮補一句
+      「本因子的歷史IC驗證已於2026-09-20降級」，屬總司令裁示的UI文字。
+  (b)`portfolio_multifactor_v2`權重貢獻重評、(c)`core_tilt`中間分析加but書：**尚未做**（本輪預算
+      用於(a)與交叉查證），留給下一輪；此項維持`- [ ]`，剩(b)(c)。
   `f_eps_growth`/`f_eps_surprise`/`f_revenue_surprise`三個PASS因子
   全部因Q4 PIT前視修正而翻盤（見上方`財報PIT.一`），回頭檢查所有
   依賴這三個因子PASS狀態的既有組合構造：

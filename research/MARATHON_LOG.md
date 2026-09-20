@@ -3,6 +3,10 @@
 
 
 
+## 2026-09-20 12:25 — hypothesis_queue 交辦「財報PIT.二」(a)：查證App scores.json/strategies.json對三個降級因子的暴露 — 無現行對外暴露，(b)(c)留待下輪
+
+交辦佇列`- [ ]`開工時8條（低於12門檻，本輪未補件：預算不足，留給下一輪，回報已標記）。本輪只做財報PIT.二(a)。GitHub連線失敗（Could not resolve host），git pull/push 可能失敗。工作樹有大量非本輪殘留變更，不納入commit。
+
 ## 2026-09-20 09:53 — hypothesis_queue #75續13：建構真實面板＋套用G0-c填補（insider_dera_panel.py）— 有價格28,184／44,209買入發行人月、悲觀版填補13,253（佔31.98%）、月最少買方153；只印覆蓋與填補筆數，無績效判定、未登記TRIALS
 
 交辦佇列 `- [ ]` 開工時0條（`- [!]`共23條，阻塞條件看過未解除）；本輪名額給自走候選池 #75 接續。詳見 HYPOTHESIS_QUEUE.md #75續13。`[自行裁量]`：面板月份止2024-11（fwd20不可超出VAL_END）。holdout：`is_holdout_consumed()`=False。等待審閱：0件。交辦佇列還剩0條未開始（`- [ ]`低於12項下限，已依深度檢查補件，見PENDING_QUEUE.md）。
