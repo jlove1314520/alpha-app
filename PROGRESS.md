@@ -1,3 +1,9 @@
+## 2026-09-20 16:5x（DevQueue cycle 20260920-154601，債務帽，`財報原子.shares交叉驗證`結案）
+
+**做了什麼**：新增`research/fin_atom_shares_check.py`（純讀快取、種子固定、判定口徑事前寫在檔頭）＋`FIN_ATOM_SHARES_CHECK.md`。(1)`shares`（淨利/EPS）對照`OrdinaryShare`÷10：入樣150檔／5,702股票-季度，**差異中位數0.65%<2%→維持現行定義**（P75=2.36%、P90=7.54%，尾端來自增減資/庫藏股/面額非10元）。(2)`ocf`兩個FinMind type重疊期**4,642/4,642逐期相等**（407檔，原本只驗過2330）。**未動`FIN_ATOM_LIBRARY.py`任何定義**。誠實揭露：量到的是「加權平均vs期末股數」兩種口徑差距，非shares的絕對誤差。
+
+**證據**：`python research/fin_atom_shares_check.py`輸出即`FIN_ATOM_SHARES_CHECK.md`。**冒煙**：只新增research/腳本與文件，未動index.html/data；沿用上一項的49/50（#39既有紅燈）。**影響檔案**：新增`fin_atom_shares_check.py`、`FIN_ATOM_SHARES_CHECK.md`；改`PENDING_QUEUE.md`、`PROGRESS_HEARTBEAT.jsonl`（含補記稽核.六心跳）。**下一步**：原子.五（依賴財報原子.補快取，受FinMind額度約束）。
+
 ## 2026-09-20 16:3x（DevQueue cycle 20260920-154601，債務帽，`稽核.六`結案：記憶體風險實測＋T86快取修復）
 
 **做了什麼**：(1)逐個`factors.py` helper量測，定位`factor_ic`第一次`prepare_factors`的3.4GB「固定成本」——根因是`twse_t86_client._load_all_t86_grouped()`把T86全歷史28.2M列／80,917個代碼（約9成是權證）全讀進process內快取，穩態常駐約4.8GB。(2)修法：讀檔時即濾掉權證類長代碼，只留普通股／ETF（`_researchable_mask()`），列數→2.93M、穩態+4,761→+704MB。(3)重新實測：`factor_ic`全量300檔private **3,247MB**（先前7.5~10GB的外推是小樣本假斜率，已在`INCIDENTS.md`更正）；`core_tilt_backtest.py`完整`main()`峰值**3,474MB**。兩者<5GB門檻、略>3GB，標🟡「已實測、可控」，不套(c)的「已實證低風險」。
