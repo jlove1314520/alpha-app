@@ -1,3 +1,17 @@
+## 2026-09-20 18:0x~19:5x（DevQueue cycle 20260920-171601，債務帽／驗證帽／研究帽，一輪連續做多項）
+
+**等待總司令審閱：0件**（`research/AWAITING_REVIEW.md`等待中表格0列）。佇列：本輪開工`- [ ]`=7（<12下限）；補件後可動手`- [ ]`只剩`原子.五`／`原子.六`（[研究]，歸馬拉松軌，DevQueue不取）——DevQueue可取項目已清空。
+
+1. **`財報PIT.四`（驗證帽）✅**：上輪失敗原因＝腳本已commit、job已跑完（13.6分鐘），但輪次在收成前逾時60分鐘被殺；本輪只收成不重跑。legacy臂A_4pass/ic_weighted/季頻VAL alpha=+8.75% p=0.168（原+10.40%/p=0.053）→分支(a)舊數字不可重現，前視貢獻不可量化；修正臂12參數點登記`TRIALS_REGISTRY`#304~#315（登記時序瑕疵已誠實註記）。`[自行裁量]`月頻兩格p=0.049/0.052不觸發(c)（12取1未校正、非預先指定格、legacy臂同格更差）。證據：`PIT4_RERUN_RESULT.md`。
+2. **`regime.替代B.規格修訂`（研究帽，[自走補入]）✅**：`REGIME_OVERLAY_PROTOCOL.md`第19節——曾PASS的4因子中3個因Q4前視修正已FAIL、只剩`f_low_vol`，映射無從建立→第18節作廢為「無可用映射、未經檢驗」，明確更正「窮盡」措辭。`[自行裁量]`採分支(b)結案。
+3. **`稽核.六續一`（債務帽）✅**：51支批次腳本掛`mem_guard`，7支被import的函式庫（score/score_v2/twse_*_client/us_factors/us_factor_ic/power_budget）依(c)跳過；52支py_compile全過、3支實跑無ImportError。`mem_probe_scale.py`含他人未提交改動，未納入commit。
+4. **`稽核.六續三`✅**：零股快取實測增量478MB（≤1GB）→INCIDENTS升級「已實測低風險」；ATOM_LIBRARY benchmark快取<1MB。
+5. **`稽核.六續四`✅ ＋ `稽核.六續五`✅**：**新發現**——基線1.7GB是24執行緒BLAS的commit charge（numpy+pandas、scipy.stats各+822MB；WorkingSet僅84/139MB），非實體記憶體；機器commit剩8.4GB/50GB。續五量測：4執行緒commit峰值2,958→1,245MB、速度+1%；1執行緒→918MB、+6%。**提案（未執行、需總司令核准）**：啟動器/批次入口設`OPENBLAS/OMP/MKL_NUM_THREADS=4`。
+6. **`財報原子.補快取`（債務帽）⛔BLOCKED**：新增`backfill_fin_atom_cache.py`，第1批361次請求成功178次後FinMind回402，`blocked_until`＝**台北19:29:54**，此後續跑（指令見條目）。首批字典序先打到00xx ETF（回空），已改4位數個股優先（新排序增量未驗證）；覆蓋率僅BS 665→680檔、CF不變。`收尾重評`依賴它，同標阻塞。
+7. **`分K.零`⛔BLOCKED**：Shioaji常駐行程未執行（`quotes_tw.json`停在09-19），量`api.kbars()`需總司令的永豐帳號/憑證且不准開第二條連線；解除＝總司令啟動`shioaji_quotes.py`。
+
+**冒煙**：`node scripts/smoke_test.mjs` 47通過＋1 FAIL（#39資料稽核閘門，違規率5.59%與2筆`float()`掃描器誤報，`data/audit_report.json`停在09-19，既有紅燈，與本輪research/文件改動無關；本輪未動index.html）。**其他**：本輪中途一度DNS解析失敗致push失敗，恢復後已重推。**下一步**：19:30後續跑補快取批次；總司令核准/駁回BLAS執行緒提案。
+
 ## 2026-09-20 18:0x（DevQueue cycle 20260920-171601，驗證帽，`財報PIT.四`結案）
 
 **做了什麼**：上輪（154601）失敗原因＝腳本已commit、job 20260920-163914-3073已跑完（13.6分鐘、exit 0、80檔、48列），但輪次在收成前逾時60分鐘被殺；本輪**沒有重跑，只收成**。新增`research/pit4_summarize_register.py`＋`PIT4_RERUN_RESULT.md`，補登記修正臂12個參數點`TRIALS_REGISTRY`#304~#315（登記時序瑕疵已於腳本檔頭與每筆design誠實註記；legacy臂不另計N）。
