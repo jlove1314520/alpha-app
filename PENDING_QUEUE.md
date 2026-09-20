@@ -2345,7 +2345,7 @@ Cowork原話：
   已登記`TRIALS_LEDGER.md` #253~#261、寫入`STRATEGY_GRAVEYARD.md`、`SELECTION_BIAS_LEDGER.md`已更新（N=263）。
   `[自行裁量]`：連續版樣本起點2011-10-27（warm-up較長）→並排比較二元版另外對齊同樣本；failed_gates登記用`gate1`（詞彙表最接近）。
   **下一條：`regime.替代B`（本輪不連續開做，因一輪一帽：驗證帽已用，替代B需研究帽寫規格，留給下一輪）。**
-- [!] **regime.替代B** [研究] **2026-09-20 marathon再度BLOCKED（自行裁量）**：規格第18節的3成分含`eps_family`（`f_eps_growth`+`f_eps_surprise`）與`revenue_surprise`，這兩個成分於本日因Q4 PIT前視修正失去PASS（`財報PIT.一`，#287~#289）；載體`core_tilt_backtest.py`的選股訊號也取自含前視的A_4pass。此刻依規格第18節開跑，等於用已知失真的因子值做「多頭期加重eps_family」的相對比較，結論無法解讀。**解除條件**：`財報PIT.三`（以修正後PIT重跑）出結果後，由驗證帽輪次判斷：(a)eps_family在修正後仍有殘存訊號→照規格第18節跑；(b)訊號消失→規格第18節的「多頭期加重eps_family」映射失去經濟意義，改寫映射（另開規格修訂、不得看結果改）或依分支「沒改善」結案。以下原文： regime用在選股權重而非總曝險——總曝險
+- [!] **regime.替代B** [研究] ⚠️**2026-09-20 DevQueue 171601更新：解除條件已評估——分支(b)成立（財報PIT.三/四皆無殘存訊號），改由`regime.替代B.規格修訂`接手，本條維持BLOCKED直到規格修訂完成。** **2026-09-20 marathon再度BLOCKED（自行裁量）**：規格第18節的3成分含`eps_family`（`f_eps_growth`+`f_eps_surprise`）與`revenue_surprise`，這兩個成分於本日因Q4 PIT前視修正失去PASS（`財報PIT.一`，#287~#289）；載體`core_tilt_backtest.py`的選股訊號也取自含前視的A_4pass。此刻依規格第18節開跑，等於用已知失真的因子值做「多頭期加重eps_family」的相對比較，結論無法解讀。**解除條件**：`財報PIT.三`（以修正後PIT重跑）出結果後，由驗證帽輪次判斷：(a)eps_family在修正後仍有殘存訊號→照規格第18節跑；(b)訊號消失→規格第18節的「多頭期加重eps_family」映射失去經濟意義，改寫映射（另開規格修訂、不得看結果改）或依分支「沒改善」結案。以下原文： regime用在選股權重而非總曝險——總曝險
   永遠100%，不同regime下切換因子權重（例如空頭期加重`f_low_vol`、多頭
   期加重`eps_family`），假設regime的價值改由「選對因子」實現，不靠降
   曝險。**這條跟core_tilt天然相容，可共用資格池與成本模型**，先寫規格
@@ -6907,6 +6907,9 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   低於6.25%基準」這個決定性數字的，見`TRIALS_LEDGER.md`#286）。
   分支：同號比例顯著高於樸素基準→進depth-2/3；不顯著→誠實判FAIL，
   然後接籌碼原子家族（原子.六，屆時另行登記）。[依賴原子.四完成]
+  **[進度2026-09-20 17:24]** 第1個工作單位完成：事前登記規格`research/ATOM_FIN_IC_MAP_SPEC.md`
+  （145表達式×2horizon＝290測試；Tier A/B兩層宇宙；判定規則事前綁定）。**尚待**：寫
+  `fin_atom_ic_map.py`→15檔smoke→30檔記憶體驗證→Tier A→Tier B全量→登記→FIN_ATOM_IC_MAP.md。本項維持`- [ ]`。
 - [ ] **分K.零** [研究] 分K可行性實測（沿用既有Shioaji連線，不准開
   第二條）。回報四個數字：`api.kbars()`最多回溯多久／涵蓋哪些標的
   （上市/上櫃/ETF/已下市各試3檔）／速率限制（全市場2年要多久）／
@@ -7015,6 +7018,8 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   **不呼叫任何新API**（純讀本機快取）。[自走補入，來源：原子.四已知限制(4)；
   原子.五的前置檢查；心跳＝`FIN_ATOM_COVERAGE.md`產出＋`PROGRESS_HEARTBEAT.jsonl`]
 - [ ] **財報原子.補快取** [債務] 針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]
+- [ ] **regime.替代B.規格修訂** [研究] [自走補入，來源：`regime.替代B`阻塞條目的解除條件(b)，2026-09-20 DevQueue 171601判定]：`財報PIT.三`（295檔，修正臂VAL最小p=0.083）與`財報PIT.四`（80檔，同格p=0.174~0.290）都顯示eps_family/revenue_surprise在修正PIT後無殘存訊號→`regime.替代B`阻塞條目的分支(b)成立：規格第18節「多頭期加重eps_family」映射失去經濟意義。做X→在`REGIME_OVERLAY_PROTOCOL.md`新增第18節修訂版（看結果前寫下、不得看結果改）：以修正PIT後**仍未被判死**的因子重寫「多頭/空頭期加重哪個因子」的經濟映射（先列`FACTORS.md`/`TRIALS_LEDGER.md`裡目前無PIT前視污染且非同家族已死者，含`f_low_vol`；逐一寫映射理由）→(a)找得出≥2個無污染且有經濟理由可區分多空的因子→鎖規格後由驗證帽輪次照原分支跑（登記試驗）；(b)找不出→依原分支以「無可用映射、未經檢驗」結案`regime.替代B`（注意：不得寫成「regime概念在台股股票軌窮盡」，替代A與B都沒有被有效檢驗）。心跳＝`REGIME_OVERLAY_PROTOCOL.md`新增節＋`PROGRESS_HEARTBEAT.jsonl`。
+- [ ] **財報原子.補快取.收尾重評** [債務] [自走補入，來源：`財報原子.補快取`(a)分支後續]：待`財報原子.補快取`各批跑完或全被402擋下後，重跑`python research/fin_atom_coverage.py`更新`FIN_ATOM_COVERAGE.md`。做X→(a)資產負債表/現金流量表相關原子「有快取者」口徑之外的全體覆蓋率≥60%→在`原子.五`條目補記「覆蓋不足已解除」，原子.五規格不必限縮宇宙；(b)仍<60%→在`原子.五`補記實際可用宇宙檔數（三張表皆有快取者）與存活者偏誤方向（下市代理覆蓋更低），規格須事前寫明限縮。心跳＝`FIN_ATOM_COVERAGE.md`更新＋`PROGRESS_HEARTBEAT.jsonl`。
 - [x] **財報原子.shares交叉驗證** [債務] ✅2026-09-20 16:5x 完成（見尾端「結案」）`shares`（淨利/EPS反推）對照資產負債表
   `OrdinaryShare`／`CapitalStock`÷面額，抽樣200檔量化差異分布，並驗證`ocf`兩個
   FinMind type在重疊期是否逐期相等（目前只驗過2330）。分支：差異中位數<2%→

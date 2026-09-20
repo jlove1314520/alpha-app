@@ -3,6 +3,10 @@
 
 
 
+## 2026-09-20 17:24 — hypothesis_queue 交辦「原子.五」第1個工作單位：寫事前登記SPEC（ATOM_FIN_IC_MAP_SPEC.md）— 搜尋空間145表達式×2horizon＝290測試、兩層宇宙(Tier A損益表約1851檔/Tier B三表齊全407檔)、每公布週期1個snapshot、判定規則事前綁定（描述性研究，尚未算任何IC，無試驗登記、holdout未動）
+
+交辦佇列`- [ ]`開工時5條（低於12門檻；本輪預算有限未補件，留下一輪，`[自行裁量]`）。本輪只做原子.五SPEC。`[自行裁量]`：不補抓快取（花FinMind額度）改兩層宇宙；ratio排除eps/shares、只用單季值；財報每公布週期只取1個snapshot（避免同一份財報重複貢獻灌水有效樣本）；n_snap<8不進同號比例分母。下一輪：寫`fin_atom_ic_map.py`→15檔smoke→30檔記憶體驗證→Tier A/B全量。等待審閱：0件。
+
 ## 2026-09-20 15:10 — hypothesis_queue 交辦「稽核.六」(a)：實測factor_ic載入路徑記憶體 — 固定成本3.4GB＋邊際8~17MB/檔，外推300檔≈7.5~10GB>5GB，(b)重構觸發（描述性債務工作，無試驗登記、holdout未動）
 
 ## 2026-09-20 12:25 — hypothesis_queue 交辦「財報PIT.二」(a)：查證App scores.json/strategies.json對三個降級因子的暴露 — 無現行對外暴露，(b)(c)留待下輪
