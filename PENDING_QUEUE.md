@@ -7020,7 +7020,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   標「覆蓋不足」不進IC地圖→(b)存貨/應收在金融業整欄NaN屬預期，記錄即可。
   **不呼叫任何新API**（純讀本機快取）。[自走補入，來源：原子.四已知限制(4)；
   原子.五的前置檢查；心跳＝`FIN_ATOM_COVERAGE.md`產出＋`PROGRESS_HEARTBEAT.jsonl`]
-- [!] **財報原子.補快取** [債務] 針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]
+- [ ] **財報原子.補快取** [債務] （2026-09-20 20:0x 馬拉松第583輪：`rate_limit_state.json` blocked_until=台北19:29:54已過，解除阻塞轉回`- [ ]`，續批投遞中）針對`FIN_ATOM_COVERAGE.md`列出的「有income快取、缺資產負債表/現金流量表快取」股票（約1,190檔缺資產負債表、約1,440檔缺現金流），以既有回補腳本樣式（參考`backfill_fin_gap_20260920`／`run_detached.py submit`）分批補抓`TaiwanStockBalanceSheet`／`TaiwanStockCashFlowsStatement`（起點2010-01-01，經`load_dev`寫入快取）。**先對照`CLAUDE.md`「FinMind免費層」額度（每小時數百次，別狂打），批次≤200檔/次、遇402即停標`- [!]`**。做X→(a)補完後重跑`fin_atom_coverage.py`，覆蓋率≥60%的原子解除「覆蓋不足」→原子.五可納入；(b)額度不足或402→標BLOCKED並記解除時間，換下一項。[自走補入，來源：`FIN_ATOM_COVERAGE.md`第5節第3點；心跳＝`PROGRESS_HEARTBEAT.jsonl`＋快取新增檔]
   **進度（DevQueue 171601）**：回補腳本`research/backfill_fin_atom_cache.py`已寫，第1批200檔/361次請求以job 20260920-172100-0300背景執行中（status檔`research/data/backfill_fin_atom_cache_status.json`），續批直接重跑同指令（已抓的命中快取）；遇402即停。**2026-09-20 17:30第1批結果**：361次請求中成功178次，第179次遇FinMind 402（`rate_limit_state.json`封鎖至**台北2026-09-20 19:29:54**）→依分支(b)標BLOCKED。首批按字典序先打到00xx ETF/債券代碼（無財報回空），僅使資產負債表快取者665→680檔、現金流量表407不變；已修腳本改為4位數個股代碼優先（未驗證新排序的實際覆蓋增量）。**解除條件**：`blocked_until`已過（≥19:30台北）→轉回`- [ ]`，續跑`python research/run_detached.py submit --name backfill_fin_atom_cache_bN --timeout-min 45 --expect research/data/backfill_fin_atom_cache_status.json -- python -u research/backfill_fin_atom_cache.py --batch-size 200`。
 - [x] **regime.替代B.規格修訂** [研究] [自走補入，來源：`regime.替代B`阻塞條目的解除條件(b)，2026-09-20 DevQueue 171601判定]：`財報PIT.三`（295檔，修正臂VAL最小p=0.083）與`財報PIT.四`（80檔，同格p=0.174~0.290）都顯示eps_family/revenue_surprise在修正PIT後無殘存訊號→`regime.替代B`阻塞條目的分支(b)成立：規格第18節「多頭期加重eps_family」映射失去經濟意義。做X→在`REGIME_OVERLAY_PROTOCOL.md`新增第18節修訂版（看結果前寫下、不得看結果改）：以修正PIT後**仍未被判死**的因子重寫「多頭/空頭期加重哪個因子」的經濟映射（先列`FACTORS.md`/`TRIALS_LEDGER.md`裡目前無PIT前視污染且非同家族已死者，含`f_low_vol`；逐一寫映射理由）→(a)找得出≥2個無污染且有經濟理由可區分多空的因子→鎖規格後由驗證帽輪次照原分支跑（登記試驗）；(b)找不出→依原分支以「無可用映射、未經檢驗」結案`regime.替代B`（注意：不得寫成「regime概念在台股股票軌窮盡」，替代A與B都沒有被有效檢驗）。心跳＝`REGIME_OVERLAY_PROTOCOL.md`新增節＋`PROGRESS_HEARTBEAT.jsonl`。
   **結案（DevQueue cycle 20260920-171601，分支(b)）**：`REGIME_OVERLAY_PROTOCOL.md`新增第19節——盤點`FACTORS.md`：曾PASS的4因子中eps_growth/eps_surprise/revenue_surprise已FAIL（#287~#289＋財報PIT.三/四），僅`f_low_vol`（純價格）有效，value_pb/pe/roe_stability校正後即FAIL→無≥2個有效因子、映射無從建立→第18節作廢為「無可用映射、未經檢驗」，不登記試驗、不跑回測；明確更正「窮盡」措辭（替代B是缺因子而暫停，非檢驗後失敗）。重啟條件：出現≥2個通過完整關卡、相互獨立的新因子。[自行裁量：採分支(b)結案而非硬找映射，理由＝只有1個有效因子，任何映射都是拿無效因子湊數。]
@@ -7038,6 +7038,30 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   餘額的表達式若要做多空組合，受「放空腿硬規則」約束（借券成本未接真實資料前不得
   採信）**。[自走補入，來源：原子.五分支文字「接籌碼原子家族（原子.六，屆時另行登記）」；
   心跳＝規格檔＋`PROGRESS_HEARTBEAT.jsonl`]
+  **進度（馬拉松第583輪，2026-09-20 20:xx，研究帽）**：**規格已完成**，見
+  `research/ATOM_CHIP_IC_MAP_SPEC.md`（事前登記，看結果前寫死）。資料源起點探測（第10關，
+  實測）：T86（本機快取）**起點2012-05-02**（2010~2012-04為空殼、2011無檔），上市only，上櫃
+  3insti快取2025-08起落在VAL_END之後不可用；個股融資融券FinMind快取2010-01-04起、4位數411檔
+  （∩價格=392檔＝宇宙U）；借券賣出餘額`TaiwanDailyShortSaleBalances`2330探測2010-01-04起
+  （本機僅2330一檔，需回補）。**搜尋空間89個depth-1表達式×2horizon＝178測試**（Tier A 67
+  本機即可、Tier B 22需SBL回補）；全部籌碼原子lag1日（收盤後才公布，PIT必要條件）。
+  **[自行裁量]**：(1)宇宙用融資融券快取∩價格392檔而非另抽300；(2)交辦寫「借券餘額」，實得為
+  「借券賣出餘額」，出借總量另立查證項；(3)Tier B未回補時記「未檢驗」不記FAIL。
+  **剩下**：實作`chip_atom_library.py`／`chip_atom_ic_map.py`→smoke→Tier A全量→聚合→登記，
+  詳見規格第8節。此項維持`- [ ]`。
+- [ ] **籌碼原子.補借券快取** [債務] [自走補入，來源：`ATOM_CHIP_IC_MAP_SPEC.md`第9節]：回補
+  `TaiwanDailyShortSaleBalances`（宇宙U約391檔，每檔1次請求，`load_dev`寫入快取，起點
+  2010-01-01）。**先對照`CLAUDE.md`「FinMind免費層」額度**，批次≤200檔、遇402即停標`- [!]`
+  並記`blocked_until`；沿用`backfill_fin_atom_cache.py`樣式（`run_detached.py submit`）。
+  做X→(a)覆蓋≥U的60%→原子.六Tier B可執行（另立試驗登記）；(b)額度不足→標BLOCKED換下一項。
+  心跳＝快取新增檔＋`PROGRESS_HEARTBEAT.jsonl`。
+- [ ] **籌碼原子.出借總量查證** [研究] [自走補入，來源：`ATOM_CHIP_IC_MAP_SPEC.md`第1節揭露]：
+  「借券餘額（出借總量）」是否有可回溯至2012年以前的官方逐檔資料。**依`CLAUDE.md`搜尋紀律
+  必須列三來源查證紀錄**（官方端點／API文件／社群或其他供應商），不得只寫「查無」；查不到時
+  要寫清楚每個來源實際看到什麼。**只查證、不回補、不寫入研究快取**；遵守「取得方式鐵律」
+  （不繞驗證碼／登入牆）。做X→(a)找到有歷史的官方端點→在規格補一段修訂（標「看過結果前」，
+  尚未跑任何IC）並立回補項；(b)三來源皆無→記入`docs/FIRST_HAND_SOURCES.md`收尾。
+  心跳＝`docs/`查證紀錄＋`PROGRESS_HEARTBEAT.jsonl`。
 
 - [x] **稽核.六續一.mem_guard推廣** [債務] `research/`底下呼叫`load_sample_with_factors`／`load_safe_sample`的62支腳本，目前59支沒有`mem_guard.install()`（實查：`grep -L mem_guard`）。做X→(a)逐支在import區塊後加`import mem_guard; mem_guard.install()`（沿用`core_tilt_backtest.py`第79~80行的寫法與註解精神），一支一支改、不動其他邏輯；(b)改完跑`python -m py_compile`全數通過＋抽3支實際`--help`/import不報錯；(c)遇到「import時就有副作用、加了會影響排程」的腳本（`run-*.ps1`會呼叫者）→跳過並記名單，不硬改。心跳＝`git diff --stat`＋`PROGRESS_HEARTBEAT.jsonl`。[自走補入，來源：`INCIDENTS.md`事件001預防措施1「記憶體安全閥推廣」；稽核.六實測後3.2~3.5GB雖低於5GB但仍高於3GB安全閥緩衝]
   **結案（DevQueue cycle 20260920-171601）**：實查62支呼叫`load_sample_with_factors`/`load_safe_sample`者，59支缺mem_guard；以AST在docstring/`__future__`之後插入`import mem_guard`＋`mem_guard.install()`（保留各檔原換行風格），**實際掛上51支**（清單`research/data/mem_guard_rollout_list.txt`，gitignore）。(c)跳過並記名單：**被排程/其他模組import的函式庫7支**——score.py、score_v2.py、twse_odd_lot_client.py、twse_t86_client.py、us_factors.py、us_factor_ic.py、power_budget.py（掛上會讓import它們的常駐/排程行程在可用記憶體<3GB時被終止，影響面超出本項）；另**mem_probe_scale.py**含別的session未提交改動，已掛上但未納入本次commit（留在工作樹，待該session一併提交）。驗收：52支`py_compile`全過；3支(factor_correlation/check_idio_vol_low_vol_overlap/deep_dive_f_value_pb)實跑25秒無ImportError（進入長時間載入）；`mem_guard.install()`回True。[自行裁量：函式庫類跳過，理由同(c)]。
