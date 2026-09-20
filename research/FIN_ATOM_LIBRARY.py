@@ -59,20 +59,13 @@ ALLOWED_FIN_WINDOWS = (1, 4, 8)
 # =============================================================================
 # PIT：法定申報期限
 # =============================================================================
+# 2026-09-20總司令裁示【Q4前視與#23無法重現】一：這個函式原本在本檔自己
+# 維護一份，但`pit.py::quarterly_pit()`等三個函式一直用舊版「一律期末+
+# 45日」（Q4前視6週）。與其兩份各自演化、日後又漂移，改成本檔的實作
+# 直接搬進`pit.py`當canonical來源（`pit.statutory_quarterly_pit_date()`），
+# 這裡改成import，不再維護第二份拷貝。
 
-def statutory_pit_date(period_end) -> pd.Timestamp:
-    """期別日 → 保守可得日（法定申報期限）。見檔頭說明。"""
-    pe = pd.Timestamp(period_end)
-    q = (pe.month - 1) // 3 + 1
-    y = pe.year
-    if q == 4:
-        # 年報：現行3個月（次年3/31）；2012年以前取舊制4個月（保守）
-        return pd.Timestamp(y + 1, 3, 31) if y >= 2013 else pd.Timestamp(y + 1, 4, 30)
-    if q == 1:
-        return pd.Timestamp(y, 5, 15)
-    if q == 2:
-        return pd.Timestamp(y, 8, 14) if y >= 2013 else pd.Timestamp(y, 8, 31)
-    return pd.Timestamp(y, 11, 14)
+from pit import statutory_quarterly_pit_date as statutory_pit_date  # noqa: E402
 
 
 def _quarter_key(ts) -> int:

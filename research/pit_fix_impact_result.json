@@ -1,0 +1,47 @@
+{
+  "f_eps_growth": {
+    "old_percentile": 100.0,
+    "old_ledger_id": 2,
+    "new_train_mean_ic": 0.04117725082580636,
+    "new_val_mean_ic": 0.005794705659382619,
+    "new_same_sign": true,
+    "new_null_percentile": 43.2,
+    "new_required_percentile": 98.33333333333333,
+    "new_passes": false,
+    "new_reasons": [
+      "val_mean_ic too small or undefined (0.0058)",
+      "not distinguishable from random-shuffle null at the Bonferroni-corrected bar (percentile=43.2, required>=98.3 for n=6)"
+    ],
+    "pass_status_changed_from_pass": true
+  },
+  "f_eps_surprise": {
+    "old_percentile": 100.0,
+    "old_ledger_id": 7,
+    "new_train_mean_ic": 0.03920783239259356,
+    "new_val_mean_ic": 0.01261697318593,
+    "new_same_sign": true,
+    "new_null_percentile": 71.8,
+    "new_required_percentile": 98.33333333333333,
+    "new_passes": false,
+    "new_reasons": [
+      "val_mean_ic too small or undefined (0.0126)",
+      "not distinguishable from random-shuffle null at the Bonferroni-corrected bar (percentile=71.8, required>=98.3 for n=6)"
+    ],
+    "pass_status_changed_from_pass": true
+  },
+  "f_revenue_surprise": {
+    "old_percentile": 99.0,
+    "old_ledger_id": 8,
+    "new_train_mean_ic": 0.046129797239230386,
+    "new_val_mean_ic": 0.013911304906309608,
+    "new_same_sign": true,
+    "new_null_percentile": 78.2,
+    "new_required_percentile": 98.33333333333333,
+    "new_passes": false,
+    "new_reasons": [
+      "val_mean_ic too small or undefined (0.0139)",
+      "not distinguishable from random-shuffle null at the Bonferroni-corrected bar (percentile=78.2, required>=98.3 for n=6)"
+    ],
+    "pass_status_changed_from_pass": true
+  }
+}

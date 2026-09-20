@@ -78,6 +78,7 @@ MAX_CONSECUTIVE_FAILS = 2
 
 sys.path.insert(0, str(ROOT / "research"))
 import marathon_lock  # noqa: E402 -- 同目錄下的鎖工具，重用它的鎖檔格式與陳舊門檻判斷
+from queue_depth_config import MIN_QUEUE_DEPTH, TARGET_QUEUE_DEPTH  # noqa: E402 -- 單一事實來源，2026-09-20裁示【Q4前視與#23無法重現】四
 
 # 2026-09-10（重開機復原.第二輪，總司令裁示「修機制不是手收尾」）：
 # 舊版防呆（曾經在 run-dev-queue-cycle.ps1 裡）是「工作目錄乾淨才動手」，
@@ -581,10 +582,15 @@ def build_prompt() -> int:
 ## 開工前先做兩件事（2026-09-18總司令裁示【改為連續自走】新增）
 1. **檢查已標`- [!]`的阻塞項有沒有解除**：逐項看阻塞原因與預計解除時間，
    到了就自己把那一行改回`- [ ]`並繼續往下做，不需要另外請示。
-2. **佇列深度檢查（2026-09-19總司令裁示【裁示】五，門檻5→12、一次補到20）**：
-   `PENDING_QUEUE.md`裡**真正能動手做的`- [ ]`項目**（不含`- [!]`阻塞項，
-   阻塞項不會被消化，算進門檻會失去意義）若低於12項，有責任自己補、一次補到
-   20項（來源優先序：①本檔「常備backlog」區塊 ②`research/REPORT.md`/
+2. **佇列深度檢查（門檻與目標值來自`research/queue_depth_config.py`
+   單一事實來源，不在這裡硬寫數字——2026-09-20總司令裁示【Q4前視與
+   #23無法重現】四要求：CLAUDE.md/這份prompt/兩份CONTINUATION_
+   PROMPT.txt過去各自硬寫過這兩個數字，2026-09-19門檻從5改12時只有
+   部分位置同步更新，另外兩份靜態prompt檔停留在舊版整整五輪沒被
+   發現）**：`PENDING_QUEUE.md`裡**真正能動手做的`- [ ]`項目**（不含
+   `- [!]`阻塞項，阻塞項不會被消化，算進門檻會失去意義）若低於
+   {MIN_QUEUE_DEPTH}項，有責任自己補、一次補到{TARGET_QUEUE_DEPTH}項
+   （來源優先序：①本檔「常備backlog」區塊 ②`research/REPORT.md`/
    `LEADS.md`/`STRATEGY_GRAVEYARD.md`裡寫著「待辦」「下一步」「未解決」但沒
    進佇列的項目 ③`HYPOTHESIS_QUEUE.md`排隊中的假設），補入時標「[自走補入]」
    與來源出處，不需要事先請示。

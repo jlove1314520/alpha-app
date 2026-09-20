@@ -1,0 +1,739 @@
+{
+  "checked_at": null,
+  "n_checked": 180,
+  "by_status_count": {
+    "OK": 174,
+    "FILE_NOT_FOUND": 5,
+    "OTHER_ERROR": 1
+  },
+  "broken": [
+    {
+      "module": "deep_dive_f_us_low_vol_small_tier",
+      "status": "OTHER_ERROR",
+      "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
+    }
+  ],
+  "all_results": [
+    {
+      "module": "adjust",
+      "status": "OK"
+    },
+    {
+      "module": "adr_premium_assembly",
+      "status": "OK"
+    },
+    {
+      "module": "adr_premium_gate",
+      "status": "OK"
+    },
+    {
+      "module": "adr_premium_gate_ex_tsm",
+      "status": "OK"
+    },
+    {
+      "module": "avg_pairwise_correlation_gate",
+      "status": "OK"
+    },
+    {
+      "module": "backfill_insider_holdings",
+      "status": "OK"
+    },
+    {
+      "module": "backfill_irb130_pledge",
+      "status": "OK"
+    },
+    {
+      "module": "backfill_margin_debt_market",
+      "status": "OK"
+    },
+    {
+      "module": "backfill_sp500_index_changes",
+      "status": "OK"
+    },
+    {
+      "module": "breadth_divergence_overlay_v1",
+      "status": "OK"
+    },
+    {
+      "module": "breadth_divergence_sanity",
+      "status": "OK"
+    },
+    {
+      "module": "build_company_info",
+      "status": "OK"
+    },
+    {
+      "module": "build_twse_listing_dates",
+      "status": "OK"
+    },
+    {
+      "module": "buyback_car_gate",
+      "status": "OK"
+    },
+    {
+      "module": "buyback_car_gate_high_execution",
+      "status": "OK"
+    },
+    {
+      "module": "calibration_probe_momentum_12_1",
+      "status": "OK"
+    },
+    {
+      "module": "capital_reduction_car_gate",
+      "status": "OK"
+    },
+    {
+      "module": "composite_quality_revaccel_inst_lowvol_sanity",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
+      "module": "composite_zscore_v1",
+      "status": "OK"
+    },
+    {
+      "module": "composite_zscore_v1_random_control",
+      "status": "OK"
+    },
+    {
+      "module": "control_group_standard",
+      "status": "OK"
+    },
+    {
+      "module": "copper_gold_ratio_circular_shift_control",
+      "status": "OK"
+    },
+    {
+      "module": "copper_gold_ratio_gate",
+      "status": "OK"
+    },
+    {
+      "module": "copper_gold_ratio_overlay_v1",
+      "status": "OK"
+    },
+    {
+      "module": "costs",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
+      "module": "cta_momentum_12m",
+      "status": "OK"
+    },
+    {
+      "module": "day_trading_ratio_dispersion_gate57",
+      "status": "OK"
+    },
+    {
+      "module": "day_trading_ratio_gate",
+      "status": "OK"
+    },
+    {
+      "module": "decompose_f_quality_roe_stability_rebalance",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_low_vol",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_quality_roe_stability",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_quality_roe_stability_val_year_breakdown",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_gross_profitability",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_gross_profitability_contamination_check",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_cached_universe",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_clean_universe",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_leave_extreme_out",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_mid_tier",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_mid_tier_n90",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_persistent_random_control",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_small_tier",
+      "status": "OTHER_ERROR",
+      "detail": "AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing"
+    },
+    {
+      "module": "deep_dive_f_us_low_vol_val_year_breakdown",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_value_bm",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_value_bm_leave_extreme_out",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_us_value_bm_val_year_breakdown",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_value_pb",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_f_value_pe",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_fut_basis_carry",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_fut_basis_mean_reversion_60d",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_loo_no_low_vol_independent_sample",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_us_value_bm_lowvol_combo",
+      "status": "OK"
+    },
+    {
+      "module": "deep_dive_us_value_bm_lowvol_leg_decomposition",
+      "status": "OK"
+    },
+    {
+      "module": "dividend_yield_portfolio_v1",
+      "status": "OK"
+    },
+    {
+      "module": "engine",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
+      "module": "equal_weight_rebalance_control_v1",
+      "status": "OK"
+    },
+    {
+      "module": "equal_weight_rebalance_costs_v1",
+      "status": "OK"
+    },
+    {
+      "module": "equal_weight_rebalance_leave_one_out_v1",
+      "status": "OK"
+    },
+    {
+      "module": "equal_weight_rebalance_plateau_v1",
+      "status": "OK"
+    },
+    {
+      "module": "equal_weight_rebalance_sanity",
+      "status": "OK"
+    },
+    {
+      "module": "ex_dividend_seasonal_sanity",
+      "status": "OK"
+    },
+    {
+      "module": "f52w_high_gates",
+      "status": "OK"
+    },
+    {
+      "module": "f52w_high_portfolio_v1",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_52w_high",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_accruals",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_amihud_illiq",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_asset_growth",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_bab",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_dividend_yield",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_gross_margin_stability",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_gross_profitability",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_idio_vol",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_inst_streak_days",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_ipo_listing_age",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_margin_utilization",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_margin_utilization_regime_split",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_residual_momentum",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_sector_neutral_rel_strength",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_short_reversal",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_short_sale_utilization",
+      "status": "OK"
+    },
+    {
+      "module": "factor_ic_short_term_reversal_1w",
+      "status": "OK"
+    },
+    {
+      "module": "factors",
+      "status": "OK"
+    },
+    {
+      "module": "finra_threshold_probe",
+      "status": "OK"
+    },
+    {
+      "module": "forced_short_covering_gate1",
+      "status": "OK"
+    },
+    {
+      "module": "fred_yield_curve_gate",
+      "status": "OK"
+    },
+    {
+      "module": "fut_cheap_gate",
+      "status": "OK"
+    },
+    {
+      "module": "fut_probe_spot_index",
+      "status": "OK"
+    },
+    {
+      "module": "fut_recheck_inst_momentum_highres",
+      "status": "OK"
+    },
+    {
+      "module": "fut_recheck_intraday_gap_continuation_highres",
+      "status": "OK"
+    },
+    {
+      "module": "fx_twd_gate",
+      "status": "OK"
+    },
+    {
+      "module": "generate_scores_future",
+      "status": "OK"
+    },
+    {
+      "module": "generate_scores_momentum",
+      "status": "OK"
+    },
+    {
+      "module": "holding_shares_per_probe",
+      "status": "OK"
+    },
+    {
+      "module": "index_reconstitution_probe",
+      "status": "OK"
+    },
+    {
+      "module": "insider_holdings_pilot_ic",
+      "status": "OK"
+    },
+    {
+      "module": "institutional_concentration_gate",
+      "status": "OK"
+    },
+    {
+      "module": "institutional_flow_dispersion_gate55",
+      "status": "OK"
+    },
+    {
+      "module": "irb130_pledge_gate",
+      "status": "OK"
+    },
+    {
+      "module": "leave_one_factor_out_bigsample",
+      "status": "OK"
+    },
+    {
+      "module": "lending_fee_gate63",
+      "status": "OK"
+    },
+    {
+      "module": "lending_fee_gate63_costs",
+      "status": "OK"
+    },
+    {
+      "module": "lending_fee_gate63_param_plateau",
+      "status": "OK"
+    },
+    {
+      "module": "lending_fee_gate_v2_longhold",
+      "status": "OK"
+    },
+    {
+      "module": "long_only_vs_market",
+      "status": "OK"
+    },
+    {
+      "module": "margin_debt_growth_gate",
+      "status": "OK"
+    },
+    {
+      "module": "margin_debt_level_circular_shift_control",
+      "status": "OK"
+    },
+    {
+      "module": "margin_debt_level_gate",
+      "status": "OK"
+    },
+    {
+      "module": "margin_debt_level_train_val_heterogeneity",
+      "status": "OK"
+    },
+    {
+      "module": "margin_debt_level_window_robustness",
+      "status": "OK"
+    },
+    {
+      "module": "margin_utilization_regime_portfolio_v1",
+      "status": "OK"
+    },
+    {
+      "module": "material_news_car_gate",
+      "status": "OK"
+    },
+    {
+      "module": "min_variance_portfolio_gate59_costs",
+      "status": "OK"
+    },
+    {
+      "module": "min_variance_portfolio_gate59_costs_1p8discount",
+      "status": "OK"
+    },
+    {
+      "module": "monthly_revenue_event_study",
+      "status": "OK"
+    },
+    {
+      "module": "mops_insider_holdings_client",
+      "status": "OK"
+    },
+    {
+      "module": "mops_insider_holdings_probe",
+      "status": "OK"
+    },
+    {
+      "module": "odd_lot_imbalance_portfolio_v1",
+      "status": "OK"
+    },
+    {
+      "module": "option_pcr_gate",
+      "status": "OK"
+    },
+    {
+      "module": "option_pcr_overlay_v1",
+      "status": "OK"
+    },
+    {
+      "module": "overnight_intraday_alt_cutpoint_placebo",
+      "status": "OK"
+    },
+    {
+      "module": "overnight_intraday_decomposition_gate",
+      "status": "OK"
+    },
+    {
+      "module": "overnight_intraday_gate6_consistency",
+      "status": "OK"
+    },
+    {
+      "module": "pair_trading_control_v1",
+      "status": "OK"
+    },
+    {
+      "module": "pair_trading_sanity",
+      "status": "OK"
+    },
+    {
+      "module": "pead_portfolio_v1",
+      "status": "OK"
+    },
+    {
+      "module": "piotroski_fscore_gate_v1",
+      "status": "OK"
+    },
+    {
+      "module": "piotroski_fscore_sanity",
+      "status": "OK"
+    },
+    {
+      "module": "pit",
+      "status": "OK"
+    },
+    {
+      "module": "portfolio_backtest_v2",
+      "status": "OK"
+    },
+    {
+      "module": "regime_conditions",
+      "status": "OK"
+    },
+    {
+      "module": "regime_conditions_value_pe",
+      "status": "OK"
+    },
+    {
+      "module": "regime_overlay",
+      "status": "OK"
+    },
+    {
+      "module": "regime_overlay_trend_filter_gate",
+      "status": "OK"
+    },
+    {
+      "module": "regime_switch_f_rel_strength",
+      "status": "OK"
+    },
+    {
+      "module": "revenue_trend_surprise_low_attention",
+      "status": "OK"
+    },
+    {
+      "module": "run_detached",
+      "status": "OK"
+    },
+    {
+      "module": "run_value_board_v2_pit_backtest",
+      "status": "OK"
+    },
+    {
+      "module": "score",
+      "status": "OK"
+    },
+    {
+      "module": "sector_rotation_accel_gate73_gate2",
+      "status": "OK"
+    },
+    {
+      "module": "selection_bias_ledger",
+      "status": "OK"
+    },
+    {
+      "module": "short_sale_utilization_gate5_loo",
+      "status": "OK"
+    },
+    {
+      "module": "short_sale_utilization_gate9_regime_overlay",
+      "status": "OK"
+    },
+    {
+      "module": "short_sale_utilization_gates",
+      "status": "OK"
+    },
+    {
+      "module": "short_sale_utilization_portfolio_v1",
+      "status": "OK"
+    },
+    {
+      "module": "sp500_index_changes_client",
+      "status": "OK"
+    },
+    {
+      "module": "spillover_overlay_v1",
+      "status": "OK"
+    },
+    {
+      "module": "spillover_overnight_gate",
+      "status": "OK"
+    },
+    {
+      "module": "train_only_ic_weight_bigsample",
+      "status": "OK"
+    },
+    {
+      "module": "trial_registry",
+      "status": "OK"
+    },
+    {
+      "module": "turn_of_month_gate",
+      "status": "OK"
+    },
+    {
+      "module": "universe",
+      "status": "OK"
+    },
+    {
+      "module": "us_8k_item502_gate52",
+      "status": "OK"
+    },
+    {
+      "module": "us_8k_pead_gate52",
+      "status": "OK"
+    },
+    {
+      "module": "us_contamination_blacklist",
+      "status": "OK"
+    },
+    {
+      "module": "us_costs",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
+      "module": "us_factor_ic",
+      "status": "OK"
+    },
+    {
+      "module": "us_factor_ic_by_size",
+      "status": "OK"
+    },
+    {
+      "module": "us_factor_ic_cached_universe",
+      "status": "FILE_NOT_FOUND"
+    },
+    {
+      "module": "us_factor_ic_lowvol_clean_universe",
+      "status": "OK"
+    },
+    {
+      "module": "us_factor_ic_quality_clean_universe",
+      "status": "OK"
+    },
+    {
+      "module": "us_factor_ic_value",
+      "status": "OK"
+    },
+    {
+      "module": "us_factor_ic_value_clean_universe",
+      "status": "OK"
+    },
+    {
+      "module": "us_factors",
+      "status": "OK"
+    },
+    {
+      "module": "us_factors_quality",
+      "status": "OK"
+    },
+    {
+      "module": "us_factors_value",
+      "status": "OK"
+    },
+    {
+      "module": "us_fundamentals",
+      "status": "OK"
+    },
+    {
+      "module": "us_leg_overlap_valuebm_lowvol",
+      "status": "OK"
+    },
+    {
+      "module": "us_pit",
+      "status": "OK"
+    },
+    {
+      "module": "us_portfolio_backtest",
+      "status": "OK"
+    },
+    {
+      "module": "us_portfolio_multifactor_v1",
+      "status": "OK"
+    },
+    {
+      "module": "us_short_leg_holdings_check",
+      "status": "OK"
+    },
+    {
+      "module": "us_short_leg_price_floor_check",
+      "status": "OK"
+    },
+    {
+      "module": "us_short_leg_tiered_borrow_check",
+      "status": "OK"
+    },
+    {
+      "module": "us_universe",
+      "status": "OK"
+    },
+    {
+      "module": "us_universe_dispersion_check",
+      "status": "OK"
+    },
+    {
+      "module": "verify_pit_value_pb",
+      "status": "OK"
+    },
+    {
+      "module": "vol_targeting_v1",
+      "status": "OK"
+    },
+    {
+      "module": "vrp_gate",
+      "status": "OK"
+    },
+    {
+      "module": "weinstein_alpha_gate",
+      "status": "OK"
+    }
+  ]
+}

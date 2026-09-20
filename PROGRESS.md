@@ -1,3 +1,75 @@
+## 2026-09-20 11:07（互動視窗CC，【裁示】Q4前視與#23無法重現，兩件都要回頭處理——三個PASS因子全部翻盤）
+
+戴**債務帽**（本輪最重要的一次更正）。總司令要求把Q4前視偏誤修好並
+做完整影響評估、把#23真的重跑、把兩道守門員的驗收記一筆、修結構性
+的prompt/規則同步問題。逐項記錄。
+
+**一、`pit.py` Q4前視偏誤修正＋影響評估（本輪最重大發現）**：
+1. `pit.py`新增`statutory_quarterly_pit_date()`（法定申報期限：
+   Q1~Q3期末+45日不變，**Q4改次年3/31**，原本誤用期末+45日把年報
+   算成2/14，前視約6週）取代舊算法，`quarterly_pit()`/`balance_
+   sheet_pit()`/`cash_flow_pit()`三個函式統一改用，`FIN_ATOM_
+   LIBRARY.py`改成從`pit.py`import這個函式，不再各自維護一份。
+   刻意保留`pit_source="assumed"`字串不變（沒有改成"assumed_
+   statutory"），避免`any_assumed()`既有呼叫端的字串比對悄悄失效。
+2. **重跑三個PASS因子，結果：`f_eps_growth`/`f_eps_surprise`/
+   `f_revenue_surprise`全部失去PASS**（percentile 100.0/100.0/99.0
+   → 43.2/71.8/78.2，門檻98.3；`TRIALS_LEDGER.md`#287/#288/#289）。
+   **這不是差一點沒過門檻，是val IC本身大幅萎縮到接近雜訊**（新val_ic
+   僅0.0058/0.0126/0.0139），強烈暗示原本的訊號有相當比例來自Q4
+   前視偏誤本身——EPS/營收在年報這個觀測點資訊量最大，模型卻被允許
+   提早6週看到。已寫進`research/FACTORS.md`最上方新增的「⛔⛔重大
+   更正」段落。**本專案「4個PASS因子裡3個」這個核心資產論述需要
+   整個重新評估**，`PENDING_QUEUE.md`新增「財報PIT.二」（優先序
+   最高，已插入ORDER-BEGIN清單最前面）要求回頭檢查`score.py`/
+   `portfolio_multifactor_v2`/`core_tilt`系列是否直接暴露這個降級。
+   FinMind重跑期間一度402冷卻，可用樣本240/300非滿額，但IC萎縮
+   幅度遠超抽樣雜訊能解釋的範圍，結論方向可信。
+
+**二、`#23`重跑（不是選擇性的，總司令原話：「一個跑不出來的登記結果
+比一個FAIL更糟」）**：
+1. `piotroski_fscore_sanity.py`重跑（`TRIALS_LEDGER.md`#290）：
+   123/300檔可用（原47/100），F-score分布mean=3.27/median=3.40
+   （原3.29/3.26，高度一致），F≥7候選池1.2%（原1.2%，完全相同）。
+   **判定SANITY_PASS，跟原始判定相同，可重現**。
+2. `piotroski_fscore_gate_v1.py`（產出#94最終FAIL判定的腳本）重跑
+   仍在背景執行中，結果另行補記。
+3. **順手做的全面體檢**：新增`research/reproducibility_check.py`，
+   從`TRIALS_LEDGER.md`掃出180個曾被登記過的腳本名稱，逐一用獨立
+   子行程＋10秒逾時試`import`（區分`BLOCKED_BY_GUARD`合規防呆 vs
+   `IMPORT_ERROR`真bug，避免誤判）。**結果：除了已修好的#23，沒有
+   發現新的dangling import**（174 OK、5個檔案已不存在、1個是刻意的
+   assertion guard非bug）。已掛進`scripts/audit_preflight.py`
+   （`audit.yml`每日執行，寫入`reproducibility_check`欄位），這是
+   「#23從09-03壞到現在沒人發現」的根本預防。
+
+**三、兩道守門員驗收通過，正式記一筆**：`net_guard.py`/`mem_guard.py`
+皆有獨立驗收測試（monkeypatch製造觸發條件、實測行為），標準一致，
+通過。`research/INCIDENTS.md`拆成事件001（記憶體耗盡本身）與**事件
+002（獨立記錄：聲稱已實作安全閥、實際上從未寫進repo）**——兩種不同
+的失敗（工程疏漏 vs 回報與實際不符）不再合併淡化。
+
+**四、修好「規則寫在CLAUDE.md、提示詞檔是另一份拷貝，兩者會不同步」
+的結構性問題**：新增`research/queue_depth_config.py`（單一事實
+來源，`MIN_QUEUE_DEPTH=12`/`TARGET_QUEUE_DEPTH=20`）；
+`scripts/dev_queue_runner.py`的動態prompt改成從這裡import而非硬寫
+數字；兩份`*_CONTINUATION_PROMPT.txt`（靜態檔，無法在讀取當下動態
+import）改用標記包住相關段落，新增`research/sync_continuation_
+prompts.py`一鍵重新產生；`scripts/audit_preflight.py`新增
+`check_queue_depth_sync()`當最後一道防線，呼叫該腳本的`--check`
+模式比對，不一致就alert。
+
+**驗證**：`pit.statutory_quarterly_pit_date()`對6組已知期別（含
+2012年前後邊界）逐一比對正確；`any_assumed()`回歸測試確認字串比對
+未受影響；`FIN_ATOM_LIBRARY.py --self-test`／`--real-data`皆過；
+`reproducibility_check.py`實測180個腳本；`sync_continuation_
+prompts.py --check`確認兩份prompt檔與config一致；`dev_queue_
+runner.py`三個檢查函式對`PENDING_QUEUE.md`跑過確認74個key無重複。
+
+**下一步**：`piotroski_fscore_gate_v1.py`重跑結果待補記；「財報
+PIT.二」（檢查score.py/portfolio_v2/core_tilt是否暴露這次因子降級）
+是下一輪最優先事項。
+
 ## 2026-09-20 10:24（互動視窗CC，【裁示】記憶體事故記錄不精確，查證後重寫；安全閥從沒真的實作到真的實作）
 
 戴**債務帽**（誠信/紀律修正優先於研究進度）。總司令查證上一輪的

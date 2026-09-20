@@ -6947,14 +6947,44 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   範疇。[自走補入，來源：`research/STRATEGY_GRAVEYARD.md`「Piotroski
   F-score」條目本輪新增段落]
 
-- [ ] **財報PIT.一** [債務] 盤點`research/pit.py::quarterly_pit()`／`balance_sheet_pit()`
-  的引用者（grep全repo：factors／portfolio／core_tilt／各回測腳本），列出哪些既有
-  因子/結論橫跨Q4且用了「期末+45日」，並用`FIN_ATOM_LIBRARY.statutory_pit_date`
-  重算Q4的可得日差異（2/14 vs 3/31）。做X→(a)若引用者的判定結論是PASS/候選→
-  該結論標「PIT前視待重驗」並排重驗項→(b)若引用者全是已FAIL的結論→只加但書、
-  不重跑（FAIL方向的前視只會高估，不改判定）→(c)**不修改`pit.py`本身**，只回報，
-  是否改由總司令裁示。[自走補入，來源：`ATOM_LIBRARY.md`「財報原子庫」PIT缺陷；
-  心跳＝本項`- [x]`＋`PROGRESS_HEARTBEAT.jsonl`]
+- [x] **財報PIT.一** [債務] ✅**已完成，且已超出原規劃範圍**——2026-09-20
+  總司令裁示【Q4前視與#23無法重現】一明確要求直接修`pit.py`（原規劃
+  「不修改pit.py本身」已被總司令的後續裁示取代）：
+  1. `pit.py::quarterly_pit()`/`balance_sheet_pit()`/`cash_flow_pit()`
+     皆改用新的`statutory_quarterly_pit_date()`（法定申報期限：Q1~Q3
+     期末+45日不變、Q4改次年3/31；2012年以前舊制保守估計Q4→4/30、
+     Q2→8/31），`FIN_ATOM_LIBRARY.py`改成從`pit.py`import這個函式，
+     不再各自維護一份。
+  2. **重跑三個PASS因子（f_eps_growth/f_eps_surprise/f_revenue_
+     surprise），結果：三個全部失去PASS**（percentile從100.0/100.0/
+     99.0掉到43.2/71.8/78.2，門檻98.3），已登記`TRIALS_LEDGER.md`
+     #287/#288/#289，完整記錄見`research/FACTORS.md`最上方新增的
+     「⛔⛔2026-09-20重大更正」段落與`research/rerun_pit_fix_impact.py`
+     （可重複執行）。**這是重大更正，不是前視存在但不影響結論的情況**。
+  3. **下一步（原規劃的「回頭檢查組合構造」，接續進行中）**：見下方
+     `財報PIT.二`（`score.py`/`portfolio_multifactor_v2`/`core_tilt`
+     系列受影響評估）。
+- [ ] **財報PIT.二** [債務] **【優先序最高，建議下一輪第一件事】**
+  `f_eps_growth`/`f_eps_surprise`/`f_revenue_surprise`三個PASS因子
+  全部因Q4 PIT前視修正而翻盤（見上方`財報PIT.一`），回頭檢查所有
+  依賴這三個因子PASS狀態的既有組合構造：
+  (a) `score.py`——`eps_family`（`f_eps_growth`+`f_eps_surprise`
+      合併計分）與獨立的`revenue_surprise`成分現在全部失去統計基礎，
+      `score.py`綜合分若仍在對外（App）產出分數，需要標註「所依賴的
+      因子已降級，分數可信度存疑」，不得靜默沿用。
+  (b) `portfolio_multifactor_v2`——`FACTORS.md`記錄它用這4個因子
+      （含`f_low_vol`）建構12組合，`f_low_vol`不受Q4 PIT影響（純
+      價量因子，不用`quarterly_pit()`）但另外3個因子的權重貢獻需要
+      重新評估，原本"p=0.053邊緣顯著"的結論可能需要下修。
+  (c) `core_tilt`系列（`CORE_TILT_SPEC.md`/`core_tilt_backtest.py`）
+      ——已知因TE不可行判死（`TRIALS_LEDGER.md`#283），不受本次
+      因子降級影響最終判定（已經是死的），但若之前有任何中間分析
+      引用這三個因子的IC強度佐證論點，需要加but書。
+  做X→分支：(a)(b)(c)逐一查證後若發現任何「現行對外可見的功能」
+  （尤其App選股頁若真的接了`score.py`分數）直接暴露在這個降級之下，
+  **立即回報，不得等到本輪結束才說**；若只是研究端的既有結論標註，
+  依序補but書即可，不需要緊急回報。[自走補入，來源：`research/
+  FACTORS.md`「⛔⛔2026-09-20重大更正」段落「下一步」小節]
 - [ ] **財報原子.覆蓋率** [債務] 對`research/data/raw`快取中全部
   `TaiwanStockFinancialStatements`股票（約3,600檔）跑`load_quarter_frame`，統計每個
   原子的非NaN比例、金融業/下市股的缺失型態、最早可用期別，輸出
@@ -6996,6 +7026,7 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
 `_format_mismatch`旗標，不再依賴「垃圾湊巧對不上」這種運氣。
 
 <!-- ORDER-BEGIN -->
+財報PIT.二
 零件.零 [研究]
 原子.一 [研究]
 原子.二 [研究]
@@ -7065,6 +7096,10 @@ Cybex.beta
 分K.零 [研究]
 稽核.六
 稽核.七
+財報PIT.一
+財報原子.覆蓋率
+財報原子.shares交叉驗證
+原子.六
 <!-- ORDER-END -->
 
 **2026-09-18（續5）清單重整說明**：舊清單65個去重項目裡，39個已確認

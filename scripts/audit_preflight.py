@@ -119,6 +119,57 @@ def run_check(label: str, code: str) -> dict:
         return {"label": label, "ok": False, "error": f"{type(e).__name__}: {e}"}
 
 
+def check_queue_depth_sync() -> dict:
+    """2026-09-20總司令裁示【Q4前視與#23無法重現】四：`CLAUDE.md`/
+    `scripts/dev_queue_runner.py`/兩份`research/*_CONTINUATION_
+    PROMPT.txt`過去各自硬寫佇列深度門檻數字，2026-09-19門檻從5改12時
+    只有部分位置同步更新，兩份靜態prompt停留在舊版整整5輪都沒被發現。
+    根因修法（`research/sync_continuation_prompts.py`）之後，這裡是
+    最後一道防線：定期用子行程呼叫該腳本的`--check`模式，確認兩份
+    prompt檔跟`research/queue_depth_config.py`（單一事實來源）仍然
+    一致，不一致就alert——沿用本檔案「用子行程隔離、不import專案模組」
+    的既有設計原則。"""
+    try:
+        p = subprocess.run(
+            [sys.executable, "research/sync_continuation_prompts.py", "--check"],
+            cwd=ROOT, capture_output=True, text=True, timeout=30,
+        )
+        synced = p.returncode == 0 and "SYNCED" in p.stdout
+        return {"ok": synced, "stdout": p.stdout.strip()[-500:],
+                "error": "" if synced else (p.stderr or "").strip()[-500:]}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(e).__name__}: {e}"}
+
+
+def run_reproducibility_check() -> dict:
+    """2026-09-20總司令裁示【Q4前視與#23無法重現】二.3：`#23`的
+    `piotroski_fscore_sanity.py`/`piotroski_fscore_gate_v1.py`從
+    2026-09-03起就`import`一個從未定義過的函式，兩支腳本從那天起就
+    無法執行，但沒有任何機制發現，直到2026-09-20研究財報原子庫PIT
+    機制時才意外撞見——**登記過的結果，要有機器定期確認它還跑得動**。
+    掛進每日audit（`audit.yml`一天一次，非高頻），呼叫`research/
+    reproducibility_check.py`批次試import`TRIALS_LEDGER.md`提到的
+    全部腳本，抓出新的dangling import。逾時給5分鐘（180支腳本×10秒
+    子行程逾時的最壞情況遠低於這個預算，正常情況幾分鐘內完成）。"""
+    try:
+        p = subprocess.run(
+            [sys.executable, "research/reproducibility_check.py"],
+            cwd=ROOT, capture_output=True, text=True, timeout=300,
+        )
+        result_path = ROOT / "research" / "reproducibility_check_result.json"
+        if not result_path.exists():
+            return {"ok": False, "error": "reproducibility_check.py執行完但沒有產出"
+                                            "reproducibility_check_result.json"}
+        data = json.loads(result_path.read_text(encoding="utf-8"))
+        broken = data.get("broken", [])
+        return {"ok": len(broken) == 0, "n_checked": data.get("n_checked", 0),
+                "by_status_count": data.get("by_status_count", {}), "broken": broken}
+    except subprocess.TimeoutExpired:
+        return {"ok": False, "error": "reproducibility_check.py超過5分鐘未完成"}
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"{type(e).__name__}: {e}"}
+
+
 def main() -> int:
     now = datetime.now(TZ)
     results = [run_check(label, code) for label, code in CHECKS]
@@ -156,6 +207,28 @@ def main() -> int:
                 "由check_external_connectivity.py轉成local_task_health告警。",
     }
 
+    queue_sync = check_queue_depth_sync()
+    doc["queue_depth_sync"] = {
+        "checked_at": now.isoformat(),
+        "ok": queue_sync["ok"],
+        "detail": queue_sync,
+        "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_"
+                "PROMPT.txt跟research/queue_depth_config.py（單一事實來源）"
+                "仍然一致，避免重演2026-09-19門檻更正只同步部分位置、"
+                "連續5輪沒觸發補件規則的問題。",
+    }
+
+    repro = run_reproducibility_check()
+    doc["reproducibility_check"] = {
+        "checked_at": now.isoformat(),
+        "ok": repro.get("ok", False),
+        "detail": repro,
+        "note": "2026-09-20【Q4前視與#23無法重現】二.3：批次確認"
+                "TRIALS_LEDGER.md登記過結果的腳本現在還能不能import，"
+                "是#23（piotroski_fscore_sanity.py自2026-09-03起dangling "
+                "import從未被發現）的根本預防。",
+    }
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -166,6 +239,13 @@ def main() -> int:
     if domain_scan["unguarded_count"]:
         print(f"::warning::合規.三發現 {domain_scan['unguarded_count']} 處硬寫黑名單網域"
               f"且未import net_guard，見 data/audit_report.json domain_blocklist_scan 欄位")
+    if not queue_sync["ok"]:
+        print(f"::warning::佇列深度門檻設定不同步，見 data/audit_report.json "
+              f"queue_depth_sync 欄位：{queue_sync}")
+    if not repro.get("ok", False):
+        print(f"::warning::reproducibility_check發現無法import的已登記腳本，"
+              f"見 data/audit_report.json reproducibility_check 欄位："
+              f"{repro.get('broken') or repro.get('error')}")
     return 0  # 自檢本身不擋住 workflow——就算真的壞了，也要讓後面步驟照跑，
     # 該失敗的地方自然會失敗，這支只負責留下紀錄。
 
