@@ -3,6 +3,8 @@
 
 
 
+## 2026-09-20 15:10 — hypothesis_queue 交辦「稽核.六」(a)：實測factor_ic載入路徑記憶體 — 固定成本3.4GB＋邊際8~17MB/檔，外推300檔≈7.5~10GB>5GB，(b)重構觸發（描述性債務工作，無試驗登記、holdout未動）
+
 ## 2026-09-20 12:25 — hypothesis_queue 交辦「財報PIT.二」(a)：查證App scores.json/strategies.json對三個降級因子的暴露 — 無現行對外暴露，(b)(c)留待下輪
 
 交辦佇列`- [ ]`開工時8條（低於12門檻，本輪未補件：預算不足，留給下一輪，回報已標記）。本輪只做財報PIT.二(a)。GitHub連線失敗（Could not resolve host），git pull/push 可能失敗。工作樹有大量非本輪殘留變更，不納入commit。

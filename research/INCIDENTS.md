@@ -95,7 +95,7 @@ as_of/fwd兩個日期的值，不需要整檔股票的完整歷史常駐記憶�
 | 腳本 | 風險評估 | 處理狀態 |
 |---|---|---|
 | `research/atom_ic_map.py` | 已修復（本事件的主角） | ✅已修復並驗證 |
-| `research/factor_ic.py` | `load_sample_with_factors()`跟`atom_ic_map.py`原本的bug是**同一種資料結構**（`dict[str, pd.DataFrame]`存全部300檔股票的完整歷史），差別只在於欄位數（因子數）目前遠少於1592——**嘗試實測欄位數/記憶體量級但腳本執行超過測試逾時未跑完，尚未實證驗證，不能宣稱「低風險」是確定結論**，只是結構性類比推測 | 🟡風險未實證，`mem_guard.py`已回填當防禦性措施（見事件002），但這不等於已完成`PENDING_QUEUE.md`「稽核.六」要求的實際量測與風險分級 |
+| `research/factor_ic.py` | **2026-09-20 15:00 已實測（稽核.六(a)，`research/mem_probe_factor_ic.py`／`mem_probe_fixed_cost.py`／`mem_probe_trace.py`，結果 `mem_probe_factor_ic.json`）**：Python 啟動＋TAIEX 基準 1,701MB；**第一次 `prepare_factors()` 一次性 +3,402MB（固定成本，與檔數無關；tracemalloc 顯示為 pandas groupby/take 在大型 frame 上的配置，尚未定位到 `factors.py` 具體行）**；之後邊際成本約 8～17MB/檔（10→20檔 +155MB／9檔、20→30檔 +64MB／8檔，單檔步進 −143~+54MB 雜訊大）。**外推 300 檔 ≈ 1.7+3.4+(2.4~5.1)＝約 7.5~10GB private，超過 5GB 門檻→PENDING_QUEUE 稽核.六(b)觸發**。⚠️簡單線性外推（138MB/檔×300＝41GB）是錯的，因為忽略了固定成本，勿引用。限制：樣本僅 26 檔可用、資料走快取、邊際估計僅兩段區間，峰值可能更高 | 🔴**已實證超過5GB門檻**（非低風險）；`mem_guard.py`防禦性措施維持；(b)重構（不常駐全歷史、先定位3.4GB固定成本來源）待做 |
 | `research/core_tilt_backtest.py` | 同時處理多檔股票的完整歷史做投組回測，股票數上限通常是50~300檔，具體欄位數與記憶體量級同樣未實測 | 🟡風險未實證，同上，`mem_guard.py`已回填 |
 | `.github/scripts/fetch_*.py`系列 | 全市場單日快照型抓取（逐日/逐檔落盤parquet，不會把全部股票全部歷史一次性讀進記憶體） | 🟢低風險，既有設計本來就是流式處理 |
 
