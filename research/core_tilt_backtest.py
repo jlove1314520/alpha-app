@@ -76,6 +76,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 import numpy as np
 import pandas as pd
 
+import mem_guard  # 2026-09-20事件001後盤點：多檔股票x全歷史常駐記憶體的同類風險，量級尚未實測（見INCIDENTS.md/稽核.六），先掛安全閥防止真的失控
+mem_guard.install()
+
 import finmind_client as fc
 import portfolio_backtest_v2 as pb2
 from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, START_DATE, sample_universe_ids, load_sample_with_factors

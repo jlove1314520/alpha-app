@@ -6920,8 +6920,32 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
   超過5GB，比照`atom_ic_map.py`的修法（只保留計算實際需要的日期，
   不常駐全歷史）重構→(c)若外推結果在安全範圍內（<3GB），更新
   `INCIDENTS.md`風險評估從「未實證」改「已實證低風險」，附上實測
-  數字。[自走補入，來源：`research/INCIDENTS.md`事件001「已盤點的
-  高風險腳本清單」]
+  數字。**進度**：2026-09-20總司令裁示【記憶體事故記錄不精確...】
+  三.2後，`research/mem_guard.py`（真正的記憶體安全閥，非事件001原本
+  誤稱的一次性bash迴圈，見`INCIDENTS.md`更正記錄與`test_mem_guard.py`
+  驗收證據）已回填進`factor_ic.py`／`core_tilt_backtest.py`當防禦性
+  措施，但這只是「萬一真的超標會被攔下」，**不等於(a)(b)(c)分支要求
+  的實際量測與風險分級**，本項仍維持`- [ ]`未結案。[自走補入，來源：
+  `research/INCIDENTS.md`事件001「已盤點的高風險腳本清單」]
+- [ ] **稽核.七** [債務] `#23` Piotroski F-score可重現性查證（原子.四
+  建置PIT研究的副產品發現，非新交辦，見`STRATEGY_GRAVEYARD.md`
+  「Piotroski F-score」條目「⚠️2026-09-20重大可重現性疑慮」段落）——
+  `piotroski_fscore_sanity.py`（產出`TRIALS_LEDGER.md`#93）與
+  `piotroski_fscore_gate_v1.py`（產出#94最終FAIL判定）自2026-09-03
+  首次commit起就`import`一個`pit.py`從未定義過的`cash_flow_pit`函式
+  （已用`git log --all -S "def cash_flow_pit"`確認整個git歷史零命中），
+  實測兩支腳本皆無法被`import`（`ImportError`），**#93/#94這兩筆已
+  登記結果依現有程式碼完全無法重現**。已補上`cash_flow_pit()`定義
+  修好dangling import（`pit.py`，2026-09-20），但未回頭重跑驗證。
+  做X→分支：(a)總司令裁示值得重跑→用現在能跑的程式碼重新執行
+  `piotroski_fscore_sanity.py`＋`piotroski_fscore_gate_v1.py`，比對
+  新舊數字是否一致，一致→證實(a)類推測（環境問題非造假）、不一致→
+  #23需要重新走完整GATE_SEQUENCE而非沿用舊結論；(b)總司令裁示#23
+  優先序低不值得重跑→僅保留本記錄供稽核，`STRATEGY_GRAVEYARD.md`
+  的FAIL判定維持但附加「可重現性存疑」但書，不主動撤銷。**不得自行
+  裁量選邊**，這牽涉到既有已結案判定的信任度，屬於需要總司令裁示的
+  範疇。[自走補入，來源：`research/STRATEGY_GRAVEYARD.md`「Piotroski
+  F-score」條目本輪新增段落]
 
 - [ ] **財報PIT.一** [債務] 盤點`research/pit.py::quarterly_pit()`／`balance_sheet_pit()`
   的引用者（grep全repo：factors／portfolio／core_tilt／各回測腳本），列出哪些既有
@@ -7040,6 +7064,7 @@ Cybex.beta
 原子.五 [研究]
 分K.零 [研究]
 稽核.六
+稽核.七
 <!-- ORDER-END -->
 
 **2026-09-18（續5）清單重整說明**：舊清單65個去重項目裡，39個已確認

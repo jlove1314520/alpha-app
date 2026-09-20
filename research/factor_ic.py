@@ -31,6 +31,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
+import mem_guard  # 2026-09-20事件001後盤點：跟atom_ic_map.py原本的bug同一種資料結構風險（多檔股票x全歷史常駐記憶體），記憶體量級尚未實測（見INCIDENTS.md/稽核.六），先掛安全閥防止真的失控
+mem_guard.install()
+
 from adjust import adjusted_price_series
 from factors import prepare_factors, FACTOR_COLUMNS
 from finmind_client import load_dev

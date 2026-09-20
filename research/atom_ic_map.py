@@ -47,6 +47,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
 
+import mem_guard  # 2026-09-20事件001補正：真正的記憶體安全閥（belt-and-suspenders，主要防護已是本檔案自己的日期壓縮設計）
+mem_guard.install()
+
 import ATOM_LIBRARY as al
 import finmind_client as fc
 from factor_ic import (
@@ -138,6 +141,24 @@ def compute_all_expressions(atom_df: pd.DataFrame) -> dict[str, pd.Series]:
                     atom_values[stock_atom], atom_values[bench_atom], n)
 
     return out
+
+
+def is_degenerate_benchmark_only(expr_name: str) -> bool:
+    """2026-09-20總司令裁示【原子.二FAIL採信，轉財報原子家族；補佇列】
+    二新增：判斷一個表達式名稱是不是「純基準原子window/scalar轉換、
+    沒有結合任何個股原子」——這類表達式在cross-sectional橫斷面上對每
+    檔股票取值完全相同，Spearman IC結構性退化（詳見`ATOM_IC_MAP.md`
+    第3節，本輪實測3184個測試裡約860個屬於這類）。
+
+    **本函式不回頭套用在`compute_all_expressions()`本身**——原子.二
+    的3184個測試已經事前登記、執行、計入`selection_bias_ledger`的N，
+    回頭過濾等於竄改已登記的搜尋空間，不做。**這支函式是給未來新的
+    表達式產生器（例如原子.五財報版、或任何後續會用到基準原子的
+    搜尋空間）在生成階段就排除這類組合用的**，讓結構性退化的組合
+    根本不進事前登記的N，不是本檔案自己的產生邏輯要改。"""
+    if expr_name.startswith("ts_corr__"):
+        return False  # ts_corr(股票原子,基準原子,n)本身結合了個股原子，不退化
+    return any(f"__{b}" in expr_name or expr_name.endswith(b) for b in BENCH_ATOM_NAMES)
 
 
 def main():

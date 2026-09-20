@@ -1005,6 +1005,29 @@ F-score要發揮排雷效果或許需要套用在更寬廣的候選池（例如�
 
 完整數字見`TRIALS_LEDGER.md`#93/#94、`HYPOTHESIS_QUEUE.md`#23。
 
+**⚠️2026-09-20重大可重現性疑慮（原子.四建置的副產品發現，非原本任務
+範圍，意外查證出來）**：`piotroski_fscore_sanity.py`（產出上方#93
+SANITY_PASS數字的腳本）自2026-09-03首次commit起，頂層就有
+`from pit import balance_sheet_pit, cash_flow_pit, quarterly_pit`，
+但`pit.py`裡**從未定義過`cash_flow_pit`**（用`git log --all -S
+"def cash_flow_pit" -- research/pit.py`查整個git歷史，零命中）——
+實測`import piotroski_fscore_sanity`直接拋`ImportError`。
+`piotroski_fscore_gate_v1.py`（產出上方#94 FAIL數字的腳本）又
+`from piotroski_fscore_sanity import _fscore_components`，代表它
+**也一樣無法被import**。換句話說，**#93/#94這兩筆已登記的結果，
+依現有程式碼完全無法重現**——現有`pit.py`從來沒有這個函式，這兩支
+腳本理論上從2026-09-03起就不能執行。已補上`cash_flow_pit()`定義
+（2026-09-20，見`pit.py`該函式docstring，沿用既有`balance_sheet_pit`/
+`quarterly_pit`同一套「期末+45日」PIT假設），修好dangling import，
+但**沒有回頭重跑#23驗證**——這不在本次任務範圍內，且#23早已結案兩週
+以上、佇列已往前走到#24，貿然重跑可能得到不同數字但意義有限。**誠實
+記錄可能性，不下結論**：(a) 也許2026-09-03當時的執行環境裡`pit.py`
+真的有這個函式、後來某次commit意外遺漏了它（但整個git歷史檢查不到
+任何蛛絲馬跡）；(b) 也許#93/#94的數字本身未經真實執行產生。兩者都
+無法在事後補證，**已登記為`PENDING_QUEUE.md`「稽核.七」供總司令
+裁示是否值得重跑，本身不影響F-score排雷閘門這個假設現在的優先序
+（本專案目前主戰場已轉向財報原子家族，#23是2026-09-03的舊佇列項目）。
+
 ---
 
 ### 除權息季節行為效應（HYPOTHESIS_QUEUE.md#24，2026-09-03FAIL）

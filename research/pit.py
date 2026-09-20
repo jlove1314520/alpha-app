@@ -97,6 +97,41 @@ def balance_sheet_pit(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
     return wide
 
 
+def cash_flow_pit(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
+    """TaiwanStockCashFlowsStatement pivoted to one row per quarter, with the
+    same `pit_date`/`pit_source='assumed'` treatment as quarterly_pit()/
+    balance_sheet_pit() (period end + 45 days) -- the cash flow statement is
+    disclosed alongside the income statement and balance sheet in the same
+    quarterly filing, so the same lag assumption applies.
+
+    Added 2026-09-20 for `ATOM_LIBRARY.py`'s fundamental atom family
+    (原子.四，營運現金流原子). **This function was referenced but never
+    defined**: `piotroski_fscore_sanity.py` already imports
+    `from pit import balance_sheet_pit, cash_flow_pit, quarterly_pit` and
+    checks for `NetCashInflowFromOperatingActivities` /
+    `CashFlowsFromOperatingActivities` columns on its result, but the
+    function itself was missing from this module (confirmed: `factors.py`
+    line ~389 says "本專案沒有現金流量表資料源...從未抓取過", which was
+    the more accurate statement of the codebase's actual state until now).
+    Verified live: `TaiwanStockCashFlowsStatement` **does** return real data
+    via FinMind free tier (e.g. 2330 since 2018 has both column names
+    present), so this was a documentation/implementation gap, not a real
+    data-availability limitation. Adding this fixes both `piotroski_fscore_
+    sanity.py`'s dangling import and gives the fundamental atom family a
+    real 營運現金流 source.
+    """
+    raw = load_dev("TaiwanStockCashFlowsStatement", stock_id, start_date)
+    if raw.empty:
+        return pd.DataFrame()
+    wide = raw.pivot_table(index="date", columns="type", values="value", aggfunc="first").reset_index()
+    wide = wide.rename(columns={"date": "fiscal_period_end"})
+    wide["pit_date"] = (
+        pd.to_datetime(wide["fiscal_period_end"]) + pd.Timedelta(days=QUARTERLY_DISCLOSURE_LAG_DAYS)
+    ).dt.strftime("%Y-%m-%d")
+    wide["pit_source"] = "assumed"
+    return wide
+
+
 def any_assumed(df: pd.DataFrame) -> bool:
     """True if any row relies on an assumed (not real) disclosure date.
     A backtest that touches any assumed-PIT data must be reported as
