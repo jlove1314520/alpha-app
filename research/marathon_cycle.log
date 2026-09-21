@@ -4244,3 +4244,9 @@ quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉�
 quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/marathon相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
 
 quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/marathon相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達100%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Marathon cycle start: 2026-09-22 04:30:37 cycle_id=20260922-043037 =====
+quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0
+===== Marathon cycle end: 2026-09-22 04:32:03 cycle_id=20260922-043037 reason=OK cost_usd=0.6062023999999999 read_kb=74.7 turns=15 duration_min=1.4 =====
