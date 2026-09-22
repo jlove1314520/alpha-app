@@ -2301,3 +2301,15 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API呼叫（純讀既有快取/帳本檔案、`git log`/`git show`/`run_detached.py status`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：0件。
 - **下一輪**：`原子.六`規格第8節執行清單（89表達式×2horizon=178測試）全數完成並判定，TW軌可考慮盤點是否有其他SPEC遺留類似「已算完但漏commit」的孤兒產出；依輪替下一輪建議選US軌（US round599最舊）。
+
+## 第604輪 · 2026-09-23T00:3x+08:00 · TW：依round601建議精簡確認，無新可推進工作單位（第九次一致結論）
+
+- 取鎖乾淨（cycle`20260923-003037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中。
+- 依round601自己記錄的建議（「已連續8輪相同結論，往後不需要每輪重複做全面複核，可直接於開工簡報確認`- [ ]`=0後即記錄『與前次結論相同』並收工」），本輪改採精簡確認而非重新逐條掃描三個備援來源：
+  - `run_detached.py status`：running=0（150筆歷史），round603收成的Tier B全量job`20260922-223837-b449`仍是最新一筆`finished`，無新增背景工作。
+  - `git status --porcelain`：僅例行排程自動更新檔（`data/audit_report.json`／`research/*.log`／`research/*.jsonl`），無孤兒未commit產出（round603那種「hypothesis_queue自走漏commit」的情況本輪未重演）。
+  - `#50`（唯一未結案研究方向）tick累積`research/data/ticks/*.parquet`實測仍**12/20**（09-23當日盤中tick尚未finalize），較round600/601無變化。
+- **結論**：與round594~601連續八輪一致，TW/US/FUT三軌本輪仍無新可推進工作單位，本輪為第九次確認。未硬湊新項，符合白名單第7條精神。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（333列，本輪未新增判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有帳本/log檔案、`git status`、`run_detached.py status`、`ls research/data/ticks/`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：0件。
+- **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20，預計還需約8個交易日）與總司令對gate50三條件的回應；建議下一輪比照本輪做法，先確認`- [ ]`=0與tick累積數字，若無變化直接記錄「與前次結論相同」收工，不必逐條重新掃描三個備援來源（已連續9輪掃無新項）。

@@ -818,3 +818,46 @@ parquet/json）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇�
 `STRATEGY_GRAVEYARD.md`「原子.六（併入上櫃三大法人重測）」條目、
 `PENDING_QUEUE.md`「財報原子.補快取」條目。
 （第597輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+
+**最後更新：2026-09-22T20:3x+08:00（馬拉松第601輪）**——取鎖乾淨
+（cycle`20260922-203037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=0（`財報原子.補快取`／`籌碼原子.補上櫃三大
+法人歷史`皆已於第598輪後續跑完成並標`[x]`，`git log`確認`7d0c7975`
+「完成籌碼原子.補上櫃三大法人歷史回補（1718/1718工作日），修
+remaining欄位bug」），24條`- [!]`阻塞中。`run_detached.py status`
+確認running=0（147筆歷史）。**依輪替本應選TW**（TW round598=17:4x最舊，
+US round599=18:3x，FUT round600=19:3x），核實TW軌是否真有新工作單位：
+逐一複核`原子.一`~`原子.六`（含`五B`）在`PENDING_QUEUE.md`皆已標`[x]`
+結案（一PASS審閱通過、二~六與五B皆FAIL），`CALIBRATION_PROBE.md`的
+300檔重跑操作指令（#77/#79/#91/US#47/#52/FUT#34複驗）經`REPORT.md`
+第552輪等多輪確認「全數複驗完畢」、`factor_ic.py::SAMPLE_SIZE`現況
+確認仍為300。重跑`fin_atom_coverage.py`（背景執行，PYTHONIOENCODING
+問題已知，輸出亂碼不影響數字判讀）確認五項原子（total_assets 67.5%/
+equity 60.7%/inventory 63.7%/receivable 65.1%/ocf 65.0%）皆≥60%，與
+round598記錄一致，無新增覆蓋率變化。`#50`（唯一未結案方向）tick
+累積`data/ticks/`實測仍12/20（`20260916`~`20260922`，較FUT round600
+無變化，屬時間累積型阻塞非本輪可推進）。掃`STRATEGY_GRAVEYARD.md`
+「下一步/待辦」關鍵字，命中處皆為歷史結案條目內部的過程記錄（例如
+#52-US round454條目的「下一步（留給下一輪判斷）」已被round456的
+Item 5.02後續測試涵蓋），非未執行的活躍待辦。**結論：TW/US/FUT三軌
+本輪皆無新可推進工作單位，與round594~600連續七輪的一致結論相同**，
+本輪為新增的第八次獨立複核，維持不硬湊新項（避免違反誠實紀律）。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（332列，本輪未新增判定，純查證/確認性質工作）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案、`git log`、
+`run_detached.py status`、重跑本機`fin_atom_coverage.py`純讀parquet
+快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條
+未開始**（24條`- [!]`阻塞中）。等待審閱：0件。**下一輪任一軌接手**：
+`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20）與
+總司令對gate50三條件的回應；若總司令未給新裁示，往後每輪不需要重複
+做這種全面複核（已連續8輪相同結論），可直接於開工簡報確認`- [ ]`=0
+後即記錄「與前次結論相同」並收工，節省輪次成本；依輪替下一輪建議選
+US軌（US round599=18:3x）。完整見`REPORT.md`第601輪心跳、
+`MARATHON_STATE.md`（輪次計數器601）。
+
+---
+
+（第598輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+（第601輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
