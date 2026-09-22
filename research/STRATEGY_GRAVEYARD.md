@@ -3465,3 +3465,22 @@ IC沒有機會，本輪只測日K的cross-sectional排序型IC。**原子.三本
 未測SUE連續分數加權（非二元閾值）、未測券商財測共識調整版、未測搭配動能
 交叉訊號。地基工程（`event_driven_prototype.py`／`event_driven_gate_
 sequence.py`）保留，可重複執行供未來變體使用。
+
+## #76 美股VIX期限結構（VIX9D/VIX比值）當TAIEX regime降曝險訊號（2026-09-22結案）
+
+**死因**：第1關cheap gate，`vix_term_structure_gate.py`——訊號=VIX9D/VIX
+比值水位、目標=TAIEX後20交易日報酬、TRAIN(<=2020-12-31)/VAL(2020-12-31~
+2024-12-31)兩期Pearson+Spearman相關性+N=500洗牌null。**train/val正負號
+相反**：TRAIN r=-0.0146(p=0.4777，接近零、不顯著)，VAL r=+0.0849
+(p=0.0101，null percentile=98.4，表面顯著)。依三項判準之一「train/val
+同號」為必要條件，正負號相反直接判FAIL，不因VAL單期看似贏過洗牌null而
+放行——這正是#32美元兌台幣匯率、#75內部人淨額(價格版)同一種死法（train/
+val正負號相反）。附帶發現：VAL期的方向(+)恰與事前綁定方向(比值越高即
+倒掛越深→後續報酬應越低，即負相關)相反，兩個獨立理由都指向FAIL。#327。
+
+**不泛化成**：VIX期限結構訊號在台股完全無用——只測了VIX9D/VIX比值水位+
+M=20交易日單一窗口這個具體操作化；未測比值變動率（速度而非水位）、未測
+其他窗口（5/10/60日）、未測VIX絕對水位本身（不取比值）、未測搭配台股
+自身波動度（`regime_overlay.py`既有20日波動度窗）的交互作用。地基查證
+（`vix_term_structure_probe.py`，確認yfinance `^VIX9D`/`^VIX`起點皆早於
+TRAIN_END）保留，可重複執行供未來變體使用。

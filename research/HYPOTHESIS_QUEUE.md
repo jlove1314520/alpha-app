@@ -11681,7 +11681,7 @@ Form 4結構性缺席不因換來源而消失；DERA 2006~2008早期資料品質
 **判定：FAIL**（`register_trial()` #324，`failed_gates=["cheap_gate_precheck"]`）。已寫進`STRATEGY_GRAVEYARD.md`。
 **#75最終狀態**：全樣本（覆蓋不足，未判定）＋2018+子樣本（G0-a/b/c事前綁定門檻皆通過，但訊號本身第1關cheap IC gate未過）——**內部人買入淨額/買方家數當cross-sectional選股訊號，本佇列判FAIL，移出排隊佇列**。地基工程（`insider_dera_*.py`八支腳本、DERA下載/解析/價格補齊/悲觀填補）保留供未來若有新機制構想需要同一批資料時複用，不因訊號本身FAIL而刪除。
 **本輪`is_holdout_consumed()`=False、`trial_registry.py --check`通過（見下方commit前驗證）。**
-**佇列狀態：#1~75全數結案，佇列實質已空。**下一輪需設計新假設軸——依`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節指引，優先方向regime/擇時型（既有死亡假設共同模式：純選股型缺降曝險機制）。**[自行裁量·下一輪起點提案]**：候選方向#76＝美股VIX期限結構（VIX9D/VIX比值，或近月/次近月VIX期貨價差）當台股大盤regime降曝險訊號——經濟理由：VIX期限結構倒掛（近端>遠端）長期被文獻記錄為市場壓力/恐慌前兆，且此軸與本佇列已死的三大法人/融資/動能/籌碼類assets完全不同維度（美股波動率市場結構，非台股自身量價或籌碼），與#10既有regime overlay基礎設施（`regime_overlay.py`）互補而非重複；資料源待查證（CBOE VIX期限結構歷史、FRED、或yfinance `^VIX9D`/`^VIX`）。下一輪從資料源起點探測（七之三第10關）開始，不跳關。
+**佇列狀態：#1~75全數結案，佇列實質已空。**下一輪需設計新假設軸——依`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節指引，優先方向regime/擇時型（既有死亡假設共同模式：純選股型缺降曝險機制）。**[自行裁量·下一輪起點提案]**：候選方向#76＝美股VIX期限結構（VIX9D/VIX比值，或近月/次近月VIX期貨價差）當台股大盤regime降曝險訊號——經濟理由：VIX期限結構倒掛（近端>遠端）長期被文獻記錄為市場壓力/恐慌前兆，且此軸與本佇列已死的三大法人/融資/動能/籌碼類assets完全不同維度（美股波動率市場結構，非台股自身量價或籌碼），與#10既有regime overlay基礎設施（`regime_overlay.py`）互補而非重複；資料源待查證（CBOE VIX期限結構歷史、FRED、或yfinance `^VIX9D`/`^VIX`）。下一輪從資料源起點探測（七之三第10關）開始，不跳關。**~~#76~~已於2026-09-22 hypothesis_queue排程接續結案：FAIL**（第1關cheap gate，`vix_term_structure_gate.py`，train/val正負號相反+VAL方向與事前預期相反，見下方#76條目與`STRATEGY_GRAVEYARD.md`/`TRIALS_LEDGER.md`#327），移出排隊佇列。**佇列#1~76全數結案，佇列實質已空**，設計新假設軸#77（見下方新章節：美國高收益債利差(High-Yield Credit Spread)當TAIEX regime降曝險訊號），現在排隊第一，尚未開始第1關。
 
 ---
 
@@ -11738,3 +11738,66 @@ VIX期限結構是美股波動率市場自身結構），但驗證標準與快�
 (c) 第1關cheap gate：Spearman相關性+洗牌null percentile≥90門檻，
     事前綁定方向為負（比值越高→後續報酬越低），train/val須同號。
 
+
+**最終判定（2026-09-22 hypothesis_queue排程接續，已結案：FAIL）**：
+`vix_term_structure_gate.py`第1關cheap gate結果——TRAIN(<=2020-12-31,
+n=2366) Pearson r=-0.0146(p=0.4777，接近零不顯著)/null percentile=53.2；
+VAL(2020-12-31~2024-12-31,n=917) Pearson r=+0.0849(p=0.0101)/null
+percentile=98.4。**train/val正負號相反**（三項判準之一「同號」未過），
+且VAL期方向(+)與事前綁定方向（比值越高即倒掛越深→後續報酬應越低，即
+負相關）相反，兩個獨立理由皆指向FAIL，依「事前綁定，不事後移動門柱」
+判定，不因VAL單期表面贏過洗牌null而放行。完整數字見`TRIALS_LEDGER.md`
+#327、`STRATEGY_GRAVEYARD.md`#76條目、`vix_term_structure_gate.py`
+（可重複執行）、`data/vix_term_structure_aligned.csv`（新增）。
+`is_holdout_consumed()`開工/收工前皆確認`False`，全程零新增API呼叫
+（yfinance快取路徑）。**不泛化成「VIX期限結構訊號本身無用」**——只測了
+VIX9D/VIX比值水位+M=20交易日單一窗口，未測變動率/其他窗口/VIX絕對水位。
+**佇列#1~76全數結案，設計新假設軸#77（見下方），現在排隊第一。**
+
+---
+
+## #77 美國高收益債利差（High-Yield Credit Spread）當TAIEX regime降曝險訊號
+
+**經濟理由**：高收益債（junk bond）對公債的利差（option-adjusted
+spread, OAS）是信用市場（bond investors）對違約風險定價的直接量化，
+機制上跟本佇列已死的四個regime代理訊號——#31選擇權部位（衍生品市場）、
+#32台幣匯率（外匯/資金流）、#33公債殖利率曲線（利率預期）、#34銅金比
+（實體商品供需）、#76 VIX期限結構（股票市場隱含波動率）——**皆不相同**：
+信用利差反映的是「債權人對企業違約風險的集體判斷」，是股票市場（VIX）
+與利率市場（殖利率曲線）之外，第三種獨立的金融市場資訊來源。文獻上
+高收益利差走闊常先於股市下跌（信用市場對企業基本面惡化較敏感、常領先
+股權市場定價），2007-2008/2020-03兩次危機皆有利差先行走闊的實證。
+台灣為高度依賴外資與全球資金流動性的市場，全球信用市場緊縮（risk-off）
+時通常伴隨外資撤出新興/小型市場。
+
+**具體假設定義（事前綁定，看任何報酬前定死）**：
+- 訊號 = ICE BofA US High Yield Index Option-Adjusted Spread（FRED
+  series `BAMLH0A0HYM2`）水位本身（level，不用變動率——理由同#33利差
+  水位機制：利差水位代表當下違約風險定價的狀態，不是速度訊號）。
+- 事前綁定方向：利差走闊（違約風險定價升高）→ TAIEX後續報酬**負相關**。
+- 目標窗口M=20交易日（沿用本佇列regime類訊號一貫量級），目標=
+  TAIEX[t+M]/TAIEX[t]-1，訊號在t日已完全確定，無未來函數。
+- 判定標準：比照#19/#31/#32/#33/#34/#76同一套cheap gate三項判準（幅度
+  非零/train-val同號/VAL贏過洗牌null percentile>=90），Pearson為主、
+  Spearman為穩健性檢查，N_SHUFFLE=500。
+
+**已知相關背景（同類已死案例，同一把尺）**：本佇列已測過5個regime/
+timing類訊號全數FAIL（#31/#32/#33/#34/#76，死因分見上方各條目與
+`STRATEGY_GRAVEYARD.md`），死法涵蓋train/val正負號相反（#32/#76）、
+cheap gate過但overlay構造後續關卡未過（#31/#34）、cheap gate本身未過
+90門檻（#33）。信用利差在經濟機制上與前五者皆不同（見上方理由），但
+驗證標準與快殺門檻完全比照辦理，不因「訊號來源類別是第一次」而放寬
+任何一關。
+
+**資料源**：`C:\alpha\alpha-data\fred_key.txt.txt`既有金鑰（凍結區檔案，
+只讀不動），比照`fred_yield_curve_gate.py`（#33）已驗證過的FRED
+API呼叫模式，`BAMLH0A0HYM2`為FRED公開序列（無需額外申請），起點回溯
+至1996-12-31（遠早於TRAIN_END 2020-12-31），資料可行性極高但**下一輪
+仍須先實測確認**（七之三第10關：起點探測），不得跳過直接假設可行。
+
+**狀態**：尚未開始第1關，尚未做資料可行性查證。下一輪從資料源起點
+探測（FRED `BAMLH0A0HYM2`實際回應內容與涵蓋範圍）開始，通過後才進
+cheap gate，不跳關。
+
+2026-09-22 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程新增，佇列#77
+第一順位，本輪工作單位到此為止。
