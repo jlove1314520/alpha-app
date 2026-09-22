@@ -1,0 +1,28 @@
+{
+  "probed_at": "2026-09-22T10:52:16.843870+00:00",
+  "train_end_boundary": "2020-12-31",
+  "val_end_boundary": "2024-12-31",
+  "series": {
+    "HYG": {
+      "ticker": "HYG",
+      "ok": true,
+      "first_date": "2007-04-11",
+      "last_date": "2026-09-21",
+      "n_rows_total": 4893,
+      "n_rows_train_period": 3458,
+      "n_rows_val_period": 1005,
+      "starts_before_train_end": true
+    },
+    "IEF": {
+      "ticker": "IEF",
+      "ok": true,
+      "first_date": "2002-07-30",
+      "last_date": "2026-09-21",
+      "n_rows_total": 6075,
+      "n_rows_train_period": 4640,
+      "n_rows_val_period": 1005,
+      "starts_before_train_end": true
+    }
+  },
+  "gate7of10_verdict": "PASS_雙腿起點皆早於TRAIN_END可開發完整SPEC"
+}
