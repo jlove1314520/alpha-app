@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-22T08:17:13.900417+08:00",
+    "generated_at": "2026-09-22T22:03:42.572031+08:00",
     "source": "data/picks_ledger.json（實際回填紀錄，非重算回測）+ data/price_history.json（0050，TWSE STOCK_DAY_ALL）",
     "hold_window": "t5",
     "assumption_note": "等權重買進Top20、持有5個交易日、依序串接複利（非同時持有多批重疊部位的完整投資組合模型）、已扣成本（股票0.1425%×2手續費+0.3%證交稅、0050 ETF 0.1425%×2手續費+0.1%證交稅）",
