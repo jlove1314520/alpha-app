@@ -2313,3 +2313,17 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（333列，本輪未新增判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有帳本/log檔案、`git status`、`run_detached.py status`、`ls research/data/ticks/`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：0件。
 - **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20，預計還需約8個交易日）與總司令對gate50三條件的回應；建議下一輪比照本輪做法，先確認`- [ ]`=0與tick累積數字，若無變化直接記錄「與前次結論相同」收工，不必逐條重新掃描三個備援來源（已連續9輪掃無新項）。
+
+---
+## 第606輪 · 2026-09-23T02:3x+08:00 · US · 研究帽：交辦佇列已清空、US軌price-only因子路線已窮盡（round599既有結論），改做`CONCENTRATED_SPEC.md`第3節既有資料缺口——建S&P500 Total Return序列 · 無新試驗判定（純資料查證＋工具函式），N不變
+
+- 取鎖乾淨。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中，逐一核對可能解除的阻塞項（金流一.4／資料源一.3／#50等）皆未到解除時間點。
+- **佇列深度自檢**：`- [ ]`=0（<12下限），round599~605連續多輪已確認三個備援來源掃無新項，本輪不重複全面掃描，直接處理下方既有缺口。
+- 三軌時間戳：TW round605=09-23 01:3x（最新）／FUT round600=09-22 19:3x／US round599=09-22 18:3x（最舊）——依輪替選US。`run_detached.py status`：running=0（151筆歷史）。
+- **本輪工作單位**（`[自行裁量]`：US軌price-only因子已窮盡、新方向待總司令裁示，改做不需新方向裁示的地基工程）：新增`sp500_tr_series.py::load_sp500tr_full_history()`，解決`CONCENTRATED_SPEC.md`第3節記錄的S&P500 Total Return序列缺口（候選#1，Yahoo Finance `^SP500TR`）。
+- **查證結果**：沿用既有`yf_price_client.py::fetch_yf_index()`（零新增抓取邏輯），取得1990-01-02起完整歷史（裁至`VAL_END`後8816列，`close`欄位零缺值）。驗證：2003-06-30~2024-12-31同期比較，`^SP500TR`年化報酬10.87% vs 價格報酬指數`^GSPC`同期8.74%，缺口2.1個百分點/年，與S&P500歷史平均股利殖利率量級（約1.8~2.2%/年）吻合，確認`^SP500TR`確實是total return序列非價格指數誤標。回傳欄位（date/adj_close）與`load_0050_full_history()`相容。`holdout.assert_no_holdout_leakage()`已內建檢查，通過。
+- 更新`CONCENTRATED_SPEC.md`第3/11節反映缺口已解決，並明確註記「解決缺口≠核准推進美股集中版」：第4節參數掃描方式仍待總司令裁示（`AWAITING_REVIEW.md`），美股集中版是否推進本身也是需要總司令裁示的新方向判斷，本輪只是清除一個「就算核准了也做不了」的技術性障礙。
+- 純資料查證與工具函式新增，非統計判定，不觸發`register_trial()`。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（346列，本輪未新增判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（yfinance走既有快取機制，一次性抓取單一指數序列）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（規.二第4節參數掃描方式提案，round605延續，非本輪新增）。
+- **下一輪**：US軌新方向仍待總司令裁示，`sp500_tr_series.py`已就緒供未來美股集中版或其他需要S&P500 TR基準的工作直接複用；依輪替下一輪建議選FUT軌。
