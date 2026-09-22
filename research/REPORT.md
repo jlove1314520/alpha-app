@@ -2253,3 +2253,16 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（331列，最大編號#329，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩0條未開始；24條`- [!]`阻塞中。等待審閱：0件。
 - **下一輪**：round557交辦的候選池盤點至此完成；US軌price-only因子路線已窮盡，若無總司令新裁示則依輪替選FUT軌（TW/US本輪皆已碰過）；另提醒round598尚未把心跳補進本檔（TW軌下一輪接手時補）。
+
+## 第598輪（此行由第600輪補記，原始心跳已在`TW_MARATHON_STATE.md`）· 2026-09-22T17:4x+08:00 · TW · 收成round597投遞的`chip_atom_ic_map.py --tier A --tag _otc`job並判定 · **FAIL**（20日p=0.913、60日p=0.924，登記TRIALS_LEDGER#328），同輪續投財報原子.補快取b17/b18達成五項原子覆蓋率≥60%收尾
+- 完整內容見`TW_MARATHON_STATE.md`第598輪、`STRATEGY_GRAVEYARD.md`「原子.六（併入上櫃三大法人重測）」條目、`PENDING_QUEUE.md`「財報原子.補快取」條目（已標`[x]`結案）。
+
+## 第600輪 · 2026-09-22T19:3x+08:00 · FUT · 取鎖乾淨（cycle`20260922-193037`）· 交辦優先於自走：交辦佇列0條`- [ ]`，佇列深度自檢重掃三個備援來源未發現新項，另查證`原子.五B`「待Tier A回補擴大後另立新SPEC重測」條件——查證結果不成立（今日回補為資產負債表/現金流量表，Channel B Tier A僅用損益表科目，兩者不相交），維持FAIL不重跑 · FUT例外條款第四次複核，結論不變（無新機制候選），無新判定
+- 開工先讀`PENDING_QUEUE.md`：全文0條`- [ ]`（方法論重建三條、出場.零、宇宙.零皆`[x]`完成），24條`- [!]`阻塞中。`run_detached.py status`確認running=0，147筆歷史紀錄皆已收成，無待收成job。
+- **佇列深度自檢**：`- [ ]`=0（<12下限）。重掃三個備援來源：`HYPOTHESIS_QUEUE.md`「排隊中」僅命中3處（2處2026-09-04歷史敘述、1處#79屬hypothesis_queue自己的獨立佇列）；`TW_LEADS.md`/`US_LEADS.md`/`FUT_LEADS.md`/`STRATEGY_GRAVEYARD.md`「下一步/待辦」核對後與round592~599結論一致，未發現新可誠實排入項。
+- **額外查證（非補件，回應`原子.五B`SPEC第6節「待Tier A回補擴大後另立新SPEC重測」的懸置條件）**：`fin_atom_ic_map.py::tier_universe('A')`（第150~156行）只交集`TaiwanStockFinancialStatements`（損益表）快取，Channel B Tier A六原子（revenue/eps/gross_profit/op_income/net_income/shares）全為損益表科目；今日round598完成的`財報原子.補快取`回補對象是資產負債表/現金流量表（total_assets/equity/inventory/receivable/ocf），與Channel B Tier A無交集。損益表覆蓋率本就已97%+（`FIN_ATOM_COVERAGE.md`第1節），K=5深度瓶頸（37/45表達式缺2011窗）根因是`net_income`/`shares`定義自2013Q1才存在的時間深度限制，非股票數覆蓋問題。**結論：懸置條件未解鎖，維持FAIL，不重跑，不開新SPEC**。
+- **依輪替選FUT**（TW round598=17:4x／US round599=18:3x／FUT round562=09-19 14:10，FUT遠遠最舊）：核對`MARATHON_PROTOCOL.md`第3節機制清單全數至少測過一個變體（round399確認）、round484/520/562三次複核「無新機制候選」，本輪`git log`確認round562之後`fut_cheap_gate.py`/`fut_basis_series.py`/`continuous_contract.py`零新增commit；`HYPOTHESIS_QUEUE.md`#77/#78/#79屬hypothesis_queue獨立軌道，非本馬拉松FUT軌新機制。**FUT例外條款第四次複核，結論不變**。
+- `#50`（唯一未結案方向）tick累積`data/ticks/`實測12/20（`20260907`~`20260922`，較round520的4/20推進8個交易日），未達20且gate50三條件總司令尚未回應，依2026-09-15裁示不重複回報細節，維持`- [!]`被動等待。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，純查證/確認性質工作）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案與`git log`/`run_detached.py status`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（24條`- [!]`阻塞中）。等待審閱：0件。
+- **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20）與總司令對gate50三條件的回應；FUT例外條款已四次複核確認不成立，往後除非有真正跳脫`MARATHON_PROTOCOL.md`第3節清單的全新機制假說不需每輪重複複核；依輪替下一輪建議選TW軌。
