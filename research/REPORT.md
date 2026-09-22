@@ -2243,3 +2243,13 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪開工前執行exit=0 PASS（329列，本輪未新增判定，因結果尚未產出）。`is_holdout_consumed()`開工前確認`False`（Tier A只讀`VAL_END`以前快取）。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩0條未開始（`財報原子.補快取``- [!]`冷卻中，17:0x後解除）。等待審閱：0件。
 - **下一輪**：優先`run_detached.py status`確認`20260922-163454-eca1`是否`finished`；`finished`則讀`chip_atom_ic_map_result_A_otc.json`，跑`chip_atom_ic_map_aggregate.py`聚合，依`ATOM_CHIP_IC_MAP_SPEC.md`第7節判定規則判(a)/(b)並`register_trial()`登記新試驗（不沿用#317），更新`CHIP_ATOM_IC_MAP.md`與`TW_LEADS.md`；`timeout`則檢視是否需提高timeout或改用`fin_atom_ic_map.py`同款效能修法。`財報原子.補快取`17:0x後可續投b17。US/FUT依累積輪替下一輪建議選其中之一（本輪TW的偏離屬一次性，不改變既有輪替原則）。
+
+## 第599輪 · 2026-09-22T18:3x+08:00 · US · 取鎖乾淨（cycle`20260922-183037`）· 交辦優先於自走：完成round557交辦的US軌候選池盤點——找到`f_us_momentum_12m`中型股tier N=30版（#53 CHEAP_PASS）未深挖的遺漏，查證後確認N=90重跑（#207）已直接FAIL，不需要新的深挖工作，改為文件盤點結案（無新統計檢定，未新增`register_trial()`）
+- 開工先讀`PENDING_QUEUE.md`：0條`- [ ]`（方法.一~三/出場.零/宇宙.零皆`[x]`完成），24條`- [!]`。佇列深度自檢`- [ ]`=0<12下限，三個備援來源盤點後發現本輪工作單位本身即為round557遺留的既有交辦，優先完成，不另外硬湊補件。
+- 三軌時間戳：TW round598（17:4x，最新）／FUT round562（09-19）／US round559（09-19 11:17，最舊）——依輪替選US。
+- round559「下一步」（收成job`d4cf`→`build_stock_financials_history.py`→`find_gap_codes()`）已由市場日排程自動吸收（`data/stock_detail.json`現況`financials_updated_count`=844，`generated_at`=2026-09-22T08:13；`find_gap_codes()`實測剩8檔，與`PENDING_QUEUE.md`既有結論一致），非本輪待辦，不重複投遞。
+- **本輪真正工作單位**：逐列核對`US_LEADS.md`全表33列找round557要求的「CHEAP_PASS但下一步從未執行」遺漏，鎖定`f_us_momentum_12m`中型股tier N=30版（#8/#53）。查證發現同一批`us_factor_ic_by_size.py`已在round446的N=90重跑（`US_LEADS.md`#28、`TRIALS_LEDGER.md`#207，percentile 60.0）把這格一併測過並直接FAIL——這個換大樣本重跑本身已是比1b深挖更早、更省成本的否證，不需要再投入新的深挖工作量。逐一核對四個樣本規模組合（不分層#44、大型#48+#204、中型#53+#207、小型#58）全數FAIL；`f_us_value_bm`非乾淨宇宙版（#16）已由round350~425乾淨宇宙版FAIL結論涵蓋，非新遺漏。
+- 產出：`STRATEGY_GRAVEYARD.md`新增「f_us_momentum_12m」家族結案段落（引用既有#44/#48/#53/#58/#204/#207）；`US_LEADS.md`#8列追加結案註記。US軌price-only因子家族（低波動/動能/反轉）三者全數FAIL收斂，0 PASS/EXPERIMENTAL——不觸發`MARATHON_PROTOCOL.md`0a節提報門檻（0a節四條新方向#49~#52是不同清單，price-only屬更早已放棄的舊方向）。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（331列，最大編號#329，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩0條未開始；24條`- [!]`阻塞中。等待審閱：0件。
+- **下一輪**：round557交辦的候選池盤點至此完成；US軌price-only因子路線已窮盡，若無總司令新裁示則依輪替選FUT軌（TW/US本輪皆已碰過）；另提醒round598尚未把心跳補進本檔（TW軌下一輪接手時補）。

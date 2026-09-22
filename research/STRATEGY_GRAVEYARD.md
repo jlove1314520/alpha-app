@@ -138,6 +138,55 @@ tier/樣本規模組合已窮盡，正式結案，不再開新變體**。原始�
 `TRIALS_LEDGER.md`#206/#245，`US_LEADS.md`#28/#33，
 `deep_dive_f_us_low_vol_mid_tier_n90.py`。
 
+### f_us_momentum_12m（美股12-1動能，US軌，2026-09-22第599輪盤點結案，FAIL）
+
+- **哪一關死的**：cheap gate（GATE_SEQUENCE前置的1a便宜關卡，same_sign
+  同號檢查／null percentile門檻），四個樣本規模組合全數未進入1b深挖。
+- **背景**：round557已指出US軌候選池需回頭盤點「CHEAP_PASS但下一步從
+  未執行」的遺漏（同一輪揪出`f_us_low_vol`中型股N=90深挖遺漏、補做後
+  結案），本輪（第599輪）比照掃`US_LEADS.md`全表，發現這個因子家族雖
+  然中型股tier N=30版（`TRIALS_LEDGER.md`#53，`US_LEADS.md`#8）曾判
+  **CHEAP_PASS**、但從未被1b深挖，形式上跟`f_us_low_vol`中型股tier
+  遺漏同款。查證後確認**不需要再投入新的深挖工作**，因為同一個
+  cheap-gate換更大樣本（N=90）重跑後直接FAIL，已足以結案（見下）。
+- **具體數字（四個樣本規模組合）**：
+  - 不分層（27/40可用，`TRIALS_LEDGER.md`#44）：train mean_ic=−0.0129、
+    val mean_ic=+0.0613，same_sign未過（train負val正）→**FAIL**。
+  - 大型股tier：N=29版（#48）train正/val負、same_sign未過→**FAIL**；
+    N=90版（`CALIBRATION_PROBE.md`裁示複驗，#204，78/90可用）train/val
+    同號皆負但percentile僅73.5（門檻96.7）→**FAIL**。
+  - 中型股tier：N=30版（#53，26/30可用）train mean_ic=+0.0119、
+    val mean_ic=+0.0968，same_sign過、percentile=99.9→**CHEAP_PASS**
+    （待深挖，`US_LEADS.md`#8信心等級標「低」，因三次不同樣本版本
+    train/val方向組合互不相同，疑似小樣本雜訊）；**N=90重跑版**
+    （#207，81/90可用，`us_factor_ic_by_size.py`同一次執行的附帶
+    產出，非CALIBRATION_PROBE.md原始明列項目但依登記紀律入帳）
+    train/val同號皆正但percentile僅**60.0**（門檻96.7，遠未過）
+    →**FAIL**，`US_LEADS.md`#28已載明此結果並定性為「便宜關卡本身
+    FAIL」。
+  - 小型股tier：N=30版（#58，`US_LEADS.md`#11）train負/val正、
+    same_sign未過→**FAIL**（僅測過N=30，未再重跑N=90——原始判定
+    已是FAIL非CHEAP_PASS，依`CALIBRATION_PROBE.md`複驗規則不需要
+    像中型股tier那樣為了解決「未定」而重跑更大樣本）。
+- **死因分類**：中型股tier N=30的CHEAP_PASS被同一套方法論換更大樣本
+  重跑後直接推翻——**用小樣本cheap-gate結果本身不可靠**（同一因子
+  在27~30檔規模下四次測試出現三種不同的train/val正負號組合），而非
+  「深挖階段構造層發現隱藏風險」。跟`f_us_low_vol`（cheap gate通過、
+  但1b策略構造深挖才現形）死法不同層級：momentum連cheap gate本身
+  換大樣本就不穩，是**檢定力不足＋樣本雜訊主導**，不是構造層的隱藏
+  瑕疵。因此**不需要再投入1b深挖工作量**——用更大、雜訊更低的樣本
+  重測cheap gate本身已經是比1b深挖更早、更省成本的否證。
+- **這個死法能不能泛化**：不泛化到「12-1動能在美股無效」——
+  Jegadeesh-Titman動能異常是文獻中最穩健的美股異常之一，這裡否決的
+  只是「27~90檔隨機抽樣、未做regime控制、按市值tier分層」這個具體
+  構造組合在本專案免費資料源上測不出穩定訊號，跟`f_us_low_vol`/
+  `f_us_value_bm`（乾淨宇宙版）同款屬於「工具/樣本限制」而非「機制
+  被推翻」。
+- **原始記錄**：`TRIALS_LEDGER.md`#44/#48/#53/#58/#204/#207，
+  `US_LEADS.md`#2/#5/#8/#11/#27/#28，`us_factor_ic.py`／
+  `us_factor_ic_by_size.py`（皆可重複執行）。**因子家族全部
+  tier/樣本規模組合已窮盡，正式結案，不再開新變體**。
+
 ### f_us_value_bm／f_us_low_vol 乾淨宇宙版本（US軌，round382-425，
 9輪短腿診斷鏈整併結案，2026-09-07 FAIL）
 
