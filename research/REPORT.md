@@ -2266,3 +2266,14 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，純查證/確認性質工作）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案與`git log`/`run_detached.py status`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 交辦佇列還剩0條未開始（24條`- [!]`阻塞中）。等待審閱：0件。
 - **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20）與總司令對gate50三條件的回應；FUT例外條款已四次複核確認不成立，往後除非有真正跳脫`MARATHON_PROTOCOL.md`第3節清單的全新機制假說不需每輪重複複核；依輪替下一輪建議選TW軌。
+
+---
+## 第601輪 · 2026-09-22T20:3x+08:00 · TW · 交辦優先於自走：確認round598後續二項債務已完成，第八次獨立複核確認三軌無新工作單位 · 無新判定，N不變
+
+- 取鎖乾淨（cycle`20260922-203037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝0——`財報原子.補快取`／`籌碼原子.補上櫃三大法人歷史`皆已於round598之後（可能由DevQueue接手）續跑完成並標`[x]`，`git log`確認`7d0c7975`「完成籌碼原子.補上櫃三大法人歷史回補（1718/1718工作日），修remaining欄位bug」。24條`- [!]`阻塞中。`run_detached.py status`確認running=0（147筆歷史）。
+- **依輪替選TW**（TW round598=17:4x最舊／US round599=18:3x／FUT round600=19:3x）。核實TW軌是否真有新工作單位：逐一複核`原子.一`~`原子.六`（含五B）在`PENDING_QUEUE.md`皆已標`[x]`結案；重跑`fin_atom_coverage.py`確認五項財報原子（total_assets 67.5%/equity 60.7%/inventory 63.7%/receivable 65.1%/ocf 65.0%）皆≥60%，與round598記錄一致無新變化；`CALIBRATION_PROBE.md`300檔重跑操作指令（#77/#79/#91/US#47/#52/FUT#34）經多輪確認「全數複驗完畢」，`factor_ic.py::SAMPLE_SIZE`現況仍為300。
+- 掃`STRATEGY_GRAVEYARD.md`「下一步/待辦」關鍵字，命中處皆為歷史結案條目內部過程記錄（非活躍待辦）。`#50`（唯一未結案方向）tick累積`data/ticks/`實測仍12/20，與FUT round600無變化，屬時間累積型阻塞非本輪可推進。
+- **結論：TW/US/FUT三軌本輪皆無新可推進工作單位，與round594~600連續七輪一致結論相同**，本輪為第八次獨立複核，維持不硬湊新項。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，純查證/確認性質工作）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案、`git log`、`run_detached.py status`、重跑本機`fin_atom_coverage.py`純讀parquet快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（24條`- [!]`阻塞中）。等待審閱：0件。
+- **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20）與總司令對gate50三條件的回應；若無新裁示，往後每輪不需重複做全面複核（已連續8輪相同結論），可於開工簡報確認`- [ ]`=0後即記錄「與前次結論相同」收工，節省輪次成本；依輪替下一輪建議選US軌。

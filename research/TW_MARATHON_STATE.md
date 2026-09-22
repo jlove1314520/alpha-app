@@ -4,6 +4,46 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-22T20:3x+08:00（馬拉松第601輪）**——取鎖乾淨
+（cycle`20260922-203037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=0（`財報原子.補快取`／`籌碼原子.補上櫃三大
+法人歷史`皆已於第598輪後續跑完成並標`[x]`，`git log`確認`7d0c7975`
+「完成籌碼原子.補上櫃三大法人歷史回補（1718/1718工作日），修
+remaining欄位bug」），24條`- [!]`阻塞中。`run_detached.py status`
+確認running=0（147筆歷史）。**依輪替本應選TW**（TW round598=17:4x最舊，
+US round599=18:3x，FUT round600=19:3x），核實TW軌是否真有新工作單位：
+逐一複核`原子.一`~`原子.六`（含`五B`）在`PENDING_QUEUE.md`皆已標`[x]`
+結案（一PASS審閱通過、二~六與五B皆FAIL），`CALIBRATION_PROBE.md`的
+300檔重跑操作指令（#77/#79/#91/US#47/#52/FUT#34複驗）經`REPORT.md`
+第552輪等多輪確認「全數複驗完畢」、`factor_ic.py::SAMPLE_SIZE`現況
+確認仍為300。重跑`fin_atom_coverage.py`（背景執行，PYTHONIOENCODING
+問題已知，輸出亂碼不影響數字判讀）確認五項原子（total_assets 67.5%/
+equity 60.7%/inventory 63.7%/receivable 65.1%/ocf 65.0%）皆≥60%，與
+round598記錄一致，無新增覆蓋率變化。`#50`（唯一未結案方向）tick
+累積`data/ticks/`實測仍12/20（`20260916`~`20260922`，較FUT round600
+無變化，屬時間累積型阻塞非本輪可推進）。掃`STRATEGY_GRAVEYARD.md`
+「下一步/待辦」關鍵字，命中處皆為歷史結案條目內部的過程記錄（例如
+#52-US round454條目的「下一步（留給下一輪判斷）」已被round456的
+Item 5.02後續測試涵蓋），非未執行的活躍待辦。**結論：TW/US/FUT三軌
+本輪皆無新可推進工作單位，與round594~600連續七輪的一致結論相同**，
+本輪為新增的第八次獨立複核，維持不硬湊新項（避免違反誠實紀律）。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（332列，本輪未新增判定，純查證/確認性質工作）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案、`git log`、
+`run_detached.py status`、重跑本機`fin_atom_coverage.py`純讀parquet
+快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條
+未開始**（24條`- [!]`阻塞中）。等待審閱：0件。**下一輪任一軌接手**：
+`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20）與
+總司令對gate50三條件的回應；若總司令未給新裁示，往後每輪不需要重複
+做這種全面複核（已連續8輪相同結論），可直接於開工簡報確認`- [ ]`=0
+後即記錄「與前次結論相同」並收工，節省輪次成本；依輪替下一輪建議選
+US軌（US round599=18:3x）。完整見`REPORT.md`第601輪心跳、
+`MARATHON_STATE.md`（輪次計數器601）。
+
+---
+
 **最後更新：2026-09-22T17:4x+08:00（馬拉松第598輪，驗證帽）**——
 取鎖乾淨。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=0，
 只有`財報原子.補快取`等既有`- [!]`冷卻中（預計17:0x解除，見下方接續
@@ -104,40 +144,5 @@ is_holdout_consumed()`開工前確認`False`（Tier A全程只讀`VAL_END`以前
 
 ---
 
-**最後更新：2026-09-22T15:3x+08:00（馬拉松第596輪）**——
-取鎖乾淨（cycle`20260922-153036`）。開工先照「交辦優先於自走」讀
-`PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
-法人歷史`），皆持續回補中，`run_detached.py status`確認running=0。
-**先確認上一輪投遞的TPEx batch5**（job`20260922-144247-c12b`）`exit=0`
-（20.1min），log自報`cached_total=1711/range_workdays=1718/remaining=7`。
-**FinMind距上次請求（14:40:41）僅約51分鐘，未滿一小時安全間隔，本輪不
-投FinMind批次**，單工作槽留給TPEx：投batch6（`--batch-size 300`，
-job`20260922-153118-42df`）。**[自行裁量][發現並記錄一個debt bug，非
-本輪阻塞]** 投遞後腳本自己重算真實`pending`，開工行印出「已快取1711，
-待處理304」——跟上一輪log摘要`remaining=7`矛盾。查`backfill_tpex_
-3insti_history.py`第103~109行：那個`remaining`欄位算法是
-`len(all_dates)-len(have)`，`have`是**整個`DATA_DIR`目錄**的parquet檔
-數，不是「在`all_dates`範圍內」的檔案數；`pending`（實際決定下一批要抓
-哪些日期）才是正確的集合成員判斷。兩者用不同邏輯，導致log摘要的
-`remaining`虛低（可能是START從更早日期改成2018-06-01後，目錄裡混有
-範圍外的舊快取檔，虛增`have`分母）。**不影響回補正確性**（下一批仍是
-用`pending`算的，對），只是狀態文字誤導、容易讓人誤判「快補完了」。
-已投batch6處理304筆裡的300筆，依歷史耗時（300項約16~17min）超過本輪
-安全邊際，session內未等待完成，留給下一輪`run_detached.py status`收成；
-建議下一輪順手修`remaining`欄位算法（改成`len(pending)`或
-`len(all_dates)-len(have & set(all_dates))`），這是純debt不急，但要讓
-下一輪知道真實進度是約304筆待處理（這批做完後約剩4筆），不是舊訊息
-暗示的「只差7筆」。`trial_registry.py --check`（`PYTHONIOENCODING=
-utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。
-`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
-未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部
-API呼叫（僅投遞TPEx job，未實際發出FinMind請求）。
-`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
-（皆持續回補中，非新交辦）。等待審閱：0件。**下一輪**：先
-`run_detached.py status`確認`20260922-153118-42df`是否`finished`，讀
-真實`pending`（不要信舊的`remaining`欄位，等下一輪修過再信）決定是否
-需batch7；`財報原子.補快取`距14:40:41滿一小時（約15:41台北）後可續投
-b15/b16（優先覆蓋率離60%較遠者：equity/inventory/receivable/ocf）；
-順手修`backfill_tpex_3insti_history.py`的`remaining`欄位算法（低優先，
-純debt）。完整見`PENDING_QUEUE.md`籌碼原子.補上櫃三大法人歷史條目。
+（第596輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
 

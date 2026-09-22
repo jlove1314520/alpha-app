@@ -679,3 +679,42 @@ remaining決定是否需batch6；`財報原子.補快取`本小時額度已接�
 
 
 （第594輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+**最後更新：2026-09-22T15:3x+08:00（馬拉松第596輪）**——
+取鎖乾淨（cycle`20260922-153036`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
+法人歷史`），皆持續回補中，`run_detached.py status`確認running=0。
+**先確認上一輪投遞的TPEx batch5**（job`20260922-144247-c12b`）`exit=0`
+（20.1min），log自報`cached_total=1711/range_workdays=1718/remaining=7`。
+**FinMind距上次請求（14:40:41）僅約51分鐘，未滿一小時安全間隔，本輪不
+投FinMind批次**，單工作槽留給TPEx：投batch6（`--batch-size 300`，
+job`20260922-153118-42df`）。**[自行裁量][發現並記錄一個debt bug，非
+本輪阻塞]** 投遞後腳本自己重算真實`pending`，開工行印出「已快取1711，
+待處理304」——跟上一輪log摘要`remaining=7`矛盾。查`backfill_tpex_
+3insti_history.py`第103~109行：那個`remaining`欄位算法是
+`len(all_dates)-len(have)`，`have`是**整個`DATA_DIR`目錄**的parquet檔
+數，不是「在`all_dates`範圍內」的檔案數；`pending`（實際決定下一批要抓
+哪些日期）才是正確的集合成員判斷。兩者用不同邏輯，導致log摘要的
+`remaining`虛低（可能是START從更早日期改成2018-06-01後，目錄裡混有
+範圍外的舊快取檔，虛增`have`分母）。**不影響回補正確性**（下一批仍是
+用`pending`算的，對），只是狀態文字誤導、容易讓人誤判「快補完了」。
+已投batch6處理304筆裡的300筆，依歷史耗時（300項約16~17min）超過本輪
+安全邊際，session內未等待完成，留給下一輪`run_detached.py status`收成；
+建議下一輪順手修`remaining`欄位算法（改成`len(pending)`或
+`len(all_dates)-len(have & set(all_dates))`），這是純debt不急，但要讓
+下一輪知道真實進度是約304筆待處理（這批做完後約剩4筆），不是舊訊息
+暗示的「只差7筆」。`trial_registry.py --check`（`PYTHONIOENCODING=
+utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
+未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部
+API呼叫（僅投遞TPEx job，未實際發出FinMind請求）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（皆持續回補中，非新交辦）。等待審閱：0件。**下一輪**：先
+`run_detached.py status`確認`20260922-153118-42df`是否`finished`，讀
+真實`pending`（不要信舊的`remaining`欄位，等下一輪修過再信）決定是否
+需batch7；`財報原子.補快取`距14:40:41滿一小時（約15:41台北）後可續投
+b15/b16（優先覆蓋率離60%較遠者：equity/inventory/receivable/ocf）；
+順手修`backfill_tpex_3insti_history.py`的`remaining`欄位算法（低優先，
+純debt）。完整見`PENDING_QUEUE.md`籌碼原子.補上櫃三大法人歷史條目。
+
+
+（第596輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
