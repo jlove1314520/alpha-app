@@ -2289,3 +2289,15 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，Tier B結果尚未產出）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API呼叫（Tier B煙霧測試與全量job皆只讀本機既有快取，docstring明文「不發任何API請求」）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 交辦佇列還剩0條未開始（24條`- [!]`阻塞中，其中`籌碼原子.補借券快取`本輪已從BLOCKED轉為進行中並產出實質進展，非新增交辦）。等待審閱：0件。
 - **下一輪**：`run_detached.py status`確認`20260922-223837-b449`是否`finished`；`finished`則讀`chip_atom_ic_map_result_B.json`，依規格第7節「Tier B僅可作輔助」寫入`CHIP_ATOM_IC_MAP.md`補充章節、`register_trial()`另立登記（依規格第9節，不沿用#317），跑`trial_registry.py --check`與`selection_bias_ledger.py`；`timeout`/`failed`則查log原因並比照Tier A的`run_detached`參數調整重跑。依輪替下一輪建議選US軌（US round599=18:3x最舊）。
+
+## 第603輪 · 2026-09-22T23:5x+08:00 · TW · 維運帽：驗證並補commit hypothesis_queue自走軌次22:55已完成但漏commit的Tier B收尾工作 · 無新判定（沿用#331），N不變，補齊遺失風險
+
+- 取鎖乾淨（cycle`20260922-233037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中。`run_detached.py status`確認round602投遞的`chip_atom_ic_map.py --tier B`全量job`20260922-223837-b449`已`finished`（exit=0，11.1min）。
+- **發現**：`git status`顯示`CHIP_ATOM_IC_MAP.md`／`TRIALS_LEDGER.md`／`TRIALS_REGISTRY.jsonl`／`SELECTION_BIAS_LEDGER.md`／`PENDING_QUEUE.md`已被修改、`chip_atom_ic_map_result_B.json`／`chip_atom_ic_map_aggregate_B.json`為未追蹤新檔，但皆未commit。比對`git log`確認22:55有一次hypothesis_queue cycle（`48d29ad8`），其`git show --stat`只含`hypothesis_queue_cycle.log`/`quota_usage_daily.log`，證實該cycle的`claude -p`session完成了實質收尾工作（讀`chip_atom_ic_map_result_B.json`→依規格第7節判定→寫`CHIP_ATOM_IC_MAP.md`「Tier B 補充」章節→`register_trial()`登記`TRIALS_LEDGER.md`/`TRIALS_REGISTRY.jsonl`#331→`PENDING_QUEUE.md`該條目轉`[x]`→重跑`SELECTION_BIAS_LEDGER.md`），但**該session自己漏做收工序最後一步（commit+push）**，`run-hypothesis-queue-cycle.ps1`的`Commit-CycleLog`是刻意窄化pathspec的設計（2026-09-18修過commit不帶pathspec誤吃無關檔案的bug），不負責commit session的實質產出，兩者是不同層級的責任。
+- **本輪工作單位＝驗證正確性＋補commit，不重做計算**：核對判定依規格第7節分支(b)——20日Poisson-binomial p=0.0452、60日p=0.1111，皆未達p<0.01門檻；高階篩選通過0個，未超過樸素期望上界；兩horizon條件1、條件2皆不成立，FAIL，且明文遵守第7節第3款「Tier B僅可作輔助」不獨立判定、只作Tier A(#317/#328)已判FAIL的穩健性佐證。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（333列，最大編號#331，無強制期內未登記判定）。重跑`selection_bias_ledger.py`確認N=333與`SELECTION_BIAS_LEDGER.md`既有內容一致（分軌TW=143/US=66/FUT=48/未分軌=76），無需覆寫。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
+- 補`git add`兩個先前漏掉的產出檔（`chip_atom_ic_map_result_B.json`／`chip_atom_ic_map_aggregate_B.json`，比照既有`_A`/`_A_otc`慣例本應進版控）。
+- 更新`TW_MARATHON_STATE.md`（新增第603輪、歸檔第598輪至`TW_STATE_ARCHIVE.md`）、`MARATHON_STATE.md`輪次計數器（602→603）。
+- 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API呼叫（純讀既有快取/帳本檔案、`git log`/`git show`/`run_detached.py status`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：0件。
+- **下一輪**：`原子.六`規格第8節執行清單（89表達式×2horizon=178測試）全數完成並判定，TW軌可考慮盤點是否有其他SPEC遺留類似「已算完但漏commit」的孤兒產出；依輪替下一輪建議選US軌（US round599最舊）。

@@ -775,3 +775,46 @@ is_holdout_consumed()`開工前確認`False`（Tier A全程只讀`VAL_END`以前
 
 
 （第596輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+
+---
+
+**最後更新：2026-09-22T17:4x+08:00（馬拉松第598輪，驗證帽）**——
+取鎖乾淨。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=0，
+只有`財報原子.補快取`等既有`- [!]`冷卻中（預計17:0x解除，見下方接續
+處理）。**本輪工作單位＝收成上一輪（第597輪）投遞的`chip_atom_ic_map.py
+--tier A --tag _otc`job**（`20260922-163454-eca1`，`run_detached.py
+status`確認`finished`/`exit=0`/耗時25.4min，log顯示宇宙U392檔、表達式
+67、horizon20有183個snapshot／horizon60有61個，已存
+`chip_atom_ic_map_result_A_otc.json`）。**戴驗證帽**：
+1. 幫`chip_atom_ic_map_aggregate.py`加`--tag`參數（讀寫`_otc`後綴檔名，
+   不動預設無tag行為，原`chip_atom_ic_map_aggregate.json`/
+   `CHIP_ATOM_IC_MAP.md`/parquet全部未變動，已用`git status`核對）。
+2. 跑`python chip_atom_ic_map_aggregate.py --tag _otc`，輸出
+   `chip_atom_ic_map_aggregate_otc.json`/`CHIP_ATOM_IC_MAP_otc.md`。
+3. 依`ATOM_CHIP_IC_MAP_SPEC.md`第7節事前綁定判定：條件1（20日p=0.913、
+   60日p=0.924，皆遠高於0.01門檻）與條件2（高階篩選兩horizon皆通過0個，
+   未超過樸素期望上界）**皆不成立→分支(b)FAIL**。與#317（併入前，
+   20日p=0.913／60日p=0.986）幾乎相同，證明併入上櫃三大法人（T86族
+   有效覆蓋50.5%→87.8%）**沒有改變結論方向**，排除「#317是檢定力不足」
+   的疑慮。
+4. `register_trial()`登記為**新試驗#328**（不沿用#317編號，依規格第12節
+   要求），`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+   PASS（330列）；`selection_bias_ledger.py`重跑更新（N全體330，
+   分軌TW=142）。更新`STRATEGY_GRAVEYARD.md`新增條目（緊接#317之前）、
+   `ATOM_CHIP_IC_MAP_SPEC.md`第10節追記結案。**不寫入`TW_LEADS.md`**
+   （FAIL不進候選清單）。
+5. **佇列深度自檢**：`- [ ]`=0（低於門檻12），依既有規則本輪收工前需
+   補件——但`財報原子.補快取`距上次請求（16:11:46）已逾79分鐘，冷卻
+   早已解除，[自行裁量]優先轉回`- [ ]`續投b17/b18（單工作槽此刻空閒，
+   `run_detached.py status`確認running=0），比另外湊補件更符合「有債務
+   優先做債務」精神，佇列深度留給下一輪若仍<12再處理。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`；
+未動凍結區；零新增外部API呼叫（`chip_atom_ic_map_aggregate.py`只讀本機
+parquet/json）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列
+還剩0條未開始**。等待審閱：0件。**下一輪**：若本輪已續投
+`財報原子.補快取`b17/b18，下一輪先`run_detached.py status`收成並重跑
+`fin_atom_coverage.py`；否則17:0x後續投。US/FUT依累積輪替下一輪建議
+選其中之一。完整見`ATOM_CHIP_IC_MAP_SPEC.md`第10節、
+`STRATEGY_GRAVEYARD.md`「原子.六（併入上櫃三大法人重測）」條目、
+`PENDING_QUEUE.md`「財報原子.補快取」條目。
+（第597輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）

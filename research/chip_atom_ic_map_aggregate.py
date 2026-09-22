@@ -56,7 +56,8 @@ CRISIS_WINDOWS = [  # 來源：atom_ic_map.py::CRISIS_WINDOWS／REGIME_OVERLAY_P
     ("2022全年空頭", "2022-01-01", "2022-12-31"),
 ]
 FAMILY_OF = {"foreign": "T86", "trust": "T86", "dealer": "T86", "total": "T86",
-             "margin_bal": "融資融券", "short_bal": "融資融券", "margin_util": "融資融券", "short_margin": "融資融券"}
+             "margin_bal": "融資融券", "short_bal": "融資融券", "margin_util": "融資融券", "short_margin": "融資融券",
+             "sbl_sales": "借券賣出", "sbl_bal": "借券賣出", "sbl_short": "借券賣出"}  # Tier B（2026-09-22補）
 
 
 def family(expr: str) -> str:
@@ -116,8 +117,8 @@ def clusters(snap: pd.DataFrame, cols: list[str], thr: float = 0.7) -> dict[str,
     return {c: ids[r] for c, r in roots.items()}
 
 
-def aggregate_h(h: int, tag: str = "") -> dict | None:
-    p = HERE / f"chip_atom_ic_snapshots_A_h{h}{tag}.parquet"
+def aggregate_h(h: int, tag: str = "", tier: str = "A") -> dict | None:
+    p = HERE / f"chip_atom_ic_snapshots_{tier}_h{h}{tag}.parquet"
     if not p.exists():
         return None
     snap = pd.read_parquet(p)
@@ -217,19 +218,64 @@ def write_md(res: list[dict], meta: dict, tag: str = "") -> None:
     (HERE / f"CHIP_ATOM_IC_MAP{tag}.md").write_text("\n".join(L), encoding="utf-8")
 
 
+def append_md_tierB(res: list[dict], meta: dict) -> None:
+    """Tier B聚合結果append進既有CHIP_ATOM_IC_MAP.md（不覆蓋Tier A內容）。
+
+    規格第7節：Tier B「未達門檻記未檢驗，達門檻後僅可作輔助，不獨立判定pass/fail」——
+    本函式只列數字分布，PASS/FAIL判定與登記在驗證帽輪次的register_trial()呼叫端。
+    """
+    L = ["", "---", "", "## Tier B 補充（借券賣出餘額族，僅供輔助，不獨立判定pass/fail）", "",
+         "> 規格第7/9節：覆蓋率達U的60%後執行；判定規則—Tier B**不單獨判pass/fail**，"
+         "只能輔助Tier A（#317/#328）已判的FAIL結論是否穩健。",
+         f"> 入樣：宇宙U請求{meta.get('n_stocks_requested')}檔、可用{meta.get('n_stocks_used')}檔，"
+         f"其中有T86者{meta.get('n_with_t86')}檔（此欄位對Tier B無意義，沿用共用meta結構）；"
+         f"橫斷面<30檔跳過的snapshot：{meta.get('skipped_snapshots')}。", ""]
+    for r in res:
+        h = r["horizon"]
+        L += [f"### horizon={h}日（Tier B）", "",
+              f"- 有IC的snapshot：{r['n_snapshots_with_ic']}（TRAIN {r['n_train_snap']}／VAL {r['n_val_snap']}）；表達式{r['n_expr']}，"
+              f"有效（兩段n_snap>=8）{r['n_valid']}，樣本不足{r['n_insufficient']}",
+              f"- TRAIN IC四分位 {r['train_ic_quartiles']}；VAL IC四分位 {r['val_ic_quartiles']}；VAL IC為正占比 {r['val_positive_share']}",
+              f"- TRAIN/VAL同號：{r['tv_same_sign']}／{r['n_valid']}（公平硬幣期望約50%）",
+              f"- K分布與各K樸素基準（不混K）：{json.dumps(r['K_dist'], ensure_ascii=False)}",
+              f"- 條件1：K>=4有效{r['n_Kge4']}個，全窗同號{r['Kge4_all_same']}個，樸素期望{r['Kge4_naive_expected']:.2f}個，"
+              f"Poisson-binomial單尾p={r['poisson_binom_p_greater']}（門檻p<0.01）",
+              f"- 高階篩選通過{r['screen_pass']}個（樸素期望上界{r['screen_naive_expected_upper']:.2f}），通過者分成{r['screen_pass_clusters']}個獨立族",
+              f"- 全體有效表達式共線分群後**有效獨立表達式數＝{r['effective_independent_clusters_all_valid']}**（同號比例解讀以此為準）",
+              "", "| 族 | 有效數 | TRAIN/VAL同號 | K分布 | 篩選通過 |", "|---|---|---|---|---|"]
+        for f, v in r["by_family"].items():
+            L.append(f"| {f} | {v['n_valid']} | {v['tv_same']} | {json.dumps(v['K_dist'])} | {v['screen_pass']} |")
+        L += ["", "| 年 | snapshot數 | 有效表達式數 | 年平均IC為正占比 |", "|---|---|---|---|"]
+        for y, v in sorted(r["by_year"].items()):
+            ps_ = v["positive_share"]
+            L.append(f"| {y} | {v['n_snap']} | {v['n_expr']} | {ps_ if ps_ is None else round(ps_, 3)} |")
+        L.append("")
+    path = HERE / "CHIP_ATOM_IC_MAP.md"
+    existing = path.read_text(encoding="utf-8") if path.exists() else ""
+    if "## Tier B 補充" in existing:
+        raise RuntimeError("CHIP_ATOM_IC_MAP.md已含Tier B補充章節，避免重複append——如需重跑請先手動移除舊章節")
+    path.write_text(existing.rstrip("\n") + "\n" + "\n".join(L), encoding="utf-8")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="", help="讀/寫檔名後綴，對應chip_atom_ic_map.py同名參數，避免蓋掉原始結果")
+    ap.add_argument("--tier", choices=("A", "B"), default="A", help="Tier A聚合成獨立md；Tier B聚合結果append進既有CHIP_ATOM_IC_MAP.md補充章節（規格第7節：僅供輔助）")
     a = ap.parse_args()
-    res = [r for h in HORIZONS if (r := aggregate_h(h, a.tag))]
+    res = [r for h in HORIZONS if (r := aggregate_h(h, a.tag, a.tier))]
     meta = {}
-    mp = HERE / f"chip_atom_ic_map_result_A{a.tag}.json"
+    mp = HERE / f"chip_atom_ic_map_result_{a.tier}{a.tag}.json"
     if mp.exists():
         m = json.loads(mp.read_text(encoding="utf-8"))
         meta = {k: m.get(k) for k in ("n_stocks_requested", "n_stocks_used", "n_with_t86", "skipped_snapshots")}
-    (HERE / f"chip_atom_ic_map_aggregate{a.tag}.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
-    write_md(res, meta, a.tag)
-    print(f"已輸出 chip_atom_ic_map_aggregate{a.tag}.json＋CHIP_ATOM_IC_MAP{a.tag}.md（{len(res)}個horizon）")
+    out_json = HERE / f"chip_atom_ic_map_aggregate{'_B' if a.tier == 'B' else ''}{a.tag}.json"
+    out_json.write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
+    if a.tier == "B":
+        append_md_tierB(res, meta)
+        print(f"已輸出 {out_json.name}＋append進CHIP_ATOM_IC_MAP.md（{len(res)}個horizon）")
+    else:
+        write_md(res, meta, a.tag)
+        print(f"已輸出 {out_json.name}＋CHIP_ATOM_IC_MAP{a.tag}.md（{len(res)}個horizon）")
     return 0
 
 
