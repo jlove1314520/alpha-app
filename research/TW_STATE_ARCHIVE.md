@@ -599,3 +599,39 @@ exit=0 PASS（328列，最大編號#326，本輪新增2筆判定）。
 `TRIALS_LEDGER.md`#325/#326、`STRATEGY_GRAVEYARD.md`「事件驅動SUE訊號」
 段落、`TW_LEADS.md`#19。
 
+
+**最後更新：2026-09-22T13:3x+08:00（馬拉松第594輪）**——
+取鎖乾淨（cycle`20260922-133037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
+法人歷史`），皆持續回補中，`run_detached.py status`確認running=0（上一輪
+兩批FinMind job與TPEx batch3皆已收成完畢）。**佇列深度自檢**：`- [ ]`
+僅2項，低於`queue_depth_config.py`門檻12，依規則需自走補件到20項——
+`[自行裁量]`檢查`data/rate_limit_state.json`確認FinMind上次請求
+12:42:32，距本輪開工僅約48分鐘不到一小時安全間隔（既有慣例約需滿一小時
+才續投避免撞402），故本輪不投FinMind批次；掃描`TW_LEADS.md`/
+`STRATEGY_GRAVEYARD.md`「下一步」相關段落與`HYPOTHESIS_QUEUE.md`最新
+`#76`（VIX期限結構regime訊號，資料源起點探測已完成，下一步為cheap
+gate1）——`#76`屬`hypothesis_queue`自己的獨立自走軌道範圍（有自己的
+continuation prompt自動接續），不重複寫入`PENDING_QUEUE.md`造成雙軌
+競爭；`TW_LEADS.md`/`STRATEGY_GRAVEYARD.md`近期「下一步」條目（#19事件
+驅動SUE延伸變體/連續分數加權、#52-US 8-K放大樣本）皆屬「需先設計具體
+構造才能開跑」而非「可立即動手」的候選，與2026-09-19深讀二.3六項徹底
+搜尋後仍只找到9項（現已完成7項只剩2項）的結論一致，**本輪判斷維持
+現況2項、不硬湊新項**，理由記於此供下一輪覆核。**本輪工作單位＝續投
+`籌碼原子.補上櫃三大法人歷史`batch4**（單工作槽規則，FinMind未滿冷卻
+故單工作槽留給TPEx）：`run_detached.py submit --name tpex3insti_hist_b4
+--timeout-min 25 --cwd . -- python -u backfill_tpex_3insti_history.py
+--batch-size 300`（job`20260922-133117-9ffe`），依歷史批次耗時約
+16~17min＞本輪25分鐘硬超時安全邊際，session內未等待完成，留給下一輪
+`run_detached.py status`收成。`trial_registry.py --check`（`PYTHONIOENCODING=
+utf-8`）exit=0 PASS（328列，本輪未新增判定，純債務/維運性質工作）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
+未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API
+呼叫（本輪僅投遞TPEx job，未實際執行FinMind請求）。`PROGRESS_HEARTBEAT.jsonl`
+已append本輪一行。**交辦佇列還剩2條未開始**（皆持續回補中，非新交辦）。
+等待審閱：0件。**下一輪**：先`run_detached.py status`確認
+`20260922-133117-9ffe`是否`finished`，讀remaining決定是否需batch5；
+`財報原子.補快取`距12:42:32已逾一小時後可續投b13/b14（優先覆蓋率離60%
+較遠者，目前ocf/equity差距最大）；`STRATEGY_GRAVEYARD.md`「事件驅動」
+結案後，若總司令核准可評估`MARATHON_PROTOCOL.md`0a節四條方向是否已
+全數窮盡。完整見`PENDING_QUEUE.md`籌碼原子.補上櫃三大法人歷史條目。

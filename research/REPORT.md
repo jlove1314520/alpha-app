@@ -2233,3 +2233,13 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫（僅投遞TPEx job，未實際發出FinMind請求）。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩2條未開始（皆持續回補中，非新交辦）。等待審閱：0件。
 - **下一輪**：先確認`20260922-153118-42df`是否`finished`，讀真實`pending`（不要信舊的`remaining`欄位，等下一輪修過再信）決定是否需batch7；`財報原子.補快取`距14:40:41滿一小時（約15:41台北）後可續投b15/b16（優先equity/inventory/receivable/ocf）；順手修`backfill_tpex_3insti_history.py`的`remaining`欄位算法。
+
+## 第597輪 · 2026-09-22T16:30+08:00 · TW · 取鎖乾淨（cycle`20260922-163037`）
+- 開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=0（`籌碼原子.補上櫃三大法人歷史`已於15:5x hypothesis_queue軌完成；`財報原子.補快取`因本小時FinMind額度已用完標`- [!]`冷卻中，預計17:0x解除）。
+- **[自行裁量：偏離嚴格輪替]**：依輪替本應選US（round557/2026-09-19最舊）或FUT（round562/2026-09-19次之），但核對`US_MARATHON_STATE.md`／`FUT_MARATHON_STATE.md`：US `#49`/`#51`/`#52`已FAIL結案、`#50`因tick累積不足（12/20）+ gate50三條件總司令尚未回應維持阻塞；FUT例外條款複核確認不成立（round562）。兩軌皆連續多輪確認無新可推進工作單位——「久未碰」是因為「沒有新東西」，不是「被忽略」。同時發現TW軌剛完成的`籌碼原子.補上櫃三大法人歷史.收尾重評`（DevQueue cycle 20260922-160102）揭露一個具體、尚未執行的新研究工作單位：三大法人族（T86）宇宙覆蓋率因併入上櫃資料由50.5%→87.8%，`ATOM_CHIP_IC_MAP_SPEC.md`第12節明文「若要重新檢定三大法人族，屬於新一輪試驗，須另行`register_trial()`登記，不能沿用#317判定」且「是否重跑由研究帽輪次另行排入佇列」——判斷優先做這個而非重複記錄US/FUT空轉。
+- **本輪工作單位（戴研究帽）**：重跑`chip_atom_ic_map.py --tier A`（沿用原規格，宇宙/表達式/判定規則不變，差異只在`chip_atom_library.load_t86_by_stock()`已併入上櫃快取），用`--tag _otc`輸出避免蓋掉`#317`原始結果。
+- **[自行裁量，發現並記錄debt]**：`run_detached.py submit`的`--cwd`相對路徑解析陷阱（與`籌碼原子.補上櫃三大法人歷史`條目記錄過的同一種）本輪再踩一次——首次未帶`--cwd`解到`REPO_ROOT`找不到腳本（exit=2）；第二次`--cwd research`因bash當時cwd已在research/內解出雙重前綴（`NotADirectoryError`）；確認須用絕對路徑`--cwd "C:/alpha/alpha-app/research"`。過程中一個失敗submit產生孤兒watchdog條目（`20260922-163434-d862`），已用`run_detached.py reap`清除。
+- 第三次submit成功（job`20260922-163454-eca1`，timeout 30分鐘），session內`wait --max-min 4`仍`STILL_RUNNING`（3分鐘時已印出「宇宙U：392檔；表達式=67（Tier A）」與兩個horizon的snapshot數，計算量與原始#317同量級），轉交下一輪收成。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪開工前執行exit=0 PASS（329列，本輪未新增判定，因結果尚未產出）。`is_holdout_consumed()`開工前確認`False`（Tier A只讀`VAL_END`以前快取）。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩0條未開始（`財報原子.補快取``- [!]`冷卻中，17:0x後解除）。等待審閱：0件。
+- **下一輪**：優先`run_detached.py status`確認`20260922-163454-eca1`是否`finished`；`finished`則讀`chip_atom_ic_map_result_A_otc.json`，跑`chip_atom_ic_map_aggregate.py`聚合，依`ATOM_CHIP_IC_MAP_SPEC.md`第7節判定規則判(a)/(b)並`register_trial()`登記新試驗（不沿用#317），更新`CHIP_ATOM_IC_MAP.md`與`TW_LEADS.md`；`timeout`則檢視是否需提高timeout或改用`fin_atom_ic_map.py`同款效能修法。`財報原子.補快取`17:0x後可續投b17。US/FUT依累積輪替下一輪建議選其中之一（本輪TW的偏離屬一次性，不改變既有輪替原則）。

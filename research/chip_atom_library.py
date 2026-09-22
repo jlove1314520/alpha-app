@@ -40,6 +40,7 @@ from validation import holdout  # noqa: E402
 
 RAW = HERE / "data" / "raw"
 T86_DIR = HERE / "data" / "raw_twse_t86"
+TPEX_3INSTI_DIR = HERE / "data" / "raw_tpex_3insti"
 VAL_END = pd.Timestamp(holdout.VAL_END)
 
 FLOW_T86 = ["foreign", "trust", "dealer", "total"]          # Tier A流量原子
@@ -53,20 +54,27 @@ SMOOTH_WINDOWS = (5, 20, 60)
 # ---------------------------------------------------------------------------
 
 def load_t86_by_stock() -> dict[str, pd.DataFrame]:
-    """讀`raw_twse_t86`全部逐日檔，回傳{4位數代號: DataFrame(date, foreign, trust,
-    dealer, total)}，日期<=VAL_END。2010-01~2012-04為0列空殼、自然被略過。"""
+    """讀`raw_twse_t86`（上市，T86）＋`raw_tpex_3insti`（上櫃，2026-09-22併入，
+    見`籌碼原子.補上櫃三大法人歷史.收尾重評`）逐日檔，回傳{4位數代號:
+    DataFrame(date, foreign, trust, dealer, total)}，日期<=VAL_END。
+    T86 2010-01~2012-04為0列空殼、TPEx 2010-01~2018-07為0列空殼（官方
+    `dailyTrade`端點本身的歷史深度限制，實測2018-08-01起才有真實資料，見
+    `ATOM_CHIP_IC_MAP_SPEC.md`第32行），皆自然被略過。**兩來源欄位名/單位
+    (股)完全一致、股票代號實測零重疊**（上市/上櫃代號不重複配發），可直接
+    concat，不需要額外去重或欄位對應。"""
     parts = []
-    for f in sorted(T86_DIR.glob("T86_*.parquet")):
-        if f.stat().st_size < 1500:  # 空殼檔
-            continue
-        d = pd.read_parquet(f)
-        if d.empty:
-            continue
-        # 逐檔先濾4位數代號（2026-09-20 記憶體修正：整批concat 3,455檔含權證/ETF字串列，
-        # 瞬時峰值private commit實測6.5GB；逐檔先濾後語意不變、峰值大降）
-        d = d[d["stock_id"].astype(str).str.fullmatch(r"\d{4}")]
-        if not d.empty:
-            parts.append(d)
+    for src_dir, prefix in ((T86_DIR, "T86_*.parquet"), (TPEX_3INSTI_DIR, "TPEX3INSTI_*.parquet")):
+        for f in sorted(src_dir.glob(prefix)):
+            if f.stat().st_size < 1500:  # 空殼檔
+                continue
+            d = pd.read_parquet(f)
+            if d.empty:
+                continue
+            # 逐檔先濾4位數代號（2026-09-20 記憶體修正：整批concat 3,455檔含權證/ETF字串列，
+            # 瞬時峰值private commit實測6.5GB；逐檔先濾後語意不變、峰值大降）
+            d = d[d["stock_id"].astype(str).str.fullmatch(r"\d{4}")]
+            if not d.empty:
+                parts.append(d)
     t = pd.concat(parts, ignore_index=True)
     t["date"] = pd.to_datetime(t["date"])
     t = t[t["date"] <= VAL_END]
