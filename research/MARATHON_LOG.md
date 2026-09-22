@@ -1,6 +1,11 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 
+## 2026-09-23T06:53:00+08:00 — 承接上一輪陳舊鎖檔（60.2分鐘）留下的未commit工作：驗證並commit「#80狀態同步＋設計#81」，本輪未新增任何判定或資料存取
+
+開工前檢查PENDING_QUEUE.md：`- [ ]`=0（連續第三輪確認）、`- [!]`=23（逐條掃描無新解除條件）。`python marathon_lock.py acquire --name hypothesis_queue`回傳`LOCK_STALE(held by 151560, 60.2 min old)`——上一輪疑似中途失敗（對話budget見底），已recover取得鎖。`git status`發現工作目錄有未commit變更：`research/HYPOTHESIS_QUEUE.md`/`STRATEGY_GRAVEYARD.md`/`MARATHON_LOG.md`三處已寫好「#80狀態同步（TRIALS_LEDGER.md#345已於上一輪commit `b54d71d7`正式登記，本輪未重複登記）＋新設計假設#81（台灣景氣對策信號/國發會景氣燈號）」完整內容，只差commit——這是我自己這條track（非其他排程/workflow）上一輪的合法未竟工作，非殘留污染。逐字核對：`TRIALS_LEDGER.md`#345與`TRIALS_REGISTRY.jsonl` id=345確認皆已在上一輪commit（`git status`兩檔案clean），數字（TRAIN r=+0.1205 percentile=100.0；VAL r=+0.0516 percentile=88.2<90.0門檻，方向與事前綁定相反）與`HYPOTHESIS_QUEUE.md`/`STRATEGY_GRAVEYARD.md`未commit內容一致，無需修正。唯一修正：`MARATHON_LOG.md`心跳時間戳為未填完的佔位符`2026-09-23T05:0x`，本輪改用系統實際時間。同目錄下另有`data/audit_report.json`等9個檔案的未commit變更，經核對非本track所有（無hypothesis_queue相關內容，疑似本機其他排程／連線檢查腳本寫入），依協定「不觸碰、不納入commit」處理，僅commit本track擁有的三檔。`is_holdout_consumed()`開工/收工前皆確認`False`。交辦佇列還剩0條未開始（`PENDING_QUEUE.md`「`- [ ]`」項目數=0，低於`queue_depth_config.py`門檻12）。依規則本輪額外重掃三個備援來源找補件候選：`HYPOTHESIS_QUEUE.md`「排隊中」grep結果與2026-09-20~22連續多輪一致（僅2處2026-09-04歷史敘述，非新排隊項）；`LEADS.md`/`TW_LEADS.md`/`US_LEADS.md`/`FUT_LEADS.md`「下一步」逐一核對皆為2026-08月已結案輪次的流水帳（`portfolio_multifactor_v2`等，已被321次試驗/方法論重建取代）；`STRATEGY_GRAVEYARD.md`最新條目確認就是本輪剛commit的#80，無未進佇列的新「下一步」。**未硬湊數量，補不出東西**——與2026-09-20~22連續6輪（576/DevQueue023101/588/590/592/599）獨立得出同一結論，符合白名單第7條「佇列真的空了，補件規則也補不出東西」。
+
+
 ## 2026-09-23T03:53:49+08:00 — #80資料源起點探測：路徑1(DGBAS失業率)確認可行、路徑2(FRED)判不可行 — 未進cheap gate
 
 開工前檢查PENDING_QUEUE.md：`- [ ]`=0、`- [!]`=23（逐條掃描無新解除條件）。續做#80。路徑1實測`data.gov.tw`REST API取得DGBAS官方XML下載連結，下載成功、免認證，涵蓋1978M01~2026M08月度失業率，早於TRAIN_END且涵蓋2008/2020危機。路徑2(FRED)確認台灣分類下無現行月度失業率/就業序列（僅剩已停用的製造業指數）。因路徑1已可行，依SPEC規則未查路徑3。因原定義「就業人數」本輪未查得可程式化來源，已在HYPOTHESIS_QUEUE.md #80續1事前（未看任何報酬前）將操作性定義改為「失業率YoY變動（百分點差）」、方向反轉為負相關，其餘SPEC條款不變。本輪僅完成資料源探測，未跑cheap gate、未登記TRIALS_REGISTRY、未碰holdout（`is_holdout_consumed()`開工/收工前皆`False`）。交辦佇列還剩0條未開始。
