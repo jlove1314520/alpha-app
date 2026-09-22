@@ -861,3 +861,47 @@ US軌（US round599=18:3x）。完整見`REPORT.md`第601輪心跳、
 
 （第598輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
 （第601輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+
+---
+
+**最後更新：2026-09-22T22:42+08:00（馬拉松第602輪）**——取鎖乾淨
+（cycle`20260922-223037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=0，24條`- [!]`阻塞中。逐項檢查阻塞條件是否
+已解除：`run_detached.py status`確認`籌碼原子.補借券快取`b3
+（job`20260922-214041-d80a`，round601之後由某輪投遞）已`finished`
+（exit=0，8.6min），讀`backfill_sbl_cache_status.json`：`coverage_of_U`
+從0.4719升至**0.6939**（≥0.6門檻、≥236檔），依`ATOM_CHIP_IC_MAP_SPEC.md`
+第7/9節觸發Tier B（原文：「回補達U的60%（沿用原子.五覆蓋率門檻）才
+執行Tier B，另立試驗登記」）。**本輪工作單位＝解除`chip_atom_ic_map.py
+--tier B`硬擋並提交全量job**：原`main()`對`--tier B`恆印警告並
+`return 2`；改為動態讀覆蓋率狀態檔，≥0.6才放行。同時修正一個潛在bug：
+逐檔組frame時原本`cal.build_chip_frame(px, t86, cal.load_margin_frame(sid),
+None)`的sbl參數恆傳`None`（即使解除硬擋也算不出IC），改成tier B時呼叫
+`cal.load_sbl_frame(sid)`；`assert len(names) == 67`改依tier動態判斷
+（A=67／B=22）。**驗證**：先跑`--tier B --n 15 --tag _smoke`（0列——15檔
+小於`MIN_VALID=30`橫斷面門檻結構上不可能有IC，非bug），再跑
+`--tier B --n 60 --tag _smoke60`（44列有IC，horizon20跳過1個snapshot、
+horizon60跳過0個，峰值1890MB），確認正確後刪除煙霧測試輸出檔。
+**提交全量job**`20260922-223837-b449`（`--tier B`，392檔×22表達式，
+timeout 40分鐘），`wait --max-min 3`仍`STILL_RUNNING`（3分鐘時已印出
+T86逐股載入2011檔、進度50/392，量級與Tier A（25.4min完成）同型），
+轉交下一輪收成。`PENDING_QUEUE.md`「籌碼原子.補借券快取」條目與
+`chip_atom_ic_map.py`模組docstring已同步更新。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，Tier B
+結果尚未產出）。`validation/holdout.py::is_holdout_consumed()`開工/收工
+前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`
+凍結區，零新增外部API呼叫（煙霧測試與全量job皆只讀本機既有快取）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條未開始**
+（24條`- [!]`阻塞中）。等待審閱：0件。**下一輪**：`run_detached.py
+status`確認`20260922-223837-b449`是否`finished`；`finished`則讀
+`chip_atom_ic_map_result_B.json`，依規格第7節「Tier B僅可作輔助」寫入
+`CHIP_ATOM_IC_MAP.md`補充章節、`register_trial()`另立登記（依規格第9節，
+不沿用#317），跑`trial_registry.py --check`與`selection_bias_ledger.py`；
+`timeout`/`failed`則查log並比照Tier A的`run_detached`參數調整重跑。
+完整見`REPORT.md`第602輪心跳、`MARATHON_STATE.md`（輪次計數器602）、
+`ATOM_CHIP_IC_MAP_SPEC.md`第7/9節、`PENDING_QUEUE.md`「籌碼原子.補借券
+快取」條目。
+
+---
+
+（第602輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
