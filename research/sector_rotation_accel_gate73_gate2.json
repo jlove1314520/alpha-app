@@ -10,98 +10,98 @@
  "k_median": 6,
  "stock_coverage": {
   "universe_ids": 2014,
-  "yf_missing": 519,
-  "yf_missing_frac": 0.2577
+  "yf_missing": 489,
+  "yf_missing_frac": 0.2428
  },
  "TRAIN": {
   "months": 101,
-  "signal_mean_monthly_pct": 1.3983,
-  "control_median_pct": 1.1604,
-  "control_p95_pct": 1.3831,
-  "control_max_pct": 1.5128,
-  "diff_vs_median_pct": 0.2379,
-  "percentile": 96.0,
-  "signal_annualized_geo_pct": 16.86,
-  "control_median_annualized_geo_pct": 13.66
+  "signal_mean_monthly_pct": 1.4126,
+  "control_median_pct": 1.1654,
+  "control_p95_pct": 1.3861,
+  "control_max_pct": 1.5065,
+  "diff_vs_median_pct": 0.2472,
+  "percentile": 96.8,
+  "signal_annualized_geo_pct": 17.06,
+  "control_median_annualized_geo_pct": 13.77
  },
  "VAL": {
   "months": 47,
-  "signal_mean_monthly_pct": 1.3782,
-  "control_median_pct": 1.3238,
-  "control_p95_pct": 1.7015,
-  "control_max_pct": 2.0491,
-  "diff_vs_median_pct": 0.0544,
-  "percentile": 61.4,
-  "signal_annualized_geo_pct": 16.51,
-  "control_median_annualized_geo_pct": 15.72
+  "signal_mean_monthly_pct": 1.3884,
+  "control_median_pct": 1.3295,
+  "control_p95_pct": 1.706,
+  "control_max_pct": 2.074,
+  "diff_vs_median_pct": 0.0588,
+  "percentile": 61.6,
+  "signal_annualized_geo_pct": 16.62,
+  "control_median_annualized_geo_pct": 15.86
  },
  "FULL": {
   "months": 148,
-  "signal_mean_monthly_pct": 1.3919,
-  "control_median_pct": 1.2118,
-  "control_p95_pct": 1.3964,
-  "control_max_pct": 1.5343,
-  "diff_vs_median_pct": 0.1802,
-  "percentile": 94.8,
-  "signal_annualized_geo_pct": 16.75,
-  "control_median_annualized_geo_pct": 14.31
+  "signal_mean_monthly_pct": 1.4049,
+  "control_median_pct": 1.2198,
+  "control_p95_pct": 1.4018,
+  "control_max_pct": 1.551,
+  "diff_vs_median_pct": 0.1852,
+  "percentile": 95.2,
+  "signal_annualized_geo_pct": 16.92,
+  "control_median_annualized_geo_pct": 14.42
  },
  "signal_net_annualized_geo_pct_0.18折_參考": {
-  "TRAIN": 13.41,
-  "VAL": 12.99
+  "TRAIN": 13.61,
+  "VAL": 13.09
  },
  "by_year_geo_return": {
   "2012": {
-   "signal_pct": 10.08,
-   "control_median_pct": 7.23
+   "signal_pct": 10.27,
+   "control_median_pct": 7.45
   },
   "2013": {
-   "signal_pct": 35.39,
-   "control_median_pct": 30.86
+   "signal_pct": 35.28,
+   "control_median_pct": 31.09
   },
   "2014": {
-   "signal_pct": 16.69,
-   "control_median_pct": 9.02
+   "signal_pct": 16.76,
+   "control_median_pct": 9.13
   },
   "2015": {
-   "signal_pct": -4.97,
-   "control_median_pct": -6.32
+   "signal_pct": -3.94,
+   "control_median_pct": -5.98
   },
   "2016": {
-   "signal_pct": 13.35,
-   "control_median_pct": 13.51
+   "signal_pct": 13.57,
+   "control_median_pct": 13.67
   },
   "2017": {
-   "signal_pct": 20.31,
-   "control_median_pct": 24.35
+   "signal_pct": 19.94,
+   "control_median_pct": 24.04
   },
   "2018": {
-   "signal_pct": -5.35,
-   "control_median_pct": -6.65
+   "signal_pct": -5.07,
+   "control_median_pct": -6.89
   },
   "2019": {
-   "signal_pct": 23.37,
-   "control_median_pct": 21.62
+   "signal_pct": 22.99,
+   "control_median_pct": 21.35
   },
   "2020": {
-   "signal_pct": 40.98,
-   "control_median_pct": 26.64
+   "signal_pct": 41.47,
+   "control_median_pct": 26.98
   },
   "2021": {
-   "signal_pct": 34.1,
-   "control_median_pct": 28.75
+   "signal_pct": 34.46,
+   "control_median_pct": 28.8
   },
   "2022": {
-   "signal_pct": -2.88,
-   "control_median_pct": -6.26
+   "signal_pct": -3.47,
+   "control_median_pct": -6.27
   },
   "2023": {
-   "signal_pct": 27.56,
-   "control_median_pct": 29.29
+   "signal_pct": 28.12,
+   "control_median_pct": 29.65
   },
   "2024": {
-   "signal_pct": 9.53,
-   "control_median_pct": 12.75
+   "signal_pct": 9.8,
+   "control_median_pct": 12.83
   }
  },
  "years_signal_beats_control_median": 9,

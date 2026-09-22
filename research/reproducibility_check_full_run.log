@@ -1,0 +1,33 @@
+從TRIALS_LEDGER.md掃出180個候選腳本名稱，逐一檢查import...
+  20/180
+  40/180
+  60/180
+  80/180
+  100/180
+  120/180
+  140/180
+  160/180
+  180/180
+
+=== 結果摘要 ===
+OK: 174
+BLOCKED_BY_GUARD: 0
+FILE_NOT_FOUND: 5
+TIMEOUT: 0
+IMPORT_ERROR: 0
+OTHER_ERROR: 1
+
+⚠️ 需要修的項目（1個）：
+  deep_dive_f_us_low_vol_small_tier.py — OTHER_ERROR：AssertionError: this script is specifically the small-tier deep-dive; if TIER in us_factor_ic_by_size.py has been changed since, re-check before reusing
+
+=== 結果重現抽查（隨機抽10筆，實際重跑比對數字）===
+Traceback (most recent call last):
+  File "C:\alpha\alpha-app\research\reproducibility_check.py", line 271, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\alpha\alpha-app\research\reproducibility_check.py", line 246, in main
+    spot_check = sample_and_rerun(n=10)
+  File "C:\alpha\alpha-app\research\reproducibility_check.py", line 159, in sample_and_rerun
+    entry = {"trial_id": r.id, "module": module_name, "old_numbers_sample": old_numbers[:5]}
+                         ^^^^
+AttributeError: 'LedgerRow' object has no attribute 'id'. Did you mean: 'tid'?

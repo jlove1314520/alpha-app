@@ -102,11 +102,20 @@ def main() -> int:
             print(f"  進度 完成{done}（空表{empty}）", flush=True)
         time.sleep(SLEEP)
 
-    have2 = len(list(DATA_DIR.glob("TPEX3INSTI_*.parquet")))
+    have2 = {p.stem.replace("TPEX3INSTI_", "") for p in DATA_DIR.glob("TPEX3INSTI_*.parquet")}
+    remaining2 = len(all_dates) - len(set(all_dates) & have2)
+    # **2026-09-22修正bug**：舊版remaining=len(all_dates)-len(have2)，have2是
+    # DATA_DIR整個目錄的檔案總數（可能混有START=2018-06-01之前的殘留快取，
+    # 例如`backfill_tpex_3insti.py`近250天版本抓過的更早期檔案），會虛增
+    # 已快取數、讓remaining看起來比實際待處理數更小（PENDING_QUEUE.md
+    # 2026-09-22 15:31馬拉松第596輪記錄的已知debt，本次順手修正——只是
+    # 狀態文字誤導，不影響回補正確性本身，因為每批next批次一律用pending
+    # 這個正確集合算，不是用這個status欄位）。改為只算「範圍內、且真的
+    # 快取了」的交集，跟開頭列印的pending邏輯一致。
     st = {"ts": datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds"),
           "new_done": done, "new_empty": empty, "stopped": stopped,
-          "cached_total": have2, "range_workdays": len(all_dates),
-          "remaining": len(all_dates) - have2}
+          "cached_total": len(have2), "range_workdays": len(all_dates),
+          "remaining": remaining2}
     STATUS.write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(st, ensure_ascii=False), flush=True)
     return 0
