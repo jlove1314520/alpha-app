@@ -493,3 +493,31 @@
 公布日/E2月營收公布日先做，全走`tail_test()`，計入`TRIALS_REGISTRY`且
 標power_class。完整見`PENDING_QUEUE.md`方法.二條目、`TRIALS_LEDGER.md`#322。
 
+
+---
+**最後更新：2026-09-22T09:1x+08:00（馬拉松第591輪，互動視窗CC接手）**——
+開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=3，挑最舊未開始項
+`方法.三`（[研究]，事件驅動原型，前置條件方法.二已通過）。新建
+`research/event_driven_prototype.py`：E1財報公布(SUE)/E2月營收公布(SUE)，
+進場=公布日後第一個交易日，前瞻報酬t+1/t+5/t+20從進場價起算，**分組依
+事件當下SUE前10%（非事後報酬，跟方法.二PEAD校準的car3事後分組刻意不同）**，
+對照組=同季度/同產業/同市值五分位、非前10%個股，PIT對齊，全走
+`tail_test()`。300檔快取樣本，兩事件類型合計11秒+21秒建表（<5分鐘門檻，
+未用`run_detached.py`）。**結果**：E1事件6706筆(訊號n=671/對照n=1134)，
+t+20 median_diff=+0.0063、right_tail訊號組0.095>對照組0.066；E2事件20339
+筆(訊號n=2034/對照n=5924)，t+20 median_diff=+0.0039、right_tail訊號組
+0.075>對照組0.051——**兩事件類型t+20方向皆一致**，power_class兩者皆
+**VALID**(`DEGENERATE_N_FLOOR`=60門檻，min(n)遠高於門檻)。`register_
+trial()`登記`TRIALS_LEDGER.md`#323（verdict=EXPERIMENTAL——本檔案只做
+`tail_test()`方向性檢查，無隨機控制組排列檢定/train-val切分/成本敏感度，
+比cheap_gate_precheck更前一步，不宣稱PASS/FAIL，定位是原型）。
+`trial_registry.py --check`exit=0 PASS（325列）。補件盤點：`- [ ]`剩3項
+（新增`方法.三續.GATE_SEQUENCE驗證`[自走補入，來源本輪#323下一步]／
+出場.零／宇宙.零後兩者性質是「暫不做只登記」），三備援來源重掃與前四輪
+結論一致無新項可補，未硬湊。holdout未動、未碰凍結區、零新增外部API呼叫
+（全部讀本機既有快取）。**下一輪**：若總司令核准往下投入，`方法.三續.
+GATE_SEQUENCE驗證`——E1/E2的SUE訊號需走完整GATE_SEQUENCE（隨機控制組/
+train-val切分/成本敏感度/leave-one-out/逐年一致性）才能宣稱PASS/FAIL。
+完整見`PENDING_QUEUE.md`方法.三條目、`TRIALS_LEDGER.md`#323、
+`research/event_driven_prototype.py`（新增，可重複執行）。
+
