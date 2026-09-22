@@ -693,8 +693,14 @@ sequence.py`自己這4關的呼叫順序1~4）。實測現行程式碼：
   load_0050_full_history()`（天條一.1既有程式碼）**已經是這個函式**
   （FinMind手動還原權息，覆蓋2003-06-30起，已過holdout檢查），
   `concentrated_backtest.py`未來動筆時直接重用即可，**不需要另外
-  提案新建構工程**。S&P500 Total Return序列缺口依然未解決（維持
-  規.一.4列出的四個候選來源，本輪未新增查證）。
+  提案新建構工程**。S&P500 Total Return序列缺口**已解決（2026-09-23
+  馬拉松第606輪，US軌·研究帽）**：新增`research/sp500_tr_series.py::
+  load_sp500tr_full_history()`（沿用`yf_price_client.py::
+  fetch_yf_index()`既有基礎設施抓`^SP500TR`，1990-01-02起完整歷史，
+  已通過`holdout.assert_no_holdout_leakage()`），`CONCENTRATED_SPEC.md`
+  第3/11節已同步更新反映此缺口已解決。**至此0050與S&P500兩條基準
+  序列的地基工程皆已就緒**，但如`CONCENTRATED_SPEC.md`第3節所述，
+  解決缺口不等於核准推進——第4節參數掃描方式仍待總司令裁示。
   **[自行裁量]**：選股訊號本身依裁示原文「E1最終FAIL，規.二集中版
   框架目前沒有存活訊號可用」，本SPEC不指定訊號，留待新候選或總司令
   另行指定；框架驗證可先用隨機/市值加權佔位訊號，與訊號驗證分開推進

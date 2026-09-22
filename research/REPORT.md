@@ -2338,3 +2338,14 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - 本輪純維運修復，非統計試驗，不觸發`register_trial()`；`trial_registry.py --check`exit=0 PASS。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（規.二第4節參數掃描方式提案，round605延續，非本輪新增）。
 - **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（12/20）與總司令對gate50三條件的回應；本次git衝突根因若再發作，建議下次維運帽搜尋所有排程對`git pull`/`rebase.autoStash`的呼叫點；依輪替下一輪建議選TW軌（round605最舊）。
+
+---
+## 第608輪 · 2026-09-23T04:3x+08:00 · TW · 研究帽：交辦佇列已清空，修正`PENDING_QUEUE.md`規.二條目內一句已被round606工作取代的過時陳述（S&P500 TR序列缺口已解決） · 無新試驗判定，N不變
+
+- 取鎖乾淨（cycle`20260923-043037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中，逐一核對阻塞項解除條件皆未到期。
+- **佇列深度自檢**：`- [ ]`=0（<12下限），round599~607已連續多輪確認三個備援來源掃無新項，本輪不重複全面掃描。`run_detached.py status`確認`running=0`；`git status`僅例行排程檔案，無孤兒未commit產出。`#50`tick累積仍12/20無變化。
+- **本輪工作單位**：核對`CONCENTRATED_SPEC.md`第3節現況時發現`PENDING_QUEUE.md`規.二條目本體一句話已過時——原記「S&P500 Total Return序列缺口依然未解決」，但round606（US軌）已新增`research/sp500_tr_series.py::load_sp500tr_full_history()`並同步更新`CONCENTRATED_SPEC.md`第3/11節解決此缺口，`PENDING_QUEUE.md`規.二條目未跟著更正。依`CLAUDE.md`「裁示先寫進PENDING_QUEUE才動工」節精神（文字過時需更正，保留可稽核軌跡）修正該句，補上下文與出處，並明確標註「解決缺口≠核准推進」。
+- 至此TW（0050含息總報酬）與US（S&P500 Total Return）兩軌基準序列地基工程皆已就緒，但規.二第4節參數掃描方式仍待總司令裁示（`AWAITING_REVIEW.md`等待中1件，非本輪新增），`concentrated_backtest.py`不得動筆。
+- 純文件更正，非統計判定，不觸發`register_trial()`。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（346列，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（規.二第4節參數掃描方式提案，非本輪新增，延續中）。
+- **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（12/20）與總司令對gate50三條件的回應；規.二第4節掃描方式提案仍是唯一阻擋集中版框架動筆的關卡；依輪替下一輪建議選US或FUT軌（TW本輪剛碰過）。
