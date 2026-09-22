@@ -2,6 +2,8 @@
 
 
 
+## 2026-09-22T21:55 — hypothesis_queue排程接續（鎖檔陳舊回收，上一輪疑似失敗）：#79續1資料路徑查證(1)(2) — TWSE openapi其他端點`indicesReport/MI_5MINS_HIST`確認不可行（僅回最近15日TAIEX單一指數、無電子子指數、不支援歷史回溯）；yfinance候選ticker`^TWEI`/`^TWOII`/`^TWWEI`/`^TWSE`皆查無資料，`TWEI.TW`回傳1筆但身分未驗證不可採信；路徑(3)FinMind尚未查證，留給下一輪。未達三路徑皆不可行的判死門檻，未進第1關、未碰holdout；PENDING_QUEUE.md本輪掃描`- [ ]`=0（24項`- [!]`已逐條檢查，皆卡外部依賴/需總司令裁示，無可解除者）。
+
 ## 2026-09-22T19:52 — hypothesis_queue排程接續：#79（台股加權指數vs電子類指數相對強度）資料源起點探測第一步 — 實測`openapi.twse.com.tw/v1/exchangeReport/MI_INDEX`：確認TWSE已無單一「電子類指數」（2007年改制後拆為9個子產業指數），且此端點傳`date`參數無效、僅回今日快照、**無歷史序列**，原假設定義需修正；找到候選替代（臺灣資訊科技指數/自製市值加權合成/未含電子指數反推），三條歷史資料路徑（TWSE其他端點/yfinance/FinMind）尚未查證；未進第1關、未碰holdout；PENDING_QUEUE.md本輪掃描`- [ ]`=0，24項`- [!]`已檢查無新解除者。
 
 ## 2026-09-22T18:52 — hypothesis_queue排程接續：#78(HYG/IEF比值代理信用利差當regime訊號)資料可行性查證PASS(HYG起點2007-04-11/IEF起點2002-07-30皆早於TRAIN_END) + 第1關cheap gate跑完並登記 — FAIL(TRIALS#330，train/val正負號相反：TRAIN r=-0.1338/VAL r=+0.1580，VAL方向符合事前預期但TRAIN不符)，佇列#1~78全數結案，寫入STRATEGY_GRAVEYARD，設計新假設#79(台股加權指數vs電子類指數相對強度當類股輪動regime訊號，SPEC寫進HYPOTHESIS_QUEUE.md，尚未查證資料源)；holdout全程未碰（開工/收工前is_holdout_consumed()皆確認False）；PENDING_QUEUE.md本輪掃描無`- [ ]`未開始交辦項。
