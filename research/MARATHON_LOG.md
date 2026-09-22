@@ -2,6 +2,8 @@
 
 
 
+## 2026-09-22T09:55 — hypothesis_queue排程接續：#77美國高收益債利差(BAMLH0A0HYM2)資料可行性查證 — 判定FAIL（資料不可及，FRED免費層2026-04起僅剩3年歷史，train期0筆覆蓋，三方查證一致）；已設計新假設軸#78（同機制改用yfinance HYG/IEF ETF價格比值當備援資料路徑），尚未開始第1關。見`HYPOTHESIS_QUEUE.md` #77/#78、`TRIALS_LEDGER.md`#329、`STRATEGY_GRAVEYARD.md`。
+
 ## 2026-09-22 13:5x — hypothesis_queue排程接續：#76(VIX期限結構regime訊號)第1關cheap gate跑完並登記 — FAIL(TRIALS#327，train/val正負號相反+VAL方向與事前預期相反)，佇列#1~76全數結案，寫入STRATEGY_GRAVEYARD，設計新假設#77(美國高收益債利差當regime訊號，SPEC寫進HYPOTHESIS_QUEUE.md，尚未查證資料源)；開工前檢查PENDING_QUEUE.md兩條`- [ ]`項目皆屬AlphaMarathon軌單工作槽管理範圍，依協定各軌獨立不搶；holdout全程未碰
 
 ## 2026-09-22 12:52 — hypothesis_queue排程接續：#76(VIX期限結構regime訊號)資料源起點探測（七之三第10關） — VIX起點1990/VIX9D起點2011皆早於TRAIN_END(2020-12-31)，通過，SPEC寫進HYPOTHESIS_QUEUE.md；未做任何判定、未碰holdout；下一輪(a)下載序列(b)對齊台股報酬(c)第1關cheap gate

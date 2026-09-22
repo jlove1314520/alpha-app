@@ -3493,3 +3493,10 @@ M=20交易日單一窗口這個具體操作化；未測比值變動率（速度�
 自身波動度（`regime_overlay.py`既有20日波動度窗）的交互作用。地基查證
 （`vix_term_structure_probe.py`，確認yfinance `^VIX9D`/`^VIX`起點皆早於
 TRAIN_END）保留，可重複執行供未來變體使用。
+
+
+## #77 美國高收益債利差（BAMLH0A0HYM2）當TAIEX regime降曝險訊號（2026-09-22結案，資料不可及）
+
+**死因**：資料源歷史深度不足，非機制被推翻。FRED官方`BAMLH0A0HYM2`序列2026-04起僅分發近3年觀測值（`hy_credit_spread_probe.py`實測：2023-09-22~2026-09-18共785筆，TRAIN期(<=2020-12-31)0筆覆蓋），三方查證一致：(1)FRED官方序列頁notes明載3年限制且更早歷史僅ICE Data Indices付費可得；(2)用限制生效前的realtime vintage(2026-01-01)重查仍只回2023-09-22起，證實資料庫已回溯截斷；(3)WebSearch交叉比對第三方彙整頁一致。依快殺標準「資料不可及」判FAIL，未進cheap gate，見`TRIALS_LEDGER.md`#329。
+
+**不泛化成「高收益債利差機制對台股regime沒用」**——機制本身從未被測試，死的是目前免費官方通路的歷史深度。備援路徑（改用yfinance可得的HYG/IEF ETF價格比值代理同一機制）已設計為#78，待下一輪查證資料可行性。

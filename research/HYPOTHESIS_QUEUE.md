@@ -11738,7 +11738,6 @@ VIX期限結構是美股波動率市場自身結構），但驗證標準與快�
 (c) 第1關cheap gate：Spearman相關性+洗牌null percentile≥90門檻，
     事前綁定方向為負（比值越高→後續報酬越低），train/val須同號。
 
-
 **最終判定（2026-09-22 hypothesis_queue排程接續，已結案：FAIL）**：
 `vix_term_structure_gate.py`第1關cheap gate結果——TRAIN(<=2020-12-31,
 n=2366) Pearson r=-0.0146(p=0.4777，接近零不顯著)/null percentile=53.2；
@@ -11801,3 +11800,76 @@ cheap gate，不跳關。
 
 2026-09-22 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程新增，佇列#77
 第一順位，本輪工作單位到此為止。
+
+**最終判定（2026-09-22 hypothesis_queue排程接續，已結案：FAIL，資料不可及，
+未進cheap gate）**：`hy_credit_spread_probe.py`直查FRED官方
+`fred/series/observations`端點，`BAMLH0A0HYM2`目前僅回傳2023-09-22~
+2026-09-18（785筆），TRAIN期(<=2020-12-31)覆蓋0筆，遠晚於七之三第10關
+「起點須早於TRAIN_END」門檻。三方查證一致：(1)FRED官方序列頁
+notes明載「Starting in April 2026, this series will only include 3
+years of observations. For more data, go to the source.」；(2)用
+`realtime_start=realtime_end=2026-01-01`（限制生效前的vintage）重查
+仍只回2023-09-22起，證實資料庫本身已回溯截斷、非僅顯示層限制；(3)
+WebSearch交叉比對govspending.org/equibles.com等第三方彙整頁一致確認
+完整1996-12-31起始歷史已隨2026-04政策變更收回、僅ICE Data Indices付費
+管道可得。依快殺標準「資料不可及」判FAIL，未進cheap gate，見
+`TRIALS_LEDGER.md`#329。**不泛化成「高收益債利差機制對台股regime沒用」
+──機制本身從未被測試**，死的是目前免費官方通路的歷史深度不足；若
+未來要接續這個機制，備援路徑是改用yfinance可得的ETF價格比值
+（如HYG/IEF或HYG/LQD，市場可觀察真實成交價，非授權受限資料）當信用
+利差代理，這是下一步待查證方向，見下方#78。`is_holdout_consumed()`
+開工/收工前皆確認`False`，全程零觸碰holdout資料。完整見
+`hy_credit_spread_probe.py`（新增，可重複執行）、
+`hy_credit_spread_probe_result.json`（新增）。**佇列#1~77全數結案，
+設計新假設軸#78（見下方新章節），現在排隊第一。**
+
+---
+
+## #78 美國高收益債ETF/公債ETF價格比值（HYG/IEF）代理信用利差當TAIEX
+regime降曝險訊號
+
+**經濟理由**：跟#77同一個經濟機制（信用市場對違約風險的集體定價），但
+換一個資料觀察窗——`BAMLH0A0HYM2`（FRED，OAS學術口徑）於2026-04起
+免費歷史深度被截斷至僅3年（見#77最終判定），而`HYG`（iShares iBoxx
+高收益公司債ETF）與`IEF`（iShares 7-10年期公債ETF）皆為yfinance可得
+的真實市場成交價，非授權受限的衍生指數資料——這不是「同一個死掉機制
+換皮」，是完成一個**從未被真正測試（資料不可及、非機制被推翻）**的
+假設，改用備援資料路徑（呼應`CLAUDE.md`七、資料原則「任何拿不到的
+結論，須先證明試過三條路：主來源→備援→由已有欄位推導」，FRED是主
+來源已證實不可行，這裡走備援）。HYG/IEF價格比值走低代表高收益債相對
+公債顯著跑輸，市場隱含解讀為信用風險upside定價上升，機制方向與#77
+相同（利差走闊→比值走低→後續報酬應轉弱）。
+
+**具體假設定義（事前綁定，看任何報酬前定死）**：
+- 訊號 = HYG收盤價 / IEF收盤價（比值水位，不用變動率——理由同#77，
+  水位代表當下信用風險定價狀態，非速度訊號）。
+- 事前綁定方向：比值走低（高收益債相對走弱）→ TAIEX後續報酬**正相關**
+  （比值本身走勢方向與#77的利差水位方向相反，因為比值高=信用風險低，
+  跟利差水位高=信用風險高是反過來的量，故此處事前綁定為正相關，務必
+  在下一輪寫程式碼時對齊這個符號，不可與#77的方向搞混）。
+- 目標窗口M=20交易日（沿用本佇列regime類訊號一貫量級），目標=
+  TAIEX[t+M]/TAIEX[t]-1。
+- 判定標準：比照#19/#31/#32/#33/#34/#76/#77同一套cheap gate三項判準
+  （幅度非零/train-val同號/VAL贏過洗牌null percentile>=90），
+  Pearson為主、Spearman為穩健性檢查，N_SHUFFLE=500。
+
+**已知相關背景**：本佇列已測過6個regime/timing類訊號全數FAIL或資料
+不可及（#31/#32/#33/#34/#76機制FAIL，#77資料不可及），死法涵蓋
+train/val正負號相反（#32/#76）、cheap gate過但overlay構造後續關卡
+未過（#31/#34）、cheap gate本身未過90門檻（#33）、資料源歷史深度
+不足（#77）。本條經濟機制與#77完全相同（信用市場定價），刻意不算
+新機制類別，是資料層補課，驗證標準與快殺門檻完全比照辦理。
+
+**資料可行性**：待下一輪查證yfinance `HYG`（inception約2007-04-04）
+與`IEF`（inception約2002-07-30）兩者歷史起點是否早於TRAIN_END
+(2020-12-31)——預期HYG起點較晚仍應通過（2007-2020約13.7年TRAIN期，
+量級與#33/#76相近），但**下一輪仍須先實測確認，不得跳過直接假設
+可行**（七之三第10關）。
+
+**狀態**：尚未開始第1關，尚未做資料可行性查證。下一輪從資料源起點
+探測（yfinance `HYG`/`IEF`實際回應內容與涵蓋範圍）開始，通過後才進
+cheap gate，不跳關。
+
+2026-09-22 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程新增，佇列#78
+第一順位，本輪工作單位到此為止（budget考量，本輪不倉促壓縮成單輪
+探測+cheap gate一次做完）。
