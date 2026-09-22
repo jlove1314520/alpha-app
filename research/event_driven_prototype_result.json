@@ -1,0 +1,224 @@
+{
+  "E1_財報公布(SUE)": {
+    "n_signal": 671,
+    "n_control": 1134,
+    "n_events_total": 6706,
+    "n_buckets_hit": 547,
+    "n_buckets_total": 2866,
+    "power_class": "VALID",
+    "power_class_reason": "min(n_signal=671, n_control=1134) >= 60",
+    "by_horizon": {
+      "1": {
+        "n_signal": 671,
+        "n_control": 1134,
+        "n_signal_dates": 671,
+        "horizon": 1,
+        "n_bootstrap": 10000,
+        "insufficient_n": false,
+        "min_n": 10,
+        "median_signal": 0.0,
+        "median_control": 0.0022297580190424604,
+        "median_diff": -0.0016532718483270599,
+        "median_diff_ci90": [
+          -0.0028799446892906477,
+          0.0002256713965768098
+        ],
+        "p90_signal": 0.05321100630128961,
+        "p90_control": 0.043458044947949206,
+        "p90_diff": 0.008822671008507088,
+        "p90_diff_ci90": [
+          -0.003405021983742115,
+          0.0217746781744008
+        ],
+        "right_tail_share_signal": 0.0029806259314456036,
+        "right_tail_share_control": 0.0008818342151675485,
+        "left_tail_share_signal": 0.0,
+        "left_tail_share_control": 0.0,
+        "cost_pct_roundtrip": 0.003013,
+        "daytrade_assumed": true,
+        "commission_discount": 0.18,
+        "expected_value_signal_net": 0.005483612763167911,
+        "expected_value_control_net": 0.004918820693761455,
+        "expected_value_diff_net": 0.000564792069406456
+      },
+      "5": {
+        "n_signal": 671,
+        "n_control": 1134,
+        "n_signal_dates": 671,
+        "horizon": 5,
+        "n_bootstrap": 10000,
+        "insufficient_n": false,
+        "min_n": 10,
+        "median_signal": 0.007752057825419545,
+        "median_control": 0.006993348425459067,
+        "median_diff": 0.0013814225262450588,
+        "median_diff_ci90": [
+          -0.0024419428603177583,
+          0.005250651927924954
+        ],
+        "p90_signal": 0.09855067264799766,
+        "p90_control": 0.07843322908482636,
+        "p90_diff": 0.024633010899124338,
+        "p90_diff_ci90": [
+          0.0046054238193484745,
+          0.04520363121853754
+        ],
+        "right_tail_share_signal": 0.026825633383010434,
+        "right_tail_share_control": 0.013227513227513227,
+        "left_tail_share_signal": 0.0,
+        "left_tail_share_control": 0.003527336860670194,
+        "cost_pct_roundtrip": 0.004513,
+        "daytrade_assumed": false,
+        "commission_discount": 0.18,
+        "expected_value_signal_net": 0.016240277168697744,
+        "expected_value_control_net": 0.009093829128615515,
+        "expected_value_diff_net": 0.007146448040082229
+      },
+      "20": {
+        "n_signal": 671,
+        "n_control": 1134,
+        "n_signal_dates": 671,
+        "horizon": 20,
+        "n_bootstrap": 10000,
+        "insufficient_n": false,
+        "min_n": 10,
+        "median_signal": 0.012145609715688899,
+        "median_control": 0.006207004966286567,
+        "median_diff": 0.00631117070956203,
+        "median_diff_ci90": [
+          -0.0007685107721985274,
+          0.013893227046803514
+        ],
+        "p90_signal": 0.193661908434011,
+        "p90_control": 0.1551197135657252,
+        "p90_diff": 0.040703555123956556,
+        "p90_diff_ci90": [
+          0.014873653547101085,
+          0.07711113564026559
+        ],
+        "right_tail_share_signal": 0.09538002980625931,
+        "right_tail_share_control": 0.06613756613756613,
+        "left_tail_share_signal": 0.01639344262295082,
+        "left_tail_share_control": 0.018518518518518517,
+        "cost_pct_roundtrip": 0.004513,
+        "daytrade_assumed": false,
+        "commission_discount": 0.18,
+        "expected_value_signal_net": 0.03253789165572235,
+        "expected_value_control_net": 0.018334883606599767,
+        "expected_value_diff_net": 0.014203008049122584
+      }
+    },
+    "direction_summary": "t+20 median_diff=+0.0063>0 且 right_tail_share訊號組(0.095)>對照組(0.066)——方向與PEAD文獻假說一致"
+  },
+  "E2_月營收公布(SUE)": {
+    "n_signal": 2034,
+    "n_control": 5924,
+    "n_events_total": 20339,
+    "n_buckets_hit": 1225,
+    "n_buckets_total": 4008,
+    "power_class": "VALID",
+    "power_class_reason": "min(n_signal=2034, n_control=5924) >= 60",
+    "by_horizon": {
+      "1": {
+        "n_signal": 2034,
+        "n_control": 5924,
+        "n_signal_dates": 2034,
+        "horizon": 1,
+        "n_bootstrap": 10000,
+        "insufficient_n": false,
+        "min_n": 10,
+        "median_signal": 0.0,
+        "median_control": 0.0,
+        "median_diff": 2.5919567384635687e-06,
+        "median_diff_ci90": [
+          0.0,
+          0.0
+        ],
+        "p90_signal": 0.031180145159586326,
+        "p90_control": 0.023743721116164757,
+        "p90_diff": 0.007490446421126208,
+        "p90_diff_ci90": [
+          0.00464220341706238,
+          0.010849577610595143
+        ],
+        "right_tail_share_signal": 0.0,
+        "right_tail_share_control": 0.0,
+        "left_tail_share_signal": 0.0,
+        "left_tail_share_control": 0.00016880486158001352,
+        "cost_pct_roundtrip": 0.003013,
+        "daytrade_assumed": true,
+        "commission_discount": 0.18,
+        "expected_value_signal_net": -0.0026522013220169477,
+        "expected_value_control_net": -0.003902830000674668,
+        "expected_value_diff_net": 0.0012506286786577205
+      },
+      "5": {
+        "n_signal": 2034,
+        "n_control": 5924,
+        "n_signal_dates": 2034,
+        "horizon": 5,
+        "n_bootstrap": 10000,
+        "insufficient_n": false,
+        "min_n": 10,
+        "median_signal": 0.0034129806619822567,
+        "median_control": 0.0014524862630173052,
+        "median_diff": 0.0017315679362776982,
+        "median_diff_ci90": [
+          -0.0003757714498754394,
+          0.0037688436899192546
+        ],
+        "p90_signal": 0.0795455255035125,
+        "p90_control": 0.061226068827493686,
+        "p90_diff": 0.017998169474086383,
+        "p90_diff_ci90": [
+          0.010396555287444514,
+          0.024541576636524485
+        ],
+        "right_tail_share_signal": 0.011307767944936086,
+        "right_tail_share_control": 0.010634706279540851,
+        "left_tail_share_signal": 0.006391347099311701,
+        "left_tail_share_control": 0.0038825118163403104,
+        "cost_pct_roundtrip": 0.004513,
+        "daytrade_assumed": false,
+        "commission_discount": 0.18,
+        "expected_value_signal_net": 0.004548092519729938,
+        "expected_value_control_net": 0.0009298235483167086,
+        "expected_value_diff_net": 0.0036182689714132294
+      },
+      "20": {
+        "n_signal": 2034,
+        "n_control": 5924,
+        "n_signal_dates": 2034,
+        "horizon": 20,
+        "n_bootstrap": 10000,
+        "insufficient_n": false,
+        "min_n": 10,
+        "median_signal": 0.008354831870277968,
+        "median_control": 0.004352502556042026,
+        "median_diff": 0.003934701041040269,
+        "median_diff_ci90": [
+          0.00015924750944166247,
+          0.00744746734533419
+        ],
+        "p90_signal": 0.16905370871694464,
+        "p90_control": 0.13644216441952625,
+        "p90_diff": 0.031733295151274314,
+        "p90_diff_ci90": [
+          0.01822841025371445,
+          0.044897390333931655
+        ],
+        "right_tail_share_signal": 0.07472959685349066,
+        "right_tail_share_control": 0.05064145847400405,
+        "left_tail_share_signal": 0.015240904621435595,
+        "left_tail_share_control": 0.012660364618501013,
+        "cost_pct_roundtrip": 0.004513,
+        "daytrade_assumed": false,
+        "commission_discount": 0.18,
+        "expected_value_signal_net": 0.023096355442059454,
+        "expected_value_control_net": 0.013324175741909788,
+        "expected_value_diff_net": 0.009772179700149666
+      }
+    },
+    "direction_summary": "t+20 median_diff=+0.0039>0 且 right_tail_share訊號組(0.075)>對照組(0.051)——方向與PEAD文獻假說一致"
+  }
+}

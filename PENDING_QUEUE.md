@@ -271,12 +271,47 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
   既有快取）。**下一步（方法.三，前置條件已通過，可以開始）**：事件
   清單E1財報公布日/E2月營收公布日先做，全走`tail_test()`，計入
   `TRIALS_REGISTRY`且標power_class。
-- [ ] **方法.三** [研究] 事件驅動原型——前置：方法.二 PEAD校準通過。
-  E1財報公布日(`statutory_pit_date()`)/E2月營收公布日/E3除權息日/
-  E4法說會日期(若無合法來源跳過，不得爬)，先做E1/E2。每事件測
-  t+1/t+5/t+20，分組依事件當下意外程度(非事後報酬)，全走方法.二
-  `tail_test()`。計入TRIALS_REGISTRY且必須同時標power_class。
-  心跳＝新增TRIALS_LEDGER列且含power_class標註。
+- [x] **方法.三** [研究] 事件驅動原型——前置：方法.二 PEAD校準通過。
+  【✅完成2026-09-22，馬拉松第591輪互動視窗CC】新建`research/
+  event_driven_prototype.py`：E1財報公布(SUE，`factors.py::
+  _eps_surprise_sue`，pit_date=`statutory_quarterly_pit_date()`)/E2月營收
+  公布(SUE，`_revenue_surprise_sue`)，進場=公布日後第一個交易日，前瞻
+  報酬t+1/t+5/t+20從進場價起算，**分組依事件當下SUE(意外程度)前10%，
+  非事後報酬**（跟方法.二PEAD校準用car3事後分組刻意不同），對照組=
+  同季度/同產業/同市值五分位、非前10%個股，PIT對齊，全走`tail_test()`。
+  300檔快取樣本。**結果**：E1事件6706筆(訊號n=671/對照n=1134)，t+20
+  median_diff=+0.0063、right_tail訊號組0.095>對照組0.066；E2事件20339筆
+  (訊號n=2034/對照n=5924)，t+20 median_diff=+0.0039、right_tail訊號組
+  0.075>對照組0.051——**兩事件類型t+20方向皆一致**，與PEAD文獻假說同
+  方向。power_class兩者皆**VALID**（`trials_power_audit.DEGENERATE_N_
+  FLOOR`=60門檻，min(n)=671與2034皆遠高於門檻）。`register_trial()`登記
+  `TRIALS_LEDGER.md`#323（verdict=EXPERIMENTAL——本檔案只做`tail_test()`
+  方向性檢查，沒有隨機控制組排列檢定/train-val切分/成本敏感度掃描，
+  比cheap_gate_precheck更前一步，不宣稱PASS/FAIL，定位是「原型」，見
+  `event_driven_prototype.py`模組docstring）。`trial_registry.py --check`
+  exit=0 PASS（325列，最大編號#323）。holdout未動
+  （`is_holdout_consumed()`開工/收工前皆確認False）、未動凍結區、零新增
+  外部API呼叫（全部讀本機既有快取，11秒/21秒建表耗時，皆<5分鐘門檻，
+  未用`run_detached.py`）。E3(除權息)/E4(法說會，若無合法來源則跳過不得
+  爬)裁示原文本身即「先做E1/E2」，不在本輪範圍。**下一步（若總司令核准
+  往下投入）**：E1/E2的SUE訊號設計需走完整GATE_SEQUENCE（第1關sanity起，
+  含隨機控制組排列檢定/train-val樣本外切分/成本敏感度掃描/leave-one-out/
+  逐年一致性）才能宣稱PASS/FAIL，目前只是方向性一致的原型結果，不得
+  直接引用為交易候選證據。完整見`TRIALS_LEDGER.md`#323、
+  `research/event_driven_prototype.py`（新增，可重複執行）、
+  `research/event_driven_prototype_result.json`（新增）。
+- [ ] **方法.三續.GATE_SEQUENCE驗證** [研究] [自走補入，來源：`方法.三`
+  #323「下一步」欄位]：E1財報公布(SUE)/E2月營收公布(SUE)兩個事件驅動
+  原型皆在prototype層級方向一致（t+20 median_diff>0、右尾較胖），值得
+  往下投入完整GATE_SEQUENCE判定，但目前只是方向性檢查、不得引用為候選
+  證據。做X→用`event_driven_prototype.py`既有事件表（`build_event_table`）
+  補上：隨機控制組排列檢定(比照`control_group_standard.py::
+  evaluate_vs_control()`，非舊版90百分位門檻)、train/val樣本外切分(依
+  裁示原文三切50/25/25，本題只能碰train+val)、成本1x/2x/3x敏感度、
+  leave-one-out（單一時期/單一產業移除後結論是否還在）。→(a)全數通過
+  →登記CHEAP_PASS並進入下一關；(b)任一關FAIL→登記FAIL＋`failed_gates`，
+  寫進`STRATEGY_GRAVEYARD.md`，不得為了救活而放寬門檻。心跳＝新增
+  `TRIALS_LEDGER.md`列＋`PROGRESS_HEARTBEAT.jsonl`。
 - [ ] **出場.零** [研究] 登記缺口，暫不做只登記：321次試驗全測「買
   什麼」零次測「什麼時候賣」，天條一(MDD<50%)本質是出場問題。
 - [ ] **宇宙.零** [研究] 登記缺口，暫不做只登記：樣本池僅80~300檔，

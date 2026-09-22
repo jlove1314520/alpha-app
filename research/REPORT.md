@@ -9,6 +9,19 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第591輪 · 2026-09-22T09:1x+08:00 · 研究帽：方法.三——事件驅動原型(E1財報/E2月營收，分組依事件當下SUE) · 產出＝新工具＋TRIALS_LEDGER#323
+
+- 取鎖乾淨（cycle`20260922-093037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=3，挑最舊未開始交辦項`方法.三`（[研究]，前置條件`方法.二`已通過）。
+- 新建`research/event_driven_prototype.py`：E1財報公布(`factors.py::_eps_surprise_sue`，SUE)/E2月營收公布(`_revenue_surprise_sue`，SUE)，進場=公布日後第一個交易日，前瞻報酬t+1/t+5/t+20從進場價起算（跟方法.二不同——這裡沒有car3中繼窗口，訊號本身就是進場當下已知的SUE）。**分組依事件當下意外程度(SUE)前10%，非事後報酬**：對照組=同季度/同產業(`load_industry_map()`)/同市值五分位(`build_market_cap_lookup`)、非前10%個股，PIT對齊，重用`pead_calibration_gate.py::_mc_quantile_bucket`同一套bucket建構邏輯（不複製）。全走`tail_test()`。300檔快取樣本，直接執行（E1建表11秒、E2建表21秒，合計遠低於5分鐘門檻，未用`run_detached.py`）。
+- **結果**：E1事件6706筆（市值查無丟棄215筆），訊號組n=671/對照組n=1134（命中547/2866個bucket）。t+1 median_diff=-0.0017（90%CI含0）；t+5 median_diff=+0.0014；**t+20 median_diff=+0.0063(90%CI[-0.0008,+0.0139])，right_tail_share訊號組0.095>對照組0.066**，EV_net_diff(1.8折成本後)=+0.0142。E2事件20339筆（市值查無丟棄2029筆），訊號組n=2034/對照組n=5924（命中1225/4008個bucket）。t+1 median_diff≈0；t+5 median_diff=+0.0017；**t+20 median_diff=+0.0039(90%CI[+0.0002,+0.0074])，right_tail_share訊號組0.075>對照組0.051**，EV_net_diff=+0.0098。**兩事件類型t+20方向皆一致**（median_diff>0且右尾較胖），與PEAD文獻假說同方向。power_class兩者皆**VALID**（`trials_power_audit.DEGENERATE_N_FLOOR`=60門檻，min(n_signal,n_control)=671與2034皆遠高於門檻）。
+- 用`register_trial()`登記`TRIALS_LEDGER.md`#323（track=TW，verdict=EXPERIMENTAL——本檔案定位是「原型」：只做`tail_test()`方向性檢查，沒有隨機控制組排列檢定/train-val樣本外切分/成本敏感度掃描/leave-one-out，比`cheap_gate_precheck`更前一步，故不宣稱PASS/FAIL，notes明確標註不得直接引用為交易候選證據）。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（325列，最大編號#323）。
+- E3(除權息)/E4(法說會，若無合法來源則跳過不得爬)裁示原文本身即「先做E1/E2」，不在本輪範圍。
+- 未動凍結區、holdout未動（`is_holdout_consumed()`開工/收工前皆確認`False`）、零新增外部API呼叫（全部讀本機既有快取）。
+- 補件盤點：`- [ ]`原剩2項（`出場.零`／`宇宙.零`，皆「暫不做只登記」）低於12下限，補入`方法.三續.GATE_SEQUENCE驗證`[自走補入，來源本輪#323「下一步」欄位：E1/E2 SUE訊號原型方向一致，值得走完整GATE_SEQUENCE]；三備援來源重掃與近五輪結論一致（常備backlog空、`HYPOTHESIS_QUEUE.md`排隊項屬hypothesis_queue軌不搶），無其他新項可補，未硬湊。
+- 交辦佇列還剩3條`- [ ]`（僅`方法.三續.GATE_SEQUENCE驗證`真正可動手）。等待審閱：0件。
+- **下一輪**：若總司令核准往下投入，`方法.三續.GATE_SEQUENCE驗證`——E1/E2的SUE訊號需走完整GATE_SEQUENCE（隨機控制組排列檢定/train-val樣本外切分/成本敏感度/leave-one-out/逐年一致性）才能宣稱PASS/FAIL。
+
+---
 ## 第590輪 · 2026-09-22T08:5x+08:00 · 研究帽：方法.二——tail_test.py＋PEAD自我校準 · 產出＝新工具＋校準PASS＋TRIALS_LEDGER#322
 
 - 取鎖乾淨。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=4，挑最舊未開始交辦項`方法.二`（[研究]，總司令2026-09-22裁示【方法論重建】新增，`方法.三`事件驅動原型的前置條件）。
