@@ -68,6 +68,10 @@ from validation import holdout
 HORIZONS = (1, 5, 20)
 TOP_DECILE = 0.10
 MIN_PRICE_HISTORY = 260  # 跟pead_calibration_gate.py同一個門檻
+# 2026-09-23【方法.三續.E1重判 續.B】波動度配對控制組第4維：事件日前
+# 60交易日已實現波動度（PIT，視窗嚴格結束於entry_idx-1，不含事件當天，
+# 見`_stock_events()`裡`entry_idx - VOL_WINDOW : entry_idx`的切片）。
+VOL_WINDOW = 60
 
 # E3(除權息)/E4(法說會) 依裁示原文「先做E1/E2」不在本檔案範圍。
 EVENT_TYPES = {
@@ -117,9 +121,26 @@ def _stock_events(stock_id: str, surprise_fn, surprise_col: str) -> pd.DataFrame
         p0 = adj_close[entry_idx]
         if pd.isna(p0) or p0 <= 0:
             continue
+        # 續.B：事件日前VOL_WINDOW個交易日已實現波動度，視窗嚴格在entry_idx
+        # 之前（[entry_idx-VOL_WINDOW, entry_idx)，不含entry_idx本身這個
+        # PIT邊界——事件當天的價格反應不得洩漏進波動度估計）。
+        if entry_idx >= VOL_WINDOW:
+            window = np.asarray(adj_close[entry_idx - VOL_WINDOW: entry_idx], dtype=float)
+            # 實測發現少數視窗含0價（資料品質問題，非本函式要修的範圍），
+            # 觸發RuntimeWarning（0/0或x/0）；實測結果顯示最終`pre_event_vol`
+            # 沒有inf值漏出（原本`~np.isnan`的濾法剛好沒漏，因為本次資料
+            # 剛好都是0/0產生nan而非x/0產生inf），但`~np.isnan`理論上無法
+            # 攔住x/0產生的inf，改用`np.isfinite`同時濾nan與inf是更穩健的
+            # 防護，`np.errstate`只是關掉警告訊息本身。
+            with np.errstate(divide="ignore", invalid="ignore"):
+                rets = window[1:] / window[:-1] - 1.0
+            rets = rets[np.isfinite(rets)]
+            pre_event_vol = float(np.std(rets, ddof=1)) if len(rets) >= 2 else None
+        else:
+            pre_event_vol = None
         row = {
             "stock_id": stock_id, "pit_date": pit, "entry_date": dates[entry_idx],
-            "surprise": float(surprise),
+            "surprise": float(surprise), "pre_event_vol": pre_event_vol,
         }
         ok = True
         for h in HORIZONS:
@@ -160,8 +181,27 @@ def build_event_table(sample_ids: list[str], surprise_fn, surprise_col: str, ver
     events["bucket_key"] = (
         events["time_bucket"].astype(str) + "|" + events["industry"].astype(str) + "|" + events["mc_quantile"].astype(str)
     )
+    # 續.B：第4配對維度（波動度五分位）。只對`pre_event_vol`非NaN的列算
+    # `vol_quantile`／`bucket_key_vol`，NaN（entry_idx<VOL_WINDOW，事件前
+    # 歷史不足60個交易日）的列這兩欄留NaN，不強行分配一個假分位——4維
+    # 分析時再篩掉，3維（既有）分析完全不受影響（`bucket_key`欄不變）。
+    n_dropped_vol = int(events["pre_event_vol"].isna().sum())
+    has_vol = events["pre_event_vol"].notna()
+    events["vol_quantile"] = np.nan
+    if has_vol.sum() >= 5:
+        try:
+            events.loc[has_vol, "vol_quantile"] = pd.qcut(
+                events.loc[has_vol, "pre_event_vol"], 5, labels=False, duplicates="drop"
+            )
+        except ValueError:
+            events.loc[has_vol, "vol_quantile"] = 0
+    events["bucket_key_vol"] = None
+    events.loc[has_vol, "bucket_key_vol"] = (
+        events.loc[has_vol, "bucket_key"].astype(str) + "|" + events.loc[has_vol, "vol_quantile"].astype(str)
+    )
     if verbose:
-        print(f"事件建表完成：{len(events)}筆（市值查無丟棄{n_dropped_mc}筆、產業查無丟棄{n_dropped_industry}筆）")
+        print(f"事件建表完成：{len(events)}筆（市值查無丟棄{n_dropped_mc}筆、產業查無丟棄{n_dropped_industry}筆、"
+              f"波動度分位查無{n_dropped_vol}筆不影響3維分析）")
     return events
 
 

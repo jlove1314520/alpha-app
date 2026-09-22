@@ -483,27 +483,29 @@ sequence.py`自己這4關的呼叫順序1~4）。實測現行程式碼：
 語意編號值（改了反而會破壞跟全域vocab的正確對應）。若總司令認為判讀
 不同，回報後可再議。
 
-- [ ] **方法.三續.E1重判** [研究] 【優先序：續.A→續.B→續.C，見上方原文】
-  續.A：`gate_random_control`改同時輸出median_diff(對照)/p90_diff(登記
-  判準b)/right_tail_share_diff(登記判準c)，同一批重抽（500+500=1000，
-  不分開跑），判準改寫死為訊號值嚴格超過1000次重抽第999名（單尾
-  p<=0.001，比Bonferroni(α/36≈0.00139)更嚴），且(d)左尾不顯著惡化
-  （沿用同一批null抽樣算left_tail_share_diff的999名上界）、且(e)三情境
-  成本下EV皆為正（沿用既有`gate_cost_sensitivity`/`margin_of_safety.py`）。
-  (b)/(c)各登記1筆新TRIALS_LEDGER試驗（計2筆），僅重判E1，E2維持既有
-  #326 FAIL不重跑。做X→(b)或(c)過且(d)(e)過→E1改判CHEAP_PASS，更正
-  #325與`STRATEGY_GRAVEYARD.md`/`TW_LEADS.md`#19裡「E1/E2皆FAIL」的
-  合併敘述（拆開E1/E2，不得讓E1的更正被E2的FAIL稀釋掉），接續.B；
-  否則→E1維持FAIL，更新原因為新判準下的具體數字，結案，不進續.B。
-  續.B（僅當續.A過才做）：新增事件日前60交易日已實現波動度(PIT，不含
-  事件當天)第4配對維度(5分位)，3維vs4維p90_diff並列，訊號組/對照組
-  波動度中位數並列。4維下p90_diff崩掉≥50%→判「波動度效應非alpha」，
-  E1結案FAIL；仍維持→誠實回報「目前366次試驗裡唯一活著的候選」。
-  續.C（僅當續.A+續.B皆過才做）：**不自己動holdout**，回報holdout期間
-  範圍/事件數、動用後是否永久消耗、建議的一次性判定門檻後停下等裁示。
-  E2不重跑，直接引用既有#326 FAIL結案。心跳＝新增TRIALS_LEDGER列＋
-  `research/event_driven_gate_sequence_result.json`更新。續.A完成即
-  回報，不等續.B。
+- [x] **方法.三續.E1重判** [研究] 【✅完成2026-09-23，互動視窗CC】
+  **續.A（通過）**：`gate_random_control`改為(b)p90_diff/(c)right_tail_
+  share_diff/(d)left_tail_share_diff共用同一批1000次null重抽（500
+  bucket限定+500全事件池），判準=訊號值嚴格超過1000次重抽第999名。
+  結果：(b)通過(訊號+0.0400>999名門檻+0.0384)、(c)未過、(d)通過，
+  OR判準下整體通過，4關全過→E1改判CHEAP_PASS。已登記`TRIALS_LEDGER.md`
+  #332((b)，CHEAP_PASS)/#333((c)，FAIL)，更正`STRATEGY_GRAVEYARD.md`/
+  `TW_LEADS.md`#19（不刪舊文字，加⚠️更正標記）。
+  **續.B（同日完成，結果：崩掉，E1最終FAIL）**：新增事件日前60交易日
+  已實現波動度五分位第4配對維度（`event_driven_prototype.py`新增
+  `pre_event_vol`/`vol_quantile`/`bucket_key_vol`，PIT安全，視窗嚴格
+  在entry_idx之前）。3維p90_diff=+0.0413 → 4維(波動度配對)p90_diff=
+  +0.0178，**崩掉56.9%（門檻50%）**——續.A通過的(b)判準顯著性主要來自
+  波動度差異非alpha，判定「波動度效應，非alpha」。已登記`TRIALS_LEDGER.
+  md`#334(FAIL)，`STRATEGY_GRAVEYARD.md`/`TW_LEADS.md`#19再次更正為
+  最終FAIL。**E1與E2至此雙雙結案FAIL，事件驅動大類沒有候選存活**。
+  **續.C不適用**：續.B未過，依裁示「僅當續.A+續.B皆過才做」，不動用
+  holdout、無需回報holdout三項。`trial_registry.py --check`PASS（336列，
+  最大編號#334）；`selection_bias_ledger.py`重跑N=336。
+  **[自行裁量，已於動工前記錄並驗證]**：裁示第5點「failed_gates閘門
+  編號不一致」查證後判斷不是真bug（gate2/gate4/gate5是全域語意編號非
+  本地呼叫序號，語意皆正確），已改名`g1`~`g4`為語意化變數名降低未來
+  誤讀風險，未改動`failed_gates`實際輸出值。
 
 ## 2026-09-20【緊急·合規】mopsov 破口已實際發生，先止血再檢討（原文登記）
 

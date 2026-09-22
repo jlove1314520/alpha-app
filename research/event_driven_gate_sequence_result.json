@@ -4,11 +4,24 @@
     "n_events": 6706,
     "gates": {
       "random_control": {
-        "passed": false,
-        "reason": "未過：訊號 0.0064 沒有超過控制組最大值 0.0093（控制組平均 0.0002，訊號百分位 94.5）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）",
-        "signal_stat": 0.006377878198172553,
-        "control_max": 0.009338072789379882,
-        "n_draws_total": 200
+        "passed": true,
+        "reason": "(b)P90差異訊號+0.0400 >999名門檻+0.0384；(c)右尾佔比差異訊號+0.0292 <=999名門檻+0.0340；(d)左尾佔比差異訊號-0.0021 <=999名門檻+0.0199（未顯著惡化）",
+        "b_pass": true,
+        "c_pass": false,
+        "d_pass": true,
+        "median_diff_signal": 0.006377878198172553,
+        "median_diff_note": "僅供對照，不決定生死",
+        "p90_diff_signal": 0.04001665563339405,
+        "p90_diff_threshold_999": 0.03843955500710355,
+        "right_tail_share_diff_signal": 0.02924246366869318,
+        "right_tail_share_diff_threshold_999": 0.03398675803047388,
+        "left_tail_share_diff_signal": -0.002125075895567697,
+        "left_tail_share_diff_threshold_999": 0.019864254343453548,
+        "n_null_draws_p90": 1000,
+        "n_null_draws_right_tail": 1000,
+        "n_null_draws_left_tail": 1000,
+        "n_skipped_insufficient": 0,
+        "n_total_requested": 1000
       },
       "train_val_oos": {
         "passed": true,
@@ -117,144 +130,7 @@
         }
       }
     },
-    "verdict": "FAIL",
-    "failed_gates": [
-      "gate2"
-    ]
-  },
-  "E2_月營收公布(SUE)": {
-    "event_name": "E2_月營收公布(SUE)",
-    "n_events": 20339,
-    "gates": {
-      "random_control": {
-        "passed": false,
-        "reason": "未過：訊號 0.0039 沒有超過控制組最大值 0.0055（控制組平均 0.0000，訊號百分位 97.0）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）",
-        "signal_stat": 0.0039082002381505675,
-        "control_max": 0.005495208174019266,
-        "n_draws_total": 200
-      },
-      "train_val_oos": {
-        "passed": false,
-        "n_sig_train": 1240,
-        "n_sig_val": 794,
-        "train_median_diff": 0.00648446288567065,
-        "val_median_diff": -0.0008190121517789688
-      },
-      "cost_sensitivity": {
-        "passed": true,
-        "mean_return": 0.027609355442059454,
-        "scenarios": {
-          "基準情境(1.8折+預設滑價)": {
-            "cost_pct": 0.004513,
-            "net_benefit": 0.023096355442059454
-          },
-          "保守情境(無折扣+預設滑價)": {
-            "cost_pct": 0.00685,
-            "net_benefit": 0.02075935544205945
-          },
-          "最壞情境(無折扣+雙倍滑價)": {
-            "cost_pct": 0.00785,
-            "net_benefit": 0.019759355442059454
-          },
-          "verdict": "PASS"
-        }
-      },
-      "leave_one_out": {
-        "passed": true,
-        "n_time_buckets": 48,
-        "n_fail_time_bucket": 0,
-        "n_industries": 30,
-        "n_fail_industry": 0,
-        "details": {
-          "removed_time_bucket": {
-            "2013Q1": true,
-            "2013Q2": true,
-            "2013Q3": true,
-            "2013Q4": true,
-            "2014Q1": true,
-            "2014Q2": true,
-            "2014Q3": true,
-            "2014Q4": true,
-            "2015Q1": true,
-            "2015Q2": true,
-            "2015Q3": true,
-            "2015Q4": true,
-            "2016Q1": true,
-            "2016Q2": true,
-            "2016Q3": true,
-            "2016Q4": true,
-            "2017Q1": true,
-            "2017Q2": true,
-            "2017Q3": true,
-            "2017Q4": true,
-            "2018Q1": true,
-            "2018Q2": true,
-            "2018Q3": true,
-            "2018Q4": true,
-            "2019Q1": true,
-            "2019Q2": true,
-            "2019Q3": true,
-            "2019Q4": true,
-            "2020Q1": true,
-            "2020Q2": true,
-            "2020Q3": true,
-            "2020Q4": true,
-            "2021Q1": true,
-            "2021Q2": true,
-            "2021Q3": true,
-            "2021Q4": true,
-            "2022Q1": true,
-            "2022Q2": true,
-            "2022Q3": true,
-            "2022Q4": true,
-            "2023Q1": true,
-            "2023Q2": true,
-            "2023Q3": true,
-            "2023Q4": true,
-            "2024Q1": true,
-            "2024Q2": true,
-            "2024Q3": true,
-            "2024Q4": true
-          },
-          "removed_industry": {
-            "光電業": true,
-            "其他": true,
-            "其他電子業": true,
-            "其他電子類": true,
-            "化學工業": true,
-            "化學生技醫療": true,
-            "半導體業": true,
-            "塑膠工業": true,
-            "建材營造": true,
-            "文化創意業": true,
-            "橡膠工業": true,
-            "汽車工業": true,
-            "油電燃氣業": true,
-            "生技醫療業": true,
-            "紡織纖維": true,
-            "航運業": true,
-            "觀光事業": true,
-            "貿易百貨": true,
-            "資訊服務業": true,
-            "農業科技業": true,
-            "通信網路業": true,
-            "造紙工業": true,
-            "金融保險": true,
-            "金融業": true,
-            "鋼鐵工業": true,
-            "電子工業": true,
-            "電子零組件業": true,
-            "電機機械": true,
-            "電腦及週邊設備業": true,
-            "食品工業": true
-          }
-        }
-      }
-    },
-    "verdict": "FAIL",
-    "failed_gates": [
-      "gate2",
-      "unknown"
-    ]
+    "verdict": "CHEAP_PASS",
+    "failed_gates": []
   }
 }
