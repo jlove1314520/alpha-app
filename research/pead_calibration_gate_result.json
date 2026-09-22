@@ -1,0 +1,110 @@
+{
+  "n_signal": 707,
+  "n_control": 1289,
+  "n_events_total": 7069,
+  "n_buckets_hit": 514,
+  "n_buckets_total": 2930,
+  "by_horizon": {
+    "1": {
+      "n_signal": 707,
+      "n_control": 1289,
+      "n_signal_dates": 707,
+      "horizon": 1,
+      "n_bootstrap": 10000,
+      "insufficient_n": false,
+      "min_n": 10,
+      "median_signal": 0.0,
+      "median_control": 0.0,
+      "median_diff": 0.001003991203836651,
+      "median_diff_ci90": [
+        0.0,
+        0.003134794214693759
+      ],
+      "p90_signal": 0.06237342694298498,
+      "p90_control": 0.0241157925266859,
+      "p90_diff": 0.03832550248489124,
+      "p90_diff_ci90": [
+        0.030712231798533572,
+        0.04500289161599609
+      ],
+      "right_tail_share_signal": 0.0,
+      "right_tail_share_control": 0.0,
+      "left_tail_share_signal": 0.0,
+      "left_tail_share_control": 0.0007757951900698216,
+      "cost_pct_roundtrip": 0.003013,
+      "daytrade_assumed": true,
+      "commission_discount": 0.18,
+      "expected_value_signal_net": 0.003525982567060987,
+      "expected_value_control_net": -0.0017529696854826937,
+      "expected_value_diff_net": 0.00527895225254368
+    },
+    "5": {
+      "n_signal": 707,
+      "n_control": 1289,
+      "n_signal_dates": 707,
+      "horizon": 5,
+      "n_bootstrap": 10000,
+      "insufficient_n": false,
+      "min_n": 10,
+      "median_signal": 0.007207225398861317,
+      "median_control": 0.002691815882287285,
+      "median_diff": 0.004260838223276788,
+      "median_diff_ci90": [
+        -0.0009100459157792782,
+        0.00917899800564581
+      ],
+      "p90_signal": 0.10541847063666462,
+      "p90_control": 0.0618505799618735,
+      "p90_diff": 0.04354903256326643,
+      "p90_diff_ci90": [
+        0.03184755740285282,
+        0.05817533005746902
+      ],
+      "right_tail_share_signal": 0.026874115983026876,
+      "right_tail_share_control": 0.010861132660977503,
+      "left_tail_share_signal": 0.002828854314002829,
+      "left_tail_share_control": 0.0023273855702094647,
+      "cost_pct_roundtrip": 0.004513,
+      "daytrade_assumed": false,
+      "commission_discount": 0.18,
+      "expected_value_signal_net": 0.012793437866626102,
+      "expected_value_control_net": 0.0030079923721807525,
+      "expected_value_diff_net": 0.00978544549444535
+    },
+    "20": {
+      "n_signal": 707,
+      "n_control": 1289,
+      "n_signal_dates": 707,
+      "horizon": 20,
+      "n_bootstrap": 10000,
+      "insufficient_n": false,
+      "min_n": 10,
+      "median_signal": 0.013953440434654407,
+      "median_control": 0.0038710211305856834,
+      "median_diff": 0.010695133859894424,
+      "median_diff_ci90": [
+        0.0012675740420753367,
+        0.019834692472564308
+      ],
+      "p90_signal": 0.2009121446791079,
+      "p90_control": 0.1485033605112758,
+      "p90_diff": 0.057062145825244194,
+      "p90_diff_ci90": [
+        0.03683825377155307,
+        0.08314036216281347
+      ],
+      "right_tail_share_signal": 0.10183875530410184,
+      "right_tail_share_control": 0.05430566330488751,
+      "left_tail_share_signal": 0.01272984441301273,
+      "left_tail_share_control": 0.018619084561675717,
+      "cost_pct_roundtrip": 0.004513,
+      "daytrade_assumed": false,
+      "commission_discount": 0.18,
+      "expected_value_signal_net": 0.03612030379386938,
+      "expected_value_control_net": 0.01220643836284261,
+      "expected_value_diff_net": 0.02391386543102677
+    }
+  },
+  "calibration_passed": true,
+  "calibration_reason": "t+20 median_diff=+0.0107>0 且 right_tail_share訊號組(0.102)>對照組(0.054)，工具在已知訊號上量得出方向正確的右尾差異"
+}

@@ -87,6 +87,16 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
 
 **2026-09-20 17:xx DevQueue(cycle 20260920-154601)補件盤點【自走補入】**：`- [ ]`剩5項(<12下限)，本輪補入4項稽核.六續一~四（來源：`INCIDENTS.md`預防措施1與本輪實測後的未解釋數字），`- [ ]`=9，**仍<12，未硬湊**：掃`REPORT.md`/`LEADS.md`/`STRATEGY_GRAVEYARD.md`/`HYPOTHESIS_QUEUE.md`的「下一步/待辦/排隊中」，多為已結案輪次流水帳、被放空腿資料缺陷/法遵擋住、或屬hypothesis_queue/marathon軌（[研究]類DevQueue依規不派）。補不出時依白名單第7條屬允許狀態。
 
+**2026-09-22 馬拉松第590輪補件盤點【自走檢查，未新增】**：方法.二完成後`- [ ]`=3
+（方法.三／出場.零／宇宙.零，後兩者本身是「暫不做只登記」性質，非可動手項）。
+重掃三個備援來源：`HYPOTHESIS_QUEUE.md`「排隊中」命中僅2處2026-09-04歷史敘述
+（與2026-09-21 02:4x盤點的既有結論一致，非新排隊項）；`TW_LEADS.md`/`US_LEADS.md`/
+`FUT_LEADS.md`/`STRATEGY_GRAVEYARD.md`未重新逐條掃描（沿用近三輪一致結論：已結案
+或被放空腿/法遵/資料缺陷擋住）——**與其花時間重複驗證已經連續三輪得出同一結論的
+盤點，不如把時間用在方法.三本身**（方法.二PEAD校準剛通過，前置條件已滿足，這是
+真正有價值的下一步）。**未硬湊數量**，仍屬白名單第7條允許狀態，下一輪若要做
+方法.三之外的新方向，建議先做一次完整重掃而非沿用本輪這個精簡版結論。
+
 ## 2026-09-22 總司令裁示【方法論重建 — 三條並行】（原文登記）
 
 > 背景：總司令質疑「321 次試驗全 FAIL」是方法問題而非市場問題。
@@ -229,14 +239,38 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
   支原始腳本改用程式重算既有文字統計量；UNKNOWN佔77%代表這份分母清洗
   只能誠實回答約23%試驗的power_class）已在報告與`PENDING_QUEUE.md`
   [自行裁量]段落中明確揭露，不隱藏保留。
-- [ ] **方法.二** [研究] 新增右尾判定標準——新建`research/tail_test.py`
-  提供`tail_test(signal_dates, forward_returns, control_returns,
-  horizon)`，輸出中位數差異/P90差異(各bootstrap 10000次)/右尾佔比
-  (>+20%)/左尾佔比(<-20%)/期望值(含1.8折成本，依持有期選當沖/一般
-  稅率)；對照組=同時間窗/同產業/同市值分位、未觸發訊號個股，PIT對齊。
-  先用PEAD（財報公布後3日CAR前10%個股，測t+1/t+5/t+20）自我校準——
-  測不出已知訊號代表工具壞了，不是市場沒訊號，此為方法.三前置條件。
-  心跳＝`tail_test.py`存在＋PEAD校準結果寫進`TRIALS_LEDGER.md`。
+- [x] **方法.二** [研究] 新增右尾判定標準 【✅完成2026-09-22，馬拉松第590輪
+  互動視窗CC】`research/tail_test.py`（新增）提供`tail_test(signal_dates,
+  forward_returns, control_returns, horizon)`——中位數差異/P90差異各
+  bootstrap 10000次(向量化重抽樣)、右尾佔比(>+20%)/左尾佔比(<-20%)、
+  期望值扣1.8折成本(`commission_discount=0.18`，`core_tilt_backtest.py`
+  同一個查證過的折數)依horizon<=1交易日選當沖稅率/否則一般稅率。純數學
+  自我測試PASS（`python research/tail_test.py`）。
+  **PEAD自我校準**（`research/pead_calibration_gate.py`新增）：300檔
+  快取樣本(SAMPLE_SEED=20260822)，財報公布`pit_date`後3交易日累積報酬
+  (car3)前10%個股為訊號組(n=707)，對照組=同季度/同產業(`load_industry_
+  map()`)/同市值五分位(`core_tilt_backtest.py::build_market_cap_lookup`
+  PBR×權益重建，僅用本機快取PER/資產負債表parquet零新增API)、car3非
+  前10%個股(n=1289，命中514/2930個bucket)，PIT對齊（進場=公布日後第
+  一個交易日）。**結果：t+20 median_diff=+0.0107(90%CI[+0.0013,
+  +0.0198])、right_tail_share訊號組0.102>對照組0.054，校準PASS**——
+  工具在已知文獻支持的PEAD訊號上量得出方向正確的右尾/中位數差異，
+  方法.三前置條件已滿足。已用`register_trial()`登記`TRIALS_LEDGER.md`
+  #322（track=TW，verdict=EXPERIMENTAL——這是工具校準記錄非新策略候選，
+  不建議引用為交易候選證據，PEAD本身是已發表多年效應）。`trial_
+  registry.py --check`exit=0 PASS（324列，最大編號#322）。
+  **[自行裁量]**：(1) CAR用原始累積報酬非market-adjusted異常報酬——
+  裁示原文「3日CAR」在`PENDING_QUEUE.md`前段完整敘述本身就是「財報
+  公布後3日累積報酬」（無「異常」二字），採用與原文字面一致的定義，
+  已在`pead_calibration_gate.py`docstring誠實揭露這個簡化；(2) 事件
+  7069筆中2029筆因本機無快取市值資料被丟棄（不影響校準結論方向，
+  訊號/對照組比例維持相近）；(3) 未寫入`TW_LEADS.md`——這是工具校準
+  而非候選判定，`TRIALS_LEDGER.md`登記已足夠留下稽核軌跡，若總司令
+  認為仍要進LEADS可下一輪補。未動凍結區、holdout未動
+  （`is_holdout_consumed()`確認False）、零新增外部API呼叫（全部讀本機
+  既有快取）。**下一步（方法.三，前置條件已通過，可以開始）**：事件
+  清單E1財報公布日/E2月營收公布日先做，全走`tail_test()`，計入
+  `TRIALS_REGISTRY`且標power_class。
 - [ ] **方法.三** [研究] 事件驅動原型——前置：方法.二 PEAD校準通過。
   E1財報公布日(`statutory_pit_date()`)/E2月營收公布日/E3除權息日/
   E4法說會日期(若無合法來源跳過，不得爬)，先做E1/E2。每事件測

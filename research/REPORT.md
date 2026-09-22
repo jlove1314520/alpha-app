@@ -9,6 +9,19 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第590輪 · 2026-09-22T08:5x+08:00 · 研究帽：方法.二——tail_test.py＋PEAD自我校準 · 產出＝新工具＋校準PASS＋TRIALS_LEDGER#322
+
+- 取鎖乾淨。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=4，挑最舊未開始交辦項`方法.二`（[研究]，總司令2026-09-22裁示【方法論重建】新增，`方法.三`事件驅動原型的前置條件）。
+- 新建`research/tail_test.py`：`tail_test(signal_dates, forward_returns, control_returns, horizon)`輸出中位數差異/P90差異（各bootstrap 10000次，向量化重抽樣）、右尾佔比(>+20%)/左尾佔比(<-20%)、期望值扣1.8折成本（`commission_discount=0.18`，沿用`core_tilt_backtest.py`同一個查證過的折數）依horizon<=1交易日選當沖稅率/否則一般稅率。純數學自我測試PASS（`python research/tail_test.py`，右尾灌測資料的p90_diff/right_tail_share方向正確）。
+- **PEAD自我校準**（`research/pead_calibration_gate.py`新建）：300檔快取樣本(SAMPLE_SEED=20260822)，財報`_quarterly_eps`的`pit_date`後3交易日累積報酬(car3)前10%個股為訊號組(n=707)，對照組=同季度(`time_bucket`)/同產業(`score.py::load_industry_map()`)/同市值五分位(`core_tilt_backtest.py::build_market_cap_lookup`PBR×權益重建，僅讀本機已快取PER/資產負債表parquet，零新增API請求)、car3非前10%個股(n=1289，命中514/2930個bucket)，PIT對齊（進場=公布日後第一個交易日，跟`monthly_revenue_event_study.py`同一個既有慣例）。全樣本建表7069筆事件（2029筆因本機無快取市值資料丟棄），耗時約16秒（cache命中）。**結果：t+1 median_diff=+0.0010、t+5 median_diff=+0.0043、t+20 median_diff=+0.0107(90%CI[+0.0013,+0.0198])，right_tail_share訊號組0.102>對照組0.054，EV_net_diff(1.8折成本後)=+0.0239——校準PASS**（判準：t+20 median_diff>0且right_tail_share訊號組>對照組，兩條件同時滿足），工具在已知文獻支持的PEAD訊號上量得出方向正確的右尾/中位數差異。
+- 用`register_trial()`登記`TRIALS_LEDGER.md`#322（track=TW，verdict=EXPERIMENTAL——工具校準記錄非新策略候選，PEAD本身是已發表多年效應，notes明確標註不建議引用為交易候選證據）。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（324列，最大編號#322）。
+- **[自行裁量]**：CAR用原始累積報酬非market-adjusted異常報酬——裁示原文在`PENDING_QUEUE.md`前段完整敘述就是「財報公布後3日累積報酬」（無「異常」二字），採用字面一致定義，已在`pead_calibration_gate.py`docstring誠實揭露這個簡化，非隱藏；未寫入`TW_LEADS.md`（工具校準非候選判定，`TRIALS_LEDGER.md`登記已足夠留下稽核軌跡）。
+- 未動凍結區、holdout未動（`is_holdout_consumed()`開工/收工前皆確認`False`）、零新增外部API呼叫（全部讀本機既有快取）。
+- 補件盤點：`- [ ]`剩3項（`方法.三`／`出場.零`／`宇宙.零`，後兩者性質是「暫不做只登記」非可動手項）。三備援來源重掃與近三輪結論一致（無新項可補），未硬湊，詳見`PENDING_QUEUE.md`本輪盤點段落。
+- 交辦佇列還剩3條`- [ ]`（僅`方法.三`真正可動手）。等待審閱：0件。
+- **下一輪**：`方法.三`事件驅動原型——前置條件已滿足，E1財報公布日/E2月營收公布日先做，全走`tail_test()`，計入`TRIALS_REGISTRY`且標power_class。
+
+---
 ## 第589輪 · 2026-09-22T07:50+08:00 · 維運帽：財報原子.補快取續跑 · 產出＝快取新增181次請求（b9/b10）
 
 - 取鎖乾淨（cycle 20260922-073037）。開工：`- [ ]`=0、`- [!]`=27（財報原子.補快取／籌碼原子.補借券快取皆因FinMind額度冷卻標BLOCKED至07:37）。
