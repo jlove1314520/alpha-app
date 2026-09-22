@@ -2327,3 +2327,14 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（346列，本輪未新增判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（yfinance走既有快取機制，一次性抓取單一指數序列）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（規.二第4節參數掃描方式提案，round605延續，非本輪新增）。
 - **下一輪**：US軌新方向仍待總司令裁示，`sp500_tr_series.py`已就緒供未來美股集中版或其他需要S&P500 TR基準的工作直接複用；依輪替下一輪建議選FUT軌。
+
+---
+## 第607輪 · 2026-09-23T03:35+08:00 · FUT · 維運帽：發現並修復卡住的git stash pop merge衝突（data/audit_report.json），無新統計判定
+
+- 取鎖乾淨（cycle`20260923-033037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝0，23條`- [!]`阻塞中。佇列深度自檢`- [ ]`=0<12下限，但round599~606已連續多輪確認三個備援來源無新項，本輪不重複全面掃描。依輪替（TW round605=01:3x／US round606=02:3x／FUT round600=19:3x最舊）選FUT。
+- `run_detached.py status`：`running=0`（151筆歷史，無需收成）。
+- **意外發現**：`git status`顯示`data/audit_report.json`為`both modified`未解決衝突（index 3-stage，working tree含`<<<<<<< Updated upstream`/`=======`/`>>>>>>> Stashed changes`字面標記），非rebase中（無`MERGE_HEAD`/`rebase-merge`/`rebase-apply`）。比對`git stash list`確認`stash@{0}`（`autostash`）內容與衝突的stash側逐檔相符（5個檔案：`audit_report.json`/`factory_stability.json`/`factory_stability_history.jsonl`/`connectivity_check.log`/`external_connectivity.jsonl`），研判某次`git pull --rebase --autostash`完成後autostash pop撞到衝突沒人處理；根因（哪支腳本觸發）本輪未查出，repo內`.ps1`未見明文`autostash`字串，留待下次維運帽深查。
+- **修復**：比對衝突兩側`generated_at`（HEAD 02:59:35 新於 stash側前一日23:00:02），取HEAD版，驗證解析後仍為合法JSON，`git add`清空衝突stage；確認`stash@{0}`已被HEAD版本涵蓋（從未真正套用成功的半套用狀態）後`git stash drop`；一併納入已被卡住、原本已staged的4個例行自動更新檔案。commit`de8a7fb2`並成功push。
+- 本輪純維運修復，非統計試驗，不觸發`register_trial()`；`trial_registry.py --check`exit=0 PASS。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（規.二第4節參數掃描方式提案，round605延續，非本輪新增）。
+- **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（12/20）與總司令對gate50三條件的回應；本次git衝突根因若再發作，建議下次維運帽搜尋所有排程對`git pull`/`rebase.autoStash`的呼叫點；依輪替下一輪建議選TW軌（round605最舊）。
