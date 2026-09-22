@@ -15,11 +15,12 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：1件）
+## 等待中（目前：2件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
 | 規.二後續：CONCENTRATED_SPEC第4節參數掃描方式提案 | 2026-09-23 | 是否採用候選C（約14~16格，見`PENDING_QUEUE.md`「2026-09-23【規.二後續】」章節）、改用候選A/B、或指定其他掃描方式；核准前`concentrated_backtest.py`不動筆掃描 | 起算中 |
+| 維運.git衝突根因：三支本機wrapper跨排程git操作協調 | 2026-09-23 | round607衝突根因已查明（`run-marathon-cycle.ps1`/`run-dev-queue-cycle.ps1`/`run-hypothesis-queue-cycle.ps1`皆用`git pull --rebase --autostash`收尾、彼此無協調），見`PENDING_QUEUE.md`「2026-09-23【維運.git衝突根因】」章節，待裁示方案甲/乙/丙或其他做法；核准前三支wrapper維持現狀不變 | 起算中 |
 
 ## 已結案審閱紀錄
 

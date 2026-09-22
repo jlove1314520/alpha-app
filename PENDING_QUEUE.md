@@ -10967,3 +10967,78 @@ Cybex「水位→速度」規律移植台股目前 **0 勝 3 敗**
 改用候選A/B、或指定其他掃描方式。核准前`concentrated_backtest.py`
 不動筆掃描第4節參數。
 
+## 2026-09-23【維運.git衝突根因】round607衝突的根因查證（原文登記）
+
+**背景**：round607（`FUT_MARATHON_STATE.md`，commit`de8a7fb2`）修復了
+`data/audit_report.json`等5檔的merge衝突（working tree留有字面
+`<<<<<<< Updated upstream`衝突標記，但不在rebase-in-progress狀態），
+當輪礙於預算未查出根因，留下明確待辦：「建議下一次維運帽輪次搜尋
+所有`.ps1`/排程設定裡`git -c rebase.autoStash`或`git pull`不帶
+`--no-rebase`的呼叫點」。本輪（第610輪，FUT/維運帽）完成這項查證。
+
+**查證結果（`[自行裁量]`，純讀取+grep，未修改任何排程腳本）**：
+`alpha-app`repo內（`.github/workflows/news_events.yml`第68行）與repo外
+`C:\alpha\`（不受版本控制，需另外`find`才找得到，這是round607在repo內
+搜尋`*.ps1`找不到的原因）**共有四個獨立位置**都使用
+`git pull --rebase --autostash`收尾：
+1. `C:\alpha\run-marathon-cycle.ps1`第65行（`Commit-CycleLog`函式，本
+   馬拉松自己的wrapper）
+2. `C:\alpha\run-dev-queue-cycle.ps1`第121行
+3. `C:\alpha\run-hypothesis-queue-cycle.ps1`第44行
+4. `.github/workflows/news_events.yml`第68行（雲端runner，跟本機衝突
+   無關，只是同一個idiom的雲端版本，libcurl環境隔離不會影響本機repo）
+
+`run-dev-queue-cycle.ps1`第4點的既有紀錄（本檔案上方「4（log自己
+commit）」段落，2026-09-16前後）證實這個`git pull --rebase --autostash`
+寫法是**刻意模仿`news_events.yml`既有的commit-if-changed模式**新增的，
+不是意外——三支本機wrapper（marathon/dev_queue/hypothesis_queue）各自
+獨立、各自的Task Scheduler排程週期不同（15~30分鐘），**彼此完全沒有
+協調機制**：`marathon_lock.py`只防同一條track內部兩輪claude session重疊，
+不管其他track的git pull/push時機；dev_queue、hypothesis_queue也各自
+只有自己track內的鎖，三者的「commit→pull --rebase --autostash→push」
+這段收尾動作彼此互不相讓。
+
+**根因推論（結構性，非單一bug）**：`--autostash`會把「當下工作目錄裡
+所有已追蹤但未commit的修改」全部暫存，不只是該wrapper自己`git add`
+準備commit的那幾個檔案。若某一輪claude -p session因為`BUDGET`/
+`TIMEOUT`被砍（`MARATHON_PROTOCOL.md`0b節已知會發生），留下幾個
+已修改但未commit的追蹤檔（例如某個claude session觸碰過的資料檔），
+下一次任一wrapper（不一定是同一條track）跑到收尾的
+`git pull --rebase --autostash`時，會把這些「別人留下的」修改也一併
+掃進stash；若同一時間遠端（被另一個wrapper搶先push）剛好也有對同一
+檔案的不同修改，rebase本身會成功（沒有真正的commit衝突），但**rebase
+完成後的`stash pop`若踩到衝突，只會讓stash保留＋工作目錄留下衝突
+標記，不會設定`rebase-merge`/`MERGE_HEAD`狀態**——這正好解釋了round607
+觀察到的異常現象「有字面衝突標記但不在rebase中」，且`git stash list`
+能找到內容吻合的`stash@{0}`。
+
+**這不是四個位置各自的bug，是「多個排程互相獨立跑`git pull --rebase
+--autostash`收尾、彼此不協調」這個結構本身的已知風險**，與
+`CLAUDE.md`十節「排程腳本會改寫的檔案必須進對應清單」、round607自己
+記錄的「屬於『多個寫入者同時推main』這個更廣風險類別下的另一個缺口」
+是同一件事的延伸，只是這次具體現形在autostash的stash-pop階段而不是
+`git add`清單遺漏。
+
+**尚未做（需要總司令裁示的架構選擇，`CLAUDE.md`「提案先於執行」——
+跨三支wrapper協調git操作屬於「做法有多種選擇需要判斷取捨」的架構
+變更，不屬於本輪`[自行裁量]`範圍）**：
+- 方案甲：三支wrapper共用一把「git操作鎖」（可仿`marathon_lock.py`
+  的PID/timestamp/cycle_id機制另建一支通用版，例如`git_op_lock.py`），
+  同一時刻只允許一支wrapper執行commit→pull→push序列。
+- 方案乙：不使用`--autostash`，改成wrapper只`git stash push --
+  <自己準備commit的那幾個明確路徑>`，避免掃到不相干的未commit修改；
+  但此法對「別人留下的未commit修改本身要不要一起處理」沒有解答，
+  只是縮小autostash的掃描範圍，不是根治協調缺失。
+- 方案丙：wrapper在`git pull --rebase --autostash`後、`git push`前，
+  多加一步偵測「工作目錄裡是否留有字面衝突標記」（grep
+  `<<<<<<< `），偵測到就跳過push、寫警告到自己的log，留給下一輪
+  或人工處理，而不是像round607那樣要等總司令肉眼發現——這條若採用，
+  依`CLAUDE.md`十二節「守門員自己的失敗只能降級成警告」精神設計，
+  偵測邏輯本身出錯也不能讓wrapper整個崩潰。
+
+三支`.ps1`皆位於`C:\alpha\`、不受`alpha-app`這個repo版本控制，本輪
+未修改任何一支（純查證＋grep＋讀檔），沒有可附的commit hash佐證這幾支
+檔案「查證當下」的內容，如實記錶。**[待總司令裁示]**：是否核准上述
+三方案之一（或指定其他做法）動手修改這三支wrapper；核准前這三支
+wrapper維持現狀不變。
+

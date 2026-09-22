@@ -9,6 +9,18 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第610輪 · 2026-09-23T06:3x+08:00 · FUT · 維運帽：查證round607 git衝突根因並提出修復方案 · 無新統計判定，新增2件等待審閱
+
+- 取鎖乾淨（cycle`20260923-063037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝0，23條`- [!]`阻塞中，逐一核對解除條件皆未到時間點。佇列深度自檢`- [ ]`=0（<12下限），round599~609已連續多輪確認三個備援來源掃無新項，本輪不重複全面掃描。
+- 三軌時間戳：TW round608=04:3x／US round609=05:3x（最新）／FUT round607=03:3x（最舊）——依輪替與round608/609既有建議選FUT。`run_detached.py status`確認`running=0`（151筆歷史，無running job）。`git status`僅例行排程檔案，無conflict標記。
+- **本輪工作單位＝完成round607留下的明確待辦**：「建議下一次維運帽輪次搜尋所有`.ps1`/排程設定裡`git -c rebase.autoStash`或`git pull`不帶`--no-rebase`的呼叫點」。`grep`repo內（`news_events.yml`第68行）＋`find /c/alpha`repo外（round607在repo內搜尋`*.ps1`找不到的原因），查出四處使用`git pull --rebase --autostash`：`run-marathon-cycle.ps1`第65行、`run-dev-queue-cycle.ps1`第121行、`run-hypothesis-queue-cycle.ps1`第44行、`news_events.yml`第68行（雲端runner，跟本機衝突無關）。
+- **根因判定**：三支本機wrapper各自獨立排程（15~30分鐘週期），彼此完全沒有跨track的git操作協調機制（`marathon_lock.py`等鎖只防同track內部session重疊）。`--autostash`會把工作目錄裡所有已追蹤未commit的修改（不只該wrapper自己準備commit的檔案）一併暫存；若某輪claude session因`BUDGET`/`TIMEOUT`被砍留下未commit修改，下一次任一wrapper跑到`git pull --rebase --autostash`會連帶掃入，若遠端剛好有同檔案的不同修改，rebase本身成功但post-rebase的stash-pop可能衝突，只留下工作目錄字面衝突標記、不設定`rebase-merge`/`MERGE_HEAD`狀態——解釋了round607觀察到的異常現象。
+- **產出**：完整查證與三個候選修復方案（甲：跨wrapper共用git操作鎖；乙：改用`git stash push -- <明確路徑>`縮小掃描範圍；丙：pull後push前偵測衝突標記、偵測到就跳過push降級成警告）寫入`PENDING_QUEUE.md`「2026-09-23【維運.git衝突根因】」章節，登記進`research/AWAITING_REVIEW.md`（等待中2件）。核准前三支wrapper維持現狀不變，本輪未修改任何`.ps1`檔案。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（347列，本輪未新增判定，純維運根因查證不觸發`register_trial()`）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。**等待審閱：2件**（規.二第4節掃描方式提案，延續中；本輪新增維運.git衝突修復方案）。
+- **下一輪**：`#50`仍被動等待tick累積至20（12/20）；本輪新增的git衝突修復提案待總司令裁示方案甲/乙/丙或其他做法；依輪替下一輪建議選TW軌。
+
+---
 ## 第594輪 · 2026-09-22T13:30+08:00 · TW · 債務帽：交辦優先於自走，佇列深度自檢（2項<12門檻，判斷維持不硬湊）＋續投TPEx batch4 · 無新判定，一項回補進度推進，job待下一輪收成
 
 - 取鎖乾淨（cycle`20260922-133037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝2（`財報原子.補快取`／`籌碼原子.補上櫃三大法人歷史`，皆持續回補中），`run_detached.py status`確認running=0。
