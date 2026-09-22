@@ -12,13 +12,17 @@
 - 每個(表達式,snapshot)有效配對<`MIN_VALID`(30)者IC記NaN並計數（規格第4節「入樣規則」）。
 - `n_snap`<8者標「樣本不足」（原子.五門檻）。
 - 記憶體：逐檔只保留「表達式×snapshot日」小表；掛`mem_guard`；只讀本機快取，**不發任何API請求**。
-- Tier B需要借券賣出餘額快取（本機僅2330），未回補前**不得執行**（規格第7節：記「未檢驗」不記FAIL）。
+- Tier B需要借券賣出餘額快取，覆蓋率（`data/backfill_sbl_cache_status.json`的
+  `coverage_of_U`）達60%前**不得執行**（規格第7/9節：未達門檻記「未檢驗」不記FAIL）；
+  2026-09-22覆蓋率達69.39%後解除此限制，本腳本改為動態讀覆蓋率狀態檔判斷。
 - 全程不碰holdout（快取層截在VAL_END；開工前檢查`is_holdout_consumed()`）。
 
 用法：
     python research/chip_atom_ic_map.py --tier A --n 15 --tag _smoke   # 15檔煙霧
     python research/chip_atom_ic_map.py --tier A --n 30 --tag _mem30    # 30檔記憶體驗證
     python research/chip_atom_ic_map.py --tier A                        # Tier A全量（宇宙U）
+    python research/chip_atom_ic_map.py --tier B --n 15 --tag _smoke   # Tier B 15檔煙霧
+    python research/chip_atom_ic_map.py --tier B                        # Tier B全量（覆蓋率達門檻才會跑）
 """
 from __future__ import annotations
 
@@ -91,12 +95,22 @@ def main() -> int:
     print(f"is_holdout_consumed()開工前檢查：{holdout.is_holdout_consumed()}", flush=True)
     assert not holdout.is_holdout_consumed(), "holdout已解鎖，中止"
     if a.tier == "B":
-        print("Tier B需借券賣出餘額回補（規格第7節，覆蓋達U的60%才可執行）——本腳本不在未回補時跑Tier B", flush=True)
-        return 2
+        # 規格第7/9節：借券賣出餘額覆蓋率達U的60%才可執行Tier B。
+        status_path = HERE / "data" / "backfill_sbl_cache_status.json"
+        try:
+            coverage = json.loads(status_path.read_text(encoding="utf-8")).get("coverage_of_U")
+        except Exception as e:  # noqa: BLE001 -- 讀不到狀態檔就保守擋下，不猜測
+            print(f"讀不到借券快取覆蓋率狀態檔（{status_path}）：{e}，Tier B不執行", flush=True)
+            return 2
+        print(f"借券賣出餘額快取覆蓋率coverage_of_U={coverage}", flush=True)
+        if coverage is None or coverage < 0.6:
+            print("覆蓋率未達60%門檻（規格第7節），Tier B不執行", flush=True)
+            return 2
 
     specs = cal.build_expression_specs()
     names = [s["name"] for s in specs if s["tier"] == a.tier]
-    assert len(names) == 67, len(names)
+    expect_n = {"A": 67, "B": 22}[a.tier]
+    assert len(names) == expect_n, (a.tier, len(names))
 
     market = load_dev("TaiwanStockPrice", "TAIEX", SNAP_START)
     holdout.assert_no_holdout_leakage(market, context="TAIEX in chip_atom_ic_map")
@@ -134,7 +148,8 @@ def main() -> int:
         px = px[px["date"] <= cal.VAL_END].reset_index(drop=True)
         t86 = t86_all.get(sid)
         n_with_t86 += int(t86 is not None and len(t86) > 0)
-        fr = cal.build_chip_frame(px, t86, cal.load_margin_frame(sid), None)
+        sbl = cal.load_sbl_frame(sid) if a.tier == "B" else None
+        fr = cal.build_chip_frame(px, t86, cal.load_margin_frame(sid), sbl)
         out = cal.compute_expressions(fr, specs, tiers=(a.tier,))
         out.index = pd.DatetimeIndex(fr["date"])
         out = out[~out.index.duplicated(keep="first")]

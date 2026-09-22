@@ -2277,3 +2277,15 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，純查證/確認性質工作）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案、`git log`、`run_detached.py status`、重跑本機`fin_atom_coverage.py`純讀parquet快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 交辦佇列還剩0條未開始（24條`- [!]`阻塞中）。等待審閱：0件。
 - **下一輪**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至20（目前12/20）與總司令對gate50三條件的回應；若無新裁示，往後每輪不需重複做全面複核（已連續8輪相同結論），可於開工簡報確認`- [ ]`=0後即記錄「與前次結論相同」收工，節省輪次成本；依輪替下一輪建議選US軌。
+
+---
+## 第602輪 · 2026-09-22T22:42+08:00 · TW · 交辦優先於自走：發現借券快取阻塞項coverage_of_U已跨過0.6門檻，解除Tier B硬擋並提交全量job · 無新判定，N不變，job待下一輪收成
+
+- 取鎖乾淨（cycle`20260922-223037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，24條`- [!]`阻塞中。逐項檢查阻塞項是否解除條件已滿足：`run_detached.py status`確認上一輪（round601後）投遞的`籌碼原子.補借券快取`b3（job`20260922-214041-d80a`）已`finished`（exit=0，8.6min），讀`backfill_sbl_cache_status.json`：`coverage_of_U`從0.4719升至**0.6939**（≥0.6門檻，≥236檔），依`ATOM_CHIP_IC_MAP_SPEC.md`第7/9節觸發Tier B。
+- **本輪工作單位＝解除`chip_atom_ic_map.py --tier B`硬擋**：原本`main()`對`a.tier == "B"`恆印警告訊息並`return 2`；改成動態讀`data/backfill_sbl_cache_status.json`的`coverage_of_U`，≥0.6才放行，否則保留原本保守擋下的行為。同時修正一個先前即使解除硬擋也會出錯的潛在bug：逐檔組frame時`cal.build_chip_frame(px, t86, cal.load_margin_frame(sid), None)`的sbl參數恆傳`None`，改成tier B時呼叫`cal.load_sbl_frame(sid)`；`assert len(names) == 67`改成依tier動態判斷（A=67／B=22）。
+- **驗證**：先跑`--tier B --n 15 --tag _smoke`（0列——15檔小於`MIN_VALID=30`橫斷面門檻，結構上不可能有IC，非bug），再跑`--tier B --n 60 --tag _smoke60`（44列有IC＝22表達式×2horizon，horizon20跳過1個snapshot、horizon60跳過0個，峰值private commit 1890MB，遠低於安全門檻），確認正確後刪除兩份煙霧測試輸出檔（result json＋snapshot parquet）。
+- **提交全量job**`20260922-223837-b449`（`--tier B`，392檔宇宙×22表達式，timeout 40分鐘），`run_detached.py wait --max-min 3`仍`STILL_RUNNING`（3分鐘時已印出T86逐股載入2011檔、進度50/392，量級與Tier A（25.4min完成）同型），依`MARATHON_PROTOCOL.md`0b節規則轉交下一輪收成，未違規空等。
+- `PENDING_QUEUE.md`「籌碼原子.補借券快取」條目已追加本輪記錄；`chip_atom_ic_map.py`模組docstring同步更新Tier B用法說明。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（332列，本輪未新增判定，Tier B結果尚未產出）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部API呼叫（Tier B煙霧測試與全量job皆只讀本機既有快取，docstring明文「不發任何API請求」）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（24條`- [!]`阻塞中，其中`籌碼原子.補借券快取`本輪已從BLOCKED轉為進行中並產出實質進展，非新增交辦）。等待審閱：0件。
+- **下一輪**：`run_detached.py status`確認`20260922-223837-b449`是否`finished`；`finished`則讀`chip_atom_ic_map_result_B.json`，依規格第7節「Tier B僅可作輔助」寫入`CHIP_ATOM_IC_MAP.md`補充章節、`register_trial()`另立登記（依規格第9節，不沿用#317），跑`trial_registry.py --check`與`selection_bias_ledger.py`；`timeout`/`failed`則查log原因並比照Tier A的`run_detached`參數調整重跑。依輪替下一輪建議選US軌（US round599=18:3x最舊）。

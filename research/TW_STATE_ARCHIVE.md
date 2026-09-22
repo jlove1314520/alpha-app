@@ -717,4 +717,61 @@ b15/b16（優先覆蓋率離60%較遠者：equity/inventory/receivable/ocf）；
 純debt）。完整見`PENDING_QUEUE.md`籌碼原子.補上櫃三大法人歷史條目。
 
 
+**最後更新：2026-09-22T16:3x+08:00（馬拉松第597輪）**——
+取鎖乾淨（cycle`20260922-163037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=0（`籌碼原子.補上櫃三大法人歷史`已於
+15:5x hypothesis_queue軌完成，`財報原子.補快取`因本小時FinMind額度
+已用完轉標`- [!]`冷卻中，預計17:0x解除）。**[自行裁量：偏離嚴格輪替]**
+依輪替本應選US（US round557/2026-09-19最舊，FUT round562/2026-09-19次之，
+TW round596/本日15:3x最新），但開工核對US_MARATHON_STATE.md／FUT_
+MARATHON_STATE.md：US #49/#51/#52已FAIL結案、#50因tick累積不足
+（12/20）+ gate50三條件總司令尚未回應維持阻塞（`- [ ]`0項，依2026-09-15
+裁示中途不重複回報tick進度）；FUT例外條款複核確認不成立（round562），
+兩軌皆連續多輪確認無新可推進工作單位，**這輪並非「久未碰所以優先」，
+是「久未碰是因為沒有新東西」**。同時發現TW軌剛完成的
+`籌碼原子.補上櫃三大法人歷史.收尾重評`（DevQueue cycle 20260922-160102）
+產出一個具體、尚未執行的新研究工作單位：三大法人族（T86）宇宙覆蓋率
+因併入上櫃資料由50.5%→87.8%，`ATOM_CHIP_IC_MAP_SPEC.md`第12節明文
+「若要重新檢定三大法人族，屬於新一輪試驗，須另行register_trial()登記，
+不能沿用#317的判定」且「是否重跑由研究帽輪次另行排入佇列」——這正是
+研究帽輪次該做的事，判斷優先做這個而非重複第N次記錄US/FUT空轉。
+**本輪工作單位（戴研究帽）**：重跑`chip_atom_ic_map.py --tier A`
+（沿用`ATOM_CHIP_IC_MAP_SPEC.md`原規格，宇宙/表達式/判定規則不變，
+差異只在`chip_atom_library.load_t86_by_stock()`已併入上櫃三大法人快取），
+用`--tag _otc`輸出至`chip_atom_ic_map_result_A_otc.json`避免蓋掉
+`#317`原始結果（保留稽核軌跡）。**[自行裁量，發現並記錄debt]**首次
+`run_detached.py submit`未帶`--cwd`預設解到`REPO_ROOT`（alpha-app根目錄）
+找不到腳本，exit=2；第二次補`--cwd research`因bash當時cwd已在research/
+內解出雙重前綴`research/research`，`NotADirectoryError`（與
+`籌碼原子.補上櫃三大法人歷史`條目記錄過的同一種`--cwd`相對路徑陷阱同型，
+確認須用絕對路徑`--cwd "C:/alpha/alpha-app/research"`）；過程中一個
+失敗的submit產生孤兒watchdog條目（`20260922-163434-d862`），已用
+`run_detached.py reap`清除。**第三次submit成功**（job
+`20260922-163454-eca1`，timeout 30分鐘），session內`wait --max-min 4`
+仍`STILL_RUNNING`（3分鐘時已印出「宇宙U：392檔；表達式=67（Tier A）」
+與兩個horizon的snapshot數，計算量與原始#317跑法同量級），轉交下一輪
+收成。**解除條件（下一輪第一件事）**：`run_detached.py status`確認
+`20260922-163454-eca1`狀態變成`finished`/`failed`/`timeout`；`finished`
+則讀`chip_atom_ic_map_result_A_otc.json`，跑聚合腳本
+（`chip_atom_ic_map_aggregate.py`，需確認是否要帶`--tag _otc`或新增
+對應參數）產生分年/牛熊段/樸此基準/共線分群數字，依`ATOM_CHIP_IC_MAP_
+SPEC.md`第7節判定規則（事前綁定，不得因看到結果而調整）判(a)/(b)，
+用`register_trial()`登記為**新試驗**（不沿用#317編號），更新
+`CHIP_ATOM_IC_MAP.md`與`TW_LEADS.md`；`timeout`則檢視是否需要提高
+timeout或改用`fin_atom_ic_map.py`同款的記憶體/效能修法。`trial_
+registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪開工前執行exit=0
+PASS（329列，本輪未新增判定，因結果尚未產出）。`validation/holdout.py::
+is_holdout_consumed()`開工前確認`False`（Tier A全程只讀`VAL_END`以前
+快取，不觸碰holdout）。未動`alpha.db`/`fetch.py`/`parsers.py`/
+`config.py`凍結區，零新增外部API呼叫（`chip_atom_ic_map.py`只讀本機
+既有快取，docstring明文「不發任何API請求」）。`PROGRESS_HEARTBEAT.jsonl`
+已append本輪一行。**交辦佇列還剩0條未開始**（`財報原子.補快取`
+`- [!]`冷卻中，17:0x後解除）。等待審閱：0件。**下一輪**：優先收成
+`20260922-163454-eca1`（見上）；若已完成且判定產出，`財報原子.補快取`
+17:0x後可續投b17；US/FUT依累積輪替下一輪建議選其中之一（本輪TW的
+偏離屬一次性，不改變既有輪替原則）。完整見`ATOM_CHIP_IC_MAP_SPEC.md`
+第12節、`PENDING_QUEUE.md`「籌碼原子.補上櫃三大法人歷史.收尾重評」
+條目。
+
+
 （第596輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
