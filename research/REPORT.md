@@ -9,6 +9,17 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第593輪 · 2026-09-22T12:30+08:00 · TW · 交辦優先於自走，收成GATE_SEQUENCE驗證背景job並判定FAIL，續跑兩項FinMind/TPEx回補 · 新判定2筆（#325/#326皆FAIL），兩項回補進度推進
+
+- 取鎖乾淨（cycle`20260922-123037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝2（`財報原子.補快取`／`籌碼原子.補上櫃三大法人歷史`，皆持續回補中），優先收成round592投遞的背景job。
+- **收成`方法.三續.GATE_SEQUENCE驗證`**：`run_detached.py status`確認`20260922-104311-7d2c`狀態`finished`（8.8min，`expect_exists=True`），讀`event_driven_gate_sequence_result.json`——E1財報公布(SUE,n=6706)與E2月營收公布(SUE,n=20339)皆**FAIL**，共同敗因是gate2隨機控制組（訊號統計量0.0064/0.0039，皆未超過控制組最大值0.0093/0.0055，2026-09-07標準升級要求超過最大值非僅高百分位），E2另外train_val_oos正負號翻轉(train+0.0065→val-0.0008)也未過。E1的train_val_oos/成本敏感度/leave_one_out三關皆PASS。`register_trial()`登記`TRIALS_LEDGER.md`#325(E1,failed_gates=['gate2'])/#326(E2,failed_gates=['gate2','unknown'])，寫入`STRATEGY_GRAVEYARD.md`「事件驅動SUE訊號」段落與`TW_LEADS.md`#19，`PENDING_QUEUE.md`該條目標`[x]`完成。事件驅動大類（E1/E2）結案FAIL，地基程式碼保留供未來變體重用。
+- **續投`財報原子.補快取`**：距上次FinMind請求（07:47:39）已逾4.75小時，冷卻早解除，投b11/b12（絕對路徑`--cwd`修正之前的相對路徑翻車，job`20260922-123258-a622`／`20260922-123752-49c7`，共188次請求全成功0個402），remaining_pairs 2077→1889。`fin_atom_coverage.py`重跑：total_assets全體57.6%（前53.9%）、equity 52.0%、inventory 54.3%、receivable 55.4%、ocf 52.5%，五者仍<60%→維持`- [ ]`續補。
+- **確認`籌碼原子.補上櫃三大法人歷史`batch3**：`20260922-115518-f116`（round592投遞）`exit=0`（16.9min），累計快取811→1111/1718，remaining=607；本輪單工作槽讓給FinMind回補，未投batch4。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（328列，最大編號#326）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，全程零新增外部API呼叫（FinMind/TPEx請求皆計入既有額度追蹤機制，非「未追蹤呼叫」）。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（皆持續回補中，非新交辦）。等待審閱：0件。
+- **下一輪**：續投`財報原子.補快取`b13/b14或`籌碼原子.補上櫃三大法人歷史`batch4（單工作槽輪流，優先覆蓋率離60%較遠者）；`MARATHON_PROTOCOL.md`0a節四條方向現況需重新盤點是否已全數窮盡。
+
+---
 ## 第592輪 · 2026-09-22T11:32+08:00 · TW · 債務帽：交辦優先於自走，續跑兩項FinMind/TPEx歷史回補 · 無新判定，兩項回補進度推進
 
 - 取鎖乾淨（cycle`20260922-113036`）。開工先讀`PENDING_QUEUE.md`，`- [ ]`＝0，逐一檢查`- [!]`阻塞項有無解除。
