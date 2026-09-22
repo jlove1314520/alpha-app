@@ -4,6 +4,48 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-22T17:4x+08:00（馬拉松第598輪，驗證帽）**——
+取鎖乾淨。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=0，
+只有`財報原子.補快取`等既有`- [!]`冷卻中（預計17:0x解除，見下方接續
+處理）。**本輪工作單位＝收成上一輪（第597輪）投遞的`chip_atom_ic_map.py
+--tier A --tag _otc`job**（`20260922-163454-eca1`，`run_detached.py
+status`確認`finished`/`exit=0`/耗時25.4min，log顯示宇宙U392檔、表達式
+67、horizon20有183個snapshot／horizon60有61個，已存
+`chip_atom_ic_map_result_A_otc.json`）。**戴驗證帽**：
+1. 幫`chip_atom_ic_map_aggregate.py`加`--tag`參數（讀寫`_otc`後綴檔名，
+   不動預設無tag行為，原`chip_atom_ic_map_aggregate.json`/
+   `CHIP_ATOM_IC_MAP.md`/parquet全部未變動，已用`git status`核對）。
+2. 跑`python chip_atom_ic_map_aggregate.py --tag _otc`，輸出
+   `chip_atom_ic_map_aggregate_otc.json`/`CHIP_ATOM_IC_MAP_otc.md`。
+3. 依`ATOM_CHIP_IC_MAP_SPEC.md`第7節事前綁定判定：條件1（20日p=0.913、
+   60日p=0.924，皆遠高於0.01門檻）與條件2（高階篩選兩horizon皆通過0個，
+   未超過樸素期望上界）**皆不成立→分支(b)FAIL**。與#317（併入前，
+   20日p=0.913／60日p=0.986）幾乎相同，證明併入上櫃三大法人（T86族
+   有效覆蓋50.5%→87.8%）**沒有改變結論方向**，排除「#317是檢定力不足」
+   的疑慮。
+4. `register_trial()`登記為**新試驗#328**（不沿用#317編號，依規格第12節
+   要求），`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+   PASS（330列）；`selection_bias_ledger.py`重跑更新（N全體330，
+   分軌TW=142）。更新`STRATEGY_GRAVEYARD.md`新增條目（緊接#317之前）、
+   `ATOM_CHIP_IC_MAP_SPEC.md`第10節追記結案。**不寫入`TW_LEADS.md`**
+   （FAIL不進候選清單）。
+5. **佇列深度自檢**：`- [ ]`=0（低於門檻12），依既有規則本輪收工前需
+   補件——但`財報原子.補快取`距上次請求（16:11:46）已逾79分鐘，冷卻
+   早已解除，[自行裁量]優先轉回`- [ ]`續投b17/b18（單工作槽此刻空閒，
+   `run_detached.py status`確認running=0），比另外湊補件更符合「有債務
+   優先做債務」精神，佇列深度留給下一輪若仍<12再處理。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`；
+未動凍結區；零新增外部API呼叫（`chip_atom_ic_map_aggregate.py`只讀本機
+parquet/json）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列
+還剩0條未開始**。等待審閱：0件。**下一輪**：若本輪已續投
+`財報原子.補快取`b17/b18，下一輪先`run_detached.py status`收成並重跑
+`fin_atom_coverage.py`；否則17:0x後續投。US/FUT依累積輪替下一輪建議
+選其中之一。完整見`ATOM_CHIP_IC_MAP_SPEC.md`第10節、
+`STRATEGY_GRAVEYARD.md`「原子.六（併入上櫃三大法人重測）」條目、
+`PENDING_QUEUE.md`「財報原子.補快取」條目。
+
+---
+
 **最後更新：2026-09-22T16:3x+08:00（馬拉松第597輪）**——
 取鎖乾淨（cycle`20260922-163037`）。開工先照「交辦優先於自走」讀
 `PENDING_QUEUE.md`：`- [ ]`=0（`籌碼原子.補上櫃三大法人歷史`已於
@@ -99,48 +141,3 @@ b15/b16（優先覆蓋率離60%較遠者：equity/inventory/receivable/ocf）；
 順手修`backfill_tpex_3insti_history.py`的`remaining`欄位算法（低優先，
 純debt）。完整見`PENDING_QUEUE.md`籌碼原子.補上櫃三大法人歷史條目。
 
----
-
-**最後更新：2026-09-22T14:4x+08:00（馬拉松第595輪）**——
-取鎖乾淨（cycle`20260922-143037`）。開工先照「交辦優先於自走」讀
-`PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
-法人歷史`），皆持續回補中。**先確認上一輪投遞的TPEx batch4**
-（job`20260922-133117-9ffe`）`exit=0`（17.4min），累計快取1111→1411/1718，
-remaining=307。**FinMind額度距上次請求（12:42:32）已逾1.8小時，冷卻早
-解除**，本輪工作單位＝續投`財報原子.補快取`b13/b14：
-`run_detached.py submit --name fin_atom_cache_backfill_b13 --timeout-min 15
---cwd . -- python -u backfill_fin_atom_cache.py --batch-size 50`
-（job`20260922-143130-7a32`，session內等待4.6min後`finished`，92次請求
-全成功0個402），接續投b14（job`20260922-143622-bfde`，4.4min後
-`finished`，87次請求全成功0個402），本小時累計179次請求接近既有
-190次/小時安全上限，本輪不再續投。remaining_pairs 1889→1710。
-`fin_atom_coverage.py`重跑：**total_assets全體61.0%（前57.6%）首度
-轉OK**、equity 55.0%（前52.0%）、inventory 57.5%（前54.3%）、
-receivable 58.7%（前55.4%）、ocf 56.3%（前52.5%）——四者仍<60%→(a)
-未達，維持`- [ ]`續補。FinMind批次收成後單工作槽空出，續投
-`籌碼原子.補上櫃三大法人歷史`batch5：`run_detached.py submit
---name tpex3insti_hist_b5 --timeout-min 25 --cwd . --
-python -u backfill_tpex_3insti_history.py --batch-size 300`
-（job`20260922-144247-c12b`），依歷史批次耗時約16~17min＞本輪剩餘時間
-安全邊際，session內未等待完成，留給下一輪`run_detached.py status`收成。
-**佇列深度自檢**：`- [ ]`僅2項，低於`queue_depth_config.py`門檻12——
-沿用round594/593判斷（掃描`TW_LEADS.md`/`STRATEGY_GRAVEYARD.md`/
-`HYPOTHESIS_QUEUE.md`後仍只有「需先設計具體構造才能開跑」的候選，
-`#76`屬hypothesis_queue自己獨立自走軌道不重複灌入），**本輪判斷維持
-現況2項、不硬湊新項**。`trial_registry.py --check`（`PYTHONIOENCODING=
-utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。
-`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
-未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，FinMind請求
-皆計入既有額度追蹤，TPEx確認查詢零新增外部API呼叫追蹤外的用量。
-`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
-（皆持續回補中，非新交辦）。等待審閱：0件。**下一輪**：先
-`run_detached.py status`確認`20260922-144247-c12b`是否`finished`並視
-remaining決定是否需batch6；`財報原子.補快取`本小時額度已接近上限，
-下一批最早15:4x台北，優先回補equity/inventory/receivable/ocf四項
-（覆蓋率離60%最遠者優先）；`STRATEGY_GRAVEYARD.md`「事件驅動」結案後，
-若總司令核准可評估`MARATHON_PROTOCOL.md`0a節四條方向是否已全數窮盡。
-完整見`PENDING_QUEUE.md`財報原子.補快取／籌碼原子.補上櫃三大法人歷史
-條目。
-
-
-（第594輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）

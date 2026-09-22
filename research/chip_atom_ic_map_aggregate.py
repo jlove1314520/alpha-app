@@ -27,6 +27,7 @@
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import sys
@@ -115,8 +116,8 @@ def clusters(snap: pd.DataFrame, cols: list[str], thr: float = 0.7) -> dict[str,
     return {c: ids[r] for c, r in roots.items()}
 
 
-def aggregate_h(h: int) -> dict | None:
-    p = HERE / f"chip_atom_ic_snapshots_A_h{h}.parquet"
+def aggregate_h(h: int, tag: str = "") -> dict | None:
+    p = HERE / f"chip_atom_ic_snapshots_A_h{h}{tag}.parquet"
     if not p.exists():
         return None
     snap = pd.read_parquet(p)
@@ -186,8 +187,8 @@ def aggregate_h(h: int) -> dict | None:
     }
 
 
-def write_md(res: list[dict], meta: dict) -> None:
-    L = ["# CHIP_ATOM_IC_MAP（原子.六 Tier A 聚合，機器產生，未下判定）", "",
+def write_md(res: list[dict], meta: dict, tag: str = "") -> None:
+    L = [f"# CHIP_ATOM_IC_MAP{tag}（原子.六 Tier A 聚合，機器產生，未下判定）", "",
          "> 產生腳本：`research/chip_atom_ic_map_aggregate.py`；規格：`ATOM_CHIP_IC_MAP_SPEC.md`（事前登記）。",
          "> **本檔只呈現零件層級分布，不列任何單一表達式為「表現好的」；判定（規格第7節）與試驗登記由驗證帽輪次做。**",
          "> Tier B（借券賣出餘額族）**未檢驗**（SBL未回補，規格第7節：記未檢驗、不記FAIL）。",
@@ -213,19 +214,22 @@ def write_md(res: list[dict], meta: dict) -> None:
             ps_ = v["positive_share"]
             L.append(f"| {y} | {v['n_snap']} | {v['n_expr']} | {ps_ if ps_ is None else round(ps_, 3)} |")
         L.append("")
-    (HERE / "CHIP_ATOM_IC_MAP.md").write_text("\n".join(L), encoding="utf-8")
+    (HERE / f"CHIP_ATOM_IC_MAP{tag}.md").write_text("\n".join(L), encoding="utf-8")
 
 
 def main() -> int:
-    res = [r for h in HORIZONS if (r := aggregate_h(h))]
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag", default="", help="讀/寫檔名後綴，對應chip_atom_ic_map.py同名參數，避免蓋掉原始結果")
+    a = ap.parse_args()
+    res = [r for h in HORIZONS if (r := aggregate_h(h, a.tag))]
     meta = {}
-    mp = HERE / "chip_atom_ic_map_result_A.json"
+    mp = HERE / f"chip_atom_ic_map_result_A{a.tag}.json"
     if mp.exists():
         m = json.loads(mp.read_text(encoding="utf-8"))
         meta = {k: m.get(k) for k in ("n_stocks_requested", "n_stocks_used", "n_with_t86", "skipped_snapshots")}
-    (HERE / "chip_atom_ic_map_aggregate.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
-    write_md(res, meta)
-    print(f"已輸出 chip_atom_ic_map_aggregate.json＋CHIP_ATOM_IC_MAP.md（{len(res)}個horizon）")
+    (HERE / f"chip_atom_ic_map_aggregate{a.tag}.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_md(res, meta, a.tag)
+    print(f"已輸出 chip_atom_ic_map_aggregate{a.tag}.json＋CHIP_ATOM_IC_MAP{a.tag}.md（{len(res)}個horizon）")
     return 0
 
 

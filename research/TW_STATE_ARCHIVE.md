@@ -635,3 +635,47 @@ utf-8`）exit=0 PASS（328列，本輪未新增判定，純債務/維運性質�
 較遠者，目前ocf/equity差距最大）；`STRATEGY_GRAVEYARD.md`「事件驅動」
 結案後，若總司令核准可評估`MARATHON_PROTOCOL.md`0a節四條方向是否已
 全數窮盡。完整見`PENDING_QUEUE.md`籌碼原子.補上櫃三大法人歷史條目。
+
+**最後更新：2026-09-22T14:4x+08:00（馬拉松第595輪）**——
+取鎖乾淨（cycle`20260922-143037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
+法人歷史`），皆持續回補中。**先確認上一輪投遞的TPEx batch4**
+（job`20260922-133117-9ffe`）`exit=0`（17.4min），累計快取1111→1411/1718，
+remaining=307。**FinMind額度距上次請求（12:42:32）已逾1.8小時，冷卻早
+解除**，本輪工作單位＝續投`財報原子.補快取`b13/b14：
+`run_detached.py submit --name fin_atom_cache_backfill_b13 --timeout-min 15
+--cwd . -- python -u backfill_fin_atom_cache.py --batch-size 50`
+（job`20260922-143130-7a32`，session內等待4.6min後`finished`，92次請求
+全成功0個402），接續投b14（job`20260922-143622-bfde`，4.4min後
+`finished`，87次請求全成功0個402），本小時累計179次請求接近既有
+190次/小時安全上限，本輪不再續投。remaining_pairs 1889→1710。
+`fin_atom_coverage.py`重跑：**total_assets全體61.0%（前57.6%）首度
+轉OK**、equity 55.0%（前52.0%）、inventory 57.5%（前54.3%）、
+receivable 58.7%（前55.4%）、ocf 56.3%（前52.5%）——四者仍<60%→(a)
+未達，維持`- [ ]`續補。FinMind批次收成後單工作槽空出，續投
+`籌碼原子.補上櫃三大法人歷史`batch5：`run_detached.py submit
+--name tpex3insti_hist_b5 --timeout-min 25 --cwd . --
+python -u backfill_tpex_3insti_history.py --batch-size 300`
+（job`20260922-144247-c12b`），依歷史批次耗時約16~17min＞本輪剩餘時間
+安全邊際，session內未等待完成，留給下一輪`run_detached.py status`收成。
+**佇列深度自檢**：`- [ ]`僅2項，低於`queue_depth_config.py`門檻12——
+沿用round594/593判斷（掃描`TW_LEADS.md`/`STRATEGY_GRAVEYARD.md`/
+`HYPOTHESIS_QUEUE.md`後仍只有「需先設計具體構造才能開跑」的候選，
+`#76`屬hypothesis_queue自己獨立自走軌道不重複灌入），**本輪判斷維持
+現況2項、不硬湊新項**。`trial_registry.py --check`（`PYTHONIOENCODING=
+utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
+未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，FinMind請求
+皆計入既有額度追蹤，TPEx確認查詢零新增外部API呼叫追蹤外的用量。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（皆持續回補中，非新交辦）。等待審閱：0件。**下一輪**：先
+`run_detached.py status`確認`20260922-144247-c12b`是否`finished`並視
+remaining決定是否需batch6；`財報原子.補快取`本小時額度已接近上限，
+下一批最早15:4x台北，優先回補equity/inventory/receivable/ocf四項
+（覆蓋率離60%最遠者優先）；`STRATEGY_GRAVEYARD.md`「事件驅動」結案後，
+若總司令核准可評估`MARATHON_PROTOCOL.md`0a節四條方向是否已全數窮盡。
+完整見`PENDING_QUEUE.md`財報原子.補快取／籌碼原子.補上櫃三大法人歷史
+條目。
+
+
+（第594輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
