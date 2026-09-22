@@ -501,7 +501,12 @@ sequence.py`自己這4關的呼叫順序1~4）。實測現行程式碼：
   最終FAIL。**E1與E2至此雙雙結案FAIL，事件驅動大類沒有候選存活**。
   **續.C不適用**：續.B未過，依裁示「僅當續.A+續.B皆過才做」，不動用
   holdout、無需回報holdout三項。`trial_registry.py --check`PASS（336列，
-  最大編號#334）；`selection_bias_ledger.py`重跑N=336。
+  最大編號#334，本輪CC自己的登記完整止於此）；`selection_bias_ledger.py`
+  當時重跑N=336。**追記**：commit推送延遲期間自走軌道（round594）未查
+  既有帳本就重跑同一分析，產生重複登記#335~#337（數字與#332~#334逐項
+  相同），已在`selection_bias_ledger.py`新增`KNOWN_DUPLICATE_IDS`機制
+  正式排除（散文更正說明不會自動生效，見`PROGRESS.md`本日條目「三」），
+  目前帳本實際N_all=339、N_valid=335。
   **[自行裁量，已於動工前記錄並驗證]**：裁示第5點「failed_gates閘門
   編號不一致」查證後判斷不是真bug（gate2/gate4/gate5是全域語意編號非
   本地呼叫序號，語意皆正確），已改名`g1`~`g4`為語意化變數名降低未來
@@ -635,12 +640,44 @@ sequence.py`自己這4關的呼叫順序1~4）。實測現行程式碼：
    是「分位歸類級」精度（PBR×權益粗估，從未宣稱權重重建級精度），
    不需要額外降級動作，維持原樣不動。
 
-- [ ] **規.一** [債務] 作廢與歸檔`CORE_TILT_SPEC.md`（TE門檻/市值權重
-  傾斜建構法/持股60~80檔/0050成份股清單與權重重建全部連帶作廢，歸檔
-  不刪，見上方原文與[自行裁量]）；確認repo內是否已有0050含息總報酬
-  與S&P500 Total Return序列（涵蓋期間/是否含息），沒有則列≥3獨立合法
-  來源提案不自己先抓。心跳＝`research/archive/CORE_TILT_SPEC.md`存在＋
-  `PROGRESS.md`更新。完成即回報，不等規.二/規.三。
+- [x] **規.一** [債務] 【✅完成2026-09-23，互動視窗CC】
+  **歸檔（git mv保留歷史）**：`CORE_TILT_SPEC.md`／`CORE_TILT_TE_
+  FEASIBILITY.md`／`implied_market_cap_validation.py`→
+  `research/archive/`，三檔案頭都加SUPERSEDED notice（理由+裁示日期，
+  原內容原樣保留供稽核追溯）。`core_tilt_backtest.py`**不整支歸檔**
+  （`build_market_cap_lookup()`/`market_cap_at_date()`仍被
+  `event_driven_prototype.py`控制組市值分位配對使用，實測`grep`確認
+  相依），改為檔頭加「部分SUPERSEDED」notice，說明哪些函式仍在用、
+  哪些（`build_target_weights()`等TE建構邏輯）已隨SPEC作廢。`py_compile`
+  與`event_driven_prototype`匯入皆確認未破壞。
+  **基準序列查證結果（只查不抓，見下方）**：
+  - **TW 0050**：`adjust.adjusted_price_series("0050",...)`（yfinance
+    auto_adjust=True，含股利還原，total-return-like）**已存在**，但實測
+    覆蓋僅2009-01-02~2024-12-30——**缺2003-2008（含2008金融海嘯）**，
+    與規.二必答問題(c)「MDD須涵蓋2008與2022」直接衝突。`research/data/
+    raw/TaiwanStockPrice__0050__2003-01-01__2024-12-31.parquet`（5304列，
+    2003-06-30起）與`TaiwanStockDividend__0050__2003-01-01__2024-12-31.
+    parquet`（28筆股利事件，2005起）**已快取在repo內**，理論上可建構
+    完整2003-2024含息序列，但目前沒有任何函式這樣做（現成
+    `adjusted_price_series`只走yfinance路徑，FinMind回退路徑存在但
+    對0050這檔沒被觸發，原因未查——不在本輪範圍）。**這是建構/工程
+    任務，需要先提案**（規.一.4原文「先做一件事並回報」，不含動手建）。
+  - **US S&P500**：repo內既有用法（`spillover_overnight_gate.py::
+    _daily_returns("^GSPC")`）用的是`^GSPC`（**價格報酬指數，不含
+    股利**），**不是**Total Return序列，目前**沒有**S&P500 Total Return
+    序列存在。候選來源（提案，未動手抓）：①Yahoo Finance `^SP500TR`
+    （官方S&P500 Total Return指數ticker，跟`^GSPC`同一套`yf_price_
+    client.py`基礎設施可直接沿用）；②SPY ETF（SPDR S&P 500 ETF
+    Trust）股利還原收盤價，跟0050的`adjusted_price_series`同一套做法；
+    ③FRED（`fred_yield_curve_gate.py`已有FRED串接基礎設施，但FRED的
+    `SP500`系列是價格指數非total return，需先查證FRED有無TR變體，
+    本輪未查）；④S&P Dow Jones Indices官方（spglobal.com），可能需
+    付費訂閱，依CLAUDE.md取得方式鐵律標「待採購」查價。
+  **[自行裁量]**：0050缺口與S&P500 TR全缺，兩者都需要新的建構/抓取
+  工程，依「提案先於執行」規則，本輪只查證回報，不逕自動手抓取或
+  建構——留待總司令裁示要不要授權建構（尤其0050那段可能只需要重用
+  已快取資料，成本遠低於S&P500 TR需要新抓取）。
+  心跳＝`research/archive/CORE_TILT_SPEC.md`存在＋`PROGRESS.md`更新。
 - [ ] **規.二** [研究] 建立`CONCENTRATED_SPEC.md`（只寫規格不實作，
   目標函數/天條對應/待測參數(5×3×4網格不得全掃，需提案抽樣法)/選擇
   驗證紀律/三個必答問題，見上方原文）。待規.一完成後接續；參數掃描

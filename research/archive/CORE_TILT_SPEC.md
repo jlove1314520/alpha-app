@@ -1,3 +1,17 @@
+> **⚠️ SUPERSEDED（2026-09-23總司令裁示【拆除機構約束，改集中版】規.一）**：
+> 本檔案已作廢，移入`research/archive/`保留稽核軌跡，不得再依此規格
+> 開新試驗。作廢理由——總司令裁示目標函數收斂為單一條「贏0050/
+> S&P500總報酬」（天條二），不再對標機構化指標（TE≤2.5%、市值權重
+> 為底+因子傾斜建構法、持股60~80檔、0050成份股清單與權重重建全部
+> 連帶作廢）。取代規格見`research/CONCENTRATED_SPEC.md`（規.二，
+> 集中版）。本檔案下方內容原樣保留供稽核追溯「為什麼TE路線被放棄」，
+> 不代表現行有效規則。`implied_market_cap_validation.py`已一併歸檔
+> 至`research/archive/`（實測`grep`確認沒有任何其他檔案import它，
+> 不是方法.二/方法.三控制組市值分位配對的實際來源——那個用的是
+> `core_tilt_backtest.py::build_market_cap_lookup()`，PBR×權益法，
+> 該工具本身仍在使用中，只是TE約束建構邏輯部分已隨本檔案一併作廢，
+> 見`core_tilt_backtest.py`檔頭的SUPERSEDED notice）。
+
 # CORE_TILT_SPEC.md — 基準相對傾斜（core_tilt）策略規格書（v3，2026-09-18修訂）
 
 **狀態：v1核准附三處必改→v2依裁示修訂（四件事）→總司令裁示【市值

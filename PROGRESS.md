@@ -1,3 +1,68 @@
+## 2026-09-23（互動視窗CC，研究帽＋債務帽，方法.三續.E1重判 ＋ 規.一）
+
+**一、方法.三續.E1重判**（總司令裁示【方法.三續 E1依登記判準重判】）：
+`event_driven_gate_sequence.py::gate_random_control`原用未登記的
+`median_diff`決定生死（方法.二登記判準是(b)P90差異或(c)右尾佔比），
+是執行偏離。**續.A**改為(b)/(c)/(d)三統計量共用同一批1000次null重抽，
+判準=訊號值嚴格超過第999名（單尾p<=0.001）。結果：(b)通過、(c)未過、
+(d)通過，OR判準下整體通過，4關全過，E1改判CHEAP_PASS（`TRIALS_LEDGER.
+md`#332/#333）。**續.B**新增事件日前60交易日已實現波動度五分位第4
+配對維度（PIT安全，`event_driven_prototype.py`新增`pre_event_vol`/
+`vol_quantile`/`bucket_key_vol`），3維p90_diff=+0.0413→4維+0.0178，
+**崩掉56.9%（門檻50%）**——續.A通過的(b)判準顯著性主要來自波動度
+效應非alpha，**E1最終改判FAIL**（`TRIALS_LEDGER.md`#334）。E1/E2至此
+雙雙結案FAIL，事件驅動大類無存活候選，續.C不適用。已更正
+`STRATEGY_GRAVEYARD.md`/`TW_LEADS.md`#19（不刪舊文字，加⚠️更正標記，
+兩階段：先標CHEAP_PASS再標最終FAIL，完整保留推理過程）。順手查證裁示
+第5點「failed_gates編號不一致」主張，判斷不是真bug（gate2/4/5是全域
+共用語意編號非本地呼叫序號，語意皆正確），已改名區域變數降低誤讀
+風險，未改動輸出值。
+
+**二、規.一：拆除機構約束**（總司令裁示【拆除機構約束，改集中版】
+規.一）：目標函數收斂為單一條「贏0050/S&P500總報酬」（天條二），
+`CORE_TILT_SPEC.md`／`CORE_TILT_TE_FEASIBILITY.md`／`implied_market_
+cap_validation.py`歸檔至`research/archive/`（`git mv`保留歷史，
+檔頭加SUPERSEDED notice）。**查證更正**：實測`grep`確認`implied_
+market_cap_validation.py`沒有被任何檔案import，不是方法.二/方法.三
+控制組市值分位配對的實際來源（那個用`core_tilt_backtest.py::
+build_market_cap_lookup()`，PBR×權益法）——裁示原文對此檔案用途的
+描述與程式碼實際情況不符，已回報供更正認知，`core_tilt_backtest.py`
+本身**不整支歸檔**（該函式仍在用），只加部分SUPERSEDED notice。
+**基準序列查證**（只查不抓）：TW 0050 total-return-like序列已存在
+（`adjust.adjusted_price_series`）但覆蓋僅2009-2024，**缺2003-2008
+（含2008金融海嘯）**，與規.二必答問題衝突，已快取的FinMind原始資料
+（2003起）理論上可補但需要新工程、需提案；US S&P500 Total Return
+序列**完全不存在**（既有`^GSPC`用法是價格指數不含股利），已列4個
+候選來源待提案。兩者皆依「提案先於執行」規則暫不動手抓取/建構。
+
+**驗證**：全部觸及`.py`檔`py_compile`過；`tail_test.py`自我測試PASS；
+`event_driven_prototype`匯入確認`core_tilt_backtest.py`未破壞；
+`trial_registry.py --check`PASS（336列）；`selection_bias_ledger.py`
+重跑N=336；`dev_queue_runner`三個檢查函式確認85 key無重複、
+ambiguity=None、mismatch=[]。
+
+**三、順手抓到一個真實bug（自走軌道與本輪並行執行時發現）**：自走
+軌道（round594）在互動視窗CC已完成「方法.三續.E1重判」續.A/續.B之後、
+本輪commit尚未push（網路一度中斷）期間，未查`TRIALS_LEDGER.md`既有
+紀錄就重跑同一分析，產生完全重複的#335/#336/#337（跟CC的#332/#333/
+#334數字逐項相同，交叉驗證了計算本身可重現）。自走軌道有自我糾錯，
+在`TRIALS_LEDGER.md`加了「排除於N/Bonferroni/DSR計算之外」的更正
+說明，**但那只是散文，`selection_bias_ledger.py::parse()`不會讀notes
+欄語意去排除任何列**——光寫更正說明不會真的讓N變乾淨，這正是
+`INCIDENTS.md`事件002「聲稱做了但沒做」同一種失敗形狀，這次在造成
+實際分母偏誤之前先抓到。已在`selection_bias_ledger.py`新增
+`KNOWN_DUPLICATE_IDS`機制（比照既有IRREPRODUCIBLE「仍計入總N、排除
+出有效N」的處理方式，但用明確編號而非verdict文字掃描，因為重複登記
+不是一種verdict語意）。重跑後N_all=339、N_valid=335
+（339−1個IRREPRODUCIBLE−3個重複登記）。**教訓（已寫進
+`selection_bias_ledger.py`註解）**：任何「更正說明」若不對應到程式碼
+真的會讀的機制，就只是一句安慰自己的話，跟沒寫沒有差別。
+
+**下一步**：規.二（`CONCENTRATED_SPEC.md`只寫規格不實作）與規.三
+（`exit_rule_lab.py`出場規則對照）留待下一輪；規.二的參數掃描方式
+（5×3×4網格不得全掃）需另外提案待裁示才准跑；0050/S&P500總報酬序列
+建構需求已回報，待總司令裁示是否授權動工。
+
 ## 2026-09-22 08:0x（互動視窗CC，研究帽，總司令裁示【方法論重建—三條並行】方法.一）
 
 **背景**：總司令質疑「321次試驗全FAIL」是方法問題而非市場問題，裁示

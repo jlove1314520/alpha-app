@@ -217,7 +217,25 @@ def main() -> int:
     # 數字讓使用者自己看差異，不強改下面既有的`survived`/`degraded`邏輯
     # （那本來就已經是逐列核對，不是靠N做粗略篩選）。
     irreproducible_rows = [r for r in rows if r["verdict"] == "IRREPRODUCIBLE"]
-    n_valid = n_all - len(irreproducible_rows)
+
+    # 2026-09-23實測發現的真實bug（不是假設性的）：自走軌道與互動視窗CC
+    # 近乎同時各自重判「方法.三續.E1重判」，自走軌道未查既有帳本就重跑，
+    # 產生跟CC的#332/#333/#334完全重複的三筆登記#335/#336/#337（同一批
+    # 分析、同一組數字）。自走軌道事後在TRIALS_LEDGER.md notes欄加了
+    # 「已排除於任何N/Bonferroni/DSR計算之外」的更正說明，**但這句話只是
+    # 散文，`parse()`的N計數完全不會讀notes欄的語意去排除任何列**——
+    # 光寫更正說明不會真的把它排除掉，這正是INCIDENTS.md事件002「聲稱
+    # 做了但沒做」同一種失敗形狀，這裡在造成實際偏誤之前先抓到並修正。
+    # `trial_registry.py`的append-only設計不允許回頭改寫#335~#337本身
+    # 的判定欄（那會毀掉「當時發生過重複登記」這個稽核證據），所以用
+    # 跟IRREPRODUCIBLE同一種「仍計入總N，但排除出有效N」處理方式，
+    # 差別是靠這裡明確列出試驗編號（而不是掃verdict文字），因為
+    # DUPLICATE不是一種verdict語意（每筆本身的PASS/FAIL判定仍然真實
+    # 有效，問題不在判定對不對，在於這3筆判定的是跟另外3筆完全相同的
+    # 分析，不是3個獨立的統計檢定）。
+    KNOWN_DUPLICATE_IDS = {335, 336, 337}  # 見TRIALS_LEDGER.md #337後方更正說明
+    duplicate_rows = [r for r in rows if r["id"] in KNOWN_DUPLICATE_IDS]
+    n_valid = n_all - len(irreproducible_rows) - len(duplicate_rows)
 
     # ── 分母自查（債務二.2）──────────────────────────────────────────────
     # 每一筆宣稱做過校正的列：當時用的分母 vs 現在的正確分母，結論是否還站得住
@@ -273,9 +291,10 @@ def main() -> int:
     L.append("")
     L.append("| 口徑 | N | Bonferroni 門檻（α=0.05 單邊） |")
     L.append("|---|---:|---:|")
-    L.append(f"| **全體（總N，含IRREPRODUCIBLE）** | {n_all} | {required_percentile(n_all):.4f} 百分位 |")
-    L.append(f"| **有效N（排除IRREPRODUCIBLE，{len(irreproducible_rows)}筆）** | {n_valid} | "
-             f"{required_percentile(n_valid):.4f} 百分位 |")
+    L.append(f"| **全體（總N，含IRREPRODUCIBLE與已知重複登記）** | {n_all} | "
+             f"{required_percentile(n_all):.4f} 百分位 |")
+    L.append(f"| **有效N（排除IRREPRODUCIBLE{len(irreproducible_rows)}筆＋已知重複登記"
+             f"{len(duplicate_rows)}筆）** | {n_valid} | {required_percentile(n_valid):.4f} 百分位 |")
     for t, n in n_track.items():
         L.append(f"| 分軌 {t} | {n} | {required_percentile(n):.4f} 百分位 |")
     L.append("")
@@ -284,6 +303,17 @@ def main() -> int:
                   "仍計入總N但不作為任何評估的可信證據）：")
         for r in sorted(irreproducible_rows, key=lambda x: x["id"]):
             L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
+        L.append("")
+    if duplicate_rows:
+        L.append("**已知重複登記列表**（2026-09-23實測發現：自走軌道與互動視窗CC近乎"
+                  "同時各自重判同一個PENDING_QUEUE條目，自走軌道未先查既有帳本就重跑，"
+                  "跟CC的#332/#333/#334登記了完全相同的分析。自走軌道事後在notes欄加了"
+                  "更正說明但那只是散文，`parse()`不會讀notes語意排除任何列——這裡改用"
+                  "`KNOWN_DUPLICATE_IDS`明確列出試驗編號才是真的把它們排除出有效N，"
+                  "散文本身不會自動生效，這是動工中自我糾錯，不是總司令發現才修）：")
+        for r in sorted(duplicate_rows, key=lambda x: x["id"]):
+            L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}——與"
+                     f"#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明")
         L.append("")
     L.append("## 2. 分母自查（債務二.2）")
     L.append("")

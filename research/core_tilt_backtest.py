@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
-"""
-core_tilt SPEC（`CORE_TILT_SPEC.md` v3）TE可行性驗證（2026-09-19總司令裁示
+"""⚠️ 部分SUPERSEDED（2026-09-23總司令裁示【拆除機構約束，改集中版】規.一）：
+`CORE_TILT_SPEC.md`已作廢並歸檔至`research/archive/`（目標函數改為單一
+「贏0050/S&P500總報酬」，TE約束/市值權重為底+因子傾斜建構法/持股60~80檔
+全數連帶作廢）。**本檔案不整支歸檔**——`build_market_cap_lookup()`/
+`market_cap_at_date()`（PBR×權益法市值估計）仍被`event_driven_
+prototype.py`（方法.二/方法.三）的控制組市值分位配對使用，實測`grep`
+確認至少這一處相依，不得移除或破壞介面。本檔案其餘部分（`build_target_
+weights()`等TE約束下的市值加權+因子傾斜+產業中性建構邏輯）已隨
+`CORE_TILT_SPEC.md`一併作廢，不再是現行策略建構方式，保留原樣供稽核
+追溯，新試驗一律走`research/CONCENTRATED_SPEC.md`（規.二）。
+
+core_tilt SPEC（`CORE_TILT_SPEC.md` v3，已作廢，見上方notice）TE可行性
+驗證（2026-09-19總司令裁示
 【#63邊緣案例＋安全邊際倍數重新錨定】三，成本.二稽核fork執行）。
 
 **問題**：`成本.三`發現12組既有構造（`portfolio_multifactor_v2`）在新統計
