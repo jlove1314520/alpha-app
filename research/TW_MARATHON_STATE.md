@@ -4,6 +4,49 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-22T14:4x+08:00（馬拉松第595輪）**——
+取鎖乾淨（cycle`20260922-143037`）。開工先照「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
+法人歷史`），皆持續回補中。**先確認上一輪投遞的TPEx batch4**
+（job`20260922-133117-9ffe`）`exit=0`（17.4min），累計快取1111→1411/1718，
+remaining=307。**FinMind額度距上次請求（12:42:32）已逾1.8小時，冷卻早
+解除**，本輪工作單位＝續投`財報原子.補快取`b13/b14：
+`run_detached.py submit --name fin_atom_cache_backfill_b13 --timeout-min 15
+--cwd . -- python -u backfill_fin_atom_cache.py --batch-size 50`
+（job`20260922-143130-7a32`，session內等待4.6min後`finished`，92次請求
+全成功0個402），接續投b14（job`20260922-143622-bfde`，4.4min後
+`finished`，87次請求全成功0個402），本小時累計179次請求接近既有
+190次/小時安全上限，本輪不再續投。remaining_pairs 1889→1710。
+`fin_atom_coverage.py`重跑：**total_assets全體61.0%（前57.6%）首度
+轉OK**、equity 55.0%（前52.0%）、inventory 57.5%（前54.3%）、
+receivable 58.7%（前55.4%）、ocf 56.3%（前52.5%）——四者仍<60%→(a)
+未達，維持`- [ ]`續補。FinMind批次收成後單工作槽空出，續投
+`籌碼原子.補上櫃三大法人歷史`batch5：`run_detached.py submit
+--name tpex3insti_hist_b5 --timeout-min 25 --cwd . --
+python -u backfill_tpex_3insti_history.py --batch-size 300`
+（job`20260922-144247-c12b`），依歷史批次耗時約16~17min＞本輪剩餘時間
+安全邊際，session內未等待完成，留給下一輪`run_detached.py status`收成。
+**佇列深度自檢**：`- [ ]`僅2項，低於`queue_depth_config.py`門檻12——
+沿用round594/593判斷（掃描`TW_LEADS.md`/`STRATEGY_GRAVEYARD.md`/
+`HYPOTHESIS_QUEUE.md`後仍只有「需先設計具體構造才能開跑」的候選，
+`#76`屬hypothesis_queue自己獨立自走軌道不重複灌入），**本輪判斷維持
+現況2項、不硬湊新項**。`trial_registry.py --check`（`PYTHONIOENCODING=
+utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
+未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，FinMind請求
+皆計入既有額度追蹤，TPEx確認查詢零新增外部API呼叫追蹤外的用量。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（皆持續回補中，非新交辦）。等待審閱：0件。**下一輪**：先
+`run_detached.py status`確認`20260922-144247-c12b`是否`finished`並視
+remaining決定是否需batch6；`財報原子.補快取`本小時額度已接近上限，
+下一批最早15:4x台北，優先回補equity/inventory/receivable/ocf四項
+（覆蓋率離60%最遠者優先）；`STRATEGY_GRAVEYARD.md`「事件驅動」結案後，
+若總司令核准可評估`MARATHON_PROTOCOL.md`0a節四條方向是否已全數窮盡。
+完整見`PENDING_QUEUE.md`財報原子.補快取／籌碼原子.補上櫃三大法人歷史
+條目。
+
+---
+
 **最後更新：2026-09-22T13:3x+08:00（馬拉松第594輪）**——
 取鎖乾淨（cycle`20260922-133037`）。開工先照「交辦優先於自走」讀
 `PENDING_QUEUE.md`：`- [ ]`=2（`財報原子.補快取`／`籌碼原子.補上櫃三大
@@ -84,35 +127,4 @@ exit=0 PASS（328列，最大編號#326，本輪新增2筆判定）。
 `TRIALS_LEDGER.md`#325/#326、`STRATEGY_GRAVEYARD.md`「事件驅動SUE訊號」
 段落、`TW_LEADS.md`#19。
 
-**最後更新：2026-09-22T10:5x+08:00（馬拉松第592輪，互動視窗CC接手）**——
-開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=2，兩項皆「登記
-缺口暫不做只登記」（`出場.零`／`宇宙.零`），文字本身即登記，已標`[x]`
-完成，無需額外動作；改做`- [!]`裡真正可動手的`方法.三續.GATE_SEQUENCE
-驗證`。新建`research/event_driven_gate_sequence.py`：對`event_driven_
-prototype.py`的E1/E2事件表補上四關（隨機控制組排列檢定比照
-`control_group_standard.py::evaluate_vs_control()`／train-val OOS切分／
-成本敏感度[自行裁量改用`margin_of_safety.py::passes_worst_case()`，理由
-`CLAUDE.md`七之三節已廢止機械倍數規則]／leave-one-out）。**實測發現
-效能地雷**：`tail_test()`預設`n_bootstrap=10000`單次呼叫（sig~700/
-ctl~6000規模）耗時5.28秒，直接同步執行整條GATE_SEQUENCE（200次排列
-檢定+leave-one-out×2事件類型）遠超5分鐘門檻，第一次同步嘗試280秒逾時
-中止、只印出E1標頭無結果。**[自行裁量]修法**：新增`AUX_N_BOOTSTRAP=500`
-套用在排列檢定/leave-one-out內部呼叫（不影響其餘關卡），實測同一呼叫
-降到0.12秒（43倍）——理由：bootstrap均值點估計不隨n_bootstrap系統性
-偏移，只是CI精度降低，這裡只需要點估計判方向。改完依`MARATHON_
-PROTOCOL.md`0b節規則改走`run_detached.py submit`
-（job_id=`20260922-104311-7d2c`，`--timeout-min 30`），session內等4分鐘
-仍未結束（`watchdog_alive=True`非卡死，計算量仍偏大），轉交下一輪收成。
-`trial_registry.py --check`未變動（本輪尚未新增登記列，等下一輪讀到
-gate結果才登記）。未動凍結區、holdout未動、零新增外部API呼叫。
-**下一輪**：先跑`python research/run_detached.py status`確認
-`20260922-104311-7d2c`是否`finished`，讀`event_driven_gate_sequence_
-result.json`依verdict登記`TRIALS_REGISTRY`（CHEAP_PASS或FAIL＋
-failed_gates寫`STRATEGY_GRAVEYARD.md`）；若`timeout`代表`AUX_
-N_BOOTSTRAP=500`仍不夠快，需再評估降`N_DRAWS_PER_VARIANT`或向量化重寫。
-完整見`PENDING_QUEUE.md`方法.三續.GATE_SEQUENCE驗證條目、
-`research/event_driven_gate_sequence.py`（新增）。
-
-（第591輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
-
-
+（第592輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
