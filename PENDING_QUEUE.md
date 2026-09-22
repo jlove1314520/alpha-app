@@ -300,18 +300,50 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
   直接引用為交易候選證據。完整見`TRIALS_LEDGER.md`#323、
   `research/event_driven_prototype.py`（新增，可重複執行）、
   `research/event_driven_prototype_result.json`（新增）。
-- [ ] **方法.三續.GATE_SEQUENCE驗證** [研究] [自走補入，來源：`方法.三`
+- [!] **方法.三續.GATE_SEQUENCE驗證** [研究] [自走補入，來源：`方法.三`
   #323「下一步」欄位]：E1財報公布(SUE)/E2月營收公布(SUE)兩個事件驅動
   原型皆在prototype層級方向一致（t+20 median_diff>0、右尾較胖），值得
   往下投入完整GATE_SEQUENCE判定，但目前只是方向性檢查、不得引用為候選
   證據。做X→用`event_driven_prototype.py`既有事件表（`build_event_table`）
   補上：隨機控制組排列檢定(比照`control_group_standard.py::
   evaluate_vs_control()`，非舊版90百分位門檻)、train/val樣本外切分(依
-  裁示原文三切50/25/25，本題只能碰train+val)、成本1x/2x/3x敏感度、
-  leave-one-out（單一時期/單一產業移除後結論是否還在）。→(a)全數通過
-  →登記CHEAP_PASS並進入下一關；(b)任一關FAIL→登記FAIL＋`failed_gates`，
-  寫進`STRATEGY_GRAVEYARD.md`，不得為了救活而放寬門檻。心跳＝新增
-  `TRIALS_LEDGER.md`列＋`PROGRESS_HEARTBEAT.jsonl`。
+  裁示原文三切50/25/25，本題只能碰train+val)、成本1x/2x/3x敏感度[自行
+  裁量：改用`margin_of_safety.py`三情境，見下]、leave-one-out（單一時期/
+  單一產業移除後結論是否還在）。→(a)全數通過→登記CHEAP_PASS並進入下一關；
+  (b)任一關FAIL→登記FAIL＋`failed_gates`，寫進`STRATEGY_GRAVEYARD.md`，
+  不得為了救活而放寬門檻。心跳＝新增`TRIALS_LEDGER.md`列＋
+  `PROGRESS_HEARTBEAT.jsonl`。
+  **[!] BLOCKED（2026-09-22馬拉松第592輪，互動視窗CC）**：新建`research/
+  event_driven_gate_sequence.py`（四關：隨機控制組排列檢定/train-val OOS/
+  成本敏感度[自行裁量改用`margin_of_safety.py::passes_worst_case()`取代
+  裁示原文字面「1x/2x/3x」，理由：`CLAUDE.md`七之三節2026-09-19裁示
+  【#63邊緣案例】已全專案廢止機械倍數規則]/leave-one-out）。**實測發現
+  效能問題**：`tail_test()`預設`n_bootstrap=10000`時單次呼叫（sig~700/
+  ctl~6000規模）耗時5.28秒，直接跑整條GATE_SEQUENCE（200次排列檢定＋
+  數十次leave-one-out×2個事件類型）遠超5分鐘門檻，第一次同步執行被
+  `MARATHON_PROTOCOL.md`0b節精神下的280秒逾時中止（只印出E1標頭，
+  無結果）。**[自行裁量]修法**：新增`AUX_N_BOOTSTRAP=500`常數，套用在
+  排列檢定與leave-one-out的內部呼叫（不影響最終判定用的其他關卡），
+  實測同一呼叫降到0.12秒（43倍），理由與精度取捨已寫在
+  `event_driven_gate_sequence.py`檔頭常數旁的註解——bootstrap均值本身
+  （點估計）不隨n_bootstrap有系統性偏移，只是CI精度降低，這裡只需要
+  點估計判方向/比大小。改完後已依`MARATHON_PROTOCOL.md`0b節規則改走
+  `run_detached.py submit`（job_id=`20260922-104311-7d2c`，
+  `--timeout-min 30`，log=`research/data/jobs/20260922-104311-7d2c.log`，
+  預期產出`research/event_driven_gate_sequence_result.json`），session
+  內等了4分鐘仍未結束（`watchdog_alive=True`，非卡死，只是計算量仍偏大），
+  故轉交下一輪收成。**解除條件**：下一輪執行
+  `python research/run_detached.py status`確認`20260922-104311-7d2c`
+  狀態變成`finished`/`failed`/`timeout`，讀`event_driven_gate_sequence_
+  result.json`（若`finished`且`expect_exists=True`）依verdict(CHEAP_PASS/
+  FAIL)登記`TRIALS_REGISTRY`，FAIL要寫`failed_gates`並補
+  `STRATEGY_GRAVEYARD.md`；若`timeout`（30分鐘仍未完成）代表
+  `AUX_N_BOOTSTRAP=500`仍不夠快，下一輪應再檢視是否要進一步降低
+  `N_DRAWS_PER_VARIANT`（100→50，會犧牲null分布的解析度，需要另外評估
+  是否可接受）或改用向量化重寫`tail_test`內部迴圈，而不是繼續加大
+  timeout硬等。**未動凍結區、holdout未動**
+  （`is_holdout_consumed()`開工前確認False）、零新增外部API呼叫（全部讀
+  本機既有快取）。
 - [x] **出場.零** [研究] 登記缺口，暫不做只登記：321次試驗全測「買
   什麼」零次測「什麼時候賣」，天條一(MDD<50%)本質是出場問題。
   【✅完成2026-09-22，馬拉松第592輪】這條的交辦內容就是「登記」本身
