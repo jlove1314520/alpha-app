@@ -3,6 +3,8 @@
 
 
 
+## 2026-09-22 12:52 — hypothesis_queue排程接續：#76(VIX期限結構regime訊號)資料源起點探測（七之三第10關） — VIX起點1990/VIX9D起點2011皆早於TRAIN_END(2020-12-31)，通過，SPEC寫進HYPOTHESIS_QUEUE.md；未做任何判定、未碰holdout；下一輪(a)下載序列(b)對齊台股報酬(c)第1關cheap gate
+
 ## 2026-09-22 10:58 — hypothesis_queue排程接續：#75続14完成第1關cheap IC gate(net_usd/n_buyers,雙版本) — FAIL(#324),#75全案結案,佇列已空,提案#76(VIX期限結構regime訊號)待下輪起點探測
 
 ## 2026-09-22 07:24 — 假設佇列輪：交辦優先，籌碼原子.出借總量試驗（14表達式×2horizon=28測試）跑完並登記 — FAIL(分支b)，高階篩選0/28，TRIALS #321；交辦佇列未開始項0條；holdout未碰
