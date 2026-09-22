@@ -1,51 +1,51 @@
 {
-  "fetched_at": "2026-09-23T06:56:36.317531+08:00",
+  "fetched_at": "2026-09-23T07:01:37.119159+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 339.99,
-      "bid": 339.91,
+      "last": 339.91,
+      "bid": 339.9,
       "ask": 340.0,
       "close": 338.98,
-      "change_pct": 0.298,
+      "change_pct": 0.2744,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 499.99,
+      "last": 499.97,
       "bid": 499.69,
       "ask": 500.0,
       "close": 501.61,
-      "change_pct": -0.323,
+      "change_pct": -0.3269,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 228.39,
-      "bid": 228.36,
-      "ask": 228.4,
+      "last": 228.33,
+      "bid": 228.33,
+      "ask": 228.39,
       "close": 227.38,
-      "change_pct": 0.4442,
+      "change_pct": 0.4178,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 378.69,
-      "bid": 378.66,
-      "ask": 378.7,
+      "last": 378.62,
+      "bid": 378.6,
+      "ask": 378.67,
       "close": 375.3,
-      "change_pct": 0.9033,
+      "change_pct": 0.8846,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 352.11,
-      "bid": 352.1,
-      "ask": 352.56,
+      "last": 352.3,
+      "bid": 352.25,
+      "ask": 352.35,
       "close": 354.97,
-      "change_pct": -0.8057,
+      "change_pct": -0.7522,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -61,14 +61,15 @@
       "source": "yahoo_fallback"
     },
     "^GSPC": {
-      "last": 7765.18,
+      "last": 7764.64,
       "bid": null,
       "ask": null,
       "close": 7764.7,
-      "change_pct": 0.0062,
-      "data_type": "DELAYED",
+      "change_pct": -0.0008,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500"
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
     },
     "^IXIC": {
       "last": 27244.28,
