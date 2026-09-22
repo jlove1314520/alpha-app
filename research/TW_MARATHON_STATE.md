@@ -4,6 +4,45 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-23T07:3x+08:00（馬拉松第611輪，研究帽）**——取鎖乾淨
+（cycle`20260923-073037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=0，23條`- [!]`阻塞中；逐一核對阻塞項開頭解除條件（含`AWAITING_
+REVIEW.md`兩件、`金流一.4`、`資料源一.3`、`#50`），皆未到解除時間點，
+維持`- [!]`。**佇列深度自檢**：`- [ ]`=0（<12下限），round599~610已連續
+12輪確認三個備援來源掃無新項，依round604/609既有建議本輪不重複全面
+掃描，改做精簡確認。三軌時間戳：US round609=09-23 05:3x／FUT
+round610=09-23 06:3x／**TW round608=09-23 04:3x（最舊）**——依輪替選TW。
+`run_detached.py status`確認`running=0`（151筆歷史，無running job需
+收成）。`git status`（開工時）僅例行排程檔案（`audit_report.json`／
+`factory_stability*`／`connectivity_check.log`／`marathon_cycle.log`等），
+無conflict標記、無孤兒未commit產出，round607修復的git stash衝突未
+復發。`#50`（唯一未結案方向）tick累積**精確重新清點為12/20**（`ls
+research/data/ticks/*.parquet`實測12個檔案：20260907/08/09/10/11/14/15/
+16/17/18/21/22；另有一個無`.parquet`副檔名的`20260915`目錄疑為殘留
+非資料檔，未計入），**更正round609記錄的「13/20」為計數誤差**，實際
+未變。`AWAITING_REVIEW.md`兩件（規.二第4節掃描方式提案、維運.git衝突
+根因修復方案）皆仍`等待中`，未收到總司令回應。**結論：與round604~610
+連續七輪一致，TW/US/FUT三軌本輪仍無新可推進工作單位**，目前唯二解鎖
+點（總司令對兩件`AWAITING_REVIEW`的裁示、tick累積至20/gate50回應）皆
+非自走可推進範圍，不硬湊新項。未執行任何新統計判定，不觸發
+`register_trial()`。`trial_registry.py --check`（`PYTHONIOENCODING=
+utf-8`）exit=0 PASS（347列，本輪未新增判定）。`validation/holdout.py::
+is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀
+既有`.md`/`.json`帳本檔案、`git status`、`run_detached.py status`、
+`ls research/data/ticks/`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪
+一行。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。**等待審閱：
+2件**（規.二第4節參數掃描方式提案／維運.git衝突根因修復方案，皆非
+本輪新增，延續中）。**下一輪任一軌接手**：兩件`AWAITING_REVIEW`項是
+目前TW/US集中版框架與三支wrapper git協調修復的唯一解鎖點，出爐前
+建議持續比照本輪做精簡確認，不必每輪重新全面掃描三個備援來源；`#50`
+仍被動等待tick累積至20（12/20）與總司令對gate50三條件的回應；依輪替
+下一輪建議選US軌（US round609/FUT round610本輪皆已比TW新，但下一輪
+若仍無新裁示，三軌可等距輪替即可，不必刻意避開剛碰過的軌）。完整見
+`REPORT.md`第611輪心跳、`AWAITING_REVIEW.md`。
+
+---
+
 **最後更新：2026-09-23T04:3x+08:00（馬拉松第608輪，研究帽）**——取鎖乾淨
 （cycle`20260923-043037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=0，23條`- [!]`阻塞中；逐一核對阻塞項開頭解除條件，皆未到解除
@@ -98,30 +137,4 @@ is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
 
 ---
 
-**最後更新：2026-09-23T00:3x+08:00（馬拉松第604輪）**——取鎖乾淨
-（cycle`20260923-003037`）。依round601自己的建議（已連續8輪同一結論後
-不必再做全面複核），本輪僅做精簡確認：`PENDING_QUEUE.md`『- [ ]』=0，
-23條`- [!]`阻塞中；`run_detached.py status`確認running=0（150筆歷史，
-無新增，round603投遞/收成的Tier B job`20260922-223837-b449`仍是最新一筆
-`finished`）；`git status`乾淨（僅例行排程檔`data/audit_report.json`／
-`research/*.log`/`*.jsonl`等自動更新檔案，無孤兒未commit產出）；`#50`
-唯一未結案方向tick累積`research/data/ticks/`實測仍**12/20**（`20260916`
-~`20260922`，09-23當日盤中tick尚未finalize，較round600/601無變化）。
-**結論：與round594~601連續八輪一致，TW/US/FUT三軌本輪仍無新可推進
-工作單位**，本輪為第九次確認，繼續維持不硬湊新項。`trial_registry.py
---check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（333列，本輪未新增
-判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
-`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程
-零新增外部API呼叫（純讀既有帳本/log檔案、`git status`、`run_detached.py
-status`、`ls research/data/ticks/`）。`PROGRESS_HEARTBEAT.jsonl`已append
-本輪一行。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。等待審閱：
-0件。**下一輪任一軌接手**：`#50`仍是三軌唯一未結案方向，被動等待tick
-累積至20（目前12/20，預計還需8個交易日finalize）與總司令對gate50三
-條件的回應；**建議下一輪比照本輪做法：先確認`- [ ]`=0與tick累積數字，
-若無變化直接記錄「與前次結論相同」收工，不必逐條重新掃描三個備援
-來源**（該三個來源已連續9輪掃無新項，重複掃描本身不再產生新資訊）。
-完整見`REPORT.md`第604輪心跳、`MARATHON_STATE.md`（輪次計數器604）。
-
----
-
-（第598輪、第601輪、第602輪、第603輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+（第598輪、第601輪、第602輪、第603輪、第604輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
