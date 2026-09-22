@@ -209,13 +209,26 @@ QUEUE.md`找，一次補到20項（2026-09-19總司令裁示【裁示】五，�
 不等於重跑原始回測——這個折衷會在`TRIALS_POWER_AUDIT.md`檔頭明確寫出，
 供總司令覆核是否要進一步要求真正重跑。
 
-- [ ] **方法.一** [研究] 試驗分母清洗（最優先，成本最低）——逐列掃
-  `TRIALS_LEDGER.md`全321列（見上方[自行裁量]），標記power_class
-  (DEGENERATE/UNDERPOWERED/VALID/UNKNOWN)，輸出N_total/N_valid/
-  N_invalid，以N_valid重算Bonferroni門檻並與舊門檻並列，列出被舊門檻
-  冤殺的試驗（新舊門檻之間），產出`research/TRIALS_POWER_AUDIT.md`。
-  完成即回報，不等方法.二/三。心跳＝`research/TRIALS_POWER_AUDIT.md`
-  新增/更新。
+- [x] **方法.一** [研究] 試驗分母清洗 【✅完成2026-09-22，互動視窗CC】
+  `research/trials_power_audit.py`（新增）逐列重算`TRIALS_LEDGER.md`
+  全323列（裁示下達時321，期間自走軌道新增2筆）power_class。結果：
+  N_total=323／N_valid=36／N_degenerate+underpowered=37／**N_unknown=250
+  （77.4%，高信心正則抽不到樣本數也無明確檢定力陳述，誠實標UNKNOWN不猜）**。
+  舊門檻99.9845百分位→新門檻（N=36）99.8611百分位。冤殺候選=0（非提取
+  失敗：有百分位記錄的非PASS試驗多半卡在100.0或明顯偏低，沒有落在新舊
+  門檻之間的邊緣案例；理由與分布已寫進`TRIALS_POWER_AUDIT.md`第2節）。
+  **重要發現**：DEGENERATE的37筆裡多數集中在2026-08-26那批`factor_ic`
+  系列因子試驗（US/TW共用同一套`evaluate_factor()`框架），VAL期普遍
+  只有47~49個不重疊20交易日快照（約2021-2024÷20交易日），包含多筆
+  CHEAP_PASS判定（`f_us_low_vol`／`f_idio_vol`／`f_bab`等家族）——這是
+  系統性、重複出現的結構特徵，不是單一個案。過程中修好一個真實bug：
+  初版`_DEGENERATE_MARKERS`正則誤判「N檔全NaN」（個股層級資料排除計數）
+  為「整筆試驗退化」，4筆全部誤判，已收斂為只認「樣本全NaN／整體變異數
+  為0」等明確全域退化陳述，重跑後其中1筆(#144)改判VALID。方法論限制
+  （TRIALS_REGISTRY.jsonl僅135列而N=321/323真正來源是LEDGER；不重跑321
+  支原始腳本改用程式重算既有文字統計量；UNKNOWN佔77%代表這份分母清洗
+  只能誠實回答約23%試驗的power_class）已在報告與`PENDING_QUEUE.md`
+  [自行裁量]段落中明確揭露，不隱藏保留。
 - [ ] **方法.二** [研究] 新增右尾判定標準——新建`research/tail_test.py`
   提供`tail_test(signal_dates, forward_returns, control_returns,
   horizon)`，輸出中位數差異/P90差異(各bootstrap 10000次)/右尾佔比
