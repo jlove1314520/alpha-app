@@ -706,9 +706,50 @@ sequence.py`自己這4關的呼叫順序1~4）。實測現行程式碼：
   裁示，不逕自寫提案並視為核准**。
   心跳＝`research/CONCENTRATED_SPEC.md`存在＋本條目狀態＋
   `PROGRESS_HEARTBEAT.jsonl`本輪一行。
-- [ ] **規.三** [研究] `research/exit_rule_lab.py`——同一進場訊號
-  (買入持有0050)比較E-a到E-d四種出場規則，年化報酬/MDD/Calmar/換手率/
-  扣成本前後淨值曲線並列，登記8次試驗。
+- [x] **規.三** [研究] 【✅完成2026-09-23，馬拉松軌·研究帽】
+  建立`research/exit_rule_lab.py`並執行：同一進場訊號(買入並持有0050)
+  逐日模擬四種出場規則，日頻T日訊號/T+1日成交，輸出未扣成本/扣成本
+  (基準情境1.8折，`validation/margin_of_safety.py`)兩條淨值曲線的
+  CAGR/MDD/Calmar/換手率。
+  **[自行裁量]格數落差**：裁示原文「登記8次試驗」，實際列舉變體
+  1(E-a)+3(E-b)+2(E-c)+1(E-d)=7，如實只登記7筆（#338~#344），不湊
+  第8筆，已在腳本docstring與commit訊息記錄這個落差。
+  **結果摘要**（完整見`research/data/exit_rule_lab_result.json`）：
+  - E-a買進持有（對照組）：CAGR 11.47%、MDD -55.75%、Calmar 0.206、
+    n_trades=1（零換手）。
+  - **E-b固定停損(8%/15%/25%)三者數字與E-a完全相同**——誠實查證：
+    進場價(2003-07-01，18.93)恰好接近0050歷史低點區域，全期最低點
+    (2008-11-20，18.04)距進場價僅約-4.67%，從未觸及任一停損線。
+    **這不是bug**，但揭露一個對規.二有意義的設計限制：固定停損綁定
+    單一原始進場價，在標的長期結構性上漲(18→202，約11倍)情境下，
+    一旦建倉初期未被停損，往後就形同虛設——已寫進TRIALS_LEDGER.md
+    對應三列的誠實揭露段落與JSON的`honest_caveat_fixed_stop`欄位，
+    **不建議規.二直接沿用「固定停損從首次進場價計算」這個設計**，除非
+    搭配週期性重設進場價基準的機制。
+  - E-c移動停損：10%版CAGR 11.19%/MDD -54.75%/Calmar 0.204/換手1.81
+    次/年；20%版CAGR 10.45%/MDD -57.50%/Calmar 0.182/換手0.56次/年
+    ——比固定停損更能實際發揮風控作用（因為峰值隨每次新高更新，不
+    綁定單一歷史進場價）。
+  - E-d 200日均線regime出場：**gross CAGR 8.32%但net CAGR轉負
+    (-6.07%)**，換手率31.5次/年（1357筆交易，年均約63次進出），
+    成本吃掉全部效益甚至轉負——跟`MARATHON_PROTOCOL.md`既有「regime
+    overlay家族已七次全FAIL結案」的結論方向一致，raw MA穿越無緩衝/
+    無確認延遲，會被高頻停損-回補的交易成本拖垮。
+  - 全部7筆登記verdict=`EXPERIMENTAL`（純描述性出場規則比較，非alpha
+    檢定，無vs隨機/vs買進持有的統計顯著性判準）。
+  `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+  （346列，新增#338~#344）；`selection_bias_ledger.py`重跑更新N=346
+  （TW=156/US=66/FUT=48/未分軌=76）；`holdout.is_holdout_consumed()`
+  執行前後皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/
+  `config.py`凍結區，全程零新增外部API呼叫（純讀既有0050價格快取）。
+  心跳＝`research/exit_rule_lab.py`＋`research/data/exit_rule_lab_
+  result.json`存在＋`TRIALS_LEDGER.md`#338~#344＋
+  `PROGRESS_HEARTBEAT.jsonl`本輪一行。
+  **下一步**：規.二第6節(b)「出場規則」暫定答案（跌出排名+15%停損）
+  可依這輪E-c/E-d結果補強——E-c移動停損10%版本的Calmar/MDD權衡優於
+  固定停損，若規.二未來要納入額外出場防線，移動停損比固定停損或raw
+  MA regime更值得考慮，但這仍待規.二第4節參數掃描方式核准後才會真正
+  進入實作階段，此處先誠實記錄發現供未來參考，不逕自修改規.二SPEC。
 
 ## 2026-09-20【緊急·合規】mopsov 破口已實際發生，先止血再檢討（原文登記）
 
