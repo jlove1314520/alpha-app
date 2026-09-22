@@ -7405,12 +7405,21 @@ ORDER 清單裡標了 `[產品]` 的就是產品類，沒標的一律當 [債務
 
 - [ ] **籌碼原子.補上櫃三大法人歷史** [債務] 2026-09-20總司令裁示　**⚠️ 2026-09-22 11:31馬拉松更正上面這行舊的「⛔自走中止…需要總司令親自操作」標記為誤植**：往下讀本條目原文可見同一天稍後已查到TPEx官方`dailyTrade`端點支援任意歷史查詢、全程免登入免密碼，`backfill_tpex_3insti_history.py`已寫好並於22:50投遞batch1（200請求，累計快取511/1718，log見`backfill_tpex_3insti_history_batch1.log`，未進版控），本身就是純自動化回補、不涉及需總司令操作的事——「⛔自走中止」那行文字疑似是早期版本裁示的殘留，未被後續進度同步更正，依`CLAUDE.md`零之一節「開工前先檢查已標`- [!]`的阻塞項有沒有解除」本輪自行裁量改回`- [ ]`並續跑。【進行中 2026-09-22 11:31（馬拉松輪）：首次投遞`20260922-113158-8698`因命令路徑寫成`--cwd research`＋`research/backfill_...py`雙重前綴，exit=2『找不到research/research/...』失敗——與`財報原子.補快取`條目記錄過的同一種`--cwd`路徑錯誤同型，修正為`--cwd research`＋去掉`research/`前綴後，改用`20260922-113458-541d`（--batch-size 300）重新投遞成功（11:34:58已確認開始執行，已快取511/1718），約10~11分鐘，TPEx為獨立資料源不吃FinMind額度，下一輪先確認exit=0再視remaining決定是否需要batch3。】【續（同輪11:51）：
 確認`20260922-113458-541d`exit=0（16.6min），累計快取511→811/1718，remaining
-907；發現先前失敗的`20260922-115148-0e8f`是zombie註冊項（NotADirectoryError
-在spawn前就把job記進registry，卡住「一次只跑一個重度工作」檢查），跑
-`run_detached.py reap`清掉orphaned=1後解除卡住，改用`20260922-115207-3b39`
-（不重複帶`--cwd research`，因bash session本身已在research目錄下，重複帶會
-雙重前綴成research/research）成功投遞batch3（--batch-size 300），11:52:07
-開始執行，預計約11:52+17min完成，remaining預估907→約607。】
+907。**新查明`--cwd`真正規則（修正本條目稍早的錯誤推論）**：
+`run_detached.py`的`Path(args.cwd or REPO_ROOT).resolve()`對相對路徑一律
+用Python行程當下的OS cwd（即bash shell當時的cwd）去解析，不是相對固定的
+REPO_ROOT；bash session的cwd會隨每次`cd ...&&`指令改變，導致同一句
+`--cwd research`在不同輪次因shell cwd不同而解析出不同結果（shell在
+research內時雙重前綴成research/research；shell在alpha-app根目錄時才正確
+解析成…/research）——**不是「已在research目錄下就不用帶--cwd」，也不是
+單純「要不要帶--cwd research」二選一，是shell當下cwd決定相對路徑基準，
+容易在自走輪次間翻車**。過程中連續兩次NotADirectoryError＋一次zombie
+registry卡住單工作槽，均已reap清除，未留殘餘。**修法**：改用絕對路徑
+`--cwd "C:\alpha\alpha-app\research"`（不受shell cwd影響），11:55:18投遞
+`20260922-115518-f116`成功執行中（已確認log顯示cached=811, remaining=
+1204，本批≤300）。下一輪：確認exit=0後remaining預估→約904，仍需2~3批
+才能到0；**下一輪任何`run_detached.py submit`一律用絕對路徑`--cwd`，
+不要再用相對路徑`research`**，避免重複踩這個雷。
   【depth-1閘門設計缺陷要修；p=0.053作廢要正式處理】三：T86（三大
   法人）只有上市股，`ATOM_CHIP_IC_MAP_SPEC.md`已記錄上市~100%/上櫃
   0%的覆蓋缺口；FinMind的`TPEX3INSTI`資料集只從2025-08起有資料、
