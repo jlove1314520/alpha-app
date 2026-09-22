@@ -2222,3 +2222,14 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，FinMind/TPEx請求皆計入既有額度追蹤，零新增未追蹤外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩2條未開始（皆持續回補中，非新交辦）。等待審閱：0件。
 - **下一輪**：先確認`20260922-144247-c12b`是否`finished`並視remaining決定是否需batch6；`財報原子.補快取`下一批最早15:4x台北，優先回補equity/inventory/receivable/ocf四項（覆蓋率離60%最遠者優先）。
+
+---
+## 第596輪 · 2026-09-22T15:30+08:00 · TW · 債務帽：交辦優先於自走，收成TPEx batch5並續投batch6，發現remaining欄位算法debt bug · 無新判定，一項回補進度推進，job待下一輪收成
+
+- 取鎖乾淨（cycle`20260922-153036`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝2（`財報原子.補快取`／`籌碼原子.補上櫃三大法人歷史`，皆持續回補中），`run_detached.py status`確認running=0。
+- **收成TPEx batch5**（job`20260922-144247-c12b`）`exit=0`（20.1min），log自報`cached_total=1711/range_workdays=1718/remaining=7`。
+- **FinMind距上次請求（14:40:41）僅約51分鐘，未滿一小時安全間隔，本輪不投FinMind批次**，單工作槽留給TPEx。
+- **[自行裁量][發現並記錄debt bug，非阻塞]**：投遞batch6後，腳本自己重算真實`pending`，開工行印出「已快取1711，待處理304」，與上一輪log摘要`remaining=7`矛盾。查`backfill_tpex_3insti_history.py`第103~109行：`remaining`欄位算法是`len(all_dates)-len(have)`，`have`是整個目錄的parquet檔數，不是「範圍內」的檔案數，跟真正決定下一批日期的`pending`（正確的集合成員判斷）用不同邏輯，導致摘要`remaining`虛低。**不影響回補正確性**，只是狀態文字誤導。已投batch6（`--batch-size 300`，job`20260922-153118-42df`，處理304筆裡的300筆），依歷史耗時超過本輪安全邊際，session內未等待完成，留給下一輪收成；已在`TW_MARATHON_STATE.md`與`PENDING_QUEUE.md`記錄建議下一輪順手修這個欄位算法（低優先純debt）。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（329列，本輪未新增判定，純債務/維運性質工作）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，零新增外部API呼叫（僅投遞TPEx job，未實際發出FinMind請求）。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（皆持續回補中，非新交辦）。等待審閱：0件。
+- **下一輪**：先確認`20260922-153118-42df`是否`finished`，讀真實`pending`（不要信舊的`remaining`欄位，等下一輪修過再信）決定是否需batch7；`財報原子.補快取`距14:40:41滿一小時（約15:41台北）後可續投b15/b16（優先equity/inventory/receivable/ocf）；順手修`backfill_tpex_3insti_history.py`的`remaining`欄位算法。
