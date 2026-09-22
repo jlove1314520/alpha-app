@@ -1,0 +1,55 @@
+{
+ "results": {
+  "i_optimistic": {
+   "net_usd": {
+    "label": "i_optimistic/net_usd",
+    "signal": "net_usd",
+    "n_train_months": 36,
+    "n_val_months": 47,
+    "train_mean_ic": 0.0253,
+    "val_mean_ic": -0.018,
+    "null_percentile": 0.5,
+    "same_sign_positive": false,
+    "passed": false
+   },
+   "n_buyers": {
+    "label": "i_optimistic/n_buyers(對照,同家族不獨立算)",
+    "signal": "n_buyers",
+    "n_train_months": 36,
+    "n_val_months": 47,
+    "train_mean_ic": 0.0183,
+    "val_mean_ic": 0.001,
+    "null_percentile": 52.0,
+    "same_sign_positive": true,
+    "passed": false
+   },
+   "net_usd_vs_n_buyers_spearman": 0.28477345722369213
+  },
+  "ii_pessimistic": {
+   "net_usd": {
+    "label": "ii_pessimistic/net_usd",
+    "signal": "net_usd",
+    "n_train_months": 36,
+    "n_val_months": 47,
+    "train_mean_ic": -0.0683,
+    "val_mean_ic": -0.0825,
+    "null_percentile": 0.0,
+    "same_sign_positive": false,
+    "passed": false
+   },
+   "n_buyers": {
+    "label": "ii_pessimistic/n_buyers(對照,同家族不獨立算)",
+    "signal": "n_buyers",
+    "n_train_months": 36,
+    "n_val_months": 47,
+    "train_mean_ic": -0.0183,
+    "val_mean_ic": -0.0125,
+    "null_percentile": 4.0,
+    "same_sign_positive": false,
+    "passed": false
+   },
+   "net_usd_vs_n_buyers_spearman": 0.295336928730564
+  }
+ },
+ "verdict": "FAIL"
+}

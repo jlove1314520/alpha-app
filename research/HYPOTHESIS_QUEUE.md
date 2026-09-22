@@ -11673,3 +11673,13 @@ Form 4結構性缺席不因換來源而消失；DERA 2006~2008早期資料品質
 **狀態**：#75仍不是PASS/FAIL；未寫TRIALS_REGISTRY（無試驗）；`is_holdout_consumed()`=False。
 **下一輪待辦（不跳關）**：(h)第1關cheap IC gate：(i)(ii)雙版本、train/val切分（沿用框架切點）、percentile≥90且train/val同號，登記試驗僅限`register_trial()`，並附DSR的V來源但書。
 
+---
+
+**#75続14（2026-09-20 hypothesis_queue排程接續，無人值守，「#75続13下一輪待辦(h)」完成：第1關cheap IC gate，(i)(ii)雙版本）**：
+新增`insider_dera_gate1.py`。訊號=`net_usd`（主）/`n_buyers`（同家族對照，spearman相關0.28~0.30，僅算一個獨立發現），逐月橫斷面Spearman IC，train=2018-01~2020-12（既有`TRAIN_END`）／val=2021-01~2024-11（面板本身止於此），N=200逐月內打散null，事前綁定方向=正。
+**結果**：(i)optimistic net_usd：train_IC=+0.0253、val_IC=−0.018，**train/val正負號相反**（null_pct=0.5，遠未過90）。(ii)pessimistic net_usd：train_IC=−0.0683、val_IC=−0.0825，train/val同號**但為負**（事前綁定方向為正，判違反），null_pct=0.0。n_buyers對照兩版本亦皆不過。
+**判定：FAIL**（`register_trial()` #324，`failed_gates=["cheap_gate_precheck"]`）。已寫進`STRATEGY_GRAVEYARD.md`。
+**#75最終狀態**：全樣本（覆蓋不足，未判定）＋2018+子樣本（G0-a/b/c事前綁定門檻皆通過，但訊號本身第1關cheap IC gate未過）——**內部人買入淨額/買方家數當cross-sectional選股訊號，本佇列判FAIL，移出排隊佇列**。地基工程（`insider_dera_*.py`八支腳本、DERA下載/解析/價格補齊/悲觀填補）保留供未來若有新機制構想需要同一批資料時複用，不因訊號本身FAIL而刪除。
+**本輪`is_holdout_consumed()`=False、`trial_registry.py --check`通過（見下方commit前驗證）。**
+**佇列狀態：#1~75全數結案，佇列實質已空。**下一輪需設計新假設軸——依`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節指引，優先方向regime/擇時型（既有死亡假設共同模式：純選股型缺降曝險機制）。**[自行裁量·下一輪起點提案]**：候選方向#76＝美股VIX期限結構（VIX9D/VIX比值，或近月/次近月VIX期貨價差）當台股大盤regime降曝險訊號——經濟理由：VIX期限結構倒掛（近端>遠端）長期被文獻記錄為市場壓力/恐慌前兆，且此軸與本佇列已死的三大法人/融資/動能/籌碼類assets完全不同維度（美股波動率市場結構，非台股自身量價或籌碼），與#10既有regime overlay基礎設施（`regime_overlay.py`）互補而非重複；資料源待查證（CBOE VIX期限結構歷史、FRED、或yfinance `^VIX9D`/`^VIX`）。下一輪從資料源起點探測（七之三第10關）開始，不跳關。
+
