@@ -63,7 +63,10 @@ def _matched_draw_equity_curve(trade_schedule, indexed_price_data, calendar, ini
             continue
         sid = rng.choice(candidates)
         entry_price = float(indexed_price_data[sid].loc[entry_date, price_col])
-        if entry_price <= 0:
+        # 2026-09-23修正：NaN<=0在Python裡恆為False，原本的entry_price<=0防呆
+        # 漏掉NaN（見validation/control_group.py::one_draw()同一個修法，
+        # 資料.零把adj_close<=0轉NaN後這個既有漏洞被真正觸發，實測炸過）。
+        if not (entry_price > 0):
             continue
         shares = int(slot_allocation // (entry_price * (1 + cost_rates["buy"])))
         if shares <= 0:
@@ -85,14 +88,21 @@ def _matched_draw_equity_curve(trade_schedule, indexed_price_data, calendar, ini
                 continue
             sid, shares = pos["sid"], pos["shares"]
             df = indexed_price_data[sid]
-            exit_price = float(df.loc[day, price_col]) if day in df.index else pos["entry_price"]
+            exit_price = float(df.loc[day, price_col]) if day in df.index else float("nan")
+            # 2026-09-23修正：原本「day in df.index就信任那個值」在adj_close<=0
+            # 轉NaN後不夠——當天在索引裡但值是NaN，退回entry_price而不是讓NaN
+            # 靜默污染cash（那比崩潰更糟，不會報錯卻會讓整條equity curve失真）。
+            if not (exit_price > 0):
+                exit_price = pos["entry_price"]
             notional = shares * exit_price
             cash += notional * (1 - cost_rates["sell"])
         mtm = cash
         for pos in open_positions.values():
             sid = pos["sid"]
             df = indexed_price_data[sid]
-            price = float(df.loc[day, price_col]) if day in df.index else pos["entry_price"]
+            price = float(df.loc[day, price_col]) if day in df.index else float("nan")
+            if not (price > 0):
+                price = pos["entry_price"]
             mtm += pos["shares"] * price
         rows.append({"date": day, "equity": mtm})
     return pd.DataFrame(rows)
