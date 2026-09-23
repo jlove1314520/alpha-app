@@ -11450,8 +11450,15 @@ wrapper維持現狀不變。
   （train r=-0.0127 vs val r=+0.0470，正負號相反，且VAL未贏過洗牌
   null）。登記`TRIALS_LEDGER.md`#363，`STRATEGY_GRAVEYARD.md`新增
   `## #82`條目，`selection_bias_ledger.py`已重跑（N=364）。
-- [ ] **常備.3** [研究] VIX絕對水位本身（不取VIX9D/VIX比值）當TAIEX
+- [x] **常備.3** [研究] VIX絕對水位本身（不取VIX9D/VIX比值）當TAIEX
   regime訊號——未測。來源：`STRATEGY_GRAVEYARD.md` #76段落。[自走補入]
+  **2026-09-23完成（DevQueue cycle 20260923-121601）**：新增
+  `vix_level_gate.py`（訊號=VIX收盤水位本身），第1關cheap gate FAIL
+  （TRAIN r=+0.0932 vs VAL r=-0.1174，正負號相反；VAL期雖方向正確
+  且顯著贏過洗牌null percentile=100.0，仍因train/val不同號判FAIL）。
+  這是regime/timing類假設第5次出現同一種死亡模式，見
+  `STRATEGY_GRAVEYARD.md` `## #83`條目的模式觀察小節。登記
+  `TRIALS_LEDGER.md`#364，`selection_bias_ledger.py`已重跑（N=365）。
 - [ ] **常備.4** [研究] 美股高收益債利差變動率版（HYG/IEF比值N日
   變動率，非水位）當TAIEX regime訊號——`#78`已測水位版FAIL，變動率
   未測。來源：`STRATEGY_GRAVEYARD.md` #78段落。[自走補入]
