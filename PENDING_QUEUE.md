@@ -11441,9 +11441,15 @@ wrapper維持現狀不變。
   證據：`STRATEGY_GRAVEYARD.md`已在`regime_alt_a`結案段落（line約3259
   附近⚠️追加區塊）與`portfolio_multifactor_v2`家族條目（line約1950
   附近）雙向補上更正說明與cross-reference。
-- [ ] **常備.2** [研究] VIX期限結構變動率版（VIX9D/VIX比值N日變動率，
+- [x] **常備.2** [研究] VIX期限結構變動率版（VIX9D/VIX比值N日變動率，
   非水位）當TAIEX regime訊號——`#76`已測水位版FAIL，變動率未測。
   來源：`STRATEGY_GRAVEYARD.md` #76段落。[自走補入]
+  **2026-09-23完成（DevQueue cycle 20260923-121601）**：新增
+  `vix_term_structure_roc_gate.py`（訊號=VIX9D/VIX比值N=20日變動率，
+  N沿用`fx_twd_gate.py`既有慣例[自行裁量]），第1關cheap gate FAIL
+  （train r=-0.0127 vs val r=+0.0470，正負號相反，且VAL未贏過洗牌
+  null）。登記`TRIALS_LEDGER.md`#363，`STRATEGY_GRAVEYARD.md`新增
+  `## #82`條目，`selection_bias_ledger.py`已重跑（N=364）。
 - [ ] **常備.3** [研究] VIX絕對水位本身（不取VIX9D/VIX比值）當TAIEX
   regime訊號——未測。來源：`STRATEGY_GRAVEYARD.md` #76段落。[自走補入]
 - [ ] **常備.4** [研究] 美股高收益債利差變動率版（HYG/IEF比值N日

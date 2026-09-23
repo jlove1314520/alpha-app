@@ -3722,3 +3722,23 @@ timing類假設累計12個測試，全數FAIL或資料不可及/前置未備，�
 `margin_debt_level_gate.py`／`copper_gold_ratio_gate.py`等），那些
 檔案目前同樣是daily-overlap+逐點打散設計，同一種統計偽影風險存在但
 方向未知，留給後續輪次逐一重跑確認。
+
+## #82 VIX期限結構（VIX9D/VIX比值）N日變動率版當TAIEX regime降曝險訊號
+（2026-09-23結案，`PENDING_QUEUE.md`常備.2）
+
+**死因**：第1關cheap gate，`vix_term_structure_roc_gate.py`——訊號=
+VIX9D/VIX比值N(20)日變動率（沿用`fx_twd_gate.py`(#32)既有N日變動率窗口
+慣例，不另挑新窗口）、目標=TAIEX後20交易日報酬、TRAIN(<=2020-12-31)/
+VAL(2020-12-31~2024-12-31)兩期Pearson+Spearman相關性+N=500洗牌null。
+**train/val正負號相反**：TRAIN r=-0.0127(p=0.5394，n=2347)，VAL
+r=+0.0470(p=0.1547，n=917，null percentile=81.4，未達90門檻)。跟水位版
+`#76`（`TRIALS_LEDGER.md`#327）同一種死法（train/val正負號相反），且
+變動率版連「VAL贏過洗牌null」這關都沒過（水位版VAL percentile=98.4
+表面過關，變動率版僅81.4），比水位版更弱、不是更強。見
+`TRIALS_LEDGER.md`#363。
+
+**不泛化成**：VIX期限結構訊號在台股完全無用——`#76`（水位）與本條
+（N=20日變動率）已測完`STRATEGY_GRAVEYARD.md` #76段落列出的兩個未測
+變體之一；仍未測其他N窗口（5/10/60日，`常備.5`同款窗口敏感度問題）、
+VIX絕對水位本身（見`常備.3`）、搭配台股自身波動度的交互作用。地基
+（`vix_term_structure_probe.py`資料可行性查證）保留可重複使用。
