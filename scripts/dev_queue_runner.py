@@ -319,8 +319,27 @@ def _entry_key_class(entry: str) -> tuple[str, str]:
     return entry.strip(), "債務"
 
 
+INLINE_CLASS_TAG = re.compile(r"\*\*[^*]+\*\*\s*(\[研究\]|\[產品\])")
+
+
 def item_class(text: str) -> str:
-    """這一項是債務、產品還是研究。以 ORDER 清單的標記為準，清單沒有就當債務。"""
+    """這一項是債務、產品還是研究。
+
+    2026-09-23（本輪DevQueue自走發現的分類漏洞修復）：舊版只用ORDER清單的key
+    做比對，但ORDER清單的key有時是「父項代號」（例如`驗.一`），而實際佇列裡
+    的子項行卻用了更長的代號（例如`驗.一第4點續（剩餘16支）`）——兩者字串
+    不相等，`_explicit_order()`比對不到，就會默默退回預設值「債務」，即使
+    那一行**自己的文字裡就明寫著`[研究]`標記**。這正是CLAUDE.md「十二」節
+    講的同一種形狀：分類邏輯的前提（key會完全對應）隨佇列內容變複雜而不再
+    成立，而且失效方向是「研究工作被誤判成債務、派給不該做研究判定的
+    DevQueue」，不是「完全不動作」，更難被發現——本次是靠實際執行
+    `find_next()`才抓到`驗.一第4點續（剩餘16支）`被誤判派工。
+    修法：優先信任這一行文字自己緊跟在`**代號**`之後的`[研究]`/`[產品]`
+    標記（如果有），比對不到才退回ORDER清單比對，兩層都沒有才預設債務。
+    """
+    m = INLINE_CLASS_TAG.search(text)
+    if m:
+        return "研究" if m.group(1) == "[研究]" else "產品"
     key = item_key(text)
     for entry in _explicit_order():
         entry_key, cls = _entry_key_class(entry)
@@ -487,10 +506,16 @@ def _line_class(text: str) -> str | None:
 
 
 def order_tag_mismatches() -> list[str]:
-    """2026-09-20（稽核.六續二）：找出「ORDER清單條目的類別 ≠ 項目行自己標的類別」以及
-    「項目行標[研究]但根本不在ORDER清單（會被item_class當債務派給DevQueue）」兩種情形。
+    """2026-09-20（稽核.六續二）：找出「ORDER清單條目的類別 ≠ 項目行自己標的類別」。
     起因：`原子.六`項目行是[研究]、ORDER清單條目卻沒帶[研究]，find_next()因此把研究項目派給了
-    DevQueue（已手動補標籤）。只報不改檔。"""
+    DevQueue（已手動補標籤）。只報不改檔。
+
+    2026-09-23（本輪DevQueue自走修復`item_class()`後更新）：「項目行標[研究]但不在
+    ORDER清單」這個分支原本會警告「item_class會當債務派給DevQueue」，但`item_class()`
+    現在優先信任項目行自己的inline標記（見該函式docstring），這種情形已經自動修正、
+    不會再誤派——只有「ORDER清單裡有這個key、但標的類別跟項目行自己標的不一樣」才是
+    需要人工核對的真矛盾（可能是ORDER清單筆誤，也可能是項目行筆誤，兩者哪個對需要
+    看裁示原文），保留這一種警告即可。"""
     lines = _lines()
     order = {}
     for entry in _explicit_order():
@@ -504,11 +529,8 @@ def order_tag_mismatches() -> list[str]:
         if line_cls is None:
             continue
         key = item_key(ln)
-        if key in order:
-            if order[key] != line_cls:
-                out.append(f"{key}: ORDER清單標{order[key]}、項目行標{line_cls}")
-        elif line_cls == "研究":
-            out.append(f"{key}: 項目行標研究但不在ORDER清單（item_class會當債務派給DevQueue）")
+        if key in order and order[key] != line_cls:
+            out.append(f"{key}: ORDER清單標{order[key]}、項目行標{line_cls}")
     return out
 
 
