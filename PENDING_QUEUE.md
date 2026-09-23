@@ -7908,6 +7908,9 @@ registry卡住單工作槽，均已reap清除，未留殘餘。**修法**：改�
 `_format_mismatch`旗標，不再依賴「垃圾湊巧對不上」這種運氣。
 
 <!-- ORDER-BEGIN -->
+驗.一續 [研究]
+資料.零 [債務]
+協調.零 [債務]
 方法.一 [研究]
 方法.二 [研究]
 方法.三 [研究]
@@ -11485,3 +11488,75 @@ wrapper維持現狀不變。
   MDD兩百分位中較不極端者換算（見腳本docstring），供總司令下一輪推翻。
   完整見`STRATEGY_GRAVEYARD.md`（待補）、`TRIALS_LEDGER.md`#359/#360、
   `research/data/regime_overlay_exit_rule_gate_result.json`。
+
+## 2026-09-23 總司令裁示【驗.一收尾優先＋資料零價格稽核＋核心檔案單一寫入者】（原文登記）
+
+> 先寫進 PENDING_QUEUE 再動工。全程繁體中文。
+>
+> ────────────────────────────────
+> 驗.一續　修正後健全性測試（最優先，其他全部排在後面）
+> ────────────────────────────────
+> 1. 修正後的引擎先跑 S1、S2（最便宜、最關鍵），S3 先用 20 個 seed，
+>    S4 最後才跑。S2 一出結果就回報。
+> 2. 結果檔必須進 repo：用 git add -f 強制加入
+>    research/data/backtest_engine_soundness_test.json（檔案小），
+>    並另存一份修正前的舊結果（_pre_fix.json）。Cowork 要能直接核對
+>    「舊 0.20% vs pandas 12.19%」這組數字。
+> 3. 凍結：S1-S3 的 PASS 還沒 commit 之前，任何以 run_backtest 為基礎
+>    的新試驗一律不得登記判定。自走軌道若已經跑了，判定欄改成
+>    ENGINE_UNVERIFIED，不計入 N。
+> 4. S1-S3 通過之後，才執行上輪的第 4 點稽核（列出所有「對 0050／
+>    TAIEX／買進持有」比較的舊判定，用新引擎重跑，翻轉就寫進
+>    AWAITING_REVIEW 停下，不自行改判）。
+>
+> ────────────────────────────────
+> 資料.零　adj_close ≤ 0 的源頭稽核
+> ────────────────────────────────
+> engine.py 已發現真實資料偶有 adj_close = 0.0（前後兩天正常），
+> 但其他腳本沒有防呆，用 adj_close 算報酬會產生 −100% 和 inf。
+> 1. 掃描本機 FinMind 價格快取：列出 adj_close ≤ 0 或 NaN 的列數、
+>    涉及檔數、日期分布，並查原始 close 是否也是 0（判斷是 FinMind
+>    原始資料的問題，還是 adjust.py 還原時產生的）。
+> 2. 在資料層修正（載入函式或 adjust.py 出口）：≤ 0 一律轉 NaN，
+>    不得在各腳本各補一次。修正前後各跑一次 adjust 的自我測試。
+> 3. grep 所有用 adj_close 算報酬、卻沒有處理 ≤ 0 的腳本並列出清單。
+>    只估計影響（每支會碰到幾筆 0 價格），暫不重跑、不改判。
+>    Pearson IC 類和事件研究類分開列。
+>
+> ────────────────────────────────
+> 協調.零　核心檔案單一寫入者
+> ────────────────────────────────
+> 已發生兩個 CC 行程同時編輯 research/backtest/engine.py。
+> 規則：research/backtest/、research/validation/、adjust.py、pit.py、
+> trial_registry.py 只允許「互動視窗 CC」修改。自走軌道（marathon／
+> hypothesis_queue／dev_queue）發現這些檔案需要改，只能寫進
+> PENDING_QUEUE 提案，不得直接編輯。寫進 CLAUDE.md。
+>
+> ────────────────────────────────
+> 不變
+> ────────────────────────────────
+> 驗.二（spillover 開盤到收盤重跑、#346 判 FAIL）、驗.三（#81 月頻＋
+> 區塊置換）照原裁示，排在驗.一續 之後。
+> E-c／E-d 依 #359/#360 結案 FAIL，STRATEGY_GRAVEYARD 補註：
+> 「E-c 事前登記點恰為 24 格高原的最高值，屬尖峰非高原」。
+>
+> 四段回報格式照舊。S2 結果出爐就回報。
+
+- [ ] **驗.一續** [研究] 修正後健全性測試最優先——S1/S2先跑(S2一出
+  結果即回報)，S3改20 seed，S4最後跑；`git add -f`強制加入
+  `research/data/backtest_engine_soundness_test.json`+另存
+  `_pre_fix.json`舊結果供核對「舊0.20% vs pandas 12.19%」；凍結：
+  S1-S3 PASS未commit前任何run_backtest試驗不得登記判定，自走軌道
+  已跑的判定欄改`ENGINE_UNVERIFIED`不計入N；S1-S3過後才執行第4點
+  全repo稽核。
+- [ ] **資料.零** [債務] adj_close<=0源頭稽核——掃描本機FinMind價格
+  快取列出<=0或NaN的列數/檔數/日期分布，查原始close是否也是0(判斷
+  FinMind原始問題還是adjust.py還原時產生)；資料層修正(載入函式或
+  adjust.py出口，<=0一律轉NaN，不得各腳本各補一次)，修正前後各跑一次
+  adjust自我測試；grep所有用adj_close算報酬卻沒防呆的腳本列清單(只
+  估計影響筆數，暫不重跑不改判，Pearson IC類與事件研究類分開列)。
+- [ ] **協調.零** [債務] 核心檔案單一寫入者——`research/backtest/`／
+  `research/validation/`／`adjust.py`／`pit.py`／`trial_registry.py`
+  只允許互動視窗CC修改，自走軌道(marathon/hypothesis_queue/dev_queue)
+  發現需要改這些檔案只能寫PENDING_QUEUE提案不得直接編輯，寫進
+  CLAUDE.md。
