@@ -17,6 +17,9 @@ research/.hypothesis_queue.lock
 # 一直漏了這一行，代表若有人不小心`git add -A`會把這個鎖檔意外commit
 # 進去。
 research/.devqueue.lock
+# 2026-09-23（結案.一方案甲，git_op_lock.py新增）：三支wrapper共用的
+# git操作鎖，跟上面幾個軌道鎖檔同樣性質，一併加進來避免同一個gap重演。
+research/.git_op.lock
 # 2026-09-18（Cowork【重構.B續·先別放棄】三，馬拉松軌能見度）：這兩個
 # cycle log被排除在版控之外，是「今天六筆commit全是馬拉松軌做的，但它
 # 的運作狀態從repo完全看不見」這個盲點的直接根因——local_task_health的
