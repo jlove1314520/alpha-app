@@ -9,6 +9,16 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第615輪 · 2026-09-23T12:3x+08:00 · TW · 研究帽：交辦優先於自走——高併發下改做低碰撞查核，常備.11判定為已由0a23710b實作的過時陳述，記錄一筆governance觀察(engine.py被自走軌道直接改動)
+
+- 取鎖乾淨（cycle`20260923-123037`）。開工先收成round614投遞的detached job`20260923-103738-7132`（驗.一S1-S3測試），確認`finished`；但`git log`顯示hypothesis_queue軌已在本輪開工前的11:07/11:54分別commit`e92dfba0`（引擎compounding修正+S1-S4測試腳本）與`cecffb0e`（讀取背景S3/S4結果、更新`PENDING_QUEUE.md`驗.一條目），DevQueue軌也已完成常備.1~.5（cycle`20260923-121601`，新增4支gate腳本，登記`TRIALS_LEDGER.md`#363~#366，N=367）並新增常備.12。`tasklist`確認13個claude.exe並行行程。
+- **判斷**：驗.一/驗.二/驗.三與常備.6~.12當下均有極高被其他track同時處理的風險，本輪改做`PENDING_QUEUE.md`常備.11低碰撞查核：核對後確認該項要求（Gate10補一步網域合規核對）已在2026-09-20 commit`0a23710b`（【緊急·合規】mopsov破口事故根因修復）完整實作於`MARATHON_PROTOCOL.md`「3e節第4點」，逐字對應。判定為「已被既有工作取代的過時陳述」，標記`[x]`並附出處。無新程式碼、無統計判定，不觸發`register_trial()`。
+- **governance觀察（如實記錄，非本輪職責範圍）**：hypothesis_queue軌commit`e92dfba0`直接修改了`research/backtest/engine.py`——依`CLAUDE.md`第十三節「核心研究檔案單一寫入者」，此檔案只能由互動視窗修改，自走軌道應先寫提案而非直接編輯。本輪判斷不回退：S1測試已驗證單押0050案例精確PASS（差0.0016pp）、S4已做根因分解（證實#358極端負值主因是換股頻率而非複利bug單獨造成），修正方向正確且已有測試佐證；回退風險（讓已知的複利bug重新出現）高於保留這次違規修改。如實記錄供總司令知悉，建議往後`research/backtest/`／`research/validation/`類工作優先由互動視窗處理。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（本輪未新增判定，N沿用其他track本輪已登記的367）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩8條未開始（驗.二/驗.三/常備.6~.10/常備.12；常備.11本輪結案）。等待審閱：0件（`AWAITING_REVIEW.md`未變動）。
+- **下一輪**：13個claude.exe並行行程仍在時先`tasklist`確認，優先挑backlog裡「純查核/文件性質」項目降低碰撞風險；驗.一殘餘S2/S3落差（1.45pp/3.80pp）根因排查與是否啟動全repo稽核屬互動視窗權責（改engine.py/validation模組），建議寫提案而非自走軌道直接動手；`常備.6`~`常備.10`為安全的自走可推進項；`常備.12`需設計新的區塊抽樣變體，非簡單套用既有函式。
+
+---
 ## 第614輪 · 2026-09-23T10:3x+08:00 · TW · 研究帽：交辦優先於自走——驗.四完成(E-c/E-d正式閘門皆FAIL)，驗.一(引擎健全性S1-S3)投遞detached job下一輪收成
 
 - 取鎖乾淨（cycle`20260923-103037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=4（**驗.一/驗.二/驗.三/驗.四**，2026-09-23總司令裁示【三個方法缺陷＋E-c/E-d走正式閘門】新交辦），交辦有貨，本輪名額全給交辦。裁示規定順序「驗.一與驗.四並行→驗.二→驗.三」。
