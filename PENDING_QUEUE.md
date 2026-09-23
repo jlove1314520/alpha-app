@@ -12211,7 +12211,13 @@ wrapper維持現狀不變。
   `blocked_until`=2026-09-23T14:44:48 UTC（台北22:44:48），本輪檢查時
   （UTC 13:52）尚未解除。解除條件：FinMind額度恢復後重跑
   `python research/f52w_2007_extension.py`續抓剩餘約258檔完成後，才可
-  執行本項第2/3點。**轉向.一** [研究] 新資料單發檢定——**第1點日期查證已完成並回報
+  執行本項第2/3點。**更新（hypothesis_queue軌2026-09-23T14:52 UTC再次確認）**：
+  重新檢查`rate_limit_state.json`，`blocked_until`（2026-09-23T14:44:48 UTC）
+  已經過去，額度已恢復，本輪已重跑`python research/f52w_2007_extension.py`
+  （背景執行、有checkpoint可斷點續傳），本輪結束時checkpoint從
+  `fetched=42/failed=6`進展到`fetched=60/failed=10`，尚未全部完成，
+  下一輪需再檢查checkpoint並視需要繼續跑（若FinMind又被限流會自動記錄
+  新的`blocked_until`，屆時照原邏輯再等）。**轉向.一** [研究] 新資料單發檢定——**第1點日期查證已完成並回報
   （2026-09-23）**：
   - **資料擷取邊界**：`factor_ic.py::START_DATE="2010-01-01"`——f52w
   (#84/#85/#86/#370/#377/#378/#385)與dividend(#74/#75/#371/#376)

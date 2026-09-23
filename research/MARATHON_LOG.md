@@ -1,5 +1,15 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23T22:57（Taipei，UTC 14:57）— hypothesis_queue排程接續：
+CLAUDE.md「十四、暫停新試驗生成期間」凍結.二仍生效（未解除），本輪
+不開新alpha試驗，改做凍結期間允許的「資料.一」（2007-2014延伸抓取）。
+重新檢查`data/rate_limit_state.json`確認FinMind 402限流的`blocked_until`
+（14:44:48 UTC）已過去，額度恢復，接續執行`f52w_2007_extension.py`
+（有checkpoint可斷點續傳），checkpoint從`fetched=42/failed=6`進展到
+`fetched=60/failed=10`（背景持續執行中，未等全部約300檔跑完就收工，
+下一輪接續）。未動核心研究檔案（十三節單一寫入者名單）、未觸碰holdout、
+未做任何gate判定/試驗登記。
+
 ## 2026-09-23T19:55:50 — hypothesis_queue排程接續：確認PENDING_QUEUE
 三項交辦皆阻塞於仍在跑的`audit_16remaining_batch2`重度工作（不插隊），
 接續#82資料源查證——找到中文維基百科「臺灣50指數」條目完整成分股變動
