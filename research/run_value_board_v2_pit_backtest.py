@@ -98,6 +98,10 @@ from universe import universe as build_universe
 from finmind_client import load_dev
 from score import load_industry_map
 from score_v2 import compute_scores_v2
+from portfolio_backtest_v2 import (
+    alpha_significance as _alpha_significance,
+    buy_and_hold_index_pct as _buy_and_hold_index_pct,
+)
 from strategies.weinstein_stage2 import prepare_market_data
 from validation import holdout
 
@@ -236,12 +240,19 @@ def make_random_signal_fn(industry_map: dict[str, str], start_date: str, top_n: 
 
 
 def buy_and_hold_index_pct(market_df: pd.DataFrame, start: str, end: str) -> float:
-    """對照組(b)：買進持有加權指數，零成本不換股——跟portfolio_backtest_v2.py同一個公式。"""
-    window = market_df[(market_df["date"] >= start) & (market_df["date"] <= end)].sort_values("date")
-    if len(window) < 2:
-        return float("nan")
-    p0, p1 = window.iloc[0]["close"], window.iloc[-1]["close"]
-    return float(p1 / p0 - 1) * 100
+    """對照組(b)：買進持有基準指數，零成本不換股。
+
+    2026-09-23馬拉松第621輪[自行裁量,bug修復]：改為直接呼叫
+    `portfolio_backtest_v2.buy_and_hold_index_pct()`（預設0050含息
+    總報酬benchmark，尺.一修正），取代這裡原本「自成一體複製一份、
+    不跨檔案import」的舊版TAIEX價格指數公式——舊版docstring自稱「跟
+    portfolio_backtest_v2.py同一個公式」，但portfolio_backtest_v2.py
+    2026-09-23尺.一改成注入benchmark參數後，這份複製已經不再逐行一致，
+    自己的docstring變成假話。理由：既有margin/odd_lot/short_sale等
+    候選都是直接import portfolio_backtest_v2的函式而非各自複製，這裡
+    改成同一種模式，屬於修好一個違反自己docstring承諾的既有bug，不是
+    新的架構決策，不需要提案先於執行。"""
+    return _buy_and_hold_index_pct(market_df, start, end)
 
 
 def taiex_mdd_sortino(market_df: pd.DataFrame, start: str, end: str) -> dict:
@@ -263,25 +274,16 @@ def taiex_mdd_sortino(market_df: pd.DataFrame, start: str, end: str) -> dict:
 
 
 def alpha_significance(equity_curve: pd.DataFrame, market_df: pd.DataFrame) -> dict:
-    """跟portfolio_backtest_v2.py::alpha_significance()逐行一致的公式，這裡
-    自成一體複製一份（不同因子引擎，各自獨立，不跨檔案import）。"""
-    mkt = market_df.set_index("date")["close"].sort_index()
-    mkt_ret = mkt.pct_change()
-    net_ret = equity_curve.set_index("date")["equity"].pct_change().rename("net_return")
-    merged = pd.concat([net_ret, mkt_ret.rename("mkt_return")], axis=1, join="inner").dropna()
-    if len(merged) < 30:
-        return {"alpha_ann_pct": float("nan"), "beta": float("nan"), "alpha_pvalue": float("nan"),
-                "alpha_significant": False, "n_days": len(merged)}
-    reg = stats.linregress(merged["mkt_return"], merged["net_return"])
-    alpha_ann_pct = ((1 + reg.intercept) ** 252 - 1) * 100
-    pvalue = (2 * stats.t.sf(abs(reg.intercept / reg.intercept_stderr), len(merged) - 2)
-              if reg.intercept_stderr else float("nan"))
-    return {
-        "alpha_ann_pct": float(alpha_ann_pct), "beta": float(reg.slope),
-        "alpha_pvalue": float(pvalue) if pvalue == pvalue else float("nan"),
-        "alpha_significant": bool(reg.intercept > 0 and pvalue == pvalue and pvalue < 0.05),
-        "n_days": len(merged),
-    }
+    """CAPM alpha/beta回歸。
+
+    2026-09-23馬拉松第621輪[自行裁量,bug修復]：改為直接呼叫
+    `portfolio_backtest_v2.alpha_significance()`（0050含息總報酬
+    benchmark、Newey-West HAC標準誤、Dimson beta，尺.一修正），取代
+    這裡原本「自成一體複製一份、不跨檔案import」的舊版簡單OLS+TAIEX
+    價格指數公式。原因同`buy_and_hold_index_pct()`——見上方註解，舊版
+    docstring自稱與portfolio_backtest_v2.py逐行一致，尺.一之後已不再
+    成立，屬於修好既有bug。"""
+    return _alpha_significance(equity_curve, market_df)
 
 
 def compute_moonshot_stats(trades: pd.DataFrame, price_data: dict[str, pd.DataFrame], horizon_days: int = 252) -> dict:

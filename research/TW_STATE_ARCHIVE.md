@@ -1334,3 +1334,55 @@ gate3/5/6後續，高併發下建議先`tasklist`+`git log`確認互動視窗CC�
 拆解成子步驟後再投入單一輪次。完整見`REPORT.md`第617輪心跳（待補）、
 `PENDING_QUEUE.md`「驗.一」「驗.三」條目、`TRIALS_REGISTRY.jsonl`
 `#346`補登記錄。
+
+---
+
+**最後更新：2026-09-23T15:3x+08:00（馬拉松第618輪，研究帽）**——取鎖乾淨
+（cycle`20260923-153037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=2（驗.一殘餘16支稽核+f52w#86、驗.二第二部分）。`tasklist`確認
+**12個claude.exe行程仍在並行**。開工先收成round616投遞的detached job
+`20260923-133203-00a4`：仍`orphaned`（上一輪已核對過與互動視窗CC重複
+勞動、已補commit資料檔，本輪不重複處理）。
+**開工中途發現新總司令裁示（commit`03bbaff1`）剛落地**：「【修正alpha
+量尺＋f52w補完審查＋稽核續跑】」，`PENDING_QUEUE.md`新增`尺.一`(組合層
+alpha/基準量尺修正，最優先，0050含息總報酬+Newey-West HAC+Dimson
+beta)、`審.一`(f52w補完審查，待尺.一完成)、`驗.一第4點續(剩餘16支)`
+(待尺.一完成)三項，`ORDER-BEGIN`優先序改為尺.一→審.一→驗.一續2→
+驗.一→驗.二。**`git status`發現`research/portfolio_backtest_v2.py`
+有uncommitted修改**，`git diff`核對確認是互動視窗CC正在即時實作`尺.一`
+（`buy_and_hold_index_pct()`/`alpha_significance()`改注入
+`benchmark`參數、新增`_load_0050_total_return_series()`，程式碼與
+裁示原文逐字對應）——**判斷本輪不得觸碰`portfolio_backtest_v2.py`
+或任何下游項目（審.一／驗.一第4點續／f52w #86正式判定），避免與互動
+視窗CC產生第三次同形狀的重複勞動/檔案衝突**（同round615/616已有
+先例）。**本輪實質工作**：確認`f52w_high_gates.py`（#86，第3/5/6關
+逐年一致性等）的計算內容**不依賴`portfolio_backtest_v2.py`的
+`alpha_significance()`/`buy_and_hold_index_pct()`**（僅import該模組的
+`_liquidity_proxy_series()`，與benchmark/alpha量尺無關），判斷此腳本
+可安全獨立跑，**先`reap`清除兩筆前次提交失敗的殘留job登記**（cwd參數
+路徑格式錯誤導致的`failed`/`orphaned`各一筆），修正`--cwd`跨殼層
+路徑跳脫問題後成功投遞`20260923-153207-e7ea`（timeout 45分鐘），
+session內確認已進入`Loading sample + factors`階段、4.7分鐘仍
+`running`+`watchdog_alive=True`，**本輪不等待完成、不對其輸出下任何
+判定**（尊重裁示原文「審.一...待尺.一完成後開始」的順序，只是先把
+獨立於量尺修正之外的診斷數字准備好，供尺.一完成後的審.一直接參考，
+不是搶跑審.一本身）。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增判定）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／
+`portfolio_backtest_v2.py`任何原始碼，全程零新增外部API呼叫。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（驗.一殘餘16支稽核+f52w#86、驗.二第二部分——現已知需等`尺.一`完成，
+`審.一`/`驗.一第4點續`兩項新增條目本輪視為與既有兩項同一組待辦，不
+重複計數）。**等待審閱：1件**（`f52w_high_portfolio_v1`#85/#370翻轉
+判定，`AWAITING_REVIEW.md`未變動，延續中，新裁示`審.一`即是對這件的
+正式處理指示）。**下一輪任一軌接手**：先確認`portfolio_backtest_v2.py`
+是否已被互動視窗CC commit完成`尺.一`（`git log`/`git diff`），完成
+才能接續`審.一`／`驗.一第4點續`；若仍在進行中，比照本輪做法找低碰撞
+的獨立工作（`run_detached.py status`收成`20260923-153207-e7ea`若已
+`finished`，先讀log但不下判定，留給`審.一`正式使用）；`驗.二`第二
+部分同樣建議先確認是否受尺.一影響（初步判斷其9關統計檢定與
+portfolio_backtest_v2的benchmark函式無關，但需二次確認）。完整見
+`REPORT.md`第618輪心跳、`PENDING_QUEUE.md`「尺.一」「審.一」章節、
+commit`03bbaff1`。

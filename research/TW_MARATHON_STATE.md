@@ -4,6 +4,60 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+
+---
+**最後更新：2026-09-23T18:3x+08:00（馬拉松第621輪，研究帽）**——取鎖乾淨
+（cycle`20260923-183037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認
+互動視窗CC無新commit，工作目錄修改檔皆是例行排程檔案，非CC-only限定
+路徑，無碰撞風險。`run_detached.py status`：`running=0`，收成上一輪
+job`20260923-163927-c80e`（已由round620收成登記，本輪不重複）。
+**本輪工作單位＝承接round620列出的候選清單，查證並修復一個範圍缺陷後
+投遞剩餘2支重算**：發現`piotroski_fscore_gate_v1.py`／`run_value_board_
+v2_pit_backtest.py`各自「自成一體複製一份」`alpha_significance()`／
+`buy_and_hold_index_pct()`（舊版docstring自稱跟`portfolio_backtest_v2.
+py`逐行一致），尺.一（commit`cbaa4412`）只改了`portfolio_backtest_v2.
+py`本體，這兩支獨立複製沒有被自動更新，直接重跑只會拿到「新引擎+舊
+量尺」的半套修正。**[自行裁量，判定為bug修復非新架構決策]**：修復
+`run_value_board_v2_pit_backtest.py`改成直接呼叫`portfolio_backtest_v2`
+的函式（import驗證通過，`piotroski_fscore_gate_v1.py`透過既有import
+間接沿用，`determinism_self_test.py`為位置參數呼叫不受影響）。同時
+發現`weinstein_alpha_gate.py`依賴的`long_only_vs_market.py::
+decompose_alpha_beta()`也有同樣缺陷，但blast radius涵蓋4支腳本
+（`portfolio_backtest.py`/`run_alpha_decomposition.py`/
+`weinstein_alpha_gate.py`/`weinstein_v2_alpha_gate.py`），**本輪不動，
+留給下一輪評估**。新增`audit_16remaining_batch2.py`（依序呼叫
+`run_value_board_v2_pit_backtest.main()`→`piotroski_fscore_gate_v1.
+main()`，順序不可顛倒，後者要讀前者產生的baseline CSV），投遞
+`run_detached.py submit`（job`20260923-183404-d854`，timeout 420分鐘/
+7小時——`run_value_board_v2_pit_backtest.py`跑500檔+TRAIN/VAL兩期各
+100次隨機對照draws，腳本docstring記錄實測約102秒/draw，200次draws
+估算上限約5.7小時，設計上跨多輪馬拉松收成）。session內確認job已進入
+TRAIN期執行（讀取快取486/500檔可用，日誌顯示正常進度），本輪不等待
+完成。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+PASS（386列，本輪未新增判定，純程式碼修復非統計判定）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／
+`portfolio_backtest_v2.py`任何原始碼（只修改`run_value_board_v2_pit_
+backtest.py`，不在CLAUDE.md「十三、核心研究檔案單一寫入者」限定清單
+內），全程零新增外部API呼叫（回測讀既有本地pickle快取）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（`驗.一第4點續`本身因job running中不算「未開始」但也未結案；驗.二）。
+**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非
+本輪新增）。**下一輪任一軌接手**：`run_detached.py status`收成
+`20260923-183404-d854`——預估要跑數小時，若仍`running`不必每輪都查，
+可先做`驗.二`或其他工作隔幾輪再回頭確認；若`finished`，讀
+`data/value_board_v2_pit_backtest_liquidity500_full.csv`與
+`data/piotroski_fscore_gate_v1_results.csv`，對照`TRIALS_LEDGER.md`
+#93/#290/#94/#291比較新舊數字方向是否一致，翻轉一律進
+`AWAITING_REVIEW.md`不自行改判；`weinstein_alpha_gate.py`同類缺陷
+待決定是否修復（需先核查`run_alpha_decomposition.py`用途）。完整見
+`REPORT.md`第621輪心跳、`PENDING_QUEUE.md`「驗.一第4點續」條目、
+`audit_16remaining_batch2.py`。
+
+---
+
 **最後更新：2026-09-23T17:3x+08:00（馬拉松第620輪，研究帽）**——取鎖乾淨
 （cycle`20260923-173037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認
@@ -90,58 +144,6 @@ checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，
 非trial候選，不計入16支這批）。完整見`REPORT.md`第619輪心跳、
 `PENDING_QUEUE.md`「驗.一第4點續（剩餘16支）」條目、
 `audit_16remaining_batch1.py`。
-
----
-
-**最後更新：2026-09-23T15:3x+08:00（馬拉松第618輪，研究帽）**——取鎖乾淨
-（cycle`20260923-153037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=2（驗.一殘餘16支稽核+f52w#86、驗.二第二部分）。`tasklist`確認
-**12個claude.exe行程仍在並行**。開工先收成round616投遞的detached job
-`20260923-133203-00a4`：仍`orphaned`（上一輪已核對過與互動視窗CC重複
-勞動、已補commit資料檔，本輪不重複處理）。
-**開工中途發現新總司令裁示（commit`03bbaff1`）剛落地**：「【修正alpha
-量尺＋f52w補完審查＋稽核續跑】」，`PENDING_QUEUE.md`新增`尺.一`(組合層
-alpha/基準量尺修正，最優先，0050含息總報酬+Newey-West HAC+Dimson
-beta)、`審.一`(f52w補完審查，待尺.一完成)、`驗.一第4點續(剩餘16支)`
-(待尺.一完成)三項，`ORDER-BEGIN`優先序改為尺.一→審.一→驗.一續2→
-驗.一→驗.二。**`git status`發現`research/portfolio_backtest_v2.py`
-有uncommitted修改**，`git diff`核對確認是互動視窗CC正在即時實作`尺.一`
-（`buy_and_hold_index_pct()`/`alpha_significance()`改注入
-`benchmark`參數、新增`_load_0050_total_return_series()`，程式碼與
-裁示原文逐字對應）——**判斷本輪不得觸碰`portfolio_backtest_v2.py`
-或任何下游項目（審.一／驗.一第4點續／f52w #86正式判定），避免與互動
-視窗CC產生第三次同形狀的重複勞動/檔案衝突**（同round615/616已有
-先例）。**本輪實質工作**：確認`f52w_high_gates.py`（#86，第3/5/6關
-逐年一致性等）的計算內容**不依賴`portfolio_backtest_v2.py`的
-`alpha_significance()`/`buy_and_hold_index_pct()`**（僅import該模組的
-`_liquidity_proxy_series()`，與benchmark/alpha量尺無關），判斷此腳本
-可安全獨立跑，**先`reap`清除兩筆前次提交失敗的殘留job登記**（cwd參數
-路徑格式錯誤導致的`failed`/`orphaned`各一筆），修正`--cwd`跨殼層
-路徑跳脫問題後成功投遞`20260923-153207-e7ea`（timeout 45分鐘），
-session內確認已進入`Loading sample + factors`階段、4.7分鐘仍
-`running`+`watchdog_alive=True`，**本輪不等待完成、不對其輸出下任何
-判定**（尊重裁示原文「審.一...待尺.一完成後開始」的順序，只是先把
-獨立於量尺修正之外的診斷數字准備好，供尺.一完成後的審.一直接參考，
-不是搶跑審.一本身）。`trial_registry.py --check`
-（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增判定）。
-`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
-`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
-未修改`research/backtest/`／`research/validation/`／
-`portfolio_backtest_v2.py`任何原始碼，全程零新增外部API呼叫。
-`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
-（驗.一殘餘16支稽核+f52w#86、驗.二第二部分——現已知需等`尺.一`完成，
-`審.一`/`驗.一第4點續`兩項新增條目本輪視為與既有兩項同一組待辦，不
-重複計數）。**等待審閱：1件**（`f52w_high_portfolio_v1`#85/#370翻轉
-判定，`AWAITING_REVIEW.md`未變動，延續中，新裁示`審.一`即是對這件的
-正式處理指示）。**下一輪任一軌接手**：先確認`portfolio_backtest_v2.py`
-是否已被互動視窗CC commit完成`尺.一`（`git log`/`git diff`），完成
-才能接續`審.一`／`驗.一第4點續`；若仍在進行中，比照本輪做法找低碰撞
-的獨立工作（`run_detached.py status`收成`20260923-153207-e7ea`若已
-`finished`，先讀log但不下判定，留給`審.一`正式使用）；`驗.二`第二
-部分同樣建議先確認是否受尺.一影響（初步判斷其9關統計檢定與
-portfolio_backtest_v2的benchmark函式無關，但需二次確認）。完整見
-`REPORT.md`第618輪心跳、`PENDING_QUEUE.md`「尺.一」「審.一」章節、
-commit`03bbaff1`。
 
 ---
 

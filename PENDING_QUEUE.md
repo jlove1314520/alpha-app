@@ -11778,6 +11778,75 @@ wrapper維持現狀不變。
   舊引擎/舊量尺產出過`TRIALS_LEDGER.md`判定（只有「曾經判過」的才需要
   重算校正，未曾判定過的屬於全新試驗不在本項範圍），確認後排入
   detached job繼續，翻轉一律進`AWAITING_REVIEW.md`不自行改判。
+
+  **2026-09-23馬拉松第621輪（TW，研究帽）**——取鎖乾淨（cycle
+  `20260923-183037`）。`git log`確認互動視窗CC無新commit，工作目錄
+  修改檔皆是例行排程檔案，非CC-only限定路徑（`research/backtest/`／
+  `research/validation/`／`adjust.py`／`pit.py`／`trial_registry.py`），
+  無碰撞風險。承接上一輪確認的3支候選（`piotroski_fscore_gate_v1`／
+  `run_value_board_v2_pit_backtest`／`weinstein_alpha_gate`），**本輪
+  查證發現一個先前未察覺的範圍缺陷**：`piotroski_fscore_gate_v1.py`／
+  `run_value_board_v2_pit_backtest.py`兩支腳本內部**各自複製一份**
+  `alpha_significance()`／`buy_and_hold_index_pct()`（`run_value_board_
+  v2_pit_backtest.py`舊版docstring原文自稱「跟portfolio_backtest_v2.py
+  同一個公式...自成一體複製一份，不跨檔案import」）——這代表尺.一
+  （commit`cbaa4412`，只改了`portfolio_backtest_v2.py`本體）**沒有
+  傳播到這兩支腳本**：margin/odd_lot/short_sale等候選是直接
+  `import portfolio_backtest_v2 as pbv2`才自動吃到修正，這兩支是獨立
+  複製，舊版docstring「逐行一致」的承諾在尺.一之後已經是假話，直接
+  重跑只會拿到「新引擎(compounding)+舊量尺(TAIEX價格指數/簡單OLS)」
+  的半套修正，不是裁示要求的「新引擎+新量尺」。**[自行裁量，判定為
+  bug修復非新架構決策，不需提案先於執行]**：修復
+  `run_value_board_v2_pit_backtest.py`，把本地複製的兩個函式改成直接
+  呼叫`portfolio_backtest_v2.alpha_significance()`/
+  `buy_and_hold_index_pct()`（import驗證通過，`piotroski_fscore_gate_
+  v1.py`透過`from run_value_board_v2_pit_backtest import`間接沿用同一
+  份修復，`determinism_self_test.py`（唯一另一個呼叫端）為位置參數呼叫
+  相容，不受影響）。**理由**：這是修好一個違反自己docstring承諾的既有
+  bug，範圍窄（僅2個呼叫端，皆已核對相容），不是新的統計判定或架構
+  選擇。**同時發現但本輪未動**：`weinstein_alpha_gate.py`依賴的
+  `long_only_vs_market.py::decompose_alpha_beta()`也是同樣性質的獨立
+  複製（同樣用TAIEX價格+簡單OLS，未套用尺.一），但`decompose_alpha_
+  beta()`被4支腳本使用（`portfolio_backtest.py`/`run_alpha_
+  decomposition.py`/`weinstein_alpha_gate.py`/`weinstein_v2_alpha_
+  gate.py`），blast radius較大且`run_alpha_decomposition.py`用途未
+  核查，**本輪不動，留給下一輪或總司令裁示是否要修**——先只解決範圍
+  已確認、風險已控的2支。新增`audit_16remaining_batch2.py`（依序呼叫
+  `run_value_board_v2_pit_backtest.main()`→`piotroski_fscore_gate_v1.
+  main()`，piotroski的比較表要讀前者產生的baseline CSV，順序不可
+  顛倒），投遞`run_detached.py submit`（job`20260923-183404-d854`，
+  timeout 420分鐘/7小時——`run_value_board_v2_pit_backtest.py`本身
+  跑500檔流動性樣本+TRAIN/VAL兩期各100次隨機對照draws，腳本docstring
+  記錄實測約102秒/draw，200次draws估算上限約5.7小時，這是已知的長
+  工作，設計上跨多輪馬拉松收成，不在單輪25分鐘窗口內等待）。session內
+  確認job已進入TRAIN期執行（讀取快取486/500檔可用，非首次重算factor，
+  日誌顯示正常進度），本輪不等待完成。`trial_registry.py --check`
+  （`PYTHONIOENCODING=utf-8`）exit=0 PASS（386列，本輪未新增判定，
+  純程式碼修復+enumeration，未執行任何新統計判定）。
+  `validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+  `False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+  未修改`research/backtest/`／`research/validation/`／
+  `portfolio_backtest_v2.py`任何原始碼（只修改`run_value_board_v2_pit_
+  backtest.py`，不在CLAUDE.md「十三、核心研究檔案單一寫入者」限定
+  清單內），全程零新增外部API呼叫（回測讀既有本地pickle快取）。
+  `PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未
+  開始**（`驗.一第4點續`本身因job running中不算「未開始」但也未結案；
+  `驗.二`）。**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，
+  延續中，非本輪新增）。**下一輪任一軌接手**：`run_detached.py status`
+  收成`20260923-183404-d854`——若仍`running`就不必每輪都查（單輪
+  102秒/draw×200draws預估要跑數小時，太頻繁查詢沒有意義），可以先做
+  `驗.二`或其他工作，隔幾輪再回頭確認；若`finished`，讀
+  `data/value_board_v2_pit_backtest_liquidity500_full.csv`與
+  `data/piotroski_fscore_gate_v1_results.csv`，對照`TRIALS_LEDGER.md`
+  #93/#290（sanity/baseline，非最終判定）與#94/#291（gate_v1最終FAIL
+  判定）比較新舊數字方向是否一致，翻轉一律進`AWAITING_REVIEW.md`不
+  自行改判；`weinstein_alpha_gate.py`／`long_only_vs_market.py::
+  decompose_alpha_beta()`的同類缺陷待決定是否修復（blast radius涵蓋
+  4支腳本，需要先核查`run_alpha_decomposition.py`/`portfolio_backtest.
+  py`(v1)用途，非本輪範圍）。完整見`REPORT.md`第621輪心跳、
+  `audit_16remaining_batch2.py`、`run_value_board_v2_pit_backtest.py`
+  git diff。
+
 - [ ] **驗.二** [研究] spillover前視偏誤——**2026-09-23裁示【稽核解封
   ＋S2對等比較＋凍結regime家族】第一部分已完成**：「#346判定FAIL
   (前視偏誤)不需要等重跑，現在寫入並從AWAITING_REVIEW移入已結案」——

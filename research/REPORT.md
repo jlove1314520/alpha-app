@@ -2474,3 +2474,14 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（347列，最大編號#345，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（規.二第4節參數掃描方式提案，非本輪新增，延續中）。
 - **下一輪**：規.二第4節提案審閱結果是集中版框架兩軌（TW/US）共同的唯一解鎖點，出爐前建議比照本輪做精簡確認即可，不必每輪重新全面掃描；`#50`仍被動等待tick累積至20（13/20，`data/ticks/`）；依輪替下一輪建議選FUT軌（TW/US本輪皆已碰過）。
+
+## 第621輪 · 2026-09-23T18:3x+08:00 · TW · 研究帽：修復piotroski/value_board兩支腳本的舊量尺複製bug，投遞剩餘2支重算
+
+- 取鎖乾淨（cycle`20260923-183037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認互動視窗CC無新commit，無碰撞風險。
+- **本輪主要發現**：`piotroski_fscore_gate_v1.py`／`run_value_board_v2_pit_backtest.py`各自「自成一體複製一份」`alpha_significance()`／`buy_and_hold_index_pct()`（舊版docstring自稱跟`portfolio_backtest_v2.py`逐行一致），尺.一（commit`cbaa4412`）只改了`portfolio_backtest_v2.py`本體，這兩支獨立複製沒有被自動更新——直接重跑只會拿到「新引擎(compounding)+舊量尺(TAIEX價格指數/簡單OLS)」的半套修正，不是裁示要求的完整修正。
+- **[自行裁量，判定為bug修復非新架構決策，不需提案先於執行]**：修復`run_value_board_v2_pit_backtest.py`，把本地複製的兩個函式改成直接呼叫`portfolio_backtest_v2.alpha_significance()`/`buy_and_hold_index_pct()`。import驗證通過；`piotroski_fscore_gate_v1.py`透過既有import間接沿用同一份修復；`determinism_self_test.py`（唯一另一呼叫端）位置參數呼叫不受影響。理由：這是修好一個違反自己docstring承諾的既有bug，範圍窄（僅2個呼叫端，皆已核對相容）。
+- **同時發現但本輪未動**：`weinstein_alpha_gate.py`依賴的`long_only_vs_market.py::decompose_alpha_beta()`也是同樣性質的獨立複製，但被4支腳本使用（`portfolio_backtest.py`/`run_alpha_decomposition.py`/`weinstein_alpha_gate.py`/`weinstein_v2_alpha_gate.py`），blast radius較大且`run_alpha_decomposition.py`用途未核查，留給下一輪或總司令裁示。
+- 新增`audit_16remaining_batch2.py`（依序呼叫`run_value_board_v2_pit_backtest.main()`→`piotroski_fscore_gate_v1.main()`，順序不可顛倒），投遞`run_detached.py submit`（job`20260923-183404-d854`，timeout 420分鐘/7小時——腳本docstring記錄實測約102秒/draw，200次draws估算上限約5.7小時，設計上跨多輪馬拉松收成）。session內確認job已進入TRAIN期執行，本輪不等待完成。
+- `trial_registry.py --check`exit=0 PASS（386列，本輪未新增判定，純程式碼修復非統計判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`portfolio_backtest_v2.py`任何原始碼（只修改`run_value_board_v2_pit_backtest.py`，不在CLAUDE.md「十三、核心研究檔案單一寫入者」限定清單內），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（`驗.一第4點續`本身因job running中不算「未開始」但也未結案；驗.二）。**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪新增）。
+- **下一輪**：`run_detached.py status`收成`20260923-183404-d854`——預估要跑數小時，若仍`running`不必每輪都查，可先做`驗.二`或其他工作；若`finished`，讀`data/value_board_v2_pit_backtest_liquidity500_full.csv`與`data/piotroski_fscore_gate_v1_results.csv`對照`TRIALS_LEDGER.md`#93/#290/#94/#291，翻轉一律進`AWAITING_REVIEW.md`不自行改判；`weinstein_alpha_gate.py`同類缺陷待決定是否修復。
