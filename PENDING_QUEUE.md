@@ -11496,26 +11496,43 @@ wrapper維持現狀不變。
   **#358已改記FRAMEWORK_CHECK_FAILED**（`TRIALS_LEDGER.md`加更正註記
   +直接修正verdict欄位，`TRIALS_REGISTRY.jsonl`同步），撤銷原「框架
   跑得動」結論，不計入N（同`FRAMEWORK_CHECK`）。
-  **尚未完成（第4點，稽核所有用run_backtest且涉及0050/TAIEX/買進持有
-  比較的TRIALS_LEDGER列）**：grep初步找到21支腳本呼叫`run_backtest`
-  （比裁示估計的28支略少，可能還有透過`buy_leg_rate`/`sell_leg_rate`
-  間接使用但不叫`run_backtest`本身的腳本未計入，需要另外查）。這是
-  一輪龐大的重跑工作量（每支腳本可能有自己的資料載入與判定邏輯）。
-  **2026-09-23裁示更新：解除BLOCKED、列最高優先**，見上方本條目開頭
-  更新文字，等`驗.一續2`的S2b通過後立刻開始，先跑5支指定腳本。
-  **馬拉松第616輪（TW，13:3x）進度**：5支中第1支
-  （`portfolio_backtest_v2`）已於round615前commit`6305aab9`完成
-  （0翻轉）。本輪修改`audit_run_backtest_5priority.py`加入「已有結果
-  就略過重跑」的續跑邏輯（`[自行裁量]`：避免重跑已完成、耗時的1/3
-  階段浪費預算），投遞detached job`20260923-133203-00a4`跑第2/3支
-  （`pead_portfolio_v1`→#73）與第3/3支（`run_score_backtest`→#12），
-  session內等待4分鐘仍`running`（`pead_portfolio_v1`的
-  `n_random=100`兩期各跑一次較慢），**下一輪用`run_detached.py
-  status`／`log`收成**，完成後對照TRIALS_LEDGER#73/#12舊判定，翻轉
-  一律進`AWAITING_REVIEW.md`不自行改判。跑完這3支後，尚有第4~5支
-  （`f52w_high_portfolio_v1`／`dividend_yield_portfolio_v1`，據腳本
-  docstring另需獨立指令因checkpoint機制單次35-40分鐘），以及裁示提到
-  「其餘16支」的第二輪稽核，留待後續輪次。
+  grep初步找到21支腳本呼叫`run_backtest`（比裁示估計的28支略少，可能
+  還有透過`buy_leg_rate`/`sell_leg_rate`間接使用但不叫`run_backtest`
+  本身的腳本未計入，需要另外查）。
+
+  **✅首批5支已全數完成（2026-09-23，互動視窗CC）**：
+  1. `portfolio_backtest_v2`(#296-#303→#367)：**0翻轉**。VAL alpha
+  顯著性判準全部維持不顯著，`ic_weighted_train_only/monthly` VAL p
+  從0.0831降到0.0514最接近門檻但未跨過。
+  2. `f52w_high_portfolio_v1`(#85→#370)：**確認翻轉，已標`未結案`
+  進AWAITING_REVIEW，不自行改判**。VAL alpha p從0.0831降到0.0017
+  跨過0.05門檻，VAL總報酬+69.30%→+122.20%。**尚需補跑`#86`
+  （`f52w_high_gates.py`第3/5/6關，尤其逐年一致性）才能確認整體
+  結論**，這是原本跟#85並列的另一個獨立FAIL理由，本輪未觸及。
+  3. `dividend_yield_portfolio_v1`(#75→#371)：**0翻轉但極接近**。
+  VAL alpha p從0.1487降到0.0511，僅差0.0011未跨過門檻，FAIL維持，
+  誠實記錄為次接近翻轉的案例。
+  4. `pead_portfolio_v1`(#73→#373)：**0翻轉，且是反例**——VAL alpha
+  p從0.4809惡化到0.6186，VAL報酬轉為落後大盤，證實複利bug修正效果
+  是策略相依的，不是單向系統性偏誤。
+  5. `run_score_backtest`(#12→#375)：**判準(配對式隨機控制組
+  percentile)未變**，兩期仍100.0，維持EXPERIMENTAL。但誠實揭露一個
+  無法排除的干擾變因：#12是5支中最早登記(2026-08-23)，中間樣本宇宙
+  可能已變動，VAL總報酬+131.65%→+34.18%的變化不能乾淨歸因於複利bug
+  單一因素。
+
+  **協調事故記錄（協調.零第5點規定的透明回報義務）**：馬拉松第616輪
+  在互動視窗CC已完成同一件事之後，仍投遞了detached job
+  `20260923-133203-00a4`重跑`pead_portfolio_v1`/`run_score_backtest`
+  （因為它讀到的PENDING_QUEUE.md還是舊版狀態，不知道互動視窗CC已經
+  用直接呼叫`run_one()`的方式完成，沒有透過它新增的續跑邏輯偵測到）。
+  互動視窗CC發現後已用`taskkill`終止該job（child_pid 160180/watchdog
+  pid 156108）並`run_detached.py reap`標記orphaned，避免浪費運算資源
+  與未來收成時的重複登記風險。核對過`TRIALS_LEDGER.md`確認沒有因此
+  產生重複的#73/#12 recheck列。
+
+  **尚未開始**：`f52w_high_portfolio_v1`的#86後續(gate3/5/6)、其餘16支
+  腳本的第二輪稽核。
 - [ ] **驗.二** [研究] spillover前視偏誤——**2026-09-23裁示【稽核解封
   ＋S2對等比較＋凍結regime家族】第一部分已完成**：「#346判定FAIL
   (前視偏誤)不需要等重跑，現在寫入並從AWAITING_REVIEW移入已結案」——
