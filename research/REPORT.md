@@ -9,6 +9,15 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第637輪 · 2026-09-24T06:3x+08:00 · US · 研究帽：延續round634方法論對US軌重新確認凍結.二四類工作皆已完成/被FinMind額度阻擋，本輪無可推進新工作單位
+
+- 取鎖乾淨（cycle`20260924-063037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0（`閘門.一`標`- [!]`），逐一核對開頭標記皆未到解除時間。三軌時間戳：TW round635=04:3x／FUT round636=05:3x／US round634=03:3x（最舊）——依round636建議與輪替選US。
+- 核心查證：`data/rate_limit_state.json`顯示FinMind`blocked_until`=1790203064.30（台北2026-09-24T06:37:44），本輪06:32查詢仍BLOCKED（約差5分鐘）。`research/.f52w_2007_extension.lock`不存在（非有行程在跑），`f52w_2007_extension_checkpoint.json`確認`fetched_ids`=222/300、`failed_ids`=41，與round636一致、本輪期間無變動，證實額度硬性擋住持續有效、無其他行程接手。
+- 逐一核對`凍結.二`允許的四類工作現況：稽核重跑（驗.一第4點續剩餘8支）已grep確認標`[x]`完成並登記#387-393；資料抓取被FinMind額度硬性擋住；工具修正（修.三）已由互動視窗CC完成並commit（`a80b27f7`，本輪`git status`確認`research/factors.py`無未commit修改）；驗.二開盤到收盤重跑已grep確認標`[x]`完成並登記`TRIALS_LEDGER.md`#394（FAIL）。`AWAITING_REVIEW.md`「等待中」確認0件。US軌`US_LEADS.md`/`STRATEGY_GRAVEYARD.md`price-only因子家族結案狀態未變，`#49`/`#51`/`#52`已FAIL結案，無對應結構性優勢候選可開新方向（`凍結.二`期間不得開新alpha試驗）。
+- **驗證**：`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（399列，本輪未新增判定）；`validation/holdout.py::is_holdout_consumed()`開工/收工前皆`False`；`run_detached.py status`：`running=0`（160筆歷史）；未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區；未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等`CLAUDE.md`十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目）；全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（僅`閘門.一`標`- [!]`，BLOCKED於續抓完成）。等待審閱：0件。下一輪待做：FinMind額度預計06:37台北解除，屆時可繼續f52w/dividend 2007-2014延伸抓取（222/300，還差78檔，`failed_ids`41筆需檢視是否永久失敗）；依輪替下一輪建議選TW軌。
+
+---
 ## 第636輪 · 2026-09-24T05:3x+08:00 · FUT · 研究帽：確認凍結.二允許的四類工作皆已完成/被FinMind額度阻擋，FUT軌本輪無可推進新工作單位
 
 - 取鎖乾淨（cycle`20260924-053037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0（`閘門.一`標`- [!]`），逐一核對開頭標記皆未到解除時間。三軌時間戳：TW round635=04:3x／US round634=03:3x／FUT round633=02:3x（最舊）——依輪替選FUT。
