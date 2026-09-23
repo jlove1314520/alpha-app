@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-09-23T01:14:59+00:00",
+  "computed_at": "2026-09-23T03:59:15+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
@@ -8,13 +8,13 @@
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
       "us_price": 452,
       "us_quote_time": 1790107200,
-      "tw_price": 2500.0,
-      "tw_quote_time": "09:14:45",
+      "tw_price": 2485.0,
+      "tw_quote_time": "11:58:40",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 2866.403,
-      "premium_pct": 14.656
+      "premium_pct": 15.348
     },
     "UMC": {
       "tw_code": "2303",
@@ -22,13 +22,13 @@
       "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
       "us_price": 25.77,
       "us_quote_time": 1790107200,
-      "tw_price": 159.0,
-      "tw_quote_time": "09:14:45",
+      "tw_price": 159.5,
+      "tw_quote_time": "11:58:20",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 163.423,
-      "premium_pct": 2.782
+      "premium_pct": 2.46
     },
     "ASX": {
       "tw_code": "3711",
@@ -36,13 +36,13 @@
       "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
       "us_price": 45.2,
       "us_quote_time": 1790107200,
-      "tw_price": 699.0,
-      "tw_quote_time": "09:14:42",
+      "tw_price": 695.0,
+      "tw_quote_time": "11:59:02",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 716.601,
-      "premium_pct": 2.518
+      "premium_pct": 3.108
     },
     "CHT": {
       "tw_code": "2412",
@@ -51,7 +51,7 @@
       "us_price": 46.11,
       "us_quote_time": 1790107200,
       "tw_price": 144.5,
-      "tw_quote_time": "09:14:35",
+      "tw_quote_time": "11:58:26",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
