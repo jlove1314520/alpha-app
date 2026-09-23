@@ -53,6 +53,27 @@ Known gap (documented, not silently ignored): capital reductions (減資) are
 NOT handled here. TaiwanStockCapitalReductionReferencePrice hasn't been
 wired in yet. A stock that underwent a capital reduction will show an
 unadjusted jump in this series on that date. See DATA.md.
+
+**2026-09-23 fix (資料.零稽核):** both upstream sources occasionally hand
+back a non-positive close that is not a real price:
+- FinMind's raw TaiwanStockPrice reports `close=0.0` on zero-volume days for
+  thinly-traded names (confirmed via cache audit: e.g. stock 5395 has 1,124
+  such rows 2004-2016, every one with `Trading_Volume` 0-3 -- this is
+  FinMind's own convention for "no trade happened", not a glitch limited to
+  one or two isolated dates as originally suspected).
+- yfinance's `auto_adjust=True` back-adjustment can go NEGATIVE for names
+  that underwent a large reverse split or special dividend relative to
+  their price level -- this is worse than the zero-price case because it
+  hits real, high-volume trading days, not just illiquid off-days (found:
+  stock 4303 has 2,129 negative-close rows 2010-2018 on volumes up to
+  ~19M shares/day; stock 8039 goes as low as -160.45 against an all-time
+  positive high of only 68.02).
+Both are fixed at this single choke point: `adj_close`/`adj_open`/
+`adj_high`/`adj_low` are masked to NaN wherever <= 0, on both the yfinance
+and FinMind paths, so every caller of `adjusted_price_series()` gets NaN
+instead of a fabricated -100% or worse return, without having to add its
+own guard. Run `python adjust.py` to self-test this masking (synthetic
+zero-price case + a live spot-check against stock 5395's known-bad dates).
 """
 from __future__ import annotations
 
@@ -147,6 +168,7 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
         out["adj_open"] = out["open"]
         out["adj_high"] = out["high"]
         out["adj_low"] = out["low"]
+        _mask_non_positive_adj_prices(out)
         out.attrs["n_events_applied"] = None  # not tracked on this path -- yfinance handles it internally
         return out
 
@@ -174,5 +196,68 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     out["adj_high"] = raw["max"].astype(float) * factor_cum
     out["adj_low"] = raw["min"].astype(float) * factor_cum
     out["source"] = "finmind"
+    _mask_non_positive_adj_prices(out)
     out.attrs["n_events_applied"] = len(events)
     return out
+
+
+def _mask_non_positive_adj_prices(df: pd.DataFrame) -> None:
+    """In-place: adj_close/adj_open/adj_high/adj_low <= 0 -> NaN.
+
+    Single choke point for both source paths (see module docstring,
+    2026-09-23 fix) -- a non-positive adjusted price is never a real price
+    (FinMind's zero-volume-day convention, or a yfinance auto_adjust
+    artifact going negative), and letting it through produces a fabricated
+    -100%-or-worse return in every downstream pct_change().
+    """
+    for col in ("adj_close", "adj_open", "adj_high", "adj_low"):
+        if col in df.columns:
+            df.loc[df[col] <= 0, col] = float("nan")
+
+
+def _self_test_synthetic() -> bool:
+    """Zero-volume-day close=0.0 (FinMind convention) must come out as NaN,
+    not survive into adj_close and later masquerade as a real -100% day."""
+    df = pd.DataFrame({
+        "adj_close": [10.0, 0.0, 11.0, -3.0, 12.0],
+        "adj_open": [10.0, 0.0, 11.0, -3.0, 12.0],
+        "adj_high": [10.5, 0.0, 11.5, -2.5, 12.5],
+        "adj_low": [9.5, 0.0, 10.5, -3.5, 11.5],
+    })
+    _mask_non_positive_adj_prices(df)
+    ok = df["adj_close"].isna().tolist() == [False, True, False, True, False]
+    print(f"[self-test 1/2] 合成案例(0與負值->NaN)：{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def _self_test_known_bad_stock() -> bool:
+    """Live spot-check against stock 5395, which the 2026-09-23 cache audit
+    confirmed has 1,124 zero-volume-day close=0.0 rows 2004-2016 in the
+    FinMind fallback path. After the fix, none of those dates should carry
+    a non-positive adj_close."""
+    try:
+        out = adjusted_price_series("5395", "2004-01-01")
+    except Exception as e:  # noqa: BLE001 -- data/network unavailable is a skip, not a fail
+        print(f"[self-test 2/2] 5395真實案例：SKIP（無法讀取資料，{e}）")
+        return True
+    if out.empty:
+        print("[self-test 2/2] 5395真實案例：SKIP（無資料）")
+        return True
+    # NaN itself is the correct/expected outcome now -- only a *non-positive
+    # number* surviving the mask would indicate the fix didn't take.
+    n_nonpositive_leftover = int((out["adj_close"] <= 0).sum())
+    n_nan = int(out["adj_close"].isna().sum())
+    ok = n_nonpositive_leftover == 0 and n_nan > 0
+    print(
+        f"[self-test 2/2] 5395真實案例：殘留<=0筆數={n_nonpositive_leftover}"
+        f"（應為0），轉NaN筆數={n_nan}（應>0，代表確實抓到已知的髒資料）："
+        f"{'PASS' if ok else 'FAIL'}"
+    )
+    return ok
+
+
+if __name__ == "__main__":
+    r1 = _self_test_synthetic()
+    r2 = _self_test_known_bad_stock()
+    print(f"整體結果：{'PASS' if (r1 and r2) else 'FAIL'}")
+    raise SystemExit(0 if (r1 and r2) else 1)

@@ -11582,12 +11582,49 @@ wrapper維持現狀不變。
   待辦：(a) 排查S2殘留誤差根因（613筆髒資料/其他來源）、(b) 確認是否
   需要把S3 seed數改回裁示原訂20（或直接沿用100，需總司令或Cowork
   確認是否可接受），(c) 根因排查完成、S1-S3全PASS後才啟動全repo稽核。
-- [ ] **資料.零** [債務] adj_close<=0源頭稽核——掃描本機FinMind價格
+- [x] **資料.零** [債務] adj_close<=0源頭稽核——掃描本機FinMind價格
   快取列出<=0或NaN的列數/檔數/日期分布，查原始close是否也是0(判斷
   FinMind原始問題還是adjust.py還原時產生)；資料層修正(載入函式或
   adjust.py出口，<=0一律轉NaN，不得各腳本各補一次)，修正前後各跑一次
   adjust自我測試；grep所有用adj_close算報酬卻沒防呆的腳本列清單(只
   估計影響筆數，暫不重跑不改判，Pearson IC類與事件研究類分開列)。
+  **已完成（2026-09-23）**：
+  (1) 掃描結果——**修正原裁示前提**：原文假設「occasional adj_close=0.0
+  glitch」，實測發現規模遠超「偶發」：**FinMind快取**（`research/data/
+  raw/TaiwanStockPrice__*.parquet`，3033檔）掃到**178,312筆**close<=0
+  或NaN，分布在1458檔（約48%的股票代號至少中一筆）；抽查最大宗
+  （5395，1124筆髒列）確認**根因是FinMind的零成交量日慣例**：這些日子
+  `Trading_Volume`/`Trading_turnover`都是0~3股，FinMind對「當天沒人
+  交易」回傳`close=0.0`而不是省略該列或NaN，不是還原(adjust.py)過程
+  產生的，是FinMind原始資料本身的慣例。**yfinance快取**（`research/
+  data/raw_yf/`，3608檔）掃到4263筆，但其中3950筆(92.7%)集中在僅3檔
+  （4303/8291/8039），性質**比FinMind更嚴重**——不是零價，是
+  **yfinance的`auto_adjust=True`還原算法對這幾檔跑出負值**（例：8039
+  一路負到-160.45，但該股全歷史正值最高只有68.02；4303在成交量高達
+  1900萬股的正常交易日也出現負收盤價），代表這不是「稀疏成交日」而是
+  「還原算法在特定股票上失準」，且發生在真實高量交易日、不是冷門股，
+  風險量級比FinMind的零價問題更高。
+  (2) 資料層修正——`research/adjust.py`新增`_mask_non_positive_adj_
+  prices()`，在yfinance路徑與FinMind路徑輸出前統一把`adj_close`／
+  `adj_open`／`adj_high`／`adj_low`裡<=0的值轉NaN，單一出口，不必每支
+  下游腳本各自補防呆。
+  (3) 自我測試——`adjust.py`原本沒有自我測試進入點，本次一併新增
+  （`python adjust.py`可跑）：合成案例(0與負值)+對5395真實資料的
+  現場抽查。修正前（暫時停用mask模擬舊行為）：5395殘留1124筆<=0，
+  整體FAIL；修正後：殘留0筆、正確轉NaN 1124筆，整體PASS——證明
+  self-test真的有偵測到這個bug，不是通過型測試。
+  (4) grep估計影響——全repo以「有做adj_close報酬類運算(pct_change/
+  除以shift等)」為條件篩出34支腳本，啟發式偵測防呆字樣後只有2支
+  無偵測到防呆：`sp500_tr_series.py`（不適用——它的adj_close來自
+  S&P500 TR指數自己的close改名，不經過adjust.py/FinMind/yfinance的
+  TW股價路徑，跟本次稽核的污染源無關）、`strategies/weinstein_
+  stage2.py`（`momentum = adj_close/adj_close.shift(N)-1`，真的沒有
+  自己的防呆，但只要它的資料來源最終經過`adjust.py::adjusted_price_
+  series()`，就會被本次(2)的資料層修正自動保護，不需要單獨改這支
+  腳本）。其餘32支（含Pearson IC類的`factor_ic.py`／`*_ic_map.py`與
+  事件研究類的`*_gate*.py`／`*event*.py`）都已偵測到既有防呆字樣，
+  **啟發式掃描為粗篩，不是逐行證明**，如實記錄此侷限。**只估計，未
+  重跑任何試驗、未改判任何既有判定**，依裁示保留給後續視需要再處理。
 - [x] **協調.零** [債務] 核心檔案單一寫入者——`research/backtest/`／
   `research/validation/`／`adjust.py`／`pit.py`／`trial_registry.py`
   只允許互動視窗CC修改，自走軌道(marathon/hypothesis_queue/dev_queue)
