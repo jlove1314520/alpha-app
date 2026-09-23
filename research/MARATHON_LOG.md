@@ -1,5 +1,16 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-24T01:55（Taipei，UTC 17:55）— hypothesis_queue排程接續（第五輪）：
+CLAUDE.md十四節凍結.二仍生效，本輪不開新alpha試驗。開工先讀
+PENDING_QUEUE.md，唯一`- [ ]`項改為`閘門.一`，明文BLOCKED於續抓剩餘
+168檔完成；查`data/rate_limit_state.json`確認FinMind仍在402封鎖中
+（約剩12分鐘解除），續抓工作本輪不可行。轉回#82「逐筆補查公告日」
+工作，新增WebSearch補查2筆：2015-09（完整，公告日09-04/生效日09-21，
+交叉驗證工商時報+自由財經）、2017-06（僅補得公告日06-02，生效日
+待補）。累計公告日補齊進度3/12筆。判定不變（可開發SPEC，逐筆補查
+中），未進回測、未動核心研究檔案、未觸碰holdout。詳見
+`HYPOTHESIS_QUEUE.md` #82條目第五輪段落。
+
 ## 2026-09-24T00:53（Taipei，UTC 16:53）— hypothesis_queue排程接續：
 開工先讀PENDING_QUEUE.md，唯一`- [ ]`項（轉向.一續）BLOCKED於總司令
 裁示，非本track可推進；順手查`run_detached.py status`發現
