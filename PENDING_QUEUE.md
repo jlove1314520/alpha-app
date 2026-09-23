@@ -11497,13 +11497,39 @@ wrapper維持現狀不變。
   ——既有月營收事件研究只測過月頻/cross-sectional排序構造，個股
   層級短窗口未測。來源：`STRATEGY_GRAVEYARD.md`（line約3498附近）。
   [自走補入]
-- [ ] **常備.11** [開發] `MARATHON_PROTOCOL.md`七之三第10關（資料源
+- [x] **常備.11** [開發] `MARATHON_PROTOCOL.md`七之三第10關（資料源
   歷史起點探測）流程補強——找到「可行的資料路徑」後，下一步應先核對
   該網域是否在`docs/DATA_SOURCE_MAP.md`的🔴清單或`research/net_
   guard.py`黑名單裡，這個核對動作要內化成第10關本身最後一步，不是
   查完就直接動手（過去曾發生「差一點就能合規地拿到」但沒交叉核對合規
   性的教訓）。來源：`STRATEGY_GRAVEYARD.md`（line約3429附近「未來
   Gate 10流程補強建議」）。[自走補入]
+  **2026-09-23馬拉松第615輪（TW軌）核查發現：這條已在2026-09-20
+  commit`0a23710b`（【緊急·合規】mopsov破口止血＋根因修復事故的
+  同一次修復）完整實作**——`research/MARATHON_PROTOCOL.md`「### 3e.
+  四道新增關卡：第 7～10 關」小節第4點，文字與本條目要求逐字對應
+  （「找到任何『可行的資料路徑』後，下一步必須先核對該路徑的網域是否
+  在`docs/DATA_SOURCE_MAP.md`的🔴清單或`research/net_guard.py::
+  DOMAIN_BLOCKLIST`裡...這個網域合規核對是第10關本身的必要子步驟，
+  不是查完歷史深度就算過關」）。這條backlog項是後續某次「佇列深度
+  補件」時，從`STRATEGY_GRAVEYARD.md`「未來Gate 10流程補強建議」段落
+  抓取建議時，沒有核對該建議是否已經被同一次事故修復採納實作，屬於
+  「已被既有工作取代的過時陳述」（同`規.二`round608案例的同一種形狀）。
+  無新程式碼、無新統計判定，純文件狀態更正，不觸發`register_trial()`。
+- [ ] **常備.12** [開發] 補套用`regime_gate_common.py`的
+  `align_monthly_nonoverlap()`/`circular_shift_null()`（或`## #81`
+  段落建議的M日不重疊區塊抽樣＋circular shift變體）到
+  `vix_term_structure_gate.py`(#76)／`hy_etf_ratio_gate.py`(#78)／
+  `vix_term_structure_roc_gate.py`(常備.2)／`vix_level_gate.py`
+  (常備.3)／`hy_etf_ratio_roc_gate.py`(常備.4)／
+  `hy_etf_ratio_window_grid_gate.py`(常備.5)六個檔案——這六個都是
+  daily-overlap前瞻報酬視窗+逐點打散虛無分布設計，統計偽影方向偏向
+  製造假陽性；本輪四筆(常備.2~.5)已在`STRATEGY_GRAVEYARD.md`
+  `## #82`~`## #85`後補記誠實揭露(判定FAIL不受影響，因為判準本身
+  robust)，但六個檔案尚未實際重跑修正版，屬於`## #81`已列出待辦的
+  延伸。來源：`STRATEGY_GRAVEYARD.md` `## #81`/`## #82`~`## #85`
+  補記段落，2026-09-23 DevQueue cycle 20260923-121601自行裁量新增。
+  [自走補入]
 
 - [x] **驗.四** [研究] E-c(10%)/E-d(MA200)走REGIME_OVERLAY_PROTOCOL.md
   正式閘門——train(<=2020-12-31)/val(2021-2024)分別報告；1000次隨機
