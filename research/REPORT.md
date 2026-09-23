@@ -9,6 +9,17 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第612輪 · 2026-09-23T08:4x+08:00 · 跨市場 · 驗證帽：修.二稽核補完（copper_gold/option_pcr/regime_alt_a三支ETF稅率重跑登記）· 3筆FAIL(0翻轉)確認，發現與另一track的live git衝突風險
+
+- 取鎖乾淨（cycle`20260923-083037`）。開工先讀`PENDING_QUEUE.md`：交辦優先於自走，找到`- [x]`修.二（已由另一互動session於08:34:46 commit `75afd54a`完成主體）、`- [ ]`修.一/結案.一/結案.二三項。
+- 修.二委託原文要求「逐支列舊/新淨報酬/原判定/新判定」，已committed的`75afd54a`把copper_gold/option_pcr/regime_alt_a等7支腳本的0翻轉結論寫進PENDING_QUEUE.md散文，但**未individually登記`TRIALS_LEDGER.md`新列**（僅spillover因翻轉而登記#346）。本輪補上正式登記：`copper_gold_ratio_overlay_v1_etf_tax_recheck`(#347,FAIL,0翻轉)、`option_pcr_overlay_v1_etf_tax_recheck`(#348,FAIL,0翻轉，誠實記錄VAL期正負號翻轉+gate3從14%→39%但仍未過60%門檻)、`regime_alt_a_etf_tax_recheck`(#349,FAIL,0翻轉，9格高原仍0/9)，皆實際重跑腳本取得數字（非估算），`trial_registry.py --check`PASS（351列）。
+- **意外發現（本輪最重要的產出）**：開始動手做`修.一`（exit_rule_lab七筆撤回重做）前，發現`research/exit_rule_lab.py`檔案mtime落在數秒前且持續變動、`git status`同時顯示該檔與`TRIALS_LEDGER.md`為uncommitted modified——確認**另一個track（很可能是互動視窗CC或DevQueue，非另一個marathon實例，因`marathon_lock.py acquire`本輪正常成功取得鎖）正在同一working directory即時編輯同一批檔案**。`tasklist`確認當下有12個`claude.exe`行程並行。**判斷：修.一已在別的track進行中，本輪不重複動手，避免兩個行程同時寫同一實體檔案造成損毀或工作遺失**（`PENDING_QUEUE.md`「維運.git衝突根因」章節記錄的正是這類跨track無協調問題的同一個病灶，只是這次是即時撞見而非事後才發現）。
+- 本輪commit範圍刻意限定`research/TRIALS_LEDGER.md`／`research/SELECTION_BIAS_LEDGER.md`／`research/REPORT.md`／`MARATHON_STATE.md`／`research/PROGRESS_HEARTBEAT.jsonl`，**不`git add`任何`exit_rule_lab.py`或`PENDING_QUEUE.md`的修.一相關變更**，留給正在進行中的那個track自己完成與commit。
+- `trial_registry.py --check`exit=0 PASS（351列）。`is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩3條未開始（修.一進行中由他track處理／結案.一待總司令實機驗證／結案.二待修.一完成後才有意義做）。等待審閱：3件（沿用既有`AWAITING_REVIEW.md`，本輪未新增翻轉）。
+- **下一輪**：檢查修.一是否已由其他track完成並commit；若尚未完成且無其他track在動，才由下一輪接手繼續做（cooldown重入邏輯/起點敏感度/交易頻率警告/重新登記7筆）。
+
+---
 ## 第610輪 · 2026-09-23T06:3x+08:00 · FUT · 維運帽：查證round607 git衝突根因並提出修復方案 · 無新統計判定，新增2件等待審閱
 
 - 取鎖乾淨（cycle`20260923-063037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`＝0，23條`- [!]`阻塞中，逐一核對解除條件皆未到時間點。佇列深度自檢`- [ ]`=0（<12下限），round599~609已連續多輪確認三個備援來源掃無新項，本輪不重複全面掃描。
