@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-09-23T03:59:15+00:00",
+  "computed_at": "2026-09-23T05:47:34+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
@@ -8,13 +8,13 @@
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
       "us_price": 452,
       "us_quote_time": 1790107200,
-      "tw_price": 2485.0,
-      "tw_quote_time": "11:58:40",
+      "tw_price": 2500.0,
+      "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 2866.403,
-      "premium_pct": 15.348
+      "premium_pct": 14.656
     },
     "UMC": {
       "tw_code": "2303",
@@ -22,13 +22,13 @@
       "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
       "us_price": 25.77,
       "us_quote_time": 1790107200,
-      "tw_price": 159.5,
-      "tw_quote_time": "11:58:20",
+      "tw_price": 160.0,
+      "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 163.423,
-      "premium_pct": 2.46
+      "premium_pct": 2.139
     },
     "ASX": {
       "tw_code": "3711",
@@ -36,13 +36,13 @@
       "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
       "us_price": 45.2,
       "us_quote_time": 1790107200,
-      "tw_price": 695.0,
-      "tw_quote_time": "11:59:02",
+      "tw_price": 693.0,
+      "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 716.601,
-      "premium_pct": 3.108
+      "premium_pct": 3.406
     },
     "CHT": {
       "tw_code": "2412",
@@ -50,13 +50,13 @@
       "source": "SEC EDGAR 20-F CIK 1132924；1 ADS＝10股普通股",
       "us_price": 46.11,
       "us_quote_time": 1790107200,
-      "tw_price": 144.5,
-      "tw_quote_time": "11:58:26",
+      "tw_price": 145.5,
+      "tw_quote_time": "13:30:00",
       "tw_quote_date": "20260923",
       "fx_rate": 31.708,
       "fx_date": "2026-09-22",
       "implied_tw_price": 146.206,
-      "premium_pct": 1.18
+      "premium_pct": 0.485
     }
   },
   "errors": []
