@@ -1,0 +1,21 @@
+{
+  "passes": true,
+  "reasons": [],
+  "train": {
+    "label": "TRAIN",
+    "n": 12682,
+    "ic": 0.023153819269568495,
+    "p_value": 0.00911939057556417
+  },
+  "val": {
+    "label": "VAL",
+    "n": 7410,
+    "ic": 0.030872289937185146,
+    "p_value": 0.00786726902406746
+  },
+  "null_percentile": 98.8,
+  "required_percentile": 90.0,
+  "same_sign": true,
+  "n_events_total": 20092,
+  "n_dropped_single_bucket": 222
+}

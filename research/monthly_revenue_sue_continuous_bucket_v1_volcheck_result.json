@@ -1,0 +1,36 @@
+{
+  "train_3dim": {
+    "label": "TRAIN_3dim",
+    "n": 12682,
+    "ic": 0.023153819269568495,
+    "p_value": 0.00911939057556417
+  },
+  "val_3dim": {
+    "label": "VAL_3dim",
+    "n": 7410,
+    "ic": 0.030872289937185146,
+    "p_value": 0.00786726902406746
+  },
+  "train_4dim": {
+    "label": "TRAIN_4dim",
+    "n": 10639,
+    "ic": 0.021885741674264172,
+    "p_value": 0.02398174945476349
+  },
+  "val_4dim": {
+    "label": "VAL_4dim",
+    "n": 6206,
+    "ic": 0.01920193223118902,
+    "p_value": 0.1303996456827181
+  },
+  "n_dropped_vol_na": 0,
+  "collapse_pct": 0.3780204749871625,
+  "is_vol_artifact": false,
+  "passes_4dim": false,
+  "reasons_4dim": [
+    "4維null percentile=84.4未過門檻90.0"
+  ],
+  "null_percentile_4dim": 84.4,
+  "required_percentile": 90.0,
+  "final_verdict": "FAIL"
+}

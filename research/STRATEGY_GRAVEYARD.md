@@ -3608,6 +3608,52 @@ IC沒有機會，本輪只測日K的cross-sectional排序型IC。**原子.三本
 交叉訊號。地基工程（`event_driven_prototype.py`／`event_driven_gate_
 sequence.py`）保留，可重複執行供未來變體使用。
 
+**⚠️ 2026-09-23更正（`PENDING_QUEUE.md`常備.8，DevQueue自走）：上面「未測
+SUE連續分數加權（非二元閾值）」這句已過時**——這個具體組合（連續分數＋
+bucket控制同時存在）已測，結案FAIL，完整記錄見下方「月營收SUE連續分數
+加權版（bucket中性化）」章節。仍未測的是券商財測共識調整版、搭配動能
+交叉訊號。
+
+## 月營收SUE連續分數加權版（bucket中性化，`PENDING_QUEUE.md`常備.8，
+2026-09-23結案FAIL）
+
+- **這條填的缺口**：本專案SUE類連續分數測試至此有兩個各自的已知缺口——
+  `monthly_revenue_event_study.py`（`HYPOTHESIS_QUEUE.md`#14，2026-09-02
+  FAIL）連續分數但**沒有**bucket控制（季度/產業/市值系統性差異混進
+  殘差）；上方E2（二元分組）**有**bucket控制但**沒有**連續分數。這條
+  測「兩者同時具備」這個交集，直接重用`event_driven_prototype.
+  build_event_table`的bucket_key構造，把`fwd20`在bucket內中性化後，
+  對連續SUE分數算pooled Spearman IC。
+- **第一階段（3維：季度x產業x市值五分位）表面CHEAP_PASS**：300檔樣本，
+  事件表20092筆（單筆bucket丟棄222筆）。TRAIN n=12682跨95月 IC=+0.0232
+  (p=0.0091)；VAL n=7410跨47月 IC=+0.0309(p=0.0079)；train/val同號；
+  VAL |IC| vs 500次洗牌null percentile=**98.8**（門檻90.0，過）。三項
+  判準全過，登記`TRIALS_LEDGER.md`#368 CHEAP_PASS。
+- **立即追加波動度配對複驗（同輪，比照E1`#332`續.A/`#334`續.B同一套
+  方法論，不留已知假陽性來源沒查）**：3維bucket完全沒控制波動度，跟
+  E1續.A被揭穿是波動度效應曝在同一個風險裡。改用`bucket_key_vol`
+  （3維+事件前60交易日已實現波動度五分位，`event_driven_prototype.py`
+  既有欄位）重跑同一套流程：TRAIN n=10639 IC=+0.0219；**VAL n=6206
+  IC=+0.0192**（3維的+0.0309崩到+0.0192，崩掉37.8%，未達#334訂的50%
+  「判定為波動度假象」門檻）；但**VAL null percentile從98.8降到84.4，
+  跌破90.0門檻，4維判準未過**——三項cheap gate判準裡的③直接失敗。
+  登記`TRIALS_LEDGER.md`#369 FAIL。
+- **最終判定：FAIL**——3維表面CHEAP_PASS不夠穩健，加入波動度控制後
+  顯著性消失（雖未達「主要是波動度效應」的50%崩解門檻，但已不足以
+  通過洗牌null檢定），跟E1(#332→#334)、#81(續1→續2)是這個專案至今
+  第三次觀察到「3維bucket表面通過、加一個更嚴格的配對維度就垮」的
+  模式。
+- **不泛化成**：連續分數加權本身這條路完全無效——只測了`fwd20`單一
+  horizon、bucket中性化這一種連續分數應用方式；未測其他horizon、未測
+  券商財測共識調整版、未測搭配動能交叉訊號（跟上方E2的「不泛化成」
+  剩餘缺口一致）。三個獨立SUE構造（#14連續無bucket／E2二元有bucket／
+  本條連續有bucket但未過波動度配對）加上E1財報SUE，SUE類策略層至今
+  累積370次試驗（含#368/#369）全數FAIL，訊噪比證據持續偏弱。
+- **原始記錄**：`TRIALS_LEDGER.md`#368（3維CHEAP_PASS）/#369（4維FAIL，
+  最終結論）、`research/monthly_revenue_sue_continuous_bucket_v1.py`／
+  `monthly_revenue_sue_continuous_bucket_v1_volcheck.py`（新增，可重複
+  執行）。`PENDING_QUEUE.md`常備.8同步標記完成。
+
 ## #76 美股VIX期限結構（VIX9D/VIX比值）當TAIEX regime降曝險訊號（2026-09-22結案）
 
 **死因**：第1關cheap gate，`vix_term_structure_gate.py`——訊號=VIX9D/VIX

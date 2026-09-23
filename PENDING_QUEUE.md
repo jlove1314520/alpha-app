@@ -11613,10 +11613,26 @@ wrapper維持現狀不變。
   解凍條件＝總司令另行裁示）**——DGBAS經常性薪資成長率當TAIEX regime
   訊號（原SPEC路徑3，因路徑1失業率已可行而未查）——未測。來源：同上。
   [自走補入]
-- [ ] **常備.8** [研究] 月營收SUE連續分數加權版（非二元閾值）——
+- [x] **常備.8** [研究] 月營收SUE連續分數加權版（非二元閾值）——
   `event_driven_gate_sequence.py`原型只測過「SUE前10%二元分組」，
   連續分數加權未測。來源：`STRATEGY_GRAVEYARD.md`（事件研究SUE段落，
-  line約3559附近）。[自走補入]
+  line約3559附近）。[自走補入] **2026-09-23 DevQueue完成，結論FAIL**：
+  新增`monthly_revenue_sue_continuous_bucket_v1.py`（重用
+  `event_driven_prototype.build_event_table`的bucket_key，在bucket內
+  中性化`fwd20`後對連續SUE分數算pooled Spearman IC）——3維（季度x產業x
+  市值）表面CHEAP_PASS（`TRIALS_LEDGER.md`#368，VAL IC=+0.0309，null
+  percentile=98.8>=90.0）。**同輪立即追加波動度配對複驗**
+  （`monthly_revenue_sue_continuous_bucket_v1_volcheck.py`，比照E1
+  `#332`/`#334`同一套方法論，因為3維bucket沒控制波動度、跟E1曾被揭穿
+  是波動度效應同一個風險）：改用4維（+波動度五分位）後VAL IC從+0.0309
+  崩到+0.0192、null percentile從98.8跌破門檻到84.4，4維判準未過，登記
+  `TRIALS_LEDGER.md`#369 FAIL。**最終判定FAIL**，3維表面通過不夠穩健。
+  完整記錄見`STRATEGY_GRAVEYARD.md`「月營收SUE連續分數加權版」新章節
+  （同時更正了本項來源那段舊文字「未測SUE連續分數加權」的過時說法）。
+  `[自行裁量]`：波動度配對複驗不在原始交辦範圍內，是讀到E1`#332`/`#334`
+  同款先例後判斷「不能留一個已知假陽性來源沒查就宣稱CHEAP_PASS」而主動
+  追加，屬於同一輪工作單位的延伸，非另開新項目。冒煙測試PASS（未動
+  `index.html`/前端，屬防禦性驗證非必要但仍跑過確認未壞）。
 - [ ] **常備.9** [研究] 月營收券商財測共識調整版SUE——同上未測項。
   來源：同上。[自走補入]
 - [ ] **常備.10** [研究] 月營收個股層級事件研究，交易後短窗口(<20日)
