@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-23T23:12:40.603630+08:00",
+    "generated_at": "2026-09-24T07:54:33.396534+08:00",
     "source": "data/picks_ledger.json（實際回填紀錄，非重算回測）+ data/price_history.json（0050，TWSE STOCK_DAY_ALL）",
     "hold_window": "t5",
     "assumption_note": "等權重買進Top20、持有5個交易日、依序串接複利（非同時持有多批重疊部位的完整投資組合模型）、已扣成本（股票0.1425%×2手續費+0.3%證交稅、0050 ETF 0.1425%×2手續費+0.1%證交稅）",
@@ -9,7 +9,7 @@
   },
   "boards": {
     "value": {
-      "n_comparable_snapshots": 10,
+      "n_comparable_snapshots": 11,
       "sample_insufficient": true,
       "ours_curve": [
         {
@@ -111,6 +111,16 @@
           "nav": 76.0005,
           "cum_return_pct": -23.9995,
           "drawdown_pct": -23.9995
+        },
+        {
+          "date": "2026-09-16",
+          "raw_return_pct": 4.1066,
+          "cost_pct": 0.585,
+          "net_return_pct": 3.5216,
+          "n_picks": 20,
+          "nav": 78.6769,
+          "cum_return_pct": -21.3231,
+          "drawdown_pct": -21.3231
         }
       ],
       "benchmark_curve": [
@@ -203,16 +213,25 @@
           "nav": 114.175,
           "cum_return_pct": 14.175,
           "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-16",
+          "raw_return_pct": 5.1918,
+          "cost_pct": 0.385,
+          "net_return_pct": 4.8068,
+          "nav": 119.6632,
+          "cum_return_pct": 19.6632,
+          "drawdown_pct": 0.0
         }
       ],
-      "cum_return_pct_ours": -23.9995,
-      "cum_return_pct_benchmark": 14.175,
-      "gap_pp": -38.1745,
+      "cum_return_pct_ours": -21.3231,
+      "cum_return_pct_benchmark": 19.6632,
+      "gap_pp": -40.9863,
       "mdd_pct_ours": -25.053,
-      "calmar_ours": -2.9905
+      "calmar_ours": -2.6613
     },
     "momentum": {
-      "n_comparable_snapshots": 9,
+      "n_comparable_snapshots": 10,
       "sample_insufficient": true,
       "ours_curve": [
         {
@@ -304,6 +323,16 @@
           "nav": 101.237,
           "cum_return_pct": 1.237,
           "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-16",
+          "raw_return_pct": 9.1424,
+          "cost_pct": 0.585,
+          "net_return_pct": 8.5574,
+          "n_picks": 20,
+          "nav": 109.9003,
+          "cum_return_pct": 9.9003,
+          "drawdown_pct": 0.0
         }
       ],
       "benchmark_curve": [
@@ -387,16 +416,25 @@
           "nav": 112.6436,
           "cum_return_pct": 12.6436,
           "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-16",
+          "raw_return_pct": 5.1918,
+          "cost_pct": 0.385,
+          "net_return_pct": 4.8068,
+          "nav": 118.0582,
+          "cum_return_pct": 18.0582,
+          "drawdown_pct": 0.0
         }
       ],
-      "cum_return_pct_ours": 1.237,
-      "cum_return_pct_benchmark": 12.6436,
-      "gap_pp": -11.4066,
+      "cum_return_pct_ours": 9.9003,
+      "cum_return_pct_benchmark": 18.0582,
+      "gap_pp": -8.1579,
       "mdd_pct_ours": -14.4689,
-      "calmar_ours": 0.4926
+      "calmar_ours": 4.211
     },
     "future": {
-      "n_comparable_snapshots": 10,
+      "n_comparable_snapshots": 11,
       "sample_insufficient": true,
       "ours_curve": [
         {
@@ -498,6 +536,16 @@
           "nav": 103.1902,
           "cum_return_pct": 3.1902,
           "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-16",
+          "raw_return_pct": 2.9919,
+          "cost_pct": 0.585,
+          "net_return_pct": 2.4069,
+          "n_picks": 20,
+          "nav": 105.6739,
+          "cum_return_pct": 5.6739,
+          "drawdown_pct": 0.0
         }
       ],
       "benchmark_curve": [
@@ -590,13 +638,22 @@
           "nav": 114.175,
           "cum_return_pct": 14.175,
           "drawdown_pct": 0.0
+        },
+        {
+          "date": "2026-09-16",
+          "raw_return_pct": 5.1918,
+          "cost_pct": 0.385,
+          "net_return_pct": 4.8068,
+          "nav": 119.6632,
+          "cum_return_pct": 19.6632,
+          "drawdown_pct": 0.0
         }
       ],
-      "cum_return_pct_ours": 3.1902,
-      "cum_return_pct_benchmark": 14.175,
-      "gap_pp": -10.9848,
+      "cum_return_pct_ours": 5.6739,
+      "cum_return_pct_benchmark": 19.6632,
+      "gap_pp": -13.9893,
       "mdd_pct_ours": -3.9336,
-      "calmar_ours": 4.3596
+      "calmar_ours": 7.314
     }
   }
 }
