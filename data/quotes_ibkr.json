@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-23T14:36:38.093326+08:00",
+  "fetched_at": "2026-09-23T14:41:39.028629+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
@@ -71,14 +71,15 @@
       "label": "S&P 500"
     },
     "^IXIC": {
-      "last": 27244.28,
+      "last": 27244.277,
       "bid": null,
       "ask": null,
-      "close": 27244.28,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 27122.094,
+      "change_pct": 0.4505,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數"
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
     },
     "^SOX": {
       "last": 12689.82,

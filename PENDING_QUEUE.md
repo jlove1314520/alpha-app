@@ -11588,6 +11588,24 @@ wrapper維持現狀不變。
 `queue_depth_config.py::MIN_QUEUE_DEPTH=12`，依規則補件，來源
 ②`STRATEGY_GRAVEYARD.md`已結案條目裡明寫「未測」的變體）**：
 
+**2026-09-23馬拉松第617輪補充查證（[自走補入]，佇列再度降到2項後的
+第二輪掃描）**：`grep`「未測/待測」共76處，逐一核對後**誠實結論：
+本輪未找到可補件的新候選**。主要原因——多數「未測」缺口已被
+round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能交叉
+訊號」變體，`STRATEGY_GRAVEYARD.md`第3665~3667行）屬於SUE機制家族，
+該家族累積**370次試驗全數FAIL**（同段落原文自陳），雖未被
+`queue_depth_config.py::FROZEN_MECHANISM_FAMILIES`正式列名（目前
+只列`regime_擇時`），但依凍結.一condition的同一經濟理由（每多一筆
+同家族試驗墊高全專案Bonferroni門檻，已系統性不work的家族不該繼續
+消耗試驗預算）判斷不宜補入，**`[自行裁量]`不強行補入湊數，留給
+總司令裁示是否正式擴大`FROZEN_MECHANISM_FAMILIES`涵蓋SUE**。其餘
+「未測」多為選項/OTM口徑（`f_options_*`，本專案台股選擇權資料源
+尚未接入，非本輪可推進）或已由`常備.11`/`常備.12`涵蓋的過時陳述。
+**下一輪若仍需補件，建議改查來源①`PENDING_QUEUE.md`「常備backlog」
+區塊本身是否有更早、未被此次76處grep涵蓋的缺口**，或請總司令直接
+指定新方向（`MARATHON_PROTOCOL.md`0a節四條方向已全數FAIL/被動等待，
+可能需要第五條新方向裁示）。
+
 - [x] **常備.1** [研究] regime.替代B——regime訊號用於選股權重而非總
   曝險調節（vs已死「曝險水位調節函數」機制類別），是完全不同的價值
   主張，尚未測試。來源：`STRATEGY_GRAVEYARD.md`（`regime_alt_a_
