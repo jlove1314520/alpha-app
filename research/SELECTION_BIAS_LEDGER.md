@@ -1,6 +1,6 @@
 # SELECTION_BIAS_LEDGER.md — 跨輪次選擇偏誤總帳
 
-**自動產生**：`research/selection_bias_ledger.py`（2026-09-23 20:40）。
+**自動產生**：`research/selection_bias_ledger.py`（2026-09-23 21:36）。
 每新增候選就重跑一次。做法比照 Cybex `_r436_selection_bias_ledger.py`，
 **只抄方法不抄參數**（Cybex 的閾值來自加密市場，對台股零效力）。
 
@@ -11,11 +11,11 @@
 
 | 口徑 | N | Bonferroni 門檻（α=0.05 單邊） |
 |---|---:|---:|
-| **全體（總N，含IRREPRODUCIBLE／已知重複登記／已知因bug失真）** | 386 | 99.9870 百分位 |
-| **有效N（排除IRREPRODUCIBLE1筆＋已知重複登記3筆＋已知因bug失真8筆）** | 374 | 99.9866 百分位 |
+| **全體（總N，含IRREPRODUCIBLE／已知重複登記／已知因bug失真）** | 392 | 99.9872 百分位 |
+| **有效N（排除IRREPRODUCIBLE1筆＋已知重複登記6筆＋已知因bug失真8筆）** | 377 | 99.9867 百分位 |
 | 分軌 FUT | 48 | 99.8958 百分位 |
-| 分軌 TW | 180 | 99.9722 百分位 |
-| 分軌 US | 69 | 99.9275 百分位 |
+| 分軌 TW | 185 | 99.9730 百分位 |
+| 分軌 US | 70 | 99.9286 百分位 |
 | 分軌 未分軌 | 89 | 99.9438 百分位 |
 
 **IRREPRODUCIBLE列表**（登記過的數值結果，用現有程式碼/資料重跑對不上，仍計入總N但不作為任何評估的可信證據）：
@@ -25,6 +25,9 @@
 - #335（2026-09-23，TW）event_driven_sue_earnings_e1_rejudge_b_p90——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
 - #336（2026-09-23，TW）event_driven_sue_earnings_e1_rejudge_c_right_tail——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
 - #337（2026-09-23，TW）event_driven_sue_earnings_e1_rejudge_volatility_matched_cont——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
+- #387（2026-09-23，TW）margin_utilization_regime_portfolio_v1_engine_fix_recheck——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
+- #388（2026-09-23，TW）odd_lot_imbalance_portfolio_v1_engine_fix_recheck——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
+- #389（2026-09-23，TW）short_sale_utilization_portfolio_v1_engine_fix_recheck——與#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明
 
 **已知因程式bug失真列表**（2026-09-23修.一：`exit_rule_lab.py`重入邏輯bug讓這7筆數字全部失真，E-d交易數1357筆、MDD比買進持有本身還差是bug的直接證據，仍計入總N但不作為任何評估的可信證據，修正版已重新登記新編號）：
 - #338（2026-09-23，TW）exit_rule_lab_E-a_buy_and_hold
@@ -46,26 +49,26 @@
 
 | # | 日期 | 軌 | 名稱 | 百分位 | 當時分母 | 當時成立 | 分軌分母 | 全體分母 | 全體下成立 |
 |---|---|---|---|---:|---:|:-:|---:|---:|:-:|
-| 2 | 2026-08-22 | TW | `f_eps_growth`（EPS成長） | 100.0 | 6 | ✓ | 180 | 386 | ✓ |
-| 7 | 2026-08-23 | TW | `f_eps_surprise`（EPS意外，SUE方法論） | 100.0 | 6 | ✓ | 180 | 386 | ✓ |
-| 8 | 2026-08-23 | TW | `f_revenue_surprise`（營收意外，SUE方法論） | 99.0 | 6 | ✗ | 180 | 386 | ✗ |
-| 9 | 2026-08-23 | TW | `f_low_vol`（低波動） | 100.0 | 6 | ✓ | 180 | 386 | ✓ |
-| 13 | 2026-08-23 | TW | `f_value_pb`（負PBR，估值因子） | 99.9 | 3 | ✓ | 180 | 386 | ✗ |
-| 14 | 2026-08-23 | TW | `f_value_pe`（負PER，估值因子） | 96.7 | 3 | ✗ | 180 | 386 | ✗ |
-| 15 | 2026-08-23 | TW | `f_quality_roe_stability`（ROE季度變異度穩定性） | 99.9 | 3 | ✓ | 180 | 386 | ✗ |
-| 40 | 2026-08-26 | TW | `f_rel_strength_regime_switch`（大盤位階開關+ | 100.0 | 未記 | — | 180 | 386 | ✓ |
-| 45 | 2026-08-26 | US | `f_us_reversal_1m`（短期反轉，近1個月累積報酬取負號，US | 50.0 | 1 | ✗ | 69 | 386 | ✗ |
+| 2 | 2026-08-22 | TW | `f_eps_growth`（EPS成長） | 100.0 | 6 | ✓ | 185 | 392 | ✓ |
+| 7 | 2026-08-23 | TW | `f_eps_surprise`（EPS意外，SUE方法論） | 100.0 | 6 | ✓ | 185 | 392 | ✓ |
+| 8 | 2026-08-23 | TW | `f_revenue_surprise`（營收意外，SUE方法論） | 99.0 | 6 | ✗ | 185 | 392 | ✗ |
+| 9 | 2026-08-23 | TW | `f_low_vol`（低波動） | 100.0 | 6 | ✓ | 185 | 392 | ✓ |
+| 13 | 2026-08-23 | TW | `f_value_pb`（負PBR，估值因子） | 99.9 | 3 | ✓ | 185 | 392 | ✗ |
+| 14 | 2026-08-23 | TW | `f_value_pe`（負PER，估值因子） | 96.7 | 3 | ✗ | 185 | 392 | ✗ |
+| 15 | 2026-08-23 | TW | `f_quality_roe_stability`（ROE季度變異度穩定性） | 99.9 | 3 | ✓ | 185 | 392 | ✗ |
+| 40 | 2026-08-26 | TW | `f_rel_strength_regime_switch`（大盤位階開關+ | 100.0 | 未記 | — | 185 | 392 | ✓ |
+| 45 | 2026-08-26 | US | `f_us_reversal_1m`（短期反轉，近1個月累積報酬取負號，US | 50.0 | 1 | ✗ | 70 | 392 | ✗ |
 
 **結論**：宣稱通過校正且有百分位數字的共 9 筆；
-其中判定為 PASS／CHEAP_PASS／EXPERIMENTAL 的，在正確的全體分母 N=386 下
+其中判定為 PASS／CHEAP_PASS／EXPERIMENTAL 的，在正確的全體分母 N=392 下
 **撐住 3 筆、倒下 5 筆**。
 
 倒下的（應降級）：
-- #8 `f_revenue_surprise`（99.0 百分位，當時分母 6，正確分母 386）
-- #13 `f_value_pb`（99.9 百分位，當時分母 3，正確分母 386）
-- #14 `f_value_pe`（96.7 百分位，當時分母 3，正確分母 386）
-- #15 `f_quality_roe_stability`（99.9 百分位，當時分母 3，正確分母 386）
-- #45 `f_us_reversal_1m`（50.0 百分位，當時分母 1，正確分母 386）
+- #8 `f_revenue_surprise`（99.0 百分位，當時分母 6，正確分母 392）
+- #13 `f_value_pb`（99.9 百分位，當時分母 3，正確分母 392）
+- #14 `f_value_pe`（96.7 百分位，當時分母 3，正確分母 392）
+- #15 `f_quality_roe_stability`（99.9 百分位，當時分母 3，正確分母 392）
+- #45 `f_us_reversal_1m`（50.0 百分位，當時分母 1，正確分母 392）
 
 ## 3. Deflated Sharpe
 
@@ -73,10 +76,10 @@
 
 | 口徑 | N | E[max SR]（示意，假設試驗間 SR 標準差 0.5） |
 |---|---:|---:|
-| 全體 | 386 | 1.487 |
+| 全體 | 392 | 1.489 |
 | FUT | 48 | 1.130 |
-| TW | 180 | 1.365 |
-| US | 69 | 1.199 |
+| TW | 185 | 1.370 |
+| US | 70 | 1.201 |
 | 未分軌 | 89 | 1.245 |
 
 **解讀**：就算所有策略的真實 Sharpe 都是 0，只要搜得夠多，最好的那一個
@@ -95,7 +98,7 @@
 
 ## 5. 誠實揭露
 
-- 帳本共 386 列；標記為通過（PASS/CHEAP_PASS/EXPERIMENTAL）的 127 筆，
+- 帳本共 392 列；標記為通過（PASS/CHEAP_PASS/EXPERIMENTAL）的 128 筆，
   但其中只有 9 筆留下可比較的統計量，其餘無法重評——
   **既不能算撐住，也不能算倒下**，它們是「當初沒留下足以判斷的證據」。
 - DSR 目前算不出來的根因是登記欄位不足。往後登記必須同時記 Sharpe、T、skew、kurt。

@@ -1475,3 +1475,55 @@ bug），找到33個匹配（原估21支）；核對`data/*checkpoint*.json`發�
 620輪心跳、`PENDING_QUEUE.md`「驗.一第4點續（剩餘16支）」條目、
 `TRIALS_LEDGER.md`#382-384。
 
+
+
+---
+**最後更新：2026-09-23T18:3x+08:00（馬拉松第621輪，研究帽）**——取鎖乾淨
+（cycle`20260923-183037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認
+互動視窗CC無新commit，工作目錄修改檔皆是例行排程檔案，非CC-only限定
+路徑，無碰撞風險。`run_detached.py status`：`running=0`，收成上一輪
+job`20260923-163927-c80e`（已由round620收成登記，本輪不重複）。
+**本輪工作單位＝承接round620列出的候選清單，查證並修復一個範圍缺陷後
+投遞剩餘2支重算**：發現`piotroski_fscore_gate_v1.py`／`run_value_board_
+v2_pit_backtest.py`各自「自成一體複製一份」`alpha_significance()`／
+`buy_and_hold_index_pct()`（舊版docstring自稱跟`portfolio_backtest_v2.
+py`逐行一致），尺.一（commit`cbaa4412`）只改了`portfolio_backtest_v2.
+py`本體，這兩支獨立複製沒有被自動更新，直接重跑只會拿到「新引擎+舊
+量尺」的半套修正。**[自行裁量，判定為bug修復非新架構決策]**：修復
+`run_value_board_v2_pit_backtest.py`改成直接呼叫`portfolio_backtest_v2`
+的函式（import驗證通過，`piotroski_fscore_gate_v1.py`透過既有import
+間接沿用，`determinism_self_test.py`為位置參數呼叫不受影響）。同時
+發現`weinstein_alpha_gate.py`依賴的`long_only_vs_market.py::
+decompose_alpha_beta()`也有同樣缺陷，但blast radius涵蓋4支腳本
+（`portfolio_backtest.py`/`run_alpha_decomposition.py`/
+`weinstein_alpha_gate.py`/`weinstein_v2_alpha_gate.py`），**本輪不動，
+留給下一輪評估**。新增`audit_16remaining_batch2.py`（依序呼叫
+`run_value_board_v2_pit_backtest.main()`→`piotroski_fscore_gate_v1.
+main()`，順序不可顛倒，後者要讀前者產生的baseline CSV），投遞
+`run_detached.py submit`（job`20260923-183404-d854`，timeout 420分鐘/
+7小時——`run_value_board_v2_pit_backtest.py`跑500檔+TRAIN/VAL兩期各
+100次隨機對照draws，腳本docstring記錄實測約102秒/draw，200次draws
+估算上限約5.7小時，設計上跨多輪馬拉松收成）。session內確認job已進入
+TRAIN期執行（讀取快取486/500檔可用，日誌顯示正常進度），本輪不等待
+完成。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+PASS（386列，本輪未新增判定，純程式碼修復非統計判定）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／
+`portfolio_backtest_v2.py`任何原始碼（只修改`run_value_board_v2_pit_
+backtest.py`，不在CLAUDE.md「十三、核心研究檔案單一寫入者」限定清單
+內），全程零新增外部API呼叫（回測讀既有本地pickle快取）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（`驗.一第4點續`本身因job running中不算「未開始」但也未結案；驗.二）。
+**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非
+本輪新增）。**下一輪任一軌接手**：`run_detached.py status`收成
+`20260923-183404-d854`——預估要跑數小時，若仍`running`不必每輪都查，
+可先做`驗.二`或其他工作隔幾輪再回頭確認；若`finished`，讀
+`data/value_board_v2_pit_backtest_liquidity500_full.csv`與
+`data/piotroski_fscore_gate_v1_results.csv`，對照`TRIALS_LEDGER.md`
+#93/#290/#94/#291比較新舊數字方向是否一致，翻轉一律進
+`AWAITING_REVIEW.md`不自行改判；`weinstein_alpha_gate.py`同類缺陷
+待決定是否修復（需先核查`run_alpha_decomposition.py`用途）。完整見
+`REPORT.md`第621輪心跳、`PENDING_QUEUE.md`「驗.一第4點續」條目、
+`audit_16remaining_batch2.py`。

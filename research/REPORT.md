@@ -9,6 +9,16 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第624輪 · 2026-09-23T21:3x+08:00 · TW · 研究帽：收成audit_16remaining_batch2並登記#390/#391，發現並更正重複登記#387-389，投遞weinstein_alpha_gate收尾job
+
+- 取鎖乾淨（cycle`20260923-213037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=4（驗.一/驗.一第4點續剩餘16支/剩餘8支/驗.二；尺.二round623已核對`[x]`、審.二已`[x]`、資料.一BLOCKED預計22:44解除未到）。`run_detached.py status`確認`audit_16remaining_batch2`（job`20260923-183404-d854`）已`finished`（exit=0，耗時176.1分鐘），「一次只跑一個重度工作」名額釋出。
+- 讀log對照`TRIALS_LEDGER.md`#93/#94/#290/#291：`run_value_board_v2_pit_backtest`（#93baseline，App端`data/strategies.json`標記value_board_v2『回測未通過』）**VAL alpha顯著性翻轉**（p=0.1441→0.0470，VAL報酬+85.52%→+228.19%），依裁示登記`TRIALS_LEDGER.md`#390（verdict=未結案）並寫入`AWAITING_REVIEW.md`，未動`data/strategies.json`。`piotroski_fscore_gate_v1`（#94/#291）gate本身0翻轉維持FAIL（本次FinMind中途402封鎖，fscore僅311/486檔覆蓋），登記#391。
+- **[自行裁量，事後發現並更正的錯誤]**：登記batch1三支（margin_utilization/odd_lot_imbalance/short_sale_utilization）前未先grep核對，重複登記了round620已完成的同一批分析（原#382/#383/#384）為新編號#387/#388/#389。append-only不回頭改判定欄，已在`TRIALS_LEDGER.md`補DUPLICATE更正說明＋`selection_bias_ledger.py::KNOWN_DUPLICATE_IDS`加入387/388/389排除出有效N（比照既有#335-337/#379同一套處理）。`short_sale_utilization`內容本身是PASS(第2關,非最終結案)→FAIL(第2/7關)方向翻轉，依CLAUDE.md最高投資原則「誠實判不及格」精神直接登記FAIL不進AWAITING_REVIEW暫停。
+- `weinstein_alpha_gate.py`(#60，11支範圍最後1支)投遞job`20260923-213506-0f76`（timeout 240分鐘）。驗.一第4點續11支範圍現況：10/11已完成，僅剩此job待收成。
+- `trial_registry.py --check`exit=0 PASS（393列，本輪#387-391五筆新增）。`is_holdout_consumed()`開工/收工皆`False`。未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼。
+- 下一輪待做：收成`20260923-213506-0f76`，對照`TRIALS_LEDGER.md`#60舊判定（FAIL，VAL純alpha百分位28.5），翻轉一律進AWAITING_REVIEW；完成後接續`驗.一第4點續（剩餘8支）`與`驗.二`第二部分；**下一輪開工先grep TRIALS_LEDGER.md核對候選是否已有登記再呼叫register_trial()，避免重蹈本輪覆轍**。
+
+---
 ## 第623輪 · 2026-09-23T20:3x+08:00 · TW · 研究帽：核對確認尺.二(DSR單位修正)六點全部完成，避免與活躍session搶寫審.二/資料.一輸出檔
 
 - 取鎖乾淨（cycle`20260923-203037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`從round622的3條增為7條——總司令新裁示【DSR單位錯誤修正＋f52w改用資訊比率重審＋2008延伸】新增`尺.二`/`審.二`/`資料.一`/`驗.一第4點續（剩餘8支）`四項，權威`<!-- ORDER-BEGIN -->`清單排`尺.二`最優先。

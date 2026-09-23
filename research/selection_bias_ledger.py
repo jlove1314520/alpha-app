@@ -251,7 +251,14 @@ def main() -> int:
     # DUPLICATE不是一種verdict語意（每筆本身的PASS/FAIL判定仍然真實
     # 有效，問題不在判定對不對，在於這3筆判定的是跟另外3筆完全相同的
     # 分析，不是3個獨立的統計檢定）。
-    KNOWN_DUPLICATE_IDS = {335, 336, 337}  # 見TRIALS_LEDGER.md #337後方更正說明
+    # 2026-09-23馬拉松第624輪（TW，研究帽）：互動視窗CC登記#387~#389前
+    # 未先grep TRIALS_LEDGER.md核對，重複登記了round620已完成的
+    # margin_utilization/odd_lot_imbalance/short_sale_utilization三支
+    # engine-fix-recheck（原#382/#383/#384，同一批分析、同一組數字，
+    # 只是round620心跳誤記登記失敗）。同一種處理：append-only不回頭
+    # 改寫判定欄，仍計入總N，排除出有效N。見TRIALS_LEDGER.md #389
+    # 後方更正說明。
+    KNOWN_DUPLICATE_IDS = {335, 336, 337, 387, 388, 389}  # 見TRIALS_LEDGER.md #337/#389後方更正說明
     duplicate_rows = [r for r in rows if r["id"] in KNOWN_DUPLICATE_IDS]
 
     # 2026-09-23總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.一：

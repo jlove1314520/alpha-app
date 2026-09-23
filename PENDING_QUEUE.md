@@ -7914,6 +7914,10 @@ registry卡住單工作槽，均已reap清除，未留殘餘。**修法**：改�
 `_format_mismatch`旗標，不再依賴「垃圾湊巧對不上」這種運氣。
 
 <!-- ORDER-BEGIN -->
+清理.一 [債務]
+結案.三 [債務]
+凍結.二 [債務]
+轉向.一 [研究]
 尺.二 [研究]
 審.二 [研究]
 資料.一 [研究]
@@ -11893,6 +11897,64 @@ wrapper維持現狀不變。
   batch2收成後的下一輪投遞**；收成後對照`TRIALS_LEDGER.md`#60舊
   判定（FAIL，VAL純alpha百分位28.5），比較新舊數字方向，翻轉一律
   進`AWAITING_REVIEW.md`不自行改判。
+
+  **2026-09-23馬拉松第624輪（TW，研究帽）——收成`audit_16remaining_
+  batch2`並登記，投遞最後1支**：`run_detached.py status`確認job
+  `20260923-183404-d854`已`finished`（exit=0，耗時176.1分鐘，早於
+  本輪21:30:37取鎖時間，未與其他session碰撞）。讀log對照
+  `TRIALS_LEDGER.md`#93/#94/#290/#291：**`run_value_board_v2_pit_
+  backtest`（#93 baseline）發現VAL alpha顯著性翻轉**（舊引擎舊量尺
+  p=0.1441不顯著→新引擎新量尺p=0.0470顯著，VAL報酬+85.52%→
+  +228.19%），依裁示「翻轉一律進AWAITING_REVIEW不自行改判」，已登記
+  `TRIALS_LEDGER.md`#390（verdict=未結案）並寫入`AWAITING_REVIEW.md`
+  （**這支是App端`data/strategies.json`公開標記『回測未通過』的策略**，
+  未動該檔案，需總司令裁示是否啟動完整GATE_SEQUENCE剩餘關卡）。
+  `piotroski_fscore_gate_v1`（#94/#291）本身**0翻轉維持FAIL**（gated
+  兩期alpha仍不顯著，且gate把已變顯著的baseline訊號壓回不顯著，比
+  舊結論更清楚地否定F-score gate有效），登記`TRIALS_LEDGER.md`#391。
+  本次piotroski因FinMind於執行中途402封鎖，fscore僅311/486檔算出
+  （64%覆蓋率），如實記錄此限制，不影響方向性結論。
+  **[自行裁量，事後發現並更正的錯誤]**：同時嘗試收成並登記batch1
+  三支（`margin_utilization_regime_portfolio_v1`／
+  `odd_lot_imbalance_portfolio_v1`／`short_sale_utilization_
+  portfolio_v1`），但登記前**未先grep`TRIALS_LEDGER.md`核對**，導致
+  重複登記了round620早已完成的同一批分析（round620心跳文字「已登記
+  TRIALS_LEDGER.md#382/#383/#384」其實是正確的，本輪查證不完整才
+  重複登記為新編號#387/#388/#389）。append-only設計不允許回頭改寫
+  #387-389本身的判定欄，已在`TRIALS_LEDGER.md`#387前方補DUPLICATE
+  更正說明，並在`research/selection_bias_ledger.py::
+  KNOWN_DUPLICATE_IDS`加入387/388/389排除出有效N計算（比照既有
+  #335-337/#379同一套處理，仍計入總N但不進多重比較分母）。
+  `short_sale_utilization_portfolio_v1`內容本身是PASS(第2關,非最終
+  結案)→FAIL(第2/7關)方向翻轉，**[自行裁量]**依CLAUDE.md最高投資
+  原則「誠實判不及格」精神，往更嚴格方向的翻轉直接登記FAIL不進
+  AWAITING_REVIEW暫停——該保護機制防的是自行升級為PASS的風險，不是
+  自行降級為FAIL的風險，詳見`TRIALS_LEDGER.md`#389notes。
+  **`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+  PASS（393列，#387-391五筆本輪新增登記）**。`weinstein_alpha_gate.py`
+  (#60)為11支範圍最後一支，batch2收成後「一次只跑一個重度工作」
+  名額已釋出，本輪投遞job`20260923-213506-0f76`（timeout 240分鐘，
+  `--expect research/data/weinstein_alpha_gate_summary.csv`）。
+  **16支續跑（實際範圍11支）現況：10/11已完成（首5支+批次1三支+
+  批次2兩支），僅剩`weinstein_alpha_gate`1支等待job收成**。
+  `validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+  `False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+  未修改`research/backtest/`／`research/validation/`／
+  `trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅呼叫
+  `register_trial()`登記＋讀log＋`run_detached.py submit`投遞job＋
+  改`selection_bias_ledger.py`的常數集合，該檔不在限定清單內），
+  全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+  **等待審閱：2件**（`審.一`f52w DSR摘要，延續中；本輪新增
+  `value_board_v2`VAL alpha翻轉#390）。**下一輪任一軌接手**：
+  `run_detached.py status`收成`20260923-213506-0f76`（預估數小時，
+  不必每輪都查）；收成後對照`TRIALS_LEDGER.md`#60舊判定（FAIL，VAL
+  純alpha百分位28.5），比較新舊數字方向，翻轉一律進
+  `AWAITING_REVIEW.md`不自行改判；完成後本項（驗.一第4點續11支範圍）
+  可全數結案，接續處理`驗.一第4點續（剩餘8支）`（尺.二完成後才續跑）
+  與`驗.二`第二部分；**下一輪開工先grep`TRIALS_LEDGER.md`核對候選
+  是否已有登記再呼叫`register_trial()`，避免重蹈本輪覆轍**。完整見
+  `REPORT.md`第624輪心跳、`TRIALS_LEDGER.md`#387-391、
+  `AWAITING_REVIEW.md`。
 
 ## 2026-09-23 總司令裁示【DSR 單位錯誤修正＋f52w 改用資訊比率重審＋2008 延伸】（原文登記）
 
