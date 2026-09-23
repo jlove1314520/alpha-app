@@ -1949,6 +1949,12 @@ equal/ic_weighted/regime_weighted×monthly/quarterly，含全部leave-one-out
   詳細死因見上方獨立條目。
 - **2026-09-20補記（財報PIT.三，流程對但因子失效）**：Q4前視修正後（`TRIALS_REGISTRY`#292~#303，295檔bigsample，`PIT3_RERUN_RESULT.md`），修正臂VAL最小alpha p=0.083、12組無一p<0.06，「p=0.053接近顯著」證據作廢；死因分類＝**流程對、但因子（f_eps_growth/f_eps_surprise/f_revenue_surprise，見#287~#289）修正PIT後失效**，非流程錯誤。前視貢獻未被直接量化（原p=0.053出自80檔樣本，見`財報PIT.四`）。
 - **2026-09-20補記（財報PIT.四，80檔樣本，分支(a)）**：以原p=0.053的80檔樣本（`TRIALS_REGISTRY`#304~#315，`PIT4_RERUN_RESULT.md`）重跑雙臂：legacy臂A_4pass/ic_weighted/季頻VAL alpha=+8.75% p=0.168（原+10.40%/p=0.053）→**舊數字不可重現、前視貢獻無法量化，不再追**。兩臂12格VAL平均差僅+0.32pp、方向不一致，無證據顯示Q4前視是主因；月頻兩格修正臂p=0.049/0.052但legacy臂同格0.081/0.089，屬12格未校正取最小、非預先指定格，**不得稱alpha殘存，仍FAIL**。死因分類維持＝流程對、因子失效。
+- **2026-09-23補記（DevQueue自走`常備.1`查核，[自行裁量]）**：本家族的
+  `weight_mode="regime_weighted"`就是`regime_alt_a`結案段落（line約
+  3259附近）2026-09-19追加時說「尚未測試」的`regime.替代B`（regime用於
+  選股權重而非總曝險調節）——同一個機制，兩個地方各自記錄，本次已在
+  `regime_alt_a`條目補上更正並互相cross-reference，`常備.1`不需要新開
+  回測，詳見該處。
 
 ### 內部人（董監事/大股東/經理人）持股轉讓 Insider Holdings Transfer
 （`HYPOTHESIS_QUEUE.md` #41，informed trading信號，股票，TW軌，
@@ -3257,6 +3263,32 @@ FUT`#244`條目「⚠️續」小節與`REGIME_OVERLAY_PROTOCOL.md`第17節。
   `regime_overlay_margin_growth_gate.py`（零新增API呼叫，用本機週頻快取）。
 
 **⚠️ 追加（2026-09-19，`regime.替代A` TRAIN判定，`regime_alt_a_train_verdict.py`，`TRIALS_LEDGER.md` #253~#261九格全FAIL）**：連續型曝險調節（E=clip(1−0.5×risk_z,0.5,1.0)，訊號＝同一200MA距離）主規格淨MDD縮小**25.5%**（門檻≥35%未過）、上檔捕捉**86.4%**（過關）；9格高原**0/9**通過（淨MDD縮小21.1%~26.3%，上檔82.1%~89.2%）。相同訊號並排：二元版（對齊連續版樣本2011-10-27起）淨MDD縮小9.6%、上檔79.1%，連續版確實「保留更多上檔＋成本較低（1.48% vs 2.79%/年）」，但保護力度先天不足，符合規格第16節事前預期（低機率通過）。誠實但書：(1)連續版warm-up較長使樣本起點晚至2011-10-27，2011危機窗僅部分覆蓋（n=47天）；(2)控制組(a)排列法百分位100.0對連續版**無鑑別力**（打亂連續曝險使換手暴增、成本把隨機組拖垮到平均−55.8pp），不作為通過依據；(3)延遲5日後淨MDD縮小掉到4.0%，保護高度依賴訊號時效；(4)價格指數口徑未含股利。**死因分類：流程對、這條假設無edge**（規格事前鎖定、成本內建、無偽影家族包裝）。**這不泛化為「regime概念在台股無效」**：本結案僅涵蓋「曝險水位調節函數」機制類別（二元＋連續兩種形式，不再嘗試第三種函數形式，除非總司令另行核准）；`regime.替代B`（regime用在選股權重而非總曝險）是完全不同的價值主張，尚未測試，不受影響。
+
+**⚠️ 更正（2026-09-23，DevQueue自走`常備.1`查核，[自行裁量]）**：上一行「`regime.
+替代B`⋯尚未測試」的判斷是錯的。`portfolio_backtest_v2.py`（`weight_mode=
+"regime_weighted"`，`_trend_regime_series()`用`weinstein_stage2.py`同一個
+大盤位階bull/bear開關，動態調整選股複合分數裡各成分因子的權重）**就是
+regime.替代B的具體實作**——regime訊號改變的是選股排序權重，不是總曝險水位，
+跟`regime_alt_a`（曝險水位調節）是結構上不同的機制，命中`常備.1`要測的
+「regime訊號用於選股權重而非總曝險調節」定義。此機制已在
+`portfolio_multifactor_v2`家族結案（下方「### portfolio_multifactor_v2」
+條目，2026-09-06整併結案）內完整測過：equal/ic_weighted/regime_weighted
+三種加權法×A_4pass/B_plus_value_pe兩因子版本×monthly/quarterly兩頻率，
+含leave-one-out子版本，80檔與298/300檔獨立樣本皆測過，`regime_weighted`
+在其中沒有特殊除外——全部卡在同一關（alpha顯著性，VAL期p值全數遠高於
+0.05）。**更早的`portfolio_multifactor_v1`初測（2026-08-26，`LEADS.md`
+line50）甚至單獨列出`regime_weighted`版本數字**：VAL alpha+10.12%
+(p=0.092不顯著)，且是三版本裡唯一在3x成本敏感度下轉負(−3.58%)的一版，
+比`equal`/`ic_weighted`更脆弱，不是更好。**結論：`常備.1`不需要新開
+一輪回測——這條假設已經被`portfolio_multifactor_v2`家族收斂判過
+FAIL，死因分類同該家族＝流程對、這條假設無edge（且2026-09-20`財報
+PIT.三/四`已排除是財報前視偏誤造成，見該家族條目補記）**。此更正不
+產生新的PASS/FAIL判定（沒有新試驗需要登記進`TRIALS_LEDGER.md`），
+只是修正一則過期的「尚未測試」描述，避免後續自走輪次重複花算力測
+同一件事。若總司令認為regime.替代B還有`portfolio_multifactor_v2`
+框架之外、真正未測過的具體變體（例如非趨勢類的regime訊號、非「加權
+既有因子」而是「regime狀態本身直接當額外因子」的構造），需另行明確
+指定，不在本更正範圍內。
 
 ### 減資事件CAR（#71，現金減資組＋彌補虧損減資組，恢復買賣日後20交易日，2026-09-19 FAIL）
 

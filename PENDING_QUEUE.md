@@ -11423,10 +11423,24 @@ wrapper維持現狀不變。
 `queue_depth_config.py::MIN_QUEUE_DEPTH=12`，依規則補件，來源
 ②`STRATEGY_GRAVEYARD.md`已結案條目裡明寫「未測」的變體）**：
 
-- [ ] **常備.1** [研究] regime.替代B——regime訊號用於選股權重而非總
+- [x] **常備.1** [研究] regime.替代B——regime訊號用於選股權重而非總
   曝險調節（vs已死「曝險水位調節函數」機制類別），是完全不同的價值
   主張，尚未測試。來源：`STRATEGY_GRAVEYARD.md`（`regime_alt_a_
   train_verdict.py`結案段落，追加⚠️註記處）。[自走補入]
+  **2026-09-23完成（DevQueue cycle 20260923-121601，[自行裁量]）**：
+  查核發現「尚未測試」的前提是錯的——`portfolio_backtest_v2.py`的
+  `weight_mode="regime_weighted"`（大盤位階bull/bear動態調整選股
+  複合分數的成分因子權重）就是這個機制，已在`portfolio_multifactor_v2`
+  家族2026-09-06整併結案裡完整測過（equal/ic_weighted/regime_weighted
+  三法×A_4pass/B_plus_value_pe×monthly/quarterly，80檔與298/300檔
+  樣本皆測，含leave-one-out），全數卡在alpha顯著性；更早的
+  `portfolio_multifactor_v1`（2026-08-26，`LEADS.md`line50）單獨列出
+  `regime_weighted`數字：VAL alpha+10.12%(p=0.092不顯著)，且是三版本
+  唯一在3x成本敏感度下轉負者，比等權/IC加權更脆弱。**不需要新開回測，
+  沒有新TRIALS_LEDGER登記**（判定沒有變化，只是更正一則過期描述）。
+  證據：`STRATEGY_GRAVEYARD.md`已在`regime_alt_a`結案段落（line約3259
+  附近⚠️追加區塊）與`portfolio_multifactor_v2`家族條目（line約1950
+  附近）雙向補上更正說明與cross-reference。
 - [ ] **常備.2** [研究] VIX期限結構變動率版（VIX9D/VIX比值N日變動率，
   非水位）當TAIEX regime訊號——`#76`已測水位版FAIL，變動率未測。
   來源：`STRATEGY_GRAVEYARD.md` #76段落。[自走補入]
