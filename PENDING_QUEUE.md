@@ -11649,7 +11649,31 @@ wrapper維持現狀不變。
 - [ ] **驗.一第4點續（剩餘16支）** [研究] 首5支的新量尺重算已完成
   （見上方尺.一三欄對照表，0翻轉，結論已同步登記#376/#377/#380/
   #381），**其餘16支尚未開始**，一律用新引擎+新量尺，避免跑兩次，
-  下一輪接續。
+  下一輪接續。**2026-09-23馬拉松第619輪（TW，研究帽）已投遞其中3支
+  的重算**：`margin_utilization_regime_portfolio_v1`（#120原FAIL）／
+  `odd_lot_imbalance_portfolio_v1`（#232原FAIL）／
+  `short_sale_utilization_portfolio_v1`（#133原PASS第2關非最終結案）
+  ——三支共用checkpoint可續跑架構（`run_one()`），已將三份checkpoint
+  的`real`欄位清空並備份（`*_checkpoint.pre_engine_fix_backup.json`），
+  投遞新增腳本`research/audit_16remaining_batch1.py`（依序呼叫三支
+  腳本的`main()`，`cost_returns`/`random_finals`讀舊快取不重算，只重算
+  真實訊號單次回測），job`20260923-163927-c80e`（timeout 40分鐘，
+  `--expect research/data/margin_utilization_regime_portfolio_v1_
+  results.csv`），session內`wait --max-min 3`仍`STILL_RUNNING`。
+  **[自行裁量]**：原本嘗試在session內直接同步跑`margin_utilization_
+  regime_portfolio_v1.py`（未用`run_detached.py`），超過5分鐘後手動
+  `taskkill`，事後檢查checkpoint的`real`欄位仍是空的（未完整跑完就被
+  砍），確認**沒有殘留半套用的資料污染**（`real`鍵本來就是本輪清空的，
+  taskkill後狀態不變，等同從未執行），改用`run_detached.py`重新投遞，
+  符合`MARATHON_PROTOCOL.md`0b節「任何可能跑超過5分鐘的工作一律脫離
+  session」規則——這是本輪違規在先、發現後自行修正的記錄，如實揭露
+  不隱藏。**下一輪**：`run_detached.py status`收成`20260923-163927-
+  c80e`，`finished`後讀三支腳本各自的`data/*_results.csv`與
+  checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，
+  翻轉一律進`AWAITING_REVIEW.md`不自行改判；完成後剩餘13支繼續，
+  優先找同樣有既有checkpoint可續跑架構的腳本（`phase_sensitivity_
+  checkpoint.json`存在但該腳本本身是相位敏感度診斷工具非trial候選，
+  不計入16支，見round619查證）。
 - [ ] **驗.二** [研究] spillover前視偏誤——**2026-09-23裁示【稽核解封
   ＋S2對等比較＋凍結regime家族】第一部分已完成**：「#346判定FAIL
   (前視偏誤)不需要等重跑，現在寫入並從AWAITING_REVIEW移入已結案」——

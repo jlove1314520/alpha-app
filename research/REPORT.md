@@ -9,6 +9,16 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第619輪 · 2026-09-23T16:3x+08:00 · TW · 研究帽：驗.一第4點續——投遞3支腳本新引擎+新量尺重算，session內違規同步執行已自糾改用run_detached.py
+
+- 取鎖乾淨（cycle`20260923-163037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認`尺.一`（commit`cbaa4412`）與`審.一`（commit`f807ce64`，DSR=0.0000決定性FAIL）皆已由互動視窗CC完成並commit，round618避開的`portfolio_backtest_v2.py`碰撞已解除。
+- **本輪工作單位＝驗.一第4點續，重算16支中的3支**：`margin_utilization_regime_portfolio_v1`（#120原FAIL）／`odd_lot_imbalance_portfolio_v1`（#232原FAIL）／`short_sale_utilization_portfolio_v1`（#133原PASS第2關非最終結案）——三支共用checkpoint可續跑架構，清空`real`欄位（存回測摘要非equity_curve時間序列）後重跑`main()`會自動用新引擎(compounding修正)+新量尺(0050含息總報酬預設值)重算，`cost_returns`/`random_finals`讀舊快取不必重算。三份checkpoint已清空並備份為`*_checkpoint.pre_engine_fix_backup.json`。
+- **[自行裁量，違規自糾記錄]**：本輪一開始誤在session內直接同步執行`margin_utilization_regime_portfolio_v1.py`（未走`run_detached.py`），超過5分鐘後手動`taskkill`，事後核對checkpoint的`real`欄位仍是空的（未跑完就被砍，等同從未執行，**沒有殘留半套用的污染資料**），違反`MARATHON_PROTOCOL.md`0b節規則，發現後立刻改正：新增`audit_16remaining_batch1.py`（依序呼叫三支腳本`main()`）並改用`run_detached.py submit`正式投遞（job`20260923-163927-c80e`，timeout 40分鐘），`wait --max-min 3`確認`STILL_RUNNING`，本輪不等待完成。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`portfolio_backtest_v2.py`任何原始碼，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（驗.一第4點續其餘13支＋驗.二第二部分；`驗.一`本身因job running中不算「未開始」但也未結案）。**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪新增）。
+- **下一輪**：`run_detached.py status`收成`20260923-163927-c80e`，`finished`後讀三支腳本`data/*_results.csv`與checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，翻轉一律進`AWAITING_REVIEW.md`不自行改判；完成後剩餘13支繼續（已排除`phase_sensitivity.py`——雖有checkpoint但是相位敏感度診斷工具非trial候選）。
+
+---
 ## 第618輪 · 2026-09-23T15:3x+08:00 · TW · 研究帽：避免與互動視窗CC碰撞——尺.一(alpha量尺修正)正被即時編輯，改投遞獨立於量尺修正的f52w #86診斷job
 
 - 取鎖乾淨（cycle`20260923-153037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=2（驗.一殘餘16支稽核+f52w#86、驗.二第二部分）。`tasklist`確認12個claude.exe行程仍並行。

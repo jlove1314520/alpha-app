@@ -4,6 +4,52 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-23T16:3x+08:00（馬拉松第619輪，研究帽）**——取鎖乾淨
+（cycle`20260923-163037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`
+確認`尺.一`（commit`cbaa4412`）與`審.一`（commit`f807ce64`，DSR=0.0000
+決定性FAIL、一頁摘要已寫入`AWAITING_REVIEW.md`待總司令裁示）**皆已由
+互動視窗CC完成並commit**，上一輪（618）避開的`portfolio_backtest_v2.py`
+碰撞已解除。**本輪工作單位＝驗.一第4點續，重算16支中的3支**：
+`margin_utilization_regime_portfolio_v1`（#120原FAIL）／
+`odd_lot_imbalance_portfolio_v1`（#232原FAIL）／
+`short_sale_utilization_portfolio_v1`（#133原PASS第2關非最終結案）——
+三支共用checkpoint可續跑架構（同`dividend_yield_portfolio_v1.run_one()`
+同一套機制，checkpoint的`real`欄位存的是完整回測摘要而非equity_curve
+時間序列，清空`real`後重跑`main()`會自動用新引擎(compounding修正)+
+新量尺(0050含息總報酬預設值)重算，`cost_returns`/`random_finals`不受
+量尺影響直接讀舊快取，省時間）。三份checkpoint的`real`欄位已清空並
+備份為`*_checkpoint.pre_engine_fix_backup.json`。**[自行裁量，違規
+自糾記錄]**：本輪一開始誤在session內直接同步執行
+`margin_utilization_regime_portfolio_v1.py`（未走`run_detached.py`），
+超過5分鐘後手動`taskkill`，事後核對checkpoint的`real`欄位仍是空的
+（未跑完就被砍，跟從未執行狀態相同，**沒有殘留半套用的污染資料**），
+違反`MARATHON_PROTOCOL.md`0b節「任何可能跑超過5分鐘的工作一律脫離
+session」規則，發現後立刻改正：新增`audit_16remaining_batch1.py`
+（依序呼叫三支腳本`main()`）並改用`run_detached.py submit`正式投遞
+（job`20260923-163927-c80e`，timeout 40分鐘），`wait --max-min 3`確認
+`STILL_RUNNING`，**本輪不等待完成、下一輪收成**。`trial_registry.py
+--check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增
+判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆
+確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／
+`portfolio_backtest_v2.py`任何原始碼（僅呼叫既有函式、清空/重算
+checkpoint資料），全程零新增外部API呼叫（回測用既有`finmind_client.
+load_dev`本地快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+**交辦佇列還剩2條未開始**（驗.一第4點續其餘13支＋驗.二第二部分；
+`驗.一`本身因這批job running中不算「未開始」但也未結案）。**等待
+審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪
+新增）。**下一輪任一軌接手**：`run_detached.py status`收成
+`20260923-163927-c80e`，`finished`後讀三支腳本`data/*_results.csv`與
+checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，
+翻轉一律進`AWAITING_REVIEW.md`不自行改判；完成後剩餘13支繼續（已排除
+`phase_sensitivity.py`——雖有checkpoint但該腳本是相位敏感度診斷工具
+非trial候選，不計入16支這批）。完整見`REPORT.md`第619輪心跳、
+`PENDING_QUEUE.md`「驗.一第4點續（剩餘16支）」條目、
+`audit_16remaining_batch1.py`。
+
+---
+
 **最後更新：2026-09-23T15:3x+08:00（馬拉松第618輪，研究帽）**——取鎖乾淨
 （cycle`20260923-153037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=2（驗.一殘餘16支稽核+f52w#86、驗.二第二部分）。`tasklist`確認
@@ -105,47 +151,6 @@ gate3/5/6後續，高併發下建議先`tasklist`+`git log`確認互動視窗CC�
 
 ---
 
-**最後更新：2026-09-23T13:3x+08:00（馬拉松第616輪，研究帽）**——取鎖乾淨
-（cycle`20260923-133037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=7（驗.一/驗.二/驗.三/常備.9/常備.10/常備.12；常備.6/常備.7已於
-round615之後被裁示改標`- [!]`家族凍結，常備.8已由DevQueue軌本輪完成）。
-`tasklist`確認**13個claude.exe行程仍在並行**（與round615一致，高併發
-持續中）。**選定驗.一**（裁示明列最高優先，且核對`驗.一續2`已完成、
-S2b完美PASS，引擎判定健全，驗.一第4點21支稽核已解鎖）：確認第1/5支
-（`portfolio_backtest_v2`）已於round615之前由其他track commit
-`6305aab9`完成（0翻轉）。檢視既有`audit_run_backtest_5priority.py`
-（前一執行個體已寫好，涵蓋2/3支：`pead_portfolio_v1`→#73、
-`run_score_backtest`→#12），發現該腳本`__main__`會無條件重跑全部3支
-（含已完成的portfolio_backtest_v2），**修改為「輸出檔已有該階段結果就
-略過重跑」的續跑邏輯**（`[自行裁量]`：避免浪費預算重算已確認0翻轉的
-結果），投遞`run_detached.py submit`（job`20260923-133203-00a4`，
-timeout 40分鐘），session內`wait --max-min 4`確認正確略過1/3、進入
-2/3（`pead_portfolio_v1`，`n_random=100`兩期各一次，耗時較長），
-**下一輪用`run_detached.py status`／`log`收成**，完成後對照
-`TRIALS_LEDGER.md`#73/#12舊判定與關鍵數字，翻轉一律進
-`AWAITING_REVIEW.md`不自行改判。跑完這2支後仍有第4~5支
-（`f52w_high_portfolio_v1`／`dividend_yield_portfolio_v1`，腳本
-docstring註記因checkpoint機制單次35-40分鐘需另外獨立指令跑），以及
-裁示提到的其餘16支稽核，留待後續輪次。`trial_registry.py --check`
-（`PYTHONIOENCODING=utf-8`）exit=0 PASS（371列，本輪未新增判定，
-純重跑既有腳本+比對，尚未產生新判定結果）。
-`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
-`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
-全程零新增外部API呼叫（回測用既有`finmind_client.load_dev`本地快取）。
-`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩6條未開始**
-（驗.二/驗.三/常備.9/常備.10/常備.12，驗.一因detached job running中
-不算「未開始」但也未結案）。**等待審閱：0件**（`AWAITING_REVIEW.md`
-未變動，本輪未新增待審項）。**下一輪任一軌接手**：優先收成
-`20260923-133203-00a4`（`run_detached.py status`確認`finished`後
-讀`research/data/audit_run_backtest_5priority.json`的`pead_
-portfolio_v1`/`run_score_backtest`欄位），登記對照結果進
-`TRIALS_LEDGER.md`並更新`驗.一`條目進度；13個claude.exe並行行程
-仍在時建議先`tasklist`確認、優先挑backlog裡低碰撞項目；`常備.9`/
-`常備.10`（月營收SUE系列）為安全的自走可推進項；`常備.12`需設計新的
-區塊抽樣變體。完整見`REPORT.md`第616輪心跳（待補）、`PENDING_QUEUE.md`
-「驗.一」條目。
-
----
-
 （第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪、
-第611輪、第614輪、第615輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+第611輪、第614輪、第615輪、第616輪已歸檔至`TW_STATE_ARCHIVE.md`，
+僅保留最新3則）
