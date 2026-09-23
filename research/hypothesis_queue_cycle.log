@@ -4345,3 +4345,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 銝?頛芸?颲佗???鋆?拚? 10 蝑???2018-06 蝻箏嚗??砍??????乓?
 ===== Hypothesis-queue cycle end: 2026-09-24 00:54:35 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑26.4分鐘 < 30分鐘門檻
