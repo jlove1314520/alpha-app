@@ -11666,6 +11666,29 @@ wrapper維持現狀不變。
   track用不同編號完成的過時待辦」，同round615常備.11案例同一形狀，
   純文件核對無新統計判定，不觸發`register_trial()`。
 
+**2026-09-23 DevQueue(cycle 20260923-154602)發現並修復分類漏洞，本輪
+無DevQueue可動手項**：權威清單取到的下一項是`驗.一第4點續（剩餘16支）`，
+查證後這其實是回測引擎健全性驗證工作（研究/驗證帽，且`research/
+backtest`／`research/validation`屬CLAUDE.md「十三、核心研究檔案單一
+寫入者」限定互動視窗才能修改），不該派給DevQueue——根因是ORDER-BEGIN
+清單只登記了父項key「驗.一」，子項行實際key是更長的「驗.一第4點續
+（剩餘16支）」，字串比對不到，`item_class()`退回預設值「債務」，即使
+該行文字自己緊跟在`**驗.一第4點續（剩餘16支）**`後面就明寫`[研究]`
+標記。跟`原子.六`那次（見`order_tag_mismatches()`docstring）是同一種
+形狀，只是這次守門員的警告分支沒能阻止實際派工。**已修復**（commit
+`8dcfba2b`）：`item_class()`改成優先信任行內`[研究]`/`[產品]`標記，
+比對不到才退回ORDER清單比對；同步簡化`order_tag_mismatches()`移除
+已被此修法解決的分支。修復後`find_next()`正確回`None`、
+`build_prompt()`正確印`NO_PENDING_ITEM_FOR_DEVQUEUE`（exit=3）。
+`node scripts/smoke_test.mjs`50項全PASS。**佇列深度檢查**：目前
+`- [ ]`僅5項且全為`[研究]`class，低於`MIN_QUEUE_DEPTH=12`，但今日
+已有`599`/`592`/`590`輪與`馬拉松第617輪`（見下方緊接的補件記錄）
+獨立重掃三個備援來源＋`STRATEGY_GRAVEYARD.md`「未測/待測」76處全部
+核對過，一致結論「誠實補不出新候選」——不重複做同一件事，本輪不再
+重掃，屬白名單第7條允許狀態。**下一輪DevQueue若仍讀到同樣結果，代表
+這是`marathon`／`hypothesis_queue`兩軌的工作範疇，DevQueue本身這一輪
+沒有可動手的項目是正確結論，不是卡住**。
+
 **2026-09-23佇列深度補件（[自走補入]，`- [ ]`項目數僅2項，低於
 `queue_depth_config.py::MIN_QUEUE_DEPTH=12`，依規則補件，來源
 ②`STRATEGY_GRAVEYARD.md`已結案條目裡明寫「未測」的變體）**：

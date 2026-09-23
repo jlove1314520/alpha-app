@@ -1,3 +1,49 @@
+## 2026-09-23（DevQueue自走cycle 20260923-154602，開發帽，修分類漏洞）
+
+等待總司令審閱：1件（非本輪產出，沿用既有狀態）——`驗.一第4點稽核：
+f52w_high_portfolio_v1（TRIALS_LEDGER#85/#370）VAL alpha顯著性判定
+翻轉FAIL→PASS`，2026-09-23完成、起算中，詳見`research/AWAITING_
+REVIEW.md`「等待中」表格。本輪未產生新的等待審閱項目。
+
+本輪只有1個commit（`8dcfba2b`）。權威清單取到的下一項是`驗.一第4點續
+（剩餘16支）`，查證後發現這其實是回測引擎健全性驗證工作（研究/驗證帽，
+且`research/backtest`／`research/validation`屬CLAUDE.md「十三、核心
+研究檔案單一寫入者」限定互動視窗才能修改），不該派給DevQueue自走——
+根因是`scripts/dev_queue_runner.py`的`item_class()`分類邏輯漏洞：
+ORDER-BEGIN權威清單只登記了父項key「驗.一」，但實際佇列裡子項行的key
+是更長的「驗.一第4點續（剩餘16支）」，字串比對不到，`item_class()`
+退回預設值「債務」，即使那一行文字自己緊跟在`**驗.一第4點續（剩餘16
+支）**`後面就明寫著`[研究]`標記也沒被信任。跟`原子.六`那次（見程式
+內`order_tag_mismatches()`docstring）是同一種形狀的問題，只是這次既有
+的WARN偵測器沒能阻止實際誤派。
+
+**已修復**：`item_class()`改成優先信任項目行自己緊跟在`**代號**`後面
+的`[研究]`/`[產品]`標記，比對不到才退回ORDER清單比對；同步簡化
+`order_tag_mismatches()`，移除已被此修法自動解決的「不在ORDER清單」
+警告分支，只保留「ORDER清單與行內標記真的衝突」這種仍需人工核對的
+情形。修復後`find_next()`正確回`None`、`python scripts/dev_queue_
+runner.py prompt`正確印出`NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為
+[研究]類，留給marathon／hypothesis_queue軌`（exit=3），不再誤闖
+single-writer保護的研究檔案，也避開了`PENDING_QUEUE.md`裡已記錄過的
+「馬拉松第616輪與互動視窗CC在同一件事上撞車」那種協調事故風險。
+
+**佇列深度盤點**：目前`- [ ]`僅5項（`驗.一`／`尺.一`／`審.一`／
+`驗.一第4點續`／`驗.二`）且全部是`[研究]`class，低於`MIN_QUEUE_
+DEPTH=12`，但今日稍早`599`/`592`/`590`輪與`馬拉松第617輪`已獨立重掃
+三個備援來源＋`STRATEGY_GRAVEYARD.md`「未測/待測」76處，一致結論
+「誠實補不出新候選」——不重複做同一件事，本輪不再重掃，依白名單第7條
+屬允許狀態。詳細記錄見`PENDING_QUEUE.md`本輪新增的對應段落。
+
+冒煙測試：`node scripts/smoke_test.mjs` 50項全PASS
+（2026/9/23 15:51:03，全部通過）。
+
+改了哪些檔案：`scripts/dev_queue_runner.py`（分類邏輯修復）、
+`PENDING_QUEUE.md`（記錄本輪發現與結論）、本檔。commit hash：
+`8dcfba2b`。下一步：DevQueue這一輪沒有可動手的項目，交棒給
+marathon／hypothesis_queue軌處理`尺.一`／`審.一`／`驗.一`系列的研究
+工作；下一輪DevQueue自走若讀到同樣的「全部是研究類」結果，屬於正確
+結論，不是卡住。
+
 ## 2026-09-23（DevQueue自走cycle 20260923-131601，研究帽，常備.8/9/10/12）
 
 等待總司令審閱：1件（非本輪產出，互動視窗CC「驗.一第4點稽核」發現
