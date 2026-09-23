@@ -2536,3 +2536,12 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`exit=0 PASS（395列，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋archive舊state條目），全程零新增外部API呼叫。
 - 交辦佇列還剩0條未開始。**等待審閱：1件**（value_board_v2 VAL alpha翻轉#390，非本輪新增，延續中）。
 - 下一輪待做：確認驗.二第二部分是否已由活躍session完成commit；資料.一預計22:44:48解除，屆時可續抓f52w/dividend 2007-2014延伸資料；依輪替下一輪建議選US軌（round613=09:3x，三軌中最舊）。
+
+**[commit後追記，CLAUDE.md十三節第5點要求]**：`git show --stat`核對後發現
+commit`9b30aa21`意外包含了`research/spillover_overnight_gate.py`（107行
+新增，屬本輪判斷應避免搶寫、另一活躍session正在做的驗.二第二部分）——
+根因是該檔案在本輪`git add`之前就已被那個session`git add`成staged狀態
+（"M "），本輪`git add <自己4個檔案>`不會unstage已staged的其他檔案，
+commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔腰截斷**，
+不是資料遺失，只是commit署名被合併，不需要重做該session的工作；如實
+記錄於此，不默默照單全收。
