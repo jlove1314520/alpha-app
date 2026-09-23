@@ -1,5 +1,20 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-24T03:54（Taipei，UTC 19:54）— hypothesis_queue排程接續（第七輪）：
+開工先讀`PENDING_QUEUE.md`，唯一`- [!]`項`閘門.一`仍BLOCKED於
+`f52w_2007_extension.py`續抓剩餘131檔（斷在idx170/300、HTTP 402）；
+查`data/rate_limit_state.json`確認`blocked_until`2026-09-23T20:21:39
+UTC，本輪查詢時尚未解除（約剩29分鐘），未手動提前重跑。CLAUDE.md十四
+節凍結.二仍生效，本輪不開新alpha試驗，接續#82「下一輪待辦(2)逐筆
+補查公告日」：新增WebSearch補查2筆——①2017-06生效日：初步AI摘要與
+另一則不相關年份的Yahoo標題衝突，改直接WebFetch鉅亨網原文
+（news.cnyes.com/news/id/3825296）逐句核對，確認公告日2017-06-02／
+生效日2017-06-19，2017-06組現已完整（4/12筆完整日期對）。②2018-03
+（中租-KY／和泰車）：查無（搜尋引擎索引對8年前單次新聞覆蓋不足，
+如實記錄非確定不存在）。判定不變（可開發SPEC，公告日逐筆補查中，
+剩8筆待補），未進回測、未動核心研究檔案、未觸碰holdout。詳見
+`HYPOTHESIS_QUEUE.md` #82條目第六輪段落。
+
 ## 2026-09-24T02:5x（Taipei，系統時間，第六輪）— hypothesis_queue排程
 接續：CLAUDE.md十四節凍結.二仍生效，本輪不開新alpha試驗。開工先讀
 PENDING_QUEUE.md，唯一`- [ ]`項`閘門.一`BLOCKED於續抓剩餘168檔完成。
