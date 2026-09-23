@@ -11,7 +11,58 @@
 
 **這份檔案只描述期貨軌「現在」的狀態，會被覆寫，不是 append-only。** 細節動作記錄看 `FUT_LOG.md`；候選判定看 `FUT_LEADS.md`；累積試驗數看 `TRIALS_LEDGER.md`；操作規則看 `MARATHON_PROTOCOL.md`。
 
-> 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的 64 則已原文搬到 `FUT_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
+> 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的 65 則已原文搬到 `FUT_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
+
+**最後更新：2026-09-24T02:3x+08:00（馬拉松第633輪，研究帽）**——取鎖乾淨
+（cycle`20260924-023037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=1（僅`閘門.一`，開考前資料品質閘門），但明文**BLOCKED於「續抓剩餘
+168檔」完成**——`定案.一`／`修.三`／`驗.四(資料一品質)`皆已由互動視窗CC
+本輪之前完成並標`[x]`（commit`a80b27f7`修正額度錯誤被吞掉的bug＋加並發鎖），
+`閘門.一`本身不是可獨立動手的工作單位。逐一核對23條`- [!]`阻塞項的解除
+條件，均未到解除時間（`金流一.4`等資料累積、`資料源一.3`待總司令領key、
+`外部一改.2`tick累積、`結案.一`需總司令實機驗證等），維持`- [!]`。**佇列
+深度自檢**：`- [ ]`=1（<12下限），但`CLAUDE.md`十四節【凍結.二】本階段
+明文暫停佇列深度補件（轉向.一結果出來前不得補新alpha試驗湊數），不重掃
+備援來源。三軌時間戳：TW round632=09-24 01:3x／US round630=09-23 23:3x／
+**FUT round625=09-23 22:3x（最舊）**——依輪替選FUT。**核心查證**：讀
+`research/f52w_2007_extension_checkpoint.json`確認`fetched_ids`已達
+**169/300**（較round625記錄的132檔續有進展，代表其他session在round625~
+本輪之間持續推進續抓），`failed_ids`/`factor_warnings`欄位存在但為空。
+`data/rate_limit_state.json`顯示FinMind於2026-09-23T18:21:39 UTC再次命中
+402，`blocked_until`=2026-09-24T04:21:39 台北（本輪02:3x查詢時仍BLOCKED，
+約差108分鐘），確認**未持有**`f52w_2007_extension.lock`鎖檔（無行程正在
+跑），續抓工作單位當下處於「不是被搶佔，是被FinMind額度硬性擋住」的
+狀態，任何session此刻嘗試續抓都會立即再次撞額度，不是可推進的工作。
+`run_detached.py status`：`running=0`（160筆歷史，無job待收成）。**本輪
+誠實結論**：`凍結.二`允許的四類工作（稽核重跑／資料抓取／工具修正／驗.二
+開盤到收盤重跑）逐一核對現況——稽核重跑（驗.一第4點續剩餘8支）已於
+round624完成並登記#387-393；資料抓取被FinMind額度硬性擋住無法執行；
+工具修正（修.三額度錯誤bug＋並發鎖）已由互動視窗CC完成（commit
+`a80b27f7`）；驗.二開盤到收盤重跑已於`驗.二續`完成並登記`TRIALS_LEDGER.md`
+#394（FAIL，第3關參數高原未過）。**四類允許工作皆已完成或被外部額度阻擋，
+FUT軌本身無獨立可推進項**（`#50`容量受限小型股方向仍被動等待tick累積，
+`外部一改.2`維持`- [!]`不重複回報進度）——依`CLAUDE.md`七之三節研究紀律
+「找不到就老實說找不到」與「零之一」白名單第7條（佇列真的空了）記錄後
+結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（399列，本輪純查證未新增判定，不觸發`register_trial()`）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
+未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改
+`research/backtest/`／`research/validation/`／`trial_registry.py`等
+`CLAUDE.md`十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive
+舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、
+`git status`/`git log`、`run_detached.py status`、`trial_registry.py
+--check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩
+1條未開始**（`閘門.一`，BLOCKED於續抓168檔完成，非可獨立推進項）。
+**等待審閱：0件**（先前`value_board_v2`翻轉#390已於2026-09-24總司令
+裁示【候選名單定案】結案，維持FAIL，非本輪新增）。**下一輪任一軌接手**：
+續抓168檔預計04:21台北解除FinMind額度封鎖，解除後才可繼續（目前169/300，
+還差131檔）；`閘門.一`待續抓完成後才可執行五項資料品質檢查；`#50`持續
+被動等待tick累積至20（13/20）；依輪替下一輪建議選US軌（round630=09-23
+23:3x，三軌中最舊）。完整見`REPORT.md`第633輪心跳、`PENDING_QUEUE.md`
+「閘門.一」條目、`data/f52w_2007_extension_checkpoint.json`。
+
+---
 
 **最後更新：2026-09-23T22:3x+08:00（馬拉松第625輪，維運帽）**——取鎖乾淨
 （cycle`20260923-223037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
@@ -119,52 +170,6 @@ wrapper協調git操作屬架構選擇，非本輪`[自行裁量]`範圍）。本
 wrapper；依輪替下一輪建議選TW軌（round608=09-23 04:3x，三軌中最舊）。
 完整見`REPORT.md`第610輪心跳（待補）、`PENDING_QUEUE.md`「2026-09-23
 【維運.git衝突根因】」章節、`AWAITING_REVIEW.md`。
-
----
-
-**最後更新：2026-09-23T03:3x+08:00（馬拉松第607輪，維運帽）**——取鎖乾淨
-（cycle`20260923-033037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-全文0條`- [ ]`，23條`- [!]`阻塞中。**佇列深度自檢**：`- [ ]`=0（<12下限），
-round599~606已連續多輪確認三個備援來源無新項，本輪不重複全面掃描。三軌
-時間戳：TW round605=09-23 01:3x／US round606=09-23 02:3x／**FUT
-round600=09-22 19:3x（最舊）**——依round606建議與輪替選FUT。`run_detached.py
-status`確認`running=0`（151筆歷史，無running job需收成）。**本輪意外發現：
-`git status`顯示`data/audit_report.json`處於未解決的merge衝突狀態**
-（`both modified`，index含3個stage，working tree內含`<<<<<<< Updated
-upstream`/`=======`/`>>>>>>> Stashed changes`字面衝突標記）——不是
-rebase中（無`.git/MERGE_HEAD`/`rebase-merge`/`rebase-apply`），比對
-`git stash list`找到內容完全相符的`stash@{0}`（標記`autostash`，含
-`data/audit_report.json`/`factory_stability.json`/
-`factory_stability_history.jsonl`/`connectivity_check.log`/
-`external_connectivity.jsonl`五檔，與衝突的「Stashed changes」側逐檔
-一致），研判是某次`git pull --rebase --autostash`完成rebase後，
-autostash自動`pop`回衝突未被處理就留下——根因（哪支腳本觸發）本輪未
-查出（repo內`*.ps1`未見明文`autostash`字串，可能是互動session或
-另一支排程直接下`git -c rebase.autoStash=true pull`，留給下一輪維運帽
-或總司令視需要再深查，不阻塞本次修復）。**修復**：比對衝突兩側
-`generated_at`（HEAD側02:59:35新於stash側前一日23:00:02），確認HEAD版
-較新且為權威來源，`git checkout --ours`解衝突並驗證解析後仍是合法
-JSON，`git add`清空index衝突stage；`stash@{0}`內容已被HEAD版本涵蓋
-（且是被conflict擋下、從未真正套用成功的半套用狀態），確認冗餘後
-`git stash drop`；同批連帶已被其他排程正常staged但因這個衝突卡住未能
-commit的其餘4個例行自動更新檔案（`factory_stability.json`等）一併
-納入本次commit。commit`de8a7fb2`並push成功（`54d1b919..de8a7fb2`）。
-**這是本輪唯一工作單位**：`#50`（唯一未結案方向）tick累積本輪未變更查
-（round600已確認12/20，FUT例外條款已四次複核不成立，不必每輪重查）。
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
-（本輪純維運修復，未新增統計判定，不觸發`register_trial()`）。
-`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
-未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，零新增外部
-API呼叫（純`git`操作與既有帳本/log讀取）。`PROGRESS_HEARTBEAT.jsonl`
-已append本輪一行。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。
-等待審閱：1件（規.二第4節參數掃描方式提案，非本輪新增，延續中）。
-**下一輪任一軌接手**：`#50`仍是三軌唯一未結案方向，被動等待tick累積至
-20（12/20）與總司令對gate50三條件的回應；本輪修復的git衝突根因
-（哪支排程觸發autostash pop衝突）若未來再發作，建議下一次維運帽輪次
-搜尋所有`.ps1`/排程設定裡`git -c rebase.autoStash`或`git pull`不帶
-`--no-rebase`的呼叫點，本輪礙於預算未展開這個較深的排查；依輪替下一輪
-建議選TW軌（round605=09-23 01:3x，三軌中最舊）。完整見`REPORT.md`
-第607輪心跳（待補）、commit`de8a7fb2`。
 
 
 **上一則保留（第520輪，供對照）**——原文：最後更新：2026-09-10T15:02+08:00（馬拉松第520輪）**——取鎖乾淨（cycle`20260910-150037`）。依round519建議本輪重新評估FUT例外條款是否仍成立。`run_detached.py status`：`running=0`（60筆歷史紀錄，無新增）；`git log`確認round519之後除round519自身commit`10abc8b5`外，還有互動session兩筆維運commit（停擺三／停擺四／停擺一收尾、深讀三新增第7~10關、深讀四.3連續曝險縮放偏好成文），皆非本馬拉松範圍，未動凍結區。**FUT例外條款複核結果：仍不成立，無新機制候選**——`MARATHON_PROTOCOL.md`第3節列出的期貨假說類別（多時間框架趨勢/突破/波動regime/均線/日內均值回歸/期現價差/三大法人期貨部位/未平倉量/隔夜vs日內/星期效應/盤別效應）round399已確認全數至少測過一個變體；`#64`基差regime訊號（round484，唯一一次真正觸發例外條款的新機制）已於round484結案FAIL；round484之後至今唯一新增的期貨相關試驗是`hypothesis_queue`（非本馬拉松軌）2026-09-10「外部一改.3」補測的五個名家發表趨勢跟隨機制（海龜/Donchian/Keltner/波動度突破/CTA多時間框架），`TRIALS_LEDGER.md`#234~#238全數FAIL，且經相關係數檢查後四條與既有`hyp_trend_multi_tf`/`hyp_donchian_breakout`同屬趨勢突破家族（`|r|>0.7`），只有波動度突破一條是真正獨立發現但percentile僅7.0，非FUT track本身的新工作單位，亦未帶來可承接的候選。**依輪替回落TW軌**：TW 14:02（round518，最舊）／US 15:02（round520本輪決策前查詢，最新）——本輪決策為FUT優先評估但未推進實質工作單位，依規則本輪工作單位改為對TW軌做同等的精簡確認（見下段）。**TW軌精簡確認**：`PENDING_QUEUE.md`第99~113行gate50查證段落仍原封不動，總司令尚未回應三條件具體定義，`#50`維持未解鎖；`data/ticks/`累積進度**4/20**（`20260907`~`20260910`四個`.parquet`皆已finalize，距20日仍差16日，較round519無變化——`20260910`當日盤中tick仍在累積中，尚未到隔日finalize時點）；`STRATEGY_GRAVEYARD.md`掃描`## #6x`/`## #7x`標題，最新結案仍為`#70`（2026-09-10，hypothesis_queue軌，非本馬拉松範圍），本馬拉松TW/US/FUT三軌自身最新結案仍為`#68`（round510），無新結案。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（243列，撞號2組皆為歷史存量不回頭改寫，本輪未產生新試驗判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。全程零新增外部API呼叫（純讀既有`.md`檔案與`git log`/`git status`/`run_detached.py status`）。**結論：FUT例外條款複核完畢並確認不成立（本輪唯一實質產出），候選池連續34輪（487~520）維持同一狀態，TW/US/FUT三軌本地端皆無新可推進工作單位**，僅剩`#50`（tick累積4/20，被動等待總司令對gate50三條件的回應）。**下一輪任一軌接手**：`#50`gate50原文仍待總司令回應；FUT例外條款已複核確認不成立，往後除非出現真正跳脫`MARATHON_PROTOCOL.md`第3節清單的全新機制假說，不需要每輪重新複核FUT，依輪替下一輪建議選TW軌。完整見`REPORT.md`第520輪心跳、`MARATHON_STATE.md`（輪次計數器520）。
