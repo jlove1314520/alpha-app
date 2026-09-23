@@ -6,6 +6,63 @@
 
 
 ---
+**最後更新：2026-09-23T19:4x+08:00（馬拉松第622輪，研究帽）**——取鎖乾淨
+（cycle`20260923-183037`，上一輪已於開工前結束reason=OK）。開工先照
+「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續
+（剩餘16支）/驗.二）。`run_detached.py status`：`audit_16remaining_
+batch2`（job`20260923-183404-d854`）仍`running`（開工57.3分鐘、收工
+62.5分鐘，符合預估數小時長工作，不必每輪都查）。`驗.二`明文排在21支
+稽核之後，本輪不動。**本輪工作單位＝承接round621標記「留給下一輪」的
+`long_only_vs_market.py::decompose_alpha_beta()`同類缺陷評估**：查證
+上一輪估計的4支呼叫端（`long_only_vs_market.py`本體／`run_alpha_
+decomposition.py`／`weinstein_alpha_gate.py`／`weinstein_v2_alpha_
+gate.py`），`grep TRIALS_LEDGER.md`逐一比對確認**真正需要重算的只有
+`weinstein_alpha_gate.py`(#60)一支**（`run_alpha_decomposition.py`0
+matches純診斷工具、`weinstein_v2_alpha_gate.py`0 matches從未登記、
+`portfolio_backtest.py`(v1)不呼叫此函式），blast radius比原估計小
+很多。**[自行裁量，判定為bug修復非新架構決策，比照round621
+`run_value_board_v2_pit_backtest.py`同一precedent]**：修復
+`long_only_vs_market.py`——`capm_beta_vs_market()`／
+`decompose_alpha_beta()`改呼叫`portfolio_backtest_v2.
+alpha_significance()`（0050含息總報酬benchmark+Newey-West HAC標準誤
++Dimson beta），取代原本各自複製的簡單OLS(np.polyfit)+TAIEX價格指數
+公式；`run_period()`的`mkt_total_ret`同步改用`buy_and_hold_index_
+pct(benchmark=0050_total_return)`，修正舊版beta/alpha跟
+excess_vs_market用兩把不同尺的內部不一致。**已知簡化未變且如實記錄**：
+純化alpha報酬序列時仍只用單一beta係數乘「當期」大盤報酬扣除，未把
+Dimson三個落後項分別扣除，本輪只修正beta估計方法與benchmark，未重新
+設計純化方法論本身。**自我測試**：合成0050完全追蹤equity_curve餵入
+`decompose_alpha_beta()`，得到beta=1.0000、alpha_ann_pct≈0.0000%
+（誤差量級1e-12，浮點精度內）、beta_contribution_pct≈
+total_return_pct（934.29%對934.29%），驗證修正後函式行為正確。
+`weinstein_alpha_gate.py`／`run_alpha_decomposition.py` import驗證
+皆正常（僅import未執行）。`git status`確認本輪只修改
+`research/long_only_vs_market.py`一個檔案，未觸碰凍結區或CLAUDE.md
+十三節限定的核心研究檔案（此檔不在`research/backtest/`／
+`research/validation/`等限定清單內，馬拉松軌可修改）。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（386列，本輪未新增判定，純程式碼修復）。`validation/holdout.py::
+is_holdout_consumed()`開工/收工前皆確認`False`。**同時補記round621
+遺漏的心跳**（發現原執行個體完成commit`6dafadcc`但未寫入`REPORT.md`
+／未更新`MARATHON_STATE.md`計數器，已於本輪一併補齊，避免下一個無
+記憶執行個體看不到那輪實際發生過什麼）。**佇列深度檢查**：`- [ ]`=3
+低於`MIN_QUEUE_DEPTH=12`，**[自行裁量]本輪不重掃三個備援來源**——
+round617今日稍早已完整重掃並誠實結論「補不出新候選」（`常備backlog`
+區塊記錄在案），本輪之後情況未變（無新FAIL/PASS結案釋出新議題），
+重複同一份exhaustive grep不產生新資訊，屬於預算的無效消耗，留給
+下一輪：若`驗.一第4點續`/`驗.二`都結案後佇列見底才需要重新掃描。
+**交辦佇列還剩2條未開始**（`驗.一第4點續`因job running中不算「未
+開始」但也未結案；`驗.二`明文排在21支之後）。**等待審閱：1件**
+（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪新增）。
+**下一輪任一軌接手**：`run_detached.py status`收成`20260923-183404-
+d854`——預估要跑數小時，若仍`running`不必每輪都查，可先投遞
+`weinstein_alpha_gate.py`(#60)重算job（N=200配對隨機控制組×TRAIN/VAL
+兩期，重度工作，本輪因batch2佔用「一次只跑一個重度工作」名額未投遞）；
+若batch2`finished`，優先收成該job並對照`TRIALS_LEDGER.md`#93/#290/
+#94/#291。完整見`REPORT.md`第622輪心跳、`PENDING_QUEUE.md`「驗.一第
+4點續」條目、commit`ea4ea60a`。
+
+---
 **最後更新：2026-09-23T18:3x+08:00（馬拉松第621輪，研究帽）**——取鎖乾淨
 （cycle`20260923-183037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認
@@ -101,52 +158,6 @@ bug），找到33個匹配（原估21支）；核對`data/*checkpoint*.json`發�
 
 ---
 
-**最後更新：2026-09-23T16:3x+08:00（馬拉松第619輪，研究帽）**——取鎖乾淨
-（cycle`20260923-163037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`
-確認`尺.一`（commit`cbaa4412`）與`審.一`（commit`f807ce64`，DSR=0.0000
-決定性FAIL、一頁摘要已寫入`AWAITING_REVIEW.md`待總司令裁示）**皆已由
-互動視窗CC完成並commit**，上一輪（618）避開的`portfolio_backtest_v2.py`
-碰撞已解除。**本輪工作單位＝驗.一第4點續，重算16支中的3支**：
-`margin_utilization_regime_portfolio_v1`（#120原FAIL）／
-`odd_lot_imbalance_portfolio_v1`（#232原FAIL）／
-`short_sale_utilization_portfolio_v1`（#133原PASS第2關非最終結案）——
-三支共用checkpoint可續跑架構（同`dividend_yield_portfolio_v1.run_one()`
-同一套機制，checkpoint的`real`欄位存的是完整回測摘要而非equity_curve
-時間序列，清空`real`後重跑`main()`會自動用新引擎(compounding修正)+
-新量尺(0050含息總報酬預設值)重算，`cost_returns`/`random_finals`不受
-量尺影響直接讀舊快取，省時間）。三份checkpoint的`real`欄位已清空並
-備份為`*_checkpoint.pre_engine_fix_backup.json`。**[自行裁量，違規
-自糾記錄]**：本輪一開始誤在session內直接同步執行
-`margin_utilization_regime_portfolio_v1.py`（未走`run_detached.py`），
-超過5分鐘後手動`taskkill`，事後核對checkpoint的`real`欄位仍是空的
-（未跑完就被砍，跟從未執行狀態相同，**沒有殘留半套用的污染資料**），
-違反`MARATHON_PROTOCOL.md`0b節「任何可能跑超過5分鐘的工作一律脫離
-session」規則，發現後立刻改正：新增`audit_16remaining_batch1.py`
-（依序呼叫三支腳本`main()`）並改用`run_detached.py submit`正式投遞
-（job`20260923-163927-c80e`，timeout 40分鐘），`wait --max-min 3`確認
-`STILL_RUNNING`，**本輪不等待完成、下一輪收成**。`trial_registry.py
---check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增
-判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆
-確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
-未修改`research/backtest/`／`research/validation/`／
-`portfolio_backtest_v2.py`任何原始碼（僅呼叫既有函式、清空/重算
-checkpoint資料），全程零新增外部API呼叫（回測用既有`finmind_client.
-load_dev`本地快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
-**交辦佇列還剩2條未開始**（驗.一第4點續其餘13支＋驗.二第二部分；
-`驗.一`本身因這批job running中不算「未開始」但也未結案）。**等待
-審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪
-新增）。**下一輪任一軌接手**：`run_detached.py status`收成
-`20260923-163927-c80e`，`finished`後讀三支腳本`data/*_results.csv`與
-checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，
-翻轉一律進`AWAITING_REVIEW.md`不自行改判；完成後剩餘13支繼續（已排除
-`phase_sensitivity.py`——雖有checkpoint但該腳本是相位敏感度診斷工具
-非trial候選，不計入16支這批）。完整見`REPORT.md`第619輪心跳、
-`PENDING_QUEUE.md`「驗.一第4點續（剩餘16支）」條目、
-`audit_16remaining_batch1.py`。
-
----
-
 （第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪、
-第611輪、第614輪、第615輪、第616輪、第617輪已歸檔至`TW_STATE_ARCHIVE.md`，
-僅保留最新3則）
+第611輪、第614輪、第615輪、第616輪、第617輪、第619輪已歸檔至
+`TW_STATE_ARCHIVE.md`，僅保留最新3則）

@@ -9,6 +9,24 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第622輪 · 2026-09-23T19:4x+08:00 · TW · 研究帽：blast radius查證確認只需重算1支，修復long_only_vs_market.py舊量尺複製bug
+
+- 取鎖乾淨（cycle`20260923-183037`已於開工前結束，reason=OK）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續/驗.二），驗.二明文排在21支稽核之後、驗.一第4點續的job`20260923-183404-d854`(`audit_16remaining_batch2`)仍running（開工時57分鐘，收工時62.5分鐘，符合預估的多小時長工作，不必每輪等待）。
+- 承接round621標記「留給下一輪或總司令裁示是否要修」的`long_only_vs_market.py::decompose_alpha_beta()`同類缺陷：查證上一輪估計的4支呼叫端（本體/`run_alpha_decomposition.py`/`weinstein_alpha_gate.py`/`weinstein_v2_alpha_gate.py`），`grep TRIALS_LEDGER.md`逐一比對，確認**真正需要重算的只有`weinstein_alpha_gate.py`(#60)一支**（其餘3支：純診斷工具0 matches、從未登記0 matches、不呼叫此函式），blast radius比原估計小很多。
+- **[自行裁量，判定為bug修復非新架構決策]**修復`long_only_vs_market.py`：`capm_beta_vs_market()`／`decompose_alpha_beta()`改呼叫`portfolio_backtest_v2.alpha_significance()`（0050含息總報酬benchmark+Newey-West HAC+Dimson beta），取代原本各自複製的簡單OLS+TAIEX價格指數公式；`run_period()`的`mkt_total_ret`同步改用`buy_and_hold_index_pct()`，修正beta/alpha與excess_vs_market用不同尺的內部不一致。
+- **自我測試**：合成0050完全追蹤equity_curve餵入`decompose_alpha_beta()`，得到beta=1.0000、alpha_ann_pct≈0.0000%（浮點精度內1e-12量級）、beta_contribution_pct≈total_return_pct，驗證行為正確。`weinstein_alpha_gate.py`／`run_alpha_decomposition.py` import驗證正常。
+- `trial_registry.py --check`exit=0 PASS（386列，本輪未新增判定，純程式碼修復）。`is_holdout_consumed()`開工/收工皆`False`。`git status`確認只改`research/long_only_vs_market.py`一個核心檔案，未觸碰凍結區或CLAUDE.md十三節限定清單。
+- 下一輪待做：`weinstein_alpha_gate.py`(#60)用修正後函式重跑（N=200配對隨機控制組×TRAIN/VAL兩期，重度工作），待batch2 job收成、確認無running job佔用後投遞。commit`ea4ea60a`。
+
+---
+## 第621輪 · 2026-09-23T18:3x+08:00 · TW · 研究帽：驗.一第4點續——修復run_value_board_v2_pit_backtest.py舊量尺複製bug，投遞剩餘2支重算job（補記，前一執行個體未寫此心跳）
+
+- 承接round620列出的候選清單，查證`piotroski_fscore_gate_v1.py`／`run_value_board_v2_pit_backtest.py`各自複製一份`alpha_significance()`/`buy_and_hold_index_pct()`（舊版docstring自稱與`portfolio_backtest_v2.py`逐行一致），尺.一(commit`cbaa4412`)只改了`portfolio_backtest_v2.py`本體，這兩支獨立複製沒有自動吃到修正。
+- **[自行裁量，判定為bug修復非新架構決策]**修復`run_value_board_v2_pit_backtest.py`改呼叫`portfolio_backtest_v2`的函式，`piotroski_fscore_gate_v1.py`透過既有import間接沿用同一份修復。同時發現`long_only_vs_market.py::decompose_alpha_beta()`（`weinstein_alpha_gate.py`依賴）也是同樣性質的獨立複製，因blast radius評估涵蓋4支腳本，本輪未動，留給下一輪（round622已接手完成）。
+- 新增`audit_16remaining_batch2.py`（依序呼叫`run_value_board_v2_pit_backtest.main()`→`piotroski_fscore_gate_v1.main()`），投遞`run_detached.py submit`（job`20260923-183404-d854`，timeout 420分鐘，估算上限約5.7小時，跨多輪馬拉松收成）。session內確認job已進入TRAIN期執行，本輪不等待完成。
+- `trial_registry.py --check`exit=0 PASS（386列，本輪未新增判定）。`is_holdout_consumed()`全程`False`。**本條目為round622執行個體依`MARATHON_PROTOCOL.md`第6節第4點精神補記**（原執行個體完成commit`6dafadcc`但未寫入本檔心跳、未更新`MARATHON_STATE.md`計數器，發現後一併補齊，避免下一個無記憶的執行個體看不到這輪實際發生過什麼）。
+
+---
 ## 第620輪 · 2026-09-23T17:3x+08:00 · TW · 研究帽：收成round619 detached job並登記3支重算結果（#382-384，0翻轉），enumeration修正21支估計bug並列出剩餘候選
 
 - 取鎖乾淨（cycle`20260923-173037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認互動視窗CC無新commit，無碰撞風險。

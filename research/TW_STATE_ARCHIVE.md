@@ -1386,3 +1386,49 @@ session內確認已進入`Loading sample + factors`階段、4.7分鐘仍
 portfolio_backtest_v2的benchmark函式無關，但需二次確認）。完整見
 `REPORT.md`第618輪心跳、`PENDING_QUEUE.md`「尺.一」「審.一」章節、
 commit`03bbaff1`。
+
+---
+
+**最後更新：2026-09-23T16:3x+08:00（馬拉松第619輪，研究帽）**——取鎖乾淨
+（cycle`20260923-163037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`
+確認`尺.一`（commit`cbaa4412`）與`審.一`（commit`f807ce64`，DSR=0.0000
+決定性FAIL、一頁摘要已寫入`AWAITING_REVIEW.md`待總司令裁示）**皆已由
+互動視窗CC完成並commit**，上一輪（618）避開的`portfolio_backtest_v2.py`
+碰撞已解除。**本輪工作單位＝驗.一第4點續，重算16支中的3支**：
+`margin_utilization_regime_portfolio_v1`（#120原FAIL）／
+`odd_lot_imbalance_portfolio_v1`（#232原FAIL）／
+`short_sale_utilization_portfolio_v1`（#133原PASS第2關非最終結案）——
+三支共用checkpoint可續跑架構（同`dividend_yield_portfolio_v1.run_one()`
+同一套機制，checkpoint的`real`欄位存的是完整回測摘要而非equity_curve
+時間序列，清空`real`後重跑`main()`會自動用新引擎(compounding修正)+
+新量尺(0050含息總報酬預設值)重算，`cost_returns`/`random_finals`不受
+量尺影響直接讀舊快取，省時間）。三份checkpoint的`real`欄位已清空並
+備份為`*_checkpoint.pre_engine_fix_backup.json`。**[自行裁量，違規
+自糾記錄]**：本輪一開始誤在session內直接同步執行
+`margin_utilization_regime_portfolio_v1.py`（未走`run_detached.py`），
+超過5分鐘後手動`taskkill`，事後核對checkpoint的`real`欄位仍是空的
+（未跑完就被砍，跟從未執行狀態相同，**沒有殘留半套用的污染資料**），
+違反`MARATHON_PROTOCOL.md`0b節「任何可能跑超過5分鐘的工作一律脫離
+session」規則，發現後立刻改正：新增`audit_16remaining_batch1.py`
+（依序呼叫三支腳本`main()`）並改用`run_detached.py submit`正式投遞
+（job`20260923-163927-c80e`，timeout 40分鐘），`wait --max-min 3`確認
+`STILL_RUNNING`，**本輪不等待完成、下一輪收成**。`trial_registry.py
+--check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增
+判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆
+確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／
+`portfolio_backtest_v2.py`任何原始碼（僅呼叫既有函式、清空/重算
+checkpoint資料），全程零新增外部API呼叫（回測用既有`finmind_client.
+load_dev`本地快取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+**交辦佇列還剩2條未開始**（驗.一第4點續其餘13支＋驗.二第二部分；
+`驗.一`本身因這批job running中不算「未開始」但也未結案）。**等待
+審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪
+新增）。**下一輪任一軌接手**：`run_detached.py status`收成
+`20260923-163927-c80e`，`finished`後讀三支腳本`data/*_results.csv`與
+checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，
+翻轉一律進`AWAITING_REVIEW.md`不自行改判；完成後剩餘13支繼續（已排除
+`phase_sensitivity.py`——雖有checkpoint但該腳本是相位敏感度診斷工具
+非trial候選，不計入16支這批）。完整見`REPORT.md`第619輪心跳、
+`PENDING_QUEUE.md`「驗.一第4點續（剩餘16支）」條目、
+`audit_16remaining_batch1.py`。
