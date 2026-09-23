@@ -3,6 +3,70 @@
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `US_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
 ---
+**最後更新：2026-09-23T23:3x+08:00（馬拉松第630輪，維運帽）**——取鎖乾淨
+（cycle`20260923-233037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=0，23條`- [!]`阻塞中，逐一核對開頭標記皆未到解除時間，維持
+`- [!]`。**佇列深度自檢**：`- [ ]`=0（<12下限），依`CLAUDE.md`十四節
+【凍結.二】規則本輪暫停佇列深度補件（轉向.一結果出來前不得補新alpha
+試驗湊數），不重複掃描。三軌時間戳：TW round624=09-23 21:3x／FUT
+round625=09-23 22:3x／**US round613=09-23 09:3x（最舊）**——依輪替選
+US。**本輪最主要發現（意外，非US軌本身工作單位）**：`git status`
+初始快照顯示`data/rate_limit_state.json`處於未解決merge衝突（`UU`，
+`both modified`，working tree內含字面`<<<<<<< Updated upstream`/
+`=======`/`>>>>>>> Stashed changes`標記，非合法JSON）——與round607
+（09-23 03:3x）發現的`data/audit_report.json`衝突同一種根因（某次
+`git pull --rebase --autostash`完成後autostash自動pop回衝突未被
+處理），但這次是不同檔案(`rate_limit_state.json`)、不同輪次觸發，
+確認這不是round607已經修完的同一次事故殘留，是新一次的同類事故。
+**修復**：比對兩側內容——「Updated upstream」(HEAD/index)側含完整
+7個資料源(finmind/twse_openapi/tpex_openapi/taifex_openapi/twse_t86/
+twse_twt93u/twse_margn_rwd/twse_mi_qfiis/twse_exright)且`last_
+request_at`落在15:08~15:12 UTC區間，`git log`確認對應最新commit
+`3f6af621`（github-actions自動更新，2026-09-23 15:12 UTC，內容與
+「Updated upstream」側逐欄位比對完全一致）；「Stashed changes」側
+只有finmind單一來源、`blocked_at`欄位與HEAD側不同但`last_request_at`
+明顯較舊（1790167487<1790175600，經`git stash show -p stash@{0}`
+比對確認該stash是純JSON縮排格式差異(1格縮排vs2格縮排)、內容早於
+HEAD，屬冗餘過期的autostash）。判定HEAD側為權威最新版本，
+`git checkout --ours -- data/rate_limit_state.json`解衝突，`python
+-c "json.load(...)"`驗證解析後為合法JSON，`git add`清空index衝突
+stage；確認`stash@{0}`內容已被HEAD版本完整涵蓋後`git stash drop`。
+**根因仍未查出**（同round607當時的結論）：repo內`*.ps1`未見明文
+`autostash`字串，可能是某支排程直接下`git -c rebase.autoStash=true
+pull`或類似參數，留給下一輪維運帽或總司令視需要深查，不阻塞本次
+修復——**若此類衝突第三次發生，建議下一輪直接查`結案.一`提案的
+`git_op_lock.py`方案甲（已核准但待總司令實機驗證）能否提前小範圍
+測試以根治，而不是每次事後救火**。**其餘檢查**：`AWAITING_REVIEW.md`
+維持1件等待中未變（`value_board_v2`翻轉待裁示）；`#50`tick累積
+`ls research/data/ticks/*.parquet`實測**13/20**（較round625持平）；
+`資料.一`仍`- [!]`BLOCKED，`data/rate_limit_state.json`（修復後）
+顯示`blocked_until`=1790182800.57（2026-09-24T01:00台北時間），本輪
+檢查時（23:3x台北）尚未解除；`驗.二`第二部分（開盤到收盤重跑
+spillover_overlay_v1）核對`git log -- research/spillover_overlay_v1.py`
+與`git status`，**確認round625提到的「另一活躍session正在處理」目前
+已無任何未commit的相關檔案、也無新commit**，研判該session已放棄或
+轉往別處，**這是一個尚未被任何人認領、凍結期間允許執行的工作單位，
+但規模較大（重建open-to-close報酬序列+重跑全部9關+新#88 cheap gate+
+量化跳空佔外溢比例），單輪25分鐘難以完整做完，留給下一輪或互動session
+評估是否用`run_detached.py submit`投遞背景工作**。`run_detached.py
+status`：`running=0`（160筆歷史，無running job）。`trial_registry.py
+--check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（395列，本輪純維運
+修復未新增判定）。`validation/holdout.py::is_holdout_consumed()`
+開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/
+`config.py`凍結區，未修改`research/backtest/`／`research/validation/`
+／`trial_registry.py`等`CLAUDE.md`十三節限定清單內任何原始碼，全程
+零新增外部API呼叫（純`git`操作、既有帳本/log讀取、`ls`）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條未開始**
+（23條`- [!]`阻塞中）。**等待審閱：1件**（`value_board_v2`翻轉判定，
+非本輪新增，延續中）。**下一輪任一軌接手**：`資料.一`被動等待FinMind
+額度於01:00台北時間解除；`#50`tick累積13/20持續被動等待；`驗.二`第
+二部分（開盤到收盤重跑）已確認無人認領、可投遞；若`rate_limit_state.json`
+或其他機器寫檔再度出現字面衝突標記，優先懷疑同一個未查出根因的排程，
+依本輪做法（比對HEAD最新commit內容為準）修復；依輪替下一輪建議選TW軌
+（US/FUT本輪或上輪已碰過）。完整見`REPORT.md`第630輪心跳（待補）、
+commit（本輪git衝突修復）。
+
+---
 **最後更新：2026-09-23T09:3x+08:00（馬拉松第613輪，研究帽）**——取鎖乾淨
 （cycle`20260923-093037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=0，23條`- [!]`阻塞中，維持不變。**佇列深度自檢**：`- [ ]`=0
@@ -91,52 +155,3 @@ round599既有結論，非本輪新判斷）。**本輪誠實結論：US軌本�
 被動等待tick累積至20（13/20，`data/ticks/`）；依輪替下一輪建議選
 FUT軌（TW/US本輪皆已碰過）。完整見`REPORT.md`第609輪心跳、
 `AWAITING_REVIEW.md`。
-
----
-**最後更新：2026-09-23T02:3x+08:00（馬拉松第606輪，研究帽）**——取鎖乾淨
-（cycle`20260923-02xxxx`）。開工先照CLAUDE.md「交辦優先於自走」讀
-`PENDING_QUEUE.md`：全文0條`- [ ]`，23條`- [!]`阻塞中，逐一核對開頭
-標記可能已解除的阻塞項（金流一.4等待資料累積、資料源一.3等待總司令
-領key、#50等待tick累積與gate50裁示等）皆未到解除時間點，維持
-`- [!]`。**佇列深度自檢**：`- [ ]`=0（<12下限），round599~605連續
-多輪已確認三個備援來源掃無新項，本輪不重複全面掃描（避免重工），
-改直接處理下方查到的既有缺口。三軌時間戳：TW round605=09-23 01:3x
-（最新）／FUT round600=09-22 19:3x／**US round599=09-22 18:3x（最舊）**
-——依輪替選US。`run_detached.py status`：`running=0`（151筆歷史，
-無running中的job需收成）。**round599既有結論**：US軌price-only因子
-家族（低波動/動能/反轉）已全數FAIL收斂，US軌若要延續新方向需總司令
-裁示（`MARATHON_PROTOCOL.md`0a節四條方向#49/#50/#51/#52主要屬TW/FUT
-範疇）。**本輪工作單位**（`[自行裁量]`：US軌本身無可自行開跑的新
-方向，但`CONCENTRATED_SPEC.md`第3節記錄一個明確、不需要新方向裁示
-的既有資料缺口——S&P500 Total Return序列，屬於「地基工程」而非
-「策略/因子新試驗」，選它作為本輪US軌可推進項）：新增
-`sp500_tr_series.py::load_sp500tr_full_history()`，查證候選#1
-（Yahoo Finance`^SP500TR`）：沿用既有`yf_price_client.py::
-fetch_yf_index()`基礎設施（零新增抓取邏輯），取得1990-01-02起完整
-歷史（裁至`VAL_END`後8816列，`close`欄位零缺值）；驗證方式：
-2003-06-30~2024-12-31同期比較，`^SP500TR`年化報酬10.87% vs 價格
-報酬指數`^GSPC`同期8.74%，缺口2.1個百分點/年，與S&P500歷史平均
-股利殖利率量級（約1.8~2.2%/年）吻合，確認`^SP500TR`確實是計入股利
-再投資的total return序列，非價格指數誤標；回傳欄位（date/adj_close）
-與`survival_constraint_allocation_test.py::load_0050_full_history()`
-相容，供`concentrated_backtest.py`核准動筆後直接複用；
-`holdout.assert_no_holdout_leakage()`已內建檢查，通過。更新
-`CONCENTRATED_SPEC.md`第3/11節反映此缺口已解決，並明確註記
-「解決缺口≠核准推進美股集中版」——第4節參數掃描方式仍待總司令裁示
-（`AWAITING_REVIEW.md`），美股集中版是否要推進本身也是需要總司令
-裁示的新方向判斷，本輪只是清除一個「就算核准了也做不了」的技術性
-障礙。純資料查證與工具函式新增，非統計判定，不觸發`register_trial()`。
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
-（346列，本輪未新增判定）。`validation/holdout.py::
-is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
-`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫
-（yfinance請求走既有`yf_price_client.py`快取機制，非本專案「頻率上限
-清單」列管對象，且僅一次性抓取單一指數序列）。`PROGRESS_HEARTBEAT.
-jsonl`已append本輪一行。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞
-中）。**等待審閱：1件**（規.二第4節參數掃描方式提案，見
-`research/AWAITING_REVIEW.md`，非本輪新增，round605延續）。**下一輪
-任一軌接手**：US軌新方向仍待總司令裁示，`sp500_tr_series.py`已就緒
-可供未來美股集中版或其他需要S&P500 TR基準的工作直接複用；依輪替
-下一輪建議選FUT軌（TW round605/US round606皆本輪或上輪已碰過）。
-完整見`REPORT.md`第606輪心跳、`MARATHON_STATE.md`（輪次計數器606）、
-`CONCENTRATED_SPEC.md`第3/11節、`sp500_tr_series.py`。

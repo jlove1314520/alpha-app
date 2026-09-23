@@ -2545,3 +2545,17 @@ commit`9b30aa21`意外包含了`research/spillover_overnight_gate.py`（107行
 commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔腰截斷**，
 不是資料遺失，只是commit署名被合併，不需要重做該session的工作；如實
 記錄於此，不默默照單全收。
+
+## 2026-09-23T23:3x+08:00 — 馬拉松第630輪（US輪替，維運帽）：修復data/rate_limit_state.json未解決git合併衝突
+
+取鎖乾淨（cycle`20260923-233037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中，凍結.二（暫停新試驗生成）期間佇列深度補件規則暫停，不硬補。三軌輪替本應選US（round613=09-23 09:3x最舊），但本輪意外發現`git status`初始快照顯示`data/rate_limit_state.json`處於未解決merge衝突（`UU`，working tree含字面`<<<<<<< Updated upstream`/`=======`/`>>>>>>> Stashed changes`標記，非合法JSON）——與round607（09-23 03:3x）修復的`data/audit_report.json`同一種根因（`git pull --rebase --autostash`完成後autostash pop回衝突未處理），但這次是不同檔案、不同輪次，確認是新一次的同類事故，非round607殘留。
+
+比對兩側：「Updated upstream」(HEAD/index)側含完整7個資料源，`last_request_at`落在2026-09-23 15:08~15:12 UTC，`git log`確認對應最新commit`3f6af621`（github-actions自動更新15:12 UTC，內容逐欄位比對完全一致）；「Stashed changes」側只有finmind單一來源，`last_request_at`明顯較舊（1790167487<1790175600），`git stash show -p stash@{0}`比對確認該stash純屬JSON縮排格式差異(1格vs2格縮排)、內容早於HEAD，屬冗餘過期的autostash。判定HEAD側為權威版本，`git checkout --ours -- data/rate_limit_state.json`解衝突，`python -c "json.load(...)"`驗證解析後為合法JSON，`git add`清空衝突stage；確認`stash@{0}`內容已被HEAD完整涵蓋後`git stash drop`。
+
+根因仍未查出（同round607當時結論）：repo內`*.ps1`未見明文`autostash`字串，留給下一輪或總司令視需要深查，不阻塞本次修復；已在`US_MARATHON_STATE.md`留下建議——若第三次發生，可考慮讓已核准但待總司令實機驗證的`git_op_lock.py`方案甲提前小範圍測試。
+
+順道核對：`AWAITING_REVIEW.md`維持1件等待中未變（`value_board_v2`翻轉判定，待總司令裁示）；`#50`tick累積`ls research/data/ticks/*.parquet`實測13/20（較round625持平）；`資料.一`仍`- [!]`BLOCKED，修復後`rate_limit_state.json`顯示`blocked_until`=2026-09-24T01:00台北時間，本輪檢查時（23:3x）尚未解除；`驗.二`第二部分（開盤到收盤重跑`spillover_overlay_v1`）核對`git log`/`git status`確認round625所稱「另一活躍session正在處理」目前已無未commit相關檔案、也無新commit，研判已放棄或轉往別處——這是一個尚未被認領、凍結期間允許執行的工作單位，但規模較大（重建open-to-close報酬序列+重跑全部9關+新#88 cheap gate+量化跳空佔外溢比例），單輪25分鐘難以做完，留給下一輪或互動session評估是否用`run_detached.py submit`投遞。
+
+**驗證**：`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（395列，本輪純維運修復未新增判定）；`validation/holdout.py::is_holdout_consumed()`開工/收工前皆`False`；`run_detached.py status`：`running=0`（160筆歷史）；未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區；未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等`CLAUDE.md`十三節限定清單內任何原始碼；全程零新增外部API呼叫（純`git`操作與既有帳本/log讀取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+
+**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。**等待審閱：1件**（`value_board_v2`翻轉判定，非本輪新增）。**下一輪接手**：資料.一被動等待01:00台北時間解除；驗.二第二部分已確認無人認領可投遞；依輪替下一輪建議選TW軌（US/FUT本輪或上輪已碰過）。完整見`US_MARATHON_STATE.md`第630輪。
