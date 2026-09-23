@@ -1,0 +1,24 @@
+{
+  "sharpe_daily": 0.10908130199008151,
+  "n_obs": 970,
+  "skew": -0.4584036920439965,
+  "kurtosis": 5.207274516302627,
+  "n_trials": 379,
+  "n_trials_source": "取兩口徑較大者（較保守）：trial_registry 379 列（排除 FDR 對照表）／selection_bias_ledger 379 列（含對照表）；口徑分歧待總司令裁示",
+  "var_sr_trials": 0.0513646542895208,
+  "n_v": 5,
+  "dsr": {
+    "dsr": 0.0,
+    "sr_observed": 0.10908130199008151,
+    "sr0_threshold": 0.6727141984909284,
+    "n_trials": 379,
+    "var_sr_trials": 0.0513646542895208,
+    "n_obs": 970,
+    "z": -17.021191395530405,
+    "freq_label": "每日"
+  },
+  "dsr_admissible": false,
+  "bonferroni_alpha_threshold": 0.00013192612137203166,
+  "bonferroni_pass": false,
+  "alpha_pvalue": 0.0045861189430791245
+}
