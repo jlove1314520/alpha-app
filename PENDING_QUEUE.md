@@ -11720,6 +11720,53 @@ wrapper維持現狀不變。
   (2處)／`weinstein_alpha_gate`(1處)——**這7支才是真正待下一輪逐一
   排查、確認是否需要重算的候選**，非本輪判定，翻轉一律進
   `AWAITING_REVIEW.md`不自行改判。
+
+  **2026-09-23 hypothesis_queue軌接續，7支候選逐一查證是否genuinely
+  使用`backtest.engine.run_backtest()`（用`grep -n "^from\|^import"`
+  比對每支檔案的import語句，排除docstring/註解裡提及`run_backtest`但
+  本身未import的假陽性，本輪只做範圍界定查證，未執行任何回測，遵守
+  CLAUDE.md「十三、核心研究檔案單一寫入者」不修改`backtest/`／
+  `validation/`本身，只讀取/呼叫）**：
+  - **確認IN SCOPE（genuinely `from backtest.engine import
+    ...run_backtest...`，需要用新引擎+新量尺重算）**：
+    `piotroski_fscore_gate_v1.py`（#94/#290/#291）、
+    `run_value_board_v2_pit_backtest.py`（#93baseline，也是
+    piotroski的鏈式依賴）、`weinstein_alpha_gate.py`（#60）。
+    另補查`portfolio_backtest.py`（無版本號的v1，非`_v2`）——同樣
+    genuinely import `run_backtest`，但`grep`
+    `TRIALS_LEDGER.md`裡精確檔名`portfolio_backtest.py`(排除
+    `_v2`)**0 matches**，代表v1從未有獨立判定記錄（可能在v2出現前
+    就被取代，未留下已結案的trial），**判斷不需要重算**（沒有舊
+    判定可回頭校正）；`portfolio_backtest`(25處廣義字串比對)的
+    疑慮到此確認清空，不是獨立遺漏。
+  - **確認OUT OF SCOPE（不使用TW引擎，或非獨立trial腳本）**：
+    `us_portfolio_backtest.py`——只import
+    `EXECUTION_LAG_DAYS`，本身第191行docstring明寫「differs from
+    `backtest.engine.run_backtest()`(the TW version)」，證實US軌
+    有自己獨立的回測引擎，未受TW compounding bug修正影響，**解除
+    裁示原文「US軌bug範圍未必相同」的疑慮：確認不相同，US軌
+    `#179`(us_portfolio_multifactor_v1)不需要重算**。
+    `strategies/weinstein_stage2.py`／`weinstein_stage2_v2.py`——
+    grep到的`run_backtest`字樣只出現在docstring裡（例如「signal_fn
+    for backtest.engine.run_backtest()」這種說明句），兩支檔案本身
+    未import、未呼叫`run_backtest`，是提供`signal_fn`給其他腳本
+    （即`weinstein_alpha_gate.py`）使用的訊號函式庫，不是獨立的
+    trial腳本，**不需要另外重算**（它們的實際回測判定已經包含在
+    `weinstein_alpha_gate.py`（IN SCOPE清單已列）裡）。
+  - **本輪查證結果：「7支候選」實際上只有3支genuinely需要重算
+    （`piotroski_fscore_gate_v1`／`run_value_board_v2_pit_backtest`／
+    `weinstein_alpha_gate`），其餘4支（`us_portfolio_backtest`／
+    `weinstein_stage2`／`weinstein_stage2_v2`／額外排查的
+    `portfolio_backtest`v1）確認排除，不計入「16支」範圍——連同
+    先前已完成的8支，**16支範圍現在已完整釐清為11支
+    （8支已完成+3支待重算），非原估計的16支**，此差異來自
+    「28支裁示估計→21支grep→16支估計」這個模糊過程本身的重複計數/
+    誤含非獨立腳本，本輪屬釐清而非新增工作量。**下一輪待做**：
+    實際重跑`piotroski_fscore_gate_v1.py`／
+    `run_value_board_v2_pit_backtest.py`／`weinstein_alpha_gate.py`
+    三支（新引擎+新量尺），本輪未執行（一輪一個有界工作單位，範圍
+    界定本身已是一個完整單位），翻轉一律進`AWAITING_REVIEW.md`
+    不自行改判。
   （規.二第4節凍結中，不得動筆）、`core_tilt_backtest.py`（引擎/框架
   本體非單一trial）、`determinism_self_test.py`（自檢工具）、
   `f52w_high_gates.py`（屬於獨立的「#86後續」條目非本項）、

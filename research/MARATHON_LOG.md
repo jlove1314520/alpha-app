@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23 17:53（hypothesis_queue軌）— PENDING_QUEUE「驗.一第4點續
+（剩餘16支）」7支候選範圍界定：逐一grep import語句排除docstring假陽性，
+確認genuinely使用`backtest.engine.run_backtest()`的只有3支
+（`piotroski_fscore_gate_v1`／`run_value_board_v2_pit_backtest`／
+`weinstein_alpha_gate`），另補查`portfolio_backtest.py`v1(無`_v2`)也
+genuinely import但`TRIALS_LEDGER.md`無獨立判定記錄故不需重算；
+`us_portfolio_backtest.py`確認有獨立US引擎（docstring自陳「differs
+from backtest.engine.run_backtest()」）不受TW bug影響；
+`weinstein_stage2.py`／`_v2.py`確認只是signal_fn函式庫非獨立trial
+腳本。**16支範圍釐清為11支（8支已完成+3支待重算）**，非原估計16支，
+純釐清非新增工作量。本輪未執行回測（範圍界定本身即完整工作單位），
+遵守CLAUDE.md十三節不修改`backtest/`／`validation/`本身只讀取查證。
+詳見`PENDING_QUEUE.md`「驗.一第4點續」條目新增段落。**交辦佇列狀態**：
+`- [ ]`僅3條，皆「驗」家族，其中`驗.一第4點續`本輪已推進，`驗.二`
+明確排在21支稽核之後暫緩。`is_holdout_consumed()`開工/收工前確認皆
+`False`。
+
 ## 2026-09-23 17:00（hypothesis_queue軌）— #82資料源起點探測（0050成分股
 調整歷史清單可得性）：三來源查證（TWSE官方頁/台灣指數公司官網/GitHub
 社群/財經媒體）皆遇WebFetch工具讀不到JS動態渲染內容的限制，**結論是
