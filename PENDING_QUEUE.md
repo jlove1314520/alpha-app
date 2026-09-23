@@ -12078,7 +12078,7 @@ wrapper維持現狀不變。
   **解除條件**：FinMind封鎖倒數解除(`data/rate_limit_state.json`
   `blocked_until`=2026-09-23T22:44:48台北時間)，屆時重跑
   `python research/f52w_2007_extension.py`即可續跑剩餘約258檔。
-- [ ] **驗.一第4點續（剩餘8支）** [研究] **2026-09-23裁示【f52w結案＋
+- [x] **驗.一第4點續（剩餘8支）** [研究] **2026-09-23裁示【f52w結案＋
   研究策略轉向「新資料單發檢定」＋佇列清理】清理.一第4點：明確核准
   現在開跑，一律用新引擎+新量尺+修正後DSR，前置條件（尺.二/驗.一続2
   S2b）已滿足**。（本項目上方曾出現一則hypothesis_queue軌插入的
@@ -12101,6 +12101,37 @@ wrapper維持現狀不變。
   NaN<=0在Python裡恆為False），資料.零把adj_close<=0轉NaN後這個既有
   漏洞被真正觸發、實測崩潰，已grep全repo確認無第三處同樣漏洞並修正
   三個檔案，commit已push。
+
+  **全repo run_backtest呼叫者完整盤點與結案（2026-09-23）**：對原始
+  ~21-22支候選逐一核對現況，**認定「剩餘8支」實質工作已完成**：
+  - **已重跑並登記verdict者（12支）**：portfolio_backtest_v2(#367/
+    #380)、dividend_yield_portfolio_v1(#371/#376)、f52w_high_
+    portfolio_v1+f52w_high_gates(#370/#377/#378/#385)、
+    pead_portfolio_v1(#373)、run_score_backtest(#375/#381)、
+    margin_utilization_regime_portfolio_v1、odd_lot_imbalance_
+    portfolio_v1、short_sale_utilization_portfolio_v1(#384/#389，
+    馬拉松軌)、run_value_board_v2_pit_backtest(#390，馬拉松軌)、
+    piotroski_fscore_gate_v1(#391，馬拉松軌)、weinstein_alpha_gate
+    (#392)、weinstein_v2_alpha_gate(#393)。
+  - **查證後判定不需要獨立重跑登記者**：`short_sale_utilization_
+    gate5_loo.py`（重跑確認TRAIN報酬+25.87%，跟已FAIL結案的父候選
+    #384/#389完全一致，僅是leave-one-out/逐年一致性子檢查，PASS/FAIL
+    不影響父候選已確定的FAIL）、`short_sale_utilization_gate9_
+    regime_overlay.py`（下檔保護子檢查，腳本自身docstring明寫「不等於
+    整條候選已完成最終判定」，父候選已FAIL，子檢查PASS/FAIL不改變
+    結論）、`core_tilt_backtest.py`（規.一已作廢SUPERSEDED，市值查詢
+    函式仍被引用但策略建構邏輯已不是現行方式）、`power_budget.py`
+    （檢定力計算機，非策略候選）、`b25_regime_report.py`（純報告
+    工具，docstring明寫「只做報告不做任何權重調整」）、
+    `portfolio_backtest.py`(v1，已被v2取代，未見獨立登記verdict)、
+    `us_portfolio_backtest.py`（US軌獨立基礎設施，不在0050/TAIEX
+    基準修正範圍內，US軌自己的因子組合候選#179等已用它獨立判定過）、
+    `determinism_self_test.py`/`backtest_engine_soundness_test.py`
+    （自我測試/健全性測試基礎設施，本身不是被judge的策略候選）、
+    `concentrated_backtest.py`（已是FRAMEWORK_CHECK_FAILED，另案
+    處理不在此列）。
+  - **結論**：「驗.一第4點續」全部21-22支候選的稽核工作**實質完成**，
+    標[x]結案。
 
 ## 2026-09-23 總司令裁示【f52w 結案＋研究策略轉向「新資料單發檢定」＋佇列清理】（原文登記）
 
