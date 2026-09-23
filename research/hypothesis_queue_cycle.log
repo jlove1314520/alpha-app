@@ -4194,3 +4194,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 Backtest soundness test (S1?4 with new S2b pandas-rebuild comparison and 20-seed sensitivity analysis) is running in the background ??it involves over 150 individual backtest runs so it takes several minutes. I'll wait for the completion notification before reviewing results and committing.
 ===== Hypothesis-queue cycle end: 2026-09-23 13:02:38 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑18.4分鐘 < 30分鐘門檻
