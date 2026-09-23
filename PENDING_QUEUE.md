@@ -11955,20 +11955,27 @@ wrapper維持現狀不變。
 > 尺.二 的單位自我測試與「可比試驗 V」一出來就回報。
 > 四段格式照舊。
 
-- [ ] **尺.二** [研究] DSR單位與輸入修正（最優先）——TRIALS_REGISTRY.
-  jsonl的dsr_inputs.sharpe混用單位(5筆FUT試驗存年化Sharpe卻配日頻
-  n_obs=6183，trials_sharpe_variance()用這5筆估V得到年化單位SR0，
-  卻跟f52w的日Sharpe比較，DSR≈0是單位錯誤不是真的沒過)。1.#379改記
-  INVALID_BUG(不刪原文加更正標記)，排除有效N外。2.dsr_inputs新增
-  必填periods_per_year；register_trial()驗證|sharpe|>1且periods_
-  per_year=252時拒絕登記；5筆FUT舊紀錄改存日頻值(年化/√252)，原值
-  留notes。3.deflated_sharpe()加單位檢查，候選與V來源單位不一致就
-  raise。4.V來源改「可比試驗」(台股多頭組合層、同一VAL期間、有存
-  equity_curve者)，每筆重算日頻資訊比率；可比試驗<10筆時不得只報
-  單一DSR，一律附V敏感度表(年化標準差0.2/0.3/0.4/0.5/0.75)。5.自我
-  測試：已知單位合成資料(年化SR=1.0,T=1000)，日頻與年化輸入DSR必須
-  一致。6.稽核dsr_reeval.py與「撐住3、倒下5」結論是否同樣單位問題，
-  翻轉進AWAITING_REVIEW。單位自我測試與可比試驗V一出來就回報。
+- [x] **尺.二** [研究] DSR單位與輸入修正（最優先）——**六點全部完成，
+  2026-09-23馬拉松第623輪（研究帽）核對確認，非本輪執行，是核對已有
+  commit的完成度**。1.#379已改記INVALID_BUG（`trial_registry.py`
+  `KNOWN_INVALID_BUG_IDS`，notes保留原文）。2.`register_trial()`已加
+  `periods_per_year`必填+`|sharpe|>1`且`periods_per_year=252`拒絕登記
+  防呆；5筆FUT舊紀錄已改存日頻值。3.`deflated_sharpe()`已加
+  `var_periods_per_year`單位檢查，不一致raise（commit`5eb1894c`）。
+  4.`comparable_trial_variance.py`已新增（可比試驗＝f52w/dividend/
+  pead/score四支，`n_comparable=4<10`，已附V敏感度表，見
+  `data/comparable_trial_variance.json`：`comparable_variance=
+  0.001705`，年化SD 0.2~0.75對應SR0(日)=0.0375~0.1405）。5.自我測試
+  已含單位一致性測試（日頻vs年化輸入DSR相同）＋#379正面回歸測試，
+  本輪重跑`python candidate_report.py --self-test`確認**仍PASS**（
+  `✓ self-test 全過`）。6.`dsr_reeval.py`已加`periods_per_year`檢查，
+  缺欄位一律記「無法計算」不猜單位；「撐住3、倒下5」誤植問題已在
+  commit`5eb1894c`訊息如實記錄更正（該結論其實來自
+  `selection_bias_ledger.py`另一個無關統計，非`dsr_reeval.py`）。
+  **完成者：另一活躍session（非本輪馬拉松，commit`5eb1894c`/
+  `3bdf8a05`帶`Claude-Session`標籤，時間20:2x~20:28，早於本輪
+  20:30:37取鎖），本輪僅核對六點逐一對照程式碼＋重跑自我測試確認，
+  未新增程式碼**。
 - [ ] **審.二** [研究] f52w用資訊比率重審——待尺.二完成後開始。1.算
   f52w對0050含息總報酬的日頻主動報酬(策略-Dimson beta x 0050)與
   資訊比率，TRAIN/VAL/全期分別列。2.用尺.二方法做DSR(附V敏感度表)，

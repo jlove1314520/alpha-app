@@ -6,6 +6,61 @@
 
 
 ---
+**最後更新：2026-09-23T20:3x+08:00（馬拉松第623輪，研究帽）**——取鎖乾淨
+（cycle`20260923-203037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=7（尺.二/審.二/資料.一/驗.一/驗.一第4點續(16支)/驗.一第4點續
+(8支)/驗.二，比round622多的4項是總司令新裁示【DSR單位錯誤修正＋f52w
+改用資訊比率重審＋2008延伸】，權威`<!-- ORDER-BEGIN -->`清單排序尺.二
+最優先）。`run_detached.py status`：`audit_16remaining_batch2`
+（job`20260923-183404-d854`）仍`running`（累計119.3分鐘，符合預估數
+小時工作，不必每輪查）——**因此本輪不得`submit`新的重度job（規則3：
+一次只跑一個重度工作）**。**開工時發現重大觀察：一個帶`Claude-Session`
+標籤的活躍session（非本馬拉松、非interactive視窗本身的commit署名模式）
+剛在20:2x~20:28完成`尺.二`（commit`5eb1894c`）與`資料.一`（commit
+`3bdf8a05`，f52w樣本延伸至2007腳本背景抓取中），且`research/data/
+comparable_trial_variance.json`的mtime是20:33——**晚於本輪20:30:37
+取鎖時間**，代表該session在本輪取鎖後仍持續在同一工作目錄執行程式，
+`research/audit_f52w_ir_review.py`（審.二腳本）也已存在但未commit
+（`git status`顯示`??`）。**[自行裁量，避免重複勞動與檔案競態]**：
+判斷該session正在依序處理尺.二→審.二→資料.一（權威排序前三項），
+本輪**不觸碰**`audit_f52w_ir_review.py`／`comparable_trial_variance.py`
+／`f52w_2007_extension.py`任何一支，也不執行任何會寫入同一批輸出檔的
+腳本，避免跟活躍session搶寫同一份`data/*.json`造成競態或重複計算浪費
+運算資源。**本輪工作單位＝逐點核對`尺.二`六點是否真的全部完成**（不
+是照做，是驗證另一session的宣稱）：1.`#379`已記`INVALID_BUG`（
+`trial_registry.py::KNOWN_INVALID_BUG_IDS`）確認。2.`register_trial()`
+已有`periods_per_year`必填+`|sharpe|>1`拒絕登記防呆確認。3.
+`deflated_sharpe()`已有`var_periods_per_year`不一致raise確認（讀
+`candidate_report.py`原始碼逐行核對）。4.`comparable_trial_variance.py`
+已存在且已實際執行過（`data/comparable_trial_variance.json`：
+`n_comparable=4<10`已附V敏感度表，數字合理）。5.重跑
+`python candidate_report.py --self-test`**本輪實測仍PASS**
+（`✓ self-test 全過`）。6.`dsr_reeval.py`已有`periods_per_year`檢查
++「無法計算」防呆確認，「撐住3、倒下5」誤植已在commit訊息如實記錄
+更正。**六點全部確認完成**，`PENDING_QUEUE.md`「尺.二」改標`[x]`並
+附核對摘要與V敏感度表數字（見該條目）。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（386列，本輪純核對未新增
+判定，不觸發`register_trial()`）。`validation/holdout.py::
+is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`
+／`research/validation/`／`trial_registry.py`等CLAUDE.md十三節限定
+清單內任何原始碼（僅讀取核對＋改`PENDING_QUEUE.md`一個條目），全程
+零新增外部API呼叫（純讀既有`.json`/程式碼、跑既有自我測試）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩6條未開始**
+（審.二/資料.一因活躍session正在處理暫不計入「未開始」但也未結案；
+驗.一/驗.一第4點續16支/8支/驗.二皆排在尺.二之後，依權威清單本輪不動）。
+**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非
+本輪新增）。**下一輪任一軌接手**：先`git status`確認活躍session是否
+已完成`審.二`/`資料.一`並commit（若已commit，`audit_f52w_ir_review.py`
+會從`??`變成已追蹤，`comparable_trial_variance.json`等資料檔內容可
+直接引用不必重算）；若仍在跑，比照本輪做法避免搶寫；`audit_16remaining_
+batch2`job預估數小時，收成後接續投遞`weinstein_alpha_gate.py`(#60)
+重算（round622標記待辦，本輪因「一次只跑一個重度工作」規則仍未投遞）；
+`驗.二`第二部分（開盤到收盤重跑spillover_overlay_v1）需先設計新腳本，
+規模較大（9關全跑），評估後排入下一次有空的重度工作槽位。完整見
+`REPORT.md`第623輪心跳、`PENDING_QUEUE.md`「尺.二」條目、commit待補。
+
+---
 **最後更新：2026-09-23T19:4x+08:00（馬拉松第622輪，研究帽）**——取鎖乾淨
 （cycle`20260923-183037`，上一輪已於開工前結束reason=OK）。開工先照
 「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續
@@ -115,49 +170,6 @@ backtest.py`，不在CLAUDE.md「十三、核心研究檔案單一寫入者」�
 
 ---
 
-**最後更新：2026-09-23T17:3x+08:00（馬拉松第620輪，研究帽）**——取鎖乾淨
-（cycle`20260923-173037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認
-互動視窗CC無新commit，`portfolio_backtest_v2.py`/`PENDING_QUEUE.md`無
-uncommitted修改，無碰撞風險。**本輪工作單位＝收成round619投遞的job並
-登記＋enumeration剩餘候選**：`run_detached.py status`確認
-`20260923-163927-c80e`已`finished`（exit=0），讀job log與三支腳本輸出，
-對照`TRIALS_LEDGER.md`#120/#232/#133舊判定：**3支皆0翻轉，維持FAIL**
-（`margin_utilization_regime_portfolio_v1`：VAL隨機控制組percentile從
-舊99.0→新0.0更決定性；`odd_lot_imbalance_portfolio_v1`：TRAIN/VAL
-percentile從33.0/13.0→11.0/1.0更決定性；`short_sale_utilization_
-portfolio_v1`：第2關本身從雙雙100.0→87.0/69.0未過門檻，VAL alpha p從
-0.0354顯著→0.4489不顯著，補強#137既有最終FAIL判定證據力）。登記
-`TRIALS_LEDGER.md`#382/#383/#384（`register_trial()`，failed_gates=
-['gate2']），`trial_registry.py --check`exit=0 PASS（386列）。**16支
-現況：8支完成（首5支+本輪3支，皆0翻轉），13支未開始**。
-**[自行裁量，enumeration發現]**：重新grep`run_backtest(`（修正先前
-`grep -v "test_"`filter誤濾掉`portfolio_backtest_v2.py`等合法候選的
-bug），找到33個匹配（原估21支）；核對`data/*checkpoint*.json`發現**沒
-有更多跟本輪3支同結構（`real`欄位）的續跑腳本**（僅存2個其他checkpoint
-`capital_reduction_verify`/`composite_zscore_v1`是完全不同資料結構，
-非同一套架構）。原始「16支」估計本身無明確逐一列名權威清單（源自「28
-支裁示估計→grep找到21支」模糊過程），本輪初步過濾出候選清單（待下一輪
-逐一確認是否曾用舊引擎判過）寫入`PENDING_QUEUE.md`「驗.一第4點續」條目，
-同時列出明確排除項（審.一診斷工具、已凍結的`concentrated_backtest.py`、
-框架自檢腳本、已用#137結案不受影響的short_sale後續關卡腳本等）。
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
-（386列）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆
-確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
-未修改`research/backtest/`／`research/validation/`／
-`portfolio_backtest_v2.py`任何原始碼（僅呼叫既有函式收成/enumeration/
-寫帳本），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append
-本輪一行。**交辦佇列還剩2條未開始**（驗.一第4點續其餘13支候選待確認範圍
-＋驗.二第二部分）。**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL
-摘要，延續中，非本輪新增）。**下一輪任一軌接手**：從`PENDING_QUEUE.md`
-「驗.一第4點續」本輪新列出的候選清單逐一確認範圍（是否曾用舊引擎/舊
-量尺產出過`TRIALS_LEDGER.md`判定），確認後排入`run_detached.py submit`
-繼續，翻轉一律進`AWAITING_REVIEW.md`不自行改判。完整見`REPORT.md`第
-620輪心跳、`PENDING_QUEUE.md`「驗.一第4點續（剩餘16支）」條目、
-`TRIALS_LEDGER.md`#382-384。
-
----
-
 （第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪、
-第611輪、第614輪、第615輪、第616輪、第617輪、第619輪已歸檔至
+第611輪、第614輪、第615輪、第616輪、第617輪、第619輪、第620輪已歸檔至
 `TW_STATE_ARCHIVE.md`，僅保留最新3則）

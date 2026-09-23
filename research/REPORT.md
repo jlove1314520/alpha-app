@@ -9,6 +9,16 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第623輪 · 2026-09-23T20:3x+08:00 · TW · 研究帽：核對確認尺.二(DSR單位修正)六點全部完成，避免與活躍session搶寫審.二/資料.一輸出檔
+
+- 取鎖乾淨（cycle`20260923-203037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`從round622的3條增為7條——總司令新裁示【DSR單位錯誤修正＋f52w改用資訊比率重審＋2008延伸】新增`尺.二`/`審.二`/`資料.一`/`驗.一第4點續（剩餘8支）`四項，權威`<!-- ORDER-BEGIN -->`清單排`尺.二`最優先。
+- **重大觀察**：`git log`顯示commit`5eb1894c`（尺.二核心修正）與`3bdf8a05`（資料.一背景抓取）帶`Claude-Session`署名標籤，時間20:2x~20:28，早於本輪20:30:37取鎖；`research/data/comparable_trial_variance.json`的mtime是20:33，**晚於取鎖時間**，代表該活躍session在本輪跑動期間仍持續在同一工作目錄執行程式；`research/audit_f52w_ir_review.py`（審.二腳本）已存在但未commit。判定該session正依序處理尺.二→審.二→資料.一，**本輪不觸碰這三項相關的任何腳本或輸出檔**，避免搶寫競態與重複運算浪費。
+- **本輪工作單位＝逐點核對尺.二六項是否真的全部完成**（驗證而非重做）：1.`#379`已記`INVALID_BUG`。2.`register_trial()`已有`periods_per_year`必填+防呆。3.`deflated_sharpe()`已有單位不一致raise。4.`comparable_trial_variance.py`已新增且已實際跑過（`n_comparable=4<10`已附V敏感度表：年化SD 0.2~0.75對應SR0(日)=0.0375~0.1405）。5.重跑`python candidate_report.py --self-test`**本輪實測仍PASS**（`✓ self-test 全過`）。6.`dsr_reeval.py`已有單位檢查，「撐住3、倒下5」誤植已在commit訊息記錄更正。**六點全部確認完成**，`PENDING_QUEUE.md`「尺.二」改標`[x]`並附核對摘要。
+- `audit_16remaining_batch2`job（`20260923-183404-d854`）仍`running`（累計119.3分鐘），依「一次只跑一個重度工作」規則本輪未新投遞job。
+- `trial_registry.py --check`exit=0 PASS（386列，本輪純核對未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼，全程零新增外部API呼叫。
+- 下一輪待做：確認活躍session是否已完成`審.二`/`資料.一`並commit；`weinstein_alpha_gate.py`(#60)重算待batch2收成後投遞；`驗.二`第二部分（開盤到收盤重跑spillover_overlay_v1）待設計新腳本。
+
+---
 ## 第622輪 · 2026-09-23T19:4x+08:00 · TW · 研究帽：blast radius查證確認只需重算1支，修復long_only_vs_market.py舊量尺複製bug
 
 - 取鎖乾淨（cycle`20260923-183037`已於開工前結束，reason=OK）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續/驗.二），驗.二明文排在21支稽核之後、驗.一第4點續的job`20260923-183404-d854`(`audit_16remaining_batch2`)仍running（開工時57分鐘，收工時62.5分鐘，符合預估的多小時長工作，不必每輪等待）。
