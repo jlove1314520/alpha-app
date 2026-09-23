@@ -11847,6 +11847,50 @@ wrapper維持現狀不變。
   `audit_16remaining_batch2.py`、`run_value_board_v2_pit_backtest.py`
   git diff。
 
+  **2026-09-23馬拉松第622輪（TW，研究帽）——blast radius查證完畢+
+  已修復`long_only_vs_market.py`**：先核查上一輪標記的4支呼叫端
+  （`long_only_vs_market.py`本體/`run_alpha_decomposition.py`/
+  `weinstein_alpha_gate.py`/`weinstein_v2_alpha_gate.py`），`grep
+  TRIALS_LEDGER.md`逐一比對：`run_alpha_decomposition.py`0
+  matches（純診斷工具，非獨立trial，無舊判定可回頭校正）；
+  `weinstein_v2_alpha_gate.py`0 matches（同上一輪已確認，從未登記，
+  屬全新trial非recheck範圍）；`portfolio_backtest.py`(v1)本身不呼叫
+  `decompose_alpha_beta()`(只在docstring提及，非import非呼叫)。
+  **真正需要重算的只有`weinstein_alpha_gate.py`(#60)一支**，
+  上一輪「blast radius涵蓋4支」的疑慮解除，風險比原估計小很多。
+  **[自行裁量，判定為bug修復非新架構決策，比照上一輪
+  `run_value_board_v2_pit_backtest.py`同一類precedent不需提案先於
+  執行]**：修復`long_only_vs_market.py`——`capm_beta_vs_market()`／
+  `decompose_alpha_beta()`改為呼叫`portfolio_backtest_v2.
+  alpha_significance()`取得Dimson beta(0050含息總報酬benchmark+
+  Newey-West HAC標準誤)，取代原本各自複製的簡單OLS(np.polyfit)+
+  TAIEX價格指數公式；`run_period()`的`mkt_total_ret`同步改用
+  `buy_and_hold_index_pct(benchmark=0050_total_return)`，修正舊版
+  「beta/alpha用一把尺、excess_vs_market用另一把尺」的內部不一致。
+  **已知簡化未變且如實記錄**：純化alpha報酬序列時仍只用單一beta
+  係數乘「當期」大盤報酬扣除，未把Dimson三個落後項分別扣除，這是
+  延續舊版就有的簡化，本輪只修正beta估計方法與benchmark，未重新
+  設計純化方法論本身。**自我測試**：合成0050完全追蹤的equity_curve
+  餵入`decompose_alpha_beta()`，得到beta=1.0000、alpha_ann_pct≈
+  0.0000%（誤差量級1e-12，浮點精度內）、beta_contribution_pct≈
+  total_return_pct（934.29% vs 934.29%），驗證修正後函式行為正確。
+  `weinstein_alpha_gate.py`／`run_alpha_decomposition.py` import
+  驗證皆正常（僅import，未執行）。`git status`確認本輪只修改
+  `research/long_only_vs_market.py`一個檔案，未觸碰凍結區或
+  CLAUDE.md十三節限定的核心研究檔案（`long_only_vs_market.py`
+  不在`research/backtest/`／`research/validation/`等限定清單內，
+  馬拉松軌可修改）。`trial_registry.py --check`
+  （`PYTHONIOENCODING=utf-8`）exit=0 PASS（386列，本輪未新增判定，
+  純程式碼修復）。`validation/holdout.py::is_holdout_consumed()`
+  開工/收工前皆`False`。**下一輪待做**：`weinstein_alpha_gate.py`
+  (#60)用修正後函式重跑——**這是N=200配對隨機控制組×TRAIN/VAL兩期
+  的重度工作，本輪因`audit_16remaining_batch2`(job`20260923-183404-
+  d854`)仍在跑（MARATHON_PROTOCOL.md 0b節「一次只跑一個重度工作，
+  遇到已有running工作會拒絕」），未投遞新的detached job，留給
+  batch2收成後的下一輪投遞**；收成後對照`TRIALS_LEDGER.md`#60舊
+  判定（FAIL，VAL純alpha百分位28.5），比較新舊數字方向，翻轉一律
+  進`AWAITING_REVIEW.md`不自行改判。
+
 - [ ] **驗.二** [研究] spillover前視偏誤——**2026-09-23裁示【稽核解封
   ＋S2對等比較＋凍結regime家族】第一部分已完成**：「#346判定FAIL
   (前視偏誤)不需要等重跑，現在寫入並從AWAITING_REVIEW移入已結案」——

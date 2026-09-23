@@ -30,6 +30,12 @@ from long_short_backtest import (
     DECILE_FRACTION, MAX_PLAUSIBLE_DAILY_RETURN, N_RANDOM_DRAWS, RANDOM_CONTROL_SEED,
     START_DATE, _get_scored, capm_beta as _capm_beta_longshort,
 )
+from portfolio_backtest_v2 import (
+    DEFAULT_BENCHMARK as _PBV2_DEFAULT_BENCHMARK,
+    _benchmark_close_series as _pbv2_benchmark_close_series,
+    alpha_significance as _pbv2_alpha_significance,
+    buy_and_hold_index_pct as _pbv2_buy_and_hold_index_pct,
+)
 from validation import costs as costmod
 from validation import holdout
 
@@ -162,15 +168,14 @@ def sortino_ratio(result: pd.DataFrame) -> float:
 
 
 def capm_beta_vs_market(result: pd.DataFrame, market_df: pd.DataFrame) -> tuple[float, float]:
-    mkt = market_df.set_index("date")["close"].sort_index()
-    mkt_ret = mkt.pct_change()
-    net_ret = result.set_index("date")["equity"].pct_change().rename("net_return")
-    merged = pd.concat([net_ret, mkt_ret.rename("mkt_return")], axis=1, join="inner").dropna()
-    if len(merged) < 30:
-        return float("nan"), float("nan")
-    beta, alpha_daily = np.polyfit(merged["mkt_return"].values, merged["net_return"].values, 1)
-    alpha_annualized = (1 + alpha_daily) ** 252 - 1
-    return float(beta), float(alpha_annualized)
+    """2026-09-23馬拉松第622輪[自行裁量,bug修復]：改為直接呼叫
+    `portfolio_backtest_v2.alpha_significance()`（0050含息總報酬benchmark、
+    Newey-West HAC標準誤、Dimson beta，尺.一修正），取代這裡原本「自成一體
+    複製一份、不跨檔案import」的舊版簡單OLS(np.polyfit)+TAIEX價格指數公式。
+    回傳值單位維持不變（alpha為小數比例非百分比，配合既有呼叫端`alpha_ann*100`
+    的印法）。"""
+    decomp = _pbv2_alpha_significance(result, market_df)
+    return decomp["beta"], decomp["alpha_ann_pct"] / 100.0
 
 
 def run_period(label, data, market_df, industry_map, start, end, cadence_name, rebalance_days):
@@ -180,14 +185,16 @@ def run_period(label, data, market_df, industry_map, start, end, cadence_name, r
     sortino = sortino_ratio(result)
     beta, alpha_ann = capm_beta_vs_market(result, market_df)
 
-    mkt_start = market_df[market_df["date"] >= start].iloc[0]["close"]
-    mkt_end = market_df[market_df["date"] <= end].iloc[-1]["close"]
-    mkt_total_ret = (mkt_end / mkt_start - 1) * 100
+    # 2026-09-23馬拉松第622輪[自行裁量,bug修復]：mkt_total_ret改用跟beta/alpha
+    # 同一把尺（0050含息總報酬，尺.一），取代舊版直接讀market_df["close"]
+    # （TAIEX價格指數，不含息）——舊版beta/alpha跟excess_vs_market用兩把不同的
+    # 尺，數字自相矛盾。
+    mkt_total_ret = _pbv2_buy_and_hold_index_pct(market_df, start, end, benchmark=_PBV2_DEFAULT_BENCHMARK)
     total_ret_pct = (result["equity"].iloc[-1] / result["equity"].iloc[0] - 1) * 100
 
     print(f"  純多前decile總報酬(扣成本)：{total_ret_pct:+.2f}%  年化：{ann_ret*100:+.2f}%  Sortino：{sortino:.3f}")
-    print(f"  對大盤(TAIEX)實測beta：{beta:+.3f}  年化alpha：{alpha_ann*100:+.2f}%")
-    print(f"  同期TAIEX本身報酬：{mkt_total_ret:+.2f}%（超額報酬：{total_ret_pct-mkt_total_ret:+.2f}pp）")
+    print(f"  對大盤(0050含息總報酬)實測Dimson beta：{beta:+.3f}  年化alpha：{alpha_ann*100:+.2f}%")
+    print(f"  同期0050含息總報酬：{mkt_total_ret:+.2f}%（超額報酬：{total_ret_pct-mkt_total_ret:+.2f}pp）")
 
     print(f"  隨機對照組（{N_RANDOM_DRAWS}次重抽，同換股時點/檔數/成本，純多不放空）...")
     random_finals = []
@@ -219,29 +226,36 @@ def decompose_alpha_beta(result: pd.DataFrame, market_df: pd.DataFrame) -> dict:
     """Cowork 稽核第2點：把「總報酬」拆成「beta×大盤貢獻」跟「alpha（扣掉beta後
     剩下的純選股能力）貢獻」兩塊，而不是只回報一個綜合的 alpha_annualized 數字。
 
-    做法：先用 `capm_beta_vs_market()` 對日報酬序列做 CAPM 迴歸拿到實測 beta；
+    做法：先用 `portfolio_backtest_v2.alpha_significance()` 對日報酬序列做
+    CAPM 迴歸拿到實測 Dimson beta（2026-09-23馬拉松第622輪[自行裁量,bug修復]：
+    改用0050含息總報酬benchmark+Newey-West HAC標準誤+Dimson beta，取代這裡
+    原本「自成一體複製一份、不跨檔案import」的舊版簡單OLS(np.polyfit)+TAIEX
+    價格指數公式，理由同`capm_beta_vs_market()`——舊版docstring自稱可獨立
+    運作，但跟portfolio_backtest_v2.py尺.一修正後已經是兩把不同的尺）；
     再逐日算「純 alpha 報酬」= 策略當日報酬 − beta×大盤當日報酬（把系統性的
     大盤暴露部分扣掉，剩下的才是真正跟選股能力有關的部分，不是運氣好搭上一段
     大盤上漲）；把這個純 alpha 報酬序列複利起來，得到一條「假設沒有大盤暴露、
     只留選股能力」的淨值曲線，在這條曲線上算年化報酬、Sortino、MDD——這些數字
     才是回答「贏隨機是選股alpha、不只是beta」的直接證據，不是靠回歸截距的
     年化換算值（那個雖然方向正確，但沒有給出完整的alpha報酬序列本身的風險
-    特性，例如MDD）。
+    特性，例如MDD）。**已知簡化未變**：純化時仍只用單一beta係數乘「當期」
+    大盤報酬扣除（不是把Dimson三個落後項分別乘各自係數扣除），這是延續舊版
+    就有的簡化，本輪只修正「beta估計方法與benchmark」，未重新設計純化方法論
+    本身，如實記錄不隱藏。
     """
-    mkt = market_df.set_index("date")["close"].sort_index()
+    decomp_stats = _pbv2_alpha_significance(result, market_df)
+    beta = decomp_stats["beta"]
+
+    mkt = _pbv2_benchmark_close_series(market_df, _PBV2_DEFAULT_BENCHMARK)
     mkt_ret = mkt.pct_change()
     net_ret = result.set_index("date")["equity"].pct_change().rename("net_return")
     merged = pd.concat([net_ret, mkt_ret.rename("mkt_return")], axis=1, join="inner").dropna()
-    if len(merged) < 30:
+    if len(merged) < 30 or beta != beta:
         return {"beta": float("nan"), "alpha_ann_pct": float("nan"), "alpha_sortino": float("nan"),
                 "alpha_mdd_pct": float("nan"), "beta_contribution_pct": float("nan"),
                 "total_return_pct": float("nan")}
 
-    x = merged["mkt_return"].values
-    y = merged["net_return"].values
-    beta, alpha_daily = np.polyfit(x, y, 1)
-
-    # 純 alpha 報酬序列：每日總報酬扣掉 beta×當日大盤報酬
+    # 純 alpha 報酬序列：每日總報酬扣掉 beta（Dimson版）×當日大盤報酬
     alpha_daily_series = merged["net_return"] - beta * merged["mkt_return"]
     alpha_equity = (1 + alpha_daily_series).cumprod()
     alpha_equity = pd.concat([pd.Series([1.0]), alpha_equity]).reset_index(drop=True)  # 補回起始點=1.0
