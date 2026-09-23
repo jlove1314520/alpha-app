@@ -9,6 +9,20 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第620輪 · 2026-09-23T17:3x+08:00 · TW · 研究帽：收成round619 detached job並登記3支重算結果（#382-384，0翻轉），enumeration修正21支估計bug並列出剩餘候選
+
+- 取鎖乾淨（cycle`20260923-173037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認互動視窗CC無新commit，無碰撞風險。
+- **收成job`20260923-163927-c80e`**（`finished`，exit=0）：讀三支腳本輸出，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定——**3支皆0翻轉，維持FAIL**：
+  1. `margin_utilization_regime_portfolio_v1`：VAL隨機控制組percentile從舊99.0→新引擎0.0，判定更決定性（舊版99.0是compounding bug製造的假象）。
+  2. `odd_lot_imbalance_portfolio_v1`：TRAIN/VAL percentile從33.0/13.0→11.0/1.0，更決定性。
+  3. `short_sale_utilization_portfolio_v1`：第2關本身從TRAIN/VAL雙雙100.0→87.0/69.0未過門檻，VAL alpha p從0.0354（顯著）惡化為0.4489（不顯著），補強#137既有最終FAIL判定的證據力（舊版「VAL單期顯著」本身也是compounding bug產物）。
+- 登記`TRIALS_LEDGER.md`#382/#383/#384（`trial_registry.register_trial()`，failed_gates=['gate2']），`trial_registry.py --check`exit=0 PASS（386列）。**16支現況：8支完成（首5支#376/#377/#380/#381+本輪3支#382-384，皆0翻轉），13支未開始**。
+- **[自行裁量，enumeration發現]**：重新`grep -rl "run_backtest(" --include="*.py" .`找到33個匹配（原估21支——先前grep誤用`grep -v "test_"`filter意外濾掉`portfolio_backtest_v2.py`/`portfolio_backtest_v2_bigsample.py`等合法候選，本輪已修正）。核對`data/*checkpoint*.json`發現**沒有更多跟本輪3支同結構（`real`欄位）的續跑腳本**——僅存另2個checkpoint（`capital_reduction_verify`鍵`queried`、`composite_zscore_v1`鍵`draw_records`）是完全不同的資料結構。原始「16支」估計本身無明確逐一列名權威清單（源自「28支裁示估計→grep找到21支」的模糊過程），本輪初步過濾出候選清單（`piotroski_fscore_gate_v1.py`/`portfolio_backtest.py`/`run_value_board_v2_pit_backtest.py`/`us_portfolio_backtest.py`/`strategies/`系列/`weinstein_alpha_gate.py`系列，共11支）與明確排除項（審.一診斷工具3支、已凍結的`concentrated_backtest.py`、框架自檢2支、已用#137結案不受影響的short_sale後續關卡3支、`f52w_high_gates.py`屬另一獨立條目），寫入`PENDING_QUEUE.md`「驗.一第4點續」條目，留給下一輪逐一確認範圍。
+- `trial_registry.py --check`exit=0 PASS（386列）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`portfolio_backtest_v2.py`任何原始碼，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（驗.一第4點續其餘13支候選待確認範圍＋驗.二第二部分）。**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪新增）。
+- **下一輪**：從`PENDING_QUEUE.md`「驗.一第4點續」本輪新列出的候選清單逐一確認是否曾用舊引擎/舊量尺產出過`TRIALS_LEDGER.md`判定，確認後排入`run_detached.py submit`繼續；翻轉一律進`AWAITING_REVIEW.md`不自行改判。
+
+---
 ## 第619輪 · 2026-09-23T16:3x+08:00 · TW · 研究帽：驗.一第4點續——投遞3支腳本新引擎+新量尺重算，session內違規同步執行已自糾改用run_detached.py
 
 - 取鎖乾淨（cycle`20260923-163037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續（剩餘16支）/驗.二第二部分）。`git log`確認`尺.一`（commit`cbaa4412`）與`審.一`（commit`f807ce64`，DSR=0.0000決定性FAIL）皆已由互動視窗CC完成並commit，round618避開的`portfolio_backtest_v2.py`碰撞已解除。

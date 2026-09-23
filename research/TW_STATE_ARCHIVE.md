@@ -1285,3 +1285,52 @@ portfolio_v1`/`run_score_backtest`欄位），登記對照結果進
 
 ---
 
+
+---
+
+**最後更新：2026-09-23T14:3x+08:00（馬拉松第617輪，研究帽）**——取鎖乾淨
+（cycle`20260923-143037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=3（驗.一/驗.二/驗.三；常備.9仍`- [!]`待採購阻塞，常備.10/常備.12
+已完成）。`tasklist`確認**15個claude.exe行程仍在並行**（高併發持續中）。
+**開工先收成round616投遞的detached job`20260923-133203-00a4`**：狀態為
+`orphaned`（非`finished`），核對log發現該job已完整跑完2/3~3/3（`pead_
+portfolio_v1`/`run_score_backtest`），但`git log`顯示**互動視窗CC已在
+本輪開工前用直接呼叫`run_one()`/`main()`的方式獨立完成同一件事**
+（commit`633b47f3`/`ecb34a98`，登記`TRIALS_LEDGER.md`#373/#375），且已
+`taskkill`終止這個重複job並記錄協調事故於`PENDING_QUEUE.md`驗.一條目
+（協調.零第5點透明回報義務）。**核對**：orphaned job輸出的
+`research/data/audit_run_backtest_5priority.json`數值與互動視窗CC已
+登記的#373/#375逐位吻合（TRAIN/VAL報酬/MDD/Sortino完全一致），確認
+無新資訊、不重複登記，但發現互動視窗CC的commit（`ecb34a98`）漏了
+`git add`這個JSON資料檔本身（只commit了`.md`/`.jsonl`帳本），導致
+working tree留著一份跟已登記結論一致但未commit的資料差異——**本輪
+housekeeping補commit這份資料檔**，純資料歸檔非新判定。
+**驗.三結案**：核對後發現該項「尚未完成」段落點名的`vix_term_
+structure_gate.py`(#76)／`hy_etf_ratio_gate.py`(#78)已由`常備.12`
+（DevQueue軌，cycle`20260923-121601`）用新增的
+`sample_nonoverlapping_blocks()`+`circular_shift_null()`完整重跑
+（`TRIALS_LEDGER.md`#374，8/8組FAIL），逐字對應驗.三要求的變體設計，
+屬「已被其他track用不同編號完成的過時待辦」（同round615常備.11同一
+形狀），標`[x]`結案，純文件核對不觸發`register_trial()`。
+**修補`trial_registry.py --check`前置阻塞**：開工時發現該檢查已是
+`exit=1`（`#346`verdict=FAIL缺`failed_gates`欄位，非本輪造成，本輪
+開工前即存在），依裁示「收工前非0不准commit」，直接在
+`TRIALS_REGISTRY.jsonl`補上`failed_gates=["unknown"]`（判死依據是
+spillover前視偏誤，不在GATE_SEQUENCE六關值域內，同`#296`先例），
+`TRIALS_LEDGER.md`同步補註記，重跑後`exit=0 PASS`（377列）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`任何原始碼（僅呼叫
+既有函式核對、修TRIALS_REGISTRY.jsonl資料），全程零新增外部API呼叫。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（驗.一殘餘16支稽核+f52w#86後續、驗.二第二部分開盤到收盤重跑；驗.三
+本輪結案）。**等待審閱：0件**（`AWAITING_REVIEW.md`未變動，本輪未新增
+待審項）。**下一輪任一軌接手**：佇列深度`- [ ]`=2，低於`MIN_QUEUE_
+DEPTH=12`門檻，下一輪開工需先執行佇列深度補件（來源①②③掃描）；
+`驗.一`剩餘16支腳本第二輪稽核+`f52w_high_portfolio_v1`的`#86`
+gate3/5/6後續，高併發下建議先`tasklist`+`git log`確認互動視窗CC是否
+已在同步進行，避免重複勞動（本輪已是本cycle第二次發生類似協調碰撞）；
+`驗.二`第二部分（開盤到收盤重跑全部9關）屬於較大範圍工作單位，建議
+拆解成子步驟後再投入單一輪次。完整見`REPORT.md`第617輪心跳（待補）、
+`PENDING_QUEUE.md`「驗.一」「驗.三」條目、`TRIALS_REGISTRY.jsonl`
+`#346`補登記錄。

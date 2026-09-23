@@ -11667,13 +11667,53 @@ wrapper維持現狀不變。
   taskkill後狀態不變，等同從未執行），改用`run_detached.py`重新投遞，
   符合`MARATHON_PROTOCOL.md`0b節「任何可能跑超過5分鐘的工作一律脫離
   session」規則——這是本輪違規在先、發現後自行修正的記錄，如實揭露
-  不隱藏。**下一輪**：`run_detached.py status`收成`20260923-163927-
-  c80e`，`finished`後讀三支腳本各自的`data/*_results.csv`與
-  checkpoint的`real`欄位，對照`TRIALS_LEDGER.md`#120/#232/#133舊判定，
-  翻轉一律進`AWAITING_REVIEW.md`不自行改判；完成後剩餘13支繼續，
-  優先找同樣有既有checkpoint可續跑架構的腳本（`phase_sensitivity_
-  checkpoint.json`存在但該腳本本身是相位敏感度診斷工具非trial候選，
-  不計入16支，見round619查證）。
+  不隱藏。**2026-09-23馬拉松第620輪（TW，研究帽）已收成並登記這3支**：
+  job`20260923-163927-c80e`（`finished`，exit=0）讀三支腳本的
+  `data/*_results.csv`與checkpoint`real`欄位，對照`TRIALS_LEDGER.md`
+  #120/#232/#133舊判定——**3支皆0翻轉，維持FAIL**（`margin_utilization_
+  regime_portfolio_v1`：VAL隨機控制組percentile從舊版99.0→新引擎0.0，
+  更決定性；`odd_lot_imbalance_portfolio_v1`：TRAIN/VAL percentile從
+  33.0/13.0→11.0/1.0，更決定性；`short_sale_utilization_portfolio_v1`：
+  第2關本身從TRAIN/VAL雙雙100.0→87.0/69.0未過門檻，VAL alpha p從
+  0.0354顯著→0.4489不顯著，補強#137既有最終FAIL判定的證據力）。已登記
+  `TRIALS_LEDGER.md`#382/#383/#384，`trial_registry.py --check`exit=0
+  PASS（386列）。**16支現況：8支已完成（首5支#376/#377/#380/#381+
+  本輪3支#382-384，皆0翻轉），13支尚未開始**。
+  **[自行裁量，本輪enumeration發現]**：重新grep repo內所有呼叫
+  `run_backtest(`的腳本（`grep -rl "run_backtest(" --include="*.py" .`），
+  找到33個匹配（比先前估計的21支多，先前grep因誤用`grep -v "test_"`
+  filter意外濾掉了`portfolio_backtest_v2.py`/`portfolio_backtest_v2_
+  bigsample.py`等合法候選，本輪已修正filter）；檢查`data/*checkpoint*.
+  json`發現**沒有更多跟本輪3支相同結構（`real`欄位）的checkpoint續跑
+  腳本**——僅存的另外2個checkpoint（`capital_reduction_verify_
+  checkpoint.json`鍵是`queried`、`composite_zscore_v1_random_control_
+  checkpoint.json`鍵是`draw_records`）是完全不同的資料結構，不屬於
+  這套`run_one()`共用續跑架構。**這代表剩餘13支必須逐一判斷是否屬於
+  「16支」範圍**（原始「16支」估計本身來自「28支裁示估計→grep找到21支」
+  這個模糊過程，從未有明確逐一列名的權威清單），初步過濾出的候選
+  （待下一輪或總司令確認範圍後逐一處理，非本輪判定）：
+  `piotroski_fscore_gate_v1.py`／`portfolio_backtest.py`（v1，可能已被
+  v2取代不需重測）／`run_value_board_v2_pit_backtest.py`／
+  `us_portfolio_backtest.py`／`strategies/run_weinstein_pilot.py`／
+  `strategies/run_weinstein_unbiased.py`／`strategies/run_weinstein_
+  unbiased_v2.py`／`strategies/weinstein_stage2.py`／`strategies/
+  weinstein_stage2_v2.py`／`weinstein_alpha_gate.py`／`weinstein_v2_
+  alpha_gate.py`；**明確排除**：`audit_alpha_scale_recompute.py`／
+  `audit_f52w_attribution.py`／`audit_f52w_dsr.py`（審.一診斷工具本身，
+  非trial候選）、`b25_regime_report.py`（報告工具）、
+  `backtest_engine_soundness_test.py`（S1-S3框架自檢，已改記
+  `FRAMEWORK_CHECK_FAILED`不計入N）、`concentrated_backtest.py`
+  （規.二第4節凍結中，不得動筆）、`core_tilt_backtest.py`（引擎/框架
+  本體非單一trial）、`determinism_self_test.py`（自檢工具）、
+  `f52w_high_gates.py`（屬於獨立的「#86後續」條目非本項）、
+  `phase_sensitivity.py`（round619已查證為診斷工具）、`power_budget.py`
+  （不相關工具）、`short_sale_utilization_gate5_loo.py`／`gate9_regime_
+  overlay.py`／`gates.py`（皆是已用#137最終FAIL結案的short_sale_
+  utilization候選的後續關卡腳本，最終判定不受新引擎影響，重跑不影響
+  結論，優先度低）。**下一輪**：從上述初步候選清單逐一確認是否曾用
+  舊引擎/舊量尺產出過`TRIALS_LEDGER.md`判定（只有「曾經判過」的才需要
+  重算校正，未曾判定過的屬於全新試驗不在本項範圍），確認後排入
+  detached job繼續，翻轉一律進`AWAITING_REVIEW.md`不自行改判。
 - [ ] **驗.二** [研究] spillover前視偏誤——**2026-09-23裁示【稽核解封
   ＋S2對等比較＋凍結regime家族】第一部分已完成**：「#346判定FAIL
   (前視偏誤)不需要等重跑，現在寫入並從AWAITING_REVIEW移入已結案」——
