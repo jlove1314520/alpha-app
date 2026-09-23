@@ -1,5 +1,39 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23T11:10:00+08:00（hypothesis_queue軌）— 交辦優先：接續驗.一（回測引擎健全性S1-S4），套用compounding修正後重跑，S2/S3/S4未跑完即撞budget，本輪未完成
+
+本輪依「交辦優先於自走」開工前掃描`PENDING_QUEUE.md`，`- [ ]`=3（驗.一/驗.二/驗.三，
+驗.四已由TW軌#614完成），依既有順序（驗.一與驗.四並行→驗.二→驗.三）接續驗.一。發現
+工作目錄已有前一輪（疑似TW軌或前一次hypothesis_queue輪次，未commit即中斷）留下的
+未竟工作：`research/backtest/engine.py`已寫好`compounding`旗標修正（新預設True，額度
+改用當下總權益/max_positions動態計算）+ 下市股改mark最後有效價格並回報殭屍部位數 +
+adj_close=0.0錯誤資料防呆（不觸發假停損），以及完整的`backtest_engine_soundness_
+test.py`（S1-S4）程式碼，兩者皆未commit。`research/data/backtest_engine_soundness_
+test.json`（10:52生成）記錄的是**套用修正前**的結果：S1 PASS(diff=0.0089pp)、
+S2 FAIL(引擎0.20% vs 直接算12.19%，差11.99pp)、S3中位數CAGR僅-0.01%——跟修正前
+bug描述的數字完全吻合，證實這份JSON是修正前的舊結果，不能拿來當作「已驗證」的證據。
+本輪重新執行`python backtest_engine_soundness_test.py`（套用compounding修正後的
+engine.py），S1-S4合計耗時較長（S2需240檔×10年月頻再平衡、S3為100個seed各跑一次
+8檔回測、S4另5次回測），連續等待約12分鐘（PID 157368，CPU持續增加確認未卡死）仍未
+執行完畢，本輪對話budget已見底（額度節流），**未取得套用修正後的S1-S4數字，不得
+宣稱驗證通過**。本機背景行程可能在本次呼叫結束後仍繼續跑完，也可能被session結束
+中斷，下一輪開工前務必先檢查`research/data/backtest_engine_soundness_test.json`
+的`generated_at`時間戳是否晚於本次心跳(11:10)，晚於則代表已跑完可直接讀結果判定，
+早於或不存在則代表未跑完、需重新執行（可能要考慮改用背景+分段檢查、或S2/S3/S4拆成
+更小的獨立工作單位以配合單輪budget）。**尚未做**：S4分析、`#358`改記
+`FRAMEWORK_CHECK_FAILED`（依規則必須等S1-S3全數確認PASS才能往下做，本輪未確認故
+未動）、稽核全部涉及0050/TAIEX比較的`run_backtest`型TRIALS_LEDGER列。已commit
+`engine.py`修正與`backtest_engine_soundness_test.py`程式碼本身（純程式碼變更，
+可逆、無資料判定風險）；**本輪`git push`因sandbox環境無網路存取(`Could not resolve
+host: github.com`)失敗，commit已在本機完成，push待下一輪有網路的執行環境接手**。
+`is_holdout_consumed()`開工/收工前皆確認`False`（本輪完全未觸碰holdout，S1-S4測試
+用的是train+val期資料，`end_date=holdout.VAL_END`已由既有腳本正確截斷）。交辦佇列
+還剩3條未開始（驗.一本身仍進行中未結案、驗.二、驗.三）。`[自行裁量]`：選擇不中斷
+背景行程、而是在對話budget見底時誠實記錄「未完成」並commit已完成的程式碼部分，理由
+是中途殺掉一個可能即將完成的長跑行程、下一輪從頭重跑，比留給下一輪先檢查有沒有機會
+撿現成結果更浪費運算資源；若下一輪判斷背景行程已經死亡（PID不存在且JSON時間戳未
+更新），才需要重新啟動。
+
 ## 2026-09-23T09:57:48.415937+08:00 — #81獨立重複探測資料源(與既有#81續1 CHEAP_PASS結論一致)，已於文件內加註更正說明，未進第2關
 
 本輪讀HYPOTHESIS_QUEUE.md #81條目「狀態」欄未先讀完下方續段就開始重跑資料源探測，

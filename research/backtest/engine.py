@@ -53,6 +53,15 @@ class BacktestConfig:
     # 預設 0 ＝ 完全比照舊行為，既有呼叫端一個字都不用改，行為位元級相同。
     max_positions: int = 10
     stop_loss_pct: float = 0.15  # tier-3 hard stop, independent of the MA exit
+    compounding: bool = True  # 2026-09-23（總司令裁示【三個方法缺陷＋E-c/E-d走正式閘門】
+    # 驗.一）：舊行為每筆買進固定用`initial_capital/max_positions`當額度，不管組合當下
+    # 實際權益是多少——獲利/虧損留在零息現金，不會被下一筆買進的資金基礎吸收，等於
+    # 「引擎不複利」。跟會複利的0050總報酬比較時，換手越高低估越嚴重（實測：240檔
+    # 等權重月頻再平衡，舊行為CAGR=0.20% vs pandas直接算12.19%，差近12個百分點；
+    # 隨機8檔100 seed同樣崩到中位數CAGR約-0.01%）。**True（新預設）**＝買進額度改用
+    # `當下總權益(mtm) / max_positions`（見`_slot_allocation()`），讓資金基礎隨真實
+    # 績效更新；**False**＝完全比照舊行為（固定用`initial_capital/max_positions`），
+    # 供需要重現舊結果時使用，不強迫所有既有試驗一次全部改判。
     initial_capital: float = 1_000_000.0
     slippage_bps: float = 5.0
     commission_discount: float = 1.0
@@ -71,7 +80,9 @@ class BacktestConfig:
 
 @dataclass
 class BacktestResult:
-    equity_curve: pd.DataFrame  # columns: date, equity
+    equity_curve: pd.DataFrame  # columns: date, equity, zombie_positions（2026-09-23
+    # 驗.一新增：當天mark-to-market時有幾檔持倉找不到當日有效價格、退回last_valid_
+    # price或entry_price估值——沿用既有欄位的呼叫端不受影響，只多一欄可忽略）
     trades: pd.DataFrame        # matches audit_ledgers.TRADES_SCHEMA
     config: BacktestConfig
     unresolved_at_end: list[str] = field(default_factory=list)  # stock_ids stuck limit-locked at cutoff
@@ -183,7 +194,16 @@ def run_backtest(
     trades: list[dict] = []
     equity_rows: list[dict] = []
     trade_counter = 0
-    slot_allocation = config.initial_capital / config.max_positions
+    slot_allocation = config.initial_capital / config.max_positions  # config.compounding=False專用，見下方_current_slot_allocation()
+    last_known_equity = config.initial_capital  # 每日mark-to-market後更新，供compounding=True的動態額度使用
+    last_valid_price: dict[str, float] = {}  # sid -> 最近一次有效(非0/非NaN)的adj_close，供補救行情缺口/資料錯誤用
+
+    def _current_slot_allocation() -> float:
+        # compounding=True（新預設）：用「最近一次算出的組合總權益」平均分配到
+        # max_positions個名額，讓買進額度隨真實績效更新，這是複利的核心修正。
+        # compounding=False：完全比照舊行為，固定用initial_capital/max_positions，
+        # 不管組合當下實際權益多少（供需要重現舊結果時使用）。
+        return (last_known_equity / config.max_positions) if config.compounding else slot_allocation
 
     def next_trading_day(day: str) -> str | None:
         i = calendar.index(day)
@@ -238,7 +258,7 @@ def run_backtest(
             trade_counter += 1
             tid = f"T{trade_counter:06d}"
             if p["side"] == "buy":
-                shares = int(slot_allocation // (fill_price * (1 + buy_leg_rate(config))))
+                shares = int(_current_slot_allocation() // (fill_price * (1 + buy_leg_rate(config))))
                 if shares <= 0 or sid in positions:
                     continue
                 notional = shares * fill_price
@@ -277,11 +297,21 @@ def run_backtest(
         pending = still_pending
 
         # 2) daily risk checks on held positions (tiers 1 and 3)
+        # 2026-09-23（驗.一）：實測發現真實資料裡偶爾出現adj_close恰好等於0.0
+        # 的錯誤數值（前後兩天都是正常價格，明顯是資料品質問題不是真實下市/
+        # 跌停）——舊版直接拿這個0.0去跟stop_loss_pct比較，`0.0 <= entry_price*
+        # (1-1.0) = 0.0`剛好成立，即使stop_loss_pct設成理論上不可能觸發的1.0
+        # 也會被這種錯誤資料點誤觸發強制出場。改成：非正值或NaN一律視為當天
+        # 沒有可信的價格，跳過風控判斷（不觸發MA-exit也不觸發stop-loss），
+        # 但仍更新`last_valid_price`供mark-to-market使用（見步驟4）。
         for sid in list(positions.keys()):
             if sid not in idx or day not in idx[sid].index:
                 continue
             row = idx[sid].loc[day]
             adj_close = float(row["adj_close"])
+            if adj_close <= 0 or pd.isna(adj_close):
+                continue  # 無效價格：不更新last_valid_price、不觸發任何風控判斷
+            last_valid_price[sid] = adj_close
             pos = positions[sid]
             ma150 = row.get("ma150")
             if ma150 is not None and not pd.isna(ma150) and adj_close < ma150:
@@ -313,13 +343,27 @@ def run_backtest(
                 open_slots -= 1
 
         # 4) mark to market
+        # 2026-09-23（驗.一第3點）：找不到價格（下市/長期停牌/當天資料缺漏或
+        # 無效）時，舊版mark在entry_price——若股票已經漲跌很多年後才下市，
+        # entry_price是進場當下的價格，拿它當「現在」的估值會嚴重失真（可能
+        # 高估也可能低估，取決於方向）。改成優先用`last_valid_price`（該檔
+        # 最近一次看到的有效價格），沒有任何有效價格紀錄時才退回entry_price
+        # （例如上市第一天就遇到資料缺漏，不曾有過有效價格可用）。
         mtm = cash
+        zombie_count = 0
         for sid, pos in positions.items():
+            has_today_valid = False
             if sid in idx and day in idx[sid].index:
-                mtm += pos["shares"] * float(idx[sid].loc[day, "adj_close"])
-            else:
-                mtm += pos["shares"] * pos["entry_price"]
-        equity_rows.append({"date": day, "equity": mtm})
+                today_price = float(idx[sid].loc[day, "adj_close"])
+                if today_price > 0 and not pd.isna(today_price):
+                    mtm += pos["shares"] * today_price
+                    has_today_valid = True
+            if not has_today_valid:
+                mark_price = last_valid_price.get(sid, pos["entry_price"])
+                mtm += pos["shares"] * mark_price
+                zombie_count += 1
+        equity_rows.append({"date": day, "equity": mtm, "zombie_positions": zombie_count})
+        last_known_equity = mtm
 
     unresolved = sorted({p["stock_id"] for p in pending})
     return BacktestResult(
