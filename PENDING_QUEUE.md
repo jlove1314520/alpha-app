@@ -11459,9 +11459,17 @@ wrapper維持現狀不變。
   這是regime/timing類假設第5次出現同一種死亡模式，見
   `STRATEGY_GRAVEYARD.md` `## #83`條目的模式觀察小節。登記
   `TRIALS_LEDGER.md`#364，`selection_bias_ledger.py`已重跑（N=365）。
-- [ ] **常備.4** [研究] 美股高收益債利差變動率版（HYG/IEF比值N日
+- [x] **常備.4** [研究] 美股高收益債利差變動率版（HYG/IEF比值N日
   變動率，非水位）當TAIEX regime訊號——`#78`已測水位版FAIL，變動率
   未測。來源：`STRATEGY_GRAVEYARD.md` #78段落。[自走補入]
+  **2026-09-23完成（DevQueue cycle 20260923-121601）**：新增
+  `hy_etf_ratio_roc_gate.py`（訊號=HYG/IEF比值N=20日變動率），第1關
+  cheap gate FAIL（TRAIN r=+0.0178 p=0.31、VAL r=+0.0327 p=0.32，
+  train/val同號但兩期皆不顯著，VAL未贏過洗牌null percentile=73.6<90）。
+  跟水位版(#78)不同死法——本條是乾淨「無edge」FAIL非train/val正負號
+  相反的統計偽影形狀。登記`TRIALS_LEDGER.md`#365，
+  `STRATEGY_GRAVEYARD.md`新增`## #84`條目，`selection_bias_ledger.py`
+  已重跑（N=366）。
 - [ ] **常備.5** [研究] 美股高收益債比值其他窗口（5/10/60日，非
   M=20單一窗口）當TAIEX regime訊號——未測。來源：同上。[自走補入]
 - [ ] **常備.6** [研究] DGBAS勞動力參與率當TAIEX regime訊號——`#80`
