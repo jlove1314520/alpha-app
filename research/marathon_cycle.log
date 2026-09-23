@@ -4620,3 +4620,9 @@ quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 
 ===== Marathon cycle end: 2026-09-24 02:36:20 cycle_id=20260924-023037 reason=OK cost_usd=2.830621599999999 read_kb=224.5 turns=62 duration_min=5.67 =====
 
 quota_throttle: SKIP: 正常頻率，距上次實跑24.3分鐘 < 30分鐘門檻
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Marathon cycle start: 2026-09-24 03:30:37 cycle_id=20260924-033037 =====
+quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0.39
+===== Marathon cycle end: 2026-09-24 03:33:32 cycle_id=20260924-033037 reason=OK cost_usd=1.4080160000000004 read_kb=87.9 turns=42 duration_min=2.87 =====
