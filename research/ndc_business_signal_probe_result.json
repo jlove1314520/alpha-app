@@ -1,0 +1,16 @@
+{
+  "probed_at": "2026-09-23T01:55:41.473514+00:00",
+  "train_end_boundary": "2020-12-31",
+  "val_end_boundary": "2024-12-31",
+  "dataset_api": "https://data.gov.tw/api/v2/rest/dataset/6099",
+  "ok": true,
+  "n_rows_total_with_real_score": 511,
+  "first_yyyymm_with_real_score": "198401",
+  "last_yyyymm_with_real_score": "202607",
+  "n_rows_train_period": 444,
+  "n_rows_val_period": 48,
+  "starts_before_train_end": true,
+  "gate7of10_verdict": "PASS_月頻歷史起點遠早於TRAIN_END可開發完整SPEC",
+  "cache_file": "C:\\alpha\\alpha-app\\data\\ndc_business_signal_raw.csv",
+  "pit_note": "資料為月頻，本檔尚未含公布延遲欄位（國發會官方於每月27日左右公布上上個月分數，下一輪cheap gate須自行加上公布延遲位移，不得用統計期間末日直接對齊）"
+}

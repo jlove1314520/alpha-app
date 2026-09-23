@@ -12287,12 +12287,48 @@ YoY），同樣FAIL。**景氣對策信號**（國家發展委員會編製，俗
 若三條路徑皆查無可行歷史來源，依七之三第10關規則直接判「前置未備、
 暫不開跑」，比照TWTASU（#57）／#79／的處理方式，換下一條假設軸#82。
 
-**狀態**：尚未開始第1關，尚未做資料可行性查證。下一輪從資料源起點
-探測（依上列優先順序查國發會開放資料/統計月報/FRED三條路徑的實際
-可程式化存取方式與歷史涵蓋範圍）開始，通過後才進cheap gate，不跳關。
+**狀態**：**資料源起點探測已完成（七之三第10關）：PASS**（`research/
+ndc_business_signal_probe.py`，路徑1第一次嘗試即成功，路徑2/3未查）。
+`data.gov.tw` v2 REST API（dataset 6099「景氣指標及燈號」）回傳官方
+托管的實際下載URL（`ws.ndc.gov.tw/Download.ashx?...`），免驗證免
+CAPTCHA，ZIP解壓後`景氣指標與燈號.csv`含「景氣對策信號綜合分數」
+（0~45分連續值）與「景氣對策信號」（五色燈號文字）兩欄，**月頻資料
+1984-01起有真實數值（1982-01~1983-12為NaN佔位，早期構成項目尚未齊全，
+已過濾）、最新到2026-07**，TRAIN期（<=2020-12）444筆、VAL期
+（2021-01~2024-12）48筆，起點遠早於TRAIN_END，判定
+**PASS_月頻歷史起點遠早於TRAIN_END可開發完整SPEC**。原始CSV已快取
+至`data/ndc_business_signal_raw.csv`，探測結果存
+`research/ndc_business_signal_probe_result.json`。**尚未完成**：公布
+延遲的確切規則（原SPEC假設每月27日左右公布上上個月，下一輪cheap gate
+前須實測校正，不得直接用統計期間末日對齊，比照#80/`statutory_pit_
+date()`精神）；月頻資料的有效樣本數/N_SHUFFLE校準（SPEC已預告，比照
+#80）。下一輪從公布延遲校正+cheap gate開始，不跳關。
 
-2026-09-23 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程新增（hypothesis_
-queue排程接續，無人值守），佇列#81第一順位，本輪工作單位到此為止
+2026-09-23 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程接續（hypothesis_
+queue排程接續，無人值守）完成資料源起點探測，佇列#81第一順位，本輪
+工作單位到此為止（budget考量，未做公布延遲校正與cheap gate）。
+`is_holdout_consumed()`開工/收工前皆確認`False`，本輪僅呼叫
+`data.gov.tw`/`ws.ndc.gov.tw`兩個官方公開端點，非新增資料商，符合
+「取得方式鐵律」。**本輪未寫TRIALS_REGISTRY**（仍在第0關地基/資料
+可行性查證階段，比照#75/#76/#77/#78/#79/#80先前地基輪次既有慣例）。
+
+**⚠️更正（同輪內發現）：上述探測與下方「#81續1」重複**——本輪讀取
+條目本身「狀態」欄時，未先掃到下方line 12361已存在的「#81續1」續段，
+該續段已完成公布延遲更正（`PUBLISH_LAG_DAYS=30`）＋第1關cheap gate
+（`cbi_signal_gate.py`，`TRIALS_LEDGER.md`#357，**CHEAP_PASS**，
+n=6724，TRAIN r=-0.1013/VAL r=-0.1222同號、VAL null percentile=100.0），
+比本輪的資料源探測更進一步。**以「#81續1」為準**，本輪新增的
+`ndc_business_signal_probe.py`/快取CSV為獨立驗證（結果一致，起點
+1984-01與#81續1一致），但不構成新判定，不影響既有CHEAP_PASS結論。
+下一輪待辦沿用#81續1：(a)第2關隨機控制組≥100 draws。此為
+`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節警告過的「排隊順序總結/條目續段
+沒有一次讀全就下結論」情況的具體案例，記錄供未來輪次注意：**讀某條目
+的「狀態」前，務必往下捲到該條目所有`續N`區塊都讀完，不能只讀到第一個
+「狀態」欄位就停**。
+
+2026-09-23（上一版，已由本次接續取代）由`HYPOTHESIS_QUEUE_PROTOCOL.md`
+第1節自動排程新增（hypothesis_queue排程接續，無人值守），佇列#81第一
+順位，本輪工作單位到此為止
 （依協定「這輪工作單位到此為止，下一輪從新加的這條開始跑第1關」，本輪
 僅完成#80狀態同步＋設計假設#81本身，未做任何外部資料存取/判定，
 `is_holdout_consumed()`開工/收工前皆確認`False`）。
