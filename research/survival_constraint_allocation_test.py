@@ -103,9 +103,12 @@ def simulate_fixed_allocation(prices: pd.DataFrame, rf_monthly: pd.DataFrame, st
     （`(1+年化率%/100)^(1/252)-1`），不是連續複利也不是完全不生息。
     """
     df = prices.sort_values("date").reset_index(drop=True)
+    # 2026-09-23修.二修正：股票部位交易標的是0050（股票型ETF），賣出證交稅率
+    # 應為0.1%（instrument_type="etf"），原本用BacktestConfig預設"normal"
+    # （一般股票0.3%）——見PENDING_QUEUE.md修.二完整清單。
     cfg = BacktestConfig(start_date=str(df["date"].iloc[0].date()), end_date=str(df["date"].iloc[-1].date()),
                           initial_capital=initial_capital, cost_multiplier=1.0,
-                          book_name="survival_constraint_allocation_test")
+                          book_name="survival_constraint_allocation_test", instrument_type="etf")
     buy_rate = buy_leg_rate(cfg)
     sell_rate = sell_leg_rate(cfg)
 

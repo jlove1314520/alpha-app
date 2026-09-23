@@ -101,10 +101,14 @@ def load_prices() -> pd.DataFrame:
 
 
 def _leg_cost(notional: float, *, side: str, commission_discount: float, slippage_bps: float) -> float:
-    """單邊交易成本（手續費+稅(僅賣出)+滑價），沿用validation/costs.py費率常數。"""
+    """單邊交易成本（手續費+稅(僅賣出)+滑價），沿用validation/costs.py費率常數。
+    2026-09-23修.二修正：交易標的是0050（股票型ETF），賣出證交稅率應為0.1%
+    （`tax_rate("etf")`），原本誤用一般股票稅率0.3%（`SECURITIES_TX_TAX_
+    NORMAL`），系統性多扣了0.2個百分點——見PENDING_QUEUE.md修.二完整清單。
+    """
     commission = notional * costmod.COMMISSION_RATE * commission_discount
     slip = notional * (slippage_bps / 10_000)
-    tax = notional * costmod.SECURITIES_TX_TAX_NORMAL if side == "sell" else 0.0
+    tax = notional * costmod.tax_rate("etf") if side == "sell" else 0.0
     return commission + slip + tax
 
 

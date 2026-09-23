@@ -11145,16 +11145,58 @@ wrapper維持現狀不變。
 「需在總司令實機驗證跑過一輪才能標記完成」，結案.一暫不標`- [x]`**，
 維持`- [ ]`直到總司令用實機驗證過至少一輪排程。
 
-- [ ] **修.二** [債務] ETF證交稅率系統性修正——`costs.py`新增
-  `SECURITIES_TX_TAX_ETF=0.001`＋`tax_rate(instrument_type)`函式
-  （呼叫端明確傳入instrument_type，不得用代號猜測）；grep全repo找出
-  交易0050/TAIEX代理部位卻用`SECURITIES_TX_TAX_NORMAL`的腳本（已知
-  至少exit_rule_lab.py/spillover_overlay_v1.py/copper_gold_ratio_
-  overlay_v1.py/option_pcr_overlay_v1.py，另查survival_constraint_
-  allocation_test.py與regime_alt_a_*）；只重算成本那段，逐支列「舊淨
-  報酬/新淨報酬/原判定/新判定」，任何一筆翻轉寫進AWAITING_REVIEW停下
-  不自行改判，沒翻轉照實寫「0翻轉」；`SURVIVAL_CONSTRAINT.md`同樣重算
-  85/15的MDD與年化報酬是否變動。**完成即回報翻轉清單，不等其他**。
+- [x] **修.二** [債務] 【✅完成2026-09-23，互動視窗CC】ETF證交稅率
+  系統性修正——`validation/costs.py`新增`SECURITIES_TX_TAX_ETF=0.001`＋
+  `tax_rate(instrument_type)`（合法值normal/daytrade/etf，呼叫端明確
+  傳入不得猜測）；`round_trip_cost_pct()`新增可選`instrument_type`覆蓋
+  參數（預設None＝完全比照舊行為）；`backtest/engine.py::BacktestConfig`
+  新增`instrument_type: str = "normal"`欄位（預設值保證所有既有呼叫端
+  行為零改變），`sell_leg_rate()`與逐筆賣出稅金計算改用`costmod.tax_
+  rate(config.instrument_type)`取代寫死的`SECURITIES_TX_TAX_NORMAL`。
+  **grep全repo找出的受影響腳本（5支，比裁示原文列的4支多找到1支）**：
+  `exit_rule_lab.py`／`spillover_overlay_v1.py`／`copper_gold_ratio_
+  overlay_v1.py`／`option_pcr_overlay_v1.py`（皆修正`_switch_cost_pct`/
+  `_leg_cost`改用`tax_rate("etf")`）／`regime_overlay_trend_filter_
+  gate.py`（`COST_PER_UNIT_EXPOSURE_CHANGE`常數加`instrument_type=
+  "etf"`，`regime_overlay_breadth_gate.py`/`_realized_vol_gate.py`/
+  `_margin_growth_gate.py`/`_drawdown_breaker_gate.py`/`regime_alt_a_
+  train_verdict.py`皆transitively引用同一常數自動修正，不需individually
+  改）；`survival_constraint_allocation_test.py`的`BacktestConfig`加
+  `instrument_type="etf"`。**翻轉清單（逐支列舊/新/原判定/新判定，實際
+  重跑非估算）**：
+  - `spillover_overlay_v1.py`(#89 2026-09-03)：**唯一翻轉**。原判定
+    第6關逐年一致性FAIL(11年僅4年正報酬)；修正稅率重跑後第6關轉PASS
+    並續行至第9關全過(VAL alpha p=0.0000顯著、VAL MDD -31.63%→
+    -9.26%改善)。已用git stash單獨還原此檔案驗證翻轉確實由稅率修正
+    造成(THRESHOLD=0.0近乎逐日切換曝險，0.2pp/次切換的差異高頻下有
+    放大效果)。已登記`TRIALS_LEDGER.md`#346(verdict=未結案，不自行
+    改判)，寫入`AWAITING_REVIEW.md`（3件），**不自行改判#89**。額外
+    風險：`HYPOTHESIS_QUEUE.md`至少3處引用#89當判例前例，若改判需
+    重新檢視，本輪未展開查證只記錄風險。
+  - `copper_gold_ratio_overlay_v1.py`(#126)：0翻轉，FAIL維持FAIL
+    (第5關leave-one-out，2019單年貢獻總報酬，拿掉後翻負-17.34%，
+    僅數字微調非結論改變)。
+  - `option_pcr_overlay_v1.py`(#122)：0翻轉，FAIL維持FAIL(第3關參數
+    高原19/49=39%正報酬，仍低於60%門檻，數字從14%改善到39%但未過)。
+  - `regime_overlay_trend_filter_gate.py`(#271)：0翻轉，FAIL維持FAIL
+    (MDD縮小14.6%→21.2%，仍遠低於35%門檻)。
+  - `regime_overlay_realized_vol_gate.py`(#272)/`_breadth_gate.py`
+    (#273)/`_margin_growth_gate.py`(#274)/`_drawdown_breaker_gate.py`
+    (#275)：皆0翻轉，逐一實際重跑確認(19.4%→28.6%/7.8%→20.0%/
+    -0.0%→0.0%/19.7%→20.7%，全部仍遠低於35%門檻或其他子判準未過)。
+  - `regime_alt_a_train_verdict.py`(#257主規格系列)：0翻轉，MDD縮小
+    25.5%→26.2%(此組原本用更舊的未折扣成本0.685%，本次一併吃到1.8折
+    折扣+ETF稅率雙重修正，變動量仍不足以跨過35%門檻)。
+  - `exit_rule_lab.py`(#338-344)：不在此列的舊/新比較範圍——該7筆本身
+    因修.一發現的重入邏輯bug而全數作廢重做，見修.一條目，此處只確認
+    `_leg_cost()`已改用`tax_rate("etf")`供修.一重做時使用。
+  `SURVIVAL_CONSTRAINT.md`天條一.1重算：0翻轉，MDD數字逐位元不變(月頻
+  再平衡對價格水位型指標無感)，CAGR/報酬缺口變動<0.02pp(85/15:
+  10.20%→10.21%/−1.41pp→−1.40pp)，天條一判定完全不變，符合裁示原文
+  「預期影響極小」判斷，已量過確認。
+  驗證：全部觸及`.py`檔`py_compile`過；`BacktestConfig`預設值行為
+  用直接呼叫確認與舊版逐位元相同；`trial_registry.py --check`PASS
+  （348列）。
 - [ ] **修.一** [研究] exit_rule_lab七筆撤回重做（最優先，但排在修.二
   之後因需要用修.二的ETF稅率）——`TRIALS_LEDGER.md` #338-#344全部加註
   INVALID_BUG（不刪原文），比照`KNOWN_DUPLICATE_IDS`排除於有效N外，

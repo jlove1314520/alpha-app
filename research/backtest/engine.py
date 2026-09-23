@@ -61,6 +61,12 @@ class BacktestConfig:
     # the two trade-row dicts below, which mislabeled every trade's audit book as "weinstein_stage2_pilot"
     # even when run_backtest() is reused for an unrelated strategy (e.g. score.py's top-N portfolio).
     # Default preserves the exact old behavior for existing callers that don't set it.
+    instrument_type: str = "normal"  # 2026-09-23（修.二）: passed straight to
+    # `validation.costs.tax_rate()`. Default "normal" preserves the EXACT prior
+    # behavior (SECURITIES_TX_TAX_NORMAL) for every existing caller -- this engine
+    # is shared by many individual-TW-stock strategies for which 0.3% is the
+    # correct rate. Set to "etf" only when the backtested position genuinely IS
+    # an ETF (e.g. 0050) -- never guess from the ticker string.
 
 
 @dataclass
@@ -124,9 +130,11 @@ def buy_leg_rate(config: BacktestConfig) -> float:
 
 def sell_leg_rate(config: BacktestConfig) -> float:
     """Single source of truth for the sell-leg cost fraction (commission +
-    tax + slippage). See buy_leg_rate()'s docstring.
+    tax + slippage). See buy_leg_rate()'s docstring. Tax rate comes from
+    `config.instrument_type` (default "normal", see `BacktestConfig` field
+    docstring) via `validation.costs.tax_rate()` -- not hardcoded here.
     """
-    return (costmod.COMMISSION_RATE * config.commission_discount + costmod.SECURITIES_TX_TAX_NORMAL) \
+    return (costmod.COMMISSION_RATE * config.commission_discount + costmod.tax_rate(config.instrument_type)) \
         * config.cost_multiplier + (config.slippage_bps / 10_000) * config.cost_multiplier
 
 
@@ -255,7 +263,7 @@ def run_backtest(
                     continue
                 shares = pos["shares"]
                 notional = shares * fill_price
-                tax = notional * costmod.SECURITIES_TX_TAX_NORMAL * config.cost_multiplier
+                tax = notional * costmod.tax_rate(config.instrument_type) * config.cost_multiplier
                 fee = notional * costmod.COMMISSION_RATE * config.commission_discount * config.cost_multiplier
                 slip = notional * (config.slippage_bps / 10_000) * config.cost_multiplier
                 proceeds = notional - tax - fee - slip

@@ -45,7 +45,10 @@ def build_exposure(market_df: pd.DataFrame, ma_window: int = MARKET_MA_WINDOW,
     return d
 
 
-COST_PER_UNIT_EXPOSURE_CHANGE = round_trip_cost_pct(commission_discount=0.18)
+COST_PER_UNIT_EXPOSURE_CHANGE = round_trip_cost_pct(commission_discount=0.18, instrument_type="etf")
+# 2026-09-23修.二修正：交易標的是TAIEX代理部位（0050股票型ETF），賣出證交稅率
+# 應為0.1%，原本用round_trip_cost_pct()預設daytrade=False（一般股票0.3%）——
+# 見PENDING_QUEUE.md修.二完整清單。regime_alt_a_*系列（import這個常數）連帶修正。
 # 換一次曝險水位(0->1或1->0視為滿額買賣)的全額摩擦成本，`CONSTITUTION.md`要求
 # 任何回測數字上報前都要先過成本模組，這裡不留"gross"版本當最終結果。
 # 2026-09-19 成本.二更正：舊版硬寫COMMISSION_RATE*2（即1.0折/無折扣）+稅+滑價，

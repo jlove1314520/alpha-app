@@ -1,3 +1,38 @@
+## 2026-09-23（互動視窗CC，債務帽，總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.二）
+
+**ETF證交稅率系統性修正**：`validation/costs.py`缺股票型ETF(0.1%)稅率
+（只有一般股0.3%/當沖0.15%），新增`SECURITIES_TX_TAX_ETF`＋
+`tax_rate(instrument_type)`；`backtest/engine.py::BacktestConfig`新增
+`instrument_type`欄位（預設"normal"，零改變既有呼叫端行為）。grep全
+repo找出5支受影響腳本（比裁示原文列的4支多找到`regime_overlay_trend_
+filter_gate.py`，其常數被5個regime候選腳本+`regime_alt_a_train_
+verdict.py`共用，一次修正全部連帶生效），逐支實際重跑（非估算）比對
+新舊淨報酬與判定：
+
+**翻轉清單（1筆翻轉，8筆無翻轉）**：
+- **`spillover_overlay_v1.py`(#89) 唯一翻轉**：FAIL(第6關逐年一致性
+  未過)→重跑後續行至第9關全過(VAL alpha p=0.0000顯著、MDD大幅改善)。
+  已用git stash單獨驗證翻轉確實由稅率修正造成，非環境差異。**依裁示
+  不自行改判**，登記`TRIALS_LEDGER.md`#346(verdict=未結案)，寫入
+  `AWAITING_REVIEW.md`（3件）待總司令裁示，並記錄`HYPOTHESIS_QUEUE.md`
+  至少3處引用#89當判例前例的下游風險（本輪未展開查證）。
+- 其餘8筆（`copper_gold_ratio_overlay_v1`#126／`option_pcr_overlay_v1`
+  #122／`regime_overlay_trend_filter_gate`#271／`_realized_vol_gate`
+  #272／`_breadth_gate`#273／`_margin_growth_gate`#274／`_drawdown_
+  breaker_gate`#275／`regime_alt_a_train_verdict`#257系列）：0翻轉，
+  數字皆有小幅改善但仍遠低於35%/60%等既有門檻，FAIL維持FAIL。
+- `SURVIVAL_CONSTRAINT.md`天條一.1：0翻轉，MDD數字逐位元不變，CAGR/
+  報酬缺口變動<0.02pp，符合裁示「預期影響極小」的判斷，量過確認。
+- `exit_rule_lab.py`(#338-344)：因修.一發現的獨立bug全數作廢重做，
+  不計入此輪舊/新比較，`_leg_cost()`已先改用ETF稅率供修.一使用。
+
+**驗證**：全部觸及`.py`檔`py_compile`過；`BacktestConfig`預設值行為
+確認與舊版逐位元相同；`trial_registry.py --check`PASS（348列）；
+`dev_queue_runner`三個檢查函式確認89 key無重複。
+
+**下一步**：修.一（exit_rule_lab七筆撤回重做）→結案.一（git_op_lock.py
+已寫好待實機驗證）→結案.二（CONCENTRATED_SPEC §4凍結掃描）。
+
 ## 2026-09-23（互動視窗CC，研究帽＋債務帽，方法.三續.E1重判 ＋ 規.一）
 
 **一、方法.三續.E1重判**（總司令裁示【方法.三續 E1依登記判準重判】）：

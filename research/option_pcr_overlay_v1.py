@@ -106,13 +106,16 @@ def build_overlay(aligned: pd.DataFrame, window: int = WINDOW, min_periods: int 
 
 def _switch_cost_pct(delta_exposure: float, mult: float = 1.0, slippage_bps: float = costs_mod.DEFAULT_SLIPPAGE_BPS,
                       commission_discount: float = 1.0) -> float:
+    """2026-09-23修.二修正：交易標的是TAIEX代理部位（0050股票型ETF），賣出
+    證交稅率應為0.1%（`tax_rate("etf")`），原本誤用一般股票稅率0.3%——
+    見PENDING_QUEUE.md修.二完整清單。"""
     if delta_exposure == 0:
         return 0.0
     notional = abs(delta_exposure)
     fee = notional * costs_mod.COMMISSION_RATE * commission_discount * mult
     slip = notional * (slippage_bps / 10_000) * mult
     if delta_exposure < 0:
-        tax = notional * costs_mod.SECURITIES_TX_TAX_NORMAL * mult
+        tax = notional * costs_mod.tax_rate("etf") * mult
         return fee + slip + tax
     return fee + slip
 
