@@ -68,6 +68,25 @@ def align_monthly_nonoverlap(signal_df: pd.DataFrame, price_df: pd.DataFrame) ->
     return pd.DataFrame(rows)
 
 
+def sample_nonoverlapping_blocks(df: pd.DataFrame, date_col: str, signal_col: str,
+                                  target_col: str, m: int) -> pd.DataFrame:
+    """日頻訊號(非月頻訊號)版本的不重疊觀測抽樣（`PENDING_QUEUE.md`常備.12，
+    `## #81`結案段落原文：「#76/#78不是月頻訊號的問題，需要另外設計M日
+    不重疊區塊抽樣＋circular shift的變體，下一輪不可直接套用
+    `align_monthly_nonoverlap()`」——那支函式假設輸入是「訊號發布日」這種
+    離散事件序列，VIX/HYG-IEF比值是每個交易日都有值的連續日頻序列，兩者
+    需要不同的降採樣邏輯）。
+
+    做法：df已按date_col排序、每列已算好m日前瞻報酬(target_col，逐日重疊
+    版本)，這裡只取索引0, m, 2m, 3m, ...的列，讓相鄰兩筆觀測的m日前瞻視窗
+    彼此不重疊（索引0的視窗是[0,m)，索引m的視窗是[m,2m)，緊接不重疊）。
+    n從原本的逐日筆數降到約 原始筆數/m，是真正獨立的觀測數。
+    """
+    df = df.sort_values(date_col).reset_index(drop=True)
+    idx = list(range(0, len(df), m))
+    return df.iloc[idx][[date_col, signal_col, target_col]].reset_index(drop=True)
+
+
 def circular_shift_null(signal: np.ndarray, target: np.ndarray, n: int, seed: int) -> dict:
     """circular shift虛無分布：保留訊號自身序列相關結構，只打散訊號與
     目標的對齊關係。shift量從1到len-1隨機抽（排除0＝不打散的恆等位移）。

@@ -1,0 +1,200 @@
+[
+  {
+    "name": "vix_term_structure_gate(#76)",
+    "m": 20,
+    "old_verdict_ref": "TRIALS_LEDGER#327",
+    "verdict": "FAIL",
+    "train": {
+      "n": 119,
+      "pearson": -0.01746106743303055,
+      "pearson_p": 0.8504991642780222,
+      "null_median_abs": 0.05150751493715603,
+      "percentile": 15.2,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 46,
+      "pearson": 0.1432058692677552,
+      "pearson_p": 0.3423941481093598,
+      "null_median_abs": 0.14351675302500025,
+      "percentile": 49.2,
+      "n_shuffle": 500
+    },
+    "same_sign": "False",
+    "nontrivial": true,
+    "beats_null": false,
+    "n_daily_overlap": 3283,
+    "n_nonoverlap_blocks": 165
+  },
+  {
+    "name": "hy_etf_ratio_gate(#78)",
+    "m": 20,
+    "old_verdict_ref": "TRIALS_LEDGER(#78 gate1)",
+    "verdict": "FAIL",
+    "train": {
+      "n": 164,
+      "pearson": -0.14221690034276582,
+      "pearson_p": 0.06928155400857344,
+      "null_median_abs": 0.06823328124589761,
+      "percentile": 88.8,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 46,
+      "pearson": 0.1915506759892826,
+      "pearson_p": 0.20221960091199095,
+      "null_median_abs": 0.16498791050728984,
+      "percentile": 58.4,
+      "n_shuffle": 500
+    },
+    "same_sign": "False",
+    "nontrivial": true,
+    "beats_null": false,
+    "n_daily_overlap": 4183,
+    "n_nonoverlap_blocks": 210
+  },
+  {
+    "name": "vix_term_structure_roc_gate(常備.2)",
+    "m": 20,
+    "old_verdict_ref": "TRIALS_LEDGER#363",
+    "verdict": "FAIL",
+    "train": {
+      "n": 118,
+      "pearson": 0.007726982920558456,
+      "pearson_p": 0.9338163700197918,
+      "null_median_abs": 0.05577195678016092,
+      "percentile": 6.2,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 46,
+      "pearson": 0.08406485637764216,
+      "pearson_p": 0.578587342583094,
+      "null_median_abs": 0.1445121652826972,
+      "percentile": 35.6,
+      "n_shuffle": 500
+    },
+    "same_sign": true,
+    "nontrivial": false,
+    "beats_null": false,
+    "n_daily_overlap": 3264,
+    "n_nonoverlap_blocks": 164
+  },
+  {
+    "name": "vix_level_gate(常備.3)",
+    "m": 20,
+    "old_verdict_ref": "TRIALS_LEDGER#364",
+    "verdict": "FAIL",
+    "train": {
+      "n": 280,
+      "pearson": 0.08210832351351716,
+      "pearson_p": 0.17065467473524057,
+      "null_median_abs": 0.03525188991755886,
+      "percentile": 87.0,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 46,
+      "pearson": -0.214990923208129,
+      "pearson_p": 0.1513296205266963,
+      "null_median_abs": 0.08399854377579113,
+      "percentile": 74.6,
+      "n_shuffle": 500
+    },
+    "same_sign": "False",
+    "nontrivial": true,
+    "beats_null": false,
+    "n_daily_overlap": 6507,
+    "n_nonoverlap_blocks": 326
+  },
+  {
+    "name": "hy_etf_ratio_roc_gate(常備.4)",
+    "m": 20,
+    "old_verdict_ref": "TRIALS_LEDGER#365",
+    "verdict": "FAIL",
+    "train": {
+      "n": 163,
+      "pearson": -0.06983694756594451,
+      "pearson_p": 0.3757043848218191,
+      "null_median_abs": 0.050723093547002315,
+      "percentile": 62.8,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 46,
+      "pearson": -0.09226063452134867,
+      "pearson_p": 0.5419782650742924,
+      "null_median_abs": 0.10335141204160576,
+      "percentile": 37.6,
+      "n_shuffle": 500
+    },
+    "same_sign": true,
+    "nontrivial": true,
+    "beats_null": false,
+    "n_daily_overlap": 4164,
+    "n_nonoverlap_blocks": 209
+  },
+  {
+    "name": "hy_etf_ratio_window_grid_gate(常備.5,M=5)",
+    "m": 5,
+    "old_verdict_ref": "TRIALS_LEDGER#366",
+    "verdict": "FAIL",
+    "train": {
+      "n": 654,
+      "pearson": -0.05915671450318429,
+      "pearson_p": 0.13071983581674546,
+      "null_median_abs": 0.031421963785960697,
+      "percentile": 84.39999999999999,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 186,
+      "pearson": 0.08016641182548531,
+      "pearson_p": 0.27672522753618656,
+      "null_median_abs": 0.08946988414240988,
+      "percentile": 42.4,
+      "n_shuffle": 500
+    },
+    "same_sign": "False",
+    "nontrivial": true,
+    "beats_null": false,
+    "n_daily_overlap": 4198,
+    "n_nonoverlap_blocks": 840
+  },
+  {
+    "name": "hy_etf_ratio_window_grid_gate(常備.5,M=10)",
+    "m": 10,
+    "old_verdict_ref": "TRIALS_LEDGER#366",
+    "verdict": "FAIL",
+    "train": {
+      "n": 327,
+      "pearson": -0.09983198157300546,
+      "pearson_p": 0.07140877790068154,
+      "null_median_abs": 0.03914133437356981,
+      "percentile": 91.60000000000001,
+      "n_shuffle": 500
+    },
+    "val": {
+      "n": 93,
+      "pearson": 0.10938978497647052,
+      "pearson_p": 0.2965845902593651,
+      "null_median_abs": 0.11803767158502092,
+      "percentile": 40.400000000000006,
+      "n_shuffle": 500
+    },
+    "same_sign": "False",
+    "nontrivial": true,
+    "beats_null": false,
+    "n_daily_overlap": 4193,
+    "n_nonoverlap_blocks": 420
+  },
+  {
+    "name": "hy_etf_ratio_window_grid_gate(常備.5,M=60)",
+    "m": 60,
+    "old_verdict_ref": "TRIALS_LEDGER#366",
+    "verdict": "FAIL",
+    "reason": "insufficient_sample_after_deoverlap",
+    "train_n": 55,
+    "val_n": 15
+  }
+]

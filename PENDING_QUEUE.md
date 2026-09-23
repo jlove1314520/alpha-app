@@ -11704,7 +11704,7 @@ wrapper維持現狀不變。
   抓取建議時，沒有核對該建議是否已經被同一次事故修復採納實作，屬於
   「已被既有工作取代的過時陳述」（同`規.二`round608案例的同一種形狀）。
   無新程式碼、無新統計判定，純文件狀態更正，不觸發`register_trial()`。
-- [ ] **常備.12** [開發] 補套用`regime_gate_common.py`的
+- [x] **常備.12** [開發] 補套用`regime_gate_common.py`的
   `align_monthly_nonoverlap()`/`circular_shift_null()`（或`## #81`
   段落建議的M日不重疊區塊抽樣＋circular shift變體）到
   `vix_term_structure_gate.py`(#76)／`hy_etf_ratio_gate.py`(#78)／
@@ -11717,7 +11717,16 @@ wrapper維持現狀不變。
   robust)，但六個檔案尚未實際重跑修正版，屬於`## #81`已列出待辦的
   延伸。來源：`STRATEGY_GRAVEYARD.md` `## #81`/`## #82`~`## #85`
   補記段落，2026-09-23 DevQueue cycle 20260923-121601自行裁量新增。
-  [自走補入]
+  [自走補入] **2026-09-23 DevQueue完成，8/8組維持FAIL**：新增
+  `regime_gate_common.sample_nonoverlapping_blocks()`（日頻訊號版
+  不重疊抽樣，跟`align_monthly_nonoverlap()`用途不同）與
+  `regime_gate_nonoverlap_reverify.py`一次重跑六個gate（`常備.5`
+  展開三個窗口共8組）。不重疊區塊抽樣後n從原本3283~6507驟降到
+  70~840（VAL期普遍僅15~46筆），circular-shift null percentile全部
+  遠低於90.0門檻（35.6~74.6，M=60時樣本數不足30無法判定）。**8/8組
+  FAIL，事前數學論證（舊設計偏樂觀，換保守設計不可能讓FAIL翻案成
+  PASS）獲實測驗證**。登記`TRIALS_LEDGER.md`#374。完整明細見
+  `STRATEGY_GRAVEYARD.md` `## #85`章節新增段落。冒煙測試PASS。
 
 - [x] **驗.四** [研究] E-c(10%)/E-d(MA200)走REGIME_OVERLAY_PROTOCOL.md
   正式閘門——train(<=2020-12-31)/val(2021-2024)分別報告；1000次隨機
