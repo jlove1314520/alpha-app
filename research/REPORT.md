@@ -9,6 +9,16 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第632輪 · 2026-09-24T01:3x+08:00 · TW · 研究帽：完成定案.一(事前登記#396/#397)、轉向.一續解除BLOCKED，避讓factors.py另一活躍session的修.三中途編輯
+
+- 取鎖乾淨（cycle`20260924-013037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=5（轉向.一續/定案.一/修.三/驗.四/閘門.一，總司令新裁示【候選名單定案＋抓取程式修正＋開考前資料品質閘門】）。
+- **定案.一完成**：`register_trial()`寫入`TRIALS_LEDGER.md`兩筆事前登記列#396(`f52w_high_portfolio_v1_2007_2014_prereg`)/#397(`dividend_yield_portfolio_v1_2007_2014_prereg`)，verdict=未結案，載明2007-01-01~2014-12-31、主判準/分段報告方式、Bonferroni單尾α=0.025、測試前置條件（修.三→驗.四→續抓→閘門.一）。`trial_registry.py --check`exit=0 PASS（399列）。同步核對`轉向.一續`已被本次裁示解除BLOCKED，標`[x]`。
+- **發現`research/factors.py`處於未commit中途編輯狀態**：`git status`顯示`M`，mtime距開工僅約14秒；`prepare_factors()`內15處`except RuntimeError`已新增`_is_quota_error(e): raise`與`_record_factor_warning(warnings_out, ...)`呼叫，但這兩個函式與`warnings_out`變數本身尚未定義——判定另一活躍互動視窗CC session正同步實作`修.三`。比照round613/623/625先例，本輪不觸碰此檔案與`f52w_2007_extension.py`，避免搶寫或提交半成品；`修.三`/`驗.四`/`閘門.一`維持`- [ ]`。
+- 重新查證`資料.一`：`data/rate_limit_state.json`顯示FinMind於16:05:32UTC再次命中402，`blocked_until`延到02:05:32台北，本輪01:3x查詢時仍BLOCKED（約差32分鐘）。`run_detached.py status`running=0，無job待收成。
+- `is_holdout_consumed()`開工/收工皆`False`。未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅呼叫`register_trial()`登記＋改狀態檔）。
+- 下一輪待做：先`git status`確認`factors.py`是否已由該活躍session完成並commit——若已commit，核對`修.三`兩點是否落實後接續`驗.四`；若仍未commit，繼續避讓或改做FUT/US輪替；`資料.一`預計02:05:32台北解除。
+
+---
 ## 第624輪 · 2026-09-23T21:3x+08:00 · TW · 研究帽：收成audit_16remaining_batch2並登記#390/#391，發現並更正重複登記#387-389，投遞weinstein_alpha_gate收尾job
 
 - 取鎖乾淨（cycle`20260923-213037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=4（驗.一/驗.一第4點續剩餘16支/剩餘8支/驗.二；尺.二round623已核對`[x]`、審.二已`[x]`、資料.一BLOCKED預計22:44解除未到）。`run_detached.py status`確認`audit_16remaining_batch2`（job`20260923-183404-d854`）已`finished`（exit=0，耗時176.1分鐘），「一次只跑一個重度工作」名額釋出。

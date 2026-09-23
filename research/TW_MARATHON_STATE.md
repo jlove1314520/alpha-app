@@ -6,6 +6,53 @@
 
 
 ---
+**最後更新：2026-09-24T01:3x+08:00（馬拉松第632輪，研究帽）**——取鎖乾淨
+（cycle`20260924-013037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=5（轉向.一續/定案.一/修.三/驗.四/閘門.一，總司令新裁示【候選名單
+定案＋抓取程式修正＋開考前資料品質閘門】）。**完成定案.一**：
+`register_trial()`寫入`TRIALS_LEDGER.md`兩筆事前登記列——**#396**
+`f52w_high_portfolio_v1_2007_2014_prereg`、**#397**
+`dividend_yield_portfolio_v1_2007_2014_prereg`（verdict=未結案，尚未執行
+回測），載明期間2007-01-01~2014-12-31、事前綁定只跑一次不得回頭改參數、
+主判準為2007-2014全段、2007-2009與2010-2014另分段報告但不作主判準、
+Bonferroni以候選數2計算單尾α=0.025、測試前置條件（修.三→驗.四→續抓168檔
+→閘門.一全部通過才准執行）。同步核對**轉向.一續**已被本次裁示解除
+BLOCKED（value_board_v2不列入、最終候選鎖定二個），改標`[x]`並附出處。
+**發現`research/factors.py`處於未commit的中途編輯狀態**（`git status`
+顯示`M`，`ls -la`mtime距本輪開工僅約14秒，內容顯示`prepare_factors()`
+內15處`except RuntimeError`已新增`if _is_quota_error(e): raise`與
+`_record_factor_warning(warnings_out, ...)`呼叫，但`_is_quota_error`／
+`_record_factor_warning`兩函式定義與`warnings_out`參數/變數本身尚未
+出現在檔案任何位置——判定另一活躍互動視窗CC session正在同步實作`修.三`
+額度錯誤防呆，屬合理的中途未完成狀態，非既有bug）。**[自行裁量，比照
+round613/623/625避讓先例]**：本輪不觸碰`research/factors.py`與
+`research/f52w_2007_extension.py`，避免搶寫或提交半成品程式碼（若此刻
+強行補完，兩個session對「防呆訊息文字/checkpoint欄位命名」等細節的
+選擇可能不一致，事後要merge反而更麻煩）；`修.三`/`驗.四`/`閘門.一`
+三項維持`- [ ]`，留給下一輪核對該session是否已commit。**重新查證
+資料.一**：`data/rate_limit_state.json`顯示FinMind於16:05:32UTC再次
+命中402（跟round625記錄的01:00那次blocked_until不同，是新一次觸發），
+`blocked_until`延到2026-09-24T02:05:32台北，本輪01:3x查詢時仍BLOCKED，
+約差32分鐘解除，維持`- [!]`。`run_detached.py status`：`running=0`
+（160筆歷史，無job待收成）。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（399列，本輪#396/#397兩筆
+新增）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆
+確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／`trial_registry.py`
+等CLAUDE.md十三節限定清單內任何原始碼（僅呼叫`register_trial()`登記＋
+改`PENDING_QUEUE.md`/`MARATHON_STATE.md`/`TW_MARATHON_STATE.md`三個
+狀態檔），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append
+本輪一行。**交辦佇列還剩3條未開始**（修.三/驗.四/閘門.一，後兩者BLOCKED
+於修.三完成與續抓進度）。**等待審閱：0件**。**下一輪任一軌接手**：
+先`git status`確認`research/factors.py`是否已由該活躍session完成並
+commit——若已commit，核對`_is_quota_error()`/`_record_factor_warning()`
+定義與`修.三`裁示原文兩點是否皆已落實（額度錯誤上拋+checkpoint改每檔
+存一次+並發檔案鎖），完成後接續`驗.四`（已抓132檔資料品質稽核）；若
+仍未commit且mtime持續變動，繼續避讓改做其他交辦或FUT/US輪替；`資料.一`
+預計02:05:32台北解除。完整見`REPORT.md`第632輪心跳、`PENDING_QUEUE.md`
+「定案.一」/「轉向.一續」條目、`TRIALS_LEDGER.md`#396/#397。
+
+---
 **最後更新：2026-09-23T21:3x+08:00（馬拉松第624輪，研究帽）**——取鎖乾淨
 （cycle`20260923-213037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=4（驗.一/驗.一第4點續(剩餘16支)/驗.一第4點續(剩餘8支)/驗.二；
@@ -112,64 +159,7 @@ batch2`job預估數小時，收成後接續投遞`weinstein_alpha_gate.py`(#60)
 `REPORT.md`第623輪心跳、`PENDING_QUEUE.md`「尺.二」條目、commit待補。
 
 ---
-**最後更新：2026-09-23T19:4x+08:00（馬拉松第622輪，研究帽）**——取鎖乾淨
-（cycle`20260923-183037`，上一輪已於開工前結束reason=OK）。開工先照
-「交辦優先於自走」讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.一第4點續
-（剩餘16支）/驗.二）。`run_detached.py status`：`audit_16remaining_
-batch2`（job`20260923-183404-d854`）仍`running`（開工57.3分鐘、收工
-62.5分鐘，符合預估數小時長工作，不必每輪都查）。`驗.二`明文排在21支
-稽核之後，本輪不動。**本輪工作單位＝承接round621標記「留給下一輪」的
-`long_only_vs_market.py::decompose_alpha_beta()`同類缺陷評估**：查證
-上一輪估計的4支呼叫端（`long_only_vs_market.py`本體／`run_alpha_
-decomposition.py`／`weinstein_alpha_gate.py`／`weinstein_v2_alpha_
-gate.py`），`grep TRIALS_LEDGER.md`逐一比對確認**真正需要重算的只有
-`weinstein_alpha_gate.py`(#60)一支**（`run_alpha_decomposition.py`0
-matches純診斷工具、`weinstein_v2_alpha_gate.py`0 matches從未登記、
-`portfolio_backtest.py`(v1)不呼叫此函式），blast radius比原估計小
-很多。**[自行裁量，判定為bug修復非新架構決策，比照round621
-`run_value_board_v2_pit_backtest.py`同一precedent]**：修復
-`long_only_vs_market.py`——`capm_beta_vs_market()`／
-`decompose_alpha_beta()`改呼叫`portfolio_backtest_v2.
-alpha_significance()`（0050含息總報酬benchmark+Newey-West HAC標準誤
-+Dimson beta），取代原本各自複製的簡單OLS(np.polyfit)+TAIEX價格指數
-公式；`run_period()`的`mkt_total_ret`同步改用`buy_and_hold_index_
-pct(benchmark=0050_total_return)`，修正舊版beta/alpha跟
-excess_vs_market用兩把不同尺的內部不一致。**已知簡化未變且如實記錄**：
-純化alpha報酬序列時仍只用單一beta係數乘「當期」大盤報酬扣除，未把
-Dimson三個落後項分別扣除，本輪只修正beta估計方法與benchmark，未重新
-設計純化方法論本身。**自我測試**：合成0050完全追蹤equity_curve餵入
-`decompose_alpha_beta()`，得到beta=1.0000、alpha_ann_pct≈0.0000%
-（誤差量級1e-12，浮點精度內）、beta_contribution_pct≈
-total_return_pct（934.29%對934.29%），驗證修正後函式行為正確。
-`weinstein_alpha_gate.py`／`run_alpha_decomposition.py` import驗證
-皆正常（僅import未執行）。`git status`確認本輪只修改
-`research/long_only_vs_market.py`一個檔案，未觸碰凍結區或CLAUDE.md
-十三節限定的核心研究檔案（此檔不在`research/backtest/`／
-`research/validation/`等限定清單內，馬拉松軌可修改）。
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
-（386列，本輪未新增判定，純程式碼修復）。`validation/holdout.py::
-is_holdout_consumed()`開工/收工前皆確認`False`。**同時補記round621
-遺漏的心跳**（發現原執行個體完成commit`6dafadcc`但未寫入`REPORT.md`
-／未更新`MARATHON_STATE.md`計數器，已於本輪一併補齊，避免下一個無
-記憶執行個體看不到那輪實際發生過什麼）。**佇列深度檢查**：`- [ ]`=3
-低於`MIN_QUEUE_DEPTH=12`，**[自行裁量]本輪不重掃三個備援來源**——
-round617今日稍早已完整重掃並誠實結論「補不出新候選」（`常備backlog`
-區塊記錄在案），本輪之後情況未變（無新FAIL/PASS結案釋出新議題），
-重複同一份exhaustive grep不產生新資訊，屬於預算的無效消耗，留給
-下一輪：若`驗.一第4點續`/`驗.二`都結案後佇列見底才需要重新掃描。
-**交辦佇列還剩2條未開始**（`驗.一第4點續`因job running中不算「未
-開始」但也未結案；`驗.二`明文排在21支之後）。**等待審閱：1件**
-（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪新增）。
-**下一輪任一軌接手**：`run_detached.py status`收成`20260923-183404-
-d854`——預估要跑數小時，若仍`running`不必每輪都查，可先投遞
-`weinstein_alpha_gate.py`(#60)重算job（N=200配對隨機控制組×TRAIN/VAL
-兩期，重度工作，本輪因batch2佔用「一次只跑一個重度工作」名額未投遞）；
-若batch2`finished`，優先收成該job並對照`TRIALS_LEDGER.md`#93/#290/
-#94/#291。完整見`REPORT.md`第622輪心跳、`PENDING_QUEUE.md`「驗.一第
-4點續」條目、commit`ea4ea60a`。
-
----
 
 （第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪、
 第611輪、第614輪、第615輪、第616輪、第617輪、第619輪、第620輪、
-第621輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+第621輪、第622輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）

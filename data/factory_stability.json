@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T23:17:03.009888+08:00",
+  "generated_at": "2026-09-24T01:37:02.679032+08:00",
   "methodology_note": "MTBF：以 data/seed/pipeline_registry.json 各節點 fault_history.event_log（2026-09-16 新增，2026-09-15 起累積）算故障事件間隔平均，需要至少 2 筆事件才回報數字，否則誠實標「資料不足」。每週人工介入次數：以PENDING_QUEUE.md 內『⛔ 自走中止』標記（scripts/dev_queue_runner.py block 產生）的時間戳依 ISO 週分組計數，只涵蓋 DevQueue 一條自走軌道。",
   "limits_note": "1) 故障事件時間戳只從 2026-09-15 起累積，累積週期不夠長之前 MTBF 大多是「資料不足」，這是誠實現況不是程式錯誤。2) 每週人工介入次數只計 DevQueue 的阻塞標記，馬拉松／假設佇列兩條自走軌道目前沒有等價機制，未計入，會低估真正的介入頻率。3) baseline_incidents_pre_ledger 是總司令人工回溯登記的兩週前起點數字，跟上面兩個自動計算的數字不是同一種量測方法，不可直接相減比較「進步多少」。",
   "baseline_incidents_pre_ledger": {
@@ -31,14 +31,14 @@
       "artifact": "research/alpha_live_server_cycle.log",
       "fault_count_since_epoch": 1,
       "mtbf_hours": null,
-      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 215 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
+      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 218 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
     },
     {
       "task": "AlphaShioajiQuotes",
       "artifact": "research/shioaji_quotes_cycle.log",
       "fault_count_since_epoch": 1,
       "mtbf_hours": null,
-      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 215 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
+      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 218 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
     },
     {
       "task": "AlphaShioajiQuotes",
@@ -52,7 +52,7 @@
       "artifact": "research/ibkr_quotes_cycle.log",
       "fault_count_since_epoch": 1,
       "mtbf_hours": null,
-      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 215 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
+      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 218 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
     },
     {
       "task": "AlphaIbkrQuotes",
@@ -80,21 +80,21 @@
       "artifact": "research/dev_queue_cycle.log",
       "fault_count_since_epoch": 1,
       "mtbf_hours": null,
-      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 215 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
+      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 218 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
     },
     {
       "task": "AlphaMarathon",
       "artifact": "research/marathon_cycle.log",
       "fault_count_since_epoch": 1,
       "mtbf_hours": null,
-      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 215 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
+      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 218 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
     },
     {
       "task": "AlphaHypothesisQueue",
       "artifact": "research/hypothesis_queue_cycle.log",
       "fault_count_since_epoch": 1,
       "mtbf_hours": null,
-      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 215 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
+      "mtbf_basis": "僅 1 筆故障事件（自 2026-09-15 健康帳建立起累積 218 小時），MTBF 定義為間隔平均，1 筆事件沒有間隔可算，不強算——資料不足"
     },
     {
       "task": "AlphaData",
@@ -148,7 +148,7 @@
     {
       "task": "AlphaNewsEvents",
       "artifact": "data/news.json",
-      "fault_count_since_epoch": 37,
+      "fault_count_since_epoch": 38,
       "mtbf_hours": 4.3,
       "mtbf_basis": "近 30 筆故障事件時間間隔平均（29 個間隔）"
     },
