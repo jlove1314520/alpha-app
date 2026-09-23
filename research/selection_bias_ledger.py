@@ -144,6 +144,10 @@ def parse() -> list[dict]:
         # 列都有同樣風險，一併修好，不只修IRREPRODUCIBLE這一個。
         verdict = "OTHER"
         for cell in reversed(c[2:]):
+            # FRAMEWORK_CHECK_FAILED必須排在FRAMEWORK_CHECK前面檢查——後者是
+            # 前者的字串子集，順序顛倒會把FRAMEWORK_CHECK_FAILED誤判成FRAMEWORK_CHECK。
+            if "FRAMEWORK_CHECK_FAILED" in cell:
+                verdict = "FRAMEWORK_CHECK_FAILED"; break
             if "FRAMEWORK_CHECK" in cell:
                 verdict = "FRAMEWORK_CHECK"; break
             if "CHEAP_PASS" in cell:
@@ -207,8 +211,12 @@ def main() -> int:
     # alpha檢定）從一開始就不計入N（連總N都不算，跟IRREPRODUCIBLE/
     # DUPLICATE/INVALID_BUG「仍計入總N、排除出有效N」不同——那些是
     # 「檢定過但有問題」，這個是「從頭到尾就不是要檢定alpha」）。
-    framework_check_rows = [r for r in rows if r["verdict"] == "FRAMEWORK_CHECK"]
-    rows = [r for r in rows if r["verdict"] != "FRAMEWORK_CHECK"]
+    # FRAMEWORK_CHECK_FAILED（驗.一新增）同一種語意處理：#358原本以為
+    # 框架驗證通過，後來發現連框架驗證本身都因複利bug而不成立，一樣
+    # 不計入N（不是「alpha試驗失敗」，是「這次執行從頭到尾就沒有檢定
+    # alpha的資格」）。
+    framework_check_rows = [r for r in rows if r["verdict"] in ("FRAMEWORK_CHECK", "FRAMEWORK_CHECK_FAILED")]
+    rows = [r for r in rows if r["verdict"] not in ("FRAMEWORK_CHECK", "FRAMEWORK_CHECK_FAILED")]
 
     # ── N 口徑：全體與分軌 ────────────────────────────────────────────────
     n_all = len(rows)
@@ -345,10 +353,11 @@ def main() -> int:
             L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
         L.append("")
     if framework_check_rows:
-        L.append(f"**FRAMEWORK_CHECK列表（{len(framework_check_rows)}筆，完全不計入N，僅供"
-                  "追蹤）**：隨機選股佔位訊號驗證回測框架本身正確性，不是alpha檢定：")
+        L.append(f"**FRAMEWORK_CHECK／FRAMEWORK_CHECK_FAILED列表（{len(framework_check_rows)}筆，"
+                  "完全不計入N，僅供追蹤）**：隨機選股佔位訊號驗證回測框架本身正確性，不是"
+                  "alpha檢定（FAILED代表連框架驗證本身都因為別的bug而不成立，見#358）：")
         for r in sorted(framework_check_rows, key=lambda x: x["id"]):
-            L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
+            L.append(f"- #{r['id']}（{r['date']}，{r['track']}，{r['verdict']}）{r['name'][:60]}")
         L.append("")
     L.append("## 2. 分母自查（債務二.2）")
     L.append("")

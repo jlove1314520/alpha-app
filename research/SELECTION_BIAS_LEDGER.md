@@ -1,6 +1,6 @@
 # SELECTION_BIAS_LEDGER.md — 跨輪次選擇偏誤總帳
 
-**自動產生**：`research/selection_bias_ledger.py`（2026-09-23 10:39）。
+**自動產生**：`research/selection_bias_ledger.py`（2026-09-23 11:13）。
 每新增候選就重跑一次。做法比照 Cybex `_r436_selection_bias_ledger.py`，
 **只抄方法不抄參數**（Cybex 的閾值來自加密市場，對台股零效力）。
 
@@ -35,8 +35,8 @@
 - #343（2026-09-23，TW）exit_rule_lab_E-c_trailing20
 - #344（2026-09-23，TW）exit_rule_lab_E-d_ma200_regime
 
-**FRAMEWORK_CHECK列表（1筆，完全不計入N，僅供追蹤）**：隨機選股佔位訊號驗證回測框架本身正確性，不是alpha檢定：
-- #358（2026-09-23，TW）concentrated_backtest_framework_check
+**FRAMEWORK_CHECK／FRAMEWORK_CHECK_FAILED列表（1筆，完全不計入N，僅供追蹤）**：隨機選股佔位訊號驗證回測框架本身正確性，不是alpha檢定（FAILED代表連框架驗證本身都因為別的bug而不成立，見#358）：
+- #358（2026-09-23，TW，FRAMEWORK_CHECK_FAILED）concentrated_backtest_framework_check
 
 ## 2. 分母自查（債務二.2）
 

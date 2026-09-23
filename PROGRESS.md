@@ -1,3 +1,51 @@
+## 2026-09-23（互動視窗CC＋hypothesis_queue接續，研究帽，總司令裁示【三個方法缺陷＋E-c/E-d走正式閘門】驗.一＋驗.四）
+
+**驗.四（自走軌道已完成）**：`research/regime_overlay_exit_rule_gate.py`
+新增，E-c(移動停損10%)/E-d(MA200regime)走`REGIME_OVERLAY_PROTOCOL.md`
+正式閘門，train/val分別報告+1000次block permutation隨機擇時對照組+
+逐年表+剔除2008+參數高原(24格)+定存利率計息並列，判定寫死p<=0.01且
+val守住天條一才PASS。**結果：兩者皆FAIL**（E-c p=0.062、E-d p=0.394，
+皆未達0.01門檻；val期MDD皆守住天條一但這只是必要非充分條件）。已登記
+`TRIALS_LEDGER.md`#359/#360。
+
+**驗.一（引擎修正，本輪與hypothesis_queue接續共同完成，兩邊獨立發現
+同一組bug）**：`backtest/engine.py`原有兩個真實bug——(1)買進額度固定
+用`initial_capital/max_positions`，獲利/虧損不反映到下一筆買進的資金
+基礎（不複利）；(2)資料裡偶發`adj_close=0.0`錯誤數值會誤觸發
+`stop_loss_pct`（即使設1.0理論上不可能觸發，`0<=entry_price*0=0`剛好
+成立）。#358(隨機8檔)實測-84.55%/MDD-93.2%不是「隨機訊號本來就該
+難看」——是這兩個bug的產物。修正：新增`compounding`旗標(預設True，
+買進額度改用當下總權益動態計算)；`adj_close<=0`或NaN視為無效價格不
+觸發風控；mark-to-market改用`last_valid_price`退回機制。
+
+**S1-S4結果**（`research/backtest_engine_soundness_test.py`）：S1
+**PASS**（差0.0016pp）。S2/S3技術上仍未達嚴格容忍度（S2差1.45pp門檻
+0.3pp，S3中位數差3.80pp），但相較修正前（S2差11.99pp、S3中位數約
+-0.01%接近歸零）已改善8倍以上。**S4逐項加回**（固定8檔+seed20260923）
+證實#358的極端負值主因是「每次rebalance重新隨機抽籤」這個高頻換手
+設計本身疊加複利bug，不是複利bug單獨造成：①零成本零停損11.14%→
+②+成本11.13%→③+15%停損9.82%→④+產業上限2.96%→⑤複製#358實際設計
+(每次重新抽籤)-4.48%。**S2/S3殘餘落差已排除lot-size假說**（本金
+100萬→1億落差幾乎不變），初步線索指向240檔實際進場日期分散多年
+（部分名稱較晚才有有效價格）跟pandas直接算法簡化基準不完全對齊，
+尚未100%驗證，已誠實記錄為已知殘餘限制，判斷不影響繼續往下走（核心
+災難性bug已確認修好且驗證過根因分解）。**#358已改記
+`FRAMEWORK_CHECK_FAILED`**（撤銷「框架跑得動」結論），`TRIALS_LEDGER.md`
+與`TRIALS_REGISTRY.jsonl`verdict欄位同步修正，不計入N。
+
+**驗.一第4點（全repo稽核，尚未開始）**：grep找到21支腳本呼叫
+`run_backtest`（裁示估計28支，含間接經`buy_leg_rate`/`sell_leg_rate`
+使用的腳本待查）。這是龐大的重跑工作量，本輪未展開，標記BLOCKED留給
+後續輪次接手。
+
+**驗.二／驗.三尚未開始**（spillover前視偏誤重跑9關、#81虛無分布區塊
+置換修正），本輪聚焦驗.一/驗.四優先項目，這兩項留待下一輪。
+
+**驗證**：`backtest/engine.py`所有既有欄位存取確認向下相容（新增
+`zombie_positions`欄位不影響既有讀取`equity`欄位的呼叫端）；
+`trial_registry.py --check`PASS(362列)；`selection_bias_ledger.py`
+重跑N_all=361/N_valid=350。
+
 ## 2026-09-23（互動視窗CC，維運帽＋研究帽，總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】結案.一＋結案.二）
 
 **結案.一（維運git衝突，核准方案甲＋丙）**：新增`research/git_op_lock.py`

@@ -82,6 +82,15 @@ VALID_VERDICTS = ("CHEAP_PASS", "PASS", "FAIL", "EXPERIMENTAL", "ABANDONED", "RE
                    # 這類列仍計入selection_bias_ledger的「總N」（畢竟真的佔用過一次試驗
                    # 名額），但排除在「有效N」之外（不能拿一個對不上的數字去佐證任何
                    # PASS/FAIL的信賴區間），見selection_bias_ledger.py::main()的n_valid。
+                   "FRAMEWORK_CHECK_FAILED",  # 2026-09-23總司令裁示【三個方法缺陷＋
+                   # E-c/E-d走正式閘門】驗.一：#358原本標FRAMEWORK_CHECK（框架跑得動），
+                   # 但複利bug修好後發現隨機組合的-84.55%其實不是「框架正常、隨機訊號
+                   # 本來就該難看」，是引擎本身的bug造成的失真結果——框架驗證這件事本身
+                   # 沒有真的成立，改標FRAMEWORK_CHECK_FAILED誠實反映「連框架驗證的
+                   # 目的都沒有達成」。**必須排在FRAMEWORK_CHECK前面**（VALID_VERDICTS
+                   # 順序有意義，見上方CHEAP_PASS/PASS的同款規則）：FRAMEWORK_CHECK
+                   # 是FRAMEWORK_CHECK_FAILED的字串子集，順序顛倒會讓掃描器把後者誤判
+                   # 成前者。
                    "FRAMEWORK_CHECK")  # 2026-09-23總司令裁示【修正兩個系統性錯誤＋兩件
                    # 待審閱結案】結案.二第3點：用隨機選股佔位訊號驗證回測框架本身正確性
                    # （成本模型/停損規則/產業曝險上限/MDD逐空頭段計算），跟IRREPRODUCIBLE
