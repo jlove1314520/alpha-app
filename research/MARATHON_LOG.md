@@ -1,5 +1,15 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-24T02:5x（Taipei，系統時間，第六輪）— hypothesis_queue排程
+接續：CLAUDE.md十四節凍結.二仍生效，本輪不開新alpha試驗。開工先讀
+PENDING_QUEUE.md，唯一`- [ ]`項`閘門.一`BLOCKED於續抓剩餘168檔完成。
+實際重跑`f52w_2007_extension.py`確認：斷在idx170/300（股票2450），
+再度命中FinMind HTTP 402封鎖，本次起算冷卻約88.4分鐘。目前
+fetched_ids=169、failed_ids=29，尚缺131檔未嘗試。已將`閘門.一`
+在PENDING_QUEUE.md改標`- [!]`並附上這次的具體斷點與冷卻狀態，供
+下一輪自走判斷是否已解除。本輪因餘額（budget）緊縮，未追加其他工作
+單位，判定不變、未進回測、未動核心研究檔案、未觸碰holdout。
+
 ## 2026-09-24T01:55（Taipei，UTC 17:55）— hypothesis_queue排程接續（第五輪）：
 CLAUDE.md十四節凍結.二仍生效，本輪不開新alpha試驗。開工先讀
 PENDING_QUEUE.md，唯一`- [ ]`項改為`閘門.一`，明文BLOCKED於續抓剩餘
