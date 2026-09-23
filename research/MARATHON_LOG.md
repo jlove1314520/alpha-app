@@ -1,5 +1,17 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-24T00:53（Taipei，UTC 16:53）— hypothesis_queue排程接續：
+開工先讀PENDING_QUEUE.md，唯一`- [ ]`項（轉向.一續）BLOCKED於總司令
+裁示，非本track可推進；順手查`run_detached.py status`發現
+`audit_16remaining_batch2`已完成但緊接的`weinstein_alpha_gate_engine_
+fix_recheck`已failed（exit=1），屬十三節單一寫入者管轄範圍不代為修改，
+僅記錄供互動視窗接手。CLAUDE.md十四節凍結.二仍生效，本輪接續#82資料
+查證：新增交叉驗證2016-06（完整，公告日2016-06-03/生效日2016-06-20）
+與2018-06（組成相符，日期待補）兩筆，累計3/12筆交叉驗證、2/12筆補得
+精確公告日。判定不變（可開發SPEC，公告日逐筆補查中），未進回測、未動
+核心研究檔案、未觸碰holdout。詳見`HYPOTHESIS_QUEUE.md` #82條目第四輪
+段落。
+
 ## 2026-09-23T22:57（Taipei，UTC 14:57）— hypothesis_queue排程接續：
 CLAUDE.md「十四、暫停新試驗生成期間」凍結.二仍生效（未解除），本輪
 不開新alpha試驗，改做凍結期間允許的「資料.一」（2007-2014延伸抓取）。
