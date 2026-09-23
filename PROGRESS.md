@@ -1,4 +1,71 @@
-## 2026-09-23（DevQueue自走cycle 20260923-121601，研究帽，常備.1~.5＋補記）
+## 2026-09-23（DevQueue自走cycle 20260923-131601，研究帽，常備.8/9/10/12）
+
+等待總司令審閱：1件（非本輪產出，互動視窗CC「驗.一第4點稽核」發現
+`f52w_high_portfolio_v1`VAL alpha顯著性翻轉，詳見`research/
+AWAITING_REVIEW.md`；本輪工作目錄共用，commit裡可能夾帶該session的
+並發寫入，已在對應commit訊息如實記錄，非本輪產出）。
+
+本輪連續完成4個commit（`c09613b4`/`505a5494`/`f278adf3`/`c59f5e01`），
+依權威清單依序取件；常備.11在本輪開始前已是`- [x]`，故從常備.8起：
+
+1. **常備.8**：月營收SUE連續分數加權版（bucket中性化，非二元閾值）。
+   新增`monthly_revenue_sue_continuous_bucket_v1.py`，重用
+   `event_driven_prototype.build_event_table`的bucket_key(季度x產業x
+   市值五分位)，bucket內中性化fwd20後對連續SUE分數算pooled Spearman
+   IC，填補#14(連續無bucket)與E2(bucket但二元)的交集缺口。3維表面
+   CHEAP_PASS(`TRIALS_LEDGER`#368，VAL IC=+0.0309，null percentile=
+   98.8)。**主動追加**波動度配對複驗（比照E1`#332`續.A/`#334`續.B同
+   一套方法論，因3維未控制波動度是已知假陽性來源）：4維(+波動度五
+   分位)後VAL IC崩到+0.0192、null percentile跌破門檻到84.4，登記
+   #369 FAIL。**最終判定FAIL**。已同步更正`STRATEGY_GRAVEYARD.md`
+   E1/E2段落過時的「未測連續分數加權」敘述。
+2. **常備.9**：月營收券商財測共識調整版SUE，標記**BLOCKED（待採購）**
+   非統計FAIL——三來源查證（data.gov.tw/TWSE openAPI/MOPS只公布實際
+   數字、FinMind無此類端點、CMoney理財寶法人機構預估為B2B付費產品需
+   電洽02-8252-6620）確認屬付費牆資料，依CLAUDE.md取得方式鐵律不找
+   替代爬法，直接標BLOCKED換下一項。
+3. **常備.10**：查核發現原始佇列文字「月營收個股層級事件研究」的
+   來源引用（`STRATEGY_GRAVEYARD.md`line約3546）實際出自`#75`內部人
+   買入淨額章節（美股SEC DERA），非月營收——**更正來源誤植**，
+   `[自行裁量]`依原文實際內容(內部人交易)執行。新增
+   `insider_event_level_shortwindow.py`（issuer x filing_date事件級
+   聚合，僅開放市場買入，進場=filing_date後第一個交易日）。t+5 VAL
+   IC=+0.0100/null percentile=93.6(過)；t+10 VAL IC=+0.0033/null
+   percentile=46.2(未過)；判準要求兩者皆過，**整體FAIL**。t+20對照
+   組正負號翻轉同既有`#324`。美股存活者偏誤但書：價格覆蓋僅34.7%
+   (4965/14306 ticker)。登記`#372`。
+4. **常備.12**：六個daily-overlap設計regime gate（`#76`/`#78`/常備.
+   2~.5）補套用不重疊區塊抽樣+circular shift虛無分布。
+   `regime_gate_common.py`新增`sample_nonoverlapping_blocks()`（日頻
+   訊號版，區別於既有`align_monthly_nonoverlap()`）。新增
+   `regime_gate_nonoverlap_reverify.py`一次重跑8組配置（常備.5展開
+   三個窗口），不重疊抽樣後n驟降到70~840（VAL僅15~46筆），circular-
+   shift null percentile全部遠低於90.0門檻。**8/8組維持FAIL**，事前
+   數學論證（舊設計偏樂觀，保守設計不可能讓FAIL翻案成PASS）獲實測
+   驗證。登記`#374`。VIX/HY信用利差代理regime訊號家族至此在兩套獨立
+   方法論下結論一致：無穩健候選。
+
+**佇列現況**：`- [ ]`僅剩3項（`驗.一`/`驗.二`/`驗.三`），皆屬
+`CLAUDE.md`十三節「核心研究檔案單一寫入者」限定互動視窗才能動的
+`research/backtest`/`research/validation`範疇，且目前正被互動視窗CC
+與其他自走軌道並發處理中（本輪多次commit觀察到`TRIALS_LEDGER.md`/
+`AWAITING_REVIEW.md`/`SELECTION_BIAS_LEDGER.md`被同時改寫）。三個
+補件備援來源（常備backlog區塊/空；`HYPOTHESIS_QUEUE.md`排隊中假設/
+已耗盡於`#81`FAIL；`TW_LEADS.md`/`US_LEADS.md`/`FUT_LEADS.md`「下一
+步」/皆已結案或屬FUT馬拉松自身正在跑的独立track，非未進佇列待辦）
+皆查無可誠實補入的新項目，不硬湊數量。依白名單第7條「佇列真的空了，
+補件規則也補不出東西」收工本輪，等下一批交辦或自走軌道產生新候選。
+
+**並發寫入誠實記錄**：本輪多次commit的`TRIALS_LEDGER.md`/
+`TRIALS_REGISTRY.jsonl`因工作目錄共用，夾帶了互動視窗CC同時段的
+`#370`/`#371`/`#373`（f52w_high/dividend_yield翻轉判定、
+pead_portfolio_v1重跑，皆非本輪產出），已在對應commit訊息逐一標註，
+未重做，未照單全收其結論。
+
+冒煙測試：每個commit前皆跑`node scripts/smoke_test.mjs`，全部50項
+通過。
+
+
 
 等待總司令審閱：1件（`修.二`稽核發現`spillover_overlay_v1`稅率修正
 翻轉FAIL→PASS，非本輪新增，詳見`research/AWAITING_REVIEW.md`）。
