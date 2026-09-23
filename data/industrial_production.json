@@ -1,17 +1,17 @@
 {
-  "fetched_at": "2026-09-22T23:44:01+00:00",
+  "fetched_at": "2026-09-23T14:14:54+00:00",
   "source": "經濟部官方開放資料（data.gov.tw #6607，工業生產統計），免金鑰",
   "note": "官方每月更新，資料通常落後1~2個月；僅涵蓋工業生產指數（行業代碼Z=全體工業加總），外銷訂單未接入（已知缺口，見本檔案docstring）",
   "known_gap": "外銷訂單金額統計未接入：官方資料按產品別拆成多個獨立資料集，未找到單一總金額聚合資料集",
   "errors": [],
   "latest": {
-    "date": "2026-07",
-    "value": 143.32,
+    "date": "2026-08",
+    "value": 145.97,
     "base_period": "110年=100",
-    "prev_date": "2026-06",
-    "change_mom_pct": 3.11
+    "prev_date": "2026-07",
+    "change_mom_pct": 1.85
   },
-  "yoy_pct": 23.95,
-  "yoy_base_date": "2025-07",
-  "history_months": 367
+  "yoy_pct": 23.47,
+  "yoy_base_date": "2025-08",
+  "history_months": 368
 }
