@@ -44,13 +44,69 @@ SHUFFLE_SEED = 20260903
 
 
 def _daily_returns(ticker: str) -> pd.DataFrame:
-    """回傳 date(Timestamp,已排序) + close + ret(當日對前一交易日收盤報酬)。"""
+    """回傳 date(Timestamp,已排序) + open + close + ret(當日對前一交易日收盤報酬)。
+    2026-09-23（驗.二第二部分，開盤到收盤重建版）新增`open`欄位：
+    `fetch_yf_index()`本來就回傳open，這裡只是額外選取，不改變既有呼叫端
+    （既有呼叫端都用`[["date","close"]]`或`[["date","close","ret"]]`子集
+    選取，加這欄不影響它們）。"""
     df = fetch_yf_index(ticker=ticker, start_date="2010-01-01")
     df = df.dropna(subset=["close"]).copy()
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").reset_index(drop=True)
     df["ret"] = df["close"].pct_change()
-    return df[["date", "close", "ret"]]
+    return df[["date", "open", "close", "ret"]]
+
+
+def build_aligned_series_o2c() -> pd.DataFrame:
+    """2026-09-23新增（驗.二第二部分，`STRATEGY_GRAVEYARD.md`#346前視偏誤
+    更正版）：跟`build_aligned_series()`同一套美股訊號時序對齊邏輯，但目標
+    報酬換成台股「t日開盤→t日收盤」（`tw_ret`欄位名沿用不變，只是定義從
+    close-to-close換成open-to-close，讓`spillover_overlay_v1.py`既有的
+    `build_overlay()`等下游函式可以直接重用，不必另外複製一份），理由見
+    `STRATEGY_GRAVEYARD.md`該條目：美股t日訊號在台股t-1收盤後才完全確定，
+    但close-to-close報酬含了「台股t-1收盤→t開盤」這段跳空，那段跳空發生
+    的同一段時窗正好跟美股當晚交易時段重疊，用收盤到收盤報酬去乘一個
+    「訊號公布時已經錯過」的曝險，等於讓回測看到了實際交易時看不到的
+    報酬。改用開盤到收盤，訊號在台股當日開盤前就已知，可以合法套用在
+    整個交易時段(開盤→收盤)的報酬上，不含那段跳空。
+
+    額外回傳`gap_ret`欄位（台股t-1收盤→t開盤的跳空報酬，非策略報酬的
+    一部分，只是診斷用）：用來量化「外溢效應有多少其實是活在跳空裡」——
+    如果`gap_ret`對`us_ret`的相關係數遠高於`tw_ret`(o2c)對`us_ret`的
+    相關係數，代表原本#346量到的相關性主要來自無法交易的跳空，這裡的
+    開盤到收盤版本只是把那部分誠實排除掉，不是「發明」了新的訊號。"""
+    us = _daily_returns("^GSPC")
+    tw = _daily_returns("^TWII")
+
+    us_dates = us["date"].to_numpy()
+    us_rets = us["ret"].to_numpy()
+
+    tw = tw.reset_index(drop=True)
+    tw["prev_close"] = tw["close"].shift(1)
+    tw["tw_ret_o2c"] = tw["close"] / tw["open"] - 1.0
+    tw["gap_ret"] = tw["open"] / tw["prev_close"] - 1.0
+
+    rows = []
+    for _, trow in tw.iterrows():
+        t_date = trow["date"]
+        if pd.isna(trow["tw_ret_o2c"]) or pd.isna(trow["gap_ret"]):
+            continue
+        idx = np.searchsorted(us_dates, np.datetime64(t_date), side="left") - 1
+        if idx < 0:
+            continue
+        us_signal_date = us_dates[idx]
+        us_signal_ret = us_rets[idx]
+        if pd.isna(us_signal_ret):
+            continue
+        rows.append({
+            "tw_date": t_date,
+            "us_signal_date": pd.Timestamp(us_signal_date),
+            "us_ret": float(us_signal_ret),
+            "tw_ret": float(trow["tw_ret_o2c"]),  # 欄位名沿用tw_ret，供build_overlay()等下游函式直接重用
+            "gap_ret": float(trow["gap_ret"]),
+        })
+    out = pd.DataFrame(rows)
+    return out
 
 
 def build_aligned_series() -> pd.DataFrame:
@@ -162,5 +218,54 @@ def main():
     return {"train": train_result, "val": val_result, "verdict": verdict}
 
 
+def main_o2c():
+    """2026-09-23新增（驗.二第二部分）：#88 cheap gate改用開盤到收盤重跑，
+    `evaluate()`本身不管目標報酬是close-to-close還是open-to-close都能重用。
+    額外印出「跳空報酬 vs 美股報酬」的相關係數，量化外溢效應有多少活在
+    跳空裡（見`build_aligned_series_o2c()`docstring）。"""
+    aligned = build_aligned_series_o2c()
+    print(f"對齊後總配對數(開盤到收盤版): {len(aligned)}")
+    print(f"日期範圍: {aligned['tw_date'].min()} ~ {aligned['tw_date'].max()}")
+    gap_days = (aligned["tw_date"] - aligned["us_signal_date"]).dt.days
+    assert gap_days.min() >= 1, "發現us_signal_date沒有嚴格早於tw_date，時序對齊有bug"
+
+    train, val = _split(aligned)
+    print(f"\nTRAIN(<= {TRAIN_END}): n={len(train)}  VAL({TRAIN_END}~{VAL_END}): n={len(val)}")
+
+    train_result = evaluate(train, f"TRAIN 開盤到收盤 (<= {TRAIN_END})")
+    val_result = evaluate(val, f"VAL 開盤到收盤 ({TRAIN_END} ~ {VAL_END})")
+
+    same_sign = (train_result["pearson"] > 0) == (val_result["pearson"] > 0)
+    nontrivial = abs(train_result["pearson"]) > 0.01 and abs(val_result["pearson"]) > 0.01
+    beats_null = val_result["null_percentile"] >= 90.0
+    verdict = "CHEAP_PASS" if (same_sign and nontrivial and beats_null) else "FAIL"
+
+    print("\n=== 開盤到收盤版 第1關cheap gate三項判準 ===")
+    print(f"  1. 幅度非零 (|r|>0.01兩期): {nontrivial}")
+    print(f"  2. train/val同號: {same_sign} (TRAIN r={train_result['pearson']:+.4f}, "
+          f"VAL r={val_result['pearson']:+.4f})")
+    print(f"  3. VAL贏過洗牌null(percentile>=90.0): {beats_null} "
+          f"(percentile={val_result['null_percentile']:.1f})")
+    print(f"\n判定: {verdict}")
+
+    # 跳空診斷：量化「外溢效應有多少活在無法交易的跳空裡」
+    gap_r, gap_p = stats.pearsonr(aligned["us_ret"].to_numpy(), aligned["gap_ret"].to_numpy())
+    o2c_r_full, _ = stats.pearsonr(aligned["us_ret"].to_numpy(), aligned["tw_ret"].to_numpy())
+    print("\n=== 跳空診斷（開盤跳空 vs 美股隔夜報酬）===")
+    print(f"  全期 跳空報酬 vs 美股報酬 Pearson r={gap_r:+.4f} (p={gap_p:.4f}, n={len(aligned)})")
+    print(f"  全期 開盤到收盤報酬 vs 美股報酬 Pearson r={o2c_r_full:+.4f}（對照）")
+    print(f"  跳空相關性佔比（|gap_r|/(|gap_r|+|o2c_r|)）="
+          f"{abs(gap_r)/(abs(gap_r)+abs(o2c_r_full))*100:.1f}%" if (abs(gap_r)+abs(o2c_r_full)) > 0 else "  跳空相關性佔比=N/A")
+
+    aligned.to_csv("data/spillover_overnight_aligned_o2c.csv", index=False)
+    return {"train": train_result, "val": val_result, "verdict": verdict,
+            "gap_pearson": float(gap_r), "gap_pearson_p": float(gap_p),
+            "o2c_pearson_full": float(o2c_r_full)}
+
+
 if __name__ == "__main__":
     main()
+    print("\n\n" + "#" * 70)
+    print("# 驗.二第二部分：開盤到收盤重建版")
+    print("#" * 70)
+    main_o2c()

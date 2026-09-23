@@ -2523,3 +2523,16 @@ A/B兩版本皆p=0.053）明確標記為「接近顯著、值得追蹤」而非�
 - `trial_registry.py --check`exit=0 PASS（386列，本輪未新增判定，純程式碼修復非統計判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`portfolio_backtest_v2.py`任何原始碼（只修改`run_value_board_v2_pit_backtest.py`，不在CLAUDE.md「十三、核心研究檔案單一寫入者」限定清單內），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩2條未開始（`驗.一第4點續`本身因job running中不算「未開始」但也未結案；驗.二）。**等待審閱：1件**（`審.一`f52w DSR=0.0000決定性FAIL摘要，延續中，非本輪新增）。
 - **下一輪**：`run_detached.py status`收成`20260923-183404-d854`——預估要跑數小時，若仍`running`不必每輪都查，可先做`驗.二`或其他工作；若`finished`，讀`data/value_board_v2_pit_backtest_liquidity500_full.csv`與`data/piotroski_fscore_gate_v1_results.csv`對照`TRIALS_LEDGER.md`#93/#290/#94/#291，翻轉一律進`AWAITING_REVIEW.md`不自行改判；`weinstein_alpha_gate.py`同類缺陷待決定是否修復。
+
+---
+## 第625輪 · 2026-09-23T22:3x+08:00 · FUT · 維運帽：查核確認前次開放項目全數結案，發現weinstein job已被CC取代，避開活躍session的驗.二競態，誠實回報本輪無新工作單位
+
+- 取鎖乾淨（cycle`20260923-223037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0——TW軌round623/624與互動視窗CC已把先前開放項目（驗.一／驗.一第4點續16支／驗.一第4點續8支／尺.二／審.二）全部標`[x]`；驗.二第一部分已`[x]`，第二部分待辦但正被另一活躍session處理中。資料.一仍BLOCKED（預計台北22:44:48解除，本輪22:30檢查尚差約13分鐘）。
+- 佇列深度自檢：`- [ ]`=0低於12下限，但CLAUDE.md十四節「凍結.二」明文暫停佇列深度補件規則，不得用新alpha試驗補件，本輪不重掃備援來源。
+- 查核並結案一項過時待辦：TW round624投遞的job`20260923-213506-0f76`（weinstein_alpha_gate_engine_fix_recheck）已failed（`validation/control_group.py::one_draw()`拋NaN轉int的ValueError，已知舊漏洞`entry_price<=0`防呆漏掉NaN）；比對`git log`確認互動視窗CC已於commit`a73d5c20`（21:47:41，晚於本job失敗時間21:37:00）修正並用修正後引擎重新跑出結果，登記`TRIALS_LEDGER.md`#392（weinstein_alpha_gate.py，VAL percentile=3.0，FAIL）與#393（weinstein_v2_alpha_gate.py，percentile=4.0，FAIL）。round624留下的「下一輪待做：收成job」已由CC工作取代，本輪未再次投遞或登記。
+- **[自行裁量，避免搶寫競態]**：`git status`發現`research/spillover_overnight_gate.py`有staged未commit變更（107 insertions），同時`tasklist`確認12個`claude.exe`行程並行，判斷另一活躍session正在做驗.二第二部分（開盤到收盤重跑），本輪不觸碰此檔案及其可能的輸出檔。
+- `#50`tick累積：`research/data/ticks/*.parquet`實測13/20（新增`20260923.parquet`），gate50三條件總司令仍未回應，維持被動等待。
+- **本輪誠實結論**：先前所有開放項目已結案或正被其他活躍session處理，凍結.二禁止新增alpha試驗、佇列深度補件規則暫停，本輪查無可推進的新工作單位——依CLAUDE.md「零之一」白名單第7條精神記錄後結束，不硬湊候選。
+- `trial_registry.py --check`exit=0 PASS（395列，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋archive舊state條目），全程零新增外部API呼叫。
+- 交辦佇列還剩0條未開始。**等待審閱：1件**（value_board_v2 VAL alpha翻轉#390，非本輪新增，延續中）。
+- 下一輪待做：確認驗.二第二部分是否已由活躍session完成commit；資料.一預計22:44:48解除，屆時可續抓f52w/dividend 2007-2014延伸資料；依輪替下一輪建議選US軌（round613=09:3x，三軌中最舊）。
