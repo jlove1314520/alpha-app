@@ -12430,4 +12430,19 @@ regime/timing類假設累計12個測試，全數FAIL或資料不可及/前置未
 需逐一重跑才能確認，不得假設）。`is_holdout_consumed()`本輪開工/收工前皆確認
 `False`。
 
+**【2026-09-23補記，hypothesis_queue軌本輪同步】**：上述「尚未完成」的
+#76/#78重跑，已由DevQueue軌`常備.12`（`PENDING_QUEUE.md`對應條目）完成——
+新增`regime_gate_common.sample_nonoverlapping_blocks()`（日頻版不重疊區塊
+抽樣，跟本條目的`align_monthly_nonoverlap()`用途不同、專為連續日頻序列
+設計）+`regime_gate_nonoverlap_reverify.py`，一次重跑
+`vix_term_structure_gate.py`(#76)／`hy_etf_ratio_gate.py`(#78)／
+`vix_term_structure_roc_gate.py`／`vix_level_gate.py`／
+`hy_etf_ratio_gate.py`(ROC版)／`hy_etf_ratio_window_grid_gate.py`
+（`常備.5`展開三窗口）共8組。結果：n從原3283~6507驟降到70~840
+（VAL期普遍僅15~46筆），circular-shift null percentile全部遠低於90.0
+門檻（35.6~74.6，M=60時樣本不足30無法判定）。**8/8組維持FAIL**，登記
+`TRIALS_LEDGER.md`#374、`STRATEGY_GRAVEYARD.md` `## #85`章節。本佇列
+regime/timing類假設（含此批）累計結論不變：全數FAIL或資料不可及，
+不進第2關以後。
+
 ---

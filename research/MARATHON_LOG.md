@@ -1,5 +1,6 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23T13:52:52 — 同步HYPOTHESIS_QUEUE.md #76/#78補記——DevQueue常備.12(#374)已完成6檔8組reverify，8/8維持FAIL，回填佇列文件避免下一輪誤讀舊「尚未完成」提示字 — 結果：文件同步完成，非新試驗
 ## 2026-09-23T12:30:00+08:00（hypothesis_queue軌）— 交辦優先：讀取上輪背景行程跑完的驗.一續S3/S4結果並記錄，框架檢查仍未過（S2/S3皆FAIL），未進一步除錯，budget見底收工
 
 開工先`git stash`暫存其他排程留下的殘留變更（`data/audit_report.json`等9檔，非本track
