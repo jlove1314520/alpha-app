@@ -11588,8 +11588,10 @@ wrapper維持現狀不變。
   adjust.py出口，<=0一律轉NaN，不得各腳本各補一次)，修正前後各跑一次
   adjust自我測試；grep所有用adj_close算報酬卻沒防呆的腳本列清單(只
   估計影響筆數，暫不重跑不改判，Pearson IC類與事件研究類分開列)。
-- [ ] **協調.零** [債務] 核心檔案單一寫入者——`research/backtest/`／
+- [x] **協調.零** [債務] 核心檔案單一寫入者——`research/backtest/`／
   `research/validation/`／`adjust.py`／`pit.py`／`trial_registry.py`
   只允許互動視窗CC修改，自走軌道(marathon/hypothesis_queue/dev_queue)
   發現需要改這些檔案只能寫PENDING_QUEUE提案不得直接編輯，寫進
-  CLAUDE.md。
+  CLAUDE.md。**已完成（2026-09-23）**：規則已寫入`CLAUDE.md`「十三、
+  核心研究檔案單一寫入者」節，涵蓋範圍、提案格式、既有事故不追溯、
+  意外掃入他人變更時的回報義務皆已明訂。
