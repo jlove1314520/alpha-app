@@ -94,12 +94,21 @@ def audit_score_topn() -> dict:
 
 if __name__ == "__main__":
     out = {}
-    print("=== 1/3: portfolio_backtest_v2 (corrected臂, A_4pass, 6權重模式x2頻率x2期) ===", flush=True)
-    out["portfolio_backtest_v2"] = audit_portfolio_backtest_v2()
-    print(json.dumps(out["portfolio_backtest_v2"], ensure_ascii=False, indent=2, default=str))
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    print(f"（階段性）已寫入 {OUT_JSON}", flush=True)
+    if OUT_JSON.exists():
+        try:
+            out = json.loads(OUT_JSON.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            out = {}
+
+    if "portfolio_backtest_v2" in out:
+        print("=== 1/3: portfolio_backtest_v2 已有既存結果（round615/commit 6305aab9），略過重跑 ===", flush=True)
+    else:
+        print("=== 1/3: portfolio_backtest_v2 (corrected臂, A_4pass, 6權重模式x2頻率x2期) ===", flush=True)
+        out["portfolio_backtest_v2"] = audit_portfolio_backtest_v2()
+        print(json.dumps(out["portfolio_backtest_v2"], ensure_ascii=False, indent=2, default=str))
+        OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        print(f"（階段性）已寫入 {OUT_JSON}", flush=True)
 
     print("\n=== 2/3: pead_portfolio_v1 ===", flush=True)
     out["pead_portfolio_v1"] = audit_pead()

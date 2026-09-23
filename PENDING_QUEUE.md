@@ -11503,6 +11503,19 @@ wrapper維持現狀不變。
   一輪龐大的重跑工作量（每支腳本可能有自己的資料載入與判定邏輯）。
   **2026-09-23裁示更新：解除BLOCKED、列最高優先**，見上方本條目開頭
   更新文字，等`驗.一續2`的S2b通過後立刻開始，先跑5支指定腳本。
+  **馬拉松第616輪（TW，13:3x）進度**：5支中第1支
+  （`portfolio_backtest_v2`）已於round615前commit`6305aab9`完成
+  （0翻轉）。本輪修改`audit_run_backtest_5priority.py`加入「已有結果
+  就略過重跑」的續跑邏輯（`[自行裁量]`：避免重跑已完成、耗時的1/3
+  階段浪費預算），投遞detached job`20260923-133203-00a4`跑第2/3支
+  （`pead_portfolio_v1`→#73）與第3/3支（`run_score_backtest`→#12），
+  session內等待4分鐘仍`running`（`pead_portfolio_v1`的
+  `n_random=100`兩期各跑一次較慢），**下一輪用`run_detached.py
+  status`／`log`收成**，完成後對照TRIALS_LEDGER#73/#12舊判定，翻轉
+  一律進`AWAITING_REVIEW.md`不自行改判。跑完這3支後，尚有第4~5支
+  （`f52w_high_portfolio_v1`／`dividend_yield_portfolio_v1`，據腳本
+  docstring另需獨立指令因checkpoint機制單次35-40分鐘），以及裁示提到
+  「其餘16支」的第二輪稽核，留待後續輪次。
 - [ ] **驗.二** [研究] spillover前視偏誤——**2026-09-23裁示【稽核解封
   ＋S2對等比較＋凍結regime家族】第一部分已完成**：「#346判定FAIL
   (前視偏誤)不需要等重跑，現在寫入並從AWAITING_REVIEW移入已結案」——

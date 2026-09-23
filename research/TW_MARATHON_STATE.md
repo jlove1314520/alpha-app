@@ -4,6 +4,48 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-23T13:3x+08:00（馬拉松第616輪，研究帽）**——取鎖乾淨
+（cycle`20260923-133037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=7（驗.一/驗.二/驗.三/常備.9/常備.10/常備.12；常備.6/常備.7已於
+round615之後被裁示改標`- [!]`家族凍結，常備.8已由DevQueue軌本輪完成）。
+`tasklist`確認**13個claude.exe行程仍在並行**（與round615一致，高併發
+持續中）。**選定驗.一**（裁示明列最高優先，且核對`驗.一續2`已完成、
+S2b完美PASS，引擎判定健全，驗.一第4點21支稽核已解鎖）：確認第1/5支
+（`portfolio_backtest_v2`）已於round615之前由其他track commit
+`6305aab9`完成（0翻轉）。檢視既有`audit_run_backtest_5priority.py`
+（前一執行個體已寫好，涵蓋2/3支：`pead_portfolio_v1`→#73、
+`run_score_backtest`→#12），發現該腳本`__main__`會無條件重跑全部3支
+（含已完成的portfolio_backtest_v2），**修改為「輸出檔已有該階段結果就
+略過重跑」的續跑邏輯**（`[自行裁量]`：避免浪費預算重算已確認0翻轉的
+結果），投遞`run_detached.py submit`（job`20260923-133203-00a4`，
+timeout 40分鐘），session內`wait --max-min 4`確認正確略過1/3、進入
+2/3（`pead_portfolio_v1`，`n_random=100`兩期各一次，耗時較長），
+**下一輪用`run_detached.py status`／`log`收成**，完成後對照
+`TRIALS_LEDGER.md`#73/#12舊判定與關鍵數字，翻轉一律進
+`AWAITING_REVIEW.md`不自行改判。跑完這2支後仍有第4~5支
+（`f52w_high_portfolio_v1`／`dividend_yield_portfolio_v1`，腳本
+docstring註記因checkpoint機制單次35-40分鐘需另外獨立指令跑），以及
+裁示提到的其餘16支稽核，留待後續輪次。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（371列，本輪未新增判定，
+純重跑既有腳本+比對，尚未產生新判定結果）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+全程零新增外部API呼叫（回測用既有`finmind_client.load_dev`本地快取）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩6條未開始**
+（驗.二/驗.三/常備.9/常備.10/常備.12，驗.一因detached job running中
+不算「未開始」但也未結案）。**等待審閱：0件**（`AWAITING_REVIEW.md`
+未變動，本輪未新增待審項）。**下一輪任一軌接手**：優先收成
+`20260923-133203-00a4`（`run_detached.py status`確認`finished`後
+讀`research/data/audit_run_backtest_5priority.json`的`pead_
+portfolio_v1`/`run_score_backtest`欄位），登記對照結果進
+`TRIALS_LEDGER.md`並更新`驗.一`條目進度；13個claude.exe並行行程
+仍在時建議先`tasklist`確認、優先挑backlog裡低碰撞項目；`常備.9`/
+`常備.10`（月營收SUE系列）為安全的自走可推進項；`常備.12`需設計新的
+區塊抽樣變體。完整見`REPORT.md`第616輪心跳（待補）、`PENDING_QUEUE.md`
+「驗.一」條目。
+
+---
+
 **最後更新：2026-09-23T12:3x+08:00（馬拉松第615輪，研究帽）**——取鎖乾淨
 （cycle`20260923-123037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=9（驗.二/驗.三/常備.6~.11，count後常備.12又新增，見下）。
@@ -117,44 +159,5 @@ backtest_engine_soundness_test.json`），S1-S3全PASS才能繼續驗.一第
 裁示【三個方法缺陷＋E-c/E-d走正式閘門】」章節、`TRIALS_LEDGER.md`
 #359/#360、`STRATEGY_GRAVEYARD.md`。
 
----
-
-**最後更新：2026-09-23T07:3x+08:00（馬拉松第611輪，研究帽）**——取鎖乾淨
-（cycle`20260923-073037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=0，23條`- [!]`阻塞中；逐一核對阻塞項開頭解除條件（含`AWAITING_
-REVIEW.md`兩件、`金流一.4`、`資料源一.3`、`#50`），皆未到解除時間點，
-維持`- [!]`。**佇列深度自檢**：`- [ ]`=0（<12下限），round599~610已連續
-12輪確認三個備援來源掃無新項，依round604/609既有建議本輪不重複全面
-掃描，改做精簡確認。三軌時間戳：US round609=09-23 05:3x／FUT
-round610=09-23 06:3x／**TW round608=09-23 04:3x（最舊）**——依輪替選TW。
-`run_detached.py status`確認`running=0`（151筆歷史，無running job需
-收成）。`git status`（開工時）僅例行排程檔案（`audit_report.json`／
-`factory_stability*`／`connectivity_check.log`／`marathon_cycle.log`等），
-無conflict標記、無孤兒未commit產出，round607修復的git stash衝突未
-復發。`#50`（唯一未結案方向）tick累積**精確重新清點為12/20**（`ls
-research/data/ticks/*.parquet`實測12個檔案：20260907/08/09/10/11/14/15/
-16/17/18/21/22；另有一個無`.parquet`副檔名的`20260915`目錄疑為殘留
-非資料檔，未計入），**更正round609記錄的「13/20」為計數誤差**，實際
-未變。`AWAITING_REVIEW.md`兩件（規.二第4節掃描方式提案、維運.git衝突
-根因修復方案）皆仍`等待中`，未收到總司令回應。**結論：與round604~610
-連續七輪一致，TW/US/FUT三軌本輪仍無新可推進工作單位**，目前唯二解鎖
-點（總司令對兩件`AWAITING_REVIEW`的裁示、tick累積至20/gate50回應）皆
-非自走可推進範圍，不硬湊新項。未執行任何新統計判定，不觸發
-`register_trial()`。`trial_registry.py --check`（`PYTHONIOENCODING=
-utf-8`）exit=0 PASS（347列，本輪未新增判定）。`validation/holdout.py::
-is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
-`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀
-既有`.md`/`.json`帳本檔案、`git status`、`run_detached.py status`、
-`ls research/data/ticks/`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪
-一行。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。**等待審閱：
-2件**（規.二第4節參數掃描方式提案／維運.git衝突根因修復方案，皆非
-本輪新增，延續中）。**下一輪任一軌接手**：兩件`AWAITING_REVIEW`項是
-目前TW/US集中版框架與三支wrapper git協調修復的唯一解鎖點，出爐前
-建議持續比照本輪做精簡確認，不必每輪重新全面掃描三個備援來源；`#50`
-仍被動等待tick累積至20（12/20）與總司令對gate50三條件的回應；依輪替
-下一輪建議選US軌（US round609/FUT round610本輪皆已比TW新，但下一輪
-若仍無新裁示，三軌可等距輪替即可，不必刻意避開剛碰過的軌）。完整見
-`REPORT.md`第611輪心跳、`AWAITING_REVIEW.md`。
-
-
-（第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+（第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪、
+第611輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）

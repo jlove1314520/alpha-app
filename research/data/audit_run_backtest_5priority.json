@@ -600,5 +600,49 @@
       "arm": "corrected",
       "n_stocks": 297
     }
-  ]
+  ],
+  "pead_portfolio_v1": {
+    "TRAIN": {
+      "label": "TRAIN",
+      "start": "2015-01-01",
+      "end": "2020-12-31",
+      "return_pct": 158.03356640173513,
+      "mdd_pct": -25.491936196912818,
+      "sortino": 0.9860945515697304,
+      "sharpe": 1.1357832327364028,
+      "n_trades": 833,
+      "alpha_ann_pct": 12.010586338914187,
+      "beta": 0.6784293859081949,
+      "alpha_pvalue": 0.019447383693678693,
+      "alpha_significant": true,
+      "cost_1x": 158.03356640173513,
+      "cost_2x": 120.57708474557249,
+      "cost_3x": 91.61503733891703,
+      "buy_and_hold_index_pct": 58.85653717715231,
+      "random_control_median_pct": 14.88858640421411,
+      "random_control_percentile": 100.0,
+      "n_random": 100
+    },
+    "VALIDATION": {
+      "label": "VALIDATION",
+      "start": "2021-01-01",
+      "end": "2024-12-31",
+      "return_pct": 48.2794861822041,
+      "mdd_pct": -20.560745910256443,
+      "sortino": 0.6235619547963785,
+      "sharpe": 0.6734625688369666,
+      "n_trades": 556,
+      "alpha_ann_pct": 3.339132535672684,
+      "beta": 0.656001357812906,
+      "alpha_pvalue": 0.6185891132793484,
+      "alpha_significant": false,
+      "cost_1x": 48.2794861822041,
+      "cost_2x": 31.96292054381431,
+      "cost_3x": 20.109240757755643,
+      "buy_and_hold_index_pct": 54.57692676769539,
+      "random_control_median_pct": 12.2040104468933,
+      "random_control_percentile": 97.0,
+      "n_random": 100
+    }
+  }
 }
