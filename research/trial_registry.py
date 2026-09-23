@@ -200,6 +200,7 @@ def register_trial(
     n_obs: int | None = None,
     skew: float | None = None,
     kurtosis: float | None = None,
+    periods_per_year: int | None = None,
     failed_gates: list[str] | None = None,
     dry_run: bool = False,
 ) -> tuple[int, str]:
@@ -208,12 +209,23 @@ def register_trial(
     參數全部是關鍵字，避免位置參數錯位把「結果」寫到「判定」欄——帳本橫跨多次改版，
     欄序本來就已經不一致過一次了。
 
-    `sharpe`/`n_obs`/`skew`/`kurtosis` 是 Deflated Sharpe 的四個必要輸入
-    （2026-09-07 Cowork.債務2.4 新增）。**四個要嘛全給、要嘛全不給**，給一半直接 raise
+    `sharpe`/`n_obs`/`skew`/`kurtosis`/`periods_per_year` 是 Deflated Sharpe 的
+    五個必要輸入（2026-09-07 Cowork.債務2.4 新增四個；2026-09-23 總司令裁示
+    【DSR 單位錯誤修正＋f52w 改用資訊比率重審＋2008 延伸】尺.二新增
+    `periods_per_year`）。**五個要嘛全給、要嘛全不給**，給一部分直接 raise
     ——半套輸入算不出 DSR，卻會讓人以為已經記了。目前不是必填：因子 IC 測試那類試驗
     本來就沒有 Sharpe，硬性要求只會逼出假數字。但只要是**會拿去報告成候選**的試驗，
-    沒給這四個，`candidate_report.report_candidate()` 就算不出 DSR，那筆候選一律
+    沒給這五個，`candidate_report.report_candidate()` 就算不出 DSR，那筆候選一律
     「不得提請審核」（債務2.3 記錄的「DSR 算不出來」根因就是這四欄從來沒被記過）。
+
+    **`periods_per_year`存在的理由（尺.二根因）**：#234~#238（FUT track）曾把
+    「年化Sharpe」直接塞進`sharpe`欄位，卻配上日頻的`n_obs`(6183)，導致
+    `trials_sharpe_variance()`用年化尺度的數字估計V、算出年化尺度的SR0門檻，
+    卻拿去跟日頻Sharpe（例如#379的0.1091）比較——單位對不上，DSR算出離譜的
+    數字（#379曾算出0.0000，更正後是0.978）。這裡用一個粗但有效的防呆：
+    **`periods_per_year=252`（日頻）時，`abs(sharpe)>1`直接拒絕登記**——
+    日頻Sharpe理論上不可能超過1（那代表單日報酬的均值超過一個標準差，
+    在真實市場資料上等同不可能），常見的犯錯模式正是把年化值誤標成日頻。
 
     `failed_gates`（2026-09-18新增）：`verdict="FAIL"` 時應填，是哪一關/哪些關卡
     判掉這筆試驗的列表，值域見 `FAILED_GATES_VOCAB`（`FAILED_GATES_ENFORCE_FROM`
@@ -257,23 +269,35 @@ def register_trial(
     round_tag = f"round{round_no}" if round_no is not None else _clean(round_note, "round_note")
 
     dsr_inputs = None
-    given = {"sharpe": sharpe, "n_obs": n_obs, "skew": skew, "kurtosis": kurtosis}
+    given = {"sharpe": sharpe, "n_obs": n_obs, "skew": skew, "kurtosis": kurtosis,
+             "periods_per_year": periods_per_year}
     present = [k for k, v in given.items() if v is not None]
     if present:
         missing = [k for k, v in given.items() if v is None]
         if missing:
             raise ValueError(
-                f"登記被拒：DSR 四輸入給了 {present} 卻缺 {missing}——"
-                "四個要嘛全給、要嘛全不給，半套輸入算不出 DSR 卻會讓人以為已經記了"
+                f"登記被拒：DSR 五輸入給了 {present} 卻缺 {missing}——"
+                "五個要嘛全給、要嘛全不給，半套輸入算不出 DSR 卻會讓人以為已經記了"
             )
         if int(n_obs) < 2:
             raise ValueError(f"登記被拒：`n_obs` 必須 ≥2（收到 {n_obs}）")
         if float(kurtosis) <= 0:
             raise ValueError(f"登記被拒：`kurtosis` 是非超額峰態（常態=3.0），不得 ≤0（收到 {kurtosis}）")
+        if int(periods_per_year) <= 0:
+            raise ValueError(f"登記被拒：`periods_per_year` 必須為正整數（收到 {periods_per_year}）")
+        if int(periods_per_year) == 252 and abs(float(sharpe)) > 1:
+            raise ValueError(
+                f"登記被拒：periods_per_year=252（日頻）時 |sharpe| 不得 >1（收到 {sharpe}）——"
+                "日Sharpe理論上不可能超過1，常見錯誤是把年化Sharpe誤標成日頻塞進這個欄位"
+                "（見#234~#238的教訓，尺.二根因）。若這個sharpe確實是年化值，"
+                "改傳periods_per_year=1，或先自行換算成日頻（年化/sqrt(252)）再傳入"
+            )
         dsr_inputs = {"sharpe": float(sharpe), "n_obs": int(n_obs),
-                      "skew": float(skew), "kurtosis": float(kurtosis)}
+                      "skew": float(skew), "kurtosis": float(kurtosis),
+                      "periods_per_year": int(periods_per_year)}
         result_c += (f"（Sharpe={dsr_inputs['sharpe']:.4f}／T={dsr_inputs['n_obs']}／"
-                     f"skew={dsr_inputs['skew']:.3f}／kurt={dsr_inputs['kurtosis']:.3f}）")
+                     f"skew={dsr_inputs['skew']:.3f}／kurt={dsr_inputs['kurtosis']:.3f}／"
+                     f"periods_per_year={dsr_inputs['periods_per_year']}）")
 
     stamp = date or datetime.now(TZ).strftime("%Y-%m-%d")
     if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", stamp):

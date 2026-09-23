@@ -262,7 +262,8 @@ def main() -> int:
     # 回頭改寫這7筆本身的判定欄，改用明確列出編號排除出有效N，仍計入
     # 總N（確實佔用過試驗名額）。見TRIALS_LEDGER.md #344前方INVALID_BUG
     # 說明。修正版7筆已重新登記為新編號，不受此排除影響。
-    KNOWN_INVALID_BUG_IDS = {338, 339, 340, 341, 342, 343, 344}
+    KNOWN_INVALID_BUG_IDS = {338, 339, 340, 341, 342, 343, 344,
+                              379}  # 尺.二：DSR用的V混用年化/日頻單位，DSR=0.0000是單位錯誤的產物
     invalid_bug_rows = [r for r in rows if r["id"] in KNOWN_INVALID_BUG_IDS]
     n_valid = n_all - len(irreproducible_rows) - len(duplicate_rows) - len(invalid_bug_rows)
 

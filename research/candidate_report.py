@@ -34,7 +34,8 @@ Sharpe/T/skew/kurt 四個 DSR 必要輸入，讓「往後算得出來」成為�
 程式內：
     from candidate_report import report_candidate, deflated_sharpe, CandidateStats
     blk = report_candidate(key="f_low_vol", headline={"隨機控制組百分位": "100.0"},
-                           stats=CandidateStats(sharpe=0.06, n_obs=1200, skew=-0.3, kurtosis=4.1),
+                           stats=CandidateStats(sharpe=0.06, n_obs=1200, skew=-0.3, kurtosis=4.1,
+                                                 periods_per_year=252),
                            var_sr_trials=0.25)
     print(blk["markdown"])
 """
@@ -80,18 +81,27 @@ CANDIDATE_VERDICTS = ("CHEAP_PASS", "PASS", "EXPERIMENTAL")
 
 @dataclass(frozen=True)
 class CandidateStats:
-    """DSR 的四個必要輸入。四個要嘛全給、要嘛全不給，不接受給一半。
+    """DSR 的五個必要輸入。五個要嘛全給、要嘛全不給，不接受給一半。
 
     `sharpe` 與 `n_obs` 必須是**同一個頻率**：日資料就給日 Sharpe 與日數，
     不要給年化 Sharpe 配日數——那會讓 DSR 高到離譜。年化值請先用
     `deannualize()` 轉回單期，並在報告裡註明頻率。
     `kurtosis` 是**非超額**峰態（常態分布 = 3.0），不是 excess kurtosis。
+
+    `periods_per_year`（2026-09-23總司令裁示【DSR單位錯誤修正＋f52w改用
+    資訊比率重審＋2008延伸】尺.二新增）：**必填，不接受用`freq_label`這種
+    自由文字猜單位**。`deflated_sharpe()`會拿它跟V的來源單位比對，
+    不一致就raise——這是#379(f52w) DSR算成0.0000那次事故的直接對策：
+    V是用5筆FUT試驗的「年化Sharpe」數字估的，卻被當成日頻SR0門檻去跟
+    f52w的日Sharpe比較，兩者差了sqrt(252)≈15.87倍，SR0門檻被錯誤地
+    高估了15倍以上，讓任何日頻候選幾乎不可能通過。
     """
 
     sharpe: float
     n_obs: int
     skew: float
     kurtosis: float
+    periods_per_year: int
     freq_label: str = "每期"
 
 
@@ -102,16 +112,26 @@ def deannualize(annual_sharpe: float, periods_per_year: int) -> float:
     return annual_sharpe / math.sqrt(periods_per_year)
 
 
-def trials_sharpe_variance() -> tuple[float | None, int]:
+def trials_sharpe_variance(periods_per_year: int) -> tuple[float | None, int]:
     """從 `TRIALS_REGISTRY.jsonl` 已登記的 Sharpe 估試驗間變異數 V。
 
+    2026-09-23總司令裁示【DSR單位錯誤修正】尺.二：**只採計
+    `dsr_inputs.periods_per_year`跟呼叫端指定值相同的紀錄**——這是
+    #379事故（年化Sharpe混進日頻V估計）的直接對策，舊紀錄沒有這個
+    欄位（`get(...)`回`None`）自然被過濾掉，不會被誤用。
+
     回傳 `(V, 樣本數)`；不足兩筆時回 `(None, n)`——**不回一個猜的數字**。
-    V 是 E[max SR] 的必要輸入，猜錯會直接讓 DSR 失去意義。
+    V 是 E[max SR] 的必要輸入，猜錯會直接讓 DSR 失去意義。**這是「任何
+    已登記Sharpe」的通用估法，V本身的代表性有既有但書（見
+    SELECTION_BIAS_LEDGER.md「V為僅有Sharpe記錄者的離散度，非全體」）
+    ——審.二一類「同VAL期間可比試驗」的更精細V估計改用
+    `comparable_trial_variance()`，不是這支函式。**
     """
     vals = [
         r["dsr_inputs"]["sharpe"]
         for r in registry_records()
         if isinstance(r.get("dsr_inputs"), dict) and r["dsr_inputs"].get("sharpe") is not None
+        and r["dsr_inputs"].get("periods_per_year") == periods_per_year
     ]
     if len(vals) < 2:
         return None, len(vals)
@@ -149,13 +169,23 @@ def default_n_trials() -> tuple[int, str]:
                f"selection_bias_ledger {n_led} 列（含對照表）；口徑分歧待總司令裁示")
 
 
-def deflated_sharpe(stats: CandidateStats, n_trials: int, var_sr_trials: float) -> dict:
+def deflated_sharpe(stats: CandidateStats, n_trials: int, var_sr_trials: float,
+                     var_periods_per_year: int | None = None) -> dict:
     """Deflated Sharpe Ratio（Bailey & López de Prado 2014）。
 
     SR0 = sqrt(V) · [(1−γ)·Φ⁻¹(1−1/N) + γ·Φ⁻¹(1−1/(N·e))]
     DSR = Φ[ (SR̂ − SR0)·√(T−1) / √(1 − γ3·SR̂ + (γ4−1)/4·SR̂²) ]
 
     參數不合法一律 raise，不回一個看起來像數字的東西——靜默的錯誤數字比沒有數字糟。
+
+    `var_periods_per_year`（2026-09-23裁示【DSR單位錯誤修正】尺.二新增）：
+    V（`var_sr_trials`）的來源單位（每年幾期，日頻=252）。給了就必須跟
+    `stats.periods_per_year`一致，不一致直接raise——**這是#379事故的
+    根本防線**：候選是日頻Sharpe，V卻是用年化Sharpe估的，兩者代入同一條
+    公式在數學上「跑得動」（不會拋例外），卻是把兩個不同單位的數字
+    硬湊在一起，產生一個看似正常、實則毫無意義的DSR。留`None`（預設）
+    只是為了不強制所有既有呼叫端都要傳這個新參數，**新呼叫一律應該傳**，
+    不傳等於放棄這道防線。
     """
     if n_trials < 2:
         raise ValueError(f"DSR 需要 N≥2 次試驗才有意義（收到 {n_trials}）")
@@ -165,6 +195,12 @@ def deflated_sharpe(stats: CandidateStats, n_trials: int, var_sr_trials: float) 
         raise ValueError(f"DSR 需要 T≥2 期觀測（收到 {stats.n_obs}）")
     if stats.kurtosis <= 0:
         raise ValueError(f"kurtosis 是非超額峰態（常態=3.0），不得 ≤0（收到 {stats.kurtosis}）")
+    if var_periods_per_year is not None and var_periods_per_year != stats.periods_per_year:
+        raise ValueError(
+            f"DSR 被拒：候選單位periods_per_year={stats.periods_per_year} 跟 "
+            f"V 來源單位periods_per_year={var_periods_per_year} 不一致——"
+            "兩者必須同頻率才能比較，否則SR0門檻的量級會整個錯掉（見#379事故，尺.二根因）"
+        )
 
     sr = float(stats.sharpe)
     sr0 = expected_max_sharpe(n_trials, var_sr_trials)
@@ -239,19 +275,21 @@ def report_candidate(
     else:
         v = var_sr_trials
         v_src = "呼叫端指定"
+        v_ppy = stats.periods_per_year if v is not None else None
         if v is None:
-            v, n_v = trials_sharpe_variance()
-            v_src = f"由 TRIALS_REGISTRY.jsonl 的 {n_v} 筆已登記 Sharpe 估得"
+            v, n_v = trials_sharpe_variance(stats.periods_per_year)
+            v_src = f"由 TRIALS_REGISTRY.jsonl 同periods_per_year({stats.periods_per_year})的 {n_v} 筆已登記 Sharpe 估得"
+            v_ppy = stats.periods_per_year
             if v is None:
                 blocked = dsr_blocked_reason.strip() or ""
                 if not blocked:
                     raise ValueError(
-                        f"報告被拒：算不出試驗間 Sharpe 變異數 V（登記簿只有 {n_v} 筆 Sharpe，"
+                        f"報告被拒：算不出試驗間 Sharpe 變異數 V（登記簿只有 {n_v} 筆同單位 Sharpe，"
                         "需要 ≥2 筆）。請明確傳 `var_sr_trials`，或填 `dsr_blocked_reason` "
                         "說明為什麼這一輪算不出 DSR——不准用猜的 V 硬算一個數字出來"
                     )
         if not blocked:
-            dsr_res = deflated_sharpe(stats, n, v)
+            dsr_res = deflated_sharpe(stats, n, v, var_periods_per_year=v_ppy)
             dsr_res["var_source"] = v_src
 
     admissible = dsr_res is not None and dsr_res["dsr"] >= DSR_MIN
@@ -396,12 +434,13 @@ def _self_test() -> int:
     # 用**單期** Sharpe 與相稱的試驗間變異數（V=0.0025 即試驗 Sharpe 標準差 0.05）。
     # 第一版拿 V=0.25 配單期 Sharpe 0.10，SR0≈1.25 遠高於觀測值，DSR 全部下溢成 0.0，
     # 三個單調性檢查變成「0 跟 0 比」——測了等於沒測。
-    base = CandidateStats(sharpe=0.10, n_obs=1000, skew=0.0, kurtosis=3.0)
+    base = CandidateStats(sharpe=0.10, n_obs=1000, skew=0.0, kurtosis=3.0, periods_per_year=252)
     V = 0.0025
 
     # 1) SR̂ 恰等於 SR0 時，z=0 → DSR 必須剛好 0.5（決定性檢查，不是靠眼睛看）
     sr0 = expected_max_sharpe(50, V)
-    r = deflated_sharpe(CandidateStats(sharpe=sr0, n_obs=1000, skew=0.0, kurtosis=3.0), 50, V)
+    r = deflated_sharpe(CandidateStats(sharpe=sr0, n_obs=1000, skew=0.0, kurtosis=3.0,
+                                        periods_per_year=252), 50, V)
     if not near(r["dsr"], 0.5, 1e-12):
         fails.append(f"SR̂=SR0 時 DSR 應為 0.5，得到 {r['dsr']}")
 
@@ -414,13 +453,13 @@ def _self_test() -> int:
     # 3) 觀測期數越長，同一個（贏過 SR0 的）Sharpe 越可信 → DSR 應上升。
     #    刻意取 0.15 > SR0(N=50)≈0.114：SR̂ 低於 SR0 時 T 變大反而讓 DSR 下降，
     #    那是正確行為，不能拿來當這條檢查的樣本。
-    if not deflated_sharpe(CandidateStats(0.15, 5000, 0.0, 3.0), 50, V)["dsr"] > \
-           deflated_sharpe(CandidateStats(0.15, 200, 0.0, 3.0), 50, V)["dsr"]:
+    if not deflated_sharpe(CandidateStats(0.15, 5000, 0.0, 3.0, 252), 50, V)["dsr"] > \
+           deflated_sharpe(CandidateStats(0.15, 200, 0.0, 3.0, 252), 50, V)["dsr"]:
         fails.append("T 變大 DSR 沒有上升")
 
     # 4) 負偏態（左尾風險）必須讓 DSR 變差，不是變好
-    d_neg = deflated_sharpe(CandidateStats(0.15, 1000, -1.0, 3.0), 50, V)["dsr"]
-    d_pos = deflated_sharpe(CandidateStats(0.15, 1000, +1.0, 3.0), 50, V)["dsr"]
+    d_neg = deflated_sharpe(CandidateStats(0.15, 1000, -1.0, 3.0, 252), 50, V)["dsr"]
+    d_pos = deflated_sharpe(CandidateStats(0.15, 1000, +1.0, 3.0, 252), 50, V)["dsr"]
     if not d_neg < d_pos:
         fails.append(f"負偏態沒有壓低 DSR：neg {d_neg:.4f} vs pos {d_pos:.4f}")
 
@@ -436,14 +475,58 @@ def _self_test() -> int:
 
     expect_raise("N<2", lambda: deflated_sharpe(base, 1, V))
     expect_raise("V≤0", lambda: deflated_sharpe(base, 50, 0.0))
-    expect_raise("T<2", lambda: deflated_sharpe(CandidateStats(0.1, 1, 0.0, 3.0), 50, V))
-    expect_raise("kurtosis≤0", lambda: deflated_sharpe(CandidateStats(0.1, 100, 0.0, 0.0), 50, V))
+    expect_raise("T<2", lambda: deflated_sharpe(CandidateStats(0.1, 1, 0.0, 3.0, 252), 50, V))
+    expect_raise("kurtosis≤0", lambda: deflated_sharpe(CandidateStats(0.1, 100, 0.0, 0.0, 252), 50, V))
     expect_raise("分母平方非正（年化 Sharpe 誤當單期）",
-                 lambda: deflated_sharpe(CandidateStats(3.0, 1000, 2.0, 1.0), 50, V))
+                 lambda: deflated_sharpe(CandidateStats(3.0, 1000, 2.0, 1.0, 252), 50, V))
+    expect_raise("V來源單位跟候選單位不一致（尺.二新增，#379事故的直接回歸測試）",
+                 lambda: deflated_sharpe(base, 50, V, var_periods_per_year=1))
 
     # 5) 報告出口：未登記 → 一律無效
     expect_raise("未登記的候選", lambda: report_candidate(
         key="#999999", headline={"百分位": "100.0"}, dsr_blocked_reason="測試"))
+
+    # 5b) 尺.二單位自我測試（2026-09-23總司令裁示【DSR單位錯誤修正】）：
+    # 已知單位的合成資料（年化SR=1.0, T=1000），分別用「日頻輸入」與
+    # 「年化輸入」餵進deflated_sharpe()，DSR必須一致。
+    #
+    # **數學上的重要前提（避免下一個人照抄公式卻測出偽陽性失敗）**：DSR公式
+    # 裡skew/kurtosis的修正項 (1 - skew*SR̂ + (kurt-1)/4*SR̂²) 直接吃SR̂的
+    # 原始數值，不是尺度不變的——年化SR=1.0跟對應的日SR≈0.063代進這個修正項
+    # 會得到不同結果，所以「兩種單位算出的DSR完全相等」只在SR̂剛好等於SR0
+    # （z=0，DSR=0.5，分子為0時分母是多少都不影響結果=0.5）這個邊界情形上
+    # 嚴格成立，這裡就是測這個邊界，不是測「任意SR̂換算後DSR不變」（那個
+    # 命題在數學上不成立，見本段第一句）。這正是「用一致單位換算正確」
+    # 這件事本身可以被精確驗證、卻不需要引入額外近似的測法。
+    V_daily = 0.0025
+    V_annual = V_daily * 252  # Var(SR)~1/period，年化係數是252倍不是sqrt(252)倍
+    sr0_daily = expected_max_sharpe(50, V_daily)
+    sr0_annual = expected_max_sharpe(50, V_annual)
+    if not near(sr0_annual, sr0_daily * math.sqrt(252), 1e-6):
+        fails.append(f"SR0年化換算不對：sr0_annual={sr0_annual} 應≈sr0_daily*sqrt(252)="
+                     f"{sr0_daily * math.sqrt(252)}")
+
+    stats_daily = CandidateStats(sharpe=sr0_daily, n_obs=1000, skew=0.0, kurtosis=3.0,
+                                  periods_per_year=252)
+    stats_annual = CandidateStats(sharpe=sr0_annual, n_obs=1000, skew=0.0, kurtosis=3.0,
+                                   periods_per_year=1)
+    dsr_daily = deflated_sharpe(stats_daily, 50, V_daily, var_periods_per_year=252)["dsr"]
+    dsr_annual = deflated_sharpe(stats_annual, 50, V_annual, var_periods_per_year=1)["dsr"]
+    if not (near(dsr_daily, 0.5, 1e-9) and near(dsr_annual, 0.5, 1e-9)):
+        fails.append(f"單位自我測試：SR̂=SR0邊界時日頻/年化DSR都該是0.5，"
+                     f"得到daily={dsr_daily} annual={dsr_annual}")
+
+    # 5c) 正面回歸測試：重現#379事故的機制——把年化V誤當日頻V使用，
+    # 必須讓一個原本會PASS的日頻候選變成FAIL（DSR大幅下降），證明
+    # 這正是造成#379算出DSR=0.0000的機制，不是抽象地說「單位要一致」。
+    real_daily_sr = 0.1091  # f52w VAL期實際觀測到的日Sharpe
+    stats_f52w_like = CandidateStats(sharpe=real_daily_sr, n_obs=970, skew=-0.4584,
+                                      kurtosis=5.2073, periods_per_year=252)
+    dsr_correct_unit = deflated_sharpe(stats_f52w_like, 50, V_daily)["dsr"]
+    dsr_wrong_unit = deflated_sharpe(stats_f52w_like, 50, V_annual)["dsr"]  # 刻意不傳var_periods_per_year，模擬修正前沒有這道防線
+    if not dsr_wrong_unit < dsr_correct_unit:
+        fails.append(f"正面回歸測試：誤用年化V算日頻候選應該讓DSR大幅下降，"
+                     f"得到correct={dsr_correct_unit} wrong={dsr_wrong_unit}（機制沒有重現）")
 
     # 6) 走完整寫入路徑，但**只碰暫存帳本**
     real_ledger, real_jsonl = tr.LEDGER, tr.JSONL
@@ -463,7 +546,7 @@ def _self_test() -> int:
             key="f_selftest", headline={"百分位": "99.0"}))
         expect_raise("登記簿 Sharpe 不足又沒指定 V", lambda: report_candidate(
             key="f_selftest", headline={"百分位": "99.0"},
-            stats=CandidateStats(0.1, 1000, 0.0, 3.0)))
+            stats=CandidateStats(0.1, 1000, 0.0, 3.0, 252)))
 
         blocked = report_candidate(key="f_selftest", headline={"百分位": "99.0"},
                                    dsr_blocked_reason="帳本未記 Sharpe")
@@ -475,18 +558,18 @@ def _self_test() -> int:
             fails.append("報告裡沒有並列原始指標")
 
         good = report_candidate(key="f_selftest", headline={"百分位": "99.0"},
-                                stats=CandidateStats(0.30, 2000, 0.0, 3.0),
+                                stats=CandidateStats(0.30, 2000, 0.0, 3.0, 252),
                                 n_trials=50, var_sr_trials=0.01)
         if not good["admissible"] or good["dsr"] < DSR_MIN:
             fails.append(f"高 Sharpe 低 V 應可提請審核，卻得到 dsr={good['dsr']}")
         bad = report_candidate(key="f_selftest", headline={"百分位": "99.0"},
-                               stats=CandidateStats(0.01, 2000, 0.0, 3.0),
+                               stats=CandidateStats(0.01, 2000, 0.0, 3.0, 252),
                                n_trials=500, var_sr_trials=0.25)
         if bad["admissible"]:
             fails.append("低 Sharpe 高搜尋次數不該可提請審核")
         expect_raise("assert_reportable 對不合格候選沒擋下", lambda: assert_reportable(
             key="f_selftest", headline={"百分位": "99.0"},
-            stats=CandidateStats(0.01, 2000, 0.0, 3.0), n_trials=500, var_sr_trials=0.25))
+            stats=CandidateStats(0.01, 2000, 0.0, 3.0, 252), n_trials=500, var_sr_trials=0.25))
 
         # 7) 預設分母要由帳本推導（且取兩口徑較大者），不是寫死
         import selection_bias_ledger as sbl
@@ -503,14 +586,23 @@ def _self_test() -> int:
         finally:
             sbl.LEDGER = real_sbl_ledger
 
-        # 8) register_trial 收下 DSR 四輸入後，V 要能從登記簿估出來
+        # 8) register_trial 收下 DSR 五輸入後，V 要能從登記簿估出來
         for s in (0.05, 0.15):
             tr.register_trial(track="TW", name="`f_selftest_v`", design="因子",
                               result="99.0 百分位", verdict="FAIL", notes="自我測試",
-                              round_no=999, sharpe=s, n_obs=1000, skew=0.0, kurtosis=3.0)
-        v, nv = trials_sharpe_variance()
+                              round_no=999, sharpe=s, n_obs=1000, skew=0.0, kurtosis=3.0,
+                              periods_per_year=252, failed_gates=["unknown"])
+        v, nv = trials_sharpe_variance(252)
         if nv != 2 or v is None or not near(v, 0.005, 1e-12):
             fails.append(f"從登記簿估 V 錯：n={nv} v={v}")
+
+        # 8b) periods_per_year=252 時 |sharpe|>1 必須被register_trial()拒絕
+        # （尺.二核心防呆：把年化Sharpe誤標日頻的#234~#238教訓）
+        expect_raise("日頻Sharpe>1應被register_trial()拒絕", lambda: tr.register_trial(
+            track="FUT", name="`f_selftest_bad_unit`", design="期貨",
+            result="99.0 百分位", verdict="FAIL", notes="自我測試",
+            round_no=999, sharpe=1.5, n_obs=1000, skew=0.0, kurtosis=3.0,
+            periods_per_year=252, failed_gates=["unknown"]))
     except Exception as e:  # noqa: BLE001 — 測試自己爆掉也要如實報
         fails.append(f"暫存帳本路徑爆掉：{e!r}")
     finally:

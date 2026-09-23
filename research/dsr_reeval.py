@@ -42,6 +42,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from candidate_report import (  # noqa: E402
     DSR_MIN,
     CandidateStats,
+    deannualize,
     deflated_sharpe,
     default_n_trials,
     report_candidate,
@@ -196,7 +197,8 @@ def breakeven_var(sr_ann: float, n_obs: int, n_trials: int) -> float | None:
     sr_d = sr_ann / math.sqrt(TRADING_DAYS)
 
     def dsr_at(v_d: float) -> float:
-        return deflated_sharpe(CandidateStats(sr_d, n_obs, 0.0, 3.0), n_trials, v_d)["dsr"]
+        return deflated_sharpe(CandidateStats(sr_d, n_obs, 0.0, 3.0, 252), n_trials, v_d,
+                                var_periods_per_year=252)["dsr"]
 
     lo, hi = 1e-12, 4.0 / TRADING_DAYS  # 上界＝年化 Sharpe 標準差 2.0，遠超任何合理值
     if dsr_at(lo) < DSR_MIN:
@@ -240,14 +242,31 @@ def main() -> int:
         sr_ann = None
         di = reg_inputs.get(r.tid)
         if isinstance(di, dict) and di.get("sharpe") is not None:
-            stats = CandidateStats(di["sharpe"], di["n_obs"], di["skew"], di["kurtosis"])
-            sr_ann = di["sharpe"] * math.sqrt(TRADING_DAYS)
-            src = "`TRIALS_REGISTRY.jsonl` 的 `dsr_inputs`（一手登記）"
+            # 2026-09-23總司令裁示【DSR單位錯誤修正】尺.二第6點：#379事故證實
+            # dsr_inputs.sharpe 曾經混用單位（年化值誤標成日頻），這裡不能直接
+            # 信任存進去的數字，必須看 periods_per_year 欄位再決定要不要換算。
+            ppy = di.get("periods_per_year")
+            if ppy is None:
+                # 舊紀錄沒有這個欄位（尺.二之前登記的），單位不明，不得用猜的
+                # ——寧可記「無法計算」，也不要重蹈#379的覆轍。
+                stats = None
+                src = "`dsr_inputs` 存在但缺 `periods_per_year`（尺.二之前的舊紀錄，單位不明，不信任）"
+            elif ppy == 252:
+                stats = CandidateStats(di["sharpe"], di["n_obs"], di["skew"], di["kurtosis"], 252)
+                sr_ann = di["sharpe"] * math.sqrt(TRADING_DAYS)
+                src = "`TRIALS_REGISTRY.jsonl` 的 `dsr_inputs`（一手登記，日頻）"
+            else:
+                # 已標明是其他頻率（例如periods_per_year=1的年化值），換算成日頻
+                # 再用，不是直接信任存進去的數字跟n_obs湊在一起。
+                daily_sr = deannualize(di["sharpe"] * math.sqrt(ppy), TRADING_DAYS)
+                stats = CandidateStats(daily_sr, di["n_obs"], di["skew"], di["kurtosis"], 252)
+                sr_ann = di["sharpe"] * math.sqrt(ppy)
+                src = f"`TRIALS_REGISTRY.jsonl` 的 `dsr_inputs`（一手登記，periods_per_year={ppy}，已換算成日頻）"
         else:
             hit, src, matched_tok = match_sharpe(toks, sharpe_rows)
             if hit:
                 sr_ann = hit["sharpe_ann"]
-                stats = CandidateStats(sr_ann / math.sqrt(TRADING_DAYS), hit["n_obs"], 0.0, 3.0,
+                stats = CandidateStats(sr_ann / math.sqrt(TRADING_DAYS), hit["n_obs"], 0.0, 3.0, 252,
                                        freq_label="日（由年化 Sharpe 換算）")
 
         item = {"tid": r.tid, "track": r.track or "未分軌", "verdict": r.verdict,
