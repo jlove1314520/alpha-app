@@ -12335,3 +12335,28 @@ data/`（僅暫存於系統`/tmp`供本輪驗證，非repo追蹤路徑）、未�
 gate、未登記`TRIALS_REGISTRY.jsonl`、未碰holdout**（`is_holdout_
 consumed()`開工/收工前皆確認`False`）。交辦佇列`- [ ]`=0（本輪未重新
 掃描，沿用06:53輪剛完成的盤點結論，未硬湊補件）。
+
+**#81續1（2026-09-23 hypothesis_queue排程接續）：公布延遲更正＋第1關cheap gate CHEAP_PASS**
+
+公布延遲更正：原SPEC「每月27日左右公布上上個月資料」為誤植，經WebSearch三方查證一致
+（國發會官方`ndc.gov.tw/nc_335_2236`、Smart自學網、StockFeel股感）確認實際規則是公布
+**上個月**資料（T+1個月延遲，每月27~30日，僅1月例外延到3月初），非兩個月延遲。已修正
+操作化為`PUBLISH_LAG_DAYS=30`（同#80保守估計，且近似27~30日公布窗口與1月例外邊界）。
+
+第1關cheap gate結果（`cbi_signal_gate.py`新增可重複執行；`TRIALS_LEDGER.md`#357）：
+訊號=景氣對策信號綜合分數(0~45分水準值)，來源`data_cache/ndc/景氣指標與燈號.csv`。
+對齊後n=6724(TRAIN 5775/VAL 949)。TRAIN Pearson r=-0.1013(p=0.0000)，VAL r=-0.1222
+(p=0.0002)，train/val同號皆為負，VAL洗牌null(N=500)percentile=100.0(門檻90.0)。三項
+判準全過，VAL方向與事前綁定負相關一致。
+
+**判定：CHEAP_PASS**——本佇列regime/timing類假設第11個測試，前10個(#31~34/#76~80)
+全數FAIL或資料不可及/前置未備，這是第一個通過第1關的。尚未進第2關隨機控制組(>=100
+draws)，尚未登記進shadow_ledger（僅GATE_SEQUENCE 1~7+9關全過才登記）。
+
+已知caveat：CSV為當前最新修訂版本(vintage)，非逐期發布原始版本，本佇列既有macro類
+訊號(#33/#77/#80)同樣未處理此限制，非本次新增。
+
+**佇列#81 CHEAP_PASS未結案**。下一輪待辦：(a)第2關隨機控制組(b)第3關參數高原(c)第4關
+成本敏感度（需先設計regime overlay降曝險構造）。`is_holdout_consumed()`本輪未碰holdout。
+
+---

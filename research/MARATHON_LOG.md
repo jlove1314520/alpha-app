@@ -1,5 +1,14 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23T09:10:00+08:00 -- #81景氣對策信號第1關cheap gate CHEAP_PASS(TRIALS#357)+公布延遲更正
+
+修正原SPEC誤植的兩個月公布延遲為WebSearch三方查證確認的一個月延遲(PUBLISH_LAG_DAYS=30)。
+cbi_signal_gate.py(新增)結果：TRAIN r=-0.1013(p=0.0000)/VAL r=-0.1222(p=0.0002)，train/val
+同號皆負，VAL洗牌null percentile=100.0，三項判準全過，方向與事前綁定一致。判定CHEAP_PASS
+——本佇列11個regime訊號中第一個過第1關(前10個#31~34/#76~80全FAIL/不可及/前置未備)。尚未進
+第2關隨機控制組，未登記shadow_ledger。交辦佇列還剩2條未開始(結案.一等總司令實機驗證/結案.
+二CONCENTRATED_SPEC非本track所有未觸碰)。holdout未碰。
+
 ## 2026-09-23T08:05:00+08:00 — #81（景氣對策信號regime訊號）資料源起點探測路徑1：判定可行，未跑cheap gate
 
 開工前檢查PENDING_QUEUE.md：`- [ ]`=0（沿用06:53輪剛完成的盤點，本輪未重新掃描）。續做#81。實測`data.gov.tw/dataset/6099`（景氣指標及燈號）找到國發會官方免認證zip下載連結，內含`景氣指標與燈號.csv`，確認`景氣對策信號綜合分數`/`景氣對策信號`（燈號）兩欄自198401起有值（早於TRAIN_END），資料至202607，依SPEC「路徑1已可行不查路徑2/3」規則判定資料可行。尚未查證公布延遲規則與有效樣本數，未下載正式研究用資料檔到repo、未跑cheap gate、未登記TRIALS_REGISTRY、未碰holdout（`is_holdout_consumed()`開工/收工前皆`False`）。交辦佇列還剩0條未開始。
