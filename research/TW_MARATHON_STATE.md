@@ -113,8 +113,15 @@ HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條未開始**（23
    結構性上漲下一旦建倉初期未被停損就形同虛設」這個設計限制，供規.二
    出場規則設計參考，不建議直接沿用。E-c移動停損比固定停損更能實際
    發揮風控作用；E-d 200日均線regime出場net CAGR轉負(-6.07%，換手
-   31.5次/年)，與既有regime overlay家族七次FAIL結論方向一致。全部7筆
-   登記verdict=EXPERIMENTAL（純描述性比較，非alpha檢定）。
+   31.5次/年)。**⚠️2026-09-23修.一更正**：本段E-d數字已知因
+   `exit_rule_lab.py`重入邏輯bug（出場觸發後隔日無條件買回，`ma_regime`
+   分支完全沒有「站上均線才進場」的判斷）而失真——bug產生的結果不得
+   當任何結論的佐證，原文「與既有regime overlay家族七次FAIL結論方向
+   一致」的說法已刪除（那是拿一個壞掉的數字去佐證一個獨立結論，方向
+   湊巧一樣不代表這個數字本身可信）。#338~#344全部已標`INVALID_BUG`，
+   見`TRIALS_LEDGER.md`對應位置與`PENDING_QUEUE.md`修.一條目，修正版
+   7筆重新登記。原文「全部7筆登記verdict=EXPERIMENTAL」的#338~#344
+   本身仍保留在案供稽核追溯，不代表現在有效。
 
 `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
 （346列，新增#338~#344）；`selection_bias_ledger.py`重跑更新N=346

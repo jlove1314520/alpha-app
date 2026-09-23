@@ -235,7 +235,18 @@ def main() -> int:
     # 分析，不是3個獨立的統計檢定）。
     KNOWN_DUPLICATE_IDS = {335, 336, 337}  # 見TRIALS_LEDGER.md #337後方更正說明
     duplicate_rows = [r for r in rows if r["id"] in KNOWN_DUPLICATE_IDS]
-    n_valid = n_all - len(irreproducible_rows) - len(duplicate_rows)
+
+    # 2026-09-23總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.一：
+    # exit_rule_lab.py的重入邏輯bug（未持倉時enter_today=True無條件成立，
+    # ma_regime分支只有pass，「站上均線才進場」從未實作）讓#338~#344全部
+    # 7筆數字失真（E-d交易數1357筆、MDD比買進持有本身還差，是bug的直接
+    # 證據）。跟KNOWN_DUPLICATE_IDS同一種處理：append-only設計不允許
+    # 回頭改寫這7筆本身的判定欄，改用明確列出編號排除出有效N，仍計入
+    # 總N（確實佔用過試驗名額）。見TRIALS_LEDGER.md #344前方INVALID_BUG
+    # 說明。修正版7筆已重新登記為新編號，不受此排除影響。
+    KNOWN_INVALID_BUG_IDS = {338, 339, 340, 341, 342, 343, 344}
+    invalid_bug_rows = [r for r in rows if r["id"] in KNOWN_INVALID_BUG_IDS]
+    n_valid = n_all - len(irreproducible_rows) - len(duplicate_rows) - len(invalid_bug_rows)
 
     # ── 分母自查（債務二.2）──────────────────────────────────────────────
     # 每一筆宣稱做過校正的列：當時用的分母 vs 現在的正確分母，結論是否還站得住
@@ -291,10 +302,11 @@ def main() -> int:
     L.append("")
     L.append("| 口徑 | N | Bonferroni 門檻（α=0.05 單邊） |")
     L.append("|---|---:|---:|")
-    L.append(f"| **全體（總N，含IRREPRODUCIBLE與已知重複登記）** | {n_all} | "
+    L.append(f"| **全體（總N，含IRREPRODUCIBLE／已知重複登記／已知因bug失真）** | {n_all} | "
              f"{required_percentile(n_all):.4f} 百分位 |")
     L.append(f"| **有效N（排除IRREPRODUCIBLE{len(irreproducible_rows)}筆＋已知重複登記"
-             f"{len(duplicate_rows)}筆）** | {n_valid} | {required_percentile(n_valid):.4f} 百分位 |")
+             f"{len(duplicate_rows)}筆＋已知因bug失真{len(invalid_bug_rows)}筆）** | {n_valid} | "
+             f"{required_percentile(n_valid):.4f} 百分位 |")
     for t, n in n_track.items():
         L.append(f"| 分軌 {t} | {n} | {required_percentile(n):.4f} 百分位 |")
     L.append("")
@@ -314,6 +326,13 @@ def main() -> int:
         for r in sorted(duplicate_rows, key=lambda x: x["id"]):
             L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}——與"
                      f"#332/#333/#334重複，見TRIALS_LEDGER.md對應位置更正說明")
+        L.append("")
+    if invalid_bug_rows:
+        L.append("**已知因程式bug失真列表**（2026-09-23修.一：`exit_rule_lab.py`重入邏輯"
+                  "bug讓這7筆數字全部失真，E-d交易數1357筆、MDD比買進持有本身還差是bug的"
+                  "直接證據，仍計入總N但不作為任何評估的可信證據，修正版已重新登記新編號）：")
+        for r in sorted(invalid_bug_rows, key=lambda x: x["id"]):
+            L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
         L.append("")
     L.append("## 2. 分母自查（債務二.2）")
     L.append("")

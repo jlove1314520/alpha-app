@@ -11197,14 +11197,30 @@ wrapper維持現狀不變。
   驗證：全部觸及`.py`檔`py_compile`過；`BacktestConfig`預設值行為
   用直接呼叫確認與舊版逐位元相同；`trial_registry.py --check`PASS
   （348列）。
-- [ ] **修.一** [研究] exit_rule_lab七筆撤回重做（最優先，但排在修.二
-  之後因需要用修.二的ETF稅率）——`TRIALS_LEDGER.md` #338-#344全部加註
-  INVALID_BUG（不刪原文），比照`KNOWN_DUPLICATE_IDS`排除於有效N外，
-  刪除#344 notes中拿bug結果當佐證的說法；每種出場規則搭配事前寫死的
-  重新進場規則（E-b/E-c冷卻20交易日、E-d收盤站回MA200之上）；起點
-  敏感度60個起點(2003-07~2008-06每月第一個交易日)報CAGR/MDD中位數/
-  P10/P90(不計入N)；新增交易頻率>12次/年警告(降級不崩潰)；用修.二的
-  ETF稅率；重新登記7筆。
+- [x] **修.一** [研究] 【✅完成2026-09-23，互動視窗CC】exit_rule_lab
+  七筆撤回重做。根因確認：`exit_rule_lab.py`原版L162-175未持倉時
+  `enter_today=True`無條件成立、`ma_regime`分支只有`pass`，「站上均線
+  才進場」從未實作，出場後隔日無條件買回。已在`TRIALS_LEDGER.md`
+  #344前方插入INVALID_BUG區塊（不刪原文，含bug描述+證據：E-d原
+  1357筆交易、MDD-69.34%比買進持有本身-55.75%更差）；`selection_
+  bias_ledger.py`新增`KNOWN_INVALID_BUG_IDS={338..344}`比照
+  `KNOWN_DUPLICATE_IDS`排除於有效N外（N_all=358/N_valid=347）；
+  已刪除`TW_MARATHON_STATE.md`裡「與既有regime overlay家族七次FAIL
+  結論方向一致」的佐證說法（該句在TRIALS_LEDGER.md#344本身notes欄
+  其實沒有，實際出現在TW_MARATHON_STATE.md的round摘要，已一併修正）。
+  **修正內容**：`simulate()`新增`cooldown_until`狀態，fixed_stop/
+  trailing_stop出場後冷卻20交易日才重新進場(新entry_price/peak_price
+  重算)；ma_regime出場後需`close > ma200`(不加緩衝帶)才重新進場；
+  新增`check_trade_frequency()`(>12次/年警告，try/except降級不崩潰)
+  與`start_sensitivity()`(60起點2003-07~2008-06，不計入N)。**結果
+  大幅改觀**：E-d修正後MDD由-89.39%（比買進持有還差）變成-29.28%
+  （優於買進持有的-55.75%，regime出場終於發揮應有的降曝險效果），
+  CAGR=8.40%(net)；E-c移動停損net CAGR 12.31%(10%)/9.80%(20%)；
+  E-b固定停損三檔仍n_trades=1（進場價恰近歷史低點，從未觸及停損線，
+  非bug是資料事實）；交易頻率檢查0筆超過12次/年門檻。已重新登記7筆
+  （新編號#350-356，verdict=EXPERIMENTAL，取代#338-344）。
+  `trial_registry.py --check`PASS(358列)；`selection_bias_ledger.py`
+  重跑N=358/347。
 - [ ] **結案.一** [債務] 維運git衝突——核准方案甲(`git_op_lock.py`)+
   方案丙(push前grep衝突標記)，乙不採用。三支`.ps1`修改後需總司令實機
   驗證跑過一輪才能標記完成，本條目完成前維持`- [ ]`。

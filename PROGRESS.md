@@ -1,3 +1,40 @@
+## 2026-09-23（互動視窗CC，研究帽，總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.一）
+
+**exit_rule_lab七筆撤回重做**：確認根因——`exit_rule_lab.py`原版未持倉
+時`enter_today=True`無條件成立、`ma_regime`分支只有`pass`，「站上均線
+才進場」從未實作，任何出場觸發後隔日即無條件買回。**證據確鑿**：E-d
+原版交易數1357筆、未扣成本MDD-69.34%，比買進持有本身的-55.75%還差——
+一個設計來降曝險的機制，MDD反而更差，這正是重入邏輯錯誤的直接證據。
+
+**處理**：`TRIALS_LEDGER.md`在#344前方插入INVALID_BUG區塊（不刪原文，
+原始7列#338-344原樣保留供稽核追溯）；`selection_bias_ledger.py`新增
+`KNOWN_INVALID_BUG_IDS`比照既有`KNOWN_DUPLICATE_IDS`機制排除於有效N外
+（仍計入總N，這7筆確實佔用過名額）；刪除`TW_MARATHON_STATE.md`裡「與
+既有regime overlay家族七次FAIL結論方向一致」的佐證說法——bug產生的
+結果不得當任何結論的佐證。
+
+**修正**：`simulate()`新增重入規則——fixed_stop/trailing_stop出場後
+冷卻20交易日才重新進場（新entry_price/peak_price重算，不沿用舊持倉
+狀態）；ma_regime出場後需收盤站回MA200之上（不加緩衝帶）才重新進場。
+新增`check_trade_frequency()`（>12次/年警告，降級不崩潰）與
+`start_sensitivity()`（60起點2003-07~2008-06每月首個交易日，報CAGR/
+MDD中位數/P10/P90，不計入N）。
+
+**結果大幅改觀**：E-d修正後MDD由-89.39%（比買進持有還差）變成
+**-29.28%**（優於買進持有的-55.75%，regime出場終於發揮應有的降曝險
+效果），net CAGR=8.40%；E-c移動停損net CAGR 12.31%(10%)/9.80%(20%)；
+E-b固定停損三檔仍n_trades=1（進場價恰近0050歷史低點，從未觸及停損線
+，非bug是資料事實，2003-2024整段11倍漲幅下單一固定停損確實會形同
+虛設）；交易頻率檢查0筆超過12次/年門檻。已重新登記7筆（#350-356，
+verdict=EXPERIMENTAL）取代作廢的#338-344。
+
+**驗證**：`py_compile`過；`trial_registry.py --check`PASS(358列)；
+`selection_bias_ledger.py`重跑N_all=358/N_valid=347；起點敏感度快速
+（0.39秒/規則/60起點），未需背景執行。
+
+**下一步**：結案.一（`git_op_lock.py`已寫好待總司令實機驗證）→結案.二
+（CONCENTRATED_SPEC §4凍結掃描，AWAITING_REVIEW兩件移入已結案）。
+
 ## 2026-09-23（互動視窗CC，債務帽，總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.二）
 
 **ETF證交稅率系統性修正**：`validation/costs.py`缺股票型ETF(0.1%)稅率
