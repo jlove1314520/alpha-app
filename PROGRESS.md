@@ -1,3 +1,52 @@
+## 2026-09-23（DevQueue自走cycle 20260923-121601，研究帽，常備.1~.5＋補記）
+
+等待總司令審閱：1件（`修.二`稽核發現`spillover_overlay_v1`稅率修正
+翻轉FAIL→PASS，非本輪新增，詳見`research/AWAITING_REVIEW.md`）。
+
+本輪連續完成6個commit（`43f0bc05`~`1abb1e81`），全部是佇列深度補件
+（`常備.1`~`常備.5`＋一筆方法論補記），依規則死路(FAIL)/更正類不必
+停下請示，全部做完才收工：
+
+1. **常備.1（查核，非新試驗）**：`PENDING_QUEUE.md`與`STRATEGY_
+   GRAVEYARD.md`原記載「regime.替代B（regime用於選股權重而非總曝險）
+   尚未測試」是錯的——查核發現`portfolio_backtest_v2.py`的
+   `weight_mode="regime_weighted"`就是這個機制，已在
+   `portfolio_multifactor_v2`家族2026-09-06結案完整測過（含
+   equal/ic_weighted/regime_weighted三法×兩因子版本×月/季頻，
+   80檔與298/300檔樣本），全數卡在alpha顯著性；更早的
+   `portfolio_multifactor_v1`單獨列出`regime_weighted`數字：VAL
+   alpha+10.12%(p=0.092)，且是三版本中唯一3x成本敏感度下轉負者。
+   已在`STRATEGY_GRAVEYARD.md`兩處互相cross-reference更正，不產生
+   新TRIALS_LEDGER登記。
+2. **常備.2**：VIX期限結構(VIX9D/VIX比值)N=20日變動率版當TAIEX
+   regime訊號，第1關cheap gate FAIL（train/val正負號相反）。新增
+   `vix_term_structure_roc_gate.py`，登記`TRIALS_LEDGER.md`#363。
+3. **常備.3**：VIX絕對水位版，FAIL（train r=+0.0932/val r=-0.1174
+   正負號相反，但VAL方向正確且顯著贏過null percentile=100.0）——
+   本佇列regime/timing類第5次出現同一種死亡模式(train方向不穩定)。
+   新增`vix_level_gate.py`，登記#364。
+4. **常備.4**：HYG/IEF比值N=20日變動率版，FAIL（train/val同號但兩期
+   皆不顯著p>0.31，VAL未贏過null）——跟前幾筆不同死法，是乾淨「無
+   edge」而非統計偽影形狀。新增`hy_etf_ratio_roc_gate.py`，登記#365。
+5. **常備.5**：HYG/IEF比值水位版M=5/10/60三窗口，0/3通過，三格全數
+   train/val正負號相反，證實#78(M=20)的反轉不是單一窗口的偶然選擇，
+   四個窗口(5/10/20/60)一致。新增`hy_etf_ratio_window_grid_gate.py`，
+   登記#366。建議HYG/IEF比值機制暫緩再測更多變體[自行裁量]。
+6. **方法論誠實揭露補記**：上述`常備.2`~`.5`四個新腳本沿用的是
+   `#76`/`#78`原本的daily-overlap前瞻報酬視窗+逐點打散虛無分布舊
+   設計，非`regime_gate_common.py`修正版（`## #81`段落已記錄此缺陷
+   尚未套用到這些檔案）。分析：缺陷方向偏向製造假陽性，四筆FAIL
+   判定的依據不受影響（修正後只會更確定FAIL）。新增`PENDING_QUEUE.md`
+   `常備.12`追蹤六個受影響檔案的修正工作。
+
+`selection_bias_ledger.py`已重跑四次，N從362累積到367。冒煙測試每個
+commit前都跑過，全部通過（未變動`index.html`/App功能，六次皆為純
+research/Python層變更）。
+
+DevQueue-Cycle: 20260923-121601
+
+---
+
 ## 2026-09-23（互動視窗CC＋hypothesis_queue接續，研究帽，總司令裁示【三個方法缺陷＋E-c/E-d走正式閘門】驗.一＋驗.四）
 
 **驗.四（自走軌道已完成）**：`research/regime_overlay_exit_rule_gate.py`
