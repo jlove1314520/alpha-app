@@ -11541,7 +11541,7 @@ wrapper維持現狀不變。
   t日開盤→收盤報酬重跑全部9關(0050開盤價或^TWII Open，ETF稅率)，登記
   新試驗；#88 cheap gate同樣改開盤到收盤，另列「開盤跳空vs美股報酬」r
   當對照量化外溢在跳空裡的比例。
-- [ ] **驗.三** [研究] #81虛無分布修正——cbi_signal_gate.py改月頻不
+- [x] **驗.三** [研究] #81虛無分布修正——cbi_signal_gate.py改月頻不
   重疊觀測(訊號發布後第一個交易日至下次發布前)，虛無分布改區塊置換
   或circular shift(不得逐點打亂)；#81依新方法重判；同一修正做進
   #76-#80共用cheap gate函式，重跑確認仍FAIL(要量過不得假設)。
@@ -11569,6 +11569,20 @@ wrapper維持現狀不變。
   函式`align_daily_signal_nonoverlap_blocks()`之類，不是重用
   `align_monthly_nonoverlap()`本身），**下一輪不可直接套用同一函式，
   要先設計正確的變體再重跑，[自行裁量]記錄於此**。
+
+  **本輪核對後結案（2026-09-23馬拉松第617輪，研究帽）**：上面「尚未
+  完成」段落點名的`vix_term_structure_gate.py`(#76)／`hy_etf_ratio_
+  gate.py`(#78)，已由`常備.12`（DevQueue軌，cycle`20260923-121601`）
+  用新增的`regime_gate_common.sample_nonoverlapping_blocks()`（M日
+  不重疊區塊抽樣，非重用`align_monthly_nonoverlap()`）＋
+  `circular_shift_null()`完整重跑，逐字對應本節要求的「M日不重疊區塊
+  抽樣＋circular shift虛無分布變體」。核對`TRIALS_LEDGER.md`#374：
+  `vix_term_structure_gate(#76)`VAL n=46 null_pct=49.2→FAIL、
+  `hy_etf_ratio_gate(#78)`VAL n=46 null_pct=58.4→FAIL，連同常備.2~.5
+  共8組全數FAIL，已登記`STRATEGY_GRAVEYARD.md`「#85」章節。**驗.三
+  全部子項（#81本體＋#76/#78延伸）皆已完成，結案**，屬「已被其他
+  track用不同編號完成的過時待辦」，同round615常備.11案例同一形狀，
+  純文件核對無新統計判定，不觸發`register_trial()`。
 
 **2026-09-23佇列深度補件（[自走補入]，`- [ ]`項目數僅2項，低於
 `queue_depth_config.py::MIN_QUEUE_DEPTH=12`，依規則補件，來源

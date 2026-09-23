@@ -9,6 +9,18 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第617輪 · 2026-09-23T14:3x+08:00 · TW · 研究帽：收成orphaned job並發現與互動視窗CC重複勞動——補commit資料檔、驗.三結案、修trial_registry前置阻塞
+
+- 取鎖乾淨（cycle`20260923-143037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.二/驗.三；常備.9仍`[!]`待採購阻塞）。`tasklist`確認15個claude.exe行程仍並行。
+- **收成round616投遞的detached job`20260923-133203-00a4`**：`run_detached.py status`顯示`orphaned`（非`finished`）。看log確認該job已完整跑完2/3~3/3（`pead_portfolio_v1`/`run_score_backtest`），但`git log`顯示**互動視窗CC已在本輪開工前用直接呼叫`run_one()`/`main()`的方式獨立完成同一件事**（commit`633b47f3`/`ecb34a98`，登記`TRIALS_LEDGER.md`#373/#375），且互動視窗CC已`taskkill`終止這個重複job並在`PENDING_QUEUE.md`驗.一條目記錄協調事故（協調.零第5點透明回報義務）。
+- **核對**：orphaned job輸出的`research/data/audit_run_backtest_5priority.json`（`run_score_backtest`區塊：TRAIN報酬+120.12%/MDD-21.63%/Sortino1.114，VAL報酬+34.18%/MDD-16.25%/Sortino0.568）與互動視窗CC已登記的#375數字逐位吻合，確認無新資訊、不重複登記。但發現互動視窗CC的commit`ecb34a98`漏了`git add`這個JSON資料檔本身（只commit了`.md`/`.jsonl`帳本文字），working tree留著一份跟已登記結論一致但未commit的資料——本輪補commit這份資料檔，純資料歸檔非新判定。
+- **驗.三結案**：核對後發現該項「尚未完成」段落點名的`vix_term_structure_gate.py`(#76)／`hy_etf_ratio_gate.py`(#78)已由`常備.12`（DevQueue軌，cycle`20260923-121601`）用新增的`sample_nonoverlapping_blocks()`+`circular_shift_null()`完整重跑（`TRIALS_LEDGER.md`#374，8/8組FAIL），逐字對應驗.三要求的變體設計，屬「已被其他track用不同編號完成的過時待辦」（同round615常備.11同一形狀），標`[x]`結案，純文件核對不觸發`register_trial()`。
+- **修補`trial_registry.py --check`前置阻塞**：開工時發現該檢查已是`exit=1`（`#346`verdict=FAIL缺`failed_gates`欄位，非本輪造成，本輪開工前即存在，`marathon_brief.py`簡報第7段已顯示此FAIL）。依裁示「收工前非0不准commit」，直接在`TRIALS_REGISTRY.jsonl`補上`failed_gates=["unknown"]`（判死依據是spillover前視偏誤，不在GATE_SEQUENCE六關值域內，同`#296`先例），`TRIALS_LEDGER.md`同步補註記，重跑後`exit=0 PASS`（377列）。
+- `validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`任何原始碼（僅呼叫既有函式核對、修`TRIALS_REGISTRY.jsonl`資料欄位），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（驗.一殘餘16支稽核+f52w#86後續、驗.二第二部分開盤到收盤重跑；驗.三本輪結案）。等待審閱：0件（`AWAITING_REVIEW.md`未變動）。
+- **下一輪**：佇列深度`- [ ]`=2，低於`MIN_QUEUE_DEPTH=12`門檻，開工需先執行佇列深度補件；`驗.一`剩餘16支腳本第二輪稽核+`f52w_high_portfolio_v1`的`#86`gate3/5/6後續，高併發下建議先`tasklist`+`git log`確認互動視窗CC是否已在同步進行，避免第三次重複勞動；`驗.二`第二部分（開盤到收盤重跑全部9關）建議拆解成子步驟後再投入單一輪次。
+
+---
 ## 第616輪 · 2026-09-23T13:3x+08:00 · TW · 研究帽：驗.一第4點稽核續跑——修audit腳本加續跑邏輯（略過已完成的1/3），投遞detached job跑第2-3/5支
 
 - 取鎖乾淨（cycle`20260923-133037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=7（驗.一/驗.二/驗.三/常備.9/常備.10/常備.12；常備.6/常備.7已改標`- [!]`家族凍結，常備.8已由DevQueue軌完成）。`tasklist`確認13個claude.exe行程仍並行。

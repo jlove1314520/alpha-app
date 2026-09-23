@@ -644,5 +644,35 @@
       "random_control_percentile": 97.0,
       "n_random": 100
     }
+  },
+  "run_score_backtest": {
+    "TRAIN": {
+      "label": "TRAIN",
+      "start": "2015-01-01",
+      "end": "2020-12-31",
+      "return_pct": 120.11845619630681,
+      "mdd_pct": -21.625202529215144,
+      "sortino": 1.1137981934920302,
+      "n_trades": 895,
+      "buy_and_hold_pct": 75.33626239467368,
+      "cost_1x": 120.11845619630681,
+      "cost_2x": 62.00543288732423,
+      "cost_3x": 19.611552159628243,
+      "random_control_percentile": 100.0
+    },
+    "VALIDATION": {
+      "label": "VALIDATION",
+      "start": "2021-01-01",
+      "end": "2024-12-31",
+      "return_pct": 34.17830433616391,
+      "mdd_pct": -16.25286696303184,
+      "sortino": 0.5676115404739203,
+      "n_trades": 611,
+      "buy_and_hold_pct": 65.31127655696723,
+      "cost_1x": 34.17830433616391,
+      "cost_2x": 5.196822463892969,
+      "cost_3x": -17.66355410373154,
+      "random_control_percentile": 100.0
+    }
   }
 }

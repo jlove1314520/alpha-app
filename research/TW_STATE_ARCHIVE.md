@@ -1128,3 +1128,63 @@ is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
 下一輪建議選US軌（US round609/FUT round610本輪皆已比TW新，但下一輪
 若仍無新裁示，三軌可等距輪替即可，不必刻意避開剛碰過的軌）。完整見
 `REPORT.md`第611輪心跳、`AWAITING_REVIEW.md`。
+**最後更新：2026-09-23T10:3x+08:00（馬拉松第614輪，研究帽）**——取鎖乾淨
+（cycle`20260923-103037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+本輪開工時`- [ ]`=4（**驗.一/驗.二/驗.三/驗.四**，2026-09-23總司令裁示
+【三個方法缺陷＋E-c/E-d走正式閘門】新交辦，round613收工後才進佇列）——
+交辦有貨，本輪名額全部給交辦，不做自走。裁示規定順序「驗.一與驗.四
+並行→驗.二→驗.三」。
+
+**驗.四（已完成）**：新增`research/regime_overlay_exit_rule_gate.py`，
+E-c移動停損10%與E-d MA200regime走`REGIME_OVERLAY_PROTOCOL.md`正式閘門
+（重用`exit_rule_lab.simulate()`同一套成本模型與冷卻期重入規則，不重寫
+底層交易邏輯；隨機擇時對照組用block permutation，保證空手總天數與
+切換次數跟真實序列完全相同，只隨機化日期落點，見腳本docstring
+[自行裁量]1~5）。結果：E-c真實CAGR對照1000次隨機排列p=0.062、E-d
+p=0.394，皆未達裁示寫死的p<=0.01門檻，VAL期MDD皆守住天條一
+（E-c-32.11%／E-d-21.30%，優於-50%），但p這關沒過，**兩者綜合FAIL**。
+登記`TRIALS_LEDGER.md`#359(E-c)/#360(E-d)，`STRATEGY_GRAVEYARD.md`補
+「E-c移動停損10%／E-d MA200 regime出場」條目（第五、六個死於同一種
+「方向有道理但統計檢定力不足」形狀的regime/出場機制）。
+`selection_bias_ledger.py`重跑，N=361（其間偵測到有其他track同時
+登記，非本輪獨占361全部增量）。E-c參數高原(24格，7~15%x10/20/40天)
+CAGR範圍[8.23%,12.31%]、MDD範圍[-52.09%,-31.63%]，形狀報告不選最佳值。
+
+**驗.一（進行中，detached job）**：發現前一個未commit的執行個體已
+寫好`research/backtest_engine_soundness_test.py`（S1-S3測試組，含
+docstring完整說明根因與方法），本輪核對邏輯後直接沿用執行，不重寫。
+`run_detached.py submit`第一次因路徑寫成`backtest_engine_soundness_
+test.py`（相對research/內部路徑，但`run_detached.py`從repo根目錄
+`C:\alpha\alpha-app`執行導致找不到檔案）失敗（exit=2），第二次改用
+`research/backtest_engine_soundness_test.py`正確路徑成功投遞，job id
+`20260923-103738-7132`，本輪收尾時仍`running`（耗時5.5分鐘，S3做
+100個seed的隨機8檔月頻回測較慢），**下一輪用`run_detached.py status`／
+`log`收成S1/S2/S3結果**，S1-S3任一不過要先修引擎（`backtest/
+engine.py`不複利bug）才能做驗.一後續（複利修正/下市股mark/#358稽核
+翻轉重跑），不得跳過。
+
+**驗.二/驗.三本輪未動**（依裁示順序在驗.一之後，且驗.一S1-S3結果
+尚未出爐，尚不知引擎要不要先修，貿然動驗.二/驗.三的重跑意義不大，
+留給下一輪視驗.一結果決定）。
+
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪未重跑確認
+（時間有限，下一輪需補跑確認exit=0）；`validation/holdout.py::
+is_holdout_consumed()`本輪未動holdout，維持`False`。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫
+（純重算既有0050價格快取＋既有樣本因子快取）。`PROGRESS_HEARTBEAT.jsonl`
+已append本輪一行。**交辦佇列還剩2條未開始**（驗.二、驗.三；驗.一
+`running`中不算「未開始」但也未結案）。**等待審閱：0件**（規.二第4節
+掃描提案與維運.git衝突根因，皆已在round613前由總司令裁示結案，見
+US_MARATHON_STATE.md round613記錄）。**下一輪任一軌接手**：優先收成
+`20260923-103738-7132`（`run_detached.py status`確認`finished`後
+`run_detached.py log`看S1/S2/S3輸出，或直接讀`research/data/
+backtest_engine_soundness_test.json`），S1-S3全PASS才能繼續驗.一第
+2~4點（複利修正/殭屍部位/#358稽核翻轉），任一FAIL要先修
+`backtest/engine.py`；驗.一結案或至少S1-S3結果出爐後再排驗.二
+（spillover前視偏誤重跑）、驗.三（#81虛無分布修正）。完整見
+`REPORT.md`第614輪心跳（待補）、`PENDING_QUEUE.md`「2026-09-23總司令
+裁示【三個方法缺陷＋E-c/E-d走正式閘門】」章節、`TRIALS_LEDGER.md`
+#359/#360、`STRATEGY_GRAVEYARD.md`。
+
+---
+
