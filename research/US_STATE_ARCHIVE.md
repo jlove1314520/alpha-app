@@ -662,3 +662,46 @@ jsonl`已append本輪一行。**交辦佇列還剩0條未開始**（23條`- [!]`
 下一輪建議選FUT軌（TW round605/US round606皆本輪或上輪已碰過）。
 完整見`REPORT.md`第606輪心跳、`MARATHON_STATE.md`（輪次計數器606）、
 `CONCENTRATED_SPEC.md`第3/11節、`sp500_tr_series.py`。
+
+---
+**最後更新：2026-09-23T05:3x+08:00（馬拉松第609輪，研究帽）**——取鎖乾淨
+（cycle`20260923-053037`）。開工先照CLAUDE.md「交辦優先於自走」讀
+`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中；逐一核對阻塞項開頭
+標記可能已解除的條件，皆未到解除時間點，維持`- [!]`（含`金流一.4`
+法人歷史累積、`資料源一.3`待總司令領key、`#50`tick累積、`外部一改`
+系列、`Cybex.beta`架構裁示待回應等）。**佇列深度自檢**：`- [ ]`=0
+（<12下限），round599~608已連續十輪確認三個備援來源掃無新項，本輪
+不重複全面掃描。三軌時間戳：TW round608=09-23 04:3x（最新）／FUT
+round607=09-23 03:3x／**US round606=09-23 02:3x（最舊）**——依輪替
+選US。`run_detached.py status`：`running=0`（151筆歷史，無running job
+需收成）。`git status`僅例行排程檔案（`audit_report.json`/
+`factory_stability*`/`connectivity_check.log`等），無conflict標記、
+無孤兒未commit產出，round607修復的git stash衝突未復發。
+**本輪查證**：`AWAITING_REVIEW.md`「規.二第4節參數掃描方式提案」仍
+`等待中`（round605完成、尚無總司令回應），`CONCENTRATED_SPEC.md`
+第4節候選A/B/C未核准前`concentrated_backtest.py`不得動筆，此關卡
+同時擋住TW與US兩軌集中版框架（第4節參數不分市場），非US軌獨有阻塞；
+round606已完成的US軌地基工程（`sp500_tr_series.py`）與round608已
+完成的TW軌文件更正皆已就緒，**第4節提案審閱結果出爐前，集中版路線
+兩軌皆無可再推進的新工作單位**。逐一核對`US_LEADS.md`/
+`STRATEGY_GRAVEYARD.md`確認price-only因子家族（低波動/動能/反轉）
+結案狀態未變（round557/599已收斂，無新遺漏）；`MARATHON_PROTOCOL.md`
+0a節四條新方向中`#49`/`#51`/`#52`已FAIL結案、`#50`屬TW/FUT範疇被動
+等待tick累積，US軌本身無對應的結構性優勢候選可開新方向（沿用
+round599既有結論，非本輪新判斷）。**本輪誠實結論：US軌本輪無新增
+可推進工作單位**——依`CLAUDE.md`七之三節研究紀律「找不到就老實說
+找不到」與`MARATHON_PROTOCOL.md`「不得無限期換皮測試」，不硬湊候選。
+未執行任何新統計判定，不觸發`register_trial()`。`trial_registry.py
+--check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（347列，最大編號
+#345，本輪未新增判定）。`validation/holdout.py::is_holdout_consumed()`
+開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/
+`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本
+檔案、`git status`、`run_detached.py status`、`trial_registry.py
+--check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列
+還剩0條未開始**（23條`- [!]`阻塞中）。**等待審閱：1件**（規.二第4節
+參數掃描方式提案，非本輪新增，延續中）。**下一輪任一軌接手**：規.二
+第4節提案審閱結果是集中版框架兩軌（TW/US）共同的唯一解鎖點，出爐前
+建議下一輪比照本輪做精簡確認即可，不必每輪重新全面掃描；`#50`仍
+被動等待tick累積至20（13/20，`data/ticks/`）；依輪替下一輪建議選
+FUT軌（TW/US本輪皆已碰過）。完整見`REPORT.md`第609輪心跳、
+`AWAITING_REVIEW.md`。
