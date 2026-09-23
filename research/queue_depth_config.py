@@ -24,3 +24,20 @@ PROMPT.txt`／`research/HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`
 
 MIN_QUEUE_DEPTH = 12  # `- [ ]`項目數低於這個門檻就要補件
 TARGET_QUEUE_DEPTH = 20  # 補件時一次補到這個數量
+
+# 2026-09-23總司令裁示【稽核解封＋S2對等比較＋凍結regime家族】凍結.一：
+# 從STRATEGY_GRAVEYARD.md抽取補件時，不得來自「已累積>=5次FAIL的機制
+# 家族」——理由：每多一筆同家族試驗都墊高全專案的多重比較(Bonferroni)
+# 門檻，一個已經證明系統性不work的家族不該繼續消耗試驗預算。
+# 解凍條件：只有總司令另行裁示才能解凍，執行者不得自行判斷「這次應該
+# 不一樣」就補入。
+FROZEN_MECHANISM_FAMILIES = {
+    "regime_擇時": (
+        "regime/擇時降曝險家族：7次覆蓋層(binary趨勢濾網#243/#244、已實現"
+        "波動度#247、回撤斷路器#246等)+E-c移動停損/E-d MA200(#359/#360)+"
+        "cbi/vix/hy等macro regime訊號#76-#81+常備.2~5，全數FAIL。"
+        "常備.6/常備.7(DGBAS總經regime)已於本次裁示同步標記凍結，"
+        "不計入補件來源。"
+    ),
+}
+
