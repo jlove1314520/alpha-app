@@ -1,0 +1,63 @@
+{
+  "by_horizon": {
+    "5": {
+      "horizon": 5,
+      "train": {
+        "n": 82987,
+        "ic": 0.014140346857985039,
+        "p_value": 4.628844982928926e-05
+      },
+      "val": {
+        "n": 34630,
+        "ic": 0.009951629682027723,
+        "p_value": 0.0640414105883059
+      },
+      "same_sign": true,
+      "null_percentile": 93.6,
+      "required_percentile": 90.0,
+      "reasons": [],
+      "passes": true
+    },
+    "10": {
+      "horizon": 10,
+      "train": {
+        "n": 82987,
+        "ic": 0.015549910236174441,
+        "p_value": 7.4734651587518024e-06
+      },
+      "val": {
+        "n": 34630,
+        "ic": 0.0033144091556884876,
+        "p_value": 0.5373914634760125
+      },
+      "same_sign": true,
+      "null_percentile": 46.2,
+      "required_percentile": 90.0,
+      "reasons": [
+        "null percentile=46.2未過門檻90.0"
+      ],
+      "passes": false
+    },
+    "20": {
+      "horizon": 20,
+      "train": {
+        "n": 82987,
+        "ic": 0.020564131718654396,
+        "p_value": 3.131687759523936e-09
+      },
+      "val": {
+        "n": 34630,
+        "ic": -0.010023168089604803,
+        "p_value": 0.062152723240227706
+      },
+      "same_sign": "False",
+      "null_percentile": 95.8,
+      "required_percentile": 90.0,
+      "reasons": [
+        "train/val正負號不一致"
+      ],
+      "passes": false
+    }
+  },
+  "verdict": "FAIL"
+}
