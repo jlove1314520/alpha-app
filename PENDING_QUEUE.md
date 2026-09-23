@@ -12815,9 +12815,18 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   在獨立進行`spillover_overnight_gate.py`的`build_aligned_series_o2c()`/
   `main_o2c()`開發(見本檔更早紀錄)，動工前先確認是否已有未commit的進度，
   避免重工或衝突。
-- [ ] **登記.一** [研究] 外部參考借鏡，只登記不執行——①集保戶股權分散表
+- [x] **登記.一** [研究] 外部參考借鏡，只登記不執行——①集保戶股權分散表
   (TDCC官方公開週頻)列入籌碼原子家族待辦，凍結.二解除前不測；②App功能
   提案：TRIALS_LEDGER父子關係樹狀視圖(每節點顯示判定與關鍵數字，退步節點
   照樣保留)，只寫提案不實作；③STRATEGY_GRAVEYARD前言加方法論提醒(同一段
   資料逐步挑最好版本往下改等於多次試驗，最終版本是樣本內最大值，須以
   試驗總數做多重比較校正，並在未用過的資料上驗證)。
+  **完成（2026-09-24馬拉松，TW軌）**：①已寫入`ATOM_CHIP_IC_MAP_SPEC.md`
+  第13節（來源/可能表達式方向/凍結.二解除前不測，只登記不查起點不寫
+  抓取腳本）。②已寫`research/PROPOSAL_2026-09-24_trials_ledger_lineage_
+  tree_view.md`（TRIALS_REGISTRY.jsonl新增選填parent_id欄位、App日誌分頁
+  唯讀樹狀視圖、風險與需總司令裁示點；只提案未動`index.html`）。③發現
+  已由另一活躍互動視窗CC session（處理審.三/驗.二續期間）在本輪查看前
+  完成，`STRATEGY_GRAVEYARD.md`前言第5點文字與交辦原文一致，本輪未重複
+  動作，僅核對確認。三項全部完成，純文件新增，未觸碰`research/backtest/`
+  `research/validation/`等CLAUDE.md十三節限定清單原始碼，未動holdout。
