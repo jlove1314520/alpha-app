@@ -11357,10 +11357,30 @@ wrapper維持現狀不變。
   重疊觀測(訊號發布後第一個交易日至下次發布前)，虛無分布改區塊置換
   或circular shift(不得逐點打亂)；#81依新方法重判；同一修正做進
   #76-#80共用cheap gate函式，重跑確認仍FAIL(要量過不得假設)。
-- [ ] **驗.四** [研究] E-c(10%)/E-d(MA200)走REGIME_OVERLAY_PROTOCOL.md
+- [x] **驗.四** [研究] E-c(10%)/E-d(MA200)走REGIME_OVERLAY_PROTOCOL.md
   正式閘門——train(<=2020-12-31)/val(2021-2024)分別報告；1000次隨機
   擇時對照組(出場次數/空手天數比例相同、日期隨機)比較CAGR/MDD百分位；
   逐年表(標贏的年份)+剔除2008後全期結果；參數高原{7..15}%x{10,20,40}天
   只報形狀不選最佳值(主判定維持10%/20天)，網格全部計入N；空手期現金
   改定存利率計息與零利息版並列；停損用含息還原價計算高點(寫進規格)；
   兩者登記進N；判定寫死：隨機對照組p<=0.01且val守住天條一才叫PASS。
+  **2026-09-23馬拉松第614輪（TW軌）完成，兩者皆FAIL**——新增
+  `research/regime_overlay_exit_rule_gate.py`（block permutation隨機
+  擇時對照組，重用`exit_rule_lab.simulate()`同一套成本模型與冷卻期
+  重入規則，不重寫底層交易邏輯），登記`TRIALS_LEDGER.md`#359(E-c)/
+  #360(E-d)。E-c：TRAIN策略CAGR=11.47% MDD=-37.77% vs 買進持有
+  CAGR=10.44% MDD=-55.75%；VAL策略CAGR=16.04% MDD=-32.11% vs 買進持有
+  CAGR=16.10% MDD=-33.96%；隨機對照組p=0.062(門檻<=0.01，FAIL)；val
+  守住天條一(MDD>-50%，PASS)；綜合FAIL。E-d：TRAIN策略CAGR=6.57%
+  MDD=-29.28% vs 買進持有CAGR=10.44% MDD=-55.75%；VAL策略CAGR=16.73%
+  MDD=-21.30% vs 買進持有CAGR=16.10% MDD=-33.96%；隨機對照組p=0.394
+  (FAIL)；val守住天條一(PASS)；綜合FAIL。死因：兩者在同樣的空手天數
+  比例與切換次數下，隨機挑選進出場時機也有相當機率跟規則一樣好或更好
+  (E-c約6%機率、E-d約39%機率)，不足以排除運氣，跟已結案regime overlay
+  家族同一種死法。E-c參數高原(24格)CAGR範圍[8.23%,12.31%]、MDD範圍
+  [-52.09%,-31.63%]，形狀報告不選最佳值。空手期現金零利息vs定存代理值
+  差異量級小(E-c CAGR 12.31%→12.43%，E-d CAGR 8.39%→8.65%)。
+  `selection_bias_ledger.py`已重跑，N=361。`[自行裁量]`p值定義取CAGR/
+  MDD兩百分位中較不極端者換算（見腳本docstring），供總司令下一輪推翻。
+  完整見`STRATEGY_GRAVEYARD.md`（待補）、`TRIALS_LEDGER.md`#359/#360、
+  `research/data/regime_overlay_exit_rule_gate_result.json`。

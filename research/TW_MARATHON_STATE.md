@@ -4,6 +4,66 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-23T10:3x+08:00（馬拉松第614輪，研究帽）**——取鎖乾淨
+（cycle`20260923-103037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+本輪開工時`- [ ]`=4（**驗.一/驗.二/驗.三/驗.四**，2026-09-23總司令裁示
+【三個方法缺陷＋E-c/E-d走正式閘門】新交辦，round613收工後才進佇列）——
+交辦有貨，本輪名額全部給交辦，不做自走。裁示規定順序「驗.一與驗.四
+並行→驗.二→驗.三」。
+
+**驗.四（已完成）**：新增`research/regime_overlay_exit_rule_gate.py`，
+E-c移動停損10%與E-d MA200regime走`REGIME_OVERLAY_PROTOCOL.md`正式閘門
+（重用`exit_rule_lab.simulate()`同一套成本模型與冷卻期重入規則，不重寫
+底層交易邏輯；隨機擇時對照組用block permutation，保證空手總天數與
+切換次數跟真實序列完全相同，只隨機化日期落點，見腳本docstring
+[自行裁量]1~5）。結果：E-c真實CAGR對照1000次隨機排列p=0.062、E-d
+p=0.394，皆未達裁示寫死的p<=0.01門檻，VAL期MDD皆守住天條一
+（E-c-32.11%／E-d-21.30%，優於-50%），但p這關沒過，**兩者綜合FAIL**。
+登記`TRIALS_LEDGER.md`#359(E-c)/#360(E-d)，`STRATEGY_GRAVEYARD.md`補
+「E-c移動停損10%／E-d MA200 regime出場」條目（第五、六個死於同一種
+「方向有道理但統計檢定力不足」形狀的regime/出場機制）。
+`selection_bias_ledger.py`重跑，N=361（其間偵測到有其他track同時
+登記，非本輪獨占361全部增量）。E-c參數高原(24格，7~15%x10/20/40天)
+CAGR範圍[8.23%,12.31%]、MDD範圍[-52.09%,-31.63%]，形狀報告不選最佳值。
+
+**驗.一（進行中，detached job）**：發現前一個未commit的執行個體已
+寫好`research/backtest_engine_soundness_test.py`（S1-S3測試組，含
+docstring完整說明根因與方法），本輪核對邏輯後直接沿用執行，不重寫。
+`run_detached.py submit`第一次因路徑寫成`backtest_engine_soundness_
+test.py`（相對research/內部路徑，但`run_detached.py`從repo根目錄
+`C:\alpha\alpha-app`執行導致找不到檔案）失敗（exit=2），第二次改用
+`research/backtest_engine_soundness_test.py`正確路徑成功投遞，job id
+`20260923-103738-7132`，本輪收尾時仍`running`（耗時5.5分鐘，S3做
+100個seed的隨機8檔月頻回測較慢），**下一輪用`run_detached.py status`／
+`log`收成S1/S2/S3結果**，S1-S3任一不過要先修引擎（`backtest/
+engine.py`不複利bug）才能做驗.一後續（複利修正/下市股mark/#358稽核
+翻轉重跑），不得跳過。
+
+**驗.二/驗.三本輪未動**（依裁示順序在驗.一之後，且驗.一S1-S3結果
+尚未出爐，尚不知引擎要不要先修，貿然動驗.二/驗.三的重跑意義不大，
+留給下一輪視驗.一結果決定）。
+
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪未重跑確認
+（時間有限，下一輪需補跑確認exit=0）；`validation/holdout.py::
+is_holdout_consumed()`本輪未動holdout，維持`False`。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫
+（純重算既有0050價格快取＋既有樣本因子快取）。`PROGRESS_HEARTBEAT.jsonl`
+已append本輪一行。**交辦佇列還剩2條未開始**（驗.二、驗.三；驗.一
+`running`中不算「未開始」但也未結案）。**等待審閱：0件**（規.二第4節
+掃描提案與維運.git衝突根因，皆已在round613前由總司令裁示結案，見
+US_MARATHON_STATE.md round613記錄）。**下一輪任一軌接手**：優先收成
+`20260923-103738-7132`（`run_detached.py status`確認`finished`後
+`run_detached.py log`看S1/S2/S3輸出，或直接讀`research/data/
+backtest_engine_soundness_test.json`），S1-S3全PASS才能繼續驗.一第
+2~4點（複利修正/殭屍部位/#358稽核翻轉），任一FAIL要先修
+`backtest/engine.py`；驗.一結案或至少S1-S3結果出爐後再排驗.二
+（spillover前視偏誤重跑）、驗.三（#81虛無分布修正）。完整見
+`REPORT.md`第614輪心跳（待補）、`PENDING_QUEUE.md`「2026-09-23總司令
+裁示【三個方法缺陷＋E-c/E-d走正式閘門】」章節、`TRIALS_LEDGER.md`
+#359/#360、`STRATEGY_GRAVEYARD.md`。
+
+---
+
 **最後更新：2026-09-23T07:3x+08:00（馬拉松第611輪，研究帽）**——取鎖乾淨
 （cycle`20260923-073037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=0，23條`- [!]`阻塞中；逐一核對阻塞項開頭解除條件（含`AWAITING_
@@ -82,66 +142,4 @@ HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條未開始**（23
 心跳、`PENDING_QUEUE.md`「2026-09-23【規.二後續】」章節（規.二條目
 更正）。
 
----
-
-**最後更新：2026-09-23T01:3x+08:00（馬拉松第605輪，研究帽）**——取鎖乾淨
-（cycle`20260923-013037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=2（`規.二`／`規.三`，2026-09-23總司令裁示【拆除機構約束，改集中版】
-新交辦，round604收工後才進佇列），23條`- [!]`阻塞中不變。**本輪連續完成
-兩項交辦**：
-
-1. **規.二**：建立`research/CONCENTRATED_SPEC.md`（只寫規格不實作）——
-   目標函數（年化總報酬>0050/S&P500含息總報酬，取代舊TE≤2.5%約束）、
-   天條對應、待測參數（持股檔數5格×部位上限3格×股票曝險比例4格=60格，
-   不得全掃，列三個候選抽樣方案A/B/C）、選擇驗證紀律、三個必答問題
-   （產業上限ceil(N/2)、出場規則、MDD日頻全期+逐空頭段）。**重要更正**：
-   規.一.4原認為0050含息總報酬序列需另外提案建構，本輪查證發現
-   `survival_constraint_allocation_test.py::load_0050_full_history()`
-   （天條一.1既有程式碼）已是這個函式，可直接重用，不需另立建構工程；
-   S&P500 Total Return序列缺口仍未解決。同時提交第4節參數掃描方式提案
-   （候選C，約14~16格）至`PENDING_QUEUE.md`待總司令裁示，登記進
-   `research/AWAITING_REVIEW.md`（**等待中：1件**）。順帶補commit孤兒
-   產出`research/e1_rejudge_result.json`（round594已判定的支撐檔案，
-   先前未git add）。
-2. **規.三**：建立`research/exit_rule_lab.py`並執行——同一進場訊號
-   (買入並持有0050)逐日模擬E-a~E-d四種出場規則（1+3+2+1=7變體，裁示
-   原文寫8次試驗，如實登記7筆不湊數），輸出未扣成本/扣成本(基準情境
-   1.8折)兩條淨值曲線的CAGR/MDD/Calmar/換手率。**重要發現**：E-b固定
-   停損(8%/15%/25%)三者數字與E-a買進持有完全相同——進場價(2003-07-01)
-   恰好接近0050歷史低點區域，全期最低點距進場價僅約-4.67%，從未觸及
-   任一停損線，已誠實揭露「固定停損綁定單一原始進場價，在標的長期
-   結構性上漲下一旦建倉初期未被停損就形同虛設」這個設計限制，供規.二
-   出場規則設計參考，不建議直接沿用。E-c移動停損比固定停損更能實際
-   發揮風控作用；E-d 200日均線regime出場net CAGR轉負(-6.07%，換手
-   31.5次/年)。**⚠️2026-09-23修.一更正**：本段E-d數字已知因
-   `exit_rule_lab.py`重入邏輯bug（出場觸發後隔日無條件買回，`ma_regime`
-   分支完全沒有「站上均線才進場」的判斷）而失真——bug產生的結果不得
-   當任何結論的佐證，原文「與既有regime overlay家族七次FAIL結論方向
-   一致」的說法已刪除（那是拿一個壞掉的數字去佐證一個獨立結論，方向
-   湊巧一樣不代表這個數字本身可信）。#338~#344全部已標`INVALID_BUG`，
-   見`TRIALS_LEDGER.md`對應位置與`PENDING_QUEUE.md`修.一條目，修正版
-   7筆重新登記。原文「全部7筆登記verdict=EXPERIMENTAL」的#338~#344
-   本身仍保留在案供稽核追溯，不代表現在有效。
-
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
-（346列，新增#338~#344）；`selection_bias_ledger.py`重跑更新N=346
-（TW=156/US=66/FUT=48/未分軌=76）；`validation/holdout.py::
-is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
-`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀
-既有0050價格快取與帳本檔案）。`PROGRESS_HEARTBEAT.jsonl`已append兩行
-（規.二、規.三各一行）。兩筆分別commit+push（`b55dc193`規.二、`9c8ecb56`
-規.三）。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。**等待審閱：
-1件**（規.二第4節參數掃描方式提案，見`research/AWAITING_REVIEW.md`）。
-**下一輪任一軌接手**：交辦佇列已清空（`- [ ]`=0），依round604既有建議
-與round601~604連續多輪一致的「三個備援來源已掃無新項」結論，`#50`仍是
-三軌唯一未結案方向（tick累積待重新清點，round604記錄12/20），被動等待
-總司令對gate50三條件與規.二掃描方式提案的回應；若佇列持續空、且`#50`
-仍卡在等待，下一輪可比照round604做法做精簡確認即可，不必每輪重新
-全面掃描。完整見`REPORT.md`第605輪心跳（待補）、`PENDING_QUEUE.md`
-「2026-09-23總司令裁示【拆除機構約束，改集中版】」章節、
-`research/CONCENTRATED_SPEC.md`、`research/exit_rule_lab.py`、
-`TRIALS_LEDGER.md`#338~#344。
-
----
-
-（第598輪、第601輪、第602輪、第603輪、第604輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+（第598輪、第601輪、第602輪、第603輪、第604輪、第605輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）

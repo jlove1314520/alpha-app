@@ -9,6 +9,17 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第614輪 · 2026-09-23T10:3x+08:00 · TW · 研究帽：交辦優先於自走——驗.四完成(E-c/E-d正式閘門皆FAIL)，驗.一(引擎健全性S1-S3)投遞detached job下一輪收成
+
+- 取鎖乾淨（cycle`20260923-103037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=4（**驗.一/驗.二/驗.三/驗.四**，2026-09-23總司令裁示【三個方法缺陷＋E-c/E-d走正式閘門】新交辦），交辦有貨，本輪名額全給交辦。裁示規定順序「驗.一與驗.四並行→驗.二→驗.三」。
+- **驗.四（完成）**：新增`research/regime_overlay_exit_rule_gate.py`——E-c移動停損10%與E-d MA200regime走`REGIME_OVERLAY_PROTOCOL.md`正式閘門，重用`exit_rule_lab.simulate()`同一套成本模型與冷卻期重入規則。1000次隨機擇時對照組用block permutation（拆真實in-position狀態序列成連續同值區段、隨機打亂順序，保證空手總天數與切換次數跟真實完全相同，只隨機化日期落點）。結果：E-c真實CAGR=12.31%對照隨機分布p=0.062、E-d真實CAGR=8.39%對照p=0.394，皆未達裁示寫死的p<=0.01門檻；VAL期MDD皆守住天條一（E-c -32.11%／E-d -21.30%，優於-50%），但p這關沒過，**兩者綜合FAIL**。逐年表E-c 9/22年、E-d 5/22年贏過買進持有；剔除2008後全期E-c CAGR=14.74%、E-d CAGR=9.72%；空手期現金零利息vs定存利率代理值差異量級小；E-c參數高原(24格)CAGR範圍[8.23%,12.31%]、MDD範圍[-52.09%,-31.63%]，形狀報告不選最佳值。登記`TRIALS_LEDGER.md`#359(E-c)/#360(E-d)，`STRATEGY_GRAVEYARD.md`補條目。`selection_bias_ledger.py`重跑，N=361。
+- **驗.一（進行中）**：發現前一個未commit的執行個體已寫好`research/backtest_engine_soundness_test.py`（S1-S3測試組），核對邏輯後沿用執行，不重寫。`run_detached.py submit`第一次因路徑相對於repo根目錄寫錯（exit=2失敗），第二次改用`research/backtest_engine_soundness_test.py`正確路徑成功投遞，job id`20260923-103738-7132`，本輪收尾時仍`running`（耗時5.5分鐘，S3做100個seed隨機8檔月頻回測較慢）。下一輪需先收成（`run_detached.py status`/`log`或讀`research/data/backtest_engine_soundness_test.json`），S1-S3全PASS才能繼續驗.一第2~4點；任一FAIL要先修`backtest/engine.py`複利bug。
+- **驗.二/驗.三本輪未動**：依裁示順序在驗.一之後，且驗.一結果未出爐，是否要先修引擎會影響驗.二/驗.三是否需要用修好的引擎重跑，留給下一輪視驗.一結果決定。
+- `trial_registry.py --check`本輪未重跑確認（時間有限，下一輪需補跑）；`validation/holdout.py::is_holdout_consumed()`維持`False`。未動凍結區，全程零新增外部API呼叫（純重算既有0050價格快取+既有樣本因子快取）。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（驗.二、驗.三；驗.一running中不算未開始但也未結案）。等待審閱：0件。
+- **下一輪**：優先收成`20260923-103738-7132`，依S1-S3結果決定驗.一後續走向；驗.一結案或至少S1-S3結果出爐後排驗.二（spillover前視偏誤重跑）、驗.三（#81虛無分布修正）。
+
+---
 ## 第613輪 · 2026-09-23T09:3x+08:00 · US · 研究帽：精簡確認——AWAITING_REVIEW已由2件降為1件，US/TW集中版第4節仍凍結，無新可推進工作單位
 
 - 取鎖乾淨（cycle`20260923-093037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中，維持不變。佇列深度自檢`- [ ]`=0（<12下限），round599~612已連續多輪確認三個備援來源掃無新項，本輪不重複全面掃描。三軌時間戳TW round611=07:3x／FUT round610=06:3x／US round609=05:3x（最舊）——依輪替與round611建議選US。
