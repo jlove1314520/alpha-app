@@ -11703,6 +11703,23 @@ wrapper維持現狀不變。
   非trial候選）、`b25_regime_report.py`（報告工具）、
   `backtest_engine_soundness_test.py`（S1-S3框架自檢，已改記
   `FRAMEWORK_CHECK_FAILED`不計入N）、`concentrated_backtest.py`
+  **2026-09-23馬拉松第620輪追加查證**：`grep -c "<腳本名>" TRIALS_
+  LEDGER.md`逐一核對這11支候選是否曾有既有判定（「16支」的定義本質
+  是「曾用舊引擎/舊量尺判過、需要重算校正」，未曾判過的屬全新試驗、
+  不在此項範圍）——`run_weinstein_pilot`／`run_weinstein_unbiased`／
+  `run_weinstein_unbiased_v2`／`weinstein_v2_alpha_gate`四支**0
+  matches**，判斷不屬於16支範圍（從未登記過，若要測是全新trial非
+  recheck，需另外走正常GATE_SEQUENCE而非「重算校正」流程），**排除**。
+  其餘7支確認曾有登記：`piotroski_fscore_gate_v1`(4處，含`#291`)／
+  `portfolio_backtest`(25處，但這是廣義字串比對，很多可能是指`portfolio_
+  backtest_v2`本身，需要下一輪逐條核對排除重複)／`run_value_board_v2_
+  pit_backtest`(1處)／`us_portfolio_backtest`(1處，但這是US軌腳本，
+  是否屬於TW軌尺.一/審.一/驗.一這條裁示的範圍待下一輪向裁示原文確認，
+  裁示原文聚焦`portfolio_backtest_v2.py`的TW compounding bug，US軌
+  的bug範圍未必相同)／`weinstein_stage2`(7處)／`weinstein_stage2_v2`
+  (2處)／`weinstein_alpha_gate`(1處)——**這7支才是真正待下一輪逐一
+  排查、確認是否需要重算的候選**，非本輪判定，翻轉一律進
+  `AWAITING_REVIEW.md`不自行改判。
   （規.二第4節凍結中，不得動筆）、`core_tilt_backtest.py`（引擎/框架
   本體非單一trial）、`determinism_self_test.py`（自檢工具）、
   `f52w_high_gates.py`（屬於獨立的「#86後續」條目非本項）、
