@@ -144,6 +144,8 @@ def parse() -> list[dict]:
         # 列都有同樣風險，一併修好，不只修IRREPRODUCIBLE這一個。
         verdict = "OTHER"
         for cell in reversed(c[2:]):
+            if "FRAMEWORK_CHECK" in cell:
+                verdict = "FRAMEWORK_CHECK"; break
             if "CHEAP_PASS" in cell:
                 verdict = "CHEAP_PASS"; break
             if "EXPERIMENTAL" in cell:
@@ -199,6 +201,14 @@ def factor_concept(name: str) -> str:
 def main() -> int:
     rows = parse()
     check_only = "--check" in sys.argv
+
+    # 2026-09-23總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】結案.二
+    # 第3點：FRAMEWORK_CHECK列（隨機選股佔位訊號驗證回測框架本身，不是
+    # alpha檢定）從一開始就不計入N（連總N都不算，跟IRREPRODUCIBLE/
+    # DUPLICATE/INVALID_BUG「仍計入總N、排除出有效N」不同——那些是
+    # 「檢定過但有問題」，這個是「從頭到尾就不是要檢定alpha」）。
+    framework_check_rows = [r for r in rows if r["verdict"] == "FRAMEWORK_CHECK"]
+    rows = [r for r in rows if r["verdict"] != "FRAMEWORK_CHECK"]
 
     # ── N 口徑：全體與分軌 ────────────────────────────────────────────────
     n_all = len(rows)
@@ -332,6 +342,12 @@ def main() -> int:
                   "bug讓這7筆數字全部失真，E-d交易數1357筆、MDD比買進持有本身還差是bug的"
                   "直接證據，仍計入總N但不作為任何評估的可信證據，修正版已重新登記新編號）：")
         for r in sorted(invalid_bug_rows, key=lambda x: x["id"]):
+            L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
+        L.append("")
+    if framework_check_rows:
+        L.append(f"**FRAMEWORK_CHECK列表（{len(framework_check_rows)}筆，完全不計入N，僅供"
+                  "追蹤）**：隨機選股佔位訊號驗證回測框架本身正確性，不是alpha檢定：")
+        for r in sorted(framework_check_rows, key=lambda x: x["id"]):
             L.append(f"- #{r['id']}（{r['date']}，{r['track']}）{r['name'][:60]}")
         L.append("")
     L.append("## 2. 分母自查（債務二.2）")

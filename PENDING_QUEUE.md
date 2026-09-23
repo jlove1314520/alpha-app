@@ -11223,10 +11223,27 @@ wrapper維持現狀不變。
   重跑N=358/347。
 - [ ] **結案.一** [債務] 維運git衝突——核准方案甲(`git_op_lock.py`)+
   方案丙(push前grep衝突標記)，乙不採用。三支`.ps1`修改後需總司令實機
-  驗證跑過一輪才能標記完成，本條目完成前維持`- [ ]`。
-- [ ] **結案.二** [研究] `CONCENTRATED_SPEC.md`§4核准候選C但凍結掃描
-  （寫進規格，出現通過全部閘門的選股訊號前不得執行§4掃描）；允許一次
-  隨機選股佔位訊號跑`concentrated_backtest`驗證框架正確性(成本/停損/
-  產業上限/MDD逐空頭段計算)，登記FRAMEWORK_CHECK不計入alpha試驗N；
-  `AWAITING_REVIEW.md`兩件移入已結案紀錄。
+  驗證跑過一輪才能標記完成，本條目完成前維持`- [ ]`。**程式碼部分已於
+  commit`da755884`完成**（`git_op_lock.py`新增+三支`.ps1`修改，PowerShell
+  語法解析器確認皆OK，`git_op_lock.py`功能自測PASS），`AWAITING_REVIEW.md`
+  的「該選哪個方案」決策本身已移入已結案紀錄，僅剩「總司令實機驗證跑過
+  一輪」這個條件未滿足，本條目維持`- [ ]`等待該驗證。
+- [x] **結案.二** [研究] 【✅完成2026-09-23，互動視窗CC】
+  `CONCENTRATED_SPEC.md`§4新增裁示段落：**核准候選C（約14格）為日後
+  掃描方式**（寫進規格，不需再提案選方案），**同時凍結整個第4節掃描
+  動作**（出現通過全部閘門的選股訊號前不得執行）。新增`research/
+  concentrated_backtest.py`（重用`backtest/engine.py::run_backtest()`
+  三層風控+`factor_ic.py`既有快取樣本，零新增API呼叫）：隨機選股佔位
+  訊號(seed=20260923)+產業上限(逐一抽樣檢查)，跑2015-01-01~VAL_END，
+  結果總報酬-84.55%/MDD-93.20%/Sortino=0.037/交易數1560（隨機訊號本
+  來就該難看，重點是框架本身跑得動——成本/停損/產業上限/逐空頭段MDD
+  (2011無資料誠實回報None、2015~2022四段皆算出合理負值)全部正確接起
+  來）。已在`trial_registry.py::VALID_VERDICTS`新增`FRAMEWORK_CHECK`
+  （明確語意：從一開始就不是要檢定alpha），`selection_bias_ledger.py::
+  main()`開頭即過濾掉這類列，完全不計入N（連總N都不算，跟IRREPRODUCIBLE/
+  DUPLICATE/INVALID_BUG「仍計總N排除有效N」不同）。已登記`TRIALS_LEDGER.md`
+  #358。`AWAITING_REVIEW.md`兩件（規.二後續參數掃描提案、維運git衝突
+  根因）移入已結案紀錄，維持1件在等待中（修.二稽核發現的spillover
+  翻轉）。`trial_registry.py --check`PASS(360列)；`selection_bias_
+  ledger.py`重跑N_all=359/N_valid=348。
 

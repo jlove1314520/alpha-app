@@ -1,3 +1,40 @@
+## 2026-09-23（互動視窗CC，維運帽＋研究帽，總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】結案.一＋結案.二）
+
+**結案.一（維運git衝突，核准方案甲＋丙）**：新增`research/git_op_lock.py`
+（仿`marathon_lock.py`，STALE_MINUTES=5）——三支本機wrapper
+（`run-marathon-cycle.ps1`/`run-dev-queue-cycle.ps1`/`run-hypothesis-
+queue-cycle.ps1`，皆在repo外`C:\alpha\`）改為commit後搶鎖→`git pull
+--rebase --autostash`→push前grep衝突標記(偵測到就跳過push寫警告，
+偵測失敗只降級不崩潰)→finally釋放鎖，直接消除round607觀察到的「多個
+autostash同時發生」競爭條件。已用PowerShell語法解析器確認三支`.ps1`
+皆OK、`git_op_lock.py`功能自測(acquire/持有時擋下/release)全過。
+**依裁示原文「需總司令實機驗證跑過一輪才能標記完成」，PENDING_QUEUE.md
+「結案.一」條目維持`- [ ]`**，但`AWAITING_REVIEW.md`裡「該選哪個方案」
+的決策本身已移入已結案紀錄（決策已確定≠任務已驗證完工，兩者分開追蹤）。
+
+**結案.二（CONCENTRATED_SPEC §4核准候選C但凍結掃描）**：規格新增裁示
+段落——候選C（約14格）核准為日後掃描方式寫進規格，同時凍結整個第4節
+實際掃描動作（目前無存活選股訊號，掃參數等於拿配額量雜訊）。新增
+`research/concentrated_backtest.py`（重用`backtest/engine.py::
+run_backtest()`三層風控+`factor_ic.py`既有快取樣本，零新增API呼叫），
+用隨機選股佔位訊號+產業上限跑一次驗證框架本身（成本/停損/產業上限/
+逐空頭段MDD計算），結果總報酬-84.55%/MDD-93.20%（隨機訊號本來就該
+難看，重點是框架跑得動）。新增`trial_registry.py::VALID_VERDICTS`
+的`FRAMEWORK_CHECK`（從一開始就不是alpha檢定），`selection_bias_
+ledger.py`新增過濾邏輯讓這類列完全不計入N（連總N都不算，比
+IRREPRODUCIBLE/DUPLICATE/INVALID_BUG的「仍計總N排除有效N」更徹底）。
+`AWAITING_REVIEW.md`兩件（規.二後續掃描提案、維運git衝突根因）移入
+已結案紀錄，維持1件等待中（spillover_overlay_v1翻轉待裁示）。
+
+**驗證**：全部觸及`.py`檔`py_compile`過；`trial_registry.py --check`
+PASS(360列)；`selection_bias_ledger.py`重跑N_all=359/N_valid=348；
+`dev_queue_runner`三個檢查函式確認89 key無重複。
+
+**下一步**：本輪【修正兩個系統性錯誤＋兩件待審閱結案】裁示全部四項
+（修.二/修.一/結案.一/結案.二）皆已處理完畢，結案.一等待總司令實機
+驗證；`spillover_overlay_v1`翻轉待總司令裁示；規.二§4掃描仍凍結中，
+等待有存活選股訊號才能解凍。
+
 ## 2026-09-23（互動視窗CC，研究帽，總司令裁示【修正兩個系統性錯誤＋兩件待審閱結案】修.一）
 
 **exit_rule_lab七筆撤回重做**：確認根因——`exit_rule_lab.py`原版未持倉

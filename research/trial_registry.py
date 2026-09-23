@@ -75,13 +75,20 @@ VALID_VERDICTS = ("CHEAP_PASS", "PASS", "FAIL", "EXPERIMENTAL", "ABANDONED", "RE
                    "VIOLATES_SURVIVAL",  # 2026-09-19天條一：MDD>50%，跟FAIL語意不同（機制有
                    # alpha但活不過歷史空頭段，補救方向是降曝險/縮部位，不是換選股邏輯），
                    # 見MARATHON_PROTOCOL.md「1a-0d.生存門檻」
-                   "IRREPRODUCIBLE")  # 2026-09-20總司令裁示【depth-1閘門設計缺陷要修；
+                   "IRREPRODUCIBLE",  # 2026-09-20總司令裁示【depth-1閘門設計缺陷要修；
                    # p=0.053作廢要正式處理】二：登記過的數值結果，用現有程式碼/資料重跑
                    # 對不上（跟FAIL不同語意——FAIL是「測過、沒過關」，IRREPRODUCIBLE是
                    # 「連測出來的數字本身都對不上，不知道當初的判定基礎還在不在」）。
                    # 這類列仍計入selection_bias_ledger的「總N」（畢竟真的佔用過一次試驗
                    # 名額），但排除在「有效N」之外（不能拿一個對不上的數字去佐證任何
                    # PASS/FAIL的信賴區間），見selection_bias_ledger.py::main()的n_valid。
+                   "FRAMEWORK_CHECK")  # 2026-09-23總司令裁示【修正兩個系統性錯誤＋兩件
+                   # 待審閱結案】結案.二第3點：用隨機選股佔位訊號驗證回測框架本身正確性
+                   # （成本模型/停損規則/產業曝險上限/MDD逐空頭段計算），跟IRREPRODUCIBLE
+                   # 不同語意——這類列從一開始就不是為了檢定alpha，是工程驗證，連「總N」
+                   # 都不計入（不是「這個候選失敗了」，是「這次執行的目的從頭到尾就不是
+                   # 要回答alpha存不存在的問題」），見selection_bias_ledger.py::parse()
+                   # 開頭就過濾掉，不進n_all。
 # 至少要有一個可比較的統計量，否則這一筆對多重比較校正毫無用處
 # （債務1 的教訓：73 筆標記通過裡只有 9 筆留下足以重評的統計量）。
 STAT_PAT = re.compile(r"百分位|percentile|p\s*[=<>]|IC\s*=|Sharpe|z\s*=|n\s*=\s*\d+")
