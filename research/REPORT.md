@@ -9,6 +9,17 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第618輪 · 2026-09-23T15:3x+08:00 · TW · 研究帽：避免與互動視窗CC碰撞——尺.一(alpha量尺修正)正被即時編輯，改投遞獨立於量尺修正的f52w #86診斷job
+
+- 取鎖乾淨（cycle`20260923-153037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=2（驗.一殘餘16支稽核+f52w#86、驗.二第二部分）。`tasklist`確認12個claude.exe行程仍並行。
+- **開工中途發現新總司令裁示剛落地**（commit`03bbaff1`，15:32:52）：「【修正alpha量尺＋f52w補完審查＋稽核續跑】」，新增`尺.一`（組合層alpha/基準量尺修正，最優先，0050含息總報酬+Newey-West HAC+Dimson beta）、`審.一`（f52w補完審查，待尺.一完成）、`驗.一第4點續（剩餘16支）`（待尺.一完成）三項，`ORDER-BEGIN`優先序改為尺.一→審.一→驗.一續2→驗.一→驗.二。
+- **`git status`發現`research/portfolio_backtest_v2.py`有uncommitted修改**，`git diff`核對確認互動視窗CC正在即時實作`尺.一`（`buy_and_hold_index_pct()`/`alpha_significance()`改注入`benchmark`參數、新增`_load_0050_total_return_series()`，逐字對應裁示原文）。**判斷本輪不觸碰該檔案或任何下游項目**，避免第三次同形狀的重複勞動/檔案衝突（同round615/616先例）。
+- **本輪實質工作**：核對`f52w_high_gates.py`（#86，第3/5/6關）的計算內容不依賴`portfolio_backtest_v2.py`的`alpha_significance()`/`buy_and_hold_index_pct()`（僅import該模組的`_liquidity_proxy_series()`），判斷此腳本可安全獨立跑。先`reap`清除兩筆前次提交失敗的殘留job登記（`--cwd`跨殼層路徑跳脫問題導致），修正後成功投遞`20260923-153207-e7ea`（timeout 45分鐘），確認已進入`Loading sample + factors`階段、4.7分鐘仍`running`+`watchdog_alive=True`。**本輪不等待完成、不對其輸出下任何判定**——尊重裁示原文「審.一...待尺.一完成後開始」的順序，只是先把獨立於量尺修正之外的診斷數字準備好供`審.一`日後參考，不是搶跑`審.一`本身。
+- `trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增判定）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`portfolio_backtest_v2.py`任何原始碼，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩2條未開始（驗.一殘餘16支稽核+f52w#86、驗.二第二部分；`尺.一`/`審.一`/`驗.一第4點續`為新裁示新增條目，與既有兩項同一組待辦，不重複計數）。**等待審閱：1件**（`f52w_high_portfolio_v1`#85/#370翻轉判定，延續中，新裁示`審.一`即是對這件的正式處理指示）。
+- **下一輪**：先確認`portfolio_backtest_v2.py`是否已被互動視窗CC commit完成`尺.一`（`git log`/`git diff`），完成才能接續`審.一`／`驗.一第4點續`；若仍在進行中，比照本輪做法找低碰撞的獨立工作；`run_detached.py status`收成`20260923-153207-e7ea`若已`finished`，先讀log但不下判定，留給`審.一`正式使用；`驗.二`第二部分建議先二次確認是否受`尺.一`影響。
+
+---
 ## 第617輪 · 2026-09-23T14:3x+08:00 · TW · 研究帽：收成orphaned job並發現與互動視窗CC重複勞動——補commit資料檔、驗.三結案、修trial_registry前置阻塞
 
 - 取鎖乾淨（cycle`20260923-143037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=3（驗.一/驗.二/驗.三；常備.9仍`[!]`待採購阻塞）。`tasklist`確認15個claude.exe行程仍並行。

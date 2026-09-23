@@ -4,6 +4,58 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `TW_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-23T15:3x+08:00（馬拉松第618輪，研究帽）**——取鎖乾淨
+（cycle`20260923-153037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=2（驗.一殘餘16支稽核+f52w#86、驗.二第二部分）。`tasklist`確認
+**12個claude.exe行程仍在並行**。開工先收成round616投遞的detached job
+`20260923-133203-00a4`：仍`orphaned`（上一輪已核對過與互動視窗CC重複
+勞動、已補commit資料檔，本輪不重複處理）。
+**開工中途發現新總司令裁示（commit`03bbaff1`）剛落地**：「【修正alpha
+量尺＋f52w補完審查＋稽核續跑】」，`PENDING_QUEUE.md`新增`尺.一`(組合層
+alpha/基準量尺修正，最優先，0050含息總報酬+Newey-West HAC+Dimson
+beta)、`審.一`(f52w補完審查，待尺.一完成)、`驗.一第4點續(剩餘16支)`
+(待尺.一完成)三項，`ORDER-BEGIN`優先序改為尺.一→審.一→驗.一續2→
+驗.一→驗.二。**`git status`發現`research/portfolio_backtest_v2.py`
+有uncommitted修改**，`git diff`核對確認是互動視窗CC正在即時實作`尺.一`
+（`buy_and_hold_index_pct()`/`alpha_significance()`改注入
+`benchmark`參數、新增`_load_0050_total_return_series()`，程式碼與
+裁示原文逐字對應）——**判斷本輪不得觸碰`portfolio_backtest_v2.py`
+或任何下游項目（審.一／驗.一第4點續／f52w #86正式判定），避免與互動
+視窗CC產生第三次同形狀的重複勞動/檔案衝突**（同round615/616已有
+先例）。**本輪實質工作**：確認`f52w_high_gates.py`（#86，第3/5/6關
+逐年一致性等）的計算內容**不依賴`portfolio_backtest_v2.py`的
+`alpha_significance()`/`buy_and_hold_index_pct()`**（僅import該模組的
+`_liquidity_proxy_series()`，與benchmark/alpha量尺無關），判斷此腳本
+可安全獨立跑，**先`reap`清除兩筆前次提交失敗的殘留job登記**（cwd參數
+路徑格式錯誤導致的`failed`/`orphaned`各一筆），修正`--cwd`跨殼層
+路徑跳脫問題後成功投遞`20260923-153207-e7ea`（timeout 45分鐘），
+session內確認已進入`Loading sample + factors`階段、4.7分鐘仍
+`running`+`watchdog_alive=True`，**本輪不等待完成、不對其輸出下任何
+判定**（尊重裁示原文「審.一...待尺.一完成後開始」的順序，只是先把
+獨立於量尺修正之外的診斷數字准備好，供尺.一完成後的審.一直接參考，
+不是搶跑審.一本身）。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（377列，本輪未新增判定）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／
+`portfolio_backtest_v2.py`任何原始碼，全程零新增外部API呼叫。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩2條未開始**
+（驗.一殘餘16支稽核+f52w#86、驗.二第二部分——現已知需等`尺.一`完成，
+`審.一`/`驗.一第4點續`兩項新增條目本輪視為與既有兩項同一組待辦，不
+重複計數）。**等待審閱：1件**（`f52w_high_portfolio_v1`#85/#370翻轉
+判定，`AWAITING_REVIEW.md`未變動，延續中，新裁示`審.一`即是對這件的
+正式處理指示）。**下一輪任一軌接手**：先確認`portfolio_backtest_v2.py`
+是否已被互動視窗CC commit完成`尺.一`（`git log`/`git diff`），完成
+才能接續`審.一`／`驗.一第4點續`；若仍在進行中，比照本輪做法找低碰撞
+的獨立工作（`run_detached.py status`收成`20260923-153207-e7ea`若已
+`finished`，先讀log但不下判定，留給`審.一`正式使用）；`驗.二`第二
+部分同樣建議先確認是否受尺.一影響（初步判斷其9關統計檢定與
+portfolio_backtest_v2的benchmark函式無關，但需二次確認）。完整見
+`REPORT.md`第618輪心跳、`PENDING_QUEUE.md`「尺.一」「審.一」章節、
+commit`03bbaff1`。
+
+---
+
 **最後更新：2026-09-23T14:3x+08:00（馬拉松第617輪，研究帽）**——取鎖乾淨
 （cycle`20260923-143037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `- [ ]`=3（驗.一/驗.二/驗.三；常備.9仍`- [!]`待採購阻塞，常備.10/常備.12
@@ -95,61 +147,5 @@ portfolio_v1`/`run_score_backtest`欄位），登記對照結果進
 
 ---
 
-**最後更新：2026-09-23T12:3x+08:00（馬拉松第615輪，研究帽）**——取鎖乾淨
-（cycle`20260923-123037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=9（驗.二/驗.三/常備.6~.11，count後常備.12又新增，見下）。
-**開工先做的第一件事＝收成上一輪投遞的detached job**：
-`20260923-103738-7132`（驗.一S1-S3測試）已`finished`；但發現`git pull
---rebase`不需要動作（已up to date），核對`git log`才發現**hypothesis_
-queue軌已在本輪開工前的11:07/11:54各commit一次**（`e92dfba0`引擎
-compounding修正+S1-S4測試腳本、`cecffb0e`讀取背景行程S3/S4結果並更新
-`PENDING_QUEUE.md`驗.一條目），**DevQueue軌也已完成常備.1~.5**（cycle
-`20260923-121601`，新增`vix_term_structure_roc_gate.py`/
-`vix_level_gate.py`/`hy_etf_ratio_roc_gate.py`/
-`hy_etf_ratio_window_grid_gate.py`四支腳本，皆FAIL並登記
-`TRIALS_LEDGER.md`#363~#366，`N=367`），且新增`常備.12`（六個daily-
-overlap gate腳本待補統計偽影修正）。`tasklist`確認**13個claude.exe
-並行行程**。**判斷**：驗.一/驗.二/驗.三與常備.6~.12目前均有極高被
-其他track同時處理的風險，本輪改挑一個低碰撞、可獨立驗證的項目——
-**常備.11查核**：核對後發現該項要求（Gate10找到可行資料路徑後補一步
-網域合規核對）**已在2026-09-20 commit`0a23710b`（【緊急·合規】mopsov
-破口事故的同一次根因修復）完整實作**，逐字對應到`MARATHON_PROTOCOL.md`
-「### 3e. 四道新增關卡：第 7～10 關」第4點；`常備.11`這條backlog項是
-稍後某次「佇列深度補件」從`STRATEGY_GRAVEYARD.md`「未來Gate 10流程
-補強建議」段落抓取時，沒核對該建議是否已被同一次事故修復採納，屬於
-「已被既有工作取代的過時陳述」（同round608規.二案例同一形狀）。標記
-`[x]`並附出處，無新程式碼、無統計判定，不觸發`register_trial()`。
-**governance觀察（如實記錄，非本輪職責範圍）**：hypothesis_queue軌
-commit`e92dfba0`直接修改了`research/backtest/engine.py`，該檔案依
-`CLAUDE.md`第十三節「核心研究檔案單一寫入者」只能由互動視窗修改，
-自走軌道發現問題應先寫提案到`PENDING_QUEUE.md`而非直接編輯——**本輪
-判斷不回退這次修改**：S1測試已驗證單押0050案例精確PASS、S4已做根因
-分解（證實#358極端負值主因是換股頻率而非複利bug單獨造成），修正方向
-正確且已有測試佐證，回退的風險（讓已知的-84%等級複利bug重新出現）
-高於保留違規修改本身；如實記錄供總司令知悉，往後同類情況建議互動
-視窗優先處理`research/backtest/`／`research/validation/`類工作，
-降低自走軌道誤觸的機會。`trial_registry.py --check`
-（`PYTHONIOENCODING=utf-8`）exit=0 PASS（本輪未新增判定，N沿用其他
-track本輪已登記的367）。`validation/holdout.py::is_holdout_consumed()`
-開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/
-`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本
-檔案、`git log`/`git status`/`tasklist`/`run_detached.py status`）。
-`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩8條未開始**
-（驗.二/驗.三/常備.6~.10/常備.12；常備.11本輪結案）。**等待審閱：0件**
-（`AWAITING_REVIEW.md`未變動，本輪未新增待審項）。**下一輪任一軌
-接手**：13個claude.exe並行行程仍在時，建議先`tasklist`確認、且優先
-挑選backlog裡「純查核/文件性質」而非需要改`research/backtest/`／
-`research/validation/`的項目，降低碰撞風險；驗.一殘餘S2/S3落差
-（1.45pp/3.80pp）根因排查與是否啟動全repo稽核，屬互動視窗權責範圍
-（改engine.py/validation模組），建議寫提案而非自走軌道直接動手；
-`常備.6`~`常備.10`（DGBAS/月營收SUE系列）為安全的自走可推進項；
-`常備.12`（六個daily-overlap gate統計偽影修正）需設計新的區塊抽樣
-變體，非簡單套用既有函式。完整見`REPORT.md`第615輪心跳、
-`PENDING_QUEUE.md`「常備.11」條目更正、`MARATHON_STATE.md`（輪次
-計數器615）。
-
----
-
-
 （第598輪、第601輪、第602輪、第603輪、第604輪、第605輪、第608輪、
-第611輪、第614輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
+第611輪、第614輪、第615輪已歸檔至`TW_STATE_ARCHIVE.md`，僅保留最新3則）
