@@ -11470,8 +11470,17 @@ wrapper維持現狀不變。
   相反的統計偽影形狀。登記`TRIALS_LEDGER.md`#365，
   `STRATEGY_GRAVEYARD.md`新增`## #84`條目，`selection_bias_ledger.py`
   已重跑（N=366）。
-- [ ] **常備.5** [研究] 美股高收益債比值其他窗口（5/10/60日，非
+- [x] **常備.5** [研究] 美股高收益債比值其他窗口（5/10/60日，非
   M=20單一窗口）當TAIEX regime訊號——未測。來源：同上。[自走補入]
+  **2026-09-23完成（DevQueue cycle 20260923-121601）**：新增
+  `hy_etf_ratio_window_grid_gate.py`，測M=5/10/60三格，第1關cheap
+  gate 0/3通過——三格全數train/val正負號相反（train恆負、val恆正，
+  效果量隨窗口拉長放大）。這證實#78的train/val反轉不是M=20窗口的
+  偶然選擇，四個窗口(5/10/20/60)全數同一種模式，更可能是train/val
+  兩段時期關係本身系統性不同。登記`TRIALS_LEDGER.md`#366，
+  `STRATEGY_GRAVEYARD.md`新增`## #85`條目（建議HYG/IEF比值機制暫緩
+  再測更多變體，[自行裁量]），`selection_bias_ledger.py`已重跑
+  （N=367）。
 - [ ] **常備.6** [研究] DGBAS勞動力參與率當TAIEX regime訊號——`#80`
   續1查證時發現替代序列（`data.gov.tw`dataset 6636）存在但未實測。
   來源：`STRATEGY_GRAVEYARD.md` #80段落。[自走補入]
