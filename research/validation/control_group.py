@@ -162,7 +162,14 @@ def run_matched_control_group(
             sid = rng.choice(candidates)
             entry_price = float(indexed[sid].loc[entry_date, price_col])
             exit_price = float(indexed[sid].loc[exit_date, price_col])
-            if entry_price <= 0:
+            # 2026-09-23（協調.零單一寫入者範圍內修正）：原本只擋entry_price<=0，
+            # 但NaN<=0在Python裡是False（NaN比較永遠傳回False），會直接漏掉這個
+            # 防呆、繼續往下算出NaN，讓int(slot_allocation // NaN)炸ValueError。
+            # 資料.零把adj_close<=0一律轉NaN後，這個既有漏洞被真正觸發
+            # （weinstein_alpha_gate.py重跑時實測炸過），改用not(...>0)同時擋
+            # 住<=0與NaN兩種情況。exit_price同理防呆，避免NaN silently污染
+            # total_pnl（那比崩潰更糟——不會報錯，卻會讓整個控制組分布失真）。
+            if not (entry_price > 0) or not (exit_price > 0):
                 continue
             shares = int(slot_allocation // (entry_price * (1 + cost_rates["buy"])))
             if shares <= 0:
