@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-09-23T11:05:37.763455+08:00",
+  "s1": {
+    "engine_cagr_pct": 11.4756,
+    "direct_cagr_pct": 11.4772,
+    "diff_pp": 0.0016,
+    "tolerance_pp": 0.1,
+    "passed": true,
+    "n_trades": 1,
+    "start_date": "2003-06-30",
+    "end_date": "2024-12-31",
+    "actual_entry_date": "2003-07-01"
+  },
+  "s2": {
+    "engine_cagr_pct": 10.7468,
+    "direct_cagr_pct": 12.1929,
+    "diff_pp": 1.4461,
+    "tolerance_pp": 0.3,
+    "passed": false,
+    "n_names": 240,
+    "n_trades": 223,
+    "n_bad_prices_found": 613,
+    "n_inf_returns_found": 0
+  },
+  "s3": {
+    "n_seeds_requested": 100,
+    "n_seeds_usable": 100,
+    "median_cagr_pct": 8.3939,
+    "p10_cagr_pct": 3.5152,
+    "p90_cagr_pct": 15.361,
+    "s2_direct_cagr_pct": 12.1929,
+    "diff_from_s2_pp": 3.799
+  },
+  "s4": {
+    "fixed_picks_used_1to4": [
+      "2916",
+      "2337",
+      "2474",
+      "3038",
+      "6782",
+      "2332",
+      "3465",
+      "4115"
+    ],
+    "steps_cagr_pct": {
+      "1_baseline_no_cost_no_stop": 11.1351,
+      "2_plus_cost_1p8discount": 11.1274,
+      "3_plus_15pct_stoploss": 9.8243,
+      "4_plus_industry_cap": 2.9647,
+      "5_replicate_358_weekly_reshuffle_full_universe": -4.4791
+    },
+    "n_trades_by_step": {
+      "1": 6,
+      "2": 6,
+      "3": 34,
+      "4": 50,
+      "5": 1726
+    }
+  },
+  "s1_s2_both_passed": false
+}

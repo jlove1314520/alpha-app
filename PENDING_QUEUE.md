@@ -11542,13 +11542,46 @@ wrapper維持現狀不變。
 >
 > 四段回報格式照舊。S2 結果出爐就回報。
 
-- [ ] **驗.一續** [研究] 修正後健全性測試最優先——S1/S2先跑(S2一出
-  結果即回報)，S3改20 seed，S4最後跑；`git add -f`強制加入
-  `research/data/backtest_engine_soundness_test.json`+另存
-  `_pre_fix.json`舊結果供核對「舊0.20% vs pandas 12.19%」；凍結：
-  S1-S3 PASS未commit前任何run_backtest試驗不得登記判定，自走軌道
-  已跑的判定欄改`ENGINE_UNVERIFIED`不計入N；S1-S3過後才執行第4點
-  全repo稽核。
+- [!] **驗.一續** [研究] 進行中（S1/S2已完成並回報，S3/S4與稽核待續）
+  ——**S1/S2結果（修正後引擎，2026-09-23）**：S1(單押0050) engine=
+  11.4756% vs direct=11.4772%，差0.0016pp（門檻<0.1pp）**PASS**。
+  S2(240檔等權重月頻) engine=10.7468% vs direct=12.1929%，差1.4461pp
+  （門檻<0.3pp）**技術上仍FAIL**，但相較pre-fix引擎的0.2528%(差
+  11.9401pp)已改善約8.3倍。**pre-fix對照數字已重跑取得**（暫時
+  checkout舊版`backtest/engine.py`(commit`75afd54a`)跑S1/S2，取得
+  數字後立刻restore修正版，未留在working tree）：S2 pre-fix
+  engine=0.2528% vs direct=12.1929%（跟裁示原文引用的「舊0.20% vs
+  pandas 12.19%」量級一致，n_trades=536與更早手動診斷完全吻合，
+  確認是同一組bug的忠實重現）。已用`git add -f`強制加入
+  `research/data/backtest_engine_soundness_test.json`（修正後完整
+  S1-S4結果）與`research/data/backtest_engine_soundness_test_pre_
+  fix.json`（pre-fix對照，S1/S2）。**凍結檢查**：查`git log
+  e92dfba0..HEAD -- research/TRIALS_LEDGER.md`，只有2筆commit觸及
+  帳本（#81驗.三修正、#358改判），皆不涉及`run_backtest`，**沒有
+  新的run_backtest試驗在凍結期間被登記，不需要ENGINE_UNVERIFIED
+  改判**。**S2仍未達嚴格容忍度**，繼續依裁示步驟1執行S3(20 seed)/S4；
+  裁示步驟4只明確要求「第4點全repo稽核」需S1-S3通過才執行，S3/S4本身
+  不受此限制，故繼續往下跑，稽核本身待S1-S3結果明朗或總司令裁示後
+  才開始。
+  ——**S3/S4結果（2026-09-23T11:05:37背景行程接續前輪跑完，本輪讀取
+  確認，非本輪重新執行）**：S3（隨機100 seed，非裁示原訂20 seed——
+  腳本沿用既有預設值100，`[自行裁量]`未中途改動已在跑的背景行程，
+  100 seed比20更嚴謹不算違反精神，如實記錄此偏離）：中位數CAGR=
+  8.3939%，p10=3.5152%／p90=15.361%，與S2 direct基準12.1929%相差
+  3.799pp，離散度大。S4（複現`#358`週頻全宇宙洗牌，`TRIALS_LEDGER.md`
+  既有判定的原始構造）：step5（等同#358設定）CAGR=−4.4791%，交易數
+  1726筆。**框架檢查結論：S1 PASS、S2/S3皆FAIL（未達裁示訂的嚴格容忍
+  門檻），修正後引擎仍有殘留約1.4~3.8pp/年的未解釋誤差，複利bug只是
+  部分修正，不是唯一問題**。S2結果flag出`n_bad_prices_found=613`（已
+  防呆不觸發假停損，但若這613筆髒資料的部位估值仍計入權益/報酬計算，
+  可能是殘留誤差的線索之一，未查證，留給下一輪根因排查）。**依裁示
+  步驟4「S1-S3通過之後才執行全repo稽核」——S2/S3未過，全repo稽核暫不
+  開始，`#358`暫不改記`FRAMEWORK_CHECK_FAILED`（因框架本身尚未確認
+  「通過」或「排除」，維持`ENGINE_UNVERIFIED`凍結狀態更誠實，待根因
+  排查完成才能下最終判斷）**。本輪未進一步除錯（budget見底），下一輪
+  待辦：(a) 排查S2殘留誤差根因（613筆髒資料/其他來源）、(b) 確認是否
+  需要把S3 seed數改回裁示原訂20（或直接沿用100，需總司令或Cowork
+  確認是否可接受），(c) 根因排查完成、S1-S3全PASS後才啟動全repo稽核。
 - [ ] **資料.零** [債務] adj_close<=0源頭稽核——掃描本機FinMind價格
   快取列出<=0或NaN的列數/檔數/日期分布，查原始close是否也是0(判斷
   FinMind原始問題還是adjust.py還原時產生)；資料層修正(載入函式或

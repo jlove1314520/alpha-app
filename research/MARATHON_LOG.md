@@ -1,5 +1,32 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23T12:30:00+08:00（hypothesis_queue軌）— 交辦優先：讀取上輪背景行程跑完的驗.一續S3/S4結果並記錄，框架檢查仍未過（S2/S3皆FAIL），未進一步除錯，budget見底收工
+
+開工先`git stash`暫存其他排程留下的殘留變更（`data/audit_report.json`等9檔，非本track
+所有）、`git pull --rebase`成功（先前DNS暫時性失敗，本輪重試已恢復）、`git push`補推
+上一輪因DNS失敗卡住的本機commit（`e92dfba0`引擎修正+`a5983395`裁示登記，共2筆一次
+推送成功）、`git stash pop`還原殘留變更（不納入本輪commit）。取得`hypothesis_queue`
+具名鎖（`LOCK_ACQUIRED`）。依「交辦優先於自走」讀`PENDING_QUEUE.md`，發現`驗.一續`
+標記進行中，上一輪（11:10）已commit引擎修正程式碼但背景行程S3/S4未跑完就budget見底。
+本輪檢查`data/backtest_engine_soundness_test.json`（已`git add -f`但未commit，仍在
+working tree），確認背景行程已於2026-09-23T11:05:37完成S1-S4全部四階段（早於上一輪
+11:10的心跳時間，代表該行程實際已跑完，只是上一輪查看時機稍早於檔案寫入完成）。
+結果：**S1 PASS**（單押0050，engine=11.4756% vs direct=11.4772%，差0.0016pp）；
+**S2仍FAIL**（240檔等權重月頻，engine=10.7468% vs direct=12.1929%，差1.4461pp，
+門檻<0.3pp，較修正前11.9401pp已改善約8.3倍但未達門檻，`n_bad_prices_found=613`）；
+**S3離散度大**（100 seed，非裁示原訂20——腳本沿用既有預設值，`[自行裁量]`未中途
+改動已在跑的背景行程，中位數CAGR=8.3939% vs direct 12.1929%差3.799pp，p10=3.5152%/
+p90=15.361%）；S4複現`#358`週頻全宇宙洗牌CAGR=−4.4791%（交易1726筆）。**結論：
+複利bug只是部分修正，引擎仍有殘留約1.4~3.8pp/年未解釋誤差，框架檢查（S1-S3全PASS）
+未通過**，依裁示步驟4「S1-S3通過才執行全repo稽核」，全repo稽核暫不開始，`#358`
+維持`ENGINE_UNVERIFIED`凍結狀態（未改記`FRAMEWORK_CHECK_FAILED`，因框架本身尚未
+確認排除，過早下最終判斷不誠實）。已把完整結果與下一輪待辦（排查S2殘留誤差根因/
+613筆髒資料是否為線索/S3 seed數是否需改回20）寫進`PENDING_QUEUE.md`驗.一續條目。
+`is_holdout_consumed()`開工/收工前皆`False`，本輪完全未觸碰holdout，未新增任何
+`run_backtest`型試驗登記（凍結期間持續有效）。交辦佇列還剩2條未開始（驗.二/驗.三，
+依裁示排在驗.一續之後，本輪未動）。本輪對話budget已見底，未進一步做S2根因排查，
+誠實記錄「未完成」而非勉強下判定。往`research/PROGRESS_HEARTBEAT.jsonl`append一行。
+
 ## 2026-09-23T11:10:00+08:00（hypothesis_queue軌）— 交辦優先：接續驗.一（回測引擎健全性S1-S4），套用compounding修正後重跑，S2/S3/S4未跑完即撞budget，本輪未完成
 
 本輪依「交辦優先於自走」開工前掃描`PENDING_QUEUE.md`，`- [ ]`=3（驗.一/驗.二/驗.三，

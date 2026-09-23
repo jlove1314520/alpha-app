@@ -1,0 +1,25 @@
+{
+  "engine_version": "pre-fix (commit 75afd54a)",
+  "s1": {
+    "engine_cagr_pct": 11.4756,
+    "direct_cagr_pct": 11.4772,
+    "diff_pp": 0.0016,
+    "tolerance_pp": 0.1,
+    "passed": true,
+    "n_trades": 1,
+    "start_date": "2003-06-30",
+    "end_date": "2024-12-31",
+    "actual_entry_date": "2003-07-01"
+  },
+  "s2": {
+    "engine_cagr_pct": 0.2528,
+    "direct_cagr_pct": 12.1929,
+    "diff_pp": 11.9401,
+    "tolerance_pp": 0.3,
+    "passed": false,
+    "n_names": 240,
+    "n_trades": 536,
+    "n_bad_prices_found": 613,
+    "n_inf_returns_found": 0
+  }
+}
