@@ -12557,3 +12557,41 @@ TRIALS_REGISTRY（比照既有慣例，設計輪不登記試驗）。下一輪�
 TWSE/台灣指數公司的靜態JSON/CSV直連端點），應優先完成這個查證，而不是
 直接判定「資料不可及」——目前的證據還不足以支撐那麼強的結論。
 `is_holdout_consumed()`本輪開工/收工前確認皆`False`。
+
+**【2026-09-23 hypothesis_queue排程接續，第二輪查證，範圍限縮發現】**：
+本輪嘗試用Bash工具的curl直接探測`taiwanindex.com.tw`／`twse.com.tw`
+靜態端點，繞過上一輪WebFetch讀不到JS動態內容的限制。**結果**：
+`curl`對`www.twse.com.tw`與對照組`www.google.com`皆DNS解析失敗
+（exit=6，Could not resolve host），確認**這不是twse.com.tw網站本身的
+問題，而是這次Bash執行環境本身沒有一般對外網路連線**（無DNS）——
+`taiwanindex.com.tw/api/News/Home`回301導向（有DNS，但可能走了不同
+的網路路徑或該域名剛好有快取/CDN，與twse.com.tw失敗不一致，尚未查明
+原因）。**範圍限縮的意義**：這代表本輪（乃至可能是這一整批hypothesis_
+queue排程呼叫）在探測新資料源時，Bash+curl這條路本身可能不可靠，
+應優先用WebFetch工具（已知能連上網頁，只是讀不到JS動態渲染內容）或
+`research/fetch.py`既有的requests-based既有函式（過去排程腳本用它
+成功抓過TWSE等資料，代表Python requests這條路徑在其他執行情境下是通的，
+本輪未實測是否在這次呼叫的環境下同樣可行，留給下一輪確認）。
+**判定不變**：仍是「前置未備，暫不開發完整SPEC」，本輪未推翻上一輪
+判定，只是釐清「查不到」的原因分兩層——不只是WebFetch的JS限制，
+還多了一層「這次環境本身的Bash網路連線」限制，下一輪應先確認
+`python -c "import requests; requests.get(...)"`是否在等價環境下可行，
+再決定要不要繼續投入這條資料源查證，或轉向設計#83新假設軸。
+`is_holdout_consumed()`本輪開工/收工前確認皆`False`。
+
+**【同輪追加，關鍵發現：Python requests可用，curl不可用】**：改用
+`python -c "import requests; requests.get(...)"`測試同一台機器，
+**`requests.get('https://www.twse.com.tw')`成功回200**——證實這次
+Bash執行環境對外連線失敗是curl本身的問題（可能缺少代理設定環境變數，
+Python requests走了不同的網路堆疊或有系統代理設定生效），不是這次
+呼叫環境完全沒有網路。**這解除了本輪稍早「Bash+curl這條路本身可能
+不可靠」的過度悲觀結論**——下一輪應統一改用`requests`（或既有
+`fetch.py`函式）探測資料源，不要用`curl`。隨手猜測的兩個候選端點
+（`taiwanindex.com.tw/index/insurance`回404、`twse.com.tw/rwd/zh/
+ETF/etfConstituent`回200但內容是404錯誤頁）皆未命中，**這只是本輪
+隨手嘗試、非窮盡查證**，真正需要的是找到台灣指數公司或TWSE官方
+「0050成分股歷史調整清單」的正確端點路徑，下一輪應優先用瀏覽器
+手動導覽（或WebFetch工具搭配已知正確頁面URL）找出正確路徑，而不是
+盲猜端點字串。`is_holdout_consumed()`本輪開工/收工前確認皆`False`。
+未修改`research/backtest/`／`research/validation`／`adjust.py`／
+`pit.py`／`trial_registry.py`（遵守CLAUDE.md十三節）。

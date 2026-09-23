@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-23T18:54:41.951611 — hypothesis_queue排程接續#82資料源查證：curl DNS失敗但requests可用，端點猜測未命中 — 判定不變(前置未備)，釐清Bash網路限制
+
 ## 2026-09-23 17:53（hypothesis_queue軌）— PENDING_QUEUE「驗.一第4點續
 （剩餘16支）」7支候選範圍界定：逐一grep import語句排除docstring假陽性，
 確認genuinely使用`backtest.engine.run_backtest()`的只有3支
