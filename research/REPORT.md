@@ -9,6 +9,15 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第635輪 · 2026-09-24T04:3x+08:00 · TW · 研究帽：確認資料.一額度解除但已被另一活躍行程接手續抓，避讓避免搶寫checkpoint，TW軌本輪無可推進新工作單位
+
+- 取鎖乾淨（cycle`20260924-043037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0（僅`閘門.一`標`- [!]`），逐一核對開頭標記皆未到解除時間。三軌時間戳：TW round632=09-24 01:3x（最舊）／FUT round633=02:3x／US round634=03:3x——依輪替選TW。
+- 核心查證：`data/rate_limit_state.json`顯示FinMind`blocked_until`=1790194899.09（台北2026-09-24T04:21:39），本輪04:31取鎖時額度已解除約10分鐘。但`research/.f52w_2007_extension.lock`內容`163704|1790194942.50|unknown`，`Get-Process -Id 163704`確認為活躍python行程（04:22:21啟動，緊接額度解除時刻），`research/data/f52w_2007_extension_checkpoint.json`確認`fetched_ids`已從round633記錄的169推進到199（`failed_ids`=35）——判定另一排程（依`閘門.一`條目文字為hypothesis_queue軌）已搶先接手續抓且正常運作中。
+- [自行裁量，比照round613/623/625避讓先例]：本輪不重複執行`f52w_2007_extension.py`，避免撞檔案鎖並浪費FinMind額度。逐一核對`凍結.二`允許的四類工作現況：稽核重跑（驗.一第4點續剩餘8支）已於round624完成並登記#387-393；資料抓取正被上述活躍行程處理；工具修正（修.三）已由互動視窗CC完成並commit（`a80b27f7`，`research/factors.py`無未commit修改）；驗.二開盤到收盤重跑已完成並登記#394（FAIL）。`AWAITING_REVIEW.md`「等待中」確認0件。
+- **驗證**：`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（399列，本輪未新增判定）；`validation/holdout.py::is_holdout_consumed()`開工/收工前皆`False`；`run_detached.py status`：`running=0`（160筆歷史）；未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區；未修改`research/backtest/`／`research/validation/`／`trial_registry.py`等`CLAUDE.md`十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目）；全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 交辦佇列還剩0條未開始（僅`閘門.一`標`- [!]`，BLOCKED於續抓完成）。等待審閱：0件。下一輪待做：續抓199/300檔（活躍行程持續中，預計還需1-2輪補齊剩餘~101檔）；依輪替下一輪建議選FUT軌。
+
+---
 ## 第634輪 · 2026-09-24T03:3x+08:00 · US · 研究帽：延續round633方法論對US軌重新確認凍結.二四類工作皆已完成/被額度阻擋，本輪無可推進新工作單位
 
 - 取鎖乾淨（cycle`20260924-033037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0（僅`閘門.一`標`- [!]`），31條`- [!]`阻塞中，逐一核對開頭標記皆未到解除時間。
