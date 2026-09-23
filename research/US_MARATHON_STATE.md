@@ -3,6 +3,53 @@
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `US_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
 ---
+**最後更新：2026-09-23T09:3x+08:00（馬拉松第613輪，研究帽）**——取鎖乾淨
+（cycle`20260923-093037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=0，23條`- [!]`阻塞中，維持不變。**佇列深度自檢**：`- [ ]`=0
+（<12下限），round599~612已連續多輪確認三個備援來源掃無新項，本輪不
+重複全面掃描。三軌時間戳：TW round611=09-23 07:3x／FUT round610=
+09-23 06:3x／**US round609=09-23 05:3x（最舊）**——依輪替與round611
+建議選US。**重要更新（本輪最主要發現）**：`AWAITING_REVIEW.md`「等待中」
+從round609記錄的2件降為**1件**——round612（跨市場軌）之後、本輪之前，
+總司令已對兩件都裁示：規.二第4節掃描方式提案→**核准候選C，但同時
+凍結整個第4節掃描動作**（無存活訊號前不得執行，僅允許佔位隨機訊號跑
+一次驗證框架）；維運.git衝突根因→**核准方案甲(`git_op_lock.py`)＋丙
+(push前偵測衝突降級警告)，乙不採用**，程式碼已寫完並通過PowerShell
+語法解析器檢查，但依裁示原文需總司令實機驗證，`PENDING_QUEUE.md`
+「結案.一」維持`- [!]`（白名單第2條：需總司令親自操作）。新增1件
+等待中：`修.二稽核發現`spillover_overlay_v1`（#89）ETF稅率修正後第6關
+FAIL→PASS翻轉，已登記`TRIALS_LEDGER.md`#346（verdict=未結案），待
+總司令裁示是否核准改判。**這代表US/TW集中版框架的唯一解鎖點（規.二
+第4節）雖已核准，但同時被凍結（無存活訊號前不執行掃描），實務上
+US軌仍無新可推進工作單位**——`concentrated_backtest.py`不得動筆，
+`sp500_tr_series.py`（round606已就緒）暫無用武之地。**高併發風險
+提醒**：開工時`tasklist`確認**12個`claude.exe`行程仍在並行**（與
+round612觀察一致），`git status`顯示`PENDING_QUEUE.md`有他process
+正在編輯的uncommitted修改（diff僅1行，判斷為另一track正常操作中，
+非衝突）——本輪依round612示範的作法，commit範圍**刻意限定本檔案＋
+`MARATHON_STATE.md`＋`REPORT.md`＋`PROGRESS_HEARTBEAT.jsonl`**，不
+`git add PENDING_QUEUE.md`或任何可能與其他track同時編輯的檔案，避免
+覆寫遺失。`run_detached.py status`：`running=0`（151筆歷史，無running
+job）。`#50`tick累積`ls research/data/ticks/*.parquet`實測仍12/20，
+無變化。未執行任何新統計判定，不觸發`register_trial()`。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（351列，本輪未新增判定，沿用round612已登記的#347~#349）。
+`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案、`git status`、
+`tasklist`、`run_detached.py status`、`ls`）。`PROGRESS_HEARTBEAT.jsonl`
+已append本輪一行。**交辦佇列還剩0條未開始**（23條`- [!]`阻塞中）。
+**等待審閱：1件**（`修.二稽核發現`spillover_overlay_v1`翻轉判定，
+`AWAITING_REVIEW.md`已更新，2件舊項已由總司令裁示結案）。**下一輪
+任一軌接手**：US/TW集中版第4節掃描仍凍結（無存活訊號前不執行）；
+`結案.一`待總司令實機驗證三支wrapper（白名單第2條，非自走可推進）；
+`spillover_overlay_v1`翻轉判定待總司令裁示；`#50`仍被動等待tick累積
+至20（12/20）；**若12個claude.exe並行行程仍在，下一輪開工先重新
+`tasklist`確認並延續本輪「限縮commit範圍」的做法，避免跨track檔案
+衝突**；依輪替下一輪建議選FUT軌（TW/US本輪皆已碰過）。完整見
+`REPORT.md`第613輪心跳、`AWAITING_REVIEW.md`。
+
+---
 **最後更新：2026-09-23T05:3x+08:00（馬拉松第609輪，研究帽）**——取鎖乾淨
 （cycle`20260923-053037`）。開工先照CLAUDE.md「交辦優先於自走」讀
 `PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中；逐一核對阻塞項開頭
@@ -93,6 +140,3 @@ jsonl`已append本輪一行。**交辦佇列還剩0條未開始**（23條`- [!]`
 下一輪建議選FUT軌（TW round605/US round606皆本輪或上輪已碰過）。
 完整見`REPORT.md`第606輪心跳、`MARATHON_STATE.md`（輪次計數器606）、
 `CONCENTRATED_SPEC.md`第3/11節、`sp500_tr_series.py`。
-
----
-**最後更新：2026-09-22T18:3x+08:00（馬拉松第599輪）**——取鎖乾淨（cycle`20260922-183037`）。開工先照CLAUDE.md「交辦優先於自走」鐵律讀`PENDING_QUEUE.md`：全文0條`- [ ]`（僅`2026-09-22總司令裁示【方法論重建】`三條已全數`[x]`完成，含出場.零/宇宙.零登記），24條`- [!]`阻塞中。**佇列深度自檢**：`- [ ]`=0（<12下限），依三個備援來源盤點——`HYPOTHESIS_QUEUE.md`「排隊中」grep僅命中2處歷史敘述（非新項）；`TW_LEADS.md`/`US_LEADS.md`/`FUT_LEADS.md`/`STRATEGY_GRAVEYARD.md`「下一步/待辦」逐一核對後，**發現本輪要做的事本身正好是round557交辦的那個未完成盤點**（見下），故不另外硬湊補件，優先完成這項既有交辦。三軌時間戳：TW round598=17:4x（最新）／FUT round562=09-19（09-19後無新機制候選）／**US round559=09-19 11:17（最舊）**——依輪替選US。`run_detached.py status`：`running=0`（147筆歷史）；round559提到的job`20260919-110815-d4cf`已不在近期登記簿窗口內（3天前的舊job，未查得finished/failed紀錄，研判早已被後續稽核/DevQueue自走接手完成——查`data/stock_detail.json`現況`financials_updated_count`=844，`generated_at`=2026-09-22T08:13（market.yml每日自動更新），`find_gap_codes()`實測剩8檔，與`PENDING_QUEUE.md`常備backlog區塊「稽核.三(a)…剩8檔量級」的既有結論一致——**這條「下一步」已由市場日排程自動吸收，非本輪US軌待辦**，不重複投遞）。**本輪真正工作單位＝round557交辦的候選池盤點**（「US軌候選池需重新盤點是否還有其他類似round446那種CHEAP_PASS但下一步從未執行的遺漏，可先掃`US_LEADS.md`各條目下一步欄位」）：逐列核對`US_LEADS.md`全表33列，找出`f_us_momentum_12m`中型股tier N=30版（#8，`TRIALS_LEDGER.md`#53，CHEAP_PASS）符合這個形狀——但查證後發現**不需要新的深挖工作**：同一批`us_factor_ic_by_size.py`已在round446的N=90重跑中把這格一併測過（`US_LEADS.md`#28、`TRIALS_LEDGER.md`#207，percentile僅60.0，FAIL），這個換大樣本重跑本身已經是比1b深挖更早、更省成本的否證，跟`f_us_low_vol`中型股tier（cheap gate換N=90後仍CHEAP_PASS、要靠1b深挖才現形）是不同死法。逐一核對`f_us_momentum_12m`四個樣本規模組合（不分層#44/大型#48+#204/中型#53+#207/小型#58）確認全數FAIL，`f_us_value_bm`（#16，book-to-market非乾淨宇宙版）已由round350~425「9輪短腿診斷鏈」的乾淨宇宙版FAIL結論涵蓋（`STRATEGY_GRAVEYARD.md`既有段落），非新遺漏。**產出**：`STRATEGY_GRAVEYARD.md`新增「f_us_momentum_12m（美股12-1動能）」家族結案段落（引用既有#44/#48/#53/#58/#204/#207，未執行新的統計檢定，純文件盤點與判定綜整，不需要`register_trial()`）；`US_LEADS.md`#8列追加結案註記，指向`STRATEGY_GRAVEYARD.md`。**至此US軌price-only因子家族（低波動/動能/反轉）三者、四個樣本規模組合、共計約20筆試驗全數FAIL收斂，0 PASS/EXPERIMENTAL**——這個結論本身不觸發`MARATHON_PROTOCOL.md`0a節「四條新方向全部結案後才誠實提報」門檻（0a節的四條方向`#49`/`#50`/`#51`/`#52`是不同的新方向清單，price-only因子屬於更早、已被0a節裁示放棄的舊方向，本輪只是把舊方向殘留的CHEAP_PASS遺漏補齊結案文件，不是新的0a結論）。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（331列，最大編號#329，本輪未新增試驗判定——純引用既有已登記編號的文件綜整）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，全程零新增外部API呼叫（純讀既有`.md`/`.json`帳本檔案）。**交辦佇列還剩幾條未開始**：0條`- [ ]`；24條`- [!]`阻塞中，其餘待總司令。**下一輪任一軌接手**：round557交辦的候選池盤點至此完成（`f_us_low_vol`round557已結案、`f_us_momentum_12m`本輪結案、`f_us_value_bm`確認非遺漏），US軌price-only因子路線已窮盡；若無總司令新裁示，下一輪US軌建議轉往`MARATHON_PROTOCOL.md`0a節四條新方向裡US軌尚可推進的部分（目前#49/#50/#51/#52主要是TW/FUT範疇，US軌若要延續需先確認是否有對應的美股版本結構性優勢，這是需要總司令裁示的新方向判斷，不是本輪自行裁量範圍）；依輪替下一輪建議選FUT軌（TW/US本輪皆已碰過）。完整見`REPORT.md`第599輪心跳、`MARATHON_STATE.md`（輪次計數器599）、`STRATEGY_GRAVEYARD.md`「f_us_momentum_12m」段落、`US_LEADS.md`#8。

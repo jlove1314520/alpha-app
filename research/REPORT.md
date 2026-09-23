@@ -9,6 +9,17 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第613輪 · 2026-09-23T09:3x+08:00 · US · 研究帽：精簡確認——AWAITING_REVIEW已由2件降為1件，US/TW集中版第4節仍凍結，無新可推進工作單位
+
+- 取鎖乾淨（cycle`20260923-093037`）。開工先讀`PENDING_QUEUE.md`：`- [ ]`=0，23條`- [!]`阻塞中，維持不變。佇列深度自檢`- [ ]`=0（<12下限），round599~612已連續多輪確認三個備援來源掃無新項，本輪不重複全面掃描。三軌時間戳TW round611=07:3x／FUT round610=06:3x／US round609=05:3x（最舊）——依輪替與round611建議選US。
+- **本輪查證重點**：`AWAITING_REVIEW.md`「等待中」從round609記錄的2件降為1件——round612之後、本輪之前，總司令已裁示兩件：規.二第4節掃描方式→核准候選C但**凍結整個第4節掃描動作**（無存活訊號前不執行）；維運.git衝突根因→核准方案甲(`git_op_lock.py`)＋丙，乙不採用，程式碼已寫完但待總司令實機驗證，`結案.一`維持`- [!]`（白名單第2條）。新增1件等待中：`spillover_overlay_v1`（#89）ETF稅率修正後FAIL→PASS翻轉，`TRIALS_LEDGER.md`#346（verdict=未結案）待裁示。
+- 結論：規.二第4節雖核准但同時凍結，`concentrated_backtest.py`不得動筆，US/TW集中版路線實務上仍無新可推進工作單位。US軌本輪誠實結論為無新增工作單位，不硬湊候選。
+- **高併發風險處理**：開工時`tasklist`確認12個`claude.exe`行程仍在並行（與round612觀察一致），`git status`顯示`PENDING_QUEUE.md`有他process的uncommitted修改（diff僅1行，判斷為正常操作非衝突）——本輪commit範圍刻意限定`US_MARATHON_STATE.md`／`MARATHON_STATE.md`／`REPORT.md`／`PROGRESS_HEARTBEAT.jsonl`，不動`PENDING_QUEUE.md`或其他可能被他track同時編輯的檔案，比照round612的作法。
+- `run_detached.py status`running=0（151筆歷史）。`#50`tick累積實測仍12/20無變化。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（351列，本輪未新增判定）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆`False`。未動凍結區，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
+- 交辦佇列還剩0條未開始（23條`- [!]`阻塞中）。等待審閱：1件（`spillover_overlay_v1`翻轉判定，見`AWAITING_REVIEW.md`）。
+- **下一輪**：US/TW集中版第4節掃描仍凍結；`結案.一`待總司令實機驗證；`spillover_overlay_v1`翻轉判定待裁示；`#50`仍被動等待tick累積至20（12/20）；若12個claude.exe並行行程仍在，下一輪先`tasklist`確認並延續限縮commit範圍的做法；依輪替下一輪建議選FUT軌。
+
+---
 ## 第612輪 · 2026-09-23T08:4x+08:00 · 跨市場 · 驗證帽：修.二稽核補完（copper_gold/option_pcr/regime_alt_a三支ETF稅率重跑登記）· 3筆FAIL(0翻轉)確認，發現與另一track的live git衝突風險
 
 - 取鎖乾淨（cycle`20260923-083037`）。開工先讀`PENDING_QUEUE.md`：交辦優先於自走，找到`- [x]`修.二（已由另一互動session於08:34:46 commit `75afd54a`完成主體）、`- [ ]`修.一/結案.一/結案.二三項。
