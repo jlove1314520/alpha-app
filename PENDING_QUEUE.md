@@ -12957,7 +12957,7 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   （399列，本輪#396/#397兩筆新增）。AWAITING_REVIEW.md #390項目已於
   裁示原文結案（維持FAIL），本輪未再變動該檔案。順序下一步接續
   **修.三**（f52w_2007_extension.py兩缺陷修正）。
-- [ ] **修.三** [債務] f52w_2007_extension.py兩缺陷修正，優先於續抓——
+- [x] **修.三** [債務] f52w_2007_extension.py兩缺陷修正，優先於續抓——
   ①額度錯誤被吞掉：prepare_factors()內factors.py L912-925用except
   RuntimeError把股利率設NaN並繼續，額度錯誤也是RuntimeError導致該檔被
   誤記成功。修正：含「額度/封鎖/402/429/428」字樣的錯誤一律往上拋、
@@ -12965,7 +12965,30 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   checkpoint的factor_warnings[sid]不得只印畫面。②並發保護：加檔案鎖
   (仿marathon_lock.py)，已有行程在跑就退出並寫警告；checkpoint改成
   每檔存一次不再每20檔存一次。
-- [ ] **驗.四(資料一品質)** [研究] 裁示原文稱「驗.四」，與更早已完成的
+  **完成（2026-09-24，互動視窗CC）**：①`factors.py`新增`_is_quota_
+  error()`/`_record_factor_warning()`兩個模組層級helper，`prepare_
+  factors()`簽章加選填`warnings_out: list|None`參數，全部15處(不只
+  L912-925那一處，全函式所有`except RuntimeError`區塊皆同一漏洞)用
+  regex一致性改寫：額度類錯誤`raise`、其他錯誤呼叫`_record_factor_
+  warning()`後維持設NaN。**已用真實FinMind封鎖狀態實測驗證**（FinMind
+  目前仍在額度冷卻中）：對2330呼叫`prepare_factors()`，`_margin_
+  utilization()`內部的`load_dev()`命中額度，錯誤正確地以RuntimeError
+  往上拋出（`_is_quota_error()`回傳True），不再被吞掉——這不是模擬
+  測試，是修正後程式碼在真實封鎖條件下的行為證明。②`f52w_2007_
+  extension.py`：新增`import marathon_lock`，`main()`改為先
+  `marathon_lock.acquire("f52w_2007_extension")`(取不到鎖直接退出寫
+  警告，finally區塊`release()`)，`marathon_lock.py::_stale_minutes_
+  for()`新增本鎖名45分鐘陳舊門檻(比預設27分鐘更寬鬆，因為本腳本無
+  `.ps1` wrapper的硬性逾時上限、單輪實測已跑過約27分鐘貼近預設值)；
+  `fetch_extended_sample()`所有分支(價格錯誤/factor錯誤/成功)後都
+  呼叫`_save_checkpoint()`，不再只在每20檔或迴圈結束時存檔；
+  `prepare_factors()`呼叫改傳`warnings_out=factor_warnings`列表，
+  非空時寫入`ckpt["factor_warnings"][sid]`；新增對`prepare_factors()`
+  拋出額度錯誤的專門處理(視同價格階段命中額度，停斷點不標記完成)。
+  **驗證**：`python -c "import ast; ast.parse(...)"`兩檔皆語法通過；
+  鎖acquire/release/衝突偵測(acquire兩次第二次正確回傳False)手動
+  smoke test通過。
+- [x] **驗.四(資料一品質)** [研究] 裁示原文稱「驗.四」，與更早已完成的
   「驗.四」(E-c/E-d regime overlay，見上方[x]項)是不同主題的重名，這裡
   加註消歧避免ORDER清單/自動比對誤判為同一項。已抓132檔資料品質稽核
   (修.三之後、續抓之前)——
@@ -12973,6 +12996,33 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   確實有除息紀錄(TaiwanStockDividend)。②「有除息紀錄但股利率全NaN」的
   檔案從checkpoint移除排入重抓。③回報三次撞額度當下各是哪一檔、那幾檔
   股利率是否為空，推論成立/不成立皆照實寫。BLOCKED於修.三完成。
+  **完成（2026-09-24，互動視窗CC）**：新增`audit_f52w_2007_data_
+  quality.py`，**零額外API呼叫**（FinMind仍封鎖中）——全程只直接讀本機
+  `research/data/raw/*.parquet`快取檔案本身（不呼叫`load_dev()`／不呼叫
+  `prepare_factors()`，避免任何觸發網路請求的風險），股利率計算邏輯
+  獨立重寫一份跟`factors.py::_dividend_yield_ttm_cash()`一致的版本。
+  132檔中`successful`(已完成非失敗)108檔逐一稽核：①**「有除息紀錄但
+  股利率全NaN」＝0檔**（狹義推論不成立——沒有「算出NaN」的案例）。
+  ②但**11檔TaiwanStockDividend快取檔案完全不存在**（`finmind_client.
+  py::_fetch()`命中額度時在寫入快取前就raise，不留檔案，這是比「算出
+  NaN」更強的證據——代表該檔的股利率資料從未成功抓過）。③**索引重建
+  三次斷點股票**（`fetched_ids`與`sample_universe_ids()`確認逐位元
+  吻合，可用索引精確定位）：round1斷點=`00401A`(idx42)、round2斷點=
+  `2887I`(idx89)、round3斷點=`7854`(idx132，與commit訊息記載完全吻合，
+  驗證重建法有效)。**決定性發現**：11檔快取缺失的股票索引為
+  `{40,41}`、`{85,86,87}`、`{126,127,128,129,130,131}`——**三組全部
+  緊鄰在三次斷點正前方**（round1斷點idx42前的idx40/41、round2斷點
+  idx89前的idx85-87、round3斷點idx132前的idx126-131），沒有任何一檔
+  散落在其他位置。**推論成立，但機制比原始猜測更精確**：不是「算出
+  NaN」，是「股利資料的FinMind呼叫在額度耗盡邊緣完全沒發生」——這些
+  股票的價格來自yfinance路徑（`adjust.py::adjusted_price_series()`
+  優先嘗試yfinance，成功則完全不觸發FinMind的`TaiwanStockPrice`/
+  `TaiwanStockDividend`呼叫），股利率是`prepare_factors()`唯一會
+  觸發FinMind股利呼叫的地方，額度在該呼叫點耗盡、舊版`except
+  RuntimeError`吞掉錯誤設NaN、該股被誤記為成功——三組緊鄰斷點的
+  空間分布排除了「純屬巧合的個別股票無股利資料」這個替代解釋。
+  已將11檔從checkpoint的`fetched_ids`移除、記入`audit_notes`，排入
+  下次續抓。完整證據見`data/audit_f52w_2007_data_quality.json`。
 - [ ] **閘門.一** [研究] 開考前資料品質閘門(抓完300檔、跑回測前)——
   ①價格：2007-2014可用檔數+其中2007-2008下市股檔數(須>0)。②零價格：
   adj_close<=0已轉NaN比例。③股利：「有除息紀錄但股利率NaN」須為0檔。

@@ -673,11 +673,39 @@ def _listing_age_days(stock_id: str, dates: pd.Series) -> pd.Series:
     return (dates_dt - listing_date).dt.days.astype(float)
 
 
+_QUOTA_ERROR_KEYWORDS = ("額度", "封鎖", "402", "429", "428")
+
+
+def _is_quota_error(exc: Exception) -> bool:
+    """2026-09-24修.三（PENDING_QUEUE.md【候選名單定案＋抓取程式修正＋
+    開考前資料品質閘門】修.三第1點）：prepare_factors()內每個因子區塊
+    原本用`except RuntimeError`把任何錯誤（含額度/封鎖類）都吞掉、設NaN
+    並繼續，導致FinMind額度用盡時該檔股票被f52w_2007_extension.py的
+    抓取迴圈誤記為「已成功處理」（因為prepare_factors()本身沒有拋出，
+    只是把股利率等欄位靜默設成NaN），額度解除後不會重抓，資料永久缺漏。
+    這裡把「額度/封鎖類錯誤」跟「其他真正的資料缺失錯誤」分開處理：
+    前者必須往上拋，讓抓取迴圈正確停在斷點；後者維持原本的降級為NaN
+    行為（不能讓單一因子的資料缺失讓整檔股票的其他因子也報廢）。"""
+    msg = str(exc)
+    return any(kw in msg for kw in _QUOTA_ERROR_KEYWORDS)
+
+
+def _record_factor_warning(warnings_out: list | None, stock_id: str, label: str, exc: Exception) -> None:
+    """2026-09-24修.三：非額度類因子降級（設NaN）的既有行為維持不變，但
+    原本只`print()`到畫面上、抓取腳本重跑後完全看不到歷史紀錄——改成
+    同時寫進呼叫端傳入的`warnings_out`列表（呼叫端通常會存進checkpoint的
+    `factor_warnings[stock_id]`），不得只印畫面。`warnings_out`為`None`
+    時（例如既有呼叫端尚未升級傳入這個參數）維持原行為，不強制要求。"""
+    if warnings_out is not None:
+        warnings_out.append(f"{label}: {exc}")
+
+
 def prepare_factors(
     stock_id: str,
     price_df: pd.DataFrame,
     market_df: pd.DataFrame,
     start_date: str = "2010-01-01",
+    warnings_out: list | None = None,
 ) -> pd.DataFrame:
     """price_df: adjust.adjusted_price_series() output for this stock
     (already load_dev()-capped). market_df: prepared TAIEX df (needs at
@@ -723,28 +751,40 @@ def prepare_factors(
         rev_pit = _revenue_yoy_acceleration(stock_id, start_date)  # (a) 月營收 YoY 加速度
         d = _asof_join(d, rev_pit, "yoy_accel", "f_rev_accel")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_rev_accel skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_rev_accel", e)
         d["f_rev_accel"] = np.nan
 
     try:
         eps_pit = _eps_yoy_growth(stock_id, start_date)  # (b) EPS 成長
         d = _asof_join(d, eps_pit, "eps_yoy", "f_eps_growth")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_eps_growth skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_eps_growth", e)
         d["f_eps_growth"] = np.nan
 
     try:
         sue_pit = _eps_surprise_sue(stock_id, start_date)  # (g) PEAD/財報意外 (SUE)
         d = _asof_join(d, sue_pit, "eps_sue", "f_eps_surprise")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_eps_surprise skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_eps_surprise", e)
         d["f_eps_surprise"] = np.nan
 
     try:
         rev_sue_pit = _revenue_surprise_sue(stock_id, start_date)  # (h) 營收意外 (SUE)
         d = _asof_join(d, rev_sue_pit, "revenue_sue", "f_revenue_surprise")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_revenue_surprise skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_revenue_surprise", e)
         d["f_revenue_surprise"] = np.nan
 
     # (i) 低波動: 60 日日報酬標準差取負號（波動越低分數越高），純價格資料，天然 point-in-time
@@ -845,7 +885,10 @@ def prepare_factors(
         roe_pit = _roe_stability(stock_id, start_date)
         d = _asof_join(d, roe_pit, "roe_stability", "f_quality_roe_stability")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_quality_roe_stability skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_quality_roe_stability", e)
         d["f_quality_roe_stability"] = np.nan
 
     # (q) 資產成長異常 -- point-in-time via pit_date（沿用 balance_sheet_pit，同
@@ -854,7 +897,10 @@ def prepare_factors(
         ag_pit = _asset_growth(stock_id, start_date)
         d = _asof_join(d, ag_pit, "asset_growth", "f_asset_growth")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_asset_growth skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_asset_growth", e)
         d["f_asset_growth"] = np.nan
 
     # (r) 盈餘品質應計項目 (accruals, Sloan 1996 balance-sheet approach) -- 沿用
@@ -863,7 +909,10 @@ def prepare_factors(
         acc_pit = _accruals(stock_id, start_date)
         d = _asof_join(d, acc_pit, "accruals", "f_accruals")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_accruals skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_accruals", e)
         d["f_accruals"] = np.nan
 
     # (s) 毛利率穩定度 (Novy-Marx 精神的品質異常變體) -- 沿用 quarterly_pit 同一個
@@ -873,7 +922,10 @@ def prepare_factors(
         gm_pit = _gross_margin_stability(stock_id, start_date)
         d = _asof_join(d, gm_pit, "gross_margin_stability", "f_gross_margin_stability")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_gross_margin_stability skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_gross_margin_stability", e)
         d["f_gross_margin_stability"] = np.nan
 
     # (x) 純毛利率因子 Gross Profitability (Novy-Marx 2013) -- 沿用
@@ -884,7 +936,10 @@ def prepare_factors(
         gp_pit = _gross_profitability(stock_id, start_date)
         d = _asof_join(d, gp_pit, "gross_profitability", "f_gross_profitability")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_gross_profitability skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_gross_profitability", e)
         d["f_gross_profitability"] = np.nan
 
     # (k)/(l) 價值 PB/PE -- 直接讀 FinMind 算好的 PER/PBR。
@@ -905,7 +960,10 @@ def prepare_factors(
             d["f_value_pb"] = np.nan
             d["f_value_pe"] = np.nan
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_value_pb/f_value_pe skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_value_pb/f_value_pe", e)
         d["f_value_pb"] = np.nan
         d["f_value_pe"] = np.nan
 
@@ -921,7 +979,10 @@ def prepare_factors(
         )
         d = d.drop(columns=["_ttm_cash_dividend_raw"])
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_dividend_yield_ttm skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_dividend_yield_ttm", e)
         d["f_dividend_yield_ttm"] = np.nan
 
     # (y) 個股融資使用率 Margin Financing Utilization Ratio (`HYPOTHESIS_QUEUE.md`
@@ -937,7 +998,10 @@ def prepare_factors(
         margin_pit = _margin_utilization(stock_id, start_date)
         d = _asof_join(d, margin_pit, "margin_utilization", "f_margin_utilization")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_margin_utilization skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_margin_utilization", e)
         d["f_margin_utilization"] = np.nan
 
     # (z) 個股融券使用率 Short Sale Utilization Ratio (`HYPOTHESIS_QUEUE.md`
@@ -952,7 +1016,10 @@ def prepare_factors(
         short_pit = _short_sale_utilization(stock_id, start_date)
         d = _asof_join(d, short_pit, "short_sale_utilization", "f_short_sale_utilization")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_short_sale_utilization skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_short_sale_utilization", e)
         d["f_short_sale_utilization"] = np.nan
 
     # (aa) 新股上市長期弱勢 IPO Long-Run Underperformance (`HYPOTHESIS_QUEUE.md`
@@ -981,7 +1048,10 @@ def prepare_factors(
         odd_lot_pit = odd_lot_imbalance_daily(stock_id, start_date).rename(columns={"date": "pit_date"})
         d = _asof_join(d, odd_lot_pit, "imbalance", "f_odd_lot_imbalance")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_odd_lot_imbalance skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_odd_lot_imbalance", e)
         d["f_odd_lot_imbalance"] = np.nan
 
     # (cc) 券資比 Short-to-Margin Ratio (`HYPOTHESIS_QUEUE.md` #68，2026-09-10
@@ -995,7 +1065,10 @@ def prepare_factors(
         sm_pit = _short_margin_ratio(stock_id, start_date)
         d = _asof_join(d, sm_pit, "short_margin_ratio", "f_short_margin_ratio")
     except RuntimeError as e:
+        if _is_quota_error(e):
+            raise
         print(f"    [factors] f_short_margin_ratio skipped for {stock_id}: {e}")
+        _record_factor_warning(warnings_out, stock_id, "f_short_margin_ratio", e)
         d["f_short_margin_ratio"] = np.nan
 
     return d

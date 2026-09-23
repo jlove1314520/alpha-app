@@ -65,8 +65,16 @@ def _stale_minutes_for(name: str) -> int:
     2026-09-06（自走一）：開發佇列軌（devqueue）每輪上限 60 分鐘，用預設的 27 分鐘
     會讓還在跑的那一輪被下一輪搶走鎖——馬拉松就是踩過這個坑才把門檻訂成「必須嚴格
     大於 ps1 的 MaxMinutes」。這裡照同一條規則給 devqueue 一個自己的值（62 > 60）。
+
+    2026-09-24（修.三，PENDING_QUEUE.md【候選名單定案＋抓取程式修正＋開考前資料
+    品質閘門】）：`f52w_2007_extension.py` 是互動視窗/排程軌手動或接續呼叫，沒有
+    對應的 `.ps1` wrapper 設硬性逾時上限，單輪實測已跑過約 27 分鐘（受 FinMind
+    每次呼叫 3 秒節流 × 約 14 次/檔 × 單輪抓取數十檔影響），貼近預設
+    `STALE_MINUTES=27`，用預設值可能讓還在跑的行程被誤判陳舊、鎖被搶走。
+    給它一個更寬鬆的值（45 分鐘），寧可稍微晚一點才回收陳舊鎖，也不要誤搶還在跑
+    的行程的鎖——這正是本輪要修的並發寫入 checkpoint 事故的根因之一。
     """
-    return {"devqueue": 62}.get(name, STALE_MINUTES)
+    return {"devqueue": 62, "f52w_2007_extension": 45}.get(name, STALE_MINUTES)
 
 
 def acquire(name: str = DEFAULT_LOCK_NAME) -> bool:

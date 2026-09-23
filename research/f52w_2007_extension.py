@@ -24,6 +24,24 @@
   下次重跑`finmind_client.py`本身的parquet快取會讓已抓到的不必重抓，
   不繞過節流機制。
 
+**2026-09-24修.三（PENDING_QUEUE.md【候選名單定案＋抓取程式修正＋開考前
+資料品質閘門】修.三，優先於續抓）兩項修正**：
+1. **額度錯誤被吞掉**：`prepare_factors()`內每個因子區塊原本用`except
+   RuntimeError`把任何錯誤都吞掉設NaN，額度/封鎖錯誤也是`RuntimeError`，
+   導致該檔被本腳本外層的`except Exception`一併吞掉、誤記為「已處理」
+   （`ckpt["fetched_ids"].append(sid)`），額度解除後不會重抓，資料永久
+   缺漏。已在`factors.py::_is_quota_error()`把額度類錯誤改為往上拋，
+   這裡外層新增對應判斷：`prepare_factors()`拋出的額度錯誤視同價格抓取
+   階段命中額度，停在斷點、不標記為已完成；其他非額度錯誤（單一因子
+   真正的資料缺失，`factors.py`內部已經降級為NaN並繼續，不會跑到這裡）
+   維持原行為，且`factors.py`回傳的`warnings_out`非空時寫入
+   `ckpt["factor_warnings"][sid]`，不再只印畫面。
+2. **並發保護**：抓取迴圈用`marathon_lock.py`同一套機制加檔案鎖（鎖名
+   `f52w_2007_extension`），已有行程在跑就直接退出並寫警告，不搶跑。
+   checkpoint改成每處理完一檔就存檔一次（原本每20檔存一次），縮小雙
+   行程意外並發時可能遺失的進度範圍（歷史上已發生過一次雙行程並發寫入
+   checkpoint事故，見`hypothesis_queue`軌相關commit）。
+
 用法：python research/f52w_2007_extension.py
 """
 from __future__ import annotations
@@ -43,9 +61,11 @@ for _s in (sys.stdout, sys.stderr):
 import numpy as np
 import pandas as pd
 
+import marathon_lock
 from adjust import adjusted_price_series
 from backtest.engine import BacktestConfig, run_backtest
 from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, sample_universe_ids, prepare_factors
+from factors import _is_quota_error
 from finmind_client import load_dev
 from score import load_industry_map
 from strategies.weinstein_stage2 import prepare_market_data
@@ -58,15 +78,18 @@ EXTENDED_START = "2006-01-01"
 OOS_START, OOS_END = "2007-01-01", "2014-12-31"
 CHECKPOINT_PATH = Path(__file__).parent / "data" / "f52w_2007_extension_checkpoint.json"
 RESULT_JSON = Path(__file__).parent / "data" / "f52w_2007_extension_result.json"
+LOCK_NAME = "f52w_2007_extension"
 
 
 def _load_checkpoint() -> dict:
     if CHECKPOINT_PATH.exists():
         try:
-            return json.loads(CHECKPOINT_PATH.read_text(encoding="utf-8"))
+            ckpt = json.loads(CHECKPOINT_PATH.read_text(encoding="utf-8"))
+            ckpt.setdefault("factor_warnings", {})
+            return ckpt
         except Exception:  # noqa: BLE001
             pass
-    return {"fetched_ids": [], "failed_ids": {}}
+    return {"fetched_ids": [], "failed_ids": {}, "factor_warnings": {}}
 
 
 def _save_checkpoint(ckpt: dict) -> None:
@@ -95,28 +118,50 @@ def fetch_extended_sample(sample_ids: list[str], market_df: pd.DataFrame) -> tup
             print(f"  [{i+1}/{len(sample_ids)}] {sid}: 價格抓取錯誤(非額度問題)，記為失敗跳過——{msg[:150]}", flush=True)
             ckpt["fetched_ids"].append(sid)
             ckpt["failed_ids"][sid] = msg[:200]
+            _save_checkpoint(ckpt)
             continue
         except Exception as e:  # noqa: BLE001
             print(f"  [{i+1}/{len(sample_ids)}] {sid}: 未預期錯誤，記為失敗跳過——{e!r}", flush=True)
             ckpt["fetched_ids"].append(sid)
             ckpt["failed_ids"][sid] = repr(e)[:200]
+            _save_checkpoint(ckpt)
             continue
 
         if px.empty or len(px) < 260:
             ckpt["fetched_ids"].append(sid)
             ckpt["failed_ids"][sid] = f"資料不足(len={len(px)})，2006年附近可能尚未上市或無資料"
+            _save_checkpoint(ckpt)
             continue
+        factor_warnings: list = []
         try:
-            d = prepare_factors(sid, px, market_df, EXTENDED_START)
-        except Exception as e:  # noqa: BLE001
+            d = prepare_factors(sid, px, market_df, EXTENDED_START, warnings_out=factor_warnings)
+        except RuntimeError as e:
+            if _is_quota_error(e):
+                print(f"  [{i+1}/{len(sample_ids)}] {sid}: factor準備階段命中額度/封鎖，"
+                      f"停在斷點——{str(e)[:150]}", flush=True)
+                rate_limited = True
+                break
+            print(f"  [{i+1}/{len(sample_ids)}] {sid}: factor準備錯誤(非額度問題)，記為失敗跳過"
+                  f"——{str(e)[:150]}", flush=True)
             ckpt["fetched_ids"].append(sid)
             ckpt["failed_ids"][sid] = f"factor準備錯誤：{e!r}"[:200]
+            _save_checkpoint(ckpt)
             continue
+        except Exception as e:  # noqa: BLE001
+            print(f"  [{i+1}/{len(sample_ids)}] {sid}: factor準備未預期錯誤，記為失敗跳過"
+                  f"——{e!r}", flush=True)
+            ckpt["fetched_ids"].append(sid)
+            ckpt["failed_ids"][sid] = f"factor準備錯誤：{e!r}"[:200]
+            _save_checkpoint(ckpt)
+            continue
+
+        if factor_warnings:
+            ckpt["factor_warnings"][sid] = factor_warnings
 
         data[sid] = d
         ckpt["fetched_ids"].append(sid)
+        _save_checkpoint(ckpt)
         if (i + 1) % 20 == 0:
-            _save_checkpoint(ckpt)
             print(f"  進度 {i+1}/{len(sample_ids)}（累計可用 {len(data)} 檔）", flush=True)
 
     _save_checkpoint(ckpt)
@@ -128,6 +173,18 @@ def fetch_extended_sample(sample_ids: list[str], market_df: pd.DataFrame) -> tup
 
 
 def main():
+    if not marathon_lock.acquire(LOCK_NAME):
+        print(f"**已有另一個 f52w_2007_extension 行程在跑，鎖被佔用，本次直接退出，"
+              f"不並發寫入checkpoint**（見2026-09-24修.三第2點，歷史上已發生過一次雙行程"
+              f"並發寫入checkpoint事故）。", flush=True)
+        return
+    try:
+        _main_locked()
+    finally:
+        marathon_lock.release(LOCK_NAME)
+
+
+def _main_locked():
     sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
     print(f"樣本池 {len(sample_ids)} 檔（沿用SAMPLE_SEED={SAMPLE_SEED}，跟既有f52w分析同一組）", flush=True)
 
