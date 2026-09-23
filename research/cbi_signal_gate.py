@@ -35,6 +35,15 @@ Spearman為穩健性檢查，N_SHUFFLE=500（月頻訊號merge到日頻TAIEX，�
 
 2026-09-23 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程接續，佇列#81
 「下一輪待辦」執行。
+
+**2026-09-23第二次修正（`PENDING_QUEUE.md`驗.三）**：原版把月頻訊號用
+`merge_asof(direction="backward")`貼到每個交易日、M=20日前瞻報酬視窗
+逐日重疊、虛無分布逐點打散——三者疊加會系統性高估顯著性（n虛胖、
+虛無分布被逐點打散低估離散度）。改用`regime_gate_common.py`的
+`align_monthly_nonoverlap()`（訊號發布後第一個交易日進場、下次發布
+前出場，不重疊觀測，n＝訊號發布次數而非交易日數）與
+`circular_shift_null()`（circular shift虛無分布，保留訊號自身序列
+相關結構，只打散對齊關係，比逐點打散更保守）重新判定。
 """
 from __future__ import annotations
 
@@ -47,12 +56,12 @@ from scipy import stats
 
 from yf_price_client import fetch_yf_index
 from validation.holdout import TRAIN_END, VAL_END
+from regime_gate_common import align_monthly_nonoverlap, circular_shift_null
 
 N_SHUFFLE = 500
 SHUFFLE_SEED = 20260923
 TAIEX_TICKER = "^TWII"
 DATA_START = "1982-01-01"
-M_TARGET_DAYS = 20
 PUBLISH_LAG_DAYS = 30
 
 _CBI_NAME_PREFIX_UTF8 = "景氣指標".encode("utf-8")
@@ -89,6 +98,9 @@ def fetch_cbi_score() -> pd.DataFrame:
 
 
 def build_aligned_series() -> pd.DataFrame:
+    """回傳不重疊觀測（entry_date, exit_date, score, fwd_ret），
+    n＝訊號發布次數（扣最後一筆無下次發布界定出場日），非交易日數。
+    """
     cbi = fetch_cbi_score()
     cbi["available_date"] = cbi["month_end"] + timedelta(days=PUBLISH_LAG_DAYS)
     cbi = cbi[["available_date", "score"]].sort_values("available_date").reset_index(drop=True)
@@ -99,46 +111,28 @@ def build_aligned_series() -> pd.DataFrame:
     tw = tw.dropna(subset=["close"]).copy()
     tw["date"] = pd.to_datetime(tw["date"])
     tw = tw.sort_values("date").drop_duplicates(subset=["date"]).reset_index(drop=True)
-    tw["tw_fwd_ret_m"] = tw["close"].shift(-M_TARGET_DAYS) / tw["close"] - 1.0
 
-    merged = pd.merge_asof(
-        tw[["date", "tw_fwd_ret_m"]],
-        cbi.rename(columns={"available_date": "date", "score": "cbi_score"}),
-        on="date", direction="backward",
-    )
-    merged = merged.dropna(subset=["cbi_score", "tw_fwd_ret_m"]).reset_index(drop=True)
+    merged = align_monthly_nonoverlap(cbi, tw[["date", "close"]])
     return merged
 
 
 def _split(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    train = df[df["date"] <= pd.Timestamp(TRAIN_END)].copy()
-    val = df[(df["date"] > pd.Timestamp(TRAIN_END)) & (df["date"] <= pd.Timestamp(VAL_END))].copy()
+    train = df[df["entry_date"] <= pd.Timestamp(TRAIN_END)].copy()
+    val = df[(df["entry_date"] > pd.Timestamp(TRAIN_END)) & (df["entry_date"] <= pd.Timestamp(VAL_END))].copy()
     return train, val
 
 
-def _shuffle_percentile(signal: np.ndarray, target: np.ndarray, n: int, seed: int) -> dict:
-    real_pearson, real_p = stats.pearsonr(signal, target)
-    rng = np.random.default_rng(seed)
-    shuffled = np.empty(n)
-    for i in range(n):
-        perm = rng.permutation(signal)
-        shuffled[i] = stats.pearsonr(perm, target)[0]
-    pctl = 100.0 * float(np.mean(np.abs(shuffled) <= abs(real_pearson)))
-    return {"pearson": float(real_pearson), "pearson_p": float(real_p),
-            "null_median_abs": float(np.median(np.abs(shuffled))), "percentile": pctl}
-
-
 def evaluate(df: pd.DataFrame, label: str) -> dict:
-    signal = df["cbi_score"].to_numpy()
-    target = df["tw_fwd_ret_m"].to_numpy()
+    signal = df["score"].to_numpy()
+    target = df["fwd_ret"].to_numpy()
     n = len(df)
     pearson, pearson_p = stats.pearsonr(signal, target)
     spearman, spearman_p = stats.spearmanr(signal, target)
-    shuf = _shuffle_percentile(signal, target, N_SHUFFLE, SHUFFLE_SEED)
+    shuf = circular_shift_null(signal, target, N_SHUFFLE, SHUFFLE_SEED)
     print(f"\n--- {label} (n={n}) ---")
     print(f"  Pearson r={pearson:+.4f} (p={pearson_p:.4f})")
     print(f"  Spearman rho={spearman:+.4f} (p={spearman_p:.4f})")
-    print(f"  Shuffle null(N={N_SHUFFLE}): median|r|={shuf['null_median_abs']:.4f}  "
+    print(f"  Circular-shift null(N={N_SHUFFLE}): median|r|={shuf['null_median_abs']:.4f}  "
           f"real|r|percentile={shuf['percentile']:.1f}")
     return {"label": label, "n": n, "pearson": pearson, "pearson_p": pearson_p,
             "spearman": spearman, "spearman_p": spearman_p,
@@ -147,11 +141,11 @@ def evaluate(df: pd.DataFrame, label: str) -> dict:
 
 def main():
     aligned = build_aligned_series()
-    print(f"aligned total pairs: {len(aligned)}")
-    print(f"date range: {aligned['date'].min()} ~ {aligned['date'].max()}")
-    print(f"cbi_score stats: mean={aligned['cbi_score'].mean():.4f} "
-          f"median={aligned['cbi_score'].median():.4f} std={aligned['cbi_score'].std():.4f} "
-          f"min={aligned['cbi_score'].min():.4f} max={aligned['cbi_score'].max():.4f}")
+    print(f"aligned total pairs (不重疊觀測，n=訊號發布次數): {len(aligned)}")
+    print(f"entry_date range: {aligned['entry_date'].min()} ~ {aligned['entry_date'].max()}")
+    print(f"cbi_score stats: mean={aligned['score'].mean():.4f} "
+          f"median={aligned['score'].median():.4f} std={aligned['score'].std():.4f} "
+          f"min={aligned['score'].min():.4f} max={aligned['score'].max():.4f}")
 
     train, val = _split(aligned)
     print(f"\nTRAIN(<= {TRAIN_END}): n={len(train)}  VAL({TRAIN_END}~{VAL_END}): n={len(val)}")

@@ -11391,6 +11391,73 @@ wrapper維持現狀不變。
   重疊觀測(訊號發布後第一個交易日至下次發布前)，虛無分布改區塊置換
   或circular shift(不得逐點打亂)；#81依新方法重判；同一修正做進
   #76-#80共用cheap gate函式，重跑確認仍FAIL(要量過不得假設)。
+  **2026-09-23馬拉松（hypothesis_queue軌）進度**：新增
+  `research/regime_gate_common.py`（`align_monthly_nonoverlap()`不重疊
+  觀測對齊+`circular_shift_null()`circular shift虛無分布，兩個可重用
+  函式）。**已完成**：套用到`cbi_signal_gate.py`（#81，月頻訊號）——
+  不重疊觀測n=329（原daily-overlap版n=6724，膨脹約20倍），VAL期
+  circular-shift null percentile從原CHEAP_PASS的100.0驟降到20.0，撤銷
+  原CHEAP_PASS改判FAIL，登記`TRIALS_LEDGER.md`#361，
+  `HYPOTHESIS_QUEUE.md`#81續2、`STRATEGY_GRAVEYARD.md`已補條目；同款
+  套用到`dgbas_unemployment_gate.py`（#80，月頻訊號）——原本就是FAIL
+  （percentile=88.2，逐點打散版），修正後仍FAIL但幅度差異巨大
+  （percentile降到0.0，VAL Pearson r從+0.0516降到幾乎零+0.0061），
+  證實原本「差一點就過關」的印象本身也是統計偽影，登記
+  `TRIALS_LEDGER.md`#362。`selection_bias_ledger.py`已重跑，N=362。
+  **尚未完成、性質不同、留給後續輪次**：`vix_term_structure_gate.py`
+  （#76）與`hy_etf_ratio_gate.py`（#78）**不是**月頻訊號貼到每交易日
+  的問題（VIX9D/VIX比值、HYG/IEF比值本身就是逐日更新的連續序列，不是
+  月頻macro release）——它們的統計偽影來源是「M=20日前瞻報酬視窗逐日
+  重疊」+「虛無分布逐點打散」兩項，不是「月頻訊號被backward-fill虛胖
+  n」，`align_monthly_nonoverlap()`的「訊號發布次數」語意在這兩個檔案
+  不適用，需要另外設計「M日不重疊區塊抽樣＋circular shift/block
+  permutation虛無分布」的變體（`regime_gate_common.py`可以新增第二個
+  函式`align_daily_signal_nonoverlap_blocks()`之類，不是重用
+  `align_monthly_nonoverlap()`本身），**下一輪不可直接套用同一函式，
+  要先設計正確的變體再重跑，[自行裁量]記錄於此**。
+
+**2026-09-23佇列深度補件（[自走補入]，`- [ ]`項目數僅2項，低於
+`queue_depth_config.py::MIN_QUEUE_DEPTH=12`，依規則補件，來源
+②`STRATEGY_GRAVEYARD.md`已結案條目裡明寫「未測」的變體）**：
+
+- [ ] **常備.1** [研究] regime.替代B——regime訊號用於選股權重而非總
+  曝險調節（vs已死「曝險水位調節函數」機制類別），是完全不同的價值
+  主張，尚未測試。來源：`STRATEGY_GRAVEYARD.md`（`regime_alt_a_
+  train_verdict.py`結案段落，追加⚠️註記處）。[自走補入]
+- [ ] **常備.2** [研究] VIX期限結構變動率版（VIX9D/VIX比值N日變動率，
+  非水位）當TAIEX regime訊號——`#76`已測水位版FAIL，變動率未測。
+  來源：`STRATEGY_GRAVEYARD.md` #76段落。[自走補入]
+- [ ] **常備.3** [研究] VIX絕對水位本身（不取VIX9D/VIX比值）當TAIEX
+  regime訊號——未測。來源：`STRATEGY_GRAVEYARD.md` #76段落。[自走補入]
+- [ ] **常備.4** [研究] 美股高收益債利差變動率版（HYG/IEF比值N日
+  變動率，非水位）當TAIEX regime訊號——`#78`已測水位版FAIL，變動率
+  未測。來源：`STRATEGY_GRAVEYARD.md` #78段落。[自走補入]
+- [ ] **常備.5** [研究] 美股高收益債比值其他窗口（5/10/60日，非
+  M=20單一窗口）當TAIEX regime訊號——未測。來源：同上。[自走補入]
+- [ ] **常備.6** [研究] DGBAS勞動力參與率當TAIEX regime訊號——`#80`
+  續1查證時發現替代序列（`data.gov.tw`dataset 6636）存在但未實測。
+  來源：`STRATEGY_GRAVEYARD.md` #80段落。[自走補入]
+- [ ] **常備.7** [研究] DGBAS經常性薪資成長率當TAIEX regime訊號
+  （原SPEC路徑3，因路徑1失業率已可行而未查）——未測。來源：同上。
+  [自走補入]
+- [ ] **常備.8** [研究] 月營收SUE連續分數加權版（非二元閾值）——
+  `event_driven_gate_sequence.py`原型只測過「SUE前10%二元分組」，
+  連續分數加權未測。來源：`STRATEGY_GRAVEYARD.md`（事件研究SUE段落，
+  line約3559附近）。[自走補入]
+- [ ] **常備.9** [研究] 月營收券商財測共識調整版SUE——同上未測項。
+  來源：同上。[自走補入]
+- [ ] **常備.10** [研究] 月營收個股層級事件研究，交易後短窗口(<20日)
+  ——既有月營收事件研究只測過月頻/cross-sectional排序構造，個股
+  層級短窗口未測。來源：`STRATEGY_GRAVEYARD.md`（line約3498附近）。
+  [自走補入]
+- [ ] **常備.11** [開發] `MARATHON_PROTOCOL.md`七之三第10關（資料源
+  歷史起點探測）流程補強——找到「可行的資料路徑」後，下一步應先核對
+  該網域是否在`docs/DATA_SOURCE_MAP.md`的🔴清單或`research/net_
+  guard.py`黑名單裡，這個核對動作要內化成第10關本身最後一步，不是
+  查完就直接動手（過去曾發生「差一點就能合規地拿到」但沒交叉核對合規
+  性的教訓）。來源：`STRATEGY_GRAVEYARD.md`（line約3429附近「未來
+  Gate 10流程補強建議」）。[自走補入]
+
 - [x] **驗.四** [研究] E-c(10%)/E-d(MA200)走REGIME_OVERLAY_PROTOCOL.md
   正式閘門——train(<=2020-12-31)/val(2021-2024)分別報告；1000次隨機
   擇時對照組(出場次數/空手天數比例相同、日期隨機)比較CAGR/MDD百分位；

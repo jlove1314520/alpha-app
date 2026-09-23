@@ -12395,4 +12395,39 @@ draws)，尚未登記進shadow_ledger（僅GATE_SEQUENCE 1~7+9關全過才登記
 **佇列#81 CHEAP_PASS未結案**。下一輪待辦：(a)第2關隨機控制組(b)第3關參數高原(c)第4關
 成本敏感度（需先設計regime overlay降曝險構造）。`is_holdout_consumed()`本輪未碰holdout。
 
+**⚠️上面這段「CHEAP_PASS未結案」已過時，現行狀態見下方「#81續2」——2026-09-23
+`PENDING_QUEUE.md`驗.三修正後撤銷CHEAP_PASS，改判FAIL，不進第2關以後。**
+
+---
+
+**#81續2（2026-09-23 `PENDING_QUEUE.md`驗.三，撤銷#81續1的CHEAP_PASS，改判FAIL）**
+
+上面#81續1的CHEAP_PASS建立在三個疊加的統計偽影上：①月頻訊號用
+`merge_asof(direction="backward")`貼到每個交易日，n從實際329個月頻觀測虛胖成
+6724筆；②M=20日前瞻報酬視窗逐日重疊（相鄰交易日視窗重疊19/20天）；③虛無分布
+用逐點`rng.permutation`打散，完全破壞景氣對策信號本身的高序列自相關結構，低估
+虛無分布離散度。三者同方向作用，系統性高估顯著性。
+
+修正：`regime_gate_common.py`（新增，`align_monthly_nonoverlap()`不重疊觀測對齊
++`circular_shift_null()`circular shift虛無分布，供後續#76~#80同款月頻macro
+訊號gate沿用）；`cbi_signal_gate.py`改用這兩個函式重跑。
+
+修正後結果：不重疊觀測n=329（原daily overlap版n=6724，膨脹約20倍）。
+TRAIN(n=283) Pearson r=-0.1037(p=0.0817)，circular-shift null percentile=80.6。
+VAL(n=46) Pearson r=-0.1031(p=0.4955)，circular-shift null percentile=**20.0**
+（門檻90.0，未過，關鍵失敗點）。train/val同號、幅度非零兩項判準仍過，唯獨
+「VAL贏過虛無分布」從原本的100.0驟降到20.0，反轉結論。
+
+**判定：FAIL**——撤銷#357原CHEAP_PASS，新登記`TRIALS_LEDGER.md`#361。本佇列
+regime/timing類假設累計12個測試，全數FAIL或資料不可及/前置未備，無一通過
+第1關。不進第2關以後，不登記shadow_ledger。
+
+**尚未完成（留給後續輪次）**：同一套`regime_gate_common.py`修正尚未套用到
+#76~#80既有gate檔案（`vix_term_structure_gate.py`/`dgbas_unemployment_gate.py`/
+`hy_etf_ratio_gate.py`/`margin_debt_level_gate.py`/`copper_gold_ratio_gate.py`
+等），那些檔案目前同樣是daily-overlap+逐點打散設計，同一種統計偽影風險存在但
+方向未知（可能讓已判FAIL的訊號維持FAIL，也可能讓某些邊緣FAIL在修正後方向改變，
+需逐一重跑才能確認，不得假設）。`is_holdout_consumed()`本輪開工/收工前皆確認
+`False`。
+
 ---

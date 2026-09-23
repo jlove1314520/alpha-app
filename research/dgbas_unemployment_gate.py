@@ -33,6 +33,12 @@ signal值連續重複多個交易日，這件事本身不改變洗牌檢定的�
 
 2026-09-23 由`HYPOTHESIS_QUEUE_PROTOCOL.md`第1節自動排程接續，佇列#80
 「下一輪待辦(a)(b)」執行。
+
+**2026-09-23第二次修正（`PENDING_QUEUE.md`驗.三）**：改用
+`regime_gate_common.py`的`align_monthly_nonoverlap()`（不重疊觀測，
+n＝訊號發布次數）與`circular_shift_null()`（circular shift虛無分布）
+重新判定，取代原本daily-overlap貼齊+逐點打散虛無分布的做法（理由見
+`cbi_signal_gate.py`同一輪修正的docstring，兩者是同一套修法）。
 """
 from __future__ import annotations
 
@@ -65,12 +71,12 @@ _session.mount("https://", _GovTwAdapter())
 
 from yf_price_client import fetch_yf_index
 from validation.holdout import TRAIN_END, VAL_END
+from regime_gate_common import align_monthly_nonoverlap, circular_shift_null
 
 N_SHUFFLE = 500
 SHUFFLE_SEED = 20260923
 TAIEX_TICKER = "^TWII"
 DATA_START = "1978-01-01"
-M_TARGET_DAYS = 20
 PUBLISH_LAG_DAYS = 30
 XML_URL = "https://ws.dgbas.gov.tw/001/Upload/461/relfile/11525/230038/mp0101a07.xml"
 MONTH_RE = re.compile(r"^(\d{4})M(\d{2})$")
@@ -116,12 +122,15 @@ def fetch_unemployment_rate() -> pd.DataFrame:
 
 
 def build_aligned_series() -> pd.DataFrame:
+    """回傳不重疊觀測（entry_date, exit_date, score, fwd_ret），
+    n＝訊號發布次數，非交易日數。"""
     unemp = fetch_unemployment_rate()
     unemp = unemp.sort_values("month_end").reset_index(drop=True)
     unemp["rate_yoy"] = unemp["rate"] - unemp["rate"].shift(12)
     unemp = unemp.dropna(subset=["rate_yoy"]).copy()
     unemp["available_date"] = unemp["month_end"] + timedelta(days=PUBLISH_LAG_DAYS)
-    unemp = unemp[["available_date", "rate_yoy"]].sort_values("available_date").reset_index(drop=True)
+    unemp = unemp[["available_date", "rate_yoy"]].rename(columns={"rate_yoy": "score"}) \
+        .sort_values("available_date").reset_index(drop=True)
 
     tw = fetch_yf_index(ticker=TAIEX_TICKER, start_date=DATA_START)
     if tw.empty:
@@ -129,46 +138,27 @@ def build_aligned_series() -> pd.DataFrame:
     tw = tw.dropna(subset=["close"]).copy()
     tw["date"] = pd.to_datetime(tw["date"])
     tw = tw.sort_values("date").drop_duplicates(subset=["date"]).reset_index(drop=True)
-    tw["tw_fwd_ret_m"] = tw["close"].shift(-M_TARGET_DAYS) / tw["close"] - 1.0
 
-    merged = pd.merge_asof(
-        tw[["date", "tw_fwd_ret_m"]],
-        unemp.rename(columns={"available_date": "date", "rate_yoy": "unemp_yoy"}),
-        on="date", direction="backward",
-    )
-    merged = merged.dropna(subset=["unemp_yoy", "tw_fwd_ret_m"]).reset_index(drop=True)
-    return merged
+    return align_monthly_nonoverlap(unemp, tw[["date", "close"]])
 
 
 def _split(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    train = df[df["date"] <= pd.Timestamp(TRAIN_END)].copy()
-    val = df[(df["date"] > pd.Timestamp(TRAIN_END)) & (df["date"] <= pd.Timestamp(VAL_END))].copy()
+    train = df[df["entry_date"] <= pd.Timestamp(TRAIN_END)].copy()
+    val = df[(df["entry_date"] > pd.Timestamp(TRAIN_END)) & (df["entry_date"] <= pd.Timestamp(VAL_END))].copy()
     return train, val
 
 
-def _shuffle_percentile(signal: np.ndarray, target: np.ndarray, n: int, seed: int) -> dict:
-    real_pearson, real_p = stats.pearsonr(signal, target)
-    rng = np.random.default_rng(seed)
-    shuffled = np.empty(n)
-    for i in range(n):
-        perm = rng.permutation(signal)
-        shuffled[i] = stats.pearsonr(perm, target)[0]
-    pctl = 100.0 * float(np.mean(np.abs(shuffled) <= abs(real_pearson)))
-    return {"pearson": float(real_pearson), "pearson_p": float(real_p),
-            "null_median_abs": float(np.median(np.abs(shuffled))), "percentile": pctl}
-
-
 def evaluate(df: pd.DataFrame, label: str) -> dict:
-    signal = df["unemp_yoy"].to_numpy()
-    target = df["tw_fwd_ret_m"].to_numpy()
+    signal = df["score"].to_numpy()
+    target = df["fwd_ret"].to_numpy()
     n = len(df)
     pearson, pearson_p = stats.pearsonr(signal, target)
     spearman, spearman_p = stats.spearmanr(signal, target)
-    shuf = _shuffle_percentile(signal, target, N_SHUFFLE, SHUFFLE_SEED)
+    shuf = circular_shift_null(signal, target, N_SHUFFLE, SHUFFLE_SEED)
     print(f"\n--- {label} (n={n}) ---")
     print(f"  Pearson r={pearson:+.4f} (p={pearson_p:.4f})")
     print(f"  Spearman rho={spearman:+.4f} (p={spearman_p:.4f})")
-    print(f"  洗牌null(N={N_SHUFFLE}): median|r|={shuf['null_median_abs']:.4f}  "
+    print(f"  circular-shift null(N={N_SHUFFLE}): median|r|={shuf['null_median_abs']:.4f}  "
           f"真實|r|percentile={shuf['percentile']:.1f}")
     return {"label": label, "n": n, "pearson": pearson, "pearson_p": pearson_p,
             "spearman": spearman, "spearman_p": spearman_p,
@@ -177,11 +167,11 @@ def evaluate(df: pd.DataFrame, label: str) -> dict:
 
 def main():
     aligned = build_aligned_series()
-    print(f"對齊後總配對數: {len(aligned)}")
-    print(f"日期範圍: {aligned['date'].min()} ~ {aligned['date'].max()}")
-    print(f"失業率YoY(百分點差)描述統計: mean={aligned['unemp_yoy'].mean():.4f} "
-          f"median={aligned['unemp_yoy'].median():.4f} std={aligned['unemp_yoy'].std():.4f} "
-          f"min={aligned['unemp_yoy'].min():.4f} max={aligned['unemp_yoy'].max():.4f}")
+    print(f"不重疊觀測總數(n=訊號發布次數): {len(aligned)}")
+    print(f"entry_date範圍: {aligned['entry_date'].min()} ~ {aligned['entry_date'].max()}")
+    print(f"失業率YoY(百分點差)描述統計: mean={aligned['score'].mean():.4f} "
+          f"median={aligned['score'].median():.4f} std={aligned['score'].std():.4f} "
+          f"min={aligned['score'].min():.4f} max={aligned['score'].max():.4f}")
 
     train, val = _split(aligned)
     print(f"\nTRAIN(<= {TRAIN_END}): n={len(train)}  VAL({TRAIN_END}~{VAL_END}): n={len(val)}")

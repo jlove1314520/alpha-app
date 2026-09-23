@@ -3653,3 +3653,32 @@ MA200單一均線」這兩個具體操作化，不是「出場規則」這個類
 `exit_rule_lab.py`（規.三）的模擬引擎與冷卻期重入邏輯保留，可重複
 執行供未來變體使用（若總司令要測其他停損%/均線窗口，重跑
 `research/regime_overlay_exit_rule_gate.py`即可，不需重寫）。
+
+
+## #81 台灣景氣對策信號（國發會景氣燈號）當TAIEX regime降曝險訊號
+（2026-09-23結案，`PENDING_QUEUE.md`驗.三，撤銷原CHEAP_PASS）
+
+**死因**：原判定（`TRIALS_LEDGER.md`#357）用`merge_asof(direction=
+"backward")`把月頻景氣對策信號貼到每一個交易日、M=20日前瞻報酬視窗
+逐日重疊、虛無分布逐點`rng.permutation`打散，三者疊加系統性高估顯著性
+（n從真實329個月頻觀測虛胖成6724筆；虛無分布逐點打散破壞了景氣對策
+信號本身的高序列自相關結構，低估虛無分布離散度）。改用新增的
+`regime_gate_common.py`（`align_monthly_nonoverlap()`不重疊觀測對齊+
+`circular_shift_null()`circular shift虛無分布）重跑`cbi_signal_gate.py`：
+不重疊觀測n=329（原6724，膨脹約20倍）。TRAIN(n=283) r=-0.1037
+(p=0.0817)，circular-shift null percentile=80.6。VAL(n=46) r=-0.1031
+(p=0.4955)，circular-shift null percentile=**20.0**（門檻90.0，未過，
+原版此項為100.0）。train/val同號、幅度非零仍過，唯獨「VAL贏過虛無
+分布」從100.0驟降到20.0，結論反轉。見`TRIALS_LEDGER.md`#361、
+`HYPOTHESIS_QUEUE.md`#81續2。
+
+**不泛化成「景氣對策信號這個總體經濟指標本身沒用」**——只證明了
+「日頻虛胖對齊+逐點打散虛無分布」這個量測方式本身是統計偽影製造機，
+機制敘事（景氣過熱後續常接轉折）從未被乾淨地測試過。本佇列regime/
+timing類假設累計12個測試，全數FAIL或資料不可及/前置未備，無一通過
+第1關。`regime_gate_common.py`兩個函式已建好可重用，**尚未套用到
+#76~#80既有gate檔案**（`vix_term_structure_gate.py`／
+`dgbas_unemployment_gate.py`／`hy_etf_ratio_gate.py`／
+`margin_debt_level_gate.py`／`copper_gold_ratio_gate.py`等），那些
+檔案目前同樣是daily-overlap+逐點打散設計，同一種統計偽影風險存在但
+方向未知，留給後續輪次逐一重跑確認。
