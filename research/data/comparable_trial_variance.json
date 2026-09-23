@@ -1,0 +1,72 @@
+{
+  "comparable_variance": 0.00170500067324374,
+  "n_comparable": 4,
+  "records": [
+    {
+      "label": "f52w_high_portfolio_v1",
+      "ok": true,
+      "n_obs": 970,
+      "beta_dimson": 0.3101041317280516,
+      "ir_daily": 0.09222182787505775,
+      "ir_annualized": 1.4639761320552425
+    },
+    {
+      "label": "dividend_yield_portfolio_v1",
+      "ok": true,
+      "n_obs": 970,
+      "beta_dimson": 0.4274550212548083,
+      "ir_daily": 0.04698602300924233,
+      "ir_annualized": 0.7458799918704835
+    },
+    {
+      "label": "pead_portfolio_v1",
+      "ok": true,
+      "n_obs": 970,
+      "beta_dimson": 0.5625395564492157,
+      "ir_daily": 0.009150129493669864,
+      "ir_annualized": 0.14525380262572693
+    },
+    {
+      "label": "run_score_backtest",
+      "ok": true,
+      "n_obs": 970,
+      "beta_dimson": 0.47492039385647034,
+      "ir_daily": 0.002471500274428182,
+      "ir_annualized": 0.039233850548189154
+    }
+  ],
+  "sensitivity_table": [
+    {
+      "ann_sd": 0.2,
+      "v_daily": 0.00015873015873015876,
+      "sr0_daily": 0.03746719517995965,
+      "sr0_annualized": 0.594773284615747
+    },
+    {
+      "ann_sd": 0.3,
+      "v_daily": 0.00035714285714285714,
+      "sr0_daily": 0.056200792769939466,
+      "sr0_annualized": 0.8921599269236202
+    },
+    {
+      "ann_sd": 0.4,
+      "v_daily": 0.000634920634920635,
+      "sr0_daily": 0.0749343903599193,
+      "sr0_annualized": 1.189546569231494
+    },
+    {
+      "ann_sd": 0.5,
+      "v_daily": 0.000992063492063492,
+      "sr0_daily": 0.09366798794989913,
+      "sr0_annualized": 1.4869332115393674
+    },
+    {
+      "ann_sd": 0.75,
+      "v_daily": 0.002232142857142857,
+      "sr0_daily": 0.14050198192484867,
+      "sr0_annualized": 2.230399817309051
+    }
+  ],
+  "sensitivity_n_trials": 386,
+  "sensitivity_n_trials_source": "取兩口徑較大者（較保守）：trial_registry 386 列（排除 FDR 對照表）／selection_bias_ledger 386 列（含對照表）；口徑分歧待總司令裁示"
+}
