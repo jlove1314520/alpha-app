@@ -9,6 +9,14 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第640輪 · 2026-09-24T23:3x+08:00 · FUT · 維運帽：收成資料.一（300/300）並把過期`- [!]`對齊為完成、補列AWAITING_REVIEW漏列的「閘門.一等Cowork核對」 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260924-233037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0，`- [!]`31條逐項核對解除條件；三軌時間戳FUT round636=05:3x最舊，依輪替選FUT。
+- 核心查證：`run_detached.py`登記簿job `20260924-224213-1281`＝finished/exit=0/expect_exists=True；`research/data/exam_2007_2014_data_gate.json` n_fetched=300、`gate_verdicts.all_pass=true`（讀檔核對，非轉述）；`git show --stat 7119c232`確認閘門.一補充已commit。
+- 修正：`資料.一`、`閘門.一`由`- [!]`改`- [x]`；轉向.一單發檢定條目補註阻塞原因更新；`AWAITING_REVIEW.md`等待中1→2件。**[自行裁量]**：不代為放行單發檢定（總司令明令等Cowork核對）；不用`git add -f`把gitignore的`research/data/`JSON硬加進repo（原閘門.一裁示字面要求進repo，但互動視窗依既有慣例留本機，兩者有出入，交Cowork/總司令裁示，回報中標出）。
+- 驗證：`trial_registry.py --check` exit=0 PASS（399列，無新判定）；`is_holdout_consumed()`=False；凍結.二生效中，未登記任何新alpha試驗。
+- 等待總司令審閱：2件（轉向.一單發檢定前置閘門.一等Cowork核對；維運查核.重開機排程行為等A/D裁示）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：等Cowork核對閘門.一；核對通過且總司令回覆後才執行單發檢定。
+---
 ## 第639輪 · 2026-09-24T22:46:39+08:00 · TW · 維運帽：交辦佇列0條`- [ ]`；核對`資料.一`阻塞條件——`data/rate_limit_state.json`的FinMind `blocked_until`(2026-09-24T00:53:56Z)已過約14小時，額度已恢復，08:53後無任何行程續抓 · 已用`run_detached.py submit`投遞`f52w_2007_extension.py`續抓（job 20260924-224213-1281，timeout 40分鐘，`breakaway=False`故session被砍時可能陪葬，腳本本身有checkpoint可斷點續傳），前次checkpoint 274/300、僅剩約26檔 · **無判定、未登記新試驗、N不變、holdout未動**（純資料抓取，屬凍結.二允許項）。收成與下一步：下一輪先`run_detached.py status`看job結果與checkpoint；抓完300檔後依`閘門.一`跑開考前資料品質閘門（四項檢查寫`research/data/exam_2007_2014_data_gate.json`），全過才准進轉向.一單發檢定。[自行裁量：用既有腳本原樣續跑、未改任何參數]
 ## 第638輪 · 2026-09-24T07:3x+08:00 · TW · 研究帽：延續round634~637方法論對TW軌重新確認凍結.二四類工作皆已完成/被FinMind額度阻擋（新一次封鎖，確認額度曾短暫解除16分鐘讓fetched_ids從222推進至274後再次撞額度），本輪無可推進新工作單位
 
