@@ -4442,3 +4442,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 銝?頛芾韏圈?撌交??銵炎??`data/rate_limit_state.json` ??`blocked_until`嚗??啣?08:53嚗?血歇??閫??喲?頝?`f52w_2007_extension.py` 蝥?嚗???00瑼??脣 `??.銝` 鞈??釭瑼Ｘ??
 ===== Hypothesis-queue cycle end: 2026-09-24 07:53:45 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑27.3分鐘 < 30分鐘門檻
