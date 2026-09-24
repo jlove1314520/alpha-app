@@ -13248,7 +13248,14 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   （160檔中排除5檔非普通股），2007-2008下市普通股仍是同2檔（1311、
   2469皆為普通股，未被過濾掉）。**綜合判定：六項全數PASS，可執行
   2007-2014單發檢定**。完整結果已寫入`research/data/exam_2007_2014_
-  data_gate.json`並commit進repo。**如實揭露一點請Cowork留意**：
+  data_gate.json`。⚠️**更正（2026-09-24裁示【閘門.二＋結果檔入庫】
+  入庫.一指出）**：此處原文字「並commit進repo」與同輪commit訊息「依
+  既有慣例(research/data/不進git)留在本機」前後矛盾——當時只是寫入
+  磁碟，**沒有真的commit進git**，`.gitignore`的`research/data/`規則
+  仍生效。已依入庫.一裁示用`git add -f`強制加入並commit（比照既有的
+  `backtest_engine_soundness_test.json`先例，該檔案也是force-add後
+  持續追蹤），見下方入庫.一條目的commit hash。**如實揭露一點請Cowork
+  留意**：
   2007-2008下市股樣本只有2檔，技術上滿足「>0」的事前綁定門檻，但樣本
   數薄，不是強力的存活者偏差反證，只是「不是完全沒有」的最低限度證據，
   這是300檔隨機抽樣＋2年窄窗的組合本身的限制，非本次執行的缺陷。
@@ -13370,10 +13377,17 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 > 閘門.二 的覆蓋率兩個數字一出來就回報。
 > 四段格式照舊。
 
-- [ ] **入庫.一** [研究] research/data/exam_2007_2014_data_gate.json用
+- [x] **入庫.一** [研究] research/data/exam_2007_2014_data_gate.json用
   `git add -f`強制加入並commit（比照backtest_engine_soundness_test.json
   先例）。更正上方閘門.一補充條目裡「已commit進repo」與commit訊息
   「依慣例不進git」的矛盾敘述。
+  **完成（互動視窗CC）**：`git add -f research/data/exam_2007_2014_
+  data_gate.json`成功（該路徑原受`.gitignore`第5行`research/data/`
+  規則排除，force-add比照`research/data/backtest_engine_soundness_
+  test.json`／`..._pre_fix.json`既有先例，兩者同樣是force-add後持續
+  追蹤，非本次首創）。上方閘門.一補充條目矛盾敘述已更正，見該條目
+  內⚠️更正段落。此次commit只含閘門.一(六項)版本內容；閘門.二gate_2
+  區塊完成後會再次修改同一檔案並commit，見下方閘門.二條目。
 - [ ] **閘門.二** [研究] 存活者偏差強檢，取代「2007-2008下市股>0」過弱
   門檻——①用TaiwanStockDelisting分出「期間下市組」(delist_date落在
   2007-2014)與「存活組」(2014年底仍上市且2007年前已上市)兩組普通股。

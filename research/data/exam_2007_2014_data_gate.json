@@ -1,0 +1,61 @@
+{
+  "generated_for": "閘門.一（2026-09-24裁示【候選名單定案】＋【開考前修正】閘門.一補充）",
+  "note": "只讀既有快取（資料.一已完成的300檔fetch），零新增API呼叫，未呼叫register_trial()。",
+  "sample_size": 300,
+  "n_fetched": 300,
+  "n_failed": 55,
+  "n_successful": 245,
+  "item1_price_and_delisted": {
+    "n_available_2007_2014": 160,
+    "n_delisted_2007_2008_among_available": 2,
+    "delisted_2007_2008_ids": [
+      "1311",
+      "2469"
+    ],
+    "n_common_stock_available_2007_2014": 155,
+    "n_common_stock_delisted_2007_2008": 2,
+    "common_stock_delisted_2007_2008_ids": [
+      "1311",
+      "2469"
+    ]
+  },
+  "item2_zero_price": {
+    "total_price_rows_2007_2014": 239539,
+    "total_nan_adj_close_2007_2014": 493,
+    "nan_ratio_2007_2014": 0.0021,
+    "residual_nonpositive_leftover": 0,
+    "max_per_stock_nan_ratio": 0.146
+  },
+  "item3_dividend_nan": {
+    "n_audited": 245,
+    "n_flagged_has_records_all_nan": 0,
+    "flagged_stock_ids": [],
+    "n_dividend_cache_missing": 0,
+    "dividend_cache_missing_ids": []
+  },
+  "item4_benchmark": {
+    "covers_2007_2014_full_window": true,
+    "date_range": [
+      "2003-06-30",
+      "2024-12-31"
+    ],
+    "mdd_2008_pct": -55.75,
+    "mdd_2008_consistent_with_public_data": true
+  },
+  "item6_common_stock_only": {
+    "n_common_stock_available_2007_2014": 155,
+    "n_common_stock_delisted_2007_2008": 2,
+    "common_stock_delisted_2007_2008_ids": [
+      "1311",
+      "2469"
+    ]
+  },
+  "gate_verdicts": {
+    "item1_pass": true,
+    "item2_pass": true,
+    "item3_pass": true,
+    "item4_pass": true,
+    "item6_pass": true,
+    "all_pass": true
+  }
+}
