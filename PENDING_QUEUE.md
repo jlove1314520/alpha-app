@@ -13162,7 +13162,7 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 > 4. 只寫查證結果和建議做法，任何設定變更都要等總司令裁示。
 > IBKR 報價若需要 IB Gateway 保持登入，請一併說明重開機後是否需要手動登入。
 
-- [ ] **維運查核.重開機排程行為** [維運] 只查證、不修改——①三支本機
+- [x] **維運查核.重開機排程行為** [維運] 只查證、不修改——①三支本機
   wrapper與IBKR報價排程在工作排程器的觸發設定（登入時執行/不論登入與否、
   觸發條件、「錯過排定時間後盡快執行」是否勾選）。②Get-WinEvent查
   2026-09-24事件ID 1074/6005/6006/6008，列實際關機/開機時間與原因。
@@ -13170,3 +13170,36 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   待總司令裁示；IBKR報價若需Gateway保持登入，一併說明重開機後是否
   需要手動登入。**依三之一節「插隊保護」排隊，先完成當前宇.一~閘門.一
   補充的研究裁示後接續處理**。
+  **【2026-09-24 23:0x DevQueue cycle 20260924-230102 查證結果，全程唯讀、未改任何設定】**
+
+  **①工作排程器設定（Get-ScheduledTask 實測）**
+  | 排程 | 登入類型 | 觸發 | 錯過補跑(StartWhenAvailable) |
+  |---|---|---|---|
+  | AlphaMarathon | **Interactive（只在使用者登入時執行）** | 每30分＋登入時 | True |
+  | AlphaDevQueue | Interactive | 每15分＋登入時 | True |
+  | AlphaHypothesisQueue | Interactive | 每30分＋登入時 | True |
+  | AlphaIbkrQuotes | Interactive | 每5分＋登入時 | True |
+  | AlphaIbkrGateway（啟動Gateway視窗） | Interactive | 登入時＋每15分 | True |
+  | AlphaLiveServer / AlphaShioajiQuotes | Interactive | 每1分／每2分＋登入時 | True |
+  | AlphaData（每日15:30） | Interactive | 每日 | True |
+  | AlphaConnectivity、AlphaTwsePublishProbe | **S4U（不需登入也能跑）** | 每5分／每15分＋登入時 | True |
+  全部 `WakeToRun=False`（不會為了排程把機器叫醒）；**沒有任何一支有「開機時」(AtStartup)觸發**，只有「使用者登入時」。
+  **②系統事件（Get-WinEvent，本機時間）**：
+  - 08:29:32 事件1074：`MoUsoCoreWorker.exe`（Windows Update）代 SYSTEM 發起**計畫中重新啟動**（Service Pack，0x80020010）。
+  - 08:29:46 事件7002：**使用者登出**。08:30:22 事件6006（記錄服務停止）。
+  - 08:31:40、08:32:35 事件1074：`TrustedInstaller.exe` 再發起**兩次計畫中重啟**（升級，0x80020003）——共連續**3次**重啟。
+  - 08:33:05 最後一次開機完成（LastBootUpTime）；08:35:45 事件19：**2026-09 預覽更新 KB5124010 (26200.9550)** 安裝成功。
+  - **無事件6008**（沒有非預期關機／當機／斷電）；6005/6006/1074 全是正常流程。原因＝**Windows Update 自動安裝更新，非使用者手動、非當機**。
+  - 08:33:27 起系統進入「現代待命」(Modern Standby，Idle Timeout)，20:16／20:33／21:25 有滑鼠喚醒紀錄，但**事件7001（使用者登入）直到 22:36:32 才出現**。`AutoAdminLogon=0`（未設自動登入）。
+  **③比對：為什麼開機到22:36排程沒跑**：08:29:46 使用者登出後，整個空窗（≈14小時07分）**沒有使用者工作階段**（開機後停在登入畫面，因為沒設自動登入，也沒人登入）。上表所有 Interactive 排程「只在使用者登入時執行」，沒有工作階段＝不會觸發；`StartWhenAvailable=True` 只補跑「錯過的觸發」，**前提仍是有登入工作階段可跑**。22:36:32 登入後，DevQueue 22:36:35、IBKR quotes 22:39 立刻恢復（登入觸發生效），時間吻合。
+  **對照證據（證明是「沒登入」而非「機器沒開」）**：同一空窗內 **S4U 的 AlphaConnectivity 照常每5分鐘寫 `external_connectivity.jsonl`（09-24 08:00~22:59 共180筆，空窗內約169筆，預期168筆）**、AlphaTwsePublishProbe 也照跑；雲端 GitHub Actions 全程照常 commit。→ 機器全程在線，只有 Interactive 排程停擺。`connectivity_check.log` 08:02 已有 `local_task_stall` 紀錄（該筆是停擺前的舊資料逾期），**監控本身有在運作**。
+  **副帶發現**：`AlphaData`（每日15:30，`run_daily.py`）**09-24 15:30 漏跑**（LastRun 仍是 09-23 15:30，`run.log` 最後寫入 09-23 15:31），22:36登入後**截至本查核（23:0x）仍未補跑**（雖 StartWhenAvailable=True）。原因未查明[未驗證]；事實是 alpha.db 目前缺 09-24 當日日抓。
+  **IBKR Gateway**：`run-ibkr-gateway-cycle.ps1` 檔頭明載「只啟動 Gateway 視窗，**不代填帳密**，人要在視窗輸入密碼」。空窗期 ibgateway 行程不存在；22:37:35 登入觸發啟動、23:01 `quotes_ibkr.json` 顯示 `connected:true`、`account_type:paper`。**結論：重開機後 Gateway 不會自動連線，需要人在登入視窗輸入（或確認2FA）**；本次是否由總司令輸入，log 無法證明[未驗證]。另有既有規則：每週日 ET 01:00 權杖作廢也需人工登入（見 `C:\alpha\CLAUDE.md` IBKR 一節）。
+  **④建議做法（全部需總司令裁示，本輪一律未動）**：
+  - **A（建議首選）設定 Windows 自動登入**（`netplwiz` 或 `AutoAdminLogon`）：重開機後自動進桌面→所有 Interactive 排程的「登入時」觸發自動生效，不用動任何排程。**代價**：開機不再需密碼，實體接觸這台機器的人可直接進入，屬總司令權衡。**IBKR Gateway 仍需人輸入密碼一次**（IBC 代填未核准）。
+  - **B（不建議）把 Interactive 改成「不論是否登入都執行」**：[文件說法，未親自驗證]該模式的工作階段取不到使用者的 DPAPI 保護憑證，git push 的 PAT（Windows 認證存放區）與 `claude -p` 登入憑證可能失效；IB Gateway 需可見桌面視窗，也無法在此模式顯示。風險高，需先單一排程試驗。
+  - **C 降低 Windows Update 重啟機率**：設定使用時間(Active Hours)或暫停更新；**無法完全避免**，A 才是根本解。
+  - **D 補跑 AlphaData**：漏掉的 09-24 日抓，建議總司令核准後手動跑一次 `python run_daily.py`（只新增當日資料，不動 alpha.db 既有內容）；並另查為何 StartWhenAvailable 未補跑。
+  - **E 監控補強**：`AlphaConnectivity`(S4U)能偵測並記錄 `local_task_stall`，但**只寫檔不主動通知**；可評估「登入畫面停留超過N分鐘」的推播（管道需總司令決定）。
+  **[自行裁量]**：本項只查證不修改；建議依風險排序（A首選、B不建議）並標明未驗證處。**心跳位置**：本條 `- [x]` 標記＋`PROGRESS.md` 最新段落。
+  **等待總司令裁示**：A（是否設自動登入）、D（是否補跑 run_daily.py）——已列入 `research/AWAITING_REVIEW.md`。

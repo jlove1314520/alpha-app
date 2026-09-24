@@ -1,3 +1,13 @@
+## 2026-09-24（DevQueue自走cycle 20260924-230102，維運帽，重開機排程行為查證）
+
+等待總司令審閱：1件——`維運查核.重開機排程行為`，2026-09-24 23:0x完成、起算中，等裁示A（是否設Windows自動登入）與D（是否補跑漏掉的AlphaData日抓），詳見`research/AWAITING_REVIEW.md`。
+
+**做了什麼**：只查證、未改任何設定（工作排程器／電源／登入皆未動）。**結論**：08:29 Windows Update（事件1074，MoUsoCoreWorker＋TrustedInstaller）連續計畫中重啟3次（KB5124010預覽更新），無事件6008（非當機）；08:29:46使用者登出、`AutoAdminLogon=0`，直到22:36:32才有登入事件7001。空窗≈14小時07分沒有使用者工作階段，而Marathon／DevQueue／HypothesisQueue／IbkrQuotes／IbkrGateway／LiveServer／ShioajiQuotes／AlphaData全是「只在使用者登入時執行」(Interactive)，且沒有開機觸發，所以整段不跑；22:36登入後立刻恢復。對照組：S4U的AlphaConnectivity空窗內照常每5分鐘寫檔（約169筆／預期168），雲端Actions也照跑，證明機器全程在線。**副帶發現**：AlphaData 09-24 15:30漏跑，登入後仍未補跑（StartWhenAvailable=True但無效，原因[未驗證]）。IBKR Gateway：重開機後不會自動連線，需人手動輸入密碼（腳本明確不代填）。
+**證據**：Get-ScheduledTask／Get-WinEvent／Winlogon 7001,7002／connectivity記錄，完整表格與建議（A首選自動登入、B不建議、C/D/E）見`PENDING_QUEUE.md`該條目末段。
+**[自行裁量]**：建議只寫不做；B方案的DPAPI／git PAT風險標為「文件說法，未親自驗證」。
+**BLOCKED**：無；A、D待總司令裁示。
+**檔案**：`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`（純文件，無程式碼變更；冒煙測試 `node scripts/smoke_test.mjs` exit=0，全部檢查PASS、無uncaught error）。
+
 ## 2026-09-23（DevQueue自走cycle 20260923-154602，開發帽，修分類漏洞）
 
 等待總司令審閱：1件（非本輪產出，沿用既有狀態）——`驗.一第4點稽核：
