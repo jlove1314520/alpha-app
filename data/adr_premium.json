@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-09-24T01:25:10+00:00",
+  "computed_at": "2026-09-24T03:53:29+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
@@ -9,7 +9,7 @@
       "us_price": 446.57,
       "us_quote_time": 1790193600,
       "tw_price": 2480.0,
-      "tw_quote_time": "09:24:05",
+      "tw_quote_time": "11:52:50",
       "tw_quote_date": "20260924",
       "fx_rate": 31.716,
       "fx_date": "2026-09-23",
@@ -22,13 +22,13 @@
       "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
       "us_price": 24.68,
       "us_quote_time": 1790193600,
-      "tw_price": 154.0,
-      "tw_quote_time": "09:24:45",
+      "tw_price": 153.0,
+      "tw_quote_time": "11:52:45",
       "tw_quote_date": "20260924",
       "fx_rate": 31.716,
       "fx_date": "2026-09-23",
       "implied_tw_price": 156.55,
-      "premium_pct": 1.656
+      "premium_pct": 2.32
     },
     "ASX": {
       "tw_code": "3711",
@@ -36,13 +36,13 @@
       "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
       "us_price": 43.93,
       "us_quote_time": 1790193600,
-      "tw_price": 688.0,
-      "tw_quote_time": "09:24:17",
+      "tw_price": 692.0,
+      "tw_quote_time": "11:52:57",
       "tw_quote_date": "20260924",
       "fx_rate": 31.716,
       "fx_date": "2026-09-23",
       "implied_tw_price": 696.642,
-      "premium_pct": 1.256
+      "premium_pct": 0.671
     },
     "CHT": {
       "tw_code": "2412",
@@ -51,7 +51,7 @@
       "us_price": 46.2,
       "us_quote_time": 1790193600,
       "tw_price": 145.5,
-      "tw_quote_time": "09:24:45",
+      "tw_quote_time": "11:52:46",
       "tw_quote_date": "20260924",
       "fx_rate": 31.716,
       "fx_date": "2026-09-23",
