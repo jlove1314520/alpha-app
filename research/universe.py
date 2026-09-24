@@ -33,11 +33,114 @@ see finmind_client.load_dev()'s own docstring for the same warning.
 """
 from __future__ import annotations
 
+import re
+
 import pandas as pd
 
 from finmind_client import _fetch
 
 UNIVERSE_CUTOFF = "2003-01-01"
+
+# ── 宇.二（2026-09-24總司令裁示【開考前修正——宇宙限普通股＋MDD判準回復原
+# 裁示】「修訂一」）：universe()／active_stock_ids() 只用代號長度篩選
+# （見上面 active_stock_ids()），完全沒有排除 ETF／債券型 ETF／特別股／TDR
+# ——宇.一實測 300 檔抽樣裡有 49 檔非普通股，f52w VAL 期持股天數裡有
+# 16.68% 落在債券型 ETF。這裡補上分類規則，供 2007-2014 單發檢定的候選
+# 宇宙限定為普通股（common_stock_only()）。**分類規則跟
+# `audit_universe_composition_val.py::classify_holding()`（宇.一，已完成的
+# 量測用途）是同一套規則，這裡是它的權威/可重用版本**——之後兩邊若要再
+# 改分類規則，只改這裡，`audit_universe_composition_val.py` 改成 import 這裡
+# 的函式，不維護第二份重複邏輯。
+_BOND_ETF_NAME_KEYWORDS = ("債",)
+_PREFERRED_NAME_SUFFIX_RE = re.compile(r"特$")
+_TDR_NAME_SUFFIX_RE = re.compile(r"-DR$", re.IGNORECASE)
+_REIT_KEYWORDS = ("受益證券", "不動產投資信託", "REIT")
+_ETF_CODE_PREFIX_RE = re.compile(r"^00\d")  # 台股ETF代號慣例：00開頭
+
+
+def classify_security(stock_id: str, stock_name: str | None, industry_category: str | None) -> str:
+    """回傳分類標籤之一：普通股／股票型ETF／債券型ETF／特別股／TDR／其他／無法分類。
+
+    主規則（`industry_category` 有值時，權威依據）：
+      - 含「ETF」字樣 -> 股票型/債券型ETF（用股票名稱是否含「債」字弱代理
+        區分——FinMind 沒有把兩者拆成不同 industry_category，如實承認這是
+        弱代理規則，不是精確分類）。
+      - =="存託憑證" 或名稱以 "-DR" 結尾 -> TDR。
+      - 含「受益證券」/「不動產投資信託」/"REIT" -> 其他。
+      - 名稱以「特」字結尾（台股特別股命名慣例：原公司簡稱＋甲/乙/丙/…
+        ＋特，例如「台新戊特」「中信金乙特」）-> 特別股。
+      - 其餘 -> 普通股。
+
+    退回規則（`industry_category` 缺值時——常見於很早下市、已從
+    TaiwanStockInfo 現況快照掉出去的股票，例如 2003~2012 年間下市的樣本，
+    這批只有 `delisted_stock_ids()` 給得出的 stock_name，沒有產業分類）：
+      - 代號以「00」開頭 -> ETF（同樣用名稱是否含「債」字區分）。
+      - 名稱以 "-DR" 結尾 -> TDR。
+      - 名稱以「特」字結尾 -> 特別股。
+      - 代號是純數字且不是「00」開頭、名稱不含上述任何特徵 -> 普通股
+        （台股傳統4碼數字代號是普通股的強訊號，早期下市股票尤其如此
+        ——ETF/特別股/TDR這幾類金融商品在台股的普及時間點本身就晚於這批
+        早期下市公司的存續期間）。
+      - 其餘（代號格式本身就異常）-> 無法分類，不得靜默歸類成普通股。
+    """
+    name = stock_name or ""
+    cat = industry_category if isinstance(industry_category, str) else None
+
+    if cat is not None:
+        if "ETF" in cat:
+            return "債券型ETF" if any(k in name for k in _BOND_ETF_NAME_KEYWORDS) else "股票型ETF"
+        if cat == "存託憑證" or _TDR_NAME_SUFFIX_RE.search(name):
+            return "TDR"
+        if any(k in cat for k in _REIT_KEYWORDS) or "REIT" in name.upper():
+            return "其他"
+        if _PREFERRED_NAME_SUFFIX_RE.search(name):
+            return "特別股"
+        return "普通股"
+
+    # ── 退回規則（industry_category缺值）──
+    if _ETF_CODE_PREFIX_RE.match(stock_id):
+        return "債券型ETF" if any(k in name for k in _BOND_ETF_NAME_KEYWORDS) else "股票型ETF"
+    if _TDR_NAME_SUFFIX_RE.search(name):
+        return "TDR"
+    if _PREFERRED_NAME_SUFFIX_RE.search(name):
+        return "特別股"
+    if stock_id.isdigit() and not stock_id.startswith("00"):
+        return "普通股"
+    return "無法分類"
+
+
+def common_stock_only(df: pd.DataFrame) -> pd.DataFrame:
+    """過濾掉 ETF／ETN／債券型ETF／特別股／TDR，只留普通股。`df` 必須含
+    `stock_id`／`stock_name`／`industry_category` 三欄（`universe()` 與
+    `active_stock_ids()` 回傳的 DataFrame 都符合）。`無法分類` 的列**不會**
+    被當成普通股保留——會被排除，並印一行警告（含代號清單），因為「排除
+    了不確定的東西」比「靜默混入非普通股」安全，跟本函式存在的理由一致。
+    """
+    category = df.apply(lambda r: classify_security(r["stock_id"], r.get("stock_name"), r.get("industry_category")), axis=1)
+    unclassified = sorted(df.loc[category == "無法分類", "stock_id"].tolist())
+    if unclassified:
+        print(f"[common_stock_only] 警告：{len(unclassified)}檔無法分類，已排除（非普通股，"
+              f"但也不確定是哪一類，寧可排除不確定的東西）：{unclassified}")
+    return df.loc[category == "普通股"].reset_index(drop=True)
+
+
+def _self_test_common_stock_only() -> None:
+    """0050/00878/00718B/2887I/2891B/9105 必須被排除；2330/2317 必須保留。"""
+    rows = [
+        {"stock_id": "0050", "stock_name": "元大台灣50", "industry_category": "ETF"},
+        {"stock_id": "00878", "stock_name": "國泰永續高股息", "industry_category": "ETF"},
+        {"stock_id": "00718B", "stock_name": "富邦中國政策債", "industry_category": "上櫃ETF"},
+        {"stock_id": "2887I", "stock_name": "台新新光辛特", "industry_category": "金融保險"},
+        {"stock_id": "2891B", "stock_name": "中信金乙特", "industry_category": "金融保險"},
+        {"stock_id": "9105", "stock_name": "泰金寶-DR", "industry_category": "存託憑證"},
+        {"stock_id": "2330", "stock_name": "台積電", "industry_category": "半導體業"},
+        {"stock_id": "2317", "stock_name": "鴻海", "industry_category": "其他電子業"},
+    ]
+    df = pd.DataFrame(rows)
+    kept = set(common_stock_only(df)["stock_id"])
+    expected_kept = {"2330", "2317"}
+    assert kept == expected_kept, f"common_stock_only()自我測試失敗：預期保留{expected_kept}，實際保留{kept}"
+    print(f"[self-test] common_stock_only() 通過：{len(rows)}檔樣本中只保留{sorted(kept)}")
 
 
 def delisted_stock_ids(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
@@ -97,3 +200,7 @@ def universe(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
     missing = combined["industry_category"].isna() & combined["stock_id"].isin(industry_lookup.index)
     combined.loc[missing, "industry_category"] = combined.loc[missing, "stock_id"].map(industry_lookup)
     return combined.reset_index(drop=True)
+
+
+if __name__ == "__main__":
+    _self_test_common_stock_only()

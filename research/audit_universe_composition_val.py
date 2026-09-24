@@ -14,7 +14,6 @@ trial()`，不寫入TRIALS_LEDGER.md。
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -32,7 +31,7 @@ from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, START_DATE, sample_universe_ids,
 from finmind_client import _fetch, load_dev
 from score import load_industry_map
 from strategies.weinstein_stage2 import prepare_market_data
-from universe import universe as build_universe
+from universe import universe as build_universe, classify_security
 from validation import holdout
 
 import portfolio_backtest_v2 as pbv2
@@ -46,76 +45,12 @@ VAL_START = "2021-01-01"
 # ────────────────────────────────────────────────────────────────────────
 # 分類規則（宇.一第1點：依TaiwanStockInfo的industry_category與代號規則）
 # ────────────────────────────────────────────────────────────────────────
-# 台股代號慣例（非官方強制規格，是市場實務命名慣例，見docstring下方自我
-# 測試逐一核對）：
-#   - ETF：industry_category欄位本身即含「ETF」字樣（TWSE版直接是"ETF"，
-#     TPEx版是「上櫃ETF」/「上櫃指數股票型基金(ETF)」這類字串）。
-#   - 債券型ETF vs 股票型ETF：目前FinMind TaiwanStockInfo沒有把「債券型」
-#     跟「股票型」ETF拆成不同industry_category（兩者都落在上面同一組
-#     字串），只能用stock_name是否含「債」字（含「政策債」「公司債」
-#     「美債」等變體）這個弱代理規則區分，分類規則本身如實承認這一點。
-#   - 特別股：股票名稱以「特」字結尾（台股特別股命名慣例是「原公司簡稱＋
-#     甲/乙/丙/丁/戊/己/庚/辛/壬/癸＋特」，例如「台新戊特」「中信金乙特」），
-#     用正規表示式比對「特$」。
-#   - TDR（存託憑證）：industry_category == "存託憑證"，或股票名稱含
-#     "-DR"後綴（台股TDR慣例）。
-#   - 其他（含REIT等）：industry_category含「受益證券」「不動產投資信託」
-#     等關鍵字，或股票名稱含「REIT」。
-#   - 普通股：以上都不符合，且industry_category是常見產業別字串。
-#   - 無法分類：industry_category缺值（NaN）或不在任何已知規則命中範圍，
-#     列進無法分類清單供人工複核，不得靜默歸類成普通股。
-
-BOND_ETF_NAME_KEYWORDS = ("債",)
-PREFERRED_NAME_SUFFIX_RE = re.compile(r"特$")
-TDR_NAME_SUFFIX_RE = re.compile(r"-DR$", re.IGNORECASE)
-REIT_KEYWORDS = ("受益證券", "不動產投資信託", "REIT")
-ETF_CODE_PREFIX_RE = re.compile(r"^00\d")  # 台股ETF代號慣例：00開頭
-
-
-def classify_holding(stock_id: str, stock_name: str | None, industry_category: str | None) -> str:
-    """回傳分類標籤之一：普通股／股票型ETF／債券型ETF／特別股／TDR／其他／無法分類。
-
-    **主規則**（industry_category有值時，權威依據）：見模組docstring。
-    **退回規則**（industry_category缺值時——常見於很早下市、已從TaiwanStockInfo
-    現況快照掉出去的股票，例如2003~2012年間下市的樣本）：改用股票代號/名稱的
-    命名慣例弱推論，且信賴度較低——只有以下情況才下判斷，其餘一律「無法分類」，
-    不得對「代號/名稱都看不出端倪」的案例亂猜：
-      - 代號以「00」開頭（台股ETF代號慣例）→ 股票型/債券型ETF（同樣用名稱
-        是否含「債」字區分）。
-      - 名稱以「-DR」結尾 → TDR。
-      - 名稱以「特」字結尾 → 特別股。
-      - 代號是純數字且不是「00」開頭、名稱不含上述任何特徵 → 普通股（台股
-        傳統4碼數字代號是普通股的強訊號，早期下市股票尤其如此——2007年以前
-        上市的公司幾乎全數是傳統普通股，ETF/特別股/TDR這幾類金融商品在台股
-        的普及時間點本身就晚於這批早期下市公司的存續期間）。
-      - 其餘（代號格式本身就異常，例如含字母但不符合上述任何規則）→ 無法分類。
-    """
-    name = stock_name or ""
-    cat = industry_category if isinstance(industry_category, str) else None
-
-    if cat is not None:
-        if "ETF" in cat:
-            if any(k in name for k in BOND_ETF_NAME_KEYWORDS):
-                return "債券型ETF"
-            return "股票型ETF"
-        if cat == "存託憑證" or TDR_NAME_SUFFIX_RE.search(name):
-            return "TDR"
-        if any(k in cat for k in REIT_KEYWORDS) or "REIT" in name.upper():
-            return "其他"
-        if PREFERRED_NAME_SUFFIX_RE.search(name):
-            return "特別股"
-        return "普通股"
-
-    # ── 退回規則（industry_category缺值）──
-    if ETF_CODE_PREFIX_RE.match(stock_id):
-        return "債券型ETF" if any(k in name for k in BOND_ETF_NAME_KEYWORDS) else "股票型ETF"
-    if TDR_NAME_SUFFIX_RE.search(name):
-        return "TDR"
-    if PREFERRED_NAME_SUFFIX_RE.search(name):
-        return "特別股"
-    if stock_id.isdigit() and not stock_id.startswith("00"):
-        return "普通股"
-    return "無法分類"
+# 2026-09-24宇.二：分類規則改由`universe.py::classify_security()`統一維護
+# （`common_stock_only()`同一套規則的權威版本，供2007-2014單發檢定候選宇宙
+# 限定使用）——這裡不再維護第二份重複邏輯，只是沿用同一個函式名做這支
+# 稽核腳本原本的別名，避免下面呼叫端要逐一改名。規則細節見
+# `universe.py::classify_security()`docstring（主規則/退回規則）。
+classify_holding = classify_security
 
 
 def _self_test(info_lookup: dict[str, dict]) -> None:
