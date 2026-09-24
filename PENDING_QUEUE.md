@@ -12082,6 +12082,11 @@ wrapper維持現狀不變。
   extension_checkpoint.json`)，下次解除後重跑腳本自動從斷點續跑，
   完成後即可進入閘門.一。**解除條件**：`data/rate_limit_state.json`
   的`blocked_until`=2026-09-24T08:53台北時間。
+  **2026-09-24 22:42 marathon軌更新**：`rate_limit_state.json`的FinMind `blocked_until`
+  (2026-09-24T00:53:56Z)已過約14小時，解除條件達成；已投遞`run_detached.py` job
+  `20260924-224213-1281`重跑`f52w_2007_extension.py`（timeout 40分鐘，checkpoint斷點續傳）。
+  下一輪先看job結果：抓完300檔→本項改`- [x]`、`閘門.一`解除阻塞改`- [ ]`；再命中402→
+  照舊記錄新的`blocked_until`。
 - [x] **驗.一第4點續（剩餘8支）** [研究] **2026-09-23裁示【f52w結案＋
   研究策略轉向「新資料單發檢定」＋佇列清理】清理.一第4點：明確核准
   現在開跑，一律用新引擎+新量尺+修正後DSR，前置條件（尺.二/驗.一続2

@@ -9,6 +9,7 @@
 - 策略候選的最終判定記在 [`LEADS.md`](./LEADS.md)，不要跟一般開發記錄混在一起。
 
 ---
+## 第639輪 · 2026-09-24T22:46:39+08:00 · TW · 維運帽：交辦佇列0條`- [ ]`；核對`資料.一`阻塞條件——`data/rate_limit_state.json`的FinMind `blocked_until`(2026-09-24T00:53:56Z)已過約14小時，額度已恢復，08:53後無任何行程續抓 · 已用`run_detached.py submit`投遞`f52w_2007_extension.py`續抓（job 20260924-224213-1281，timeout 40分鐘，`breakaway=False`故session被砍時可能陪葬，腳本本身有checkpoint可斷點續傳），前次checkpoint 274/300、僅剩約26檔 · **無判定、未登記新試驗、N不變、holdout未動**（純資料抓取，屬凍結.二允許項）。收成與下一步：下一輪先`run_detached.py status`看job結果與checkpoint；抓完300檔後依`閘門.一`跑開考前資料品質閘門（四項檢查寫`research/data/exam_2007_2014_data_gate.json`），全過才准進轉向.一單發檢定。[自行裁量：用既有腳本原樣續跑、未改任何參數]
 ## 第638輪 · 2026-09-24T07:3x+08:00 · TW · 研究帽：延續round634~637方法論對TW軌重新確認凍結.二四類工作皆已完成/被FinMind額度阻擋（新一次封鎖，確認額度曾短暫解除16分鐘讓fetched_ids從222推進至274後再次撞額度），本輪無可推進新工作單位
 
 - 取鎖乾淨（cycle`20260924-073037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=0（`閘門.一`標`- [!]`），逐一核對開頭標記皆未到解除時間。三軌時間戳：US round637=06:3x／FUT round636=05:3x／TW round635=04:3x（最舊）——依round637建議與輪替選TW。
