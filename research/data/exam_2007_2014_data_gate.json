@@ -56,6 +56,507 @@
     "item3_pass": true,
     "item4_pass": true,
     "item6_pass": true,
-    "all_pass": true
+    "all_pass": true,
+    "gate2_pass": true,
+    "all_pass_including_gate2": true
+  },
+  "gate_2": {
+    "definition_caveat": "存活組的「2007年前已上市」判準用2007-01-01前有價格列當代理指標（FinMind TaiwanStockInfo無上市日期欄位，universe.py自身即以價格列存在為tradeable的ground truth，此處沿用同一原則），非官方上市日期資料。",
+    "n_common_stock_in_300_sample": 251,
+    "n_period_delisted_group": 7,
+    "n_survivor_group": 61,
+    "n_excluded_neither_group": 183,
+    "excluded_reasons_sample": [
+      {
+        "stock_id": "8427",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6578",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "1343",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6492",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6510",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "7756",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6767",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "3438",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6027",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "4741",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "4543",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "3609",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "8708",
+        "reason": "2007年前已下市(delist_date=2004-03-15)，不屬本閘門任一組"
+      },
+      {
+        "stock_id": "6673",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "7516",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "4729",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "1342",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6584",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "4553",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      },
+      {
+        "stock_id": "6840",
+        "reason": "2014-12-31仍上市，但2007-01-01前無價格資料(推論為2007年後才上市)，不屬存活組"
+      }
+    ],
+    "period_delisted_group_ids": [
+      "1311",
+      "2350",
+      "2391",
+      "2469",
+      "5346",
+      "5492",
+      "8199"
+    ],
+    "survivor_group_ids_count_only": 61,
+    "coverage_period_delisted_pct": 100.0,
+    "n_covered_period_delisted": 7,
+    "coverage_survivor_pct": 100.0,
+    "n_covered_survivor": 61,
+    "gap_pp": 0.0,
+    "criteria": {
+      "coverage_floor_period_delisted_pct": 80.0,
+      "max_gap_pp": 10.0
+    },
+    "gate2a_pass_coverage_floor": true,
+    "gate2b_pass_gap_within_limit": true,
+    "gate2_pass": true,
+    "n_failed_total": 55,
+    "failed_detail": [
+      {
+        "stock_id": "7756",
+        "stock_name": "多那之",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=103)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "8708",
+        "stock_name": "大中鋼鐵",
+        "in_period_delisted_group": false,
+        "delist_date": "2004-03-15",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7893",
+        "stock_name": "睿信",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2825",
+        "stock_name": "中央產保",
+        "in_period_delisted_group": false,
+        "delist_date": "2006-09-14",
+        "failure_reason": "資料不足(len=139)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "3467",
+        "stock_name": "台灣精材",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=247)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2811",
+        "stock_name": "台東企銀",
+        "in_period_delisted_group": false,
+        "delist_date": "2006-12-19",
+        "failure_reason": "資料不足(len=228)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00401A",
+        "stock_name": "主動摩根台灣鑫收",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "1212",
+        "stock_name": "中日國際",
+        "in_period_delisted_group": false,
+        "delist_date": "2005-10-28",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7743",
+        "stock_name": "金利食安",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=171)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7930",
+        "stock_name": "威世波",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7765",
+        "stock_name": "中華資安",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=90)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2828",
+        "stock_name": "萬通銀行",
+        "in_period_delisted_group": false,
+        "delist_date": "2003-09-30",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7826",
+        "stock_name": "極風雲創",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00942B",
+        "stock_name": "台新美A公司債20+",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=180)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "6181",
+        "stock_name": "宇詮科技",
+        "in_period_delisted_group": false,
+        "delist_date": "2005-06-28",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7758",
+        "stock_name": "睿騰能源",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2887I",
+        "stock_name": "台新新光辛特",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7712",
+        "stock_name": "博盛半導體",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=244)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00945B",
+        "stock_name": "凱基美國非投等債",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=172)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7798",
+        "stock_name": "將捷",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "8345",
+        "stock_name": "超秦",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00940",
+        "stock_name": "元大台灣價值高息",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=195)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2891A",
+        "stock_name": "中信特",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=215)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7843",
+        "stock_name": "英柏得",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7854",
+        "stock_name": "佐茂",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7945",
+        "stock_name": "廣盛科技",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7738",
+        "stock_name": "東聯互動",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=136)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7894",
+        "stock_name": "瀚軒",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7709",
+        "stock_name": "榮田",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=237)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "8722",
+        "stock_name": "尚德興業",
+        "in_period_delisted_group": false,
+        "delist_date": "2004-11-01",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7939",
+        "stock_name": "技宸",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00989B",
+        "stock_name": "台新美國非投等債",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00983B",
+        "stock_name": "大華優利美公債20",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7706",
+        "stock_name": "宏碁創達",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=246)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7785",
+        "stock_name": "北祥科服",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "8724",
+        "stock_name": "立大農畜興業",
+        "in_period_delisted_group": false,
+        "delist_date": "2004-11-16",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00400A",
+        "stock_name": "主動國泰動能高息",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7708",
+        "stock_name": "全家餐飲",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=248)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "8707",
+        "stock_name": "中精機",
+        "in_period_delisted_group": false,
+        "delist_date": "2003-09-03",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "5208",
+        "stock_name": "蔚華",
+        "in_period_delisted_group": false,
+        "delist_date": "2003-09-23",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7805",
+        "stock_name": "威聯通",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=26)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7797",
+        "stock_name": "Q Burger",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00947",
+        "stock_name": "台新臺灣IC設計",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=143)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00988A",
+        "stock_name": "主動統一全球創新",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7757",
+        "stock_name": "金色三麥",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=126)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7924",
+        "stock_name": "TLC-KY",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7749",
+        "stock_name": "意騰-KY",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "3001",
+        "stock_name": "協和",
+        "in_period_delisted_group": false,
+        "delist_date": "2004-11-15",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "00982T",
+        "stock_name": "平衡兆豐台美動能",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "5325",
+        "stock_name": "大騰電子",
+        "in_period_delisted_group": false,
+        "delist_date": "2005-10-31",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "1510",
+        "stock_name": "台安電機",
+        "in_period_delisted_group": false,
+        "delist_date": "2003-09-30",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2378",
+        "stock_name": "鴻運電子",
+        "in_period_delisted_group": false,
+        "delist_date": "2006-07-12",
+        "failure_reason": "資料不足(len=85)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "7925",
+        "stock_name": "健生",
+        "in_period_delisted_group": false,
+        "delist_date": null,
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2525",
+        "stock_name": "寶祥實業",
+        "in_period_delisted_group": false,
+        "delist_date": "2005-01-05",
+        "failure_reason": "資料不足(len=0)，2006年附近可能尚未上市或無資料"
+      },
+      {
+        "stock_id": "2366",
+        "stock_name": "亞旭電腦",
+        "in_period_delisted_group": false,
+        "delist_date": "2006-03-01",
+        "failure_reason": "資料不足(len=33)，2006年附近可能尚未上市或無資料"
+      }
+    ]
   }
 }
