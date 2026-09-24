@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-24T20:05:44.954218+08:00",
+ "fetched_at": "2026-09-25T01:26:13.859057+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
@@ -20,11 +20,11 @@
   },
   "ex_dividend": {
    "ok": true,
-   "kept": 163,
+   "kept": 164,
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 10650,
+ "count": 10651,
  "events": [
   {
    "code": "4552",
@@ -32,6 +32,15 @@
    "date": "2026-10-28",
    "type": "除權息",
    "title": "除權息交易日（現金 0.6 元）",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "1727",
+   "name": "",
+   "date": "2026-10-13",
+   "type": "除權息",
+   "title": "除權息交易日",
    "source": "TWSE 除權息",
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
