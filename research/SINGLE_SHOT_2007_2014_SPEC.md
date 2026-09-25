@@ -240,3 +240,23 @@ Cowork核對 → 本SPEC的單發檢定執行。**閘門.一未全數通過前�
 - 三次修訂皆早於本次2007-2014回測任何執行（截至修訂當下`TRIALS_
   LEDGER.md` #396/#397 verdict仍為未結案），符合本節「事前登記」
   紀律，未見任何2007-2014結果後才調整。
+
+## 8. 執行結果（考.一，2026-09-25，only-once，已執行完畢）
+
+**狀態：已執行，only-once資格已消耗，不得重跑本SPEC定義的這次單發
+檢定。** 執行腳本：`research/single_shot_2007_2014_test.py`。完整結果：
+`research/data/single_shot_2007_2014_result.json`（`git add -f`入repo）。
+正式登記：`TRIALS_LEDGER.md` #398（f52w）／#399（dividend），
+`STRATEGY_GRAVEYARD.md` `## #17`／`## #4`。
+
+| | f52w_high_portfolio_v1 | dividend_yield_portfolio_v1 |
+|---|---|---|
+| 4.1 IR單尾p（門檻<0.025） | 0.0611（**FAIL**） | 0.0128（PASS） |
+| 4.2-a 2008 MDD（門檻嚴格優於-55.75%） | -47.14%（PASS） | -53.72%（PASS） |
+| 4.2-b 全段MDD（門檻>-50%） | -47.14%（PASS） | -53.72%（**FAIL**） |
+| **4.3 綜合判定** | **FAIL** | **FAIL** |
+
+**兩個候選皆FAIL**，依裁示事前宣告的後續路徑：**兩個候選正式結案；
+凍結.二維持，由Cowork與總司令重新討論研究方向，不得自行開新試驗**。
+本SPEC與這兩個候選的研究工作到此停止，不接續holdout、不接續任何
+後續測試（裁示第6點）。

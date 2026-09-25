@@ -1,0 +1,172 @@
+{
+  "generated_for": "考.一（2026-09-25裁示【2007-2014單發檢定放行＋daily_price日期欄位緊急查核】）",
+  "spec": "SINGLE_SHOT_2007_2014_SPEC.md（含2.1節宇.二修訂一／4.2節規.五修訂）",
+  "n_common_stock_universe": 251,
+  "n_usable_data": 208,
+  "results": {
+    "f52w_high_portfolio_v1": {
+      "label": "f52w_high_portfolio_v1",
+      "period": [
+        "2007-01-01",
+        "2014-12-31"
+      ],
+      "n_trades": 919,
+      "candidate_return_pct_2007_2014": 113.91,
+      "benchmark_0050_return_pct_2007_2014": 50.14,
+      "ir_test": {
+        "ir_annualized": 0.5783734876238544,
+        "ir_daily": 0.03643410507537649,
+        "beta_dimson": 0.5684795759923392,
+        "alpha_ann_pct": 6.667846281719747,
+        "n_obs": 1988,
+        "two_tailed_p": 0.12221681768294705,
+        "one_tailed_p": 0.061108408841473526,
+        "direction_positive": true,
+        "passes_bonferroni_0025": false
+      },
+      "mdd_2008_pct": -47.14,
+      "mdd_2008_benchmark_pct": -55.75,
+      "mdd_2008_strictly_better_than_0050": true,
+      "mdd_full_period_pct": -47.14,
+      "mdd_full_period_over_neg50": true,
+      "yearly_table": [
+        {
+          "year": 2007,
+          "candidate_return_pct": 22.62,
+          "0050_return_pct": 8.99
+        },
+        {
+          "year": 2008,
+          "candidate_return_pct": -37.91,
+          "0050_return_pct": -42.04
+        },
+        {
+          "year": 2009,
+          "candidate_return_pct": 55.58,
+          "0050_return_pct": 68.19
+        },
+        {
+          "year": 2010,
+          "candidate_return_pct": 16.81,
+          "0050_return_pct": 13.03
+        },
+        {
+          "year": 2011,
+          "candidate_return_pct": -12.3,
+          "0050_return_pct": -15.88
+        },
+        {
+          "year": 2012,
+          "candidate_return_pct": 22.29,
+          "0050_return_pct": 13.64
+        },
+        {
+          "year": 2013,
+          "candidate_return_pct": 31.62,
+          "0050_return_pct": 10.44
+        },
+        {
+          "year": 2014,
+          "candidate_return_pct": 10.01,
+          "0050_return_pct": 16.96
+        }
+      ],
+      "sub_period_2007_2009_reference_only": {
+        "return_pct": 17.63,
+        "mdd_pct": -47.14,
+        "0050_return_pct": 8.11
+      },
+      "sub_period_2010_2014_reference_only": {
+        "return_pct": 82.31,
+        "mdd_pct": -21.78,
+        "0050_return_pct": 38.76
+      },
+      "gate_ir_pass": false,
+      "gate_mdd_2008_pass": true,
+      "gate_mdd_full_pass": true,
+      "overall_verdict": "FAIL"
+    },
+    "dividend_yield_portfolio_v1": {
+      "label": "dividend_yield_portfolio_v1",
+      "period": [
+        "2007-01-01",
+        "2014-12-31"
+      ],
+      "n_trades": 579,
+      "candidate_return_pct_2007_2014": 203.87,
+      "benchmark_0050_return_pct_2007_2014": 50.14,
+      "ir_test": {
+        "ir_annualized": 0.8318645768938427,
+        "ir_daily": 0.05240254273678751,
+        "beta_dimson": 0.7046888844027855,
+        "alpha_ann_pct": 10.685134507552508,
+        "n_obs": 1988,
+        "two_tailed_p": 0.025642983474118804,
+        "one_tailed_p": 0.012821491737059402,
+        "direction_positive": true,
+        "passes_bonferroni_0025": true
+      },
+      "mdd_2008_pct": -53.72,
+      "mdd_2008_benchmark_pct": -55.75,
+      "mdd_2008_strictly_better_than_0050": true,
+      "mdd_full_period_pct": -53.72,
+      "mdd_full_period_over_neg50": false,
+      "yearly_table": [
+        {
+          "year": 2007,
+          "candidate_return_pct": 15.42,
+          "0050_return_pct": 8.99
+        },
+        {
+          "year": 2008,
+          "candidate_return_pct": -40.08,
+          "0050_return_pct": -42.04
+        },
+        {
+          "year": 2009,
+          "candidate_return_pct": 126.27,
+          "0050_return_pct": 68.19
+        },
+        {
+          "year": 2010,
+          "candidate_return_pct": 4.98,
+          "0050_return_pct": 13.03
+        },
+        {
+          "year": 2011,
+          "candidate_return_pct": -9.66,
+          "0050_return_pct": -15.88
+        },
+        {
+          "year": 2012,
+          "candidate_return_pct": 31.29,
+          "0050_return_pct": 13.64
+        },
+        {
+          "year": 2013,
+          "candidate_return_pct": 34.94,
+          "0050_return_pct": 10.44
+        },
+        {
+          "year": 2014,
+          "candidate_return_pct": 11.69,
+          "0050_return_pct": 16.96
+        }
+      ],
+      "sub_period_2007_2009_reference_only": {
+        "return_pct": 58.96,
+        "mdd_pct": -53.72,
+        "0050_return_pct": 8.11
+      },
+      "sub_period_2010_2014_reference_only": {
+        "return_pct": 90.3,
+        "mdd_pct": -19.33,
+        "0050_return_pct": 38.76
+      },
+      "gate_ir_pass": true,
+      "gate_mdd_2008_pass": true,
+      "gate_mdd_full_pass": false,
+      "overall_verdict": "FAIL"
+    }
+  }
+}
