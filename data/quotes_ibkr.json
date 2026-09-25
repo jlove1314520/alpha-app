@@ -1,51 +1,51 @@
 {
-  "fetched_at": "2026-09-25T19:41:36.527472+08:00",
+  "fetched_at": "2026-09-25T19:46:38.395157+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 336.35,
-      "bid": 336.13,
-      "ask": 336.5,
+      "last": 336.0,
+      "bid": 335.95,
+      "ask": 336.3,
       "close": 335.92,
-      "change_pct": 0.128,
+      "change_pct": 0.0238,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 497.66,
-      "bid": 497.6,
-      "ask": 497.94,
+      "last": 497.85,
+      "bid": 497.48,
+      "ask": 497.82,
       "close": 497.93,
-      "change_pct": -0.0542,
+      "change_pct": -0.0161,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 226.13,
-      "bid": 226.13,
-      "ask": 226.18,
+      "last": 226.17,
+      "bid": 226.08,
+      "ask": 226.14,
       "close": 224.58,
-      "change_pct": 0.6902,
+      "change_pct": 0.708,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 381.85,
+      "last": 382.1,
       "bid": 381.86,
-      "ask": 381.98,
+      "ask": 382.12,
       "close": 377.94,
-      "change_pct": 1.0346,
+      "change_pct": 1.1007,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 343.6,
-      "bid": 343.43,
-      "ask": 343.6,
+      "last": 343.41,
+      "bid": 343.4,
+      "ask": 343.44,
       "close": 342.36,
-      "change_pct": 0.3622,
+      "change_pct": 0.3067,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -81,14 +81,15 @@
       "label": "那斯達克綜合指數"
     },
     "^SOX": {
-      "last": 12492.54,
+      "last": 12492.536,
       "bid": null,
       "ask": null,
-      "close": 12492.54,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 12534.274,
+      "change_pct": -0.333,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "PHLX",
-      "label": "費城半導體指數"
+      "label": "費城半導體指數",
+      "source": "yahoo_fallback"
     }
   }
 }
