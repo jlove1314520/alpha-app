@@ -1,5 +1,8 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-25T11:21（Taipei，第二十二輪，hypothesis_queue排程接續）— 本輪無新工作單位：
+開工先讀`PENDING_QUEUE.md`：全檔`- [ ]`計數為0，`- [!]`共28項，解除條件皆未達成（金流一.4法人歷史16日<20日視窗；其餘為等總司令裁示／外部key／Cowork核對）。凍結.二仍生效（轉向.一未寫「凍結.二解除」），不得登記新alpha試驗、不得補件湊數。`trial_registry --check`=0，`is_holdout_consumed()`=False。等待審閱：2件（見research/AWAITING_REVIEW.md）。工作目錄其他modified檔為別的自動化來源寫入，未納入本次commit。
+
 ## 2026-09-25T10:2x（Taipei，第二十一輪，hypothesis_queue排程接續）— 本輪無新工作單位：
 開工先讀`PENDING_QUEUE.md`：全檔`- [ ]`計數為0，`- [!]`共28項，解除條件皆未達成（金流一.4法人歷史16日<20日視窗；其餘為等總司令裁示／外部key／資料累積）。凍結.二仍生效：`PENDING_QUEUE.md`內三處「凍結.二解除」皆為條件說明，非解除宣告；不開新alpha試驗、佇列補件不以新alpha候選湊數。`is_holdout_consumed()`=False，`trial_registry.py --check` exit=0。github.com DNS解析失敗，`git pull`未成功，本輪commit僅在本機，push待網路恢復。**本輪無產出＋原因：凍結中、無可做交辦、無合格補件來源。**未進回測、未動十三節核心檔案。**交辦佇列還剩0條未開始**。等待總司令審閱：2件（`research/AWAITING_REVIEW.md`：查.一、考.一）。
 
