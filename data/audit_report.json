@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-09-25T23:00:02.656424+08:00",
- "duration_sec": 10.8,
+ "generated_at": "2026-09-26T03:20:42.377309+08:00",
+ "duration_sec": 6.3,
  "reference": {
   "twse": {
    "ok": true,
@@ -16,11 +16,11 @@
  "universe": 2109,
  "reference_date": "2026-09-24",
  "listed_universe_size": 2142,
- "stocks_with_violation": 1,
+ "stocks_with_violation": 0,
  "code_free_violations": 0,
  "completeness_gap_stocks": 570,
  "completeness_gap_rate": 0.27027,
- "violation_rate": 0.00047,
+ "violation_rate": 0.0,
  "violation_rate_gate": 0.01,
  "gate_pass": true,
  "informational_only_checks": [
@@ -34,12 +34,12 @@
   "mixed_date_codes_sample": [],
   "note": "全市場（universe=官方今日有收盤價的普通股/ETF）比對price_history.json每檔最後一筆日期與當日最大日期，落後>=1個交易日即計入，不設價差門檻。刻意獨立於violation_rate/informational_only_checks之外，見check_a4_mixed_date()docstring。"
  },
- "total_violations": 599,
+ "total_violations": 598,
  "by_check": {
   "a_price_source": {
-   "checked": 6548,
+   "checked": 6547,
    "violations": 0,
-   "unverifiable": 1888,
+   "unverifiable": 1889,
    "note": ""
   },
   "a2_not_in_official": {
@@ -49,8 +49,8 @@
    "note": "歷史檔案（price_history）另有 399 個已下市代號，屬正常歷史保留，不列違規"
   },
   "a3_stale_price": {
-   "checked": 1977,
-   "violations": 1,
+   "checked": 1976,
+   "violations": 0,
    "unverifiable": 1,
    "note": ""
   },
@@ -294,16 +294,6 @@
   }
  ],
  "violations": [
-  {
-   "check": "a3_stale_price",
-   "code": "1589",
-   "name": "永冠-KY",
-   "detail": "這一檔在選股榜單上，但本地價格已落後官方最新交易日 632 天",
-   "ours": "2024-12-31",
-   "official": "2026-09-24",
-   "diff_pct": null,
-   "source": "quotes_all_tw.json / price_history.json"
-  },
   {
    "check": "e_quarters_stale",
    "code": "1256",
@@ -6557,7 +6547,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-09-25T03:18:07.766346+08:00",
+  "checked_at": "2026-09-26T03:20:26.505418+08:00",
   "ok": true,
   "checks": [
    {
@@ -6579,7 +6569,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-09-25T03:18:07.766346+08:00",
+  "checked_at": "2026-09-26T03:20:26.505418+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -6961,7 +6951,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-09-25T03:18:07.766346+08:00",
+  "checked_at": "2026-09-26T03:20:26.505418+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -6971,7 +6961,7 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-09-25T03:18:07.766346+08:00",
+  "checked_at": "2026-09-26T03:20:26.505418+08:00",
   "ok": false,
   "detail": {
    "ok": false,
