@@ -1,5 +1,8 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-25T12:25（Taipei，第二十三輪，hypothesis_queue排程接續）— 本輪無新工作單位：
+開工先讀`PENDING_QUEUE.md`：全檔`- [ ]`計數為0，`- [!]`共28項，解除條件皆未達成（金流一.4法人歷史16日<20日視窗；轉向.一閘門.一/二等Cowork核對；其餘為等總司令裁示／外部key／資料累積）。凍結.二仍生效，不得登記新alpha試驗、不得用新alpha候選補件。`is_holdout_consumed()`=False。交辦佇列還剩0條未開始。等待審閱：依`AWAITING_REVIEW.md`（marathon軌最近回報2件：查.一、考.一）。
+
 ## 2026-09-25T11:21（Taipei，第二十二輪，hypothesis_queue排程接續）— 本輪無新工作單位：
 開工先讀`PENDING_QUEUE.md`：全檔`- [ ]`計數為0，`- [!]`共28項，解除條件皆未達成（金流一.4法人歷史16日<20日視窗；其餘為等總司令裁示／外部key／Cowork核對）。凍結.二仍生效（轉向.一未寫「凍結.二解除」），不得登記新alpha試驗、不得補件湊數。`trial_registry --check`=0，`is_holdout_consumed()`=False。等待審閱：2件（見research/AWAITING_REVIEW.md）。工作目錄其他modified檔為別的自動化來源寫入，未納入本次commit。
 
