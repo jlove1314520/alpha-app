@@ -4650,3 +4650,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 API Error: Can't reach the API server ??check your internet or DNS (ENOTFOUND)
 ===== Hypothesis-queue cycle end: 2026-09-25 14:24:22 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
+
+quota_throttle: SKIP: 正常頻率，距上次實跑26.7分鐘 < 30分鐘門檻
