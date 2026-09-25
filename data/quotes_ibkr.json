@@ -1,15 +1,15 @@
 {
-  "fetched_at": "2026-09-25T17:46:37.109787+08:00",
+  "fetched_at": "2026-09-25T17:51:38.038089+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 335.77,
-      "bid": 335.67,
-      "ask": 335.98,
+      "last": 335.72,
+      "bid": 335.62,
+      "ask": 335.83,
       "close": 335.92,
-      "change_pct": -0.0447,
+      "change_pct": -0.0595,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -23,29 +23,29 @@
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 226.34,
-      "bid": 226.34,
-      "ask": 226.41,
+      "last": 226.3,
+      "bid": 226.3,
+      "ask": 226.38,
       "close": 224.58,
-      "change_pct": 0.7837,
+      "change_pct": 0.7659,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 381.73,
-      "bid": 381.66,
+      "last": 381.66,
+      "bid": 381.55,
       "ask": 381.8,
       "close": 377.94,
-      "change_pct": 1.0028,
+      "change_pct": 0.9843,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 343.96,
-      "bid": 343.93,
-      "ask": 343.96,
+      "last": 343.95,
+      "bid": 343.9,
+      "ask": 343.97,
       "close": 342.36,
-      "change_pct": 0.4673,
+      "change_pct": 0.4644,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -81,14 +81,15 @@
       "label": "那斯達克綜合指數"
     },
     "^SOX": {
-      "last": 12492.54,
+      "last": 12492.536,
       "bid": null,
       "ask": null,
-      "close": 12492.54,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 12534.274,
+      "change_pct": -0.333,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "PHLX",
-      "label": "費城半導體指數"
+      "label": "費城半導體指數",
+      "source": "yahoo_fallback"
     }
   }
 }
