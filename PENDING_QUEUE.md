@@ -14726,3 +14726,52 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   **push狀態**：本輪完成時網路一度連不上github.com（`Could not
   resolve host`），已本地commit，會在網路恢復後盡快push，若下一輪
   仍卡住會在下次回報時註明。
+
+## 2026-09-27 總司令裁示【乾.三 補充第九項：看門狗自身健康檢查（唯讀診斷＋最小修正）】（原文登記，插隊）
+
+> 【乾.三 補充第九項：看門狗自身健康檢查（唯讀診斷＋最小修正）】併入
+> 乾.三同一條目登記，先寫進 PENDING_QUEUE 再動工，不得延後乾.三主體。
+>
+> 背景：local_schedule_watchdog.yml 設定每 30 分鐘執行，每次都會改寫
+> checked_at，理應每次都產生 commit。但 09-26 16:41 部署後到 09-27
+> 00:30，github-actions[bot] 只 commit 過一次（21:40）。
+>
+> 一、用 gh run list -w local_schedule_watchdog.yml -L 20 列出最近執行
+> 紀錄：建立時間、event、status、conclusion。
+>   失敗的執行用 gh run view <id> --log-failed 印出失敗步驟最後 30 行。
+>
+> 二、歸類根因：
+>   (a) GitHub 排程根本沒觸發或嚴重延遲
+>   (b) 有執行但 push 失敗（rebase 衝突或與本機 push 競爭）
+>   (c) 其他
+>
+> 三、最小修正：
+>   (b) 類：commit 步驟改成最多重試 3 次（每次 pull --rebase 後再
+>   push，間隔 10 秒），仍失敗則該 job 顯示紅燈。不得改用 force push。
+>   (a) 類：只回報，不要自行改排程頻率。由 Cowork 另外決定是否改由
+>   本機排程互相監控。
+>
+> 四、結果寫進 PENDING_QUEUE 的乾.三條目後 push，然後停下等 Cowork
+> 核對。
+
+**⚠️ 登記時發現的不一致（互動視窗，2026-09-27）**：裁示原文稱「併入
+乾.三同一條目登記」「不得延後乾.三主體」，但互動視窗查證`PENDING_
+QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
+**皆查無任何先前的「乾.三」條目或主體內容**（`git log`/`git grep`
+「乾.三」全repo比對亦無結果）。如實記錄此落差，不假裝已看過不存在
+的內容、也不阻塞本次任務——「看門狗自身健康檢查」本身條理完整、
+自成一體，不依賴任何未知的「乾.三主體」內容即可獨立執行，故直接
+以本則裁示的全部內容作為`乾.三`條目登記，若總司令或Cowork那邊確實
+有更早的「乾.三主體」訊息互動視窗沒收到，請另行告知補登。
+
+- [ ] **乾.三** [維運] 看門狗自身健康檢查(唯讀診斷＋最小修正，local_
+  schedule_watchdog.yml每30分鐘理應都commit checked_at，但09-26 16:41
+  部署後到09-27 00:30只commit過一次21:40)。一、用gh run list -w local_
+  schedule_watchdog.yml -L 20列出最近執行紀錄(建立時間/event/status/
+  conclusion)，失敗的執行用gh run view <id> --log-failed印失敗步驟
+  最後30行。二、歸類根因：(a)排程根本沒觸發或嚴重延遲(b)有執行但push
+  失敗(rebase衝突或與本機push競爭)(c)其他。三、最小修正：(b)類commit
+  步驟改成最多重試3次(每次pull --rebase後再push，間隔10秒)，仍失敗
+  則job顯示紅燈，不得改用force push；(a)類只回報不自行改排程頻率，
+  由Cowork另外決定是否改由本機排程互相監控。四、結果寫進PENDING_QUEUE
+  的乾.三條目後push，然後停下等Cowork核對。
