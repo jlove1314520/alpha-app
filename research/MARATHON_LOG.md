@@ -1,5 +1,8 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-26T21:55（Taipei，第三十八輪，hypothesis_queue排程接續）— 本輪無新工作單位：
+開工讀`PENDING_QUEUE.md`：唯一`- [ ]`為「停.一」（禁止性交辦：停止H.一一切自動重跑，待Cowork核對乾.一後才解除）——已核對全repo的`.ps1/.bat/.yml`無任何排程呼叫`holdout_2025_dividend_account_test.py`，本輪亦未執行該腳本，遵守中，狀態維持`- [ ]`（Cowork尚未核對）。乾.一／乾.二⑥⑦的`--gates-only`實跑需等FinMind冷卻至22:40台北（`rate_limit_state.json` blocked_until實測），且屬互動視窗持有項目，本軌不搶跑以免雙行程重複耗額度。凍結.二仍生效，不登記新alpha試驗、不以新alpha候選補件；常備backlog重掃結論同前幾輪（無可誠實補入的非alpha項目）。鎖檔取得乾淨。`is_holdout_consumed()`回傳True（H.一單次解鎖先前已消耗，非本輪造成；本輪未觸碰holdout）。未動凍結區與核心研究檔案；工作目錄殘留的data/類自動化變更非本輪產生，未納入commit。交辦佇列還剩1條未開始（停.一，禁止性、無可執行動作）；等待總司令審閱：4件（`AWAITING_REVIEW.md`本輪未更動）。
+
 ## 2026-09-26T20:51（Taipei，第三十七輪，hypothesis_queue排程接續）— 本輪無新工作單位：
 開工讀`PENDING_QUEUE.md`：全檔0條`- [ ]`；`- [!]`阻塞項解除條件皆未達（金流一.4法人歷史仍16個交易日，今日週六無新交易日；H.一留給互動視窗；其餘等總司令裁示／外部key）。凍結.二仍生效（「轉向.一」尚未寫「凍結.二解除」），依CLAUDE.md第十四節不登記新alpha試驗、不以新alpha候選補件。鎖檔取得乾淨（LOCK_ACQUIRED）。未碰holdout、未動凍結區與核心研究檔案；工作目錄殘留的data/、log類自動化變更非本輪產生，未納入commit。交辦佇列還剩0條未開始；等待總司令審閱：4件（`AWAITING_REVIEW.md`本輪未更動）。
 
