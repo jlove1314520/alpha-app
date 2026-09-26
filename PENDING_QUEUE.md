@@ -14399,11 +14399,28 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   在本裁示完成並經Cowork核對前，不得執行holdout_2025_dividend_account_
   test.py的正式回測段落。**心跳**：已取消本session的ScheduleWakeup自動
   重跑迴圈，改為只檢查乾.一進度，不再呼叫該腳本的正式回測路徑。
-- [ ] **證.一** [研究] 用已快取資料，對5檔2025年有除息的普通股，印出
+- [x] **證.一** [研究] 用已快取資料，對5檔2025年有除息的普通股，印出
   ①因子資料裡ttm_cash_dividend最後一筆pit_date②不截斷的TaiwanStock
   Dividend裡最新除息日。兩者不一致即證實factors.py::_dividend_yield_
   ttm_cash()用load_dev()導致2025年後股利事件未進入訊號。證據寫進
   PENDING_QUEUE。
+  **完成（互動視窗，2026-09-26）**：新增`research/audit_h1_dividend_pit_
+  lag.py`，**全程零FinMind呼叫**（`load_dev()`與`load_full_history()`
+  最終走同一個`_fetch()`快取鍵，選的5檔皆已快取，跑前後`data/rate_
+  limit_state.json`的`last_request_at`完全沒變，已核對確認）。實測輸出
+  （`research/data/h1_dividend_pit_lag_evidence.json`）：
+
+  | 股票 | 因子最後pit_date(load_dev截VAL_END) | 不截斷最新2025+除息日 | 一致？ |
+  |---|---|---|---|
+  | 3260 | 2024-06-27 | 2026-09-21 | 不一致 |
+  | 5906 | 2024-09-05 | 2026-09-10 | 不一致 |
+  | 6584 | 2024-08-27 | 2026-09-08 | 不一致 |
+  | 7738 | 2024-09-03 | 2026-09-07 | 不一致 |
+  | 2464 | 2024-07-03 | 2026-09-02 | 不一致 |
+
+  **5/5檔不一致，證實Cowork推論①**：H.一目前的股利因子計算完全看不到
+  2025年以後任何一筆真實除息事件，訊號停留在VAL_END前的最後一次除息，
+  距今已超過一年，殖利率因子在holdout期實質上是失真的。
 - [ ] **修.五** [研究] 1.將_dividend_yield_ttm_cash計算邏輯抽成純函式
   (輸入股利DataFrame)，考.一路徑與holdout路徑共用；holdout路徑改用
   load_full_history(allow_holdout=True)取得的股利資料。自我測試：
