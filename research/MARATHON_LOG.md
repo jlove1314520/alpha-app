@@ -1,5 +1,8 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-26T23:51（Taipei，第四十輪，hypothesis_queue排程接續）— 本輪無新工作單位：
+開工讀`PENDING_QUEUE.md`：全檔唯一`- [ ]`為「停.一」（禁止性交辦：H.一正式回測維持暫停，待Cowork核對`h1_gates.json`），本輪未執行`holdout_2025_dividend_account_test.py`。乾.二`--gates-only`已由互動視窗於23:04完成（gates_pass=False：G2a=1、G2b=3，疑點留給Cowork核對）；查.一亦已完成待Cowork核對，兩者皆`[!]`等裁示，解除條件未達。凍結.二仍生效，故不新開alpha試驗、不以新alpha試驗補佇列深度（`- [ ]`僅1項，低於12項下限，如實記錄佇列變淺）。`is_holdout_consumed()`未動。交辦佇列還剩0條可動工（1條禁止性`- [ ]`）。等待總司令審閱：2件（乾.二gates結果、查.一方案回報，皆待Cowork核對）。
+
 ## 2026-09-26T22:55（Taipei，第三十九輪，hypothesis_queue排程接續）— 本輪無新工作單位：
 開工讀`PENDING_QUEUE.md`：唯一`- [ ]`仍為「停.一」（禁止性交辦，Cowork尚未核對，維持`- [ ]`）；本輪未執行`holdout_2025_dividend_account_test.py`。FinMind冷卻已於22:40過期（`rate_limit_state.json` blocked_until實測早於現在），乾.二⑥⑦的`--gates-only`此刻已有互動視窗行程在跑（Win32_Process可見`holdout_2025_dividend_account_test.py --gates-only`，`h1_gates.json`尚未產生），本軌不搶跑、不並行，避免雙行程重複耗FinMind額度。凍結.二仍生效（「轉向.一」尚未寫「凍結.二解除」），不登記新alpha試驗、不以新alpha候選補件。鎖檔取得乾淨（LOCK_ACQUIRED）。未碰holdout（`is_holdout_consumed()`先前已因H.一單次解鎖為True，非本輪造成）、未動凍結區與核心研究檔案；工作目錄殘留的data/類自動化變更非本輪產生，未納入commit。交辦佇列還剩1條未開始（停.一，禁止性、無可執行動作）；等待總司令審閱：4件（`AWAITING_REVIEW.md`本輪未更動）。
 
