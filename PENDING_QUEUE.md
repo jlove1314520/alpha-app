@@ -13778,11 +13778,51 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 > 修.四（影響 App 資料，先做）→ 結.一 → 新.一 → H.一 → 停下回報。
 > 四段格式照舊。
 
-- [!] **修.四** [債務] daily_price日期欄位修正(核准)——parsers.py的　**⛔ 自走中止（2026-09-26 08:31）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
+- [x] **修.四** [債務] daily_price日期欄位修正(核准)——parsers.py的
   bwibbu()/stock_day()改用raw payload內的交易日，t86依提案小改fetch.py
   介面。修正前先備份alpha.db。歷史污染列(09-12/13/14、09-19/20/21重複，
   09-25標籤實為09-23)依提案修復，修復前後各匯出一份比對表並入庫。
   修正後加自我測試：同一份payload在不同執行日解析，date欄位須相同。
+  ⚠️**更正Marathon自走輪08:31的「自走中止」判斷**：該輪誤判本項「需要
+  總司令親自操作」而中止，實際上這是一則已明確核准、且做法已寫死的
+  程式修正（純bug修復+已授權任務），不需要總司令親自登入/花錢，互動
+  視窗可直接執行——已於本輪完成，如實記錄這個誤判供日後自走判斷校準
+  參考（不追究，只是記錄）。**完成（2026-09-26T08:3x+08:00，互動視窗
+  CC）**：①`C:\alpha\alpha-data\alpha.db`執行前備份
+  `alpha.db.backup_20260926_before_修四`（289MB，開工第一步，早於任何
+  程式修改）。②`parsers.py`新增`_roc_to_western()`，`bwibbu()`/
+  `stock_day()`改為優先用raw payload內嵌"Date"欄位(ROC格式)換算，
+  轉換失敗才retreat回呼叫端傳入的執行日。③`fetch.py::get_records()`
+  改回傳`(rows, matched_date)`，`twse_rwd`(T86)一支回傳`_recent_
+  dates()`實際命中的`ymd`，其餘kind回傳`None`；同步修正另外2處呼叫端
+  （`compute_margin_maintenance.py`兩個函式）解包新的tuple回傳值。
+  ④`run_daily.py::run_tw()`改用`matched_date`(有值時)換算成t86的
+  `date`參數，取代舊版一律傳執行日`d`。⑤`parsers.py`新增`_self_test()`
+  （`python parsers.py`可執行），三項自我測試（bwibbu/stock_day在不同
+  執行日皆得payload內嵌日期、t86原封不動使用呼叫端傳入的交易日）全數
+  PASS。⑥**真實冒煙測試**：`PYTHONIOENCODING=utf-8 python run_daily.py`
+  實際執行一次，daily_price/valuation/inst_trades首度出現`date=
+  2026-09-24`正確列（此前這個交易日的資料從未被任何一次執行抓到過，
+  見查.一），確認修正在真實環境下生效。⑦**歷史污染列修復**：新增
+  `fix_date_field_migration.py`（先dry-run看計畫、`--apply`才真的寫），
+  用`raw_records`每個`fetch_date`的payload內嵌真實交易日重建完整
+  fetch_date→true_date對照表（涵蓋全部16筆`raw_records`歷史，不只
+  裁示原文點名的兩組週末重複與09-25誤標——**這是系統性問題，整段
+  08-21~09-26歷史全部曾經off-by-one或更多**，如實回報而非只修裁示
+  點名的3處）；執行前建立第二層備份`alpha.db.backup_20260926_083405_
+  before_migration_apply`；`daily_price`/`valuation`用raw payload內嵌
+  日期重新解析(高信賴度)，`inst_trades`(t86)因payload本身無日期欄位、
+  改用同批`stock_day`的正確交易日交叉推論(中信賴度，已標註)；修復後
+  三表`DISTINCT date`皆為12個乾淨的真實交易日(無重複、無off-by-one)，
+  2330股價逐日核對合理連續。修復前後比對表已用`git add -f`匯入repo：
+  `research/data/daily_price_date_fix_dryrun_20260926_083324.json`／
+  `daily_price_date_fix_applied_20260926_083405.json`。**已知限制**：
+  `alpha-data`本身不是git repo（CLAUDE.md既有記載），`fetch.py`/
+  `parsers.py`/`run_daily.py`/`compute_margin_maintenance.py`/
+  `fix_date_field_migration.py`這幾個檔案的異動沒有git版本歷史可查，
+  只有磁碟上的兩層`.backup_*`檔案可還原，這是既有結構限制非本次新增
+  的問題。下一步：結.一/新.一已由Marathon自走輪完成，H.一由互動視窗
+  接續執行（見下方）。
 - [x] **結.一** [研究] 考.一結案確認——#398 f52w、#399 dividend依事前
   規則判FAIL維持不變。STRATEGY_GRAVEYARD補註dividend：2007-2014 IR
   0.83/單尾p=0.013通過Bonferroni，僅全期MDD-53.72%超過-50%(同期0050
