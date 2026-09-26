@@ -7,6 +7,7 @@
 **提案／登記**：App三項提案（持有此股的主動ETF＋加減碼、共識價帶須標VWAP推估、公司行動還原前置）資料源合規前全不開工；假設「一週內≥3檔主動ETF共同加碼」登記於文件第3節，**未進TRIALS_REGISTRY／HYPOTHESIS_QUEUE可執行區**（凍結.二＋2025-05起資料全在holdout內，禁回測）。EPS預估不列入。
 **[自行裁量]**：假設不放進HYPOTHESIS_QUEUE避免自走軌道誤撿；被WAF擋一律不繞過；條款多數來自搜尋摘要／小模型摘要，已在文件第5節揭露。
 **BLOCKED**：無（本項已完成；後續取得資料需總司令親自操作／裁示）。
+**收工狀態**：`dev_queue_runner.py next`回`NO_PENDING_ITEM`；`- [ ]`僅剩`H.一`（holdout單次解鎖，屬白名單第3條且互動視窗正在做修.四／已留給互動視窗，自走輪不執行——**未動**、未碰互動視窗的未追蹤檔`research/holdout_2025_dividend_account_test.py`）。佇列深度1<12，但**凍結.二尚未寫「解除」**，不得補入新alpha試驗候選，且此前多輪盤點三個備援來源皆無誠實可補項，故**不硬湊**（白名單第7條前置紀錄）；28項`- [!]`逐項核對無到期可解除者（金流一.4仍缺44個交易日的法人歷史，其餘皆等總司令／外部條件）。
 **檔案**：`docs/ACTIVE_ETF_HOLDINGS_PROPOSAL.md`（新）、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`（純文件，無程式碼變更；`node scripts/smoke_test.mjs` exit=0，1~50項檢查全PASS、無uncaught error）。
 
 ## 2026-09-24（DevQueue自走cycle 20260924-230102，維運帽，重開機排程行為查證）
