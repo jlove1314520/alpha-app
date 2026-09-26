@@ -14764,7 +14764,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 以本則裁示的全部內容作為`乾.三`條目登記，若總司令或Cowork那邊確實
 有更早的「乾.三主體」訊息互動視窗沒收到，請另行告知補登。
 
-- [ ] **乾.三** [維運] 看門狗自身健康檢查(唯讀診斷＋最小修正，local_
+- [!] **乾.三** [維運] 看門狗自身健康檢查(唯讀診斷＋最小修正，local_
   schedule_watchdog.yml每30分鐘理應都commit checked_at，但09-26 16:41
   部署後到09-27 00:30只commit過一次21:40)。一、用gh run list -w local_
   schedule_watchdog.yml -L 20列出最近執行紀錄(建立時間/event/status/
@@ -14775,3 +14775,47 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   則job顯示紅燈，不得改用force push；(a)類只回報不自行改排程頻率，
   由Cowork另外決定是否改由本機排程互相監控。四、結果寫進PENDING_QUEUE
   的乾.三條目後push，然後停下等Cowork核對。
+  **完成（互動視窗，2026-09-27 01:3x，維運帽，唯讀診斷，未修改任何
+  workflow）**：
+
+  **一、`gh run list -w local_schedule_watchdog.yml -L 20`實測**：
+  ```
+  conclusion=failure createdAt=2026-09-26T13:40:07Z(=21:40台北)
+  databaseId=36245931366 event=schedule status=completed
+  ```
+  **只有這一筆，不是20筆裡只顯示1筆——是全部歷史紀錄就只有這一次**
+  （截至查證當下2026-09-27 01:35台北，距16:41部署已過約8小時54分鐘，
+  `*/30 * * * *`理論上該觸發約17~18次）。`gh run view 36245931366
+  --log-failed`最後30行：這次執行**commit成功**（`[main 0dbd5036]
+  本機排程停擺告警：更新STATUS.json心跳欄位` + `main -> main` push
+  成功），**失敗原因是job設計本身**——`echo "::error::..." ; exit 1`
+  這段是`local_schedule_watchdog.yml`刻意寫的「偵測到停擺就讓job變
+  紅燈」邏輯，那次執行當下DevQueue確實處於stalled=true狀態（見查.一
+  條目16:01~19:16的YIELD事故，21:40時尚未完全恢復），**這是設計正確
+  運作、不是bug**。
+
+  **二、根因歸類：(a) GitHub排程根本沒觸發或嚴重延遲**（不是(b)）——
+  唯一一次執行本身commit+push都成功，沒有push失敗的證據可查，所以
+  不是(b)類。用`gh api repos/.../actions/workflows`確認這支workflow
+  `state:"active"`（未被GitHub停用），cron語法`*/30 * * * *`與repo
+  內其他正常運作的workflow寫法一致，排除設定本身有語法錯誤。**額外
+  佐證（同一種問題不只發生在這支新workflow上）**：拿同樣是無時段限制
+  `*/30 * * * *`、已運作多時的`news_events.yml`做對照，其最近10次
+  執行時間間隔實測為**2.5~5.7小時，沒有一次接近30分鐘**（例：
+  15:45→11:39間隔約4小時、11:39→06:23間隔約5小時14分）。**這代表
+  這不是新增的`local_schedule_watchdog.yml`本身的問題，是這個repo
+  整體「每30分鐘」類排程在GitHub Actions端普遍嚴重延遲/漏觸發的既有
+  現象**（推測與repo內`quotes.yml`等其他更高頻排程搶GitHub Actions
+  排程資源有關，但這只是推測，互動視窗沒有GitHub排程器內部的可見度
+  可以確認確切原因，如實標註這是推測不是已證實的根因）。
+
+  **三、最小修正**：因為根因判定為(a)類，**依裁示不修改排程頻率、
+  不新增重試邏輯**（(b)類的重試修正條件不成立——唯一一次執行的push
+  本身就成功了，沒有push失敗可修）。維持`local_schedule_watchdog.yml`
+  現狀不變。
+
+  **四、等Cowork核對後裁示**：是否要改用本機排程互相監控本機停擺
+  （裁示原文已言明這是Cowork的決定範圍，互動視窗不自行判斷）；若
+  這個「repo整體30分鐘級排程普遍延遲」的現象屬實且持續，可能也影響
+  `news_events.yml`等其他既有排程的實際時效性，建議一併納入Cowork
+  的後續評估範圍（僅供參考，非本次裁示要求的動作）。

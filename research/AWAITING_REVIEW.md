@@ -15,7 +15,7 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：7件）
+## 等待中（目前：8件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -26,6 +26,7 @@
 | 源.二：主動ETF條款逐字查證補充（群益/中信/第一金＋官方OpenAPI目錄＋詢問信範本，見`docs/ACTIVE_ETF_ISSUER_VERIFICATION.md`第8節、`docs/ACTIVE_ETF_INQUIRY_LETTER_TEMPLATE.md`） | 2026-09-26 16:5x | 群益＝唯一「robots明確Allow＋條款頁未見禁止」但**不建收集器**（端點未確認、屬法遵疑慮）。證交所/櫃買OpenAPI(143/225端點)確認無主動ETF持股端點；data.gov.tw站內檢索未完成(內部API參數探測失敗已停手)。等裁示：①是否授權群益收集器（需先讀其JS找端點）②是否寄詢問信（範本已備，CC不代寄）③總司令是否在瀏覽器手動搜尋data.gov.tw一次 | 剛完成 |
 | UX.一：App介面改版提案＋原型（見`docs/UX_REDESIGN_PROPOSAL.md`、`prototype/ux_v2.html`） | 2026-09-26 17:1x | 未動`index.html`。現況盤點6頁截圖、首頁故事化、設計token含淺色模式、動畫（含reduced-motion）、方法論骨架、用語審查表皆已做成提案＋原型。等裁示5題：①首頁改價值主張＋真實個股示範？②「我們vs0050」樣本不足時收合門檻（建議≥60交易日）？③是否導入淺色模式？④用語替代（「建議進場價／分批買入計畫」等）先套用還是待律師確認？⑤空殼的「交易」「日誌」是否降低導覽權重？ | 剛完成 |
 | 查.一（2026-09-26版）：排程健康診斷——DevQueue疑似停擺告警根因＋修正方案 | 2026-09-26 22:3x | DevQueue在16:01~19:16間連續YIELD、無commit心跳，觸發警.一告警，但22:16已自行恢復（stalled=false）。根因：`dev_queue_runner.py::_recent_real_dirty_reason()`碰撞防護偵測到互動視窗當時正在編輯`factors.py`/`holdout_2025_dividend_account_test.py`（修.五/乾.二工作），正確YIELD但`run-dev-queue-cycle.ps1`在collision分支直接`exit 0`，沒進到後面會commit心跳的`finally`區塊——是既有防護機制正常運作的副作用，不是DevQueue故障。等裁示：兩個修正方案擇一——方案A（推薦）讓YIELD分支也commit一次心跳（限定路徑，比照既有finally區塊模式）；方案B把停擺判定改成三條排程任一有心跳即視為存活。STATUS.json的schedule_health/local_pipeline_health過期問題（`generate_status_json.py`從無排程觸發，純人工手動執行）已直接修正：`check_local_schedule_heartbeat.py`新增新鮮度判定，>24小時的區塊已正確標示`status:"stale"`並實測驗證（見`PENDING_QUEUE.md`查.一條目）。 | 起算中 |
+| 乾.三：看門狗自身健康檢查——local_schedule_watchdog.yml幾乎沒被GitHub觸發 | 2026-09-27 01:3x | `gh run list`實測：16:41部署到查證當下（01:35，約8小時54分鐘）**只執行過1次**（理論上`*/30 * * * *`該觸發約17~18次），該次執行本身commit+push皆成功，失敗是job設計本身的「偵測到停擺就變紅燈」邏輯，不是bug。根因歸類**(a)GitHub排程根本沒觸發/嚴重延遲**，非(b)push失敗——用同樣`*/30 * * * *`、運作已久的`news_events.yml`做對照，其最近10次執行間隔實測2.5~5.7小時，沒有一次接近30分鐘，**證明這不是新workflow特有的問題，是repo整體「每30分鐘」類排程在GitHub Actions端普遍延遲的既有現象**（推測與repo內其他高頻排程搶資源有關，未證實）。依裁示(a)類只回報不自行改排程頻率，維持`local_schedule_watchdog.yml`現狀未修改。等裁示：①是否改由本機排程互相監控本機停擺；②是否將「repo整體30分鐘級排程普遍延遲」現象（可能也影響news_events.yml等既有排程時效性）另外納入評估範圍 | 起算中 |
 
 ## 已結案審閱紀錄
 
