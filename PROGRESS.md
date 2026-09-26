@@ -1,3 +1,12 @@
+## 2026-09-26（marathon自走cycle 20260926-163037，情報帽，源.二 主動ETF條款逐字查證補充）
+
+等待總司令審閱：5件——查.一、考.一、登記.二、資料源.主動ETF、**源.二（本輪新增）**。詳見`research/AWAITING_REVIEW.md`。
+
+**做了什麼**：只讀條款與目錄，未抓任何持股資料、未寫alpha.db、未動原始碼。①今日重抓原始回應：群益／中信 robots 皆 `Allow: /`；第一金 `/robots.txt` 與 `/llms.txt` 皆 HTTP 200 但 body 是站內404頁（兩者都不存在）；群益 sitemap 再讀 `/capital/statement`、`/capital/other/protect` 兩頁，未見重製／自動讀取條文。②證交所 OpenAPI（143端點）與櫃買 OpenAPI（225端點）swagger 逐端點比對：**無主動式ETF持股／PCF端點**；data.gov.tw 站內檢索因 Nuxt 前端渲染＋內部API參數探測失敗（已停手不再猜）而**未完成，不下「不存在」結論**。③新增 `docs/ACTIVE_ETF_INQUIRY_LETTER_TEMPLATE.md`（給總司令自己寄，CC不代寄）。④**不建收集器**`[自行裁量]`：群益雖 robots 明確允許＋條款頁未見禁止，但持股端點未確認且屬白名單第6條法遵疑慮，比照富邦處理。
+**影響檔案**：`docs/ACTIVE_ETF_ISSUER_VERIFICATION.md`（新增第8節）、`docs/ACTIVE_ETF_INQUIRY_LETTER_TEMPLATE.md`（新）、`PENDING_QUEUE.md`（源.二→`[x]`）、`research/AWAITING_REVIEW.md`、`research/MARATHON_LOG.md`、`research/PROGRESS_HEARTBEAT.jsonl`。
+**驗證**：`trial_registry.py --check` exit=0 PASS；未登記新試驗；`is_holdout_consumed()`=True（H.一已核准單次解鎖後消耗，本輪未觸碰）。無 `index.html` 改動，未跑冒煙測試（不適用）。
+**下一步／卡住**：等總司令裁示①是否授權群益收集器（需先讀JS找端點）②是否寄詢問信③瀏覽器手動搜尋data.gov.tw一次。佇列剩 `- [ ]` 3條（警.一、標.一、UX.一），本輪刻意不碰警.一（互動視窗執行順序的下一項，避免兩個行程重複）。
+
 ## 2026-09-26（DevQueue自走cycle 20260926-094601，維運帽，資料源.主動ETF 查證表 v2）
 
 等待總司令審閱：4件——`查.一`（實質結案，保留稽核軌跡）、`考.一`（轉為H.一重跑等待）、`登記.二`、`資料源.主動ETF`（本輪v2更正並新增待裁示：是否授權富邦3檔收集器）。詳見`research/AWAITING_REVIEW.md`。

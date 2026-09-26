@@ -154,3 +154,64 @@
 - 富邦歷史只測了 2026/06/15 一個舊日期。
 - 子任務回報的網域／代號對應（統一 fundCode、復華頁碼、群益內部 ID 399、
   兆豐 fund_id=23）來自各頁面連結或程式碼，未獨立第二次核對。
+
+## 8. 源.二補充查證（2026-09-26，marathon 自走軌，情報帽；只讀條款，未抓任何持股資料）
+
+本節補 v2 缺口，範圍照總司令裁示【源.二】：群益、中信、第一金三家條款，加 data.gov.tw
+與官方 OpenAPI 目錄。**所有請求皆單次、間隔 ≥3 秒、UA 為
+`AlphaResearch/1.0 (compliance verification; read-only …)`；沒有請求任何持股／PCF 頁。**
+
+### 8.1 三家逐字條款與 robots（原文以「」標示，非摘要）
+
+| 投信 | robots.txt（今日 curl 原始回應） | 條款原文 | 判定 |
+|---|---|---|---|
+| 群益 | `www.capitalfund.com.tw/robots.txt` 200 `text/plain`，全文：`User-agent: *`／`Allow: /`／`Sitemap: …/sitemap.xml` | 讀了 sitemap（2,815 個網址）中 3 個可能的條款頁：`/capital/other/statement`（v2 已讀）、`/capital/statement`、`/capital/other/protect`（反洗錢）。**三頁皆未見**重製／轉載／自動讀取條文，僅頁尾「©2020 by Capital Investment Trust Corporation. All Rights reserved」。**限制**：後兩頁是 WebFetch 小模型判讀、非逐字元核對 HTML；「沒找到」≠「沒有」。 | **未禁止＋robots 明確允許＝條件式可行**，但見 8.3：持股資料端點未確認、且屬法遵疑慮，**本輪不建收集器** |
+| 中信 | `www.ctbcinvestments.com/robots.txt` 200，全文：`User-agent: *`／`Allow: /`（23 bytes） | v2 已讀自 JS bundle（`/Privacy` 第七節）：「非經本公司授權使用或同意，本網站資料均不得以任何形式、利用任何方式予以重製、轉載。」——**今日未重讀**，沿用 v2 原文 | **禁止**（robots 允許不凌駕條款） |
+| 第一金 | `www.fsitc.com.tw/robots.txt` 與 **`/llms.txt`**：兩者皆 HTTP 200 但 body 是同一張站內 404 錯誤頁 HTML（表單 action 為 `./llms.txt?404;https://www.fsitc.com.tw:443/llms.txt`，`content-type: text/html`）＝**兩者都不存在**（伺服器把 404 包成 200）。⚠️ 初版引用的 `LLM-Policy`／`Allow: /` 來自 GoDaddy 待售網域 `www.fsitc.com`，對第一金無效（v2 已更正，這裡再確認 llms.txt 同理） | v2 已讀（`FooterLink.aspx?ID=1007`）：「非經本公司書面授權同意，不得以任何形式轉載、傳輸、傳播、散布、展示、出版、再製或利用【第一金投信理財網】內容的局部、全部的內容，用以賺取利益」——今日未重讀 | **不明→禁止**（無 robots、無 llms.txt；條款有「用以賺取利益」限定語，是否涵蓋內部研究屬法律解讀） |
+
+### 8.2 data.gov.tw 與官方 OpenAPI 目錄（三來源查證，結論分級）
+
+依「搜尋紀律：三來源查證」，逐一列出實際看到什麼：
+
+1. **官方 OpenAPI 目錄（機器可讀、最可靠的一項）**：今日下載
+   `openapi.twse.com.tw/v1/swagger.json`（「臺灣證券交易所 OpenAPI 1.0」，**143 個端點**）
+   與 `www.tpex.org.tw/openapi/swagger.json`（「證券櫃檯買賣中心 OpenAPI 1.0.0」，**225 個端點**），
+   以「ETF／持股／成分／投資組合／PCF／申購買回／受益憑證／指數股票」逐端點比對 path 與說明：
+   證交所僅有 `/ETFReport/ETFRank`（定期定額交易戶數排行月報，非持股）、
+   `/fund/MI_QFIIS_*`（外資持股，非 ETF）；櫃買僅有 `/tpex_opfund_recommended_dealer`
+   （**開放式基金**受益憑證造市商，非主動式 ETF 持股）與各指數成分股端點。
+   **兩個官方 OpenAPI 皆無主動式 ETF 持股／PCF 端點。**
+2. **data.gov.tw 站內搜尋**：搜尋頁是 Nuxt 前端渲染，WebFetch 只拿到空殼（「無資料」）；
+   嘗試其前端目錄 API（`POST /api/front/dataset/list`）時，我猜的關鍵字參數
+   （keyword／query／q／qs／search／keywords／name）**全部沒有生效**（每次回傳全站
+   52,437 筆未過濾），共 4 組關鍵字＋6 個參數名的探測後**停止**——那是未公開文件的
+   內部端點，不應繼續猜。改用 WebSearch 限縮 `site: data.gov.tw`：搜尋引擎回傳的相關
+   資料集只有「定期定額交易戶數統計排行（區分股票及ETF）」（dataset/55021 是個股期貨
+   交易量）、集保戶股權分散表（dataset/11452）等，**沒有任何主動式 ETF 每日持股資料集**。
+   **結論分級**：搜尋引擎層「未見」；站內檢索層「**無法有效查詢，尚未證明沒有**」——
+   這一項**不得下「不存在」的結論**，需總司令在瀏覽器手動搜尋一次，或等有文件的 API 參數。
+3. **社群／GitHub（其他人怎麼取得）**：WebSearch 見 `nctuwanglin/active-etf`（自述持股
+   取自「各投信官網公告的 PCF」）、`kevin12596/00981a`（統一 ezmoney，Playwright 爬蟲）、
+   `solymx/tw-etf-pages`（統一＋復華）、`jasperchen111/ETF`（MoneyDJ 前十大）。
+   **這證明技術上可行、且有人在做，但不構成授權**——依「取得方式鐵律」，別人在爬
+   不改變各家條款的文字，我方不以此為依據。
+
+**data.gov.tw 部分的最終判斷**：官方 OpenAPI 兩個目錄查無；data.gov.tw 站內檢索未完成
+（工具限制）。**不宣稱「政府資料開放平臺沒有」**，登記為待總司令手動搜尋一次的項目。
+
+### 8.3 對裁示第 4 點的判斷（能不能建收集器）
+
+裁示第 4 點：「條款明文允許或未禁止、且 robots 允許者，才可依原裁示建立收集器。」
+
+- **群益**是三家中唯一同時滿足「robots 明確 Allow」＋「已讀條款頁未見禁止」的。
+  **但本輪仍不建收集器**，原因（`[自行裁量]`，總司令可推翻）：
+  ① 條款頁只有小模型判讀，未逐字元核對；② 持股資料端點**尚未確認**（Angular SPA，
+  實際 `CFWeb` API 路徑未讀）——建收集器前得先讀其 JS bundle 找端點，那一步本身
+  就是「摸內部 API」，該由總司令先點頭；③ 依白名單第 6 條（法遵疑慮：ToS、爬蟲），
+  「未見禁止」是缺席證據，與富邦同級的殘餘不確定性，處理方式與富邦一致（見 v2 第 3 節）。
+- 中信、第一金：不符合第 4 點，不建。
+
+### 8.4 詢問信範本
+
+見 `docs/ACTIVE_ETF_INQUIRY_LETTER_TEMPLATE.md`。**CC 不代寄**；寄件人與聯絡方式由總司令
+自行填入（文件內以中文說明欄位、不放任何看起來像真值的佔位符）。
