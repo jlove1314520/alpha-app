@@ -14569,3 +14569,51 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   已算好的`all_dates`聯集交易日曆找「period_end往前10個觀察到的交易日」
   當門檻。**⑥⑦尚未執行**：FinMind冷卻至22:40台北才可執行`--gates-only`，
   尚未到時間，已排程等冷卻解除後重跑。
+
+## 2026-09-26 總司令裁示【查.一：排程健康診斷（唯讀診斷，不得干擾乾.二 22:40 的 --gates-only 執行）】（原文登記，插隊，唯讀診斷、與乾.二並行不衝突）
+
+> 【查.一：排程健康診斷（唯讀診斷，不得干擾乾.二 22:40 的 --gates-only 執行）】
+> 先寫進 PENDING_QUEUE 再動工。
+>
+> 一、DevQueue 停擺告警：data/STATUS.json 的 local_schedule_heartbeat 在
+> 21:40 判定 stalled=true（DevQueue 最後 commit d849038，19:16；今天
+> 16:01→19:16 也空了 3 小時），但 Marathon 與 Hypothesis-queue 同時段都有
+> 正常 commit。
+>   1. 用 schtasks /query /tn <DevQueue任務名> /v /fo LIST 印出：狀態、
+>      上次執行時間、上次結果碼、下次執行時間、「只在使用者登入時執行」
+>      設定。
+>   2. 查 DevQueue 的 cycle log 最後 50 行，判斷是以下哪一種：
+>      (a) 停.一或其他裁示讓它刻意暫停
+>      (b) 節流跳過但沒 commit 心跳
+>      (c) 真的卡住或崩潰
+>   3. (a) 或 (b)：不要改告警門檻。改為讓 DevQueue 每輪即使跳過也寫一次
+>      心跳 commit，或是把 check_local_schedule_heartbeat.py 的判定來源
+>      改成「三條排程任一有心跳即為存活，但分別列出各自的 minutes_since」。
+>      擇一實作前先回報推薦方案，等 Cowork 核可。
+>      (c)：只回報原因與 Traceback，不要自行重啟會觸發 H.一 的任何流程。
+>
+> 二、STATUS.json 過期區塊：local_pipeline_health 與 schedule_health 的
+> checked_at 停在 2026-09-15T19:40，11 天沒更新，但仍顯示 status: ok。
+>   1. 查 generate_status_json.py 是哪個排程在跑、為什麼 09-15 之後不再
+>      更新這兩區。
+>   2. 最低要求：這兩區的 checked_at 超過 24 小時，就一律改顯示
+>      status: "stale"，不得繼續顯示 ok。偵測失敗只降級成警告，不得讓
+>      任何排程崩潰。
+>
+> 三、全部結果寫進 PENDING_QUEUE 的查.一 條目並 push，然後停下等 Cowork
+> 核對。
+
+- [ ] **查.一** [維運] 排程健康診斷(唯讀，不得干擾乾.二22:40的--gates-only
+  執行)。一、DevQueue停擺告警：①用schtasks /query /tn <DevQueue任務名>
+  /v /fo LIST印出狀態/上次執行時間/上次結果碼/下次執行時間/「只在使用者
+  登入時執行」設定。②查DevQueue cycle log最後50行，判斷(a)停.一等裁示
+  刻意暫停(b)節流跳過但沒commit心跳(c)真的卡住或崩潰。③(a)/(b)：不改
+  告警門檻，改讓DevQueue每輪即使跳過也寫心跳commit，或把check_local_
+  schedule_heartbeat.py判定來源改成「三條排程任一有心跳即存活，分別列
+  各自minutes_since」，擇一實作前先回報推薦方案等Cowork核可；(c)：只
+  回報原因與Traceback，不自行重啟任何會觸發H.一的流程。二、STATUS.json
+  過期區塊：①查generate_status_json.py是哪個排程在跑、為何09-15後不再
+  更新local_pipeline_health/schedule_health。②最低要求：這兩區checked_
+  at超過24小時一律改顯示status:"stale"，不得繼續顯示ok；偵測失敗只降級
+  警告，不得讓任何排程崩潰。三、全部結果寫進PENDING_QUEUE並push，然後
+  停下等Cowork核對。
