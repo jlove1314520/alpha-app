@@ -5,12 +5,18 @@ holdout單次解鎖＋daily_price修正核准】）：holdout單次解鎖，新�
 一致性檢查，期間2025-01-01~資料最新日。
 
 **ONLY-ONCE 鐵律（裁示原文）**：只跑一次；有結果數字產出後不得重跑。
-`validation.holdout.unlock_holdout_once()`本身就是全域、跨專案唯一一次
-（不是「這個候選限定」，是整個repo一次燒毀，見該函式docstring）——這支
-腳本呼叫它之後，holdout對整個專案永久解鎖，不是只對這個候選解鎖，這點
-與裁示「僅限新.一這一個候選」的政策意圖不同但機制上必然如此（機制本身
-沒有辦法做到「只對一個候選解鎖」，只能靠政策自律不濫用，這裡如實記錄
-這個機制限制，不是規避裁示）。
+`validation.holdout.unlock_holdout_once()`本身仍是全域、跨專案唯一一次
+（不是「這個候選限定」，是整個repo一次燒毀，見該函式docstring）——這件事
+沒有改變。
+
+**2026-09-26 守.一裁示已補上機制層級的收窄**：上一段原本如實記錄的機制
+限制（「解鎖後對整個專案永久開放」）已被`validation/holdout.py`的
+`ALLOWED_HOLDOUT_READERS`允許清單堵住——`assert_no_holdout_leakage()`
+現在額外檢查呼叫堆疊上是否出現本檔案的檔名，不在清單內的任何其他腳本，
+即使`is_holdout_consumed()`為True，讀到VAL_END之後的資料一律仍然raise，
+效果等同holdout從未解鎖過。也就是說機制上現在**確實只對這支腳本解鎖**，
+不再只是政策自律。往後新研究已無回測用的乾淨資料，唯一的樣本外檢定
+管道是紙上交易（forward paper trading）。
 
 **只讀既有機制，不重新發明**：`adjust.py::adjustment_events()`的docstring
 明講「Callers doing an actual one-time holdout evaluation should use
@@ -408,6 +414,21 @@ def main():
     OUT_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     print(f"\n已寫入 {OUT_JSON}", flush=True)
     return out
+
+
+def _self_test_allowlist_passthrough() -> None:
+    """守.一自我測試專用（2026-09-26）：從本檔案（ALLOWED_HOLDOUT_READERS
+    允許清單內）直接呼叫assert_no_holdout_leakage()，餵一筆VAL_END之後的
+    假資料。因為呼叫堆疊的最上層frame就是這支腳本自己，在holdout已被
+    #400合法解鎖過的前提下，這裡應該no-op通過、不得raise。
+
+    不呼叫真正的main()（那會觸發完整的uncapped資料載入，成本高且會被
+    FinMind冷卻卡住），只單獨測「呼叫者身分是否被正確識別為允許清單內」
+    這一件事，這是#400腳本自身的holdout存取權限有沒有被誤傷的唯一
+    需要驗證的點。
+    """
+    df = pd.DataFrame({"date": ["2025-06-01"]})
+    holdout.assert_no_holdout_leakage(df, context="守.一自我測試：#400腳本本身呼叫")
 
 
 if __name__ == "__main__":

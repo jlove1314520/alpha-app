@@ -29,6 +29,7 @@ already has parsed dates.
 """
 from __future__ import annotations
 
+import inspect
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +41,33 @@ VAL_END = "2024-12-31"     # inclusive. VAL = (TRAIN_END, VAL_END]
 # HOLDOUT = (VAL_END, today]. Not given a fixed end date -- it grows every day
 # that passes, which is the point: it should always be "the real, not-yet-seen future"
 # relative to whenever a strategy's train/val work was actually done.
+
+# 2026-09-26 守.一裁示：unlock_holdout_once()成功後，is_holdout_consumed()==True
+# 是「holdout這個資源本身」的全域一次性狀態，但總司令核准的解鎖範圍只限#400候選
+# （dividend_yield_v1_common×帳戶70/30），不是全專案。這份清單就是把「資源已解鎖」
+# 跟「這支腳本可以讀」拆成兩個獨立條件——is_holdout_consumed()仍是全域的（因為
+# unlock_holdout_once()本來就設計成一次性、不可逆），但assert_no_holdout_leakage()
+# 現在額外要求呼叫鏈上必須出現這份清單裡的檔名，否則即使holdout已解鎖，其他任何
+# 腳本讀到VAL_END之後的資料一律照舊raise，行為等同holdout從未解鎖過。
+ALLOWED_HOLDOUT_READERS = frozenset({
+    "holdout_2025_dividend_account_test.py",  # #400，唯一經總司令核准的holdout解鎖對象
+})
+
+
+def _caller_is_allowlisted() -> bool:
+    """走呼叫堆疊，檢查ALLOWED_HOLDOUT_READERS裡的檔名是否出現在呼叫鏈上的任何一層。
+
+    用堆疊而不是要求呼叫端自己傳一個「我是誰」的參數，是刻意的——後者形同讓
+    每個呼叫端自報身分，可以被隨手抄一個字串繞過；堆疊反映的是「這次呼叫實際
+    是從哪個檔案的程式碼觸發的」，不是呼叫端聲稱的身分。#400腳本透過
+    backtest.engine.run_backtest()或portfolio_backtest_v2.alpha_significance()
+    間接呼到這裡也算數，因為它們都在同一個process、同一條呼叫鏈上，
+    inspect.stack()會照樣看到#400腳本自己的frame。
+    """
+    for frame_info in inspect.stack():
+        if Path(frame_info.filename).name in ALLOWED_HOLDOUT_READERS:
+            return True
+    return False
 
 _RESEARCH_DIR = Path(__file__).parent.parent
 HOLDOUT_LOCK = _RESEARCH_DIR / "HOLDOUT_LOCK.json"   # committed to git -- the lock must survive
@@ -85,21 +113,37 @@ def assert_no_holdout_leakage(df: pd.DataFrame, date_col: str = "date", context:
     ledger itself, as a second layer independent of where the data came from.
 
     If holdout has been legitimately unlocked (is_holdout_consumed() is
-    True), this check is a no-op -- at that point later dates are expected
-    and allowed, since the whole point of unlocking was to look at them.
+    True) AND the call originates from a script on ALLOWED_HOLDOUT_READERS,
+    this check is a no-op -- at that point later dates are expected and
+    allowed, since the whole point of unlocking was to look at them.
+
+    2026-09-26 守.一裁示收窄：is_holdout_consumed()==True不再單獨等於no-op。
+    總司令核准的解鎖範圍只限#400候選一支腳本，其他任何腳本即使holdout
+    已經被合法解鎖過，讀到VAL_END之後的資料仍然要raise——見上方
+    ALLOWED_HOLDOUT_READERS與_caller_is_allowlisted()。這個收窄之後，
+    本專案已無回測用的乾淨資料可以再次合法解鎖；往後新研究唯一的樣本外
+    檢定管道是紙上交易（forward paper trading），不是再次呼叫
+    unlock_holdout_once()（該函式本身仍是一次性、已經燒過，這裡不改變
+    這件事，只是把「燒過之後」的存取範圍鎖到#400）。
     """
-    if is_holdout_consumed():
+    if is_holdout_consumed() and _caller_is_allowlisted():
         return
     if df.empty or date_col not in df.columns:
         return
     max_date = df[date_col].max()
     if pd.Timestamp(max_date) > pd.Timestamp(VAL_END):
+        narrowed_note = (
+            " (holdout已被合法解鎖過，但本次呼叫鏈上未出現ALLOWED_HOLDOUT_READERS"
+            "允許清單內的檔名，依2026-09-26守.一裁示收窄規則，一律視同未解鎖)"
+            if is_holdout_consumed() else ""
+        )
         raise AssertionError(
             f"HOLDOUT LEAKAGE{f' ({context})' if context else ''}: data contains rows up to "
             f"{max_date!r}, which is after VAL_END ({VAL_END}), but holdout has not been unlocked "
-            "(is_holdout_consumed() is False). This should be impossible if finmind_client.load_dev() "
-            "was used correctly -- check for a direct _fetch()/load_full_history() call, or a non-"
-            "FinMind data source, that bypassed the cap."
+            "(is_holdout_consumed() is False) for this caller. This should be impossible if "
+            "finmind_client.load_dev() was used correctly -- check for a direct _fetch()/"
+            "load_full_history() call, or a non-FinMind data source, that bypassed the cap."
+            f"{narrowed_note}"
         )
 
 

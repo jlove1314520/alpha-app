@@ -19,6 +19,7 @@ import pandas as pd
 
 import finmind_client as fc
 import holdout_leak_audit as hla
+from validation import holdout
 from validation.holdout import VAL_END
 
 
@@ -92,9 +93,43 @@ def test_audit_classifies_and_finds_no_uncapped_loader():
           f"訊息文字 {rep['counts']['AFTER_VAL_END_IN_PROSE']} 筆、未cap呼叫 0 筆）")
 
 
+def test_allowlist_blocks_non_allowlisted_caller():
+    """守.一（2026-09-26總司令裁示）核心驗證：holdout已被#400合法解鎖後
+    （`is_holdout_consumed()`為True，這是本專案的真實current state，不是
+    模擬），任何不在`ALLOWED_HOLDOUT_READERS`清單內的呼叫端（本測試檔案
+    自己就是一個），讀到VAL_END之後的資料仍然必須raise，效果等同從未
+    解鎖過。這是「僅限#400」這句裁示能不能被機制真正擋住的唯一驗證點。
+    """
+    assert holdout.is_holdout_consumed(), (
+        "此測試假設holdout已被#400合法解鎖過（本專案的真實狀態）；"
+        "若此assert失敗，代表HOLDOUT_LOCK.json遺失或尚未執行過#400，"
+        "本測試的前提不成立，須先確認repo狀態"
+    )
+    df = pd.DataFrame({"date": ["2025-06-01"]})
+    try:
+        holdout.assert_no_holdout_leakage(df, context="守.一測試：非允許清單呼叫端(本測試檔案自己)")
+    except AssertionError as e:
+        assert "允許清單" in str(e) or "ALLOWED_HOLDOUT_READERS" in str(e), \
+            f"錯誤訊息應說明是被允許清單收窄擋下，實際：{e}"
+    else:
+        raise AssertionError("非允許清單腳本讀到2025年資料竟然沒有raise——守.一收窄規則失效")
+    print("test_allowlist_blocks_non_allowlisted_caller PASS")
+
+
+def test_allowlist_passes_for_400_script():
+    """對照組：#400腳本自己（在ALLOWED_HOLDOUT_READERS清單內）呼叫同一個
+    函式、餵同一種2025年資料，必須no-op通過、不得raise——證明收窄規則
+    沒有連#400自己都一併擋掉。
+    """
+    import holdout_2025_dividend_account_test as h400
+    h400._self_test_allowlist_passthrough()  # 不raise就是PASS
+    print("test_allowlist_passes_for_400_script PASS")
+
+
 def main() -> int:
     tests = [test_default_refuses, test_allow_holdout_warns_and_names_caller,
-             test_load_dev_still_caps, test_audit_classifies_and_finds_no_uncapped_loader]
+             test_load_dev_still_caps, test_audit_classifies_and_finds_no_uncapped_loader,
+             test_allowlist_blocks_non_allowlisted_caller, test_allowlist_passes_for_400_script]
     failed = []
     for t in tests:
         try:

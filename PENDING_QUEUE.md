@@ -14185,12 +14185,44 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 >    給總司令自己寄給投信客服。CC 不得代寄。
 > 4. 條款明文允許或未禁止、且 robots 允許者，才可依原裁示建立收集器。
 
-- [ ] **守.一** [研究] holdout防護收窄——目前unlock後assert_no_holdout_
+- [x] **守.一** [研究] holdout防護收窄——目前unlock後assert_no_holdout_
   leakage()對全專案no-op，總司令核准的僅限#400。①改允許清單：只有
   holdout_2025_dividend_account_test.py可用VAL_END後資料，其他任何
   研究腳本碰到2025+資料一律照舊raise。②自我測試：#400通過、任一其他
   研究腳本讀2025資料須raise。③註記往後新研究無回測用乾淨資料，唯一
   樣本外檢定是紙上交易(往前)。
+  **完成（互動視窗，2026-09-26）**：`research/validation/holdout.py`新增
+  `ALLOWED_HOLDOUT_READERS`允許清單（目前僅含
+  `holdout_2025_dividend_account_test.py`）與`_caller_is_allowlisted()`
+  （用`inspect.stack()`走呼叫鏈，檢查允許清單內的檔名是否出現在任一層，
+  不是要求呼叫端自報身分，避免被隨手繞過）。`assert_no_holdout_leakage()`
+  的no-op條件由單純`is_holdout_consumed()`改為
+  `is_holdout_consumed() and _caller_is_allowlisted()`——holdout這個
+  資源本身仍是全域一次性解鎖（`unlock_holdout_once()`機制不變），但
+  「解鎖後誰可以讀」現在被機制收窄到僅#400。①②已完成：`research/
+  holdout_2025_dividend_account_test.py`新增`_self_test_allowlist_
+  passthrough()`（從本檔案自己呼叫，驗證no-op通過）；`research/
+  holdout_guard_test.py`新增`test_allowlist_blocks_non_allowlisted_
+  caller`（從測試檔案自己呼叫、餵2025年資料，驗證仍會raise，錯誤訊息
+  含「允許清單」字樣）與`test_allowlist_passes_for_400_script`（呼叫
+  #400腳本的self-test helper，驗證no-op）。實測：
+  `python research/holdout_guard_test.py`——新增的兩項測試皆PASS
+  （既有4項中3項PASS，`test_audit_classifies_and_finds_no_uncapped_
+  loader`原本就是FAIL，經`git stash`回到本次修改前確認同樣FAIL，是
+  `holdout_leak_audit.py`靜態掃描自身既有的已知缺陷（誤判合法的
+  `TaiwanStockInfo`/uncapped#400呼叫），非本次改動造成，不在守.一範圍
+  內，如實記錄不順手修）。③已完成：`holdout_2025_dividend_account_
+  test.py`與`holdout.py`的docstring都已加註「機制上現在確實只對這支
+  腳本解鎖，往後新研究唯一樣本外檢定管道是紙上交易」。**未做**：
+  `holdout_leak_audit.py`（靜態稽核）尚未同步認識新的允許清單概念，
+  這是獨立的既有缺陷，不影響守.一要求的執行期（runtime）強制力，
+  暫不動它，如需總司令另行裁示再處理。**驗證H.一不受影響**：
+  `holdout_2025_dividend_account_test.py`第四輪重跑已於本次修改前
+  因FinMind冷卻中斷（進度150/251檔已快取），本次修改未動它呼叫
+  `run_backtest()`/`pbv2.alpha_significance()`的既有邏輯，只在
+  `assert_no_holdout_leakage()`內部新增一個前置身分檢查，正常（未違規）
+  資料路徑不受影響（df不含VAL_END後資料時本來就不會raise，這條路徑
+  完全沒變）。
 - [ ] **警.一** [維運] 本機停擺告警(核准E方向)——①新增GitHub Actions
   排程(每30分鐘)：檢查最近一筆本機排程commit(IBKR quotes/DevQueue)
   時間，應運作時段超過60分鐘無新commit就讓job失敗(GitHub預設寄信給
