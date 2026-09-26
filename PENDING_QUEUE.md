@@ -14421,13 +14421,46 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   **5/5檔不一致，證實Cowork推論①**：H.一目前的股利因子計算完全看不到
   2025年以後任何一筆真實除息事件，訊號停留在VAL_END前的最後一次除息，
   距今已超過一年，殖利率因子在holdout期實質上是失真的。
-- [ ] **修.五** [研究] 1.將_dividend_yield_ttm_cash計算邏輯抽成純函式
+- [x] **修.五** [研究] 1.將_dividend_yield_ttm_cash計算邏輯抽成純函式
   (輸入股利DataFrame)，考.一路徑與holdout路徑共用；holdout路徑改用
   load_full_history(allow_holdout=True)取得的股利資料。自我測試：
   2007-2014資料重跑，#399股票部位報酬與MDD須逐位元相同。2.逐一檢查
   dividend策略signal_fn用到的所有輸入(股利率/流動性/產業/資格篩選)，
   列出每項資料來源與是否截斷，截斷者比照修正。3.載入迴圈：額度類錯誤
   一律往上拋並中止，不得計入n_factor_fail。
+  **完成（互動視窗，2026-09-26）**：
+  ①`research/factors.py`：`_dividend_yield_ttm_cash(stock_id, start_date)`
+  拆成純函式`_dividend_yield_ttm_cash_from_df(div)`（核心計算邏輯，逐行
+  沿用未改）+薄wrapper（走`load_dev()`，考.一/一般研究路徑不變）。
+  `research/holdout_2025_dividend_account_test.py`新增
+  `_dividend_yield_ttm_cash_uncapped(stock_id, start_date)`（走
+  `load_full_history(allow_holdout=True)`+同一份純函式），在`main()`
+  載入迴圈開始前透過`factors_mod._dividend_yield_ttm_cash = _dividend_
+  yield_ttm_cash_uncapped`monkeypatch生效（跟同一支腳本既有的
+  `pbv2._0050_TOTAL_RETURN_SERIES`monkeypatch手法一致，不需要改
+  `prepare_factors()`本身）。**自我測試**：新增`research/test_dividend_
+  yield_refactor_selftest.py`，呼叫`single_shot_2007_2014_test.py`
+  docstring明確標示「可安全反覆測試」的`load_common_stock_data_2007_
+  2014()`+不寫檔的`run_single_shot()`（非重跑only-once段落），實測
+  候選報酬=+203.87%、全段MDD=-53.72%，與TRIALS_LEDGER#399既有登記
+  **逐位元相同（PASS）**，全程零FinMind呼叫（`data/rate_limit_state.
+  json`的`last_request_at`跑前後未變）。
+  ②逐一檢查`dividend_yield_portfolio_v1.py::make_signal_fn()`的所有
+  輸入：**股利率**(`f_dividend_yield_ttm`)——找到並修正上述bug；
+  **流動性**(`pbv2._liquidity_proxy_series(d)`)——純從已載入的`d`
+  (uncapped `px`)算`Trading_money.rolling(20)`，無獨立FinMind呼叫，
+  乾淨；**產業**(`score.load_industry_map()`／`_info_lookup()`)——
+  皆直接呼叫`_fetch("TaiwanStockInfo",...)`(非`load_dev()`)，本質是
+  當下產業分類快照非時間序列，全codebase一致用法，非本次bug類型的
+  截斷風險；**資格篩選**(`_eligible_single_factor()`)——只用
+  `n_components`+`liquidity_proxy`，已涵蓋在流動性檢查內，乾淨。
+  結論：僅股利率因子一項截斷，已修正，其餘三項皆確認未截斷。
+  ③`holdout_2025_dividend_account_test.py`載入迴圈：`except Exception`
+  改為先呼叫`factors._is_quota_error(e)`（既有共用工具，2026-09-24
+  修.三為f52w_2007_extension.py同款bug新增），額度類錯誤`raise`往上拋
+  中止整支腳本，不計入`n_factor_fail`；其他失敗歸類原因並印出分類
+  統計（`factor_fail_reasons`），也是乾.一G3要求的「附失敗原因分類」
+  的資料來源。
 - [ ] **乾.一** [研究] 新增--gates-only模式(載入資料+檢查，印完即結束，
   不跑回測)。只印計數與日期，不得印任何報酬/IR/MDD：G1額度相關失敗=0
   G2股利新鮮度(2025年後有除息紀錄的可用股票，因子最後pit_date須≥該

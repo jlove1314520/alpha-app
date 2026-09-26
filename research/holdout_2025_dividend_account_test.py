@@ -30,6 +30,7 @@ validation.holdout.unlock_holdout_once() themselves」——這支腳本逐字
 """
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -51,7 +52,8 @@ from adjust import _mask_non_positive_adj_prices
 from backtest.engine import BacktestConfig, buy_leg_rate, sell_leg_rate, run_backtest
 from cbc_rf_rate_client import load_risk_free_rate_series, rf_rate_for_date
 from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, sample_universe_ids
-from factors import prepare_factors
+import factors as factors_mod
+from factors import prepare_factors, _is_quota_error
 from finmind_client import _fetch, load_full_history
 from score import load_industry_map
 from strategies.weinstein_stage2 import prepare_market_data
@@ -69,6 +71,7 @@ BOND_WEIGHT = 0.30
 REBALANCE_DAYS = div_mod.REBALANCE_DAYS  # 承接股票部位同一個月頻節奏，帳戶再平衡沿用同一組交易日
 
 OUT_JSON = Path(__file__).parent / "data" / "holdout_2025_dividend_account_result.json"
+GATES_JSON = Path(__file__).parent / "data" / "h1_gates.json"  # 乾.一：只印計數/日期，不含任何報酬/IR/MDD
 
 
 def _info_lookup() -> dict[str, dict]:
@@ -81,6 +84,29 @@ def _info_lookup() -> dict[str, dict]:
         if sid not in lookup:
             lookup[sid] = {"stock_name": row["stock_name"], "industry_category": row.get("industry_category")}
     return lookup
+
+
+def _dividend_yield_ttm_cash_uncapped(stock_id: str, start_date: str) -> pd.DataFrame:
+    """修.五（2026-09-26總司令裁示【緊急：H.一立即暫停重跑，修正兩個bug後
+    先做乾跑檢查】）：`factors.py::_dividend_yield_ttm_cash()`的holdout版本
+    ——用`load_full_history(allow_holdout=True)`取代`load_dev()`，計算邏輯
+    完全共用`factors._dividend_yield_ttm_cash_from_df()`（同一份純函式，
+    不是另外複製一份算法）。
+
+    這支函式在`main()`裡透過monkeypatch
+    `factors_mod._dividend_yield_ttm_cash = _dividend_yield_ttm_cash_uncapped`
+    生效——`prepare_factors()`內部呼叫`_dividend_yield_ttm_cash(...)`是
+    module-level的bare name查找，在Python裡是呼叫當下才解析，不是def時
+    綁定，所以從外部覆寫`factors`模組的這個名字，`prepare_factors()`
+    接下來呼叫到的就是這一版，不需要改`prepare_factors()`本身或重新
+    plumb一個新參數穿過整條呼叫鏈。跟同一支腳本裡
+    `pbv2._0050_TOTAL_RETURN_SERIES`的既有monkeypatch手法一致。
+
+    證據：`research/audit_h1_dividend_pit_lag.py`（5/5檔的因子pit_date
+    停在VAL_END前最後一次除息，跟真實2025+除息日不一致）。
+    """
+    div = load_full_history("TaiwanStockDividend", stock_id, start_date, allow_holdout=True)
+    return factors_mod._dividend_yield_ttm_cash_from_df(div)
 
 
 def _uncapped_adjustment_events(raw: pd.DataFrame, div: pd.DataFrame) -> pd.DataFrame:
@@ -237,8 +263,11 @@ def compute_2007_2014_account_7030_reference() -> dict:
                     "套用同一套70/30帳戶模擬邏輯，僅供參考不作H.一判準。"}
 
 
-def main():
+def main(gates_only: bool = False):
     print("=== H.一：holdout單次解鎖，dividend_yield_v1_common×帳戶70/30一致性檢查 ===", flush=True)
+    if gates_only:
+        print("**--gates-only模式（乾.一）**：只載入資料＋跑G1~G4檢查，印完就結束，"
+              "不執行第5步以後的正式回測，不印任何報酬/IR/MDD。", flush=True)
     already_unlocked = holdout.is_holdout_consumed()
     print(f"is_holdout_consumed() 開工前 = {already_unlocked}"
           f"{'（第一次執行已解鎖過，本次是接續完成崩潰前未跑完的部分，見HOLDOUT_LOG.md）' if already_unlocked else ''}",
@@ -304,9 +333,18 @@ def main():
     print(f"  0050 uncapped序列範圍：{zero050_series.index.min()} ~ {zero050_series.index.max()}"
           f"（{len(zero050_series)}筆）", flush=True)
 
+    # 修.五第1點：讓prepare_factors()內部呼叫的股利率因子改用uncapped
+    # 資料——見_dividend_yield_ttm_cash_uncapped()docstring，這是
+    # module-level bare name monkeypatch，必須在下面的載入迴圈開始「之前」
+    # 生效，否則前面已經跑掉的呼叫依然會用到capped版本。
+    factors_mod._dividend_yield_ttm_cash = _dividend_yield_ttm_cash_uncapped
+    print("已monkeypatch factors._dividend_yield_ttm_cash -> uncapped版本"
+          "（修.五第1點，見audit_h1_dividend_pit_lag.py的診斷證據）", flush=True)
+
     # ── 3. 載入普通股宇宙的uncapped還原股價+因子 ──
     data: dict[str, pd.DataFrame] = {}
     n_price_fail, n_factor_fail = 0, 0
+    factor_fail_reasons: dict[str, int] = {}  # 修.五第3點+乾.一G3：失敗原因分類，額度類不計入這裡（往上拋中止）
     for i, sid in enumerate(common_ids):
         px = uncapped_adjusted_price_series(sid, LOOKBACK_START)
         if px.empty or len(px) < 200:
@@ -314,8 +352,19 @@ def main():
             continue
         try:
             d = prepare_factors(sid, px, market_df, LOOKBACK_START)
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
+            # 修.五第3點：額度類錯誤(FinMind 402/封鎖冷卻)一律往上拋並中止，
+            # 不得計入n_factor_fail——舊版的裸except Exception會把
+            # prepare_factors()內部因子區塊刻意往上拋的額度錯誤（見
+            # factors.py::_is_quota_error()docstring）當成「這一檔資料剛好
+            # 缺」的一般失敗吞掉，讓額度用盡後續跑的資料看起來是「乾淨的
+            # 全部成功」，其實只是安靜漏掉沒抓到的部分。
+            if _is_quota_error(e):
+                print(f"\n額度類錯誤，中止載入迴圈（第{i+1}檔 {sid}）：{e}", flush=True)
+                raise
             n_factor_fail += 1
+            reason = f"{type(e).__name__}: {str(e)[:120]}"
+            factor_fail_reasons[reason] = factor_fail_reasons.get(reason, 0) + 1
             continue
         data[sid] = d
         if (i + 1) % 50 == 0:
@@ -323,6 +372,8 @@ def main():
     print(f"資料載入完成：可用{len(data)}檔（價格不足/失敗{n_price_fail}檔、factor失敗{n_factor_fail}檔）"
           f"——holdout期完全無yfinance可用（該路徑同樣被cap在VAL_END），純FinMind覆蓋率"
           f"天生低於考.一的2007-2014段，如實記錄。", flush=True)
+    if factor_fail_reasons:
+        print(f"  factor失敗原因分類：{factor_fail_reasons}", flush=True)
 
     industry_map = load_industry_map()
     liquidity = {sid: pbv2._liquidity_proxy_series(d) for sid, d in data.items()}
@@ -333,6 +384,70 @@ def main():
     if period_end is None:
         raise RuntimeError("資料完全沒有涵蓋到2025-01-01之後，H.一無法執行")
     print(f"\n資料實際涵蓋的最新日 = {period_end}（不是今天，FinMind本身有發布落後）", flush=True)
+
+    if gates_only:
+        print("\n=== 乾.一：G1~G4資料診斷（只印計數與日期，不含任何報酬/IR/MDD）===", flush=True)
+
+        # G1：額度相關失敗=0——迴圈設計上額度錯誤會立即raise中止整支腳本
+        # （修.五第3點），能執行到這裡代表本次執行過程中沒有遇到任何額度
+        # 錯誤，不是「遇到了但吞掉沒算」。
+        g1_quota_fail = 0
+        print(f"G1 額度相關失敗 = {g1_quota_fail}（能執行到這一行本身就是證據——"
+              f"遇到額度錯誤會立即raise中止整支腳本，不會落到這裡）", flush=True)
+
+        # G2：股利新鮮度——對每一檔可用股票，用已monkeypatch成uncapped版的
+        # factors_mod._dividend_yield_ttm_cash()（跟prepare_factors()內部
+        # 實際用的是同一個函式，不是另外重算一次)找出它在period_end之前
+        # （含）最新一筆2025年後的除息日；若這檔股票確實有這種事件，檢查
+        # 它自己資料裡最後一個交易日有沒有涵蓋到該除息日（涵蓋不到，代表
+        # 這檔的價格資料本身落後於除息日，因子不可能反映到這筆事件——
+        # 這是資料覆蓋率問題，不是修.五修的那個bug，但同樣值得攔下來看）。
+        g2_mismatches = []
+        g2_checked = 0
+        for sid, d in data.items():
+            div_pit = factors_mod._dividend_yield_ttm_cash(sid, LOOKBACK_START)
+            if div_pit.empty:
+                continue
+            ex_dates_2025 = div_pit[(div_pit["pit_date"] >= "2025-01-01") & (div_pit["pit_date"] <= period_end)]
+            if ex_dates_2025.empty:
+                continue
+            g2_checked += 1
+            latest_ex_date = ex_dates_2025["pit_date"].max()
+            last_data_date = d["date"].max()
+            if last_data_date < latest_ex_date:
+                g2_mismatches.append({"stock_id": sid, "latest_ex_date": str(latest_ex_date),
+                                       "last_data_date": str(last_data_date)})
+        print(f"G2 股利新鮮度：檢查了{g2_checked}檔有2025+除息紀錄的可用股票，"
+              f"不一致{len(g2_mismatches)}檔（因子最後pit_date < 該除息日）", flush=True)
+        if g2_mismatches:
+            print(f"  不一致明細：{g2_mismatches}", flush=True)
+
+        # G3：可用檔數/價格失敗檔數/因子失敗檔數（附失敗原因分類）
+        print(f"G3 可用檔數={len(data)}　價格失敗檔數={n_price_fail}　"
+              f"因子失敗檔數={n_factor_fail}（原因分類：{factor_fail_reasons or '無'}）", flush=True)
+
+        # G4：資料實際涵蓋到的最新交易日
+        print(f"G4 資料實際涵蓋到的最新交易日 = {period_end}", flush=True)
+
+        gates_pass = (g1_quota_fail == 0) and (len(g2_mismatches) == 0)
+        gates_out = {
+            "generated_at": pd.Timestamp.now().isoformat(),
+            "G1_quota_related_failures": g1_quota_fail,
+            "G2_dividend_freshness": {"checked": g2_checked, "mismatches": g2_mismatches},
+            "G3_counts": {"usable": len(data), "price_fail": n_price_fail,
+                          "factor_fail": n_factor_fail, "factor_fail_reasons": factor_fail_reasons},
+            "G4_latest_covered_trading_date": period_end,
+            "gates_pass": gates_pass,
+            "note": "乾.一：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。"
+                    "gates_pass為True僅代表資料層面可以放行，仍須由Cowork核對後"
+                    "才能執行正式回測，本腳本本身不會自動接著跑。",
+        }
+        GATES_JSON.parent.mkdir(parents=True, exist_ok=True)
+        GATES_JSON.write_text(json.dumps(gates_out, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        print(f"\n已寫入 {GATES_JSON}", flush=True)
+        print(f"\n**乾.一結果：{'gates_pass=True，資料層面可以放行' if gates_pass else 'gates_pass=False，尚不可放行'}**"
+              f"——停在這裡，等Cowork核對後再另行放行正式回測。", flush=True)
+        return gates_out
 
     # ── 5. 股票部位：dividend_yield_portfolio_v1，參數與考.一完全相同 ──
     signal_fn = div_mod.make_signal_fn(industry_map, liquidity)
@@ -432,4 +547,10 @@ def _self_test_allowlist_passthrough() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--gates-only", action="store_true",
+                         help="乾.一：只跑G1~G4資料診斷，印完就結束，不執行正式回測，"
+                              "不印任何報酬/IR/MDD（總司令2026-09-26裁示【緊急：H.一"
+                              "立即暫停重跑，修正兩個bug後先做乾跑檢查】）")
+    args = parser.parse_args()
+    main(gates_only=args.gates_only)

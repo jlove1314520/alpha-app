@@ -479,7 +479,7 @@ def _gross_profitability(stock_id: str, start_date: str) -> pd.DataFrame:
 DIVIDEND_YIELD_TRAILING_DAYS = 365  # 近12個月現金股利加總的視窗
 
 
-def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
+def _dividend_yield_ttm_cash_from_df(div: pd.DataFrame) -> pd.DataFrame:
     """`HYPOTHESIS_QUEUE.md` #4股票股利率carry：TW股票近12個月現金股利/股價
     （殖利率），高殖利率排名靠前。這裡只算分子（trailing 12個月現金股利加總，
     元/股），除以股價的動作留到`prepare_factors()`（跟f_value_pb/pe直接讀
@@ -489,14 +489,23 @@ def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
     `TaiwanStockDividend`的`CashExDividendTradingDate`（除息交易日）本身就是
     市場公開資訊的生效日——除息當天全市場都看得到這件事發生了，不像財報有
     申報延遲，所以這裡直接把ex-date當成`pit_date`使用，不套用`quarterly_pit`
-    那種+45天假設。用`adjust.py::adjustment_events()`已經在用的同一個資料集
-    （`TaiwanStockDividend`），沿用`load_dev()`（VAL_END自動截斷），零額外
-    新資料源需求，但這是這批因子第一次直接讀這個資料集本身（不是透過
-    adjust.py的還原價邏輯），所以走FinMind呼叫（非零額外呼叫）。
+    那種+45天假設。
 
-    2026-09-01 HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#4起跑。
+    2026-09-26修.五（總司令裁示【緊急：H.一立即暫停重跑，修正兩個bug後先做
+    乾跑檢查】）：從`_dividend_yield_ttm_cash(stock_id, start_date)`抽出的
+    純函式版本，輸入改成呼叫端已經抓好的`div` DataFrame（不在這裡決定要
+    走`load_dev()`還是`load_full_history()`）。這麼做是因為原本的版本內部
+    寫死呼叫`load_dev()`，`holdout_2025_dividend_account_test.py`的載入
+    迴圈透過`prepare_factors()`間接呼到這裡時，從未把它換成uncapped版本
+    （跟同一支腳本裡`uncapped_adjusted_price_series()`特地為股價做的處理
+    不同），導致holdout期(2025年起)真實發生的除息事件對這個因子完全不
+    可見——訊號停留在最後一次VAL_END前的除息，殖利率因子實質失真。
+    證據見`research/audit_h1_dividend_pit_lag.py`與`data/h1_dividend_pit_
+    lag_evidence.json`（5/5檔不一致）。抽成純函式後，考.一/一般研究路徑
+    （`_dividend_yield_ttm_cash()`，見下）與holdout路徑都呼叫同一份計算
+    邏輯，只有「餵進來的div是capped還是uncapped」不同，不會再各自維護
+    一份、其中一份忘記更新。
     """
-    div = load_dev("TaiwanStockDividend", stock_id, start_date)
     if div.empty or "CashExDividendTradingDate" not in div.columns:
         return pd.DataFrame(columns=["pit_date", "ttm_cash_dividend"])
     events = div[["CashExDividendTradingDate", "CashEarningsDistribution"]].copy()
@@ -519,6 +528,20 @@ def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
     events["ttm_cash_dividend"] = ttm
     events["pit_date"] = events["ex_date"]
     return events[["pit_date", "ttm_cash_dividend"]]
+
+
+def _dividend_yield_ttm_cash(stock_id: str, start_date: str) -> pd.DataFrame:
+    """一般研究/考.一路徑：走`load_dev()`（VAL_END自動截斷），零額外新資料源
+    需求。核心計算邏輯見`_dividend_yield_ttm_cash_from_df()`——這支只負責
+    「用哪個loader抓資料」，不重複計算邏輯。
+
+    2026-09-01 HYPOTHESIS_QUEUE_PROTOCOL.md自動排程新增，佇列#4起跑。
+    2026-09-26修.五：抽出`_dividend_yield_ttm_cash_from_df()`後改為薄
+    wrapper，行為與抽出前完全相同（同一份計算邏輯，只是搬了位置），
+    見`research/test_dividend_yield_refactor_selftest.py`的逐位元回歸測試。
+    """
+    div = load_dev("TaiwanStockDividend", stock_id, start_date)
+    return _dividend_yield_ttm_cash_from_df(div)
 
 
 def _margin_utilization(stock_id: str, start_date: str) -> pd.DataFrame:
