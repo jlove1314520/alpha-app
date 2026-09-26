@@ -110,6 +110,43 @@ def evaluate() -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# 2026-09-26【查.一】二.2：STATUS.json的schedule_health/local_pipeline_health
+# 兩區checked_at停在2026-09-15T19:40（11天未更新）卻仍讓人誤讀成「現在還ok」
+# ——根因是generate_status_json.py本身沒有掛在任何排程上（純人工/CC手動執行，
+# 見查.一條目的查證），沒有東西會定期重跑它去更新這兩區。這裡不是去改
+# generate_status_json.py本身（改了也沒用，它不會自己被觸發），而是讓「本來
+# 就已經在雲端每30分鐘跑、也已經在讀寫STATUS.json」的這支腳本，順便對這兩區
+# 的checked_at做「離現在多久」的新鮮度判定——這是唯一能在「檔案不會自己更新」
+# 的前提下，仍然讓過期狀態被看見的位置：檔案生成當下checked_at必然等於生成
+# 時刻本身（永遠新鮮），staleness只能由「之後某個會定期執行的東西」在讀取時
+# 判定，不能靠生成端自己判定。
+# ---------------------------------------------------------------------------
+STALE_THRESHOLD_HOURS = 24
+STALENESS_WATCHED_KEYS = ("schedule_health", "local_pipeline_health")
+
+
+def _mark_block_staleness(doc: dict, key: str, now: datetime) -> None:
+    block = doc.get(key)
+    if not isinstance(block, dict):
+        return
+    checked_at_raw = block.get("checked_at")
+    try:
+        if not checked_at_raw:
+            block["status"] = "unknown"
+            return
+        ts = datetime.fromisoformat(str(checked_at_raw))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        age_hours = (now - ts.astimezone(timezone.utc)).total_seconds() / 3600.0
+        block["status"] = "stale" if age_hours > STALE_THRESHOLD_HOURS else "ok"
+        block["status_checked_at"] = now.isoformat()
+        block["status_age_hours"] = round(age_hours, 1)
+    except Exception as e:  # noqa: BLE001 -- 偵測失敗只降級成警告，不得讓排程崩潰（十二節同一套原則）
+        print(f"::warning::新鮮度判定失敗（{key}）：{type(e).__name__}: {e}")
+        block["status"] = "unknown"
+
+
 def _write_into_status_json(result: dict) -> None:
     if STATUS_PATH.exists():
         try:
@@ -119,6 +156,9 @@ def _write_into_status_json(result: dict) -> None:
     else:
         doc = {}
     doc["local_schedule_heartbeat"] = result
+    now = datetime.now(timezone.utc)
+    for key in STALENESS_WATCHED_KEYS:
+        _mark_block_staleness(doc, key, now)
     STATUS_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
 
 

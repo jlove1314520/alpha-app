@@ -14603,7 +14603,7 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 > 三、全部結果寫進 PENDING_QUEUE 的查.一 條目並 push，然後停下等 Cowork
 > 核對。
 
-- [ ] **查.一** [維運] 排程健康診斷(唯讀，不得干擾乾.二22:40的--gates-only
+- [!] **查.一** [維運] 排程健康診斷(唯讀，不得干擾乾.二22:40的--gates-only
   執行)。一、DevQueue停擺告警：①用schtasks /query /tn <DevQueue任務名>
   /v /fo LIST印出狀態/上次執行時間/上次結果碼/下次執行時間/「只在使用者
   登入時執行」設定。②查DevQueue cycle log最後50行，判斷(a)停.一等裁示
@@ -14617,3 +14617,80 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   at超過24小時一律改顯示status:"stale"，不得繼續顯示ok；偵測失敗只降級
   警告，不得讓任何排程崩潰。三、全部結果寫進PENDING_QUEUE並push，然後
   停下等Cowork核對。
+  **完成（互動視窗，2026-09-26 21:4x~22:3x，維運帽）**：
+
+  **一.1 schtasks輸出**（任務名`AlphaDevQueue`）：`Status: Ready`、
+  `Last Run Time: 2026/9/26 下午10:16:01`、`Last Result: 0`（成功）、
+  `Next Run Time: 2026/9/26 下午10:31:00`、`Logon Mode: Interactive
+  only`（**這就是「只在使用者登入時執行」的答案——確認設定為僅登入時
+  執行，不是「不論登入與否都執行」**，代表使用者登出/鎖定畫面時這條
+  排程不會跑，這是既有設定不是本次異常）。另有第二筆trigger
+  `Schedule Type: At logon time`（登入時額外觸發一次，跟主要的15分鐘
+  週期並存，判斷為刻意的雙保險設計，非異常）。
+
+  **一.2 分類判定：(b) 節流跳過但沒commit心跳**（不是(c)真的卡住/崩潰）。
+  證據：`research/dev_queue_cycle.log`最後50行顯示16:01~22:01之間每15
+  分鐘準時觸發，但連續多輪印出`check_collision: YIELD: ...`後**沒有
+  任何後續行**（沒有`cycle end`、沒有commit）；19:16:02與22:16:02兩輪
+  則完整跑完`PROCEED→lock→prompt→finally→cycle end`全流程並commit。
+  追出根因：`scripts/dev_queue_runner.py::_recent_real_dirty_reason()`
+  （`COLLISION_RECENCY_MINUTES=20`）偵測到20分鐘內有非機器寫入檔案被
+  改動就YIELD——21:16那輪的YIELD訊息明確列出
+  `research/factors.py`、`research/holdout_2025_dividend_account_
+  test.py`（**正是互動視窗當時正在做修.五/乾.二的檔案**）。
+  `run-dev-queue-cycle.ps1`第38~40行`if ($LASTEXITCODE -ne 0) {
+  exit 0 }`在collision check失敗時直接整支腳本結束，**在進入後面
+  commit`dev_queue_cycle.log`的`finally`區塊之前就退出**，所以YIELD
+  時完全不留任何痕跡。**這是既有碰撞防護機制正確運作**（正確避開跟
+  互動視窗同時寫同一批檔案），不是DevQueue壞掉——但它讓警.一的停擺
+  偵測在互動視窗長時間編輯同一批檔案時產生假警報。**截至現在22:16已
+  自行恢復**（DevQueue最新commit`2e9a06fb`，距今10.9分鐘，`stalled=
+  false`），不是持續性故障。
+
+  **一.3 兩個修正方案（皆未實作，等Cowork核可擇一）**：
+  - 方案A（**推薦**）：讓`run-dev-queue-cycle.ps1`在collision
+    YIELD時也commit一次心跳（比照下方`finally`區塊已有的
+    `git add research/dev_queue_cycle.log`+`git commit -- <路徑>`
+    模式，只是搬到YIELD分支也執行一次，不用`git add -A`避免撿到
+    互動視窗尚未commit的內容——這正是collision check原本要防的事，
+    heartbeat commit必須嚴格限定路徑）。優點：跟Marathon/
+    Hypothesis-queue的節流跳過本來就會commit心跳的既有行為一致；
+    保留「真的是DevQueue自己壞掉」的偵測力（不會被其他軌道的心跳
+    掩蓋）。風險：每15分鐘一次額外小commit（頻率跟其他兩軌的既有
+    模式相同，非新增負擔）。
+  - 方案B：把`check_local_schedule_heartbeat.py`的停擺判定邏輯改成
+    「DevQueue/Marathon/Hypothesis-queue三條任一有新鮮心跳即視為
+    機器存活」，分別列出各自`minutes_since`供人工判讀。優點：不用
+    改DevQueue本身。缺點：會**掩蓋「DevQueue真的自己壞了、但另外
+    兩條還在跑」的情境**，違反警.一「本機排程停擺」原意是要能個別
+    抓到某一條真的死掉，不是只看「這台機器有沒有活著」。
+  互動視窗建議採方案A，理由：問題根源是「YIELD路徑沒有心跳」，方案A
+  直接補這個洞、不犧牲個別軌道的偵測力；方案B治標不治本，且會讓未來
+  真正的DevQueue專屬故障被另外兩條的心跳掩蓋掉。
+
+  **二.1 根因**：`generate_status_json.py`**沒有掛在任何排程上**——
+  已查證`.github/workflows/*.yml`、`C:\alpha\*.ps1`皆無任何呼叫；
+  `git log -- data/STATUS.json`顯示這份檔案過去都是**人工/CC互動
+  session做功能開發時順手手動執行**才更新（例如「源頭二.3」系列資料
+  源接入的commit），最後一次是09-15的「週六.四」commit，之後11天沒有
+  任何功能開發session剛好觸發它，不是排程停擺，是**它從來就不是排程
+  任務**。
+
+  **二.2 已實作**：在`scripts/check_local_schedule_heartbeat.py`
+  （警.一既有、雲端每30分鐘真實排程、本來就會讀寫`data/STATUS.json`
+  的腳本）新增`_mark_block_staleness()`，對`schedule_health`／
+  `local_pipeline_health`兩區的`checked_at`做「離現在多久」判定，
+  `>24小時`寫入`status:"stale"`，否則`status:"ok"`，偵測失敗
+  （parse錯誤等）降級為`status:"unknown"`並印`::warning::`，不拋
+  例外、不影響其他欄位寫入。**理由選在這裡而非改
+  `generate_status_json.py`本身**：後者沒有排程觸發，`checked_at`
+  在生成當下必然等於生成時刻本身（永遠是「剛檢查過」），staleness
+  只能由「之後某個真的會定期執行的東西」在讀取時判定，不能靠生成端
+  自證。實測：`python scripts/check_local_schedule_heartbeat.py`後，
+  `data/STATUS.json`的`schedule_health.status`與`local_pipeline_
+  health.status`皆正確顯示`"stale"`，`status_age_hours`=266.8（約
+  11.1天，與09-15T19:40的既有`checked_at`吻合）。
+
+  **push狀態**：本輪完成時網路一度連不上github.com（`Could not
+  resolve host`），已本地commit，會在網路恢復後盡快push，若下一輪
+  仍卡住會在下次回報時註明。

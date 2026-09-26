@@ -607,7 +607,10 @@
         "rule": "每個平日06:10（UTC）排程，寬限3.0小時",
         "note": ""
       }
-    ]
+    ],
+    "status": "stale",
+    "status_checked_at": "2026-09-26T14:27:16.761289+00:00",
+    "status_age_hours": 266.8
   },
   "local_pipeline_health": {
     "checked_at": "2026-09-15T19:40:21.880603+08:00",
@@ -760,7 +763,10 @@
         "status": "ok"
       }
     ],
-    "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。"
+    "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
+    "status": "stale",
+    "status_checked_at": "2026-09-26T14:27:16.761289+00:00",
+    "status_age_hours": 266.8
   },
   "app_data_sources": [
     {
@@ -1140,20 +1146,20 @@
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。"
   ],
   "local_schedule_heartbeat": {
-    "checked_at": "2026-09-26T13:40:33.351673+00:00",
+    "checked_at": "2026-09-26T14:27:16.654386+00:00",
     "stall_threshold_minutes": 60,
     "devqueue": {
-      "last_commit_sha": "d849038aee4dd98fb156f7477d66f4d1e99b9ceb",
-      "last_commit_at": "2026-09-26T11:16:03+00:00",
-      "minutes_since": 144.5
+      "last_commit_sha": "2e9a06fb4ee849b4f564524a0981cb5ddbdfd5f8",
+      "last_commit_at": "2026-09-26T14:16:03+00:00",
+      "minutes_since": 11.2
     },
     "ibkr_quotes": {
       "last_commit_sha": "316718d350c5de68c6f5e40fdd03657f9ca76ce4",
       "last_commit_at": "2026-09-25T23:56:38+00:00",
-      "minutes_since": 823.9,
+      "minutes_since": 870.6,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring"
     },
-    "stalled": true,
+    "stalled": false,
     "judged_by": "devqueue",
     "note": "本機排程最後活動時間；只看DevQueue的commit心跳判定是否停擺（理由與IBKR排除原因見本檔案docstring），偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
   }
