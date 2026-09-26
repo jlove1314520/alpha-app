@@ -14494,3 +14494,69 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 修.五(修完bug，已完成) → 乾.一(乾跑檢查，印完停下等Cowork核對，
 **進行中**：--gates-only已實作，第一次實跑因既有FinMind冷卻BLOCKED，
 等冷卻解除後重跑)。不得跳過任何一步直接回測。
+
+## 2026-09-26 總司令裁示【乾.二：補強乾.一閘門後再跑，仍只印計數/日期】（原文登記，插隊，最高優先，緊接乾.一之後）
+
+> 【乾.二：補強乾.一閘門後再跑，仍只印計數/日期】先寫進 PENDING_QUEUE 再動工。
+>
+> 背景：修.五已由 Cowork 核對通過。但現行 G2 呼叫的是已 monkeypatch 的函式
+> 本身，無法證明 prepare_factors() 產出的 d 真的吃到 uncapped 股利資料
+> （即使 patch 沒生效，G2 仍會是 0）。本項只改 --gates-only 分支，不得改動
+> 第 5 步以後的正式回測程式碼，也不得改 prepare_factors()。
+>
+> 一、保留現有 G2，改名為 G2a（除息日 vs 該檔股價最後日，屬快取新鮮度檢查）。
+>
+> 二、新增 G2b「patch 生效檢查」（必須 = 0）：
+>   對每檔可用股票，取 uncapped 股利事件中位於 [2025-01-01, period_end] 的
+>   最新除息日 E，以及該事件的 ttm_cash_dividend 期望值 X。
+>   跳過該檔股價最後日 < E 的股票（已在 G2a 列出）。
+>   在 d 中取第一個 date >= E 的列，計算 obs = f_dividend_yield_ttm × close。
+>   若 obs 為 NaN，或 |obs − X| > 1e-6 × max(1, X)，記為不一致並列出明細
+>   （stock_id, E, X, obs）。
+>
+> 三、新增 G2c「檢定力對照」（必須 > 0）：
+>   在 G2b 的受檢股票中，計算「X 不等於 d 在 2024-12-31（或之前最後一個
+>   交易日）的 ttm 值」的檔數。
+>   若 = 0，代表 G2b 分辨不出 patch 有沒有生效，gates_pass 一律為 False。
+>
+> 四、新增 G5「股價截止日分佈」：
+>   印出各檔 d["date"].max() 的最小值、中位數、最大值，以及最後日早於
+>   period_end 超過 10 個交易日的檔數與清單。
+>   該檔數 > 可用檔數的 5% 時，gates_pass = False。
+>
+> 五、gates_pass = (G1 == 0) 且 (G2a == 0) 且 (G2b == 0) 且 (G2c > 0) 且
+>   (G5 未超標)。
+>   全部寫進 research/data/h1_gates.json，並 git add -f 入庫。
+>
+> 六、22:40 FinMind 冷卻解除後才執行 --gates-only。
+>   若再撞額度牆，照舊 raise 中止並記錄第幾檔；不得改 prepare_factors 的
+>   因子範圍來省額度（那需另行裁示）。
+>
+> 七、跑完即停。禁止印出任何報酬、IR、MDD，禁止自行接著跑正式回測。等
+>   Cowork 核對 h1_gates.json 後另行放行。
+>
+> 八、在 TRIALS_LEDGER #400 附註一行已知限制（不修、不影響本次判準）：
+>   「ttm_cash_dividend 只在除息日更新、之後沿用不衰減，停發股利的公司
+>   殖利率會被高估；與 #399 同定義，屬預先登記內容。若 H.一 PASS，紙.一
+>   前須另開試驗處理。」
+
+- [ ] **乾.二** [研究] 補強乾.一的G2閘門，避免「即使patch沒生效G2仍會是0」
+  的漏洞，只改--gates-only分支，不得改第5步以後的正式回測程式碼、不得
+  改prepare_factors()。①現有G2改名G2a(除息日vs該檔股價最後日，快取新鮮
+  度檢查)。②新增G2b「patch生效檢查」(必須=0)：對每檔可用股票取uncapped
+  股利事件中[2025-01-01,period_end]最新除息日E與其ttm_cash_dividend期望
+  值X(跳過股價最後日<E者，已在G2a列出)，在d中取第一個date>=E的列算
+  obs=f_dividend_yield_ttm×close，obs為NaN或|obs−X|>1e-6×max(1,X)記為
+  不一致並列明細(stock_id,E,X,obs)。③新增G2c「檢定力對照」(必須>0)：
+  G2b受檢股票中「X不等於d在2024-12-31(或之前最後交易日)的ttm值」的檔數，
+  =0代表G2b分辨不出patch有沒有生效，gates_pass一律False。④新增G5「股價
+  截止日分佈」：印各檔d["date"].max()的最小/中位/最大值，最後日早於
+  period_end超過10個交易日的檔數與清單，該檔數>可用檔數5%時gates_pass=
+  False。⑤gates_pass=(G1==0)且(G2a==0)且(G2b==0)且(G2c>0)且(G5未超標)，
+  全部寫進research/data/h1_gates.json並git add -f入庫。⑥22:40冷卻解除後
+  才執行--gates-only，撞額度牆照舊raise中止記錄第幾檔，不得改因子範圍
+  省額度(需另行裁示)。⑦跑完即停，禁止印報酬/IR/MDD、禁止自行接著跑正式
+  回測，等Cowork核對後另行放行。⑧TRIALS_LEDGER#400附註一行已知限制
+  (不修、不影響本次判準)：ttm_cash_dividend只在除息日更新之後沿用不
+  衰減，停發股利公司殖利率會被高估，與#399同定義屬預先登記內容，若H.一
+  PASS紙.一前須另開試驗處理。
