@@ -1,17 +1,16 @@
 {
- "fetched_at": "2026-09-27T02:59:37.593700+08:00",
+ "fetched_at": "2026-09-27T05:55:50.971114+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 6,
-   "kept": 6
-  },
-  "tpex_mops": {
-   "ok": true,
    "rows": 4,
    "kept": 4
+  },
+  "tpex_mops": {
+   "ok": false,
+   "error": "ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
   },
   "twse_revenue": {
    "ok": true,
@@ -24,7 +23,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 10792,
+ "count": 10796,
  "events": [
   {
    "code": "4552",
@@ -151,6 +150,42 @@
    "title": "除權息交易日（現金 0.8 元）",
    "source": "TWSE 除權息",
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-09-26",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1721",
+   "name": "國慶科技",
+   "date": "2026-09-26",
+   "type": "其他",
+   "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2072",
+   "name": "世紀風電",
+   "date": "2026-09-26",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2023",
+   "name": "燁輝",
+   "date": "2026-09-26",
+   "type": "其他",
+   "title": "公告本公司第二十五次買回庫藏股執行情形",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
   {
    "code": "1721",
