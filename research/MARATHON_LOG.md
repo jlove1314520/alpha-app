@@ -1,7 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
 ## 2026-09-26T16:57（Taipei，第三十三輪，hypothesis_queue排程接續，開發帽）— 領交辦UX.一：提案＋原型完成，等審閱
-開工讀`PENDING_QUEUE.md`：唯一`- [ ]`為UX.一（交辦優先於自走；凍結.二仍生效，假設佇列不得開新alpha試驗）。做了：6頁393×852現況截圖、用語審查、`prototype/ux_v2.html`（暗/淺色、reduced-motion、真實2330資料、導覽可跳過，三種模式pageerror=0）、`docs/UX_REDESIGN_PROPOSAL.md`。未動index.html、未登記試驗、`is_holdout_consumed()`未觸碰。冒煙測試全通過。本機連不上github.com，push未成（見PROGRESS.md）。交辦佇列還剩0條未開始。
+開工讀`PENDING_QUEUE.md`：唯一`- [ ]`為UX.一（交辦優先於自走；凍結.二仍生效，假設佇列不得開新alpha試驗）。做了：6頁393×852現況截圖、用語審查、`prototype/ux_v2.html`（暗/淺色、reduced-motion、真實2330資料、導覽可跳過，三種模式pageerror=0）、`docs/UX_REDESIGN_PROPOSAL.md`。未動index.html、未登記試驗、`is_holdout_consumed()`未觸碰。冒煙測試全通過。起初連不上github.com，重試後push成功（7164ac18）。交辦佇列還剩0條未開始。
 
 ## 2026-09-26T15:55（Taipei，第三十二輪，hypothesis_queue排程接續）— 本輪無新工作單位：
 開工讀`PENDING_QUEUE.md`：全檔0條`- [ ]`；29條`- [!]`逐項核對解除條件皆未達（金流一.4法人歷史仍16個交易日、今日週六無新交易日；H.一留給互動視窗、holdout已消耗未觸碰；資料.一後續等Cowork/總司令放行；其餘等總司令裁示／外部key）。凍結.二仍生效（「轉向.一」尚未寫「凍結.二解除」），依CLAUDE.md第十四節不登記新alpha試驗、不以新alpha候選補件。`git pull`本輪成功（Already up to date）。未碰holdout、未動凍結區與核心研究檔案；工作目錄殘留的data/、log類自動化變更非本輪產生，未納入commit。交辦佇列還剩0條未開始；等待總司令審閱：4件（`AWAITING_REVIEW.md`本輪未更動，與表格列數一致）。
