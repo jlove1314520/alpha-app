@@ -14272,10 +14272,39 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
     盤後之後，實際跟本機三支wrapper撞期的機率客觀上很低，可以先觀察
     是否真的發生過push-rejected才決定是否值得修。
   總司令尚未擇一，暫不實作，狀態維持現狀（方案C）等裁示。
-- [ ] **標.一** [開發] 三大法人資料信賴度標示——修.四修復的inst_trades
+- [x] **標.一** [開發] 三大法人資料信賴度標示——修.四修復的inst_trades
   在2026-08-21~09-26屬「中信賴度(交叉推論)」，App顯示這段期間三大法人
   資料時加註「此期間資料經修復，僅供參考」。研究上任何試驗用到這段
   資料一律排除。
+  **完成（互動視窗，2026-09-26）＋重要誠實揭露**：先查證實際受影響範圍
+  ——`research/data/daily_price_date_fix_applied_20260926_083405.json`的
+  `fetch_date_to_true_date.t86_cross_inferred`顯示真正的true_date範圍是
+  **2026-08-20~09-24**（裁示原文「2026-08-21~09-26」用的是fetch_date，
+  這裡改用更精確的true_date）。**查證發現：App目前顯示的「三大法人」資料
+  （`data/stock_detail.json`的`institutional`、`data/market_tw.json`的
+  `institutional_history`）完全不經過`alpha-data/alpha.db`的`inst_trades`
+  表**——那條路徑是`.github/scripts/fetch_market_tw.py`直接呼叫TWSE T86、
+  跑在GitHub Actions雲端，是獨立於`alpha-data`本機管線之外的第二條資料
+  管線（`alpha-data`目前定位是「Phase 2自動下單用的後端/歷史庫」，
+  見CLAUDE.md）。**也就是說本次修改不會讓App畫面出現任何看得到的變化**
+  ——不是沒做，是誠實記錄現況：目前沒有任何App功能會讀到這段被修復的
+  資料，所以沒有東西需要顯示標記。已做的事：①新增
+  `alpha-data/data_reliability.py`（`INST_TRADES_REPAIRED_START/END`
+  常數+`is_inst_trades_repaired_period()`/`inst_trades_reliability_note()`
+  /`exclude_inst_trades_repaired_period()`三個函式+`_self_test()`，
+  `python alpha-data/data_reliability.py`已PASS），把信賴度判定寫進
+  源頭共用模組，供(a)目前唯一實際會讀`inst_trades`的`alpha-data/
+  query.py`（人工CLI查詢）即時顯示，(b)未來若Phase 2的App功能或研究
+  改讀這張表，直接沿用不必重新調查。②`query.py::stock()`已接上
+  `inst_trades_reliability_note()`，實測`python query.py 2330`（2330最新
+  一筆inst_trades剛好落在2026-09-24，在受影響範圍內）正確印出「法人
+  （股）外資-4,667,832投信-1,287,718自營242,701（2026-09-24）　注意：
+  此期間資料經修復，僅供參考（三大法人日期為交叉推論，中信賴度）」。
+  ③研究排除：查證`research/`目錄下**沒有任何腳本讀取`alpha-data`的
+  `inst_trades`表**（`research/`一律走FinMind API，經grep確認0筆
+  匹配），故「研究試驗排除這段資料」目前同樣沒有實際呼叫端，
+  `exclude_inst_trades_repaired_period()`已備妥待未來使用，同一份
+  誠實揭露適用。
 - [x] **源.二** [情報] 主動ETF條款逐字查證(只讀條款不抓持股)——①群益/
   中信/第一金逐字讀使用條款中與程式讀取/重製/轉載有關條文，引用原文；
   第一金另讀/llms.txt。②查data.gov.tw是否有主動式ETF每日持股開放資料
