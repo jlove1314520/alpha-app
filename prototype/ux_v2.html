@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Alpha 介面改版原型（UX.一，僅供檢視，未影響現行 App）</title>
+<!-- 2026-09-26 UX.一 原型。只借鑑「首頁先講故事、再給資料」的概念，版面與程式碼皆自行撰寫，
+     不複製任何第三方網站的程式碼或素材。資料一律即時抓 FinMind 真實資料；抓不到就顯示
+     「查無資料＋原因」，絕不放假數字。不含登入／金流／推播。 -->
+<style>
+  /* ── 設計規範：全部走 CSS 變數，深色為預設，淺色由系統偏好或手動切換 ── */
+  :root{
+    --page:#0b0a09; --surface:#15130f; --surface-2:#1d1a14; --hairline:rgba(255,255,255,.08);
+    --ink:#f5f3ee; --ink-2:#c9c4ba; --ink-3:#8f897e;
+    --gold:#e9c98f; --gold-deep:#c9974a;
+    --up:#ff5257; --down:#24c98a;            /* 台股慣例：紅漲綠跌 */
+    --warn:#fab219;
+    --fs-xs:12px; --fs-sm:13.5px; --fs-md:15px; --fs-lg:18px; --fs-xl:26px; --fs-hero:32px;
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+    --r-sm:8px; --r-md:14px; --r-lg:20px;
+    --shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --page:#f6f3ec; --surface:#ffffff; --surface-2:#f0ece2; --hairline:rgba(0,0,0,.09);
+      --ink:#1d1a14; --ink-2:#4a453b; --ink-3:#6f695d;
+      --gold:#a5741f; --gold-deep:#8a5f14; --up:#d92d34; --down:#0d8f5f; --warn:#b07a00;
+      --shadow:0 6px 20px rgba(60,50,30,.12);
+    }
+  }
+  :root[data-theme="light"]{
+    --page:#f6f3ec; --surface:#ffffff; --surface-2:#f0ece2; --hairline:rgba(0,0,0,.09);
+    --ink:#1d1a14; --ink-2:#4a453b; --ink-3:#6f695d;
+    --gold:#a5741f; --gold-deep:#8a5f14; --up:#d92d34; --down:#0d8f5f; --warn:#b07a00;
+    --shadow:0 6px 20px rgba(60,50,30,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--page);color:var(--ink);font:var(--fs-md)/1.6 -apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+       padding:var(--sp-4) var(--sp-4) 80px;max-width:520px;margin:0 auto}
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-5)}
+  .brand{font-weight:700;letter-spacing:.02em}
+  .theme{background:var(--surface);color:var(--ink-2);border:1px solid var(--hairline);border-radius:999px;padding:6px 12px;font-size:var(--fs-xs)}
+  h1{font-size:var(--fs-hero);line-height:1.2;margin-bottom:var(--sp-3)}
+  h1 em{font-style:normal;color:var(--gold)}
+  .lead{color:var(--ink-2);margin-bottom:var(--sp-5)}
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:var(--sp-4);margin-bottom:var(--sp-4);box-shadow:var(--shadow)}
+  .card h2{font-size:var(--fs-sm);color:var(--ink-3);font-weight:600;margin-bottom:var(--sp-2)}
+  .bignum{font-size:var(--fs-xl);font-weight:700;font-variant-numeric:tabular-nums}
+  .chg{display:inline-block;margin-left:var(--sp-2);font-size:var(--fs-sm);font-variant-numeric:tabular-nums}
+  .up{color:var(--up)} .down{color:var(--down)}
+  .note{font-size:var(--fs-xs);color:var(--ink-3);margin-top:var(--sp-2)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);margin-top:var(--sp-3)}
+  .kv{background:var(--surface-2);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3)}
+  .kv b{display:block;font-size:var(--fs-md);font-variant-numeric:tabular-nums}
+  .kv span{font-size:var(--fs-xs);color:var(--ink-3)}
+  svg.chart{width:100%;height:120px;display:block;margin-top:var(--sp-3)}
+  .method h3{font-size:var(--fs-md);margin:var(--sp-3) 0 var(--sp-1)}
+  .method p,.method li{font-size:var(--fs-sm);color:var(--ink-2)}
+  .method ul{padding-left:1.2em}
+  /* 載入中骨架：無資料／載入中／失敗三種狀態各自有畫面 */
+  .skel{height:1em;border-radius:6px;background:linear-gradient(90deg,var(--surface-2),var(--hairline),var(--surface-2));background-size:200% 100%;animation:sh 1.4s linear infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+  .empty{padding:var(--sp-4);text-align:center;color:var(--ink-3);font-size:var(--fs-sm);border:1px dashed var(--hairline);border-radius:var(--r-md)}
+  /* 捲動淡入 */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,.9,.3,1)}
+  .reveal.in{opacity:1;transform:none}
+  .nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:var(--surface);border-top:1px solid var(--hairline);padding:10px 0 calc(10px + env(safe-area-inset-bottom));font-size:var(--fs-xs);color:var(--ink-3)}
+  .nav .on{color:var(--gold)}
+  /* 新手導覽（可跳過，記住看過） */
+  .tour{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:9}
+  .tour.show{display:flex}
+  .tour .box{background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:var(--sp-5);width:100%;max-width:520px}
+  .tour .row{display:flex;justify-content:space-between;margin-top:var(--sp-4)}
+  .tour button{border:0;border-radius:999px;padding:10px 18px;font-size:var(--fs-sm)}
+  .tour .skip{background:transparent;color:var(--ink-3)}
+  .tour .next{background:var(--gold);color:#1d1a14;font-weight:600}
+  /* 尊重使用者「減少動態效果」設定：所有動畫／過場一律關閉 */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">Alpha <span style="color:var(--ink-3);font-weight:400;font-size:var(--fs-xs)">原型 · 非現行 App</span></div>
+  <button class="theme" id="themeBtn" type="button">切換深／淺色</button>
+</div>
+
+<h1 class="reveal">先看懂一檔股票，<br><em>再決定要不要相信分數。</em></h1>
+<p class="lead reveal">Alpha 把公開資料整理成看得懂的圖與數字，並且每個分數都告訴你怎麼算、資料從哪來、哪裡不準。
+  這是研究與教育用途，<b>不是投資建議</b>。</p>
+
+<!-- 首屏：用一檔真實個股示範核心圖表（即時抓 FinMind，抓不到就誠實顯示原因） -->
+<div class="card reveal" id="demo">
+  <h2>示範：台積電 2330 近 60 個交易日收盤（真實資料）</h2>
+  <div id="demoBody"><div class="skel" style="width:40%;height:32px"></div><div class="skel" style="margin-top:12px;height:120px"></div></div>
+  <div class="note" id="demoSrc">資料來源：FinMind TaiwanStockPrice（盤後資料，非即時報價）</div>
+</div>
+
+<div class="card reveal method" id="method">
+  <h2>方法論（每個分數怎麼算）</h2>
+  <h3>資料從哪來</h3>
+  <p>台股：證交所／櫃買／期交所官方開放資料為主，FinMind 僅作歷史補充；美股：SEC EDGAR 財報。每張卡片都標示更新時間與來源。</p>
+  <h3>內行人一定會問：為什麼不是「越高分越該買」？</h3>
+  <ul>
+    <li>分數是把估值、成長、動能、籌碼等因子<b>排序</b>後的結果，只代表「在全市場相對位置」，不是預測。</li>
+    <li>排行榜尚未經過完整策略回測與樣本外驗證前，<b>不代表能贏大盤</b>；畫面上一律標示。</li>
+    <li>高分但「資料完整度」低的個股會變淡並標「資料稀疏」，分數僅供參考。</li>
+  </ul>
+  <h3>已知限制</h3>
+  <ul>
+    <li>美股回測存在存活者偏誤：已下市股（約 7.1%）沒有價格來源，尚未完全修正。</li>
+    <li>所有報價為盤後／延遲資料，不是即時成交價。</li>
+  </ul>
+</div>
+
+<div class="card reveal">
+  <h2>三種空畫面長這樣（範例）</h2>
+  <div class="empty">尚無交易紀錄。<br>串接券商或手動新增後，這裡會顯示本週損益。</div>
+  <div class="note">「載入中」用骨架條、「無資料」說明原因與下一步、「失敗」說明可重試——三者不混為一句話。</div>
+</div>
+
+<div class="nav"><span class="on">今日</span><span>市場</span><span>選股</span><span>交易</span><span>日誌</span><span>設定</span></div>
+
+<div class="tour" id="tour" role="dialog" aria-modal="true" aria-label="新手導覽">
+  <div class="box">
+    <div id="tourTxt" style="font-size:var(--fs-md)"></div>
+    <div class="row"><button class="skip" id="tourSkip" type="button">跳過（不再顯示）</button><button class="next" id="tourNext" type="button">下一步</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* 每一段各自 try/catch：一個區塊壞掉不外溢到其他區塊（CLAUDE.md 錯誤隔離原則） */
+  const $=id=>document.getElementById(id);
+  const log=(l,e)=>console.warn('[ux_v2]',l,e);
+
+  try{ // 主題：記住手動選擇
+    const saved=localStorage.getItem('ux_v2_theme'); if(saved)document.documentElement.dataset.theme=saved;
+    $('themeBtn').onclick=()=>{
+      const cur=document.documentElement.dataset.theme
+        ||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+      const nx=cur==='light'?'dark':'light';
+      document.documentElement.dataset.theme=nx; try{localStorage.setItem('ux_v2_theme',nx)}catch(e){log('theme-save',e)}
+    };
+  }catch(e){log('theme',e)}
+
+  try{ // 捲動淡入
+    const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  }catch(e){log('reveal',e);document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'))}
+
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function countUp(el,to,dec){ // 數字跳動；減少動態時直接顯示終值
+    const fmt=v=>v.toLocaleString('zh-TW',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+    if(reduce){el.textContent=fmt(to);return}
+    const t0=performance.now(),D=700;
+    (function step(t){const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,3);el.textContent=fmt(to*e);if(p<1)requestAnimationFrame(step)})(t0);
+  }
+
+  (async function demo(){ // 真實資料示範
+    const body=$('demoBody');
+    try{
+      const d=new Date();d.setDate(d.getDate()-120);
+      const s=d.toISOString().slice(0,10);
+      const r=await fetch('https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=2330&start_date='+s);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const j=await r.json();
+      const rows=(j.data||[]).slice(-60);
+      if(rows.length<2)throw new Error('回傳筆數不足（'+rows.length+'）');
+      const cl=rows.map(x=>x.close),last=cl[cl.length-1],prev=cl[cl.length-2];
+      const pct=(last/prev-1)*100;
+      const mn=Math.min(...cl),mx=Math.max(...cl);
+      const pts=cl.map((v,i)=>((i/(cl.length-1))*300).toFixed(1)+','+(110-((v-mn)/(mx-mn||1))*100).toFixed(1)).join(' ');
+      const up=pct>=0;
+      body.innerHTML='<div><span class="bignum" id="bn">0</span><span class="chg '+(up?'up':'down')+'">'+(up?'+':'')+pct.toFixed(2)+'%</span></div>'
+        +'<svg class="chart" viewBox="0 0 300 120" preserveAspectRatio="none" role="img" aria-label="台積電近60日收盤走勢">'
+        +'<polyline fill="none" stroke="var(--'+(up?'up':'down')+')" stroke-width="2" points="'+pts+'"/></svg>'
+        +'<div class="grid3"><div class="kv"><b>'+mx+'</b><span>60日最高</span></div><div class="kv"><b>'+mn+'</b><span>60日最低</span></div><div class="kv"><b>'+rows[rows.length-1].date.slice(5)+'</b><span>資料日</span></div></div>';
+      countUp($('bn'),last,last<1000?2:0);
+    }catch(e){
+      log('demo',e);
+      body.innerHTML='<div class="empty">目前抓不到示範資料：'+String(e.message||e).replace(/</g,'&lt;')+'。<br>可能是網路或 FinMind 額度限制，稍後重新整理即可。這裡不會顯示假數字。</div>';
+    }
+  })().catch(e=>log('demo-outer',e));
+
+  try{ // 新手導覽：可跳過、看過就記住
+    const steps=['① 今日：看自選股與大盤概況，資料為盤後／延遲。','② 選股：分數是相對排序，不是預測，先讀方法論。','③ 交易：目前只有介面規劃，沒有任何真實下單。'];
+    let i=0;const tour=$('tour');
+    const seen=()=>{try{return localStorage.getItem('ux_v2_tour_seen')==='1'}catch(e){return false}};
+    const done=()=>{tour.classList.remove('show');try{localStorage.setItem('ux_v2_tour_seen','1')}catch(e){log('tour-save',e)}};
+    const paint=()=>{$('tourTxt').textContent=steps[i];$('tourNext').textContent=i===steps.length-1?'完成':'下一步'};
+    $('tourNext').onclick=()=>{if(i>=steps.length-1)done();else{i++;paint()}};
+    $('tourSkip').onclick=done;
+    if(!seen()){paint();tour.classList.add('show')}
+  }catch(e){log('tour',e)}
+})();
+</script>
+</body>
+</html>
