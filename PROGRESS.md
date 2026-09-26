@@ -1,3 +1,14 @@
+## 2026-09-26（DevQueue自走cycle 20260926-084601，情報帽，登記.二 主動式ETF每日持股）
+
+等待總司令審閱：3件——`查.一`（date欄位系統性問題）、`考.一`（2007-2014單發檢定結案）沿用既有狀態；本輪新增`登記.二`，2026-09-26 08:5x完成、起算中，等裁示①資料取得路徑（書面詢問投信／人工下載）②是否授權純查證data.gov.tw。詳見`research/AWAITING_REVIEW.md`。
+
+**做了什麼**：只查證、只提案、只登記，未抓任何持股資料、未實作、未回測。產出`docs/ACTIVE_ETF_HOLDINGS_PROPOSAL.md`。
+**查證結論**：TWSE主動式ETF頁、TWSE OpenAPI（143端點，僅`/ETFReport/ETFRank`與ETF有關）、TPEx主動式ETF頁三者皆無每日持股；官方原始層在各投信官網，但七家皆未確認允許程式讀取（TWSE條款第6條明禁自動化下載；統一robots取不到、野村/復華連線失敗、TPEx robots被WAF 302擋——**未換UA繞過**；七家條款皆未逐字讀完）。判定「合規未確認」，非「資料不存在」，目前無合規可抓來源。
+**提案／登記**：App三項提案（持有此股的主動ETF＋加減碼、共識價帶須標VWAP推估、公司行動還原前置）資料源合規前全不開工；假設「一週內≥3檔主動ETF共同加碼」登記於文件第3節，**未進TRIALS_REGISTRY／HYPOTHESIS_QUEUE可執行區**（凍結.二＋2025-05起資料全在holdout內，禁回測）。EPS預估不列入。
+**[自行裁量]**：假設不放進HYPOTHESIS_QUEUE避免自走軌道誤撿；被WAF擋一律不繞過；條款多數來自搜尋摘要／小模型摘要，已在文件第5節揭露。
+**BLOCKED**：無（本項已完成；後續取得資料需總司令親自操作／裁示）。
+**檔案**：`docs/ACTIVE_ETF_HOLDINGS_PROPOSAL.md`（新）、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`PROGRESS.md`（純文件，無程式碼變更；`node scripts/smoke_test.mjs` exit=0，1~50項檢查全PASS、無uncaught error）。
+
 ## 2026-09-24（DevQueue自走cycle 20260924-230102，維運帽，重開機排程行為查證）
 
 等待總司令審閱：1件——`維運查核.重開機排程行為`，2026-09-24 23:0x完成、起算中，等裁示A（是否設Windows自動登入）與D（是否補跑漏掉的AlphaData日抓），詳見`research/AWAITING_REVIEW.md`。
