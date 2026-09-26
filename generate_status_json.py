@@ -1093,6 +1093,18 @@ def main():
         "todo": TODO,
         "known_limitations": KNOWN_LIMITATIONS,
     }
+    # 2026-09-26（警.一）：local_schedule_heartbeat 這個key是
+    # .github/workflows/local_schedule_watchdog.yml（雲端，每30分鐘）
+    # 呼叫 scripts/check_local_schedule_heartbeat.py 寫入的，這支腳本本身
+    # 不計算它。這裡整份覆寫前先讀舊檔把這個key保留下來，避免兩個寫入者
+    # 互相清空對方欄位（本機這支跑的時候，把雲端寫的心跳資訊蓋掉）。
+    if OUT_PATH.exists():
+        try:
+            prior = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+            if "local_schedule_heartbeat" in prior:
+                payload["local_schedule_heartbeat"] = prior["local_schedule_heartbeat"]
+        except Exception:  # noqa: BLE001 -- 舊檔壞掉就不保留，不讓這支也跟著炸
+            pass
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"寫入 {OUT_PATH}")
     print(f"latest_commit={payload['latest_commit']}，data_files={len(payload['data_files'])}筆，workflows={len(payload['workflows'])}筆")

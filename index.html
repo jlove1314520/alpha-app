@@ -1424,6 +1424,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="data-freshness-summary">檢查中…</div>
       <div id="data-freshness-list" style="margin-top:6px"></div>
       <div class="note" style="margin-top:6px">檢查時間：<b id="data-freshness-tm">--:--</b>。規則：盤中資料超過30分鐘沒更新、每日排程超過寬限3小時沒落地，就標紅「逾期」。標「本機」的項目只有你這台電腦開機且排程在跑才會更新。已知簡化：不扣國定假日，假日當天盤中項目會誤標逾期。</div>
+      <!-- 2026-09-26（警.一）：本機排程（DevQueue/馬拉松/假設佇列）停擺時，本機自己
+      連push都推不出去、無法自己通知任何人，靠雲端 .github/workflows/
+      local_schedule_watchdog.yml 每30分鐘從git commit歷史判定並寫回這裡。 -->
+      <div class="note" id="local-schedule-heartbeat-note" style="margin-top:6px">本機排程心跳：檢查中…</div>
     </div>
 
     <!-- 2026-09-06（P0 稽核.一）資料健康：把 scripts/data_audit.py 每晚跑出來的
@@ -7419,6 +7423,28 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const sum=document.getElementById('data-freshness-summary');
     if(sum)sum.innerHTML=badRows.length?`<b style="color:${FRESH_BAD_COLOR}">${badRows.length} 項逾期/無資料</b>：${badRows.map(r=>r.item.label).join('、')}`:`<b style="color:${FRESH_OK_COLOR}">全部正常</b>`;
     setTxt('data-freshness-tm',fmtTzMMDDHHMM(now,'Asia/Taipei'));
+    // 2026-09-26（警.一②）：本機排程停擺告警，資料來自
+    // scripts/check_local_schedule_heartbeat.py（雲端每30分鐘寫入STATUS.json）。
+    const hbNote=document.getElementById('local-schedule-heartbeat-note');
+    if(hbNote){
+      try{
+        const hb=statusDoc&&statusDoc.local_schedule_heartbeat;
+        if(!hb){
+          hbNote.innerHTML='本機排程心跳：讀不到（STATUS.json尚無此欄位，或讀取失敗）';
+        }else{
+          const mins=hb.devqueue&&hb.devqueue.minutes_since;
+          const at=hb.devqueue&&hb.devqueue.last_commit_at?fmtTzMMDDHHMM(new Date(hb.devqueue.last_commit_at),'Asia/Taipei'):'—';
+          if(hb.stalled){
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">疑似停擺</b>（DevQueue最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘，門檻${hb.stall_threshold_minutes}分鐘）`;
+          }else{
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_OK_COLOR}">正常</b>（DevQueue最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘）`;
+          }
+        }
+      }catch(e){
+        console.warn('[loadDataFreshness:heartbeat]',e);recordGlobalError('loadDataFreshness:heartbeat',e);
+        hbNote.innerHTML='本機排程心跳：顯示失敗（'+e.message+'）';
+      }
+    }
   }
   // 2026-08-25 新增，2026-08-28擴充：設定頁+首頁底部顯示 App 版本／Service
   // Worker 版本／SW 狀態，方便確認手機是不是真的更新到最新版（用手機開 App
@@ -7426,7 +7452,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-17.2317';
+  const APP_VERSION='2026-09-26.1641';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

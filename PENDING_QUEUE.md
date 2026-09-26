@@ -14223,12 +14223,55 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
   `assert_no_holdout_leakage()`內部新增一個前置身分檢查，正常（未違規）
   資料路徑不受影響（df不含VAL_END後資料時本來就不會raise，這條路徑
   完全沒變）。
-- [ ] **警.一** [維運] 本機停擺告警(核准E方向)——①新增GitHub Actions
+- [x] **警.一** [維運] 本機停擺告警(核准E方向)——①新增GitHub Actions
   排程(每30分鐘)：檢查最近一筆本機排程commit(IBKR quotes/DevQueue)
   時間，應運作時段超過60分鐘無新commit就讓job失敗(GitHub預設寄信給
   repo擁有者，免token)。②status.json寫入「本機排程最後活動時間」，
   App狀態列顯示。③另查結案.一的git鎖是否已裝進三支wrapper、audit_
   report.json排程是否走同一把鎖，沒有的話列修正方案等裁示。
+  **完成（互動視窗，2026-09-26）**：
+  ①新增`scripts/check_local_schedule_heartbeat.py`＋`.github/workflows/
+  local_schedule_watchdog.yml`（每30分鐘cron）。判定邏輯只看**DevQueue**
+  commit心跳（`git log`裡subject含「DevQueue cycle log 自動更新」的最新
+  一筆），超過60分鐘無新commit就讓job失敗（GitHub預設寄信給repo擁有者，
+  免token）。**[自行裁量]**：IBKR quotes只記錄最近一次commit時間，不納入
+  停擺判定——查證發現IBKR有兩個已知非故障空窗會讓「距今分鐘數」變很大
+  （盤外時段、IBKR Gateway每週日01:00 ET權杖過期需人工登入，見CLAUDE.md
+  「IBKR Gateway/TWS」段落），拿它當判定依據會製造大量假警報；DevQueue
+  已查證24/7每日都跑（含週末，2026-09-20週日仍有11次cycle commit），
+  是更穩定的心跳訊號。②`data/STATUS.json`新增`local_schedule_heartbeat`
+  欄位（含devqueue/ibkr_quotes各自的last_commit_sha/at/minutes_since、
+  stalled布林值）；同步修改`generate_status_json.py::main()`在整份覆寫前
+  保留舊檔這個key，避免本機排程（跑這支）與雲端watchdog互相清空對方欄位。
+  App設定頁「資料新鮮度」卡片新增「本機排程心跳」一行（`index.html`
+  `loadDataFreshness()`），顯示DevQueue最近commit時間+距今分鐘數，
+  stalled時標紅。冒煙測試：`node scripts/smoke_test.mjs`——48項全數PASS
+  （含改動到的第24項「設定頁資料新鮮度卡片」），exit 0，無累積uncaught
+  error。③查核結果：三支wrapper（`run-marathon-cycle.ps1`/
+  `run-dev-queue-cycle.ps1`/`run-hypothesis-queue-cycle.ps1`，實際路徑在
+  `C:\alpha\`，不在`alpha-app`內）**皆已**在git收尾段落呼叫
+  `research/git_op_lock.py`（結案.一方案甲），無缺口。`audit.yml`（每晚
+  寫`audit_report.json`）**沒有**使用同一把鎖，且**架構上不能直接共用**：
+  `git_op_lock.py`鎖的是本機檔案系統上的`.git_op.lock`，只對「同一台
+  Windows機器上競爭同一working directory」的行程有意義；`audit.yml`跑在
+  GitHub託管、每次全新checkout的Ubuntu runner，跟本機完全是不同的檔案
+  系統，無法共用同一把本機檔案鎖。真正的風險類別不同：`git_op_lock.py`
+  解決「同一台機器三支wrapper同時commit+pull+push造成的autostash衝突」，
+  `audit.yml`的風險是「雲端與本機幾乎同時各自push main」——此時GitHub會
+  拒絕後到的push（non-fast-forward），但`audit.yml`目前commit步驟**沒有
+  pull --rebase重試迴圈**（`market.yml`/`quotes.yml`/`news_events.yml`
+  都有，見CLAUDE.md第十節「副帶發現」，此為已知既有缺口，本次只是首次
+  提出具體修正方案，之前是「待另行評估」）。**修正方案（列出，不實作，
+  等總司令裁示採用哪個或維持現狀）**：
+  - 方案A（最小改動）：`audit.yml`的commit步驟比照`news_events.yml`加
+    `git pull --rebase --autostash`後再push，失敗才真正報錯——本次
+    新增的`local_schedule_watchdog.yml`已採用這個做法（見其commit步驟）。
+  - 方案B（更嚴謹）：把方案A的重試邏輯抽成`git_op_lock.py`旁的共用
+    shell片段，供所有workflow引用，避免每支workflow各自複製貼上同一段。
+  - 方案C（維持現狀）：`audit.yml`一天只跑一次、且排在`market.yml`
+    盤後之後，實際跟本機三支wrapper撞期的機率客觀上很低，可以先觀察
+    是否真的發生過push-rejected才決定是否值得修。
+  總司令尚未擇一，暫不實作，狀態維持現狀（方案C）等裁示。
 - [ ] **標.一** [開發] 三大法人資料信賴度標示——修.四修復的inst_trades
   在2026-08-21~09-26屬「中信賴度(交叉推論)」，App顯示這段期間三大法人
   資料時加註「此期間資料經修復，僅供參考」。研究上任何試驗用到這段

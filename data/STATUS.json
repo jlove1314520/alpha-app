@@ -1138,5 +1138,23 @@
     "scores.json（選股頁分數）2026-08-27新增GitHub Actions每日排程（research/generate_scores_live.py，market.yml），只讀repo內JSON、不依賴parquet/FinMind，不會再因為研究者本機沒開機而停擺——但這條JSON-only路徑覆蓋率上限約0.74（technical/analyst/catalyst三項恆缺），跟研究端手動執行（research/generate_scores_v2.py，因子較完整）互不覆蓋衝突，用meta.engine_version分辨這次是哪條管線產生的。",
     "本檔案（STATUS.json）由generate_status_json.py產生，APP_DATA_SOURCES那份面板對照表是人工核對、不是自動掃描——異動面板資料源時要記得同步更新腳本裡的常數，否則這份清單會跟實際程式碼不同步。",
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。"
-  ]
+  ],
+  "local_schedule_heartbeat": {
+    "checked_at": "2026-09-26T08:35:32.834612+00:00",
+    "stall_threshold_minutes": 60,
+    "devqueue": {
+      "last_commit_sha": "b43a77ec9d42b1a1b33ddb8c1e85065f2faea8e6",
+      "last_commit_at": "2026-09-26T08:01:02+00:00",
+      "minutes_since": 34.5
+    },
+    "ibkr_quotes": {
+      "last_commit_sha": "316718d350c5de68c6f5e40fdd03657f9ca76ce4",
+      "last_commit_at": "2026-09-25T23:56:38+00:00",
+      "minutes_since": 518.9,
+      "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring"
+    },
+    "stalled": false,
+    "judged_by": "devqueue",
+    "note": "本機排程最後活動時間；只看DevQueue的commit心跳判定是否停擺（理由與IBKR排除原因見本檔案docstring），偵測放在雲端是因為本機push被卡住時無法自己通知任何人。"
+  }
 }

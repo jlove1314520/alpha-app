@@ -1,0 +1,63 @@
+# 本機排程停擺告警（2026-09-26 總司令裁示【警.一】，方向E）
+#
+# 為什麼放在雲端：本機排程一旦被git卡住（例如stash-pop衝突），連push都推不出去，
+# 本機自己完全沒有管道通知任何人——這正是2026-09-26稽核發現「git stash-pop衝突
+# 卡住push約5小時」事故的根因類型。偵測本身不能依賴本機還活著。
+#
+# 判定邏輯與IBKR排除理由見 scripts/check_local_schedule_heartbeat.py docstring；
+# 這裡只做「每30分鐘跑一次、失敗就讓job變紅燈」——job變紅燈時GitHub會用內建的
+# repo擁有者email通知，不需要另外設定任何token/webhook。
+name: 本機排程停擺告警
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 兩條本機排程最密的時候約15分鐘一次commit；2000筆history已經是
+          # 遠高於「找得到最近一次DevQueue/IBKR commit」所需的量，這裡抓
+          # 更保守的深度，確保排程真的停擺數天時仍能找到「上一次還活著」
+          # 的時間點，而不是因為checkout深度不夠就誤判成「完全沒有紀錄」。
+          fetch-depth: 3000
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 檢查本機排程心跳（DevQueue commit時間），寫進STATUS.json
+        id: heartbeat
+        continue-on-error: true
+        run: python scripts/check_local_schedule_heartbeat.py
+
+      # 跟audit.yml同一套理由（if: always()）：即使上一步判定「停擺」而
+      # exit 1，STATUS.json裡的心跳欄位還是要落地，不能因為要讓job變紅燈
+      # 就放棄commit這次量到的診斷資訊——那樣總司令只看得到「紅燈」，看不到
+      # 「停了幾分鐘、上一次是幾點」這些真正有用的細節。
+      - name: Commit 心跳結果
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/STATUS.json
+          if git diff --cached --quiet; then
+            echo "心跳欄位與上次相同，不產生 commit"
+          else
+            git commit -m "本機排程停擺告警：更新 STATUS.json 心跳欄位（每30分鐘排程）"
+            git pull --rebase --autostash
+            git push
+          fi
+
+      - name: 停擺就讓這個 job 顯示紅燈（觸發GitHub預設email通知）
+        if: steps.heartbeat.outcome == 'failure'
+        run: |
+          echo "::error::本機排程疑似停擺超過60分鐘，詳見 data/STATUS.json 的 local_schedule_heartbeat 欄位"
+          exit 1
