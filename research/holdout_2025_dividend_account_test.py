@@ -386,7 +386,7 @@ def main(gates_only: bool = False):
     print(f"\n資料實際涵蓋的最新日 = {period_end}（不是今天，FinMind本身有發布落後）", flush=True)
 
     if gates_only:
-        print("\n=== 乾.一：G1~G4資料診斷（只印計數與日期，不含任何報酬/IR/MDD）===", flush=True)
+        print("\n=== 乾.一/乾.二：G1~G5資料診斷（只印計數與日期，不含任何報酬/IR/MDD）===", flush=True)
 
         # G1：額度相關失敗=0——迴圈設計上額度錯誤會立即raise中止整支腳本
         # （修.五第3點），能執行到這裡代表本次執行過程中沒有遇到任何額度
@@ -395,14 +395,14 @@ def main(gates_only: bool = False):
         print(f"G1 額度相關失敗 = {g1_quota_fail}（能執行到這一行本身就是證據——"
               f"遇到額度錯誤會立即raise中止整支腳本，不會落到這裡）", flush=True)
 
-        # G2：股利新鮮度——對每一檔可用股票，用已monkeypatch成uncapped版的
-        # factors_mod._dividend_yield_ttm_cash()（跟prepare_factors()內部
-        # 實際用的是同一個函式，不是另外重算一次)找出它在period_end之前
-        # （含）最新一筆2025年後的除息日；若這檔股票確實有這種事件，檢查
-        # 它自己資料裡最後一個交易日有沒有涵蓋到該除息日（涵蓋不到，代表
-        # 這檔的價格資料本身落後於除息日，因子不可能反映到這筆事件——
-        # 這是資料覆蓋率問題，不是修.五修的那個bug，但同樣值得攔下來看）。
-        g2_mismatches = []
+        # 乾.二背景：既有G2呼叫的是「已被monkeypatch的函式本身」，即使patch
+        # 沒生效（呼叫到的還是舊的capped版）G2也會回報0——它只證明「事件
+        # 存在」，不證明「這個事件真的進了prepare_factors()吐出來的d」。
+        # 拆成G2a(快取新鮮度)/G2b(patch是否真的生效)/G2c(G2b有沒有辨別力)
+        # 三層，只有三層都過才算真的驗證到「holdout路徑吃到uncapped股利」。
+        g2a_mismatches = []  # 快取新鮮度：股價最後日 < 除息日
+        g2b_mismatches = []  # patch生效檢查：d裡實際觀察到的ttm跟uncapped期望值對不上
+        g2c_effective = []   # 檢定力對照：X真的跟VAL_END前的舊值不同的檔數
         g2_checked = 0
         for sid, d in data.items():
             div_pit = factors_mod._dividend_yield_ttm_cash(sid, LOOKBACK_START)
@@ -412,15 +412,55 @@ def main(gates_only: bool = False):
             if ex_dates_2025.empty:
                 continue
             g2_checked += 1
-            latest_ex_date = ex_dates_2025["pit_date"].max()
+            latest_row = ex_dates_2025.sort_values("pit_date").iloc[-1]
+            E = latest_row["pit_date"]
+            X = float(latest_row["ttm_cash_dividend"])
             last_data_date = d["date"].max()
-            if last_data_date < latest_ex_date:
-                g2_mismatches.append({"stock_id": sid, "latest_ex_date": str(latest_ex_date),
-                                       "last_data_date": str(last_data_date)})
-        print(f"G2 股利新鮮度：檢查了{g2_checked}檔有2025+除息紀錄的可用股票，"
-              f"不一致{len(g2_mismatches)}檔（因子最後pit_date < 該除息日）", flush=True)
-        if g2_mismatches:
-            print(f"  不一致明細：{g2_mismatches}", flush=True)
+
+            # G2a：跟乾.一原版一樣，股價資料本身有沒有涵蓋到除息日。
+            if last_data_date < E:
+                g2a_mismatches.append({"stock_id": sid, "latest_ex_date": str(E),
+                                        "last_data_date": str(last_data_date)})
+                continue  # 裁示明文：股價最後日<E的股票跳過G2b（已在G2a列出）
+
+            # G2b：在d中取第一個date>=E的列，比對obs=f_dividend_yield_ttm×close
+            # 是否等於uncapped事件本身算出的X——這是真正檢查patch有沒有讓
+            # prepare_factors()的輸出改變的地方，不是再呼叫一次同一個函式。
+            on_or_after = d[d["date"] >= E].sort_values("date")
+            if on_or_after.empty:
+                g2b_mismatches.append({"stock_id": sid, "E": str(E), "X": X, "obs": None,
+                                        "reason": "d中找不到date>=E的列（不應該發生，因為last_data_date>=E已通過）"})
+                continue
+            row0 = on_or_after.iloc[0]
+            close0 = row0.get("close")
+            fdy0 = row0.get("f_dividend_yield_ttm")
+            obs = (float(fdy0) * float(close0)) if pd.notna(fdy0) and pd.notna(close0) else None
+            is_mismatch = (obs is None) or (abs(obs - X) > 1e-6 * max(1.0, abs(X)))
+            if is_mismatch:
+                g2b_mismatches.append({"stock_id": sid, "E": str(E), "X": X, "obs": obs})
+
+            # G2c：檢定力對照——同一檔股票在2024-12-31(或之前最後一個交易日)
+            # 的ttm值，是不是真的跟X不同。全部都相同就代表G2b測不出patch
+            # 有沒有生效（capped/uncapped剛好算出一樣的值，或patch根本沒動）。
+            pre_2025 = d[d["date"] <= "2024-12-31"].sort_values("date")
+            if not pre_2025.empty:
+                row_pre = pre_2025.iloc[-1]
+                fdy_pre = row_pre.get("f_dividend_yield_ttm")
+                close_pre = row_pre.get("close")
+                pre_ttm = (float(fdy_pre) * float(close_pre)) if pd.notna(fdy_pre) and pd.notna(close_pre) else None
+                if pre_ttm is None or abs(pre_ttm - X) > 1e-6 * max(1.0, abs(X)):
+                    g2c_effective.append(sid)
+
+        print(f"G2a 快取新鮮度：檢查了{g2_checked}檔有2025+除息紀錄的可用股票，"
+              f"不一致{len(g2a_mismatches)}檔（股價最後日 < 除息日）", flush=True)
+        if g2a_mismatches:
+            print(f"  G2a不一致明細：{g2a_mismatches}", flush=True)
+        print(f"G2b patch生效檢查：不一致{len(g2b_mismatches)}檔"
+              f"（d實際觀察值obs跟uncapped期望值X對不上，須=0）", flush=True)
+        if g2b_mismatches:
+            print(f"  G2b不一致明細：{g2b_mismatches}", flush=True)
+        print(f"G2c 檢定力對照：{len(g2c_effective)}檔的X真的不同於VAL_END前的舊值"
+              f"（須>0，=0代表G2b沒有辨別力，測不出patch有沒有生效）", flush=True)
 
         # G3：可用檔數/價格失敗檔數/因子失敗檔數（附失敗原因分類）
         print(f"G3 可用檔數={len(data)}　價格失敗檔數={n_price_fail}　"
@@ -429,23 +469,60 @@ def main(gates_only: bool = False):
         # G4：資料實際涵蓋到的最新交易日
         print(f"G4 資料實際涵蓋到的最新交易日 = {period_end}", flush=True)
 
-        gates_pass = (g1_quota_fail == 0) and (len(g2_mismatches) == 0)
+        # G5：股價截止日分佈——用all_dates（本次載入的全部股票聯集出的交易日
+        # 曆，第4步已算過）找period_end往前數10個「觀察到的交易日」的位置，
+        # 早於這個位置的股票視為「最後日明顯落後period_end」。
+        last_dates_per_stock = {sid: d["date"].max() for sid, d in data.items()}
+        sorted_last_dates = sorted(last_dates_per_stock.values())
+        g5_min = sorted_last_dates[0]
+        g5_median = sorted_last_dates[len(sorted_last_dates) // 2]
+        g5_max = sorted_last_dates[-1]
+        try:
+            period_end_idx = all_dates.index(period_end)
+            cutoff_idx = max(0, period_end_idx - 10)
+            g5_cutoff_date = all_dates[cutoff_idx]
+        except ValueError:
+            g5_cutoff_date = period_end  # 理論上period_end一定在all_dates裡（它本身就是從all_dates算出來的）
+        g5_stale = [{"stock_id": sid, "last_data_date": str(dt)}
+                    for sid, dt in last_dates_per_stock.items() if dt < g5_cutoff_date]
+        g5_stale_pct = (len(g5_stale) / len(data) * 100.0) if data else 0.0
+        print(f"G5 股價截止日分佈：最小={g5_min}　中位數={g5_median}　最大={g5_max}"
+              f"　10個交易日前的門檻日={g5_cutoff_date}"
+              f"　落後檔數={len(g5_stale)}/{len(data)}（{g5_stale_pct:.1f}%，須≤5%）", flush=True)
+        if g5_stale:
+            print(f"  G5落後清單：{g5_stale}", flush=True)
+
+        gates_pass = (
+            g1_quota_fail == 0
+            and len(g2a_mismatches) == 0
+            and len(g2b_mismatches) == 0
+            and len(g2c_effective) > 0
+            and g5_stale_pct <= 5.0
+        )
         gates_out = {
             "generated_at": pd.Timestamp.now().isoformat(),
             "G1_quota_related_failures": g1_quota_fail,
-            "G2_dividend_freshness": {"checked": g2_checked, "mismatches": g2_mismatches},
+            "G2a_cache_freshness": {"checked": g2_checked, "mismatches": g2a_mismatches},
+            "G2b_patch_effective_check": {"mismatches": g2b_mismatches},
+            "G2c_detection_power": {"n_effective": len(g2c_effective), "stock_ids": g2c_effective},
             "G3_counts": {"usable": len(data), "price_fail": n_price_fail,
                           "factor_fail": n_factor_fail, "factor_fail_reasons": factor_fail_reasons},
             "G4_latest_covered_trading_date": period_end,
+            "G5_price_cutoff_distribution": {
+                "min": str(g5_min), "median": str(g5_median), "max": str(g5_max),
+                "cutoff_10_trading_days_before_period_end": str(g5_cutoff_date),
+                "n_stale": len(g5_stale), "n_total": len(data), "stale_pct": round(g5_stale_pct, 2),
+                "stale_list": g5_stale,
+            },
             "gates_pass": gates_pass,
-            "note": "乾.一：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。"
+            "note": "乾.一/乾.二：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。"
                     "gates_pass為True僅代表資料層面可以放行，仍須由Cowork核對後"
                     "才能執行正式回測，本腳本本身不會自動接著跑。",
         }
         GATES_JSON.parent.mkdir(parents=True, exist_ok=True)
         GATES_JSON.write_text(json.dumps(gates_out, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
         print(f"\n已寫入 {GATES_JSON}", flush=True)
-        print(f"\n**乾.一結果：{'gates_pass=True，資料層面可以放行' if gates_pass else 'gates_pass=False，尚不可放行'}**"
+        print(f"\n**乾.一/乾.二結果：{'gates_pass=True，資料層面可以放行' if gates_pass else 'gates_pass=False，尚不可放行'}**"
               f"——停在這裡，等Cowork核對後再另行放行正式回測。", flush=True)
         return gates_out
 
