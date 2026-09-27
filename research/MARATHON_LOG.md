@@ -1,5 +1,25 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-27T20:56（Taipei，hypothesis_queue排程接續，第十四輪）— 開工先讀
+`PENDING_QUEUE.md`：`- [ ]`項0條，`- [!]`項15條，逐一略讀查無與本track相關
+的新解除條件。轉回本track自己的#82，嘗試接續上一輪未解決的
+`yuantaetfs.com`頁面編碼異常診斷，但上一輪未留下確切URL（`MARATHON_LOG.md`
+/`HYPOTHESIS_QUEUE.md`皆只寫站台名稱，未記完整頁面路徑），本輪猜測一個
+候選URL（`/product/detail/0050/Fund_QUOTE`）得到404，判斷繼續盲猜URL屬
+低效益且本輪預算已相對吃緊，**不繼續猜測**，如實記錄「上一輪應留完整URL
+供接續而未留，屬可補的流程缺口」。**本輪未新增任何WebSearch查詢、未進入
+回測、未修改`research/backtest/`／`validation`／`adjust.py`／`pit.py`／
+`trial_registry.py`（CLAUDE.md十三節單一寫入者，`git status`確認無這些
+路徑的未commit變更）**。`is_holdout_consumed()`本輪查證為`True`（延續
+2026-09-26守.一裁示後`#400`一次性解鎖的既定狀態，非本輪造成，本輪工作
+不在`ALLOWED_HOLDOUT_READERS`呼叫鏈上）。累計交叉驗證進度不變：仍8/12筆
+完整，剩餘4筆（2016-12/2018-03/2018-06/2018-12）不變。**交辦佇列還剩0條
+未開始**。CLAUDE.md「十四、凍結.二」仍生效中（`轉向.一`尚未有裁示結果），
+本輪未新增任何alpha試驗、未進入回測，符合凍結規則。**下一輪建議**：接續
+探索前先在`HYPOTHESIS_QUEUE.md`本條目補記上一輪`yuantaetfs.com`嘗試的
+完整URL（若上一輪執行者能在下次輪到時回頭補），或改走`taiwanindex.com.tw`
+URL枚舉路徑（上上輪建議、本輪因預算考量未執行）。
+
 ## 2026-09-27T19:0x（Taipei，hypothesis_queue排程接續，第十三輪）— 開工先讀
 `PENDING_QUEUE.md`：`- [ ]`項0條，`- [!]`項15條，逐一略讀查無與本track相關
 的新解除條件。轉回本track自己的#82，本輪改走上一輪建議的替代路徑（不再
