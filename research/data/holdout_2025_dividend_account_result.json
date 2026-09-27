@@ -1,0 +1,150 @@
+{
+  "generated_for": "H.一（2026-09-26裁示，TRIALS_LEDGER#400）",
+  "period": [
+    "2025-01-01",
+    "2026-09-24"
+  ],
+  "n_months": 21,
+  "n_common_stock_universe": 251,
+  "n_usable_data": 214,
+  "stock_leg": {
+    "return_pct": -12.31,
+    "mdd_pct": -20.32,
+    "n_trades": 150,
+    "ir_annualized": -0.46886474929900684,
+    "ir_daily": -0.02953570298023376,
+    "beta_dimson": 0.11069508532120119,
+    "alpha_ann_pct": -7.165755985645728,
+    "alpha_pvalue_reported_not_gating": 0.5597939071615652,
+    "n_obs": 414,
+    "benchmark_0050_return_pct": -39.66
+  },
+  "account_70_30": {
+    "return_pct": -7.93,
+    "mdd_pct": -14.34
+  },
+  "reference_2007_2014_account_7030_mechanically_computed_not_a_gate": {
+    "stock_leg_return_pct": 203.87,
+    "stock_leg_mdd_pct": -53.72,
+    "account_70_30_return_pct": 132.43,
+    "account_70_30_mdd_pct": -40.4,
+    "note": "機械式重現考.一#399的股票部位equity_curve(確定性重現既有結果，非新試驗)，套用同一套70/30帳戶模擬邏輯，僅供參考不作H.一判準。"
+  },
+  "monthly_table": [
+    {
+      "month": "2025-01",
+      "stock_leg_return_pct": -0.62,
+      "account_return_pct": -0.41
+    },
+    {
+      "month": "2025-02",
+      "stock_leg_return_pct": 6.6,
+      "account_return_pct": 4.62
+    },
+    {
+      "month": "2025-03",
+      "stock_leg_return_pct": -3.98,
+      "account_return_pct": -2.78
+    },
+    {
+      "month": "2025-04",
+      "stock_leg_return_pct": -8.23,
+      "account_return_pct": -5.63
+    },
+    {
+      "month": "2025-05",
+      "stock_leg_return_pct": 0.11,
+      "account_return_pct": 0.11
+    },
+    {
+      "month": "2025-06",
+      "stock_leg_return_pct": -1.73,
+      "account_return_pct": -1.18
+    },
+    {
+      "month": "2025-07",
+      "stock_leg_return_pct": 0.47,
+      "account_return_pct": 0.36
+    },
+    {
+      "month": "2025-08",
+      "stock_leg_return_pct": 1.95,
+      "account_return_pct": 1.39
+    },
+    {
+      "month": "2025-09",
+      "stock_leg_return_pct": -1.61,
+      "account_return_pct": -1.1
+    },
+    {
+      "month": "2025-10",
+      "stock_leg_return_pct": 2.74,
+      "account_return_pct": 1.98
+    },
+    {
+      "month": "2025-11",
+      "stock_leg_return_pct": -5.1,
+      "account_return_pct": -3.59
+    },
+    {
+      "month": "2025-12",
+      "stock_leg_return_pct": 0.64,
+      "account_return_pct": 0.48
+    },
+    {
+      "month": "2026-01",
+      "stock_leg_return_pct": 1.59,
+      "account_return_pct": 1.15
+    },
+    {
+      "month": "2026-02",
+      "stock_leg_return_pct": 1.88,
+      "account_return_pct": 1.33
+    },
+    {
+      "month": "2026-03",
+      "stock_leg_return_pct": -1.22,
+      "account_return_pct": -0.82
+    },
+    {
+      "month": "2026-04",
+      "stock_leg_return_pct": 2.41,
+      "account_return_pct": 1.71
+    },
+    {
+      "month": "2026-05",
+      "stock_leg_return_pct": 2.41,
+      "account_return_pct": 1.71
+    },
+    {
+      "month": "2026-06",
+      "stock_leg_return_pct": -1.51,
+      "account_return_pct": -1.03
+    },
+    {
+      "month": "2026-07",
+      "stock_leg_return_pct": -7.91,
+      "account_return_pct": -5.53
+    },
+    {
+      "month": "2026-08",
+      "stock_leg_return_pct": 0.84,
+      "account_return_pct": 0.62
+    },
+    {
+      "month": "2026-09",
+      "stock_leg_return_pct": -1.42,
+      "account_return_pct": -0.97
+    }
+  ],
+  "gates": {
+    "gate1_ir_direction_positive": false,
+    "gate2_account_mdd_over_neg50": true,
+    "overall_verdict": "FAIL"
+  },
+  "rf_fallback_months": [
+    "2026-09"
+  ],
+  "power_caveat": "期間約21個月，事前宣告檢定力不足以證明顯著，本結果定位為一致性檢查，不是統計顯著性證明。",
+  "data_limitation": "holdout期完全無yfinance可用（yf_price_client.py同樣被cap在VAL_END），純FinMind覆蓋率天生低於考.一的2007-2014段。"
+}
