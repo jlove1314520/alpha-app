@@ -594,6 +594,54 @@ def main(gates_only: bool = False):
               f"——停在這裡，等Cowork核對後再另行放行正式回測。", flush=True)
         return gates_out
 
+    # ── G7（2026-09-27總司令裁示【放.一】第零點）：正式回測開跑前最後一道
+    # 檢查——確認三條「策略本身以外、composite/backtest都要依賴」的基準
+    # 序列本身有沒有跟上H1_PERIOD_END，不然即使G1~G6全過，回測算出來的
+    # IR/alpha/帳戶MDD還是會因為基準序列本身斷尾而失真（例如0050基準
+    # 序列停在9月初，IR比較的分母就少了最後三週的真實波動）。必須在
+    # 「即將執行H.一正式回測」那行之前完成，不過就中止——這裡就是那道
+    # 防線，任一不符不得自行force_refresh後接著跑，必須先停下回報。
+    rf_monthly = load_risk_free_rate_series()
+    g7_checks = {
+        "zero050_series": {
+            "earliest": str(zero050_series.index.min()), "latest": str(zero050_series.index.max()),
+            "count": int(len(zero050_series)), "pass": str(zero050_series.index.max()) >= H1_PERIOD_END,
+        },
+        "market_df": {
+            "earliest": str(market_df["date"].min()), "latest": str(market_df["date"].max()),
+            "count": int(len(market_df)), "pass": str(market_df["date"].max()) >= H1_PERIOD_END,
+        },
+        "rf_monthly": {
+            "earliest": str(rf_monthly["date"].min()), "latest": str(rf_monthly["date"].max()),
+            "count": int(len(rf_monthly)),
+            "pass": bool(((rf_monthly["date"].dt.year == 2026) & (rf_monthly["date"].dt.month == 9)).any()),
+        },
+    }
+    print("\n=== G7：正式回測開跑前基準序列新鮮度檢查 ===", flush=True)
+    for name, c in g7_checks.items():
+        print(f"  {name}：最早={c['earliest']}　最新={c['latest']}　筆數={c['count']}"
+              f"　{'PASS' if c['pass'] else 'FAIL'}", flush=True)
+    g7_pass = all(c["pass"] for c in g7_checks.values())
+
+    # G7結果無論成敗都併入h1_gates.json（讀已有檔案，只更新這一個key，
+    # 不動乾.一/乾.二/乾.三既有的G1~G6欄位）。
+    try:
+        existing_gates = json.loads(GATES_JSON.read_text(encoding="utf-8")) if GATES_JSON.exists() else {}
+    except Exception:  # noqa: BLE001
+        existing_gates = {}
+    existing_gates["G7_benchmark_freshness"] = {
+        "checked_at": pd.Timestamp.now().isoformat(), "h1_period_end": H1_PERIOD_END,
+        "checks": g7_checks, "g7_pass": g7_pass,
+    }
+    GATES_JSON.parent.mkdir(parents=True, exist_ok=True)
+    GATES_JSON.write_text(json.dumps(existing_gates, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    print(f"已寫入 {GATES_JSON}（G7_benchmark_freshness）", flush=True)
+
+    if not g7_pass:
+        print("\n**G7未通過，依裁示【放.一】零：立即中止，不執行正式回測。**"
+              "不得自行force_refresh基準序列後接著跑，回報等Cowork裁示。", flush=True)
+        return {"aborted": True, "reason": "G7_benchmark_freshness_failed", "g7_checks": g7_checks}
+
     # ── 5. 股票部位：dividend_yield_portfolio_v1，參數與考.一完全相同 ──
     signal_fn = div_mod.make_signal_fn(industry_map, liquidity)
     cfg = BacktestConfig(start_date=PERIOD_START, end_date=period_end,
@@ -605,7 +653,6 @@ def main(gates_only: bool = False):
     stock_eq = result.equity_curve
 
     # ── 6. 帳戶層級70/30 ──
-    rf_monthly = load_risk_free_rate_series()
     account_eq = simulate_account(stock_eq, rf_monthly, STOCK_WEIGHT, rebalance_every_n_days=REBALANCE_DAYS)
 
     # ── 7. 統計量 ──

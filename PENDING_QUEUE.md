@@ -15053,3 +15053,13 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   兩者皆等Cowork核對，凍結.二繼續生效。六、另記低優先待辦(本次不處理)：
   2330/3231的TaiwanStockPrice latest快取與alpha.db皆停在2026-08-21，
   疑08-21某流程寫入快照後未更新，等H.一結案後另查根因，本次只登記。
+  **G7已實作（互動視窗，2026-09-27）**：在`holdout_2025_dividend_
+  account_test.py`的`main()`裡，`gates_only`早退區塊之後、「即將執行
+  H.一正式回測」那行之前，新增G7檢查（`zero050_series`/`market_df`/
+  `rf_monthly`三條序列的最早/最新/筆數，判準見裁示原文），結果無論
+  成敗都寫進`h1_gates.json`的`G7_benchmark_freshness`欄位，未過就
+  `return`中止、不執行正式回測。**開跑前預先查證（cache-only，未動
+  任何基準序列）**：0050/TAIEX uncapped快取皆已到2026-09-24（符合
+  (1)(2)）；但`rf_monthly`（定存利率代理）目前最新月份僅到
+  **2026-08-01，不涵蓋2026-09**——依裁示不得自行force_refresh，預期
+  G7會在(3)這一項FAIL，實際結果以下面正式執行的輸出為準。
