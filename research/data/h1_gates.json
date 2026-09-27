@@ -215,5 +215,30 @@
   "G6_dividend_factor_skipped": {},
   "other_factor_warning_count": 0,
   "gates_pass": true,
-  "note": "乾.一/乾.二/乾.三：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。gates_pass為True僅代表資料層面可以放行，仍須由Cowork核對後才能執行正式回測，本腳本本身不會自動接著跑。"
+  "note": "乾.一/乾.二/乾.三：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。gates_pass為True僅代表資料層面可以放行，仍須由Cowork核對後才能執行正式回測，本腳本本身不會自動接著跑。",
+  "G7_benchmark_freshness": {
+    "checked_at": "2026-09-27T09:51:41.031171",
+    "h1_period_end": "2026-09-24",
+    "checks": {
+      "zero050_series": {
+        "earliest": "2003-06-30",
+        "latest": "2026-09-24",
+        "count": 5719,
+        "pass": true
+      },
+      "market_df": {
+        "earliest": "2024-01-02",
+        "latest": "2026-09-24",
+        "count": 662,
+        "pass": true
+      },
+      "rf_monthly": {
+        "earliest": "2001-01-01 00:00:00",
+        "latest": "2026-08-01 00:00:00",
+        "count": 308,
+        "pass": false
+      }
+    },
+    "g7_pass": false
+  }
 }
