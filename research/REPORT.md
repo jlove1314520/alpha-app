@@ -2662,3 +2662,15 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - 觀察（如實記錄，未動）：`AWAITING_REVIEW.md`「等待中」表格核對11件，與表頭一致，本輪未變動，皆為等Cowork/總司令裁示項目，非FUT軌可推進。
 - 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 等待總司令審閱：11件（查.一daily_price日期欄位／考.一2007-2014單發檢定／登記.二主動式ETF／資料源.主動ETF／源.二主動ETF條款／UX.一介面改版／查.一排程健康診斷／乾.三看門狗健檢／驗.五+修.六基準汙染診斷／紙.一70/30基礎設施／查.二放行TPEx補齊，完整見`AWAITING_REVIEW.md`）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：依輪替下一輪選US軌（round641=09-25 00:3x，三軌中最舊）；凍結.二在轉向.一結果登記前不解除，不補新alpha試驗。
+
+---
+## 第644輪 · 2026-09-27T16:3x+08:00 · US · 維運帽：核對交辦佇列與阻塞項、確認互動視窗已同步修正AWAITING_REVIEW.md計數落差、凍結.二下查無可推進新工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260927-163037`）。三軌時間戳：TW round642=09-27 14:3x／FUT round643=09-27 15:3x／**US round641=09-25 00:3x（最舊）**——依輪替選US。
+- 核心查證：`PENDING_QUEUE.md` `grep -c "^- \[ \]"`=0（無未開始交辦項）、`grep -c "^- \[!\]"`=40條（較round643的39條多1條，來自互動視窗新增「查.三＋清.一」後又標`[x]`結案，淨值變動屬正常軌跡），逐一核對阻塞項開頭標記均未到解除時間。`data/rate_limit_state.json`確認FinMind`blocked_until`=2026-09-27T08:22:52 UTC，本輪16:31台北（08:31 UTC）查詢時**額度已解除約9分鐘**，但無待續抓的資料抓取工作（`資料.一`／`閘門.一`已於round640完成300/300）。
+- 意外發現並確認已由他方修正（如實記錄，非本輪動作）：開工簡報顯示`research/AWAITING_REVIEW.md`「等待中（目前：11件）」與實際表格列數13列不符（互動視窗於16:16~16:31完成「查.三＋清.一」合併裁示並push，新增2列但表頭未同步）——本輪`git log -- research/AWAITING_REVIEW.md`核對確認互動視窗已在commit`20c4585b`（16:32:17）自行修正為「13件」，與13列表格一致，本輪到達時已無需再修。
+- 核對`凍結.二`允許的四類工作現況：稽核重跑／驗.二重跑已於先前輪次全部完成並登記；資料抓取（`資料.一`/`閘門.一`）已完成300/300；工具修正（修.三、修.六）已由互動視窗commit。US軌本身無`#49`/`#51`/`#52`以外的結構性優勢候選可開新方向，`凍結.二`期間本來就不得開新alpha試驗。`#50`tick累積`ls research/data/ticks/*.parquet`實測仍13/20（無新增），依裁示不重複回報細節。`run_detached.py status`：running=0（162筆歷史，無job待收成）。
+- 驗證：`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（402列，本輪純查證未新增判定）；`validation/holdout.py::is_holdout_consumed()`讀取為`True`（H.一單次解鎖已於09-27消耗，非本輪新增動作，僅讀取核對）。
+- 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、`trial_registry.py --check`、`ls`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- **本輪誠實結論**：`凍結.二`允許的四類工作皆已完成或無新內容，`AWAITING_REVIEW.md`計數落差已由互動視窗自行修正、本輪到達時已一致，US軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗。
+- 等待總司令審閱：13件（與`AWAITING_REVIEW.md`「等待中」表格列數一致，完整清單見該檔案；本輪較round643多列出「查.三」「清.一」兩項，皆為互動視窗剛完成、停下等Cowork核對的項目）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：依輪替下一輪選TW軌（round642=09-27 14:3x，三軌中最舊）；凍結.二在轉向.一結果登記前不解除，不補新alpha試驗。
