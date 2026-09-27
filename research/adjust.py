@@ -73,6 +73,18 @@ df()`／`_combine_adjustment_events()`。
 `h1_benchmark_contamination_diagnosis.json`供後續查證，不得誤以為
 本次連這個問題都一併解決了。
 
+**2026-09-27查.二後續查證（仍未修改公式，只是證據更完整）**：查證台股
+官方公開資訊觀測站現金增資公告的實際用語慣例（例如個股公告原文「每仟股
+得認購34.61290969股」「每仟股得認購76.90883104股」），數字量級跟本欄位
+異常值（16.19、19.74）同一個數量級，強烈懷疑`CashIncreaseSubscriptionRate`
+的真實單位是「每仟股認購股數」，換算成跟`stock_ratio`同尺度的「每一股
+認股比率」需要**除以1000**（例：16.195151→0.016195151，即每股約1.62%，
+數量級跟`stock_ratio`常見範圍相符，遠比原始16.195151合理）。**這是一個
+有實際官方公告用語佐證、量級吻合的強假設，但不是FinMind官方文件白紙
+黑字寫明的定義**，依「不得猜換算比例」的紀律，**本輪依然不修改公式**，
+只把這個更完整的證據記在這裡，供總司令/Cowork裁示是否採用「除以1000」
+這個換算後再動手改。
+
 **2026-09-23 fix (資料.零稽核):** both upstream sources occasionally hand
 back a non-positive close that is not a real price:
 - FinMind's raw TaiwanStockPrice reports `close=0.0` on zero-volume days for
@@ -357,21 +369,40 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     return out
 
 
-ANOMALY_RETURN_THRESHOLD_PCT = 11.0  # 修.六第三點：跟驗.五的掃描門檻一致
+ANOMALY_RETURN_THRESHOLD_PCT = 11.0  # ⚠️2026-09-27查.二後已改為日期相依門檻
+# （見下方ANOMALY_RETURN_THRESHOLD_PCT_BEFORE_REGIME_CUT/_AFTER），這個舊
+# 常數保留供其他模組/既有測試引用單一數字時的相容性，本函式內部已不再
+# 直接使用它判斷異常，改呼叫_anomaly_threshold_pct()。
+ANOMALY_REGIME_CUT = "2015-06-01"  # 台股單日漲跌幅限制從±7%放寬到±10%的生效日
+ANOMALY_RETURN_THRESHOLD_PCT_BEFORE_REGIME_CUT = 7.5  # 查.二：±7%限制+安全margin
+ANOMALY_RETURN_THRESHOLD_PCT_AFTER_REGIME_CUT = 10.5  # 查.二：±10%限制+安全margin
 ANOMALY_MIN_ROWS_AFTER_LISTING = 5
 ANOMALY_LOG_PATH = Path(__file__).parent / "data" / "adjustment_anomaly_warnings.jsonl"
 
 
+def _anomaly_threshold_pct(date_str: str) -> float:
+    """日期相依的異常門檻（查.二2026-09-27裁示，取代修.六原本單一11%門檻）：
+    2015-06-01前台股單日漲跌幅限制為±7%，之後放寬為±10%——用單一11%門檻
+    掃描2015-06-01前的資料會系統性漏掉「7%~11%之間」這段其實已經超限、
+    理論上不該發生的真異常（例如興櫃期間無漲跌幅限制產生的假訊號）。改用
+    限制值+0.5個百分點的安全margin，不緊貼理論上限（避免正常的漲跌停
+    邊界值因為浮點/複權誤差被誤判)，也不放到跟舊門檻一樣寬而失去日期
+    相依門檻的意義。"""
+    return ANOMALY_RETURN_THRESHOLD_PCT_BEFORE_REGIME_CUT if date_str < ANOMALY_REGIME_CUT \
+        else ANOMALY_RETURN_THRESHOLD_PCT_AFTER_REGIME_CUT
+
+
 def check_adjusted_series_anomalies(df: pd.DataFrame, stock_id: str) -> list[dict]:
-    """修.六第三點（2026-09-27裁示）永久閘門：任何還原價序列出現單日
-    |報酬|>11%（新上市5日內除外）即列入警告清單。**這是偵測器本身，
-    依CLAUDE.md十二節『守門員自己的失敗只能降級成警告，不得中斷被監控
-    的流程』原則設計——刻意包在最外層try/except，任何內部錯誤都只印
-    警告、回傳空list，絕不讓呼叫`adjusted_price_series()`的任何排程
-    因為這個附加檢查而中斷。**這支只負責『偵測並回傳』，不負責『寫進
-    STATUS.json』（那是另一層彙整的責任，見`_append_anomaly_log()`與
-    `scripts/check_local_schedule_heartbeat.py`的docstring說明，目前
-    尚未接上任何排程，如實記錄現況）。"""
+    """修.六第三點（2026-09-27裁示）永久閘門，**查.二（同日稍後裁示）已將
+    門檻改為日期相依**：任何還原價序列出現單日|報酬|超過當日對應門檻
+    （2015-06-01前±7.5%、之後±10.5%，見`_anomaly_threshold_pct()`），
+    新上市5日內除外，即列入警告清單。**這是偵測器本身，依CLAUDE.md十二節
+    『守門員自己的失敗只能降級成警告，不得中斷被監控的流程』原則設計——
+    刻意包在最外層try/except，任何內部錯誤都只印警告、回傳空list，絕不
+    讓呼叫`adjusted_price_series()`的任何排程因為這個附加檢查而中斷。**
+    這支只負責『偵測並回傳』，不負責『寫進STATUS.json』（那是另一層彙整
+    的責任，見`_append_anomaly_log()`與`scripts/check_local_schedule_
+    heartbeat.py`的docstring說明，目前尚未接上任何排程，如實記錄現況）。"""
     try:
         if df.empty or "adj_close" not in df.columns or len(df) <= ANOMALY_MIN_ROWS_AFTER_LISTING:
             return []
@@ -380,9 +411,11 @@ def check_adjusted_series_anomalies(df: pd.DataFrame, stock_id: str) -> list[dic
         hits = []
         for i in range(ANOMALY_MIN_ROWS_AFTER_LISTING, len(d)):
             r = ret.iloc[i]
-            if pd.notna(r) and abs(r) > ANOMALY_RETURN_THRESHOLD_PCT:
+            date_str = str(d.loc[i, "date"])
+            if pd.notna(r) and abs(r) > _anomaly_threshold_pct(date_str):
                 hits.append({
-                    "stock_id": stock_id, "date": str(d.loc[i, "date"]), "ret_pct": round(float(r), 2),
+                    "stock_id": stock_id, "date": date_str, "ret_pct": round(float(r), 2),
+                    "threshold_pct": _anomaly_threshold_pct(date_str),
                     "detected_at": pd.Timestamp.now().isoformat(),
                 })
         return hits

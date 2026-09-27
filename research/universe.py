@@ -33,13 +33,56 @@ see finmind_client.load_dev()'s own docstring for the same warning.
 """
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 
 import pandas as pd
 
 from finmind_client import _fetch
 
 UNIVERSE_CUTOFF = "2003-01-01"
+
+# ── 查.二（2026-09-27總司令裁示【新.二結案＋紙.一＋查.二放行】）：本模組
+# 上面的docstring原本明寫「不試圖用上市日期欄位判斷可交易性，價格列存在
+# 就是可交易的證據」——查.二的查證結果推翻了這個假設的一半：FinMind的
+# TaiwanStockPrice確實會包含上市/上櫃「之前」的興櫃交易期間資料（興櫃
+# 無漲跌幅限制、流動性極低，混入回測會製造假的大幅漲跌）。這不是撤回
+# 整份docstring的邏輯（「下市後沒有資料」那一半仍然成立），是新增一層
+# 「上市/上櫃前」的過濾，兩者互補、不衝突。
+_TWSE_LISTING_PATH = Path(__file__).parent / "data" / "twse_listing_dates.json"
+_OTC_LISTING_PATH = Path(__file__).parent / "data" / "otc_listing_dates.json"
+
+
+def listing_date_lookup() -> dict[str, str]:
+    """公司代號 -> 'YYYY-MM-DD' 上市/上櫃日期，合併TWSE(`t187ap03_L`)與
+    TPEx(`mopsfin_t187ap03_O`)兩個官方端點的既有快取。**只涵蓋目前仍在
+    市的上市/上櫃公司**——已下市公司或興櫃公司不在這裡面，呼叫端對查不到
+    的代號一律視為「上市日不明」，不得猜測（見`build_twse_listing_dates.py`
+    /`build_otc_listing_dates.py`各自的docstring範圍界定）。"""
+    out: dict[str, str] = {}
+    for path in (_TWSE_LISTING_PATH, _OTC_LISTING_PATH):
+        if not path.exists():
+            continue
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for sid, ymd in doc.get("listing_dates", {}).items():
+            out[sid] = f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:]}"
+    return out
+
+
+def truncate_to_listing_date(df: pd.DataFrame, stock_id: str, listing_dates: dict[str, str] | None = None) -> pd.DataFrame:
+    """把`df`（必須含`date`欄，字串或可比較的日期型別）截斷到只保留
+    `date >= 上市/上櫃日`的列。查不到上市日的代號（已下市/興櫃/資料源本身
+    缺這檔）**原樣不截斷**——這不是「假設沒問題」，是這個函式的職責邊界：
+    「查不到就不截斷」讓呼叫端自己決定要不要把這種代號整檔排除（例如查.二
+    要求的「從嚴格宇宙中排除並列出清單」是在更上層的宇宙篩選步驟做，不是
+    在這裡默默處理，兩個步驟分開才看得出各自漏了多少）。"""
+    if listing_dates is None:
+        listing_dates = listing_date_lookup()
+    ld = listing_dates.get(stock_id)
+    if ld is None or df.empty:
+        return df
+    return df[df["date"].astype(str) >= ld].reset_index(drop=True)
 
 # ── 宇.二（2026-09-24總司令裁示【開考前修正——宇宙限普通股＋MDD判準回復原
 # 裁示】「修訂一」）：universe()／active_stock_ids() 只用代號長度篩選
@@ -58,8 +101,18 @@ _REIT_KEYWORDS = ("受益證券", "不動產投資信託", "REIT")
 _ETF_CODE_PREFIX_RE = re.compile(r"^00\d")  # 台股ETF代號慣例：00開頭
 
 
-def classify_security(stock_id: str, stock_name: str | None, industry_category: str | None) -> str:
-    """回傳分類標籤之一：普通股／股票型ETF／債券型ETF／特別股／TDR／其他／無法分類。
+def classify_security(stock_id: str, stock_name: str | None, industry_category: str | None,
+                       security_type: str | None = None) -> str:
+    """回傳分類標籤之一：普通股／股票型ETF／債券型ETF／特別股／TDR／興櫃／
+    其他／無法分類。
+
+    **`security_type`（2026-09-27查.二新增，可選參數，預設None＝完全比照
+    舊行為）**：傳入`TaiwanStockInfo.type`欄位值（"twse"/"tpex"/"emerging"）
+    時，`"emerging"`（興櫃）一律回傳「興櫃」，優先於下面所有其他規則——
+    興櫃股無漲跌幅限制、流動性極低，且會在真正上市/上櫃前混入回測（查.二
+    查證發現的資料汙染），不論名稱/產業分類是什麼都要排除，不是跟ETF/
+    特別股同一層級的分類問題。舊呼叫端沒有傳這個參數時，行為與2026-09-27
+    之前完全一致（不會因為新增這個參數就意外改變既有呼叫的分類結果）。
 
     主規則（`industry_category` 有值時，權威依據）：
       - 含「ETF」字樣 -> 股票型/債券型ETF（用股票名稱是否含「債」字弱代理
@@ -83,6 +136,9 @@ def classify_security(stock_id: str, stock_name: str | None, industry_category: 
         早期下市公司的存續期間）。
       - 其餘（代號格式本身就異常）-> 無法分類，不得靜默歸類成普通股。
     """
+    if security_type == "emerging":
+        return "興櫃"
+
     name = stock_name or ""
     cat = industry_category if isinstance(industry_category, str) else None
 
@@ -110,22 +166,30 @@ def classify_security(stock_id: str, stock_name: str | None, industry_category: 
 
 
 def common_stock_only(df: pd.DataFrame) -> pd.DataFrame:
-    """過濾掉 ETF／ETN／債券型ETF／特別股／TDR，只留普通股。`df` 必須含
+    """過濾掉 ETF／ETN／債券型ETF／特別股／TDR／興櫃，只留普通股。`df` 必須含
     `stock_id`／`stock_name`／`industry_category` 三欄（`universe()` 與
     `active_stock_ids()` 回傳的 DataFrame 都符合）。`無法分類` 的列**不會**
     被當成普通股保留——會被排除，並印一行警告（含代號清單），因為「排除
     了不確定的東西」比「靜默混入非普通股」安全，跟本函式存在的理由一致。
+
+    **2026-09-27查.二新增**：若`df`含`type`欄（`TaiwanStockInfo.type`，
+    "twse"/"tpex"/"emerging"），興櫃(`emerging`)股會被排除——舊呼叫端的
+    `df`若沒有這欄（`.get("type")`回`None`），行為完全不變，不受影響。
     """
-    category = df.apply(lambda r: classify_security(r["stock_id"], r.get("stock_name"), r.get("industry_category")), axis=1)
+    category = df.apply(lambda r: classify_security(r["stock_id"], r.get("stock_name"),
+                                                     r.get("industry_category"), r.get("type")), axis=1)
     unclassified = sorted(df.loc[category == "無法分類", "stock_id"].tolist())
     if unclassified:
         print(f"[common_stock_only] 警告：{len(unclassified)}檔無法分類，已排除（非普通股，"
               f"但也不確定是哪一類，寧可排除不確定的東西）：{unclassified}")
+    n_emerging = int((category == "興櫃").sum())
+    if n_emerging:
+        print(f"[common_stock_only] 排除{n_emerging}檔興櫃股（查.二2026-09-27新增規則）")
     return df.loc[category == "普通股"].reset_index(drop=True)
 
 
 def _self_test_common_stock_only() -> None:
-    """0050/00878/00718B/2887I/2891B/9105 必須被排除；2330/2317 必須保留。"""
+    """0050/00878/00718B/2887I/2891B/9105/6559(興櫃) 必須被排除；2330/2317 必須保留。"""
     rows = [
         {"stock_id": "0050", "stock_name": "元大台灣50", "industry_category": "ETF"},
         {"stock_id": "00878", "stock_name": "國泰永續高股息", "industry_category": "ETF"},
@@ -133,14 +197,28 @@ def _self_test_common_stock_only() -> None:
         {"stock_id": "2887I", "stock_name": "台新新光辛特", "industry_category": "金融保險"},
         {"stock_id": "2891B", "stock_name": "中信金乙特", "industry_category": "金融保險"},
         {"stock_id": "9105", "stock_name": "泰金寶-DR", "industry_category": "存託憑證"},
-        {"stock_id": "2330", "stock_name": "台積電", "industry_category": "半導體業"},
-        {"stock_id": "2317", "stock_name": "鴻海", "industry_category": "其他電子業"},
+        {"stock_id": "6559", "stock_name": "興櫃樣本股", "industry_category": "半導體業", "type": "emerging"},
+        {"stock_id": "2330", "stock_name": "台積電", "industry_category": "半導體業", "type": "twse"},
+        {"stock_id": "2317", "stock_name": "鴻海", "industry_category": "其他電子業", "type": "twse"},
     ]
     df = pd.DataFrame(rows)
     kept = set(common_stock_only(df)["stock_id"])
     expected_kept = {"2330", "2317"}
     assert kept == expected_kept, f"common_stock_only()自我測試失敗：預期保留{expected_kept}，實際保留{kept}"
     print(f"[self-test] common_stock_only() 通過：{len(rows)}檔樣本中只保留{sorted(kept)}")
+
+
+def _self_test_listing_date_truncation() -> None:
+    """truncate_to_listing_date()：上市日已知的代號正確截斷；查不到上市日
+    的代號原樣不動（不得猜測）。"""
+    lookup = {"2330": "1994-09-05"}
+    df = pd.DataFrame({"date": ["1994-06-01", "1994-09-05", "1994-12-01"], "close": [1.0, 2.0, 3.0]})
+    truncated = truncate_to_listing_date(df, "2330", lookup)
+    assert list(truncated["date"]) == ["1994-09-05", "1994-12-01"], \
+        f"truncate_to_listing_date()自我測試失敗：{list(truncated['date'])}"
+    unchanged = truncate_to_listing_date(df, "9999", lookup)
+    assert list(unchanged["date"]) == list(df["date"]), "查無上市日的代號不應被截斷"
+    print("[self-test] truncate_to_listing_date() 通過")
 
 
 def delisted_stock_ids(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
@@ -204,3 +282,4 @@ def universe(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
 
 if __name__ == "__main__":
     _self_test_common_stock_only()
+    _self_test_listing_date_truncation()

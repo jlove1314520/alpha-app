@@ -1,0 +1,200 @@
+{
+ "generated_at": "2026-09-27T14:43:16.447086",
+ "verdict_locked_note": "本檔案數字只作報告用途，不改變#398/#399/#400任何已登記判定",
+ "results": {
+  "f52w_high_portfolio_v1": {
+   "label": "f52w_high_portfolio_v1",
+   "n_positions": 468,
+   "n_positions_with_known_listing_date": 427,
+   "n_positions_with_unknown_listing_date": 41,
+   "holding_days_total": 27432,
+   "holding_days_pre_listing": 1329,
+   "pct_holding_days_pre_listing": 4.845,
+   "pnl_contribution_pre_listing_pct_of_initial_capital": 0.335,
+   "note": "pnl_contribution為估算：假設持倉期間部位金額不變(跟run_backtest()的整股買賣模型一致)，取entry_price到上市/上櫃日當天(或前一個有效交易日)價格的報酬乘上進場金額，除以全部部位進場金額總和，非策略總損益的精確拆解，只作量級參考。",
+   "tainted_examples": [
+    {
+     "stock_id": "3711",
+     "entry_date": "2007-02-01",
+     "listing_date": "2018-04-30",
+     "exit_date": "2007-05-14",
+     "pre_listing_days": 61
+    },
+    {
+     "stock_id": "3711",
+     "entry_date": "2007-06-12",
+     "listing_date": "2018-04-30",
+     "exit_date": "2007-07-12",
+     "pre_listing_days": 20
+    },
+    {
+     "stock_id": "3711",
+     "entry_date": "2007-11-12",
+     "listing_date": "2018-04-30",
+     "exit_date": "2008-01-08",
+     "pre_listing_days": 40
+    },
+    {
+     "stock_id": "6183",
+     "entry_date": "2009-04-22",
+     "listing_date": "2011-12-01",
+     "exit_date": "2009-05-22",
+     "pre_listing_days": 21
+    },
+    {
+     "stock_id": "4729",
+     "entry_date": "2009-01-15",
+     "listing_date": "2009-02-24",
+     "exit_date": "2009-06-23",
+     "pre_listing_days": 21
+    },
+    {
+     "stock_id": "3591",
+     "entry_date": "2009-05-22",
+     "listing_date": "2010-11-12",
+     "exit_date": "2009-07-22",
+     "pre_listing_days": 41
+    },
+    {
+     "stock_id": "6183",
+     "entry_date": "2009-06-23",
+     "listing_date": "2011-12-01",
+     "exit_date": "2009-09-11",
+     "pre_listing_days": 57
+    },
+    {
+     "stock_id": "3711",
+     "entry_date": "2009-08-21",
+     "listing_date": "2018-04-30",
+     "exit_date": "2009-09-21",
+     "pre_listing_days": 21
+    },
+    {
+     "stock_id": "3591",
+     "entry_date": "2010-03-25",
+     "listing_date": "2010-11-12",
+     "exit_date": "2010-04-26",
+     "pre_listing_days": 21
+    },
+    {
+     "stock_id": "6183",
+     "entry_date": "2010-05-25",
+     "listing_date": "2011-12-01",
+     "exit_date": "2010-07-23",
+     "pre_listing_days": 42
+    },
+    {
+     "stock_id": "3591",
+     "entry_date": "2010-05-25",
+     "listing_date": "2010-11-12",
+     "exit_date": "2011-02-24",
+     "pre_listing_days": 121
+    },
+    {
+     "stock_id": "3711",
+     "entry_date": "2010-11-19",
+     "listing_date": "2018-04-30",
+     "exit_date": "2011-02-24",
+     "pre_listing_days": 63
+    },
+    {
+     "stock_id": "2718",
+     "entry_date": "2011-03-28",
+     "listing_date": "2011-03-29",
+     "exit_date": "2011-04-28",
+     "pre_listing_days": 1
+    },
+    {
+     "stock_id": "8114",
+     "entry_date": "2010-10-21",
+     "listing_date": "2012-11-26",
+     "exit_date": "2011-06-29",
+     "pre_listing_days": 168
+    },
+    {
+     "stock_id": "3711",
+     "entry_date": "2011-09-27",
+     "listing_date": "2018-04-30",
+     "exit_date": "2011-12-26",
+     "pre_listing_days": 63
+    }
+   ]
+  },
+  "dividend_yield_portfolio_v1": {
+   "label": "dividend_yield_portfolio_v1",
+   "n_positions": 299,
+   "n_positions_with_known_listing_date": 297,
+   "n_positions_with_unknown_listing_date": 2,
+   "holding_days_total": 34649,
+   "holding_days_pre_listing": 664,
+   "pct_holding_days_pre_listing": 1.916,
+   "pnl_contribution_pre_listing_pct_of_initial_capital": -0.2184,
+   "note": "pnl_contribution為估算：假設持倉期間部位金額不變(跟run_backtest()的整股買賣模型一致)，取entry_price到上市/上櫃日當天(或前一個有效交易日)價格的報酬乘上進場金額，除以全部部位進場金額總和，非策略總損益的精確拆解，只作量級參考。",
+   "tainted_examples": [
+    {
+     "stock_id": "8114",
+     "entry_date": "2008-01-10",
+     "listing_date": "2012-11-26",
+     "exit_date": "2008-01-24",
+     "pre_listing_days": 10
+    },
+    {
+     "stock_id": "8114",
+     "entry_date": "2008-02-18",
+     "listing_date": "2012-11-26",
+     "exit_date": "2008-09-04",
+     "pre_listing_days": 140
+    },
+    {
+     "stock_id": "8114",
+     "entry_date": "2010-02-24",
+     "listing_date": "2012-11-26",
+     "exit_date": "2010-07-23",
+     "pre_listing_days": 105
+    },
+    {
+     "stock_id": "8114",
+     "entry_date": "2011-06-29",
+     "listing_date": "2012-11-26",
+     "exit_date": "2011-09-26",
+     "pre_listing_days": 62
+    },
+    {
+     "stock_id": "6183",
+     "entry_date": "2011-07-28",
+     "listing_date": "2011-12-01",
+     "exit_date": "2011-11-25",
+     "pre_listing_days": 84
+    },
+    {
+     "stock_id": "8114",
+     "entry_date": "2011-09-27",
+     "listing_date": "2012-11-26",
+     "exit_date": "2012-06-01",
+     "pre_listing_days": 166
+    },
+    {
+     "stock_id": "4741",
+     "entry_date": "2013-08-07",
+     "listing_date": "2017-09-26",
+     "exit_date": "2013-09-06",
+     "pre_listing_days": 21
+    },
+    {
+     "stock_id": "6438",
+     "entry_date": "2014-08-15",
+     "listing_date": "2021-01-19",
+     "exit_date": "2014-10-17",
+     "pre_listing_days": 43
+    },
+    {
+     "stock_id": "6438",
+     "entry_date": "2014-11-14",
+     "listing_date": "2021-01-19",
+     "exit_date": "2014-12-31",
+     "pre_listing_days": 33
+    }
+   ]
+  }
+ }
+}

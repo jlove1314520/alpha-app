@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
-"""查.二 第一、二點（查證段，唯讀）：選股宇宙是否混入「上市前興櫃期間」。
+"""查.二 第一、二點（查證段）：選股宇宙是否混入「上市前興櫃期間」。
 
-**只讀既有快取，零新API呼叫、不新增爬取來源**（裁示原文）。上市日來源＝
-`research/data/twse_listing_dates.json`（TWSE t187ap03_L，#46時期已存的既有
-檔案，只涵蓋「現存TWSE上市公司」）；TPEx／興櫃／已下市公司沒有上市日，
-如實標「上市日不明」，不猜測。這是資料源本身的缺口，不是查證偷懶。
+**2026-09-27總司令裁示【新.二結案＋紙.一＋查.二放行】放行後更新**：上市/
+上櫃日來源改用`universe.listing_date_lookup()`（合併TWSE `t187ap03_L`與
+TPEx `mopsfin_t187ap03_O`兩個官方端點，各自的快取見`build_twse_listing_
+dates.py`/`build_otc_listing_dates.py`，本次執行本身零新API呼叫，只讀
+既有快取），覆蓋率從純TWSE的1094檔提升到合併後1987檔。仍為興櫃或已下市、
+查無官方上市/上櫃紀錄的股票如實標「上市日不明」，不猜測——這是資料源
+本身的邊界，不是查證偷懶。異常門檻改呼叫`adjust._anomaly_threshold_pct()`
+（單一權威來源，避免這裡跟`adjust.py`各自維護一份日期相依門檻邏輯而
+日後漂移不一致）。
 
 異常＝**原始收盤價**(raw close)單日變動超過日期相依門檻
 （2015-06-01前±7.5%、之後±10.5%）。歸類：
@@ -33,17 +38,19 @@ from pathlib import Path
 import pandas as pd
 
 import holdout_2025_dividend_account_test as h1
+from adjust import _anomaly_threshold_pct
 from factor_ic import SAMPLE_SEED, SAMPLE_SIZE, sample_universe_ids
-from universe import classify_security
+from universe import classify_security, listing_date_lookup
 
 RAW = Path(__file__).parent / "data" / "raw"
 OUT = Path(__file__).parent / "data" / "q2_ipo_pre_listing_contamination.json"
-LISTING = json.loads((Path(__file__).parent / "data" / "twse_listing_dates.json").read_text(encoding="utf-8"))["listing_dates"]
-REGIME_CUT = "2015-06-01"
+LISTING_YMD = listing_date_lookup()  # 已是'YYYY-MM-DD'格式（見universe.py），
+# 跟本檔案原本直接讀twse_listing_dates.json(YYYYMMDD)不同格式，下面thr()/
+# scan()改用這個格式，不需要再自己組字串。
 
 
 def thr(date: str) -> float:
-    return 7.5 if date < REGIME_CUT else 10.5
+    return _anomaly_threshold_pct(date)
 
 
 def raw_price(sid: str) -> pd.DataFrame:
@@ -90,8 +97,7 @@ def scan(sids: list[str], lo: str, hi: str) -> tuple[list[dict], dict]:
         d = d[(d["date"] >= lo) & (d["date"] <= hi)].reset_index(drop=True)
         if len(d) < 6:
             continue
-        ld = LISTING.get(sid)
-        list_date = f"{ld[:4]}-{ld[4:6]}-{ld[6:]}" if ld else None
+        list_date = LISTING_YMD.get(sid)
         if list_date:
             n_known += 1
         ev = event_dates(sid)
