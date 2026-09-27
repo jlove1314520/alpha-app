@@ -14891,7 +14891,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 > 維持現狀，雲端看門狗定位為「數小時級停擺」的最後防線，不改頻率、
 > 不再投入；30 分鐘級偵測由第八項負責。
 
-- [ ] **乾.三主體** [研究/維運] 修正G2b/G2c判定＋補吞錯誤缺口(G6)＋
+- [!] **乾.三主體** [研究/維運] 修正G2b/G2c判定＋補吞錯誤缺口(G6)＋
   處理過期快取＋固定期末日，重跑--gates-only；並實作查.一心跳方案B
   強化版。只改--gates-only分支與資料載入段，不得改第5步以後正式回測
   邏輯、不得改prepare_factors()計算、不得改策略參數。
@@ -14964,3 +14964,23 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   `local_schedule_heartbeat`顯示區塊（含舊結構備援相容），冒煙測試
   `node scripts/smoke_test.mjs`48項全數PASS。**七（重跑）尚未執行**，
   緊接在此commit之後進行。
+  **七（重跑）已完成，`gates_pass = True`**（互動視窗，2026-09-27
+  09:15）：`python research/holdout_2025_dividend_account_test.py
+  --gates-only`完整跑完，結果（`research/data/h1_gates.json`，已
+  `git add -f`入庫）：
+  - G1=0（無額度錯誤）
+  - **G2a=0檔不一致**（原1檔2330已因2330重抓修復）
+  - **G2b=0檔不一致**（原3檔7758/6539/3531已因「date>=E且close>0」
+    修正解決），`no_valid_trade`=0檔
+  - **G2c=134檔n_effective(>0，通過)**，另有30檔`n_pre_none`
+    （VAL_END前無交易資料，不計入n_effective，不影響判定）
+  - G3：可用檔數=214、價格失敗=37、因子失敗=0
+  - **G6=0**（無股利率因子被跳過）
+  - G4：資料涵蓋至2026-09-24（固定值，H1_PERIOD_END）
+  - **G5=3/214（1.4%，≤5%通過）**（原4檔中2330已修復移出，剩
+    6806/3454/2809三檔皆為真實下市，保留在清單內符合預期，不算異常）
+  - **`gates_pass = True` —— 資料層面可以放行**
+  **依裁示七，跑完即停，未印任何報酬/IR/MDD，未接著跑正式回測。**
+  H.一正式回測**仍然維持停.一的暫停狀態**，資料層面的問題已全部排除，
+  但是否正式放行回測仍是Cowork/總司令的決定，互動視窗不自行判斷、
+  不自行執行。
