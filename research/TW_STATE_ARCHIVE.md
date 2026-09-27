@@ -1838,3 +1838,44 @@ BLOCKED於續抓完成）。**等待審閱：0件**。**下一輪任一軌接手
 
 
 
+
+---
+**最後更新：2026-09-27T14:3x+08:00（馬拉松第642輪，研究帽）**——取鎖乾淨
+（cycle`20260927-143037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=2（驗.二第二部分／查.二放行）。**本輪主要發現：驗.二第二部分是
+過期重複補件**——今天稍早hypothesis_queue軌道13:51做佇列深度補件時，
+把這項當成「未做過的稽核類工作」補入，但`spillover_overlay_v1_o2c.py`
+早在2026-09-24（3天前）就已完整重跑第2-9關並終局判定：commit`8ca6dad5`
+登記為`TRIALS_LEDGER.md`#394，第3關參數密集高原未過（FAIL），
+`STRATEGY_GRAVEYARD.md`已明文「#19在台股的兩種實現皆已窮盡並判死，
+不建議再嘗試同一機制的其他變體」。已把`PENDING_QUEUE.md`該項改標`[x]`
+並附完整出處，避免下一輪自走再次誤補同一項（詳見該檔案本項條目）。
+**查.二放行本輪不動**：`git status`顯示`research/adjust.py`/`universe.py`/
+`audit_q2_ipo_pre_listing.py`等CLAUDE.md十三節單一寫入者限定檔案有大量
+未commit變更，`ls`實測mtime距本輪開工僅3~17分鐘（14:15~14:29），核對
+`dev_queue_cycle.log`／`hypothesis_queue_cycle.log`確認本機兩條自走排程
+同一時段皆為YIELD/未執行，判定是互動視窗CC session剛做的中途未完成
+編輯（內容確認是`check_adjusted_series_anomalies()`日期相依門檻、
+`universe.listing_date_lookup()`/`truncate_to_listing_date()`新增、
+`CashIncreaseSubscriptionRate`單位查證等，皆對應查.二放行裁示的①③⑤⑥
+項）。**[自行裁量，比照round613/623/625避讓先例]**：本輪不觸碰這些
+限定檔案，避免搶寫或提交半成品程式碼；查.二放行本身也涉及裁示明文
+「adjust.py屬十三節單一寫入者範圍由互動視窗執行」，自走軌道結構上就
+不該碰。**佇列深度自檢**：修正後`- [ ]`=0（查.二放行仍`- [ ]`但正被
+互動視窗處理中，非自走可推進項），凍結.二仍生效，不補新alpha試驗。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（未新增判定，本輪純佇列維運）。`is_holdout_consumed()`開工/收工前皆
+`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／`research/adjust.py`
+／`research/pit.py`／`research/trial_registry.py`任何原始碼，全程零
+新增外部API呼叫（純`git`/`ls`/既有帳本讀取）。`PROGRESS_HEARTBEAT.jsonl`
+已append本輪一行。**交辦佇列還剩0條可由自走推進**（查.二放行等互動
+視窗完成）。**等待審閱：10件**（`AWAITING_REVIEW.md`表頭與實際列數
+核對一致，本輪未變動；順道發現其中「新.二」一列今日已由【新.二結案＋
+紙.一＋查.二放行】裁示回覆，但該列尚未搬移到「已結案審閱紀錄」表，
+非本輪工作範圍，留給下一輪或該項原負責軌道搬移）。**下一輪任一軌接手**：先`git status`確認`research/adjust.py`等
+檔案是否已由互動視窗commit——若已commit，查.二放行後續步驟（TPEx資料
+校驗、common_stock_only()興櫃排除的下游影響評估等）才輪到自走接手；
+若仍是未commit的編輯中狀態，繼續避讓；依輪替下一輪建議選FUT或US軌
+（TW本輪已碰過）。完整見`REPORT.md`第642輪心跳、`PENDING_QUEUE.md`
+「驗.二第二部分」條目更正。
