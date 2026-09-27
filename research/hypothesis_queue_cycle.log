@@ -5293,3 +5293,10 @@ quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉�
 quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/hypothesis_queue相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
 
 quota_throttle: SKIP: 純Python訊號比對——自上次判定候選池空轉以來，PENDING_QUEUE.md/hypothesis_queue相關狀態檔/TRIALS_REGISTRY.jsonl 內容完全沒變，沒有新資訊值得再叫一次 claude 重新確認，本輪連 claude -p 都不叫
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Hypothesis-queue cycle start: 2026-09-28 07:21:02 =====
+Error: Exceeded USD budget (5)
+===== Hypothesis-queue cycle end: 2026-09-28 07:24:53 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
