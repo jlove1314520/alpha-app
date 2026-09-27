@@ -15633,13 +15633,39 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   `research/data/survival_constraint_allocation_test.json`MDD/CAGR
   數字逐位元核對與原登記值一致（未變動任何回測邏輯，僅新增統計量）。
 
-- [ ] **紙.一** [開發/研究] 前進式紙上追蹤(非回測非新試驗)：2026-10第
+- [!] **紙.一** [開發/研究] 前進式紙上追蹤(非回測非新試驗)：2026-10第
   一個交易日起模擬70/30虛擬帳戶(0050/定存代理)，初始資金虛擬值；每月
   最後交易日檢查再平衡，計ETF稅0.1%+1.8折手續費；每月寫一筆紀錄到
   `research/data/paper_7030_log.jsonl`(日期/權重/淨值/再平衡交易/成本)；
   App新增卡片顯示虛擬帳戶淨值/目前權重/下次再平衡日期，標明「紙上
   追蹤，非投資建議」；目的驗證排程/資料/再平衡流程，不下真實單，真錢
   閘門不變。**心跳**：`research/data/paper_7030_log.jsonl`每月一筆。
+
+  **完成回報（2026-09-27，互動視窗CC，`- [!]`＝基礎設施已完成、尚未
+  啟動因為還沒到2026-10）**：新增`research/paper_7030_tracker.py`——
+  用`data/price_history.json`的0050實際成交序列判斷「2026-10第一個
+  交易日」(不猜行事曆)；月末偵測用「連續兩筆資料月份不同」判斷前一筆
+  是月末(誠實揭露：需晚一個交易日才能確認，但用的仍是該歷史月末日
+  當天的真實收盤價，非前視偏誤，只是偵測時間點延後)；再平衡沿用
+  `survival_constraint_allocation_test.py`同一套`BacktestConfig`/
+  `buy_leg_rate`/`sell_leg_rate`(ETF稅0.1%+1.8折手續費)；冪等可重複
+  執行。**自我測試**：(1)實際執行一次，正確判斷「尚未到2026-10-01或
+  之後的交易日資料，略過」，`data/paper_7030.json`寫出`started:false`
+  狀態；(2)用合成價格序列(2026-10-01~2026-12-01含兩個月末)dry-run
+  驗證帳戶邏輯：初始70/30分帳=700000/300000，股票隨價格mark-to-
+  market後正確算出再平衡delta與成本(數字經手算覆核一致)。已接入
+  `.github/workflows/market.yml`（排在`update_price_history.py`之後，
+  取得當日剛更新的0050收盤價；`continue-on-error: true`+腳本內
+  try/except雙重保護，失敗只印`::warning::`不中斷其他排程步驟）；
+  commit allowlist已加入`data/paper_7030.json`與`research/PROGRESS_
+  HEARTBEAT.jsonl`(直接列名)、`research/data/paper_7030_log.jsonl`
+  (gitignored目錄，額外一行`git add -f`)。App端`index.html`交易頁
+  「策略」子分頁新增卡片(`#paper-7030-card`/`loadPaper7030()`)，讀
+  `data/paper_7030.json`，未啟動時誠實顯示「尚未啟動」而非假數字，
+  標明「紙上追蹤，非投資建議」。冒煙測試`node scripts/smoke_test.mjs`
+  全部50項PASS（含新舊功能都正常）。**尚未發生、如實記錄**：帳戶要
+  等2026-10第一個交易日的market.yml排程實際跑過才會建立inception紀錄，
+  這是設計上的等待，不是缺陷。
 
 - [ ] **查.二放行** [研究/維運] 承接既有查.二條目，正式放行動工：①允許
   用櫃買中心官方OpenAPI(免金鑰)上櫃公司基本資料端點補上櫃日期，只呼叫

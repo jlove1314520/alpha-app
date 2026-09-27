@@ -1212,6 +1212,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="subscreen" id="trade-sub-strategy">
       <div class="note" style="text-align:center;background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:8px;margin-bottom:12px;color:var(--warn)">⚠ 紙上模擬，非真實交易，非投資建議</div>
+      <!-- 2026-09-27新增（紙.一，總司令裁示【新.二結案＋紙.一＋查.二放行】）：
+      0050/定存70/30前進式紙上追蹤虛擬帳戶。目的是驗證排程/資料/再平衡流程
+      正確性，不是證明績效——跟下面strategy-list(選股策略上架前測)是不同性質
+      的兩件事，各自獨立卡片。資料只讀data/paper_7030.json，不寫死任何數字。 -->
+      <div id="paper-7030-card"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
       <div id="strategy-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
     </div>
 
@@ -4858,7 +4863,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('trade-sub-monitor').classList.remove('active');
       document.getElementById('trade-sub-picks').classList.remove('active');
       document.getElementById('trade-sub-'+b.dataset.sub).classList.add('active');
-      if(b.dataset.sub==='strategy')loadStrategies();
+      if(b.dataset.sub==='strategy'){loadStrategies();loadPaper7030();}
       if(b.dataset.sub==='monitor')loadStrategyMonitor();
       if(b.dataset.sub==='picks')loadPicksReportCard();
     });
@@ -4882,6 +4887,43 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:8px">目前部位：${s.current_position||'無'}</div>
     </div>`;
   }
+  // 2026-09-27新增（紙.一）：0050/定存70/30前進式紙上追蹤卡片。資料來源
+  // research/paper_7030_tracker.py每次排程執行寫出的data/paper_7030.json，
+  // 啟動前(2026-10第一個交易日之前)started=false，顯示「尚未啟動」而不是
+  // 假數字。失敗只影響這張卡片，不中斷其他分頁載入（沿用既有try/catch+
+  // recordGlobalError慣例）。
+  async function loadPaper7030(){
+    const el=document.getElementById('paper-7030-card');if(!el)return;
+    try{
+      const r=await fetch('data/paper_7030.json?t='+Date.now());
+      const j=r.ok?await r.json():{started:false};
+      if(!j.started){
+        el.innerHTML=`<div class="card" style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><b>0050核心配置 70/30（紙上追蹤）</b></div>
+          <div class="note" style="margin-top:6px">${j.note||'尚未啟動：預定2026-10第一個交易日起，每月最後一個交易日再平衡一次'}</div>
+        </div>`;
+        return;
+      }
+      const ret=j.total_return_pct;
+      el.innerHTML=`<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div><b style="font-size:15px">0050核心配置 70/30（紙上追蹤）</b><div class="note" style="margin-top:2px">虛擬帳戶 · 截至 ${j.as_of_date||'—'}</div></div>
+        </div>
+        <div class="bot-stats" style="margin-top:10px">
+          <div class="s"><span>虛擬淨值</span><b>${j.nav!=null?Math.round(j.nav).toLocaleString():'—'}</b></div>
+          <div class="s"><span>累積報酬</span><b class="${(ret||0)>=0?'pos':'neg'}">${ret!=null?(ret>=0?'+':'')+ret.toFixed(2)+'%':'—'}</b></div>
+          <div class="s"><span>0050權重</span><b>${j.stock_weight!=null?(j.stock_weight*100).toFixed(0)+'%':'—'}</b></div>
+          <div class="s"><span>定存權重</span><b>${j.bond_weight!=null?(j.bond_weight*100).toFixed(0)+'%':'—'}</b></div>
+        </div>
+        <div class="note" style="margin-top:8px">${j.next_rebalance_note||''}（已累積${j.history_months||0}個月紀錄）</div>
+        <div class="note" style="margin-top:4px;color:var(--warn)">⚠ ${j.disclaimer||'紙上追蹤，非投資建議'}</div>
+      </div>`;
+    }catch(e){
+      console.warn('[loadPaper7030]',e);recordGlobalError('loadPaper7030',e);
+      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+    }
+  }
+
   async function loadStrategies(){
     const el=document.getElementById('strategy-list');if(!el)return;
     try{
@@ -7467,7 +7509,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-27.0906';
+  const APP_VERSION='2026-09-27.1413';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
