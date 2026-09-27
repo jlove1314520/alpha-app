@@ -15923,10 +15923,17 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   「除以1000是正確方向」這個結論。受影響範圍：本機已快取的
   `TaiwanStockDividend`資料中**110檔股票、151筆現金增資事件**（含
   `CashExDividendTradingDate`且比率非0，這是快取範圍內的下限，非全
-  市場精確數字）。**App端資料不受影響**——grep全repo確認`research/
-  adjust.py`只被`research/`目錄下的研究腳本呼叫，App實際顯示的價格圖
-  （`data/price_history.json`）走完全獨立的還原路徑
-  (`research/build_price_history.py`+TWSE TWT48U，不經過`adjust.py`)。
+  市場精確數字）。**⚠️2026-09-27【修.七】更正：「App端資料不受影響」
+  這句話是錯的**——原判斷只確認了`research/adjust.py`本身沒被App端
+  呼叫，但漏查`research/build_price_history.py`自己複製了一份同款還原
+  公式（見該檔案第72~105行`_dividend_events()`，docstring自己承認
+  「複製`research/adjust.py::adjustment_events()`的公式」），認股比率
+  一樣未除以1000、也沒有分割/減資/面額變更事件處理，產出`data/price_
+  history.json`的`adj_close`欄位供`generate_scores_momentum.py`的
+  `relative_strength`因子讀取——**App端資料確實受影響**，修正與重建
+  範圍見本檔案「修.七」條目。（原句「App實際顯示的價格圖走完全獨立的
+  還原路徑，不經過adjust.py」保留於下方供稽核，但結論方向錯誤：獨立
+  不等於沒有同一個bug，這條路徑是同一個bug的第二個拷貝，不是沒有bug）。
   **既有研究影響範圍(只回報，判定鎖定不動)**：151筆事件中9筆落在
   #398/#399的候選宇宙+2007-2014期間內(2038/2451/2481×2/3481/3680/
   3689/5483/6220)，holdout期間(H.一實際使用的2025-01-01~2026-09-24)
