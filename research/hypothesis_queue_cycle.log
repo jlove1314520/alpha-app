@@ -5245,3 +5245,5 @@ quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_pro
 quota_throttle: SKIP: 正常頻率，距上次實跑23.8分鐘 < 30分鐘門檻
 
 quota_throttle: SKIP: 節流中，距上次實跑53.8分鐘 < 120分鐘門檻（帳號週用量已達90%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: SKIP: 節流中，距上次實跑83.8分鐘 < 120分鐘門檻（帳號週用量已達90%（門檻90%），節流保留額度給交辦與資料管線）
