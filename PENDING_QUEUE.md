@@ -15950,3 +15950,60 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   **只整理不改狀態**：已核對`git diff PENDING_QUEUE.md`確認本部分工作
   期間本檔案零變動（除了本條目自己標記`- [x]`是裁示允許的收尾動作，
   被盤點的40條本身一個字元都沒有被觸碰）。已push，停下等Cowork核對。
+
+## 2026-09-27 總司令裁示【修.七：還原公式統一＋股票股利單位實證＋佇列清理】
+
+> 【修.七：還原公式統一＋股票股利單位實證＋佇列清理】先寫進 PENDING_QUEUE 再動工。依序執行。
+>
+> 一、更正查.三的結論：「App 端資料不受影響」有誤。research/build_price_history.py 第 88~104 行自己複製了一份還原公式，認股比率沒有除以 1000，也沒有處理分割、減資、面額變更；它產出 data/price_history.json 的 adj_close，generate_scores_momentum.py 的相對強弱因子會讀這個欄位。請在 PENDING_QUEUE 的查.三條目更正這一句。
+>
+> 二、股票股利單位實證（不猜，以官方參考價為準）：
+>   1. 用 TaiwanStockDividendResult 挑 5 檔「只有股票股利」（現金=0、認股=0）的事件，再挑 5 檔「現金＋股票股利」混合事件。
+>   2. 列表比對：
+>      (a) 官方參考價 ÷ 前一日收盤價
+>      (b) 現行公式（StockEarningsDistribution 直接當成每股配股數）算出的因子
+>      (c) StockEarningsDistribution ÷ 10 後算出的因子
+>   3. 哪一個跟 (a) 相符就採用哪一個，修正 adjust.py，附自我測試（10 檔誤差都 < 0.6%）。都對不上就停下回報，不得修改。
+>   4. 回報受影響的事件數與股票數，以及 2007-2014 期間佔多少。既有判定一律鎖定。
+>
+> 三、公式統一（消除重複拷貝）：
+>   1. build_price_history.py 改為呼叫 adjust.py 的同一套事件函式（股利＋分割＋減資＋面額變更，含第二項的修正），刪掉它自己那份拷貝。
+>   2. 全 repo grep 還有沒有其他自行計算還原因子的腳本，全部改成呼叫 adjust.py，或列出來回報。
+>   3. 重建受影響股票的 data/price_history.json adj_close，重新產生動能分數。冒煙測試必須全部通過。
+>   4. 回報 App 上有哪幾檔股票的分數因此改變、變化多少。
+>
+> 四、佇列清理（Cowork 已核可）：
+>   1. docs/BLOCKED_TRIAGE_2026-09-27.md 的 (A) 類 21 條全部結案，每條附取代它的裁示或 commit。
+>   2. (D) 類：regime.替代B 結案；資料源一.4、外部一改.1 併入資料源一.3 的下游，不另外掛阻塞。
+>   3. 「已完成、等 Cowork 核對」的項目改標記為 - [?]，並列入 AWAITING_REVIEW.md；- [!] 只留給真正卡住的項目。
+>   4. 以後新增代號前先 grep，不得重複使用。
+>   5. (B) 類 12 條先不要動，等總司令回覆後再依裁示處理。
+>
+> 五、完成後 push，停下等 Cowork 核對。紙.一 不得動。
+
+- [ ] **修.七** [研究/維運] 還原公式統一＋股票股利單位實證＋佇列清理，
+  依序執行。一、更正查.三結論：「App端資料不受影響」有誤，
+  `build_price_history.py`第88~104行自己複製一份還原公式(認股比率未
+  除以1000、未處理分割/減資/面額變更)，產出`data/price_history.json`
+  的adj_close被`generate_scores_momentum.py`相對強弱因子讀取，需在
+  PENDING_QUEUE查.三條目更正。二、股票股利單位實證(不猜，以官方參考
+  價為準)：①用`TaiwanStockDividendResult`挑5檔純股票股利(現金=0/認股
+  =0)+5檔現金+股票股利混合事件。②比對(a)官方參考價÷前一日收盤價
+  (b)現行公式(`StockEarningsDistribution`直接當每股配股數)因子
+  (c)`StockEarningsDistribution`÷10後因子。③哪個跟(a)相符就採用，
+  修正adjust.py，自我測試10檔誤差都<0.6%；都對不上停下回報不得修改。
+  ④回報受影響事件數/股票數，2007-2014期間佔比。既有判定鎖定。三、
+  公式統一(消除重複拷貝)：①`build_price_history.py`改呼叫adjust.py
+  同一套事件函式(股利+分割+減資+面額變更，含第二項修正)，刪掉自己
+  那份拷貝。②全repo grep還有無其他自行計算還原因子的腳本，全改呼叫
+  adjust.py或列出回報。③重建受影響股票的`data/price_history.json`
+  adj_close，重新產生動能分數，冒煙測試須全PASS。④回報App上哪幾檔
+  股票分數因此改變、變化多少。四、佇列清理(Cowork已核可)：①
+  `docs/BLOCKED_TRIAGE_2026-09-27.md`(A)類21條全部結案，每條附取代
+  裁示或commit。②(D)類：regime.替代B結案；資料源一.4/外部一改.1併入
+  資料源一.3下游不另掛阻塞。③「已完成等Cowork核對」項目改標記
+  `- [?]`並列入AWAITING_REVIEW.md，`- [!]`只留真正卡住的項目。④以後
+  新增代號前先grep不得重複使用。⑤(B)類12條先不動，等總司令回覆後
+  再處理。五、完成後push，停下等Cowork核對。**紙.一不得動**。
+  **心跳**：本條目checklist狀態＋`docs/BLOCKED_TRIAGE_2026-09-27.md`
+  更新。
