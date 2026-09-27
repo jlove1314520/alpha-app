@@ -15210,7 +15210,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 >   並回報。
 >   五、全部完成後 push，停下等 Cowork 核對。
 
-- [ ] **驗.五＋修.六** [研究/維運] H.一基準汙染診斷(判定鎖定FAIL)＋
+- [!] **驗.五＋修.六** [研究/維運] H.一基準汙染診斷(判定鎖定FAIL)＋
   資料層分割/減資還原修正，依序先驗.五再修.六。
   **驗.五**(只做診斷不是重跑，#400判定鎖定FAIL不得改變)：①印0050
   uncapped adj_close在2025-06-05~06-25逐日價格與日報酬，確認2025-06-18
@@ -15236,6 +15236,106 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   降級警告不得讓排程崩潰。④盤點受影響App端資料(alpha.db/圖表/訊號中
   所有2025年以後有分割或減資事件的股票)列清單，修正後重建受影響部分
   並回報。⑤全部完成後push，停下等Cowork核對。
+
+  **完成回報（2026-09-27，互動視窗CC，`- [!]`：驗.五全部完成、
+  修.六①②③完成，④(盤點+重建)背景執行中，尚未完成，故整條標`- [!]`
+  不標`- [x]`）**：
+
+  **驗.五**：
+  - ①確認：0050 uncapped adj_close在2025-06-18當天`ret_pct=-74.78%`，
+    `price_ratio=0.2522`，與1拆4的理論比例`0.25`幾乎完全吻合
+    （`expected_ratio_if_split: 0.25`），確認是分割未還原的假跌，
+    不是真實下跌。證據存於`research/data/
+    h1_benchmark_contamination_diagnosis.json`的`item1_0050_window`。
+  - ②holdout期間(2025-01-01~2026-09-24)掃描214檔可用股票+0050，共
+    436筆單日|報酬|>11%命中（0050本身1筆＝上述分割事件；214檔股票
+    435筆）。分類結果：0050那1筆＝疑似分割(1拆4)（已confirm）；214檔
+    的435筆中392筆「其他/待查」、39筆「疑似減資或其他大幅價格調整」、
+    2筆「疑似分割(1拆2)」、2筆「疑似分割(1拆10)」。**誠實揭露分類
+    工具本身的限制**：抽查`8427`/`7708`/`1293`/`6977`/`7785`（原本
+    被啟發式分類器判「疑似減資」）用`TaiwanStockCapitalReductionReference
+    Price`直接查證，這五檔**零真實減資事件**，判為假陽性——這個
+    啟發式分類器（依價格比例猜測事件類型）只用來提供人工複核的線索，
+    不是最終定論，且強烈懷疑「其他/待查」與部分「疑似減資」的大量
+    命中，跟下面④修.六發現的`CashIncreaseSubscriptionRate`欄位尺度
+    問題同源（見該欄位下方的獨立說明），但尚未逐筆驗證，如實標
+    未解決，不猜測換算比例強行分類。完整清單存於同一份JSON的
+    `item2_holdout_period_scan`。
+  - ③對2007-2014(#399資料)做同樣掃描，208檔可用股票，共1158筆命中：
+    996筆「其他/待查」、152筆「疑似減資或其他大幅價格調整」、7筆
+    「疑似分割(1拆2)」、2筆「疑似分割(1拆10)」、1筆「疑似分割(1拆5)」。
+    只回報，**#399判定維持鎖定不動**。存於同一份JSON的
+    `item3_2007_2014_scan`。
+  - ④診斷值（不改判定）：先用`run_backtest()`同一組輸入重建股票部位
+    equity curve，逐位元核對與#400已登記數字（報酬-12.31%/MDD-20.32%/
+    150筆交易）完全一致後才繼續（`reconstruction_verified_identical_
+    to_registered_result: true`），確認這不是重跑，是重建已消耗結果。
+    用1:4分割比例修正0050序列後重算：IR(年化)從原始`-0.4689`變成
+    `-2.7097`（更負）、beta_dimson從`0.111`變成`0.4626`、
+    alpha(年化)從`-7.17%`變成`-27.96%`(p=0.0118)、0050同期含息買進
+    持有從原始誤算的`-39.66%`變成真實的`+141.35%`。股票部位報酬/MDD/
+    交易數完全不受影響（未重跑）。全部寫入`research/data/h1_gates.json`
+    的`diagnostic_benchmark_corrected`欄位。
+  - ⑤`TRIALS_LEDGER.md`#400與`STRATEGY_GRAVEYARD.md`的`## #400`條目
+    均已改寫：註明0050基準受未處理1拆4分割汙染、原始IR/beta/0050報酬
+    數字不可信；判定維持FAIL，理由改為「修正後股票部位對真實0050基準
+    (+141.35%)的落後幅度遠大於原始判定所示」；已撤回「2007-2014的IR
+    由正轉負示範holdout意義」這段敘述，改寫為「原始敘述本身邏輯沒錯，
+    但引用的holdout期原始數字當時已受污染，故撤回這個具體措辭，正確
+    說法是修正後兩期都指向同一結論（此候選在holdout期沒有正向alpha）」。
+
+  **修.六**：
+  - ①查證FinMind官方文件`https://finmind.github.io/tutor/TaiwanMarket/
+    Fundamental/`＋live API測試（非猜名稱）：`TaiwanStockSplitPrice`
+    （接受`data_id`，欄位date/stock_id/type/before_price/after_price/
+    max_price/min_price/open_price，0050實測`before_price=188.65,
+    after_price=47.16`）；`TaiwanStockCapitalReductionReferencePrice`
+    （接受`data_id`，欄位含ClosingPriceonTheLastTradingDay/
+    PostReductionReferencePrice等，用2327的5筆真實減資事件驗證）；
+    `TaiwanStockParValueChange`（**拒絕**`data_id`，實測回傳HTTP 400
+    `"parameter data_id don't provide"`，改用市場全體(空字串)查詢後
+    在客戶端用`stock_id`欄位過濾）。
+  - ②`research/adjust.py`已重構：新增
+    `_split_events_from_df()`/`_capital_reduction_events_from_df()`/
+    `_par_value_change_events_from_df()`/`_combine_adjustment_events()`/
+    `_par_value_change_market_wide()`，`adjustment_events()`與holdout
+    腳本的`_uncapped_adjustment_events()`都改呼叫`_combine_adjustment_
+    events()`合併四類事件(股利+分割+減資+面額變更)。自我測試（
+    `python adjust.py`既有`_self_test_synthetic()`/`_self_test_known_
+    bad_stock()`均PASS）：0050在2025-06-18還原後日報酬落在±10%內
+    (通過)；另挑2327(5次真實減資事件2013~2022)逐一核對除權日當日報酬
+    (+1.92%、+8.99%等)，均在±10%內(通過)。
+  - ③新增永久閘門`check_adjusted_series_anomalies()`（閾值
+    `ANOMALY_RETURN_THRESHOLD_PCT=11.0`，排除新上市前5個交易日），
+    整段包在try/except、內部失敗只印`::warning::`絕不拋出（已用缺欄位/
+    空DataFrame/None日期等異常輸入直接測試過，確認不會讓呼叫端崩潰，
+    符合CLAUDE.md十二節「守門員自身失敗只能降級」的規則）；命中寫入
+    append-only的`research/data/adjustment_anomaly_warnings.jsonl`
+    （依`(stock_id, date)`去重）。`generate_status_json.py`新增
+    `build_adjustment_anomaly_warnings()`並已接進`main()`的
+    `adjustment_anomaly_warnings`欄位——**如實註記**：這支腳本本身
+    目前沒有排程自動執行（既有已知缺口，非本輪新增），要等下一次
+    有人手動跑或被排進排程才會反映到`STATUS.json`實際輸出裡。
+  - ④**進行中，尚未完成**：`inventory_2025_corporate_actions()`已在
+    背景執行（掃描H.一的251檔樣本，非全市場，範圍已在程式內明確
+    註記），因FinMind三類資料集額度限制，掃描仍在跑，尚未產出
+    `research/data/h1_2025_corporate_actions_inventory.json`的最終
+    結果，**「修正後重建受影響部分」也因此尚未開始**。這是本條目
+    唯一未完成的部分，不因此延後前面已完成部分的push，會在背景掃描
+    完成、重建做完後另開一則回報收尾（不需要總司令重新裁示）。
+  - **本輪未解決、如實記錄的疑點（重要，會影響對「其他/待查」數量的
+    解讀）**：`TaiwanStockDividend`的`CashIncreaseSubscriptionRate`
+    （現金增資認股比率）欄位，某些事件的值遠大於一般認知的「比率」
+    尺度（例如1316在2025-01-09該值為16.195151、1586在2026-06-18為
+    19.74422）。若直接代入既有公式`denominator = 1 + stock_ratio +
+    rights_ratio`（未經任何尺度換算），會把該日期以前的還原價壓縮成
+    約1/17，並在事件日產生一筆假的+1514%跳空——這極可能是②/③掃描
+    中大量「其他/待查」與部分「疑似減資」命中的根因。但FinMind官方
+    文件對這個欄位只給範例值「9.84、39.8」未寫明單位，不能排除這
+    就是欄位本身的正常尺度、且既有公式（本輪之前就存在、不是本輪
+    新寫的）可能一直誤解這個欄位——**依「不得猜名稱/不得猜換算比例」
+    的紀律，本輪不猜測修正，只在`adjust.py`模組docstring與這裡列為
+    未解決疑點，需要先取得官方對這個欄位單位的進一步確認才能動手修**。
 
 ## 2026-09-27 總司令裁示【新.二：研究方向轉向「0050核心＋加值層」v1（先求有）】（原文登記，排在驗.五/修.六完成並經Cowork核對後才動工）
 

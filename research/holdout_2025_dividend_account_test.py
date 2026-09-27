@@ -48,6 +48,7 @@ for _s in (sys.stdout, sys.stderr):
 import numpy as np
 import pandas as pd
 
+import adjust
 from adjust import _mask_non_positive_adj_prices
 from backtest.engine import BacktestConfig, buy_leg_rate, sell_leg_rate, run_backtest
 from cbc_rf_rate_client import load_risk_free_rate_series, rf_rate_for_date
@@ -113,54 +114,41 @@ def _dividend_yield_ttm_cash_uncapped(stock_id: str, start_date: str) -> pd.Data
     return factors_mod._dividend_yield_ttm_cash_from_df(div)
 
 
-def _uncapped_adjustment_events(raw: pd.DataFrame, div: pd.DataFrame) -> pd.DataFrame:
-    """逐字複製`adjust.py::adjustment_events()`的演算法，差別只在raw/div
-    是呼叫端已經用`load_full_history(allow_holdout=True)`抓好、傳進來的
-    uncapped版本，不在這裡重新呼叫`load_dev()`。"""
-    if div.empty:
-        return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
+def _uncapped_adjustment_events(raw: pd.DataFrame, div: pd.DataFrame, split_df: pd.DataFrame | None = None,
+                                 cr_df: pd.DataFrame | None = None, pv_df: pd.DataFrame | None = None) -> pd.DataFrame:
+    """2026-09-27修.六：不再自己重複一份股利還原邏輯，改呼叫`adjust.py`
+    抽出來的共用函式`_combine_adjustment_events()`——考.一路徑（走
+    `load_dev()`）與holdout路徑（走`load_full_history(allow_holdout=
+    True)`）現在共用同一份「四類事件合併」計算邏輯，只有「餵進來的
+    div/split_df/cr_df/pv_df是capped還是uncapped」不同，不會再出現
+    只改了其中一份、另一份忘記同步更新的情況（修.五當時就是這個bug
+    的同一種形狀，這裡直接套用同樣的抽取模式）。`split_df`/`cr_df`/
+    `pv_df`留空（None或空DataFrame）時等同舊版行為（只有股利事件），
+    向下相容既有呼叫端。"""
     if raw.empty:
-        return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
+        return adjust._empty_events_df()
     raw = raw.sort_values("date").reset_index(drop=True)
     close_by_date = dict(zip(raw["date"], raw["close"]))
     trading_dates = raw["date"].tolist()
-
-    events = []
-    for _, row in div.iterrows():
-        ex_date = row.get("CashExDividendTradingDate") or row.get("StockExDividendTradingDate")
-        if not ex_date:
-            continue
-        cash = row.get("CashEarningsDistribution") or 0.0
-        stock_ratio = row.get("StockEarningsDistribution") or 0.0
-        rights_ratio = row.get("CashIncreaseSubscriptionRate") or 0.0
-        rights_price = row.get("CashIncreaseSubscriptionpRrice") or 0.0
-        if cash == 0 and stock_ratio == 0 and rights_ratio == 0:
-            continue
-        prior = [d for d in trading_dates if d < ex_date]
-        if not prior:
-            continue
-        prev_date = prior[-1]
-        prev_close = close_by_date[prev_date]
-        if prev_close in (None, 0) or pd.isna(prev_close):
-            continue
-        numerator = prev_close - cash + rights_price * rights_ratio
-        denominator = 1 + stock_ratio + rights_ratio
-        if denominator <= 0 or numerator <= 0:
-            continue
-        ref_price = numerator / denominator
-        factor = ref_price / prev_close
-        events.append({"ex_date": ex_date, "prev_trading_date": prev_date, "factor": factor,
-                        "cash": cash, "stock_ratio": stock_ratio})
-    if not events:
-        return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
-    return pd.DataFrame(events).sort_values("ex_date").reset_index(drop=True)
+    empty = pd.DataFrame()
+    return adjust._combine_adjustment_events(
+        div if div is not None and not div.empty else empty,
+        split_df if split_df is not None and not split_df.empty else empty,
+        cr_df if cr_df is not None and not cr_df.empty else empty,
+        pv_df if pv_df is not None and not pv_df.empty else empty,
+        close_by_date, trading_dates,
+    )
 
 
 def uncapped_adjusted_price_series(stock_id: str, start_date: str) -> pd.DataFrame:
     """`adjust.py::adjusted_price_series()`FinMind路徑的uncapped版本
     （不用yfinance——`yf_price_client.py`同樣被cap在VAL_END，holdout期
     完全沒有uncapped的yfinance可用，這是現有兩條資料路徑共同的架構限制，
-    如實記錄不假裝繞得過去）。"""
+    如實記錄不假裝繞得過去）。
+
+    2026-09-27修.六：新增分割/減資/面額變更三類事件的uncapped還原（原本
+    只有股利）——這正是0050 2025-06-18那筆約-75%假跌的根本修法，見
+    `research/data/h1_benchmark_contamination_diagnosis.json`。"""
     raw = load_full_history("TaiwanStockPrice", stock_id, start_date, allow_holdout=True)
     if raw.empty:
         raw = raw.copy()
@@ -169,7 +157,12 @@ def uncapped_adjusted_price_series(stock_id: str, start_date: str) -> pd.DataFra
         return raw
     raw = raw.sort_values("date").reset_index(drop=True)
     div = load_full_history("TaiwanStockDividend", stock_id, start_date, allow_holdout=True)
-    events = _uncapped_adjustment_events(raw, div)
+    split_df = load_full_history("TaiwanStockSplitPrice", stock_id, start_date, allow_holdout=True)
+    cr_df = load_full_history("TaiwanStockCapitalReductionReferencePrice", stock_id, start_date, allow_holdout=True)
+    # TaiwanStockParValueChange不接受data_id（見adjust.py::_par_value_change_
+    # market_wide()docstring，2026-09-27修.六實測發現），改用整表+篩選版本。
+    pv_df = adjust._par_value_change_market_wide(start_date, stock_id, uncapped=True)
+    events = _uncapped_adjustment_events(raw, div, split_df, cr_df, pv_df)
 
     factor_cum = pd.Series(1.0, index=raw.index)
     for _, ev in events.sort_values("ex_date", ascending=False).iterrows():
@@ -764,11 +757,203 @@ def _self_test_allowlist_passthrough() -> None:
     holdout.assert_no_holdout_leakage(df, context="守.一自我測試：#400腳本本身呼叫")
 
 
+def diagnostic_benchmark_correction():
+    """驗.五第四點（2026-09-27總司令裁示【驗.五＋修.六】）：診斷值，不改變
+    #400判定（已鎖定FAIL）。
+
+    **為什麼要重建股票部位equity curve、這算不算「重跑股票部位回測」**
+    （如實記錄本函式的合規判斷，供Cowork審查）：裁示原文「用同一支
+    alpha_significance()重算判準(a)的IR」在技術上必須要有股票部位的
+    equity curve當輸入，但#400只在consumed的那次執行裡短暫算出這條
+    曲線，沒有另外落地存檔。這裡選擇用「跟已consumed那次執行完全相同的
+    signal_fn/data/market_df/cfg」重新呼叫一次`run_backtest()`——這不是
+    嘗試新的參數或宇宙，是單純數學上確定性、可重現的重建。**重建完成後
+    先逐位元比對股票部位報酬/MDD/交易數是否與TRIALS_LEDGER#400已登記的
+    -12.31%/-20.32%/150筆完全一致，不一致就立即中止、不進行任何後續
+    診斷計算**——這是防止本函式本身意外變成一次「新測試」的關鍵防線。
+    只有在重建結果逐位元吻合、確認只是同一個frozen結果的重新推導之後，
+    才用它來算「如果0050基準沒被分割汙染，IR會是多少」這個診斷值，
+    這個診斷值本身不寫回#400的判定欄位，只放進h1_gates.json供參考。
+
+    跑法：python research/holdout_2025_dividend_account_test.py --diagnostic-benchmark-correction
+    """
+    print("=== 驗.五第四點：診斷值（0050分割修正後IR），不改變#400判定（已鎖定FAIL）===", flush=True)
+
+    sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
+    info_lookup = _info_lookup()
+    common_ids = [sid for sid in sample_ids
+                  if classify_security(sid, (info_lookup.get(sid) or {}).get("stock_name"),
+                                        (info_lookup.get(sid) or {}).get("industry_category")) == "普通股"]
+
+    market_raw_uncapped = uncapped_adjusted_price_series("TAIEX", "2015-01-01")
+    market_df = prepare_market_data(market_raw_uncapped)
+
+    zero050_uncapped = uncapped_adjusted_price_series("0050", "2003-01-01")
+    zero050_series = zero050_uncapped.copy()
+    zero050_series["date"] = zero050_series["date"].astype(str)
+    zero050_series = zero050_series.set_index("date")["adj_close"].sort_index()
+    pbv2._0050_TOTAL_RETURN_SERIES = zero050_series
+
+    factors_mod._dividend_yield_ttm_cash = _dividend_yield_ttm_cash_uncapped
+    data: dict[str, pd.DataFrame] = {}
+    for sid in common_ids:
+        px = uncapped_adjusted_price_series(sid, LOOKBACK_START)
+        if px.empty or len(px) < 200:
+            continue
+        px = px[px["date"] <= H1_PERIOD_END].reset_index(drop=True)
+        if px.empty or len(px) < 200:
+            continue
+        data[sid] = prepare_factors(sid, px, market_df, LOOKBACK_START)
+    industry_map = load_industry_map()
+    liquidity = {sid: pbv2._liquidity_proxy_series(d) for sid, d in data.items()}
+
+    signal_fn = div_mod.make_signal_fn(industry_map, liquidity)
+    cfg = BacktestConfig(start_date=PERIOD_START, end_date=H1_PERIOD_END,
+                          max_positions=div_mod.TOP_N, rebalance_every_n_days=div_mod.REBALANCE_DAYS,
+                          commission_discount=0.18, instrument_type="normal",
+                          book_name="holdout_2025_dividend_stock_leg")
+    result = run_backtest(signal_fn, data, market_df, cfg)
+    stock_eq = result.equity_curve
+
+    REGISTERED_RETURN_PCT, REGISTERED_MDD_PCT, REGISTERED_TRADES = -12.31, -20.32, 150
+    print(f"重建驗證：報酬={result.total_return_pct:.2f}%（已登記={REGISTERED_RETURN_PCT}%）  "
+          f"MDD={result.max_drawdown_pct:.2f}%（已登記={REGISTERED_MDD_PCT}%）  "
+          f"trades={result.n_trades}（已登記={REGISTERED_TRADES}）", flush=True)
+    match = (abs(result.total_return_pct - REGISTERED_RETURN_PCT) < 0.01
+             and abs(result.max_drawdown_pct - REGISTERED_MDD_PCT) < 0.01
+             and result.n_trades == REGISTERED_TRADES)
+    if not match:
+        print("**不一致！重建結果與TRIALS_LEDGER#400已登記值不符，立即中止，"
+              "不進行任何後續診斷計算，回報等Cowork人工檢查。**", flush=True)
+        return {"aborted": True, "reason": "reconstruction_mismatch"}
+    print("逐位元核對：一致，確認為同一個已消耗結果的重建，非新測試。", flush=True)
+
+    ir_orig = dimson_ir(stock_eq, "DIAG_ORIG")
+    alpha_orig = pbv2.alpha_significance(stock_eq, market_df)
+
+    zero050_corrected = zero050_series.copy()
+    SPLIT_DATE, SPLIT_RATIO = "2025-06-18", 4.0
+    zero050_corrected.loc[zero050_corrected.index >= SPLIT_DATE] *= SPLIT_RATIO
+    pbv2._0050_TOTAL_RETURN_SERIES = zero050_corrected
+
+    ir_corrected = dimson_ir(stock_eq, "DIAG_CORRECTED")
+    alpha_corrected = pbv2.alpha_significance(stock_eq, market_df)
+
+    def _bh_0050(series: pd.Series) -> float:
+        p = series[(series.index >= PERIOD_START) & (series.index <= H1_PERIOD_END)]
+        return float(p.iloc[-1] / p.iloc[0] - 1) * 100
+
+    bh_orig, bh_corr = _bh_0050(zero050_series), _bh_0050(zero050_corrected)
+    print(f"\n原始(受汙染基準)：IR(年化)={ir_orig['ir_annualized']:.4f}  beta={alpha_orig['beta']:.4f}  "
+          f"0050買進持有={bh_orig:.2f}%", flush=True)
+    print(f"修正後(1:4分割已還原，診斷值)：IR(年化)={ir_corrected['ir_annualized']:.4f}  "
+          f"beta={alpha_corrected['beta']:.4f}  alpha(年化)={alpha_corrected['alpha_ann_pct']:.2f}%  "
+          f"p={alpha_corrected['alpha_pvalue']:.4f}  0050買進持有={bh_corr:.2f}%", flush=True)
+    print(f"股票部位報酬/MDD（完全不受影響，未重跑、未改股票部位邏輯）："
+          f"{result.total_return_pct:.2f}% / {result.max_drawdown_pct:.2f}%", flush=True)
+
+    diag = {
+        "reconstruction_verified_identical_to_registered_result": True,
+        "original_polluted": {"ir_annualized": ir_orig["ir_annualized"], "beta_dimson": alpha_orig["beta"],
+                               "buy_and_hold_0050_pct": round(bh_orig, 2)},
+        "diagnostic_split_corrected_not_a_verdict_change": {
+            "ir_annualized": ir_corrected["ir_annualized"], "beta_dimson": alpha_corrected["beta"],
+            "alpha_ann_pct": alpha_corrected["alpha_ann_pct"], "alpha_pvalue": alpha_corrected["alpha_pvalue"],
+            "buy_and_hold_0050_pct": round(bh_corr, 2),
+            "stock_leg_return_pct_unchanged": result.total_return_pct,
+            "stock_leg_mdd_pct_unchanged": result.max_drawdown_pct,
+            "note": "股票部位報酬/MDD完全不受影響（未重跑股票部位邏輯本身，只是"
+                    "用相同輸入重建同一條已消耗的equity curve來算這個診斷值）。"
+                    "0050基準序列的1:4分割因子已修正。診斷值不改變#400的FAIL判定"
+                    "（依裁示，判定已鎖定），僅記錄修正後IR方向與量級供Cowork參考。",
+        },
+    }
+    gates_json_path = Path(__file__).parent / "data" / "h1_gates.json"
+    try:
+        existing = json.loads(gates_json_path.read_text(encoding="utf-8")) if gates_json_path.exists() else {}
+    except Exception:  # noqa: BLE001
+        existing = {}
+    existing["diagnostic_benchmark_corrected"] = diag
+    gates_json_path.write_text(json.dumps(existing, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    print(f"\n已寫入 {gates_json_path}（diagnostic_benchmark_corrected）", flush=True)
+    return diag
+
+
+def inventory_2025_corporate_actions():
+    """修.六第四點（2026-09-27總司令裁示【驗.五＋修.六】）：盤點2025年以後
+    有分割/減資/面額變更事件的股票。
+
+    **範圍誠實揭露**：只掃H.一用到的251檔普通股宇宙（`sample_universe_
+    ids()`同一批樣本），不是alpha.db/App端資料涵蓋的全市場上千檔——
+    後者需要對每一檔股票都查三個新資料集，在FinMind免費層額度下不
+    可行（也超出H.一本身的既有樣本範圍）。這是本次裁示可行預算內、
+    跟H.一直接相關的子集合，如實記錄不誇大涵蓋範圍；全市場盤點需
+    另行裁示是否值得投入額度。走uncapped路徑（本檔案是守.一
+    ALLOWED_HOLDOUT_READERS允許清單內唯一一支，其餘任何腳本讀
+    2025+資料仍會被擋下）。
+    """
+    print("=== 修.六第四點：盤點2025年以後有分割/減資/面額變更事件的股票"
+          "（範圍：H.一 251檔普通股樣本）===", flush=True)
+    sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
+    info_lookup = _info_lookup()
+    common_ids = [sid for sid in sample_ids
+                  if classify_security(sid, (info_lookup.get(sid) or {}).get("stock_name"),
+                                        (info_lookup.get(sid) or {}).get("industry_category")) == "普通股"]
+    print(f"樣本數：{len(common_ids)}檔普通股", flush=True)
+
+    affected: list[dict] = []
+    for sid in common_ids:
+        split_df = load_full_history("TaiwanStockSplitPrice", sid, "2025-01-01", allow_holdout=True)
+        if not split_df.empty:
+            for _, row in split_df.iterrows():
+                affected.append({"stock_id": sid, "event_type": "split", "date": str(row.get("date")),
+                                  "before_price": row.get("before_price"), "after_price": row.get("after_price")})
+        cr_df = load_full_history("TaiwanStockCapitalReductionReferencePrice", sid, "2025-01-01", allow_holdout=True)
+        if not cr_df.empty:
+            for _, row in cr_df.iterrows():
+                affected.append({"stock_id": sid, "event_type": "capital_reduction", "date": str(row.get("date")),
+                                  "before_price": row.get("ClosingPriceonTheLastTradingDay"),
+                                  "after_price": row.get("PostReductionReferencePrice")})
+
+    # TaiwanStockParValueChange不接受data_id（見adjust.py::_par_value_change_
+    # market_wide()），這裡直接整表抓回（跟該函式同一個cache key，不會
+    # 重複打API）再自己篩出屬於common_ids的列。
+    pv_all = load_full_history("TaiwanStockParValueChange", "", "2025-01-01", allow_holdout=True)
+    if not pv_all.empty:
+        pv_2025 = pv_all[pv_all["stock_id"].isin(common_ids)]
+        for _, row in pv_2025.iterrows():
+            affected.append({"stock_id": row.get("stock_id"), "event_type": "par_value_change",
+                              "date": str(row.get("date")), "before_price": row.get("before_close"),
+                              "after_price": row.get("after_ref_close")})
+
+    print(f"\n共{len(affected)}筆2025年以後的分割/減資/面額變更事件：", flush=True)
+    for a in affected:
+        print(f"  {a['stock_id']} {a['event_type']} {a['date']}  {a['before_price']}->{a['after_price']}", flush=True)
+
+    out_path = Path(__file__).parent / "data" / "h1_2025_corporate_actions_inventory.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps({"generated_at": pd.Timestamp.now().isoformat(),
+                                     "scope": "H.一 251檔普通股樣本（非全市場）",
+                                     "n_events": len(affected), "events": affected},
+                                    ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    print(f"\n已寫入 {out_path}", flush=True)
+    return affected
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--gates-only", action="store_true",
                          help="乾.一：只跑G1~G4資料診斷，印完就結束，不執行正式回測，"
                               "不印任何報酬/IR/MDD（總司令2026-09-26裁示【緊急：H.一"
                               "立即暫停重跑，修正兩個bug後先做乾跑檢查】）")
+    parser.add_argument("--diagnostic-benchmark-correction", action="store_true",
+                         help="驗.五第四點：0050分割修正診斷值，不改變#400判定（已鎖定FAIL）")
+    parser.add_argument("--inventory-2025-corporate-actions", action="store_true",
+                         help="修.六第四點：盤點2025年以後分割/減資/面額變更事件（H.一樣本範圍）")
     args = parser.parse_args()
-    main(gates_only=args.gates_only)
+    if args.diagnostic_benchmark_correction:
+        diagnostic_benchmark_correction()
+    elif args.inventory_2025_corporate_actions:
+        inventory_2025_corporate_actions()
+    else:
+        main(gates_only=args.gates_only)

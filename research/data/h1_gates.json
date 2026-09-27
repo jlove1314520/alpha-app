@@ -241,5 +241,23 @@
       }
     },
     "g7_pass": true
+  },
+  "diagnostic_benchmark_corrected": {
+    "reconstruction_verified_identical_to_registered_result": true,
+    "original_polluted": {
+      "ir_annualized": -0.46886474929900684,
+      "beta_dimson": 0.11069508532120119,
+      "buy_and_hold_0050_pct": -39.66
+    },
+    "diagnostic_split_corrected_not_a_verdict_change": {
+      "ir_annualized": -2.7096998578339404,
+      "beta_dimson": 0.46263823943850385,
+      "alpha_ann_pct": -27.961783095529324,
+      "alpha_pvalue": 0.011793485110468273,
+      "buy_and_hold_0050_pct": 141.35,
+      "stock_leg_return_pct_unchanged": -12.312776153269589,
+      "stock_leg_mdd_pct_unchanged": -20.32012446758312,
+      "note": "股票部位報酬/MDD完全不受影響（未重跑股票部位邏輯本身，只是用相同輸入重建同一條已消耗的equity curve來算這個診斷值）。0050基準序列的1:4分割因子已修正。診斷值不改變#400的FAIL判定（依裁示，判定已鎖定），僅記錄修正後IR方向與量級供Cowork參考。"
+    }
   }
 }

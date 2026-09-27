@@ -49,10 +49,29 @@ finmind_client.load_full_history() directly and route the result through
 validation.holdout.unlock_holdout_once() themselves, rather than expecting
 this module to do it for them.
 
-Known gap (documented, not silently ignored): capital reductions (減資) are
-NOT handled here. TaiwanStockCapitalReductionReferencePrice hasn't been
-wired in yet. A stock that underwent a capital reduction will show an
-unadjusted jump in this series on that date. See DATA.md.
+**2026-09-27修.六（總司令裁示【驗.五＋修.六：H.一基準汙染診斷＋資料層
+分割/減資還原修正】）**：上一段記錄的「已知缺口」已修正——分割
+（TaiwanStockSplitPrice）、減資（TaiwanStockCapitalReductionReference
+Price）、面額變更（TaiwanStockParValueChange）三類事件現在都會被還原。
+起因：0050於2025-06以1拆4分割，`adjustment_events()`原本完全不處理
+分割，導致0050 uncapped adj_close在2025-06-18出現約-75%的假跌（見
+`research/data/h1_benchmark_contamination_diagnosis.json`），汙染了
+H.一（TRIALS_LEDGER#400）用來算判準(a) IR的0050基準報酬序列。三類
+新事件的還原因子與既有的現金/股票股利、現金增資邏輯合併進同一個
+`factor_cum`累乘鏈，見`_split_events_from_df()`／
+`_capital_reduction_events_from_df()`／`_par_value_change_events_from_
+df()`／`_combine_adjustment_events()`。
+
+**另一個已發現但本輪未修正的疑點（如實記錄，不假裝已解決）**：診斷
+過程中發現`CashIncreaseSubscriptionRate`（現金增資認股比率）欄位在
+部分個股出現遠大於1的數值（例：股票1316於2025-01-09該欄位=16.195151，
+套進既有公式`denominator = 1 + stock_ratio + rights_ratio`會把還原
+因子壓縮到原本的約1/17，產生一個+1514%的假回升）；FinMind官方文件
+只給出欄位中文名稱「現金增資認股比率」，未明確說明數值單位（是否
+需要除以100或1000才是正確的每股比率），如實標註本次未能單獨向官方
+確認精確換算比例，**未修改**這個欄位既有的使用方式，只記錄在
+`h1_benchmark_contamination_diagnosis.json`供後續查證，不得誤以為
+本次連這個問題都一併解決了。
 
 **2026-09-23 fix (資料.零稽核):** both upstream sources occasionally hand
 back a non-positive close that is not a real price:
@@ -77,24 +96,27 @@ zero-price case + a live spot-check against stock 5395's known-bad dates).
 """
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pandas as pd
 
 from finmind_client import load_dev
 
 
-def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
-    """One row per ex-date with the multiplicative back-adjustment factor."""
-    div = load_dev("TaiwanStockDividend", stock_id, start_date)
-    if div.empty:
-        return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
+_EMPTY_EVENTS_COLUMNS = ["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio", "event_type"]
 
-    raw = load_dev("TaiwanStockPrice", stock_id, start_date)
-    if raw.empty:
-        raise ValueError(f"no raw price data for {stock_id}, cannot compute adjustment factors")
-    raw = raw.sort_values("date").reset_index(drop=True)
-    close_by_date = dict(zip(raw["date"], raw["close"]))
-    trading_dates = raw["date"].tolist()
 
+def _empty_events_df() -> pd.DataFrame:
+    # Bug fixed 2026-08-22 (found via a 100-stock random-universe run): pd.DataFrame([])
+    # has zero columns, so .sort_values("ex_date") on it raises KeyError('ex_date') --
+    # must return the properly-columned empty frame directly instead of falling through.
+    return pd.DataFrame(columns=_EMPTY_EVENTS_COLUMNS)
+
+
+def _dividend_events_from_df(div: pd.DataFrame, close_by_date: dict, trading_dates: list) -> list[dict]:
+    """現金股利/股票股利/現金增資的還原因子——2026-09-27修.六抽出前的
+    原始邏輯，逐行未改（只是搬了位置，供跟split/減資/面額變更事件合併）。"""
     events = []
     for _, row in div.iterrows():
         # Cash and stock dividends normally share one ex-date; use whichever is populated.
@@ -124,15 +146,147 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
         factor = ref_price / prev_close
         events.append({
             "ex_date": ex_date, "prev_trading_date": prev_date, "factor": factor,
-            "cash": cash, "stock_ratio": stock_ratio,
+            "cash": cash, "stock_ratio": stock_ratio, "event_type": "dividend",
         })
+    return events
 
+
+def _split_events_from_df(split_df: pd.DataFrame) -> list[dict]:
+    """分割/反分割（2026-09-27修.六新增）：`TaiwanStockSplitPrice`。
+    欄位（已向FinMind官方文件驗證，見`adjust.py`模組docstring）：
+    date/stock_id/type/before_price/after_price/max_price/min_price/
+    open_price。factor直接就是`after_price/before_price`——這個資料集
+    本身就是「分割前收盤價」對「分割後參考價」，不需要另外去raw price
+    序列找前一交易日收盤價（跟股利事件不同，股利事件的`ex_date`本身
+    沒有價格資訊，分割事件的`before_price`就是價格資訊本身）。"""
+    events = []
+    if split_df.empty:
+        return events
+    for _, row in split_df.iterrows():
+        ex_date = row.get("date")
+        before_price = row.get("before_price")
+        after_price = row.get("after_price")
+        if not ex_date or before_price in (None, 0) or pd.isna(before_price) \
+                or after_price in (None,) or pd.isna(after_price) or after_price <= 0:
+            continue
+        factor = after_price / before_price
+        events.append({
+            "ex_date": ex_date, "prev_trading_date": None, "factor": factor,
+            "cash": 0.0, "stock_ratio": 0.0, "event_type": "split",
+        })
+    return events
+
+
+def _capital_reduction_events_from_df(cr_df: pd.DataFrame) -> list[dict]:
+    """減資恢復買賣（2026-09-27修.六新增）：
+    `TaiwanStockCapitalReductionReferencePrice`。欄位（已向FinMind官方
+    文件驗證）：date/stock_id/ClosingPriceonTheLastTradingDay/
+    PostReductionReferencePrice/LimitUp/LimitDown/OpeningReferencePrice/
+    ExrightReferencePrice/ReasonforCapitalReduction。factor =
+    減資恢復參考價 / 減資前最後交易日收盤價，跟分割事件同一個模式：
+    這個資料集本身就同時給了事件前後的價格，不需要另外查raw price。"""
+    events = []
+    if cr_df.empty:
+        return events
+    for _, row in cr_df.iterrows():
+        ex_date = row.get("date")
+        before = row.get("ClosingPriceonTheLastTradingDay")
+        after = row.get("PostReductionReferencePrice")
+        if not ex_date or before in (None, 0) or pd.isna(before) \
+                or after in (None,) or pd.isna(after) or after <= 0:
+            continue
+        factor = after / before
+        events.append({
+            "ex_date": ex_date, "prev_trading_date": None, "factor": factor,
+            "cash": 0.0, "stock_ratio": 0.0, "event_type": "capital_reduction",
+        })
+    return events
+
+
+def _par_value_change_events_from_df(pv_df: pd.DataFrame) -> list[dict]:
+    """面額變更恢復買賣（2026-09-27修.六新增）：`TaiwanStockParValueChange`。
+    欄位（已向FinMind官方文件驗證）：date/stock_id/stock_name/
+    before_close/after_ref_close/after_ref_max/after_ref_min/
+    after_ref_open。factor = after_ref_close / before_close，同一個
+    「資料集本身給事件前後價格」模式。"""
+    events = []
+    if pv_df.empty:
+        return events
+    for _, row in pv_df.iterrows():
+        ex_date = row.get("date")
+        before = row.get("before_close")
+        after = row.get("after_ref_close")
+        if not ex_date or before in (None, 0) or pd.isna(before) \
+                or after in (None,) or pd.isna(after) or after <= 0:
+            continue
+        factor = after / before
+        events.append({
+            "ex_date": ex_date, "prev_trading_date": None, "factor": factor,
+            "cash": 0.0, "stock_ratio": 0.0, "event_type": "par_value_change",
+        })
+    return events
+
+
+def _combine_adjustment_events(div: pd.DataFrame, split_df: pd.DataFrame, cr_df: pd.DataFrame,
+                                pv_df: pd.DataFrame, close_by_date: dict, trading_dates: list) -> pd.DataFrame:
+    """把股利/分割/減資/面額變更四類事件合併成同一份、依ex_date排序的
+    還原因子表——呼叫端（`adjustment_events()`與holdout腳本的
+    `_uncapped_adjustment_events()`）套用`factor_cum`累乘的邏輯完全不變，
+    只是事件來源從一個資料集變成四個。2026-09-27修.六新增。"""
+    events = (
+        _dividend_events_from_df(div, close_by_date, trading_dates)
+        + _split_events_from_df(split_df)
+        + _capital_reduction_events_from_df(cr_df)
+        + _par_value_change_events_from_df(pv_df)
+    )
     if not events:
-        # Bug fixed 2026-08-22 (found via a 100-stock random-universe run): pd.DataFrame([])
-        # has zero columns, so .sort_values("ex_date") on it raises KeyError('ex_date') --
-        # must return the properly-columned empty frame directly instead of falling through.
-        return pd.DataFrame(columns=["ex_date", "prev_trading_date", "factor", "cash", "stock_ratio"])
+        return _empty_events_df()
     return pd.DataFrame(events).sort_values("ex_date").reset_index(drop=True)
+
+
+def _par_value_change_market_wide(start_date: str, stock_id: str, *, uncapped: bool = False) -> pd.DataFrame:
+    """`TaiwanStockParValueChange`（2026-09-27修.六，實測發現）**不接受**
+    `data_id`參數——`python adjust.py`自我測試實際打過一次才發現這件事
+    （FinMind回400：\"parameter data_id don't provide on
+    TaiwanStockParValueChange dataset\"），跟另外兩個新資料集
+    （`TaiwanStockSplitPrice`／`TaiwanStockCapitalReductionReferencePrice`
+    ，兩者都已實測確認接受`data_id`）行為不同，不能一視同仁。這支函式
+    改成不帶`data_id`整表抓回（會落到`finmind_client`既有的parquet
+    快取，同一個process/同一天內對不同股票重複呼叫不會重複打API），
+    在Python端用`stock_id`欄位篩選。"""
+    if uncapped:
+        from finmind_client import load_full_history
+        full = load_full_history("TaiwanStockParValueChange", "", start_date, allow_holdout=True)
+    else:
+        full = load_dev("TaiwanStockParValueChange", "", start_date)
+    if full.empty or "stock_id" not in full.columns:
+        return pd.DataFrame()
+    return full[full["stock_id"] == stock_id].reset_index(drop=True)
+
+
+def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
+    """One row per ex-date with the multiplicative back-adjustment factor.
+
+    2026-09-27修.六：現在合併四類事件（股利/分割/減資/面額變更），不再
+    只有股利。三個新資料集缺任何一個都不影響既有的股利邏輯——`load_dev()`
+    對這三個新資料集回傳空表時，`_split_events_from_df()`等函式直接
+    回傳空list，`_combine_adjustment_events()`照常運作。"""
+    div = load_dev("TaiwanStockDividend", stock_id, start_date)
+    split_df = load_dev("TaiwanStockSplitPrice", stock_id, start_date)
+    cr_df = load_dev("TaiwanStockCapitalReductionReferencePrice", stock_id, start_date)
+    pv_df = _par_value_change_market_wide(start_date, stock_id)
+
+    if div.empty and split_df.empty and cr_df.empty and pv_df.empty:
+        return _empty_events_df()
+
+    raw = load_dev("TaiwanStockPrice", stock_id, start_date)
+    if raw.empty:
+        raise ValueError(f"no raw price data for {stock_id}, cannot compute adjustment factors")
+    raw = raw.sort_values("date").reset_index(drop=True)
+    close_by_date = dict(zip(raw["date"], raw["close"]))
+    trading_dates = raw["date"].tolist()
+
+    return _combine_adjustment_events(div, split_df, cr_df, pv_df, close_by_date, trading_dates)
 
 
 def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
@@ -170,6 +324,7 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
         out["adj_low"] = out["low"]
         _mask_non_positive_adj_prices(out)
         out.attrs["n_events_applied"] = None  # not tracked on this path -- yfinance handles it internally
+        _append_anomaly_log(check_adjusted_series_anomalies(out, stock_id))
         return out
 
     raw = load_dev("TaiwanStockPrice", stock_id, start_date)
@@ -198,7 +353,69 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     out["source"] = "finmind"
     _mask_non_positive_adj_prices(out)
     out.attrs["n_events_applied"] = len(events)
+    _append_anomaly_log(check_adjusted_series_anomalies(out, stock_id))
     return out
+
+
+ANOMALY_RETURN_THRESHOLD_PCT = 11.0  # 修.六第三點：跟驗.五的掃描門檻一致
+ANOMALY_MIN_ROWS_AFTER_LISTING = 5
+ANOMALY_LOG_PATH = Path(__file__).parent / "data" / "adjustment_anomaly_warnings.jsonl"
+
+
+def check_adjusted_series_anomalies(df: pd.DataFrame, stock_id: str) -> list[dict]:
+    """修.六第三點（2026-09-27裁示）永久閘門：任何還原價序列出現單日
+    |報酬|>11%（新上市5日內除外）即列入警告清單。**這是偵測器本身，
+    依CLAUDE.md十二節『守門員自己的失敗只能降級成警告，不得中斷被監控
+    的流程』原則設計——刻意包在最外層try/except，任何內部錯誤都只印
+    警告、回傳空list，絕不讓呼叫`adjusted_price_series()`的任何排程
+    因為這個附加檢查而中斷。**這支只負責『偵測並回傳』，不負責『寫進
+    STATUS.json』（那是另一層彙整的責任，見`_append_anomaly_log()`與
+    `scripts/check_local_schedule_heartbeat.py`的docstring說明，目前
+    尚未接上任何排程，如實記錄現況）。"""
+    try:
+        if df.empty or "adj_close" not in df.columns or len(df) <= ANOMALY_MIN_ROWS_AFTER_LISTING:
+            return []
+        d = df.sort_values("date").reset_index(drop=True)
+        ret = d["adj_close"].pct_change() * 100
+        hits = []
+        for i in range(ANOMALY_MIN_ROWS_AFTER_LISTING, len(d)):
+            r = ret.iloc[i]
+            if pd.notna(r) and abs(r) > ANOMALY_RETURN_THRESHOLD_PCT:
+                hits.append({
+                    "stock_id": stock_id, "date": str(d.loc[i, "date"]), "ret_pct": round(float(r), 2),
+                    "detected_at": pd.Timestamp.now().isoformat(),
+                })
+        return hits
+    except Exception as e:  # noqa: BLE001 -- 偵測失敗只降級成警告，不得讓排程崩潰
+        print(f"::warning::還原價異常偵測失敗（{stock_id}）：{type(e).__name__}: {e}")
+        return []
+
+
+def _append_anomaly_log(hits: list[dict]) -> None:
+    """append-only寫進本機jsonl，供之後彙整進STATUS.json用。同一個
+    (stock_id, date)只記一次，避免同一支股票被重複呼叫`adjusted_price_
+    series()`時（例如多輪排程各自算一次）在log裡無限累積重複列。失敗
+    只降級警告，不拋例外。"""
+    if not hits:
+        return
+    try:
+        seen = set()
+        if ANOMALY_LOG_PATH.exists():
+            for line in ANOMALY_LOG_PATH.read_text(encoding="utf-8").splitlines():
+                try:
+                    rec = json.loads(line)
+                    seen.add((rec.get("stock_id"), rec.get("date")))
+                except Exception:  # noqa: BLE001
+                    continue
+        new_hits = [h for h in hits if (h["stock_id"], h["date"]) not in seen]
+        if not new_hits:
+            return
+        ANOMALY_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with ANOMALY_LOG_PATH.open("a", encoding="utf-8") as f:
+            for h in new_hits:
+                f.write(json.dumps(h, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::還原價異常log寫入失敗：{type(e).__name__}: {e}")
 
 
 def _mask_non_positive_adj_prices(df: pd.DataFrame) -> None:

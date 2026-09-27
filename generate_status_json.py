@@ -1038,6 +1038,41 @@ def build_rate_limit_status() -> dict:
     }
 
 
+def build_adjustment_anomaly_warnings() -> dict:
+    """修.六第三點（2026-09-27總司令裁示【驗.五＋修.六】）永久閘門的彙整
+    半：`research/adjust.py::adjusted_price_series()`每次算還原價都會
+    偵測單日|報酬|>11%（新上市5日內除外），append進`research/data/
+    adjustment_anomaly_warnings.jsonl`；這支負責讀出來彙整成STATUS.json
+    的一個欄位。**如實記錄現況**：目前沒有任何排程呼叫`generate_status_
+    json.py`（見`data/STATUS.json`原本11天未更新的根因，查.一條目），
+    所以這個彙整本身也是「有跑才會更新」，不是自動即時的——這不是本次
+    裁示要求解決的範圍（裁示只要求『依規則只降級成警告，不得讓排程
+    崩潰』），如實揭露而非假裝已經是即時監控。"""
+    path = REPO_ROOT / "research" / "data" / "adjustment_anomaly_warnings.jsonl"
+    if not path.exists():
+        return {"note": "尚無任何還原價異常紀錄（adjustment_anomaly_warnings.jsonl不存在）",
+                "n_warnings": 0, "warnings": []}
+    try:
+        warnings_list = []
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                warnings_list.append(json.loads(line))
+            except Exception:  # noqa: BLE001
+                continue
+        return {
+            "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%"
+                    "還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，"
+                    "不影響任何回測/排程執行；本欄位本身依賴有人手動執行"
+                    "generate_status_json.py才會更新，非即時。",
+            "n_warnings": len(warnings_list),
+            "warnings": warnings_list,
+        }
+    except Exception as e:  # noqa: BLE001 -- 讀取失敗只降級警告
+        return {"note": f"讀取adjustment_anomaly_warnings.jsonl失敗：{e}", "n_warnings": 0, "warnings": []}
+
+
 def build_local_pipeline_health() -> dict:
     """本機十條管線的新鮮度（2026-09-10 停擺四）。
 
@@ -1087,6 +1122,7 @@ def main():
         "workflows": build_workflows(),
         "schedule_health": build_schedule_health(),  # 2026-09-03（P0三-三.1）排程錯過時窗判定
         "local_pipeline_health": build_local_pipeline_health(),  # 2026-09-10（停擺四）本機管線
+        "adjustment_anomaly_warnings": build_adjustment_anomaly_warnings(),  # 2026-09-27修.六第三點
         "app_data_sources": APP_DATA_SOURCES,
         "field_fallback_chains": FIELD_FALLBACK_CHAINS,
         "rate_limit_status": build_rate_limit_status(),
