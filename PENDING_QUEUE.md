@@ -15568,19 +15568,25 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 核對`STRATEGY_GRAVEYARD.md`/`REPORT.md`/`LEADS.md`待辦後，找到一項
 明確符合「非新搜尋，屬既有試驗方法論修正重跑」的項目：
 
-- [ ] **驗.二第二部分** [驗證] `spillover_overlay_v1`（TRIALS_LEDGER
-  #346，已判FAIL：前視偏誤——原版用台股收盤到收盤報酬乘上美股t日訊號，
-  但美股t日訊號要等台股t-1收盤後才知道）改用「開盤到收盤」重建版本
-  （美股t-1收盤訊號→台股t日開盤進場→t日收盤出場，消除前視偏誤），
-  重跑GATE_SEQUENCE並登記為新試驗編號（依CLAUDE.md七之三節，這是對
-  既有假設的方法論修正重跑，非CLAUDE.md十四節「新研究方向搜尋」，
-  符合十四節第2點允許項目）。**心跳**：完成後在
-  `research/PROGRESS_HEARTBEAT.jsonl`append一行，並在`TRIALS_LEDGER.md`
-  新增判定列。**限制**：本項只能呼叫`research/backtest/`／
-  `research/validation/`既有函式（`run_backtest()`等），不得修改這兩個
-  目錄或`research/adjust.py`/`research/pit.py`/`research/trial_
-  registry.py`的原始碼（CLAUDE.md十三節單一寫入者限定，自走軌道發現
-  需要改動這些檔案時只能寫提案，不得直接編輯）。**其餘佇列深度**：
+- [x] **驗.二第二部分**（⚠️2026-09-27馬拉松軌道核對：本項為過期重複補件
+  ——**開盤到收盤重建版本三天前已完成並終局判定**，補件當下沒有查到這個
+  事實。證據：`research/spillover_overlay_v1_o2c.py`（commit `8ca6dad5`，
+  2026-09-24 00:35，訊息「審.三＋驗.二續：value_board_v2便宜重審(#395)＋
+  spillover開盤到收盤版最終判死(#394)」）已完整重用`spillover_overlay_v1.py`
+  的`build_overlay()`/`apply_costs()`/gate2~gate9等函式，資料源換成
+  `spillover_overnight_gate.build_aligned_series_o2c()`(open-to-close報酬)，
+  跑完整第2-9關，登記為`TRIALS_LEDGER.md` #394：**第3關參數密集高原未過
+  （49點網格0點報酬為正，門檻60%），快殺判定FAIL**，未進第4-9關。
+  `STRATEGY_GRAVEYARD.md`「#19（跨市場美股隔夜報酬外溢效應）」條目已記錄
+  「至此#19在台股的兩種可能實現（close-to-close/open-to-close）皆已窮盡
+  並判死，結案，不建議再嘗試同一機制的其他變體」。**結論：不重跑，維持
+  #394既有FAIL判定，本項標記完成，避免下一輪自走再次誤補同一項**】[驗證]
+  ~~`spillover_overlay_v1`（TRIALS_LEDGER #346，已判FAIL：前視偏誤——原版
+  用台股收盤到收盤報酬乘上美股t日訊號，但美股t日訊號要等台股t-1收盤後
+  才知道）改用「開盤到收盤」重建版本（美股t-1收盤訊號→台股t日開盤進場
+  →t日收盤出場，消除前視偏誤），重跑GATE_SEQUENCE並登記為新試驗編號
+  （依CLAUDE.md七之三節，這是對既有假設的方法論修正重跑，非CLAUDE.md
+  十四節「新研究方向搜尋」，符合十四節第2點允許項目）~~。**其餘佇列深度**：
   本輪未找到第二項符合資格的稽核/資料/工具類候選，如實記錄佇列僅補到
   1項（未達12項下限），依凍結.二第4點「補不到12項就誠實記錄佇列變淺，
   不得為了維持深度而違反第1點」，不強行湊數。

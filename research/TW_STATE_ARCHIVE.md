@@ -1692,3 +1692,49 @@ is_holdout_consumed()`開工/收工前皆確認`False`。未動`alpha.db`/
 避免重蹈本輪重複登記的覆轍**。完整見`REPORT.md`第624輪心跳、
 `TRIALS_LEDGER.md`#387-391、`AWAITING_REVIEW.md`。
 
+---
+**最後更新：2026-09-24T01:3x+08:00（馬拉松第632輪，研究帽）**——取鎖乾淨
+（cycle`20260924-013037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`- [ ]`=5（轉向.一續/定案.一/修.三/驗.四/閘門.一，總司令新裁示【候選名單
+定案＋抓取程式修正＋開考前資料品質閘門】）。**完成定案.一**：
+`register_trial()`寫入`TRIALS_LEDGER.md`兩筆事前登記列——**#396**
+`f52w_high_portfolio_v1_2007_2014_prereg`、**#397**
+`dividend_yield_portfolio_v1_2007_2014_prereg`（verdict=未結案，尚未執行
+回測），載明期間2007-01-01~2014-12-31、事前綁定只跑一次不得回頭改參數、
+主判準為2007-2014全段、2007-2009與2010-2014另分段報告但不作主判準、
+Bonferroni以候選數2計算單尾α=0.025、測試前置條件（修.三→驗.四→續抓168檔
+→閘門.一全部通過才准執行）。同步核對**轉向.一續**已被本次裁示解除
+BLOCKED（value_board_v2不列入、最終候選鎖定二個），改標`[x]`並附出處。
+**發現`research/factors.py`處於未commit的中途編輯狀態**（`git status`
+顯示`M`，`ls -la`mtime距本輪開工僅約14秒，內容顯示`prepare_factors()`
+內15處`except RuntimeError`已新增`if _is_quota_error(e): raise`與
+`_record_factor_warning(warnings_out, ...)`呼叫，但`_is_quota_error`／
+`_record_factor_warning`兩函式定義與`warnings_out`參數/變數本身尚未
+出現在檔案任何位置——判定另一活躍互動視窗CC session正在同步實作`修.三`
+額度錯誤防呆，屬合理的中途未完成狀態，非既有bug）。**[自行裁量，比照
+round613/623/625避讓先例]**：本輪不觸碰`research/factors.py`與
+`research/f52w_2007_extension.py`，避免搶寫或提交半成品程式碼（若此刻
+強行補完，兩個session對「防呆訊息文字/checkpoint欄位命名」等細節的
+選擇可能不一致，事後要merge反而更麻煩）；`修.三`/`驗.四`/`閘門.一`
+三項維持`- [ ]`，留給下一輪核對該session是否已commit。**重新查證
+資料.一**：`data/rate_limit_state.json`顯示FinMind於16:05:32UTC再次
+命中402（跟round625記錄的01:00那次blocked_until不同，是新一次觸發），
+`blocked_until`延到2026-09-24T02:05:32台北，本輪01:3x查詢時仍BLOCKED，
+約差32分鐘解除，維持`- [!]`。`run_detached.py status`：`running=0`
+（160筆歷史，無job待收成）。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（399列，本輪#396/#397兩筆
+新增）。`validation/holdout.py::is_holdout_consumed()`開工/收工前皆
+確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／`trial_registry.py`
+等CLAUDE.md十三節限定清單內任何原始碼（僅呼叫`register_trial()`登記＋
+改`PENDING_QUEUE.md`/`MARATHON_STATE.md`/`TW_MARATHON_STATE.md`三個
+狀態檔），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append
+本輪一行。**交辦佇列還剩3條未開始**（修.三/驗.四/閘門.一，後兩者BLOCKED
+於修.三完成與續抓進度）。**等待審閱：0件**。**下一輪任一軌接手**：
+先`git status`確認`research/factors.py`是否已由該活躍session完成並
+commit——若已commit，核對`_is_quota_error()`/`_record_factor_warning()`
+定義與`修.三`裁示原文兩點是否皆已落實（額度錯誤上拋+checkpoint改每檔
+存一次+並發檔案鎖），完成後接續`驗.四`（已抓132檔資料品質稽核）；若
+仍未commit且mtime持續變動，繼續避讓改做其他交辦或FUT/US輪替；`資料.一`
+預計02:05:32台北解除。完整見`REPORT.md`第632輪心跳、`PENDING_QUEUE.md`
+「定案.一」/「轉向.一續」條目、`TRIALS_LEDGER.md`#396/#397。
