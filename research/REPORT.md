@@ -2653,3 +2653,12 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - `trial_registry.py --check`未新增判定（本輪純佇列維運）。`is_holdout_consumed()`開工/收工前皆`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`任何原始碼，全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append。
 - 交辦佇列還剩0條可由自走推進（查.二放行等互動視窗完成）。**等待審閱：10件**（非本輪新增，詳見上）。
 - **下一輪**：先`git status`確認`research/adjust.py`等檔案是否已由互動視窗commit——若已commit，查.二放行後續步驟才輪到自走接手；若仍是編輯中狀態，繼續避讓；依輪替下一輪建議選FUT或US軌。完整見`TW_MARATHON_STATE.md`第642輪、`PENDING_QUEUE.md`「驗.二第二部分」條目更正。
+---
+## 第643輪 · 2026-09-27T15:3x+08:00 · FUT · 研究帽：核對交辦與39條`- [!]`阻塞解除條件、確認查.二放行已由互動視窗完成push、凍結.二下查無可推進新工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260927-153037`）。三軌時間戳：FUT round640=09-24 23:3x最舊（逾2.5天未碰），依輪替選FUT。
+- 核心查證：`PENDING_QUEUE.md` `- [ ]`=0、`- [!]`=39條，逐一核對開頭標記均未到解除時間；`git status`確認`research/adjust.py`／`universe.py`／`audit_q2_ipo_pre_listing.py`已由互動視窗commit（`36bf7fab`「查.二放行」），無殘留未commit編輯——銜接round642留下的待辦，已確認可放心不避讓；核對「查.二放行」①-⑦全部完成並標`[x]`（TPEx上櫃日期893檔補齊、72檔查無上市日排除嚴格宇宙、`common_stock_only()`興櫃排除、#398/#399影響評估4.85%/1.92%持股天數污染、`check_adjusted_series_anomalies()`日期相依門檻已改、`CashIncreaseSubscriptionRate`維持不修改公式、已push停下等Cowork核對）；「新.二結案」「紙.一」皆已完成。`data/rate_limit_state.json`確認FinMind`blocked_until`=2026-09-27T08:22:52 UTC（本輪07:32查詢時仍BLOCKED，約差51分鐘）。
+- 驗證：`trial_registry.py --check` exit=0 PASS（402列，本輪未新增判定）；`validation/holdout.py::is_holdout_consumed()`讀取為`True`（H.一單次解鎖已於09-27正式消耗，非本輪新增動作，僅讀取核對）；`run_detached.py status` running=0（162筆歷史）。
+- 觀察（如實記錄，未動）：`AWAITING_REVIEW.md`「等待中」表格核對11件，與表頭一致，本輪未變動，皆為等Cowork/總司令裁示項目，非FUT軌可推進。
+- 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 等待總司令審閱：11件（查.一daily_price日期欄位／考.一2007-2014單發檢定／登記.二主動式ETF／資料源.主動ETF／源.二主動ETF條款／UX.一介面改版／查.一排程健康診斷／乾.三看門狗健檢／驗.五+修.六基準汙染診斷／紙.一70/30基礎設施／查.二放行TPEx補齊，完整見`AWAITING_REVIEW.md`）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：依輪替下一輪選US軌（round641=09-25 00:3x，三軌中最舊）；凍結.二在轉向.一結果登記前不解除，不補新alpha試驗。

@@ -13,6 +13,59 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的 65 則已原文搬到 `FUT_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
+**最後更新：2026-09-27T15:3x+08:00（馬拉松第643輪，研究帽）**——取鎖乾淨
+（cycle`20260927-153037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=39條阻塞中，
+逐一核對開頭標記可能已解除的條件均未到解除時間（金流一.4法人史累積、
+資料源一.3待總司令領key、外部一改.2 tick累積等）。**佇列深度自檢**：
+`- [ ]`=0（<12下限），`CLAUDE.md`十四節【凍結.二】仍生效（`轉向.一`結果
+尚未登記），本階段暫停佇列深度補件，不重掃備援來源。三軌時間戳：TW
+round642=09-27 14:3x／US round641=09-25 00:3x／**FUT round640=09-24
+23:3x（最舊，逾2.5天未碰）**——依輪替選FUT。**核心查證**：`git status`
+確認`research/adjust.py`／`universe.py`／`audit_q2_ipo_pre_listing.py`
+等`CLAUDE.md`十三節單一寫入者限定檔案**已由互動視窗commit**（`36bf7fab`
+「查.二放行」），無殘留未commit編輯，銜接round642留下的「下一輪先確認
+是否已commit」待辦。`PENDING_QUEUE.md`核對：「查.二放行」①-⑦全部已
+完成並標`[x]`（TPEx上櫃日期893檔補齊、72檔查無上市日排除嚴格宇宙、
+`common_stock_only()`興櫃排除、#398/#399影響評估：持股天數落在上市前
+興櫃比例4.85%/1.92%、報酬貢獻+0.34%/-0.22%、`check_adjusted_series_
+anomalies()`日期相依門檻已改、`CashIncreaseSubscriptionRate`單位疑義
+維持不修改公式、已push停下等Cowork核對）；「新.二結案」／「紙.一」
+（基礎設施完成，等2026-10第一個交易日啟動）皆已完成。`data/rate_limit_
+state.json`確認FinMind`blocked_until`=2026-09-27T08:22:52 UTC（本輪
+07:32查詢時仍BLOCKED，約差51分鐘），非本輪可推進資料抓取的理由。
+`run_detached.py status`：`running=0`（162筆歷史，無job待收成）。
+`AWAITING_REVIEW.md`「等待中」表格核對**11件**（表頭與列數一致），
+本輪未變動——皆為等Cowork/總司令裁示的項目，非FUT軌可推進。**本輪
+誠實結論**：`凍結.二`允許的四類工作（稽核重跑／資料抓取／工具修正／
+驗.二重跑）先前輪次已全部完成或被外部條件阻擋，`查.二放行`為前一輪
+互動視窗新增的工作已完整結案並push，FUT軌本身查無可推進的新工作
+單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）記錄後
+結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗、不搶碰十三節
+限定檔案。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）
+exit=0 PASS（402列，本輪純查證未新增判定，不觸發`register_trial()`）。
+`validation/holdout.py::is_holdout_consumed()`本輪讀取為`True`（H.一
+單次解鎖已於2026-09-27正式消耗，非本輪新增動作，僅讀取核對，未再次
+解鎖）。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改`research/backtest/`／`research/validation/`／`research/adjust.py`
+／`research/pit.py`／`trial_registry.py`等`CLAUDE.md`十三節限定清單內
+任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增
+外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、
+`run_detached.py status`、`trial_registry.py --check`）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條未開始**。
+**等待審閱：11件**（查.一daily_price日期欄位／考.一2007-2014單發檢定／
+登記.二主動式ETF／資料源.主動ETF／源.二主動ETF條款／UX.一介面改版／
+查.一排程健康診斷／乾.三看門狗健檢／驗.五+修.六基準汙染診斷／紙.一
+70/30基礎設施／查.二放行TPEx補齊，完整清單見`AWAITING_REVIEW.md`）。
+**下一輪任一軌接手**：FinMind額度預計08:22台北解除，解除後三軌皆可用
+於既有查證工作（若有）；`#50`持續被動等待tick累積至20；`轉向.一`凍結
+在等Cowork核對`查.二放行`與其餘10件等待審閱項目，此前不解凍、不補新
+alpha試驗；依輪替下一輪建議選US軌（round641=09-25 00:3x，三軌中最舊）。
+完整見`REPORT.md`第643輪心跳、`PENDING_QUEUE.md`「查.二放行」條目、
+`AWAITING_REVIEW.md`。
+
+---
+
 **最後更新：2026-09-24T23:3x+08:00（馬拉松第640輪，維運帽）**——取鎖乾淨。研究帽：交辦優先於自走，開工讀`PENDING_QUEUE.md`：`- [ ]`=0、`- [!]`逐項核對。收成上一輪(639)投遞的job `20260924-224213-1281`（`f52w_2007_extension_resume`，finished exit=0、expect_exists=True）：資料.一300/300完成，互動視窗CC已接續完成宇.一/宇.二/規.五/閘門.一補充（commit `7119c232`，閘門六項全PASS）。**本輪動作＝把過期的`- [!]`標記對齊事實**：`資料.一`、`閘門.一`改`- [x]`（保留歷史阻塞文字）；轉向.一單發檢定條目補註「等資料.一」阻塞已解除，現行唯一阻塞是總司令裁示的「閘門.一後停下等Cowork核對」（零之一白名單第2類，自走不得放行）；`AWAITING_REVIEW.md`新增一列（原本只列重開機查核1件，漏列閘門.一等Cowork核對，N由1→2）。凍結.二仍生效，無新alpha試驗、N不變；`is_holdout_consumed()`=False。FUT軌本輪無獨立可推進項（凍結.二：不得登記新alpha試驗；期貨軌無稽核/資料類待辦）。
 
 **最後更新：2026-09-24T05:3x+08:00（馬拉松第636輪，研究帽）**——取鎖乾淨
@@ -62,109 +115,3 @@ f52w/dividend 2007-2014延伸資料（目前222/300，還差78檔，但`failed_i
 `data/f52w_2007_extension_checkpoint.json`。
 
 ---
-
-**最後更新：2026-09-24T02:3x+08:00（馬拉松第633輪，研究帽）**——取鎖乾淨
-（cycle`20260924-023037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=1（僅`閘門.一`，開考前資料品質閘門），但明文**BLOCKED於「續抓剩餘
-168檔」完成**——`定案.一`／`修.三`／`驗.四(資料一品質)`皆已由互動視窗CC
-本輪之前完成並標`[x]`（commit`a80b27f7`修正額度錯誤被吞掉的bug＋加並發鎖），
-`閘門.一`本身不是可獨立動手的工作單位。逐一核對23條`- [!]`阻塞項的解除
-條件，均未到解除時間（`金流一.4`等資料累積、`資料源一.3`待總司令領key、
-`外部一改.2`tick累積、`結案.一`需總司令實機驗證等），維持`- [!]`。**佇列
-深度自檢**：`- [ ]`=1（<12下限），但`CLAUDE.md`十四節【凍結.二】本階段
-明文暫停佇列深度補件（轉向.一結果出來前不得補新alpha試驗湊數），不重掃
-備援來源。三軌時間戳：TW round632=09-24 01:3x／US round630=09-23 23:3x／
-**FUT round625=09-23 22:3x（最舊）**——依輪替選FUT。**核心查證**：讀
-`research/f52w_2007_extension_checkpoint.json`確認`fetched_ids`已達
-**169/300**（較round625記錄的132檔續有進展，代表其他session在round625~
-本輪之間持續推進續抓），`failed_ids`/`factor_warnings`欄位存在但為空。
-`data/rate_limit_state.json`顯示FinMind於2026-09-23T18:21:39 UTC再次命中
-402，`blocked_until`=2026-09-24T04:21:39 台北（本輪02:3x查詢時仍BLOCKED，
-約差108分鐘），確認**未持有**`f52w_2007_extension.lock`鎖檔（無行程正在
-跑），續抓工作單位當下處於「不是被搶佔，是被FinMind額度硬性擋住」的
-狀態，任何session此刻嘗試續抓都會立即再次撞額度，不是可推進的工作。
-`run_detached.py status`：`running=0`（160筆歷史，無job待收成）。**本輪
-誠實結論**：`凍結.二`允許的四類工作（稽核重跑／資料抓取／工具修正／驗.二
-開盤到收盤重跑）逐一核對現況——稽核重跑（驗.一第4點續剩餘8支）已於
-round624完成並登記#387-393；資料抓取被FinMind額度硬性擋住無法執行；
-工具修正（修.三額度錯誤bug＋並發鎖）已由互動視窗CC完成（commit
-`a80b27f7`）；驗.二開盤到收盤重跑已於`驗.二續`完成並登記`TRIALS_LEDGER.md`
-#394（FAIL，第3關參數高原未過）。**四類允許工作皆已完成或被外部額度阻擋，
-FUT軌本身無獨立可推進項**（`#50`容量受限小型股方向仍被動等待tick累積，
-`外部一改.2`維持`- [!]`不重複回報進度）——依`CLAUDE.md`七之三節研究紀律
-「找不到就老實說找不到」與「零之一」白名單第7條（佇列真的空了）記錄後
-結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗。
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
-（399列，本輪純查證未新增判定，不觸發`register_trial()`）。
-`validation/holdout.py::is_holdout_consumed()`開工/收工前皆確認`False`。
-未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改
-`research/backtest/`／`research/validation/`／`trial_registry.py`等
-`CLAUDE.md`十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive
-舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、
-`git status`/`git log`、`run_detached.py status`、`trial_registry.py
---check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩
-1條未開始**（`閘門.一`，BLOCKED於續抓168檔完成，非可獨立推進項）。
-**等待審閱：0件**（先前`value_board_v2`翻轉#390已於2026-09-24總司令
-裁示【候選名單定案】結案，維持FAIL，非本輪新增）。**下一輪任一軌接手**：
-續抓168檔預計04:21台北解除FinMind額度封鎖，解除後才可繼續（目前169/300，
-還差131檔）；`閘門.一`待續抓完成後才可執行五項資料品質檢查；`#50`持續
-被動等待tick累積至20（13/20）；依輪替下一輪建議選US軌（round630=09-23
-23:3x，三軌中最舊）。完整見`REPORT.md`第633輪心跳、`PENDING_QUEUE.md`
-「閘門.一」條目、`data/f52w_2007_extension_checkpoint.json`。
-
----
-
-**最後更新：2026-09-23T22:3x+08:00（馬拉松第625輪，維運帽）**——取鎖乾淨
-（cycle`20260923-223037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`- [ ]`=0——TW軌round623/624與互動視窗CC已把先前開放項目全部結案：
-`驗.一`／`驗.一第4點續(剩餘16支)`／`驗.一第4點續(剩餘8支)`／`尺.二`／
-`審.二`皆已`[x]`；`驗.二`第一部分已`[x]`，第二部分（開盤到收盤重跑）
-仍待辦但正被另一活躍session處理中（見下）。`資料.一`仍`BLOCKED`
-（FinMind 402額度，`data/rate_limit_state.json`記`blocked_until`=
-2026-09-23T14:44:48 UTC＝台北22:44:48，本輪22:30檢查時尚差約13分鐘，
-未到解除時間，維持`- [!]`）。**佇列深度自檢**：`- [ ]`=0低於
-`MIN_QUEUE_DEPTH=12`下限，但`CLAUDE.md`十四節「凍結.二」明文本階段
-佇列深度補件規則暫停，**不得**用新alpha試驗補件，本輪不重掃備援來源。
-`run_detached.py status`：`running=0`。**查核並結案一項過時待辦**：
-TW round624投遞的job`20260923-213506-0f76`
-（`weinstein_alpha_gate_engine_fix_recheck`）已`failed`（exit=1，
-`validation/control_group.py::one_draw()`拋`ValueError: cannot
-convert float NaN to integer`）——追查為已知舊漏洞
-（`entry_price<=0`防呆漏掉NaN，因NaN<=0在Python恆為False）；比對
-`git log`確認互動視窗CC已於commit`a73d5c20`（21:47:41，晚於本job
-21:35:06啟動、21:37:00失敗）修正此漏洞，並用修正後引擎重新跑出結果，
-登記`TRIALS_LEDGER.md`**#392**（`weinstein_alpha_gate.py`，VAL純alpha
-配對式隨機控制組percentile=3.0，FAIL）與**#393**
-（`weinstein_v2_alpha_gate.py`，percentile=4.0，FAIL）。round624留下
-的「下一輪待做：收成job」**已由CC的工作取代，不需要重新投遞**，本輪
-未再次呼叫`register_trial()`。**[自行裁量，避免搶寫競態]**：
-`git status`發現`research/spillover_overnight_gate.py`有staged未commit
-變更（107 insertions，比對`git log`最近一筆commit內容不含這批修改），
-同時`tasklist`確認**12個`claude.exe`行程仍在並行**——判斷是另一個
-活躍session正在做`驗.二`第二部分（開盤到收盤重跑9關），本輪**不觸碰
-此檔案及其可能的輸出檔**，避免搶寫競態或重複運算浪費（比照round613/
-623先例）。`#50`tick累積：`research/data/ticks/*.parquet`實測
-**13/20**（新增`20260923.parquet`，較round600的12/20推進1日），
-gate50三條件總司令仍未回應，維持`- [!]`被動等待，非本輪可推進項。
-**本輪誠實結論**：先前所有開放項目已結案或正被其他活躍session處理，
-`凍結.二`禁止新增alpha試驗、佇列深度補件規則暫停，本輪查無可推進的
-新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）
-記錄後結束本輪，不硬湊候選。`trial_registry.py --check`
-（`PYTHONIOENCODING=utf-8`）exit=0 PASS（395列，本輪未新增判定，純
-查證/核對）。`validation/holdout.py::is_holdout_consumed()`開工/收工
-前皆確認`False`。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`
-凍結區，未修改`research/backtest/`／`research/validation/`／
-`trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對
-＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.md`/`.json`
-帳本檔案、`git log`/`git status`、`tasklist`、`run_detached.py
-status`、`ls`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦
-佇列還剩0條未開始**。**等待審閱：1件**（`value_board_v2`VAL alpha
-翻轉#390，非本輪新增，延續中，見`AWAITING_REVIEW.md`）。**下一輪任一
-軌接手**：確認`驗.二`第二部分是否已由活躍session完成commit（若已
-commit，`research/spillover_overnight_gate.py`會從staged未commit變成
-已進歷史，可直接引用結果不必重算）；`資料.一`預計22:44:48解除，屆時
-可繼續f52w/dividend 2007-2014延伸抓取（轉向.一前置）；`#50`持續被動
-等待tick累積至20（13/20）與gate50裁示；依輪替下一輪建議選**US軌**
-（round613=09:3x，三軌中最舊）。完整見`REPORT.md`第625輪心跳、
-`TRIALS_LEDGER.md`#392/#393、`FUT_STATE_ARCHIVE.md`（round600歸檔）。
-
