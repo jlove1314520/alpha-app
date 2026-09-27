@@ -17,20 +17,28 @@
 教訓）：只補既有沒有的股票/日期，既有資料不會被覆蓋，股票數只會增加不會
 減少，減少就中止不寫檔。
 
-**2026-08-27新增：`adj_close`（還原權息收盤價）**。同樣讀本機已快取的FinMind
-`TaiwanStockDividend` parquet，複製`research/adjust.py`的TWSE官方除權息參考價
-公式（ref_price=(前一日收盤-現金股利+現金增資認購價×認股比率)/(1+股票股利
-比率+認股比率)，factor=ref_price/前一日收盤，由最近到最早反向套用），但
-**刻意不透過`adjust.py`/`finmind_client.load_dev()`**——那條路徑會把資料
-cap在`validation.holdout.VAL_END`（研究/回測用途的holdout規則），這裡建置
+**2026-08-27新增：`adj_close`（還原權息收盤價）**。讀本機已快取的FinMind
+事件資料集，套用TWSE官方除權息參考價公式，由最近到最早反向套用。
+**刻意不透過`finmind_client.load_dev()`**——那條路徑會把資料cap在
+`validation.holdout.VAL_END`（研究/回測用途的holdout規則），這裡建置
 的是App正式上線用的即時資料，不是回測，不該套用holdout時間窗——所以直接
 讀本機parquet快取（跟這支腳本原本讀`TaiwanStockPrice`同一個做法），自成
 一體不共用holdout邏輯。`close`欄位不變(原始收盤，供既有用途/稽核比對)，
 新增的`adj_close`才是還原後的值，供`generate_scores_momentum.py`的
 `relative_strength`因子改用（見該檔案的P0修正說明）。之後
 `.github/scripts/update_price_history.py`會用TWSE官方`TWT48U`預告表接續
-每日回溯調整新發生的除權息事件，兩邊用同一條公式，一次性回補+每日累積
-互補涵蓋範圍。
+每日回溯調整新發生的除權息事件，一次性回補+每日累積互補涵蓋範圍。
+
+**2026-09-27修.七更正（總司令裁示【修.七：還原公式統一...】）**：本檔案
+原本自己複製了一份`research/adjust.py::adjustment_events()`的還原公式
+（只處理股利事件，且`StockEarningsDistribution`/`CashIncreaseSubscription
+Rate`兩個欄位單位錯誤——未除以10/1000，查.三/修.七已在`adjust.py`修正
+並驗證），現改為**直接呼叫`adjust.py`的`_combine_adjustment_events()`**
+（股利+分割+減資+面額變更四類事件合併，與研究端完全同一套公式、同一套
+單位換算，不再維護第二份拷貝）。輸入資料仍**只讀本機parquet快取**（見
+`_load_split_events()`/`_load_capital_reduction_events()`/
+`_load_par_value_change_events()`），不經過`load_dev()`/holdout，維持
+本檔案「App正式上線資料、不受holdout時間窗限制」的既有設計不變。
 """
 from __future__ import annotations
 
@@ -39,6 +47,8 @@ import re
 from pathlib import Path
 
 import pandas as pd
+
+from adjust import _combine_adjustment_events
 
 RAW_DIR = Path(__file__).parent / "data" / "raw"
 OUT_PATH = Path(__file__).parent.parent / "data" / "price_history.json"
@@ -69,40 +79,47 @@ def _load_concat(dataset: str, code: str) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
-def _dividend_events(code: str, full_price_df: pd.DataFrame) -> list[dict]:
-    """複製`research/adjust.py::adjustment_events()`的公式，但直接讀本機
-    parquet快取、不經過`load_dev()`/holdout（見本檔案檔頭2026-08-27新增
-    說明）。`full_price_df`是這支股票的完整(未裁到90天前)價格歷史，用來找
-    每個除權息日「前一個交易日」的原始收盤價當公式錨點。"""
+def _load_par_value_change_events(code: str) -> pd.DataFrame:
+    """`TaiwanStockParValueChange`是市場全體單一快取檔(不接受`data_id`，
+    見`adjust.py::_par_value_change_market_wide()`同款說明)，讀本機
+    `TaiwanStockParValueChange__ALL__*.parquet`後在Python端過濾
+    `stock_id`，不經過`load_dev()`/holdout。"""
+    frames = []
+    for p in RAW_DIR.glob("TaiwanStockParValueChange__ALL__*.parquet"):
+        try:
+            df = pd.read_parquet(p)
+            if not df.empty:
+                frames.append(df)
+        except Exception:
+            continue
+    if not frames:
+        return pd.DataFrame()
+    full = pd.concat(frames, ignore_index=True)
+    if "stock_id" not in full.columns:
+        return pd.DataFrame()
+    return full[full["stock_id"] == code].reset_index(drop=True)
+
+
+def _adjustment_events(code: str, full_price_df: pd.DataFrame) -> list[dict]:
+    """2026-09-27修.七：改呼叫`adjust.py::_combine_adjustment_events()`
+    （股利+分割+減資+面額變更四類事件，與研究端同一套公式/同一套單位
+    換算），不再維護本檔案自己的拷貝。輸入資料仍只讀本機parquet快取、
+    不經過`load_dev()`/holdout（見本檔案檔頭說明）。`full_price_df`是
+    這支股票的完整(未裁到90天前)價格歷史，供股利事件公式定位「前一個
+    交易日」收盤價當錨點（分割/減資/面額變更三類事件的資料集本身就
+    自帶事件前後價格，不需要這個錨點）。"""
     div = _load_concat("TaiwanStockDividend", code)
-    if div.empty:
+    split_df = _load_concat("TaiwanStockSplitPrice", code)
+    cr_df = _load_concat("TaiwanStockCapitalReductionReferencePrice", code)
+    pv_df = _load_par_value_change_events(code)
+    if div.empty and split_df.empty and cr_df.empty and pv_df.empty:
         return []
     close_by_date = dict(zip(full_price_df["date"], full_price_df["close"]))
     trading_dates = full_price_df["date"].tolist()
-
-    events = []
-    for _, row in div.iterrows():
-        ex_date = row.get("CashExDividendTradingDate") or row.get("StockExDividendTradingDate")
-        if not ex_date:
-            continue
-        cash = row.get("CashEarningsDistribution") or 0.0
-        stock_ratio = row.get("StockEarningsDistribution") or 0.0
-        rights_ratio = row.get("CashIncreaseSubscriptionRate") or 0.0
-        rights_price = row.get("CashIncreaseSubscriptionpRrice") or 0.0
-        if cash == 0 and stock_ratio == 0 and rights_ratio == 0:
-            continue
-        prior = [d for d in trading_dates if d < ex_date]
-        if not prior:
-            continue
-        prev_close = close_by_date[prior[-1]]
-        if prev_close in (None, 0) or pd.isna(prev_close):
-            continue
-        numerator = prev_close - cash + rights_price * rights_ratio
-        denominator = 1 + stock_ratio + rights_ratio
-        if denominator <= 0 or numerator <= 0:
-            continue
-        events.append({"ex_date": ex_date, "factor": (numerator / denominator) / prev_close})
-    return sorted(events, key=lambda e: e["ex_date"])
+    combined = _combine_adjustment_events(div, split_df, cr_df, pv_df, close_by_date, trading_dates)
+    if combined.empty:
+        return []
+    return [{"ex_date": r["ex_date"], "factor": r["factor"]} for _, r in combined.iterrows()]
 
 
 def build_price_rows(code: str) -> list[dict]:
@@ -111,7 +128,7 @@ def build_price_rows(code: str) -> list[dict]:
         return []
     df = df.drop_duplicates(subset=["date"], keep="last").sort_values("date").reset_index(drop=True)
 
-    events = _dividend_events(code, df)
+    events = _adjustment_events(code, df)
     adj = df["close"].astype(float).copy()
     for ev in sorted(events, key=lambda e: e["ex_date"], reverse=True):
         mask = df["date"] < ev["ex_date"]

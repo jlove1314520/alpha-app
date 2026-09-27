@@ -16047,3 +16047,51 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   **1441筆(46.1%)落在2007-2014期間**——規模遠大於現金增資bug
   (110檔/151筆)，因為股票股利在台股遠比現金增資普遍。既有判定一律
   鎖定不動，只回報。
+
+  **項三完成回報（公式統一）**：①`research/build_price_history.py`
+  已改為呼叫`adjust.py`的`_combine_adjustment_events()`（股利+分割+
+  減資+面額變更四類事件，含項二修正），刪除自己那份拷貝(`_dividend_
+  events()`)；分割/減資從個股快取讀，面額變更從市場全體快取讀後過濾
+  stock_id(比照`adjust.py::_par_value_change_market_wide()`同款邏輯)，
+  仍完全只讀本機parquet快取、不經過`load_dev()`/holdout，符合本檔案
+  原有「App正式資料不受holdout時間窗限制」設計。單檔驗證：8908在
+  2012-09-10的還原因子=0.9259259259259258，與手算預期值逐位元一致。
+  ②全repo grep`StockEarningsDistribution`/`CashIncreaseSubscriptionRate`：
+  只有`adjust.py`/`build_price_history.py`兩處真正計算還原因子（已修正
+  統一），另外`cash_increase_dilution_gate1.py`/`forced_trader_events_
+  probe.py`兩支只用這兩個欄位當事件篩選條件(`!=0`)，不涉及數值計算，
+  不受影響。另外確認`.github/scripts/update_price_history.py`是完全
+  獨立機制（用TWSE官方`TWT48U`除權息預告表直接取得官方因子，不經過
+  `StockEarningsDistribution`/`CashIncreaseSubscriptionRate`，跟本次
+  bug無關），不是第二個重複拷貝。③已重跑`build_price_history.py`
+  (2958檔股票)，但發現`merge_rows()`的「既有值優先覆蓋」設計會讓
+  已存在日期的`adj_close`**永遠不會被backfill的新值覆蓋**（實測：
+  重跑後90天視窗內0筆adj_close改變）——這是保護「其他排程寫入的較新
+  欄位」的既有設計，不是為了保護「已知算錯的欄位」，兩者目的不同。
+  新增一次性腳本`research/fix_adj_close_2026_09_27.py`，只覆蓋
+  `adj_close`欄位(不動其他欄位/不受merge_rows()影響)，重算結果：
+  **177檔股票、8154列的adj_close改變，最大差異239.636%(股票6131)**。
+  已重新產生`scores_momentum.json`。**意外發現並直接修正一個既有bug
+  （純bug修復，不在本輪主要範圍內，CLAUDE.md允許直接改）**：
+  `generate_scores_momentum.py`的「過期價格過濾」區塊引用`main()`
+  沒有定義的`price_history`變數，長期靠`except Exception`吞掉
+  `NameError`、印警告後跳過整段過濾——這段防護邏輯**從一開始就沒有
+  真正執行過**，不是本次修正造成的，已補上變數載入，修正後實測正確
+  剔除1檔停滯價格代號。冒煙測試`node scripts/smoke_test.mjs`
+  **全部50項通過**。
+
+  **項三.4：App上分數改變回報**：動能榜(`scores_momentum.json`)
+  **1669檔股票的total_score改變**（佔約1977檔有分數股票的84%）。
+  機制：`relative_strength`因子直接讀`adj_close`，177檔股票的原始值
+  改變是直接效果；但`total_score`用全市場**百分位**排名轉換，177檔
+  的底層數值改變會讓全體排名分布輕微位移，波及其他表面上adj_close
+  沒變的股票——這是百分位計分法的預期副作用，不是bug。變化最大的
+  前5檔：4722(8.60→5.50)、3296(4.50→7.60)、6224(5.10→8.10)、
+  8039(1.60→4.50)、3679(4.10→6.90)。**價值成長榜(`scores.json`)與
+  未來性濾網(`scores_future.json`)不受影響**——grep確認兩者完全不用
+  `adj_close`（`generate_scores_live.py`的technical因子刻意用未還原
+  的原始`close`，見該檔案docstring）。**刻意未動的部分（如實記錄，
+  非遺漏）**：`data/picks_ledger.json`/`data/strategy_performance.json`
+  這類前瞻紙上追蹤台帳，依專案既有紀律「逐日累積不可回填」，即使底層
+  價格資料已修正，**過去已經記錄的歷史快照/報酬數字不得回溯更改**，
+  只會在之後的每日排程自然吃到修正後的新資料，不屬於本輪「重建」範圍。

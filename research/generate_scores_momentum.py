@@ -672,6 +672,13 @@ def main():
 
         # 還在名冊、但價格早就停住的也要擋（正峰 1538、永冠-KY 1589 停在 2024-12-31）
         try:
+            # 2026-09-27（修.七過程中意外發現的既有bug，純bug修復直接改，不在
+            # 本輪主要範圍內）：`price_history`是`build_rows()`的區域變數，
+            # `main()`沒有自己的，之前這裡一直靠NameError被下面except吞掉、
+            # 印警告後跳過整段停滯價格過濾——不是本次adj_close修正造成的，是
+            # 這段程式碼從一開始就沒有存取到它需要的變數，過期價格過濾實際上
+            # 從未真正執行過。
+            price_history = _load_json(PRICE_HISTORY_PATH).get("prices", {}) if PRICE_HISTORY_PATH.exists() else {}
             _last = {c: (rows[-1].get("date") or "") for c, rows in price_history.items() if rows}
             _latest = max((d for d in _last.values() if d), default=None)
             if _latest:
