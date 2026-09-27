@@ -1,5 +1,8 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-27T10:00（Taipei，hypothesis_queue排程接續，交辦「放.一」）— 執行H.一正式回測腳本，G7判準(3)FAIL依裁示中止：
+讀交辦佇列：`- [ ]`為「停.一」（禁止性）與「放.一」（放行H.一正式回測）。執行`holdout_2025_dividend_account_test.py`（不帶--gates-only）；資料載入214檔可用、factor失敗0、最新交易日2026-09-24；G7：zero050_series最新2026-09-24 PASS、market_df最新2026-09-24 PASS、rf_monthly最新2026-08-01 **FAIL**（不涵蓋2026-09）。依裁示零立即中止，**未印出「即將執行H.一正式回測」、未跑回測、only-once資格未消耗**，未自行force_refresh。`放.一`已標`- [!]`，解除條件=Cowork裁示是否准許刷新rf_monthly。`is_holdout_consumed()`=True為既有狀態（非本輪造成）。未登記新試驗。交辦佇列還剩0條未開始（`- [ ]`僅餘禁止性「停.一」）。
+
 ## 2026-09-27T08:51（Taipei，第四十九輪，hypothesis_queue排程接續）— 本輪無新工作單位：
 開工讀`PENDING_QUEUE.md`：全檔唯一`- [ ]`仍為「停.一」（禁止性，H.一正式回測維持暫停），未執行`holdout_2025_dividend_account_test.py`。`- [!]`共33項解除條件皆未達（乾.一/乾.二/乾.三/查.一等Cowork核對；FinMind無新額度事件）。凍結.二仍生效，依CLAUDE.md十四第4點不得以新alpha試驗補件，未登記TRIALS_REGISTRY、未動任何原始碼。`is_holdout_consumed()`=True（既有單發鎖已消耗，非本輪造成，本輪未碰holdout）。交辦佇列還剩0條未開始（`- [ ]`僅停.一禁止性）；等待審閱：見research/AWAITING_REVIEW.md（等Cowork/總司令裁示）。
 
