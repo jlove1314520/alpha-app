@@ -1,5 +1,22 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-27T17:53（Taipei，hypothesis_queue排程接續，第十二輪）— 開工acquire鎖
+檔回傳`LOCK_STALE`（上一輪pid 96300、58.3分鐘陳舊，自動回收，疑似上一輪失敗
+未正常release）。開工先讀`PENDING_QUEUE.md`：`- [ ]`項目0條（`修.七`已由互動
+視窗完成commit，不再進行中）；`- [!]`項15條（`docs/BLOCKED_TRIAGE_2026-09-27.md`
+整理後從40條大幅減少），逐一略讀查無與本track相關的新解除條件。轉回本track
+自己的#82：WebSearch嘗試補查2016-12/2018-03/2020-12三筆，**本輪皆查無**（搜尋
+引擎索引被2024-2026年近期0050調整新聞洗版，2020-12查詢額外混入一則2025-12
+南亞科新聞誤配、已排除未採用）。累計完整公告日+生效日維持8/12不變，剩餘4筆
+（2016-12/2018-03/2018-06/2018-12，2020-12本輪確認查無不算新增缺口）。判定
+不變（資料可行，逐筆補查中），提出下一輪路徑建議（WebSearch對三筆已連續多輪
+查無、可考慮改走taiwanindex.com.tw網址枚舉或接受缺口分層設計SPEC）。
+`is_holdout_consumed()`=True（既有單發鎖，非本輪造成）。未動`research/
+backtest/`／`validation`／`adjust.py`／`pit.py`／`trial_registry.py`（十三節
+單一寫入者，本輪git status確認這些路徑乾淨）。未登記TRIALS_REGISTRY（資料
+蒐集輪慣例不登記）。交辦佇列還剩0條未開始。凍結.二仍生效，未新增alpha試驗、
+未進入回測。
+
 ## 2026-09-27T16:56（Taipei，hypothesis_queue排程接續，第十一輪）— 開工先讀
 `PENDING_QUEUE.md`：唯一`- [ ]`項`修.七`因`research/build_price_history.py`
 當下有未commit變更、內容與該條目項三①吻合，判定他行程進行中，本輪不觸碰、
