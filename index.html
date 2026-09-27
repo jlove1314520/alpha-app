@@ -7432,12 +7432,27 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         if(!hb){
           hbNote.innerHTML='本機排程心跳：讀不到（STATUS.json尚無此欄位，或讀取失敗）';
         }else{
-          const mins=hb.devqueue&&hb.devqueue.minutes_since;
-          const at=hb.devqueue&&hb.devqueue.last_commit_at?fmtTzMMDDHHMM(new Date(hb.devqueue.last_commit_at),'Asia/Taipei'):'—';
+          // 2026-09-27（乾.三主體第八點）：判定來源改成三軌
+          // (DevQueue/Marathon/Hypothesis-queue)任一有新鮮心跳即存活，
+          // 資料結構搬進hb.tracks；舊版hb.devqueue是備援相容寫法，避免
+          // 雲端排程還沒跑過新版腳本時這裡直接壞掉。
+          const tracks=hb.tracks||{devqueue:hb.devqueue};
+          let freshest=null;
+          for(const name in tracks){
+            const t=tracks[name];if(!t)continue;
+            if(t.minutes_since!=null&&(freshest==null||t.minutes_since<freshest.minutes_since)){
+              freshest={name,minutes_since:t.minutes_since,last_commit_at:t.last_commit_at};
+            }
+          }
+          const mins=freshest&&freshest.minutes_since;
+          const at=freshest&&freshest.last_commit_at?fmtTzMMDDHHMM(new Date(freshest.last_commit_at),'Asia/Taipei'):'—';
+          const trackLabel=freshest?freshest.name:'—';
+          const stalledTracks=hb.track_stalled||[];
+          const stalledNote=stalledTracks.length?`；個別軌道停擺：${stalledTracks.join('、')}`:'';
           if(hb.stalled){
-            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">疑似停擺</b>（DevQueue最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘，門檻${hb.stall_threshold_minutes}分鐘）`;
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_BAD_COLOR}">疑似停擺</b>（三軌皆無新心跳，最新為${trackLabel} ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘，門檻${hb.stall_threshold_minutes}分鐘）`;
           }else{
-            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_OK_COLOR}">正常</b>（DevQueue最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘）`;
+            hbNote.innerHTML=`本機排程心跳：<b style="color:${FRESH_OK_COLOR}">正常</b>（${trackLabel}最近一次commit ${at}，距今約${mins==null?'—':mins.toFixed(0)}分鐘${stalledNote}）`;
           }
         }
       }catch(e){
@@ -7452,7 +7467,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-26.1641';
+  const APP_VERSION='2026-09-27.0906';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

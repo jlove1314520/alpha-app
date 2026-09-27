@@ -66,6 +66,10 @@ import dividend_yield_portfolio_v1 as div_mod
 
 LOOKBACK_START = "2024-01-01"  # 給TTM股利率(366天)+流動性代理(20日)足夠緩衝
 PERIOD_START = "2025-01-01"
+# 乾.三主體第六點（2026-09-27裁示）：固定共同期末日=乾.二G4量到的值，在看到
+# 任何結果前先決定，避免之後任何單檔重抓（例如本輪item五對2330的force_
+# refresh）把期末日意外拉長、產生「不同輪跑出不同期末日」的不可重現性。
+H1_PERIOD_END = "2026-09-24"
 STOCK_WEIGHT = 0.70
 BOND_WEIGHT = 0.30
 REBALANCE_DAYS = div_mod.REBALANCE_DAYS  # 承接股票部位同一個月頻節奏，帳戶再平衡沿用同一組交易日
@@ -345,13 +349,23 @@ def main(gates_only: bool = False):
     data: dict[str, pd.DataFrame] = {}
     n_price_fail, n_factor_fail = 0, 0
     factor_fail_reasons: dict[str, int] = {}  # 修.五第3點+乾.一G3：失敗原因分類，額度類不計入這裡（往上拋中止）
+    dividend_factor_warnings: dict[str, str] = {}  # 乾.三第一點：G6，f_dividend_yield_ttm的skip警告，stock_id->訊息
+    other_factor_warning_count = 0  # 乾.三第一點：其他因子的warning只計數，不列入判定
     for i, sid in enumerate(common_ids):
         px = uncapped_adjusted_price_series(sid, LOOKBACK_START)
         if px.empty or len(px) < 200:
             n_price_fail += 1
             continue
+        # 乾.三第六點：載入後立即截斷至固定共同期末日，讓後面所有計算
+        # （因子/回測/gates）都只看得到≤H1_PERIOD_END的資料，不因為任何
+        # 單檔後續重抓而各自延伸到不同的最新日。
+        px = px[px["date"] <= H1_PERIOD_END].reset_index(drop=True)
+        if px.empty or len(px) < 200:
+            n_price_fail += 1
+            continue
+        warnings_out: list[str] = []
         try:
-            d = prepare_factors(sid, px, market_df, LOOKBACK_START)
+            d = prepare_factors(sid, px, market_df, LOOKBACK_START, warnings_out=warnings_out)
         except Exception as e:  # noqa: BLE001
             # 修.五第3點：額度類錯誤(FinMind 402/封鎖冷卻)一律往上拋並中止，
             # 不得計入n_factor_fail——舊版的裸except Exception會把
@@ -366,6 +380,16 @@ def main(gates_only: bool = False):
             reason = f"{type(e).__name__}: {str(e)[:120]}"
             factor_fail_reasons[reason] = factor_fail_reasons.get(reason, 0) + 1
             continue
+        # 乾.三第一點：G6補吞錯誤缺口——prepare_factors()內部每個因子區塊
+        # 各自try/except降級成NaN，不會讓整檔股票的載入失敗，但「降級」跟
+        # 「乾淨算出來」是兩回事；股利率因子被跳過會直接讓G2b的期望值X
+        # 落空（obs必然對不上），所以獨立列出、單獨計入gates_pass判定，
+        # 其他因子的warning（策略composite用不到）只累計次數。
+        for w in warnings_out:
+            if w.startswith("f_dividend_yield_ttm:"):
+                dividend_factor_warnings[sid] = w
+            else:
+                other_factor_warning_count += 1
         data[sid] = d
         if (i + 1) % 50 == 0:
             print(f"  進度 {i+1}/{len(common_ids)}（累計可用 {len(data)} 檔）", flush=True)
@@ -374,16 +398,21 @@ def main(gates_only: bool = False):
           f"天生低於考.一的2007-2014段，如實記錄。", flush=True)
     if factor_fail_reasons:
         print(f"  factor失敗原因分類：{factor_fail_reasons}", flush=True)
+    if dividend_factor_warnings:
+        print(f"  G6股利率因子被跳過：{dividend_factor_warnings}", flush=True)
+    if other_factor_warning_count:
+        print(f"  其他因子warning次數（不列入判定）：{other_factor_warning_count}", flush=True)
 
     industry_map = load_industry_map()
     liquidity = {sid: pbv2._liquidity_proxy_series(d) for sid, d in data.items()}
 
-    # ── 4. 找出資料實際涵蓋到的最新日（不是今天，FinMind latest本身有落後） ──
+    # ── 4. 資料實際涵蓋到的最新日：乾.三第六點固定用H1_PERIOD_END常數，
+    # 不再從已載入資料反推——反推法的問題是「單檔重抓後最新日跟著變」，
+    # 事前固定常數才能讓判準在看到任何結果前就已經決定，不會因為
+    # item五的force_refresh而事後被拉長。 ──
+    period_end = H1_PERIOD_END
     all_dates = sorted({d for df_ in data.values() for d in df_["date"].tolist()})
-    period_end = max(dt for dt in all_dates if dt >= PERIOD_START) if any(dt >= PERIOD_START for dt in all_dates) else None
-    if period_end is None:
-        raise RuntimeError("資料完全沒有涵蓋到2025-01-01之後，H.一無法執行")
-    print(f"\n資料實際涵蓋的最新日 = {period_end}（不是今天，FinMind本身有發布落後）", flush=True)
+    print(f"\n資料實際涵蓋的最新日（固定值，乾.三第六點）= {period_end}", flush=True)
 
     if gates_only:
         print("\n=== 乾.一/乾.二：G1~G5資料診斷（只印計數與日期，不含任何報酬/IR/MDD）===", flush=True)
@@ -400,9 +429,11 @@ def main(gates_only: bool = False):
         # 存在」，不證明「這個事件真的進了prepare_factors()吐出來的d」。
         # 拆成G2a(快取新鮮度)/G2b(patch是否真的生效)/G2c(G2b有沒有辨別力)
         # 三層，只有三層都過才算真的驗證到「holdout路徑吃到uncapped股利」。
-        g2a_mismatches = []  # 快取新鮮度：股價最後日 < 除息日
-        g2b_mismatches = []  # patch生效檢查：d裡實際觀察到的ttm跟uncapped期望值對不上
+        g2a_mismatches = []   # 快取新鮮度：股價最後日 < 除息日
+        g2b_mismatches = []   # patch生效檢查：d裡實際觀察到的ttm跟uncapped期望值對不上（真的不一致）
+        g2b_no_valid_trade = []  # 乾.三第三點：E起10列內都沒有有效成交，另列不算patch失敗
         g2c_effective = []   # 檢定力對照：X真的跟VAL_END前的舊值不同的檔數
+        g2c_pre_none = []    # 乾.三第四點：pre_ttm算不出來(None)的檔數，不計入n_effective
         g2_checked = 0
         for sid, d in data.items():
             div_pit = factors_mod._dividend_yield_ttm_cash(sid, LOOKBACK_START)
@@ -423,32 +454,50 @@ def main(gates_only: bool = False):
                                         "last_data_date": str(last_data_date)})
                 continue  # 裁示明文：股價最後日<E的股票跳過G2b（已在G2a列出）
 
-            # G2b：在d中取第一個date>=E的列，比對obs=f_dividend_yield_ttm×close
-            # 是否等於uncapped事件本身算出的X——這是真正檢查patch有沒有讓
-            # prepare_factors()的輸出改變的地方，不是再呼叫一次同一個函式。
-            on_or_after = d[d["date"] >= E].sort_values("date")
-            if on_or_after.empty:
-                g2b_mismatches.append({"stock_id": sid, "E": str(E), "X": X, "obs": None,
-                                        "reason": "d中找不到date>=E的列（不應該發生，因為last_data_date>=E已通過）"})
-                continue
-            row0 = on_or_after.iloc[0]
-            close0 = row0.get("close")
-            fdy0 = row0.get("f_dividend_yield_ttm")
-            obs = (float(fdy0) * float(close0)) if pd.notna(fdy0) and pd.notna(close0) else None
-            is_mismatch = (obs is None) or (abs(obs - X) > 1e-6 * max(1.0, abs(X)))
-            if is_mismatch:
-                g2b_mismatches.append({"stock_id": sid, "E": str(E), "X": X, "obs": obs})
+            # G2b（乾.三第三點修正）：原版直接取「date>=E的第一列」比對，但
+            # 診斷（見PENDING_QUEUE乾.三條目二）發現7758/6539/3531三檔的
+            # 問題是**除息日E當天本身零成交**（close=0，甚至volume也是0），
+            # 不是patch沒生效——除息日零成交在台股是常見現象（除息前後
+            # 停資停券、當沖限制、或單純當天沒人成交），不能算patch失敗。
+            # 改成「date>=E且close>0」的第一列，最多往後找10列；10列內都
+            # 沒有有效成交才另列g2b_no_valid_trade（不算patch失敗，因為
+            # 這種情況下obs本來就沒有意義可比較，是流動性問題不是資料
+            # bug）；找得到有效列才真正比對obs跟X，這才是patch有沒有生效
+            # 的檢查。
+            on_or_after = d[d["date"] >= E].sort_values("date").head(10)
+            valid_rows = on_or_after[on_or_after["close"] > 0]
+            if valid_rows.empty:
+                g2b_no_valid_trade.append({
+                    "stock_id": sid, "E": str(E),
+                    "checked_dates": on_or_after["date"].tolist(),
+                    "note": "E起10列內皆無close>0的有效成交，不列入G2b patch失敗判定",
+                })
+            else:
+                row0 = valid_rows.iloc[0]
+                close0 = row0.get("close")
+                fdy0 = row0.get("f_dividend_yield_ttm")
+                obs = (float(fdy0) * float(close0)) if pd.notna(fdy0) and pd.notna(close0) else None
+                is_mismatch = (obs is None) or (abs(obs - X) > 1e-6 * max(1.0, abs(X)))
+                if is_mismatch:
+                    g2b_mismatches.append({"stock_id": sid, "E": str(E), "X": X, "obs": obs,
+                                            "valid_row_date": str(row0["date"])})
 
-            # G2c：檢定力對照——同一檔股票在2024-12-31(或之前最後一個交易日)
-            # 的ttm值，是不是真的跟X不同。全部都相同就代表G2b測不出patch
-            # 有沒有生效（capped/uncapped剛好算出一樣的值，或patch根本沒動）。
+            # G2c（乾.三第四點修正）：同一檔股票在2024-12-31(或之前最後一個
+            # 交易日)的ttm值，是不是真的跟X不同。pre_ttm算不出來(None，例如
+            # 該檔在VAL_END前完全沒有交易資料)的不計入n_effective，另列
+            # n_pre_none——避免「算不出來」被誤當成「兩者相同」而膨脹或
+            # 誤導檢定力數字。
             pre_2025 = d[d["date"] <= "2024-12-31"].sort_values("date")
-            if not pre_2025.empty:
+            if pre_2025.empty:
+                g2c_pre_none.append(sid)
+            else:
                 row_pre = pre_2025.iloc[-1]
                 fdy_pre = row_pre.get("f_dividend_yield_ttm")
                 close_pre = row_pre.get("close")
                 pre_ttm = (float(fdy_pre) * float(close_pre)) if pd.notna(fdy_pre) and pd.notna(close_pre) else None
-                if pre_ttm is None or abs(pre_ttm - X) > 1e-6 * max(1.0, abs(X)):
+                if pre_ttm is None:
+                    g2c_pre_none.append(sid)
+                elif abs(pre_ttm - X) > 1e-6 * max(1.0, abs(X)):
                     g2c_effective.append(sid)
 
         print(f"G2a 快取新鮮度：檢查了{g2_checked}檔有2025+除息紀錄的可用股票，"
@@ -456,15 +505,28 @@ def main(gates_only: bool = False):
         if g2a_mismatches:
             print(f"  G2a不一致明細：{g2a_mismatches}", flush=True)
         print(f"G2b patch生效檢查：不一致{len(g2b_mismatches)}檔"
-              f"（d實際觀察值obs跟uncapped期望值X對不上，須=0）", flush=True)
+              f"（有效成交列的obs跟uncapped期望值X對不上，須=0）；"
+              f"另有{len(g2b_no_valid_trade)}檔E起10列內無有效成交(不算patch失敗)", flush=True)
         if g2b_mismatches:
             print(f"  G2b不一致明細：{g2b_mismatches}", flush=True)
+        if g2b_no_valid_trade:
+            print(f"  G2b無有效成交明細：{g2b_no_valid_trade}", flush=True)
         print(f"G2c 檢定力對照：{len(g2c_effective)}檔的X真的不同於VAL_END前的舊值"
-              f"（須>0，=0代表G2b沒有辨別力，測不出patch有沒有生效）", flush=True)
+              f"（須>0，=0代表G2b沒有辨別力，測不出patch有沒有生效）；"
+              f"另有{len(g2c_pre_none)}檔pre_ttm算不出來(不計入n_effective)", flush=True)
 
         # G3：可用檔數/價格失敗檔數/因子失敗檔數（附失敗原因分類）
         print(f"G3 可用檔數={len(data)}　價格失敗檔數={n_price_fail}　"
               f"因子失敗檔數={n_factor_fail}（原因分類：{factor_fail_reasons or '無'}）", flush=True)
+
+        # G6（乾.三第一點）：股利率因子本身被prepare_factors()內部降級跳過
+        # 的檔數——跟factor_fail不同，factor_fail是整檔股票連prepare_
+        # factors()都拋例外；G6是「這檔股票的其他因子都算出來了，但股利率
+        # 這一個因子單獨被吞掉設NaN」，這種情況G2b的X必然對不上obs，
+        # 是patch邏輯以外、資料源本身的另一種失效模式，獨立列出獨立判定。
+        print(f"G6 股利率因子被跳過檔數 = {len(dividend_factor_warnings)}（須=0）", flush=True)
+        if dividend_factor_warnings:
+            print(f"  G6明細：{dividend_factor_warnings}", flush=True)
 
         # G4：資料實際涵蓋到的最新交易日
         print(f"G4 資料實際涵蓋到的最新交易日 = {period_end}", flush=True)
@@ -498,13 +560,17 @@ def main(gates_only: bool = False):
             and len(g2b_mismatches) == 0
             and len(g2c_effective) > 0
             and g5_stale_pct <= 5.0
+            and len(dividend_factor_warnings) == 0
         )
         gates_out = {
             "generated_at": pd.Timestamp.now().isoformat(),
+            "H1_PERIOD_END": H1_PERIOD_END,
             "G1_quota_related_failures": g1_quota_fail,
             "G2a_cache_freshness": {"checked": g2_checked, "mismatches": g2a_mismatches},
-            "G2b_patch_effective_check": {"mismatches": g2b_mismatches},
-            "G2c_detection_power": {"n_effective": len(g2c_effective), "stock_ids": g2c_effective},
+            "G2b_patch_effective_check": {"mismatches": g2b_mismatches,
+                                           "no_valid_trade": g2b_no_valid_trade},
+            "G2c_detection_power": {"n_effective": len(g2c_effective), "stock_ids": g2c_effective,
+                                     "n_pre_none": len(g2c_pre_none), "pre_none_stock_ids": g2c_pre_none},
             "G3_counts": {"usable": len(data), "price_fail": n_price_fail,
                           "factor_fail": n_factor_fail, "factor_fail_reasons": factor_fail_reasons},
             "G4_latest_covered_trading_date": period_end,
@@ -514,15 +580,17 @@ def main(gates_only: bool = False):
                 "n_stale": len(g5_stale), "n_total": len(data), "stale_pct": round(g5_stale_pct, 2),
                 "stale_list": g5_stale,
             },
+            "G6_dividend_factor_skipped": dividend_factor_warnings,
+            "other_factor_warning_count": other_factor_warning_count,
             "gates_pass": gates_pass,
-            "note": "乾.一/乾.二：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。"
+            "note": "乾.一/乾.二/乾.三：只做資料診斷，不含任何策略結果數字（報酬/IR/MDD）。"
                     "gates_pass為True僅代表資料層面可以放行，仍須由Cowork核對後"
                     "才能執行正式回測，本腳本本身不會自動接著跑。",
         }
         GATES_JSON.parent.mkdir(parents=True, exist_ok=True)
         GATES_JSON.write_text(json.dumps(gates_out, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
         print(f"\n已寫入 {GATES_JSON}", flush=True)
-        print(f"\n**乾.一/乾.二結果：{'gates_pass=True，資料層面可以放行' if gates_pass else 'gates_pass=False，尚不可放行'}**"
+        print(f"\n**乾.一/乾.二/乾.三結果：{'gates_pass=True，資料層面可以放行' if gates_pass else 'gates_pass=False，尚不可放行'}**"
               f"——停在這裡，等Cowork核對後再另行放行正式回測。", flush=True)
         return gates_out
 

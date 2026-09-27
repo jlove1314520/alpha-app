@@ -14929,3 +14929,38 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   九、已完成(commit 93200779)，看門狗根因=GitHub排程延遲(a)類，
   Cowork裁示維持現狀不改頻率，雲端看門狗定位數小時級最後防線，
   30分鐘級偵測改由第八項負責。
+  **一~六、八已完成（互動視窗，2026-09-27 01:0x~01:2x）**：
+  **二先印診斷**（讀快取，零新增API呼叫）：7758(E=2026-07-23)、
+  6539(E=2026-08-27)、3531(E=2026-06-09)三檔E當天皆`close=0`（3531
+  當天`Trading_Volume=113`但close仍為0，屬同一種失效模式的小變體），
+  次一交易日起即有正常成交與正確算出的`f_dividend_yield_ttm`。三檔
+  `warnings_out`皆為空（不是G6的整欄NaN跳過）。**結論：三檔皆歸類
+  (a) E當天零成交**，不是patch邏輯或股利率因子計算本身的bug。
+  **一（G6）／三（G2b修正）／四（G2c修正）**：已改
+  `research/holdout_2025_dividend_account_test.py`——載入迴圈傳入
+  `warnings_out`收集`f_dividend_yield_ttm:`開頭的skip訊息(G6)；G2b
+  改取「date>=E且close>0」的第一列(最多往後10列)，10列內無有效成交
+  另列`G2b_no_valid_trade`不算patch失敗；G2c的`pre_ttm`為None時另列
+  `n_pre_none`不計入`n_effective`。`gates_pass`公式加入`G6==0`一項。
+  **六（固定期末日）**：新增`H1_PERIOD_END="2026-09-24"`常數，載入迴圈
+  內`px`截斷至`≤H1_PERIOD_END`後才進`prepare_factors()`，第4步
+  `period_end`直接用此常數（不再從`all_dates`反推）。TRIALS_LEDGER
+  #400已於重跑前附註登記（見上方commit，早於本次--gates-only執行）。
+  **五（G5落後股票分類）**：用`universe.py::delisted_stock_ids()`
+  （現有下市資料來源，未新增爬取）查詢——`6806`(下市2026-06-23)、
+  `3454`(下市2026-03-27)、`2809`(下市2025-10-01)皆**(a)真實下市**，
+  最後交易日與下市日吻合，保留不動；`2330`（台積電）**非下市**，
+  判定**(b)快取過期**，已用`load_full_history(...,force_refresh=True)`
+  對此單一股票重抓，重抓後最新日=2026-09-24。**廣義盤點**（只回報，
+  除2330外未重抓）：掃全部`TaiwanStockPrice__*__2024-01-01__latest`
+  快取檔，最後日期早於2026-09-17者共4檔（含前述6806/3454/2809），
+  另發現一檔`3231`（非原G5清單、也非下市，最後日2026-08-21）——依
+  裁示「除(b)類外不重抓」，3231不在原始4檔G5名單內，本次僅回報不
+  重抓。**八（心跳方案B強化版）**：`scripts/check_local_schedule_
+  heartbeat.py`判定來源改為三軌
+  (DevQueue/Marathon/Hypothesis-queue)任一心跳≤60分鐘即本機存活，
+  新增`track_stall_threshold_minutes=360`的個別軌道警告，偵測失敗
+  單軌降級為`::warning::`不中斷整體判定。連帶更新`index.html`的
+  `local_schedule_heartbeat`顯示區塊（含舊結構備援相容），冒煙測試
+  `node scripts/smoke_test.mjs`48項全數PASS。**七（重跑）尚未執行**，
+  緊接在此commit之後進行。

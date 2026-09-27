@@ -10,15 +10,23 @@
 一定拿得到，不依賴本機任何檔案），用「最近一次 DevQueue/IBKR 排程留下的 commit
 時間戳」當心跳。
 
-**只用 DevQueue 的 commit 當停擺判定依據，IBKR 只記錄不判定**（這是本次裁示裡
-「不確定但可還原的技術選擇」，標記 [自行裁量]，理由如下）：
-DevQueue（`run-dev-queue-cycle.ps1`）確認 24/7 每日都在跑（含週末，見
-commit 歷史 2026-09-20 週日仍有 11 次 cycle commit），是最穩定的「這台機器活著」
-訊號。IBKR quotes 有兩個已知、非故障的空窗：(1) 只在美股盤中時段才有新資料；
+**判定邏輯沿革**：2026-09-26【警.一】原版只用 DevQueue 的 commit 當停擺判定
+依據（IBKR 只記錄不判定）。2026-09-27【查.一】查出根因——`dev_queue_runner.py`
+的碰撞防護機制（`_recent_real_dirty_reason()`）在互動視窗長時間編輯非機器
+寫入檔案時會正確 YIELD 避免衝突，但 YIELD 分支在進入會 commit 心跳的
+`finally` 區塊之前就 `exit 0`，導致 DevQueue 心跳在互動視窗做研究工作時
+容易假性中斷。當時提出兩個修正方案：A（讓 YIELD 分支也 commit 心跳）、
+B（判定改成三軌任一有心跳即存活）。**2026-09-27【乾.三主體第八點】總司令
+裁示不採方案 A**（互動視窗編輯檔案時讓 DevQueue 去 commit，會跟互動視窗
+自己的 git 操作搶著寫，重演 round607 那種 stash-pop 衝突根因），**改採方案
+B 強化版**：判定來源改成「DevQueue／Marathon／Hypothesis-queue 三軌任一
+有新鮮心跳（≤60分鐘）即視為本機整體存活」，同時保留個別軌道層級的
+`track_stalled` 警告（>360分鐘），讓「機器整體活著」跟「某一條軌道真的
+自己停了」分開回答，不互相掩蓋。IBKR quotes 仍維持原設計只記錄不判定
+——它有兩個已知、非故障的空窗：(1) 只在美股盤中時段才有新資料；
 (2) IBKR Gateway 每週日 01:00 ET 權杖過期需要人工登入，見 CLAUDE.md「IBKR
-Gateway/TWS」段落，這段空窗長達數小時到數天，若拿它當停擺判定依據會製造大量
-假警報。因此本檔案只把 IBKR 最近一次 commit 時間寫進報告供人參考，
-真正觸發 job 失敗的判斷只看 DevQueue。
+Gateway/TWS」段落，這段空窗長達數小時到數天，若拿它當判定依據會製造大量
+假警報。
 
 跑法：`python scripts/check_local_schedule_heartbeat.py`
 （需要在 git checkout 過的 repo 內執行，且 `git log` 要抓得到足夠歷史——
@@ -48,11 +56,31 @@ STATUS_PATH = REPO_ROOT / "data" / "STATUS.json"
 
 STALL_THRESHOLD_MIN = 60  # 裁示原文：「超過60分鐘沒有新commit」
 
-# 兩條本機排程各自的commit message特徵樣式（實測抓自git log，見PENDING_QUEUE.md
-# 「警.一」條目的查證紀錄）。用search不是match，因為兩邊都會夾帶cycle_id/時間戳等
-# 變動內容。
+# 2026-09-27【乾.三主體第八點】總司令裁示：不採方案A（互動視窗編輯檔案時
+# 讓DevQueue的YIELD分支也commit心跳，會在互動視窗正做git相關操作時跟它
+# 搶著commit，重演round607那種stash-pop衝突根因），改採方案B強化版——
+# 判定來源從「只看DevQueue」改成「三軌（DevQueue／Marathon／Hypothesis-
+# queue）任一有新鮮心跳即視為本機存活」，同時保留個別軌道層級的
+# track_stalled警告（>360分鐘=6小時），讓「機器整體有沒有活著」跟
+# 「某一條軌道是不是真的自己停了」這兩個問題分開回答，不互相掩蓋。
+TRACK_STALL_THRESHOLD_MIN = 360  # 個別軌道層級警告門檻（6小時），跟上面
+# 60分鐘的「本機整體存活」門檻是兩個不同層級的判斷，不是同一個數字。
+
+# 三條本機排程各自的commit message特徵樣式（實測抓自git log，見PENDING_QUEUE.md
+# 「警.一」／「乾.三」條目的查證紀錄）。用search不是match，因為都會夾帶
+# cycle_id/時間戳等變動內容。
 DEVQUEUE_PATTERN = re.compile(r"DevQueue cycle log 自動更新")
+MARATHON_PATTERN = re.compile(r"Marathon cycle log 自動更新")
+HYPOTHESIS_QUEUE_PATTERN = re.compile(r"Hypothesis-queue cycle log 自動更新")
 IBKR_PATTERN = re.compile(r"IBKR quotes auto-update")
+
+# 三軌判定用（不含IBKR——IBKR維持警.一原本的設計，只記錄不參與停擺判定，
+# 理由見IBKR_PATTERN附近既有註記：盤外時段與每週人工登入空窗會製造假警報）。
+JUDGMENT_TRACKS = {
+    "devqueue": DEVQUEUE_PATTERN,
+    "marathon": MARATHON_PATTERN,
+    "hypothesis_queue": HYPOTHESIS_QUEUE_PATTERN,
+}
 
 
 def _git_log(pattern: re.Pattern, max_scan: int = 2000) -> tuple[str, datetime] | tuple[None, None]:
@@ -79,22 +107,45 @@ def _git_log(pattern: re.Pattern, max_scan: int = 2000) -> tuple[str, datetime] 
 
 def evaluate() -> dict:
     now = datetime.now(timezone.utc)
-    dq_sha, dq_ts = _git_log(DEVQUEUE_PATTERN)
-    ibkr_sha, ibkr_ts = _git_log(IBKR_PATTERN)
 
-    dq_minutes = (now - dq_ts).total_seconds() / 60.0 if dq_ts else None
+    tracks: dict[str, dict] = {}
+    for name, pattern in JUDGMENT_TRACKS.items():
+        try:
+            sha, ts = _git_log(pattern)
+        except Exception as e:  # noqa: BLE001 -- 偵測失敗只降級成警告，不得讓排程崩潰（十二節同一套原則）
+            print(f"::warning::track心跳查詢失敗（{name}）：{type(e).__name__}: {e}")
+            sha, ts = None, None
+        minutes = (now - ts).total_seconds() / 60.0 if ts else None
+        tracks[name] = {
+            "last_commit_sha": sha,
+            "last_commit_at": ts.isoformat() if ts else None,
+            "minutes_since": round(minutes, 1) if minutes is not None else None,
+            "track_stalled": (minutes is None) or (minutes > TRACK_STALL_THRESHOLD_MIN),
+        }
+
+    ibkr_sha, ibkr_ts = _git_log(IBKR_PATTERN)
     ibkr_minutes = (now - ibkr_ts).total_seconds() / 60.0 if ibkr_ts else None
 
-    stalled = dq_minutes is None or dq_minutes > STALL_THRESHOLD_MIN
+    # 方案B強化版：三軌任一minutes_since<60分鐘，就視為「本機這台機器整體
+    # 是活著的」——不再只看DevQueue單一訊號，避免互動視窗長時間編輯檔案時
+    # DevQueue被碰撞防護正確YIELD（見查.一條目根因）卻沒有心跳可看，被
+    # 誤判成「本機停擺」。
+    any_alive = any(
+        (t["minutes_since"] is not None) and (t["minutes_since"] <= STALL_THRESHOLD_MIN)
+        for t in tracks.values()
+    )
+    stalled = not any_alive
+
+    # 個別軌道層級警告：即使整體判定「本機存活」，某一條軌道自己可能真的
+    # 停了超過6小時——這個訊號跟「本機整體停擺」是兩個不同層級的問題，
+    # 分開列出，不讓其中一個掩蓋另一個。
+    track_stalled_names = [name for name, t in tracks.items() if t["track_stalled"]]
 
     return {
         "checked_at": now.isoformat(),
         "stall_threshold_minutes": STALL_THRESHOLD_MIN,
-        "devqueue": {
-            "last_commit_sha": dq_sha,
-            "last_commit_at": dq_ts.isoformat() if dq_ts else None,
-            "minutes_since": round(dq_minutes, 1) if dq_minutes is not None else None,
-        },
+        "track_stall_threshold_minutes": TRACK_STALL_THRESHOLD_MIN,
+        "tracks": tracks,
         "ibkr_quotes": {
             "last_commit_sha": ibkr_sha,
             "last_commit_at": ibkr_ts.isoformat() if ibkr_ts else None,
@@ -103,10 +154,17 @@ def evaluate() -> dict:
                     "都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring",
         },
         "stalled": stalled,
-        "judged_by": "devqueue",
-        "note": "本機排程最後活動時間；只看DevQueue的commit心跳判定是否停擺"
-                "（理由與IBKR排除原因見本檔案docstring），偵測放在雲端是因為"
-                "本機push被卡住時無法自己通知任何人。",
+        "track_stalled": track_stalled_names,
+        "judged_by": "any_of_three_tracks",
+        "note": "本機排程最後活動時間；2026-09-27【乾.三主體第八點】裁示改為"
+                "「DevQueue／Marathon／Hypothesis-queue三軌任一有新鮮心跳"
+                "（≤60分鐘）即視為本機整體存活」（取代原本只看DevQueue單一"
+                "訊號的版本，因為DevQueue的既有碰撞防護機制在互動視窗長時間"
+                "編輯檔案時會正確YIELD但不留心跳，容易誤判——詳見PENDING_"
+                "QUEUE.md查.一條目的根因分析）。個別軌道超過"
+                f"{TRACK_STALL_THRESHOLD_MIN}分鐘另外標記track_stalled警告，"
+                "不影響本機整體存活的判定，但值得單獨留意。偵測放在雲端是"
+                "因為本機push被卡住時無法自己通知任何人。",
     }
 
 
@@ -166,11 +224,14 @@ def main() -> int:
     result = evaluate()
     _write_into_status_json(result)
     print(json.dumps(result, ensure_ascii=False, indent=2))
+    if result["track_stalled"]:
+        print(f"::warning::個別軌道停擺（不影響本機整體存活判定）：{result['track_stalled']}"
+              f"（門檻{TRACK_STALL_THRESHOLD_MIN}分鐘）")
     if result["stalled"]:
-        dq = result["devqueue"]
+        minutes_summary = {name: t["minutes_since"] for name, t in result["tracks"].items()}
         print(
-            f"::error::本機排程疑似停擺——DevQueue最近一次commit(sha={dq['last_commit_sha']})"
-            f"距今{dq['minutes_since']}分鐘（門檻{STALL_THRESHOLD_MIN}分鐘）"
+            f"::error::本機排程疑似停擺——三軌(DevQueue/Marathon/Hypothesis-queue)"
+            f"皆無{STALL_THRESHOLD_MIN}分鐘內的新commit，各軌距今分鐘數：{minutes_summary}"
         )
         return 1
     return 0
