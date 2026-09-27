@@ -5159,3 +5159,10 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
 
 quota_throttle: SKIP: 正常頻率，距上次實跑26.0分鐘 < 30分鐘門檻
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Hypothesis-queue cycle start: 2026-09-27 15:51:02 =====
+Error: Exceeded USD budget (5)
+===== Hypothesis-queue cycle end: 2026-09-27 15:59:06 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
