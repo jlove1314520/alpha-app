@@ -15612,7 +15612,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 >   6. CashIncreaseSubscriptionRate 單位疑義照原指令處理，確認前不得修改公式。
 >   7. 完成後 push，停下等 Cowork 核對。
 
-- [ ] **新.二結案** [研究] 依盤點選項(c)：只補SURVIVAL_CONSTRAINT.md四個
+- [x] **新.二結案** [研究] 依盤點選項(c)：只補SURVIVAL_CONSTRAINT.md四個
   配置的Sharpe(對定存超額報酬)與逐年報酬表(補充欄位不計入試驗次數，
   沿用既有`research/data/survival_constraint_allocation_test.json`
   equity curve計算，不重跑回測)；新.二標記`[x]`，結論：「C1等同天條
@@ -15620,6 +15620,18 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   新增`docs/RESEARCH_DIRECTION_2026-09-27.md`(研究題目轉向：以0050為
   核心加值層、先求有再求好、v1=70/30、求好階段待查.二完成後另行預先
   登記)。**心跳**：本條目checklist本身。
+
+  **完成回報（2026-09-27，互動視窗CC）**：`survival_constraint_
+  allocation_test.py`新增`sharpe_vs_deposit_rate()`/`yearly_returns()`
+  兩個函式，沿用同一條equity curve重算（同一支腳本重跑，邏輯無變動，
+  非新回測），四格Sharpe(對定存超額報酬)分別為100/0=0.6171、85/15=
+  0.6185、70/30=0.6196、60/40=0.6203（彼此極接近，符合無槓桿簡化
+  再平衡下超額報酬對配置比例近似線性縮放的預期，不構成配置間的額外
+  取捨依據）；逐年報酬表(2003-2024)已寫入`SURVIVAL_CONSTRAINT.md`新增
+  一節。`docs/RESEARCH_DIRECTION_2026-09-27.md`已建立，內容涵蓋研究
+  題目轉向說明、v1=70/30定案理由、求好階段待查.二完成的明確條件。
+  `research/data/survival_constraint_allocation_test.json`MDD/CAGR
+  數字逐位元核對與原登記值一致（未變動任何回測邏輯，僅新增統計量）。
 
 - [ ] **紙.一** [開發/研究] 前進式紙上追蹤(非回測非新試驗)：2026-10第
   一個交易日起模擬70/30虛擬帳戶(0050/定存代理)，初始資金虛擬值；每月

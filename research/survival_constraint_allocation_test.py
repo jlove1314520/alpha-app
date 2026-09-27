@@ -141,7 +141,7 @@ def simulate_fixed_allocation(prices: pd.DataFrame, rf_monthly: pd.DataFrame, st
                     cost = sell_notional * sell_rate
                     stock_value -= sell_notional
                     bond_value += (sell_notional - cost)
-        rows.append({"date": date, "equity": stock_value + bond_value})
+        rows.append({"date": date, "equity": stock_value + bond_value, "rf_daily_ret": bond_daily_ret})
 
     equity_curve = pd.DataFrame(rows)
     holdout.assert_no_holdout_leakage(equity_curve, context=f"survival_constraint w={stock_w}")
@@ -152,6 +152,35 @@ def compute_mdd(equity: pd.Series) -> float:
     running_max = equity.cummax()
     dd = equity / running_max - 1.0
     return float(dd.min() * 100)
+
+
+def sharpe_vs_deposit_rate(equity_curve: pd.DataFrame) -> float:
+    """年化Sharpe，超額報酬＝每日組合報酬－當日定存代理隱含日報酬（同一條
+    equity curve模擬時已經用的同一個rf_daily_ret，不是另外估算）。
+    2026-09-27【新.二結案】補充欄位：沿用天條一.1已跑出的equity curve，
+    不重跑回測、不算新試驗。"""
+    df = equity_curve.sort_values("date").reset_index(drop=True)
+    daily_ret = df["equity"].pct_change()
+    excess = (daily_ret - df["rf_daily_ret"]).dropna()
+    if excess.std(ddof=0) == 0:
+        return 0.0
+    return float(excess.mean() / excess.std(ddof=0) * np.sqrt(252))
+
+
+def yearly_returns(equity_curve: pd.DataFrame) -> dict[str, float]:
+    """逐年報酬：每年最後一個交易日權益 / 前一年最後一個交易日權益 − 1；
+    第一年用該年第一筆權益當起點（非全年資料）。2026-09-27【新.二結案】
+    補充欄位，同一條equity curve，不重跑回測。"""
+    df = equity_curve.sort_values("date").reset_index(drop=True)
+    df["year"] = df["date"].dt.year
+    out: dict[str, float] = {}
+    prev_year_end_equity = None
+    for yr, grp in df.groupby("year"):
+        start_equity = prev_year_end_equity if prev_year_end_equity is not None else float(grp["equity"].iloc[0])
+        end_equity = float(grp["equity"].iloc[-1])
+        out[str(yr)] = round((end_equity / start_equity - 1) * 100, 2)
+        prev_year_end_equity = end_equity
+    return out
 
 
 def segment_mdd(equity_curve: pd.DataFrame, start: str, end: str) -> float | None:
@@ -186,14 +215,19 @@ def main() -> None:
         seg_mdds = {name: segment_mdd(eq, s, e) for name, (s, e) in BEAR_SEGMENTS.items()}
         worst_seg = min((v for v in seg_mdds.values() if v is not None), default=overall_mdd)
         survives_article1 = worst_seg >= MDD_SURVIVAL_THRESHOLD_PCT and overall_mdd >= MDD_SURVIVAL_THRESHOLD_PCT
+        sharpe_vs_rf = sharpe_vs_deposit_rate(eq)
+        yearly = yearly_returns(eq)
         results.append({
             "stock_weight": w, "bond_weight": round(1 - w, 2),
             "total_return_pct": round(total_return_pct, 2), "cagr_pct": round(cagr_pct, 3),
             "overall_mdd_pct": round(overall_mdd, 2), "worst_segment_mdd_pct": round(worst_seg, 2),
             "segment_mdds_pct": {k: (round(v, 2) if v is not None else None) for k, v in seg_mdds.items()},
             "survives_article1_mdd50": survives_article1,
+            "sharpe_vs_deposit_rate": round(sharpe_vs_rf, 4),
+            "yearly_returns_pct": yearly,
         })
         print(f"  CAGR={cagr_pct:.2f}%  全期MDD={overall_mdd:.2f}%  最差空頭段MDD={worst_seg:.2f}%  "
+              f"Sharpe(對定存)={sharpe_vs_rf:.4f}  "
               f"天條一={'PASS' if survives_article1 else 'VIOLATES_SURVIVAL'}")
 
     base_cagr = results[0]["cagr_pct"]  # 100/0（純0050）當基準
@@ -204,6 +238,8 @@ def main() -> None:
            "mdd_survival_threshold_pct": MDD_SURVIVAL_THRESHOLD_PCT,
            "data_source_note": "0050繞過yfinance(僅涵蓋2009起)，直接用FinMind還原權息路徑取得2003-06-30起完整歷史，涵蓋2008金融海嘯",
            "bond_proxy": "央行五大銀行定存利率-一個月-固定，月頻算術平均（保守假設，低估真實固定收益報酬）",
+           "supplement_note": "2026-09-27【新.二結案】補充sharpe_vs_deposit_rate與yearly_returns_pct兩欄位，"
+                               "沿用同一條equity curve重算，非新回測、不列入試驗次數",
            "results": results}
     OUT_JSON.parent.mkdir(exist_ok=True)
     with open(OUT_JSON, "w", encoding="utf-8") as f:
