@@ -139,6 +139,16 @@ def _dividend_events_from_df(div: pd.DataFrame, close_by_date: dict, trading_dat
     `reference_price/before_price`實際比例誤差全部<0.6%（原始未除以
     1000的舊公式誤差達7.7%~24.3%，方向一致但量級差了近3個數量級，
     確認是單位問題不是公式本身錯）。見`_self_test_cash_increase_rate_
+    unit()`。
+
+    **2026-09-27修.七同步修正**：`StockEarningsDistribution`（股票股利/
+    無償配股率）同樣需要**除以10**才是套進公式的正確單位——FinMind的
+    原始值是台股股利公告慣用的「每股配股數(元)」，換算成「每股配股
+    比率」需除以股票面額新台幣10元（例：配股1元/股＝配股率10%＝0.1，
+    不是1.0）。用`TaiwanStockDividendResult`核對5筆純股票股利事件
+    （現金=0）＋5筆現金+股票股利混合事件，除以10後的還原因子與官方
+    比例誤差全部<0.6%（原始未除以10的舊公式誤差達29.96%~72.00%，同樣
+    方向一致、量級差了兩個數量級）。見`_self_test_stock_dividend_
     unit()`。"""
     events = []
     for _, row in div.iterrows():
@@ -147,7 +157,7 @@ def _dividend_events_from_df(div: pd.DataFrame, close_by_date: dict, trading_dat
         if not ex_date:
             continue
         cash = row.get("CashEarningsDistribution") or 0.0
-        stock_ratio = row.get("StockEarningsDistribution") or 0.0
+        stock_ratio = (row.get("StockEarningsDistribution") or 0.0) / 10.0
         rights_ratio = (row.get("CashIncreaseSubscriptionRate") or 0.0) / 1000.0
         rights_price = row.get("CashIncreaseSubscriptionpRrice") or 0.0
         if cash == 0 and stock_ratio == 0 and rights_ratio == 0:
@@ -547,7 +557,40 @@ def _self_test_cash_increase_rate_unit() -> bool:
         ok = ok and case_ok
         print(f"  {c['sid']}：官方比例={actual_ratio:.6f} 修正後公式比例={our_ratio:.6f} "
               f"誤差={err_pct:.3f}%：{'PASS' if case_ok else 'FAIL'}")
-    print(f"[self-test 3/3] CashIncreaseSubscriptionRate除以1000修正：{'PASS' if ok else 'FAIL'}")
+    print(f"[self-test 3/4] CashIncreaseSubscriptionRate除以1000修正：{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def _self_test_stock_dividend_unit() -> bool:
+    """修.七（2026-09-27裁示）：`StockEarningsDistribution`除以10的單位
+    修正，用5筆純股票股利事件(現金=0)+5筆現金+股票股利混合事件(共10筆，
+    2010~2024年，2026-09-27即時查證FinMind API取得，輸入值寫死避免每次
+    自我測試消耗額外API請求)核對還原因子與官方`TaiwanStockDividendResult`
+    的`reference_price/before_price`實際比例誤差<0.6%。"""
+    cases = [
+        {"sid": "8908", "cash": 0.0, "stock_ratio_raw": 0.8, "before_price": 26.0, "reference_price": 24.07},
+        {"sid": "3312", "cash": 0.0, "stock_ratio_raw": 0.5, "before_price": 11.2, "reference_price": 10.66},
+        {"sid": "5531", "cash": 0.0, "stock_ratio_raw": 0.5, "before_price": 10.9, "reference_price": 10.38},
+        {"sid": "8941", "cash": 0.0, "stock_ratio_raw": 1.0, "before_price": 58.2, "reference_price": 52.91},
+        {"sid": "2597", "cash": 0.0, "stock_ratio_raw": 4.0, "before_price": 202.0, "reference_price": 144.28},
+        {"sid": "2356", "cash": 1.0, "stock_ratio_raw": 0.5, "before_price": 18.75, "reference_price": 16.9},
+        {"sid": "6441", "cash": 4.0, "stock_ratio_raw": 0.5, "before_price": 63.8, "reference_price": 56.95},
+        {"sid": "2106", "cash": 1.8, "stock_ratio_raw": 0.70010353, "before_price": 68.9, "reference_price": 62.7},
+        {"sid": "1308", "cash": 0.6, "stock_ratio_raw": 0.2, "before_price": 18.4, "reference_price": 17.45},
+        {"sid": "6762", "cash": 3.0, "stock_ratio_raw": 2.0, "before_price": 259.0, "reference_price": 213.33},
+    ]
+    ok = True
+    for c in cases:
+        stock_ratio = c["stock_ratio_raw"] / 10.0
+        ref_price = (c["before_price"] - c["cash"]) / (1 + stock_ratio)
+        our_ratio = ref_price / c["before_price"]
+        actual_ratio = c["reference_price"] / c["before_price"]
+        err_pct = abs(our_ratio - actual_ratio) / actual_ratio * 100
+        case_ok = err_pct < 0.6
+        ok = ok and case_ok
+        print(f"  {c['sid']}：官方比例={actual_ratio:.6f} 修正後公式比例={our_ratio:.6f} "
+              f"誤差={err_pct:.3f}%：{'PASS' if case_ok else 'FAIL'}")
+    print(f"[self-test 4/4] StockEarningsDistribution除以10修正：{'PASS' if ok else 'FAIL'}")
     return ok
 
 
@@ -555,5 +598,6 @@ if __name__ == "__main__":
     r1 = _self_test_synthetic()
     r2 = _self_test_known_bad_stock()
     r3 = _self_test_cash_increase_rate_unit()
-    print(f"整體結果：{'PASS' if (r1 and r2 and r3) else 'FAIL'}")
-    raise SystemExit(0 if (r1 and r2) else 1)
+    r4 = _self_test_stock_dividend_unit()
+    print(f"整體結果：{'PASS' if (r1 and r2 and r3 and r4) else 'FAIL'}")
+    raise SystemExit(0 if (r1 and r2 and r3 and r4) else 1)
