@@ -14395,10 +14395,25 @@ round615~616的常備.1~.12消化；剩餘可見的（例如SUE「搭配動能�
 > 結果寫進 research/data/h1_gates.json 並 git add -f 入庫，然後停下。
 > 由 Cowork 核對後，再另行放行正式回測。
 
-- [ ] **停.一** [研究] 立即停止H.一一切自動重跑——不論哪個軌道或排程，
+- [x] **停.一** [研究] 立即停止H.一一切自動重跑——不論哪個軌道或排程，
   在本裁示完成並經Cowork核對前，不得執行holdout_2025_dividend_account_
   test.py的正式回測段落。**心跳**：已取消本session的ScheduleWakeup自動
   重跑迴圈，改為只檢查乾.一進度，不再呼叫該腳本的正式回測路徑。
+  **完成（自走hypothesis_queue軌道，2026-09-27，[自行裁量]標記結案）**：
+  本條原始限制的目的（避免在乾.一/乾.二/乾.三修bug＋補閘門完成前，
+  自動軌道搶跑正式回測）已由後續一連串明確裁示取代並完成——乾.三
+  （2026-09-27）補強閘門後`gates_pass=True`；放.一/放.二明確核准放行
+  正式回測；正式回測已實際執行完成，#400 dividend判定FAIL、verdict已
+  鎖定寫入`TRIALS_LEDGER.md`/`STRATEGY_GRAVEYARD.md`；驗.五＋修.六
+  （同日稍後）進一步做完基準汙染診斷與資料層修正，全案已如實登記在
+  `AWAITING_REVIEW.md`「考.一」列等Cowork核對。也就是說「本裁示完成
+  並經Cowork核對」的前置條件已由更新的明確裁示（乾.三/放.一/放.二）
+  正式取代並執行完畢，此條的暫停動作已達成原始目的，不再是有效的
+  待辦阻塞項，予以結案。**未做的事**：本次僅更新此條目狀態（文書性
+  結案），未觸碰`research/backtest/`／`research/validation/`／
+  `research/adjust.py`／`research/pit.py`／`research/trial_registry.py`
+  等CLAUDE.md十三節限定清單內任何原始碼，未執行任何FinMind呼叫，未動
+  `alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區。
 - [x] **證.一** [研究] 用已快取資料，對5檔2025年有除息的普通股，印出
   ①因子資料裡ttm_cash_dividend最後一筆pit_date②不截斷的TaiwanStock
   Dividend裡最新除息日。兩者不一致即證實factors.py::_dividend_yield_
@@ -15539,3 +15554,28 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
     `check_adjusted_series_anomalies`在`adjust.py`(CLAUDE.md十三節單一寫入者
     範圍，自走軌道只可提案)，`common_stock_only()`上市日截斷也待上市日資料
     補齊後才做；第四點`CashIncreaseSubscriptionRate`單位查官方定義。
+
+## 2026-09-27 自走hypothesis_queue軌道補件（佇列深度檢查）
+
+**背景**：本輪開工檢查`- [ ]`項目數＝0（低於12項下限），但凍結.二
+（CLAUDE.md十四節，仍生效中——見「考.一」條目「凍結.二繼續生效」明文）
+規定本階段不得用新alpha試驗補件，只能排入稽核/資料/工具類工作。逐一
+核對`STRATEGY_GRAVEYARD.md`/`REPORT.md`/`LEADS.md`待辦後，找到一項
+明確符合「非新搜尋，屬既有試驗方法論修正重跑」的項目：
+
+- [ ] **驗.二第二部分** [驗證] `spillover_overlay_v1`（TRIALS_LEDGER
+  #346，已判FAIL：前視偏誤——原版用台股收盤到收盤報酬乘上美股t日訊號，
+  但美股t日訊號要等台股t-1收盤後才知道）改用「開盤到收盤」重建版本
+  （美股t-1收盤訊號→台股t日開盤進場→t日收盤出場，消除前視偏誤），
+  重跑GATE_SEQUENCE並登記為新試驗編號（依CLAUDE.md七之三節，這是對
+  既有假設的方法論修正重跑，非CLAUDE.md十四節「新研究方向搜尋」，
+  符合十四節第2點允許項目）。**心跳**：完成後在
+  `research/PROGRESS_HEARTBEAT.jsonl`append一行，並在`TRIALS_LEDGER.md`
+  新增判定列。**限制**：本項只能呼叫`research/backtest/`／
+  `research/validation/`既有函式（`run_backtest()`等），不得修改這兩個
+  目錄或`research/adjust.py`/`research/pit.py`/`research/trial_
+  registry.py`的原始碼（CLAUDE.md十三節單一寫入者限定，自走軌道發現
+  需要改動這些檔案時只能寫提案，不得直接編輯）。**其餘佇列深度**：
+  本輪未找到第二項符合資格的稽核/資料/工具類候選，如實記錄佇列僅補到
+  1項（未達12項下限），依凍結.二第4點「補不到12項就誠實記錄佇列變淺，
+  不得為了維持深度而違反第1點」，不強行湊數。
