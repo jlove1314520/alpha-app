@@ -15316,13 +15316,21 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
     `adjustment_anomaly_warnings`欄位——**如實註記**：這支腳本本身
     目前沒有排程自動執行（既有已知缺口，非本輪新增），要等下一次
     有人手動跑或被排進排程才會反映到`STATUS.json`實際輸出裡。
-  - ④**進行中，尚未完成**：`inventory_2025_corporate_actions()`已在
-    背景執行（掃描H.一的251檔樣本，非全市場，範圍已在程式內明確
-    註記），因FinMind三類資料集額度限制，掃描仍在跑，尚未產出
-    `research/data/h1_2025_corporate_actions_inventory.json`的最終
-    結果，**「修正後重建受影響部分」也因此尚未開始**。這是本條目
-    唯一未完成的部分，不因此延後前面已完成部分的push，會在背景掃描
-    完成、重建做完後另開一則回報收尾（不需要總司令重新裁示）。
+  - ④**BLOCKED，尚未完成**：`inventory_2025_corporate_actions()`
+    （掃描H.一的251檔樣本，非全市場，範圍已在程式內明確註記）背景
+    執行中撞上FinMind額度上限崩潰（`TaiwanStockCapitalReduction
+    ReferencePrice`資料集回傳HTTP 402「Requests reach the upper
+    limit」），崩潰發生在任何盤點結果印出/寫檔之前，
+    `research/data/h1_2025_corporate_actions_inventory.json`**尚未
+    產生**，「修正後重建受影響部分」也因此尚未開始。額度已依既有
+    `finmind_client.py`機制標記封鎖，`data/rate_limit_state.json`
+    記錄`blocked_until`對應**2026-09-27 13:07:37台北時間**（約封鎖
+    2小時，崩潰當下約11:07台北時間）。依「額度用完就誠實拒絕，不
+    排隊、不重試」的紀律，**不在額度解除前重試**；這是本條目唯一
+    未完成的部分，不因此延後前面已完成部分的push，會在額度解除後
+    重跑、拿到結果後另開一則回報收尾（不需要總司令重新裁示，屬於
+    「阻塞不是停止」既有規則範疇——維運層級的資料盤點重試，非新
+    alpha試驗，也非only-once資源）。
   - **本輪未解決、如實記錄的疑點（重要，會影響對「其他/待查」數量的
     解讀）**：`TaiwanStockDividend`的`CashIncreaseSubscriptionRate`
     （現金增資認股比率）欄位，某些事件的值遠大於一般認知的「比率」
