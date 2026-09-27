@@ -1,0 +1,80 @@
+{
+ "generated_at": "2026-09-27T19:56:08.068102",
+ "verdict_locked_note": "本檔案全部數字為診斷值，#398/#399/#400判定一律鎖定不變，兩個候選已判FAIL，本次診斷不會讓任何一個翻盤成PASS。",
+ "n_common_universe": 251,
+ "n_usable": 208,
+ "data_path_census": {
+  "n_stocks_yfinance": 191,
+  "n_stocks_finmind": 17,
+  "n_rows_yfinance": 636758,
+  "n_rows_finmind": 40527,
+  "pct_rows_yfinance": 94.02,
+  "pct_rows_finmind": 5.98,
+  "n_finmind_stocks_with_dividend_type_event": 4,
+  "note": "「股票股利或現金增資事件」用adjustment_events()的event_type=='dividend'粗粒度判斷(該事件類型同時涵蓋現金股利/股票股利/現金增資三種，資料本身沒有更細的拆分)，如實揭露這是寬鬆上界估計，不是精確只算股票股利/現金增資兩種的數字。"
+ },
+ "results": {
+  "f52w_high_portfolio_v1": {
+   "diagnostic_value_verdict_locked": true,
+   "registered": {
+    "n_trades": 919,
+    "candidate_return_pct_2007_2014": 113.91,
+    "mdd_full_period_pct": -47.14,
+    "mdd_2008_pct": -47.14,
+    "ir_annualized": 0.5783734876238544,
+    "one_tailed_p": 0.061108408841473526
+   },
+   "diag_v6_corrected": {
+    "n_trades": 1001,
+    "candidate_return_pct_2007_2014": 97.55,
+    "mdd_full_period_pct": -51.93,
+    "mdd_2008_pct": -51.93,
+    "ir_annualized": 0.45306164390313247,
+    "one_tailed_p": 0.11188707275011467
+   },
+   "delta": {
+    "n_trades": 82,
+    "candidate_return_pct_2007_2014": -16.36,
+    "mdd_full_period_pct": -4.79,
+    "mdd_2008_pct": -4.79,
+    "ir_annualized": -0.1253,
+    "one_tailed_p": 0.0508
+   },
+   "gate_ir_pass_diag": false,
+   "gate_mdd_2008_pass_diag": true,
+   "gate_mdd_full_pass_diag": false,
+   "overall_verdict_diag_only": "FAIL"
+  },
+  "dividend_yield_portfolio_v1": {
+   "diagnostic_value_verdict_locked": true,
+   "registered": {
+    "n_trades": 579,
+    "candidate_return_pct_2007_2014": 203.87,
+    "mdd_full_period_pct": -53.72,
+    "mdd_2008_pct": -53.72,
+    "ir_annualized": 0.8318645768938427,
+    "one_tailed_p": 0.012821491737059402
+   },
+   "diag_v6_corrected": {
+    "n_trades": 579,
+    "candidate_return_pct_2007_2014": 203.87,
+    "mdd_full_period_pct": -53.72,
+    "mdd_2008_pct": -53.72,
+    "ir_annualized": 0.8318684237087466,
+    "one_tailed_p": 0.012821059754467637
+   },
+   "delta": {
+    "n_trades": 0,
+    "candidate_return_pct_2007_2014": 0.0,
+    "mdd_full_period_pct": 0.0,
+    "mdd_2008_pct": 0.0,
+    "ir_annualized": 0.0,
+    "one_tailed_p": -0.0
+   },
+   "gate_ir_pass_diag": true,
+   "gate_mdd_2008_pass_diag": true,
+   "gate_mdd_full_pass_diag": false,
+   "overall_verdict_diag_only": "FAIL"
+  }
+ }
+}

@@ -1,0 +1,50 @@
+{
+ "generated_at": "2026-09-27T20:01:46.742127",
+ "verdict_locked_note": "本檔案全部數字為診斷值，#7/#8/#9已登記PASS判定一律鎖定不變。",
+ "sample_size": 300,
+ "sample_seed": 20260822,
+ "results": {
+  "f_eps_surprise": {
+   "diagnostic_value_verdict_locked": true,
+   "registered": {
+    "null_percentile": 100.0,
+    "verdict": "PASS"
+   },
+   "diag_v6_corrected": {
+    "null_percentile": 61.2,
+    "required_percentile": 98.33,
+    "val_mean_ic": 0.0095,
+    "passes_diag_only": false
+   },
+   "delta_null_percentile": -38.8
+  },
+  "f_revenue_surprise": {
+   "diagnostic_value_verdict_locked": true,
+   "registered": {
+    "null_percentile": 99.0,
+    "verdict": "PASS"
+   },
+   "diag_v6_corrected": {
+    "null_percentile": 87.0,
+    "required_percentile": 98.33,
+    "val_mean_ic": 0.0173,
+    "passes_diag_only": false
+   },
+   "delta_null_percentile": -12.0
+  },
+  "f_low_vol": {
+   "diagnostic_value_verdict_locked": true,
+   "registered": {
+    "null_percentile": 100.0,
+    "verdict": "PASS"
+   },
+   "diag_v6_corrected": {
+    "null_percentile": 100.0,
+    "required_percentile": 98.33,
+    "val_mean_ic": 0.0717,
+    "passes_diag_only": true
+   },
+   "delta_null_percentile": 0.0
+  }
+ }
+}
