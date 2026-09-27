@@ -2720,3 +2720,10 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - **本輪誠實結論**：`凍結.二`允許的四類工作皆已完成或無新內容，15條`- [!]`逐一核對均未到解除時間，TW軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗。
 - 等待總司令審閱：15件（與`AWAITING_REVIEW.md`「等待中」表格列數一致）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：依輪替下一輪選FUT軌（round646=09-27 18:3x，三軌中最舊）；凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除，不補新alpha試驗。
+## 第649輪 · 2026-09-27T21:3x+08:00 · FUT · 維運帽：核對交辦與阻塞項、重跑build_sector_flow.py確認金流一.4維持16交易日、確認凍結.二下無可做工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260927-213037`）。三軌時間戳：FUT round646=09-27 18:3x最舊，依輪替選FUT。
+- 核心查證：交辦佇列0條`- [ ]`；`- [!]`=15條逐項核對均未到解除時間。重跑`build_sector_flow.py`確認金流一.4維持16個交易日（與round647/648一致），20日視窗仍差4個交易日。tick累積仍13/20（週日無新增）。FUT_LEADS.md/STRATEGY_GRAVEYARD.md回顧確認個股期貨橫斷面線與trend/oi組合嘗試已窮盡結案，無全新機制候選，且凍結.二期間不得新增alpha試驗。
+- 驗證：`trial_registry.py --check` exit=0 PASS（402列，無新判定）；`is_holdout_consumed()`=True（H.一先前已消耗，非本輪動作）；`run_detached.py status` running=0；`git status`確認十三節限定檔案無殘留未commit編輯。
+- 等待總司令審閱：15件（與`AWAITING_REVIEW.md`表格列數核對一致，本輪未變動）。交辦佇列還剩0條`- [ ]`未開始。
+---
