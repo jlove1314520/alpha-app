@@ -13142,3 +13142,49 @@ SSR輸出，不是純client-side JS抓取**，跟`taiwanindex.com.tw`的
 或Cowork核准，下一步是寫`__NUXT__`變數池反混淆解析器（獨立工程
 任務，建議登記進`PENDING_QUEUE.md`交辦而非繼續由本track自走猜測），
 或改先完成剩餘4筆公告日補查（優先度較低但成本較低）。
+
+**【2026-09-27T22:5x hypothesis_queue排程接續第十六輪，#82驗證yuantaetfs.com
+Nuxt SSR資料實際內容】**：開工先讀`PENDING_QUEUE.md`（`- [ ]`0條、`- [!]`15條，
+逐一核對無與本track相關的新解除條件）。接續第十五輪發現的`yuantaetfs.com`
+Nuxt payload「技術可行、待寫解析器」，本輪不手寫JS物件字面量解析器（風險
+較高、邊界案例多），改用本機既有Node.js（v24.19.0，`CLAUDE.md`記錄已裝）
+直接`eval()`執行整段IIFE取得還原後的物件，寫成可重用小工具
+`research/tools/nuxt_ssr_eval.js`。**驗證結果：解析完全成功**，
+`/product/detail/0050/ratio`頁面`__NUXT__.data[1].weightData`含今日
+（2026-09-24）完整PCF成分股清單（`InKind.FundComposition`，含`stkcd`/
+`name`/`ename`/`qty`每檔申購贖回單位數）。第十五輪標記的「編碼異常」
+本輪確認**根本不存在**——用`ord()`逐碼位檢查（例如「公告消息」還原為
+`0x516c 0x544a 0x6d88 0x606f`，正確的公告=0x516c0x544a、消息=0x6d880x606f），
+correctly UTF-8解碼；上一輪`print()`看到的亂碼純粹是Windows主控台cp950
+codepage顯示問題（跟`CLAUDE.md`十二節記錄的同一類console編碼陷阱），
+不是資料本身損壞，第十五輪已初步指出此點，本輪用codepoint層級證據
+完全坐實。
+
+**但對#82目標無直接幫助，如實記錄**：逐一檢查這個頁面payload全部欄位
+（`fundData`/`fileListData`/`fileLinkData`89個鍵/`tagList`/`rebalance`/
+`table0061Data`等），**`rebalance`鍵為空陣列`[]`，其餘欄位全部是「當下
+即時快照」性質（今日PCF申購贖回籃、今日淨值、今日成交量），沒有任何
+一個欄位是歷史成分股調整公告日/生效日清單**。這頁是「即時申贖檔案」
+頁，不是「定期審核歷史」頁，跟#82需要的2015~2020年公告日/生效日缺口
+（剩2016-12/2018-03/2018-06/2018-12四筆）**性質不同，此路不通**。
+**技術結論仍有價值保留**：`research/tools/nuxt_ssr_eval.js`是通用工具，
+未來若#82或其他研究需要`yuantaetfs.com`或其他Nuxt SSR網站的即時資料
+（例如日後真的需要即時PCF籃驗證申贖成本假設），這支工具可直接重用，
+不必重新排查編碼問題。
+
+**未修改`research/backtest/`／`validation`／`adjust.py`／`pit.py`／
+`trial_registry.py`（十三節單一寫入者，`git status`確認無這些路徑
+未commit變更）**。`is_holdout_consumed()`開工/收工前皆確認`True`
+（延續既定狀態，非本輪造成，本輪工作不在`ALLOWED_HOLDOUT_READERS`
+呼叫鏈上）。累計交叉驗證進度不變：仍8/12筆完整，剩餘4筆
+（2016-12/2018-03/2018-06/2018-12）未變，本輪未嘗試WebSearch補查。
+本輪不登記`TRIALS_REGISTRY.jsonl`（技術排查輪，比照既有慣例不登記）。
+**交辦佇列還剩0條未開始**。CLAUDE.md「十四、凍結.二」仍生效中
+（`轉向.一`尚未有裁示結果），本輪工作屬允許範圍內的「資料抓取／工具
+排查」，未新增任何alpha試驗、未進入回測。**下一輪建議**：`yuantaetfs.com`
+路徑已證實無歷史公告日資料，不建議再往這個網站查；剩餘4筆公告日
+WebSearch已連續多輪查無（邊際效益遞減），建議下一輪改評估「接受
+組成已知但精確公告日缺失，僅用生效日做次要驗證」這個第十二輪已提出的
+替代SPEC設計路徑，或改詢問總司令是否核准8/12筆已足夠先寫SPEC事前登記
+（此為需總司令裁示的範疇，屬CLAUDE.md零之一第7類佇列真空但仍應誠實
+標記，不擅自決定"8筆夠了"）。

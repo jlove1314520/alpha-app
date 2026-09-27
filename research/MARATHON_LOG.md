@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-27T22:56:47 — hypothesis_queue第十六輪：驗證yuantaetfs.com Nuxt SSR資料，寫成通用工具research/tools/nuxt_ssr_eval.js — 此頁確認無歷史公告日資料，#82仍卡剩餘4筆（2016-12/2018-03/2018-06/2018-12），凍結.二仍生效
+
 ## 2026-09-27T21:5x（Taipei，hypothesis_queue排程接續，第十五輪）— 開工先讀
 `PENDING_QUEUE.md`：`- [ ]`項0條，`- [!]`項15條，逐一略讀查無與本track相關
 的新解除條件（同上兩輪）。轉回本track的#82，接續第十四輪建議的路徑：從
