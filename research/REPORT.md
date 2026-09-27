@@ -2687,3 +2687,16 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、`trial_registry.py --check`、`ls`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - **本輪誠實結論**：`凍結.二`允許的四類工作皆已完成或無新內容，15條`- [!]`逐一核對均未到解除時間，TW軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗。
 - 等待總司令審閱：14件（與`AWAITING_REVIEW.md`「等待中」表格列數一致）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：依輪替下一輪選FUT軌（round643=09-27 15:3x，三軌中最舊）；凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除，不補新alpha試驗；`金流一.4`還需3個交易日、`外部一改.2`tick累積仍13/20。
+---
+## 第646輪 · 2026-09-27T18:3x+08:00 · FUT · 維運帽：核對交辦與阻塞項、確認凍結.二下無可做工作單位；發現並記錄金流一.4交易日數落差 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260927-183037`）。三軌時間戳：FUT round643=09-27 15:3x（最舊）／US round644=09-27 16:3x／TW round645=09-27 17:3x——依輪替選FUT。
+- 核心查證：`PENDING_QUEUE.md` `grep -c "^- \[ \]"`=0（無未開始交辦項）、`grep -c "^- \[!\]"`=15條，逐一核對開頭標記解除條件均未到解除時間。
+- **發現並記錄一項落差（如實記錄，未修正根因）**：實測執行`build_sector_flow.py`（零額外請求，只讀既有`institutional_history.json`）確認法人歷史仍**16個交易日**（20260901~20260924）、20日視窗還差4個交易日——與round645心跳所寫「17個交易日（09-24記錄16日+09-25週五新增1日）」不一致。查`git log -- data/institutional_history.json`，最後一次更新此檔的commit（`0ce14b6e`，09-26 08:07台北）資料仍只到20260924，未見20260925（週五）資料——round645可能是用「16+週五1天=17」的算術推論、未實際重跑腳本驗證。無論16或17，20日視窗都未滿足，對阻塞判定本身無影響，本輪未深究`accumulate_institutional.py`是否漏抓09-25的根因，留給下一輪或研究帽處理。
+- `data/rate_limit_state.json`確認FinMind`blocked_until`=2026-09-27T08:22:52 UTC，本輪10:31 UTC（台北18:31）查詢時額度已解除逾2小時，但`資料.一`／`閘門.一`皆已於round640完成300/300，無待續抓工作。
+- 核對`凍結.二`允許的四類工作現況：稽核重跑／驗.二重跑先前輪次已全部完成並登記；資料抓取已完成300/300；工具修正已由互動視窗commit；`git status`確認十三節限定清單內檔案無殘留未commit編輯。`run_detached.py status`：running=0（162筆歷史，無job待收成）。
+- `AWAITING_REVIEW.md`「等待中」表格核對14件（表頭與列數一致，與round645相符，本輪未變動）。
+- 驗證：`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（402列，本輪純查證未新增判定）；`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪新增動作，僅讀取核對）。
+- 未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`等CLAUDE.md十三節限定清單內任何原始碼。唯一寫入動作是重跑`build_sector_flow.py`（零額外外部請求，只讀repo內既有檔案），輸出與既有`sector_flow.json`/`PENDING_QUEUE.md`倒數文字完全一致無實質變化。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- **本輪誠實結論**：`凍結.二`允許的四類工作皆已完成或無新內容，15條`- [!]`逐一核對均未到解除時間，FUT軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗。
+- 等待總司令審閱：14件（與`AWAITING_REVIEW.md`「等待中」表格列數一致）。交辦佇列還剩0條`- [ ]`未開始。下一步建議：依輪替下一輪選US軌（round644=09-27 16:3x，三軌中最舊）；凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除，不補新alpha試驗；建議下一輪順手查證`accumulate_institutional.py`是否漏抓20260925交易日資料。
