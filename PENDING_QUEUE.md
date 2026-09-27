@@ -14819,3 +14819,113 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   這個「repo整體30分鐘級排程普遍延遲」的現象屬實且持續，可能也影響
   `news_events.yml`等其他既有排程的實際時效性，建議一併納入Cowork
   的後續評估範圍（僅供參考，非本次裁示要求的動作）。
+
+## 2026-09-27 總司令裁示【乾.三主體：修正G2b/G2c判定＋補吞錯誤缺口＋處理過期快取，重跑--gates-only】（原文登記，補貼09-26 23:33裁示，與已完成第九項合併為同一乾.三條目）
+
+> 【乾.三主體：修正G2b/G2c判定＋補吞錯誤缺口＋處理過期快取，重跑
+> --gates-only】（此即 09-26 23:33 裁示的乾.三主體，前次漏貼；與已完成
+> 的第九項合併為同一條目）先寫進 PENDING_QUEUE 再動工。只改
+> --gates-only 分支與資料載入段，不得改第 5 步以後的正式回測邏輯、
+> 不得改 prepare_factors() 的計算、不得改策略參數。
+>
+> 一、補吞錯誤缺口（G6，須=0）：
+>   1. 載入迴圈呼叫 prepare_factors 時傳入 warnings_out=<每檔各自的
+>      list>。
+>   2. 統計所有「f_dividend_yield_ttm skipped」的股票，列出 stock_id
+>      與錯誤訊息，寫進 h1_gates.json 的 G6_dividend_factor_skipped。
+>   3. G6 > 0 → gates_pass=False。其他因子的 warning 只記錄計數，
+>      不列入判定（策略不用）。
+>
+> 二、G2b 三檔先印診斷（只印日期、收盤價、成交量、因子值，不得印任何
+> 報酬）：
+>   對 7758、6539、3531 各印 d 中從 E 起往後 6 列的 date / close /
+>   Trading_Volume / f_dividend_yield_ttm，並印該檔 f_dividend_yield_
+>   ttm 整欄 NaN 的比例。
+>   結論須明確歸類為以下之一：(a) E 當天零成交（close=0）(b) 整欄
+>   NaN（對應 G6）(c) 其他（附證據）。
+>
+> 三、修正 G2b 判定：
+>   改取「date >= E 且 close > 0」的第一列（最多往後找 10 列）再比對
+>   obs 與 X。
+>   10 列內都沒有有效成交的，列入 G2b_no_valid_trade（另列，不算
+>   patch 失敗）。
+>   有效列存在但 obs 為 NaN 或 |obs − X| 超過容差，才算 G2b 不一致
+>   （須=0）。
+>
+> 四、修正 G2c：pre_ttm 為 None 的股票不計入 n_effective，另列
+> n_pre_none 計數。仍須 n_effective > 0。
+>
+> 五、G5 落後股票分類：
+>   對 2330、6806、3454、2809 查下市/停牌紀錄（用現有下市資料來源，
+>   不得新增爬取來源）。
+>   歸類為 (a) 真實下市/停牌 → 保留不動，列出最後交易日；或 (b) 快取
+>   過期。
+>   (b) 類只對該檔 TaiwanStockPrice 以 force_refresh=True 重抓
+>   uncapped 資料。其餘股票不得動快取。
+>   另外盤點本次 214 檔可用股票所用的 TaiwanStockPrice __latest 快取
+>   中，最後日期早於 2026-09-17 的全部檔案，列表回報（只回報，除
+>   (b) 類外不重抓）。
+>
+> 六、固定期末日：
+>   新增常數 H1_PERIOD_END = "2026-09-24"（= 乾.二 G4），載入後把每檔
+>   序列截斷至 ≤ 此日，period_end 直接使用此常數。
+>   理由：在看到任何結果前決定共同期末日，避免單檔重抓把期末日拉長。
+>   重跑前先在 TRIALS_LEDGER #400 附註登記這一行。
+>
+> 七、重跑 python research/holdout_2025_dividend_account_test.py
+> --gates-only，結果寫入 research/data/h1_gates.json 並 git add -f
+> 入庫。
+>   gates_pass = G1==0 且 G2a==0 且 G2b==0 且 G2c.n_effective>0 且
+>   G5≤5% 且 G6==0。
+>   跑完即停，禁止印出任何報酬/IR/MDD，禁止接著跑正式回測，等 Cowork
+>   核對。
+>
+> 八、查.一 心跳方案裁示：不採方案 A（互動視窗編輯時做 git 操作，會
+> 重演 stash-pop 衝突）。改實作方案 B 強化版：
+>   check_local_schedule_heartbeat.py 判定「三軌任一心跳 < 60 分鐘即
+>   為本機存活」。
+>   但個別軌道 minutes_since > 360 另外標示 track_stalled 警告並列出。
+>   偵測失敗只降級成警告。
+>
+> 九、（已完成，見 9320077）看門狗根因=GitHub排程延遲(a)。Cowork 裁示：
+> 維持現狀，雲端看門狗定位為「數小時級停擺」的最後防線，不改頻率、
+> 不再投入；30 分鐘級偵測由第八項負責。
+
+- [ ] **乾.三主體** [研究/維運] 修正G2b/G2c判定＋補吞錯誤缺口(G6)＋
+  處理過期快取＋固定期末日，重跑--gates-only；並實作查.一心跳方案B
+  強化版。只改--gates-only分支與資料載入段，不得改第5步以後正式回測
+  邏輯、不得改prepare_factors()計算、不得改策略參數。
+  一、G6(須=0)：載入迴圈傳入warnings_out，統計所有「f_dividend_yield_
+  ttm skipped」股票列出stock_id與錯誤訊息，寫進h1_gates.json的G6_
+  dividend_factor_skipped；G6>0則gates_pass=False；其他因子warning
+  只計數不列入判定。
+  二、G2b三檔(7758/6539/3531)先印診斷：各印d中從E起往後6列的date/
+  close/Trading_Volume/f_dividend_yield_ttm，印該檔f_dividend_yield_
+  ttm整欄NaN比例，結論歸類(a)E當天零成交(b)整欄NaN(對應G6)(c)其他
+  (附證據)。
+  三、修正G2b：改取「date>=E且close>0」第一列(最多往後找10列)比對
+  obs與X；10列內都無有效成交列入G2b_no_valid_trade(另列不算patch
+  失敗)；有效列存在但obs為NaN或超容差才算G2b不一致(須=0)。
+  四、修正G2c：pre_ttm為None不計入n_effective，另列n_pre_none計數，
+  仍須n_effective>0。
+  五、G5落後股票(2330/6806/3454/2809)分類：查下市/停牌紀錄(用現有
+  下市資料來源，不得新增爬取來源)，歸類(a)真實下市/停牌→保留不動列
+  最後交易日，或(b)快取過期→只對該檔TaiwanStockPrice以force_
+  refresh=True重抓uncapped資料，其餘不得動快取；另盤點214檔可用股票
+  的TaiwanStockPrice__latest快取中最後日期早於2026-09-17者全部列表
+  回報(只回報，除(b)類外不重抓)。
+  六、固定期末日：新增常數H1_PERIOD_END="2026-09-24"(=乾.二G4)，載入
+  後每檔序列截斷至≤此日，period_end直接用此常數；重跑前先在TRIALS_
+  LEDGER#400附註登記這一行。
+  七、重跑--gates-only，結果寫入h1_gates.json並git add -f入庫；
+  gates_pass=G1==0且G2a==0且G2b==0且G2c.n_effective>0且G5≤5%且
+  G6==0；跑完即停，禁止印報酬/IR/MDD、禁止接著跑正式回測，等Cowork
+  核對。
+  八、查.一心跳方案裁示：不採方案A(互動視窗編輯時做git操作會重演
+  stash-pop衝突)，改實作方案B強化版：check_local_schedule_
+  heartbeat.py判定「三軌任一心跳<60分鐘即本機存活」，但個別軌道
+  minutes_since>360另外標示track_stalled警告並列出，偵測失敗只降級
+  警告。
+  九、已完成(commit 93200779)，看門狗根因=GitHub排程延遲(a)類，
+  Cowork裁示維持現狀不改頻率，雲端看門狗定位數小時級最後防線，
+  30分鐘級偵測改由第八項負責。
