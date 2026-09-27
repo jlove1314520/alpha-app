@@ -1,5 +1,25 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-27T21:5x（Taipei，hypothesis_queue排程接續，第十五輪）— 開工先讀
+`PENDING_QUEUE.md`：`- [ ]`項0條，`- [!]`項15條，逐一略讀查無與本track相關
+的新解除條件（同上兩輪）。轉回本track的#82，接續第十四輪建議的路徑：從
+`research/archive/CORE_TILT_SPEC.md`舊研究補記出第十三輪未留的完整URL
+（`yuantaetfs.com/product/detail/0050/ratio`與`/tradeInfo/pcf/0050`），
+直接用同一套SSL修法重測，**推翻第十三輪「頁面編碼異常」的結論**：兩個
+URL皆200、皆可完整utf-8解碼、皆含「2330」「持股比重」關鍵字，根因判斷是
+Windows主控台cp950顯示中文時的亂碼（非例外，是顯示層問題），第十三輪
+執行者用print()直接看主控台輸出才誤判為「解碼後找不到關鍵字」。另發現
+頁面`__NUXT__`payload非空殼（不同於`taiwanindex.com.tw`），資料確實嵌入
+SSR輸出，屬Nuxt變數池混淆格式，需要獨立寫解析器才能結構化取出。**#82
+狀態更新為「技術可行，待寫Nuxt payload解析器」**。詳細記錄已補寫進
+`HYPOTHESIS_QUEUE.md`本輪條目。**本輪未新增WebSearch、未進入回測、未動
+`research/backtest/`／`validation`／`adjust.py`／`pit.py`／
+`trial_registry.py`**（`git status`確認）。`is_holdout_consumed()`開工/
+收工前皆確認`True`（延續既定狀態非本輪造成）。**交辦佇列還剩0條未開始**；
+CLAUDE.md「十四、凍結.二」仍生效中，本輪工作屬允許範圍（資料源技術排查），
+未新增alpha試驗。**下一輪建議**：寫Nuxt解析器屬獨立工程任務，建議登記進
+`PENDING_QUEUE.md`交辦而非本track繼續猜測；或改做剩餘4筆公告日補查。
+
 ## 2026-09-27T20:56（Taipei，hypothesis_queue排程接續，第十四輪）— 開工先讀
 `PENDING_QUEUE.md`：`- [ ]`項0條，`- [!]`項15條，逐一略讀查無與本track相關
 的新解除條件。轉回本track自己的#82，嘗試接續上一輪未解決的

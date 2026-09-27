@@ -13101,3 +13101,44 @@ Subject Key Identifier`，跟`CLAUDE.md`已知央行外匯局同款憑證問題�
 不變**：仍8/12筆完整，剩餘4筆（2016-12/2018-03/2018-06/2018-12）未變。
 `is_holdout_consumed()`開工/收工前皆確認`False`。未動`research/backtest/`
 ／`validation`／`adjust.py`／`pit.py`／`trial_registry.py`。
+
+**【2026-09-27T21:5x hypothesis_queue排程接續第十五輪，#82排查「編碼
+異常」根因，實測結果推翻上一輪結論】**：開工先讀`PENDING_QUEUE.md`——
+`- [ ]`項0條，`- [!]`項15條逐一核對過查無新解除條件（同上兩輪結論）。
+轉回本track的#82，接續第十三/十四輪未解決的`yuantaetfs.com`「編碼
+異常」問題（第十四輪建議先補記完整URL但上一輪未留，本輪從
+`research/archive/CORE_TILT_SPEC.md`舊研究記錄中找到兩個候選URL：
+`yuantaetfs.com/product/detail/0050/ratio`與`yuantaetfs.com/
+tradeInfo/pcf/0050`）。用同一套SSL修法（只關閉`VERIFY_X509_STRICT`
+旗標）直接fetch兩個URL：**兩者皆200、皆可用utf-8完整解碼、皆含
+「2330」「持股比重」等預期關鍵字**——**第十三輪「解碼後找不到任何
+預期中文關鍵字」的結論本輪未能重現，判斷根因是Windows主控台cp950
+codepage印出UTF-8中文字時的顯示亂碼（跟`CLAUDE.md`十二節記錄的
+`UnicodeEncodeError`同一類console編碼陷阱，只是這次是「顯示亂碼」
+不是「拋例外」），不是頁面本身的編碼異常**——本輪改用寫入UTF-8檔案
+＋逐位元檢查關鍵字（避開主控台print）驗證，結果清楚：頁面資料完整、
+可解碼、含真實內容。**進一步發現**：頁面含`__NUXT__`變數且經檢查
+**不是空殼**（不同於`taiwanindex.com.tw`的`data:[{}]`）——payload
+是Nuxt SSR常見的「變數池＋函式呼叫」混淆序列化格式（大量單字母/雙字母
+變數名`a,b,c...aa,ab...`後接`et[0]={...}`賦值），**資料確實嵌入
+SSR輸出，不是純client-side JS抓取**，跟`taiwanindex.com.tw`的
+「架構限制，這條路走不通」是不同結論。**#82狀態更新**：
+`yuantaetfs.com`由「編碼異常，未排除」升級為「**技術可行**，但要
+真正取出逐檔持股/權重需要寫一支Nuxt payload反混淆解析器（比對變數
+索引重建物件），屬於一次獨立的工程工作，非本輪WebSearch/curl範圍能
+完成，如實記錄升級為「已確認可行、待寫解析器」而非直接宣告資料到手」。
+**本輪未新增WebSearch查詢、未嘗試逐一補查剩餘4筆公告日**（本輪聚焦
+排查上一輪遺留的技術缺口，屬第十四輪自己建議的接續路徑）。**未修改
+`research/backtest/`／`validation`／`adjust.py`／`pit.py`／
+`trial_registry.py`（十三節單一寫入者，`git status`確認無這些路徑
+未commit變更）**。`is_holdout_consumed()`開工/收工前皆確認`True`
+（延續既定狀態，非本輪造成，本輪工作不在`ALLOWED_HOLDOUT_READERS`
+呼叫鏈上）。累計交叉驗證進度不變：仍8/12筆完整，剩餘4筆
+（2016-12/2018-03/2018-06/2018-12）未變。本輪不登記
+`TRIALS_REGISTRY.jsonl`（資料蒐集/技術排查輪，比照既有慣例不登記）。
+**交辦佇列還剩0條未開始**。CLAUDE.md「十四、凍結.二」仍生效中
+（`轉向.一`尚未有裁示結果），本輪工作屬允許範圍內的「資料抓取／工具
+排查」，未新增任何alpha試驗、未進入回測。**下一輪建議**：若總司令
+或Cowork核准，下一步是寫`__NUXT__`變數池反混淆解析器（獨立工程
+任務，建議登記進`PENDING_QUEUE.md`交辦而非繼續由本track自走猜測），
+或改先完成剩餘4筆公告日補查（優先度較低但成本較低）。
