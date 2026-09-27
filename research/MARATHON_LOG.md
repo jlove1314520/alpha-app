@@ -1,5 +1,31 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-27T19:0x（Taipei，hypothesis_queue排程接續，第十三輪）— 開工先讀
+`PENDING_QUEUE.md`：`- [ ]`項0條，`- [!]`項15條，逐一略讀查無與本track相關
+的新解除條件。轉回本track自己的#82，本輪改走上一輪建議的替代路徑（不再
+重複WebSearch同4筆查無日期，改嘗試直接查資料源端點）：①`taiwanindex.
+com.tw`的`/news`與`/index_review_schedule`兩頁，用Python requests直接
+抓HTML並檢查Nuxt SSR狀態（`window.__NUXT__`），**確認`data:[{}]`為空殼**
+——這比前幾輪「WebFetch讀不到JS動態內容」的結論更確定：即使用requests
+成功連線拿到完整HTML（非curl/DNS問題），伺服器端渲染階段就沒有把清單
+資料寫入初始HTML，代表這個站台的新聞/審核清單本身是100%純client-side
+抓取，**沒有瀏覽器JS執行環境這條路走不通**，不是工具限制而是架構限制。
+②嘗試第四類來源（元大投信官網`yuantaetfs.com`，前幾輪提過未查）：
+原本SSL連線失敗（`CERTIFICATE_VERIFY_FAILED: Missing Subject Key
+Identifier`，跟`CLAUDE.md`已知央行外匯局同款憑證問題同一種成因），
+套用同一個修法（只關閉`ssl.VERIFY_X509_STRICT`旗標）後連線成功
+（200，1MB內容），**但頁面文字編碼異常**（宣稱utf-8但解碼後找不到任何
+預期的中文關鍵字，big5/cp1252鏈式解碼嘗試也未解出，本輪額度用盡未能
+排除，留給下一輪）。**累計交叉驗證進度不變**：仍8/12筆完整，剩餘4筆
+（2016-12/2018-03/2018-06/2018-12）未變——本輪是技術路徑探索，非日期
+補查輪。`is_holdout_consumed()`開工/收工前皆確認`False`。未動
+`research/backtest/`／`validation`／`adjust.py`／`pit.py`／
+`trial_registry.py`（十三節單一寫入者）。未登記TRIALS_REGISTRY（資料
+蒐集輪慣例不登記）。交辦佇列還剩0條未開始。凍結.二仍生效，未新增alpha
+試驗、未進入回測。**本機對github.com的git pull/push本輪測試仍DNS解析
+失敗**（`Could not resolve host: github.com`，跟第52輪同款已知連線問題），
+commit會嘗試但push可能失敗，如實記錄不重試多次。**等待總司令審閱：0件**。
+
 ## 2026-09-27T17:53（Taipei，hypothesis_queue排程接續，第十二輪）— 開工acquire鎖
 檔回傳`LOCK_STALE`（上一輪pid 96300、58.3分鐘陳舊，自動回收，疑似上一輪失敗
 未正常release）。開工先讀`PENDING_QUEUE.md`：`- [ ]`項目0條（`修.七`已由互動

@@ -13082,3 +13082,22 @@ WebSearch嘗試補查剩餘4筆之3（2016-12中壽/華亞科、2018-03中租-KY
 補件，凍結.二第4點允許誠實記錄佇列變淺不強行湊數）。CLAUDE.md
 「十四、凍結.二」仍生效中（`轉向.一`尚未有裁示結果），本輪未新增
 任何alpha試驗、未進入回測，符合凍結規則。
+
+**【2026-09-27T19:0x hypothesis_queue排程接續第十三輪，#82技術路徑探索，
+非新日期補查輪】**：改走上一輪（第十二輪）建議的替代路徑，不重複WebSearch
+同4筆查無日期。①`taiwanindex.com.tw`的`/news`與`/index_review_schedule`
+兩頁，用Python requests直接抓HTML（非curl，已知curl在部分執行環境DNS會
+失敗）並檢查Nuxt SSR狀態，**確認`window.__NUXT__`的`data:[{}]`為空殼**——
+這比前幾輪「WebFetch讀不到JS動態內容」的結論更確定：即使成功連線拿到完整
+HTML，伺服器端渲染階段就沒有寫入清單資料，代表這個站台的新聞/審核清單
+本身是100%純client-side抓取，**沒有瀏覽器JS執行環境這條路走不通，是架構
+限制不是工具限制**。②嘗試第四類來源`yuantaetfs.com`（元大投信官網，前幾輪
+標記「未查」）：原本SSL連線失敗（`CERTIFICATE_VERIFY_FAILED: Missing
+Subject Key Identifier`，跟`CLAUDE.md`已知央行外匯局同款憑證問題同一種
+成因），套用同一個修法（只關閉`ssl.VERIFY_X509_STRICT`旗標，非
+`verify=False`）後連線成功（200，解壓後約1MB），**但頁面文字編碼異常**
+（宣稱utf-8，解碼後找不到任何預期中文關鍵字，big5/cp1252鏈式解碼嘗試
+也未解出，本輪額度用盡未能排除原因，留給下一輪）。**累計交叉驗證進度
+不變**：仍8/12筆完整，剩餘4筆（2016-12/2018-03/2018-06/2018-12）未變。
+`is_holdout_consumed()`開工/收工前皆確認`False`。未動`research/backtest/`
+／`validation`／`adjust.py`／`pit.py`／`trial_registry.py`。
