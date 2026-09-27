@@ -50,6 +50,32 @@ UNIVERSE_CUTOFF = "2003-01-01"
 # 無漲跌幅限制、流動性極低，混入回測會製造假的大幅漲跌）。這不是撤回
 # 整份docstring的邏輯（「下市後沒有資料」那一半仍然成立），是新增一層
 # 「上市/上櫃前」的過濾，兩者互補、不衝突。
+#
+# ── 查.三（2026-09-27總司令裁示【查.三＋清.一（合併版）】，Cowork裁示）：
+# 查.二完成後發現251檔common-stock抽樣裡有72檔查無官方上市/上櫃日
+# （TWSE `t187ap03_L`／TPEx `mopsfin_t187ap03_O`都只涵蓋「現存」公司，
+# 查不到不等於「這檔股票有問題」，多數是已經走完生命週期的正常案例）。
+# 交叉核對`delisted_stock_ids()`後這72檔**完全被兩類原因解釋**：33檔
+# （45.8%）是`TaiwanStockDelisting`登記在案的已下市公司；剩下39檔
+# （54.2%）`TaiwanStockInfo.type`皆為`"emerging"`（興櫃），至今尚未正式
+# 上市/上櫃。零筆「查不到原因」的殘留（33+39=72，完全對得上）。
+#
+# **裁示（取代原本「整批排除72檔」的暫定做法）**：預設宇宙**保留**這72檔
+# ——只排除其中目前仍是興櫃的39檔（`common_stock_only()`的`security_
+# type=="emerging"`判斷已經做這件事，不需要新程式碼），另外33檔已下市
+# 公司**原樣保留、不截斷**（`truncate_to_listing_date()`對查無上市日的
+# 代號本來就不截斷，同樣不需要新程式碼——這裡記錄的是「預設行為即裁示
+# 要求的行為」，不是新增邏輯）。「嚴格宇宙」（整批排除72檔）**降級為
+# 敏感度對照專用**，見下面`strict_universe_exclude_unknown_listing()`，
+# 不再是任何判準使用的主宇宙。
+#
+# **理由（Cowork原話精神，量化證據見`research/data/q2_impact_398_399.json`
+# 與`q2_ipo_pre_listing_contamination.json`）**：興櫃汙染實測對#398/#399
+# 的影響只占持股天數<5%（4.85%/1.92%）、估算報酬貢獻<0.35%（+0.34%/
+# -0.22%）——量級很小；但把72檔（其中45.8%是已下市公司）整批排除在
+# 「嚴格宇宙」之外，等於系統性排除「活得不夠久」的公司樣本，直接命中
+# `CLAUDE.md`七之三節台股偽影家族⑦「存活者偏誤（最貴的一個，優先懷疑）」
+# ——用一個影響量級很小的污染去交換一個代價可能更大的偏誤，不划算。
 _TWSE_LISTING_PATH = Path(__file__).parent / "data" / "twse_listing_dates.json"
 _OTC_LISTING_PATH = Path(__file__).parent / "data" / "otc_listing_dates.json"
 
@@ -83,6 +109,24 @@ def truncate_to_listing_date(df: pd.DataFrame, stock_id: str, listing_dates: dic
     if ld is None or df.empty:
         return df
     return df[df["date"].astype(str) >= ld].reset_index(drop=True)
+
+
+def strict_universe_exclude_unknown_listing(stock_ids: list[str], listing_dates: dict[str, str] | None = None) -> tuple[list[str], list[str]]:
+    """查.三（2026-09-27裁示，Cowork）：把「整批排除查無上市/上櫃日的
+    代號」明確做成一個獨立、**只給敏感度對照用**的函式，不是預設宇宙。
+
+    回傳`(kept, excluded)`：`excluded`是`stock_ids`裡查不到上市/上櫃日的
+    代號（不論是已下市還是仍興櫃，這個函式不區分——它本來就代表「更保守
+    但可能引入更貴存活者偏誤」的那個對照組，不是正確答案）。**預設宇宙
+    請直接用`common_stock_only()`（已排除興櫃）+`truncate_to_listing_
+    date()`（已知上市日者截斷，查無者保留），不要呼叫這個函式當主宇宙**
+    ——見本模組查.三段落docstring的完整理由（興櫃污染量級小，整批排除的
+    存活者偏誤代價更大）。"""
+    if listing_dates is None:
+        listing_dates = listing_date_lookup()
+    kept = [s for s in stock_ids if s in listing_dates]
+    excluded = [s for s in stock_ids if s not in listing_dates]
+    return kept, excluded
 
 # ── 宇.二（2026-09-24總司令裁示【開考前修正——宇宙限普通股＋MDD判準回復原
 # 裁示】「修訂一」）：universe()／active_stock_ids() 只用代號長度篩選
@@ -221,6 +265,14 @@ def _self_test_listing_date_truncation() -> None:
     print("[self-test] truncate_to_listing_date() 通過")
 
 
+def _self_test_strict_universe_exclude_unknown_listing() -> None:
+    lookup = {"2330": "1994-09-05", "2317": "1991-06-18"}
+    kept, excluded = strict_universe_exclude_unknown_listing(["2330", "2317", "9999"], lookup)
+    assert kept == ["2330", "2317"] and excluded == ["9999"], \
+        f"strict_universe_exclude_unknown_listing()自我測試失敗：kept={kept}, excluded={excluded}"
+    print("[self-test] strict_universe_exclude_unknown_listing() 通過")
+
+
 def delisted_stock_ids(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
     """Stocks delisted on/after `cutoff`. Columns: stock_id, stock_name, delist_date."""
     d = _fetch("TaiwanStockDelisting", "", "1990-01-01")
@@ -283,3 +335,4 @@ def universe(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
 if __name__ == "__main__":
     _self_test_common_stock_only()
     _self_test_listing_date_truncation()
+    _self_test_strict_universe_exclude_unknown_listing()

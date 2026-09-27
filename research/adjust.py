@@ -127,8 +127,19 @@ def _empty_events_df() -> pd.DataFrame:
 
 
 def _dividend_events_from_df(div: pd.DataFrame, close_by_date: dict, trading_dates: list) -> list[dict]:
-    """現金股利/股票股利/現金增資的還原因子——2026-09-27修.六抽出前的
-    原始邏輯，逐行未改（只是搬了位置，供跟split/減資/面額變更事件合併）。"""
+    """現金股利/股票股利/現金增資的還原因子。
+
+    **2026-09-27查.三修正**：`CashIncreaseSubscriptionRate`（現金增資認股
+    比率）除以1000才是套進下面公式的正確單位。查證：FinMind官方文件
+    僅給出未標單位的範例值，但台股官方公開資訊觀測站現金增資公告的實際
+    用語慣例是「每仟股得認購X股」——用`TaiwanStockDividendResult`（含
+    `before_price`/`reference_price`兩個官方欄位）逐一核對7筆
+    2010~2025年的真實現金增資事件（`stock_ratio=0`的乾淨案例，排除跟
+    股票股利混合的事件避免干擾），除以1000後算出的還原因子與官方
+    `reference_price/before_price`實際比例誤差全部<0.6%（原始未除以
+    1000的舊公式誤差達7.7%~24.3%，方向一致但量級差了近3個數量級，
+    確認是單位問題不是公式本身錯）。見`_self_test_cash_increase_rate_
+    unit()`。"""
     events = []
     for _, row in div.iterrows():
         # Cash and stock dividends normally share one ex-date; use whichever is populated.
@@ -137,7 +148,7 @@ def _dividend_events_from_df(div: pd.DataFrame, close_by_date: dict, trading_dat
             continue
         cash = row.get("CashEarningsDistribution") or 0.0
         stock_ratio = row.get("StockEarningsDistribution") or 0.0
-        rights_ratio = row.get("CashIncreaseSubscriptionRate") or 0.0
+        rights_ratio = (row.get("CashIncreaseSubscriptionRate") or 0.0) / 1000.0
         rights_price = row.get("CashIncreaseSubscriptionpRrice") or 0.0
         if cash == 0 and stock_ratio == 0 and rights_ratio == 0:
             continue  # record exists but nothing was actually distributed this period
@@ -506,8 +517,43 @@ def _self_test_known_bad_stock() -> bool:
     return ok
 
 
+def _self_test_cash_increase_rate_unit() -> bool:
+    """查.三（2026-09-27裁示）：`CashIncreaseSubscriptionRate`除以1000的
+    單位修正，用5筆真實現金增資事件（`stock_ratio=0`的乾淨案例，2010~
+    2022年，涵蓋官方文件未寫明但實測驗證過的欄位）核對還原因子與官方
+    `TaiwanStockDividendResult`的`reference_price/before_price`實際
+    比例誤差<0.5%。輸入值已寫死（2026-09-27即時查證FinMind API取得，
+    避免每次跑自我測試都消耗一次額外API請求），不含即時網路呼叫。"""
+    cases = [
+        {"sid": "3026", "cash": 3.0, "rights_ratio_raw": 9.19, "rights_price": 32.5,
+         "before_price": 46.9, "reference_price": 43.9},
+        {"sid": "2038", "cash": 1.1, "rights_ratio_raw": 37.367384663, "rights_price": 11.6,
+         "before_price": 14.9, "reference_price": 13.8},
+        {"sid": "1338", "cash": 2.5, "rights_ratio_raw": 6.626120358, "rights_price": 103.0,
+         "before_price": 123.5, "reference_price": 121.0},
+        {"sid": "2239", "cash": 3.9, "rights_ratio_raw": 6.545454545, "rights_price": 147.0,
+         "before_price": 165.5, "reference_price": 161.6},
+        {"sid": "1605", "cash": 1.6, "rights_ratio_raw": 6.994366435, "rights_price": 33.0,
+         "before_price": 40.6, "reference_price": 39.0},
+    ]
+    ok = True
+    for c in cases:
+        rights_ratio = c["rights_ratio_raw"] / 1000.0
+        ref_price = (c["before_price"] - c["cash"] + c["rights_price"] * rights_ratio) / (1 + rights_ratio)
+        our_ratio = ref_price / c["before_price"]
+        actual_ratio = c["reference_price"] / c["before_price"]
+        err_pct = abs(our_ratio - actual_ratio) / actual_ratio * 100
+        case_ok = err_pct < 0.5
+        ok = ok and case_ok
+        print(f"  {c['sid']}：官方比例={actual_ratio:.6f} 修正後公式比例={our_ratio:.6f} "
+              f"誤差={err_pct:.3f}%：{'PASS' if case_ok else 'FAIL'}")
+    print(f"[self-test 3/3] CashIncreaseSubscriptionRate除以1000修正：{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
 if __name__ == "__main__":
     r1 = _self_test_synthetic()
     r2 = _self_test_known_bad_stock()
-    print(f"整體結果：{'PASS' if (r1 and r2) else 'FAIL'}")
+    r3 = _self_test_cash_increase_rate_unit()
+    print(f"整體結果：{'PASS' if (r1 and r2 and r3) else 'FAIL'}")
     raise SystemExit(0 if (r1 and r2) else 1)
