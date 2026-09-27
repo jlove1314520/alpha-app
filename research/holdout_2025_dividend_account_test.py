@@ -187,12 +187,20 @@ def uncapped_adjusted_price_series(stock_id: str, start_date: str) -> pd.DataFra
 
 
 def simulate_account(stock_equity: pd.DataFrame, rf_monthly: pd.DataFrame, stock_w: float,
-                      *, rebalance_every_n_days: int, initial_capital: float = 1_000_000.0) -> pd.DataFrame:
+                      *, rebalance_every_n_days: int, initial_capital: float = 1_000_000.0,
+                      fallback_months_out: set | None = None) -> pd.DataFrame:
     """帳戶層級70/30固定配置，逐字比照`survival_constraint_allocation_
     test.py::simulate_fixed_allocation()`的邏輯（月頻再平衡+真實權重
     漂移+定期再平衡照實收成本），差別只在股票腿餵進來的是已經跑完
     `dividend_yield_portfolio_v1`策略的權益曲線（不是buy&hold 0050），
-    債券腿一樣是定存代理。"""
+    債券腿一樣是定存代理。
+
+    `fallback_months_out`（放.二第三點，2026-09-27裁示）：選填，傳入一個
+    set就會把每個用到`rf_rate_for_date()`既有fallback邏輯（查無當月資料、
+    回傳最近一筆已公布值）的年月記錄進去，純粹用於`h1_gates.json`的
+    `rf_fallback_months`只讀紀錄，不影響`rf_rate_for_date()`本身的計算
+    結果或這支函式其餘的帳戶模擬邏輯——`compute_2007_2014_account_7030_
+    reference()`沿用預設值None，行為完全不變。"""
     df = stock_equity.sort_values("date").reset_index(drop=True)
     cfg = BacktestConfig(start_date=str(df["date"].iloc[0]), end_date=str(df["date"].iloc[-1]),
                           initial_capital=initial_capital, cost_multiplier=1.0,
@@ -209,7 +217,12 @@ def simulate_account(stock_equity: pd.DataFrame, rf_monthly: pd.DataFrame, stock
         date = row["date"]
         if prev_equity is not None:
             stock_value *= equity_now / prev_equity
-        rf_pct = rf_rate_for_date(pd.Timestamp(date), rf_monthly)
+        ts = pd.Timestamp(date)
+        if fallback_months_out is not None:
+            target_month = pd.Timestamp(year=ts.year, month=ts.month, day=1)
+            if not (rf_monthly["date"] == target_month).any():
+                fallback_months_out.add(target_month.strftime("%Y-%m"))
+        rf_pct = rf_rate_for_date(ts, rf_monthly)
         bond_daily_ret = (1.0 + rf_pct / 100.0) ** (1.0 / 252.0) - 1.0
         bond_value *= (1.0 + bond_daily_ret)
         prev_equity = equity_now
@@ -594,14 +607,23 @@ def main(gates_only: bool = False):
               f"——停在這裡，等Cowork核對後再另行放行正式回測。", flush=True)
         return gates_out
 
-    # ── G7（2026-09-27總司令裁示【放.一】第零點）：正式回測開跑前最後一道
-    # 檢查——確認三條「策略本身以外、composite/backtest都要依賴」的基準
-    # 序列本身有沒有跟上H1_PERIOD_END，不然即使G1~G6全過，回測算出來的
-    # IR/alpha/帳戶MDD還是會因為基準序列本身斷尾而失真（例如0050基準
-    # 序列停在9月初，IR比較的分母就少了最後三週的真實波動）。必須在
-    # 「即將執行H.一正式回測」那行之前完成，不過就中止——這裡就是那道
-    # 防線，任一不符不得自行force_refresh後接著跑，必須先停下回報。
+    # ── G7（2026-09-27總司令裁示【放.一】第零點，判準(3)由【放.二】更正）：
+    # 正式回測開跑前最後一道檢查——確認三條「策略本身以外、composite/
+    # backtest都要依賴」的基準序列本身有沒有跟上H1_PERIOD_END，不然即使
+    # G1~G6全過，回測算出來的IR/alpha/帳戶MDD還是會因為基準序列本身斷尾
+    # 而失真。必須在「即將執行H.一正式回測」那行之前完成，不過就中止——
+    # 這裡就是那道防線，任一不符不得自行force_refresh後接著跑，必須先
+    # 停下回報。
+    #
+    # 放.二更正rf_monthly判準：原版要求「涵蓋2026-09」，Cowork裁示更正為
+    # 「最新月份≥2026-08-01即通過」——央行定存利率月資料有約一個月發布
+    # 落差，截至H1_PERIOD_END=2026-09-24時點上只公布到8月，這正是當時
+    # 時點上正確的最新資訊，不是資料缺漏。9月份沿用
+    # rf_rate_for_date()既有的fallback（最近一筆已公布值），哪些月份
+    # 用到fallback會記進rf_fallback_months（見下方simulate_account()
+    # 呼叫處），只作紀錄不影響判定。
     rf_monthly = load_risk_free_rate_series()
+    RF_MIN_LATEST_MONTH = "2026-08-01"
     g7_checks = {
         "zero050_series": {
             "earliest": str(zero050_series.index.min()), "latest": str(zero050_series.index.max()),
@@ -614,7 +636,8 @@ def main(gates_only: bool = False):
         "rf_monthly": {
             "earliest": str(rf_monthly["date"].min()), "latest": str(rf_monthly["date"].max()),
             "count": int(len(rf_monthly)),
-            "pass": bool(((rf_monthly["date"].dt.year == 2026) & (rf_monthly["date"].dt.month == 9)).any()),
+            "pass": bool(rf_monthly["date"].max() >= pd.Timestamp(RF_MIN_LATEST_MONTH)),
+            "criterion": f"放.二更正：最新月份≥{RF_MIN_LATEST_MONTH}即通過（原「須涵蓋2026-09」已由Cowork裁示更正）",
         },
     }
     print("\n=== G7：正式回測開跑前基準序列新鮮度檢查 ===", flush=True)
@@ -653,7 +676,9 @@ def main(gates_only: bool = False):
     stock_eq = result.equity_curve
 
     # ── 6. 帳戶層級70/30 ──
-    account_eq = simulate_account(stock_eq, rf_monthly, STOCK_WEIGHT, rebalance_every_n_days=REBALANCE_DAYS)
+    rf_fallback_months: set[str] = set()  # 放.二第三點：只作紀錄，不影響判定
+    account_eq = simulate_account(stock_eq, rf_monthly, STOCK_WEIGHT, rebalance_every_n_days=REBALANCE_DAYS,
+                                   fallback_months_out=rf_fallback_months)
 
     # ── 7. 統計量 ──
     ir_info = dimson_ir(stock_eq, "HOLDOUT_2025_STOCK_LEG")
@@ -713,6 +738,7 @@ def main(gates_only: bool = False):
         "monthly_table": monthly_rows,
         "gates": {"gate1_ir_direction_positive": gate1_pass, "gate2_account_mdd_over_neg50": gate2_pass,
                   "overall_verdict": "PASS" if overall_pass else "FAIL"},
+        "rf_fallback_months": sorted(rf_fallback_months),  # 放.二第三點：只作紀錄，不影響判定
         "power_caveat": "期間約21個月，事前宣告檢定力不足以證明顯著，本結果定位為一致性檢查，不是統計顯著性證明。",
         "data_limitation": "holdout期完全無yfinance可用（yf_price_client.py同樣被cap在VAL_END），"
                             "純FinMind覆蓋率天生低於考.一的2007-2014段。",
