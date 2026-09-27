@@ -5194,3 +5194,5 @@ quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 
 ===== Marathon cycle end: 2026-09-27 23:34:34 cycle_id=20260927-233037 reason=OK cost_usd=1.2609451999999999 read_kb=114.0 turns=29 duration_min=3.92 =====
 
 quota_throttle: SKIP: 節流中，距上次實跑26.0分鐘 < 120分鐘門檻（帳號週用量已達90%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: SKIP: 節流中，距上次實跑56.0分鐘 < 120分鐘門檻（帳號週用量已達90%（門檻90%），節流保留額度給交辦與資料管線）
