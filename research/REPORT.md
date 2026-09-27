@@ -1,3 +1,11 @@
+## 第652輪 · 2026-09-28T02:0x+08:00 · FUT · 維運帽：核對交辦與阻塞項、確認凍結.二下無可做工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260928-020037`）。三軌時間戳：FUT round649=09-27 21:3x最舊，依輪替選FUT。
+- 核心查證：交辦佇列0條`- [ ]`；`- [!]`=15條逐項核對均未到解除時間（金流一.4讀`institutional_history.json`確認`dates`陣列仍20筆、最後日期20260924，solid交易日數維持16日/20日視窗仍差4日；外部一改.2 tick累積仍13/20）。今日已跨入09-28（週一），查詢時刻為台北02:0x盤前（09:00開盤），尚無新交易資料，兩項阻塞皆未解除。`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，皆為條件敘述提及、非實際宣告解除，凍結.二仍生效。
+- 驗證：`trial_registry.py --check` exit=0 PASS（402列，無新判定）；`is_holdout_consumed()`=True（H.一先前已消耗，非本輪動作）；`run_detached.py status` running=0；`git status --short`確認十三節限定檔案（backtest/validation/adjust.py/pit.py/trial_registry.py）無殘留未commit編輯。
+- `AWAITING_REVIEW.md`「等待中」表格逐行核對22~36行共15列，與表頭一致，本輪未變動。
+- 等待總司令審閱：15件（與`AWAITING_REVIEW.md`表格列數核對一致）。交辦佇列還剩0條`- [ ]`未開始。
+---
 ## 第651輪 · 2026-09-27T23:3x+08:00 · TW · 維運帽：核對交辦與阻塞項、確認凍結.二下無可做工作單位 · 無判定、N不變
 
 - 取鎖乾淨（cycle `20260927-233037`）。三軌時間戳：TW round648=09-27 20:3x最舊，依輪替選TW。
