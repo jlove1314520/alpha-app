@@ -16260,6 +16260,21 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   **五、額度**：全程只讀本機已快取的FinMind parquet，零新增API呼叫，
   未撞到額度牆。
 
+  **⚠️2026-09-29【驗.七】執行中發現並更正驗.六項四的兩個錯誤（如實記錄，
+  不刪舊文字）**：①上方「251檔普通股樣本(已排除興櫃)」的興櫃排除**當時
+  並未生效**——`_build_sample()`從`h1._info_lookup()`取`type`，但該lookup
+  只有stock_name/industry_category，`type`恆為None，樣本仍是含39檔興櫃的
+  251檔；②上方「holdout期間還原價與原始價皆為0筆」是**假象**——當時走
+  `adjusted_price_series()`→`load_dev()`被cap在VAL_END=2024-12-31，holdout
+  視窗根本沒有任何列可掃，0不是「修好了」。已修正腳本（興櫃排除改讀
+  TaiwanStockInfo parquet的`type`；holdout改走`h1.uncapped_adjusted_price_
+  series()`允許清單路徑）重跑，**更正後數字**：樣本211檔（真正排除興櫃）；
+  2007-2014還原價**605筆**／原始價826筆；holdout還原價**15筆**／原始價
+  **396筆**（原始價396筆多為除權息/除權參考價重設日，還原後只剩15筆，
+  代表修.六/修.七的還原修正在holdout期間確實把絕大多數跳空還原掉了）。
+  第一版JSON已被更正版覆蓋（`research/data/diag_v6_anomaly_rescan.json`，
+  `verdict_locked_note`註明更正版）。
+
   **六、已push，停下等Cowork核對**。凍結.二仍生效，紙.一全程未被
   觸碰。
 
@@ -16288,7 +16303,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 >
 > 五、完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動，不得動。
 
-- [ ] **驗.七** [驗證/維運] 殘留異常分類＋#7/#8重驗預登記＋Sortino納入
+- [x] **驗.七** [驗證/維運] 殘留異常分類＋#7/#8重驗預登記＋Sortino納入
   標準報表＋#82暫停。一、#82立即暫停(新alpha軸第六類，在凍結.二範圍
   內；投信官網/指數公司網站確認robots.txt與ToS允許前不得再探測)，假設
   佇列改只做心跳不得開新軸。二、699筆殘留異常分類(2007-2014還原價，
@@ -16312,3 +16327,64 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   Sharpe照列只記錄。任何候選在看到結果前不得更改此判準」。五、完成後
   push停下等Cowork核對。紙.一10/1照常啟動不得動。**心跳**：本條目
   checklist狀態＋TRIALS_LEDGER新編號(#7/#8重驗預登記)。
+
+  **完成回報（2026-09-29，互動視窗CC）**：
+
+  **一、#82暫停**：`HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt`最上方新增
+  「第負一步」凌駕既有挑假設指示（#82暫停、投信官網/指數公司網站確認
+  robots.txt與ToS前不得再探測、無交辦時只寫心跳、不得開新軸不得補件新
+  alpha假設），`HYPOTHESIS_QUEUE_PROTOCOL.md`標題下與`HYPOTHESIS_QUEUE.md`
+  #82條目同步加註，原文保留。commit `8e1c0edf`。
+
+  **二、699筆殘留異常分類**（`research/audit_v7_residual_classify.py`→
+  `research/data/diag_v7_residual_classification.json`，只回報不修）：
+  (a)上市日未知已下市股33檔：**98筆**；(b)yfinance路徑：**584筆**；
+  (c)FinMind路徑：**0筆**；(d)上市後5日內：**17筆**；(e)其他：0筆。
+  **(b)類584筆中有274筆(22檔)異常日早於官方上市/上櫃日**——上市前興櫃
+  期間透過yfinance路徑漏進來（`truncate_to_listing_date()`尚未接進
+  `adjusted_price_series()`），這是(b)類最大的來源；另有94筆(6檔)來自
+  `type=emerging`股票（驗.六樣本的興櫃排除未生效，見驗.六更正）。
+  **(b)類抽5筆**（固定種子，可重現）：第一版用「原始價vs還原價」對照
+  在yfinance路徑上是恆真（adjust.py的yfinance路徑`close`即auto_adjust
+  值），無鑑別力，如實作廢；改用FinMind原始收盤價當獨立基準：
+  | 股票 | 日期 | yfinance報酬 | 判斷 |
+  |---|---|---|---|
+  | 8027 | 2008-11-18 | +17.81% | 上市前興櫃期間（上櫃日2015-06-09） |
+  | 8215 | 2008-07-21 | +12.18% | 上市前興櫃期間（上櫃日2010-11-12） |
+  | 2332 | 2009-04-02 | +8.11% | **yfinance自身錯誤**（FinMind原始價+6.78%，在±7%法定上限內） |
+  | 3011 | 2009-06-08 | +14.34% | **yfinance自身錯誤**（FinMind原始價+6.90%） |
+  | 8359 | 2012-12-26 | +13.47% | 無法判定（興櫃股，FinMind快取無該日） |
+  結論：yfinance路徑的殘留異常＝「上市前興櫃期間漏入」＋「yfinance本身
+  的還原/拼接錯誤」兩種，後者在原始價層面根本不存在超限。**修法另行
+  裁示**（候選：①`adjusted_price_series()`內建上市日截斷②yfinance路徑
+  加FinMind原始價交叉核對閘門）。
+
+  **三、#7/#8重驗**：事前登記#401(`f_eps_surprise`)/#402(`f_revenue_
+  surprise`)於執行前commit（`270f8775`）；結果登記#403/#404**皆FAIL**：
+  | 因子 | 原登記 | (i)舊還原公式＋新財報時點 | (ii)新還原公式＋新財報時點 | 門檻 |
+  |---|---|---|---|---|
+  | f_eps_surprise | 100.0 | 61.2 | 61.2 | 98.33 |
+  | f_revenue_surprise | 99.0 | 87.2 | 87.0 | 98.33 |
+  **(i)≈(ii)**：四項還原修正對這兩個因子幾乎零影響，原登記→現在的全部
+  差距來自財報時點(Q4 PIT)修正，與FACTORS.md 2026-09-20記錄一致。原#7/#8
+  鎖定不動。依三.4：**未改`score.py`**；`FACTORS.md`最上方新增「重驗未過，
+  待處理」段落；降權/移除方案寫在`docs/FACTOR_REVALIDATION_PROPOSAL_
+  2026-09-29.md`（A降權不推薦：權重無依據；**B移除只留low_vol＋可排名
+  門檻改1＋資格池接common_stock_only＋App揭露，推薦**；C整榜暫停不推薦），
+  等Cowork核可。現況：`score.py`三成分中兩成分（eps_family/revenue_
+  surprise）仍在即時計分路徑運作，每日產出`scores.json`。
+
+  **四、Sortino納入標準報表**：①`survival_constraint_allocation_test.py`
+  新增`sortino_vs_deposit_rate()`（MAR=定存代理當日隱含報酬，只算低於MAR
+  的偏差；`[自行裁量]`採Sortino&Price全期間分母定義，理由寫在docstring，
+  與engine.py既有MAR=0/下檔日分母的變體不同，明確區分）。②四格＋0050
+  買進持有(=100/0)：Sharpe 0.6171/0.6185/0.6196/0.6203，Sortino
+  **0.8857**/0.8875/0.8890/0.8899，已寫進SURVIVAL_CONSTRAINT.md與JSON。
+  ③`pbv2.run_one()`輸出新增`sortino_vs_rf`欄位（同定義；既有`sortino`
+  MAR=0欄位保留不動），print/summary同步印出，合成序列自我測試正常
+  （正漂移為正、失敗只回NaN不中斷回測）。④`docs/RESEARCH_DIRECTION_
+  2026-09-27.md`新增「求好階段判準（事前鎖定）」一節（MDD>−50%硬性、
+  Sortino≥0050買進持有0.8857、Sharpe只記錄、看結果前不得改）。
+
+  **五、已push，停下等Cowork核對。紙.一全程未被觸碰**（10/1照常自動
+  啟動）。凍結.二仍生效。

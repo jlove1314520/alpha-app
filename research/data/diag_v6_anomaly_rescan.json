@@ -1,14 +1,14 @@
 {
- "generated_at": "2026-09-27T20:03:12.171976",
- "verdict_locked_note": "本檔案全部數字為診斷值，不改變任何既有判定。",
+ "generated_at": "2026-09-29T00:30:02.604669",
+ "verdict_locked_note": "本檔案全部數字為診斷值，不改變任何既有判定。2026-09-29驗.七更正版：興櫃排除真正生效、holdout改走uncapped路徑（第一版holdout=0筆為VAL_END cap假象）。",
  "registered_v5_flat11pct_adjclose": {
   "universe_2007_2014_flat11pct_adjclose": 1158,
   "universe_holdout_flat11pct_adjclose": 435
  },
- "n_sample_common_stock_excl_emerging": 251,
+ "n_sample_common_stock_excl_emerging": 211,
  "universe_2007_2014": {
-  "adj_close_hits": 699,
-  "close_hits": 920,
+  "adj_close_hits": 605,
+  "close_hits": 826,
   "adj_close_top20": [
    {
     "stock_id": "8427",
@@ -255,9 +255,221 @@
   ]
  },
  "universe_holdout": {
-  "adj_close_hits": 0,
-  "close_hits": 0,
-  "adj_close_top20": [],
-  "close_top20": []
+  "adj_close_hits": 15,
+  "close_hits": 396,
+  "adj_close_top20": [
+   {
+    "stock_id": "6986",
+    "date": "2025-03-17",
+    "ret_pct": 10.8,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6986",
+    "date": "2025-04-07",
+    "ret_pct": -13.38,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6986",
+    "date": "2025-04-10",
+    "ret_pct": 12.79,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6986",
+    "date": "2025-11-12",
+    "ret_pct": 17.31,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6986",
+    "date": "2026-06-26",
+    "ret_pct": -11.93,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3467",
+    "date": "2025-02-24",
+    "ret_pct": 12.22,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3467",
+    "date": "2025-02-26",
+    "ret_pct": 11.56,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3467",
+    "date": "2025-03-03",
+    "ret_pct": -16.31,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3467",
+    "date": "2025-03-18",
+    "ret_pct": 16.11,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3467",
+    "date": "2025-03-24",
+    "ret_pct": 11.03,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3467",
+    "date": "2025-03-25",
+    "ret_pct": -11.92,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "7743",
+    "date": "2025-04-07",
+    "ret_pct": -19.79,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "7743",
+    "date": "2025-05-20",
+    "ret_pct": -17.87,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "7765",
+    "date": "2025-04-07",
+    "ret_pct": -18.35,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "7765",
+    "date": "2025-04-10",
+    "ret_pct": 23.36,
+    "threshold_pct": 10.5
+   }
+  ],
+  "close_top20": [
+   {
+    "stock_id": "3018",
+    "date": "2025-08-25",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2025-08-26",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2025-12-01",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2025-12-02",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-01-09",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-01-12",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-02-03",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-02-04",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-04-28",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-04-29",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-06-29",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "3018",
+    "date": "2026-06-30",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-03-06",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-03-07",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-04-17",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-04-18",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-09-22",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-09-23",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-09-25",
+    "ret_pct": -100.0,
+    "threshold_pct": 10.5
+   },
+   {
+    "stock_id": "6767",
+    "date": "2025-09-26",
+    "ret_pct": Infinity,
+    "threshold_pct": 10.5
+   }
+  ]
  }
 }
