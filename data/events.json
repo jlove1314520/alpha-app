@@ -1,12 +1,12 @@
 {
- "fetched_at": "2026-09-28T23:45:14.623768+08:00",
+ "fetched_at": "2026-09-29T05:34:51.989133+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 4,
-   "kept": 4
+   "rows": 13,
+   "kept": 13
   },
   "tpex_mops": {
    "ok": true,
@@ -24,7 +24,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 10809,
+ "count": 10822,
  "events": [
   {
    "code": "4552",
@@ -153,38 +153,119 @@
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
-   "code": "6949",
-   "name": "沛爾生醫*-創",
-   "date": "2026-09-27",
-   "type": "其他",
-   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "1721",
-   "name": "國慶科技",
-   "date": "2026-09-27",
-   "type": "其他",
-   "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
-   "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
    "code": "2072",
    "name": "世紀風電",
-   "date": "2026-09-27",
+   "date": "2026-09-28",
    "type": "其他",
    "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
   {
-   "code": "2509",
-   "name": "全坤建",
-   "date": "2026-09-27",
+   "code": "1721",
+   "name": "國慶科技",
+   "date": "2026-09-28",
    "type": "其他",
-   "title": "公告本公司「全坤御峰」工地火災事件說明",
+   "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2881",
+   "name": "富邦金",
+   "date": "2026-09-28",
+   "type": "人事",
+   "title": "富邦金控代富邦證券(香港)有限公司公告董事派任情形",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2881",
+   "name": "富邦金",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "富邦金控代富邦證券(香港)有限公司公告股東常會 重要決議事項",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2881",
+   "name": "富邦金",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "富邦金控代日盛嘉富證券國際有限公司公告 股東常會重要決議事項",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2885",
+   "name": "元大金",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "元大金控代子公司元大證券(韓國)公告受韓國金融委員會裁罰",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6451",
+   "name": "訊芯-KY",
+   "date": "2026-09-28",
+   "type": "人事",
+   "title": "代重要子公司訊芯科技(香港)有限公司 公告董事會本次決議不發放股利",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6451",
+   "name": "訊芯-KY",
+   "date": "2026-09-28",
+   "type": "人事",
+   "title": "代重要子公司訊芸科技(香港)有限公司 公告董事會本次決議不發放股利",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1795",
+   "name": "美時",
+   "date": "2026-09-28",
+   "type": "增減資",
+   "title": "公告本公司董事會決議庫藏股註銷暨訂定減資基準日",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1795",
+   "name": "美時",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "本公司對美國子公司Alvogen Pharma US Inc.資金貸與案",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4927",
+   "name": "泰鼎-KY",
+   "date": "2026-09-28",
+   "type": "其他",
+   "title": "代重要子公司Apex Circuit (Thailand) Co., Ltd. 公告營運未受泰國曼谷及部分地區淹水影響",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
@@ -222,6 +303,42 @@
    "type": "其他",
    "title": "公告本公司名稱由「夠麻吉股份有限公司」更名為 「納維康生技股份有限公司」，公告期間：115年6月29日 至115年9月28日",
    "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-09-27",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1721",
+   "name": "國慶科技",
+   "date": "2026-09-27",
+   "type": "其他",
+   "title": "公告本公司名稱由「三晃股份有限公司」更名為 「國慶科技股份有限公司」 ，公告期間：115年07月01日至115年9月30日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2072",
+   "name": "世紀風電",
+   "date": "2026-09-27",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2509",
+   "name": "全坤建",
+   "date": "2026-09-27",
+   "type": "其他",
+   "title": "公告本公司「全坤御峰」工地火災事件說明",
+   "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
   {
