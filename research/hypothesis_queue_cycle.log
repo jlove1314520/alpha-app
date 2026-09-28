@@ -5367,3 +5367,5 @@ quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）�
 **??.鈭???**嚗閫貊１隞颱??詨??弦瑼?嚗?銝?靽風頝臬?嚗?Ｙ??啣?閮剜??啣摰?
 ===== Hypothesis-queue cycle end: 2026-09-28 17:23:34 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 節流中，距上次實跑27.5分鐘 < 120分鐘門檻（帳號週用量已達93%（門檻90%），節流保留額度給交辦與資料管線）
