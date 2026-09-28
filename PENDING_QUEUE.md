@@ -16262,3 +16262,53 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 
   **六、已push，停下等Cowork核對**。凍結.二仍生效，紙.一全程未被
   觸碰。
+
+## 2026-09-29 總司令裁示【驗.七：殘留異常分類＋#7/#8 重驗預登記＋Sortino 納入標準報表＋#82 暫停】
+
+> 【驗.七：殘留異常分類＋#7/#8 重驗預登記＋Sortino 納入標準報表＋#82 暫停】先寫進 PENDING_QUEUE 再動工。
+>
+> 一、#82 立即暫停：它屬於新的 alpha 軸（第六類），在凍結.二 範圍內；且投信官網／指數公司網站在確認 robots.txt 與服務條款允許之前不得再探測。假設佇列改為只做心跳，不得開新軸。
+>
+> 二、699 筆殘留異常分類（2007-2014 還原價，日期相依門檻）：
+>   逐筆歸入 (a) 上市日未知的 33 檔已下市股 (b) yfinance 路徑 (c) FinMind 路徑 (d) 上市後 5 日內 (e) 其他。
+>   (b) 類抽 5 筆對照原始價與 TaiwanStockDividendResult 官方參考價，判斷是 yfinance 自身還原錯誤還是真實漲跌。
+>   只回報，不修；修法另行裁示。
+>
+> 三、#7 f_eps_surprise、#8 f_revenue_surprise 重驗（屬上線因子的驗證，不是新試驗，凍結.二 不適用）：
+>   1. 先預先登記：方法與原 #7/#8 完全相同（打散對照百分位、Bonferroni n=6、門檻 98.33），資料改用修正後資料層，期間同原登記。
+>   2. 為了分開原因，各跑兩組：(i) 舊還原公式＋新財報時點 (ii) 新還原公式＋新財報時點。列表回報。
+>   3. 結果登記為新編號，原 #7/#8 判定鎖定不動。
+>   4. 若 (ii) 過不了門檻：不得自行改 score.py，改為提出降權或移除方案，等 Cowork 核可。App 端在核可前先在 FACTORS.md 註記「重驗未過，待處理」。
+>
+> 四、Sortino 納入標準報表（不是新試驗）：
+>   1. survival_constraint_allocation_test.py 新增 sortino_vs_deposit_rate()，MAR 固定為定存代理的當日隱含報酬，只算低於 MAR 的偏差；沿用同一條 equity curve 計算，不重跑。
+>   2. 對 100/0、85/15、70/30、60/40 與 0050 買進持有各算一次，寫進 SURVIVAL_CONSTRAINT.md 與 result JSON，跟 Sharpe 並列。
+>   3. pbv2 的標準結果輸出同樣加入 sortino 欄位（以後所有回測都自動印）。
+>   4. docs/RESEARCH_DIRECTION_2026-09-27.md 補一段：「求好階段判準（事前鎖定）：帳戶 MDD > −50% 為硬性條件；風險調整判準改用 Sortino ≥ 0050 買進持有；Sharpe 照列只記錄。任何候選在看到結果前不得更改此判準。」
+>
+> 五、完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動，不得動。
+
+- [ ] **驗.七** [驗證/維運] 殘留異常分類＋#7/#8重驗預登記＋Sortino納入
+  標準報表＋#82暫停。一、#82立即暫停(新alpha軸第六類，在凍結.二範圍
+  內；投信官網/指數公司網站確認robots.txt與ToS允許前不得再探測)，假設
+  佇列改只做心跳不得開新軸。二、699筆殘留異常分類(2007-2014還原價，
+  日期相依門檻)：逐筆歸入(a)上市日未知的33檔已下市股(b)yfinance路徑
+  (c)FinMind路徑(d)上市後5日內(e)其他；(b)類抽5筆對照原始價與
+  `TaiwanStockDividendResult`官方參考價，判斷是yfinance自身還原錯誤
+  還是真實漲跌；只回報不修。三、#7 f_eps_surprise/#8 f_revenue_surprise
+  重驗(上線因子驗證非新試驗，凍結.二不適用)：①先預先登記，方法同原
+  #7/#8(打散對照百分位/Bonferroni n=6/門檻98.33)，資料改修正後資料層，
+  期間同原登記。②各跑兩組分開原因：(i)舊還原公式＋新財報時點(ii)新
+  還原公式＋新財報時點，列表回報。③結果登記新編號，原#7/#8判定鎖定。
+  ④若(ii)過不了門檻：不得自行改score.py，改提降權或移除方案等Cowork
+  核可；App端核可前先在FACTORS.md註記「重驗未過，待處理」。四、Sortino
+  納入標準報表(非新試驗)：①`survival_constraint_allocation_test.py`
+  新增`sortino_vs_deposit_rate()`，MAR固定為定存代理當日隱含報酬，只算
+  低於MAR的偏差，沿用同一條equity curve不重跑。②對100/0、85/15、
+  70/30、60/40與0050買進持有各算一次，寫進SURVIVAL_CONSTRAINT.md與
+  result JSON，跟Sharpe並列。③pbv2標準結果輸出加入sortino欄位。④
+  `docs/RESEARCH_DIRECTION_2026-09-27.md`補「求好階段判準(事前鎖定)：
+  帳戶MDD>−50%為硬性條件；風險調整判準改用Sortino≥0050買進持有；
+  Sharpe照列只記錄。任何候選在看到結果前不得更改此判準」。五、完成後
+  push停下等Cowork核對。紙.一10/1照常啟動不得動。**心跳**：本條目
+  checklist狀態＋TRIALS_LEDGER新編號(#7/#8重驗預登記)。
