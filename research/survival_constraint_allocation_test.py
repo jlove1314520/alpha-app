@@ -167,6 +167,31 @@ def sharpe_vs_deposit_rate(equity_curve: pd.DataFrame) -> float:
     return float(excess.mean() / excess.std(ddof=0) * np.sqrt(252))
 
 
+def sortino_vs_deposit_rate(equity_curve: pd.DataFrame) -> float:
+    """年化Sortino，MAR固定為定存代理的當日隱含報酬（模擬時債券腿實際
+    使用的同一個`rf_daily_ret`），只算低於MAR的偏差。2026-09-29【驗.七】
+    四.1補充欄位：沿用同一條equity curve，不重跑回測、不算新試驗。
+
+    **[自行裁量]下方偏差的定義**：採Sortino & Price(1994)教科書版——
+    downside deviation = sqrt( mean over **所有**期間 of min(excess,0)^2 )
+    （非下檔日以0計入分母），不是`backtest/engine.py::BacktestResult.
+    sortino_ratio`那種「只用下檔日平均」的變體（且那個變體MAR=0）。理由：
+    教科書版是Sortino原始定義、跟Sharpe的分母口徑（全期間）一致、且不會
+    在下檔日很少時把分母算得很小而誇大比率。兩者都不是錯，只是口徑不同，
+    這裡明確選一個並寫下來，`pbv2`新增的`sortino_vs_rf`用同一個定義以便
+    跨報表比較。"""
+    df = equity_curve.sort_values("date").reset_index(drop=True)
+    daily_ret = df["equity"].pct_change()
+    excess = (daily_ret - df["rf_daily_ret"]).dropna()
+    if excess.empty:
+        return float("nan")
+    downside = np.minimum(excess.to_numpy(), 0.0)
+    downside_dev = float(np.sqrt(np.mean(downside ** 2)))
+    if downside_dev == 0:
+        return float("nan")
+    return float(excess.mean() / downside_dev * np.sqrt(252))
+
+
 def yearly_returns(equity_curve: pd.DataFrame) -> dict[str, float]:
     """逐年報酬：每年最後一個交易日權益 / 前一年最後一個交易日權益 − 1；
     第一年用該年第一筆權益當起點（非全年資料）。2026-09-27【新.二結案】
@@ -216,6 +241,7 @@ def main() -> None:
         worst_seg = min((v for v in seg_mdds.values() if v is not None), default=overall_mdd)
         survives_article1 = worst_seg >= MDD_SURVIVAL_THRESHOLD_PCT and overall_mdd >= MDD_SURVIVAL_THRESHOLD_PCT
         sharpe_vs_rf = sharpe_vs_deposit_rate(eq)
+        sortino_vs_rf = sortino_vs_deposit_rate(eq)
         yearly = yearly_returns(eq)
         results.append({
             "stock_weight": w, "bond_weight": round(1 - w, 2),
@@ -224,10 +250,11 @@ def main() -> None:
             "segment_mdds_pct": {k: (round(v, 2) if v is not None else None) for k, v in seg_mdds.items()},
             "survives_article1_mdd50": survives_article1,
             "sharpe_vs_deposit_rate": round(sharpe_vs_rf, 4),
+            "sortino_vs_deposit_rate": round(sortino_vs_rf, 4),
             "yearly_returns_pct": yearly,
         })
         print(f"  CAGR={cagr_pct:.2f}%  全期MDD={overall_mdd:.2f}%  最差空頭段MDD={worst_seg:.2f}%  "
-              f"Sharpe(對定存)={sharpe_vs_rf:.4f}  "
+              f"Sharpe(對定存)={sharpe_vs_rf:.4f}  Sortino(對定存)={sortino_vs_rf:.4f}  "
               f"天條一={'PASS' if survives_article1 else 'VIOLATES_SURVIVAL'}")
 
     base_cagr = results[0]["cagr_pct"]  # 100/0（純0050）當基準
@@ -238,8 +265,10 @@ def main() -> None:
            "mdd_survival_threshold_pct": MDD_SURVIVAL_THRESHOLD_PCT,
            "data_source_note": "0050繞過yfinance(僅涵蓋2009起)，直接用FinMind還原權息路徑取得2003-06-30起完整歷史，涵蓋2008金融海嘯",
            "bond_proxy": "央行五大銀行定存利率-一個月-固定，月頻算術平均（保守假設，低估真實固定收益報酬）",
-           "supplement_note": "2026-09-27【新.二結案】補充sharpe_vs_deposit_rate與yearly_returns_pct兩欄位，"
-                               "沿用同一條equity curve重算，非新回測、不列入試驗次數",
+           "supplement_note": "2026-09-27【新.二結案】補充sharpe_vs_deposit_rate與yearly_returns_pct兩欄位；"
+                               "2026-09-29【驗.七】四.1補充sortino_vs_deposit_rate（MAR=定存代理當日隱含報酬，"
+                               "Sortino&Price教科書版全期間分母）。皆沿用同一條equity curve重算，非新回測、"
+                               "不列入試驗次數。100/0配置＝0050買進持有（stock_w=1.0時不做再平衡）",
            "results": results}
     OUT_JSON.parent.mkdir(exist_ok=True)
     with open(OUT_JSON, "w", encoding="utf-8") as f:

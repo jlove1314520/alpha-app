@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-27T14:03:54.548261+08:00",
+  "generated_at": "2026-09-29T00:26:46.475411+08:00",
   "allocations_tested": [
     1.0,
     0.85,
@@ -9,7 +9,7 @@
   "mdd_survival_threshold_pct": -50.0,
   "data_source_note": "0050繞過yfinance(僅涵蓋2009起)，直接用FinMind還原權息路徑取得2003-06-30起完整歷史，涵蓋2008金融海嘯",
   "bond_proxy": "央行五大銀行定存利率-一個月-固定，月頻算術平均（保守假設，低估真實固定收益報酬）",
-  "supplement_note": "2026-09-27【新.二結案】補充sharpe_vs_deposit_rate與yearly_returns_pct兩欄位，沿用同一條equity curve重算，非新回測、不列入試驗次數",
+  "supplement_note": "2026-09-27【新.二結案】補充sharpe_vs_deposit_rate與yearly_returns_pct兩欄位；2026-09-29【驗.七】四.1補充sortino_vs_deposit_rate（MAR=定存代理當日隱含報酬，Sortino&Price教科書版全期間分母）。皆沿用同一條equity curve重算，非新回測、不列入試驗次數。100/0配置＝0050買進持有（stock_w=1.0時不做再平衡）",
   "results": [
     {
       "stock_weight": 1.0,
@@ -28,6 +28,7 @@
       },
       "survives_article1_mdd50": false,
       "sharpe_vs_deposit_rate": 0.6171,
+      "sortino_vs_deposit_rate": 0.8857,
       "yearly_returns_pct": {
         "2003": 23.84,
         "2004": 5.62,
@@ -71,6 +72,7 @@
       },
       "survives_article1_mdd50": true,
       "sharpe_vs_deposit_rate": 0.6185,
+      "sortino_vs_deposit_rate": 0.8875,
       "yearly_returns_pct": {
         "2003": 20.17,
         "2004": 5.16,
@@ -114,6 +116,7 @@
       },
       "survives_article1_mdd50": true,
       "sharpe_vs_deposit_rate": 0.6196,
+      "sortino_vs_deposit_rate": 0.889,
       "yearly_returns_pct": {
         "2003": 16.56,
         "2004": 4.63,
@@ -157,6 +160,7 @@
       },
       "survives_article1_mdd50": true,
       "sharpe_vs_deposit_rate": 0.6203,
+      "sortino_vs_deposit_rate": 0.8899,
       "yearly_returns_pct": {
         "2003": 14.19,
         "2004": 4.22,

@@ -338,6 +338,37 @@ def sharpe_ratio(equity_curve: pd.DataFrame) -> float:
     return float(r.mean() / r.std() * np.sqrt(252))
 
 
+def sortino_vs_rf(equity_curve: pd.DataFrame, rf_monthly: pd.DataFrame | None = None) -> float:
+    """年化Sortino，MAR＝定存代理當日隱含報酬（2026-09-29總司令裁示【驗.七】
+    四.3：標準結果輸出加入sortino欄位，以後所有回測自動印）。
+    跟`survival_constraint_allocation_test.py::sortino_vs_deposit_rate()`
+    同一個定義（Sortino&Price教科書版：downside deviation用全期間分母、
+    非下檔日以0計入），兩份報表可直接比較。既有`sortino`欄位（`BacktestResult.
+    sortino_ratio`，MAR=0、只用下檔日分母）保留不動，避免破壞既有呼叫端。
+    定存代理走`cbc_rf_rate_client`（本機parquet快取）；任何失敗只回NaN，
+    不得讓回測本身中斷（CLAUDE.md十二節）。"""
+    try:
+        from cbc_rf_rate_client import load_risk_free_rate_series, rf_rate_for_date
+        eq = equity_curve.sort_values("date").reset_index(drop=True)
+        if len(eq) < 2:
+            return float("nan")
+        if rf_monthly is None:
+            rf_monthly = load_risk_free_rate_series()
+        daily_ret = eq["equity"].pct_change()
+        rf_daily = eq["date"].map(lambda d: (1.0 + rf_rate_for_date(pd.Timestamp(d), rf_monthly) / 100.0) ** (1.0 / 252.0) - 1.0)
+        excess = (daily_ret - rf_daily).dropna()
+        if excess.empty:
+            return float("nan")
+        downside = np.minimum(excess.to_numpy(), 0.0)
+        dd = float(np.sqrt(np.mean(downside ** 2)))
+        if dd == 0:
+            return float("nan")
+        return float(excess.mean() / dd * np.sqrt(252))
+    except Exception as e:  # noqa: BLE001 -- 附加統計量失敗不得拖垮回測
+        print(f"::warning::sortino_vs_rf 計算失敗（{type(e).__name__}: {e}），回NaN")
+        return float("nan")
+
+
 def run_one(factor_version, weight_mode, cadence_name, label, data, market_df, industry_map,
             trend_regime, liquidity, start, end, do_cost_sensitivity=True,
             do_random_control=True, n_random=15) -> dict:
@@ -357,6 +388,7 @@ def run_one(factor_version, weight_mode, cadence_name, label, data, market_df, i
 
     alpha = alpha_significance(result.equity_curve, market_df)
     sharpe = sharpe_ratio(result.equity_curve)
+    sortino_rf = sortino_vs_rf(result.equity_curve)  # 驗.七四.3：標準輸出自動附Sortino(對定存)
     bh_pct = buy_and_hold_index_pct(market_df, start, end)
 
     cost_returns = {1: result.total_return_pct}
@@ -385,7 +417,7 @@ def run_one(factor_version, weight_mode, cadence_name, label, data, market_df, i
         "factor_version": factor_version, "weight_mode": weight_mode, "cadence": cadence_name,
         "label": label, "start": start, "end": end,
         "return_pct": result.total_return_pct, "mdd_pct": result.max_drawdown_pct,
-        "sortino": result.sortino_ratio, "sharpe": sharpe, "n_trades": result.n_trades,
+        "sortino": result.sortino_ratio, "sortino_vs_rf": sortino_rf, "sharpe": sharpe, "n_trades": result.n_trades,
         "alpha_ann_pct": alpha["alpha_ann_pct"], "beta": alpha["beta"],
         "alpha_pvalue": alpha["alpha_pvalue"], "alpha_significant": alpha["alpha_significant"],
         "cost_1x": cost_returns[1], "cost_2x": cost_returns[2], "cost_3x": cost_returns[3],
@@ -432,7 +464,7 @@ def main():
                                 do_cost_sensitivity=False, do_random_control=False)
                     quick_results.append(r)
                     print(f"  {factor_version}/{weight_mode}/{cadence_name}/{label}: "
-                          f"報酬={r['return_pct']:+.2f}%  MDD={r['mdd_pct']:.2f}%  Sortino={r['sortino']:.3f}  "
+                          f"報酬={r['return_pct']:+.2f}%  MDD={r['mdd_pct']:.2f}%  Sortino={r['sortino']:.3f}  Sortino(rf)={r['sortino_vs_rf']:.3f}  "
                           f"alpha={r['alpha_ann_pct']:+.2f}%(p={r['alpha_pvalue']:.3f})  "
                           f"買進持有大盤={r['buy_and_hold_index_pct']:+.2f}%")
 
@@ -450,7 +482,7 @@ def main():
                             do_cost_sensitivity=True, do_random_control=True, n_random=15)
                 full_results.append(r)
                 print(f"\n--- {factor_version} / {weight_mode} / {cadence_name} / VALIDATION（完整版）---")
-                print(f"  報酬={r['return_pct']:+.2f}%  MDD={r['mdd_pct']:.2f}%  Sortino={r['sortino']:.3f}  "
+                print(f"  報酬={r['return_pct']:+.2f}%  MDD={r['mdd_pct']:.2f}%  Sortino={r['sortino']:.3f}  Sortino(rf)={r['sortino_vs_rf']:.3f}  "
                       f"Sharpe={r['sharpe']:.3f}  trades={r['n_trades']}")
                 print(f"  alpha(年化)={r['alpha_ann_pct']:+.2f}%  beta={r['beta']:+.3f}  "
                       f"p={r['alpha_pvalue']:.4f}  顯著為正={r['alpha_significant']}")
@@ -461,7 +493,7 @@ def main():
     df = pd.DataFrame(full_results)
     df.to_csv("data/portfolio_backtest_v2_results.csv", index=False)
     print("\n=== SUMMARY（階段2，VALIDATION完整版，存 data/portfolio_backtest_v2_results.csv）===")
-    print(df[["factor_version", "weight_mode", "cadence", "return_pct", "mdd_pct", "sortino", "sharpe",
+    print(df[["factor_version", "weight_mode", "cadence", "return_pct", "mdd_pct", "sortino", "sortino_vs_rf", "sharpe",
               "alpha_ann_pct", "alpha_pvalue", "alpha_significant", "buy_and_hold_index_pct",
               "random_control_percentile", "cost_3x"]].to_string(index=False))
     return quick_df, df

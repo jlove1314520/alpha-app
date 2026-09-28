@@ -1,0 +1,5738 @@
+{
+ "generated_at": "2026-09-29T00:26:02.283095",
+ "note": "驗.七項二，只回報不修；分類優先序見腳本docstring",
+ "n_hits": 699,
+ "n_unknown_delisted_33": 33,
+ "counts": {
+  "(a)上市日未知已下市股": 98,
+  "(b)yfinance路徑": 584,
+  "(c)FinMind路徑": 0,
+  "(d)上市後5日內": 17,
+  "(e)其他": 0
+ },
+ "b_class_spot_checks": [
+  {
+   "stock_id": "2332",
+   "date": "2009-04-02",
+   "adj_ret_pct": 8.11,
+   "raw_ret_pct": 8.11,
+   "raw_close_prev": 13.854947090148926,
+   "raw_close": 14.97832202911377,
+   "official_reference_ratio": null,
+   "judgement": "真實漲跌（非除權息日，原始價本身就大幅變動，還原未改變它）"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-18",
+   "adj_ret_pct": 17.81,
+   "raw_ret_pct": 17.81,
+   "raw_close_prev": 0.6102442741394043,
+   "raw_close": 0.7189173698425293,
+   "official_reference_ratio": null,
+   "judgement": "真實漲跌（非除權息日，原始價本身就大幅變動，還原未改變它）"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-21",
+   "adj_ret_pct": 12.18,
+   "raw_ret_pct": 12.18,
+   "raw_close_prev": 17.229883193969727,
+   "raw_close": 19.32839012145996,
+   "official_reference_ratio": null,
+   "judgement": "真實漲跌（非除權息日，原始價本身就大幅變動，還原未改變它）"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2009-06-08",
+   "adj_ret_pct": 14.34,
+   "raw_ret_pct": 14.34,
+   "raw_close_prev": 7.175900459289551,
+   "raw_close": 8.205230712890625,
+   "official_reference_ratio": null,
+   "judgement": "真實漲跌（非除權息日，原始價本身就大幅變動，還原未改變它）"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-26",
+   "adj_ret_pct": 13.47,
+   "raw_ret_pct": 13.47,
+   "raw_close_prev": 19.179601669311523,
+   "raw_close": 21.76264190673828,
+   "official_reference_ratio": null,
+   "judgement": "真實漲跌（非除權息日，原始價本身就大幅變動，還原未改變它）"
+  }
+ ],
+ "hits": [
+  {
+   "stock_id": "8427",
+   "date": "2012-07-03",
+   "ret_pct": -18.38,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3018",
+   "date": "2008-08-08",
+   "ret_pct": 12.84,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3018",
+   "date": "2009-01-12",
+   "ret_pct": 14.02,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3018",
+   "date": "2011-08-16",
+   "ret_pct": 10.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3018",
+   "date": "2012-01-06",
+   "ret_pct": 7.8,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3018",
+   "date": "2013-02-25",
+   "ret_pct": 11.03,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3438",
+   "date": "2013-02-25",
+   "ret_pct": 8.82,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2448",
+   "date": "2011-07-14",
+   "ret_pct": -7.65,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "2352",
+   "date": "2007-10-01",
+   "ret_pct": 10.51,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2352",
+   "date": "2013-02-25",
+   "ret_pct": 11.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2012-07-30",
+   "ret_pct": 8.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2012-08-23",
+   "ret_pct": 16.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2012-09-05",
+   "ret_pct": 8.55,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2012-09-17",
+   "ret_pct": 7.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2012-11-12",
+   "ret_pct": 11.48,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-02-11",
+   "ret_pct": 9.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-02-17",
+   "ret_pct": 8.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-02-27",
+   "ret_pct": 7.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-03-11",
+   "ret_pct": 10.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-05-07",
+   "ret_pct": 11.36,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-05-21",
+   "ret_pct": 8.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-05-22",
+   "ret_pct": 20.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-05-26",
+   "ret_pct": 8.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-06-11",
+   "ret_pct": 11.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-06-19",
+   "ret_pct": 9.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-06-20",
+   "ret_pct": 10.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-06-30",
+   "ret_pct": 14.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-07-01",
+   "ret_pct": -9.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-10-13",
+   "ret_pct": -11.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4741",
+   "date": "2014-10-31",
+   "ret_pct": 8.44,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-01-14",
+   "ret_pct": -13.42,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-01-15",
+   "ret_pct": 8.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-02-19",
+   "ret_pct": 19.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-04-03",
+   "ret_pct": 23.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-04-07",
+   "ret_pct": -10.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-04-10",
+   "ret_pct": 8.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-07-23",
+   "ret_pct": -9.79,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-08-18",
+   "ret_pct": 13.57,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2008-12-31",
+   "ret_pct": 17.28,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2009-01-06",
+   "ret_pct": -10.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2009-01-14",
+   "ret_pct": 8.79,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2009-02-09",
+   "ret_pct": 7.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2009-03-10",
+   "ret_pct": 83.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4729",
+   "date": "2013-02-25",
+   "ret_pct": 12.96,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4553",
+   "date": "2014-11-07",
+   "ret_pct": 18.42,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4553",
+   "date": "2014-11-10",
+   "ret_pct": -10.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5492",
+   "date": "2007-08-08",
+   "ret_pct": -10.44,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5492",
+   "date": "2008-08-26",
+   "ret_pct": -15.02,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8426",
+   "date": "2012-02-06",
+   "ret_pct": 9.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8426",
+   "date": "2013-07-10",
+   "ret_pct": 11.73,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2008-02-19",
+   "ret_pct": -7.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2008-10-20",
+   "ret_pct": -21.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2009-01-16",
+   "ret_pct": -83.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2009-03-19",
+   "ret_pct": -13.47,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2009-04-02",
+   "ret_pct": -13.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2009-06-22",
+   "ret_pct": -7.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2009-07-21",
+   "ret_pct": -13.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2009-08-06",
+   "ret_pct": -30.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2011-09-13",
+   "ret_pct": -13.17,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-01-17",
+   "ret_pct": -11.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-04-03",
+   "ret_pct": -7.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-07-05",
+   "ret_pct": -13.1,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-10-31",
+   "ret_pct": 14.43,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-11-06",
+   "ret_pct": 14.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-11-12",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2012-11-21",
+   "ret_pct": -11.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5386",
+   "date": "2014-08-28",
+   "ret_pct": 10.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2007-10-24",
+   "ret_pct": 1252150.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2007-10-26",
+   "ret_pct": 7.9,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2008-08-11",
+   "ret_pct": 8.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2008-09-23",
+   "ret_pct": -20.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2008-10-22",
+   "ret_pct": -8.23,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2008-10-23",
+   "ret_pct": -20.53,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2008-12-01",
+   "ret_pct": 8.86,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-02-25",
+   "ret_pct": 8.08,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-05-06",
+   "ret_pct": 17.54,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-05-20",
+   "ret_pct": 8.1,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-06-15",
+   "ret_pct": -8.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-07-07",
+   "ret_pct": 8.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-07-13",
+   "ret_pct": -10.54,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-08-21",
+   "ret_pct": 9.4,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2009-10-01",
+   "ret_pct": 15.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-03-03",
+   "ret_pct": 7.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-06-07",
+   "ret_pct": -15.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-06-08",
+   "ret_pct": 17.53,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-11-04",
+   "ret_pct": 19.72,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-11-05",
+   "ret_pct": -18.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-11-08",
+   "ret_pct": -10.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-11-11",
+   "ret_pct": 29.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3591",
+   "date": "2010-11-12",
+   "ret_pct": -12.36,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3356",
+   "date": "2009-04-02",
+   "ret_pct": 8.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6290",
+   "date": "2013-07-23",
+   "ret_pct": 9.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8240",
+   "date": "2008-08-18",
+   "ret_pct": 12.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8240",
+   "date": "2009-01-19",
+   "ret_pct": 14.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4429",
+   "date": "2009-12-14",
+   "ret_pct": 8.25,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "4429",
+   "date": "2010-04-08",
+   "ret_pct": 8.64,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "4429",
+   "date": "2010-07-13",
+   "ret_pct": -8.64,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "4429",
+   "date": "2010-07-19",
+   "ret_pct": -10.79,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "4429",
+   "date": "2010-09-09",
+   "ret_pct": 8.77,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "4429",
+   "date": "2012-07-11",
+   "ret_pct": -10.53,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "1730",
+   "date": "2012-03-05",
+   "ret_pct": 8.48,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2008-03-27",
+   "ret_pct": -13.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2008-09-18",
+   "ret_pct": -13.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2008-10-27",
+   "ret_pct": -9.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2008-11-28",
+   "ret_pct": -19.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2009-01-20",
+   "ret_pct": -19.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2009-02-04",
+   "ret_pct": -12.4,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2009-06-08",
+   "ret_pct": -18.53,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2010-02-22",
+   "ret_pct": -94.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2011-02-11",
+   "ret_pct": -93.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2011-02-22",
+   "ret_pct": 1610.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2011-11-04",
+   "ret_pct": 14.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-02-03",
+   "ret_pct": 14.34,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-02-06",
+   "ret_pct": 12.54,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-02-09",
+   "ret_pct": 14.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-02-16",
+   "ret_pct": 13.86,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-03-05",
+   "ret_pct": 14.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-03-27",
+   "ret_pct": -13.49,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-04-05",
+   "ret_pct": -13.1,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6240",
+   "date": "2012-09-11",
+   "ret_pct": 13.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4999",
+   "date": "2013-03-12",
+   "ret_pct": 67.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4999",
+   "date": "2013-05-31",
+   "ret_pct": 7.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4999",
+   "date": "2013-06-03",
+   "ret_pct": -8.46,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2733",
+   "date": "2013-01-07",
+   "ret_pct": 9.28,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2733",
+   "date": "2013-12-30",
+   "ret_pct": 9.18,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2733",
+   "date": "2014-06-05",
+   "ret_pct": 9.03,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2733",
+   "date": "2014-10-13",
+   "ret_pct": -8.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5474",
+   "date": "2008-07-31",
+   "ret_pct": 7.99,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5474",
+   "date": "2008-08-18",
+   "ret_pct": 12.13,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5474",
+   "date": "2009-01-12",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5474",
+   "date": "2013-07-16",
+   "ret_pct": 8.46,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5474",
+   "date": "2014-06-26",
+   "ret_pct": 8.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4707",
+   "date": "2008-08-18",
+   "ret_pct": -10.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4707",
+   "date": "2009-01-19",
+   "ret_pct": -8.45,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4707",
+   "date": "2009-04-02",
+   "ret_pct": 13.43,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8049",
+   "date": "2008-08-18",
+   "ret_pct": -7.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8049",
+   "date": "2009-04-02",
+   "ret_pct": 14.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4123",
+   "date": "2009-04-02",
+   "ret_pct": 14.35,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4123",
+   "date": "2012-08-17",
+   "ret_pct": -9.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4123",
+   "date": "2012-12-24",
+   "ret_pct": 13.31,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4123",
+   "date": "2013-09-26",
+   "ret_pct": -10.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4123",
+   "date": "2013-09-27",
+   "ret_pct": 11.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4123",
+   "date": "2014-08-11",
+   "ret_pct": 22.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8114",
+   "date": "2008-08-18",
+   "ret_pct": -8.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-10-30",
+   "ret_pct": 8.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-10-31",
+   "ret_pct": -9.35,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-06",
+   "ret_pct": 13.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-07",
+   "ret_pct": -11.78,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-09",
+   "ret_pct": 14.56,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-13",
+   "ret_pct": -12.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-16",
+   "ret_pct": 10.77,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-19",
+   "ret_pct": -12.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-20",
+   "ret_pct": 13.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-21",
+   "ret_pct": -12.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-22",
+   "ret_pct": 14.32,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-26",
+   "ret_pct": -12.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-11-29",
+   "ret_pct": 15.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-06",
+   "ret_pct": -14.02,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-10",
+   "ret_pct": 13.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-11",
+   "ret_pct": -12.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-13",
+   "ret_pct": 13.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-18",
+   "ret_pct": -11.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-26",
+   "ret_pct": 13.47,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-27",
+   "ret_pct": -12.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-01-11",
+   "ret_pct": 13.35,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-01-16",
+   "ret_pct": -14.02,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-01-22",
+   "ret_pct": 13.4,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-01-29",
+   "ret_pct": -12.9,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-02-01",
+   "ret_pct": 13.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-02-04",
+   "ret_pct": -12.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-02-05",
+   "ret_pct": 13.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-02-19",
+   "ret_pct": -13.08,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-02-22",
+   "ret_pct": 17.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-02-26",
+   "ret_pct": -15.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-03-05",
+   "ret_pct": 16.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2013-03-06",
+   "ret_pct": -14.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2024",
+   "date": "2007-04-16",
+   "ret_pct": 12.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2109",
+   "date": "2007-04-16",
+   "ret_pct": 9.66,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5346",
+   "date": "2007-08-06",
+   "ret_pct": -12.35,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5346",
+   "date": "2010-09-14",
+   "ret_pct": 72.5,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5346",
+   "date": "2012-09-28",
+   "ret_pct": 133.33,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3037",
+   "date": "2007-03-05",
+   "ret_pct": -8.61,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3037",
+   "date": "2008-08-08",
+   "ret_pct": 7.99,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-01-08",
+   "ret_pct": 8.73,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-06-18",
+   "ret_pct": -15.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-06-19",
+   "ret_pct": 18.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-06-20",
+   "ret_pct": -15.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-06-23",
+   "ret_pct": 17.04,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-10-03",
+   "ret_pct": 7.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-11-04",
+   "ret_pct": -31.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-11-13",
+   "ret_pct": -47.37,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-11-14",
+   "ret_pct": 10.4,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2008-12-10",
+   "ret_pct": 8.66,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2010-10-04",
+   "ret_pct": 408.0,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2013-08-14",
+   "ret_pct": -7.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3441",
+   "date": "2013-08-15",
+   "ret_pct": 9.48,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1218",
+   "date": "2007-03-05",
+   "ret_pct": -7.51,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1218",
+   "date": "2010-08-12",
+   "ret_pct": 35.48,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-01-25",
+   "ret_pct": -8.93,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-01-29",
+   "ret_pct": -17.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-01-30",
+   "ret_pct": 27.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-02-01",
+   "ret_pct": 20.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-02-21",
+   "ret_pct": -37.16,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-02-22",
+   "ret_pct": 19.6,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-02-25",
+   "ret_pct": 17.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-03-06",
+   "ret_pct": -25.23,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-03-13",
+   "ret_pct": 20.51,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-03-18",
+   "ret_pct": -20.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-03-21",
+   "ret_pct": 18.42,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-03-24",
+   "ret_pct": -15.56,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-03-31",
+   "ret_pct": 20.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-04-01",
+   "ret_pct": -23.17,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-04-02",
+   "ret_pct": -7.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-04-03",
+   "ret_pct": 17.93,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-04-10",
+   "ret_pct": -12.28,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-04-25",
+   "ret_pct": 21.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-04-30",
+   "ret_pct": -15.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-02",
+   "ret_pct": 43.55,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-05",
+   "ret_pct": -28.09,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-09",
+   "ret_pct": 21.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-13",
+   "ret_pct": -15.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-16",
+   "ret_pct": 19.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-20",
+   "ret_pct": -15.2,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-23",
+   "ret_pct": 19.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-28",
+   "ret_pct": -19.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-05-30",
+   "ret_pct": 26.23,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-02",
+   "ret_pct": -20.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-03",
+   "ret_pct": 8.77,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-06",
+   "ret_pct": 17.46,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-10",
+   "ret_pct": -21.62,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-13",
+   "ret_pct": 19.72,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-20",
+   "ret_pct": 19.12,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-25",
+   "ret_pct": -33.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-06-27",
+   "ret_pct": 21.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-03",
+   "ret_pct": -21.25,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-04",
+   "ret_pct": 19.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-09",
+   "ret_pct": -23.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-11",
+   "ret_pct": 21.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-14",
+   "ret_pct": -17.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-17",
+   "ret_pct": 17.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-18",
+   "ret_pct": 19.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-07-25",
+   "ret_pct": -28.36,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-18",
+   "ret_pct": 16.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-19",
+   "ret_pct": -17.14,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-21",
+   "ret_pct": 20.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-22",
+   "ret_pct": 19.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-27",
+   "ret_pct": -32.84,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-28",
+   "ret_pct": 20.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-08-29",
+   "ret_pct": 18.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-03",
+   "ret_pct": -35.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-04",
+   "ret_pct": 21.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-05",
+   "ret_pct": 8.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-08",
+   "ret_pct": -29.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-11",
+   "ret_pct": -12.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-12",
+   "ret_pct": 21.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-18",
+   "ret_pct": 19.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-09-19",
+   "ret_pct": 20.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-10-08",
+   "ret_pct": 16.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-10-22",
+   "ret_pct": -52.86,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-10-23",
+   "ret_pct": 12.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-10-24",
+   "ret_pct": 33.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-10-27",
+   "ret_pct": -27.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-10-30",
+   "ret_pct": 17.65,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-11-12",
+   "ret_pct": -17.65,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-11-14",
+   "ret_pct": 21.43,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-11-21",
+   "ret_pct": 17.65,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-12-22",
+   "ret_pct": -33.01,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-12-23",
+   "ret_pct": 19.57,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2008-12-26",
+   "ret_pct": -20.61,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2009-01-12",
+   "ret_pct": 22.93,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2009-01-13",
+   "ret_pct": -24.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-06-20",
+   "ret_pct": 48.36,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-06-21",
+   "ret_pct": -7.62,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-07-02",
+   "ret_pct": 9.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-07-13",
+   "ret_pct": 14.1,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-07-31",
+   "ret_pct": -8.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-09-14",
+   "ret_pct": 11.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-11-27",
+   "ret_pct": 13.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-11-30",
+   "ret_pct": 8.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-12-13",
+   "ret_pct": -8.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2012-12-20",
+   "ret_pct": -7.78,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-03-18",
+   "ret_pct": 15.05,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-05-06",
+   "ret_pct": 11.13,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-05-17",
+   "ret_pct": 9.56,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-07-23",
+   "ret_pct": 8.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-12-03",
+   "ret_pct": 29.91,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-12-04",
+   "ret_pct": 22.37,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-12-05",
+   "ret_pct": 16.67,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2013-12-06",
+   "ret_pct": -7.83,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3564",
+   "date": "2014-09-23",
+   "ret_pct": 17.66,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3147",
+   "date": "2013-12-17",
+   "ret_pct": 11.79,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3147",
+   "date": "2014-01-08",
+   "ret_pct": 11.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3147",
+   "date": "2014-02-25",
+   "ret_pct": 7.87,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3147",
+   "date": "2014-02-26",
+   "ret_pct": 8.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5263",
+   "date": "2012-11-02",
+   "ret_pct": 9.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5263",
+   "date": "2012-12-18",
+   "ret_pct": -8.75,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5263",
+   "date": "2012-12-19",
+   "ret_pct": 16.71,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5263",
+   "date": "2014-08-12",
+   "ret_pct": 9.45,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5304",
+   "date": "2007-04-16",
+   "ret_pct": 611.76,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "6183",
+   "date": "2009-04-02",
+   "ret_pct": 12.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6183",
+   "date": "2009-09-10",
+   "ret_pct": -24.14,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6183",
+   "date": "2009-09-25",
+   "ret_pct": 12.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6609",
+   "date": "2008-08-14",
+   "ret_pct": -63.8,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6609",
+   "date": "2008-08-18",
+   "ret_pct": 177.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3064",
+   "date": "2008-08-18",
+   "ret_pct": -9.82,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3064",
+   "date": "2010-02-08",
+   "ret_pct": -8.02,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3064",
+   "date": "2012-02-06",
+   "ret_pct": 12.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3494",
+   "date": "2008-08-07",
+   "ret_pct": 9.55,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3494",
+   "date": "2009-01-12",
+   "ret_pct": 14.08,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3494",
+   "date": "2009-04-02",
+   "ret_pct": 7.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3494",
+   "date": "2012-12-24",
+   "ret_pct": 9.73,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-04-14",
+   "ret_pct": -8.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-04-15",
+   "ret_pct": 7.54,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-04-24",
+   "ret_pct": 7.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-02",
+   "ret_pct": 8.57,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-04",
+   "ret_pct": -10.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-09",
+   "ret_pct": 18.79,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-11",
+   "ret_pct": -14.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-14",
+   "ret_pct": 17.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-17",
+   "ret_pct": -17.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-21",
+   "ret_pct": 12.18,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-22",
+   "ret_pct": 11.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-23",
+   "ret_pct": -18.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-24",
+   "ret_pct": 23.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-25",
+   "ret_pct": -21.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-09-04",
+   "ret_pct": -9.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-09-16",
+   "ret_pct": -9.84,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-10-01",
+   "ret_pct": -11.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-10-13",
+   "ret_pct": -9.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-10-14",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-10-27",
+   "ret_pct": -22.41,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-10-28",
+   "ret_pct": -9.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-11-18",
+   "ret_pct": -11.2,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-11-20",
+   "ret_pct": -7.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-11-25",
+   "ret_pct": 9.51,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-12-04",
+   "ret_pct": -7.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-12-10",
+   "ret_pct": 14.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-12-11",
+   "ret_pct": -10.18,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-12-16",
+   "ret_pct": 13.61,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-12-29",
+   "ret_pct": -20.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-12-31",
+   "ret_pct": 26.49,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-06",
+   "ret_pct": -20.41,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-09",
+   "ret_pct": 10.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-12",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-14",
+   "ret_pct": 14.61,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-15",
+   "ret_pct": -11.76,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-16",
+   "ret_pct": 15.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-01-19",
+   "ret_pct": -21.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-02-06",
+   "ret_pct": 8.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2009-02-11",
+   "ret_pct": -9.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2010-11-12",
+   "ret_pct": 151.14,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2013-02-25",
+   "ret_pct": 8.41,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2013-04-30",
+   "ret_pct": 13.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1907",
+   "date": "2009-04-02",
+   "ret_pct": 9.99,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1907",
+   "date": "2012-12-24",
+   "ret_pct": 7.87,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4157",
+   "date": "2013-10-01",
+   "ret_pct": 9.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4157",
+   "date": "2013-10-02",
+   "ret_pct": 9.82,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4157",
+   "date": "2013-10-30",
+   "ret_pct": 11.32,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4157",
+   "date": "2013-12-27",
+   "ret_pct": 10.9,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4157",
+   "date": "2014-01-17",
+   "ret_pct": -11.96,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3465",
+   "date": "2008-08-18",
+   "ret_pct": -18.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3465",
+   "date": "2009-06-08",
+   "ret_pct": 10.4,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3465",
+   "date": "2012-09-05",
+   "ret_pct": -8.45,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3548",
+   "date": "2008-09-09",
+   "ret_pct": -10.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8284",
+   "date": "2014-01-03",
+   "ret_pct": 12.7,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8284",
+   "date": "2014-03-04",
+   "ret_pct": -8.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8284",
+   "date": "2014-07-01",
+   "ret_pct": 8.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1308",
+   "date": "2009-01-19",
+   "ret_pct": 10.16,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3217",
+   "date": "2010-08-02",
+   "ret_pct": -10.04,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2008-07-28",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2008-07-29",
+   "ret_pct": -12.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2008-08-07",
+   "ret_pct": 10.34,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2008-09-29",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2008-09-30",
+   "ret_pct": -13.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2009-08-07",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2474",
+   "date": "2009-08-10",
+   "ret_pct": -8.35,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2486",
+   "date": "2007-03-05",
+   "ret_pct": -7.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2486",
+   "date": "2008-09-30",
+   "ret_pct": -8.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4950",
+   "date": "2012-12-24",
+   "ret_pct": 7.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4950",
+   "date": "2013-09-16",
+   "ret_pct": 13.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2012-08-17",
+   "ret_pct": 9.36,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2012-10-09",
+   "ret_pct": 9.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2012-10-12",
+   "ret_pct": 11.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2012-10-15",
+   "ret_pct": 10.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2012-10-26",
+   "ret_pct": 9.47,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-03-29",
+   "ret_pct": -14.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-04-01",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-10-22",
+   "ret_pct": -9.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-10-28",
+   "ret_pct": -9.12,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-11-08",
+   "ret_pct": 10.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-11-28",
+   "ret_pct": 16.93,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2013-11-29",
+   "ret_pct": 10.45,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-03-07",
+   "ret_pct": -12.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-03-11",
+   "ret_pct": 9.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-05-13",
+   "ret_pct": -9.22,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-05-27",
+   "ret_pct": 23.72,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-08-04",
+   "ret_pct": 21.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-08-05",
+   "ret_pct": -8.78,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-08-21",
+   "ret_pct": 15.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-10-01",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-10-02",
+   "ret_pct": -9.09,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-10-30",
+   "ret_pct": -10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3678",
+   "date": "2014-12-31",
+   "ret_pct": 15.66,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2393",
+   "date": "2007-07-11",
+   "ret_pct": 8.16,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3481",
+   "date": "2007-03-05",
+   "ret_pct": -9.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3481",
+   "date": "2007-07-05",
+   "ret_pct": 11.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3481",
+   "date": "2007-08-03",
+   "ret_pct": 8.17,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6412",
+   "date": "2013-11-08",
+   "ret_pct": -13.09,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3576",
+   "date": "2009-01-19",
+   "ret_pct": -8.99,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8917",
+   "date": "2008-08-04",
+   "ret_pct": -99.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8917",
+   "date": "2008-08-25",
+   "ret_pct": 66470.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8917",
+   "date": "2009-08-11",
+   "ret_pct": -8.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6275",
+   "date": "2009-01-19",
+   "ret_pct": -9.14,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6275",
+   "date": "2010-02-08",
+   "ret_pct": 13.72,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1714",
+   "date": "2008-08-08",
+   "ret_pct": 7.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1714",
+   "date": "2009-04-02",
+   "ret_pct": 9.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2332",
+   "date": "2008-02-14",
+   "ret_pct": 16.02,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2332",
+   "date": "2009-04-02",
+   "ret_pct": 8.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2332",
+   "date": "2014-12-29",
+   "ret_pct": 7.51,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2201",
+   "date": "2009-04-02",
+   "ret_pct": 12.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-02-26",
+   "ret_pct": 8.32,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-04-24",
+   "ret_pct": 7.76,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-07-11",
+   "ret_pct": 10.99,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-08-16",
+   "ret_pct": -13.71,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-08-20",
+   "ret_pct": 10.59,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-12-20",
+   "ret_pct": 13.1,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-12-24",
+   "ret_pct": -13.26,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2007-12-28",
+   "ret_pct": 9.41,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-01-22",
+   "ret_pct": -14.41,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-01-29",
+   "ret_pct": 13.48,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-01-31",
+   "ret_pct": -12.91,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-02-12",
+   "ret_pct": 14.7,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-02-15",
+   "ret_pct": -12.45,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-07-03",
+   "ret_pct": 15.68,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-07-07",
+   "ret_pct": -8.71,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-09-04",
+   "ret_pct": -12.59,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-09-08",
+   "ret_pct": 12.72,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-09-16",
+   "ret_pct": -13.49,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-09-19",
+   "ret_pct": 13.16,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-10-08",
+   "ret_pct": -16.23,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-10-13",
+   "ret_pct": -14.84,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-10-30",
+   "ret_pct": 9.13,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-11-18",
+   "ret_pct": -12.35,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-11-20",
+   "ret_pct": -9.0,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2008-12-10",
+   "ret_pct": 7.78,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-01-07",
+   "ret_pct": 22.53,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-02-06",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-02-09",
+   "ret_pct": -12.5,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-02-10",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-02-12",
+   "ret_pct": -11.33,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-02-19",
+   "ret_pct": -14.18,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-03-19",
+   "ret_pct": 16.01,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-03-20",
+   "ret_pct": -10.43,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-04-14",
+   "ret_pct": 8.02,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-04-20",
+   "ret_pct": 9.22,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-04-21",
+   "ret_pct": 17.19,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-04-30",
+   "ret_pct": 8.42,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-05-06",
+   "ret_pct": 22.06,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-05-21",
+   "ret_pct": 8.79,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-08-21",
+   "ret_pct": -7.56,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-08-31",
+   "ret_pct": -10.91,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-09-02",
+   "ret_pct": 8.57,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-09-17",
+   "ret_pct": 8.3,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2009-09-18",
+   "ret_pct": 8.05,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2010-10-26",
+   "ret_pct": 7.59,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2011-07-12",
+   "ret_pct": -17.82,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2011-08-05",
+   "ret_pct": -15.34,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2011-08-10",
+   "ret_pct": 8.01,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8199",
+   "date": "2011-09-08",
+   "ret_pct": -17.91,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "2340",
+   "date": "2007-03-06",
+   "ret_pct": -7.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2340",
+   "date": "2007-07-25",
+   "ret_pct": 14.31,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5534",
+   "date": "2007-01-18",
+   "ret_pct": -9.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5534",
+   "date": "2007-01-19",
+   "ret_pct": 8.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5534",
+   "date": "2007-03-05",
+   "ret_pct": -8.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5514",
+   "date": "2013-08-26",
+   "ret_pct": -13.18,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5514",
+   "date": "2013-08-27",
+   "ret_pct": 19.56,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5203",
+   "date": "2007-03-05",
+   "ret_pct": -9.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5203",
+   "date": "2008-09-30",
+   "ret_pct": -7.75,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5820",
+   "date": "2007-09-07",
+   "ret_pct": 49.85,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5820",
+   "date": "2010-08-30",
+   "ret_pct": 84.23,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5820",
+   "date": "2011-08-26",
+   "ret_pct": -10.15,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5820",
+   "date": "2012-08-24",
+   "ret_pct": -8.43,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "5483",
+   "date": "2011-08-23",
+   "ret_pct": 7.6,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2451",
+   "date": "2008-01-02",
+   "ret_pct": 8.6,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2451",
+   "date": "2008-07-29",
+   "ret_pct": -8.91,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2451",
+   "date": "2008-08-07",
+   "ret_pct": 12.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2451",
+   "date": "2008-09-18",
+   "ret_pct": -7.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2451",
+   "date": "2008-09-30",
+   "ret_pct": -11.22,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3680",
+   "date": "2012-08-03",
+   "ret_pct": 10.87,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3680",
+   "date": "2013-07-08",
+   "ret_pct": -10.2,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3680",
+   "date": "2013-07-09",
+   "ret_pct": 14.94,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-01-11",
+   "ret_pct": 13.64,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-09-16",
+   "ret_pct": -9.09,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-10-28",
+   "ret_pct": 12.85,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-11-04",
+   "ret_pct": 10.99,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-11-05",
+   "ret_pct": -12.87,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-11-07",
+   "ret_pct": 8.11,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-11-25",
+   "ret_pct": 8.7,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-11-28",
+   "ret_pct": -8.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-12-11",
+   "ret_pct": 10.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-12-12",
+   "ret_pct": -7.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-12-15",
+   "ret_pct": 8.2,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-12-18",
+   "ret_pct": 8.43,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2008-12-31",
+   "ret_pct": -9.09,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-01-12",
+   "ret_pct": -8.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-01-16",
+   "ret_pct": 10.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-01-19",
+   "ret_pct": -9.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-01-21",
+   "ret_pct": 9.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-02-02",
+   "ret_pct": -8.08,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-02-05",
+   "ret_pct": 7.61,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2009-02-06",
+   "ret_pct": -7.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9957",
+   "date": "2012-07-12",
+   "ret_pct": -12.78,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3689",
+   "date": "2012-08-08",
+   "ret_pct": 7.77,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2064",
+   "date": "2014-03-10",
+   "ret_pct": -8.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6438",
+   "date": "2014-01-13",
+   "ret_pct": 10.83,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4154",
+   "date": "2013-07-10",
+   "ret_pct": 8.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1468",
+   "date": "2012-01-06",
+   "ret_pct": 8.23,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2375",
+   "date": "2007-06-25",
+   "ret_pct": 9.15,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2375",
+   "date": "2010-10-29",
+   "ret_pct": -47.24,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2375",
+   "date": "2010-11-16",
+   "ret_pct": 76.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2375",
+   "date": "2014-11-14",
+   "ret_pct": -23.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5220",
+   "date": "2014-11-12",
+   "ret_pct": -9.01,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8916",
+   "date": "2013-08-30",
+   "ret_pct": 11.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2614",
+   "date": "2009-04-02",
+   "ret_pct": 11.6,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3260",
+   "date": "2013-07-12",
+   "ret_pct": 8.13,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1527",
+   "date": "2014-08-08",
+   "ret_pct": -9.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2460",
+   "date": "2007-07-10",
+   "ret_pct": -16.86,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2460",
+   "date": "2007-07-11",
+   "ret_pct": 15.73,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2337",
+   "date": "2007-03-06",
+   "ret_pct": 8.12,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2337",
+   "date": "2007-07-19",
+   "ret_pct": 8.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2337",
+   "date": "2007-07-25",
+   "ret_pct": 8.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2338",
+   "date": "2010-09-29",
+   "ret_pct": 9.96,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6220",
+   "date": "2010-03-23",
+   "ret_pct": 9.09,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9934",
+   "date": "2007-03-02",
+   "ret_pct": -7.57,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5871",
+   "date": "2013-06-20",
+   "ret_pct": -8.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5871",
+   "date": "2013-06-26",
+   "ret_pct": 17.59,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2916",
+   "date": "2010-07-19",
+   "ret_pct": -13.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1435",
+   "date": "2007-06-25",
+   "ret_pct": 14.1,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1435",
+   "date": "2009-06-08",
+   "ret_pct": -7.78,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8047",
+   "date": "2008-08-18",
+   "ret_pct": 10.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8047",
+   "date": "2009-04-02",
+   "ret_pct": 13.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8047",
+   "date": "2014-12-26",
+   "ret_pct": 11.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3288",
+   "date": "2008-08-18",
+   "ret_pct": 12.79,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3288",
+   "date": "2012-03-05",
+   "ret_pct": 14.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3131",
+   "date": "2013-02-25",
+   "ret_pct": 14.12,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3131",
+   "date": "2013-07-10",
+   "ret_pct": 11.87,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3038",
+   "date": "2007-07-24",
+   "ret_pct": 12.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3038",
+   "date": "2012-02-06",
+   "ret_pct": 9.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2608",
+   "date": "2009-04-02",
+   "ret_pct": 7.55,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "6298",
+   "date": "2008-08-06",
+   "ret_pct": -8.59,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "6298",
+   "date": "2014-07-14",
+   "ret_pct": -8.55,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "2511",
+   "date": "2008-07-29",
+   "ret_pct": -7.77,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2511",
+   "date": "2008-09-30",
+   "ret_pct": -10.5,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2511",
+   "date": "2009-04-02",
+   "ret_pct": 14.37,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2009-04-02",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2009-06-08",
+   "ret_pct": 14.34,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2010-02-08",
+   "ret_pct": -8.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2014-12-29",
+   "ret_pct": 9.17,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1471",
+   "date": "2007-04-16",
+   "ret_pct": -7.74,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1471",
+   "date": "2009-04-02",
+   "ret_pct": 9.42,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-10-08",
+   "ret_pct": 13.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-10-19",
+   "ret_pct": 8.43,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-10-22",
+   "ret_pct": 9.44,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-10-24",
+   "ret_pct": 20.1,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-10-25",
+   "ret_pct": -9.8,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-10-31",
+   "ret_pct": 11.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-11-15",
+   "ret_pct": -7.52,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4163",
+   "date": "2012-11-19",
+   "ret_pct": -7.63,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1513",
+   "date": "2014-11-27",
+   "ret_pct": -9.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1436",
+   "date": "2011-08-16",
+   "ret_pct": 18.78,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1436",
+   "date": "2011-09-29",
+   "ret_pct": 15.76,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1436",
+   "date": "2012-08-06",
+   "ret_pct": -54.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1340",
+   "date": "2013-12-17",
+   "ret_pct": 19.6,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1340",
+   "date": "2013-12-20",
+   "ret_pct": 14.03,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1340",
+   "date": "2013-12-26",
+   "ret_pct": 8.2,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1340",
+   "date": "2014-01-14",
+   "ret_pct": -14.9,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3711",
+   "date": "2008-08-08",
+   "ret_pct": 7.9,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1452",
+   "date": "2012-01-06",
+   "ret_pct": 8.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8039",
+   "date": "2009-12-17",
+   "ret_pct": 584917.33,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8039",
+   "date": "2010-02-08",
+   "ret_pct": 7.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "9938",
+   "date": "2009-04-02",
+   "ret_pct": 11.68,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1316",
+   "date": "2007-03-05",
+   "ret_pct": -8.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1316",
+   "date": "2009-04-02",
+   "ret_pct": 8.91,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1316",
+   "date": "2012-02-06",
+   "ret_pct": 12.87,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2481",
+   "date": "2007-02-13",
+   "ret_pct": -8.42,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2481",
+   "date": "2007-03-12",
+   "ret_pct": 10.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2481",
+   "date": "2008-08-05",
+   "ret_pct": 7.67,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2481",
+   "date": "2012-01-06",
+   "ret_pct": 7.9,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2481",
+   "date": "2013-02-25",
+   "ret_pct": 8.04,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-01-03",
+   "ret_pct": 8.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-01-09",
+   "ret_pct": 9.89,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-01-20",
+   "ret_pct": -8.72,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-02-19",
+   "ret_pct": 8.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-04-07",
+   "ret_pct": 15.22,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-04-08",
+   "ret_pct": 9.23,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-04-11",
+   "ret_pct": -10.8,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-04-21",
+   "ret_pct": 9.58,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-05-22",
+   "ret_pct": 9.16,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-08-15",
+   "ret_pct": 8.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-09-05",
+   "ret_pct": 7.93,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4980",
+   "date": "2014-09-12",
+   "ret_pct": -7.86,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2350",
+   "date": "2008-07-22",
+   "ret_pct": -9.66,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-02-26",
+   "ret_pct": 20.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-02-29",
+   "ret_pct": -10.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-03-07",
+   "ret_pct": 10.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-06-06",
+   "ret_pct": 23.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-09-04",
+   "ret_pct": -7.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-10-06",
+   "ret_pct": -9.09,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-10-15",
+   "ret_pct": -17.53,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-10-16",
+   "ret_pct": -9.25,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-10-17",
+   "ret_pct": -31.13,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-10-20",
+   "ret_pct": -20.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-10-30",
+   "ret_pct": 9.95,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-13",
+   "ret_pct": -95.12,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-14",
+   "ret_pct": 900.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-17",
+   "ret_pct": -27.0,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-18",
+   "ret_pct": 17.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-19",
+   "ret_pct": 10.47,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-28",
+   "ret_pct": -11.88,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2013-11-12",
+   "ret_pct": 1561.19,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-02-07",
+   "ret_pct": 20.91,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-02-21",
+   "ret_pct": 7.76,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-06-19",
+   "ret_pct": 18.06,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-07-01",
+   "ret_pct": 17.71,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-07-03",
+   "ret_pct": 8.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-07-24",
+   "ret_pct": 10.07,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-08-14",
+   "ret_pct": -9.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2014-09-02",
+   "ret_pct": 9.21,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5210",
+   "date": "2010-02-08",
+   "ret_pct": -7.96,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1325",
+   "date": "2008-09-30",
+   "ret_pct": -8.93,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "1325",
+   "date": "2010-02-08",
+   "ret_pct": -8.84,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2015",
+   "date": "2007-10-01",
+   "ret_pct": 11.46,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2330",
+   "date": "2012-01-02",
+   "ret_pct": -7.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2330",
+   "date": "2012-01-05",
+   "ret_pct": 7.8,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2007-07-04",
+   "ret_pct": -17.04,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2007-07-06",
+   "ret_pct": -9.39,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2007-07-25",
+   "ret_pct": 15.38,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2007-12-06",
+   "ret_pct": -12.69,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2007-12-07",
+   "ret_pct": 7.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2007-12-31",
+   "ret_pct": 14.29,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2008-01-02",
+   "ret_pct": -11.3,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2008-09-08",
+   "ret_pct": 7.52,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2008-09-15",
+   "ret_pct": -8.48,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2009-02-06",
+   "ret_pct": -19.08,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2009-02-27",
+   "ret_pct": -29.57,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2009-03-02",
+   "ret_pct": 28.53,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2009-03-03",
+   "ret_pct": 10.99,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2009-03-24",
+   "ret_pct": 20.28,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-02-22",
+   "ret_pct": -14.8,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-02-24",
+   "ret_pct": 7.98,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-02-25",
+   "ret_pct": -10.35,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-03-12",
+   "ret_pct": 8.48,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-04-19",
+   "ret_pct": -14.08,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-06-24",
+   "ret_pct": 12.41,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-06-25",
+   "ret_pct": -10.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-07-22",
+   "ret_pct": -9.92,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2010-10-27",
+   "ret_pct": 8.33,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2011-02-18",
+   "ret_pct": 11.55,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2011-02-24",
+   "ret_pct": -14.17,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2011-03-28",
+   "ret_pct": -10.97,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2011-03-29",
+   "ret_pct": -12.56,
+   "threshold_pct": 7.5,
+   "category": "(d)上市後5日內",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2718",
+   "date": "2013-08-01",
+   "ret_pct": 8.81,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5452",
+   "date": "2008-08-14",
+   "ret_pct": -37.63,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "5452",
+   "date": "2008-08-18",
+   "ret_pct": 50.9,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-01-25",
+   "ret_pct": 8.23,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-02-12",
+   "ret_pct": 18.6,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-02-13",
+   "ret_pct": -21.29,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-02-14",
+   "ret_pct": 34.03,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-02-27",
+   "ret_pct": -13.85,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-03-09",
+   "ret_pct": 13.73,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-03-12",
+   "ret_pct": 14.34,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-07-05",
+   "ret_pct": 17.83,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-07-09",
+   "ret_pct": 8.93,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-07-16",
+   "ret_pct": 8.43,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-08-15",
+   "ret_pct": -8.22,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-08-20",
+   "ret_pct": 9.57,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-09-03",
+   "ret_pct": -27.97,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-10-01",
+   "ret_pct": 10.75,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-11-28",
+   "ret_pct": -14.29,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-11-29",
+   "ret_pct": 17.05,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-12-03",
+   "ret_pct": -14.87,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-12-06",
+   "ret_pct": -9.25,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-12-14",
+   "ret_pct": -13.72,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2007-12-17",
+   "ret_pct": 8.03,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2008-01-21",
+   "ret_pct": 7.72,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2008-01-23",
+   "ret_pct": -19.72,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2008-01-25",
+   "ret_pct": 8.16,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2008-01-31",
+   "ret_pct": -9.83,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2008-06-25",
+   "ret_pct": -14.34,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2009-09-21",
+   "ret_pct": -11.44,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "3519",
+   "date": "2011-09-07",
+   "ret_pct": -13.02,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2008-09-18",
+   "ret_pct": -13.37,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2008-10-28",
+   "ret_pct": -13.35,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2009-01-12",
+   "ret_pct": -13.26,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2009-04-02",
+   "ret_pct": 13.73,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2009-06-08",
+   "ret_pct": 13.96,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2013-08-20",
+   "ret_pct": -16.49,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "4113",
+   "date": "2013-08-22",
+   "ret_pct": 19.22,
+   "threshold_pct": 7.5,
+   "category": "(b)yfinance路徑",
+   "source": "yfinance"
+  },
+  {
+   "stock_id": "2391",
+   "date": "2008-09-01",
+   "ret_pct": -7.69,
+   "threshold_pct": 7.5,
+   "category": "(a)上市日未知已下市股",
+   "source": "finmind"
+  }
+ ],
+ "b_class_pre_listing_hits": {
+  "n_hits": 274,
+  "n_stocks": 22
+ },
+ "b_class_spot_checks_v2_note": "v1抽查在yfinance路徑上raw==adj為恆真（adjust.py的yfinance路徑close即auto_adjust值），不具鑑別力，改用FinMind原始收盤價快取當獨立基準，見b_class_spot_checks_v2",
+ "b_class_spot_checks_v2": [
+  {
+   "stock_id": "2332",
+   "date": "2009-04-02",
+   "listing_date": "1994-10-17",
+   "yfinance_ret_pct": 8.11,
+   "legal_limit_pct": 7.0,
+   "finmind_raw_ret_pct": null,
+   "judgement": "無法判定（FinMind快取無該日）"
+  },
+  {
+   "stock_id": "8027",
+   "date": "2008-11-18",
+   "listing_date": "2015-06-09",
+   "yfinance_ret_pct": 17.81,
+   "legal_limit_pct": 7.0,
+   "finmind_raw_ret_pct": null,
+   "judgement": "上市前興櫃期間（無漲跌幅限制，真實成交但不該進上市宇宙）"
+  },
+  {
+   "stock_id": "8215",
+   "date": "2008-07-21",
+   "listing_date": "2010-11-12",
+   "yfinance_ret_pct": 12.18,
+   "legal_limit_pct": 7.0,
+   "finmind_raw_ret_pct": null,
+   "judgement": "上市前興櫃期間（無漲跌幅限制，真實成交但不該進上市宇宙）"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2009-06-08",
+   "listing_date": "2002-07-22",
+   "yfinance_ret_pct": 14.34,
+   "legal_limit_pct": 7.0,
+   "finmind_raw_ret_pct": null,
+   "judgement": "無法判定（FinMind快取無該日）"
+  },
+  {
+   "stock_id": "8359",
+   "date": "2012-12-26",
+   "listing_date": null,
+   "yfinance_ret_pct": 13.47,
+   "legal_limit_pct": 7.0,
+   "finmind_raw_ret_pct": null,
+   "judgement": "無法判定（FinMind快取無該日）"
+  }
+ ],
+ "hits_from_emerging_type_stocks": {
+  "n_hits": 94,
+  "n_stocks": 6,
+  "note": "v6/v7樣本建構的興櫃排除用h1._info_lookup()的type欄位，但該lookup不含type，排除實際上未生效（如實揭露）"
+ },
+ "b_class_spot_checks_v3_finmind_dev": [
+  {
+   "stock_id": "2332",
+   "date": "2009-04-02",
+   "finmind_raw_prev_date": "2009-04-01",
+   "finmind_raw_ret_pct": 6.78,
+   "finmind_prev_close": 24.35,
+   "finmind_close": 26.0,
+   "yfinance_ret_pct": 8.11,
+   "judgement": "yfinance自身錯誤（FinMind原始價+6.78% vs yfinance+8.11%）"
+  },
+  {
+   "stock_id": "3011",
+   "date": "2009-06-08",
+   "finmind_raw_prev_date": "2009-06-06",
+   "finmind_raw_ret_pct": 6.9,
+   "finmind_prev_close": 7.83,
+   "finmind_close": 8.37,
+   "yfinance_ret_pct": 14.34,
+   "judgement": "yfinance自身錯誤（FinMind原始價+6.90% vs yfinance+14.34%）"
+  }
+ ]
+}

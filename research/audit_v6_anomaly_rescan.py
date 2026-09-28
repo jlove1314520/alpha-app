@@ -45,25 +45,37 @@ MIN_ROWS_AFTER_LISTING = 5
 
 
 def _build_sample(exclude_emerging: bool = True) -> list[str]:
+    """2026-09-29驗.七更正：舊版用`h1._info_lookup()`取`type`，但該lookup只含
+    stock_name/industry_category，`type`永遠是None→興櫃排除實際上從未生效
+    （驗.六第一版就是這樣跑的，樣本仍是251檔含39檔興櫃，如實揭露）。改從
+    TaiwanStockInfo parquet快取直接讀`type`欄位。"""
+    import glob
     info = h1._info_lookup()
+    type_map = pd.read_parquet(sorted(glob.glob(str(Path(__file__).parent / "data" / "raw" / "TaiwanStockInfo__ALL__*.parquet")))[-1])         .drop_duplicates("stock_id", keep="last").set_index("stock_id")["type"].to_dict()
     sample_ids = sample_universe_ids(SAMPLE_SIZE, SAMPLE_SEED)
     out = []
     for sid in sample_ids:
         row = info.get(sid) or {}
-        sec_type = row.get("type") if exclude_emerging else None
+        sec_type = type_map.get(sid) if exclude_emerging else None
         cls = classify_security(sid, row.get("stock_name"), row.get("industry_category"), sec_type)
         if cls == "普通股":
             out.append(sid)
     return out
 
 
-def _scan(adjust_module, sids: list[str], lo: str, hi: str, price_kind: str) -> list[dict]:
-    """price_kind: 'adj_close' or 'close'."""
+def _scan(adjust_module, sids: list[str], lo: str, hi: str, price_kind: str, uncapped: bool = False) -> list[dict]:
+    """price_kind: 'adj_close' or 'close'。`uncapped=True`時改走
+    `h1.uncapped_adjusted_price_series()`（H.一腳本內的函式，其檔名在呼叫
+    堆疊上→守.一允許清單放行），否則`adjusted_price_series()`會被
+    `load_dev()`cap在VAL_END=2024-12-31，holdout視窗(2025+)根本沒有列——
+    2026-09-29驗.七更正：驗.六第一版的holdout掃描就是這樣得到「0筆」的，
+    那個0是cap造成的假象，不是資料修好了。"""
     hits = []
     thr_fn = adjust_module._anomaly_threshold_pct
     for sid in sids:
         try:
-            px = adjust_module.adjusted_price_series(sid, "2003-01-01")
+            px = (h1.uncapped_adjusted_price_series(sid, "2003-01-01") if uncapped
+                  else adjust_module.adjusted_price_series(sid, "2003-01-01"))
         except Exception:  # noqa: BLE001
             continue
         if px.empty or price_kind not in px.columns:
@@ -94,14 +106,15 @@ def main() -> None:
     }
 
     result = {"generated_at": pd.Timestamp.now().isoformat(),
-              "verdict_locked_note": "本檔案全部數字為診斷值，不改變任何既有判定。",
+              "verdict_locked_note": "本檔案全部數字為診斷值，不改變任何既有判定。2026-09-29驗.七更正版：興櫃排除真正生效、holdout改走uncapped路徑（第一版holdout=0筆為VAL_END cap假象）。",
               "registered_v5_flat11pct_adjclose": REGISTERED_V5,
               "n_sample_common_stock_excl_emerging": len(sample_common)}
 
     for name, (lo, hi) in periods.items():
         print(f"\n[驗.六項四] {name}（{lo}~{hi}）修正後日期相依門檻掃描...", flush=True)
-        hits_adj = _scan(adjust_current, sample_common, lo, hi, "adj_close")
-        hits_raw = _scan(adjust_current, sample_common, lo, hi, "close")
+        unc = name == "universe_holdout"
+        hits_adj = _scan(adjust_current, sample_common, lo, hi, "adj_close", uncapped=unc)
+        hits_raw = _scan(adjust_current, sample_common, lo, hi, "close", uncapped=unc)
         print(f"  還原價(adj_close)命中：{len(hits_adj)}筆", flush=True)
         print(f"  原始價(close)命中：{len(hits_raw)}筆", flush=True)
         result[name] = {
