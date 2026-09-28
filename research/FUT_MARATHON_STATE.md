@@ -14,6 +14,70 @@
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `FUT_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
 ---
+**最後更新：2026-09-29T00:3x+08:00（馬拉松第661輪，維運帽）**——取鎖乾淨
+（cycle`20260929-003037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=**1**（round648~660以來首次出現未開始交辦項，非0）：
+`驗.七`（殘留異常分類＋#7/#8重驗預登記＋Sortino納入標準報表＋#82暫停，
+五個子項）。**判斷是否可做**：`git log --oneline -3`確認最近3個commit
+（`db3e820e`/`270f8775`/`8e1c0edf`）皆已在處理此條目的項一/二/三.1/四，
+作者含`Claude Fable 5.1`（互動視窗協作模型署名）；`git status --short`
+確認核心研究檔案清單（`research/backtest/`／`research/validation/`／
+`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`）
+無殘留未commit編輯，但`powershell Get-CimInstance Win32_Process`實測
+發現**兩支非`run_detached.py`啟動的python行程正在跑**：
+`audit_v7_factor_revalidation.py --group ii`（PID116796，00:29:22啟動，
+對應項三②(ii)新還原公式＋新財報時點）與`audit_v6_anomaly_rescan.py`
+（PID114532，00:30:00啟動，對應db3e820e提到的「已修正並重跑中」）——
+兩者啟動時間都在本輪取鎖（00:30:37）前不到90秒，且`run_detached.py
+status`顯示`running=0`（這兩支不是透過脫離session機制跑的，代表是
+互動視窗當下正在執行的前景/背景工作，不是孤兒行程）。**本輪判斷**：
+`驗.七`雖是交辦、理論上該做，但它同時正被另一個活躍session實際執行中
+（有時間吻合的commit與running process佐證，非臆測），此時搶著碰同一批
+輸出檔（`research/data/diag_v7_factor_revalidation.json`已在`git status`
+顯示為`M`）會有覆寫/競爭風險，且項三本身是統計判定性質（#7/#8重驗
+n=6 Bonferroni門檻判定），屬於`CLAUDE.md`「絕對不准為了省額度而降階的
+工作」點名的統計判定類別，不適合由每輪25分鐘、無記憶的馬拉松執行個體
+在不清楚對方進度下插手。**依「不確定但可還原→自行裁量」處理**：本輪
+不觸碰`驗.七`、不啟動任何新的`audit_v7`/`audit_v6`相關行程，避免與
+進行中的互動視窗工作衝突；`[自行裁量]`標記，下一輪開工前重新檢查
+這兩支行程是否已結束、commit是否已納入，若已結束且條目仍是`- [ ]`
+才由下一輪接手完成收尾（例如`register_trial()`登記、`AWAITING_REVIEW.md`
+更新）。核對15條`- [!]`阻塞項：`institutional_history.json`確認`dates`
+陣列仍20筆、最後日期`20260924`，solid交易日數維持**16日**，今日
+09-29（週二）00:3x查詢，尚未進入新交易日收盤入庫窗口，20日視窗仍差
+4個交易日，未解除；tick累積`ls research/data/ticks/*.parquet`實測仍
+**13/20**，未解除；其餘13條逐一核對開頭標記，均為等總司令/Cowork裁示
+或其他外部條件，皆未到解除時間。**佇列深度自檢**：`- [ ]`=1（<12下限），
+`CLAUDE.md`十四節【凍結.二】仍生效（`grep -c "凍結.二解除"
+PENDING_QUEUE.md`=3，皆為條件敘述提及該詞彙、非實際宣告解除），本階段
+暫停佇列深度補件，且即使補件`驗.七`本身也非alpha試驗（屬驗證/維運，
+凍結.二不禁止），但仍不因佇列淺而硬做已被他人佔用的項目。三軌時間戳：
+FUT round658=09-28 17:0x（最舊）／US round659=09-28 19:3x／TW
+round660=09-28 22:0x——依輪替選FUT。`run_detached.py status`：
+`running=0`（162筆歷史，無job待收成，兩支正在跑的行程如上述非透過此
+機制啟動）。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）
+exit=0 PASS（404列，本輪純查證未新增判定）。`validation/holdout.py::
+is_holdout_consumed()`讀取為`True`（非本輪動作，僅讀取核對）。
+`AWAITING_REVIEW.md`「等待中」表格表頭「目前：15件」，較round648~660
+無變動。**本輪誠實結論**：交辦佇列有1條`驗.七`，但實測證據顯示它正被
+互動視窗即時執行中，為避免覆寫/競爭與重複統計判定，本輪選擇不插手，
+記錄觀察並結束本輪，不硬做、不觸碰`凍結.二`禁止的新alpha試驗、不搶碰
+十三節限定檔案、未啟動任何與`驗.七`重疊的新行程。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何
+原始碼（僅讀取核對＋改狀態檔＋archive舊state條目＋一次PowerShell
+`Get-CimInstance`查詢行程命令列，無外部API呼叫）。`PROGRESS_HEARTBEAT.
+jsonl`已append本輪一行。**交辦佇列還剩1條未開始**（`驗.七`，判定為
+他人進行中，非漏做）。**等待審閱：15件**（與`AWAITING_REVIEW.md`
+「等待中」表格列數一致）。**下一輪任一軌接手**：依輪替下一輪建議選US軌
+（round659=09-28 19:3x，三軌中最舊）；開工前務必重新檢查`驗.七`
+是否仍在進行中（`Get-CimInstance`查`audit_v7`/`audit_v6`相關PID、
+`git log`看有沒有新commit），若已完成收尾且仍是`- [ ]`才動手，避免
+與互動視窗重複勞動；凍結.二在總司令/Cowork明確寫「凍結.二解除」前
+不解除；`金流一.4`還需4個交易日；`外部一改.2`tick累積仍13/20。完整見
+`REPORT.md`第661輪心跳、`PENDING_QUEUE.md`「驗.七」條目、
+`research/AWAITING_REVIEW.md`。
+
+---
 **最後更新：2026-09-28T17:0x+08:00（馬拉松第658輪，維運帽）**——取鎖乾淨
 （cycle`20260928-170037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=15條（與
@@ -113,51 +177,3 @@ FUT軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」
 （20日視窗，今日09-28收盤後入庫將是第一個新增交易日）；`外部一改.2`
 tick累積仍13/20。完整見`REPORT.md`第655輪心跳、`PENDING_QUEUE.md`
 「凍結.二」條目、`research/AWAITING_REVIEW.md`。
-
-**最後更新：2026-09-28T02:0x+08:00（馬拉松第652輪，維運帽）**——取鎖乾淨
-（cycle`20260928-020037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=15條（與
-round648~651一致）。逐一核對15條`- [!]`阻塞項開頭標記是否解除：`金流
-一.4`直接讀`data/institutional_history.json`確認`dates`陣列仍20筆、
-最後日期`20260924`，solid交易日數維持**16日**（round647查明的正確值），
-今日已跨入09-28（週一），但查詢時刻為台北02:0x（盤前，09:00才開盤），
-今日尚無新交易資料可入庫，20日視窗仍差4個交易日，未解除；`外部一改.2`
-tick累積`ls research/data/ticks/*.parquet`實測仍**13/20**（同理，盤前
-無新增tick），未解除；其餘13條逐一核對開頭標記，均為等總司令/Cowork
-裁示或其他外部條件，皆未到解除時間。**佇列深度自檢**：`- [ ]`=0（<12
-下限），`CLAUDE.md`十四節【凍結.二】仍生效（`grep -c "凍結.二解除"
-PENDING_QUEUE.md`=3，皆為條件敘述提及該詞彙、非實際宣告解除，依規則
-字面仍算生效中），本階段暫停佇列深度補件，不重掃備援來源。三軌時間戳：
-TW round651=09-27 23:3x／US round650=09-27 22:3x／**FUT round649=09-27
-21:3x（最舊）**——依輪替選FUT。**逐一核對`凍結.二`允許的四類工作現況**：
-稽核重跑／驗.二重跑先前輪次已全部完成並登記；資料抓取（`資料.一`/
-`閘門.一`）已完成300/300；工具修正（修.三/修.六/修.七）已由互動視窗
-commit；`git status --short`確認`research/backtest/`／`research/
-validation/`／`research/adjust.py`／`research/pit.py`／`research/
-trial_registry.py`等十三節限定清單內檔案無殘留未commit編輯（輸出為空）。
-FUT軌本身`FUT_LEADS.md`/`STRATEGY_GRAVEYARD.md`回顧：個股期貨橫斷面
-調查線與trend/oi組合嘗試皆已窮盡並結案，無清楚剩餘的「全新機制」候選，
-且`凍結.二`期間本來就不得登記新alpha試驗。`run_detached.py status`：
-`running=0`（162筆歷史，無job待收成）。`trial_registry.py --check`
-（`PYTHONIOENCODING=utf-8`）exit=0 PASS（402列，本輪純查證未新增判定）。
-`validation/holdout.py::is_holdout_consumed()`讀取為`True`（H.一單次
-解鎖已於09-27消耗，非本輪新增動作，僅讀取核對）。`AWAITING_REVIEW.md`
-「等待中」表格逐行核對22~36行共**15列**，與表頭「目前：15件」一致，
-較round648~651記錄的15件無變動。**本輪誠實結論**：四類允許工作皆已
-完成或無新內容，`- [!]`15條逐一核對均未到解除時間（含跨入新交易日
-09-28但盤前尚無新資料這一項新查證），FUT軌本身查無可推進的新工作
-單位——依`CLAUDE.md`「零之一」白名單第7條精神（佇列真的空了）記錄後
-結束本輪，不硬湊候選、不觸碰`凍結.二`禁止的新alpha試驗、不搶碰十三節
-限定檔案。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
-未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊
-state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、
-`git status`/`git log`、`run_detached.py status`、`trial_registry.py
---check`、`ls`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦
-佇列還剩0條未開始**。**等待審閱：15件**（與`AWAITING_REVIEW.md`「等待
-中」表格列數一致）。**下一輪任一軌接手**：依輪替下一輪建議選US軌
-（round650=09-27 22:3x，三軌中最舊）；凍結.二在總司令/Cowork明確寫
-「凍結.二解除」前不解除，不補新alpha試驗；`金流一.4`還需4個交易日
-（20日視窗，今日09-28開盤後若順利入庫將是第一個新增交易日）；`外部
-一改.2`tick累積仍13/20。完整見`REPORT.md`第652輪心跳、`PENDING_QUEUE.md`
-「凍結.二」條目、`research/AWAITING_REVIEW.md`。
-
