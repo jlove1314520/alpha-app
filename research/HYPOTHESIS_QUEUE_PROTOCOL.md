@@ -1,5 +1,7 @@
 # HYPOTHESIS_QUEUE_PROTOCOL.md — 假設佇列自動排程操作規則
 
+> **⚠️ 2026-09-29 總司令裁示【驗.七】一（凌駕本檔案第1節「挑下一條未結案假設」）**：#82 立即暫停（新 alpha 軸第六類，凍結.二範圍內）；投信官網／指數公司網站在確認 robots.txt 與服務條款前不得再探測；本軌道改為**只做心跳**——有 PENDING_QUEUE.md 交辦就做交辦，否則只寫心跳後結束，**不得開新軸、不得挑新假設**。解除條件：總司令另行裁示。完整文字見 `HYPOTHESIS_QUEUE_CONTINUATION_PROMPT.txt` 第負一步。
+
 **你是誰、為什麼在讀這份檔案：** 你是被 Windows 工作排程器（`AlphaHypothesisQueue`
 任務）喚醒一次的 Claude Code headless 執行個體（`claude -p`，無人在場、無對話
 記憶）。你不記得任何一輪之前發生過什麼——你唯一知道的就是這個 repo 現在的檔案
