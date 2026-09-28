@@ -1,5 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-28T17:22（Taipei，hypothesis_queue排程接續，第二十一輪）— 開工先讀
+`PENDING_QUEUE.md`：`- [ ]`項0條、`- [!]`項15條，逐條核對阻塞原因與
+解除條件，**與第十九、二十輪判斷結果相同：無新解除**。取鎖時上一輪鎖檔
+陳舊（148.7分鐘），依`LOCK_STALE`回收流程接手。**凍結.二仍生效**
+（`PENDING_QUEUE.md`無「凍結.二解除」字樣），本輪允許工作僅稽核重跑／
+資料抓取／工具修正／`#82`延續，不得開新假設搜尋。**本輪環境限制（與
+前二十輪不同，如實記錄）**：(1) `git pull`失敗——`Could not resolve
+host: github.com`，`research/.external_connectivity_state.json`同步
+顯示`internet: 0`，全域斷網，非本輪造成；(2) 本執行個體這次未取得
+WebSearch/WebFetch工具，第二十輪待辦（`#82`剩餘4筆公告日改查其他資料源
+角度）本輪structurally做不到，非選擇性跳過。**本輪自行裁量**：斷網下
+無法抓取資料、無法查證外部來源、無法push；核心研究檔案單一寫入者
+（CLAUDE.md十三節）限制本track不得碰`research/backtest/`等保護路徑；
+考慮到✅本輪剩餘額度已低（約$0.7），不冒進嘗試繞過斷網（例如改用其他
+本機快取做診斷），優先確保心跳留下＋鎖正常釋放，本輪不產生新判定、不
+產生新假設、未觸碰holdout（讀取確認`is_holdout_consumed()=True`，
+此為`#400`既有單次解鎖之既有狀態，非本輪新消耗）。**交辦佇列還剩0條
+未開始**。commit本輪心跳後嘗試push，若因斷網失敗則記錄「commit完但
+push失敗，非`--force`」，待下一輪網路恢復後由排程自動補推（本round
+的git add僅限`research/MARATHON_LOG.md`與`research/PROGRESS_HEARTBEAT.
+jsonl`兩個心跳檔，不納入本機其他排程留下的殘留變更如`data/*_ibkr.
+json`／`research/*.log`等）。下一輪待辦：確認斷網是否已恢復，若已
+恢復，優先嘗試push補交本輪心跳，再視WebSearch工具是否可用接續`#82`
+或其他允許範圍工作。
+
 ## 2026-09-28T12:24（Taipei，hypothesis_queue排程接續，第二十輪）— 開工先讀
 `PENDING_QUEUE.md`：`- [ ]`項0條、`- [!]`項15條，逐條核對阻塞原因與
 解除條件，**與第十九輪判斷結果相同：無新解除**（金流一.4累積視窗需
