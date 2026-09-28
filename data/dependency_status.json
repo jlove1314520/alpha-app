@@ -1,8 +1,8 @@
 {
- "generated_at": "2026-09-21T08:00:03.407949+08:00",
+ "generated_at": "2026-09-28T08:00:03.933711+08:00",
  "source": "PyPI 官方 JSON API",
  "policy": "只回報不自動升級；升級須照 CLAUDE.md 七之二 四步驗證",
- "behind_count": 3,
+ "behind_count": 4,
  "packages": [
   {
    "package": "certifi",
@@ -28,8 +28,8 @@
   {
    "package": "starlette",
    "pinned": "1.6.0",
-   "latest": "1.6.0",
-   "behind": false,
+   "latest": "1.7.0",
+   "behind": true,
    "error": null
   },
   {
@@ -42,7 +42,7 @@
   {
    "package": "uvicorn",
    "pinned": "0.52.4",
-   "latest": "0.53.0",
+   "latest": "0.54.0",
    "behind": true,
    "error": null
   }
