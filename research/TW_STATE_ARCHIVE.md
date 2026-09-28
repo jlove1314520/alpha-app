@@ -1927,3 +1927,60 @@ append本輪一行。**交辦佇列還剩0條未開始**。**等待審閱：14�
 完整見`REPORT.md`第645輪心跳、`PENDING_QUEUE.md`「凍結.二」條目、
 `research/AWAITING_REVIEW.md`。
 
+---
+**最後更新：2026-09-27T20:3x+08:00（馬拉松第648輪，維運帽）**——取鎖乾淨
+（cycle`20260927-203037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=15條（與
+round645一致，`修.七`完成後的佇列規模未再變動）。逐一核對15條`- [!]`
+阻塞項是否解除：`金流一.4`（法人歷史，需20交易日）——上一輪（round647,
+US軌）已重跑`build_sector_flow.py`查明並更正round645「17日」的暫態誤記，
+確認為**16個交易日**（20260826~28/31四個低覆蓋率交易日被`_solid_dates()`
+門檻濾掉），今日09-27為週日無新交易日，本輪查證維持**16日，20日視窗
+仍差4個交易日，未解除**；`外部一改.2`tick累積`ls research/data/ticks/
+*.parquet`實測仍**13/20**（週日無新交易日tick，未解除）；其餘13條
+（`資料源一.3`／`結案.一`／`Cybex.beta`／`外部二改`／`稽核.三`／
+`稽核.五`／`零之三`／`常備.9`／`重構.C4`／`研究.c`／`資料源.外銷訂單
+彙總`／`分K.零`／`紙.一`）逐一核對開頭標記，均為等總司令操作/裁示、
+外部條件（法遵/資料源查證回覆）、或時間閘（`紙.一`等2026-10第一個
+交易日），皆未到解除時間。**佇列深度自檢**：`- [ ]`=0（<12下限），
+`CLAUDE.md`十四節【凍結.二】仍生效（總司令回覆的B類11條`- [!]`實體行
+本輪仍原封不動，未見「凍結.二解除」字樣），本階段暫停佇列深度補件。
+三軌時間戳：TW round645=09-27 17:3x／FUT round646=09-27 18:3x／US
+round647=09-27 19:3x（最新）——依輪替本應選TW（645最舊），本輪即為
+TW。**與round645相比的新增背景**（不影響TW軌本身結論，僅供對照）：
+hypothesis_queue軌道在本輪之間完成「驗.六：資料修正後的影響重估
+（診斷）」（commit`332507f1`），純診斷性質、未動任何#398/#399/#400
+判定，已列入`AWAITING_REVIEW.md`（14→15件）。`data/rate_limit_state.json`
+確認FinMind`blocked_until`=2026-09-27T08:22:52 UTC，本輪查詢時（台北
+20:33，約UTC12:33）額度已解除逾4小時，但`資料.一`／`閘門.一`皆已於
+round640完成300/300，無待續抓工作，額度狀態不觸發新工作單位。
+`run_detached.py status`：`running=0`（162筆歷史，無job待收成）。
+`git status`確認僅常駐排程自動改寫的機器寫檔（`data/audit_report.json`
+等，均在既有白名單範圍內）有未commit變更，`research/backtest/`／
+`research/validation/`／`research/adjust.py`／`research/pit.py`／
+`research/trial_registry.py`等十三節限定清單內原始碼**零未commit
+編輯**。**逐一核對`凍結.二`允許的四類工作現況**：稽核重跑／驗.二重跑
+先前輪次已全部完成並登記；資料抓取（`資料.一`/`閘門.一`）已完成
+300/300；工具修正（修.三/修.六/修.七）已由互動視窗commit。
+`AWAITING_REVIEW.md`「等待中」表格核對**15件**（表頭與列數一致，較
+round645的14件多1件，為hypothesis_queue軌新完成的`驗.六`）。**本輪
+誠實結論**：四類允許工作皆已完成或無新內容，15條`- [!]`逐一核對均未
+到解除時間，TW軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」
+白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊候選、不觸碰
+`凍結.二`禁止的新alpha試驗。`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（本輪純查證未新增判定）。
+`validation/holdout.py::is_holdout_consumed()`讀取為`True`（H.一單次
+解鎖已於09-27消耗，非本輪新增動作，僅讀取核對）。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何
+原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API
+呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、
+`run_detached.py status`、`trial_registry.py --check`、`ls`）。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條未開始**。
+**等待審閱：15件**（與`AWAITING_REVIEW.md`「等待中」表格列數一致）。
+**下一輪任一軌接手**：依輪替下一輪建議選FUT軌（round646=09-27
+18:3x，三軌中最舊）；凍結.二在總司令/Cowork明確寫「凍結.二解除」前
+不解除，不補新alpha試驗；`金流一.4`還需4個交易日（20日視窗，round647
+已更正為16日基準）；`外部一改.2`tick累積仍13/20。完整見`REPORT.md`
+第648輪心跳、`PENDING_QUEUE.md`「凍結.二」條目、
+`research/AWAITING_REVIEW.md`。
+
