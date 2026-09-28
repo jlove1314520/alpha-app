@@ -5308,3 +5308,11 @@ quota_throttle: SKIP: 節流中，距上次實跑56.1分鐘 < 120分鐘門檻（
 quota_throttle: SKIP: 節流中，距上次實跑86.1分鐘 < 120分鐘門檻（帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線）
 
 quota_throttle: SKIP: 節流中，距上次實跑116.1分鐘 < 120分鐘門檻（帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Hypothesis-queue cycle start: 2026-09-28 09:51:02 =====
+蝑?撖拚嚗?隞?
+??頛迎?hypothesis_queue蝚砍?銋憚嚗???鈭方齒雿?嚗PENDING_QUEUE.md`嚗- [ ]`??璇- [!]`??5璇???銝頛芸??函??啗圾?斗?隞塚???.鈭??怠??啗岫撽???隞???潭頛芷?摨血歇?亥?銝?嚗??拍?$0.15嚗??芾?鋆?銝??啣極雿雿??芰?銝?頝喟???`MARATHON_LOG.md`蝚砍?銋憚?PROGRESS_HEARTBEAT.jsonl`嚗蒂甇?虜?嗅極嚗歇commit+push??瑼歇???銝頛芸敺#82`鞈?皞霅辣蝥?
+===== Hypothesis-queue cycle end: 2026-09-28 09:53:43 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
