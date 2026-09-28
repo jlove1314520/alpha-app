@@ -5324,3 +5324,12 @@ quota_throttle: SKIP: 節流中，距上次實跑57.3分鐘 < 120分鐘門檻（
 quota_throttle: SKIP: 節流中，距上次實跑87.3分鐘 < 120分鐘門檻（帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線）
 
 quota_throttle: SKIP: 節流中，距上次實跑117.3分鐘 < 120分鐘門檻（帳號週用量已達91%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達92%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Hypothesis-queue cycle start: 2026-09-28 12:21:02 =====
+?祈憚嚗ypothesis_queue??蝚砌??憚嚗撌伐?
+
+- **鈭方齒雿??0璇??**嚗PENDING_QUEUE.md` `- [ ]`0璇- [!]`15璇????詨??⊥閫?嚗?- **??.鈭???**嚗#82`隞??刻????亥??挾嚗洵?頛芸歇霅祕 `yuantaetfs.com` ?⊥風?脣?鞈?嚗迨頝臭???嚗?行??/12璅??◎SPEC?蝮賢隞方?蝷綽??芾銵捱摰?- ?祈憚憿漲撠嚗??洵??頛芰???芾?鋆?嚗??銝?頝喋迤撣賊??暸?嚗?撌乩??桐?隞亙?銝剝葉?瑯歇?湔 `MARATHON_LOG.md`嚗PROGRESS_HEARTBEAT.jsonl`嚗ommit `e822aceb` 撌犁ush嚗?撌脤??橘?`LOCK_RELEASED`嚗?
+===== Hypothesis-queue cycle end: 2026-09-28 12:25:34 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
