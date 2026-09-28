@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-09-26T08:07:10.455658+08:00",
+    "generated_at": "2026-09-29T01:40:01.510529+08:00",
     "last_fetch_count": 20
   },
   "events": {
@@ -1049,7 +1049,8 @@
         "rights_price": 0.0,
         "type": "權息",
         "first_seen": "2026-08-26",
-        "applied": false
+        "applied": true,
+        "skip_reason": "前一筆可用資料(2024-12-31)距離除權息日(2026-08-26)超過10天，research端FinMind快取對這檔股票可能已經過期太久，無法安全定錨調整係數，不套用。"
       }
     ],
     "6947": [
