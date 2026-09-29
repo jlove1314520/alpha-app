@@ -316,7 +316,7 @@ def _start_query_service(api, state) -> None:
     import socket
 
     lock = threading.Lock()
-    cache: dict[str, tuple[float, list[dict], str]] = {}  # code -> (取得時間, bars, 交易日)
+    cache: dict[tuple[str, str | None, str | None], tuple[float, list[dict], str]] = {}  # (code,start,end) -> (取得時間, bars, 交易日)
     account_cache: dict[str, tuple[float, object]] = {}  # "positions"/"balance" -> (取得時間, 結果)
 
     try:
@@ -390,11 +390,20 @@ def _start_query_service(api, state) -> None:
         except Exception as e:  # noqa: BLE001
             return None, f"{type(e).__name__}: {e}"
 
-    def _query(code: str) -> tuple[list[dict], str, str | None]:
-        """回傳 (bars, 交易日, 錯誤訊息)。查不到就誠實回空清單＋原因。"""
+    def _query(code: str, start: str | None = None, end: str | None = None) -> tuple[list[dict], str, str | None]:
+        """回傳 (bars, 交易日, 錯誤訊息)。查不到就誠實回空清單＋原因。
+
+        start/end（2026-09-29分K.零新增，可選，皆為"YYYY-MM-DD"）：正式App
+        流量從不帶這兩個參數（維持None，行為與改版前逐位元相同、只查today，
+        backward compatible）；只有分K.零回溯量測探針會帶，用來測
+        `api.kbars()`最多能回溯多久。帶了start就不做「查不到退回
+        update_date」那段fallback——那段fallback是給「查today」這個情境
+        用的，帶明確歷史區間代表呼叫端自己決定日期，查無資料就誠實回空。
+        """
         now = time.time()
+        cache_key = (code, start, end)
         with lock:
-            hit = cache.get(code)
+            hit = cache.get(cache_key)
             if hit and now - hit[0] < KBARS_QUERY_CACHE_SEC:
                 return hit[1], hit[2], None
         ok, why = _kbars_budget_take()
@@ -405,22 +414,27 @@ def _start_query_service(api, state) -> None:
                 contract = api.Contracts.Stocks[code]
                 if contract is None:
                     return [], "", f"{code} 不在合約清單（可能已下市或代號有誤）"
-                # 先查今天；今天沒有（週末/盤前）就退到合約的最後更新日，
-                # 也就是最後一個交易日——總司令指定「隔日開盤前仍顯示前一交易日全日」。
-                day = datetime.now(TW_TZ).date().isoformat()
-                kb = api.kbars(contract, start=day, end=day)
-                bars = _kbars_to_bars(kb)
-                if not bars:
-                    day = str(getattr(contract, "update_date", "") or "")
-                    if day:
-                        ok2, why2 = _kbars_budget_take()
-                        if not ok2:
-                            return [], "", why2
-                        kb = api.kbars(contract, start=day, end=day)
-                        bars = _kbars_to_bars(kb)
+                if start:
+                    day = end or start
+                    kb = api.kbars(contract, start=start, end=day)
+                    bars = _kbars_to_bars(kb)
+                else:
+                    # 先查今天；今天沒有（週末/盤前）就退到合約的最後更新日，
+                    # 也就是最後一個交易日——總司令指定「隔日開盤前仍顯示前一交易日全日」。
+                    day = datetime.now(TW_TZ).date().isoformat()
+                    kb = api.kbars(contract, start=day, end=day)
+                    bars = _kbars_to_bars(kb)
+                    if not bars:
+                        day = str(getattr(contract, "update_date", "") or "")
+                        if day:
+                            ok2, why2 = _kbars_budget_take()
+                            if not ok2:
+                                return [], "", why2
+                            kb = api.kbars(contract, start=day, end=day)
+                            bars = _kbars_to_bars(kb)
             with lock:
-                cache[code] = (now, bars, day)
-            return bars, day, None if bars else f"{code} 在 {day} 沒有 1 分K 資料"
+                cache[cache_key] = (now, bars, day)
+            return bars, day, None if bars else f"{code} 在 {start or day}~{end or day} 沒有 1 分K 資料"
         except Exception as e:  # noqa: BLE001
             return [], "", f"{type(e).__name__}: {e}"
 
@@ -441,9 +455,16 @@ def _start_query_service(api, state) -> None:
             req_id = msg.get("req_id")
             if op == "kbars":
                 code = str(msg.get("code") or "").strip()
-                bars, day, err = _query(code)
+                # start/end（2026-09-29分K.零）：可選，正式App流量不帶，只有回溯
+                # 量測探針會帶，見_query() docstring。
+                start = msg.get("start")
+                end = msg.get("end")
+                start = str(start).strip() if start else None
+                end = str(end).strip() if end else None
+                bars, day, err = _query(code, start, end)
                 reply = {"t": token, "event": "kbars_reply", "req_id": req_id,
                          "code": code, "bars": bars, "trade_date": day, "error": err,
+                         "start": start, "end": end,
                          "kbars_calls_today": kbars_calls_today(),
                          "kbars_daily_budget": KBARS_DAILY_BUDGET,
                          "ts": datetime.now(TW_TZ).isoformat()}

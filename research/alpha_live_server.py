@@ -1009,15 +1009,21 @@ ACCOUNT_QUERY_CACHE_SEC = 10.0
 ACCOUNT_QUERY_TIMEOUT_SEC = 8.0
 
 
-def _kbars_request(code: str, req_id: str) -> bool:
-    """把查詢送給常駐行程。送不出去回 False（例如行程沒開），由呼叫端誠實回報。"""
+def _kbars_request(code: str, req_id: str, start: str | None = None, end: str | None = None) -> bool:
+    """把查詢送給常駐行程。送不出去回 False（例如行程沒開），由呼叫端誠實回報。
+
+    start/end（2026-09-29分K.零新增，可選）：只有`_kbars_via_daemon_probe()`
+    這個診斷專用路徑會帶，正式`/live/kbars`（`_kbars_via_daemon()`）從不帶，
+    訊息裡照樣是None、daemon端行為不變，backward compatible。
+    """
     global _kbars_sock
     try:
         if _kbars_sock is None:
             import socket
             _kbars_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             _kbars_sock.setblocking(False)
-        msg = {"t": LOCAL_TOKEN, "op": "kbars", "code": code, "req_id": req_id}
+        msg = {"t": LOCAL_TOKEN, "op": "kbars", "code": code, "req_id": req_id,
+               "start": start, "end": end}
         _kbars_sock.sendto(json.dumps(msg).encode("utf-8"), KBARS_REQ_ADDR)
         return True
     except OSError as e:
@@ -1228,6 +1234,61 @@ async def _kbars_via_daemon(code: str) -> dict | None:
     }
     _kbars_cache[code] = (now, result)
     return result
+
+
+async def _kbars_via_daemon_probe(code: str, start: str, end: str | None) -> dict:
+    """分K.零回溯量測診斷專用，2026-09-29新增：跟`_kbars_via_daemon()`故意分開，
+    不共用`_kbars_cache`（那個快取鍵只有code，混進來會讓探針結果跟正式今日
+    查詢互相污染），且**即使bars為空也把error原因整包回傳**（正式路徑是空
+    就回None讓呼叫端走404，這裡要看得到daemon給的原因才能判斷「查不到」是
+    因為額度、合約查無、還是這個日期範圍真的沒有資料）。不走`/live/kbars`
+    這個production端點，只給`/live/kbars_probe`用。"""
+    req_id = secrets.token_hex(8)
+    loop = asyncio.get_event_loop()
+    fut: asyncio.Future = loop.create_future()
+    _kbars_pending[req_id] = fut
+    if not _kbars_request(code, req_id, start=start, end=end):
+        _kbars_pending.pop(req_id, None)
+        return {"code": code, "start": start, "end": end, "ok": False,
+                "error": "送出失敗：常駐行程可能沒開"}
+    try:
+        msg = await asyncio.wait_for(fut, timeout=KBARS_REQ_TIMEOUT_SEC)
+    except asyncio.TimeoutError:
+        _kbars_pending.pop(req_id, None)
+        return {"code": code, "start": start, "end": end, "ok": False,
+                "error": f"逾時（{KBARS_REQ_TIMEOUT_SEC}秒）：常駐行程可能沒開或正在忙"}
+    bars = msg.get("bars") or []
+    return {
+        "code": code, "start": start, "end": end, "ok": True,
+        "bar_count": len(bars),
+        # 2026-09-29修正：_kbars_to_bars()的bar欄位鍵名是"ts"不是"t"（見
+        # shioaji_quotes.py同名函式docstring），第一版誤用"t"導致
+        # first/last_bar_t恆為None，已用該次smoke測試（2330當日249根bar）
+        # 當場抓到並修正。
+        "first_bar_t": bars[0].get("ts") if bars else None,
+        "last_bar_t": bars[-1].get("ts") if bars else None,
+        "trade_date": msg.get("trade_date"),
+        "error": msg.get("error"),
+        "kbars_calls_today": msg.get("kbars_calls_today"),
+        "kbars_daily_budget": msg.get("kbars_daily_budget"),
+    }
+
+
+@app.get("/live/kbars_probe")
+async def live_kbars_probe(code: str, start: str, end: str | None = None,
+                            x_alpha_local_token: str | None = Header(default=None)):
+    """分K.零回溯量測診斷專用端點，2026-09-29新增。**不是App正式功能**，只給
+    本機探針腳本（`research/probe_kbars_lookback.py`）呼叫，量`api.kbars()`
+    最多能回溯多久／涵蓋哪些標的／停牌時的表現。token一律必檢，跟其他
+    `/live/*`端點同規格。刻意跟`/live/kbars`分開路由，讓正式流量的程式碼
+    路徑（含快取鍵、404語意）完全不受這次擴充影響。"""
+    _check_token(x_alpha_local_token)
+    code = (code or "").strip()
+    start = (start or "").strip()
+    end = (end or "").strip() or None
+    if not code or not start:
+        raise HTTPException(status_code=400, detail="code與start必填（start格式YYYY-MM-DD）")
+    return await _kbars_via_daemon_probe(code, start, end)
 
 
 @app.get("/live/stream")
