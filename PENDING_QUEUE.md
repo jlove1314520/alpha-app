@@ -16465,6 +16465,25 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   停下等Cowork核對。**心跳**：完成時本行改`- [x]`並附完成回報，且往
   `research/PROGRESS_HEARTBEAT.jsonl` append一行。score.py不得改；紙.一不
   得動；凍結.二仍生效。
+  **[DevQueue cycle 20260929-101602 進度記錄]**：一（12件）已由先前輪次
+  commit `f390e081`完成；二（析.一）、三（析.二1-4，含合規資料源查證
+  附錄）本輪commit `1ca63fdd`／`3c2bc4ca`完成。**四（yfinance路徑修正）
+  發現`research/adjust.py`工作目錄裡已有未commit的完整實作**（
+  `truncate_to_listing_date`兩路徑皆套用、`crosscheck_yf_vs_finmind`
+  交叉核對、`_self_test_crosscheck_known_cases`/`_self_test_truncation_
+  both_paths`/`_self_test_crosscheck_fail_open`三個新self-test），研判
+  是互動視窗依`CLAUDE.md`十三節正在進行中的工作——**`research/adjust.py`
+  屬單一寫入者限定檔案，DevQueue依規則不修改、不commit此檔**，本輪
+  刻意略過、不搶做。跑過`python adjust.py`唯讀驗證（未修改檔案）：
+  新增的三個self-test全部PASS；但**整體`python adjust.py`目前FAIL**——
+  原因是兩個與本次無關的既有self-test失敗（`2038`還原價單元測試誤差
+  0.574%、`CashIncreaseSubscriptionRate`四捨五入測試FAIL），**與四無關
+  的既有缺陷**，如實記錄供互動視窗下一輪一併確認是否為已知問題。
+  五（push）本輪未觸碰四，故不宣稱整項完成；**建議互動視窗下一輪確認
+  上述兩個既有self-test失敗後，完成四並push**。[自行裁量]：選擇「唯讀
+  執行self-test觀察狀態」而非「完全不碰這支腳本」，因為只是呼叫函式
+  非編輯原始碼，十三節明文允許「讀/呼叫」，且能提供互動視窗更完整的
+  現況資訊。
 
   **【驗.八一】12件待決事項落地明細（2026-09-29）**：
   - 結案(3)：外部二改／Cybex.beta／零之三（見各條首行標記）。
