@@ -16388,3 +16388,47 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 
   **五、已push，停下等Cowork核對。紙.一全程未被觸碰**（10/1照常自動
   啟動）。凍結.二仍生效。
+
+
+## 2026-09-29 總司令裁示【驗.八（修正版）：待決 12 件執行＋EPS/營收拆解＋營收→EPS 預估研究前置＋yfinance 修正】
+
+> 【驗.八（修正版）：待決 12 件執行＋EPS/營收拆解＋營收→EPS 預估研究前置＋yfinance 修正】先寫進 PENDING_QUEUE 再動工。依序執行。
+>
+> 一、12 件待決事項（總司令 09-29 裁示照 Cowork 推薦，唯一更正：常備.9 不結案）：
+>   結案：外部二改（期貨 3 條免做）、Cybex.beta（跳過）、零之三（不放寬、結案）。
+>   保留：常備.9（券商共識預估）改列「暫緩，資料源評估中」，不結案；更正理由：常備.8 是無共識預估版本，與常備.9 不同源，共識預估版本從未測試。
+>   暫緩（移到待辦）：群益 API（3 條合併為 1 條）、外銷訂單資料、Stooq key、重構.C4。
+>   同意：本地 AI 選 Breeze-7B；分K.零 啟動 shioaji 常駐實測；稽核.三 B 組（融資融券／借券／外資持股逐檔逐日累積），照既有節流規則。
+>   結案.一 git 鎖：保留，標記「待總司令實機驗證」。
+>
+> 二、析.一：EPS/營收訊號拆解（診斷，不是新試驗，不改任何判定）：
+>   1. 在舊 PIT（季末+45 日）下，把 f_eps_surprise、f_revenue_surprise 的 IC 拆成 (a) 落在 Q4 前視窗口（2/14~3/31）的觀測值 (b) 其他觀測值，分別計算並回報 IC 與樣本數。
+>   2. 在正確 PIT 下，算兩個因子的 IC 隨持有天數衰減的曲線（公布後 1、5、10、20、60 個交易日）。
+>   3. 算 f_revenue_surprise 與 f_low_vol 的橫斷面相關係數。
+>   4. 寫成 docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md。
+>
+> 三、析.二：營收→EPS 預估（nowcast）研究前置（只做可行性與登記草案，不跑任何報酬回測）：
+>   1. 用 TaiwanStockMonthRevenue（公布日以 month_revenue_pit 為準）與 TaiwanStockFinancialStatements（公布日以 statutory_quarterly_pit_date 為準），對每檔股票每季計算「季報公布前一刻」可得的預估 EPS = 當季已公布月營收累計 × 過去 4 季平均淨利率 ÷ 股本。
+>   2. 只做準確度檢查：預估 EPS 與實際 EPS 的相關係數、方向命中率、誤差分布；並列出每季「最後一個月營收公布日」到「季報公布日」平均相隔幾個交易日（這就是可以卡位的時間窗）。
+>   3. 寫一份預先登記草案 docs/PREREG_DRAFT_nowcast_eps.md：假設、進出場規則、判準（MDD 硬性、Sortino、與 0050 比較）、資料期間、驗證方式（含前進式紙上驗證）。只寫草案，不登記、不執行，等 Cowork 審。
+>   4. 查證並回報：FinMind 以外是否有「合規、官方或可授權」的券商共識預估資料來源與費用。不得爬取任何禁止爬取的網站。
+>
+> 四、yfinance 路徑修正：
+>   1. adjust.py::adjusted_price_series() 無論走 yfinance 或 FinMind 路徑都套用 truncate_to_listing_date()。
+>   2. 新增交叉核對：yfinance 還原日報酬 vs「FinMind 原始價＋已驗證 adjust.py 事件因子」日報酬，差距 > 2 個百分點者列入警告清單，只列出、不切換主要來源，回報受影響股票數與天數。
+>   3. 自我測試：3011、2332 那兩筆必須被抓到。
+>
+> 五、完成後 push，停下等 Cowork 核對。score.py 在總司令決定計分榜方案前不得修改。紙.一 10/1 照常啟動，不得動。凍結.二 仍生效（析.二只做前置，不是試驗）。
+
+- [ ] **驗.八** [驗證/維運/研究前置] 依序執行：一、12件待決事項落地(結案：
+  外部二改/Cybex.beta/零之三；常備.9改列「暫緩，資料源評估中」不結案；暫緩：
+  群益API合併1條/外銷訂單/Stooq key/重構.C4；同意：Breeze-7B/分K.零shioaji
+  常駐實測/稽核.三B組；結案.一git鎖保留標「待總司令實機驗證」)。二、析.一
+  EPS/營收訊號拆解(診斷)→docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md。
+  三、析.二營收→EPS nowcast可行性(不跑報酬回測)＋docs/PREREG_DRAFT_nowcast_eps.md
+  草案(不登記不執行)＋券商共識預估合規資料源查證。四、yfinance路徑
+  修正(truncate_to_listing_date兩路徑皆套用＋yfinance vs FinMind原始價
+  ＋事件因子日報酬交叉核對只警告＋3011/2332自我測試必抓到)。五、push
+  停下等Cowork核對。**心跳**：完成時本行改`- [x]`並附完成回報，且往
+  `research/PROGRESS_HEARTBEAT.jsonl` append一行。score.py不得改；紙.一不
+  得動；凍結.二仍生效。
