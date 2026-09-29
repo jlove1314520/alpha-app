@@ -16508,7 +16508,47 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 
 - [!] **群益API(合併)** [暫緩/待辦] ⏸2026-09-29總司令裁示【驗.八】一：稽核.五(群益部分)／新二／二 三條合併為本單一條目，暫緩。
   阻塞原因不變：申請流程綁定總司令個人身分（群益開戶客戶本人、本機完成驗證小工具測試、簽署「期貨API下單服務聲明書」）。三來源查證見`docs/CAPITAL_SECURITIES_API_GATE.md`。
-- [ ] **本地AI摘要(Breeze-7B)** [開發] 2026-09-29總司令裁示【驗.八】一：本地AI選Breeze-7B（聯發科繁中優化款）。接續原「新四」交辦：確認GPU(RTX 5060 Laptop 8GB/RAM 31GB，已確認)→裝Breeze-7B 4-bit量化→法說會PDF摘要→`summaries.json`→個股頁。遵守既有法遵白名單（只走官方公開來源、robots.txt/ToS未確認允許不得探測）、摘要標示「AI生成／非投資建議」、模型授權條款須先讀並記錄；心跳＝完成時本行改`- [x]`。
+- [!] **本地AI摘要(Breeze-7B)** [開發] 2026-09-29總司令裁示【驗.八】一：本地AI選Breeze-7B（聯發科繁中優化款）。接續原「新四」交辦：確認GPU(RTX 5060 Laptop 8GB/RAM 31GB，已確認)→裝Breeze-7B 4-bit量化→法說會PDF摘要→`summaries.json`→個股頁。遵守既有法遵白名單（只走官方公開來源、robots.txt/ToS未確認允許不得探測）、摘要標示「AI生成／非投資建議」、模型授權條款須先讀並記錄；心跳＝完成時本行改`- [x]`。
+  **⛔ 自走中止（DevQueue cycle 20260929-101602，2026-09-29 10:40）：法遵疑慮，白名單第6條停下**。
+  已完成部分：①GPU確認——`nvidia-smi`實測RTX 5060 Laptop、8151MiB VRAM、
+  driver 577.13、CUDA 12.9。②模型選型——`MediaTek-Research/Breeze-7B-
+  Instruct-v1_0`，HF API查得授權條款`license:apache-2.0`（已讀，寬鬆
+  商業可用，無額外限制），已記錄。③量化格式——GGUF
+  `ZoneTwelve/Breeze-7B-Instruct-v1_0-GGUF`的`Q4_K_M`（4,538,717,120
+  bytes≈4.23GB，經HF API `tree/main`查得精確大小，8GB VRAM可留約3.5GB
+  給context/activations）。④已透過winget背景安裝Ollama（本機執行
+  GGUF的runtime，Windows有CUDA加速預編譯版，比自建llama-cpp-python+
+  CUDA工具鏈風險低很多——RTX 5060是很新的Blackwell架構，自編譯CUDA
+  kernel有相容性風險），安裝仍在跑，尚未完成，未驗證。
+
+  **卡住的原因（重新發現既有結論，非本輪新查）**：任務描述的資料來源
+  「法說會PDF」**已在2026-09-08被證明不可行且已寫進文件**——
+  `docs/DATA_SOURCE_MAP.md`「🔴(b)法說會簡報PDF」＋
+  `docs/FIRST_HAND_SOURCES.md`#14：簡報PDF主機`doc.twse.com.tw`
+  robots.txt**全站`Disallow: /`**，且`events.json`的法說會事件只有
+  公告標題（例如「受邀參加XX證券舉辦之法人說明會」），不含任何簡報
+  產品內容，無法從合規管道取得可摘要的原始文字。依`CLAUDE.md`「取得
+  方式鐵律」不得繞過robots.txt，**这一步在資料源層就走不下去**，
+  不是模型或工程問題。本輪額外verify：`curl`實測`mops.twse.com.tw`
+  對非瀏覽器UA的請求觸發WAF安全性封鎖頁（非robots問題，是另一層
+  技術性封鎖），進一步印證這條路徑不適合程式化存取。
+
+  **待總司令裁示（自帶分支，需總司令選一個才能繼續，不是可還原的
+  技術選擇）**：
+  (a) 改用**已合規取得的結構化財務資料**（月營收PIT、財報PIT、
+      `events.json`重大訊息標題）產生「資料驅動的繁中敘述摘要」
+      （例如「本季營收年增X%、主因Y，前次法說會提及Z」），不逐字
+      摘要簡報PDF內容，改成摘要我們已有的數字——**這不是原裁示字面
+      的「法說會PDF摘要」，是用同一支本地模型做不同輸入的替代方案**，
+      需要總司令確認這個範圍縮小是否可接受。
+  (b) 改用`docs/DATA_SOURCE_MAP.md`「🟢(c)公司官網產品頁」——
+      2,138家逐站查robots.txt與條款，工作量是獨立子專案，需另外
+      排入佇列並核准規模。
+  (c) 總司令另有其他合規來源指示。
+  (d) 暫緩本項，模型/GPU基礎設施已就緒（一旦Ollama安裝完成會另行
+      記錄），等資料源問題解決後再接。
+  Ollama安裝完成後的驗證與(a)/(b)/(c)/(d)裁示後的下一步，留給下一輪
+  接手（互動視窗或DevQueue皆可，非單一寫入者限定檔案）。
 - [ ] **稽核.三B** [資料/開發] 2026-09-29總司令裁示【驗.八】一：核准稽核.三B組——融資融券（逐檔，現況`data/margin_maintenance.json`僅全市場加總）／借券（`data/securities_lending_sell.json`、`short_lending_available.json`）／外資持股比（`data/foreign_holding.json`）三類由「每日覆蓋最新一天」改為逐檔逐日累積(append)。照既有節流規則（外部API頻率上限清單，額度用完就誠實拒絕不換來源硬取）；新增輸出檔須同步確認在`market.yml`allowlist（CLAUDE.md十節）；改寫前先確認各既有下游讀取者是否假設檔案只有今天一筆；格式選擇（分檔vs單檔成長型）[自行裁量]、寫下理由。心跳＝完成時本行改`- [x]`。
 
 **2026-09-29 hypothesis_queue 心跳輪次【稽核.三B組第1類，部分完成】**：`驗.八`本身
