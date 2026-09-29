@@ -2,6 +2,30 @@
 
 跟 [`LEADS.md`](./LEADS.md) 同樣的精神，但單位是「因子」不是「策略」：每個因子的 IC 檢定結果一列，含最終判定。**沒通過的因子也要記，且要記清楚為什麼沒通過**——`score.py`（尚未實作）只會用通過的因子，沒通過的權重直接是 0，但這裡的紀錄不會消失。
 
+## 🔧 2026-09-29【評.B】計分方案 B 生效（`score.py` 研究路徑）
+
+依總司令2026-09-29核准【評.B】，`docs/FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md`
+方案 B 在 `research/score.py` 生效（生效日 2026-09-29）：
+
+- `SCORE_COMPONENTS` 只剩 `low_vol`；`eps_family`（含 `f_eps_growth`，#287 FAIL）
+  與 `revenue_surprise` 仍照常計算、照常輸出到明細欄位，**但不進 composite**
+  （`DISPLAY_ONLY_COMPONENTS`）。`MIN_COMPONENTS_FOR_RANKING` 由 2 改 1。
+- 前置條件：`export_scores_json()` 資格池接上 `universe.common_stock_only()`，
+  排除 ETF／特別股／受益證券／TDR／興櫃（實測沒有這層過濾時，低波動榜前 20 會
+  混入特別股 2881A、2891C、受益證券 01004T、ETF 00718B 共 4 檔）。
+- 理由：#403/#404（財報時點修正後重驗）FAIL，EPS／營收意外兩成分已不具
+  正式 PASS；低波動（#9）是唯一仍持有效判定的成分。
+- 揭露文字（`_meta.score_disclosure`）：「目前只用低波動一個成分計分；EPS／營收
+  意外成分因財報時點修正後未通過重驗（#403/#404）已暫停計分，明細仍顯示供參考。」
+- 不回溯：既有每日選股紀錄、績效紀錄不改；生效日起 `score.py` 路徑產生的新
+  紀錄標「計分方案 B」（`_meta.score_scheme = "B"`）。
+- **已知範圍限制**：線上 App 的 `scores.json` 由 `generate_scores_live.py`
+  （`score_v2` 八因子＋`weights_frozen.json`）產生，**不經過 `score.py`**，本次
+  未改動；見 `PENDING_QUEUE.md` 評.B 完成回報。
+- 新舊前 20 名對照（as-of 2024-12-30、300 檔抽樣可用 234 檔）：
+  `research/data/diag_score_scheme_B_compare.json`（腳本
+  `research/diag_score_scheme_B_compare.py`）。歷史回測腳本的已鎖判定不重跑。
+
 ## ⛔ 2026-09-29【驗.七】重驗未過，待處理：`f_eps_surprise`（#7）／`f_revenue_surprise`（#8）
 
 依總司令2026-09-29裁示【驗.七】三，對#7/#8做事前登記的正式重驗

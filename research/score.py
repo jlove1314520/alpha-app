@@ -1,5 +1,8 @@
 """AI 選股引擎 Phase A 步驟 3 -- composite scoring engine.
 
+**2026-09-29 計分方案 B 生效（【評.B】）：composite 只含 low_vol。** 下面 3 成分的敘述是方案 A 的歷史說明；
+方案 B 起 eps_family／revenue_surprise 只計算並輸出明細、不進 composite（見 SCORE_COMPONENTS 附近註解）。
+
 Only combines factors that passed factor_ic.py's Bonferroni-corrected bar
 (FACTORS.md 2026-08-23): f_eps_growth, f_eps_surprise, f_revenue_surprise,
 f_low_vol. A factor that failed IC testing gets weight 0, permanently --
@@ -73,14 +76,19 @@ warnings.filterwarnings("ignore", message="invalid value encountered in subtract
 EPS_FAMILY_COLS = ["f_eps_growth", "f_eps_surprise"]
 INDEPENDENT_RAW_COLS = ["f_revenue_surprise", "f_low_vol"]
 ALL_RAW_COLS_NEEDED = EPS_FAMILY_COLS + INDEPENDENT_RAW_COLS
-SCORE_COMPONENTS = ["eps_family", "revenue_surprise", "low_vol"]
+# 計分方案 B（2026-09-29 總司令核准【評.B】，依 docs/FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md）：
+# 只有 low_vol 進 composite。eps_family（含 #287 FAIL 的 f_eps_growth）與 revenue_surprise 因財報時點修正後
+# 未通過重驗（#403/#404）暫停計分——仍照常計算、仍輸出明細欄位供參考（DISPLAY_ONLY_COMPONENTS），但不進 composite。
+SCORE_SCHEME = "B"
+SCORE_COMPONENTS = ["low_vol"]
+DISPLAY_ONLY_COMPONENTS = ["eps_family", "revenue_surprise"]
 MIN_PEER_GROUP_SIZE = 5
-MIN_COMPONENTS_FOR_RANKING = 2  # a composite built from just 1 of 3 components is too thin to rank/pick on;
-# observed concretely with ETF tickers (e.g. 00844B, 00923) which have no real EPS/revenue data and end up
-# scored on f_low_vol alone -- ETFs are structurally smoother than single stocks, so a low-vol-only score
-# would systematically over-rank them for a reason that has nothing to do with stock-picking quality. Rows
-# below this threshold are still returned by compute_scores_at_date() (with their real n_components visible)
-# but excluded from anything that acts on the ranking (top-N export, backtest selection) via eligible_for_ranking().
+MIN_COMPONENTS_FOR_RANKING = 1  # 方案 B 只剩 1 個成分，門檻必須是 1，否則榜單清空。
+# 舊風險（2 改 1 之前的原因）：ETF（例如 00844B、00923）沒有真實 EPS／營收，只靠 f_low_vol 計分，而 ETF 結構上
+# 比個股平滑，low-vol-only 會系統性高估它們。方案 B 的前置條件：export_scores_json() 的資格池必須先通過
+# universe.common_stock_only()（排除 ETF／特別股／TDR／興櫃）才能排名。
+SCORE_DISCLOSURE_ZH = ("目前只用低波動一個成分計分；EPS／營收意外成分因財報時點修正後未通過重驗（#403/#404）"
+                       "已暫停計分，明細仍顯示供參考。")
 
 
 def _stock_info() -> pd.DataFrame:
@@ -170,9 +178,10 @@ def compute_scores_at_date(
     cs["revenue_surprise"] = _zscore_within_group(cs["f_revenue_surprise"], groups)
     cs["low_vol"] = _zscore_within_group(cs["f_low_vol"], groups)
 
+    # 顯示用成分（DISPLAY_ONLY_COMPONENTS）已在上面算好、留在輸出欄位裡，但不進 composite／n_components。
     cs["composite"] = cs[SCORE_COMPONENTS].mean(axis=1, skipna=True)
     cs["n_components"] = cs[SCORE_COMPONENTS].notna().sum(axis=1)
-    cs = cs[cs["n_components"] > 0].copy()  # a stock with all 3 components missing can't be scored at all
+    cs = cs[cs["n_components"] > 0].copy()  # a stock with all scoring components missing can't be scored at all
     cs["rank"] = cs["composite"].rank(ascending=False, method="min").astype(int)
     return cs.sort_values("rank").reset_index(drop=True)
 
@@ -186,6 +195,26 @@ def eligible_for_ranking(cs: pd.DataFrame) -> pd.DataFrame:
     out = cs[cs["n_components"] >= MIN_COMPONENTS_FOR_RANKING].copy()
     out["rank"] = out["composite"].rank(ascending=False, method="min").astype(int)
     return out.sort_values("rank").reset_index(drop=True)
+
+
+def _common_stock_pool(cs: pd.DataFrame, name_map: dict[str, str] | None) -> pd.DataFrame:
+    """方案 B 前置條件（評.B 一.3）：資格池只留普通股，排除 ETF／特別股／TDR／興櫃。
+    分類走 `universe.common_stock_only()`（含 `type` 欄的興櫃規則）；
+    `無法分類` 的列依該函式既有規則一併排除（寧可排除不確定的東西）。
+    """
+    if cs.empty:
+        return cs
+    from universe import common_stock_only
+    info = _stock_info()
+    type_map = dict(zip(info["stock_id"], info["type"])) if (not info.empty and "type" in info.columns) else {}
+    df = pd.DataFrame({
+        "stock_id": cs["stock_id"].values,
+        "stock_name": [(name_map or {}).get(s) for s in cs["stock_id"]],
+        "industry_category": cs["industry"].where(cs["industry"] != "UNKNOWN", None).values,
+        "type": [type_map.get(s) for s in cs["stock_id"]],
+    })
+    keep = set(common_stock_only(df)["stock_id"])
+    return cs[cs["stock_id"].isin(keep)].reset_index(drop=True)
 
 
 def export_scores_json(
@@ -205,7 +234,9 @@ def export_scores_json(
     就是 `None`（寫進 JSON 是 `null`）——前端負責在 null 時退回只顯示代號，
     這裡不用假名稱填充，誠實反映「沒有這筆資料」。
     """
-    cs = eligible_for_ranking(compute_scores_at_date(as_of, data, industry_map))
+    scored = compute_scores_at_date(as_of, data, industry_map)
+    scored = _common_stock_pool(scored, name_map)
+    cs = eligible_for_ranking(scored)
     if top_n:
         cs = cs.head(top_n)
     cs["stock_name"] = cs["stock_id"].map(name_map) if name_map else None
@@ -227,14 +258,19 @@ def export_scores_json(
         "_meta": {
             "as_of": as_of,
             "generated_by": "research/score.py",
+            "score_scheme": SCORE_SCHEME,
             "score_components": SCORE_COMPONENTS,
+            "display_only_components": DISPLAY_ONLY_COMPONENTS,
+            "score_disclosure": SCORE_DISCLOSURE_ZH,
+            "universe_filter": "universe.common_stock_only()（排除ETF／特別股／TDR／興櫃）",
             "eps_family_note": "avg peer-z of f_eps_growth + f_eps_surprise (correlated +0.831, "
-                                "collapsed to avoid double-counting -- see FACTORS.md 2026-08-23)",
+                                "collapsed to avoid double-counting -- see FACTORS.md 2026-08-23)；"
+                                "方案B起僅顯示、不進composite",
             "peer_group": "industry_category (TaiwanStockInfo), static classification, "
                            f"min group size {MIN_PEER_GROUP_SIZE} else whole-sample fallback",
             "min_components_for_ranking": MIN_COMPONENTS_FOR_RANKING,
-            "disclaimer": "研究/教育用途，非投資建議。歷史回測不代表未來績效。樣本非全市場逐檔掃描"
-                           "（見 FACTORS.md/STRATEGY_LOG.md 已知限制）。",
+            "disclaimer": SCORE_DISCLOSURE_ZH + "研究/教育用途，非投資建議。歷史回測不代表未來績效。"
+                           "樣本非全市場逐檔掃描（見 FACTORS.md/STRATEGY_LOG.md 已知限制）。",
         },
         "scores": records,
     }

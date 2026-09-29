@@ -116,6 +116,83 @@ RATE_LIMIT_MIN_INTERVAL_SEC = 3.0
 RATE_LIMIT_BLOCK_SECONDS = 2 * 60 * 60
 SOURCE_KEY = "finmind"
 
+# 2026-09-29【評.B】二：若環境變數或本機 .env 有 FINMIND_TOKEN 就以 Bearer 帶上（註冊帶 token 免費層 600/hr，
+# 未帶 300/hr；付費方案更高，見 docs/FINMIND_PAID_PLAN_2026-09-29.md）；沒有就維持原狀（無 token、固定3秒間隔）。
+# 鐵律（repo 是公開的）：token 只從 .env／環境變數讀進記憶體，**不得印出、不得寫進任何檔案或 log**——
+# 連共用狀態檔 rate_limit_state.json（會被 commit）也只寫 has_token 布林與 plan_limit_per_hour，不寫 token 或其片段。
+FM_USER_INFO_URL = "https://api.web.finmindtrade.com/v2/user_info"
+TOKEN_ENV_NAME = "FINMIND_TOKEN"
+ENV_FILE_CANDIDATES = [Path(__file__).parent.parent / ".env", Path(__file__).parent / ".env"]
+DEFAULT_TOKEN_LIMIT_PER_HOUR = 600  # 註冊帶 token 的免費層；user_info 查得到實際方案時以實際為準
+MIN_INTERVAL_FLOOR_SEC = 1.0  # 付費大額度方案的節流下限，不因額度高就無間隔狂打
+PLAN_RECHECK_SEC = 6 * 60 * 60
+_token_cache: dict = {}
+
+
+def _get_token() -> str | None:
+    """回傳 FINMIND_TOKEN（環境變數優先，其次本機 .env），沒有則 None。結果只快取在記憶體。
+    此函式與其呼叫端**不得**印出或記錄回傳值。"""
+    if "v" in _token_cache:
+        return _token_cache["v"]
+    tok = (os.environ.get(TOKEN_ENV_NAME) or "").strip()
+    if not tok:
+        for envp in ENV_FILE_CANDIDATES:
+            try:
+                if not envp.exists():
+                    continue
+                for line in envp.read_text(encoding="utf-8-sig").splitlines():
+                    line = line.strip()
+                    if line.startswith("export "):
+                        line = line[7:].strip()
+                    if line.startswith(TOKEN_ENV_NAME + "="):
+                        tok = line.split("=", 1)[1].strip().strip('"').strip("'")
+                        break
+            except Exception:  # noqa: BLE001 -- 讀不到 .env 一律當沒有 token（fail open，見 CLAUDE.md 十二節）
+                tok = ""
+            if tok:
+                break
+    _token_cache["v"] = tok or None
+    return _token_cache["v"]
+
+
+def _auth_headers() -> dict:
+    tok = _get_token()
+    return {"Authorization": f"Bearer {tok}"} if tok else {}
+
+
+def _plan_limit_per_hour(state: dict) -> int | None:
+    """有 token 時回傳每小時請求上限：優先用狀態檔內 6 小時內查過的值，否則呼叫一次官方
+    /v2/user_info（api_request_limit）；查不到就用免費註冊層預設 600。無 token 回 None。"""
+    if not _get_token():
+        return None
+    src = state["sources"].setdefault(SOURCE_KEY, {})
+    now = time.time()
+    if src.get("has_token") and src.get("plan_limit_per_hour") and now - src.get("plan_checked_at", 0) < PLAN_RECHECK_SEC:
+        return int(src["plan_limit_per_hour"])
+    limit = DEFAULT_TOKEN_LIMIT_PER_HOUR
+    try:
+        r = requests.get(FM_USER_INFO_URL, headers=_auth_headers(), timeout=10)
+        if r.status_code == 200:
+            v = r.json().get("api_request_limit")
+            if isinstance(v, (int, float)) and v > 0:
+                limit = int(v)
+    except Exception:  # noqa: BLE001 -- 查方案失敗只降級成預設值，不影響主流程
+        pass
+    src["has_token"] = True
+    src["plan_limit_per_hour"] = limit
+    src["plan_checked_at"] = now
+    return limit
+
+
+def _min_interval_sec(state: dict) -> float:
+    """無 token：維持原本固定 RATE_LIMIT_MIN_INTERVAL_SEC（3 秒）。有 token：依實際方案每小時上限自動調整，
+    間隔 = max(MIN_INTERVAL_FLOOR_SEC, 3600/上限)（600/hr→6秒、1,600/hr→2.25秒、6,000/hr 以上→1秒）。"""
+    limit = _plan_limit_per_hour(state)
+    if limit is None:
+        state["sources"].setdefault(SOURCE_KEY, {})["has_token"] = False
+        return RATE_LIMIT_MIN_INTERVAL_SEC
+    return max(MIN_INTERVAL_FLOOR_SEC, 3600.0 / limit)
+
 
 def _load_rate_limit_state() -> dict:
     if RATE_LIMIT_STATE_PATH.exists():
@@ -146,9 +223,11 @@ def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
             f"{source} 目前處於封鎖冷卻中（還剩約{remain_min}分鐘，"
             f"原因：{src.get('block_reason', '未知')}），依「資料源禮儀」規則拒絕發送請求"
         )
+    interval = _min_interval_sec(state)
+    src = state["sources"].setdefault(source, src)
     last = src.get("last_request_at")
-    if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
-        time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
+    if last and (now - last) < interval:
+        time.sleep(interval - (now - last))
     src["last_request_at"] = time.time()
     state["sources"][source] = src
     _save_rate_limit_state(state)
@@ -212,7 +291,7 @@ def _fetch(
     for attempt in range(max_retries):
         try:
             _throttle()  # 這裡如果目前在封鎖冷卻中會直接RuntimeError，不會發出請求
-            resp = requests.get(FM_BASE, params=params, timeout=timeout)
+            resp = requests.get(FM_BASE, params=params, headers=_auth_headers(), timeout=timeout)
             if resp.status_code in (402, 403, 428, 429):
                 # 2026-08-28新增：這幾個狀態碼是「額度用盡/被封鎖/請求過快」，不是
                 # 「這個dataset本來就查不到」——重試只會讓封鎖更久，這裡立刻把這個

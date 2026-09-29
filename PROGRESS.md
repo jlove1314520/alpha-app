@@ -1,3 +1,18 @@
+## 2026-09-29（互動視窗CC，開發/驗證帽，【評.B】計分榜方案B執行＋FinMind token自.env讀取）
+
+等待總司令審閱：20件（新增1件：評.B，見`research/AWAITING_REVIEW.md`）。
+
+**做了什麼**：
+1. `research/score.py`：`SCORE_COMPONENTS`只留`low_vol`；`eps_family`（含f_eps_growth）與`revenue_surprise`照算照輸出明細、不進composite；`MIN_COMPONENTS_FOR_RANKING` 2→1；`export_scores_json()`資格池接`universe.common_stock_only()`；`_meta`加`score_scheme="B"`與總司令指定的揭露警語。
+2. `research/finmind_client.py`：本機`.env`／環境變數有`FINMIND_TOKEN`就帶Bearer，沒有維持原行為；節流依`/v2/user_info`的`api_request_limit`自動調整；token不印出、不寫進state/log/commit。
+3. `research/FACTORS.md`加方案B生效日與理由；新增診斷`research/diag_score_scheme_B_compare.py`。
+4. 冒煙測試`node scripts/smoke_test.mjs`全50項＋第12項PASS（含第39/41/46）。
+5. 新舊前20名（as-of 2024-12-30、234檔可用）：合格185→166檔，前20重疊3檔；不過濾普通股會混入特別股2881A/2891C、受益證券01004T、債券ETF 00718B。
+
+**重要落差（待裁示）**：線上App的`scores.json`由`generate_scores_live.py`（score_v2八因子＋凍結權重）產生、不經`score.py`，故方案B目前只落在研究路徑，線上榜單與警語沒變（貼「只用低波動」警語對live榜單是不實揭露）。選項：(甲)live維持現狀；(乙)live路徑也改僅low_vol＋普通股池＋警語。[自行裁量]先不動live。
+
+**未動**：紙.一（10/1）、凍結.二、holdout、live scores.json、index.html。驗.九背景鏈仍在跑（trace進行中），完成後另行收尾。
+
 ## 2026-09-29（DevQueue自走cycle 20260929-170102，維運帽，驗.九轉為誠實阻塞：兩子任務解除條件皆未滿足，佇列無其他可做項目，符合CLAUDE.md零之一節白名單第7條）
 
 等待總司令審閱：19件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表；本輪僅為狀態核對＋阻塞標記，未產生新的審閱項）。
