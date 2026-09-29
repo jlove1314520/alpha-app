@@ -2895,3 +2895,16 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - **本輪誠實結論**：交辦佇列唯一的`- [ ]`項目`驗.九`正被DevQueue即時執行中，為避免覆寫/競爭本輪不插手；凍結.二允許的四類工作皆已完成或無新內容，13條`- [!]`逐一核對均未到解除時間（tick累積14/20有進展但未達標），FUT軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、未啟動任何與`驗.九`重疊的新行程。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目＋一次PowerShell`Get-CimInstance`查詢行程命令列，無外部API呼叫）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 等待總司令審閱：19件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩1條`- [ ]`未開始（`驗.九`，判定為他人進行中，非漏做）。下一輪建議選US軌（round665=09-29 12:0x，三軌中最舊）；開工前務必重新檢查`驗.九`是否仍在進行中。
 ---
+## 第668輪 · 2026-09-29T17:0x+08:00 · US · 維運帽：核對`驗.九`——crosscheck背景工作已因FinMind額度耗盡（402）停止、非crash，記錄BLOCKED不重試 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260929-170037`）。三軌時間戳：US round665=09-29 12:0x最舊，依輪替選US。
+- 開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=1（僅`驗.九`）。`Get-CimInstance`實測round667記錄的PID135492與cycle161602記錄的PID118932皆已不存在；讀`research/data/diag_v9_fetch_missing.json`（`generated_at:2026-09-29T16:24:16`）確認crosscheck背景工作因FinMind回傳HTTP 402（額度上限）而停止（`requests_used=253`，per_phase：nowcast168／crosscheck85），符合腳本設計「撞牆即停不吞錯」，非crash。
+- 交叉核對`data/rate_limit_state.json`：`sources.finmind.blocked_until=1790677456.67`＝2026-09-29T18:24:16+08:00，與腳本訊息「已標記finmind額度2小時」一致。`[自行裁量]`：不重試、不繞過（研究紀律「取得方式鐵律」＋外部API頻率上限清單FinMind一節），本輪僅記錄真實狀態，全程零外部API呼叫。
+- 一（定量分解）記憶體本輪17:02查詢仍2.60GB（<3GB門檻，較cycle161602持平未回升），未解除。
+- 逐一核對13條`- [!]`阻塞項：`institutional_history.json`確認`dates`陣列仍20筆、最後日期`20260924`，solid交易日數維持16日，20日視窗仍差4個交易日，未解除；tick累積`ls research/data/ticks/*.parquet`實測**14/20**（與round667一致），未解除；其餘11條均未到解除時間。`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，皆為條件敘述提及、非實際宣告解除，凍結.二仍生效。
+- 驗證：`run_detached.py status` running=0（162筆歷史，無job待收成）；`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（406列，本輪純查證未新增判定）；`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪動作）；`git status --short`確認十三節限定檔案（backtest/validation/adjust.py/pit.py/trial_registry.py）無殘留未commit編輯。
+- `AWAITING_REVIEW.md`「等待中」表格逐行核對共19列，與表頭「目前：19件」一致（與round667相同，非本輪異動）。
+- **本輪誠實結論**：`驗.九`crosscheck子項已因FinMind額度耗盡暫停，本輪誠實記錄這個狀態轉折並遵守2小時冷卻不重試；凍結.二允許的四類工作皆已完成或無新內容，13條`- [!]`逐一核對均未到解除時間，US軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不重試已知額度耗盡的外部請求。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目＋一次PowerShell`Get-CimInstance`查詢行程命令列，無外部API呼叫）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- **commit前發現的並發寫入**：本輪對`PENDING_QUEUE.md`的編輯尚未commit時，DevQueue cycle 20260929-170102獨立做出完全一致的結論並先行commit（`8e12fa782`），因工作目錄共用連帶掃進本輪尚未commit的編輯（內容一致、非衝突，且把`驗.九`從`- [ ]`改標`- [!]`阻塞）。本輪對`PENDING_QUEUE.md`不再重複commit。
+- 等待總司令審閱：19件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩0條`- [ ]`未開始（`驗.九`已由DevQueue改標`- [!]`阻塞，`- [!]`共14條）。下一輪建議選TW軌（round666=09-29 15:0x，三軌中最舊）；開工前先檢查`驗.九`retry條件（記憶體≥3GB或FinMind額度過2026-09-29T18:24+08:00解除）是否已滿足。
+---
