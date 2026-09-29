@@ -5599,9 +5599,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       weightNoteEl.textContent=noteByEngine[meta.engine_version]
         ||(meta.score_scheme==='B'
           ?'價值成長榜（計分方案B）：總分只用低波動（近60日日報酬標準差，越低越高分）；其餘成分明細僅供參考、不計分 ｜ 非投資建議'
-          :'價值成長榜：權重凍結於2024-12-31前之研究期，本期分數為正式out-of-sample應用 ｜ 非投資建議');
+          :'價值成長榜（計分方案A・恢復，2026-09-30生效）：八項成分依凍結權重加權；權重凍結於2024-12-31前之研究期。尚未回測驗證，財報成長成分重驗未過（#287/#403），僅供參考 ｜ 非投資建議');
     }
-    // 2026-09-29（評.B-2）三榜共用：scores*.json 的 meta.backtest_status 一律顯示成標籤；價值成長榜方案B另附揭露全文。
+    // 2026-09-30（價值成長榜恢復）三榜共用：scores*.json 的 meta.backtest_status 一律顯示成標籤；meta.backtest_note（若有）接在標籤後；方案B（已撤銷）的揭露全文仍相容。
     _safeSync('renderPicksBacktestTag',()=>{
       const el=document.getElementById('picks-backtest-note');
       const covEl=document.getElementById('picks-coverage-note');
@@ -5610,6 +5610,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         if(meta.backtest_status){
           const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
           el.innerHTML=`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:#c9524a;border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${esc(meta.backtest_status)}</span>`
+            +(meta.backtest_note?` <span style="color:var(--ink-3)">${esc(meta.backtest_note)}</span>`:'')
             +(planB&&meta.score_scheme_disclosure?` <span style="color:var(--ink-3)">${esc(meta.score_scheme_disclosure)}</span>`:'');
           el.style.display='';
         }else{el.style.display='none'}
@@ -7534,7 +7535,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-29.2350';
+  const APP_VERSION='2026-09-30.0100';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

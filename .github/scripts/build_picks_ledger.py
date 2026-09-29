@@ -109,8 +109,8 @@ def build_snapshot(board: str, score_path: Path, quotes: dict, taiex_close: floa
         "taken_at": datetime.now(TW_TZ).isoformat(),
         "board": board,
         "engine_version": data["meta"].get("engine_version"),
-        # 評.B-2：新紀錄註明計分方案（價值成長榜方案B=只用低波動）；既有歷史紀錄不回溯修改。
-        "score_scheme": ("計分方案 B" if data["meta"].get("score_scheme") == "B" else data["meta"].get("score_scheme")),
+        # 價值成長榜恢復（2026-09-30）：新紀錄註明計分方案（A（恢復）=凍結八項權重；B=已撤銷的低波動方案）；既有歷史紀錄不回溯修改。
+        "score_scheme": (f"計分方案 {data['meta']['score_scheme']}" if data["meta"].get("score_scheme") else None),
         "taiex_close_at_snapshot": taiex_close,
         "picks": picks,
     }

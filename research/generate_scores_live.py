@@ -63,11 +63,12 @@ None。改讀`research/build_company_info.py`一次性建置的`data/company_inf
 `industry`欄位對約19%（603/3137）在FinMind原始資料裡本身就有同日期多種
 分類歧義的股票，誠實留None（不猜可能錯的分類），細節見該腳本檔頭說明。
 
-**2026-09-29 評.B-2（計分方案 B，2026-09-30 起生效）**：總分只用 `low_vol`（近60日日報酬
-標準差取負號，公式與視窗同 `research/factors.py` 的 `f_low_vol`，價格為 `data/price_history.json`
-的 `adj_close`）；其他八個成分照常計算並輸出到 `factors` 明細，但權重為 0、不進總分。資格池為
-「官方在市名冊∩`universe.common_stock_only()`∩價格未過期」。權重另存 `weights_frozen_planB.json`
-（`weights_frozen.json` 原檔保留不動；`coverage` 仍以原凍結權重算「明細因子完整度」，不影響總分）。
+**2026-09-30 價值成長榜恢復（計分方案 A）**：總司令 09-29 裁示（低波動不符其價值定義，撤銷線上方案 B）——
+線上總分恢復用 `weights_frozen.json`（原 8 項凍結權重，缺項依「重新分配權重」規則）。方案 B 的
+`weights_frozen_planB.json` 與研究端 `score.py` 方案 B 原封保留、僅不再被線上路徑引用。
+評.B-2 的資格池（官方在市名冊∩`universe.common_stock_only()`∩價格未過期；排除ETF／特別股／TDR／興櫃）
+與過期股價過濾的修正沿用，並在算百分位之前先過濾。`meta.backtest_status` 維持「尚未回測驗證」，
+另註「財報成長成分重驗未過（#287/#403），僅供參考」。
 
 以上任何一項未來要補，原則不變：先問「有沒有第二條路、能不能從已有欄位推導」，
 不是直接放棄——已經在STATUS.json的known_limitations列出，供之後排優先序。
@@ -96,7 +97,6 @@ import pandas as pd
 
 import live_factors
 import score_v2
-from factors import LOW_VOL_WINDOW
 from score_live import apply_frozen_weights, load_frozen_weights
 from score_v2 import (
     COVERAGE_MIN_FOR_RANKING, LIQUIDITY_FLOOR_20D_VALUE, REVENUE_BASE_FLOOR,
@@ -114,12 +114,10 @@ EVENTS_PATH = REPO_ROOT / "data" / "events.json"  # 2026-09-05：題材/事件�
 OUT_PATH = REPO_ROOT / "scores.json"
 TW_TZ = timezone(timedelta(hours=8))
 
-PLAN_B_PATH = Path(__file__).parent / "weights_frozen_planB.json"
-PLAN_B_EFFECTIVE_FROM = "2026-09-30"
-PLAN_B_DISCLOSURE = (
-    "自 2026-09-30 起只用低波動計分；財報成長、營收成分因重驗未過或未驗證，暫不計分，明細仍顯示。"
-)
-PLAN_B_BACKTEST_STATUS = "尚未回測驗證"
+SCORE_SCHEME = "A（恢復）"
+SCORE_SCHEME_EFFECTIVE_FROM = "2026-09-30"
+BACKTEST_STATUS = "尚未回測驗證"
+BACKTEST_NOTE = "財報成長成分重驗未過（#287/#403），僅供參考"
 GROWTH_QUALITY_MONTHS = 24  # 近12個月 vs 再前12個月，24個月起跳，要求視窗內完全連續
 MA_WINDOW = 60
 VOL_SHORT_WINDOW = 20
@@ -251,45 +249,6 @@ def _chips_signal(institutional: dict | None) -> float | None:
     return total if any_val else None
 
 
-def load_plan_b_weights() -> dict:
-    """讀 weights_frozen_planB.json 並驗 sha256（同 score_live.load_frozen_weights 的雜湊規則）。"""
-    import hashlib
-    d = json.loads(PLAN_B_PATH.read_text(encoding="utf-8"))
-    h = hashlib.sha256(json.dumps(d["weights"], sort_keys=True).encode("utf-8")).hexdigest()
-    if h != d["weights_sha256"]:
-        raise RuntimeError(f"weights_frozen_planB.json 的 sha256 不符（記錄={d['weights_sha256']}，實際={h}）")
-    if abs(sum(d["weights"].values()) - 1.0) > 1e-9 or d["weights"].get("low_vol") != 1.0:
-        raise RuntimeError("weights_frozen_planB.json 必須是 low_vol=1.0、其餘 0")
-    return d
-
-
-LOW_VOL_MAX_CALENDAR_GAP_DAYS = 12  # 春節連休最長約9天，留餘裕；超過視為資料空窗
-
-
-def low_vol_from_price_rows(price_rows: list[dict]) -> tuple[float | None, dict]:
-    """方案B唯一計分成分。與 factors.py 的 f_low_vol 逐行同一公式：
-    `daily_ret = adj_close.pct_change(); f_low_vol = -daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).std()`，
-    取最新一列。價格只用 adj_close（price_history.json 已走 adjust.py 還原）；任一還原價缺值使視窗
-    不足時回傳 None（不進榜），不改用未還原的 close 湊數。"""
-    if not price_rows:
-        return None, {}
-    rows = sorted(price_rows, key=lambda r: r["date"])
-    adj = pd.Series([r.get("adj_close") for r in rows], dtype=float)
-    daily_ret = adj.pct_change()
-    f = -daily_ret.rolling(LOW_VOL_WINDOW, min_periods=LOW_VOL_WINDOW).std()
-    v = f.iloc[-1]
-    if pd.isna(v) or not np.isfinite(v):
-        return None, {}
-    # price_history.json 在 2025-01～2026-08 有約20個月空窗（holdout 期未回補），視窗若跨過空窗，
-    # 「最近60列」就不是最近60個交易日、標準差會被空窗前後的跳空污染 → 視同歷史不足，不進榜。
-    win_dates = [pd.Timestamp(r["date"]) for r in rows[-LOW_VOL_WINDOW - 1:]]
-    max_gap = max((b - a).days for a, b in zip(win_dates, win_dates[1:]))
-    if max_gap > LOW_VOL_MAX_CALENDAR_GAP_DAYS:
-        return None, {}
-    return float(v), {"window": LOW_VOL_WINDOW, "max_calendar_gap_days": int(max_gap), "std_daily_ret": float(-v), "as_of": rows[-1]["date"],
-                      "first_date_in_window": rows[-LOW_VOL_WINDOW - 1]["date"], "price_source": "adj_close"}
-
-
 def _load_price_history() -> dict:
     if not PRICE_HISTORY_PATH.exists():
         return {}
@@ -412,7 +371,6 @@ def build_rows() -> pd.DataFrame:
         if peg is not None and not np.isfinite(peg):
             peg = None
 
-        lv_val, lv_comp = low_vol_from_price_rows(price_rows)
         rows.append({
             "stock_id": code,
             "raw_eps_yoy": eps_yoy, "eps_yoy_source": "stock_detail_quarters" if eps_yoy is not None else None,
@@ -429,7 +387,6 @@ def build_rows() -> pd.DataFrame:
             "raw_inst_behavior": inst_val, "inst_components": inst_comp,
             "raw_event": ev_val, "event_components": ev_comp,
             "liquidity_20d": liquidity_20d,
-            "raw_low_vol": lv_val, "low_vol_components": lv_comp,
             "industry": (company_info.get(code) or {}).get("industry"),
         })
 
@@ -441,6 +398,13 @@ def build_rows() -> pd.DataFrame:
 def compute_scores_live() -> pd.DataFrame:
     cs = build_rows()
     if cs.empty:
+        return cs
+
+    # 資格池（評.B-2 保留、價值成長榜恢復後仍沿用）：官方在市名冊∩普通股∩價格未過期，
+    # 在算任何百分位之前先過濾，讓百分位以合格池計算。
+    cs, elig_info = apply_eligibility(cs, _load_price_history(), _name_map(), _company_info())
+    if cs.empty:
+        cs.attrs["eligibility"] = elig_info
         return cs
 
     # 2026-09-05：估值改「同產業百分位」的 PER/PBR/PEG 複合（總司令一.2）。
@@ -476,28 +440,28 @@ def compute_scores_live() -> pd.DataFrame:
         sc, pct = _pct_score(cs[col], score_v2.FACTOR_DEFS[key]["higher_better"])
         cs[f"{key}_score"], cs[f"{key}_pct"] = sc, pct
 
-    # coverage＝明細因子資料完整度（仍以原凍結權重加權），不影響總分（方案B總分只看 low_vol）。
-    covs = []
+    # 原8項凍結權重加權（價值成長榜恢復，2026-09-30 生效）：缺項時以「重新分配權重」規則算總分，
+    # coverage＝有資料的因子權重總和。
+    totals, covs = [], []
     for _, row in cs.iterrows():
-        den = 0.0
+        num, den = 0.0, 0.0
         for key, meta in score_v2.FACTOR_DEFS.items():
-            if pd.notna(row.get(f"{key}_score")):
+            sc = row.get(f"{key}_score")
+            if pd.notna(sc):
+                num += sc * meta["weight"]
                 den += meta["weight"]
-        covs.append(round(den, 2))
+        if den == 0:
+            totals.append(np.nan)
+            covs.append(0.0)
+        else:
+            totals.append(round(num / den, 1))
+            covs.append(round(den, 2))
+    cs["total_score"] = totals
     cs["coverage"] = covs
-
-    # 方案B：資格池內、只用 low_vol 的百分位計分（歷史不足視窗者 raw_low_vol 為 None → 不進榜）。
-    company_info = _company_info()
-    cs, elig_info = apply_eligibility(cs, _load_price_history(), _name_map(), company_info)
-    sc, pct = _pct_score(cs["raw_low_vol"], True)
-    cs["low_vol_score"], cs["low_vol_pct"] = sc, pct
-    cs["total_score"] = cs["low_vol_score"]
-    elig_info["dropped_low_vol_history_insufficient"] = int(cs["total_score"].isna().sum())
     cs = cs.dropna(subset=["total_score"]).copy()
-    elig_info["ranked_pool"] = len(cs)
-    order = cs.sort_values(["total_score", "raw_low_vol"], ascending=[False, False]).index
-    cs["rank"] = pd.Series(range(1, len(order) + 1), index=order).reindex(cs.index).astype(int)
+    cs["rank"] = cs["total_score"].rank(ascending=False, method="min").astype(int)
     cs = cs.sort_values("rank")
+    elig_info["ranked_pool"] = len(cs)
     cs.attrs["eligibility"] = elig_info
     return cs
 
@@ -526,11 +490,6 @@ def _raw_dict(key: str, row: pd.Series) -> dict:
 
 
 def _raw_dict_impl(key: str, row: pd.Series) -> dict:
-    if key == "low_vol":
-        c = row.get("low_vol_components") or {}
-        return {"neg_std_60d": _r(row["raw_low_vol"]), "std_daily_ret": _r(c.get("std_daily_ret")),
-                "window": c.get("window"), "as_of": c.get("as_of"),
-                "first_date_in_window": c.get("first_date_in_window"), "price_source": c.get("price_source")}
     if key == "earnings_growth":
         c = row.get("eg_components") or {}
         return {
@@ -593,10 +552,6 @@ def _raw_dict_impl(key: str, row: pd.Series) -> dict:
 def _reason(key: str, row: pd.Series) -> str:
     pct = row.get(f"{key}_pct")
     front = max(1, round((1 - pct) * 100)) if pd.notna(pct) else None
-    if key == "low_vol":
-        c = row.get("low_vol_components") or {}
-        return (f"近 {c.get('window')} 個交易日日報酬標準差 {c.get('std_daily_ret', 0)*100:.2f}%（還原價；越低分數越高），"
-                f"低波動居合格池前 {front}%。方案B（2026-09-30起）：總分只用這一項。")
     if key == "earnings_growth":
         c = row.get("eg_components") or {}
         bits = []
@@ -666,10 +621,15 @@ def _reason(key: str, row: pd.Series) -> str:
 
 
 def _summary(row: pd.Series, present: list[str]) -> str:
-    lv = row.get("low_vol_score")
-    c = row.get("low_vol_components") or {}
-    return (f"低波動 {lv:.1f}/10（近{c.get('window')}日日報酬標準差 {c.get('std_daily_ret', 0)*100:.2f}%）；"
-            "其餘成分僅供參考、不計分。")
+    if not present:
+        return "本檔可用資料不足，暫無總評。"
+    ranked = sorted(present, key=lambda k: -row[f"{k}_score"])
+    top = ranked[0]
+    parts = [f"{score_v2.FACTOR_DEFS[top]['label']}表現較突出（{row[f'{top}_score']:.1f}/10）"]
+    worst = ranked[-1]
+    if len(ranked) > 1 and row[f"{worst}_score"] <= 4:
+        parts.append(f"{score_v2.FACTOR_DEFS[worst]['label']}偏弱")
+    return "，".join(parts) + "。"
 
 
 def _company_info() -> dict[str, dict]:
@@ -706,9 +666,7 @@ def main():
     frozen = load_frozen_weights()
     apply_frozen_weights(frozen)
     print(f"已套用凍結權重 weights_frozen.json（frozen_at={frozen['frozen_at']}，"
-          f"sha256={frozen['weights_sha256'][:12]}...；僅用於明細因子完整度 coverage，總分走方案B）")
-    plan_b = load_plan_b_weights()
-    print(f"方案B權重 weights_frozen_planB.json（生效 {plan_b['effective_from']}，sha256={plan_b['weights_sha256'][:12]}...）：總分只用 low_vol")
+          f"sha256={frozen['weights_sha256'][:12]}...）")
 
     prior_count = None
     if OUT_PATH.exists():
@@ -726,12 +684,12 @@ def main():
         payload = {
             "meta": {
                 "engine_version": "scoring-live-json", "generated_at": datetime.now(TW_TZ).isoformat(),
-                "data_asof": as_of, "market": "TW", "weights_hash": plan_b["weights_sha256"],
-                "score_scheme": "B", "backtest_status": PLAN_B_BACKTEST_STATUS,
-                "score_scheme_disclosure": PLAN_B_DISCLOSURE,
+                "data_asof": as_of, "market": "TW", "weights_hash": frozen["weights_sha256"],
+                "score_scheme": SCORE_SCHEME, "score_scheme_effective_from": SCORE_SCHEME_EFFECTIVE_FROM,
+                "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,
                 "disclaimer": "非投資建議；這次沒有任何股票算出分數（repo內JSON資料可能還太少）。",
             },
-            "weights": plan_b["weights"], "stocks": [],
+            "weights": {k: v["weight"] for k, v in score_v2.FACTOR_DEFS.items()}, "stocks": [],
         }
     else:
         # 2026-08-27修正（使用者P1-新裁示，取代舊的coverage<0.5硬性排除）：
@@ -753,7 +711,7 @@ def main():
         cs["liquidity_insufficient"] = (
             cs["liquidity_20d"].isna() | (cs["liquidity_20d"] < LIQUIDITY_FLOOR_20D_VALUE)
         )
-        ranked = cs.sort_values(["liquidity_insufficient", "total_score", "raw_low_vol"], ascending=[True, False, False]).copy()
+        ranked = cs.sort_values(["liquidity_insufficient", "total_score"], ascending=[True, False]).copy()
         liquidity_ok_mask = ~ranked["liquidity_insufficient"]
         ranked.loc[liquidity_ok_mask, "display_rank"] = range(1, int(liquidity_ok_mask.sum()) + 1)
 
@@ -761,7 +719,6 @@ def main():
         for sid, row in ranked.iterrows():
             present = [k for k in score_v2.FACTOR_DEFS if pd.notna(row.get(f"{k}_score"))]
             missing = [k for k in score_v2.FACTOR_DEFS if k not in present]
-            scored_keys = ["low_vol"] + present
             # 2026-09-15（總司令裁示，稽核.三修法(b)）：missing_factors只是一串key名，
             # 看不出「為什麼」缺——這裡額外標註有明確原因的缺項（目前只有
             # earnings_growth的過期排除，其餘因子的None仍是單純資料不足，不硬湊理由）。
@@ -779,11 +736,13 @@ def main():
                     "percentile": round(float(row[f"{k}_pct"]), 2),
                     "raw": _raw_dict(k, row),
                     "reason": _reason(k, row),
-                } for k in scored_keys
+                } for k in present
             }
             flags = []
             if row["liquidity_insufficient"]:
                 flags.append("流動性不足")
+            if row["coverage"] < COVERAGE_MIN_FOR_RANKING:
+                flags.append("資料稀疏，分數僅供參考")
             display_rank = row.get("display_rank")
             stocks.append({
                 "code": sid, "name": name_map.get(sid),
@@ -796,7 +755,6 @@ def main():
                 "liquidity_20d": _r(row.get("liquidity_20d")),
                 "data_asof": as_of,
                 "summary": _summary(row, present),
-                "score_scheme": "B",
                 "factors": factors_obj,
                 "flags": flags,
                 "news_warning": None,
@@ -810,19 +768,17 @@ def main():
                 "universe_size": len(cs),
                 "avg_coverage": avg_coverage,
                 "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE,
-                "weights_hash": plan_b["weights_sha256"],
-                "legacy_weights_hash": frozen["weights_sha256"],
-                "score_scheme": "B", "score_scheme_effective_from": PLAN_B_EFFECTIVE_FROM,
-                "backtest_status": PLAN_B_BACKTEST_STATUS,
-                "score_scheme_disclosure": PLAN_B_DISCLOSURE,
-                "score_scheme_note": "方案B：total_score＝low_vol 百分位×10；coverage＝明細因子資料完整度，不影響總分；"
-                                     "rank／display_rank 依 total_score（同分以未四捨五入的低波動原始值）排序。",
+                "weights_hash": frozen["weights_sha256"],
+                "score_scheme": SCORE_SCHEME, "score_scheme_effective_from": SCORE_SCHEME_EFFECTIVE_FROM,
+                "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,
+                "score_scheme_note": "方案A（恢復）：total_score＝原8項凍結權重（weights_frozen.json）加權，缺項依"
+                                     "「重新分配權重」規則；coverage＝有資料的因子權重總和。",
                 "eligibility": elig,
                 "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json"
                            "+data/company_info.json（不讀parquet、不呼叫FinMind），"
                            "供GitHub Actions每日排程使用，見generate_scores_live.py檔頭說明。",
                 "disclaimer": (
-                    PLAN_B_DISCLOSURE + "本榜尚未回測驗證。"
+                    "本榜尚未回測驗證；財報成長成分重驗未過（#287/#403），僅供參考。"
                     "非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。"
                     "2026-08-27改版：不再用coverage<0.5排除股票，全市場都進榜——"
                     "總分跟「資料完整度」(coverage)是兩件事，高分低完整度不代表可信，"
@@ -833,7 +789,7 @@ def main():
                     "generate_scores_live.py檔頭的已知限制說明。"
                 ),
             },
-            "weights": plan_b["weights"],
+            "weights": {k: v["weight"] for k, v in score_v2.FACTOR_DEFS.items()},
             "stocks": stocks,
         }
 
