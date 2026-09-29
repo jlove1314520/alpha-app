@@ -6,6 +6,55 @@
 
 
 ---
+**最後更新：2026-09-30T02:0x+08:00（馬拉松第676輪，維運帽）**——取鎖乾淨
+（cycle`20260930-020037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項——round675記錄的3條`修.八`／
+`價值成長榜恢復`／`先.一`皆明文標「互動視窗執行」，本輪核對已全數不在
+`- [ ]`清單，交由互動視窗自行收工，非馬拉松代勞），`grep -c "^- \[!\]"`=13
+（較round674的14條−1：`驗.九`已於前一輪確認由互動視窗22:50完成並改列
+`- [x]`＋移入`AWAITING_REVIEW.md`，本輪核對PENDING_QUEUE.md 16772行
+確認`- [x]`狀態維持）。逐一核對13條`- [!]`阻塞項：`金流一.4`（讀
+`build_sector_flow.py::_solid_dates()`自動維護的倒數行，非raw陣列長度）
+仍**17個交易日**（20260901~20260929），20日視窗仍差3個交易日，未解除；
+`外部一改.2`／`研究.c`共用tick累積`ls research/data/ticks/*.parquet`
+實測仍**14/20**，未解除；`本地AI摘要(Breeze-7B)`——DevQueue上一輪
+（cycle`20260930-011601`）已完成Ollama安裝後的合成輸入推論smoke test
+驗證，但(a)/(b)/(c)/(d)資料來源裁示分支仍待總司令選一個，屬白名單第6條
+法遵疑慮，本輪核對仍`- [!]`未解除，不代為決定；其餘10條逐一核對開頭
+標記，均為等總司令/Cowork裁示或其他外部條件，皆未到解除時間（`紙.一`
+需等2026-10第一個交易日，今日仍09-30）。`grep -c "凍結.二解除"
+PENDING_QUEUE.md`=4，逐行核對皆為條件敘述提及、非實際宣告解除，凍結.二
+仍生效。**佇列深度自檢**：`- [ ]`=0（<12下限）但凍結.二期間暫停補件，
+不硬湊alpha試驗候選。三軌時間戳：TW round672=09-29 21:0x（本輪選定，
+三軌中最舊）／FUT round675=09-30 01:0x／US round674=09-29 23:0x。
+驗證：`git status --short -- research/backtest/ research/validation/
+research/adjust.py research/pit.py research/trial_registry.py`輸出為空
+（十三節限定檔案無殘留未commit編輯）；`run_detached.py status`
+`running=0`（162筆歷史，無job待收成）；`trial_registry.py --check`
+（`PYTHONIOENCODING=utf-8`）exit=0 PASS（406列，本輪未新增判定）。
+`AWAITING_REVIEW.md`「等待中（目前：25件）」，逐行核對與25筆資料列
+一致（較round675的22件+3，來自互動視窗完成`修.八`／`價值成長榜恢復`／
+`先.一`部分項目後移入等待審閱，非本輪動作）。**本輪誠實結論**：交辦
+佇列0條`- [ ]`；凍結.二允許的四類工作皆已完成或無新內容；13條`- [!]`
+逐一核對均未到解除時間（`金流一.4`仍差3個交易日、tick累積仍14/20、
+`本地AI摘要`仍待總司令四選一裁示）；TW軌本身查無可推進的新工作單位
+——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、
+不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不代做互動視窗
+保留項目。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，
+未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊
+state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、
+`git status`/`git log`、`run_detached.py status`、`trial_registry.py
+--check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還
+剩0條`- [ ]`未開始**。**等待審閱：25件**（與`AWAITING_REVIEW.md`表格
+列數一致）。**下一輪任一軌接手**：依輪替下一輪建議選US軌
+（round674=09-29 23:0x，三軌中最舊，FUT剛在round675更新過）；開工前
+先重新檢查`- [ ]`有無新交辦、`本地AI摘要(Breeze-7B)`四選一是否已裁示、
+`金流一.4`還需3個交易日、`外部一改.2`tick累積14/20還差6日；凍結.二在
+總司令/Cowork明確寫「凍結.二解除」前不解除。完整見`REPORT.md`第676輪
+心跳、`PENDING_QUEUE.md`「金流一.4」「本地AI摘要(Breeze-7B)」條目、
+`research/AWAITING_REVIEW.md`。
+
+---
 **最後更新：2026-09-29T21:0x+08:00（馬拉松第672輪，維運帽）**——取鎖乾淨
 （cycle`20260929-210037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=14條（與
@@ -90,52 +139,3 @@ jsonl`已append本輪一行。**交辦佇列還剩0條`- [ ]`未開始**。**等
 總司令/Cowork明確寫「凍結.二解除」前不解除；`金流一.4`還需4個交易日；
 `外部一改.2`tick累積14/20，還差6日。完整見`REPORT.md`第669輪心跳、
 `PENDING_QUEUE.md`「驗.九」條目、`research/AWAITING_REVIEW.md`。
-
----
-**最後更新：2026-09-29T15:0x+08:00（馬拉松第666輪，維運/研究帽）**——取鎖乾淨
-（cycle`20260929-150037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`grep -c "^- \[ \]"`=1（僅`分K.零`，round665已完成四個數字的最後一項
-「停牌/漲跌停」實測，本輪要做的是round665交付的「下一個工作單位」——
-把四個數字換算成一份可核准/駁回的SPEC提案）。**做了什麼**：寫
-`research/INTRADAY_KBARS_BACKFILL_SPEC.md`（分K.一SPEC，提案性質，
-未核准不得執行）。內容含：①四個數字換算成方案對照表（規模20/50/
-100/300/500檔對應回補2年/5年歷史所需天數，用round664量到的
-`N×2.1天/2年`公式換算）；②點出分K.零量測階段沒處理到的結構性
-問題——「自選股」只存在使用者手機端`localStorage`，伺服器端無法
-得知任何使用者選了哪些股票，所以交辦原文「自選股規模」不能照字面
-理解，必須先選一個伺服器端可固定的清單；③三個候選方案（A：固定
-20~50檔小清單／B：跟研究樣本一致300檔／C：暫緩，等具體研究假設
-出現）各自優缺點；④若核准A/B的執行設計草案（排程沿用round664已
-擴充的daemon協定、儲存格式比照既有tick parquet模式、斷點續傳、
-已下市標的過濾避免白燒額度、重啟驗證四步）；⑤本輪建議（C相對
-保守，但若總司令已有具體分K驅動研究方向如`#50`滑價估計則A/B優先
-序不同，裁決權在總司令）。**本輪未實作任何排程或程式改動**，未動
-`shioaji_quotes.py`/`alpha_live_server.py`正式路徑，純寫文件提案。
-`分K.零`本項在`PENDING_QUEUE.md`改標`- [x]`並移入`research/
-AWAITING_REVIEW.md`等待審閱清單（19號項目，表頭同步改為「目前：
-19件」）。**交辦佇列重新核對**：改標後`- [ ]`=0。**佇列深度自檢**：
-`- [ ]`=0（<12下限），`CLAUDE.md`十四節【凍結.二】仍生效，本階段
-暫停佇列深度補件（不得補alpha試驗）；重掃`常備backlog`區塊（確認
-空的，最近round664已掃過）、`HYPOTHESIS_QUEUE.md`（僅2處2026-09-04
-歷史敘述性「排隊中」文字，非真正待開跑假設，與round664/更早期
-`DevQueue 023101`的結論一致）、`LEADS.md`系列與`STRATEGY_GRAVEYARD.md`
-（無未進佇列待辦）——**沒有可誠實補入的新項目，不硬湊數量**，依
-`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪。三軌時間戳：
-TW round663=09-29 10:0x（最舊）／FUT round664=09-29 11:0x／US
-round665=09-29 12:0x（實際commit時間14:11）——依輪替選TW。
-`run_detached.py status`：`running=0`（162筆歷史，無job待收成）。
-`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪未新增
-判定，預期仍PASS（純寫SPEC文件與狀態檔，無回測/因子判定）。
-`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪
-動作，僅讀取核對）。未動`alpha.db`/`fetch.py`/`parsers.py`/
-`config.py`凍結區，未修改十三節限定清單內任何原始碼，未變更正式
-交易連線，全程零外部API呼叫（純寫文件＋改狀態檔＋archive舊state
-條目）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還
-剩0條未開始**。**等待審閱：19件**（與`AWAITING_REVIEW.md`表格列數
-一致，較上一輪+1，來自`分K.零`本輪完成）。**下一輪任一軌接手**：
-依輪替下一輪建議選FUT軌（round664=09-29 11:0x，三軌中最舊）；
-`分K.一`要等總司令對SPEC提案的三選一裁示才能動工，不得自行選方案
-開始建置；凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。
-完整見`REPORT.md`第666輪心跳、`PENDING_QUEUE.md`「分K.零」條目、
-`research/INTRADAY_KBARS_BACKFILL_SPEC.md`、`research/AWAITING_
-REVIEW.md`。

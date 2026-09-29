@@ -2231,3 +2231,52 @@ solid交易日數維持16日，20日視窗仍差4個交易日，未解除；tick
 回溯天數，屬於對正式交易連線的變更，建議由互動視窗執行較安全（重啟
 風險）。完整見`REPORT.md`第663輪心跳、`PENDING_QUEUE.md`「分K.零」
 條目、`research/data/probe_kbars_coverage_result.json`。
+---
+**最後更新：2026-09-29T15:0x+08:00（馬拉松第666輪，維運/研究帽）**——取鎖乾淨
+（cycle`20260929-150037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=1（僅`分K.零`，round665已完成四個數字的最後一項
+「停牌/漲跌停」實測，本輪要做的是round665交付的「下一個工作單位」——
+把四個數字換算成一份可核准/駁回的SPEC提案）。**做了什麼**：寫
+`research/INTRADAY_KBARS_BACKFILL_SPEC.md`（分K.一SPEC，提案性質，
+未核准不得執行）。內容含：①四個數字換算成方案對照表（規模20/50/
+100/300/500檔對應回補2年/5年歷史所需天數，用round664量到的
+`N×2.1天/2年`公式換算）；②點出分K.零量測階段沒處理到的結構性
+問題——「自選股」只存在使用者手機端`localStorage`，伺服器端無法
+得知任何使用者選了哪些股票，所以交辦原文「自選股規模」不能照字面
+理解，必須先選一個伺服器端可固定的清單；③三個候選方案（A：固定
+20~50檔小清單／B：跟研究樣本一致300檔／C：暫緩，等具體研究假設
+出現）各自優缺點；④若核准A/B的執行設計草案（排程沿用round664已
+擴充的daemon協定、儲存格式比照既有tick parquet模式、斷點續傳、
+已下市標的過濾避免白燒額度、重啟驗證四步）；⑤本輪建議（C相對
+保守，但若總司令已有具體分K驅動研究方向如`#50`滑價估計則A/B優先
+序不同，裁決權在總司令）。**本輪未實作任何排程或程式改動**，未動
+`shioaji_quotes.py`/`alpha_live_server.py`正式路徑，純寫文件提案。
+`分K.零`本項在`PENDING_QUEUE.md`改標`- [x]`並移入`research/
+AWAITING_REVIEW.md`等待審閱清單（19號項目，表頭同步改為「目前：
+19件」）。**交辦佇列重新核對**：改標後`- [ ]`=0。**佇列深度自檢**：
+`- [ ]`=0（<12下限），`CLAUDE.md`十四節【凍結.二】仍生效，本階段
+暫停佇列深度補件（不得補alpha試驗）；重掃`常備backlog`區塊（確認
+空的，最近round664已掃過）、`HYPOTHESIS_QUEUE.md`（僅2處2026-09-04
+歷史敘述性「排隊中」文字，非真正待開跑假設，與round664/更早期
+`DevQueue 023101`的結論一致）、`LEADS.md`系列與`STRATEGY_GRAVEYARD.md`
+（無未進佇列待辦）——**沒有可誠實補入的新項目，不硬湊數量**，依
+`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪。三軌時間戳：
+TW round663=09-29 10:0x（最舊）／FUT round664=09-29 11:0x／US
+round665=09-29 12:0x（實際commit時間14:11）——依輪替選TW。
+`run_detached.py status`：`running=0`（162筆歷史，無job待收成）。
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）本輪未新增
+判定，預期仍PASS（純寫SPEC文件與狀態檔，無回測/因子判定）。
+`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪
+動作，僅讀取核對）。未動`alpha.db`/`fetch.py`/`parsers.py`/
+`config.py`凍結區，未修改十三節限定清單內任何原始碼，未變更正式
+交易連線，全程零外部API呼叫（純寫文件＋改狀態檔＋archive舊state
+條目）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還
+剩0條未開始**。**等待審閱：19件**（與`AWAITING_REVIEW.md`表格列數
+一致，較上一輪+1，來自`分K.零`本輪完成）。**下一輪任一軌接手**：
+依輪替下一輪建議選FUT軌（round664=09-29 11:0x，三軌中最舊）；
+`分K.一`要等總司令對SPEC提案的三選一裁示才能動工，不得自行選方案
+開始建置；凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。
+完整見`REPORT.md`第666輪心跳、`PENDING_QUEUE.md`「分K.零」條目、
+`research/INTRADAY_KBARS_BACKFILL_SPEC.md`、`research/AWAITING_
+REVIEW.md`。
+
