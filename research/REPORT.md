@@ -1,3 +1,14 @@
+## 第663輪 · 2026-09-29T10:0x+08:00 · TW · 維運/研究帽：`分K.零`涵蓋範圍實測（上市/上櫃/ETF 9檔全PASS、已下市3檔全404）· 無alpha判定、N不變
+
+- 取鎖乾淨（cycle `20260929-100036`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=4（`分K.零`／`驗.八`／`本地AI摘要(Breeze-7B)`／`稽核.三B`），`- [!]`=12（較上輪15少3，`驗.八一`已把群益API三條合併為1條）。
+- `驗.八`：`git status --short`顯示互動視窗有兩個untracked檔（`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`／`research/audit_v8_signal_anatomy.py`），mtime在取鎖前3分鐘內，比照round661對`驗.七`的判斷不插手；`本地AI摘要(Breeze-7B)`／`稽核.三B`非馬拉松研究帽慣常範疇，本輪選`分K.零`（總司令已在`驗.八`明確同意解除阻塞）。
+- 確認`shioaji_quotes.py`(PID 129748)常駐中、`/health`帶token回應`shioaji_connected:true`、`stale_process:false`。寫`research/probe_kbars_coverage.py`測涵蓋範圍：上市3（2412/1101/2882）／上櫃3（6547/4966/8299）／ETF3（0050/0056/00878）全部200（68根bar，09:01開盤到查詢時10:08）；已下市3（6452康友-KY/3662樂陞/4803VHQ-KY）全部404（不在訂閱清單/熱檔聚合皆無），推論Shioaji contract lookup對已下市代碼查不到。
+- **自我糾正記錄**：原第3個下市樣本填錯代碼（誤把4930當淘帝-KY，實際4930是仍上市的燦星網），empirical結果（回200而非404）當場暴露這個查證疏漏，已查證VHQ-KY正確代號4803（2021-12-27正式下市）補測，結果檔誠實留下更正記錄不覆蓋原始錯誤。
+- 意外發現：404失敗查詢一樣計入`kbars_usage.calls_today`（13次呼叫，budget從null累加到18，多出5次推測是其他既有活動），代表contract查不到的失敗查詢一樣燒額度。
+- 尚未做（已寫入`分K.零`條目）：最多回溯多久——現有`shioaji_quotes.py`的op="kbars"協定寫死`start=day,end=day`(今天)，要測需先擴充daemon協定+重啟常駐行程（對正式交易連線的變更，列為下一個獨立工作單位，建議由互動視窗執行）；速率限制依賴此才能測；停牌/漲跌停標的本輪未查到現成清單，未測。`分K.零`維持`- [ ]`。
+- 核對12條`- [!]`阻塞項：`institutional_history.json`/`tick累積`同前輪未解除，其餘10條均未到解除時間。`trial_registry.py --check` exit=0 PASS（406列，本輪未新增判定）。`run_detached.py status` running=0。`AWAITING_REVIEW.md`表頭「目前：16件」未變動。
+- 等待總司令審閱：16件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩3條`- [ ]`未開始（`驗.八`判定為互動視窗進行中非漏做；另兩條留給互動視窗）。下一輪建議選FUT軌（round661=09-29 00:3x，三軌中最舊）。
+---
 ## 第662輪 · 2026-09-29T09:0x+08:00 · US · 維運帽：核對交辦與阻塞項（含`驗.七`完成後續）、確認凍結.二下無可做工作單位 · 無判定、N不變
 
 - 取鎖乾淨（cycle `20260929-090036`）。三軌時間戳：US round659=09-28 19:3x最舊，依輪替選US。
