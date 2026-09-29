@@ -1,3 +1,20 @@
+## 2026-09-30（互動視窗，研究帽，【先.二】缺日補齊＋先.一草案修訂＋不看報酬前置檢查）
+
+等待總司令審閱：26件（新增：先.二）。
+
+**做了什麼**：
+1. 先.二-一：TWSE holidaySchedule 列 9/25 中秋節、9/28 教師節為休市日，裁示前提（缺兩個交易日）不成立；只缺 9/29 且已由每日 CI 補上。新增 `scripts/check_0050_continuity.py`，0050 在 9/24–9/29 連續，PASS。仍停在 9/24 的 62 檔：上市無成交 6、上櫃無成交 16、興櫃 39、TAIEX 1；興櫃／TAIEX 是否納入價格抓取列為提案，未動。
+2. 先.二-二：草案四項修訂全數標〔待總司令確認〕（價格落後改12個月百分位≤60%、全期單發＋兩段方向一致、凍結.二解凍註記、預付設備款正式放棄）。
+3. 先.二-三：`research/precheck_supply_tightness.py`（離線，不算報酬、未登記試驗）結果寫入草案 §7：宇宙1,623檔、44個換股日、每日可計分≥1,020檔；五指標無 |r|>0.7；池規模四種定義中位數126–132、最小≥106；「其他」桶中位7.1%。補抓現金流量表408檔（僅6008、8287回空）。
+4. **存活者偏誤缺口**：2013–2024 非金融非興櫃下市股92檔，損益表快取只含51檔，缺41檔。`listed_universe.json` 只有 active，不能當時點名冊。
+
+**[自行裁量]**：快取讀取改任意起迄後綴＋排除空檔；資產負債表缺口補抓（133／232檔成功，遇 FinMind HTTP 402 封鎖2小時，尚餘99檔，PENDING_QUEUE 標 `- [!]`，約09:25後續抓）。
+
+**與裁示不符**：裁示寫缺216檔，實測缺口383檔（另加27檔），已如實回報。`research/diag_planb_live_check.py` 已損壞（無關，另案）。
+
+**影響檔案**：`docs/PREREG_DRAFT_supply_tightness.md`、`research/precheck_supply_tightness.py`＋`_results.json`、`research/backfill_cashflow_gap.py`、`scripts/check_0050_continuity.py`、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`research/PROGRESS_HEARTBEAT.jsonl`。
+**下一步**：停下等 Cowork 核對；紙.一 10/1 照常啟動，未動。無 index.html 變更，未跑冒煙測試。
+
 ## 2026-09-30（DevQueue自走cycle 20260930-011601，維運帽，修復DevQueue分類漏洞第二例＋Breeze-7B推論驗證＋佇列0項確認）
 
 等待總司令審閱：25件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表）。
