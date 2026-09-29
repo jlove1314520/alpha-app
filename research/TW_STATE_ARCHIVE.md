@@ -2080,3 +2080,51 @@ status`、`trial_registry.py --check`、`ls`）。`PROGRESS_HEARTBEAT.jsonl`
 `REPORT.md`第654輪心跳、`PENDING_QUEUE.md`「凍結.二」條目、
 `research/AWAITING_REVIEW.md`。
 
+
+---
+**最後更新：2026-09-28T14:3x+08:00（馬拉松第657輪，維運帽）**——取鎖乾淨
+（cycle`20260928-143037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=15條（與
+round648~656一致）。逐一核對15條`- [!]`阻塞項是否解除：直接讀
+`data/institutional_history.json`確認`dates`陣列仍20筆、最後日期
+`20260924`，solid交易日數維持**16日**，今日09-28（週一）14:3x查詢
+（收盤後約1小時，法人資料排程尚未入庫本日新交易日），20日視窗仍差
+4個交易日，未解除；`外部一改.2`／`研究.c`共用的tick累積`ls research/
+data/ticks/*.parquet`實測仍**13/20**（同理排程尚未寫入新tick），
+未解除；其餘13條（`資料源.外銷訂單彙總`／`重構.C4`／`資料源一.3`／
+`外部二改`／`Cybex.beta`／`分K.零`／`稽核.三`／`稽核.五`／`零之三`／
+`結案.一`／`常備.9`／`紙.一`）逐一核對開頭標記，均為等總司令/Cowork
+裁示或其他外部條件，皆未到解除時間（`紙.一`需等2026-10第一個交易日，
+今日仍09月）。**佇列深度自檢**：`- [ ]`=0（<12下限），`CLAUDE.md`
+十四節【凍結.二】仍生效（`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，
+皆為條件敘述提及該詞彙、非實際宣告解除），本階段暫停佇列深度補件，
+不重掃備援來源。三軌時間戳：TW round654=09-28 07:0x（最舊）／FUT
+round655=09-28 09:3x／US round656=09-28 12:0x——依輪替選TW。**逐一
+核對`凍結.二`允許的四類工作現況**：稽核重跑／驗.二重跑先前輪次已
+全部完成並登記；資料抓取（`資料.一`/`閘門.一`）已完成300/300；工具
+修正已由互動視窗commit；`git status --short`確認`research/backtest/`
+／`research/validation/`／`research/adjust.py`／`research/pit.py`／
+`research/trial_registry.py`等十三節限定清單內檔案無殘留未commit
+編輯（輸出為空）。`run_detached.py status`：`running=0`（162筆歷史，
+無job待收成）。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）
+exit=0 PASS（402列，本輪純查證未新增判定）。`validation/holdout.py::
+is_holdout_consumed()`讀取為`True`（H.一單次解鎖已於09-27消耗，非
+本輪新增動作，僅讀取核對）。`AWAITING_REVIEW.md`「等待中」表格逐行
+核對共**15列**，與表頭「目前：15件」一致，較round648~656無變動。
+**本輪誠實結論**：四類允許工作皆已完成或無新內容，`- [!]`15條逐一
+核對均未到解除時間，TW軌本身查無可推進的新工作單位——依`CLAUDE.md`
+「零之一」白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊
+候選、不觸碰`凍結.二`禁止的新alpha試驗、不搶碰十三節限定檔案。未動
+`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節
+限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），
+全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/
+`git log`、`run_detached.py status`、`trial_registry.py --check`、
+`ls`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩
+0條未開始**。**等待審閱：15件**（與`AWAITING_REVIEW.md`「等待中」
+表格列數一致）。**下一輪任一軌接手**：依輪替下一輪建議選FUT軌
+（round655=09-28 09:3x，三軌中最舊）；凍結.二在總司令/Cowork明確寫
+「凍結.二解除」前不解除，不補新alpha試驗；`金流一.4`還需4個交易日
+（20日視窗，收盤後排程入庫後可望更新）；`外部一改.2`tick累積仍
+13/20。完整見`REPORT.md`第657輪心跳、`PENDING_QUEUE.md`「凍結.二」
+條目、`research/AWAITING_REVIEW.md`。
+

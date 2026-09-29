@@ -2876,3 +2876,12 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - **本輪誠實結論**：`分K.零`唯一未開始交辦項的下一步需要變更正式交易連線，不適合由無人值守馬拉松執行；凍結.二允許的四類工作皆已完成或無新內容，13條`- [!]`逐一核對均未到解除時間，US軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不變更正式交易連線。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、`trial_registry.py --check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 等待總司令審閱：18件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩1條`- [ ]`未開始（`分K.零`，判定為需互動視窗處理，非漏做）。下一輪建議選TW軌（round663=09-29 10:0x，三軌中最舊）；開工前先重新檢查`分K.零`是否已由互動視窗處理。
 ---
+## 第666輪 · 2026-09-29T15:0x+08:00 · TW · 維運/研究帽：完成`分K.零`收尾——寫`分K.一`SPEC提案（三候選方案，未核准不得執行）· 無alpha判定、N不變
+
+- 取鎖乾淨（cycle `20260929-150037`）。開工讀`PENDING_QUEUE.md`：`- [ ]`=1（僅`分K.零`，round665已完成四個數字的最後一項，本輪要做的是round665交付的「下一個工作單位」——把四個數字換算成SPEC提案）。
+- 寫`research/INTRADAY_KBARS_BACKFILL_SPEC.md`：①四數字換算成方案對照表（規模20/50/100/300/500檔對應回補2年/5年所需天數）；②點出結構性問題——「自選股」只存使用者手機端localStorage，伺服器端無法得知使用者選了哪些股票，交辦原文「自選股規模」不能照字面理解；③三候選方案（A固定20~50檔／B跟研究樣本一致300檔／C暫緩等具體研究假設出現）；④若核准A/B的執行設計草案；⑤本輪建議C相對保守但裁決權在總司令。本輪未實作任何排程或程式改動，未動`shioaji_quotes.py`/`alpha_live_server.py`正式路徑。
+- `分K.零`在`PENDING_QUEUE.md`改標`- [x]`並移入`AWAITING_REVIEW.md`（19號項目，表頭同步改為「目前：19件」）。
+- 佇列深度自檢：改標後`- [ ]`=0（<12下限），凍結.二仍生效不得補alpha試驗；重掃常備backlog（空）／HYPOTHESIS_QUEUE.md（僅2處歷史敘述性文字，非真正待開跑假設）／LEADS系列／STRATEGY_GRAVEYARD（無未進佇列待辦）——沒有可誠實補入的新項目，依「零之一」白名單第7條精神記錄後結束本輪。
+- `run_detached.py status` running=0。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼，未變更正式交易連線，全程零外部API呼叫。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 等待總司令審閱：19件（與`AWAITING_REVIEW.md`表格列數一致，較上一輪+1）。交辦佇列還剩0條`- [ ]`未開始。下一輪建議選FUT軌（round664=09-29 11:0x，三軌中最舊）；`分K.一`要等總司令對SPEC三選一裁示才能動工。
+---

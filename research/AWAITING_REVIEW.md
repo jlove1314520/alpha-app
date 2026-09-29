@@ -15,7 +15,7 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：18件）
+## 等待中（目前：19件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -38,6 +38,7 @@
 | 驗.八（修正版）：12件待決落地(一)＋EPS/營收訊號拆解(析.一)＋營收→EPS nowcast前置與券商共識預估合規查證(析.二，草案`docs/PREREG_DRAFT_nowcast_eps.md`，不登記不執行)＋yfinance路徑修正(四，`research/adjust.py`)（見`PENDING_QUEUE.md`驗.八完成回報） | 2026-09-29 | **請Cowork核對，未動score.py／紙.一／任何既有判定，凍結.二仍生效**。四的結果：①`adjusted_price_series()`兩條路徑（yfinance／FinMind）皆套上市日截斷；300檔樣本中235檔有價格，64檔被截、共33,596列（截掉跨度p50 1.34年／p90 5.37年／最大9.95年），57檔上市日未知不截；13檔截掉跨度>3年，可能是轉板而被誤截合法上櫃歷史（只列出未處理：4741,6584,3564,3147,6692,8284,2938,6438,5220,6558,6689,3711,8027）。②yfinance vs「FinMind原始價＋已驗證事件因子」日報酬交叉核對（差>2pp，或yfinance超過漲跌幅門檻而FinMind在門檻內；只警告、不切換主要來源、快取only、fail-open）已實作，**但批次覆蓋率目前0/235**：yfinance為主來源的股票從未抓過FinMind的Dividend/Split/CapitalReduction事件快取，故無法比對；補抓需約900+次FinMind請求（每檔約4次），受免費額度與402冷卻限制（冷卻至約12:15），可用`python research/audit_v8_yf_crosscheck.py --fetch-budget N`分批續跑。**請裁示是否值得花額度補齊，或接受部分覆蓋**。③自我測試：3011（yf+14.34% vs FinMind+6.90%）與2332必抓到——**2332只差1.33pp(<2pp)，是靠「yfinance超過漲跌幅門檻而FinMind在門檻內」這條輔助判準才抓到，不是靠>2pp主判準**，請確認是否接受此輔助判準。④`python research/adjust.py`整體仍FAIL，唯一原因是**既有**自我測試3/4（2038，CashIncreaseSubscriptionRate，誤差0.574%）——與四無關，在HEAD未修改版本上同樣失敗；我未動容差，**請裁示該測試是否放寬容差或修正資料**。⑤四改變價格序列後已重跑析.一：可用股票240→234，各快照IC最大變動−0.0022，結論不變（已記於`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`§4）。⑥析.二券商共識預估查證：查了TWSE OpenAPI(t187ap15_L/16_L為公司自行預測)、GitHub(yikuochan/fadacai-portfolio#14)、LSEG I/B/E/S與TEJ供應商（無公開價格），共識預估資料源結論=「待採購／需詢價」，常備.9維持「暫緩，資料源評估中」；顯示型網站一律未爬。 | 自2026-09-29起 |
 
 | 本地AI摘要(Breeze-7B)：GPU/模型選型與Ollama安裝已完成，法說會PDF資料源命中既有法遵阻塞（見`PENDING_QUEUE.md`「本地AI摘要(Breeze-7B)」完成回報） | 2026-09-29 10:40 | GPU確認(RTX 5060 8GB/CUDA 12.9)、模型選型(Breeze-7B-Instruct-v1_0，Apache-2.0已讀)、量化格式(GGUF Q4_K_M≈4.23GB)、Ollama已透過winget安裝完成。**卡住**：任務指定的法說會PDF資料源`doc.twse.com.tw`早在2026-09-08已查證robots.txt全站`Disallow: /`（`docs/DATA_SOURCE_MAP.md`「🔴(b)」），本輪額外驗證`mops.twse.com.tw`對非瀏覽器UA觸發WAF封鎖，不得繞過。等裁示四選一：(a)改用已合規的結構化財務資料產生敘述式摘要(範圍縮小，需確認可接受)／(b)改走公司官網產品頁(需另立逐站查robots的子專案)／(c)總司令另有合規來源指示／(d)暫緩，模型基礎設施已就緒待資料源解決後再接 | 起算中 |
+| 分K.零：Shioaji `api.kbars()`四個數字全部測完（回溯~7.8年／涵蓋上市上櫃ETF可查已下市404／全市場回補不可行但20~500檔規模可行(需42天~3年視規模)／鎖漲跌停正常回傳真停牌回傳乾淨空結果）＋分K.一SPEC提案（見`research/INTRADAY_KBARS_BACKFILL_SPEC.md`、`PENDING_QUEUE.md`「分K.零」完成回報） | 2026-09-29 15:0x | 分K.一SPEC列出三個候選範圍方案（A：固定20~50檔／B：跟研究樣本一致300檔／C：暫緩等具體研究假設出現），本輪建議C（相對保守）但若總司令已有具體分K驅動研究方向（如#50滑價估計）則A/B優先序不同。等裁示選哪個方案，或維持現狀不建置任何回補排程 | 起算中 |
 
 ## 已結案審閱紀錄
 
