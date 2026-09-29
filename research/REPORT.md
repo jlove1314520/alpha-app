@@ -2866,3 +2866,13 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - **本輪誠實結論**：`分K.零`唯一未開始交辦項的下一步需要變更正式交易連線，不適合由無人值守馬拉松執行；凍結.二允許的四類工作皆已完成或無新內容，12條`- [!]`逐一核對均未到解除時間，FUT軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不變更正式交易連線。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、`trial_registry.py --check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - 等待總司令審閱：18件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩1條`- [ ]`未開始（`分K.零`，判定為需互動視窗處理，非漏做）。下一輪建議選US軌（round662=09-29 09:0x，三軌中最舊）；開工前先重新檢查`分K.零`是否已由互動視窗處理。
 ---
+## 第665輪 · 2026-09-29T12:0x+08:00 · US · 維運帽：核對交辦與阻塞項、確認凍結.二下無可做工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260929-120037`）。三軌時間戳：US round662=09-29 09:0x最舊，依輪替選US。
+- 開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=1（僅`分K.零`，round663/664已判定其下一步——擴充daemon協定+重啟常駐行程——需互動視窗執行，本輪重新核對此判斷仍成立，不觸碰）；`grep -c "^- \[!\]"`=13條。
+- 逐一核對13條`- [!]`阻塞項：`institutional_history.json`確認`dates`陣列仍20筆、最後日期`20260924`，solid交易日數維持16日（今日09-29盤中查詢，13:30才收盤，20日視窗仍差4個交易日）；tick累積`ls research/data/ticks/*.parquet`實測仍13/20；其餘11條均未到解除時間。`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，皆為條件敘述提及、非實際宣告解除，凍結.二仍生效。
+- 驗證：`run_detached.py status` running=0（162筆歷史，無job待收成）；`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（406列，本輪純查證未新增判定）；`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪動作）；`git status --short`確認十三節限定檔案（backtest/validation/adjust.py/pit.py/trial_registry.py）無殘留未commit編輯。
+- `AWAITING_REVIEW.md`「等待中」表格逐行核對共18列，與表頭「目前：18件」一致（與round663/664相同，非本輪異動）。
+- **本輪誠實結論**：`分K.零`唯一未開始交辦項的下一步需要變更正式交易連線，不適合由無人值守馬拉松執行；凍結.二允許的四類工作皆已完成或無新內容，13條`- [!]`逐一核對均未到解除時間，US軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不變更正式交易連線。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、`trial_registry.py --check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 等待總司令審閱：18件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩1條`- [ ]`未開始（`分K.零`，判定為需互動視窗處理，非漏做）。下一輪建議選TW軌（round663=09-29 10:0x，三軌中最舊）；開工前先重新檢查`分K.零`是否已由互動視窗處理。
+---
