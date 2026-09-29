@@ -5581,3 +5581,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 Round complete. Summary: hypothesis_queue track ran in heartbeat-only mode per the standing ??.銝ause ??#82 remains paused, no new axis opened, no new alpha hypothesis backfilled. `PENDING_QUEUE.md` had zero `- [ ]` unassigned items, so only heartbeat entries were written (`PROGRESS_HEARTBEAT.jsonl` + `MARATHON_LOG.md`), committed, and pushed (after resolving a fetch-first conflict with a concurrent marathon-track commit). Lock acquired and released cleanly throughout.
 ===== Hypothesis-queue cycle end: 2026-09-29 21:23:00 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑28.0分鐘 < 30分鐘門檻
