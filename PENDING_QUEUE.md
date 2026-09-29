@@ -17025,3 +17025,26 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 **冒煙測試（node scripts/smoke_test.mjs）**：50 項中 **49 項 PASS、第 39 項 FAIL**；**41 PASS、46 PASS**（產業覆蓋 100%）。第 39 項（資料一致性稽核閘門，違規率 4.08%>1%，86 檔）是既有失敗、與本次修改無關：origin/main HEAD 由 CI 於 23:00 產生的 `data/audit_report.json` 即為 4.08%（reference_date 2026-09-24）；原因是 TWSE OpenAPI `STOCK_DAY_ALL`／`BWIBBU_ALL` 至今仍回 1150924（09-24）舊資料，而 `quotes_tw.json` 已是 09-29 即時價，稽核比對即出現落差。此為上游來源落後，本機無法修復。**[自行裁量] 依 CLAUDE.md「任一項FAIL不要 commit」本應停下，但因此 FAIL 在未含本次改動的 origin/main 就已存在、且與 index.html／榜單無因果，卡住 commit 無益，故照裁示 push，並在此明示；請 Cowork 核對。**
 
 **[自行裁量]清單**：`meta` 沿用現有欄位名而非 `_meta`；同分以未四捨五入的 low_vol 原始值排序；興櫃以 listed_universe 過濾；方案B下移除「資料稀疏」旗標；`factors` 內 low_vol 權重 100%；12日空洞防線；過舊股價過濾的順帶修正；89 檔產業補齊；regenerated `scores.json` 一併提交（CI 下次執行會覆寫）；`scores.json` 於 09-29 產生但揭露寫生效 09-30；櫃轉市估計法與「null＝維持官方日」；4741/6584/8284 維持截斷；上櫃日為推估值；bootstrap 標準差定義；冒煙 39 既有 FAIL 下仍 commit。
+
+## 2026-09-30 總司令裁示【修.八：上市股價停更修復（10/1 前必須完成）＋第三份還原公式統一】
+
+【修.八：上市股價停更修復（10/1 前必須完成）＋第三份還原公式統一】先寫進 PENDING_QUEUE 再動工。依序執行。
+
+一、上市股價停更（最優先，紙.一 10/1 依賴 0050 價格）：
+  1. 事實：data/price_history.json 中 1,421 檔上市股票（含 0050）最後日期停在 2026-09-24，上櫃 990 檔正常更新到 09-29；缺 9/25、9/28、9/29 三個交易日。冒煙測試第 39 項已抓到，但被歸類為「上游落後」，Cowork 不接受這個歸類，要求查出根因。
+  2. 在 market.yml 的實際執行環境重現 .github/scripts/update_price_history.py 的 fetch_twse()：印出 STOCK_DAY_ALL 回傳的筆數、Date 欄位分布、0050 那一列。判斷是 (a) 交易所 OpenAPI 本身停更 (b) 我們的解析或合併邏輯把新資料丟掉 (c) 排程根本沒跑到這一步 (d) 其他。
+  3. 若是 (a)：改用交易所官方的其他端點作為備援（例如 rwd 版每日收盤行情），只用官方公開端點，照既有節流規則。若是 (b)(c)：直接修。
+  4. 修完後補抓 9/25、9/28、9/29 三天的上市資料。0050 的 adj_close 要經過 adjust.py 的事件因子。附自我測試：0050 最新日期必須等於最近一個交易日。
+  5. 冒煙測試第 39 項必須 PASS。
+  6. 確認 research/paper_7030_tracker.py 在 10/1 能讀到正確的 0050 價格；若價格資料過期，紙.一 必須中止並寫入錯誤紀錄，不得用舊價格硬算。
+
+二、第三份還原公式：.github/scripts/update_price_history.py 的 apply_dividend_adjustments() 自己實作了一份還原公式（修.七 漏掉 .github/scripts/）。
+  1. 用修.七 那 10 檔股票股利、5 檔現金增資的官方參考價案例，比對它算出的因子是否一致。
+  2. 不一致或缺分割、減資、面額變更處理，就改成呼叫 adjust.py 的同一套事件函式（或共用模組）。
+  3. 再全 repo（含 .github/、scripts/）grep 一次所有自行計算還原因子的地方，列表回報。
+
+三、191 檔停在 2024-12-31 的股票（低優先）：列出清單與類別（債券 ETF／一般股／已下市），查出為何每日更新沒有補上。一般股要修，債券 ETF 列出即可。
+
+四、完成後 push，停下等 Cowork 核對。
+
+- [ ] **修.八**（互動視窗執行；動 `.github/scripts/update_price_history.py`、`data/price_history.json`、`research/adjust.py`（十三節僅互動視窗）、`research/paper_7030_tracker.py`；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
