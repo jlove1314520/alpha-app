@@ -355,11 +355,35 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
         out["adj_open"] = out["open"]
         out["adj_high"] = out["high"]
         out["adj_low"] = out["low"]
+        # 驗.八四（2026-09-29）：yfinance路徑也要截斷到上市/上櫃日——原本只有
+        # 宇宙篩選那層會呼叫truncate_to_listing_date()，價格函式本身不截，
+        # 導致興櫃期間（無漲跌幅限制）的價格漏進還原價序列（驗.七：22檔、274筆）。
+        out = _truncate_pre_listing(out, stock_id)
         _mask_non_positive_adj_prices(out)
         out.attrs["n_events_applied"] = None  # not tracked on this path -- yfinance handles it internally
         _append_anomaly_log(check_adjusted_series_anomalies(out, stock_id))
+        # 驗.八四第2點：與「FinMind原始價+已驗證事件因子」逐日報酬交叉比對，
+        # 只列警告清單、不切換主要來源。fail open（十二節）。
+        _append_crosscheck_log(crosscheck_yf_vs_finmind(out, stock_id, start_date))
         return out
 
+    out = _finmind_adjusted_frame(stock_id, start_date)
+    if out.empty:
+        return out
+    n_events = out.attrs.get("_n_events")
+    out = _truncate_pre_listing(out, stock_id)
+    _mask_non_positive_adj_prices(out)
+    out.attrs["n_events_applied"] = n_events
+    _append_anomaly_log(check_adjusted_series_anomalies(out, stock_id))
+    return out
+
+
+def _finmind_adjusted_frame(stock_id: str, start_date: str) -> pd.DataFrame:
+    """FinMind原始價 x 已驗證事件因子（股利/分割/減資/面額變更）的還原價序列，
+    **不截斷、不遮罩、不寫異常log**——`adjusted_price_series()`的FinMind備援路徑
+    與yfinance交叉比對（`crosscheck_yf_vs_finmind()`）共用這一份，確保兩邊比的是
+    同一個「FinMind重建」。回傳空表時仍帶`source`欄。事件數放在
+    `out.attrs["_n_events"]`。"""
     raw = load_dev("TaiwanStockPrice", stock_id, start_date)
     if raw.empty:
         # Bug fixed 2026-08-22: this used to call .sort_values("date") before checking
@@ -384,10 +408,26 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     out["adj_high"] = raw["max"].astype(float) * factor_cum
     out["adj_low"] = raw["min"].astype(float) * factor_cum
     out["source"] = "finmind"
-    _mask_non_positive_adj_prices(out)
-    out.attrs["n_events_applied"] = len(events)
-    _append_anomaly_log(check_adjusted_series_anomalies(out, stock_id))
+    out.attrs["_n_events"] = len(events)
     return out
+
+
+def _truncate_pre_listing(df: pd.DataFrame, stock_id: str) -> pd.DataFrame:
+    """驗.八四第1點：兩條來源路徑共用的上市日截斷。查無上市日者原樣保留
+    （`universe.truncate_to_listing_date()`本來的職責邊界，已下市/興櫃不截）。
+    截斷是資料清理、不是守門員，但上市日檔案讀取失敗仍依十二節fail open：
+    印警告、回傳原表，不讓所有呼叫端因為一個靜態檔壞掉而全部中斷。
+    被截掉的列數放在`out.attrs["n_rows_truncated_pre_listing"]`。"""
+    try:
+        from universe import truncate_to_listing_date
+
+        out = truncate_to_listing_date(df, stock_id)
+        out.attrs["n_rows_truncated_pre_listing"] = int(len(df) - len(out))
+        return out
+    except Exception as e:  # noqa: BLE001 -- fail open
+        print(f"::warning::上市日截斷失敗（{stock_id}），未截斷：{type(e).__name__}: {e}")
+        df.attrs["n_rows_truncated_pre_listing"] = 0
+        return df
 
 
 ANOMALY_RETURN_THRESHOLD_PCT = 11.0  # ⚠️2026-09-27查.二後已改為日期相依門檻
@@ -470,6 +510,108 @@ def _append_anomaly_log(hits: list[dict]) -> None:
                 f.write(json.dumps(h, ensure_ascii=False) + "\n")
     except Exception as e:  # noqa: BLE001
         print(f"::warning::還原價異常log寫入失敗：{type(e).__name__}: {e}")
+
+
+YF_CROSSCHECK_THRESHOLD_PP = 2.0  # 驗.八四第2點：逐日報酬差>2個百分點列警告
+YF_CROSSCHECK_LOG_PATH = Path(__file__).parent / "data" / "yf_finmind_crosscheck_warnings.jsonl"
+
+
+def _finmind_cache_ready(stock_id: str, start_date: str) -> bool:
+    """交叉比對只用**已快取**的FinMind資料，絕不觸發網路請求——免費額度只有
+    每小時數百次，每次呼叫`adjusted_price_series()`都多打5個資料集會把研究管線
+    自己推進402冷卻（驗.八析.二實際踩過）。缺快取就回報「無法比對」，不硬打。"""
+    from finmind_client import _cache_path
+    from validation.holdout import VAL_END
+
+    need = [
+        ("TaiwanStockPrice", stock_id), ("TaiwanStockDividend", stock_id),
+        ("TaiwanStockSplitPrice", stock_id), ("TaiwanStockCapitalReductionReferencePrice", stock_id),
+        ("TaiwanStockParValueChange", ""),
+    ]
+    return all(_cache_path(ds, sid, start_date, VAL_END).exists() for ds, sid in need)
+
+
+def _crosscheck_frames(yf_df: pd.DataFrame, fin_df: pd.DataFrame, stock_id: str,
+                       threshold_pp: float = YF_CROSSCHECK_THRESHOLD_PP) -> list[dict]:
+    """純函式（不碰網路/檔案），兩張表都要有`date`、`adj_close`。兩張表先各自
+    以日期內連接，再各算逐日報酬（缺日時兩邊跨同一段，仍可比）。兩種警告：
+    (1) `diff_over_threshold`：|yfinance報酬-FinMind重建報酬|>threshold_pp；
+    (2) `yf_over_limit_fin_within`：yfinance單日|報酬|超過該日漲跌幅門檻
+    （`_anomaly_threshold_pct()`），而FinMind重建在門檻內——驗.七判定為
+    「yfinance自身還原錯誤」的簽名（2332：yfinance+8.11%、FinMind原始價
+    +6.78%，差僅1.33pp，單看(1)抓不到，靠(2)抓）。"""
+    if yf_df.empty or fin_df.empty:
+        return []
+    a = yf_df[["date", "adj_close"]].rename(columns={"adj_close": "yf"})
+    b = fin_df[["date", "adj_close"]].rename(columns={"adj_close": "fin"})
+    j = a.merge(b, on="date", how="inner").sort_values("date").reset_index(drop=True)
+    if len(j) < 2:
+        return []
+    j["yf_ret"] = j["yf"].pct_change() * 100
+    j["fin_ret"] = j["fin"].pct_change() * 100
+    hits = []
+    for _, r in j.iloc[1:].iterrows():
+        if pd.isna(r["yf_ret"]) or pd.isna(r["fin_ret"]):
+            continue
+        date_str = str(r["date"])
+        diff = abs(r["yf_ret"] - r["fin_ret"])
+        lim = _anomaly_threshold_pct(date_str)
+        kinds = []
+        if diff > threshold_pp:
+            kinds.append("diff_over_threshold")
+        if abs(r["yf_ret"]) > lim and abs(r["fin_ret"]) <= lim:
+            kinds.append("yf_over_limit_fin_within")
+        if kinds:
+            hits.append({
+                "stock_id": stock_id, "date": date_str,
+                "yf_ret_pct": round(float(r["yf_ret"]), 2),
+                "finmind_ret_pct": round(float(r["fin_ret"]), 2),
+                "diff_pp": round(float(diff), 2), "kinds": kinds,
+                "detected_at": pd.Timestamp.now().isoformat(),
+            })
+    return hits
+
+
+def crosscheck_yf_vs_finmind(yf_out: pd.DataFrame, stock_id: str, start_date: str = "1990-01-01",
+                             *, threshold_pp: float = YF_CROSSCHECK_THRESHOLD_PP) -> list[dict]:
+    """驗.八四第2點（2026-09-29裁示）：yfinance還原日報酬 vs「FinMind原始價+已驗證
+    事件因子」日報酬，差異>2個百分點列進警告清單。**只列出、不切換主要來源**
+    （`adjusted_price_series()`仍回yfinance）。依十二節fail open：任何內部錯誤只印
+    警告、回傳空list；FinMind快取不齊全時直接跳過（不打網路，見
+    `_finmind_cache_ready()`），跳過不算通過也不算失敗。"""
+    try:
+        if yf_out.empty or not _finmind_cache_ready(stock_id, start_date):
+            return []
+        fin = _truncate_pre_listing(_finmind_adjusted_frame(stock_id, start_date), stock_id)
+        _mask_non_positive_adj_prices(fin)
+        return _crosscheck_frames(yf_out, fin, stock_id, threshold_pp)
+    except Exception as e:  # noqa: BLE001 -- 守門員自身失敗只降級
+        print(f"::warning::yfinance/FinMind交叉比對失敗（{stock_id}）：{type(e).__name__}: {e}")
+        return []
+
+
+def _append_crosscheck_log(hits: list[dict]) -> None:
+    """append-only jsonl，(stock_id, date)去重；失敗只降級警告。"""
+    if not hits:
+        return
+    try:
+        seen = set()
+        if YF_CROSSCHECK_LOG_PATH.exists():
+            for line in YF_CROSSCHECK_LOG_PATH.read_text(encoding="utf-8").splitlines():
+                try:
+                    rec = json.loads(line)
+                    seen.add((rec.get("stock_id"), rec.get("date")))
+                except Exception:  # noqa: BLE001
+                    continue
+        new_hits = [h for h in hits if (h["stock_id"], h["date"]) not in seen]
+        if not new_hits:
+            return
+        YF_CROSSCHECK_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with YF_CROSSCHECK_LOG_PATH.open("a", encoding="utf-8") as f:
+            for h in new_hits:
+                f.write(json.dumps(h, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::yfinance/FinMind交叉比對log寫入失敗：{type(e).__name__}: {e}")
 
 
 def _mask_non_positive_adj_prices(df: pd.DataFrame) -> None:
@@ -594,10 +736,113 @@ def _self_test_stock_dividend_unit() -> bool:
     return ok
 
 
+def _self_test_crosscheck_known_cases() -> bool:
+    """驗.八四第3點：3011與2332必須被交叉比對抓到（輸入寫死，來源=驗.七
+    `PENDING_QUEUE.md`（2332 2009-04-02：yfinance+8.11% vs FinMind原始價+6.78%；
+    3011 2009-06-08：+14.34% vs +6.90%），不含網路）。另含兩個負向對照：
+    差<=2pp且都在門檻內者不得誤報。"""
+    def mk(prev, ret_pct, d):
+        return [(d[0], prev), (d[1], prev * (1 + ret_pct / 100.0))]
+
+    def frame(rows):
+        return pd.DataFrame(rows, columns=["date", "adj_close"])
+
+    cases = [
+        ("2332", ("2009-04-01", "2009-04-02"), 8.11, 6.78, True),
+        ("3011", ("2009-06-05", "2009-06-08"), 14.34, 6.90, True),
+        ("NEG1", ("2009-04-01", "2009-04-02"), 3.50, 2.90, False),
+        ("NEG2", ("2020-04-01", "2020-04-02"), 9.90, 9.50, False),
+    ]
+    ok = True
+    for sid, d, yr, fr, want in cases:
+        hits = _crosscheck_frames(frame(mk(50.0, yr, d)), frame(mk(50.0, fr, d)), sid)
+        got = len(hits) > 0
+        case_ok = got == want
+        ok = ok and case_ok
+        kinds = hits[0]["kinds"] if hits else []
+        print(f"  {sid}：yf {yr:+.2f}% vs FinMind {fr:+.2f}% -> 警告={got}（應={want}）{kinds}："
+              f"{'PASS' if case_ok else 'FAIL'}")
+    print(f"[self-test 修.八-A] yfinance/FinMind交叉比對抓得到2332/3011：{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def _self_test_truncation_both_paths() -> bool:
+    """驗.八四第1點：`adjusted_price_series()`在yfinance與FinMind兩條路徑都要套上市日
+    截斷。用monkeypatch餵合成資料（不碰網路/快取）：上市日2010-01-05，資料含
+    2010-01-04之前的興櫃期間列，兩條路徑輸出的最早日期都必須>=上市日。"""
+    import yf_price_client as _yf
+    import universe as _uni
+
+    dates = ["2009-12-30", "2010-01-04", "2010-01-05", "2010-01-06", "2010-01-07"]
+    px = [10.0, 30.0, 12.0, 12.1, 12.2]
+
+    def yf_stub(stock_id, start_date="2010-01-01", end_date=None, force_refresh=False):
+        return pd.DataFrame({"date": dates, "stock_id": stock_id, "open": px, "high": px,
+                             "low": px, "close": px, "volume": 1.0, "source": "yfinance"})
+
+    def yf_empty(stock_id, start_date="2010-01-01", end_date=None, force_refresh=False):
+        return pd.DataFrame()
+
+    def load_stub(dataset, data_id="", start_date="2000-01-01", end_date=None, date_col="date", force_refresh=False):
+        return pd.DataFrame({"date": dates, "stock_id": data_id, "open": px, "close": px,
+                             "max": px, "min": px})
+
+    g = globals()
+    saved = (_yf.fetch_yf_adjusted, _uni.listing_date_lookup, g["load_dev"], g["adjustment_events"],
+             g["_append_anomaly_log"], g["_append_crosscheck_log"], g["crosscheck_yf_vs_finmind"])
+    try:
+        _uni.listing_date_lookup = lambda: {"9999": "2010-01-05"}
+        g["load_dev"] = load_stub
+        g["adjustment_events"] = lambda sid, sd="1990-01-01": _empty_events_df()
+        g["_append_anomaly_log"] = lambda hits: None
+        g["_append_crosscheck_log"] = lambda hits: None
+        g["crosscheck_yf_vs_finmind"] = lambda *a, **k: []
+        res = {}
+        for name, stub in (("yfinance", yf_stub), ("finmind", yf_empty)):
+            _yf.fetch_yf_adjusted = stub
+            out = adjusted_price_series("9999", "2009-01-01")
+            res[name] = (str(out["date"].min()), len(out), out.attrs.get("n_rows_truncated_pre_listing"))
+        _yf.fetch_yf_adjusted = yf_stub
+        res["unknown"] = len(adjusted_price_series("0000", "2009-01-01"))
+    finally:
+        (_yf.fetch_yf_adjusted, _uni.listing_date_lookup, g["load_dev"], g["adjustment_events"],
+         g["_append_anomaly_log"], g["_append_crosscheck_log"], g["crosscheck_yf_vs_finmind"]) = saved
+    ok = (res["yfinance"][0] >= "2010-01-05" and res["finmind"][0] >= "2010-01-05"
+          and res["yfinance"][1] == 3 and res["finmind"][1] == 3 and res["unknown"] == 5)
+    print(f"  yfinance路徑最早={res['yfinance'][0]}（列數{res['yfinance'][1]}，截{res['yfinance'][2]}）；"
+          f"FinMind路徑最早={res['finmind'][0]}（列數{res['finmind'][1]}，截{res['finmind'][2]}）；"
+          f"查無上市日代號列數={res['unknown']}（應5，不截）")
+    print(f"[self-test 修.八-B] 兩條路徑都套用上市日截斷：{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def _self_test_crosscheck_fail_open() -> bool:
+    """十二節：交叉比對自己壞掉（例如FinMind重建拋例外）只能印警告並回空list。"""
+    g = globals()
+    saved = (g["_finmind_cache_ready"], g["_finmind_adjusted_frame"])
+    try:
+        g["_finmind_cache_ready"] = lambda sid, sd: True
+
+        def boom(sid, sd):
+            raise ValueError("模擬FinMind重建失敗")
+
+        g["_finmind_adjusted_frame"] = boom
+        got = crosscheck_yf_vs_finmind(pd.DataFrame({"date": ["2020-01-02"], "adj_close": [1.0]}), "0000")
+    finally:
+        g["_finmind_cache_ready"], g["_finmind_adjusted_frame"] = saved
+    ok = got == []
+    print(f"[self-test 修.八-C] 交叉比對自身失敗fail open（回空list不拋例外）：{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
 if __name__ == "__main__":
     r1 = _self_test_synthetic()
     r2 = _self_test_known_bad_stock()
     r3 = _self_test_cash_increase_rate_unit()
     r4 = _self_test_stock_dividend_unit()
-    print(f"整體結果：{'PASS' if (r1 and r2 and r3 and r4) else 'FAIL'}")
-    raise SystemExit(0 if (r1 and r2 and r3 and r4) else 1)
+    r5 = _self_test_crosscheck_known_cases()
+    r6 = _self_test_truncation_both_paths()
+    r7 = _self_test_crosscheck_fail_open()
+    allok = r1 and r2 and r3 and r4 and r5 and r6 and r7
+    print(f"整體結果：{'PASS' if allok else 'FAIL'}")
+    raise SystemExit(0 if allok else 1)

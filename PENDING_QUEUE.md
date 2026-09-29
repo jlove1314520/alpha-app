@@ -16453,7 +16453,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 >
 > 五、完成後 push，停下等 Cowork 核對。score.py 在總司令決定計分榜方案前不得修改。紙.一 10/1 照常啟動，不得動。凍結.二 仍生效（析.二只做前置，不是試驗）。
 
-- [!] **驗.八** [驗證/維運/研究前置] 依序執行：一、12件待決事項落地(結案：　**⛔ 自走中止（2026-09-29 10:25）**：驗.八四(yfinance路徑修正，需編輯research/adjust.py)發現互動視窗已在working tree進行中但未commit；依CLAUDE.md十三節單一寫入者規則，DevQueue不得編輯/commit research/adjust.py，只能等互動視窗完成。一/二/三已完成並push(commit 1ca63fdd/3c2bc4ca)。解除條件：互動視窗完成四並push、或總司令另行裁示DevQueue可代為處理
+- [x] **驗.八** [驗證/維運/研究前置] ✅完成(2026-09-29，互動視窗完成四；原DevQueue自走中止已解除，見下方完成回報) 依序執行：一、12件待決事項落地(結案：　**⛔ 自走中止（2026-09-29 10:25）**：驗.八四(yfinance路徑修正，需編輯research/adjust.py)發現互動視窗已在working tree進行中但未commit；依CLAUDE.md十三節單一寫入者規則，DevQueue不得編輯/commit research/adjust.py，只能等互動視窗完成。一/二/三已完成並push(commit 1ca63fdd/3c2bc4ca)。解除條件：互動視窗完成四並push、或總司令另行裁示DevQueue可代為處理
   外部二改/Cybex.beta/零之三；常備.9改列「暫緩，資料源評估中」不結案；暫緩：
   群益API合併1條/外銷訂單/Stooq key/重構.C4；同意：Breeze-7B/分K.零shioaji
   常駐實測/稽核.三B組；結案.一git鎖保留標「待總司令實機驗證」)。二、析.一
@@ -16484,6 +16484,19 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   執行self-test觀察狀態」而非「完全不碰這支腳本」，因為只是呼叫函式
   非編輯原始碼，十三節明文允許「讀/呼叫」，且能提供互動視窗更完整的
   現況資訊。
+
+  **【驗.八 完成回報（互動視窗，2026-09-29）】**（一/二/三已於commit f390e081／1ca63fdd／3c2bc4ca完成；本段為四與收尾）
+  - **四.1 上市日截斷兩路徑皆套用**：`adjusted_price_series()`的yfinance路徑與FinMind路徑皆呼叫`truncate_to_listing_date`（新`_truncate_pre_listing`，fail open，`attrs["n_rows_truncated_pre_listing"]`）。批次量測（300檔抽樣，`research/audit_v8_yf_crosscheck.py`）：235檔有價格→64檔被截、共33,596列，截掉跨度p50 1.34年／p90 5.37年／最大9.95年；57檔上市日未知不截。
+  - **四.2 yfinance vs FinMind交叉核對**：差>2pp、或「yfinance超過漲跌幅門檻而FinMind在門檻內」進警告清單`data/yf_finmind_crosscheck_warnings.jsonl`（去重、append-only；只警告不切換主來源）。**批次覆蓋率0/235，BLOCKED**：yfinance為主來源的股票從未抓過FinMind Dividend/Split/CapitalReduction事件快取（`data/raw`實測：Price有298檔快取、Dividend 272、SplitPrice 40、CapitalReduction 115，四類齊備者僅40檔，且日期範圍未必為(2010,VAL_END)），故無法比對；補抓約900+次FinMind請求，受免費額度與402冷卻（冷卻至約12:15）限制。解除條件：額度恢復後執行`python research/audit_v8_yf_crosscheck.py --fetch-budget N`（可續跑，遇任何RuntimeError立即停手，不硬打）。
+  - **四.3 自我測試**：新增`_self_test_crosscheck_known_cases`（3011必抓：yf+14.34% vs FinMind+6.90%；2332必抓；兩個反例不誤報）、`_self_test_truncation_both_paths`、`_self_test_crosscheck_fail_open`，皆PASS。
+  - **[自行裁量]① 2332只差1.33pp(<2pp)**，是靠輔助判準「yfinance超過漲跌幅門檻而FinMind在門檻內」才抓到，不是主判準>2pp；已在AWAITING_REVIEW請Cowork確認是否接受。
+  - **[自行裁量]② 交叉核對只讀快取、不在`adjusted_price_series()`內即時打FinMind**（避免每次取價變成網路呼叫、避免撞免費額度冷卻），代價=覆蓋率取決於快取補齊程度。
+  - **既有缺陷（與四無關，未修）**：`python research/adjust.py`整體仍FAIL，唯一原因是既有自我測試3/4（2038，CashIncreaseSubscriptionRate，誤差0.574%）；在HEAD未修改版本上同樣失敗。未動容差（動門檻須裁示）。
+  - **已知限制（轉板）**：`truncate_to_listing_date`可能截掉轉板股的合法上櫃歷史；截掉跨度>3年者13檔列出未處理：4741,6584,3564,3147,6692,8284,2938,6438,5220,6558,6689,3711,8027。
+  - **析.一重跑（四改變價格後）**：可用股票240→234；20日快照平均IC最大變動−0.0022，結論不變；已註記於`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`§4。
+  - **三/析.二**：`docs/PREREG_DRAFT_nowcast_eps.md`為草案（不登記不執行）；券商共識預估查了TWSE OpenAPI／GitHub issue／LSEG I/B/E/S與TEJ，共識資料源=「待採購／需詢價」，常備.9維持「暫緩，資料源評估中」，顯示型網站未爬。
+  - **未動**：score.py、紙.一（paper_7030_tracker.py／market.yml步驟／App卡片／data/paper_7030.json）、holdout、既有判定（#7/#8/#9/#398–#404）；凍結.二仍生效。未動index.html，故未跑冒煙測試。
+  - **心跳**：本行已改`- [x]`，`research/PROGRESS_HEARTBEAT.jsonl`已append一行；`research/AWAITING_REVIEW.md`已新增驗.八列（等待審閱17件）。等Cowork核對。
 
   **【驗.八一】12件待決事項落地明細（2026-09-29）**：
   - 結案(3)：外部二改／Cybex.beta／零之三（見各條首行標記）。

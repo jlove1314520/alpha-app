@@ -1,3 +1,16 @@
+## 2026-09-29（互動視窗，驗證帽，驗.八 四：yfinance路徑修正＋收尾）
+
+等待總司令審閱：17件（本輪新增驗.八）。詳見`research/AWAITING_REVIEW.md`。
+
+**做了什麼**：`research/adjust.py`的`adjusted_price_series()`兩條路徑皆套上市日截斷；新增yfinance vs「FinMind原始價＋事件因子」日報酬交叉核對（差>2pp或yf超過漲跌幅門檻而FinMind在門檻內→警告清單，只警告不切主來源，快取only、fail-open）；新增3個自我測試（3011／2332必抓到）；新增`research/audit_v8_yf_crosscheck.py`批次量測（含`--fetch-budget`可續跑補抓）。四改變價格後重跑析.一，可用股票240→234、IC最大變動−0.0022、結論不變，已註記於`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`。
+**量測**：235檔有價格、64檔被截共33,596列（跨度p50 1.34年／p90 5.37年／最大9.95年）；13檔截掉>3年列為疑似轉板（只列出）。
+**未完成／BLOCKED**：交叉核對批次覆蓋0/235——yfinance主來源股票沒有FinMind事件快取，補抓約900+次請求，受免費額度與402冷卻（至約12:15）限制；續跑指令`python research/audit_v8_yf_crosscheck.py --fetch-budget N`。
+**既有缺陷（與四無關，未修）**：`python research/adjust.py`整體FAIL僅因既有自我測試3/4（2038，誤差0.574%），HEAD未修改版本同樣失敗；未動容差，待裁示。
+**[自行裁量]**：交叉核對只讀快取、不即時打FinMind；2332（差1.33pp）靠輔助判準才抓到。
+**驗證**：新增自我測試A/B/C與既有1/2、4/4 PASS；未動index.html，未跑冒煙測試。
+**未動**：score.py、紙.一、holdout、既有判定；凍結.二仍生效。
+**下一步**：push後停下等Cowork核對。
+
 ## 2026-09-27（DevQueue自走cycle 20260927-160101，維運帽，清.一查證阻塞＋佇列確認清空）
 
 等待總司令審閱：11件（本輪未新增，維持原狀）。詳見`research/AWAITING_REVIEW.md`。
