@@ -16792,3 +16792,40 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
   **心跳**：本行暫不改`- [x]`（尚未完全完成），但已有實質進度，本輪
   commit即為心跳；`research/PROGRESS_HEARTBEAT.jsonl` append一行記錄
   本輪進度。
+
+  **DevQueue cycle 20260929-161602 接手核對（無新增程式碼，純狀態驗證）**：
+  - 一（定量分解）：**仍阻塞**。`Get-CimInstance Win32_OperatingSystem`
+    實測系統可用記憶體本輪全程2.5~2.8GB（<3GB門檻），且呈下降趨勢；
+    `Get-Process`交叉核對確認主要佔用者是使用者本機`Riot Client`／
+    `LeagueClientUxRender`／`LeagueClient`（League of Legends客戶端，
+    合計約4GB）＋多個並行`claude.exe` session（各約350~560MB），非本
+    管線洩漏。`[自行裁量]`：不再嘗試第4次執行`audit_v9_revenue_trace.py`
+    （前三次已於前一輪cycle 20260929-154602嘗試，皆因mem_guard終止，
+    符合「同一項試了兩次還是失敗」門檻，且retry條件明文為「記憶體回升
+    ≥3GB」而非「重新嘗試」，繼續嘗試只是重複同一個已知結果）；也不
+    考慮要求關閉使用者自己的前景應用程式（不可逆／需使用者操作，且
+    超出本次授權範圍）。retry條件不變。
+  - 二（crosscheck續跑）：**確認健康，未重複啟動**。`Get-CimInstance
+    Win32_Process`確認PID 118932（`audit_v9_fetch_missing.py --phase all`，
+    啟動於15:25:12）仍在執行；`research/data/raw/`底下
+    `TaiwanStockSplitPrice`／`TaiwanStockCapitalReductionReferencePrice`
+    parquet快取檔持續以約14秒/筆的節奏新增（本輪核對時最新寫入距離
+    檢查時間僅數秒），符合腳本設計的節流節奏，判定為健康在製品，
+    **未重複啟動第二個process**（避免同時打兩條FinMind請求流撞402）。
+    完成或撞牆結果會寫進`research/data/diag_v9_fetch_missing.json`
+    （gitignore），下一輪核對即可。
+  - 阻塞項目盤點（開工前兩件事第1點）：逐一檢視現存13個`- [!]`項目
+    （資料源.外銷訂單彙總／重構.C4／金流一.4／資料源一.3／外部一改.2／
+    研究.c／稽核.三／稽核.五／結案.一／常備.9／紙.一／群益API(合併)／
+    本地AI摘要(Breeze-7B)），**無一項本輪解除條件已滿足**：金流一.4由
+    `build_sector_flow.py`每日自動改寫不需人工介入；紙.一等
+    2026-10第一個交易日（今日09-29尚未到）；其餘皆需總司令裁示、
+    外部資料累積、或法遵/合規問題，非DevQueue可逕行處理的可還原技術
+    選擇。
+  - 佇列深度：`- [ ]`仍為1（<12下限）。與16:0x馬拉松第667輪「確認凍結.二
+    下無可做工作單位」的結論一致，本輪額外快速重掃`HYPOTHESIS_QUEUE.md`
+    「排隊中」／`STRATEGY_GRAVEYARD.md`「下一步」／`*_LEADS.md`「下一步」，
+    命中的皆為已被後續輪次接續或結案的歷史紀錄（例如FUT軌round341~399
+    一系列「下一步」皆已在後續round被執行並結案），或屬`[研究]`類（歸
+    marathon/hypothesis_queue軌，非DevQueue該做），**沒有可誠實補入的
+    新項目，不硬湊數量**，屬白名單第7條前置紀錄。

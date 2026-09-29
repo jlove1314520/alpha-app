@@ -1,4 +1,56 @@
-## 2026-09-29（DevQueue自走cycle 20260929-154602，驗證/研究診斷帽，驗.九進行中：一析.三靜態AST比對完成確定排除PIT修正為revenue掉分原因＋二額度卡住項目nowcast補抓完成crosscheck接續中）
+## 2026-09-29（DevQueue自走cycle 20260929-161602，維運帽，驗.九狀態核對：確認阻塞/進行中兩子項皆維持正確狀態，無新增程式碼）
+
+等待總司令審閱：19件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表；本輪僅為狀態核對，未產生新的審閱項）。
+
+**做了什麼**（純驗證，未寫新程式碼）：
+1. 用`python scripts/dev_queue_runner.py next`／`check_collision`確認
+   `驗.九`仍是唯一`- [ ]`項目、且沒有其他自走軌道持鎖，可安全接手。
+2. **驗.九一（定量分解）維持阻塞**：`Get-CimInstance
+   Win32_OperatingSystem`本輪全程實測系統可用記憶體2.5~2.8GB，持續
+   低於`mem_guard.py`固定門檻3GB且呈下降趨勢；用`Get-CimInstance
+   Win32_Process`交叉核對確認主要佔用者是使用者本機`Riot Client`／
+   `LeagueClientUxRender`／`LeagueClient`（League of Legends用戶端，
+   合計約4GB）＋多個並行`claude.exe` session，非本管線自身有記憶體
+   洩漏。`[自行裁量]`：不執行第4次`audit_v9_revenue_trace.py`（前一輪
+   已嘗試3次皆被mem_guard終止，符合「同一項試了兩次還是失敗」的停手
+   門檻；retry條件明文是「記憶體回升≥3GB」不是「重複嘗試」，重試只會
+   得到同一個已知結果）；不考慮要求使用者關閉自己的前景應用程式
+   （不可逆／需使用者操作，超出本次自走授權範圍）。
+3. **驗.九二（crosscheck續跑）確認健康、未重複啟動**：`Get-CimInstance
+   Win32_Process`確認前一輪已背景啟動的PID 118932
+   （`audit_v9_fetch_missing.py --phase all`，啟動於15:25:12）仍在
+   執行；`research/data/raw/`底下crosscheck相關parquet快取檔
+   （`TaiwanStockSplitPrice`／`TaiwanStockCapitalReductionReferencePrice`）
+   持續以約14秒/筆的節奏新增，最新寫入距檢查時間僅數秒，判定為健康
+   在製品，**刻意不重複啟動第二個process**（避免同時打兩條FinMind
+   請求流撞402）。
+4. **13個既有`- [!]`阻塞項目逐一核對解除條件**（開工前兩件事第1點）：
+   資料源.外銷訂單彙總／重構.C4／金流一.4／資料源一.3／外部一改.2／
+   研究.c／稽核.三／稽核.五／結案.一／常備.9／紙.一／群益API(合併)／
+   本地AI摘要(Breeze-7B)，**無一項本輪解除**——金流一.4由
+   `build_sector_flow.py`每日自動改寫不需人工介入；紙.一等
+   2026-10第一個交易日（尚未到）；其餘皆需總司令裁示、外部資料累積、
+   或法遵/合規問題。
+5. **佇列深度檢查**：`- [ ]`仍為1（<12下限）。與16:0x馬拉松第667輪
+   「確認凍結.二下無可做工作單位」結論一致；本輪額外快速重掃
+   `HYPOTHESIS_QUEUE.md`「排隊中」／`STRATEGY_GRAVEYARD.md`「下一步」／
+   `*_LEADS.md`「下一步」，命中的皆為已被後續輪次接續或結案的歷史紀錄
+   （例如FUT軌round341~399一系列「下一步」已在後續round陸續執行並
+   結案），或屬`[研究]`類（歸marathon/hypothesis_queue軌，非DevQueue
+   該做），**沒有可誠實補入的新項目，不硬湊數量**，屬白名單第7條
+   前置紀錄。
+
+**驗證**：`node scripts/smoke_test.mjs`（見下方輸出）；未改`index.html`
+或任何管線程式碼，純`PENDING_QUEUE.md`／`PROGRESS.md`文件更新。
+
+**卡住的問題**：同前一輪——系統可用記憶體<3GB（環境因素，本輪查明
+主因是使用者本機League of Legends用戶端佔用約4GB，非程式bug），
+阻塞`audit_v9_revenue_trace.py`定量分解部分；retry條件＝記憶體回升
+≥3GB，下一輪DevQueue或記憶體釋出後的任何時點可直接重跑。crosscheck
+續跑（二）持續在背景進行中，預估仍需相當時間（14秒/請求×剩餘筆數），
+下一輪核對`research/data/diag_v9_fetch_missing.json`即可知進度。
+
+
 
 等待總司令審閱：19件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表；本輪工作屬既有#37/#38驗.七/驗.八審閱項目的延伸證據，未產生新的獨立審閱項）。
 
