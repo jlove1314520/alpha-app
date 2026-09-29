@@ -2854,3 +2854,15 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - 驗證：`trial_registry.py --check` exit=0 PASS（402列，無新判定）；`is_holdout_consumed()`=True（H.一先前已消耗，非本輪動作）；`run_detached.py status` running=0；`git status`確認十三節限定檔案無殘留未commit編輯。
 - 等待總司令審閱：15件（與`AWAITING_REVIEW.md`表格列數核對一致，本輪未變動）。交辦佇列還剩0條`- [ ]`未開始。
 ---
+## 第664輪 · 2026-09-29T11:0x+08:00 · FUT · 維運帽：核對交辦與阻塞項、確認`分K.零`下一步需互動視窗處理、凍結.二下FUT軌無新工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260929-110036`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=1（僅`分K.零`；`驗.八`／`稽核.三B`已於round663之後由互動視窗/DevQueue完成並標`- [x]`）。
+- 核對`分K.零`：round663（馬拉松第663輪）已完成「涵蓋範圍」量測（上市/上櫃/ETF共9檔全200、已下市3檔全404），下一步「最多回溯多久」需擴充`shioaji_quotes.py`daemon協定（加start/end參數）並重啟常駐行程——round663已明確記錄「對正式交易連線的變更，建議由互動視窗執行」。本輪重新核對此判斷仍成立（`shioaji_quotes.py`是實盤報價常駐行程，重啟有中斷風險，非可回復的純讀取操作），依「零之一」白名單精神不自行變更正式交易連線，本輪不觸碰，`分K.零`維持`- [ ]`。
+- 逐一核對12條`- [!]`阻塞項：`data/institutional_history.json`確認`dates`陣列仍20筆、最後日期`20260924`，solid交易日數維持16日（20日視窗仍差4個交易日，未解除）；`research/data/ticks/*.parquet`實測仍13/20（未解除）；其餘10條均為等總司令/Cowork裁示或其他外部條件，皆未到解除時間。
+- `grep -c "凍結.二解除" PENDING_QUEUE.md`=3，皆為條件敘述提及、非實際宣告解除，`CLAUDE.md`十四節【凍結.二】仍生效。三軌時間戳：FUT round661=09-29 00:3x（最舊）／TW round663=09-29 10:0x／US round662=09-29 09:0x——依輪替選FUT。
+- 逐一核對`凍結.二`允許的四類工作現況：稽核重跑／驗.二重跑先前輪次已全部完成並登記；資料抓取（`資料.一`/`閘門.一`）已完成300/300；工具修正已由互動視窗commit；`git status --short`確認`research/backtest/`／`research/validation/`／`research/adjust.py`／`research/pit.py`／`research/trial_registry.py`等十三節限定清單內檔案無殘留未commit編輯（輸出為空）。FUT軌本身`FUT_LEADS.md`/`STRATEGY_GRAVEYARD.md`回顧：個股期貨橫斷面線、trend/oi組合嘗試、全天close-to-close反轉/順勢皆已窮盡並結案，無清楚剩餘的全新機制候選，且凍結.二期間本來就不得登記新alpha試驗。
+- 驗證：`run_detached.py status` running=0（162筆歷史，無job待收成）；`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（406列，本輪純查證未新增判定）；`validation/holdout.py::is_holdout_consumed()`讀取為`True`（H.一單次解鎖已於09-27消耗，非本輪新增動作，僅讀取核對）。
+- `AWAITING_REVIEW.md`「等待中」表格逐行核對共18列，與表頭「目前：18件」一致（較round663的16件+2，來自`驗.八`本身與`本地AI摘要(Breeze-7B)`兩項完成待審，非本輪新增動作）。
+- **本輪誠實結論**：`分K.零`唯一未開始交辦項的下一步需要變更正式交易連線，不適合由無人值守馬拉松執行；凍結.二允許的四類工作皆已完成或無新內容，12條`- [!]`逐一核對均未到解除時間，FUT軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不變更正式交易連線。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、`trial_registry.py --check`）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- 等待總司令審閱：18件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩1條`- [ ]`未開始（`分K.零`，判定為需互動視窗處理，非漏做）。下一輪建議選US軌（round662=09-29 09:0x，三軌中最舊）；開工前先重新檢查`分K.零`是否已由互動視窗處理。
+---
