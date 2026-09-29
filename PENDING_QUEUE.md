@@ -16453,7 +16453,7 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
 >
 > 五、完成後 push，停下等 Cowork 核對。score.py 在總司令決定計分榜方案前不得修改。紙.一 10/1 照常啟動，不得動。凍結.二 仍生效（析.二只做前置，不是試驗）。
 
-- [ ] **驗.八** [驗證/維運/研究前置] 依序執行：一、12件待決事項落地(結案：
+- [!] **驗.八** [驗證/維運/研究前置] 依序執行：一、12件待決事項落地(結案：　**⛔ 自走中止（2026-09-29 10:25）**：驗.八四(yfinance路徑修正，需編輯research/adjust.py)發現互動視窗已在working tree進行中但未commit；依CLAUDE.md十三節單一寫入者規則，DevQueue不得編輯/commit research/adjust.py，只能等互動視窗完成。一/二/三已完成並push(commit 1ca63fdd/3c2bc4ca)。解除條件：互動視窗完成四並push、或總司令另行裁示DevQueue可代為處理
   外部二改/Cybex.beta/零之三；常備.9改列「暫緩，資料源評估中」不結案；暫緩：
   群益API合併1條/外銷訂單/Stooq key/重構.C4；同意：Breeze-7B/分K.零shioaji
   常駐實測/稽核.三B組；結案.一git鎖保留標「待總司令實機驗證」)。二、析.一
