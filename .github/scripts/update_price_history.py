@@ -55,6 +55,10 @@ EX_RIGHT_URL = "https://www.twse.com.tw/rwd/zh/exRight/TWT48U"
 # 2026-09-30（修.八）：TWSE官方rwd每日收盤行情（含歷史日期），STOCK_DAY_ALL
 # OpenAPI檔案是「隔天清晨才更新」的快照（見fetch_twse()診斷），夜間排程時上市
 # 永遠比上櫃慢一個交易日；這個端點同日收盤後即有資料，當補洞／備援用。
+REDUCTION_URL = "https://www.twse.com.tw/rwd/zh/reducation/TWTAUU"  # 減資恢復買賣參考價（TWSE官方，免金鑰）
+REDUCTION_SOURCE = "twse_reduction"
+REDUCTION_ANCHOR_TOL = 0.005  # 前一筆close需貼近「停止買賣前收盤價」（0.5%），否則視為定錨失敗
+REDUCTION_ALREADY_TOL = 0.01  # 前後兩筆adj/close比值已相差約factor（1%內）＝來源已含此次調整
 MI_INDEX_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
 MI_INDEX_SOURCE = "twse_mi_index"  # 獨立節流名稱，不跟其他腳本的twse_rwd互相拖累
 MI_INDEX_MAX_DATES_PER_RUN = 8
@@ -476,6 +480,113 @@ def apply_dividend_adjustments(prices: dict, ledger: dict, today_iso: str) -> in
     return applied_count
 
 
+def fetch_capital_reductions(today_iso: str) -> list[dict]:
+    """TWSE官方減資恢復買賣參考價表（rwd/zh/reducation/TWTAUU，免金鑰，支援
+    startDate/endDate區間查詢，實測2026-09-30）。每日抓「今天前120天～後60天」，
+    已知參考價的事件才回傳（未來事件參考價欄位為「-」，等公布後下一輪才會進來）。
+    調整係數=恢復買賣參考價/停止買賣前收盤價（彌補虧損/退還股款/現金減資皆同一式，
+    與research/adjust.py對TaiwanStockCapitalReductionReferencePrice的用法一致）。
+    **已知範圍**：只涵蓋上市（TWSE）；上櫃（TPEx）swagger 225個端點中沒有對應的
+    減資參考價表（2026-09-30查證），上櫃減資由下一輪的異常跳空稽核列出、不在此調整。"""
+    today = datetime.strptime(today_iso, "%Y-%m-%d")
+    params = {"response": "json",
+              "startDate": (today - timedelta(days=120)).strftime("%Y%m%d"),
+              "endDate": (today + timedelta(days=60)).strftime("%Y%m%d")}
+    r = _get_retry(REDUCTION_URL, REDUCTION_SOURCE, params=params, timeout=20)
+    r.raise_for_status()
+    body = r.json()
+    if body.get("stat") != "OK" or not body.get("data"):
+        return []
+    fields = body["fields"]
+
+    def _idx(want):
+        for i, f in enumerate(fields):
+            if want in f:
+                return i
+        return None
+
+    i_date, i_code = _idx("恢復買賣日期"), _idx("股票代號")
+    i_pre, i_ref, i_why = _idx("停止買賣前收盤價"), _idx("恢復買賣參考價"), _idx("減資原因")
+    if None in (i_date, i_code, i_pre, i_ref):
+        raise RuntimeError("TWTAUU 欄位對應失敗（TWSE可能改版了欄位名稱）")
+    out = []
+    for row in body["data"]:
+        m = re.match(r"^(\d{2,3})/(\d{2})/(\d{2})$", str(row[i_date]).strip())
+        code = (row[i_code] or "").strip()
+        pre, ref = _num(row[i_pre]), _num(row[i_ref])
+        if not (m and code and pre and ref and pre > 0 and ref > 0):
+            continue
+        out.append({"code": code, "resume_date": f"{int(m.group(1)) + 1911}-{m.group(2)}-{m.group(3)}",
+                    "pre_close": pre, "ref_price": ref,
+                    "reason": row[i_why] if i_why is not None else None})
+    return out
+
+
+def merge_reductions(ledger: dict, items: list[dict], today_iso: str) -> int:
+    bucket_all = ledger.setdefault("reductions", {})
+    added = 0
+    for it in items:
+        bucket = bucket_all.setdefault(it["code"], [])
+        if any(e["resume_date"] == it["resume_date"] for e in bucket):
+            continue
+        bucket.append({**it, "first_seen": today_iso, "applied": False})
+        added += 1
+    return added
+
+
+def apply_reduction_adjustments(prices: dict, ledger: dict, today_iso: str) -> int:
+    """對 resume_date<=today_iso 且未處理的減資事件，把date<resume_date的列的
+    adj_close乘上factor=ref_price/pre_close。三道守門（任一不過就不套用並記
+    skip_reason，adj_close維持原狀，不會比修正前更差）：
+    1. 定錨：resume_date前一筆的close必須貼近pre_close（REDUCTION_ANCHOR_TOL），
+       擋掉快取缺口（例如停在2024-12-31的股票）；
+    2. 冪等：resume_date當天或之後第一筆若存在，且前一筆adj/close÷該筆adj/close
+       已約等於factor，代表來源（research端還原）已含此次調整，不重複乘；
+    3. factor必須為正有限值。
+    事件在資料窗內尚無前一筆（新上市/歷史不足）時不標applied，等資料累積。"""
+    applied = 0
+    for code, events in ledger.get("reductions", {}).items():
+        rows = prices.get(code)
+        if not rows:
+            continue
+        rows_sorted = sorted(rows, key=lambda r: r["date"])
+        for ev in events:
+            if ev.get("applied") or ev["resume_date"] > today_iso:
+                continue
+            prior = [r for r in rows_sorted if r["date"] < ev["resume_date"]]
+            if not prior:
+                continue
+            anchor = prior[-1]
+            factor = ev["ref_price"] / ev["pre_close"]
+            if anchor.get("close") in (None, 0) or abs(anchor["close"] / ev["pre_close"] - 1) > REDUCTION_ANCHOR_TOL:
+                ev["applied"] = True
+                ev["skip_reason"] = (f"定錨失敗：前一筆({anchor['date']})close={anchor.get('close')}"
+                                     f"與停止買賣前收盤價{ev['pre_close']}不符，快取缺口或資料異常，不套用")
+                continue
+            post = [r for r in rows_sorted if r["date"] >= ev["resume_date"]]
+            if post and post[0].get("close") and anchor.get("adj_close") and post[0].get("adj_close"):
+                ratio = (anchor["adj_close"] / anchor["close"]) / (post[0]["adj_close"] / post[0]["close"])
+                if abs(ratio / factor - 1) <= REDUCTION_ALREADY_TOL:
+                    ev["applied"] = True
+                    ev["skip_reason"] = "來源adj_close已含此次減資調整（前後比值≈factor），不重複套用"
+                    continue
+            if not (factor > 0 and factor == factor and factor != float("inf")):
+                ev["applied"] = True
+                ev["skip_reason"] = "factor非正有限值，資料異常，不套用"
+                continue
+            for r in rows:
+                if r["date"] < ev["resume_date"]:
+                    base = r.get("adj_close")
+                    if base is None:
+                        base = r.get("close")
+                    if base is not None:
+                        r["adj_close"] = base * factor
+            ev["applied"] = True
+            ev["factor_applied"] = factor
+            applied += 1
+    return applied
+
+
 def main():
     if not OUT_PATH.exists():
         print(f"錯誤：{OUT_PATH} 不存在——這支腳本設計上只做累積更新，"
@@ -529,7 +640,11 @@ def main():
             prices[code] = merge_rows(prices.get(code), latest)
         twse_updated = len(twse)
 
-    twse_dates_with_data = sorted(set(twse_gap_dates) | ({openapi_date} if openapi_date else set()))
+    # 已存最後上市日也算「查得到資料的日子」：OpenAPI落後(T+1)、且當天MI_INDEX尚未發布時，
+    # 前一輪已補好的日期不在本輪twse_gap_dates裡，不納入會讓自我測試誤判FAIL（2026-09-30實測）。
+    stored_last_twse = max((prices[c][-1]["date"] for c in (set(twse) or {"0050"}) if prices.get(c)), default=None)
+    twse_dates_with_data = sorted(set(twse_gap_dates) | ({openapi_date} if openapi_date else set())
+                                  | ({stored_last_twse} if stored_last_twse else set()))
     twse_latest_date = twse_dates_with_data[-1] if twse_dates_with_data else None
     today_iso = twse_latest_date or today_tw
 
@@ -557,6 +672,18 @@ def main():
     except Exception as e:
         print(f"除權息預告表(TWT48U) 更新失敗（不影響價量本身，adj_close退回等於close）：{e}")
         errors.append(f"ex_dividend: {e}")
+
+    reductions_added = reductions_applied = 0
+    try:
+        ledger = load_ex_dividend_ledger()
+        reductions_added = merge_reductions(ledger, fetch_capital_reductions(today_iso), today_iso)
+        reductions_applied = apply_reduction_adjustments(prices, ledger, today_iso)
+        ledger.setdefault("meta", {})["reductions_generated_at"] = datetime.now(TW_TZ).isoformat()
+        EX_DIVIDEND_EVENTS_PATH.write_text(
+            json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    except Exception as e:
+        print(f"減資參考價表(TWTAUU) 更新失敗（不影響價量本身，減資調整略過）：{e}")
+        errors.append(f"capital_reduction: {e}")
 
     tpex_payload_date = None
     try:
@@ -595,6 +722,8 @@ def main():
     payload["meta"]["errors"] = errors
     payload["meta"]["ex_dividend_events_added"] = ex_div_added
     payload["meta"]["ex_dividend_events_applied"] = ex_div_applied
+    payload["meta"]["capital_reduction_events_added"] = reductions_added
+    payload["meta"]["capital_reduction_events_applied"] = reductions_applied
     payload["meta"]["mixed_date_warning"] = mixed_date_warning
     payload["meta"]["twse_openapi_date"] = openapi_date
     payload["meta"]["twse_gap_filled_dates"] = twse_gap_dates

@@ -1,7 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-09-30T00:43:32.250489+08:00",
-    "last_fetch_count": 16
+    "generated_at": "2026-09-30T01:06:11.084160+08:00",
+    "last_fetch_count": 16,
+    "reductions_generated_at": "2026-09-30T01:06:11.399515+08:00"
   },
   "events": {
     "01010T": [
@@ -2131,6 +2132,127 @@
         "rights_ratio": 0.0,
         "rights_price": 0.0,
         "type": "息",
+        "first_seen": "2026-09-24",
+        "applied": false
+      }
+    ]
+  },
+  "reductions": {
+    "2380": [
+      {
+        "code": "2380",
+        "resume_date": "2026-06-29",
+        "pre_close": 6.6,
+        "ref_price": 23.86,
+        "reason": "彌補虧損",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "skip_reason": "定錨失敗：前一筆(2024-12-31)close=4.33與停止買賣前收盤價6.6不符，快取缺口或資料異常，不套用"
+      }
+    ],
+    "1459": [
+      {
+        "code": "1459",
+        "resume_date": "2026-08-03",
+        "pre_close": 11.85,
+        "ref_price": 12.46,
+        "reason": "退還股款",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "factor_applied": 1.0514767932489453
+      }
+    ],
+    "6176": [
+      {
+        "code": "6176",
+        "resume_date": "2026-08-24",
+        "pre_close": 81.3,
+        "ref_price": 105.06,
+        "reason": "退還股款",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "skip_reason": "定錨失敗：前一筆(2024-12-31)close=196.5與停止買賣前收盤價81.3不符，快取缺口或資料異常，不套用"
+      }
+    ],
+    "1563": [
+      {
+        "code": "1563",
+        "resume_date": "2026-09-07",
+        "pre_close": 66.0,
+        "ref_price": 84.66,
+        "reason": "退還股款",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "factor_applied": 1.2827272727272727
+      }
+    ],
+    "2321": [
+      {
+        "code": "2321",
+        "resume_date": "2026-09-21",
+        "pre_close": 15.1,
+        "ref_price": 27.61,
+        "reason": "彌補虧損",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "factor_applied": 1.828476821192053
+      }
+    ],
+    "3356": [
+      {
+        "code": "3356",
+        "resume_date": "2026-09-21",
+        "pre_close": 59.4,
+        "ref_price": 68.04,
+        "reason": "退還股款",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "skip_reason": "來源adj_close已含此次減資調整（前後比值≈factor），不重複套用"
+      }
+    ],
+    "3591": [
+      {
+        "code": "3591",
+        "resume_date": "2026-09-21",
+        "pre_close": 23.65,
+        "ref_price": 25.22,
+        "reason": "退還股款",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "skip_reason": "來源adj_close已含此次減資調整（前後比值≈factor），不重複套用"
+      }
+    ],
+    "1441": [
+      {
+        "code": "1441",
+        "resume_date": "2026-09-29",
+        "pre_close": 8.72,
+        "ref_price": 10.13,
+        "reason": "彌補虧損",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "factor_applied": 1.161697247706422
+      }
+    ],
+    "6550": [
+      {
+        "code": "6550",
+        "resume_date": "2026-09-29",
+        "pre_close": 9.92,
+        "ref_price": 19.09,
+        "reason": "彌補虧損",
+        "first_seen": "2026-09-24",
+        "applied": true,
+        "factor_applied": 1.9243951612903225
+      }
+    ],
+    "2601": [
+      {
+        "code": "2601",
+        "resume_date": "2026-10-05",
+        "pre_close": 5.91,
+        "ref_price": 7.06,
+        "reason": "彌補虧損",
         "first_seen": "2026-09-24",
         "applied": false
       }
