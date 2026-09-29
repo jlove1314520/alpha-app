@@ -16981,3 +16981,24 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
   - **[需總司令／Cowork 裁示的重要落差]**：評.B 的前提「scores.json 的 EPS／營收成分來自 score.py」與線上 App 實況不符。**線上 App 的 `scores.json`（1977 檔、`stocks` 欄位）由 `research/generate_scores_live.py`（排程在 `market.yml`）以 `score_v2.FACTOR_DEFS` 八因子＋`weights_frozen.json` 產生，不經過 `score.py`**；`score.py`（`meta`／`scores` 格式）只被手動 `generate_scores_json.py` 與歷史回測腳本使用。因此本次方案 B 只落在 `score.py` 研究路徑，**線上榜單目前排序與警語都沒變**。我沒有替總司令直接改 live 八因子路徑，也沒有在 App 上貼「只用低波動一個成分」的警語，因為那對 live 榜單是**不實揭露**。一.4 的 App 端警語與一.7 的「計分方案 B」標註，只對 `score.py` 路徑產出的紀錄成立（`_meta.score_scheme="B"`）；既有 picks_ledger／績效紀錄未回溯動。**待裁示**：(甲) live 路徑維持現狀（八因子凍結權重，另案處理其中 eps／營收類因子）；(乙) 在 `generate_scores_live.py` 也做「僅 low_vol」＋普通股資格池＋警語（會改變線上榜單與 picks_ledger 來源，屬較大變更，建議 Cowork 核對後再做）。[自行裁量]：選擇不動 live 路徑、先如實回報。
   - **[自行裁量]**：(1) 對照日用 2024-12-30（見上）；(2) token 無法查方案時保守用 600/hr；(3) 舊榜對照為記憶體內 monkeypatch 重算，未覆寫任何 repo 根目錄 `scores.json`；(4) 歷史回測腳本（portfolio_backtest*／run_score_backtest／long_short_backtest／calibration_probe_momentum_12_1）匯入同一批常數，其已鎖判定（#7/#8/#9/#398–#404）依守.一不重跑、不動。
   - **未動**：紙.一（10/1 啟動）、凍結.二、holdout、live `scores.json`、`index.html`。token 由總司令自行填入 `.env`，CC 未接觸任何 token 值，也未打 FinMind。
+
+## 2026-09-29 總司令裁示【評.B-2：方案 B 套用到 App 線上計分＋上櫃轉上市截斷修正＋樣本規則】
+
+【評.B-2：方案 B 套用到 App 線上計分＋上櫃轉上市截斷修正＋樣本規則】先寫進 PENDING_QUEUE 再動工。
+
+一、方案 B 套用到線上路徑（總司令 09-29 核准的「價值成長榜只用低波動計分」，當時的前提誤以為線上走 score.py，Cowork 更正）：
+  1. research/generate_scores_live.py：composite 改為只用 low_vol，公式與 factors.py 的 f_low_vol 完全一致（同一視窗、同一還原價來源；data/price_history.json 的 adj_close 已走 adjust.py），歷史不足視窗的股票留 None 不進榜。
+  2. 其他成分（earnings_growth、revenue_momentum、growth_quality、chips、technical、valuation_adj）照常計算並輸出到明細欄位，但不進總分。weights_frozen.json 保留不刪，另存一份 weights_frozen_planB.json 並註明生效日。
+  3. 資格池接 universe.common_stock_only()，排除 ETF／特別股／TDR／興櫃。
+  4. scores.json 的 _meta 加 backtest_status「尚未回測驗證」（與動能榜、未來性榜一致），並加上揭露：「自 2026-09-30 起只用低波動計分；財報成長、營收成分因重驗未過或未驗證，暫不計分，明細仍顯示。」App 選股頁同步顯示這個標籤。
+  5. 冒煙測試全部通過（特別是第 39、41、46 項），回報新舊榜單前 20 名與產業分布對照。既有的每日紀錄不回溯修改，新紀錄註明「計分方案 B」。
+
+二、上市日截斷修正：truncate_to_listing_date() 改用「上市日與上櫃日取較早者」。重新檢查被截斷的 64 檔，列出每檔改前、改後的截斷日，並確認 4741、6584、8284、6438 不再被誤砍。附自我測試。
+
+三、樣本規則（寫進研究協定文件）：以後的因子 IC 測試，樣本至少 300 檔，並回報池內重抽的百分位標準差。樣本少於 150 檔的既有結論，在 FACTORS.md 標註「低檢定力」。
+
+四、FinMind token 驗證：下一次呼叫 FinMind 時，用 user_info 查一次方案，只把 api_request_limit 與 user_count 寫進 rate_limit_state.json，不得印出或記錄 token 本身。回報每小時上限是否已經是 600。
+
+五、完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動，不得動。
+
+- [ ] **評.B-2**（互動視窗執行；動 `research/generate_scores_live.py`、`truncate_to_listing_date()`（adjust.py/pit.py 系，十三節僅互動視窗可改）、FACTORS.md、研究協定文件、`rate_limit_state.json`、index.html 選股頁標籤）
