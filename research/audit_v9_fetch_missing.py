@@ -20,7 +20,8 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 from finmind_client import _cache_path, load_dev
 from universe import listing_date_lookup, universe
 
-SPACING = 14.0
+import os
+SPACING = float(os.environ.get("V9_SPACING", "14"))
 END = "2024-12-31"  # holdout.VAL_END（此處硬寫以避免 import 驗證模組鏈）
 OUT = Path(__file__).parent / "data" / "diag_v9_fetch_missing.json"
 NOWCAST = [("TaiwanStockFinancialStatements", "2010-01-01"), ("TaiwanStockMonthRevenue", "2010-01-01"),
@@ -63,7 +64,8 @@ def main() -> int:
     remaining = [t for t in missing if not _cache_path(t[0], t[1], t[2], END).exists()]
     out = {"generated_at": datetime.now().isoformat(timespec="seconds"), "phase": phase, "requests_used": used,
            "remaining": len(remaining), "stopped": stopped, "per_phase": per_phase}
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+    if cap > 0:
+        OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(out, ensure_ascii=False), flush=True)
     return 0 if not remaining else (3 if stopped else 0)
 
