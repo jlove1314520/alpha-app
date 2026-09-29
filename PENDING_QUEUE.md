@@ -16519,7 +16519,11 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   給context/activations）。④已透過winget背景安裝Ollama（本機執行
   GGUF的runtime，Windows有CUDA加速預編譯版，比自建llama-cpp-python+
   CUDA工具鏈風險低很多——RTX 5060是很新的Blackwell架構，自編譯CUDA
-  kernel有相容性風險），安裝仍在跑，尚未完成，未驗證。
+  kernel有相容性風險）。**更新（10:5x）**：winget安裝已完成，`ollama.exe
+  --version`回報`0.34.4`（需開新shell刷新PATH，同session內`where ollama`
+  暫時找不到，屬正常現象非安裝失敗）。尚未拉取Breeze-7B GGUF模型檔、
+  尚未做任何推論測試——**基礎設施就緒但功能未驗證**，如實記錄，不宣稱
+  已可用。
 
   **卡住的原因（重新發現既有結論，非本輪新查）**：任務描述的資料來源
   「法說會PDF」**已在2026-09-08被證明不可行且已寫進文件**——
