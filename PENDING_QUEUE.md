@@ -17048,3 +17048,38 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 四、完成後 push，停下等 Cowork 核對。
 
 - [ ] **修.八**（互動視窗執行；動 `.github/scripts/update_price_history.py`、`data/price_history.json`、`research/adjust.py`（十三節僅互動視窗）、`research/paper_7030_tracker.py`；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+
+## 2026-09-30 總司令裁示【修.八＋價值成長榜恢復＋先.一（合併版）】（第一部分＝上方已登記之修.八，不重複登記；第二、三部分為新增）
+
+【修.八＋價值成長榜恢復＋先.一（合併版）】先寫進 PENDING_QUEUE 再動工。若修.八 已登記，第一部分照原條目執行，不重複登記。依序執行。
+
+第一部分：修.八 上市股價停更修復（10/1 前必須完成）
+  1. data/price_history.json 中 1,421 檔上市股票（含 0050）停在 2026-09-24，上櫃正常到 09-29。冒煙測試第 39 項「上游落後」的歸類不接受，要查根因：在 market.yml 實際環境重現 update_price_history.py 的 fetch_twse()，印出 STOCK_DAY_ALL 筆數、Date 分布與 0050 那一列，判斷是 (a) 交易所 OpenAPI 停更 (b) 解析或合併丟資料 (c) 排程沒跑到 (d) 其他。
+  2. (a) 就改用交易所官方其他端點備援（只用官方公開端點、照既有節流）；(b)(c) 直接修。補抓 9/25、9/28、9/29，0050 adj_close 經 adjust.py 事件因子。自我測試：0050 最新日期等於最近交易日。冒煙測試第 39 項須 PASS。
+  3. paper_7030_tracker.py 在 10/1 讀到的 0050 價格若過期，必須中止並寫入錯誤紀錄，不得用舊價格硬算。
+  4. update_price_history.py 的 apply_dividend_adjustments() 是第三份還原公式拷貝：用修.七 的 15 筆官方參考價案例比對，不一致就改成共用 adjust.py 的事件函式；全 repo（含 .github/、scripts/）再 grep 一次，列出所有自行計算還原因子的地方。
+  5. 191 檔停在 2024-12-31 的清單（債券 ETF／一般股／已下市）列出並查原因，一般股要修（低優先）。
+
+第二部分：App 價值成長榜恢復（總司令 09-29 裁示：低波動不符合其價值定義，撤銷方案 B 在線上榜的套用）
+  1. generate_scores_live.py 的線上總分恢復為 weights_frozen.json（原 8 項權重），保留 weights_frozen_planB.json 與 research 端 score.py 的方案 B 不動（研究用）。
+  2. 保留本次新增的誠實揭露：backtest_status「尚未回測驗證」，並註明「財報成長成分重驗未過（#287/#403），僅供參考」。保留普通股資格池（排除 ETF／特別股／TDR／興櫃）。
+  3. score_scheme 改標「A（恢復）」，生效日 2026-09-30。冒煙測試全部 PASS。
+
+第三部分：先.一 供給吃緊先行指標＋股價落後（總司令 09-29 指定的衛星方向，凍結.二 對本方向解凍；本輪只做盤點與可行性，不跑任何報酬回測）
+  1. 盤點：從 TRIALS_LEDGER／STRATEGY_GRAVEYARD／FACTORS.md 找出所有跟合約負債（預收款項）、存貨週轉、毛利率變化、資本支出／預付設備款、月營收加速相關的既有試驗，列表回報（編號、定義、結果、樣本數、是否低檢定力）。
+  2. 資料可得性：確認 FinMind TaiwanStockBalanceSheet／CashFlowsStatement／FinancialStatements 中這些科目的欄位名稱、起始年份與缺值率（至少 300 檔樣本）。特別處理 2018 年 IFRS15 前後「預收款項→合約負債」的科目銜接。
+  3. 公布時點：一律用法定申報截止日（年報 3/31、Q1 5/15、Q2 8/14、Q3 11/14）當作可得日，月營收用 month_revenue_pit。
+  4. 寫 docs/PREREG_DRAFT_supply_tightness.md 草案：
+     (a) 「供給吃緊分數」的定義（每個指標怎麼算、怎麼合併，同產業內標準化）
+     (b) 「股價落後」的定義（例如基本面改善幅度 vs 同期股價漲幅或本益比變化的落差）
+     (c) 進出場與持有期（依季報公布節奏）
+     (d) 判準：帳戶 MDD > −50% 硬性、Sortino ≥ 0050、樣本 ≥ 300 檔、池內重抽百分位標準差
+     (e) 資料期間與樣本外切分，以及前進式紙上驗證方式
+     只寫草案、不登記、不回測，等 Cowork 與總司令審閱。
+
+全部完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動。
+
+（CC 註記：第一部分之 4 條較先前修.八原文多了「修.七 15 筆案例」的具體化，與原條目二一致，併入同一條目執行。第二部分改動 `research/generate_scores_live.py`（非十三節保護路徑）與 `index.html` 選股頁揭露文字；第三部分產出 `docs/PREREG_DRAFT_supply_tightness.md`，不動 `TRIALS_LEDGER`、不登記試驗、不回測。）
+
+- [ ] **價值成長榜恢復**（互動視窗執行；動 `research/generate_scores_live.py`、`scores.json`、`index.html` 選股頁揭露、`research/weights_frozen.json` 僅讀不改；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+- [ ] **先.一**（互動視窗執行；只做盤點與可行性、寫 `docs/PREREG_DRAFT_supply_tightness.md`，不回測、不登記；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
