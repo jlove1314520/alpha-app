@@ -1,0 +1,1259 @@
+{
+  "generated_at": "2026-09-29T22:41:03",
+  "note": "診斷、非試驗；只讀快取；統計限 date<=VAL_END；不改判定。",
+  "backfill": null,
+  "sample": {
+    "n_requested": 300,
+    "n_with_price": 235,
+    "n_no_price": 65,
+    "n_unknown_listing_date_untruncated": 57
+  },
+  "truncation": {
+    "n_stocks_truncated": 64,
+    "n_rows_dropped_total": 33596,
+    "span_years_quantiles": {
+      "min": 0.11,
+      "p50": 1.34,
+      "p90": 5.37,
+      "max": 9.95
+    },
+    "possible_board_transfer_gt3y": [
+      {
+        "stock_id": "4741",
+        "listing_date": "2017-09-26",
+        "first_price_date": "2012-06-27",
+        "rows_dropped": 1291,
+        "rows_total": 3057,
+        "dropped_span_years": 5.25,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6584",
+        "listing_date": "2023-05-18",
+        "first_price_date": "2016-08-01",
+        "rows_dropped": 1653,
+        "rows_total": 2050,
+        "dropped_span_years": 6.79,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "3564",
+        "listing_date": "2013-12-03",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 968,
+        "rows_total": 3670,
+        "dropped_span_years": 3.91,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "3147",
+        "listing_date": "2018-05-29",
+        "first_price_date": "2013-09-30",
+        "rows_dropped": 1140,
+        "rows_total": 2746,
+        "dropped_span_years": 4.66,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6692",
+        "listing_date": "2024-02-02",
+        "first_price_date": "2018-09-21",
+        "rows_dropped": 1306,
+        "rows_total": 1524,
+        "dropped_span_years": 5.37,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "8284",
+        "listing_date": "2020-05-18",
+        "first_price_date": "2012-11-05",
+        "rows_dropped": 1837,
+        "rows_total": 2965,
+        "dropped_span_years": 7.53,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "2938",
+        "listing_date": "2026-09-16",
+        "first_price_date": "2016-10-05",
+        "rows_dropped": 2005,
+        "rows_total": 2005,
+        "dropped_span_years": 9.95,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6438",
+        "listing_date": "2021-01-19",
+        "first_price_date": "2013-11-25",
+        "rows_dropped": 1750,
+        "rows_total": 2708,
+        "dropped_span_years": 7.15,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "5220",
+        "listing_date": "2018-04-26",
+        "first_price_date": "2014-10-07",
+        "rows_dropped": 865,
+        "rows_total": 2493,
+        "dropped_span_years": 3.55,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6558",
+        "listing_date": "2018-12-05",
+        "first_price_date": "2015-11-17",
+        "rows_dropped": 746,
+        "rows_total": 2219,
+        "dropped_span_years": 3.05,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6689",
+        "listing_date": "2022-09-13",
+        "first_price_date": "2018-07-17",
+        "rows_dropped": 1014,
+        "rows_total": 1572,
+        "dropped_span_years": 4.16,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "3711",
+        "listing_date": "2018-04-30",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 2044,
+        "rows_total": 3670,
+        "dropped_span_years": 8.32,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "8027",
+        "listing_date": "2015-06-09",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 1338,
+        "rows_total": 3669,
+        "dropped_span_years": 5.43,
+        "possible_board_transfer": true
+      }
+    ],
+    "all_truncated": [
+      {
+        "stock_id": "6578",
+        "listing_date": "2018-09-18",
+        "first_price_date": "2016-07-20",
+        "rows_dropped": 531,
+        "rows_total": 2058,
+        "dropped_span_years": 2.16,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6492",
+        "listing_date": "2017-04-24",
+        "first_price_date": "2014-12-04",
+        "rows_dropped": 568,
+        "rows_total": 2442,
+        "dropped_span_years": 2.39,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6510",
+        "listing_date": "2016-03-24",
+        "first_price_date": "2015-01-20",
+        "rows_dropped": 285,
+        "rows_total": 2421,
+        "dropped_span_years": 1.17,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6767",
+        "listing_date": "2021-01-25",
+        "first_price_date": "2019-12-05",
+        "rows_dropped": 279,
+        "rows_total": 1233,
+        "dropped_span_years": 1.14,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "4741",
+        "listing_date": "2017-09-26",
+        "first_price_date": "2012-06-27",
+        "rows_dropped": 1291,
+        "rows_total": 3057,
+        "dropped_span_years": 5.25,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "4543",
+        "listing_date": "2016-03-15",
+        "first_price_date": "2014-10-07",
+        "rows_dropped": 350,
+        "rows_total": 2493,
+        "dropped_span_years": 1.44,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "1342",
+        "listing_date": "2020-11-24",
+        "first_price_date": "2019-10-07",
+        "rows_dropped": 277,
+        "rows_total": 1274,
+        "dropped_span_years": 1.13,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6584",
+        "listing_date": "2023-05-18",
+        "first_price_date": "2016-08-01",
+        "rows_dropped": 1653,
+        "rows_total": 2050,
+        "dropped_span_years": 6.79,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6840",
+        "listing_date": "2023-03-24",
+        "first_price_date": "2022-01-05",
+        "rows_dropped": 292,
+        "rows_total": 724,
+        "dropped_span_years": 1.21,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6986",
+        "listing_date": "2026-06-26",
+        "first_price_date": "2023-11-30",
+        "rows_dropped": 263,
+        "rows_total": 263,
+        "dropped_span_years": 2.57,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3467",
+        "listing_date": "2025-03-25",
+        "first_price_date": "2023-12-22",
+        "rows_dropped": 247,
+        "rows_total": 247,
+        "dropped_span_years": 1.26,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3591",
+        "listing_date": "2010-11-12",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 214,
+        "rows_total": 3670,
+        "dropped_span_years": 0.85,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "7743",
+        "listing_date": "2025-05-20",
+        "first_price_date": "2024-04-23",
+        "rows_dropped": 171,
+        "rows_total": 171,
+        "dropped_span_years": 1.07,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6782",
+        "listing_date": "2022-11-28",
+        "first_price_date": "2020-08-14",
+        "rows_dropped": 561,
+        "rows_total": 1066,
+        "dropped_span_years": 2.29,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "4999",
+        "listing_date": "2013-06-03",
+        "first_price_date": "2012-10-03",
+        "rows_dropped": 159,
+        "rows_total": 2987,
+        "dropped_span_years": 0.67,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "7765",
+        "listing_date": "2025-09-08",
+        "first_price_date": "2024-08-20",
+        "rows_dropped": 90,
+        "rows_total": 90,
+        "dropped_span_years": 1.05,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6844",
+        "listing_date": "2024-03-08",
+        "first_price_date": "2021-11-12",
+        "rows_dropped": 560,
+        "rows_total": 761,
+        "dropped_span_years": 2.32,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "8114",
+        "listing_date": "2012-11-26",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 720,
+        "rows_total": 3670,
+        "dropped_span_years": 2.89,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3441",
+        "listing_date": "2010-10-04",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 185,
+        "rows_total": 3670,
+        "dropped_span_years": 0.75,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3564",
+        "listing_date": "2013-12-03",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 968,
+        "rows_total": 3670,
+        "dropped_span_years": 3.91,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6556",
+        "listing_date": "2017-10-31",
+        "first_price_date": "2016-01-06",
+        "rows_dropped": 440,
+        "rows_total": 2184,
+        "dropped_span_years": 1.82,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "4566",
+        "listing_date": "2018-02-05",
+        "first_price_date": "2017-02-24",
+        "rows_dropped": 235,
+        "rows_total": 1911,
+        "dropped_span_years": 0.95,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3147",
+        "listing_date": "2018-05-29",
+        "first_price_date": "2013-09-30",
+        "rows_dropped": 1140,
+        "rows_total": 2746,
+        "dropped_span_years": 4.66,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "7712",
+        "listing_date": "2024-12-26",
+        "first_price_date": "2023-12-27",
+        "rows_dropped": 241,
+        "rows_total": 244,
+        "dropped_span_years": 1.0,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "5263",
+        "listing_date": "2012-12-18",
+        "first_price_date": "2012-06-21",
+        "rows_dropped": 127,
+        "rows_total": 3061,
+        "dropped_span_years": 0.49,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6183",
+        "listing_date": "2011-12-01",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 475,
+        "rows_total": 3670,
+        "dropped_span_years": 1.91,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6692",
+        "listing_date": "2024-02-02",
+        "first_price_date": "2018-09-21",
+        "rows_dropped": 1306,
+        "rows_total": 1524,
+        "dropped_span_years": 5.37,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "7402",
+        "listing_date": "2015-12-29",
+        "first_price_date": "2014-12-26",
+        "rows_dropped": 247,
+        "rows_total": 2436,
+        "dropped_span_years": 1.01,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "8215",
+        "listing_date": "2010-11-12",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 214,
+        "rows_total": 3670,
+        "dropped_span_years": 0.85,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "4157",
+        "listing_date": "2014-01-17",
+        "first_price_date": "2013-08-30",
+        "rows_dropped": 96,
+        "rows_total": 2766,
+        "dropped_span_years": 0.38,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "8284",
+        "listing_date": "2020-05-18",
+        "first_price_date": "2012-11-05",
+        "rows_dropped": 1837,
+        "rows_total": 2965,
+        "dropped_span_years": 7.53,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6841",
+        "listing_date": "2023-03-01",
+        "first_price_date": "2021-09-14",
+        "rows_dropped": 352,
+        "rows_total": 801,
+        "dropped_span_years": 1.46,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6919",
+        "listing_date": "2024-10-02",
+        "first_price_date": "2022-12-26",
+        "rows_dropped": 425,
+        "rows_total": 485,
+        "dropped_span_years": 1.77,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6412",
+        "listing_date": "2013-11-08",
+        "first_price_date": "2013-03-12",
+        "rows_dropped": 165,
+        "rows_total": 2884,
+        "dropped_span_years": 0.66,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6643",
+        "listing_date": "2019-01-23",
+        "first_price_date": "2017-09-20",
+        "rows_dropped": 330,
+        "rows_total": 1770,
+        "dropped_span_years": 1.34,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6512",
+        "listing_date": "2016-03-25",
+        "first_price_date": "2015-02-05",
+        "rows_dropped": 274,
+        "rows_total": 2409,
+        "dropped_span_years": 1.13,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "7738",
+        "listing_date": "2025-10-16",
+        "first_price_date": "2024-06-13",
+        "rows_dropped": 136,
+        "rows_total": 136,
+        "dropped_span_years": 1.34,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6561",
+        "listing_date": "2018-06-05",
+        "first_price_date": "2017-06-29",
+        "rows_dropped": 228,
+        "rows_total": 1829,
+        "dropped_span_years": 0.93,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "2938",
+        "listing_date": "2026-09-16",
+        "first_price_date": "2016-10-05",
+        "rows_dropped": 2005,
+        "rows_total": 2005,
+        "dropped_span_years": 9.95,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "7709",
+        "listing_date": "2025-02-25",
+        "first_price_date": "2024-01-08",
+        "rows_dropped": 237,
+        "rows_total": 237,
+        "dropped_span_years": 1.13,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3689",
+        "listing_date": "2012-10-18",
+        "first_price_date": "2012-06-21",
+        "rows_dropped": 84,
+        "rows_total": 3061,
+        "dropped_span_years": 0.33,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "2064",
+        "listing_date": "2014-12-26",
+        "first_price_date": "2012-06-27",
+        "rows_dropped": 601,
+        "rows_total": 3037,
+        "dropped_span_years": 2.5,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6438",
+        "listing_date": "2021-01-19",
+        "first_price_date": "2013-11-25",
+        "rows_dropped": 1750,
+        "rows_total": 2708,
+        "dropped_span_years": 7.15,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "5220",
+        "listing_date": "2018-04-26",
+        "first_price_date": "2014-10-07",
+        "rows_dropped": 865,
+        "rows_total": 2493,
+        "dropped_span_years": 3.55,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6582",
+        "listing_date": "2017-06-14",
+        "first_price_date": "2016-06-30",
+        "rows_dropped": 231,
+        "rows_total": 2071,
+        "dropped_span_years": 0.96,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "8478",
+        "listing_date": "2017-12-11",
+        "first_price_date": "2015-09-23",
+        "rows_dropped": 541,
+        "rows_total": 2256,
+        "dropped_span_years": 2.22,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "7708",
+        "listing_date": "2024-11-15",
+        "first_price_date": "2023-12-21",
+        "rows_dropped": 216,
+        "rows_total": 248,
+        "dropped_span_years": 0.9,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6558",
+        "listing_date": "2018-12-05",
+        "first_price_date": "2015-11-17",
+        "rows_dropped": 746,
+        "rows_total": 2219,
+        "dropped_span_years": 3.05,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6922",
+        "listing_date": "2023-11-09",
+        "first_price_date": "2023-02-24",
+        "rows_dropped": 172,
+        "rows_total": 450,
+        "dropped_span_years": 0.71,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6689",
+        "listing_date": "2022-09-13",
+        "first_price_date": "2018-07-17",
+        "rows_dropped": 1014,
+        "rows_total": 1572,
+        "dropped_span_years": 4.16,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "7757",
+        "listing_date": "2025-10-20",
+        "first_price_date": "2024-06-27",
+        "rows_dropped": 126,
+        "rows_total": 126,
+        "dropped_span_years": 1.31,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6581",
+        "listing_date": "2018-01-30",
+        "first_price_date": "2016-09-12",
+        "rows_dropped": 340,
+        "rows_total": 2020,
+        "dropped_span_years": 1.38,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6804",
+        "listing_date": "2022-03-31",
+        "first_price_date": "2020-12-02",
+        "rows_dropped": 320,
+        "rows_total": 991,
+        "dropped_span_years": 1.33,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "4163",
+        "listing_date": "2012-11-15",
+        "first_price_date": "2012-06-20",
+        "rows_dropped": 105,
+        "rows_total": 3062,
+        "dropped_span_years": 0.41,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "1340",
+        "listing_date": "2014-01-14",
+        "first_price_date": "2013-12-06",
+        "rows_dropped": 26,
+        "rows_total": 2699,
+        "dropped_span_years": 0.11,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "3711",
+        "listing_date": "2018-04-30",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 2044,
+        "rows_total": 3670,
+        "dropped_span_years": 8.32,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "8027",
+        "listing_date": "2015-06-09",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 1338,
+        "rows_total": 3669,
+        "dropped_span_years": 5.43,
+        "possible_board_transfer": true
+      },
+      {
+        "stock_id": "6494",
+        "listing_date": "2016-05-09",
+        "first_price_date": "2014-12-24",
+        "rows_dropped": 331,
+        "rows_total": 2438,
+        "dropped_span_years": 1.37,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6805",
+        "listing_date": "2023-11-09",
+        "first_price_date": "2020-11-20",
+        "rows_dropped": 721,
+        "rows_total": 999,
+        "dropped_span_years": 2.97,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "2718",
+        "listing_date": "2011-03-29",
+        "first_price_date": "2010-01-04",
+        "rows_dropped": 304,
+        "rows_total": 3670,
+        "dropped_span_years": 1.23,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6899",
+        "listing_date": "2024-04-08",
+        "first_price_date": "2022-06-29",
+        "rows_dropped": 429,
+        "rows_total": 611,
+        "dropped_span_years": 1.78,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6756",
+        "listing_date": "2020-12-24",
+        "first_price_date": "2019-12-20",
+        "rows_dropped": 247,
+        "rows_total": 1222,
+        "dropped_span_years": 1.01,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "4768",
+        "listing_date": "2022-04-13",
+        "first_price_date": "2019-11-26",
+        "rows_dropped": 576,
+        "rows_total": 1240,
+        "dropped_span_years": 2.38,
+        "possible_board_transfer": false
+      },
+      {
+        "stock_id": "6579",
+        "listing_date": "2017-08-21",
+        "first_price_date": "2016-06-06",
+        "rows_dropped": 295,
+        "rows_total": 2087,
+        "dropped_span_years": 1.21,
+        "possible_board_transfer": false
+      }
+    ]
+  },
+  "crosscheck": {
+    "threshold_pp": 2.0,
+    "n_stocks_checked": 235,
+    "n_stocks_not_checkable_no_finmind_cache": 0,
+    "not_checkable_ids": [],
+    "n_stocks_with_hits": 179,
+    "n_hit_days": 6001,
+    "hit_days_by_kind": {
+      "diff_over_threshold": 5974,
+      "yf_over_limit_fin_within": 278
+    },
+    "hits_per_stock": {
+      "6027": 371,
+      "6559": 368,
+      "7516": 357,
+      "6673": 287,
+      "4980": 256,
+      "2733": 243,
+      "6583": 239,
+      "3678": 237,
+      "2761": 177,
+      "8298": 163,
+      "9957": 163,
+      "6696": 153,
+      "6808": 144,
+      "6539": 133,
+      "3288": 114,
+      "1293": 113,
+      "3064": 107,
+      "6898": 101,
+      "4115": 93,
+      "6240": 90,
+      "4553": 83,
+      "6812": 74,
+      "1343": 73,
+      "4154": 73,
+      "2245": 66,
+      "2718": 62,
+      "8426": 54,
+      "7706": 54,
+      "4741": 44,
+      "8047": 42,
+      "5386": 35,
+      "6616": 32,
+      "8359": 31,
+      "6767": 28,
+      "3465": 28,
+      "5483": 28,
+      "6220": 28,
+      "3324": 28,
+      "3438": 27,
+      "5474": 27,
+      "5210": 27,
+      "3441": 26,
+      "7402": 26,
+      "4729": 25,
+      "4123": 25,
+      "6977": 24,
+      "6275": 23,
+      "3221": 22,
+      "3131": 22,
+      "6609": 21,
+      "8284": 21,
+      "8927": 20,
+      "3531": 20,
+      "3564": 19,
+      "3548": 19,
+      "5514": 19,
+      "3260": 19,
+      "5906": 19,
+      "6556": 18,
+      "6512": 18,
+      "2064": 18,
+      "6804": 18,
+      "5443": 18,
+      "3689": 17,
+      "4113": 17,
+      "4543": 16,
+      "6290": 16,
+      "3680": 16,
+      "2916": 16,
+      "8027": 16,
+      "5263": 15,
+      "4950": 15,
+      "8916": 15,
+      "4163": 15,
+      "5452": 15,
+      "8049": 14,
+      "6494": 14,
+      "1586": 13,
+      "3018": 12,
+      "6298": 12,
+      "7756": 11,
+      "3609": 10,
+      "8240": 10,
+      "4707": 10,
+      "8917": 10,
+      "1468": 10,
+      "6578": 9,
+      "3591": 9,
+      "8215": 9,
+      "3217": 9,
+      "2375": 9,
+      "5220": 9,
+      "1435": 9,
+      "1436": 9,
+      "5481": 8,
+      "2340": 8,
+      "2338": 8,
+      "6840": 7,
+      "00759B": 7,
+      "1465": 7,
+      "2511": 7,
+      "3356": 6,
+      "3147": 6,
+      "2881A": 6,
+      "3605": 6,
+      "5871": 6,
+      "1471": 6,
+      "1452": 6,
+      "8039": 6,
+      "1316": 6,
+      "6492": 5,
+      "00772B": 5,
+      "6584": 5,
+      "4960": 5,
+      "4999": 5,
+      "00834B": 5,
+      "1218": 5,
+      "2891C": 5,
+      "3711": 5,
+      "1325": 5,
+      "2352": 4,
+      "3037": 4,
+      "2923": 4,
+      "2486": 4,
+      "00785B": 4,
+      "2450": 4,
+      "2460": 4,
+      "2337": 4,
+      "4108": 4,
+      "3011": 4,
+      "9938": 4,
+      "00742": 4,
+      "3494": 3,
+      "6841": 3,
+      "2393": 3,
+      "3576": 3,
+      "1714": 3,
+      "2332": 3,
+      "5203": 3,
+      "3515": 3,
+      "6922": 3,
+      "2608": 3,
+      "2481": 3,
+      "2015": 3,
+      "4768": 3,
+      "6510": 2,
+      "5223": 2,
+      "6782": 2,
+      "00842B": 2,
+      "2002": 2,
+      "1907": 2,
+      "4157": 2,
+      "2464": 2,
+      "1308": 2,
+      "6768": 2,
+      "3481": 2,
+      "2201": 2,
+      "6561": 2,
+      "6605": 2,
+      "8499": 2,
+      "6582": 2,
+      "5907": 2,
+      "00735": 2,
+      "00755B": 2,
+      "1513": 2,
+      "3617": 2,
+      "0056": 2,
+      "2330": 2,
+      "6756": 2,
+      "2704": 1,
+      "2038": 1,
+      "8114": 1,
+      "00780B": 1,
+      "01004T": 1,
+      "2614": 1,
+      "01007T": 1,
+      "6184": 1,
+      "3038": 1,
+      "6579": 1
+    },
+    "top_hits_by_diff_pp": [
+      {
+        "stock_id": "6240",
+        "date": "2011-02-22",
+        "yf_ret_pct": 6.91,
+        "finmind_ret_pct": 1610.64,
+        "diff_pp": 1603.72,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:46.559774"
+      },
+      {
+        "stock_id": "6539",
+        "date": "2024-07-05",
+        "yf_ret_pct": -51.09,
+        "finmind_ret_pct": 43.44,
+        "diff_pp": 94.52,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:51.393667"
+      },
+      {
+        "stock_id": "4980",
+        "date": "2020-07-28",
+        "yf_ret_pct": 90.53,
+        "finmind_ret_pct": -2.37,
+        "diff_pp": 92.89,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:41:01.770124"
+      },
+      {
+        "stock_id": "6240",
+        "date": "2010-02-22",
+        "yf_ret_pct": -94.11,
+        "finmind_ret_pct": -5.81,
+        "diff_pp": 88.3,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:46.552636"
+      },
+      {
+        "stock_id": "2375",
+        "date": "2010-11-16",
+        "yf_ret_pct": -6.94,
+        "finmind_ret_pct": 76.38,
+        "diff_pp": 83.32,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:55.959258"
+      },
+      {
+        "stock_id": "6696",
+        "date": "2020-07-27",
+        "yf_ret_pct": 84.09,
+        "finmind_ret_pct": 1.25,
+        "diff_pp": 82.84,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:41:03.702180"
+      },
+      {
+        "stock_id": "3465",
+        "date": "2015-03-13",
+        "yf_ret_pct": 64.11,
+        "finmind_ret_pct": -1.74,
+        "diff_pp": 65.85,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:50.041104"
+      },
+      {
+        "stock_id": "1436",
+        "date": "2012-08-06",
+        "yf_ret_pct": -54.69,
+        "finmind_ret_pct": 6.97,
+        "diff_pp": 61.66,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:41:00.359655"
+      },
+      {
+        "stock_id": "3678",
+        "date": "2021-03-02",
+        "yf_ret_pct": 11.11,
+        "finmind_ret_pct": 67.59,
+        "diff_pp": 56.47,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:51.305339"
+      },
+      {
+        "stock_id": "8298",
+        "date": "2020-07-27",
+        "yf_ret_pct": 50.21,
+        "finmind_ret_pct": 3.84,
+        "diff_pp": 46.37,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:48.928998"
+      },
+      {
+        "stock_id": "4154",
+        "date": "2024-08-19",
+        "yf_ret_pct": 43.35,
+        "finmind_ret_pct": -1.03,
+        "diff_pp": 44.38,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:55.724608"
+      },
+      {
+        "stock_id": "1471",
+        "date": "2018-01-22",
+        "yf_ret_pct": 52.18,
+        "finmind_ret_pct": 9.96,
+        "diff_pp": 42.22,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:59.755050"
+      },
+      {
+        "stock_id": "6027",
+        "date": "2020-07-09",
+        "yf_ret_pct": 0.0,
+        "finmind_ret_pct": 38.14,
+        "diff_pp": 38.14,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:44.445338"
+      },
+      {
+        "stock_id": "6673",
+        "date": "2020-07-16",
+        "yf_ret_pct": 0.0,
+        "finmind_ret_pct": 37.28,
+        "diff_pp": 37.28,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:44.862990"
+      },
+      {
+        "stock_id": "6583",
+        "date": "2020-04-24",
+        "yf_ret_pct": 0.0,
+        "finmind_ret_pct": 36.62,
+        "diff_pp": 36.62,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:46.894386"
+      },
+      {
+        "stock_id": "1218",
+        "date": "2010-08-12",
+        "yf_ret_pct": 35.48,
+        "finmind_ret_pct": 0.65,
+        "diff_pp": 34.84,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:48.373941"
+      },
+      {
+        "stock_id": "6298",
+        "date": "2018-08-24",
+        "yf_ret_pct": 17.93,
+        "finmind_ret_pct": -15.96,
+        "diff_pp": 33.9,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:59.216612"
+      },
+      {
+        "stock_id": "6027",
+        "date": "2020-07-27",
+        "yf_ret_pct": 31.44,
+        "finmind_ret_pct": -1.78,
+        "diff_pp": 33.21,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:44.445538"
+      },
+      {
+        "stock_id": "6559",
+        "date": "2024-09-16",
+        "yf_ret_pct": 13.59,
+        "finmind_ret_pct": 45.64,
+        "diff_pp": 32.06,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:55.910779"
+      },
+      {
+        "stock_id": "6583",
+        "date": "2020-05-06",
+        "yf_ret_pct": 0.0,
+        "finmind_ret_pct": 31.53,
+        "diff_pp": 31.53,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:46.894694"
+      },
+      {
+        "stock_id": "4154",
+        "date": "2024-08-16",
+        "yf_ret_pct": -30.96,
+        "finmind_ret_pct": 0.0,
+        "diff_pp": 30.96,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:55.724588"
+      },
+      {
+        "stock_id": "7516",
+        "date": "2020-07-08",
+        "yf_ret_pct": 0.0,
+        "finmind_ret_pct": 29.25,
+        "diff_pp": 29.25,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:44.900063"
+      },
+      {
+        "stock_id": "8284",
+        "date": "2021-03-22",
+        "yf_ret_pct": -28.0,
+        "finmind_ret_pct": 0.1,
+        "diff_pp": 28.1,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:50.509378"
+      },
+      {
+        "stock_id": "8298",
+        "date": "2020-06-29",
+        "yf_ret_pct": 0.0,
+        "finmind_ret_pct": 27.85,
+        "diff_pp": 27.85,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:48.928128"
+      },
+      {
+        "stock_id": "6808",
+        "date": "2024-03-26",
+        "yf_ret_pct": 25.93,
+        "finmind_ret_pct": -1.85,
+        "diff_pp": 27.77,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:47.107070"
+      },
+      {
+        "stock_id": "6559",
+        "date": "2024-05-24",
+        "yf_ret_pct": 32.11,
+        "finmind_ret_pct": 4.35,
+        "diff_pp": 27.76,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:55.909642"
+      },
+      {
+        "stock_id": "7516",
+        "date": "2021-02-01",
+        "yf_ret_pct": -8.02,
+        "finmind_ret_pct": 19.57,
+        "diff_pp": 27.59,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:44.901825"
+      },
+      {
+        "stock_id": "6559",
+        "date": "2024-09-18",
+        "yf_ret_pct": 18.71,
+        "finmind_ret_pct": -8.85,
+        "diff_pp": 27.56,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:55.910798"
+      },
+      {
+        "stock_id": "6583",
+        "date": "2021-03-10",
+        "yf_ret_pct": 10.12,
+        "finmind_ret_pct": 36.9,
+        "diff_pp": 26.79,
+        "kinds": [
+          "diff_over_threshold"
+        ],
+        "detected_at": "2026-09-29T22:40:46.897219"
+      },
+      {
+        "stock_id": "2375",
+        "date": "2014-11-14",
+        "yf_ret_pct": -24.91,
+        "finmind_ret_pct": 1.05,
+        "diff_pp": 25.96,
+        "kinds": [
+          "diff_over_threshold",
+          "yf_over_limit_fin_within"
+        ],
+        "detected_at": "2026-09-29T22:40:55.972580"
+      }
+    ]
+  }
+}

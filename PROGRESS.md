@@ -1,3 +1,19 @@
+## 2026-09-29（互動視窗CC，開發/驗證帽，【驗.九】營收因子99.0→87.0定量拆解＋交叉核對＋nowcast可行性）
+
+等待總司令審閱：21件（新增1件：驗.九，見`research/AWAITING_REVIEW.md`）。
+
+**做了什麼**：
+1. 析.三：以現行輕量路徑**逐位元重現#8＝99.0**（80檔／47截面／val_IC 0.049577）與#404(i)＝87.2；自99.0起一次換一個變數。價格建構器修正−4.8～−8.6（唯一方向一致）；樣本換人在100檔下±30互相抵銷、300檔≈0；種子／資料期間／`month_revenue_pit`貢獻0；上市日截斷在300檔為+2.1。**主因＝價格建構器＋小樣本百分位雜訊（80檔sd≈20），不是Q4 PIT**。#404(ii)之87.0未重現（現行89.1，差2.1，[待查]，不影響判定）。判定不變（#8/#404鎖定）。
+2. 文件：`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`新增§6.4；`docs/FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md`第1節營收因果敘述更正（保留原文加註）。
+3. 額度阻塞項補完：yfinance vs FinMind交叉核對235檔中179檔、6,001個日期差≥2pp；上市日截斷影響64檔／33,596列。nowcast僅170/300檔可用（FinMind 402）：方向命中率增額Q1–Q3＋2.1pp [＋0.5,＋3.7]、Q4 −0.4pp [−2.8,＋1.9]、合併＋1.5pp [−0.02,＋2.9]（臨界）；Q4窗口最長(≈50交易日)卻無增額。
+4. 完整報告：`PENDING_QUEUE.md`「驗.九完成報告」；診斷JSON：`research/data/diag_v9_revenue_trace.json`、`diag_v8_nowcast_eps.json`、`diag_v8_yf_crosscheck.json`（`git add -f`）。
+
+**影響檔案**：兩份docs、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`research/PROGRESS_HEARTBEAT.jsonl`、`research/audit_v9_*.py`／`audit_v8_*.py`、三份diag JSON。未動holdout、紙.一、凍結.二、score.py；未改任何判定。冒煙測試不適用（純docs／研究腳本）。
+
+**下一步**：停下等Cowork核對；評.B線上路徑（甲/乙）仍待裁示。
+
+**卡住**：nowcast樣本受FinMind 402限制只到170檔，總司令填token後可補齊。
+
 ## 2026-09-29（互動視窗CC，開發/驗證帽，【評.B】計分榜方案B執行＋FinMind token自.env讀取）
 
 等待總司令審閱：20件（新增1件：評.B，見`research/AWAITING_REVIEW.md`）。

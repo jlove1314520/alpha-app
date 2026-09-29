@@ -1,0 +1,1491 @@
+{
+ "generated_at": "2026-09-29T22:40:21",
+ "verdict_locked_note": "可行性前置診斷，不是試驗、不含任何報酬回測、不登記TRIALS_REGISTRY、不改任何既有判定（凍結.二仍生效）。",
+ "sample": {
+  "n_stocks_requested": 300,
+  "n_stocks_used_any": 170,
+  "n_stock_quarters_all": 5615,
+  "n_stock_quarters_with_balance_sheet": 5550,
+  "eval_quarters": "2014-12-31..2024-09-30",
+  "holdout_guard": "評估季 pit_date <= 2024-12-31",
+  "note": "FinMind 免費額度於本次執行中觸發 402 冷卻，BalanceSheet 只有已快取的子集可用；A 版（面額10股本，裁示公式）只能跑在該子集，B 版（隱含股數）跑在全部可用樣本。"
+ },
+ "formula_A": "est_EPS = 該季三個月月營收(PIT)加總 × 前4季歸屬母公司淨利率簡單平均 ÷ (前一季CapitalStock/面額10)；僅 BalanceSheet 已快取子集",
+ "formula_B": "同上，但股數＝前一季歸屬淨利÷前一季EPS（隱含股數，不需 BalanceSheet）；全部可用樣本",
+ "A_par10_shares_subset": {
+  "n_stocks": 169,
+  "n_stock_quarters": 5550,
+  "pooled": {
+   "n_stock_quarters": 5550,
+   "level_corr_est_vs_actual": {
+    "n": 5550,
+    "spearman": 0.7609,
+    "pearson_winsor1_99": 0.7071
+   },
+   "level_corr_seasonal_naive_vs_actual": {
+    "n": 5550,
+    "spearman": 0.6695,
+    "pearson_winsor1_99": 0.6734
+   },
+   "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+    "n": 5550,
+    "spearman": 0.5935,
+    "pearson_winsor1_99": 0.441
+   },
+   "direction_hit(est vs EPS_ly)": {
+    "n": 5489,
+    "hit_rate": 0.7282,
+    "base_rate_actual_up": 0.5152
+   },
+   "direction_hit_baseline(上一季YoY方向延續)": {
+    "n": 5452,
+    "hit_rate": 0.7152,
+    "base_rate_actual_up": 0.5156
+   },
+   "sign_profit_hit": {
+    "hit_rate": 0.8214,
+    "base_rate_actual_positive": 0.7425
+   },
+   "error_est_minus_actual": {
+    "n": 5550,
+    "bias_mean": -2.2385,
+    "MAE": 2.8095,
+    "MedAE": 0.2695,
+    "err_q05_25_50_75_95": [
+     -1.4476,
+     -0.3063,
+     -0.015,
+     0.2343,
+     1.0807
+    ],
+    "norm_err_q05_25_50_75_95": [
+     -2.3508,
+     -0.5393,
+     -0.0246,
+     0.3637,
+     1.5387
+    ],
+    "share_abs_norm_err_le_0.25": 0.3387,
+    "share_abs_norm_err_le_0.5": 0.5395
+   },
+   "error_seasonal_naive_minus_actual": {
+    "n": 5550,
+    "bias_mean": -0.0153,
+    "MAE": 0.7169,
+    "MedAE": 0.35,
+    "err_q05_25_50_75_95": [
+     -1.68,
+     -0.36,
+     -0.01,
+     0.33,
+     1.7
+    ],
+    "norm_err_q05_25_50_75_95": [
+     -2.4281,
+     -0.6088,
+     -0.0221,
+     0.5611,
+     2.2326
+    ],
+    "share_abs_norm_err_le_0.25": 0.2719,
+    "share_abs_norm_err_le_0.5": 0.455
+   }
+  },
+  "by_quarter_of_year": {
+   "Q1": {
+    "n_stock_quarters": 1381,
+    "level_corr_est_vs_actual": {
+     "n": 1381,
+     "spearman": 0.767,
+     "pearson_winsor1_99": 0.7436
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1381,
+     "spearman": 0.6488,
+     "pearson_winsor1_99": 0.6728
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1381,
+     "spearman": 0.617,
+     "pearson_winsor1_99": 0.4748
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1363,
+     "hit_rate": 0.7351,
+     "base_rate_actual_up": 0.5348
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1352,
+     "hit_rate": 0.6901,
+     "base_rate_actual_up": 0.5348
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8132,
+     "base_rate_actual_positive": 0.7234
+    },
+    "error_est_minus_actual": {
+     "n": 1381,
+     "bias_mean": -0.7919,
+     "MAE": 1.2813,
+     "MedAE": 0.2519,
+     "err_q05_25_50_75_95": [
+      -1.2733,
+      -0.2141,
+      0.0275,
+      0.2822,
+      1.0785
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -1.7763,
+      -0.3831,
+      0.0513,
+      0.4224,
+      1.6002
+     ],
+     "share_abs_norm_err_le_0.25": 0.3454,
+     "share_abs_norm_err_le_0.5": 0.5655
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1381,
+     "bias_mean": -0.0403,
+     "MAE": 0.6048,
+     "MedAE": 0.31,
+     "err_q05_25_50_75_95": [
+      -1.49,
+      -0.36,
+      -0.02,
+      0.26,
+      1.49
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.0487,
+      -0.5672,
+      -0.0411,
+      0.4103,
+      2.0432
+     ],
+     "share_abs_norm_err_le_0.25": 0.3121,
+     "share_abs_norm_err_le_0.5": 0.5011
+    }
+   },
+   "Q2": {
+    "n_stock_quarters": 1396,
+    "level_corr_est_vs_actual": {
+     "n": 1396,
+     "spearman": 0.7766,
+     "pearson_winsor1_99": 0.6808
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1396,
+     "spearman": 0.6643,
+     "pearson_winsor1_99": 0.6701
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1396,
+     "spearman": 0.608,
+     "pearson_winsor1_99": 0.4052
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1382,
+     "hit_rate": 0.7366,
+     "base_rate_actual_up": 0.5239
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1376,
+     "hit_rate": 0.7217,
+     "base_rate_actual_up": 0.5247
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8345,
+     "base_rate_actual_positive": 0.7514
+    },
+    "error_est_minus_actual": {
+     "n": 1396,
+     "bias_mean": -6.9266,
+     "MAE": 7.7063,
+     "MedAE": 0.2451,
+     "err_q05_25_50_75_95": [
+      -1.3872,
+      -0.3267,
+      -0.0402,
+      0.1894,
+      0.8312
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.3231,
+      -0.5953,
+      -0.0626,
+      0.2726,
+      1.2179
+     ],
+     "share_abs_norm_err_le_0.25": 0.3532,
+     "share_abs_norm_err_le_0.5": 0.5587
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1396,
+     "bias_mean": -0.0408,
+     "MAE": 0.7017,
+     "MedAE": 0.34,
+     "err_q05_25_50_75_95": [
+      -1.6025,
+      -0.37,
+      -0.02,
+      0.32,
+      1.5825
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.3275,
+      -0.6366,
+      -0.0394,
+      0.5394,
+      1.9864
+     ],
+     "share_abs_norm_err_le_0.25": 0.2536,
+     "share_abs_norm_err_le_0.5": 0.4491
+    }
+   },
+   "Q3": {
+    "n_stock_quarters": 1397,
+    "level_corr_est_vs_actual": {
+     "n": 1397,
+     "spearman": 0.7897,
+     "pearson_winsor1_99": 0.7927
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1397,
+     "spearman": 0.7164,
+     "pearson_winsor1_99": 0.6938
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1397,
+     "spearman": 0.5916,
+     "pearson_winsor1_99": 0.5205
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1384,
+     "hit_rate": 0.7146,
+     "base_rate_actual_up": 0.5043
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1371,
+     "hit_rate": 0.7163,
+     "base_rate_actual_up": 0.5047
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8282,
+     "base_rate_actual_positive": 0.7631
+    },
+    "error_est_minus_actual": {
+     "n": 1397,
+     "bias_mean": -0.7135,
+     "MAE": 1.1049,
+     "MedAE": 0.2771,
+     "err_q05_25_50_75_95": [
+      -1.5269,
+      -0.3827,
+      -0.079,
+      0.1571,
+      0.988
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.3905,
+      -0.7167,
+      -0.1149,
+      0.2544,
+      1.3439
+     ],
+     "share_abs_norm_err_le_0.25": 0.3372,
+     "share_abs_norm_err_le_0.5": 0.5268
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1397,
+     "bias_mean": -0.032,
+     "MAE": 0.7084,
+     "MedAE": 0.35,
+     "err_q05_25_50_75_95": [
+      -1.748,
+      -0.35,
+      0.0,
+      0.33,
+      1.61
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.306,
+      -0.6101,
+      0.0,
+      0.6222,
+      2.0767
+     ],
+     "share_abs_norm_err_le_0.25": 0.2763,
+     "share_abs_norm_err_le_0.5": 0.4481
+    }
+   },
+   "Q4": {
+    "n_stock_quarters": 1376,
+    "level_corr_est_vs_actual": {
+     "n": 1376,
+     "spearman": 0.7164,
+     "pearson_winsor1_99": 0.6435
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1376,
+     "spearman": 0.638,
+     "pearson_winsor1_99": 0.6359
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1376,
+     "spearman": 0.585,
+     "pearson_winsor1_99": 0.3764
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1360,
+     "hit_rate": 0.7265,
+     "base_rate_actual_up": 0.4978
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1353,
+     "hit_rate": 0.7324,
+     "base_rate_actual_up": 0.4982
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8096,
+     "base_rate_actual_positive": 0.7318
+    },
+    "error_est_minus_actual": {
+     "n": 1376,
+     "bias_mean": -0.4822,
+     "MAE": 1.1058,
+     "MedAE": 0.2991,
+     "err_q05_25_50_75_95": [
+      -1.595,
+      -0.292,
+      0.03,
+      0.3091,
+      1.375
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.7358,
+      -0.416,
+      0.043,
+      0.5241,
+      2.064
+     ],
+     "share_abs_norm_err_le_0.25": 0.319,
+     "share_abs_norm_err_le_0.5": 0.5065
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1376,
+     "bias_mean": 0.0526,
+     "MAE": 0.8534,
+     "MedAE": 0.41,
+     "err_q05_25_50_75_95": [
+      -1.77,
+      -0.38,
+      0.0,
+      0.42,
+      2.2
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.8897,
+      -0.6148,
+      0.0,
+      0.6906,
+      2.8518
+     ],
+     "share_abs_norm_err_le_0.25": 0.2456,
+     "share_abs_norm_err_le_0.5": 0.4215
+    }
+   }
+  },
+  "q1q3_vs_q4": {
+   "Q1-Q3": {
+    "pooled": {
+     "n_stock_quarters": 4174,
+     "level_corr_est_vs_actual": {
+      "n": 4174,
+      "spearman": 0.7768,
+      "pearson_winsor1_99": 0.7298
+     },
+     "level_corr_seasonal_naive_vs_actual": {
+      "n": 4174,
+      "spearman": 0.681,
+      "pearson_winsor1_99": 0.6851
+     },
+     "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+      "n": 4174,
+      "spearman": 0.5981,
+      "pearson_winsor1_99": 0.4541
+     },
+     "direction_hit(est vs EPS_ly)": {
+      "n": 4129,
+      "hit_rate": 0.7287,
+      "base_rate_actual_up": 0.5209
+     },
+     "direction_hit_baseline(上一季YoY方向延續)": {
+      "n": 4099,
+      "hit_rate": 0.7094,
+      "base_rate_actual_up": 0.5213
+     },
+     "sign_profit_hit": {
+      "hit_rate": 0.8253,
+      "base_rate_actual_positive": 0.746
+     },
+     "error_est_minus_actual": {
+      "n": 4174,
+      "bias_mean": -2.8174,
+      "MAE": 3.3711,
+      "MedAE": 0.2626,
+      "err_q05_25_50_75_95": [
+       -1.3742,
+       -0.314,
+       -0.0256,
+       0.2098,
+       0.9728
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.2036,
+       -0.5748,
+       -0.0443,
+       0.3175,
+       1.3899
+      ],
+      "share_abs_norm_err_le_0.25": 0.3452,
+      "share_abs_norm_err_le_0.5": 0.5503
+     },
+     "error_seasonal_naive_minus_actual": {
+      "n": 4174,
+      "bias_mean": -0.0377,
+      "MAE": 0.6719,
+      "MedAE": 0.33,
+      "err_q05_25_50_75_95": [
+       -1.6135,
+       -0.36,
+       -0.02,
+       0.3,
+       1.57
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.2583,
+       -0.6061,
+       -0.0311,
+       0.5202,
+       2.0323
+      ],
+      "share_abs_norm_err_le_0.25": 0.2805,
+      "share_abs_norm_err_le_0.5": 0.466
+     }
+    },
+    "hit_increment": {
+     "n_stock_quarters": 4099,
+     "n_stocks_clusters": 169,
+     "hit_est": 0.7312,
+     "hit_naive_prevQ_yoy_dir": 0.7094,
+     "increment_vs_naive": 0.0217,
+     "increment_vs_naive_ci95_cluster_boot": [
+      0.0055,
+      0.0378
+     ],
+     "ci_excludes_zero_vs_naive": true,
+     "base_rate_actual_up": 0.5213,
+     "increment_vs_majority_direction": 0.2098,
+     "increment_vs_majority_ci95_cluster_boot": [
+      0.1873,
+      0.2309
+     ],
+     "boot": {
+      "n_boot": 2000,
+      "seed": 20260929,
+      "unit": "stock(cluster)"
+     }
+    }
+   },
+   "Q4": {
+    "pooled": {
+     "n_stock_quarters": 1376,
+     "level_corr_est_vs_actual": {
+      "n": 1376,
+      "spearman": 0.7164,
+      "pearson_winsor1_99": 0.6435
+     },
+     "level_corr_seasonal_naive_vs_actual": {
+      "n": 1376,
+      "spearman": 0.638,
+      "pearson_winsor1_99": 0.6359
+     },
+     "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+      "n": 1376,
+      "spearman": 0.585,
+      "pearson_winsor1_99": 0.3764
+     },
+     "direction_hit(est vs EPS_ly)": {
+      "n": 1360,
+      "hit_rate": 0.7265,
+      "base_rate_actual_up": 0.4978
+     },
+     "direction_hit_baseline(上一季YoY方向延續)": {
+      "n": 1353,
+      "hit_rate": 0.7324,
+      "base_rate_actual_up": 0.4982
+     },
+     "sign_profit_hit": {
+      "hit_rate": 0.8096,
+      "base_rate_actual_positive": 0.7318
+     },
+     "error_est_minus_actual": {
+      "n": 1376,
+      "bias_mean": -0.4822,
+      "MAE": 1.1058,
+      "MedAE": 0.2991,
+      "err_q05_25_50_75_95": [
+       -1.595,
+       -0.292,
+       0.03,
+       0.3091,
+       1.375
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.7358,
+       -0.416,
+       0.043,
+       0.5241,
+       2.064
+      ],
+      "share_abs_norm_err_le_0.25": 0.319,
+      "share_abs_norm_err_le_0.5": 0.5065
+     },
+     "error_seasonal_naive_minus_actual": {
+      "n": 1376,
+      "bias_mean": 0.0526,
+      "MAE": 0.8534,
+      "MedAE": 0.41,
+      "err_q05_25_50_75_95": [
+       -1.77,
+       -0.38,
+       0.0,
+       0.42,
+       2.2
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.8897,
+       -0.6148,
+       0.0,
+       0.6906,
+       2.8518
+      ],
+      "share_abs_norm_err_le_0.25": 0.2456,
+      "share_abs_norm_err_le_0.5": 0.4215
+     }
+    },
+    "hit_increment": {
+     "n_stock_quarters": 1353,
+     "n_stocks_clusters": 165,
+     "hit_est": 0.728,
+     "hit_naive_prevQ_yoy_dir": 0.7324,
+     "increment_vs_naive": -0.0044,
+     "increment_vs_naive_ci95_cluster_boot": [
+      -0.0294,
+      0.018
+     ],
+     "ci_excludes_zero_vs_naive": false,
+     "base_rate_actual_up": 0.4982,
+     "increment_vs_majority_direction": 0.2262,
+     "increment_vs_majority_ci95_cluster_boot": [
+      0.1893,
+      0.2455
+     ],
+     "boot": {
+      "n_boot": 2000,
+      "seed": 20260929,
+      "unit": "stock(cluster)"
+     }
+    }
+   },
+   "all": {
+    "hit_increment": {
+     "n_stock_quarters": 5452,
+     "n_stocks_clusters": 169,
+     "hit_est": 0.7304,
+     "hit_naive_prevQ_yoy_dir": 0.7152,
+     "increment_vs_naive": 0.0152,
+     "increment_vs_naive_ci95_cluster_boot": [
+      0.0007,
+      0.0295
+     ],
+     "ci_excludes_zero_vs_naive": true,
+     "base_rate_actual_up": 0.5156,
+     "increment_vs_majority_direction": 0.2148,
+     "increment_vs_majority_ci95_cluster_boot": [
+      0.1965,
+      0.2324
+     ],
+     "boot": {
+      "n_boot": 2000,
+      "seed": 20260929,
+      "unit": "stock(cluster)"
+     }
+    }
+   }
+  },
+  "by_year": {
+   "2014": {
+    "n": 118,
+    "level_spearman": 0.6645,
+    "direction_hit": 0.735
+   },
+   "2015": {
+    "n": 481,
+    "level_spearman": 0.7863,
+    "direction_hit": 0.7284
+   },
+   "2016": {
+    "n": 499,
+    "level_spearman": 0.7621,
+    "direction_hit": 0.7041
+   },
+   "2017": {
+    "n": 509,
+    "level_spearman": 0.718,
+    "direction_hit": 0.7217
+   },
+   "2018": {
+    "n": 531,
+    "level_spearman": 0.7246,
+    "direction_hit": 0.6876
+   },
+   "2019": {
+    "n": 554,
+    "level_spearman": 0.7726,
+    "direction_hit": 0.7624
+   },
+   "2020": {
+    "n": 575,
+    "level_spearman": 0.7253,
+    "direction_hit": 0.704
+   },
+   "2021": {
+    "n": 598,
+    "level_spearman": 0.7794,
+    "direction_hit": 0.7618
+   },
+   "2022": {
+    "n": 608,
+    "level_spearman": 0.7727,
+    "direction_hit": 0.7264
+   },
+   "2023": {
+    "n": 612,
+    "level_spearman": 0.7566,
+    "direction_hit": 0.757
+   },
+   "2024": {
+    "n": 465,
+    "level_spearman": 0.7961,
+    "direction_hit": 0.7158
+   }
+  },
+  "cross_sectional_by_quarter": {
+   "est_vs_actual_level": {
+    "n_quarters": 40,
+    "mean_spearman": 0.7624,
+    "share_positive": 1.0,
+    "min": 0.5887
+   },
+   "est_minus_EPSly_vs_actual_minus_EPSly": {
+    "n_quarters": 40,
+    "mean_spearman": 0.5895,
+    "share_positive": 1.0,
+    "min": 0.4652
+   },
+   "seasonal_naive_level_baseline": {
+    "n_quarters": 40,
+    "mean_spearman": 0.6728,
+    "share_positive": 1.0,
+    "min": 0.5007
+   }
+  }
+ },
+ "B_implied_shares_full": {
+  "n_stocks": 170,
+  "n_stock_quarters": 5569,
+  "pooled": {
+   "n_stock_quarters": 5569,
+   "level_corr_est_vs_actual": {
+    "n": 5569,
+    "spearman": 0.7605,
+    "pearson_winsor1_99": 0.7838
+   },
+   "level_corr_seasonal_naive_vs_actual": {
+    "n": 5569,
+    "spearman": 0.6697,
+    "pearson_winsor1_99": 0.6738
+   },
+   "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+    "n": 5569,
+    "spearman": 0.5936,
+    "pearson_winsor1_99": 0.5735
+   },
+   "direction_hit(est vs EPS_ly)": {
+    "n": 5508,
+    "hit_rate": 0.7286,
+    "base_rate_actual_up": 0.5143
+   },
+   "direction_hit_baseline(上一季YoY方向延續)": {
+    "n": 5470,
+    "hit_rate": 0.7163,
+    "base_rate_actual_up": 0.5146
+   },
+   "sign_profit_hit": {
+    "hit_rate": 0.8226,
+    "base_rate_actual_positive": 0.7465
+   },
+   "error_est_minus_actual": {
+    "n": 5569,
+    "bias_mean": -0.1759,
+    "MAE": 0.6732,
+    "MedAE": 0.266,
+    "err_q05_25_50_75_95": [
+     -1.3089,
+     -0.294,
+     -0.0102,
+     0.2405,
+     1.1002
+    ],
+    "norm_err_q05_25_50_75_95": [
+     -2.2072,
+     -0.5225,
+     -0.018,
+     0.376,
+     1.5491
+    ],
+    "share_abs_norm_err_le_0.25": 0.3399,
+    "share_abs_norm_err_le_0.5": 0.5425
+   },
+   "error_seasonal_naive_minus_actual": {
+    "n": 5569,
+    "bias_mean": -0.0142,
+    "MAE": 0.716,
+    "MedAE": 0.35,
+    "err_q05_25_50_75_95": [
+     -1.68,
+     -0.36,
+     -0.01,
+     0.33,
+     1.7
+    ],
+    "norm_err_q05_25_50_75_95": [
+     -2.4166,
+     -0.605,
+     -0.0212,
+     0.5589,
+     2.2317
+    ],
+    "share_abs_norm_err_le_0.25": 0.2737,
+    "share_abs_norm_err_le_0.5": 0.4574
+   }
+  },
+  "by_quarter_of_year": {
+   "Q1": {
+    "n_stock_quarters": 1388,
+    "level_corr_est_vs_actual": {
+     "n": 1388,
+     "spearman": 0.7623,
+     "pearson_winsor1_99": 0.7921
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1388,
+     "spearman": 0.6484,
+     "pearson_winsor1_99": 0.6719
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1388,
+     "spearman": 0.6094,
+     "pearson_winsor1_99": 0.5849
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1370,
+     "hit_rate": 0.7336,
+     "base_rate_actual_up": 0.5321
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1359,
+     "hit_rate": 0.6932,
+     "base_rate_actual_up": 0.532
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8127,
+     "base_rate_actual_positive": 0.7269
+    },
+    "error_est_minus_actual": {
+     "n": 1388,
+     "bias_mean": -0.0899,
+     "MAE": 0.7055,
+     "MedAE": 0.2529,
+     "err_q05_25_50_75_95": [
+      -1.1726,
+      -0.2046,
+      0.0276,
+      0.2938,
+      1.0895
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -1.7313,
+      -0.3694,
+      0.0581,
+      0.4367,
+      1.6166
+     ],
+     "share_abs_norm_err_le_0.25": 0.3465,
+     "share_abs_norm_err_le_0.5": 0.5648
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1388,
+     "bias_mean": -0.0367,
+     "MAE": 0.6054,
+     "MedAE": 0.31,
+     "err_q05_25_50_75_95": [
+      -1.4865,
+      -0.36,
+      -0.02,
+      0.26,
+      1.5
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.0342,
+      -0.5647,
+      -0.0376,
+      0.4115,
+      2.0382
+     ],
+     "share_abs_norm_err_le_0.25": 0.3134,
+     "share_abs_norm_err_le_0.5": 0.5022
+    }
+   },
+   "Q2": {
+    "n_stock_quarters": 1403,
+    "level_corr_est_vs_actual": {
+     "n": 1403,
+     "spearman": 0.7779,
+     "pearson_winsor1_99": 0.776
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1403,
+     "spearman": 0.6685,
+     "pearson_winsor1_99": 0.6759
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1403,
+     "spearman": 0.6056,
+     "pearson_winsor1_99": 0.5219
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1389,
+     "hit_rate": 0.7401,
+     "base_rate_actual_up": 0.5248
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1382,
+     "hit_rate": 0.7214,
+     "base_rate_actual_up": 0.5253
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8368,
+     "base_rate_actual_positive": 0.7555
+    },
+    "error_est_minus_actual": {
+     "n": 1403,
+     "bias_mean": -0.283,
+     "MAE": 0.6533,
+     "MedAE": 0.2427,
+     "err_q05_25_50_75_95": [
+      -1.2596,
+      -0.3083,
+      -0.0366,
+      0.1949,
+      0.8603
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.1433,
+      -0.5779,
+      -0.0612,
+      0.2831,
+      1.2269
+     ],
+     "share_abs_norm_err_le_0.25": 0.3564,
+     "share_abs_norm_err_le_0.5": 0.5624
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1403,
+     "bias_mean": -0.0435,
+     "MAE": 0.6957,
+     "MedAE": 0.34,
+     "err_q05_25_50_75_95": [
+      -1.6,
+      -0.365,
+      -0.02,
+      0.32,
+      1.568
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.3249,
+      -0.6352,
+      -0.0396,
+      0.5359,
+      1.9623
+     ],
+     "share_abs_norm_err_le_0.25": 0.2545,
+     "share_abs_norm_err_le_0.5": 0.4526
+    }
+   },
+   "Q3": {
+    "n_stock_quarters": 1405,
+    "level_corr_est_vs_actual": {
+     "n": 1405,
+     "spearman": 0.7914,
+     "pearson_winsor1_99": 0.829
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1405,
+     "spearman": 0.7146,
+     "pearson_winsor1_99": 0.6923
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1405,
+     "spearman": 0.5912,
+     "pearson_winsor1_99": 0.632
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1393,
+     "hit_rate": 0.7136,
+     "base_rate_actual_up": 0.5039
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1380,
+     "hit_rate": 0.7174,
+     "base_rate_actual_up": 0.5043
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8292,
+     "base_rate_actual_positive": 0.7658
+    },
+    "error_est_minus_actual": {
+     "n": 1405,
+     "bias_mean": -0.2206,
+     "MAE": 0.5955,
+     "MedAE": 0.2717,
+     "err_q05_25_50_75_95": [
+      -1.369,
+      -0.3716,
+      -0.0668,
+      0.1642,
+      1.0006
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.218,
+      -0.6914,
+      -0.1048,
+      0.2669,
+      1.3359
+     ],
+     "share_abs_norm_err_le_0.25": 0.3381,
+     "share_abs_norm_err_le_0.5": 0.5324
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1405,
+     "bias_mean": -0.0304,
+     "MAE": 0.7099,
+     "MedAE": 0.35,
+     "err_q05_25_50_75_95": [
+      -1.772,
+      -0.35,
+      0.0,
+      0.33,
+      1.61
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.2942,
+      -0.6091,
+      0.0,
+      0.6222,
+      2.1267
+     ],
+     "share_abs_norm_err_le_0.25": 0.2769,
+     "share_abs_norm_err_le_0.5": 0.4491
+    }
+   },
+   "Q4": {
+    "n_stock_quarters": 1373,
+    "level_corr_est_vs_actual": {
+     "n": 1373,
+     "spearman": 0.7161,
+     "pearson_winsor1_99": 0.7398
+    },
+    "level_corr_seasonal_naive_vs_actual": {
+     "n": 1373,
+     "spearman": 0.6369,
+     "pearson_winsor1_99": 0.6353
+    },
+    "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+     "n": 1373,
+     "spearman": 0.5933,
+     "pearson_winsor1_99": 0.5592
+    },
+    "direction_hit(est vs EPS_ly)": {
+     "n": 1356,
+     "hit_rate": 0.7271,
+     "base_rate_actual_up": 0.4963
+    },
+    "direction_hit_baseline(上一季YoY方向延續)": {
+     "n": 1349,
+     "hit_rate": 0.7331,
+     "base_rate_actual_up": 0.4967
+    },
+    "sign_profit_hit": {
+     "hit_rate": 0.8114,
+     "base_rate_actual_positive": 0.7371
+    },
+    "error_est_minus_actual": {
+     "n": 1373,
+     "bias_mean": -0.1078,
+     "MAE": 0.7405,
+     "MedAE": 0.2915,
+     "err_q05_25_50_75_95": [
+      -1.4142,
+      -0.2677,
+      0.04,
+      0.3102,
+      1.3267
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.5221,
+      -0.3988,
+      0.0607,
+      0.529,
+      2.0758
+     ],
+     "share_abs_norm_err_le_0.25": 0.3183,
+     "share_abs_norm_err_le_0.5": 0.5098
+    },
+    "error_seasonal_naive_minus_actual": {
+     "n": 1373,
+     "bias_mean": 0.055,
+     "MAE": 0.8548,
+     "MedAE": 0.4,
+     "err_q05_25_50_75_95": [
+      -1.782,
+      -0.38,
+      0.0,
+      0.42,
+      2.2
+     ],
+     "norm_err_q05_25_50_75_95": [
+      -2.8577,
+      -0.6061,
+      0.0,
+      0.6866,
+      2.8393
+     ],
+     "share_abs_norm_err_le_0.25": 0.2498,
+     "share_abs_norm_err_le_0.5": 0.4253
+    }
+   }
+  },
+  "q1q3_vs_q4": {
+   "Q1-Q3": {
+    "pooled": {
+     "n_stock_quarters": 4196,
+     "level_corr_est_vs_actual": {
+      "n": 4196,
+      "spearman": 0.7765,
+      "pearson_winsor1_99": 0.8009
+     },
+     "level_corr_seasonal_naive_vs_actual": {
+      "n": 4196,
+      "spearman": 0.6815,
+      "pearson_winsor1_99": 0.6861
+     },
+     "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+      "n": 4196,
+      "spearman": 0.5953,
+      "pearson_winsor1_99": 0.5822
+     },
+     "direction_hit(est vs EPS_ly)": {
+      "n": 4152,
+      "hit_rate": 0.729,
+      "base_rate_actual_up": 0.5202
+     },
+     "direction_hit_baseline(上一季YoY方向延續)": {
+      "n": 4121,
+      "hit_rate": 0.7107,
+      "base_rate_actual_up": 0.5205
+     },
+     "sign_profit_hit": {
+      "hit_rate": 0.8263,
+      "base_rate_actual_positive": 0.7495
+     },
+     "error_est_minus_actual": {
+      "n": 4196,
+      "bias_mean": -0.1982,
+      "MAE": 0.6512,
+      "MedAE": 0.2571,
+      "err_q05_25_50_75_95": [
+       -1.2971,
+       -0.2983,
+       -0.0224,
+       0.2158,
+       0.9893
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.0829,
+       -0.5583,
+       -0.0397,
+       0.331,
+       1.407
+      ],
+      "share_abs_norm_err_le_0.25": 0.347,
+      "share_abs_norm_err_le_0.5": 0.5531
+     },
+     "error_seasonal_naive_minus_actual": {
+      "n": 4196,
+      "bias_mean": -0.0369,
+      "MAE": 0.6706,
+      "MedAE": 0.33,
+      "err_q05_25_50_75_95": [
+       -1.6125,
+       -0.36,
+       -0.02,
+       0.31,
+       1.57
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.2531,
+       -0.6023,
+       -0.0296,
+       0.5172,
+       2.0314
+      ],
+      "share_abs_norm_err_le_0.25": 0.2815,
+      "share_abs_norm_err_le_0.5": 0.4678
+     }
+    },
+    "hit_increment": {
+     "n_stock_quarters": 4121,
+     "n_stocks_clusters": 170,
+     "hit_est": 0.7316,
+     "hit_naive_prevQ_yoy_dir": 0.7107,
+     "increment_vs_naive": 0.0209,
+     "increment_vs_naive_ci95_cluster_boot": [
+      0.0047,
+      0.0369
+     ],
+     "ci_excludes_zero_vs_naive": true,
+     "base_rate_actual_up": 0.5205,
+     "increment_vs_majority_direction": 0.2111,
+     "increment_vs_majority_ci95_cluster_boot": [
+      0.1884,
+      0.233
+     ],
+     "boot": {
+      "n_boot": 2000,
+      "seed": 20260929,
+      "unit": "stock(cluster)"
+     }
+    }
+   },
+   "Q4": {
+    "pooled": {
+     "n_stock_quarters": 1373,
+     "level_corr_est_vs_actual": {
+      "n": 1373,
+      "spearman": 0.7161,
+      "pearson_winsor1_99": 0.7398
+     },
+     "level_corr_seasonal_naive_vs_actual": {
+      "n": 1373,
+      "spearman": 0.6369,
+      "pearson_winsor1_99": 0.6353
+     },
+     "yoy_change_corr(est-EPS_ly vs actual-EPS_ly)": {
+      "n": 1373,
+      "spearman": 0.5933,
+      "pearson_winsor1_99": 0.5592
+     },
+     "direction_hit(est vs EPS_ly)": {
+      "n": 1356,
+      "hit_rate": 0.7271,
+      "base_rate_actual_up": 0.4963
+     },
+     "direction_hit_baseline(上一季YoY方向延續)": {
+      "n": 1349,
+      "hit_rate": 0.7331,
+      "base_rate_actual_up": 0.4967
+     },
+     "sign_profit_hit": {
+      "hit_rate": 0.8114,
+      "base_rate_actual_positive": 0.7371
+     },
+     "error_est_minus_actual": {
+      "n": 1373,
+      "bias_mean": -0.1078,
+      "MAE": 0.7405,
+      "MedAE": 0.2915,
+      "err_q05_25_50_75_95": [
+       -1.4142,
+       -0.2677,
+       0.04,
+       0.3102,
+       1.3267
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.5221,
+       -0.3988,
+       0.0607,
+       0.529,
+       2.0758
+      ],
+      "share_abs_norm_err_le_0.25": 0.3183,
+      "share_abs_norm_err_le_0.5": 0.5098
+     },
+     "error_seasonal_naive_minus_actual": {
+      "n": 1373,
+      "bias_mean": 0.055,
+      "MAE": 0.8548,
+      "MedAE": 0.4,
+      "err_q05_25_50_75_95": [
+       -1.782,
+       -0.38,
+       0.0,
+       0.42,
+       2.2
+      ],
+      "norm_err_q05_25_50_75_95": [
+       -2.8577,
+       -0.6061,
+       0.0,
+       0.6866,
+       2.8393
+      ],
+      "share_abs_norm_err_le_0.25": 0.2498,
+      "share_abs_norm_err_le_0.5": 0.4253
+     }
+    },
+    "hit_increment": {
+     "n_stock_quarters": 1349,
+     "n_stocks_clusters": 166,
+     "hit_est": 0.7294,
+     "hit_naive_prevQ_yoy_dir": 0.7331,
+     "increment_vs_naive": -0.0037,
+     "increment_vs_naive_ci95_cluster_boot": [
+      -0.028,
+      0.0193
+     ],
+     "ci_excludes_zero_vs_naive": false,
+     "base_rate_actual_up": 0.4967,
+     "increment_vs_majority_direction": 0.2261,
+     "increment_vs_majority_ci95_cluster_boot": [
+      0.1886,
+      0.2468
+     ],
+     "boot": {
+      "n_boot": 2000,
+      "seed": 20260929,
+      "unit": "stock(cluster)"
+     }
+    }
+   },
+   "all": {
+    "hit_increment": {
+     "n_stock_quarters": 5470,
+     "n_stocks_clusters": 170,
+     "hit_est": 0.7311,
+     "hit_naive_prevQ_yoy_dir": 0.7163,
+     "increment_vs_naive": 0.0148,
+     "increment_vs_naive_ci95_cluster_boot": [
+      -0.0002,
+      0.0291
+     ],
+     "ci_excludes_zero_vs_naive": false,
+     "base_rate_actual_up": 0.5146,
+     "increment_vs_majority_direction": 0.2165,
+     "increment_vs_majority_ci95_cluster_boot": [
+      0.1968,
+      0.2353
+     ],
+     "boot": {
+      "n_boot": 2000,
+      "seed": 20260929,
+      "unit": "stock(cluster)"
+     }
+    }
+   }
+  },
+  "by_year": {
+   "2014": {
+    "n": 117,
+    "level_spearman": 0.6894,
+    "direction_hit": 0.75
+   },
+   "2015": {
+    "n": 477,
+    "level_spearman": 0.7842,
+    "direction_hit": 0.7282
+   },
+   "2016": {
+    "n": 498,
+    "level_spearman": 0.7603,
+    "direction_hit": 0.7
+   },
+   "2017": {
+    "n": 511,
+    "level_spearman": 0.7082,
+    "direction_hit": 0.7168
+   },
+   "2018": {
+    "n": 546,
+    "level_spearman": 0.7157,
+    "direction_hit": 0.6852
+   },
+   "2019": {
+    "n": 560,
+    "level_spearman": 0.7778,
+    "direction_hit": 0.7705
+   },
+   "2020": {
+    "n": 577,
+    "level_spearman": 0.723,
+    "direction_hit": 0.6998
+   },
+   "2021": {
+    "n": 597,
+    "level_spearman": 0.7791,
+    "direction_hit": 0.761
+   },
+   "2022": {
+    "n": 607,
+    "level_spearman": 0.7725,
+    "direction_hit": 0.7309
+   },
+   "2023": {
+    "n": 609,
+    "level_spearman": 0.755,
+    "direction_hit": 0.7574
+   },
+   "2024": {
+    "n": 470,
+    "level_spearman": 0.8125,
+    "direction_hit": 0.721
+   }
+  },
+  "cross_sectional_by_quarter": {
+   "est_vs_actual_level": {
+    "n_quarters": 40,
+    "mean_spearman": 0.7622,
+    "share_positive": 1.0,
+    "min": 0.5946
+   },
+   "est_minus_EPSly_vs_actual_minus_EPSly": {
+    "n_quarters": 40,
+    "mean_spearman": 0.5893,
+    "share_positive": 1.0,
+    "min": 0.4404
+   },
+   "seasonal_naive_level_baseline": {
+    "n_quarters": 40,
+    "mean_spearman": 0.6732,
+    "share_positive": 1.0,
+    "min": 0.5047
+   }
+  }
+ },
+ "sensitivity_on_A_subset": {
+  "margin_ratio_of_sums": {
+   "level_corr": {
+    "n": 5550,
+    "spearman": 0.7774,
+    "pearson_winsor1_99": 0.8189
+   },
+   "direction_hit": {
+    "n": 5489,
+    "hit_rate": 0.7342,
+    "base_rate_actual_up": 0.5152
+   }
+  },
+  "par10_share_ratio_vs_implied": {
+   "median": 1.0025,
+   "share_within_10pct": 0.9056,
+   "share_within_25pct": 0.958
+  }
+ },
+ "tradeable_window_tdays": {
+  "definition": "(T_n=第3個月營收公布日, 季報法定截止日] 內的交易日數；法定截止日≥實際公告日，故為窗口上限",
+  "overall": {
+   "mean": 30.66,
+   "median": 25.0,
+   "p10": 24.0,
+   "p90": 50.0
+  },
+  "by_quarter_of_year": {
+   "Q1": {
+    "mean": 24.0,
+    "median": 24.0,
+    "n": 1397
+   },
+   "Q2": {
+    "mean": 24.57,
+    "median": 25.0,
+    "n": 1411
+   },
+   "Q3": {
+    "mean": 24.68,
+    "median": 25.0,
+    "n": 1416
+   },
+   "Q4": {
+    "mean": 49.63,
+    "median": 50.0,
+    "n": 1391
+   }
+  },
+  "by_year_quarter_mean": {
+   "2014Q4": 50.0,
+   "2015Q1": 24.0,
+   "2015Q2": 25.0,
+   "2015Q3": 25.0,
+   "2015Q4": 52.0,
+   "2016Q1": 24.0,
+   "2016Q2": 25.0,
+   "2016Q3": 25.0,
+   "2016Q4": 51.0,
+   "2017Q1": 24.0,
+   "2017Q2": 25.0,
+   "2017Q3": 25.0,
+   "2017Q4": 51.0,
+   "2018Q1": 24.0,
+   "2018Q2": 25.0,
+   "2018Q3": 25.0,
+   "2018Q4": 47.0,
+   "2019Q1": 24.0,
+   "2019Q2": 24.0,
+   "2019Q3": 24.0,
+   "2019Q4": 49.0,
+   "2020Q1": 24.0,
+   "2020Q2": 25.0,
+   "2020Q3": 25.0,
+   "2020Q4": 50.0,
+   "2021Q1": 24.0,
+   "2021Q2": 25.0,
+   "2021Q3": 24.0,
+   "2021Q4": 50.0,
+   "2022Q1": 24.0,
+   "2022Q2": 25.0,
+   "2022Q3": 25.0,
+   "2022Q4": 48.0,
+   "2023Q1": 24.0,
+   "2023Q2": 24.0,
+   "2023Q3": 25.0,
+   "2023Q4": 49.0,
+   "2024Q1": 24.0,
+   "2024Q2": 23.0,
+   "2024Q3": 24.0
+  }
+ }
+}

@@ -1,0 +1,1218 @@
+{
+  "generated_at": "2026-09-29T22:17:28",
+  "note": "診斷、非試驗；只讀快取（零網路）；統計限date<=VAL_END；不改任何既有判定；缺快取只記缺口不補抓。",
+  "shas": {
+    "orig": "899c96644",
+    "frozen": "7a8fd5cda",
+    "head": "b51afa207"
+  },
+  "n_snapshots": 121,
+  "n_train_snaps": 74,
+  "n_val_snaps": 47,
+  "static_code_check": {
+    "research/pit.py::month_revenue_pit": true,
+    "research/factors.py::_asof_join": true,
+    "research/factors.py::_revenue_surprise_sue": true,
+    "research/pit.py::changed_functions": [
+      "balance_sheet_pit",
+      "quarterly_pit"
+    ],
+    "research/pit.py::added_functions": [
+      "_pivot_with_statutory_pit",
+      "cash_flow_pit",
+      "statutory_quarterly_pit_date"
+    ],
+    "research/factors.py::changed_functions": [
+      "_institutional_daily_net",
+      "prepare_factors"
+    ],
+    "research/factors.py::added_functions": [
+      "_accruals",
+      "_asset_growth",
+      "_consecutive_positive_streak_days",
+      "_dividend_yield_ttm_cash",
+      "_dividend_yield_ttm_cash_from_df",
+      "_finmind_institutional_wide",
+      "_gross_margin_stability",
+      "_gross_profitability",
+      "_is_quota_error",
+      "_listing_age_days",
+      "_load_twse_listing_dates",
+      "_margin_utilization",
+      "_record_factor_warning",
+      "_short_margin_ratio",
+      "_short_sale_utilization",
+      "prepare_score_factors"
+    ],
+    "factor_ic_constants": {
+      "SAMPLE_SEED": {
+        "orig": "20260822",
+        "cur": "20260822"
+      },
+      "SAMPLE_SIZE": {
+        "orig": "100",
+        "cur": "300"
+      },
+      "START_DATE": {
+        "orig": "\"2010-01-01\"",
+        "cur": "\"2010-01-01\""
+      },
+      "SNAPSHOT_START": {
+        "orig": "\"2015-01-01\"",
+        "cur": "\"2015-01-01\""
+      },
+      "N_SHUFFLES": {
+        "orig": "1000",
+        "cur": "1000"
+      },
+      "SHUFFLE_SEED": {
+        "orig": "20260822",
+        "cur": "20260822"
+      },
+      "BASE_ALPHA": {
+        "orig": "0.10",
+        "cur": "0.10"
+      }
+    }
+  },
+  "universe": {
+    "n_old": 3196,
+    "n_cur": 3196,
+    "same_population": true,
+    "same_order": false,
+    "n_positions_differ": 3196,
+    "first100_old_eq_first100_of_old300": true,
+    "first100_cur_eq_first100_of_cur300": true
+  },
+  "sample_overlap": {
+    "old100~cur100": 4,
+    "old100~cur300": 10,
+    "old300~cur300": 27,
+    "old100~old300": 100,
+    "cur100~cur300": 100
+  },
+  "sample_cache_coverage": {
+    "old100": {
+      "price": 100,
+      "div": 87,
+      "rev": 85,
+      "yf": 100
+    },
+    "old300": {
+      "price": 262,
+      "div": 264,
+      "rev": 255,
+      "yf": 300
+    },
+    "cur100": {
+      "price": 100,
+      "div": 100,
+      "rev": 100,
+      "yf": 100
+    },
+    "cur300": {
+      "price": 300,
+      "div": 300,
+      "rev": 300,
+      "yf": 300
+    }
+  },
+  "validation_reproduce_8": {
+    "expected": {
+      "percentile": 99.0,
+      "n_usable": 80,
+      "n_val": 47,
+      "val_ic": 0.049577
+    },
+    "got": {
+      "percentile": 99.0,
+      "n_usable": 80,
+      "n_val": 47,
+      "val_ic": 0.049576761095742154,
+      "train_ic": 0.05341714753818692,
+      "val_ir": 0.3185202406562366
+    },
+    "match": true
+  },
+  "validation_reproduce_404": {
+    "expected": {
+      "i_percentile": 87.2,
+      "i_val_ic": 0.0174,
+      "ii_percentile": 87.0,
+      "ii_val_ic": 0.0173,
+      "n_val": 47
+    },
+    "got_i": {
+      "percentile": 87.2,
+      "val_ic": 0.017375608020248234,
+      "n_val": 47,
+      "n_usable": 240
+    },
+    "got_ii": {
+      "percentile": 89.1,
+      "val_ic": 0.0179187588865984,
+      "n_val": 47,
+      "n_usable": 234
+    },
+    "match_i": true,
+    "match_ii": false
+  },
+  "grid": {
+    "old100|orig": {
+      "label": "old100 × orig",
+      "builder": "orig",
+      "n_sample": 100,
+      "n_usable": 80,
+      "status": {
+        "price_short": 6,
+        "ok": 80,
+        "price_err": 14
+      },
+      "train_ic": 0.05341714753818692,
+      "train_ir": 0.3481954045959889,
+      "val_ic": 0.049576761095742154,
+      "val_ir": 0.3185202406562366,
+      "val_hit": 0.6595744680851063,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 99.0,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": true,
+      "sec": 17.1,
+      "sample": "old100"
+    },
+    "cur300|frozen": {
+      "label": "cur300 × frozen",
+      "builder": "frozen",
+      "n_sample": 300,
+      "n_usable": 240,
+      "status": {
+        "ok": 240,
+        "price_short": 18,
+        "price_err": 42
+      },
+      "train_ic": 0.04375805765167688,
+      "train_ir": 0.400768017579783,
+      "val_ic": 0.017375608020248234,
+      "val_ir": 0.1715834629332829,
+      "val_hit": 0.5531914893617021,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 87.2,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 41.2,
+      "sample": "cur300"
+    },
+    "cur300|cur": {
+      "label": "cur300 × cur",
+      "builder": "cur",
+      "n_sample": 300,
+      "n_usable": 234,
+      "status": {
+        "ok": 234,
+        "price_short": 15,
+        "price_err": 51
+      },
+      "train_ic": 0.04337423050841057,
+      "train_ir": 0.40158027556994547,
+      "val_ic": 0.0179187588865984,
+      "val_ir": 0.17890047557554156,
+      "val_hit": 0.5319148936170213,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 89.1,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 30.9,
+      "sample": "cur300"
+    },
+    "old100|frozen": {
+      "label": "old100 × frozen",
+      "builder": "frozen",
+      "n_sample": 100,
+      "n_usable": 80,
+      "status": {
+        "price_short": 6,
+        "ok": 80,
+        "price_err": 14
+      },
+      "train_ic": 0.04811064752876478,
+      "train_ir": 0.3061035652650376,
+      "val_ic": 0.036177233797038924,
+      "val_ir": 0.22779012470288904,
+      "val_hit": 0.6170212765957447,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 94.19999999999999,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 13.6,
+      "sample": "old100"
+    },
+    "old100|cur_notrunc": {
+      "label": "old100 × cur_notrunc",
+      "builder": "cur_notrunc",
+      "n_sample": 100,
+      "n_usable": 77,
+      "status": {
+        "price_short": 6,
+        "ok": 77,
+        "price_err": 17
+      },
+      "train_ic": 0.04763166784385697,
+      "train_ir": 0.2892498658828229,
+      "val_ic": 0.03594148194328997,
+      "val_ir": 0.22425327929672972,
+      "val_hit": 0.5957446808510638,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 93.30000000000001,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 28.2,
+      "sample": "old100"
+    },
+    "old100|cur": {
+      "label": "old100 × cur",
+      "builder": "cur",
+      "n_sample": 100,
+      "n_usable": 75,
+      "status": {
+        "price_short": 3,
+        "ok": 75,
+        "price_err": 22
+      },
+      "train_ic": 0.052948555551886135,
+      "train_ir": 0.316851036677529,
+      "val_ic": 0.03360279293370516,
+      "val_ir": 0.20368596232056999,
+      "val_hit": 0.5957446808510638,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 90.8,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 30.3,
+      "sample": "old100"
+    },
+    "old300|orig": {
+      "label": "old300 × orig",
+      "builder": "orig",
+      "n_sample": 300,
+      "n_usable": 214,
+      "status": {
+        "price_short": 14,
+        "ok": 214,
+        "price_err": 72
+      },
+      "train_ic": 0.04799246382534053,
+      "train_ir": 0.5127192268172024,
+      "val_ic": 0.025257765876674835,
+      "val_ir": 0.24035941224782653,
+      "val_hit": 0.5957446808510638,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 95.89999999999999,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 25.9,
+      "sample": "old300"
+    },
+    "old300|frozen": {
+      "label": "old300 × frozen",
+      "builder": "frozen",
+      "n_sample": 300,
+      "n_usable": 248,
+      "status": {
+        "price_short": 18,
+        "ok": 248,
+        "price_err": 34
+      },
+      "train_ic": 0.04554790415634817,
+      "train_ir": 0.49889599762932985,
+      "val_ic": 0.014884200683190754,
+      "val_ir": 0.14700912964400817,
+      "val_hit": 0.5106382978723404,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 78.9,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 27.3,
+      "sample": "old300"
+    },
+    "old300|cur_notrunc": {
+      "label": "old300 × cur_notrunc",
+      "builder": "cur_notrunc",
+      "n_sample": 300,
+      "n_usable": 226,
+      "status": {
+        "price_short": 15,
+        "ok": 226,
+        "price_err": 59
+      },
+      "train_ic": 0.04742416154469377,
+      "train_ir": 0.507531087757644,
+      "val_ic": 0.014493044754313945,
+      "val_ir": 0.14081685442446343,
+      "val_hit": 0.5106382978723404,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 80.9,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 23.0,
+      "sample": "old300"
+    },
+    "old300|cur": {
+      "label": "old300 × cur",
+      "builder": "cur",
+      "n_sample": 300,
+      "n_usable": 218,
+      "status": {
+        "price_short": 13,
+        "ok": 218,
+        "price_err": 69
+      },
+      "train_ic": 0.04742089508310554,
+      "train_ir": 0.4837709313594606,
+      "val_ic": 0.013437472858475578,
+      "val_ir": 0.12963393138495846,
+      "val_hit": 0.5106382978723404,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 76.2,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 24.4,
+      "sample": "old300"
+    },
+    "cur100|orig": {
+      "label": "cur100 × orig",
+      "builder": "orig",
+      "n_sample": 100,
+      "n_usable": 80,
+      "status": {
+        "ok": 80,
+        "price_short": 7,
+        "price_err": 13
+      },
+      "train_ic": 0.03239672597411631,
+      "train_ir": 0.21111985103520822,
+      "val_ic": 0.020284641167758206,
+      "val_ir": 0.12832620276023377,
+      "val_hit": 0.5106382978723404,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 66.7,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 13.6,
+      "sample": "cur100"
+    },
+    "cur100|frozen": {
+      "label": "cur100 × frozen",
+      "builder": "frozen",
+      "n_sample": 100,
+      "n_usable": 80,
+      "status": {
+        "ok": 80,
+        "price_short": 7,
+        "price_err": 13
+      },
+      "train_ic": 0.04388324577674721,
+      "train_ir": 0.2952004701712679,
+      "val_ic": 0.017869835986836686,
+      "val_ir": 0.1109311337356725,
+      "val_hit": 0.574468085106383,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 60.6,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 18.1,
+      "sample": "cur100"
+    },
+    "cur100|cur_notrunc": {
+      "label": "cur100 × cur_notrunc",
+      "builder": "cur_notrunc",
+      "n_sample": 100,
+      "n_usable": 80,
+      "status": {
+        "ok": 80,
+        "price_short": 7,
+        "price_err": 13
+      },
+      "train_ic": 0.0437254821560554,
+      "train_ir": 0.2940898571698919,
+      "val_ic": 0.017892731755256835,
+      "val_ir": 0.11056875355270038,
+      "val_hit": 0.5531914893617021,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 61.5,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 14.6,
+      "sample": "cur100"
+    },
+    "cur100|cur": {
+      "label": "cur100 × cur",
+      "builder": "cur",
+      "n_sample": 100,
+      "n_usable": 78,
+      "status": {
+        "ok": 78,
+        "price_short": 5,
+        "price_err": 17
+      },
+      "train_ic": 0.03965070812934273,
+      "train_ir": 0.2601038635436795,
+      "val_ic": 0.01691893325538908,
+      "val_ir": 0.10471154221492664,
+      "val_hit": 0.5531914893617021,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 58.5,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 16.1,
+      "sample": "cur100"
+    },
+    "cur300|orig": {
+      "label": "cur300 × orig",
+      "builder": "orig",
+      "n_sample": 300,
+      "n_usable": 240,
+      "status": {
+        "ok": 240,
+        "price_short": 18,
+        "price_err": 42
+      },
+      "train_ic": 0.044176473629705885,
+      "train_ir": 0.38827146676871016,
+      "val_ic": 0.023224343232408174,
+      "val_ir": 0.22660895025556616,
+      "val_hit": 0.6170212765957447,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 95.8,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 25.5,
+      "sample": "cur300"
+    },
+    "cur300|cur_notrunc": {
+      "label": "cur300 × cur_notrunc",
+      "builder": "cur_notrunc",
+      "n_sample": 300,
+      "n_usable": 240,
+      "status": {
+        "ok": 240,
+        "price_short": 18,
+        "price_err": 42
+      },
+      "train_ic": 0.04373390221985968,
+      "train_ir": 0.40061990233243605,
+      "val_ic": 0.017343547865267733,
+      "val_ir": 0.17099236342275942,
+      "val_hit": 0.5531914893617021,
+      "n_train": 74,
+      "n_val": 47,
+      "percentile": 87.0,
+      "required": 98.33333333333333,
+      "same_sign": true,
+      "passes": false,
+      "sec": 23.6,
+      "sample": "cur300"
+    }
+  },
+  "chain_A_sample_first": [
+    {
+      "step": "A0→A1",
+      "variable": "(a1)樣本檔數100→300（舊順序，前100檔不變）",
+      "from": "old100×orig",
+      "to": "old300×orig",
+      "pct_from": 99.0,
+      "pct_to": 95.89999999999999,
+      "d_pct": -3.1000000000000085,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.025257765876674835,
+      "n_val_to": 47,
+      "n_usable_to": 214,
+      "passes_to": false
+    },
+    {
+      "step": "A1→A2",
+      "variable": "(a2)宇宙順序修正→同seed抽到不同的300檔",
+      "from": "old300×orig",
+      "to": "cur300×orig",
+      "pct_from": 95.89999999999999,
+      "pct_to": 95.8,
+      "d_pct": -0.09999999999999432,
+      "val_ic_from": 0.025257765876674835,
+      "val_ic_to": 0.023224343232408174,
+      "n_val_to": 47,
+      "n_usable_to": 240,
+      "passes_to": false
+    },
+    {
+      "step": "A2→A3",
+      "variable": "(f0)價格建構器：FinMind原始價→yfinance優先（#404 (i)）",
+      "from": "cur300×orig",
+      "to": "cur300×frozen",
+      "pct_from": 95.8,
+      "pct_to": 87.2,
+      "d_pct": -8.599999999999994,
+      "val_ic_from": 0.023224343232408174,
+      "val_ic_to": 0.017375608020248234,
+      "n_val_to": 47,
+      "n_usable_to": 240,
+      "passes_to": false
+    },
+    {
+      "step": "A3→A4",
+      "variable": "(f)現行adjust其餘修正（split/減資/面額/FinMind路徑）",
+      "from": "cur300×frozen",
+      "to": "cur300×cur_notrunc",
+      "pct_from": 87.2,
+      "pct_to": 87.0,
+      "d_pct": -0.20000000000000284,
+      "val_ic_from": 0.017375608020248234,
+      "val_ic_to": 0.017343547865267733,
+      "n_val_to": 47,
+      "n_usable_to": 240,
+      "passes_to": false
+    },
+    {
+      "step": "A4→A5",
+      "variable": "(e)上市日截斷（興櫃期間價格移除）（#404 (ii)）",
+      "from": "cur300×cur_notrunc",
+      "to": "cur300×cur",
+      "pct_from": 87.0,
+      "pct_to": 89.1,
+      "d_pct": 2.0999999999999943,
+      "val_ic_from": 0.017343547865267733,
+      "val_ic_to": 0.0179187588865984,
+      "n_val_to": 47,
+      "n_usable_to": 234,
+      "passes_to": false
+    }
+  ],
+  "chain_B_builder_first": [
+    {
+      "step": "B0→B1",
+      "variable": "(f0)價格建構器→yfinance優先",
+      "from": "old100×orig",
+      "to": "old100×frozen",
+      "pct_from": 99.0,
+      "pct_to": 94.19999999999999,
+      "d_pct": -4.800000000000011,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.036177233797038924,
+      "n_val_to": 47,
+      "n_usable_to": 80,
+      "passes_to": false
+    },
+    {
+      "step": "B1→B2",
+      "variable": "(f)現行adjust其餘修正",
+      "from": "old100×frozen",
+      "to": "old100×cur_notrunc",
+      "pct_from": 94.19999999999999,
+      "pct_to": 93.30000000000001,
+      "d_pct": -0.8999999999999773,
+      "val_ic_from": 0.036177233797038924,
+      "val_ic_to": 0.03594148194328997,
+      "n_val_to": 47,
+      "n_usable_to": 77,
+      "passes_to": false
+    },
+    {
+      "step": "B2→B3",
+      "variable": "(e)上市日截斷",
+      "from": "old100×cur_notrunc",
+      "to": "old100×cur",
+      "pct_from": 93.30000000000001,
+      "pct_to": 90.8,
+      "d_pct": -2.500000000000014,
+      "val_ic_from": 0.03594148194328997,
+      "val_ic_to": 0.03360279293370516,
+      "n_val_to": 47,
+      "n_usable_to": 75,
+      "passes_to": false
+    },
+    {
+      "step": "B3→B4",
+      "variable": "(a2)宇宙順序修正→抽到不同的100檔",
+      "from": "old100×cur",
+      "to": "cur100×cur",
+      "pct_from": 90.8,
+      "pct_to": 58.5,
+      "d_pct": -32.3,
+      "val_ic_from": 0.03360279293370516,
+      "val_ic_to": 0.01691893325538908,
+      "n_val_to": 47,
+      "n_usable_to": 78,
+      "passes_to": false
+    },
+    {
+      "step": "B4→B5",
+      "variable": "(a1)檔數100→300",
+      "from": "cur100×cur",
+      "to": "cur300×cur",
+      "pct_from": 58.5,
+      "pct_to": 89.1,
+      "d_pct": 30.599999999999994,
+      "val_ic_from": 0.01691893325538908,
+      "val_ic_to": 0.0179187588865984,
+      "n_val_to": 47,
+      "n_usable_to": 234,
+      "passes_to": false
+    }
+  ],
+  "single_swap_from_original": [
+    {
+      "step": "S0",
+      "variable": "只換價格建構器→yfinance優先",
+      "from": "old100×orig",
+      "to": "old100×frozen",
+      "pct_from": 99.0,
+      "pct_to": 94.19999999999999,
+      "d_pct": -4.800000000000011,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.036177233797038924,
+      "n_val_to": 47,
+      "n_usable_to": 80,
+      "passes_to": false
+    },
+    {
+      "step": "S1",
+      "variable": "只換價格建構器→現行(無截斷)",
+      "from": "old100×orig",
+      "to": "old100×cur_notrunc",
+      "pct_from": 99.0,
+      "pct_to": 93.30000000000001,
+      "d_pct": -5.699999999999989,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.03594148194328997,
+      "n_val_to": 47,
+      "n_usable_to": 77,
+      "passes_to": false
+    },
+    {
+      "step": "S2",
+      "variable": "只換價格建構器→現行(含截斷)",
+      "from": "old100×orig",
+      "to": "old100×cur",
+      "pct_from": 99.0,
+      "pct_to": 90.8,
+      "d_pct": -8.200000000000003,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.03360279293370516,
+      "n_val_to": 47,
+      "n_usable_to": 75,
+      "passes_to": false
+    },
+    {
+      "step": "S3",
+      "variable": "只把檔數改300（舊順序）",
+      "from": "old100×orig",
+      "to": "old300×orig",
+      "pct_from": 99.0,
+      "pct_to": 95.89999999999999,
+      "d_pct": -3.1000000000000085,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.025257765876674835,
+      "n_val_to": 47,
+      "n_usable_to": 214,
+      "passes_to": false
+    },
+    {
+      "step": "S4",
+      "variable": "只把宇宙順序改現行（100檔）",
+      "from": "old100×orig",
+      "to": "cur100×orig",
+      "pct_from": 99.0,
+      "pct_to": 66.7,
+      "d_pct": -32.3,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.020284641167758206,
+      "n_val_to": 47,
+      "n_usable_to": 80,
+      "passes_to": false
+    },
+    {
+      "step": "S5",
+      "variable": "檔數300＋現行順序（其餘全同原始）",
+      "from": "old100×orig",
+      "to": "cur300×orig",
+      "pct_from": 99.0,
+      "pct_to": 95.8,
+      "d_pct": -3.200000000000003,
+      "val_ic_from": 0.049576761095742154,
+      "val_ic_to": 0.023224343232408174,
+      "n_val_to": 47,
+      "n_usable_to": 240,
+      "passes_to": false
+    }
+  ],
+  "common_support": {
+    "old100": {
+      "n_common": 75,
+      "rows": {
+        "orig": {
+          "n_usable": 75,
+          "val_ic": 0.04570552270872059,
+          "val_ir": 0.28950084726883163,
+          "n_val": 47,
+          "percentile": 98.2,
+          "passes": false
+        },
+        "frozen": {
+          "n_usable": 75,
+          "val_ic": 0.03594148194328997,
+          "val_ir": 0.22425327929672972,
+          "n_val": 47,
+          "percentile": 93.30000000000001,
+          "passes": false
+        },
+        "cur_notrunc": {
+          "n_usable": 75,
+          "val_ic": 0.03594148194328997,
+          "val_ir": 0.22425327929672972,
+          "n_val": 47,
+          "percentile": 93.30000000000001,
+          "passes": false
+        },
+        "cur": {
+          "n_usable": 75,
+          "val_ic": 0.03360279293370516,
+          "val_ir": 0.20368596232056999,
+          "n_val": 47,
+          "percentile": 90.8,
+          "passes": false
+        }
+      }
+    },
+    "old300": {
+      "n_common": 184,
+      "rows": {
+        "orig": {
+          "n_usable": 184,
+          "val_ic": 0.023493592439941077,
+          "val_ir": 0.21672936518683095,
+          "n_val": 47,
+          "percentile": 94.0,
+          "passes": false
+        },
+        "frozen": {
+          "n_usable": 184,
+          "val_ic": 0.018806253477431763,
+          "val_ir": 0.1609464499480327,
+          "n_val": 47,
+          "percentile": 88.8,
+          "passes": false
+        },
+        "cur_notrunc": {
+          "n_usable": 184,
+          "val_ic": 0.018806253477431763,
+          "val_ir": 0.1609464499480327,
+          "n_val": 47,
+          "percentile": 88.8,
+          "passes": false
+        },
+        "cur": {
+          "n_usable": 184,
+          "val_ic": 0.01752788071286748,
+          "val_ir": 0.1482188466611369,
+          "n_val": 47,
+          "percentile": 84.1,
+          "passes": false
+        }
+      }
+    },
+    "cur100": {
+      "n_common": 78,
+      "rows": {
+        "orig": {
+          "n_usable": 78,
+          "val_ic": 0.020284641167758206,
+          "val_ir": 0.12832620276023377,
+          "n_val": 47,
+          "percentile": 66.7,
+          "passes": false
+        },
+        "frozen": {
+          "n_usable": 78,
+          "val_ic": 0.017869835986836686,
+          "val_ir": 0.1109311337356725,
+          "n_val": 47,
+          "percentile": 60.6,
+          "passes": false
+        },
+        "cur_notrunc": {
+          "n_usable": 78,
+          "val_ic": 0.017892731755256835,
+          "val_ir": 0.11056875355270038,
+          "n_val": 47,
+          "percentile": 61.5,
+          "passes": false
+        },
+        "cur": {
+          "n_usable": 78,
+          "val_ic": 0.01691893325538908,
+          "val_ir": 0.10471154221492664,
+          "n_val": 47,
+          "percentile": 58.5,
+          "passes": false
+        }
+      }
+    },
+    "cur300": {
+      "n_common": 234,
+      "rows": {
+        "orig": {
+          "n_usable": 234,
+          "val_ic": 0.023224343232408174,
+          "val_ir": 0.22660895025556616,
+          "n_val": 47,
+          "percentile": 95.8,
+          "passes": false
+        },
+        "frozen": {
+          "n_usable": 234,
+          "val_ic": 0.017375608020248234,
+          "val_ir": 0.1715834629332829,
+          "n_val": 47,
+          "percentile": 87.2,
+          "passes": false
+        },
+        "cur_notrunc": {
+          "n_usable": 234,
+          "val_ic": 0.017343547865267733,
+          "val_ir": 0.17099236342275942,
+          "n_val": 47,
+          "percentile": 87.0,
+          "passes": false
+        },
+        "cur": {
+          "n_usable": 234,
+          "val_ic": 0.0179187588865984,
+          "val_ir": 0.17890047557554156,
+          "n_val": 47,
+          "percentile": 89.1,
+          "passes": false
+        }
+      }
+    }
+  },
+  "fast_eval_crosscheck": {
+    "old100×orig": {
+      "fast_pct": 99.1,
+      "real_pct": 99.0,
+      "fast_val_ic": 0.049576761095742154,
+      "real_val_ic": 0.049576761095742154
+    },
+    "cur300×cur": {
+      "fast_pct": 88.5,
+      "real_pct": 89.1,
+      "fast_val_ic": 0.0179187588865984,
+      "real_val_ic": 0.0179187588865984
+    },
+    "cur300×frozen": {
+      "fast_pct": 85.6,
+      "real_pct": 87.2,
+      "fast_val_ic": 0.017375608020248234,
+      "real_val_ic": 0.017375608020248234
+    }
+  },
+  "pool_resample": {
+    "pool_size": 1373,
+    "n_draws": 400,
+    "n_shuffles_each": 500,
+    "sizes": {
+      "80": {
+        "by_builder": {
+          "orig": {
+            "pct_mean": 86.64599999999999,
+            "pct_sd": 20.216431040121794,
+            "pct_q05": 38.39,
+            "pct_q25": 83.39999999999999,
+            "pct_q50": 95.69999999999999,
+            "pct_q75": 99.6,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.36,
+            "share_ge_99.0": 0.3125,
+            "share_le_87.0": 0.295,
+            "val_ic_mean": 0.0381605246405116,
+            "val_ic_sd": 0.01871333355115265
+          },
+          "frozen": {
+            "pct_mean": 84.57449999999999,
+            "pct_sd": 22.411765877547445,
+            "pct_q05": 25.970000000000002,
+            "pct_q25": 78.60000000000001,
+            "pct_q50": 94.8,
+            "pct_q75": 99.2,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.33,
+            "share_ge_99.0": 0.285,
+            "share_le_87.0": 0.33,
+            "val_ic_mean": 0.03583684882560861,
+            "val_ic_sd": 0.018214423901556864
+          },
+          "cur_notrunc": {
+            "pct_mean": 84.56450000000001,
+            "pct_sd": 22.43240601785729,
+            "pct_q05": 25.990000000000002,
+            "pct_q25": 78.60000000000001,
+            "pct_q50": 94.8,
+            "pct_q75": 99.2,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.33,
+            "share_ge_99.0": 0.285,
+            "share_le_87.0": 0.33,
+            "val_ic_mean": 0.035838258598810936,
+            "val_ic_sd": 0.018217923152044777
+          },
+          "cur": {
+            "pct_mean": 84.0995,
+            "pct_sd": 22.955147565415476,
+            "pct_q05": 29.700000000000017,
+            "pct_q25": 79.30000000000001,
+            "pct_q50": 94.6,
+            "pct_q75": 99.2,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.335,
+            "share_ge_99.0": 0.28,
+            "share_le_87.0": 0.3425,
+            "val_ic_mean": 0.03562345263531171,
+            "val_ic_sd": 0.018297418451699906
+          }
+        },
+        "paired_builder_effect": {
+          "frozen-orig": {
+            "d_pct_mean": -2.071499999999999,
+            "d_pct_sd": 8.751193504316998,
+            "d_val_ic_mean": -0.0023236758149030048,
+            "d_val_ic_sd": 0.005342999841333782
+          },
+          "cur_notrunc-orig": {
+            "d_pct_mean": -2.0814999999999997,
+            "d_pct_sd": 8.750454716756153,
+            "d_val_ic_mean": -0.0023222660417006715,
+            "d_val_ic_sd": 0.00534544472826182
+          },
+          "cur-orig": {
+            "d_pct_mean": -2.546499999999999,
+            "d_pct_sd": 8.946431565154903,
+            "d_val_ic_mean": -0.0025370720051998974,
+            "d_val_ic_sd": 0.005388380374593301
+          },
+          "cur_notrunc-frozen": {
+            "d_pct_mean": -0.010000000000000054,
+            "d_pct_sd": 0.15652475842498534,
+            "d_val_ic_mean": 1.4097732023329435e-06,
+            "d_val_ic_sd": 4.0564343808643705e-05
+          },
+          "cur-cur_notrunc": {
+            "d_pct_mean": -0.4649999999999996,
+            "d_pct_sd": 2.91975598295474,
+            "d_val_ic_mean": -0.00021480596349922638,
+            "d_val_ic_sd": 0.0014018469644171772
+          }
+        }
+      },
+      "240": {
+        "by_builder": {
+          "orig": {
+            "pct_mean": 99.1135,
+            "pct_sd": 3.222144898976456,
+            "pct_q05": 96.17,
+            "pct_q25": 99.8,
+            "pct_q50": 100.0,
+            "pct_q75": 100.0,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.8875,
+            "share_ge_99.0": 0.875,
+            "share_le_87.0": 0.015,
+            "val_ic_mean": 0.03796570765988158,
+            "val_ic_sd": 0.009738647181767203
+          },
+          "frozen": {
+            "pct_mean": 98.64849999999998,
+            "pct_sd": 3.654278006665612,
+            "pct_q05": 93.18,
+            "pct_q25": 99.35000000000001,
+            "pct_q50": 100.0,
+            "pct_q75": 100.0,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.845,
+            "share_ge_99.0": 0.8075,
+            "share_le_87.0": 0.0275,
+            "val_ic_mean": 0.034827731770195776,
+            "val_ic_sd": 0.009298941861529152
+          },
+          "cur_notrunc": {
+            "pct_mean": 98.6485,
+            "pct_sd": 3.6472109549627088,
+            "pct_q05": 92.99,
+            "pct_q25": 99.4,
+            "pct_q50": 100.0,
+            "pct_q75": 100.0,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.845,
+            "share_ge_99.0": 0.8075,
+            "share_le_87.0": 0.0275,
+            "val_ic_mean": 0.034832918865653796,
+            "val_ic_sd": 0.009299996538391931
+          },
+          "cur": {
+            "pct_mean": 98.5275,
+            "pct_sd": 4.099663858171789,
+            "pct_q05": 92.37,
+            "pct_q25": 99.2,
+            "pct_q50": 100.0,
+            "pct_q75": 100.0,
+            "pct_q95": 100.0,
+            "share_ge_98.33": 0.8375,
+            "share_ge_99.0": 0.7975,
+            "share_le_87.0": 0.0275,
+            "val_ic_mean": 0.03458908556207074,
+            "val_ic_sd": 0.009357560351882744
+          }
+        },
+        "paired_builder_effect": {
+          "frozen-orig": {
+            "d_pct_mean": -0.465,
+            "d_pct_sd": 1.882757286534831,
+            "d_val_ic_mean": -0.003137975889685801,
+            "d_val_ic_sd": 0.0028859631227125086
+          },
+          "cur_notrunc-orig": {
+            "d_pct_mean": -0.465,
+            "d_pct_sd": 1.8921878870767566,
+            "d_val_ic_mean": -0.003132788794227778,
+            "d_val_ic_sd": 0.0028876487183168067
+          },
+          "cur-orig": {
+            "d_pct_mean": -0.586,
+            "d_pct_sd": 2.1731553096822145,
+            "d_val_ic_mean": -0.003376622097810833,
+            "d_val_ic_sd": 0.002958417857857987
+          },
+          "cur_notrunc-frozen": {
+            "d_pct_mean": 0.0,
+            "d_pct_sd": 0.06164414002969007,
+            "d_val_ic_mean": 5.1870954580236035e-06,
+            "d_val_ic_sd": 1.7866702429870114e-05
+          },
+          "cur-cur_notrunc": {
+            "d_pct_mean": -0.12100000000000001,
+            "d_pct_sd": 0.9105816822229621,
+            "d_val_ic_mean": -0.00024383330358305477,
+            "d_val_ic_sd": 0.0007221815830873331
+          }
+        }
+      }
+    }
+  },
+  "gaps": {
+    "n_missing_cache_entries": 1378,
+    "missing_sample": [
+      "TaiwanStockSplitPrice__6287__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockSplitPrice__00704L__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockSplitPrice__3474__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__2025__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__3055__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6996__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__3390__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__00952__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6614__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__4544__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__5309__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__00764B__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__5345__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__00850__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__5347__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__00959B__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__9939__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__1515__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6148__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__00645__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__4764__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__4139__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__2324__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6189__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__00876__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__3289__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__8349A__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__1264__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__3130__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__8433__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__1530__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__5531__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6586__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__4909__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6496__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__8085__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__3086__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__4966__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__5230__2010-01-01__2024-12-31.parquet",
+      "TaiwanStockPrice__6642__2010-01-01__2024-12-31.parquet"
+    ],
+    "not_usable_by_status": {
+      "old100|orig": {
+        "price_short": 6,
+        "price_err": 14
+      },
+      "old100|cur": {
+        "price_short": 3,
+        "price_err": 22
+      },
+      "old300|orig": {
+        "price_short": 14,
+        "price_err": 72
+      },
+      "old300|cur": {
+        "price_short": 13,
+        "price_err": 69
+      },
+      "cur100|orig": {
+        "price_short": 7,
+        "price_err": 13
+      },
+      "cur100|cur": {
+        "price_short": 5,
+        "price_err": 17
+      },
+      "cur300|orig": {
+        "price_short": 18,
+        "price_err": 42
+      },
+      "cur300|cur": {
+        "price_short": 15,
+        "price_err": 51
+      }
+    },
+    "note": "缺快取者一律不補抓；usable=價格建得出來且>=260列且營收表可算（等價原load_sample_with_factors對營收因子的門檻）。"
+  },
+  "elapsed_sec": 1336.8
+}
