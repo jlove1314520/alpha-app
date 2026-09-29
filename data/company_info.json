@@ -23,6 +23,14 @@
         "tpex_R": 363
       },
       "note": "題材七待辦1：官方網址來源為 MOPS 開放資料 t187ap03_L（上市）/mopsfin_t187ap03_O（上櫃）/mopsfin_t187ap03_R（興櫃），三來源代號互不重疊。ETF/債券/已下市證券沒有這欄是正常現象，非缺漏。見 research/build_company_official_websites.py。"
+    },
+    "industry_backfill_2026_09_29": {
+      "before_missing": 90,
+      "after_missing": 1,
+      "filled": 89,
+      "source": "https://openapi.twse.com.tw/v1/opendata/t187ap03_L（產業別代碼 21=化學工業、22=生技醫療業）",
+      "note": "backfill_company_industry.py 後仍缺的上市股（FinMind 同時給化學工業/化學生技醫療而判歧義），改用 TWSE 官方產業別代碼補；只補 None，不覆寫既有值。",
+      "generated_at": "2026-09-29T23:33:27.123025+08:00"
     }
   },
   "companies": {
@@ -1704,7 +1712,7 @@
     },
     "6598": {
       "name": "ABC-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.ApBioCode.com/tw",
       "official_domain": "apbiocode.com",
       "official_website_source": "twse_L"
@@ -1824,7 +1832,7 @@
     },
     "6589": {
       "name": "台康生技",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.eirgenix.com",
       "official_domain": "eirgenix.com",
       "official_website_source": "twse_L"
@@ -1880,7 +1888,7 @@
     },
     "6446": {
       "name": "藥華藥",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.PharmaEssentia.com",
       "official_domain": "pharmaessentia.com",
       "official_website_source": "twse_L"
@@ -2097,7 +2105,7 @@
     },
     "6491": {
       "name": "晶碩",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.pegavision.com",
       "official_domain": "pegavision.com",
       "official_website_source": "twse_L"
@@ -2174,7 +2182,7 @@
     },
     "6431": {
       "name": "光麗-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.kl-holdings.com/",
       "official_domain": "kl-holdings.com",
       "official_website_source": "twse_L"
@@ -2188,7 +2196,7 @@
     },
     "6534": {
       "name": "正瀚-創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.chbio.com.tw",
       "official_domain": "chbio.com.tw",
       "official_website_source": "twse_L"
@@ -2258,7 +2266,7 @@
     },
     "6472": {
       "name": "保瑞",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://bora-corp.com/",
       "official_domain": "bora-corp.com",
       "official_website_source": "twse_L"
@@ -2377,7 +2385,7 @@
     },
     "6541": {
       "name": "泰福-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.tanvex.com",
       "official_domain": "tanvex.com",
       "official_website_source": "twse_L"
@@ -2489,7 +2497,7 @@
     },
     "6550": {
       "name": "北極星藥業-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.polarispharma.com",
       "official_domain": "polarispharma.com",
       "official_website_source": "twse_L"
@@ -5616,7 +5624,7 @@
     },
     "7799": {
       "name": "禾榮科",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.heron-neutron.com/",
       "official_domain": "heron-neutron.com",
       "official_website_source": "twse_L"
@@ -5630,7 +5638,7 @@
     },
     "7803": {
       "name": "雲象科技-創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.aetherai.com/",
       "official_domain": "aetherai.com",
       "official_website_source": "twse_L"
@@ -6127,7 +6135,7 @@
     },
     "7827": {
       "name": "漢康-KY創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.hanchorbio.com",
       "official_domain": "hanchorbio.com",
       "official_website_source": "twse_L"
@@ -7578,7 +7586,7 @@
     },
     "6796": {
       "name": "晉弘",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.miis.com.tw",
       "official_domain": "miis.com.tw",
       "official_website_source": "twse_L"
@@ -7620,14 +7628,14 @@
     },
     "6794": {
       "name": "向榮生技",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.unicocell.com",
       "official_domain": "unicocell.com",
       "official_website_source": "twse_L"
     },
     "6782": {
       "name": "視陽",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.viscovision.com.tw",
       "official_domain": "viscovision.com.tw",
       "official_website_source": "twse_L"
@@ -7907,7 +7915,7 @@
     },
     "6861": {
       "name": "睿生光電",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.innocare-x.com",
       "official_domain": "innocare-x.com",
       "official_website_source": "twse_L"
@@ -7921,7 +7929,7 @@
     },
     "6838": {
       "name": "台新藥",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.formosapharma.com",
       "official_domain": "formosapharma.com",
       "official_website_source": "twse_L"
@@ -8138,14 +8146,14 @@
     },
     "6666": {
       "name": "羅麗芬-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.luolihfen.com/",
       "official_domain": "luolihfen.com",
       "official_website_source": "twse_L"
     },
     "6657": {
       "name": "華安",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.energenesis-biomedical.com",
       "official_domain": "energenesis-biomedical.com",
       "official_website_source": "twse_L"
@@ -8348,7 +8356,7 @@
     },
     "6645": {
       "name": "金萬林-創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.kimforest.com",
       "official_domain": "kimforest.com",
       "official_website_source": "twse_L"
@@ -9496,7 +9504,7 @@
     },
     "6918": {
       "name": "愛派司",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.aplusbio.com/",
       "official_domain": "aplusbio.com",
       "official_website_source": "twse_L"
@@ -9643,7 +9651,7 @@
     },
     "6885": {
       "name": "全福生技",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.brimbiotech.com/",
       "official_domain": "brimbiotech.com",
       "official_website_source": "twse_L"
@@ -9685,7 +9693,7 @@
     },
     "6919": {
       "name": "康霈*",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.caliwaybiopharma.com",
       "official_domain": "caliwaybiopharma.com",
       "official_website_source": "twse_L"
@@ -9734,7 +9742,7 @@
     },
     "6949": {
       "name": "沛爾生醫-創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.pellbmt.com",
       "official_domain": "pellbmt.com",
       "official_website_source": "twse_L"
@@ -9762,7 +9770,7 @@
     },
     "6955": {
       "name": "邦睿生技-創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.bonraybio.com",
       "official_domain": "bonraybio.com",
       "official_website_source": "twse_L"
@@ -9899,7 +9907,7 @@
     },
     "6931": {
       "name": "青松健康",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.qingsong.com.tw/",
       "official_domain": "qingsong.com.tw",
       "official_website_source": "twse_L"
@@ -9920,7 +9928,7 @@
     },
     "6934": {
       "name": "心誠鎂",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.hcmed-inno.com",
       "official_domain": "hcmed-inno.com",
       "official_website_source": "twse_L"
@@ -9934,7 +9942,7 @@
     },
     "6936": {
       "name": "永鴻生技",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.vetnostrum.com/",
       "official_domain": "vetnostrum.com",
       "official_website_source": "twse_L"
@@ -9969,7 +9977,7 @@
     },
     "1776": {
       "name": "展宇",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "https://www.headway.com.tw",
       "official_domain": "headway.com.tw",
       "official_website_source": "twse_L"
@@ -9997,7 +10005,7 @@
     },
     "1783": {
       "name": "和康生",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.mbi.com.tw",
       "official_domain": "mbi.com.tw",
       "official_website_source": "twse_L"
@@ -10018,7 +10026,7 @@
     },
     "1786": {
       "name": "科妍",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.scivision.com.tw",
       "official_domain": "scivision.com.tw",
       "official_website_source": "twse_L"
@@ -10032,14 +10040,14 @@
     },
     "1789": {
       "name": "神隆",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.scinopharm.com/tw",
       "official_domain": "scinopharm.com",
       "official_website_source": "twse_L"
     },
     "1795": {
       "name": "美時",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.lotuspharm.com.tw",
       "official_domain": "lotuspharm.com.tw",
       "official_website_source": "twse_L"
@@ -10116,70 +10124,70 @@
     },
     "1773": {
       "name": "勝一",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.shinychem.com.tw/",
       "official_domain": "shinychem.com.tw",
       "official_website_source": "twse_L"
     },
     "1725": {
       "name": "元禎",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.yuanjen.com/",
       "official_domain": "yuanjen.com",
       "official_website_source": "twse_L"
     },
     "1726": {
       "name": "永記",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.rainbowpaint.com.tw",
       "official_domain": "rainbowpaint.com.tw",
       "official_website_source": "twse_L"
     },
     "1727": {
       "name": "中華化",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.chciw.com.tw",
       "official_domain": "chciw.com.tw",
       "official_website_source": "twse_L"
     },
     "1730": {
       "name": "花仙子",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "WWW.FARCENT.COM.TW",
       "official_domain": "farcent.com.tw",
       "official_website_source": "twse_L"
     },
     "1731": {
       "name": "美吾華",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.maywufa.com.tw",
       "official_domain": "maywufa.com.tw",
       "official_website_source": "twse_L"
     },
     "1732": {
       "name": "毛寶",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.maobao.com.tw",
       "official_domain": "maobao.com.tw",
       "official_website_source": "twse_L"
     },
     "1733": {
       "name": "五鼎",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.apexbio.com.tw",
       "official_domain": "apexbio.com.tw",
       "official_website_source": "twse_L"
     },
     "1734": {
       "name": "杏輝",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.sinphar.com",
       "official_domain": "sinphar.com",
       "official_website_source": "twse_L"
     },
     "1735": {
       "name": "日勝化",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.twemc.com",
       "official_domain": "twemc.com",
       "official_website_source": "twse_L"
@@ -10207,21 +10215,21 @@
     },
     "1752": {
       "name": "南光",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.nangkuang.com.tw",
       "official_domain": "nangkuang.com.tw",
       "official_website_source": "twse_L"
     },
     "1760": {
       "name": "寶齡富錦",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.pbf.com.tw",
       "official_domain": "pbf.com.tw",
       "official_website_source": "twse_L"
     },
     "1762": {
       "name": "中化生",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.ccsb.com.tw",
       "official_domain": "ccsb.com.tw",
       "official_website_source": "twse_L"
@@ -10631,7 +10639,7 @@
     },
     "1723": {
       "name": "中碳",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.cscc.com.tw",
       "official_domain": "cscc.com.tw",
       "official_website_source": "twse_L"
@@ -11041,84 +11049,84 @@
     },
     "1707": {
       "name": "葡萄王",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.grapeking.com.tw",
       "official_domain": "grapeking.com.tw",
       "official_website_source": "twse_L"
     },
     "1708": {
       "name": "東鹼",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.sesoda.com.tw",
       "official_domain": "sesoda.com.tw",
       "official_website_source": "twse_L"
     },
     "1709": {
       "name": "和益",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.fucc.com.tw",
       "official_domain": "fucc.com.tw",
       "official_website_source": "twse_L"
     },
     "1710": {
       "name": "東聯",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.oucc.com.tw",
       "official_domain": "oucc.com.tw",
       "official_website_source": "twse_L"
     },
     "1711": {
       "name": "永光",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "https://www.ecic.com/",
       "official_domain": "ecic.com",
       "official_website_source": "twse_L"
     },
     "1712": {
       "name": "興農",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.sinon.com.tw",
       "official_domain": "sinon.com.tw",
       "official_website_source": "twse_L"
     },
     "1713": {
       "name": "國化",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.ccwi.com.tw",
       "official_domain": "ccwi.com.tw",
       "official_website_source": "twse_L"
     },
     "1714": {
       "name": "和桐",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.htgroup.com.tw",
       "official_domain": "htgroup.com.tw",
       "official_website_source": "twse_L"
     },
     "1717": {
       "name": "長興",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "https://www.eternal-group.com/Home",
       "official_domain": "eternal-group.com",
       "official_website_source": "twse_L"
     },
     "1718": {
       "name": "中纖",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.cmfc.com.tw",
       "official_domain": "cmfc.com.tw",
       "official_website_source": "twse_L"
     },
     "1720": {
       "name": "生達",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.standard.com.tw",
       "official_domain": "standard.com.tw",
       "official_website_source": "twse_L"
     },
     "1721": {
       "name": "三晃",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.sunko.com.tw",
       "official_domain": "sunko.com.tw",
       "official_website_source": "twse_L"
@@ -11230,7 +11238,7 @@
     },
     "1722": {
       "name": "台肥",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.taifer.com.tw",
       "official_domain": "taifer.com.tw",
       "official_website_source": "twse_L"
@@ -14733,7 +14741,7 @@
     },
     "4104": {
       "name": "佳醫",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.excelsiormedical.com.tw",
       "official_domain": "excelsiormedical.com.tw",
       "official_website_source": "twse_L"
@@ -14747,7 +14755,7 @@
     },
     "4106": {
       "name": "雃博",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://tw.wellell.com/zh-tw",
       "official_domain": "tw.wellell.com",
       "official_website_source": "twse_L"
@@ -14761,7 +14769,7 @@
     },
     "4108": {
       "name": "懷特",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.phytohealth.com.tw",
       "official_domain": "phytohealth.com.tw",
       "official_website_source": "twse_L"
@@ -14817,7 +14825,7 @@
     },
     "4119": {
       "name": "旭富",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.sci-pharmtech.com.tw",
       "official_domain": "sci-pharmtech.com.tw",
       "official_website_source": "twse_L"
@@ -14859,7 +14867,7 @@
     },
     "3716": {
       "name": "中化控股",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.cenra.com/",
       "official_domain": "cenra.com",
       "official_website_source": "twse_L"
@@ -14999,7 +15007,7 @@
     },
     "3705": {
       "name": "永信",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.yungshingroup.com",
       "official_domain": "yungshingroup.com",
       "official_website_source": "twse_L"
@@ -15629,7 +15637,7 @@
     },
     "4722": {
       "name": "國精化",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.qualipoly.com.tw",
       "official_domain": "qualipoly.com.tw",
       "official_website_source": "twse_L"
@@ -15678,14 +15686,14 @@
     },
     "4736": {
       "name": "泰博",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.taidoc.com.tw",
       "official_domain": "taidoc.com.tw",
       "official_website_source": "twse_L"
     },
     "4737": {
       "name": "華廣",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.bionime.com",
       "official_domain": "bionime.com",
       "official_website_source": "twse_L"
@@ -15699,7 +15707,7 @@
     },
     "4739": {
       "name": "康普",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.coremaxcorp.com",
       "official_domain": "coremaxcorp.com",
       "official_website_source": "twse_L"
@@ -15734,7 +15742,7 @@
     },
     "4746": {
       "name": "台耀",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.formosalab.com",
       "official_domain": "formosalab.com",
       "official_website_source": "twse_L"
@@ -15762,7 +15770,7 @@
     },
     "4720": {
       "name": "德淵",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.texyear.com",
       "official_domain": "texyear.com",
       "official_website_source": "twse_L"
@@ -15930,7 +15938,7 @@
     },
     "4755": {
       "name": "三福化",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.sfchem.com.tw",
       "official_domain": "sfchem.com.tw",
       "official_website_source": "twse_L"
@@ -16070,14 +16078,14 @@
     },
     "4763": {
       "name": "材料*-KY",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "www.acetekgroup.com",
       "official_domain": "acetekgroup.com",
       "official_website_source": "twse_L"
     },
     "4764": {
       "name": "雙鍵",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.dbc.com.tw/",
       "official_domain": "dbc.com.tw",
       "official_website_source": "twse_L"
@@ -16091,7 +16099,7 @@
     },
     "4766": {
       "name": "南寶",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "http://www.nanpao.com.tw",
       "official_domain": "nanpao.com.tw",
       "official_website_source": "twse_L"
@@ -16112,14 +16120,14 @@
     },
     "4770": {
       "name": "上品",
-      "industry": null,
+      "industry": "化學工業",
       "official_website": "https://www.alliedsupreme.com",
       "official_domain": "alliedsupreme.com",
       "official_website_source": "twse_L"
     },
     "4771": {
       "name": "望隼",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.vizionfocus.com/",
       "official_domain": "vizionfocus.com",
       "official_website_source": "twse_L"
@@ -16259,7 +16267,7 @@
     },
     "4178": {
       "name": "永笙-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://stemcytebio.com/",
       "official_domain": "stemcytebio.com",
       "official_website_source": "twse_L"
@@ -16287,7 +16295,7 @@
     },
     "4190": {
       "name": "佐登-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "https://www.jourdeness.com",
       "official_domain": "jourdeness.com",
       "official_website_source": "twse_L"
@@ -16308,7 +16316,7 @@
     },
     "4195": {
       "name": "基米-創",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.genomics.com.tw",
       "official_domain": "genomics.com.tw",
       "official_website_source": "twse_L"
@@ -16406,14 +16414,14 @@
     },
     "4133": {
       "name": "亞諾法",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.abnova.com",
       "official_domain": "abnova.com",
       "official_website_source": "twse_L"
     },
     "4137": {
       "name": "麗豐-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.chlitinaholding.com/",
       "official_domain": "chlitinaholding.com",
       "official_website_source": "twse_L"
@@ -16434,7 +16442,7 @@
     },
     "4142": {
       "name": "國光生",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.adimmune.com.tw/",
       "official_domain": "adimmune.com.tw",
       "official_website_source": "twse_L"
@@ -16448,7 +16456,7 @@
     },
     "4148": {
       "name": "全宇生技-KY",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.allcosmos.com",
       "official_domain": "allcosmos.com",
       "official_website_source": "twse_L"
@@ -16473,7 +16481,7 @@
     },
     "4155": {
       "name": "訊映",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.okbiotech.com",
       "official_domain": "okbiotech.com",
       "official_website_source": "twse_L"
@@ -16508,7 +16516,7 @@
     },
     "4164": {
       "name": "承業醫",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.chcg.com",
       "official_domain": "chcg.com",
       "official_website_source": "twse_L"
@@ -16536,7 +16544,7 @@
     },
     "4169": {
       "name": "泰宗",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "http://www.tcmbio.com/",
       "official_domain": "tcmbio.com",
       "official_website_source": "twse_L"
@@ -18613,7 +18621,7 @@
     },
     "3164": {
       "name": "景岳",
-      "industry": null,
+      "industry": "生技醫療業",
       "official_website": "www.genmont.com.tw",
       "official_domain": "genmont.com.tw",
       "official_website_source": "twse_L"

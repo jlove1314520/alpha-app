@@ -771,6 +771,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
         <div class="note num" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
         <div class="note" id="picks-weight-note" style="margin-top:2px">非投資建議</div>
+        <div class="note" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
@@ -783,7 +784,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="note" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
-    <div class="note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
+    <div class="note" id="picks-coverage-note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
       高分但資料完整度低的股票分數僅供參考、不代表可信——卡片變淡、加註「資料稀疏」的就是這種情況。</div>
 
     <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
@@ -5411,11 +5412,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   let REPORT_CACHE_BOARD='value'; // 記錄目前顯示的報告屬於哪個榜單，factorRowHtml()要看這個決定用哪套FACTOR_LABELS
   let ENTRY_PLAN_CACHE=null;
   const FACTOR_LABELS={
-    earnings_growth:'財報成長', revenue_momentum:'營收動能', growth_quality:'成長性/未來性',
+    low_vol:'低波動', earnings_growth:'財報成長', revenue_momentum:'營收動能', growth_quality:'成長性/未來性',
     chips:'籌碼', technical:'技術型態', valuation_adj:'估值(成長調整)',
     analyst:'機構觀點', catalyst:'題材/事件',
   };
-  const FACTOR_ORDER=['earnings_growth','revenue_momentum','growth_quality','chips','technical','valuation_adj','analyst','catalyst'];
+  const FACTOR_ORDER=['low_vol','earnings_growth','revenue_momentum','growth_quality','chips','technical','valuation_adj','analyst','catalyst'];
   // 題材動能榜的因子集合，跟上面價值成長榜完全獨立（見
   // research/generate_scores_momentum.py檔頭說明：因子/權重各自版本控管）。
   const MOMENTUM_FACTOR_LABELS={
@@ -5548,12 +5549,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(Math.abs(v)>=1e4)return (v/1e4).toFixed(0)+'萬';
     return v.toFixed(0);
   }
+  function boardCfg0(){return BOARD_CONFIG[PICKS_BOARD]}
   function pickRowHtml(r,allRows){
     // 2026-08-27修正（P1-新，使用者裁示「選股改為全市場+資料完整度，不要用
     // 門檻排除」）：coverage不再是伺服器端排除條件，這裡改成「視覺弱化」——
     // 低完整度的卡片降低整體不透明度+加註「資料稀疏」，但仍然完整顯示，
     // 不隱藏、不排除。流動性門檻維持不變（不進數字排名，rank會是null）。
-    const lowCov=r.coverage<0.5;
+    const _pcache=boardCfg0().cacheGet();
+    const planB=!!(_pcache&&_pcache.meta&&_pcache.meta.score_scheme==='B'&&PICKS_BOARD==='value');
+    const lowCov=!planB&&r.coverage<0.5;  // 方案B：總分只看低波動，資料完整度不影響總分，不再變淡/標資料稀疏
     const lowLiq=(r.flags||[]).includes('流動性不足');
     const topPick=r.rank===1;
     const boardCfg=BOARD_CONFIG[PICKS_BOARD];
@@ -5593,8 +5597,25 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         'scoring-future-v1':'未來性濾網：因子聚焦法人籌碼行為+毛利率品質+產能利用率代理（(a)類，現在就能算的部分）｜ 非投資建議',
       };
       weightNoteEl.textContent=noteByEngine[meta.engine_version]
-        ||'價值成長榜：權重凍結於2024-12-31前之研究期，本期分數為正式out-of-sample應用 ｜ 非投資建議';
+        ||(meta.score_scheme==='B'
+          ?'價值成長榜（計分方案B）：總分只用低波動（近60日日報酬標準差，越低越高分）；其餘成分明細僅供參考、不計分 ｜ 非投資建議'
+          :'價值成長榜：權重凍結於2024-12-31前之研究期，本期分數為正式out-of-sample應用 ｜ 非投資建議');
     }
+    // 2026-09-29（評.B-2）三榜共用：scores*.json 的 meta.backtest_status 一律顯示成標籤；價值成長榜方案B另附揭露全文。
+    _safeSync('renderPicksBacktestTag',()=>{
+      const el=document.getElementById('picks-backtest-note');
+      const covEl=document.getElementById('picks-coverage-note');
+      const planB=meta.score_scheme==='B';
+      if(el){
+        if(meta.backtest_status){
+          const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+          el.innerHTML=`<span style="display:inline-block;font-size:10.5px;font-weight:600;color:#c9524a;border:1px solid rgba(201,82,74,.5);border-radius:6px;padding:1px 7px">${esc(meta.backtest_status)}</span>`
+            +(planB&&meta.score_scheme_disclosure?` <span style="color:var(--ink-3)">${esc(meta.score_scheme_disclosure)}</span>`:'');
+          el.style.display='';
+        }else{el.style.display='none'}
+      }
+      if(covEl)covEl.style.display=planB?'none':'';
+    });
     const allRows=json.stocks||[];
     renderPicksChips(allRows);
     const listEl=document.getElementById('picks-list');
@@ -5674,6 +5695,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function pctLabel(p){return Math.max(1,Math.round((1-p)*100))+'%'}
   function factorContribRowHtml(key,row,labels,weights,allRows){
     const weightPct=Math.round((weights[key]||0)*100);
+    const refOnly=weights.low_vol===1&&!(weights[key]>0);  // 方案B：非計分成分，明細仍顯示
+    const wTxt=refOnly?'僅供參考 · 不計分':'權重 '+weightPct+'%';
     const f=row.factors&&row.factors[key];
     if(!f){
       // 這輪缺資料的類別（價值成長榜的analyst/catalyst，見score_v2.py說明；
@@ -5685,7 +5708,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const reasonTxt=FACTOR_MISSING_REASON[key]
         ||'這檔股票目前這項因子資料不足（例如上市時間太短、價量/法人歷史不夠），不是永久缺資料源。';
       return `<div class="factor-row">
-        <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span>
+        <div class="fr-top"><span class="fr-name" style="color:var(--ink-3)">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">${wTxt}</span></span>
           <span style="font-size:9px;color:#c9a35a;background:rgba(216,176,112,.08);padding:2px 6px;border-radius:5px">尚無資料 · 不計入</span></div>
         <div class="fr-reason" style="color:var(--ink-4)">${reasonTxt}</div>
       </div>`;
@@ -5694,7 +5717,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 呈現（金色往右=拉高，灰色往左=拉低），跟單純0~10絕對分數的長條圖分開表達「貢獻」。
     const dirUp=f.score>=5;
     const mag=Math.min(50,Math.abs(f.score-5)/5*50);
-    const dirTag=f.score>5.2?'<span style="color:var(--gold);font-weight:600">▲ 拉高總分</span>'
+    const dirTag=refOnly?'<span style="color:var(--ink-4)">· 不計分</span>':f.score>5.2?'<span style="color:var(--gold);font-weight:600">▲ 拉高總分</span>'
       :f.score<4.8?'<span style="color:var(--ink-3)">▼ 拉低總分</span>'
       :'<span style="color:var(--ink-4)">· 中性</span>';
     const pctBadge=typeof f.percentile==='number'
@@ -5702,7 +5725,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const ip=industryPercentileFor(allRows,row.industry,key,f.score);
     const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)前${pctLabel(ip.pct)}</span>`:'';
     return `<div class="factor-row">
-      <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">權重 ${weightPct}%</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
+      <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">${wTxt}</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
       <div style="position:relative;height:8px;border-radius:999px;background:var(--surface-3);margin-top:6px;overflow:hidden">
         <div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.15)"></div>
         <div class="bar-fill" style="position:absolute;top:0;bottom:0;${dirUp?`left:50%;width:${mag}%`:`right:50%;width:${mag}%`};background:${dirUp?'var(--gold-grad)':'rgba(138,133,123,.55)'};border-radius:999px"></div>
@@ -5717,6 +5740,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 前端另外算的、專門給「選股理由」卡用的版本，不動 research/ 產生腳本。
   function buildReasonSummary(row,boardCfg){
     const order=boardCfg.factorOrder,labels=boardCfg.factorLabels;
+    const _c=boardCfg.cacheGet();
+    if(_c&&_c.weights&&_c.weights.low_vol===1&&row.summary)return row.summary;  // 方案B：只有低波動計分，直接用伺服器端摘要
     const avail=order.map(k=>({key:k,f:row.factors&&row.factors[k]})).filter(x=>x.f&&typeof x.f.percentile==='number');
     if(!avail.length)return row.summary||'這檔目前所有因子皆無資料，無法拆解選股理由。';
     const sorted=[...avail].sort((a,b)=>b.f.percentile-a.f.percentile);
@@ -5784,7 +5809,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('report-total-score').textContent=row.total_score.toFixed(1);
     document.getElementById('report-total-score').style.color=scoreColor(row.total_score);
     const covPct=Math.round(row.coverage*100);
-    document.getElementById('report-coverage').textContent=`資料完整度 ${covPct}%${row.coverage<0.7?'（部分因子本次缺資料，總分依「重新分配權重」規則計算，僅供參考）':''}`;
+    document.getElementById('report-coverage').textContent=`資料完整度 ${covPct}%${row.score_scheme==='B'?'（明細因子資料完整度；方案B總分只用低波動，不受影響）':row.coverage<0.7?'（部分因子本次缺資料，總分依「重新分配權重」規則計算，僅供參考）':''}`;
     document.getElementById('report-summary').textContent=row.summary||'';
     _safeSync('renderExtremeMoveWarning',()=>renderExtremeMoveWarning(row));  // 2026-09-05 新一.7
     _safeAsync('renderReportEvents',()=>renderReportEvents(row));  // 2026-09-08 建置一.1
@@ -7509,7 +7534,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-27.1413';
+  const APP_VERSION='2026-09-29.2350';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

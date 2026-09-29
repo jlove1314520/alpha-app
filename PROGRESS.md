@@ -1,3 +1,19 @@
+## 2026-09-29（互動視窗CC，開發/驗證帽，【評.B-2】方案B套用線上計分＋上市日截斷取較早者＋樣本規則＋FinMind user_info）
+
+等待總司令審閱：22件（新增1件：評.B-2，見`research/AWAITING_REVIEW.md`）。
+
+**做了什麼**：
+1. 一：`research/generate_scores_live.py`改只用low_vol計分（與`f_low_vol`公式一致，862檔逐檔比對0不一致），其餘成分只輸出明細；資格池接`common_stock_only()`；`weights_frozen_planB.json`新增（生效2026-09-30）；`scores.json`加`score_scheme:"B"`／`backtest_status:"尚未回測驗證"`／揭露；`index.html`選股頁同步顯示；ledger新紀錄註明「計分方案 B」。**榜單有名次861→239檔**（`price_history.json`有2024-12-31→2026-08-26約20個月空洞，加12日間隔防線），隨每日資料累積回升。新舊前20重疊0檔，新榜偏建材營造／金融／食品／化學。順帶修「過舊股價過濾」未定義變數、補89檔industry。
+2. 二：`universe.listing_date_lookup()`取上市／上櫃較早者＋櫃轉市上櫃起算日估計（240檔櫃轉市，45檔估計）。64檔中3檔改變（6438、8114、6183；共少砍2,952列）。**4741/6584/8284是興櫃→上櫃，截斷正確維持**（與裁示前提不同，詳見`PENDING_QUEUE.md`）。
+3. 三：`MARATHON_PROTOCOL.md`新增2c節；`FACTORS.md`新增評.B-2三節並在5個<150檔小節加「低檢定力」標註（判定不動）。
+4. 四：FinMind `/v2/user_info`→`api_request_limit=600`、`user_count=0`，只寫入`rate_limit_state.json`；token未印出。
+
+**冒煙測試**（`node scripts/smoke_test.mjs`）：50項中49 PASS、1 FAIL。**第41、46項PASS**；**第39項FAIL為既有**（origin/main HEAD的CI稽核已4.08%>1%，TWSE OpenAPI仍回09-24舊資料，與本次改動無關）。[自行裁量]因此仍commit，已在完成回報明示。
+
+**影響檔案**：`research/generate_scores_live.py`、`research/weights_frozen_planB.json`、`research/universe.py`、`research/build_otc_to_twse_dates.py`、`research/diag_*.py`、`research/backfill_company_industry_chem_bio.py`、`scores.json`、`index.html`、`.github/scripts/build_picks_ledger.py`、`data/company_info.json`、`data/rate_limit_state.json`、`research/FACTORS.md`、`research/MARATHON_PROTOCOL.md`。
+
+**下一步**：等Cowork核對（榜單縮水接受度、4741/6584/8284判斷、冒煙39處置）；6438/8114/6183還原價快取待重建；紙.一10/1照常，未動。
+
 ## 2026-09-29（互動視窗CC，開發/驗證帽，【驗.九】營收因子99.0→87.0定量拆解＋交叉核對＋nowcast可行性）
 
 等待總司令審閱：21件（新增1件：驗.九，見`research/AWAITING_REVIEW.md`）。

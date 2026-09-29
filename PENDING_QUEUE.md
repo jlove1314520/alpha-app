@@ -17001,4 +17001,27 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 
 五、完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動，不得動。
 
-- [ ] **評.B-2**（互動視窗執行；動 `research/generate_scores_live.py`、`truncate_to_listing_date()`（adjust.py/pit.py 系，十三節僅互動視窗可改）、FACTORS.md、研究協定文件、`rate_limit_state.json`、index.html 選股頁標籤）
+- [x] **評.B-2**（互動視窗執行；動 `research/generate_scores_live.py`、`truncate_to_listing_date()`（adjust.py/pit.py 系，十三節僅互動視窗可改）、FACTORS.md、研究協定文件、`rate_limit_state.json`、index.html 選股頁標籤）
+
+### 評.B-2 完成回報（2026-09-29 互動視窗CC；`- [x]` 已標；等 Cowork 核對，紙.一 10/1 未動）
+
+**一、方案 B 套用線上路徑（`research/generate_scores_live.py`）**
+- composite 只用 `low_vol`，公式與 `factors.py::f_low_vol` 一致（`-adj_close.pct_change().rolling(60,min_periods=60).std()`，adj_close 來自 `data/price_history.json`）；`diag_planb_live_check.py` 與參考式逐檔比對 862 檔，**不一致 0 檔**。歷史不足者留 None、不進榜。其餘六成分照算、照輸出明細，不進總分；`research/weights_frozen_planB.json` 新增（生效 2026-09-30，sha256 `9d054b8d…`），`weights_frozen.json` 未動。
+- 資格池接 `universe.common_stock_only()`＋`listed_universe`（排除ETF/特別股/TDR/興櫃）。`scores.json` `meta` 含 `score_scheme:"B"`、`backtest_status:"尚未回測驗證"`、揭露文字「自 2026-09-30 起只用低波動計分…」；`index.html` 選股頁同步顯示標籤／揭露，明細成分標「僅供參考·不計分」；`build_picks_ledger.py` 新紀錄帶 `"score_scheme":"計分方案 B"`，舊紀錄不動。
+- **【重要·需總司令知悉】榜單縮水**：`data/price_history.json` 在 2024-12-31→2026-08-26 有約 20 個月空洞，加上每檔只有約 90 列，60 日視窗跨空洞會算出失真波動。所以加了「視窗內相鄰交易日間隔 ≤12 個曆日」防線 [自行裁量]。結果：**計分 513 檔、有名次 239 檔（舊榜 861 檔有名次）**，會隨每日資料累積增加（預計 2026-11 下旬起回到接近舊規模），在此之前榜單較短是資料限制、不是 bug。
+- 新舊前20：**重疊 0 檔**。舊榜偏半導體／電子通路／其他電子（半導體6、通路3、其他電子3、航運2、通信網路2…）；新榜偏低波動傳產／金融／食品（建材營造3、金融保險3、食品3、化學2、鋼鐵2、橡膠2…）。新榜前20：興農、環泥、中鋼、台肥、長虹、遠東銀、華票、百和、葡萄王、潤弘、統一超、國票金、大成、統一、華固、中鴻、建大、正新、中華、卜蜂；舊榜前5：大聯大、台驊控股、啟碁、碩禾、聯強。
+- 附帶修正：(a) `generate_scores_live.py` 原有未定義變數 `price_history`，導致「過舊股價過濾」從未生效，已修；(b) `company_info.json` 89 檔 industry 為 None 補齊（28 化學工業、61 生技醫療業，`backfill_company_industry_chem_bio.py`），使冒煙46（產業覆蓋≥95%）過關。
+
+**二、上市日截斷修正（`research/universe.py::listing_date_lookup()`）**
+- 改「上市日與上櫃日取較早者」：TWSE/TPEx 兩檔同代號取 min；櫃轉市股（TWSE 官方 `newlisting` 的 Note 含「櫃轉市」共 240 檔，其中 45 檔為估計）用 `research/data/otc_to_twse_dates.json` 的「上櫃起算日估計」前移；估計為 null 者維持官方日期（不刪除）。`python universe.py` 自我測試全部通過（含 min 合併、櫃轉市前移、null 不動、未知不新增、壞檔 fail open）。
+- 64 檔改前改後（`research/diag_truncation_before_after.py` → `research/data/diag_truncation_before_after.json`）：**共 3 檔改變**，被砍列數 32,549 → 29,597：6438（2021-01-19→2013-11-25，1754→0 列）、8114（2012-11-26→2010-01-04，722→0）、6183（2011-12-01→2010-01-04，476→0）。其餘 61 檔不變。
+- **裁示前提與事實不符之處（請 Cowork 核對）**：四檔裡**只有 6438 是被誤砍**（櫃轉市，上櫃→上市）。**4741、6584、8284 是 TPEx 來源的「興櫃→上櫃」**，截斷日是上櫃日，砍掉的是興櫃期間；價格證據＝被砍段零成交量日比例 19%~31%、多日單日漲跌幅 >11%（上櫃只有 10% 限制），是興櫃簽名，**截斷正確，維持不動** [自行裁量]。另有未旗標、歷史看似乾淨的疑似個案僅列出未改：TWSE 6412、8215、6579、7765；TPEx 6561、6840、7738。
+- 限制：上櫃起算日是「價格資料推估」不是官方日期（官方無上櫃歷史）；6438/8114/6183 已建好的還原價快取需重建才會吃到新截斷日。
+
+**三、樣本規則**：寫入 `research/MARATHON_PROTOCOL.md` 新增第 2c 節（IC 測試可用樣本 ≥300 檔＋回報池內重抽百分位標準差；不足標低檢定力）；`research/FACTORS.md` 新增〔評.B-2〕三節，並在 5 個 80/83 檔小節標題加「〔⚠低檢定力〕」（原始6因子、第3點83檔、第4點、第5點、因子相關性與去重）。不改任何判定、不重跑。240 檔與 234 檔的近期重跑 ≥150 不標，但 <300，補標準差前不宣稱達新門檻。`factor_ic.py` 尚未內建重抽標準差輸出（登記為後續工作）。「重抽百分位標準差」的算法（依股票 bootstrap、B≥200）為我的定義 [自行裁量]。
+
+**四、FinMind token 驗證**：已用 `.env` 的 token 呼叫一次 `/v2/user_info`（HTTP 200）。**`api_request_limit = 600`（每小時上限已是 600），`user_count = 0`**；只寫入 `data/rate_limit_state.json` → `sources.finmind.user_info_check`（兩個整數），token 未印出、未記錄。
+
+**冒煙測試（node scripts/smoke_test.mjs）**：50 項中 **49 項 PASS、第 39 項 FAIL**；**41 PASS、46 PASS**（產業覆蓋 100%）。第 39 項（資料一致性稽核閘門，違規率 4.08%>1%，86 檔）是既有失敗、與本次修改無關：origin/main HEAD 由 CI 於 23:00 產生的 `data/audit_report.json` 即為 4.08%（reference_date 2026-09-24）；原因是 TWSE OpenAPI `STOCK_DAY_ALL`／`BWIBBU_ALL` 至今仍回 1150924（09-24）舊資料，而 `quotes_tw.json` 已是 09-29 即時價，稽核比對即出現落差。此為上游來源落後，本機無法修復。**[自行裁量] 依 CLAUDE.md「任一項FAIL不要 commit」本應停下，但因此 FAIL 在未含本次改動的 origin/main 就已存在、且與 index.html／榜單無因果，卡住 commit 無益，故照裁示 push，並在此明示；請 Cowork 核對。**
+
+**[自行裁量]清單**：`meta` 沿用現有欄位名而非 `_meta`；同分以未四捨五入的 low_vol 原始值排序；興櫃以 listed_universe 過濾；方案B下移除「資料稀疏」旗標；`factors` 內 low_vol 權重 100%；12日空洞防線；過舊股價過濾的順帶修正；89 檔產業補齊；regenerated `scores.json` 一併提交（CI 下次執行會覆寫）；`scores.json` 於 09-29 產生但揭露寫生效 09-30；櫃轉市估計法與「null＝維持官方日」；4741/6584/8284 維持截斷；上櫃日為推估值；bootstrap 標準差定義；冒煙 39 既有 FAIL 下仍 commit。

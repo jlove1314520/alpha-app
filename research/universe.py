@@ -78,6 +78,7 @@ UNIVERSE_CUTOFF = "2003-01-01"
 # ——用一個影響量級很小的污染去交換一個代價可能更大的偏誤，不划算。
 _TWSE_LISTING_PATH = Path(__file__).parent / "data" / "twse_listing_dates.json"
 _OTC_LISTING_PATH = Path(__file__).parent / "data" / "otc_listing_dates.json"
+_OTC_TO_TWSE_PATH = Path(__file__).parent / "data" / "otc_to_twse_dates.json"
 
 
 def listing_date_lookup() -> dict[str, str]:
@@ -85,14 +86,34 @@ def listing_date_lookup() -> dict[str, str]:
     TPEx(`mopsfin_t187ap03_O`)兩個官方端點的既有快取。**只涵蓋目前仍在
     市的上市/上櫃公司**——已下市公司或興櫃公司不在這裡面，呼叫端對查不到
     的代號一律視為「上市日不明」，不得猜測（見`build_twse_listing_dates.py`
-    /`build_otc_listing_dates.py`各自的docstring範圍界定）。"""
+    /`build_otc_listing_dates.py`各自的docstring範圍界定）。
+
+    評.B-2（2026-09-29）：同一代號兩邊都有日期時取**較早者**（原本是後讀的
+    OTC覆蓋TWSE）。另外，櫃轉市股票的TWSE「上市日期」其實是轉上市日，會把
+    先前的上櫃期間整段誤砍——`otc_to_twse_dates.json`（官方「櫃轉市」旗標＋
+    價格快取估計，見`build_otc_to_twse_dates.py`）有估計上櫃起算日者取較早者，
+    沒有估計（null：無價格快取或轉上市日前無價格列）者維持官方日期不變——
+    新抓價格快取後要重跑該腳本，估計才會涵蓋到。"""
     out: dict[str, str] = {}
     for path in (_TWSE_LISTING_PATH, _OTC_LISTING_PATH):
         if not path.exists():
             continue
         doc = json.loads(path.read_text(encoding="utf-8"))
         for sid, ymd in doc.get("listing_dates", {}).items():
-            out[sid] = f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:]}"
+            d = f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:]}"
+            out[sid] = min(out[sid], d) if sid in out else d
+    if _OTC_TO_TWSE_PATH.exists():
+        try:
+            transfers = json.loads(_OTC_TO_TWSE_PATH.read_text(encoding="utf-8")).get("transfers", {})
+        except Exception as e:  # noqa: BLE001 -- fail open：估計表壞掉時退回官方日期
+            print(f"::warning::櫃轉市估計表讀取失敗，退回官方上市日：{type(e).__name__}: {e}")
+            transfers = {}
+        for sid, info in transfers.items():
+            if sid not in out:
+                continue
+            est = info.get("otc_start_est")
+            if est:
+                out[sid] = min(out[sid], est)
     return out
 
 
@@ -265,6 +286,36 @@ def _self_test_listing_date_truncation() -> None:
     print("[self-test] truncate_to_listing_date() 通過")
 
 
+def _self_test_listing_date_lookup_earliest() -> None:
+    """評.B-2：兩個官方檔案同代號取較早者；櫃轉市估計表把轉上市日往前拉到上櫃
+    起算日；估計為null者維持官方日期不變；估計表壞掉時fail open。"""
+    import tempfile
+    global _TWSE_LISTING_PATH, _OTC_LISTING_PATH, _OTC_TO_TWSE_PATH
+    saved = (_TWSE_LISTING_PATH, _OTC_LISTING_PATH, _OTC_TO_TWSE_PATH)
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            _TWSE_LISTING_PATH, _OTC_LISTING_PATH, _OTC_TO_TWSE_PATH = td / "t.json", td / "o.json", td / "x.json"
+            _TWSE_LISTING_PATH.write_text(json.dumps({"listing_dates": {"1111": "20200101", "2222": "20210119", "3333": "20150101"}}), encoding="utf-8")
+            _OTC_LISTING_PATH.write_text(json.dumps({"listing_dates": {"1111": "20120601", "4444": "20170926"}}), encoding="utf-8")
+            lk = listing_date_lookup()
+            assert lk["1111"] == "2012-06-01", f"兩邊都有應取較早者：{lk['1111']}"
+            assert lk["2222"] == "2021-01-19" and lk["4444"] == "2017-09-26"
+            _OTC_TO_TWSE_PATH.write_text(json.dumps({"transfers": {
+                "2222": {"otc_start_est": "2013-11-25"}, "3333": {"otc_start_est": None}, "9999": {"otc_start_est": "2010-01-04"}}}), encoding="utf-8")
+            lk = listing_date_lookup()
+            assert lk["2222"] == "2013-11-25", f"櫃轉市應拉到上櫃起算日：{lk['2222']}"
+            assert lk["3333"] == "2015-01-01", "估計為null應維持官方日期"
+            assert "9999" not in lk, "不在官方名單的代號不得憑估計表憑空出現"
+            df = pd.DataFrame({"date": ["2013-11-01", "2013-11-25", "2020-06-01", "2021-01-19"], "close": [1.0, 2.0, 3.0, 4.0]})
+            assert list(truncate_to_listing_date(df, "2222", lk)["date"]) == ["2013-11-25", "2020-06-01", "2021-01-19"], "櫃轉市上櫃期間不應被砍"
+            _OTC_TO_TWSE_PATH.write_text("{壞掉", encoding="utf-8")
+            assert listing_date_lookup()["2222"] == "2021-01-19", "估計表壞掉應退回官方日期（fail open）"
+    finally:
+        _TWSE_LISTING_PATH, _OTC_LISTING_PATH, _OTC_TO_TWSE_PATH = saved
+    print("[self-test] listing_date_lookup() 取較早者／櫃轉市估計 通過")
+
+
 def _self_test_strict_universe_exclude_unknown_listing() -> None:
     lookup = {"2330": "1994-09-05", "2317": "1991-06-18"}
     kept, excluded = strict_universe_exclude_unknown_listing(["2330", "2317", "9999"], lookup)
@@ -335,4 +386,5 @@ def universe(cutoff: str = UNIVERSE_CUTOFF) -> pd.DataFrame:
 if __name__ == "__main__":
     _self_test_common_stock_only()
     _self_test_listing_date_truncation()
+    _self_test_listing_date_lookup_earliest()
     _self_test_strict_universe_exclude_unknown_listing()

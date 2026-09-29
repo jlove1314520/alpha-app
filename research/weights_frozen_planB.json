@@ -1,0 +1,20 @@
+{
+  "engine_version": "score_v2.1-planB",
+  "scheme": "B",
+  "effective_from": "2026-09-30",
+  "ruling": "評.B-2（總司令2026-09-29核准方案B「價值成長榜只用低波動計分」，Cowork更正線上路徑為generate_scores_live.py）",
+  "based_on": "weights_frozen.json（原八因子凍結權重，保留不刪、不改；本檔只是另存的方案B權重）",
+  "note": "low_vol=近60日日報酬標準差取負號（與research/factors.py f_low_vol同一公式、同一視窗、data/price_history.json的adj_close）；其餘成分照常計算並輸出明細但權重0，不進總分。",
+  "weights": {
+    "low_vol": 1.0,
+    "earnings_growth": 0.0,
+    "revenue_momentum": 0.0,
+    "growth_quality": 0.0,
+    "chips": 0.0,
+    "technical": 0.0,
+    "valuation_adj": 0.0,
+    "analyst": 0.0,
+    "catalyst": 0.0
+  },
+  "weights_sha256": "9d054b8d7d61af97f6ae883cda172af2ad41c2ad82a98168f4cd310b4cb66a7a"
+}
