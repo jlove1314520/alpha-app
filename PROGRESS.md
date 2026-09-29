@@ -1,3 +1,56 @@
+## 2026-09-30（DevQueue自走cycle 20260930-011601，維運帽，修復DevQueue分類漏洞第二例＋Breeze-7B推論驗證＋佇列0項確認）
+
+等待總司令審閱：25件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表）。
+
+**做了什麼**：
+1. 開工序取到權威清單下一項`修.八`，查證後發現它是總司令當天新裁示、
+   尚未登記進`<!-- ORDER-BEGIN -->`清單的項目，項目行用中文括號
+   `（互動視窗執行；動 research/adjust.py...)`標註只能由互動視窗執行
+   （CLAUDE.md十三節），`item_class()`舊版比對不到這種寫法、預設回傳
+   「債務」，`find_next()`因此誤派給DevQueue——跟本檔案`2026-09-23
+   DevQueue(cycle 20260923-154602)`那次是同一種形狀的分類漏洞（第二
+   例）。**已修復**`scripts/dev_queue_runner.py`：新增
+   `INLINE_INTERACTIVE_TAG`偵測「（互動視窗執行」，`item_class()`回傳
+   新類別「互動視窗」，`find_next()`兩處分支都跳過此類別。修復後
+   `python scripts/dev_queue_runner.py next`正確回`NO_PENDING_ITEM`
+   （exit=3）。實際上原始`修.八`在我介入前就已被互動視窗完成並標
+   `- [x]`（commit `981aa9d7`），所以本次是「查證中發現漏洞、順手修
+   好」，未造成誤做。
+2. 對已完成的`修.八`做獨立交叉驗證（只讀/執行既有self-test，未編輯任何
+   `research/adjust.py`等十三節保護檔案）：`selftest_price_freshness.py`
+   ／`selftest_reduction_adjust.py`全PASS；`node scripts/smoke_test.mjs`
+   50項全PASS（含#39違規率0.05%）；另做只讀diagnostic確認CI端
+   `apply_dividend_adjustments()`公式與`adjust.py`逐字一致（TWSE
+   `TWT48U`官方欄位本身已是正確比例，不是修.七那個FinMind單位bug）；
+   全repo grep還原公式，確認只剩兩處刻意文件化的holdout繞過複本
+   （`survival_constraint_allocation_test.py`／
+   `holdout_2025_dividend_account_test.py`），並指出真正缺口：CI端
+   尚無分割／面額變更事件處理，留給互動視窗下一輪。
+3. `本地AI摘要(Breeze-7B)`項目明文授權「Ollama安裝完成後的驗證...
+   DevQueue皆可」這一子步驟：`ollama pull
+   hf.co/ZoneTwelve/Breeze-7B-Instruct-v1_0-GGUF:Q4_K_M`成功
+   （4.5GB）；用自行編造的合成輸入（非受限資料源）做推論smoke
+   test，100% GPU、0.85秒、繁中輸出流暢正確。(a)/(b)/(c)/(d)資料源
+   分支選擇仍待總司令裁示，本行維持`- [!]`，未觸碰法說會PDF等受限
+   來源，未逾越白名單第6條。
+4. 佇列盤點：`- [ ]`＝0、`- [!]`＝13項，逐一核對全部維持阻塞正確
+   （研究類/被動等資料累積/需總司令操作或裁示分支/日期未到2026-10-01）。
+   `凍結.二`禁止補alpha試驗湊數且解除條件未滿足，不補件，符合白名單
+   第7條。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 50項全PASS（見下方摘要，
+與互動視窗當輪數字一致）。
+
+**影響檔案**：`scripts/dev_queue_runner.py`（分類邏輯修復）、
+`PENDING_QUEUE.md`（本輪記錄＋Breeze-7B驗證附記）。
+
+**下一步**：`本地AI摘要(Breeze-7B)`等總司令選(a)/(b)/(c)/(d)其中一個
+資料源分支；CI端還原公式缺口（分割/面額變更）留給互動視窗評估是否
+新增TWSE官方端點；佇列`- [ ]`已空，下一輪DevQueue若仍讀到相同結果，
+代表沒有新裁示前DevQueue本身沒有可動手項目，非卡住。
+
+### 冒煙測試(Node.js/Playwright) 2026/9/30 01:3x（全部通過，50項，含第39項違規率0.05%）
+
 ## 2026-09-30（互動視窗CC，開發/驗證帽，【修.八＋價值成長榜恢復＋先.一（合併版）】）
 
 等待總司令審閱：25件（新增3件：修.八、價值成長榜恢復、先.一，見`research/AWAITING_REVIEW.md`）。

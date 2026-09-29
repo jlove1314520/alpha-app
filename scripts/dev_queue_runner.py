@@ -263,9 +263,12 @@ def find_next() -> tuple[int, str] | None:
     優先依頂端的權威順序清單取件；清單裡的項目都做完（或都被標成阻塞）之後，
     再回到檔案順序處理剩下的。**`[研究]` 類項目一律跳過**（2026-09-18新增，
     見下方迴圈內註解）——這支只服務 DevQueue（開發帽），研究類工作交給
-    marathon／hypothesis_queue 讀同一份檔案自己接手，回 None 不代表沒有
-    任何待辦，只代表「沒有輪到 DevQueue 做的」，呼叫端要用
-    `_has_any_pending_line()` 分辨這兩種情況。
+    marathon／hypothesis_queue 讀同一份檔案自己接手。**標「（互動視窗執行」
+    的項目一律跳過**（2026-09-30新增，見`item_class()`docstring）——這類
+    項目通常涉及CLAUDE.md「十三、核心研究檔案單一寫入者」保護的檔案
+    （`research/adjust.py`等），只能由跟總司令即時對話的互動視窗session
+    修改，DevQueue不得代做。回 None 不代表沒有任何待辦，只代表「沒有輪到
+    DevQueue 做的」，呼叫端要用 `_has_any_pending_line()` 分辨這兩種情況。
     """
     lines = _lines()
     pending = [(i, ln) for i, ln in enumerate(lines) if ln.startswith("- [ ]")]
@@ -302,12 +305,19 @@ def find_next() -> tuple[int, str] | None:
             if cls == "研究":
                 continue
             if key in by_key:
+                # 2026-09-30：ORDER清單條目本身只認[研究]/[產品]，不認得項目行
+                # 自己標的「（互動視窗執行」中文括號註記——保險起見這裡也用
+                # item_class()複查一次實際行文字，避免ORDER清單把互動視窗專屬
+                # 項目標成[產品]/[債務]而繞過下面fallback分支的過濾。
+                if item_class(by_key[key][1]) == "互動視窗":
+                    continue
                 return by_key[key]
     # 走到這裡代表：沒有ORDER清單、或清單裡沒有一項能在pending裡對上——
-    # 兩種情況都退回檔案順序，但一樣要濾掉[研究]類項目（用item_class()判斷，
-    # 邏輯與上面ordered分支一致，只是這裡沒有現成的cls可用）。
-    non_research = [(i, ln) for i, ln in pending if item_class(ln) != "研究"]
-    return non_research[0] if non_research else None
+    # 兩種情況都退回檔案順序，但一樣要濾掉[研究]類與互動視窗專屬項目
+    # （用item_class()判斷，邏輯與上面ordered分支一致，只是這裡沒有現成的
+    # cls可用；互動視窗專屬見item_class() 2026-09-30新增的偵測）。
+    devqueue_eligible = [(i, ln) for i, ln in pending if item_class(ln) not in ("研究", "互動視窗")]
+    return devqueue_eligible[0] if devqueue_eligible else None
 
 
 def _entry_key_class(entry: str) -> tuple[str, str]:
@@ -320,10 +330,11 @@ def _entry_key_class(entry: str) -> tuple[str, str]:
 
 
 INLINE_CLASS_TAG = re.compile(r"\*\*[^*]+\*\*\s*(\[研究\]|\[產品\])")
+INLINE_INTERACTIVE_TAG = re.compile(r"\*\*[^*]+\*\*\s*（互動視窗執行")
 
 
 def item_class(text: str) -> str:
-    """這一項是債務、產品還是研究。
+    """這一項是債務、產品、研究，還是互動視窗專屬。
 
     2026-09-23（本輪DevQueue自走發現的分類漏洞修復）：舊版只用ORDER清單的key
     做比對，但ORDER清單的key有時是「父項代號」（例如`驗.一`），而實際佇列裡
@@ -336,10 +347,23 @@ def item_class(text: str) -> str:
     `find_next()`才抓到`驗.一第4點續（剩餘16支）`被誤判派工。
     修法：優先信任這一行文字自己緊跟在`**代號**`之後的`[研究]`/`[產品]`
     標記（如果有），比對不到才退回ORDER清單比對，兩層都沒有才預設債務。
-    """
+
+    2026-09-30（DevQueue cycle 20260930-011601 發現並修復同一形狀的第二個
+    漏洞）：`修.八`／`評.B-2`／`價值成長榜恢復`／`先.一`這類項目行用的是
+    `**代號**（互動視窗執行；動 ...)`這種中文括號註記，不是`[研究]`/[產品]
+    方括號標記，`INLINE_CLASS_TAG`比對不到，且這些項目多半也不在ORDER清單
+    裡（是總司令當天新裁示，尚未登記進ORDER-BEGIN），於是兩層都落空、預設
+    「債務」，讓`find_next()`把CLAUDE.md「十三、核心研究檔案單一寫入者」
+    明定只能由互動視窗修改的項目（例如`修.八`動`research/adjust.py`）派給
+    了DevQueue——跟上面「十二」節那次是同一種形狀（守門員的判準前提，隨
+    佇列新增的新寫法而不再成立）。修法：新增`INLINE_INTERACTIVE_TAG`偵測
+    這個中文括號寫法，回傳新類別「互動視窗」，由`find_next()`比照「研究」
+    類跳過，讓真正該接手的互動視窗session去讀。"""
     m = INLINE_CLASS_TAG.search(text)
     if m:
         return "研究" if m.group(1) == "[研究]" else "產品"
+    if INLINE_INTERACTIVE_TAG.search(text):
+        return "互動視窗"
     key = item_key(text)
     for entry in _explicit_order():
         entry_key, cls = _entry_key_class(entry)
@@ -574,11 +598,13 @@ def build_prompt() -> int:
     if nxt is None:
         PROMPT_OUT.write_text("NO_PENDING_ITEM", encoding="utf-8")
         if _has_any_pending_line():
-            # 還有「- [ ]」項目，只是全部是[研究]類（不歸DevQueue管）——這是
-            # 正常讓路，不是矛盾。清掉舊的mismatch旗標（狀態已經自癒）。
+            # 還有「- [ ]」項目，只是全部是[研究]類或「（互動視窗執行」類
+            # （不歸DevQueue管）——這是正常讓路，不是矛盾。清掉舊的mismatch
+            # 旗標（狀態已經自癒）。
             _clear_format_mismatch()
-            _safe_print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類，留給"
-                         "marathon／hypothesis_queue軌")
+            _safe_print("NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或"
+                         "「（互動視窗執行」類，留給marathon／hypothesis_queue軌"
+                         "或互動視窗session")
             return 3
         stale = False
         try:

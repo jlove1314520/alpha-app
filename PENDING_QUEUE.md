@@ -16665,6 +16665,26 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
       記錄），等資料源問題解決後再接。
   Ollama安裝完成後的驗證與(a)/(b)/(c)/(d)裁示後的下一步，留給下一輪
   接手（互動視窗或DevQueue皆可，非單一寫入者限定檔案）。
+
+  **Ollama推論驗證完成（DevQueue cycle 20260930-011601，2026-09-30
+  01:3x）**：本行仍維持`- [!]`（(a)/(b)/(c)/(d)裁示分支仍待總司令選一
+  個，屬白名單第6條法遵疑慮，DevQueue不得代為決定），只做已明文授權的
+  「Ollama安裝完成後的驗證」這一步，不涉及任何法說會PDF或受限資料源：
+  1. `ollama pull hf.co/ZoneTwelve/Breeze-7B-Instruct-v1_0-GGUF:Q4_K_M`
+     成功，`ollama list`確認本機已有模型（4.5GB）。
+  2. 推論smoke test：用**自行編造的合成輸入**（非來自任何受限資料源，
+     格式比照選項(a)「資料驅動的繁中敘述摘要」構想，僅供驗證管線是否
+     跑得動，不代表已裁定選(a)）——「台積電(2330) 2026年8月營收年增
+     12.5%，主因AI伺服器晶片需求增加；前次法說會提及資本支出將維持
+     高檔」，經Ollama HTTP API（`localhost:11434/api/generate`）得到
+     連貫的繁體中文摘要句：「台積電2026年8月營收年增12.5%，主要由AI
+     伺服器晶片需求增加驅動，且前次法說會預測資本支出將維持高檔水準」。
+  3. `ollama ps`確認`100% GPU`、VRAM佔用5.0GB（8GB可用內，仍有餘裕）；
+     `total_duration`0.85秒／43 token，速度足夠給個股頁即時或批次使用。
+  4. **結論**：模型/GPU/Ollama runtime三者組合的技術可行性已驗證完成，
+     繁中輸出品質主觀評估流暢正確。**(a)/(b)/(c)/(d)的資料源分支選擇
+     仍未裁定，本項目仍不得標`- [x]`**，等總司令選一個分支才能接上真正
+     的下游資料，寫進`summaries.json`／個股頁。
 - [x] **稽核.三B** [資料/開發] 2026-09-29總司令裁示【驗.八】一：核准稽核.三B組——融資融券（逐檔，現況`data/margin_maintenance.json`僅全市場加總）／借券（`data/securities_lending_sell.json`、`short_lending_available.json`）／外資持股比（`data/foreign_holding.json`）三類由「每日覆蓋最新一天」改為逐檔逐日累積(append)。照既有節流規則（外部API頻率上限清單，額度用完就誠實拒絕不換來源硬取）；新增輸出檔須同步確認在`market.yml`allowlist（CLAUDE.md十節）；改寫前先確認各既有下游讀取者是否假設檔案只有今天一筆；格式選擇（分檔vs單檔成長型）[自行裁量]、寫下理由。心跳＝完成時本行改`- [x]`。
   **【DevQueue cycle 20260929-101602 完成第2/3類，三類全部完成】**：接續
   hypothesis_queue輪次已完成的第1類（外資持股比），本輪新增：
@@ -17102,3 +17122,20 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 - 凍結.二仍有效：本草案不得執行，待 Cowork／總司令審閱且轉向.一結案後才可能轉正式登記。
 
 **冒煙測試**：50 項全部通過（#39 違規率 0.05%）。**心跳**：`research/PROGRESS_HEARTBEAT.jsonl` 已追加三行。**停下等 Cowork 核對。**
+
+## 2026-09-30 DevQueue cycle 20260930-011601（維運帽）：發現並修復分類漏洞（第二例，同「十二」節形狀）＋Ollama/Breeze-7B驗證＋佇列現況確認為0（`- [ ]`與`- [!]`皆已清空/處理）
+
+**背景**：本輪開工時`权威清单`取到的下一項是`修.八`，查證後發現這是總司令當天新裁示、尚未登記進`<!-- ORDER-BEGIN -->`清單的項目，項目行本身用`**修.八**（互動視窗執行；動...)`這種中文括號寫法標註只能由互動視窗執行（CLAUDE.md「十三、核心研究檔案單一寫入者」保護`research/adjust.py`），不是`[研究]`/`[產品]`方括號標記。`item_class()`舊版兩層判斷（inline方括號→ORDER清單比對）都比對不到，預設回傳「債務」，`find_next()`因此把它派給了DevQueue——跟`PENDING_QUEUE.md`本節上方「2026-09-23 DevQueue(cycle 20260923-154602)發現並修復分類漏洞」那次（`驗.一第4點續`被誤判派工）是同一種形狀：分類邏輯的前提（新裁示會用既有標記法）隨佇列新增的新寫法而不再成立。
+
+**已修復**（`scripts/dev_queue_runner.py`，非十三節保護檔案，純bug修復不需提案）：新增`INLINE_INTERACTIVE_TAG`正則偵測`**代號**（互動視窗執行`這個寫法，`item_class()`回傳新類別「互動視窗」；`find_next()`的ORDER清單迴圈與檔案順序fallback兩處都比照既有「研究」類跳過邏輯，加入「互動視窗」類的跳過（ORDER迴圈那側額外用`item_class()`複查pending行本身，避免ORDER清單條目把互動視窗專屬項目誤標成其他類別而繞過過濾）；`build_prompt()`的`NO_PENDING_ITEM_FOR_DEVQUEUE`訊息同步更新措辭。**修復後驗證**：`python scripts/dev_queue_runner.py next`正確回`NO_PENDING_ITEM`＋exit=3（原本會印出`修.八`全文）。與2026-09-23那次的差異：這次原始的`修.八`本身在我開始複查後、正式介入前就被互動視窗完成並標`- [x]`（見上方「合併版收尾」commit `981aa9d7`），所以沒有機會實際誤做，屬於「查證過程中發現漏洞、順手修好」而非「已經誤做才回頭修」。
+
+**複查`修.八`本身進度（未實際動工，僅讀取/執行既有self-test，未編輯`research/adjust.py`／`.github/scripts/update_price_history.py`／`research/paper_7030_tracker.py`）**：互動視窗commit `981aa9d7`關閉前，本輪已獨立跑過`scripts/selftest_price_freshness.py`／`scripts/selftest_reduction_adjust.py`全PASS、`node scripts/smoke_test.mjs`50項全PASS（含第39項0.05%），與互動視窗自己回報的結果一致，屬獨立交叉驗證非重工。另外對「第三份還原公式」子任務做了只讀診斷（未編輯任何保護檔案）：
+1. 用真實TWSE `TWT48U`端點（`https://www.twse.com.tw/rwd/zh/exRight/TWT48U`）確認「無償配股率」／「現金增資配股率」欄位**本身已是正確比例格式**（例如2614東森現金增資配股率0.38195352、2890永豐金0.04329540，量級與`adjust.py`修正後的FinMind案例0.9%~3.9%一致），跟修.七發現的FinMind`StockEarningsDistribution`/`CashIncreaseSubscriptionRate`需要÷10/÷1000的單位bug**不是同一個問題**——`.github/scripts/update_price_history.py::apply_dividend_adjustments()`的公式結構（`numerator/denominator`）與`adjust.py`第174-178行逐字相同，且輸入欄位單位本來就對，**不是bug**。
+2. 全repo grep自行計算還原因子的地方（`numerator.*cash`/`denominator.*1\s*\+`/`ref_price.*=.*\(`）：只有`research/adjust.py`（canonical）與`.github/scripts/update_price_history.py`（CI端，公式已驗證與adjust.py一致，見上）兩處真正實作核心公式；另外`research/survival_constraint_allocation_test.py`與`research/holdout_2025_dividend_account_test.py`各自有一份**已自行文件化、刻意為之**的重現版本（理由：`adjust.py`的`load_dev()`會擋住holdout資料，這兩支腳本需要繞過該保護，已在各自檔案docstring說明，非疏漏）。`research/build_price_history.py`已於修.七項三改為直接呼叫`adjust.py::_combine_adjustment_events()`，不再是duplicate。
+3. **真正的缺口**（供互動視窗下一輪參考，未動手修）：`.github/scripts/update_price_history.py`目前只處理股利（含修.八(4)新增的減資）事件，**完全沒有分割（分割）／面額變更事件的抓取邏輯**（`adjust.py`有`_split_events_from_df()`/`_par_value_change_events_from_df()`，但都依賴FinMind parquet快取，CI端這支輕量腳本沒有pandas/FinMind依賴，不能直接import）；上方合併版收尾回報的「未解：面額變更／分割（6696／6949）尚未處理」與本次grep發現的缺口互相印證。是否要幫CI腳本另外串TWSE官方端點抓分割/面額變更事件，屬於需要判斷取捨的架構決策（新資料源+可能需要調整adjust.py介面），依十三節與「提案先於執行」留給互動視窗。
+
+**Ollama/Breeze-7B驗證（`本地AI摘要(Breeze-7B)`項目，`- [!]`維持阻塞，僅完成該行已明文授權的「驗證」子步驟）**：見該行下方新增的獨立記錄段落（`ollama pull hf.co/ZoneTwelve/Breeze-7B-Instruct-v1_0-GGUF:Q4_K_M`成功、100% GPU推論、繁中輸出流暢）。(a)/(b)/(c)/(d)資料源分支選擇仍待總司令裁示，未觸碰任何受限資料源（法說會PDF），未逾越白名單第6條。
+
+**佇列現況**：`- [ ]`＝0、`- [!]`＝13項，逐一核對後**全部維持阻塞正確**（研究類/被動等資料累積/需總司令親自操作或裁示分支/日期未到），僅上述Ollama驗證是可動手且已完成的部分。佇列深度遠低於`MIN_QUEUE_DEPTH=12`，但`凍結.二`（總司令2026-09-23裁示）明文禁止本輪自走軌道用`STRATEGY_GRAVEYARD.md`/`HYPOTHESIS_QUEUE.md`補新alpha試驗湊數，且解除條件（轉向.一結案）未滿足，故不補件，符合CLAUDE.md零之一節白名單第7條「佇列真的空了，且補件規則也補不出東西」。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 50項全PASS（含第39項違規率0.05%，與互動視窗最新數字一致）。**影響檔案**：`scripts/dev_queue_runner.py`（分類邏輯修復）、`PENDING_QUEUE.md`（本節＋Breeze-7B驗證記錄）。未動`research/adjust.py`／`.github/scripts/update_price_history.py`／`research/paper_7030_tracker.py`／`research/backtest/`／`research/validation/`／`research/pit.py`／`research/trial_registry.py`任何一個十三節保護檔案。**等待總司令審閱：25件**（沿用`research/AWAITING_REVIEW.md`既有列表，本輪為純維運診斷/驗證/bug修復，未新增審閱項）。
