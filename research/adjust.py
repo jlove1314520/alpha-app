@@ -674,7 +674,7 @@ def _self_test_cash_increase_rate_unit() -> bool:
     單位修正，用5筆真實現金增資事件（`stock_ratio=0`的乾淨案例，2010~
     2022年，涵蓋官方文件未寫明但實測驗證過的欄位）核對還原因子與官方
     `TaiwanStockDividendResult`的`reference_price/before_price`實際
-    比例誤差<0.5%。輸入值已寫死（2026-09-27即時查證FinMind API取得，
+    比例誤差<0.6%（驗.九三由0.5%校正，見case_ok處註解）。輸入值已寫死（2026-09-27即時查證FinMind API取得，
     避免每次跑自我測試都消耗一次額外API請求），不含即時網路呼叫。"""
     cases = [
         {"sid": "3026", "cash": 3.0, "rights_ratio_raw": 9.19, "rights_price": 32.5,
@@ -695,7 +695,9 @@ def _self_test_cash_increase_rate_unit() -> bool:
         our_ratio = ref_price / c["before_price"]
         actual_ratio = c["reference_price"] / c["before_price"]
         err_pct = abs(our_ratio - actual_ratio) / actual_ratio * 100
-        case_ok = err_pct < 0.5
+        # 門檻0.6%（原0.5%）：2038誤差0.574%，來源為官方參考價四捨五入至升降單位，
+        # Cowork 09-27已接受（2026-09-29驗.九三，總司令裁示）
+        case_ok = err_pct < 0.6
         ok = ok and case_ok
         print(f"  {c['sid']}：官方比例={actual_ratio:.6f} 修正後公式比例={our_ratio:.6f} "
               f"誤差={err_pct:.3f}%：{'PASS' if case_ok else 'FAIL'}")
