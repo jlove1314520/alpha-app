@@ -16497,3 +16497,23 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
   阻塞原因不變：申請流程綁定總司令個人身分（群益開戶客戶本人、本機完成驗證小工具測試、簽署「期貨API下單服務聲明書」）。三來源查證見`docs/CAPITAL_SECURITIES_API_GATE.md`。
 - [ ] **本地AI摘要(Breeze-7B)** [開發] 2026-09-29總司令裁示【驗.八】一：本地AI選Breeze-7B（聯發科繁中優化款）。接續原「新四」交辦：確認GPU(RTX 5060 Laptop 8GB/RAM 31GB，已確認)→裝Breeze-7B 4-bit量化→法說會PDF摘要→`summaries.json`→個股頁。遵守既有法遵白名單（只走官方公開來源、robots.txt/ToS未確認允許不得探測）、摘要標示「AI生成／非投資建議」、模型授權條款須先讀並記錄；心跳＝完成時本行改`- [x]`。
 - [ ] **稽核.三B** [資料/開發] 2026-09-29總司令裁示【驗.八】一：核准稽核.三B組——融資融券（逐檔，現況`data/margin_maintenance.json`僅全市場加總）／借券（`data/securities_lending_sell.json`、`short_lending_available.json`）／外資持股比（`data/foreign_holding.json`）三類由「每日覆蓋最新一天」改為逐檔逐日累積(append)。照既有節流規則（外部API頻率上限清單，額度用完就誠實拒絕不換來源硬取）；新增輸出檔須同步確認在`market.yml`allowlist（CLAUDE.md十節）；改寫前先確認各既有下游讀取者是否假設檔案只有今天一筆；格式選擇（分檔vs單檔成長型）[自行裁量]、寫下理由。心跳＝完成時本行改`- [x]`。
+
+**2026-09-29 hypothesis_queue 心跳輪次【稽核.三B組第1類，部分完成】**：`驗.八`本身
+（含四之yfinance修正，涉及`research/adjust.py`）已由DevQueue track在同時段執行中
+（commit 1ca63fdd＋uncommitted，`.devqueue.lock`held cycle 20260929-101602）——依
+`CLAUDE.md`十三節「核心研究檔案單一寫入者」，`research/adjust.py`不得由自走軌道
+（含hypothesis_queue）修改，本輪不碰驗.八本身，避免與DevQueue並行寫入衝突。改做
+`稽核.三B`三類中風險最低、最先完成的第1類（外資持股比）：新增
+`.github/scripts/accumulate_foreign_holding.py`（沿用`accumulate_institutional.py`
+已驗證的「讀回上次JSON→併入今天→去重→存緊湊陣列格式」慣例，零額外TWSE請求），
+輸出獨立檔`data/foreign_holding_history.json`（**刻意不改`foreign_holding.json`
+本身**，`generate_status_json.py`／`index.html`兩個既有讀取者假設它只有今天一筆，
+維持不動避免破壞）。格式選擇[自行裁量]：不設滾動視窗上限（跟institutional_history
+不同，那支是為60日z-score固定需求而生，本檔無已知固定視窗下游，理由寫在腳本檔頭）。
+已本機smoke test：讀入1363檔（本次快照日20260924，foreign_holding.json本身資料日
+較舊，非本次任務範圍），輸出0.06MB，抽查2330＝[69.2, 30.79, 17947099425.0]與官方
+數字量級相符。已掛進`market.yml`（緊接fetch_foreign_holding.py之後）並補進git add
+allowlist。**尚未做（下一輪繼續稽核.三B）**：融資融券逐檔（`update_margin_
+maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
+`fetch_short_lending_available.py`）兩類，同一套慣例接續即可。本輪維持
+`稽核.三B`原`- [ ]`（僅完成三類中一類，不改標記）。

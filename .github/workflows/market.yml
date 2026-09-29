@@ -107,6 +107,9 @@ jobs:
       - name: 更新外資及陸資持股比率（TWSE官方MI_QFIIS，免金鑰，源頭二.3第1名）
         run: python .github/scripts/fetch_foreign_holding.py
         continue-on-error: true
+      - name: 累積外資持股比率逐檔逐日歷史（零額外請求，稽核.三B組第1類）
+        run: python .github/scripts/accumulate_foreign_holding.py
+        continue-on-error: true
       - name: 更新個股OHLCV價量歷史（TWSE STOCK_DAY_ALL/TPEx tpex_mainboard_quotes，累積式寫回，免金鑰）
         run: python .github/scripts/update_price_history.py
         continue-on-error: true
@@ -216,7 +219,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/paper_7030.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/paper_7030.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
           git add -f research/data/paper_7030_log.jsonl 2>/dev/null || true
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 

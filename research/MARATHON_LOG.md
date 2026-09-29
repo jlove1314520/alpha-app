@@ -1,5 +1,7 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-29T10:30 — hypothesis_queue：稽核.三B組第1類（外資持股比逐檔逐日累積）完成 — 新增accumulate_foreign_holding.py，foreign_holding_history.json從無到有（1363檔×1日），驗.八本身涉及research/adjust.py（單一寫入者限制）跳過交還DevQueue/互動視窗
+
 ## 2026-09-28T19:52（Taipei，hypothesis_queue排程接續，第二十二輪）— 開工先讀
 `PENDING_QUEUE.md`：`- [ ]`項0條、`- [!]`項15條，逐條核對阻塞原因與
 解除條件（資料累積類/需總司令操作類/等Cowork核對類/等API key類），
