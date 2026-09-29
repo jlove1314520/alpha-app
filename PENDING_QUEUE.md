@@ -17047,7 +17047,7 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 
 四、完成後 push，停下等 Cowork 核對。
 
-- [ ] **修.八**（互動視窗執行；動 `.github/scripts/update_price_history.py`、`data/price_history.json`、`research/adjust.py`（十三節僅互動視窗）、`research/paper_7030_tracker.py`；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+- [x] **修.八**（互動視窗執行；動 `.github/scripts/update_price_history.py`、`data/price_history.json`、`research/adjust.py`（十三節僅互動視窗）、`research/paper_7030_tracker.py`；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
 
 ## 2026-09-30 總司令裁示【修.八＋價值成長榜恢復＋先.一（合併版）】（第一部分＝上方已登記之修.八，不重複登記；第二、三部分為新增）
 
@@ -17081,5 +17081,24 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 
 （CC 註記：第一部分之 4 條較先前修.八原文多了「修.七 15 筆案例」的具體化，與原條目二一致，併入同一條目執行。第二部分改動 `research/generate_scores_live.py`（非十三節保護路徑）與 `index.html` 選股頁揭露文字；第三部分產出 `docs/PREREG_DRAFT_supply_tightness.md`，不動 `TRIALS_LEDGER`、不登記試驗、不回測。）
 
-- [ ] **價值成長榜恢復**（互動視窗執行；動 `research/generate_scores_live.py`、`scores.json`、`index.html` 選股頁揭露、`research/weights_frozen.json` 僅讀不改；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
-- [ ] **先.一**（互動視窗執行；只做盤點與可行性、寫 `docs/PREREG_DRAFT_supply_tightness.md`，不回測、不登記；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+- [x] **價值成長榜恢復**（互動視窗執行；動 `research/generate_scores_live.py`、`scores.json`、`index.html` 選股頁揭露、`research/weights_frozen.json` 僅讀不改；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+- [x] **先.一**（互動視窗執行；只做盤點與可行性、寫 `docs/PREREG_DRAFT_supply_tightness.md`，不回測、不登記；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+
+### 2026-09-30【修.八＋價值成長榜恢復＋先.一（合併版）】完成回報（互動視窗CC）
+
+**修.八**（commit e75baa3d／05ca9010／99948bde）：
+1. 前提更正：9/25、9/28 為休市日，實際只缺 9/29 一日；根因是 TWSE OpenAPI `STOCK_DAY_ALL` 為 T+1 靜態檔（盤後當日不含當日行情）。修法：rwd `MI_INDEX` 備援／補洞，並加 `[診斷]`／`[補洞]`／`[自我測試]` 日誌；紙.一追蹤器遇過舊價格中止（不啟動帳戶）。[自行裁量]
+2. 第三份還原公式：`.github/scripts/update_price_history.py` 已對照官方參考價案例；新增「減資」事件（TWSE `reducation/TWTAUU`），0050 自我測試在 T+1 時的誤判已修（改用 `stored_last_twse` 聯集）。
+3. **未解**：面額變更／分割（6696 約 1/10 跌幅且 raw==adj；6949 1490→60.4）尚未處理；**櫃買（TPEx）減資未涵蓋**（僅上市）；4303／5287 於 2026-08-26 列 adj_close 為 None；近期資料有 68 檔個股缺口 >5 日；403 筆跳空掃描被新上市／ETF／興櫃類主導；1589 在 TWSE 名冊但無成交（需人工核對）；23 檔疑下市普通股未查證。
+4. 191 檔停在 2024-12-31 的股票已分類（興櫃152／ETF7／指數5／特別股3／疑下市23／疑停牌1），清單見 `docs/PRICE_HISTORY_STUCK_2024-12-31.md`；一般股中的疑下市／疑停牌待總司令或 Cowork 裁示是否補抓。
+5. 另：`research/diag_planb_live_check.py` 因方案B撤銷、`g.low_vol_from_price_rows` 已移除而**壞掉**（未修，非本次範圍，僅診斷用）。
+
+**價值成長榜恢復**（commit dd4bf713）：線上計分回到凍結八項權重加權平均（方案A・恢復，2026-09-30 生效），資格池（普通股、過舊價過濾）保留，撤銷評.B-2 的方案B（只 low_vol），保留「尚未回測驗證」誠實標籤與「財報成長重驗未過」備註；`weights_frozen.json` 僅讀不改。榜單有名次 847 檔（方案B前為 858；差異來自資格池與資料空洞防線，未逐檔追因）。
+
+**先.一**（commit d9c1c474）：僅盤點與可行性，未回測、未登記任何試驗。`docs/PREREG_DRAFT_supply_tightness.md` 含五指標盤點表、資料可用性、揭露時點、(a)～(e) 事前登記草案。重點發現：
+- 五個指標**沒有任何一個曾被直接檢定**（三來源：TRIALS_LEDGER／GRAVEYARD／FACTORS、TRIALS_REGISTRY／LEADS／HYPOTHESIS_QUEUE、原子圖譜文件＋本機原始快取）；最近的是 #67／#90（毛利穩定度、毛利／總資產，皆 FAIL、80 檔低檢定力）、#1／#92（營收加速，FAIL），月營收加速屬已 FAIL 的 SUE 家族。
+- FinMind **無「預收款項」與「預付設備款」科目**；合約負債實值僅 2018Q1–2024Q4 共 28 季（2017 為 97% 零值佔位）；2018 銜接須用「其他流動負債＋合約負債」代理（推論，待對照 MOPS 驗證）。
+- 時間獨立樣本約 44 季，預收純合約負債僅 24 季 YoY，**檢定力是最大限制**，草案已預先承認。
+- 凍結.二仍有效：本草案不得執行，待 Cowork／總司令審閱且轉向.一結案後才可能轉正式登記。
+
+**冒煙測試**：50 項全部通過（#39 違規率 0.05%）。**心跳**：`research/PROGRESS_HEARTBEAT.jsonl` 已追加三行。**停下等 Cowork 核對。**
