@@ -83,6 +83,55 @@ def _load_0050_price_series() -> list[dict]:
     return sorted(rows, key=lambda r: r["date"])
 
 
+MAX_STALE_WEEKDAYS = 5  # 0050最新日期落後今天(台北)超過這麼多個平日就視為停更（長假最多容忍5個平日）
+
+
+def _check_price_freshness(prices: list[dict], today_iso: str | None = None) -> tuple[bool, str]:
+    """紙.一的價格新鮮度閘門（2026-09-30修.八）：0050價格過期時回傳(False,原因)，
+    呼叫端必須中止並寫錯誤紀錄，不得用舊價格硬算。三道獨立檢查，任一不過即過期：
+    (1) 0050自己沒有任何資料；(2) price_history全市場最新日期比0050新（0050落後別檔，
+    正是2026-09上市股價T+1停更的形狀）；(3) 0050最新日期落後今天超過MAX_STALE_WEEKDAYS個平日。
+    本函式自己的例外由呼叫端接住降級（十二節），不會中斷其他排程。"""
+    if not prices:
+        return False, "0050在price_history.json沒有任何資料"
+    last = prices[-1]["date"]
+    try:
+        with open(PRICE_HISTORY_PATH, encoding="utf-8") as f:
+            doc = json.load(f)
+        others = [rows[-1]["date"] for rows in doc.get("prices", {}).values() if rows]
+        market_max = max(others) if others else last
+    except Exception as e:  # noqa: BLE001 - 守門員自身失敗只降級，見十二節
+        print(f"::warning::紙.一新鮮度閘門讀全市場最新日期失敗（略過此檢查）：{type(e).__name__}: {e}")
+        market_max = last
+    if market_max > last:
+        return False, f"0050最新日期({last})落後全市場最新日期({market_max})，上市股價疑似停更"
+    today = today_iso or datetime.now(TZ).strftime("%Y-%m-%d")
+    d0 = datetime.strptime(last, "%Y-%m-%d").date()
+    d1 = datetime.strptime(today, "%Y-%m-%d").date()
+    weekdays = sum(1 for i in range(1, (d1 - d0).days + 1) if (d0 + timedelta(days=i)).weekday() < 5)
+    if weekdays > MAX_STALE_WEEKDAYS:
+        return False, f"0050最新日期({last})落後今天({today}) {weekdays}個平日（>{MAX_STALE_WEEKDAYS}），價格資料過期"
+    return True, ""
+
+
+def _abort_stale(reason: str, log: list[dict]) -> None:
+    """過期中止：不寫紀錄檔、不算任何淨值；把原因寫進心跳(status=ERROR)與App摘要的last_error。"""
+    print(f"::warning::紙.一中止：{reason}（不使用舊價格計算）")
+    _write_app_summary(log)
+    try:
+        with open(APP_SUMMARY_PATH, encoding="utf-8") as f:
+            summary = json.load(f)
+        summary["last_error"] = {"status": "ABORTED_STALE_PRICE", "reason": reason,
+                                 "ts": datetime.now(TZ).isoformat()}
+        with open(APP_SUMMARY_PATH, "w", encoding="utf-8") as f:
+            json.dump(summary, f, ensure_ascii=False, indent=2)
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::紙.一寫入last_error失敗（不影響中止）：{type(e).__name__}: {e}")
+    with open(HEARTBEAT_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps({"ts": datetime.now(TZ).isoformat(), "item": "紙.一", "status": "ERROR",
+                            "note": f"中止（價格過期）：{reason}"}, ensure_ascii=False) + "\n")
+
+
 def _first_trading_day_on_or_after(prices: list[dict], anchor: str) -> dict | None:
     for row in prices:
         if row["date"] >= anchor:
@@ -204,6 +253,11 @@ def _write_app_summary(log: list[dict]) -> None:
 def run() -> dict:
     prices = _load_0050_price_series()
     log = _load_log()
+
+    fresh, reason = _check_price_freshness(prices)
+    if not fresh:
+        _abort_stale(reason, log)
+        return {"processed": 0, "started": bool(log), "aborted": True, "reason": reason}
 
     if not log:
         first_row = _first_trading_day_on_or_after(prices, START_ANCHOR)

@@ -52,6 +52,13 @@ TW_TZ = timezone(timedelta(hours=8))
 STOCK_DAY_ALL_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
 TPEX_QUOTES_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
 EX_RIGHT_URL = "https://www.twse.com.tw/rwd/zh/exRight/TWT48U"
+# 2026-09-30（修.八）：TWSE官方rwd每日收盤行情（含歷史日期），STOCK_DAY_ALL
+# OpenAPI檔案是「隔天清晨才更新」的快照（見fetch_twse()診斷），夜間排程時上市
+# 永遠比上櫃慢一個交易日；這個端點同日收盤後即有資料，當補洞／備援用。
+MI_INDEX_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
+MI_INDEX_SOURCE = "twse_mi_index"  # 獨立節流名稱，不跟其他腳本的twse_rwd互相拖累
+MI_INDEX_MAX_DATES_PER_RUN = 8
+MI_INDEX_MIN_ROWS = 800  # 少於此筆數判定為異常回應（正常約1380）
 PRICE_HISTORY_DAYS = 90
 
 # 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
@@ -162,6 +169,15 @@ def fetch_twse() -> dict[str, dict]:
     rows = r.json()
     if not isinstance(rows, list):
         raise RuntimeError("STOCK_DAY_ALL 回傳非預期格式（可能是無效路徑回傳的HTML，已知地雷）")
+    # 2026-09-30（修.八）：診斷輸出，讓CI log直接看得到「上游檔案是不是舊的」，
+    # 不用再靠事後推測（Last-Modified是伺服器產生這份靜態JSON的時間）。
+    date_dist: dict[str, int] = {}
+    for row in rows:
+        d = str(row.get("Date", ""))
+        date_dist[d] = date_dist.get(d, 0) + 1
+    row_0050 = next((row for row in rows if row.get("Code") == "0050"), None)
+    print(f"[診斷] STOCK_DAY_ALL：{len(rows)}筆，Last-Modified={r.headers.get('Last-Modified')}，"
+          f"Date分布={dict(sorted(date_dist.items()))}，0050={row_0050}")
     out = {}
     for row in rows:
         code = row.get("Code")
@@ -206,6 +222,100 @@ def fetch_tpex() -> dict[str, dict]:
             "turnover": _num(row.get("TransactionAmount")),
         }
     return out
+
+
+def fetch_twse_rwd(date_iso: str) -> dict[str, dict] | None:
+    """TWSE官方rwd每日收盤行情（MI_INDEX，type=ALLBUT0999＝全部不含權證等）。
+    回傳None＝該日無資料（休市，或當日尚未發布——「很抱歉，沒有符合條件的資料!」）；
+    抓取／格式異常則raise，由呼叫端降級成警告（十二節）。輸出格式與fetch_twse()相同。
+    2026-09-30（修.八）實測：115-09-24這天1380筆，與STOCK_DAY_ALL逐檔比對，
+    開高低收量額在1369檔完全一致，其餘11檔都是當日無成交（兩邊收盤皆空，本來就跳過）。"""
+    r = _get_retry(MI_INDEX_URL, MI_INDEX_SOURCE,
+                   params={"date": date_iso.replace("-", ""), "type": "ALLBUT0999", "response": "json"},
+                   timeout=30)
+    r.raise_for_status()
+    body = r.json()
+    if not isinstance(body, dict):
+        raise RuntimeError("MI_INDEX 回傳非預期格式（非JSON物件）")
+    if body.get("stat") != "OK":
+        return None
+    tbl = next((t for t in body.get("tables") or [] if "每日收盤行情" in (t.get("title") or "")), None)
+    if not tbl or not tbl.get("data"):
+        return None
+    title_date = _roc_ymd_to_iso((tbl.get("title") or "").split(" ")[0])
+    if title_date != date_iso:
+        raise RuntimeError(f"MI_INDEX 表頭日期({title_date})與請求日期({date_iso})不符，拒絕採用")
+    fields = tbl["fields"]
+
+    def _ix(name):
+        if name not in fields:
+            raise RuntimeError(f"MI_INDEX 欄位缺少「{name}」：{fields}")
+        return fields.index(name)
+
+    i_code, i_vol, i_val = _ix("證券代號"), _ix("成交股數"), _ix("成交金額")
+    i_open, i_high, i_low, i_close = _ix("開盤價"), _ix("最高價"), _ix("最低價"), _ix("收盤價")
+    out = {}
+    for row in tbl["data"]:
+        code = str(row[i_code]).strip()
+        close = _num(row[i_close])
+        if not code or close is None:
+            continue
+        out[code] = {
+            "date": date_iso,
+            "open": _num(row[i_open]),
+            "high": _num(row[i_high]),
+            "low": _num(row[i_low]),
+            "close": close,
+            "adj_close": close,
+            "volume": _num(row[i_vol]),
+            "turnover": _num(row[i_val]),
+        }
+    if len(tbl["data"]) < MI_INDEX_MIN_ROWS:
+        raise RuntimeError(f"MI_INDEX {date_iso} 只有{len(tbl['data'])}筆（<{MI_INDEX_MIN_ROWS}），判定回應異常")
+    return out
+
+
+def weekdays_after(start_iso: str | None, end_iso: str) -> list[str]:
+    """(start_iso, end_iso] 之間的週一到週五日期（ISO字串）。start為None時只回傳end本身（若為平日）。"""
+    end = datetime.strptime(end_iso, "%Y-%m-%d")
+    if start_iso is None:
+        return [end_iso] if end.weekday() < 5 else []
+    d = datetime.strptime(start_iso, "%Y-%m-%d") + timedelta(days=1)
+    out = []
+    while d <= end:
+        if d.weekday() < 5:
+            out.append(d.strftime("%Y-%m-%d"))
+        d += timedelta(days=1)
+    return out
+
+
+def backfill_twse_gap(prices: dict, twse_codes: set, openapi_date: str | None, today_tw: str,
+                      errors: list) -> tuple[dict[str, dict[str, dict]], list[str], list[str]]:
+    """上市補洞：找出「已存最後上市日」之後、到今天為止的每個平日，OpenAPI那天（openapi_date）
+    以外的日子改問MI_INDEX。休市日／尚未發布的日子MI_INDEX回「無資料」＝跳過（官方休市日曆
+    holidaySchedule可佐證，例：2026-09-25中秋、09-28教師節）。單輪最多問MI_INDEX_MAX_DATES_PER_RUN天，
+    每次請求過既有_get_retry節流（3秒間隔、429/403封鎖2小時）。回傳(各日期資料, 有資料日期, 無資料日期)。
+    任何一天抓取失敗只記errors並繼續（fail open，維持既有資料）。"""
+    stored_last = max((prices[c][-1]["date"] for c in twse_codes if prices.get(c)), default=None)
+    candidates = [d for d in weekdays_after(stored_last, today_tw) if d != openapi_date]
+    fetched: dict[str, dict[str, dict]] = {}
+    no_data: list[str] = []
+    for d in candidates[:MI_INDEX_MAX_DATES_PER_RUN]:
+        try:
+            rows = fetch_twse_rwd(d)
+        except Exception as e:
+            print(f"上市補洞(MI_INDEX {d}) 失敗（不中止）：{e}")
+            errors.append(f"twse_mi_index_{d}: {e}")
+            continue
+        if rows is None:
+            no_data.append(d)
+        else:
+            fetched[d] = rows
+    if len(candidates) > MI_INDEX_MAX_DATES_PER_RUN:
+        print(f"[補洞] 待補平日共{len(candidates)}天，本輪只處理前{MI_INDEX_MAX_DATES_PER_RUN}天，其餘下輪續補")
+    print(f"[補洞] 已存上市最後日={stored_last}，OpenAPI日={openapi_date}，今天(台北)={today_tw}；"
+          f"MI_INDEX有資料={sorted(fetched)}，無資料(休市或未發布)={no_data}")
+    return fetched, sorted(fetched), no_data
 
 
 def merge_rows(existing: list[dict] | None, latest: dict) -> list[dict]:
@@ -385,13 +495,43 @@ def main():
     ex_div_applied = 0
     ex_div_added = 0
     twse = {}
+    today_tw = datetime.now(TW_TZ).strftime("%Y-%m-%d")
+    openapi_date = None
     try:
         twse = fetch_twse()
-        today_iso = next(iter(twse.values()))["date"] if twse else datetime.now(TW_TZ).strftime("%Y-%m-%d")
+        openapi_date = next(iter(twse.values()))["date"] if twse else None
     except Exception as e:
-        print(f"價量(TWSE) 抓取失敗，除權息判斷改用今天日期：{e}")
+        print(f"價量(TWSE OpenAPI) 抓取失敗（改靠MI_INDEX補洞／備援）：{e}")
         errors.append(f"price_twse: {e}")
-        today_iso = datetime.now(TW_TZ).strftime("%Y-%m-%d")
+
+    # 2026-09-30（修.八）：STOCK_DAY_ALL是隔天清晨才更新的快照，夜間排程時上市比上櫃
+    # 慢一個交易日；另外若排程漏跑或OpenAPI落後多日，這裡用官方MI_INDEX把「已存最後上市日」
+    # 之後的交易日補齊（休市日無資料自動跳過）。OpenAPI整個失敗時，用0050當上市代表找已存最後日。
+    twse_gap: dict[str, dict[str, dict]] = {}
+    twse_gap_dates: list[str] = []
+    twse_no_data_dates: list[str] = []
+    try:
+        gap_codes = set(twse) if twse else ({"0050"} if prices.get("0050") else set())
+        if gap_codes:
+            twse_gap, twse_gap_dates, twse_no_data_dates = backfill_twse_gap(
+                prices, gap_codes, openapi_date, today_tw, errors)
+    except Exception as e:
+        print(f"上市補洞整體失敗（不中止，維持既有資料）：{e}")
+        errors.append(f"twse_gap_backfill: {e}")
+
+    # 上市各日資料先全部merge進prices（含補洞的日期），再處理除權息——這樣補洞日期(<除權息日)
+    # 的列也會被回溯調整到；除權息日當天及之後的列不受影響（factor只乘進date<ex_date的列）。
+    for d in sorted(twse_gap):
+        for code, latest in twse_gap[d].items():
+            prices[code] = merge_rows(prices.get(code), latest)
+    if twse:
+        for code, latest in twse.items():
+            prices[code] = merge_rows(prices.get(code), latest)
+        twse_updated = len(twse)
+
+    twse_dates_with_data = sorted(set(twse_gap_dates) | ({openapi_date} if openapi_date else set()))
+    twse_latest_date = twse_dates_with_data[-1] if twse_dates_with_data else None
+    today_iso = twse_latest_date or today_tw
 
     # 2026-09-17（總司令裁示【稽核.四.1】先封鎖，再修）：twse/tpex是兩個獨立
     # 請求，openapi.twse.com.tw的STOCK_DAY_ALL實測會在台北23:10仍回前一個
@@ -402,7 +542,7 @@ def main():
     # meta，供下游決定要不要相信；不在這裡猜「應該用哪一天」或硬改資料，
     # 那是下游依落後與否各自決定要不要輸出現價的事。twse_payload_date取自
     # 上面已經抓到的today_iso（twse抓取失敗時為None，代表這次比對做不了）。
-    twse_payload_date = today_iso if twse else None
+    twse_payload_date = twse_latest_date
 
     try:
         ledger = load_ex_dividend_ledger()
@@ -417,11 +557,6 @@ def main():
     except Exception as e:
         print(f"除權息預告表(TWT48U) 更新失敗（不影響價量本身，adj_close退回等於close）：{e}")
         errors.append(f"ex_dividend: {e}")
-
-    if twse:
-        for code, latest in twse.items():
-            prices[code] = merge_rows(prices.get(code), latest)
-        twse_updated = len(twse)
 
     tpex_payload_date = None
     try:
@@ -461,6 +596,20 @@ def main():
     payload["meta"]["ex_dividend_events_added"] = ex_div_added
     payload["meta"]["ex_dividend_events_applied"] = ex_div_applied
     payload["meta"]["mixed_date_warning"] = mixed_date_warning
+    payload["meta"]["twse_openapi_date"] = openapi_date
+    payload["meta"]["twse_gap_filled_dates"] = twse_gap_dates
+    payload["meta"]["twse_no_data_dates"] = twse_no_data_dates
+    # 自我測試（修.八）：0050最新日期必須等於本輪查得到資料的最近一個上市交易日。
+    # 只記錄結果、不中止（守門員自身失敗不得拖垮主流程，十二節）；同時印出讓CI log可見。
+    row_0050 = prices.get("0050") or []
+    actual_0050 = row_0050[-1]["date"] if row_0050 else None
+    check_ok = bool(twse_latest_date) and actual_0050 == twse_latest_date
+    payload["meta"]["twse_latest_check"] = {
+        "expected_latest_trading_day": twse_latest_date, "actual_0050_last_date": actual_0050, "ok": check_ok}
+    print(f"[自我測試] 0050最新日期={actual_0050}，本輪查得到的最近上市交易日={twse_latest_date}："
+          f"{'PASS' if check_ok else 'FAIL'}")
+    if not check_ok:
+        errors.append(f"self_check_0050_latest: 0050最新日期={actual_0050} != 最近上市交易日={twse_latest_date}")
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     print(f"寫入 {OUT_PATH}：TWSE {twse_updated} 檔+TPEx {tpex_updated} 檔（合計 {len(prices)} 檔有資料），"
           f"除權息事件本輪新增 {ex_div_added} 筆、套用回溯調整 {ex_div_applied} 筆")
