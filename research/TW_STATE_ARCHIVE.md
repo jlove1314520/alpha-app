@@ -2280,3 +2280,63 @@ round665=09-29 12:0x（實際commit時間14:11）——依輪替選TW。
 `research/INTRADAY_KBARS_BACKFILL_SPEC.md`、`research/AWAITING_
 REVIEW.md`。
 
+---
+**最後更新：2026-09-29T18:0x+08:00（馬拉松第669輪，維運帽）**——取鎖乾淨
+（cycle`20260929-180037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項，`分K.零`已由round666完成並移入
+`AWAITING_REVIEW.md`），`grep -c "^- \[!\]"`=14條（較round661~666的
+12/13條略增，round667新增`驗.九`後轉`- [!]`）。逐一核對14條`- [!]`
+阻塞項是否解除：直接讀`data/institutional_history.json`確認`dates`
+陣列仍20筆、最後日期`20260924`，solid交易日數維持**16日**，今日
+09-29（週二）18:0x查詢（收盤後約4.5小時，法人資料排程尚未入庫本日
+新交易日），20日視窗仍差4個交易日，未解除；`外部一改.2`／`研究.c`
+共用的tick累積`ls research/data/ticks/*.parquet`實測**14/20**（與
+round667/668一致），未解除；`驗.九`retry條件（記憶體≥3GB或FinMind
+額度過2026-09-29T18:24+08:00解除）本輪實測：`Get-CimInstance
+Win32_OperatingSystem`可用實體記憶體**2.70GB**（<3GB，未解除）；
+`data/rate_limit_state.json`確認`blocked_until=1790677456.67`＝
+2026-09-29T18:24:16+08:00，本輪查詢時間18:0x**尚未到解除時刻**（差
+約24分鐘），未解除；其餘11條逐一核對開頭標記，均為等總司令/Cowork
+裁示或其他外部條件，皆未到解除時間（`紙.一`需等2026-10第一個交易日，
+今日仍09月）。**佇列深度自檢**：`- [ ]`=0（<12下限），`CLAUDE.md`
+十四節【凍結.二】仍生效（`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，
+皆為條件敘述提及該詞彙、非實際宣告解除；`轉向.一`本身已完成第1點
+查證、待Cowork核對閘門一/二後總司令放行單發檢定，現列在
+`AWAITING_REVIEW.md`），本階段暫停佇列深度補件，不重掃備援來源。
+三軌時間戳：TW round666=09-29 15:0x（最舊）／FUT round667=09-29
+16:0x／US round668=09-29 17:0x——依輪替選TW。**逐一核對`凍結.二`
+允許的四類工作現況**：稽核重跑／驗.二重跑先前輪次已全部完成並登記；
+資料抓取（`資料.一`/`閘門.一`）已完成300/300；工具修正已由互動視窗
+commit；`git status --short`確認`research/backtest/`／`research/
+validation/`／`research/adjust.py`／`research/pit.py`／`research/
+trial_registry.py`等十三節限定清單內檔案無殘留未commit編輯（輸出為
+空）。**額外核對是否有互動視窗/DevQueue正在進行的工作**：
+`Get-CimInstance Win32_Process`未偵測到`audit_v9`/`audit_v8`/
+`audit_v7`/`audit_v6`相關python行程；僅`http.server 8792`（冒煙測試
+用途，非研究行程）與一支無法讀取命令列的python.exe（PID 115432，
+推測為`shioaji_quotes.py`常駐行程，權限限制無法讀取完整命令列，非
+異常）。`run_detached.py status`：`running=0`（162筆歷史，無job待
+收成）。`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+PASS（406列，本輪純查證未新增判定）。`validation/holdout.py::is_
+holdout_consumed()`讀取為`True`（H.一單次解鎖已於09-27消耗，非本輪
+新增動作，僅讀取核對）。`AWAITING_REVIEW.md`「等待中」表頭「目前：
+19件」，本輪未變動。**本輪誠實結論**：交辦佇列無`- [ ]`項目，凍結.二
+允許的四類工作皆已完成或無新內容，14條`- [!]`逐一核對均未到解除時間
+（`驗.九`兩個retry條件皆差臨門一步：記憶體2.70GB<3GB、FinMind額度
+約24分鐘後才解除），TW軌本身查無可推進的新工作單位——依`CLAUDE.md`
+「零之一」白名單第7條精神（佇列真的空了）記錄後結束本輪，不硬湊
+候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不變更
+正式交易連線。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`
+凍結區，未修改十三節限定清單內任何原始碼（僅讀取核對＋改狀態檔＋
+archive舊state條目），全程零新增外部API呼叫（純讀既有`.json`/`.md`
+帳本檔案、`git status`/`git log`、`run_detached.py status`、
+`trial_registry.py --check`、`Get-CimInstance`）。`PROGRESS_HEARTBEAT.
+jsonl`已append本輪一行。**交辦佇列還剩0條`- [ ]`未開始**。**等待
+審閱：19件**（與`AWAITING_REVIEW.md`表格列數一致）。**下一輪任一軌
+接手**：依輪替下一輪建議選FUT軌（round667=09-29 16:0x，三軌中最舊）；
+開工前先重新檢查`驗.九`retry條件（記憶體≥3GB或FinMind額度過
+2026-09-29T18:24+08:00解除，兩者本輪查詢時已非常接近，下一輪查詢
+時大機率已解除，需重新讀取確認並視情況改回`- [ ]`接續）；凍結.二在
+總司令/Cowork明確寫「凍結.二解除」前不解除；`金流一.4`還需4個交易日；
+`外部一改.2`tick累積14/20，還差6日。完整見`REPORT.md`第669輪心跳、
+`PENDING_QUEUE.md`「驗.九」條目、`research/AWAITING_REVIEW.md`。
