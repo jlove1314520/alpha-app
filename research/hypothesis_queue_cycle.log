@@ -5466,3 +5466,14 @@ This round (hypothesis_queue #23) is done: PENDING_QUEUE.md confirmed 0 unfinish
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
 
 quota_throttle: SKIP: 正常頻率，距上次實跑27.7分鐘 < 30分鐘門檻
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Hypothesis-queue cycle start: 2026-09-29 10:21:01 =====
+This round (hypothesis_queue track): #82 remains paused (heartbeat-only unless PENDING_QUEUE has work). Found 4 unfinished items ??撽??? ?.?? ?砍AI??(Breeze-7B), 蝔賣.銝 ??but 撽???was already being actively executed by a concurrent DevQueue process (live lock held, uncommitted edits to `research/adjust.py`), and that file is restricted to the interactive session only per CLAUDE.md 禮13 ("?詨??弦瑼??桐?撖怠??), so I didn't touch it. ?.??and Breeze-7B were too large/risky for this bounded round (live trading daemon restart; multi-GB model download).
+
+Instead I completed one safely-scoped piece of 蝔賣.銝: added `.github/scripts/accumulate_foreign_holding.py` (following the existing `accumulate_institutional.py` pattern) to accumulate 憭??瘥?history into a new `data/foreign_holding_history.json`, without touching the existing `foreign_holding.json` snapshot (so `index.html`/`generate_status_json.py` are unaffected). Wired into `market.yml` + allowlist, smoke-tested locally (1,363 stocks, 2330 sanity-checked). Committed (`52baf3fc`); **push failed ??this machine's `github.com` DNS resolution is currently down**, same issue other tracks are hitting tonight. It'll retry next round.
+
+Remaining for 蝔賣.銝: ??? and ? (two more data categories), same pattern, next round. PENDING_QUEUE.md and heartbeat files updated with full detail.
+===== Hypothesis-queue cycle end: 2026-09-29 10:25:56 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
