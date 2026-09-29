@@ -1,3 +1,53 @@
+## 2026-09-29（DevQueue自走cycle 20260929-170102，維運帽，驗.九轉為誠實阻塞：兩子任務解除條件皆未滿足，佇列無其他可做項目，符合CLAUDE.md零之一節白名單第7條）
+
+等待總司令審閱：19件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表；本輪僅為狀態核對＋阻塞標記，未產生新的審閱項）。
+
+**做了什麼**（純驗證＋誠實狀態轉換，未寫新程式碼）：
+1. 用`python scripts/dev_queue_runner.py next`確認`驗.九`仍是唯一
+   `- [ ]`項目。
+2. **驗.九一（定量分解）仍阻塞**：`Get-CimInstance
+   Win32_OperatingSystem`實測系統可用記憶體2.70GB（<3GB門檻）。前一輪
+   （161602）已判定不再嘗試第4次執行`audit_v9_revenue_trace.py`（符合
+   「同一項試了兩次還是失敗」門檻），本輪維持該判斷，retry條件不變
+   （記憶體回升≥3GB）。
+3. **驗.九二（crosscheck續跑）狀態變化：行程已結束，非仍在跑**。前一輪
+   核對時的PID 118932本輪已不存在；`research/data/
+   diag_v9_fetch_missing.json`（`generated_at`2026-09-29T16:24:16）記錄
+   撞牆停下：`RuntimeError: FinMind回應HTTP 402...dataset=
+   TaiwanStockSplitPrice`，`requests_used=253/remaining=426`，
+   `per_phase={nowcast:168,crosscheck:85}`——腳本正確地撞牆即停、寫進
+   診斷檔、未吞錯，符合CLAUDE.md「額度卡住的項目...撞牆就中止回報，
+   不得吞錯」的設計。核對`data/rate_limit_state.json`確認FinMind
+   `blocked_until`換算為台北時間**18:24**，本輪查核時間為**17:01**，
+   額度尚未解除（crosscheck 511筆缺口僅完成85筆，尚餘約426筆）。
+4. **13個既有`- [!]`阻塞項目逐一核對**（開工前兩件事第1點）：與前一輪
+   結論相同，無一項本輪解除。
+5. **佇列深度確認**：`- [ ]`僅1項（<12下限），凍結.二禁止補alpha試驗
+   湊數，前一輪已重掃`HYPOTHESIS_QUEUE.md`/`STRATEGY_GRAVEYARD.md`/
+   `*_LEADS.md`確認無可誠實補入項目，本輪未重複該項搜尋（結論不會在
+   一小時內改變）。
+6. **本輪新決策**：兩個子任務的解除條件（記憶體≥3GB／FinMind額度
+   2026-09-29 18:24台北解除）皆非本輪可強制達成，且佇列裡沒有其他
+   `- [ ]`項目可換做，符合CLAUDE.md零之一節白名單第7條「佇列真的空了，
+   且補件規則也補不出東西」——本輪執行
+   `python scripts/dev_queue_runner.py block "..."`把**驗.九**本身標記
+   `- [!]`，`find_next()`已驗證回傳`NO_PENDING_ITEM`（exit=3）。這不是
+   放棄該項，兩個retry條件仍持續有效，任一滿足即可在下一輪把這行改回
+   `- [ ]`繼續接續，記錄於`PENDING_QUEUE.md`「DevQueue cycle
+   20260929-170102接手核對」段落。
+
+**驗證**：`node scripts/smoke_test.mjs` 全50項PASS（見下方摘要）；未改
+`index.html`或任何管線程式碼，純`PENDING_QUEUE.md`／`PROGRESS.md`文件
+更新。
+
+**卡住的問題**：驗.九全項現在標記阻塞。retry條件：記憶體回升≥3GB
+（定量分解）或FinMind額度於2026-09-29 18:24台北時間解除（crosscheck
+續跑，屆時可用`python research/audit_v9_fetch_missing.py --phase
+crosscheck`接續，腳本設計為只補還缺的426筆）。任一滿足即可在下一輪
+DevQueue把`PENDING_QUEUE.md`該行改回`- [ ]`繼續。
+
+### 冒煙測試(Node.js/Playwright) 2026/9/29 17:06:02（全部通過，50項）
+
 ## 2026-09-29（DevQueue自走cycle 20260929-161602，維運帽，驗.九狀態核對：確認阻塞/進行中兩子項皆維持正確狀態，無新增程式碼）
 
 等待總司令審閱：19件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表；本輪僅為狀態核對，未產生新的審閱項）。

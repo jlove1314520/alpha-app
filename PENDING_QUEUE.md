@@ -16749,7 +16749,7 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 >
 > 五、完成後 push，停下等 Cowork 核對。score.py 在總司令決定計分榜方案前不得修改。紙.一 10/1 照常啟動，不得動。凍結.二 仍生效。
 
-- [ ] **驗.九** [驗證/資料/研究診斷] **進行中，DevQueue cycle 20260929-154602
+- [!] **驗.九** [驗證/資料/研究診斷] **進行中，DevQueue cycle 20260929-154602　**⛔ 自走中止（2026-09-29 17:04）**：兩個子任務皆合法阻塞未解除：記憶體2.70GB<3GB門檻（第4次重試已判定不再嘗試）；FinMind額度封鎖至2026-09-29 18:24台北時間（crosscheck撞402正確停下未吞錯，尚餘約426筆待補）。佇列深度=1、無其他可做項目、凍結.二禁止補alpha試驗湊數，符合CLAUDE.md零之一節白名單第7條。retry條件：記憶體回升≥3GB或FinMind額度解除，任一滿足即可解除本阻塞。
   接手，狀態如下**：
   - 三（adjust.py門檻0.5%→0.6%）：**已完成**（commit `f29b55921`，先前輪次）。
   - 四（FinMind付費方案查詢）：**已完成**（`docs/FINMIND_PAID_PLAN_2026-09-29.md`，
@@ -16829,3 +16829,66 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
     一系列「下一步」皆已在後續round被執行並結案），或屬`[研究]`類（歸
     marathon/hypothesis_queue軌，非DevQueue該做），**沒有可誠實補入的
     新項目，不硬湊數量**，屬白名單第7條前置紀錄。
+
+  **DevQueue cycle 20260929-170102 接手核對（無新增程式碼，純狀態驗證＋
+  誠實記錄轉為阻塞）**：
+  - 一（定量分解）：**仍阻塞**。`Get-CimInstance Win32_OperatingSystem`
+    實測系統可用記憶體本輪2.70GB（<3GB門檻）。不再嘗試第4次執行（前次
+    161602已判定），retry條件不變（記憶體回升≥3GB）。
+  - 二（crosscheck續跑）：**行程已結束（非仍在跑），撞牆停下，符合設計**。
+    上一輪核對時的PID 118932本輪已不存在；`research/data/
+    diag_v9_fetch_missing.json`（`generated_at`2026-09-29T16:24:16）記錄
+    `requests_used=253/remaining=426`，`per_phase={nowcast:168,
+    crosscheck:85}`，`stopped`欄位為`RuntimeError: FinMind回應HTTP 402
+    ...dataset=TaiwanStockSplitPrice data_id=1907`——腳本正確地撞牆即停、
+    寫進診斷檔，未吞錯。核對`data/rate_limit_state.json`：
+    `finmind.blocked_until=1790677456.67`（換算UTC 2026-09-29T10:24:16，
+    即台北時間**18:24**），本輪檢查時間為台北**17:01**，額度尚未解除
+    （還需約83分鐘）。crosscheck批次511筆中僅完成85筆，尚有約426筆
+    待補（與`remaining`欄位一致），額度解除後可用
+    `python research/audit_v9_fetch_missing.py --phase crosscheck`接續
+    （腳本設計為只補還缺的，不需要指定續傳位置）。
+  - 阻塞項目盤點（開工前兩件事第1點）：13個既有`- [!]`項目本輪逐一核對，
+    與161602輪結論相同，**無一項解除條件本輪已滿足**（金流一.4仍等
+    交易日累積、紙.一仍等10月首個交易日、其餘皆需總司令裁示或外部資料/
+    合規前提，非可還原技術選擇）。
+  - `[自行裁量]`：兩個子任務的解除條件（記憶體≥3GB／FinMind額度
+    2026-09-29 18:24台北解除）皆非本輪可強制達成，且佇列裡沒有其他
+    `- [ ]`項目可換做（深度=1，凍結.二禁止補alpha試驗湊數，稽核.三之前
+    已核對過無其他可補項目），符合CLAUDE.md零之一節白名單第7條
+    「佇列真的空了，且補件規則也補不出東西」，本輪將**驗.九**本身標記
+    `- [!]`阻塞，讓`find_next()`誠實回報`NO_PENDING_ITEM`而非讓下一輪
+    重複做同一次無新資訊的狀態檢查——這不是放棄該項，兩個retry條件
+    仍持續有效，任一滿足即可在下一輪把這行改回`- [ ]`繼續接續。
+
+  **馬拉松第668輪核對（US軌，維運帽，無新增程式碼，純狀態驗證）**：
+  - 二（crosscheck續跑）：**狀態已變，非「仍在跑」**——上一次commit
+    （`7b07745ad`，cycle 161602）記錄PID 118932於15:25:12啟動、當時仍
+    在執行；本輪`Get-CimInstance`實測該PID已不存在，改讀
+    `research/data/diag_v9_fetch_missing.json`（`generated_at:
+    2026-09-29T16:24:16`）：`stopped`欄位為`RuntimeError: FinMind回傳
+    HTTP 402（額度/速率限制錯誤，已標記finmind額度2小時，見
+    C:\alpha\alpha-app\data\rate_limit_state.json）`，`requests_used=253`
+    （`per_phase`：nowcast168／crosscheck85），**符合腳本設計的「撞牆即
+    停不吞錯」行為，不是crash**。交叉核對`data/rate_limit_state.json`：
+    `sources.finmind.blocked_until=1790677456.67`，換算為
+    **2026-09-29T18:24:16+08:00**，與腳本訊息「2小時」一致。
+  - `[自行裁量]`：**不重試、不繞過**（`CLAUDE.md`「外部API頻率上限
+    清單」FinMind一節「別短時間內狂打」＋研究紀律「取得方式鐵律」
+    「額度用完就誠實拒絕，不排隊、不重試」），本輪僅記錄真實狀態，
+    不啟動任何新的FinMind請求（本輪全程零外部API呼叫）。二的正確狀態
+    改為**BLOCKED（FinMind額度冷卻），解除時間2026-09-29T18:24+08:00
+    之後**，屆時DevQueue可重跑`python research/audit_v9_fetch_missing.py
+    --phase crosscheck`（腳本本身會自動只補還缺的511筆裡尚未完成的
+    部分，不需要重新設計）。
+  - 一（定量分解）：核對系統可用記憶體，本輪17:02查詢仍為**2.60GB**
+    （<3GB門檻，較cycle161602記錄的2.5~2.8GB持平未回升），未解除，
+    retry條件不變（記憶體回升≥3GB）。
+  - `institutional_history.json`／tick累積（`外部一改.2`／`研究.c`）
+    同步核對：`dates`陣列仍20筆、最後日期`20260924`，solid交易日數
+    維持16日；tick累積`ls research/data/ticks/*.parquet`實測**14/20**
+    （與round667一致，本輪查詢時段收盤後尚無新增），皆未解除。
+  - 本輪未動`research/audit_v9_fetch_missing.py`／
+    `research/audit_v9_revenue_trace.py`程式碼本身（僅讀取其輸出檔與
+    `rate_limit_state.json`確認狀態），未修改十三節限定清單內任何原始
+    碼，未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區。
