@@ -1,3 +1,65 @@
+## 2026-09-29（DevQueue自走cycle 20260929-101602，開發/研究前置帽，驗.八二/三＋稽核.三B組完成、本地AI摘要基礎設施＋法遵阻塞）
+
+等待總司令審閱：18件（本輪新增1件：本地AI摘要Breeze-7B）。詳見`research/AWAITING_REVIEW.md`。
+
+**做了什麼**：
+1. **驗.八 二（析.一）**：EPS/營收訊號拆解診斷，`research/audit_v8_
+   signal_anatomy.py`＋`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`。
+   關鍵發現：舊PIT下`f_eps_surprise`的IC幾乎全來自Q4前視窗，剔除後僅剩
+   +0.013；`f_revenue_surprise`99→87下降不是Q4修正造成，提案文件因果
+   敘述需更正。不改任何既有判定。
+2. **驗.八 三（析.二）**：營收→EPS nowcast可行性前置研究，`research/
+   audit_v8_nowcast_eps.py`＋`docs/PREREG_DRAFT_nowcast_eps.md`（含
+   附錄：FinMind以外券商共識預估EPS資料源三來源查證，TEJ/CMoney定價
+   未公開標「待採購」，MOPS結構性確認無此資料）。52檔可用樣本（FinMind
+   402冷卻），nowcast水準相關0.72>naive 0.60，但方向命中增量小。只寫
+   草案不登記不執行。
+3. **驗.八 四（yfinance路徑修正）**：本輪一度阻塞——發現互動視窗
+   正在`research/adjust.py`（單一寫入者限定檔案）並行工作，依CLAUDE.md
+   十三節不搶做不commit，唯讀跑self-test觀察狀態後即讓路。**互動視窗
+   已在本輪期間完成並push**，`PENDING_QUEUE.md`「驗.八」已標`[x]`，
+   我方無需再動作。
+4. **稽核.三B組**：接續hypothesis_queue已完成的第1類（外資持股比），
+   本輪完成第2/3類——`accumulate_margin_by_stock.py`（融資融券逐檔，
+   讀`stock_detail.json.stocks[code].margin`）、`accumulate_securities_
+   lending_sell.py`（借券賣出，TWSE/TPEx schema不同分開存，含民國年
+   日期轉換）、`accumulate_short_lending_available.py`（可融券賣出，
+   誠實標註日期鍵為抓取時間非官方交易日）。三支皆零額外API請求、沿用
+   `accumulate_foreign_holding.py`已驗證慣例、已掛進`market.yml`並補
+   git add allowlist、既有單日快照檔不動。三類全部完成，稽核.三B標`[x]`。
+5. **本地AI摘要(Breeze-7B)**：GPU確認（RTX 5060 8GB/CUDA 12.9）、模型
+   選型（Breeze-7B-Instruct-v1_0，Apache-2.0授權已讀）、量化格式選定
+   （GGUF Q4_K_M≈4.23GB）、Ollama已透過winget安裝並驗證（0.34.4）。
+   **卡在法遵**：任務指定的法說會PDF資料源`doc.twse.com.tw`早在
+   2026-09-08已查證robots.txt全站`Disallow: /`（既有文件
+   `docs/DATA_SOURCE_MAP.md`），本輪額外驗證`mops.twse.com.tw`對非
+   瀏覽器UA觸發WAF封鎖。已列四個替代方案待總司令裁示，不擅自繞過。
+
+**驗證**：`node scripts/smoke_test.mjs` 50項全PASS（跑了兩次，析.一/
+析.二完成後與稽核.三B完成後各一次）；三支累積器腳本各自二次執行確認
+冪等（新增0筆）；`accumulate_margin_by_stock.py`抽查2330數值與
+`stock_detail.json`原始值一致；`market.yml`新增步驟已用`python -c
+"import yaml..."`驗證YAML語法正確。
+
+**[自行裁量]**：①選擇Ollama而非自建llama-cpp-python+CUDA工具鏈（RTX
+5060是很新的Blackwell架構，自編譯CUDA kernel相容性風險高於用官方
+預編譯runtime）；②融資融券/借券兩類TWSE/TPEx欄位schema不同時選擇
+分開存不硬湊同一格式；③可融券賣出餘額缺交易日欄位時選擇用`fetched_at`
+抓取時間當日期鍵並誠實標註可能落差，不用其他檔案的日期去湊。
+
+**分K.零現況（非本輪範圍，如實記錄）**：佇列僅剩此1項`- [ ]`，標記
+`[研究]`不歸DevQueue管（`dev_queue_runner.py`明文排除），已由馬拉松
+第663輪分析並正確判定「擴充daemon協定屬於下一個獨立工作單位」，本輪
+未重複判斷。**佇列深度補件**：`- [ ]`=1<12下限，但`- [!]`13項多數為
+等裁示/等外部條件，重掃三個備援來源顯示與2026-09-18~09-27連續多輪
+一致的既有結論（凍結.二期間無誠實可補的非alpha新項目），未硬湊，
+符合白名單第7條精神。
+
+**下一步**：等總司令對本地AI摘要四選一裁示；等Cowork核對本輪新增的
+析.一/析.二/稽核.三B完成回報。
+
+DevQueue-Cycle: 20260929-101602
+
 ## 2026-09-29（互動視窗，驗證帽，驗.八 四：yfinance路徑修正＋收尾）
 
 等待總司令審閱：17件（本輪新增驗.八）。詳見`research/AWAITING_REVIEW.md`。
