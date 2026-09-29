@@ -16549,7 +16549,48 @@ QUEUE.md`全文、`TRIALS_LEDGER.md`、`research/AWAITING_REVIEW.md`，
       記錄），等資料源問題解決後再接。
   Ollama安裝完成後的驗證與(a)/(b)/(c)/(d)裁示後的下一步，留給下一輪
   接手（互動視窗或DevQueue皆可，非單一寫入者限定檔案）。
-- [ ] **稽核.三B** [資料/開發] 2026-09-29總司令裁示【驗.八】一：核准稽核.三B組——融資融券（逐檔，現況`data/margin_maintenance.json`僅全市場加總）／借券（`data/securities_lending_sell.json`、`short_lending_available.json`）／外資持股比（`data/foreign_holding.json`）三類由「每日覆蓋最新一天」改為逐檔逐日累積(append)。照既有節流規則（外部API頻率上限清單，額度用完就誠實拒絕不換來源硬取）；新增輸出檔須同步確認在`market.yml`allowlist（CLAUDE.md十節）；改寫前先確認各既有下游讀取者是否假設檔案只有今天一筆；格式選擇（分檔vs單檔成長型）[自行裁量]、寫下理由。心跳＝完成時本行改`- [x]`。
+- [x] **稽核.三B** [資料/開發] 2026-09-29總司令裁示【驗.八】一：核准稽核.三B組——融資融券（逐檔，現況`data/margin_maintenance.json`僅全市場加總）／借券（`data/securities_lending_sell.json`、`short_lending_available.json`）／外資持股比（`data/foreign_holding.json`）三類由「每日覆蓋最新一天」改為逐檔逐日累積(append)。照既有節流規則（外部API頻率上限清單，額度用完就誠實拒絕不換來源硬取）；新增輸出檔須同步確認在`market.yml`allowlist（CLAUDE.md十節）；改寫前先確認各既有下游讀取者是否假設檔案只有今天一筆；格式選擇（分檔vs單檔成長型）[自行裁量]、寫下理由。心跳＝完成時本行改`- [x]`。
+  **【DevQueue cycle 20260929-101602 完成第2/3類，三類全部完成】**：接續
+  hypothesis_queue輪次已完成的第1類（外資持股比），本輪新增：
+  - 第2類（融資融券逐檔）：`.github/scripts/accumulate_margin_by_stock.py`
+    讀`data/stock_detail.json`的`stocks[code].margin`（既有MI_MARGN/TPEx
+    逐股資料，每天被覆寫），零額外請求累積成`data/margin_by_stock_
+    history.json`。日期來源用`stock_detail.json`的`meta.generated_at`
+    （來源檔本身無逐股日期欄位）。本機smoke test：1936檔、抽查2330＝
+    [29707.0, 28833.0, 16.0]（今日融資餘額/前日餘額/融券今日餘額，
+    與stock_detail.json原始值一致）；第二次執行「新增0筆」確認冪等。
+  - 第3類（借券）拆兩支，因兩個來源檔schema完全不同不硬湊：
+    `accumulate_securities_lending_sell.py`（TWSE TWT93U 6欄位＋TPEx
+    tpex_short_sell 4欄位，各自獨立series，因兩邊借券賣出實際發布日
+    可能不同步，不共用日期鍵；TPEx `tpex_date`民國年格式需轉換，已寫
+    `_roc_to_iso_compact()`並驗證"1150924"→"20260924"）；
+    `accumulate_short_lending_available.py`（TWSE SBL/TWT96U＋TPEx對應
+    上櫃，單一數字非明細）。**誠實揭露**：`short_lending_available.json`
+    本身沒有交易日欄位，只能用`fetched_at`抓取時間當日期鍵，已在
+    `meta.date_key_caveat`註明「可能與實際生效日期有1個交易日內落差」，
+    不假裝比實際掌握的精確度更高。本機smoke test：借券賣出TWSE 1301檔/
+    TPEx 1008檔；可融券TWSE 1237檔/OTC 853檔；三支腳本第二次執行皆
+    「新增0筆」確認冪等。
+  - 格式選擇[自行裁量]：三類都延續`accumulate_foreign_holding.py`已驗證
+    的「讀回上次JSON→併入今天→去重→緊湊陣列/單值」慣例，不設滾動視窗
+    上限（同一組理由：無已知固定視窗下游，成長到需要瘦身時再加上限，
+    理由寫在各腳本檔頭）；TWSE/TPEx欄位不同的兩類分開存不硬湊同schema。
+  - 下游檢查：`update_margin_maintenance.py`／`fetch_securities_lending_
+    sell.py`／`fetch_short_lending_available.py`本身與`merge_stock_
+    detail_margin()`寫入的`stock_detail.json.stocks[code].margin`**皆未
+    修改**，三支既有讀取者（個股頁融資融券分頁）不受影響——只新增獨立
+    歷史檔，不改既有單日快照語意。
+  - 已掛進`market.yml`：`accumulate_margin_by_stock.py`緊接
+    `update_margin_maintenance.py`之後；`accumulate_short_lending_
+    available.py`緊接`fetch_short_lending_available.py`之後；
+    `accumulate_securities_lending_sell.py`緊接`fetch_securities_
+    lending_sell.py`之後。三個新輸出檔已補進git add allowlist（YAML
+    語法已用`python -c "import yaml..."`驗證）。
+  - `node scripts/smoke_test.mjs` 50項全PASS（未改`index.html`，僅新增
+    資料管線腳本，驗證不受影響）。
+  - **尚未做（如實記錄，非本輪範圍）**：個股頁尚未接這三份新歷史檔
+    （原裁示只要求「逐檔逐日累積」，未要求前端呈現；若總司令想在個股
+    頁顯示趨勢圖，需另開新任務）。
 
 **2026-09-29 hypothesis_queue 心跳輪次【稽核.三B組第1類，部分完成】**：`驗.八`本身
 （含四之yfinance修正，涉及`research/adjust.py`）已由DevQueue track在同時段執行中

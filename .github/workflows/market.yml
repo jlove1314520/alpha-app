@@ -70,8 +70,14 @@ jobs:
       - name: 更新可借券賣出股數（TWSE官方SBL/TWT96U，免金鑰，源頭二.3第5名）
         run: python .github/scripts/fetch_short_lending_available.py
         continue-on-error: true
+      - name: 累積可融券賣出餘額逐檔逐日歷史（零額外請求，稽核.三B組第3類之二）
+        run: python .github/scripts/accumulate_short_lending_available.py
+        continue-on-error: true
       - name: 更新借券賣出當日成交量（TWSE官方TWT93U＋TPEx官方tpex_short_sell，免金鑰，源頭一.2b）
         run: python .github/scripts/fetch_securities_lending_sell.py
+        continue-on-error: true
+      - name: 累積借券賣出逐檔逐日歷史（零額外請求，稽核.三B組第3類之一）
+        run: python .github/scripts/accumulate_securities_lending_sell.py
         continue-on-error: true
       - name: 更新SEC 13F機構持倉（僅追蹤波克夏海瑟威，免金鑰，源頭二.3第6名）
         run: python .github/scripts/fetch_us_13f_holdings.py
@@ -103,6 +109,9 @@ jobs:
         continue-on-error: true
       - name: 更新大盤融資維持率+個股融資融券（TWSE官方MI_MARGN/STOCK_DAY_ALL，2026-09-15起分母也改TWSE官方，零FinMind依賴）
         run: python .github/scripts/update_margin_maintenance.py
+        continue-on-error: true
+      - name: 累積個股融資融券逐檔逐日歷史（零額外請求，稽核.三B組第2類）
+        run: python .github/scripts/accumulate_margin_by_stock.py
         continue-on-error: true
       - name: 更新外資及陸資持股比率（TWSE官方MI_QFIIS，免金鑰，源頭二.3第1名）
         run: python .github/scripts/fetch_foreign_holding.py
@@ -219,7 +228,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/paper_7030.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/short_lending_available_history.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/securities_lending_sell_history.json data/margin_by_stock_history.json data/paper_7030.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
           git add -f research/data/paper_7030_log.jsonl 2>/dev/null || true
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
