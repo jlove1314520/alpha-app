@@ -1,5 +1,13 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-09-29T13:22（Taipei，hypothesis_queue排程接續）— 心跳模式，#82暫停，未開新軸
+— 依總司令【驗.七】一裁示，本軌道改為只做心跳直到另行裁示解除。開工先讀
+`PENDING_QUEUE.md`：僅1條`- [ ]`（`分K.零`），該項屬AlphaMarathon軌道正在
+進行中的維運/研究帽工作（Shioaji常駐連線分K可行性實測，已進行到第664輪，
+不涉及hypothesis_queue），非本軌道可接手的交辦項，故不搶做。因此本輪只寫
+心跳，未挑任何未結案假設、未開新軸、未補件新的alpha假設進佇列（凍結.二
+第4點）。鎖檔上輪為陳舊鎖（held by 124064，59.8分鐘未更新）已自動回收接手。
+
 ## 2026-09-29T10:30 — hypothesis_queue：稽核.三B組第1類（外資持股比逐檔逐日累積）完成 — 新增accumulate_foreign_holding.py，foreign_holding_history.json從無到有（1363檔×1日），驗.八本身涉及research/adjust.py（單一寫入者限制）跳過交還DevQueue/互動視窗
 
 ## 2026-09-28T19:52（Taipei，hypothesis_queue排程接續，第二十二輪）— 開工先讀
