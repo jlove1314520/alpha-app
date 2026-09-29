@@ -17162,5 +17162,5 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 四、紙.一 10/1 照常啟動，不得動。
 
 - [ ] **先.二-一 缺日補齊**（互動視窗執行；動 `.github/scripts/update_price_history.py`／`data/price_history.json`；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
-- [ ] **先.二-二 先.一草案修訂**（僅改 `docs/PREREG_DRAFT_supply_tightness.md` 文字，標「待總司令確認」；心跳同上）
+- [x] **先.二-二 先.一草案修訂**（DevQueue cycle 20260930-070101 接手完成，commit 見下；`docs/PREREG_DRAFT_supply_tightness.md` 已核對逐一涵蓋二.1～4：①價格落後改「近12個月還原報酬產業桶內百分位≤60%」、60日版降為敏感度＋方向一致性要求②判定期間改全期2014-04～2024-12單發＋2014-2019/2020-2024兩段方向一致，取消前段僅管線確認的切法③凍結.二對本方向已解凍註記寫入檔頭④預付設備款因FinMind無此科目、MOPS禁止爬取正式放棄；全文段落均已標「〔待總司令確認〕」，未擅自定案。證據：`git diff` 前後對照，四項修訂內容與裁示原文一一對應，§6清單同步更新為四項待確認事項）
 - [ ] **先.二-三 不看報酬前置檢查**（含補抓現金流量表 216 檔；結果寫入草案 §7；不算報酬、不登記；心跳同上）
