@@ -16749,11 +16749,46 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 >
 > 五、完成後 push，停下等 Cowork 核對。score.py 在總司令決定計分榜方案前不得修改。紙.一 10/1 照常啟動，不得動。凍結.二 仍生效。
 
-- [ ] **驗.九** [驗證/資料/研究診斷] 依序：一、析.三 營收因子99.0→87.0掉分追查
-  (逐位元重現#8→單變因逐步換到#404設定→列表回報百分位變化→補進anatomy文件
-  並更正FACTOR_REVALIDATION_PROPOSAL第1節)；二、額度卡住項目(交叉核對批次
-  235檔、nowcast 300檔完整重跑，撞牆中止回報不吞錯)；三、adjust.py現金增資
-  單位自我測試門檻0.5%→0.6%(註解寫理由)，全部自我測試須PASS；四、FinMind
-  付費方案查詢(只查不買)；五、push後停下等Cowork。score.py不得改；紙.一不得動；
-  凍結.二仍生效。**心跳**：完成時本行改`- [x]`並附完成回報，且往
-  `research/PROGRESS_HEARTBEAT.jsonl` append一行。
+- [ ] **驗.九** [驗證/資料/研究診斷] **進行中，DevQueue cycle 20260929-154602
+  接手，狀態如下**：
+  - 三（adjust.py門檻0.5%→0.6%）：**已完成**（commit `f29b55921`，先前輪次）。
+  - 四（FinMind付費方案查詢）：**已完成**（`docs/FINMIND_PAID_PLAN_2026-09-29.md`，
+    先前輪次撰寫，本輪commit）。
+  - 一（析.三營收因子掉分追查）：**部分完成**。靜態AST比對**已完成、結論
+    確定**：`f_revenue_surprise`實際呼叫的三個函式（`month_revenue_pit`／
+    `_asof_join`／`_revenue_surprise_sue`）899c96644→HEAD逐位元不變，
+    證實原登記「PIT修正是全部原因」對revenue是錯的（對eps_surprise仍
+    成立，不受影響）。定量單變數分解（`research/audit_v9_revenue_trace.py`
+    已寫好、只讀快取零網路）**阻塞**：系統可用記憶體持續<3GB
+    （`research/mem_guard.py`固定門檻，不可執行期間調整），15:44/15:47
+    嘗試兩次皆被立即終止，符合CLAUDE.md零之一節「同一項試了兩次還是
+    失敗」。`[自行裁量]`：不繞過mem_guard（裁示明文門檻不可調整，且
+    現在正是記憶體最緊繃、最不該關掉安全閥的時候），改為記錄BLOCKED、
+    完成靜態分析部分並commit，retry條件＝系統可用記憶體回升≥3GB。
+    詳見`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`；已更正
+    `FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md`第1節（僅revenue一列，
+    加註不刪除原文）。
+  - 二（額度卡住項目）：**進行中**。`research/audit_v9_fetch_missing.py`
+    （本輪新增，節流14秒/次、撞牆即停不吞錯、可續跑）：nowcast 300檔
+    完整重跑前置資料66筆缺口**已補抓完成**（65筆成功、1筆原本就存在，
+    requests_used=65/remaining=0/stopped=null，零撞牆）。crosscheck
+    235檔批次實際待補511筆（含4個資料集×300檔候選裡缺快取的部分，非
+    全部235都缺）`[自行裁量]`本輪已於背景啟動續跑（同一支腳本，只補
+    還缺的，14秒/次節流，未與nowcast階段重疊執行以免同時打FinMind兩條
+    請求流超過安全速率），完成或撞牆結果見下一輪`research/data/
+    diag_v9_fetch_missing.json`（gitignore）；若本輪收工時仍未跑完，
+    下一輪DevQueue可直接重跑`python research/audit_v9_fetch_missing.py
+    --phase crosscheck`接續（會自動只補還缺的）。`audit_v8_nowcast_eps.py`
+    已加`_paired_hit_
+    increment()`（方向命中率相對naive/多數方向基準的cluster bootstrap
+    95%CI）與Q1-Q3/Q4分開報告，但**尚未實際執行**（同樣import
+    `factor_ic`會被mem_guard擋，需等記憶體釋出後補跑用完整300檔樣本）。
+  - 五（push後停下等Cowork）：**本輪暫不適用**——一／二尚未完全完成，
+    不宣稱整項驗.九完成；本輪commit的是部分完成的進度，push後**不視為
+    達成五的停下條件**，DevQueue下一輪應繼續接續一（記憶體恢復後）與
+    二（crosscheck續跑），完全完成後才觸發五。
+  - score.py不得改（未改）；紙.一不得動（未動）；凍結.二仍生效（本輪
+    未新增任何alpha試驗登記）。
+  **心跳**：本行暫不改`- [x]`（尚未完全完成），但已有實質進度，本輪
+  commit即為心跳；`research/PROGRESS_HEARTBEAT.jsonl` append一行記錄
+  本輪進度。

@@ -171,3 +171,108 @@ composite 裡會部分抵銷）。營收與 EPS 意外相關 +0.24，也低於 0
 3. 若總司令日後想以「公布日後事件框架」重驗這兩個因子，需另案事前登記
    （新試驗、受凍結.二約束、須計入多重比較），本診斷的事件曲線**不得**
    當作該試驗的證據。
+
+## 6.（2026-09-29 續，驗.九一）§1.2「本次診斷無法解釋」的落差追查
+
+**狀態：部分完成。**§1.2 留下的問題（「99.0→87.0 的下降不是 Q4 修正
+造成」，但真正原因當時列為「未驗證」的三個候選：還原公式、抽樣宇宙、
+其他管線變更）本節縮小範圍；**逐位元的靜態程式碼比對已完成且結論
+確定**，定量單變數分解因系統記憶體不足被阻塞（見下方 §6.2）。
+
+### 6.1 靜態程式碼比對（已完成，結論確定，零網路零記憶體風險）
+
+比較 commit `899c96644`（#8 登記當時）與現行 HEAD（`726f5e4d5`）之間，
+`f_revenue_surprise` 實際呼叫鏈上每一個函式的 AST（去除 docstring 後
+逐節點比較，非啟發式）：
+
+| 函式 | 檔案 | AST 是否逐節點相同（899c96644 vs HEAD） |
+|---|---|---|
+| `month_revenue_pit`（revenue_surprise 唯一用到的 PIT 函式） | `research/pit.py` | **相同** |
+| `_asof_join` | `research/factors.py` | **相同** |
+| `_revenue_surprise_sue`（revenue_surprise 本體） | `research/factors.py` | **相同** |
+
+同一次比對也列出兩個檔案裡「有變更」的函式：`pit.py::changed_functions`
+＝`balance_sheet_pit`、`quarterly_pit`（`f_eps_surprise`／`f_eps_growth`
+用到的 PIT 函式，**不是** revenue 用的）；`factors.py::changed_functions`
+＝`_institutional_daily_net`、`prepare_factors`（後者是組裝函式，呼叫
+`_revenue_surprise_sue` 本身不變，僅為新增其他因子而擴充）。
+
+**結論（確定）**：`f_revenue_surprise` 實際呼叫的三個函式在 #8 與現行
+之間逐位元不變，**排除「財報時點修正」作為 revenue 掉分原因的可能性**
+——這個機制在 revenue 這條路徑上根本不存在（對 `f_eps_surprise` 不受
+影響，它確實經過 `quarterly_pit`/`balance_sheet_pit` 變更）。因此
+§1.2 留下的候選原因縮小為：**還原公式（`adjust.py`）與抽樣宇宙
+（`universe()`）兩者之一或皆有**，"其他管線變更" 這個候選可排除
+（呼叫鏈上其餘函式除組裝函式外皆未變）。
+
+重現方式（獨立於下方 §6.2 整支腳本，不 import `factor_ic`，不受
+`mem_guard` 影響，可隨時重跑驗證本節）：
+```python
+import ast, subprocess
+from pathlib import Path
+REPO = Path("C:/alpha/alpha-app")
+def git_show(sha, path):
+    return subprocess.run(["git", "show", f"{sha}:{path}"], cwd=REPO,
+        check=True, capture_output=True).stdout.decode("utf-8")
+def funcs(src):
+    tree = ast.parse(src); out = {}
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if n.body and isinstance(n.body[0], ast.Expr):
+                n.body = n.body[1:] or [ast.Pass()]
+            out[n.name] = ast.dump(n)
+    return out
+a = funcs(git_show("899c96644", "research/pit.py"))
+b = funcs((REPO / "research/pit.py").read_text(encoding="utf-8"))
+print(a["month_revenue_pit"] == b["month_revenue_pit"])  # True
+```
+
+### 6.2 定量單變數分解（阻塞，待補）
+
+`research/audit_v9_revenue_trace.py`（本輪新增，只讀快取、零網路、
+與 `factor_ic.load_sample_with_factors` 對營收因子完全等價的輕量路徑）
+設計的分解鏈，用來把 §6.1 縮小出的兩個候選（還原公式 vs 抽樣宇宙）
+量化拆分：
+
+- **鏈 A（先換樣本、再換價格建構器）**：(a1) 檔數 100→300（舊順序）→
+  (a2) 宇宙順序修正後同 seed 抽到不同 300 檔 → (f0) 價格建構器 FinMind
+  原始價→yfinance 優先（#404 (i)）→(f) 現行 adjust 其餘修正 →(e) 上市日
+  截斷（#404 (ii)）。
+- **鏈 B（先換價格建構器、最後換樣本）**：同五步驟顛倒順序，交叉檢查
+  路徑相依性。
+- **單變數控制**：從 `old100×orig` 出發，一次只換一項，六種組合各自
+  對照。
+- 另有「共同支持集」（控制哪些檔在四個建構器下都可用，排除組成差異
+  干擾）與「池內重抽樣」（估計換一批股票的百分位噪音，M=400 次抽樣×
+  size 80/240，成對比較建構器效應的均值與標準差）。
+
+**候選原因的結構性證據**（非猜測，但精確佔比需要本節數字才能定案）：
+1. **樣本組成差異**：`research/universe.py` 在 commit `ab7e9a40c`
+   修過「51% 已下市股被誤判 active」的合併 bug，改變了函式回傳的股票
+   順序；`factor_ic` 用固定 seed 對 `universe()` 的回傳列表做
+   `random.Random(SEED).sample()`，順序一變，同一個 seed 抽到的 300
+   檔就完全不同（`research/universe.py` 899c96644→HEAD diffstat 差
+   263 行，已查證）。
+2. **價格建構器差異**：`research/adjust.py` 在 #8 當時（899c96644）與
+   #404 (i) 組凍結版（7a8fd5cda）之間差 148 行（yfinance 優先、多項
+   還原修正）；這條路徑改變的是 IC 計算裡「前瞻報酬 R」這一腿
+   （`p1/p0-1`），即使 revenue 的因子值 F 完全沒變，R 變了同樣會讓 IC
+   與百分位改變——這正是 §0 提到的「抽樣宇宙 300→240 檔的差異」候選
+   的另一面（可用檔數變化本身就是 adjust 建構器差異的下游結果）。
+
+**阻塞原因**：系統可用實體記憶體持續低於 `research/mem_guard.py` 固定
+門檻 3GB（`factor_ic` 模組載入時呼叫 `mem_guard.install()`，門檻本身
+依裁示不可執行期間調整），2026-09-29 15:44、15:47 兩次嘗試執行皆被
+立即終止（`mem_guard: 系統可用記憶體 2.6~2.7GB 低於門檻 3GB`）。依
+CLAUDE.md 零之一節「同一項試了兩次還是失敗」記錄為阻塞，不繞過安全閥
+（現在正是系統記憶體最緊繃、最不該關掉安全閥的時候）。**retry 條件**：
+系統可用記憶體回升到 ≥3GB 時執行 `python research/audit_v9_revenue_trace.py`
+（腳本已就緒、未改動），把輸出（`research/data/diag_v9_revenue_trace.json`）
+的鏈 A／鏈 B／單變數控制／池內重抽樣結果貼進本節，取代候選原因為確定
+數字。
+
+### 6.3 對 `FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md` 第 1 節的更正
+
+已同步修改該文件第 1 節，加註「已更正」指標並保留原文（依 CLAUDE.md
+三之二節「舊文字不得直接刪除」精神），僅針對 `f_revenue_surprise` 一列，
+不影響 `f_eps_surprise` 一列的既有因果敘述。

@@ -41,7 +41,7 @@ from finmind_client import load_dev
 from validation import holdout
 
 OUT = Path(__file__).parent / "data" / "diag_v8_nowcast_eps.json"
-HIST_START = "2012-01-01"
+HIST_START = "2010-01-01"  # 驗.九二.2：由2012改2010以重用既有快取；評估季由EVAL_FROM固定，不受影響
 EVAL_FROM = pd.Timestamp("2014-12-31")  # 第一個評估季（需前四季→2013Q4起有資料）
 PAR_VALUE = 10.0
 SCALE_FLOOR = 0.1
@@ -231,6 +231,41 @@ def _block(df: pd.DataFrame) -> dict:
     }
 
 
+def _paired_hit_increment(d: pd.DataFrame, n_boot: int = 2000, seed: int = 20260929) -> dict:
+    """驗.九二.2：同一批股票-季上，est 方向命中率 − naive(上一季YoY方向延續) 命中率，
+    以股票為單位的 cluster bootstrap 95%CI。另附「永遠猜多數方向」基準（用同批列自身多數方向，偏樂觀的上限基準）。"""
+    x = d[["sid", "est_", "eps_ly", "eps_lq", "actual"]].copy()
+    x["p_est"] = x["est_"] - x["eps_ly"]
+    x["p_nv"] = x["eps_lq"] - x["eps_ly"]
+    x["a"] = x["actual"] - x["eps_ly"]
+    x = x[np.isfinite(x[["p_est", "p_nv", "a"]]).all(axis=1) & (x["p_est"] != 0) & (x["p_nv"] != 0) & (x["a"] != 0)]
+    if len(x) < 30:
+        return {"n": int(len(x))}
+    x["h_est"] = (np.sign(x["p_est"]) == np.sign(x["a"])).astype(float)
+    x["h_nv"] = (np.sign(x["p_nv"]) == np.sign(x["a"])).astype(float)
+    x["up"] = (x["a"] > 0).astype(float)
+    g = x.groupby("sid").agg(n=("a", "size"), he=("h_est", "sum"), hn=("h_nv", "sum"), up=("up", "sum"))
+    n, he, hn, up = (g[c].to_numpy() for c in ("n", "he", "hn", "up"))
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(g), size=(n_boot, len(g)))
+    N = n[idx].sum(1)
+    d_nv = he[idx].sum(1) / N - hn[idx].sum(1) / N
+    up_r = up[idx].sum(1) / N
+    d_maj = he[idx].sum(1) / N - np.maximum(up_r, 1 - up_r)
+    ci = lambda v: [round(float(np.percentile(v, 2.5)), 4), round(float(np.percentile(v, 97.5)), 4)]
+    hr_e, hr_n, base = he.sum() / n.sum(), hn.sum() / n.sum(), up.sum() / n.sum()
+    return {
+        "n_stock_quarters": int(n.sum()), "n_stocks_clusters": int(len(g)),
+        "hit_est": round(float(hr_e), 4), "hit_naive_prevQ_yoy_dir": round(float(hr_n), 4),
+        "increment_vs_naive": round(float(hr_e - hr_n), 4), "increment_vs_naive_ci95_cluster_boot": ci(d_nv),
+        "ci_excludes_zero_vs_naive": bool(ci(d_nv)[0] > 0 or ci(d_nv)[1] < 0),
+        "base_rate_actual_up": round(float(base), 4),
+        "increment_vs_majority_direction": round(float(hr_e - max(base, 1 - base)), 4),
+        "increment_vs_majority_ci95_cluster_boot": ci(d_maj),
+        "boot": {"n_boot": n_boot, "seed": seed, "unit": "stock(cluster)"},
+    }
+
+
 def _xs_ic(df: pd.DataFrame, x: str, y: str, min_n: int = 15) -> dict:
     ics = []
     for _, g in df.groupby("pe"):
@@ -276,6 +311,11 @@ def main() -> None:
             "n_stock_quarters": int(len(d)),
             "pooled": _block(dd),
             "by_quarter_of_year": {f"Q{k}": _block(g) for k, g in dd.groupby("qtr")},
+            "q1q3_vs_q4": {
+                "Q1-Q3": {"pooled": _block(dd[dd["qtr"] <= 3]), "hit_increment": _paired_hit_increment(dd[dd["qtr"] <= 3])},
+                "Q4": {"pooled": _block(dd[dd["qtr"] == 4]), "hit_increment": _paired_hit_increment(dd[dd["qtr"] == 4])},
+                "all": {"hit_increment": _paired_hit_increment(dd)},
+            },
             "by_year": {str(k): {"n": int(len(g)), "level_spearman": _corr(g["est"].to_numpy(), g["actual"].to_numpy()).get("spearman"),
                                  "direction_hit": _hit(g["d_est"].to_numpy(), g["d_act"].to_numpy()).get("hit_rate")}
                         for k, g in dd.groupby("year")},

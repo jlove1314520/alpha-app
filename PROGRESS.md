@@ -1,4 +1,75 @@
-## 2026-09-29（DevQueue自走cycle 20260929-101602，開發/研究前置帽，驗.八二/三＋稽核.三B組完成、本地AI摘要基礎設施＋法遵阻塞）
+## 2026-09-29（DevQueue自走cycle 20260929-154602，驗證/研究診斷帽，驗.九進行中：一析.三靜態AST比對完成確定排除PIT修正為revenue掉分原因＋二額度卡住項目nowcast補抓完成crosscheck接續中）
+
+等待總司令審閱：19件（本輪無新增，沿用`research/AWAITING_REVIEW.md`既有列表；本輪工作屬既有#37/#38驗.七/驗.八審閱項目的延伸證據，未產生新的獨立審閱項）。
+
+**做了什麼**：
+1. **驗.九一（析.三）營收因子99.0→87.0掉分追查——靜態程式碼比對部分
+   完成，結論確定**：新增`research/audit_v9_revenue_trace.py`（只讀
+   FinMind/yfinance快取，`requests.*`與`yf_price_client.fetch_yf_
+   adjusted`皆monkeypatch成零網路，四個價格建構器`orig`/`frozen`/
+   `cur_notrunc`/`cur`對應899c96644/7a8fd5cda/現行三個commit）。獨立
+   跑一次不依賴`factor_ic`的AST比對（可重現，見文件內嵌程式碼）：
+   `f_revenue_surprise`實際呼叫的三個函式——`pit.month_revenue_pit`／
+   `factors._asof_join`／`factors._revenue_surprise_sue`——在#8登記
+   當時(899c96644)與現行HEAD之間**逐位元不變**。這證實`TRIALS_LEDGER`
+   #404與`docs/FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md`第1節「原→
+   (i)差距歸因於財報時點(PIT)修正」這句因果敘述**對revenue是錯的**（對
+   `f_eps_surprise`不受影響，它確實經過`quarterly_pit`/`balance_sheet_
+   pit`變更）。已把結論補進`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`
+   §6（**以Edit方式在既有文件後面新增章節，未覆蓋既有析.一內容**——先
+   前一版操作失誤用Write整份覆寫掉已committed的§0-5，被自己的nowcast
+   fetch進度檢查空檔中即時發現並用`git checkout`還原，如實記錄這個
+   過程），並在`FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md`第1節加註
+   「已更正」指標（保留原文不刪除）。
+2. **驗.九一定量單變數分解——阻塞，非邏輯問題，是系統資源問題**：
+   完整的鏈A/鏈B/單變數控制/池內重抽樣（`audit_v9_revenue_trace.py`
+   已寫好）需要`import factor_ic`，該模組載入時呼叫`mem_guard.
+   install()`；本機系統可用實體記憶體本輪全程卡在2.6~2.9GB（`Get-
+   CimInstance Win32_OperatingSystem`實測；`Get-Process`確認為Riot
+   Client/League client等使用者本機遊戲行程佔用約4GB＋數個並行claude
+   session，非本腳本自身洩漏），持續低於`mem_guard.py`固定門檻3GB
+   （裁示明文不可執行期間調整）。**嘗試三次**（15:44、15:47、16:04
+   記憶體回升到2.9GB後再試一次）**皆被立即終止**。`[自行裁量]`：不
+   繞過安全閥（現在正是最不該關掉它的時候），改為完成不需要
+   `factor_ic`的靜態分析部分並如實記錄阻塞，retry條件＝系統可用記憶體
+   回升≥3GB。
+3. **驗.九二（額度卡住項目）**：新增`research/audit_v9_fetch_missing.py`
+   （節流14秒/次≈257次/小時，任何`RuntimeError`立即停手不重試，可
+   續跑）。nowcast 300檔完整重跑前置的3個資料集缺口（66筆）**已補抓
+   完成**：`requests_used=65、remaining=0、stopped=null`，零撞牆
+   （只跑了一個process，避免與crosscheck同時打FinMind超過安全速率）。
+   crosscheck（yfinance vs FinMind交叉核對批次）235檔對應4個資料集
+   實際待補511筆，`[自行裁量]`本輪已於背景啟動續跑，收工時進度見
+   commit時點的`research/data/diag_v9_fetch_missing.json`
+   （gitignore，不進repo）；未跑完部分下一輪DevQueue直接重跑同一指令
+   即可接續。`audit_v8_nowcast_eps.py`已加`_paired_hit_increment()`
+   （方向命中率相對naive/多數方向基準的cluster bootstrap 95%CI）與
+   Q1-Q3/Q4分開報告的程式碼，**尚未實際執行**（同樣被mem_guard擋，
+   跟第2點同一個阻塞原因，等記憶體釋出後補跑）。
+4. **驗.九三（adjust.py現金增資單位門檻）**：先前輪次已完成
+   （commit`f29b55921`），本輪重新執行`python research/adjust.py`
+   確認全部自我測試仍PASS（含2038誤差0.574%<0.6%新門檻）。
+5. **驗.九四（FinMind付費方案查詢）**：先前輪次已查證完成，本輪commit
+   `docs/FINMIND_PAID_PLAN_2026-09-29.md`（三來源查證：官網前端程式檔
+   `chunk-4f103538.4b69191e.js`、官方API文件`llms-full.txt`、GitHub
+   README＋社群文章）。只查未買。
+6. **驗.九五（push後停下等Cowork）**：**本輪不適用**——一（定量部分）
+   與二（crosscheck批次）尚未完全完成，`PENDING_QUEUE.md`「驗.九」
+   本行維持`- [ ]`，不宣稱整項完成，push後DevQueue下一輪應繼續接續
+   （記憶體恢復後補跑`audit_v9_revenue_trace.py`與
+   `audit_v8_nowcast_eps.py`；crosscheck批次視上次進度續跑）。
+
+**驗證**：`node scripts/smoke_test.mjs` 50項全PASS（未改`index.html`，
+純研究診斷腳本與文件異動，驗證不受影響）；`python research/adjust.py`
+自我測試全PASS；`audit_v9_fetch_missing.py` nowcast階段
+`requests_used=65/remaining=0/stopped=null`為機器可查證據。
+
+**卡住的問題**：系統可用記憶體<3GB（環境因素，非程式bug），阻塞
+`audit_v9_revenue_trace.py`與`audit_v8_nowcast_eps.py`（皆import
+`factor_ic`）。retry條件寫在`docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`
+§6.2與`PENDING_QUEUE.md`「驗.九」條目，下一輪DevQueue（或記憶體釋出
+後的任何時點）可直接重跑，無需重新調查。
+
 
 等待總司令審閱：18件（本輪新增1件：本地AI摘要Breeze-7B）。詳見`research/AWAITING_REVIEW.md`。
 

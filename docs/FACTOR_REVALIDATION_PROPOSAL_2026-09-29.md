@@ -15,6 +15,20 @@ score.py，改為提出降權或移除方案，等 Cowork 核可。」本文件�
 這與 2026-09-20 `FACTORS.md` 已記錄的重跑結論一致，本次是預先登記的正式
 重驗再確認。
 
+> ⚠️ **2026-09-29 驗.九一更正（僅針對 `f_revenue_surprise` 一列，
+> `f_eps_surprise` 一列不受影響）**：上面這句因果敘述對 `f_revenue_surprise`
+> 是錯的。靜態 AST 比對證實 `f_revenue_surprise` 實際呼叫的三個函式
+> （`pit.month_revenue_pit`／`factors._asof_join`／
+> `factors._revenue_surprise_sue`）在 #8 當時（commit `899c96644`）與現行
+> HEAD 之間逐位元不變——revenue 的 PIT 函式從來沒有變過，「PIT修正是
+> 全部原因」這個機制在 revenue 這條路徑上不存在。真正變了的是
+> `quarterly_pit`／`balance_sheet_pit`，那是 `f_eps_surprise`／
+> `f_eps_growth` 用到的函式，此更正**不影響**上表 `f_eps_surprise` 那一列
+> （它確實經過 PIT 函式變更，原敘述對它仍然成立）。revenue 掉分的真正
+> 候選原因（樣本因 `universe()` 順序修正而改變、價格建構器改變前瞻報酬
+> 計算）與定量分解詳見 `docs/EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`
+> （該文件第2節定量部分因系統記憶體不足暫時阻塞，待補）。
+
 ## 2. 現況：這兩個因子在 App 即時計分路徑上的位置
 
 `research/score.py`：
