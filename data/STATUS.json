@@ -609,8 +609,8 @@
       }
     ],
     "status": "stale",
-    "status_checked_at": "2026-09-29T06:06:15.418107+00:00",
-    "status_age_hours": 330.4
+    "status_checked_at": "2026-09-29T13:14:05.926781+00:00",
+    "status_age_hours": 337.6
   },
   "local_pipeline_health": {
     "checked_at": "2026-09-15T19:40:21.880603+08:00",
@@ -765,8 +765,8 @@
     ],
     "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
     "status": "stale",
-    "status_checked_at": "2026-09-29T06:06:15.418107+00:00",
-    "status_age_hours": 330.4
+    "status_checked_at": "2026-09-29T13:14:05.926781+00:00",
+    "status_age_hours": 337.6
   },
   "app_data_sources": [
     {
@@ -1146,33 +1146,33 @@
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。"
   ],
   "local_schedule_heartbeat": {
-    "checked_at": "2026-09-29T06:06:15.320909+00:00",
+    "checked_at": "2026-09-29T13:14:05.867342+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "a9654461d48e98f28f67cbe64b925ce62240be9c",
-        "last_commit_at": "2026-09-29T06:01:02+00:00",
-        "minutes_since": 5.2,
+        "last_commit_sha": "05187ebcd172dc3b13e77884d1dc73ca9a54f04f",
+        "last_commit_at": "2026-09-29T10:46:03+00:00",
+        "minutes_since": 148.0,
         "track_stalled": false
       },
       "marathon": {
-        "last_commit_sha": "4ceb83ff1ef18097e9ba4502db2cb1c07e741009",
-        "last_commit_at": "2026-09-29T05:30:37+00:00",
-        "minutes_since": 35.6,
+        "last_commit_sha": "0394b61f81f9fcc47ab499870448f99f185314b3",
+        "last_commit_at": "2026-09-29T13:07:52+00:00",
+        "minutes_since": 6.2,
         "track_stalled": false
       },
       "hypothesis_queue": {
-        "last_commit_sha": "e19cddae81a1c39e30c5671264a329505d4aa0d7",
-        "last_commit_at": "2026-09-29T05:51:02+00:00",
-        "minutes_since": 15.2,
+        "last_commit_sha": "44b34c1c750413223225aeb15cc8f7dfe84fcd12",
+        "last_commit_at": "2026-09-29T12:51:03+00:00",
+        "minutes_since": 23.0,
         "track_stalled": false
       }
     },
     "ibkr_quotes": {
       "last_commit_sha": "55c73608ef86426a1d882017839403562a5411a8",
       "last_commit_at": "2026-09-28T08:01:05+00:00",
-      "minutes_since": 1325.2,
+      "minutes_since": 1753.0,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring"
     },
     "stalled": false,
