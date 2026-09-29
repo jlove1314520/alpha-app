@@ -16937,3 +16937,22 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
     未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改
     十三節限定清單內任何原始碼，全程零新增外部API呼叫（純讀`.json`
     帳本檔案、`git status`、`Get-CimInstance`）。
+
+## 2026-09-29 總司令裁示【評.B：計分榜方案 B 執行（總司令 09-29 核准）】
+
+> 【評.B：計分榜方案 B 執行（總司令 09-29 核准）】先寫進 PENDING_QUEUE 再動工。與進行中的驗.九並行，不影響驗.九。
+>
+> 一、依 docs/FACTOR_REVALIDATION_PROPOSAL_2026-09-29.md 方案 B 執行：
+>   1. research/score.py：SCORE_COMPONENTS 只保留 low_vol。eps_family、revenue_surprise 照常計算並輸出到 scores.json 明細欄位，但不進 composite。f_eps_growth（#287 FAIL）一併移出 composite。
+>   2. MIN_COMPONENTS_FOR_RANKING 由 2 改為 1。
+>   3. 前置條件（必做）：export_scores_json() 的資格池接上 universe.common_stock_only()，排除 ETF／特別股／TDR／興櫃。
+>   4. App 揭露：scores.json 的 _meta 與選股頁警語改為「目前只用低波動一個成分計分；EPS／營收意外成分因財報時點修正後未通過重驗（#403/#404）已暫停計分，明細仍顯示供參考。」
+>   5. FACTORS.md 註記方案 B 生效日與理由。
+>   6. 冒煙測試全部通過才算完成，特別是第 39、41、46 項。回報新榜單前 20 名的產業分布，並與舊榜單對照。
+>   7. 既有的每日選股紀錄、績效紀錄不回溯修改；從生效日起新紀錄註明「計分方案 B」。
+>
+> 二、FinMind token：finmind_client.py 改為若本機 .env 有 FINMIND_TOKEN 就帶上（Bearer），沒有就維持現狀；rate_limit_state 依實際方案自動調整節流間隔。token 只從 .env 讀，不得印出、不得寫進任何 commit 或 log（repo 是公開的）。總司令會自己填入 token。
+>
+> 三、完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動，不得動。凍結.二 仍生效。
+
+- [ ] **評.B** [開發/驗證] 計分榜方案 B（僅 low_vol 計分，EPS／營收明細保留不入 composite）＋資格池接 `common_stock_only()`＋App 揭露＋FACTORS.md 註記＋冒煙測試（第 39/41/46 項）＋FinMind token 自 `.env` 讀取。**心跳**：完成時本行標 `- [x]`，並 append 一行至 `research/PROGRESS_HEARTBEAT.jsonl`。與驗.九並行、互不影響；紙.一與凍結.二不動。
