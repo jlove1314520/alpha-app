@@ -16892,3 +16892,48 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
     `research/audit_v9_revenue_trace.py`程式碼本身（僅讀取其輸出檔與
     `rate_limit_state.json`確認狀態），未修改十三節限定清單內任何原始
     碼，未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區。
+
+  **馬拉松第672輪核對（TW軌，維運帽，無新增程式碼，純狀態驗證，狀態
+  有實質變化）**：
+  - 二（crosscheck）**FinMind補抓子步驟已完成，瓶頸轉為記憶體**：
+    `research/data/diag_v9_fetch_missing.json`（gitignore，本輪讀取）
+    `generated_at=2026-09-29T20:48:17`，`requests_used=426`／
+    `remaining=0`／`stopped=null`——511筆crosscheck候選（含此前輪次
+    已完成的85筆）已**全數補齊快取，零撞牆**。核對`data/rate_limit_
+    state.json`：`finmind.blocked_until`已於18:24過期，`last_request_at`
+    20:47:57為額度解除後的正常請求，非違規。**但這只代表FinMind快取
+    補齊，不代表二.1「跑完並回報受影響股票數與天數」已完成**——實際
+    做比對的是`research/audit_v8_yf_crosscheck.py`，它`import factor_ic`
+    （會觸發`mem_guard.install()`），本輪`Get-CimInstance
+    Win32_OperatingSystem`實測系統可用記憶體**2.76GB**（<3GB門檻），
+    未達標，執行會被`mem_guard`於10秒內`os._exit(1)`強制終止。`[自行
+    裁量]`：不嘗試執行（前次對同類mem_guard阻塞已判定「試了兩次還是
+    失敗」不再重試，本次雖是不同腳本`audit_v8_yf_crosscheck.py`而非
+    `audit_v9_revenue_trace.py`，但阻塞成因相同——記憶體<3GB門檻——
+    重試無新資訊，等同重複已知結果）。retry條件維持不變：**記憶體
+    回升≥3GB**（一次滿足即可同時解除一與二剩餘部分，因為兩者阻塞
+    成因相同）。
+  - 一（定量分解）：仍阻塞，同上記憶體門檻，未變動。
+  - 十三節限定清單檔案（`research/backtest/`／`research/validation/`／
+    `adjust.py`／`pit.py`／`trial_registry.py`）`git status --short`
+    確認無殘留編輯（本輪未觸碰）。發現`research/audit_v9_fetch_missing.py`
+    有未commit的修改（非本輪所做，`git diff`顯示為新增`V9_SPACING`環境
+    變數覆寫與`cap<=0`時跳過寫檔，屬於他人WIP、非十三節限定檔案），
+    本輪**刻意不commit這份diff**（不確定完整意圖、且`.devqueue.lock`
+    未持有中代表不是這一刻在跑，但仍可能是尚未收工的前次DevQueue工作
+    產物，貿然commit有覆蓋風險），只讀取不修改，留給下一個接手者
+    （很可能是DevQueue）自行決定是否連同其後續動作一起commit。
+  - 阻塞項目盤點：14個既有`- [!]`項目本輪逐一核對，institutional_
+    history dates陣列仍20筆、最後日期`20260924`、solid交易日數維持
+    16日（本輪查詢21:1x，法人資料本日尚未入庫新交易日）；tick累積仍
+    14/20；其餘12條均未到解除時間，**無一項本輪解除**。
+  - 佇列深度：`- [ ]`=0（<12下限），`凍結.二`仍生效
+    （`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，皆條件敘述非宣告），
+    不補alpha試驗湊數。
+  - **本輪誠實結論**：驗.九的FinMind額度阻塞已實質解除（crosscheck
+    快取補齊），但這只是把瓶頸從「額度」轉移到「記憶體」，實際的分析/
+    比對步驟仍未能執行；交辦佇列無`- [ ]`項目、TW軌本身查無其他可推進
+    的新工作單位，依`CLAUDE.md`「零之一」白名單第7條記錄後結束本輪。
+    未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改
+    十三節限定清單內任何原始碼，全程零新增外部API呼叫（純讀`.json`
+    帳本檔案、`git status`、`Get-CimInstance`）。

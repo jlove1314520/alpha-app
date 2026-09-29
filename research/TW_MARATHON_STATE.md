@@ -6,6 +6,31 @@
 
 
 ---
+**最後更新：2026-09-29T21:0x+08:00（馬拉松第672輪，維運帽）**——取鎖乾淨
+（cycle`20260929-210037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=14條（與
+round669~671一致）。逐一核對14條`- [!]`阻塞項：**`驗.九`狀態有實質變化**
+——讀`research/data/diag_v9_fetch_missing.json`（gitignore）：
+`generated_at=2026-09-29T20:48:17`，`requests_used=426`／`remaining=0`／
+`stopped=null`，crosscheck 511筆FinMind快取補抓**已全數完成、零撞牆**
+（上一輪round671記錄仍253/511卡在額度冷卻）；核對`data/rate_limit_
+state.json`確認`finmind.blocked_until`已於18:24過期、`last_request_at`
+20:47:57為額度解除後的正常請求。**但瓶頸轉移，非全部解除**：二.1「跑完
+並回報受影響股票數與天數」實際要跑的是`research/audit_v8_yf_
+crosscheck.py`（`import factor_ic`→觸發`mem_guard`），本輪`Get-
+CimInstance Win32_OperatingSystem`實測系統可用記憶體**2.76GB**（<3GB
+門檻），執行會被10秒內`os._exit(1)`強制終止；一（定量分解，`audit_v9_
+revenue_trace.py`同樣觸發`mem_guard`）同一原因仍阻塞。`[自行裁量]`：
+不嘗試執行（阻塞成因與先前輪次判定「試了兩次還是失敗」相同——記憶體
+<3GB——重試無新資訊）；發現`research/audit_v9_fetch_missing.py`有
+未commit的WIP修改（非十三節限定檔案，本輪只讀不commit，留給後續
+接手者自行處理，避免覆蓋風險）。retry條件維持不變：記憶體回升≥3GB。
+`institutional_history.json`確認`dates`陣列仍20筆、最後日期`20260924`，
+solid交易日數維持16日；tick累積仍14/20；其餘12條均未到解除時間。
+`凍結.二`仍生效，佇列深度`- [ ]`=0不補alpha試驗湊數。完整見
+`PENDING_QUEUE.md`「驗.九」條目本輪新增段落。
+
+---
 **最後更新：2026-09-29T18:0x+08:00（馬拉松第669輪，維運帽）**——取鎖乾淨
 （cycle`20260929-180037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
 `grep -c "^- \[ \]"`=0（無未開始交辦項，`分K.零`已由round666完成並移入
@@ -114,58 +139,3 @@ round665=09-29 12:0x（實際commit時間14:11）——依輪替選TW。
 完整見`REPORT.md`第666輪心跳、`PENDING_QUEUE.md`「分K.零」條目、
 `research/INTRADAY_KBARS_BACKFILL_SPEC.md`、`research/AWAITING_
 REVIEW.md`。
-
----
-**最後更新：2026-09-29T10:0x+08:00（馬拉松第663輪，維運/研究帽）**——取鎖乾淨
-（cycle`20260929-100036`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
-`grep -c "^- \[ \]"`=4（`分K.零`／`驗.八`／`本地AI摘要(Breeze-7B)`／
-`稽核.三B`——`驗.八一`已由互動視窗於今日09:xx commit`f390e081`完成，但
-`驗.八`整體仍`- [ ]`因二~五未完成；`grep -c "^- \[!\]"`=12（較round648~662
-的15少3，因`驗.八一`已把`群益API`三條合併為1條暫緩，見下方）。**判斷本輪
-可插手哪一條**：`驗.八`本身——`git status --short`顯示`docs/
-EPS_REVENUE_SIGNAL_ANATOMY_2026-09-29.md`／`research/audit_v8_signal_
-anatomy.py`兩個untracked檔案，mtime為09:57/10:00（取鎖前3分內），比照
-round661對`驗.七`的判斷（時間吻合＝互動視窗正在做，避免插手覆寫競爭），
-本輪不觸碰`驗.八`；`本地AI摘要(Breeze-7B)`／`稽核.三B`皆是[開發]/[資料]
-性質、非馬拉松研究帽慣常範疇（且Breeze-7B需要本機裝GPU套件、稽核.三B
-涉及改寫下游讀取假設，兩者都更適合互動視窗執行），本輪選擇**`分K.零`**
-——它是`CLAUDE.md`「零之一」允許的可還原技術任務、且已由總司令在`驗.八`
-明確同意解除阻塞。**做了什麼**：確認`shioaji_quotes.py`(PID 129748)
-常駐中、`/health`帶token回應`shioaji_connected:true`且`stale_process:
-false`；寫`research/probe_kbars_coverage.py`測涵蓋範圍（上市/上櫃/ETF/
-已下市各3檔，沿用既有`/live/kbars`端點不開第二條連線）。**結果**：上市/
-上櫃/ETF共9檔全部200（68根bar，09:01開盤到查詢當下），已下市3檔
-（6452康友-KY/3662樂陞/4803VHQ-KY）全部404——推論Shioaji contract
-lookup對已下市代碼查不到。**過程中的自我糾正**：原本第3個下市樣本填錯
-代碼（4930誤當淘帝-KY，實際4930是仍上市的燦星網，淘帝-KY正確代號2929
-也未下市），empirical結果（回200而非404）當場暴露這個查證疏漏，已用
-查證過的VHQ-KY(4803，2021-12-27正式下市)補測並在結果檔誠實留下更正
-記錄，不覆蓋掉原始錯誤。**意外發現**：404的失敗查詢一樣會被
-`kbars_usage.calls_today`計入（13次呼叫，budget從null累加到18，多出
-5次推測是同時段其他既有活動），代表**contract查不到的失敗查詢一樣燒
-額度**。**尚未做（下一步，已寫入`分K.零`條目）**：最多回溯多久——現有
-`shioaji_quotes.py`的op="kbars"協定寫死`start=day,end=day`(今天)，
-沒有start/end參數，要測需先擴充daemon協定+重啟常駐行程，屬於對正式
-交易連線的變更，列為下一個獨立工作單位；速率限制（全市場2年要多久）
-依賴(1)才能測；停牌/漲跌停標的本輪沒查到現成清單，未測。`分K.零`維持
-`- [ ]`。核對12條`- [!]`阻塞項（較上輪少3條，因`驗.八一`已把群益API
-三條合併為1條）：`institutional_history.json`確認`dates`陣列仍20筆、
-solid交易日數維持16日，20日視窗仍差4個交易日，未解除；tick累積仍
-13/20，未解除；其餘10條均未到解除時間。`CLAUDE.md`十四節【凍結.二】
-仍生效（`分K.零`屬infra可行性測試非alpha試驗，不受凍結.二限制）。
-`run_detached.py status`：running=0。`trial_registry.py --check`
-（`PYTHONIOENCODING=utf-8`）exit=0 PASS（406列，本輪純infra測試未新增
-判定）。`AWAITING_REVIEW.md`「等待中」表頭「目前：16件」，本輪未變動
-（`驗.七`仍等Cowork核對）。未動`alpha.db`/`fetch.py`/`parsers.py`/
-`config.py`凍結區，未修改十三節限定清單內任何原始碼；本輪對外部服務
-的呼叫僅限本機`alpha_live_server.py`（既有常駐行程，走既有token驗證，
-未開第二條Shioaji連線，13次kbars查詢均在240/日預算內）。
-`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩3條未開始**
-（`驗.八`判定為互動視窗進行中非漏做；`本地AI摘要(Breeze-7B)`／
-`稽核.三B`留給互動視窗或下一輪，非馬拉松研究帽慣常範疇）。**等待審閱：
-16件**（與`AWAITING_REVIEW.md`表格列數一致）。**下一輪任一軌接手**：
-依輪替下一輪建議選FUT軌（round661=09-29 00:3x，三軌中最舊）；開工前
-先重新檢查`驗.八`是否仍在進行中；`分K.零`下一步是擴充daemon協定測
-回溯天數，屬於對正式交易連線的變更，建議由互動視窗執行較安全（重啟
-風險）。完整見`REPORT.md`第663輪心跳、`PENDING_QUEUE.md`「分K.零」
-條目、`research/data/probe_kbars_coverage_result.json`。

@@ -1,3 +1,13 @@
+## 第672輪 · 2026-09-29T21:0x+08:00 · TW · 維運帽：`驗.九`crosscheck FinMind補抓已完成（426/426零撞牆）、瓶頸轉為記憶體<3GB、一與二剩餘分析步驟仍阻塞、凍結.二下TW軌無可做工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260929-210037`）。三軌時間戳：TW round669=09-29 18:0x最舊，依輪替選TW。
+- 開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（無未開始交辦項）；`grep -c "^- \[!\]"`=14條（與round669~671一致）。
+- 逐一核對14條`- [!]`阻塞項：`驗.九`——讀`research/data/diag_v9_fetch_missing.json`（gitignore）：`generated_at=2026-09-29T20:48:17`、`requests_used=426`／`remaining=0`／`stopped=null`，crosscheck 511筆FinMind快取補抓**已全數完成、零撞牆**（上輪round671仍253/511卡額度冷卻，`audit_v9_fetch_missing.py --phase crosscheck`PID131264已於本輪查詢時不存在，代表已跑完退出）；`data/rate_limit_state.json`確認`finmind.blocked_until`已於18:24過期、`last_request_at`20:47:57為額度解除後正常請求。**瓶頸轉移非全解**：實際做比對/分解的`research/audit_v8_yf_crosscheck.py`與`research/audit_v9_revenue_trace.py`皆`import factor_ic`（觸發`mem_guard`），本輪`Get-CimInstance Win32_OperatingSystem`實測系統可用記憶體**2.76GB**（<3GB門檻），執行會被10秒內`os._exit(1)`強制終止，`[自行裁量]`不嘗試執行（阻塞成因與先前「試了兩次還是失敗」判定相同，重試無新資訊）。發現`research/audit_v9_fetch_missing.py`有未commit的WIP修改（新增`V9_SPACING`環境變數與`cap<=0`跳過寫檔，非十三節限定檔案），本輪只讀不commit，留給後續接手者處理。`institutional_history.json`確認`dates`陣列仍20筆、最後日期`20260924`，solid交易日數維持16日；tick累積`ls research/data/ticks/*.parquet`實測仍14/20；其餘12條均未到解除時間。`grep -c "凍結.二解除" PENDING_QUEUE.md`=3，皆為條件敘述提及、非實際宣告解除，凍結.二仍生效。
+- 驗證：`trial_registry.py --check` exit=0 PASS（406列，本輪未新增判定）；`is_holdout_consumed()`=True（非本輪動作）；`run_detached.py status` running=0（162筆歷史，無job待收成）；`git status --short`確認十三節限定檔案（backtest/validation/adjust.py/pit.py/trial_registry.py）無殘留未commit編輯。
+- `AWAITING_REVIEW.md`「等待中」表頭「目前：19件」，本輪未變動。
+- **本輪誠實結論**：驗.九的FinMind額度阻塞已實質解除（crosscheck快取補齊），但瓶頸轉移到記憶體<3GB門檻，實際分析/比對步驟仍未能執行；交辦佇列無`- [ ]`項目、TW軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不commit他人WIP。
+- 等待總司令審閱：19件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩0條`- [ ]`未開始。下一輪建議選FUT軌（round670=09-29 19:0x，三軌中最舊），開工前先重新檢查記憶體是否已回升≥3GB（滿足即可接續驗.九一與二剩餘分析步驟）。
+---
 ## 第671輪 · 2026-09-29T20:0x+08:00 · US · 維運帽：`驗.九`FinMind retry條件已解除但仍被DevQueue即時執行中、記憶體retry條件仍未解除、凍結.二下US軌無可做工作單位 · 無判定、N不變
 
 - 取鎖乾淨（cycle `20260929-200037`）。三軌時間戳：US round668=09-29 17:0x最舊，依輪替選US。
