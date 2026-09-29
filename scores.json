@@ -1,8 +1,8 @@
 {
   "meta": {
     "engine_version": "scoring-live-json",
-    "generated_at": "2026-09-29T23:44:45.347594+08:00",
-    "data_asof": "2026-09-29",
+    "generated_at": "2026-09-30T00:38:00.300927+08:00",
+    "data_asof": "2026-09-30",
     "market": "TW",
     "universe_size": 513,
     "avg_coverage": 0.806,
@@ -27,8 +27,8 @@
     "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json+data/company_info.json（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用，見generate_scores_live.py檔頭說明。",
     "disclaimer": "自 2026-09-30 起只用低波動計分；財報成長、營收成分因重驗未過或未驗證，暫不計分，明細仍顯示。本榜尚未回測驗證。非投資建議；所有分數只是資料整理與排序，不代表買賣訊號。資料為盤後/延遲資料。2026-08-27改版：不再用coverage<0.5排除股票，全市場都進榜——總分跟「資料完整度」(coverage)是兩件事，高分低完整度不代表可信，請一併參考每檔的coverage數值跟missing_factors清單。analyst/catalyst兩項全市場沒有資料源、technical用未還原權息的收盤價（除權息前後會失真）、revenue_momentum未做規模分層——已依coverage規則重新分配權重，不會把沒資料當成0分，細節見generate_scores_live.py檔頭的已知限制說明。",
     "coverage_collapse_warning": false,
-    "prior_run_stock_count": 1977,
-    "prior_run_avg_coverage": 0.761
+    "prior_run_stock_count": 513,
+    "prior_run_avg_coverage": 0.806
   },
   "weights": {
     "low_vol": 1.0,
@@ -54,7 +54,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 45720162.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.4/10（近60日日報酬標準差 0.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -179,7 +179,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 27651503.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.0/10（近60日日報酬標準差 0.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -304,7 +304,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 468318787.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.0/10（近60日日報酬標準差 0.97%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -429,7 +429,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 131398447.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.0/10（近60日日報酬標準差 0.97%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -554,7 +554,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 46006945.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.0/10（近60日日報酬標準差 1.00%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -681,7 +681,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 186351932.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.5/10（近60日日報酬標準差 1.07%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -779,7 +779,7 @@
         "earnings_growth": "財報資料過期（最新 2005Q4，落後現在 83 季），未列入計分"
       },
       "liquidity_20d": 54334104.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.4/10（近60日日報酬標準差 1.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -873,7 +873,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 43009402.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.3/10（近60日日報酬標準差 1.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -998,7 +998,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 45469671.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.3/10（近60日日報酬標準差 1.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1123,7 +1123,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 36054696.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.2/10（近60日日報酬標準差 1.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1249,7 +1249,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 306756309.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.1/10（近60日日報酬標準差 1.19%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1360,7 +1360,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 299189396.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.1/10（近60日日報酬標準差 1.19%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1454,7 +1454,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 55955250.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.1/10（近60日日報酬標準差 1.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1579,7 +1579,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 691212758.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.0/10（近60日日報酬標準差 1.22%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1706,7 +1706,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 98030333.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.9/10（近60日日報酬標準差 1.24%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1800,7 +1800,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 28518869.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.8/10（近60日日報酬標準差 1.30%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -1925,7 +1925,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 36168049.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.4/10（近60日日報酬標準差 1.39%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2050,7 +2050,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 116976097.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.4/10（近60日日報酬標準差 1.40%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2175,7 +2175,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 27836147.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.3/10（近60日日報酬標準差 1.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2300,7 +2300,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 73612952.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.3/10（近60日日報酬標準差 1.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2425,7 +2425,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 264818911.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.2/10（近60日日報酬標準差 1.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2554,7 +2554,7 @@
         "earnings_growth": "財報資料過期（最新 2005Q4，落後現在 83 季），未列入計分"
       },
       "liquidity_20d": 1391624912.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.1/10（近60日日報酬標準差 1.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2648,7 +2648,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 37180833.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.0/10（近60日日報酬標準差 1.52%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2775,7 +2775,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 42322410.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.9/10（近60日日報酬標準差 1.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2870,7 +2870,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 74446770.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.9/10（近60日日報酬標準差 1.54%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -2979,7 +2979,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 35474226.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.9/10（近60日日報酬標準差 1.54%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3104,7 +3104,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 40888755.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.9/10（近60日日報酬標準差 1.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3229,7 +3229,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 79916859.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.8/10（近60日日報酬標準差 1.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3354,7 +3354,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 24747211.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.8/10（近60日日報酬標準差 1.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3480,7 +3480,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 564423218.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.8/10（近60日日報酬標準差 1.56%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3589,7 +3589,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1390734975.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.6/10（近60日日報酬標準差 1.60%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3714,7 +3714,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 267751472.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.5/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3839,7 +3839,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 113876031.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.4/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -3964,7 +3964,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 45446136.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.3/10（近60日日報酬標準差 1.65%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4091,7 +4091,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 811554533.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.3/10（近60日日報酬標準差 1.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4188,7 +4188,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 820630631.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.2/10（近60日日報酬標準差 1.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4302,7 +4302,7 @@
         "earnings_growth": "財報資料過期（最新 2005Q4，落後現在 83 季），未列入計分"
       },
       "liquidity_20d": 42918026.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.2/10（近60日日報酬標準差 1.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4396,7 +4396,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 253022365.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.1/10（近60日日報酬標準差 1.71%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4521,7 +4521,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 161254758.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.1/10（近60日日報酬標準差 1.73%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4648,7 +4648,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 49127095.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.0/10（近60日日報酬標準差 1.74%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4744,7 +4744,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 44395712.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.0/10（近60日日報酬標準差 1.76%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4838,7 +4838,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 49658922.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.9/10（近60日日報酬標準差 1.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -4966,7 +4966,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 45723171.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.7/10（近60日日報酬標準差 1.82%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5078,7 +5078,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 139675721.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.7/10（近60日日報酬標準差 1.84%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5173,7 +5173,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 65395182.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.6/10（近60日日報酬標準差 1.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5282,7 +5282,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 41702709.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.6/10（近60日日報酬標準差 1.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5411,7 +5411,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 39574638.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.6/10（近60日日報酬標準差 1.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5507,7 +5507,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 20353138.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.6/10（近60日日報酬標準差 1.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5601,7 +5601,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 87682052.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.6/10（近60日日報酬標準差 1.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5727,7 +5727,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 317441157.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.5/10（近60日日報酬標準差 1.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5838,7 +5838,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 115867722.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.5/10（近60日日報酬標準差 1.88%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -5932,7 +5932,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 40825643.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.3/10（近60日日報酬標準差 1.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6059,7 +6059,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 21463514.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.2/10（近60日日報酬標準差 1.98%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6153,7 +6153,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 339462319.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.1/10（近60日日報酬標準差 1.98%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6282,7 +6282,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 760676788.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.1/10（近60日日報酬標準差 1.99%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6376,7 +6376,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 40457410.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.0/10（近60日日報酬標準差 2.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6501,7 +6501,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 30285470.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.9/10（近60日日報酬標準差 2.09%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6626,7 +6626,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 149077951.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.8/10（近60日日報酬標準差 2.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6752,7 +6752,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 58172336.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.8/10（近60日日報酬標準差 2.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6863,7 +6863,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 29728975.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.8/10（近60日日報酬標準差 2.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -6957,7 +6957,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 31482013.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.7/10（近60日日報酬標準差 2.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7082,7 +7082,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 474065272.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.7/10（近60日日報酬標準差 2.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7209,7 +7209,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 88632105.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.7/10（近60日日報酬標準差 2.15%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7303,7 +7303,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 30363189.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.7/10（近60日日報酬標準差 2.15%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7428,7 +7428,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 108730364.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.6/10（近60日日報酬標準差 2.16%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7555,7 +7555,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 20385528.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.6/10（近60日日報酬標準差 2.16%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7649,7 +7649,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 53563648733.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.6/10（近60日日報酬標準差 2.17%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7775,7 +7775,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 45127317.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.5/10（近60日日報酬標準差 2.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -7884,7 +7884,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7998674523.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.4/10（近60日日報酬標準差 2.25%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8009,7 +8009,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 259100202.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.4/10（近60日日報酬標準差 2.26%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8134,7 +8134,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 185442772.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.4/10（近60日日報酬標準差 2.27%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8263,7 +8263,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2571169057.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.3/10（近60日日報酬標準差 2.30%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8358,7 +8358,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 39829180.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.3/10（近60日日報酬標準差 2.31%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8469,7 +8469,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 340468514.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.3/10（近60日日報酬標準差 2.31%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8563,7 +8563,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 26038374.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.3/10（近60日日報酬標準差 2.32%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8688,7 +8688,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 814492662.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.2/10（近60日日報酬標準差 2.33%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8814,7 +8814,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 79902566.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.2/10（近60日日報酬標準差 2.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -8932,7 +8932,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 24932176.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.1/10（近60日日報酬標準差 2.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9042,7 +9042,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 126434117.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.1/10（近60日日報酬標準差 2.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9167,7 +9167,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 28066755.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.0/10（近60日日報酬標準差 2.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9292,7 +9292,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 20971456.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.0/10（近60日日報酬標準差 2.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9417,7 +9417,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 38459476.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.0/10（近60日日報酬標準差 2.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9542,7 +9542,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 597981629.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.0/10（近60日日報酬標準差 2.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9667,7 +9667,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 130106290.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.9/10（近60日日報酬標準差 2.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9792,7 +9792,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 143627569.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.9/10（近60日日報酬標準差 2.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -9917,7 +9917,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 291415109.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.9/10（近60日日報酬標準差 2.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10043,7 +10043,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 419692373.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.8/10（近60日日報酬標準差 2.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10152,7 +10152,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 63815013.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.8/10（近60日日報酬標準差 2.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10277,7 +10277,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 23318545.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.7/10（近60日日報酬標準差 2.51%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10405,7 +10405,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 30174863.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.7/10（近60日日報酬標準差 2.52%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10515,7 +10515,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 146966840.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.7/10（近60日日報酬標準差 2.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10640,7 +10640,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 117029259.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.6/10（近60日日報酬標準差 2.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10765,7 +10765,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 21244489.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.6/10（近60日日報酬標準差 2.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -10891,7 +10891,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 76587810.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.5/10（近60日日報酬標準差 2.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11002,7 +11002,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 49761271.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.5/10（近60日日報酬標準差 2.65%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11096,7 +11096,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 78087359.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.4/10（近60日日報酬標準差 2.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11221,7 +11221,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 49750363.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.4/10（近60日日報酬標準差 2.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11346,7 +11346,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 128827937.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.4/10（近60日日報酬標準差 2.67%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11471,7 +11471,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 103375430.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.4/10（近60日日報酬標準差 2.68%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11596,7 +11596,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 46146556.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.3/10（近60日日報酬標準差 2.68%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11725,7 +11725,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 349018555.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.3/10（近60日日報酬標準差 2.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11822,7 +11822,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 104184799.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.2/10（近60日日報酬標準差 2.71%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -11934,7 +11934,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 264877868.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.2/10（近60日日報酬標準差 2.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12028,7 +12028,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1903101952.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.2/10（近60日日報酬標準差 2.78%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12153,7 +12153,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1133080458.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.1/10（近60日日報酬標準差 2.78%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12278,7 +12278,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 95103268.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.1/10（近60日日報酬標準差 2.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12405,7 +12405,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 35308831.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.1/10（近60日日報酬標準差 2.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12499,7 +12499,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 213816432.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.1/10（近60日日報酬標準差 2.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12626,7 +12626,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 131799196.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.1/10（近60日日報酬標準差 2.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12723,7 +12723,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 22876009.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.0/10（近60日日報酬標準差 2.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12833,7 +12833,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 97649326.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.0/10（近60日日報酬標準差 2.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -12958,7 +12958,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 32657628.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.9/10（近60日日報酬標準差 2.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13083,7 +13083,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 34284290.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.9/10（近60日日報酬標準差 2.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13209,7 +13209,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1040804499.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.9/10（近60日日報酬標準差 2.98%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13319,7 +13319,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 112458157.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.8/10（近60日日報酬標準差 2.98%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13431,7 +13431,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2139523996.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.8/10（近60日日報酬標準差 3.00%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13541,7 +13541,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 659711354.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.8/10（近60日日報酬標準差 3.06%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13667,7 +13667,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 64154050.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.7/10（近60日日報酬標準差 3.08%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13778,7 +13778,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 139587460.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.7/10（近60日日報酬標準差 3.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13874,7 +13874,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 42496288.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.7/10（近60日日報酬標準差 3.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -13968,7 +13968,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 182067133.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.7/10（近60日日報酬標準差 3.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14094,7 +14094,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 105956557.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.7/10（近60日日報酬標準差 3.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14204,7 +14204,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1711255039.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.6/10（近60日日報酬標準差 3.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14315,7 +14315,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 369316186.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.6/10（近60日日報酬標準差 3.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14409,7 +14409,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 245538173.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.6/10（近60日日報酬標準差 3.19%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14535,7 +14535,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2039042202.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.6/10（近60日日報酬標準差 3.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14645,7 +14645,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 799983355.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.5/10（近60日日報酬標準差 3.27%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14757,7 +14757,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 172079482.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.5/10（近60日日報酬標準差 3.28%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14867,7 +14867,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9558089415.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.5/10（近60日日報酬標準差 3.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -14995,7 +14995,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 47280263.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.4/10（近60日日報酬標準差 3.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15105,7 +15105,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 46853675.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.4/10（近60日日報酬標準差 3.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15230,7 +15230,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 708797230.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.4/10（近60日日報酬標準差 3.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15357,7 +15357,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 53671540.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.4/10（近60日日報酬標準差 3.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15451,7 +15451,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1882162119.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.4/10（近60日日報酬標準差 3.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15580,7 +15580,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 74018494.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.3/10（近60日日報酬標準差 3.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15676,7 +15676,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1017296529.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.3/10（近60日日報酬標準差 3.51%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15775,7 +15775,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 497769126.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.3/10（近60日日報酬標準差 3.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -15900,7 +15900,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 39374136.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.3/10（近60日日報酬標準差 3.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16026,7 +16026,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1483953922.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.2/10（近60日日報酬標準差 3.56%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16138,7 +16138,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 50950464.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.2/10（近60日日報酬標準差 3.58%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16248,7 +16248,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 458430674.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.2/10（近60日日報酬標準差 3.60%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16373,7 +16373,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 50148703.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.2/10（近60日日報酬標準差 3.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16500,7 +16500,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 121369841.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.1/10（近60日日報酬標準差 3.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16595,7 +16595,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 75761609.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.1/10（近60日日報酬標準差 3.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16704,7 +16704,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 49127587.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.1/10（近60日日報酬標準差 3.67%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16829,7 +16829,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 89378877.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.0/10（近60日日報酬標準差 3.70%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -16954,7 +16954,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1539323182.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.0/10（近60日日報酬標準差 3.76%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17079,7 +17079,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 10105537211.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.0/10（近60日日報酬標準差 3.78%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17204,7 +17204,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 59733095.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.0/10（近60日日報酬標準差 3.79%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17330,7 +17330,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 36937737.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.0/10（近60日日報酬標準差 3.80%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17439,7 +17439,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 30485762.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.9/10（近60日日報酬標準差 3.80%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17567,7 +17567,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 35365448.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.9/10（近60日日報酬標準差 3.82%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17680,7 +17680,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 352736025.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.9/10（近60日日報酬標準差 3.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17793,7 +17793,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 279079668.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.9/10（近60日日報酬標準差 3.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -17903,7 +17903,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1236173118.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.9/10（近60日日報酬標準差 3.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18028,7 +18028,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 21528779761.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.9/10（近60日日報酬標準差 3.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18155,7 +18155,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 51424893.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.8/10（近60日日報酬標準差 3.87%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18249,7 +18249,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 81464036.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.8/10（近60日日報酬標準差 3.87%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18374,7 +18374,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 195087419.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.8/10（近60日日報酬標準差 3.88%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18499,7 +18499,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 101855954.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.8/10（近60日日報酬標準差 3.91%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18626,7 +18626,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 462789233.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.7/10（近60日日報酬標準差 3.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18724,7 +18724,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 359899479.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.7/10（近60日日報酬標準差 3.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18818,7 +18818,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 770301041.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.7/10（近60日日報酬標準差 3.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -18943,7 +18943,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1013690660.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.6/10（近60日日報酬標準差 3.98%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19068,7 +19068,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 233789737.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.6/10（近60日日報酬標準差 4.01%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19193,7 +19193,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 255953266.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.6/10（近60日日報酬標準差 4.02%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19320,7 +19320,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 36155757.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.5/10（近60日日報酬標準差 4.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19414,7 +19414,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 23790790.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.5/10（近60日日報酬標準差 4.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19539,7 +19539,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2089460644.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.5/10（近60日日報酬標準差 4.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19666,7 +19666,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 86702307.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.5/10（近60日日報酬標準差 4.12%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19763,7 +19763,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 106688307.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.5/10（近60日日報酬標準差 4.15%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19873,7 +19873,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 90920819.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.4/10（近60日日報酬標準差 4.16%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -19998,7 +19998,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7057912174.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.4/10（近60日日報酬標準差 4.16%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20126,7 +20126,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 72626395.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.4/10（近60日日報酬標準差 4.17%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20239,7 +20239,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 25057376.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.4/10（近60日日報酬標準差 4.20%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20349,7 +20349,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 336589271.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.3/10（近60日日報酬標準差 4.22%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20477,7 +20477,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1013818176.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.3/10（近60日日報酬標準差 4.24%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20587,7 +20587,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1626326854.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.3/10（近60日日報酬標準差 4.24%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20715,7 +20715,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1064373616.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.3/10（近60日日報酬標準差 4.26%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20825,7 +20825,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 451414021.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.3/10（近60日日報酬標準差 4.27%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -20950,7 +20950,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 11512220501.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.2/10（近60日日報酬標準差 4.29%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21075,7 +21075,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 79308976.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.2/10（近60日日報酬標準差 4.29%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21203,7 +21203,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 125305717.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.2/10（近60日日報酬標準差 4.32%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21316,7 +21316,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 431397332.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.2/10（近60日日報酬標準差 4.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21426,7 +21426,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 207729949.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.1/10（近60日日報酬標準差 4.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21551,7 +21551,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7982206079.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.1/10（近60日日報酬標準差 4.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21677,7 +21677,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1300528058.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.1/10（近60日日報酬標準差 4.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21790,7 +21790,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 22799536.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.1/10（近60日日報酬標準差 4.39%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -21884,7 +21884,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 477840431.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.1/10（近60日日報酬標準差 4.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22013,7 +22013,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 965780421.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.0/10（近60日日報酬標準差 4.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22107,7 +22107,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 66841148.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.0/10（近60日日報酬標準差 4.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22235,7 +22235,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 145952228.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.0/10（近60日日報酬標準差 4.50%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22347,7 +22347,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 222537621.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.0/10（近60日日報酬標準差 4.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22441,7 +22441,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 204606024.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.0/10（近60日日報酬標準差 4.54%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22568,7 +22568,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 278388269.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.9/10（近60日日報酬標準差 4.54%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22662,7 +22662,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 62497091.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.9/10（近60日日報酬標準差 4.57%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22787,7 +22787,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 25866263121.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.9/10（近60日日報酬標準差 4.59%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -22915,7 +22915,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 133975745.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.9/10（近60日日報酬標準差 4.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23026,7 +23026,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6819449677.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.8/10（近60日日報酬標準差 4.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23139,7 +23139,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3885488604.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.8/10（近60日日報酬標準差 4.63%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23234,7 +23234,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1249736009.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.8/10（近60日日報酬標準差 4.65%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23343,7 +23343,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 110047474.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.8/10（近60日日報酬標準差 4.68%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23471,7 +23471,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 6254870323.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.8/10（近60日日報酬標準差 4.71%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23581,7 +23581,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 180424536.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.7/10（近60日日報酬標準差 4.72%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23706,7 +23706,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 956328774.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.7/10（近60日日報酬標準差 4.73%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23833,7 +23833,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 27024780.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.7/10（近60日日報酬標準差 4.75%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -23927,7 +23927,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 371113792.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.7/10（近60日日報酬標準差 4.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24054,7 +24054,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 70672310.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.7/10（近60日日報酬標準差 4.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24151,7 +24151,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2664067731.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.6/10（近60日日報酬標準差 4.84%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24261,7 +24261,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 168094769.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.6/10（近60日日報酬標準差 4.87%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24386,7 +24386,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3812379002.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.6/10（近60日日報酬標準差 4.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24511,7 +24511,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7104311534.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.6/10（近60日日報酬標準差 4.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24640,7 +24640,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 514935079.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.6/10（近60日日報酬標準差 4.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24737,7 +24737,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 8712807900.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.5/10（近60日日報酬標準差 4.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24847,7 +24847,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1501535532.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.5/10（近60日日報酬標準差 5.06%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -24972,7 +24972,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3228991981.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.5/10（近60日日報酬標準差 5.12%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25097,7 +25097,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1573542734.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.5/10（近60日日報酬標準差 5.12%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25224,7 +25224,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 660461095.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.4/10（近60日日報酬標準差 5.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25318,7 +25318,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3522048758.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.4/10（近60日日報酬標準差 5.28%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25443,7 +25443,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1089822566.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.4/10（近60日日報酬標準差 5.31%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25568,7 +25568,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 22624312804.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.4/10（近60日日報酬標準差 5.31%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25694,7 +25694,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 56907429.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.4/10（近60日日報酬標準差 5.32%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25803,7 +25803,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 21714176956.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.4/10（近60日日報酬標準差 5.33%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -25932,7 +25932,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 511224980.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.3/10（近60日日報酬標準差 5.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26026,7 +26026,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6890243284.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.3/10（近60日日報酬標準差 5.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26152,7 +26152,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6436693337.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.3/10（近60日日報酬標準差 5.41%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26265,7 +26265,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 110859607.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.3/10（近60日日報酬標準差 5.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26359,7 +26359,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3130146206.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.3/10（近60日日報酬標準差 5.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26485,7 +26485,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 108618467.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.2/10（近60日日報酬標準差 5.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26600,7 +26600,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 21897026663.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.2/10（近60日日報酬標準差 5.58%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26725,7 +26725,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4600528360.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.2/10（近60日日報酬標準差 5.72%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26851,7 +26851,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 34152926028.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.2/10（近60日日報酬標準差 5.73%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -26961,7 +26961,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 19940122992.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 5.91%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27071,7 +27071,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 707696185.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 5.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27183,7 +27183,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 75020666.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 6.03%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27294,7 +27294,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 438419933.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 6.17%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27406,7 +27406,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2167321698.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 6.23%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27517,7 +27517,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 8209325240.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 6.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27626,7 +27626,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7542538908.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.1/10（近60日日報酬標準差 6.63%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27751,7 +27751,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2265850.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 10.0/10（近60日日報酬標準差 0.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27879,7 +27879,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1099549.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 10.0/10（近60日日報酬標準差 0.46%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -27990,7 +27990,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1143700.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 10.0/10（近60日日報酬標準差 0.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28119,7 +28119,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7381670.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 10.0/10（近60日日報酬標準差 0.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28215,7 +28215,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4191360.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 10.0/10（近60日日報酬標準差 0.56%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28342,7 +28342,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3731226.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 10.0/10（近60日日報酬標準差 0.58%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28470,7 +28470,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2852475.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.9/10（近60日日報酬標準差 0.59%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28585,7 +28585,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2206042.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.9/10（近60日日報酬標準差 0.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28681,7 +28681,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1273817.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.8/10（近60日日報酬標準差 0.63%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28808,7 +28808,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3819565.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.8/10（近60日日報酬標準差 0.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -28935,7 +28935,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7511170.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.8/10（近60日日報酬標準差 0.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29062,7 +29062,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6730677.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.8/10（近60日日報酬標準差 0.67%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29192,7 +29192,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1094092.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.8/10（近60日日報酬標準差 0.67%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29306,7 +29306,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 18485961.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.7/10（近60日日報酬標準差 0.68%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29402,7 +29402,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1873966.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.7/10（近60日日報酬標準差 0.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29533,7 +29533,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1191006.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.7/10（近60日日報酬標準差 0.71%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29633,7 +29633,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 4231800.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.7/10（近60日日報酬標準差 0.72%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29729,7 +29729,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1848100.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.7/10（近60日日報酬標準差 0.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29856,7 +29856,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 839529.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.6/10（近60日日報酬標準差 0.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -29985,7 +29985,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 895909.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.6/10（近60日日報酬標準差 0.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30083,7 +30083,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1513833.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.6/10（近60日日報酬標準差 0.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30179,7 +30179,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2059033.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.6/10（近60日日報酬標準差 0.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30309,7 +30309,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 495917.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.6/10（近60日日報酬標準差 0.78%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30423,7 +30423,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2667020.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.6/10（近60日日報酬標準差 0.79%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30519,7 +30519,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1367297.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.5/10（近60日日報酬標準差 0.80%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30649,7 +30649,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 644025.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.5/10（近60日日報酬標準差 0.80%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30764,7 +30764,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2773259.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.5/10（近60日日報酬標準差 0.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -30876,7 +30876,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1079504.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.5/10（近60日日報酬標準差 0.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31005,7 +31005,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3114933.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.5/10（近60日日報酬標準差 0.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31101,7 +31101,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1570349.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.4/10（近60日日報酬標準差 0.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31229,7 +31229,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1136320.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.4/10（近60日日報酬標準差 0.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31346,7 +31346,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6087222.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.4/10（近60日日報酬標準差 0.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31473,7 +31473,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2117432.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.4/10（近60日日報酬標準差 0.85%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31602,7 +31602,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 5008208.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.3/10（近60日日報酬標準差 0.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31700,7 +31700,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1527610.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.3/10（近60日日報酬標準差 0.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31796,7 +31796,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1746582.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.3/10（近60日日報酬標準差 0.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -31925,7 +31925,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 518206.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.3/10（近60日日報酬標準差 0.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32024,7 +32024,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3779400.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.3/10（近60日日報酬標準差 0.89%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32136,7 +32136,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1249361.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.2/10（近60日日報酬標準差 0.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32265,7 +32265,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3691625.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.2/10（近60日日報酬標準差 0.91%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32361,7 +32361,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1990001.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.2/10（近60日日報酬標準差 0.91%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32488,7 +32488,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1190649.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.2/10（近60日日報酬標準差 0.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32615,7 +32615,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1007471.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.2/10（近60日日報酬標準差 0.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32742,7 +32742,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4494839.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.1/10（近60日日報酬標準差 0.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32869,7 +32869,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2435826.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.1/10（近60日日報酬標準差 0.92%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -32996,7 +32996,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13468561.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.1/10（近60日日報酬標準差 0.93%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33125,7 +33125,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 493770.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.1/10（近60日日報酬標準差 0.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33221,7 +33221,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 269368.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.1/10（近60日日報酬標準差 0.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33350,7 +33350,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1501489.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 9.0/10（近60日日報酬標準差 0.97%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33450,7 +33450,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 16453999.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.9/10（近60日日報酬標準差 1.00%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33546,7 +33546,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1255669.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.9/10（近60日日報酬標準差 1.01%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33673,7 +33673,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13679719.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.9/10（近60日日報酬標準差 1.01%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33800,7 +33800,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4247834.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.9/10（近60日日報酬標準差 1.01%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -33927,7 +33927,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3537188.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.9/10（近60日日報酬標準差 1.02%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34057,7 +34057,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 348087.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.8/10（近60日日報酬標準差 1.03%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34169,7 +34169,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6550093.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.8/10（近60日日報酬標準差 1.03%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34296,7 +34296,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13926450.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.8/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34425,7 +34425,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2156345.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.8/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34522,7 +34522,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3874228.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.8/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34639,7 +34639,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 17430740.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.8/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34770,7 +34770,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 514492.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.7/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34868,7 +34868,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9905224.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.7/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -34964,7 +34964,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4015582.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.7/10（近60日日報酬標準差 1.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35091,7 +35091,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 15053562.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.7/10（近60日日報酬標準差 1.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35219,7 +35219,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 395358.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.7/10（近60日日報酬標準差 1.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35340,7 +35340,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 12612040.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.6/10（近60日日報酬標準差 1.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35437,7 +35437,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 683867.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.6/10（近60日日報酬標準差 1.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35554,7 +35554,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2420879.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.6/10（近60日日報酬標準差 1.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35681,7 +35681,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6867892.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.6/10（近60日日報酬標準差 1.06%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35808,7 +35808,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2916467.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.6/10（近60日日報酬標準差 1.06%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -35936,7 +35936,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 345500.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.5/10（近60日日報酬標準差 1.07%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36056,7 +36056,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 9376315.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.5/10（近60日日報酬標準差 1.09%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36168,7 +36168,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 5997292.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.5/10（近60日日報酬標準差 1.09%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36295,7 +36295,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4578228.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.5/10（近60日日報酬標準差 1.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36423,7 +36423,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 477210.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.4/10（近60日日報酬標準差 1.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36534,7 +36534,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6798306.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.4/10（近60日日報酬標準差 1.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36665,7 +36665,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 544640.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.4/10（近60日日報酬標準差 1.12%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36761,7 +36761,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1839817.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.4/10（近60日日報酬標準差 1.12%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -36888,7 +36888,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7010440.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.3/10（近60日日報酬標準差 1.12%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37016,7 +37016,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2691560.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.3/10（近60日日報酬標準差 1.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37127,7 +37127,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3879570.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.3/10（近60日日報酬標準差 1.13%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37256,7 +37256,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7530181.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.2/10（近60日日報酬標準差 1.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37352,7 +37352,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1802127.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.2/10（近60日日報酬標準差 1.15%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37479,7 +37479,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3270581.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.2/10（近60日日報酬標準差 1.15%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37606,7 +37606,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3876672.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.2/10（近60日日報酬標準差 1.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37735,7 +37735,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 655947.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.1/10（近60日日報酬標準差 1.19%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37831,7 +37831,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7516653.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.1/10（近60日日報酬標準差 1.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -37958,7 +37958,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1734022.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.1/10（近60日日報酬標準差 1.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38085,7 +38085,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1356653.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.0/10（近60日日報酬標準差 1.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38212,7 +38212,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 602230.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.0/10（近60日日報酬標準差 1.22%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38342,7 +38342,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 152282.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.0/10（近60日日報酬標準差 1.22%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38454,7 +38454,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 743175.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 8.0/10（近60日日報酬標準差 1.23%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38585,7 +38585,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 434862.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.9/10（近60日日報酬標準差 1.23%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38684,7 +38684,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1302108.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.9/10（近60日日報酬標準差 1.25%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38797,7 +38797,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 12985897.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.9/10（近60日日報酬標準差 1.26%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -38914,7 +38914,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 943840.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.9/10（近60日日報酬標準差 1.26%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39043,7 +39043,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1264294.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.8/10（近60日日報酬標準差 1.26%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39139,7 +39139,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 14376600.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.8/10（近60日日報酬標準差 1.29%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39266,7 +39266,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3073872.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.8/10（近60日日報酬標準差 1.30%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39393,7 +39393,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6365160.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.8/10（近60日日報酬標準差 1.31%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39520,7 +39520,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 983032.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.7/10（近60日日報酬標準差 1.31%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39651,7 +39651,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 7647387.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.7/10（近60日日報酬標準差 1.32%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39751,7 +39751,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3246886.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.7/10（近60日日報酬標準差 1.32%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39853,7 +39853,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 236429.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.7/10（近60日日報酬標準差 1.32%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -39982,7 +39982,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3689801.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.7/10（近60日日報酬標準差 1.33%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40078,7 +40078,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 10615654.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.6/10（近60日日報酬標準差 1.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40208,7 +40208,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 19425464.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.6/10（近60日日報酬標準差 1.34%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40320,7 +40320,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3436180.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.6/10（近60日日報酬標準差 1.35%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40447,7 +40447,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 12496932.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.6/10（近60日日報酬標準差 1.36%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40575,7 +40575,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 11496103.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.6/10（近60日日報酬標準差 1.36%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40688,7 +40688,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 484379.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.5/10（近60日日報酬標準差 1.36%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40784,7 +40784,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 345695.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.5/10（近60日日報酬標準差 1.36%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -40911,7 +40911,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 12210530.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.5/10（近60日日報酬標準差 1.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41040,7 +41040,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1149252.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.5/10（近60日日報酬標準差 1.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41136,7 +41136,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 362204.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.5/10（近60日日報酬標準差 1.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41263,7 +41263,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 757661.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.4/10（近60日日報酬標準差 1.38%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41391,7 +41391,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1263047.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.4/10（近60日日報酬標準差 1.38%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41508,7 +41508,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 19502670.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.4/10（近60日日報酬標準差 1.38%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41637,7 +41637,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 388899.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.3/10（近60日日報酬標準差 1.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41733,7 +41733,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 12136922.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.3/10（近60日日報酬標準差 1.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41860,7 +41860,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1512873.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.3/10（近60日日報酬標準差 1.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -41987,7 +41987,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 19799510.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.3/10（近60日日報酬標準差 1.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42116,7 +42116,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2552684.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.2/10（近60日日報酬標準差 1.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42215,7 +42215,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1128750.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.2/10（近60日日報酬標準差 1.46%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42329,7 +42329,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 492983.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.2/10（近60日日報酬標準差 1.46%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42425,7 +42425,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 751432.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.2/10（近60日日報酬標準差 1.46%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42552,7 +42552,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 771281.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.1/10（近60日日報酬標準差 1.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42682,7 +42682,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3246205.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.1/10（近60日日報酬標準差 1.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42795,7 +42795,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3748963.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.1/10（近60日日報酬標準差 1.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -42906,7 +42906,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2170697.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.1/10（近60日日報酬標準差 1.49%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43033,7 +43033,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2574947.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.0/10（近60日日報酬標準差 1.49%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43163,7 +43163,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2177902.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.0/10（近60日日報酬標準差 1.51%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43275,7 +43275,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4324018.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.0/10（近60日日報酬標準差 1.51%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43405,7 +43405,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 939700.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 7.0/10（近60日日報酬標準差 1.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43517,7 +43517,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7896068.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.9/10（近60日日報酬標準差 1.54%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43646,7 +43646,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6541850.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.8/10（近60日日報酬標準差 1.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43742,7 +43742,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 12096905.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.8/10（近60日日報酬標準差 1.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43869,7 +43869,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 213316.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.7/10（近60日日報酬標準差 1.56%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -43998,7 +43998,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1134476.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.7/10（近60日日報酬標準差 1.56%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44103,7 +44103,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1817400.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.7/10（近60日日報酬標準差 1.57%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44215,7 +44215,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1616854.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.7/10（近60日日報酬標準差 1.58%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44343,7 +44343,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2410122.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.7/10（近60日日報酬標準差 1.59%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44460,7 +44460,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 18626060.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.6/10（近60日日報酬標準差 1.60%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44587,7 +44587,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3549528.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.6/10（近60日日報酬標準差 1.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44714,7 +44714,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 17619823.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.6/10（近60日日報酬標準差 1.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44841,7 +44841,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3769642.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.6/10（近60日日報酬標準差 1.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -44970,7 +44970,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 19422444.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.5/10（近60日日報酬標準差 1.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45069,7 +45069,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1341506.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.5/10（近60日日報酬標準差 1.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45183,7 +45183,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3741487.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.5/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45281,7 +45281,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9674020.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.5/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45377,7 +45377,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13685384.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.5/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45505,7 +45505,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 481666.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.4/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45626,7 +45626,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 4429074.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.4/10（近60日日報酬標準差 1.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45728,7 +45728,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 779422.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.4/10（近60日日報酬標準差 1.65%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45855,7 +45855,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 17994154.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.4/10（近60日日報酬標準差 1.65%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -45982,7 +45982,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 5608443.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.3/10（近60日日報酬標準差 1.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46110,7 +46110,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6116777.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.3/10（近60日日報酬標準差 1.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46223,7 +46223,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3216309.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.3/10（近60日日報酬標準差 1.68%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46319,7 +46319,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3257447.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.2/10（近60日日報酬標準差 1.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46449,7 +46449,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 542773.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.2/10（近60日日報酬標準差 1.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46561,7 +46561,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 11109996.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.2/10（近60日日報酬標準差 1.70%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46688,7 +46688,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 783497.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.1/10（近60日日報酬標準差 1.72%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46815,7 +46815,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2438332.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.1/10（近60日日報酬標準差 1.74%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -46942,7 +46942,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13686424.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.1/10（近60日日報酬標準差 1.74%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47072,7 +47072,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2176044.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.0/10（近60日日報酬標準差 1.75%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47186,7 +47186,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 804887.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.0/10（近60日日報酬標準差 1.75%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47284,7 +47284,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 571554.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 6.0/10（近60日日報酬標準差 1.75%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47383,7 +47383,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2189224.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.9/10（近60日日報酬標準差 1.76%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47498,7 +47498,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1163607.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.9/10（近60日日報酬標準差 1.77%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47588,7 +47588,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 8442172.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.9/10（近60日日報酬標準差 1.78%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47690,7 +47690,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 5547899.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.9/10（近60日日報酬標準差 1.78%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47817,7 +47817,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2582631.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.8/10（近60日日報酬標準差 1.79%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -47947,7 +47947,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1134490.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.8/10（近60日日報酬標準差 1.80%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48060,7 +48060,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 10642581.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.8/10（近60日日報酬標準差 1.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48171,7 +48171,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3703295.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.8/10（近60日日報酬標準差 1.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48298,7 +48298,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13067560.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.8/10（近60日日報酬標準差 1.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48429,7 +48429,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 6139851.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.8/10（近60日日報酬標準差 1.81%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48532,7 +48532,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1940631.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.7/10（近60日日報酬標準差 1.82%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48652,7 +48652,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 532830.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.7/10（近60日日報酬標準差 1.83%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48764,7 +48764,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6246300.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.7/10（近60日日報酬標準差 1.84%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -48891,7 +48891,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 14138883.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.5/10（近60日日報酬標準差 1.86%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49022,7 +49022,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 6668080.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.5/10（近60日日報酬標準差 1.87%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49129,7 +49129,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 6593976.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.5/10（近60日日報酬標準差 1.88%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49217,7 +49217,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1998888.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.4/10（近60日日報酬標準差 1.89%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49316,7 +49316,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2533592.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.4/10（近60日日報酬標準差 1.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49403,7 +49403,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4147553.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.4/10（近60日日報酬標準差 1.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49523,7 +49523,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 4218580.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.4/10（近60日日報酬標準差 1.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49637,7 +49637,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 493693.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.4/10（近60日日報酬標準差 1.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49734,7 +49734,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 478871.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.3/10（近60日日報酬標準差 1.93%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49854,7 +49854,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 12590572.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.3/10（近60日日報酬標準差 1.93%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -49969,7 +49969,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1871565.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.3/10（近60日日報酬標準差 1.93%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50081,7 +50081,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 16139455.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.3/10（近60日日報酬標準差 1.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50211,7 +50211,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 375138.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.2/10（近60日日報酬標準差 1.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50323,7 +50323,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 10410614.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.2/10（近60日日報酬標準差 1.97%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50450,7 +50450,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9327349.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.2/10（近60日日報酬標準差 1.97%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50578,7 +50578,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3542515.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.2/10（近60日日報酬標準差 1.97%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50695,7 +50695,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1588596.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.1/10（近60日日報酬標準差 1.98%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50822,7 +50822,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1002835.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.1/10（近60日日報酬標準差 2.00%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -50949,7 +50949,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1675599.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.1/10（近60日日報酬標準差 2.00%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51078,7 +51078,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1233653.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.0/10（近60日日報酬標準差 2.02%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51174,7 +51174,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 15585011.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.0/10（近60日日報酬標準差 2.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51302,7 +51302,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 662642.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.0/10（近60日日報酬標準差 2.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51417,7 +51417,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 11017106.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.0/10（近60日日報酬標準差 2.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51517,7 +51517,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3099108.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 5.0/10（近60日日報酬標準差 2.06%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51621,7 +51621,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3722279.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.9/10（近60日日報酬標準差 2.07%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51720,7 +51720,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 6251582.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.9/10（近60日日報酬標準差 2.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51834,7 +51834,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 8877362.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.9/10（近60日日報酬標準差 2.10%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -51934,7 +51934,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1178061.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.9/10（近60日日報酬標準差 2.11%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52036,7 +52036,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 832182.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.8/10（近60日日報酬標準差 2.11%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52163,7 +52163,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2901770.1,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.8/10（近60日日報酬標準差 2.14%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52290,7 +52290,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4726896.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.7/10（近60日日報酬標準差 2.15%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52417,7 +52417,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9142961.15,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.6/10（近60日日報酬標準差 2.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52550,7 +52550,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 72025.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.6/10（近60日日報酬標準差 2.18%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52630,7 +52630,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 17785443.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.5/10（近60日日報酬標準差 2.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52760,7 +52760,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1470950.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.5/10（近60日日報酬標準差 2.21%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52872,7 +52872,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 744216.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.5/10（近60日日報酬標準差 2.22%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -52999,7 +52999,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1436536.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.5/10（近60日日報酬標準差 2.23%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53126,7 +53126,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 8191095.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.4/10（近60日日報酬標準差 2.25%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53253,7 +53253,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2532102.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.4/10（近60日日報酬標準差 2.28%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53383,7 +53383,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1083331.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.3/10（近60日日報酬標準差 2.28%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53495,7 +53495,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1339276.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.2/10（近60日日報酬標準差 2.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53622,7 +53622,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 169528.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.2/10（近60日日報酬標準差 2.40%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53751,7 +53751,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 795855.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.2/10（近60日日報酬標準差 2.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53850,7 +53850,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 4083777.65,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.2/10（近60日日報酬標準差 2.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -53962,7 +53962,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 793337.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.1/10（近60日日報酬標準差 2.42%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54092,7 +54092,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 1115140.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.1/10（近60日日報酬標準差 2.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54206,7 +54206,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6730412.35,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.1/10（近60日日報酬標準差 2.43%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54303,7 +54303,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7586098.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 4.0/10（近60日日報酬標準差 2.44%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54414,7 +54414,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13862398.95,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.9/10（近60日日報酬標準差 2.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54541,7 +54541,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 666333.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.9/10（近60日日報酬標準差 2.45%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54668,7 +54668,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1300317.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.8/10（近60日日報酬標準差 2.47%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54796,7 +54796,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6228875.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.8/10（近60日日報酬標準差 2.48%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -54908,7 +54908,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 11949226.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.8/10（近60日日報酬標準差 2.51%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55019,7 +55019,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3459477.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.7/10（近60日日報酬標準差 2.52%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55148,7 +55148,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 18260804.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.7/10（近60日日報酬標準差 2.52%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55246,7 +55246,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4138438.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.6/10（近60日日報酬標準差 2.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55342,7 +55342,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2675193.9,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.6/10（近60日日報酬標準差 2.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55471,7 +55471,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9069822.05,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.6/10（近60日日報酬標準差 2.55%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55570,7 +55570,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3192606.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.5/10（近60日日報酬標準差 2.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55682,7 +55682,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7397462.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.5/10（近60日日報酬標準差 2.61%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55809,7 +55809,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 7900152.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.5/10（近60日日報酬標準差 2.62%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -55937,7 +55937,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1363884.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.5/10（近60日日報酬標準差 2.64%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56057,7 +56057,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 2179524.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.4/10（近60日日報酬標準差 2.67%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56169,7 +56169,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 11867960.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.3/10（近60日日報酬標準差 2.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56296,7 +56296,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3492166.4,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.3/10（近60日日報酬標準差 2.69%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56423,7 +56423,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2987558.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.3/10（近60日日報酬標準差 2.70%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56551,7 +56551,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 953506.3,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.2/10（近60日日報酬標準差 2.74%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56664,7 +56664,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2516462.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.2/10（近60日日報酬標準差 2.74%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56764,7 +56764,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 5249029.75,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.0/10（近60日日報酬標準差 2.88%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56863,7 +56863,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 5145604.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.0/10（近60日日報酬標準差 2.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -56979,7 +56979,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3265508.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 3.0/10（近60日日報酬標準差 2.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57077,7 +57077,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3014715.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.9/10（近60日日報酬標準差 2.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57175,7 +57175,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1350629.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.9/10（近60日日報酬標準差 2.95%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57274,7 +57274,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 88205.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.8/10（近60日日報酬標準差 3.00%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57386,7 +57386,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9913669.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.8/10（近60日日報酬標準差 3.05%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57515,7 +57515,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 969427.5,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.7/10（近60日日報酬標準差 3.07%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57615,7 +57615,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3575585.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.6/10（近60日日報酬標準差 3.23%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57714,7 +57714,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 4544825.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.5/10（近60日日報酬標準差 3.37%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57826,7 +57826,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 9694391.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.5/10（近60日日報酬標準差 3.38%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -57953,7 +57953,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 3591796.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.3/10（近60日日報酬標準差 3.53%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58080,7 +58080,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 2379786.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.2/10（近60日日報酬標準差 3.58%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58210,7 +58210,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 7600413.2,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.1/10（近60日日報酬標準差 3.65%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58325,7 +58325,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 10684270.0,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 2.1/10（近60日日報酬標準差 3.66%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58441,7 +58441,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 3890104.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.8/10（近60日日報酬標準差 3.90%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58545,7 +58545,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 15144495.25,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.7/10（近60日日報酬標準差 3.94%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58641,7 +58641,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 6160619.8,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.7/10（近60日日報酬標準差 3.96%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58770,7 +58770,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 282410.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.6/10（近60日日報酬標準差 4.01%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58866,7 +58866,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 1319656.7,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.6/10（近60日日報酬標準差 4.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -58996,7 +58996,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 19392376.85,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.4/10（近60日日報酬標準差 4.17%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -59109,7 +59109,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 590081.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.2/10（近60日日報酬標準差 4.29%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -59229,7 +59229,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 17717917.6,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 1.2/10（近60日日報酬標準差 4.30%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -59343,7 +59343,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 13174043.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.9/10（近60日日報酬標準差 4.56%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -59443,7 +59443,7 @@
         "earnings_growth": "財報資料過期（最新 2024Q4，落後現在 7 季），未列入計分"
       },
       "liquidity_20d": 972945.45,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.5/10（近60日日報酬標準差 5.04%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
@@ -59545,7 +59545,7 @@
       ],
       "missing_factor_notes": {},
       "liquidity_20d": 4385606.55,
-      "data_asof": "2026-09-29",
+      "data_asof": "2026-09-30",
       "summary": "低波動 0.2/10（近60日日報酬標準差 5.58%）；其餘成分僅供參考、不計分。",
       "score_scheme": "B",
       "factors": {
