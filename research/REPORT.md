@@ -1,3 +1,13 @@
+## 第673輪 · 2026-09-29T22:0x+08:00 · FUT · 維運帽：`驗.九`FinMind子任務已完成（crosscheck 426/426零撞牆，無新變化）、記憶體retry條件仍未解除（2.63GB<3GB）、凍結.二下FUT軌無可做工作單位 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20260929-220037`）。三軌時間戳：FUT round670=09-29 19:0x最舊，依輪替選FUT。
+- 開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（無未開始交辦項）；`grep -c "^- \[!\]"`=14條（與round670~672一致）。
+- 逐一核對14條`- [!]`阻塞項：`驗.九`——`Get-CimInstance Win32_Process`未發現任何`audit_v9`相關行程在跑（round672記錄的crosscheck PID131264已跑完退出）；`research/data/diag_v9_fetch_missing.json`（gitignore）仍為`generated_at=2026-09-29T20:48:17`／`requests_used=426`／`remaining=0`，與round672一致、無新變化，crosscheck FinMind子任務已完成；`git status --short`確認`research/audit_v9_fetch_missing.py`無殘留未commit編輯（round672提到的WIP已由該輪自己的commit`575901a71`併入）。記憶體retry條件本輪實測**2.63GB**（<3GB門檻，較round672的2.76GB略降），驗.九一（`audit_v9_revenue_trace.py`定量分解）仍阻塞，`[自行裁量]`不重試。`data/institutional_history.json`（須用`encoding='utf-8'`讀取，預設`cp950`會`UnicodeDecodeError`）確認`dates`陣列仍20筆、最後日期`20260924`，solid交易日數維持16日；tick累積`ls research/data/ticks/*.parquet`實測仍14/20；其餘12條均未到解除時間。`grep -c "凍結.二解除" PENDING_QUEUE.md`=4，逐行核對其中3行為條件敘述提及、1行為round670心跳文字裡引用「=3」這個數字字串被命中，非實際宣告解除，凍結.二仍生效。
+- 驗證：`trial_registry.py --check` exit=0 PASS（406列，本輪未新增判定）；`is_holdout_consumed()`=True（非本輪動作）；`run_detached.py status` running=0（162筆歷史，無job待收成）；`git status --short`確認十三節限定檔案（backtest/validation/adjust.py/pit.py/trial_registry.py）無殘留未commit編輯。
+- `AWAITING_REVIEW.md`「等待中」表頭「目前：19件」，逐行核對21行（含表頭/分隔線）與19筆資料列一致，本輪未變動。
+- **本輪誠實結論**：驗.九的FinMind子任務已完成、無新進展可記；記憶體retry條件仍未解除；凍結.二允許的四類工作皆已完成或無新內容；FUT軌本身`FUT_LEADS.md`/`STRATEGY_GRAVEYARD.md`確認無清楚剩餘的全新機制候選——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定檔案、不變更正式交易連線。
+- 等待總司令審閱：19件（與`AWAITING_REVIEW.md`表格列數一致）。交辦佇列還剩0條`- [ ]`未開始。下一輪建議選US軌（round671=09-29 20:0x，三軌中最舊），開工前先重新檢查`驗.九`記憶體retry條件是否已回升≥3GB。
+---
 ## 第672輪 · 2026-09-29T21:0x+08:00 · TW · 維運帽：`驗.九`crosscheck FinMind補抓已完成（426/426零撞牆）、瓶頸轉為記憶體<3GB、一與二剩餘分析步驟仍阻塞、凍結.二下TW軌無可做工作單位 · 無判定、N不變
 
 - 取鎖乾淨（cycle `20260929-210037`）。三軌時間戳：TW round669=09-29 18:0x最舊，依輪替選TW。
