@@ -17209,6 +17209,6 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
   FAIL → 如實結案，寫進 STRATEGY_GRAVEYARD，不得提換參數重試。
   兩者都 push 後停下，等 Cowork 核對。紙.一 不得動。
 
-- [ ] **先.四-一 定稿＋SHA256＋TRIALS_LEDGER 預先登記＋存活者偏誤聲明＋commit/push（執行前）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
+- [x] **先.四-一 定稿＋SHA256＋TRIALS_LEDGER 預先登記＋存活者偏誤聲明＋commit/push（執行前）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行） **完成 2026-09-30**：定稿 `docs/PREREG_supply_tightness_FINAL.md`（SHA256=cad8741362daa350d501bf15f2c9bb313132d4be5d3aec52f368681def8f2740，LF 位元組＝git blob）；TRIALS_LEDGER／TRIALS_REGISTRY 預先登記 #405 `supply_tightness_satellite_v1_prereg`（未結案），內含五指標、12 個月落後、前 20 檔等權、遲滯 30、季頻換股日、全期單發＋兩段一致、§4(d) 九關順序、5 個自由參數、存活者偏誤聲明；登記時尚未執行任何回測。此列 commit＋push 後才開始先.四-二。
 - [!] **先.四-二 單發執行（§4(d) 逐關判定＋敏感度＋逐年/兩段）→ `research/data/supply_tightness_result.json`＋TRIALS_LEDGER 判定列**（依賴先.四-一已 push；績效數字印出後不得重跑）　**⛔ 自走中止（2026-09-30 23:04）**：依賴先.四-一（定稿＋SHA256＋TRIALS_LEDGER預先登記＋push）尚未完成；先.四-一標記為（互動視窗），依CLAUDE.md十三節單一寫入者規則不得由DevQueue自走執行，須等互動視窗session完成並push後才能重新評估本項
 - [!] **先.四-三 收尾：PASS→提前進式紙上追蹤方案／FAIL→STRATEGY_GRAVEYARD；push 後停**（紙.一不得動）　**⛔ 自走中止（2026-09-30 23:04）**：依賴先.四-二（單發執行判定結果）尚未完成，先.四-二本身又依賴先.四-一（互動視窗專屬）尚未完成；同一條依賴鏈，須等互動視窗session完成先.四-一與先.四-二後才能重新評估本項
