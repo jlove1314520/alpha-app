@@ -186,3 +186,50 @@ append本輪一行。**交辦佇列還剩0條`- [ ]`未開始**。**等待審閱
 總司令/Cowork明確寫「凍結.二解除」前不解除。完整見`REPORT.md`第678輪
 心跳、`PENDING_QUEUE.md`「金流一.4」「本地AI摘要(Breeze-7B)」條目、
 `research/AWAITING_REVIEW.md`。
+
+---
+**最後更新：2026-09-30T10:0x+08:00（馬拉松第684輪，維運帽）**——取鎖乾淨
+（cycle`20260930-100037`）。開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`
+=0（round683記錄的4條`先.三`子任務已由互動視窗完成並移入
+`AWAITING_REVIEW.md`「等待中」表，本輪核對非馬拉松動作）；`grep -c "^- \[!\]"`
+=13（較round683的15減2：`先.二-三b`／`先.三-二`FinMind 402封鎖已於09:25
+解除，實測`data/rate_limit_state.json`的`last_request_at`已晚於
+`blocked_until`，兩條已由互動視窗從`- [!]`清單移除，非新增交辦）。逐一
+核對13條`- [!]`阻塞項：`金流一.4`實測`data/institutional_history.json`
+原始21筆，經`_solid_dates()`過濾後仍**17個交易日**（20260901~20260929，
+09-30當日資料尚未反映在此檔），20日視窗仍差3個交易日，未解除；
+`外部一改.2`／`研究.c`共用tick累積實測仍**14/20**，未解除；`本地AI摘要
+(Breeze-7B)`四選一仍待總司令裁示，未解除；其餘均等待總司令核准或親自
+操作、或未到解除時間（`紙.一`需10/1，本輪查詢仍09-30）。`grep -c "凍結.
+二解除" PENDING_QUEUE.md`=4，逐行核對皆為條件敘述提及、非實際宣告解除，
+凍結.二仍生效。三軌時間戳：FUT round681=09-30 07:0x（最舊，本輪選定）／
+TW round682=09-30 08:0x／US round683=09-30 09:0x。**逐一核對凍結.二允許
+的四類工作現況**：稽核重跑／驗.二重跑先前輪次已全部完成並登記；資料抓取
+（資料.一已完成300/300，`先.三`為互動視窗自行裁量的獨立工作，已結案待
+審，不代做）；工具修正已由互動視窗commit；`git status --short`確認
+`research/backtest/`／`research/validation/`／`research/adjust.py`／
+`research/pit.py`／`research/trial_registry.py`等十三節限定清單內檔案
+無殘留未commit編輯（輸出為空）。FUT軌本身`FUT_LEADS.md`/`STRATEGY_
+GRAVEYARD.md`回顧：個股期貨橫斷面線、trend/oi組合嘗試、全天
+close-to-close反轉/順勢皆已窮盡並結案，無清楚剩餘的全新機制候選，且
+凍結.二期間本來就不得登記新alpha試驗。驗證：`run_detached.py status`
+running=0（162筆歷史，無job待收成）；`trial_registry.py --check` exit=0
+PASS（406列，本輪未新增判定）。`AWAITING_REVIEW.md`「等待中（目前：
+27件）」，逐行核對（`sed -n '22,49p'`實測27筆資料列）與表頭一致，較
+round683的26件+1（`先.三`結案新增一列）。**本輪誠實結論**：交辦佇列0條
+`- [ ]`；凍結.二允許的四類工作皆已完成或無新內容；13條`- [!]`逐一核對
+均未到解除時間；FUT軌本身查無可推進的新工作單位——依`CLAUDE.md`「零之
+一」白名單第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新
+alpha試驗、不搶碰十三節限定檔案、不代做互動視窗保留項目。未動
+`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定
+清單內任何原始碼（僅讀取核對＋改狀態檔），全程零新增外部API呼叫（純讀
+既有`.json`/`.md`帳本檔案、`git status`/`git log`、`run_detached.py
+status`、`trial_registry.py --check`）。`PROGRESS_HEARTBEAT.jsonl`已
+append本輪一行。**交辦佇列還剩0條`- [ ]`未開始**。**等待審閱：27件**
+（與`AWAITING_REVIEW.md`表格列數一致）。**下一輪任一軌接手**：依輪替
+下一輪建議選TW軌（round682=09-30 08:0x，三軌中最舊）；開工前先重新
+檢查`- [ ]`有無新交辦、`金流一.4`還需3個交易日、`外部一改.2`tick累積
+14/20還差6日、`本地AI摘要(Breeze-7B)`四選一是否已裁示；凍結.二在總
+司令/Cowork明確寫「凍結.二解除」前不解除。完整見`REPORT.md`第684輪
+心跳、`PENDING_QUEUE.md`「金流一.4」「本地AI摘要(Breeze-7B)」條目、
+`research/AWAITING_REVIEW.md`。
