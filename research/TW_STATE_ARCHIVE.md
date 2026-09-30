@@ -2340,3 +2340,29 @@ jsonl`已append本輪一行。**交辦佇列還剩0條`- [ ]`未開始**。**等
 總司令/Cowork明確寫「凍結.二解除」前不解除；`金流一.4`還需4個交易日；
 `外部一改.2`tick累積14/20，還差6日。完整見`REPORT.md`第669輪心跳、
 `PENDING_QUEUE.md`「驗.九」條目、`research/AWAITING_REVIEW.md`。
+
+---
+**最後更新：2026-09-29T21:0x+08:00（馬拉松第672輪，維運帽）**——取鎖乾淨
+（cycle`20260929-210037`）。開工先照「交辦優先於自走」讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（無未開始交辦項），`grep -c "^- \[!\]"`=14條（與
+round669~671一致）。逐一核對14條`- [!]`阻塞項：**`驗.九`狀態有實質變化**
+——讀`research/data/diag_v9_fetch_missing.json`（gitignore）：
+`generated_at=2026-09-29T20:48:17`，`requests_used=426`／`remaining=0`／
+`stopped=null`，crosscheck 511筆FinMind快取補抓**已全數完成、零撞牆**
+（上一輪round671記錄仍253/511卡在額度冷卻）；核對`data/rate_limit_
+state.json`確認`finmind.blocked_until`已於18:24過期、`last_request_at`
+20:47:57為額度解除後的正常請求。**但瓶頸轉移，非全部解除**：二.1「跑完
+並回報受影響股票數與天數」實際要跑的是`research/audit_v8_yf_
+crosscheck.py`（`import factor_ic`→觸發`mem_guard`），本輪`Get-
+CimInstance Win32_OperatingSystem`實測系統可用記憶體**2.76GB**（<3GB
+門檻），執行會被10秒內`os._exit(1)`強制終止；一（定量分解，`audit_v9_
+revenue_trace.py`同樣觸發`mem_guard`）同一原因仍阻塞。`[自行裁量]`：
+不嘗試執行（阻塞成因與先前輪次判定「試了兩次還是失敗」相同——記憶體
+<3GB——重試無新資訊）；發現`research/audit_v9_fetch_missing.py`有
+未commit的WIP修改（非十三節限定檔案，本輪只讀不commit，留給後續
+接手者自行處理，避免覆蓋風險）。retry條件維持不變：記憶體回升≥3GB。
+`institutional_history.json`確認`dates`陣列仍20筆、最後日期`20260924`，
+solid交易日數維持16日；tick累積仍14/20；其餘12條均未到解除時間。
+`凍結.二`仍生效，佇列深度`- [ ]`=0不補alpha試驗湊數。完整見
+`PENDING_QUEUE.md`「驗.九」條目本輪新增段落。
+
