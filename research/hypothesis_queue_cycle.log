@@ -5791,3 +5791,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 Pushed (`df17b7ad8`). This round: no actionable `- [ ]` for the hypothesis_queue track ??the only two remaining pending items (????鈭?.??銝? are single-shot backtest steps explicitly reserved for the interactive window session to avoid duplicate execution. #82 remains paused per the 2026-09-29 directive. Recorded heartbeat only and ended the round.
 ===== Hypothesis-queue cycle end: 2026-09-30 23:22:34 =====
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑28.5分鐘 < 30分鐘門檻
