@@ -17210,5 +17210,5 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
   兩者都 push 後停下，等 Cowork 核對。紙.一 不得動。
 
 - [ ] **先.四-一 定稿＋SHA256＋TRIALS_LEDGER 預先登記＋存活者偏誤聲明＋commit/push（執行前）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
-- [ ] **先.四-二 單發執行（§4(d) 逐關判定＋敏感度＋逐年/兩段）→ `research/data/supply_tightness_result.json`＋TRIALS_LEDGER 判定列**（依賴先.四-一已 push；績效數字印出後不得重跑）
-- [ ] **先.四-三 收尾：PASS→提前進式紙上追蹤方案／FAIL→STRATEGY_GRAVEYARD；push 後停**（紙.一不得動）
+- [!] **先.四-二 單發執行（§4(d) 逐關判定＋敏感度＋逐年/兩段）→ `research/data/supply_tightness_result.json`＋TRIALS_LEDGER 判定列**（依賴先.四-一已 push；績效數字印出後不得重跑）　**⛔ 自走中止（2026-09-30 23:04）**：依賴先.四-一（定稿＋SHA256＋TRIALS_LEDGER預先登記＋push）尚未完成；先.四-一標記為（互動視窗），依CLAUDE.md十三節單一寫入者規則不得由DevQueue自走執行，須等互動視窗session完成並push後才能重新評估本項
+- [!] **先.四-三 收尾：PASS→提前進式紙上追蹤方案／FAIL→STRATEGY_GRAVEYARD；push 後停**（紙.一不得動）　**⛔ 自走中止（2026-09-30 23:04）**：依賴先.四-二（單發執行判定結果）尚未完成，先.四-二本身又依賴先.四-一（互動視窗專屬）尚未完成；同一條依賴鏈，須等互動視窗session完成先.四-一與先.四-二後才能重新評估本項
