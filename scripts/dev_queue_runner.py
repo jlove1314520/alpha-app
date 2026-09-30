@@ -330,7 +330,7 @@ def _entry_key_class(entry: str) -> tuple[str, str]:
 
 
 INLINE_CLASS_TAG = re.compile(r"\*\*[^*]+\*\*\s*(\[研究\]|\[產品\])")
-INLINE_INTERACTIVE_TAG = re.compile(r"\*\*[^*]+\*\*\s*（互動視窗執行")
+INLINE_INTERACTIVE_TAG = re.compile(r"\*\*[^*]+\*\*\s*（互動視窗(?!或)")
 
 
 def item_class(text: str) -> str:
@@ -358,7 +358,18 @@ def item_class(text: str) -> str:
     了DevQueue——跟上面「十二」節那次是同一種形狀（守門員的判準前提，隨
     佇列新增的新寫法而不再成立）。修法：新增`INLINE_INTERACTIVE_TAG`偵測
     這個中文括號寫法，回傳新類別「互動視窗」，由`find_next()`比照「研究」
-    類跳過，讓真正該接手的互動視窗session去讀。"""
+    類跳過，讓真正該接手的互動視窗session去讀。
+
+    2026-09-30（DevQueue cycle 20260930-230102 發現並修復同一形狀的第三個
+    漏洞）：上面9/30當天才修好的`INLINE_INTERACTIVE_TAG`寫死要求後面緊接
+    「執行」兩字，但同一天稍晚新增的`先.四-一`用的是`**先.四-一 ...**
+    （互動視窗；心跳...)`——冒號改成分號、且沒有「執行」二字，`先.二-一`／
+    `先.二-三`則用「（互動視窗完成 2026-09-30」。三個變體只有「（互動視窗」
+    這四個字是共同前綴，「執行」只是眾多可能後綴之一。修法：把規則放寬成
+    只要求「（互動視窗」前綴本身，不管後面接什麼字，但加一個否定後顧
+    `(?!或)`排除掉散文裡「（互動視窗或DevQueue皆可，非單一寫入者限定檔案）」
+    這種明確標示雙方都可接手的措辭（目前這類措辭都不是緊跟在`**代號**`
+    之後，不會誤觸，這裡只是防未來真的有人這樣寫）。"""
     m = INLINE_CLASS_TAG.search(text)
     if m:
         return "研究" if m.group(1) == "[研究]" else "產品"
