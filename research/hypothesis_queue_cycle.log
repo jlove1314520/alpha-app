@@ -5688,3 +5688,11 @@ This round: confirmed `PENDING_QUEUE.md` has no unstarted `- [ ]` delegated item
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
 
 quota_throttle: SKIP: 正常頻率，距上次實跑28.5分鐘 < 30分鐘門檻
+git push 已跳過：偵測到衝突標記於 data/rate_limit_state.json，留給下一輪或人工處理
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Hypothesis-queue cycle start: 2026-09-30 09:21:02 =====
+Error: Exceeded USD budget (5)
+===== Hypothesis-queue cycle end: 2026-09-30 09:25:30 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
