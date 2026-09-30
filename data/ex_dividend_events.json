@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-09-30T08:41:07.226512+08:00",
-    "last_fetch_count": 16,
-    "reductions_generated_at": "2026-09-30T08:41:07.879781+08:00"
+    "generated_at": "2026-09-30T23:50:22.740069+08:00",
+    "last_fetch_count": 15,
+    "reductions_generated_at": "2026-09-30T23:50:23.485265+08:00"
   },
   "events": {
     "01010T": [
@@ -1503,7 +1503,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-09-08",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9782621435594887
       }
     ],
     "1442": [
@@ -2254,6 +2255,17 @@
         "ref_price": 7.06,
         "reason": "彌補虧損",
         "first_seen": "2026-09-24",
+        "applied": false
+      }
+    ],
+    "2323": [
+      {
+        "code": "2323",
+        "resume_date": "2026-10-12",
+        "pre_close": 11.0,
+        "ref_price": 10.88,
+        "reason": "退還股款",
+        "first_seen": "2026-09-30",
         "applied": false
       }
     ]
