@@ -17164,7 +17164,7 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 - [x] **先.二-一 缺日補齊**（互動視窗完成 2026-09-30；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）〔前提更正〕TWSE holidaySchedule 列 1150925 中秋節、1150928 教師節，9/25、9/28 為休市日，無資料可補；缺的只有 9/29，且已由每日 CI 補上，故無須改 `update_price_history.py`／`price_history.json`。自我測試 `scripts/check_0050_continuity.py 2026-09-24 2026-09-29`：實際交易日=[09-24, 09-29]，0050 缺列=[]，PASS（休市日以 TWSE 官方 holidaySchedule 為準）。仍停在 09-24 的 62 檔拆解：上市當日無成交 6、上櫃當日無成交 16、興櫃 39（官方無收盤價）、TAIEX 指數列 1。[提案，待總司令裁示]：興櫃與 TAIEX 是否納入每日價格抓取範圍屬架構變更，本輪未動。
 - [x] **先.二-二 先.一草案修訂**（DevQueue cycle 20260930-070101 接手完成，commit 見下；`docs/PREREG_DRAFT_supply_tightness.md` 已核對逐一涵蓋二.1～4：①價格落後改「近12個月還原報酬產業桶內百分位≤60%」、60日版降為敏感度＋方向一致性要求②判定期間改全期2014-04～2024-12單發＋2014-2019/2020-2024兩段方向一致，取消前段僅管線確認的切法③凍結.二對本方向已解凍註記寫入檔頭④預付設備款因FinMind無此科目、MOPS禁止爬取正式放棄；全文段落均已標「〔待總司令確認〕」，未擅自定案。證據：`git diff` 前後對照，四項修訂內容與裁示原文一一對應，§6清單同步更新為四項待確認事項）
 - [x] **先.二-三 不看報酬前置檢查**（互動視窗完成 2026-09-30；結果寫入草案 `docs/PREREG_DRAFT_supply_tightness.md` §7，程式 `research/precheck_supply_tightness.py`，數字 `research/precheck_supply_tightness_results.json`；不算報酬、未呼叫 `register_trial()`；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）〔結果〕宇宙 1,623 檔、44 個換股日、每日可計分 ≥1,020 檔；五指標兩兩相關無 |r|>0.7（原始最大 0.099、桶內 z 最大 0.076）；池規模（前20%∩價格落後）12 個月版中位數 130（最小 109）、60 日版 132（最小 110），四種定義皆遠高於門檻→可行；「其他」桶占比中位數 7.12%、最大 8.15%；I2 在 2014 年不可算（覆蓋 0），2015 起 60%→2024 年 79%。〔重大發現〕存活者偏誤：2013–2024 非金融非興櫃下市股 92 檔，損益表快取只含 51 檔，缺 41 檔（其他資料集可得：資產負債表 8、月營收 34、價格 40）；已列草案 §6 第 8 項待裁示。〔與裁示不符〕裁示寫缺 216 檔現金流量表，實測缺口為 383 檔（381 無快取＋2 空檔），改用任意後綴快取讀法後再多 27 檔；共補抓 408 檔成功，僅 6008、8287 回空（皆不在 TaiwanStockInfo，資料源無此檔，與報酬無關）。〔其他發現〕`data/listed_universe.json` 只有 active、無法當時點名冊（改用 TaiwanStockInfo＋TaiwanStockDelisting＋價格末日交叉核對）；`research/diag_planb_live_check.py` 已損壞（無關本方向，另案）。[自行裁量] 快取讀取改任意起迄後綴＋排除空檔（檔名起迄不一致，原固定後綴會低估覆蓋）；資產負債表缺口補抓（不在裁示範圍，為讓池規模與覆蓋率不因缺表低估）。等 Cowork 核對。
-- [!] **先.二-三b 資產負債表缺口補抓（BLOCKED）**〔自行裁量〕：232 檔缺口已補 133 檔，1408、3369、6008 回空，6697 起遇 FinMind HTTP 402（2 小時封鎖，`data/rate_limit_state.json`），尚餘 99 檔。解除條件：約 2026-09-30 09:25 後；續抓指令 `python research/backfill_cashflow_gap.py TaiwanStockBalanceSheet`，補完後離線重跑 `python research/precheck_supply_tightness.py` 更新草案 §7.1–7.4。心跳：完成時標 `- [x]` 並 append `research/PROGRESS_HEARTBEAT.jsonl`。
+- [x] **先.二-三b 資產負債表缺口補抓**（完成 2026-09-30 09:37，與先.三-二同一件：FinMind 402 於約 09:26 解除後續抓 101 檔〔99 檔＋4712、4803〕全數成功，缺口歸零；`research/data/` 為 git-ignored；心跳同上）
 
 ## 2026-09-30 總司令裁示【先.三：存活者偏誤探測＋資料補齊＋草案持股數修訂】（原文）
 【先.三：存活者偏誤探測＋資料補齊＋草案持股數修訂】先寫進 PENDING_QUEUE 再動工。本輪不計算任何報酬、不登記試驗。
@@ -17181,8 +17181,8 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 
 完成後 push，停下等 Cowork 核對。紙.一 10/1 照常啟動。
 
-- [ ] **先.三-一 存活者偏誤探測（41檔下市股損益表）**（互動視窗；不算報酬、不登記；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
-- [!] **先.三-二 BS 99檔補抓＋重跑 precheck＋更新§7**（BLOCKED：FinMind 402，約 2026-09-30 09:25 解除；解除即續抓，與先.二-三b 同一件；心跳同上）
-- [ ] **先.三-三 草案§4(c)持股數20檔修訂＋§7.2池規模重跑（每日≥20檔可選）**（標〔待總司令確認〕；心跳同上）
-- [ ] **先.三-四 興櫃不納入價格抓取／TAIEX 不重複（僅記錄結案）**（心跳同上）
-- [ ] **先.三-五 diag_planb_live_check.py 確認無用途後移 archive**（心跳同上）
+- [x] **先.三-一 存活者偏誤探測（41檔下市股損益表）**（完成 2026-09-30 09:27；`research/probe_delisted_fs.py`〔新增，照節流、未觸發 402、不算報酬〕探測結果：**補到 2 檔**（4712：2010-03-31～2024-12-31；4803：2015-12-31～2021-09-30），**39 檔 FinMind 回空**〔清單見草案 §7.6〕；依裁示草案 §5 第 6 項明列「偏誤方向對本策略有利（高估），判讀須從嚴」，**不採 (a) 降階分數**，§6 第 8 項標已裁示；下市股缺口由 41/92 降為 39/92（42.4%）；心跳：見 `research/PROGRESS_HEARTBEAT.jsonl`）
+- [x] **先.三-二 BS 99檔補抓＋重跑 precheck＋更新§7**（完成 2026-09-30 09:41；`python research/backfill_cashflow_gap.py TaiwanStockBalanceSheet` 續抓 101 檔全數成功、`remaining_targets`=0；重跑 `research/precheck_supply_tightness.py`〔離線〕：宇宙 1,625 檔、季表 1,624 檔、每日可計分中位數 1,307／最少 1,060、仍無 |r|>0.7（最大 0.098）、無季表股票由 100 檔降至 1 檔；草案 §7.1–7.7 全面更新；結果 JSON 已更新；心跳同上）
+- [x] **先.三-三 草案§4(c)持股數20檔修訂＋§7.2池規模重跑（每日≥20檔可選）**（完成 2026-09-30；`docs/PREREG_DRAFT_supply_tightness.md` §4(b)組合方式／§4(c)／§4(d)9、11 已改寫：持股規則改「價格落後池中緊縮分數前20檔等權各5%」、遲滯帶改「仍在落後池分數前30名續抱」、自由參數仍計5個〔前20%門檻換成持股數20〕；`research/precheck_supply_tightness.py` 新增 `lagpool_*` 欄位，BS 補齊後重跑：四種落後定義全 44 個換股日落後池最小 622 檔（中位 773.5），遠大於 20 與 30，**§7.2 通過**；先.二版「前20%∩落後」表改標作廢僅留歷史對照；標〔待總司令確認〕；心跳同上）
+- [x] **先.三-四 興櫃不納入價格抓取／TAIEX 不重複（僅記錄結案）**（完成 2026-09-30；`docs/PREREG_DRAFT_supply_tightness.md` §6第9項已補上結案文字：興櫃不納入每日價格抓取、TAIEX其他管線已有不重複抓取，無程式變更；心跳同上）
+- [x] **先.三-五 diag_planb_live_check.py 確認無用途後移 archive**（完成，已於 `e714390c0` `git mv` 至 `research/archive/diag_planb_live_check.py`；心跳同上）

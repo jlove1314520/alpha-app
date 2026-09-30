@@ -1,3 +1,18 @@
+## 2026-09-30（互動視窗，研究帽，【先.三】存活者偏誤探測＋資料補齊＋草案持股數修訂）
+
+等待總司令審閱：27件（新增：先.三）。
+
+**做了什麼**（不算報酬、未登記試驗）：
+1. 先.三-一：新增 `research/probe_delisted_fs.py`，FinMind 402 於約 09:26 解除後對 41 檔缺損益表的下市股逐檔探測（照節流）：**補到 2 檔**（4712、4803），**39 檔回空**。草案 §5 第 6 項明列「偏誤方向對本策略有利（高估），判讀須從嚴」，不採降階分數(a)；§6 第 8 項標已裁示。
+2. 先.三-二：BS 缺口續抓 101 檔全數成功（缺口歸零；同時結案先.二-三b）；重跑 precheck：宇宙 1,625 檔、季表 1,624 檔、每日可計分 ≥1,060、仍無 |r|>0.7（最大 0.098）；草案 §7 全面更新（7.1–7.7）。
+3. 先.三-三：草案 §4(c) 改「價格落後池中緊縮分數最高 20 檔等權各 5%」，遲滯帶改「仍在落後池分數前 30 名續抱」，自由參數仍計 5 個（持股數 20 取代前 20%）；precheck 新增落後池檔數欄位，四種落後定義全 44 個換股日落後池 ≥622 檔（≥20，通過）。皆標〔待總司令確認〕。
+4. 先.三-四：興櫃不納入每日價格抓取；TAIEX 其他管線已有（`research/data/raw/TaiwanStockPrice__TAIEX__*.parquet`），不重複；僅記錄結案。
+5. 先.三-五：`research/diag_planb_live_check.py` 呼叫已移除的 `g.low_vol_from_price_rows`，除歷史文件外無任何引用，已 `git mv` 至 `research/archive/`。
+
+**[自行裁量]**：探測範圍＝precheck 名單中 41 檔（不含興櫃）；4712 無價格快取故實際不進換股日。
+**影響檔案**：`docs/PREREG_DRAFT_supply_tightness.md`、`research/precheck_supply_tightness.py`＋`_results.json`、`research/probe_delisted_fs.py`（新）、`research/archive/diag_planb_live_check.py`（移動）、`PENDING_QUEUE.md`、`research/AWAITING_REVIEW.md`、`research/PROGRESS_HEARTBEAT.jsonl`。
+**下一步**：停下等 Cowork 核對；紙.一 10/1 照常啟動，未動。無 index.html 變更，未跑冒煙測試。
+
 ## 2026-09-30（互動視窗，研究帽，【先.二】缺日補齊＋先.一草案修訂＋不看報酬前置檢查）
 
 等待總司令審閱：26件（新增：先.二）。

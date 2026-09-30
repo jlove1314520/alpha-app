@@ -327,6 +327,12 @@ def main() -> int:
         for tag in ("adj", "raw"):
             for w in ("r12", "r60"):
                 row[f"pool_{w}_{tag}"] = int((top & sc[f"lag_{w}_{tag}"]).sum())
+                lagm = sc[f"lag_{w}_{tag}"]
+                row[f"lagpool_{w}_{tag}"] = int(lagm.sum())
+                # 先.三-三：落後池內緊縮分數排名（1=最緊）；前20檔＝持股、前30名＝遲滯續抱帶
+                rk = sc.loc[lagm, "score"].rank(ascending=False, method="first")
+                row[f"lagpool_top20_{w}_{tag}"] = int((rk <= 20).sum())
+                row[f"lagpool_top30_{w}_{tag}"] = int((rk <= 30).sum())
         row["n_delisted_later_scorable"] = int(sc["delisted"].sum())
         bsz = sc.groupby("bucket").size().sort_values(ascending=False)
         row["bucket_sizes"] = {k: int(v) for k, v in bsz.items()}
@@ -356,6 +362,11 @@ def main() -> int:
                 "dates_lt10": int((s < 10).sum()), "share_lt10": round(float((s < 10).mean()), 3),
                 "feasible": bool(s.median() >= 20 and (s < 10).mean() <= 0.30)}
     pool_summary = {c: feas(c) for c in res.columns if c.startswith("pool_")}
+    lagpool_summary = {c: {"median": float(res[c].median()), "min": int(res[c].min()), "max": int(res[c].max()),
+                           "dates_lt20": int((res[c] < 20).sum())}
+                       for c in res.columns if c.startswith("lagpool_") and not c.startswith("lagpool_top")}
+    lagpool_summary["ok_20_every_date"] = {c: bool((res[c] >= 20).all()) for c in res.columns if c.startswith("lagpool_")
+                                           and not c.startswith("lagpool_top")}
 
     # 覆蓋率（依年）
     res["year"] = res["date"].str[:4]
@@ -401,7 +412,7 @@ def main() -> int:
         "scorable": {"median": float(res["n_scorable"].median()), "min": int(res["n_scorable"].min()),
                      "dates_lt300": res.loc[res["n_scorable"] < 300, "date"].tolist()},
         "corr_raw_spearman_mean": avg_sp.round(3).to_dict(), "corr_bucket_z_spearman_mean": avg_z.round(3).to_dict(),
-        "corr_flags_abs_gt_0.7": flags, "pool_summary": pool_summary, "coverage_by_year": cov_year,
+        "corr_flags_abs_gt_0.7": flags, "pool_summary": pool_summary, "lagpool_summary_先三三": lagpool_summary, "coverage_by_year": cov_year,
         "bucket": {"n_bucket_median": float(res["n_bucket"].median()), "other_share_median": float(res["other_share"].median()),
                    "other_share_max": float(res["other_share"].max()),
                    "last_date_bucket_sizes": rows[-1]["bucket_sizes"], "first_date_bucket_sizes": rows[0]["bucket_sizes"]},
