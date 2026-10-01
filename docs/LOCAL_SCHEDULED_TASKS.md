@@ -77,6 +77,7 @@ powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1 -Reve
 | `AlphaDevQueue` | 開發任務佇列自走輪次 | 每 15 分鐘 ＋ 登入時 | `research/dev_queue_cycle.log` |
 | `AlphaMarathon` | 研究馬拉松自走輪次 | 每 30 分鐘 ＋ 登入時（延遲 5 分） | `research/marathon_cycle.log`、`research/MARATHON_STATE.md` |
 | `AlphaHypothesisQueue` | 假設佇列自走輪次 | 每 30 分鐘 ＋ 登入時（延遲 3 分） | `research/hypothesis_queue_cycle.log` |
+| `AlphaPaperSupplyV2`（**2026-10-01新增，先.五-三**，Interactive／Limited，`[自行裁量]`） | 紙.二：供給緊縮v2前進式紙上追蹤（#407，事後假設非證據，不下任何單）；2026-10-15前不動作，之後每換股視窗逐檔補財報、產生訊號與月末淨值 | 每 1 小時（`scripts/run_paper_supply_v2.ps1`） | `research/data/paper_supply_v2_cycle.log`、`research/data/paper_supply_v2_log.jsonl`（append-only，git-ignored，強制加入） |
 | `AlphaData` | `alpha-data` 每日六大類資料入庫 | 每日 15:30 | `C:\alpha\alpha-data\run.log`、`alpha.db` 各表的 `max(date)` |
 | `AlphaDepCheck` | 相依套件安全性更新檢查 | 每週日 08:00 | `data/dependency_status.json` |
 | `AlphaTdccHolders` | TDCC 集保股權分散表週更（千張大戶，源頭一.2a） | 每週五 20:00 | `research/tdcc_holders_cycle.log`、`data/holders.json`、`research/data/tdcc/*.csv`（本機累積，未入 git） |
