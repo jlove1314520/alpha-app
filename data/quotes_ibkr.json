@@ -1,6 +1,97 @@
 {
-  "connected": false,
-  "error": "連線失敗（IB Gateway可能沒開，或port/防火牆設定不對）：TimeoutError: ",
-  "quotes": {},
-  "fetched_at": "2026-10-01T20:36:11.206357+08:00"
+  "fetched_at": "2026-10-01T20:41:49.388475+08:00",
+  "connected": true,
+  "account_type": "paper",
+  "error": null,
+  "quotes": {
+    "AAPL": {
+      "last": null,
+      "bid": null,
+      "ask": null,
+      "close": null,
+      "change_pct": null,
+      "data_type": "DELAYED",
+      "exchange": "SMART"
+    },
+    "MSFT": {
+      "last": 518.9,
+      "bid": 518.67,
+      "ask": 519.09,
+      "close": 512.9,
+      "change_pct": 1.1698,
+      "data_type": "DELAYED",
+      "exchange": "SMART"
+    },
+    "NVDA": {
+      "last": 230.15,
+      "bid": 230.08,
+      "ask": 230.18,
+      "close": 228.38,
+      "change_pct": 0.775,
+      "data_type": "DELAYED",
+      "exchange": "SMART"
+    },
+    "TSLA": {
+      "last": 356.42,
+      "bid": 356.17,
+      "ask": 356.5,
+      "close": 354.81,
+      "change_pct": 0.4538,
+      "data_type": "DELAYED",
+      "exchange": "SMART"
+    },
+    "GOOGL": {
+      "last": 348.93,
+      "bid": 348.82,
+      "ask": 349.03,
+      "close": 344.08,
+      "change_pct": 1.4096,
+      "data_type": "DELAYED",
+      "exchange": "SMART"
+    },
+    "^DJI": {
+      "last": 50906.05,
+      "bid": null,
+      "ask": null,
+      "close": 51349.9,
+      "change_pct": -0.8644,
+      "data_type": "YAHOO_DELAYED",
+      "exchange": "CME",
+      "label": "道瓊工業指數",
+      "source": "yahoo_fallback"
+    },
+    "^GSPC": {
+      "last": 7651.54,
+      "bid": null,
+      "ask": null,
+      "close": 7670.84,
+      "change_pct": -0.2516,
+      "data_type": "YAHOO_DELAYED",
+      "exchange": "CBOE",
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
+    },
+    "^IXIC": {
+      "last": 26861.064,
+      "bid": null,
+      "ask": null,
+      "close": 26797.541,
+      "change_pct": 0.237,
+      "data_type": "YAHOO_DELAYED",
+      "exchange": "NASDAQ",
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
+    },
+    "^SOX": {
+      "last": 12628.624,
+      "bid": null,
+      "ask": null,
+      "close": 12629.161,
+      "change_pct": -0.0043,
+      "data_type": "YAHOO_DELAYED",
+      "exchange": "PHLX",
+      "label": "費城半導體指數",
+      "source": "yahoo_fallback"
+    }
+  }
 }

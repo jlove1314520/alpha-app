@@ -1,6 +1,24 @@
 {
-  "connected": false,
-  "error": "連線失敗（IB Gateway可能沒開，或port/防火牆設定不對）：TimeoutError: ",
-  "balance": {},
-  "fetched_at": "2026-10-01T20:36:11.206357+08:00"
+  "fetched_at": "2026-10-01T20:41:49.390582+08:00",
+  "connected": true,
+  "account_type": "paper",
+  "error": null,
+  "balance": {
+    "BuyingPower": {
+      "value": "4079230.00",
+      "currency": "USD"
+    },
+    "GrossPositionValue": {
+      "value": "0.00",
+      "currency": "USD"
+    },
+    "NetLiquidation": {
+      "value": "1022444.35",
+      "currency": "USD"
+    },
+    "TotalCashValue": {
+      "value": "1019807.50",
+      "currency": "USD"
+    }
+  }
 }
