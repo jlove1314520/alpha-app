@@ -17214,3 +17214,25 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 - [x] **先.四-三**（互動視窗）收尾：PASS→提前進式紙上追蹤方案／FAIL→STRATEGY_GRAVEYARD；push 後停（紙.一不得動） **完成 2026-10-01**：判定FAIL→如實結案寫入STRATEGY_GRAVEYARD #406（含存活者偏誤聲明「下市股缺 39/92（42.4%），偏誤方向對策略有利，判讀從嚴」），不提換參數重試、不提紙上追蹤方案，紙.一未動、holdout未動；push後停，等Cowork核對。
 
 **2026-09-30 23:0x DevQueue cycle 20260930-230102（維運帽）**：本輪原定取件是`先.四-一`，但複查發現該項自身文字標`（互動視窗；...)`——`；`不是`執行`，`INLINE_INTERACTIVE_TAG`正則只認「（互動視窗執行」，這是同一形狀分類漏洞的第三次重演（前兩次見上方2026-09-23／2026-09-30 011601兩段記錄），已修`scripts/dev_queue_runner.py`（放寬為只認「（互動視窗」前綴＋負向後顧排除「或」字，避免誤吃「互動視窗或DevQueue皆可」這種雙方皆可的散文）。修復後`find_next()`正確跳過`先.四-一`，改指向`先.四-二`；先用`block`暫停並記錄「依賴先.四-一未完成」。**但在本輪查證期間，互動視窗session已並行完成並push `先.四-一`**（commit `31a3d7e2a`/`1c23f9366`，line 17212已標`[x]`且文字明寫「此列commit＋push後才開始先.四-二」）——代表互動視窗正在連續執行`先.四`這條單發鏈，若DevQueue此時搶做`先.四-二`（「只跑一次、印出績效數字後不得重跑」的不可逆單發回測），會與互動視窗形成執行競賽，兩邊都可能各自跑一次同一個「只能跑一次」的判定，其中一次會變成無效的重複執行，違反「單發」的前提。**[自行裁量]**：改為把`先.四-二`／`先.四-三`直接標`（互動視窗）`交還，不由DevQueue解除阻塞後接手執行——不是因為技術上DevQueue不能呼叫`run_backtest()`（CLAUDE.md十三節允許自走軌道呼叫既有函式，只禁止改核心研究檔案原始碼），是因為這條單發鏈的執行權此刻明顯已經在互動視窗手上，插隊執行有真實的重複執行風險，屬於「不確定但可還原」以外的情況（單發執行本身依規格定義為不可逆），選擇不搶、留給正在進行中的一方做完，符合白名單精神但更保守。若總司令認為DevQueue可以接手，可推翻此標記改回`- [ ]`不帶互動視窗標籤。
+
+## 2026-10-01 總司令裁示【先.五：#406 結案確認＋I1–I4 前進式紙上追蹤登記＋Shioaji commit 洪水】（原文）
+總司令 2026-10-01 同意。先寫進 PENDING_QUEUE 再動工。
+
+一、#406 FAIL 結案經 Cowork 核對確認（登記 31a3d7e2 早於執行 deb160a8、SHA256 吻合、關卡順序正確、印績效前修正 panel 截斷屬規則三允許範圍）。關6 試驗數口徑定為常規：一律取兩口徑較大者，不再列待裁示。
+
+二、紙.二（供給緊縮 v2 前進式紙上追蹤，事後假設，非回測）：
+1. 新檔 docs/PREREG_supply_tightness_v2_FORWARD.md：與 PREREG_supply_tightness_FINAL.md 完全相同，唯一差異＝刪除 I5，改為 I1–I4 至少 3 個可得才計分。檔內明寫「本假設源自 #406 登記後之消融結果，非證據，只以前進資料判讀」。計算 SHA256，TRIALS_LEDGER／TRIALS_REGISTRY 新增 #407 前進式事前登記，commit＋push 後才可產生第一筆持股。
+2. 禁止對 v2 跑任何歷史回測，包含 2025-01～2026-09 holdout（holdout 不解鎖）。
+3. 換股日＝法定期限日後第一個交易日，首次 2026-11-16（11/14 為週六）；只用換股日當下 PIT 可得資料；分數前 20 檔等權各 5%、遲滯帶 30 名、隔日開盤價進場、成本同引擎；虛擬資金，不下任何真實單。
+4. 輸出 research/data/paper_supply_v2_log.jsonl（append-only；每次換股記持股、分數、成交價、成本；每月末記淨值與同期 0050 還原淨值）。腳本冪等，可重跑不重複寫入；資料過期或來源失敗只降級警告並記錄，不得補猜。
+5. 判讀：滿 4 季（2027-11 換股日）才首次判讀，只看 Sortino≥0050 與 MDD>−50%；滿 8 季前不得作為真錢依據。追蹤期間不得修改任何定義。
+6. 紙.一 不得動；App 暫不顯示紙.二。
+
+三、Shioaji commit 洪水：10/1 單日 158 個「Shioaji quotes auto-update」commit（9/21～9/30 每天 1 個），於 19:46 一次推上。查出 10/1 起行為改變的原因，改回盤中只寫檔、每日收盤後最多 1 個 commit，避免與 Marathon／DevQueue 搶 git index.lock。不得改寫已推上的歷史。
+
+push 後停下等 Cowork 核對。
+
+- [x] **先.五-一 #406 結案確認（無需動工）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行） **完成 2026-10-01**：Cowork 核對確認；關6 試驗數口徑定為常規（取兩口徑較大者），不再列待裁示。
+- [ ] **先.五-二 紙.二 v2 定稿＋SHA256＋#407 前進式事前登記＋commit/push（產生第一筆持股前）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）新檔 `docs/PREREG_supply_tightness_v2_FORWARD.md`（與 FINAL 唯一差異：刪 I5、I1–I4 至少 3 個可得），註明事後假設非證據；TRIALS_LEDGER／TRIALS_REGISTRY 新增 #407；禁任何歷史回測、holdout 不解鎖。
+- [ ] **先.五-三 紙.二 前進式追蹤腳本（冪等、append-only、降級不補猜）**（互動視窗；依賴先.五-二已 push；心跳：`research/data/paper_supply_v2_log.jsonl` 之 append-only 紀錄＋本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）首次換股日 2026-11-16；紙.一 不得動；App 不顯示。
+- [ ] **先.五-四 Shioaji quotes auto-update commit 洪水根因＋改為盤中只寫檔、收盤後每日最多 1 個 commit**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）不得改寫已推上的歷史；若動 `research/shioaji_quotes.py` 須依七之二重啟並驗證。
