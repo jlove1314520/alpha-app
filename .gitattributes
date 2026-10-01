@@ -1,0 +1,3 @@
+# 2026-10-01 先.六-二：文件一律以 LF 存入／取出，避免 Windows 文字模式寫檔把整份轉成 CRLF（1.5MB 假 diff）
+*.md text eol=lf
+.gitattributes text eol=lf
