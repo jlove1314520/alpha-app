@@ -1,3 +1,31 @@
+## 2026-10-01（互動視窗，維運帽，【先.九：緊急】.md行尾＋workflow防呆＋cron避開整點）
+
+等待總司令審閱：35件（新增「先.九」）。
+
+**先.九-一 .md 行尾 renormalize**：commit b6d766ed。誠實揭露：預期 111 檔，實際只有 1 檔需要改——origin 的 114 個 .md 與 `.gitattributes` 早已是 LF，唯一例外是 `docs/PRICE_HISTORY_STUCK_2024-12-31.md`（CR CR LF，96 個多餘 CR）。`git diff --cached --ignore-cr-at-eol` 只忽略一個行尾 CR，對雙 CR 檔不為空，故改用 `--ignore-space-at-eol` 驗證為空（零內容變更）。push 後在暫存目錄 fresh clone，`git status` 乾淨、全部 .md 為 i/lf w/lf。未改寫已推歷史。
+
+**先.九-二 workflow 防呆**（commit 196d2694a）：market.yml、quotes.yml 重試迴圈在 `git fetch`／rebase 前，news_events.yml、local_schedule_watchdog.yml 在 `git pull --rebase --autostash` 前，加 `git stash push --include-untracked -m ci-leftovers || true`。已 commit 資料不動；五支 workflow 以 yaml.safe_load 全數解析通過。
+
+**先.九-三 cron 避開整點／半點**（同 commit）：
+
+| workflow | 原 cron | 新 cron | 備註 |
+|---|---|---|---|
+| market.yml | 0 9／30 10／30 21（週一至五） | 13 9／41 10／43 21 | 依裁示，台北 17:13／18:41／05:43 |
+| quotes.yml | 0,10,20,30,40,50（四個時段） | 7,17,27,37,47,57（台股收盤時段 5 點為 7,17,27,37） | `[自行裁量]` 避開 :00/:30 與 market 的 :13/:41/:43 |
+| news_events.yml | */30 | 19,49 | `[自行裁量]` 仍每 30 分鐘一次 |
+| local_schedule_watchdog.yml | */30 | 23,53 | `[自行裁量]` 仍每 30 分鐘一次 |
+| audit.yml | 20 15 | 不變 | 本來就不在整點／半點 |
+
+新 cron 只對 push 之後的排定時段生效。10/1 17:00 台北（09:00 UTC）舊 cron 班次 23:25 台北查仍未派發（最近一筆 schedule run 是 10/1 00:39 UTC），已延遲逾 6 小時。派發延遲記錄工具 `scripts/log_dispatch_delay.py`（人工呼叫，不在任何排程內）已備，輸出 `research/dispatch_delay_log.jsonl`。
+
+**先.九-四**：BLOCKED，等 10/2 08:00 台北查 market.yml 有無 10/1 收盤資料成功 run；無則改標「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一。**先.九-五**（新增）：連續 3 個交易日（10/2、10/5、10/6）記錄派發延遲，BLOCKED 等資料累積。
+
+**仍BLOCKED**：先.七-一（待 10/2 09:00 開盤）、先.七-二（待 10/1 17:00 market.yml 班次落地）。
+
+**規則十 allowlist**：本輪未新增任何會改寫 repo 檔案的排程步驟，四支 workflow 的 `git add` 清單不變；`log_dispatch_delay.py` 不在排程內執行。
+
+**未動**：紙.一、紙.二、holdout；未 register_trial。
+
 ## 2026-10-01（互動視窗，研究／開發帽，【先.八】等待期三線並行收尾：一、三完成，二由DevQueue完成）
 
 等待總司令審閱：34件（新增「先.八-一」「先.八-三」；「先.八-二」已於DevQueue輪次計入）。

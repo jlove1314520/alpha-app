@@ -17302,7 +17302,8 @@ push 後停下等 Cowork 核對。
 
 （心跳：完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.九"）
 
-- [ ] **先.九-一 .md 行尾 renormalize（git add --renormalize -- '*.md' .gitattributes；驗證 diff --cached --ignore-cr-at-eol 為空；commit＋push；fresh clone 驗 status 乾淨）**
-- [ ] **先.九-二 四支 workflow 的 push 重試迴圈前加 git stash push --include-untracked -m ci-leftovers || true；YAML 語法驗證**
-- [ ] **先.九-三 cron 避開整點／半點（market.yml 三時段改 13 9／41 10／43 21；其他 workflow 一併錯開並列表）；之後連續3個交易日記錄派發延遲**
-- [ ] **先.九-四 10/2 08:00 台北檢查 market.yml 有無10/1收盤資料成功run；無則標 BLOCKED「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一**
+- [x] **先.九-一 .md 行尾 renormalize**——完成（2026-10-01）。實測：origin 的 114 個 .md 加 .gitattributes 中，只有 `docs/PRICE_HISTORY_STUCK_2024-12-31.md` 一檔行尾不是 LF（CR CR LF，96個多餘CR），其餘早已是 LF，故實際變更 1 檔而非預期 111 檔。`--ignore-cr-at-eol` 只忽略一個行尾CR、對雙CR檔非空，改用 `--ignore-space-at-eol` 驗證為空（零內容變更）。commit b6d766ed 已推，未改寫歷史；push 後 fresh clone `git status` 乾淨、全部 .md 為 i/lf w/lf。**
+- [x] **先.九-二 四支 workflow 加 stash 防呆**——完成（commit 196d2694a）。market.yml／quotes.yml 在重試迴圈的 `git fetch`／rebase 前、news_events.yml／local_schedule_watchdog.yml 在 `git pull --rebase --autostash` 前，加 `git stash push --include-untracked -m ci-leftovers || true`；已 commit 的資料不動。五支 workflow YAML 以 yaml.safe_load 全數解析通過。**
+- [x] **先.九-三 cron 避開整點／半點**——完成（commit 196d2694a，只改排程時間）。market.yml 依裁示改 13 9／41 10／43 21（台北17:13／18:41／05:43）；[自行裁量] quotes.yml 全部改 :07/:17/:27/:37/:47/:57（避開 :00/:30 且避開 market 的 :13/:41/:43）、news_events.yml `*/30` 改 `19,49 * * * *`、local_schedule_watchdog.yml `*/30` 改 `23,53 * * * *`；audit.yml 為 `20 15`，不需改。注意：新 cron 只對 push 之後的排定時段生效。派發延遲記錄工具 `scripts/log_dispatch_delay.py` 已備（見下方先.九-五）。**
+- [!] **先.九-四 10/2 08:00 台北檢查 market.yml 有無10/1收盤資料成功run；無則標 BLOCKED「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一**——BLOCKED（等 2026-10-02 08:00 台北）。2026-10-01 23:25 台北查 `gh run list`：10/1 17:00 台北（09:00 UTC）舊 cron 班次尚未派發（最近一筆 schedule run 是 10/1 00:39 UTC），已延遲逾 6 小時，仍屬等待中，尚未達標 BLOCKED 條件；10/2 08:00 若仍無，改標「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一。
+- [!] **先.九-五 連續3個交易日記錄派發延遲（cron排定→run createdAt）**——BLOCKED（等 2026-10-02、10-05、10-06 三個交易日累積資料）。每個交易日結束後執行 `python scripts/log_dispatch_delay.py --since 2026-10-02`，結果去重 append 到 `research/dispatch_delay_log.jsonl`；三個交易日齊備後回報延遲分佈（對照先.七-三舊 cron 的 4.5~8.6 小時），不另做任何 cron 調整，除非總司令裁示。
