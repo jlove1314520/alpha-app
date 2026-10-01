@@ -17251,7 +17251,7 @@ push 後停下等 Cowork 核對。
 紙.一、holdout 不得動。push 後停下等 Cowork 核對。
 
 - [ ] **先.六-一 紙.二上線前修正（價格來源改 FinMind＋adjust.py 還原、財報就緒規則改覆蓋率計分、自測新增來源切換／79%81%邊界、dry-run）**（心跳：完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）
-- [ ] **先.六-二 PENDING_QUEUE.md 轉回 LF＋.gitattributes＋找出並修正寫入 CRLF 的程式**（心跳同上）
+- [x] **先.六-二 PENDING_QUEUE.md 轉回 LF＋.gitattributes＋找出並修正寫入 CRLF 的程式**（心跳同上） **完成 2026-10-01**：commit `5020ebaa9` 已將 PENDING_QUEUE.md 轉回 LF（本輪覆查：CRLF 計數=0，size 1,535,951 bytes）並新增 `.gitattributes`（`*.md text eol=lf`）；根因＝commit 訊息已記錄「互動視窗以 Windows 文字模式讀寫自動 LF→CRLF」，非 repo 內某支腳本——已核對 `scripts/dev_queue_runner.py` 寫 PENDING_QUEUE.md 用 `write_text(..., newline="\n")`，本就強制 LF，非肇因。該 commit 技術內容已完成，僅此行勾選狀態漏更新，本輪補標。〔發現，記錄不擴大範圍〕本輪順便掃描全 repo 發現另有 48 個 `.md` 檔仍含 CRLF（含 `CLAUDE.md` 本身 1,128 處），`.gitattributes` 的 `*.md text eol=lf` 只對「之後」的 add/commit 生效、不會回溯已入庫內容；是否要對這 48 檔執行 `git add --renormalize .` 屬裁示未涵蓋的範圍（本次裁示字面只限 PENDING_QUEUE.md），不在本輪擅自處理，留待總司令另行裁示。（本行由 hypothesis_queue 軌道補標，取 devqueue 具名鎖執行）
 - [ ] **先.六-三 IBKR commit 洪水修復（內容不變不寫檔不 commit、盤中每30分鐘最多1 commit、停擺告警改讀檔內 checked_at 並實測不誤報）**（心跳同上）
-- [ ] **先.六-四 Shioaji 登入失敗原因查證（10/2 開盤後；不印出任何金鑰憑證）**（心跳同上；若 10/2 前無法驗證則標 `- [!]` BLOCKED＋解除條件）
+- [!] **先.六-四 Shioaji 登入失敗原因查證（10/2 開盤後；不印出任何金鑰憑證）**（心跳同上；若 10/2 前無法驗證則標 `- [!]` BLOCKED＋解除條件） BLOCKED：裁示字面要求「10/2 開盤後」查證，本輪執行時間為 2026-10-01（台北時間），尚未到 10/2 開盤；解除條件＝10/2 台股開盤（09:00 台北）之後。
 - [ ] **先.六-五 adjust.py 檔頭「待裁示」字樣更新，結案 CashIncreaseSubscriptionRate 疑點**（心跳同上）
