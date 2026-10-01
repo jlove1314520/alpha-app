@@ -5,13 +5,18 @@
 
 硬規則（對應 PREREG v2 §8）：
 - 任何持股／分數／績效只能在「換股日當下」產生，不得事後補算過去日期：換股日 < 2026-11-16 一律拒絕；
-  換股日後超過 MAX_LATE 個交易日仍無法產生訊號 → 記 skipped_data_unready，沿用既有持股，不補算。
+  財報達 98% 入庫即換股；換股日後逾 MAX_LATE 個交易日仍未達 98% → 不跳過，改以當下已入庫者計分
+  （未入庫者當季不計分、記錄覆蓋率）；財報或價格覆蓋率 < 80% 才記 skipped_data_unready，沿用既有持股，不補算。
 - 紀錄 research/data/paper_supply_v2_log.jsonl 為 append-only；腳本冪等（每筆事件有 key，已存在即不再寫）。
 - 資料過期或來源失敗只降級成警告並記錄，不得補猜、不得以估計值替代缺失資料。
 - 追蹤期間不得修改任何定義；滿 4 季（2027-11-15 換股日）前報告模式不輸出任何績效數字。
 
-[自行裁量]（見 PROGRESS.md 2026-10-01 紙.二條目）：價格來源用 yfinance（.TW/.TWO），財報用 FinMind 逐檔抓取；
-訊號資訊集為「換股日之前的收盤」、成交日為訊號後第一個交易日開盤；初始虛擬資金 1,000,000 元（只影響顯示，績效與規模無關）。
+[自行裁量]（見 PROGRESS.md 2026-10-01 紙.二／先.六 條目）：
+- 價格與回測同源（先.六-一）：FinMind TaiwanStockPrice 原始價 ＋ research/adjust.py 的事件還原（股利／分割／減資／面額變更，
+  由 adjust._combine_adjustment_events 合併），用於 12 個月落後排名、成交價與淨值；成交開盤價另與 data/price_history.json
+  （官方 TWSE/TPEx 原始開盤）交叉核對，差異 > 0.5% 記警告。yfinance 只作備援，使用時該筆標記 price_source=fallback。
+- 財報用 FinMind 逐檔抓取；訊號資訊集為「換股日之前的收盤」、成交日為訊號後第一個交易日開盤；
+  初始虛擬資金 1,000,000 元（只影響顯示，績效與規模無關）。
 """
 from __future__ import annotations
 
@@ -34,6 +39,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import precheck_supply_tightness as pt  # noqa: E402  只借用 _wide/_grid/FINANCIAL/NON_STOCK，同一份指標定義
 import supply_tightness_core as core  # noqa: E402
+import adjust as adj  # noqa: E402  只借用 _combine_adjustment_events（純函式，與回測同一份還原邏輯）
 from pit import statutory_quarterly_pit_date  # noqa: E402
 
 TZ = timezone(timedelta(hours=8))
@@ -59,6 +65,11 @@ STMT_DS = (("fs", "TaiwanStockFinancialStatements"), ("bs", "TaiwanStockBalanceS
 STMT_START = "2024-01-01"
 REFRESH_BUDGET = 200
 CLOSE_HHMM = (14, 30)
+PRICE_DS = ("TaiwanStockPrice", "TaiwanStockDividend", "TaiwanStockCapitalReductionReferencePrice")
+EVENT_DS_ALL = ("TaiwanStockSplitPrice", "TaiwanStockParValueChange")
+PRICE_START = "2025-01-01"
+XCHECK_TOL = 0.005
+PRICE_HISTORY_PATH = HERE.parent / "data" / "price_history.json"
 NOTICE = "紙.二為事後假設的前進式追蹤，非證據；滿 8 季前不得作為真錢依據。"
 
 
@@ -402,18 +413,159 @@ def ds_settled(df, mtime, period: pd.Period, D: pd.Timestamp) -> bool:
     return mtime is not None and mtime >= cutoff
 
 
+def adjust_bars(raw, div, spl, cr, pv):
+    """FinMind 原始日線＋事件表 → bars。Open/High/Low/Close 為原始價；Adj Close＝原始收盤×累計還原因子。
+    還原事件（股利／分割／減資／面額變更）由 adjust._combine_adjustment_events 合併，累乘方式與
+    precheck_supply_tightness.adjusted_close（回測所用）逐行相同。無有效價格回傳 None。"""
+    if raw is None or len(raw) == 0 or "date" not in raw.columns:
+        return None
+    r = raw.sort_values("date").drop_duplicates("date", keep="last").reset_index(drop=True)
+    dates = r["date"].astype(str).tolist()
+    close = dict(zip(dates, pd.to_numeric(r["close"], errors="coerce").astype(float)))
+    div, spl, cr, pv = (x if x is not None else pd.DataFrame() for x in (div, spl, cr, pv))
+    fac = np.ones(len(r))
+    if not (div.empty and spl.empty and cr.empty and pv.empty):
+        ev = adj._combine_adjustment_events(div, spl, cr, pv, close, dates)
+        if len(ev):
+            d_arr = np.array(dates)
+            for _, e in ev.sort_values("ex_date", ascending=False).iterrows():
+                fac[d_arr < str(e["ex_date"])] *= float(e["factor"])
+    num = lambda k: pd.to_numeric(r[k], errors="coerce").astype(float).values  # noqa: E731
+    c = num("close")
+    out = pd.DataFrame({"Open": num("open"), "High": num("max"), "Low": num("min"), "Close": c, "Adj Close": c * fac},
+                       index=pd.DatetimeIndex(pd.to_datetime(dates)))
+    out = out[out["Close"] > 0]
+    for k in ("Open", "High", "Low"):
+        out.loc[~(out[k] > 0), k] = np.nan
+    return out if len(out) else None
+
+
+def px_ready(df, mtime, need_date: pd.Timestamp, is_price: bool) -> bool:
+    """價格類資料已「塵埃落定」：快取已含 need_date 當日，或快取是在 need_date 隔天零時之後才抓的（缺就是真的缺，不補猜）。"""
+    if is_price and df is not None and len(df) and "date" in df.columns and str(df["date"].max()) >= str(need_date.date()):
+        return True
+    return mtime is not None and mtime >= (need_date + pd.Timedelta(days=1)).tz_localize(TZ).timestamp()
+
+
 class LiveSource:
     def __init__(self):
         import finmind_client as fc
         self.fc = fc
+        self.fallback: set = set()
+        self.calendar_source = "finmind"
+        self._ph = None
 
-    # 交易日曆＝0050 的完整日線；今天盤中（14:30 前）的 bar 一律捨棄
+    def _cache(self, ds, code, start=PRICE_START):
+        p = self.fc._cache_path(ds, code, start, None)
+        if not p.exists():
+            return None, None
+        try:
+            return pd.read_parquet(p), p.stat().st_mtime
+        except Exception:  # noqa: BLE001
+            return None, None
+
+    def _fresh(self, ds, code, hours):
+        df, mt = self._cache(ds, code)
+        return mt is not None and (time.time() - mt) < hours * 3600
+
+    # 交易日曆＝0050 的完整日線（FinMind 原始價＋事件還原，與回測同源）；今天盤中（14:30 前）的 bar 一律捨棄。
+    # FinMind 失敗才退 yfinance 並標記 calendar_source=fallback。
     def calendar(self, now):
-        d = _yf_one("0050.TW", "6y")
-        d = d[d["Close"] > 0]
+        try:
+            d = self._calendar_finmind(now)
+            self.calendar_source = "finmind"
+        except Exception as e:  # noqa: BLE001
+            print(f"[警告] 0050 日曆 FinMind 來源失敗，改用 yfinance 備援：{type(e).__name__}: {e}", flush=True)
+            d = _yf_one("0050.TW", "6y")
+            d = d[d["Close"] > 0]
+            self.calendar_source = "fallback"
         if len(d) and d.index[-1].date() == now.date() and (now.hour, now.minute) < CLOSE_HHMM:
             d = d.iloc[:-1]
         return d["Adj Close"].astype(float)
+
+    def _calendar_finmind(self, now):
+        self.refresh_events(max_age_hours=20)
+        for ds, hrs in zip(PRICE_DS, (3, 20, 20)):
+            if not self._fresh(ds, "0050", hrs):
+                self.fc._fetch(ds, "0050", PRICE_START, None, force_refresh=True)
+        d = self._bars_from_cache("0050")
+        if d is None or len(d) < 100:
+            raise RuntimeError("FinMind 0050 日線不足")
+        return d
+
+    def _events_all(self):
+        out = {}
+        for ds in EVENT_DS_ALL:
+            df, _ = self._cache(ds, "")
+            out[ds] = df
+        return out
+
+    def _bars_from_cache(self, code, ev=None):
+        raw, _ = self._cache(PRICE_DS[0], code)
+        if raw is None or raw.empty:
+            return None
+        ev = ev if ev is not None else self._events_all()
+        div, _ = self._cache(PRICE_DS[1], code)
+        cr, _ = self._cache(PRICE_DS[2], code)
+        spl, pv = ev.get(EVENT_DS_ALL[0]), ev.get(EVENT_DS_ALL[1])
+        pick = lambda f: f[f["stock_id"].astype(str) == code] if f is not None and len(f) and "stock_id" in f.columns else None  # noqa: E731
+        return adjust_bars(raw, div, pick(spl), cr, pick(pv))
+
+    def events_ready(self, need_date):
+        for ds in EVENT_DS_ALL:
+            df, mt = self._cache(ds, "")
+            if mt is None or not px_ready(df, mt, need_date, False):
+                return False
+        return True
+
+    def refresh_events(self, max_age_hours=0):
+        """全市場事件表（分割／面額變更；其餘兩個還原資料集在註冊層級不接受全市場查詢，只能逐檔）。"""
+        for ds in EVENT_DS_ALL:
+            if max_age_hours and self._fresh(ds, "", max_age_hours):
+                continue
+            self.fc._fetch(ds, "", PRICE_START, None, force_refresh=True)
+
+    def px_pending(self, code, need_date):
+        miss = []
+        for k, ds in enumerate(PRICE_DS):
+            df, mt = self._cache(ds, code)
+            if not px_ready(df, mt, need_date, k == 0):
+                miss.append(ds)
+        return miss
+
+    def refresh_px(self, code, which):
+        for ds in which:
+            self.fc._fetch(ds, code, PRICE_START, None, force_refresh=True)
+
+    def ensure_px(self, codes, last_bar):
+        """持股的價格快取補到最新一根 bar（價格 1 次、股利／減資每日各 1 次）；封鎖即停，失敗留給下一輪。"""
+        n = 0
+        for c in codes:
+            df, _ = self._cache(PRICE_DS[0], c)
+            need = [PRICE_DS[0]] if df is None or df.empty or str(df["date"].max()) < str(last_bar.date()) else []
+            need += [ds for ds in PRICE_DS[1:] if not self._fresh(ds, c, 20)]
+            for ds in need:
+                try:
+                    self.fc._fetch(ds, c, PRICE_START, None, force_refresh=True)
+                    n += 1
+                except Exception as e:  # noqa: BLE001
+                    print(f"[警告] 持股 {c} {ds} 更新失敗：{e}", flush=True)
+                    if "封鎖" in str(e):
+                        return n
+        return n
+
+    def official_open(self, code, date):
+        """官方 TWSE/TPEx 原始開盤價（data/price_history.json，約最近 90 個交易日）；查不到回 None。"""
+        if self._ph is None:
+            try:
+                self._ph = json.loads(PRICE_HISTORY_PATH.read_text(encoding="utf-8")).get("prices", {})
+            except Exception:  # noqa: BLE001
+                self._ph = {}
+        for row in self._ph.get(code, []):
+            if row.get("date") == str(date.date()):
+                o = row.get("open")
+                return float(o) if o else None
+        return None
 
     def universe(self):
         fc = self.fc
@@ -454,7 +606,32 @@ class LiveSource:
             self.fc._fetch(ds_of[k], code, STMT_START, None, force_refresh=True)
 
     def prices(self, uni_rows, start, end):
-        """uni_rows: [(code, suffix)] → {code: DataFrame[Open,High,Low,Close,Adj Close]}，只回傳有資料者。"""
+        """uni_rows: [(code, suffix)] → {code: DataFrame[Open,High,Low,Close,Adj Close]}，只回傳有資料者。
+        主來源 FinMind 快取（原始價＋事件還原，與回測同源）；FinMind 無可用價格者才退 yfinance，並記入 self.fallback。"""
+        self.fallback = set()
+        out, need_fb = {}, []
+        ev = self._events_all()
+        ev_missing = any(v is None for v in ev.values())
+        for c, s in uni_rows:
+            d = None
+            if not ev_missing:
+                try:
+                    d = self._bars_from_cache(c, ev)
+                except Exception:  # noqa: BLE001
+                    d = None
+            if d is not None:
+                d = d[(d.index >= start) & (d.index <= end)]
+            if d is None or d.empty:
+                need_fb.append((c, s))
+            else:
+                out[c] = d
+        if need_fb:
+            got = self._yf_prices(need_fb, start, end)
+            self.fallback = set(got)
+            out.update(got)
+        return out
+
+    def _yf_prices(self, uni_rows, start, end):
         out = {}
         todo = list(uni_rows)
         for attempt in range(2):
@@ -590,30 +767,55 @@ def run(src, now, log_path=LOG_PATH, state_path=STATE_PATH, budget=REFRESH_BUDGE
         if R is None:
             continue
         late = int((cal > R).sum())
-        if late > MAX_LATE:
-            new.append({"type": "skipped_data_unready", "key": f"skip|{p}", "ts": ts, "period": str(p), "R": str(R.date()),
-                        "reason": f"換股日後逾 {MAX_LATE} 個交易日仍無法產生訊號（settled={frac:.3f}），沿用既有持股，不補算"})
-            continue
-        if frac < SETTLED_MIN:
-            continue
+        need = cal[cal <= D][-1]
+        used, px_frac, ev_ok = _px_phase(src, list(uni["code"]), need, budget - spent, warn)
+        spent += used
+        res[f"px_ready_{p}"] = round(px_frac, 4)
+        log(f"{p}：價格／還原事件就緒 {px_frac:.1%}（事件表{'已更新' if ev_ok else '未更新'}），本輪 FinMind 累計呼叫 {spent} 次")
+        full = frac >= SETTLED_MIN and px_frac >= SETTLED_MIN and ev_ok
+        if not full:
+            if late <= MAX_LATE:
+                continue
+            if frac < PRICE_COV_MIN:
+                new.append({"type": "skipped_data_unready", "key": f"skip|{p}", "ts": ts, "period": str(p), "R": str(R.date()),
+                            "reason": f"換股日後逾 {MAX_LATE} 個交易日，財報覆蓋率 {frac:.1%} < {PRICE_COV_MIN:.0%}（財報），沿用既有持股，不補算",
+                            "stmt_coverage": round(frac, 4), "n_settled": n_set, "px_ready": round(px_frac, 4)})
+                continue
+        if not ev_ok:
+            warn("events_stale", f"{p}：全市場還原事件表（分割／面額變更）未能更新，沿用舊快取或備援")
         tables = {}
         for c in uni["code"]:
+            if frac < SETTLED_MIN and not flags[c][0]:
+                tables[c] = None  # 未入庫者當季不計分
+                continue
             s = src.stmt_state(c)
             tables[c] = quarter_table_from_frames(s["fs"][0], s["bs"][0], s["cf"][0])
         start = R - pd.DateOffset(months=15)
         bars = src.prices([(c, suffix[c]) for c in uni["code"]], start, last_bar)
+        fb = sorted(getattr(src, "fallback", set()) & set(bars))
         cov = len(bars) / max(1, len(uni))
         if cov < PRICE_COV_MIN:
-            warn("price_coverage_low", f"{p}：價格覆蓋 {cov:.1%} < {PRICE_COV_MIN:.0%}，不產生訊號")
+            if late > MAX_LATE:
+                new.append({"type": "skipped_data_unready", "key": f"skip|{p}", "ts": ts, "period": str(p), "R": str(R.date()),
+                            "reason": f"換股日後逾 {MAX_LATE} 個交易日，價格覆蓋率 {cov:.1%} < {PRICE_COV_MIN:.0%}（價格），沿用既有持股，不補算",
+                            "stmt_coverage": round(frac, 4), "price_coverage": round(cov, 4)})
+            else:
+                warn("price_coverage_low", f"{p}：價格覆蓋 {cov:.1%} < {PRICE_COV_MIN:.0%}，不產生訊號")
             continue
+        if fb:
+            warn("price_fallback", f"{p}：{len(fb)} 檔 FinMind 無可用價格，改用 yfinance 備援（price_source=fallback）")
         prev = [e for e in ev + new if e.get("type") == "signal"]
         prev_codes = [x["code"] for x in prev[-1]["picks"]] if prev else []
         sig = build_signal(R, target_period(R), uni, tables, bars, prev_codes)
         after = max(R, last_bar)
         new.append({"type": "signal", "key": f"signal|{p}", "ts": ts, "period": str(p), "R": str(R.date()),
                     "target_quarter": str(target_period(R)), "after_date": str(after.date()),
-                    "fill_rule": "after_date 後第一個交易日開盤", "n_settled": n_set, "price_coverage": round(cov, 4),
-                    "price_source": "yfinance(.TW/.TWO) 原始開收＋Adj Close", "universe_info": "TaiwanStockInfo 快取",
+                    "fill_rule": "after_date 後第一個交易日開盤", "n_settled": n_set, "n_unsettled": len(flags) - n_set,
+                    "stmt_mode": "full" if frac >= SETTLED_MIN else "partial", "stmt_coverage": round(frac, 4),
+                    "px_ready": round(px_frac, 4), "price_coverage": round(cov, 4),
+                    "price_source": "FinMind TaiwanStockPrice 原始價＋adjust.py 事件還原（股利/分割/減資/面額變更）"
+                                    + (f"；{len(fb)} 檔備援 yfinance" if fb else ""),
+                    "price_fallback_codes": fb[:200], "universe_info": "TaiwanStockInfo 快取",
                     "universe_n": len(uni), **sig})
         log(f"{p}：已產生訊號 {len(sig['picks'])} 檔（存活 {sig['n_alive']}、可計分 {sig['n_scored']}、落後池 {sig['n_pool']}）")
     sigs = [e for e in ev + new if e.get("type") == "signal"]
@@ -648,6 +850,40 @@ def _refresh(src, todo, flags, budget, warn):
     return used, touched
 
 
+def _px_phase(src, codes, need, budget, warn):
+    """價格／還原事件補抓（與財報共用每輪預算）：全市場事件表 2 次，其餘逐檔；遇封鎖或連續 5 次失敗即停。
+    回傳 (呼叫數, 價格就緒比例, 事件表是否新鮮)。"""
+    used, fails = 0, 0
+    try:
+        if not src.events_ready(need) and budget >= 2:
+            src.refresh_events()
+            used += 2
+    except Exception as e:  # noqa: BLE001
+        warn("events_failed", e)
+        fails += 5 if "封鎖" in str(e) else 0
+    pend = {c: m for c in codes if (m := src.px_pending(c, need))}
+    stop = fails >= 5
+    for c, miss in pend.items():
+        if stop:
+            break
+        for ds in miss:
+            if used >= budget or fails >= 5:
+                stop = True
+                break
+            used += 1
+            try:
+                src.refresh_px(c, [ds])
+                fails = 0
+            except Exception as e:  # noqa: BLE001
+                fails += 1
+                warn("px_refresh_failed", f"{c}/{ds}: {e}")
+                if "封鎖" in str(e):
+                    stop = True
+                    break
+    left = sum(1 for c in codes if src.px_pending(c, need))
+    return used, 1 - left / max(1, len(codes)), bool(src.events_ready(need))
+
+
 def _settled(src, code, period, D):
     s = src.stmt_state(code)
     miss = [k for k, (df, mt) in s.items() if not ds_settled(df, mt, period, D)]
@@ -658,13 +894,21 @@ def _sim_phase(src, sigs, suffix, cal, adj50, now, now_date, ts, br, sr, ev, new
     codes = sorted({x["code"] for s in sigs for x in s["picks"]})
     start = min(pd.Timestamp(s["after_date"]) for s in sigs) - pd.Timedelta(days=60)
     try:
+        src.ensure_px(codes, cal[-1])
+    except Exception as e:  # noqa: BLE001  持股價格快取補抓失敗只降級，沿用現有快取
+        warn("px_ensure_failed", e)
+    try:
         bars = src.prices([(c, suffix.get(c, ".TW")) for c in codes], start, cal[-1])
     except Exception as e:  # noqa: BLE001
         warn("price_fetch_failed", e)
         return
+    fb = getattr(src, "fallback", set())
     for c in codes:
         if c not in bars:
             warn("no_bars", f"持股 {c} 取不到價格，不補猜（無法成交／估值該檔）")
+    if fb:
+        warn("price_fallback_holdings", f"持股 {sorted(fb)} 價格改用 yfinance 備援（price_source=fallback）")
+    no_ref = []
     sg = [{"period": s["period"], "after": pd.Timestamp(s["after_date"]), "picks": [x["code"] for x in s["picks"]]}
           for s in sigs]
     r = simulate(sg, cal, bars, br, sr)
@@ -677,13 +921,23 @@ def _sim_phase(src, sigs, suffix, cal, adj50, now, now_date, ts, br, sr, ev, new
         e = {"type": "fill", "key": key, "ts": ts, "date": str(f["date"].date()), "code": f["code"], "side": f["side"],
              "signal_period": f["period"], "value": round(f["value"], 2), "px_raw": round(f["px_raw"], 4),
              "shares_raw": round(f["value"] / f["px_raw"], 4) if f["px_raw"] and np.isfinite(f["px_raw"]) else None,
-             "cost": round(f["cost"], 2), "px_basis": "adj_close_forced(原始收盤供對照)" if f["side"] == "forced_sell" else "raw_open"}
+             "cost": round(f["cost"], 2), "px_basis": "adj_close_forced(原始收盤供對照)" if f["side"] == "forced_sell" else "raw_open",
+             "price_source": "fallback" if f["code"] in fb else "finmind+adjust"}
         if key in logged:
             old = logged[key]
             if abs(old["px_raw"] - e["px_raw"]) > 0.005 * abs(old["px_raw"]) or abs(old["value"] - e["value"]) > 0.02 * abs(old["value"]):
                 warn(f"replay_mismatch|{key}", f"已記 value={old['value']} px={old['px_raw']}，重算 value={e['value']} px={e['px_raw']}（以已記錄為準）")
         else:
             new.append(e)
+            if f["side"] != "forced_sell":
+                ref = src.official_open(f["code"], f["date"])
+                if ref is None or not ref > 0:
+                    no_ref.append(f"{f['code']}@{f['date'].date()}")
+                elif abs(f["px_raw"] - ref) / ref > XCHECK_TOL:
+                    warn(f"open_xcheck|{f['code']}|{f['date'].date()}",
+                         f"成交開盤價 {f['px_raw']:.4f} 與官方 TWSE/TPEx 開盤 {ref:.4f} 差 {abs(f['px_raw'] - ref) / ref:.2%} > {XCHECK_TOL:.1%}")
+    if no_ref:
+        warn("open_xcheck_missing", f"{len(no_ref)} 筆成交無官方開盤價可交叉核對（price_history.json 無該日資料）：{no_ref[:10]}")
     for x in r["expired"]:
         new.append({"type": "order_expired", "key": f"expired|{x['date'].date()}|{x['code']}|{x['reason']}", "ts": ts,
                     "date": str(x["date"].date()), "code": x["code"], "reason": x["reason"]})

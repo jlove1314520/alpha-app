@@ -1,3 +1,15 @@
+## 2026-10-01（互動視窗，維運／研究帽，【先.六】紙.二上線前修正＋commit洪水收尾）
+
+等待總司令審閱：30件（新增「先.六」）。
+
+**做了什麼**：(一)紙.二上線前修正（PREREG v2檔未改，屬推翻腳本〔自行裁量〕）：價格改FinMind TaiwanStockPrice＋`research/adjust.py`還原（與`precheck.adjusted_close`同一路徑，含股利／分割／減資／面額變更），用於12個月落後排名、成交價與淨值；成交開盤價與`data/price_history.json`交叉核對（差異>0.5%警告、不改成交價）；yfinance僅備援，使用時訊號與逐筆成交標記。財報就緒改為98%即換股、逾10交易日以已入庫者計分並記錄覆蓋率、覆蓋率<80%才`skipped_data_unready`。自測由9項增為16項全PASS（新增adjust_bars對照回測演算法、來源切換、官方開盤查表、開盤交叉核對、財報覆蓋率79%/81%與98%/97%邊界、價格覆蓋率79%/81%邊界與補抓／封鎖／事件表過期、11-16前無持股）；`--dry`確認10-15前不動作；實機小樣本冒煙（0050／2330／2317）：開盤價與官方逐檔差0.0、2330還原價對yfinance比值全1.0000、0050 2025分割還原正確。(二)PENDING_QUEUE.md已是LF並新增`.gitattributes`（`*.md text eol=lf`）；CRLF真因更正：不是PowerShell launcher，是互動視窗先前以Python文字模式改寫該檔；`scripts/build_sector_flow.py`的讀寫亦改`newline=""`防再發；未改寫已推歷史。(三)IBKR commit洪水：根因＝launcher任一報價的last／change_pct有變就commit（盤中每5分鐘跳動）；`ibkr_quotes.py::_write_failure`內容相同不重寫、`C:\alpha\run-ibkr-quotes-cycle.ps1`（repo外，備份`.bak_20261001`）改為盤中每30分鐘最多1個commit且內容未變不commit、`check_local_schedule_heartbeat.py`改讀檔內fetched_at；實測不誤報，21:51週期log出現rate cap訊息且無新IBKR commit。(四)Shioaji 10/1登入失敗：`external_connectivity.jsonl`顯示本機對外網路10/1 00:12～19:47中斷，錯誤為`ShioajiConnectionError: login: connection error`（連線層），線索指向網路而非憑證；未讀取任何金鑰憑證內容；先.六-四仍BLOCKED，待10/2開盤確認connected=true。(五)`adjust.py`檔頭「是否採用除以1000待裁示」改為引用015f1402與TaiwanStockDividendResult官方參考價驗證，疑點結案。紙.一、holdout未動。
+
+**未確證／風險**：(1)Shioaji原因為線索非定論，需10/2開盤驗證。(2)9/25、9/30與10/1的push失敗根因仍未確證。(3)IBKR launcher在repo外，且30分鐘上限使盤中git歷史變稀（熱檔仍每2分鐘更新）；收盤前最後30分鐘靠收盤後寬限期補commit。(4)紙.二補抓FinMind約11,500次（財報約5,800＋價格／股利／減資約5,700＋事件表2）佔共用額度，每輪上限200次，首輪完整補齊約需2～3天（每小時一輪）。(5)沒有FinMind快取的代號才退yfinance備援。(6)ready-but-late訊號可能晚於換股日數日產生（成交取訊號後下一開盤）。
+
+**[自行裁量]**：partial模式只在財報覆蓋率<98%時遮蔽未入庫檔；價格覆蓋率<80%但未逾10日仍警告＋等待；補抓連續5次失敗或遇封鎖即停；IBKR 30分鐘上限＋收盤後寬限；停擺告警改讀檔內fetched_at；開盤交叉核對只警告不改價。
+
+**規則十 allowlist**：本批新增的排程步驟仍只寫`research/data/paper_supply_v2_log.jsonl`（git-ignored，`git add -f`＋`git commit -o`路徑限定）；IBKR launcher（repo外）仍只commit`data/quotes_ibkr.json`等原有檔案，未新增改寫其他追蹤檔。
+
 ## 2026-10-01（互動視窗，維運／研究帽，【先.五】#406結案確認＋紙.二前進式追蹤＋Shioaji commit洪水）
 
 等待總司令審閱：29件（新增「先.五」）。

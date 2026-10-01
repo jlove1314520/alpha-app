@@ -105,6 +105,25 @@ def _git_log(pattern: re.Pattern, max_scan: int = 2000) -> tuple[str, datetime] 
     return None, None
 
 
+IBKR_QUOTES_PATH = REPO_ROOT / "data" / "quotes_ibkr.json"
+
+
+def _ibkr_file_freshness(now: datetime) -> tuple[str | None, float | None]:
+    """讀已checkout的data/quotes_ibkr.json內的fetched_at，不依賴IBKR commit頻率。
+    讀不到/格式不對一律(None, None)，只降級不拋例外（十二節：守門員自己失敗不得拖垮主流程）。"""
+    try:
+        raw = json.loads(IBKR_QUOTES_PATH.read_text(encoding="utf-8")).get("fetched_at")
+        if not raw:
+            return None, None
+        ts = datetime.fromisoformat(str(raw))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        return ts.isoformat(), (now - ts.astimezone(timezone.utc)).total_seconds() / 60.0
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::IBKR檔內fetched_at讀取失敗：{type(e).__name__}: {e}")
+        return None, None
+
+
 def evaluate() -> dict:
     now = datetime.now(timezone.utc)
 
@@ -125,6 +144,7 @@ def evaluate() -> dict:
 
     ibkr_sha, ibkr_ts = _git_log(IBKR_PATTERN)
     ibkr_minutes = (now - ibkr_ts).total_seconds() / 60.0 if ibkr_ts else None
+    ibkr_file_at, ibkr_file_minutes = _ibkr_file_freshness(now)
 
     # 方案B強化版：三軌任一minutes_since<60分鐘，就視為「本機這台機器整體
     # 是活著的」——不再只看DevQueue單一訊號，避免互動視窗長時間編輯檔案時
@@ -150,8 +170,14 @@ def evaluate() -> dict:
             "last_commit_sha": ibkr_sha,
             "last_commit_at": ibkr_ts.isoformat() if ibkr_ts else None,
             "minutes_since": round(ibkr_minutes, 1) if ibkr_minutes is not None else None,
+            "file_fetched_at": ibkr_file_at,
+            "file_minutes_since": round(ibkr_file_minutes, 1) if ibkr_file_minutes is not None else None,
             "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗"
-                    "都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring",
+                    "都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。"
+                    "2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次"
+                    "（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；"
+                    "file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，"
+                    "同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）",
         },
         "stalled": stalled,
         "track_stalled": track_stalled_names,

@@ -318,7 +318,8 @@ def _update_queue_countdown(n_dates, dates, missing, usable) -> None:
     """
     q = ROOT / "PENDING_QUEUE.md"
     try:
-        txt = q.read_text(encoding="utf-8")
+        with open(q, encoding="utf-8", newline="") as _f:  # 先.六-二：不做換行轉換
+            txt = _f.read()
         if _CD_BEGIN not in txt or _CD_END not in txt:
             return
         if missing:
@@ -341,8 +342,8 @@ def _update_queue_countdown(n_dates, dates, missing, usable) -> None:
         head = txt.split(_CD_BEGIN, 1)[0]
         tail = txt.split(_CD_END, 1)[1]
         body = "\n".join(lines)
-        q.write_text(head + _CD_BEGIN + "\n" + body + "\n" + _CD_END + tail,
-                     encoding="utf-8")
+        with open(q, "w", encoding="utf-8", newline="") as _f:
+            _f.write(head + _CD_BEGIN + "\n" + body + "\n" + _CD_END + tail)
         print("  已更新 PENDING_QUEUE 的金流一倒數行")
     except Exception as e:  # noqa: BLE001
         # 倒數更新失敗不能影響主要產出——這只是文件同步，不是資料

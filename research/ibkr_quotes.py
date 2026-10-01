@@ -114,10 +114,33 @@ def _write_failure(reason: str) -> None:
     成失敗：這三份檔案共用同一個連線/paper帳戶檢查，連線那一關沒過，後面三種
     資料通通拿不到，沒有理由只讓quotes誠實、部位/餘額卻留著上一輪的舊資料。"""
     now_iso = datetime.now(TW_TZ).isoformat()
-    _write_json_failure(OUT_PATH, {"connected": False, "error": reason, "quotes": {}, "fetched_at": now_iso})
-    _write_json_failure(POSITIONS_OUT_PATH, {"connected": False, "error": reason, "positions": [], "fetched_at": now_iso})
-    _write_json_failure(BALANCE_OUT_PATH, {"connected": False, "error": reason, "balance": {}, "fetched_at": now_iso})
-    print(f"寫入失敗狀態（quotes/positions/balance 三份皆標 connected:false）：{reason}")
+    # 先.六-三（2026-10-01）：內容（不含fetched_at）跟現有檔案一樣就不重寫，跟
+    # shioaji_quotes.py::_write_failure（a3e0722fd）同一套修法——Gateway斷線期間每輪
+    # 只有時間戳在動，重寫只會製造無意義的工作目錄變動。成功路徑不套用：那邊要靠
+    # fetched_at讓消費端判斷報價新不新鮮，不能讓它停住。
+    wrote = 0
+    for path, payload in (
+        (OUT_PATH, {"connected": False, "error": reason, "quotes": {}, "fetched_at": now_iso}),
+        (POSITIONS_OUT_PATH, {"connected": False, "error": reason, "positions": [], "fetched_at": now_iso}),
+        (BALANCE_OUT_PATH, {"connected": False, "error": reason, "balance": {}, "fetched_at": now_iso}),
+    ):
+        if _same_except_fetched_at(path, payload):
+            continue
+        _write_json_failure(path, payload)
+        wrote += 1
+    print(f"失敗狀態（quotes/positions/balance 三份皆標 connected:false）：{reason}"
+          + ("" if wrote else "（內容與現有檔案相同，未重寫）"))
+
+
+def _same_except_fetched_at(path: Path, payload: dict) -> bool:
+    """現有檔案去掉fetched_at後與payload去掉fetched_at相同→True。讀不到/壞掉一律False（照寫）。"""
+    try:
+        old = json.loads(path.read_text(encoding="utf-8"))
+        a = {k: v for k, v in old.items() if k != "fetched_at"}
+        b = {k: v for k, v in payload.items() if k != "fetched_at"}
+        return a == b and old.get("connected") is False
+    except Exception:  # noqa: BLE001 -- 判斷失敗就照寫，不得讓比對邏輯癱瘓寫檔
+        return False
 
 
 def _write_json_failure(path: Path, payload: dict) -> None:

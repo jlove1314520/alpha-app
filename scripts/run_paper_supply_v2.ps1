@@ -10,8 +10,11 @@
 # processes' staged changes. No other repo file is rewritten by this launcher.
 #
 # Shared FinMind quota: the python script limits itself to 200 per-code calls per run and stops
-# at the first block-type error. Hourly cadence is intentional (a refresh of ~5,800 per-code
-# calls needs many runs); it is a no-op outside the data window.
+# at the first block-type error. Statements (~5,800 per-code calls) and prices/dividends/capital
+# reductions (~5,700 per-code calls plus 2 market-wide event calls) share that 200-call budget, so
+# the first full refresh takes about 2-3 days of hourly runs. Prices come from FinMind +
+# research/adjust.py (same as the backtest); yfinance is a flagged fallback only.
+# It is a no-op outside the data window.
 
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\paper_supply_v2_cycle.log"

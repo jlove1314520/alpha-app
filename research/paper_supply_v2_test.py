@@ -62,7 +62,7 @@ def synth_bars(rng, cal, n0=50.0):
 
 
 class Synth:
-    def __init__(self, seed=7, industries=(("A", 28), ("B", 27), ("C", 5)), settled=True, miss_prices=()):
+    def __init__(self, seed=7, industries=(("A", 28), ("B", 27), ("C", 5)), settled=True, miss_prices=(), unsettled_codes=()):
         rng = np.random.default_rng(seed)
         self.cal = pd.bdate_range("2024-09-02", "2027-12-31")
         rows = []
@@ -82,6 +82,17 @@ class Synth:
         self.fail_msg = "FinMind rejected the request (HTTP 400, synthetic)"
         self.refresh_calls = 0
         self.drop_target = False
+        self.unsettled_codes = set(unsettled_codes)
+        self.px_unready = set()
+        self.px_calls = 0
+        self.fail_px = False
+        self.px_msg = "FinMind rejected the request (HTTP 400, synthetic)"
+        self.events_ok = True
+        self.events_refreshed = 0
+        self.fail_events = False
+        self.fb_codes = set()
+        self.fallback = set()
+        self.open_override = {}
 
     def calendar(self, now):
         if self.fail_calendar:
@@ -98,11 +109,13 @@ class Synth:
 
     def stmt_state(self, code):
         f, b, c = self.stm[code]
-        if self.drop_target or not self.settled:
+        old = pd.Timestamp("2026-10-01", tz=TZ).timestamp()
+        if self.drop_target or not self.settled or code in self.unsettled_codes:
             f = f[f["date"] != "2026-09-30"]
             b = b[b["date"] != "2026-09-30"]
             c = c[c["date"] != "2026-09-30"]
-        return {"fs": (f, self.mtime), "bs": (b, self.mtime), "cf": (c, self.mtime)}
+        mt = old if code in self.unsettled_codes else self.mtime
+        return {"fs": (f, mt), "bs": (b, mt), "cf": (c, mt)}
 
     def refresh_stmt(self, code, which):
         self.refresh_calls += 1
@@ -112,7 +125,35 @@ class Synth:
     def prices(self, rows, start, end):
         if self.fail_prices:
             raise RuntimeError("synthetic price failure")
+        self.fallback = {c for c, _ in rows if c in self.fb_codes and c not in self.miss}
         return {c: self.bars[c].loc[start:end] for c, _ in rows if c not in self.miss}
+
+    def events_ready(self, need):
+        return self.events_ok
+
+    def refresh_events(self, max_age_hours=0):
+        self.events_refreshed += 1
+        if self.fail_events:
+            raise RuntimeError(self.px_msg)
+        self.events_ok = True
+
+    def px_pending(self, code, need):
+        return ["TaiwanStockPrice"] if code in self.px_unready else []
+
+    def refresh_px(self, code, which):
+        self.px_calls += 1
+        if self.fail_px:
+            raise RuntimeError(self.px_msg)
+        self.px_unready.discard(code)
+
+    def ensure_px(self, codes, last_bar):
+        return 0
+
+    def official_open(self, code, date):
+        if (code, str(date.date())) in self.open_override:
+            return self.open_override[(code, str(date.date()))]
+        b = self.bars.get(code)
+        return float(b.at[date, "Open"]) if b is not None and date in b.index else None
 
 
 # ───────────────────────── 測試 ─────────────────────────
@@ -424,6 +465,288 @@ def test_report_gate():
         lp = Path(td) / "log.jsonl"
         lp.write_text("", encoding="utf-8")
         assert pv2.report(Synth(), now_at(2027, 3, 1), log_path=lp) is None     # 滿 4 季前不輸出任何績效數字
+
+
+# ---------------- 先.六-一 新增：價格來源／覆蓋率 ----------------
+class FakeFC:
+    """假 finmind_client：只提供快取路徑與記錄 _fetch 呼叫，不連網。"""
+    def __init__(self, root):
+        self.root = Path(root)
+        self.calls = []
+
+    def _cache_path(self, ds, code, start, end):
+        return self.root / f"{ds}__{code or 'ALL'}__{start}__{end or 'latest'}.parquet"
+
+    def _fetch(self, ds, code, start, end, force_refresh=False):
+        self.calls.append((ds, code))
+
+
+def _live(td):
+    s = pv2.LiveSource.__new__(pv2.LiveSource)
+    s.fc = FakeFC(td)
+    s.fallback = set()
+    s.calendar_source = "finmind"
+    s._ph = None
+    return s
+
+
+def _put(s, ds, code, df, mtime=None):
+    p = s.fc._cache_path(ds, code, pv2.PRICE_START, None)
+    df.to_parquet(p)
+    if mtime is not None:
+        import os
+        os.utime(p, (mtime, mtime))
+
+
+def _raw_px(dates, closes):
+    c = np.array(closes, float)
+    return pd.DataFrame({"date": dates, "stock_id": "X", "open": c * 0.99, "max": c * 1.01, "min": c * 0.98, "close": c})
+
+
+def _evs(p):
+    return [json.loads(x) for x in _lines(p)]
+
+
+def test_adjust_bars_matches_backtest_logic():
+    dates = [str(d.date()) for d in pd.bdate_range("2026-01-05", periods=30)]
+    closes = [100 + i for i in range(30)]
+    raw = _raw_px(dates, closes)
+    import adjust as adj
+
+    def ref(raw, div, spl, cr, pv):
+        r = raw.sort_values("date")
+        close = dict(zip(r["date"], r["close"]))
+        ds = r["date"].tolist()
+        ev = adj._combine_adjustment_events(div, spl, cr, pv, close, ds)
+        fac = pd.Series(1.0, index=r["date"].values)
+        d_arr = np.array(ds)
+        for _, e in ev.sort_values("ex_date", ascending=False).iterrows():
+            fac[d_arr < e["ex_date"]] = fac[d_arr < e["ex_date"]] * e["factor"]
+        return r["close"].astype(float).values * fac.values
+
+    div = pd.DataFrame([{"CashExDividendTradingDate": dates[10], "StockExDividendTradingDate": "", "CashEarningsDistribution": 2.0,
+                         "StockEarningsDistribution": 0.0, "CashIncreaseSubscriptionRate": 0.0, "CashIncreaseSubscriptionpRrice": 0.0}])
+    spl = pd.DataFrame([{"date": dates[20], "stock_id": "X", "before_price": 120.0, "after_price": 60.0}])
+    cr = pd.DataFrame([{"date": dates[25], "stock_id": "X", "ClosingPriceonTheLastTradingDay": 100.0, "PostReductionReferencePrice": 90.0}])
+    pvc = pd.DataFrame([{"date": dates[15], "stock_id": "X", "before_close": 100.0, "after_ref_close": 100.0}])
+    got = pv2.adjust_bars(raw, div, spl, cr, pvc)
+    exp = ref(raw, div, spl, cr, pvc)
+    assert np.allclose(got["Adj Close"].values, exp, rtol=1e-12), (got["Adj Close"].values[:3], exp[:3])
+    f_div = (closes[9] - 2.0) / closes[9]
+    assert abs(got["Adj Close"].iloc[0] - closes[0] * 0.5 * 0.9 * f_div) < 1e-9
+    assert abs(got["Adj Close"].iloc[-1] - closes[-1]) < 1e-9
+    assert np.allclose(got["Open"].values, np.array(closes) * 0.99) and np.allclose(got["Close"].values, closes)
+    plain = pv2.adjust_bars(raw, None, None, None, None)
+    assert np.allclose(plain["Adj Close"].values, closes)
+    assert pv2.adjust_bars(None, None, None, None, None) is None and pv2.adjust_bars(raw.iloc[0:0], None, None, None, None) is None
+    bad = raw.copy()
+    bad.loc[3, "close"] = 0.0
+    bad.loc[4, "open"] = 0.0
+    g2 = pv2.adjust_bars(bad, None, None, None, None)
+    assert len(g2) == 29 and np.isnan(g2["Open"].iloc[3])
+
+
+def test_live_source_finmind_primary_and_fallback():
+    import types
+    with tempfile.TemporaryDirectory() as td:
+        s = _live(td)
+        dates = [str(d.date()) for d in pd.bdate_range("2026-01-05", periods=40)]
+        cl = [100.0] * 40
+        _put(s, "TaiwanStockPrice", "1000", _raw_px(dates, cl))
+        _put(s, "TaiwanStockPrice", "1001", _raw_px(dates, cl))
+        yf_calls = []
+
+        def fake_yf(self, rows, start, end):
+            yf_calls.append([c for c, _ in rows])
+            idx = pd.bdate_range("2026-01-05", periods=40)
+            return {c: pd.DataFrame({"Open": 50.0, "High": 51.0, "Low": 49.0, "Close": 50.0, "Adj Close": 50.0}, index=idx) for c, _ in rows}
+
+        s._yf_prices = types.MethodType(fake_yf, s)
+        rows = [("1000", ".TW"), ("1001", ".TW"), ("1002", ".TW")]
+        st, en = pd.Timestamp("2026-01-01"), pd.Timestamp("2026-12-31")
+        out = s.prices(rows, st, en)
+        assert set(out) == {"1000", "1001", "1002"} and s.fallback == {"1000", "1001", "1002"}
+        _put(s, "TaiwanStockSplitPrice", "", pd.DataFrame([{"date": dates[20], "stock_id": "1001", "before_price": 100.0, "after_price": 50.0}]))
+        _put(s, "TaiwanStockParValueChange", "", pd.DataFrame({"date": [], "stock_id": [], "before_close": [], "after_ref_close": []}))
+        out = s.prices(rows, st, en)
+        assert s.fallback == {"1002"} and yf_calls[-1] == ["1002"]
+        assert abs(out["1000"]["Adj Close"].iloc[0] - 100.0) < 1e-9 and abs(out["1001"]["Adj Close"].iloc[0] - 50.0) < 1e-9
+        assert abs(out["1001"]["Open"].iloc[0] - 99.0) < 1e-9
+        o2 = s.prices(rows[:2], pd.Timestamp(dates[10]), pd.Timestamp(dates[20]))
+        assert str(o2["1000"].index[0].date()) == dates[10] and str(o2["1000"].index[-1].date()) == dates[20] and s.fallback == set()
+        s._yf_prices = types.MethodType(lambda self, rows, a, b: {}, s)
+        out = s.prices(rows, st, en)
+        assert set(out) == {"1000", "1001"} and s.fallback == set()
+
+
+def test_official_open_lookup():
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "price_history.json"
+        p.write_text(json.dumps({"meta": {}, "prices": {"1000": [{"date": "2026-11-17", "open": 50.5, "close": 51.0},
+                                                                   {"date": "2026-11-18", "open": None, "close": 51.0}]}}), encoding="utf-8")
+        old = pv2.PRICE_HISTORY_PATH
+        pv2.PRICE_HISTORY_PATH = p
+        try:
+            s = _live(td)
+            assert s.official_open("1000", pd.Timestamp("2026-11-17")) == 50.5
+            assert s.official_open("1000", pd.Timestamp("2026-11-18")) is None
+            assert s.official_open("1000", pd.Timestamp("2026-11-19")) is None and s.official_open("9999", pd.Timestamp("2026-11-17")) is None
+            pv2.PRICE_HISTORY_PATH = Path(td) / "missing.json"
+            assert _live(td).official_open("1000", pd.Timestamp("2026-11-17")) is None
+        finally:
+            pv2.PRICE_HISTORY_PATH = old
+
+
+def _mk(td, name):
+    return dict(log_path=Path(td) / f"{name}.jsonl", state_path=Path(td) / f"{name}.json", verbose=False)
+
+
+def test_source_switch_flags_and_xcheck():
+    with tempfile.TemporaryDirectory() as td:
+        s = Synth()
+        k = _mk(td, "a")
+        pv2.run(s, now_at(2026, 11, 16), **k)
+        sg = [e for e in _evs(k["log_path"]) if e["type"] == "signal"][0]
+        assert sg["price_fallback_codes"] == [] and "備援" not in sg["price_source"]
+        picks = [p["code"] for p in sg["picks"]]
+        s.fb_codes = set(picks[:2])
+        pv2.run(s, now_at(2026, 11, 17), **k)
+        ev = _evs(k["log_path"])
+        fills = {e["code"]: e for e in ev if e["type"] == "fill"}
+        assert {c for c, e in fills.items() if e["price_source"] == "fallback"} == set(picks[:2])
+        assert all(e["price_source"] == "finmind+adjust" for c, e in fills.items() if c not in picks[:2])
+        assert any(e.get("reason") == "price_fallback_holdings" for e in ev)
+        s2 = Synth()
+        k2 = _mk(td, "b")
+        pv2.run(s2, now_at(2026, 11, 16), **k2)
+        pk = [p["code"] for p in [e for e in _evs(k2["log_path"]) if e["type"] == "signal"][0]["picks"]]
+        d = pd.Timestamp("2026-11-17")
+        o = lambda c: float(s2.bars[c].at[d, "Open"])  # noqa: E731
+        s2.open_override = {(pk[0], "2026-11-17"): o(pk[0]) * 1.01, (pk[1], "2026-11-17"): o(pk[1]) * 1.003, (pk[2], "2026-11-17"): None}
+        pv2.run(s2, now_at(2026, 11, 17), **k2)
+        w = [e for e in _evs(k2["log_path"]) if e["type"] == "warning"]
+        xs = [e for e in w if e["reason"].startswith("open_xcheck|")]
+        assert [e["reason"] for e in xs] == [f"open_xcheck|{pk[0]}|2026-11-17"], xs
+        miss = [e for e in w if e["reason"] == "open_xcheck_missing"]
+        assert len(miss) == 1 and pk[2] in miss[0]["detail"]
+        s3 = Synth()
+        s3.fb_codes = {"1000", "1001", "1002"}
+        k3 = _mk(td, "c")
+        pv2.run(s3, now_at(2026, 11, 16), **k3)
+        ev3 = _evs(k3["log_path"])
+        sg3 = [e for e in ev3 if e["type"] == "signal"][0]
+        assert sg3["price_fallback_codes"] == ["1000", "1001", "1002"] and "3 檔備援 yfinance" in sg3["price_source"]
+        assert any(e.get("reason") == "price_fallback" for e in ev3)
+
+
+def _big(**kw):
+    return Synth(industries=(("A", 50), ("B", 45), ("C", 5)), **kw)
+
+
+def _codes100():
+    return [str(1000 + i) for i in range(100)]
+
+
+def test_stmt_coverage_boundary_79_81():
+    with tempfile.TemporaryDirectory() as td:
+        cs = _codes100()
+        base = _big()
+        kb = _mk(td, "base")
+        pv2.run(base, now_at(2026, 11, 16), **kb)
+        sgb = [e for e in _evs(kb["log_path"]) if e["type"] == "signal"][0]
+        assert sgb["stmt_mode"] == "full" and sgb["stmt_coverage"] == 1.0 and sgb["n_unsettled"] == 0
+        s79 = _big(unsettled_codes=cs[-21:])
+        k79 = _mk(td, "c79")
+        pv2.run(s79, now_at(2026, 12, 2), **k79)
+        ev = _evs(k79["log_path"])
+        sk = [e for e in ev if e["type"] == "skipped_data_unready"]
+        assert len(sk) == 1 and sk[0]["key"] == "skip|2026Q3" and sk[0]["stmt_coverage"] == 0.79, sk
+        assert not [e for e in ev if e["type"] == "signal"]
+        s81 = _big(unsettled_codes=cs[-19:])
+        k81 = _mk(td, "c81")
+        pv2.run(s81, now_at(2026, 12, 2), **k81)
+        ev = _evs(k81["log_path"])
+        assert not [e for e in ev if e["type"] == "skipped_data_unready"]
+        sg = [e for e in ev if e["type"] == "signal"]
+        assert len(sg) == 1 and sg[0]["stmt_mode"] == "partial" and sg[0]["stmt_coverage"] == 0.81 and sg[0]["n_unsettled"] == 19, sg
+        assert not set(p["code"] for p in sg[0]["picks"]) & set(cs[-19:]) and sg[0]["R"] == "2026-11-16"
+        s81b = _big(unsettled_codes=cs[-19:])
+        k81b = _mk(td, "c81b")
+        pv2.run(s81b, now_at(2026, 11, 19), **k81b)
+        assert not [e for e in _evs(k81b["log_path"]) if e["type"] in ("signal", "skipped_data_unready")]
+        s98 = _big(unsettled_codes=cs[-2:])
+        k98 = _mk(td, "c98")
+        pv2.run(s98, now_at(2026, 11, 19), **k98)
+        sg98 = [e for e in _evs(k98["log_path"]) if e["type"] == "signal"]
+        assert len(sg98) == 1 and sg98[0]["stmt_mode"] == "full" and sg98[0]["stmt_coverage"] == 0.98
+        s97 = _big(unsettled_codes=cs[-3:])
+        k97 = _mk(td, "c97")
+        pv2.run(s97, now_at(2026, 11, 19), **k97)
+        assert not [e for e in _evs(k97["log_path"]) if e["type"] in ("signal", "skipped_data_unready")]
+        pv2.run(s97, now_at(2026, 12, 2), **k97)
+        sg97 = [e for e in _evs(k97["log_path"]) if e["type"] == "signal"]
+        assert len(sg97) == 1 and sg97[0]["stmt_mode"] == "partial" and sg97[0]["stmt_coverage"] == 0.97
+        s79.unsettled_codes = set()
+        pv2.run(s79, now_at(2026, 12, 3), **k79)
+        assert not [e for e in _evs(k79["log_path"]) if e["type"] == "signal"]
+
+
+def test_price_coverage_boundary_79_81_and_px_refresh():
+    with tempfile.TemporaryDirectory() as td:
+        cs = _codes100()
+        s79 = _big(miss_prices=cs[-21:])
+        k = _mk(td, "p79")
+        pv2.run(s79, now_at(2026, 11, 19), **k)
+        ev = _evs(k["log_path"])
+        assert any(e.get("reason") == "price_coverage_low" for e in ev) and not [e for e in ev if e["type"] in ("signal", "skipped_data_unready")]
+        pv2.run(s79, now_at(2026, 12, 2), **k)
+        sk = [e for e in _evs(k["log_path"]) if e["type"] == "skipped_data_unready"]
+        assert len(sk) == 1 and sk[0]["price_coverage"] == 0.79 and sk[0]["stmt_coverage"] == 1.0, sk
+        s81 = _big(miss_prices=cs[-19:])
+        k81 = _mk(td, "p81")
+        pv2.run(s81, now_at(2026, 11, 16), **k81)
+        sg = [e for e in _evs(k81["log_path"]) if e["type"] == "signal"]
+        assert len(sg) == 1 and sg[0]["price_coverage"] == 0.81
+        sp = _big()
+        sp.px_unready = set(cs[:30])
+        kp = _mk(td, "px")
+        pv2.run(sp, now_at(2026, 11, 19), **kp)
+        assert sp.px_calls == 30 and not sp.px_unready
+        sgp = [e for e in _evs(kp["log_path"]) if e["type"] == "signal"]
+        assert len(sgp) == 1 and sgp[0]["px_ready"] == 1.0
+        sf = _big()
+        sf.px_unready = set(cs[:30])
+        sf.fail_px = True
+        kf = _mk(td, "pxf")
+        pv2.run(sf, now_at(2026, 11, 19), **kf)
+        assert sf.px_calls == 5 and not [e for e in _evs(kf["log_path"]) if e["type"] == "signal"]
+        pv2.run(sf, now_at(2026, 12, 2), **kf)
+        sgf = [e for e in _evs(kf["log_path"]) if e["type"] == "signal"]
+        assert len(sgf) == 1 and sgf[0]["px_ready"] == 0.7 and sgf[0]["stmt_mode"] == "full"
+        sb = _big()
+        sb.px_unready = set(cs[:30])
+        sb.fail_px = True
+        sb.px_msg = "FinMind blocked (synthetic) 封鎖"
+        pv2.run(sb, now_at(2026, 11, 19), **_mk(td, "pxb"))
+        assert sb.px_calls == 1
+        se = _big()
+        se.events_ok = False
+        se.fail_events = True
+        ke = _mk(td, "ev")
+        pv2.run(se, now_at(2026, 11, 19), **ke)
+        assert not [e for e in _evs(ke["log_path"]) if e["type"] == "signal"]
+        pv2.run(se, now_at(2026, 12, 2), **ke)
+        eve = _evs(ke["log_path"])
+        assert len([e for e in eve if e["type"] == "signal"]) == 1 and any(e.get("reason") == "events_stale" for e in eve)
+
+
+def test_no_holdings_before_first_rebalance():
+    with tempfile.TemporaryDirectory() as td:
+        k = _mk(td, "pre")
+        s = Synth()
+        for day in [(2026, 9, 1), (2026, 10, 1), (2026, 10, 14), (2026, 10, 20), (2026, 11, 2), (2026, 11, 13), (2026, 11, 14), (2026, 11, 15)]:
+            pv2.run(s, now_at(*day), **k)
+        assert not [e for e in _evs(k["log_path"]) if e["type"] in ("signal", "fill", "nav")] if k["log_path"].exists() else True
 
 
 def main() -> int:
