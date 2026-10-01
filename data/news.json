@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-01T04:31:35.661964+08:00",
+ "fetched_at": "2026-10-01T08:20:35.877045+08:00",
  "source": "中央社財經 RSS＋Yahoo股市 RSS（只存索引不存全文）",
  "not_used": {
   "鉅亨網": "公開 RSS 兩個路徑皆 404，唯一可通的是站台後端 API，依 CLAUDE.md 取得方式鐵律不採用"
@@ -26,17 +26,214 @@
    "kept": 20
   },
   "經濟日報焦點": {
-   "ok": false,
-   "error": "ParseError: no element found: line 1, column 0"
+   "ok": true,
+   "items": 20,
+   "kept": 20
   }
  },
  "count": 300,
  "news": [
   {
+   "title": "《火焰之紋章 萬縷千絲》獲高評價 成 Switch 2 必玩獨佔遊戲",
+   "url": "https://tw.stock.yahoo.com/news/%E7%81%AB%E7%84%B0%E4%B9%8B%E7%B4%8B%E7%AB%A0-%E8%90%AC%E7%B8%B7%E5%8D%83%E7%B5%B2-%E7%8D%B2%E9%AB%98%E8%A9%95%E5%83%B9-%E6%88%90-switch-235956841.html",
+   "published": "Wed, 30 Sep 2026 23:59:56 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "川普再批聯準會翻修超支，要求鮑威爾辭去聯準會理事職務",
+   "url": "https://tw.stock.yahoo.com/news/%E5%B7%9D%E6%99%AE%E5%86%8D%E6%89%B9%E8%81%AF%E6%BA%96%E6%9C%83%E7%BF%BB%E4%BF%AE%E8%B6%85%E6%94%AF-%E8%A6%81%E6%B1%82%E9%AE%91%E5%A8%81%E7%88%BE%E8%BE%AD%E5%8E%BB%E8%81%AF%E6%BA%96%E6%9C%83%E7%90%86%E4%BA%8B%E8%81%B7%E5%8B%99-235907647.html",
+   "published": "Wed, 30 Sep 2026 23:59:07 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美光Q4營收暴增379%，但毛利率展望遜預期，股價盤後震盪小紅",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%85%89q4%E7%87%9F%E6%94%B6%E6%9A%B4%E5%A2%9E379-%E4%BD%86%E6%AF%9B%E5%88%A9%E7%8E%87%E5%B1%95%E6%9C%9B%E9%81%9C%E9%A0%90%E6%9C%9F-%E8%82%A1%E5%83%B9%E7%9B%A4%E5%BE%8C%E5%85%88%E6%BC%B2%E5%BE%8C%E8%B7%8C-235852255.html",
+   "published": "Wed, 30 Sep 2026 23:58:52 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美國8月份消費者支出月增0.6%，創逾一年最快增速",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%9C%8B8%E6%9C%88%E4%BB%BD%E5%80%8B%E4%BA%BA%E6%94%AF%E5%87%BA%E6%9C%88%E5%A2%9E0-6-%E5%89%B5%E9%80%BE-%E5%B9%B4%E6%9C%80%E5%BF%AB%E5%A2%9E%E9%80%9F-235707962.html",
+   "published": "Wed, 30 Sep 2026 23:57:07 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美債殖利率偏高，台指期夜盤震盪下跌32點，聚焦PCB、矽光子等族群",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%82%B5%E6%AE%96%E5%88%A9%E7%8E%87%E5%81%8F%E9%AB%98-%E5%8F%B0%E6%8C%87%E6%9C%9F%E5%A4%9C%E7%9B%A4%E9%9C%87%E7%9B%AA%E4%B8%8B%E8%B7%8C32%E9%BB%9E-%E8%81%9A%E7%84%A6pcb-%E7%9F%BD%E5%85%89%E5%AD%90%E7%AD%89%E6%97%8F%E7%BE%A4-235327867.html",
+   "published": "Wed, 30 Sep 2026 23:53:27 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美伊和談卡關但波斯灣出口急復甦，原油流量回到戰前近九成",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E4%BC%8A%E5%92%8C%E8%AB%87%E5%8D%A1%E9%97%9C%E4%BD%86%E6%B3%A2%E6%96%AF%E7%81%A3%E5%87%BA%E5%8F%A3%E6%80%A5%E5%BE%A9%E7%94%A6-%E5%8E%9F%E6%B2%B9%E6%B5%81%E9%87%8F%E5%9B%9E%E5%88%B0%E6%88%B0%E5%89%8D%E8%BF%91%E4%B9%9D%E6%88%90-235312449.html",
+   "published": "Wed, 30 Sep 2026 23:53:12 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "歐洲央行總裁拉加德首度鬆口，不排除2027年任期屆滿前提前卸任",
+   "url": "https://tw.stock.yahoo.com/news/%E6%AD%90%E6%B4%B2%E5%A4%AE%E8%A1%8C%E7%B8%BD%E8%A3%81%E6%8B%89%E5%8A%A0%E5%BE%B7%E9%A6%96%E5%BA%A6%E9%AC%86%E5%8F%A3-%E4%B8%8D%E6%8E%92%E9%99%A42027%E5%B9%B4%E4%BB%BB%E6%9C%9F%E5%B1%86%E6%BB%BF%E5%89%8D%E6%8F%90%E5%89%8D%E5%8D%B8%E4%BB%BB-235239440.html",
+   "published": "Wed, 30 Sep 2026 23:52:39 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "NetApp推出安全的零複製資料啟用能力，賦能代理驅動型企業",
+   "url": "https://tw.stock.yahoo.com/news/netapp%E6%8E%A8%E5%87%BA%E5%AE%89%E5%85%A8%E7%9A%84%E9%9B%B6%E8%A4%87%E8%A3%BD%E8%B3%87%E6%96%99%E5%95%9F%E7%94%A8%E8%83%BD%E5%8A%9B-%E8%B3%A6%E8%83%BD%E4%BB%A3%E7%90%86%E9%A9%85%E5%8B%95%E5%9E%8B%E4%BC%81%E6%A5%AD-235100049.html",
+   "published": "Wed, 30 Sep 2026 23:51:00 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美伊談判卡關、燃料庫存吃緊，布油週三漲0.9%站上103美元、月線飆14%",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E4%BC%8A%E8%AB%87%E5%88%A4%E5%8D%A1%E9%97%9C-%E7%87%83%E6%96%99%E5%BA%AB%E5%AD%98%E5%90%83%E7%B7%8A-%E5%B8%83%E6%B2%B9%E9%80%B1%E4%B8%89%E6%BC%B20-9-%E7%AB%99%E4%B8%8A103%E7%BE%8E%E5%85%83-234943233.html",
+   "published": "Wed, 30 Sep 2026 23:49:43 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美FTC擬加強調查OpenAI、Anthropic，數週內要求高層作證",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8Eftc%E6%93%AC%E5%8A%A0%E5%BC%B7%E8%AA%BF%E6%9F%A5openai-anthropic-%E6%95%B8%E9%80%B1%E5%85%A7%E8%A6%81%E6%B1%82%E9%AB%98%E5%B1%A4%E4%BD%9C%E8%AD%89-234725354.html",
+   "published": "Wed, 30 Sep 2026 23:47:25 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "韓國公布赴美能源投資計畫，核電1,200億美元、燃氣電廠223億美元",
+   "url": "https://tw.stock.yahoo.com/news/%E9%9F%93%E5%9C%8B%E5%85%AC%E5%B8%83%E8%B5%B4%E7%BE%8E%E8%83%BD%E6%BA%90%E6%8A%95%E8%B3%87%E8%A8%88%E7%95%AB-%E6%A0%B8%E9%9B%BB1-200%E5%84%84%E7%BE%8E%E5%85%83-%E7%87%83%E6%B0%A3%E9%9B%BB%E5%BB%A0223%E5%84%84%E7%BE%8E%E5%85%83-234723135.html",
+   "published": "Wed, 30 Sep 2026 23:47:23 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "川普研議柴油出口限制，柴油期貨週三漲1.2%、第三季飆53%",
+   "url": "https://tw.stock.yahoo.com/news/%E5%B7%9D%E6%99%AE%E7%A0%94%E8%AD%B0%E6%9F%B4%E6%B2%B9%E5%87%BA%E5%8F%A3%E9%99%90%E5%88%B6-%E6%9F%B4%E6%B2%B9%E6%9C%9F%E8%B2%A8%E9%80%B1%E4%B8%89%E6%BC%B21-2-%E7%AC%AC%E4%B8%89%E5%AD%A3%E9%A3%8653-234556821.html",
+   "published": "Wed, 30 Sep 2026 23:45:56 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "電力缺口成委內瑞拉石油重組最大障礙",
+   "url": "https://tw.stock.yahoo.com/news/%E9%9B%BB%E5%8A%9B%E7%BC%BA%E5%8F%A3%E6%88%90%E5%A7%94%E5%85%A7%E7%91%9E%E6%8B%89%E7%9F%B3%E6%B2%B9%E9%87%8D%E7%B5%84%E6%9C%80%E5%A4%A7%E9%9A%9C%E7%A4%99-234546699.html",
+   "published": "Wed, 30 Sep 2026 23:45:46 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "聯準會理事庫克示警通膨仍處高水位，重申致力推動回歸2%目標",
+   "url": "https://tw.stock.yahoo.com/news/%E8%81%AF%E6%BA%96%E6%9C%83%E7%90%86%E4%BA%8B%E5%BA%AB%E5%85%8B%E7%A4%BA%E8%AD%A6%E9%80%9A%E8%86%A8%E4%BB%8D%E8%99%95%E9%AB%98%E6%B0%B4%E4%BD%8D-%E9%87%8D%E7%94%B3%E8%87%B4%E5%8A%9B%E6%8E%A8%E5%8B%95%E5%9B%9E%E6%AD%B82-%E7%9B%AE%E6%A8%99-234420617.html",
+   "published": "Wed, 30 Sep 2026 23:44:20 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美議員炒股禁令闖關失敗，53票支持仍卡關，民主黨批漏洞多",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%AD%B0%E5%93%A1%E7%82%92%E8%82%A1%E7%A6%81%E4%BB%A4%E9%97%96%E9%97%9C%E5%A4%B1%E6%95%97-53%E7%A5%A8%E6%94%AF%E6%8C%81%E4%BB%8D%E5%8D%A1%E9%97%9C-%E6%B0%91%E4%B8%BB%E9%BB%A8%E6%89%B9%E6%BC%8F%E6%B4%9E%E5%A4%9A-234244865.html",
+   "published": "Wed, 30 Sep 2026 23:42:44 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美跨黨派敲定能源審批改革，擬限1至2年完成審查、期中選舉後表決",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E8%B7%A8%E9%BB%A8%E6%B4%BE%E6%95%B2%E5%AE%9A%E8%83%BD%E6%BA%90%E5%AF%A9%E6%89%B9%E6%94%B9%E9%9D%A9-%E6%93%AC%E9%99%901%E8%87%B32%E5%B9%B4%E5%AE%8C%E6%88%90%E5%AF%A9%E6%9F%A5-%E6%9C%9F%E4%B8%AD%E9%81%B8%E8%88%89%E5%BE%8C%E8%A1%A8%E6%B1%BA-233916151.html",
+   "published": "Wed, 30 Sep 2026 23:39:16 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "NetApp與Supermicro攜手合作，為不同規模的AI提供強大支援",
+   "url": "https://tw.stock.yahoo.com/news/netapp%E8%88%87supermicro%E6%94%9C%E6%89%8B%E5%90%88%E4%BD%9C-%E7%82%BA%E4%B8%8D%E5%90%8C%E8%A6%8F%E6%A8%A1%E7%9A%84ai%E6%8F%90%E4%BE%9B%E5%BC%B7%E5%A4%A7%E6%94%AF%E6%8F%B4-233800571.html",
+   "published": "Wed, 30 Sep 2026 23:38:00 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "習近平再喊兩岸和平發展 台灣仍是國慶焦點",
+   "url": "https://tw.news.yahoo.com/%E7%BF%92%E8%BF%91%E5%B9%B3%E5%86%8D%E5%96%8A%E5%85%A9%E5%B2%B8%E5%92%8C%E5%B9%B3%E7%99%BC%E5%B1%95-%E5%8F%B0%E7%81%A3%E4%BB%8D%E6%98%AF%E5%9C%8B%E6%85%B6%E7%84%A6%E9%BB%9E-233607281.html",
+   "published": "Wed, 30 Sep 2026 23:36:07 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "南韓投資美國能源2千億美元 推動阿拉斯加LNG案",
+   "url": "https://tw.news.yahoo.com/%E5%8D%97%E9%9F%93%E6%8A%95%E8%B3%87%E7%BE%8E%E5%9C%8B%E8%83%BD%E6%BA%902%E5%8D%83%E5%84%84%E7%BE%8E%E5%85%83-%E6%8E%A8%E5%8B%95%E9%98%BF%E6%8B%89%E6%96%AF%E5%8A%A0lng%E6%A1%88-233435450.html",
+   "published": "Wed, 30 Sep 2026 23:34:35 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美國原油上週產量創1,395.5萬桶/日新高，油商憂高油價難持續",
+   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%9C%8B%E5%8E%9F%E6%B2%B9%E4%B8%8A%E9%80%B1%E7%94%A2%E9%87%8F%E5%89%B51-395-5%E8%90%AC%E6%A1%B6-%E6%97%A5%E6%96%B0%E9%AB%98-%E6%B2%B9%E5%95%86%E6%86%82%E9%AB%98%E6%B2%B9%E5%83%B9%E9%9B%A3%E6%8C%81%E7%BA%8C-233421356.html",
+   "published": "Wed, 30 Sep 2026 23:34:21 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "Inateck 鍵盤保護殼設計獲肯定 勇奪紅點設計大獎",
+   "url": "https://tw.stock.yahoo.com/news/inateck-%E9%8D%B5%E7%9B%A4%E4%BF%9D%E8%AD%B7%E6%AE%BC%E8%A8%AD%E8%A8%88%E7%8D%B2%E8%82%AF%E5%AE%9A-%E5%8B%87%E5%A5%AA%E7%B4%85%E9%BB%9E%E8%A8%AD%E8%A8%88%E5%A4%A7%E7%8D%8E-233320585.html",
+   "published": "Wed, 30 Sep 2026 23:33:20 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "告別智慧電視監控：50美元 Raspberry Pi 化身私人媒體中心",
+   "url": "https://tw.stock.yahoo.com/news/%E5%91%8A%E5%88%A5%E6%99%BA%E6%85%A7%E9%9B%BB%E8%A6%96%E7%9B%A3%E6%8E%A7-50%E7%BE%8E%E5%85%83-raspberry-pi-%E5%8C%96%E8%BA%AB%E7%A7%81%E4%BA%BA%E5%AA%92%E9%AB%94%E4%B8%AD%E5%BF%83-233014091.html",
+   "published": "Wed, 30 Sep 2026 23:30:14 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "日銀政策轉向 未來升息可能加速",
+   "url": "https://tw.stock.yahoo.com/news/%E6%97%A5%E9%8A%80%E6%94%BF%E7%AD%96%E8%BD%89%E5%90%91-%E6%9C%AA%E4%BE%86%E5%8D%87%E6%81%AF%E5%8F%AF%E8%83%BD%E5%8A%A0%E9%80%9F-233010791.html",
+   "published": "Wed, 30 Sep 2026 23:30:10 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "Fed總部翻修成本增至24億美元，內部調查未發現違法違規",
+   "url": "https://tw.stock.yahoo.com/news/fed%E7%B8%BD%E9%83%A8%E7%BF%BB%E4%BF%AE%E6%88%90%E6%9C%AC%E5%A2%9E%E8%87%B324%E5%84%84%E7%BE%8E%E5%85%83-%E5%85%A7%E9%83%A8%E8%AA%BF%E6%9F%A5%E6%9C%AA%E7%99%BC%E7%8F%BE%E9%81%95%E6%B3%95%E9%81%95%E8%A6%8F-232833464.html",
+   "published": "Wed, 30 Sep 2026 23:28:33 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "Fed以6比1通過銀行壓力測試改革，資本要求波動可望減半",
+   "url": "https://tw.stock.yahoo.com/news/fed%E4%BB%A56%E6%AF%941%E9%80%9A%E9%81%8E%E9%8A%80%E8%A1%8C%E5%A3%93%E5%8A%9B%E6%B8%AC%E8%A9%A6%E6%94%B9%E9%9D%A9-%E8%B3%87%E6%9C%AC%E8%A6%81%E6%B1%82%E6%B3%A2%E5%8B%95%E5%8F%AF%E6%9C%9B%E6%B8%9B%E5%8D%8A-232647273.html",
+   "published": "Wed, 30 Sep 2026 23:26:47 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "全球股市Q3市值再增3兆美元，KOSPI逆勢急吐近兩成",
+   "url": "https://tw.stock.yahoo.com/news/%E5%85%A8%E7%90%83%E8%82%A1%E5%B8%82q3%E5%B8%82%E5%80%BC%E5%86%8D%E5%A2%9E3%E5%85%86%E7%BE%8E%E5%85%83-kospi%E9%80%86%E5%8B%A2%E6%80%A5%E5%90%90%E8%BF%91%E5%85%A9%E6%88%90-232432987.html",
+   "published": "Wed, 30 Sep 2026 23:24:32 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "晴到多雲高溫炎熱 紫外線強防曬補水",
+   "url": "https://tw.news.yahoo.com/%E6%99%B4%E5%88%B0%E5%A4%9A%E9%9B%B2%E9%AB%98%E6%BA%AB%E7%82%8E%E7%86%B1-%E7%B4%AB%E5%A4%96%E7%B7%9A%E5%BC%B7%E9%98%B2%E6%9B%AC%E8%A3%9C%E6%B0%B4-232314005.html",
+   "published": "Wed, 30 Sep 2026 23:23:14 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
    "title": "以色列：杜拜航空機師企圖讓飛機墜毀 乘客力阻悲劇",
    "url": "https://money.udn.com/money/story/5599/9787001",
    "published": "Wed, 30 Sep 2026 23:21:54 +0800",
    "source": "經濟日報焦點",
+   "codes": []
+  },
+  {
+   "title": "日本財務省數據顯示，8月27日至9月28日未動用資金干預匯市",
+   "url": "https://tw.stock.yahoo.com/news/%E6%97%A5%E6%9C%AC%E8%B2%A1%E5%8B%99%E7%9C%81%E6%95%B8%E6%93%9A%E9%A1%AF%E7%A4%BA-8%E6%9C%8827%E6%97%A5%E8%87%B39%E6%9C%8828%E6%97%A5%E6%9C%AA%E5%8B%95%E7%94%A8%E8%B3%87%E9%87%91%E5%B9%B2%E9%A0%90%E5%8C%AF%E5%B8%82-232146607.html",
+   "published": "Wed, 30 Sep 2026 23:21:46 GMT",
+   "source": "Yahoo股市",
    "codes": []
   },
   {
@@ -47,10 +244,87 @@
    "codes": []
   },
   {
+   "title": "川普公布南韓對美2000億美元投資計畫 含阿拉斯加LNG",
+   "url": "https://tw.stock.yahoo.com/news/%E5%B7%9D%E6%99%AE%E5%85%AC%E5%B8%83%E5%8D%97%E9%9F%93%E5%B0%8D%E7%BE%8E2000%E5%84%84%E7%BE%8E%E5%85%83%E6%8A%95%E8%B3%87%E8%A8%88%E7%95%AB-%E5%90%AB%E9%98%BF%E6%8B%89%E6%96%AF%E5%8A%A0lng-232003576.html",
+   "published": "Wed, 30 Sep 2026 23:20:03 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "斡旋想換同公司其他業務？內行人：這個沒注意不可能",
+   "url": "https://tw.stock.yahoo.com/news/%E6%96%A1%E6%97%8B%E6%83%B3%E6%8F%9B%E5%90%8C%E5%85%AC%E5%8F%B8%E5%85%B6%E4%BB%96%E6%A5%AD%E5%8B%99%EF%BC%9F%E5%85%A7%E8%A1%8C%E4%BA%BA%EF%BC%9A%E9%80%99%E5%80%8B%E6%B2%92%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%8F%AF%E8%83%BD-231500989.html",
+   "published": "Wed, 30 Sep 2026 23:15:00 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "寵物保險業者導入AI客服代理 效率與滿意度顯著提升",
+   "url": "https://tw.stock.yahoo.com/news/%E5%AF%B5%E7%89%A9%E4%BF%9D%E9%9A%AA%E6%A5%AD%E8%80%85%E5%B0%8E%E5%85%A5ai%E5%AE%A2%E6%9C%8D%E4%BB%A3%E7%90%86-%E6%95%88%E7%8E%87%E8%88%87%E6%BB%BF%E6%84%8F%E5%BA%A6%E9%A1%AF%E8%91%97%E6%8F%90%E5%8D%87-231447642.html",
+   "published": "Wed, 30 Sep 2026 23:14:47 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "Lyft 應用程式登陸歐洲 北美旅客暢行無阻",
+   "url": "https://tw.stock.yahoo.com/news/lyft-%E6%87%89%E7%94%A8%E7%A8%8B%E5%BC%8F%E7%99%BB%E9%99%B8%E6%AD%90%E6%B4%B2-%E5%8C%97%E7%BE%8E%E6%97%85%E5%AE%A2%E6%9A%A2%E8%A1%8C%E7%84%A1%E9%98%BB-231329630.html",
+   "published": "Wed, 30 Sep 2026 23:13:29 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "台股ETF十月除息秀登場，台新00904、00947配息各為2.2元、2元同創新高",
+   "url": "https://tw.stock.yahoo.com/news/%E5%8F%B0%E8%82%A1etf%E5%8D%81%E6%9C%88%E9%99%A4%E6%81%AF%E7%A7%80%E7%99%BB%E5%A0%B4-%E5%8F%B0%E6%96%B000904-00947%E9%85%8D%E6%81%AF%E5%90%84%E7%82%BA2-2%E5%85%83-2%E5%85%83%E5%90%8C%E5%89%B5%E6%96%B0%E9%AB%98-230924954.html",
+   "published": "Wed, 30 Sep 2026 23:09:24 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "美光營收獲利雙超預期 下一季財測再創新高",
+   "url": "https://tw.news.yahoo.com/%E7%BE%8E%E5%85%89%E7%87%9F%E6%94%B6%E7%8D%B2%E5%88%A9%E9%9B%99%E8%B6%85%E9%A0%90%E6%9C%9F-%E4%B8%8B-%E5%AD%A3%E8%B2%A1%E6%B8%AC%E5%86%8D%E5%89%B5%E6%96%B0%E9%AB%98-230650600.html",
+   "published": "Wed, 30 Sep 2026 23:06:50 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
    "title": "杜拜航空空中喋血 以色列防長：是「聖戰恐攻」",
    "url": "https://money.udn.com/money/story/5599/9786937",
    "published": "Wed, 30 Sep 2026 23:06:37 +0800",
    "source": "經濟日報焦點",
+   "codes": []
+  },
+  {
+   "title": "應用材料股價今年翻倍 摩根士丹利上調財測看好前景",
+   "url": "https://tw.stock.yahoo.com/news/%E6%87%89%E7%94%A8%E6%9D%90%E6%96%99%E8%82%A1%E5%83%B9%E4%BB%8A%E5%B9%B4%E7%BF%BB%E5%80%8D-%E6%91%A9%E6%A0%B9%E5%A3%AB%E4%B8%B9%E5%88%A9%E4%B8%8A%E8%AA%BF%E8%B2%A1%E6%B8%AC%E7%9C%8B%E5%A5%BD%E5%89%8D%E6%99%AF-230531126.html",
+   "published": "Wed, 30 Sep 2026 23:05:31 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "MarketBeat 點名五檔遊戲類股 近期高交易量受市場矚目",
+   "url": "https://tw.stock.yahoo.com/news/marketbeat-%E9%BB%9E%E5%90%8D%E4%BA%94%E6%AA%94%E9%81%8A%E6%88%B2%E9%A1%9E%E8%82%A1-%E8%BF%91%E6%9C%9F%E9%AB%98%E4%BA%A4%E6%98%93%E9%87%8F%E5%8F%97%E5%B8%82%E5%A0%B4%E7%9F%9A%E7%9B%AE-230502780.html",
+   "published": "Wed, 30 Sep 2026 23:05:02 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "凱基金董事會通過辦理現增200億-250億元，七成以上將挹注凱基證券",
+   "url": "https://tw.stock.yahoo.com/news/%E5%87%B1%E5%9F%BA%E9%87%91%E8%91%A3%E4%BA%8B%E6%9C%83%E9%80%9A%E9%81%8E%E8%BE%A6%E7%90%86%E7%8F%BE%E5%A2%9E200%E5%84%84-250%E5%84%84%E5%85%83-%E4%B8%83%E6%88%90%E4%BB%A5%E4%B8%8A%E5%B0%87%E6%8C%B9%E6%B3%A8%E5%87%B1%E5%9F%BA%E8%AD%89%E5%88%B8-230206699.html",
+   "published": "Wed, 30 Sep 2026 23:02:06 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "Veridian Credit Union 奪全美會員價值冠軍 愛荷華合作社連年獲肯定",
+   "url": "https://tw.stock.yahoo.com/news/veridian-credit-union-%E5%A5%AA%E5%85%A8%E7%BE%8E%E6%9C%83%E5%93%A1%E5%83%B9%E5%80%BC%E5%86%A0%E8%BB%8D-%E6%84%9B%E8%8D%B7%E8%8F%AF%E5%90%88%E4%BD%9C%E7%A4%BE%E9%80%A3%E5%B9%B4%E7%8D%B2%E8%82%AF%E5%AE%9A-230136479.html",
+   "published": "Wed, 30 Sep 2026 23:01:36 GMT",
+   "source": "Yahoo股市",
+   "codes": []
+  },
+  {
+   "title": "AI加速晶片開發：新思科技聯手OpenAI打造智慧設計模型",
+   "url": "https://tw.stock.yahoo.com/news/ai%E5%8A%A0%E9%80%9F%E6%99%B6%E7%89%87%E9%96%8B%E7%99%BC-%E6%96%B0%E6%80%9D%E7%A7%91%E6%8A%80%E8%81%AF%E6%89%8Bopenai%E6%89%93%E9%80%A0%E6%99%BA%E6%85%A7%E8%A8%AD%E8%A8%88%E6%A8%A1%E5%9E%8B-230132886.html",
+   "published": "Wed, 30 Sep 2026 23:01:32 GMT",
+   "source": "Yahoo股市",
    "codes": []
   },
   {
@@ -1901,287 +2175,6 @@
    "url": "https://www.cna.com.tw/news/afe/202609300089.aspx",
    "published": "Wed, 30 Sep 2026 12:15:36 +0800",
    "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "新台幣午盤升0.2分 暫收31.874元",
-   "url": "https://www.cna.com.tw/news/afe/202609300087.aspx",
-   "published": "Wed, 30 Sep 2026 12:06:31 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "醫療照護走入家中 壽險業接力推在宅醫療保單",
-   "url": "https://www.cna.com.tw/news/afe/202609300077.aspx",
-   "published": "Wed, 30 Sep 2026 11:55:10 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "宏碁平板標案需求回溫 跨足電子紙搶攻第二螢幕商機",
-   "url": "https://www.cna.com.tw/news/afe/202609300042.aspx",
-   "published": "Wed, 30 Sep 2026 10:44:56 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "投資人把 Fed 想得太鷹？威廉斯稱不急 10月升息押注降溫",
-   "url": "https://money.udn.com/money/story/5599/9784913",
-   "published": "Wed, 30 Sep 2026 09:42:25 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "颶風波洛橫掃墨國沿岸 強度減弱直撲內陸無傷亡",
-   "url": "https://money.udn.com/money/story/5599/9784906",
-   "published": "Wed, 30 Sep 2026 09:36:28 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "用可愛風迎戰 Meta！OpenAI 推俏皮 AI 代理 dots 奧特曼說幫你包辦大小事",
-   "url": "https://money.udn.com/money/story/5599/9784897",
-   "published": "Wed, 30 Sep 2026 09:31:40 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "鴻海員工分紅獎金入帳 表現優異者逾百萬元入袋",
-   "url": "https://money.udn.com/money/story/5612/9784894",
-   "published": "Wed, 30 Sep 2026 09:30:57 +0800",
-   "source": "經濟日報產業",
-   "codes": []
-  },
-  {
-   "title": "AI巨頭倡業界自律 專家指安全規範恐成大公司護城河",
-   "url": "https://money.udn.com/money/story/123398/9784891",
-   "published": "Wed, 30 Sep 2026 09:30:47 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "川習會國宴內幕！陸企高層最後關頭遭白宮拒於門外 原因曝光",
-   "url": "https://money.udn.com/money/story/5599/9784878",
-   "published": "Wed, 30 Sep 2026 09:26:18 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "台積電衝上2505元 台股早盤漲逾500點站回48000點",
-   "url": "https://money.udn.com/money/story/5607/9784872",
-   "published": "Wed, 30 Sep 2026 09:21:26 +0800",
-   "source": "經濟日報證券",
-   "codes": [
-    "2330"
-   ]
-  },
-  {
-   "title": "鴻海員工分紅獎金入帳 表現優異者逾百萬元入袋",
-   "url": "https://www.cna.com.tw/news/afe/202609300025.aspx",
-   "published": "Wed, 30 Sep 2026 09:20:19 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "台股開高重返48K！台積電領軍五大權值股全紅 「這些 AI 股」同步上攻",
-   "url": "https://money.udn.com/money/story/5607/9784865",
-   "published": "Wed, 30 Sep 2026 09:14:46 +0800",
-   "source": "經濟日報證券",
-   "codes": [
-    "2330"
-   ]
-  },
-  {
-   "title": "台積電衝上2505元 台股早盤漲逾500點站回48000點",
-   "url": "https://www.cna.com.tw/news/afe/202609300022.aspx",
-   "published": "Wed, 30 Sep 2026 09:14:12 +0800",
-   "source": "中央社財經",
-   "codes": [
-    "2330"
-   ]
-  },
-  {
-   "title": "台股開盤漲135.53點",
-   "url": "https://money.udn.com/money/story/5607/9784857",
-   "published": "Wed, 30 Sep 2026 09:12:34 +0800",
-   "source": "經濟日報證券",
-   "codes": []
-  },
-  {
-   "title": "台股開盤漲135.53點",
-   "url": "https://www.cna.com.tw/news/afe/202609300021.aspx",
-   "published": "Wed, 30 Sep 2026 09:05:10 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "新台幣開盤升2.6分 為31.85元",
-   "url": "https://www.cna.com.tw/news/afe/202609300020.aspx",
-   "published": "Wed, 30 Sep 2026 09:03:08 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "銅價短線震盪 銅礦供給恐現2017年來首次下降",
-   "url": "https://money.udn.com/money/story/5612/9784830",
-   "published": "Wed, 30 Sep 2026 09:00:36 +0800",
-   "source": "經濟日報產業",
-   "codes": []
-  },
-  {
-   "title": "AI高層白宮午餐會 川普強調業界應自律監管",
-   "url": "https://money.udn.com/money/story/5599/9784820",
-   "published": "Wed, 30 Sep 2026 08:55:03 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "南韓控地雷炸傷3軍人 北韓駁斥稱對方將付代價",
-   "url": "https://money.udn.com/money/story/5599/9784819",
-   "published": "Wed, 30 Sep 2026 08:54:48 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "美中關稅減免未納入黃豆 美國壓榨創高支撐市場",
-   "url": "https://money.udn.com/money/story/5599/9784814",
-   "published": "Wed, 30 Sep 2026 08:50:38 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "9月房市買氣小幅回溫！永慶：全台交易年增17% 「這都」暴增29%最亮眼",
-   "url": "https://tw.stock.yahoo.com/news/9%E6%9C%88%E6%88%BF%E5%B8%82%E8%B2%B7%E6%B0%A3%E5%B0%8F%E5%B9%85%E5%9B%9E%E6%BA%AB%EF%BC%81%E6%B0%B8%E6%85%B6%EF%BC%9A%E5%85%A8%E5%8F%B0%E4%BA%A4%E6%98%93%E5%B9%B4%E5%A2%9E17-%E3%80%8C%E9%80%99%E9%83%BD%E3%80%8D%E6%9A%B4%E5%A2%9E29%E6%9C%80%E4%BA%AE%E7%9C%BC-084840822.html",
-   "published": "Wed, 30 Sep 2026 08:48:40 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "費半走揚台指期夜盤大漲 台股多空震盪",
-   "url": "https://money.udn.com/money/story/5612/9784811",
-   "published": "Wed, 30 Sep 2026 08:45:31 +0800",
-   "source": "經濟日報產業",
-   "codes": []
-  },
-  {
-   "title": "聯準會鷹派政策加持 美元強勢恐續拖累英鎊第四季匯率",
-   "url": "https://tw.stock.yahoo.com/news/%E8%81%AF%E6%BA%96%E6%9C%83%E9%B7%B9%E6%B4%BE%E6%94%BF%E7%AD%96%E5%8A%A0%E6%8C%81-%E7%BE%8E%E5%85%83%E5%BC%B7%E5%8B%A2%E6%81%90%E7%BA%8C%E6%8B%96%E7%B4%AF%E8%8B%B1%E9%8E%8A%E7%AC%AC%E5%9B%9B%E5%AD%A3%E5%8C%AF%E7%8E%87-084226687.html",
-   "published": "Wed, 30 Sep 2026 08:42:26 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "美國企業AI導入速度不同調 各州使用率差異顯著",
-   "url": "https://tw.stock.yahoo.com/news/%E7%BE%8E%E5%9C%8B%E4%BC%81%E6%A5%ADai%E5%B0%8E%E5%85%A5%E9%80%9F%E5%BA%A6%E4%B8%8D%E5%90%8C%E8%AA%BF-%E5%90%84%E5%B7%9E%E4%BD%BF%E7%94%A8%E7%8E%87%E5%B7%AE%E7%95%B0%E9%A1%AF%E8%91%97-084113727.html",
-   "published": "Wed, 30 Sep 2026 08:41:13 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "川普推AI變成自打臉？實測狂唱反調超尷尬",
-   "url": "https://tw.news.yahoo.com/%E5%B7%9D%E6%99%AE%E6%8E%A8ai%E8%AE%8A%E6%88%90%E8%87%AA%E6%89%93%E8%87%89-%E5%AF%A6%E6%B8%AC%E7%8B%82%E5%94%B1%E5%8F%8D%E8%AA%BF%E8%B6%85%E5%B0%B7%E5%B0%AC-083919425.html",
-   "published": "Wed, 30 Sep 2026 08:39:19 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "不與習近平合作！川普畫美中 AI 紅線 喊美國不能自廢武功",
-   "url": "https://money.udn.com/money/story/5599/9784803",
-   "published": "Wed, 30 Sep 2026 08:39:11 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "賣壓止不住！美國10年期公債殖利率恐衝破6% 投資人要緊張了",
-   "url": "https://money.udn.com/money/story/123398/9784797",
-   "published": "Wed, 30 Sep 2026 08:35:51 +0800",
-   "source": "經濟日報焦點",
-   "codes": []
-  },
-  {
-   "title": "2月才賣湖口廠！欣興今砸100億元買下普利司通湖口近2萬坪土地",
-   "url": "https://tw.stock.yahoo.com/news/2%E6%9C%88%E6%89%8D%E8%B3%A3%E6%B9%96%E5%8F%A3%E5%BB%A0%EF%BC%81%E6%AC%A3%E8%88%88%E4%BB%8A%E7%A0%B8100%E5%84%84%E5%85%83%E8%B2%B7%E4%B8%8B%E6%99%AE%E5%88%A9%E5%8F%B8%E9%80%9A%E6%B9%96%E5%8F%A3%E8%BF%912%E8%90%AC%E5%9D%AA%E5%9C%9F%E5%9C%B0-083439051.html",
-   "published": "Wed, 30 Sep 2026 08:34:39 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "費半走揚台指期夜盤大漲 台股多空震盪",
-   "url": "https://www.cna.com.tw/news/afe/202609300016.aspx",
-   "published": "Wed, 30 Sep 2026 08:32:59 +0800",
-   "source": "中央社財經",
-   "codes": []
-  },
-  {
-   "title": "9月30日盤前／油市回落、費半上漲 台股景氣燈號連9紅 喜迎10月行情",
-   "url": "https://money.udn.com/money/story/5607/9784792",
-   "published": "Wed, 30 Sep 2026 08:31:48 +0800",
-   "source": "經濟日報證券",
-   "codes": []
-  },
-  {
-   "title": "企業 AI 應用趨勢下合規成難題 Shield 推出 MCP Server 解決資安隱憂",
-   "url": "https://tw.stock.yahoo.com/news/%E4%BC%81%E6%A5%AD-ai-%E6%87%89%E7%94%A8%E8%B6%A8%E5%8B%A2%E4%B8%8B%E5%90%88%E8%A6%8F%E6%88%90%E9%9B%A3%E9%A1%8C-shield-%E6%8E%A8%E5%87%BA-083057953.html",
-   "published": "Wed, 30 Sep 2026 08:30:57 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "中國推政策組合方案＋PMI回溫，恆生指數週三震盪收漲89.7點或0.37%",
-   "url": "https://tw.stock.yahoo.com/news/%E4%B8%AD%E5%9C%8B%E6%8E%A8%E6%94%BF%E7%AD%96%E7%B5%84%E5%90%88%E6%96%B9%E6%A1%88-pmi%E5%9B%9E%E6%BA%AB-%E6%81%86%E7%94%9F%E6%8C%87%E6%95%B8%E9%80%B1%E4%B8%89%E9%9C%87%E7%9B%AA%E6%94%B6%E6%BC%B289-7%E9%BB%9E%E6%88%960-37-083026079.html",
-   "published": "Wed, 30 Sep 2026 08:30:26 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "服務業大缺工！ 每職缺僅0.16人應徵 近百萬工作機會搶人才",
-   "url": "https://tw.stock.yahoo.com/news/%E6%9C%8D%E5%8B%99%E6%A5%AD%E5%A4%A7%E7%BC%BA%E5%B7%A5-%E6%AF%8F%E8%81%B7%E7%BC%BA%E5%83%850-16%E4%BA%BA%E6%87%89%E5%BE%B5-%E8%BF%91%E7%99%BE%E8%90%AC%E5%B7%A5%E4%BD%9C%E6%A9%9F%E6%9C%83%E6%90%B6%E4%BA%BA%E6%89%8D-083000078.html",
-   "published": "Wed, 30 Sep 2026 08:30:00 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "SuperX宣布AI創新中心升級至2.0，新增模型即服務 (MaaS)",
-   "url": "https://tw.stock.yahoo.com/news/superx%E5%AE%A3%E5%B8%83ai%E5%89%B5%E6%96%B0%E4%B8%AD%E5%BF%83%E5%8D%87%E7%B4%9A%E8%87%B32-0-%E6%96%B0%E5%A2%9E%E6%A8%A1%E5%9E%8B%E5%8D%B3%E6%9C%8D%E5%8B%99-maas-083000266.html",
-   "published": "Wed, 30 Sep 2026 08:30:00 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "鴻海員工一早香醒了 百萬分紅獎金今入袋",
-   "url": "https://money.udn.com/money/story/5612/9784791",
-   "published": "Wed, 30 Sep 2026 08:29:15 +0800",
-   "source": "經濟日報產業",
-   "codes": []
-  },
-  {
-   "title": "推動捷運青線南延小港 陳其邁：帶動區域交通重組、串聯小港發展動能",
-   "url": "https://tw.stock.yahoo.com/news/%E6%8E%A8%E5%8B%95%E6%8D%B7%E9%81%8B%E9%9D%92%E7%B7%9A%E5%8D%97%E5%BB%B6%E5%B0%8F%E6%B8%AF-%E9%99%B3%E5%85%B6%E9%82%81-%E5%B8%B6%E5%8B%95%E5%8D%80%E5%9F%9F%E4%BA%A4%E9%80%9A%E9%87%8D%E7%B5%84-%E4%B8%B2%E8%81%AF%E5%B0%8F%E6%B8%AF%E7%99%BC%E5%B1%95%E5%8B%95%E8%83%BD-082901860.html",
-   "published": "Wed, 30 Sep 2026 08:29:01 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "鼓勵資產管理發展 14業者獲金管會政策優惠",
-   "url": "https://tw.stock.yahoo.com/news/%E9%BC%93%E5%8B%B5%E8%B3%87%E7%94%A2%E7%AE%A1%E7%90%86%E7%99%BC%E5%B1%95-14%E6%A5%AD%E8%80%85%E7%8D%B2%E9%87%91%E7%AE%A1%E6%9C%83%E6%94%BF%E7%AD%96%E5%84%AA%E6%83%A0-082709592.html",
-   "published": "Wed, 30 Sep 2026 08:27:09 GMT",
-   "source": "Yahoo股市",
-   "codes": []
-  },
-  {
-   "title": "【公告】特力屋將於115年10月6日召開上市前業績發表會",
-   "url": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E7%89%B9%E5%8A%9B%E5%B1%8B%E5%B0%87%E6%96%BC115%E5%B9%B410%E6%9C%886%E6%97%A5%E5%8F%AC%E9%96%8B%E4%B8%8A%E5%B8%82%E5%89%8D%E6%A5%AD%E7%B8%BE%E7%99%BC%E8%A1%A8%E6%9C%83-082707831.html",
-   "published": "Wed, 30 Sep 2026 08:27:07 GMT",
-   "source": "Yahoo股市",
-   "codes": [
-    "7867"
-   ]
-  },
-  {
-   "title": "【公告】華新研發主管異動",
-   "url": "https://tw.stock.yahoo.com/news/%E5%85%AC%E5%91%8A-%E8%8F%AF%E6%96%B0%E7%A0%94%E7%99%BC%E4%B8%BB%E7%AE%A1%E7%95%B0%E5%8B%95-082705266.html",
-   "published": "Wed, 30 Sep 2026 08:27:05 GMT",
-   "source": "Yahoo股市",
    "codes": []
   }
  ]
