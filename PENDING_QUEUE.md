@@ -17233,6 +17233,6 @@ maintenance.py`）／借券（`fetch_securities_lending_sell.py`／
 push 後停下等 Cowork 核對。
 
 - [x] **先.五-一 #406 結案確認（無需動工）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行） **完成 2026-10-01**：Cowork 核對確認；關6 試驗數口徑定為常規（取兩口徑較大者），不再列待裁示。
-- [ ] **先.五-二 紙.二 v2 定稿＋SHA256＋#407 前進式事前登記＋commit/push（產生第一筆持股前）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）新檔 `docs/PREREG_supply_tightness_v2_FORWARD.md`（與 FINAL 唯一差異：刪 I5、I1–I4 至少 3 個可得），註明事後假設非證據；TRIALS_LEDGER／TRIALS_REGISTRY 新增 #407；禁任何歷史回測、holdout 不解鎖。
+- [x] **先.五-二 紙.二 v2 定稿＋SHA256＋#407 前進式事前登記＋commit/push（產生第一筆持股前）**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）新檔 `docs/PREREG_supply_tightness_v2_FORWARD.md`（與 FINAL 唯一差異：刪 I5、I1–I4 至少 3 個可得），註明事後假設非證據；TRIALS_LEDGER／TRIALS_REGISTRY 新增 #407；禁任何歷史回測、holdout 不解鎖。 **完成 2026-10-01**：新檔 `docs/PREREG_supply_tightness_v2_FORWARD.md`（LF，SHA256=6fdafef2b5799ea94724b13ee5aa2f13a146d37a54db6bfeceb1479f6aa83d5b；與 FINAL 之 diff 僅 I5 列刪除、§4(a) 組合句改為 I1–I4 至少 3 個、新檔頭、檔尾 §8 前向規則）；#407 前進式事前登記已寫入 TRIALS_LEDGER／TRIALS_REGISTRY；檔內明寫「本假設源自 #406 登記後之消融結果，非證據，只以前進資料判讀」。`[自行裁量]`：「隔日開盤價進場」取字面讀法（訊號日＝換股日、成交日＝次一交易日開盤），已寫入 §8 第 4 點。commit＋push 後才可產生第一筆持股。
 - [ ] **先.五-三 紙.二 前進式追蹤腳本（冪等、append-only、降級不補猜）**（互動視窗；依賴先.五-二已 push；心跳：`research/data/paper_supply_v2_log.jsonl` 之 append-only 紀錄＋本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）首次換股日 2026-11-16；紙.一 不得動；App 不顯示。
 - [ ] **先.五-四 Shioaji quotes auto-update commit 洪水根因＋改為盤中只寫檔、收盤後每日最多 1 個 commit**（互動視窗；心跳：本項 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行）不得改寫已推上的歷史；若動 `research/shioaji_quotes.py` 須依七之二重啟並驗證。
