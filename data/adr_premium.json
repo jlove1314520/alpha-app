@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-10-01T02:11:26+00:00",
+  "computed_at": "2026-10-01T04:57:49+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
@@ -8,13 +8,13 @@
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
       "us_price": 456.19,
       "us_quote_time": 1790798400,
-      "tw_price": 2495.0,
-      "tw_quote_time": "10:10:40",
+      "tw_price": 2500.0,
+      "tw_quote_time": "12:56:40",
       "tw_quote_date": "20261001",
       "fx_rate": 31.852,
       "fx_date": "2026-09-30",
       "implied_tw_price": 2906.113,
-      "premium_pct": 16.477
+      "premium_pct": 16.245
     }
   },
   "errors": [
