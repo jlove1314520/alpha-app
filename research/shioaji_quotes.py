@@ -649,6 +649,17 @@ def _load_env(path: Path) -> dict[str, str]:
 
 
 def _write_failure(reason: str) -> None:
+    # 先.五-四（2026-10-01）：fetched_at 每次都不同 → git diff 永遠有變動 → launcher 每2分鐘 commit
+    # 一次（10/1 單日158個）。狀態與原因沒變就不碰檔案；讀檔失敗一律 fail open 照舊寫入。
+    try:
+        if OUT_PATH.exists():
+            prev = json.loads(OUT_PATH.read_text(encoding="utf-8"))
+            if (prev.get("connected") is False and prev.get("error") == reason
+                    and not prev.get("quotes")):
+                print(f"失敗狀態未變（{reason}），不重寫檔案避免空轉commit")
+                return
+    except Exception as e:  # noqa: BLE001
+        print(f"[警告] 讀取既有失敗狀態失敗，照舊寫入：{type(e).__name__}: {e}")
     payload = {
         "fetched_at": datetime.now(TW_TZ).isoformat(),
         "connected": False,
