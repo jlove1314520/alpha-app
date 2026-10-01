@@ -456,6 +456,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   .cmodal button{flex:1;border:0;border-radius:11px;padding:12px 0;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
   .cmodal .cancel{background:var(--surface-3);color:var(--ink)}
   .cmodal .del{background:var(--up-deep);color:#fff}
+  #scr-picks.supply-mode .picks-lb-only{display:none!important}
 </style>
 </head>
 <body>
@@ -769,9 +770,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:10px">
       <div>
         <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
-        <div class="note num" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
-        <div class="note" id="picks-weight-note" style="margin-top:2px">非投資建議</div>
-        <div class="note" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
+        <div class="note num picks-lb-only" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
+        <div class="note picks-lb-only" id="picks-weight-note" style="margin-top:2px">非投資建議</div>
+        <div class="note picks-lb-only" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
     </div>
@@ -781,22 +782,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="mkt-toggle" id="picks-board-toggle" style="margin-top:8px;width:100%"></div>
     <!-- 2026-08-27新增（策略層面重要決定，使用者要求「最重要」，兩榜都要固定
          顯示，回測完成前不得移除）：本榜是資料排序，不是驗證過的策略。 -->
-    <div class="note" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。</div>
+    <div class="note picks-lb-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
-    <div class="note" id="picks-coverage-note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
+    <div class="note picks-lb-only" id="picks-coverage-note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
       高分但資料完整度低的股票分數僅供參考、不代表可信——卡片變淡、加註「資料稀疏」的就是這種情況。</div>
 
     <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
-    <div class="press" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
+    <div class="press picks-lb-only" style="display:flex;align-items:center;gap:10px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 14px" onclick="document.getElementById('picks-search-input').focus()">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8a857b" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="picks-search-input" type="text" placeholder="搜尋股票代號或公司名稱…" oninput="onPicksSearchInput(this.value)" style="flex:1;background:none;border:0;outline:0;color:var(--ink);font-size:13.5px;font-family:inherit">
       <span style="font-size:10px;color:#c9a35a;background:rgba(216,176,112,.1);padding:3px 8px;border-radius:6px;flex-shrink:0">查評分</span>
     </div>
-    <div id="picks-search-result"></div>
+    <div id="picks-search-result" class="picks-lb-only"></div>
 
     <!-- 主流題材（資金流向）chips -->
-    <div id="mainstream-wrap" style="margin-top:12px">
+    <div id="mainstream-wrap" class="picks-lb-only" style="margin-top:12px">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:12px;color:var(--ink-3)">🔥 主流題材（資金流入中）</div>
         <span class="press refresh-btn" id="mainstream-refresh" onclick="refreshTap(this,null,loadMainstreamIndustries)">重新整理</span>
@@ -806,17 +807,34 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </div>
 
     <!-- 產業篩選 chips -->
-    <div id="picks-chips" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px"></div>
+    <div id="picks-chips" class="picks-lb-only" style="display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px"></div>
 
-    <div class="card" id="picks-list-card" style="margin-top:10px">
+    <div class="card picks-lb-only" id="picks-list-card" style="margin-top:10px">
       <h3>綜合評分排行<span class="press refresh-btn" id="picks-refresh" onclick="refreshTap(this,null,async()=>{fmClearCache();await hydratePicks(true)})">重新整理</span></h3>
       <div class="note" style="margin-bottom:8px">最後更新（本機瀏覽器抓取時間）：<b id="picks-updated-tm">--:--</b></div>
       <div id="picks-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
       <div class="note">來源：research/score_v2.py（本機/排程產生，非即時報價） · 點列可看完整評分報告</div>
     </div>
 
+
+    <!-- 2026-10-01（先.八-三，總司令裁示）供給吃緊觀察清單：純描述性資料。
+         只列最新一季「法定期限已過」之財報的 I1–I4 原始變化值與產業桶內百分位（同 PREREG v2 定義）；
+         不得出現綜合分數、排名、買進字樣、任何績效數字。資料 data/supply_watchlist.json 由既有排程每日更新。 -->
+    <div class="card" id="picks-supply-card" style="display:none;margin-top:10px">
+      <h3>供給吃緊觀察清單</h3>
+      <div class="note" style="color:#c9524a;font-weight:600">描述性資料，未經回測驗證；紙上追蹤中，滿8季前不得作為真錢依據</div>
+      <div class="note" id="supply-meta-line" style="margin-top:6px">載入中…</div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <select id="supply-industry" onchange="onSupplyFilter(this.value)" style="flex:1;min-width:0;background:rgba(255,255,255,.05);color:var(--ink);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:8px 10px;font-size:13px"><option value="">全部產業</option></select>
+      </div>
+      <div id="supply-sort-chips" style="display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:4px"></div>
+      <div id="supply-list" style="margin-top:6px"></div>
+      <div id="supply-more" style="text-align:center;margin-top:8px"></div>
+      <div class="note" id="supply-defs" style="margin-top:10px"></div>
+    </div>
+
     <!-- 美股/期貨：見 PROGRESS.md -->
-    <div class="card" id="picks-us-panel" style="display:none">
+    <div class="card picks-lb-only" id="picks-us-panel" style="display:none">
       <h3>美股評分</h3>
       <!-- 2026-08-28更正（P0併入）：先前這裡暗示美股「沒有來源」是誤判，
       已查證yfinance提供.financials/.balance_sheet/.cashflow（損益表/資產
@@ -824,7 +842,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       回測工作之後——不是無來源，是還沒排到，措辭要如實反映這個差異。 -->
       <div class="note"><b style="color:var(--ink-2)">建置中，尚無評分。</b>台股評分引擎（research/score_v2.py）的8大因子有一半以上依賴台股專屬資料源（月營收/三大法人籌碼等FinMind台股資料集），美股需要另外設計一套因子管線——資料源已查證可行（yfinance提供美股損益表/資產負債表/現金流量表），已排入研究待辦（BACKLOG B29），會接在P0修復跟台股回測工作之後。目前沒有時程承諾，請不要預期短期內上線。</div>
     </div>
-    <div class="card" id="picks-fut-panel" style="display:none">
+    <div class="card picks-lb-only" id="picks-fut-panel" style="display:none">
       <h3>期貨策略訊號</h3>
       <div class="note"><b style="color:var(--ink-2)">無已驗證策略，不提供訊號。</b>期貨軌（TAIFEX台指期）研究馬拉松目前已測過22個策略假說，全部未通過統計驗證關卡（含一個一度看似通過便宜關卡、但完整樣本外驗證後證實失敗的候選）——這不是還沒開始做，是誠實做過、目前確實還沒有找到站得住腳的訊號。不會為了「有東西可以顯示」硬推一個沒驗證過的訊號上來，那樣比不顯示更危險。</div>
     </div>
@@ -5451,6 +5469,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function barFill(coverage){
     return (coverage!=null&&coverage<0.5)?'rgba(216,176,112,.5)':'var(--gold-grad)';
   }
+  let SUPPLY_VIEW=false;
   const PICKS_TOP_N=30; // 排行榜預設只顯示前 30 名，樣本其餘檔數靠搜尋查（見 generate_scores_v2.py 說明）
   let PICKS_INDUSTRY=null; // null = 全部產業
   // 2026-08-27新增（策略層面決定）：三榜共用同一個載入/渲染函式，只是檔名跟
@@ -5462,6 +5481,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function hydratePicks(forceReload){
     renderMktToggle('picks');onPicksToggleChange();
     renderPicksBoardToggle();
+    applySupplyMode();
+    if(SUPPLY_VIEW){_safeAsync('hydrateSupply',()=>hydrateSupply(forceReload));return}
     _safeAsync('loadMainstreamIndustries',loadMainstreamIndustries);
     const cfg=_picksBoardConfig();
     if(cfg.cacheGet()&&!forceReload){renderPicks(cfg.cacheGet());stampUpdated('picks');return}
@@ -5483,8 +5504,93 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 切換價值成長榜/題材動能榜——兩榜完全獨立的因子/權重（見
   // research/score_live_momentum.py檔頭說明），切換時保留各自的cache，
   // 不用每次都重新fetch。
+
+  // ══════ 2026-10-01（先.八-三）供給吃緊觀察清單：只顯示 I1–I4 原始變化值與桶內百分位，無綜合分數／排名／績效 ══════
+  let SUPPLY_CACHE=null,SUPPLY_FILTER='',SUPPLY_SORT='I1',SUPPLY_DESC=true,SUPPLY_SHOWN=100;
+  const SUPPLY_IND_LABEL={I1:'預收增加',I2:'存貨周轉',I3:'毛利率',I4:'資本支出'};
+  function applySupplyMode(){
+    const sc=document.getElementById('scr-picks');if(sc)sc.classList.toggle('supply-mode',!!SUPPLY_VIEW);
+    const card=document.getElementById('picks-supply-card');if(card)card.style.display=SUPPLY_VIEW?'':'none';
+  }
+  function switchSupplyView(){
+    if(SUPPLY_VIEW)return;
+    SUPPLY_VIEW=true;
+    renderPicksBoardToggle();applySupplyMode();
+    _safeAsync('hydrateSupply',()=>hydrateSupply(false));
+  }
+  async function hydrateSupply(forceReload){
+    const listEl=document.getElementById('supply-list');if(!listEl)return;
+    if(SUPPLY_CACHE&&!forceReload){renderSupply();return}
+    listEl.innerHTML=skeletonRowsHtml(6);
+    try{
+      const res=await fetch('data/supply_watchlist.json?_='+Math.floor(Date.now()/3600000));
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      SUPPLY_CACHE=await res.json();
+      renderSupply();
+    }catch(e){
+      console.warn('[hydrateSupply]',e);recordGlobalError('hydrateSupply',e);
+      listEl.innerHTML='<div class="note">尚未產生 data/supply_watchlist.json，或載入失敗（'+String(e.message).replace(/[&<>]/g,'')+'）。此清單由排程每日產生後 commit 進 repo。</div>';
+      const m=document.getElementById('supply-meta-line');if(m)m.textContent='—';
+    }
+  }
+  function onSupplyFilter(v){SUPPLY_FILTER=v;SUPPLY_SHOWN=100;_safeSync('renderSupply',renderSupply)}
+  function onSupplySort(k){
+    if(SUPPLY_SORT===k)SUPPLY_DESC=!SUPPLY_DESC;else{SUPPLY_SORT=k;SUPPLY_DESC=true}
+    SUPPLY_SHOWN=100;_safeSync('renderSupply',renderSupply);
+  }
+  function supplyMoreTap(){SUPPLY_SHOWN+=100;_safeSync('renderSupply',renderSupply)}
+  function supplyFmt(k,v){
+    if(v==null||!isFinite(v))return '—';
+    if(k==='I2')return (v>0?'+':'')+v.toFixed(2)+'次';
+    const pp=v*100;return (pp>0?'+':'')+pp.toFixed(2)+'pp';
+  }
+  function renderSupply(){
+    const d=SUPPLY_CACHE;if(!d)return;
+    const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const m=d.meta||{};
+    const covPct=m.coverage_period!=null?(m.coverage_period*100).toFixed(1)+'%':'—';
+    const lowCov=m.coverage_period!=null&&m.coverage_period<0.8;
+    document.getElementById('supply-meta-line').innerHTML=
+      `基準季 <b>${esc(m.period)}</b>（法定公告期限 ${esc(m.period_deadline)} 已過）· 資料日 ${esc(m.as_of)}<br>名冊 ${m.n_universe} 檔，已入庫該季財報 ${m.n_with_period} 檔（${covPct}），可計百分位 ${m.n_scored} 檔`
+      +(lowCov?'<br><span style="color:#c9a35a">⚠ 入庫覆蓋率未達 80%，下列百分位只代表已入庫的股票，僅供參考</span>':'');
+    const rows=d.rows||[];
+    const inds=[...new Set(rows.map(r=>r.i))].sort();
+    const sel=document.getElementById('supply-industry');
+    if(sel&&sel.options.length!==inds.length+1){
+      sel.innerHTML='<option value="">全部產業</option>'+inds.map(i=>`<option value="${esc(i)}">${esc(i)}</option>`).join('');
+    }
+    if(sel)sel.value=SUPPLY_FILTER;
+    document.getElementById('supply-sort-chips').innerHTML=['I1','I2','I3','I4'].map(k=>{
+      const on=SUPPLY_SORT===k;
+      return chip(`${k} ${SUPPLY_IND_LABEL[k]}${on?(SUPPLY_DESC?' ↓':' ↑'):''}`,on,`onSupplySort('${k}')`);
+    }).join('');
+    const idx={I1:0,I2:1,I3:2,I4:3}[SUPPLY_SORT];
+    let list=SUPPLY_FILTER?rows.filter(r=>r.i===SUPPLY_FILTER):rows.slice();
+    list.sort((a,b)=>{
+      const x=a.v[idx],y=b.v[idx];
+      const xn=(x==null),yn=(y==null);
+      if(xn&&yn)return a.c<b.c?-1:1;
+      if(xn)return 1;if(yn)return -1;
+      return SUPPLY_DESC?(y-x):(x-y);
+    });
+    const listEl=document.getElementById('supply-list');
+    if(!list.length){listEl.innerHTML='<div class="note">目前沒有已入庫該季財報的股票符合條件。</div>';document.getElementById('supply-more').innerHTML='';return}
+    const cell=(k,r,j)=>{
+      const p=r.p[j];
+      return `<div style="flex:1;min-width:0"><div style="font-size:10px;color:var(--ink-3)">${k}</div><div class="num" style="font-size:12.5px">${supplyFmt(k,r.v[j])}</div><div class="num" style="font-size:10.5px;color:var(--ink-3)">${p==null?'—':'桶內 '+Math.round(p*100)+'%'}</div></div>`;
+    };
+    listEl.innerHTML=list.slice(0,SUPPLY_SHOWN).map(r=>
+      `<div style="padding:9px 0;border-bottom:1px solid var(--hairline)"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:13.5px">${esc(r.n)} ${esc(r.c)}</b><span class="note" style="margin:0">${esc(r.i)}${r.b!==r.i?'（桶：'+esc(r.b)+'）':''}${r.sc?'':' · 指標不足3項，無百分位'}</span></div>`
+      +`<div style="display:flex;gap:6px;margin-top:4px">${['I1','I2','I3','I4'].map((k,j)=>cell(k,r,j)).join('')}</div></div>`).join('');
+    document.getElementById('supply-more').innerHTML=list.length>SUPPLY_SHOWN?chip(`再顯示 100 檔（共 ${list.length}）`,false,'supplyMoreTap()'):`<span class="note">共 ${list.length} 檔</span>`;
+    const ind=m.indicators||{};
+    document.getElementById('supply-defs').innerHTML=['I1','I2','I3','I4'].map(k=>`${k}：${esc(ind[k]||'')}`).join('<br>')
+      +'<br>百分位：'+esc(m.percentile_def||'')+'<br>限制：'+(m.limits||[]).map(esc).join('；');
+  }
   function switchPicksBoard(board){
-    if(PICKS_BOARD===board)return;
+    const wasSupply=SUPPLY_VIEW;
+    if(PICKS_BOARD===board&&!wasSupply)return;
+    SUPPLY_VIEW=false;applySupplyMode();
     PICKS_BOARD=board;
     PICKS_INDUSTRY=null; // 換榜單時清掉產業篩選，避免舊榜單選的產業在新榜單裡對不上
     renderPicksBoardToggle();
@@ -5492,8 +5598,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   function renderPicksBoardToggle(){
     const el=document.getElementById('picks-board-toggle');if(!el)return;
-    const mk=(id)=>`<span class="mtg-opt press${PICKS_BOARD===id?' on':''}" style="flex:1;text-align:center" onclick="switchPicksBoard('${id}')">${BOARD_CONFIG[id].title}</span>`;
-    el.innerHTML=Object.keys(BOARD_CONFIG).map(mk).join('');
+    const mk=(id)=>`<span class="mtg-opt press${(!SUPPLY_VIEW&&PICKS_BOARD===id)?' on':''}" style="flex:1;text-align:center" onclick="switchPicksBoard('${id}')">${BOARD_CONFIG[id].title}</span>`;
+    el.innerHTML=Object.keys(BOARD_CONFIG).map(mk).join('')
+      +`<span class="mtg-opt press${SUPPLY_VIEW?' on':''}" style="flex:1;text-align:center" onclick="switchSupplyView()">供給觀察</span>`;
   }
   // 沒有公司名稱（null/缺欄位）時退回只顯示代號，不要顯示 "null"/"undefined" 這種假名稱。
   function pickLabel(r){
@@ -7535,7 +7642,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-09-30.0100';
+  const APP_VERSION='2026-10-01.2243';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -1673,10 +1673,60 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("50. 首頁狀態列「休市」vs「已收盤」文案：isTradingDay()正確區分週末/國定假日與一般交易日",
     closedLabelErrors.length === 0, closedLabelErrors.join("; ") || closedLabelInfo);
 
+  // 51.【2026-10-01新增，先.八-三】選股頁「供給觀察」頁籤：固定標示免責句、顯示I1–I4原始值與
+  // 桶內百分位、可依產業篩選與單一指標排序；整張卡不得出現買進／綜合分數／排名／報酬／績效字樣。
+  const supplyErrors = [];
+  let supplyInfo = "";
+  try {
+    await page.evaluate(() => go("picks"));
+    await page.waitForTimeout(400);
+    await page.evaluate(() => switchSupplyView());
+    await page.waitForFunction(() => document.querySelectorAll("#supply-list > div").length > 0 || /尚未產生/.test(document.getElementById("supply-list").textContent), null, { timeout: 8000 });
+    const r = await page.evaluate(() => {
+      const card = document.getElementById("picks-supply-card");
+      const vis = el => !!el && el.offsetParent !== null;
+      const text = card.innerText;
+      const out = { visible: vis(card), text: text.length };
+      out.disclaimer = text.includes("描述性資料，未經回測驗證；紙上追蹤中，滿8季前不得作為真錢依據");
+      out.rows = document.querySelectorAll("#supply-list > div").length;
+      out.lbHidden = !vis(document.getElementById("picks-list-card")) && !vis(document.getElementById("picks-chips"));
+      out.bad = ["買進", "綜合", "排名", "報酬", "績效", "勝率", "夏普", "Sortino"].filter(w => text.includes(w));
+      const firstCode = () => { const b = document.querySelector("#supply-list > div b"); return b ? b.textContent : ""; };
+      out.first1 = firstCode();
+      if (typeof onSupplySort === "function") { onSupplySort("I2"); out.first2 = firstCode(); onSupplySort("I2"); out.first3 = firstCode(); onSupplySort("I1"); }
+      const sel = document.getElementById("supply-industry");
+      out.nOpt = sel ? sel.options.length : 0;
+      if (sel && sel.options.length > 1) {
+        sel.value = sel.options[1].value; onSupplyFilter(sel.value);
+        out.filtered = [...document.querySelectorAll("#supply-list > div")].every(d => d.textContent.includes(sel.value));
+        out.nFiltered = document.querySelectorAll("#supply-list > div").length;
+        onSupplyFilter("");
+      }
+      return out;
+    });
+    if (!r.visible) supplyErrors.push("供給觀察卡不可見");
+    if (!r.disclaimer) supplyErrors.push("缺固定免責句");
+    if (!r.lbHidden) supplyErrors.push("切到供給觀察後排行榜未隱藏");
+    if (r.bad.length) supplyErrors.push("出現禁用字樣：" + r.bad.join(","));
+    if (r.rows === 0) supplyErrors.push("沒有任何資料列");
+    if (r.nOpt > 1 && r.filtered === false) supplyErrors.push("產業篩選後仍有他產業列");
+    supplyInfo = `列數${r.rows}、產業選項${r.nOpt - 1}、篩選後${r.nFiltered ?? "-"}列、排序前後首列：${r.first1}→${r.first2}→${r.first3}`;
+    await page.screenshot({ path: "scripts/_supply_tab.png", fullPage: false });
+    await page.evaluate(() => switchPicksBoard("value"));
+    await page.waitForTimeout(300);
+    const back = await page.evaluate(() => ({ lb: document.getElementById("picks-list-card").offsetParent !== null, sup: document.getElementById("picks-supply-card").offsetParent !== null }));
+    if (!back.lb || back.sup) supplyErrors.push("切回價值成長榜後版面未還原");
+    await page.evaluate(() => go("home"));
+  } catch (e) {
+    supplyErrors.push(`測試本身出錯：${e.message || e}`);
+  }
+  record("51. 選股頁「供給觀察」頁籤：固定免責句、I1–I4原始值＋桶內百分位、產業篩選、單指標排序、無禁用字樣、切回榜單版面還原",
+    supplyErrors.length === 0, supplyErrors.join("; ") || supplyInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
