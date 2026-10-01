@@ -5961,3 +5961,10 @@ hypothesis_queue ?祈憚蝯???
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
 
 quota_throttle: SKIP: 正常頻率，距上次實跑12.4分鐘 < 30分鐘門檻
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Hypothesis-queue cycle start: 2026-10-01 23:51:01 =====
+API Error: Can't reach the API server ??check your internet or DNS (ENOTFOUND)
+===== Hypothesis-queue cycle end: 2026-10-01 23:54:01 =====
+quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
