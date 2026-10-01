@@ -17290,3 +17290,19 @@ push 後停下等 Cowork 核對。
 - [x] **先.八-二 紙.二 2026Q2 真實資料彩排（只輸出統計，不寫log、不算報酬；問題先回報）**（DevQueue 20261001-223102；心跳：`research/PROGRESS_HEARTBEAT.jsonl`） **完成 2026-10-01 22:5x**：新增`research/dress_rehearsal_supply_v2_2026q2.py`（唯讀借用`paper_supply_v2.run()`，程序記憶體內暫時覆寫`FIRST_PERIOD`/`FIRST_REBALANCE`為2026Q2/2026-08-17、用不存在的暫存log/state路徑＋`dry=True`雙重保險，執行後核對兩個暫存路徑確實仍不存在、未寫入`paper_supply_v2_log.jsonl`）。以production相同`REFRESH_BUDGET=200`跑一次：**財報覆蓋率3.83%（74/1930）、價格覆蓋率0.1%**，遠低於80%門檻，`skipped_data_unready`邏輯擋下、未呼叫`build_signal`，故「可計分檔數／落後池檔數／選出檔數」本輪無數字（非程式錯誤：`STMT_START=2024-01-01`／`PRICE_START=2025-01-01`快取命名空間執行前完全是空的，單輪200預算本就不足以覆蓋全市場1930檔×3種財報）；使用備援來源0檔；耗用FinMind 80次、耗時435.8秒。**意外發現並回報（問題先回報，未修正）**：本輪80次呼叫後觸發FinMind HTTP 402，已把`data/rate_limit_state.json`標記2小時系統級封鎖（2026-10-01T14:49 UTC起），懷疑與同時間另一支未提交的`scripts/build_supply_watchlist.py`（先.八-三用，同一FinMind帳號）合計消耗額度有關；未重試、未繞過，讓封鎖自然恢復。彩排暫存輸出檔（`research/dress_rehearsal_2026q2_output.log`）執行後已刪除，統計已留存於PROGRESS.md與本列。冒煙測試51項全PASS。已記入`research/AWAITING_REVIEW.md`（32件）。
 - [x] **先.八-一 產業層級缺貨可行性盤點（docs/FEASIBILITY_industry_shortage.md；至少一項可及時另擬 docs/PREREG_DRAFT_industry_shortage.md；不算報酬）** 完成（2026-10-01 22:59，另一並行互動視窗session`session_01LQWLqXmnXb1bxX6YFEpKr8`，commit `897a56697`；此行由DevQueue 20261001-223102補標，避免佇列狀態與實際進度不一致）：`docs/FEASIBILITY_industry_shortage.md`判定三項官方月資料源皆「部分可及」且皆無vintage，(a)工業產銷存存貨率可用到2026-06但存貨量/銷售量等4檔已停在2023-03、且發現「存貨率」≠「存貨價值/銷售價值」自算比（約10個百分點落差，官方定義未取得不得混用）；(b)HS碼別僅到21類金額且無數量故單價不可及（判「待採購」）；(c)外銷訂單經`service.moea.gov.tw/EE520/opendata/`命名規則實測約9個貨品別類別可及（1984-2026-07）；已查TRIALS_LEDGER/STRATEGY_GRAVEYARD/TRIALS_REGISTRY/HYPOTHESIS_QUEUE確認無同機制試驗，最接近者#405/#406（資料層級不同）。`docs/PREREG_DRAFT_industry_shortage.md`為草案，未登記、未消耗N、未計算報酬，待裁示事項標〔待總司令確認〕。DevQueue本輪原本也嘗試盤點此項（見`research/dress_rehearsal_supply_v2_2026q2.py`commit同輪的過程記錄），發現與此並行session的分析更周全（含我未發現的62446-62448系列停更缺口與存貨率定義落差），已採用並行session版本、刪除自己較弱的草稿，不重複造輪子。
 - [x] **先.八-三 App「供給吃緊觀察清單」頁籤（I1–I4原始變化值＋桶內百分位；無綜合分數／買進字樣／績效數字；冒煙測試＋截圖）** 完成（2026-10-01 22:50 台北，commit 48c59a006）：選股頁「供給觀察」檢視，固定頁首標示、產業篩選、單一指標排序，無綜合分數／買進字樣／績效數字；每日由 scripts/run_supply_watchlist.ps1（AlphaDataAudit 第二動作）更新 data/supply_watchlist.json；冒煙測試 1-51 全過，截圖 docs/img/supply_watchlist_tab.png。誠實註記：目前覆蓋率僅 0.9%（18/1930 檔有 2026Q2 財報快取），頁面顯示「覆蓋率未達80%」警示；冒煙檢查51因資料稀疏未實際跑到產業篩選／排序切換（產業選項0）。[自行裁量]
+
+## 2026-10-01【總司令裁示·先.九：緊急——.md 行尾 renormalize＋workflow 防呆＋cron 避開整點】
+
+【先.九：緊急——.md 行尾 renormalize＋workflow 防呆＋cron 避開整點】總司令 2026-10-01 同意。優先於先.八，先做完再接先.八。先寫進 PENDING_QUEUE 再動工。
+一、緊急（今晚 market.yml 落地前完成）：對全 repo 執行 git add --renormalize -- '*.md' .gitattributes（預期 111 檔，純行尾）。commit 前驗證：git diff --cached --ignore-cr-at-eol --stat 必須為空（零內容變更），git diff --cached --stat 列出檔數；commit＋push。push 後在暫存目錄 fresh clone，確認 git status 完全乾淨。不得改寫已推歷史。
+二、防呆：market.yml／quotes.yml／news_events.yml／local_schedule_watchdog.yml 的 push 重試迴圈，在 git fetch／rebase 之前先執行 git stash push --include-untracked -m ci-leftovers || true，避免工作目錄殘留擋住 rebase；已 commit 的資料不得丟棄。每支改完確認 YAML 語法正確。
+三、cron 避開整點／半點（GitHub 整點負載高）：market.yml 改 '13 9 * * 1-5'（台北17:13）、'41 10 * * 1-5'（台北18:41）、'43 21 * * 1-5'（台北05:43）；其他 workflow 若有整點／半點 cron 一併錯開幾分鐘並列表回報。之後連續 3 個交易日記錄派發延遲（cron 排定→run createdAt）。
+四、10/2 08:00 台北時若 market.yml 仍無 10/1 收盤資料的成功 run，於 PENDING_QUEUE 標 BLOCKED 並寫明「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一。
+紙.一、紙.二、holdout 不得動。完成後接續先.八。push 後停下等 Cowork 核對。
+
+（心跳：完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.九"）
+
+- [ ] **先.九-一 .md 行尾 renormalize（git add --renormalize -- '*.md' .gitattributes；驗證 diff --cached --ignore-cr-at-eol 為空；commit＋push；fresh clone 驗 status 乾淨）**
+- [ ] **先.九-二 四支 workflow 的 push 重試迴圈前加 git stash push --include-untracked -m ci-leftovers || true；YAML 語法驗證**
+- [ ] **先.九-三 cron 避開整點／半點（market.yml 三時段改 13 9／41 10／43 21；其他 workflow 一併錯開並列表）；之後連續3個交易日記錄派發延遲**
+- [ ] **先.九-四 10/2 08:00 台北檢查 market.yml 有無10/1收盤資料成功run；無則標 BLOCKED「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一**
