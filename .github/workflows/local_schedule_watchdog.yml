@@ -11,7 +11,8 @@ name: 本機排程停擺告警
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # 2026-10-01（總司令裁示【先.九】三）避開整點／半點尖峰：原 */30（:00／:30）改為每小時 :23／:53，仍是每 30 分鐘一次。
+    - cron: "23,53 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -52,6 +53,8 @@ jobs:
             echo "心跳欄位與上次相同，不產生 commit"
           else
             git commit -m "本機排程停擺告警：更新 STATUS.json 心跳欄位（每30分鐘排程）"
+            # 2026-10-01（【先.九】二）rebase前先收走工作目錄殘留；已commit的資料不受影響。
+            git stash push --include-untracked -m ci-leftovers || true
             git pull --rebase --autostash
             git push
           fi

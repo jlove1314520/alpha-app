@@ -18,9 +18,13 @@ on:
     # **誠實揭露：目前只有一個交易日的實測值**（總司令要求連續三個交易日）。
     # 探測器持續在跑，累積足夠後若發現 16:15 不具代表性會再調整。
     # 但 14:10 是已證明必敗的時間點，不需要等三天才改。
-    - cron: '0 9 * * 1-5'      # 台北 17:00 — 台股主班次
-    - cron: '30 10 * * 1-5'    # 台北 18:30 — 補救班次
-    - cron: '30 21 * * 1-5'    # 台北隔日 05:30 — 美股班次（不變）
+    #
+    # 2026-10-01（總司令裁示【先.九】三）cron 避開整點／半點：實測 GitHub schedule
+    # 派發延遲 4.5~8.6 小時（執行本身只要 2.8~9.4 分鐘），整點／半點是全站排程
+    # 負載尖峰。原 '0 9'／'30 10'／'30 21' 分別改為 :13／:41／:43，三班次語意不變。
+    - cron: '13 9 * * 1-5'     # 台北 17:13 — 台股主班次
+    - cron: '41 10 * * 1-5'    # 台北 18:41 — 補救班次
+    - cron: '43 21 * * 1-5'    # 台北隔日 05:43 — 美股班次
   workflow_dispatch: {}
 
 permissions:
@@ -238,6 +242,9 @@ jobs:
               exit 0
             fi
             echo "push失敗，可能跟其他寫入者（quotes.yml/AlphaMarathon）撞在一起，第${i}次，fetch+rebase後重試"
+            # 2026-10-01（【先.九】二）rebase前先把工作目錄殘留（未追蹤／未暫存）收進stash，
+            # 避免"cannot rebase: You have unstaged changes"擋住重試；已commit的資料不受影響。
+            git stash push --include-untracked -m ci-leftovers || true
             git fetch origin main
             git rebase origin/main || { echo "rebase衝突，放棄自動解決"; git rebase --abort; exit 1; }
             sleep $((RANDOM % 6 + 3))
