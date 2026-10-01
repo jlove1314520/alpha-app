@@ -1,3 +1,17 @@
+## 2026-10-01（互動視窗，維運帽，【先.七】10/2開盤後三項核對＋小修）
+
+等待總司令審閱：31件（新增「先.七」）。
+
+**做了什麼**：(三)market.yml 近14天排程診斷（只診斷未修）：17:00班每天晚commit是GitHub排程派發延遲，不是執行過久。run createdAt 比 cron 排定時刻晚 4.5～8.6 小時（9/28 最長8.55小時，9/29～9/30 約6.6～6.8小時），18:30班晚4.1～7.7小時，05:30班晚1.9～3.6小時，逐週惡化；job 只比 run 晚1～3秒，無 runner／concurrency 等待；執行僅2.8～9.4分鐘，最慢步驟 SEC Form 4（35～42秒，最長187秒）與8-K（最長155秒）。(四)PENDING_QUEUE.md／PROGRESS.md 的 `C:/alpha/run-shioaji-quotes-c…` 路徑已改正斜線，兩檔 0x07／0x0D 計數皆為0。
+
+**尚待**：(一)Shioaji 登入確認待10/2 09:00後；(二)紙.一首筆 inception 核對待10/1 17:00班次落地（10/1 22:17 時 started:false、log尚不存在，原因即上述派發延遲）。不得手動補寫紙.一。
+
+**未確證／風險**：GitHub 為何延遲派發無法自本機判定；另一軌道「10/1排程缺席」為過早判斷，應10/2 01:30後再看；PAT無 workflow-dispatch 權限（403），本機無法補觸發。建議（提案，未動）：等總司令裁示是否調整 cron 分鐘或加本機補觸發。
+
+**[自行裁量]**：診斷以 `gh run list` 的 createdAt／updatedAt 推算開始與結束時間；本條引文以字面反斜線記述避免再生成控制字元。
+
+**規則十 allowlist**：本輪只改文件（PENDING_QUEUE／PROGRESS／AWAITING_REVIEW／PROGRESS_HEARTBEAT），無新增會改寫追蹤檔的排程步驟。
+
 ## 2026-10-01（互動視窗，維運／研究帽，【先.六】紙.二上線前修正＋commit洪水收尾）
 
 等待總司令審閱：30件（新增「先.六」）。
@@ -14,7 +28,7 @@
 
 等待總司令審閱：29件（新增「先.五」）。
 
-**做了什麼**：(一)#406 FAIL結案經Cowork核對確認，關6試驗數口徑定為常規（取兩口徑較大者）。(二)紙.二：新增 `docs/PREREG_supply_tightness_v2_FORWARD.md`（僅刪I5、I1-I4至少3個可得才計分，SHA256 6fdafef2b5799ea94724b13ee5aa2f13a146d37a54db6bfeceb1479f6aa83d5b），TRIALS #407 前進式事前登記並先 push；新增 `research/paper_supply_v2.py`（冪等、append-only、degrade-only，輸出 `research/data/paper_supply_v2_log.jsonl`）、`research/paper_supply_v2_test.py`（合成資料自測9/9 PASS，不跑任何歷史回測，holdout未解鎖）、`scripts/run_paper_supply_v2.ps1`、排程 `AlphaPaperSupplyV2`（每小時；2026-10-15前不動作）、`docs/LOCAL_SCHEDULED_TASKS.md` 新增一列。首次換股日2026-11-16，之後2027-04-01／05-17／08-16／11-15；滿4季（2027-11-15）才首次判讀，滿8季前不得作為真錢依據。紙.一未動、App未顯示紙.二。(三)Shioaji洪水：10/1 08:31起登入失敗，`shioaji_quotes.py::_write_failure` 每2分鐘以新fetched_at改寫檔案，`run-shioaji-quotes-cycle.ps1` 無條件commit，單日158個commit。修法兩層：失敗內容相同不重寫（commit a3e0722fd）；launcher僅在13:45後、每日最多1個commit（改動在repo外 `C:lphaun-shioaji-quotes-cycle.ps1`，備份 `.bak_20261001`）。未改寫任何已推歷史。
+**做了什麼**：(一)#406 FAIL結案經Cowork核對確認，關6試驗數口徑定為常規（取兩口徑較大者）。(二)紙.二：新增 `docs/PREREG_supply_tightness_v2_FORWARD.md`（僅刪I5、I1-I4至少3個可得才計分，SHA256 6fdafef2b5799ea94724b13ee5aa2f13a146d37a54db6bfeceb1479f6aa83d5b），TRIALS #407 前進式事前登記並先 push；新增 `research/paper_supply_v2.py`（冪等、append-only、degrade-only，輸出 `research/data/paper_supply_v2_log.jsonl`）、`research/paper_supply_v2_test.py`（合成資料自測9/9 PASS，不跑任何歷史回測，holdout未解鎖）、`scripts/run_paper_supply_v2.ps1`、排程 `AlphaPaperSupplyV2`（每小時；2026-10-15前不動作）、`docs/LOCAL_SCHEDULED_TASKS.md` 新增一列。首次換股日2026-11-16，之後2027-04-01／05-17／08-16／11-15；滿4季（2027-11-15）才首次判讀，滿8季前不得作為真錢依據。紙.一未動、App未顯示紙.二。(三)Shioaji洪水：10/1 08:31起登入失敗，`shioaji_quotes.py::_write_failure` 每2分鐘以新fetched_at改寫檔案，`run-shioaji-quotes-cycle.ps1` 無條件commit，單日158個commit。修法兩層：失敗內容相同不重寫（commit a3e0722fd）；launcher僅在13:45後、每日最多1個commit（改動在repo外 `C:/alpha/run-shioaji-quotes-cycle.ps1`，備份 `.bak_20261001`）。未改寫任何已推歷史。
 
 **未確證／風險**：(1)10/1當日push全失敗的原因未能確證（假說：機器寫入的髒檔擋住pull）。(2)IBKR launcher有同款無條件commit邏輯，因心跳檢查 `IBKR_PATTERN` 依賴其commit訊息未動，待裁示。(3)財報就緒窗口（法定期限日～換股日）很短，可能常降級或跳過。(4)逐檔補抓FinMind約5,800次，每輪上限200次，佔共用額度。(5)yfinance價格與凍結版FinMind重建有偏差。(6)期限日後、換股日前才送達的財報含些微未來函數。(7)`adjust.py` 的 `CashIncreaseSubscriptionRate` 單位疑點仍未解。(8)FinMind全股票財報批次查詢屬贊助限定。
 
