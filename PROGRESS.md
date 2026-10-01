@@ -1,3 +1,23 @@
+## 2026-10-01（DevQueue 20261001-223102，維運帽，【先.八-二】紙.二 2026Q2 真實資料彩排）
+
+等待總司令審閱：32件（新增「先.八-二」）。
+
+**做了什麼**：新增`research/dress_rehearsal_supply_v2_2026q2.py`，唯讀借用`paper_supply_v2.run()`（不複製貼上其內部邏輯），程序記憶體內暫時把`FIRST_PERIOD`/`FIRST_REBALANCE`覆寫成2026Q2/2026-08-17（未改`paper_supply_v2.py`原始碼），用不存在的暫存log/state路徑＋`dry=True`雙重保險，以production相同`REFRESH_BUDGET=200`跑一次，只輸出裁示指定的統計：
+
+- 財報覆蓋率 3.83%（74/1930）、價格覆蓋率 0.1%
+- 可計分檔數／落後池檔數／選出檔數：**無法產出**——覆蓋率遠低於80%門檻，`paper_supply_v2.py`既有的`skipped_data_unready`邏輯在到達`build_signal`之前就擋下了，不是程式錯誤，是`STMT_START=2024-01-01`／`PRICE_START=2025-01-01`快取命名空間在執行前完全是空的（先前誤判是空的時少看了後半段`ls`結果，複查後發現已有260/259/45筆既有快取，推測來自另一支尚未提交的`scripts/build_supply_watchlist.py`），單一輪200預算本就不足以覆蓋全市場1930檔×3種財報科目
+- 使用備援來源：0檔
+- 耗用FinMind：80次、435.8秒
+- 未輸出任何2026-08-17之後的價格/淨值/報酬；未寫入`paper_supply_v2_log.jsonl`／state（執行後核對兩個暫存路徑確實不存在）；彩排暫存輸出檔已刪除
+
+**發現問題，已回報、未修正（問題先回報）**：本輪80次呼叫後觸發FinMind HTTP 402，已把`data/rate_limit_state.json`標記2小時系統級封鎖（2026-10-01T14:49 UTC起，約台北2026-10-02 00:49解除）。懷疑原因：執行期間另一支未提交的`scripts/build_supply_watchlist.py`（先.八-三用，docstring寫明「每次自限額度預設500次」）可能同時在消耗同一FinMind帳號的額度，兩者合計超過該帳號當下實際可用上限（`rate_limit_state.json`快取的`plan_limit_per_hour:600`可能高於實況，或只是當下額度已被其他排程用掉大半）。未嘗試重試或繞過，依「資料源禮儀」規則讓封鎖自然恢復；封鎖期間本輪後續任何FinMind相依工作會自動降級。
+
+**冒煙測試**：`node scripts/smoke_test.mjs` 51項全PASS。
+
+**[自行裁量]**：①FinMind呼叫計數改用monkeypatch `finmind_client._fetch`做精確計數（涵蓋run()內部`spent`計數器之外的日曆/事件表前置呼叫），比只解析print行更完整誠實；②暫存輸出檔的認定＝彩排程式產生的stdout重導向檔案，script本身保留（可重複使用的工具，非「結果」）。
+
+**規則十 allowlist**：本輪只新增`research/dress_rehearsal_supply_v2_2026q2.py`＋改`PENDING_QUEUE.md`/`PROGRESS.md`/`research/AWAITING_REVIEW.md`，無新增會改寫追蹤檔的排程步驟。
+
 ## 2026-10-01（互動視窗，維運帽，【先.七】10/2開盤後三項核對＋小修）
 
 等待總司令審閱：31件（新增「先.七」）。
