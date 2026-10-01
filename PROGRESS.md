@@ -1,3 +1,19 @@
+## 2026-10-01（互動視窗，驗證帽，【先.四-二／三】供給緊縮衛星策略單發執行→FAIL結案）
+
+等待總司令審閱：28件（新增「先.四」）。
+
+**做了什麼**：依事前登記#405（定稿SHA256 cad87413…）對全期2014-04~2024-12共44個換股日單發執行一次（`research/supply_tightness_backtest.py --run`，2.9分鐘），結果`research/data/supply_tightness_result.json`，判定列TRIALS_LEDGER #406 **FAIL**。
+
+**證據（§4(d)順序）**：關1樣本PASS；關2天條一PASS（MDD -34.5%，空頭段-32.6%/-28.9%/-16.0%）；**關3 Sortino 0.855 < 0050 0.885 FAIL（首個失敗關卡）**，總報酬+323% vs 0050 +356%，逐年贏5/11；其後照報：關4百分位96.5（SD 8.2）通過；關5隨機對照組FAIL（200組中7組超過策略）；關6 Bonferroni（N=408）與DSR全V情境FAIL；關7成本/頻率/高原FAIL；兩段方向相反（2014-2019超額-27.1%、2020-2024超額+19.7%）；關9自由參數5個PASS。存活者偏誤：下市股缺 39/92（42.4%），偏誤方向對策略有利，判讀從嚴。
+
+**[自行裁量]**：(1)印績效數字前，dry對照precheck發現可計分數差97檔，根因＝panel截斷到VAL_END使部分股票資產負債表整檔為空而被判None、丟失I3/I4；改為I1/I2=NaN但保留I3/I4（與precheck口徑一致）後重建panel，重dry後44日完全一致，績效數字印出後未重跑。(2)關4的全樣本百分位取自200組隨機對照、SD取自200次股票bootstrap；(3)關7相鄰頻率與高原以Sortino差方向一致判定。(4)N口徑分歧（407/407→取408）待總司令裁示。
+
+**結案**：FAIL→寫入STRATEGY_GRAVEYARD #406，不提換參數重試、不提紙上追蹤方案；紙.一與holdout未動。去I5消融版（Sortino 1.072）僅報告，不作重試依據。
+
+**影響檔案**：research/supply_tightness_panel.py、research/supply_tightness_core.py、research/supply_tightness_backtest.py、research/data/supply_tightness_result.json（force-add）、research/TRIALS_LEDGER.md、research/TRIALS_REGISTRY.jsonl、research/STRATEGY_GRAVEYARD.md、research/AWAITING_REVIEW.md、PENDING_QUEUE.md、research/PROGRESS_HEARTBEAT.jsonl。
+
+**下一步**：等Cowork核對；佇列無其他互動視窗項目。冒煙測試：本輪未動index.html，未跑。
+
 ## 2026-09-30 DevQueue cycle 20260930-230102（維運帽）：修分類漏洞第三例＋避免與互動視窗搶跑先.四單發鏈＋確認佇列真空
 
 等待總司令審閱：27件（本輪無新增/無變更，與上一筆互動視窗記錄一致）。
