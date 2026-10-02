@@ -3210,3 +3210,13 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - `AWAITING_REVIEW.md`「等待中：39件」，與表格列數一致，本輪未變動。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - **本輪誠實結論**：未自行修改任何受保護檔案（`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區、十三節限定清單皆未touch），僅補強`先.七-一`/`先.六-四`診斷證據供裁示。交辦佇列還剩0條`- [ ]`未開始。等待總司令審閱：39件（與`AWAITING_REVIEW.md`表格列數一致）。下一輪建議選TW軌（round694=10-01 23:1x，三軌中最舊）；開工前先確認market.yml今日批次17:49 UTC後是否出現。凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。
 ---
+## 第697輪 · 2026-10-02T22:3x+08:00 · TW · 維運帽：修正round696對external_connectivity.jsonl的讀數（實際80%失敗非全True），先.七-一「本機網路已排除」改回「待查」，並與維運.AlphaData三日DNS解析失敗交叉參照疑似同根因 · 無判定、N不變
+
+- 取鎖乾淨（cycle `20261002-223037`）。三軌時間戳：TW round694=10-01 23:1x（最舊，本輪選定）／US round695=10-02 20:3x／FUT round696=10-02 21:3x。
+- 開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（無未開始交辦項）；`grep -c "^- \[!\]"`=21（與round696持平）。
+- **本輪實質產出**：用`shioaji.log`（Rust核心append-only log）確認10/1、10/2兩個交易日Shioaji零次成功連線，失敗點在「get site info」（早於帳密驗證，排除憑證/API key到期假設）。重新逐筆核對`research/external_connectivity.jsonl`（依`ts`前綴嚴格篩選日期），**更正round696「今天259筆全部internet.ok=True」的說法**：實際272筆中218筆`False`（80%），連續壞區間00:02~18:07台北（18:12才恢復，恰好銜接round695/696查詢時間，兩輪看到的是已恢復後的尾段）；10/1同樣83%失敗（幾乎整天）；09-30則28%（晚間才開始）。此異常窗口完整覆蓋Shioaji盤中失敗時段，也完整覆蓋`維運.AlphaData三日DNS解析失敗`條目認定的「15:30窄窗口」——已在兩個條目下方補記交叉參照，懷疑同根因（本機網路/DNS/Tailscale週期性異常），但未越權合併判定或修改`fetch.py`凍結區。
+- 先.七-一「失敗→依序查」三步結果：本機網路＝有異常（由「已排除」改回「待查」）；憑證到期＝已排除；永豐維護公告＝round696已三來源查無。不更動先.七-一/先.六-四BLOCKED狀態與解除條件。
+- 逐一核對其餘`- [!]`：`金流一.4`trading_days_available仍18（market.yml今日主班次截至查詢時間14:31 UTC仍缺席，未到round696訂的17:49 UTC升級判斷點，不重複升級）；`外部一改.2`tick累積仍15/20；`本地AI摘要`仍待裁示；`紙.一`/`先.七-二`仍待market.yml含10/2資料落地。`凍結.二解除`grep=4，皆條件敘述非宣告，凍結.二仍生效。
+- 驗證：`run_detached.py status` running=0；`trial_registry.py --check` exit=0 PASS（409列，本輪未新增判定）；`is_holdout_consumed()`=True；十三節限定清單`git status --short`輸出為空。
+- `AWAITING_REVIEW.md`「等待中：39件」，與round696一致，本輪未變動。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- **本輪誠實結論**：未自行修改任何受保護檔案（`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區、十三節限定清單皆未touch），僅修正並收斂`先.七-一`/`先.六-四`/`維運.AlphaData三日DNS解析失敗`的根因診斷供裁示。交辦佇列還剩0條`- [ ]`未開始。等待總司令審閱：39件（與`AWAITING_REVIEW.md`表格列數一致）。下一輪建議選US軌（round695=10-02 20:3x，三軌中最舊，須重新比對）。
