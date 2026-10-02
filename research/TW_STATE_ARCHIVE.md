@@ -2750,3 +2750,88 @@ session獨立完成並提交，本輪查到時已結案，已正確還原自己�
 進度。凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。完整見
 `REPORT.md`第694輪心跳、`PENDING_QUEUE.md`相關條目、
 `research/AWAITING_REVIEW.md`。
+
+---
+**最後更新：2026-10-02T22:3x+08:00（馬拉松第697輪，TW軌，維運帽）**——取鎖
+乾淨（cycle`20261002-223037`）。三軌時間戳（開工前）：TW round694=10-01
+23:1x（最舊，本輪選定）／FUT round696=10-02 21:3x／US round695=10-02
+20:3x。開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（無未開始交辦
+項，與round694~696持平）；`grep -c "^- \[!\]"`=21（持平，round694的18
+加round695/696新增的3條）。
+
+**本輪實質產出：修正並收斂「先.七-一／先.六-四 Shioaji連線失敗」的根因
+診斷**（詳見`PENDING_QUEUE.md`「先.七-一」條目下方本輪補記）：
+1. 直接讀`shioaji.log`（Rust核心append-only log）確認：10/1、10/2兩個
+   完整交易日**零次**成功連上（最後一次成功是09-30T00:31 UTC的
+   `contracts_v2::traffic`backend response；之後兩天共約300次登入嘗試
+   全部卡在「get site info」這一步，失敗點早於帳密/token驗證，**排除
+   憑證／API key到期**這個假設方向）。
+2. **更正round696（21:3x）對`external_connectivity.jsonl`的讀數**：
+   round696稱「今天259筆全部`internet.ok=True`」，本輪用`results.
+   internet.ok`欄位依`ts`前綴嚴格篩選2026-10-02重新逐筆核對兩次（結果
+   一致）：**實際272筆中218筆`False`（80%）**，連續壞區間
+   **00:02～18:07台北**（18:12起才轉全部`True`，正好銜接round695/696
+   查詢時間20:3x/21:3x，round696看到的是已恢復後的尾段，不是全天）。
+   往前核對：10/1同樣288筆中240筆`False`（83%，幾乎整天）；09-30則
+   73/261筆`False`（28%，晚間才開始，範圍小得多）。壞區間`fail_streak`
+   曾達106，`tailscale`同步壞，確認是本機對外連線真的有長時間異常，
+   不只是round696說的「這支腳本沒測對網域」。
+3. 這個異常窗口（00:02~18:07）完整覆蓋Shioaji盤中失敗時段（09:00~
+   13:30台北），也完整覆蓋`維運.AlphaData三日DNS解析失敗`條目原本認定
+   的「15:30窄窗口」——已在該條目下方補記交叉參照：15:30很可能只是
+   落在這個更大異常窗口裡的一個點，不是獨立現象，但本輪未越權合併兩
+   條目的判定、未碰`fetch.py`凍結區。
+4. 先.七-一「失敗→依序查」三步執行結果：本機網路＝有異常（**由「已
+   排除」改回「待查」**）；憑證/API key到期＝已排除（失敗點在site
+   info之前）；永豐維護公告＝round696已三來源查無。**不更動先.七-一/
+   先.六-四的BLOCKED狀態與既有解除條件**（仍等10/5樣本或總司令查永豐
+   帳戶狀態），本輪只修正「網路已排除」這個子結論的事實依據，並留下
+   「為何本機網路連續3天都在類似長窗口異常、晚間自行恢復」這個未解之
+   問供總司令或下一輪查Windows事件記錄/排程/VPN設定。
+
+逐一核對其餘`- [!]`阻塞項（與round696一致，本輪僅重複驗證，未發現
+新解除）：`金流一.4``sector_flow.json``meta.trading_days_available`仍
+**18**（因今日10/2台股主班次`market.yml`截至查詢時間14:31 UTC仍缺席，
+尚未到round696訂的17:49 UTC升級判斷時間點，不重複升級，沿用既定分支）；
+`外部一改.2`／`研究.c`tick累積`ls research/data/ticks/*.parquet`實測仍
+**15/20**，未解除；`本地AI摘要(Breeze-7B)`仍待總司令四選一，未解除；
+`紙.一`／`先.七-二`仍待market.yml含10/2收盤資料的那一輪落地，未解除。
+`grep -c "凍結.二解除" PENDING_QUEUE.md`=4，逐行核對皆為條件敘述提及、
+非實際宣告解除，凍結.二仍生效。**佇列深度自檢**：`- [ ]`=0（<12下限），
+凍結.二期間暫停補件。**逐一核對凍結.二允許的四類工作現況**：稽核重跑／
+驗.二重跑先前輪次已全部完成並登記；資料抓取（`資料.一`已完成300/300）；
+工具修正本輪未改動任何原始碼（僅讀取診斷＋補寫`PENDING_QUEUE.md`狀態
+記錄，`TW_MARATHON_STATE.md`/`TW_STATE_ARCHIVE.md`屬狀態檔不在十三節
+限定清單內）；`git status --short -- research/backtest/ research/
+validation/ research/adjust.py research/pit.py research/
+trial_registry.py`輸出為空（十三節限定清單內檔案無殘留未commit編輯，
+本輪亦未touch）。TW軌本身`TW_LEADS.md`/`STRATEGY_GRAVEYARD.md`結案
+狀態未變，無清楚剩餘的全新機制候選，且凍結.二期間本來就不得登記新
+alpha試驗。驗證：`run_detached.py status`running=0（162筆歷史，無job
+待收成）；`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0
+PASS（409列，另有FDR對照表33列，最大編號#407，本輪未新增判定）；
+`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪動作，
+僅讀取核對）。`AWAITING_REVIEW.md`「等待中（目前：39件）」，與round696
+一致，本輪未變動。**本輪誠實結論**：交辦佇列0條`- [ ]`；凍結.二允許的
+四類工作皆已完成或無新內容；21條`- [!]`逐一核對均未到解除時間；TW軌
+本身查無可推進的新alpha試驗工作單位；**本輪實質產出是Shioaji連線失敗
+根因診斷的重大修正（網路排除結論被推翻，改為待查，並發現與AlphaData
+DNS失敗條目可能同根因），已完整記錄進`PENDING_QUEUE.md`「先.七-一」與
+「維運.AlphaData三日DNS解析失敗」兩個條目，未自行執行任何修復動作或
+更動BLOCKED狀態**——依`CLAUDE.md`「零之一」白名單第7條精神記錄後結束
+本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節限定
+檔案。未動`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改
+十三節限定清單內任何原始碼。全程新增外部呼叫僅限讀取性質驗證
+（`requests.get()`即時重測兩個site-info網址、`gh run list`查
+market.yml既有紀錄），無資料抓取類API呼叫，未讀取或輸出任何金鑰／
+憑證內容。`PROGRESS_HEARTBEAT.jsonl`已append一行。**交辦佇列還剩
+0條`- [ ]`未開始**。**等待審閱：39件**（與`AWAITING_REVIEW.md`表格
+列數一致）。**下一輪任一軌接手**：依輪替下一輪建議選US軌（round695=
+10-02 20:3x，三軌中最舊，須下一輪開工時重新比對三軌實際時間戳）；
+開工前先重新檢查`- [ ]`有無新交辦、`market.yml`今日17:00台北班次是否
+已過17:49 UTC上限仍缺席（若是則依round696既定分支升級判斷）、`金流
+一.4`／`外部一改.2`tick累積進度、`先.七-一`根因是否有新線索（本機網路
+連續3天異常窗口的成因）。凍結.二在總司令/Cowork明確寫「凍結.二解除」
+前不解除。完整見`REPORT.md`第697輪心跳、`PENDING_QUEUE.md`「先.七-一」
+「維運.AlphaData三日DNS解析失敗」「金流一.4」條目、
+`research/AWAITING_REVIEW.md`。

@@ -11404,6 +11404,25 @@ wrapper維持現狀不變。
   語法解析器確認皆OK，`git_op_lock.py`功能自測PASS），`AWAITING_REVIEW.md`
   的「該選哪個方案」決策本身已移入已結案紀錄，僅剩「總司令實機驗證跑過
   一輪」這個條件未滿足，本條目維持`- [ ]`等待該驗證。
+  〔馬拉松2026-10-03T07:3x+08:00補充證據，TW軌第706輪，維運帽，純讀查
+  不改任何原始碼〕**找到一個具體實例，支持這個修法的必要性**：追查
+  「先.七-一」引用的`research/external_connectivity.jsonl`10/2數字
+  （round697聲稱「272筆中218筆False」）時，發現**這批資料在git歷史裡
+  完全不存在**——用`git log --all -- research/external_connectivity.jsonl`
+  逐一核對round701/703前後commit（含`41d062542 On main: autostash`這個
+  merge commit的兩個parent）對10/2這一天的筆數，結果都是**0筆**（10/1、
+  10/3皆有正常筆數，只有10/2整天缺）。對照`41d062542`commit訊息本身就是
+  `git pull --rebase --autostash`自動產生的「On main: autostash」，且
+  同一時段恰好有另一筆「修復`data/audit_report.json`遺留的git stash pop
+  衝突標記」（見round703 commit`7b6180bbf`說明）——**型態吻合：工作目錄
+  裡被append的新行在stash/rebase衝突處理過程中遺失，從未被commit**，
+  是本條目要解決的「維運git衝突」這個問題類別的一個具體已發生案例，不是
+  假設性風險。**影響**：round697/round699引用的「10/2 218/272筆False
+  （80%）」這個數字現在無法從git歷史重現驗證，只能依賴當時那兩輪
+  state記錄文字本身（已足夠支撐`先.十二-二`的根因結論，不影響該結論，
+  該結論已另外由總司令/互動視窗查明是iPhone熱點斷線所致，證據鏈完整，
+  不依賴這份已遺失的原始日誌）。本輪未修改`external_connectivity.jsonl`
+  或任何原始碼，僅查git歷史佐證。
 - [x] **結案.二** [研究] 【✅完成2026-09-23，互動視窗CC】
   `CONCENTRATED_SPEC.md`§4新增裁示段落：**核准候選C（約14格）為日後
   掃描方式**（寫進規格，不需再提案選方案），**同時凍結整個第4節掃描
