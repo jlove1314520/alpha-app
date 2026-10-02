@@ -207,7 +207,7 @@ def build_payload(df, uni, period, D, n_cache, n_period, n_bucket, fstat, as_of)
                 "FinMind 財報無公布日；基準季採法定期限已過之最近一季，已入庫者才顯示，未入庫者標「未入庫」",
                 "產業分類為 TaiwanStockInfo 當下快照，非時點資料",
                 "未套用價格存活篩選（本頁不含任何價格資料）",
-                "覆蓋率未達 80% 前，桶內百分位僅供參考",
+                "財報入庫覆蓋率未達 80% 前，頁面不顯示桶內百分位，只顯示「資料準備中（已涵蓋 x／N 檔）」與原始變化值（先.十-三）",
             ],
             "fetch": {"calls": fstat.get("calls", 0), "ok": fstat.get("ok", 0), "fail": fstat.get("fail", 0),
                       "stopped": fstat.get("stopped"), "todo_missing": fstat.get("todo_missing", 0),

@@ -1681,7 +1681,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     await page.evaluate(() => go("picks"));
     await page.waitForTimeout(400);
     await page.evaluate(() => switchSupplyView());
-    await page.waitForFunction(() => document.querySelectorAll("#supply-list > div").length > 0 || /尚未產生/.test(document.getElementById("supply-list").textContent), null, { timeout: 8000 });
+    await page.waitForFunction(() => (typeof SUPPLY_CACHE !== "undefined" && SUPPLY_CACHE && document.querySelectorAll("#supply-list > div b").length > 0) || /尚未產生/.test(document.getElementById("supply-list").textContent), null, { timeout: 8000 });
     const r = await page.evaluate(() => {
       const card = document.getElementById("picks-supply-card");
       const vis = el => !!el && el.offsetParent !== null;
@@ -1693,6 +1693,15 @@ async function runSmokeTest(baseUrl, headless = true) {
       out.bad = ["買進", "綜合", "排名", "報酬", "績效", "勝率", "夏普", "Sortino"].filter(w => text.includes(w));
       const firstCode = () => { const b = document.querySelector("#supply-list > div b"); return b ? b.textContent : ""; };
       out.first1 = firstCode();
+      // 先.十-三：覆蓋率<80%不得顯示百分位，只顯示「資料準備中（已涵蓋 x／N 檔）」；達標後才顯示百分位
+      const cov = SUPPLY_CACHE.meta.coverage_period;
+      out.cov = cov;
+      out.lowNoPct = !document.getElementById("supply-list").innerText.includes("桶內");
+      out.lowMsg = /資料準備中（已涵蓋 \d+／[\d,]+ 檔）/.test(document.getElementById("supply-meta-line").innerText);
+      const saved = SUPPLY_CACHE.meta.coverage_period;
+      SUPPLY_CACHE.meta.coverage_period = 0.9; renderSupply();
+      out.highHasPct = document.getElementById("supply-list").innerText.includes("桶內") && !/資料準備中/.test(document.getElementById("supply-meta-line").innerText);
+      SUPPLY_CACHE.meta.coverage_period = saved; renderSupply();
       if (typeof onSupplySort === "function") { onSupplySort("I2"); out.first2 = firstCode(); onSupplySort("I2"); out.first3 = firstCode(); onSupplySort("I1"); }
       const sel = document.getElementById("supply-industry");
       out.nOpt = sel ? sel.options.length : 0;
@@ -1709,8 +1718,13 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!r.lbHidden) supplyErrors.push("切到供給觀察後排行榜未隱藏");
     if (r.bad.length) supplyErrors.push("出現禁用字樣：" + r.bad.join(","));
     if (r.rows === 0) supplyErrors.push("沒有任何資料列");
+    if (r.cov < 0.8) {
+      if (!r.lowNoPct) supplyErrors.push("覆蓋率<80%仍顯示桶內百分位");
+      if (!r.lowMsg) supplyErrors.push("覆蓋率<80%缺「資料準備中（已涵蓋 x／N 檔）」");
+    }
+    if (!r.highHasPct) supplyErrors.push("覆蓋率達標（模擬0.9）後未顯示百分位或仍顯示資料準備中");
     if (r.nOpt > 1 && r.filtered === false) supplyErrors.push("產業篩選後仍有他產業列");
-    supplyInfo = `列數${r.rows}、產業選項${r.nOpt - 1}、篩選後${r.nFiltered ?? "-"}列、排序前後首列：${r.first1}→${r.first2}→${r.first3}`;
+    supplyInfo = `覆蓋率${(r.cov*100).toFixed(1)}%：低覆蓋不顯示百分位=${r.lowNoPct}、達標模擬顯示百分位=${r.highHasPct}；列數${r.rows}、產業選項${r.nOpt - 1}、篩選後${r.nFiltered ?? "-"}列、排序前後首列：${r.first1}→${r.first2}→${r.first3}`;
     await page.screenshot({ path: "scripts/_supply_tab.png", fullPage: false });
     await page.evaluate(() => switchPicksBoard("value"));
     await page.waitForTimeout(300);
@@ -1720,7 +1734,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) {
     supplyErrors.push(`測試本身出錯：${e.message || e}`);
   }
-  record("51. 選股頁「供給觀察」頁籤：固定免責句、I1–I4原始值＋桶內百分位、產業篩選、單指標排序、無禁用字樣、切回榜單版面還原",
+  record("51. 選股頁「供給觀察」頁籤：固定免責句、I1–I4原始值、覆蓋率<80%不顯示桶內百分位而顯示資料準備中、達標才顯示百分位、產業篩選、單指標排序、無禁用字樣、切回榜單版面還原",
     supplyErrors.length === 0, supplyErrors.join("; ") || supplyInfo);
 
   const finalErrors = await page.evaluate(

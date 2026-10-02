@@ -5552,7 +5552,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const lowCov=m.coverage_period!=null&&m.coverage_period<0.8;
     document.getElementById('supply-meta-line').innerHTML=
       `基準季 <b>${esc(m.period)}</b>（法定公告期限 ${esc(m.period_deadline)} 已過）· 資料日 ${esc(m.as_of)}<br>名冊 ${m.n_universe} 檔，已入庫該季財報 ${m.n_with_period} 檔（${covPct}），可計百分位 ${m.n_scored} 檔`
-      +(lowCov?'<br><span style="color:#c9a35a">⚠ 入庫覆蓋率未達 80%，下列百分位只代表已入庫的股票，僅供參考</span>':'');
+      +(lowCov?`<br><span style="color:#c9a35a">資料準備中（已涵蓋 ${m.n_with_period}／${m.n_universe.toLocaleString('en-US')} 檔）：財報入庫覆蓋率未達 80%，暫不顯示桶內百分位，下列僅列已入庫股票的原始變化值</span>`:'');
     const rows=d.rows||[];
     const inds=[...new Set(rows.map(r=>r.i))].sort();
     const sel=document.getElementById('supply-industry');
@@ -5577,15 +5577,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!list.length){listEl.innerHTML='<div class="note">目前沒有已入庫該季財報的股票符合條件。</div>';document.getElementById('supply-more').innerHTML='';return}
     const cell=(k,r,j)=>{
       const p=r.p[j];
-      return `<div style="flex:1;min-width:0"><div style="font-size:10px;color:var(--ink-3)">${k}</div><div class="num" style="font-size:12.5px">${supplyFmt(k,r.v[j])}</div><div class="num" style="font-size:10.5px;color:var(--ink-3)">${p==null?'—':'桶內 '+Math.round(p*100)+'%'}</div></div>`;
+      const pTxt=lowCov?'':`<div class="num" style="font-size:10.5px;color:var(--ink-3)">${p==null?'—':'桶內 '+Math.round(p*100)+'%'}</div>`;
+      return `<div style="flex:1;min-width:0"><div style="font-size:10px;color:var(--ink-3)">${k}</div><div class="num" style="font-size:12.5px">${supplyFmt(k,r.v[j])}</div>${pTxt}</div>`;
     };
     listEl.innerHTML=list.slice(0,SUPPLY_SHOWN).map(r=>
-      `<div style="padding:9px 0;border-bottom:1px solid var(--hairline)"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:13.5px">${esc(r.n)} ${esc(r.c)}</b><span class="note" style="margin:0">${esc(r.i)}${r.b!==r.i?'（桶：'+esc(r.b)+'）':''}${r.sc?'':' · 指標不足3項，無百分位'}</span></div>`
+      `<div style="padding:9px 0;border-bottom:1px solid var(--hairline)"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:13.5px">${esc(r.n)} ${esc(r.c)}</b><span class="note" style="margin:0">${esc(r.i)}${r.b!==r.i?'（桶：'+esc(r.b)+'）':''}${(r.sc||lowCov)?'':' · 指標不足3項，無百分位'}</span></div>`
       +`<div style="display:flex;gap:6px;margin-top:4px">${['I1','I2','I3','I4'].map((k,j)=>cell(k,r,j)).join('')}</div></div>`).join('');
     document.getElementById('supply-more').innerHTML=list.length>SUPPLY_SHOWN?chip(`再顯示 100 檔（共 ${list.length}）`,false,'supplyMoreTap()'):`<span class="note">共 ${list.length} 檔</span>`;
     const ind=m.indicators||{};
     document.getElementById('supply-defs').innerHTML=['I1','I2','I3','I4'].map(k=>`${k}：${esc(ind[k]||'')}`).join('<br>')
-      +'<br>百分位：'+esc(m.percentile_def||'')+'<br>限制：'+(m.limits||[]).map(esc).join('；');
+      +'<br>百分位：'+(lowCov?'（覆蓋率達 80% 後才顯示）':'')+esc(m.percentile_def||'')+'<br>限制：'+(m.limits||[]).map(esc).join('；');
   }
   function switchPicksBoard(board){
     const wasSupply=SUPPLY_VIEW;
@@ -7642,7 +7643,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-01.2243';
+  const APP_VERSION='2026-10-02.2005';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
