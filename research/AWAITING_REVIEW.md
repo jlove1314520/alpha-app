@@ -15,10 +15,11 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：35件）
+## 等待中（目前：36件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
+| 先.十-四：rate_limit_state.json的block_reason過濾token_tail與疑似金鑰片段（已清除現檔並commit）＋全repo金鑰片段掃描（0筆真實洩漏） | 2026-10-02 19:3x | 根因：FinMind HTTP 402回應原文（含`token_tail`金鑰末8碼）被`research/finmind_client.py`／`research/backfill_price_history_gaps.py`原封不動寫進會被commit的`data/rate_limit_state.json`；已各自新增`_redact_secrets()`正則過濾後才寫入，現檔唯一洩漏片段已改為`[redacted]`（diff僅此一行）。全repo掃描`ghp_`/`github_pat_`/AWS/PEM私鑰/Slack/JWT/Bearer格式0命中；掃描`token`/`api_key`/`secret`類鍵名15處命中逐一核對，僅本次修正本身與空值`"token_tail":""`log，無其他真實金鑰。等Cowork核對：①正則覆蓋鍵名是否足夠（目前：token_tail/token/api_key/apikey/api_token/secret/password）②是否需對`research/ex_dividend_seasonal_sanity_run.log`等歷史log檔也做同樣redaction（目前判斷其值為空字串非真實洩漏，未處理） | 剛完成 |
 | 先.六：紙.二上線前修正＋PENDING_QUEUE轉LF＋IBKR commit洪水收尾＋adjust.py疑點結案 | 2026-10-01 | ①紙.二：價格來源改FinMind＋adjust.py還原（與回測同路徑）、成交開盤價與官方price_history交叉核對(>0.5%警告)、yfinance僅備援並標記；財報就緒改98%即換股、逾10交易日以已入庫者計分、覆蓋率<80%才skip；自測16項PASS含來源切換與79%/81%邊界，dry-run確認2026-11-16前無持股；PREREG v2檔未改。②PENDING_QUEUE.md已轉LF＋.gitattributes；CRLF真因是互動視窗自己的Python文字模式寫入，不是PowerShell launcher（需更正裁示的推測），build_sector_flow.py同步改newline保持LF。③IBKR洪水：launcher(repo外)改為盤中每30分鐘最多1 commit、內容不變不寫不commit，停擺告警改讀檔內fetched_at，實測不誤報。④Shioaji 10/1登入失敗線索＝本機網路10/1 00:12~19:47中斷(連線層錯誤)，待10/2開盤驗證(先.六-四仍BLOCKED)。⑤adjust.py疑點結案。等Cowork核對 | 自2026-10-01起 |
 | 先.七（10/2開盤後三項核對＋小修） | 2026-10-01 22:25 | (三)market.yml派發延遲診斷完成：GitHub排程派發晚4.5~8.6小時、執行僅2.8~9.4分鐘，等總司令裁示是否調整；(四)控制字元修正完成；(一)Shioaji待10/2開盤、(二)紙.一首筆inception待10/1 17:00班次落地，皆BLOCKED待核對 | 0小時 |
 | 先.五：#406 結案確認＋紙.二 前進式紙上追蹤（#407）＋Shioaji commit 洪水修復 | 2026-10-01 | ①紙.二：docs/PREREG_supply_tightness_v2_FORWARD.md（SHA256 6fdafef2…，TRIALS #407）已登記推上；`research/paper_supply_v2.py`＋自測9項(合成資料，無歷史回測)＋`scripts/run_paper_supply_v2.ps1`＋排程AlphaPaperSupplyV2(每小時，2026-10-15前不動作)完成，首次換股日2026-11-16，滿4季(2027-11-15)才首次判讀。②Shioaji洪水：10/1 08:31起登入失敗，`_write_failure`每2分鐘改寫帶新fetched_at，launcher無條件commit→158個commit；已改為失敗時內容相同不重寫(commit a3e0722fd)、launcher僅13:45後每日最多1個commit。當日push全失敗原因未能確證(假說：髒檔擋pull)。待裁示：IBKR launcher(run-ibkr-quotes-cycle.ps1)有同款洪水邏輯，因`check_local_schedule_heartbeat.py::IBKR_PATTERN`依賴其commit訊息而未動，是否一併改；風險與[自行裁量]項見PENDING_QUEUE先.五-三。等Cowork核對 | 自2026-10-01起 |

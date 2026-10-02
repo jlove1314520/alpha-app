@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import uuid
 from datetime import datetime, timezone
@@ -233,12 +234,26 @@ def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
     _save_rate_limit_state(state)
 
 
+_SECRET_FIELD_RE = re.compile(
+    r'"(token_tail|token|api_key|apikey|api_token|secret|password)"\s*:\s*"[^"]*"',
+    re.IGNORECASE,
+)
+
+
+def _redact_secrets(text: str) -> str:
+    """過濾疑似金鑰/token片段後才能寫進會被commit的共用狀態檔（鐵律見
+    CLAUDE.md 先.十-四：rate_limit_state.json 曾經把 FinMind 402 回應裡的
+    token_tail 原文存進 block_reason 並被 commit 進公開 repo）。"""
+    return _SECRET_FIELD_RE.sub(lambda m: f'"{m.group(1)}":"[redacted]"', text)
+
+
 def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
     """收到428/403後呼叫，把這個來源標記成封鎖中，讓所有process（不限
     這支腳本）都會透過共用狀態檔看到並停止繼續打這個來源。"""
     state = _load_rate_limit_state()
     src = state["sources"].setdefault(source, {})
     src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    detail = _redact_secrets(detail) if detail else detail
     src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
     src["blocked_at"] = datetime.now(timezone.utc).isoformat()
     _save_rate_limit_state(state)

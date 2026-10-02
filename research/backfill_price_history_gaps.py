@@ -115,10 +115,24 @@ def _rate_limit_wait_or_raise(source: str = FINMIND_SOURCE_KEY) -> None:
     _save_rate_limit_state(state)
 
 
+_SECRET_FIELD_RE = re.compile(
+    r'"(token_tail|token|api_key|apikey|api_token|secret|password)"\s*:\s*"[^"]*"',
+    re.IGNORECASE,
+)
+
+
+def _redact_secrets(text: str) -> str:
+    """過濾疑似金鑰/token片段後才能寫進會被commit的共用狀態檔（見
+    CLAUDE.md 先.十-四；與 finmind_client.py 同名函式重複實作，因本檔
+    rate_limit_state 讀寫邏輯本身就是獨立複製，一併修。"""
+    return _SECRET_FIELD_RE.sub(lambda m: f'"{m.group(1)}":"[redacted]"', text)
+
+
 def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
     state = _load_rate_limit_state()
     src = state["sources"].setdefault(source, {})
     src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    detail = _redact_secrets(detail) if detail else detail
     src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
     src["blocked_at"] = datetime.now(timezone.utc).isoformat()
     _save_rate_limit_state(state)
