@@ -1,3 +1,21 @@
+## 2026-10-02（DevQueue cycle 20261002-201601，維運帽，先.十-二補標驗證）
+
+等待總司令審閱：37件（新增「先.十-二」）。
+
+**先.十-二 FinMind額度統一：單一預熱排程**：本輪分配到這一項時發現另一個並行互動視窗session（`session_01LQWLqXmnXb1bxX6YFEpKr8`）已於 2026-10-02 19:52:42 以 commit `603ed36fc` 完成（已是 HEAD 祖先），但 `PENDING_QUEUE.md` 的核取方塊漏標——跟先前「先.十-一」同一種「做完沒同步寫回條目」的模式。本輪實際只做**驗證＋補標**，未改動任何程式碼：
+
+- `research/finmind_warmup.py`：唯一 FinMind 抓取者，優先序 P0維運→P1即時需求/持股→P2補缺(財報優先/價格次之)→P3保鮮；滾動1小時用量經共用 `data/rate_limit_state.json` 計數（含其他行程），達450即停；封鎖即停、失敗退避、鎖檔防並發。
+- `paper_supply_v2.LiveSource(read_only=True)`、`main()` 固定 `budget=0`；`build_supply_watchlist.py::main()` 已不再呼叫 `fetch_phase()`（`fstat` 固定 `calls=0`）——兩者確實只讀快取。
+- Task Scheduler 任務 `AlphaFinMindWarmup` 實測存在且 `State=Running`，`LastRunTime=2026/10/2 20:07:55`、`NextRunTime=2026/10/2 20:22:54`（確認每15分鐘確實在跑）。
+- `python research/finmind_warmup.py --status`（程式自算，非口算）：`stmt_code_coverage=7.82%`（151/1930完整）、`px_code_coverage=0.1%`（2/1930完整）、`calls_last_hour=234`（<450上限）、`remaining_backlog_calls=10941`、**預估完成時間 `eta_local=2026-10-03T22:42+08:00`**（`eta_hours_at_92pct_cap=26.4`小時，估計值會隨通過率浮動）。
+- 11/1 前彩排（目標財報/價格覆蓋率≥98%）尚未到驗證時點，待排程持續預熱後再執行。
+
+冒煙測試：#1-5/8/9/11/13-19/21-26/28-38/40-47/50/51 PASS；**#6/20/27/39/48/49 FAIL**——這六項與本輪變更無關（資料時效性問題：sector_flow.json date 落後1天、三大法人柱狀圖資料未載入、一致性違規率3.60%>1%門檻等），本輪未改動 index.html 或任何資料產生邏輯，純屬既有資料新鮮度狀態，與前次（b10efefa6）的「#6/20/27/39/48/49 為既有失敗，與本變更無關」結論一致。
+
+**未動**：紙.一、紙.二、holdout；未 register_trial；未修改 `research/finmind_warmup.py`/`paper_supply_v2.py`/`build_supply_watchlist.py` 程式碼。
+
+下一步：接續佇列下一項（先.十-三，同樣是另一session已完成但漏標，本輪一併查證補標）。
+
 ## 2026-10-01（互動視窗，維運帽，【先.九：緊急】.md行尾＋workflow防呆＋cron避開整點）
 
 等待總司令審閱：35件（新增「先.九」）。
