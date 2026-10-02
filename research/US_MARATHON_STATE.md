@@ -234,3 +234,75 @@ holdout.py::is_holdout_consumed()`讀取為`True`（非本輪動作，僅讀取
 `REPORT.md`第692輪心跳、`PENDING_QUEUE.md`「金流一.4」「外部一改.2」
 「本地AI摘要(Breeze-7B)」「紙.一」「轉向.一」條目、
 `research/AWAITING_REVIEW.md`。
+
+---
+
+**最後更新：2026-10-02T20:3x+08:00（馬拉松第695輪，維運帽）**——取鎖乾淨。
+三軌時間戳：US round692=10-01 21:0x（最舊，本輪選定）／FUT round693=
+10-01 22:0x／TW round694=10-01 23:1x。開工先讀`PENDING_QUEUE.md`：
+`grep -c "^- \[ \]"`=0（凍結.二期間不補件，維持）；`grep -c "^- \[!\]"`
+=21（本輪新增1條「維運.AlphaData三日DNS解析失敗」，其餘為既有累積）。
+**本輪不是單純逐一核對阻塞項解除時間，而是主動查證多個時間敏感的
+已知阻塞條件，因為距上次更新已過24小時、多個條件的時間窗口已經
+到期或接近到期**：
+1. **先.六-四／先.七-一（Shioaji 10/2開盤後確認）**：查`data/
+   quotes_sinopac.json`10/2收盤快照、`research/.live_state_sinopac.json`
+   mtime（仍停2026-09-30 13:45，10/1與10/2兩個完整交易日皆未更新）、
+   `research/external_connectivity.jsonl`（10/2全天internet.ok=True）。
+   **結論：10/2仍登入失敗，且本次已排除網路原因**（10/1是網路中斷，
+   10/2網路正常但照樣連不上），指向Shioaji端憑證/API key/維護，需
+   總司令本人查永豐帳戶狀態（白名單第2條），已詳細記錄於PENDING_
+   QUEUE對應兩條目，未讀取或輸出任何金鑰憑證內容。
+2. **維運.market.yml今日排程缺席／先.九-四／先.九-五**：`gh run list
+   --workflow=market.yml`確認10/2截至20:32台北仍只有1筆run（屬前一天
+   21:43 UTC美股班次延遲落地，非今日台股班次）；已執行`python
+   scripts/log_dispatch_delay.py --since 2026-10-02`記錄0筆（未到
+   8.6小時延遲上限，暫不升級為「確定缺席」）。三個相關條目已同步
+   更新一致結論，避免互相矛盾。
+3. **新發現（本輪真正的維運產出）：`C:\alpha\alpha-data`（Phase 2
+   歷史資料庫管線，不在alpha-app repo內）的`run_daily.py`連續3天
+   （10-01、10-02）因DNS解析失敗（`NameResolutionError...getaddrinfo
+   failed`，對`openapi.twse.com.tw`/`www.twse.com.tw`/`openapi.
+   taifex.com.tw`/`www.sec.gov`四個網域皆失敗）完全沒有新增資料，
+   `alpha.db`卡在2026-09-29**。本輪立即重跑連線測試確認DNS/連線
+   目前正常（非持續性故障），研判是每天15:30那個特定時間窗口本機
+   DNS resolver短暫異常，已完整記錄根因、證據鏈與三個修復選項(a)/
+   (b)/(c)到`PENDING_QUEUE.md`新條目「維運.AlphaData三日DNS解析
+   失敗」，**未改動`fetch.py`/`parsers.py`/`config.py`/`alpha.db`
+   任何位元組**（依根目錄CLAUDE.md規定需總司令確認才能動）。
+4. **附帶發現**：`AlphaQuotesTW`/`AlphaNewsEvents`兩個本機watchdog
+   聲稱連續錯過9/14個應跑班次，直接核對`data/quotes_tw.json`/
+   `data/news.json`實際`fetched_at`皆新鮮正常，判斷是`先.九-三`
+   （2026-10-01）cron錯開分鐘數後watchdog的「預期班次」邏輯未同步
+   更新，產生假陽性告警（非真停擺），已記錄供日後修復參考，未修改
+   watchdog程式碼本身。
+**逐一核對凍結.二允許的四類工作現況**：稽核重跑／驗.二重跑先前輪次
+已全部完成並登記；資料抓取（`資料.一`已完成300/300）；工具修正——
+本輪僅執行既有工具（`log_dispatch_delay.py`讀取，無程式碼修改）；
+`git status --short -- research/backtest/ research/validation/
+research/adjust.py research/pit.py research/trial_registry.py`輸出
+為空（十三節限定清單內檔案無殘留未commit編輯，本輪亦未touch）。US軌
+本身查無新工作單位，凍結.二期間不得開新alpha試驗。驗證：`run_
+detached.py status`running=0；`PYTHONIOENCODING=utf-8 python research/
+trial_registry.py --check`exit=0 PASS（409列不變，本輪未新增判定，
+純維運工作不產生試驗）；`holdout.py::is_holdout_consumed()`=True
+（僅讀取核對）。`AWAITING_REVIEW.md`「等待中：51件」（較round692的
+28件增加，為互動視窗本輪活躍產出的結案項，非馬拉松動作，本輪僅讀取
+核對）。**本輪誠實結論**：交辦佇列0條`- [ ]`；本輪產出4筆維運發現
+（2筆Shioaji/market.yml既有阻塞項的時效性更新、1筆全新的alpha-data
+DNS故障根因鑑識、1筆watchdog假陽性觀察），已完整記錄進`PENDING_
+QUEUE.md`供總司令/互動視窗裁示，**未自行修改任何受保護檔案**（`alpha.
+db`/`fetch.py`/`parsers.py`/`config.py`凍結區、十三節限定清單皆未
+touch）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩
+0條`- [ ]`未開始**。**等待審閱：51件**（與`AWAITING_REVIEW.md`表格
+列數一致）。**下一輪任一軌接手**：依輪替下一輪建議選FUT軌（round693=
+10-01 22:0x，三軌中最舊）；開工前務必先確認：Shioaji 10/3（下一個
+交易日，10/3-10/4為週末，故實際是10/6）是否仍登入失敗（累積更多
+樣本）、`market.yml`今日09:13/10:41 UTC批次最終是否在17:49 UTC前
+出現（本輪查詢時仍未到判斷時間點）、`alpha-data`明天15:30的
+`run_daily.py`是否恢復正常（若恢復代表是偶發自癒，若再失敗則3天
+變4天，升高修復優先度）。凍結.二在總司令/Cowork明確寫「凍結.二解除」
+前不解除。完整見`REPORT.md`第695輪心跳（待補）、`PENDING_QUEUE.md`
+「先.六-四」「先.七-一」「維運.market.yml今日(10/1)排程兩次觸發皆
+缺席」「先.九-四」「先.九-五」「維運.AlphaData三日DNS解析失敗」
+條目、`research/AWAITING_REVIEW.md`。
