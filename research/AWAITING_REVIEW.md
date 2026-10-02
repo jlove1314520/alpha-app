@@ -15,10 +15,11 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：38件）
+## 等待中（目前：39件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
+| 先.十-五：產業缺貨方向——產業桶對照表（13桶，未凍結）＋草案第二版＋§5執行前檢查（見`docs/industry_shortage_mapping.md`、`docs/PREREG_DRAFT_industry_shortage.md`、`research/industry_shortage_precheck_results.json`） | 2026-10-02 | **請Cowork逐桶審「字面對應」後才可凍結對照表（SHA256存證）**：特別看B02（C=光學器材，等級C弱）、B11（造紙，桶內活躍股4檔全期不出分數，有效桶12，關1「桶數≥10」裕度2）、2016-01／2021-01／2023-03分類斷點是否需處理。執行前檢查（不含報酬）：每換股日有分數桶12個、可計分股849～990、與#406的I5/I2/I4個股相關均<0.1；#406組合分數與SUE相關待財報預熱完成。A/C每日快照已啟動（`AlphaMoeaPitSnapshot`）。未登記、未算報酬 | 剛送審 |
 | 先.十-三：供給觀察頁財報覆蓋率<80%改顯示「資料準備中」（另一並行session commit`b10efefa6`完成、本輪驗證補標） | 2026-10-02 20:05 | 已核對index.html第5551-5589行邏輯＋截圖`docs/screenshots/supply_tab_lowcov_20261002.png`存在；冒煙測試#51 PASS（低覆蓋/達標模擬兩情境）。等Cowork核對畫面文案是否符合期待 | 剛完成 |
 | 先.十-二：FinMind額度統一單一預熱排程（`research/finmind_warmup.py`，另一並行session commit`603ed36fc`完成、本輪驗證補標） | 2026-10-02 20:1x | 已驗證：Task Scheduler `AlphaFinMindWarmup`每15分鐘確實在跑（`State=Running`）、`paper_supply_v2`/`build_supply_watchlist`已改唯讀、`--status`回報`stmt_code_coverage=7.82%`／`px_code_coverage=0.1%`／`calls_last_hour=234`（<450上限）／預估完成時間`eta_local=2026-10-03T22:42+08:00`。11/1前彩排（目標覆蓋率≥98%）尚未到驗證時點。等Cowork核對：①預熱優先序（P0維運→P1即時需求→P2補缺→P3保鮮）是否符合裁示原意②ETA是否合理 | 剛完成 |
 | 先.十-四：rate_limit_state.json的block_reason過濾token_tail與疑似金鑰片段（已清除現檔並commit）＋全repo金鑰片段掃描（0筆真實洩漏） | 2026-10-02 19:3x | 根因：FinMind HTTP 402回應原文（含`token_tail`金鑰末8碼）被`research/finmind_client.py`／`research/backfill_price_history_gaps.py`原封不動寫進會被commit的`data/rate_limit_state.json`；已各自新增`_redact_secrets()`正則過濾後才寫入，現檔唯一洩漏片段已改為`[redacted]`（diff僅此一行）。全repo掃描`ghp_`/`github_pat_`/AWS/PEM私鑰/Slack/JWT/Bearer格式0命中；掃描`token`/`api_key`/`secret`類鍵名15處命中逐一核對，僅本次修正本身與空值`"token_tail":""`log，無其他真實金鑰。等Cowork核對：①正則覆蓋鍵名是否足夠（目前：token_tail/token/api_key/apikey/api_token/secret/password）②是否需對`research/ex_dividend_seasonal_sanity_run.log`等歷史log檔也做同樣redaction（目前判斷其值為空字串非真實洩漏，未處理） | 剛完成 |

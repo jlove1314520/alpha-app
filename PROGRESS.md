@@ -1,3 +1,19 @@
+## 2026-10-02（互動視窗，先.十 收工，研究帽／維運帽）
+
+等待總司令審閱：39件（本輪新增「先.十-五 產業缺貨對照表＋草案第二版」；先.十-二／-三／-四 已由前面各列涵蓋）。
+
+**先.十-一 紙.一 未啟動根因（已查證，非推測）**：`gh run view 36949207832 --log`（market.yml，2026-10-02 01:08 UTC）原文：`File ".../research/cbc_rf_rate_client.py", line 82, in _atomic_to_parquet` → `df.to_parquet(tmp_path, index=False)` → `ImportError: Unable to find a usable engine; tried using: 'pyarrow', 'fastparquet'.`。根因是 runner 沒裝 pyarrow，快取寫 parquet 失敗；不是連不上央行。修法：`data/rf_monthly.json`（本機每月抓、commit），runner 只讀檔，任何例外寫 `paper_7030.json` 的 `last_error` 並令心跳 status=ERROR。紙.一 log 未手動補寫，等下一次 market.yml 自然啟動（inception 仍為 2026-10-01 收盤）。
+
+**先.十-二**：單一預熱排程 `AlphaFinMindWarmup` 運作中，上限 450 次／小時，paper_supply_v2 與 build_supply_watchlist 只讀快取。DevQueue 最近一次狀態：財報覆蓋 7.82%、價格 0.1%、積欠約 10,941 次呼叫、預估完成約 2026-10-03T22:42+08:00。**關鍵路徑風險**：11/14 之前若價格仍未備齊，剩餘約 5,790 次價格呼叫在 450 次／小時下需約 13 小時，11/16 首次換股前偏緊；11/1 前重跑一次彩排（規則同先.八-二，只輸出覆蓋率統計）。
+
+**先.十-三**：供給觀察頁覆蓋率<80% 只顯示「資料準備中（已涵蓋 x／1,930 檔）」與原始變化值；冒煙測試 #51，截圖 `docs/screenshots/supply_tab_lowcov_20261002.png`。**先.十-四**：block_reason 過濾 token_tail 與疑似金鑰片段，現檔已清除；全 repo 掃描 0 筆真實洩漏。
+
+**先.十-五 產業缺貨**：解凍；對照表 13 桶（`docs/industry_shortage_mapping.csv`，字面對應附依據欄與等級）已建，停下等 Cowork 審後才可凍結；草案第二版依七點改寫（月頻、T+1、K=3、S_C 近3月、無價格濾網、關1/4/5/7 改寫、不採購 HS）；§5 執行前檢查 125 個換股日、每日有分數桶 12（關1 門檻 10，裕度 2）、可計分股 849~990，未計算任何報酬；每日快照 A/C 已啟動（排程 `AlphaMoeaPitSnapshot`）；帳本重跑 N=408。`[自行裁量]`：換股日取每月 26 日當日或之後第一個交易日；B11 全期不出分數（有效桶 12）；#406 組合/SUE 相關延後到財報預熱完成；precheck 不重建 panel 母體並於文件揭露。
+
+**BLOCKED 維持**：先.九-四（10/2 01:05Z 的 market.yml 是含 10/1 收盤的第一次，已晚於 08:00 期限，需總司令到 GitHub 網頁 Actions 手動 Run workflow）；先.九-五（手動腳本 `scripts/log_dispatch_delay.py --since 2026-10-02`）；先.七-一/二。
+
+**未動**：紙.一 log、紙.二、holdout；未 register_trial；未計算任何報酬。下一步：等 Cowork 審對照表。
+
 ## 2026-10-02（DevQueue cycle 20261002-201601，維運帽，先.十-二／先.十-三補標驗證）
 
 等待總司令審閱：38件（新增「先.十-二」「先.十-三」）。
