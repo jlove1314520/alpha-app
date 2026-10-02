@@ -1,3 +1,17 @@
+## 2026-10-03（互動視窗，先.十一 收工，維運帽／研究帽）
+
+等待總司令審閱：42件（本輪新增「先.十一-一 對照表凍結」「先.十一-三 本機網路診斷」「先.十一-四 紙.一已知偏差」三列）。
+
+**先.十一-一**：B02 只用 S_A，其餘 12 桶照現表；凍結 SHA256：`docs/industry_shortage_mapping.csv` = e6e55820e205ef0cfe7cb034c6818509cdf355b6432d395181d0ef4c7b6228bf、`docs/industry_shortage_stock_map.csv` = 40b9a16752019499f4fa53717974dd9c66574301432320a794bab9002a7763bc（LF 位元組），記於 `docs/industry_shortage_mapping_FROZEN.json`，之後不得修改。
+
+**先.十一-二**：BLOCKED，等 FinMind 財報預熱（涵蓋 23.68%，預計 2026-10-04 00:13 完成）。解除後依序：與 #406 分數／I5／SUE 相關係數（不含報酬，任一 |r|>0.7 即停下回報）→ PREREG_industry_shortage_FINAL.md＋SHA256＋TRIALS_LEDGER 事前登記 → 單發執行。
+
+**先.十一-三 本機網路診斷**：`scripts/check_external_connectivity.py` 每列 JSONL 新增 `net_diag`（系統 DNS vs 直連 1.1.1.1／8.8.8.8、預設閘道 ping、tailscale status、近期網卡事件）與 `class` 分類；DNS 加時間上限、240 秒 watchdog 防止無紀錄盲區；`scripts/selftest_connectivity_diag.py` 18 項全過（含注入診斷自身失敗仍 fail open，規則十二）。證據：9/30 失敗 73 筆、10/1 失敗 235 筆，皆為「整條外網斷」（iPhone 熱點 Wi-Fi 為唯一上行且掉線；1.1.1.1 純 IP 亦失敗；非 DNS-only、非 Tailscale 接管 DNS 失敗）；10/1 19:42 至 10/2 23:42 有 28 小時無紀錄，原因無法確認。**更正**：先前馬拉松「10/2 272 筆／218 失敗」「83%／80%」為誤讀，已在原文前加過時指標。backfill：fetch.py 未改；10/3 15:30 預期只補回 10/2，9/30 與 10/1 不會自然補回（讀碼推論，待實跑驗證）。規則十：本輪沒有新增會改寫 repo 追蹤檔的排程步驟，`research/external_connectivity.jsonl`／`.external_connectivity_state.json` 本來就是本機排程 AlphaConnectivity 的機器寫檔（非 workflow），不需動 allowlist。
+
+**先.十一-四 紙.一**：`research/data/paper_7030_log.jsonl` 已有 inception，依裁示不得修改，未動。**已知偏差**：inception 未扣 0050 期初買進成本（stock_value_post 恰 700,000、NAV 恰 1,000,000），起始 NAV 略高估，後續比較時須注意。先.九-四標為不需執行（10/2 01:08 那次已含 10/1）。
+
+紙.二、holdout 未動。push 後停下等 Cowork 核對。
+
 ## 2026-10-02（互動視窗，先.十 收工，研究帽／維運帽）
 
 等待總司令審閱：39件（本輪新增「先.十-五 產業缺貨對照表＋草案第二版」；先.十-二／-三／-四 已由前面各列涵蓋）。

@@ -15,10 +15,13 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：39件）
+## 等待中（目前：42件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
+| 先.十一-三：本機網路診斷（connectivity監測加入DNS對照／閘道ping／tailscale／網卡事件＋分類＋watchdog；10/1～10/2證據回報；更正馬拉松誤讀） | 2026-10-03 | `scripts/check_external_connectivity.py`每列JSONL新增`net_diag`與`class`（整條外網斷／只有DNS壞／Tailscale接管DNS失敗／其他／正常）；`scripts/selftest_connectivity_diag.py` 18項全過（含注入診斷自身失敗仍fail open、watchdog 240秒留hung紀錄）。證據：9/30 73次、10/1 235次失敗＝整條外網斷（iPhone熱點Wi-Fi為唯一上行且掉線，1.1.1.1純IP亦失敗，非DNS-only、非Tailscale）；10/1 19:42～10/2 23:42有28小時無紀錄（原因無法確認，Task Scheduler歷史停用）；馬拉松「10/2 272筆/218失敗」「83%/80%」為誤讀，已加過時指標。backfill只回報：10/3 15:30預期只補回10/2，9/30與10/1不會自然補回（讀碼推論，待實跑驗證）。等Cowork核對：①分類規則門檻是否合理②是否核准啟用Task Scheduler歷史記錄③9/30、10/1缺口是否另案補抓 | 2026-10-03 | 剛完成 |
+| 先.十一-一：產業缺貨對照表凍結（B02移除S_C、只用S_A；其餘12桶照現表）＋SHA256 | 2026-10-03 | `docs/industry_shortage_mapping.csv` SHA256=e6e55820e205ef0cfe7cb034c6818509cdf355b6432d395181d0ef4c7b6228bf；`docs/industry_shortage_stock_map.csv` SHA256=40b9a16752019499f4fa53717974dd9c66574301432320a794bab9002a7763bc（LF位元組）；`docs/industry_shortage_mapping_FROZEN.json`，之後不得修改。先.十一-二（相關係數→PREREG_FINAL→單發）仍BLOCKED於FinMind財報預熱（涵蓋23.68%，預計10/4 00:13完成），解除後才可續做。等Cowork核對凍結內容 | 2026-10-03 | 剛完成 |
+| 先.十一-四：紙.一inception已寫入（不得修改）＋已知偏差記錄；先.九-四標不需執行 | 2026-10-03 | `research/data/paper_7030_log.jsonl`僅有inception（stock_value_post恰700,000、NAV恰1,000,000），0050期初買進成本未扣，起始NAV略高估；依裁示未修改、已記PROGRESS。等Cowork核對：後續績效比較是否以「扣期初成本後」重算起點（由讀取端調整，不動紀錄檔） | 2026-10-03 | 剛完成 |
 | 先.十-五：產業缺貨方向——產業桶對照表（13桶，未凍結）＋草案第二版＋§5執行前檢查（見`docs/industry_shortage_mapping.md`、`docs/PREREG_DRAFT_industry_shortage.md`、`research/industry_shortage_precheck_results.json`） | 2026-10-02 | **請Cowork逐桶審「字面對應」後才可凍結對照表（SHA256存證）**：特別看B02（C=光學器材，等級C弱）、B11（造紙，桶內活躍股4檔全期不出分數，有效桶12，關1「桶數≥10」裕度2）、2016-01／2021-01／2023-03分類斷點是否需處理。執行前檢查（不含報酬）：每換股日有分數桶12個、可計分股849～990、與#406的I5/I2/I4個股相關均<0.1；#406組合分數與SUE相關待財報預熱完成。A/C每日快照已啟動（`AlphaMoeaPitSnapshot`）。未登記、未算報酬 | 剛送審 |
 | 先.十-三：供給觀察頁財報覆蓋率<80%改顯示「資料準備中」（另一並行session commit`b10efefa6`完成、本輪驗證補標） | 2026-10-02 20:05 | 已核對index.html第5551-5589行邏輯＋截圖`docs/screenshots/supply_tab_lowcov_20261002.png`存在；冒煙測試#51 PASS（低覆蓋/達標模擬兩情境）。等Cowork核對畫面文案是否符合期待 | 剛完成 |
 | 先.十-二：FinMind額度統一單一預熱排程（`research/finmind_warmup.py`，另一並行session commit`603ed36fc`完成、本輪驗證補標） | 2026-10-02 20:1x | 已驗證：Task Scheduler `AlphaFinMindWarmup`每15分鐘確實在跑（`State=Running`）、`paper_supply_v2`/`build_supply_watchlist`已改唯讀、`--status`回報`stmt_code_coverage=7.82%`／`px_code_coverage=0.1%`／`calls_last_hour=234`（<450上限）／預估完成時間`eta_local=2026-10-03T22:42+08:00`。11/1前彩排（目標覆蓋率≥98%）尚未到驗證時點。等Cowork核對：①預熱優先序（P0維運→P1即時需求→P2補缺→P3保鮮）是否符合裁示原意②ETA是否合理 | 剛完成 |

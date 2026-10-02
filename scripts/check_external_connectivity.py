@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import socket
 import subprocess
 import sys
@@ -145,6 +146,228 @@ def check_ibkr() -> tuple[bool, str]:
         return True, f"API 埠開啟：{open_ports}"
     return False, ("四個 API 埠全部關閉（4001/4002/7496/7497）"
                    "——Gateway 若在跑多半是卡在登入畫面，需人工重登")
+
+
+# ---------------------------------------------------------------------------
+# 先.十一-三（2026-10-02 總司令裁示）：網路斷線原因診斷。
+# 動機：10/1 整天與 10/2 部分時段 run_daily 報 getaddrinfo failed，但監測只記得「斷了」，
+# 分不出是「整條外網斷」「只有 DNS 壞」還是「Tailscale 接管 DNS 失敗」；
+# 且 10/1 19:42→10/2 23:42 有 28 小時沒有任何紀錄（行程疑似卡在 getaddrinfo 超過排程上限）。
+# 規則十二：以下全部 fail open——診斷自己的任何例外/逾時只降級成診斷欄位裡的一行文字，
+# 不得影響原有三項檢查、不得非零退出。每一項都有時間上限（getaddrinfo 本身沒有逾時）。
+# ---------------------------------------------------------------------------
+CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
+DNS_PROBE_HOST = "www.gstatic.com"
+DIRECT_DNS = ("1.1.1.1", "8.8.8.8")
+TS_MAGIC_DNS = "100.100.100.100"
+EVENT_WINDOW_MIN = 15
+WATCHDOG_SECONDS = 240
+_STAGE = {"name": "start"}
+
+
+def _bounded(fn, timeout: float, default=None):
+    """在 daemon 執行緒跑 fn，超過 timeout 就放棄等待（回傳 (False, default)）。"""
+    box: dict = {}
+
+    def run() -> None:
+        try:
+            box["v"] = fn()
+        except Exception as e:  # noqa: BLE001
+            box["e"] = f"{type(e).__name__}: {e}"
+
+    import threading
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
+    t.join(timeout)
+    if t.is_alive():
+        return False, default
+    if "e" in box:
+        return True, {"ok": False, "detail": box["e"]}
+    return True, box.get("v", default)
+
+
+def _run(cmd: list[str], timeout: float, enc: str | None = None) -> str:
+    # enc=None 用系統區域編碼（route/ping/wevtutil 在繁中 Windows 輸出 cp950）；tailscale 的 JSON 傳 utf-8。
+    p = subprocess.run(cmd, capture_output=True, timeout=timeout, text=True,
+                       encoding=enc, errors="replace", creationflags=CREATE_NO_WINDOW)
+    return (p.stdout or "") + (p.stderr or "")
+
+
+def _dns_query_udp(server: str, host: str, timeout: float = 3.0) -> dict:
+    """直接對指定 DNS 伺服器送 UDP A 查詢（繞過系統解析器/NRPT）。"""
+    import os
+    import struct
+    import time
+    qid = struct.unpack("!H", os.urandom(2))[0]
+    q = b"".join(bytes([len(p)]) + p.encode() for p in host.split(".")) + b"\x00"
+    pkt = struct.pack("!HHHHHH", qid, 0x0100, 1, 0, 0, 0) + q + struct.pack("!HH", 1, 1)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(timeout)
+    t0 = time.monotonic()
+    try:
+        s.sendto(pkt, (server, 53))
+        data, _ = s.recvfrom(1024)
+    except socket.timeout:
+        return {"ok": False, "detail": f"無回應（{timeout:g}s）"}
+    except OSError as e:
+        return {"ok": False, "detail": f"{type(e).__name__}: {getattr(e, 'winerror', e.errno)}"}
+    finally:
+        s.close()
+    ms = int((time.monotonic() - t0) * 1000)
+    if len(data) < 12 or struct.unpack("!H", data[:2])[0] != qid:
+        return {"ok": False, "detail": "回應格式不符"}
+    flags, _, an = struct.unpack("!HHH", data[2:8])
+    rcode = flags & 0xF
+    return {"ok": rcode == 0 and an >= 1, "answered": True, "detail": f"rcode={rcode} an={an}", "ms": ms}
+
+
+def _dns_system(host: str) -> dict:
+    import time
+    t0 = time.monotonic()
+    infos = socket.getaddrinfo(host, 443, socket.AF_INET)
+    return {"ok": bool(infos), "detail": infos[0][4][0] if infos else "空結果",
+            "ms": int((time.monotonic() - t0) * 1000)}
+
+
+def _default_gateway() -> dict:
+    out = _run(["route", "print", "-4", "0.0.0.0"], 6)
+    best = None
+    for line in out.splitlines():
+        p = line.split()
+        if len(p) >= 5 and p[0] == "0.0.0.0" and p[1] == "0.0.0.0":
+            try:
+                metric = int(p[4])
+            except ValueError:
+                continue
+            if best is None or metric < best[1]:
+                best = (p[2], metric)
+    if best is None:
+        return {"ip": None, "ok": False, "detail": "無預設路由"}
+    gw = best[0]
+    import re
+    if not re.fullmatch(r"\d+\.\d+\.\d+\.\d+", gw):
+        return {"ip": "on-link", "ok": None, "detail": "預設路由為 on-link（PPPoE 等），不做閘道 ping"}
+    ping = _run(["ping", "-n", "2", "-w", "1500", gw], 8)
+    return {"ip": gw, "ok": "TTL=" in ping, "detail": "ping 有回應" if "TTL=" in ping else "ping 無回應"}
+
+
+def _tailscale_state() -> dict:
+    exe = TAILSCALE if Path(TAILSCALE).exists() else "tailscale"
+    raw = _run([exe, "status", "--json"], 10, "utf-8")
+    j = json.loads(raw[raw.index("{"):])
+    return {
+        "backend": j.get("BackendState"),
+        "magic_dns": bool((j.get("CurrentTailnet") or {}).get("MagicDNSEnabled")),
+        "self_online": (j.get("Self") or {}).get("Online"),
+        "health": [str(h)[:120] for h in (j.get("Health") or [])][:3],
+    }
+
+
+def _recent_nic_events() -> dict:
+    """近 EVENT_WINDOW_MIN 分鐘的網卡/WLAN 斷線事件（NetworkProfile 10001、WLAN-AutoConfig 8003/8002）。"""
+    ms = EVENT_WINDOW_MIN * 60 * 1000
+    spec = [
+        ("Microsoft-Windows-NetworkProfile/Operational", "10001"),
+        ("Microsoft-Windows-WLAN-AutoConfig/Operational", "8003 or EventID=8002"),
+    ]
+    found, last = [], None
+    for chan, ids in spec:
+        q = f"*[System[(EventID={ids}) and TimeCreated[timediff(@SystemTime) <= {ms}]]]"
+        out = _run(["wevtutil", "qe", chan, f"/q:{q}", "/c:20", "/rd:true", "/f:text"], 10)
+        n = out.count("Event ID:")
+        if n:
+            found.append(f"{chan.split('-')[-1].split('/')[0]}:{n}")
+            for line in out.splitlines():
+                if line.strip().startswith("Date:"):
+                    last = max(last or "", line.split(":", 1)[1].strip())
+                    break
+    return {"count": len(found), "detail": ",".join(found) or "無", "last": last}
+
+
+def classify_outage(inet_ok: bool, d: dict) -> tuple[str, str]:
+    """回傳 (類別, 說明)。類別只有：正常／整條外網斷／只有DNS壞／Tailscale接管DNS失敗／其他。"""
+    if inet_ok:
+        return "正常", ""
+    direct_ok = [h for h, r in d.get("direct_dns", {}).items() if r.get("ok")]
+    gw = d.get("gateway") or {}
+    if not direct_ok:
+        gwtxt = ("無預設閘道" if gw.get("ip") is None and "ip" in gw
+                 else f"閘道 {gw.get('ip')} " + {True: "ping 通", False: "ping 不通", None: "未測"}.get(gw.get("ok"), "未測"))
+        return "整條外網斷", f"1.1.1.1/8.8.8.8 直連 DNS 皆無回應；{gwtxt}"
+    sysd = d.get("system_dns") or {}
+    if sysd.get("ok"):
+        return "其他", "系統 DNS 與直連 DNS 皆通但 HTTPS 檢查失敗（非 DNS/整條斷）"
+    ts = d.get("tailscale") or {}
+    tsdns = d.get("tailscale_dns")
+    takeover = ts.get("magic_dns") and (ts.get("backend") not in (None, "Running")
+                                        or (tsdns is not None and not tsdns.get("answered")))
+    if takeover:
+        return "Tailscale接管DNS失敗", (f"系統 DNS 失敗但直連 {','.join(direct_ok)} 通；"
+                                        f"MagicDNS 啟用、tailscale={ts.get('backend')}、{TS_MAGIC_DNS} 無回應")
+    return "只有DNS壞", f"系統 DNS 失敗（{sysd.get('detail')}）但直連 {','.join(direct_ok)} 通；Tailscale 非主因"
+
+
+def collect_net_diag(inet_ok: bool) -> dict:
+    """蒐集診斷。整體 fail open：任何失敗只留下文字，不丟例外。"""
+    d: dict = {}
+    try:
+        import threading
+        res: dict = {}
+
+        def put(key, fn, to):
+            def go():
+                ok, v = _bounded(fn, to, {"ok": False, "detail": f"逾時（>{to:g}s）"})
+                res[key] = v if ok else {"ok": False, "detail": f"逾時（>{to:g}s）", "timeout": True}
+            th = threading.Thread(target=go, daemon=True)
+            th.start()
+            return th
+
+        ths = [
+            put("system_dns", lambda: _dns_system(DNS_PROBE_HOST), 6),
+            put("gateway", _default_gateway, 12),
+            put("tailscale", _tailscale_state, 12),
+            put("nic_events", _recent_nic_events, 25),
+        ]
+        for h in DIRECT_DNS:
+            ths.append(put(f"direct_{h}", lambda h=h: _dns_query_udp(h, DNS_PROBE_HOST), 5))
+        ths.append(put("tsdns", lambda: _dns_query_udp(TS_MAGIC_DNS, DNS_PROBE_HOST), 5))
+        for th in ths:
+            th.join(30)
+        d["system_dns"] = res.get("system_dns")
+        d["direct_dns"] = {h: res.get(f"direct_{h}") or {"ok": False, "detail": "未完成"} for h in DIRECT_DNS}
+        d["gateway"] = res.get("gateway")
+        d["tailscale"] = res.get("tailscale")
+        ts = d["tailscale"] or {}
+        d["tailscale_dns"] = res.get("tsdns") if ts.get("magic_dns") else None
+        d["nic_events"] = res.get("nic_events")
+        d["class"], d["class_detail"] = classify_outage(inet_ok, d)
+    except Exception as e:  # noqa: BLE001
+        d["diag_error"] = f"{type(e).__name__}: {e}"
+        d.setdefault("class", "診斷失敗")
+        d.setdefault("class_detail", "")
+    return d
+
+
+def _start_watchdog() -> None:
+    """行程卡死（例如 getaddrinfo）超過 WATCHDOG_SECONDS 就留下一筆 hung 紀錄後自行結束，
+    避免再出現 10/1→10/2 那種 28 小時完全沒有紀錄的盲區。fail open：寫不出來也只是結束。"""
+    import os
+    import threading
+
+    def dog() -> None:
+        try:
+            rec = {"ts": datetime.now(TZ).isoformat(), "hung": True, "stage": _STAGE["name"],
+                   "note": f"行程超過 {WATCHDOG_SECONDS}s 未完成，watchdog 強制結束（卡在 {_STAGE['name']}）"}
+            LOG.parent.mkdir(parents=True, exist_ok=True)
+            with LOG.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        except Exception:  # noqa: BLE001
+            pass
+        os._exit(0)
+
+    t = threading.Timer(WATCHDOG_SECONDS, dog)
+    t.daemon = True
+    t.start()
 
 
 def _load_state() -> dict:
@@ -370,14 +593,26 @@ def main() -> int:
     a = ap.parse_args()
 
     now = datetime.now(TZ)
+    _start_watchdog()
+    _STAGE["name"] = "internet"
+    # check_internet 內的 urllib 解析 DNS 沒有逾時上限，包一層時間上限（先.十一-三）。
+    done, inet = _bounded(check_internet, 40)
+    if not done:
+        inet = (False, "check_internet 逾時（>40s），疑似 getaddrinfo 卡住")
+    elif isinstance(inet, dict):
+        inet = (False, f"check_internet 例外：{inet.get('detail')}")
+    _STAGE["name"] = "tailscale_netcheck"
     checks = {
-        "internet": check_internet(),
+        "internet": inet,
         "tailscale": check_tailscale(),
         "ibkr_gateway": check_ibkr(),
     }
     state = _load_state()
     alerts = []
     record = {"ts": now.isoformat(), "results": {}}
+    _STAGE["name"] = "net_diag"
+    record["net_diag"] = collect_net_diag(checks["internet"][0])
+    _STAGE["name"] = "local_tasks"
 
     for name, (ok, detail) in checks.items():
         streak = 0 if ok else int(state.get(name, 0)) + 1
@@ -420,12 +655,19 @@ def main() -> int:
         print("=" * 66)
         for name, streak, detail in alerts:
             print(f"  [{name}] 連續失敗 {streak} 次：{detail}")
+        nd = record.get("net_diag") or {}
+        if nd.get("class") not in (None, "正常"):
+            print(f"  斷線分類：{nd.get('class')}（{nd.get('class_detail')}）")
         print(f"  紀錄：{LOG.relative_to(ROOT)}")
         return 1
 
     if not a.quiet:
         print(f"對外連通性 {now.strftime('%H:%M:%S')}：", end="")
         print("、".join(f"{n}{'✓' if ok else '✗'}" for n, (ok, _) in checks.items()))
+        nd = record.get("net_diag") or {}
+        print(f"  斷線分類：{nd.get('class')}  DNS(系統)={(nd.get('system_dns') or {}).get('detail')}"
+              f"  閘道={(nd.get('gateway') or {}).get('detail')}  Tailscale={(nd.get('tailscale') or {}).get('backend')}"
+              f"  近{EVENT_WINDOW_MIN}分鐘斷線事件={(nd.get('nic_events') or {}).get('detail')}")
         for name, (ok, detail) in checks.items():
             print(f"  {'✓' if ok else '✗'} {name}: {detail}")
     return 0
