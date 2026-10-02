@@ -296,15 +296,40 @@ def run() -> dict:
     return {"processed": len(boundaries), "started": True}
 
 
+def _record_failure(exc: BaseException, tb_text: str) -> None:
+    """先.十-一（2026-10-02總司令裁示）：任何例外都要落地到paper_7030.json的last_error與
+    心跳status=ERROR，不得只印warning。本函式自己的失敗只降級成警告（十二節）。"""
+    reason = f"{type(exc).__name__}: {exc}"
+    ts = datetime.now(TZ).isoformat()
+    try:
+        summary = {"started": False, "note": "紙.一執行失敗，尚未啟動或未更新"}
+        if APP_SUMMARY_PATH.exists():
+            with open(APP_SUMMARY_PATH, encoding="utf-8") as f:
+                summary = json.load(f)
+        summary["last_error"] = {"status": "EXCEPTION", "reason": reason,
+                                 "traceback_tail": tb_text.strip().splitlines()[-6:], "ts": ts}
+        APP_SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(APP_SUMMARY_PATH, "w", encoding="utf-8") as f:
+            json.dump(summary, f, ensure_ascii=False, indent=2)
+    except Exception as e2:  # noqa: BLE001
+        print(f"::warning::紙.一寫入last_error失敗：{type(e2).__name__}: {e2}")
+    try:
+        with open(HEARTBEAT_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": ts, "item": "紙.一", "status": "ERROR",
+                                "note": f"例外中止：{reason}"}, ensure_ascii=False) + "\n")
+    except Exception as e3:  # noqa: BLE001
+        print(f"::warning::紙.一寫入心跳失敗：{type(e3).__name__}: {e3}")
+
+
 if __name__ == "__main__":
     try:
         run()
-    except Exception:
-        # 依CLAUDE.md十二節「守門員自身失敗只能降級成警告」精神：這是排程
-        # 附掛的一個獨立功能，失敗不得讓整支market.yml的其他步驟連帶中斷
-        # （呼叫端已用continue-on-error保護，這裡額外印::warning::方便被
-        # 既有STATUS.json/告警機制看見）。
+    except Exception as _exc:
+        # 十二節：失敗不得讓market.yml其他步驟中斷（呼叫端另有continue-on-error），
+        # 但先.十-一起必須把錯誤寫進paper_7030.json last_error＋心跳status=ERROR。
         import traceback
-        print("::warning::紙.一 paper_7030_tracker.py 執行失敗，見下方traceback（不影響其他排程步驟）")
-        traceback.print_exc()
+        _tb = traceback.format_exc()
+        print("::error::紙.一 paper_7030_tracker.py 執行失敗，已寫入last_error與心跳（不影響其他排程步驟）")
+        print(_tb)
+        _record_failure(_exc, _tb)
         sys.exit(0)

@@ -59,6 +59,7 @@ import requests
 CACHE_DIR = Path(__file__).parent / "data" / "raw_cbc_rf_rate"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_PATH = CACHE_DIR / "A13Rate_monthly.parquet"
+RF_MONTHLY_JSON = Path(__file__).resolve().parent.parent / "data" / "rf_monthly.json"
 
 SOURCE_URL = "https://www.cbc.gov.tw/public/data/OpenData/A13Rate.csv"
 RATE_COL = "定存利率-一個月-固定"
@@ -123,13 +124,22 @@ def fetch_raw(force: bool = False) -> pd.DataFrame:
         raise RuntimeError(
             f"A13Rate.csv欄位不含預期的'{RATE_COL}'，實際欄位: {list(df.columns)}"
         )
-    _atomic_to_parquet(df, CACHE_PATH)
+    try:
+        _atomic_to_parquet(df, CACHE_PATH)
+    except Exception as e:  # noqa: BLE001 - 快取只是加速；runner沒有pyarrow時不得因此丟掉已下載的資料（先.十-一）
+        print(f"::warning::央行利率快取寫入失敗（略過，不影響本次資料）：{type(e).__name__}: {e}")
     return df
 
 
 def load_risk_free_rate_series(force: bool = False) -> pd.DataFrame:
     """回傳月頻無風險利率代理序列，columns: date(月初), rf_rate_pct
-    （六家銀行『定存利率-一個月-固定』算術平均，單位：百分比年化）。"""
+    （六家銀行『定存利率-一個月-固定』算術平均，單位：百分比年化）。
+
+    先.十-一（2026-10-02）：優先讀`data/rf_monthly.json`（由本機排程
+    `scripts/export_rf_monthly.py`每月抓取後commit，runner只讀檔、零網路、
+    零parquet依賴）；檔案不存在或force=True才走央行CSV下載。"""
+    if not force and RF_MONTHLY_JSON.exists():
+        return load_rf_monthly_json()
     raw = fetch_raw(force=force)
     raw = raw.copy()
     raw["date"] = raw["年月"].map(_roc_yyymm_to_date)
@@ -143,6 +153,19 @@ def load_risk_free_rate_series(force: bool = False) -> pd.DataFrame:
         .reset_index(drop=True)
     )
     return monthly
+
+
+def load_rf_monthly_json(path: Path | None = None) -> pd.DataFrame:
+    import json
+    with open(path or RF_MONTHLY_JSON, encoding="utf-8") as f:
+        doc = json.load(f)
+    rows = doc["monthly"]
+    if not rows:
+        raise RuntimeError("rf_monthly.json的monthly為空")
+    df = pd.DataFrame(rows)
+    df["date"] = pd.to_datetime(df["date"])
+    df["rf_rate_pct"] = pd.to_numeric(df["rf_rate_pct"], errors="raise")
+    return df[["date", "rf_rate_pct"]].sort_values("date").reset_index(drop=True)
 
 
 def rf_rate_for_date(date: pd.Timestamp, monthly: pd.DataFrame) -> float:
