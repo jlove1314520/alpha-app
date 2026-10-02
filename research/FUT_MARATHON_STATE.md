@@ -13,92 +13,6 @@
 
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `FUT_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
-**最後更新：2026-10-01T22:0x+08:00（馬拉松第693輪，維運帽）**——取鎖乾淨
-（cycle`20261001-220036`）。三軌時間戳（開工前）：US round689=09-30
-15:0x／FUT round690=09-30 16:0x（最舊，本輪選定）／TW round691=10-01
-20:0x／US round692=10-01 21:0x（round692已於TW round691之後追加完成，
-實質最新序為TW691→US692，本輪FUT690仍是三軌中最舊，依輪替選FUT）。
-開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（與round692持平，
-`先.五-三`等互動視窗項目本輪查詢時已處理完畢不再計入）；`grep -c
-"^- \[!\]"`=14（較round692的13＋1：新增`先.六-四`Shioaji登入失敗原因
-查證，BLOCKED至10/2開盤，屬互動視窗本輪新增非馬拉松漏做）。逐一核對
-14條`- [!]`阻塞項，與round692結論一致、均未到解除時間（`金流一.4`
-20日視窗仍差2個交易日；`外部一改.2`／`研究.c`tick累積仍15/20；`本地
-AI摘要(Breeze-7B)`仍待總司令四選一；`紙.一`仍`started:false`；
-`先.六-四`BLOCKED至10/2開盤）。`grep -c "凍結.二解除" PENDING_QUEUE.md`
-=4，皆條件敘述非宣告解除，凍結.二仍生效。**佇列深度自檢**：`- [ ]`=0
-（<12下限），凍結.二期間暫停補件。
-
-**本輪新發現（維運帽，兩項皆已寫入PENDING_QUEUE.md供總司令/互動視窗
-裁示，本輪不擅自執行修復）**：
-1. **`.gitattributes`（commit`5020ebaa9`）新增`*.md text eol=lf`後，
-   全repo仍有111個既有`.md`檔案（`git -c core.autocrlf=false add
-   --renormalize --dry-run -- '*.md'`實測）未renormalize，`先.六-二`
-   當時已記錄此風險並留給總司令裁示範圍，本輪查到**這個風險已經從
-   理論變成實際故障**：`.github/workflows/local_schedule_watchdog.yml`
-   2026-10-01T13:46:04Z（run`36871130021`）因`docs/PRICE_HISTORY_
-   STUCK_2024-12-31.md`行尾正規化造成的unstaged diff，`git pull
-   --rebase --autostash`在stash reapply時衝突失敗。本輪**不自行
-   renormalize**（尊重`先.六-二`已明文留給總司令的裁示範圍），已將
-   完整根因與提案寫入`PENDING_QUEUE.md`新條目「維運.先.六-二後續一」。
-2. **`market.yml`（台股主班次）今日(10/1)兩次排程觸發（09:00 UTC主班次
-   ／10:30 UTC補救班次）完全缺席**：`gh run list --workflow=market.yml`
-   實測全天僅1筆run（昨晚美股班次，`createdAt=2026-10-01T00:39:54Z`），
-   查詢時間已過兩排程時間4~5小時仍無任何run/queued紀錄；同時段
-   `quotes.yml`／`news_events.yml`／`local_schedule_watchdog.yml`皆
-   正常觸發，排除GitHub平台性故障，問題收斂在`market.yml`這一支。
-   已嘗試`gh workflow run market.yml`手動補觸發，失敗：`HTTP 403
-   Resource not accessible by personal access token`（目前PAT僅供
-   push、無Actions workflow dispatch權限）。**影響**：round692原本
-   預期「今晚market.yml跑完後應會更新」`紙.一`／`金流一.4`，**本輪
-   證實不會發生**，因為今天的排程根本沒跑；10/1收盤資料要等下一次
-   成功觸發（最近的是明天10/2台北17:00）才會入庫，`紙.一`／`金流一.4`
-   倒數各再延後至少一天。已寫入`PENDING_QUEUE.md`新條目「維運.
-   market.yml今日(10/1)排程兩次觸發皆缺席」，解除條件寫明：明天排程
-   正常或總司令/Cowork用網頁手動補跑。
-
-**逐一核對凍結.二允許的四類工作現況**：稽核重跑／驗.二重跑先前輪次
-已全部完成並登記；資料抓取（`資料.一`已完成300/300）；工具修正本輪
-僅寫狀態檔與PENDING_QUEUE發現記錄，未修改任何原始碼；`git status
---short -- research/backtest/ research/validation/ research/adjust.py
-research/pit.py research/trial_registry.py`輸出為空（十三節限定清單
-內檔案無殘留未commit編輯，本輪亦未touch）。FUT軌本身`FUT_LEADS.md`/
-`STRATEGY_GRAVEYARD.md`回顧：個股期貨橫斷面線、trend/oi組合嘗試、
-全天close-to-close反轉/順勢皆已窮盡並結案，無清楚剩餘的全新機制候選，
-且凍結.二期間本來就不得登記新alpha試驗。驗證：`run_detached.py
-status`running=0（162筆歷史，無job待收成）；`trial_registry.py
---check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（本輪未新增判定）；
-`validation/holdout.py::is_holdout_consumed()`讀取為`True`（非本輪
-動作，僅讀取核對）。`AWAITING_REVIEW.md`「等待中（目前：41列資料，
-含表頭42列）」，較round692的28件已明顯增加，為互動視窗本輪活躍產出
-（`先.六`系列五項子任務），非馬拉松動作，本輪僅讀取核對不變動。
-
-**本輪誠實結論**：交辦佇列0條`- [ ]`；凍結.二允許的四類工作皆已完成
-或無新內容；14條`- [!]`逐一核對均未到解除時間；FUT軌本身查無可推進
-的新工作單位；**本輪實際產出是兩筆維運發現（CRLF/gitattributes結構性
-風險、market.yml今日排程缺席），已完整記錄進`PENDING_QUEUE.md`供
-總司令/互動視窗裁示，未自行執行任何修復動作**（尊重先前已明文留給
-總司令的裁示範圍、以及`gh workflow run`權限不足的客觀限制）——依
-`CLAUDE.md`「零之一」白名單精神，不確定但可還原的部分（要不要renormalize、
-要不要等明天排程）已標記等待裁示，不是本輪自行判斷就動手。未動
-`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節
-限定清單內任何原始碼，全程零新增外部研究類API呼叫（僅`gh run
-list`/`gh workflow run`/`git`相關指令與既有`.json`/`.md`帳本檔案
-讀取）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩
-0條`- [ ]`未開始**。**等待審閱：41件**（與`AWAITING_REVIEW.md`表格
-資料列數一致，含表頭42列；較round692的28件+13，差異來自互動視窗
-`先.六`系列本輪活躍產出的結案項，非馬拉松動作）。**下一輪任一軌
-接手**：依輪替下一輪建議選US軌（round692=10-01 21:0x，三軌中非最舊
-但TW691更晚；實際最舊未結案為FUT本輪690已更新，故下一輪應選TW或US
-取決於下一輪開工時三軌實際時間戳，請下一輪重新比對）；開工前務必
-先確認`market.yml`今天(10/2)17:00排程是否已正常觸發、`.gitattributes`
-renormalize是否已有總司令裁示、`紙.一`／`金流一.4`是否已隨新資料
-更新。凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。完整見
-`REPORT.md`第693輪心跳、`PENDING_QUEUE.md`「維運.先.六-二後續一」
-「維運.market.yml今日(10/1)排程兩次觸發皆缺席」「金流一.4」「本地AI
-摘要(Breeze-7B)」「紙.一」條目、`research/AWAITING_REVIEW.md`。
-
----
 **最後更新：2026-10-02T21:3x+08:00（馬拉松第696輪，維運帽）**——取鎖乾淨
 （cycle`20261002-213037`）。三軌時間戳（開工前）：FUT round693=10-01
 22:0x（最舊，本輪選定）／TW round694=10-01 23:1x／US round695=10-02
@@ -345,4 +259,85 @@ GRAVEYARD.md`結案狀態未變，凍結.二期間本來就不得登記新alpha�
 `先.七-一`是否已到10/5開盤可驗證。凍結.二在總司令/Cowork明確寫
 「凍結.二解除」前不解除。完整見`REPORT.md`第702輪心跳、
 `PENDING_QUEUE.md`「金流一.4」「先.十一-二」「先.十二」相關條目、
+`research/AWAITING_REVIEW.md`。
+
+---
+**最後更新：2026-10-03T06:3x+08:00（馬拉松第705輪，FUT軌，維運帽）**——取鎖
+乾淨（cycle`20261003-063037`）。三軌時間戳（開工前）：FUT round702=10-03
+03:3x（最舊，本輪選定）／TW round703=10-03 04:3x／US round704=10-03
+05:3x。開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（無未開始交辦
+項，與round703~704持平）；`grep -c "^- \[!\]"`=19（持平）。
+
+逐一核對19條`- [!]`阻塞項（今日2026-10-03仍為週六，無新交易日資料，
+多數條件結構上不可能在本輪解除，本輪對有量化進度可能性的條目重新
+實測，其餘沿用round704既定結論不重複贅述）：`先.十一-二`／`先.十二-三`
+FinMind財報預熱：`finmind_warmup.py --status`實測`stmt_code_coverage`
+已由round704的61.09%推進至**67.41%**（`stmt_codes_complete`1301/1930，
+`calls_last_hour=367`，`eta_local=2026-10-04T00:36`）；`px_code_
+coverage`仍**0.1%**（`px_codes_complete`2/1930，與round704一致，持續
+停滯，round704已如實記錄此觀察，本輪重複驗證確認非單輪異常而是持續
+現象），未達門檻，未解除；`金流一.4``sector_flow.json`
+`trading_days_available`仍**19**、`windows_missing_days.20`仍**1**，
+`generated_at`仍`2026-10-03T00:23:57`（週六無新批次），未解除；`外部
+一改.2`／`研究.c`tick累積`ls research/data/ticks/*.parquet`實測仍
+**15/20**（週末無盤中tick可累積，依2026-09-15總司令裁示本輪不重複
+贅述進度細節），未解除；`先.七-一`／`先.六-四`Shioaji：
+`data/quotes_sinopac.json`仍`connected:false`、`market_status:closed`、
+`fetched_at`停在2026-10-02T08:31（週六無交易，下一交易日2026-10-05
+週一，結構上不可能在本輪驗證），未解除；`先.九-五`派發延遲樣本仍1/3
+（僅10/2一筆，等10/5、10/6），週六無新run，未解除；其餘13條（`本地
+AI摘要(Breeze-7B)`／`維運.先.六-二後續一`／`資料源.外銷訂單彙總`／
+`重構.C4`／`資料源一.3`／`稽核.三`／`稽核.五`／`結案.一`／`常備.9`／
+`群益API(合併)`等）皆待總司令/Cowork裁示或親自操作，與round704一致，
+未解除。`grep -c "凍結.二解除" PENDING_QUEUE.md`=4，逐行核對皆為條件
+敘述提及、非實際宣告解除，凍結.二仍生效。**佇列深度自檢**：
+`- [ ]`=0（<12下限），凍結.二期間暫停補件，不硬湊alpha試驗候選。
+**逐一核對凍結.二允許的四類工作現況**：稽核重跑／驗.二重跑先前輪次
+已全部完成並登記；資料抓取（`資料.一`已完成300/300，`先.十一-二`
+財報預熱為既有排程被動累積，本輪僅讀取核對）；工具修正本輪未修改任何
+原始碼（僅讀取診斷＋執行本節下方housekeeping，`FUT_MARATHON_STATE.md`/
+`FUT_STATE_ARCHIVE.md`屬狀態檔不在十三節限定清單內）；`git status
+--short -- research/backtest/ research/validation/ research/adjust.py
+research/pit.py research/trial_registry.py`輸出為空（十三節限定清單
+內檔案無殘留未commit編輯，本輪亦未touch）。FUT軌本身`FUT_LEADS.md`/
+`STRATEGY_GRAVEYARD.md`結案狀態未變，無清楚剩餘的全新機制候選，且
+凍結.二期間本來就不得登記新alpha試驗。
+
+**housekeeping（[自行裁量]，非交辦，屬馬拉松維運帽日常工作）**：
+`FUT_MARATHON_STATE.md`累積到4個條目（693/696/699/702），超過規則
+要求的「只保留最新3則」，已將最舊的693原文搬到`FUT_STATE_ARCHIVE.md`
+（append-only，接續既有時間順序）。本檔只留696／699／702／本輪705。
+純檔案維護，未變動任何判定內容。
+
+驗證：`run_detached.py status`running=0（162筆歷史，無job待收成）；
+`trial_registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS
+（409列，另有FDR對照表33列，最大編號#407，本輪未新增判定）；
+`holdout.py::is_holdout_consumed()`未重查（非本輪動作範圍，先前輪次
+已核對為`True`，條件不變）。`AWAITING_REVIEW.md`「等待中（目前：44件）」，
+逐行核對（46列扣表頭/分隔列2＝44）與表格列數一致，與round703/704
+持平，本輪未變動。
+
+**本輪誠實結論**：交辦佇列0條`- [ ]`；凍結.二允許的四類工作皆已完成
+或無新內容；19條`- [!]`逐一核對均未到解除時間，唯一有量化進度的是
+先.十一-二/先.十二-三財報預熱61.09%→67.41%（`px_code_coverage`持續
+停滯於0.1%，已連兩輪觀察到同一現象，記錄供後續判斷是否需要調整
+warmup排程優先序，本輪未修改`finmind_warmup.py`原始碼）；FUT軌本身
+查無可推進的新alpha試驗工作單位；**今日仍為週六無開盤，多數時效性
+阻塞結構上不可能在本輪解除**——依`CLAUDE.md`「零之一」白名單第7條
+精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不
+搶碰十三節限定檔案、不代做互動視窗保留項目。未動`alpha.db`/
+`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節限定清單內
+任何原始碼。全程新增外部呼叫僅限讀取性質驗證（`research/
+finmind_warmup.py --status`讀取既有快取狀態、`run_detached.py
+status`、`trial_registry.py --check`、既有`.json`/`.md`帳本檔案
+讀取），未讀取或輸出任何金鑰／憑證內容。`PROGRESS_HEARTBEAT.jsonl`
+本輪已append一行。**交辦佇列還剩0條`- [ ]`未開始**。**等待審閱：
+44件**（與`AWAITING_REVIEW.md`表格列數一致）。**下一輪任一軌接手**：
+依輪替下一輪建議選TW軌（round703=10-03 04:3x，三軌中最舊）；開工前
+先重新檢查`- [ ]`有無新交辦、先.十一-二/先.十二-三財報預熱`px_code_
+coverage`是否開始推進、`stmt_code_coverage`是否已達完成門檻、`金流
+一.4`20日視窗是否已補到0（週一10/5開盤後才可能）、`先.七-一`/`先.
+九-五`是否已到10/5開盤可驗證。凍結.二在總司令/Cowork明確寫「凍結.二
+解除」前不解除。完整見`REPORT.md`第705輪心跳、`PENDING_QUEUE.md`
+「金流一.4」「先.十一-二」「先.十二-三」相關條目、
 `research/AWAITING_REVIEW.md`。
