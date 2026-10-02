@@ -1,5 +1,15 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-10-03T04:52（Taipei，hypothesis_queue排程接續）— hypothesis_queue 心跳模式，#82 暫停，未開新軸
+— 依總司令【驗.七】一裁示持續執行只做心跳。開工先讀`PENDING_QUEUE.md`：
+頂層（非引文區塊）`- [ ]`數量為0（逐一grep確認，命中的`[ ]`字樣皆為
+說明文字或`>`引文區塊內的歷史裁示原文，非當前可動手項；`#75(c2續)`/
+`#75(h)`兩個先前自走補入項已在`HYPOTHESIS_QUEUE.md`結案為FAIL，見該檔
+「#75最終狀態」）。本輪僅寫心跳，未挑任何未結案假設、未開新軸、未補件
+新的alpha假設進佇列（凍結.二第4點）。`git fetch`+`rebase`前先確認工作區
+殘留變更（`data/`、`research/.*state.json`等）皆為其他排程來源留下，
+不觸碰、不納入本次commit。鎖檔為乾淨LOCK_ACQUIRED。
+
 ## 2026-10-03T00:52（Taipei，hypothesis_queue排程接續）— hypothesis_queue 心跳模式，#82 暫停，未開新軸
 — 依總司令【驗.七】一裁示持續執行只做心跳。開工先讀`PENDING_QUEUE.md`：
 頂層（非引文區塊）`- [ ]`數量為0，僅剩`- [!]`BLOCKED項（含先.十二-三等
