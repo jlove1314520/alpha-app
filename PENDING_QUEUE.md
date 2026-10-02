@@ -17307,3 +17307,21 @@ push 後停下等 Cowork 核對。
 - [x] **先.九-三 cron 避開整點／半點**——完成（commit 196d2694a，只改排程時間）。market.yml 依裁示改 13 9／41 10／43 21（台北17:13／18:41／05:43）；[自行裁量] quotes.yml 全部改 :07/:17/:27/:37/:47/:57（避開 :00/:30 且避開 market 的 :13/:41/:43）、news_events.yml `*/30` 改 `19,49 * * * *`、local_schedule_watchdog.yml `*/30` 改 `23,53 * * * *`；audit.yml 為 `20 15`，不需改。注意：新 cron 只對 push 之後的排定時段生效。派發延遲記錄工具 `scripts/log_dispatch_delay.py` 已備（見下方先.九-五）。**
 - [!] **先.九-四 10/2 08:00 台北檢查 market.yml 有無10/1收盤資料成功run；無則標 BLOCKED「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一**——BLOCKED（等 2026-10-02 08:00 台北）。2026-10-01 23:25 台北查 `gh run list`：10/1 17:00 台北（09:00 UTC）舊 cron 班次尚未派發（最近一筆 schedule run 是 10/1 00:39 UTC），已延遲逾 6 小時，仍屬等待中，尚未達標 BLOCKED 條件；10/2 08:00 若仍無，改標「需總司令到 GitHub 網頁 Actions 手動 Run workflow」，不得手動補寫紙.一。
 - [!] **先.九-五 連續3個交易日記錄派發延遲（cron排定→run createdAt）**——BLOCKED（等 2026-10-02、10-05、10-06 三個交易日累積資料）。每個交易日結束後執行 `python scripts/log_dispatch_delay.py --since 2026-10-02`，結果去重 append 到 `research/dispatch_delay_log.jsonl`；三個交易日齊備後回報延遲分佈（對照先.七-三舊 cron 的 4.5~8.6 小時），不另做任何 cron 調整，除非總司令裁示。
+
+## 2026-10-02【總司令裁示·先.十：紙.一 啟動失敗修復＋FinMind 額度統一＋產業缺貨草案裁示】
+
+【先.十：紙.一 啟動失敗修復＋FinMind 額度統一＋產業缺貨草案裁示】總司令 2026-10-02 同意。先寫進 PENDING_QUEUE 再動工。優先序 一→二→三→四→五。
+一、紙.一 未啟動（10/2 01:08 UTC 那次 market.yml 已有 0050 10/1 收盤 112.9，但 paper_7030.json 仍 started:false、無 log）：用 gh run view --log 查該次「更新紙.一」步驟的實際錯誤並附原文；疑為 cbc_rf_rate_client 在 GitHub runner 無快取需連央行網站失敗（推測，待證）。修法：定存利率月序列改為由本機排程每月抓取後 commit 成 data/rf_monthly.json（官方開放資料，小檔），runner 只讀檔；另外任何例外都要寫入 paper_7030.json 的 last_error 與心跳 status=ERROR，不得只印 warning。修好後由下一次 market.yml 自然啟動（inception 依設計仍為 2026-10-01 收盤），不得手動補寫 log。
+二、FinMind 額度統一：建立單一預熱排程（每小時總用量上限 450 次，留餘裕給其他排程），作為 paper_supply_v2 與 build_supply_watchlist 的唯一抓取者，兩者改為只讀同一份快取；所有 FinMind 呼叫走同一個 rate_limit_state 計數。現在開始預熱：1,930 檔 2025-01 起日價、2024Q1～2026Q2 三種財報（歷史資料，不算任何報酬）。回報預估完成時間；到 11/1 前重跑一次彩排（規則同先.八-二，只輸出覆蓋率等統計），目標財報與價格覆蓋率皆 ≥98%，未達則回報缺口與原因。
+三、供給觀察頁：財報覆蓋率 <80% 時不顯示百分位，只顯示「資料準備中（已涵蓋 x／1,930 檔）」與原始變化值；覆蓋率達標後才顯示百分位。冒煙測試附截圖。
+四、data/rate_limit_state.json 的 block_reason 含 FinMind 回應帶出的 token_tail（金鑰末8碼）：寫入前過濾掉 token_tail 及任何疑似金鑰片段，現檔清除後 commit；不改寫歷史、不需換金鑰。全 repo 掃一次有無其他金鑰片段並回報（不得印出內容，只報檔名與行號）。
+五、產業缺貨草案裁示（docs/PREREG_DRAFT_industry_shortage.md §6）：1.此方向解凍，視為新機制；2.對照表由 CC 依官方分類名稱字面對應逐桶建立並附依據欄，凍結前停下等 Cowork 審；3.接受月頻、T+1月底後可用、K=3、S_C 近3月；4.不加價格落後濾網；5.關1加「每換股日有訊號產業桶數≥10」、關4改產業桶 cluster bootstrap、關5隨機對照為抽 K=3 桶×200 組、關7高原依草案；6.現在開始每日快照 A、C 兩組 CSV（只存檔）；7.不採購 HS 原始資料。依此更新草案，完成對照表與 §5 執行前檢查（不得計算任何報酬），push 後停下等 Cowork 審。
+紙.一 log、紙.二、holdout 不得手動動。push 後停下等 Cowork 核對。
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十"）
+
+- [ ] **先.十-一 紙.一 啟動失敗修復：gh run view --log 查「更新紙.一」實際錯誤並附原文；定存利率月序列改本機每月抓取→data/rf_monthly.json，runner只讀檔；任何例外寫入 paper_7030.json last_error＋心跳 status=ERROR；不得手動補寫 log，等下一次 market.yml 自然啟動**
+- [ ] **先.十-二 FinMind 額度統一：單一預熱排程（每小時總上限450次），paper_supply_v2 與 build_supply_watchlist 只讀同一份快取，全部走同一個 rate_limit_state；開始預熱1,930檔2025-01起日價＋2024Q1~2026Q2三種財報；回報預估完成時間；11/1前重跑彩排，目標覆蓋率皆≥98%**
+- [ ] **先.十-三 供給觀察頁：財報覆蓋率<80%不顯示百分位，只顯示「資料準備中（已涵蓋 x／1,930 檔）」＋原始變化值；達標後才顯示百分位；冒煙測試附截圖**
+- [ ] **先.十-四 rate_limit_state.json 的 block_reason 過濾 token_tail 與疑似金鑰片段，現檔清除後commit；全repo掃一次其他金鑰片段（只報檔名與行號，不印內容）**
+- [ ] **先.十-五 產業缺貨草案裁示（PREREG_DRAFT_industry_shortage §6）七點：解凍、對照表（停下等Cowork審）、月頻T+1/K=3/S_C近3月、無價格落後濾網、關1/4/5/7改寫、每日快照A/C兩組CSV、不採購HS；更新草案、完成對照表與§5執行前檢查（不得計算任何報酬），push後停下等Cowork審**
