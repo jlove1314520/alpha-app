@@ -3198,3 +3198,15 @@ commit時把它一併帶入。**已用`ast.parse()`驗證語法完整、非攔�
 - `AWAITING_REVIEW.md`「等待中：51件」，與表格列數一致，本輪未變動（互動視窗本輪活躍產出所致，非馬拉松動作）。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
 - **本輪誠實結論**：未自行修改任何受保護檔案（`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區、十三節限定清單皆未touch），僅記錄維運發現供裁示。交辦佇列還剩0條`- [ ]`未開始。等待總司令審閱：51件（與`AWAITING_REVIEW.md`表格列數一致）。下一輪建議選FUT軌（round693=10-01 22:0x，三軌中最舊）；開工前先確認Shioaji下一交易日(10/6)是否仍失敗、market.yml今日批次17:49 UTC後是否出現、alpha-data明天15:30是否恢復正常。凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。
 ---
+## 第696輪 · 2026-10-02T21:3x+08:00 · FUT · 維運帽：交辦佇列`- [ ]`=0（凍結.二暫停補件）、21條`- [!]`逐一核對均未到解除時間 · 本輪產出：修正先.七-一/先.六-四（Shioaji）診斷方向（原始錯誤字串從「不可考」改為可考，見PENDING_QUEUE） · 無判定、N不變
+
+- 取鎖乾淨。三軌時間戳：FUT round693=10-01 22:0x（最舊，本輪選定）／TW round694=10-01 23:1x／US round695=10-02 20:3x（剛結束）。
+- 開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0；`grep -c "^- \[!\]"`=21（與round695持平）。
+- 重點查證：`research/shioaji.log`（Rust核心log，append-only）顯示10/2交易時段151個獨立登入嘗試全部在`get site info`這一步失敗（連`sinotrade.github.io`/`sinotrade.gitlab.io`兩個鏡像都連不上，942次失敗），這個失敗點在帳密驗證之前，修正了round695「原始錯誤字串已不可考」的結論。即時重測兩網址皆200成功（已自行恢復）；`external_connectivity.jsonl`今天全部`ok=True`但只測gstatic/1.1.1.1，不含github.io/gitlab.io，兩者不能互相推論；WebSearch查永豐維護公告無結果。已補寫進`PENDING_QUEUE.md`「先.七-一」條目，不更動其BLOCKED狀態與解除條件。
+- market.yml今日(10/2)主/補救班次截至查詢時間13:3x UTC仍缺席，未到round695設定的17:49 UTC判斷上限，沿用既有結論不重複升級。
+- `金流一.4`視窗仍18/差2、`外部一改.2`tick仍15/20，皆因今日市場資料未落地未推進。`紙.一`根因已由並行session修復（先.十-一，已標`[x]`），非本輪動作。
+- 逐一核對凍結.二允許的四類工作現況：稽核重跑／驗.二重跑已全部完成並登記；資料抓取（`資料.一`300/300）；工具修正本輪未改任何原始碼；`git status --short -- research/backtest/ research/validation/ research/adjust.py research/pit.py research/trial_registry.py`輸出為空。FUT軌本身查無新工作單位，凍結.二期間不得開新alpha試驗。
+- 驗證：`run_detached.py status`running=0；`trial_registry.py --check`exit=0 PASS（409列不變）；`holdout.py::is_holdout_consumed()`=True（僅讀取核對）。
+- `AWAITING_REVIEW.md`「等待中：39件」，與表格列數一致，本輪未變動。`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。
+- **本輪誠實結論**：未自行修改任何受保護檔案（`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區、十三節限定清單皆未touch），僅補強`先.七-一`/`先.六-四`診斷證據供裁示。交辦佇列還剩0條`- [ ]`未開始。等待總司令審閱：39件（與`AWAITING_REVIEW.md`表格列數一致）。下一輪建議選TW軌（round694=10-01 23:1x，三軌中最舊）；開工前先確認market.yml今日批次17:49 UTC後是否出現。凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。
+---
