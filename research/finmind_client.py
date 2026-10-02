@@ -209,6 +209,31 @@ def _save_rate_limit_state(state: dict) -> None:
     RATE_LIMIT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _bump_call_counter(src: dict, now: float) -> None:
+    """【先.十-二】全域每小時用量計數：以「分鐘桶」記在共用狀態檔 sources.<source>.calls_by_minute
+    （桶鍵=epoch分鐘，只留最近60分鐘，檔案不會膨脹）。所有 FinMind 呼叫（本client、backfill）
+    都走這裡，預熱排程用它判斷滾動1小時內的總用量。計數失敗一律吞掉（fail open，不得中斷請求）。"""
+    try:
+        b = src.setdefault("calls_by_minute", {})
+        cur = int(now // 60)
+        b[str(cur)] = int(b.get(str(cur), 0)) + 1
+        for k in [k for k in b if int(k) <= cur - 60]:
+            del b[k]
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def calls_last_hour(source: str = SOURCE_KEY, now: float | None = None) -> int:
+    """滾動1小時內（含目前這分鐘）經共用狀態檔記錄的呼叫總數；讀不到回0。"""
+    try:
+        now = time.time() if now is None else now
+        b = _load_rate_limit_state()["sources"].get(source, {}).get("calls_by_minute", {})
+        cur = int(now // 60)
+        return sum(int(v) for k, v in b.items() if cur - 60 < int(k) <= cur)
+    except Exception:  # noqa: BLE001
+        return 0
+
+
 def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
     """真正發送請求前一定要呼叫。如果這個來源目前在封鎖冷卻中，直接拋
     RuntimeError（不要讓呼叫端誤以為「沒資料」，這是「不能問」不是「問了沒有」，
@@ -230,21 +255,47 @@ def _rate_limit_wait_or_raise(source: str = SOURCE_KEY) -> None:
     if last and (now - last) < interval:
         time.sleep(interval - (now - last))
     src["last_request_at"] = time.time()
+    _bump_call_counter(src, src["last_request_at"])
     state["sources"][source] = src
     _save_rate_limit_state(state)
 
 
-_SECRET_FIELD_RE = re.compile(
-    r'"(token_tail|token|api_key|apikey|api_token|secret|password)"\s*:\s*"[^"]*"',
-    re.IGNORECASE,
+import re as _re_secret
+
+_SECRET_KEYS = r"token_tail|token|api_key|apikey|api_token|access_token|secret|password|authorization"
+_SECRET_FIELD_RE = _re_secret.compile(
+    r'"?(?:' + _SECRET_KEYS + r')"?\s*[:=]\s*(?:"(?:[^"\\]|\\.)*"|\[[^\]]*\]|[^,}\s]*)',
+    _re_secret.IGNORECASE,
+)
+_SECRET_FRAGMENT_RES = (
+    _re_secret.compile(r"Bearer\s+\S+", _re_secret.IGNORECASE),
+    _re_secret.compile(r"eyJ[\w-]{8,}\.[\w-]{8,}(?:\.[\w-]*)?"),
+    _re_secret.compile(r"[A-Za-z0-9_\-]{32,}"),
 )
 
 
 def _redact_secrets(text: str) -> str:
-    """過濾疑似金鑰/token片段後才能寫進會被commit的共用狀態檔（鐵律見
-    CLAUDE.md 先.十-四：rate_limit_state.json 曾經把 FinMind 402 回應裡的
-    token_tail 原文存進 block_reason 並被 commit 進公開 repo）。"""
-    return _SECRET_FIELD_RE.sub(lambda m: f'"{m.group(1)}":"[redacted]"', text)
+    """寫進會被commit的共用狀態檔（或任何log／例外訊息）前，先過濾 token_tail、
+    金鑰欄位（含被 [:200] 截斷到沒有結尾引號的）與疑似金鑰片段（Bearer／JWT／32字元以上
+    連續英數）。2026-10-02【先.十-四】：rate_limit_state.json 曾把 FinMind 402 回應的
+    token_tail（金鑰末8碼）原文存進 block_reason 並 commit 進公開 repo。失敗一律 fail open
+    成「整段遮蔽」，不得讓過濾本身中斷主流程（CLAUDE.md 十二節）。"""
+    try:
+        out = text or ""
+        for rx in _SECRET_FRAGMENT_RES:
+            out = rx.sub("[redacted-secret]", out)
+        out = _SECRET_FIELD_RE.sub("[redacted-secret]", out)
+        try:
+            tok = _get_token()
+            if tok:
+                for frag in (tok, tok[-8:]):
+                    if frag and len(frag) >= 6:
+                        out = out.replace(frag, "[redacted-secret]")
+        except Exception:  # noqa: BLE001
+            pass
+        return out
+    except Exception:  # noqa: BLE001
+        return "[redacted-unparseable]"
 
 
 def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
@@ -316,14 +367,14 @@ def _fetch(
                 raise RuntimeError(
                     f"FinMind回應HTTP {resp.status_code}（額度/封鎖類錯誤，已標記{SOURCE_KEY}"
                     f"封鎖{RATE_LIMIT_BLOCK_SECONDS//3600}小時，見{RATE_LIMIT_STATE_PATH}）："
-                    f"dataset={dataset} data_id={data_id} -- {resp.text[:300]}"
+                    f"dataset={dataset} data_id={data_id} -- {_redact_secrets(resp.text[:300])}"
                 )
             if 400 <= resp.status_code < 500:
                 # Client error (bad dataset name, bad params, paid-tier gate) -- this will
                 # never succeed on retry, so fail fast instead of burning the retry budget.
                 raise RuntimeError(
                     f"FinMind rejected the request (HTTP {resp.status_code}): "
-                    f"dataset={dataset} data_id={data_id} -- {resp.text[:300]}"
+                    f"dataset={dataset} data_id={data_id} -- {_redact_secrets(resp.text[:300])}"
                 )
             resp.raise_for_status()
             body = resp.json()

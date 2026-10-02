@@ -111,21 +111,46 @@ def _rate_limit_wait_or_raise(source: str = FINMIND_SOURCE_KEY) -> None:
     if last and (now - last) < RATE_LIMIT_MIN_INTERVAL_SEC:
         time.sleep(RATE_LIMIT_MIN_INTERVAL_SEC - (now - last))
     src["last_request_at"] = time.time()
+    try:  # 【先.十-二】全域每小時計數（分鐘桶），失敗吞掉不中斷請求
+        _b = src.setdefault("calls_by_minute", {})
+        _cur = int(src["last_request_at"] // 60)
+        _b[str(_cur)] = int(_b.get(str(_cur), 0)) + 1
+        for _k in [k for k in _b if int(k) <= _cur - 60]:
+            del _b[_k]
+    except Exception:  # noqa: BLE001
+        pass
     state["sources"][source] = src
     _save_rate_limit_state(state)
 
 
-_SECRET_FIELD_RE = re.compile(
-    r'"(token_tail|token|api_key|apikey|api_token|secret|password)"\s*:\s*"[^"]*"',
-    re.IGNORECASE,
+import re as _re_secret
+
+_SECRET_KEYS = r"token_tail|token|api_key|apikey|api_token|access_token|secret|password|authorization"
+_SECRET_FIELD_RE = _re_secret.compile(
+    r'"?(?:' + _SECRET_KEYS + r')"?\s*[:=]\s*(?:"(?:[^"\\]|\\.)*"|\[[^\]]*\]|[^,}\s]*)',
+    _re_secret.IGNORECASE,
+)
+_SECRET_FRAGMENT_RES = (
+    _re_secret.compile(r"Bearer\s+\S+", _re_secret.IGNORECASE),
+    _re_secret.compile(r"eyJ[\w-]{8,}\.[\w-]{8,}(?:\.[\w-]*)?"),
+    _re_secret.compile(r"[A-Za-z0-9_\-]{32,}"),
 )
 
 
 def _redact_secrets(text: str) -> str:
-    """過濾疑似金鑰/token片段後才能寫進會被commit的共用狀態檔（見
-    CLAUDE.md 先.十-四；與 finmind_client.py 同名函式重複實作，因本檔
-    rate_limit_state 讀寫邏輯本身就是獨立複製，一併修。"""
-    return _SECRET_FIELD_RE.sub(lambda m: f'"{m.group(1)}":"[redacted]"', text)
+    """寫進會被commit的共用狀態檔（或任何log／例外訊息）前，先過濾 token_tail、
+    金鑰欄位（含被 [:200] 截斷到沒有結尾引號的）與疑似金鑰片段（Bearer／JWT／32字元以上
+    連續英數）。2026-10-02【先.十-四】：rate_limit_state.json 曾把 FinMind 402 回應的
+    token_tail（金鑰末8碼）原文存進 block_reason 並 commit 進公開 repo。失敗一律 fail open
+    成「整段遮蔽」，不得讓過濾本身中斷主流程（CLAUDE.md 十二節）。"""
+    try:
+        out = text or ""
+        for rx in _SECRET_FRAGMENT_RES:
+            out = rx.sub("[redacted-secret]", out)
+        out = _SECRET_FIELD_RE.sub("[redacted-secret]", out)
+        return out
+    except Exception:  # noqa: BLE001
+        return "[redacted-unparseable]"
 
 
 def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
@@ -159,7 +184,7 @@ def fetch_finmind_price(code: str) -> list[dict]:
     }, timeout=20)
     if r.status_code in (402, 403, 428, 429):
         _rate_limit_record_block(FINMIND_SOURCE_KEY, r.status_code, r.text[:200])
-        raise RuntimeError(f"FinMind回應HTTP {r.status_code}，已標記封鎖{RATE_LIMIT_BLOCK_SECONDS//3600}小時：{r.text[:200]}")
+        raise RuntimeError(f"FinMind回應HTTP {r.status_code}，已標記封鎖{RATE_LIMIT_BLOCK_SECONDS//3600}小時：{_redact_secrets(r.text[:200])}")
     r.raise_for_status()
     d = r.json()
     if d.get("msg") != "success":

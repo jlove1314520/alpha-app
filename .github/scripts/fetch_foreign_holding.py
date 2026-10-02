@@ -80,10 +80,41 @@ def _rate_limit_wait_or_raise(source: str) -> None:
     _save_rate_limit_state(state)
 
 
+import re as _re_secret
+
+_SECRET_KEYS = r"token_tail|token|api_key|apikey|api_token|access_token|secret|password|authorization"
+_SECRET_FIELD_RE = _re_secret.compile(
+    r'"?(?:' + _SECRET_KEYS + r')"?\s*[:=]\s*(?:"(?:[^"\\]|\\.)*"|\[[^\]]*\]|[^,}\s]*)',
+    _re_secret.IGNORECASE,
+)
+_SECRET_FRAGMENT_RES = (
+    _re_secret.compile(r"Bearer\s+\S+", _re_secret.IGNORECASE),
+    _re_secret.compile(r"eyJ[\w-]{8,}\.[\w-]{8,}(?:\.[\w-]*)?"),
+    _re_secret.compile(r"[A-Za-z0-9_\-]{32,}"),
+)
+
+
+def _redact_secrets(text: str) -> str:
+    """寫進會被commit的共用狀態檔（或任何log／例外訊息）前，先過濾 token_tail、
+    金鑰欄位（含被 [:200] 截斷到沒有結尾引號的）與疑似金鑰片段（Bearer／JWT／32字元以上
+    連續英數）。2026-10-02【先.十-四】：rate_limit_state.json 曾把 FinMind 402 回應的
+    token_tail（金鑰末8碼）原文存進 block_reason 並 commit 進公開 repo。失敗一律 fail open
+    成「整段遮蔽」，不得讓過濾本身中斷主流程（CLAUDE.md 十二節）。"""
+    try:
+        out = text or ""
+        for rx in _SECRET_FRAGMENT_RES:
+            out = rx.sub("[redacted-secret]", out)
+        out = _SECRET_FIELD_RE.sub("[redacted-secret]", out)
+        return out
+    except Exception:  # noqa: BLE001
+        return "[redacted-unparseable]"
+
+
 def _rate_limit_record_block(source: str, status_code: int, detail: str = "") -> None:
     state = _load_rate_limit_state()
     src = state["sources"].setdefault(source, {})
     src["blocked_until"] = time.time() + RATE_LIMIT_BLOCK_SECONDS
+    detail = _redact_secrets(detail) if detail else detail
     src["block_reason"] = f"HTTP {status_code}" + (f" {detail}" if detail else "")
     src["blocked_at"] = datetime.now(timezone.utc).isoformat()
     _save_rate_limit_state(state)
