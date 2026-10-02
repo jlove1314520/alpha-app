@@ -17344,3 +17344,20 @@ push 後停下等 Cowork 核對。
 〔馬拉松2026-10-02T22:3x+08:00補充，TW軌維運帽，交叉參照先.七-一同輪新發現〕本輪重新逐筆核對`research/external_connectivity.jsonl`（嚴格依`ts`前綴篩選日期，見「先.七-一」條目下方同時間戳的補記），發現10/1、10/2兩天本機對外連線（`internet.ok`）實際分別有83%、80%的檢查點是`False`，異常窗口分別是00:12～23:57與00:02～18:07（遠寬於15:30單點）——**這代表上面「每天15:30那個特定時間點附近會出現短暫的DNS解析失敗窗口」這句話可能需要修正為「15:30只是落在一個遠更寬的本機連線異常窗口裡，不是獨立的窄窗口現象」**。不確定這是否完全解釋`fetch.py`對TWSE/TAIFEX/SEC四網域的DNS失敗（兩邊測的網域不同、工具不同），但時間窗高度重疊，值得總司令/下一輪裁示時一併考慮根因可能是同一個（本機網路/DNS/Tailscale在這幾天的某種週期性異常）。本輪未修改`fetch.py`或任何凍結區檔案，僅記錄關聯供裁示參考。
 
 **附帶發現（同一輪查`research/external_connectivity.jsonl`的`local_tasks.stalled`清單時順便核對，非本條目主旨，供日後複核watchdog準確度參考）**：清單裡列的`AlphaQuotesTW`（聲稱連續錯過9個班次）與`AlphaNewsEvents`（聲稱連續錯過14個班次），本輪直接讀取`data/quotes_tw.json`（`fetched_at=2026-10-02T11:00:43Z`，對應19:00台北，距查詢時間僅約1.5小時）與`data/news.json`（`fetched_at=2026-10-02T13:52:07+08:00`，距查詢時間約6.5小時，其cadence本就較疏）**皆屬正常新鮮，並非真的停擺**，判斷是`先.九-三`（2026-10-01）把`quotes.yml`/`news_events.yml`的cron從整點/半點改成錯開的分鐘數（:07/:17/:27/:37/:47/:57與`19,49 * * * *`）後，這兩個watchdog各自的「預期應跑班次」判斷邏輯還是舊假設，沒有跟著cron變更同步更新，導致假陽性（呼應CLAUDE.md十二節「偵測器的精準度要定期複核，不是裝了就一勞永逸」）。本輪未深入修復這個watchdog邏輯（不在本條目範圍、且非今天新增的緊急問題，影響僅止於告警雜訊，不影響實際資料新鮮度），僅記錄供下一輪或總司令決定是否要排入待辦修正。
+
+## 2026-10-02【總司令裁示·先.十一：對照表凍結＋產業缺貨登記單發＋本機網路診斷】
+
+總司令 2026-10-02 同意（原文）：
+「【先.十一：對照表凍結＋產業缺貨登記單發＋本機網路診斷】總司令 2026-10-02 同意。先寫進 PENDING_QUEUE 再動工。
+一、對照表審定：B02 移除 S_C（光學器材為 C 級，不具代表性），B02 只用 S_A；其餘 12 桶照現表。改完計算 docs/industry_shortage_mapping.csv 與 stock_map 的 SHA256 並凍結，之後不得修改。
+二、產業缺貨登記與單發（順序不得顛倒）：1. 等 FinMind 財報預熱完成後，補做 §5 剩餘項目「與 #406 分數、I5、SUE 的相關係數」（不含報酬）；任一 |r|>0.7 即停下回報，視為同家族，不得登記。2. 通過後，草案改為 docs/PREREG_industry_shortage_FINAL.md（〔待總司令確認〕全部改為〔總司令 2026-10-02 確認〕），計算 SHA256，TRIALS_LEDGER 新增事前登記（含對照表 SHA256），commit＋push 後才可執行。3. 依 §3 關卡順序單發執行，敏感度照草案；結果寫 research/data/industry_shortage_result.json＋TRIALS_LEDGER 判定列。印出績效前崩潰可修後重跑並記錄，印出後不得重跑。PASS→只可提前進式紙上追蹤；FAIL→如實寫 STRATEGY_GRAVEYARD，不得換參數重試。
+三、本機網路診斷（不改凍結區）：connectivity 監測加入：系統 DNS 與直連 1.1.1.1／8.8.8.8 解析對照、預設閘道 ping、tailscale status、網卡斷線事件（Windows 事件記錄），以區分「整條外網斷」「只有 DNS 壞」「Tailscale 接管 DNS 失敗」。回報 10/1～10/2 能回溯的證據與之後再發時的分類。alpha-data 的 fetch.py 不得修改；網路穩定後確認 run_daily 能否自然補回 10/1～10/2，回報即可。
+四、紙.一：若 research/data/paper_7030_log.jsonl 尚無 inception，修正 inception 未扣 0050 期初買進成本（同 BacktestConfig 費率）並補測試；若已寫入則不得修改，於 PROGRESS 記錄此已知偏差。先.九-四 標為不需執行（10/2 01:08 那次已含 10/1）。
+紙.二、holdout 不得動。push 後停下等 Cowork 核對。」
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十一"）
+
+- [ ] **先.十一-一 對照表審定：B02 移除 S_C 只用 S_A，其餘12桶照現表；改完計算 mapping.csv 與 stock_map.csv 的 SHA256 並凍結（之後不得修改）**
+- [ ] **先.十一-二 產業缺貨登記與單發：(1)財報預熱完成後補做§5「與#406分數/I5/SUE相關係數」（任一|r|>0.7即停下回報不登記）→(2)草案改 docs/PREREG_industry_shortage_FINAL.md＋SHA256＋TRIALS_LEDGER事前登記（含對照表SHA256）＋commit/push後才可執行→(3)依§3單發執行，結果寫 research/data/industry_shortage_result.json＋TRIALS_LEDGER判定列；PASS只可前進式紙上追蹤、FAIL寫STRATEGY_GRAVEYARD不得換參數重試**
+- [ ] **先.十一-三 本機網路診斷：connectivity監測加入系統DNS vs 1.1.1.1/8.8.8.8解析對照、預設閘道ping、tailscale status、網卡斷線事件；回報10/1~10/2可回溯證據與分類；fetch.py不得修改；網路穩定後確認run_daily能否自然補回10/1~10/2，回報即可**
+- [ ] **先.十一-四 紙.一：paper_7030_log.jsonl 尚無inception→修正inception未扣0050期初買進成本（同BacktestConfig費率）並補測試；已寫入則不得修改，於PROGRESS記錄已知偏差；先.九-四標為不需執行**
