@@ -15,10 +15,12 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：42件）
+## 等待中（目前：44件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
+| 先.十二-一：alpha-data 補洞回報（run_daily 不支援指定日期重跑，未補跑，凍結區未動；實際缺口為交易日 9/28、9/30、10/1、10/2，openapi 只給最新日） | 2026-10-03 | 待總司令裁示：(a) 是否同意另寫獨立腳本（import fetch.get_rwd＋parsers.t86＋db.upsert，不改凍結檔）只補 T86 的 9/28、9/30（10/1、10/2 預期 10/3 15:30 自然補入）；(b) 價量／估值 9/28、9/30 是否另案處理；10/3 15:30 run 之後會再唯讀核對入庫日期 | 0 小時（2026-10-03 起算） |
+| 先.十二-二：斷網期間 BLOCKED／失敗項目逐條重核（維運.AlphaData三日DNS 結案、Shioaji 順延 10/5 09:00 開盤驗證、先.九-五 仍等 10/5～10/6；IBKR Gateway 未登入屬週期性人工登入，非網路） | 2026-10-03 | 待 Cowork 核對狀態更新是否與證據一致；IBKR Gateway 需總司令本人登入（非本輪可處理） | 0 小時（2026-10-03 起算） |
 | 先.十一-三：本機網路診斷（connectivity監測加入DNS對照／閘道ping／tailscale／網卡事件＋分類＋watchdog；10/1～10/2證據回報；更正馬拉松誤讀） | 2026-10-03 | `scripts/check_external_connectivity.py`每列JSONL新增`net_diag`與`class`（整條外網斷／只有DNS壞／Tailscale接管DNS失敗／其他／正常）；`scripts/selftest_connectivity_diag.py` 18項全過（含注入診斷自身失敗仍fail open、watchdog 240秒留hung紀錄）。證據：9/30 73次、10/1 235次失敗＝整條外網斷（iPhone熱點Wi-Fi為唯一上行且掉線，1.1.1.1純IP亦失敗，非DNS-only、非Tailscale）；10/1 19:42～10/2 23:42有28小時無紀錄（原因無法確認，Task Scheduler歷史停用）；馬拉松「10/2 272筆/218失敗」「83%/80%」為誤讀，已加過時指標。backfill只回報：10/3 15:30預期只補回10/2，9/30與10/1不會自然補回（讀碼推論，待實跑驗證）。等Cowork核對：①分類規則門檻是否合理②是否核准啟用Task Scheduler歷史記錄③9/30、10/1缺口是否另案補抓 | 2026-10-03 | 剛完成 |
 | 先.十一-一：產業缺貨對照表凍結（B02移除S_C、只用S_A；其餘12桶照現表）＋SHA256 | 2026-10-03 | `docs/industry_shortage_mapping.csv` SHA256=e6e55820e205ef0cfe7cb034c6818509cdf355b6432d395181d0ef4c7b6228bf；`docs/industry_shortage_stock_map.csv` SHA256=40b9a16752019499f4fa53717974dd9c66574301432320a794bab9002a7763bc（LF位元組）；`docs/industry_shortage_mapping_FROZEN.json`，之後不得修改。先.十一-二（相關係數→PREREG_FINAL→單發）仍BLOCKED於FinMind財報預熱（涵蓋23.68%，預計10/4 00:13完成），解除後才可續做。等Cowork核對凍結內容 | 2026-10-03 | 剛完成 |
 | 先.十一-四：紙.一inception已寫入（不得修改）＋已知偏差記錄；先.九-四標不需執行 | 2026-10-03 | `research/data/paper_7030_log.jsonl`僅有inception（stock_value_post恰700,000、NAV恰1,000,000），0050期初買進成本未扣，起始NAV略高估；依裁示未修改、已記PROGRESS。等Cowork核對：後續績效比較是否以「扣期初成本後」重算起點（由讀取端調整，不動紀錄檔） | 2026-10-03 | 剛完成 |

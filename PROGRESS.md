@@ -1,3 +1,15 @@
+## 2026-10-03（互動視窗，先.十二 斷網後收尾，維運帽）
+
+等待總司令審閱：44件（本輪新增「先.十二-一 alpha-data 補洞回報」「先.十二-二 斷網項目重核」兩列）。
+
+**先.十二-一**：`alpha-data/run_daily.py::main()` 無日期參數、`fetch.get_records()` 以今天往回推、openapi 端點只回最新已發布日，**不支援指定日期重跑，未補跑，未改 fetch.py／parsers.py／config.py／alpha.db**。唯讀查庫：daily_price／valuation／inst_trades 最新交易日 9/29（taifex 9/24）；9/30 的 run 抓到的是 9/29 資料，所以實際缺口是 **9/28、9/30、10/1、10/2**，不只 9/30 與 10/1。10/3 15:30 run 預期自然補入 openapi 當時最新日與 T86 最近一日；9/28、9/30 不會自然補回。T86 的 9/30、10/1、10/2 於 TWSE rwd 端點可查得（唯讀探測）。建議（待總司令裁示，本輪不做）：另寫獨立腳本只補 T86 缺日。
+
+**先.十二-二**：維運.AlphaData三日DNS 更正根因為整條外網斷並標 [x]（加過時指標）；先.六-四／先.七-一 Shioaji 10/2 開盤時段網路仍斷、quotes_sinopac.json 為 connected=False／closed，驗證落空，維持 BLOCKED，順延 **10/5（週一）09:00 台北開盤**驗證；先.九-五 與網路無關，10/2 兩筆已入 `research/dispatch_delay_log.jsonl`，仍等 10/5、10/6；IBKR Gateway 未登入屬週期性人工登入（見 C:\alpha\CLAUDE.md），非網路。
+
+**先.十二-三**：仍 BLOCKED，FinMind 財報預熱涵蓋 27.56%（532/1930），預計 2026-10-04 00:05～00:13 完成，之後依序相關係數（|r|>0.7 停）→FINAL 登記 push→單發。紙.一、紙.二、holdout 未動。
+
+**規則十**：本輪未新增任何會改寫 repo 檔案的排程步驟，無 allowlist 變動（本機 Task Scheduler 任務不算 workflow）。**[自行裁量]**：同一份工作目錄內馬拉松並行寫入的先.七-二 `[x]` 與 `research/dispatch_delay_log.jsonl` 一併 commit。
+
 ## 2026-10-03（互動視窗，先.十一 收工，維運帽／研究帽）
 
 等待總司令審閱：42件（本輪新增「先.十一-一 對照表凍結」「先.十一-三 本機網路診斷」「先.十一-四 紙.一已知偏差」三列）。
