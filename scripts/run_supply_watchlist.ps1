@@ -1,15 +1,14 @@
 # Supply-tightness watchlist (App tab data) daily launcher. Plain ASCII on purpose (PowerShell 5.1).
 #
-# What it does: runs scripts\build_supply_watchlist.py (incremental FinMind per-stock statement
-# fetch, 400 calls per run, fails open on any block), which rewrites data\supply_watchlist.json only
-# when the content changed. If it changed, commits that single file path-scoped and pushes.
+# What it does: runs scripts\build_supply_watchlist.py (READ-ONLY on the FinMind cache; since
+# 2026-10-02 [ruling xian.10-2] the only FinMind fetcher is research\finmind_warmup.py), which
+# rewrites data\supply_watchlist.json only when the content changed. If it changed, commits that single file path-scoped and pushes.
 # Descriptive data only: no returns, no composite score. Not evidence, not a trial.
 #
 # Rule-10 note: this launcher rewrites exactly one tracked file, data/supply_watchlist.json, and
 # commits it path-scoped (git commit -o). The FinMind cache it fills lives under research/data/raw
-# (git-ignored) and is shared read/write with paper_supply_v2 as plain API-response cache only; no
-# paper_supply_v2 record or log is touched. Quota: shares the 600/hour FinMind plan via
-# data/rate_limit_state.json; the script stops at the first block-type error.
+# (git-ignored) and is shared read-only with paper_supply_v2; no paper_supply_v2 record or log is
+# touched. This launcher makes no FinMind call at all (quota is owned by finmind_warmup.py).
 
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\supply_watchlist_cycle.log"
@@ -23,7 +22,7 @@ $env:PYTHONIOENCODING = "utf-8"
 $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content -Path $logPath -Value "`n===== supply_watchlist launcher: $ts =====" -Encoding utf8
 
-$out = & $pythonExe scripts\build_supply_watchlist.py --budget 400 2>&1
+$out = & $pythonExe scripts\build_supply_watchlist.py 2>&1
 Add-Content -Path $logPath -Value ($out -join "`n") -Encoding utf8
 
 git add -- $outFile 2>&1 | Out-Null

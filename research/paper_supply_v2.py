@@ -448,9 +448,11 @@ def px_ready(df, mtime, need_date: pd.Timestamp, is_price: bool) -> bool:
 
 
 class LiveSource:
-    def __init__(self):
+    # 先.十-二（2026-10-02）：read_only=True 時完全不呼叫 FinMind，只讀快取；唯一抓取者是 research/finmind_warmup.py。
+    def __init__(self, read_only=False):
         import finmind_client as fc
         self.fc = fc
+        self.read_only = read_only
         self.fallback: set = set()
         self.calendar_source = "finmind"
         self._ph = None
@@ -484,10 +486,11 @@ class LiveSource:
         return d["Adj Close"].astype(float)
 
     def _calendar_finmind(self, now):
-        self.refresh_events(max_age_hours=20)
-        for ds, hrs in zip(PRICE_DS, (3, 20, 20)):
-            if not self._fresh(ds, "0050", hrs):
-                self.fc._fetch(ds, "0050", PRICE_START, None, force_refresh=True)
+        if not self.read_only:
+            self.refresh_events(max_age_hours=20)
+            for ds, hrs in zip(PRICE_DS, (3, 20, 20)):
+                if not self._fresh(ds, "0050", hrs):
+                    self.fc._fetch(ds, "0050", PRICE_START, None, force_refresh=True)
         d = self._bars_from_cache("0050")
         if d is None or len(d) < 100:
             raise RuntimeError("FinMind 0050 日線不足")
@@ -520,6 +523,8 @@ class LiveSource:
 
     def refresh_events(self, max_age_hours=0):
         """全市場事件表（分割／面額變更；其餘兩個還原資料集在註冊層級不接受全市場查詢，只能逐檔）。"""
+        if self.read_only:
+            return
         for ds in EVENT_DS_ALL:
             if max_age_hours and self._fresh(ds, "", max_age_hours):
                 continue
@@ -534,12 +539,16 @@ class LiveSource:
         return miss
 
     def refresh_px(self, code, which):
+        if self.read_only:
+            return
         for ds in which:
             self.fc._fetch(ds, code, PRICE_START, None, force_refresh=True)
 
     def ensure_px(self, codes, last_bar):
         """持股的價格快取補到最新一根 bar（價格 1 次、股利／減資每日各 1 次）；封鎖即停，失敗留給下一輪。"""
         n = 0
+        if self.read_only:
+            return n
         for c in codes:
             df, _ = self._cache(PRICE_DS[0], c)
             need = [PRICE_DS[0]] if df is None or df.empty or str(df["date"].max()) < str(last_bar.date()) else []
@@ -570,7 +579,7 @@ class LiveSource:
     def universe(self):
         fc = self.fc
         path = fc._cache_path("TaiwanStockInfo", "", "2000-01-01", None)
-        if path.exists() and (time.time() - path.stat().st_mtime) > 45 * 86400:
+        if not self.read_only and path.exists() and (time.time() - path.stat().st_mtime) > 45 * 86400:
             try:
                 fc._fetch("TaiwanStockInfo", "", "2000-01-01", None, force_refresh=True)
             except Exception:  # noqa: BLE001  更新失敗沿用舊名冊（降級），不中斷
@@ -601,6 +610,8 @@ class LiveSource:
         # 結構上封頂於 VAL_END(2024-12-31)。此處不做任何 holdout 評估或績效計算，只存快取（供換股日 PIT
         # 截斷後計分），起日 2024-01-01 與既有 2010-2024／2025-latest 快取檔名不同，不互相覆蓋。
         # 節流與封鎖保護由 _fetch 內建（共用跨行程 rate_limit_state.json）。
+        if self.read_only:
+            return
         ds_of = dict(STMT_DS)
         for k in which:
             self.fc._fetch(ds_of[k], code, STMT_START, None, force_refresh=True)
@@ -1000,7 +1011,7 @@ def main(argv=None) -> int:
         print(dict(Counter(e.get("type") for e in ev)), f"壞行 {bad}", NOTICE)
         return 0
     try:
-        src = LiveSource()
+        src = LiveSource(read_only=True)
         if "--report" in argv:
             report(src, now)
             return 0
@@ -1014,7 +1025,7 @@ def main(argv=None) -> int:
                 return 0
             LOCK_PATH.touch()
         try:
-            run(src, now, dry="--dry" in argv)
+            run(src, now, budget=0, dry="--dry" in argv)
         finally:
             try:
                 LOCK_PATH.unlink()

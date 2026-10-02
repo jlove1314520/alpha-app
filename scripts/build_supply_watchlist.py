@@ -231,7 +231,7 @@ def main(argv=None) -> int:
     ap.add_argument("--budget", type=int, default=500, help="本輪 FinMind 呼叫上限")
     ap.add_argument("--throttle", type=float, default=0.0, help="每次成功呼叫後額外等待秒數")
     ap.add_argument("--force", action="store_true", help="同日也覆寫輸出")
-    ap.add_argument("--no-fetch", action="store_true", help="只用既有快取產出")
+    ap.add_argument("--no-fetch", action="store_true", help="（保留相容）本腳本自先.十-二起一律只讀快取，不再抓取")
     ap.add_argument("--cache-dir", default=str(DEFAULT_CACHE))
     ap.add_argument("--out", default=str(OUT_PATH))
     a = ap.parse_args(argv)
@@ -245,10 +245,7 @@ def main(argv=None) -> int:
     D = pv2.deadline(period)
     uni = universe(cache_dir)
     ds_map, start = pv2.STMT_DS, pv2.STMT_START
-    fstat = {}
-    if not a.no_fetch:
-        fstat = fetch_phase(list(uni["code"]), ds_map, start, period, a.budget, a.throttle)
-        print(f"[抓取] {fstat}", flush=True)
+    fstat = {"calls": 0, "note": "只讀快取；唯一抓取者為 research/finmind_warmup.py（先.十-二）"}
     df, n_cache, n_period, n_bucket = compute(uni, ds_map, start, period, pv2)
     payload = build_payload(df, uni, period, D, n_cache, n_period, n_bucket, fstat, now.strftime("%Y-%m-%d"))
     old = None

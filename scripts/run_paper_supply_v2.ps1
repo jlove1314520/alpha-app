@@ -9,12 +9,11 @@
 # (git add -f) and committed path-scoped (git commit -o <file>) so this never sweeps up other
 # processes' staged changes. No other repo file is rewritten by this launcher.
 #
-# Shared FinMind quota: the python script limits itself to 200 per-code calls per run and stops
-# at the first block-type error. Statements (~5,800 per-code calls) and prices/dividends/capital
-# reductions (~5,700 per-code calls plus 2 market-wide event calls) share that 200-call budget, so
-# the first full refresh takes about 2-3 days of hourly runs. Prices come from FinMind +
-# research/adjust.py (same as the backtest); yfinance is a flagged fallback only.
-# It is a no-op outside the data window.
+# FinMind quota (ruling xian.10-2, 2026-10-02): the python script is now READ-ONLY on the FinMind
+# cache (LiveSource(read_only=True), budget 0, zero FinMind calls). The only fetcher is
+# research/finmind_warmup.py (Task AlphaFinMindWarmup, hard cap 450 calls per rolling hour). Prices
+# come from the cache + research/adjust.py (same as the backtest); yfinance is a flagged fallback
+# only. It is a no-op outside the data window.
 
 $repoDir = "C:\alpha\alpha-app"
 $logPath = "$repoDir\research\data\paper_supply_v2_cycle.log"
