@@ -1,4 +1,4 @@
-"""先.十-五.2：產業缺貨方向「產業桶對照表」建置腳本（草案，未凍結；凍結須待 Cowork 審）。
+"""先.十-五.2／先.十一-一：產業缺貨方向「產業桶對照表」建置腳本（2026-10-02 總司令審定後已凍結；有 FROZEN.json 時拒絕重新產生）。
 
 不讀任何價格、不計算任何報酬。輸出：
   docs/industry_shortage_mapping.csv      桶層級對照（A 中分類／C 貨品別／證交所產業別，各附依據與等級）
@@ -34,12 +34,12 @@ BUCKETS = [
          basis_t="電子零組件業＝字面對應；半導體業＝官方定義對應",
          ga="A", gc="B", gt="A,B", note=""),
     dict(id="B02", name="電腦通信光電（資通訊硬體）",
-         a=[("27", "電腦、電子產品及光學製品製造業")], c=["光學器材"], t=["電腦及週邊設備業", "通信網路業", "光電業"],
+         a=[("27", "電腦、電子產品及光學製品製造業")], c=[], t=["電腦及週邊設備業", "通信網路業", "光電業"],
          basis_a="『電腦及週邊設備業』字面含於『電腦、電子產品及光學製品製造業』；通信網路屬 TSIC 27 通信傳播設備；光電業字面對應『光學製品』",
-         basis_c="C『光學器材』僅字面對應『光電業』的『光』；貨品別是否涵蓋面板未能由官方名稱確認",
+         basis_c="總司令 2026-10-02 審定：移除 S_C（『光學器材』為 C 級，對電腦通信不具代表性），B02 只用 S_A",
          basis_t="電腦及週邊設備業＝字面；通信網路業＝官方定義；光電業＝字面（弱）",
-         ga="A,B", gc="C", gt="A,B,C",
-         note="資通類（資訊與通信產品）貨品別檔案取不到（網址不存在），故 B02 的 S_C 只能用『光學器材』，對電腦通信代表性弱，須 Cowork 審是否保留 C"),
+         ga="A,B", gc="-", gt="A,B,C",
+         note="僅有 S_A（總司令 2026-10-02 審定移除 S_C；資通類貨品別檔案取不到，光學器材代表性弱）"),
     dict(id="B03", name="電機設備（電力設備與電線電纜）",
          a=[("28", "電力設備及配備製造業")], c=["電機產品"], t=["電器電纜"],
          basis_a="『電器電纜』對應『電力設備及配備製造業』（TSIC 28 含電線及配線器材）",
@@ -148,10 +148,29 @@ def stock_map():
 
 
 def sha(p):
-    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+    return hashlib.sha256(Path(p).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
+FROZEN = DOCS / "industry_shortage_mapping_FROZEN.json"
+
+
+def verify():
+    import json
+    fz = json.loads(FROZEN.read_text(encoding="utf-8"))
+    ok = True
+    for name, want in fz["sha256_lf"].items():
+        got = sha(DOCS / name)
+        print(("OK  " if got == want else "BAD ") + name, got)
+        ok = ok and got == want
+    return ok
 
 
 def main():
+    if "--verify" in sys.argv:
+        sys.exit(0 if verify() else 1)
+    if FROZEN.exists():
+        print("對照表已凍結（%s），不得重新產生；用 --verify 核對 SHA256" % FROZEN.name)
+        sys.exit(2)
     DOCS.mkdir(exist_ok=True)
     fb = DOCS / "industry_shortage_mapping.csv"
     with fb.open("w", encoding="utf-8", newline="\n") as f:
@@ -216,12 +235,12 @@ def main():
     lines.append("")
     lines.append("## 已知限制（供 Cowork 審）\n")
     lines.append("- 『電機機械』（證交所）混有電機與機械，整類歸 B04；B03 因此只含『電器電纜』，股票數少。\n"
-                 "- 『光電業』『通信網路業』在 TSIC 與證交所歸屬不同體系，B02 的 S_C 只能用『光學器材』（資通類貨品別檔案取不到），代表性弱。\n"
-                 "- B10～B13 沒有 S_C，只用 S_A；因此訊號來源在桶間不一致（有的桶是 S_A 與 S_C 平均，有的只有 S_A）。\n"
+                 "- 『光電業』『通信網路業』在 TSIC 與證交所歸屬不同體系，B02 依總司令 2026-10-02 審定不用 S_C（資通類貨品別檔案取不到，光學器材代表性弱），只用 S_A。\n"
+                 "- B02、B10～B13 沒有 S_C，只用 S_A；因此訊號來源在桶間不一致（有的桶是 S_A 與 S_C 平均，有的只有 S_A）。\n"
                  "- 『電子零組件業』『半導體業』合併為 B01，使 B01 成為最大桶；K=3 時 B01 入選會主導持股。\n"
                  "- 桶 <8 檔當期不出分數（草案 §2(b)）；B11 造紙可能常因此缺席。\n"
                  "- 對照表為 A 與 C 兩種分類各自映射到證交所產業別，未使用 TSIC 與證交所之間的官方對照檔（官方沒有）。\n")
-    lines.append("## SHA256（存證用；對照表凍結前此值會隨 Cowork 審後修改而變）\n")
+    lines.append("## SHA256（存證用；總司令 2026-10-02 審定後凍結，之後不得修改）\n")
     lines.append(f"- `docs/industry_shortage_mapping.csv`：`{sha(fb)}`")
     lines.append(f"- `docs/industry_shortage_stock_map.csv`：`{sha(fs)}`")
     (DOCS / "industry_shortage_mapping.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
