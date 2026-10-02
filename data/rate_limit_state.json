@@ -3,11 +3,28 @@
     "finmind": {
       "has_token": true,
       "plan_limit_per_hour": 600,
-      "plan_checked_at": 1790723309.3887477,
-      "last_request_at": 1790732255.5507953,
+      "plan_checked_at": 1790965264.8644123,
+      "last_request_at": 1790966110.728211,
       "blocked_until": 1790731548.0913234,
       "block_reason": "HTTP 402 {\"msg\":\"Requests reach the upper limit. https://finmindtrade.com/\",\"status\":402,\"token_tail\":\"[redacted]\"}",
-      "blocked_at": "2026-09-29T23:25:48.091336+00:00"
+      "blocked_at": "2026-09-29T23:25:48.091336+00:00",
+      "calls_by_minute": {
+        "29849421": 10,
+        "29849422": 1,
+        "29849423": 10,
+        "29849424": 10,
+        "29849425": 10,
+        "29849426": 10,
+        "29849427": 10,
+        "29849428": 10,
+        "29849429": 10,
+        "29849430": 10,
+        "29849431": 10,
+        "29849432": 10,
+        "29849433": 10,
+        "29849434": 10,
+        "29849435": 2
+      }
     },
     "twse_openapi": {
       "last_request_at": 1790958258.1421325

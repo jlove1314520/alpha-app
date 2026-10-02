@@ -5,64 +5,6 @@
 > 2026-09-05 起本檔只保留最新 3 則（每輪開工簡報會印這 3 則）；更早的已原文搬到 `US_STATE_ARCHIVE.md`（append-only），需要時 grep 那裡。
 
 ---
-**最後更新：2026-10-01T21:0x+08:00（馬拉松第692輪，維運帽）**——取鎖乾淨
-（cycle`20261001-210036`）。三軌時間戳：US round689=09-30 15:0x（最舊，
-本輪選定）／FUT round690=09-30 16:0x／TW round691=2026-10-01 20:0x（本輪
-開工前剛完成，結論相同）。開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`
-=1（`先.五-三`，標明「互動視窗」執行、非馬拉松範圍，非真正可動手項）；
-`grep -c "^- \[!\]"`=13（與round689持平）。逐一核對13條`- [!]`阻塞項：
-`金流一.4`實測`data/sector_flow.json` `meta.trading_days_available`=18、
-`windows_missing_days.20`=2（較round689的3縮1，與TW round691記錄一致），
-20日視窗仍差2個交易日，未解除；`外部一改.2`／`研究.c`共用tick累積
-`ls research/data/ticks/*.parquet`實測15/20（較round689持平，仍差5日），
-未解除；`本地AI摘要(Breeze-7B)`(a)/(b)/(c)/(d)資料來源裁示分支仍待總
-司令選一，屬白名單第6條法遵疑慮，未解除；`紙.一`需2026-10-01（今日）
-但`data/paper_7030.json`仍`started:false`（當日收盤尚未經market.yml
-寫入，查詢時刻早於台股收盤後批次），未解除；其餘9條逐一核對開頭標記，
-均為等總司令/Cowork裁示或其他外部條件，皆未到解除時間。`grep -c
-"凍結.二解除" PENDING_QUEUE.md`=4，逐行核對皆為條件敘述提及、非實際
-宣告解除，凍結.二仍生效（`轉向.一`仍阻塞於等Cowork人工核對閘門.一，
-屬白名單第2類，自走軌道不得代為放行）。**佇列深度自檢**：`- [ ]`=1但
-保留給互動視窗，實質可動手項=0（<12下限），凍結.二期間暫停補件，不
-硬湊alpha試驗候選。**逐一核對凍結.二允許的四類工作現況**：稽核重跑／
-驗.二重跑先前輪次已全部完成並登記；資料抓取（`資料.一`已完成
-300/300）；工具修正已由互動視窗commit（`git log`最新數筆均為排程自動
-更新，無互動視窗新commit待複查）；`git status --short -- research/
-backtest/ research/validation/ research/adjust.py research/pit.py
-research/trial_registry.py`輸出為空（十三節限定清單內檔案無殘留未
-commit編輯）。US軌本身`US_LEADS.md`/`STRATEGY_GRAVEYARD.md`price-only
-因子家族結案狀態未變，`CALIBRATION_PROBE.md`唯一指名給US軌的操作指令
-（#47/#52重跑）先前輪次已複核確認2026-09-04早已結案、無殘留，本輪再次
-核對`TRIALS_LEDGER.md`第572~573行備註仍為最終狀態，無新變化。無對應
-結構性優勢候選可開新方向（凍結.二期間本來就不得開新alpha試驗）。驗證：
-`run_detached.py status`running=0（162筆歷史，無job待收成）；`trial_
-registry.py --check`（`PYTHONIOENCODING=utf-8`）exit=0 PASS（409列，
-另有FDR對照表33列，最大編號#407，本輪未新增判定）；`validation/
-holdout.py::is_holdout_consumed()`讀取為`True`（非本輪動作，僅讀取
-核對）。`AWAITING_REVIEW.md`「等待中（目前：28件）」，逐行核對與28筆
-資料列一致，與round691一致，本輪未變動。**本輪誠實結論**：交辦佇列
-實質0條可動手項（`先.五-三`保留給互動視窗）；凍結.二允許的四類工作
-皆已完成或無新內容；13條`- [!]`逐一核對均未到解除時間；US軌本身查無
-可推進的新工作單位——依`CLAUDE.md`「零之一」白名單第7條精神記錄後
-結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha試驗、不搶碰十三節
-限定檔案、不代做互動視窗保留項目。未動`alpha.db`/`fetch.py`/
-`parsers.py`/`config.py`凍結區，未修改十三節限定清單內任何原始碼
-（僅讀取核對＋改狀態檔），全程零新增外部API呼叫（純讀既有`.json`/
-`.md`帳本檔案、`git status`/`git log`、`run_detached.py status`、
-`trial_registry.py --check`、`holdout.py`）。`PROGRESS_HEARTBEAT.jsonl`
-已append本輪一行。**交辦佇列還剩0條真正可動手的`- [ ]`未開始**。
-**等待審閱：28件**（與`AWAITING_REVIEW.md`表格列數一致）。**下一輪任一
-軌接手**：依輪替下一輪建議選FUT軌（round690=09-30 16:0x，三軌中最舊）；
-開工前先重新檢查`- [ ]`有無新交辦、`金流一.4`20日視窗是否已補到0（目前
-差2個交易日）、`外部一改.2`tick累積15/20還差5日、`本地AI摘要
-(Breeze-7B)`四選一是否已裁示、`紙.一`是否已有`started:true`紀錄
-（今晚market.yml跑完後應會更新）、`轉向.一`Cowork核對是否已完成。
-凍結.二在總司令/Cowork明確寫「凍結.二解除」前不解除。完整見
-`REPORT.md`第692輪心跳、`PENDING_QUEUE.md`「金流一.4」「外部一改.2」
-「本地AI摘要(Breeze-7B)」「紙.一」「轉向.一」條目、
-`research/AWAITING_REVIEW.md`。
-
----
 
 **最後更新：2026-10-02T20:3x+08:00（馬拉松第695輪，維運帽）**——取鎖乾淨。
 三軌時間戳：US round692=10-01 21:0x（最舊，本輪選定）／FUT round693=
@@ -226,3 +168,67 @@ Run workflow」）、`金流一.4`／`外部一改.2`tick累積進度、`先.七
 「凍結.二解除」前不解除。完整見`REPORT.md`第698輪心跳、
 `PENDING_QUEUE.md`「金流一.4」「先.七-一」「維運.market.yml」相關
 條目、`research/AWAITING_REVIEW.md`。
+
+---
+**最後更新：2026-10-03T02:3x+08:00（馬拉松第701輪，US軌，維運帽）**——
+取鎖乾淨（cycle`20261003-023037`）。三軌時間戳（開工前）：US round698=
+10-02 23:3x（最舊，本輪選定）／FUT round699=10-03 00:3x／TW round700=
+10-03 01:3x。開工先讀`PENDING_QUEUE.md`：`grep -c "^- \[ \]"`=0（無未
+開始交辦項，先.十二-一/二已由互動視窗於round700之前標`[x]`結案）；
+`grep -c "^- \[!\]"`=19（較round698的21減少2條，為先.十二-一/二結案
+＋維運.market.yml今日(10/1)已解除所致，非本輪新增變動）。
+
+逐一核對19條`- [!]`阻塞項：`金流一.4` `sector_flow.json`
+`meta.trading_days_available`仍**19**、`windows_missing_days.20`仍
+**1**（與round700一致），未解除；`外部一改.2`／`研究.c`tick累積
+`ls research/data/ticks/*.parquet`實測仍**15/20**，未解除；`本地AI
+摘要(Breeze-7B)`仍待總司令四選一，未解除；`先.十二-三`／`先.十一-二`
+重跑`finmind_warmup.py --status`：`stmt_code_coverage`已由round700
+記錄的34.09%升至**39.59%**（`calls_last_hour=111`，`eta_local=
+2026-10-04T00:32+08:00`），仍未達完成門檻，未解除；`先.六-四`／
+`先.七-一`（Shioaji）：`data/quotes_sinopac.json`仍`connected:false`，
+下一交易日2026-10-05（週一），本輪查詢時間（週六02:3x）尚未到，未
+解除；`先.九-五`派發延遲樣本仍1/3（僅10/2一筆，等10/5、10/6），未
+解除；其餘13條（`資料源.外銷訂單彙總`／`重構.C4`／`資料源一.3`／
+`稽核.三`／`稽核.五`／`結案.一`／`常備.9`／`群益API(合併)`／維運
+`.gitattributes`renormalize提案／`紙.一`／其餘維運觀察項）皆等
+總司令/Cowork裁示或固定條件，均未到解除時間，與round700一致，不
+重複贅述。`grep -c "凍結.二解除" PENDING_QUEUE.md`=4，逐行核對皆為
+條件敘述提及、非實際宣告解除，凍結.二仍生效。**佇列深度自檢**：
+`- [ ]`=0（<12下限），凍結.二期間暫停補件，不硬湊alpha試驗候選。
+**逐一核對凍結.二允許的四類工作現況**：稽核重跑／驗.二重跑先前輪次
+已全部完成並登記；資料抓取（`資料.一`已完成300/300）；工具修正——
+本輪僅執行既有工具（`finmind_warmup.py --status`／`trial_registry.py
+--check`／`run_detached.py status`）與更新狀態記錄，未修改任何原始
+碼；`git status --short -- research/backtest/ research/validation/
+research/adjust.py research/pit.py research/trial_registry.py`輸出
+為空（十三節限定清單內檔案無殘留未commit編輯，本輪亦未touch）。US軌
+本身`US_LEADS.md`/`STRATEGY_GRAVEYARD.md`結案狀態未變，凍結.二期間
+本來就不得登記新alpha試驗。
+
+驗證：`run_detached.py status` running=0（162筆歷史，無job待收成）；
+`trial_registry.py --check` exit=0 PASS（409列，另有FDR對照表33列，
+最大編號#407，本輪未新增判定）；`is_holdout_consumed()`未重查（非
+本輪動作範圍，round700已核對為True，條件不變）。`AWAITING_REVIEW.md`
+「等待中（目前：44件）」，逐行核對與44筆資料列一致，本輪未變動（本
+輪未產生新完成項，先.十二-一/二等為互動視窗先前commit）。
+
+**本輪誠實結論**：交辦佇列`- [ ]`=0；凍結.二允許的四類工作皆已完成
+或無新內容；19條`- [!]`逐一核對均未到解除時間（唯一有量化進度的是
+先.十一-二/先.十二-三財報預熱34.09%→39.59%，仍未達完成門檻）；US軌
+本身查無可推進的新alpha試驗工作單位——依`CLAUDE.md`「零之一」白名單
+第7條精神記錄後結束本輪，不硬湊候選、不觸碰凍結.二禁止的新alpha
+試驗、不搶碰十三節限定檔案、不代做互動視窗保留項目。未動
+`alpha.db`/`fetch.py`/`parsers.py`/`config.py`凍結區，未修改十三節
+限定清單內任何原始碼。全程新增外部呼叫僅限讀取性質驗證與既有工具的
+`--status`/`--check`查詢，無新增資料抓取類API呼叫。
+`PROGRESS_HEARTBEAT.jsonl`已append本輪一行。**交辦佇列還剩0條
+`- [ ]`未開始**。**等待審閱：44件**（與`AWAITING_REVIEW.md`表格列
+數一致）。**下一輪任一軌接手**：依輪替下一輪建議選FUT軌（round699=
+10-03 00:3x，三軌中最舊）；開工前先重新檢查`- [ ]`有無新交辦、
+先.十一-二/先.十二-三財報預熱是否已達完成門檻、`金流一.4`20日視窗
+是否已補到0、`外部一改.2`tick累積15/20進度、`先.六-四`/`先.七-一`
+是否已到10/5開盤可驗證。凍結.二在總司令/Cowork明確寫「凍結.二解除」
+前不解除。完整見`REPORT.md`第701輪心跳、`PENDING_QUEUE.md`「金流
+一.4」「外部一改.2」「先.十二-三」相關條目、
+`research/AWAITING_REVIEW.md`。
