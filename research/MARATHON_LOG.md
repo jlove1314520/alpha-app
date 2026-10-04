@@ -1,5 +1,16 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+- 2026-10-05 01:23 marathon(TW) 開工讀PENDING_QUEUE發現唯一交辦項（先.十三-三）已由
+  AlphaDevQueue平行完成並提交（654089b5f，trial #409 VIOLATES_SURVIVAL）；本輪獨立
+  實作途中發現該commit缺少 industry_shortage_core.py／liquidity.py 依賴（backtest.py
+  會ImportError），已補齊並誠實記錄與已登記結果的小幅數字落差（MDD -55.85%本機 vs
+  -55.94%已登記，不影響VIOLATES_SURVIVAL判定），commit 4599e92d0 並push；已殺掉本輪
+  自己多餘的背景 --run 行程避免覆寫已提交result.json。查PENDING_QUEUE新增先.十四-
+  一/二/三（total司令2026-10-05裁示，track interactive/devqueue），比照hypothesis_queue
+  同一情境先例判定不介入以免與devqueue並行寫入衝突，本輪不代做、不開新alpha試驗
+  （凍結.二仍生效）。佇列`- [ ]`現6項（含先.十四舊版重複）、`- [!]`19項，凍結.二期間
+  不強制補到MIN_QUEUE_DEPTH=12。
+
 ## 2026-10-05T00:53（Taipei，hypothesis_queue排程接續）— hypothesis_queue 心跳模式，#82 暫停，未開新軸
 — 依總司令【驗.七】一裁示持續執行只做心跳。開工先讀`PENDING_QUEUE.md`：
 頂層（非引文區塊）`- [ ]`僅1項——`先.十三-三 先.十一-二 續行`（FinMind財報
