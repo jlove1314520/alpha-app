@@ -1,5 +1,30 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+## 2026-10-05T00:53（Taipei，hypothesis_queue排程接續）— hypothesis_queue 心跳模式，#82 暫停，未開新軸
+— 依總司令【驗.七】一裁示持續執行只做心跳。開工先讀`PENDING_QUEUE.md`：
+頂層（非引文區塊）`- [ ]`僅1項——`先.十三-三 先.十一-二 續行`（FinMind財報
+預熱已完成，解除阻塞）。查該條目與其所屬整條「先.十一-二」任務鏈（先.十一→
+先.十二→先.十三各子項）歷次心跳皆標`track "interactive"`，且核對
+`research/dev_queue_cycle.log`：`AlphaDevQueue` 排程在 00:46:02 這一輪已
+PROMPT_READY（讀到同一條`- [ ]`）並觸發 claude -p，產生
+`research/industry_shortage_corr406.py`／`industry_shortage_corr406_results.json`
+（§5「與#406分數/I5/SUE相關係數」計算結果：四者 pooled rank corr 與逐日最大
+絕對值皆遠低於0.7門檻，`stop_by_mean_abs_gt_0.7`／`any_daily_abs_gt_0.7`
+均為空，未觸發同家族停下），`.devqueue.lock`仍存在（00:46建立，距本輪僅約
+7分鐘，判定該輪可能仍在跑或剛結束尚未commit）。**判定本輪不介入此項**：
+(1) 該任務鏈明確屬`interactive`/DevQueue track管轄，非hypothesis_queue；
+(2) 另一自動化已在處理中，重複介入會造成並行寫入風險；(3) 此任務後續步驟
+（docs/PREREG_industry_shortage_FINAL.md事前登記、TRIALS_LEDGER正式登記、
+單發執行）本身即屬「新試驗登記/執行」，若由hypothesis_queue track代做會
+與凍結.二「自走軌道不得登記新的alpha試驗」字面衝突，即便先.十一已獲總司令
+個別核准，風險判斷上仍以不介入為保守做法。未新增、未修改、未commit此任務
+相關的任何檔案（`industry_shortage_corr406.*`、`PENDING_QUEUE.md`該行）。
+本輪僅寫心跳，未挑任何未結案假設、未開新軸、未補件新的alpha假設進佇列
+（凍結.二第4點）。`git status`確認其餘殘留變更（`data/`、
+`research/.*state.json`、各類`.log`/`.jsonl`）皆為其他排程來源留下，
+不觸碰、不納入本次commit。鎖檔為乾淨回收後LOCK_ACQUIRED（上一輪陳舊鎖
+2341分鐘，疑似該輪異常終止未釋放，已記錄）。
+
 ## 2026-10-03T04:52（Taipei，hypothesis_queue排程接續）— hypothesis_queue 心跳模式，#82 暫停，未開新軸
 — 依總司令【驗.七】一裁示持續執行只做心跳。開工先讀`PENDING_QUEUE.md`：
 頂層（非引文區塊）`- [ ]`數量為0（逐一grep確認，命中的`[ ]`字樣皆為
