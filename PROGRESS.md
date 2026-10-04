@@ -33,6 +33,8 @@ STATUS.json）。詳細狀態見 `PENDING_QUEUE.md` 先.十四-一 條目。
 
 **結果**：產業缺貨桶輪動單發（trial #409，事前登記 #408）判定 **VIOLATES_SURVIVAL**：全期 MDD -55.9%；Sortino 0.323 < 0050 0.883；總報酬 +76.5% vs +351%；隨機 3 桶對照 30/200 不輸策略；Bonferroni(N=411)與 DSR 全 V 情境未過；成本 2×/3× 近零/負；兩段超額皆負。已寫 STRATEGY_GRAVEYARD、重跑 selection_bias_ledger，不做參數重試，holdout 未動。檔案：research/industry_shortage_backtest.py、research/data/industry_shortage_result.json、TRIALS_*、STRATEGY_GRAVEYARD.md、AWAITING_REVIEW.md。[自行裁量]：流動性代理用 60 日成交金額均值（1 檔無價格檔、155 持股位排最後）；failed_gates 對映 gate2/gate4。
 
+**並發覆寫事件**：AlphaMarathon round701 於 01:06～01:22 平行改寫同路徑 `research/industry_shortage_backtest.py`，654089b5f 內 runner 為馬拉松版（非產出 result.json 者）。已還原互動視窗版至原路徑、馬拉松版改名 `industry_shortage_backtest_marathon_variant.py` 保留；result.json 自 01:13 未變動，trial #409 不受影響、未重跑；還原版已重跑 --dry 驗證。
+
 先.十三-一（補洞）、先.十三-二（merge=union）已於先前完成。下一步：先.十四（見 PENDING_QUEUE）。
 
 ## 2026-10-03（互動視窗，先.十二 斷網後收尾，維運帽）

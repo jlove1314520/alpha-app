@@ -17414,7 +17414,7 @@ push 後停下等 Cowork 核對。
 
 - [x] **先.十三-一 alpha-data 補洞（backfill_gap.py，備份→dry-run→寫入→核對，異常即還原）**（修正：先.十二-一 所列 9/28 為教師節休市，非缺口）。結果 2026-10-05：備份 alpha.db.backup_20261005_004417_before_backfill_gap；實缺為三表 9/30、10/1（10/2 已由自然更新入庫），taifex 缺 9/29、9/30、10/1；9/25、9/28 休市無資料不寫入；10/3、10/4 週末；寫入 valuation 2165／daily_price 2762／inst_trades 36947／taifex_large 4158 筆，單日筆數與相鄰交易日相符，寫後重數與 integrity_check 皆 ok；寫入前以 10/2 全日對照端點格式 parity OK。
 - [x] **先.十三-二 append-only .jsonl 加 merge=union（.gitattributes）＋兩分支各 append 一行合併測試**。結果：8 檔加 merge=union，暫存 repo 的 merge 與 rebase 兩分支各 append 一行皆兩行保留。
-- [x] **先.十三-三 先.十一-二 續行（FinMind 財報預熱已於 2026-10-05 完成，解除阻塞）** 結果 2026-10-05：相關係數均值 0.001/0.026/0.034/0.058（無停）；FINAL 登記 #408 push（8b42dd8e）；單發完成=trial #409，判定 **VIOLATES_SURVIVAL**（全期 MDD -55.9%；Sortino 0.323<0050 0.883；隨機對照 30/200 不輸；Bonferroni/DSR 未過；成本 2×/3× 近零/負），已寫 STRATEGY_GRAVEYARD，不做參數重試；結果檔 research/data/industry_shortage_result.json；holdout 未動。
+- [x] **先.十三-三 先.十一-二 續行（FinMind 財報預熱已於 2026-10-05 完成，解除阻塞）** 結果 2026-10-05：相關係數均值 0.001/0.026/0.034/0.058（無停）；FINAL 登記 #408 push（8b42dd8e）；單發完成=trial #409，判定 **VIOLATES_SURVIVAL**（全期 MDD -55.9%；Sortino 0.323<0050 0.883；隨機對照 30/200 不輸；Bonferroni/DSR 未過；成本 2×/3× 近零/負），已寫 STRATEGY_GRAVEYARD，不做參數重試；結果檔 research/data/industry_shortage_result.json；holdout 未動。 **並發覆寫事件（2026-10-05 01:06～01:22，規則十三.5 如實記錄）**：AlphaMarathon round701 在互動視窗 --run 執行期間平行改寫了同路徑 research/industry_shortage_backtest.py，commit 654089b5f 內的該檔是馬拉松版（import industry_shortage_core），不是產出 result.json 的互動視窗版（result.json 鍵 liquidity_proxy_note／missing_price_file_slots=155／seed=20261005 僅互動視窗版會產生，可證來源）。已將互動視窗版還原至原路徑、馬拉松版改名 industry_shortage_backtest_marathon_variant.py 保留供稽核（4599e92d0 補的 industry_shortage_core.py／liquidity.py 為其依賴，一併保留）；result.json 自 01:13 寫出後未變動，trial #409 判定不受影響，未重跑。馬拉松版本機 sanity（MDD -55.85%／Sortino 0.359）為另一實作，不得取代登記值。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十三"。）
 
@@ -17428,9 +17428,9 @@ push 後停下等 Cowork 核對。
 三、先.十一-二 照原順序：財報預熱完成→相關係數（|r|>0.7 停）→FINAL 登記 push→單發。
 紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
 
-- [ ] **先.十四-一 無聲停擺偵測（launcher 偵測登入過期／額度／認證錯誤→心跳 status＋data/STATUS.json＋watchdog／App 紅色橫幅；連續 3 小時無實際執行告警；注入假錯誤字串自測＋冒煙測試截圖）**
-- [ ] **先.十四-二 FinMind 預熱覆蓋率回報＋股價預熱排程（1,930 檔須於 2026-11-10 前完成，寫入 docs/LOCAL_SCHEDULED_TASKS.md）**
-- [ ] **先.十四-三 先.十一-二 照原順序（已由先.十三-三 承接，單發完成即併入）**
+- [→] **先.十四-一 無聲停擺偵測（launcher 偵測登入過期／額度／認證錯誤→心跳 status＋data/STATUS.json＋watchdog／App 紅色橫幅；連續 3 小時無實際執行告警；注入假錯誤字串自測＋冒煙測試截圖）**　**⛔ 自走中止（2026-10-05 01:31）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事（⚠️ 舊版條目，已由下方修訂版先.十四 條目取代，勿重複執行；DevQueue 20261005-004602 的部分完成狀態記於修訂版條目）
+- [→] **先.十四-二 FinMind 預熱覆蓋率回報＋股價預熱排程（1,930 檔須於 2026-11-10 前完成，寫入 docs/LOCAL_SCHEDULED_TASKS.md）**（⚠️ 舊版條目，已由下方修訂版先.十四 條目取代，勿重複執行）
+- [→] **先.十四-三 先.十一-二 照原順序（已由先.十三-三 承接，單發完成即併入）**（⚠️ 舊版條目，已由下方修訂版先.十四 條目取代，勿重複執行）
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十四"。）
 
