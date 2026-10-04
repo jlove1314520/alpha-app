@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-04T06:27:15.685527+08:00",
+ "fetched_at": "2026-10-04T10:00:56.454490+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
@@ -9,9 +9,8 @@
    "kept": 5
   },
   "tpex_mops": {
-   "ok": true,
-   "rows": 36,
-   "kept": 36
+   "ok": false,
+   "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
   },
   "twse_revenue": {
    "ok": true,
@@ -187,6 +186,15 @@
    "title": "代子公司FBD Biologics Limited公告，HCB303美國新藥 臨床試驗申請（IND）獲准進行臨床試驗",
    "source": "TWSE 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6834",
+   "name": "",
+   "date": "2026-10-02",
+   "type": "除權息",
+   "title": "除權息交易日",
+   "source": "TWSE 除權息",
+   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
    "code": "4747",
@@ -511,15 +519,6 @@
    "title": "本公司董事會決議收回已發行之限制員工權利新股註銷減資事宜",
    "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "6834",
-   "name": "",
-   "date": "2026-10-02",
-   "type": "除權息",
-   "title": "除權息交易日",
-   "source": "TWSE 除權息",
-   "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
    "code": "6949",
