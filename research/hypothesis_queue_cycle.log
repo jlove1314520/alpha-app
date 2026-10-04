@@ -6372,3 +6372,11 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
 
 quota_throttle: SKIP: 正常頻率，距上次實跑25.5分鐘 < 30分鐘門檻
+
+quota_throttle: RUN: 未達節流條件，正常頻率
+
+===== Hypothesis-queue cycle start: 2026-10-05 01:51:02 =====
+You've hit your session limit 繚 resets 5:30am (Asia/Taipei)
+===== Hypothesis-queue cycle end: 2026-10-05 01:51:11 =====
+auth_classify: {"status": "OK", "matched": null}
+quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
