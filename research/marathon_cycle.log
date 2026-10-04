@@ -6186,3 +6186,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 TIMEOUT after 25 min -> taskkill /T /F pid=267268
 quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0.56
 ===== Marathon cycle end: 2026-10-05 01:25:42 cycle_id=20261005-010037 reason=TIMEOUT cost_usd= read_kb=163.8 turns= duration_min= =====
+
+quota_throttle: SKIP: 正常頻率，距上次實跑4.9分鐘 < 30分鐘門檻
