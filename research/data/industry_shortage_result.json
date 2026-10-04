@@ -1,0 +1,579 @@
+{
+ "design_file": "docs/PREREG_industry_shortage_FINAL.md",
+ "design_sha256": "7e73dd0b0600f9ccfc8f7caea96fffa3dcedfa010773c6a989644d47dee6241b",
+ "run_date": "2026-10-05",
+ "prereg_trial_id": 408,
+ "seed": 20261005,
+ "n_rebalance": 125,
+ "liquidity_proxy_note": "截斷用近60交易日 Trading_money 日均值（流動性代理，非真市值）",
+ "stocks_without_price_file": 1,
+ "gate1_sample": {
+  "min_scorable": 849,
+  "min_scored_buckets": 12,
+  "n_dates_scorable_lt300": 0,
+  "n_dates_buckets_lt10": 0,
+  "pass": true
+ },
+ "main": {
+  "start": "2014-04-28",
+  "end": "2024-12-31",
+  "n_days": 2613,
+  "total_ret": 0.7648844967626272,
+  "cagr": 0.05464410454752988,
+  "mdd": -0.559372071039636,
+  "sortino": 0.32338559881789497,
+  "sharpe_d": 0.02163955867947793,
+  "bench_total_ret": 3.5115295275774487,
+  "bench_cagr": 0.15154241986225836,
+  "bench_mdd": -0.33957005414581987,
+  "bench_sortino": 0.8831228871575106,
+  "sortino_diff": -0.5597372883396157,
+  "excess_total_ret": -2.746645030814822,
+  "stats": {
+   "buy_deferred": 0,
+   "buy_abandoned": 0,
+   "sell_forced": 0,
+   "traded_value": 169.49526602070938,
+   "cost_paid": 0.5798911228051353
+  },
+  "yearly": {
+   "2014": {
+    "strategy": 0.019818502721780318,
+    "bench": 0.1260287354713383,
+    "excess": -0.10621023274955799
+   },
+   "2015": {
+    "strategy": 0.1351642373350601,
+    "bench": -0.06280615630958675,
+    "excess": 0.19797039364464686
+   },
+   "2016": {
+    "strategy": -0.10019787481437492,
+    "bench": 0.19648427577096905,
+    "excess": -0.296682150585344
+   },
+   "2017": {
+    "strategy": 0.039025619759262,
+    "bench": 0.18138874239142977,
+    "excess": -0.14236312263216777
+   },
+   "2018": {
+    "strategy": -0.14005749658109734,
+    "bench": -0.049384989436504934,
+    "excess": -0.0906725071445924
+   },
+   "2019": {
+    "strategy": 0.22807901560229005,
+    "bench": 0.33521145271742725,
+    "excess": -0.1071324371151372
+   },
+   "2020": {
+    "strategy": 0.46429512992014144,
+    "bench": 0.31139036915266627,
+    "excess": 0.15290476076747517
+   },
+   "2021": {
+    "strategy": 0.07153984117260825,
+    "bench": 0.21923260965899827,
+    "excess": -0.14769276848639
+   },
+   "2022": {
+    "strategy": -0.27543454366011966,
+    "bench": -0.2137467162026705,
+    "excess": -0.06168782745744916
+   },
+   "2023": {
+    "strategy": 0.22858708172275177,
+    "bench": 0.2751520190388237,
+    "excess": -0.04656493731607192
+   },
+   "2024": {
+    "strategy": 0.10546549958237339,
+    "bench": 0.4864399482352997,
+    "excess": -0.3809744486529263
+   }
+  },
+  "years_beating": 2,
+  "years_total": 11,
+  "two_segments": {
+   "2014-2019": {
+    "n_days": 1397,
+    "ret": 0.14301145797527282,
+    "mdd": -0.3090374072496841,
+    "beta": 0.8714279474512997,
+    "bench_ret": 0.8933610592506083,
+    "excess": -0.7503496012753355
+   },
+   "2020-2024": {
+    "n_days": 1216,
+    "ret": 0.5440654461057972,
+    "mdd": -0.5593720710396359,
+    "beta": 0.9546396196428951,
+    "bench_ret": 1.3828152087183652,
+    "excess": -0.838749762612568
+   }
+  },
+  "regimes": [
+   {
+    "n_days": 246,
+    "ret": 0.05002338785428617,
+    "mdd": -0.25541979004357096,
+    "beta": 0.9185735369574248,
+    "bench_ret": 0.22540898288017663,
+    "excess": -0.17538559502589046,
+    "type": "bull",
+    "start": "2011-12-19",
+    "end": "2015-04-27",
+    "covered_days": 246,
+    "complete": true
+   },
+   {
+    "n_days": 83,
+    "ret": -0.17624672378880446,
+    "mdd": -0.2026771351095944,
+    "beta": 1.2326831084864784,
+    "bench_ret": -0.20360110803324083,
+    "excess": 0.02735438424443637,
+    "type": "bear",
+    "start": "2015-04-27",
+    "end": "2015-08-24",
+    "covered_days": 83,
+    "complete": true
+   },
+   {
+    "n_days": 1079,
+    "ret": 0.25225195688988356,
+    "mdd": -0.3090374072496773,
+    "beta": 0.8525547702917009,
+    "bench_ret": 0.9116716354341889,
+    "excess": -0.6594196785443054,
+    "type": "bull",
+    "start": "2015-08-24",
+    "end": "2020-01-14",
+    "covered_days": 1079,
+    "complete": true
+   },
+   {
+    "n_days": 40,
+    "ret": -0.30417537529013317,
+    "mdd": -0.3139344042866188,
+    "beta": 1.3237821490142845,
+    "bench_ret": -0.27778168410221216,
+    "excess": -0.02639369118792101,
+    "type": "bear",
+    "start": "2020-01-14",
+    "end": "2020-03-19",
+    "covered_days": 40,
+    "complete": true
+   },
+   {
+    "n_days": 444,
+    "ret": 1.0759116935303177,
+    "mdd": -0.3062021034408733,
+    "beta": 1.0411693846926964,
+    "bench_ret": 1.120393573213906,
+    "excess": -0.04448187968358841,
+    "type": "bull",
+    "start": "2020-03-19",
+    "end": "2022-01-04",
+    "covered_days": 444,
+    "complete": true
+   },
+   {
+    "n_days": 197,
+    "ret": -0.40075897484230383,
+    "mdd": -0.4295897294539376,
+    "beta": 1.1594681738940489,
+    "bench_ret": -0.314307706490196,
+    "excess": -0.08645126835210781,
+    "type": "bear",
+    "start": "2022-01-04",
+    "end": "2022-10-25",
+    "covered_days": 197,
+    "complete": true
+   },
+   {
+    "n_days": 530,
+    "ret": 0.6065778714413788,
+    "mdd": -0.26006848272972327,
+    "beta": 0.744859287571328,
+    "bench_ret": 1.118429477780698,
+    "excess": -0.5118516063393193,
+    "type": "bull",
+    "start": "2022-10-25",
+    "end": "2024-12-31",
+    "covered_days": 530,
+    "complete": false
+   }
+  ],
+  "skew": -0.44251905431365757,
+  "kurtosis_nonexcess": 5.714640501547176
+ },
+ "holdings": {
+  "n_min": 20,
+  "n_max": 20,
+  "turnover_mean": 0.5286290322580645,
+  "missing_price_file_slots": 155,
+  "sim_stats": {
+   "buy_deferred": 0,
+   "buy_abandoned": 0,
+   "sell_forced": 0,
+   "traded_value": 169.49526602070938,
+   "cost_paid": 0.5798911228051353
+  }
+ },
+ "gate2_survival": {
+  "mdd_all": -0.559372071039636,
+  "bear_segments": [
+   {
+    "n_days": 83,
+    "ret": -0.17624672378880446,
+    "mdd": -0.2026771351095944,
+    "beta": 1.2326831084864784,
+    "bench_ret": -0.20360110803324083,
+    "excess": 0.02735438424443637,
+    "type": "bear",
+    "start": "2015-04-27",
+    "end": "2015-08-24",
+    "covered_days": 83,
+    "complete": true
+   },
+   {
+    "n_days": 40,
+    "ret": -0.30417537529013317,
+    "mdd": -0.3139344042866188,
+    "beta": 1.3237821490142845,
+    "bench_ret": -0.27778168410221216,
+    "excess": -0.02639369118792101,
+    "type": "bear",
+    "start": "2020-01-14",
+    "end": "2020-03-19",
+    "covered_days": 40,
+    "complete": true
+   },
+   {
+    "n_days": 197,
+    "ret": -0.40075897484230383,
+    "mdd": -0.4295897294539376,
+    "beta": 1.1594681738940489,
+    "bench_ret": -0.314307706490196,
+    "excess": -0.08645126835210781,
+    "type": "bear",
+    "start": "2022-01-04",
+    "end": "2022-10-25",
+    "covered_days": 197,
+    "complete": true
+   }
+  ],
+  "pass": false
+ },
+ "gate3_sortino": {
+  "strategy": 0.32338559881789497,
+  "bench": 0.8831228871575106,
+  "diff": -0.5597372883396157,
+  "excess_total_ret": -2.746645030814822,
+  "years_beating": 2,
+  "years_total": 11,
+  "evaluate_gate8_VAL_reported_only": {
+   "gate": 8,
+   "candidate_name": "industry_shortage_v1",
+   "phase": "VAL",
+   "passed": true,
+   "candidate_return_pct": 76.48844967626272,
+   "candidate_mdd_pct": -55.9372071039636,
+   "matched_benchmark_w": 0.3,
+   "matched_benchmark_return_pct": 21.289459137292567,
+   "matched_benchmark_mdd_pct": -11.352703877571138,
+   "matched_benchmark_sortino": 0.855128415105502,
+   "note": "最近鄰w匹配，非連續風險相等；見match_by_risk() docstring"
+  },
+  "pass": false
+ },
+ "gate4_cluster_bootstrap": {
+  "B": 200,
+  "K_per_boot": 20,
+  "K_full": 200,
+  "percentile_full": 85.0,
+  "boot_pct_mean": 84.05,
+  "boot_pct_sd": 14.745666257135829,
+  "pct_minus_1sd": 70.25433374286418,
+  "boot_sortino_gt_bench_share": 0.0,
+  "boot_pct_p10_p50_p90": [
+   60.0,
+   90.0,
+   100.0
+  ],
+  "unstable_sd_gt_15": false,
+  "pass": false
+ },
+ "gate5_random_control": {
+  "K": 200,
+  "strategy_sortino": 0.32338559881789497,
+  "control_max": 0.5777256225201343,
+  "control_mean": 0.1496108305934325,
+  "control_p95": 0.42498026007404843,
+  "n_exceeding_strategy": 30,
+  "pass": false
+ },
+ "gate6_multiple_testing": {
+  "n_trials": 411,
+  "n_note": "取兩口徑較大者（較保守）：trial_registry 410 列（排除 FDR 對照表）／selection_bias_ledger 410 列（含對照表）；口徑分歧待總司令裁示",
+  "bonferroni_required_percentile": 99.98783454987834,
+  "strategy_percentile_full": 85.0,
+  "bonferroni_pass": false,
+  "dsr_daily": [
+   {
+    "name": "帳本V(僅有Sharpe記錄者，非全體，必然低估)",
+    "V": 0.001227093795345487,
+    "V_samples": 7,
+    "dsr": 1.1620807079226747e-05,
+    "sr0": 0.10484817324893417,
+    "pass": false
+   },
+   {
+    "name": "年化SD=0.2",
+    "V": 0.00015873015873015876,
+    "dsr": 0.20691430088502943,
+    "sr0": 0.03770958156812166,
+    "pass": false
+   },
+   {
+    "name": "年化SD=0.3",
+    "V": 0.00035714285714285714,
+    "dsr": 0.03786998034332428,
+    "sr0": 0.05656437235218248,
+    "pass": false
+   },
+   {
+    "name": "年化SD=0.4",
+    "V": 0.000634920634920635,
+    "dsr": 0.0031214798024941093,
+    "sr0": 0.07541916313624332,
+    "pass": false
+   },
+   {
+    "name": "年化SD=0.5",
+    "V": 0.000992063492063492,
+    "dsr": 0.00011058450272904974,
+    "sr0": 0.09427395392030415,
+    "pass": false
+   },
+   {
+    "name": "年化SD=0.75",
+    "V": 0.002232142857142857,
+    "dsr": 5.628673083180047e-10,
+    "sr0": 0.1414109308804562,
+    "pass": false
+   }
+  ],
+  "v_caveat": "V 為僅有 Sharpe 記錄者之離散度，非全體，必然低估；門檻因此偏鬆",
+  "all_v_pass": false
+ },
+ "gate7_costs": {
+  "1x": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.7648844967626272,
+   "cagr": 0.05464410454752988,
+   "mdd": -0.559372071039636,
+   "sortino": 0.32338559881789497,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.5597372883396157,
+   "excess_total_ret": -2.746645030814822,
+   "bench_total_ret": 3.5115295275774487,
+   "survive": false
+  },
+  "2x": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.10787000822797266,
+   "cagr": 0.009639999048389525,
+   "mdd": -0.5775265967940861,
+   "sortino": 0.15673941079944034,
+   "bench_sortino": 0.8820945149728695,
+   "sortino_diff": -0.7253551041734292,
+   "excess_total_ret": -3.3949580747280232,
+   "bench_total_ret": 3.502828082955996,
+   "survive": false
+  },
+  "3x": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": -0.30492995344855156,
+   "cagr": -0.03349218875870541,
+   "mdd": -0.6355239355467267,
+   "sortino": -0.006895190439164389,
+   "bench_sortino": 0.8810661427882285,
+   "sortino_diff": -0.8879613332273929,
+   "excess_total_ret": -3.79905659178307,
+   "bench_total_ret": 3.494126638334518,
+   "survive": false
+  }
+ },
+ "gate7_frequency": {
+  "bimonthly_even_months": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.6617155566667645,
+   "cagr": 0.04871138282331411,
+   "mdd": -0.47028398581576225,
+   "sortino": 0.30314590604523883,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.5799769811122718,
+   "excess_total_ret": -2.8498139709106844,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  },
+  "quarterly_3_6_9_12": {
+   "start": "2014-06-26",
+   "end": "2024-12-31",
+   "total_ret": 0.33523180693813637,
+   "cagr": 0.027873070473402484,
+   "mdd": -0.5105683696856437,
+   "sortino": 0.2247991898837549,
+   "bench_sortino": 0.8580023278106491,
+   "sortino_diff": -0.6332031379268942,
+   "excess_total_ret": -2.9006512916535376,
+   "bench_total_ret": 3.235883098591674,
+   "same_direction": true
+  }
+ },
+ "gate7_plateau": {
+  "K2": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 2.152402260199591,
+   "cagr": 0.11352431951662623,
+   "mdd": -0.47134248378161636,
+   "sortino": 0.542006352630556,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.3411165345269547,
+   "excess_total_ret": -1.3591272673778576,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  },
+  "K4": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.9257442810209595,
+   "cagr": 0.06329495936072105,
+   "mdd": -0.49705686244123504,
+   "sortino": 0.3574136704840395,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.5257092166734711,
+   "excess_total_ret": -2.5857852465564894,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  },
+  "lag_T=R-1": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.4893614595006144,
+   "cagr": 0.03801140625390853,
+   "mdd": -0.5037314678249107,
+   "sortino": 0.259591399006711,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.6235314881507996,
+   "excess_total_ret": -3.0221680680768346,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  },
+  "lag_T=R-3": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": -0.14683438491099032,
+   "cagr": -0.014762332470102058,
+   "mdd": -0.5974619842304065,
+   "sortino": 0.060617487197022854,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.8225053999604878,
+   "excess_total_ret": -3.658363912488439,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  },
+  "SC_win2": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.7142755794594091,
+   "cagr": 0.05177429379884946,
+   "mdd": -0.5823260652035094,
+   "sortino": 0.3092832953535514,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.5738395918039592,
+   "excess_total_ret": -2.7972539481180396,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  },
+  "SC_win4": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 0.008246759466303155,
+   "cagr": 0.0007694693790827323,
+   "mdd": -0.5605405004275843,
+   "sortino": 0.12160321543941509,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.7615196717180955,
+   "excess_total_ret": -3.503282768111146,
+   "bench_total_ret": 3.5115295275774487,
+   "same_direction": true
+  }
+ },
+ "gate7_holdings_report_only": {
+  "n15": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 1.2562305999139665,
+   "cagr": 0.07918455831973592,
+   "mdd": -0.5708493534037128,
+   "sortino": 0.40794420429518496,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.4751786828623257,
+   "excess_total_ret": -2.2552989276634823,
+   "bench_total_ret": 3.5115295275774487
+  },
+  "n25": {
+   "start": "2014-04-28",
+   "end": "2024-12-31",
+   "total_ret": 1.2947498616081754,
+   "cagr": 0.08089685494599319,
+   "mdd": -0.539128884560604,
+   "sortino": 0.42087215122260846,
+   "bench_sortino": 0.8831228871575106,
+   "sortino_diff": -0.4622507359349022,
+   "excess_total_ret": -2.2167796659692733,
+   "bench_total_ret": 3.5115295275774487
+  }
+ },
+ "gate7": {
+  "costs_pass": false,
+  "frequency_pass": true,
+  "plateau_pass": true,
+  "pass": false
+ },
+ "gate8_regimes": {
+  "reported": true,
+  "n_segments": 7
+ },
+ "gate9_free_params": {
+  "count": 5,
+  "list": [
+   "持股上限20",
+   "K=3",
+   "月頻",
+   "T+1月底落後",
+   "S_C 3月窗"
+  ],
+  "pass": true
+ },
+ "two_segment_consistency": {
+  "excess_2014_2019": -0.7503496012753355,
+  "excess_2020_2024": -0.838749762612568,
+  "excess_full": -2.746645030814822,
+  "pass": true
+ },
+ "verdict": "VIOLATES_SURVIVAL",
+ "first_failed_gate": "gate2_survival",
+ "first_failed_gate_name": "天條一",
+ "survivorship_disclaimer": "下市股缺漏，偏誤方向對策略有利，判讀從嚴；桶歸屬為當前名冊（stock_map），同樣有時點偏誤",
+ "elapsed_min": 6.552861154079437
+}

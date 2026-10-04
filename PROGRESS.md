@@ -1,3 +1,11 @@
+## 2026-10-05（互動視窗，先.十三-三 單發結案，研究／驗證帽）
+
+等待總司令審閱：45件（本輪新增「先.十三-三：#408 單發結果」一列）。
+
+**結果**：產業缺貨桶輪動單發（trial #409，事前登記 #408）判定 **VIOLATES_SURVIVAL**：全期 MDD -55.9%；Sortino 0.323 < 0050 0.883；總報酬 +76.5% vs +351%；隨機 3 桶對照 30/200 不輸策略；Bonferroni(N=411)與 DSR 全 V 情境未過；成本 2×/3× 近零/負；兩段超額皆負。已寫 STRATEGY_GRAVEYARD、重跑 selection_bias_ledger，不做參數重試，holdout 未動。檔案：research/industry_shortage_backtest.py、research/data/industry_shortage_result.json、TRIALS_*、STRATEGY_GRAVEYARD.md、AWAITING_REVIEW.md。[自行裁量]：流動性代理用 60 日成交金額均值（1 檔無價格檔、155 持股位排最後）；failed_gates 對映 gate2/gate4。
+
+先.十三-一（補洞）、先.十三-二（merge=union）已於先前完成。下一步：先.十四（見 PENDING_QUEUE）。
+
 ## 2026-10-03（互動視窗，先.十二 斷網後收尾，維運帽）
 
 等待總司令審閱：44件（本輪新增「先.十二-一 alpha-data 補洞回報」「先.十二-二 斷網項目重核」兩列）。
