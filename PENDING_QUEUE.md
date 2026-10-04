@@ -17418,6 +17418,8 @@ push 後停下等 Cowork 核對。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十三"。）
 
+> ⚠️ 下面這段已過時，現行版本見檔尾「先.十四（修訂版：加入紙.一 帳本防重複）」
+
 # 2026-10-05【先.十四：無聲停擺偵測＋股價預熱排程確認】（總司令裁示原文，動工前先寫入；排在先.十三 之後）
 
 【先.十四：無聲停擺偵測＋股價預熱排程確認】總司令 2026-10-05 同意。先寫進 PENDING_QUEUE，排在先.十三之後動工。
@@ -17431,3 +17433,18 @@ push 後停下等 Cowork 核對。
 - [ ] **先.十四-三 先.十一-二 照原順序（已由先.十三-三 承接，單發完成即併入）**
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十四"。）
+
+
+# 2026-10-05【先.十四（修訂版）：無聲停擺偵測＋股價預熱確認＋紙.一 帳本防重複】（總司令裁示原文，動工前先寫入；取代上方同名舊版）
+
+【先.十四：無聲停擺偵測＋股價預熱確認＋紙.一 帳本防重複】總司令 2026-10-05 同意。先寫進 PENDING_QUEUE，排在先.十三-三（#408 單發）之後動工，不得打斷單發。
+一、無聲停擺偵測：10/3 09:35～10/5 00:30 本機 Claude Code 登入過期約 39 小時，launcher 照常寫「佇列空／節流跳過」cycle log，告警未觸發。修法：所有呼叫 claude 的 launcher 偵測輸出中的登入過期（如「Login expired」「/login」）、額度用盡、認證錯誤，寫入心跳 status=AUTH_EXPIRED／QUOTA 並同步到 data/STATUS.json；local_schedule_watchdog 與 App 首頁讀到即顯示紅色橫幅「本機 Claude 需要重新登入」。另加規則：連續 3 小時沒有任何一筆實際執行（非節流／非佇列空）的 Claude 工作即告警。以注入假錯誤字串的自測驗證，冒煙測試附截圖。
+二、FinMind 預熱：回報目前財報與股價覆蓋率、預熱行程是否仍在跑；保證 1,930 檔股價在 2026-11-10 前完成，排程寫入 docs/LOCAL_SCHEDULED_TASKS.md。
+三、紙.一 帳本防重複：.gitattributes 移除 research/data/paper_7030_log.jsonl 的 merge=union（帳本需唯一性，其餘 7 個紀錄檔維持）；paper_7030_tracker.py 載入 log 時檢查 date+event 重複，發現重複即寫 last_error 與心跳 ERROR、不計算，不得自動刪除任何紀錄。補自測。
+紙.一 log 內容、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
+
+- [ ] **先.十四-一 無聲停擺偵測（launcher 偵測登入過期／額度／認證錯誤→心跳 status＋data/STATUS.json＋watchdog／App 紅色橫幅；連續 3 小時無實際執行告警；假錯誤字串自測＋冒煙測試截圖）**
+- [ ] **先.十四-二 FinMind 預熱覆蓋率回報＋1,930 檔股價 2026-11-10 前完成之排程（寫入 docs/LOCAL_SCHEDULED_TASKS.md）**
+- [ ] **先.十四-三 紙.一 帳本防重複（.gitattributes 移除 paper_7030_log.jsonl 的 merge=union；tracker 載入檢查 date+event 重複→last_error＋心跳 ERROR、不計算、不刪紀錄；補自測）**
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十四"。排在先.十三-三 之後，不打斷單發。）
