@@ -1,3 +1,32 @@
+## 2026-10-05（DevQueue cycle 20261005-004602，先.十四-一 部分完成，開發帽）
+
+等待總司令審閱：45件（本輪為持續進行中的開發項目，非卡在等裁示狀態，不計入此N；見`AWAITING_REVIEW.md`）。
+
+**背景**：本輪開工時發現同一 cycle_id 先前已有一次執行完成了「先.十三-三」全流程
+（FINAL 文件定稿、同家族相關係數查證、`register_trial()` 事前登記 #408、單發回測
+腳本撰寫與執行、結果登記 #409 判 VIOLATES_SURVIVAL、寫入 STRATEGY_GRAVEYARD），
+已 commit（`8b42dd8ea`、`654089b5f`）。本輪誤以為尚未完成而重做一次對照表相關係數
+查證（結果一致）與重跑單發回測（因 Windows multiprocessing spawn 問題
+`BrokenProcessPool` 失敗，未寫出新結果，未覆蓋既有 trial #409），**已撤回自己重複
+產生的 FINAL 文件草稿與重複的 trial #410 登記**（`git checkout` 還原，未污染帳本）。
+[自行裁量]：發現重複後選擇「驗證既有結果正確、撤回自己的重複動作」而非「覆蓋重做」，
+因為試驗帳本的唯一性比我個人的重新驗證更重要。
+
+**先.十四-一（無聲停擺偵測）完成部分**：新增 `scripts/claude_auth_classifier.py`
+（登入過期/額度字串分類，19個case自測全過）、`scripts/update_claude_launcher_heartbeat.py`
+（寫 `research/data/claude_launcher_heartbeat.json`）、`scripts/check_local_schedule_heartbeat.py`
+擴充 `claude_auth` 彙整區塊（AUTH_EXPIRED/QUOTA_EXCEEDED/STALLED_3H，3小時門檻）、
+`index.html` 新增 `#claude-auth-banner` 紅色橫幅。已接進 `C:\alpha\run-dev-queue-cycle.ps1`
+（這支腳本在 alpha-app repo 外，不受git控管，直接改本機檔案生效）。
+`scripts/selftest_claude_auth_detection.py` 19項全過，含注入假錯誤字串與守門員
+自己失敗（心跳檔不存在/壞JSON）兩類情境。冒煙測試 `node scripts/smoke_test.mjs`
+51項全過。
+
+**⛔ 未完成（留給下一輪）**：`run-marathon-cycle.ps1`／`run-hypothesis-queue-cycle.ps1`
+的 `$reason` 判定時序與 devqueue 不同（marathon 靠 `cycle_stats.py` 事後讀 jsonl
+判定 OK/BUDGET/ERROR），本輪未接；App 紅色橫幅未附截圖（需真的觸發情境或灌測試
+STATUS.json）。詳細狀態見 `PENDING_QUEUE.md` 先.十四-一 條目。
+
 ## 2026-10-05（互動視窗，先.十三-三 單發結案，研究／驗證帽）
 
 等待總司令審閱：45件（本輪新增「先.十三-三：#408 單發結果」一列）。

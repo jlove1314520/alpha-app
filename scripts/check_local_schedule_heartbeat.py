@@ -105,6 +105,67 @@ def _git_log(pattern: re.Pattern, max_scan: int = 2000) -> tuple[str, datetime] 
     return None, None
 
 
+# 2026-10-05（先.十四-一）：三支 claude -p launcher（devqueue/marathon/
+# hypothesis_queue）各自寫入的認證/額度心跳檔，見
+# scripts/update_claude_launcher_heartbeat.py docstring。research/data/ 整個
+# 被 .gitignore 蓋住，這個檔案只有在某支 wrapper 曾經 force-add 過才會出現在
+# 已 checkout 的 repo 裡，讀不到是正常初始狀態，不是錯誤。
+CLAUDE_AUTH_PATH = REPO_ROOT / "research" / "data" / "claude_launcher_heartbeat.json"
+CLAUDE_AUTH_STALL_HOURS = 3.0
+CLAUDE_AUTH_LAUNCHERS = ("devqueue", "marathon", "hypothesis_queue")
+
+
+def _evaluate_claude_auth(now: datetime) -> dict:
+    """讀三支 claude -p launcher 的心跳檔，判斷：①任一近況是 AUTH_EXPIRED／
+    QUOTA_EXCEEDED → 對應紅色橫幅；②任一超過 CLAUDE_AUTH_STALL_HOURS 小時
+    沒有「實際執行嘗試」（last_attempt_at，排除佇列空/交辦阻塞這類正常無為）
+    → STALLED_3H。偵測失敗（檔案不存在、格式錯）一律降級成 UNKNOWN，不拋例外
+    （十二節：守門員自己的失敗只能降級，不得讓這支監控腳本本身被拖垮）。"""
+    try:
+        if not CLAUDE_AUTH_PATH.exists():
+            return {"overall_status": "UNKNOWN", "detail": "心跳檔尚未產生（可能是三支launcher都還沒跑過一輪、或本機尚未force-add過）", "launchers": {}}
+        raw = json.loads(CLAUDE_AUTH_PATH.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::claude_auth心跳檔讀取失敗：{type(e).__name__}: {e}")
+        return {"overall_status": "UNKNOWN", "detail": f"讀取失敗：{type(e).__name__}: {e}", "launchers": {}}
+    launchers: dict[str, dict] = {}
+    overall = "OK"
+    reasons = []
+    for name in CLAUDE_AUTH_LAUNCHERS:
+        rec = raw.get(name) if isinstance(raw, dict) else None
+        if not isinstance(rec, dict):
+            launchers[name] = {"status": "NO_DATA"}
+            continue
+        last_reason = rec.get("last_reason")
+        attempt_at = rec.get("last_attempt_at")
+        hours_since_attempt = None
+        stalled_3h = False
+        if attempt_at:
+            try:
+                ts = datetime.fromisoformat(str(attempt_at))
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+                hours_since_attempt = (now - ts.astimezone(timezone.utc)).total_seconds() / 3600.0
+                stalled_3h = hours_since_attempt > CLAUDE_AUTH_STALL_HOURS
+            except Exception as e:  # noqa: BLE001
+                print(f"::warning::claude_auth時間戳解析失敗（{name}）：{type(e).__name__}: {e}")
+        status = last_reason if last_reason in ("AUTH_EXPIRED", "QUOTA_EXCEEDED") else ("STALLED_3H" if stalled_3h else "OK")
+        launchers[name] = {
+            "status": status, "last_reason": last_reason, "last_detail": rec.get("last_detail"),
+            "last_cycle_id": rec.get("last_cycle_id"), "last_attempt_at": attempt_at,
+            "last_ok_at": rec.get("last_ok_at"),
+            "hours_since_last_attempt": round(hours_since_attempt, 2) if hours_since_attempt is not None else None,
+        }
+        if status in ("AUTH_EXPIRED", "QUOTA_EXCEEDED"):
+            overall = status
+            reasons.append(f"{name}:{status}")
+        elif status == "STALLED_3H" and overall == "OK":
+            overall = "STALLED_3H"
+            reasons.append(f"{name}:STALLED_3H({launchers[name]['hours_since_last_attempt']}h)")
+    return {"overall_status": overall, "detail": "；".join(reasons) if reasons else "三支launcher皆正常",
+            "launchers": launchers, "checked_at": now.isoformat()}
+
+
 IBKR_QUOTES_PATH = REPO_ROOT / "data" / "quotes_ibkr.json"
 
 
@@ -161,11 +222,18 @@ def evaluate() -> dict:
     # 分開列出，不讓其中一個掩蓋另一個。
     track_stalled_names = [name for name, t in tracks.items() if t["track_stalled"]]
 
+    try:
+        claude_auth = _evaluate_claude_auth(now)
+    except Exception as e:  # noqa: BLE001 -- 十二節：新增的偵測邏輯自己失敗只能降級，不得拖垮既有停擺判定
+        print(f"::warning::claude_auth整體評估失敗：{type(e).__name__}: {e}")
+        claude_auth = {"overall_status": "UNKNOWN", "detail": f"評估失敗：{type(e).__name__}: {e}", "launchers": {}}
+
     return {
         "checked_at": now.isoformat(),
         "stall_threshold_minutes": STALL_THRESHOLD_MIN,
         "track_stall_threshold_minutes": TRACK_STALL_THRESHOLD_MIN,
         "tracks": tracks,
+        "claude_auth": claude_auth,
         "ibkr_quotes": {
             "last_commit_sha": ibkr_sha,
             "last_commit_at": ibkr_ts.isoformat() if ibkr_ts else None,
