@@ -1,0 +1,44 @@
+{
+ "threshold": 0.7,
+ "summary": {
+  "score406": {
+   "n_dates": 125,
+   "mean": 0.001,
+   "median": 0.004,
+   "min": -0.062,
+   "max": 0.063,
+   "max_abs_daily": 0.063,
+   "pooled_rank_corr": 0.001
+  },
+  "I5": {
+   "n_dates": 125,
+   "mean": 0.026,
+   "median": 0.022,
+   "min": -0.131,
+   "max": 0.311,
+   "max_abs_daily": 0.311,
+   "pooled_rank_corr": 0.027
+  },
+  "eps_sue": {
+   "n_dates": 125,
+   "mean": 0.034,
+   "median": 0.034,
+   "min": -0.147,
+   "max": 0.222,
+   "max_abs_daily": 0.222,
+   "pooled_rank_corr": 0.033
+  },
+  "revenue_sue": {
+   "n_dates": 125,
+   "mean": 0.058,
+   "median": 0.053,
+   "min": -0.113,
+   "max": 0.339,
+   "max_abs_daily": 0.339,
+   "pooled_rank_corr": 0.058
+  }
+ },
+ "stop_by_mean_abs_gt_0.7": [],
+ "any_daily_abs_gt_0.7": [],
+ "note": "個股層級逐日 Spearman；桶分數為 mapped 活躍股的所屬桶分數；不含任何報酬。"
+}
