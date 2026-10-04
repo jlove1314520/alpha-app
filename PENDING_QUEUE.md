@@ -17407,3 +17407,13 @@ push 後停下等 Cowork 核對。
 - [!] **先.十二-三 先.十一-二 續行**：BLOCKED 於 FinMind 財報預熱（涵蓋 23.68%，預計 10/4 00:13）；解除後照原順序：相關係數（|r|>0.7 停）→FINAL 登記 push→單發。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十二"。）
+
+# 2026-10-03【先.十三：alpha-data 補洞＋append-only 紀錄防遺失】（總司令裁示原文，動工前先寫入）
+
+【先.十三：alpha-data 補洞＋append-only 紀錄防遺失】總司令 2026-10-03 同意。先寫進 PENDING_QUEUE 再動工。一、alpha-data 補洞（總司令明示同意本次寫入 alpha.db；fetch.py／parsers.py／config.py 仍不得修改）：1. 更正缺口：9/28 為教師節休市非缺口；實際缺 daily_price／valuation／inst_trades 的 9/30、10/1、10/2（10/3 自然更新後再確認），taifex 自 9/25 起依交易日曆核對。2. 另寫獨立腳本 alpha-data/backfill_gap.py：只補缺日、只用 TWSE／TAIFEX 官方公開端點、遵守既有速率禮儀。3. 寫入前先備份 alpha.db（加日期後綴），先 dry-run 列出每表每日將新增筆數並與相鄰交易日筆數比對，合理才正式寫入；寫入後再核一次筆數，任何異常即從備份還原並回報。二、append-only 紀錄防遺失：對 repo 內追蹤的 append-only .jsonl 紀錄檔（至少 research/external_connectivity.jsonl、research/PROGRESS_HEARTBEAT.jsonl、research/dispatch_delay_log.jsonl，另列出其他同類檔）在 .gitattributes 加 merge=union；以兩個分支各 append 一行的測試確認合併後兩行都在。三、先.十一-二 照原順序：FinMind 財報預熱完成→相關係數（|r|>0.7 停）→FINAL 登記 push→單發。紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
+
+- [ ] **先.十三-一 alpha-data 補洞（backfill_gap.py，備份→dry-run→寫入→核對，異常即還原）**（修正：先.十二-一 所列 9/28 為教師節休市，非缺口）
+- [ ] **先.十三-二 append-only .jsonl 加 merge=union（.gitattributes）＋兩分支各 append 一行合併測試**
+- [!] **先.十三-三 先.十一-二 續行（同先.十二-三，等 FinMind 財報預熱完成）**
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十三"。）
