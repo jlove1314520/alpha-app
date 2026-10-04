@@ -17448,3 +17448,15 @@ push 後停下等 Cowork 核對。
 - [ ] **先.十四-三 紙.一 帳本防重複（.gitattributes 移除 paper_7030_log.jsonl 的 merge=union；tracker 載入檢查 date+event 重複→last_error＋心跳 ERROR、不計算、不刪紀錄；補自測）**
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十四"。排在先.十三-三 之後，不打斷單發。）
+
+# 2026-10-05【先.十五：供給緊縮命題移至美股——可行性盤點（只盤點，不計任何報酬）】（總司令裁示原文，動工前先寫入；排在先.十四 之後）
+
+【先.十五：供給緊縮命題移至美股——可行性盤點（只盤點，不計任何報酬）】總司令 2026-10-05 同意。先寫進 PENDING_QUEUE，排在先.十四之後動工。
+一、資料盤點（全部走 SEC 官方免費管道，遵守 SEC 流量禮儀：含 User-Agent、≤10 請求／秒）：1. EDGAR XBRL Frames／Company Facts API 能否取得 2010 起全體美股的：合約負債（ContractWithCustomerLiabilityCurrent 與 IFRS15 前的 DeferredRevenueCurrent）、存貨、銷貨成本、毛利、資本支出（PaymentsToAcquirePropertyPlantAndEquipment）、營收；逐欄位記錄覆蓋率（有值公司數／全體）、起始年度。2. PIT：確認每筆數值可對應到 10-Q／10-K 的 acceptance datetime（EDGAR full-index 或 submissions API），列出取得方式與樣本驗證 20 筆。3. 宇宙與價格：美股普通股宇宙（排除 ADR／ETF／SPAC／金融）、下市股價格來源（repo 既有 US 來源逐一列可否覆蓋下市股）、基準（SPY 或 VTI 還原）、無風險利率（3M T-bill）。4. 既有 US 試驗盤點：TRIALS_LEDGER／GRAVEYARD 中美股供給緊縮、合約負債、存貨週轉類試驗，列最接近編號與結果。
+二、輸出 docs/FEASIBILITY_us_supply_tightness.md：每項資料「可及／部分可及／不可及」與缺口；不可及者如實記錄不繞牆。至少 I1～I4 中 3 項可及且 PIT 可得時，另擬 docs/PREREG_DRAFT_us_supply_tightness.md：指標定義逐字沿用 PREREG_supply_tightness_FINAL（美股科目對應表附依據）、12 個月價格落後池、季頻、前 20 檔等權、判準沿用 §4(d) 全部關卡（基準改 SPY），未定處標〔待總司令確認〕。不得計算任何報酬。
+三、先.十四 三項照舊；紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
+
+- [ ] **先.十五-一 SEC XBRL 資料盤點（合約負債／存貨／銷貨成本／毛利／資本支出／營收 逐欄覆蓋率與起始年度；PIT acceptance datetime 取得方式＋20 筆樣本驗證；宇宙／下市股價格／SPY 或 VTI／3M T-bill；既有 US 試驗盤點）**
+- [ ] **先.十五-二 輸出 docs/FEASIBILITY_us_supply_tightness.md；若 I1～I4 至少 3 項可及且 PIT 可得→另擬 docs/PREREG_DRAFT_us_supply_tightness.md（不計任何報酬，未定處標〔待總司令確認〕）**
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十五"。排在先.十四 之後。）
