@@ -1,3 +1,13 @@
 # 2026-10-01 先.六-二：文件一律以 LF 存入／取出，避免 Windows 文字模式寫檔把整份轉成 CRLF（1.5MB 假 diff）
 *.md text eol=lf
 .gitattributes text eol=lf
+
+# 2026-10-03 先.十三-二：append-only 紀錄檔合併時取兩邊聯集，避免 rebase／merge 衝突時整批遺失
+research/external_connectivity.jsonl merge=union
+research/PROGRESS_HEARTBEAT.jsonl merge=union
+research/dispatch_delay_log.jsonl merge=union
+research/twse_publish_probe.jsonl merge=union
+research/data/adjustment_anomaly_warnings.jsonl merge=union
+research/data/paper_7030_log.jsonl merge=union
+data/factory_stability_history.jsonl merge=union
+data/moea_pit/manifest.jsonl merge=union
