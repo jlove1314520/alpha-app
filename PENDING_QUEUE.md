@@ -17460,3 +17460,17 @@ push 後停下等 Cowork 核對。
 - [ ] **先.十五-二 輸出 docs/FEASIBILITY_us_supply_tightness.md；若 I1～I4 至少 3 項可及且 PIT 可得→另擬 docs/PREREG_DRAFT_us_supply_tightness.md（不計任何報酬，未定處標〔待總司令確認〕）**
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十五"。排在先.十四 之後。）
+
+# 2026-10-05【先.十六：單發防撞＋中間檔可重現】（總司令裁示原文，動工前先寫入；排在先.十四、先.十五 之後）
+
+【先.十六：單發防撞＋中間檔可重現】總司令 2026-10-05 同意。先寫進 PENDING_QUEUE，排在先.十四、先.十五之後。
+一、單發防撞：PENDING_QUEUE 中標「單發」「只跑一次」或「互動視窗」的條目，互動視窗開工前先在該條目追加「〔互動視窗執行中 YYYY-MM-DD HH:MM〕」並 commit＋push；Marathon／DevQueue／Hypothesis-queue 讀到此標記一律跳過，並在 cycle log 記「讓行」。完成或中止時由互動視窗移除標記。以 10/5 01:xx 的 #409 撞車為測試案例，寫一個模擬測試確認排程會跳過。
+二、中間檔可重現：單發回測所依賴、不進 repo 的中間檔（如 research/data/*liquidity*.pkl、panel 檔），執行時記錄每個檔的 SHA256、建置時間、建置腳本與參數到 result.json 的 inputs 欄；#409 事後補記目前本機檔的 SHA256（標明為事後補記）。
+三、先.十四-一 補齊「連續 3 小時無實際執行即告警」規則；先.十四-二／三、先.十五 照舊。
+紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
+
+- [ ] **先.十六-一 單發防撞（「〔互動視窗執行中 YYYY-MM-DD HH:MM〕」標記：互動視窗開工前追加並 commit＋push，三條自走軌道讀到即跳過並在 cycle log 記「讓行」，完成／中止時移除；以 #409 撞車為案例寫模擬測試）**
+- [ ] **先.十六-二 中間檔可重現（單發 runner 執行時把不進 repo 的中間檔 SHA256／建置時間／建置腳本與參數寫入 result.json 的 inputs 欄；#409 事後補記本機檔 SHA256，標明事後補記）**
+- [ ] **先.十六-三 先.十四-一 補齊「連續 3 小時無實際執行即告警」規則（先.十四-二／三、先.十五 照舊）**
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十六"。排在先.十四、先.十五 之後。）
