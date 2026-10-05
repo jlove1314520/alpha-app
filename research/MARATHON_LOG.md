@@ -20,6 +20,8 @@
   （凍結.二仍生效）。佇列`- [ ]`現6項（含先.十四舊版重複）、`- [!]`19項，凍結.二期間
   不強制補到MIN_QUEUE_DEPTH=12。
 
+## 2026-10-06 00:21 — hypothesis_queue 心跳模式，#82 暫停，未開新軸 — 交辦 10 條皆〔互動視窗執行中〕讓行，無新工作
+
 ## 2026-10-05T15:22+0800 — hypothesis_queue 心跳模式，#82 暫停，未開新軸；做交辦先.十七-五（部分） — Shioaji 10/5 13:45 connected=true／48檔REALTIME_TICK 佐證，dispatch_delay 未達3日故標[!]；先.十七-一～四 互動視窗 BLOCKED 讓行；交辦佇列剩4條未開始；is_holdout_consumed 未動
 
 ## 2026-10-05T13:30+0800 — hypothesis_queue 心跳模式，#82 暫停，未開新軸；做交辦先.十四-二 — FinMind預熱覆蓋率100%(5790/5790)，排程寫入LOCAL_SCHEDULED_TASKS第七節；先.十四-三互動視窗進行中，讓行；交辦佇列剩6條未開始
