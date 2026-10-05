@@ -227,3 +227,17 @@ Select-Object -ExpandProperty Triggers`確認`StartBoundary`是15:00、
 `Repetition`間隔30分鐘、時長19小時。**在拿到至少三個交易日的實測結果
 之前，不要調整`market.yml`的cron，也不要猜發布時間是幾點**（總司令
 原話明令，見`PENDING_QUEUE.md`）。
+
+## 七、`AlphaFinMindWarmup`（2026-10-05，先.十四-二）
+
+**實測（2026-10-05 13:07 `research/data/finmind_warmup_status.json`）**：宇宙 1,930 檔；
+財報三種資料集 5790/5790 檔、價格家族（日價／股利／減資）5790/5790 檔，覆蓋率皆 100%，待補呼叫 0 次，
+最後一輪停止原因 `no_more_tasks`。**「1,930 檔股價 2026-11-10 前完成」的目標已提前達成**，不需要額外趕工。
+誠實註記：覆蓋率算的是「檔案存在」；其中財報 5408 個、價格 3288 個檔案內容非空，其餘是 FinMind 該檔該資料集本來就回空
+（例如無股利或減資事件、2025-01 前未上市），不是漏抓。
+
+**排程**：工作名稱 `AlphaFinMindWarmup`（狀態 Ready），每 15 分鐘一輪，腳本 `scripts/run_finmind_warmup.ps1`
+→ `research/finmind_warmup.py`。之後進入「保鮮」階段（P3：缺目標季財報檔者優先抓）。
+用量上限：滾動 1 小時 450 次（官方免費註冊額度 600 次，留 150 給其他排程）。
+**回報頻率**：覆蓋率維持 100% 期間不再逐輪回報；只有覆蓋率下降或 `blocked=true` 才回報。
+查看：`python research/finmind_warmup.py --status`。
