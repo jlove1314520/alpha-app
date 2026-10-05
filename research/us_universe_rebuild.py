@@ -65,6 +65,9 @@ NONCOMMON_PAT = re.compile(
     r"depositary\s+share|subordinat|trust\s+preferred|contingent\s+value", re.I)
 
 
+ROW_RE = re.compile(r"^(\S+)\s+(.*?)\s+(\d+)\s+(\d{4}-\d{2}-\d{2})\s+(edgar/\S+)\s*$")
+
+
 def get(url: str, cache: Path, binary: bool = False):
     if cache.exists():
         try:
@@ -100,17 +103,13 @@ def scan_index() -> dict:
             continue
         n25 = 0
         for line in txt.splitlines():
-            # 固定欄寬：Form Type(12) Company Name(62) CIK(12) Date Filed(12) File Name
-            if len(line) < 98 or not line[:12].strip():
+            # 不用固定欄寬：form.idx 的資料列欄位起點與表頭不一致（實測 2024Q1：
+            # 表頭說 Date Filed 在 86，實際資料從 91 開始），硬切會整份解析不到。
+            m = ROW_RE.match(line)
+            if not m:
                 continue
-            ft = line[:12].strip()
+            ft, name, cik_s, dt, fn = m.group(1), m.group(2).strip(), m.group(3), m.group(4), m.group(5)
             if ft not in ("25", "25-NSE", "10-K", "10-Q", "10-K/A", "10-Q/A"):
-                continue
-            name = line[12:74].strip()
-            cik_s = line[74:86].strip()
-            dt = line[86:98].strip()
-            fn = line[98:].strip()
-            if not cik_s.isdigit() or len(dt) != 10:
                 continue
             cik = int(cik_s)
             all_ciks.add(cik)
@@ -128,7 +127,20 @@ def scan_index() -> dict:
 
 # ───────── 步驟2：Form 25 證券類別 ─────────
 SEC_CLASS_RE = re.compile(r"<securityClassTitle>(.*?)</securityClassTitle>", re.I | re.S)
-DESC_RE = re.compile(r"<description>(.*?)</description>", re.I | re.S)
+# 2010～2010 年代中期的 Form 25 不是 XML，是 EDGARizer 產的 HTML：證券類別寫在
+# 「(Description of class of securities)」這行說明文字的**正前方**。實測三筆 2010 年的
+# 件都是這個形狀（例：「… principal executive offices) Common Stock (Description of
+# class of securities)」）。純字串比對，抓不到就回空並標 parsed=False，不臆測。
+DESC_BEFORE_RE = re.compile(r"([^)（]{1,150})\(\s*Description\s+of\s+(?:the\s+)?class\s+of\s+securities", re.I)
+TAG_RE = re.compile(r"<[^>]+>")
+ENT_RE = re.compile(r"&#\d+;|&[a-zA-Z]+;")
+
+
+def _plain_text(raw: str) -> str:
+    body = raw.split("<TEXT>", 1)[-1]
+    t = TAG_RE.sub(" ", body)
+    t = ENT_RE.sub(" ", t)
+    return re.sub(r"\s+", " ", t).strip()
 
 
 def form25_classes(items: list[dict], limit: int | None = None) -> dict:
@@ -143,13 +155,16 @@ def form25_classes(items: list[dict], limit: int | None = None) -> dict:
             out[acc] = {"error": "fetch_failed"}
             continue
         titles = [re.sub(r"\s+", " ", t).strip() for t in SEC_CLASS_RE.findall(txt)]
+        src = "securityClassTitle"
         if not titles:
-            titles = [re.sub(r"\s+", " ", t).strip() for t in DESC_RE.findall(txt)][:5]
-        blob = " | ".join(titles)[:500]
+            titles = [m.strip(" .,;:-–—") for m in DESC_BEFORE_RE.findall(_plain_text(txt))]
+            titles = [t for t in titles if t]
+            src = "html_description_of_class"
+        blob = " | ".join(titles)[:1000]
         is_common = bool(COMMON_PAT.search(blob)) and not _only_noncommon(titles)
         out[acc] = {"cik": it["cik"], "date": it["date"], "form": it["form"],
                     "titles": titles[:8], "is_common": is_common,
-                    "parsed": bool(titles)}
+                    "parsed": bool(titles), "src": src}
         if i % 500 == 0:
             print(f"  Form25 {i}/{len(todo)} …", flush=True)
     return out
