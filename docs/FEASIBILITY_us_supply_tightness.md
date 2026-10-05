@@ -26,6 +26,37 @@ CLAUDE.md「Cowork／任何人提出的數字，程式重算驗證前不得當�
 > 但書改為「下市股無價格，一律視為全損」，原「7.1%」措辭作廢。
 > 本節以下的原文保留供稽核，記錄的是**修復前**的狀態。
 
+## 0a. 最終結論（總司令 2026-10-05【先.二十二】一裁定結案）
+
+# 資料不可及：下市股代號解析 10／60（16.7%），Stooq 為驗證牆
+
+**美股供給緊縮線到此結案**，不進入先.十七 的事前登記與單發。這不是策略 FAIL——
+策略從未被檢定；是**取得不到做出可信判定所需的資料**，屬「資料不可及」。
+
+| 查證路徑 | 結果 |
+|---|---|
+| 路徑1 `submissions.tickers` | 已下市者一律為空（SEC 只列現用代號） |
+| 路徑2 Form 25 本文括號代號 | 2／60 |
+| 路徑3 下市前最後一份 10-K／10-Q 封面頁 | 8／60（13.3%） |
+| 路徑4 Stooq 公開代號清單 | **不可及**：三端點全為「This site requires JavaScript」驗證牆，連 aapl.us 亦然；依取得方式鐵律不繞牆 |
+| **四路合併** | **10／60（16.7%）** |
+
+**為什麼這一項足以否決整條線**：沒有代號就無法向任何價格源發問，
+83.3% 的已下市股連「有沒有價格」都問不出來。存活者偏誤（CLAUDE.md 偽影家族⑦
+「最貴的一個」）因此無法以任何保守規則消除——【先.十八】四的「無價格一律 −100%」
+只能處理「知道是哪一檔、但拿不到價」，處理不了「根本不知道是哪一檔」。
+
+**仍然留下的資產**（本輪建置，日後任何美股研究可直接沿用）：
+
+- `research/data/us_universe_pit.json` v2：21,315 家歷史申報人，2010–2024 下市 4,996 家（未過濾），
+  含 `first_periodic_report`／`last_periodic_report`／`stopped_filing`。
+- `research/data/us_sic_universe.json`：全名冊 SIC／ticker／formerNames（先.十八-二）。
+- `research/data/us_benchmark_spy.parquet`、`us_rf_dtb3.parquet`：美股原生源基準與無風險利率。
+- `research/sec_rate_limiter.py`：跨行程共用的 SEC 限速器。
+
+> 下列 §0b～§6 為結案前的完整查證過程，全部保留供稽核。
+
+---
 ## 0b. 先.十八 母體重建結果（2026-10-05 完成，取代 §0 更正一所述的「修復前」狀態）
 
 腳本 `research/us_universe_rebuild.py`；報告 `research/data/us_universe_rebuild_report.json`。

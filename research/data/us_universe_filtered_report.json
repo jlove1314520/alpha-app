@@ -1,0 +1,90 @@
+{
+ "filtered_universe_total": 12053,
+ "excluded": {
+  "financial_6000_6799": 5187,
+  "spac_6770": 1539,
+  "foreign_20f_40f": 0,
+  "no_sic": 364,
+  "no_periodic_report": 2172
+ },
+ "by_year": {
+  "2010": {
+   "universe_in_year": 6929,
+   "delisted_in_year": 175,
+   "stopped_filing_in_year": 466
+  },
+  "2011": {
+   "universe_in_year": 6787,
+   "delisted_in_year": 195,
+   "stopped_filing_in_year": 526
+  },
+  "2012": {
+   "universe_in_year": 6501,
+   "delisted_in_year": 185,
+   "stopped_filing_in_year": 424
+  },
+  "2013": {
+   "universe_in_year": 6308,
+   "delisted_in_year": 170,
+   "stopped_filing_in_year": 363
+  },
+  "2014": {
+   "universe_in_year": 6226,
+   "delisted_in_year": 147,
+   "stopped_filing_in_year": 421
+  },
+  "2015": {
+   "universe_in_year": 6039,
+   "delisted_in_year": 184,
+   "stopped_filing_in_year": 432
+  },
+  "2016": {
+   "universe_in_year": 5693,
+   "delisted_in_year": 214,
+   "stopped_filing_in_year": 350
+  },
+  "2017": {
+   "universe_in_year": 5419,
+   "delisted_in_year": 181,
+   "stopped_filing_in_year": 303
+  },
+  "2018": {
+   "universe_in_year": 5198,
+   "delisted_in_year": 162,
+   "stopped_filing_in_year": 244
+  },
+  "2019": {
+   "universe_in_year": 5057,
+   "delisted_in_year": 175,
+   "stopped_filing_in_year": 255
+  },
+  "2020": {
+   "universe_in_year": 4947,
+   "delisted_in_year": 150,
+   "stopped_filing_in_year": 191
+  },
+  "2021": {
+   "universe_in_year": 5234,
+   "delisted_in_year": 137,
+   "stopped_filing_in_year": 145
+  },
+  "2022": {
+   "universe_in_year": 5182,
+   "delisted_in_year": 173,
+   "stopped_filing_in_year": 177
+  },
+  "2023": {
+   "universe_in_year": 4989,
+   "delisted_in_year": 258,
+   "stopped_filing_in_year": 222
+  },
+  "2024": {
+   "universe_in_year": 4676,
+   "delisted_in_year": 237,
+   "stopped_filing_in_year": 198
+  }
+ },
+ "generated_at": "2026-10-05T23:48:42+08:00",
+ "note": "排除金融 SIC 6000–6799（含 SPAC 6770）與僅申報 20-F／40-F 的外國發行人；逐年母體以 first_periodic_report 為起點、delisted_at／stopped_filing_since 為終點，避免把後來才 IPO 的公司算進早年。**SIC 取自 submissions 端點，是最近一次申報時的分類，非時點資料**（存活者為今日分類、已下市者為當年分類，年份混雜），見 FEASIBILITY 揭露。",
+ "app_file_untouched": ".github/scripts/fetch_us_sic.py 與 data/us_sic.json 刻意維持 9 檔不動，理由見 research/us_sic_universe_fetch.py 檔頭 [自行裁量]"
+}
