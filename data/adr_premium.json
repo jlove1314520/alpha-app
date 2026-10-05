@@ -1,40 +1,30 @@
 {
-  "computed_at": "2026-10-05T17:02:08+00:00",
+  "computed_at": "2026-10-05T23:06:16+00:00",
   "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
       "ratio": 5,
       "source": "SEC EDGAR 20-F CIK 1046179；1 ADS＝5股普通股（1997年掛牌以來未變）",
-      "us_price": 484.13,
-      "us_quote_time": 1791219711,
+      "us_price": 485.8,
+      "us_quote_time": 1791230400,
       "tw_price": 2575.0,
       "tw_quote_time": "13:30:00",
       "tw_quote_date": "20261005",
-      "fx_rate": 31.83,
-      "fx_date": "2026-10-02",
-      "implied_tw_price": 3081.972,
-      "premium_pct": 19.688
-    },
-    "ASX": {
-      "tw_code": "3711",
-      "ratio": 2,
-      "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
-      "us_price": 47.38,
-      "us_quote_time": 1791219712,
-      "tw_price": 742.0,
-      "tw_quote_time": "13:30:00",
-      "tw_quote_date": "20261005",
-      "fx_rate": 31.83,
-      "fx_date": "2026-10-02",
-      "implied_tw_price": 754.053,
-      "premium_pct": 1.624
+      "fx_rate": 31.788,
+      "fx_date": "2026-10-05",
+      "implied_tw_price": 3088.522,
+      "premium_pct": 19.943
     }
   },
   "errors": [
     {
       "ticker": "UMC",
       "reason": "台股 2303 報價缺失"
+    },
+    {
+      "ticker": "ASX",
+      "reason": "台股 3711 報價缺失"
     },
     {
       "ticker": "CHT",
