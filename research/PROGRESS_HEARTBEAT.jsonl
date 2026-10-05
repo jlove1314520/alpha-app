@@ -479,3 +479,4 @@
 {"ts": "2026-10-05T15:40:00+08:00", "track": "interactive", "round": "先.十八", "item": "先.十八-六 完成：AWAITING_REVIEW 等待中 49→3 列（三個例外另立專列），48 列移入已審區", "status": "OK"}
 {"ts": "2026-10-05T15:45:00+08:00", "track": "interactive", "round": "先.十八", "item": "先.十八-三 完成：SPY 改走 yfinance Adj Close（4465筆）＋FRED DTB3（4440筆）建快取，停用 FinMind USStockPrice", "status": "OK"}
 {"ts": "2026-10-05T16:30:00+08:00", "track": "marathon", "round": "维運-讓行", "item": "先.十八-一/二/四/五由互動視窗執行中讓行；先.十九依序排在先.十八-一/二之後（前置名冊未建好），本輪無可做項目；凍結.二下佇列補件不得補新alpha試驗", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl"]}
+{"ts": "2026-10-05T17:15:00+08:00", "track": "dev_queue", "round": "20261005-170101", "item": "先.十九-一~四 前置未備（先.十八-一 名冊重建執行中）標BLOCKED；先.十一-二/先.十二-三 殘留[!]改[x]；凍結.二下無可補件", "artifacts_changed": ["PENDING_QUEUE.md", "PROGRESS.md", "research/PROGRESS_HEARTBEAT.jsonl"]}
