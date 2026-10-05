@@ -146,12 +146,22 @@ def scan_index() -> dict:
 
 
 # ───────── 步驟2：Form 25 證券類別 ─────────
-SEC_CLASS_RE = re.compile(r"<securityClassTitle>(.*?)</securityClassTitle>", re.I | re.S)
+SEC_CLASS_RE = re.compile(r"<(?:securityClassTitle|descriptionClassSecurity)>(.*?)"
+                          r"</(?:securityClassTitle|descriptionClassSecurity)>", re.I | re.S)
+# 25-NSE 由交易所代為申報，XML 裡 <issuer><cik> 才是被下市的公司；form.idx 那一列
+# 記到的可能是交易所自己的 CIK（實測 NYSE＝876661 重複出現數百次）。不取 issuer CIK
+# 會把所有交易所代申報的下市事件全部記到交易所頭上，等於整批遺失。
+ISSUER_CIK_RE = re.compile(r"<issuer>.*?<cik>\s*(\d+)\s*</cik>", re.I | re.S)
 # 2010～2010 年代中期的 Form 25 不是 XML，是 EDGARizer 產的 HTML：證券類別寫在
 # 「(Description of class of securities)」這行說明文字的**正前方**。實測三筆 2010 年的
 # 件都是這個形狀（例：「… principal executive offices) Common Stock (Description of
 # class of securities)」）。純字串比對，抓不到就回空並標 parsed=False，不臆測。
-DESC_BEFORE_RE = re.compile(r"([^)（]{1,150})\(\s*Description\s+of\s+(?:the\s+)?class\s+of\s+securities", re.I)
+DESC_MARK_RE = re.compile(r"\(\s*Description\s+of\s+(?:the\s+)?class(?:es)?\s+of\s+securit", re.I)
+# Form 25 的固定句型是：「…of Issuer's principal executive offices) <證券類別> (Description
+# of class of securities)」。**不能用「不含右括號」去界定證券類別**——證券名稱本身常帶括號
+# （實測 2024 年件：「Arrow Dow Jones Global Yield ETF (GYLD)」），那樣會擷到空字串，
+# 這正是第一版 15,238 筆只解析出 1,663 筆（10.9%）的原因。改成往回找地址欄的結尾。
+ADDR_END_RE = re.compile(r"(?:principal\s+executive\s+offices|executive\s+offices|offices)\s*\)", re.I)
 TAG_RE = re.compile(r"<[^>]+>")
 ENT_RE = re.compile(r"&#\d+;|&[a-zA-Z]+;")
 
@@ -163,6 +173,24 @@ def _plain_text(raw: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+def _titles_from_html(txt: str) -> list[str]:
+    """從去標籤後的 Form 25 內文取證券類別：以「(Description of class of securities)」
+    為右界，往回切到地址欄結尾「…executive offices)」為左界；找不到左界時退回取前
+    150 字。抓不到就回空清單並讓呼叫端標 parsed=False，不臆測。"""
+    out = []
+    for m in DESC_MARK_RE.finditer(txt):
+        win = txt[max(0, m.start() - 300):m.start()]
+        a = None
+        for am in ADDR_END_RE.finditer(win):
+            a = am
+        seg = win[a.end():] if a else win[-150:]
+        seg = re.sub(r"_{3,}|-{3,}", " ", seg)
+        seg = re.sub(r"\s+", " ", seg).strip(" .,;:-–—()")
+        if seg:
+            out.append(seg[:200])
+    return out
+
+
 def _one_form25(it: dict) -> tuple[str, dict]:
     acc = Path(it["file"]).name.replace(".txt", "")
     txt = get(f"https://www.sec.gov/Archives/{it['file']}", F25 / f"{acc}.txt.gz")
@@ -170,14 +198,14 @@ def _one_form25(it: dict) -> tuple[str, dict]:
         return acc, {"cik": it["cik"], "date": it["date"], "form": it["form"],
                      "error": "fetch_failed", "parsed": False, "is_common": False}
     titles = [re.sub(r"\s+", " ", t).strip() for t in SEC_CLASS_RE.findall(txt)]
-    src = "securityClassTitle"
+    src = "xml_class_tag"
     if not titles:
-        titles = [m.strip(" .,;:-–—") for m in DESC_BEFORE_RE.findall(_plain_text(txt))]
-        titles = [t for t in titles if t]
+        titles = _titles_from_html(_plain_text(txt))
         src = "html_description_of_class"
+    issuers = sorted({int(c) for c in ISSUER_CIK_RE.findall(txt)})
     blob = " | ".join(titles)[:1000]
     is_common = bool(COMMON_PAT.search(blob)) and not _only_noncommon(titles)
-    return acc, {"cik": it["cik"], "date": it["date"], "form": it["form"],
+    return acc, {"cik": it["cik"], "issuer_ciks": issuers, "date": it["date"], "form": it["form"],
                  "titles": titles[:8], "is_common": is_common,
                  "parsed": bool(titles), "src": src}
 
@@ -241,21 +269,38 @@ def build(state: dict) -> None:
     names = {int(k): v for k, v in state["names"].items()}
     # 現有 ticker 對照（只用來補 ticker 欄，不決定母體）
     tick = {}
-    old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
-    if old and not OUT_V1_BAK.exists():
-        OUT_V1_BAK.write_text(json.dumps(old, ensure_ascii=False), encoding="utf-8")
+    cur = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
+    if cur and cur.get("schema") != "v2" and not OUT_V1_BAK.exists():
+        OUT_V1_BAK.write_text(json.dumps(cur, ensure_ascii=False), encoding="utf-8")
         print(f"  舊版已備份至 {OUT_V1_BAK.name}（不刪除、不覆蓋）", flush=True)
+    # ticker 對照一律讀 v1 備份：v2 的 universe 以 CIK 為鍵，沒有 ticker 鍵，
+    # 若誤讀 v2 會讓 ticker 查找全數落空（第一版驗證表因此 12 檔全報錯）。
+    old = json.loads(OUT_V1_BAK.read_text(encoding="utf-8")) if OUT_V1_BAK.exists() else cur
     for t, v in (old.get("universe") or {}).items():
         if v.get("cik"):
             tick.setdefault(int(v["cik"]), t)
     # 普通股下市事件：每個 CIK 取最早的一次普通股 Form 25
     delisted = {}
+    # 候選：每個 CIK 的所有「普通股 Form 25」日期
+    cand: dict[int, list[str]] = {}
     for v in cls.values():
         if not v.get("is_common"):
             continue
-        c = int(v["cik"])
-        if c not in delisted or v["date"] < delisted[c]:
-            delisted[c] = v["date"]
+        # 25-NSE 由交易所代申報，真正下市的是 <issuer><cik>；有 issuer 就以它為準
+        for c in (v.get("issuer_ciks") or [int(v["cik"])]):
+            cand.setdefault(int(c), []).append(v["date"])
+    # **交易所轉板不是下市**：公司從 NYSE 轉 Nasdaq 也要申報普通股的 Form 25，
+    # 但它仍在市、而且continues 繼續申報 10-K／10-Q（實測 PEP 2017、HON 2021、
+    # WMT 2025 都是這種情形，第一版把這三檔誤標成下市）。判別方式：真正下市的
+    # 公司會停止申報定期報告。取「最早的、且其後 GRACE_DAYS 天內不再有定期報告」
+    # 的那一次 Form 25 當下市日；都不符合就不算下市。
+    GRACE_DAYS = 180
+    for c, dates in cand.items():
+        lr = last_report.get(c)
+        for d in sorted(dates):
+            if lr is None or (date.fromisoformat(lr) - date.fromisoformat(d)).days <= GRACE_DAYS:
+                delisted[c] = d
+                break
     today = date.today()
     uni = {}
     for cik in state["all_ciks"]:
@@ -305,7 +350,9 @@ def build(state: dict) -> None:
                       "ok_not_delisted": bool(r and r["status"] != "delisted")}
     sample = []
     for cikv, dt in sorted(delisted.items(), key=lambda kv: kv[1])[:20]:
-        a = next((k for k, v in cls.items() if int(v.get("cik", -1)) == cikv and v.get("is_common")), None)
+        a = next((k for k, v in cls.items()
+                  if v.get("is_common") and v.get("date") == dt
+                  and cikv in [int(x) for x in (v.get("issuer_ciks") or [v.get("cik", -1)])]), None)
         sample.append({"cik": cikv, "name": names.get(cikv, ""), "delisted_at": dt,
                        "titles": cls.get(a, {}).get("titles"),
                        "form25_url": f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cikv}&type=25&dateb=&owner=include&count=40"})

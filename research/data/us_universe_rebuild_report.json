@@ -1,0 +1,326 @@
+{
+ "generated_at": "2026-10-05T17:49:33+08:00",
+ "counts": {
+  "total": 21315,
+  "active": 7931,
+  "delisted": 5728,
+  "stopped_filing": 7656
+ },
+ "by_year": {
+  "2010": {
+   "delisted": 328,
+   "stopped_filing": 713
+  },
+  "2011": {
+   "delisted": 299,
+   "stopped_filing": 812
+  },
+  "2012": {
+   "delisted": 326,
+   "stopped_filing": 663
+  },
+  "2013": {
+   "delisted": 288,
+   "stopped_filing": 601
+  },
+  "2014": {
+   "delisted": 266,
+   "stopped_filing": 581
+  },
+  "2015": {
+   "delisted": 302,
+   "stopped_filing": 652
+  },
+  "2016": {
+   "delisted": 361,
+   "stopped_filing": 533
+  },
+  "2017": {
+   "delisted": 307,
+   "stopped_filing": 471
+  },
+  "2018": {
+   "delisted": 288,
+   "stopped_filing": 410
+  },
+  "2019": {
+   "delisted": 276,
+   "stopped_filing": 420
+  },
+  "2020": {
+   "delisted": 248,
+   "stopped_filing": 314
+  },
+  "2021": {
+   "delisted": 283,
+   "stopped_filing": 282
+  },
+  "2022": {
+   "delisted": 443,
+   "stopped_filing": 323
+  },
+  "2023": {
+   "delisted": 577,
+   "stopped_filing": 389
+  },
+  "2024": {
+   "delisted": 404,
+   "stopped_filing": 319
+  },
+  "2025": {
+   "delisted": 420,
+   "stopped_filing": 173
+  },
+  "2026": {
+   "delisted": 312,
+   "stopped_filing": 0
+  }
+ },
+ "check_12_large_caps_must_not_be_delisted": {
+  "AAPL": {
+   "cik": 320193,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "WMT": {
+   "cik": 104169,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "IBM": {
+   "cik": 51143,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "PG": {
+   "cik": 80424,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "V": {
+   "cik": 1403161,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "PEP": {
+   "cik": 77476,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "UPS": {
+   "cik": 1090727,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "FDX": {
+   "cik": 1048911,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "LLY": {
+   "cik": 59478,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "AMGN": {
+   "cik": 318154,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "HON": {
+   "cik": 773840,
+   "status": "active",
+   "ok_not_delisted": true
+  },
+  "TMO": {
+   "cik": 97745,
+   "status": "active",
+   "ok_not_delisted": true
+  }
+ },
+ "sample_20_delisted_for_manual_audit": [
+  {
+   "cik": 1103126,
+   "name": "Towers Watson Delaware Inc.",
+   "delisted_at": "2010-01-04",
+   "titles": [
+    "Class A Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1103126&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 793279,
+   "name": "CANDELA CORP /DE/",
+   "delisted_at": "2010-01-05",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=793279&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1065648,
+   "name": "TBS INTERNATIONAL LTD",
+   "delisted_at": "2010-01-07",
+   "titles": [
+    "Common Stock Class A"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1065648&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 763730,
+   "name": "GALLERY OF HISTORY INC",
+   "delisted_at": "2010-01-08",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=763730&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1042521,
+   "name": "Sun American Bancorp",
+   "delisted_at": "2010-01-08",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1042521&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1010610,
+   "name": "TLC VISION CORP",
+   "delisted_at": "2010-01-08",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1010610&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 847935,
+   "name": "ALLION HEALTHCARE INC",
+   "delisted_at": "2010-01-13",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=847935&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1096197,
+   "name": "ECTEL LTD",
+   "delisted_at": "2010-01-13",
+   "titles": [
+    "Ordinary Shares"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1096197&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1277475,
+   "name": "GANDER MOUNTAIN CO",
+   "delisted_at": "2010-01-15",
+   "titles": [
+    "Common Stock, par value $0.01 per share"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1277475&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 924646,
+   "name": "MPS GROUP INC",
+   "delisted_at": "2010-01-20",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=924646&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1412203,
+   "name": "Sports Properties Acquisition Corp.",
+   "delisted_at": "2010-01-20",
+   "titles": [
+    "Warrants, exercisable for one share of Common Stock at an exercise price of $7.00 per share"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1412203&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1414255,
+   "name": "Sapphire Industrials Corp.",
+   "delisted_at": "2010-01-20",
+   "titles": [
+    "Common Stock, par value $0.001 per share, and Units, consisting of one share of Common Stock and one Warrant"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1414255&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 799526,
+   "name": "FLANDERS CORP",
+   "delisted_at": "2010-01-22",
+   "titles": [
+    "Common Stock, par value $0.001 per share"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=799526&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1071246,
+   "name": "MS STRUCTURED ASSET CORP",
+   "delisted_at": "2010-01-25",
+   "titles": [
+    "SATURNS DaimlerChrysler North America Holdings Corp. Debenture Backed Series 2003-12 Class A Callable Units"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1071246&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1415581,
+   "name": "TRIAN ACQUISITION I CORP.",
+   "delisted_at": "2010-01-25",
+   "titles": [
+    "Common Stock, par value $0.0001 per share, and Units, each consisting of one share of Common Stock and one Warrant"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1415581&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 890640,
+   "name": "COREL CORP",
+   "delisted_at": "2010-01-26",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=890640&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 1006637,
+   "name": "TICKETMASTER ENTERTAINMENT LLC",
+   "delisted_at": "2010-01-26",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=1006637&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 709519,
+   "name": "SUN MICROSYSTEMS, INC.",
+   "delisted_at": "2010-01-26",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=709519&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 914242,
+   "name": "TELEFONICA OF ARGENTINA INC",
+   "delisted_at": "2010-01-26",
+   "titles": [
+    "(New) American Depositary Shares (Each representing 40 Class B Ordinary Shares)"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=914242&type=25&dateb=&owner=include&count=40"
+  },
+  {
+   "cik": 800460,
+   "name": "CALIFORNIA MICRO DEVICES CORP",
+   "delisted_at": "2010-01-27",
+   "titles": [
+    "Common Stock"
+   ],
+   "form25_url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=800460&type=25&dateb=&owner=include&count=40"
+  }
+ ],
+ "form25_total": 15238,
+ "form25_parsed": 15204,
+ "form25_judged_common": 7606
+}
