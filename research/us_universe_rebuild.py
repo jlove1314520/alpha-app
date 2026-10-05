@@ -28,7 +28,9 @@ import gzip
 import json
 import re
 import sys
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -68,6 +70,24 @@ NONCOMMON_PAT = re.compile(
 ROW_RE = re.compile(r"^(\S+)\s+(.*?)\s+(\d+)\s+(\d{4}-\d{2}-\d{2})\s+(edgar/\S+)\s*$")
 
 
+# 全域發送節流：不論幾條執行緒，整個行程合計不超過 1/SLEEP＝5 req/秒
+# （SEC 官方上限 10 req/秒，專案慣例取一半）。單執行緒時網路延遲會把實際速率
+# 壓到約 1.5 req/秒——那是把額度浪費掉，不是更有禮貌；用這個限速器配上少量
+# 執行緒，才真的跑在「專案自訂的 5 req/秒」上。
+_rate_lock = threading.Lock()
+_next_slot = [0.0]
+
+
+def _acquire_slot() -> None:
+    with _rate_lock:
+        now = time.monotonic()
+        t = max(now, _next_slot[0])
+        _next_slot[0] = t + SLEEP
+    d = t - time.monotonic()
+    if d > 0:
+        time.sleep(d)
+
+
 def get(url: str, cache: Path, binary: bool = False):
     if cache.exists():
         try:
@@ -77,7 +97,7 @@ def get(url: str, cache: Path, binary: bool = False):
                 return cache.read_text(encoding="utf-8", errors="replace")
             except Exception:  # noqa: BLE001
                 pass
-    time.sleep(SLEEP)
+    _acquire_slot()
     try:
         r = requests.get(url, headers=HEADERS, timeout=180)
     except Exception as e:  # noqa: BLE001
@@ -143,30 +163,41 @@ def _plain_text(raw: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
-def form25_classes(items: list[dict], limit: int | None = None) -> dict:
-    """抓每筆 Form 25 的本文，解析證券類別字樣。回傳 {accession: {...}}"""
+def _one_form25(it: dict) -> tuple[str, dict]:
+    acc = Path(it["file"]).name.replace(".txt", "")
+    txt = get(f"https://www.sec.gov/Archives/{it['file']}", F25 / f"{acc}.txt.gz")
+    if txt is None:
+        return acc, {"cik": it["cik"], "date": it["date"], "form": it["form"],
+                     "error": "fetch_failed", "parsed": False, "is_common": False}
+    titles = [re.sub(r"\s+", " ", t).strip() for t in SEC_CLASS_RE.findall(txt)]
+    src = "securityClassTitle"
+    if not titles:
+        titles = [m.strip(" .,;:-–—") for m in DESC_BEFORE_RE.findall(_plain_text(txt))]
+        titles = [t for t in titles if t]
+        src = "html_description_of_class"
+    blob = " | ".join(titles)[:1000]
+    is_common = bool(COMMON_PAT.search(blob)) and not _only_noncommon(titles)
+    return acc, {"cik": it["cik"], "date": it["date"], "form": it["form"],
+                 "titles": titles[:8], "is_common": is_common,
+                 "parsed": bool(titles), "src": src}
+
+
+def form25_classes(items: list[dict], limit: int | None = None, workers: int = 6) -> dict:
+    """抓每筆 Form 25 的本文，解析證券類別字樣。回傳 {accession: {...}}
+
+    用少量執行緒＋上面的全域限速器：合計仍是 5 req/秒，但不會讓網路延遲把速率
+    壓到 1.5 req/秒。已落地快取者不佔用發送額度（get() 命中快取直接回傳）。
+    """
     out = {}
     todo = items if limit is None else items[:limit]
-    for i, it in enumerate(todo):
-        acc = Path(it["file"]).name.replace(".txt", "")
-        cache = F25 / f"{acc}.txt.gz"
-        txt = get(f"https://www.sec.gov/Archives/{it['file']}", cache)
-        if txt is None:
-            out[acc] = {"error": "fetch_failed"}
-            continue
-        titles = [re.sub(r"\s+", " ", t).strip() for t in SEC_CLASS_RE.findall(txt)]
-        src = "securityClassTitle"
-        if not titles:
-            titles = [m.strip(" .,;:-–—") for m in DESC_BEFORE_RE.findall(_plain_text(txt))]
-            titles = [t for t in titles if t]
-            src = "html_description_of_class"
-        blob = " | ".join(titles)[:1000]
-        is_common = bool(COMMON_PAT.search(blob)) and not _only_noncommon(titles)
-        out[acc] = {"cik": it["cik"], "date": it["date"], "form": it["form"],
-                    "titles": titles[:8], "is_common": is_common,
-                    "parsed": bool(titles), "src": src}
-        if i % 500 == 0:
-            print(f"  Form25 {i}/{len(todo)} …", flush=True)
+    t0 = time.time()
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        for n, (acc, rec) in enumerate(ex.map(_one_form25, todo), 1):
+            out[acc] = rec
+            if n % 1000 == 0:
+                el = time.time() - t0
+                print(f"  Form25 {n}/{len(todo)}（{n / max(el, 1e-9) * 60:.0f} 筆/分，"
+                      f"已耗時 {el / 60:.1f} 分）", flush=True)
     return out
 
 
