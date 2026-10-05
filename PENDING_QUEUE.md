@@ -17456,8 +17456,8 @@ push 後停下等 Cowork 核對。
 二、輸出 docs/FEASIBILITY_us_supply_tightness.md：每項資料「可及／部分可及／不可及」與缺口；不可及者如實記錄不繞牆。至少 I1～I4 中 3 項可及且 PIT 可得時，另擬 docs/PREREG_DRAFT_us_supply_tightness.md：指標定義逐字沿用 PREREG_supply_tightness_FINAL（美股科目對應表附依據）、12 個月價格落後池、季頻、前 20 檔等權、判準沿用 §4(d) 全部關卡（基準改 SPY），未定處標〔待總司令確認〕。不得計算任何報酬。
 三、先.十四 三項照舊；紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
 
-- [ ] **先.十五-一 SEC XBRL 資料盤點（合約負債／存貨／銷貨成本／毛利／資本支出／營收 逐欄覆蓋率與起始年度；PIT acceptance datetime 取得方式＋20 筆樣本驗證；宇宙／下市股價格／SPY 或 VTI／3M T-bill；既有 US 試驗盤點）**
-- [ ] **先.十五-二 輸出 docs/FEASIBILITY_us_supply_tightness.md；若 I1～I4 至少 3 項可及且 PIT 可得→另擬 docs/PREREG_DRAFT_us_supply_tightness.md（不計任何報酬，未定處標〔待總司令確認〕）**
+- [x] **先.十五-一 SEC XBRL 資料盤點（合約負債／存貨／銷貨成本／毛利／資本支出／營收 逐欄覆蓋率與起始年度；PIT acceptance datetime 取得方式＋20 筆樣本驗證；宇宙／下市股價格／SPY 或 VTI／3M T-bill；既有 US 試驗盤點）** ✅ 完成（2026-10-05 marathon 軌，[自行裁量]：先.十四-三互動視窗進行中不碰其檔，先.十五不與其共檔故先做）：Frames 187 次＋PIT 樣本約 42 次請求；I2/I3/I4 可及、I1 部分可及、I5 不可及；PIT 20 筆 18 成功（2 筆為 20-F 申報人）；下市股價格仍為缺口。腳本 research/us_supply_feasibility_*.py，輸出 research/data/us_supply_feas/。
+- [x] **先.十五-二 輸出 docs/FEASIBILITY_us_supply_tightness.md；若 I1～I4 至少 3 項可及且 PIT 可得→另擬 docs/PREREG_DRAFT_us_supply_tightness.md（不計任何報酬，未定處標〔待總司令確認〕）** ✅ 完成：docs/FEASIBILITY_us_supply_tightness.md＋docs/PREREG_DRAFT_us_supply_tightness.md（I1～I4 達 3 項可及且 PIT 可得，故擬草案；未計任何報酬、未登記試驗；待確認項列於草案 §8）。**push 後停下等 Cowork 核對。**
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十五"。排在先.十四 之後。）
 
