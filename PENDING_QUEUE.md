@@ -17474,3 +17474,21 @@ push 後停下等 Cowork 核對。
 - [x] **先.十六-三 先.十四-一 補齊「連續 3 小時無實際執行即告警」規則（先.十四-二／三、先.十五 照舊）** 完成 2026-10-05（隨先.十四-一 一併落地，故先於先.十六 其餘兩項完成）：規則本體在 `scripts/check_local_schedule_heartbeat.py::_evaluate_claude_auth()`（`CLAUDE_AUTH_STALL_HOURS=3.0`，逾時判 `STALLED_3H`）；「實際執行」的定義在 `scripts/update_claude_launcher_heartbeat.py::NO_ATTEMPT_REASONS`——節流跳過／佇列空／佇列格式不符這類「本來就不該做事」的輪次只更新 `last_checked_at`、不推新 `last_attempt_at`，所以不會把停擺掩蓋成正常。本輪補上的關鍵是**三支 launcher 都會回報心跳**（先前只有 devqueue 有，規則算得出來卻沒有資料佐證）。自測 `scripts/selftest_claude_auth_launchers.py` 含「10/3 事故重演」一項：三支持續寫 BLOCKED_BY_RULE、last_attempt_at 停在 39 小時前 → 整體判 STALLED_3H，確認這次事故若重演會告警。App 端橫幅文案「本機自走系統連續 3 小時以上沒有實際執行」已截圖（`research/data/shots/claude_auth_stalled_3h.png`）。**先.十六-一／二 仍未開始**，照裁示排在先.十五 之後。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十六"。排在先.十四、先.十五 之後。）
+
+# 2026-10-05【先.十七：美股供給緊縮——防撞先行＋草案定案＋事前登記單發】（總司令裁示原文，動工前先寫入；順序：先.十六 三項全部完成並驗證 → 本項）
+
+【先.十七：美股供給緊縮——防撞先行＋草案定案＋事前登記單發】總司令 2026-10-05 同意。先寫進 PENDING_QUEUE 再動工。順序：先.十六 三項全部完成並驗證 → 本項。
+一、草案 docs/PREREG_DRAFT_us_supply_tightness.md 八項裁示：1.一律申報後下一個交易日開盤進場；2.基準 SPY 還原；3.SIC 2 碼，<8 檔併入其他；4.兩階段規則逐字照台版 §4(b)；5.10-K/A 不更新分數，只用最早申報；6.每換股日可計分 ≥300 檔；7.視為新試驗，計入多重檢定 N；8.全期單發＋兩段方向一致，holdout 2025-01 起不動。存活者偏誤但書（下市股 7.1% 無價格，偏誤對策略有利，判讀從嚴）寫入定稿，不得移除。
+二、執行前檢查（不看報酬）：宇宙過濾後（排除金融／SPAC／20-F／ETF）逐換股日可計分檔數、落後池檔數、季度 YoY 可算覆蓋率、I1 新舊概念銜接樣本 20 家連續性、FRED 3M T-bill 實測；任一換股日 <300 檔即停下回報。指標兩兩相關 |r|>0.7 停下回報。
+三、通過後：另存 docs/PREREG_us_supply_tightness_FINAL.md，SHA256，TRIALS_LEDGER 事前登記，commit＋push 後才可執行。單發前依先.十六 在條目加「〔互動視窗執行中〕」標記；中間檔 SHA256 記入 result.json inputs。
+四、依 §4(d) 順序單發；結果 research/data/us_supply_tightness_result.json＋判定列。印出後不得重跑；PASS→只可提前進式紙上追蹤；FAIL→墳場，不換參數重試。
+五、Shioaji 先.六-四／先.七-一 結案（10/5 13:30 有 48 檔 REALTIME_TICK）。quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報。
+紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
+
+- [ ] **先.十七-一 美股草案八項裁示寫入 docs/PREREG_DRAFT_us_supply_tightness.md（含不得移除的存活者偏誤但書）**（前置：先.十五 盤點、先.十六 三項完成並驗證）
+- [ ] **先.十七-二 執行前檢查（不看報酬）：宇宙過濾後逐換股日可計分檔數／落後池／季度 YoY 覆蓋率／I1 新舊概念銜接 20 家／FRED 3M T-bill 實測；任一換股日 <300 檔或指標兩兩 |r|>0.7 即停下回報**
+- [ ] **先.十七-三 通過後定稿 docs/PREREG_us_supply_tightness_FINAL.md＋SHA256＋TRIALS_LEDGER 事前登記＋commit/push（push 完成才可執行）**
+- [ ] **先.十七-四 依 §4(d) 順序單發（先加「〔互動視窗執行中〕」標記、中間檔 SHA256 記入 result.json inputs）→ research/data/us_supply_tightness_result.json＋判定列；印出後不得重跑；PASS→僅前進式紙上追蹤，FAIL→墳場不重試**
+- [ ] **先.十七-五 Shioaji 先.六-四／先.七-一 結案（10/5 13:30 48 檔 REALTIME_TICK）＋quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報**
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十七"。順序在先.十六 三項全部完成並驗證之後。）
