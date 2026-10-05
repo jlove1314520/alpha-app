@@ -504,3 +504,4 @@
 {"ts": "2026-10-06T00:21:25+08:00", "track": "hypothesis_queue", "round": "heartbeat-only-2026-10-06T00:21", "item": "心跳模式：#82暫停；PENDING_QUEUE 10條 - [ ] 全帶〔互動視窗執行中〕標記，依先.十六-一全數讓行，未開新軸", "artifacts_changed": ["research/MARATHON_LOG.md", "research/PROGRESS_HEARTBEAT.jsonl"], "note": "交辦佇列未開始 0 條可做（10 條讓行）；is_holdout_consumed 未動"}
 {"ts": "2026-10-06T00:30:49+0800", "track": "marathon", "round": "20261006-003049", "item": "全部 - [ ] 交辦項皆帶互動視窗執行中標記，讓行，無自走工作", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl"], "note": "凍結.二仍有效，不開新alpha試驗"}
 {"ts": "2026-10-06T02:30:00+08:00", "track": "interactive", "round": "先.二十三", "item": "先.二十三 全部完成：1.5x/0.5x 跨市場複製驗證 #416 FAIL（主判定 4/8）；adjust.py 台股漲跌幅守衛已修並自測 11/11", "status": "OK"}
+{"ts": "2026-10-06T03:40:00+08:00", "track": "interactive", "round": "先.二十四", "item": "先.二十四 完成：yfinance 台股壞價盤點 1,313 筆/179 檔，寫入 docs/AUDIT_yf_tw_bad_prices_2026-10-06.md；未重跑未改判定", "status": "OK"}
