@@ -6364,3 +6364,5 @@ quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）�
 quota_throttle: RECORDED marathon: made_progress=False consecutive_no_progress=1 seven_day_utilization=0.94
 auth_classify: {"status": "OK", "matched": null}
 ===== Marathon cycle end: 2026-10-06 03:00:40 cycle_id=20261006-030036 reason=ERROR cost_usd=0 read_kb=0.0 turns=1 duration_min=0.01 =====
+
+quota_throttle: SKIP: 節流中，距上次實跑29.9分鐘 < 120分鐘門檻（帳號週用量已達94%（門檻90%），節流保留額度給交辦與資料管線）
