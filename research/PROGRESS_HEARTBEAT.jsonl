@@ -485,3 +485,4 @@
 {"ts": "2026-10-05T18:00:49+0800", "track": "marathon", "round": "維運-讓行", "item": "先.十八-二/四/五由互動視窗執行中，本輪讓行；無可做的未標記交辦", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl"], "note": "未開始交辦3條皆讓行；低於深度下限12，補件待互動視窗收尾後處理（避免與先.十八衝突）"}
 {"ts":"2026-10-05T18:21:28","track":"hypothesis_queue","round":"heartbeat-mode","item":"心跳模式，#82暫停；先.十八-二/四/五 皆互動視窗執行中，讓行","artifacts_changed":["research/MARATHON_LOG.md"],"note":"凍結.二有效，未開新軸"}
 {"ts": "2026-10-05T19:00:48+0800", "track": "marathon", "round": "維運-讓行", "item": "先.十八-二/四/五由互動視窗執行中，本輪讓行；無可做的交辦", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl"], "note": "佇列深度低於12，但凍結.二期間不得以新alpha試驗補件"}
+{"ts": "2026-10-05T19:25:00", "track": "hypothesis_queue", "round": "心跳模式", "item": "hypothesis_queue 心跳模式，#82 暫停，未開新軸；讓行互動視窗：交辦 `- [ ]` 3條皆帶〔互動視窗執行中〕標記", "artifacts_changed": ["research/MARATHON_LOG.md", "research/PROGRESS_HEARTBEAT.jsonl"], "note": "讓行：先.十八-二/四/五；凍結.二有效，holdout未動"}
