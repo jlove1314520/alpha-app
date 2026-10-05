@@ -1,0 +1,29 @@
+{
+ "generated_at": "2026-10-05T16:27:57+08:00",
+ "ruling": "先.十八-三",
+ "note": "只建資料，不計任何報酬；SPY 一律走美股原生源，禁用 FinMind USStockPrice（CLAUDE.md 七之三）",
+ "spy": {
+  "ok": true,
+  "source": "yfinance SPY（美股原生源；auto_adjust=False 取 Adj Close）",
+  "n_rows": 4465,
+  "start": "2009-01-02",
+  "end": "2026-10-02",
+  "total_return_adj_close": 10.3787,
+  "total_return_close_unadjusted": 7.2793,
+  "dividend_effect_pp": 309.9,
+  "sanity_adj_ge_close": true,
+  "path": "research\\data\\us_benchmark_spy.parquet"
+ },
+ "rf_dtb3": {
+  "ok": true,
+  "source": "FRED DTB3（3-Month Treasury Bill Secondary Market Rate, Discount Basis），經 research/fred_yield_curve_gate.fetch_fred_series()",
+  "n_rows": 4440,
+  "start": "2009-01-02",
+  "end": "2026-10-01",
+  "min_pct": -0.05,
+  "max_pct": 5.36,
+  "latest_pct": 4.0,
+  "daily_conv": "dtb3_daily = dtb3_pct/100/252",
+  "path": "research\\data\\us_rf_dtb3.parquet"
+ }
+}

@@ -17507,9 +17507,9 @@ push 後停下等 Cowork 核對。
 
 - [ ] **先.十八-一 名冊重建（full-index 2010Q1～2026Q3 全量；Form 25／25-NSE 解析證券類別，只有普通股下市才標 delisted；加「最後 10-K／10-Q 申報日」欄，>15 個月未申報標 stopped_filing）＋報告逐年檔數／20 檔抽樣可核／12 檔大型股不得再被標 delisted**〔互動視窗執行中 2026-10-05 15:20〕
 - [ ] **先.十八-二 SIC 全量（fetch_us_sic.py 覆蓋全名冊）＋排除金融 6000–6799／SPAC 6770／20-F 後的普通股母體逐年表**〔互動視窗執行中 2026-10-05 15:20〕
-- [ ] **先.十八-三 基準與利率：SPY 改走 yfinance Adj Close 建快取（不得再用 FinMind USStockPrice）；3M T-bill 用 fred_yield_curve_gate.fetch_fred_series('DTB3')**〔互動視窗執行中 2026-10-05 15:20〕
+- [x] **先.十八-三 基準與利率：SPY 改走 yfinance Adj Close 建快取（不得再用 FinMind USStockPrice）；3M T-bill 用 fred_yield_curve_gate.fetch_fred_series('DTB3')**〔互動視窗執行中 2026-10-05 15:20〕 完成 2026-10-05：`research/us_benchmark_rf_build.py` 產出 `research/data/us_benchmark_spy.parquet`（yfinance SPY，auto_adjust=False 取 Adj Close，4,465 筆 2009-01-02～2026-10-02；自我檢查：還原總報酬 1037.9% vs 未還原 727.9%，含息效果 +310pp、方向正確）與 `research/data/us_rf_dtb3.parquet`（FRED DTB3 經 fred_yield_curve_gate.fetch_fred_series，4,440 筆，區間 −0.05%～5.36%，**負值為 2015 年國庫券貼現率的真實歷史現象，非資料錯誤**；另附 dtb3_daily＝pct/100/252）。**已不再使用 FinMind USStockPrice**。狀態檔 `research/data/us_benchmark_rf_status.json`。
 - [ ] **先.十八-四 下市股價格保守規則（無價格者於 delisted／stopped_filing 日 −100% 出場並計成本）寫入草案；但書改為「下市股無價格，一律視為全損」；刪除所有「7.1%」字樣；報告受影響持股位數**〔互動視窗執行中 2026-10-05 15:20〕
 - [ ] **先.十八-五 更新 FEASIBILITY 與 PREREG_DRAFT，push 後停下等 Cowork 核對（核對通過才回到先.十七）**〔互動視窗執行中 2026-10-05 15:20〕
-- [ ] **先.十八-六 待審批次結案：AWAITING_REVIEW 先.十六 及更早各列（除先.九-五、結案.一、先.十七-二／三）標「Cowork 已於讀取核對（2026-10-05）」並移至已審區**〔互動視窗執行中 2026-10-05 15:20〕
+- [x] **先.十八-六 待審批次結案：AWAITING_REVIEW 先.十六 及更早各列（除先.九-五、結案.一、先.十七-二／三）標「Cowork 已於讀取核對（2026-10-05）」並移至已審區**〔互動視窗執行中 2026-10-05 15:20〕 完成 2026-10-05：`research/AWAITING_REVIEW.md` 等待中由 49 列降為 **3 列**，恰為裁示明列的三個例外——先.九-五 派發延遲（待 3 日樣本）、結案.一 實機驗證（需總司令本機跑一輪，CC 無法代驗）、先.十七-二／三（母體缺陷，見先.十七 條目）。其餘 48 列移入已結案區並註明「Cowork 已於讀取核對（2026-10-05）」與批次結案依據；已結案區由 9 列增為 57 列。前兩個例外原本不是獨立列（散在先.十二-二 等列的敘述裡），依裁示名稱另立專列，使其在 git diff 一眼可見。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十八"。先.十七-二／三 維持 BLOCKED 至本項經核對。）
