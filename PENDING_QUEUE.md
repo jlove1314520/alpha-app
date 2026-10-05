@@ -17608,3 +17608,17 @@ push 後停下等 Cowork 核對。
 - [x] **先.二十三-五 結果寫 research/data/trend_scale_xmkt_result.json＋TRIALS_LEDGER；PASS→擬紙上追蹤與安全方案草稿；FAIL→墳場不重試** 完成 2026-10-06：結果寫 research/data/trend_scale_xmkt_result.json，TRIALS_LEDGER #416 判定列，已寫入 STRATEGY_GRAVEYARD 不換參數重試，selection_bias_ledger 已重跑。FAIL 故不擬安全方案草稿。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.二十三"。整批模式。）
+
+# 2026-10-06【先.二十四：yfinance 台股壞價影響盤點（只盤點不重跑）】（總司令裁示原文，動工前先寫入）
+
+【先.二十四：yfinance 台股壞價影響盤點（只盤點不重跑）】總司令 2026-10-06 同意。先寫進 PENDING_QUEUE 再動工，整批模式。
+一、列出所有曾經經由 research/adjust.py 的 yfinance 路徑取得台股還原價的試驗（TRIALS_LEDGER 編號、使用期間、標的數）。
+二、對每個試驗的輸入價格，以新守衛（單日 ±11% 不可能）掃描，列出命中筆數、日期、標的；以 FinMind 路徑重建同期序列並比對差異大小。
+三、逐試驗判斷影響方向：命中是否落在持有期間、可能讓結論偏好還是偏壞；只列出「可能翻案」的試驗，不重跑、不改判定，結果寫 docs/AUDIT_yf_tw_bad_prices_2026-10-06.md。
+紙.一、紙.二、holdout 不得動。完成 push 後停下。
+
+- [ ] **先.二十四-一 列出所有曾經由 adjust.py yfinance 路徑取得台股還原價的試驗（編號／期間／標的數）**〔互動視窗執行中 2026-10-06 03:00〕
+- [ ] **先.二十四-二 以新守衛掃描輸入價格（命中筆數／日期／標的）＋以 FinMind 路徑重建同期序列比對差異**〔互動視窗執行中 2026-10-06 03:00〕
+- [ ] **先.二十四-三 逐試驗判斷影響方向（命中是否落在持有期間、偏好或偏壞），只列「可能翻案」者，不重跑不改判定；結果寫 docs/AUDIT_yf_tw_bad_prices_2026-10-06.md**〔互動視窗執行中 2026-10-06 03:00〕
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.二十四"。整批模式，只盤點不重跑。）
