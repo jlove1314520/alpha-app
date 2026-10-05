@@ -114,7 +114,7 @@ def get(url: str, cache: Path, binary: bool = False):
 # ───────── 步驟1：form.idx ─────────
 def scan_index() -> dict:
     """回傳 {form25: [...], last_report: {cik: 'YYYY-MM-DD'}, names: {cik: name}}"""
-    form25, last_report, names, all_ciks = [], {}, {}, set()
+    form25, last_report, first_report, names, all_ciks = [], {}, {}, {}, set()
     for y, q in QUARTERS:
         url = f"https://www.sec.gov/Archives/edgar/full-index/{y}/QTR{q}/form.idx"
         txt = get(url, IDX / f"form_{y}Q{q}.idx.gz")
@@ -140,9 +140,14 @@ def scan_index() -> dict:
             elif ft in ("10-K", "10-Q"):  # 修正版不算 /A（原件才代表一次正式定期申報）
                 if dt > last_report.get(cik, ""):
                     last_report[cik] = dt
+                # first_report 是逐年母體表的關鍵：沒有它，2019 年才 IPO 的公司會被
+                # 算進 2010 年的母體，整張表會**系統性高估早年檔數**，而那張表正是
+                # 先.十八-二 的交付物本身。
+                if cik not in first_report or dt < first_report[cik]:
+                    first_report[cik] = dt
         print(f"  {y}Q{q}: Form25 {n25}、累計申報人 {len(all_ciks)}、有定期報告者 {len(last_report)}", flush=True)
-    return {"form25": form25, "last_report": last_report, "names": names,
-            "all_ciks": sorted(all_ciks)}
+    return {"form25": form25, "last_report": last_report, "first_report": first_report,
+            "names": names, "all_ciks": sorted(all_ciks)}
 
 
 # ───────── 步驟2：Form 25 證券類別 ─────────
@@ -266,6 +271,7 @@ def main() -> int:
 def build(state: dict) -> None:
     cls = state.get("form25_classes", {})
     last_report = {int(k): v for k, v in state["last_report"].items()}
+    first_report = {int(k): v for k, v in (state.get("first_report") or {}).items()}
     names = {int(k): v for k, v in state["names"].items()}
     # 現有 ticker 對照（只用來補 ticker 欄，不決定母體）
     tick = {}
@@ -307,6 +313,7 @@ def build(state: dict) -> None:
         cik = int(cik)
         lr = last_report.get(cik)
         rec = {"cik": cik, "name": names.get(cik, ""), "ticker": tick.get(cik),
+               "first_periodic_report": first_report.get(cik),
                "last_periodic_report": lr, "status": "active"}
         if cik in delisted:
             rec["status"] = "delisted"

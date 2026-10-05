@@ -285,10 +285,24 @@ def summarize(res: dict) -> dict:
             by_year[y][r["category"]] += 1
         out["reasons"] = {"counts": c, "by_year": dict(sorted(by_year.items()))}
     if "yfinance" in out:
-        p = out["yfinance"]["pct_has_price"]
-        out["verdict_rule_4"] = ("美股線可進入先.十七（≥70%）" if p >= 70 else
-                                 "資料不可及，美股線停、回報待裁示（<30%）" if p < 30 else
-                                 "介於 30～70%：列兩種讀法交由總司令裁示")
+        y = out["yfinance"]
+        n, nt = y["n"], y["n_no_ticker"]
+        p_all = y["pct_has_price"]                      # 分母含查不到代號者（保守）
+        p_res = round(100.0 * y["n_has_price"] / max(1, n - nt), 1)   # 分母只算解析得到代號者
+        def _v(x):
+            return ("可進入先.十七（≥70%）" if x >= 70 else
+                    "資料不可及、美股線停（<30%）" if x < 30 else "介於 30～70%，需裁示")
+        out["verdict_rule_4"] = {
+            "pct_denominator_all": p_all, "reading_all": _v(p_all),
+            "pct_denominator_ticker_resolved": p_res, "reading_ticker_resolved": _v(p_res),
+            "n_no_ticker": nt,
+            "ticker_resolution_rate_pct": round(100.0 * (n - nt) / max(1, n), 1),
+            "note": ("兩種分母都報，因為門檻可能落在不同側，該選哪一個屬總司令裁示、不由腳本決定。"
+                     "CC 的建議是採用 pct_denominator_all（含查不到代號者）——"
+                     "「查不到代號所以測不到價格」在實務上等同拿不到價格，"
+                     "從分母剔除會讓比例虛高、可能讓 70% 門檻被誤判通過。"),
+            "agreement": "兩種讀法一致" if _v(p_all) == _v(p_res) else "**兩種讀法不一致，必須由總司令裁示**",
+        }
     return out
 
 
