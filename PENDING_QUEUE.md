@@ -17601,10 +17601,10 @@ push 後停下等 Cowork 核對。
 六、結果寫 research/data/trend_scale_xmkt_result.json＋TRIALS_LEDGER；PASS → 擬前進式紙上追蹤與安全方案草稿（分階段曝險上限、加碼條件、只用槓桿 ETF），交總司令裁示；FAIL → 墳場不重試。
 紙.一、紙.二、holdout 不得動。長工作 30 分鐘心跳。全部完成後 push 並停下。
 
-- [ ] **先.二十三-一 事前登記 docs/PREREG_trend_scale_xmkt_FINAL.md＋SHA256＋TRIALS_LEDGER（明載屬事後假設、以未看過市場做複製驗證），commit＋push 後才可執行**〔互動視窗執行中 2026-10-06 01:30〕
-- [ ] **先.二十三-二 8 市場（EFA/EEM/EWJ/EWG/EWU/EWT/EWZ/EWY）1.5×／0.5× 單發＋等權組合版天條一／隨機擇時／成本 1×2×3×；SPY、0050 只列參考不計入判定**〔互動視窗執行中 2026-10-06 01:30〕
-- [ ] **先.二十三-三 另報 1.25／0.75 與 1.75／0.25 兩組同表（不判定）**〔互動視窗執行中 2026-10-06 01:30〕
-- [ ] **先.二十三-四 修 research/adjust.py 的 yfinance 路徑 0050 瑕疵（2014-01-02 假跌 −75%）＋補自測**〔互動視窗執行中 2026-10-06 01:30〕
-- [ ] **先.二十三-五 結果寫 research/data/trend_scale_xmkt_result.json＋TRIALS_LEDGER；PASS→擬紙上追蹤與安全方案草稿；FAIL→墳場不重試**〔互動視窗執行中 2026-10-06 01:30〕
+- [x] **先.二十三-一 事前登記 docs/PREREG_trend_scale_xmkt_FINAL.md＋SHA256＋TRIALS_LEDGER（明載屬事後假設、以未看過市場做複製驗證），commit＋push 後才可執行** 完成 2026-10-06：docs/PREREG_trend_scale_xmkt_FINAL.md（SHA256 f5220d7f…），TRIALS_LEDGER #415，commit 1b8eb8157 push 後才執行。明載本規則源自 #413/#414 只報告的配置數據、屬事後假設，SPY/0050 不計入判定。
+- [x] **先.二十三-二 8 市場（EFA/EEM/EWJ/EWG/EWU/EWT/EWZ/EWY）1.5×／0.5× 單發＋等權組合版天條一／隨機擇時／成本 1×2×3×；SPY、0050 只列參考不計入判定** 完成 2026-10-06：**FAIL**，主判定 8 市場中只有 4 個達標（門檻 6）。通過 ['EFA', 'EWT', 'EWZ', 'EWY']；未過 ['EEM', 'EWJ', 'EWG', 'EWU']。組合版年化 5.46% vs 基準 8.35%、MDD -47.6% vs -61.2%、Sortino 0.462 vs 0.596（低於基準）；天條一通過但隨機擇時對照未過（百分位 82.5）、成本 1×/2×/3× 皆未存活。登記 #416。
+- [x] **先.二十三-三 另報 1.25／0.75 與 1.75／0.25 兩組同表（不判定）** 完成 2026-10-06：1.25/0.75 有 5/8 達標、1.75/0.25 僅 2/8（1.5/0.5 為 4/8）。**曝險愈高達標數愈少，與「加槓桿能改善風險調整後報酬」的假設方向相反。**
+- [x] **先.二十三-四 修 research/adjust.py 的 yfinance 路徑 0050 瑕疵（2014-01-02 假跌 −75%）＋補自測** 完成 2026-10-06：research/adjust.py 新增 `_yf_series_physically_impossible()` 守衛——台股有漲跌幅限制，單日 ±11% 以上在物理上不可能，偵測到即改走 FinMind 路徑（原本只記警告、仍回傳壞資料）。只對四位數台股代號生效、守衛自身失敗 fail open。自測 `scripts/selftest_adjust_tw_limit_guard.py` 11 項全過（含真實事故重現、漲跌停不誤殺、美股不受影響、4 種自身失敗情境）。實測修正後 `adjusted_price_series("0050")` 回傳 5,304 筆、2003-06-30～2024-12-31、日報酬 −9.13%～+7.95%。
+- [x] **先.二十三-五 結果寫 research/data/trend_scale_xmkt_result.json＋TRIALS_LEDGER；PASS→擬紙上追蹤與安全方案草稿；FAIL→墳場不重試** 完成 2026-10-06：結果寫 research/data/trend_scale_xmkt_result.json，TRIALS_LEDGER #416 判定列，已寫入 STRATEGY_GRAVEYARD 不換參數重試，selection_bias_ledger 已重跑。FAIL 故不擬安全方案草稿。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.二十三"。整批模式。）

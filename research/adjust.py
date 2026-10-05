@@ -313,6 +313,44 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
     return _combine_adjustment_events(div, split_df, cr_df, pv_df, close_by_date, trading_dates)
 
 
+# 台股有漲跌幅限制（2015-06 起 ±10%，之前 ±7%），**單日報酬超過 ±11% 在物理上不可能**，
+# 出現就一定是還原因子算錯，不是市場真的這樣動。
+# 2026-10-06（先.二十三-五）實測：yfinance 對 0050 在 2014-01-02 給出 −75.06%
+# （37.186 → 9.273，恰為 4 倍），且該路徑只回溯到 2009-01-02；用這份序列跑 2 倍槓桿
+# 會把淨值打成負數。原本本函式只把 anomaly 記進警告檔、**仍舊回傳壞資料**——
+# 那正是 CLAUDE.md 一再警告的「程式跑完、沒報錯、但答案是錯的」那種形狀。
+# 修法：偵測到物理上不可能的日報酬就改走 FinMind 路徑（該路徑對 0050 給出 5,304 筆、
+# 2003-06-30～2024-12-31、日報酬 −9.13%～+7.95%，合於漲跌幅限制）。
+# 只對四位數台股代號生效；美股等非台股標的無此限制，不受影響。
+_TW_DAILY_LIMIT_IMPOSSIBLE = 0.11
+
+
+def _yf_series_physically_impossible(df: pd.DataFrame, stock_id: str) -> bool:
+    """yfinance 還原序列是否含「物理上不可能」的日報酬（僅台股四位數代號適用）。
+
+    偵測邏輯自身失敗一律回 False（fail open，CLAUDE.md 十二節）——
+    寧可漏抓一次，不可讓價格函式整支拋例外。
+    """
+    try:
+        sid = str(stock_id)
+        if not (len(sid) == 4 and sid.isdigit()):
+            return False
+        a = pd.to_numeric(df["close"], errors="coerce").dropna()
+        a = a[a > 0].to_numpy(dtype=float)
+        if len(a) < 3:
+            return False
+        r = a[1:] / a[:-1] - 1.0
+        bad = int((abs(r) > _TW_DAILY_LIMIT_IMPOSSIBLE).sum())
+        if bad:
+            worst = float(max(r.min(), r.max(), key=abs))
+            print(f"::warning::adjust: {sid} 的 yfinance 還原序列有 {bad} 筆物理上不可能的日報酬"
+                  f"（最極端 {worst * 100:.2f}%，台股漲跌幅上限 ±10%），改走 FinMind 路徑")
+        return bad > 0
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::adjust: 物理合理性檢查失敗（降級為不切換）：{type(e).__name__}: {e}")
+        return False
+
+
 def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.DataFrame:
     """Adjusted daily price series, capped at VAL_END. Tries yfinance first
     (see module docstring, 2026-08-26); falls back to the FinMind-based
@@ -340,6 +378,10 @@ def adjusted_price_series(stock_id: str, start_date: str = "1990-01-01") -> pd.D
     from yf_price_client import fetch_yf_adjusted
 
     yf_df = fetch_yf_adjusted(stock_id, start_date)
+    if not yf_df.empty and _yf_series_physically_impossible(yf_df, stock_id):
+        # 先.二十三-五（2026-10-06）：yfinance 回傳物理上不可能的日報酬時改走 FinMind 路徑，
+        # 詳見 _yf_series_physically_impossible() 的說明。
+        yf_df = yf_df.iloc[0:0]
     if not yf_df.empty:
         out = yf_df.copy()
         out["adj_close"] = out["close"]
