@@ -17493,3 +17493,23 @@ push 後停下等 Cowork 核對。
   〔hypothesis_queue 軌 2026-10-05 15:3x 部分完成，只做心跳模式下的交辦〕**Shioaji 部分結案**：`data/quotes_sinopac.json` 於 commit 50ac52fbb（10/5 13:45:40）`connected=true`、`market_status=open`、48 檔全為 `data_type=REALTIME_TICK`，`research/.live_state_sinopac.json` mtime 10/5 13:45（10/1、10/2 皆未更新、本日恢復）→ 先.六-四／先.七-一 可依原定分支標結案（登入成功分支；該兩條原文仍在上方 [!]，由互動視窗／Cowork 核對後改 [x]，本軌不動其標記）。**quotes.yml 派發延遲**：`log_dispatch_delay.py --since 2026-10-05 --workflow quotes.yml` 新增 0 筆（唯一一筆 10/5 06:53Z schedule run 無法配對排定時間，market.yml 預設參數則回「沒有符合的 schedule run」）；dispatch_delay_log 目前僅有 10/2 兩筆（max 392.9 分）。**未達連續 3 日，不回報結論**——解除條件：10/7 後有 3 個日曆日（10/5、10/6、10/7）的 schedule run 可配對資料再回報；若 quotes.yml 仍無法配對，需先查 cron 排定時間對應邏輯（屬 scripts 修正，非本軌凍結範圍）。先.十七-一～四 屬互動視窗 15:17 才標 BLOCKED 的新 alpha 軸（母體非 survivorship-free），本軌讓行不碰。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十七"。順序在先.十六 三項全部完成並驗證之後。）
+
+# 2026-10-05【先.十八：美股母體修復（保守假設）＋待審批次結案】（總司令裁示原文，動工前先寫入）
+
+【先.十八：美股母體修復（保守假設）＋待審批次結案】總司令 2026-10-05 同意。先寫進 PENDING_QUEUE 再動工。先.十七-二／三 維持 BLOCKED，本項完成並經 Cowork 核對後才解除。
+一、名冊重建（只建資料，不計報酬）：1. research/us_universe_pit.py 改為掃 SEC full-index 2010Q1～2026Q3 全量，Form 25／25-NSE 必須解析證券類別，只有普通股（Common Stock／Ordinary Shares／Class A/B）下市才標 delisted；2. 另加「最後一次 10-K／10-Q 申報日」欄，超過 15 個月未申報者標 stopped_filing 並記最後申報日；3. 產出 research/data/us_universe_pit.json 新版，報告：2010～2024 每年 delisted 與 stopped_filing 檔數、抽樣 20 檔人工可核（附 CIK 與 Form 25 連結）、AAPL/WMT/IBM 等 12 檔必須不再被標 delisted。
+二、SIC 全量：執行 fetch_us_sic.py 覆蓋全名冊（約 36 分鐘，0.2 秒間隔），產出排除金融（6000–6799）／SPAC（6770）／20-F 後的普通股母體檔數逐年表。
+三、基準與利率：SPY 改走 yfinance Adj Close 建快取，不得再用 FinMind USStockPrice；3M T-bill 用 fred_yield_curve_gate.fetch_fred_series('DTB3')。
+四、下市股價格保守規則寫入草案：持股在 delisted／stopped_filing 日期之後無價格者，一律於該日以 −100% 出場並計入成本；此為最壞假設，使偏誤方向對策略不利；定稿但書改為「下市股無價格，一律視為全損」，並報告受影響持股位數。原「7.1%」字樣全部刪除。
+五、以上完成後更新 FEASIBILITY 與 PREREG_DRAFT，push 後停下等 Cowork 核對；核對通過才回到先.十七 的八項裁示與登記流程。
+六、待審批次結案：research/AWAITING_REVIEW.md 中 先.十六 及更早各列，除「先.九-五 派發延遲（待 3 日）」「結案.一 實機驗證（總司令）」「先.十七-二／三」外，一律標「Cowork 已於讀取核對（2026-10-05）」並移至已審區；之後新增列才需審。
+紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
+
+- [ ] **先.十八-一 名冊重建（full-index 2010Q1～2026Q3 全量；Form 25／25-NSE 解析證券類別，只有普通股下市才標 delisted；加「最後 10-K／10-Q 申報日」欄，>15 個月未申報標 stopped_filing）＋報告逐年檔數／20 檔抽樣可核／12 檔大型股不得再被標 delisted**
+- [ ] **先.十八-二 SIC 全量（fetch_us_sic.py 覆蓋全名冊）＋排除金融 6000–6799／SPAC 6770／20-F 後的普通股母體逐年表**
+- [ ] **先.十八-三 基準與利率：SPY 改走 yfinance Adj Close 建快取（不得再用 FinMind USStockPrice）；3M T-bill 用 fred_yield_curve_gate.fetch_fred_series('DTB3')**
+- [ ] **先.十八-四 下市股價格保守規則（無價格者於 delisted／stopped_filing 日 −100% 出場並計成本）寫入草案；但書改為「下市股無價格，一律視為全損」；刪除所有「7.1%」字樣；報告受影響持股位數**
+- [ ] **先.十八-五 更新 FEASIBILITY 與 PREREG_DRAFT，push 後停下等 Cowork 核對（核對通過才回到先.十七）**
+- [ ] **先.十八-六 待審批次結案：AWAITING_REVIEW 先.十六 及更早各列（除先.九-五、結案.一、先.十七-二／三）標「Cowork 已於讀取核對（2026-10-05）」並移至已審區**
+
+（心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十八"。先.十七-二／三 維持 BLOCKED 至本項經核對。）
