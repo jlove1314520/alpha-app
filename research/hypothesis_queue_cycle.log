@@ -6633,3 +6633,11 @@ quota_throttle: SKIP: 節流中，距上次實跑59.4分鐘 < 120分鐘門檻（
 quota_throttle: SKIP: 節流中，距上次實跑89.4分鐘 < 120分鐘門檻（帳號週用量已達92%（門檻90%），節流保留額度給交辦與資料管線）
 
 quota_throttle: SKIP: 節流中，距上次實跑119.4分鐘 < 120分鐘門檻（帳號週用量已達92%（門檻90%），節流保留額度給交辦與資料管線）
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達92%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Hypothesis-queue cycle start: 2026-10-06 02:51:01 =====
+You've hit your session limit 繚 resets 3:20am (Asia/Taipei)
+===== Hypothesis-queue cycle end: 2026-10-06 02:51:04 =====
+auth_classify: {"status": "OK", "matched": null}
+quota_throttle: RECORDED hypothesis_queue: made_progress=False consecutive_no_progress=1
