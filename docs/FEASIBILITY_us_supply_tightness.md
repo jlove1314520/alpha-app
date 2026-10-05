@@ -6,6 +6,109 @@
 > 原始輸出：`research/data/us_supply_feas/`（`frames_coverage.json`、`merged_coverage.json`、`pit_sample20.json`）。
 > 標 **[自行裁量]** 者為 CC 選擇；標 **[待驗證]** 者未經程式證實。
 
+---
+
+## ⚠️ 0. 互動視窗複核更正（2026-10-05 02:xx，先.十七 前置查核）
+
+本報告由 marathon 軌於 2026-10-05 14:09 產出；互動視窗在進入先.十七（事前登記單發）前依
+CLAUDE.md「Cowork／任何人提出的數字，程式重算驗證前不得當裁示依據」做獨立複核，
+**下方 §1～§6 的原文一律保留供稽核，但其中四處經程式查證為錯誤或過樂觀，以本節為準。**
+
+獨立複核腳本：`research/us_supply_feasibility_probe.py`（互動視窗版，與 marathon 版同名但
+為不同實作；Frames 時點欄位用 `CY{年}Q4I`、期間欄位改用**年度** `CY{年}`——
+原版對期間型欄位若使用 `CY{年}Q4` 只會涵蓋「日曆季對齊的單季揭露」，會嚴重低估真實可得率）。
+輸出：`research/data/us_supply_feasibility.json`。
+
+### 更正一（最嚴重）：存活者偏誤但書的「7.1%」數字不成立，實際情形嚴重得多
+
+原文 §4、§6 寫「已下市股 7.1%（775／10,863 檔）無價格來源」。**程式查證**
+（`research/data/us_universe_pit.json`）：
+
+| 查證項 | 實測值 | 意義 |
+|---|---|---|
+| `quarters_scanned` | `['2025Q4','2026Q1','2026Q2','2026Q3']` | **只掃了近 4 季**，`--from-year 2010` 全量回補從未執行 |
+| `delisted_at` 範圍 | 2025-10-01 ～ 2026-09-04 | — |
+| `delisted_at` 早於 2025-01-01 的檔數 | **0** | **2010–2024 回測期間下市的公司，一家都不在名冊裡** |
+| 常識性大型股被標 `delisted` | AAPL、WMT、PG、IBM、V、PEP、UPS、FDX、LLY、AMGN、HON、TMO（12/12 抽樣全中） | 大規模偽陽性 |
+
+兩個獨立缺陷：
+1. **掃描窗太短**：名冊的 775 檔「下市股」全部是近 12 個月的事件。對 2010–2024 的回測而言，
+   **母體裡的下市股數量是 0**，等於 100% 用今天還活著的公司回測過去——正是 CLAUDE.md
+   偽影家族⑦「最貴的一個」的完整形態，不是 7.1% 的局部缺口。
+2. **Form 25 判讀錯誤**：`research/us_universe_pit.py` 的 `FORM25_RE` 只比對表單代號 `25`／`25-NSE`，
+   **不讀 Form 25 的「證券類別」欄位**。Form 25 是「下市某一類已登記證券」（大型股到期贖回的
+   上市票券、權證都會觸發），不等於普通股下市，於是任何申報過 Form 25 的公司被整家標成下市。
+   775 檔中有 324 檔仍在當下申報人快照裡，前 20 名為 AAPL、LLY、WMT、V、PG、PM、AZN、
+   AMGN、TMO、IBM…，幾乎可判定 324 檔全為偽陽性。
+
+**結論：美股版在修好宇宙之前，不具備做 2010–2024 survivorship-free 回測的前提。**
+原但書文字（「7.1%／775 檔」）**不得照抄進定稿**——那個數字會讓讀者以為缺口是局部的。
+
+### 更正二：`data/us_sic.json` 只有 9 檔，不足以做金融／ADR／ETF／SPAC 排除
+
+原文 §3 寫「可用 SIC 碼（`data/us_sic.json`，已有 SEC 抓取腳本）排除金融」。實測
+`len(tickers)=9`（AAPL/AMZN/ASX/CHT/GOOGL/MSFT/NVDA/TSM/UMC）。
+正確表述是「**方法可及、資料未建**」：`.github/scripts/fetch_us_sic.py` 走
+`submissions/CIK{cik}.json` 的 `sic` 欄位，覆蓋 10,863 檔約需 10,863 次請求
+（依 SEC 禮儀 0.2 秒間隔約 36 分鐘），尚未執行。**在這份資料建好之前，
+「排除金融／SPAC／20-F／ETF 後的逐換股日可計分檔數」無法量測**，
+而那正是先.十七-二 的第一項執行前檢查。
+
+### 更正三：基準 SPY 現行路徑走的是台灣資料商，牴觸 CLAUDE.md 七之三
+
+原文 §4 寫既有 `deep_dive_f_us_low_vol.py::_load_market_benchmark()`（yfinance）。實際：
+函式名為 `_load_market_df()`（`research/deep_dive_f_us_low_vol.py:98`），內部呼叫
+`load_dev("USStockPrice","SPY",...)`（L74 `from finmind_client import load_dev`）＝**FinMind**。
+CLAUDE.md 七之三明定「美股…**禁止用台灣資料商作為美股宇宙或價格的主來源**」。
+故基準為「**部分可及**：需改走美股原生源（yfinance SPY `Adj Close`）」，repo 內查無現成
+SPY／VTI 還原價快取。FinMind `USStockPrice` 的 `Close` 是否含息還原亦未載明（查無）。
+
+### 更正四：3M T-bill 不是「未實測／部分可及」，基礎設施已齊備
+
+原文 §4 列「部分可及／未實測」。實際 repo 已有可用的 FRED client：
+`research/fred_yield_curve_gate.py:100 fetch_fred_series(series_id, start_date)`，
+打 `api.stlouisfed.org/fred/series/observations`，附檔案快取
+（`research/data/raw/FRED_{series}_{hash}.json`，既有 `FRED_T10Y2Y_*.json`），
+取 `DTB3`／`TB3MS` 只需帶入 `series_id`，無須新寫 client。key 檔
+`C:\alpha\alpha-data\fred_key.txt.txt` 存在且非空（僅確認存在性，未讀內容）。
+判定改為 **可及**。
+
+### 互動視窗獨立實測的欄位覆蓋率（與 §1 交叉比對，結論一致）
+
+落在宇宙 8,456 個相異 CIK 內的申報人數；期間型欄位用年度 frames。
+括號為佔當年「有 `Assets` 申報人」的比例（該列是 XBRL 申報母體的分母）。
+
+| 概念（tag） | 2012 | 2014 | 2018 | 2024 |
+|---|---|---|---|---|
+| `Assets`（分母基準） | 2,746 | 3,062 | 3,690 | 5,545 |
+| I1 `ContractWithCustomerLiabilityCurrent`（新） | 0 | 0（0%） | 1,065（29%） | 1,920（35%） |
+| I1 `DeferredRevenueCurrent`（舊） | 688 | 784（26%） | 471（13%） | 499（9%） |
+| I2 `InventoryNet` | 1,348 | 1,485（48%） | 1,749（47%） | 2,445（44%） |
+| 銷貨成本（三 tag 聯集，年度） | 1,477 | 1,624（53%） | 2,153（58%） | 3,021（54%） |
+| I3 `GrossProfit`（年度） | 1,241 | 1,349（44%） | 1,635（44%） | 2,471（45%） |
+| I4 `PaymentsToAcquirePropertyPlantAndEquipment`（年度） | 2,018 | 2,214（72%） | 2,729（74%） | 3,716（67%） |
+| 營收（兩 tag 聯集，年度） | 1,360 | 1,445（47%） | 3,039（82%） | 4,379（79%） |
+
+**與 §1 的結論方向一致**：I2／I3／I4 可及，I1 的新概念 2018 才出現（ASC 606）、舊概念逐年萎縮，
+兩者需銜接；絕對檔數在 2014 年即達 1,300～2,200 家，**單就基本面資料而言，
+「每換股日可計分 ≥300 檔」不會是瓶頸**——瓶頸在更正一的宇宙與更正二的過濾資料。
+
+### PIT 獨立複核：20/20 取得 acceptanceDateTime
+
+互動視窗另抽 20 家（AAPL、MSFT、NVDA、INTC、CSCO、WMT、HD、CAT、DE、F、GM、BA、MMM、
+KO、PEP、NKE、TGT、LOW、UPS、FDX），**20 筆全部**從 `submissions/CIK{cik}.json` 的
+`filings.recent.acceptanceDateTime` 取得，其中 **16 筆在 16:00 之後被接受**。
+原文 §2 的 18/20 是因抽樣含 2 筆 20-F 申報人（ADR），非端點缺陷，兩次結果不衝突。
+
+**時區誠實揭露**：SEC 回傳的字串帶 `Z` 後綴（如 `2026-07-23T22:44:23.000Z`），
+但 EDGAR 的 acceptanceDateTime 慣例為美東時間，`Z` 疑為 SEC 自身 JSON 的標示瑕疵；
+本輪**未能三來源查證定論**，列為未決。
+**但此疑義不影響本案設計**：裁示一.1 已定「一律申報後**下一個交易日開盤**進場」，
+無論該時戳是 ET 或 UTC，最晚的接受時間都早於次一交易日開盤，不會產生前視偏誤
+（代價是偶爾比理論上可行的時點晚一天進場，方向保守）。
+
+---
+
 ## 結論先行
 
 | 項目 | 判定 | 一句話 |
@@ -16,12 +119,17 @@
 | I4 資本支出／營收 | **可及** | 資本支出∩營收約 3,200–3,650 家／年 |
 | I5 月營收加速 | **不可及** | 美股無月營收（只有季報），不繞牆、不以其他代用 |
 | PIT（acceptance datetime） | **可及** | 20 筆樣本：18 筆 10-K／10-Q 全部取得；2 筆是 20-F 申報人（見 §2） |
-| 普通股宇宙（含下市） | **部分可及** | 有 survivorship-free 名冊，無 ADR／ETF／SPAC／金融的乾淨欄位，需自行以 SIC 等過濾 |
-| 下市股價格 | **不可及（重大缺口）** | 沿用既有結論：7.1%（775／10,863）無價格來源 |
-| 基準 SPY／VTI 還原價 | **可及** | yfinance 在市標的；repo 既有 `_load_market_benchmark()` 模式 |
-| 無風險利率 3M T-bill | **部分可及** | FRED 有 key 檔（`alpha-data\fred_key.txt.txt`），本輪**未實測**端點，屬 [待驗證] |
+| 普通股宇宙（含下市） | ⚠️ **不可及**（原寫「部分可及」，見 §0 更正一／二） | 名冊非 survivorship-free（只掃近 4 季、324 檔偽陽性）；SIC 過濾資料僅 9 檔未建 |
+| 下市股價格 | **不可及（重大缺口）** | ⚠️ 本列數字已被 §0 更正一推翻：7.1% 嚴重低估，2010–2024 期間下市股在母體內為 0 檔 |
+| 基準 SPY／VTI 還原價 | ⚠️ **部分可及**（原寫「可及」，見 §0 更正三） | 既有路徑實為 FinMind（台灣資料商），牴觸 CLAUDE.md 七之三，須改走美股原生源 |
+| 無風險利率 3M T-bill | ✅ **可及**（原寫「部分可及」，見 §0 更正四） | repo 已有 `fred_yield_curve_gate.py::fetch_fred_series()` 可用，帶入 DTB3／TB3MS 即可 |
 
 **I1～I4 至少 3 項可及且 PIT 可得 → 達成擬 PREREG 草案的條件**（見 `docs/PREREG_DRAFT_us_supply_tightness.md`）。
+
+> ⚠️ **但擬草案 ≠ 可事前登記**：上述條件只管「指標算不算得出來」。§0 更正一指出母體本身
+> 不具 survivorship-free 前提、更正二指出過濾資料未建，**兩者都必須先修好，先.十七-二 的
+> 執行前檢查才有意義，先.十七-三 的事前登記才可以做**。互動視窗據此停在登記之前等裁示。
+
 **但存在一個會決定可行性的缺口：下市股無價格**，對「價格落後」型策略偏誤方向偏樂觀（詳 §4）。
 
 ## 1. 逐欄覆蓋率（Frames API，單位 USD，同一概念同一期間回傳全體申報人）

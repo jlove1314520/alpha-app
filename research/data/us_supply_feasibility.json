@@ -1,0 +1,1368 @@
+{
+ "generated_at": "2026-10-05T15:09:16+08:00",
+ "source": "SEC EDGAR XBRL frames + submissions（官方公開端點，約4 req/秒，含識別用 User-Agent）",
+ "universe_file": "research/data/us_universe_pit.json",
+ "universe_n": 10863,
+ "universe_distinct_cik": 8456,
+ "note": "只盤點資料可得性，未讀任何價格、未計算任何報酬、未碰 holdout",
+ "pit": {
+  "n_sample": 20,
+  "n_with_acceptance_datetime": 20,
+  "n_accepted_after_1600_ET": 17,
+  "rows": [
+   {
+    "ticker": "AAPL",
+    "cik": 320193,
+    "form": "10-Q",
+    "accn": "0000320193-26-000020",
+    "reportDate": "2026-06-27",
+    "filingDate": "2026-07-31",
+    "acceptanceDateTime": "2026-07-31T10:01:02.000Z",
+    "accepted_after_1600_ET": false
+   },
+   {
+    "ticker": "MSFT",
+    "cik": 789019,
+    "form": "10-K",
+    "accn": "0001193125-26-323660",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-07-29",
+    "acceptanceDateTime": "2026-07-29T20:08:01.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "NVDA",
+    "cik": 1045810,
+    "form": "10-Q",
+    "accn": "0001045810-26-000075",
+    "reportDate": "2026-07-26",
+    "filingDate": "2026-08-26",
+    "acceptanceDateTime": "2026-08-26T20:36:00.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "INTC",
+    "cik": 50863,
+    "form": "10-Q",
+    "accn": "0000050863-26-000157",
+    "reportDate": "2026-06-27",
+    "filingDate": "2026-07-24",
+    "acceptanceDateTime": "2026-07-23T22:44:23.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "CSCO",
+    "cik": 858877,
+    "form": "10-K",
+    "accn": "0000858877-26-000132",
+    "reportDate": "2026-07-25",
+    "filingDate": "2026-09-02",
+    "acceptanceDateTime": "2026-09-02T20:36:56.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "WMT",
+    "cik": 104169,
+    "form": "10-Q",
+    "accn": "0000104169-26-000154",
+    "reportDate": "2026-07-31",
+    "filingDate": "2026-08-28",
+    "acceptanceDateTime": "2026-08-28T20:11:28.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "HD",
+    "cik": 354950,
+    "form": "10-Q",
+    "accn": "0001628280-26-058715",
+    "reportDate": "2026-08-02",
+    "filingDate": "2026-08-25",
+    "acceptanceDateTime": "2026-08-24T21:49:11.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "CAT",
+    "cik": 18230,
+    "form": "10-Q",
+    "accn": "0000018230-26-000046",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-08-05",
+    "acceptanceDateTime": "2026-08-05T12:43:40.000Z",
+    "accepted_after_1600_ET": false
+   },
+   {
+    "ticker": "DE",
+    "cik": 315189,
+    "form": "10-Q",
+    "accn": "0001104659-26-102213",
+    "reportDate": "2026-08-02",
+    "filingDate": "2026-08-27",
+    "acceptanceDateTime": "2026-08-27T14:03:01.000Z",
+    "accepted_after_1600_ET": false
+   },
+   {
+    "ticker": "F",
+    "cik": 37996,
+    "form": "10-Q",
+    "accn": "0000037996-26-000156",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-07-29",
+    "acceptanceDateTime": "2026-07-28T23:29:21.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "GM",
+    "cik": 1467858,
+    "form": "10-Q",
+    "accn": "0001467858-26-000051",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-07-21",
+    "acceptanceDateTime": "2026-07-21T20:16:05.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "BA",
+    "cik": 12927,
+    "form": "10-Q",
+    "accn": "0001628280-26-050038",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-07-28",
+    "acceptanceDateTime": "2026-07-28T17:16:22.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "MMM",
+    "cik": 66740,
+    "form": "10-Q",
+    "accn": "0000066740-26-000246",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-07-21",
+    "acceptanceDateTime": "2026-07-21T16:08:01.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "KO",
+    "cik": 21344,
+    "form": "10-Q",
+    "accn": "0001628280-26-050503",
+    "reportDate": "2026-07-03",
+    "filingDate": "2026-07-29",
+    "acceptanceDateTime": "2026-07-29T18:04:37.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "PEP",
+    "cik": 77476,
+    "form": "10-Q",
+    "accn": "0000077476-26-000035",
+    "reportDate": "2026-06-13",
+    "filingDate": "2026-07-09",
+    "acceptanceDateTime": "2026-07-08T21:52:18.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "NKE",
+    "cik": 320187,
+    "form": "10-Q",
+    "accn": "0000320187-26-000193",
+    "reportDate": "2026-08-31",
+    "filingDate": "2026-10-02",
+    "acceptanceDateTime": "2026-10-02T20:15:53.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "TGT",
+    "cik": 27419,
+    "form": "10-Q",
+    "accn": "0000027419-26-000042",
+    "reportDate": "2026-08-01",
+    "filingDate": "2026-08-28",
+    "acceptanceDateTime": "2026-08-28T17:53:59.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "LOW",
+    "cik": 60667,
+    "form": "10-Q",
+    "accn": "0000060667-26-000117",
+    "reportDate": "2026-07-31",
+    "filingDate": "2026-08-27",
+    "acceptanceDateTime": "2026-08-27T20:44:37.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "UPS",
+    "cik": 1090727,
+    "form": "10-Q",
+    "accn": "0001628280-26-053249",
+    "reportDate": "2026-06-30",
+    "filingDate": "2026-08-05",
+    "acceptanceDateTime": "2026-08-05T19:48:32.000Z",
+    "accepted_after_1600_ET": true
+   },
+   {
+    "ticker": "FDX",
+    "cik": 1048911,
+    "form": "10-K",
+    "accn": "0001048911-26-000105",
+    "reportDate": "2026-05-31",
+    "filingDate": "2026-07-20",
+    "acceptanceDateTime": "2026-07-20T20:14:12.000Z",
+    "accepted_after_1600_ET": true
+   }
+  ]
+ },
+ "frames": {
+  "I1_合約負債(新)": {
+   "2009": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": null
+    },
+    "n_all_filers_union": 0,
+    "n_in_universe_union": 0,
+    "cov_in_universe_pct": 0.0
+   },
+   "2010": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": null
+    },
+    "n_all_filers_union": 0,
+    "n_in_universe_union": 0,
+    "cov_in_universe_pct": 0.0
+   },
+   "2011": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": null
+    },
+    "n_all_filers_union": 0,
+    "n_in_universe_union": 0,
+    "cov_in_universe_pct": 0.0
+   },
+   "2012": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": null
+    },
+    "n_all_filers_union": 0,
+    "n_in_universe_union": 0,
+    "cov_in_universe_pct": 0.0
+   },
+   "2014": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": null
+    },
+    "n_all_filers_union": 0,
+    "n_in_universe_union": 0,
+    "cov_in_universe_pct": 0.0
+   },
+   "2016": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": {
+      "n_all_filers": 50,
+      "n_in_universe": 29
+     }
+    },
+    "n_all_filers_union": 50,
+    "n_in_universe_union": 29,
+    "cov_in_universe_pct": 0.3
+   },
+   "2018": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": {
+      "n_all_filers": 1664,
+      "n_in_universe": 1065
+     }
+    },
+    "n_all_filers_union": 1664,
+    "n_in_universe_union": 1065,
+    "cov_in_universe_pct": 12.6
+   },
+   "2020": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": {
+      "n_all_filers": 1992,
+      "n_in_universe": 1462
+     }
+    },
+    "n_all_filers_union": 1992,
+    "n_in_universe_union": 1462,
+    "cov_in_universe_pct": 17.3
+   },
+   "2022": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": {
+      "n_all_filers": 2054,
+      "n_in_universe": 1669
+     }
+    },
+    "n_all_filers_union": 2054,
+    "n_in_universe_union": 1669,
+    "cov_in_universe_pct": 19.7
+   },
+   "2024": {
+    "per_tag": {
+     "ContractWithCustomerLiabilityCurrent": {
+      "n_all_filers": 2033,
+      "n_in_universe": 1920
+     }
+    },
+    "n_all_filers_union": 2033,
+    "n_in_universe_union": 1920,
+    "cov_in_universe_pct": 22.7
+   }
+  },
+  "I1_遞延收入(舊)": {
+   "2009": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 301,
+      "n_in_universe": 150
+     }
+    },
+    "n_all_filers_union": 301,
+    "n_in_universe_union": 150,
+    "cov_in_universe_pct": 1.8
+   },
+   "2010": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 1446,
+      "n_in_universe": 507
+     }
+    },
+    "n_all_filers_union": 1446,
+    "n_in_universe_union": 507,
+    "cov_in_universe_pct": 6.0
+   },
+   "2011": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 1856,
+      "n_in_universe": 642
+     }
+    },
+    "n_all_filers_union": 1856,
+    "n_in_universe_union": 642,
+    "cov_in_universe_pct": 7.6
+   },
+   "2012": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 1823,
+      "n_in_universe": 688
+     }
+    },
+    "n_all_filers_union": 1823,
+    "n_in_universe_union": 688,
+    "cov_in_universe_pct": 8.1
+   },
+   "2014": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 1839,
+      "n_in_universe": 784
+     }
+    },
+    "n_all_filers_union": 1839,
+    "n_in_universe_union": 784,
+    "cov_in_universe_pct": 9.3
+   },
+   "2016": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 1710,
+      "n_in_universe": 887
+     }
+    },
+    "n_all_filers_union": 1710,
+    "n_in_universe_union": 887,
+    "cov_in_universe_pct": 10.5
+   },
+   "2018": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 801,
+      "n_in_universe": 471
+     }
+    },
+    "n_all_filers_union": 801,
+    "n_in_universe_union": 471,
+    "cov_in_universe_pct": 5.6
+   },
+   "2020": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 663,
+      "n_in_universe": 433
+     }
+    },
+    "n_all_filers_union": 663,
+    "n_in_universe_union": 433,
+    "cov_in_universe_pct": 5.1
+   },
+   "2022": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 693,
+      "n_in_universe": 525
+     }
+    },
+    "n_all_filers_union": 693,
+    "n_in_universe_union": 525,
+    "cov_in_universe_pct": 6.2
+   },
+   "2024": {
+    "per_tag": {
+     "DeferredRevenueCurrent": {
+      "n_all_filers": 537,
+      "n_in_universe": 499
+     }
+    },
+    "n_all_filers_union": 537,
+    "n_in_universe_union": 499,
+    "cov_in_universe_pct": 5.9
+   }
+  },
+  "I2_存貨": {
+   "2009": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 720,
+      "n_in_universe": 420
+     }
+    },
+    "n_all_filers_union": 720,
+    "n_in_universe_union": 420,
+    "cov_in_universe_pct": 5.0
+   },
+   "2010": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 2726,
+      "n_in_universe": 1026
+     }
+    },
+    "n_all_filers_union": 2726,
+    "n_in_universe_union": 1026,
+    "cov_in_universe_pct": 12.1
+   },
+   "2011": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 3387,
+      "n_in_universe": 1288
+     }
+    },
+    "n_all_filers_union": 3387,
+    "n_in_universe_union": 1288,
+    "cov_in_universe_pct": 15.2
+   },
+   "2012": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 3244,
+      "n_in_universe": 1348
+     }
+    },
+    "n_all_filers_union": 3244,
+    "n_in_universe_union": 1348,
+    "cov_in_universe_pct": 15.9
+   },
+   "2014": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 3128,
+      "n_in_universe": 1485
+     }
+    },
+    "n_all_filers_union": 3128,
+    "n_in_universe_union": 1485,
+    "cov_in_universe_pct": 17.6
+   },
+   "2016": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 2844,
+      "n_in_universe": 1604
+     }
+    },
+    "n_all_filers_union": 2844,
+    "n_in_universe_union": 1604,
+    "cov_in_universe_pct": 19.0
+   },
+   "2018": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 2699,
+      "n_in_universe": 1749
+     }
+    },
+    "n_all_filers_union": 2699,
+    "n_in_universe_union": 1749,
+    "cov_in_universe_pct": 20.7
+   },
+   "2020": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 2814,
+      "n_in_universe": 2023
+     }
+    },
+    "n_all_filers_union": 2814,
+    "n_in_universe_union": 2023,
+    "cov_in_universe_pct": 23.9
+   },
+   "2022": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 2807,
+      "n_in_universe": 2245
+     }
+    },
+    "n_all_filers_union": 2807,
+    "n_in_universe_union": 2245,
+    "cov_in_universe_pct": 26.5
+   },
+   "2024": {
+    "per_tag": {
+     "InventoryNet": {
+      "n_all_filers": 2593,
+      "n_in_universe": 2445
+     }
+    },
+    "n_all_filers_union": 2593,
+    "n_in_universe_union": 2445,
+    "cov_in_universe_pct": 28.9
+   }
+  },
+  "I2I3_銷貨成本": {
+   "2009": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 85,
+      "n_in_universe": 58
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 130,
+      "n_in_universe": 76
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 90,
+      "n_in_universe": 53
+     }
+    },
+    "n_all_filers_union": 273,
+    "n_in_universe_union": 170,
+    "cov_in_universe_pct": 2.0
+   },
+   "2010": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 330,
+      "n_in_universe": 145
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 530,
+      "n_in_universe": 201
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 336,
+      "n_in_universe": 122
+     }
+    },
+    "n_all_filers_union": 1076,
+    "n_in_universe_union": 420,
+    "cov_in_universe_pct": 5.0
+   },
+   "2011": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 383,
+      "n_in_universe": 161
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 625,
+      "n_in_universe": 234
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 453,
+      "n_in_universe": 151
+     }
+    },
+    "n_all_filers_union": 1304,
+    "n_in_universe_union": 488,
+    "cov_in_universe_pct": 5.8
+   },
+   "2012": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 345,
+      "n_in_universe": 150
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 587,
+      "n_in_universe": 239
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 459,
+      "n_in_universe": 161
+     }
+    },
+    "n_all_filers_union": 1255,
+    "n_in_universe_union": 502,
+    "cov_in_universe_pct": 5.9
+   },
+   "2014": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 305,
+      "n_in_universe": 152
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 552,
+      "n_in_universe": 264
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 441,
+      "n_in_universe": 179
+     }
+    },
+    "n_all_filers_union": 1166,
+    "n_in_universe_union": 533,
+    "cov_in_universe_pct": 6.3
+   },
+   "2016": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 283,
+      "n_in_universe": 164
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 476,
+      "n_in_universe": 276
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 414,
+      "n_in_universe": 209
+     }
+    },
+    "n_all_filers_union": 1048,
+    "n_in_universe_union": 581,
+    "cov_in_universe_pct": 6.9
+   },
+   "2018": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 656,
+      "n_in_universe": 464
+     },
+     "CostOfGoodsSold": {
+      "n_all_filers": 26,
+      "n_in_universe": 18
+     },
+     "CostOfRevenue": {
+      "n_all_filers": 385,
+      "n_in_universe": 235
+     }
+    },
+    "n_all_filers_union": 1000,
+    "n_in_universe_union": 672,
+    "cov_in_universe_pct": 7.9
+   },
+   "2020": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 548,
+      "n_in_universe": 412
+     },
+     "CostOfGoodsSold": null,
+     "CostOfRevenue": {
+      "n_all_filers": 361,
+      "n_in_universe": 238
+     }
+    },
+    "n_all_filers_union": 883,
+    "n_in_universe_union": 631,
+    "cov_in_universe_pct": 7.5
+   },
+   "2022": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 422,
+      "n_in_universe": 350
+     },
+     "CostOfGoodsSold": null,
+     "CostOfRevenue": {
+      "n_all_filers": 311,
+      "n_in_universe": 223
+     }
+    },
+    "n_all_filers_union": 708,
+    "n_in_universe_union": 554,
+    "cov_in_universe_pct": 6.6
+   },
+   "2024": {
+    "per_tag": {
+     "CostOfGoodsAndServicesSold": {
+      "n_all_filers": 386,
+      "n_in_universe": 362
+     },
+     "CostOfGoodsSold": null,
+     "CostOfRevenue": {
+      "n_all_filers": 281,
+      "n_in_universe": 251
+     }
+    },
+    "n_all_filers_union": 641,
+    "n_in_universe_union": 589,
+    "cov_in_universe_pct": 7.0
+   }
+  },
+  "I3_毛利": {
+   "2009": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 327,
+      "n_in_universe": 197
+     }
+    },
+    "n_all_filers_union": 327,
+    "n_in_universe_union": 197,
+    "cov_in_universe_pct": 2.3
+   },
+   "2010": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 1383,
+      "n_in_universe": 601
+     }
+    },
+    "n_all_filers_union": 1383,
+    "n_in_universe_union": 601,
+    "cov_in_universe_pct": 7.1
+   },
+   "2011": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 2027,
+      "n_in_universe": 844
+     }
+    },
+    "n_all_filers_union": 2027,
+    "n_in_universe_union": 844,
+    "cov_in_universe_pct": 10.0
+   },
+   "2012": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 2025,
+      "n_in_universe": 886
+     }
+    },
+    "n_all_filers_union": 2025,
+    "n_in_universe_union": 886,
+    "cov_in_universe_pct": 10.5
+   },
+   "2014": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 1961,
+      "n_in_universe": 964
+     }
+    },
+    "n_all_filers_union": 1961,
+    "n_in_universe_union": 964,
+    "cov_in_universe_pct": 11.4
+   },
+   "2016": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 1772,
+      "n_in_universe": 1041
+     }
+    },
+    "n_all_filers_union": 1772,
+    "n_in_universe_union": 1041,
+    "cov_in_universe_pct": 12.3
+   },
+   "2018": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 1581,
+      "n_in_universe": 1072
+     }
+    },
+    "n_all_filers_union": 1581,
+    "n_in_universe_union": 1072,
+    "cov_in_universe_pct": 12.7
+   },
+   "2020": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 1256,
+      "n_in_universe": 932
+     }
+    },
+    "n_all_filers_union": 1256,
+    "n_in_universe_union": 932,
+    "cov_in_universe_pct": 11.0
+   },
+   "2022": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 746,
+      "n_in_universe": 589
+     }
+    },
+    "n_all_filers_union": 746,
+    "n_in_universe_union": 589,
+    "cov_in_universe_pct": 7.0
+   },
+   "2024": {
+    "per_tag": {
+     "GrossProfit": {
+      "n_all_filers": 630,
+      "n_in_universe": 580
+     }
+    },
+    "n_all_filers_union": 630,
+    "n_in_universe_union": 580,
+    "cov_in_universe_pct": 6.9
+   }
+  },
+  "I4_資本支出": {
+   "2009": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 114,
+      "n_in_universe": 70
+     }
+    },
+    "n_all_filers_union": 114,
+    "n_in_universe_union": 70,
+    "cov_in_universe_pct": 0.8
+   },
+   "2010": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 384,
+      "n_in_universe": 155
+     }
+    },
+    "n_all_filers_union": 384,
+    "n_in_universe_union": 155,
+    "cov_in_universe_pct": 1.8
+   },
+   "2011": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 428,
+      "n_in_universe": 169
+     }
+    },
+    "n_all_filers_union": 428,
+    "n_in_universe_union": 169,
+    "cov_in_universe_pct": 2.0
+   },
+   "2012": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 406,
+      "n_in_universe": 176
+     }
+    },
+    "n_all_filers_union": 406,
+    "n_in_universe_union": 176,
+    "cov_in_universe_pct": 2.1
+   },
+   "2014": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 367,
+      "n_in_universe": 192
+     }
+    },
+    "n_all_filers_union": 367,
+    "n_in_universe_union": 192,
+    "cov_in_universe_pct": 2.3
+   },
+   "2016": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 310,
+      "n_in_universe": 187
+     }
+    },
+    "n_all_filers_union": 310,
+    "n_in_universe_union": 187,
+    "cov_in_universe_pct": 2.2
+   },
+   "2018": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 286,
+      "n_in_universe": 206
+     }
+    },
+    "n_all_filers_union": 286,
+    "n_in_universe_union": 206,
+    "cov_in_universe_pct": 2.4
+   },
+   "2020": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 260,
+      "n_in_universe": 203
+     }
+    },
+    "n_all_filers_union": 260,
+    "n_in_universe_union": 203,
+    "cov_in_universe_pct": 2.4
+   },
+   "2022": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 246,
+      "n_in_universe": 210
+     }
+    },
+    "n_all_filers_union": 246,
+    "n_in_universe_union": 210,
+    "cov_in_universe_pct": 2.5
+   },
+   "2024": {
+    "per_tag": {
+     "PaymentsToAcquirePropertyPlantAndEquipment": {
+      "n_all_filers": 209,
+      "n_in_universe": 197
+     }
+    },
+    "n_all_filers_union": 209,
+    "n_in_universe_union": 197,
+    "cov_in_universe_pct": 2.3
+   }
+  },
+  "營收": {
+   "2009": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": {
+      "n_all_filers": 1,
+      "n_in_universe": 0
+     },
+     "Revenues": {
+      "n_all_filers": 247,
+      "n_in_universe": 145
+     }
+    },
+    "n_all_filers_union": 248,
+    "n_in_universe_union": 145,
+    "cov_in_universe_pct": 1.7
+   },
+   "2010": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": null,
+     "Revenues": {
+      "n_all_filers": 1158,
+      "n_in_universe": 449
+     }
+    },
+    "n_all_filers_union": 1158,
+    "n_in_universe_union": 449,
+    "cov_in_universe_pct": 5.3
+   },
+   "2011": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": null,
+     "Revenues": {
+      "n_all_filers": 1875,
+      "n_in_universe": 668
+     }
+    },
+    "n_all_filers_union": 1875,
+    "n_in_universe_union": 668,
+    "cov_in_universe_pct": 7.9
+   },
+   "2012": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": null,
+     "Revenues": {
+      "n_all_filers": 1956,
+      "n_in_universe": 725
+     }
+    },
+    "n_all_filers_union": 1956,
+    "n_in_universe_union": 725,
+    "cov_in_universe_pct": 8.6
+   },
+   "2014": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": null,
+     "Revenues": {
+      "n_all_filers": 1912,
+      "n_in_universe": 795
+     }
+    },
+    "n_all_filers_union": 1912,
+    "n_in_universe_union": 795,
+    "cov_in_universe_pct": 9.4
+   },
+   "2016": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": {
+      "n_all_filers": 72,
+      "n_in_universe": 50
+     },
+     "Revenues": {
+      "n_all_filers": 1831,
+      "n_in_universe": 949
+     }
+    },
+    "n_all_filers_union": 1879,
+    "n_in_universe_union": 982,
+    "cov_in_universe_pct": 11.6
+   },
+   "2018": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": {
+      "n_all_filers": 1415,
+      "n_in_universe": 947
+     },
+     "Revenues": {
+      "n_all_filers": 1799,
+      "n_in_universe": 1138
+     }
+    },
+    "n_all_filers_union": 2925,
+    "n_in_universe_union": 1898,
+    "cov_in_universe_pct": 22.4
+   },
+   "2020": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": {
+      "n_all_filers": 1172,
+      "n_in_universe": 874
+     },
+     "Revenues": {
+      "n_all_filers": 1065,
+      "n_in_universe": 742
+     }
+    },
+    "n_all_filers_union": 2132,
+    "n_in_universe_union": 1536,
+    "cov_in_universe_pct": 18.2
+   },
+   "2022": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": {
+      "n_all_filers": 611,
+      "n_in_universe": 499
+     },
+     "Revenues": {
+      "n_all_filers": 581,
+      "n_in_universe": 422
+     }
+    },
+    "n_all_filers_union": 1109,
+    "n_in_universe_union": 855,
+    "cov_in_universe_pct": 10.1
+   },
+   "2024": {
+    "per_tag": {
+     "RevenueFromContractWithCustomerExcludingAssessedTax": {
+      "n_all_filers": 555,
+      "n_in_universe": 521
+     },
+     "Revenues": {
+      "n_all_filers": 456,
+      "n_in_universe": 404
+     }
+    },
+    "n_all_filers_union": 925,
+    "n_in_universe_union": 845,
+    "cov_in_universe_pct": 10.0
+   }
+  },
+  "總資產(分母)": {
+   "2009": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 1425,
+      "n_in_universe": 808
+     }
+    },
+    "n_all_filers_union": 1425,
+    "n_in_universe_union": 808,
+    "cov_in_universe_pct": 9.6
+   },
+   "2010": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 6512,
+      "n_in_universe": 2142
+     }
+    },
+    "n_all_filers_union": 6512,
+    "n_in_universe_union": 2142,
+    "cov_in_universe_pct": 25.3
+   },
+   "2011": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 8166,
+      "n_in_universe": 2623
+     }
+    },
+    "n_all_filers_union": 8166,
+    "n_in_universe_union": 2623,
+    "cov_in_universe_pct": 31.0
+   },
+   "2012": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 7851,
+      "n_in_universe": 2746
+     }
+    },
+    "n_all_filers_union": 7851,
+    "n_in_universe_union": 2746,
+    "cov_in_universe_pct": 32.5
+   },
+   "2014": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 7494,
+      "n_in_universe": 3062
+     }
+    },
+    "n_all_filers_union": 7494,
+    "n_in_universe_union": 3062,
+    "cov_in_universe_pct": 36.2
+   },
+   "2016": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 6672,
+      "n_in_universe": 3315
+     }
+    },
+    "n_all_filers_union": 6672,
+    "n_in_universe_union": 3315,
+    "cov_in_universe_pct": 39.2
+   },
+   "2018": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 6305,
+      "n_in_universe": 3690
+     }
+    },
+    "n_all_filers_union": 6305,
+    "n_in_universe_union": 3690,
+    "cov_in_universe_pct": 43.6
+   },
+   "2020": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 6849,
+      "n_in_universe": 4447
+     }
+    },
+    "n_all_filers_union": 6849,
+    "n_in_universe_union": 4447,
+    "cov_in_universe_pct": 52.6
+   },
+   "2022": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 6871,
+      "n_in_universe": 4989
+     }
+    },
+    "n_all_filers_union": 6871,
+    "n_in_universe_union": 4989,
+    "cov_in_universe_pct": 59.0
+   },
+   "2024": {
+    "per_tag": {
+     "Assets": {
+      "n_all_filers": 6271,
+      "n_in_universe": 5545
+     }
+    },
+    "n_all_filers_union": 6271,
+    "n_in_universe_union": 5545,
+    "cov_in_universe_pct": 65.6
+   }
+  }
+ },
+ "frames_annual_duration": {
+  "I2I3_銷貨成本": {
+   "2009": {
+    "n_all": 2080,
+    "n_uni": 961
+   },
+   "2010": {
+    "n_all": 3303,
+    "n_uni": 1282
+   },
+   "2011": {
+    "n_all": 3758,
+    "n_uni": 1397
+   },
+   "2012": {
+    "n_all": 3674,
+    "n_uni": 1477
+   },
+   "2014": {
+    "n_all": 3547,
+    "n_uni": 1624
+   },
+   "2016": {
+    "n_all": 3438,
+    "n_uni": 1929
+   },
+   "2018": {
+    "n_all": 3425,
+    "n_uni": 2153
+   },
+   "2020": {
+    "n_all": 3445,
+    "n_uni": 2463
+   },
+   "2022": {
+    "n_all": 3512,
+    "n_uni": 2819
+   },
+   "2024": {
+    "n_all": 3229,
+    "n_uni": 3021
+   }
+  },
+  "I3_毛利": {
+   "2009": {
+    "n_all": 1642,
+    "n_uni": 736
+   },
+   "2010": {
+    "n_all": 2857,
+    "n_uni": 1054
+   },
+   "2011": {
+    "n_all": 3346,
+    "n_uni": 1166
+   },
+   "2012": {
+    "n_all": 3276,
+    "n_uni": 1241
+   },
+   "2014": {
+    "n_all": 3101,
+    "n_uni": 1349
+   },
+   "2016": {
+    "n_all": 2768,
+    "n_uni": 1481
+   },
+   "2018": {
+    "n_all": 2643,
+    "n_uni": 1635
+   },
+   "2020": {
+    "n_all": 2777,
+    "n_uni": 1961
+   },
+   "2022": {
+    "n_all": 2879,
+    "n_uni": 2306
+   },
+   "2024": {
+    "n_all": 2627,
+    "n_uni": 2471
+   }
+  },
+  "I4_資本支出": {
+   "2009": {
+    "n_all": 3069,
+    "n_uni": 1339
+   },
+   "2010": {
+    "n_all": 4592,
+    "n_uni": 1736
+   },
+   "2011": {
+    "n_all": 5180,
+    "n_uni": 1900
+   },
+   "2012": {
+    "n_all": 5068,
+    "n_uni": 2018
+   },
+   "2014": {
+    "n_all": 4780,
+    "n_uni": 2214
+   },
+   "2016": {
+    "n_all": 4324,
+    "n_uni": 2412
+   },
+   "2018": {
+    "n_all": 4278,
+    "n_uni": 2729
+   },
+   "2020": {
+    "n_all": 4431,
+    "n_uni": 3201
+   },
+   "2022": {
+    "n_all": 4415,
+    "n_uni": 3583
+   },
+   "2024": {
+    "n_all": 3948,
+    "n_uni": 3716
+   }
+  },
+  "營收": {
+   "2009": {
+    "n_all": 1812,
+    "n_uni": 741
+   },
+   "2010": {
+    "n_all": 3101,
+    "n_uni": 1058
+   },
+   "2011": {
+    "n_all": 3858,
+    "n_uni": 1253
+   },
+   "2012": {
+    "n_all": 3879,
+    "n_uni": 1360
+   },
+   "2014": {
+    "n_all": 3600,
+    "n_uni": 1445
+   },
+   "2016": {
+    "n_all": 4389,
+    "n_uni": 2418
+   },
+   "2018": {
+    "n_all": 4986,
+    "n_uni": 3039
+   },
+   "2020": {
+    "n_all": 5163,
+    "n_uni": 3566
+   },
+   "2022": {
+    "n_all": 5215,
+    "n_uni": 4080
+   },
+   "2024": {
+    "n_all": 4773,
+    "n_uni": 4379
+   }
+  }
+ },
+ "frames_annual_note": "D(期間)型欄位改用年度 frames CY{年}；原 CY{年}Q4 只涵蓋日曆季對齊的單季揭露，會嚴重低估真實可得率"
+}

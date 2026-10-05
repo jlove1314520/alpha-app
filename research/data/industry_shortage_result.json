@@ -575,5 +575,43 @@
  "first_failed_gate": "gate2_survival",
  "first_failed_gate_name": "天條一",
  "survivorship_disclaimer": "下市股缺漏，偏誤方向對策略有利，判讀從嚴；桶歸屬為當前名冊（stock_map），同樣有時點偏誤",
- "elapsed_min": 6.552861154079437
+ "elapsed_min": 6.552861154079437,
+ "inputs": [
+  {
+   "path": "research/data/supply_tightness_panel.pkl",
+   "build_script": "research/supply_tightness_panel.py",
+   "params": {
+    "note": "離線建置，只讀 research/data/raw 快取"
+   },
+   "retroactive": true,
+   "retroactive_note": "事後補記（先.十六-二，2026-10-05）：非單發執行當下記錄；SHA256 為補記時本機檔現況。檔案 mtime 早於 result.json（liquidity 01:06 < result 01:13；panel 2026-10-01），與執行順序相容，但無法證明執行當下內容即此版本。",
+   "size_bytes": 244333554,
+   "built_at_mtime": "2026-10-01T00:09:04",
+   "sha256": "5516727cc2ab1bc4c8777b9d3fb54d0852c8060bd9c6cc034ff9e82a26798ead"
+  },
+  {
+   "path": "research/data/industry_shortage_liquidity.pkl",
+   "build_script": "research/industry_shortage_liquidity.py",
+   "params": {
+    "roll_window_days": 60,
+    "field": "Trading_money",
+    "cutoff": "2024-12-31"
+   },
+   "retroactive": true,
+   "retroactive_note": "事後補記（先.十六-二，2026-10-05）：非單發執行當下記錄；SHA256 為補記時本機檔現況。檔案 mtime 早於 result.json（liquidity 01:06 < result 01:13；panel 2026-10-01），與執行順序相容，但無法證明執行當下內容即此版本。",
+   "size_bytes": 58921367,
+   "built_at_mtime": "2026-10-05T01:06:15",
+   "sha256": "4385ca67f1647eb1e0f7ec3338809da77f1349d77d5c98a5da9b3962752ae677"
+  },
+  {
+   "path": "docs/industry_shortage_stock_map.csv",
+   "build_script": "人工維護，進 repo",
+   "params": null,
+   "retroactive": true,
+   "retroactive_note": "事後補記（先.十六-二，2026-10-05）：非單發執行當下記錄；SHA256 為補記時本機檔現況。檔案 mtime 早於 result.json（liquidity 01:06 < result 01:13；panel 2026-10-01），與執行順序相容，但無法證明執行當下內容即此版本。",
+   "size_bytes": 144540,
+   "built_at_mtime": "2026-10-02T23:58:21",
+   "sha256": "40b9a16752019499f4fa53717974dd9c66574301432320a794bab9002a7763bc"
+  }
+ ]
 }
