@@ -473,6 +473,15 @@ def run_all():
             return o.tolist()
         return str(o)
 
+    # 先.十六-二：不進 repo 的中間檔記 SHA256／建置時間／建置腳本／參數
+    try:
+        from input_provenance import describe_inputs
+        res["inputs"] = describe_inputs([
+            {"path": PANEL, "build_script": "research/supply_tightness_panel.py", "params": {"note": "離線建置，只讀 research/data/raw 快取"}},
+        ])
+    except Exception as e:  # noqa: BLE001 -- 記錄失敗不得中斷單發結果寫檔
+        print(f"WARN_INPUT_PROVENANCE_FAILED: {type(e).__name__}: {e}", flush=True)
+        res["inputs"] = {"error": f"{type(e).__name__}: {e}"}
     OUT.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=conv), encoding="utf-8")
     prog(f"已寫入 {OUT}")
     return 0

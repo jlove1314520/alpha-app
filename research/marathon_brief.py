@@ -62,6 +62,14 @@ def main() -> None:
     else:
         print("（尚無紀錄：新版 run-marathon-cycle.ps1 第一次跑之後才會有）")
 
+    _section("1b. 互動視窗執行中標記（先.十六-一 單發防撞，有標記的條目本輪一律讓行、不碰）")
+    try:
+        r0 = subprocess.run([sys.executable, str(RESEARCH.parent / "scripts" / "interactive_yield.py")],
+                            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
+        print(r0.stdout.rstrip() or r0.stderr.rstrip() or "（無輸出）")
+    except Exception as e:  # noqa: BLE001 — 簡報不能因為讓行偵測失敗就整份不能看
+        print(f"（讓行偵測執行失敗，不中斷簡報：{e!r}）")
+
     _section("2. 鎖檔與脫離session工作登記簿")
     lock = RESEARCH / ".marathon.lock"
     print("鎖檔:", lock.read_text(encoding="utf-8").strip() if lock.exists() else "（無）")

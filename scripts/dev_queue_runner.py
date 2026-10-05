@@ -78,6 +78,14 @@ MAX_CONSECUTIVE_FAILS = 2
 
 sys.path.insert(0, str(ROOT / "research"))
 import marathon_lock  # noqa: E402 -- 同目錄下的鎖工具，重用它的鎖檔格式與陳舊門檻判斷
+try:  # 先.十六-一 單發防撞；匯入失敗 fail open（寧可漏抓不可癱瘓，CLAUDE.md 十二）
+    from interactive_yield import has_mark as _yield_has_mark, report as _yield_report  # noqa: E402
+except Exception:  # noqa: BLE001
+    def _yield_has_mark(text):  # type: ignore[misc]
+        return False
+
+    def _yield_report(lines):  # type: ignore[misc]
+        return []
 from queue_depth_config import MIN_QUEUE_DEPTH, TARGET_QUEUE_DEPTH  # noqa: E402 -- 單一事實來源，2026-09-20裁示【Q4前視與#23無法重現】四
 
 # 2026-09-10（重開機復原.第二輪，總司令裁示「修機制不是手收尾」）：
@@ -271,6 +279,13 @@ def find_next() -> tuple[int, str] | None:
     DevQueue 做的」，呼叫端要用 `_has_any_pending_line()` 分辨這兩種情況。
     """
     lines = _lines()
+    # 2026-10-05（先.十六-一）：帶「〔互動視窗執行中〕」標記的條目在 cycle log 記「讓行」
+    # （實際跳過由 item_class()==「互動視窗」達成）；偵測自身失敗只降級
+    try:
+        for _m in _yield_report(lines):
+            _safe_print(_m)
+    except Exception:  # noqa: BLE001
+        pass
     pending = [(i, ln) for i, ln in enumerate(lines) if ln.startswith("- [ ]")]
     if not pending:
         return None
@@ -370,6 +385,12 @@ def item_class(text: str) -> str:
     `(?!或)`排除掉散文裡「（互動視窗或DevQueue皆可，非單一寫入者限定檔案）」
     這種明確標示雙方都可接手的措辭（目前這類措辭都不是緊跟在`**代號**`
     之後，不會誤觸，這裡只是防未來真的有人這樣寫）。"""
+    # 2026-10-05（先.十六-一）：「〔互動視窗執行中 ...〕」單發防撞標記優先於一切分類
+    try:
+        if _yield_has_mark(text):
+            return "互動視窗"
+    except Exception:  # noqa: BLE001 -- 守門員自身失敗只降級，fail open
+        pass
     m = INLINE_CLASS_TAG.search(text)
     if m:
         return "研究" if m.group(1) == "[研究]" else "產品"
