@@ -17485,10 +17485,10 @@ push 後停下等 Cowork 核對。
 五、Shioaji 先.六-四／先.七-一 結案（10/5 13:30 有 48 檔 REALTIME_TICK）。quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報。
 紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
 
-- [ ] **先.十七-一 美股草案八項裁示寫入 docs/PREREG_DRAFT_us_supply_tightness.md（含不得移除的存活者偏誤但書）**（前置：先.十五 盤點、先.十六 三項完成並驗證）
-- [ ] **先.十七-二 執行前檢查（不看報酬）：宇宙過濾後逐換股日可計分檔數／落後池／季度 YoY 覆蓋率／I1 新舊概念銜接 20 家／FRED 3M T-bill 實測；任一換股日 <300 檔或指標兩兩 |r|>0.7 即停下回報**
-- [ ] **先.十七-三 通過後定稿 docs/PREREG_us_supply_tightness_FINAL.md＋SHA256＋TRIALS_LEDGER 事前登記＋commit/push（push 完成才可執行）**
-- [ ] **先.十七-四 依 §4(d) 順序單發（先加「〔互動視窗執行中〕」標記、中間檔 SHA256 記入 result.json inputs）→ research/data/us_supply_tightness_result.json＋判定列；印出後不得重跑；PASS→僅前進式紙上追蹤，FAIL→墳場不重試**
+- [!] **先.十七-一 美股草案八項裁示寫入 docs/PREREG_DRAFT_us_supply_tightness.md（含不得移除的存活者偏誤但書）**（前置：先.十五 盤點、先.十六 三項完成並驗證）　**⛔ 自走中止（2026-10-05 15:31）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
+- [!] **先.十七-二 執行前檢查（不看報酬）：宇宙過濾後逐換股日可計分檔數／落後池／季度 YoY 覆蓋率／I1 新舊概念銜接 20 家／FRED 3M T-bill 實測；任一換股日 <300 檔或指標兩兩 |r|>0.7 即停下回報**
+- [!] **先.十七-三 通過後定稿 docs/PREREG_us_supply_tightness_FINAL.md＋SHA256＋TRIALS_LEDGER 事前登記＋commit/push（push 完成才可執行）**
+- [!] **先.十七-四 依 §4(d) 順序單發（先加「〔互動視窗執行中〕」標記、中間檔 SHA256 記入 result.json inputs）→ research/data/us_supply_tightness_result.json＋判定列；印出後不得重跑；PASS→僅前進式紙上追蹤，FAIL→墳場不重試** ⛔ BLOCKED（2026-10-05 馬拉松軌）：前置先.十七-一已BLOCKED（美股母體非survivorship-free、SIC過濾僅9檔，需總司令裁示資料源），且凍結.二期間不得登記新alpha試驗；解除條件＝先.十七-一解除且凍結.二解除（轉向.一完成）。先.十七-二／三同此。
 - [!] **先.十七-五 Shioaji 先.六-四／先.七-一 結案（10/5 13:30 48 檔 REALTIME_TICK）＋quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報**
   〔hypothesis_queue 軌 2026-10-05 15:3x 部分完成，只做心跳模式下的交辦〕**Shioaji 部分結案**：`data/quotes_sinopac.json` 於 commit 50ac52fbb（10/5 13:45:40）`connected=true`、`market_status=open`、48 檔全為 `data_type=REALTIME_TICK`，`research/.live_state_sinopac.json` mtime 10/5 13:45（10/1、10/2 皆未更新、本日恢復）→ 先.六-四／先.七-一 可依原定分支標結案（登入成功分支；該兩條原文仍在上方 [!]，由互動視窗／Cowork 核對後改 [x]，本軌不動其標記）。**quotes.yml 派發延遲**：`log_dispatch_delay.py --since 2026-10-05 --workflow quotes.yml` 新增 0 筆（唯一一筆 10/5 06:53Z schedule run 無法配對排定時間，market.yml 預設參數則回「沒有符合的 schedule run」）；dispatch_delay_log 目前僅有 10/2 兩筆（max 392.9 分）。**未達連續 3 日，不回報結論**——解除條件：10/7 後有 3 個日曆日（10/5、10/6、10/7）的 schedule run 可配對資料再回報；若 quotes.yml 仍無法配對，需先查 cron 排定時間對應邏輯（屬 scripts 修正，非本軌凍結範圍）。先.十七-一～四 屬互動視窗 15:17 才標 BLOCKED 的新 alpha 軸（母體非 survivorship-free），本軌讓行不碰。
 
