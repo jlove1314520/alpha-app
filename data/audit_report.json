@@ -1,11 +1,11 @@
 {
- "generated_at": "2026-10-05T23:00:02.966935+08:00",
- "duration_sec": 20.3,
+ "generated_at": "2026-10-06T06:04:46.066403+08:00",
+ "duration_sec": 7.8,
  "reference": {
   "twse": {
    "ok": true,
-   "rows": 1380,
-   "usable": 1231
+   "rows": 1381,
+   "usable": 1232
   },
   "tpex": {
    "ok": true,
@@ -13,74 +13,57 @@
    "usable": 886
   }
  },
- "universe": 2117,
- "reference_date": "2026-10-02",
+ "universe": 2118,
+ "reference_date": "2026-10-05",
  "listed_universe_size": 2142,
- "stocks_with_violation": 85,
+ "stocks_with_violation": 1,
  "code_free_violations": 0,
  "completeness_gap_stocks": 569,
- "completeness_gap_rate": 0.26878,
- "violation_rate": 0.04015,
+ "completeness_gap_rate": 0.26865,
+ "violation_rate": 0.00047,
  "violation_rate_gate": 0.01,
- "gate_pass": false,
+ "gate_pass": true,
  "informational_only_checks": [
   "e_pe"
  ],
  "a4_mixed_date": {
-  "max_date": "2026-10-02",
-  "checked": 2117,
-  "mixed_date_count": 16,
-  "mixed_date_rate": 0.00756,
-  "mixed_date_codes_sample": [
-   "2751",
-   "3684",
-   "4175",
-   "4192",
-   "5455",
-   "5703",
-   "6276",
-   "6661",
-   "6680",
-   "6721",
-   "7584",
-   "7713",
-   "8080",
-   "8455",
-   "8917",
-   "8923"
-  ],
+  "max_date": "2026-10-05",
+  "checked": 2118,
+  "mixed_date_count": 0,
+  "mixed_date_rate": 0.0,
+  "mixed_date_codes_sample": [],
   "note": "全市場（universe=官方今日有收盤價的普通股/ETF）比對price_history.json每檔最後一筆日期與當日最大日期，落後>=1個交易日即計入，不設價差門檻。刻意獨立於violation_rate/informational_only_checks之外，見check_a4_mixed_date()docstring。"
  },
- "total_violations": 772,
+ "total_violations": 598,
  "by_check": {
   "a_price_source": {
-   "checked": 5666,
-   "violations": 144,
-   "unverifiable": 2802,
+   "checked": 6587,
+   "violations": 0,
+   "unverifiable": 1885,
    "note": ""
   },
   "a2_not_in_official": {
    "checked": 0,
    "violations": 0,
    "unverifiable": 0,
-   "note": "歷史檔案（price_history）另有 506 個已下市代號，屬正常歷史保留，不列違規"
+   "note": "歷史檔案（price_history）另有 505 個已下市代號，屬正常歷史保留，不列違規"
   },
   "a3_stale_price": {
-   "checked": 1977,
+   "checked": 1976,
    "violations": 1,
    "unverifiable": 1,
    "note": ""
   },
   "c_range": {
-   "checked": 2117,
-   "violations": 30,
+   "checked": 2118,
+   "violations": 0,
    "unverifiable": 0,
    "note": ""
   },
   "e_pe": {
    "checked": 695,
    "violations": 28,
-   "unverifiable": 853,
+   "unverifiable": 854,
    "note": ""
   },
   "e_quarters_stale": {
@@ -114,7 +97,7 @@
    "code": "3550",
    "name": "聯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 9.295429630892704e+17,
+   "ours": 9.043228051759956e+17,
    "official": 215.0,
    "diff_pct": 100.0,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
@@ -134,9 +117,9 @@
    "code": "4414",
    "name": "如興",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 38.57,
+   "ours": 38.52,
    "official": 54.0,
-   "diff_pct": 40.0,
+   "diff_pct": 40.17,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -151,32 +134,22 @@
   },
   {
    "check": "e_pe",
-   "code": "6579",
-   "name": "研揚",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 16.06,
-   "official": 21.65,
-   "diff_pct": 34.82,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
    "code": "6477",
    "name": "安集",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 865.0,
+   "ours": 851.25,
    "official": 1153.33,
-   "diff_pct": 33.33,
+   "diff_pct": 35.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "3583",
-   "name": "辛耘",
+   "code": "6579",
+   "name": "研揚",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 35.02,
-   "official": 44.23,
-   "diff_pct": 26.31,
+   "ours": 16.01,
+   "official": 21.65,
+   "diff_pct": 35.24,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -184,19 +157,19 @@
    "code": "8249",
    "name": "菱光",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 16.02,
+   "ours": 15.82,
    "official": 20.1,
-   "diff_pct": 25.5,
+   "diff_pct": 27.05,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "1506",
-   "name": "正道",
+   "code": "3583",
+   "name": "辛耘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 245.25,
-   "official": 196.2,
-   "diff_pct": 20.0,
+   "ours": 36.13,
+   "official": 44.23,
+   "diff_pct": 22.41,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -204,19 +177,49 @@
    "code": "2534",
    "name": "宏盛",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 278.33,
+   "ours": 275.83,
    "official": 334.0,
-   "diff_pct": 20.0,
+   "diff_pct": 21.09,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "4906",
-   "name": "正文",
+   "code": "1506",
+   "name": "正道",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 298.93,
-   "official": 348.75,
-   "diff_pct": 16.67,
+   "ours": 242.75,
+   "official": 196.2,
+   "diff_pct": 19.18,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2442",
+   "name": "新美齊",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 2.39,
+   "official": 2.8,
+   "diff_pct": 17.4,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "3135",
+   "name": "凌航",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 5.87,
+   "official": 6.86,
+   "diff_pct": 16.88,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "7610",
+   "name": "聯友金屬-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 59.37,
+   "official": 49.51,
+   "diff_pct": 16.6,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -231,42 +234,12 @@
   },
   {
    "check": "e_pe",
-   "code": "2442",
-   "name": "新美齊",
+   "code": "4906",
+   "name": "正文",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 2.42,
-   "official": 2.8,
-   "diff_pct": 15.75,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "4807",
-   "name": "日成-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.45,
-   "official": 12.08,
-   "diff_pct": 15.6,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3135",
-   "name": "凌航",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 5.94,
-   "official": 6.86,
-   "diff_pct": 15.41,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "7610",
-   "name": "聯友金屬-創",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 56.89,
-   "official": 49.51,
-   "diff_pct": 12.98,
+   "ours": 301.07,
+   "official": 348.75,
+   "diff_pct": 15.84,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -274,19 +247,9 @@
    "code": "6944",
    "name": "兆聯實業",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 22.52,
+   "ours": 22.94,
    "official": 19.85,
-   "diff_pct": 11.86,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "4582",
-   "name": "聚恆-創",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.67,
-   "official": 9.69,
-   "diff_pct": 11.74,
+   "diff_pct": 13.48,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -294,1772 +257,52 @@
    "code": "9941",
    "name": "裕融",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 9.81,
+   "ours": 9.71,
    "official": 10.94,
-   "diff_pct": 11.54,
+   "diff_pct": 12.72,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_pe",
-   "code": "8926",
-   "name": "台汽電",
+   "code": "6796",
+   "name": "晉弘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 14.57,
-   "official": 16.21,
-   "diff_pct": 11.27,
+   "ours": 142.5,
+   "official": 160.28,
+   "diff_pct": 12.48,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2348",
+   "name": "海悅",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 15.0,
+   "official": 16.85,
+   "diff_pct": 12.33,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "4582",
+   "name": "聚恆-創",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 8.63,
+   "official": 9.69,
+   "diff_pct": 12.25,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   }
  ],
  "violations": [
   {
-   "check": "a_price_source",
-   "code": "1303",
-   "name": "南亞",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 286.0,
-   "official": 260.0,
-   "diff_pct": 10.0,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "1595",
-   "name": "川寶",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 79.3,
-   "official": 73.5,
-   "diff_pct": 7.89,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "1595",
-   "name": "川寶",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 79.3,
-   "official": 73.5,
-   "diff_pct": 7.89,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "1714",
-   "name": "和桐",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 18.5,
-   "official": 16.85,
-   "diff_pct": 9.79,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "1773",
-   "name": "勝一",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 180.5,
-   "official": 170.5,
-   "diff_pct": 5.87,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "1815",
-   "name": "富喬",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 121.0,
-   "official": 128.5,
-   "diff_pct": 5.84,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "1815",
-   "name": "富喬",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 121.0,
-   "official": 128.5,
-   "diff_pct": 5.84,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2032",
-   "name": "新鋼",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 19.0,
-   "official": 20.05,
-   "diff_pct": 5.24,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2059",
-   "name": "川湖",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 13355.0,
-   "official": 12145.0,
-   "diff_pct": 9.96,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2313",
-   "name": "華通",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 248.5,
-   "official": 226.0,
-   "diff_pct": 9.96,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2340",
-   "name": "台亞",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 50.3,
-   "official": 45.75,
-   "diff_pct": 9.95,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2360",
-   "name": "致茂",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 2325.0,
-   "official": 2190.0,
-   "diff_pct": 6.16,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2399",
-   "name": "映泰",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 48.6,
-   "official": 51.2,
-   "diff_pct": 5.08,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2426",
-   "name": "鼎元",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 114.0,
-   "official": 104.0,
-   "diff_pct": 9.62,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2466",
-   "name": "冠西電",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 155.0,
-   "official": 141.0,
-   "diff_pct": 9.93,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "2493",
-   "name": "揚博",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 208.0,
-   "official": 196.5,
-   "diff_pct": 5.85,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3064",
-   "name": "泰偉",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 15.8,
-   "official": 14.3,
-   "diff_pct": 10.49,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3064",
-   "name": "泰偉",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 15.8,
-   "official": 14.3,
-   "diff_pct": 10.49,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3114",
-   "name": "好德",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 39.65,
-   "official": 43.6,
-   "diff_pct": 9.06,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3114",
-   "name": "好德",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 39.65,
-   "official": 43.6,
-   "diff_pct": 9.06,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3268",
-   "name": "海德威",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 21.65,
-   "official": 23.1,
-   "diff_pct": 6.28,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3268",
-   "name": "海德威",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 21.65,
-   "official": 23.1,
-   "diff_pct": 6.28,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3284",
-   "name": "太普高",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 20.1,
-   "official": 21.6,
-   "diff_pct": 6.94,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3284",
-   "name": "太普高",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 20.1,
-   "official": 21.6,
-   "diff_pct": 6.94,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3317",
-   "name": "尼克森",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 65.3,
-   "official": 71.8,
-   "diff_pct": 9.05,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3317",
-   "name": "尼克森",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 65.3,
-   "official": 71.8,
-   "diff_pct": 9.05,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3362",
-   "name": "先進光",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 175.5,
-   "official": 191.0,
-   "diff_pct": 8.12,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3362",
-   "name": "先進光",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 175.5,
-   "official": 191.0,
-   "diff_pct": 8.12,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3374",
-   "name": "精材",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 467.5,
-   "official": 498.5,
-   "diff_pct": 6.22,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3374",
-   "name": "精材",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 467.5,
-   "official": 498.5,
-   "diff_pct": 6.22,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3441",
-   "name": "聯一光",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 211.0,
-   "official": 232.0,
-   "diff_pct": 9.05,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3441",
-   "name": "聯一光",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 211.0,
-   "official": 232.0,
-   "diff_pct": 9.05,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3443",
-   "name": "創意",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 8600.0,
-   "official": 7900.0,
-   "diff_pct": 8.86,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3490",
-   "name": "單井",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 50.7,
-   "official": 46.15,
-   "diff_pct": 9.86,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3490",
-   "name": "單井",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 50.7,
-   "official": 46.15,
-   "diff_pct": 9.86,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3491",
-   "name": "昇達科",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 1485.0,
-   "official": 1630.0,
-   "diff_pct": 8.9,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3491",
-   "name": "昇達科",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 1485.0,
-   "official": 1630.0,
-   "diff_pct": 8.9,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3498",
-   "name": "陽程",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 215.0,
-   "official": 236.5,
-   "diff_pct": 9.09,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3498",
-   "name": "陽程",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 215.0,
-   "official": 236.5,
-   "diff_pct": 9.09,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3518",
-   "name": "柏騰",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 48.75,
-   "official": 44.35,
-   "diff_pct": 9.92,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3564",
-   "name": "其陽",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 56.1,
-   "official": 61.7,
-   "diff_pct": 9.08,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3564",
-   "name": "其陽",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 56.1,
-   "official": 61.7,
-   "diff_pct": 9.08,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3597",
-   "name": "映興",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 27.7,
-   "official": 30.45,
-   "diff_pct": 9.03,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3597",
-   "name": "映興",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 27.7,
-   "official": 30.45,
-   "diff_pct": 9.03,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3625",
-   "name": "西勝",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 11.15,
-   "official": 10.4,
-   "diff_pct": 7.21,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3625",
-   "name": "西勝",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 11.15,
-   "official": 10.4,
-   "diff_pct": 7.21,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3629",
-   "name": "地心引力",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 14.6,
-   "official": 13.35,
-   "diff_pct": 9.36,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3629",
-   "name": "地心引力",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 14.6,
-   "official": 13.35,
-   "diff_pct": 9.36,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3691",
-   "name": "碩禾",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 113.0,
-   "official": 105.5,
-   "diff_pct": 7.11,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "3691",
-   "name": "碩禾",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 113.0,
-   "official": 105.5,
-   "diff_pct": 7.11,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4127",
-   "name": "天良",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 45.6,
-   "official": 43.3,
-   "diff_pct": 5.31,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4127",
-   "name": "天良",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 45.6,
-   "official": 43.3,
-   "diff_pct": 5.31,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4154",
-   "name": "樂威科-KY",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 11.25,
-   "official": 11.85,
-   "diff_pct": 5.06,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4154",
-   "name": "樂威科-KY",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 11.25,
-   "official": 11.85,
-   "diff_pct": 5.06,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4174",
-   "name": "浩鼎",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 42.0,
-   "official": 46.2,
-   "diff_pct": 9.09,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4174",
-   "name": "浩鼎",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 42.0,
-   "official": 46.2,
-   "diff_pct": 9.09,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4542",
-   "name": "科嶠",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 336.5,
-   "official": 358.0,
-   "diff_pct": 6.01,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4542",
-   "name": "科嶠",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 336.5,
-   "official": 358.0,
-   "diff_pct": 6.01,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4556",
-   "name": "旭然",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 114.5,
-   "official": 125.5,
-   "diff_pct": 8.76,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4556",
-   "name": "旭然",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 114.5,
-   "official": 125.5,
-   "diff_pct": 8.76,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4609",
-   "name": "唐鋒",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 4.76,
-   "official": 4.31,
-   "diff_pct": 10.44,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4609",
-   "name": "唐鋒",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 4.76,
-   "official": 4.31,
-   "diff_pct": 10.44,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4760",
-   "name": "勤凱",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 317.0,
-   "official": 348.5,
-   "diff_pct": 9.04,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4760",
-   "name": "勤凱",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 317.0,
-   "official": 348.5,
-   "diff_pct": 9.04,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4806",
-   "name": "桂田文創",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 13.4,
-   "official": 12.1,
-   "diff_pct": 10.74,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4806",
-   "name": "桂田文創",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 13.4,
-   "official": 12.1,
-   "diff_pct": 10.74,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4924",
-   "name": "欣厚-KY",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 15.9,
-   "official": 15.0,
-   "diff_pct": 6.0,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4924",
-   "name": "欣厚-KY",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 15.9,
-   "official": 15.0,
-   "diff_pct": 6.0,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4927",
-   "name": "泰鼎-KY",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 52.9,
-   "official": 48.15,
-   "diff_pct": 9.87,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "4949",
-   "name": "有成精密",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 82.5,
-   "official": 77.7,
-   "diff_pct": 6.18,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5011",
-   "name": "久陽",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 20.45,
-   "official": 22.45,
-   "diff_pct": 8.91,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5011",
-   "name": "久陽",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 20.45,
-   "official": 22.45,
-   "diff_pct": 8.91,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5013",
-   "name": "強新",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 46.85,
-   "official": 51.5,
-   "diff_pct": 9.03,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5013",
-   "name": "強新",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 46.85,
-   "official": 51.5,
-   "diff_pct": 9.03,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5016",
-   "name": "松和",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 28.6,
-   "official": 27.0,
-   "diff_pct": 5.93,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5016",
-   "name": "松和",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 28.6,
-   "official": 27.0,
-   "diff_pct": 5.93,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5205",
-   "name": "中茂",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 22.8,
-   "official": 25.05,
-   "diff_pct": 8.98,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5205",
-   "name": "中茂",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 22.8,
-   "official": 25.05,
-   "diff_pct": 8.98,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5227",
-   "name": "立凱-KY",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 30.55,
-   "official": 28.95,
-   "diff_pct": 5.53,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5227",
-   "name": "立凱-KY",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 30.55,
-   "official": 28.95,
-   "diff_pct": 5.53,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5355",
-   "name": "佳總",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 7.4,
-   "official": 7.87,
-   "diff_pct": 5.97,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5355",
-   "name": "佳總",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 7.4,
-   "official": 7.87,
-   "diff_pct": 5.97,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5432",
-   "name": "新門",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 164.5,
-   "official": 178.0,
-   "diff_pct": 7.58,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5432",
-   "name": "新門",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 164.5,
-   "official": 178.0,
-   "diff_pct": 7.58,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5452",
-   "name": "佶優",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 27.95,
-   "official": 30.0,
-   "diff_pct": 6.83,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "5452",
-   "name": "佶優",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 27.95,
-   "official": 30.0,
-   "diff_pct": 6.83,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6120",
-   "name": "達運",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 14.35,
-   "official": 15.25,
-   "diff_pct": 5.9,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6126",
-   "name": "信音",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 31.25,
-   "official": 33.4,
-   "diff_pct": 6.44,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6126",
-   "name": "信音",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 31.25,
-   "official": 33.4,
-   "diff_pct": 6.44,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6144",
-   "name": "得利影",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 14.05,
-   "official": 13.05,
-   "diff_pct": 7.66,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6144",
-   "name": "得利影",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 14.05,
-   "official": 13.05,
-   "diff_pct": 7.66,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6152",
-   "name": "百一",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 17.25,
-   "official": 15.7,
-   "diff_pct": 9.87,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6163",
-   "name": "華電網",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 41.2,
-   "official": 43.4,
-   "diff_pct": 5.07,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6163",
-   "name": "華電網",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 41.2,
-   "official": 43.4,
-   "diff_pct": 5.07,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6174",
-   "name": "安碁",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 55.0,
-   "official": 60.5,
-   "diff_pct": 9.09,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6174",
-   "name": "安碁",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 55.0,
-   "official": 60.5,
-   "diff_pct": 9.09,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6187",
-   "name": "萬潤",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 1355.0,
-   "official": 1490.0,
-   "diff_pct": 9.06,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6187",
-   "name": "萬潤",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 1355.0,
-   "official": 1490.0,
-   "diff_pct": 9.06,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6190",
-   "name": "萬泰科",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 70.8,
-   "official": 77.4,
-   "diff_pct": 8.53,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6190",
-   "name": "萬泰科",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 70.8,
-   "official": 77.4,
-   "diff_pct": 8.53,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6196",
-   "name": "帆宣",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 679.0,
-   "official": 618.0,
-   "diff_pct": 9.87,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6213",
-   "name": "聯茂",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 751.0,
-   "official": 683.0,
-   "diff_pct": 9.96,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6274",
-   "name": "台燿",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 1620.0,
-   "official": 1780.0,
-   "diff_pct": 8.99,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6274",
-   "name": "台燿",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 1620.0,
-   "official": 1780.0,
-   "diff_pct": 8.99,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6419",
-   "name": "京晨科",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 156.0,
-   "official": 171.5,
-   "diff_pct": 9.04,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6419",
-   "name": "京晨科",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 156.0,
-   "official": 171.5,
-   "diff_pct": 9.04,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6485",
-   "name": "點序",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 83.6,
-   "official": 79.0,
-   "diff_pct": 5.82,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6485",
-   "name": "點序",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 83.6,
-   "official": 79.0,
-   "diff_pct": 5.82,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6531",
-   "name": "愛普*",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 1055.0,
-   "official": 1000.0,
-   "diff_pct": 5.5,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6532",
-   "name": "瑞耘",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 120.0,
-   "official": 112.0,
-   "diff_pct": 7.14,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6532",
-   "name": "瑞耘",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 120.0,
-   "official": 112.0,
-   "diff_pct": 7.14,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6538",
-   "name": "倉和",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 372.5,
-   "official": 335.5,
-   "diff_pct": 11.03,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6538",
-   "name": "倉和",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 372.5,
-   "official": 335.5,
-   "diff_pct": 11.03,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6691",
-   "name": "洋基工程",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 794.0,
-   "official": 741.0,
-   "diff_pct": 7.15,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6708",
-   "name": "天擎",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 62.4,
-   "official": 68.6,
-   "diff_pct": 9.04,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6708",
-   "name": "天擎",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 62.4,
-   "official": 68.6,
-   "diff_pct": 9.04,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6716",
-   "name": "應廣",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 121.0,
-   "official": 133.0,
-   "diff_pct": 9.02,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6716",
-   "name": "應廣",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 121.0,
-   "official": 133.0,
-   "diff_pct": 9.02,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6875",
-   "name": "國邑*",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 29.9,
-   "official": 27.55,
-   "diff_pct": 8.53,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6875",
-   "name": "國邑*",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 29.9,
-   "official": 27.55,
-   "diff_pct": 8.53,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6901",
-   "name": "鑽石投資",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 18.0,
-   "official": 17.0,
-   "diff_pct": 5.88,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6945",
-   "name": "圓祥生技",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 136.0,
-   "official": 129.5,
-   "diff_pct": 5.02,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "6945",
-   "name": "圓祥生技",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 136.0,
-   "official": 129.5,
-   "diff_pct": 5.02,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7556",
-   "name": "意德士",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 273.0,
-   "official": 300.0,
-   "diff_pct": 9.0,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7556",
-   "name": "意德士",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 273.0,
-   "official": 300.0,
-   "diff_pct": 9.0,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7717",
-   "name": "萊德光電-KY",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 561.0,
-   "official": 592.0,
-   "diff_pct": 5.24,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7717",
-   "name": "萊德光電-KY",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 561.0,
-   "official": 592.0,
-   "diff_pct": 5.24,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7772",
-   "name": "耀穎",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 186.0,
-   "official": 167.5,
-   "diff_pct": 11.04,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7772",
-   "name": "耀穎",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 186.0,
-   "official": 167.5,
-   "diff_pct": 11.04,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7788",
-   "name": "松川精密",
-   "detail": "quotes_tw.json 的現價與官方收盤不一致",
-   "ours": 332.5,
-   "official": 307.0,
-   "diff_pct": 8.31,
-   "source": "quotes_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7825",
-   "name": "和亞智慧",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 84.9,
-   "official": 80.6,
-   "diff_pct": 5.33,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "7825",
-   "name": "和亞智慧",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 84.9,
-   "official": 80.6,
-   "diff_pct": 5.33,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8067",
-   "name": "志旭",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 11.8,
-   "official": 11.2,
-   "diff_pct": 5.36,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8067",
-   "name": "志旭",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 11.8,
-   "official": 11.2,
-   "diff_pct": 5.36,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8084",
-   "name": "巨虹",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 21.8,
-   "official": 19.65,
-   "diff_pct": 10.94,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8084",
-   "name": "巨虹",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 21.8,
-   "official": 19.65,
-   "diff_pct": 10.94,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8086",
-   "name": "宏捷科",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 120.0,
-   "official": 129.0,
-   "diff_pct": 6.98,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8086",
-   "name": "宏捷科",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 120.0,
-   "official": 129.0,
-   "diff_pct": 6.98,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8109",
-   "name": "博大",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 146.5,
-   "official": 139.0,
-   "diff_pct": 5.4,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8109",
-   "name": "博大",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 146.5,
-   "official": 139.0,
-   "diff_pct": 5.4,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8111",
-   "name": "立碁",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 85.8,
-   "official": 94.3,
-   "diff_pct": 9.01,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8111",
-   "name": "立碁",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 85.8,
-   "official": 94.3,
-   "diff_pct": 9.01,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8358",
-   "name": "金居",
-   "detail": "quotes_all_tw.json 的現價與官方收盤不一致",
-   "ours": 519.0,
-   "official": 570.0,
-   "diff_pct": 8.95,
-   "source": "quotes_all_tw.json"
-  },
-  {
-   "check": "a_price_source",
-   "code": "8358",
-   "name": "金居",
-   "detail": "sparklines.json 的現價與官方收盤不一致",
-   "ours": 519.0,
-   "official": 570.0,
-   "diff_pct": 8.95,
-   "source": "sparklines.json"
-  },
-  {
    "check": "a3_stale_price",
-   "code": "1589",
-   "name": "永冠-KY",
-   "detail": "這一檔在選股榜單上，但本地價格已落後官方最新交易日 640 天",
-   "ours": "2024-12-31",
-   "official": "2026-10-02",
+   "code": "8183",
+   "name": "精星",
+   "detail": "這一檔在選股榜單上，但本地價格已落後官方最新交易日 13 天",
+   "ours": "2026-09-22",
+   "official": "2026-10-05",
    "diff_pct": null,
    "source": "quotes_all_tw.json / price_history.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3064",
-   "name": "泰偉",
-   "detail": "現價低於 20 日低點超過 5%",
-   "ours": 15.75,
-   "official": 14.3,
-   "diff_pct": 9.21,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3114",
-   "name": "好德",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 39.65,
-   "official": 43.6,
-   "diff_pct": 9.96,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3268",
-   "name": "海德威",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 21.75,
-   "official": 23.1,
-   "diff_pct": 6.21,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3317",
-   "name": "尼克森",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 68.3,
-   "official": 71.8,
-   "diff_pct": 5.12,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3441",
-   "name": "聯一光",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 211.0,
-   "official": 232.0,
-   "diff_pct": 9.95,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3564",
-   "name": "其陽",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 56.1,
-   "official": 61.7,
-   "diff_pct": 9.98,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3597",
-   "name": "映興",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 28.35,
-   "official": 30.45,
-   "diff_pct": 7.41,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3625",
-   "name": "西勝",
-   "detail": "現價低於 20 日低點超過 5%",
-   "ours": 11.15,
-   "official": 10.4,
-   "diff_pct": 6.73,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "3629",
-   "name": "地心引力",
-   "detail": "現價低於 20 日低點超過 5%",
-   "ours": 14.6,
-   "official": 13.35,
-   "diff_pct": 8.56,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "4127",
-   "name": "天良",
-   "detail": "現價低於 20 日低點超過 5%",
-   "ours": 45.6,
-   "official": 43.3,
-   "diff_pct": 5.04,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "4174",
-   "name": "浩鼎",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 43.1,
-   "official": 46.2,
-   "diff_pct": 7.19,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "4556",
-   "name": "旭然",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 114.5,
-   "official": 125.5,
-   "diff_pct": 9.61,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "4760",
-   "name": "勤凱",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 317.0,
-   "official": 348.5,
-   "diff_pct": 9.94,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "5011",
-   "name": "久陽",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 20.45,
-   "official": 22.45,
-   "diff_pct": 9.78,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "5013",
-   "name": "強新",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 46.85,
-   "official": 51.5,
-   "diff_pct": 9.93,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "5355",
-   "name": "佳總",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 7.4,
-   "official": 7.87,
-   "diff_pct": 6.35,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "5432",
-   "name": "新門",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 167.5,
-   "official": 178.0,
-   "diff_pct": 6.27,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "5452",
-   "name": "佶優",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 27.95,
-   "official": 30.0,
-   "diff_pct": 7.33,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6126",
-   "name": "信音",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 31.6,
-   "official": 33.4,
-   "diff_pct": 5.7,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6174",
-   "name": "安碁",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 55.0,
-   "official": 60.5,
-   "diff_pct": 10.0,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6187",
-   "name": "萬潤",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 1385.0,
-   "official": 1490.0,
-   "diff_pct": 7.58,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6190",
-   "name": "萬泰科",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 71.6,
-   "official": 77.4,
-   "diff_pct": 8.1,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6274",
-   "name": "台燿",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 1620.0,
-   "official": 1780.0,
-   "diff_pct": 9.88,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6419",
-   "name": "京晨科",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 156.0,
-   "official": 171.5,
-   "diff_pct": 9.94,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6708",
-   "name": "天擎",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 62.4,
-   "official": 68.6,
-   "diff_pct": 9.94,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "6875",
-   "name": "國邑*",
-   "detail": "現價低於 20 日低點超過 5%",
-   "ours": 29.9,
-   "official": 27.55,
-   "diff_pct": 7.86,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "7556",
-   "name": "意德士",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 273.0,
-   "official": 300.0,
-   "diff_pct": 9.89,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "8084",
-   "name": "巨虹",
-   "detail": "現價低於 20 日低點超過 5%",
-   "ours": 21.8,
-   "official": 19.65,
-   "diff_pct": 9.86,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "8111",
-   "name": "立碁",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 85.8,
-   "official": 94.3,
-   "diff_pct": 9.91,
-   "source": "sparklines.json"
-  },
-  {
-   "check": "c_range",
-   "code": "8358",
-   "name": "金居",
-   "detail": "現價高於 20 日高點超過 5%",
-   "ours": 526.0,
-   "official": 570.0,
-   "diff_pct": 8.37,
-   "source": "sparklines.json"
   },
   {
    "check": "e_quarters_stale",
@@ -2096,19 +339,9 @@
    "code": "1506",
    "name": "正道",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 245.25,
+   "ours": 242.75,
    "official": 196.2,
-   "diff_pct": 20.0,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "1522",
-   "name": "堤維西",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 30.47,
-   "official": 27.29,
-   "diff_pct": 10.42,
+   "diff_pct": 19.18,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2322,6 +555,16 @@
    "source": "stock_detail.json"
   },
   {
+   "check": "e_pe",
+   "code": "2072",
+   "name": "世紀風電",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 8.05,
+   "official": 9.0,
+   "diff_pct": 11.84,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
    "check": "e_quarters_stale",
    "code": "2235",
    "name": "謚源",
@@ -2376,9 +619,9 @@
    "code": "2348",
    "name": "海悅",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 15.15,
+   "ours": 15.0,
    "official": 16.85,
-   "diff_pct": 11.22,
+   "diff_pct": 12.33,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2386,9 +629,19 @@
    "code": "2442",
    "name": "新美齊",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 2.42,
+   "ours": 2.39,
    "official": 2.8,
-   "diff_pct": 15.75,
+   "diff_pct": 17.4,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
+   "check": "e_pe",
+   "code": "2464",
+   "name": "盟立",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 465.85,
+   "official": 514.47,
+   "diff_pct": 10.44,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2396,9 +649,9 @@
    "code": "2534",
    "name": "宏盛",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 278.33,
+   "ours": 275.83,
    "official": 334.0,
-   "diff_pct": 20.0,
+   "diff_pct": 21.09,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2406,9 +659,9 @@
    "code": "2545",
    "name": "皇翔",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 39.94,
+   "ours": 40.0,
    "official": 35.74,
-   "diff_pct": 10.52,
+   "diff_pct": 10.65,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -2936,19 +1189,9 @@
    "code": "3135",
    "name": "凌航",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 5.94,
+   "ours": 5.87,
    "official": 6.86,
-   "diff_pct": 15.41,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
-   "code": "3138",
-   "name": "耀登",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 35.79,
-   "official": 39.48,
-   "diff_pct": 10.31,
+   "diff_pct": 16.88,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -3566,7 +1809,7 @@
    "code": "3550",
    "name": "聯穎",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 9.295429630892704e+17,
+   "ours": 9.043228051759956e+17,
    "official": 215.0,
    "diff_pct": 100.0,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
@@ -3666,9 +1909,9 @@
    "code": "3583",
    "name": "辛耘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 35.02,
+   "ours": 36.13,
    "official": 44.23,
-   "diff_pct": 26.31,
+   "diff_pct": 22.41,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -3696,9 +1939,9 @@
    "code": "3605",
    "name": "宏致",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 40.6,
+   "ours": 40.0,
    "official": 44.87,
-   "diff_pct": 10.53,
+   "diff_pct": 12.18,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4086,9 +2329,9 @@
    "code": "4414",
    "name": "如興",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 38.57,
+   "ours": 38.52,
    "official": 54.0,
-   "diff_pct": 40.0,
+   "diff_pct": 40.17,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4356,9 +2599,9 @@
    "code": "4582",
    "name": "聚恆-創",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 8.67,
+   "ours": 8.63,
    "official": 9.69,
-   "diff_pct": 11.74,
+   "diff_pct": 12.25,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4526,9 +2769,9 @@
    "code": "4807",
    "name": "日成-KY",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 10.45,
+   "ours": 10.76,
    "official": 12.08,
-   "diff_pct": 15.6,
+   "diff_pct": 12.25,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -4556,9 +2799,9 @@
    "code": "4906",
    "name": "正文",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 298.93,
+   "ours": 301.07,
    "official": 348.75,
-   "diff_pct": 16.67,
+   "diff_pct": 15.84,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6226,9 +4469,9 @@
    "code": "6477",
    "name": "安集",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 865.0,
+   "ours": 851.25,
    "official": 1153.33,
-   "diff_pct": 33.33,
+   "diff_pct": 35.49,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6446,9 +4689,9 @@
    "code": "6579",
    "name": "研揚",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 16.06,
+   "ours": 16.01,
    "official": 21.65,
-   "diff_pct": 34.82,
+   "diff_pct": 35.24,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -6642,16 +4885,6 @@
    "source": "stock_detail.json"
   },
   {
-   "check": "e_pe",
-   "code": "6672",
-   "name": "騰輝電子-KY",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 60.05,
-   "official": 66.31,
-   "diff_pct": 10.42,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
    "check": "e_quarters_stale",
    "code": "6679",
    "name": "鈺太",
@@ -6690,6 +4923,16 @@
    "official": "2026Q4 當期",
    "diff_pct": null,
    "source": "stock_detail.json"
+  },
+  {
+   "check": "e_pe",
+   "code": "6691",
+   "name": "洋基工程",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 25.06,
+   "official": 22.17,
+   "diff_pct": 11.54,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
    "check": "e_quarters_stale",
@@ -6812,6 +5055,16 @@
    "source": "stock_detail.json"
   },
   {
+   "check": "e_pe",
+   "code": "6770",
+   "name": "力積電",
+   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
+   "ours": 23.11,
+   "official": 25.5,
+   "diff_pct": 10.34,
+   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
+  },
+  {
    "check": "e_quarters_stale",
    "code": "6781",
    "name": "AES-KY",
@@ -6846,9 +5099,9 @@
    "code": "6796",
    "name": "晉弘",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 144.25,
+   "ours": 142.5,
    "official": 160.28,
-   "diff_pct": 11.11,
+   "diff_pct": 12.48,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -7086,9 +5339,9 @@
    "code": "6944",
    "name": "兆聯實業",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 22.52,
+   "ours": 22.94,
    "official": 19.85,
-   "diff_pct": 11.86,
+   "diff_pct": 13.48,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -7186,9 +5439,9 @@
    "code": "7610",
    "name": "聯友金屬-創",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 56.89,
+   "ours": 59.37,
    "official": 49.51,
-   "diff_pct": 12.98,
+   "diff_pct": 16.6,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -7526,9 +5779,9 @@
    "code": "8249",
    "name": "菱光",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 16.02,
+   "ours": 15.82,
    "official": 20.1,
-   "diff_pct": 25.5,
+   "diff_pct": 27.05,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -7866,9 +6119,9 @@
    "code": "8926",
    "name": "台汽電",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 14.57,
+   "ours": 14.59,
    "official": 16.21,
-   "diff_pct": 11.27,
+   "diff_pct": 11.08,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -7963,22 +6216,12 @@
   },
   {
    "check": "e_pe",
-   "code": "9927",
-   "name": "泰銘",
-   "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 11.89,
-   "official": 10.57,
-   "diff_pct": 11.1,
-   "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
-  },
-  {
-   "check": "e_pe",
    "code": "9941",
    "name": "裕融",
    "detail": "本方用近四季EPS推算的本益比與官方本益比對不起來（基礎可能不同，見下方e_pe informational說明，本檢查不計入violation_rate）",
-   "ours": 9.81,
+   "ours": 9.71,
    "official": 10.94,
-   "diff_pct": 11.54,
+   "diff_pct": 12.72,
    "source": "stock_detail.json（推算） vs fundamentals.json（官方）"
   },
   {
@@ -8310,7 +6553,7 @@
   "note": "由 scripts/check_external_connectivity.py 每 5 分鐘更新。產出檔停擺依據修改時間判定；connectivity_alerts 額外納入internet/tailscale/ibkr_gateway 這類「行程活著但連不上」的連續失敗告警（2026-09-15新增，此前只印在log沒亮燈，IBKR斷線6天才被發現就是這個缺口）。"
  },
  "self_check": {
-  "checked_at": "2026-10-03T03:59:17.104542+08:00",
+  "checked_at": "2026-10-06T06:04:32.264916+08:00",
   "ok": true,
   "checks": [
    {
@@ -8332,7 +6575,7 @@
   "note": "audit.yml 每次執行最前面跑，確認後面幾支腳本要用到的 import/常數撈得到——2026-09-10~17 因 data_audit.py 誤刪 TWSE_COMPANY 導致build_listed_universe.py 連續一週 ImportError 全滅，但audit_report.json 本身完全沒有任何紀錄，只能靠 gh run list 才查得到，這個欄位就是補這個盲點。"
  },
  "domain_blocklist_scan": {
-  "checked_at": "2026-10-03T03:59:17.104542+08:00",
+  "checked_at": "2026-10-06T06:04:32.264916+08:00",
   "domains": [
    "mopsov.twse.com.tw",
    "doc.twse.com.tw",
@@ -8714,7 +6957,7 @@
   "note": "2026-09-20合規.三：掃repo全部.py找黑名單網域硬寫字串（黑名單來源research/net_guard.py::DOMAIN_BLOCKLIST）。unguarded=True代表該檔案提到黑名單網域卻沒有`import net_guard`，是最可能重演2026-09-19 mopsov違規事件的檔案，由check_external_connectivity.py轉成local_task_health告警。"
  },
  "queue_depth_sync": {
-  "checked_at": "2026-10-03T03:59:17.104542+08:00",
+  "checked_at": "2026-10-06T06:04:32.264916+08:00",
   "ok": true,
   "detail": {
    "ok": true,
@@ -8724,14 +6967,14 @@
   "note": "2026-09-20【Q4前視與#23無法重現】四：確認兩份*_CONTINUATION_PROMPT.txt跟research/queue_depth_config.py（單一事實來源）仍然一致，避免重演2026-09-19門檻更正只同步部分位置、連續5輪沒觸發補件規則的問題。"
  },
  "reproducibility_check": {
-  "checked_at": "2026-10-03T03:59:17.104542+08:00",
+  "checked_at": "2026-10-06T06:04:32.264916+08:00",
   "ok": false,
   "detail": {
    "ok": false,
-   "n_checked": 201,
+   "n_checked": 202,
    "by_status_count": {
     "IMPORT_ERROR": 182,
-    "OK": 10,
+    "OK": 11,
     "FILE_NOT_FOUND": 9
    },
    "broken": [
