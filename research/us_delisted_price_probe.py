@@ -88,10 +88,61 @@ def get_json(url: str, name: str):
     return d
 
 
+SICMAP = HERE / "data" / "us_sic_universe.json"
+FIN_LO, FIN_HI = 6000, 6799
+
+
+def _frame_filters(v: dict, s: dict | None) -> str | None:
+    """回傳排除原因；None 表示留在抽樣母體內。
+
+    **為什麼要過濾（2026-10-05 第二輪修正）**：第一輪直接從 delisted 全集抽樣，抽出
+    BLACKROCK PENNSYLVANIA STRATEGIC MUNICIPAL TRUST、PPLUS TRUST SERIES GSC-3 這類
+    封閉式基金與結構型信託——它們沒有存貨、沒有銷貨成本、沒有資本支出，**供給緊縮策略
+    永遠不可能持有**。拿它們的價格可得性去餵一個決定整條美股線存續的關卡，是在量錯母體。
+    第一輪結果保留於 us_delisted_price_probe_unfiltered_frame.json 供對照。"""
+    if s is None:
+        return "no_sic_record"
+    sic = s.get("sic")
+    try:
+        sic_i = int(sic) if sic not in (None, "", "0000") else None
+    except Exception:  # noqa: BLE001
+        sic_i = None
+    if sic_i is None:
+        return "no_sic"
+    if FIN_LO <= sic_i <= FIN_HI:
+        return "financial_or_trust_6000_6799"
+    if s.get("files_20f_or_40f") and not s.get("files_10k_or_10q"):
+        return "foreign_20f_40f_only"
+    f, d = v.get("first_periodic_report"), v.get("delisted_at")
+    if not f:
+        return "no_first_report"
+    # 只申報一兩年就消失者，從來不可能進入「12 個月價格落後池」，納入會壓低量到的可得率
+    if (int(d[:4]) - int(f[:4])) * 12 + (int(d[5:7]) - int(f[5:7])) < 24:
+        return "listed_under_2_years"
+    return None
+
+
 def pick_sample() -> list[dict]:
     uni = json.loads(UNI.read_text(encoding="utf-8"))["universe"]
-    pool = [v for v in uni.values()
-            if v.get("status") == "delisted" and "2012" <= (v.get("delisted_at") or "")[:4] <= "2020"]
+    sicmap = {}
+    if SICMAP.exists():
+        try:
+            sicmap = json.loads(SICMAP.read_text(encoding="utf-8")).get("sic", {})
+        except Exception:  # noqa: BLE001
+            sicmap = {}
+    raw = [v for v in uni.values()
+           if v.get("status") == "delisted" and "2012" <= (v.get("delisted_at") or "")[:4] <= "2020"]
+    excl = {}
+    pool = []
+    for v in raw:
+        r = _frame_filters(v, sicmap.get(str(v["cik"])))
+        if r:
+            excl[r] = excl.get(r, 0) + 1
+        else:
+            pool.append(v)
+    print(f"抽樣母體：delisted(2012-2020) 全集 {len(raw)} → 過濾後 {len(pool)}；"
+          f"排除原因 {excl}", flush=True)
+    pick_sample.frame_info = {"raw": len(raw), "filtered": len(pool), "excluded": excl}
     pool.sort(key=lambda v: int(v["cik"]))          # 先排序再抽，確保可重現
     rng = random.Random(SEED)
     sample = rng.sample(pool, min(N_SAMPLE, len(pool)))
@@ -239,10 +290,12 @@ def main() -> int:
     res["generated_at"] = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
     res["ruling"] = "先.十九-一／二"
     res["seed"] = SEED
+    res["frame"] = "filtered（排除金融/信託 SIC 6000-6799、僅 20-F/40-F 申報人、上市未滿 2 年）"
     res["note"] = "只測資料可得性與下市原因，不計算任何報酬；holdout 未動"
     if "--sample" in args:
         s = pick_sample()
         res["sample"] = s
+        res["frame_info"] = getattr(pick_sample, "frame_info", None)
         print(f"抽樣 {len(s)} 檔（2012～2020 普通股下市，種子 {SEED}）；"
               f"其中有代號 {sum(1 for x in s if x.get('probe_ticker'))} 檔", flush=True)
     sample = res.get("sample", [])
