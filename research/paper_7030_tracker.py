@@ -132,6 +132,40 @@ def _abort_stale(reason: str, log: list[dict]) -> None:
                             "note": f"中止（價格過期）：{reason}"}, ensure_ascii=False) + "\n")
 
 
+def _find_duplicate(log: list[dict]) -> str | None:
+    """先.十四-三：帳本以 date+event 為唯一鍵；回傳第一個重複鍵的描述，無重複回 None。"""
+    seen: set[tuple] = set()
+    for i, e in enumerate(log):
+        key = (e.get("date"), e.get("event"))
+        if key in seen:
+            return f"第{i + 1}列 date={key[0]} event={key[1]} 與先前列重複"
+        seen.add(key)
+    return None
+
+
+def _abort_duplicate(reason: str) -> None:
+    """帳本重複：不計算、不寫紀錄、不刪任何列；寫 last_error(status=DUPLICATE_LOG_ENTRY) 與心跳 ERROR。"""
+    print(f"::error::紙.一中止：帳本重複（{reason}），需人工檢視 {LOG_PATH}，本程式不自動刪除任何紀錄")
+    ts = datetime.now(TZ).isoformat()
+    try:
+        summary = {"started": False, "note": "紙.一帳本重複，未更新"}
+        if APP_SUMMARY_PATH.exists():
+            with open(APP_SUMMARY_PATH, encoding="utf-8") as f:
+                summary = json.load(f)
+        summary["last_error"] = {"status": "DUPLICATE_LOG_ENTRY", "reason": reason, "ts": ts}
+        APP_SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(APP_SUMMARY_PATH, "w", encoding="utf-8") as f:
+            json.dump(summary, f, ensure_ascii=False, indent=2)
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::紙.一寫入last_error失敗（不影響中止）：{type(e).__name__}: {e}")
+    try:
+        with open(HEARTBEAT_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps({"ts": ts, "item": "紙.一", "status": "ERROR",
+                                "note": f"中止（帳本重複）：{reason}"}, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::紙.一寫入心跳失敗：{type(e).__name__}: {e}")
+
+
 def _first_trading_day_on_or_after(prices: list[dict], anchor: str) -> dict | None:
     for row in prices:
         if row["date"] >= anchor:
@@ -251,9 +285,13 @@ def _write_app_summary(log: list[dict]) -> None:
 
 
 def run() -> dict:
-    prices = _load_0050_price_series()
     log = _load_log()
+    dup = _find_duplicate(log)
+    if dup:
+        _abort_duplicate(dup)
+        return {"processed": 0, "started": bool(log), "aborted": True, "reason": dup}
 
+    prices = _load_0050_price_series()
     fresh, reason = _check_price_freshness(prices)
     if not fresh:
         _abort_stale(reason, log)

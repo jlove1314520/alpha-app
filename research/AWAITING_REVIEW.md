@@ -15,7 +15,7 @@
   移到「已結案審閱紀錄」，不得直接刪除（保留稽核軌跡）。
 - N=0時「等待中」表格留表頭但清空列，不得整份刪除本檔案。
 
-## 等待中（目前：45件）
+## 等待中（目前：48件）
 
 | 項目 | 完成時間 | 等待審閱內容 | 等待時長 |
 |---|---|---|---|
@@ -65,6 +65,9 @@
 | 先.八-三：App「供給吃緊觀察清單」（picks看板內新增「供給觀察」檢視，見`scripts/build_supply_watchlist.py`、`data/supply_watchlist.json`、`docs/img/supply_watchlist_tab.png`，commit 48c59a006） | 2026-10-01 22:3x | **請Cowork核對並裁示**：①首版涵蓋18檔、覆蓋率0.93%（FinMind額度有限、每日自限額度逐日累積，非程式錯誤）；②依總司令指定只顯示I1–I4原始變化值與產業桶內百分位，無綜合分數、無買進字樣、無績效數字，頁首固定標示「描述性資料，未經回測驗證；紙上追蹤中，滿8季前不得作為真錢依據」；③`[自行裁量]`置於picks看板內而非新增底部導覽鈕（底部導覽已6鈕）；④冒煙測試51項全PASS（含第51項供給觀察檢查）。 | 0日 |
 | 先.九：.md行尾renormalize＋workflow防呆＋cron避開整點（commit b6d766ed、196d2694a） | 2026-10-01 23:3x | **請Cowork核對**：①行尾實際只有1檔（PRICE_HISTORY_STUCK_2024-12-31.md，雙CR）需改，非預期111檔；origin其餘.md本來就是LF；②四支workflow已加stash防呆、YAML解析通過；③market.yml cron依裁示改13 9／41 10／43 21，[自行裁量]另錯開quotes（:07起每10分）、news_events（:19/:49）、watchdog（:23/:53）；④10/1 17:00班次仍未派發（已逾6小時），先.九-四待10/2 08:00查，先.九-五（3交易日派發延遲記錄）待累積。 | 0日 |
 | 先.十三-三：#408 產業缺貨單發結果（trial #409）——判定 VIOLATES_SURVIVAL（全期 MDD -55.9%）；另 Sortino 0.323 < 0050 0.883、隨機對照 30/200 不輸策略、Bonferroni/DSR 皆未過、成本 2×/3× 報酬近零/負；已寫 STRATEGY_GRAVEYARD、不做參數重試 | 2026-10-05 | 等 Cowork 核對：①單發流程（FINAL SHA256 7e73dd0b…、SEED 20261005、績效於 JSON 寫完後才讀）②持股截斷用成交金額代理、155 持股位缺價格檔流動性排最後是否可接受 ③failed_gates 對映（gate2/gate4）④結論：產業缺貨方向 FAIL 結案，本方向不再開新試驗；⑤並發覆寫事件：馬拉松在單發執行期間改寫同路徑 runner，654089b5f 內 runner 非產出 result.json 者；已還原互動視窗版、馬拉松版改名保留，result.json 未動、未重跑——請核對來源證據是否足夠；另有先.十三-一補洞、先.十三-二 merge=union 結果亦待核 | 剛完成 |
+| 先.十四-一：無聲停擺偵測（三支 launcher 認證／額度偵測鏈接齊＋首頁紅色橫幅缺口修正） | 2026-10-05 | 等 Cowork 核對：①hypothesis-queue 改用 Tee-Object 只分類「本輪」輸出（不可整份 cycle log 丟分類器，否則 10/3 舊字樣會被當本輪狀態）是否妥當 ②發現並修正的缺口：DevQueue 版把橫幅寫在只有「設定」頁才跑的 loadDataFreshness() 內，與裁示「App 首頁顯示」不符，已抽成啟動時呼叫 ③自測 22 項＋既有 19 項全過、截圖 4 張、冒煙測試 exit=0 ④三支 .ps1 在 C:lpha\（repo 外），需總司令實機跑過一輪才算完全驗證 | 剛完成 |
+| 先.十四-二：FinMind 預熱覆蓋率回報（已完成，待補 0） | 2026-10-05 | 等 Cowork 核對：①財報／價格家族逐檔齊全率皆 100%（1,930/1,930），待補 0 次、距 11/10 尚餘 36 天 ②誠實揭露：TaiwanStockPrice 有 137 檔空檔，但該 137 檔在 alpha.db 最新交易日同樣完全無成交，判為停牌／非普通股而非缺口，實際可用價格覆蓋 92.9%——請核對這個判定是否接受 ③AlphaFinMindWarmup 先前未登記在 LOCAL_SCHEDULED_TASKS.md，本次補登記 | 剛完成 |
+| 先.十四-三：紙.一 帳本防重複 | 2026-10-05 | 等 Cowork 核對：①已移除 paper_7030_log.jsonl 的 merge=union（其餘 7 檔維持），git check-attr 實測確認 ②重複檢查放在「載入 log 後、載入價格前」，發現即寫 last_error=DUPLICATE_LOG_ENTRY＋心跳 ERROR 並中止，不計算、不刪任何列 ③自測 11 項全過 ④紙.一 log 內容未動（目前僅 1 列 inception） | 剛完成 |
 
 ## 已結案審閱紀錄
 

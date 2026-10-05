@@ -1,3 +1,33 @@
+## 2026-10-05（互動視窗，先.十四 三項完成，維運／開發帽）
+
+等待總司令審閱：48件（本輪新增先.十四-一／二／三 三列）。
+
+**先.十四-一 無聲停擺偵測**：接續 DevQueue cycle 20261005-004602 的部分成果，補完 `run-marathon-cycle.ps1`／
+`run-hypothesis-queue-cycle.ps1` 兩支 launcher 的認證／額度偵測鏈（三支 .ps1 語法檢查皆 PARSE OK）。
+hypothesis-queue 原本沒有 stream-json，改用 `Tee-Object` 另存本輪輸出再分類——**不可把整份 cycle log 丟給分類器**，
+否則 10/3 事故留下的舊 "OAuth session expired" 字樣會被當成本輪狀態。
+**另發現並修正一個真缺口**：先前版本把紅色橫幅寫在 `loadDataFreshness()` 內，而該函式只有使用者點進「設定」頁才會跑，
+等於這個「本機 Claude 掛了」的告警要使用者自己想到去翻設定頁才看得到——與裁示「App 首頁讀到即顯示」不符，
+也剛好重演 10/3 事故「機制存在但沒有人在那個位置看它」的同一種形狀。已抽成 `renderClaudeAuthBanner()`＋
+`loadClaudeAuthBanner()` 並加進啟動序列（抓檔失敗 fail open 當無告警）。
+自測 `scripts/selftest_claude_auth_launchers.py` 22 項全過（以 10/3 真實事故原文字串注入三支 launcher 各自的輸入格式、
+額度字串、節流不得推新 last_attempt_at、3 小時門檻、10/3 事故重演、守門員自身失敗 4 種降級情境），既有 19 項自測仍全過。
+截圖 `research/data/shots/claude_auth_{auth_expired,quota,stalled_3h,ok}.png` 四張（三種告警顯示、OK 不顯示）。
+冒煙測試 `node scripts/smoke_test.mjs` **exit=0、51 項全過、無 uncaught error**。
+
+**先.十四-二 FinMind 預熱**：**已完成，待補 0 次呼叫**（2026-10-05 01:38 實測），距 11/10 期限尚餘 36 天，
+11/14 期限與 11/16 首次換股不受威脅。財報與價格家族逐檔齊全率皆 1,930/1,930＝100%，預熱行程仍每 15 分鐘在跑。
+誠實揭露：`TaiwanStockPrice` 有 137 檔空檔，但該 137 檔在 `alpha.db` 最新交易日（10/02）同樣完全無成交紀錄，
+屬停牌／非普通股，FinMind 回空是正確結果而非抓取缺口，故實際可用價格覆蓋 1,793/1,930＝92.9%。
+排程與覆蓋率表已寫入 `docs/LOCAL_SCHEDULED_TASKS.md`（`AlphaFinMindWarmup` 先前未登記，本次補登記）。
+
+**先.十四-三 紙.一 帳本防重複**：`.gitattributes` 移除 `paper_7030_log.jsonl` 的 merge=union（其餘 7 檔維持）；
+`paper_7030_tracker.py` 在載入 log 後、載入價格前檢查 date+event 重複，發現即寫 `last_error=DUPLICATE_LOG_ENTRY`
+與心跳 ERROR 並中止，不計算、不刪除任何列。自測 11 項全過。紙.一 log 內容未動。
+
+**先.十六-三**（「連續 3 小時無實際執行即告警」規則）隨先.十四-一 一併落地並通過自測，已先行標記完成；
+先.十六-一／二 仍未開始，照裁示排在先.十五 之後。holdout、紙.一 log 內容、紙.二 全程未動。
+
 ## 2026-10-05（DevQueue cycle 20261005-004602，先.十四-一 部分完成，開發帽）
 
 等待總司令審閱：45件（本輪為持續進行中的開發項目，非卡在等裁示狀態，不計入此N；見`AWAITING_REVIEW.md`）。

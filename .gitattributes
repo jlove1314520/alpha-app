@@ -8,6 +8,7 @@ research/PROGRESS_HEARTBEAT.jsonl merge=union
 research/dispatch_delay_log.jsonl merge=union
 research/twse_publish_probe.jsonl merge=union
 research/data/adjustment_anomaly_warnings.jsonl merge=union
-research/data/paper_7030_log.jsonl merge=union
+# 2026-10-05 先.十四-三：research/data/paper_7030_log.jsonl 自此移除 merge=union——帳本每列 date+event 需唯一，
+# union 合併可能產生重複列；改由 paper_7030_tracker.py 載入時偵測重複並中止（不自動刪除任何列）
 data/factory_stability_history.jsonl merge=union
 data/moea_pit/manifest.jsonl merge=union

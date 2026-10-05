@@ -7643,31 +7643,47 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         hbNote.innerHTML='本機排程心跳：顯示失敗（'+e.message+'）';
       }
     }
-    // 2026-10-05（先.十四-一）：本機 claude -p launcher 登入過期／額度用盡／
-    // 連續3小時無實際執行的紅色橫幅。獨立try/catch，失敗只影響這個橫幅，
-    // 不影響上面其他面板（CLAUDE.md「App穩定性與錯誤隔離原則」）。
+    // 2026-10-05（先.十四-一）：橫幅更新沿用這裡已經抓好的 STATUS.json，不重抓一次。
+    renderClaudeAuthBanner(statusDoc);
+  }
+  // 2026-10-05（先.十四-一）：本機 claude -p launcher 登入過期／額度用盡／連續3小時
+  // 無實際執行的紅色橫幅。
+  // **2026-10-05（先.十四-一續）為什麼要抽成獨立函式並在啟動時呼叫**：第一版寫在
+  // loadDataFreshness() 裡面，而那支只有 hydrateSettings()（＝使用者點進「設定」頁）
+  // 才會跑——等於這個「本機 Claude 掛了」的告警，必須使用者自己想到去翻設定頁才看得到，
+  // 跟裁示要求的「App 首頁讀到即顯示紅色橫幅」不符，也剛好重演 10/3 事故的同一種形狀
+  // （告警機制存在、但沒有人會在那個位置看它）。現在首頁一載入就評估一次。
+  // 獨立try/catch，失敗只影響這個橫幅，不影響其他面板（CLAUDE.md「App穩定性與錯誤隔離原則」）。
+  function renderClaudeAuthBanner(statusDoc){
     try{
       const banner=document.getElementById('claude-auth-banner');
-      if(banner){
-        const ca=statusDoc&&statusDoc.local_schedule_heartbeat&&statusDoc.local_schedule_heartbeat.claude_auth;
-        const st=ca&&ca.overall_status;
-        if(st==='AUTH_EXPIRED'){
-          banner.style.display='block';
-          banner.innerHTML='⚠️ 本機 Claude 需要重新登入（偵測到登入過期）：'+(ca.detail||'');
-        }else if(st==='QUOTA_EXCEEDED'){
-          banner.style.display='block';
-          banner.innerHTML='⚠️ 本機 Claude 額度已用盡：'+(ca.detail||'');
-        }else if(st==='STALLED_3H'){
-          banner.style.display='block';
-          banner.innerHTML='⚠️ 本機自走系統連續 3 小時以上沒有實際執行：'+(ca.detail||'');
-        }else{
-          banner.style.display='none';
-          banner.innerHTML='';
-        }
+      if(!banner)return;
+      const ca=statusDoc&&statusDoc.local_schedule_heartbeat&&statusDoc.local_schedule_heartbeat.claude_auth;
+      const st=ca&&ca.overall_status;
+      if(st==='AUTH_EXPIRED'){
+        banner.style.display='block';
+        banner.innerHTML='⚠️ 本機 Claude 需要重新登入（偵測到登入過期）：'+(ca.detail||'');
+      }else if(st==='QUOTA_EXCEEDED'){
+        banner.style.display='block';
+        banner.innerHTML='⚠️ 本機 Claude 額度已用盡：'+(ca.detail||'');
+      }else if(st==='STALLED_3H'){
+        banner.style.display='block';
+        banner.innerHTML='⚠️ 本機自走系統連續 3 小時以上沒有實際執行：'+(ca.detail||'');
+      }else{
+        banner.style.display='none';
+        banner.innerHTML='';
       }
     }catch(e){
-      console.warn('[loadDataFreshness:claudeAuthBanner]',e);recordGlobalError('loadDataFreshness:claudeAuthBanner',e);
+      console.warn('[renderClaudeAuthBanner]',e);recordGlobalError('renderClaudeAuthBanner',e);
     }
+  }
+  // 啟動時自己抓一次 STATUS.json（設定頁沒被點開也要看得到橫幅）。抓檔失敗
+  // 一律當成「沒有告警」處理，不得讓它變成另一個單點故障（CLAUDE.md 十二節 fail open）。
+  async function loadClaudeAuthBanner(){
+    let doc=null;
+    try{const r=await fetch('data/STATUS.json?t='+Date.now());if(r.ok)doc=await r.json();}
+    catch(e){console.warn('[loadClaudeAuthBanner:STATUS]',e);}
+    renderClaudeAuthBanner(doc);
   }
   // 2026-08-25 新增，2026-08-28擴充：設定頁+首頁底部顯示 App 版本／Service
   // Worker 版本／SW 狀態，方便確認手機是不是真的更新到最新版（用手機開 App
@@ -7675,7 +7691,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-05.0124';
+  const APP_VERSION='2026-10-05.1457';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -7797,6 +7813,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 才觸發loadAboutVersions()那次），使用者才能不用點進設定就一眼確認手機是
   // 不是新版。
   _safeAsync('loadAboutVersions',loadAboutVersions);
+  // 2026-10-05（先.十四-一）：本機 Claude 登入過期／額度／停擺的紅色橫幅要在首頁
+  // 一載入就評估，不是等使用者點進設定頁（見 renderClaudeAuthBanner 的註解）。
+  _safeAsync('loadClaudeAuthBanner',loadClaudeAuthBanner);
   // 2026-09-03深夜（乙.4）：讀即時伺服器設定並嘗試連線；沒設定/連不上就維持冷資料路徑並標「離線」。
   _safeSync('loadLiveConfig',loadLiveConfig);
   _safeSync('renderLiveStatus',renderLiveStatus);

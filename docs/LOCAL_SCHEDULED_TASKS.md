@@ -78,9 +78,36 @@ powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1 -Reve
 | `AlphaMarathon` | 研究馬拉松自走輪次 | 每 30 分鐘 ＋ 登入時（延遲 5 分） | `research/marathon_cycle.log`、`research/MARATHON_STATE.md` |
 | `AlphaHypothesisQueue` | 假設佇列自走輪次 | 每 30 分鐘 ＋ 登入時（延遲 3 分） | `research/hypothesis_queue_cycle.log` |
 | `AlphaPaperSupplyV2`（**2026-10-01新增，先.五-三**，Interactive／Limited，`[自行裁量]`） | 紙.二：供給緊縮v2前進式紙上追蹤（#407，事後假設非證據，不下任何單）；2026-10-15前不動作，之後每換股視窗逐檔補財報、產生訊號與月末淨值 | 每 1 小時（`scripts/run_paper_supply_v2.ps1`） | `research/data/paper_supply_v2_cycle.log`、`research/data/paper_supply_v2_log.jsonl`（append-only，git-ignored，強制加入） |
+| `AlphaFinMindWarmup`（**2026-10-02新增，先.十-二**；2026-10-05 先.十四-二 補登記） | 紙.二用的 FinMind 快取唯一預熱來源（財報 3 類＋價格家族 3 類，共 1,930 檔）。每輪上限約 14 分鐘、滾動 1 小時硬上限 450 次呼叫，與其他 FinMind 使用者共用 `data/rate_limit_state.json` 計數 | 每 15 分鐘（`scripts/run_finmind_warmup.ps1`，MultipleInstances=IgnoreNew） | `research/data/finmind_warmup_cycle.log`、`research/data/finmind_warmup_status.json`（看 `remaining_backlog_calls` 與 `eta_local`） |
 | `AlphaData` | `alpha-data` 每日六大類資料入庫 | 每日 15:30 | `C:\alpha\alpha-data\run.log`、`alpha.db` 各表的 `max(date)` |
 | `AlphaDepCheck` | 相依套件安全性更新檢查 | 每週日 08:00 | `data/dependency_status.json` |
 | `AlphaTdccHolders` | TDCC 集保股權分散表週更（千張大戶，源頭一.2a） | 每週五 20:00 | `research/tdcc_holders_cycle.log`、`data/holders.json`、`research/data/tdcc/*.csv`（本機累積，未入 git） |
+
+
+### FinMind 預熱完成度（先.十四-二，2026-10-05 01:38 實測，資料源：`research/data/finmind_warmup_status.json`）
+
+**結論：已於 2026-10-05 完成，待補 0 次呼叫，距 11/10 期限尚餘 36 天。** 11/14 期限與 11/16 首次換股不受預熱進度威脅。
+
+| 項目 | 數字 | 說明 |
+|---|---|---|
+| 宇宙檔數 | 1,930 | `paper_supply_v2.LiveSource.universe()` |
+| 財報覆蓋（逐檔齊全） | **1,930 / 1,930＝100%** | 每檔 3 個資料集（FinancialStatements／BalanceSheet／CashFlows），5,790/5,790 檔案全有 |
+| 價格家族覆蓋（逐檔齊全） | **1,930 / 1,930＝100%** | 每檔 3 個資料集（Price／Dividend／CapitalReduction），5,790/5,790 檔案全有 |
+| 待補呼叫數 | **0** | `remaining_backlog_calls`，`last_run_stop=no_more_tasks` |
+| 滾動 1 小時用量 | 7 / 450 | 遠低於自訂上限 |
+
+**誠實揭露：「檔案存在」不等於「有資料」。** 逐資料集的非空檔數（>2KB）：
+
+| 資料集 | 非空 | 空檔 | 空檔是否為缺口 |
+|---|---|---|---|
+| `TaiwanStockPrice` | 1,793 | 137 | **否**。這 137 檔在 `alpha.db` 的 `daily_price` 最新交易日（2026-10-02）同樣**完全沒有成交紀錄**，屬停牌／非普通股／無交易標的，FinMind 回空是正確結果，不是抓取失敗 |
+| `TaiwanStockDividend` | 1,450 | 480 | 否。當期無配息者本來就無資料 |
+| `TaiwanStockCapitalReductionReferencePrice` | 45 | 1,885 | 否。減資是罕見事件 |
+
+因此**實際可用價格覆蓋為 1,793 / 1,930＝92.9%**，其餘 137 檔是市場上本來就沒有在交易的標的，非預熱缺口。
+
+（查核方式：讀取快取檔的**檔案大小與列數**，以及 `alpha.db` 的成交紀錄；
+未將任何 `*__latest.parquet` 的價格數值帶入任何回測或研究計算，holdout 未動。）
 
 ---
 
