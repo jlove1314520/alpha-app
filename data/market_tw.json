@@ -1,17 +1,11 @@
 {
-  "fetched_at": "2026-10-03T00:45:16+00:00",
-  "errors": [
-    "tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_index (Caused by NameResolutionError(\"HTTPSConnection(host='www.tpex.org.tw', port=443): Failed to resolve 'www.tpex.org.tw' ([Errno -3] Temporary failure in name resolution)\"))",
-    "institutional_tpex: HTTPSConnectionPool(host='www.tpex.org.tw', port=443): Max retries exceeded with url: /openapi/v1/tpex_3insti_daily_trading (Caused by NameResolutionError(\"HTTPSConnection(host='www.tpex.org.tw', port=443): Failed to resolve 'www.tpex.org.tw' ([Errno -3] Temporary failure in name resolution)\"))"
-  ],
+  "fetched_at": "2026-10-05T18:24:07+00:00",
+  "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
     "close": 48475.74,
     "change_pct": 0.25,
     "sparkline": [
-      46164.72,
-      45857.66,
-      46551.13,
       47326.27,
       47105.78,
       47183.36,
@@ -28,12 +22,10 @@
       48024.6,
       47631.96,
       47940.13,
-      48353.49
+      48353.49,
+      48475.74
     ],
     "sparkline_dates": [
-      "2026-09-02",
-      "2026-09-03",
-      "2026-09-04",
       "2026-09-07",
       "2026-09-08",
       "2026-09-09",
@@ -50,10 +42,10 @@
       "2026-09-24",
       "2026-09-29",
       "2026-09-30",
-      "2026-10-01"
+      "2026-10-01",
+      "2026-10-02"
     ],
     "sparkline_60d": [
-      45479.11,
       45734.41,
       45354.61,
       45380.52,
@@ -112,10 +104,10 @@
       48024.6,
       47631.96,
       47940.13,
-      48353.49
+      48353.49,
+      48475.74
     ],
     "sparkline_60d_dates": [
-      "2026-07-07",
       "2026-07-08",
       "2026-07-09",
       "2026-07-13",
@@ -174,7 +166,8 @@
       "2026-09-24",
       "2026-09-29",
       "2026-09-30",
-      "2026-10-01"
+      "2026-10-01",
+      "2026-10-02"
     ]
   },
   "sectors": [
@@ -364,6 +357,17 @@
       "change_pct": 0.19
     }
   ],
+  "tpex": {
+    "date": "20261005",
+    "close": 432.48,
+    "change": 5.55,
+    "change_pct": 1.2999789192607687,
+    "sparkline": [
+      418.82,
+      426.93,
+      432.48
+    ]
+  },
   "tx_futures": {
     "contract_month": "202610",
     "last": 48671.0,
@@ -407,11 +411,11 @@
     }
   },
   "institutional": {
-    "date": "20261002",
-    "foreign_net_lots": 408465.8,
-    "trust_net_lots": 44463.8,
-    "dealer_net_lots": -395274.7,
-    "total_net_lots": 57654.9
+    "date": "20261005",
+    "foreign_net_lots": 380019.1,
+    "trust_net_lots": -44852.9,
+    "dealer_net_lots": 401876.9,
+    "total_net_lots": 737043.2
   },
   "institutional_history": [
     {
@@ -420,6 +424,13 @@
       "trust_net_lots": 44463.8,
       "dealer_net_lots": -395274.7,
       "total_net_lots": 57654.9
+    },
+    {
+      "date": "20261005",
+      "foreign_net_lots": 380019.1,
+      "trust_net_lots": -44852.9,
+      "dealer_net_lots": 401876.9,
+      "total_net_lots": 737043.2
     }
   ]
 }
