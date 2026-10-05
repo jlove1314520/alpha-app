@@ -36,6 +36,8 @@ from pathlib import Path
 
 import requests
 
+from sec_rate_limiter import acquire_slot as _shared_acquire_slot
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -79,13 +81,10 @@ _next_slot = [0.0]
 
 
 def _acquire_slot() -> None:
-    with _rate_lock:
-        now = time.monotonic()
-        t = max(now, _next_slot[0])
-        _next_slot[0] = t + SLEEP
-    d = t - time.monotonic()
-    if d > 0:
-        time.sleep(d)
+    """先.二十-一：改為呼叫跨行程共用限速器。行程內的 threading 版本在兩個
+    Python 行程並行時會各自用滿 5 req/秒＝合計 10，剛好等於 SEC 官方上限、
+    失去安全邊際；共用版以檔案為狀態，確保**合計** ≤5 req/秒。"""
+    _shared_acquire_slot()
 
 
 def get(url: str, cache: Path, binary: bool = False):

@@ -32,6 +32,9 @@ from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from sec_rate_limiter import acquire_slot as _sec_slot  # noqa: E402
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -61,13 +64,14 @@ def _wait():
 
 
 def get_json(url: str, name: str):
+    """SEC 端點：用跨行程共用限速器（先.二十-一），與先.十八-二 的 SIC 抓取共用同一份額度。"""
     p = CACHE / name
     if p.exists():
         try:
             return json.loads(p.read_text(encoding="utf-8"))
         except Exception:  # noqa: BLE001
             pass
-    _wait()
+    _sec_slot()
     try:
         r = requests.get(url, headers=HEADERS, timeout=60)
     except Exception as e:  # noqa: BLE001
