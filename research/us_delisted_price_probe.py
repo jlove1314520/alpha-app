@@ -152,14 +152,41 @@ def pick_sample() -> list[dict]:
         for t, v in (json.loads(UNI_V1.read_text(encoding="utf-8")).get("universe") or {}).items():
             if v.get("cik"):
                 old.setdefault(int(v["cik"]), t)
+    # 四路合併解析代號（先.二十一-一）：
+    #   路徑1 舊名冊 ticker 欄／submissions.tickers（已下市者多半為空）
+    #   路徑2 Form 25 本文的括號代號
+    #   路徑3 下市前最後一份 10-K／10-Q 封面頁
+    #   路徑4 Stooq 代號清單 —— **不可及**（整站 JS 驗證牆，依取得方式鐵律不繞）
+    src = {}
     for s in sample:
         cik = int(s["cik"])
         tk = s.get("ticker") or old.get(cik)
+        if tk:
+            src[cik] = "path1_universe_ticker"
         if not tk:
             d = get_json(f"https://data.sec.gov/submissions/CIK{cik:010d}.json", f"SUB_{cik}.json")
             tks = (d.get("tickers") or []) if isinstance(d, dict) else []
             tk = tks[0] if tks else None
+            if tk:
+                src[cik] = "path1_submissions_tickers"
         s["probe_ticker"] = tk
+    need = [s for s in sample if not s.get("probe_ticker")]
+    if need:
+        try:
+            import us_delisted_ticker_resolve as TR
+            r3 = TR.resolve(need, budget=TR.MAX_REQUESTS)
+            got = {int(x["cik"]): x.get("path3_symbol") for x in r3["rows"] if x.get("path3_symbol")}
+            for s in sample:
+                c = int(s["cik"])
+                if not s.get("probe_ticker") and got.get(c):
+                    s["probe_ticker"] = got[c]
+                    src[c] = "path3_cover_page"
+            print(f"  路徑3 封面頁補上 {len(got)} 檔代號（用了 {r3['requests_used']} 次請求）", flush=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"::warning::路徑3 解析失敗（降級，不中斷）：{type(e).__name__}: {e}", flush=True)
+    for s in sample:
+        s["ticker_source"] = src.get(int(s["cik"]))
+    pick_sample.ticker_sources = src
     return sample
 
 
@@ -296,6 +323,10 @@ def main() -> int:
         s = pick_sample()
         res["sample"] = s
         res["frame_info"] = getattr(pick_sample, "frame_info", None)
+        srcs = getattr(pick_sample, "ticker_sources", {}) or {}
+        import collections as _c
+        res["ticker_source_breakdown"] = dict(_c.Counter(srcs.values()))
+        res["ticker_source_breakdown"]["path4_stooq"] = "不可及（整站 JS 驗證牆，不繞牆）"
         print(f"抽樣 {len(s)} 檔（2012～2020 普通股下市，種子 {SEED}）；"
               f"其中有代號 {sum(1 for x in s if x.get('probe_ticker'))} 檔", flush=True)
     sample = res.get("sample", [])
