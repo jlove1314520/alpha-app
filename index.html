@@ -6606,7 +6606,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function renderAutoPreflight(pf){
     const el=document.getElementById('auto-preflight');if(!el)return;
     if(!pf||!Array.isArray(pf.items)){el.textContent='尚未執行（本機跑 python research/auto_rebalance_bb90.py --preflight，只查詢、不送單）';return}
-    const col={PASS:'var(--up,#1a7f37)',FAIL:'var(--down,#cf222e)',INFO:'var(--ink-3,#666)'};
+    const col={PASS:'#2da44e',FAIL:'#e5534b',INFO:'var(--ink-3,#888)'};  // 固定色：不用 --up/--down（台股慣例漲紅跌綠，會讓 PASS 顯示成紅色）
     el.innerHTML='<div style="margin-bottom:4px">執行時間：'+_autoEsc(pf.ran_at)+'　PASS '+_autoEsc(pf.pass)+'／FAIL '+_autoEsc(pf.fail)+'</div>'+
       pf.items.map(i=>'<div style="margin:2px 0"><b style="color:'+(col[i.result]||'inherit')+'">'+_autoEsc(i.result)+'</b> '+_autoEsc(i.name)+'<br><span style="color:var(--ink-4)">'+_autoEsc(i.detail)+'</span></div>').join('');
   }
@@ -7930,7 +7930,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.1942';
+  const APP_VERSION='2026-10-06.1947';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

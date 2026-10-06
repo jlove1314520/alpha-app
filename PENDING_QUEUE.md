@@ -17856,8 +17856,8 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十三）。研究項另以 TRIALS_REGISTRY／TRIALS_LEDGER 登記。
 
-- [ ] **先.三十三-一 上線前自檢 --preflight（只查詢不送單，結果寫本機 status，App 顯示清單）＋今晚跑一次**
-- [ ] **先.三十三-二 App「真錢帳戶」卡（/auto/status 加欄位、空狀態、冒煙全綠才 commit）**
+- [x] **先.三十三-一 上線前自檢 --preflight（只查詢不送單，結果寫本機 status，App 顯示清單）＋今晚跑一次**〔互動視窗 commit 668e39208：13 項（含 INFO 模式）。今晚 19:39 實跑 PASS 5／FAIL 7：FAIL＝①永豐正式環境登入被拒「Token doesn't have production permission」（金鑰尚無正式權限＝簽署／測試報告未完成）→ signed 與三項唯讀查詢無法檢查 ②推播訂閱 0 支 ③除息資料不含 0050／00646／00697B 任何事件（除息日價差會被當異常整批拒單，需另案補資料）。正式環境只 login、不 activate_ca（結構上無法送單），結束即 logout；detail 不含金額／金鑰值。自測 148 PASS。〕
+- [x] **先.三十三-二 App「真錢帳戶」卡（/auto/status 加欄位、空狀態、冒煙全綠才 commit）**〔互動視窗 commit 668e39208＋本輪配色修正：`live_account_summary()`（LIVE 帳本＋對帳基準；損益只算自動交易買進股數、對照＝同金額同日收盤買 0050、未計費稅），`/auto/status` 回 `live_account`（只在本機、需 token）。目前無 LIVE 成交→空狀態「尚無真錢自動交易紀錄」。冒煙全部通過；live server 已重啟，[build] git sha=668e392（之後的 commit 未動 server 檔），CORS 預檢含精確來源＋credentials。〕
 - [x] **先.三十三-三-1 槓桿版 Bb-90 預登記（SHA256）commit**〔分身完成：docs/PREREG_leveraged_bb90_FINAL.md，SHA256=1fc3ffea5b87f7e7598970a66d13ed33742893e634dbcea2ec46ce9a2031df73，登記 #419，commit 18c7dec06（先於任何程式）〕
 - [x] **先.三十三-三-2 合成 2 倍追蹤誤差驗證（00631L／00647L，2014 起；>2pp 判無效不跑網格）**〔分身完成：**00631L 年化差 4.20pp（真實 27.50% vs 合成 23.30%）→ 判無效**；00647L 0.49pp 通過。合成序列系統性低估真實正2（方向保守）。〕
 - [x] **先.三十三-三-3 六組網格單發執行＋判定＋JSON 入庫＋TRIALS_LEDGER 登記**〔分身完成：依事前登記**網格未執行**（追蹤驗證未過），登記 #420 判定 ABANDONED（語意 INVALID），結果 research/data/leveraged_bb90_result.json。只報告：00647L 2023–24 日成交金額中位數約 889 萬元，1,000 萬組合×5% 調整單約占 5.6%。若要再測須總司令另裁示並重新事前登記（例如 TW 腿改用台灣短利／台指期基差建模）。〕

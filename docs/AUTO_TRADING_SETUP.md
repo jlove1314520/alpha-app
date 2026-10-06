@@ -75,6 +75,11 @@
 - 狀態檔 `status.json` 新增 `next_tranche`、`deviation`、`drift_alert`；偏離目標 >5 個百分點只顯示，不自動賣出。
 - 設定新增：`sim_cash_twd`（模擬資金，須夠買整張）、`monthly_contribution_twd`（第 4 批後常態月投入）。
 
+### 先.三十三：上線前自檢與真錢帳戶卡（2026-10-06）
+- `python research/auto_rebalance_bb90.py --preflight`：逐項 PASS／FAIL＋缺什麼，結果寫本機 `status.json` 的 `preflight`，App 自動交易卡「上線前自檢」顯示。只查詢、**絕不送單**：正式環境只 `login`、不 `activate_ca`（沒有 CA 就不可能送出委託），結束即 `logout`；說明文字不含金額、持股數、帳號或金鑰值。
+- 2026-10-06 19:39 首跑：PASS 5／FAIL 7。正式環境登入被拒（永豐回應 `Token doesn't have production permission`：目前金鑰只有模擬權限，需完成簽署與模擬測試報告後由永豐開通）；推播 0 支；`data/ex_dividend_events.json` 不含三檔白名單的除息事件。
+- App「真錢帳戶」卡：`/auto/status` 的 `live_account`（LIVE 族帳本＋對帳基準，只在本機）。損益只算自動交易買進的股數；對照組＝每筆成交改成同金額、同日收盤買 0050；未計手續費與稅。無 LIVE 成交時顯示空狀態。
+
 ### 先.三十二：模擬否決窗演練設定（2026-10-06 新增，僅 SIMULATION 有效）
 
 | 設定鍵 | 預設 | 作用 | LIVE 類影響 |

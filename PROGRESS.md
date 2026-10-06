@@ -1,3 +1,15 @@
+## 2026-10-06 19:2x～20:0x（互動視窗＋研究分身，先.三十三 三件並行）
+
+等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**一、上線前自檢 --preflight → 完成（668e39208）**：首跑 PASS 5／FAIL 7。FAIL 三個根因：①永豐正式環境登入被拒「Token doesn't have production permission」（金鑰只有模擬權限，簽署／測試報告未完成）→ signed 與餘額／未交割款／持股查詢都無法檢查 ②推播訂閱 0 支 ③`data/ex_dividend_events.json` 不含 0050／00646／00697B 的除息事件（除息日會整批拒單，需另案）。自測 148 PASS。
+
+**二、App 真錢帳戶卡 → 完成**：`/auto/status` 加 `live_account`；目前無 LIVE 成交→空狀態。冒煙全部通過；live server 重啟、build=668e392、CORS 預檢通過。順手修：自檢清單原本用 `--up/--down`（台股漲紅跌綠），PASS 顯示成紅色，改固定色。
+
+**三、槓桿版 Bb-90 單發檢定 → 無效（INVALID，登記 ABANDONED #420）**：預登記 `docs/PREREG_leveraged_bb90_FINAL.md` SHA256=1fc3ffea…（#419，18c7dec06）。追蹤驗證 00631L 合成 vs 真實年化差 4.20pp（>2pp 門檻）、00647L 0.49pp → 依登記不跑網格，六組無數字。結果 `research/data/leveraged_bb90_result.json`（b10e381b9）。
+
+**冒煙測試**：`node scripts/smoke_test.mjs`「=== 冒煙測試結果：全部通過 ===」（exit=0）。
+
 ## 2026-10-06 19:0x～19:3x（互動視窗，先.三十二 前置，開發帽）
 
 等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
