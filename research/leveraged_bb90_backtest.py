@@ -43,6 +43,29 @@ STRESS = {"2008": ("2008-01-01", "2008-12-31"), "2020": ("2020-02-01", "2020-04-
           "2022": ("2022-01-01", "2022-12-31")}
 DAILY_JUMP_MAX = 0.21
 
+# 先.三十四-一：#421 重新登記（docs/PREREG_leveraged_bb90_421.md）。以 --formula 421 切換；
+# 預設仍為 #419/#420 舊公式（保留供稽核，不刪）。
+F421 = "--formula" in sys.argv and sys.argv[sys.argv.index("--formula") + 1] == "421"
+if F421:
+    PREREG = "docs/PREREG_leveraged_bb90_421.md"
+    PREREG_TRIAL = 421
+    OUT = HERE / "data" / "leveraged_bb90_421_result.json"
+    SPREAD = 0.0          # 期貨定價原理：不含借款利差
+N_FAMILY = 36 if F421 else 30
+
+
+def load_tw_rf_daily(dates: pd.Series) -> np.ndarray:
+    """#421：data/rf_monthly.json 央行一個月定存（年化%，月資料）→ 所屬月份日化 /252；缺月向前填補；2025 起不讀。"""
+    d = json.loads((ROOT / "data" / "rf_monthly.json").read_text(encoding="utf-8"))["monthly"]
+    m = pd.Series({pd.Period(r["date"][:7], "M"): float(r["rf_rate_pct"]) for r in d if r["date"][:10] <= END})
+    m = m.sort_index()
+    m = m.reindex(pd.period_range(m.index.min(), pd.Period(END[:7], "M"), freq="M")).ffill()
+    per = pd.to_datetime(dates).dt.to_period("M")
+    v = per.map(m).astype(float).to_numpy()
+    if np.isnan(v).any():
+        raise RuntimeError("rf_monthly 無法涵蓋全部交易日（期初缺值）")
+    return v / 100.0 / 252.0
+
 
 def prog(m: str) -> None:
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {m}", flush=True)
@@ -83,7 +106,7 @@ def load_all() -> tuple[pd.DataFrame, pd.Series]:
     fx = pd.Series(fxd["value"].astype(float).to_numpy(),
                    index=pd.to_datetime(fxd["date"]).dt.normalize()).sort_index()
     fx = fx[fx.index <= END]
-    b = (load_dtb3_annual(base["date"]) + SPREAD) / 252.0
+    b = (load_tw_rf_daily(base["date"]) if F421 else (load_dtb3_annual(base["date"]) + SPREAD) / 252.0)
     base["r_ltw"] = 2.0 * base["r_0050"].to_numpy(float) - b - FEE / 252.0
     base.loc[base.index[0], "r_ltw"] = 0.0
     lus = vti_lev_twd(fx)
@@ -271,9 +294,10 @@ def main() -> int:
     sha = hashlib.sha256((ROOT / PREREG).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
     res = {"generated_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
            "prereg": PREREG, "prereg_sha256": sha, "prereg_trial_id": PREREG_TRIAL,
-           "n_trials_counted": 6, "n_trials_family": 30,
+           "n_trials_counted": 6, "n_trials_family": N_FAMILY,
            "holdout_note": "資料截至 2024-12-31，2025 起未讀取（DTB3／DEXTAUS／VTI 快取在載入處截斷）",
-           "synthetic": "2×日報酬 −(DTB3+1%)/252 −1%/252；L_US 於美元層計算後換台幣"}
+           "synthetic": ("#421：2×含息日報酬 −當地短利/252 −1%/252（台股：央行一個月定存 rf_monthly；美股：DTB3）；L_US 於美元層計算後換台幣"
+                         if F421 else "2×日報酬 −(DTB3+1%)/252 −1%/252；L_US 於美元層計算後換台幣")}
     prog("載入資料")
     df, _fx = load_all()
     dates = df["date"]
@@ -311,7 +335,8 @@ def main() -> int:
                 sh.append(float(r.mean() / r.std(ddof=1)))
     sh += [S[k]["sharpe_daily"] for k in GRID]
     V = float(np.var(sh, ddof=1))
-    res["dsr_V"] = {"value_daily": V, "n_sharpes": len(sh), "source": "本家族 30 組（#418 24 組重算＋本次 6 組）日頻 Sharpe 樣本變異數",
+    res["dsr_V"] = {"value_daily": V, "n_sharpes": len(sh), "N_used": N_FAMILY,
+                    "source": "本家族可取得 30 組（#418 24 組重算＋本次 6 組）日頻 Sharpe 樣本變異數" + ("；#420 未產生網格 Sharpe，只計入 N" if F421 else ""),
                     "bias_note": "同家族配置組合高度相關，V 偏小→SR0 偏低→DSR 偏寬鬆；另報全帳本 V 敏感度"}
     v_global = None
     try:
@@ -328,16 +353,16 @@ def main() -> int:
     res["grid"] = {}
     for k in GRID:
         s = S[k]
-        d = dsr(rets[k], 30, V)
+        d = dsr(rets[k], N_FAMILY, V)
         ex = rets[k] - rets["Bb-90"]
         rep = {}
         if v_global:
             try:
-                rep["dsr_global_V"] = dsr(rets[k], 30, v_global)["dsr"]
+                rep["dsr_global_V"] = dsr(rets[k], N_FAMILY, v_global)["dsr"]
             except Exception as e:  # noqa: BLE001
                 rep["dsr_global_V"] = f"{type(e).__name__}"
         try:
-            rep["dsr_excess_vs_bb90_family_V"] = dsr(ex, 30, V)["dsr"]
+            rep["dsr_excess_vs_bb90_family_V"] = dsr(ex, N_FAMILY, V)["dsr"]
         except Exception as e:  # noqa: BLE001
             rep["dsr_excess_vs_bb90_family_V"] = f"{type(e).__name__}"
         cb = cluster_boot(rets[k], rets["Bb-90"], dates)
