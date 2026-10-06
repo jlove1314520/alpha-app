@@ -27,6 +27,9 @@ class Fake:
         o = self.orders[oid]; q = o["qty"] if self.fill else 0
         return {"status": "Filled" if q else "Submitted", "filled_qty": q, "avg_price": o["limit_price"]}
 
+def S(p):  # 測試用：SIMULATION 族的分檔路徑
+    return p.scoped("SIMULATION")
+
 def setup(cfg=None):
     d = Path(tempfile.mkdtemp())
     base = {"mode": "SIMULATION", "tranche": 1, "tranche_total": 4, "total_capital_twd": 4_000_000,
@@ -35,8 +38,9 @@ def setup(cfg=None):
     (d / "config.local.json").write_text(json.dumps(base), encoding="utf-8")
     return A.Paths(d)
 
-def ledger(p):
-    return [json.loads(l) for l in p.ledger.read_text(encoding="utf-8").splitlines()] if p.ledger.exists() else []
+def ledger(p, mode="SIMULATION"):
+    q = p.scoped(mode)
+    return [json.loads(l) for l in q.ledger.read_text(encoding="utf-8").splitlines()] if q.ledger.exists() else []
 
 def run(p, b, now=NOW, pc=PC):
     return A.run_month_end(p, b, now, prev_close=pc, poll_sec=0, polls=1)
@@ -75,7 +79,7 @@ check("拒單：停止旗標", any(w.startswith("STOP_FLAG") for w in A.gate_ord
 # 端到端情境
 p = setup(); b = Fake(); run(p, b)
 p.stop_flag.write_text("x"); p2 = p
-p2.ledger.unlink()
+S(p2).ledger.unlink()
 b2 = Fake(); p3 = setup(); p3.stop_flag.write_text("x")
 r = run(p3, b2)
 check("停止旗標：一張單都不送", len(b2.placed) == 0 and any(x["event"] == "REJECT" for x in ledger(p3)))
@@ -94,7 +98,7 @@ p = setup(); run(p, Fake())  # 建基準（首次不送單？先清）
 p = setup(); b = Fake({"0050": 5})
 run(p, b)  # 首次：基準＝{0050:5}，送單成交後快照更新
 b.pos["0050"] += 777  # 券商持股被外部改動
-p.ledger.unlink(); p.pending.unlink(missing_ok=True)
+S(p).ledger.unlink(); S(p).pending.unlink(missing_ok=True)
 b.placed.clear()
 r = run(p, b, now=NOW + timedelta(days=31), pc={k: (v[0], "2026-11-29") for k, v in PC.items()})
 check("持股對不上：不送單、ERROR、紅色橫幅", len(b.placed) == 0 and r["state"] == "ERROR"
@@ -120,16 +124,32 @@ except A.AutoTradingError:
 # 否決窗
 p = setup({"mode": "LIVE_WITH_VETO"}); b = Fake()
 r = run(p, b)
-check("否決窗：先寫待執行訂單、不送單", r["state"] == "WAITING_VETO" and len(b.placed) == 0 and p.pending.exists())
+L = p.scoped("LIVE_WITH_VETO")
+check("否決窗：先寫待執行訂單、不送單", r["state"] == "WAITING_VETO" and len(b.placed) == 0 and L.pending.exists())
 r = run(p, b, now=NOW + timedelta(minutes=10))
 check("否決窗內再跑仍等待", r["state"] == "WAITING_VETO" and len(b.placed) == 0)
 p.stop_flag.write_text("x")
 r = run(p, b, now=NOW + timedelta(minutes=31))
 check("否決窗：全部取消(停止旗標)後逾時也不送", len(b.placed) == 0)
 p.stop_flag.unlink()
-p.pending.write_text(json.dumps({**json.loads(p.pending.read_text(encoding="utf-8")), "cancelled": False}), encoding="utf-8")
+L.pending.write_text(json.dumps({**json.loads(L.pending.read_text(encoding="utf-8")), "cancelled": False}), encoding="utf-8")
 r = run(p, b, now=NOW + timedelta(minutes=31))
 check("否決窗：逾時且未取消才送單", len(b.placed) >= 1)
+
+# 先.三十-一-1：模擬與 LIVE 狀態分離、冪等鍵含模式
+p = setup(); bs = Fake()
+r = run(p, bs)
+check("分離：模擬先成交", r["state"] == "OK" and len(bs.placed) >= 1)
+cfgj = json.loads(p.config.read_text(encoding="utf-8")); cfgj["mode"] = "LIVE"
+p.config.write_text(json.dumps(cfgj), encoding="utf-8")
+bl = Fake()  # 真錢帳戶：持股與模擬無關
+r = run(p, bl)
+check("分離：同月切 LIVE 真錢照常送單", len(bl.placed) >= 1 and r["state"] == "OK" and not r["skipped"])
+check("分離：切 LIVE 對帳不報錯", json.loads(p.status.read_text(encoding="utf-8")).get("banner") != "red")
+check("分離：冪等鍵含模式", all(o.get("key", "").startswith("LIVE-") for o in bl.placed)
+      and all(o.get("key", "").startswith("SIMULATION-") for o in bs.placed))
+n = len(bl.placed); run(p, bl)
+check("分離：LIVE 重跑不重複下單", len(bl.placed) == n)
 
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)

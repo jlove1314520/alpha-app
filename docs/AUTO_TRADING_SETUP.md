@@ -45,7 +45,11 @@
   - `LIVE`：正式帳戶，無否決窗（須總司令另行裁示）。
 - 目標：0050 45%／00646 45%／00697B 10%。**新資金優先補低配、盡量不賣**（僅買入；偏離只靠新資金修正）。
 - 硬限制（任一不符即拒單並通知）：白名單標的、僅現股（不含融資券／當沖）、單次金額上限、限價且偏離前收 ≤1%、資料新鮮度、下單前券商持股對帳、緊急停止旗標。
-- 紀錄：`research/data/live_orders.jsonl`（append-only；刻意不加 `merge=union`）。重複執行以「月份＋批次＋標的」冪等鍵略過，不重複下單。
+- 紀錄：~~`research/data/live_orders.jsonl`~~（⚠️ 2026-10-06 先.三十-一-1 起改為按模式族分檔，舊檔保留不再寫入）。
+  - 模式族：`SIMULATION` 一套、`LIVE_WITH_VETO`／`LIVE` 共用一套（同一個真錢帳戶）。
+  - 每族各自的帳本 `auto_trading/<族>/orders.jsonl`（append-only）、對帳快照 `auto_trading/<族>/state.json`、待執行訂單 `auto_trading/<族>/pending_orders.json`。
+  - 共用：`config.local.json`、`STOP.flag`、`status.json`（App 讀）。
+  - 冪等鍵＝「模式族＋月份＋批次＋標的」（例：`LIVE-202610-T1-0050`），重複執行略過不重複下單；模擬已成交的同月同批，切到 LIVE 類後真錢照常送單，對帳以真錢帳戶自己的快照為準。
 - 對帳不符：寫 `last_error`、心跳 `ERROR`、App 紅色橫幅，並停止送單（失敗時 fail open 於**通知**，fail closed 於**送單**）。
 - App：設定頁「自動交易」區塊顯示狀態、待執行訂單與「全部取消」按鈕，另有常駐「緊急停止」開關；兩者都只寫本機停止旗標，不具任何下單能力（走 `alpha_live_server.py` 的 `/auto/*`，需 `X-Alpha-Local-Token`）。
 

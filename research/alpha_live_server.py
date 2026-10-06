@@ -1200,13 +1200,15 @@ async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)
     """自動交易狀態（唯讀）：status.json、待執行訂單（否決窗）、緊急停止旗標。本端點沒有任何下單能力。"""
     _check_token(x_alpha_local_token)
     status = _read_json_safe(AUTO_TRADING_DIR / "status.json") or {}
-    pending = _read_json_safe(AUTO_TRADING_DIR / "pending_orders.json")
+    cfg = _read_json_safe(AUTO_TRADING_DIR / "config.local.json") or {}
+    # 先.三十-一-1：待執行訂單按模式族分開存（auto_rebalance_bb90.mode_family 同一規則）
+    family = "LIVE" if cfg.get("mode") in ("LIVE_WITH_VETO", "LIVE") else "SIMULATION"
+    pending = _read_json_safe(AUTO_TRADING_DIR / family / "pending_orders.json")
     if isinstance(pending, dict) and (pending.get("done") or pending.get("cancelled")):
         pending_view = {"cancelled": bool(pending.get("cancelled")), "done": bool(pending.get("done"))}
     else:
         pending_view = pending if isinstance(pending, dict) else None
-    cfg = _read_json_safe(AUTO_TRADING_DIR / "config.local.json") or {}
-    return {"ok": True, "mode": cfg.get("mode", "SIMULATION"),
+    return {"ok": True, "mode": cfg.get("mode", "SIMULATION"), "family": family,
             "stopped": (AUTO_TRADING_DIR / "STOP.flag").exists(),
             "status": status, "pending": pending_view}
 

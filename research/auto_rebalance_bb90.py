@@ -4,6 +4,10 @@
 模式 SIMULATION／LIVE_WITH_VETO／LIVE 由本機 research/data/auto_trading/config.local.json 決定，
 缺失或讀不懂一律 SIMULATION。憑證只從 .env 讀進行程記憶體，不印出、不寫檔。
 CLI 的 --mode-override 只允許降級成 SIMULATION（互動視窗／Cowork 驗證用）。
+先.三十-一-1：對帳快照、帳本、待執行訂單按模式族分開存（SIMULATION／LIVE 類各一套，
+放在 auto_trading/<族>/），冪等鍵以模式族開頭，模擬成交不會讓真錢單被當成已送出。
+先.三十-一：--settle 盤後結算（遲到成交／EXPIRED 隔日重排）、整股＋零股拆單、INSUFFICIENT_CASH、
+期數自動遞增與常態期（月度投入補低配、偏離>5pp 只告警不賣）、官方交易日曆與 should_run 觸發條件。
 """
 from __future__ import annotations
 
@@ -12,6 +16,7 @@ import json
 import math
 import os
 import sys
+import threading
 import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -24,7 +29,6 @@ except Exception:
 
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_DIR = REPO / "research" / "data" / "auto_trading"
-LEDGER = REPO / "research" / "data" / "live_orders.jsonl"
 HEARTBEAT = REPO / "research" / "PROGRESS_HEARTBEAT.jsonl"
 PRICE_HISTORY = REPO / "data" / "price_history.json"
 TW = timezone(timedelta(hours=8))
@@ -34,6 +38,12 @@ WHITELIST = frozenset(WEIGHTS)
 MODES = ("SIMULATION", "LIVE_WITH_VETO", "LIVE")
 VETO_MINUTES = 30
 LOT = 1000
+CASH_BUFFER = 1.003
+MAX_ROUNDS = 5
+SETTLE_AFTER = (13, 35)
+DRIFT_ALERT_PP = 5.0
+NONFINAL = ("SUBMITTED", "OPEN", "PARTIAL")
+CAL_URL = "https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json&queryYear={y}"
 
 
 class AutoTradingError(Exception):
@@ -49,16 +59,29 @@ def round_down_tick(price: float) -> float:
     return round(math.floor(round(price / t, 6)) * t, 2)
 
 
+def mode_family(mode: str) -> str:
+    """LIVE_WITH_VETO 與 LIVE 共用真錢帳戶，同一族；其餘（含無效值）一律 SIMULATION。"""
+    return "LIVE" if mode in ("LIVE_WITH_VETO", "LIVE") else "SIMULATION"
+
+
 class Paths:
-    def __init__(self, base: Path | None = None, ledger: Path | None = None, heartbeat: Path | None = None):
+    """共用：設定檔、停止旗標、status（App 讀）、心跳。按模式族分開：pending／state／ledger（見 scoped）。"""
+
+    def __init__(self, base: Path | None = None, heartbeat: Path | None = None, family: str | None = None):
         self.base = Path(base) if base else DEFAULT_DIR
         self.config = self.base / "config.local.json"
         self.stop_flag = self.base / "STOP.flag"
-        self.pending = self.base / "pending_orders.json"
         self.status = self.base / "status.json"
-        self.state = self.base / "state.json"
-        self.ledger = Path(ledger) if ledger else (self.base / "live_orders.jsonl" if base else LEDGER)
         self.heartbeat = Path(heartbeat) if heartbeat else (self.base / "heartbeat.jsonl" if base else HEARTBEAT)
+        self.family = family
+        if family:
+            d = self.base / family
+            self.pending = d / "pending_orders.json"
+            self.state = d / "state.json"
+            self.ledger = d / "orders.jsonl"
+
+    def scoped(self, mode: str) -> "Paths":
+        return Paths(self.base, self.heartbeat, mode_family(mode))
 
 
 def _read_json(p: Path):
@@ -130,6 +153,20 @@ def load_prev_closes(path: Path = PRICE_HISTORY) -> dict:
 
 
 # ---------- 規劃 ----------
+def split_qty(qty: int, odd_ok: bool) -> list[tuple[str, int]]:
+    """>=1000 且非整張：整股一張單＋盤中零股一張單；<1000 只能零股；不支援零股時只留整張部分。"""
+    if qty <= 0:
+        return []
+    whole = qty // LOT * LOT
+    odd = qty - whole
+    out = []
+    if whole:
+        out.append(("Common", whole))
+    if odd and odd_ok:
+        out.append(("IntradayOdd", odd))
+    return out
+
+
 def plan_orders(prices: dict, holdings: dict, budget: float, odd_ok: bool, dev_pct: float = 0.5) -> list[dict]:
     """只買不賣：新資金優先補低配，剩餘資金按目標權重分。prices={code:prev_close}。"""
     total = budget + sum(holdings.get(c, 0) * prices[c] for c in WEIGHTS)
@@ -143,14 +180,9 @@ def plan_orders(prices: dict, holdings: dict, budget: float, odd_ok: bool, dev_p
     orders = []
     for c in WEIGHTS:
         limit = round_down_tick(prices[c] * (1 + dev_pct / 100))
-        qty = int(alloc[c] // limit)
-        if not odd_ok:
-            qty = qty // LOT * LOT
-        if qty <= 0:
-            continue
-        orders.append({"symbol": c, "action": "Buy", "qty": qty, "limit_price": limit,
-                       "lot": "IntradayOdd" if (qty % LOT and odd_ok) else "Common",
-                       "cond": "Cash", "amount": round(qty * limit, 2)})
+        for lot, q in split_qty(int(alloc[c] // limit), odd_ok):
+            orders.append({"symbol": c, "action": "Buy", "qty": q, "limit_price": limit, "lot": lot,
+                           "part": "C" if lot == "Common" else "O", "cond": "Cash", "amount": round(q * limit, 2)})
     return orders
 
 
@@ -167,6 +199,10 @@ def gate_order(o: dict, ctx: dict) -> list[str]:
         why.append("CASH_ONLY:僅限現股")
     if o.get("lot") not in ("Common", "IntradayOdd"):
         why.append("LOT:僅允許整股／盤中零股")
+    elif o.get("lot") == "Common" and (o.get("qty") or 0) % LOT:
+        why.append("LOT:整股數量必須是1000的倍數")
+    elif o.get("lot") == "IntradayOdd" and (o.get("qty") or 0) >= LOT:
+        why.append("LOT:零股數量必須小於1000")
     cap = ctx["cfg"].get("per_order_cap_twd") or 0
     amt = (o.get("qty") or 0) * (o.get("limit_price") or 0)
     if cap <= 0:
@@ -240,8 +276,20 @@ class ShioajiBroker:
         self._trades[oid] = (trade, o)
         return {"order_id": oid}
 
+    def _find(self, order_id: str):
+        if order_id in self._trades:
+            return self._trades[order_id]
+        # 新行程（盤後 --settle）：從券商當日委託清單找回
+        self.api.update_status(self.api.stock_account)
+        for t in self.api.list_trades():
+            if getattr(t.order, "id", None) == order_id:
+                lot = "Common" if "Common" in str(getattr(t.order, "order_lot", "Common")) else "IntradayOdd"
+                self._trades[order_id] = (t, {"lot": lot})
+                return self._trades[order_id]
+        raise AutoTradingError(f"券商當日委託清單找不到 {order_id}")
+
     def status(self, order_id: str) -> dict:
-        trade, o = self._trades[order_id]
+        trade, o = self._find(order_id)
         self.api.update_status(self.api.stock_account)
         st = trade.status
         filled = sum(d.quantity for d in (st.deals or []))
@@ -250,188 +298,25 @@ class ShioajiBroker:
         avg = (sum(d.price * d.quantity for d in st.deals) / sum(d.quantity for d in st.deals)) if st.deals else None
         return {"status": str(getattr(st.status, "value", st.status)), "filled_qty": int(filled), "avg_price": avg}
 
+    def cash(self, timeout: float = 20.0) -> float:
+        """現貨交割帳戶餘額（api.account_balance().acc_balance）。逾時或失敗一律拋錯（送單 fail closed）。
+        官方文件：https://sinotrade.github.io/zh/tutor/accounting/account_balance/ 僅支援永豐銀行／分戶帳／LINE Bank。"""
+        box = {}
 
-# ---------- 主流程 ----------
-def _ledger_keys(paths: Paths) -> dict:
-    keys = {}
-    if paths.ledger.exists():
-        for line in paths.ledger.read_text(encoding="utf-8").splitlines():
+        def _call():
             try:
-                r = json.loads(line)
-            except Exception:
-                continue
-            if r.get("key"):
-                keys[r["key"]] = r.get("event")
-    return keys
-
-
-def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None = None,
-                  mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5) -> dict:
-    cfg = load_config(paths)
-    mode = cfg["mode"]
-    if mode_override:
-        if mode_override != "SIMULATION":
-            raise AutoTradingError("--mode-override 只允許 SIMULATION")
-        mode = "SIMULATION"
-    today = now.astimezone(TW).date()
-    ym = today.strftime("%Y%m")
-    tranche = int(cfg.get("tranche", 1))
-    prev_close = prev_close if prev_close is not None else load_prev_closes()
-    res = {"mode": mode, "month": ym, "tranche": tranche, "submitted": [], "rejected": [], "skipped": [], "state": "OK"}
-
-    def log(event, o, **kw):
-        _append(paths.ledger, {"ts": now.astimezone(TW).isoformat(timespec="seconds"), "event": event, "mode": mode,
-                               "key": o.get("key"), "symbol": o.get("symbol"), "qty": o.get("qty"),
-                               "limit_price": o.get("limit_price"), **kw})
-
-    stopped = is_stopped(paths)
-    pend = _read_json(paths.pending)
-    try:
-        positions = broker.positions()
-    except Exception as e:
-        report_error(paths, f"取得券商持股失敗：{e}")
-        res["state"] = "ERROR"
-        return res
-
-    # 下單前對帳：與上次執行後留存的持股快照比較（首次執行只建基準）
-    state = _read_json(paths.state)
-    reconciled = True
-    if state is not None and {k: v for k, v in state.get("positions", {}).items() if v} != {k: v for k, v in positions.items() if v}:
-        reconciled = False
-        report_error(paths, f"持股對帳不符：本機記錄{state.get('positions')}≠券商{positions}")
-        res["state"] = "ERROR"
-    elif state is None:
-        _write_json(paths.state, {"positions": positions, "baseline_at": now.isoformat(timespec="seconds")})
-
-    if pend and (pend.get("done") or not pend.get("execute_after")):
-        pend = None
-    if pend and pend.get("month") == ym and pend.get("tranche") == tranche and pend.get("cancelled"):
-        res["state"] = "CANCELLED"
-        return res
-    if pend and pend.get("month") == ym and pend.get("tranche") == tranche:
-        if now < datetime.fromisoformat(pend["execute_after"]):
-            res["state"] = "WAITING_VETO"
-            return res
-        orders = pend["orders"]
-    else:
-        budget = (cfg.get("total_capital_twd") or 0) / max(1, int(cfg.get("tranche_total", 4)))
-        missing = [c for c in WHITELIST if c not in prev_close]
-        if missing or budget <= 0:
-            orders = []
-            ctxmsg = f"缺前收價{missing}" if missing else "未設定資金（total_capital_twd）"
-            log("REJECT", {"key": f"{ym}-T{tranche}-ALL", "symbol": "ALL"}, reasons=["PRICE_MISSING:" + ctxmsg if missing else "CAP:" + ctxmsg])
-            res["rejected"].append({"symbol": "ALL", "reasons": [ctxmsg]})
-            if missing:
-                report_error(paths, f"價格缺失，整批拒單：{missing}")
-                res["state"] = "ERROR"
-            return res
-        odd_ok = mode != "SIMULATION"
-        orders = plan_orders({c: prev_close[c][0] for c in WEIGHTS}, positions, budget, odd_ok,
-                             dev_pct=min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2))
-        for o in orders:
-            o["key"] = f"{ym}-T{tranche}-{o['symbol']}"
-
-    ctx = {"cfg": cfg, "prev_close": prev_close, "today": today, "stopped": stopped, "reconciled": reconciled}
-    done = _ledger_keys(paths)
-    ok_orders = []
-    for o in orders:
-        if done.get(o["key"]) in ("SUBMITTED", "FILLED", "PARTIAL", "OPEN"):
-            res["skipped"].append(o["key"])
-            continue
-        why = gate_order(o, ctx)
-        if why:
-            log("REJECT", o, reasons=why)
-            res["rejected"].append({"symbol": o["symbol"], "reasons": why})
-        else:
-            ok_orders.append(o)
-
-    if res["rejected"]:
-        write_status(paths, last_reject=[r["reasons"] for r in res["rejected"]][:5])
-    if stopped or not reconciled:
-        if pend:
-            _write_json(paths.pending, {**pend, "cancelled": True})
-        return res
-
-    if mode == "LIVE_WITH_VETO" and not (pend and pend.get("month") == ym and pend.get("tranche") == tranche):
-        if ok_orders:
-            _write_json(paths.pending, {"month": ym, "tranche": tranche, "created_at": now.isoformat(timespec="seconds"),
-                                        "execute_after": (now + timedelta(minutes=VETO_MINUTES)).isoformat(timespec="seconds"),
-                                        "orders": ok_orders})
-            write_status(paths, mode=mode, pending=len(ok_orders))
-            res["state"] = "WAITING_VETO"
-        return res
-
-    placed = []
-    for o in ok_orders:
-        try:
-            r = broker.place(o)
-        except Exception as e:
-            log("ERROR", o, error=str(e))
-            report_error(paths, f"送單失敗 {o['symbol']}：{e}")
-            res["state"] = "ERROR"
-            continue
-        log("SUBMITTED", o, order_id=r["order_id"], amount=o["amount"])
-        placed.append((o, r["order_id"]))
-        res["submitted"].append(o["key"])
-        time.sleep(1.0 if mode == "SIMULATION" and poll_sec else 0)
-
-    filled = {}
-    for o, oid in placed:
-        st = {}
-        for _ in range(polls):
-            try:
-                st = broker.status(oid)
+                box["v"] = self.api.account_balance()
             except Exception as e:
-                st = {"status": "UNKNOWN", "filled_qty": 0, "error": str(e)}
-            if st.get("filled_qty", 0) >= o["qty"]:
-                break
-            time.sleep(poll_sec)
-        ev = "FILLED" if st.get("filled_qty", 0) >= o["qty"] else ("PARTIAL" if st.get("filled_qty", 0) else "OPEN")
-        log(ev, o, order_id=oid, filled_qty=st.get("filled_qty", 0), avg_price=st.get("avg_price"), broker_status=st.get("status"))
-        filled[o["symbol"]] = filled.get(o["symbol"], 0) + st.get("filled_qty", 0)
+                box["e"] = e
 
-    if placed:
-        after = broker.positions()
-        expect = dict(positions)
-        for c, q in filled.items():
-            expect[c] = expect.get(c, 0) + q
-        if {k: v for k, v in after.items() if v} != {k: v for k, v in expect.items() if v}:
-            report_error(paths, f"成交後持股對帳不符：預期{expect}≠券商{after}")
-            res["state"] = "ERROR"
-        else:
-            _write_json(paths.state, {"positions": after, "updated_at": now.isoformat(timespec="seconds")})
-        _write_json(paths.pending, {"month": ym, "tranche": tranche, "done": True, "orders": []})
-    if res["state"] == "OK":
-        write_status(paths, mode=mode, last_run=now.isoformat(timespec="seconds"), last_error=None, banner=None, pending=0)
-    return res
+        t = threading.Thread(target=_call, daemon=True)
+        t.start()
+        t.join(timeout)
+        if t.is_alive() or "v" not in box:
+            raise AutoTradingError(f"account_balance 查詢逾時或失敗（{type(box.get('e')).__name__ if box.get('e') else 'timeout'}）")
+        bal = getattr(box["v"], "acc_balance", None)
+        if bal is None or getattr(box["v"], "errmsg", ""):
+            raise AutoTradingError("account_balance 回傳無餘額欄位或帶有錯誤訊息")
+        return float(bal)
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--run", action="store_true", help="執行一次月底流程（依本機設定檔模式）")
-    ap.add_argument("--mode-override", help="只允許 SIMULATION")
-    ap.add_argument("--stop", action="store_true")
-    a = ap.parse_args()
-    paths = Paths()
-    if a.stop:
-        paths.stop_flag.parent.mkdir(parents=True, exist_ok=True)
-        paths.stop_flag.write_text(datetime.now(TW).isoformat(), encoding="utf-8")
-        print("已寫入停止旗標")
-        return 0
-    if not a.run:
-        ap.print_help()
-        return 0
-    try:
-        mode = "SIMULATION" if a.mode_override else load_config(paths)["mode"]
-        broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
-        res = run_month_end(paths, broker, datetime.now(TW), mode_override=a.mode_override)
-        print(json.dumps(res, ensure_ascii=False))
-        return 0 if res["state"] in ("OK", "WAITING_VETO") else 1
-    except Exception as e:
-        report_error(paths, f"自動再平衡執行失敗：{type(e).__name__}")
-        print(f"[ERROR] {type(e).__name__}（細節不印出，避免洩漏憑證）", flush=True)
-        return 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())

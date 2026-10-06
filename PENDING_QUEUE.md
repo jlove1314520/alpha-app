@@ -17733,7 +17733,7 @@ push 後停下等 Cowork 核對。
 紅線：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發任何真實下單；憑證不讀出、不印出、不 commit。全部完成後一次回報：commit 清單、自測數、盤中模擬成交紀錄、排程截圖。
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十）。
 
-- [ ] **先.三十-一-1 模擬／LIVE 狀態分離＋冪等鍵含模式**
+- [x] **先.三十-一-1 模擬／LIVE 狀態分離＋冪等鍵含模式**〔DevQueue 20261006-170101 完成：`research/auto_rebalance_bb90.py` 新增 `mode_family()`／`Paths.scoped()`，帳本／對帳快照／待執行訂單改存 `auto_trading/<SIMULATION|LIVE>/`（LIVE_WITH_VETO 與 LIVE 同族，同一真錢帳戶），冪等鍵改為「族-月份-批次-標的」，`_ledger_keys` 另以 mode 欄位過濾；`alpha_live_server.py` `/auto/status` 依設定模式讀對應族的待執行訂單並回 `family`；文件第三節更新。先寫會失敗的自測（同月模擬成交→切 LIVE：修前 3 項 FAIL），修後 `scripts/selftest_auto_rebalance.py` 34/34 PASS；冒煙 49 PASS exit=0。[自行裁量] 舊根目錄 `pending_orders.json`／`state.json`／`research/data/live_orders.jsonl` 皆為先.二十九模擬產物，不刪不搬、不再讀寫（避免被誤當 LIVE 基準）；`status.json` 維持共用（App 只讀一份）。〕
 - [ ] **先.三十-一-2 --settle 晚成交（FILLED／PARTIAL／EXPIRED、結算後快照、隔日重規劃）**
 - [ ] **先.三十-一-3 拆單（整股＋盤中零股）**
 - [ ] **先.三十-一-4 INSUFFICIENT_CASH 硬限制（查官方餘額 API）**
