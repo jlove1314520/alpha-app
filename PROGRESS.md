@@ -1,3 +1,21 @@
+## 2026-10-06 18:31～18:5x（DevQueue cycle 20261006-183101，開發帽）
+
+等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**一、先.三十一-一 Web Push（第一段，本輪做）→ 已實作、自測通過，未實機驗證**
+- 做了什麼：新增 `research/web_push.py`（VAPID 金鑰只在本機 .env，`--gen-keys` 只在缺時附加、只印公鑰；訂閱存 `research/data/auto_trading/push_subscriptions.json`，已被 .gitignore 排除；`send()` 永不拋例外、410/404 自動清除失效訂閱；`push_log.jsonl` 只記類別與成敗數，不記股數金額）；`alpha_live_server.py` 新增 `/push/vapid_public_key`、`/push/subscribe`、`/push/unsubscribe`、`/push/test`（皆驗 token）；`sw.js` 加 push／notificationclick；設定頁自動交易卡加「開啟本裝置推播」「測試推播」按鈕與狀態列。commit `431367202`。
+- 證據：`python scripts/selftest_web_push.py` 17 項全 PASS（含 aes128gcm 加密→瀏覽器端金鑰解回原文、VAPID 簽章與公鑰一致）；對 Apple 推播服務送假 token：VAPID sub 用 `.example` 佔位信箱回 403 BadJwtToken，改用 App 公開網址後回 400 BadWebPushToken（假 token 的預期結果，代表簽章已被接受）。
+- 服務重啟四步：①已重啟（PID 292500 → 新行程 18:42 啟動）②`/health` build=`6e6b20c`；HEAD 已前進到 `f8604b275`，但兩者之間的 commit 都沒動 `alpha_live_server.py`（該檔最後修改 commit＝`431367202`），③OPTIONS 預檢 `/push/test` 回 `access-control-allow-origin: https://jlove1314520.github.io`＋`allow-credentials: true` ④`stale_process=false`。帶 token 打 `/push/test` 回 `NO_SUBSCRIPTION`（目前 0 支裝置訂閱，符合預期）。
+- `[自行裁量]`：①VAPID sub 用 `https://jlove1314520.github.io`（已公開網址，非個資；不用使用者 email）②點按鈕直接呼叫 `pushEnable()` 而非經 `_safeAsync`（後者把呼叫推到微任務，可能讓 iOS 判定不是使用者手勢；函式本身已有 try/catch＋recordGlobalError）③每台裝置最多保留 10 筆訂閱。
+- 分工：本輪開工時發現互動視窗同時在同一工作目錄改 `auto_rebalance_bb90.py`（先.三十一-三／四），為免撞檔，本輪只做不碰該檔的部分；引擎接線（否決窗 fail closed）與開啟步驟文件由互動視窗 `f8604b275` 完成並標 `[x]`。**誠實揭露**：本輪 `git pull --rebase` 時，互動視窗尚未 push 的 4 個本機 commit 被重新套用到遠端最新的心跳 commit 之上，**commit hash 改變**（內容不變）：6b1e89bab→3ba451213、7f9930b18→5805ad542、3575a3096→2da967386、1eabed442→62c4b91c5。
+- 待總司令：在 iPhone 依 `docs/AUTO_TRADING_SETUP.md` 第八節開啟推播並按「測試推播」（實機截圖屬【先.三十一】回報要求）。
+
+**二、先.三十一-七 → `[!]` 時間阻塞**：須 10/7 09:00–13:30 盤中模擬成交、12:20 後量測；解除條件：10/7 09:00 後下一輪改回 `- [ ]`。
+
+**三、其他**：先.三十一-二～六 已由互動視窗完成（本輪未重做）。阻塞項 19＋1 逐條核對，解除條件皆未到（金流一.4 仍缺交易日、先.三十-三／-五 等 10/7、其餘待裁示或暫緩）。**佇列深度**：`- [ ]`＝0（<12 下限），凍結.二仍有效，沿用上一輪（17:46）盤點結論，無可誠實補件項，不硬湊。
+
+**冒煙測試**：`node scripts/smoke_test.mjs`「=== 冒煙測試結果：全部通過 ===」（18:40:45，無 FAIL，含第 52 項）。
+
 ## 2026-10-06 17:46～17:5x（DevQueue cycle 20261006-174602，維運帽）
 
 等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
