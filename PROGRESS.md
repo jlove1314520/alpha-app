@@ -1,3 +1,22 @@
+## 2026-10-06 17:01～17:2x（DevQueue cycle 20261006-170101，開發帽）
+
+等待總司令審閱：12 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**一、先.三十-一-1 模擬／LIVE 狀態分離＋冪等鍵含模式 → `[x]`（commit `cd214fb41`）**
+- 做了什麼：`research/auto_rebalance_bb90.py` 新增 `mode_family()` 與 `Paths.scoped()`；帳本／對帳快照／待執行訂單改存 `research/data/auto_trading/<SIMULATION|LIVE>/`（LIVE_WITH_VETO 與 LIVE 同族＝同一真錢帳戶）；冪等鍵改為「族-月份-批次-標的」，讀帳本時再以 mode 欄位過濾一次。`alpha_live_server.py` 的 `/auto/status` 依設定模式讀對應族的待執行訂單並多回 `family`。`docs/AUTO_TRADING_SETUP.md` 第三節同步更正（舊路徑劃線保留）。
+- 證據：先寫會失敗的自測（同月模擬成交→切 LIVE），修前 3 項 FAIL；修後 `scripts/selftest_auto_rebalance.py` 34/34 PASS。冒煙 `node scripts/smoke_test.mjs` exit=0、49 項 PASS、無 FAIL。
+- 常駐服務四步驗證（七之二）：停掉舊行程後排程於 17:08 拉起；啟動 log `[build] git sha=cd214fb`＝本 commit（之後 HEAD 只多了 IBKR 報價自動 commit，未動伺服器檔）；OPTIONS 預檢回 `access-control-allow-origin: https://jlove1314520.github.io`＋`access-control-allow-credentials: true`；帶 token 的 `/health` 為 `stale_process=false`；`/auto/status` 回 `family=SIMULATION`。
+  - 附帶發現：伺服器目前走 **http**://127.0.0.1:8001（https 握手會被記成 Invalid HTTP request），CLAUDE.md 七之二範例指令仍寫 https，非本輪範圍，僅記錄。
+- `[自行裁量]`：先.二十九留下的根目錄 `pending_orders.json`／`state.json`／`research/data/live_orders.jsonl` 皆是模擬產物，不刪不搬、不再讀寫（避免被誤當 LIVE 基準）；`status.json` 維持共用（App 只讀一份）。
+
+**二、先.三十其餘九項 → 讓行（不是 BLOCKED，是撞車迴避）**
+- 開工後發現另一個行程（研判為互動視窗，16:57 起）正在同一工作目錄實作先.三十-一-2～二-2 與四：未 commit 的 `auto_rebalance_bb90.py` 已出現 `settle`／`split_qty`／`_cash_ok`／交易日曆／`watchdog`，`index.html` 已有「破億路徑」區塊，`smoke_test.mjs`／`alpha_live_server.py` 也有未 commit 修改。
+- 本輪準備寫的晚成交自測因對方已改過 `Fake` 類別，替換斷言失敗、**未寫入任何東西**，沒有覆蓋對方的工作。依第十三節「核心檔案單一寫入者」精神，本輪不再碰這幾支檔案，也不改 PENDING_QUEUE 裡對應條目的狀態（由互動視窗做完後自己標）。
+- 先.三十-三（10/7 09:00 後）、先.三十-五（10/7 12:20 後）本來就有時間條件，未到。
+
+**佇列深度**：`- [ ]`＝10（全是先.三十，由互動視窗進行中）。凍結.二仍有效，新 alpha 試驗不得補入；允許類別（稽核重跑/資料/工具）依前幾輪盤點無可誠實補入的新項目，本輪不硬湊。
+**其餘 `[!]`**：先.九-五（10/7 12:00 後重跑）、先.二十八-三（10/7 12:20 後）解除時間未到，其餘維持原阻塞原因。
+
 ## 2026-10-06 15:46～16:0x（DevQueue cycle 20261006-154601，維運帽）
 
 等待總司令審閱：12 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
