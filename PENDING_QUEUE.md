@@ -17734,13 +17734,13 @@ push 後停下等 Cowork 核對。
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十）。
 
 - [x] **先.三十-一-1 模擬／LIVE 狀態分離＋冪等鍵含模式**〔DevQueue 20261006-170101 完成：`research/auto_rebalance_bb90.py` 新增 `mode_family()`／`Paths.scoped()`，帳本／對帳快照／待執行訂單改存 `auto_trading/<SIMULATION|LIVE>/`（LIVE_WITH_VETO 與 LIVE 同族，同一真錢帳戶），冪等鍵改為「族-月份-批次-標的」，`_ledger_keys` 另以 mode 欄位過濾；`alpha_live_server.py` `/auto/status` 依設定模式讀對應族的待執行訂單並回 `family`；文件第三節更新。先寫會失敗的自測（同月模擬成交→切 LIVE：修前 3 項 FAIL），修後 `scripts/selftest_auto_rebalance.py` 34/34 PASS；冒煙 49 PASS exit=0。[自行裁量] 舊根目錄 `pending_orders.json`／`state.json`／`research/data/live_orders.jsonl` 皆為先.二十九模擬產物，不刪不搬、不再讀寫（避免被誤當 LIVE 基準）；`status.json` 維持共用（App 只讀一份）。〕
-- [ ] **先.三十-一-2 --settle 晚成交（FILLED／PARTIAL／EXPIRED、結算後快照、隔日重規劃）**
-- [ ] **先.三十-一-3 拆單（整股＋盤中零股）**
-- [ ] **先.三十-一-4 INSUFFICIENT_CASH 硬限制（查官方餘額 API）**
-- [ ] **先.三十-一-5 批次自動 +1、第 4 批後常態月投入、偏離>5pp 顯示**
-- [ ] **先.三十-二-1 Windows 工作排程器三時段＋交易日判斷**
-- [ ] **先.三十-二-2 排程心跳＋watchdog＋紅橫幅**
-- [ ] **先.三十-二-3 否決窗推播（先查現有機制）**
+- [x] **先.三十-一-2 --settle 晚成交（FILLED／PARTIAL／EXPIRED、結算後快照、隔日重規劃）**〔互動視窗完成：`--settle` 以券商回報記 FILLED／PARTIAL／EXPIRED，結算後快照為下次對帳基準；未成交餘量記 EXPIRED，下一交易日以 R2… 後綴重排（上限 5 輪）。自測含晚成交→下月對帳通過。〕
+- [x] **先.三十-一-3 拆單（整股＋盤中零股）**〔互動視窗完成：split_qty 1449→整股1000＋盤中零股449，冪等鍵各自獨立；模擬只留整股。〕
+- [x] **先.三十-一-4 INSUFFICIENT_CASH 硬限制（查官方餘額 API）**〔互動視窗完成：INSUFFICIENT_CASH（餘額≥批次總額×1.003，否則整批拒單＋紅橫幅＋心跳ERROR，查不到即拒）。模擬用 sim_cash_twd；`account_balance()` 模擬支援未驗證，T+2 限制未驗證，皆已記入文件。〕
+- [x] **先.三十-一-5 批次自動 +1、第 4 批後常態月投入、偏離>5pp 顯示**〔互動視窗完成：批次完成後 next_tranche 自動+1（T1…Tn→M），常態期受 monthly_contribution_twd 限制；偏離>5pp 寫入 status 並顯示於 App，永不賣出。selftest 76/76 PASS。〕
+- [x] **先.三十-二-1 Windows 工作排程器三時段＋交易日判斷**〔互動視窗完成：5 個工作排程（09:05／09:40 run、13:40 settle、09:55／14:00 看門狗），日曆取證交所官方休市表（失敗即 fail closed）。已以安全的 run 啟動驗證 NOT_TRIGGERED。〕
+- [x] **先.三十-二-2 排程心跳＋watchdog＋紅橫幅**〔互動視窗完成：schedule_heartbeat.jsonl＋watchdog（漏跑→MISSED＋紅橫幅；看門狗自身失敗 fail open）。〕
+- [x] **先.三十-二-3 否決窗推播（先查現有機制）**〔互動視窗完成：查無現有推播機制，未註冊任何服務；提案寫入文件第七節與 AWAITING_REVIEW。〕
 - [ ] **先.三十-三 10/7 盤中模擬端到端（BLOCKED 至 2026-10-07 09:00）**
-- [ ] **先.三十-四 App 破億路徑卡＋驗算**
+- [x] **先.三十-四 App 破億路徑卡＋驗算**〔互動視窗完成：破億路徑卡（輸入走 /settings，server ALLOWED_SETTINGS_KEYS 新增 breakthrough_path）；冒煙第52項驗算 PASS（推算約1790萬、月投入約34萬，2%內）；冒煙全綠。〕
 - [ ] **先.三十-五 先.二十八-三 量測（BLOCKED 至 2026-10-07 12:20）**

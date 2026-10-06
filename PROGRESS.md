@@ -1,3 +1,14 @@
+## 2026-10-06 先.三十（互動視窗，開發帽）
+
+等待總司令審閱：13 件（新增「先.三十」一列；清單見 `research/AWAITING_REVIEW.md`）。
+
+- 自動交易四缺陷：模擬／LIVE 分離（先前已 commit）、`--settle` 晚成交結算、拆單、INSUFFICIENT_CASH；期數自動遞增、常態月投入、偏離>5pp 顯示。`scripts/selftest_auto_rebalance.py` 76/76 PASS。
+- 排程：5 個 Windows 工作排程（腳本在 `C:\alpha\`），看門狗與排程心跳；推播無現成機制，提案寫入 `docs/AUTO_TRADING_SETUP.md` 第七節，未註冊外部服務。
+- App：破億路徑卡；`alpha_live_server.py` 的 `ALLOWED_SETTINGS_KEYS` 加入 `breakthrough_path`；`/auto/status` 具模式族感知。
+- 冒煙測試 `node scripts/smoke_test.mjs`：exit=0、50 項全 PASS、無 FAIL（含新增第52項：淨資產600萬、目標2038-01-13、10.19% → 推算約1790萬、所需月投入約34萬，各在2%內）。
+- `[自行裁量]`：scheduler 涵蓋所有平日由程式判斷交易日；批次僅在送單前寫入 state；前日未結算批次先自動結算，仍未結算則 ERROR。
+- 未完成：先.三十-三（10/7 09:00 盤中模擬）、先.三十-五（10/7 12:20 後量測）。發現 `TW_HOLIDAYS_2026` 缺 2026-09-28（教師節），未改。
+
 ## 2026-10-06 17:01～17:2x（DevQueue cycle 20261006-170101，開發帽）
 
 等待總司令審閱：12 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。

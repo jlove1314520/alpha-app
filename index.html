@@ -1431,6 +1431,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">此區只寫本機停止旗標，沒有任何下單能力；下單由本機排程的 auto_rebalance_bb90.py 執行，模式由本機設定檔決定。</div>
     </div>
 
+    <div class="card" id="bt-path-card">
+      <h3>破億路徑（試算，非保證）</h3>
+      <div class="setting-row"><span>目前淨資產（元）</span><div class="setting-input"><input id="bt-nw" type="number" inputmode="numeric" placeholder="例如 6000000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div class="setting-row" style="margin-top:8px"><span>每月投入（元）</span><div class="setting-input"><input id="bt-pmt" type="number" inputmode="numeric" placeholder="例如 300000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div class="setting-row" style="margin-top:8px"><span>出生日期</span><div class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></div></div>
+      <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
+      <div class="note" style="margin-top:6px">四個數字只存在你的裝置與本機伺服器設定檔（經 /settings 同步），不會進公開 repo。10.19% 為 Bb-90 回測年化（回測，非保證），目標金額 1 億元。</div>
+    </div>
+
     <div class="card">
       <h3>API 金鑰</h3>
       <div class="setting-row">
@@ -2934,6 +2944,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadTodayEvents',loadTodayEvents);
     _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
     _safeAsync('loadAutoTrading',loadAutoTrading);
+    _safeAsync('renderBtPath',async()=>{renderBtPath()});
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
     _safeAsync('loadBenchmarkComparison',async()=>{await loadBenchmarkComparison();renderBenchmarkComparison()});  // 2026-09-15 我們vs0050主圖
     await loadIntradayQuotes();
@@ -6506,6 +6517,49 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 算好的帳戶淨值，含現金+持股市值，比自己重算可靠），USD需要FX_RATE才能併入
   // NTD總額，匯率沒有時該部分誠實跳過並在detail說明，不用舊匯率硬湊。
   // 先.二十九：自動交易狀態／否決窗／緊急停止（只經 /auto/*，不具下單能力）
+  // 先.三十-四：破億路徑（輸入只存本機設定，不進 repo）
+  const BT_RATE=0.1019,BT_GOAL=1e8;  // Bb-90 回測年化（回測，非保證）
+  function btRead(){try{const s=localStorage.getItem('alpha_bt_path');return s?JSON.parse(s):{}}catch(e){console.warn('[btRead]',e);recordGlobalError('btRead',e);return{}}}
+  function btCalc(o){
+    const goal=o.goal||BT_GOAL,pmt=o.pmt||0;
+    const n=(o.target-o.now)/(365.25*86400000);
+    if(!(n>0)||!(o.nw>=0))return null;
+    const fvAt=(r)=>{const g=Math.pow(1+r,n),m=Math.pow(1+r,1/12)-1;return o.nw*g+pmt*(Math.abs(m)>1e-12?(g-1)/m:12*n)};
+    const g=Math.pow(1+o.rate,n),m=Math.pow(1+o.rate,1/12)-1,af=(g-1)/m;
+    const fvNo=o.nw*g,fvWith=fvNo+pmt*af;
+    const reqNo=o.nw>0?Math.pow(goal/o.nw,1/n)-1:null;
+    let reqWith=null;
+    if(fvAt(-0.5)<goal){let lo=-0.5,hi=2;if(fvAt(hi)>=goal){for(let i=0;i<80;i++){const mid=(lo+hi)/2;if(fvAt(mid)<goal)lo=mid;else hi=mid}reqWith=(lo+hi)/2}}
+    return{n,fvNo,fvWith,reqNo,reqWith,needPmt:Math.max(0,(goal-fvNo)/af)};
+  }
+  function btFmt(v){if(v==null||!isFinite(v))return'—';return v>=1e8?'NT$ '+(v/1e8).toFixed(2)+' 億':'NT$ '+Math.round(v/1e4).toLocaleString()+' 萬'}
+  function btPct(v){return v==null||!isFinite(v)?'—':(v*100).toFixed(2)+'%'}
+  function renderBtPath(){
+    const out=document.getElementById('bt-out');if(!out)return;
+    const s=btRead();
+    const set=(id,v)=>{const el=document.getElementById(id);if(el&&document.activeElement!==el&&v!=null)el.value=v};
+    set('bt-nw',s.nw);set('bt-pmt',s.pmt);set('bt-birth',s.birth);set('bt-age',s.age==null?40:s.age);
+    const nw=Number(s.nw),pmt=Number(s.pmt||0),age=Number(s.age==null||s.age===''?40:s.age);
+    if(s.nw===''||s.nw==null||!(nw>=0)||!s.birth){out.textContent='請填入淨資產與出生日期';return}
+    const b=new Date(s.birth+'T00:00:00');if(isNaN(b)){out.textContent='出生日期格式不正確';return}
+    const target=new Date(b.getFullYear()+age,b.getMonth(),b.getDate());
+    const c=btCalc({nw,pmt,target:target.getTime(),now:Date.now(),rate:BT_RATE});
+    if(!c){out.textContent='目標日期已過或輸入不合理，請調整目標年齡';return}
+    const d=target.getFullYear()+'-'+String(target.getMonth()+1).padStart(2,'0')+'-'+String(target.getDate()).padStart(2,'0');
+    out.innerHTML=['目標日期：'+d+'（剩 '+c.n.toFixed(1)+' 年）',
+      '需要年化報酬（不再投入）：'+btPct(c.reqNo),
+      '需要年化報酬（含每月投入）：'+btPct(c.reqWith),
+      '以 '+btPct(BT_RATE)+'（回測，非保證）推算到目標日：不投入 '+btFmt(c.fvNo)+'；含每月投入 '+btFmt(c.fvWith),
+      '要達 1 億，每月需投入：'+btFmt(c.needPmt)].join('<br>');
+  }
+  function btSave(){
+    try{
+      const g=id=>{const el=document.getElementById(id);return el?el.value:''};
+      localStorage.setItem('alpha_bt_path',JSON.stringify({nw:g('bt-nw'),pmt:g('bt-pmt'),birth:g('bt-birth'),age:g('bt-age')}));
+      localStorage.setItem('alpha_settings_synced_at','');pushSettingsSoon();
+    }catch(e){console.warn('[btSave]',e);recordGlobalError('btSave',e)}
+    renderBtPath();
+  }
   async function loadAutoTrading(){
     const note=document.getElementById('auto-status-note');
     if(!note)return;
@@ -6519,6 +6573,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const bits=['模式：'+(d.mode||'SIMULATION')];
       if(st.updated_at)bits.push('更新：'+st.updated_at);
       if(st.last_error)bits.push('最近錯誤：'+st.last_error);
+      if(st.next_tranche!=null)bits.push('下一期：'+st.next_tranche);
+      if(Array.isArray(st.drift_alert)&&st.drift_alert.length&&st.deviation)bits.push('偏離目標超過5個百分點（只提醒，不自動賣出）：'+st.drift_alert.map(c=>c+' '+(st.deviation[c]&&st.deviation[c].dev_pp>0?'+':'')+(st.deviation[c]?st.deviation[c].dev_pp:'?')+'pp').join('、'));
       note.textContent=bits.join('　');
       const tg=document.getElementById('auto-stop-toggle');if(tg)tg.checked=!!d.stopped;
       const pe=document.getElementById('auto-pending'),cb=document.getElementById('auto-cancel-all');
@@ -6643,13 +6699,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 「伺服器沒開是常態」處理），不影響 localStorage-only 的既有行為。
   let SETTINGS_PUSH_TIMER=null,SETTINGS_PULLED_ONCE=false;
   function _collectLocalSettings(){
-    return {watchlist:WL,currency:CCY,risk_control:readRC()};
+    return {watchlist:WL,currency:CCY,risk_control:readRC(),breakthrough_path:btRead()};
   }
   function _applyServerSettings(s){
     if(!s||typeof s!=='object')return;
     if(Array.isArray(s.watchlist)){WL=s.watchlist;localStorage.setItem('alpha_wl',JSON.stringify(WL))}
     if(typeof s.currency==='string'){CCY=s.currency;localStorage.setItem('alpha_ccy',CCY)}
     if(s.risk_control&&typeof s.risk_control==='object')localStorage.setItem('alpha_rc',JSON.stringify(s.risk_control));
+    if(s.breakthrough_path&&typeof s.breakthrough_path==='object'){localStorage.setItem('alpha_bt_path',JSON.stringify(s.breakthrough_path));try{renderBtPath()}catch(e){console.warn('[applyServerSettings:bt]',e);recordGlobalError('applyBt',e)}}
   }
   async function pullSettingsOnce(){
     if(SETTINGS_PULLED_ONCE)return;  // 每個App session只在啟動時拉一次
@@ -7807,7 +7864,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.1517';
+  const APP_VERSION='2026-10-06.1719';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

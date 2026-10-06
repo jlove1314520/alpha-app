@@ -1737,10 +1737,23 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("51. 選股頁「供給觀察」頁籤：固定免責句、I1–I4原始值、覆蓋率<80%不顯示桶內百分位而顯示資料準備中、達標才顯示百分位、產業篩選、單指標排序、無禁用字樣、切回榜單版面還原",
     supplyErrors.length === 0, supplyErrors.join("; ") || supplyInfo);
 
+  const btErrors = [];
+  try {
+    const bt = await page.evaluate(() => btCalc({ nw: 6e6, pmt: 0, target: Date.UTC(2038, 0, 13), now: Date.UTC(2026, 9, 6), rate: 0.1019 }));
+    const within = (x, t) => Math.abs(x - t) / t <= 0.02;
+    if (!within(bt.fvNo, 17.9e6)) btErrors.push(`不投入推算 ${Math.round(bt.fvNo)} 偏離 17.9M 超過2%`);
+    if (!within(bt.needPmt, 340e3)) btErrors.push(`所需月投入 ${Math.round(bt.needPmt)} 偏離 340k 超過2%`);
+    const out = await page.evaluate(() => { localStorage.setItem("alpha_bt_path", JSON.stringify({ nw: "6000000", pmt: "300000", birth: "1998-01-13", age: "40" })); renderBtPath(); return document.getElementById("bt-out").textContent; });
+    if (!out.includes("目標日期：2038-01-13")) btErrors.push(`卡片未顯示目標日期：${out.slice(0, 120)}`);
+    await page.evaluate(() => localStorage.removeItem("alpha_bt_path"));
+  } catch (e) { btErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("52. 破億路徑公式驗算：淨資產600萬、目標2038-01-13、10.19%→推算約1790萬、所需月投入約34萬（各在2%內）；卡片可渲染",
+    btErrors.length === 0, btErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -320,3 +320,547 @@ class ShioajiBroker:
         return float(bal)
 
 
+# ---------- 官方交易日曆 ----------
+def _fetch_calendar_rows(year: int) -> list:
+    import requests
+    r = requests.get(CAL_URL.format(y=year), timeout=20)
+    r.raise_for_status()
+    doc = r.json()
+    if doc.get("stat") != "ok" or not doc.get("data"):
+        raise AutoTradingError("TWSE holidaySchedule 回傳異常")
+    return doc["data"]
+
+
+def load_calendar(year: int, base: Path | None = None, fetch=None) -> dict | None:
+    """TWSE 官方「市場開休市日期」。列出且名稱含「開始交易日／最後交易日」者為交易日，其餘列出者一律休市
+    （含「市場無交易，僅辦理結算交割作業」）。抓取成功就更新本機快取；失敗退回快取；兩者皆無回傳 None。"""
+    base = Path(base) if base else DEFAULT_DIR
+    cache = base / f"calendar_{year}.json"
+    try:
+        rows = (fetch or _fetch_calendar_rows)(year)
+        closed = sorted(r[0] for r in rows if not ("開始交易日" in r[1] or "最後交易日" in r[1]))
+        doc = {"year": year, "closed": closed, "source": CAL_URL.format(y=year),
+               "fetched_at": datetime.now(TW).isoformat(timespec="seconds")}
+        _write_json(cache, doc)
+        return doc
+    except Exception as e:
+        print(f"[warn] 取得交易日曆失敗，改用本機快取：{type(e).__name__}", flush=True)
+        doc = _read_json(cache)
+        return doc if isinstance(doc, dict) and doc.get("closed") is not None else None
+
+
+def is_trading_day(d: date, cal: dict | None) -> bool:
+    if d.weekday() >= 5:
+        return False
+    if cal is None or cal.get("year") != d.year:
+        raise AutoTradingError("無法取得官方交易日曆（網路與本機快取皆失敗），不判斷")
+    return d.isoformat() not in set(cal["closed"])
+
+
+def is_last_trading_day_of_month(d: date, cal: dict) -> bool:
+    if not is_trading_day(d, cal):
+        return False
+    n = d + timedelta(days=1)
+    while n.month == d.month:
+        if is_trading_day(n, cal):
+            return False
+        n += timedelta(days=1)
+    return True
+
+
+# ---------- 帳本／狀態輔助 ----------
+def _eff_mode(cfg: dict, mode_override: str | None) -> str:
+    if mode_override:
+        if mode_override != "SIMULATION":
+            raise AutoTradingError("--mode-override 只允許 SIMULATION")
+        return "SIMULATION"
+    return cfg["mode"]
+
+
+def _log(paths: Paths, now: datetime, mode: str, event: str, o: dict, **kw) -> None:
+    _append(paths.ledger, {"ts": now.astimezone(TW).isoformat(timespec="seconds"), "event": event, "mode": mode,
+                           "key": o.get("key"), "symbol": o.get("symbol"), "qty": o.get("qty"),
+                           "limit_price": o.get("limit_price"), **kw})
+
+
+def _ledger_latest(paths: Paths) -> dict:
+    """每個冪等鍵最後一筆紀錄（只收本模式族；帳本已分檔，再用 mode 欄位擋一次，防手動併檔）。"""
+    out = {}
+    if paths.ledger.exists():
+        for line in paths.ledger.read_text(encoding="utf-8").splitlines():
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            if r.get("key") and mode_family(r.get("mode", "")) == paths.family:
+                out[r["key"]] = r
+    return out
+
+
+def _filled(r: dict) -> int:
+    return min(int(r.get("filled_qty") or 0), int(r.get("qty") or 0))
+
+
+def _filled_amount(r: dict) -> float:
+    return _filled(r) * float(r.get("avg_price") or r.get("limit_price") or 0)
+
+
+def _rec_date(r: dict) -> date:
+    return date.fromisoformat(r["ts"][:10])
+
+
+def _nz(d: dict) -> dict:
+    return {k: v for k, v in d.items() if v}
+
+
+def _complete_batch(state: dict, latest: dict, fam: str) -> None:
+    b = state.get("batch")
+    pref = f"{fam}-{b['ym']}-{b['label']}-"
+    state["last_keys"] = [k for k in latest if k.startswith(pref)]
+    state["last_done"] = b["ym"]
+    state["last_label"] = b["label"]
+    if b["label"].startswith("T"):
+        state["next_tranche"] = int(b["label"][1:]) + 1
+    state["batch"] = None
+
+
+def _update_drift(shared: Paths, positions: dict, prev_close: dict) -> None:
+    """常態期偏離檢查：任一資產偏離目標>5 個百分點寫進 status（App 顯示）；只告警，永不賣出。"""
+    try:
+        if any(c not in prev_close for c in WEIGHTS):
+            return
+        vals = {c: positions.get(c, 0) * prev_close[c][0] for c in WEIGHTS}
+        tot = sum(vals.values())
+        if tot <= 0:
+            return
+        dev = {c: {"target_pct": WEIGHTS[c] * 100, "actual_pct": round(vals[c] / tot * 100, 2),
+                   "dev_pp": round(vals[c] / tot * 100 - WEIGHTS[c] * 100, 2)} for c in WEIGHTS}
+        alert = [c for c in WEIGHTS if abs(dev[c]["dev_pp"]) > DRIFT_ALERT_PP]
+        write_status(shared, deviation=dev, drift_alert=alert)
+    except Exception as e:
+        print(f"[warn] 偏離計算失敗：{e}", flush=True)
+
+
+def _finalize(paths: Paths, broker, now: datetime, prev_close: dict) -> str:
+    """把已終結（FILLED／EXPIRED）且尚未入帳的成交併進對帳基準，並推進批次。
+    回傳 OK／PENDING（仍有未終結委託，不動基準）／ERROR（持股對不上，已通報）。"""
+    state = _read_json(paths.state)
+    if state is None:
+        report_error(paths, "缺對帳基準（state），無法結算")
+        return "ERROR"
+    latest = _ledger_latest(paths)
+    if any(r.get("event") in NONFINAL for r in latest.values()):
+        return "PENDING"
+    applied = set(state.get("applied", []))
+    fresh = {k: r for k, r in latest.items() if r.get("event") in ("FILLED", "EXPIRED") and k not in applied}
+    try:
+        after = broker.positions()
+    except Exception as e:
+        report_error(paths, f"取得券商持股失敗：{e}")
+        return "ERROR"
+    expect = dict(state.get("positions", {}))
+    for r in fresh.values():
+        expect[r["symbol"]] = expect.get(r["symbol"], 0) + _filled(r)
+    if _nz(after) != _nz(expect):
+        report_error(paths, f"持股對帳不符：預期{_nz(expect)}≠券商{_nz(after)}（基準{_nz(state.get('positions', {}))}）")
+        return "ERROR"
+    state["positions"] = after
+    state["applied"] = sorted(applied | set(fresh))
+    state["updated_at"] = now.isoformat(timespec="seconds")
+    b = state.get("batch")
+    if b:
+        pref = f"{paths.family}-{b['ym']}-{b['label']}-R{b['round']}-"
+        cur = [r for k, r in latest.items() if k.startswith(pref)]
+        if cur and all(r.get("event") == "FILLED" and _filled(r) >= int(r.get("qty") or 0) for r in cur):
+            _complete_batch(state, latest, paths.family)
+    _write_json(paths.state, state)
+    _update_drift(Paths(paths.base, paths.heartbeat), after, prev_close)
+    return "OK"
+
+
+def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: datetime, batch_id: str, res: dict) -> bool:
+    """INSUFFICIENT_CASH：整批金額×1.003（手續費緩衝）不得超過可用餘額；查不到一律拒（fail closed）。"""
+    need = sum(o["qty"] * o["limit_price"] for o in orders) * CASH_BUFFER
+    reason = None
+    try:
+        if mode == "SIMULATION":
+            if cfg.get("sim_cash_twd") is None:
+                raise AutoTradingError("模擬模式需在本機設定 sim_cash_twd")
+            cash = float(cfg["sim_cash_twd"])
+        else:
+            cash = float(broker.cash())
+        if cash < need:
+            reason = f"INSUFFICIENT_CASH:可用餘額{cash:.0f}不足整批所需{need:.0f}（含{(CASH_BUFFER - 1) * 100:.1f}%手續費緩衝）"
+    except Exception as e:
+        reason = f"INSUFFICIENT_CASH:餘額查詢失敗（{type(e).__name__}），整批不送單"
+    if reason:
+        _log(paths, now, mode, "REJECT", {"key": f"{batch_id}-ALL", "symbol": "ALL"}, reasons=[reason])
+        res["rejected"].append({"symbol": "ALL", "reasons": [reason]})
+        report_error(paths, reason)
+        res["state"] = "ERROR"
+        return False
+    return True
+
+
+# ---------- 主流程 ----------
+def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None = None,
+                  mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5) -> dict:
+    cfg = load_config(paths)
+    mode = _eff_mode(cfg, mode_override)
+    shared, paths = paths, paths.scoped(mode)
+    fam = paths.family
+    today = now.astimezone(TW).date()
+    ym = today.strftime("%Y%m")
+    prev_close = prev_close if prev_close is not None else load_prev_closes()
+    res = {"mode": mode, "family": fam, "month": ym, "submitted": [], "rejected": [], "skipped": [], "state": "OK"}
+
+    def log(event, o, **kw):
+        _log(paths, now, mode, event, o, **kw)
+
+    stopped = is_stopped(shared)
+    try:
+        positions = broker.positions()
+    except Exception as e:
+        report_error(paths, f"取得券商持股失敗：{e}")
+        res["state"] = "ERROR"
+        return res
+
+    # 前一個交易日以前的未結算委託：先嘗試自動結算（補救漏跑的盤後排程），仍未結算就停手
+    latest = _ledger_latest(paths)
+    if any(r.get("event") in NONFINAL and _rec_date(r) < today for r in latest.values()):
+        settle(shared, broker, now, mode_override=mode_override, force=True, prev_close=prev_close)
+        latest = _ledger_latest(paths)
+        left = [k for k, r in latest.items() if r.get("event") in NONFINAL and _rec_date(r) < today]
+        if left:
+            report_error(paths, f"前次批次尚未結算（{len(left)}筆），不送新單")
+            res["state"] = "ERROR"
+            return res
+        positions = broker.positions()
+
+    state = _read_json(paths.state)
+    if state is None:
+        state = {"positions": positions, "applied": [], "next_tranche": int(cfg.get("tranche", 1)),
+                 "baseline_at": now.isoformat(timespec="seconds")}
+        _write_json(paths.state, state)
+    nonfinal = [k for k, r in latest.items() if r.get("event") in NONFINAL]
+    if nonfinal:
+        res["skipped"] = nonfinal
+        return res
+    reconciled = True
+    if _finalize(paths, broker, now, prev_close) == "ERROR":
+        reconciled = False
+        res["state"] = "ERROR"
+    state = _read_json(paths.state)
+    latest = _ledger_latest(paths)
+
+    tranche_total = max(1, int(cfg.get("tranche_total", 4)))
+    batch = state.get("batch")
+    if batch:
+        label, bym, rnd = batch["label"], batch["ym"], int(batch["round"])
+        pref = f"{fam}-{bym}-{label}-R{rnd}-"
+        if any(k.startswith(pref) for k in latest) and reconciled:
+            if today <= date.fromisoformat(batch["round_date"]):
+                res["skipped"] = [k for k in latest if k.startswith(pref)]
+                return res
+            if rnd >= MAX_ROUNDS:
+                report_error(paths, f"批次 {label} 補單已達 {MAX_ROUNDS} 輪仍未買足，停止自動補單，需人工處理")
+                res["state"] = "ERROR"
+                return res
+            rnd += 1
+        budget = float(batch["budget"])
+        if rnd > 1:
+            budget = max(0.0, budget - sum(_filled_amount(r) for k, r in latest.items()
+                                           if k.startswith(f"{fam}-{bym}-{label}-")))
+    else:
+        if state.get("last_done") == ym:
+            res["skipped"] = list(state.get("last_keys", []))
+            return res
+        n = int(state.get("next_tranche") or cfg.get("tranche", 1))
+        label = f"T{n}" if n <= tranche_total else "M"
+        bym, rnd = ym, 1
+        budget = ((cfg.get("total_capital_twd") or 0) / tranche_total if label != "M"
+                  else float(cfg.get("monthly_contribution_twd") or 0))
+    res.update(tranche=label, round=rnd)
+    batch_id = f"{fam}-{bym}-{label}-R{rnd}"
+    pend = _read_json(paths.pending)
+    if pend and (pend.get("done") or not pend.get("execute_after")):
+        pend = None
+    same_pend = bool(pend and pend.get("batch_id") == batch_id)
+
+    if same_pend and pend.get("cancelled"):
+        res["state"] = "CANCELLED"
+        return res
+    if same_pend:
+        if now < datetime.fromisoformat(pend["execute_after"]):
+            res["state"] = "WAITING_VETO"
+            return res
+        orders = pend["orders"]
+    else:
+        missing = [c for c in WHITELIST if c not in prev_close]
+        if missing or budget <= 0:
+            if budget <= 0 and not missing and batch:
+                _complete_batch(state, latest, fam)
+                _write_json(paths.state, state)
+                return res
+            ctxmsg = (f"缺前收價{missing}" if missing else
+                      ("未設定每月投入（monthly_contribution_twd）" if label == "M" else "未設定資金（total_capital_twd）"))
+            log("REJECT", {"key": f"{batch_id}-ALL", "symbol": "ALL"},
+                reasons=[("PRICE_MISSING:" if missing else "CAP:") + ctxmsg])
+            res["rejected"].append({"symbol": "ALL", "reasons": [ctxmsg]})
+            if missing:
+                report_error(paths, f"價格缺失，整批拒單：{missing}")
+                res["state"] = "ERROR"
+            return res
+        odd_ok = mode != "SIMULATION"
+        orders = plan_orders({c: prev_close[c][0] for c in WEIGHTS}, positions, budget, odd_ok,
+                             dev_pct=min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2))
+        for o in orders:
+            o["key"] = f"{batch_id}-{o['symbol']}-{o['part']}"
+        if not orders and batch and rnd > 1:
+            _complete_batch(state, latest, fam)
+            _write_json(paths.state, state)
+            return res
+
+    ctx = {"cfg": cfg, "prev_close": prev_close, "today": today, "stopped": stopped, "reconciled": reconciled}
+    ok_orders = []
+    for o in orders:
+        if latest.get(o["key"], {}).get("event") in ("SUBMITTED", "OPEN", "PARTIAL", "FILLED", "EXPIRED"):
+            res["skipped"].append(o["key"])
+            continue
+        why = gate_order(o, ctx)
+        if why:
+            log("REJECT", o, reasons=why)
+            res["rejected"].append({"symbol": o["symbol"], "reasons": why})
+        else:
+            ok_orders.append(o)
+
+    if res["rejected"]:
+        write_status(paths, last_reject=[r["reasons"] for r in res["rejected"]][:5])
+    if stopped or not reconciled:
+        if pend:
+            _write_json(paths.pending, {**pend, "cancelled": True})
+        return res
+
+    if mode == "LIVE_WITH_VETO" and not same_pend:
+        if ok_orders and _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+            _write_json(paths.pending, {"batch_id": batch_id, "month": bym, "tranche": label, "round": rnd,
+                                        "created_at": now.isoformat(timespec="seconds"),
+                                        "execute_after": (now + timedelta(minutes=VETO_MINUTES)).isoformat(timespec="seconds"),
+                                        "orders": ok_orders})
+            write_status(paths, mode=mode, family=fam, pending=len(ok_orders))
+            res["state"] = "WAITING_VETO"
+        return res
+
+    if not ok_orders or not _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+        return res
+
+    state["batch"] = {"label": label, "ym": bym, "round": rnd, "budget": float(batch["budget"]) if batch else budget,
+                      "round_date": today.isoformat()}
+    _write_json(paths.state, state)
+    placed = []
+    for o in ok_orders:
+        try:
+            r = broker.place(o)
+        except Exception as e:
+            log("ERROR", o, error=str(e))
+            report_error(paths, f"送單失敗 {o['symbol']}：{e}")
+            res["state"] = "ERROR"
+            continue
+        log("SUBMITTED", o, order_id=r["order_id"], amount=o["amount"])
+        placed.append((o, r["order_id"]))
+        res["submitted"].append(o["key"])
+        time.sleep(1.0 if mode == "SIMULATION" and poll_sec else 0)
+
+    for o, oid in placed:
+        st = {}
+        for _ in range(polls):
+            try:
+                st = broker.status(oid)
+            except Exception as e:
+                st = {"status": "UNKNOWN", "filled_qty": 0, "error": str(e)}
+            if st.get("filled_qty", 0) >= o["qty"]:
+                break
+            time.sleep(poll_sec)
+        ev = "FILLED" if st.get("filled_qty", 0) >= o["qty"] else ("PARTIAL" if st.get("filled_qty", 0) else "OPEN")
+        log(ev, o, order_id=oid, filled_qty=st.get("filled_qty", 0), avg_price=st.get("avg_price"),
+            broker_status=st.get("status"))
+
+    if placed:
+        _write_json(paths.pending, {"batch_id": batch_id, "month": bym, "tranche": label, "done": True, "orders": []})
+        if _finalize(paths, broker, now, prev_close) == "ERROR":
+            res["state"] = "ERROR"
+    if res["state"] == "OK":
+        write_status(paths, mode=mode, family=fam, last_run=now.isoformat(timespec="seconds"), last_error=None,
+                     banner=None, pending=0, next_tranche=(_read_json(paths.state) or {}).get("next_tranche"))
+    return res
+
+
+def settle(paths: Paths, broker, now: datetime, mode_override: str | None = None, force: bool = False,
+           prev_close: dict | None = None) -> dict:
+    """盤後結算：依券商成交回報記下每張委託的最終成交量（FILLED／PARTIAL＋EXPIRED），更新持股基準。
+    未成交餘額記 EXPIRED，由下一個交易日的 run 以新冪等鍵後綴（R2…）重排，絕不靜默丟棄。"""
+    cfg = load_config(paths)
+    mode = _eff_mode(cfg, mode_override)
+    shared, paths = paths, paths.scoped(mode)
+    local = now.astimezone(TW)
+    res = {"mode": mode, "family": paths.family, "state": "OK", "settled": [], "unsettled": []}
+    if not force and (local.hour, local.minute) < SETTLE_AFTER:
+        res["state"] = "TOO_EARLY"
+        return res
+    prev_close = prev_close if prev_close is not None else load_prev_closes()
+    for key, r in _ledger_latest(paths).items():
+        if r.get("event") not in NONFINAL:
+            continue
+        try:
+            st = broker.status(r["order_id"])
+        except Exception as e:
+            res["unsettled"].append(key)
+            report_error(paths, f"結算查不到委託 {key}：{type(e).__name__}")
+            res["state"] = "ERROR"
+            continue
+        q, fq = int(r["qty"]), min(int(st.get("filled_qty") or 0), int(r["qty"]))
+        o = {"key": key, "symbol": r["symbol"], "qty": q, "limit_price": r.get("limit_price")}
+        extra = {"order_id": r["order_id"], "filled_qty": fq, "avg_price": st.get("avg_price"),
+                 "broker_status": st.get("status"), "settled": True}
+        if fq >= q:
+            _log(paths, now, mode, "FILLED", o, **extra)
+        else:
+            if fq:
+                _log(paths, now, mode, "PARTIAL", o, **extra)
+            _log(paths, now, mode, "EXPIRED", o, remaining=q - fq, **extra)
+        res["settled"].append({"key": key, "filled": fq, "qty": q})
+    if res["unsettled"]:
+        return res
+    if _finalize(paths, broker, now, prev_close) == "ERROR":
+        res["state"] = "ERROR"
+    else:
+        write_status(shared, last_settle=now.isoformat(timespec="seconds"), last_error=None, banner=None,
+                     next_tranche=(_read_json(paths.state) or {}).get("next_tranche"))
+    return res
+
+
+# ---------- 觸發條件與排程入口 ----------
+def should_run(paths: Paths, now: datetime, cfg: dict, cal: dict | None) -> str | None:
+    """排程每個交易日 09:05／09:40 都會呼叫 --run，這裡決定當天要不要真的動作。
+    回傳觸發原因（open_batch／month_end／first_tranche）或 None。"""
+    d = now.astimezone(TW).date()
+    if not is_trading_day(d, cal):
+        return None
+    mode = cfg["mode"]
+    sp = paths.scoped(mode)
+    state = _read_json(sp.state) or {}
+    if state.get("batch"):
+        return "open_batch"
+    ym = d.strftime("%Y%m")
+    if state.get("last_done") == ym:
+        return None
+    pend = _read_json(sp.pending)
+    if pend and pend.get("month") == ym and pend.get("cancelled"):
+        return None
+    if is_last_trading_day_of_month(d, cal):
+        return "month_end"
+    n = int(state.get("next_tranche") or cfg.get("tranche", 1))
+    if mode_family(mode) == "LIVE" and n == 1 and not state.get("last_done"):
+        return "first_tranche"
+    return None
+
+
+def sched_heartbeat(paths: Paths, task: str, outcome: str, **kw) -> None:
+    try:
+        _append(paths.base / "schedule_heartbeat.jsonl",
+                {"ts": datetime.now(TW).isoformat(timespec="seconds"), "task": task, "outcome": outcome, **kw})
+    except Exception as e:
+        print(f"[warn] 寫排程心跳失敗：{e}", flush=True)
+
+
+def watchdog(paths: Paths, now: datetime, which: str, cal: dict | None = None) -> str:
+    """看門狗：交易日該跑的排程任務沒有心跳→紅色橫幅＋心跳 ERROR。自身失敗一律 fail open（不阻擋任何事）。"""
+    try:
+        d = now.astimezone(TW).date()
+        cal = cal if cal is not None else load_calendar(d.year, paths.base)
+        if not is_trading_day(d, cal):
+            return "NOT_TRADING_DAY"
+        since = now.astimezone(TW).replace(hour=9, minute=30, second=0, microsecond=0) if which == "run" \
+            else now.astimezone(TW).replace(hour=13, minute=35, second=0, microsecond=0)
+        hb = paths.base / "schedule_heartbeat.jsonl"
+        seen = []
+        if hb.exists():
+            for line in hb.read_text(encoding="utf-8").splitlines():
+                try:
+                    r = json.loads(line)
+                except Exception:
+                    continue
+                if r.get("task") == which and datetime.fromisoformat(r["ts"]) >= since:
+                    seen.append(r)
+        if not seen:
+            report_error(paths, f"排程漏跑：交易日 {d} 的 {which} 任務沒有心跳（工作排程器未觸發或本機未開機）", "auto_trading_watchdog")
+            return "MISSED"
+        return "OK"
+    except Exception as e:
+        print(f"[warn] 看門狗自身失敗，fail open：{type(e).__name__}", flush=True)
+        return "WATCHDOG_FAILED_OPEN"
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--run", action="store_true", help="排程入口：交易日且符合觸發條件才執行月底流程")
+    ap.add_argument("--settle", action="store_true", help="盤後結算（排程 13:40）")
+    ap.add_argument("--watchdog", choices=("run", "settle"), help="看門狗：檢查當日該任務是否有心跳")
+    ap.add_argument("--mode-override", help="只允許 SIMULATION；--run 時略過觸發條件（互動驗證用）")
+    ap.add_argument("--force", action="store_true", help="--settle 略過 13:35 時間限制")
+    ap.add_argument("--stop", action="store_true")
+    a = ap.parse_args()
+    paths = Paths()
+    now = datetime.now(TW)
+    if a.stop:
+        paths.stop_flag.parent.mkdir(parents=True, exist_ok=True)
+        paths.stop_flag.write_text(now.isoformat(), encoding="utf-8")
+        print("已寫入停止旗標")
+        return 0
+    if a.watchdog:
+        out = watchdog(paths, now, a.watchdog)
+        print(out)
+        return 0
+    if not (a.run or a.settle):
+        ap.print_help()
+        return 0
+    task = "settle" if a.settle else "run"
+    try:
+        cfg = load_config(paths)
+        mode = _eff_mode(cfg, a.mode_override)
+        if a.run:
+            reason = "mode_override"
+            if not a.mode_override:
+                try:
+                    reason = should_run(paths, now, cfg, load_calendar(now.year, paths.base))
+                except AutoTradingError as e:
+                    report_error(paths, f"排程無法判斷交易日：{e}", "auto_trading_schedule")
+                    sched_heartbeat(paths, task, "ERROR", detail="calendar")
+                    print(f"[ERROR] {e}")
+                    return 1
+            if reason is None:
+                sched_heartbeat(paths, task, "NOT_TRIGGERED")
+                print("今日不需動作（非交易日或不符觸發條件）")
+                return 0
+            broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
+            res = run_month_end(paths, broker, now, mode_override=a.mode_override)
+        else:
+            latest = _ledger_latest(paths.scoped(mode))
+            if not any(r.get("event") in NONFINAL for r in latest.values()):
+                sched_heartbeat(paths, task, "NOTHING_TO_SETTLE")
+                print("沒有待結算的委託")
+                return 0
+            broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
+            res = settle(paths, broker, now, mode_override=a.mode_override, force=a.force)
+        sched_heartbeat(paths, task, res["state"], reason=(reason if a.run else None))
+        print(json.dumps(res, ensure_ascii=False))
+        return 0 if res["state"] in ("OK", "WAITING_VETO") else 1
+    except Exception as e:
+        report_error(paths, f"自動再平衡{task}執行失敗：{type(e).__name__}")
+        sched_heartbeat(paths, task, "ERROR", detail=type(e).__name__)
+        print(f"[ERROR] {type(e).__name__}（細節不印出，避免洩漏憑證）", flush=True)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
