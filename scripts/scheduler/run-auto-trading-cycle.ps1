@@ -22,4 +22,9 @@ $stamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
 $out = & $pythonExe -X utf8 @a 2>&1 | Out-String
 $code = $LASTEXITCODE
 Add-Content -Path $logPath -Value "[$stamp] task=$Task exit=$code`n$out" -Encoding UTF8
+if ($Task -eq "run" -or $Task -eq "settle") {
+  # best effort: publish the de-identified heartbeat; failure must never change the exit code
+  $pub = & $pythonExe -X utf8 "scripts\scheduler\publish_heartbeat.py" 2>&1 | Out-String
+  Add-Content -Path $logPath -Value "[$stamp] publish_heartbeat: $pub" -Encoding UTF8
+}
 exit $code

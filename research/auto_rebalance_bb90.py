@@ -15,6 +15,7 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
 import threading
 import time
@@ -72,6 +73,7 @@ class Paths:
         self.config = self.base / "config.local.json"
         self.stop_flag = self.base / "STOP.flag"
         self.status = self.base / "status.json"
+        self.public_hb = self.base / "auto_heartbeat.json"
         self.heartbeat = Path(heartbeat) if heartbeat else (self.base / "heartbeat.jsonl" if base else HEARTBEAT)
         self.family = family
         if family:
@@ -864,12 +866,37 @@ def should_run(paths: Paths, now: datetime, cfg: dict, cal: dict | None) -> str 
     return None
 
 
+PUBLIC_HB_TASKS = ("run", "settle")
+PUBLIC_HB_KEEP = 40
+
+
+def write_public_heartbeat(paths: Paths, task: str, outcome: str, now: datetime | None = None) -> None:
+    """先.三十一-二：去識別化心跳（只有 ts／任務名／結果代碼，不含金額、持股、委託、reason/detail）。
+    寫在 git 忽略的本機路徑，由 scripts/scheduler/publish_heartbeat.py 驗證後以單檔 commit 推上公開 repo。"""
+    try:
+        code = outcome if isinstance(outcome, str) and re.fullmatch(r"[A-Z_]{2,32}", outcome) else "OTHER"
+        if task not in PUBLIC_HB_TASKS:
+            return
+        now = now or datetime.now(TW)
+        doc = _read_json(paths.public_hb) or {}
+        events = [e for e in (doc.get("events") or []) if isinstance(e, dict)]
+        events.append({"ts": now.isoformat(timespec="seconds"), "task": task, "code": code})
+        out = {"schema": 1, "updated_at": now.isoformat(timespec="seconds"), "events": events[-PUBLIC_HB_KEEP:]}
+        paths.public_hb.parent.mkdir(parents=True, exist_ok=True)
+        tmp = paths.public_hb.with_suffix(".tmp")
+        tmp.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+        tmp.replace(paths.public_hb)
+    except Exception as e:
+        print(f"[warn] 寫公開心跳失敗：{type(e).__name__}", flush=True)
+
+
 def sched_heartbeat(paths: Paths, task: str, outcome: str, **kw) -> None:
     try:
         _append(paths.base / "schedule_heartbeat.jsonl",
                 {"ts": datetime.now(TW).isoformat(timespec="seconds"), "task": task, "outcome": outcome, **kw})
     except Exception as e:
         print(f"[warn] 寫排程心跳失敗：{e}", flush=True)
+    write_public_heartbeat(paths, task, outcome)
 
 
 def watchdog(paths: Paths, now: datetime, which: str, cal: dict | None = None) -> str:

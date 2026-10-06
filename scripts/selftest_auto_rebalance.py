@@ -384,5 +384,28 @@ p = setup(); b = Fake(payable_err=True)
 r = run(p, b)
 check("交割款：未交割款查詢失敗→一律拒單（fail closed）", not b.placed and r["state"] == "ERROR")
 
+# ---- 先.三十一-二：去識別化心跳 ----
+import importlib.util as _ilu
+_sp = _ilu.spec_from_file_location("publish_heartbeat", str(Path(__file__).resolve().parent / "scheduler" / "publish_heartbeat.py"))
+_ph = _ilu.module_from_spec(_sp); _sp.loader.exec_module(_ph)
+p = setup()
+A.sched_heartbeat(p, "run", "WAITING_VETO", reason="mode_override", detail="X123456789")
+A.sched_heartbeat(p, "settle", "weird code 1234")
+A.sched_heartbeat(p, "watchdog", "OK")
+_pub = json.loads(p.public_hb.read_text(encoding="utf-8"))
+check("公開心跳：只有 schema/updated_at/events", set(_pub) == {"schema", "updated_at", "events"})
+check("公開心跳：每筆只有 ts/task/code", all(set(e) == {"ts", "task", "code"} for e in _pub["events"]))
+check("公開心跳：不合規結果碼降為 OTHER、非 run/settle 任務不寫", [e["code"] for e in _pub["events"]] == ["WAITING_VETO", "OTHER"])
+check("公開心跳：不含 reason/detail 內容", "X123456789" not in json.dumps(_pub) and "mode_override" not in json.dumps(_pub))
+check("隱私檢查：正常檔通過", _ph.privacy_check(_pub) is None)
+_bad = json.loads(json.dumps(_pub)); _bad["events"][0]["qty"] = 1000
+check("隱私檢查：多出 qty 欄位被擋", _ph.privacy_check(_bad) is not None)
+_bad = json.loads(json.dumps(_pub)); _bad["events"][0]["code"] = "OK1000"
+check("隱私檢查：結果碼含數字被擋", _ph.privacy_check(_bad) is not None)
+_bad = json.loads(json.dumps(_pub)); _bad["events"][0]["task"] = "buy 0050"
+check("隱私檢查：任務名不在白名單被擋", _ph.privacy_check(_bad) is not None)
+_bad = json.loads(json.dumps(_pub)); _bad["holdings"] = {"0050": 1}
+check("隱私檢查：多出頂層欄位被擋", _ph.privacy_check(_bad) is not None)
+
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)
