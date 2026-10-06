@@ -472,6 +472,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <span class="pill num" id="mkt-us"><span class="dot"></span>美股 <b>—</b> <span class="tm">--:--</span></span>
     </div>
   </header>
+  <div id="auto-banner" style="display:none;background:rgba(220,38,38,.14);border-bottom:1px solid rgba(220,38,38,.4);color:#ef4444;font-size:12px;font-weight:600;padding:8px 16px;line-height:1.5"></div>
   <div id="diag-banner" style="display:none;background:rgba(250,178,25,.1);border-bottom:1px solid rgba(250,178,25,.25);color:var(--warn);font-size:11px;padding:8px 16px;line-height:1.5"></div>
   <!-- 2026-10-05（先.十四-一）：本機 Claude 登入過期／額度用盡／連續3小時無實際執行
        的紅色橫幅，獨立於上面的診斷橫幅（那個是給JS錯誤用的黃色、可摺疊）——這個
@@ -1416,6 +1417,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="live-status-note" style="margin-top:8px">尚未設定</div>
       <button class="btn ghost" style="width:100%;margin-top:10px" onclick="testLiveConnection()">測試連線</button>
       <div class="note" style="margin-top:6px">連得上時：首頁/市場頁/個股頁的數字改由本機 alpha_live_server.py 的串流更新（伺服器端目前是每2秒比對一次再送，不是真逐筆推送，回應會標 mode=poll-diff-2s），個股頁可切「1分K(即時)」（本機 tick 聚合，非 api.kbars）。連不上時自動退回 GitHub 冷資料並標「離線，顯示最後收盤」。三個端點一律驗 token，即使已經過 Cloudflare Access／私有網路。網址與 token 只存在你的裝置本機，不會上傳。</div>
+    </div>
+
+    <div class="card" id="auto-trading-card">
+      <h3>自動交易（Bb-90）</h3>
+      <div class="note" id="auto-status-note">尚未連線本機伺服器</div>
+      <div id="auto-pending" class="note" style="margin-top:6px"></div>
+      <button class="btn ghost" id="auto-cancel-all" style="width:100%;margin-top:8px;display:none" onclick="autoSetStop(true,'全部取消待執行訂單並停止')">全部取消</button>
+      <div class="setting-row" style="margin-top:10px">
+        <span>緊急停止<br><span style="font-size:10px;color:var(--ink-4)">開啟後一律拒單，需手動關閉才恢復</span></span>
+        <div class="setting-input"><input id="auto-stop-toggle" type="checkbox" onchange="autoSetStop(this.checked,'緊急停止開關')"></div>
+      </div>
+      <div class="note" style="margin-top:6px">此區只寫本機停止旗標，沒有任何下單能力；下單由本機排程的 auto_rebalance_bb90.py 執行，模式由本機設定檔決定。</div>
     </div>
 
     <div class="card">
@@ -2920,6 +2933,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
     _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
+    _safeAsync('loadAutoTrading',loadAutoTrading);
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
     _safeAsync('loadBenchmarkComparison',async()=>{await loadBenchmarkComparison();renderBenchmarkComparison()});  // 2026-09-15 我們vs0050主圖
     await loadIntradayQuotes();
@@ -6491,6 +6505,44 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 卡片文字與note已誠實標「概算，非交易確認」。IBKR用NetLiquidation（IBKR官方
   // 算好的帳戶淨值，含現金+持股市值，比自己重算可靠），USD需要FX_RATE才能併入
   // NTD總額，匯率沒有時該部分誠實跳過並在detail說明，不用舊匯率硬湊。
+  // 先.二十九：自動交易狀態／否決窗／緊急停止（只經 /auto/*，不具下單能力）
+  async function loadAutoTrading(){
+    const note=document.getElementById('auto-status-note');
+    if(!note)return;
+    const ban=document.getElementById('auto-banner');
+    try{
+      if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器';return}
+      const r=await liveFetch('/auto/status',5000);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const st=d.status||{};
+      const bits=['模式：'+(d.mode||'SIMULATION')];
+      if(st.updated_at)bits.push('更新：'+st.updated_at);
+      if(st.last_error)bits.push('最近錯誤：'+st.last_error);
+      note.textContent=bits.join('　');
+      const tg=document.getElementById('auto-stop-toggle');if(tg)tg.checked=!!d.stopped;
+      const pe=document.getElementById('auto-pending'),cb=document.getElementById('auto-cancel-all');
+      const p=d.pending;let active=false;
+      if(p&&Array.isArray(p.orders)&&p.orders.length&&!p.done&&!p.cancelled){
+        active=true;
+        pe.textContent='待執行（'+(p.execute_after||'?')+' 後送出）：'+p.orders.map(o=>(o.symbol||'')+' '+(o.action==='Sell'?'賣':'買')+' '+(o.qty||'')+'股 @'+(o.limit_price||'')).join('；');
+      }else pe.textContent=p&&p.cancelled?'待執行訂單已取消':'目前沒有待執行訂單';
+      if(cb)cb.style.display=active?'':'none';
+      if(ban){
+        const red=st.banner==='red'||!!st.last_error;
+        ban.style.display=(red||d.stopped)?'':'none';
+        ban.textContent=red?('自動交易異常：'+(st.last_error||'請檢查')):'自動交易已緊急停止（一律拒單）';
+      }
+    }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）'}
+  }
+  async function autoSetStop(stop,why){
+    try{
+      if(!LIVE.configured||!LIVE.url)throw new Error('未連線本機伺服器');
+      const r=await fetch(LIVE.url+'/auto/stop',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({stop:!!stop}),credentials:'include'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+    }catch(e){console.warn('[autoSetStop]',why,e);recordGlobalError('autoSetStop',e);alert('操作失敗：'+(e&&e.message||e))}
+    await loadAutoTrading();
+  }
   async function loadHomeBrokerCard(){
     const cta=document.getElementById('home-broker-cta');
     const card=document.getElementById('home-asset-card');
@@ -7755,7 +7807,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.1219';
+  const APP_VERSION='2026-10-06.1517';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

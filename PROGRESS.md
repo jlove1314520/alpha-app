@@ -1,3 +1,13 @@
+## 2026-10-06（互動視窗，先.二十九 修訂版：自動交易規則更正＋回放＋自動執行系統）
+
+等待總司令審閱：12 件（新增三件：第 1 批開通、PIT 回放、破億路徑卡 BLOCKED）。
+
+**一、規則更正**：CLAUDE.md 第八節改寫為目標自動交易（①～⑤硬條件），舊文保留並標被取代；PENDING_QUEUE 七處引用加註。
+**二、PIT 回放**：`scripts/pit_replay_auto_rebalance.py`，五個月底流程全 PASS；`data/price_history.json` 對 00646／00697B 有缺口（2025-01～2026-05），回放用 FinMind 補；只檢流程，無淨值／報酬。
+**三、自動執行系統**：`research/auto_rebalance_bb90.py`（45／45／10、只買不賣、七項硬限制、三模式、append-only 帳本、對帳、心跳 ERROR＋紅橫幅）、`docs/AUTO_TRADING_SETUP.md`、`scripts/selftest_auto_rebalance.py` 29/29 PASS；Shioaji 模擬環境端到端走通（3 張整股單被接受、收盤後未成交，已撤銷，詳見文件第六節）。App 設定頁「自動交易」區塊＋紅橫幅＋`/auto/status`、`/auto/stop`（只動 STOP.flag）。冒煙測試 51 項全 PASS。動到常駐 alpha_live_server.py，已依七之二重啟驗證。
+**四、BLOCKED**：「破億路徑」卡——原版文字不在 repo／對話紀錄，無法還原，待總司令補述。
+**未動**：紙.一、紙.一b 正式紀錄、紙.二、holdout；未在 LIVE 類模式觸發任何下單。仍 BLOCKED：先.二十八-三 於 2026-10-07 12:20 後量測。
+
 ## 2026-10-06（互動視窗，先.二十八 清殭屍＋研究排程降頻，維運帽）
 
 等待總司令審閱：9 件（本輪不新增審閱項；先.二十八-三 等 24 小時量測，非等裁示）。

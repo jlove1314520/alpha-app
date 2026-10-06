@@ -1191,6 +1191,44 @@ async def post_settings(payload: dict, x_alpha_local_token: str | None = Header(
     return {"ok": True, "updated_at": doc["updated_at"], "settings": settings}
 
 
+AUTO_TRADING_DIR = Path(os.environ.get("ALPHA_AUTO_TRADING_DIR")
+                        or (Path(__file__).parent / "data" / "auto_trading"))
+
+
+@app.get("/auto/status")
+async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)):
+    """自動交易狀態（唯讀）：status.json、待執行訂單（否決窗）、緊急停止旗標。本端點沒有任何下單能力。"""
+    _check_token(x_alpha_local_token)
+    status = _read_json_safe(AUTO_TRADING_DIR / "status.json") or {}
+    pending = _read_json_safe(AUTO_TRADING_DIR / "pending_orders.json")
+    if isinstance(pending, dict) and (pending.get("done") or pending.get("cancelled")):
+        pending_view = {"cancelled": bool(pending.get("cancelled")), "done": bool(pending.get("done"))}
+    else:
+        pending_view = pending if isinstance(pending, dict) else None
+    cfg = _read_json_safe(AUTO_TRADING_DIR / "config.local.json") or {}
+    return {"ok": True, "mode": cfg.get("mode", "SIMULATION"),
+            "stopped": (AUTO_TRADING_DIR / "STOP.flag").exists(),
+            "status": status, "pending": pending_view}
+
+
+@app.post("/auto/stop")
+async def post_auto_stop(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    """寫入／清除本機緊急停止旗標。payload: {"stop": true|false}。只動 STOP.flag，不送任何訂單。"""
+    _check_token(x_alpha_local_token)
+    if not isinstance(payload, dict) or not isinstance(payload.get("stop"), bool):
+        raise HTTPException(status_code=400, detail="需要 {\"stop\": true|false}")
+    flag = AUTO_TRADING_DIR / "STOP.flag"
+    try:
+        if payload["stop"]:
+            AUTO_TRADING_DIR.mkdir(parents=True, exist_ok=True)
+            flag.write_text(datetime.now(TW_TZ).isoformat(), encoding="utf-8")
+        elif flag.exists():
+            flag.unlink()
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"寫入停止旗標失敗：{e}") from e
+    return {"ok": True, "stopped": flag.exists()}
+
+
 async def _kbars_via_daemon(code: str) -> dict | None:
     """向常駐行程查當日 1 分K。查得到回結果 dict，查不到回 None（讓呼叫端走既有的 404）。
 
