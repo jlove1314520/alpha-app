@@ -17658,3 +17658,17 @@ push 後停下等 Cowork 核對。
 - [x] **先.二十六-五 壞價後續：確認紙.二 #407／App 選股分數／供給觀察頁是否經 adjust.py yfinance 路徑取價；有則列出受影響標的並改走 FinMind，只修資料來源不改策略定義** 完成 2026-10-06：逐項確認——**紙.二 #407** 主來源是 FinMind＋adjust.py 事件還原，yfinance 僅為 FinMind 無價時的備援；**查證該備援從未被使用**（紙.二 首次換股 2026-11-16，尚未啟動、無任何紀錄），**零污染**，已在備援路徑加同一條物理合理性守衛（自測 5/5），**只改資料來源、未動任何策略定義**。**App 選股分數**走 TWSE 官方端點（update_price_history.py），**供給觀察頁**走 finmind_client，兩者皆不經 adjust.py 的 yfinance 路徑，無曝險。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.二十六"。整批模式。）
+
+# 2026-10-06【先.二十七：紙.一b 接上排程＋App 並列顯示】（總司令裁示原文，動工前先寫入）
+
+【先.二十七：紙.一b 接上排程＋App 並列顯示】總司令 2026-10-06 同意。先寫進 PENDING_QUEUE 再動工，整批模式，完成 push 停下。
+一、research/paper_1b_tracker.py 接進 .github/workflows/market.yml，放在紙.一 步驟之後、同樣 continue-on-error；commit 步驟的 git add 清單加入 data/paper_1b.json 與 research/data/paper_1b_log.jsonl（-f）。以模擬日期 2026-11-02、2026-11-30 各做一次 dry-run 驗證：11-02 建立 inception、11-30 做月底再平衡、重跑不重複寫入；dry-run 不得寫入正式紀錄檔。
+二、App 首頁紙上追蹤卡片改為紙.一（70/30）與紙.一b（Bb-90）並列：各自淨值、累積報酬、目前權重、下次再平衡日；紙.一b 未啟動前顯示「2026-11-02 啟動」。標示「紙上追蹤，非投資建議」。冒煙測試附截圖。
+三、10/30 紙.一 第一次月底記帳、11/2 紙.一b inception 若未在當日 market.yml 執行後寫入，心跳記 ERROR 並觸發 App 紅色橫幅（沿用先.十四 機制）。
+紙.一、紙.二、holdout 不得動。
+
+心跳位置（三之三）：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.二十七）。
+
+- [ ] **先.二十七-一 紙.一b 接進 market.yml＋git add 清單＋模擬日期 dry-run（11-02 inception／11-30 月底／重跑不重複／不寫正式檔）**
+- [ ] **先.二十七-二 App 首頁紙上追蹤卡片改紙.一／紙.一b 並列＋冒煙測試附截圖**
+- [ ] **先.二十七-三 逾期未記帳→心跳 ERROR＋App 紅色橫幅（沿用先.十四）**
