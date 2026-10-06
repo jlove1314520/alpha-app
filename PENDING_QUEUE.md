@@ -17945,3 +17945,35 @@ push 後停下等 Cowork 核對。
 五、總司令截圖中出現的身分證字號與帳號，不得寫入 repo、文件、log 或任何 commit。
 
 紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。完成後一次回報：#421 判定與六組數字（若有跑）、三次自檢結果、10/7 演練結果。
+
+# 2026-10-06【先.三十五：推播按鈕修復（今晚立即，最高優先，批次模式）】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.三十五】推播按鈕修復（今晚立即，最高優先，批次模式）
+
+一、根因（Cowork 已查證）：index.html 的「開啟本裝置推播」「測試推播」按鈕呼叫 pushEnable()／pushTest()，但兩個函式在 repo 與本機都不存在（commit 43136720 只加了按鈕）。先.三十一-一 回報「已實作、冒煙全過」不實，PROGRESS 註明為假完成。
+
+二、實作 pushEnable()：
+1. 先檢查 'serviceWorker' in navigator、'PushManager' in window，以及是否從主畫面開啟（navigator.standalone 或 display-mode: standalone）。不符就在 #push-note 寫明原因（例如「請從主畫面圖示開啟」「iOS 需 16.4 以上」），不得只寫「錯誤」。
+2. Notification.requestPermission() 必須是點擊後第一個呼叫，前面不得有任何 await（iOS 使用者手勢限制）；被拒就寫明「通知權限被拒，請到 iPhone 設定→通知→Alpha 開啟」。
+3. await navigator.serviceWorker.ready → GET LIVE.url+'/push/vapid_public_key'（帶 X-Alpha-Local-Token）→ base64url 轉 Uint8Array → pushManager.subscribe({userVisibleOnly:true, applicationServerKey}) → POST /push/subscribe，body {"subscription": sub.toJSON(), "label": "iPhone"}。
+4. 每一步失敗都在 #push-note 顯示是第幾步、什麼錯（例如 HTTP 狀態、本機離線、token 錯），並寫入 recordGlobalError。成功時顯示「已訂閱，共 N 支裝置」。
+
+三、實作 pushTest()：POST /push/test，顯示 delivered／failed／errors；沒有訂閱時提示先按「開啟本裝置推播」。
+
+四、冒煙測試補檢查：掃描 index.html 所有 onclick／oninput／onchange 屬性，呼叫的函式名稱都必須在頁面全域定義，缺一個即 FAIL。另加兩案：按鈕存在且兩個函式為 function。
+
+五、完成後：冒煙全綠才 commit；sw.js 版本號與 APP_VERSION 一起更新，確保手機拿到新版；alpha_live_server 若有改動依七之二重啟。回報後請總司令在 iPhone 重新開啟 App（必要時把 App 完全關掉再開）重按兩個按鈕。
+
+六、若推播今晚仍無法開通：明早 09:05 演練 A 照規則 PUSH_FAILED 不執行，照實記錄；演練 B 照做。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。另：.gitignore 補上 `.env.*` 並保留 `!.env.example`（避免 .env 備份檔被 commit）。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十五）。
+
+- [ ] **先.三十五-一 查證根因＋PROGRESS 註明先.三十一-一 假完成**
+- [ ] **先.三十五-二 實作 pushEnable()（環境檢查、requestPermission 為第一個呼叫、四步驟逐步錯誤訊息、成功顯示裝置數）**
+- [ ] **先.三十五-三 實作 pushTest()**
+- [ ] **先.三十五-四 冒煙：全域 handler 存在性掃描＋兩函式存在案**
+- [ ] **先.三十五-五 冒煙全綠 commit、版本號更新、.gitignore 補 .env.*（保留 !.env.example）**
+- [!] **先.三十五-六 總司令 iPhone 重開 App 重按兩按鈕**〔需總司令本人裝置〕
