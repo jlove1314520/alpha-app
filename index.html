@@ -1435,6 +1435,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
       <div class="note" id="push-note" style="margin-top:6px">推播：尚未檢查</div>
       <div class="note" style="margin-top:6px">真錢「否決窗」開始時會推播（標的／股數／限價／總額／預定送單時間＋如何取消）；推播送不出去，該批就不執行、下次排程重試。iPhone 需 iOS 16.4 以上，且必須從「加到主畫面」的圖示開啟本 App 才能開啟推播。標準 Web Push，不經第三方帳號。</div>
+      <h4 style="margin:12px 0 4px">上線前自檢</h4>
+      <div id="auto-preflight" class="note">尚未執行（本機跑 <code>python research/auto_rebalance_bb90.py --preflight</code>，只查詢、不送單）</div>
+    </div>
+
+    <div class="card" id="live-account-card">
+      <h3>真錢帳戶（Bb-90）</h3>
+      <div id="live-account-body" class="note">尚未連線本機伺服器</div>
+      <div class="note" style="margin-top:6px">資料只從本機伺服器讀取（需 token），不存進 GitHub、不進公開心跳。損益只算自動交易買進的部分，未計手續費與稅，市值以最新收盤估算；對照組＝每筆成交改成同金額、同日收盤買 0050。</div>
     </div>
 
     <div class="card" id="bt-path-card">
@@ -6594,6 +6602,29 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){console.warn('[loadAutoHeartbeat]',e);recordGlobalError('loadAutoHeartbeat',e);AUTO_BAN.hb=''}
     renderAutoBanner();
   }
+  const _autoEsc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function renderAutoPreflight(pf){
+    const el=document.getElementById('auto-preflight');if(!el)return;
+    if(!pf||!Array.isArray(pf.items)){el.textContent='尚未執行（本機跑 python research/auto_rebalance_bb90.py --preflight，只查詢、不送單）';return}
+    const col={PASS:'var(--up,#1a7f37)',FAIL:'var(--down,#cf222e)',INFO:'var(--ink-3,#666)'};
+    el.innerHTML='<div style="margin-bottom:4px">執行時間：'+_autoEsc(pf.ran_at)+'　PASS '+_autoEsc(pf.pass)+'／FAIL '+_autoEsc(pf.fail)+'</div>'+
+      pf.items.map(i=>'<div style="margin:2px 0"><b style="color:'+(col[i.result]||'inherit')+'">'+_autoEsc(i.result)+'</b> '+_autoEsc(i.name)+'<br><span style="color:var(--ink-4)">'+_autoEsc(i.detail)+'</span></div>').join('');
+  }
+  function renderLiveAccount(a){
+    const el=document.getElementById('live-account-body');if(!el)return;
+    if(!a){el.textContent='伺服器未回傳帳戶資料（可能是舊版，需重啟）';return}
+    if(a.error){el.textContent='無法計算：'+a.error;return}
+    if(a.empty){el.textContent='尚無真錢自動交易紀錄（第 1 批尚未執行）。';return}
+    const n=v=>v==null?'—':Number(v).toLocaleString('zh-TW');
+    const sg=v=>v==null?'—':(v>0?'+':'')+n(v);
+    const rows=(a.holdings||[]).map(h=>'<tr><td>'+_autoEsc(h.symbol)+'</td><td style="text-align:right">'+n(h.shares)+'</td><td style="text-align:right">'+_autoEsc(h.pct)+'%</td><td style="text-align:right">'+_autoEsc(h.target_pct)+'%</td><td style="text-align:right">'+(h.dev_pp==null?'—':(h.dev_pp>0?'+':'')+_autoEsc(h.dev_pp)+'pp')+'</td></tr>').join('');
+    el.innerHTML='<div>自 '+_autoEsc(a.since)+' 起（市值基準日 '+_autoEsc(a.as_of)+'）</div>'+
+      '<table style="width:100%;font-size:12px;margin:6px 0"><tr><th style="text-align:left">標的</th><th style="text-align:right">股數</th><th style="text-align:right">占比</th><th style="text-align:right">目標</th><th style="text-align:right">偏離</th></tr>'+rows+'</table>'+
+      '<div>累計投入：'+n(a.invested)+' 元　總市值：'+n(a.market_value)+' 元</div>'+
+      '<div>自動交易損益：'+sg(a.pnl)+' 元　對照（同金額同日買 0050）：'+sg(a.bench_0050_pnl)+' 元</div>'+
+      (a.has_preexisting?'<div style="color:var(--ink-4)">帳戶另有自動交易以外的持股，占比含這部分、損益不含。</div>':'')+
+      (a.bench_missing_fills?'<div style="color:var(--ink-4)">有 '+_autoEsc(a.bench_missing_fills)+' 筆成交日找不到 0050 收盤，對照組未計入。</div>':'');
+  }
   async function loadAutoTrading(){
     const note=document.getElementById('auto-status-note');
     if(!note)return;
@@ -6619,6 +6650,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         pe.textContent='待執行（'+(p.execute_after||'?')+' 後送出）：'+p.orders.map(o=>(o.symbol||'')+' '+(o.action==='Sell'?'賣':'買')+' '+(o.qty||'')+'股 @'+(o.limit_price||'')).join('；');
       }else pe.textContent=p&&p.cancelled?'待執行訂單已取消':'目前沒有待執行訂單';
       if(cb)cb.style.display=active?'':'none';
+      try{renderAutoPreflight(st.preflight)}catch(e){console.warn('[renderAutoPreflight]',e);recordGlobalError('renderAutoPreflight',e)}
+      try{renderLiveAccount(d.live_account)}catch(e){console.warn('[renderLiveAccount]',e);recordGlobalError('renderLiveAccount',e)}
       const red=st.banner==='red'||!!st.last_error;
       AUTO_BAN.local=red?('自動交易異常：'+(st.last_error||'請檢查')):(d.stopped?'自動交易已緊急停止（一律拒單）':'');
       renderAutoBanner();
@@ -7897,7 +7930,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.1840';
+  const APP_VERSION='2026-10-06.1942';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

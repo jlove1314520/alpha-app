@@ -523,6 +523,63 @@ for cfgx in ({}, {"mode": "LIVE_WITH_VETO"}):
         ok = True
     check(f"演練 B：{cfgx or '未開 sim_veto'} 一律拒絕", ok and not b.placed)
 
+# ---- 先.三十三-一：上線前自檢（假券商，不碰網路） ----
+class _Acct: signed = False
+class _Bal: errmsg = ""; acc_balance = 123456.0
+class _Api:
+    def __init__(self, fail=False): self.fail = fail; self.stock_account = _Acct(); self.orders = 0
+    def account_balance(self):
+        if self.fail: raise RuntimeError("x")
+        return _Bal()
+    def settlements(self, a): return []
+    def list_positions(self, a): return []
+    def place_order(self, *a, **k): self.orders += 1; raise AssertionError("自檢不得送單")
+_api = _Api()
+p = setup({"sim_veto": True})
+_env = {k: "x" for k in A.PREFLIGHT_ENV_KEYS}; _env["SINOPAC_CA_PATH"] = str(p.config)
+_tasks = {n: "Ready" for n in A.PREFLIGHT_TASKS}
+A._write_json(p.base / f"calendar_{NOW.year}.json", {"year": NOW.year, "closed": ["2026-01-01"]})
+out = A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env)
+R = {i["id"]: i for i in out["items"]}
+check("自檢：涵蓋十一項（env／登入／signed／三查詢／推播／排程／日曆／價格／除息／設定）",
+      all(k in R for k in ("env", "live_login", "signed", "q_balance", "q_settlements", "q_positions", "push", "tasks", "calendar", "prices", "exdiv", "config")))
+check("自檢：未簽署照實 FAIL 並說明缺什麼", R["signed"]["result"] == "FAIL" and "未簽署" in R["signed"]["detail"])
+check("自檢：唯讀查詢成功→PASS，且不送任何委託", R["q_balance"]["result"] == "PASS" and _api.orders == 0)
+check("自檢：結果不含金額／金鑰值", "123456" not in json.dumps(out, ensure_ascii=False) and '"x"' not in json.dumps(out, ensure_ascii=False))
+check("自檢：寫入本機 status.preflight", (json.loads(p.status.read_text(encoding="utf-8")).get("preflight") or {}).get("ran_at") == out["ran_at"])
+_env2 = dict(_env); _env2.pop("SINOPAC_CA_PASSWD")
+out = A.preflight(p, NOW, broker_factory=lambda: _Api(fail=True), task_states={**_tasks, "AlphaAutoRun0905": None, "AlphaAutoWatchRun": "Disabled"}, env=_env2)
+R = {i["id"]: i for i in out["items"]}
+check("自檢：缺金鑰只報名稱", R["env"]["result"] == "FAIL" and "SINOPAC_CA_PASSWD" in R["env"]["detail"])
+check("自檢：查詢失敗→FAIL", R["q_balance"]["result"] == "FAIL")
+check("自檢：排程未註冊／停用→FAIL", R["tasks"]["result"] == "FAIL" and "未註冊" in R["tasks"]["detail"] and "Disabled" in R["tasks"]["detail"])
+p = setup({"per_order_cap_twd": 1000, "total_capital_twd": 0})
+out = A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env)
+R = {i["id"]: i for i in out["items"]}
+check("自檢：資金為 0→設定 FAIL", R["config"]["result"] == "FAIL" and "total_capital_twd" in R["config"]["detail"])
+check("自檢：缺當年日曆快取→FAIL", R["calendar"]["result"] == "FAIL")
+p = setup({"per_order_cap_twd": 1000})
+R = {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env)["items"]}
+check("自檢：單筆上限小於單批最大一筆→FAIL", R["config"]["result"] == "FAIL" and "per_order_cap_twd" in R["config"]["detail"])
+
+# ---- 先.三十三-二：真錢帳戶卡 ----
+p = setup()
+check("帳戶卡：無 LIVE 成交→空狀態", A.live_account_summary(p) == {"empty": True})
+_pd = {"prices": {"0050": [{"date": "2026-10-01", "close": 100.0}, {"date": "2026-10-05", "close": 110.0}],
+                  "00646": [{"date": "2026-10-05", "close": 55.0}], "00697B": [{"date": "2026-10-05", "close": 36.0}]}}
+L = p.scoped("LIVE")
+for k, sym, q, px in (("LIVE-202610-T1-R1-0050-C", "0050", 1000, 100.0), ("LIVE-202610-T1-R1-00646-C", "00646", 2000, 50.0)):
+    A._append(L.ledger, {"ts": "2026-10-01T09:40:00+08:00", "event": "FILLED", "mode": "LIVE_WITH_VETO", "key": k, "symbol": sym,
+                         "qty": q, "filled_qty": q, "avg_price": px, "limit_price": px})
+A._write_json(L.state, {"positions": {"0050": 1000, "00646": 2000}})
+a = A.live_account_summary(p, price_doc=_pd)
+h = {x["symbol"]: x for x in a["holdings"]}
+check("帳戶卡：累計投入＝成交金額合計", a["invested"] == 200000)
+check("帳戶卡：損益＝市值−投入（110×1000＋55×2000−200000＝20000）", a["pnl"] == 20000 and a["market_value"] == 220000)
+check("帳戶卡：0050 對照＝同日同金額買 0050（2000 股×110−200000＝20000）", a["bench_0050_pnl"] == 20000)
+check("帳戶卡：占比與偏離（0050 50%，偏離 +5pp）", h["0050"]["pct"] == 50.0 and h["0050"]["dev_pp"] == 5.0 and h["00697B"]["shares"] == 0)
+check("帳戶卡：模擬帳本不計入真錢卡", A.live_account_summary(setup(), price_doc=_pd)["empty"] is True)
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")

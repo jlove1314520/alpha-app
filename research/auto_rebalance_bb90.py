@@ -993,6 +993,240 @@ def watchdog(paths: Paths, now: datetime, which: str, cal: dict | None = None) -
         return "WATCHDOG_FAILED_OPEN"
 
 
+# ---------- 先.三十三-二：真錢帳戶卡（只在本機回給 App，不寫進 repo／公開心跳） ----------
+def live_account_summary(paths: Paths | None = None, price_doc: dict | None = None) -> dict:
+    """讀 LIVE 族帳本與對帳基準：各標的股數／市值占比／與目標偏離、累計投入、
+    與「同金額同日買 0050」對照損益。沒有任何 LIVE 成交時回 {"empty": True}（App 顯示空狀態，不放假資料）。
+    未計手續費與稅；市值用 price_history 最新收盤。"""
+    paths = (paths or Paths()).scoped("LIVE")
+    latest = _ledger_latest(paths)
+    fills = [r for r in latest.values() if _filled(r) > 0]
+    if not fills:
+        return {"empty": True}
+    doc = price_doc if price_doc is not None else (_read_json(PRICE_HISTORY) or {})
+    px = doc.get("prices") or {}
+    last = {c: float(px[c][-1]["close"]) for c in WEIGHTS if px.get(c)}
+    state = _read_json(paths.state) or {}
+    pos = {c: int((state.get("positions") or {}).get(c, 0)) for c in WEIGHTS}
+    if any(c not in last for c in WEIGHTS):
+        return {"empty": False, "error": "price_history 缺白名單標的收盤價，無法計算市值"}
+    vals = {c: pos[c] * last[c] for c in WEIGHTS}
+    tot = sum(vals.values())
+    invested = sum(_filled_amount(r) for r in fills)
+    s0050 = sorted(px.get("0050", []), key=lambda r: r["date"])
+
+    def close_on(d: str):
+        c = None
+        for r in s0050:
+            if r["date"] <= d:
+                c = r["close"]
+            else:
+                break
+        return c
+    bench_sh, miss = 0.0, 0
+    for r in fills:
+        c = close_on(r["ts"][:10])
+        if c:
+            bench_sh += _filled_amount(r) / float(c)
+        else:
+            miss += 1
+    bench_val = bench_sh * last["0050"]
+    bought = {c: 0 for c in WEIGHTS}
+    for r in fills:
+        if r.get("symbol") in bought:
+            bought[r["symbol"]] += _filled(r)
+    sys_val = sum(bought[c] * last[c] for c in WEIGHTS)
+    first = min(r["ts"][:10] for r in fills)
+    return {"empty": False, "as_of": max(px[c][-1]["date"] for c in WEIGHTS), "since": first,
+            "holdings": [{"symbol": c, "shares": pos[c], "value": round(vals[c]),
+                          "pct": round(vals[c] / tot * 100, 2) if tot else 0.0, "target_pct": WEIGHTS[c] * 100,
+                          "dev_pp": round(vals[c] / tot * 100 - WEIGHTS[c] * 100, 2) if tot else None} for c in WEIGHTS],
+            "market_value": round(tot), "invested": round(invested), "pnl": round(sys_val - invested),
+            "has_preexisting": any(pos[c] != bought[c] for c in WEIGHTS),
+            "bench_0050_value": round(bench_val), "bench_0050_pnl": round(bench_val - invested),
+            "bench_missing_fills": miss, "note": "損益只算自動交易買進的股數；未計手續費與稅；市值以最新收盤估算"}
+
+
+# ---------- 先.三十三-一：上線前自檢（只查詢，絕不送單） ----------
+PREFLIGHT_ENV_KEYS = ("SINOPAC_API_KEY", "SINOPAC_SECRET_KEY", "SINOPAC_PERSON_ID", "SINOPAC_CA_PATH",
+                      "SINOPAC_CA_PASSWD", "ALPHA_VAPID_PRIVATE_KEY", "ALPHA_VAPID_PUBLIC_KEY", "ALPHA_VAPID_SUBJECT")
+PREFLIGHT_TASKS = ("AlphaAutoRun0905", "AlphaAutoRun0940", "AlphaAutoSettle1340", "AlphaAutoWatchRun", "AlphaAutoWatchSettle")
+
+
+def _read_env_file() -> dict:
+    env = {}
+    p = REPO / ".env"
+    if p.exists():
+        for line in p.read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.lstrip().startswith("#"):
+                k, v = line.split("=", 1)
+                env[k.strip()] = v.strip().strip('"').strip("'")
+    return env
+
+
+def _timed(fn, timeout: float = 25.0):
+    box = {}
+
+    def _call():
+        try:
+            box["v"] = fn()
+        except Exception as e:
+            box["e"] = e
+
+    t = threading.Thread(target=_call, daemon=True)
+    t.start()
+    t.join(timeout)
+    if t.is_alive():
+        raise TimeoutError("逾時")
+    if "e" in box:
+        raise box["e"]
+    return box.get("v")
+
+
+def _task_states(names) -> dict:
+    """{任務名: State 字串或 None(未註冊)}；用 PowerShell Get-ScheduledTask，只讀。"""
+    import subprocess
+    cmd = ("$n=@(" + ",".join(f"'{n}'" for n in names) + "); foreach($x in $n){ $t=Get-ScheduledTask -TaskName $x "
+           "-ErrorAction SilentlyContinue; if($t){ \"$x=$($t.State)\" } else { \"$x=MISSING\" } }")
+    out = subprocess.run(["powershell", "-NoProfile", "-Command", cmd], capture_output=True, text=True, timeout=60).stdout
+    res = {n: None for n in names}
+    for line in out.splitlines():
+        if "=" in line:
+            k, v = line.strip().split("=", 1)
+            if k in res:
+                res[k] = None if v == "MISSING" else v
+    return res
+
+
+def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None, env=None) -> dict:
+    """逐項 PASS／FAIL／WARN＋缺什麼。detail 只寫有無／成功與否／日期，不含任何金額、持股數、帳號、金鑰值。
+    正式環境只做 login（不 activate_ca——沒有 CA 就不可能送出委託）＋唯讀查詢，結束即 logout。"""
+    items = []
+
+    def add(iid, name, result, detail):
+        items.append({"id": iid, "name": name, "result": result, "detail": detail})
+
+    cfg = load_config(paths)
+    today = now.astimezone(TW).date()
+    # 1 .env 金鑰（只報有無）
+    try:
+        env = env if env is not None else _read_env_file()
+        miss = [k for k in PREFLIGHT_ENV_KEYS if not env.get(k)]
+        ca_ok = bool(env.get("SINOPAC_CA_PATH")) and Path(env["SINOPAC_CA_PATH"]).exists()
+        if not ca_ok and "SINOPAC_CA_PATH" not in miss:
+            miss.append("SINOPAC_CA_PATH（檔案不存在）")
+        add("env", "本機 .env 金鑰齊全（只檢查有無）", "PASS" if not miss else "FAIL",
+            "全部存在" if not miss else "缺：" + "、".join(miss))
+    except Exception as e:
+        env = {}
+        add("env", "本機 .env 金鑰齊全（只檢查有無）", "FAIL", f"讀取失敗（{type(e).__name__}）")
+    # 2–3 永豐正式環境唯讀
+    api = None
+    try:
+        if broker_factory:
+            api = broker_factory()
+        else:
+            import shioaji as sj
+            api = sj.Shioaji(simulation=False)
+            _timed(lambda: api.login(api_key=env["SINOPAC_API_KEY"], secret_key=env["SINOPAC_SECRET_KEY"]), 60)
+        acct = getattr(api, "stock_account", None)
+        if acct is None:
+            add("live_login", "永豐正式環境唯讀登入", "FAIL", "登入成功但無證券帳戶")
+        else:
+            add("live_login", "永豐正式環境唯讀登入", "PASS", "登入成功（未啟用 CA，無法送單）")
+            signed = bool(getattr(acct, "signed", False))
+            add("signed", "證券帳戶 API 簽署（signed）", "PASS" if signed else "FAIL",
+                "已簽署" if signed else "未簽署：需完成永豐 API 簽署與測試報告（docs/AUTO_TRADING_SETUP.md 第二節）")
+            for iid, name, fn in (
+                    ("q_balance", "唯讀查詢：交割戶餘額", lambda: api.account_balance()),
+                    ("q_settlements", "唯讀查詢：未交割款", lambda: api.settlements(acct)),
+                    ("q_positions", "唯讀查詢：持股", lambda: api.list_positions(acct))):
+                try:
+                    v = _timed(fn)
+                    bad = v is None or bool(getattr(v, "errmsg", ""))
+                    add(iid, name, "FAIL" if bad else "PASS", "查詢失敗（回傳空或帶錯誤訊息）" if bad else "查詢成功（金額不顯示）")
+                except Exception as e:
+                    add(iid, name, "FAIL", f"查詢失敗（{type(e).__name__}）")
+    except Exception as e:
+        api = None if not broker_factory else api  # 登入失敗不呼叫 logout（會再拋 AuthError）
+        why = f"登入失敗（{type(e).__name__}）"
+        if "production permission" in str(e):
+            why = ("登入被拒：目前 API 金鑰沒有正式環境權限（永豐回應 Token doesn't have production permission）——"
+                   "需完成 API 簽署與模擬測試報告、由永豐開通正式權限（docs/AUTO_TRADING_SETUP.md 第二節）")
+        add("live_login", "永豐正式環境唯讀登入", "FAIL", why)
+        for iid, name in (("signed", "證券帳戶 API 簽署（signed）"), ("q_balance", "唯讀查詢：交割戶餘額"),
+                          ("q_settlements", "唯讀查詢：未交割款"), ("q_positions", "唯讀查詢：持股")):
+            add(iid, name, "FAIL", "未登入，無法檢查")
+    finally:
+        if api is not None and not broker_factory:
+            try:
+                api.logout()
+            except Exception as e:
+                print(f"[warn] 自檢登出失敗：{type(e).__name__}", flush=True)
+    # 4 推播訂閱
+    try:
+        import web_push
+        n = len(web_push.load_subs(paths.base))
+        add("push", "推播訂閱 ≥1 支裝置", "PASS" if n >= 1 else "FAIL",
+            f"{n} 支" + ("" if n >= 1 else "：請在 iPhone 依文件第八節開啟推播"))
+    except Exception as e:
+        add("push", "推播訂閱 ≥1 支裝置", "FAIL", f"無法讀取（{type(e).__name__}）")
+    # 5 工作排程
+    try:
+        st = task_states if task_states is not None else _task_states(PREFLIGHT_TASKS)
+        bad = [f"{k}（{'未註冊' if v is None else v}）" for k, v in st.items() if v is None or v == "Disabled"]
+        add("tasks", "5 個工作排程已註冊且啟用", "PASS" if not bad else "FAIL", "全部 Ready" if not bad else "；".join(bad))
+    except Exception as e:
+        add("tasks", "5 個工作排程已註冊且啟用", "FAIL", f"查詢失敗（{type(e).__name__}）")
+    # 6 日曆快取
+    cal = _read_json(paths.base / f"calendar_{today.year}.json")
+    ok = isinstance(cal, dict) and cal.get("year") == today.year and bool(cal.get("closed"))
+    add("calendar", "官方日曆快取年份正確", "PASS" if ok else "FAIL",
+        f"{today.year} 年，抓取於 {str(cal.get('fetched_at', ''))[:10]}" if ok else f"缺 {today.year} 年快取或內容不符")
+    # 7 價格與除息資料新鮮度
+    pc = load_prev_closes()
+    max_age = int(cfg.get("max_data_age_days", 4))
+    stale = [f"{c}（{pc[c][1] if c in pc else '無'}）" for c in WEIGHTS
+             if c not in pc or (today - date.fromisoformat(pc[c][1])).days > max_age]
+    add("prices", f"price_history 新鮮（{max_age} 日內）", "PASS" if not stale else "FAIL",
+        "三檔最新 " + "／".join(sorted({pc[c][1] for c in pc})) if not stale else "過期或缺：" + "、".join(stale))
+    try:
+        doc = _read_json(REPO / "data" / "ex_dividend_events.json") or {}
+        gen = str((doc.get("meta") or {}).get("generated_at") or "")[:10]
+        fresh = bool(gen) and (today - date.fromisoformat(gen)).days <= max_age
+        ev = doc.get("events") or {}
+        nocov = [c for c in WEIGHTS if not ev.get(c)]
+        res = "PASS" if fresh and not nocov else "FAIL"
+        det = (f"產生於 {gen or '未知'}" + ("" if fresh else "（過期）")
+               + (f"；不含白名單標的 {'、'.join(nocov)} 的除息事件——除息日價差會被當異常整批拒單" if nocov else ""))
+        add("exdiv", "除息資料新鮮且涵蓋白名單", res, det)
+    except Exception as e:
+        add("exdiv", "除息資料新鮮且涵蓋白名單", "FAIL", f"讀取失敗（{type(e).__name__}）")
+    # 8 設定合理
+    tot, cap = float(cfg.get("total_capital_twd") or 0), float(cfg.get("per_order_cap_twd") or 0)
+    tt, tr = int(cfg.get("tranche_total") or 0), int(cfg.get("tranche") or 0)
+    probs = []
+    if tot <= 0:
+        probs.append("total_capital_twd 為 0 或未設定")
+    if cap <= 0:
+        probs.append("per_order_cap_twd 為 0 或未設定")
+    if not (tt >= 1 and 1 <= tr <= tt):
+        probs.append("tranche／tranche_total 不在合理範圍")
+    if tot > 0 and cap > 0 and tt >= 1 and all(c in pc for c in WEIGHTS):
+        biggest = max((o["amount"] for odd in (True, False)
+                       for o in plan_orders({c: pc[c][0] for c in WEIGHTS}, {}, tot / tt, odd)), default=0)
+        if biggest > cap:
+            probs.append("per_order_cap_twd 小於單批最大一筆委託（該筆會被拒單）")
+    add("config", "config.local.json 資金／上限／期數合理", "PASS" if not probs else "FAIL",
+        "合理（數字不顯示）" if not probs else "；".join(probs))
+    add("mode", "目前模式", "INFO", f"{cfg['mode']}" + ("（sim_veto 開）" if cfg.get("sim_veto") is True else ""))
+    out = {"ran_at": now.isoformat(timespec="seconds"),
+           "pass": sum(i["result"] == "PASS" for i in items), "fail": sum(i["result"] == "FAIL" for i in items),
+           "items": items}
+    write_status(paths, preflight=out)
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="store_true", help="排程入口：交易日且符合觸發條件才執行月底流程")
@@ -1002,6 +1236,7 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="--settle 略過 13:35 時間限制")
     ap.add_argument("--drill-label", help="先.三十二 演練 B：以獨立批次名走否決窗（僅 SIMULATION＋sim_veto，心跳記 drill 不發布）")
     ap.add_argument("--stop", action="store_true")
+    ap.add_argument("--preflight", action="store_true", help="先.三十三 上線前自檢：只查詢、絕不送單，結果寫本機 status")
     a = ap.parse_args()
     paths = Paths()
     now = datetime.now(TW)
@@ -1009,6 +1244,12 @@ def main() -> int:
         paths.stop_flag.parent.mkdir(parents=True, exist_ok=True)
         paths.stop_flag.write_text(now.isoformat(), encoding="utf-8")
         print("已寫入停止旗標")
+        return 0
+    if a.preflight:
+        out = preflight(paths, now)
+        for i in out["items"]:
+            print(f"{i['result']:4} {i['name']}：{i['detail']}")
+        print(f"合計 PASS {out['pass']}／FAIL {out['fail']}（結果已寫入本機 status.json）")
         return 0
     if a.watchdog:
         out = watchdog(paths, now, a.watchdog)

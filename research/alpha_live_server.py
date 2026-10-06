@@ -1208,9 +1208,16 @@ async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)
         pending_view = {"cancelled": bool(pending.get("cancelled")), "done": bool(pending.get("done"))}
     else:
         pending_view = pending if isinstance(pending, dict) else None
+    # 先.三十三-二：真錢帳戶卡（LIVE 族帳本＋對帳基準，只在本機回給已帶 token 的 App；不寫檔、不進 repo）
+    try:
+        import auto_rebalance_bb90 as _ab
+        live_account = _ab.live_account_summary(_ab.Paths(AUTO_TRADING_DIR))
+    except Exception as e:
+        print(f"[warn] 真錢帳戶摘要計算失敗：{type(e).__name__}", flush=True)
+        live_account = {"empty": False, "error": f"計算失敗（{type(e).__name__}）"}
     return {"ok": True, "mode": cfg.get("mode", "SIMULATION"), "family": family,
             "stopped": (AUTO_TRADING_DIR / "STOP.flag").exists(),
-            "status": status, "pending": pending_view}
+            "status": status, "pending": pending_view, "live_account": live_account}
 
 
 @app.post("/auto/stop")
