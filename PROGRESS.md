@@ -1,3 +1,15 @@
+## 2026-10-06 15:46～16:0x（DevQueue cycle 20261006-154601，維運帽）
+
+等待總司令審閱：12 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**一、先.二十九-四「破億路徑」卡 → 標 `- [!]` BLOCKED**：三處查證——①repo 全文 grep「破億」②`~/.claude/projects/C--alpha-alpha-app` 對話紀錄③`~/.claude/projects/C--alpha` 對話紀錄——全部只有修訂版「同原版第三、四項」一句，原版需求不存在。解除條件：總司令在 PENDING_QUEUE 補述卡片內容。
+**二、先.六-四／先.七-一（Shioaji 登入）→ 結案 `[x]`**：`data/quotes_sinopac.json` commit 50ac52fbb（10/5 13:45）與 47a6a8a0e（10/6 13:45）皆 connected=True、market_status=open、48 檔全 REALTIME_TICK，走成功分支。未讀取任何金鑰。
+**三、先.九-五 派發延遲 → 仍 `[!]`**：`log_dispatch_delay.py --since 2026-10-02` 新增 4 筆（181.8／550.6／522.3／252.0 分），檔案現 6 筆；10/6 三個排程時段尚未派發，2026-10-07 12:00 台北後重跑。
+**四、修 tick 收盤壓縮（[自走補入] 債務）**：10/5、10/6 收盤都留下完整 `.parquet.tmp` 卻沒 rename。離線重跑同一份 jsonl 一次成功、位元組數相同 → [自行裁量] 判定為 Windows 暫時性檔案鎖（daemon stdout 未落地，原始例外已不可得，屬推斷）。`research/tick_recorder.py::compact()` rename 改 5 次退避重試，最終失敗寫 `research/data/ticks/_compact_errors.jsonl` 後拋出（jsonl 保留）。成功路徑、模擬失敗路徑都驗過；正式 20261006 以 CLI 補壓 108713 列。研究.c tick 交易日現 17／20。
+**冒煙測試**：`node scripts/smoke_test.mjs` exit=0，49 項 PASS、無 FAIL（跑兩次）。
+**佇列深度**：`- [ ]`＝0（<12 下限）。凍結.二仍有效（轉向.一未結案），新 alpha 試驗不得補入；依前幾輪盤點，允許類別（稽核重跑/資料/工具）無可誠實補入的新項目，本輪只補入上面那一項（已完成），不硬湊。
+**其餘 `[!]` 檢查**：先.二十八-三（10/7 12:20 後）、金流一.4／研究.c（等資料累積）、本地AI摘要（法遵停下）、資料源一.3／結案.一／群益（需總司令）、維運 renormalize 提案（待裁示）、紙.一（已啟動，月度進行中）——皆維持，無可解除。
+
 ## 2026-10-06（互動視窗，先.二十九 修訂版：自動交易規則更正＋回放＋自動執行系統）
 
 等待總司令審閱：12 件（新增三件：第 1 批開通、PIT 回放、破億路徑卡 BLOCKED）。
