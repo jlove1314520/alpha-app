@@ -17977,3 +17977,28 @@ push 後停下等 Cowork 核對。
 - [x] **先.三十五-四 冒煙：全域 handler 存在性掃描＋兩函式存在案**〔冒煙第53項（掃 368 個處理器屬性、66 個函式名）＋第54項；以舊版 index.html 實跑兩項皆正確 FAIL（只抓到 pushEnable、pushTest），新版 PASS。〕
 - [x] **先.三十五-五 冒煙全綠 commit、版本號更新、.gitignore 補 .env.*（保留 !.env.example）**〔冒煙全部通過後 commit；版本號由 pre-commit hook 同步更新 index.html APP_VERSION 與 sw.js；.gitignore 補 `.env.*`＋`!.env.example`（實測 .env.bak 被忽略、.env.example 仍追蹤）。alpha_live_server.py 未改，免重啟。〕
 - [!] **先.三十五-六 總司令 iPhone 重開 App 重按兩按鈕**〔需總司令本人裝置〕〔線上版已確認部署：sw.js 快取版本 alpha-v2026-10-06.2102、index.html 含 pushEnable（2026-10-06 21:1x 查證）〕
+
+# 2026-10-06【先.三十六：推播發送缺套件修復（今晚立即，最高優先）】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.三十六】推播發送缺套件修復（今晚立即，最高優先）
+
+一、根因（Cowork 已查證本機 push_log.jsonl）：21:24 四次測試推播皆失敗「NETWORK:ModuleNotFoundError」。web_push._pywebpush_sender 會 import pywebpush，但常駐伺服器與排程用的 Store Python（C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe）沒有安裝。訂閱已成功（1 支，web.push.apple.com）。
+二、用同一個 python.exe 執行 -m pip install pywebpush（依 requirements 釘版本並寫進 requirements）；確認同一個直譯器 import pywebpush、shioaji 都成功。
+三、依七之二重啟 alpha_live_server，驗 /health build 與 stale_process=false。
+四、立即呼叫 /push/test 實送一次，push_log 必須出現 ok≥1；回報給總司令「請看手機是否收到」。
+五、補檢查，防止再次假通過：
+  1. --preflight 新增「推播發送依賴可載入」：用排程同一個直譯器實際 import pywebpush 與 cryptography，失敗判 FAIL。
+  2. selftest_web_push 新增一案：不替換發送器，直接檢查 _pywebpush_sender 的依賴可 import。
+  3. PROGRESS 註明先.三十一-一 第二處假完成（只用假發送器測試）。
+六、錯誤分類修正：ModuleNotFoundError 不是網路錯誤，push_log 改記為 DEPENDENCY，App 顯示「電腦缺推播套件」。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十六）。
+
+- [ ] **先.三十六-一 用排程同一個 Store python 安裝 pywebpush（釘版本寫 requirements）＋確認 import pywebpush／shioaji**
+- [ ] **先.三十六-二 錯誤分類 DEPENDENCY＋App 顯示「電腦缺推播套件」**
+- [ ] **先.三十六-三 preflight 新增推播依賴項＋selftest_web_push 真發送器依賴案**
+- [ ] **先.三十六-四 重啟 alpha_live_server（七之二）＋實送 /push/test、push_log ok≥1**
+- [ ] **先.三十六-五 PROGRESS 註明先.三十一-一 第二處假完成**
