@@ -17976,4 +17976,4 @@ push 後停下等 Cowork 核對。
 - [x] **先.三十五-三 實作 pushTest()**〔pushTest()：POST /push/test 顯示送達／失敗／錯誤；無訂閱提示先開啟。對真實本機伺服器實測回「目前沒有任何已訂閱裝置」。〕
 - [x] **先.三十五-四 冒煙：全域 handler 存在性掃描＋兩函式存在案**〔冒煙第53項（掃 368 個處理器屬性、66 個函式名）＋第54項；以舊版 index.html 實跑兩項皆正確 FAIL（只抓到 pushEnable、pushTest），新版 PASS。〕
 - [x] **先.三十五-五 冒煙全綠 commit、版本號更新、.gitignore 補 .env.*（保留 !.env.example）**〔冒煙全部通過後 commit；版本號由 pre-commit hook 同步更新 index.html APP_VERSION 與 sw.js；.gitignore 補 `.env.*`＋`!.env.example`（實測 .env.bak 被忽略、.env.example 仍追蹤）。alpha_live_server.py 未改，免重啟。〕
-- [!] **先.三十五-六 總司令 iPhone 重開 App 重按兩按鈕**〔需總司令本人裝置〕
+- [!] **先.三十五-六 總司令 iPhone 重開 App 重按兩按鈕**〔需總司令本人裝置〕〔線上版已確認部署：sw.js 快取版本 alpha-v2026-10-06.2102、index.html 含 pushEnable（2026-10-06 21:1x 查證）〕
