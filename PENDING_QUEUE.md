@@ -18002,3 +18002,35 @@ push 後停下等 Cowork 核對。
 - [x] **先.三十六-三 preflight 新增推播依賴項＋selftest_web_push 真發送器依賴案**〔preflight 新增 push_deps（子行程以排程 Store python 實際 import 四個依賴）；selftest_web_push 新增真發送器依賴兩案（本直譯器＋排程直譯器）與 DEPENDENCY 分類案，兩個直譯器皆全 PASS；selftest_auto_rebalance 161 PASS。〕
 - [x] **先.三十六-四 重啟 alpha_live_server（七之二）＋實送 /push/test、push_log ok≥1**〔已重啟：[build] git sha=71173e0＝HEAD、stale_process=False、CORS 預檢含精確來源＋credentials。21:30:39 實送 /push/test：delivered=1、failed=0，push_log ok=1。自檢重跑 PASS 8／FAIL 5（推播兩項 PASS；FAIL 皆為正式權限未開通）。〕
 - [x] **先.三十六-五 PROGRESS 註明先.三十一-一 第二處假完成**〔PROGRESS.md 已註明。〕
+
+# 2026-10-06【先.三十七：今晚無券商演練（立即，總司令在線，批次模式）】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.三十七】今晚無券商演練（立即，總司令在線，批次模式）
+
+目的：今晚先驗證使用者端的整條流程（推播內容、App 顯示待執行訂單、全部取消、到期送出、結算記帳），不連永豐任何環境。成交與券商對帳仍由 10/7 盤中演練 A 驗證。
+
+一、新增 --night-drill（僅 SIMULATION 有效）：
+- 使用假券商，不得建立 Shioaji 連線；否決窗僅本演練縮短為 3 分鐘。
+- 狀態、帳本、待執行訂單寫到獨立目錄 research/data/auto_trading_drill/。
+- 不得影響 10/7 09:05 正式模擬演練所用的 state／ledger／pending／公開心跳。
+- 演練結束後，App 必須恢復讀取正式目錄。
+
+二、App 在演練期間要能顯示演練的待執行訂單，「全部取消」要作用在演練批次上，畫面標示「演練（假券商）」。用最小改動達成（例如伺服器讀取演練旗標檔），演練結束即移除旗標，並依七之二重啟驗證。
+
+三、兩輪演練，價格用 data/price_history.json 最新收盤：
+- N1（取消）：建立待執行訂單並推播 → 推播後回報「請按全部取消」→ 確認一張都沒送、帳本有取消紀錄。
+- N2（不取消）：建立待執行訂單並推播 → 3 分鐘後由程式再呼叫一次送單（假券商全數成交）→ 結算 → 對帳通過 → 推播「批次完成」。
+- 每一步完成就推播通知總司令目前進度。
+
+四、完成後清除演練旗標與演練目錄的待執行訂單，確認正式目錄未被改動（列出檔案修改時間前後對照），自測與冒煙全綠才 commit。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十七）。
+
+- [ ] **先.三十七-一 --night-drill（假券商、獨立目錄、否決窗 3 分鐘、不碰正式目錄）＋自測**
+- [ ] **先.三十七-二 伺服器演練旗標切換讀取目錄＋App 標示「演練（假券商）」＋七之二重啟**
+- [ ] **先.三十七-三 N1（取消）演練**
+- [ ] **先.三十七-四 N2（不取消→送單→結算→對帳→批次完成推播）演練**
+- [ ] **先.三十七-五 清旗標／演練 pending、正式目錄修改時間前後對照、自測冒煙全綠 commit**
