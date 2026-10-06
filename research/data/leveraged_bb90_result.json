@@ -1,0 +1,97 @@
+{
+ "generated_at": "2026-10-06T19:42:14+08:00",
+ "prereg": "docs/PREREG_leveraged_bb90_FINAL.md",
+ "prereg_sha256": "1fc3ffea5b87f7e7598970a66d13ed33742893e634dbcea2ec46ce9a2031df73",
+ "prereg_trial_id": 419,
+ "n_trials_counted": 6,
+ "n_trials_family": 30,
+ "holdout_note": "資料截至 2024-12-31，2025 起未讀取（DTB3／DEXTAUS／VTI 快取在載入處截斷）",
+ "synthetic": "2×日報酬 −(DTB3+1%)/252 −1%/252；L_US 於美元層計算後換台幣",
+ "period": {
+  "start": "2003-07-01",
+  "end": "2024-12-31",
+  "n_days": 5303
+ },
+ "tracking_validation": {
+  "00631L": {
+   "symbol": "00631L",
+   "ok": true,
+   "synthetic": "r_ltw",
+   "data": {
+    "adjusted_price_series": {
+     "n": 2487,
+     "start": "2014-10-23",
+     "n_jumps_gt_21pct": 2,
+     "source": null
+    },
+    "_finmind_adjusted_frame": {
+     "n": 2484,
+     "start": "2014-10-31",
+     "n_jumps_gt_21pct": 0,
+     "source": null
+    },
+    "used": "_finmind_adjusted_frame"
+   },
+   "window": [
+    "2014-11-03",
+    "2024-12-31"
+   ],
+   "n_days": 2483,
+   "cagr_actual": 0.2750189389747004,
+   "cagr_synthetic": 0.23302029771799582,
+   "abs_cagr_gap_pp": 4.1998641256704605,
+   "mdd_actual": -0.5213055303717136,
+   "mdd_synthetic": -0.5909236098651647,
+   "report_only": {
+    "monthly_te_annualized_pp": 7.762953424550728,
+    "daily_corr_same_day": 0.971215270512742,
+    "daily_corr_actual_vs_synthetic_lag1": -0.011158780819588899
+   },
+   "pass": false
+  },
+  "00647L": {
+   "symbol": "00647L",
+   "ok": true,
+   "synthetic": "r_lus",
+   "data": {
+    "adjusted_price_series": {
+     "n": 2209,
+     "start": "2015-02-05",
+     "n_jumps_gt_21pct": 0,
+     "source": null
+    },
+    "used": "adjusted_price_series"
+   },
+   "window": [
+    "2015-12-02",
+    "2024-12-30"
+   ],
+   "n_days": 2206,
+   "cagr_actual": 0.19428915082740894,
+   "cagr_synthetic": 0.19919593612312325,
+   "abs_cagr_gap_pp": 0.4906785295714311,
+   "mdd_actual": -0.6007785810036168,
+   "mdd_synthetic": -0.5966928626999224,
+   "report_only": {
+    "monthly_te_annualized_pp": 12.153005570503776,
+    "daily_corr_same_day": 0.17233199293049709,
+    "daily_corr_actual_vs_synthetic_lag1": 0.6679560477425585
+   },
+   "pass": true
+  }
+ },
+ "tracking_valid": false,
+ "verdict": "INVALID：追蹤誤差驗證未通過（或無法完成），依事前登記不跑網格",
+ "volume_00647L_report_only": {
+  "window": "2023-01-01~2024-12-31",
+  "n_days": 481,
+  "source": "FinMind（adjust._finmind_adjusted_frame）",
+  "median_daily_value_twd": 8895170.0,
+  "p10_daily_value_twd": 3587682.0,
+  "assumed_rebalance_trade_twd": 500000.0,
+  "trade_pct_of_median": 5.621028041060486,
+  "note": "只報告不判定；假設組合1,000萬×5%調整",
+  "note_added": "追蹤驗證判無效後補算（只報告項，與網格無關）；首版欄名錯誤(volume)已修正為 Trading_money"
+ },
+ "stress_report_only": "網格未執行，無壓力段結果"
+}
