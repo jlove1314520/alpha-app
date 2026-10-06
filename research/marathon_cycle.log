@@ -6391,3 +6391,5 @@ quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）�
 ===== Marathon cycle start: 2026-10-06 08:00:37 cycle_id=20261006-080037 =====
 quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0.02
 ===== Marathon cycle end: 2026-10-06 08:01:00 cycle_id=20261006-080037 reason=OK cost_usd=0.2967822 read_kb=19.3 turns=4 duration_min=0.34 =====
+
+quota_throttle: SKIP: 正常頻率，距上次實跑29.6分鐘 < 30分鐘門檻
