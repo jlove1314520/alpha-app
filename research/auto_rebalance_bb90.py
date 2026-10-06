@@ -1050,6 +1050,7 @@ def live_account_summary(paths: Paths | None = None, price_doc: dict | None = No
 # ---------- 先.三十三-一：上線前自檢（只查詢，絕不送單） ----------
 PREFLIGHT_ENV_KEYS = ("SINOPAC_API_KEY", "SINOPAC_SECRET_KEY", "SINOPAC_PERSON_ID", "SINOPAC_CA_PATH",
                       "SINOPAC_CA_PASSWD", "ALPHA_VAPID_PRIVATE_KEY", "ALPHA_VAPID_PUBLIC_KEY", "ALPHA_VAPID_SUBJECT")
+SCHED_PYTHON = r"C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe"  # 與 run-auto-trading-cycle.ps1 相同
 EXDIV_FRESH_HOURS = 72  # 同 generate_status_json.py 對 data/ex_dividend_events.json 的門檻
 PREFLIGHT_TASKS = ("AlphaAutoRun0905", "AlphaAutoRun0940", "AlphaAutoSettle1340", "AlphaAutoWatchRun", "AlphaAutoWatchSettle")
 
@@ -1100,7 +1101,7 @@ def _task_states(names) -> dict:
 
 
 def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None, env=None,
-              exdiv_doc: dict | None = None) -> dict:
+              exdiv_doc: dict | None = None, sched_python: str | None = None) -> dict:
     """逐項 PASS／FAIL／WARN＋缺什麼。detail 只寫有無／成功與否／日期，不含任何金額、持股數、帳號、金鑰值。
     正式環境只做 login（不 activate_ca——沒有 CA 就不可能送出委託）＋唯讀查詢，結束即 logout。"""
     items = []
@@ -1174,6 +1175,22 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
             f"{n} 支" + ("" if n >= 1 else "：請在 iPhone 依文件第八節開啟推播"))
     except Exception as e:
         add("push", "推播訂閱 ≥1 支裝置", "FAIL", f"無法讀取（{type(e).__name__}）")
+    # 4b 推播發送依賴（先.三十六）：用排程同一個直譯器實際 import，不送任何推播
+    try:
+        import subprocess
+        sp = sched_python or SCHED_PYTHON
+        if not Path(sp).exists():
+            add("push_deps", "推播發送依賴可載入（排程直譯器）", "FAIL", "找不到排程用的 python.exe")
+        else:
+            r = subprocess.run([sp, "-c", "import pywebpush, cryptography, http_ece, py_vapid"],
+                               capture_output=True, text=True, timeout=120)
+            ok = r.returncode == 0
+            last = (r.stderr.strip().splitlines() or ["?"])[-1][:160]
+            add("push_deps", "推播發送依賴可載入（排程直譯器）", "PASS" if ok else "FAIL",
+                "pywebpush／cryptography／http_ece／py_vapid 皆可載入" if ok
+                else f"電腦缺推播套件：{last}（用排程的 python.exe -m pip install -r research/requirements-live.txt）")
+    except Exception as e:
+        add("push_deps", "推播發送依賴可載入（排程直譯器）", "FAIL", f"檢查失敗（{type(e).__name__}）")
     # 5 工作排程
     try:
         st = task_states if task_states is not None else _task_states(PREFLIGHT_TASKS)

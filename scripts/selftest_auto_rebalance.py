@@ -621,6 +621,13 @@ p2 = setup(); out = A.preflight(p2, NOW, broker_factory=lambda: _ok, task_states
 check("權限：推播送不到只警告、自檢照常完成", out["fail"] >= 0 and json.loads(p2.status.read_text(encoding="utf-8"))["live_permission"]["effective"] is True)
 PUSH_RESULT.update({"ok": 1, "errors": []})
 
+# ---- 先.三十六：自檢推播依賴項 ----
+p = setup()
+R = {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env, sched_python=str(p.base / "no_python.exe"))["items"]}
+check("自檢推播依賴：找不到排程直譯器→FAIL", R["push_deps"]["result"] == "FAIL")
+R = {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env, sched_python=sys.executable)["items"]}
+check("自檢推播依賴：可載入→PASS", R["push_deps"]["result"] == "PASS")
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")

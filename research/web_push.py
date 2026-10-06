@@ -164,6 +164,17 @@ def _pywebpush_sender(sub: dict, payload: str, vapid: dict, ttl: int, urgency: s
 SENDER = _pywebpush_sender  # 自測替換用，正式流程不要動
 
 
+def sender_dependencies_ok() -> tuple[bool, str]:
+    """先.三十六：實際 import 真發送器的依賴（不送任何推播）。回傳 (是否可載入, 說明)。"""
+    missing = []
+    for mod in ("pywebpush", "cryptography", "http_ece", "py_vapid"):
+        try:
+            __import__(mod)
+        except ImportError as e:
+            missing.append(f"{mod}（{type(e).__name__}）")
+    return (not missing, "全部可載入" if not missing else "缺：" + "、".join(missing))
+
+
 def send(title: str, body: str, kind: str = "info", base: Path = DEFAULT_DIR, url: str = "./",
          ttl: int = 3600, urgency: str = "high", env_path: Path = ENV_PATH, sender=None) -> dict:
     """送給所有已訂閱裝置。永遠不拋例外。404／410（訂閱已失效）自動移除。"""
@@ -185,6 +196,11 @@ def send(title: str, body: str, kind: str = "info", base: Path = DEFAULT_DIR, ur
         for s in subs:
             try:
                 code = fn(s, payload, vapid, ttl, urgency)
+            except ImportError as e:
+                # 先.三十六：缺套件不是網路錯誤（ModuleNotFoundError 是 ImportError 子類）
+                res["failed"] += 1
+                res["errors"].append(f"DEPENDENCY:電腦缺推播套件（{getattr(e, 'name', None) or type(e).__name__}）")
+                continue
             except Exception as e:
                 res["failed"] += 1
                 res["errors"].append(f"NETWORK:{type(e).__name__}")

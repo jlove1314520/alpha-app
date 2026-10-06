@@ -6730,7 +6730,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       if(!r.ok){_pushFail(1,'測試推播請求失敗：'+await _pushHttpErr(r));return}
       const j=await r.json();
       if(!j.subscriptions){_pushNote('目前沒有任何已訂閱裝置，請先按「開啟本裝置推播」');return}
-      _pushNote('送達 '+(j.delivered||0)+' 支、失敗 '+(j.failed||0)+' 支（共 '+j.subscriptions+' 支訂閱）'+(j.errors&&j.errors.length?'；錯誤：'+j.errors.join('；'):''));
+      const errs=(j.errors||[]).map(x=>String(x).startsWith('DEPENDENCY:')?'電腦缺推播套件（請 CC 在本機安裝 pywebpush）':x);
+      _pushNote('送達 '+(j.delivered||0)+' 支、失敗 '+(j.failed||0)+' 支（共 '+j.subscriptions+' 支訂閱）'+(errs.length?'；錯誤：'+errs.join('；'):'')+(j.delivered?'。請看手機是否收到。':''));
     }catch(e){_pushFail(1,'連不到本機伺服器（'+(e&&e.message||e)+'）',e)}
   }
   async function autoSetStop(stop,why){
@@ -8006,7 +8007,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.2102';
+  const APP_VERSION='2026-10-06.2130';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

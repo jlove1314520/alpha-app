@@ -95,5 +95,22 @@ try:
 except Exception as e:
     check(f"VAPID：簽章（{type(e).__name__}）", False)
 
+
+# ---- 先.三十六：不替換發送器，直接檢查真發送器的依賴（先.三十一-一 只用假發送器測，漏裝 pywebpush 沒被抓到）----
+import subprocess
+from pathlib import Path as _P
+import auto_rebalance_bb90 as _AB
+ok_dep, why_dep = W.sender_dependencies_ok()
+check(f"真發送器：本直譯器可載入 _pywebpush_sender 依賴（{why_dep}）", ok_dep and W.SENDER is W._pywebpush_sender)
+if _P(_AB.SCHED_PYTHON).exists():
+    _r = subprocess.run([_AB.SCHED_PYTHON, "-c", "import pywebpush, cryptography, http_ece, py_vapid"], capture_output=True, text=True, timeout=120)
+    check("真發送器：排程用的 Store python 也可載入依賴", _r.returncode == 0)
+else:
+    print("SKIP 真發送器：本機沒有排程用的 Store python（非這台電腦）——[警告] 未驗證")
+def _missing(*a):
+    raise ModuleNotFoundError("No module named 'pywebpush'", name="pywebpush")
+r = W.send("t", "b", base=base, env_path=env, sender=_missing)
+check("錯誤分類：缺套件記 DEPENDENCY（不是 NETWORK）", bool(r["errors"]) and r["errors"][0].startswith("DEPENDENCY:") and "pywebpush" in r["errors"][0])
+
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)
