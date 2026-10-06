@@ -17669,6 +17669,6 @@ push 後停下等 Cowork 核對。
 
 心跳位置（三之三）：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.二十七）。
 
-- [ ] **先.二十七-一 紙.一b 接進 market.yml＋git add 清單＋模擬日期 dry-run（11-02 inception／11-30 月底／重跑不重複／不寫正式檔）**
-- [ ] **先.二十七-二 App 首頁紙上追蹤卡片改紙.一／紙.一b 並列＋冒煙測試附截圖**
-- [ ] **先.二十七-三 逾期未記帳→心跳 ERROR＋App 紅色橫幅（沿用先.十四）**
+- [x] **先.二十七-一 紙.一b 接進 market.yml＋git add 清單＋模擬日期 dry-run（11-02 inception／11-30 月底／重跑不重複／不寫正式檔）**
+- [x] **先.二十七-二 App 首頁紙上追蹤卡片改紙.一／紙.一b 並列＋冒煙測試附截圖**
+- [x] **先.二十七-三 逾期未記帳→心跳 ERROR＋App 紅色橫幅（沿用先.十四）**

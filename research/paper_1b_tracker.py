@@ -60,6 +60,13 @@ INITIAL_VIRTUAL_CAPITAL = 1_000_000.0
 START_ANCHOR = "2026-11-01"
 TZ = timezone(timedelta(hours=8))
 MAX_STALE_WEEKDAYS = 5
+_TODAY_OVERRIDE: str | None = None   # 僅 dry-run 沙盒使用（--today）
+
+
+def _today():
+    if _TODAY_OVERRIDE:
+        return datetime.strptime(_TODAY_OVERRIDE, "%Y-%m-%d").date()
+    return datetime.now(TZ).date()
 
 _CFG = BacktestConfig(start_date=START_ANCHOR, end_date=START_ANCHOR,
                       initial_capital=INITIAL_VIRTUAL_CAPITAL,
@@ -148,12 +155,26 @@ def _abort(status: str, reason: str) -> None:
     _heartbeat(f"中止（{status}）：{reason}", status="ERROR")
 
 
+def _is_last_weekday_of_month(d: str) -> bool:
+    x = datetime.strptime(d, "%Y-%m-%d").date()
+    nxt = x + timedelta(days=1)
+    while nxt.weekday() >= 5:
+        nxt += timedelta(days=1)
+    return nxt.month != x.month
+
+
 def _month_ends(dates: list[str], after: str | None) -> list[str]:
-    """回傳已確認的月末日（連續兩筆月份不同 → 前一筆是月末），只取 after 之後者。"""
+    """回傳已確認的月末日，只取 after 之後者。兩種確認方式：
+    (a) 連續兩筆月份不同 → 前一筆是月末（沿用紙.一）；
+    (b) **當日確認**（先.二十七）：最新一筆本身就是該月最後一個「平日」且有成交資料，
+        則它必然是該月最後交易日（之後不可能再有同月交易日），當天即可記帳，
+        不必等下個月第一筆。使用的是該日收盤價，無前視。"""
     out = []
     for a, b in zip(dates, dates[1:]):
         if a[:7] != b[:7] and (after is None or a > after):
             out.append(a)
+    if dates and (after is None or dates[-1] > after) and _is_last_weekday_of_month(dates[-1])             and dates[-1] not in out:
+        out.append(dates[-1])
     return out
 
 
@@ -205,7 +226,7 @@ def run() -> dict:
 
     # 新鮮度：最新共同交易日不得落後今天超過 MAX_STALE_WEEKDAYS 個平日
     last_d = datetime.strptime(common[-1], "%Y-%m-%d").date()
-    today = datetime.now(TZ).date()
+    today = _today()
     wd = sum(1 for i in range(1, (today - last_d).days + 1)
              if (last_d + timedelta(days=i)).weekday() < 5)
     if wd > MAX_STALE_WEEKDAYS:
@@ -265,7 +286,34 @@ def run() -> dict:
     return {"processed": len(pend), "started": True}
 
 
+def _enter_sandbox(sandbox: str, prices: str, today: str) -> None:
+    """dry-run：所有輸入輸出改指向沙盒目錄，絕不碰正式紀錄檔／摘要／心跳。"""
+    global PRICE_HISTORY_PATH, LOG_PATH, APP_SUMMARY_PATH, HEARTBEAT_PATH, _TODAY_OVERRIDE
+    sb = Path(sandbox).resolve()
+    official = [(REPO_ROOT / "research" / "data").resolve(), (REPO_ROOT / "data").resolve(),
+                HEARTBEAT_PATH.resolve().parent]
+    if any(sb == o for o in official):
+        raise SystemExit(f"沙盒目錄不得等於正式目錄：{sb}")
+    sb.mkdir(parents=True, exist_ok=True)
+    PRICE_HISTORY_PATH = Path(prices).resolve()
+    LOG_PATH = sb / "paper_1b_log.jsonl"
+    APP_SUMMARY_PATH = sb / "paper_1b.json"
+    HEARTBEAT_PATH = sb / "PROGRESS_HEARTBEAT.jsonl"
+    _TODAY_OVERRIDE = today
+
+
 if __name__ == "__main__":
+    import argparse
+    _ap = argparse.ArgumentParser()
+    _ap.add_argument("--dry-run", action="store_true", help="沙盒模式：需搭配 --sandbox/--prices/--today")
+    _ap.add_argument("--sandbox")
+    _ap.add_argument("--prices")
+    _ap.add_argument("--today")
+    _a = _ap.parse_args()
+    if _a.dry_run:
+        if not (_a.sandbox and _a.prices and _a.today):
+            raise SystemExit("--dry-run 必須同時給 --sandbox --prices --today，否則拒絕執行（避免誤寫正式檔）")
+        _enter_sandbox(_a.sandbox, _a.prices, _a.today)
     try:
         run()
     except Exception as _exc:  # noqa: BLE001

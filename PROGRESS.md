@@ -1,3 +1,15 @@
+## 2026-10-06（互動視窗，先.二十七 整批完成，維運／開發帽）
+
+等待總司令審閱：9件。
+
+**一、紙.一b 接進排程**：`market.yml` 紙.一步驟後新增「更新紙.一b」與「紙上追蹤看守」（皆 continue-on-error）。
+CLAUDE.md 十確認：新增輸出 `data/paper_1b.json`、`data/paper_tracking_watch.json`、`research/data/paper_1b_log.jsonl`(-f) 已進 git add 清單。
+`scripts/dryrun_paper_1b.py`：沙箱模擬 11-02（inception）、11-02 重跑（不重複）、11-30（month_end）、重跑、12-01、價格過期中止，**12/12 PASS**；官方三檔檔案雜湊前後不變。
+**二、App**：首頁紙上追蹤卡片改紙.一(70/30)／紙.一b(Bb-90) 並列，顯示 NAV、累計報酬、權重、下次再平衡；未啟動顯示「2026-11-02 啟動」；標示「紙上追蹤，非投資建議」。截圖 `docs/screens/paper_*.png`；390px 無水平捲動、無頁面錯誤。
+**三、逾期看守**：`research/paper_tracking_watchdog.py`（自測 12/12），10/30 紙.一首次月底或 11/02 紙.一b 啟動於當日 market.yml 後仍未記帳 → 心跳 ERROR＋App 紅色橫幅（沿用先.十四）；看守檔逾 96h 未更新 App 亦警示；看守自身失敗 fail open、exit 0（CLAUDE.md 十二）。
+冒煙測試 `smoke_test.mjs` 5/5 PASS。
+**[自行裁量]**：①紙.一 的 10/30 月底條目需 11/02 資料才寫得出，看守以資料確認為準（不能動紙.一）；②期限 2026-11-02 20:00 台北；③「預計」再平衡日=當月最後一個平日；④紙.一b 月底用當日確認。紙.一、紙.二、holdout 未動。
+
 ## 2026-10-06（互動視窗，先.二十六 整批完成，研究／維運帽）
 
 等待總司令審閱：8件。
