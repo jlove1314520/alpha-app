@@ -112,6 +112,9 @@ def _git_log(pattern: re.Pattern, max_scan: int = 2000) -> tuple[str, datetime] 
 # 已 checkout 的 repo 裡，讀不到是正常初始狀態，不是錯誤。
 CLAUDE_AUTH_PATH = REPO_ROOT / "research" / "data" / "claude_launcher_heartbeat.json"
 CLAUDE_AUTH_STALL_HOURS = 3.0
+# 先.二十八：marathon／hypothesis_queue 降為每 6 小時一輪，門檻改 7 小時（6h 間隔＋1h 容忍）；
+# devqueue 維持每 15 分鐘，門檻仍 3 小時。狀態字串沿用 STALLED_3H 以免動到 App 與既有消費端。
+CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER = {"devqueue": 3.0, "marathon": 7.0, "hypothesis_queue": 7.0}
 CLAUDE_AUTH_LAUNCHERS = ("devqueue", "marathon", "hypothesis_queue")
 
 
@@ -146,7 +149,7 @@ def _evaluate_claude_auth(now: datetime) -> dict:
                 if ts.tzinfo is None:
                     ts = ts.replace(tzinfo=timezone.utc)
                 hours_since_attempt = (now - ts.astimezone(timezone.utc)).total_seconds() / 3600.0
-                stalled_3h = hours_since_attempt > CLAUDE_AUTH_STALL_HOURS
+                stalled_3h = hours_since_attempt > CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER.get(name, CLAUDE_AUTH_STALL_HOURS)
             except Exception as e:  # noqa: BLE001
                 print(f"::warning::claude_auth時間戳解析失敗（{name}）：{type(e).__name__}: {e}")
         status = last_reason if last_reason in ("AUTH_EXPIRED", "QUOTA_EXCEEDED") else ("STALLED_3H" if stalled_3h else "OK")

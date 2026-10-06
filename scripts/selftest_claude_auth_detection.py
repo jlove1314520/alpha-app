@@ -103,15 +103,25 @@ def test_aggregator(tmpdir: Path):
     r = hb._evaluate_claude_auth(now)
     check("情境二：devqueue AUTH_EXPIRED -> overall_status=AUTH_EXPIRED", r["overall_status"] == "AUTH_EXPIRED", str(r))
 
-    # 情境三：marathon 連續 4 小時沒有嘗試執行（超過3小時門檻）-> STALLED_3H
-    stale = (now - timedelta(hours=4)).astimezone().isoformat(timespec="seconds")
+    # 情境三：marathon 連續 8 小時沒有嘗試執行（超過7小時門檻，先.二十八）-> STALLED_3H
+    stale = (now - timedelta(hours=8)).astimezone().isoformat(timespec="seconds")
     hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
         "devqueue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
         "marathon": {"last_reason": "ERROR", "last_attempt_at": stale},
         "hypothesis_queue": {"last_reason": "QUEUE_EMPTY", "last_attempt_at": stale},
     }, ensure_ascii=False), encoding="utf-8")
     r = hb._evaluate_claude_auth(now)
-    check("情境三：marathon 4小時無嘗試 -> overall_status=STALLED_3H", r["overall_status"] == "STALLED_3H", str(r))
+    check("情境三：marathon 8小時無嘗試 -> overall_status=STALLED_3H", r["overall_status"] == "STALLED_3H", str(r))
+
+    # 情境三之二（先.二十八）：marathon／hypothesis_queue 5 小時無嘗試（每 6 小時一輪的正常間隔）不得誤報
+    mid = (now - timedelta(hours=5)).astimezone().isoformat(timespec="seconds")
+    hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
+        "devqueue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
+        "marathon": {"last_reason": "OK", "last_attempt_at": mid, "last_ok_at": mid},
+        "hypothesis_queue": {"last_reason": "OK", "last_attempt_at": mid, "last_ok_at": mid},
+    }, ensure_ascii=False), encoding="utf-8")
+    r = hb._evaluate_claude_auth(now)
+    check("情境三之二：研究線 5小時無嘗試 -> 仍 OK（7小時門檻）", r["overall_status"] == "OK", str(r))
 
     # 情境四：心跳檔不存在 -> UNKNOWN，不拋例外
     missing_path = tmpdir / "__no_such_file__.json"

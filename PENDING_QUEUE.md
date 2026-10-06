@@ -17485,11 +17485,11 @@ push 後停下等 Cowork 核對。
 五、Shioaji 先.六-四／先.七-一 結案（10/5 13:30 有 48 檔 REALTIME_TICK）。quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報。
 紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
 
-- [!] **先.十七-一 美股草案八項裁示寫入 docs/PREREG_DRAFT_us_supply_tightness.md（含不得移除的存活者偏誤但書）**（前置：先.十五 盤點、先.十六 三項完成並驗證）　**⛔ 自走中止（2026-10-05 15:31）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
-- [!] **先.十七-二 執行前檢查（不看報酬）：宇宙過濾後逐換股日可計分檔數／落後池／季度 YoY 覆蓋率／I1 新舊概念銜接 20 家／FRED 3M T-bill 實測；任一換股日 <300 檔或指標兩兩 |r|>0.7 即停下回報**
-- [!] **先.十七-三 通過後定稿 docs/PREREG_us_supply_tightness_FINAL.md＋SHA256＋TRIALS_LEDGER 事前登記＋commit/push（push 完成才可執行）**
-- [!] **先.十七-四 依 §4(d) 順序單發（先加「〔互動視窗執行中〕」標記、中間檔 SHA256 記入 result.json inputs）→ research/data/us_supply_tightness_result.json＋判定列；印出後不得重跑；PASS→僅前進式紙上追蹤，FAIL→墳場不重試** ⛔ BLOCKED（2026-10-05 馬拉松軌）：前置先.十七-一已BLOCKED（美股母體非survivorship-free、SIC過濾僅9檔，需總司令裁示資料源），且凍結.二期間不得登記新alpha試驗；解除條件＝先.十七-一解除且凍結.二解除（轉向.一完成）。先.十七-二／三同此。
-- [!] **先.十七-五 Shioaji 先.六-四／先.七-一 結案（10/5 13:30 48 檔 REALTIME_TICK）＋quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報**
+- [x] **先.十七-一 美股草案八項裁示寫入 docs/PREREG_DRAFT_us_supply_tightness.md（含不得移除的存活者偏誤但書）**（前置：先.十五 盤點、先.十六 三項完成並驗證）　**⛔ 自走中止（2026-10-05 15:31）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事 [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十七-二 執行前檢查（不看報酬）：宇宙過濾後逐換股日可計分檔數／落後池／季度 YoY 覆蓋率／I1 新舊概念銜接 20 家／FRED 3M T-bill 實測；任一換股日 <300 檔或指標兩兩 |r|>0.7 即停下回報** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十七-三 通過後定稿 docs/PREREG_us_supply_tightness_FINAL.md＋SHA256＋TRIALS_LEDGER 事前登記＋commit/push（push 完成才可執行）** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十七-四 依 §4(d) 順序單發（先加「〔互動視窗執行中〕」標記、中間檔 SHA256 記入 result.json inputs）→ research/data/us_supply_tightness_result.json＋判定列；印出後不得重跑；PASS→僅前進式紙上追蹤，FAIL→墳場不重試** ⛔ BLOCKED（2026-10-05 馬拉松軌）：前置先.十七-一已BLOCKED（美股母體非survivorship-free、SIC過濾僅9檔，需總司令裁示資料源），且凍結.二期間不得登記新alpha試驗；解除條件＝先.十七-一解除且凍結.二解除（轉向.一完成）。先.十七-二／三同此。 [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十七-五 Shioaji 先.六-四／先.七-一 結案（10/5 13:30 48 檔 REALTIME_TICK）＋quotes.yml 派發延遲記入 dispatch_delay_log，連續 3 日後回報** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
   〔hypothesis_queue 軌 2026-10-05 15:3x 部分完成，只做心跳模式下的交辦〕**Shioaji 部分結案**：`data/quotes_sinopac.json` 於 commit 50ac52fbb（10/5 13:45:40）`connected=true`、`market_status=open`、48 檔全為 `data_type=REALTIME_TICK`，`research/.live_state_sinopac.json` mtime 10/5 13:45（10/1、10/2 皆未更新、本日恢復）→ 先.六-四／先.七-一 可依原定分支標結案（登入成功分支；該兩條原文仍在上方 [!]，由互動視窗／Cowork 核對後改 [x]，本軌不動其標記）。**quotes.yml 派發延遲**：`log_dispatch_delay.py --since 2026-10-05 --workflow quotes.yml` 新增 0 筆（唯一一筆 10/5 06:53Z schedule run 無法配對排定時間，market.yml 預設參數則回「沒有符合的 schedule run」）；dispatch_delay_log 目前僅有 10/2 兩筆（max 392.9 分）。**未達連續 3 日，不回報結論**——解除條件：10/7 後有 3 個日曆日（10/5、10/6、10/7）的 schedule run 可配對資料再回報；若 quotes.yml 仍無法配對，需先查 cron 排定時間對應邏輯（屬 scripts 修正，非本軌凍結範圍）。先.十七-一～四 屬互動視窗 15:17 才標 BLOCKED 的新 alpha 軸（母體非 survivorship-free），本軌讓行不碰。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十七"。順序在先.十六 三項全部完成並驗證之後。）
@@ -17506,11 +17506,11 @@ push 後停下等 Cowork 核對。
 紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
 
 - [x] **先.十八-一 名冊重建（full-index 2010Q1～2026Q3 全量；Form 25／25-NSE 解析證券類別，只有普通股下市才標 delisted；加「最後 10-K／10-Q 申報日」欄，>15 個月未申報標 stopped_filing）＋報告逐年檔數／20 檔抽樣可核／12 檔大型股不得再被標 delisted** 完成 2026-10-05：`research/us_universe_rebuild.py` 掃 form.idx 2010Q1～2026Q3 共 67 季，Form 25／25-NSE 共 28,762 列（去重後 15,238 件），解析成功 **15,204 件（99.8%）**，判定普通股 7,606 件。新名冊 v2：**總計 21,315 家**（舊版僅 10,863 且不含 2010–2024 下市者）、active 7,931、delisted 5,728、stopped_filing 7,656；**2010–2024 下市合計 4,996 家**（舊版為 0）。12 檔大型股驗證 **12/12 全部不再被標 delisted**；20 檔抽樣 20/20 皆附證券類別證據與 Form 25 連結。舊版已備份為 `us_universe_pit.v1.bak.json`（不刪除）。**過程中修掉四個會靜默產生錯誤結果的 bug**：①form.idx 欄位起點與表頭不一致（固定欄寬→全檔 0 筆）②Form 25 在 2010 年代是 HTML 非 XML ③證券類別擷取排除了右括號，但名稱常含括號（如 `ETF (GYLD)`）→ 只解析出 10.9% ④25-NSE 由交易所代申報，`<issuer><cik>` 才是被下市公司，原本全記到交易所頭上（NYSE 876661 重複數百次）。另新增判別：**交易所轉板不是下市**——PEP 2017／HON 2021／WMT 2025 由 NYSE 轉 Nasdaq 都申報普通股 Form 25 但仍在市，改以「其後 180 天內是否仍申報 10-K／10-Q」區分。
-- [ ] **先.十八-二 SIC 全量（fetch_us_sic.py 覆蓋全名冊）＋排除金融 6000–6799／SPAC 6770／20-F 後的普通股母體逐年表**〔互動視窗執行中 2026-10-05 15:20〕
-- [x] **先.十八-三 基準與利率：SPY 改走 yfinance Adj Close 建快取（不得再用 FinMind USStockPrice）；3M T-bill 用 fred_yield_curve_gate.fetch_fred_series('DTB3')**〔互動視窗執行中 2026-10-05 15:20〕 完成 2026-10-05：`research/us_benchmark_rf_build.py` 產出 `research/data/us_benchmark_spy.parquet`（yfinance SPY，auto_adjust=False 取 Adj Close，4,465 筆 2009-01-02～2026-10-02；自我檢查：還原總報酬 1037.9% vs 未還原 727.9%，含息效果 +310pp、方向正確）與 `research/data/us_rf_dtb3.parquet`（FRED DTB3 經 fred_yield_curve_gate.fetch_fred_series，4,440 筆，區間 −0.05%～5.36%，**負值為 2015 年國庫券貼現率的真實歷史現象，非資料錯誤**；另附 dtb3_daily＝pct/100/252）。**已不再使用 FinMind USStockPrice**。狀態檔 `research/data/us_benchmark_rf_status.json`。
-- [ ] **先.十八-四 下市股價格保守規則（無價格者於 delisted／stopped_filing 日 −100% 出場並計成本）寫入草案；但書改為「下市股無價格，一律視為全損」；刪除所有「7.1%」字樣；報告受影響持股位數**〔互動視窗執行中 2026-10-05 15:20〕
-- [ ] **先.十八-五 更新 FEASIBILITY 與 PREREG_DRAFT，push 後停下等 Cowork 核對（核對通過才回到先.十七）**〔互動視窗執行中 2026-10-05 15:20〕
-- [x] **先.十八-六 待審批次結案：AWAITING_REVIEW 先.十六 及更早各列（除先.九-五、結案.一、先.十七-二／三）標「Cowork 已於讀取核對（2026-10-05）」並移至已審區**〔互動視窗執行中 2026-10-05 15:20〕 完成 2026-10-05：`research/AWAITING_REVIEW.md` 等待中由 49 列降為 **3 列**，恰為裁示明列的三個例外——先.九-五 派發延遲（待 3 日樣本）、結案.一 實機驗證（需總司令本機跑一輪，CC 無法代驗）、先.十七-二／三（母體缺陷，見先.十七 條目）。其餘 48 列移入已結案區並註明「Cowork 已於讀取核對（2026-10-05）」與批次結案依據；已結案區由 9 列增為 57 列。前兩個例外原本不是獨立列（散在先.十二-二 等列的敘述裡），依裁示名稱另立專列，使其在 git diff 一眼可見。
+- [x] **先.十八-二 SIC 全量（fetch_us_sic.py 覆蓋全名冊）＋排除金融 6000–6799／SPAC 6770／20-F 後的普通股母體逐年表** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十八-三 基準與利率：SPY 改走 yfinance Adj Close 建快取（不得再用 FinMind USStockPrice）；3M T-bill 用 fred_yield_curve_gate.fetch_fred_series('DTB3')** 完成 2026-10-05：`research/us_benchmark_rf_build.py` 產出 `research/data/us_benchmark_spy.parquet`（yfinance SPY，auto_adjust=False 取 Adj Close，4,465 筆 2009-01-02～2026-10-02；自我檢查：還原總報酬 1037.9% vs 未還原 727.9%，含息效果 +310pp、方向正確）與 `research/data/us_rf_dtb3.parquet`（FRED DTB3 經 fred_yield_curve_gate.fetch_fred_series，4,440 筆，區間 −0.05%～5.36%，**負值為 2015 年國庫券貼現率的真實歷史現象，非資料錯誤**；另附 dtb3_daily＝pct/100/252）。**已不再使用 FinMind USStockPrice**。狀態檔 `research/data/us_benchmark_rf_status.json`。
+- [x] **先.十八-四 下市股價格保守規則（無價格者於 delisted／stopped_filing 日 −100% 出場並計成本）寫入草案；但書改為「下市股無價格，一律視為全損」；刪除所有「7.1%」字樣；報告受影響持股位數** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十八-五 更新 FEASIBILITY 與 PREREG_DRAFT，push 後停下等 Cowork 核對（核對通過才回到先.十七）** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十八-六 待審批次結案：AWAITING_REVIEW 先.十六 及更早各列（除先.九-五、結案.一、先.十七-二／三）標「Cowork 已於讀取核對（2026-10-05）」並移至已審區** 完成 2026-10-05：`research/AWAITING_REVIEW.md` 等待中由 49 列降為 **3 列**，恰為裁示明列的三個例外——先.九-五 派發延遲（待 3 日樣本）、結案.一 實機驗證（需總司令本機跑一輪，CC 無法代驗）、先.十七-二／三（母體缺陷，見先.十七 條目）。其餘 48 列移入已結案區並註明「Cowork 已於讀取核對（2026-10-05）」與批次結案依據；已結案區由 9 列增為 57 列。前兩個例外原本不是獨立列（散在先.十二-二 等列的敘述裡），依裁示名稱另立專列，使其在 git diff 一眼可見。
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十八"。先.十七-二／三 維持 BLOCKED 至本項經核對。）
 
@@ -17523,10 +17523,10 @@ push 後停下等 Cowork 核對。
 四、依第一項結果給結論：有價格比例 ≥70% → 美股線可進入先.十七；<30% → 判「資料不可及」，美股線停，回報待裁示；介於其間 → 列出兩種讀法交由總司令裁示。
 紙.一、紙.二、holdout 不得動。push 後停下等 Cowork 核對。
 
-- [!] **先.十九-一 下市股價格覆蓋實測（2012～2020 delisted 普通股固定種子隨機抽 60 檔；yfinance 逐檔測下市前任何日價，報有價格檔數／平均可用年數／最後價格日距下市日天數；同 60 檔測 Stooq 免 key 公開 CSV 端點，不領 key、不繞 CAPTCHA）**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。
-- [!] **先.十九-二 下市原因分類（Form 25 日期前後 90 天內有 8-K Item 2.01／DEFM14A／SC TO-T／15-12G／15-15D → merger_or_going_private；Chapter 11／7 的 8-K Item 1.03 → bankruptcy；其餘 unknown）＋逐年三類檔數**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。
-- [!] **先.十九-三 草案全損規則改寫（bankruptcy／unknown → 下市日 −100%；merger_or_going_private → 最後可得價格出場，無價格則 −100%）＋新增「選股階段存活者偏誤」段（無價格下市股無法進入落後池，偏誤對策略有利，全損規則無法消除，判讀從嚴）**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。
-- [!] **先.十九-四 依第一項結果給結論（有價格比例 ≥70% → 美股線可進先.十七；<30% → 判「資料不可及」、美股線停並回報待裁示；介於其間 → 列兩種讀法交由總司令裁示）**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。
+- [x] **先.十九-一 下市股價格覆蓋實測（2012～2020 delisted 普通股固定種子隨機抽 60 檔；yfinance 逐檔測下市前任何日價，報有價格檔數／平均可用年數／最後價格日距下市日天數；同 60 檔測 Stooq 免 key 公開 CSV 端點，不領 key、不繞 CAPTCHA）**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。 [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十九-二 下市原因分類（Form 25 日期前後 90 天內有 8-K Item 2.01／DEFM14A／SC TO-T／15-12G／15-15D → merger_or_going_private；Chapter 11／7 的 8-K Item 1.03 → bankruptcy；其餘 unknown）＋逐年三類檔數**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。 [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十九-三 草案全損規則改寫（bankruptcy／unknown → 下市日 −100%；merger_or_going_private → 最後可得價格出場，無價格則 −100%）＋新增「選股階段存活者偏誤」段（無價格下市股無法進入落後池，偏誤對策略有利，全損規則無法消除，判讀從嚴）**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。 [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.十九-四 依第一項結果給結論（有價格比例 ≥70% → 美股線可進先.十七；<30% → 判「資料不可及」、美股線停並回報待裁示；介於其間 → 列兩種讀法交由總司令裁示）**　**⛔ 自走中止（2026-10-05 17:04）**：前置未備：先.十九 裁示明定排在先.十八-一／二 完成之後，而先.十八-一 名冊重建（research/us_universe_rebuild.py --form25）在 2026-10-05 17:0x 仍由互動視窗執行中（PID 272804/273020），research/data/us_universe_pit.json 仍是 2026-09-08 舊版、us_universe_pit.v1.bak.json 尚未產生；探測腳本 research/us_delisted_price_probe.py 已就緒（3a83cd18d）。解除條件：先.十八-一／二 標 [x] 且新名冊落地後，下一輪自走自行改回 - [ ] 執行。 [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.十九"。排在先.十八-一／二 完成之後；不計任何報酬。）
 
@@ -17538,9 +17538,9 @@ push 後停下等 Cowork 核對。
 三、先.十九 完成即 push 結果（含兩種分母讀法），停下等 Cowork 核對。
 紙.一、紙.二、holdout 不得動。
 
-- [ ] **先.二十-一 跨行程共用限速器：先.十八-二 與先.十九-一／二 並行時，合計對 SEC ≤5 req/秒（同一個全域限速器，非各自 5）**〔互動視窗執行中 2026-10-05 18:05〕
-- [ ] **先.二十-二 長工作進度回報機制：>20 分鐘的抓取／計算每 30 分鐘往 research/PROGRESS_HEARTBEAT.jsonl 追加進度（已完成／總數、預估剩餘）並 commit＋push，只 commit 心跳檔**〔互動視窗執行中 2026-10-05 18:05〕
-- [ ] **先.二十-三 先.十九 完成即 push 結果（含兩種分母讀法），停下等 Cowork 核對**〔互動視窗執行中 2026-10-05 18:05〕
+- [x] **先.二十-一 跨行程共用限速器：先.十八-二 與先.十九-一／二 並行時，合計對 SEC ≤5 req/秒（同一個全域限速器，非各自 5）** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.二十-二 長工作進度回報機制：>20 分鐘的抓取／計算每 30 分鐘往 research/PROGRESS_HEARTBEAT.jsonl 追加進度（已完成／總數、預估剩餘）並 commit＋push，只 commit 心跳檔** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.二十-三 先.十九 完成即 push 結果（含兩種分母讀法），停下等 Cowork 核對** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.二十"。）
 
@@ -17553,10 +17553,10 @@ push 後停下等 Cowork 核對。
 四、更正 FEASIBILITY §0b「2010–2024 下市 4,996 家」為未過濾數字，補過濾後數字。
 紙.一、紙.二、holdout 不得動。長工作維持 30 分鐘心跳。push 後停下等 Cowork 核對。
 
-- [ ] **先.二十一-一 代號解析第 3、4 條路（10-K／10-Q 封面頁正則；Stooq 公開代號清單名稱模糊比對 ≥0.9 並附人工可核欄）各限 1 小時／120 次請求，報告各自與合併解析率**〔互動視窗執行中 2026-10-05 23:40〕
-- [ ] **先.二十一-二 第二輪重抽（SIC 完成後，過濾母體同種子抽 60 檔，四路合併解析代號後測 yfinance；分母含查不到代號者）**〔互動視窗執行中 2026-10-05 23:40〕
-- [ ] **先.二十一-三 判定（≥70% 進先.十七；<30% 判資料不可及、美股線停並記 TRIALS_LEDGER 為資料不可及非 FAIL；介於其間兩種讀法並列停下等裁示）**〔互動視窗執行中 2026-10-05 23:40〕
-- [ ] **先.二十一-四 更正 FEASIBILITY §0b「2010–2024 下市 4,996 家」為未過濾數字＋補過濾後數字**〔互動視窗執行中 2026-10-05 23:40〕
+- [x] **先.二十一-一 代號解析第 3、4 條路（10-K／10-Q 封面頁正則；Stooq 公開代號清單名稱模糊比對 ≥0.9 並附人工可核欄）各限 1 小時／120 次請求，報告各自與合併解析率** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.二十一-二 第二輪重抽（SIC 完成後，過濾母體同種子抽 60 檔，四路合併解析代號後測 yfinance；分母含查不到代號者）** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.二十一-三 判定（≥70% 進先.十七；<30% 判資料不可及、美股線停並記 TRIALS_LEDGER 為資料不可及非 FAIL；介於其間兩種讀法並列停下等裁示）** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
+- [x] **先.二十一-四 更正 FEASIBILITY §0b「2010–2024 下市 4,996 家」為未過濾數字＋補過濾後數字** [x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行
 
 （心跳：各項完成後標 `- [x]`＋`research/PROGRESS_HEARTBEAT.jsonl` 一行，track "interactive"、round "先.二十一"。長工作維持 30 分鐘心跳。）
 
@@ -17672,3 +17672,16 @@ push 後停下等 Cowork 核對。
 - [x] **先.二十七-一 紙.一b 接進 market.yml＋git add 清單＋模擬日期 dry-run（11-02 inception／11-30 月底／重跑不重複／不寫正式檔）**
 - [x] **先.二十七-二 App 首頁紙上追蹤卡片改紙.一／紙.一b 並列＋冒煙測試附截圖**
 - [x] **先.二十七-三 逾期未記帳→心跳 ERROR＋App 紅色橫幅（沿用先.十四）**
+
+# 2026-10-06【先.二十八：清殭屍待辦＋研究排程降頻（收斂期）】（總司令裁示原文，動工前先寫入）
+
+【先.二十八：清殭屍待辦＋研究排程降頻（收斂期）】總司令 2026-10-06 同意。先寫進 PENDING_QUEUE 再動工，整批模式，完成 push 停下。
+一、清理：先.十七、先.十八-二／四／五、先.十九、先.二十、先.二十一 底下所有未完成或 BLOCKED 條目，標「[x] 結案：美股線已於先.二十二 判資料不可及（#410），本條不再執行」，並移除全部「〔互動視窗執行中〕」標記；確認 PENDING_QUEUE 不再有任何殘留的執行中標記（逐條列出移除清單）。SIC 全量資料若已抓完，保留為資產並記錄位置；未完成則停止，不再續抓。
+二、降頻（提案即執行，總司令已核准）：AlphaMarathon 與 AlphaHypothesisQueue 由每 30 分鐘改為每 6 小時（00:05／06:05／12:05／18:05），保留登入觸發；AlphaDevQueue 維持每 15 分鐘。一次只改這一個變因，不得同時換模型。docs/LOCAL_SCHEDULED_TASKS.md 同步更新。
+三、降頻前後各量測 24 小時：兩條軌道實際呼叫 Claude 次數與 cost_usd 合計，寫入 PROGRESS.md；先.十四 的「連續 3 小時無實際執行即告警」門檻相應改為 7 小時，避免降頻後誤報。
+紙.一、紙.一b、紙.二、holdout 不得動。
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.二十八）。
+
+- [x] **先.二十八-一 清殭屍待辦（先.十七／十八-二四五／十九／二十／二十一 未完成與 BLOCKED 標結案、移除全部執行中標記並逐條列清單、SIC 資料去留）**
+- [x] **先.二十八-二 AlphaMarathon／AlphaHypothesisQueue 改每 6 小時（00:05／06:05／12:05／18:05）＋保留登入觸發，AlphaDevQueue 不動，更新 docs/LOCAL_SCHEDULED_TASKS.md**
+- [!] **先.二十八-三 降頻前後 24 小時量測（Claude 呼叫次數＋cost_usd）寫入 PROGRESS.md，先.十四 無實際執行告警門檻 3h→7h** 〔降頻前基準已記入 PROGRESS.md；降頻後 24 小時窗為 2026-10-06 12:17:29～2026-10-07 12:17:29，阻塞原因：需等實際 24 小時，解除時間 2026-10-07 12:20 後，跑 `python scripts/measure_cycle_cost.py --start 2026-10-06T12:17:29+08:00 --end 2026-10-07T12:17:29+08:00` 補寫 PROGRESS.md 後改 [x]。門檻 3h→7h 已完成（研究線 7h，devqueue 維持 3h）〕

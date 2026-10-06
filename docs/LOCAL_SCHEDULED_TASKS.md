@@ -75,8 +75,8 @@ powershell -ExecutionPolicy Bypass -File C:\alpha\convert-tasks-to-s4u.ps1 -Reve
 | `AlphaConnectivity` | 對外連通性監測 ＋ 常駐工作停擺自檢 | 每 5 分鐘 ＋ 登入時（延遲 1 分） | `research/external_connectivity.jsonl`、`data/audit_report.json` 的 `local_task_health` |
 | `AlphaTwsePublishProbe` | 實測 TWSE T86／MI_MARGN／STOCK_DAY_ALL 的實際發布時間 | **每日** 13:30 起每 15 分鐘、共 6.5 小時 ＋ 登入時（延遲 2 分） | `research/twse_probe.log`、`research/twse_publish_probe.jsonl` |
 | `AlphaDevQueue` | 開發任務佇列自走輪次 | 每 15 分鐘 ＋ 登入時 | `research/dev_queue_cycle.log` |
-| `AlphaMarathon` | 研究馬拉松自走輪次 | 每 30 分鐘 ＋ 登入時（延遲 5 分） | `research/marathon_cycle.log`、`research/MARATHON_STATE.md` |
-| `AlphaHypothesisQueue` | 假設佇列自走輪次 | 每 30 分鐘 ＋ 登入時（延遲 3 分） | `research/hypothesis_queue_cycle.log` |
+| `AlphaMarathon` | 研究馬拉松自走輪次 | 每 6 小時（00:05／06:05／12:05／18:05）＋ 登入時（延遲 5 分）〔先.二十八，2026-10-06 由每 30 分鐘降頻〕 | `research/marathon_cycle.log`、`research/MARATHON_STATE.md` |
+| `AlphaHypothesisQueue` | 假設佇列自走輪次 | 每 6 小時（00:05／06:05／12:05／18:05）＋ 登入時（延遲 3 分）〔先.二十八，2026-10-06 由每 30 分鐘降頻〕 | `research/hypothesis_queue_cycle.log` |
 | `AlphaPaperSupplyV2`（**2026-10-01新增，先.五-三**，Interactive／Limited，`[自行裁量]`） | 紙.二：供給緊縮v2前進式紙上追蹤（#407，事後假設非證據，不下任何單）；2026-10-15前不動作，之後每換股視窗逐檔補財報、產生訊號與月末淨值 | 每 1 小時（`scripts/run_paper_supply_v2.ps1`） | `research/data/paper_supply_v2_cycle.log`、`research/data/paper_supply_v2_log.jsonl`（append-only，git-ignored，強制加入） |
 | `AlphaFinMindWarmup`（**2026-10-02新增，先.十-二**；2026-10-05 先.十四-二 補登記） | 紙.二用的 FinMind 快取唯一預熱來源（財報 3 類＋價格家族 3 類，共 1,930 檔）。每輪上限約 14 分鐘、滾動 1 小時硬上限 450 次呼叫，與其他 FinMind 使用者共用 `data/rate_limit_state.json` 計數 | 每 15 分鐘（`scripts/run_finmind_warmup.ps1`，MultipleInstances=IgnoreNew） | `research/data/finmind_warmup_cycle.log`、`research/data/finmind_warmup_status.json`（看 `remaining_backlog_calls` 與 `eta_local`） |
 | `AlphaData` | `alpha-data` 每日六大類資料入庫 | 每日 15:30 | `C:\alpha\alpha-data\run.log`、`alpha.db` 各表的 `max(date)` |

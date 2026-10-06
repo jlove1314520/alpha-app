@@ -79,7 +79,7 @@ with tempfile.TemporaryDirectory() as td:
     importlib.reload(CH)
     CH.CLAUDE_AUTH_PATH = hb
     now = datetime.now(timezone.utc)
-    old = (now - timedelta(hours=3.5)).astimezone().isoformat(timespec="seconds")
+    old = (now - timedelta(hours=8)).astimezone().isoformat(timespec="seconds")
     recent = (now - timedelta(minutes=10)).astimezone().isoformat(timespec="seconds")
 
     def write(d):
@@ -90,7 +90,7 @@ with tempfile.TemporaryDirectory() as td:
     check("三支皆近期有執行→OK", CH._evaluate_claude_auth(now)["overall_status"] == "OK")
     write({n: {"last_reason": "OK", "last_attempt_at": old, "last_ok_at": old} for n in CH.CLAUDE_AUTH_LAUNCHERS})
     r = CH._evaluate_claude_auth(now)
-    check("三支皆逾3小時無實際執行→STALLED_3H", r["overall_status"] == "STALLED_3H")
+    check("三支皆逾門檻（devqueue 3h／其餘 7h）無實際執行→STALLED_3H", r["overall_status"] == "STALLED_3H")
     check("STALLED_3H detail 含小時數", "h)" in r["detail"])
     d2 = {n: {"last_reason": "OK", "last_attempt_at": recent, "last_ok_at": recent} for n in CH.CLAUDE_AUTH_LAUNCHERS}
     d2["marathon"] = {"last_reason": "AUTH_EXPIRED", "last_attempt_at": recent, "last_detail": "oauth"}

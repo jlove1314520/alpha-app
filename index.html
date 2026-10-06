@@ -7732,7 +7732,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         banner.innerHTML='⚠️ 本機 Claude 額度已用盡：'+(ca.detail||'');
       }else if(st==='STALLED_3H'){
         banner.style.display='block';
-        banner.innerHTML='⚠️ 本機自走系統連續 3 小時以上沒有實際執行：'+(ca.detail||'');
+        banner.innerHTML='⚠️ 本機自走系統超過門檻時間（開發線 3 小時／研究線 7 小時）沒有實際執行：'+(ca.detail||'');
       }else{
         banner.style.display='none';
         banner.innerHTML='';
@@ -7755,7 +7755,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.1028';
+  const APP_VERSION='2026-10-06.1219';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
