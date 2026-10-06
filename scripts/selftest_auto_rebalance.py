@@ -315,5 +315,25 @@ check("看門狗：自身失敗 fail open(不告警不拋錯)",
 p = setup(); A.sched_heartbeat(p, "run", "OK")
 check("排程心跳：寫入 schedule_heartbeat.jsonl", (p.base / "schedule_heartbeat.jsonl").exists())
 
+# ---- 先.三十一-六：App／expected_shift_calendar 的 2026 休市表與官方日曆快取一致 ----
+import re as _re
+_root = Path(__file__).resolve().parent.parent
+_off = A.load_calendar(2026)
+if _off is None:
+    check("休市表比對：取得官方日曆（網路或本機快取）", False)
+else:
+    _offw = {d for d in _off["closed"] if datetime.fromisoformat(d).weekday() < 5}
+    _html = (_root / "index.html").read_text(encoding="utf-8")
+    _m = _re.search(r"const TW_HOLIDAYS_2026=new Set\(\[(.*?)\]\)", _html, _re.S)
+    _app = set(_re.findall(r"\d{4}-\d{2}-\d{2}", _m.group(1))) if _m else set()
+    _appw = {d for d in _app if datetime.fromisoformat(d).weekday() < 5}
+    _py = (_root / "scripts" / "expected_shift_calendar.py").read_text(encoding="utf-8")
+    _m2 = _re.search(r"TW_HOLIDAYS_2026 = \{(.*?)\}", _py, _re.S)
+    _pyset = set(_re.findall(r"\d{4}-\d{2}-\d{2}", _m2.group(1))) if _m2 else set()
+    _pyw = {d for d in _pyset if datetime.fromisoformat(d).weekday() < 5}
+    check(f"休市表比對：index.html 平日休市日 == 官方（差異 {sorted(_offw ^ _appw)}）", _appw == _offw and bool(_app))
+    check(f"休市表比對：expected_shift_calendar.py 平日休市日 == 官方（差異 {sorted(_offw ^ _pyw)}）", _pyw == _offw and bool(_pyset))
+    check("休市表比對：兩份清單含 2026-09-28（教師節）", "2026-09-28" in _app and "2026-09-28" in _pyset)
+
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)
