@@ -15,12 +15,20 @@ def check(name, cond):
     if not cond: fails.append(name)
 
 class Fake:
-    def __init__(self, pos=None, fill=True, fail_place=False, cash=10**9, cash_err=False, partial=None):
+    def __init__(self, pos=None, fill=True, fail_place=False, cash=10**9, cash_err=False, partial=None,
+                 refs=None, payable=0.0, payable_err=False):
+        self.refs = refs; self.payable = payable; self.payable_err = payable_err
         self.pos = dict(pos or {}); self.fill = fill; self.fail_place = fail_place; self.placed = []; self.orders = {}
         self.cash_val = cash; self.cash_err = cash_err; self.partial = partial; self.late = {}  # oid -> 遲到成交量
     def cash(self):
         if self.cash_err: raise RuntimeError("balance timeout")
         return self.cash_val
+    def reference_prices(self, codes, today=None):
+        if self.refs is not None: return self.refs
+        return {c: (PC[c][0], today.isoformat()) for c in codes}
+    def unsettled_payable(self):
+        if self.payable_err: raise RuntimeError('settlements timeout')
+        return self.payable
     def late_fill(self, frac=1.0):
         for oid, o in self.orders.items():
             q = int(o["qty"] * frac) // (1000 if o["lot"] == "Common" else 1) * (1000 if o["lot"] == "Common" else 1)
@@ -334,6 +342,47 @@ else:
     check(f"休市表比對：index.html 平日休市日 == 官方（差異 {sorted(_offw ^ _appw)}）", _appw == _offw and bool(_app))
     check(f"休市表比對：expected_shift_calendar.py 平日休市日 == 官方（差異 {sorted(_offw ^ _pyw)}）", _pyw == _offw and bool(_pyset))
     check("休市表比對：兩份清單含 2026-09-28（教師節）", "2026-09-28" in _app and "2026-09-28" in _pyset)
+
+# ---- 先.三十一-三／四：限價基準改平盤參考價＋交叉核對；未交割款扣除 ----
+TODAY = NOW.date()
+TD = TODAY.isoformat()
+_ok, _pr = A.resolve_base_prices({c: (PC[c][0], TD) for c in PC}, PC, TODAY, {})
+check("參考價：與昨收一致→通過且基準＝參考價", not _pr and _ok["0050"] == (100.0, TD))
+_ok, _pr = A.resolve_base_prices({"0050": (97.5, TD), "00646": (50.0, TD), "00697B": (36.0, TD)}, PC, TODAY, {})
+check("參考價：非除息日價差2.5%→問題清單含 REFERENCE_GAP", any(x.startswith("REFERENCE_GAP:0050") for x in _pr))
+_ev = {"0050": [{"ex_date": TD, "cash": 2.0}]}
+_ok, _pr = A.resolve_base_prices({"0050": (97.5, TD), "00646": (50.0, TD), "00697B": (36.0, TD)}, PC, TODAY, _ev)
+check("參考價：除息日（股利2.0）價差2.5%→放行並採參考價", not _pr and _ok["0050"][0] == 97.5)
+_ev2 = {"0050": [{"ex_date": TD, "cash": 0.5}]}
+_ok, _pr = A.resolve_base_prices({"0050": (95.0, TD), "00646": (50.0, TD), "00697B": (36.0, TD)}, PC, TODAY, _ev2)
+check("參考價：除息日但價差5%遠超股利可解釋範圍→仍拒", any(x.startswith("REFERENCE_GAP:0050") for x in _pr))
+_ok, _pr = A.resolve_base_prices({"0050": (100.0, TD), "00646": (50.0, TD)}, PC, TODAY, {})
+check("參考價：缺 00697B→REFERENCE_MISSING", any(x.startswith("REFERENCE_MISSING:00697B") for x in _pr))
+_ok, _pr = A.resolve_base_prices({"0050": (100.0, "2026-10-29"), "00646": (50.0, TD), "00697B": (36.0, TD)}, PC, TODAY, {})
+check("參考價：更新日不是今天→REFERENCE_STALE", any(x.startswith("REFERENCE_STALE:0050") for x in _pr))
+
+p = setup(); b = Fake(refs={"0050": (100.5, TD), "00646": (50.0, TD), "00697B": (36.0, TD)})
+r = run(p, b)
+_o = [x for x in b.placed if x["symbol"] == "0050"]
+check("端到端：限價基準採參考價100.5（不是昨收100）", bool(_o) and _o[0]["limit_price"] == A.round_down_tick(100.5 * 1.005))
+p = setup(); b = Fake(refs={"0050": (97.0, TD), "00646": (50.0, TD), "00697B": (36.0, TD)})
+_saved = A.load_ex_div_events; A.load_ex_div_events = lambda *a, **k: {}
+r = run(p, b); A.load_ex_div_events = _saved
+check("端到端：價差異常且非除息日→整批拒單、不送單、ERROR",
+      r["state"] == "ERROR" and not b.placed and any("REFERENCE_GAP" in str(x) for x in r["rejected"]))
+p = setup(); b = Fake(refs={})
+r = run(p, b)
+check("端到端：查不到參考價→整批拒單", r["state"] == "ERROR" and not b.placed)
+p = setup(); b = Fake(payable=99_500_000)
+r = run(p, b)
+check("交割款：可用餘額扣掉未交割應付款後不足→INSUFFICIENT_CASH 不送單",
+      not b.placed and any("INSUFFICIENT_CASH" in str(x) for x in r["rejected"]))
+p = setup(); b = Fake(payable=1_000)
+r = run(p, b)
+check("交割款：未交割款很小→照常送單", bool(b.placed))
+p = setup(); b = Fake(payable_err=True)
+r = run(p, b)
+check("交割款：未交割款查詢失敗→一律拒單（fail closed）", not b.placed and r["state"] == "ERROR")
 
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)

@@ -105,8 +105,15 @@
 - 自動交易 App 區塊：本機 `/auto/status`（GET）與 `/auto/stop`（POST）只讀寫狀態與 STOP.flag，不具下單能力。
 
 ### 先.三十 自測與 10/7 盤中模擬（待填）
-- 自測：`scripts/selftest_auto_rebalance.py` 76 項全 PASS（拆單、晚成交結算、EXPIRED／R2 重排、PARTIAL、INSUFFICIENT_CASH 各情境、期數 T1→T2→M、偏離告警、日曆、觸發條件、看門狗）。**誠實揭露：測試是實作之後才寫的**，對象為假券商，`ShioajiBroker` 的狀態回補路徑未對真券商驗證。
+- 自測：`scripts/selftest_auto_rebalance.py` 91 項全 PASS（先.三十一-三／四／六 後；原 76 項）（拆單、晚成交結算、EXPIRED／R2 重排、PARTIAL、INSUFFICIENT_CASH 各情境、期數 T1→T2→M、偏離告警、日曆、觸發條件、看門狗）。**誠實揭露：測試是實作之後才寫的**，對象為假券商，`ShioajiBroker` 的狀態回補路徑未對真券商驗證。
 - 2026-10-07 09:00–13:30 盤中模擬端到端紀錄：（待 10/7 執行後填入；須取得實際成交，否則如實寫「未取得成交」）。
+
+### 先.三十一-三／四：限價基準與交割款（2026-10-06）
+- **限價基準**：改用 Shioaji 合約 `reference`（平盤參考價）與 `update_date`，來源 <https://sinotrade.github.io/zh/tutor/contract/>。**文件只說 reference 是參考價，沒有寫是否含除息調整**，所以不單信它：每次送單前與 `price_history.json` 昨收交叉核對，差距 >1% 時，只有 `data/ex_dividend_events.json` 登記當日除息、且價差不超過「現金股利／昨收＋1%」才放行，其餘整批拒單並報錯。`update_date` 不是今天、昨收過期、缺值同樣整批拒單。
+- 實測（2026-10-06 模擬環境）：三檔 reference 等於前一日收盤、update_date 為當日，與昨收核對通過。**已知缺口**：`ex_dividend_events.json` 目前沒有 0050／00646／00697B 的事件（ETF 未收錄），所以除息豁免實際上不會觸發；遇到 ETF 除息日會整批拒單（安全方向，需人工處理），要補事件才會放行。
+- **交割款**：可用餘額扣掉 `api.settlements()` 回傳各列 `amount` 的絕對值總和後，才與整批所需金額比較；查詢逾時或失敗一律拒單。來源 <https://sinotrade.github.io/zh/tutor/accounting/settlements/>。**文件只列欄位（date／amount／T），未說明 amount 正負號與 T 涵蓋範圍**，因此採保守的絕對值加總（寧可多扣）。模擬環境 settlements 回空清單，**含未交割款的真實資料行為尚未實測**。
+- 模擬環境 `account_balance()` 可用（回傳成功）；模擬模式的現金仍取設定檔 `sim_cash_twd`，不依賴它。
+- **正式環境唯讀檢查：未能完成**。以目前 .env 的金鑰登入正式環境，券商回覆 400「Token doesn't have production permission」，即金鑰尚無正式環境權限（依永豐流程需完成 API 測試簽署後開通，細節以券商說明為準）。因此 `account_balance`／`settlements` 在正式帳戶的欄位與行為**未驗證**；開通後須重做一次唯讀檢查（只確認欄位存在，不寫金額）。
 
 ## 七、否決窗手機推播提案（未核准，未註冊任何外部服務）
 - 現況：repo 無推播機制。

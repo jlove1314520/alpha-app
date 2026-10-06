@@ -152,6 +152,52 @@ def load_prev_closes(path: Path = PRICE_HISTORY) -> dict:
     return out
 
 
+def load_ex_div_events(path: Path | None = None) -> dict:
+    """{code: [{ex_date, cash}]}；讀不到回 {}（此時任何超過門檻的價差都不會被當成除息日豁免）。"""
+    doc = _read_json(path or (REPO / "data" / "ex_dividend_events.json")) or {}
+    return doc.get("events") or {}
+
+
+def resolve_base_prices(refs: dict, prev_close: dict, today: date, events: dict | None = None,
+                        gap_pct: float = 1.0, max_age_days: int = 4) -> tuple[dict, list]:
+    """先.三十一-三：限價基準＝Shioaji 合約平盤參考價（reference），並與 price_history 昨收交叉核對。
+    refs={code:(reference, update_date_iso)}；回傳 ({code:(ref, today_iso)}, 問題清單)，問題非空＝整批拒單。
+    規則：缺 reference／update_date 不是今天 → 拒；與昨收差距 >gap_pct% → 除息日（events 內 ex_date==今天）
+    才放行，且放行上限是「現金股利／昨收＋gap_pct%」，其餘一律拒。"""
+    base, problems = {}, []
+    events = events or {}
+    for c in WEIGHTS:
+        r = refs.get(c)
+        if not r or not r[0] or r[0] <= 0:
+            problems.append(f"REFERENCE_MISSING:{c} 無平盤參考價")
+            continue
+        px, ud = float(r[0]), str(r[1] or "")[:10].replace("/", "-")
+        if ud != today.isoformat():
+            problems.append(f"REFERENCE_STALE:{c} 參考價更新日{ud or '未知'}不是今天{today.isoformat()}")
+            continue
+        pc = prev_close.get(c)
+        if not pc:
+            problems.append(f"PRICE_MISSING:{c} 缺昨收，無法交叉核對")
+            continue
+        age = (today - date.fromisoformat(pc[1])).days
+        if age > max_age_days:
+            problems.append(f"STALE:{c} 昨收資料已過期{age}天")
+            continue
+        gap = abs(px / pc[0] - 1) * 100
+        if gap > gap_pct + 1e-9:
+            ev = [e for e in events.get(c, []) if e.get("ex_date") == today.isoformat()]
+            cash = sum(float(e.get("cash") or 0) for e in ev)
+            allow = gap_pct + (cash / pc[0] * 100 if ev else 0.0)
+            if not ev:
+                problems.append(f"REFERENCE_GAP:{c} 參考價{px}與昨收{pc[0]}差{gap:.2f}%>{gap_pct}%且非除息日")
+                continue
+            if gap > allow + 1e-9:
+                problems.append(f"REFERENCE_GAP:{c} 除息日但價差{gap:.2f}%超過股利{cash}可解釋的{allow:.2f}%")
+                continue
+        base[c] = (px, today.isoformat())
+    return base, problems
+
+
 # ---------- 規劃 ----------
 def split_qty(qty: int, odd_ok: bool) -> list[tuple[str, int]]:
     """>=1000 且非整張：整股一張單＋盤中零股一張單；<1000 只能零股；不支援零股時只留整張部分。"""
@@ -318,6 +364,34 @@ class ShioajiBroker:
         if bal is None or getattr(box["v"], "errmsg", ""):
             raise AutoTradingError("account_balance 回傳無餘額欄位或帶有錯誤訊息")
         return float(bal)
+
+    def reference_prices(self, codes, today=None) -> dict:
+        """{code:(reference, update_date)}。官方合約欄位 reference（參考價）、update_date（合約更新日），
+        https://sinotrade.github.io/zh/tutor/contract/ ；文件未說明 reference 是否含除息調整，故另以昨收交叉核對。"""
+        out = {}
+        for c in codes:
+            k = self.api.Contracts.Stocks[c]
+            out[c] = (getattr(k, "reference", None), getattr(k, "update_date", None))
+        return out
+
+    def unsettled_payable(self, timeout: float = 20.0) -> float:
+        """T+0／T+1／T+2 未交割款合計（api.settlements 各列 amount 取絕對值加總）。
+        官方文件 https://sinotrade.github.io/zh/tutor/accounting/settlements/ 只列欄位 date／amount／T，
+        未說明 amount 正負號與 T 的涵蓋範圍，所以保守加總所有列的絕對值（寧可多扣）；查詢逾時或失敗一律拋錯。"""
+        box = {}
+
+        def _call():
+            try:
+                box["v"] = self.api.settlements(self.api.stock_account)
+            except Exception as e:
+                box["e"] = e
+
+        t = threading.Thread(target=_call, daemon=True)
+        t.start()
+        t.join(timeout)
+        if t.is_alive() or "v" not in box or box["v"] is None:
+            raise AutoTradingError(f"settlements 查詢逾時或失敗（{type(box.get('e')).__name__ if box.get('e') else 'timeout'}）")
+        return float(sum(abs(float(getattr(r, "amount", 0) or 0)) for r in box["v"]))
 
 
 # ---------- 官方交易日曆 ----------
@@ -489,8 +563,11 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
             cash = float(cfg["sim_cash_twd"])
         else:
             cash = float(broker.cash())
+        payable = float(broker.unsettled_payable())
+        cash -= payable
         if cash < need:
-            reason = f"INSUFFICIENT_CASH:可用餘額{cash:.0f}不足整批所需{need:.0f}（含{(CASH_BUFFER - 1) * 100:.1f}%手續費緩衝）"
+            reason = (f"INSUFFICIENT_CASH:可用餘額{cash:.0f}（已扣未交割款{payable:.0f}）不足整批所需{need:.0f}"
+                      f"（含{(CASH_BUFFER - 1) * 100:.1f}%手續費緩衝）")
     except Exception as e:
         reason = f"INSUFFICIENT_CASH:餘額查詢失敗（{type(e).__name__}），整批不送單"
     if reason:
@@ -590,11 +667,30 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
     if same_pend and pend.get("cancelled"):
         res["state"] = "CANCELLED"
         return res
+    def base_prices():
+        """取平盤參考價並與昨收交叉核對；有任何問題＝整批拒單報錯，回傳 None。"""
+        try:
+            refs = broker.reference_prices(list(WEIGHTS), today)
+            base, problems = resolve_base_prices(refs, prev_close, today, load_ex_div_events(),
+                                                 cfg.get("max_price_dev_pct", 1.0), cfg.get("max_data_age_days", 4))
+        except Exception as e:
+            base, problems = {}, [f"REFERENCE_MISSING:參考價查詢失敗（{type(e).__name__}）"]
+        if problems:
+            log("REJECT", {"key": f"{batch_id}-ALL", "symbol": "ALL"}, reasons=problems)
+            res["rejected"].append({"symbol": "ALL", "reasons": problems})
+            report_error(paths, "限價基準檢查未通過，整批拒單：" + "；".join(problems))
+            res["state"] = "ERROR"
+            return None
+        return base
+
     if same_pend:
         if now < datetime.fromisoformat(pend["execute_after"]):
             res["state"] = "WAITING_VETO"
             return res
         orders = pend["orders"]
+        gate_px = base_prices()
+        if gate_px is None:
+            return res
     else:
         missing = [c for c in WHITELIST if c not in prev_close]
         if missing or budget <= 0:
@@ -611,8 +707,11 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
                 report_error(paths, f"價格缺失，整批拒單：{missing}")
                 res["state"] = "ERROR"
             return res
+        gate_px = base_prices()
+        if gate_px is None:
+            return res
         odd_ok = mode != "SIMULATION"
-        orders = plan_orders({c: prev_close[c][0] for c in WEIGHTS}, positions, budget, odd_ok,
+        orders = plan_orders({c: gate_px[c][0] for c in WEIGHTS}, positions, budget, odd_ok,
                              dev_pct=min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2))
         for o in orders:
             o["key"] = f"{batch_id}-{o['symbol']}-{o['part']}"
@@ -621,7 +720,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
             _write_json(paths.state, state)
             return res
 
-    ctx = {"cfg": cfg, "prev_close": prev_close, "today": today, "stopped": stopped, "reconciled": reconciled}
+    ctx = {"cfg": cfg, "prev_close": gate_px, "today": today, "stopped": stopped, "reconciled": reconciled}
     ok_orders = []
     for o in orders:
         if latest.get(o["key"], {}).get("event") in ("SUBMITTED", "OPEN", "PARTIAL", "FILLED", "EXPIRED"):
