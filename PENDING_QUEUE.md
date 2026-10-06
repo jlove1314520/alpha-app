@@ -18128,3 +18128,26 @@ push 後停下等 Cowork 核對。
 紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十九）。上方原版五個 `- [ ]` 一併依本修訂版處理。
+
+# 2026-10-07【先.四十：先.三十九 程式立即 commit（單次例外）＋23:00 稽核誤報查因】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十】先.三十九 程式立即 commit（單次例外）＋23:00 稽核誤報查因
+
+一、單次例外放行（總司令裁示）：冒煙第 39 項（資料一致性稽核）FAIL 與先.三十九 改動無關——違規清單不含 0050／00646／00697B，且 23:00 稽核每晚 FAIL、06:04 重跑 PASS（10/5 23:00 4.0%、10/6 06:04 0.05%、10/6 23:00 3.7%）。
+  - 准許先.三十九-二／四／五 的程式在其餘冒煙全綠、自測全綠的前提下立即 commit。
+  - commit 訊息與 PROGRESS 寫明「冒煙第 39 項單次例外，依先.四十」。本例外只適用這一次，不得延伸。
+二、commit 後依七之二重啟 alpha_live_server，驗 /health build 等於新 commit、stale_process=false、/auto/cancel_pending 可用；sw.js 版本與 APP_VERSION 一起更新。
+三、確認明早 09:05 演練 A 會用到的檔案在工作目錄中無任何未 commit 的改動（列出 git status 結果）。
+四、新項目：查 23:00 稽核為何每晚超標、06:04 又通過。
+  - 比對兩次的 reference_date、各檢查項違規數（尤其 e_quarters_stale 565、a_price_source 138、g_comma_parsing 9）。
+  - 找出是官方參考資料時間差、抓取時點，還是真資料問題，修正後回報。修正前不得調整 1% 門檻。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十）。
+
+- [ ] **先.四十-一 先.三十九 程式 commit（冒煙第39項單次例外）**
+- [ ] **先.四十-二 七之二重啟驗證＋/auto/cancel_pending 可用**
+- [ ] **先.四十-三 09:05 演練 A 相關檔案 git status 乾淨**
+- [ ] **先.四十-四 23:00 稽核每晚超標查因＋修正（不調 1% 門檻）**
