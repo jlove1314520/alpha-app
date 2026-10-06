@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-10-06T09:58:48.341417+08:00",
+    "generated_at": "2026-10-06T23:57:27.646828+08:00",
     "last_fetch_count": 22,
-    "reductions_generated_at": "2026-10-06T09:58:49.304479+08:00"
+    "reductions_generated_at": "2026-10-06T23:57:28.749297+08:00"
   },
   "events": {
     "01010T": [
@@ -469,7 +469,8 @@
         "rights_price": 0.0,
         "type": "權息",
         "first_seen": "2026-08-26",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9065348070583673
       }
     ],
     "2701": [
@@ -2171,7 +2172,8 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-09-16",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9735676291333533
       }
     ],
     "00930": [
@@ -2401,6 +2403,17 @@
         "ref_price": 10.88,
         "reason": "退還股款",
         "first_seen": "2026-09-30",
+        "applied": false
+      }
+    ],
+    "4155": [
+      {
+        "code": "4155",
+        "resume_date": "2026-10-19",
+        "pre_close": 14.2,
+        "ref_price": 14.68,
+        "reason": "退還股款",
+        "first_seen": "2026-10-06",
         "applied": false
       }
     ]
