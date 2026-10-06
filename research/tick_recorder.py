@@ -60,6 +60,7 @@ import os
 import shutil
 import sys
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -280,7 +281,30 @@ def compact(day: str, delete_jsonl: bool = True) -> dict:
         tmp.unlink(missing_ok=True)
         return {"day": day, "rows": 0, "codes": len(files),
                 "skipped": "核對失敗（寫入 %d 讀回 %d），jsonl 保留" % (rows, back.num_rows)}
-    tmp.replace(out)
+    del back
+    # 2026-10-06：10/5、10/6 收盤壓縮都留下完整的 .tmp 卻沒 rename（離線重跑同一份
+    # jsonl 一次成功、產出位元組數與殘留 .tmp 相同），判斷是 Windows 上剛寫完的檔案被
+    # 短暫鎖住（防毒／索引）造成 replace 暫時性失敗。daemon 的 stdout 沒有落地，例外
+    # 訊息看不到，所以這裡短重試，最終仍失敗就寫進 `_compact_errors.jsonl` 再拋出
+    # （jsonl 原封保留，隔日啟動 compact_stale_days() 照舊會補壓）。
+    last_err = None
+    for attempt in range(5):
+        try:
+            tmp.replace(out)
+            last_err = None
+            break
+        except OSError as e:
+            last_err = e
+            time.sleep(1.0 + attempt)
+    if last_err is not None:
+        try:
+            with open(TICKS_ROOT / "_compact_errors.jsonl", "a", encoding="utf-8") as f:
+                f.write(json.dumps({"at": datetime.now(TW_TZ).isoformat(), "day": day,
+                                    "step": "replace", "error": f"{type(last_err).__name__}: {last_err}"},
+                                   ensure_ascii=False) + "\n")
+        except Exception as log_e:
+            print(f"  [tick落地] 寫 _compact_errors.jsonl 失敗：{type(log_e).__name__}: {log_e}", flush=True)
+        raise last_err
 
     deleted = False
     if delete_jsonl:
