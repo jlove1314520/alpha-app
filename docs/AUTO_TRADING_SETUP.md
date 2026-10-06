@@ -75,6 +75,19 @@
 - 狀態檔 `status.json` 新增 `next_tranche`、`deviation`、`drift_alert`；偏離目標 >5 個百分點只顯示，不自動賣出。
 - 設定新增：`sim_cash_twd`（模擬資金，須夠買整張）、`monthly_contribution_twd`（第 4 批後常態月投入）。
 
+### 先.三十八：掛單＋撤單串接（2026-10-06）
+- **緊急停止會撤單**：停止旗標生效時，下一次 `--run`／`--settle` 先撤掉「本系統帳本內」尚未終結的委託（只照帳本的委託編號撤，不碰帳戶裡其他委託），帳本記 `CANCELLED`；撤單失敗→ERROR＋紅色橫幅＋推播，請立即到券商 App 人工確認。
+- **模擬環境驗證**：`python research/auto_rebalance_bb90.py --sim-cancel-test`（0050 限價買 1 張，限價＝前收×0.95；掛單→查詢→撤單→確認 Cancelled）。結果只寫 `research/data/auto_trading_drill/cancel_test.jsonl`，不動正式帳本。2026-10-06 22:40 實測：PreSubmitted→Cancelled、成交 0，PASS（模擬環境當晚仍可下單）。
+- **真錢掛單＋撤單測試（只能由總司令本人執行，CC／Cowork 不得執行）**：
+  1. 先確認自檢顯示「正式環境權限：已生效」（`--preflight`）。沒生效時本指令會直接拒絕。
+  2. 在電腦開 PowerShell，貼上（此為完整指令，勿修改）：
+     `cd C:\alpha\alpha-app; C:\Users\user\AppData\Local\Microsoft\WindowsApps\python.exe -X utf8 research\auto_rebalance_bb90.py --live-cancel-test`
+  3. 畫面會顯示即將送出的內容（0050 盤中零股買 1 股、限價＝前收×0.95，預期不會成交），要求完整輸入確認字串「我確認以真錢帳戶掛0050零股1股並立即撤單」；不符就取消、不送單。
+  4. 送出後約 1 秒撤單，再查詢確認 Cancelled；結果寫入 LIVE 帳本（SUBMITTED→CANCELLED）、App 狀態並推播。
+  5. 盤中零股只在盤中時段撮合，建議台股交易時間執行。
+  - 防呆：不受設定檔模式影響；非互動終端機（排程、自動化）或排程環境變數 `ALPHA_SCHEDULED_TASK` 存在時一律拒絕。**以上步驟依程式寫法整理，真錢環境尚未實際執行過，以你看到的畫面為準。**
+- Shioaji 預設委託回呼會把含帳號的委託內容印到畫面／排程 log，已在 ShioajiBroker 關閉（狀態一律主動查詢）。
+
 ### 先.三十三：上線前自檢與真錢帳戶卡（2026-10-06）
 - `python research/auto_rebalance_bb90.py --preflight`：逐項 PASS／FAIL＋缺什麼，結果寫本機 `status.json` 的 `preflight`，App 自動交易卡「上線前自檢」顯示。只查詢、**絕不送單**：正式環境只 `login`、不 `activate_ca`（沒有 CA 就不可能送出委託），結束即 `logout`；說明文字不含金額、持股數、帳號或金鑰值。
 - 2026-10-06 19:39 首跑：PASS 5／FAIL 7。正式環境登入被拒（永豐回應 `Token doesn't have production permission`：目前金鑰只有模擬權限，需完成簽署與模擬測試報告後由永豐開通）；推播 0 支；`data/ex_dividend_events.json` 不含三檔白名單的除息事件。

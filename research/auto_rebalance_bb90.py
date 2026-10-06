@@ -316,6 +316,9 @@ class ShioajiBroker:
                 env[k.strip()] = v.strip().strip('"').strip("'")
         self.api = sj.Shioaji(simulation=simulation)
         self.api.login(api_key=env["SINOPAC_API_KEY"], secret_key=env["SINOPAC_SECRET_KEY"])
+        # 先.三十八：Shioaji 預設委託回呼會把整筆委託（含帳號）印到 stdout，排程會寫進 scheduler.log；
+        # 改成不印（狀態一律用 update_status／list_trades 主動查，不依賴回呼）
+        self.api.set_order_callback(lambda *a, **k: None)
         if not simulation:
             ca = env.get("SINOPAC_CA_PATH")
             if not (ca and env.get("SINOPAC_CA_PASSWD")):
@@ -360,6 +363,14 @@ class ShioajiBroker:
                 self._trades[order_id] = (t, {"lot": lot})
                 return self._trades[order_id]
         raise AutoTradingError(f"券商當日委託清單找不到 {order_id}")
+
+    def cancel(self, order_id: str) -> dict:
+        """先.三十八：撤單（只撤指定委託）。官方 api.cancel_order(trade) 後 update_status 回查狀態。
+        https://sinotrade.github.io/zh/tutor/order/Stock/ 。失敗一律拋錯（由呼叫端記 ERROR）。"""
+        trade, o = self._find(order_id)
+        self.api.cancel_order(trade)
+        self.api.update_status(self.api.stock_account)
+        return self.status(order_id)
 
     def status(self, order_id: str) -> dict:
         trade, o = self._find(order_id)
@@ -563,7 +574,7 @@ def _finalize(paths: Paths, broker, now: datetime, prev_close: dict) -> str:
     if any(r.get("event") in NONFINAL for r in latest.values()):
         return "PENDING"
     applied = set(state.get("applied", []))
-    fresh = {k: r for k, r in latest.items() if r.get("event") in ("FILLED", "EXPIRED") and k not in applied}
+    fresh = {k: r for k, r in latest.items() if r.get("event") in ("FILLED", "EXPIRED", "CANCELLED") and k not in applied}
     try:
         after = broker.positions()
     except Exception as e:
@@ -616,6 +627,29 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
     return True
 
 
+def cancel_open(paths: Paths, broker, now: datetime, mode: str) -> dict:
+    """先.三十八：撤掉「本系統帳本內」尚未終結（SUBMITTED／OPEN／PARTIAL）的委託——只照帳本的 order_id 撤，
+    絕不列舉或撤帳戶裡其他委託。每筆記 CANCELLED（含撤單前已成交量）；任一撤單失敗→ERROR＋紅橫幅＋推播。
+    paths 須為已 scoped 的族路徑。"""
+    out = {"cancelled": [], "failed": []}
+    for key, r in _ledger_latest(paths).items():
+        if r.get("event") not in NONFINAL or not r.get("order_id"):
+            continue
+        o = {"key": key, "symbol": r.get("symbol"), "qty": r.get("qty"), "limit_price": r.get("limit_price")}
+        try:
+            st = broker.cancel(r["order_id"])
+            fq = min(int((st or {}).get("filled_qty") or 0), int(r.get("qty") or 0))
+            _log(paths, now, mode, "CANCELLED", o, order_id=r["order_id"], filled_qty=fq,
+                 avg_price=(st or {}).get("avg_price"), broker_status=(st or {}).get("status"), reason="STOP_FLAG")
+            out["cancelled"].append(key)
+        except Exception as e:
+            _log(paths, now, mode, "ERROR", o, order_id=r["order_id"], error=f"撤單失敗：{type(e).__name__}")
+            out["failed"].append(key)
+    if out["failed"]:
+        report_error(paths, f"緊急停止撤單失敗 {len(out['failed'])} 筆，請立即人工到券商確認並撤單")
+    return out
+
+
 # ---------- 主流程 ----------
 def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None = None,
                   mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5,
@@ -635,6 +669,11 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         _log(paths, now, mode, event, o, **kw)
 
     stopped = is_stopped(shared)
+    if stopped:
+        co = cancel_open(paths, broker, now, mode)
+        res["cancelled_open"] = co
+        if co["failed"]:
+            res["state"] = "ERROR"
     try:
         positions = broker.positions()
     except Exception as e:
@@ -872,6 +911,11 @@ def settle(paths: Paths, broker, now: datetime, mode_override: str | None = None
         res["state"] = "TOO_EARLY"
         return res
     prev_close = prev_close if prev_close is not None else load_prev_closes()
+    if is_stopped(shared):
+        co = cancel_open(paths, broker, now, mode)
+        res["cancelled_open"] = co
+        if co["failed"]:
+            res["state"] = "ERROR"
     for key, r in _ledger_latest(paths).items():
         if r.get("event") not in NONFINAL:
             continue
@@ -1113,6 +1157,97 @@ def night_drill(phase: str, now: datetime | None = None) -> dict:
              f"{'，批次已完成' if st.get('last_done') else ''}。")
         return {"phase": phase, **res, "last_done": st.get("last_done")}
     raise AutoTradingError(f"未知演練步驟 {phase}")
+
+
+# ---------- 先.三十八：掛單＋砍單串接驗證 ----------
+CANCEL_TEST_LOG = REPO / "research" / "data" / "auto_trading_drill" / "cancel_test.jsonl"
+LIVE_TEST_CONFIRM = "我確認以真錢帳戶掛0050零股1股並立即撤單"
+
+
+def _probe_price() -> float:
+    pc = load_prev_closes()
+    if "0050" not in pc:
+        raise AutoTradingError("price_history 沒有 0050 前收")
+    return round_down_tick(pc["0050"][0] * 0.95)
+
+
+def _cancel_roundtrip(broker, o: dict, wait_sec: float = 2.0) -> dict:
+    """掛單→查詢→撤單→再查詢。回傳各步結果（不含帳號、金鑰）。"""
+    steps = {}
+    r = broker.place(o)
+    oid = r["order_id"]
+    steps["placed"] = True
+    time.sleep(wait_sec)
+    steps["after_place"] = broker.status(oid)
+    steps["after_cancel"] = broker.cancel(oid)
+    time.sleep(wait_sec)
+    steps["final"] = broker.status(oid)
+    steps["cancelled"] = "cancel" in str(steps["final"].get("status", "")).lower()
+    steps["filled_qty"] = int(steps["final"].get("filled_qty") or 0)
+    return {"order_id": oid, **steps}
+
+
+def sim_cancel_test(now: datetime | None = None, broker=None) -> dict:
+    """先.三十八-二：模擬環境 0050 限價買 1 張（前收×0.95，依檔位取整）→查詢→撤單→確認 Cancelled。
+    只寫 research/data/auto_trading_drill/cancel_test.jsonl，不動正式 state／ledger／pending。"""
+    now = now or datetime.now(TW)
+    rec = {"ts": now.isoformat(timespec="seconds"), "env": "SIMULATION", "symbol": "0050", "qty_lots": 1}
+    env = _read_env_file()
+    try:
+        rec["limit_price"] = _probe_price()
+        b = broker or ShioajiBroker(simulation=True)
+        o = {"symbol": "0050", "action": "Buy", "qty": LOT, "limit_price": rec["limit_price"], "lot": "Common",
+             "part": "C", "cond": "Cash", "key": "SIMTEST"}
+        rec.update(_cancel_roundtrip(b, o))
+        rec["result"] = "PASS" if rec["cancelled"] and rec["filled_qty"] == 0 else "FAIL"
+    except Exception as e:
+        rec["result"] = "ERROR"
+        rec["error"] = f"{type(e).__name__}：{_mask_secrets(str(e), env)[:300]}"
+    _append(CANCEL_TEST_LOG, rec)
+    return rec
+
+
+def live_cancel_test(now: datetime | None = None) -> dict:
+    """先.三十八-三：真錢掛單＋撤單測試。**只能由總司令本人在終端機手動執行**；CC／Cowork 不得執行、不得排程。
+    0050 盤中零股買 1 股，限價＝前收×0.95（不會成交），掛單後 5 秒內撤單、查詢確認 Cancelled；
+    結果寫 LIVE 帳本（事件 SUBMITTED→CANCELLED）、status 並推播。不受 config 模式影響。"""
+    now = now or datetime.now(TW)
+    if not sys.stdin or not sys.stdin.isatty():
+        raise AutoTradingError("--live-cancel-test 只能在互動終端機由本人手動執行（偵測到非互動執行，拒絕）")
+    if os.environ.get("ALPHA_SCHEDULED_TASK"):
+        raise AutoTradingError("--live-cancel-test 不得由排程呼叫")
+    perm = (_read_json(Paths().status) or {}).get("live_permission") or {}
+    if not perm.get("effective"):
+        raise AutoTradingError("正式環境權限尚未生效（先跑 --preflight 確認「正式環境權限：已生效」）")
+    px = _probe_price()
+    print(f"即將以【真錢帳戶】送出：0050 盤中零股 買 1 股，限價 {px}（前收×0.95，預期不會成交），掛單後 5 秒內撤單。")
+    typed = input(f"請完整輸入確認字串「{LIVE_TEST_CONFIRM}」：").strip()
+    if typed != LIVE_TEST_CONFIRM:
+        raise AutoTradingError("確認字串不符，已取消，未送出任何委託")
+    paths = Paths().scoped("LIVE")
+    o = {"symbol": "0050", "action": "Buy", "qty": 1, "limit_price": px, "lot": "IntradayOdd", "part": "O",
+         "cond": "Cash", "key": f"LIVETEST-{now.strftime('%Y%m%d%H%M%S')}-0050-O", "amount": px}
+    b = ShioajiBroker(simulation=False)
+    rec = {"ts": now.isoformat(timespec="seconds"), "env": "LIVE", "symbol": "0050", "qty_shares": 1, "limit_price": px}
+    try:
+        r = b.place(o)
+        _log(paths, now, "LIVE", "SUBMITTED", o, order_id=r["order_id"], reason="LIVE_CANCEL_TEST")
+        time.sleep(1.0)
+        st = b.cancel(r["order_id"])
+        time.sleep(2.0)
+        st = b.status(r["order_id"])
+        fq = int(st.get("filled_qty") or 0)
+        _log(paths, datetime.now(TW), "LIVE", "CANCELLED", o, order_id=r["order_id"], filled_qty=fq,
+             avg_price=st.get("avg_price"), broker_status=st.get("status"), reason="LIVE_CANCEL_TEST")
+        ok = "cancel" in str(st.get("status", "")).lower() and fq == 0
+        rec.update(order_id=r["order_id"], final_status=st.get("status"), filled_qty=fq, result="PASS" if ok else "FAIL")
+    except Exception as e:
+        rec.update(result="ERROR", error=f"{type(e).__name__}：{_mask_secrets(str(e), _read_env_file())[:300]}")
+        report_error(paths, f"真錢掛單＋撤單測試失敗：{type(e).__name__}，請到券商 App 確認是否有殘留委託")
+    _append(CANCEL_TEST_LOG, rec)
+    write_status(Paths(), live_cancel_test={k: rec.get(k) for k in ("ts", "result", "final_status", "filled_qty")})
+    push_notify(Paths(), "真錢掛單＋撤單測試", f"結果：{rec['result']}（0050 零股 1 股，限價 {px}）", "info")
+    return rec
 
 # ---------- 先.三十三-二：真錢帳戶卡（只在本機回給 App，不寫進 repo／公開心跳） ----------
 def live_account_summary(paths: Paths | None = None, price_doc: dict | None = None) -> dict:
@@ -1403,6 +1538,9 @@ def main() -> int:
     ap.add_argument("--drill-label", help="先.三十二 演練 B：以獨立批次名走否決窗（僅 SIMULATION＋sim_veto，心跳記 drill 不發布）")
     ap.add_argument("--stop", action="store_true")
     ap.add_argument("--night-drill", choices=NIGHT_PHASES, help="先.三十七 今晚無券商演練（假券商、獨立目錄、僅 SIMULATION）")
+    ap.add_argument("--sim-cancel-test", action="store_true", help="先.三十八 模擬環境掛單＋撤單驗證（不動正式帳本）")
+    ap.add_argument("--live-cancel-test", action="store_true",
+                    help="先.三十八 真錢掛單＋撤單測試：僅限總司令本人手動執行（CC／Cowork 不得執行、不得排程）")
     ap.add_argument("--preflight", action="store_true", help="先.三十三 上線前自檢：只查詢、絕不送單，結果寫本機 status")
     a = ap.parse_args()
     paths = Paths()
@@ -1412,6 +1550,18 @@ def main() -> int:
         paths.stop_flag.write_text(now.isoformat(), encoding="utf-8")
         print("已寫入停止旗標")
         return 0
+    if a.sim_cancel_test:
+        out = sim_cancel_test()
+        print(json.dumps(out, ensure_ascii=False, default=str))
+        return 0 if out.get("result") == "PASS" else 1
+    if a.live_cancel_test:
+        try:
+            out = live_cancel_test()
+        except AutoTradingError as e:
+            print(f"[拒絕] {e}")
+            return 2
+        print(json.dumps(out, ensure_ascii=False, default=str))
+        return 0 if out.get("result") == "PASS" else 1
     if a.night_drill:
         out = night_drill(a.night_drill)
         print(json.dumps(out, ensure_ascii=False))

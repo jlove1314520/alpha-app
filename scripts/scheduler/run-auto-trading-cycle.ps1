@@ -18,6 +18,7 @@ switch ($Task) {
 }
 Set-Location $repoDir
 $env:PYTHONUTF8 = "1"
+$env:ALPHA_SCHEDULED_TASK = "1"  # senior directive 38: --live-cancel-test refuses to run under the scheduler
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $stamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
 $out = & $pythonExe -X utf8 @a 2>&1 | Out-String

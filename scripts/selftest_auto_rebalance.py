@@ -674,6 +674,67 @@ try:
 finally:
     A.DEFAULT_DIR, A.DRILL_DIR, A.load_prev_closes = _od, _dd, _lp
 
+# ---- 先.三十八-一：緊急停止撤單（只撤本系統帳本內未終結委託） ----
+class FakeC(Fake):
+    def __init__(self, *a, cancel_err=False, **k):
+        super().__init__(*a, **k); self.cancelled = []; self.cancel_err = cancel_err
+        self.orders["OTHER-1"] = {"symbol": "2330", "qty": 1000, "limit_price": 900.0, "lot": "Common"}  # 帳戶裡別人的單
+    def cancel(self, oid):
+        if self.cancel_err: raise RuntimeError("cancel rejected")
+        self.cancelled.append(oid); return {"status": "Cancelled", "filled_qty": 0, "avg_price": None}
+p = setup(); b = FakeC(fill=False)
+r = run(p, b)
+open_keys = [x["key"] for x in ledger(p) if x["event"] == "OPEN"]
+check("撤單前置：模擬送單後掛著（OPEN）", r["state"] == "OK" and len(open_keys) >= 1)
+p.stop_flag.write_text("x")
+r = A.settle(p, b, NOW, force=True, prev_close=PC)
+lg = A._ledger_latest(S(p))
+check("撤單成功：停止旗標生效時 settle 先撤單，帳本記 CANCELLED", all(lg[k]["event"] == "CANCELLED" for k in open_keys) and len(r["cancelled_open"]["cancelled"]) == len(open_keys))
+check("撤單：只撤本系統帳本內的委託（不動帳戶其他委託）", "OTHER-1" not in b.cancelled and len(b.cancelled) == len(open_keys))
+check("撤單：撤單後對帳通過（CANCELLED 視為終結）", r["state"] == "OK")
+p.stop_flag.unlink()
+p = setup(); b = FakeC(fill=False)
+run(p, b)
+b.cancel_err = True
+p.stop_flag.write_text("x")
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+r = run(p, b, now=NOW + timedelta(minutes=5))
+st = json.loads(p.status.read_text(encoding="utf-8"))
+check("撤單失敗：ERROR＋紅橫幅＋推播", r["state"] == "ERROR" and r["cancelled_open"]["failed"] and st.get("banner") == "red"
+      and any(c["kind"] == "error" for c in PUSH_CALLS))
+check("撤單失敗：帳本記 ERROR、不送新單", any(x["event"] == "ERROR" and "撤單失敗" in (x.get("error") or "") for x in ledger(p)) and not r["submitted"])
+p.stop_flag.unlink()
+p = setup(); b = FakeC(fill=True); run(p, b)
+p.stop_flag.write_text("x")
+r = A.settle(p, b, NOW, force=True, prev_close=PC)
+check("撤單：沒有未終結委託時不呼叫撤單", b.cancelled == [] and r["cancelled_open"] == {"cancelled": [], "failed": []})
+p.stop_flag.unlink()
+
+# ---- 先.三十八-二／三：模擬掛單撤單、真錢測試指令防呆（不連券商） ----
+class _CB:
+    def __init__(self): self.st = {}
+    def place(self, o): self.st["X1"] = "PreSubmitted"; return {"order_id": "X1"}
+    def status(self, oid): return {"status": self.st[oid], "filled_qty": 0, "avg_price": None}
+    def cancel(self, oid): self.st[oid] = "Cancelled"; return self.status(oid)
+_ctl, _ts = A.CANCEL_TEST_LOG, A.time.sleep
+A.CANCEL_TEST_LOG = Path(tempfile.mkdtemp()) / "cancel_test.jsonl"; A.time.sleep = lambda *a: None
+try:
+    rec = A.sim_cancel_test(NOW, broker=_CB())
+    check("模擬掛單撤單：PreSubmitted→Cancelled、成交 0 判 PASS，且只寫演練目錄的紀錄檔", rec["result"] == "PASS" and A.CANCEL_TEST_LOG.exists())
+    check("模擬掛單撤單：限價＝前收×0.95 依檔位取整", rec["limit_price"] == A.round_down_tick(A.load_prev_closes()["0050"][0] * 0.95))
+finally:
+    A.CANCEL_TEST_LOG, A.time.sleep = _ctl, _ts
+import io as _io
+_stdin = sys.stdin
+sys.stdin = _io.StringIO(A.LIVE_TEST_CONFIRM + "\n")
+try:
+    A.live_cancel_test(NOW); _ok = False
+except A.AutoTradingError as e:
+    _ok = "互動終端機" in str(e)
+finally:
+    sys.stdin = _stdin
+check("真錢撤單測試：非互動終端機（排程／自動化）一律拒絕，且在連券商之前就擋下", _ok)
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")
