@@ -75,6 +75,17 @@
 - 狀態檔 `status.json` 新增 `next_tranche`、`deviation`、`drift_alert`；偏離目標 >5 個百分點只顯示，不自動賣出。
 - 設定新增：`sim_cash_twd`（模擬資金，須夠買整張）、`monthly_contribution_twd`（第 4 批後常態月投入）。
 
+### 先.三十二：模擬否決窗演練設定（2026-10-06 新增，僅 SIMULATION 有效）
+
+| 設定鍵 | 預設 | 作用 | LIVE 類影響 |
+|---|---|---|---|
+| `sim_veto` | `false`（未設定即 false；必須恰為 JSON `true` 才生效，字串 `"true"` 不算） | 模擬批次也走 30 分鐘否決窗＋否決窗開始推播；推播送不到同樣整批不執行（fail closed） | 無：`LIVE_WITH_VETO` 一律走否決窗、`LIVE` 一律不走，與本鍵無關（`sim_veto_on()`，自測有對應案例） |
+| `sim_drill_date` | 無 | 指定日期（`YYYY-MM-DD`）讓排程的 `--run` 在非月底也觸發一次（觸發原因 `sim_drill`） | 無：`should_run()` 只在 mode=SIMULATION 時看這個鍵 |
+
+- 演練 B（取消）用 `python research/auto_rebalance_bb90.py --run --drill-label DRILLB`：以獨立批次名（`SIMULATION-<年月>-DRILLB-R1`）建立待執行訂單，**不動** state 的批次／`last_done`／期數；取消走 App「全部取消」同一條本機 API（`POST /auto/stop {"stop":true}` 寫 `STOP.flag`）。否決窗到期後再跑同一指令，走正式的停止旗標路徑（逐筆 `REJECT STOP_FLAG`、pending 標 `cancelled`）。萬一到期仍未取消，程式判演練失敗（`DRILL_NOT_CANCELLED`）且**絕不送單**。
+- `--drill-label` 只接受 `DRILL` 開頭大寫英數、必須 `sim_veto: true` 且設定檔 mode 為 SIMULATION，否則拒絕。演練心跳記 `task=drill`，不寫進公開心跳 `data/auto_heartbeat.json`、也不滿足看門狗，避免與排程實證混淆。
+- 演練結束後：清除停止旗標（App 再按一次或 `POST /auto/stop {"stop":false}`），並把 `sim_drill_date` 移除或留著（過了那天就不再觸發）。
+
 ## 四、分批進場（4 批各 25%）
 
 1. 第 1 批：須同時滿足 ①PIT 快照回放流程檢查 PASS ②模擬環境端到端通過 ③總司令完成上列第 1～7 步並切換模式。
@@ -107,6 +118,7 @@
 ### 先.三十 自測與 10/7 盤中模擬（待填）
 - 自測：`scripts/selftest_auto_rebalance.py` 91 項全 PASS（先.三十一-三／四／六 後；原 76 項）（拆單、晚成交結算、EXPIRED／R2 重排、PARTIAL、INSUFFICIENT_CASH 各情境、期數 T1→T2→M、偏離告警、日曆、觸發條件、看門狗）。**誠實揭露：測試是實作之後才寫的**，對象為假券商，`ShioajiBroker` 的狀態回補路徑未對真券商驗證。
 - 2026-10-07 09:00–13:30 盤中模擬端到端紀錄：（待 10/7 執行後填入；須取得實際成交，否則如實寫「未取得成交」）。
+- 先.三十二 前置（2026-10-06 晚）：自測 131 項全 PASS（新增 sim_veto／演練日／演練 B 共 19 項）；休市表比對在無網路且無快取時改印 SKIP＋警告（交易流程本身仍是抓不到日曆一律不動作，未放寬）。排程器內 WindowsApps `python.exe` 實測可用：臨時一次性排程（同樣 Interactive 登入類型）以該路徑 import shioaji 1.7.4 成功，故**不改路徑**；臨時排程已刪除，未手動觸發任何交易排程。
 
 ### 先.三十一-三／四：限價基準與交割款（2026-10-06）
 - **限價基準**：改用 Shioaji 合約 `reference`（平盤參考價）與 `update_date`，來源 <https://sinotrade.github.io/zh/tutor/contract/>。**文件只說 reference 是參考價，沒有寫是否含除息調整**，所以不單信它：每次送單前與 `price_history.json` 昨收交叉核對，差距 >1% 時，只有 `data/ex_dividend_events.json` 登記當日除息、且價差不超過「現金股利／昨收＋1%」才放行，其餘整批拒單並報錯。`update_date` 不是今天、昨收過期、缺值同樣整批拒單。

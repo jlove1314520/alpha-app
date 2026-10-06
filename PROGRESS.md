@@ -1,3 +1,26 @@
+## 2026-10-06 19:0x～19:3x（互動視窗，先.三十二 前置，開發帽）
+
+等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**一、先.三十二 原文已先寫進 PENDING_QUEUE（動工前）**，拆成 3 項今晚前置（已完成）＋4 項 10/7 時間閘（`[!]`）。
+
+**二、先.三十二-零 排程器 python 路徑預檢 → 不需改**
+- 5 個自動交易排程從未觸發過（LastTaskResult 267011），下次 10/7 09:05／09:40／09:55／13:40／14:00。
+- launcher 用 `WindowsApps\python.exe`（Store 版 3.13 執行別名，裝有 shioaji）。用臨時一次性排程（同 Interactive 登入）實測：該路徑在排程器內 import shioaji 1.7.4 成功、exit=0。`C:\Program Files\Python313` 沒裝套件，改過去反而會壞，所以**不改**。臨時排程已刪，**沒有手動觸發任何交易排程**。
+
+**三、先.三十二-二-0 sim_veto → 完成，自測 131 項全 PASS**
+- `research/auto_rebalance_bb90.py`：新增 `sim_veto_on()`；否決窗條件由 `mode == "LIVE_WITH_VETO"` 改為它（LIVE_WITH_VETO 恆走、LIVE 恆不走、SIMULATION 須設定恰為 `true`）。
+- `[自行裁量]` 新增 `sim_drill_date`（僅 SIMULATION）：10/7 不是月底，不加這個排程根本不會觸發，演練 A 無法「由排程觸發」。
+- `[自行裁量]` 演練 B 用 `--drill-label DRILLB`：獨立批次、不動 state、心跳記 `drill` 不進公開心跳（不污染排程實證）；到期仍未取消→判失敗且絕不送單。
+- 本機設定已加 `sim_veto: true`、`sim_drill_date: 2026-10-07`，mode 仍 SIMULATION（設定檔在 gitignore 內）。乾跑：10/7 09:05／09:40＝`sim_drill`、10/8＝不觸發。
+- ⚠️ 推播訂閱目前 0 支：總司令若 09:05 前沒在 iPhone 開啟推播，演練 A 會依規則 PUSH_FAILED 整批不執行（有效測試，照實記錄）。
+
+**四、先.三十二-三 休市表比對 SKIP → 完成**：只改自測；模擬無日曆實測印 SKIP＋警告、exit=0；引擎抓不到日曆仍一律不動作，未改。
+
+**五、10/7 待做（`[!]` 時間閘）**：09:05／09:40／13:40 排程心跳實證、演練 A、演練 B（A 成交後或 13:40 結算後執行）、12:20 後先.二十八-三 量測。
+
+**冒煙測試**：本輪未動 `index.html`／常駐服務，未跑冒煙；以 `scripts/selftest_auto_rebalance.py` 131 PASS 為驗證。
+
 ## 2026-10-06 18:31～18:5x（DevQueue cycle 20261006-183101，開發帽）
 
 等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。

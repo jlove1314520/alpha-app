@@ -338,8 +338,11 @@ check("排程心跳：寫入 schedule_heartbeat.jsonl", (p.base / "schedule_hear
 import re as _re
 _root = Path(__file__).resolve().parent.parent
 _off = A.load_calendar(2026)
+SKIPS = []
 if _off is None:
-    check("休市表比對：取得官方日曆（網路或本機快取）", False)
+    # 先.三十二-三：無網路且無本機快取時只 SKIP＋警告（交易流程本身仍是抓不到日曆一律不動作，不在此放寬）
+    SKIPS.append("休市表比對：取得官方日曆（網路或本機快取）")
+    print("SKIP 休市表比對：取得官方日曆（網路與本機快取皆無）——[警告] 本項未驗證，有網路或快取時須重跑", flush=True)
 else:
     _offw = {d for d in _off["closed"] if datetime.fromisoformat(d).weekday() < 5}
     _html = (_root / "index.html").read_text(encoding="utf-8")
@@ -454,5 +457,73 @@ except Exception:
 A.push_send = _orig
 check("推播：推播函式自己拋例外時 report_error 不中斷", ok_boom)
 
+
+# ---- 先.三十二：sim_veto（僅 SIMULATION 有效、預設 false、LIVE 類不受影響）＋演練日觸發＋演練 B ----
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "failed": 0, "errors": []})
+check("sim_veto：輔助判斷（LIVE_WITH_VETO 恆真／LIVE 恆假／SIMULATION 須恰為 true）",
+      A.sim_veto_on({}, "LIVE_WITH_VETO") and A.sim_veto_on({"sim_veto": False}, "LIVE_WITH_VETO")
+      and not A.sim_veto_on({"sim_veto": True}, "LIVE") and not A.sim_veto_on({}, "SIMULATION")
+      and not A.sim_veto_on({"sim_veto": "true"}, "SIMULATION") and A.sim_veto_on({"sim_veto": True}, "SIMULATION"))
+p = setup(); b = Fake(); r = run(p, b)
+check("sim_veto：預設（未設定）模擬照舊立即送單、無否決窗", r["state"] == "OK" and b.placed and "execute_after" not in (A._read_json(S(p).pending) or {}))
+p = setup({"sim_veto": True}); b = Fake(); r = run(p, b)
+vs = [c for c in PUSH_CALLS if c["kind"] == "veto_start"]
+check("sim_veto：true→模擬也進否決窗＋推播、不送單", r["state"] == "WAITING_VETO" and not b.placed and S(p).pending.exists() and len(vs) == 1)
+r = run(p, b, now=NOW + timedelta(minutes=10))
+check("sim_veto：否決窗內再跑仍等待", r["state"] == "WAITING_VETO" and not b.placed)
+r = run(p, b, now=NOW + timedelta(minutes=31))
+check("sim_veto：逾時未取消→送單並成交", r["state"] == "OK" and len(b.placed) >= 1 and any(c["kind"] == "complete" for c in PUSH_CALLS))
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 0, "errors": ["NO_SUBSCRIPTION:x"]})
+p = setup({"sim_veto": True}); b = Fake(); r = run(p, b)
+check("sim_veto：推播送不到→整批不執行（fail closed，同 LIVE_WITH_VETO）",
+      r["state"] == "ERROR" and not S(p).pending.exists() and not b.placed
+      and any("PUSH_FAILED" in json.dumps(x, ensure_ascii=False) for x in r["rejected"]))
+PUSH_RESULT.update({"ok": 1, "errors": []})
+p = setup({"mode": "LIVE", "sim_veto": True}); b = Fake(); r = run(p, b)
+check("sim_veto：LIVE 不受影響（照舊直接送單、無否決窗）", r["state"] == "OK" and b.placed and "execute_after" not in (A._read_json(p.scoped("LIVE").pending) or {}))
+p = setup({"mode": "LIVE_WITH_VETO", "sim_veto": False}); b = Fake(); r = run(p, b)
+check("sim_veto：LIVE_WITH_VETO 設 false 仍走否決窗", r["state"] == "WAITING_VETO" and not b.placed)
+# 演練日觸發（僅 SIMULATION）
+_cal = {"year": 2026, "closed": []}
+_d7 = datetime(2026, 10, 7, 9, 5, tzinfo=TW)
+p = setup({"sim_drill_date": "2026-10-07"})
+check("演練日：SIMULATION 在 sim_drill_date 觸發 sim_drill", A.should_run(p, _d7, A.load_config(p), _cal) == "sim_drill")
+check("演練日：其他日期不觸發", A.should_run(p, _d7 + timedelta(days=1), A.load_config(p), _cal) is None)
+p = setup({"mode": "LIVE_WITH_VETO", "sim_drill_date": "2026-10-07"}); A._write_json(p.scoped("LIVE_WITH_VETO").state, {"last_done": "202609", "next_tranche": 2})
+check("演練日：LIVE 類設了也不觸發", A.should_run(p, _d7, A.load_config(p), _cal) is None)
+# 演練 B：獨立批次走否決窗→停止旗標取消→逾時零送單
+def drill(p, b, now):
+    return A.run_month_end(p, b, now, prev_close=PC, poll_sec=0, polls=1, mode_override="SIMULATION", drill_label="DRILLB")
+p = setup({"sim_veto": True}); b = Fake()
+r = run(p, b); r = run(p, b, now=NOW + timedelta(minutes=31))  # 演練 A 先完成，本月 last_done
+_st_before = json.loads(S(p).state.read_text(encoding="utf-8")); n_before = len(b.placed)
+r = drill(p, b, NOW + timedelta(minutes=40))
+pend = json.loads(S(p).pending.read_text(encoding="utf-8"))
+check("演練 B：A 已完成同月仍可建立獨立批次待執行訂單", r["state"] == "WAITING_VETO" and "DRILLB" in pend["batch_id"] and pend["orders"])
+p.stop_flag.write_text("x")  # App「全部取消」＝POST /auto/stop {stop:true} 寫的同一個旗標
+r = drill(p, b, NOW + timedelta(minutes=71))
+pend = json.loads(S(p).pending.read_text(encoding="utf-8"))
+lg = [x for x in ledger(p) if "DRILLB" in (x.get("key") or "")]
+check("演練 B：逾時零送單、pending 標 cancelled", len(b.placed) == n_before and pend.get("cancelled") is True)
+check("演練 B：帳本逐筆記 REJECT STOP_FLAG", lg and all(x["event"] == "REJECT" for x in lg) and any("STOP_FLAG" in json.dumps(x, ensure_ascii=False) for x in lg))
+_st_after = json.loads(S(p).state.read_text(encoding="utf-8"))
+check("演練 B：不動 state 批次（last_done／next_tranche／batch／positions 不變）",
+      all(_st_after.get(k) == _st_before.get(k) for k in ("last_done", "next_tranche", "batch", "positions", "last_label")))
+r = drill(p, b, NOW + timedelta(minutes=80))
+check("演練 B：已取消後重跑仍為 CANCELLED、零送單", r["state"] == "CANCELLED" and len(b.placed) == n_before)
+p.stop_flag.unlink()
+p = setup({"sim_veto": True}); b = Fake()
+r = drill(p, b, NOW); r = drill(p, b, NOW + timedelta(minutes=31))
+check("演練 B 保險：未取消到期→判失敗且絕不送單", r["state"] == "ERROR" and not b.placed and not (json.loads(S(p).state.read_text(encoding="utf-8")) or {}).get("batch"))
+for cfgx in ({}, {"mode": "LIVE_WITH_VETO"}):
+    p = setup(cfgx); b = Fake()
+    try:
+        drill(p, b, NOW); ok = False
+    except A.AutoTradingError:
+        ok = True
+    check(f"演練 B：{cfgx or '未開 sim_veto'} 一律拒絕", ok and not b.placed)
+
+if SKIPS:
+    print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)

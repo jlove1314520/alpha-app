@@ -470,6 +470,14 @@ def is_last_trading_day_of_month(d: date, cal: dict) -> bool:
 
 
 # ---------- 帳本／狀態輔助 ----------
+def sim_veto_on(cfg: dict, mode: str) -> bool:
+    """是否走 30 分鐘否決窗＋推播。LIVE_WITH_VETO 一律走（與 sim_veto 無關）；
+    先.三十二：SIMULATION 僅在本機設定 sim_veto 恰為 true 時走（預設 false）；LIVE 永不走。"""
+    if mode == "LIVE_WITH_VETO":
+        return True
+    return mode == "SIMULATION" and cfg.get("sim_veto") is True
+
+
 def _eff_mode(cfg: dict, mode_override: str | None) -> str:
     if mode_override:
         if mode_override != "SIMULATION":
@@ -610,9 +618,12 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
 
 # ---------- 主流程 ----------
 def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None = None,
-                  mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5) -> dict:
+                  mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5,
+                  drill_label: str | None = None) -> dict:
     cfg = load_config(paths)
     mode = _eff_mode(cfg, mode_override)
+    if drill_label and not (mode == "SIMULATION" and cfg["mode"] == "SIMULATION" and sim_veto_on(cfg, mode)):
+        raise AutoTradingError("演練批次只允許 SIMULATION 且 sim_veto: true")
     shared, paths = paths, paths.scoped(mode)
     fam = paths.family
     today = now.astimezone(TW).date()
@@ -661,7 +672,12 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
 
     tranche_total = max(1, int(cfg.get("tranche_total", 4)))
     batch = state.get("batch")
-    if batch:
+    if drill_label:
+        # 先.三十二 演練 B：獨立批次名，不碰 state 的批次／last_done；之後的否決窗／停止流程與正式批次同一條路
+        label, bym, rnd = drill_label, ym, 1
+        budget = (cfg.get("total_capital_twd") or 0) / tranche_total
+        batch = None
+    elif batch:
         label, bym, rnd = batch["label"], batch["ym"], int(batch["round"])
         pref = f"{fam}-{bym}-{label}-R{rnd}-"
         if any(k.startswith(pref) for k in latest) and reconciled:
@@ -769,7 +785,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
             _write_json(paths.pending, {**pend, "cancelled": True})
         return res
 
-    if mode == "LIVE_WITH_VETO" and not same_pend:
+    if sim_veto_on(cfg, mode) and not same_pend:
         if ok_orders and _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
             exec_after = now + timedelta(minutes=VETO_MINUTES)
             lines = "；".join(f"{o['symbol']} {'賣' if o.get('action') == 'Sell' else '買'}{o['qty']}股 限價{o['limit_price']}" for o in ok_orders)
@@ -790,6 +806,13 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
                                         "orders": ok_orders})
             write_status(paths, mode=mode, family=fam, pending=len(ok_orders))
             res["state"] = "WAITING_VETO"
+        return res
+
+    if drill_label:
+        # 演練 B 的唯一預期是「已取消」；走到這裡代表否決窗到期仍未取消→判失敗，且絕不送單、不動 state 批次
+        log("REJECT", {"key": f"{batch_id}-ALL", "symbol": "ALL"}, reasons=["DRILL_NOT_CANCELLED:演練批次否決窗到期仍未取消，不送單"])
+        report_error(paths, f"演練批次 {label} 否決窗到期仍未取消（演練失敗，未送單）")
+        res["state"] = "ERROR"
         return res
 
     if not ok_orders or not _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
@@ -900,6 +923,9 @@ def should_run(paths: Paths, now: datetime, cfg: dict, cal: dict | None) -> str 
         return None
     if is_last_trading_day_of_month(d, cal):
         return "month_end"
+    # 先.三十二：模擬演練日（本機設定 sim_drill_date，僅 SIMULATION 有效）讓排程在非月底也觸發一次
+    if mode == "SIMULATION" and cfg.get("sim_drill_date") == d.isoformat():
+        return "sim_drill"
     n = int(state.get("next_tranche") or cfg.get("tranche", 1))
     if mode_family(mode) == "LIVE" and n == 1 and not state.get("last_done"):
         return "first_tranche"
@@ -974,6 +1000,7 @@ def main() -> int:
     ap.add_argument("--watchdog", choices=("run", "settle"), help="看門狗：檢查當日該任務是否有心跳")
     ap.add_argument("--mode-override", help="只允許 SIMULATION；--run 時略過觸發條件（互動驗證用）")
     ap.add_argument("--force", action="store_true", help="--settle 略過 13:35 時間限制")
+    ap.add_argument("--drill-label", help="先.三十二 演練 B：以獨立批次名走否決窗（僅 SIMULATION＋sim_veto，心跳記 drill 不發布）")
     ap.add_argument("--stop", action="store_true")
     a = ap.parse_args()
     paths = Paths()
@@ -993,6 +1020,12 @@ def main() -> int:
     task = "settle" if a.settle else "run"
     try:
         cfg = load_config(paths)
+        if a.drill_label:
+            if not a.run or not re.fullmatch(r"DRILL[A-Z0-9]{1,8}", a.drill_label):
+                print("--drill-label 需搭配 --run，且格式為 DRILL 開頭大寫英數")
+                return 2
+            a.mode_override = "SIMULATION"
+            task = "drill"  # 不是 run／settle：不寫進公開心跳、不滿足看門狗，避免混淆排程實證
         mode = _eff_mode(cfg, a.mode_override)
         if a.run:
             reason = "mode_override"
@@ -1009,7 +1042,7 @@ def main() -> int:
                 print("今日不需動作（非交易日或不符觸發條件）")
                 return 0
             broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
-            res = run_month_end(paths, broker, now, mode_override=a.mode_override)
+            res = run_month_end(paths, broker, now, mode_override=a.mode_override, drill_label=a.drill_label)
         else:
             latest = _ledger_latest(paths.scoped(mode))
             if not any(r.get("event") in NONFINAL for r in latest.values()):
