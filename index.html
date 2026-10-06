@@ -1429,6 +1429,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="setting-input"><input id="auto-stop-toggle" type="checkbox" onchange="autoSetStop(this.checked,'緊急停止開關')"></div>
       </div>
       <div class="note" style="margin-top:6px">此區只寫本機停止旗標，沒有任何下單能力；下單由本機排程的 auto_rebalance_bb90.py 執行，模式由本機設定檔決定。</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn ghost" style="flex:1" onclick="pushEnable()">開啟本裝置推播</button>
+        <button class="btn ghost" id="push-test-btn" style="flex:1" onclick="pushTest()">測試推播</button>
+      </div>
+      <div class="note" id="push-note" style="margin-top:6px">推播：尚未檢查</div>
+      <div class="note" style="margin-top:6px">真錢「否決窗」開始時會推播（標的／股數／限價／總額／預定送單時間＋如何取消）；推播送不出去，該批就不執行、下次排程重試。iPhone 需 iOS 16.4 以上，且必須從「加到主畫面」的圖示開啟本 App 才能開啟推播。標準 Web Push，不經第三方帳號。</div>
     </div>
 
     <div class="card" id="bt-path-card">
@@ -6560,15 +6566,44 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){console.warn('[btSave]',e);recordGlobalError('btSave',e)}
     renderBtPath();
   }
+  // 先.三十一-二：橫幅由三個來源合成——本機狀態/緊急停止、本機離線、Pages 上的去識別化排程心跳
+  const AUTO_BAN={local:'',offline:'',hb:''};
+  function renderAutoBanner(){
+    const ban=document.getElementById('auto-banner');if(!ban)return;
+    const msgs=[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.local].filter(Boolean);
+    ban.style.display=msgs.length?'':'none';
+    ban.textContent=msgs.join('　｜　');
+  }
+  // 規則：台股交易日，台北 09:50 後當日沒有 run 心跳，或 13:50 後沒有 settle 心跳→紅色橫幅。
+  // 讀不到心跳檔（網路錯誤、404）時不亂報，只 console.warn（無法判斷≠未執行）。
+  function evalAutoHeartbeat(doc,now){
+    const z=_zonedParts(now||new Date(),'Asia/Taipei');
+    if(!isTradingDay(now||new Date(),'Asia/Taipei',TW_HOLIDAYS_2026))return '';
+    const today=_ymd(z),mins=z.h*60+z.mi;
+    const ev=(doc&&Array.isArray(doc.events))?doc.events:[];
+    const has=t=>ev.some(e=>e&&e.task===t&&typeof e.ts==='string'&&e.ts.slice(0,10)===today);
+    if(mins>=13*60+50&&!has('settle'))return '自動交易排程未執行（電腦可能關機或離線）：今日盤後結算沒有心跳';
+    if(mins>=9*60+50&&!has('run'))return '自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳';
+    return '';
+  }
+  async function loadAutoHeartbeat(){
+    try{
+      const r=await fetch('data/auto_heartbeat.json?t='+Date.now(),{cache:'no-store'});
+      if(!r.ok){console.warn('[loadAutoHeartbeat] HTTP',r.status);AUTO_BAN.hb='';return}
+      AUTO_BAN.hb=evalAutoHeartbeat(await r.json());
+    }catch(e){console.warn('[loadAutoHeartbeat]',e);recordGlobalError('loadAutoHeartbeat',e);AUTO_BAN.hb=''}
+    renderAutoBanner();
+  }
   async function loadAutoTrading(){
     const note=document.getElementById('auto-status-note');
     if(!note)return;
-    const ban=document.getElementById('auto-banner');
+    _safeAsync('loadAutoHeartbeat',loadAutoHeartbeat);
     try{
-      if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器';return}
+      if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器';AUTO_BAN.offline='';AUTO_BAN.local='';renderAutoBanner();return}
       const r=await liveFetch('/auto/status',5000);
       if(!r.ok)throw new Error('HTTP '+r.status);
       const d=await r.json();
+      AUTO_BAN.offline='';
       const st=d.status||{};
       const bits=['模式：'+(d.mode||'SIMULATION')];
       if(st.updated_at)bits.push('更新：'+st.updated_at);
@@ -6584,12 +6619,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         pe.textContent='待執行（'+(p.execute_after||'?')+' 後送出）：'+p.orders.map(o=>(o.symbol||'')+' '+(o.action==='Sell'?'賣':'買')+' '+(o.qty||'')+'股 @'+(o.limit_price||'')).join('；');
       }else pe.textContent=p&&p.cancelled?'待執行訂單已取消':'目前沒有待執行訂單';
       if(cb)cb.style.display=active?'':'none';
-      if(ban){
-        const red=st.banner==='red'||!!st.last_error;
-        ban.style.display=(red||d.stopped)?'':'none';
-        ban.textContent=red?('自動交易異常：'+(st.last_error||'請檢查')):'自動交易已緊急停止（一律拒單）';
-      }
-    }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）'}
+      const red=st.banner==='red'||!!st.last_error;
+      AUTO_BAN.local=red?('自動交易異常：'+(st.last_error||'請檢查')):(d.stopped?'自動交易已緊急停止（一律拒單）':'');
+      renderAutoBanner();
+    }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）';AUTO_BAN.offline='本機離線：讀不到本機自動交易狀態（/auto/status）';renderAutoBanner()}
   }
   async function autoSetStop(stop,why){
     try{
@@ -7864,7 +7897,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.1829';
+  const APP_VERSION='2026-10-06.1840';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

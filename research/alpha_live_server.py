@@ -1231,6 +1231,55 @@ async def post_auto_stop(payload: dict, x_alpha_local_token: str | None = Header
     return {"ok": True, "stopped": flag.exists()}
 
 
+# 先.三十一-一：Web Push（VAPID，方案A）。App 經這組端點交訂閱、送測試推播；
+# 私鑰只在本機 .env，這裡只回公鑰。訂閱與 auto_rebalance_bb90.py 共用 AUTO_TRADING_DIR。
+def _web_push():
+    import web_push  # research/ 同目錄；延後載入，pywebpush 缺失時只影響推播端點
+    return web_push
+
+
+@app.get("/push/vapid_public_key")
+async def get_push_public_key(x_alpha_local_token: str | None = Header(default=None)):
+    _check_token(x_alpha_local_token)
+    wp = _web_push()
+    return {"ok": True, "public_key": wp.public_key(), "subscriptions": len(wp.load_subs(AUTO_TRADING_DIR))}
+
+
+@app.post("/push/subscribe")
+async def post_push_subscribe(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    """payload: {"subscription": PushSubscription.toJSON(), "label": "iPhone"}。同 endpoint 覆蓋。"""
+    _check_token(x_alpha_local_token)
+    wp = _web_push()
+    sub = payload.get("subscription") if isinstance(payload, dict) else None
+    if not wp.valid_subscription(sub):
+        raise HTTPException(status_code=400, detail="訂閱格式不正確（需要 endpoint 與 keys.p256dh／keys.auth）")
+    try:
+        n = wp.add_sub(AUTO_TRADING_DIR, sub, payload.get("label", ""))
+    except (OSError, ValueError) as e:
+        raise HTTPException(status_code=500, detail=f"儲存訂閱失敗：{type(e).__name__}") from e
+    return {"ok": True, "subscriptions": n}
+
+
+@app.post("/push/unsubscribe")
+async def post_push_unsubscribe(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    _check_token(x_alpha_local_token)
+    ep = payload.get("endpoint") if isinstance(payload, dict) else None
+    if not isinstance(ep, str):
+        raise HTTPException(status_code=400, detail="需要 {\"endpoint\": \"...\"}")
+    return {"ok": True, "subscriptions": _web_push().remove_sub(AUTO_TRADING_DIR, ep)}
+
+
+@app.post("/push/test")
+async def post_push_test(x_alpha_local_token: str | None = Header(default=None)):
+    """送一則測試推播給所有已訂閱裝置（設定頁「測試推播」按鈕）。"""
+    _check_token(x_alpha_local_token)
+    wp = _web_push()
+    r = await asyncio.to_thread(wp.send, "Alpha 測試推播",
+                                "收到這則代表否決窗推播可以送到這支裝置。", "test", AUTO_TRADING_DIR)
+    return {"ok": bool(r.get("ok")), "delivered": r.get("ok", 0), "failed": r.get("failed", 0),
+            "subscriptions": r.get("subscriptions", 0), "errors": r.get("errors", [])[:5]}
+
+
 async def _kbars_via_daemon(code: str) -> dict | None:
     """向常駐行程查當日 1 分K。查得到回結果 dict，查不到回 None（讓呼叫端走既有的 404）。
 

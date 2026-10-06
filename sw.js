@@ -9,7 +9,7 @@
    ——完全不呼叫 respondWith()，讓瀏覽器照平常方式直接打網路，成功拿新資料、
    失敗就是網路錯誤，由 App 的 fetch 呼叫端（index.html 的 fm()）自己顯示
    「連線失敗，請重試」，不會被這裡默默塞舊資料進去。 */
-const CACHE = 'alpha-v2026-10-06.1829'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
+const CACHE = 'alpha-v2026-10-06.1840'; // 2026-08-28起改用時間戳格式，由.git/hooks/pre-commit在每次commit時自動改寫
 const SHELL_URLS = ['./', './index.html', './manifest.webmanifest', './icon192.png', './icon512.png', './icon512-maskable.png'];
 
 self.addEventListener('install', e => {
@@ -56,4 +56,24 @@ self.addEventListener('fetch', e => {
       return r;
     }).catch(() => caches.match(e.request).then(m => m || caches.match('./index.html')))
   );
+});
+
+// 先.三十一-一：Web Push（VAPID）。本機 alpha_live_server／auto_rebalance_bb90.py 送來的
+// 否決窗、拒單、漏跑、批次完成通知。iOS 規定每則 push 都必須顯示通知，不可靜默。
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
+  const title = d.title || 'Alpha';
+  e.waitUntil(self.registration.showNotification(title, {
+    body: d.body || '', tag: d.tag || 'alpha', renotify: true,
+    icon: './icon192.png', badge: './icon192.png', data: { url: d.url || './' }
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const target = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if ('focus' in c) return c.focus(); }
+    return self.clients.openWindow(target);
+  }));
 });
