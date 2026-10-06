@@ -6658,6 +6658,81 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       renderAutoBanner();
     }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）';AUTO_BAN.offline='本機離線：讀不到本機自動交易狀態（/auto/status）';renderAutoBanner()}
   }
+  // ── 先.三十五：推播按鈕（先.三十一-一 只加了按鈕、沒有函式，屬假完成，這裡補上） ──
+  // iOS 規定 Notification.requestPermission() 必須在使用者點擊的同一個同步流程裡呼叫，
+  // 所以 pushEnable() 本身不是 async，權限請求前只做同步檢查、不得有任何 await。
+  function _pushNote(msg){const el=document.getElementById('push-note');if(el)el.textContent='推播：'+msg}
+  function _pushFail(step,msg,e){
+    _pushNote('第'+step+'步失敗：'+msg);
+    console.warn('[push] step '+step,msg,e||'');
+    try{recordGlobalError('push step '+step,e||new Error(msg))}catch(err){console.warn('[push] recordGlobalError 失敗',err)}
+  }
+  function _pushStandalone(){
+    try{return navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)}catch(e){return false}
+  }
+  function _b64urlToBytes(s){
+    const pad='='.repeat((4-s.length%4)%4);
+    const raw=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/'));
+    const out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out;
+  }
+  async function _pushHttpErr(r){
+    if(r.status===401)return 'HTTP 401：token 不正確（請到設定頁重新貼上本機 token）';
+    let d='';try{const j=await r.json();d=j&&j.detail?('：'+j.detail):''}catch(e){d=''}
+    return 'HTTP '+r.status+d+(r.status===404?'（伺服器可能是舊版，需重啟）':'');
+  }
+  function pushEnable(){
+    // 第0步：同步環境檢查（不可 await）
+    if(!('serviceWorker' in navigator)){_pushFail(0,'這個瀏覽器不支援 Service Worker（iPhone 需 iOS 16.4 以上，並用 Safari 加到主畫面）');return}
+    if(!('PushManager' in window)||typeof Notification==='undefined'){
+      _pushFail(0,_pushStandalone()?'這個系統版本不支援網頁推播（iOS 需 16.4 以上）':'請從主畫面的 Alpha 圖示開啟 App 再按（Safari 分頁裡不能開推播；iOS 需 16.4 以上）');return}
+    if(!_pushStandalone()){_pushFail(0,'請從主畫面的 Alpha 圖示開啟 App 再按（目前是在瀏覽器分頁裡）');return}
+    if(!LIVE.configured||!LIVE.url){_pushFail(0,'尚未連線本機伺服器（先在上方設定網址與 token 並按「測試連線」）');return}
+    let permP;
+    try{permP=Notification.requestPermission()}catch(e){_pushFail(1,'無法要求通知權限（'+(e&&e.message||e)+'）',e);return}
+    _pushNote('第1步：要求通知權限中…');
+    Promise.resolve(permP).then(perm=>_pushEnableRest(perm)).catch(e=>_pushFail(1,'要求通知權限失敗（'+(e&&e.message||e)+'）',e));
+  }
+  async function _pushEnableRest(perm){
+    if(perm!=='granted'){_pushFail(1,perm==='denied'?'通知權限被拒，請到 iPhone 設定→通知→Alpha 開啟後再按一次':'尚未允許通知（'+perm+'），請再按一次並選「允許」');return}
+    let reg,key,sub;
+    try{_pushNote('第2步：等待 Service Worker…');reg=await navigator.serviceWorker.ready}
+    catch(e){_pushFail(2,'Service Worker 未就緒（'+(e&&e.message||e)+'），請把 App 完全關掉再開',e);return}
+    try{
+      _pushNote('第3步：向本機伺服器取公鑰…');
+      const r=await liveFetch('/push/vapid_public_key',8000);
+      if(!r.ok){_pushFail(3,'取公鑰失敗：'+await _pushHttpErr(r));return}
+      const j=await r.json();key=j&&j.public_key;
+      if(!key){_pushFail(3,'伺服器沒有回傳公鑰（本機 .env 可能缺 VAPID 金鑰）');return}
+    }catch(e){_pushFail(3,'連不到本機伺服器（本機離線或網址錯：'+(e&&e.name==='AbortError'?'逾時':(e&&e.message||e))+'）',e);return}
+    try{
+      _pushNote('第4步：向 Apple／瀏覽器推播服務訂閱…');
+      const appKey=_b64urlToBytes(key);
+      sub=await reg.pushManager.getSubscription();
+      if(sub&&sub.options&&sub.options.applicationServerKey){
+        const cur=new Uint8Array(sub.options.applicationServerKey);
+        if(cur.length!==appKey.length||cur.some((v,i)=>v!==appKey[i])){await sub.unsubscribe();sub=null}
+      }
+      if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:appKey});
+    }catch(e){_pushFail(4,'訂閱失敗（'+(e&&e.name||'')+' '+(e&&e.message||e)+'）',e);return}
+    try{
+      _pushNote('第5步：把訂閱交給本機伺服器…');
+      const r=await fetch(LIVE.url+'/push/subscribe',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({subscription:sub.toJSON(),label:'iPhone'}),credentials:'include'});
+      if(!r.ok){_pushFail(5,'登記訂閱失敗：'+await _pushHttpErr(r));return}
+      const j=await r.json();
+      _pushNote('已訂閱，共 '+(j.subscriptions!=null?j.subscriptions:'?')+' 支裝置。可按「測試推播」確認收得到。');
+    }catch(e){_pushFail(5,'連不到本機伺服器（'+(e&&e.message||e)+'）',e)}
+  }
+  async function pushTest(){
+    try{
+      if(!LIVE.configured||!LIVE.url){_pushFail(0,'尚未連線本機伺服器');return}
+      _pushNote('送出測試推播中…');
+      const r=await fetch(LIVE.url+'/push/test',{method:'POST',headers:liveHeaders(),credentials:'include'});
+      if(!r.ok){_pushFail(1,'測試推播請求失敗：'+await _pushHttpErr(r));return}
+      const j=await r.json();
+      if(!j.subscriptions){_pushNote('目前沒有任何已訂閱裝置，請先按「開啟本裝置推播」');return}
+      _pushNote('送達 '+(j.delivered||0)+' 支、失敗 '+(j.failed||0)+' 支（共 '+j.subscriptions+' 支訂閱）'+(j.errors&&j.errors.length?'；錯誤：'+j.errors.join('；'):''));
+    }catch(e){_pushFail(1,'連不到本機伺服器（'+(e&&e.message||e)+'）',e)}
+  }
   async function autoSetStop(stop,why){
     try{
       if(!LIVE.configured||!LIVE.url)throw new Error('未連線本機伺服器');
@@ -7931,7 +8006,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.2038';
+  const APP_VERSION='2026-10-06.2102';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

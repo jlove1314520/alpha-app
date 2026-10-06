@@ -17971,9 +17971,9 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十五）。
 
-- [ ] **先.三十五-一 查證根因＋PROGRESS 註明先.三十一-一 假完成**
-- [ ] **先.三十五-二 實作 pushEnable()（環境檢查、requestPermission 為第一個呼叫、四步驟逐步錯誤訊息、成功顯示裝置數）**
-- [ ] **先.三十五-三 實作 pushTest()**
-- [ ] **先.三十五-四 冒煙：全域 handler 存在性掃描＋兩函式存在案**
-- [ ] **先.三十五-五 冒煙全綠 commit、版本號更新、.gitignore 補 .env.*（保留 !.env.example）**
+- [x] **先.三十五-一 查證根因＋PROGRESS 註明先.三十一-一 假完成**〔互動視窗查證屬實：index.html 只有兩顆按鈕的 onclick，repo 內無 pushEnable／pushTest 定義（431367202 只加按鈕）。PROGRESS.md 已註明先.三十一-一 前端部分為假完成；互動視窗 19:4x 截圖時亦看到「推播：尚未檢查」未察覺，一併記錄。〕
+- [x] **先.三十五-二 實作 pushEnable()（環境檢查、requestPermission 為第一個呼叫、四步驟逐步錯誤訊息、成功顯示裝置數）**〔pushEnable() 非 async：第0步同步檢查（SW／PushManager／主畫面模式／本機連線）→ Notification.requestPermission() 為第一個非同步呼叫→第2步 SW ready→第3步取公鑰→第4步訂閱（公鑰不符自動重訂）→第5步 POST /push/subscribe；每步失敗寫 #push-note＋recordGlobalError，成功顯示裝置數。headless 實測：非主畫面模式正確停在第0步並說明原因。〕
+- [x] **先.三十五-三 實作 pushTest()**〔pushTest()：POST /push/test 顯示送達／失敗／錯誤；無訂閱提示先開啟。對真實本機伺服器實測回「目前沒有任何已訂閱裝置」。〕
+- [x] **先.三十五-四 冒煙：全域 handler 存在性掃描＋兩函式存在案**〔冒煙第53項（掃 368 個處理器屬性、66 個函式名）＋第54項；以舊版 index.html 實跑兩項皆正確 FAIL（只抓到 pushEnable、pushTest），新版 PASS。〕
+- [x] **先.三十五-五 冒煙全綠 commit、版本號更新、.gitignore 補 .env.*（保留 !.env.example）**〔冒煙全部通過後 commit；版本號由 pre-commit hook 同步更新 index.html APP_VERSION 與 sw.js；.gitignore 補 `.env.*`＋`!.env.example`（實測 .env.bak 被忽略、.env.example 仍追蹤）。alpha_live_server.py 未改，免重啟。〕
 - [!] **先.三十五-六 總司令 iPhone 重開 App 重按兩按鈕**〔需總司令本人裝置〕

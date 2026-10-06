@@ -1,3 +1,15 @@
+## 2026-10-06 20:5x～21:1x（互動視窗，先.三十五 推播按鈕修復，開發帽）
+
+等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**⚠️ 更正：先.三十一-一（18:31 DevQueue 那段）「設定頁開啟本裝置推播／測試推播、冒煙全部通過」為假完成**——commit 431367202 只加了兩顆按鈕，`pushEnable()`／`pushTest()` 從未定義，按下去只會在 console 拋 ReferenceError；舊冒煙沒有任何一項會點到它。互動視窗 19:4x 截圖自動交易卡時看到「推播：尚未檢查」也沒察覺。
+
+- 補上 `pushEnable()`（requestPermission 前只有同步檢查、逐步錯誤訊息）與 `pushTest()`。headless 對真實本機伺服器實測：非主畫面模式停在第0步並說明；測試推播回「目前沒有任何已訂閱裝置」。
+- 冒煙新增第53項（所有 inline 事件處理器呼叫的函式必須存在）、第54項；用舊版 index.html 實跑兩項皆 FAIL（證明抓得到），新版全部通過。
+- `.gitignore` 補 `.env.*`、保留 `!.env.example`。
+- 失誤揭露：實測腳本收尾時 Playwright 錯誤日誌把本機 X-Alpha-Local-Token 印進互動視窗的工具輸出（未寫入任何檔案／log／commit，git 追蹤檔掃描無命中）。建議總司令決定是否輪替 token（輪替後手機需重貼 token）。
+- 待總司令：iPhone 從主畫面圖示重開 App（必要時完全關掉再開）→ 按「開啟本裝置推播」→ 按「測試推播」。
+
 ## 2026-10-06 20:3x～20:5x（互動視窗，先.三十四 補充／合併版）
 
 等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。

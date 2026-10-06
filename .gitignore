@@ -45,6 +45,9 @@ research/.live_state_sinopac.json.tmp
 *.db
 fred_key.txt
 .env
+# 2026-10-06 先.三十五：.env 的備份／變體（.env.bak、.env.local…）一律不進 repo，只保留範本
+.env.*
+!.env.example
 secrets/
 *.pfx
 shioaji.log

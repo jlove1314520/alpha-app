@@ -1750,10 +1750,56 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("52. 破億路徑公式驗算：淨資產600萬、目標2038-01-13、10.19%→推算約1790萬、所需月投入約34萬（各在2%內）；卡片可渲染",
     btErrors.length === 0, btErrors.join("; "));
 
+  // 53.【2026-10-06 先.三十五】inline 事件處理器呼叫的函式都必須在頁面全域存在。
+  // 起因：先.三十一-一 只加了「開啟本裝置推播／測試推播」按鈕，pushEnable／pushTest 根本不存在，
+  // 按了只會在 console 拋 ReferenceError，舊冒煙沒有任何一項會點到它，所以「全部通過」是假的。
+  // 掃描範圍：原始 index.html 的靜態屬性＋測試結束時 DOM 上（含動態產生）的屬性。
+  const handlerErrors = [];
+  let handlerInfo = "";
+  try {
+    const res = await page.evaluate(async () => {
+      const src = await (await fetch("index.html", { cache: "no-store" })).text();
+      const KW = new Set(["if", "for", "while", "switch", "return", "typeof", "function", "new", "catch", "void", "await", "async", "delete", "in", "of", "do"]);
+      const vals = [];
+      const re = /\son(?:click|input|change)\s*=\s*"([^"]*)"/gi;
+      let m; while ((m = re.exec(src))) vals.push(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&"));
+      for (const el of document.querySelectorAll("[onclick],[oninput],[onchange]")) for (const a of ["onclick", "oninput", "onchange"]) { const v = el.getAttribute(a); if (v) vals.push(v); }
+      const names = new Set();
+      for (const v of vals) {
+        const code = v.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/g, "''");
+        const r2 = /(^|[^.\w$])([A-Za-z_$][\w$]*)\s*\(/g; let k;
+        while ((k = r2.exec(code))) if (!KW.has(k[2])) names.add(k[2]);
+      }
+      const missing = [];
+      for (const n of names) { let t; try { t = (0, eval)("typeof " + n); } catch (e) { t = "error"; } if (t !== "function") missing.push(n + "(" + t + ")"); }
+      return { count: vals.length, names: names.size, missing };
+    });
+    handlerInfo = `掃描 ${res.count} 個處理器屬性、${res.names} 個不同函式名`;
+    if (res.missing.length) handlerErrors.push("未定義：" + res.missing.join("、"));
+  } catch (e) { handlerErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("53. index.html 所有 onclick／oninput／onchange 呼叫的函式都在頁面全域定義（缺一個即 FAIL）",
+    handlerErrors.length === 0, handlerErrors.join("; ") || handlerInfo);
+
+  // 54.【2026-10-06 先.三十五】推播兩顆按鈕存在且綁定的函式是 function
+  const pushBtnErrors = [];
+  try {
+    const r = await page.evaluate(() => ({
+      enableBtn: !!document.querySelector('button[onclick="pushEnable()"]'),
+      testBtn: !!document.getElementById("push-test-btn"),
+      enable: typeof pushEnable, test: typeof pushTest, note: !!document.getElementById("push-note"),
+    }));
+    if (!r.enableBtn) pushBtnErrors.push("找不到「開啟本裝置推播」按鈕");
+    if (!r.testBtn) pushBtnErrors.push("找不到「測試推播」按鈕");
+    if (r.enable !== "function") pushBtnErrors.push(`pushEnable 是 ${r.enable}`);
+    if (r.test !== "function") pushBtnErrors.push(`pushTest 是 ${r.test}`);
+    if (!r.note) pushBtnErrors.push("找不到 #push-note 狀態列");
+  } catch (e) { pushBtnErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("54. 推播按鈕存在，且 pushEnable／pushTest 皆為 function", pushBtnErrors.length === 0, pushBtnErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
