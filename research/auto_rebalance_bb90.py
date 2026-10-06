@@ -619,7 +619,7 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
 # ---------- 主流程 ----------
 def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None = None,
                   mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5,
-                  drill_label: str | None = None) -> dict:
+                  drill_label: str | None = None, veto_minutes: float | None = None) -> dict:
     cfg = load_config(paths)
     mode = _eff_mode(cfg, mode_override)
     if drill_label and not (mode == "SIMULATION" and cfg["mode"] == "SIMULATION" and sim_veto_on(cfg, mode)):
@@ -787,7 +787,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
 
     if sim_veto_on(cfg, mode) and not same_pend:
         if ok_orders and _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
-            exec_after = now + timedelta(minutes=VETO_MINUTES)
+            exec_after = now + timedelta(minutes=VETO_MINUTES if veto_minutes is None else veto_minutes)
             lines = "；".join(f"{o['symbol']} {'賣' if o.get('action') == 'Sell' else '買'}{o['qty']}股 限價{o['limit_price']}" for o in ok_orders)
             total = sum(float(o.get("amount") or 0) for o in ok_orders)
             body = (f"否決窗開始：{lines}；總額約NT${total:,.0f}；排定 {exec_after.astimezone(TW).strftime('%H:%M')} 送出。"
@@ -992,6 +992,127 @@ def watchdog(paths: Paths, now: datetime, which: str, cal: dict | None = None) -
         print(f"[warn] 看門狗自身失敗，fail open：{type(e).__name__}", flush=True)
         return "WATCHDOG_FAILED_OPEN"
 
+
+
+# ---------- 先.三十七：今晚無券商演練（假券商、獨立目錄，不建立任何 Shioaji 連線） ----------
+DRILL_DIR = REPO / "research" / "data" / "auto_trading_drill"
+DRILL_FLAG = "DRILL_ACTIVE.flag"   # 存在時 alpha_live_server 的 /auto/status、/auto/stop 改讀演練目錄
+NIGHT_VETO_MINUTES = 3
+NIGHT_PHASES = ("start", "n1-create", "n1-execute", "n2-create", "n2-execute", "n2-settle", "finish")
+
+
+class DrillBroker:
+    """假券商：狀態存在演練目錄 fake_broker.json（跨行程延續）。送單後先掛著，n2-settle 時才全數成交，
+    以走到「盤後結算→對帳→批次完成」那一段。沒有任何網路連線。"""
+
+    def __init__(self, base: Path, fill_now: bool = False):
+        self.f = Path(base) / "fake_broker.json"
+        self.d = _read_json(self.f) or {"positions": {}, "orders": {}}
+        self.fill_now = fill_now
+
+    def _save(self):
+        _write_json(self.f, self.d)
+
+    def positions(self):
+        return dict(self.d["positions"])
+
+    def reference_prices(self, codes, today=None):
+        pc = load_prev_closes()
+        return {c: (pc[c][0], today.isoformat()) for c in codes if c in pc}
+
+    def cash(self):
+        raise AutoTradingError("演練不查真實餘額")
+
+    def unsettled_payable(self):
+        return 0.0
+
+    def place(self, o):
+        oid = f"DRILL-{len(self.d['orders']) + 1}"
+        self.d["orders"][oid] = {"symbol": o["symbol"], "qty": int(o["qty"]), "price": o["limit_price"], "filled": 0}
+        self._save()
+        return {"order_id": oid}
+
+    def fill_all(self):
+        for oid, o in self.d["orders"].items():
+            if o["filled"] < o["qty"]:
+                self.d["positions"][o["symbol"]] = self.d["positions"].get(o["symbol"], 0) + (o["qty"] - o["filled"])
+                o["filled"] = o["qty"]
+        self._save()
+
+    def status(self, oid):
+        o = self.d["orders"][oid]
+        return {"status": "Filled" if o["filled"] >= o["qty"] else "Submitted", "filled_qty": o["filled"],
+                "avg_price": o["price"] if o["filled"] else None}
+
+
+def _drill_paths() -> Paths:
+    return Paths(DRILL_DIR)
+
+
+def night_drill(phase: str, now: datetime | None = None) -> dict:
+    """先.三十七 演練各步驟。只動 DRILL_DIR；正式目錄（DEFAULT_DIR）只讀 config 的資金欄位與推播訂閱（複製一份）。"""
+    now = now or datetime.now(TW)
+    off_cfg = load_config(Paths())
+    if off_cfg["mode"] != "SIMULATION":
+        raise AutoTradingError("--night-drill 只允許在 SIMULATION 模式下執行")
+    dp = _drill_paths()
+    DRILL_DIR.mkdir(parents=True, exist_ok=True)
+
+    def prog(msg):
+        push_notify(dp, "演練（假券商）進度", msg, "info")
+        print(msg, flush=True)
+
+    if phase == "start":
+        cfg = {k: off_cfg[k] for k in ("tranche_total", "total_capital_twd", "per_order_cap_twd",
+                                        "max_price_dev_pct", "max_data_age_days") if k in off_cfg}
+        cfg.update({"mode": "SIMULATION", "sim_veto": True, "tranche": 1, "sim_cash_twd": 10 ** 12,
+                    "note": "先.三十七 今晚無券商演練（假券商）"})
+        _write_json(dp.config, cfg)
+        subs = DEFAULT_DIR / "push_subscriptions.json"
+        if subs.exists():
+            (DRILL_DIR / "push_subscriptions.json").write_bytes(subs.read_bytes())
+        (DRILL_DIR / DRILL_FLAG).write_text(now.isoformat(timespec="seconds"), encoding="utf-8")
+        prog("演練開始：App 自動交易卡現在顯示「演練（假券商）」，不連永豐。")
+        return {"phase": phase, "state": "OK"}
+    if phase == "finish":
+        for f in (DRILL_DIR / DRILL_FLAG, dp.stop_flag, dp.scoped("SIMULATION").pending):
+            if f.exists():
+                f.unlink()
+        prog("演練結束：App 已恢復讀取正式目錄。")
+        return {"phase": phase, "state": "OK"}
+
+    broker = DrillBroker(DRILL_DIR)
+    pc = load_prev_closes()
+    if phase in ("n1-create", "n1-execute"):
+        res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,
+                            drill_label="DRILLN1", veto_minutes=NIGHT_VETO_MINUTES)
+        if phase == "n1-create" and res["state"] == "WAITING_VETO":
+            prog("N1 已建立待執行訂單（3 分鐘否決窗）。請在 App 自動交易卡按「全部取消」。")
+        elif phase == "n1-execute":
+            sent = [k for k in res.get("submitted", [])]
+            prog(f"N1 否決窗到期：送出 {len(sent)} 張（預期 0）；狀態 {res['state']}。")
+        return {"phase": phase, **res}
+    if phase == "n2-create":
+        if dp.stop_flag.exists():
+            dp.stop_flag.unlink()
+        res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,
+                            veto_minutes=NIGHT_VETO_MINUTES)
+        if res["state"] == "WAITING_VETO":
+            prog("N2 已建立待執行訂單（3 分鐘否決窗）。這一輪請不要取消，3 分鐘後程式會送出。")
+        return {"phase": phase, **res}
+    if phase == "n2-execute":
+        res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,
+                            veto_minutes=NIGHT_VETO_MINUTES)
+        prog(f"N2 否決窗到期：已送出 {len(res.get('submitted', []))} 張（假券商，尚未成交，等結算）；狀態 {res['state']}。")
+        return {"phase": phase, **res}
+    if phase == "n2-settle":
+        broker.fill_all()
+        res = settle(dp, broker, now, mode_override="SIMULATION", force=True, prev_close=pc)
+        st = _read_json(dp.scoped("SIMULATION").state) or {}
+        prog(f"N2 結算：{len(res.get('settled', []))} 筆成交入帳，對帳{'通過' if res['state'] == 'OK' else '未通過'}"
+             f"{'，批次已完成' if st.get('last_done') else ''}。")
+        return {"phase": phase, **res, "last_done": st.get("last_done")}
+    raise AutoTradingError(f"未知演練步驟 {phase}")
 
 # ---------- 先.三十三-二：真錢帳戶卡（只在本機回給 App，不寫進 repo／公開心跳） ----------
 def live_account_summary(paths: Paths | None = None, price_doc: dict | None = None) -> dict:
@@ -1281,6 +1402,7 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="--settle 略過 13:35 時間限制")
     ap.add_argument("--drill-label", help="先.三十二 演練 B：以獨立批次名走否決窗（僅 SIMULATION＋sim_veto，心跳記 drill 不發布）")
     ap.add_argument("--stop", action="store_true")
+    ap.add_argument("--night-drill", choices=NIGHT_PHASES, help="先.三十七 今晚無券商演練（假券商、獨立目錄、僅 SIMULATION）")
     ap.add_argument("--preflight", action="store_true", help="先.三十三 上線前自檢：只查詢、絕不送單，結果寫本機 status")
     a = ap.parse_args()
     paths = Paths()
@@ -1290,6 +1412,10 @@ def main() -> int:
         paths.stop_flag.write_text(now.isoformat(), encoding="utf-8")
         print("已寫入停止旗標")
         return 0
+    if a.night_drill:
+        out = night_drill(a.night_drill)
+        print(json.dumps(out, ensure_ascii=False))
+        return 0 if out.get("state") in ("OK", "WAITING_VETO", "CANCELLED") else 1
     if a.preflight:
         out = preflight(paths, now)
         for i in out["items"]:

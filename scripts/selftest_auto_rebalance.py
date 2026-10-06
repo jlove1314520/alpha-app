@@ -628,6 +628,52 @@ check("自檢推播依賴：找不到排程直譯器→FAIL", R["push_deps"]["re
 R = {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env, sched_python=sys.executable)["items"]}
 check("自檢推播依賴：可載入→PASS", R["push_deps"]["result"] == "PASS")
 
+# ---- 先.三十七：今晚無券商演練（暫時把正式／演練目錄都指到暫存，確認只動演練目錄） ----
+import shutil as _sh, sys as _sys
+_off = Path(tempfile.mkdtemp()); _drl = Path(tempfile.mkdtemp()) / "auto_trading_drill"
+(_off / "config.local.json").write_text(json.dumps({"mode": "SIMULATION", "tranche": 1, "tranche_total": 4,
+    "total_capital_twd": 4_000_000, "per_order_cap_twd": 1_000_000, "max_price_dev_pct": 1.0, "max_data_age_days": 4}), encoding="utf-8")
+(_off / "push_subscriptions.json").write_text("[]", encoding="utf-8")
+_od, _dd, _lp = A.DEFAULT_DIR, A.DRILL_DIR, A.load_prev_closes
+A.DEFAULT_DIR, A.DRILL_DIR = _off, _drl
+_t0 = datetime.now(TW).replace(hour=21, minute=0, second=0, microsecond=0)
+A.load_prev_closes = lambda *a, **k: {c: (PC[c][0], (_t0.date() - timedelta(days=1)).isoformat()) for c in PC}
+_before = {f.name: f.stat().st_mtime for f in _off.iterdir()}
+_shio = "shioaji" in _sys.modules
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+try:
+    A.night_drill("start", _t0)
+    dp = A.Paths(_drl)
+    check("夜間演練：start 建立旗標與演練設定（SIMULATION＋sim_veto）", (_drl / A.DRILL_FLAG).exists() and A.load_config(dp)["sim_veto"] is True)
+    r = A.night_drill("n1-create", _t0 + timedelta(minutes=1))
+    pend = json.loads(dp.scoped("SIMULATION").pending.read_text(encoding="utf-8"))
+    check("夜間演練 N1：待執行訂單＋否決窗 3 分鐘", r["state"] == "WAITING_VETO" and "DRILLN1" in pend["batch_id"]
+          and datetime.fromisoformat(pend["execute_after"]) - datetime.fromisoformat(pend["created_at"]) == timedelta(minutes=3))
+    dp.stop_flag.write_text("x")
+    r = A.night_drill("n1-execute", _t0 + timedelta(minutes=5))
+    lg = [x for x in ledger(dp) if "DRILLN1" in (x.get("key") or "")]
+    check("夜間演練 N1：取消後零送單、帳本記取消（REJECT STOP_FLAG）", not r.get("submitted") and lg and all(x["event"] == "REJECT" for x in lg))
+    r = A.night_drill("n2-create", _t0 + timedelta(minutes=6))
+    check("夜間演練 N2：清除停止旗標後建立新批次待執行訂單", r["state"] == "WAITING_VETO" and not dp.stop_flag.exists())
+    r = A.night_drill("n2-execute", _t0 + timedelta(minutes=10))
+    check("夜間演練 N2：到期送單（假券商，先掛著）", len(r["submitted"]) >= 1 and r["state"] == "OK")
+    r = A.night_drill("n2-settle", _t0 + timedelta(minutes=11))
+    check("夜間演練 N2：結算成交入帳、對帳通過、批次完成", r["state"] == "OK" and r["last_done"] and all(x["filled"] == x["qty"] for x in r["settled"]))
+    check("夜間演練：每步有進度推播且有批次完成推播", sum(c["title"] == "演練（假券商）進度" for c in PUSH_CALLS) >= 5 and any(c["kind"] == "complete" for c in PUSH_CALLS))
+    A.night_drill("finish", _t0 + timedelta(minutes=12))
+    check("夜間演練：finish 移除旗標與待執行訂單", not (_drl / A.DRILL_FLAG).exists() and not dp.scoped("SIMULATION").pending.exists())
+    check("夜間演練：正式目錄完全未被改動", {f.name: f.stat().st_mtime for f in _off.iterdir()} == _before)
+    check("夜間演練：沒有載入 shioaji", ("shioaji" in _sys.modules) == _shio)
+    _cfg = json.loads((_off / "config.local.json").read_text(encoding="utf-8")); _cfg["mode"] = "LIVE_WITH_VETO"
+    (_off / "config.local.json").write_text(json.dumps(_cfg), encoding="utf-8")
+    try:
+        A.night_drill("start", _t0); _ok = False
+    except A.AutoTradingError:
+        _ok = True
+    check("夜間演練：正式設定為 LIVE 類時拒絕執行", _ok)
+finally:
+    A.DEFAULT_DIR, A.DRILL_DIR, A.load_prev_closes = _od, _dd, _lp
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")

@@ -1195,15 +1195,26 @@ AUTO_TRADING_DIR = Path(os.environ.get("ALPHA_AUTO_TRADING_DIR")
                         or (Path(__file__).parent / "data" / "auto_trading"))
 
 
+# 先.三十七：今晚無券商演練。演練目錄有 DRILL_ACTIVE.flag 時，/auto/status 與 /auto/stop 改讀寫演練目錄
+# （App 的「全部取消」因此作用在演練批次上）；旗標移除即自動回到正式目錄，不需重啟。
+AUTO_DRILL_DIR = AUTO_TRADING_DIR.parent / "auto_trading_drill"
+
+
+def _auto_dir() -> tuple[Path, bool]:
+    drill = (AUTO_DRILL_DIR / "DRILL_ACTIVE.flag").exists()
+    return (AUTO_DRILL_DIR if drill else AUTO_TRADING_DIR), drill
+
+
 @app.get("/auto/status")
 async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)):
     """自動交易狀態（唯讀）：status.json、待執行訂單（否決窗）、緊急停止旗標。本端點沒有任何下單能力。"""
     _check_token(x_alpha_local_token)
-    status = _read_json_safe(AUTO_TRADING_DIR / "status.json") or {}
-    cfg = _read_json_safe(AUTO_TRADING_DIR / "config.local.json") or {}
+    adir, drill = _auto_dir()
+    status = _read_json_safe(adir / "status.json") or {}
+    cfg = _read_json_safe(adir / "config.local.json") or {}
     # 先.三十-一-1：待執行訂單按模式族分開存（auto_rebalance_bb90.mode_family 同一規則）
     family = "LIVE" if cfg.get("mode") in ("LIVE_WITH_VETO", "LIVE") else "SIMULATION"
-    pending = _read_json_safe(AUTO_TRADING_DIR / family / "pending_orders.json")
+    pending = _read_json_safe(adir / family / "pending_orders.json")
     if isinstance(pending, dict) and (pending.get("done") or pending.get("cancelled")):
         pending_view = {"cancelled": bool(pending.get("cancelled")), "done": bool(pending.get("done"))}
     else:
@@ -1215,8 +1226,8 @@ async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)
     except Exception as e:
         print(f"[warn] 真錢帳戶摘要計算失敗：{type(e).__name__}", flush=True)
         live_account = {"empty": False, "error": f"計算失敗（{type(e).__name__}）"}
-    return {"ok": True, "mode": cfg.get("mode", "SIMULATION"), "family": family,
-            "stopped": (AUTO_TRADING_DIR / "STOP.flag").exists(),
+    return {"ok": True, "mode": cfg.get("mode", "SIMULATION"), "family": family, "drill": drill,
+            "stopped": (adir / "STOP.flag").exists(),
             "status": status, "pending": pending_view, "live_account": live_account}
 
 
@@ -1226,16 +1237,17 @@ async def post_auto_stop(payload: dict, x_alpha_local_token: str | None = Header
     _check_token(x_alpha_local_token)
     if not isinstance(payload, dict) or not isinstance(payload.get("stop"), bool):
         raise HTTPException(status_code=400, detail="需要 {\"stop\": true|false}")
-    flag = AUTO_TRADING_DIR / "STOP.flag"
+    adir, drill = _auto_dir()
+    flag = adir / "STOP.flag"
     try:
         if payload["stop"]:
-            AUTO_TRADING_DIR.mkdir(parents=True, exist_ok=True)
+            adir.mkdir(parents=True, exist_ok=True)
             flag.write_text(datetime.now(TW_TZ).isoformat(), encoding="utf-8")
         elif flag.exists():
             flag.unlink()
     except OSError as e:
         raise HTTPException(status_code=500, detail=f"寫入停止旗標失敗：{e}") from e
-    return {"ok": True, "stopped": flag.exists()}
+    return {"ok": True, "stopped": flag.exists(), "drill": drill}
 
 
 # 先.三十一-一：Web Push（VAPID，方案A）。App 經這組端點交訂閱、送測試推播；
