@@ -86,6 +86,14 @@ class Paths:
         return Paths(self.base, self.heartbeat, mode_family(mode))
 
 
+def _num(v) -> float:
+    """數值統一轉換：先去千分位逗號再轉 float；None／空字串視為 0（呼叫端原本就是 `or 0`）。
+    先.四十：data_audit 的 g_comma_parsing 防線要求，不直接 float() 外部來源的值。"""
+    if v is None or v == "":
+        return 0.0
+    return float(str(v).replace(",", ""))
+
+
 def _read_json(p: Path):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
@@ -175,7 +183,7 @@ def load_prev_closes(path: Path = PRICE_HISTORY) -> dict:
         if rows:
             r = rows[-1]
             if r.get("close") and r.get("date"):
-                out[c] = (float(r["close"]), r["date"])
+                out[c] = (_num(r["close"]), r["date"])
     return out
 
 
@@ -198,7 +206,7 @@ def resolve_base_prices(refs: dict, prev_close: dict, today: date, events: dict 
         if not r or not r[0] or r[0] <= 0:
             problems.append(f"REFERENCE_MISSING:{c} 無平盤參考價")
             continue
-        px, ud = float(r[0]), str(r[1] or "")[:10].replace("/", "-")
+        px, ud = _num(r[0]), str(r[1] or "")[:10].replace("/", "-")
         if ud != today.isoformat():
             problems.append(f"REFERENCE_STALE:{c} 參考價更新日{ud or '未知'}不是今天{today.isoformat()}")
             continue
@@ -213,7 +221,7 @@ def resolve_base_prices(refs: dict, prev_close: dict, today: date, events: dict 
         gap = abs(px / pc[0] - 1) * 100
         if gap > gap_pct + 1e-9:
             ev = [e for e in events.get(c, []) if e.get("ex_date") == today.isoformat()]
-            cash = sum(float(e.get("cash") or 0) for e in ev)
+            cash = sum(_num(e.get("cash")) for e in ev)
             allow = gap_pct + (cash / pc[0] * 100 if ev else 0.0)
             if not ev:
                 problems.append(f"REFERENCE_GAP:{c} 參考價{px}與昨收{pc[0]}差{gap:.2f}%>{gap_pct}%且非除息日")
@@ -429,7 +437,7 @@ class ShioajiBroker:
         t.join(timeout)
         if t.is_alive() or "v" not in box or box["v"] is None:
             raise AutoTradingError(f"settlements 查詢逾時或失敗（{type(box.get('e')).__name__ if box.get('e') else 'timeout'}）")
-        return float(sum(abs(float(getattr(r, "amount", 0) or 0)) for r in box["v"]))
+        return sum((abs(_num(getattr(r, "amount", 0))) for r in box["v"]), 0.0)
 
 
 # ---------- 官方交易日曆 ----------
@@ -522,7 +530,7 @@ def _filled(r: dict) -> int:
 
 
 def _filled_amount(r: dict) -> float:
-    return _filled(r) * float(r.get("avg_price") or r.get("limit_price") or 0)
+    return _filled(r) * _num(r.get("avg_price") or r.get("limit_price"))
 
 
 def _rec_date(r: dict) -> date:
@@ -754,7 +762,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         label = f"T{n}" if n <= tranche_total else "M"
         bym, rnd = ym, 1
         budget = ((cfg.get("total_capital_twd") or 0) / tranche_total if label != "M"
-                  else float(cfg.get("monthly_contribution_twd") or 0))
+                  else _num(cfg.get("monthly_contribution_twd")))
     res.update(tranche=label, round=rnd)
     batch_id = f"{fam}-{bym}-{label}-R{rnd}"
     pend = _read_json(paths.pending)
@@ -846,7 +854,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         if ok_orders and _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
             exec_after = now + timedelta(minutes=VETO_MINUTES if veto_minutes is None else veto_minutes)
             lines = "；".join(f"{o['symbol']} {'賣' if o.get('action') == 'Sell' else '買'}{o['qty']}股 限價{o['limit_price']}" for o in ok_orders)
-            total = sum(float(o.get("amount") or 0) for o in ok_orders)
+            total = sum(_num(o.get("amount")) for o in ok_orders)
             hhmm = exec_after.astimezone(TW).strftime('%H:%M')
             # 先.三十九（修訂版）：預設＝無人回應即依計畫送出；取消是可選的，文字不得要求限時操作
             body = (f"無需操作，{hhmm} 將自動送出；如要取消可按全部取消。"
@@ -1306,7 +1314,7 @@ def live_account_summary(paths: Paths | None = None, price_doc: dict | None = No
         return {"empty": True}
     doc = price_doc if price_doc is not None else (_read_json(PRICE_HISTORY) or {})
     px = doc.get("prices") or {}
-    last = {c: float(px[c][-1]["close"]) for c in WEIGHTS if px.get(c)}
+    last = {c: _num(px[c][-1]["close"]) for c in WEIGHTS if px.get(c)}
     state = _read_json(paths.state) or {}
     pos = {c: int((state.get("positions") or {}).get(c, 0)) for c in WEIGHTS}
     if any(c not in last for c in WEIGHTS):
@@ -1531,7 +1539,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
     except Exception as e:
         add("exdiv", "除息資料新鮮且來源涵蓋 ETF", "FAIL", f"讀取失敗（{type(e).__name__}）")
     # 8 設定合理
-    tot, cap = float(cfg.get("total_capital_twd") or 0), float(cfg.get("per_order_cap_twd") or 0)
+    tot, cap = _num(cfg.get("total_capital_twd")), _num(cfg.get("per_order_cap_twd"))
     tt, tr = int(cfg.get("tranche_total") or 0), int(cfg.get("tranche") or 0)
     probs = []
     if tot <= 0:

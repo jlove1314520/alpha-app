@@ -325,6 +325,25 @@ def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
             return None
         return (loc["sparks"].get(c) or [None])[-1]
 
+    def _iso(v):
+        t = str(v or "").strip().replace("/", "-")
+        if len(t) == 8 and t.isdigit():
+            t = f"{t[:4]}-{t[4:6]}-{t[6:]}"
+        return t[:10] if len(t) >= 10 else None
+
+    # 2026-10-07（先.四十）：快照檔「自己的日期」優先。原本 _same_day 只用 price_history 的
+    # 最後一天代替快照日期，但各檔更新時點不同——23:00 稽核時 quotes_tw.json 已是當天收盤、
+    # price_history／quotes_all_tw／sparklines 要到 23:57 才前進，官方 TWSE 還停在前一日、
+    # TPEx 已是當日，於是 10/5、10/6 兩晚各灌出 3.7～4.0% 的假違規（06:04 重跑都 PASS）。
+    # 快照有自己的日期就只在「同一天」比；日期不同→無法查核（過期另由 a3／完整度檢查負責）。
+    snap_day = {
+        "quotes_tw.json": lambda c: _iso((loc["quotes_tw"].get(c) or {}).get("date")),
+        "quotes_all_tw.json": lambda c: _iso((loc["quotes_all"].get(c) or {}).get("date")
+                                             or (loc["quotes_all"].get(c) or {}).get("as_of")),
+        "sparklines.json": lambda c: (_iso(loc.get("sparks_stale_dates", {}).get(c))
+                                      or _iso(loc.get("sparks_asof"))),
+    }
+
     files = {
         "quotes_all_tw.json": _quotes_all_close,
         "quotes_tw.json": lambda c: (loc["quotes_tw"].get(c) or {}).get("price"),
@@ -337,9 +356,12 @@ def check_a_price_sources(a, universe, ref, names, loc, ref_date=None):
         for fname, getter in files.items():
             # 快照類檔案（沒有逐日結構）在我們的資料已經跑到參考日之後時
             # 無從比對——標無法查核，不算違規
-            if fname != "price_history.json" and not snapshot_ok:
-                a.note("a_price_source", unverifiable=1)
-                continue
+            if fname != "price_history.json":
+                sd = snap_day[fname](code) if fname in snap_day else None
+                rd = _ref_day(code)
+                if (sd and rd and sd != rd) or (not (sd and rd) and not snapshot_ok):
+                    a.note("a_price_source", unverifiable=1)
+                    continue
             try:
                 ours = num(getter(code))
             except Exception:
@@ -513,9 +535,20 @@ def check_a2_not_in_official(a, ref, names, loc, official_only):
 
 
 def check_c_range(a, universe, ref, names, loc):
-    """(c) 20 日低點 ≤ 現價 ≤ 20 日高點（允許當日突破 5%）。"""
+    """(c) 20 日低點 ≤ 現價 ≤ 20 日高點（允許當日突破 5%）。
+
+    2026-10-07（先.四十）：走勢線最後一天必須等於官方參考日才比——走勢線落後一天時，
+    官方收盤根本不在那 20 天視窗裡，單日大漲 >5% 就會被誤判「高於 20 日高點」。
+    """
     for code in universe:
         official = ref[code]["close"]
+        rv = (ref.get(code) or {}).get("date")
+        rd = _roc_to_iso(rv) or (str(rv or "")[:10] or None)
+        sd = loc.get("sparks_stale_dates", {}).get(code) or loc.get("sparks_asof")
+        sd = str(sd)[:10] if sd else None
+        if rd and sd and rd != sd:
+            a.note("c_range", unverifiable=1)
+            continue
         sp = loc["sparks"].get(code)
         vals = [num(x) for x in (sp or [])]
         vals = [v for v in vals if v is not None]
@@ -726,6 +759,7 @@ def main():
         # 2026-09-17（稽核.四.1修正版(b)）：sparklines.json新增的stale_dates，
         # 供_sparklines_close()判斷該代號的走勢線最後一點是不是落後日期。
         "sparks_stale_dates": (load_json(DATA / "sparklines.json") or {}).get("stale_dates", {}),
+        "sparks_asof": ((load_json(DATA / "sparklines.json") or {}).get("meta") or {}).get("data_asof"),
         "fundamentals": (load_json(DATA / "fundamentals.json") or {}).get("fundamentals", {}),
         "stock_detail": (load_json(DATA / "stock_detail.json") or {}).get("stocks", {}),
     }

@@ -18095,10 +18095,10 @@ push 後停下等 Cowork 核對。
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十九）。
 
 - [x] **先.三十九-一 N1 收尾（n1-execute，已取消 0 張→PASS）**〔23:0x n1-execute：總司令按的全部取消（演練目錄停止旗標）生效，3 筆 REJECT STOP_FLAG、送出 0 張、假券商 0 委託→**PASS**。第一輪 22:33 失敗原因：否決窗僅 3 分鐘、無人回應（演練設計錯誤，非功能錯誤）；當輪程式判 DRILL_NOT_CANCELLED 且 0 張送出。〕
-- [!] **先.三十九-二 /auto/cancel_pending＋App 全部取消改呼叫＋倒數＋自測三案**〔程式完成未 commit：/auto/cancel_pending（不寫 STOP.flag）、引擎取消本批記 CANCELLED、App「全部取消（只取消這一批）」、「將於 HH:MM 自動送出，無需操作（剩 X 分 Y 秒）」倒數；否決窗推播改「無需操作，HH:MM 將自動送出；如要取消可按全部取消」。自測 194 PASS（含三案）。阻塞：冒煙第39項資料稽核 FAIL（23:00 稽核排程 e253a909b 違規率 3.74%，與本改動無關），依規則不 commit；解除：稽核恢復 ≤1% 或總司令裁示。〕
+- [x] **先.三十九-二 /auto/cancel_pending＋App 全部取消改呼叫＋倒數＋自測三案**〔程式完成未 commit：/auto/cancel_pending（不寫 STOP.flag）、引擎取消本批記 CANCELLED、App「全部取消（只取消這一批）」、「將於 HH:MM 自動送出，無需操作（剩 X 分 Y 秒）」倒數；否決窗推播改「無需操作，HH:MM 將自動送出；如要取消可按全部取消」。自測 194 PASS（含三案）。阻塞：冒煙第39項資料稽核 FAIL（23:00 稽核排程 e253a909b 違規率 3.74%，與本改動無關），依規則不 commit；解除：稽核恢復 ≤1% 或總司令裁示。〕〔先.四十：43bcc41be 已 commit 並重啟驗證。〕
 - [x] **先.三十九-三 演練否決窗 10 分鐘；N1b（只取消本批、停止旗標不開）→N2（送單→結算→對帳→完成推播）→finish＋正式目錄前後對照**〔演練全由程式完成：N1b 23:17 建單→CC 呼叫 /auto/cancel_pending（App 同端點）→23:27 到期 CANCELLED、0 張、停止旗標未開；N2 23:27 建單（推播「無需操作，23:37 將自動送出」）→23:37 自動送 3 張→結算 3 筆入帳、對帳通過、批次完成推播（推播 8 則皆 ok=1）→23:38 finish。正式目錄 state／ledger／pending／push_log／公開心跳 mtime 不變（僅 installed_at.txt 為第四項新增、calendar_2026.json 為 23:14 自測重抓官方日曆）。〕
-- [!] **先.三十九-四 心跳橫幅：安裝時間晚於應執行時間不報警＋公開心跳加安裝時間欄位**〔程式完成未 commit：installed_at.txt＝2026-10-06T17:13:09+08:00（取自排程檔建立時間），公開心跳加 installed_at、publish_heartbeat 隱私檢查允許此欄位、App 安裝晚於應執行時間不報警；register 腳本首次註冊寫入安裝時間。阻塞同上。〕
-- [!] **先.三十九-五 自測冒煙全綠 commit、sw.js 版本、七之二重啟**〔live server 已用工作目錄新程式重啟（/auto/cancel_pending 實測可用），但因未 commit，啟動 log 的 build sha 不等於程式內容；commit 後需再依七之二重啟驗證。阻塞同上。〕
+- [x] **先.三十九-四 心跳橫幅：安裝時間晚於應執行時間不報警＋公開心跳加安裝時間欄位**〔程式完成未 commit：installed_at.txt＝2026-10-06T17:13:09+08:00（取自排程檔建立時間），公開心跳加 installed_at、publish_heartbeat 隱私檢查允許此欄位、App 安裝晚於應執行時間不報警；register 腳本首次註冊寫入安裝時間。阻塞同上。〕〔先.四十：43bcc41be 已 commit 並重啟驗證。〕
+- [x] **先.三十九-五 自測冒煙全綠 commit、sw.js 版本、七之二重啟**〔live server 已用工作目錄新程式重啟（/auto/cancel_pending 實測可用），但因未 commit，啟動 log 的 build sha 不等於程式內容；commit 後需再依七之二重啟驗證。阻塞同上。〕〔先.四十：43bcc41be 已 commit 並重啟驗證。〕
 
 # 2026-10-06【先.三十九（修訂版）：演練收尾＋按鈕拆分（今晚立即；總司令不需操作手機）】（總司令裁示原文，動工前先寫入；取代上方先.三十九原版）
 
@@ -18147,7 +18147,7 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十）。
 
-- [ ] **先.四十-一 先.三十九 程式 commit（冒煙第39項單次例外）**
-- [ ] **先.四十-二 七之二重啟驗證＋/auto/cancel_pending 可用**
-- [ ] **先.四十-三 09:05 演練 A 相關檔案 git status 乾淨**
-- [ ] **先.四十-四 23:00 稽核每晚超標查因＋修正（不調 1% 門檻）**
+- [x] **先.四十-一 先.三十九 程式 commit（冒煙第39項單次例外）**〔43bcc41be：依單次例外 commit（訊息與 PROGRESS 註明），自測 194 PASS、其餘冒煙全綠。更正：第39項的 9 筆程式層級違規其實就在 auto_rebalance_bb90.py（10/6 新增檔第一次被掃），已於先.四十-四一併修正。〕
+- [x] **先.四十-二 七之二重啟驗證＋/auto/cancel_pending 可用**〔重啟後 [build] git sha=43bcc41＝HEAD、stale_process=False、/auto/cancel_pending 回 cancelled=false（無待執行訂單，端點可用）、CORS 正確。四之修正後再次重啟（見四）。〕
+- [x] **先.四十-三 09:05 演練 A 相關檔案 git status 乾淨**〔git status -- auto_rebalance_bb90.py／alpha_live_server.py／web_push.py／scripts/scheduler／index.html／sw.js／data/auto_heartbeat.json／requirements-live.txt／price_history.json／ex_dividend_events.json：全部乾淨；C:lpha 排程 launcher 與 repo 備份一致。本機 config／SIMULATION 狀態檔在 gitignore 內（SIMULATION 族目錄尚未建立＝全新狀態）。〕
+- [x] **先.四十-四 23:00 稽核每晚超標查因＋修正（不調 1% 門檻）**〔根因：時間差，不是真資料錯。23:00 時各檔更新時點不同——quotes_tw 已是當日收盤、官方 TWSE STOCK_DAY_ALL 仍停前一日；官方 TPEx 已是當日、quotes_all_tw／sparklines／price_history 要到 23:57 才前進。稽核原本用 price_history 最後日期代替快照日期判斷「同一天」而失準（a_price_source 138＝quotes_all 62＋sparklines 62＋quotes_tw 14；c_range 21 全是走勢線落後一天、官方單日大漲）。e_quarters_stale 565 屬完整度類、不計入違規率，兩次相同，非原因。g_comma_parsing 9＝auto_rebalance_bb90.py 直接 float()（10/6 新檔首次被掃），改用 _num()（去千分位）。修正：data_audit 快照檔用自己的日期、c_range 要求走勢線最後日＝官方參考日，日期不同→無法查核；新增 scripts/selftest_data_audit_dates.py 5 案（修正前 2 FAIL 重現、修正後全 PASS，同日真錯仍報）。00:13 實跑違規率 0.095%、程式層級 0，冒煙全部通過。1% 門檻未動。〕
