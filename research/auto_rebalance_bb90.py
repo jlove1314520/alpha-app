@@ -1135,7 +1135,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
         if acct is None:
             add("live_login", "永豐正式環境唯讀登入", "FAIL", "登入成功但無證券帳戶")
         else:
-            add("live_login", "永豐正式環境唯讀登入", "PASS", "登入成功（未啟用 CA，無法送單）")
+            add("live_login", "永豐正式環境唯讀登入", "PASS", "正式環境權限：已生效；登入成功（未啟用 CA，無法送單）")
             signed = bool(getattr(acct, "signed", False))
             add("signed", "證券帳戶 API 簽署（signed）", "PASS" if signed else "FAIL",
                 "已簽署" if signed else "未簽署：需完成永豐 API 簽署與測試報告（docs/AUTO_TRADING_SETUP.md 第二節）")
@@ -1151,10 +1151,11 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
                     add(iid, name, "FAIL", f"查詢失敗（{type(e).__name__}）")
     except Exception as e:
         api = None if not broker_factory else api  # 登入失敗不呼叫 logout（會再拋 AuthError）
-        why = f"登入失敗（{type(e).__name__}）"
+        # 先.三十四補充：逐字記錄券商錯誤訊息，但先遮掉所有 .env 值（金鑰、身分證字號、憑證路徑等）並限長
+        raw = _mask_secrets(str(e), env)[:300]
+        why = f"登入失敗（{type(e).__name__}）：{raw}"
         if "production permission" in str(e):
-            why = ("登入被拒：目前 API 金鑰沒有正式環境權限（永豐回應 Token doesn't have production permission）——"
-                   "需完成 API 簽署與模擬測試報告、由永豐開通正式權限（docs/AUTO_TRADING_SETUP.md 第二節）")
+            why += "——目前 API 金鑰尚無正式環境權限，待永豐開通（docs/AUTO_TRADING_SETUP.md 第二節）"
         add("live_login", "永豐正式環境唯讀登入", "FAIL", why)
         for iid, name in (("signed", "證券帳戶 API 簽署（signed）"), ("q_balance", "唯讀查詢：交割戶餘額"),
                           ("q_settlements", "唯讀查詢：未交割款"), ("q_positions", "唯讀查詢：持股")):
@@ -1232,8 +1233,26 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
     out = {"ran_at": now.isoformat(timespec="seconds"),
            "pass": sum(i["result"] == "PASS" for i in items), "fail": sum(i["result"] == "FAIL" for i in items),
            "items": items}
-    write_status(paths, preflight=out)
+    # 先.三十四補充：正式環境權限首次生效時，App 顯示並推播一次（推播失敗只記警告，不影響自檢）
+    prev = (_read_json(paths.status) or {}).get("live_permission") or {}
+    ok_live = any(i["id"] == "live_login" and i["result"] == "PASS" for i in items)
+    perm = {"effective": ok_live, "checked_at": out["ran_at"],
+            "since": (prev.get("since") if prev.get("effective") else out["ran_at"]) if ok_live else None}
+    write_status(paths, preflight=out, live_permission=perm)
+    if ok_live and not prev.get("effective"):
+        try:
+            if not push_notify(paths, "正式環境權限已生效", "永豐正式環境唯讀登入成功（自檢只查詢、未啟用 CA，未送任何委託）。", "info"):
+                print("[warn] 權限生效推播未送達（只記警告）", flush=True)
+        except Exception as e:
+            print(f"[warn] 權限生效推播失敗：{type(e).__name__}（只記警告）", flush=True)
     return out
+
+
+def _mask_secrets(text: str, env: dict | None) -> str:
+    for v in sorted((env or {}).values(), key=len, reverse=True):
+        if v and len(v) >= 4:
+            text = text.replace(v, "<已遮蔽>")
+    return re.sub(r"\b[A-Z][12]\d{8}\b", "<已遮蔽>", text)  # 台灣身分證字號樣式
 
 
 def main() -> int:

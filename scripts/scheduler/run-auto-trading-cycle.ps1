@@ -13,6 +13,7 @@ switch ($Task) {
   "settle"           { $a = @("research\auto_rebalance_bb90.py","--settle") }
   "watchdog-run"     { $a = @("research\auto_rebalance_bb90.py","--watchdog","run") }
   "watchdog-settle"  { $a = @("research\auto_rebalance_bb90.py","--watchdog","settle") }
+  "preflight"        { $a = @("research\auto_rebalance_bb90.py","--preflight") }  # senior directive 34: read-only check, never places orders
   default            { exit 2 }
 }
 Set-Location $repoDir

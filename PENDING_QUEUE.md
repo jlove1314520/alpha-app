@@ -17909,9 +17909,9 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十四補充）。
 
-- [ ] **先.三十四補-1 自檢逐字記錄登入錯誤（遮蔽所有 .env 值）＋權限生效時 App 顯示「正式環境權限：已生效」＋推播一次（失敗只警告）**
-- [ ] **先.三十四補-2 立即重跑 --preflight 並記錄**
-- [ ] **先.三十四補-3 註冊 10/7 08:30／14:00 一次性自檢排程（只查詢）**
+- [x] **先.三十四補-1 自檢逐字記錄登入錯誤（遮蔽所有 .env 值）＋權限生效時 App 顯示「正式環境權限：已生效」＋推播一次（失敗只警告）**〔互動視窗：登入錯誤改為「例外類型＋券商原文」，先遮蔽全部 .env 值與身分證字號樣式再寫入、限 300 字；權限生效時 status.live_permission.effective=true、自檢顯示「正式環境權限：已生效」、App 自動交易卡顯示權限狀態，首次生效推播一次（失敗只警告）。自測 159 PASS、冒煙全部通過。〕
+- [x] **先.三十四補-2 立即重跑 --preflight 並記錄**〔2026-10-06 20:36 實跑：仍被拒，逐字＝`BadRequestError：StatusCode: 400, Detail: Token doesn't have production permission.`；PASS 6／FAIL 6。〕
+- [x] **先.三十四補-3 註冊 10/7 08:30／14:00 一次性自檢排程（只查詢）**〔已註冊 AlphaPreflight1007_0830／AlphaPreflight1007_1400（一次性、Interactive、StartWhenAvailable），經 run-auto-trading-cycle.ps1 新增的 `preflight` 任務呼叫 `--preflight`，輸出記在本機 research/data/auto_trading/scheduler.log；repo 備份 scripts/scheduler/ 同步。〕
 - [!] **先.三十四補-4 10/7 08:30 自檢結果記錄**〔時間閘：2026-10-07 08:30 後〕
 - [!] **先.三十四補-5 10/7 14:00 自檢結果記錄**〔時間閘：2026-10-07 14:00 後〕
 

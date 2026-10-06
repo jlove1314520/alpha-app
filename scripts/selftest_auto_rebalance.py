@@ -594,6 +594,33 @@ check("自檢除息：來源沒有任何 00 開頭代號→FAIL", r3["result"] =
 _b, _pr = A.resolve_base_prices({c: (PC[c][0] * (0.95 if c == "0050" else 1), TODAY.isoformat()) for c in PC}, PC, TODAY, {})
 check("引擎除息規則不變：無事件可解釋的 >1% 價差仍整批拒單", bool(_pr))
 
+# ---- 先.三十四補充：登入錯誤逐字但遮蔽；權限生效顯示＋只推播一次 ----
+class _Rej(Exception): pass
+def _rej():
+    raise _Rej("StatusCode: 400, Detail: Token doesn't have production permission. id=A123456789 key=" + _env["SINOPAC_API_KEY"] + "zz")
+_env3 = dict(_env); _env3["SINOPAC_API_KEY"] = "SECRETKEY123"; _env = _env3
+p = setup()
+R = {i["id"]: i for i in A.preflight(p, NOW, broker_factory=_rej, task_states=_tasks, env=_env)["items"]}
+d = R["live_login"]["detail"]
+check("權限：被拒時逐字記錄錯誤訊息", "Token doesn't have production permission" in d)
+check("權限：錯誤訊息遮蔽金鑰與身分證字號", "SECRETKEY123" not in d and "A123456789" not in d and "<已遮蔽>" in d)
+st = json.loads(p.status.read_text(encoding="utf-8"))
+check("權限：未生效寫 live_permission.effective=false", st["live_permission"]["effective"] is False)
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+_ok = _Api(); _ok.stock_account.signed = True
+A.preflight(p, NOW, broker_factory=lambda: _ok, task_states=_tasks, env=_env)
+st = json.loads(p.status.read_text(encoding="utf-8"))
+check("權限：生效→effective=true、自檢顯示「正式環境權限：已生效」",
+      st["live_permission"]["effective"] is True and "已生效" in [i for i in st["preflight"]["items"] if i["id"] == "live_login"][0]["detail"])
+check("權限：首次生效推播一次", len([c for c in PUSH_CALLS if c["title"] == "正式環境權限已生效"]) == 1)
+A.preflight(p, NOW + timedelta(hours=1), broker_factory=lambda: _ok, task_states=_tasks, env=_env)
+check("權限：之後再跑不重複推播、since 不變", len([c for c in PUSH_CALLS if c["title"] == "正式環境權限已生效"]) == 1
+      and json.loads(p.status.read_text(encoding="utf-8"))["live_permission"]["since"] == st["live_permission"]["since"])
+PUSH_RESULT.update({"ok": 0, "errors": ["NO_SUBSCRIPTION:x"]})
+p2 = setup(); out = A.preflight(p2, NOW, broker_factory=lambda: _ok, task_states=_tasks, env=_env)
+check("權限：推播送不到只警告、自檢照常完成", out["fail"] >= 0 and json.loads(p2.status.read_text(encoding="utf-8"))["live_permission"]["effective"] is True)
+PUSH_RESULT.update({"ok": 1, "errors": []})
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")
