@@ -6708,3 +6708,5 @@ quota_throttle: RUN: 未達節流條件，正常頻率
 ===== Hypothesis-queue cycle end: 2026-10-06 10:51:32 =====
 auth_classify: {"status": "OK", "matched": null}
 quota_throttle: RECORDED hypothesis_queue: made_progress=True consecutive_no_progress=0
+
+quota_throttle: SKIP: 正常頻率，距上次實跑29.5分鐘 < 30分鐘門檻
