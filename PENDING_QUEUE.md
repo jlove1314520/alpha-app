@@ -18029,8 +18029,8 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十七）。
 
-- [ ] **先.三十七-一 --night-drill（假券商、獨立目錄、否決窗 3 分鐘、不碰正式目錄）＋自測**
-- [ ] **先.三十七-二 伺服器演練旗標切換讀取目錄＋App 標示「演練（假券商）」＋七之二重啟**
+- [x] **先.三十七-一 --night-drill（假券商、獨立目錄、否決窗 3 分鐘、不碰正式目錄）＋自測**〔8acdbebbd：DrillBroker＋night_drill 七步驟、只寫 research/data/auto_trading_drill/、veto 3 分鐘；自測含正式目錄 mtime 不變、未載入 shioaji。〕
+- [x] **先.三十七-二 伺服器演練旗標切換讀取目錄＋App 標示「演練（假券商）」＋七之二重啟**〔伺服器 DRILL_ACTIVE.flag 切換目錄、回 drill=true；App 標「演練（假券商）」；重啟驗證 build=8acdbeb、stale_process=False、CORS 通過。〕
 - [ ] **先.三十七-三 N1（取消）演練**
 - [ ] **先.三十七-四 N2（不取消→送單→結算→對帳→批次完成推播）演練**
 - [ ] **先.三十七-五 清旗標／演練 pending、正式目錄修改時間前後對照、自測冒煙全綠 commit**
@@ -18062,6 +18062,6 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十八）。
 
-- [ ] **先.三十八-一 ShioajiBroker.cancel／cancel_open（只撤自己帳本內未終結委託）＋停止旗標時 run/settle 先撤單＋撤單失敗 ERROR＋自測三案**
-- [ ] **先.三十八-二 模擬環境 0050 掛單（前收×0.95）→查詢→砍單→確認 Cancelled（不開放則逐字記錯、改排 10/7 08:05 並驗證開盤未成交）**
-- [ ] **先.三十八-三 --live-cancel-test（只寫不跑：權限生效才可用、手動確認字串、零股 1 股前收×0.95、5 秒內撤單、不受模式影響、不得被排程呼叫）＋文件**
+- [x] **先.三十八-一 ShioajiBroker.cancel／cancel_open（只撤自己帳本內未終結委託）＋停止旗標時 run/settle 先撤單＋撤單失敗 ERROR＋自測三案**〔801bada42：cancel／cancel_open、停止旗標時 run/settle 先撤、撤單失敗 ERROR＋紅橫幅＋推播；自測：撤成功、撤失敗、只撤自己的單、無未終結不撤等 7 案。〕
+- [x] **先.三十八-二 模擬環境 0050 掛單（前收×0.95）→查詢→砍單→確認 Cancelled（不開放則逐字記錯、改排 10/7 08:05 並驗證開盤未成交）**〔2026-10-06 22:40 模擬環境實測（未關閉時段外拒絕，當晚可下單）：0050 限價 110.15 買 1 張 → PreSubmitted → 撤單 → Cancelled、成交 0，PASS；紀錄在 research/data/auto_trading_drill/cancel_test.jsonl，未動正式 state／ledger／pending。順帶發現 Shioaji 預設委託回呼會印出帳號，已關閉。〕
+- [x] **先.三十八-三 --live-cancel-test（只寫不跑：權限生效才可用、手動確認字串、零股 1 股前收×0.95、5 秒內撤單、不受模式影響、不得被排程呼叫）＋文件**〔801bada42：--live-cancel-test 已寫、CC 未執行；文件 docs/AUTO_TRADING_SETUP.md 先.三十八 節寫明執行方式；非互動終端機／排程環境一律拒絕（自測覆蓋）。〕
