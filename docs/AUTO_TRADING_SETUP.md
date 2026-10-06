@@ -121,3 +121,21 @@
 - 方案 B：Firebase Cloud Messaging（需 Google 帳號與專案，金鑰進本機）。
 - 方案 C：OneSignal 等託管服務（最省事，但訂單摘要會經第三方）。
 - 建議：先 A；任何一案都屬註冊外部服務，需總司令裁示。過渡期以 App 橫幅與 `/auto/status` 為準。
+
+## 八、手機推播開通步驟（先.三十一-一，方案 A：標準 Web Push＋VAPID，不註冊任何第三方帳號）
+
+> 狀態：程式與自測已完成（selftest_web_push 17 項、selftest_auto_rebalance 含推播接線 12 項）。
+> **尚未在總司令的 iPhone 實機驗證**——以下步驟是依 Apple 官方「iOS 16.4 起，加到主畫面的網頁 App 才能收 Web Push」的說法整理，
+> 「沒有親眼看到的畫面」，實際按鈕位置請以你手機上看到的為準。
+
+**事前條件**：iPhone 為 iOS 16.4 以上；本機 `.env` 已有 VAPID 金鑰（已產生，`python research/web_push.py --status` 顯示 `vapid_ready: true`）；本機服務（alpha_live_server）在跑。
+
+1. 用 Safari 開 https://jlove1314520.github.io/alpha-app/ 。
+2. 點 Safari 下方分享按鈕 → 「加入主畫面」→ 確認。**一定要從主畫面圖示開啟**，在 Safari 分頁裡開不會有推播權限。
+3. 從主畫面開啟 Alpha → 設定 → 自動交易卡 → 按「開啟本裝置推播」→ 系統問是否允許通知時選「允許」。
+4. 按「測試推播」。手機應收到「Alpha 測試推播」。收不到：確認 iPhone 沒開專注模式、設定 → 通知 → Alpha 為開啟。
+5. 否決窗推播收不到時，系統**不會執行該批**（fail closed）：App 出現紅色橫幅、下次排程重試。
+
+**推播事件**：否決窗開始（標的／股數／限價／總額／排定送出時間／取消方式）、整批拒單或 ERROR、排程漏跑、批次完成。
+**失敗處理**：只有「否決窗開始」推播送不出去才會擋單；其餘推播失敗只降級成警告。
+**隱私**：VAPID 私鑰只在本機 `.env`；推播內容不經任何第三方帳號，但會經 Apple 推播服務（內容端對端加密，Apple 看不到明文）；`push_log.jsonl` 只記類別與成功／失敗數。

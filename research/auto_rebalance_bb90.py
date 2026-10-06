@@ -126,8 +126,33 @@ def write_status(paths: Paths, **kw) -> None:
     _write_json(paths.status, st)
 
 
+def push_send(paths: Paths, title: str, body: str, kind: str) -> dict:
+    """先.三十一-一：Web Push（research/web_push.py）。永不拋例外；回傳 {"ok": 送達裝置數, ...}。
+    自測以替換本函式代替真的送出。"""
+    try:
+        import web_push
+        return web_push.send(title, body, kind=kind, base=paths.base)
+    except Exception as e:
+        return {"ok": 0, "failed": 0, "errors": [f"INTERNAL:{type(e).__name__}"]}
+
+
+def push_notify(paths: Paths, title: str, body: str, kind: str) -> bool:
+    """非關鍵推播：失敗只印一行警告（降級），不影響交易流程。"""
+    try:
+        r = push_send(paths, title, body, kind)
+        if not r.get("ok"):
+            print(f"[warn] 推播未送達（{kind}）：{'；'.join(r.get('errors', [])[:3]) or '未知'}", flush=True)
+            return False
+        return True
+    except Exception as e:
+        print(f"[warn] 推播失敗（{kind}）：{type(e).__name__}", flush=True)
+        return False
+
+
 def report_error(paths: Paths, msg: str, rnd: str = "auto_rebalance") -> None:
     """對帳不符等失敗：last_error＋紅色橫幅旗標＋心跳 ERROR。本身失敗只降級成警告。"""
+    push_notify(paths, "自動排程漏跑" if rnd == "auto_trading_watchdog" else "自動交易異常或整批拒單",
+                msg[:160], "watchdog" if rnd == "auto_trading_watchdog" else "error")
     try:
         write_status(paths, last_error=msg, banner="red")
     except Exception as e:
@@ -489,9 +514,11 @@ def _nz(d: dict) -> dict:
     return {k: v for k, v in d.items() if v}
 
 
-def _complete_batch(state: dict, latest: dict, fam: str) -> None:
+def _complete_batch(state: dict, latest: dict, fam: str, paths: Paths | None = None) -> None:
     b = state.get("batch")
     pref = f"{fam}-{b['ym']}-{b['label']}-"
+    if paths is not None:
+        push_notify(paths, "自動交易批次完成", f"{b['ym']} 批次 {b['label']} 已完成（共 {len([k for k in latest if k.startswith(pref)])} 筆委託紀錄）。", "complete")
     state["last_keys"] = [k for k in latest if k.startswith(pref)]
     state["last_done"] = b["ym"]
     state["last_label"] = b["label"]
@@ -548,7 +575,7 @@ def _finalize(paths: Paths, broker, now: datetime, prev_close: dict) -> str:
         pref = f"{paths.family}-{b['ym']}-{b['label']}-R{b['round']}-"
         cur = [r for k, r in latest.items() if k.startswith(pref)]
         if cur and all(r.get("event") == "FILLED" and _filled(r) >= int(r.get("qty") or 0) for r in cur):
-            _complete_batch(state, latest, paths.family)
+            _complete_batch(state, latest, paths.family, paths)
     _write_json(paths.state, state)
     _update_drift(Paths(paths.base, paths.heartbeat), after, prev_close)
     return "OK"
@@ -697,7 +724,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         missing = [c for c in WHITELIST if c not in prev_close]
         if missing or budget <= 0:
             if budget <= 0 and not missing and batch:
-                _complete_batch(state, latest, fam)
+                _complete_batch(state, latest, fam, paths)
                 _write_json(paths.state, state)
                 return res
             ctxmsg = (f"缺前收價{missing}" if missing else
@@ -718,7 +745,7 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         for o in orders:
             o["key"] = f"{batch_id}-{o['symbol']}-{o['part']}"
         if not orders and batch and rnd > 1:
-            _complete_batch(state, latest, fam)
+            _complete_batch(state, latest, fam, paths)
             _write_json(paths.state, state)
             return res
 
@@ -744,9 +771,22 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
 
     if mode == "LIVE_WITH_VETO" and not same_pend:
         if ok_orders and _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+            exec_after = now + timedelta(minutes=VETO_MINUTES)
+            lines = "；".join(f"{o['symbol']} {'賣' if o.get('action') == 'Sell' else '買'}{o['qty']}股 限價{o['limit_price']}" for o in ok_orders)
+            total = sum(float(o.get("amount") or 0) for o in ok_orders)
+            body = (f"否決窗開始：{lines}；總額約NT${total:,.0f}；排定 {exec_after.astimezone(TW).strftime('%H:%M')} 送出。"
+                    f"要取消：開 App 自動交易卡按「全部取消」，或打開緊急停止。")
+            r_push = push_send(paths, "自動交易否決窗開始", body, "veto_start")
+            if not r_push.get("ok"):
+                why_push = "PUSH_FAILED:否決窗開始推播未送達，本批不執行（fail closed）：" + ("；".join(r_push.get("errors", [])[:3]) or "未知")
+                log("REJECT", {"key": f"{batch_id}-ALL", "symbol": "ALL"}, reasons=[why_push])
+                res["rejected"].append({"symbol": "ALL", "reasons": [why_push]})
+                report_error(paths, "否決窗開始推播未送達，本批不執行，下次排程重試")
+                res["state"] = "ERROR"
+                return res
             _write_json(paths.pending, {"batch_id": batch_id, "month": bym, "tranche": label, "round": rnd,
                                         "created_at": now.isoformat(timespec="seconds"),
-                                        "execute_after": (now + timedelta(minutes=VETO_MINUTES)).isoformat(timespec="seconds"),
+                                        "execute_after": exec_after.isoformat(timespec="seconds"),
                                         "orders": ok_orders})
             write_status(paths, mode=mode, family=fam, pending=len(ok_orders))
             res["state"] = "WAITING_VETO"

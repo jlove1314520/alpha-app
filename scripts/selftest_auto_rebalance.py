@@ -5,6 +5,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "research"))
 import auto_rebalance_bb90 as A
 
+PUSH_CALLS = []
+PUSH_RESULT = {"ok": 1, "failed": 0, "errors": []}
+
+
+def _push_stub(paths, title, body, kind):
+    PUSH_CALLS.append({"title": title, "body": body, "kind": kind})
+    return dict(PUSH_RESULT)
+
+
+A.push_send = _push_stub
+
 TW = A.TW
 NOW = datetime(2026, 10, 30, 13, 0, tzinfo=TW)
 PC = {"0050": (100.0, "2026-10-29"), "00646": (50.0, "2026-10-29"), "00697B": (36.0, "2026-10-29")}
@@ -406,6 +417,42 @@ _bad = json.loads(json.dumps(_pub)); _bad["events"][0]["task"] = "buy 0050"
 check("隱私檢查：任務名不在白名單被擋", _ph.privacy_check(_bad) is not None)
 _bad = json.loads(json.dumps(_pub)); _bad["holdings"] = {"0050": 1}
 check("隱私檢查：多出頂層欄位被擋", _ph.privacy_check(_bad) is not None)
+
+# ---- 先.三十一-一：Web Push 接線 ----
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+p = setup({"mode": "LIVE_WITH_VETO"}); b = Fake()
+r = run(p, b); L = p.scoped("LIVE_WITH_VETO")
+vs = [c for c in PUSH_CALLS if c["kind"] == "veto_start"]
+check("推播：否決窗開始送出一則 veto_start 並寫入 pending", len(vs) == 1 and L.pending.exists() and r["state"] == "WAITING_VETO")
+check("推播：內容含股數／限價／總額／送出時間／取消方式", all(k in vs[0]["body"] for k in ("股", "限價", "總額", "送出", "全部取消")))
+check("推播：內容不含帳號與金鑰字樣", not any(k in vs[0]["body"].lower() for k in ("secret", "api_key", "token", "account")))
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 0, "errors": ["NO_SUBSCRIPTION:x"]})
+p = setup({"mode": "LIVE_WITH_VETO"}); b = Fake()
+r = run(p, b); L = p.scoped("LIVE_WITH_VETO")
+check("推播：否決窗推播失敗→不寫 pending、不送單（fail closed）", r["state"] == "ERROR" and not L.pending.exists() and not b.placed)
+check("推播：失敗→紅色橫幅與 last_error", json.loads(p.status.read_text(encoding="utf-8")).get("banner") == "red")
+check("推播：失敗原因 PUSH_FAILED 進拒單紀錄", any("PUSH_FAILED" in json.dumps(x, ensure_ascii=False) for x in r["rejected"]))
+PUSH_RESULT.update({"ok": 1, "errors": []})
+r = run(p, b, now=NOW + timedelta(days=1))
+check("推播：恢復後下次排程重試即進入否決窗", r["state"] == "WAITING_VETO" and L.pending.exists())
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 0, "errors": ["NO_SUBSCRIPTION:x"]})
+p = setup(); b = Fake()
+r = run(p, b)
+check("推播：模擬模式推播失敗只降級，照常成交", r["state"] == "OK" and len(b.placed) >= 1)
+check("推播：批次完成有送 complete 推播（失敗不影響）", any(c["kind"] == "complete" for c in PUSH_CALLS))
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+A.report_error(p, "對帳不符測試")
+check("推播：report_error 送 error 推播", any(c["kind"] == "error" for c in PUSH_CALLS))
+A.report_error(p, "漏跑測試", rnd="auto_trading_watchdog")
+check("推播：看門狗漏跑送 watchdog 推播", any(c["kind"] == "watchdog" for c in PUSH_CALLS))
+_orig = A.push_send
+A.push_send = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom"))
+try:
+    A.report_error(p, "推播本身爆炸"); ok_boom = True
+except Exception:
+    ok_boom = False
+A.push_send = _orig
+check("推播：推播函式自己拋例外時 report_error 不中斷", ok_boom)
 
 print("失敗：", fails if fails else "無")
 sys.exit(1 if fails else 0)

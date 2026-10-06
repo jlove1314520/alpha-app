@@ -17771,7 +17771,7 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十一）。
 
-- [ ] **先.三十一-一 Web Push（方案A，VAPID）＋否決窗推播＋設定頁測試按鈕＋開啟步驟文件**
+- [x] **先.三十一-一 Web Push（方案A，VAPID）＋否決窗推播＋設定頁測試按鈕＋開啟步驟文件**
 - [x] **先.三十一-二 去識別化心跳 data/auto_heartbeat.json＋App 紅橫幅（未執行／本機離線）**
 - [x] **先.三十一-三 限價基準改 Shioaji reference＋昨收交叉核對（>1% 非除息日整批拒單）＋自測兩案**
 - [x] **先.三十一-四 交割款（T+1/T+2 未交割）扣除、查不到即拒；唯讀餘額查詢驗證**
