@@ -1050,6 +1050,7 @@ def live_account_summary(paths: Paths | None = None, price_doc: dict | None = No
 # ---------- 先.三十三-一：上線前自檢（只查詢，絕不送單） ----------
 PREFLIGHT_ENV_KEYS = ("SINOPAC_API_KEY", "SINOPAC_SECRET_KEY", "SINOPAC_PERSON_ID", "SINOPAC_CA_PATH",
                       "SINOPAC_CA_PASSWD", "ALPHA_VAPID_PRIVATE_KEY", "ALPHA_VAPID_PUBLIC_KEY", "ALPHA_VAPID_SUBJECT")
+EXDIV_FRESH_HOURS = 72  # 同 generate_status_json.py 對 data/ex_dividend_events.json 的門檻
 PREFLIGHT_TASKS = ("AlphaAutoRun0905", "AlphaAutoRun0940", "AlphaAutoSettle1340", "AlphaAutoWatchRun", "AlphaAutoWatchSettle")
 
 
@@ -1098,7 +1099,8 @@ def _task_states(names) -> dict:
     return res
 
 
-def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None, env=None) -> dict:
+def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None, env=None,
+              exdiv_doc: dict | None = None) -> dict:
     """逐項 PASS／FAIL／WARN＋缺什麼。detail 只寫有無／成功與否／日期，不含任何金額、持股數、帳號、金鑰值。
     正式環境只做 login（不 activate_ca——沒有 CA 就不可能送出委託）＋唯讀查詢，結束即 logout。"""
     items = []
@@ -1191,17 +1193,24 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
     add("prices", f"price_history 新鮮（{max_age} 日內）", "PASS" if not stale else "FAIL",
         "三檔最新 " + "／".join(sorted({pc[c][1] for c in pc})) if not stale else "過期或缺：" + "、".join(stale))
     try:
-        doc = _read_json(REPO / "data" / "ex_dividend_events.json") or {}
-        gen = str((doc.get("meta") or {}).get("generated_at") or "")[:10]
-        fresh = bool(gen) and (today - date.fromisoformat(gen)).days <= max_age
+        # 先.三十四-二：新鮮度依 generate_status_json.py 對本檔的 72 小時門檻；來源涵蓋 ETF＝檔內已有 00 開頭代號。
+        # 白名單三檔無事件屬正常（TWT48U 只預告約 5 週內的除權息），判 PASS 附註。引擎的除息拒單規則不在此處、不受影響。
+        doc = exdiv_doc if exdiv_doc is not None else (_read_json(REPO / "data" / "ex_dividend_events.json") or {})
+        gen_raw = str((doc.get("meta") or {}).get("generated_at") or "")
+        gen = datetime.fromisoformat(gen_raw) if gen_raw else None
+        if gen is not None and gen.tzinfo is None:
+            gen = gen.replace(tzinfo=TW)
+        age_h = (now - gen).total_seconds() / 3600 if gen else None
+        fresh = age_h is not None and age_h <= EXDIV_FRESH_HOURS
         ev = doc.get("events") or {}
-        nocov = [c for c in WEIGHTS if not ev.get(c)]
-        res = "PASS" if fresh and not nocov else "FAIL"
-        det = (f"產生於 {gen or '未知'}" + ("" if fresh else "（過期）")
-               + (f"；不含白名單標的 {'、'.join(nocov)} 的除息事件——除息日價差會被當異常整批拒單" if nocov else ""))
-        add("exdiv", "除息資料新鮮且涵蓋白名單", res, det)
+        etf = any(str(k).startswith("00") for k in ev)
+        hit = [c for c in WEIGHTS if ev.get(c)]
+        probs = ([] if fresh else [f"資料過期或缺產生時間（{gen_raw[:16] or '未知'}，門檻 {EXDIV_FRESH_HOURS} 小時）"]) +                 ([] if etf else ["抓取來源未涵蓋 ETF（檔內沒有 00 開頭代號）"])
+        det = (f"產生於 {gen_raw[:16]}，來源涵蓋 ETF；" + (f"白名單有除息公告：{'、'.join(hit)}" if hit else "白名單三檔近期無除息公告")
+               if not probs else "；".join(probs))
+        add("exdiv", "除息資料新鮮且來源涵蓋 ETF", "PASS" if not probs else "FAIL", det)
     except Exception as e:
-        add("exdiv", "除息資料新鮮且涵蓋白名單", "FAIL", f"讀取失敗（{type(e).__name__}）")
+        add("exdiv", "除息資料新鮮且來源涵蓋 ETF", "FAIL", f"讀取失敗（{type(e).__name__}）")
     # 8 設定合理
     tot, cap = float(cfg.get("total_capital_twd") or 0), float(cfg.get("per_order_cap_twd") or 0)
     tt, tr = int(cfg.get("tranche_total") or 0), int(cfg.get("tranche") or 0)

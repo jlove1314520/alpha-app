@@ -580,6 +580,20 @@ check("帳戶卡：0050 對照＝同日同金額買 0050（2000 股×110−20000
 check("帳戶卡：占比與偏離（0050 50%，偏離 +5pp）", h["0050"]["pct"] == 50.0 and h["0050"]["dev_pp"] == 5.0 and h["00697B"]["shares"] == 0)
 check("帳戶卡：模擬帳本不計入真錢卡", A.live_account_summary(setup(), price_doc=_pd)["empty"] is True)
 
+# ---- 先.三十四-二：自檢除息項（新鮮＋來源涵蓋 ETF；白名單無事件判 PASS）；引擎除息拒單不變 ----
+p = setup()
+_g = (NOW - timedelta(hours=10)).isoformat()
+def _ex(doc):
+    return {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env, exdiv_doc=doc)["items"]}["exdiv"]
+r1 = _ex({"meta": {"generated_at": _g}, "events": {"00713": [{"ex_date": "2026-10-20"}], "2330": [{}]}})
+check("自檢除息：新鮮＋有 00 開頭代號、白名單無事件→PASS 附註近期無除息公告", r1["result"] == "PASS" and "近期無除息公告" in r1["detail"])
+r2 = _ex({"meta": {"generated_at": (NOW - timedelta(hours=80)).isoformat()}, "events": {"00713": [{}]}})
+check("自檢除息：超過 72 小時→FAIL", r2["result"] == "FAIL" and "過期" in r2["detail"])
+r3 = _ex({"meta": {"generated_at": _g}, "events": {"2330": [{}]}})
+check("自檢除息：來源沒有任何 00 開頭代號→FAIL", r3["result"] == "FAIL" and "ETF" in r3["detail"])
+_b, _pr = A.resolve_base_prices({c: (PC[c][0] * (0.95 if c == "0050" else 1), TODAY.isoformat()) for c in PC}, PC, TODAY, {})
+check("引擎除息規則不變：無事件可解釋的 >1% 價差仍整批拒單", bool(_pr))
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")
