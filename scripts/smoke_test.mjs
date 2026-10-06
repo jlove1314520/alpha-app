@@ -1796,10 +1796,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { pushBtnErrors.push(`測試本身出錯：${e.message || e}`); }
   record("54. 推播按鈕存在，且 pushEnable／pushTest 皆為 function", pushBtnErrors.length === 0, pushBtnErrors.join("; "));
 
+  // 55.【2026-10-07 先.四十一】git 追蹤檔不得含本機 .env 的證券帳號（SINOPAC_EXPECTED_ACCOUNT_ID）。
+  // 在本機比對、絕不印出數值；.env 沒設定這個鍵時無從比對，照實標「未設定」而不是假裝檢查過。
+  const accErrors = [];
+  let accInfo = "";
+  try {
+    const fsm = await import("node:fs");
+    const cp = await import("node:child_process");
+    const envTxt = fsm.existsSync(".env") ? fsm.readFileSync(".env", "utf8") : "";
+    const m = envTxt.split(/\r?\n/).map((l) => l.trim()).find((l) => /^SINOPAC_EXPECTED_ACCOUNT_ID\s*=/.test(l));
+    const acc = m ? m.split("=").slice(1).join("=").trim().replace(/^["']|["']$/g, "") : "";
+    if (!acc) {
+      accInfo = "本機 .env 未設定 SINOPAC_EXPECTED_ACCOUNT_ID，無從比對（請總司令自行填入）";
+    } else if (acc.length < 7) {
+      accInfo = "帳號長度不足 7 位，依規格不比對";
+    } else {
+      const r = cp.spawnSync("git", ["grep", "-l", "-F", "--", acc], { encoding: "utf8" });
+      const files = (r.stdout || "").split(/\r?\n/).filter(Boolean);
+      if (r.status !== 0 && r.status !== 1) accErrors.push(`git grep 執行失敗（exit ${r.status}）`);
+      else if (files.length) accErrors.push(`有 ${files.length} 個追蹤檔含帳號：${files.join("、")}`);
+      else accInfo = "追蹤檔皆不含帳號（數值未印出）";
+    }
+  } catch (e) { accErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("55. git 追蹤檔不得含本機 .env 的證券帳號（本機比對、不印數值）", accErrors.length === 0, accErrors.join("; ") || accInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

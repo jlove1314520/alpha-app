@@ -451,7 +451,7 @@ PENDING_QUEUE「一.2」項目：逐字比照`research/ibkr_order_server.py`架�
 伺服器基礎設施本身就跟正式環境分開，不是帳戶物件上一個可讀欄位。已用
 兩層防護補強：①`simulation=True`寫死在程式碼常數，`/submit_order`
 request body完全沒有「要不要模擬」這個欄位可以傳②帳戶ID白名單交叉比對
-（`EXPECTED_SIM_ACCOUNT_ID="0727956"`，2026-09-01實測登入這個模擬環境
+（`EXPECTED_SIM_ACCOUNT_ID="（帳號已移至本機 .env）"`，2026-09-01實測登入這個模擬環境
 拿到的帳戶），不符合就拒絕下單。
 
 **Log沿用`data/paper_order_log.json`**（跟IBKR共用同一份，不是分開開
@@ -459,7 +459,7 @@ request body完全沒有「要不要模擬」這個欄位可以傳②帳戶ID白
 彙總，不用同時讀兩個檔案再合併。
 
 **⚠ 今晚只驗證到`/health`（login+帳戶白名單比對通過，回傳
-`account_id:"0727956"`+`account_type:"simulation"`）跟token驗證機制
+`account_id:"（帳號已移至本機 .env）"`+`account_type:"simulation"`）跟token驗證機制
 （無token打`/submit_order`正確回401，且這個測試在觸及任何下單邏輯之前
 就被擋下，沒有連線到Shioaji）——**沒有呼叫過`/submit_order`送出任何
 測試單**，真正的下單測試留到台股開盤（08:30後）且使用者親自在旁邊確認

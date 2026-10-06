@@ -23,8 +23,8 @@
    刻意的設計，不是漏做。
 3. **帳戶ID白名單交叉比對**（`EXPECTED_SIM_ACCOUNT_ID`）：每次下單前
    查`api.list_accounts()`，除了確認simulation模式登入成功，還要求
-   回傳的`account_id`要等於這裡寫死的已知模擬帳戶ID（2026-09-01實測
-   登入這個模擬環境拿到的帳戶是`0727956`）——不符合就直接中止不下單。
+   回傳的`account_id`要等於已知模擬帳戶ID——2026-10-07（先.四十一）起改從本機
+   `.env` 的 `SINOPAC_EXPECTED_ACCOUNT_ID` 讀取（帳號已移至本機 .env），缺值拒絕啟動；不符合就直接中止不下單。
    **這是額外的防呆，不是唯一防線**：真正的安全邊界是simulation模式
    登入的伺服器端點本身就是跟正式環境完全分開的基礎設施，不是靠這串
    字串比對，字串比對只是「萬一哪天帳戶設定被改掉、多開了一個非預期的
@@ -90,7 +90,6 @@ TOKEN_PATH = Path(__file__).parent / ".shioaji_order_token"  # gitignored，見.
 TW_TZ = timezone(timedelta(hours=8))
 
 SIMULATION_MODE = True  # 寫死，不接受request覆蓋，見模組docstring安全防護第2點
-EXPECTED_SIM_ACCOUNT_ID = "0727956"  # 2026-09-01實測登入模擬環境拿到的帳戶ID，見安全防護第3點
 SERVER_PORT = 8794
 ORDER_FILL_WAIT_SEC = 10
 
@@ -106,6 +105,10 @@ def _load_env(path: Path) -> dict[str, str]:
         k, v = line.split("=", 1)
         kv[k.strip()] = v.strip()
     return kv
+
+
+# 先.四十一：帳號不寫進公開 repo，改由總司令自行填入本機 .env（CC 不代填、不讀出）。缺值→拒絕啟動。
+EXPECTED_SIM_ACCOUNT_ID = _load_env(ENV_PATH).get("SINOPAC_EXPECTED_ACCOUNT_ID", "").strip()
 
 
 def _load_or_create_token() -> str:
@@ -150,11 +153,11 @@ def _verify_paper_account(accounts) -> str:
     if not accounts:
         raise RuntimeError("查不到任何帳戶，無法確認是否為模擬環境，安全起見拒絕")
     account_id = accounts[0].account_id
+    if not EXPECTED_SIM_ACCOUNT_ID:
+        raise RuntimeError("本機 .env 缺 SINOPAC_EXPECTED_ACCOUNT_ID，無法確認是模擬帳戶，拒絕執行")
     if account_id != EXPECTED_SIM_ACCOUNT_ID:
-        raise RuntimeError(
-            f"帳戶ID（{account_id}）不符合已知的模擬環境帳戶白名單"
-            f"（{EXPECTED_SIM_ACCOUNT_ID}），鐵律只能操作已驗證過的模擬帳戶，拒絕執行"
-        )
+        # 錯誤訊息不印出任何帳號（先.四十一）
+        raise RuntimeError("帳戶ID不符合本機 .env 設定的模擬帳戶白名單，鐵律只能操作已驗證過的模擬帳戶，拒絕執行")
     return account_id
 
 
@@ -291,6 +294,9 @@ def submit_order(req: OrderRequest, x_alpha_local_token: str | None = Header(def
 
 if __name__ == "__main__":
     import uvicorn
+    if not EXPECTED_SIM_ACCOUNT_ID:
+        print("拒絕啟動：本機 .env 缺 SINOPAC_EXPECTED_ACCOUNT_ID（模擬帳戶白名單，請總司令自行填入）", flush=True)
+        raise SystemExit(2)
     print(f"本機下單伺服器啟動於 http://127.0.0.1:{SERVER_PORT}（只監聽本機，其他裝置連不到）", flush=True)
     print(f"App設定頁要填的Token：{LOCAL_TOKEN}", flush=True)
     print("今晚只驗證到login，沒有實際送過測試單——真正下單測試留到台股開盤且使用者親自確認才做。", flush=True)

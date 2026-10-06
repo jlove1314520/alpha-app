@@ -1,3 +1,12 @@
+## 2026-10-07 07:3x～07:4x（互動視窗，先.四十一 帳號移出公開檔案，維運帽）
+
+等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+- **證券帳號自 2026-09-01（commit 641d81e1c，已推送至 GitHub）起曾公開於 repo**，已自目前所有追蹤檔移除（`research/shioaji_order_server.py`、`BACKLOG.md`、`PROGRESS.md`）；**未改寫 git 歷史**，歷史 commit 仍含該號碼，是否清除歷史待總司令裁示。
+- `shioaji_order_server.py` 改從本機 `.env` 讀 `SINOPAC_EXPECTED_ACCOUNT_ID`，缺值拒絕啟動；需總司令自行填入（CC 不代填）。
+- 冒煙第 55 項：追蹤檔不得含 `.env` 帳號（本機比對、不印數值）；目前 `.env` 未設定該鍵，照實標「無從比對」。
+- 順帶處理：`data/audit_report.json` 被自動排程的 autostash 留在合併衝突狀態（冒煙第 39 項讀檔失敗），已取 HEAD（04:23 雲端稽核，違規率 0.047%）解除；stash 清單未動。冒煙全部通過。
+
 ## 2026-10-07 00:0x～00:3x（互動視窗，先.四十 稽核誤報查因，維運帽）
 
 等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
@@ -10922,7 +10931,7 @@ App功能補完」條目。
 新增`research/shioaji_order_server.py`（逐字比照`ibkr_order_server.py`
 架構）。**查證發現Shioaji沒有IBKR那種可查詢的模擬帳戶旗標**（帳戶物件
 沒有任何欄位標示模擬環境），改用兩層防護：`simulation=True`寫死不接受
-request覆蓋+帳戶ID白名單交叉比對(`0727956`)。Log沿用`data/
+request覆蓋+帳戶ID白名單交叉比對(`（帳號已移至本機 .env）`)。Log沿用`data/
 paper_order_log.json`（跟IBKR共用，新增`broker`欄位區分）。**今晚只測
 `/health`（login+帳戶白名單通過）跟token驗證(401)，完全沒有呼叫過
 `/submit_order`送測試單**——留到台股開盤且使用者親自確認才做，這是

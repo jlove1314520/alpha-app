@@ -44,7 +44,8 @@ def _count(args) -> int | None:
             return sum(1 for _ in d.iterdir()) if d.exists() else 0
         if args.count_cmd:
             r = subprocess.run(args.count_cmd, shell=True, cwd=ROOT,
-                               capture_output=True, text=True, timeout=60)
+                               capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=60)
             return int(r.stdout.strip().split()[0])
     except Exception as e:  # noqa: BLE001
         print(f"::warning::進度計數失敗（本輪跳過，不影響長工作）：{type(e).__name__}: {e}", flush=True)
@@ -52,14 +53,17 @@ def _count(args) -> int | None:
 
 
 def _git(*a, timeout=120):
-    return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, timeout=timeout)
+    # 一律指定 utf-8：git 輸出含中文時，Windows 預設 cp950 會丟 UnicodeDecodeError
+    return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace", timeout=timeout)
 
 
 def _commit_push(msg: str) -> str:
     got = False
     try:
         r = subprocess.run([sys.executable, str(LOCK_PY), "acquire"], cwd=ROOT,
-                           capture_output=True, text=True, timeout=60)
+                           capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=60)
         got = (r.returncode == 0)
     except Exception:  # noqa: BLE001
         got = False
@@ -77,7 +81,8 @@ def _commit_push(msg: str) -> str:
         if got:
             try:
                 subprocess.run([sys.executable, str(LOCK_PY), "release"], cwd=ROOT,
-                               capture_output=True, text=True, timeout=60)
+                               capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=60)
             except Exception:  # noqa: BLE001
                 pass
 

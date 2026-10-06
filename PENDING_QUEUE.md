@@ -18151,3 +18151,28 @@ push 後停下等 Cowork 核對。
 - [x] **先.四十-二 七之二重啟驗證＋/auto/cancel_pending 可用**〔重啟後 [build] git sha=43bcc41＝HEAD、stale_process=False、/auto/cancel_pending 回 cancelled=false（無待執行訂單，端點可用）、CORS 正確。四之修正後再次重啟（見四）。〕
 - [x] **先.四十-三 09:05 演練 A 相關檔案 git status 乾淨**〔git status -- auto_rebalance_bb90.py／alpha_live_server.py／web_push.py／scripts/scheduler／index.html／sw.js／data/auto_heartbeat.json／requirements-live.txt／price_history.json／ex_dividend_events.json：全部乾淨；C:lpha 排程 launcher 與 repo 備份一致。本機 config／SIMULATION 狀態檔在 gitignore 內（SIMULATION 族目錄尚未建立＝全新狀態）。〕
 - [x] **先.四十-四 23:00 稽核每晚超標查因＋修正（不調 1% 門檻）**〔根因：時間差，不是真資料錯。23:00 時各檔更新時點不同——quotes_tw 已是當日收盤、官方 TWSE STOCK_DAY_ALL 仍停前一日；官方 TPEx 已是當日、quotes_all_tw／sparklines／price_history 要到 23:57 才前進。稽核原本用 price_history 最後日期代替快照日期判斷「同一天」而失準（a_price_source 138＝quotes_all 62＋sparklines 62＋quotes_tw 14；c_range 21 全是走勢線落後一天、官方單日大漲）。e_quarters_stale 565 屬完整度類、不計入違規率，兩次相同，非原因。g_comma_parsing 9＝auto_rebalance_bb90.py 直接 float()（10/6 新檔首次被掃），改用 _num()（去千分位）。修正：data_audit 快照檔用自己的日期、c_range 要求走勢線最後日＝官方參考日，日期不同→無法查核；新增 scripts/selftest_data_audit_dates.py 5 案（修正前 2 FAIL 重現、修正後全 PASS，同日真錯仍報）。00:13 實跑違規率 0.095%、程式層級 0，冒煙全部通過。1% 門檻未動。〕
+
+# 2026-10-07【先.四十一：帳號號碼移出公開檔案（低優先）】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十一】帳號號碼移出公開檔案（低優先；09:00–13:45 演練期間不得改動 auto_rebalance_bb90.py、排程與 alpha_live_server 相關檔案）
+
+一、Cowork 查證：證券帳號（已遮蔽）出現在 research/shioaji_order_server.py（第 27、93 行）、BACKLOG.md（第 454、462 行）、PROGRESS.md（第 10925 行），自 2026-09-01 起公開。PROGRESS 提到的 commit 641d81e1c 在遠端查無此物件，請確認是不是未推送的本機 commit；若是，推送前先移除帳號。
+二、處理：
+  1. shioaji_order_server.py 改從 .env 讀 SINOPAC_EXPECTED_ACCOUNT_ID；缺值時拒絕啟動。
+  2. 文件內帳號一律改寫為「（帳號已移至本機 .env）」。
+  3. 由總司令自行把帳號填入 .env，CC 不代填、不讀出。
+三、防再犯：冒煙測試新增一項，git 追蹤檔中不得出現 7 位以上、與 .env 中 SINOPAC_EXPECTED_ACCOUNT_ID 相同的字串；比對在本機進行，不印出數值。
+四、不得改寫 git 歷史（總司令未裁示）；PROGRESS 註明帳號自 2026-09-01 起曾公開，已自目前檔案移除。
+五、本項可在 13:45 後或演練以外的時段執行；冒煙全綠才 commit。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。
+
+註（互動視窗）：登記時刻意把原文裡的帳號數字改寫為「（已遮蔽）」，避免本條目自己把帳號再寫進公開檔案。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十一）。
+
+- [x] **先.四十一-一 確認 641d81e1c 是否已推送**〔查證：641d81e1c（完整 641d81e1ca5a…）在 origin/main 內，GitHub API 查得到（2026-09-01T15:59:23Z），**已推送、已公開**；Cowork「遠端查無此物件」判斷有誤。〕
+- [x] **先.四十一-二 shioaji_order_server.py 改讀 SINOPAC_EXPECTED_ACCOUNT_ID（缺值拒絕啟動）＋文件帳號改寫**〔shioaji_order_server.py 改從 .env 讀 SINOPAC_EXPECTED_ACCOUNT_ID，缺值 main 拒絕啟動（exit 2）、下單檢查也拒絕；錯誤訊息不再印帳號。BACKLOG.md 2 處、PROGRESS.md 1 處改寫為「（帳號已移至本機 .env）」。git grep 追蹤檔已無該號碼。.env 未代填。另：程式註解顯示該號碼是登入模擬環境取得的帳戶 ID，仍依裁示比照處理。〕
+- [x] **先.四十一-三 冒煙新增：git 追蹤檔不得含 .env 帳號（本機比對、不印值）**〔冒煙第55項：讀本機 .env 的帳號、git grep -F 比對追蹤檔、不印數值；暫存假 repo 實測可抓到外洩檔。目前 .env 未設定該鍵→照實標「無從比對」。冒煙全部通過。〕
+- [x] **先.四十一-四 PROGRESS 註明曾公開、已移除；不改寫歷史**〔PROGRESS 已註明；未改寫 git 歷史（歷史中 641d81e1c 等 commit 仍含該號碼）。〕
