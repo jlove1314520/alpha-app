@@ -17997,8 +17997,8 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.三十六）。
 
-- [ ] **先.三十六-一 用排程同一個 Store python 安裝 pywebpush（釘版本寫 requirements）＋確認 import pywebpush／shioaji**
-- [ ] **先.三十六-二 錯誤分類 DEPENDENCY＋App 顯示「電腦缺推播套件」**
-- [ ] **先.三十六-三 preflight 新增推播依賴項＋selftest_web_push 真發送器依賴案**
-- [ ] **先.三十六-四 重啟 alpha_live_server（七之二）＋實送 /push/test、push_log ok≥1**
-- [ ] **先.三十六-五 PROGRESS 註明先.三十一-一 第二處假完成**
+- [x] **先.三十六-一 用排程同一個 Store python 安裝 pywebpush（釘版本寫 requirements）＋確認 import pywebpush／shioaji**〔Store python 安裝 pywebpush==2.5.0（http_ece 1.2.1、py-vapid 1.9.4、cryptography 50.0.0），釘進 research/requirements-live.txt；同直譯器 import pywebpush 與 shioaji 1.7.4 皆成功；既有鎖版本 fastapi/uvicorn/starlette/requests/certifi/urllib3 未變。〕
+- [x] **先.三十六-二 錯誤分類 DEPENDENCY＋App 顯示「電腦缺推播套件」**〔web_push.send：ImportError→`DEPENDENCY:電腦缺推播套件（模組名）`；App 測試推播把 DEPENDENCY 顯示為「電腦缺推播套件」。commit 71173e011。〕
+- [x] **先.三十六-三 preflight 新增推播依賴項＋selftest_web_push 真發送器依賴案**〔preflight 新增 push_deps（子行程以排程 Store python 實際 import 四個依賴）；selftest_web_push 新增真發送器依賴兩案（本直譯器＋排程直譯器）與 DEPENDENCY 分類案，兩個直譯器皆全 PASS；selftest_auto_rebalance 161 PASS。〕
+- [x] **先.三十六-四 重啟 alpha_live_server（七之二）＋實送 /push/test、push_log ok≥1**〔已重啟：[build] git sha=71173e0＝HEAD、stale_process=False、CORS 預檢含精確來源＋credentials。21:30:39 實送 /push/test：delivered=1、failed=0，push_log ok=1。自檢重跑 PASS 8／FAIL 5（推播兩項 PASS；FAIL 皆為正式權限未開通）。〕
+- [x] **先.三十六-五 PROGRESS 註明先.三十一-一 第二處假完成**〔PROGRESS.md 已註明。〕

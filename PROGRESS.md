@@ -1,3 +1,16 @@
+## 2026-10-06 21:2x～21:3x（互動視窗，先.三十六 推播缺套件修復，維運帽）
+
+等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+**⚠️ 更正：先.三十一-一 第二處假完成**——`scripts/selftest_web_push.py` 17 項全部用假發送器（替換 SENDER），從未載入真正的 `_pywebpush_sender`；而排程與常駐伺服器用的 Store Python 根本沒裝 pywebpush（自測是用另一支已安裝的 Program Files Python 跑的，所以過）。21:24 總司令實測四次全部 `NETWORK:ModuleNotFoundError`（錯誤分類也錯了）。
+
+- Store Python 安裝 pywebpush==2.5.0 並釘進 `research/requirements-live.txt`；既有鎖版本未變。
+- 錯誤分類：缺套件改記 `DEPENDENCY`，App 顯示「電腦缺推播套件」。
+- 防再犯：`--preflight` 新增「推播發送依賴可載入（排程直譯器）」；`selftest_web_push` 新增真發送器依賴檢查（含排程直譯器）。
+- 重啟 live server：build=71173e0、stale_process=False、CORS 通過。**21:30:39 實送測試推播 delivered=1**（push_log ok=1）。
+- 自檢 PASS 8／FAIL 5（剩下 5 項 FAIL 都是永豐正式權限未開通）。
+- 自測：selftest_auto_rebalance 161 PASS；selftest_web_push 兩個直譯器皆全 PASS；冒煙全部通過。
+
 ## 2026-10-06 20:5x～21:1x（互動視窗，先.三十五 推播按鈕修復，開發帽）
 
 等待總司令審閱：13 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
