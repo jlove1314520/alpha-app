@@ -661,12 +661,44 @@ class LiveSource:
                     d = _pick(raw, t, len(tk) == 1)
                     if d is None:
                         miss.append((c, s))
+                    elif _yf_chunk_implausible(d, c):
+                        # 先.二十六-五（2026-10-06）：yfinance 對台股偶爾回傳物理上不可能的
+                        # 還原價（實測 0050 在 2014-01-02 為 −75.06%，恰為 4 倍）。
+                        # 這條備援只在 FinMind 無價時才走，寧可**當成沒有價格**
+                        # （該檔照既有缺價邏輯處理），也不可把壞價餵進紙上追蹤帳本。
+                        warn("yf_implausible", f"{c}：yfinance 備援序列含物理上不可能的日報酬，視為無價格")
+                        miss.append((c, s))
                     else:
                         out[c] = d[d.index <= end]
             todo = [(c, ".TWO" if s == ".TW" else ".TW") for c, s in miss]
             if not todo:
                 break
         return out
+
+
+# 台股有漲跌幅限制（2015-06 起 ±10%，之前 ±7%），單日報酬超過 ±11% 物理上不可能。
+# 與 research/adjust.py::_yf_series_physically_impossible() 同一條判準，但這裡是
+# paper_supply_v2 自己的 yfinance 備援路徑（不經過 adjust.adjusted_price_series），
+# 所以必須各自把關——「每個元件各自正確、合起來仍有漏洞」是本專案反覆踩過的形狀。
+_TW_IMPOSSIBLE = 0.11
+
+
+def _yf_chunk_implausible(d, code: str) -> bool:
+    """yfinance 備援序列是否含物理上不可能的日報酬。自身失敗一律回 False（fail open）。"""
+    try:
+        if not (len(str(code)) == 4 and str(code).isdigit()):
+            return False
+        col = "Adj Close" if "Adj Close" in d.columns else ("Close" if "Close" in d.columns else None)
+        if col is None:
+            return False
+        a = pd.to_numeric(d[col], errors="coerce").dropna()
+        a = a[a > 0].to_numpy(dtype=float)
+        if len(a) < 3:
+            return False
+        r = a[1:] / a[:-1] - 1.0
+        return bool((abs(r) > _TW_IMPOSSIBLE).any())
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _flat(d):

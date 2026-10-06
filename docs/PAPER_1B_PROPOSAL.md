@@ -50,8 +50,9 @@ Ba/Bb/Bc 系列在相同股票占比下，MDD 一律比 Aa/Ab/Ac 淺 5～9 個�
 | 美股大盤 | 元大S&P500 | **00646** | 約 0.66%／年 | 1 股（盤中零股） | **追蹤 S&P500，非 VTI 的全市場** |
 | 美國公債 | 元大美債20年 | **00679B** | 約 0.33%／年 | 1 股（盤中零股） | **存續期 20 年，非 IEF 的 7–10 年** |
 
-> ⚠️ **費用率為概估，須由總司令或 CC 另行向發行商公開資料查證後才可寫入正式文件**——
-> 本專案規則要求數字須有來源，此處僅為提案階段的量級參考。
+> ⚠️ **下面這張表已過時，以文末【先.二十六】附錄 A 為準**（2026-10-06 查證完成）：
+> 安全腿**不用 00679B**，改為 **00697B**（與 IEF 追蹤同一指數）；費用率已換成官方揭露值並附來源。
+> 原表的概估數字保留供稽核，**不得據以執行**。
 
 ### 標的替換造成的偏離（必須揭露）
 
@@ -92,3 +93,167 @@ Ba/Bb/Bc 系列在相同股票占比下，MDD 一律比 Aa/Ab/Ac 淺 5～9 個�
    是否接受此偏離，或改找其他標的。
 
 **CC 不自行開始紙.一b，等裁示。**
+
+---
+
+# 【先.二十六】核准後的定案內容（2026-10-06）
+
+> 總司令 2026-10-06【先.二十六】一核准紙.一b。以下取代上方第 3 節的概估內容。
+
+## A. 安全腿定案：00697B（元大美債7-10）
+
+**台灣市場只有兩檔 7～10 年期美國公債 ETF**（其餘發行商在此天期無產品），且**都是上櫃不是上市**：
+
+| 項目 | **00697B（選定）** | 00695B |
+|---|---|---|
+| 全名 | 元大美國政府7至10年期債券ETF | 富邦美國政府債券7-10年期 |
+| 發行商 | 元大投信 | 富邦投信 |
+| **追蹤指數** | **ICE US Treasury 7~10 Year Bond Index** | FTSE US Treasury 7-10 Years Index |
+| 經理費 | **0.20%** | 最高 0.2% |
+| 保管費 | 級距式：30億以下 0.10%／30–200億 0.06%／200億以上 0.04% | 級距式：30億以下 0.17%／30億以上 0.1% |
+| 成立日 | 2017-06-15（上市 2017-06-23） | 2017-05-31 |
+| 規模 | NT$22.92 億（2026-10-02） | NT$14.36 億（2026-09-30） |
+| 掛牌 | **上櫃**（`00697B.TWO`） | **上櫃**（`00695B.TWO`） |
+
+**選 00697B 的理由不是存續期數字，是指數同一性**：它與 IEF **追蹤同一個指數**
+（ICE US Treasury 7-10 Year Bond Index），存續期在結構上必然相同。
+
+> ⚠️ **誠實揭露**：兩檔的官方頁面**都沒有揭露 duration 數字**，本報告**沒有**用二手網站的數字補上。
+> 若需實際存續期，須另向發行商索取基金月報。
+> 同理，二手網站流傳的「總費用率 0.42%／0.44%」**未採用**，因為那是推估、非官方揭露。
+
+### 匯率避險狀態：用資料實證判定為「未避險」
+
+官方頁面查不到避險說明，故以 2017-06～2024-12 的 1,778 個重疊交易日實證：
+
+| 比較對象 | 累積報酬 | 與 00697B 實際（5.76%）的差距 |
+|---|---|---|
+| **IEF 台幣計價（未避險情境）** | **5.91%** | **0.15 個百分點** |
+| IEF 純美元（避險情境） | −1.60% | 7.36 個百分點 |
+
+**判定：00697B 未對新台幣避險**，與本案的換算方法（美元報酬 × DEXTAUS 匯率變動）一致。
+7.5 年只差 0.15pp，同時驗證了**標的選擇**與**換算方法**兩件事都正確。
+（對照：00695B 差 2.81pp，追蹤的是不同指數。）
+
+## B. 實際台灣 ETF 重算（只報告，不列入判定）
+
+期間 2017-06-15～2024-12-30（1839 個共同交易日，受限於 00697B 2017-06 才成立）：
+
+| 版本 | 年化 | MDD | Sortino | 最差 12 個月 | 2022 年 |
+|---|---|---|---|---|---|
+| **實際台灣 ETF**（0050／00646／00697B） | **14.75%** | -25.6% | 1.378 | -14.0% | -14.02% |
+| IEF／VTI 換算版（同期間） | 14.46% | -25.6% | 1.456 | -16.0% | -15.90% |
+
+兩者年化差 0.28 個百分點、MDD 幾乎相同——**台灣可執行版與回測假設的落差很小**。
+
+> ⚠️ 這段期間（2017-06 起）**不含 2008 金融海嘯**，年化 14.75% 遠高於全期回測的 10.19%，
+> **不可用這個數字代表長期預期**。它的用途只是驗證「換算 vs 實際」的落差，不是績效宣稱。
+
+## C. 風險揭露：若安全腿誤用 20 年期（TLT 換算）
+
+| 版本 | 年化 | 全期 MDD | **2022 年** |
+|---|---|---|---|
+| IEF 版（7–10 年期，回測基準） | 10.19% | -43.8% | **-15.89%** |
+| TLT 版（20 年期） | 10.27% | -43.6% | **-17.45%** |
+
+2022 年升息段相差 **1.56 個百分點**（長天期較差），
+全期 MDD 則相差無幾——因為安全腿只占 10%，存續期選擇的影響被權重稀釋。
+**這也說明：若日後提高安全腿權重，存續期的選擇會變得重要得多。**
+
+## D. 流動性與執行性的保留事項（交總司令判斷）
+
+- 00697B 規模 NT$22.92 億、00695B 僅 14.36 億，相較 IEF 的 US$414.7 億差約三個數量級。
+- 兩檔都是**上櫃**，取價時代號須用 `.TWO` 後綴（`adjust.py` 已可正確處理）。
+- 月度再平衡的交易量是否會對這種規模的 ETF 造成衝擊，**屬總司令判斷範圍**。
+
+## E. 附錄：美國遺產稅事實整理（非美國居民持有美股 ETF）
+
+> 以下為**事實查證整理，不構成稅務建議或投資建議**（總司令【先.二十六】四）。
+
+### E-1 免稅額：非美國居民與美國公民／居民差 250 倍
+
+| 身分 | 免稅額（2026） |
+|---|---|
+| 非美國居民（NRA） | **US$60,000**，且**不隨通膨調整** |
+| 美國公民／居民 | **US$15,000,000** |
+
+NRA 可用的統一抵免額（unified credit）為 US$13,000，即對應上述 6 萬美元。
+
+### E-2 稅率
+
+適用 Form 706 的 Table A 統一稅率表：**最低 18%，最高 40%**，40% 自課稅額超過 US$1,000,000 起適用。
+
+### E-3 什麼算「美國境內財產」——**券商在哪裡不影響認定**
+
+IRS Form 706-NA 說明書原文：
+
+> "Generally, no matter where stock certificates are physically located, stock of corporations
+> organized in or under U.S. law is property located in the United States, and all other corporate
+> stock is property located outside the United States."
+
+IRS 另一頁更明確：美國境內財產包含美國法律下組織之公司股份，
+**即使非居民將證券持有於境外或登記在名義人（nominee）名下**。
+
+| 持有方式 | 是否為美國境內財產 |
+|---|---|
+| 美國券商直接持有 VTI／IEF | **是** |
+| **台灣複委託持有 VTI／IEF** | **是**——「held abroad」與「nominee name」都被明文涵蓋 |
+
+**亦即複委託並不會讓美國上市 ETF 脫離美國遺產稅範圍。**
+
+### E-4 台灣上市／上櫃 ETF（0050／00646／00697B）
+
+依 E-3 的原文「all other corporate stock is property located outside the United States」，
+台灣發行、依台灣法令組織的基金**不屬於**美國境內財產，**即使其持有美國資產或追蹤美國指數**。
+
+> ⚠️ **查證限制**：IRS 該條文用語是「corporate stock」，而台灣 ETF 的法律形式多為
+> **證券投資信託基金（信託）**而非公司股份。**查不到** IRS 針對台灣境內基金受益憑證的個別函釋，
+> 上述結論是從一般規則推得、**非直接明文**。實際涉及申報時應由合格稅務專業人士確認。
+
+### E-5 美台之間沒有遺產稅條約
+
+IRS 列出的遺產／贈與稅條約國為 Australia、Austria、Canada、Denmark、Finland、France、
+Germany、Greece、Ireland、Italy、Japan、Netherlands、South Africa、Switzerland、United Kingdom
+——**台灣不在其中**。台灣亦**不在** IRS 的所得稅條約國清單內。
+
+### E-6 配息預扣稅與遺產稅是兩回事
+
+| | 配息預扣稅 | 遺產稅 |
+|---|---|---|
+| 課稅時點 | **生前**，每次配息當下扣繳 | **身故時**，就財產移轉課徵 |
+| 稅率 | 美國來源股利對 NRA 原則 **30%** | 18%–40%，超過 US$60,000 部分 |
+| 台灣適用 | 無條約 → **30% 法定稅率** | 無條約 → **無額外減免** |
+
+**兩者各自獨立，繳了 30% 預扣稅不代表身故時免遺產稅。**
+
+### E-7 對紙.一b 兩條路的意義（事實陳述，非建議）
+
+- 走**台灣上櫃 ETF**（0050／00646／00697B）：依 E-4，原則上不在美國遺產稅範圍
+  （但有 E-4 的查證限制）；代價是標的與回測不完全相同（已於附錄 A、B 量化）。
+- 走**複委託買 VTI／IEF**：忠於回測標的，但依 E-3 **仍在**美國遺產稅範圍，
+  免稅額僅 US$60,000。
+
+---
+
+**本節為事實整理，不構成稅務建議或投資建議。實際申報、規劃或執行前，應諮詢合格的稅務專業人士。**
+
+## F. 來源清單
+
+**台灣 ETF（附錄 A）**
+
+1. [元大 00697B 基本資訊（官網）](https://www.yuantaetfs.com/product/detail/00697B/Basic_information)
+2. [元大美國政府7至10年期債券ETF傘型基金 公開說明書（PDF）](https://www.yuantafunds.com/fund/download/1161%E7%BE%8E%E5%9C%8B%E6%94%BF%E5%BA%9C7%E8%87%B310%E5%B9%B4%E5%82%B5ETF%E5%82%98-%E5%85%AC%E9%96%8B%E8%AA%AA%E6%98%8E%E6%9B%B8.pdf)
+3. [元大投信 基金總覽 1161（官網）](https://www.yuantafunds.com/myfund/information/1161)
+4. [富邦投信 基金總覽 Fd=66（官網）](https://www.fubon.com/asset-management/fund/info/fund?Fd=66)
+5. [iShares IEF 官方產品頁](https://www.ishares.com/us/products/239456/ishares-710-year-treasury-bond-etf)
+
+**美國遺產稅（附錄 E）**
+
+6. [IRS — Estate tax for nonresidents not citizens of the United States](https://www.irs.gov/businesses/small-businesses-self-employed/estate-tax-for-nonresidents-not-citizens-of-the-united-states)
+7. [IRS — Instructions for Form 706-NA](https://www.irs.gov/instructions/i706na)
+8. [IRS — Tax inflation adjustments for tax year 2026](https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026-including-amendments-from-the-one-big-beautiful-bill)
+9. [IRS — Instructions for Form 706（Table A 統一稅率表）](https://www.irs.gov/instructions/i706)
+10. [IRS — Some nonresidents with U.S. assets must file estate tax returns](https://www.irs.gov/individuals/international-taxpayers/some-nonresidents-with-us-assets-must-file-estate-tax-returns)
+11. [IRS — Estate & gift tax treaties (international)](https://www.irs.gov/businesses/small-businesses-self-employed/estate-gift-tax-treaties-international)
+12. [IRS — United States income tax treaties A to Z](https://www.irs.gov/businesses/international-businesses/united-states-income-tax-treaties-a-to-z)
+13. [IRS — Federal income tax withholding on other U.S. source income paid to nonresident aliens](https://www.irs.gov/individuals/international-taxpayers/federal-income-tax-withholding-and-reporting-on-other-kinds-of-us-source-income-paid-to-nonresident-aliens)
