@@ -1231,6 +1231,19 @@ async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)
             "status": status, "pending": pending_view, "live_account": live_account}
 
 
+@app.post("/auto/cancel_pending")
+async def post_auto_cancel_pending(x_alpha_local_token: str | None = Header(default=None)):
+    """先.三十九：只取消目前這一批待執行訂單（不寫 STOP.flag，之後批次照常）。不具下單能力。"""
+    _check_token(x_alpha_local_token)
+    adir, drill = _auto_dir()
+    try:
+        import auto_rebalance_bb90 as _ab
+        out = _ab.cancel_pending(_ab.Paths(adir))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"取消失敗：{type(e).__name__}") from e
+    return {**out, "drill": drill}
+
+
 @app.post("/auto/stop")
 async def post_auto_stop(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
     """寫入／清除本機緊急停止旗標。payload: {"stop": true|false}。只動 STOP.flag，不送任何訂單。"""

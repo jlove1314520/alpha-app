@@ -19,3 +19,7 @@ foreach ($d in $defs) {
   Register-ScheduledTask -TaskName $d.N -Action $action -Trigger $trigger -Principal $principal -Settings $settings -Description "Alpha auto rebalance ($($d.T) $($d.At)); see docs/AUTO_TRADING_SETUP.md" | Out-Null
   Write-Output "registered: $($d.N)"
 }
+# senior directive 39: record first install time (time only) for the public heartbeat; the App uses it to
+# avoid a false "schedule did not run" banner on the install day. Existing file is kept (first install wins).
+$inst = "C:\alpha\alpha-app\research\data\auto_trading\installed_at.txt"
+if (-not (Test-Path $inst)) { [IO.File]::WriteAllText($inst, (Get-Date -Format "yyyy-MM-ddTHH:mm:ss") + "+08:00") }

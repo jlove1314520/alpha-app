@@ -650,6 +650,20 @@ def cancel_open(paths: Paths, broker, now: datetime, mode: str) -> dict:
     return out
 
 
+def cancel_pending(paths: Paths, now: datetime | None = None) -> dict:
+    """先.三十九：只把「目前這一批」待執行訂單標成已取消（不寫 STOP.flag，之後的批次照常）。
+    paths 為共用（未 scoped）路徑；依設定模式找對應族的 pending。沒有待執行批次時回 cancelled=False。"""
+    now = now or datetime.now(TW)
+    cfg = load_config(paths)
+    sp = paths.scoped(cfg["mode"])
+    pend = _read_json(sp.pending)
+    if not isinstance(pend, dict) or pend.get("done") or pend.get("cancelled") or not pend.get("execute_after"):
+        return {"ok": True, "cancelled": False, "reason": "目前沒有待執行訂單"}
+    pend.update(cancelled=True, cancelled_by="USER_CANCEL_PENDING", cancelled_at=now.isoformat(timespec="seconds"))
+    _write_json(sp.pending, pend)
+    return {"ok": True, "cancelled": True, "batch_id": pend.get("batch_id")}
+
+
 # ---------- 主流程 ----------
 def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None = None,
                   mode_override: str | None = None, poll_sec: float = 2.0, polls: int = 5,
@@ -749,6 +763,10 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
     same_pend = bool(pend and pend.get("batch_id") == batch_id)
 
     if same_pend and pend.get("cancelled"):
+        # 先.三十九：只取消本批（App「全部取消」→ /auto/cancel_pending）→逐筆記 CANCELLED、不送單；之後批次照常
+        for o in pend.get("orders") or []:
+            if o.get("key") and latest.get(o["key"], {}).get("event") != "CANCELLED":
+                log("CANCELLED", o, filled_qty=0, reason=pend.get("cancelled_by") or "STOP_FLAG")
         res["state"] = "CANCELLED"
         return res
     def base_prices():
@@ -829,8 +847,10 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
             exec_after = now + timedelta(minutes=VETO_MINUTES if veto_minutes is None else veto_minutes)
             lines = "；".join(f"{o['symbol']} {'賣' if o.get('action') == 'Sell' else '買'}{o['qty']}股 限價{o['limit_price']}" for o in ok_orders)
             total = sum(float(o.get("amount") or 0) for o in ok_orders)
-            body = (f"否決窗開始：{lines}；總額約NT${total:,.0f}；排定 {exec_after.astimezone(TW).strftime('%H:%M')} 送出。"
-                    f"要取消：開 App 自動交易卡按「全部取消」，或打開緊急停止。")
+            hhmm = exec_after.astimezone(TW).strftime('%H:%M')
+            # 先.三十九（修訂版）：預設＝無人回應即依計畫送出；取消是可選的，文字不得要求限時操作
+            body = (f"無需操作，{hhmm} 將自動送出；如要取消可按全部取消。"
+                    f"內容：{lines}；總額約NT${total:,.0f}。")
             r_push = push_send(paths, "自動交易否決窗開始", body, "veto_start")
             if not r_push.get("ok"):
                 why_push = "PUSH_FAILED:否決窗開始推播未送達，本批不執行（fail closed）：" + ("；".join(r_push.get("errors", [])[:3]) or "未知")
@@ -980,6 +1000,15 @@ PUBLIC_HB_TASKS = ("run", "settle")
 PUBLIC_HB_KEEP = 40
 
 
+def installed_at(paths: Paths) -> str | None:
+    """先.三十九：排程安裝時間（register-auto-trading-tasks.ps1 寫入 installed_at.txt），格式不符回 None。"""
+    try:
+        t = (paths.base / "installed_at.txt").read_text(encoding="utf-8").strip()
+        return t if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+08:00", t) else None
+    except Exception:
+        return None
+
+
 def write_public_heartbeat(paths: Paths, task: str, outcome: str, now: datetime | None = None) -> None:
     """先.三十一-二：去識別化心跳（只有 ts／任務名／結果代碼，不含金額、持股、委託、reason/detail）。
     寫在 git 忽略的本機路徑，由 scripts/scheduler/publish_heartbeat.py 驗證後以單檔 commit 推上公開 repo。"""
@@ -992,6 +1021,9 @@ def write_public_heartbeat(paths: Paths, task: str, outcome: str, now: datetime 
         events = [e for e in (doc.get("events") or []) if isinstance(e, dict)]
         events.append({"ts": now.isoformat(timespec="seconds"), "task": task, "code": code})
         out = {"schema": 1, "updated_at": now.isoformat(timespec="seconds"), "events": events[-PUBLIC_HB_KEEP:]}
+        inst = installed_at(paths)
+        if inst:
+            out["installed_at"] = inst  # 先.三十九：排程首次安裝時間（只有時間），App 用來避免安裝當天的誤報
         paths.public_hb.parent.mkdir(parents=True, exist_ok=True)
         tmp = paths.public_hb.with_suffix(".tmp")
         tmp.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -1041,8 +1073,9 @@ def watchdog(paths: Paths, now: datetime, which: str, cal: dict | None = None) -
 # ---------- 先.三十七：今晚無券商演練（假券商、獨立目錄，不建立任何 Shioaji 連線） ----------
 DRILL_DIR = REPO / "research" / "data" / "auto_trading_drill"
 DRILL_FLAG = "DRILL_ACTIVE.flag"   # 存在時 alpha_live_server 的 /auto/status、/auto/stop 改讀演練目錄
-NIGHT_VETO_MINUTES = 3
-NIGHT_PHASES = ("start", "n1-create", "n1-execute", "n2-create", "n2-execute", "n2-settle", "finish")
+NIGHT_VETO_MINUTES = 10  # 先.三十九：3 分鐘來不及開 App，改 10 分鐘（僅演練）
+NIGHT_PHASES = ("start", "n1-create", "n1-execute", "n1b-create", "n1b-execute", "n2-create", "n2-execute",
+                "n2-settle", "finish")
 
 
 class DrillBroker:
@@ -1127,11 +1160,22 @@ def night_drill(phase: str, now: datetime | None = None) -> dict:
 
     broker = DrillBroker(DRILL_DIR)
     pc = load_prev_closes()
+    if phase in ("n1b-create", "n1b-execute"):
+        if phase == "n1b-create" and dp.stop_flag.exists():
+            dp.stop_flag.unlink()
+        res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,
+                            drill_label="DRILLN1B", veto_minutes=NIGHT_VETO_MINUTES)
+        if phase == "n1b-create" and res["state"] == "WAITING_VETO":
+            prog("N1b 已建立待執行訂單（演練：程式稍後會自己呼叫「全部取消」同一個端點，無需操作）。")
+        elif phase == "n1b-execute":
+            prog(f"N1b 到期：送出 {len(res.get('submitted', []))} 張（預期 0）；狀態 {res['state']}；"
+                 f"緊急停止旗標{'有開（不符預期）' if dp.stop_flag.exists() else '未開（符合預期）'}。")
+        return {"phase": phase, **res, "stop_flag": dp.stop_flag.exists()}
     if phase in ("n1-create", "n1-execute"):
         res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,
                             drill_label="DRILLN1", veto_minutes=NIGHT_VETO_MINUTES)
         if phase == "n1-create" and res["state"] == "WAITING_VETO":
-            prog("N1 已建立待執行訂單（3 分鐘否決窗）。請在 App 自動交易卡按「全部取消」。")
+            prog(f"N1 已建立待執行訂單（{NIGHT_VETO_MINUTES} 分鐘否決窗）。無需操作。")
         elif phase == "n1-execute":
             sent = [k for k in res.get("submitted", [])]
             prog(f"N1 否決窗到期：送出 {len(sent)} 張（預期 0）；狀態 {res['state']}。")
@@ -1142,7 +1186,8 @@ def night_drill(phase: str, now: datetime | None = None) -> dict:
         res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,
                             veto_minutes=NIGHT_VETO_MINUTES)
         if res["state"] == "WAITING_VETO":
-            prog("N2 已建立待執行訂單（3 分鐘否決窗）。這一輪請不要取消，3 分鐘後程式會送出。")
+            exe = (_read_json(dp.scoped("SIMULATION").pending) or {}).get("execute_after", "")[11:16]
+            prog(f"N2 已建立待執行訂單。無需操作，{exe} 將自動送出；如要取消可按全部取消。")
         return {"phase": phase, **res}
     if phase == "n2-execute":
         res = run_month_end(dp, broker, now, prev_close=pc, mode_override="SIMULATION", poll_sec=0, polls=1,

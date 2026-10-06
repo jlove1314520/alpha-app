@@ -20,8 +20,10 @@ TASKS = {"run", "settle"}
 
 def privacy_check(doc) -> str | None:
     """回傳 None 代表通過，否則回傳第一個違規原因。白名單式：只認這幾個欄位與格式。"""
-    if not isinstance(doc, dict) or set(doc) != {"schema", "updated_at", "events"}:
-        return "頂層欄位不是 schema/updated_at/events"
+    if not isinstance(doc, dict) or not ({"schema", "updated_at", "events"} <= set(doc) <= {"schema", "updated_at", "events", "installed_at"}):
+        return "頂層欄位不是 schema/updated_at/events(/installed_at)"
+    if "installed_at" in doc and not (isinstance(doc["installed_at"], str) and TS.fullmatch(doc["installed_at"])):
+        return "installed_at 格式不符"
     if doc["schema"] != 1:
         return "schema 不是 1"
     if not (isinstance(doc["updated_at"], str) and TS.fullmatch(doc["updated_at"])):

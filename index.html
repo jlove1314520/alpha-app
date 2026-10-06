@@ -1423,7 +1423,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>自動交易（Bb-90）</h3>
       <div class="note" id="auto-status-note">尚未連線本機伺服器</div>
       <div id="auto-pending" class="note" style="margin-top:6px"></div>
-      <button class="btn ghost" id="auto-cancel-all" style="width:100%;margin-top:8px;display:none" onclick="autoSetStop(true,'全部取消待執行訂單並停止')">全部取消</button>
+      <button class="btn ghost" id="auto-cancel-all" style="width:100%;margin-top:8px;display:none" onclick="autoCancelPending()">全部取消（只取消這一批）</button>
       <div class="setting-row" style="margin-top:10px">
         <span>緊急停止<br><span style="font-size:10px;color:var(--ink-4)">開啟後一律拒單，需手動關閉才恢復</span></span>
         <div class="setting-input"><input id="auto-stop-toggle" type="checkbox" onchange="autoSetStop(this.checked,'緊急停止開關')"></div>
@@ -6590,8 +6590,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const today=_ymd(z),mins=z.h*60+z.mi;
     const ev=(doc&&Array.isArray(doc.events))?doc.events:[];
     const has=t=>ev.some(e=>e&&e.task===t&&typeof e.ts==='string'&&e.ts.slice(0,10)===today);
+    // 先.三十九：排程安裝時間晚於當日應執行時間→那一項不報警（安裝當天的誤報）
+    const inst=doc&&typeof doc.installed_at==='string'?doc.installed_at:'';
+    const instMins=inst.slice(0,10)===today?(+inst.slice(11,13))*60+(+inst.slice(14,16)):(inst.slice(0,10)>today?1e9:-1);
+    if(instMins>13*60+50)return '';
     if(mins>=13*60+50&&!has('settle'))return '自動交易排程未執行（電腦可能關機或離線）：今日盤後結算沒有心跳';
-    if(mins>=9*60+50&&!has('run'))return '自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳';
+    if(mins>=9*60+50&&!has('run')&&!(instMins>9*60+50))return '自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳';
     return '';
   }
   async function loadAutoHeartbeat(){
@@ -6648,8 +6652,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const p=d.pending;let active=false;
       if(p&&Array.isArray(p.orders)&&p.orders.length&&!p.done&&!p.cancelled){
         active=true;
-        pe.textContent=(d.drill?'演練（假券商）':'')+'待執行（'+(p.execute_after||'?')+' 後送出）：'+p.orders.map(o=>(o.symbol||'')+' '+(o.action==='Sell'?'賣':'買')+' '+(o.qty||'')+'股 @'+(o.limit_price||'')).join('；');
-      }else pe.textContent=p&&p.cancelled?'待執行訂單已取消':'目前沒有待執行訂單';
+        window._autoExecAfter=p.execute_after||null;
+        pe.textContent=(d.drill?'演練（假券商）':'')+'將於 '+String(p.execute_after||'?').slice(11,16)+' 自動送出，無需操作（剩 '+autoCountdownText()+'）：'+p.orders.map(o=>(o.symbol||'')+' '+(o.action==='Sell'?'賣':'買')+' '+(o.qty||'')+'股 @'+(o.limit_price||'')).join('；');
+      }else{window._autoExecAfter=null;pe.textContent=p&&p.cancelled?'本批已取消（之後批次照常）':'目前沒有待執行訂單'}
       if(cb)cb.style.display=active?'':'none';
       try{renderAutoPreflight(st.preflight)}catch(e){console.warn('[renderAutoPreflight]',e);recordGlobalError('renderAutoPreflight',e)}
       try{renderLiveAccount(d.live_account)}catch(e){console.warn('[renderLiveAccount]',e);recordGlobalError('renderLiveAccount',e)}
@@ -6733,6 +6738,34 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const errs=(j.errors||[]).map(x=>String(x).startsWith('DEPENDENCY:')?'電腦缺推播套件（請 CC 在本機安裝 pywebpush）':x);
       _pushNote('送達 '+(j.delivered||0)+' 支、失敗 '+(j.failed||0)+' 支（共 '+j.subscriptions+' 支訂閱）'+(errs.length?'；錯誤：'+errs.join('；'):'')+(j.delivered?'。請看手機是否收到。':''));
     }catch(e){_pushFail(1,'連不到本機伺服器（'+(e&&e.message||e)+'）',e)}
+  }
+  // 先.三十九：否決窗倒數（每秒更新文字裡的「剩 X 分 Y 秒」）
+  function autoCountdownText(){
+    const t=window._autoExecAfter?Date.parse(window._autoExecAfter):NaN;
+    if(!isFinite(t))return '?';
+    const s=Math.max(0,Math.round((t-Date.now())/1000));
+    return s<=0?'0 秒（即將送出）':(Math.floor(s/60)+' 分 '+(s%60)+' 秒');
+  }
+  if(!window._autoCdTimer)window._autoCdTimer=setInterval(()=>{
+    try{
+      const pe=document.getElementById('auto-pending');
+      if(pe&&window._autoExecAfter)pe.textContent=pe.textContent.replace(/剩 [^）]*）/,'剩 '+autoCountdownText()+'）');
+    }catch(e){console.warn('[autoCountdown]',e);recordGlobalError('autoCountdown',e)}
+  },1000);
+  // 先.三十九：「全部取消」只取消目前這一批（不開緊急停止，之後批次照常）
+  async function autoCancelPending(){
+    const pe=document.getElementById('auto-pending');
+    try{
+      if(!LIVE.configured||!LIVE.url)throw new Error('未連線本機伺服器');
+      const r=await fetch(LIVE.url+'/auto/cancel_pending',{method:'POST',headers:liveHeaders(),credentials:'include'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const j=await r.json();
+      if(pe)pe.textContent=j.cancelled?((j.drill?'演練（假券商）':'')+'本批已取消（之後批次照常）'):('沒有可取消的待執行訂單：'+(j.reason||''));
+      if(j.cancelled){window._autoExecAfter=null;const cb=document.getElementById('auto-cancel-all');if(cb)cb.style.display='none'}
+    }catch(e){
+      console.warn('[autoCancelPending]',e);recordGlobalError('autoCancelPending',e);
+      if(pe)pe.textContent='取消失敗（'+(e&&e.message||e)+'）——如需立即擋下，請打開下方「緊急停止」';
+    }
   }
   async function autoSetStop(stop,why){
     try{
@@ -8007,7 +8040,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-06.2232';
+  const APP_VERSION='2026-10-07.0009';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
