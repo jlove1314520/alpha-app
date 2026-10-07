@@ -201,6 +201,12 @@ jobs:
       - name: 更新紙.一b 0050/00646/00697B 前進式紙上追蹤（非回測非新試驗）
         run: python research/paper_1b_tracker.py
         continue-on-error: true
+      # 2026-10-07新增（先.四十七-二，總司令裁示）：紙.三 S3-C6（信用利差閘門×槓桿Bb-90 C6）前進式紙上追蹤，
+      # 2026-10月底建倉。BAA10Y取FRED官方公開CSV（每次1個請求、免金鑰）；取不到或當月未到齊→不記帳、
+      # 寫last_error與心跳ERROR、下次重試（fail closed）。腳本自帶try/except＋continue-on-error雙保險（CLAUDE.md十二）。
+      - name: 更新紙.三 S3-C6 前進式紙上追蹤（非回測非新試驗、不下單）
+        run: python research/paper_3_tracker.py
+        continue-on-error: true
       # 先.二十七-三：看守紙.一10/30月底首次記帳與紙.一b 11/2啟動有沒有寫入；
       # 未寫入→心跳ERROR＋App紅色橫幅。看守員自身失敗只降級成警告（十二、十一）。
       - name: 紙上追蹤看守（逾期未記帳→ERROR＋App紅橫幅）
@@ -244,9 +250,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/short_lending_available_history.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/securities_lending_sell_history.json data/margin_by_stock_history.json data/paper_7030.json data/paper_1b.json data/paper_tracking_watch.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/short_lending_available_history.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/securities_lending_sell_history.json data/margin_by_stock_history.json data/paper_7030.json data/paper_1b.json data/paper_3.json data/paper_tracking_watch.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
           git add -f research/data/paper_7030_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_1b_log.jsonl 2>/dev/null || true
+          git add -f research/data/paper_3_log.jsonl 2>/dev/null || true
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do

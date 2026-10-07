@@ -5017,11 +5017,39 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       return _paperCardHtml('紙.一b Bb-90','0050 / 00646 / 00697B','<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
     }
   }
+  // 2026-10-07（先.四十七-二）：紙.三 S3-C6（信用利差危機閘門×槓桿版 Bb-90 C6）前進式紙上追蹤。
+  // 只讀 data/paper_3.json；顯示虛擬淨值、閘門目前狀態（BAA10Y 月底值 vs 12 個月底平均）、與 Bb-90／0050 對照。
+  function _paperGateHtml(g,pend){
+    if(!g)return '—';
+    const st=g.gate_open?'<span class="pos">開（持有槓桿腿）</span>':'<span class="neg">關（槓桿腿改持現金）</span>';
+    let t=st+'<div class="note" style="margin:2px 0 0;font-size:11px">'+_paperEsc(g.month_end)+' BAA10Y '+_paperEsc(g.baa10y)+'％ vs 12月平均 '+_paperEsc(g.avg12)+'％</div>';
+    if(pend)t+='<div class="note" style="margin:2px 0 0;font-size:11px;color:var(--warn)">已判定下個交易日切換為「'+(pend.to_open?'開':'關')+'」</div>';
+    return t;
+  }
+  async function _renderPaper3(){
+    const title='紙.三 S3-C6 危機閘門',sub='00631L/00647L 各25%·0050/00646 各15%·00697B 20%（閘門關時2倍腿改現金）';
+    try{
+      const j=await _fetchPaperJson('data/paper_3.json');
+      const err=j.last_error?'<div class="note" style="margin-top:6px;font-size:11px;color:var(--down,#e5534b)">最近一次未記帳：'+_paperEsc(j.last_error.reason||j.last_error.status)+'</div>':'';
+      if(!j.started)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err);
+      const sg=v=>v==null?'—':(v>=0?'+':'')+Number(v).toFixed(2)+'%';
+      const wp=j.weights_post||{};
+      const w=Object.keys(wp).map(k=>_paperEsc(k==='CASH'?'現金':k)+' '+(wp[k]*100).toFixed(0)+'%').join('<br>');
+      return _paperCardHtml(title,sub,
+        _paperRow('閘門目前',_paperGateHtml(j.gate_now,j.pending_switch))
+        +_paperCommonRows(j,w||'—')
+        +_paperRow('對照 Bb-90（同日起算）',sg(j.bench_bb90_return_pct))
+        +_paperRow('對照 0050 全持有',sg(j.bench_0050_return_pct))+err);
+    }catch(e){
+      console.warn('[_renderPaper3]',e);recordGlobalError('_renderPaper3',e);
+      return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
+    }
+  }
   async function loadPaper7030(){
     const el=document.getElementById('paper-7030-card');if(!el)return;
     try{
-      const [a,b]=await Promise.all([_renderPaper7030(),_renderPaper1b()]);
-      el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">'+a+b+'</div>'
+      const [a,b,c]=await Promise.all([_renderPaper7030(),_renderPaper1b(),_renderPaper3()]);
+      el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">'+a+b+'<div style="grid-column:1 / -1">'+c+'</div></div>'
         +'<div class="note" style="margin:-4px 0 10px;text-align:center;color:var(--warn)">⚠ 紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。</div>';
     }catch(e){
       console.warn('[loadPaper7030]',e);recordGlobalError('loadPaper7030',e);
@@ -8045,7 +8073,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-07.1904';
+  const APP_VERSION='2026-10-07.2221';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
