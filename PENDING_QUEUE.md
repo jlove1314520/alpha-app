@@ -18152,7 +18152,7 @@ push 後停下等 Cowork 核對。
 
 - [x] **先.四十-一 先.三十九 程式 commit（冒煙第39項單次例外）**〔43bcc41be：依單次例外 commit（訊息與 PROGRESS 註明），自測 194 PASS、其餘冒煙全綠。更正：第39項的 9 筆程式層級違規其實就在 auto_rebalance_bb90.py（10/6 新增檔第一次被掃），已於先.四十-四一併修正。〕
 - [x] **先.四十-二 七之二重啟驗證＋/auto/cancel_pending 可用**〔重啟後 [build] git sha=43bcc41＝HEAD、stale_process=False、/auto/cancel_pending 回 cancelled=false（無待執行訂單，端點可用）、CORS 正確。四之修正後再次重啟（見四）。〕
-- [x] **先.四十-三 09:05 演練 A 相關檔案 git status 乾淨**〔git status -- auto_rebalance_bb90.py／alpha_live_server.py／web_push.py／scripts/scheduler／index.html／sw.js／data/auto_heartbeat.json／requirements-live.txt／price_history.json／ex_dividend_events.json：全部乾淨；C:lpha 排程 launcher 與 repo 備份一致。本機 config／SIMULATION 狀態檔在 gitignore 內（SIMULATION 族目錄尚未建立＝全新狀態）。〕
+- [x] **先.四十-三 09:05 演練 A 相關檔案 git status 乾淨**〔git status -- auto_rebalance_bb90.py／alpha_live_server.py／web_push.py／scripts/scheduler／index.html／sw.js／data/auto_heartbeat.json／requirements-live.txt／price_history.json／ex_dividend_events.json：全部乾淨；C:\alpha 排程 launcher 與 repo 備份一致。本機 config／SIMULATION 狀態檔在 gitignore 內（SIMULATION 族目錄尚未建立＝全新狀態）。〕
 - [x] **先.四十-四 23:00 稽核每晚超標查因＋修正（不調 1% 門檻）**〔根因：時間差，不是真資料錯。23:00 時各檔更新時點不同——quotes_tw 已是當日收盤、官方 TWSE STOCK_DAY_ALL 仍停前一日；官方 TPEx 已是當日、quotes_all_tw／sparklines／price_history 要到 23:57 才前進。稽核原本用 price_history 最後日期代替快照日期判斷「同一天」而失準（a_price_source 138＝quotes_all 62＋sparklines 62＋quotes_tw 14；c_range 21 全是走勢線落後一天、官方單日大漲）。e_quarters_stale 565 屬完整度類、不計入違規率，兩次相同，非原因。g_comma_parsing 9＝auto_rebalance_bb90.py 直接 float()（10/6 新檔首次被掃），改用 _num()（去千分位）。修正：data_audit 快照檔用自己的日期、c_range 要求走勢線最後日＝官方參考日，日期不同→無法查核；新增 scripts/selftest_data_audit_dates.py 5 案（修正前 2 FAIL 重現、修正後全 PASS，同日真錯仍報）。00:13 實跑違規率 0.095%、程式層級 0，冒煙全部通過。1% 門檻未動。〕
 
 # 2026-10-07【先.四十一：帳號號碼移出公開檔案（低優先）】（總司令裁示原文，動工前先寫入）
@@ -18371,8 +18371,8 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十六）。
 
-- [x] **先.四十六-一 research/telegram_reader.py（唯讀包裝、單一目標、不下載媒體、去識別、增量、repo 外輸出）**〔research/telegram_reader.py：ReadOnlyClient 只開放 get_entity／iter_messages（＋連線生命週期），其他屬性與 __call__ 原始請求一律拋錯；只讀 .env TELEGRAM_TARGET_CHAT；只存 id／時間／回覆編號／官方或一般／文字／has_media；首次回補 90 天、之後 min_id 增量；輸出 C:lpha	elegram_export\sinopac_api\。已知限制：只開放兩個讀取方法讀不到管理員名單，管理員以個人身分發言會標「一般」。〕
-- [x] **先.四十六-二 設定工具 run_telegram_setup.bat（隱藏輸入、備份 .env、首次登入由總司令本人）＋.gitignore *.session＋secrets 權限**〔C:lpha\setup_caun_telegram_setup.bat＋setup_telegram.ps1：api_id／api_hash 隱藏輸入、先備份 .env 到 secrets、寫入三鍵、引導 --login（手機／驗證碼／兩步驟密碼由總司令本人輸入）、登入檔 C:lpha\secrets	elegram_reader.session 設僅本人權限；.gitignore 補 *.session。telethon==1.45.0 已裝並釘版。〕
-- [x] **先.四十六-三 排程 08:15／20:15＋隨機延遲＋連續 3 次失敗才推播**〔AlphaTelegram0815／AlphaTelegram2015（每日、RandomDelay 10 分鐘、Interactive），啟動器 C:lphaun-telegram-reader.ps1（repo 備份 scripts/scheduler/），一律 exit 0；連續 3 次失敗才推播一次；未設定時記 NOT_CONFIGURED 不算失敗（試跑確認）。〕
+- [x] **先.四十六-一 research/telegram_reader.py（唯讀包裝、單一目標、不下載媒體、去識別、增量、repo 外輸出）**〔research/telegram_reader.py：ReadOnlyClient 只開放 get_entity／iter_messages（＋連線生命週期），其他屬性與 __call__ 原始請求一律拋錯；只讀 .env TELEGRAM_TARGET_CHAT；只存 id／時間／回覆編號／官方或一般／文字／has_media；首次回補 90 天、之後 min_id 增量；輸出 C:\alpha\telegram_export\sinopac_api\。已知限制：只開放兩個讀取方法讀不到管理員名單，管理員以個人身分發言會標「一般」。〕
+- [x] **先.四十六-二 設定工具 run_telegram_setup.bat（隱藏輸入、備份 .env、首次登入由總司令本人）＋.gitignore *.session＋secrets 權限**〔C:\alpha\setup_ca\run_telegram_setup.bat＋setup_telegram.ps1：api_id／api_hash 隱藏輸入、先備份 .env 到 secrets、寫入三鍵、引導 --login（手機／驗證碼／兩步驟密碼由總司令本人輸入）、登入檔 C:\alpha\secrets\telegram_reader.session 設僅本人權限；.gitignore 補 *.session。telethon==1.45.0 已裝並釘版。〕
+- [x] **先.四十六-三 排程 08:15／20:15＋隨機延遲＋連續 3 次失敗才推播**〔AlphaTelegram0815／AlphaTelegram2015（每日、RandomDelay 10 分鐘、Interactive），啟動器 C:\alpha\run-telegram-reader.ps1（repo 備份 scripts/scheduler/），一律 exit 0；連續 3 次失敗才推播一次；未設定時記 NOT_CONFIGURED 不算失敗（試跑確認）。〕
 - [x] **先.四十六-四 每日摘要 digest（repo 外）**〔每次執行為當日與有新訊息的日期產生 digest_YYYY-MM-DD.md，十類關鍵字、附訊息編號，只在 repo 外。〕
 - [x] **先.四十六-五 自測五案＋冒煙＋推播通知＋回報設定步驟**〔scripts/selftest_telegram_reader.py 19 項全 PASS（寫入方法 12 項＋原始請求被擋、目標外拒讀、媒體不下載、欄位去識別、增量不重抓、摘要、未設定、連續 3 次才推播、登入檔與輸出在 repo 外、.gitignore）；冒煙全部通過；推播通知已送。〕
