@@ -18447,3 +18447,19 @@ push 後停下等 Cowork 核對。
 - [ ] **先.五十-6 cash() 旁唯讀參考 trading_limits().trading_available（08:30–15:00），差距 >5% 只警告**
 - [ ] **先.五十-7 先.四十九 升級清單補三項**
 - [ ] **先.五十-8 smoke＋preflight（唯讀）＋commit 回報**
+
+# 2026-10-08【先.五十一：行情與 App 優化（TG 群組回饋）】（總司令裁示原文，動工前先寫入；收到時先.五十 進行中）
+
+先寫進 PENDING_QUEUE 再動工
+【先.五十一】行情與 App 優化（TG 群組回饋）——時間閘：10/8 13:40 結算完成後才可動工；不得碰自動交易引擎與交易模式
+1. shioaji_quotes.py 股票 tick handler：tick.simtrade 為真時不寫 last／change_pct、不進 add_tick 走勢與量，改寫入獨立欄位 sim_price／sim_at；App 個股與首頁在 08:30–09:00、13:25–13:30 以灰字「試撮 xxx」顯示。補 selftest：試撮 tick 不得改動 last。
+2. 行情 daemon 掛 set_event_callback：只記 event_code 與時間，嚴禁印出原始訊息（含身分證）。event_code=1 記缺口起點，13 記終點，重連後在 kbars 每日 270 次預算內補齊缺口；App 在缺口期間顯示「行情中斷，補資料中」。
+3. 處置／注意股：每日 18:30 跑 api.punish()／api.notice() 寫 data/disposal_flags.json；上櫃資料若比上市舊超過 1 個交易日，就以 TPEx 公開資料交叉補。App 個股頁顯示紅標，AI 選股候選清單排除處置股。
+4. 排行榜頁：用 api.scanners 取漲跌幅、成交量、成交值前 50，盤中每 60 秒刷新一次，查詢頻率要算進每 5 秒 50 次的預算。
+5. IX0001 Quote 的 estimate_amount_sum 寫入首頁「今日預估成交金額」，並每日落地到 research/data/est_amount/ 供日後研究。
+6. 長駐行情程式加 faulthandler，崩潰後由排程在 2 分鐘內自動重啟，並在 heartbeat 標記重啟次數。
+7. smoke 全套＋相關 selftest，commit 後回報。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十一）。
+
+- [!] **先.五十一 全條（試撮分流、事件缺口補 kbars、處置／注意股、排行榜、預估成交金額、faulthandler 自動重啟）**〔時間閘：2026-10-08 13:40 結算完成後；不得碰自動交易引擎與交易模式〕
