@@ -18400,3 +18400,24 @@ push 後停下等 Cowork 核對。
 - [x] **先.四十六補-三 已有 api_id／api_hash 時沿用（可選覆蓋）**〔.env 已有 api_id／api_hash 時預設沿用（Enter），輸入 y 才重新輸入覆蓋；已登入時 start() 不再要求手機／驗證碼。〕
 - [x] **先.四十六補-四 Shioaji 1.7.5～1.7.7 release notes 查證（只回報、不升級）**〔查證完成（官方 release 頁、PyPI、GitHub 三來源）：1.7.6 已撤回（快取登入兩缺陷），1.7.7 修正；1.7.6 起回報自動更新 Trade 快取＋event_id（下單行為改變）；帳務、CA 無變更；#237 Windows 登入卡死跨版本未解。寫入 docs 第十節；未升級，升級列入 AWAITING_REVIEW 待裁示。〕
 - [x] **先.四十六補-五 推播通知重跑設定工具**〔推播「Telegram 設定工具已更新」送達。〕
+
+# 2026-10-08【先.四十九：Shioaji 1.7.4 → 1.7.7 升級】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十九】Shioaji 1.7.4 → 1.7.7 升級（總司令裁示；時間閘：10/8 13:40 結算完成後～10/12 08:00 前）
+
+一、前提：10/8 第 1 批真錢結算對帳完成且無 ERROR；否則延後並回報。
+二、升級前先記錄 1.7.4 的版本鎖與安裝來源，確保可一鍵退回；不得安裝 1.7.6。
+三、升級後在模擬環境依 docs/AUTO_TRADING_SETUP.md 第十節清單驗證：首次與快取登入、signed、activate_ca／到期日、整股與零股 place→update_status→cancel、委託回報 callback（確認 1.7.6 起的回報快取行為與我們的結算邏輯相容）、持股與餘額查詢；最後跑 --preflight 必須全部 PASS。
+四、任一項失敗 → 立即退回 1.7.4、重跑 --preflight 確認恢復、回報原因。
+五、通過後更新 requirements-live.txt 釘 1.7.7，AWAITING_REVIEW 該項結案；全程不得在 LIVE 類模式觸發任何真實下單。
+
+紅線不變：CC／Cowork 不得改動交易模式或任何真錢設定；憑證與私鑰不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十九）。
+
+- [!] **先.四十九-一 前提：10/8 第 1 批真錢結算對帳完成且無 ERROR**〔時間閘：2026-10-08 13:40 結算後〕
+- [!] **先.四十九-二 記錄 1.7.4 版本鎖與來源（可一鍵退回）**〔依一〕
+- [!] **先.四十九-三 升級 1.7.7＋模擬環境驗證清單＋--preflight 全 PASS**〔依一〕
+- [!] **先.四十九-四 失敗即退回 1.7.4 並重跑 --preflight**〔依三〕
+- [!] **先.四十九-五 釘 1.7.7、AWAITING_REVIEW 結案**〔依三〕
