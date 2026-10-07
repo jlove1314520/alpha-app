@@ -235,18 +235,50 @@ def fetch_margin_by_stock_tpex() -> dict[str, dict]:
     return per_stock
 
 
-def fetch_close_by_stock() -> dict[str, float]:
+def _roc_to_iso(v) -> str | None:
+    t = str(v or "").strip()
+    if len(t) == 7 and t.isdigit():
+        return f"{int(t[:3]) + 1911:04d}-{t[3:5]}-{t[5:7]}"
+    return None
+
+
+def fetch_close_by_stock() -> tuple[dict[str, float], str | None]:
+    """回傳 (代號:收盤價, 資料日期ISO)。2026-10-07（先.四十三-三）起連同日期一起回傳，
+    給維持率檢查「分子收盤價日期＝分母融資日期」用（實測晚上 STOCK_DAY_ALL 常仍是前一交易日）。"""
     r = _get_retry(STOCK_DAY_ALL_URL, "twse_openapi", timeout=30)
     r.raise_for_status()
     rows = r.json()
     if not isinstance(rows, list):
         raise RuntimeError("STOCK_DAY_ALL 回傳非預期格式（可能是無效路徑回傳的HTML，已知地雷）")
     out = {}
+    dates = set()
     for row in rows:
         code = row.get("Code")
         px = _num(row.get("ClosingPrice"))
         if code and px is not None:
             out[code] = px
+            d = _roc_to_iso(row.get("Date"))
+            if d:
+                dates.add(d)
+    return out, (max(dates) if len(dates) == 1 else (None if not dates else max(dates)))
+
+
+def closes_from_price_history(day: str) -> dict[str, float]:
+    """price_history.json 裡指定日期的逐股收盤（本 repo 每日管線產物，TWSE STOCK_DAY_ALL＋TPEx 衍生）。
+    只在 STOCK_DAY_ALL 日期與融資日期不同時拿來補同一天的收盤，讀不到回空 dict。"""
+    try:
+        ph = json.loads((REPO_ROOT / "data" / "price_history.json").read_text(encoding="utf-8")).get("prices") or {}
+    except Exception as e:
+        print(f"讀 price_history.json 失敗：{type(e).__name__}")
+        return {}
+    out = {}
+    for code, rows in ph.items():
+        for row in reversed(rows[-15:]):
+            if str(row.get("date") or "")[:10] == day:
+                px = _num(row.get("close"))
+                if px is not None:
+                    out[code] = px
+                break
     return out
 
 
@@ -280,10 +312,26 @@ def _fetch_margin_money_for_date(date_str: str, headers: dict) -> tuple[str, flo
         raise RuntimeError(f"「融資金額(仟元)」今日餘額解析失敗：{money_row}")
     raw_date = body["date"]  # "20260914" 格式，轉成跟其他欄位一致的ISO格式
     iso_date = f"{raw_date[:4]}-{raw_date[4:6]}-{raw_date[6:8]}"
-    return iso_date, int(round(money_thousand * 1000))
+    # 2026-10-07（先.四十三-三）：分子的逐股融資餘額改用同一個回應的 tables[1]（融資融券彙總，
+    # 與分母同一天），不再用沒有日期欄位的 openapi MI_MARGN，避免分子分母不同天。
+    lots = {}
+    if len(body["tables"]) > 1:
+        t1 = body["tables"][1]
+        f1 = t1.get("fields", [])
+        try:
+            bal_idx = f1.index("今日餘額")  # 第一個「今日餘額」是融資段
+        except ValueError:
+            bal_idx = None
+        if bal_idx is not None:
+            for row in t1.get("data", []):
+                code = str(row[0]).strip() if row else ""
+                v = _num(row[bal_idx]) if row and len(row) > bal_idx else None
+                if code and v is not None:
+                    lots[code] = v
+    return iso_date, int(round(money_thousand * 1000)), lots
 
 
-def fetch_market_margin_money() -> tuple[str, float]:
+def fetch_market_margin_money() -> tuple[str, float, dict]:
     """全市場融資金額（分母），改用TWSE官方www.twse.com.tw/rwd端點（見模組
     docstring 2026-09-15更新說明）。跟T86一樣「只抓今天」會在假日/當日尚未
     發布時直接失敗，比舊版FinMind（抓近10天取最後一筆）更容易誤報
@@ -343,19 +391,9 @@ def merge_stock_detail_margin(per_stock: dict[str, dict], tpex_codes: set[str] |
 
 
 def main():
-    margin_by_stock, margin_per_stock_detail = fetch_margin_by_stock()
-    close_by_stock = fetch_close_by_stock()
-    print(f"融資個股 {len(margin_by_stock)} 檔，收盤價個股 {len(close_by_stock)} 檔")
-
-    collateral_value = 0.0
-    matched = 0
-    for code, lots in margin_by_stock.items():
-        px = close_by_stock.get(code)
-        if px is None or lots <= 0:
-            continue
-        collateral_value += lots * 1000 * px
-        matched += 1
-    print(f"可配對算擔保品市值的個股 {matched} 檔")
+    margin_by_stock, margin_per_stock_detail = fetch_margin_by_stock()  # 個股頁用（不變）
+    close_by_stock, close_date = fetch_close_by_stock()
+    print(f"融資個股 {len(margin_by_stock)} 檔，收盤價個股 {len(close_by_stock)} 檔（收盤日 {close_date}）")
 
     tpex_codes = set()
     try:
@@ -376,19 +414,48 @@ def main():
     # 但一個正常大小的數字很容易被誤讀成「今天的維持率就是這樣」。現在即使
     # 分母失敗，也讓App知道「今天嘗試過，但這個數字不可信」，不是靜默沿用舊值。
     try:
-        money_date, margin_money = fetch_market_margin_money()
+        money_date, margin_money, lots_same_day = fetch_market_margin_money()
         data_incomplete = False
         incomplete_reason = None
     except Exception as e:
         print(f"分母（TWSE全市場融資金額）取得失敗：{e}")
-        money_date, margin_money = None, None
+        money_date, margin_money, lots_same_day = None, None, {}
         data_incomplete = True
         incomplete_reason = f"TWSE全市場融資金額取得失敗：{e}"
-
-    ratio = collateral_value / margin_money * 100 if margin_money else None
+    # 2026-10-07（先.四十三-三）：分子＝與分母同一天的逐股融資餘額 × 同一天收盤價。
+    # 收盤價先用 STOCK_DAY_ALL；日期不同改用 price_history.json 同一天的收盤；仍對不上→不相除、標資料不完整。
+    close_source, numerator_close_date = "STOCK_DAY_ALL", close_date
+    if money_date and close_date != money_date:
+        alt = closes_from_price_history(money_date)
+        if alt:
+            close_by_stock, close_source, numerator_close_date = alt, "price_history.json", money_date
+    collateral_value, matched, missing_lots = 0.0, 0, 0.0
+    for code, lots in lots_same_day.items():
+        if lots <= 0:
+            continue
+        px = close_by_stock.get(code)
+        if px is None:
+            missing_lots += lots
+            continue
+        collateral_value += lots * 1000 * px
+        matched += 1
+    total_lots = sum(v for v in lots_same_day.values() if v > 0)
+    coverage = (1 - missing_lots / total_lots) if total_lots else 0.0
+    print(f"可配對算擔保品市值的個股 {matched} 檔（收盤來源 {close_source}，張數覆蓋 {coverage:.2%}）")
+    if not data_incomplete and (numerator_close_date != money_date or coverage < 0.99):
+        data_incomplete = True
+        incomplete_reason = (f"分子收盤價日期（{numerator_close_date}）與分母融資日期（{money_date}）不同，不相除"
+                             if numerator_close_date != money_date
+                             else f"同日收盤價只涵蓋 {coverage:.1%} 的融資張數（<99%），不相除")
+    ratio = collateral_value / margin_money * 100 if (margin_money and not data_incomplete) else None
     record = {
         "date": today,
         "margin_money_date": money_date,
+        "numerator_margin_date": money_date if lots_same_day else None,
+        "numerator_close_date": numerator_close_date,
+        "numerator_close_source": close_source,
+        "definition_note": "本站算法：上市（TWSE）全部可融資證券（含 ETF）融資餘額×當日收盤÷信用交易統計融資金額；"
+                           "與籌碼K等外部數值約差 0.88 倍、原因未查明，見 research/MARGIN_RATIO_RECONCILE.md",
         "collateral_value": round(collateral_value) if collateral_value else None,
         "margin_money": margin_money,
         "matched_stocks": matched,
@@ -398,7 +465,7 @@ def main():
         # 2026-09-03（P0三-三.3）：這個檔案頂層是list（App/舊解析器都依賴這個形狀，不改），
         # 時間戳與來源改寫進每一筆record，最後一筆的generated_at就是整份檔案的產生時間。
         "generated_at": datetime.now(TW_TZ).isoformat(),
-        "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+        "source": "分子=TWSE官方www.twse.com.tw/rwd MI_MARGN 融資融券彙總(逐股融資今日餘額，與分母同一天同一回應)×同日收盤價（STOCK_DAY_ALL；日期不同改用price_history.json同日收盤）加總；分母=同一回應信用交易統計「融資金額(仟元)」今日餘額×1000（2026-10-07 先.四十三-三 起分子分母強制同一天）",
     }
     print(f"維持率估算：{record['ratio_pct']}%" if not data_incomplete else f"資料不完整：{incomplete_reason}")
 

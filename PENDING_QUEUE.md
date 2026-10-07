@@ -18206,4 +18206,4 @@ push 後停下等 Cowork 核對。
 
 - [ ] **先.四十三-一 演練 A 結果核對＋演練 B（cancel_pending）＋先.三十二 各項結案**
 - [ ] **先.四十三-二 DevQueue 停擺：殘留檔來源查證與處理、check_collision 60 分鐘規則、log UTF-8**
-- [ ] **先.四十三-三 融資維持率分子拆解與 8 日對帳→MARGIN_RATIO_RECONCILE.md（不得硬調）**
+- [x] **先.四十三-三 融資維持率分子拆解與 8 日對帳→MARGIN_RATIO_RECONCILE.md（不得硬調）**〔分身完成：8 日重建（官方 rwd MI_MARGN 指定日期＋price_history 同日收盤）無任何版本 ≤0.5pp（全部／普通股／排除ETF／排除O!皆差 14～24pp），外部／本站恆≈0.881（系統性口徑差，原因未查明）→不改算法，App 標「本站算法」與約高 13% 差距。查出真 bug：分子分母可能不同天卻相除，已改分子用同一 rwd 回應逐股餘額＋同日收盤（STOCK_DAY_ALL 落後改用 price_history），不同天→資料不完整；歷史 22 筆追溯標記。報告 research/MARGIN_RATIO_RECONCILE.md。〕

@@ -6,7 +6,8 @@
     "margin_money": 546937698000,
     "matched_stocks": 1227,
     "ratio_pct": 185.07,
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-08-27",
@@ -17,7 +18,8 @@
     "ratio_pct": 191.5,
     "data_incomplete": false,
     "incomplete_reason": null,
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-08-28",
@@ -25,10 +27,12 @@
     "collateral_value": 1081995095320,
     "margin_money": 559918784000,
     "matched_stocks": 1228,
-    "ratio_pct": 193.24,
-    "data_incomplete": false,
-    "incomplete_reason": null,
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-08-28 的資料、分母為 2026-08-27，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 193.24
   },
   {
     "date": "2026-08-29",
@@ -36,10 +40,12 @@
     "collateral_value": 1101743926660,
     "margin_money": 567177536000,
     "matched_stocks": 1226,
-    "ratio_pct": 194.25,
-    "data_incomplete": false,
-    "incomplete_reason": null,
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-08-29 的資料、分母為 2026-08-28，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 194.25
   },
   {
     "date": "2026-08-31",
@@ -50,7 +56,8 @@
     "ratio_pct": 193.33,
     "data_incomplete": false,
     "incomplete_reason": null,
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-01",
@@ -58,10 +65,12 @@
     "collateral_value": 1095577539270,
     "margin_money": 569876911000,
     "matched_stocks": 1227,
-    "ratio_pct": 192.25,
-    "data_incomplete": false,
-    "incomplete_reason": null,
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-01 的資料、分母為 2026-08-31，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 192.25
   },
   {
     "date": "2026-09-03",
@@ -69,12 +78,14 @@
     "collateral_value": 1113537766150,
     "margin_money": 585675285000,
     "matched_stocks": 1232,
-    "ratio_pct": 190.13,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-03 的資料、分母為 2026-09-02，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
     "generated_at": "2026-09-02T23:29:33Z",
-    "generated_at_note": "2026-09-03回填：取自檔案最後一次git commit時間；之後每筆由update_margin_maintenance.py寫入真正產生時間"
+    "generated_at_note": "2026-09-03回填：取自檔案最後一次git commit時間；之後每筆由update_margin_maintenance.py寫入真正產生時間",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 190.13
   },
   {
     "date": "2026-09-04",
@@ -82,11 +93,13 @@
     "collateral_value": 1067357693740,
     "margin_money": 578739307000,
     "matched_stocks": 1225,
-    "ratio_pct": 184.43,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-04 的資料、分母為 2026-09-03，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-04T19:11:24.252832+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 184.43
   },
   {
     "date": "2026-09-05",
@@ -94,11 +107,13 @@
     "collateral_value": 1096246850160,
     "margin_money": 581894588000,
     "matched_stocks": 1228,
-    "ratio_pct": 188.39,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-05 的資料、分母為 2026-09-04，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-05T07:10:04.466932+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 188.39
   },
   {
     "date": "2026-09-07",
@@ -106,11 +121,13 @@
     "collateral_value": 1096246850160,
     "margin_money": 581894588000,
     "matched_stocks": 1228,
-    "ratio_pct": 188.39,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-07 的資料、分母為 2026-09-04，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-07T20:21:24.721340+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 188.39
   },
   {
     "date": "2026-09-09",
@@ -122,7 +139,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-09T22:44:15.057328+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-10",
@@ -130,11 +148,13 @@
     "collateral_value": 1116323592230,
     "margin_money": 587166811000,
     "matched_stocks": 1236,
-    "ratio_pct": 190.12,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-10 的資料、分母為 2026-09-09，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-10T07:25:58.298274+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=FinMind TaiwanStockTotalMarginPurchaseShortSale(全市場融資金額，一天一次)",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 190.12
   },
   {
     "date": "2026-09-11",
@@ -142,7 +162,11 @@
     "collateral_value": 1119569354460,
     "margin_money": 591897687000,
     "matched_stocks": 1231,
-    "ratio_pct": 189.15
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 189.15,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-11 的資料、分母為 2026-09-10，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-12",
@@ -150,7 +174,11 @@
     "collateral_value": 1086327157760,
     "margin_money": 587871180000,
     "matched_stocks": 1233,
-    "ratio_pct": 184.79
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 184.79,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-12 的資料、分母為 2026-09-11，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-13",
@@ -158,7 +186,11 @@
     "collateral_value": 1086327157760,
     "margin_money": 587871180000,
     "matched_stocks": 1233,
-    "ratio_pct": 184.79
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 184.79,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-13 的資料、分母為 2026-09-11，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-14",
@@ -166,7 +198,11 @@
     "collateral_value": 1086327157760,
     "margin_money": 587871180000,
     "matched_stocks": 1233,
-    "ratio_pct": 184.79
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 184.79,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-14 的資料、分母為 2026-09-11，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-15",
@@ -174,11 +210,13 @@
     "collateral_value": 1069365335110,
     "margin_money": 583877609000,
     "matched_stocks": 1233,
-    "ratio_pct": 183.15,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-15 的資料、分母為 2026-09-14，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-15T19:37:35.235203+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 183.15
   },
   {
     "date": "2026-09-16",
@@ -190,7 +228,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-16T23:10:00.212725+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-17",
@@ -202,7 +241,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-17T22:18:27.035984+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-18",
@@ -210,7 +250,11 @@
     "collateral_value": 1084161134580,
     "margin_money": 589397267000,
     "matched_stocks": 1235,
-    "ratio_pct": 183.94
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 183.94,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-18 的資料、分母為 2026-09-17，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-19",
@@ -218,11 +262,13 @@
     "collateral_value": 1127510449900,
     "margin_money": 594039480000,
     "matched_stocks": 1231,
-    "ratio_pct": 189.8,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-19 的資料、分母為 2026-09-18，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-19T07:31:55.425907+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 189.8
   },
   {
     "date": "2026-09-21",
@@ -234,7 +280,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-21T23:53:57.139856+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-22",
@@ -246,7 +293,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-22T23:10:24.445877+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-23",
@@ -258,7 +306,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-23T23:12:11.488376+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-24",
@@ -270,7 +319,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-24T23:27:26.794741+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-25",
@@ -278,11 +328,13 @@
     "collateral_value": 1192514594980,
     "margin_money": 615103402000,
     "matched_stocks": 1229,
-    "ratio_pct": 193.87,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-25 的資料、分母為 2026-09-24，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-25T23:28:30.644865+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 193.87
   },
   {
     "date": "2026-09-26",
@@ -290,11 +342,13 @@
     "collateral_value": 1192514594980,
     "margin_money": 615103402000,
     "matched_stocks": 1229,
-    "ratio_pct": 193.87,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-26 的資料、分母為 2026-09-24，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-09-26T08:07:00.062947+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 193.87
   },
   {
     "date": "2026-09-27",
@@ -302,7 +356,11 @@
     "collateral_value": 1192514594980,
     "margin_money": 615103402000,
     "matched_stocks": 1229,
-    "ratio_pct": 193.87
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 193.87,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-27 的資料、分母為 2026-09-24，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-28",
@@ -310,7 +368,11 @@
     "collateral_value": 1192514594980,
     "margin_money": 615103402000,
     "matched_stocks": 1229,
-    "ratio_pct": 193.87
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 193.87,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-09-28 的資料、分母為 2026-09-24，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   },
   {
     "date": "2026-09-29",
@@ -322,7 +384,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-29T23:39:15.740824+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-09-30",
@@ -334,7 +397,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-09-30T23:50:15.189744+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-10-01",
@@ -342,11 +406,13 @@
     "collateral_value": 1205074434880,
     "margin_money": 622252453000,
     "matched_stocks": 1232,
-    "ratio_pct": 193.66,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-10-01 的資料、分母為 2026-09-30，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-10-01T08:42:35.289600+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 193.66
   },
   {
     "date": "2026-10-02",
@@ -358,7 +424,8 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-10-02T23:48:12.453102+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-10-03",
@@ -366,11 +433,13 @@
     "collateral_value": 1251246325780,
     "margin_money": 635104422000,
     "matched_stocks": 1230,
-    "ratio_pct": 197.01,
-    "data_incomplete": false,
-    "incomplete_reason": null,
+    "ratio_pct": null,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-10-03 的資料、分母為 2026-10-02，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）",
     "generated_at": "2026-10-03T08:49:27.572779+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 197.01
   },
   {
     "date": "2026-10-06",
@@ -382,18 +451,19 @@
     "data_incomplete": false,
     "incomplete_reason": null,
     "generated_at": "2026-10-06T23:57:20.467872+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）",
+    "numerator_date_verified": false
   },
   {
     "date": "2026-10-07",
-    "margin_money_date": "2026-10-06",
+    "finmind_margin_money_date": "2026-10-06",
     "collateral_value": 1269675607920,
     "margin_money": 637657044000,
     "matched_stocks": 1230,
-    "ratio_pct": 199.12,
-    "data_incomplete": false,
-    "incomplete_reason": null,
-    "generated_at": "2026-10-07T09:05:18.221919+08:00",
-    "source": "分子=TWSE官方MI_MARGN(逐股融資餘額)×STOCK_DAY_ALL(逐股收盤價)加總；分母=TWSE官方www.twse.com.tw/rwd信用交易統計「融資金額(仟元)」今日餘額×1000（一天一次，2026-09-15起拔掉FinMind依賴）"
+    "ratio_pct": null,
+    "numerator_date_verified": false,
+    "ratio_pct_unpaired": 199.12,
+    "data_incomplete": true,
+    "incomplete_reason": "分子取自紀錄日 2026-10-07 的資料、分母為 2026-10-06，日期不同不相除（先.四十三-三 追溯標記，原值存 ratio_pct_unpaired）"
   }
 ]

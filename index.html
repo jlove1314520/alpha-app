@@ -3822,10 +3822,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:20px;font-weight:700;color:var(--warn)">資料不完整</div><div class="note">${last.date}：${last.incomplete_reason||'分母（全市場融資金額）當天取得失敗'}</div></div>`;
     }else{
       const lv=marginLevel(last.ratio_pct);
-      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}${last.date}</div></div>`;
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}${last.date}（本站算法）</div></div>`;
     }
     if(chartEl)chartEl.innerHTML=marginChart(history.filter(h=>!h.data_incomplete));
-    if(noteEl)noteEl.textContent=`來源：TWSE官方MI_MARGN/STOCK_DAY_ALL逐股融資餘額×收盤價加總（GitHub Actions排程，累積 ${history.length} 天）÷ FinMind全市場融資金額（唯一保留的FinMind依賴，一天一次；若當天失敗會明確標示「資料不完整」而非沿用舊值）`;
+    // 2026-10-07（先.四十三-三）：標明本站算法與外部數值的差距（對帳見 research/MARGIN_RATIO_RECONCILE.md），不為貼近外部值硬調
+    if(noteEl)noteEl.textContent=`本站算法：上市（TWSE）全部可融資證券（含 ETF）同一天的融資餘額×收盤價加總 ÷ 信用交易統計融資金額（皆 TWSE 官方，累積 ${history.length} 天）。與籌碼K等外部數值相比，本站約高 13%（外部≈本站×0.88，2026-09-23～10-06 八個交易日比值穩定），差異原因尚未查明，僅供趨勢參考。分子分母不同天時一律標「資料不完整」、不相除。`;
     // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-margin）簡短文字版。
     const ee=document.getElementById('chips-entry-margin');
     if(ee){
@@ -8040,7 +8041,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-07.0009';
+  const APP_VERSION='2026-10-07.1851';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
