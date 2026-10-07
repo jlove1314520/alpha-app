@@ -467,6 +467,21 @@ def main():
         "generated_at": datetime.now(TW_TZ).isoformat(),
         "source": "分子=TWSE官方www.twse.com.tw/rwd MI_MARGN 融資融券彙總(逐股融資今日餘額，與分母同一天同一回應)×同日收盤價（STOCK_DAY_ALL；日期不同改用price_history.json同日收盤）加總；分母=同一回應信用交易統計「融資金額(仟元)」今日餘額×1000（2026-10-07 先.四十三-三 起分子分母強制同一天）",
     }
+    # 先.五十三-A1：另寫對齊籌碼K的 ratio_pct_ck＝round(ratio_pct × k, 1)，k 讀 data/margin_ratio_calibration.json
+    # （不寫死）。讀不到校準檔或資料不完整就不寫 ck，只記警告。換算函式與 research/build_margin_calibration.py 共用。
+    if not data_incomplete and record["ratio_pct"] is not None:
+        try:
+            import sys as _sys
+            _sys.path.insert(0, str(REPO_ROOT / "research"))
+            import build_margin_calibration as _bmc
+            _cal = json.loads((REPO_ROOT / "data" / "margin_ratio_calibration.json").read_text(encoding="utf-8"))
+            _ck = _bmc.ck_value(record["ratio_pct"], _cal)
+            if _ck is None:
+                print("::warning::校準檔沒有 k，本筆不寫 ratio_pct_ck")
+            else:
+                record["ratio_pct_ck"] = _ck
+        except Exception as _e:  # noqa: BLE001 — 校準失敗只降級成警告，不影響本站原值寫入
+            print(f"::warning::讀取校準檔失敗，本筆不寫 ratio_pct_ck：{type(_e).__name__}")
     print(f"維持率估算：{record['ratio_pct']}%" if not data_incomplete else f"資料不完整：{incomplete_reason}")
 
     history = []

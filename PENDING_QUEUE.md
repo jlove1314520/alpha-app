@@ -18503,10 +18503,10 @@ C. 連線預算補漏（時間閘：10/8 13:40 結算完成後才可動工）
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十三）。
 
-- [ ] **先.五十三-A1 ratio_pct_ck（k 讀校準檔）＋backfill 同步**（互動視窗執行：分身處理中，DevQueue 勿派）
-- [ ] **先.五十三-A2 App 主數字改 ratio_pct_ck、標題下說明、三條線／圖表／入口卡一律改用**（互動視窗執行：分身處理中，DevQueue 勿派）
-- [ ] **先.五十三-A3 external_points（只存總司令提供讀數）＋重算 k＋誤差 >0.5pp 警告**（互動視窗執行：分身處理中，DevQueue 勿派）
-- [ ] **先.五十三-A4 股災段標「校準未驗證」＋分段校準預案**（互動視窗執行：分身處理中，DevQueue 勿派）
+- [x] **先.五十三-A1 ratio_pct_ck（k 讀校準檔）＋backfill 同步**（互動視窗執行：分身處理中，DevQueue 勿派）〔build_margin_calibration.ck_value＝round(ratio_pct×k,1)，k 讀校準檔；update_margin_maintenance.py 每日新紀錄寫 ratio_pct_ck（讀不到校準只警告不寫）；--apply 回寫 margin_maintenance 15 筆、margin_backfill 82 筆；資料不完整紀錄不算。〕
+- [!] **先.五十三-A2 App 主數字改 ratio_pct_ck、標題下說明、三條線／圖表／入口卡一律改用**（互動視窗執行：分身處理中，DevQueue 勿派）〔App 改版已完成並通過冒煙第 56、新增 58 項，但冒煙第 42 項 FAIL（隨機抽樣抽到 4804：10/7 新進在市名冊、報價與 price_history 尚無資料，屬既有資料缺口、與本改動無關），依規則未 commit；修補檔存 scratchpad xian53_A2_app.patch，index.html／smoke_test.mjs 已還原 HEAD。解除：4804 有報價或總司令裁示單次例外。〕
+- [x] **先.五十三-A3 external_points（只存總司令提供讀數）＋重算 k＋誤差 >0.5pp 警告**（互動視窗執行：分身處理中，DevQueue 勿派）〔margin_ratio_calibration.json 新增 external_points（8 點，來源標總司令提供；10/5 為週一交易日照常納入）；k＝0.8815（外部÷同日本站重建值平均），每點誤差 0.00～0.14pp、最大 0.14pp，warn=false（未觸發校準待更新）。〕
+- [x] **先.五十三-A4 股災段標「校準未驗證」＋分段校準預案**（互動視窗執行：分身處理中，DevQueue 勿派）〔股災段 82 筆 ck_status＝「校準未驗證」（crash_verified 皆 false）；external_points 一旦含股災期讀數且誤差 >1pp，build 自動改 mode=segmented 依本站水位（<150／150–175／175–200／≥200）分段 k。App 註記待 A2。〕
 - [x] **先.五十三-B5 DevQueue 只剩時間閘／BLOCKED 時記 GATED、不觸發 STALLED_3H＋selftest**〔dev_queue_runner：無 - [ ] 但有 - [!] → exit 6；wrapper（C:\alpha\run-dev-queue-cycle.ps1，repo 外）6→GATED；update_claude_launcher_heartbeat NO_ATTEMPT 加 GATED；check_local_schedule_heartbeat：GATED／QUEUE_EMPTY／BLOCKED_BY_RULE 且 last_checked_at 新鮮→不判 STALLED_3H（真停擺 last_checked_at 也過期照報）。selftest_claude_auth_detection 新增 5 案全 PASS。〕
 - [!] **先.五十三-C6 SHIOAJI_LOGIN_SCRIPTS 查證 alpha_live_server 是否登入＋preflight**〔時間閘：2026-10-08 13:40 結算完成後〕
 - [ ] **先.五十三-7 smoke＋selftest＋commit 回報**

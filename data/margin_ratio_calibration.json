@@ -1,45 +1,99 @@
 {
- "generated_at": "2026-10-08T01:16:50+08:00",
+ "k": 0.8815,
  "ratio_mean": 0.8815,
- "ratio_min": 0.8809,
- "ratio_max": 0.8822,
- "n_days": 8,
+ "mode": "global",
+ "segments": [],
+ "generated_at": "2026-10-08T07:49:36+08:00",
+ "n_points": 8,
+ "max_err_pp": 0.14,
+ "warn": false,
  "date_from": "2026-09-23",
  "date_to": "2026-10-06",
- "daily": [
+ "n_days": 8,
+ "ratio_min": 0.88088,
+ "ratio_max": 0.8822,
+ "external_points": [
   {
    "date": "2026-09-23",
-   "ratio": 0.8809
+   "chipk_pct": 170.4,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 193.44,
+   "ratio": 0.88089,
+   "err_pp": 0.12
   },
   {
    "date": "2026-09-24",
-   "ratio": 0.8815
+   "chipk_pct": 170.9,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 193.87,
+   "ratio": 0.88152,
+   "err_pp": 0.0
   },
   {
    "date": "2026-09-29",
-   "ratio": 0.8816
+   "chipk_pct": 169.1,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 191.81,
+   "ratio": 0.8816,
+   "err_pp": 0.02
   },
   {
    "date": "2026-09-30",
-   "ratio": 0.8819
+   "chipk_pct": 170.8,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 193.66,
+   "ratio": 0.88196,
+   "err_pp": 0.09
   },
   {
    "date": "2026-10-01",
-   "ratio": 0.8822
+   "chipk_pct": 172.1,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 195.08,
+   "ratio": 0.8822,
+   "err_pp": 0.14
   },
   {
    "date": "2026-10-02",
-   "ratio": 0.8822
+   "chipk_pct": 173.8,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 197.01,
+   "ratio": 0.88219,
+   "err_pp": 0.14
   },
   {
    "date": "2026-10-05",
-   "ratio": 0.8811
+   "chipk_pct": 176.8,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 200.67,
+   "ratio": 0.88105,
+   "err_pp": 0.09
   },
   {
    "date": "2026-10-06",
-   "ratio": 0.8809
+   "chipk_pct": 175.4,
+   "source": "總司令提供（MARGIN_RATIO_RECONCILE.md 外部列）",
+   "site_pct": 199.12,
+   "ratio": 0.88088,
+   "err_pp": 0.12
   }
  ],
- "meaning": "籌碼K口徑 ≈ 本站算法 × ratio_mean（八日對帳比值，估算；原因未查明）",
- "source": "research/MARGIN_RATIO_RECONCILE.md（先.四十三-三，外部值由總司令提供；本檔只存比值）"
+ "crash_ranges": [
+  [
+   "2024-07-15",
+   "2024-08-15"
+  ],
+  [
+   "2025-03-01",
+   "2025-05-31"
+  ]
+ ],
+ "crash_verified": {
+  "0": false,
+  "1": false
+ },
+ "warn_pp": 0.5,
+ "segment_pp": 1.0,
+ "meaning": "對齊籌碼K ≈ 本站算法 × k（由總司令提供的籌碼K讀數與同日本站原值重算；誤差 >0.5pp 標校準待更新）",
+ "source": "external_points 只存總司令提供的籌碼K讀數，未抓取籌碼K網站；本站原值見 MARGIN_RATIO_RECONCILE.md／margin_maintenance.json／margin_backfill.json"
 }
