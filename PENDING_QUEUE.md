@@ -18341,5 +18341,38 @@ push 後停下等 Cowork 核對。
 - [x] **先.四十八-一 LEVERAGE_SAFETY_PLAN 改「已裁示」版（階段 0、不接下單）**〔docs/LEVERAGE_SAFETY_PLAN.md 改為已裁示版：階段門檻生效、目前階段 0（真錢不得持有槓桿 ETF）、仍不接下單；其餘數字於接入另案時確認。〕
 - [x] **先.四十八-二 樣本外警示寫入安全方案與紙.三 卡片＋階段 1 新增條件**〔數字先以結果檔程式核對：21 個持有月中 13 個月關閉（62%；22 次月底判定中 13 次判關）——總司令原文 13 正確，先前分身回報「12 個月」有誤已更正；+41.92%、落後 Bb-90 34.25pp、落後 0050 96.61pp。寫入安全方案新節與紙.三卡片；階段 1 新增條件⑤。冒煙全部通過。〕
 - [x] **先.四十八-三 AWAITING_REVIEW 結案先.四十七-三**〔AWAITING_REVIEW 15→14，先.四十七-三 移至已結案。〕
-- [!] **先.四十八-四 接續先.四十六 Telegram 只讀擷取**〔阻塞：先.四十六 原文不在 repo 與本對話；解除：總司令／Cowork 補貼原文〕
+- [ ] **先.四十八-四 接續先.四十六 Telegram 只讀擷取**〔阻塞：先.四十六 原文不在 repo 與本對話；解除：總司令／Cowork 補貼原文〕〔阻塞解除：總司令已補貼【先.四十六】原文（見下方條目），依該條執行〕
 - [x] **先.四十八-五 禁止依 2025～2026 樣本外結果調整的新試驗（寫入規則處）**〔寫入 research/HOLDOUT_LOG.md（保留資料已用盡、禁止依樣本外調整的新試驗、允許清單不得再新增）與 LEVERAGE_SAFETY_PLAN 樣本外警示節。〕
+
+# 2026-10-07【先.四十六：永豐 API 官方 Telegram 群組只讀擷取】（總司令裁示原文，動工前先寫入；先.四十八-四 的阻塞由本條解除）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十六】永豐 API 官方 Telegram 群組只讀擷取（總司令裁示；先.四十八-四 的阻塞由本條解除）
+
+一、research/telegram_reader.py（Telethon，用總司令個人帳號 MTProto，只讀）：
+  1. 只允許讀 .env 裡 TELEGRAM_TARGET_CHAT 指定的一個群組（群組名稱或邀請連結由總司令在設定工具中輸入）；目標以外一律拒絕。
+  2. 程式層禁止任何寫入動作：用包裝類別只開放 get_entity 與 iter_messages；send／edit／delete／forward／join／leave／mark_read 等一律拋錯，並寫自測證明。
+  3. 不下載任何媒體或檔案，只存文字、時間、訊息編號、回覆對象編號；發言者只存「官方／一般」標記（依管理員身分判斷），不存他人姓名、帳號、電話。
+  4. 增量抓取：記錄上次讀到的訊息編號，只抓新的；首次回補最近 90 天。
+  5. 輸出到 C:\alpha\telegram_export\sinopac_api\YYYY-MM-DD.jsonl（repo 外）；repo 內不存任何群組內容。
+
+二、憑證與安全：
+  1. api_id、api_hash 存本機 .env；登入檔（.session）存 C:\alpha\secrets\，權限只給總司令的 Windows 帳號；.gitignore 補 *.session。
+  2. CC／Cowork 不得讀出、印出、複製或 commit 上述任何一項。
+  3. 一次性設定工具 C:\alpha\setup_ca\run_telegram_setup.bat：讓總司令輸入 api_id／api_hash（輸入時不顯示）與目標群組，寫入 .env（先備份到 secrets）；再引導首次登入（手機驗證碼／兩步驟密碼由總司令本人輸入，CC 不經手）。
+
+三、排程：每天 08:15、20:15 各一次（避開 09:05／09:40／13:40 交易排程），隨機延遲 0～10 分鐘；失敗只記警告與心跳，連續 3 次失敗才推播，不影響任何交易流程。
+
+四、每日摘要：同目錄產生 digest_YYYY-MM-DD.md，依關鍵字分類（正式環境／權限、CA 憑證、零股、上櫃、下單錯誤碼、斷線重連、流量限制、維護公告、版本更新、breaking change），每則附訊息編號。摘要也只存在 repo 外。
+
+五、自測：寫入方法全被擋、目標以外群組拒讀、媒體不下載、增量不重抓、登入檔路徑不在 repo 內。冒煙全綠才 commit。完成後推播通知總司令，並回報設定工具使用步驟。
+
+紅線不變：CC／Cowork 不得改動交易模式或任何真錢設定、不得在 LIVE 類模式觸發下單；Telegram 憑證與登入檔、券商憑證、推播私鑰都不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十六）。
+
+- [ ] **先.四十六-一 research/telegram_reader.py（唯讀包裝、單一目標、不下載媒體、去識別、增量、repo 外輸出）**
+- [ ] **先.四十六-二 設定工具 run_telegram_setup.bat（隱藏輸入、備份 .env、首次登入由總司令本人）＋.gitignore *.session＋secrets 權限**
+- [ ] **先.四十六-三 排程 08:15／20:15＋隨機延遲＋連續 3 次失敗才推播**
+- [ ] **先.四十六-四 每日摘要 digest（repo 外）**
+- [ ] **先.四十六-五 自測五案＋冒煙＋推播通知＋回報設定步驟**
