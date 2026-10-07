@@ -18376,3 +18376,27 @@ push 後停下等 Cowork 核對。
 - [x] **先.四十六-三 排程 08:15／20:15＋隨機延遲＋連續 3 次失敗才推播**〔AlphaTelegram0815／AlphaTelegram2015（每日、RandomDelay 10 分鐘、Interactive），啟動器 C:\alpha\run-telegram-reader.ps1（repo 備份 scripts/scheduler/），一律 exit 0；連續 3 次失敗才推播一次；未設定時記 NOT_CONFIGURED 不算失敗（試跑確認）。〕
 - [x] **先.四十六-四 每日摘要 digest（repo 外）**〔每次執行為當日與有新訊息的日期產生 digest_YYYY-MM-DD.md，十類關鍵字、附訊息編號，只在 repo 外。〕
 - [x] **先.四十六-五 自測五案＋冒煙＋推播通知＋回報設定步驟**〔scripts/selftest_telegram_reader.py 19 項全 PASS（寫入方法 12 項＋原始請求被擋、目標外拒讀、媒體不下載、欄位去識別、增量不重抓、摘要、未設定、連續 3 次才推播、登入檔與輸出在 repo 外、.gitignore）；冒煙全部通過；推播通知已送。〕
+
+# 2026-10-08【先.四十六-補：Telegram 目標群組改支援「顯示名稱」解析】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十六-補】Telegram 目標群組改支援「顯示名稱」解析（總司令設定時以 @Shioaji 失敗：該群組為私人群組、無 @ 帳號名稱）
+
+一、setup 流程新增：目標群組欄位接受「顯示名稱」（例：Shioaji）。只在首次設定時，用 iter_dialogs 逐一比對已加入的群組與頻道，找出標題完全相同者：
+  1. 只比對標題，不讀任何訊息內容；不把其他聊天的標題寫進檔案、log 或終端機輸出（只印「找到 N 個同名群組」）。
+  2. 唯一一個 → 記下數字 ID 寫入 .env 的 TELEGRAM_TARGET_CHAT_ID；多個同名 → 列出各自成員數讓總司令輸入序號選擇（總司令截圖顯示該群約 2,663 位成員）；零個 → 報錯說明。
+  3. iter_dialogs 只在 --login／setup 模式開放；每日排程的 ReadOnlyClient 仍只開放 get_entity／iter_messages，且只認 TELEGRAM_TARGET_CHAT_ID。自測補兩案：排程模式呼叫 iter_dialogs 會拋錯；ID 以外的群組拒讀。
+二、提示文字改為：「群組顯示名稱（例：Shioaji），或 @帳號名稱，或邀請連結」。
+三、setup 已登入時不得要求重新輸入 api_id／api_hash（已存在就沿用，可選擇覆蓋）。
+四、順帶：群組置頂公告顯示 Shioaji 已發布 1.7.7（修正 1.7.6 的兩個登入問題），我們目前釘 1.7.4。查官方 release notes 回報 1.7.5～1.7.7 有無影響下單、帳務、CA 的變更；只回報，不得在 10/8 交易時段（09:00–13:45）前後升級，升級需另行裁示。
+五、完成後推播通知總司令重跑設定工具。
+
+紅線不變：CC／Cowork 不得改動交易模式或任何真錢設定、不得在 LIVE 類模式觸發下單；Telegram 憑證與登入檔不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十六-補）。
+
+- [ ] **先.四十六補-一 顯示名稱解析（iter_dialogs 僅 setup 模式、只印同名數量、多個列成員數選序號）→ TELEGRAM_TARGET_CHAT_ID；排程只認 ID＋自測兩案**
+- [ ] **先.四十六補-二 提示文字改為三種輸入方式**
+- [ ] **先.四十六補-三 已有 api_id／api_hash 時沿用（可選覆蓋）**
+- [ ] **先.四十六補-四 Shioaji 1.7.5～1.7.7 release notes 查證（只回報、不升級）**
+- [ ] **先.四十六補-五 推播通知重跑設定工具**
