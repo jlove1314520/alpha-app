@@ -116,6 +116,7 @@ CLAUDE_AUTH_STALL_HOURS = 3.0
 # devqueue 維持每 15 分鐘，門檻仍 3 小時。狀態字串沿用 STALLED_3H 以免動到 App 與既有消費端。
 CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER = {"devqueue": 3.0, "marathon": 7.0, "hypothesis_queue": 7.0}
 CLAUDE_AUTH_LAUNCHERS = ("devqueue", "marathon", "hypothesis_queue")
+QUIET_REASONS = ("GATED", "QUEUE_EMPTY", "BLOCKED_BY_RULE")  # 先.五十三-B5：正常無為
 
 
 def _evaluate_claude_auth(now: datetime) -> dict:
@@ -143,15 +144,27 @@ def _evaluate_claude_auth(now: datetime) -> dict:
         attempt_at = rec.get("last_attempt_at")
         hours_since_attempt = None
         stalled_3h = False
+        limit_h = CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER.get(name, CLAUDE_AUTH_STALL_HOURS)
+
+        def _hours(v):
+            ts = datetime.fromisoformat(str(v))
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=timezone.utc)
+            return (now - ts.astimezone(timezone.utc)).total_seconds() / 3600.0
         if attempt_at:
             try:
-                ts = datetime.fromisoformat(str(attempt_at))
-                if ts.tzinfo is None:
-                    ts = ts.replace(tzinfo=timezone.utc)
-                hours_since_attempt = (now - ts.astimezone(timezone.utc)).total_seconds() / 3600.0
-                stalled_3h = hours_since_attempt > CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER.get(name, CLAUDE_AUTH_STALL_HOURS)
+                hours_since_attempt = _hours(attempt_at)
+                stalled_3h = hours_since_attempt > limit_h
             except Exception as e:  # noqa: BLE001
                 print(f"::warning::claude_auth時間戳解析失敗（{name}）：{type(e).__name__}: {e}")
+        # 2026-10-08（先.五十三-B5）：最近一輪是「正常無為」（佇列只剩時間閘／BLOCKED、或佇列空）且
+        # last_checked_at 仍新鮮 → 排程有在跑、只是沒事可做，不是停擺。真停擺時 last_checked_at 也會過期。
+        if stalled_3h and last_reason in QUIET_REASONS and rec.get("last_checked_at"):
+            try:
+                if _hours(rec["last_checked_at"]) <= limit_h:
+                    stalled_3h = False
+            except Exception as e:  # noqa: BLE001
+                print(f"::warning::claude_auth last_checked_at 解析失敗（{name}）：{type(e).__name__}: {e}")
         status = last_reason if last_reason in ("AUTH_EXPIRED", "QUOTA_EXCEEDED") else ("STALLED_3H" if stalled_3h else "OK")
         launchers[name] = {
             "status": status, "last_reason": last_reason, "last_detail": rec.get("last_detail"),

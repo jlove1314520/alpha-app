@@ -123,6 +123,38 @@ def test_aggregator(tmpdir: Path):
     r = hb._evaluate_claude_auth(now)
     check("情境三之二：研究線 5小時無嘗試 -> 仍 OK（7小時門檻）", r["overall_status"] == "OK", str(r))
 
+    # 情境三之三（先.五十三-B5）：devqueue 佇列只剩時間閘／BLOCKED → GATED，5 小時沒有「嘗試」但每輪都有檢查 → 不得 STALLED_3H
+    hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
+        "devqueue": {"last_reason": "GATED", "last_attempt_at": mid, "last_checked_at": fresh},
+        "marathon": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
+        "hypothesis_queue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
+    }, ensure_ascii=False), encoding="utf-8")
+    r = hb._evaluate_claude_auth(now)
+    check("情境三之三：只剩時間閘項目（GATED、檢查新鮮）-> 不得 STALLED_3H", r["overall_status"] == "OK", str(r))
+    # 情境三之四：GATED 但連 last_checked_at 也過期（排程真的沒在跑）-> 仍要 STALLED_3H
+    hb.CLAUDE_AUTH_PATH.write_text(json.dumps({
+        "devqueue": {"last_reason": "GATED", "last_attempt_at": mid, "last_checked_at": mid},
+        "marathon": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
+        "hypothesis_queue": {"last_reason": "OK", "last_attempt_at": fresh, "last_ok_at": fresh},
+    }, ensure_ascii=False), encoding="utf-8")
+    r = hb._evaluate_claude_auth(now)
+    check("情境三之四：GATED 但檢查也過期 -> 仍 STALLED_3H（真停擺照報）", r["overall_status"] == "STALLED_3H", str(r))
+    import update_claude_launcher_heartbeat as up
+    check("GATED 屬於「不算嘗試」的正常無為", "GATED" in up.NO_ATTEMPT_REASONS)
+    # dev_queue_runner：佇列只剩 - [!] 項目時 build_prompt 回 6（GATED）；有 - [ ] 時不受影響
+    import dev_queue_runner as dq
+    importlib.reload(dq)
+    q = tmpdir / "PENDING_QUEUE.md"
+    q.write_text("# t\n\n<!-- ORDER-BEGIN -->\n<!-- ORDER-END -->\n\n- [x] **done**\n- [!] **等時間閘**〔時間閘：明天〕\n", encoding="utf-8")
+    dq.QUEUE = q; dq.PROMPT_OUT = tmpdir / "prompt.txt"; dq.STATE = tmpdir / "state.json"
+    dq._record_format_mismatch = lambda d: None; dq._clear_format_mismatch = lambda: None
+    dq._report_order_tag_mismatches = lambda: None
+    rc = dq.build_prompt()
+    check("dev_queue_runner：只剩時間閘／BLOCKED 項目 -> exit 6（GATED）", rc == 6, f"rc={rc}")
+    q.write_text("# t\n\n<!-- ORDER-BEGIN -->\n<!-- ORDER-END -->\n\n- [x] **done**\n", encoding="utf-8")
+    rc = dq.build_prompt()
+    check("dev_queue_runner：真的沒有任何待辦 -> 仍 exit 3（QUEUE_EMPTY）", rc == 3, f"rc={rc}")
+
     # 情境四：心跳檔不存在 -> UNKNOWN，不拋例外
     missing_path = tmpdir / "__no_such_file__.json"
     hb.CLAUDE_AUTH_PATH = missing_path

@@ -750,6 +750,16 @@ def build_prompt() -> int:
                          "活躍使用中，判定為歷史敘述殘留，不觸發格式不符警報"
                          "（2026-09-19修法，見_stale_status_markers_present()docstring）")
         _clear_format_mismatch()
+        # 2026-10-08（先.五十三-B5）：沒有 - [ ] 但還有 - [!]（時間閘／BLOCKED）→ 正常無為 GATED（exit 6），
+        # 讓心跳記 last_reason=GATED，不被當成「3 小時沒有執行」的停擺。
+        try:
+            gated = any(ln.lstrip().startswith("- [!]") for ln in _lines())
+        except Exception as e:  # noqa: BLE001
+            gated = False
+            _safe_print(f"WARN_DETECTOR_CRASHED: gated check failed ({type(e).__name__})")
+        if gated:
+            _safe_print("NO_PENDING_ITEM_GATED：剩餘項目皆為時間閘或 BLOCKED，正常無為")
+            return 6
         _safe_print("NO_PENDING_ITEM")
         return 3
     _clear_format_mismatch()

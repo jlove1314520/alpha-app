@@ -42,6 +42,7 @@ except Exception:  # noqa: BLE001
 
 PATH = Path(__file__).resolve().parent.parent / "research" / "data" / "claude_launcher_heartbeat.json"
 NO_ATTEMPT_REASONS = {
+    "GATED",  # 2026-10-08 先.五十三-B5：佇列只剩時間閘／BLOCKED，正常無為
     "QUEUE_EMPTY", "BLOCKED_BY_RULE", "QUEUE_FORMAT_MISMATCH", "QUEUE_ORDER_MARKER_AMBIGUOUS",
 }
 

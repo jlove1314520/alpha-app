@@ -18503,10 +18503,10 @@ C. 連線預算補漏（時間閘：10/8 13:40 結算完成後才可動工）
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十三）。
 
-- [ ] **先.五十三-A1 ratio_pct_ck（k 讀校準檔）＋backfill 同步**
-- [ ] **先.五十三-A2 App 主數字改 ratio_pct_ck、標題下說明、三條線／圖表／入口卡一律改用**
-- [ ] **先.五十三-A3 external_points（只存總司令提供讀數）＋重算 k＋誤差 >0.5pp 警告**
-- [ ] **先.五十三-A4 股災段標「校準未驗證」＋分段校準預案**
-- [ ] **先.五十三-B5 DevQueue 只剩時間閘／BLOCKED 時記 GATED、不觸發 STALLED_3H＋selftest**
+- [ ] **先.五十三-A1 ratio_pct_ck（k 讀校準檔）＋backfill 同步**（互動視窗執行：分身處理中，DevQueue 勿派）
+- [ ] **先.五十三-A2 App 主數字改 ratio_pct_ck、標題下說明、三條線／圖表／入口卡一律改用**（互動視窗執行：分身處理中，DevQueue 勿派）
+- [ ] **先.五十三-A3 external_points（只存總司令提供讀數）＋重算 k＋誤差 >0.5pp 警告**（互動視窗執行：分身處理中，DevQueue 勿派）
+- [ ] **先.五十三-A4 股災段標「校準未驗證」＋分段校準預案**（互動視窗執行：分身處理中，DevQueue 勿派）
+- [x] **先.五十三-B5 DevQueue 只剩時間閘／BLOCKED 時記 GATED、不觸發 STALLED_3H＋selftest**〔dev_queue_runner：無 - [ ] 但有 - [!] → exit 6；wrapper（C:lphaun-dev-queue-cycle.ps1，repo 外）6→GATED；update_claude_launcher_heartbeat NO_ATTEMPT 加 GATED；check_local_schedule_heartbeat：GATED／QUEUE_EMPTY／BLOCKED_BY_RULE 且 last_checked_at 新鮮→不判 STALLED_3H（真停擺 last_checked_at 也過期照報）。selftest_claude_auth_detection 新增 5 案全 PASS。〕
 - [!] **先.五十三-C6 SHIOAJI_LOGIN_SCRIPTS 查證 alpha_live_server 是否登入＋preflight**〔時間閘：2026-10-08 13:40 結算完成後〕
 - [ ] **先.五十三-7 smoke＋selftest＋commit 回報**
