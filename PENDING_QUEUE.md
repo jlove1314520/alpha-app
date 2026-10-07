@@ -18283,7 +18283,7 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十五）；研究項另以 TRIALS_REGISTRY／TRIALS_LEDGER 登記。
 
-- [ ] **先.四十五-一 Bb-90 樣本外單發（預登記 SHA256→只跑一次→JSON＋LEDGER→推播百分比摘要）**
+- [!] **先.四十五-一 Bb-90 樣本外單發（預登記 SHA256→只跑一次→JSON＋LEDGER→推播百分比摘要）**〔分身 2026-10-07：預登記 docs/PREREG_bb90_oos_2025.md SHA256=ce89180b6ff3af93c753d8b83325d1ba8bd9446b93402a6d267439c5eb3ae878（d92de9b4c），登記 #423（8ad3214b1）；執行程式 research/bb90_oos_2025.py 已寫好、**尚未執行**。阻塞：保留資料 2026-09-26 已由 #400 解鎖過，守門（validation/holdout.py 的 ALLOWED_HOLDOUT_READERS）只放行 #400 腳本；本腳本守門自檢（一列假日期、未讀任何保留期資料）被擋。research/validation/ 屬十三節核心檔、本分身不得修改，亦不採借用 #400 腳本身分等繞道。解除條件：互動視窗依總司令本條裁示把 'bb90_oos_2025.py' 加入 ALLOWED_HOLDOUT_READERS（附裁示出處）並 commit 後，執行一次 `python research/bb90_oos_2025.py`（結果檔已存在即拒絕重跑），再以 research/web_push.py send() 推播百分比摘要、TRIALS_LEDGER 登記結果。〕
 - [ ] **先.四十五-三 主線 A 危機閘門×槓桿 Bb-90（預登記→單發→控制組→8 市場複製→判定）**
 - [x] **先.四十五-四 支線 B 盤點（一頁）→至多 2 個從未乾淨測過的假說登記與評估**〔分身：盤點 research/TW_EVIDENCE_INVENTORY.md——月營收動能（#1、#80、#91、#323、#326、#368、#369）、投信買超（#317、#328、#79、#26/#27/#31）、除權息（#95、#186、#189）皆已測過且 FAIL，不得重測；季底作帳只測過指數層級月轉效應（#96 FAIL），個股層級「季底投信作帳」從未測過、可登記，但缺 PIT 投信持股資料，本輪不登記不執行（判定：無登記，待資料可行性查證後由總司令決定）。無新試驗編號。〕
 - [ ] **先.四十五-五 支線 C 台指期 CTA 衛星（資料可得性→預登記→組合層級評估）**
