@@ -18176,3 +18176,34 @@ push 後停下等 Cowork 核對。
 - [x] **先.四十一-二 shioaji_order_server.py 改讀 SINOPAC_EXPECTED_ACCOUNT_ID（缺值拒絕啟動）＋文件帳號改寫**〔shioaji_order_server.py 改從 .env 讀 SINOPAC_EXPECTED_ACCOUNT_ID，缺值 main 拒絕啟動（exit 2）、下單檢查也拒絕；錯誤訊息不再印帳號。BACKLOG.md 2 處、PROGRESS.md 1 處改寫為「（帳號已移至本機 .env）」。git grep 追蹤檔已無該號碼。.env 未代填。另：程式註解顯示該號碼是登入模擬環境取得的帳戶 ID，仍依裁示比照處理。〕
 - [x] **先.四十一-三 冒煙新增：git 追蹤檔不得含 .env 帳號（本機比對、不印值）**〔冒煙第55項：讀本機 .env 的帳號、git grep -F 比對追蹤檔、不印數值；暫存假 repo 實測可抓到外洩檔。目前 .env 未設定該鍵→照實標「無從比對」。冒煙全部通過。〕
 - [x] **先.四十一-四 PROGRESS 註明曾公開、已移除；不改寫歷史**〔PROGRESS 已註明；未改寫 git 歷史（歷史中 641d81e1c 等 commit 仍含該號碼）。〕
+
+# 2026-10-07【先.四十三：演練結果核對＋DevQueue 停擺＋融資維持率對帳（合併先.四十二，批次模式）】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十三】演練結果核對＋DevQueue 停擺＋融資維持率對帳（合併先.四十二，批次模式）
+
+一、先.三十二 演練結果核對：公開心跳顯示 10/7 09:05 WAITING_VETO、09:40 OK、13:40 settle OK，排程實證 PASS。
+  1. 從本機帳本與 status 列出演練 A：送出股數、成交股數與均價、結算後對帳結果、推播是否送達（只記錄數量與結果，不寫金額以外的帳戶資料）。
+  2. 演練 B 若未做：現在以模擬環境＋sim_veto 建立一批，透過 /auto/cancel_pending 取消，確認 0 張送出、停止旗標未開。
+  3. 先.三十二-一／二-A／二-B 依結果標 [x] 或寫明失敗原因。
+
+二、DevQueue 停擺 15.8 小時：每輪 check_collision 都因殘留未 commit 檔案（research/data/adjustment_anomaly_warnings.jsonl、research/data/us_universe_rebuild_report.json、scripts/long_job_progress_heartbeat.py）而讓行。
+  1. 查出是哪個程序寫的；工作已結束就 commit 或還原，不得直接刪除。
+  2. check_collision 改為：檔案超過 60 分鐘沒變動、且沒有對應的執行中程序 → 記警告後照常執行。
+  3. dev_queue_cycle.log 中文亂碼：統一用 UTF-8 寫檔。
+
+三、大盤融資維持率對帳（總司令以籌碼K比對）：
+  - 外部值：10/6 175.4、10/5 176.8、10/2 173.8、10/1 172.1、9/30 170.8、9/29 169.1、9/24 170.9、9/23 170.4（%）。
+  - 我方：10/6 199.31、9/24 190.69。分母融資金額兩邊相同，差異全在分子（高約 12～14%）。
+  1. 拆解分子：列前 50 大貢獻；計算「只含普通股」「排除 ETF／ETN／槓桿反向」「排除全額交割與停止信用」等版本，逐日與外部 8 個值比對；檢查欄位（今日餘額／前日餘額／限額）、張股換算、收盤價日期。
+  2. 某版本 8 天內都與外部值差 ≤0.5pp → 寫明定義與公開來源後改用；找不到則保留，但 App 標明「本站算法」與差距，不得為貼近外部值而硬調。
+  3. 分子分母日期不同時（如 9/25、9/26）不得相除，標「資料不完整」。
+  4. 結果寫入 research/MARGIN_RATIO_RECONCILE.md。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單；憑證與推播私鑰不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十三）。
+
+- [ ] **先.四十三-一 演練 A 結果核對＋演練 B（cancel_pending）＋先.三十二 各項結案**
+- [ ] **先.四十三-二 DevQueue 停擺：殘留檔來源查證與處理、check_collision 60 分鐘規則、log UTF-8**
+- [ ] **先.四十三-三 融資維持率分子拆解與 8 日對帳→MARGIN_RATIO_RECONCILE.md（不得硬調）**
