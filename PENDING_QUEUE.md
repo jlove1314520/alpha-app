@@ -18439,14 +18439,14 @@ push 後停下等 Cowork 核對。
 
 註（互動視窗）：本條修改 research/auto_rebalance_bb90.py，10/8 09:05 真錢第 1 批會用到；須在 09:00 前完成並全套自測、自檢通過，否則還原改動、不得帶未驗證的修改進入交易時段。
 
-- [ ] **先.五十-1 ShioajiBroker.close()＋各進入點 try/finally 登出**
-- [ ] **先.五十-2 preflight 第 18 項連線預算（≥5 FAIL）**
-- [ ] **先.五十-3 selftest：禁用 limit_up／limit_down 計價、00697B 極端漲跌停情境以 reference ±1% 出價並對齊級距**
-- [ ] **先.五十-4 SIM 不支援零股：文件更正＋演練零股結果標 SIM_ODD_UNSUPPORTED**
-- [!] **先.五十-5 10/8 13:40 settle「零股首次真實驗證」逐筆報告**〔程式今晚完成；實際報告時間閘 10/8 13:40 後〕
-- [ ] **先.五十-6 cash() 旁唯讀參考 trading_limits().trading_available（08:30–15:00），差距 >5% 只警告**
-- [ ] **先.五十-7 先.四十九 升級清單補三項**
-- [ ] **先.五十-8 smoke＋preflight（唯讀）＋commit 回報**
+- [x] **先.五十-1 ShioajiBroker.close()＋各進入點 try/finally 登出**〔ShioajiBroker.close()（登出失敗只警告）＋_close_broker；run／settle／sim／live 撤單測試／零股驗證以 finally 關閉；preflight 原本已 finally 登出。watchdog 不登入。〕
+- [x] **先.五十-2 preflight 第 18 項連線預算（≥5 FAIL）**〔conn_budget：python 程序命令列含 shioaji_quotes／shioaji_order_server／auto_rebalance_bb90（排除本行程與其他 --preflight）＋本次 ≥5 即 FAIL；實跑 0＋1＝1 條 PASS。〕
+- [x] **先.五十-3 selftest：禁用 limit_up／limit_down 計價、00697B 極端漲跌停情境以 reference ±1% 出價並對齊級距**〔自測：全 repo 下單路徑無 limit_up／limit_down；00697B（limit_up 9999.95、limit_down 0.01）基準取 reference、限價在 ±1% 內並對齊 0.01，0050 對齊 0.05。〕
+- [x] **先.五十-4 SIM 不支援零股：文件更正＋演練零股結果標 SIM_ODD_UNSUPPORTED**〔docs 第十一節更正；_log 對模擬族零股紀錄標 SIM_ODD_UNSUPPORTED，演練 A 判定排除。核對：模擬模式本來就只下整股，10/7 演練帳本無零股。〕
+- [!] **先.五十-5 10/8 13:40 settle「零股首次真實驗證」逐筆報告**〔程式今晚完成；實際報告時間閘 10/8 13:40 後〕　〔程式已完成：送單時記 pre_batch_positions；settle 結尾與「已全數成交」的 13:40 排程都會產生 odd_lot_verification 報告＋推播；自測 5 案 PASS。待 10/8 13:40 實際產出。〕
+- [x] **先.五十-6 cash() 旁唯讀參考 trading_limits().trading_available（08:30–15:00），差距 >5% 只警告**〔_cash_crosscheck：08:30–15:00 查 trading_limits().trading_available，與餘額−未交割應付差 >5% 只寫 status.cash_crosscheck 警告；失敗只警告；自測證明不改擋單。〕
+- [x] **先.五十-7 先.四十九 升級清單補三項**〔docs 第十一節補三項；目前程式 grep 無 contracts_cb／contracts_timeout／fetch_contract、無 msg.dict／isinstance(msg, dict)。〕
+- [x] **先.五十-8 smoke＋preflight（唯讀）＋commit 回報**〔selftest_auto_rebalance 220 PASS（+18）；冒煙全部通過；--preflight（唯讀）PASS 18／FAIL 0。〕
 
 # 2026-10-08【先.五十一：行情與 App 優化（TG 群組回饋）】（總司令裁示原文，動工前先寫入；收到時先.五十 進行中）
 

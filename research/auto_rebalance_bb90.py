@@ -94,6 +94,16 @@ def _num(v) -> float:
     return float(str(v).replace(",", ""))
 
 
+def _close_broker(broker) -> None:
+    """先.五十-1：各進入點 finally 呼叫；沒有 close() 的測試券商略過。"""
+    fn = getattr(broker, "close", None)
+    if callable(fn):
+        try:
+            fn()
+        except Exception as e:
+            print(f"[warn] 券商連線關閉失敗：{type(e).__name__}（只記警告）", flush=True)
+
+
 def _read_json(p: Path):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
@@ -337,6 +347,32 @@ class ShioajiBroker:
                                  person_id=env.get("SINOPAC_PERSON_ID", ""))
         self._trades = {}
 
+    def close(self) -> None:
+        """先.五十-1：登出釋放連線（同一身分證最多 5 條）。失敗只記警告。"""
+        try:
+            self.api.logout()
+        except Exception as e:
+            print(f"[warn] Shioaji 登出失敗：{type(e).__name__}（只記警告）", flush=True)
+
+    def trading_available(self, timeout: float = 20.0) -> float:
+        """先.五十-6：唯讀參考 api.trading_limits().trading_available（官方僅 08:30–15:00 有效）。失敗拋錯由呼叫端吞掉。"""
+        box = {}
+
+        def _call():
+            try:
+                box["v"] = self.api.trading_limits(self.api.stock_account)
+            except Exception as e:
+                box["e"] = e
+
+        t = threading.Thread(target=_call, daemon=True)
+        t.start()
+        t.join(timeout)
+        v = box.get("v")
+        ta = getattr(v, "trading_available", None) if v is not None else None
+        if ta is None:
+            raise AutoTradingError("trading_limits 查詢失敗或無 trading_available 欄位")
+        return float(ta)
+
     def positions(self) -> dict:
         out = {}
         try:
@@ -508,6 +544,9 @@ def _eff_mode(cfg: dict, mode_override: str | None) -> str:
 
 
 def _log(paths: Paths, now: datetime, mode: str, event: str, o: dict, **kw) -> None:
+    # 先.五十-4：模擬環境不支援零股（永豐群組 #83956 #84243 #84559），模擬帳本裡的零股紀錄一律標記、不計入驗證
+    if mode_family(mode) == "SIMULATION" and o.get("lot") == "IntradayOdd":
+        kw.setdefault("validation", "SIM_ODD_UNSUPPORTED")
     _append(paths.ledger, {"ts": now.astimezone(TW).isoformat(timespec="seconds"), "event": event, "mode": mode,
                            "key": o.get("key"), "symbol": o.get("symbol"), "qty": o.get("qty"),
                            "limit_price": o.get("limit_price"), **kw})
@@ -610,6 +649,23 @@ def _finalize(paths: Paths, broker, now: datetime, prev_close: dict) -> str:
     return "OK"
 
 
+def _cash_crosscheck(paths: Paths, broker, avail: float, now: datetime) -> None:
+    """先.五十-6：唯讀參考 trading_limits().trading_available（08:30–15:00），與「餘額−未交割應付」差 >5% 只記警告，
+    不改變任何擋單規則。不印金額。"""
+    try:
+        hm = (now.astimezone(TW).hour, now.astimezone(TW).minute)
+        if not ((8, 30) <= hm <= (15, 0)) or not hasattr(broker, "trading_available"):
+            return
+        ta = float(broker.trading_available())
+        gap = abs(ta - avail) / max(abs(avail), 1.0)
+        info = {"checked_at": now.isoformat(timespec="seconds"), "gap_pct": round(gap * 100, 2), "warn": gap > 0.05}
+        write_status(Paths(paths.base, paths.heartbeat), cash_crosscheck=info)
+        if gap > 0.05:
+            print(f"[warn] 可用額度交叉核對差距 {gap * 100:.1f}%（>5%，只記警告，不影響擋單）", flush=True)
+    except Exception as e:
+        print(f"[warn] 可用額度交叉核對失敗：{type(e).__name__}（只記警告）", flush=True)
+
+
 def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: datetime, batch_id: str, res: dict) -> bool:
     """INSUFFICIENT_CASH：整批金額×1.003（手續費緩衝）不得超過可用餘額；查不到一律拒（fail closed）。"""
     need = sum(o["qty"] * o["limit_price"] for o in orders) * CASH_BUFFER
@@ -623,6 +679,7 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
             cash = float(broker.cash())
         payable = float(broker.unsettled_payable())
         cash -= payable
+        _cash_crosscheck(paths, broker, cash, now)
         if cash < need:
             reason = (f"INSUFFICIENT_CASH:可用餘額{cash:.0f}（已扣未交割款{payable:.0f}）不足整批所需{need:.0f}"
                       f"（含{(CASH_BUFFER - 1) * 100:.1f}%手續費緩衝）")
@@ -889,6 +946,8 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
 
     state["batch"] = {"label": label, "ym": bym, "round": rnd, "budget": float(batch["budget"]) if batch else budget,
                       "round_date": today.isoformat()}
+    state["pre_batch_positions"] = dict(positions)   # 先.五十-5：本批送單前券商持股（unit=Share），供零股驗證比對
+    state["pre_batch_date"] = today.isoformat()
     _write_json(paths.state, state)
     placed = []
     for o in ok_orders:
@@ -974,7 +1033,46 @@ def settle(paths: Paths, broker, now: datetime, mode_override: str | None = None
     else:
         write_status(shared, last_settle=now.isoformat(timespec="seconds"), last_error=None, banner=None,
                      next_tranche=(_read_json(paths.state) or {}).get("next_tranche"))
+    try:
+        rep_ = odd_lot_verification(paths, broker, now)
+        if rep_:
+            res["odd_lot_verification"] = rep_
+    except Exception as e:
+        print(f"[warn] 零股驗證報告產生失敗：{type(e).__name__}（只記警告）", flush=True)
     return res
+
+
+def odd_lot_verification(paths: Paths, broker, now: datetime) -> dict | None:
+    """先.五十-5：「零股首次真實驗證」——只針對 LIVE 族當日的盤中零股委託，逐筆列委託量、成交量、均價，
+    並以 unit=Share 持股前後差（券商現有持股 − 本批前對帳基準）對照本日整股＋零股成交量合計。只寫本機，不進 repo。"""
+    if paths.family != "LIVE":
+        return None
+    day = now.astimezone(TW).date().isoformat()
+    lat = _ledger_latest(paths)
+    today = {k: r for k, r in lat.items() if str(r.get("ts", ""))[:10] == day and r.get("symbol") in WEIGHTS}
+    odd = {k: r for k, r in today.items() if k.endswith("-O")}
+    if not odd:
+        return None
+    st = _read_json(paths.state) or {}
+    if st.get("pre_batch_date") != day:
+        print("[warn] 零股驗證：找不到本日送單前的持股基準（pre_batch_positions），不比對持股差", flush=True)
+    base_pos = dict(st.get("pre_batch_positions") or {}) if st.get("pre_batch_date") == day else None
+    after = broker.positions()
+    rows = [{"key": k, "symbol": r["symbol"], "qty": r.get("qty"), "filled": _filled(r), "avg_price": r.get("avg_price"),
+             "event": r.get("event"), "broker_status": r.get("broker_status")} for k, r in sorted(odd.items())]
+    per = {}
+    for c in WEIGHTS:
+        filled_all = sum(_filled(r) for r in today.values() if r["symbol"] == c)
+        diff = None if base_pos is None else int(after.get(c, 0)) - int(base_pos.get(c, 0))
+        per[c] = {"filled_common_plus_odd": filled_all, "position_diff_shares": diff, "match": diff is not None and filled_all == diff}
+    out = {"date": day, "unit": "Share", "odd_orders": rows, "per_symbol": per,
+           "all_match": all(v["match"] for v in per.values())}
+    _write_json(paths.ledger.parent / f"odd_lot_verification_{day.replace('-', '')}.json", out)
+    msg = "；".join(f"{c} 成交 {v['filled_common_plus_odd']} 股／持股增 {v['position_diff_shares']} 股{'' if v['match'] else '（不符）'}"
+                   for c, v in per.items())
+    push_notify(Paths(paths.base, paths.heartbeat), "零股首次真實驗證", ("全部相符。" if out["all_match"] else "有不符，請查看。") + msg, "info")
+    print("零股首次真實驗證：" + msg, flush=True)
+    return out
 
 
 # ---------- 觸發條件與排程入口 ----------
@@ -1253,7 +1351,11 @@ def sim_cancel_test(now: datetime | None = None, broker=None) -> dict:
         b = broker or ShioajiBroker(simulation=True)
         o = {"symbol": "0050", "action": "Buy", "qty": LOT, "limit_price": rec["limit_price"], "lot": "Common",
              "part": "C", "cond": "Cash", "key": "SIMTEST"}
-        rec.update(_cancel_roundtrip(b, o))
+        try:
+            rec.update(_cancel_roundtrip(b, o))
+        finally:
+            if broker is None:
+                _close_broker(b)
         rec["result"] = "PASS" if rec["cancelled"] and rec["filled_qty"] == 0 else "FAIL"
     except Exception as e:
         rec["result"] = "ERROR"
@@ -1299,6 +1401,7 @@ def live_cancel_test(now: datetime | None = None) -> dict:
     except Exception as e:
         rec.update(result="ERROR", error=f"{type(e).__name__}：{_mask_secrets(str(e), _read_env_file())[:300]}")
         report_error(paths, f"真錢掛單＋撤單測試失敗：{type(e).__name__}，請到券商 App 確認是否有殘留委託")
+    _close_broker(b)
     _append(CANCEL_TEST_LOG, rec)
     write_status(Paths(), live_cancel_test={k: rec.get(k) for k in ("ts", "result", "final_status", "filled_qty")})
     push_notify(Paths(), "真錢掛單＋撤單測試", f"結果：{rec['result']}（0050 零股 1 股，限價 {px}）", "info")
@@ -1411,8 +1514,30 @@ def _task_states(names) -> dict:
     return res
 
 
+SHIOAJI_LOGIN_SCRIPTS = ("shioaji_quotes.py", "shioaji_order_server.py", "auto_rebalance_bb90.py")
+
+
+def _shioaji_procs() -> list[str]:
+    """本機正在執行、會登入 Shioaji 的 python 程式（依命令列判斷，排除本行程）。回傳腳本名清單。"""
+    import subprocess
+    r = subprocess.run(["powershell", "-NoProfile", "-Command",
+                        "Get-CimInstance Win32_Process -Filter \"Name like 'python%'\" | "
+                        "ForEach-Object { \"$($_.ProcessId)`t$($_.CommandLine)\" }"],
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+    me = os.getpid()
+    out = []
+    for line in r.stdout.splitlines():
+        pid, _, cmd = line.partition("	")
+        if not pid.strip().isdigit() or int(pid) == me:
+            continue
+        hit = next((n for n in SHIOAJI_LOGIN_SCRIPTS if n in cmd), None)
+        if hit and "--preflight" not in cmd:
+            out.append(hit)
+    return out
+
+
 def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None, env=None,
-              exdiv_doc: dict | None = None, sched_python: str | None = None) -> dict:
+              exdiv_doc: dict | None = None, sched_python: str | None = None, proc_lister=None) -> dict:
     """逐項 PASS／FAIL／WARN＋缺什麼。detail 只寫有無／成功與否／日期，不含任何金額、持股數、帳號、金鑰值。
     正式環境只做 login（不 activate_ca——沒有 CA 就不可能送出委託）＋唯讀查詢，結束即 logout。"""
     items = []
@@ -1524,6 +1649,15 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
                 else f"電腦缺推播套件：{last}（用排程的 python.exe -m pip install -r research/requirements-live.txt）")
     except Exception as e:
         add("push_deps", "推播發送依賴可載入（排程直譯器）", "FAIL", f"檢查失敗（{type(e).__name__}）")
+    # 先.五十-2：連線預算（同一身分證最多 5 條 Shioaji 連線，模擬＋正式合計；永豐群組 #81524 #84357）
+    try:
+        procs = proc_lister() if proc_lister else _shioaji_procs()
+        n = len(procs) + 1                      # ＋本次自檢
+        names = "、".join(sorted(set(procs))) or "無"
+        add("conn_budget", "Shioaji 連線預算（含本次，<5 條）", "PASS" if n < 5 else "FAIL",
+            f"本機登入中的程式 {len(procs)} 個（{names}）＋本次自檢＝{n} 條" + ("" if n < 5 else "——達上限，新登入會被拒"))
+    except Exception as e:
+        add("conn_budget", "Shioaji 連線預算（含本次，<5 條）", "FAIL", f"查詢程序失敗（{type(e).__name__}）")
     # 5 工作排程
     try:
         st = task_states if task_states is not None else _task_states(PREFLIGHT_TASKS)
@@ -1584,7 +1718,8 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
         sp = paths.scoped("SIMULATION")
         sst = _read_json(sp.state) or {}
         lat = _ledger_latest(sp)
-        filled = [r for k, r in lat.items() if "-DRILL" not in k and r.get("event") == "FILLED"]
+        filled = [r for k, r in lat.items() if "-DRILL" not in k and r.get("event") == "FILLED"
+                  and r.get("validation") != "SIM_ODD_UNSUPPORTED"]
         okA = bool(sst.get("last_done")) and not sst.get("batch") and bool(filled)
         add("drill_a", "模擬演練 A（建單→送單→成交→結算對帳→批次完成）", "PASS" if okA else "FAIL",
             f"批次完成（{sst.get('last_done')}），成交 {len(filled)} 筆" if okA else "模擬帳本沒有完成的批次")
@@ -1705,15 +1840,33 @@ def main() -> int:
                 print("今日不需動作（非交易日或不符觸發條件）")
                 return 0
             broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
-            res = run_month_end(paths, broker, now, mode_override=a.mode_override, drill_label=a.drill_label)
+            try:
+                res = run_month_end(paths, broker, now, mode_override=a.mode_override, drill_label=a.drill_label)
+            finally:
+                _close_broker(broker)
         else:
             latest = _ledger_latest(paths.scoped(mode))
             if not any(r.get("event") in NONFINAL for r in latest.values()):
+                # 先.五十-5：盤中已全數成交也要做零股首次真實驗證（只查詢持股，不送單）
+                sp = paths.scoped(mode)
+                day = now.date().isoformat()
+                if (sp.family == "LIVE" and any(k.endswith("-O") and str(r.get("ts", ""))[:10] == day for k, r in latest.items())
+                        and not (sp.ledger.parent / f"odd_lot_verification_{day.replace('-', '')}.json").exists()):
+                    vb = ShioajiBroker(simulation=False)
+                    try:
+                        odd_lot_verification(sp, vb, now)
+                    except Exception as e:
+                        print(f"[warn] 零股驗證報告產生失敗：{type(e).__name__}（只記警告）", flush=True)
+                    finally:
+                        _close_broker(vb)
                 sched_heartbeat(paths, task, "NOTHING_TO_SETTLE")
                 print("沒有待結算的委託")
                 return 0
             broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
-            res = settle(paths, broker, now, mode_override=a.mode_override, force=a.force)
+            try:
+                res = settle(paths, broker, now, mode_override=a.mode_override, force=a.force)
+            finally:
+                _close_broker(broker)
         sched_heartbeat(paths, task, res["state"], reason=(reason if a.run else None))
         print(json.dumps(res, ensure_ascii=False))
         return 0 if res["state"] in ("OK", "WAITING_VETO") else 1

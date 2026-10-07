@@ -239,3 +239,15 @@
 - 1.7.4 是否受 1.7.6 問題影響：官方未直接說明；兩個問題與 1.7.6 新增的回報快取直接相關、官方只撤回 1.7.6，研判 1.7.4 不受影響（推論）。
 - 跨版本未解問題：GitHub #237 回報 Windows 上 `api.login()` 可能卡死在原生程式（1.7.0、1.7.5 皆有回報，官方未回覆）；本專案自檢登入已包逾時。
 - 建議（待總司令裁示）：非交易時段另案由 1.7.4 直接升 1.7.7（**不得裝 1.7.6**），升級前在模擬環境驗證：首次與快取登入、signed、activate_ca／到期日、整股與零股 place→update_status→cancel、order callback 與 event_id、帳務三查詢欄位、登入逾時；退回指令 `pip install shioaji==1.7.4`。`auto_rebalance_bb90.py` 主動 update_status、不依賴回呼，理論上不受新快取行為影響，仍須實測。
+
+## 十一、永豐 TG 群組實戰回饋修補（先.五十，2026-10-08）
+
+- **⚠️ 更正：模擬環境不支援零股下單**（群組 #83956 #84243 #84559：模擬不支援零股、零股庫存放大 1000 倍）。**所有模擬演練的零股成交結果一律無效**；本專案模擬模式原本就只下整股（`odd_ok = mode != "SIMULATION"`），10/7 演練 A／B 帳本中沒有任何零股委託。程式另加保險：模擬族帳本若出現零股紀錄，一律標 `validation=SIM_ODD_UNSUPPORTED`、不計入驗證通過。**盤中零股的第一次真實驗證就是 10/8 真錢第 1 批**，13:40 結算（或已全數成交時的 13:40 排程）會產生「零股首次真實驗證」報告：逐筆零股委託量、成交量、均價，並以送單前持股（`pre_batch_positions`，unit=Share）對照結算後持股差，逐檔比對，寫本機 `LIVE/odd_lot_verification_YYYYMMDD.json` 並推播。
+- **連線**：`ShioajiBroker.close()` 登出；run／settle／撤單測試／零股驗證都以 finally 關閉；`--preflight` 新增「連線預算」（本機登入中的 Shioaji 程式＋本次 ≥5 條即 FAIL；同一身分證最多 5 條，群組 #81524 #84357）。
+- **計價**：下單一律以合約 `reference`（平盤參考價）±0.5% 對齊檔位，全 repo 下單路徑不得使用 `limit_up`／`limit_down`（自測涵蓋 00697B 漲跌停 9999.95／0.01 情境）。
+- **可用額度交叉參考**：08:30–15:00 唯讀查 `trading_limits().trading_available`，與「餘額−未交割應付」差 >5% 只記警告（status `cash_crosscheck`），不改變擋單規則。
+
+### 先.四十九 升級檢查清單補充（先.五十-7）
+8. **OrderEventDict 唯讀**：1.7 起委託回報是唯讀的 OrderEventDict，程式不得以 `isinstance(msg, dict)` 判斷、不得寫入 msg、不得用 `msg.dict`（群組 #84781 #80952）。本專案已關閉回呼、改主動查詢，升級後仍需 grep 確認。
+9. **login 參數**：1.7 已移除 `contracts_cb`／`contracts_timeout`／`fetch_contract`，所有 `login()` 呼叫不得帶這三個參數（群組 #81680）。
+10. **長駐行情程式**：加 `faulthandler`（原生崩潰時留下堆疊），崩潰後由排程自動重啟（1.7.6／1.7.7 有長時間執行崩潰回報，群組 #84933 #84934）。

@@ -814,6 +814,101 @@ cfg = json.loads(p.config.read_text(encoding="utf-8")); cfg["sim_drill_date"] = 
 out = A.preflight(p, NOWP, broker_factory=lambda: _ApiCA(), task_states=_tasks, env=_env_ok, exdiv_doc={"meta": {"generated_at": NOWP.isoformat()}, "events": {"00713": [{}]}}, sched_python=sys.executable)
 check("演練設定未清理→FAIL、不可切換", {i["id"]: i for i in out["items"]}["drill_cfg"]["result"] == "FAIL" and out["go_live_ready"] is False)
 
+# ---- 先.五十：TG 群組實戰回饋修補 ----
+import subprocess as _sp, re as _re2
+from types import SimpleNamespace as _NS
+# 1 close()：登出失敗只記警告；_close_broker 對沒有 close 的券商略過
+class _ApiLogout:
+    def __init__(self, boom=False): self.boom = boom; self.n = 0
+    def logout(self):
+        self.n += 1
+        if self.boom: raise RuntimeError("x")
+_b = object.__new__(A.ShioajiBroker); _b.api = _ApiLogout()
+A._close_broker(_b)
+_b2 = object.__new__(A.ShioajiBroker); _b2.api = _ApiLogout(boom=True)
+try:
+    A._close_broker(_b2); A._close_broker(Fake()); _cl_ok = True
+except Exception:
+    _cl_ok = False
+check("close()：呼叫 api.logout()；登出失敗只警告；沒有 close 的券商略過", _b.api.n == 1 and _b2.api.n == 1 and _cl_ok)
+_src = Path(A.__file__).read_text(encoding="utf-8")
+check("close()：run／settle／模擬撤單測試／真錢撤單測試／零股驗證進入點都以 finally 或結尾關閉連線",
+      _src.count("_close_broker(broker)") >= 2 and "_close_broker(b)" in _src and "_close_broker(vb)" in _src)
+# 2 連線預算
+p = setup()
+_pf = lambda procs: {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _api, task_states=_tasks, env=_env, proc_lister=lambda: procs)["items"]}["conn_budget"]
+check("連線預算：3 個常駐＋本次＝4 條→PASS", _pf(["shioaji_quotes.py", "alpha_x", "y"])["result"] == "PASS")
+check("連線預算：4 個常駐＋本次＝5 條→FAIL", _pf(["shioaji_quotes.py", "shioaji_order_server.py", "auto_rebalance_bb90.py", "shioaji_quotes.py"])["result"] == "FAIL")
+# 3 禁止以 limit_up／limit_down 計價；00697B 極端漲跌停仍以 reference 出價並對齊級距
+_root = Path(A.__file__).resolve().parent.parent
+_hits = []
+for _f in list((_root / "research").glob("*.py")) + list((_root / "scripts").glob("*.py")):
+    if _f.name.startswith("selftest_"):
+        continue
+    _t = _f.read_text(encoding="utf-8", errors="ignore")
+    if ("place_order" in _t or "plan_orders" in _t or "limit_price" in _t) and _re2.search(r"limit_up|limit_down", _t):
+        _hits.append(_f.name)
+check(f"全 repo 下單路徑不使用 limit_up／limit_down 計價（命中：{_hits or '無'}）", not _hits)
+class _Contract:
+    def __init__(self, ref, ud): self.reference = ref; self.update_date = ud; self.limit_up = 9999.95; self.limit_down = 0.01
+_bb = object.__new__(A.ShioajiBroker)
+_bb.api = _NS(Contracts=_NS(Stocks={"0050": _Contract(117.0, TODAY.isoformat()), "00646": _Contract(78.0, TODAY.isoformat()),
+                                    "00697B": _Contract(33.95, TODAY.isoformat())}))
+_refs = _bb.reference_prices(["0050", "00646", "00697B"], TODAY)
+_pc = {"0050": (117.0, TD), "00646": (78.0, TD), "00697B": (33.95, TD)}
+_base, _probs = A.resolve_base_prices(_refs, _pc, TODAY, {})
+_ords = A.plan_orders({c: _base[c][0] for c in _base}, {}, 1_000_000, True, dev_pct=0.5)
+_o97 = [o for o in _ords if o["symbol"] == "00697B"]
+check("00697B 參考價情境（limit_up=9999.95、limit_down=0.01）：基準取 reference 33.95、無問題", not _probs and _base["00697B"][0] == 33.95)
+check("00697B 限價在 reference ±1% 內且對齊 0.01 級距", _o97 and all(abs(o["limit_price"] / 33.95 - 1) <= 0.01 and round(o["limit_price"] * 100) == o["limit_price"] * 100 for o in _o97))
+check("0050 限價在 reference ±1% 內且對齊 0.05 級距", all(abs(o["limit_price"] / 117.0 - 1) <= 0.01 and abs(o["limit_price"] / 0.05 - round(o["limit_price"] / 0.05)) < 1e-9
+      for o in _ords if o["symbol"] == "0050"))
+# 4 SIM 零股標記
+p = setup()
+A._log(S(p), NOW, "SIMULATION", "FILLED", {"key": "SIMULATION-202610-T1-R1-0050-O", "symbol": "0050", "qty": 5, "lot": "IntradayOdd"}, filled_qty=5)
+A._log(S(p), NOW, "SIMULATION", "FILLED", {"key": "SIMULATION-202610-T1-R1-0050-C", "symbol": "0050", "qty": 1000, "lot": "Common"}, filled_qty=1000)
+_lg = {x["key"]: x for x in ledger(p)}
+check("SIM 零股紀錄標 SIM_ODD_UNSUPPORTED、整股不標", _lg["SIMULATION-202610-T1-R1-0050-O"].get("validation") == "SIM_ODD_UNSUPPORTED"
+      and "validation" not in _lg["SIMULATION-202610-T1-R1-0050-C"])
+# 5 零股首次真實驗證
+p = setup({"mode": "LIVE_WITH_VETO"}); L = p.scoped("LIVE_WITH_VETO")
+_day = NOW.date().isoformat()
+A._write_json(L.state, {"positions": {"0050": 0}, "pre_batch_positions": {"0050": 0, "00646": 0, "00697B": 0}, "pre_batch_date": _day})
+for k, q, f in (("LIVE-202610-T1-R1-0050-C", 1000, 1000), ("LIVE-202610-T1-R1-0050-O", 449, 449), ("LIVE-202610-T1-R1-00646-O", 30, 20)):
+    A._log(L, NOW, "LIVE_WITH_VETO", "FILLED" if q == f else "PARTIAL", {"key": k, "symbol": k.split("-")[4], "qty": q, "limit_price": 100.0,
+           "lot": "IntradayOdd" if k.endswith("-O") else "Common"}, filled_qty=f, avg_price=100.0)
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+_vb = Fake(pos={"0050": 1449, "00646": 20})
+_rep = A.odd_lot_verification(L, _vb, NOW)
+check("零股驗證：逐筆列 2 筆零股委託（委託量、成交量、均價）", _rep and len(_rep["odd_orders"]) == 2 and {r["filled"] for r in _rep["odd_orders"]} == {449, 20})
+check("零股驗證：unit=Share 持股前後差與成交量逐檔比對相符", _rep["per_symbol"]["0050"]["match"] and _rep["per_symbol"]["00646"]["match"] and _rep["all_match"])
+check("零股驗證：寫本機報告檔並推播", (L.ledger.parent / f"odd_lot_verification_{_day.replace('-', '')}.json").exists() and any(c["title"] == "零股首次真實驗證" for c in PUSH_CALLS))
+_rep2 = A.odd_lot_verification(L, Fake(pos={"0050": 1000, "00646": 20}), NOW)
+check("零股驗證：持股差不符時標記不符", _rep2["all_match"] is False and _rep2["per_symbol"]["0050"]["match"] is False)
+check("零股驗證：模擬族不產生報告", A.odd_lot_verification(S(setup()), Fake(), NOW) is None)
+# 6 可用額度交叉核對：只警告、不改擋單
+class _FakeTA(Fake):
+    def __init__(self, ta, **k): super().__init__(**k); self.ta = ta
+    def trading_available(self): return self.ta
+p = setup({"mode": "LIVE_WITH_VETO"})
+_now_mkt = datetime(2026, 10, 30, 9, 40, tzinfo=TW)
+A._cash_crosscheck(p.scoped("LIVE"), _FakeTA(800_000), 1_000_000, _now_mkt)
+_cc = json.loads(p.status.read_text(encoding="utf-8")).get("cash_crosscheck") or {}
+check("可用額度交叉核對：差 >5% 記警告（status.cash_crosscheck.warn）", _cc.get("warn") is True and _cc.get("gap_pct") == 20.0)
+p2 = setup({"mode": "LIVE_WITH_VETO"})
+A._cash_crosscheck(p2.scoped("LIVE"), _FakeTA(800_000), 1_000_000, datetime(2026, 10, 30, 16, 0, tzinfo=TW))
+check("可用額度交叉核對：08:30–15:00 以外不查", "cash_crosscheck" not in (json.loads(p2.status.read_text(encoding="utf-8")) if p2.status.exists() else {}))
+class _FakeTABoom(Fake):
+    def trading_available(self): raise RuntimeError("x")
+try:
+    A._cash_crosscheck(p.scoped("LIVE"), _FakeTABoom(), 1_000_000, _now_mkt); _ccb = True
+except Exception:
+    _ccb = False
+check("可用額度交叉核對：查詢失敗只警告不拋錯", _ccb)
+p = setup({"mode": "LIVE"}); b = _FakeTA(1, cash=10**9)
+r = run(p, b)
+check("可用額度交叉核對：不改變擋單規則（差距極大仍照常送單）", r["state"] == "OK" and len(b.placed) >= 1)
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")
