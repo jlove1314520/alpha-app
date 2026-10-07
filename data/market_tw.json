@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-07T01:02:13+00:00",
+  "fetched_at": "2026-10-07T16:26:11+00:00",
   "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
@@ -362,15 +362,16 @@
     }
   ],
   "tpex": {
-    "date": "20261006",
-    "close": 430.86,
-    "change": -1.62,
-    "change_pct": -0.3745837957824639,
+    "date": "20261007",
+    "close": 430.46,
+    "change": -0.4,
+    "change_pct": -0.0928375806526482,
     "sparkline": [
       418.82,
       426.93,
       432.48,
-      430.86
+      430.86,
+      430.46
     ]
   },
   "tx_futures": {
@@ -416,11 +417,11 @@
     }
   },
   "institutional": {
-    "date": "20261006",
-    "foreign_net_lots": -8065.6,
-    "trust_net_lots": -84107.4,
-    "dealer_net_lots": 107117.9,
-    "total_net_lots": 14944.9
+    "date": "20261007",
+    "foreign_net_lots": 18928.0,
+    "trust_net_lots": -13585.5,
+    "dealer_net_lots": -464993.2,
+    "total_net_lots": -459650.7
   },
   "institutional_history": [
     {
@@ -443,6 +444,13 @@
       "trust_net_lots": -84107.4,
       "dealer_net_lots": 107117.9,
       "total_net_lots": 14944.9
+    },
+    {
+      "date": "20261007",
+      "foreign_net_lots": 18928.0,
+      "trust_net_lots": -13585.5,
+      "dealer_net_lots": -464993.2,
+      "total_net_lots": -459650.7
     }
   ]
 }

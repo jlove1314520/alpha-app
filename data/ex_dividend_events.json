@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-10-07T09:05:34.166260+08:00",
-    "last_fetch_count": 22,
-    "reductions_generated_at": "2026-10-07T09:05:35.122194+08:00"
+    "generated_at": "2026-10-08T00:29:11.236065+08:00",
+    "last_fetch_count": 18,
+    "reductions_generated_at": "2026-10-08T00:29:12.411115+08:00"
   },
   "events": {
     "01010T": [
@@ -897,7 +897,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-08-26",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9606299212598425
       }
     ],
     "6133": [
@@ -1065,7 +1066,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-08-26",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9922481686046511
       }
     ],
     "6955": [
@@ -1406,7 +1408,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-05",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9962724935732648
       }
     ],
     "00953B": [
@@ -1429,7 +1432,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-05",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9929324894514768
       }
     ],
     "00985B": [
@@ -1452,7 +1456,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-05",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9947263681592039
       }
     ],
     "6924": [
@@ -1563,7 +1568,8 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-05",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9958646616541353
       }
     ],
     "5258": [
@@ -2043,7 +2049,8 @@
         "rights_price": 0.0,
         "type": "權",
         "first_seen": "2026-09-11",
-        "applied": false
+        "applied": true,
+        "factor_applied": 0.9585013026991204
       }
     ],
     "00710B": [
@@ -2270,6 +2277,18 @@
         "rights_price": 0.0,
         "type": "息",
         "first_seen": "2026-10-05",
+        "applied": false
+      }
+    ],
+    "2028": [
+      {
+        "ex_date": "2026-10-23",
+        "cash": 0.2,
+        "stock_ratio": 0.0,
+        "rights_ratio": 0.0,
+        "rights_price": 0.0,
+        "type": "息",
+        "first_seen": "2026-10-07",
         "applied": false
       }
     ]
