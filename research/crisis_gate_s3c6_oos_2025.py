@@ -37,6 +37,7 @@ START, END = "2025-01-01", "2026-09-30"
 HIST_START = "2023-10-01"   # 只用來取 2024-12 月底訊號所需的前 11 個月底，以及第一天日報酬前值
 OUT = HERE / "data" / "s3c6_oos_2025_result.json"
 JUMP = 0.21
+RUN_LOG = ["2026-10-07 第 1 次執行在載入階段中斷（RuntimeError：rf_monthly 無法涵蓋全部交易日）：原始價格未截到 2026-09-30，含 2026-10 日期；中斷時尚未計算任何報酬或績效、未寫結果檔。修正＝價格序列截到 END（程式 bug 修正，未改任何登記參數），第 2 次執行為唯一產出結果的一次。"]
 
 
 def guard_preflight() -> bool:
@@ -55,6 +56,7 @@ def uncapped_adj(sym: str) -> pd.DataFrame:
     from finmind_client import load_full_history
     raw = load_full_history("TaiwanStockPrice", sym, HIST_START, allow_holdout=True)
     raw = raw.sort_values("date").reset_index(drop=True)
+    raw = raw[pd.to_datetime(raw["date"]) <= END].reset_index(drop=True)   # 修正：截到登記期間終點（見 RUN_LOG）
     div = load_full_history("TaiwanStockDividend", sym, HIST_START, allow_holdout=True)
     split_df = load_full_history("TaiwanStockSplitPrice", sym, HIST_START, allow_holdout=True)
     cr_df = load_full_history("TaiwanStockCapitalReductionReferencePrice", sym, HIST_START, allow_holdout=True)
@@ -255,6 +257,7 @@ def main() -> int:
            "period": {"start": str(dates.iloc[0].date()), "end": str(dates.iloc[-1].date()), "n_days": int(len(df))},
            "config_C6": C6, "gate": "S3：BAA10Y 月底值 > 最近12個月月底平均 → 下個月兩條2倍腿改台幣現金",
            "data_meta": {**meta, "real_etf_daily_jumps_gt_21pct": jumps},
+           "run_log": RUN_LOG,
            "power_note": "21 個月統計檢定力很低，好壞都不構成證明；描述性樣本外檢驗，非部署判定。",
            "segment_gate_on": [bool(x) for x in seg_on],
            "gate_months": gate_list,
