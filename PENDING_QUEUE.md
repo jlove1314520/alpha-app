@@ -18421,3 +18421,29 @@ push 後停下等 Cowork 核對。
 - [!] **先.四十九-三 升級 1.7.7＋模擬環境驗證清單＋--preflight 全 PASS**〔依一〕
 - [!] **先.四十九-四 失敗即退回 1.7.4 並重跑 --preflight**〔依三〕
 - [!] **先.四十九-五 釘 1.7.7、AWAITING_REVIEW 結案**〔依三〕
+
+# 2026-10-08【先.五十：永豐 TG 群組實戰回饋修補】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.五十】永豐 TG 群組實戰回饋修補（不得切換模式、不得觸發任何真錢委託）
+1. ShioajiBroker 新增 close()：所有進入點（run_month_end／settle／watchdog／cancel_open／preflight）以 try/finally 呼叫 api.logout()，登出失敗只記警告。
+2. preflight 新增第 18 項「連線預算」：列出本機會登入 Shioaji 的常駐程式數量，加上本次共 ≥5 條就 FAIL（模擬＋正式合計，以身分證計）。
+3. 新增 selftest：全 repo 下單路徑禁止使用 limit_up／limit_down 計價；00697B 參考價情境（limit_up=9999.95、limit_down=0.01）仍以 reference ±1% 出價，並對齊 0.01/0.05 級距。
+4. 文件與 ledger 更正：AUTO_TRADING_SETUP.md 註明「SIM 不支援零股下單，SIM 演練的零股成交結果無效」；sim_veto／--night-drill 的零股訂單結果標記為 SIM_ODD_UNSUPPORTED，不計入驗證通過。
+5. 10/8 13:40 settle 報告加一段「零股首次真實驗證」：零股各筆委託量、成交量、均價、unit=Share 持股前後差，逐筆比對。
+6. cash() 旁加唯讀參考 trading_limits().trading_available（僅 08:30–15:00），與「餘額−未交割應付」差距 >5% 只記警告，不改變擋單規則。
+7. 先.四十九 升級檢查清單補三項：OrderEventDict 唯讀（禁止 isinstance dict 判斷與寫入 msg）、login 不得帶 contracts_cb/contracts_timeout/fetch_contract、長駐行情程式加 faulthandler 並在崩潰後自動重啟。
+8. 跑 smoke 全套＋preflight（唯讀），commit 後回報。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十）。
+
+註（互動視窗）：本條修改 research/auto_rebalance_bb90.py，10/8 09:05 真錢第 1 批會用到；須在 09:00 前完成並全套自測、自檢通過，否則還原改動、不得帶未驗證的修改進入交易時段。
+
+- [ ] **先.五十-1 ShioajiBroker.close()＋各進入點 try/finally 登出**
+- [ ] **先.五十-2 preflight 第 18 項連線預算（≥5 FAIL）**
+- [ ] **先.五十-3 selftest：禁用 limit_up／limit_down 計價、00697B 極端漲跌停情境以 reference ±1% 出價並對齊級距**
+- [ ] **先.五十-4 SIM 不支援零股：文件更正＋演練零股結果標 SIM_ODD_UNSUPPORTED**
+- [!] **先.五十-5 10/8 13:40 settle「零股首次真實驗證」逐筆報告**〔程式今晚完成；實際報告時間閘 10/8 13:40 後〕
+- [ ] **先.五十-6 cash() 旁唯讀參考 trading_limits().trading_available（08:30–15:00），差距 >5% 只警告**
+- [ ] **先.五十-7 先.四十九 升級清單補三項**
+- [ ] **先.五十-8 smoke＋preflight（唯讀）＋commit 回報**
