@@ -18484,3 +18484,29 @@ push 後停下等 Cowork 核對。
 - [x] **先.五十二-4 卡片日期用資料日；資料不完整時顯示上一筆有效日期**〔卡片與籌碼入口一律顯示資料日（margin_money_date）；最新一筆不完整時顯示「資料不完整」＋上一筆有效資料日與數值。〕
 - [x] **先.五十二-5 新版提示「有新版，點此更新」**〔checkNewVersion：載入、每 30 分鐘、切回畫面時抓 sw.js 比對 APP_VERSION，較新則頂端顯示「有新版，點此更新」，點擊沿用 forceUpdateApp（清快取重載）；冒煙 57 驗證。〕
 - [x] **先.五十二-6 smoke 全套＋commit 回報**〔冒煙全部通過（新增第 56、57 項）。〕
+
+# 2026-10-08【先.五十三：融資維持率主數字對齊籌碼K＋兩項修補】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.五十三】融資維持率主數字對齊籌碼K＋兩項修補（不得切換模式、不得觸發真錢委託）
+A. 融資維持率（可立即動工，只動 App／GitHub Actions）
+1. update_margin_maintenance.py：每筆紀錄另寫 ratio_pct_ck = round(ratio_pct × k, 1)，k 讀 data/margin_ratio_calibration.json 的 ratio_mean，不得寫死在程式碼裡。backfill 檔同步補 ratio_pct_ck。
+2. App 維持率卡：主數字改為 ratio_pct_ck，標題下方寫「對齊籌碼K（係數 k，近 N 日最大誤差 X pp）」，灰字附本站原值。160/150/130 三條線、圖表、市場頁入口卡一律改用 ratio_pct_ck。資料不完整的顯示規則不變。
+3. margin_ratio_calibration.json 新增 external_points 陣列，只存總司令提供的籌碼K讀數（不得抓取籌碼K網站）。build_margin_calibration.py 改為從 external_points 與同日本站原值重算 k；任一點誤差 >0.5pp 時，App 顯示「校準待更新」警告，只降級成警告，不隱藏數字。
+4. 股災段的 ratio_pct_ck 先標「校準未驗證」，等總司令提供 2024-08、2025-04 的籌碼K讀數後再驗證；若同一水位區間的誤差 >1pp，改為依水位分段校準，並在 App 註明。
+心跳：PENDING_QUEUE 標 - [x]，PROGRESS_HEARTBEAT.jsonl append 一行。
+B. DevQueue 停擺誤報（可立即動工）
+5. check_local_schedule_heartbeat.py 與 dev_queue_runner：佇列只剩時間閘或 BLOCKED 項目時，記為正常無為（last_reason=GATED，並更新 last_attempt_at 或另設 last_checked_at），不得觸發 STALLED_3H 紅條。補 selftest：只剩時間閘項目時，狀態不得為 STALLED_3H。
+C. 連線預算補漏（時間閘：10/8 13:40 結算完成後才可動工）
+6. SHIOAJI_LOGIN_SCRIPTS 加入 alpha_live_server.py；先查證它是否真的登入 Shioaji，有登入才計入，並在 commit 訊息註明查證結果。跑 preflight（唯讀）確認仍然 PASS。
+7. smoke 全套＋selftest，commit 後回報。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十三）。
+
+- [ ] **先.五十三-A1 ratio_pct_ck（k 讀校準檔）＋backfill 同步**
+- [ ] **先.五十三-A2 App 主數字改 ratio_pct_ck、標題下說明、三條線／圖表／入口卡一律改用**
+- [ ] **先.五十三-A3 external_points（只存總司令提供讀數）＋重算 k＋誤差 >0.5pp 警告**
+- [ ] **先.五十三-A4 股災段標「校準未驗證」＋分段校準預案**
+- [ ] **先.五十三-B5 DevQueue 只剩時間閘／BLOCKED 時記 GATED、不觸發 STALLED_3H＋selftest**
+- [!] **先.五十三-C6 SHIOAJI_LOGIN_SCRIPTS 查證 alpha_live_server 是否登入＋preflight**〔時間閘：2026-10-08 13:40 結算完成後〕
+- [ ] **先.五十三-7 smoke＋selftest＋commit 回報**
