@@ -17802,9 +17802,9 @@ push 後停下等 Cowork 核對。
 - [x] **先.三十二-零（10/6 前置）排程器 python 路徑預檢：確認 5 個自動交易工作排程的執行檔路徑，若指向 WindowsApps 捷徑則預先改實體 python.exe 完整路徑（不手動觸發 run）**〔互動視窗 2026-10-06 19:1x：5 個排程（Interactive 登入、`wscript run-auto-trading-hidden.vbs`）皆從未觸發過（LastTaskResult 267011＝尚未執行），下次 10/7 09:05／09:40／13:40。launcher 用 `WindowsApps\python.exe`（App 執行別名→Store 版 3.13，裝有 shioaji）。以臨時一次性排程（同 Interactive）實測該路徑 import shioaji 1.7.4 成功、exit=0，**不改路徑**（`C:\Program Files\Python313` 沒裝套件，改過去反而會壞）；臨時排程已刪。副發現：CWD 為 system32 時 shioaji.log 寫不進去僅警告，交易 launcher 會先 Set-Location 到 repo，不受影響。〕
 - [x] **先.三十二-二-0（10/6 前置）sim_veto 設定（僅 SIMULATION 有效、預設 false、LIVE 類不受影響）＋自測**〔互動視窗：`sim_veto_on()`（LIVE_WITH_VETO 恆走、LIVE 恆不走、SIMULATION 須恰為 true）；[自行裁量] 另加 `sim_drill_date`（僅 SIMULATION）讓 10/7 非月底排程也觸發，否則演練 A 不可能由排程觸發；演練 B 用 `--drill-label DRILLB` 獨立批次（不動 state、心跳記 drill 不發布、到期未取消絕不送單）。本機 config 已設 sim_veto=true、sim_drill_date=2026-10-07（mode 仍 SIMULATION）。乾跑 should_run：10/7 09:05／09:40＝sim_drill、10/8＝None。自測 131 PASS exit=0。⚠️ 推播訂閱目前 0 支：總司令若未開啟，09:05 會依規則 PUSH_FAILED 整批不執行。〕
 - [x] **先.三十二-三 selftest「休市表比對：取得官方日曆」無網路且無快取→SKIP＋警告（交易流程維持 fail closed）**〔互動視窗：只改 `scripts/selftest_auto_rebalance.py`；以 monkeypatch 模擬無日曆實測印出 SKIP＋警告、exit=0；引擎 `is_trading_day()` 抓不到日曆仍拋錯不動作，未改。〕
-- [!] **先.三十二-一 10/7 09:05／09:40／13:40 排程實證（auto_heartbeat.json 時間戳）**〔時間閘：2026-10-07 09:05 後〕
-- [!] **先.三十二-二-A 演練 A（不取消）：建單＋推播→送單→實際成交→結算→對帳→完成推播**〔時間閘：2026-10-07 09:05～13:40〕
-- [!] **先.三十二-二-B 演練 B（取消）：否決窗內經 App 同一條本機 API 全部取消→逾時確認零送單**〔時間閘：2026-10-07 盤中〕
+- [x] **先.三十二-一 10/7 09:05／09:40／13:40 排程實證（auto_heartbeat.json 時間戳）**〔時間閘：2026-10-07 09:05 後〕〔PASS：公開心跳 09:05:09 WAITING_VETO、09:40:21 OK、13:40:08 settle OK（DevQueue 20261007-191602 核對，見先.四十三-一）。〕
+- [x] **先.三十二-二-A 演練 A（不取消）：建單＋推播→送單→實際成交→結算→對帳→完成推播**〔時間閘：2026-10-07 09:05～13:40〕〔PASS：3 筆全成交、結算後部位與送出股數一致、建單與完成推播皆送達（明細見先.四十三-一）。〕
+- [x] **先.三十二-二-B 演練 B（取消）：否決窗內經 App 同一條本機 API 全部取消→逾時確認零送單**〔時間閘：2026-10-07 盤中〕〔PASS（改於 10/7 盤後 18:44～19:14 模擬環境執行，非盤中——依先.四十三／四十四 裁示「現在以模擬環境＋sim_veto 建立一批」）：cancel_pending 取消 3 筆、0 張送出、停止旗標未開。〕
 - [x] **先.三十二-四 先.二十八-三 量測**〔時間閘：2026-10-07 12:20 後，同先.三十-五〕〔2026-10-07 18:0x 同先.二十八-三已完成量測〕
 
 # 2026-10-06【先.三十三：今晚並行三件（批次模式）】（總司令裁示原文，動工前先寫入）
@@ -18204,7 +18204,7 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十三）。
 
-- [ ] **先.四十三-一 演練 A 結果核對＋演練 B（cancel_pending）＋先.三十二 各項結案**
+- [x] **先.四十三-一 演練 A 結果核對＋演練 B（cancel_pending）＋先.三十二 各項結案**〔DevQueue 20261007-191602 核對本機帳本（research/data/auto_trading/SIMULATION/orders.jsonl、state.json、push_log.jsonl、schedule_heartbeat.jsonl）：**演練 A**＝批次 T1（202610）：09:05 建單＋WAITING_VETO、推播 veto_start 送達 1 支；09:40 送出 3 筆共 10,000 股（0050 3,000／00646 5,000／00697B 2,000）；成交 0050 3,000 股均價 116.55、00697B 2,000 股均價 33.80（09:40 即成交），00646 5,000 股 09:40 掛單、13:40 結算時成交均價 78.20；13:40 settle OK、state 部位＝送出股數一致、batch 清空、last_done=202610；完成推播 complete 送達 1 支。**演練 B**＝互動視窗 19:14 已執行（本輪未重跑，避免重複建批）：18:44 建 DRILLB 批（推播 veto_start 送達）→19:14:17 經 cancel_pending 取消 3 筆（reason=USER_CANCEL_PENDING、filled_qty 皆 0）、帳本無任何 DRILLB 的 SUBMITTED／OPEN／FILLED、STOP.flag 不存在。19:14:42 --preflight 17 PASS／0 FAIL（drill_a／drill_b／drill_cfg 皆 PASS）。〕
 - [ ] **先.四十三-二 DevQueue 停擺：殘留檔來源查證與處理、check_collision 60 分鐘規則、log UTF-8**
 - [x] **先.四十三-三 融資維持率分子拆解與 8 日對帳→MARGIN_RATIO_RECONCILE.md（不得硬調）**〔分身完成：8 日重建（官方 rwd MI_MARGN 指定日期＋price_history 同日收盤）無任何版本 ≤0.5pp（全部／普通股／排除ETF／排除O!皆差 14～24pp），外部／本站恆≈0.881（系統性口徑差，原因未查明）→不改算法，App 標「本站算法」與約高 13% 差距。查出真 bug：分子分母可能不同天卻相除，已改分子用同一 rwd 回應逐股餘額＋同日收盤（STOCK_DAY_ALL 落後改用 price_history），不同天→資料不完整；歷史 22 筆追溯標記。報告 research/MARGIN_RATIO_RECONCILE.md。〕
 
@@ -18235,7 +18235,7 @@ push 後停下等 Cowork 核對。
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十四）。
 
 - [ ] **先.四十四-一 preflight「CA 憑證可啟用」（activate_ca＋到期日，不下單、不印憑證）＋今晚實跑**
-- [ ] **先.四十四-二 演練 A 結果、演練 B（cancel_pending）、先.三十二 各項結案（同先.四十三-一）**
+- [x] **先.四十四-二 演練 A 結果、演練 B（cancel_pending）、先.三十二 各項結案（同先.四十三-一）**〔同先.四十三-一，證據見該條。〕
 - [ ] **先.四十四-三 移除 sim_drill_date、確認 10/8 SIMULATION 不觸發**
 - [ ] **先.四十四-四 docs 第九節「真錢第 1 批上線清單」**
 - [ ] **先.四十四-五 全部 PASS 才在 App 顯示「可切換真錢模式」，否則寫原因**
