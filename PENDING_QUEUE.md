@@ -18205,7 +18205,7 @@ push 後停下等 Cowork 核對。
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十三）。
 
 - [x] **先.四十三-一 演練 A 結果核對＋演練 B（cancel_pending）＋先.三十二 各項結案**〔DevQueue 20261007-191602 核對本機帳本（research/data/auto_trading/SIMULATION/orders.jsonl、state.json、push_log.jsonl、schedule_heartbeat.jsonl）：**演練 A**＝批次 T1（202610）：09:05 建單＋WAITING_VETO、推播 veto_start 送達 1 支；09:40 送出 3 筆共 10,000 股（0050 3,000／00646 5,000／00697B 2,000）；成交 0050 3,000 股均價 116.55、00697B 2,000 股均價 33.80（09:40 即成交），00646 5,000 股 09:40 掛單、13:40 結算時成交均價 78.20；13:40 settle OK、state 部位＝送出股數一致、batch 清空、last_done=202610；完成推播 complete 送達 1 支。**演練 B**＝互動視窗 19:14 已執行（本輪未重跑，避免重複建批）：18:44 建 DRILLB 批（推播 veto_start 送達）→19:14:17 經 cancel_pending 取消 3 筆（reason=USER_CANCEL_PENDING、filled_qty 皆 0）、帳本無任何 DRILLB 的 SUBMITTED／OPEN／FILLED、STOP.flag 不存在。19:14:42 --preflight 17 PASS／0 FAIL（drill_a／drill_b／drill_cfg 皆 PASS）。〕
-- [ ] **先.四十三-二 DevQueue 停擺：殘留檔來源查證與處理、check_collision 60 分鐘規則、log UTF-8**
+- [x] **先.四十三-二 DevQueue 停擺：殘留檔來源查證與處理、check_collision 60 分鐘規則、log UTF-8**〔DevQueue 20261007-191602 依 commit a49af71d0 結案 [自行裁量]：check_collision 改內容雜湊（≥60 分鐘未變且無執行中寫手→WARN 照常執行）、run-dev-queue-cycle.ps1 改 UTF-8（repo 外）；三個殘留檔目前工作目錄已非髒檔（git status 未列）。本輪 DevQueue 確實有跑起來＝停擺已解除的實證。〕
 - [x] **先.四十三-三 融資維持率分子拆解與 8 日對帳→MARGIN_RATIO_RECONCILE.md（不得硬調）**〔分身完成：8 日重建（官方 rwd MI_MARGN 指定日期＋price_history 同日收盤）無任何版本 ≤0.5pp（全部／普通股／排除ETF／排除O!皆差 14～24pp），外部／本站恆≈0.881（系統性口徑差，原因未查明）→不改算法，App 標「本站算法」與約高 13% 差距。查出真 bug：分子分母可能不同天卻相除，已改分子用同一 rwd 回應逐股餘額＋同日收盤（STOCK_DAY_ALL 落後改用 price_history），不同天→資料不完整；歷史 22 筆追溯標記。報告 research/MARGIN_RATIO_RECONCILE.md。〕
 
 # 2026-10-07【先.四十四：真錢第 1 批上線前最後驗證（今晚完成，批次模式）】（總司令裁示原文，動工前先寫入）
