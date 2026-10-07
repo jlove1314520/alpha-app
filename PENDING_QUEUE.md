@@ -18341,7 +18341,7 @@ push 後停下等 Cowork 核對。
 - [x] **先.四十八-一 LEVERAGE_SAFETY_PLAN 改「已裁示」版（階段 0、不接下單）**〔docs/LEVERAGE_SAFETY_PLAN.md 改為已裁示版：階段門檻生效、目前階段 0（真錢不得持有槓桿 ETF）、仍不接下單；其餘數字於接入另案時確認。〕
 - [x] **先.四十八-二 樣本外警示寫入安全方案與紙.三 卡片＋階段 1 新增條件**〔數字先以結果檔程式核對：21 個持有月中 13 個月關閉（62%；22 次月底判定中 13 次判關）——總司令原文 13 正確，先前分身回報「12 個月」有誤已更正；+41.92%、落後 Bb-90 34.25pp、落後 0050 96.61pp。寫入安全方案新節與紙.三卡片；階段 1 新增條件⑤。冒煙全部通過。〕
 - [x] **先.四十八-三 AWAITING_REVIEW 結案先.四十七-三**〔AWAITING_REVIEW 15→14，先.四十七-三 移至已結案。〕
-- [ ] **先.四十八-四 接續先.四十六 Telegram 只讀擷取**〔阻塞：先.四十六 原文不在 repo 與本對話；解除：總司令／Cowork 補貼原文〕〔阻塞解除：總司令已補貼【先.四十六】原文（見下方條目），依該條執行〕
+- [x] **先.四十八-四 接續先.四十六 Telegram 只讀擷取**〔阻塞：先.四十六 原文不在 repo 與本對話；解除：總司令／Cowork 補貼原文〕〔阻塞解除：總司令已補貼【先.四十六】原文（見下方條目），依該條執行〕〔已依先.四十六 完成（見該條目）。〕
 - [x] **先.四十八-五 禁止依 2025～2026 樣本外結果調整的新試驗（寫入規則處）**〔寫入 research/HOLDOUT_LOG.md（保留資料已用盡、禁止依樣本外調整的新試驗、允許清單不得再新增）與 LEVERAGE_SAFETY_PLAN 樣本外警示節。〕
 
 # 2026-10-07【先.四十六：永豐 API 官方 Telegram 群組只讀擷取】（總司令裁示原文，動工前先寫入；先.四十八-四 的阻塞由本條解除）
@@ -18371,8 +18371,8 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十六）。
 
-- [ ] **先.四十六-一 research/telegram_reader.py（唯讀包裝、單一目標、不下載媒體、去識別、增量、repo 外輸出）**
-- [ ] **先.四十六-二 設定工具 run_telegram_setup.bat（隱藏輸入、備份 .env、首次登入由總司令本人）＋.gitignore *.session＋secrets 權限**
-- [ ] **先.四十六-三 排程 08:15／20:15＋隨機延遲＋連續 3 次失敗才推播**
-- [ ] **先.四十六-四 每日摘要 digest（repo 外）**
-- [ ] **先.四十六-五 自測五案＋冒煙＋推播通知＋回報設定步驟**
+- [x] **先.四十六-一 research/telegram_reader.py（唯讀包裝、單一目標、不下載媒體、去識別、增量、repo 外輸出）**〔research/telegram_reader.py：ReadOnlyClient 只開放 get_entity／iter_messages（＋連線生命週期），其他屬性與 __call__ 原始請求一律拋錯；只讀 .env TELEGRAM_TARGET_CHAT；只存 id／時間／回覆編號／官方或一般／文字／has_media；首次回補 90 天、之後 min_id 增量；輸出 C:lpha	elegram_export\sinopac_api\。已知限制：只開放兩個讀取方法讀不到管理員名單，管理員以個人身分發言會標「一般」。〕
+- [x] **先.四十六-二 設定工具 run_telegram_setup.bat（隱藏輸入、備份 .env、首次登入由總司令本人）＋.gitignore *.session＋secrets 權限**〔C:lpha\setup_caun_telegram_setup.bat＋setup_telegram.ps1：api_id／api_hash 隱藏輸入、先備份 .env 到 secrets、寫入三鍵、引導 --login（手機／驗證碼／兩步驟密碼由總司令本人輸入）、登入檔 C:lpha\secrets	elegram_reader.session 設僅本人權限；.gitignore 補 *.session。telethon==1.45.0 已裝並釘版。〕
+- [x] **先.四十六-三 排程 08:15／20:15＋隨機延遲＋連續 3 次失敗才推播**〔AlphaTelegram0815／AlphaTelegram2015（每日、RandomDelay 10 分鐘、Interactive），啟動器 C:lphaun-telegram-reader.ps1（repo 備份 scripts/scheduler/），一律 exit 0；連續 3 次失敗才推播一次；未設定時記 NOT_CONFIGURED 不算失敗（試跑確認）。〕
+- [x] **先.四十六-四 每日摘要 digest（repo 外）**〔每次執行為當日與有新訊息的日期產生 digest_YYYY-MM-DD.md，十類關鍵字、附訊息編號，只在 repo 外。〕
+- [x] **先.四十六-五 自測五案＋冒煙＋推播通知＋回報設定步驟**〔scripts/selftest_telegram_reader.py 19 項全 PASS（寫入方法 12 項＋原始請求被擋、目標外拒讀、媒體不下載、欄位去識別、增量不重抓、摘要、未設定、連續 3 次才推播、登入檔與輸出在 repo 外、.gitignore）；冒煙全部通過；推播通知已送。〕
