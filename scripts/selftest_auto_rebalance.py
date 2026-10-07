@@ -780,6 +780,40 @@ check("公開心跳：installed_at 格式不符被擋", _pub.privacy_check({**hb
 A.write_public_heartbeat(p, "run", "OK", NOW)
 check("公開心跳：安裝時間檔格式錯就不寫該欄位", "installed_at" not in json.loads(p.public_hb.read_text(encoding="utf-8")))
 
+# ---- 先.四十四：CA 憑證檢查、演練結果項、可切換真錢判定 ----
+class _ApiCA(_Api):
+    def __init__(self, exp="2027-06-30", ok=True):
+        super().__init__(); self.stock_account.signed = True; self._exp = exp; self._ok = ok; self.ca_calls = 0
+    def activate_ca(self, ca_path, ca_passwd, person_id=None):
+        self.ca_calls += 1; return self._ok
+    def get_ca_expiretime(self, person_id): return self._exp
+_env_ok = dict(_env); _env_ok["SINOPAC_API_KEY"] = "K1234567"
+PUSH_RESULT.update({"ok": 1, "errors": []})
+p = setup({"sim_veto": True}); b = Fake()
+run(p, b); run(p, b, now=NOW + timedelta(minutes=31))                         # 演練 A：成交、批次完成
+A._write_json(p.base / "calendar_2026.json", {"year": 2026, "closed": ["2026-01-01"]})
+p.config.write_text(json.dumps({**json.loads(p.config.read_text(encoding="utf-8"))}), encoding="utf-8")
+r = A.run_month_end(p, b, NOW + timedelta(minutes=40), prev_close=PC, poll_sec=0, polls=1, mode_override="SIMULATION", drill_label="DRILLB")
+A.cancel_pending(p, NOW + timedelta(minutes=41))
+A.run_month_end(p, b, NOW + timedelta(minutes=71), prev_close=PC, poll_sec=0, polls=1, mode_override="SIMULATION", drill_label="DRILLB")
+api_ok = _ApiCA()
+(p.base / "push_subscriptions.json").write_text(json.dumps({"subscriptions": [{"endpoint": "https://push.example/x", "keys": {"p256dh": "a", "auth": "b"}}]}), encoding="utf-8")
+NOWP = datetime(2026, 10, 7, 19, 0, tzinfo=TW)
+out = A.preflight(p, NOWP, broker_factory=lambda: api_ok, task_states=_tasks, env=_env_ok, exdiv_doc={"meta": {"generated_at": NOWP.isoformat()}, "events": {"00713": [{}]}}, sched_python=sys.executable)
+R = {i["id"]: i for i in out["items"]}
+check("CA：啟用成功且到期日 >30 天→PASS，顯示到期日", R["ca"]["result"] == "PASS" and "2027-06-30" in R["ca"]["detail"] and api_ok.ca_calls == 1)
+check("CA：detail 不含路徑／密碼／身分證", not any(v in R["ca"]["detail"] for v in (_env_ok["SINOPAC_CA_PATH"], _env_ok["SINOPAC_CA_PASSWD"])))
+check("演練項：A 完成、B 取消 0 張、無 sim_drill_date→皆 PASS", all(R[k]["result"] == "PASS" for k in ("drill_a", "drill_b", "drill_cfg")))
+check("自檢：CA 檢查不送任何委託", api_ok.orders == 0)
+check("可切換真錢：全部 PASS→go_live_ready=True", out["fail"] == 0 and out["go_live_ready"] is True and not out["go_live_blockers"])
+out = A.preflight(p, NOWP, broker_factory=lambda: _ApiCA(exp="2026-11-05"), task_states=_tasks, env=_env_ok, exdiv_doc={"meta": {"generated_at": NOWP.isoformat()}, "events": {"00713": [{}]}}, sched_python=sys.executable)
+R = {i["id"]: i for i in out["items"]}
+check("CA：距到期 ≤30 天→FAIL", R["ca"]["result"] == "FAIL")
+check("可切換真錢：任一 FAIL→不顯示且列出原因", out["go_live_ready"] is False and any("CA" in x for x in out["go_live_blockers"]))
+cfg = json.loads(p.config.read_text(encoding="utf-8")); cfg["sim_drill_date"] = "2026-10-07"; p.config.write_text(json.dumps(cfg), encoding="utf-8")
+out = A.preflight(p, NOWP, broker_factory=lambda: _ApiCA(), task_states=_tasks, env=_env_ok, exdiv_doc={"meta": {"generated_at": NOWP.isoformat()}, "events": {"00713": [{}]}}, sched_python=sys.executable)
+check("演練設定未清理→FAIL、不可切換", {i["id"]: i for i in out["items"]}["drill_cfg"]["result"] == "FAIL" and out["go_live_ready"] is False)
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")

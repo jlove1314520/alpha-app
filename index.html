@@ -6612,7 +6612,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const el=document.getElementById('auto-preflight');if(!el)return;
     if(!pf||!Array.isArray(pf.items)){el.textContent='尚未執行（本機跑 python research/auto_rebalance_bb90.py --preflight，只查詢、不送單）';return}
     const col={PASS:'#2da44e',FAIL:'#e5534b',INFO:'var(--ink-3,#888)'};  // 固定色：不用 --up/--down（台股慣例漲紅跌綠，會讓 PASS 顯示成紅色）
-    el.innerHTML='<div style="margin-bottom:4px">執行時間：'+_autoEsc(pf.ran_at)+'　PASS '+_autoEsc(pf.pass)+'／FAIL '+_autoEsc(pf.fail)+'</div>'+
+    // 先.四十四-五：全部 PASS（含 CA）才顯示「可切換真錢模式」；否則寫明原因
+    const gl=pf.go_live_ready===true
+      ?'<div style="margin:4px 0 6px;padding:6px 8px;border-radius:8px;background:rgba(45,164,78,.15);color:#2da44e"><b>可切換真錢模式</b>：上線前自檢全部通過。切換方式見 docs/AUTO_TRADING_SETUP.md 第九節（由你本人修改本機設定檔）。</div>'
+      :'<div style="margin:4px 0 6px;padding:6px 8px;border-radius:8px;background:rgba(229,83,75,.12);color:#e5534b"><b>尚不可切換真錢模式</b>'+(Array.isArray(pf.go_live_blockers)&&pf.go_live_blockers.length?'：'+pf.go_live_blockers.map(_autoEsc).join('；'):'：自檢結果未含完整判定，請重跑 --preflight')+'</div>';
+    el.innerHTML=gl+'<div style="margin-bottom:4px">執行時間：'+_autoEsc(pf.ran_at)+'　PASS '+_autoEsc(pf.pass)+'／FAIL '+_autoEsc(pf.fail)+'</div>'+
       pf.items.map(i=>'<div style="margin:2px 0"><b style="color:'+(col[i.result]||'inherit')+'">'+_autoEsc(i.result)+'</b> '+_autoEsc(i.name)+'<br><span style="color:var(--ink-4)">'+_autoEsc(i.detail)+'</span></div>').join('');
   }
   function renderLiveAccount(a){
@@ -8041,7 +8045,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-07.1851';
+  const APP_VERSION='2026-10-07.1904';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

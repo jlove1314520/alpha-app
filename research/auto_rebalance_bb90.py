@@ -1445,10 +1445,30 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
         if acct is None:
             add("live_login", "永豐正式環境唯讀登入", "FAIL", "登入成功但無證券帳戶")
         else:
-            add("live_login", "永豐正式環境唯讀登入", "PASS", "正式環境權限：已生效；登入成功（未啟用 CA，無法送單）")
+            add("live_login", "永豐正式環境唯讀登入", "PASS", "正式環境權限：已生效；登入成功（自檢不送任何委託）")
             signed = bool(getattr(acct, "signed", False))
             add("signed", "證券帳戶 API 簽署（signed）", "PASS" if signed else "FAIL",
                 "已簽署" if signed else "未簽署：需完成永豐 API 簽署與測試報告（docs/AUTO_TRADING_SETUP.md 第二節）")
+            # 先.四十四-一：CA 憑證可啟用（只驗證、不下單；不印路徑、密碼、身分證字號或憑證內容）
+            try:
+                if broker_factory and not hasattr(api, "activate_ca"):
+                    raise AutoTradingError("測試券商不支援 CA")
+                ok_ca = _timed(lambda: api.activate_ca(ca_path=env["SINOPAC_CA_PATH"], ca_passwd=env["SINOPAC_CA_PASSWD"],
+                                                       person_id=env.get("SINOPAC_PERSON_ID", "")), 60)
+                exp = _timed(lambda: api.get_ca_expiretime(env.get("SINOPAC_PERSON_ID", "")), 30)
+                exp_s = str(exp)[:10] if exp else "未知"
+                days = None
+                try:
+                    days = (date.fromisoformat(exp_s) - today).days
+                except Exception:
+                    days = None
+                good = bool(ok_ca) and days is not None and days > 30
+                add("ca", "CA 憑證可啟用（只驗證、不下單）", "PASS" if good else "FAIL",
+                    (f"啟用成功，到期日 {exp_s}（剩 {days} 天）" if ok_ca and days is not None else
+                     f"啟用結果 {bool(ok_ca)}，到期日 {exp_s}") + ("" if good else "——需啟用成功且距到期 >30 天"))
+            except Exception as e:
+                add("ca", "CA 憑證可啟用（只驗證、不下單）", "FAIL",
+                    f"啟用失敗（{type(e).__name__}）：{_mask_secrets(str(e), env)[:200]}")
             for iid, name, fn in (
                     ("q_balance", "唯讀查詢：交割戶餘額", lambda: api.account_balance()),
                     ("q_settlements", "唯讀查詢：未交割款", lambda: api.settlements(acct)),
@@ -1467,7 +1487,8 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
         if "production permission" in str(e):
             why += "——目前 API 金鑰尚無正式環境權限，待永豐開通（docs/AUTO_TRADING_SETUP.md 第二節）"
         add("live_login", "永豐正式環境唯讀登入", "FAIL", why)
-        for iid, name in (("signed", "證券帳戶 API 簽署（signed）"), ("q_balance", "唯讀查詢：交割戶餘額"),
+        for iid, name in (("signed", "證券帳戶 API 簽署（signed）"), ("ca", "CA 憑證可啟用（只驗證、不下單）"),
+                          ("q_balance", "唯讀查詢：交割戶餘額"),
                           ("q_settlements", "唯讀查詢：未交割款"), ("q_positions", "唯讀查詢：持股")):
             add(iid, name, "FAIL", "未登入，無法檢查")
     finally:
@@ -1555,10 +1576,34 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
             probs.append("per_order_cap_twd 小於單批最大一筆委託（該筆會被拒單）")
     add("config", "config.local.json 資金／上限／期數合理", "PASS" if not probs else "FAIL",
         "合理（數字不顯示）" if not probs else "；".join(probs))
+    # 先.四十四：模擬演練結果與演練設定清理（讀 SIMULATION 族帳本／狀態，不連券商）
+    try:
+        sp = paths.scoped("SIMULATION")
+        sst = _read_json(sp.state) or {}
+        lat = _ledger_latest(sp)
+        filled = [r for k, r in lat.items() if "-DRILL" not in k and r.get("event") == "FILLED"]
+        okA = bool(sst.get("last_done")) and not sst.get("batch") and bool(filled)
+        add("drill_a", "模擬演練 A（建單→送單→成交→結算對帳→批次完成）", "PASS" if okA else "FAIL",
+            f"批次完成（{sst.get('last_done')}），成交 {len(filled)} 筆" if okA else "模擬帳本沒有完成的批次")
+        dB = {k: r for k, r in lat.items() if "-DRILLB-" in k}
+        subB = [k for k, r in dB.items() if r.get("event") in ("SUBMITTED", "OPEN", "PARTIAL", "FILLED")]
+        canB = [k for k, r in dB.items() if r.get("event") == "CANCELLED"]
+        okB = bool(canB) and not subB and not paths.stop_flag.exists()
+        add("drill_b", "模擬演練 B（只取消本批→0 張送出、停止旗標未開）", "PASS" if okB else "FAIL",
+            f"取消 {len(canB)} 筆、送出 0 張" if okB else
+            (f"有 {len(subB)} 筆被送出" if subB else ("停止旗標是開的" if paths.stop_flag.exists() else "尚未完成（無取消紀錄）")))
+        okC = "sim_drill_date" not in cfg
+        add("drill_cfg", "演練設定已清理（無 sim_drill_date）", "PASS" if okC else "FAIL",
+            "已移除" if okC else f"仍有 sim_drill_date={cfg.get('sim_drill_date')}")
+    except Exception as e:
+        add("drill_a", "模擬演練結果", "FAIL", f"讀取失敗（{type(e).__name__}）")
     add("mode", "目前模式", "INFO", f"{cfg['mode']}" + ("（sim_veto 開）" if cfg.get("sim_veto") is True else ""))
     out = {"ran_at": now.isoformat(timespec="seconds"),
            "pass": sum(i["result"] == "PASS" for i in items), "fail": sum(i["result"] == "FAIL" for i in items),
            "items": items}
+    # 先.四十四-五：全部 PASS 才標示可切換真錢模式（切換仍由總司令本人改設定檔）
+    out["go_live_ready"] = out["fail"] == 0 and any(i["id"] == "ca" and i["result"] == "PASS" for i in items)
+    out["go_live_blockers"] = [f"{i['name']}：{i['detail']}" for i in items if i["result"] == "FAIL"]
     # 先.三十四補充：正式環境權限首次生效時，App 顯示並推播一次（推播失敗只記警告，不影響自檢）
     prev = (_read_json(paths.status) or {}).get("live_permission") or {}
     ok_live = any(i["id"] == "live_login" and i["result"] == "PASS" for i in items)
