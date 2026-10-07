@@ -1820,10 +1820,51 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { accErrors.push(`測試本身出錯：${e.message || e}`); }
   record("55. git 追蹤檔不得含本機 .env 的證券帳號（本機比對、不印數值）", accErrors.length === 0, accErrors.join("; ") || accInfo);
 
+  // 56.【2026-10-08 先.五十二】融資維持率卡：日期用資料日、口徑換算比值讀 data/margin_ratio_calibration.json（不得寫死）
+  const mgErrors = [];
+  let mgInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const src = await (await fetch("index.html", { cache: "no-store" })).text();
+      await loadMarginMaintenance();
+      const sum = (document.getElementById("margin-summary") || {}).innerText || "";
+      const conv = (document.getElementById("margin-conv") || {}).innerText || "";
+      const cal = await (await fetch("data/margin_ratio_calibration.json", { cache: "no-store" })).json();
+      return { hard: /0\.881|0\.8815/.test(src), sum, conv, ratio: cal.ratio_mean, crash: ((document.getElementById("margin-crash-low") || {}).innerText || "") };
+    });
+    if (r.hard) mgErrors.push("index.html 寫死了 0.881 比值");
+    if (!/資料日/.test(r.sum)) mgErrors.push("卡片沒有顯示資料日：" + r.sum.slice(0, 80));
+    if (/資料不完整/.test(r.sum) && !/上一筆有效/.test(r.sum)) mgErrors.push("資料不完整時沒有顯示上一筆有效日期");
+    if (r.conv && !r.conv.includes(String(r.ratio))) mgErrors.push("換算灰字的比值與 calibration 檔不一致");
+    mgInfo = `摘要：${r.sum.replace(/\s+/g, " ").slice(0, 60)}｜換算：${r.conv.slice(0, 40) || "（無有效值）"}｜${r.crash.slice(0, 40)}`;
+  } catch (e) { mgErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("56. 融資維持率卡：資料日、資料不完整顯示上一筆有效、口徑換算比值讀檔不寫死", mgErrors.length === 0, mgErrors.join("; ") || mgInfo);
+
+  // 57.【2026-10-08 先.五十二】新版提示：sw.js 版本比頁面新才顯示「有新版，點此更新」
+  const nvErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const el = document.getElementById("new-version-banner");
+      const real = window.fetch;
+      await checkNewVersion();
+      const sameHidden = el && el.style.display === "none";
+      window.fetch = async () => new Response("const CACHE = 'alpha-v9999-12-31.2359';");
+      try { await checkNewVersion(); } finally { window.fetch = real; }
+      const newerShown = el && el.style.display === "block" && /有新版，點此更新/.test(el.textContent);
+      await checkNewVersion();
+      return { exists: !!el, sameHidden, newerShown, fn: typeof applyNewVersion };
+    });
+    if (!r.exists) nvErrors.push("找不到 #new-version-banner");
+    if (!r.sameHidden) nvErrors.push("版本相同時不該顯示");
+    if (!r.newerShown) nvErrors.push("sw.js 版本較新時沒有顯示提示");
+    if (r.fn !== "function") nvErrors.push("applyNewVersion 不是 function");
+  } catch (e) { nvErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("57. 新版提示：版本相同不顯示、sw.js 較新時頂端顯示「有新版，點此更新」", nvErrors.length === 0, nvErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

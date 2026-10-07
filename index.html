@@ -460,6 +460,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 </style>
 </head>
 <body>
+<div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
 <div id="app">
 
   <header class="top">
@@ -770,7 +771,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="li"><span class="sw" style="background:var(--critical)"></span>&lt;130% 斷頭區</div>
       </div>
       <div class="note">跌破 150% 為市場公認警戒；跌破整戶維持率(通常130%)交易人會被要求補繳保證金或遭券商斷頭砍倉</div>
-      <div class="note" id="margin-note">來源：TWSE 全市場融資餘額逐股×收盤價加總（本機 Python 每日計算）÷ FinMind 全市場融資金額</div>
+      <div class="note" id="margin-note">來源與算法說明載入中…</div>
     </div>
   </section>
 
@@ -3800,37 +3801,49 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       ${lineEls}<circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--accent)"/>
     </svg>${n===1?'<div class="note" style="margin-top:2px">目前只有一天資料，趨勢線會隨每日累積增加</div>':''}`;
   }
+  // 2026-10-08（先.五十二）：資料日＝分子分母共同的日期（不是抓取日）；舊紀錄沒有分母日期欄位時退回紀錄日。
+  function marginDataDay(h){return (h&&(h.margin_money_date||h.finmind_margin_money_date||h.date))||'—'}
+  async function _marginJson(url){const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
   async function loadMarginMaintenance(){
     const sumEl=document.getElementById('margin-summary'),chartEl=document.getElementById('margin-chart'),noteEl=document.getElementById('margin-note');
     if(!sumEl)return;
-    let history=[];
-    try{
-      const r=await fetch('data/margin_maintenance.json?t='+Date.now());
-      if(r.ok)history=await r.json();
-    }catch(e){console.warn('[loadMarginMaintenance]',e);recordGlobalError('loadMarginMaintenance',e)}
-    if(!Array.isArray(history)||!history.length){
-      sumEl.innerHTML='<div class="note">查無資料（本機每日計算尚未產生歷史）</div>';
+    const [hR,cR,bR]=await Promise.allSettled([_marginJson('data/margin_maintenance.json'),_marginJson('data/margin_ratio_calibration.json'),_marginJson('research/data/margin_backfill.json')]);
+    if(hR.status==='rejected'){console.warn('[loadMarginMaintenance]',hR.reason);recordGlobalError('loadMarginMaintenance',hR.reason)}
+    if(cR.status==='rejected')console.warn('[loadMarginMaintenance:calibration]',cR.reason);
+    if(bR.status==='rejected')console.warn('[loadMarginMaintenance:backfill]',bR.reason);
+    const history=hR.status==='fulfilled'&&Array.isArray(hR.value)?hR.value:[];
+    const calib=cR.status==='fulfilled'?cR.value:null;
+    const bf=bR.status==='fulfilled'?bR.value:null;
+    if(!history.length){
+      sumEl.innerHTML='<div class="note">查無資料（每日計算尚未產生歷史）</div>';
       if(chartEl)chartEl.innerHTML='';
       return;
     }
-    const last=history[history.length-1];
-    // 2026-08-27 修正（使用者要求）：分母(FinMind全市場融資金額)當天取得失敗時，
-    // update_margin_maintenance.py 會寫入 data_incomplete=true、ratio_pct=null
-    // 的明確記錄，這裡要顯示「資料不完整」而不是留著上一筆看起來正常的百分比
-    // 讓人誤以為今天的維持率就是這樣。
+    const valid=history.filter(h=>!h.data_incomplete&&h.ratio_pct!=null);
+    const last=history[history.length-1],prev=valid[valid.length-1];
+    const ratio=calib&&typeof calib.ratio_mean==='number'?calib.ratio_mean:null;
+    const conv=v=>ratio&&v!=null?`<div class="note" id="margin-conv" style="color:var(--ink-4);margin-top:2px">換算籌碼K口徑 ≈ ${(v*ratio).toFixed(1)}%（本站 × ${ratio}，八日對帳比值，估算）</div>`:'';
     if(last.data_incomplete){
-      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:20px;font-weight:700;color:var(--warn)">資料不完整</div><div class="note">${last.date}：${last.incomplete_reason||'分母（全市場融資金額）當天取得失敗'}</div></div>`;
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:20px;font-weight:700;color:var(--warn)">資料不完整</div><div class="note">資料日 ${marginDataDay(last)}：${last.incomplete_reason||'分子分母不同天或取得失敗，不相除'}</div>`
+        +(prev?`<div class="note" style="margin-top:4px">上一筆有效：資料日 ${marginDataDay(prev)}　${prev.ratio_pct.toFixed(1)}%（本站算法）</div>${conv(prev.ratio_pct)}`:'<div class="note">尚無有效的上一筆</div>')+`</div>`;
     }else{
       const lv=marginLevel(last.ratio_pct);
-      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}${last.date}（本站算法）</div></div>`;
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}（本站算法）</div>${conv(last.ratio_pct)}</div>`;
     }
-    if(chartEl)chartEl.innerHTML=marginChart(history.filter(h=>!h.data_incomplete));
-    // 2026-10-07（先.四十三-三）：標明本站算法與外部數值的差距（對帳見 research/MARGIN_RATIO_RECONCILE.md），不為貼近外部值硬調
-    if(noteEl)noteEl.textContent=`本站算法：上市（TWSE）全部可融資證券（含 ETF）同一天的融資餘額×收盤價加總 ÷ 信用交易統計融資金額（皆 TWSE 官方，累積 ${history.length} 天）。與籌碼K等外部數值相比，本站約高 13%（外部≈本站×0.88，2026-09-23～10-06 八個交易日比值穩定），差異原因尚未查明，僅供趨勢參考。分子分母不同天時一律標「資料不完整」、不相除。`;
-    // 2026-09-02新增：市場頁「籌碼」精簡入口卡（#chips-entry-margin）簡短文字版。
+    let chartHtml=marginChart(valid);
+    try{
+      const bv=bf&&Array.isArray(bf.records)?bf.records.filter(r=>!r.data_incomplete&&r.ratio_pct!=null):[];
+      if(bv.length){
+        const lo=(bf.low_2025_04&&bf.low_2025_04.ratio_pct!=null)?`2025-04 股災最低 ${bf.low_2025_04.ratio_pct.toFixed(1)}%（${bf.low_2025_04.date}）`:'';
+        const lo24=(bf.low_2024_08&&bf.low_2024_08.ratio_pct!=null)?`；2024-08 最低 ${bf.low_2024_08.ratio_pct.toFixed(1)}%（${bf.low_2024_08.date}）`:'';
+        chartHtml+=`<div class="note" style="margin-top:8px">歷史校準（本站算法回補 ${bv.length} 天，2024-07～08、2025-03～05）</div>${marginChart(bv)}<div class="note" id="margin-crash-low" style="color:var(--serious)">${lo}${lo24}</div>`;
+      }
+    }catch(e){console.warn('[loadMarginMaintenance:backfill-chart]',e);recordGlobalError('loadMarginMaintenance:backfill-chart',e)}
+    if(chartEl)chartEl.innerHTML=chartHtml;
+    if(noteEl)noteEl.textContent=`本站算法：上市（TWSE）全部可融資證券（含 ETF）同一天的「逐股融資餘額 × 收盤 × 1000 ÷ 融資金額」（皆 TWSE 官方，累積 ${history.length} 天）。此公式與愛玩股、FinLab 公開的標準公式相同；FinLab 的分母另外加計上櫃。與籌碼K的口徑換算比值見上方灰字（八日對帳估算，差異原因尚未查明），僅供趨勢參考。分子分母不同天時一律標「資料不完整」、不相除；日期一律為資料日。`;
     const ee=document.getElementById('chips-entry-margin');
     if(ee){
-      if(last.data_incomplete){ee.textContent='資料不完整';ee.style.color='var(--warn)'}
+      if(last.data_incomplete){ee.textContent='資料不完整'+(prev?'（上一筆 '+prev.ratio_pct.toFixed(1)+'%）':'');ee.style.color='var(--warn)'}
       else{const lv=marginLevel(last.ratio_pct);ee.textContent=(last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—')+(lv?'·'+lv.l:'');ee.style.color=lv?lv.c:'var(--ink)'}
     }
   }
@@ -8075,7 +8088,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-07.2253';
+  const APP_VERSION='2026-10-08.0122';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -8105,6 +8118,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       console.warn('[forceUpdate]',e);recordGlobalError('forceUpdate',e);
       toast('強制更新失敗：'+e.message);
     }
+  }
+
+  // 2026-10-08（先.五十二-5）：偵測新版。抓 sw.js 讀出快取版本（pre-commit 與 APP_VERSION 同步改寫），
+  // 比目前頁面的 APP_VERSION 新就在頂端顯示「有新版，點此更新」；點擊沿用 forceUpdateApp（清快取＋重載）。
+  // 網路失敗（離線）是正常情況，只 console.warn 不記錄錯誤 log（刻意排除，避免離線時錯誤 log 一直長）。
+  async function checkNewVersion(){
+    let txt;
+    try{txt=await fetch('sw.js?_='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'')}
+    catch(e){console.warn('[checkNewVersion] 網路失敗（不記錄）',e);return}
+    try{
+      const m=(txt||'').match(/CACHE\s*=\s*'alpha-v([^']+)'/);
+      const swVer=m?m[1]:null;
+      const el=document.getElementById('new-version-banner');
+      if(el)el.style.display=(swVer&&swVer>APP_VERSION)?'block':'none';
+      window._latestSwVersion=swVer;
+    }catch(e){console.warn('[checkNewVersion]',e);recordGlobalError('checkNewVersion',e)}
+  }
+  async function applyNewVersion(){
+    try{const el=document.getElementById('new-version-banner');if(el)el.textContent='更新中…';await forceUpdateApp()}
+    catch(e){console.warn('[applyNewVersion]',e);recordGlobalError('applyNewVersion',e)}
   }
 
   // ── 漲跌顏色偏好（2026-08-24 新增）：預設台股慣例紅漲綠跌，可切成國際慣例綠漲紅跌。
@@ -8197,6 +8230,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 才觸發loadAboutVersions()那次），使用者才能不用點進設定就一眼確認手機是
   // 不是新版。
   _safeAsync('loadAboutVersions',loadAboutVersions);
+  // 2026-10-08（先.五十二-5）：新版提示——載入時、每 30 分鐘、切回畫面時各檢查一次
+  _safeAsync('checkNewVersion',checkNewVersion);
+  try{
+    setInterval(()=>{checkNewVersion().catch(e=>{console.warn('[checkNewVersion:interval]',e);recordGlobalError('checkNewVersion:interval',e)})},30*60*1000);
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkNewVersion().catch(e=>{console.warn('[checkNewVersion:visible]',e);recordGlobalError('checkNewVersion:visible',e)})});
+  }catch(e){console.warn('[checkNewVersion:setup]',e);recordGlobalError('checkNewVersion:setup',e)}
   // 2026-10-05（先.十四-一）：本機 Claude 登入過期／額度／停擺的紅色橫幅要在首頁
   // 一載入就評估，不是等使用者點進設定頁（見 renderClaudeAuthBanner 的註解）。
   _safeAsync('loadClaudeAuthBanner',loadClaudeAuthBanner);

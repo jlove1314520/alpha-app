@@ -1,0 +1,890 @@
+{
+ "generated_at": "2026-10-08T01:20:28+08:00",
+ "definition": "本站算法：上市逐股融資今日餘額×1000×同日收盤 ÷ 同日信用交易統計融資金額（同一 MI_MARGN 回應），與 data/margin_maintenance.json 同定義",
+ "sources": [
+  "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN",
+  "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX",
+  "data/price_history.json"
+ ],
+ "ranges": [
+  [
+   "2024-07-15",
+   "2024-08-15"
+  ],
+  [
+   "2025-03-01",
+   "2025-05-31"
+  ]
+ ],
+ "records": [
+  {
+   "date": "2024-07-15",
+   "margin_money": 335092411000,
+   "collateral_value": 589240230540,
+   "matched_stocks": 1150,
+   "lots_coverage": 0.99969,
+   "ratio_pct": 175.84,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-16",
+   "margin_money": 335880055000,
+   "collateral_value": 592069901480,
+   "matched_stocks": 1153,
+   "lots_coverage": 0.99981,
+   "ratio_pct": 176.27,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-17",
+   "margin_money": 340495549000,
+   "collateral_value": 598294820210,
+   "matched_stocks": 1155,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 175.71,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-18",
+   "margin_money": 340041155000,
+   "collateral_value": 587507911400,
+   "matched_stocks": 1155,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 172.78,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-19",
+   "margin_money": 336866469000,
+   "collateral_value": 567386689180,
+   "matched_stocks": 1156,
+   "lots_coverage": 0.99387,
+   "ratio_pct": 168.43,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-22",
+   "margin_money": 331601598000,
+   "collateral_value": 542589056300,
+   "matched_stocks": 1154,
+   "lots_coverage": 0.99375,
+   "ratio_pct": 163.63,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-23",
+   "margin_money": 328897658000,
+   "collateral_value": 549160374200,
+   "matched_stocks": 1155,
+   "lots_coverage": 0.99375,
+   "ratio_pct": 166.97,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-26",
+   "margin_money": 331849533000,
+   "collateral_value": 540590481740,
+   "matched_stocks": 1154,
+   "lots_coverage": 0.99373,
+   "ratio_pct": 162.9,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-29",
+   "margin_money": 325475169000,
+   "collateral_value": 522159403110,
+   "matched_stocks": 1157,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 160.43,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-30",
+   "margin_money": 325946717000,
+   "collateral_value": 532244406270,
+   "matched_stocks": 1156,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 163.29,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-07-31",
+   "margin_money": 328853507000,
+   "collateral_value": 536764083780,
+   "matched_stocks": 1156,
+   "lots_coverage": 0.99983,
+   "ratio_pct": 163.22,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-01",
+   "margin_money": 329197935000,
+   "collateral_value": 549324262180,
+   "matched_stocks": 1158,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 166.87,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-02",
+   "margin_money": 325855472000,
+   "collateral_value": 519760880900,
+   "matched_stocks": 1158,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 159.51,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-05",
+   "margin_money": 307568708000,
+   "collateral_value": 455818752830,
+   "matched_stocks": 1159,
+   "lots_coverage": 0.99984,
+   "ratio_pct": 148.2,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-06",
+   "margin_money": 291262041000,
+   "collateral_value": 434971380660,
+   "matched_stocks": 1157,
+   "lots_coverage": 0.99585,
+   "ratio_pct": 149.34,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-07",
+   "margin_money": 291654137000,
+   "collateral_value": 463072485720,
+   "matched_stocks": 1158,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 158.77,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-08",
+   "margin_money": 293751576000,
+   "collateral_value": 459547702240,
+   "matched_stocks": 1157,
+   "lots_coverage": 0.99985,
+   "ratio_pct": 156.44,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-09",
+   "margin_money": 294958954000,
+   "collateral_value": 472753321530,
+   "matched_stocks": 1157,
+   "lots_coverage": 0.99952,
+   "ratio_pct": 160.28,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-12",
+   "margin_money": 293030367000,
+   "collateral_value": 479012893740,
+   "matched_stocks": 1157,
+   "lots_coverage": 0.99982,
+   "ratio_pct": 163.47,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-13",
+   "margin_money": 293914933000,
+   "collateral_value": 482905344200,
+   "matched_stocks": 1156,
+   "lots_coverage": 0.99982,
+   "ratio_pct": 164.3,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-14",
+   "margin_money": 292831503000,
+   "collateral_value": 484644172540,
+   "matched_stocks": 1156,
+   "lots_coverage": 0.99982,
+   "ratio_pct": 165.5,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2024-08-15",
+   "margin_money": 293476780000,
+   "collateral_value": 482536805720,
+   "matched_stocks": 1156,
+   "lots_coverage": 0.97755,
+   "ratio_pct": null,
+   "data_incomplete": true,
+   "incomplete_reason": "同日收盤只涵蓋 97.76% 融資張數（門檻 99%），不相除",
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-03",
+   "margin_money": 324050396000,
+   "collateral_value": 524264206620,
+   "matched_stocks": 1186,
+   "lots_coverage": 0.99996,
+   "ratio_pct": 161.78,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-04",
+   "margin_money": 326111501000,
+   "collateral_value": 531403646940,
+   "matched_stocks": 1186,
+   "lots_coverage": 0.99988,
+   "ratio_pct": 162.95,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-05",
+   "margin_money": 328033352000,
+   "collateral_value": 540518749120,
+   "matched_stocks": 1187,
+   "lots_coverage": 0.99995,
+   "ratio_pct": 164.78,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-06",
+   "margin_money": 328609499000,
+   "collateral_value": 538895550200,
+   "matched_stocks": 1185,
+   "lots_coverage": 0.99982,
+   "ratio_pct": 163.99,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-07",
+   "margin_money": 327851463000,
+   "collateral_value": 531883127510,
+   "matched_stocks": 1185,
+   "lots_coverage": 0.99925,
+   "ratio_pct": 162.23,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-10",
+   "margin_money": 327246302000,
+   "collateral_value": 528617396560,
+   "matched_stocks": 1186,
+   "lots_coverage": 0.99987,
+   "ratio_pct": 161.54,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-11",
+   "margin_money": 325806691000,
+   "collateral_value": 519252468400,
+   "matched_stocks": 1185,
+   "lots_coverage": 0.99995,
+   "ratio_pct": 159.37,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-12",
+   "margin_money": 327694493000,
+   "collateral_value": 526324674760,
+   "matched_stocks": 1190,
+   "lots_coverage": 1.0,
+   "ratio_pct": 160.61,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-13",
+   "margin_money": 326414588000,
+   "collateral_value": 517969004570,
+   "matched_stocks": 1186,
+   "lots_coverage": 0.99995,
+   "ratio_pct": 158.68,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-14",
+   "margin_money": 325694534000,
+   "collateral_value": 519747135320,
+   "matched_stocks": 1190,
+   "lots_coverage": 1.0,
+   "ratio_pct": 159.58,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-17",
+   "margin_money": 325360733000,
+   "collateral_value": 520917432670,
+   "matched_stocks": 1190,
+   "lots_coverage": 1.0,
+   "ratio_pct": 160.1,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-18",
+   "margin_money": 324691148000,
+   "collateral_value": 524863832100,
+   "matched_stocks": 1189,
+   "lots_coverage": 0.99999,
+   "ratio_pct": 161.65,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-19",
+   "margin_money": 324290100000,
+   "collateral_value": 517511494590,
+   "matched_stocks": 1190,
+   "lots_coverage": 1.0,
+   "ratio_pct": 159.58,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-20",
+   "margin_money": 324238426000,
+   "collateral_value": 523642750620,
+   "matched_stocks": 1190,
+   "lots_coverage": 0.99855,
+   "ratio_pct": 161.5,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-21",
+   "margin_money": 324119474000,
+   "collateral_value": 521092888470,
+   "matched_stocks": 1191,
+   "lots_coverage": 1.0,
+   "ratio_pct": 160.77,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-24",
+   "margin_money": 323759132000,
+   "collateral_value": 514303248710,
+   "matched_stocks": 1190,
+   "lots_coverage": 1.0,
+   "ratio_pct": 158.85,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-25",
+   "margin_money": 322275801000,
+   "collateral_value": 513550422580,
+   "matched_stocks": 1190,
+   "lots_coverage": 1.0,
+   "ratio_pct": 159.35,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-26",
+   "margin_money": 321865442000,
+   "collateral_value": 514893561270,
+   "matched_stocks": 1188,
+   "lots_coverage": 1.0,
+   "ratio_pct": 159.97,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-27",
+   "margin_money": 321121581000,
+   "collateral_value": 507209136180,
+   "matched_stocks": 1187,
+   "lots_coverage": 0.99987,
+   "ratio_pct": 157.95,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-28",
+   "margin_money": 316022604000,
+   "collateral_value": 487667262540,
+   "matched_stocks": 1191,
+   "lots_coverage": 1.0,
+   "ratio_pct": 154.31,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-03-31",
+   "margin_money": 300314124000,
+   "collateral_value": 442737075550,
+   "matched_stocks": 1191,
+   "lots_coverage": 1.0,
+   "ratio_pct": 147.42,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-01",
+   "margin_money": 298958157000,
+   "collateral_value": 452155204200,
+   "matched_stocks": 1189,
+   "lots_coverage": 1.0,
+   "ratio_pct": 151.24,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-02",
+   "margin_money": 298816651000,
+   "collateral_value": 455642499580,
+   "matched_stocks": 1193,
+   "lots_coverage": 1.0,
+   "ratio_pct": 152.48,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-07",
+   "margin_money": 285252992000,
+   "collateral_value": 398433047780,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99924,
+   "ratio_pct": 139.68,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-08",
+   "margin_money": 256789020000,
+   "collateral_value": 347466142560,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99919,
+   "ratio_pct": 135.31,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-09",
+   "margin_money": 223785029000,
+   "collateral_value": 291591842250,
+   "matched_stocks": 1192,
+   "lots_coverage": 0.99912,
+   "ratio_pct": 130.3,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-10",
+   "margin_money": 222431725000,
+   "collateral_value": 320797141540,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99911,
+   "ratio_pct": 144.22,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-11",
+   "margin_money": 213955822000,
+   "collateral_value": 316942194470,
+   "matched_stocks": 1190,
+   "lots_coverage": 0.9991,
+   "ratio_pct": 148.13,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-14",
+   "margin_money": 212803927000,
+   "collateral_value": 321203639460,
+   "matched_stocks": 1192,
+   "lots_coverage": 0.99912,
+   "ratio_pct": 150.94,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-15",
+   "margin_money": 213994817000,
+   "collateral_value": 333727797720,
+   "matched_stocks": 1192,
+   "lots_coverage": 0.99912,
+   "ratio_pct": 155.95,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-16",
+   "margin_money": 214549780000,
+   "collateral_value": 326097138010,
+   "matched_stocks": 1194,
+   "lots_coverage": 0.99913,
+   "ratio_pct": 151.99,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-17",
+   "margin_money": 216020028000,
+   "collateral_value": 329132379780,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99912,
+   "ratio_pct": 152.36,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-18",
+   "margin_money": 215979291000,
+   "collateral_value": 329509267760,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99913,
+   "ratio_pct": 152.57,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-21",
+   "margin_money": 212486669000,
+   "collateral_value": 316056422090,
+   "matched_stocks": 1190,
+   "lots_coverage": 0.99907,
+   "ratio_pct": 148.74,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-22",
+   "margin_money": 210932049000,
+   "collateral_value": 310149485370,
+   "matched_stocks": 1190,
+   "lots_coverage": 0.99912,
+   "ratio_pct": 147.04,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-23",
+   "margin_money": 210393071000,
+   "collateral_value": 321812199350,
+   "matched_stocks": 1189,
+   "lots_coverage": 0.9989,
+   "ratio_pct": 152.96,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-24",
+   "margin_money": 210093888000,
+   "collateral_value": 320705473740,
+   "matched_stocks": 1190,
+   "lots_coverage": 0.99775,
+   "ratio_pct": 152.65,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-25",
+   "margin_money": 208844606000,
+   "collateral_value": 325068742940,
+   "matched_stocks": 1194,
+   "lots_coverage": 0.99911,
+   "ratio_pct": 155.65,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-28",
+   "margin_money": 208154193000,
+   "collateral_value": 327266293830,
+   "matched_stocks": 1188,
+   "lots_coverage": 0.99906,
+   "ratio_pct": 157.22,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-29",
+   "margin_money": 209008974000,
+   "collateral_value": 333545651330,
+   "matched_stocks": 1194,
+   "lots_coverage": 0.99911,
+   "ratio_pct": 159.58,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-04-30",
+   "margin_money": 209669672000,
+   "collateral_value": 330980575200,
+   "matched_stocks": 1194,
+   "lots_coverage": 0.99908,
+   "ratio_pct": 157.86,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-02",
+   "margin_money": 209351182000,
+   "collateral_value": 338252479220,
+   "matched_stocks": 1193,
+   "lots_coverage": 0.99913,
+   "ratio_pct": 161.57,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-05",
+   "margin_money": 208867379000,
+   "collateral_value": 330444731670,
+   "matched_stocks": 1193,
+   "lots_coverage": 0.99913,
+   "ratio_pct": 158.21,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-06",
+   "margin_money": 209482846000,
+   "collateral_value": 334224830940,
+   "matched_stocks": 1193,
+   "lots_coverage": 0.99909,
+   "ratio_pct": 159.55,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-07",
+   "margin_money": 209439756000,
+   "collateral_value": 332755295790,
+   "matched_stocks": 1195,
+   "lots_coverage": 0.99913,
+   "ratio_pct": 158.88,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-08",
+   "margin_money": 209567416000,
+   "collateral_value": 336940042400,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99892,
+   "ratio_pct": 160.78,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-09",
+   "margin_money": 209817781000,
+   "collateral_value": 340364518340,
+   "matched_stocks": 1194,
+   "lots_coverage": 0.99909,
+   "ratio_pct": 162.22,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-12",
+   "margin_money": 210111994000,
+   "collateral_value": 346738570540,
+   "matched_stocks": 1195,
+   "lots_coverage": 0.99914,
+   "ratio_pct": 165.03,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-13",
+   "margin_money": 210508471000,
+   "collateral_value": 349960088660,
+   "matched_stocks": 1191,
+   "lots_coverage": 0.99806,
+   "ratio_pct": 166.25,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-14",
+   "margin_money": 212011750000,
+   "collateral_value": 358947046630,
+   "matched_stocks": 1196,
+   "lots_coverage": 0.99914,
+   "ratio_pct": 169.31,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-15",
+   "margin_money": 213312394000,
+   "collateral_value": 359522795160,
+   "matched_stocks": 1196,
+   "lots_coverage": 0.99914,
+   "ratio_pct": 168.54,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-16",
+   "margin_money": 216410527000,
+   "collateral_value": 365196321230,
+   "matched_stocks": 1197,
+   "lots_coverage": 0.99915,
+   "ratio_pct": 168.75,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-19",
+   "margin_money": 216535926000,
+   "collateral_value": 358332364720,
+   "matched_stocks": 1197,
+   "lots_coverage": 0.99915,
+   "ratio_pct": 165.48,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-20",
+   "margin_money": 217435458000,
+   "collateral_value": 361697183170,
+   "matched_stocks": 1196,
+   "lots_coverage": 0.99915,
+   "ratio_pct": 166.35,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-21",
+   "margin_money": 217856446000,
+   "collateral_value": 367079265140,
+   "matched_stocks": 1197,
+   "lots_coverage": 0.99915,
+   "ratio_pct": 168.5,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-22",
+   "margin_money": 220045068000,
+   "collateral_value": 368397377700,
+   "matched_stocks": 1194,
+   "lots_coverage": 0.99903,
+   "ratio_pct": 167.42,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-23",
+   "margin_money": 219546355000,
+   "collateral_value": 366640669630,
+   "matched_stocks": 1196,
+   "lots_coverage": 0.99916,
+   "ratio_pct": 167.0,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-26",
+   "margin_money": 220657750000,
+   "collateral_value": 366568300000,
+   "matched_stocks": 1199,
+   "lots_coverage": 0.99912,
+   "ratio_pct": 166.13,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-27",
+   "margin_money": 220599614000,
+   "collateral_value": 363711399050,
+   "matched_stocks": 1201,
+   "lots_coverage": 0.99917,
+   "ratio_pct": 164.87,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-28",
+   "margin_money": 220246367000,
+   "collateral_value": 362554594730,
+   "matched_stocks": 1195,
+   "lots_coverage": 0.99916,
+   "ratio_pct": 164.61,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  },
+  {
+   "date": "2025-05-29",
+   "margin_money": 221181413000,
+   "collateral_value": 364954944710,
+   "matched_stocks": 1197,
+   "lots_coverage": 0.99906,
+   "ratio_pct": 165.0,
+   "data_incomplete": false,
+   "close_source": "TWSE MI_INDEX（同日官方收盤行情）"
+  }
+ ],
+ "skipped": [
+  {
+   "date": "2024-07-24",
+   "reason": "MI_MARGN 查無資料（休市或未發布）"
+  },
+  {
+   "date": "2024-07-25",
+   "reason": "MI_MARGN 查無資料（休市或未發布）"
+  },
+  {
+   "date": "2025-04-03",
+   "reason": "MI_MARGN 查無資料（休市或未發布）"
+  },
+  {
+   "date": "2025-04-04",
+   "reason": "MI_MARGN 查無資料（休市或未發布）"
+  },
+  {
+   "date": "2025-05-01",
+   "reason": "MI_MARGN 查無資料（休市或未發布）"
+  },
+  {
+   "date": "2025-05-30",
+   "reason": "MI_MARGN 查無資料（休市或未發布）"
+  }
+ ],
+ "low_2025_04": {
+  "date": "2025-04-09",
+  "ratio_pct": 130.3
+ },
+ "low_2024_08": {
+  "date": "2024-08-05",
+  "ratio_pct": 148.2
+ },
+ "low_2024_07_08": {
+  "date": "2024-08-05",
+  "ratio_pct": 148.2
+ }
+}
