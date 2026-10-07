@@ -5031,7 +5031,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     try{
       const j=await _fetchPaperJson('data/paper_3.json');
       const err=j.last_error?'<div class="note" style="margin-top:6px;font-size:11px;color:var(--down,#e5534b)">最近一次未記帳：'+_paperEsc(j.last_error.reason||j.last_error.status)+'</div>':'';
-      if(!j.started)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err);
+      // 先.四十八 二：樣本外警示（#428，數字已以結果檔程式核對）
+      const oos='<div class="note" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ 樣本外（2025-01～2026-09，#428）：閘門 21 個持有月中 13 個月關閉，累積 +41.9%，落後 Bb-90 34.3pp、落後 0050 96.6pp。21 個月檢定力低，好壞都不構成證明。紙.三期間若閘門關閉占比 >50% 且落後 Bb-90 >10pp，進槓桿階段 1 須總司令另行裁示。</div>';
+      if(!j.started)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err+oos);
       const sg=v=>v==null?'—':(v>=0?'+':'')+Number(v).toFixed(2)+'%';
       const wp=j.weights_post||{};
       const w=Object.keys(wp).map(k=>_paperEsc(k==='CASH'?'現金':k)+' '+(wp[k]*100).toFixed(0)+'%').join('<br>');
@@ -5039,7 +5041,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         _paperRow('閘門目前',_paperGateHtml(j.gate_now,j.pending_switch))
         +_paperCommonRows(j,w||'—')
         +_paperRow('對照 Bb-90（同日起算）',sg(j.bench_bb90_return_pct))
-        +_paperRow('對照 0050 全持有',sg(j.bench_0050_return_pct))+err);
+        +_paperRow('對照 0050 全持有',sg(j.bench_0050_return_pct))+err+oos);
     }catch(e){
       console.warn('[_renderPaper3]',e);recordGlobalError('_renderPaper3',e);
       return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
@@ -8073,7 +8075,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-07.2221';
+  const APP_VERSION='2026-10-07.2253';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
