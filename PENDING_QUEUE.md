@@ -18207,3 +18207,35 @@ push 後停下等 Cowork 核對。
 - [ ] **先.四十三-一 演練 A 結果核對＋演練 B（cancel_pending）＋先.三十二 各項結案**
 - [ ] **先.四十三-二 DevQueue 停擺：殘留檔來源查證與處理、check_collision 60 分鐘規則、log UTF-8**
 - [x] **先.四十三-三 融資維持率分子拆解與 8 日對帳→MARGIN_RATIO_RECONCILE.md（不得硬調）**〔分身完成：8 日重建（官方 rwd MI_MARGN 指定日期＋price_history 同日收盤）無任何版本 ≤0.5pp（全部／普通股／排除ETF／排除O!皆差 14～24pp），外部／本站恆≈0.881（系統性口徑差，原因未查明）→不改算法，App 標「本站算法」與約高 13% 差距。查出真 bug：分子分母可能不同天卻相除，已改分子用同一 rwd 回應逐股餘額＋同日收盤（STOCK_DAY_ALL 落後改用 price_history），不同天→資料不完整；歷史 22 筆追溯標記。報告 research/MARGIN_RATIO_RECONCILE.md。〕
+
+# 2026-10-07【先.四十四：真錢第 1 批上線前最後驗證（今晚完成，批次模式）】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.四十四】真錢第 1 批上線前最後驗證（今晚完成，批次模式）
+
+一、--preflight 新增「CA 憑證可啟用」：用 .env 的 CA 路徑、密碼、身分證字號執行 activate_ca 與 get_ca_expiretime，只驗證、不下任何委託；印出結果與到期日，不印任何憑證內容。今晚實跑一次並回報。
+
+二、完成先.四十三-一：
+  1. 從本機帳本列出 10/7 演練 A：送出股數、成交股數與均價、13:40 結算對帳結果、推播是否送達。
+  2. 以模擬環境＋sim_veto 建一批，經 /auto/cancel_pending 取消，確認 0 張送出、停止旗標未開（演練 B）。
+  3. 先.三十二-一／二-A／二-B 依結果結案。
+
+三、清理演練設定：本機 config.local.json 移除 sim_drill_date；sim_veto 保留（只影響 SIMULATION）。確認 should_run 在 10/8 對 SIMULATION 回「不觸發」。
+
+四、產出「真錢第 1 批上線清單」寫入 docs/AUTO_TRADING_SETUP.md 第九節，列出：
+  1. 上面一～三的結果；
+  2. 總司令要親手修改的設定項目（mode 改 LIVE_WITH_VETO；total_capital_twd、per_order_cap_twd 由總司令自填，CC 不建議金額）；
+  3. 切換後 10/8 的預期時程：09:05 建單＋推播「無需操作」、09:35 後由 09:40 排程送出、13:40 結算對帳、批次完成推播；
+  4. 任一步失敗時系統的自動行為（拒單、紅色橫幅、推播），無需總司令操作。
+
+五、全部 PASS 才在 App 自動交易卡顯示「可切換真錢模式」；任一 FAIL 就寫明原因，不得顯示。
+
+紅線不變：CC／Cowork 不得把模式改成 LIVE 類、不得在 LIVE 類模式觸發真實下單（含 --live-cancel-test）；憑證、金鑰與推播私鑰不讀出、不印出、不 commit。
+
+心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十四）。
+
+- [ ] **先.四十四-一 preflight「CA 憑證可啟用」（activate_ca＋到期日，不下單、不印憑證）＋今晚實跑**
+- [ ] **先.四十四-二 演練 A 結果、演練 B（cancel_pending）、先.三十二 各項結案（同先.四十三-一）**
+- [ ] **先.四十四-三 移除 sim_drill_date、確認 10/8 SIMULATION 不觸發**
+- [ ] **先.四十四-四 docs 第九節「真錢第 1 批上線清單」**
+- [ ] **先.四十四-五 全部 PASS 才在 App 顯示「可切換真錢模式」，否則寫原因**
