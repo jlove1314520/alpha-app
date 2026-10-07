@@ -323,6 +323,8 @@ class ShioajiBroker:
                 k, v = line.split("=", 1)
                 env[k.strip()] = v.strip().strip('"').strip("'")
         self.api = sj.Shioaji(simulation=simulation)
+        # 先.四十四：Shioaji 預設事件訊息（Session Property 那行）含身分證字號，排程會寫進 scheduler.log → 登入前關掉
+        self.api.set_event_callback(lambda *a, **k: None)
         self.api.login(api_key=env["SINOPAC_API_KEY"], secret_key=env["SINOPAC_SECRET_KEY"])
         # 先.三十八：Shioaji 預設委託回呼會把整筆委託（含帳號）印到 stdout，排程會寫進 scheduler.log；
         # 改成不印（狀態一律用 update_status／list_trades 主動查，不依賴回呼）
@@ -1440,6 +1442,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
         else:
             import shioaji as sj
             api = sj.Shioaji(simulation=False)
+            api.set_event_callback(lambda *a, **k: None)  # 事件訊息含身分證字號，不輸出（先.四十四）
             _timed(lambda: api.login(api_key=env["SINOPAC_API_KEY"], secret_key=env["SINOPAC_SECRET_KEY"]), 60)
         acct = getattr(api, "stock_account", None)
         if acct is None:

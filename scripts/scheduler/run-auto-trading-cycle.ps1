@@ -23,6 +23,8 @@ $env:ALPHA_SCHEDULED_TASK = "1"  # senior directive 38: --live-cancel-test refus
 $stamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
 $out = & $pythonExe -X utf8 @a 2>&1 | Out-String
 $code = $LASTEXITCODE
+# senior directive 44: second line of defence - mask Taiwan national-ID-shaped strings before logging
+$out = $out -replace '\b[A-Z][12][0-9]{8}\b', '<masked>'
 Add-Content -Path $logPath -Value "[$stamp] task=$Task exit=$code`n$out" -Encoding UTF8
 if ($Task -eq "run" -or $Task -eq "settle") {
   # best effort: publish the de-identified heartbeat; failure must never change the exit code
