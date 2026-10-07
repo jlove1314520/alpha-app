@@ -1,7 +1,9 @@
 """先.四十六：永豐 API 官方 Telegram 群組「只讀」擷取（Telethon／總司令個人帳號 MTProto）。
 
 安全設計（總司令裁示，自測 scripts/selftest_telegram_reader.py 逐條證明）：
-- 只讀一個群組：本機 .env 的 TELEGRAM_TARGET_CHAT；其他目標一律拒絕。
+- 只讀一個群組：排程只認本機 .env 的 TELEGRAM_TARGET_CHAT_ID（數字 ID，設定工具解析後寫入）；其他目標一律拒絕。
+- 先.四十六-補：設定模式（--login）可輸入「群組顯示名稱」，用 SetupClient.iter_dialogs 只比對標題找出同名群組
+  （不讀任何訊息、不輸出其他聊天的標題，只印「找到 N 個同名群組」），iter_dialogs 只在設定模式開放。
 - 程式層禁止寫入：ReadOnlyClient 只開放 get_entity／iter_messages（＋連線生命週期）；
   send／edit／delete／forward／join／leave／mark_read／下載媒體／原始 TL 請求（__call__）一律拋 PermissionError。
 - 不下載任何媒體；只存文字、時間、訊息編號、回覆對象編號、發言者「官方／一般」標記，不存他人姓名、帳號、電話。
@@ -88,6 +90,67 @@ class ReadOnlyClient:
         for bad in ("search", "from_user", "filter"):
             kw.pop(bad, None)
         return self._c.iter_messages(entity, **kw)
+
+
+class SetupClient:
+    """設定模式專用（--login）：多開放 iter_dialogs 讓顯示名稱解析成數字 ID；寫入類一律拒絕。
+    排程模式絕不使用本類別（排程只用 ReadOnlyClient）。"""
+
+    _ALLOWED = ("connect", "disconnect", "is_user_authorized", "start", "get_entity", "iter_dialogs")
+
+    def __init__(self, client):
+        object.__setattr__(self, "_c", client)
+
+    def __getattr__(self, name):
+        if name in self._ALLOWED:
+            return getattr(self._c, name)
+        raise ReadOnlyViolation(f"設定模式也不允許呼叫 {name}")
+
+    def __setattr__(self, name, value):
+        raise ReadOnlyViolation("只讀包裝不可修改")
+
+    def __call__(self, *a, **k):
+        raise ReadOnlyViolation("不允許送出原始 Telegram 請求")
+
+
+def _peer_id(ent) -> int:
+    from telethon import utils
+    return int(utils.get_peer_id(ent))
+
+
+async def resolve_target(sc, text: str, choose=input, out=print, peer_id=_peer_id) -> int:
+    """把設定工具輸入的目標（顯示名稱／@帳號名稱／邀請連結）解析成數字 ID（Telethon marked id）。
+    顯示名稱：iter_dialogs 只比對群組與頻道的標題（完全相同），不讀訊息、不輸出任何聊天標題。"""
+    t = (text or "").strip()
+    if not t:
+        raise ValueError("沒有輸入目標群組")
+    if t.startswith("@") or "t.me/" in t or t.startswith(("http://", "https://")):
+        return peer_id(await sc.get_entity(t))
+    hits = []
+    async for d in sc.iter_dialogs():
+        if (getattr(d, "is_group", False) or getattr(d, "is_channel", False)) and (getattr(d, "title", "") or "").strip() == t:
+            hits.append(d)
+    out(f"找到 {len(hits)} 個同名群組")
+    if not hits:
+        raise LookupError("你已加入的群組／頻道裡沒有標題完全相同的（請確認大小寫、空白，或改用邀請連結）")
+    if len(hits) == 1:
+        return peer_id(hits[0].entity)
+    for i, d in enumerate(hits, 1):
+        n = getattr(getattr(d, "entity", None), "participants_count", None)
+        out(f"  序號 {i}：成員約 {n if n is not None else '（未知）'} 位")
+    k = int(str(choose(f"請輸入序號（1～{len(hits)}）：")).strip())
+    if not 1 <= k <= len(hits):
+        raise ValueError("序號超出範圍")
+    return peer_id(hits[k - 1].entity)
+
+
+def write_env_key(key: str, value: str, path: Path = ENV_PATH) -> None:
+    """取代或附加 .env 的單一鍵（保留其他行與換行格式）；不印出任何值。"""
+    raw = path.read_bytes().decode("utf-8") if path.exists() else ""   # 不用 read_text：它會把 CRLF 轉成 LF
+    eol = "\r\n" if "\r\n" in raw else "\n"
+    lines = [l for l in raw.splitlines() if not re.match(rf"^\s*{re.escape(key)}\s*=", l)]
+    lines.append(f"{key}={value}")
+    path.write_text(eol.join(lines) + eol, encoding="utf-8", newline="")
 
 
 def read_env(path: Path = ENV_PATH) -> dict:
@@ -225,8 +288,9 @@ async def run_once(env: dict, out_dir: Path = EXPORT_DIR, client=None, now: date
     now = now or datetime.now(TW)
     state_p = out_dir / STATE_NAME
     state = _load_json(state_p, {})
-    target = env.get("TELEGRAM_TARGET_CHAT", "").strip()
-    if not (env.get("TELEGRAM_API_ID") and env.get("TELEGRAM_API_HASH") and target):
+    target_s = env.get("TELEGRAM_TARGET_CHAT_ID", "").strip()   # 先.四十六-補：排程只認數字 ID
+    target = int(target_s) if re.fullmatch(r"-?\d+", target_s) else None
+    if not (env.get("TELEGRAM_API_ID") and env.get("TELEGRAM_API_HASH") and target is not None):
         _heartbeat(out_dir, "NOT_CONFIGURED")
         return {"state": "NOT_CONFIGURED"}
     try:
@@ -264,14 +328,21 @@ async def login(env: dict) -> int:
     """一次性登入：手機號碼／驗證碼／兩步驟密碼由 Telethon 在終端機向總司令本人詢問，本程式不記錄、不印出。"""
     SECRETS_DIR.mkdir(parents=True, exist_ok=True)
     c = make_client(env)
-    await c.start()
+    sc = SetupClient(c)
+    await sc.start()          # 已登入就不會再問手機／驗證碼
     try:
-        ro = ReadOnlyClient(c, env.get("TELEGRAM_TARGET_CHAT", ""))
-        ent = await ro.get_entity(env.get("TELEGRAM_TARGET_CHAT", ""))
-        print(f"登入成功，目標群組可讀取：{getattr(ent, 'title', '（無標題）')}", flush=True)
+        try:
+            tid = await resolve_target(sc, env.get("TELEGRAM_TARGET_CHAT", ""))
+        except Exception as e:
+            print(f"找不到目標群組（{type(e).__name__}）：{e}", flush=True)
+            return 1
+        write_env_key("TELEGRAM_TARGET_CHAT_ID", str(tid))
+        ro = ReadOnlyClient(c, tid)
+        ent = await ro.get_entity(tid)
+        print(f"登入成功，目標群組可讀取：{getattr(ent, 'title', '（無標題）')}（ID 已寫入 .env）", flush=True)
         return 0
     except Exception as e:
-        print(f"登入成功，但目標群組無法讀取（{type(e).__name__}）：請確認你的帳號已在群組內、群組名稱或邀請連結正確", flush=True)
+        print(f"目標群組無法讀取（{type(e).__name__}）：請確認你的帳號已在群組內", flush=True)
         return 1
     finally:
         await c.disconnect()

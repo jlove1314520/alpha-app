@@ -103,7 +103,7 @@ msgs = [msg(1, 100, "太舊不回補"), msg(2, 30, "正式環境權限開通了�
         msg(3, 10, "附圖", media=NS(photo=True)), msg(4, 1, "CA 憑證 activate_ca 失敗", post=True),
         msg(5, 0.5, "零股下單錯誤碼 88", from_channel=777, reply=4)]
 fc = FakeClient(msgs)
-env = {"TELEGRAM_API_ID": "1", "TELEGRAM_API_HASH": "h", "TELEGRAM_TARGET_CHAT": TARGET}
+env = {"TELEGRAM_API_ID": "1", "TELEGRAM_API_HASH": "h", "TELEGRAM_TARGET_CHAT": TARGET, "TELEGRAM_TARGET_CHAT_ID": "-100777"}
 r = asyncio.run(T.run_once(env, out_dir=out, client=fc, now=NOW))
 rows = [json.loads(l) for f in sorted(out.glob("20*.jsonl")) for l in f.read_text(encoding="utf-8").splitlines()]
 check("首次回補 90 天：抓到 4 則、排除 100 天前那則", r["state"] == "OK" and sorted(x["id"] for x in rows) == [2, 3, 4, 5])
@@ -138,6 +138,69 @@ class Boom(FakeClient):
 o2 = Path(tempfile.mkdtemp())
 res = [asyncio.run(T.run_once(env, out_dir=o2, client=Boom([]), now=NOW))["state"] for _ in range(4)]
 check("失敗只記警告：連續第 3 次才推播一次（第 1、2、4 次不推）", res == ["ERROR"] * 4 and pushed == [3])
+
+# ---- 先.四十六-補：顯示名稱解析（只在設定模式）、排程只認數字 ID ----
+ro = T.ReadOnlyClient(FakeClient([]), -100777)
+try:
+    ro.iter_dialogs; d_ok = False
+except T.ReadOnlyViolation:
+    d_ok = True
+check("排程模式（ReadOnlyClient）呼叫 iter_dialogs 會拋錯", d_ok)
+fc = FakeClient([])
+ro = T.ReadOnlyClient(fc, -100777)
+try:
+    asyncio.run(ro.get_entity(-100888)); id_ok = False
+except T.ReadOnlyViolation:
+    id_ok = True
+check("ID 以外的群組拒讀（且未呼叫底層）", id_ok and not any(isinstance(c, tuple) and c[0] == "get_entity" for c in fc.calls))
+r4 = asyncio.run(T.run_once({"TELEGRAM_API_ID": "1", "TELEGRAM_API_HASH": "h", "TELEGRAM_TARGET_CHAT": TARGET},
+                            out_dir=Path(tempfile.mkdtemp()), client=FakeClient([]), now=NOW))
+check("排程只認 TELEGRAM_TARGET_CHAT_ID：只有名稱沒有 ID→NOT_CONFIGURED", r4["state"] == "NOT_CONFIGURED")
+
+
+class FakeSetup:
+    def __init__(self, dialogs): self.dialogs = dialogs; self.msg_reads = 0
+    async def get_entity(self, t): return NS(id=555, title="by-link")
+    def iter_dialogs(self):
+        async def g():
+            for d in self.dialogs:
+                yield d
+        return g()
+    def iter_messages(self, *a, **k): self.msg_reads += 1
+
+
+def dlg(title, eid, n=None, group=True):
+    return NS(title=title, is_group=group, is_channel=not group, entity=NS(id=eid, participants_count=n))
+
+
+pid = lambda ent: -(1000000000000 + ent.id)
+logs = []
+fs = FakeSetup([dlg("家人群", 1), dlg("Shioaji", 42, 2663), dlg("公司機密群", 3), dlg("Shioaji", 9, 12, group=False)])
+sc = T.SetupClient(fs)
+got = asyncio.run(T.resolve_target(sc, "Shioaji", choose=lambda p: "1", out=logs.append, peer_id=pid))
+check("顯示名稱多個同名：列成員數讓總司令選序號，選 1→對應 ID", got == pid(NS(id=42)) and any("找到 2 個同名群組" in x for x in logs)
+      and any("2663" in x for x in logs))
+check("名稱解析不輸出其他聊天的標題、不讀任何訊息", not any(("家人群" in x) or ("公司機密群" in x) for x in logs) and fs.msg_reads == 0)
+logs.clear()
+got = asyncio.run(T.resolve_target(T.SetupClient(FakeSetup([dlg("Shioaji", 42, 2663), dlg("別的", 5)])), "Shioaji", out=logs.append, peer_id=pid))
+check("顯示名稱唯一：直接取得 ID、只印「找到 1 個同名群組」", got == pid(NS(id=42)) and logs == ["找到 1 個同名群組"])
+try:
+    asyncio.run(T.resolve_target(T.SetupClient(FakeSetup([dlg("別的", 5)])), "Shioaji", out=logs.append, peer_id=pid)); z_ok = False
+except LookupError:
+    z_ok = True
+check("顯示名稱零個：報錯說明", z_ok)
+got = asyncio.run(T.resolve_target(T.SetupClient(FakeSetup([])), "https://t.me/+abc", out=logs.append, peer_id=pid))
+check("邀請連結／@名稱：直接 get_entity 解析", got == pid(NS(id=555)))
+try:
+    T.SetupClient(FakeSetup([])).send_message; s_ok = False
+except T.ReadOnlyViolation:
+    s_ok = True
+check("設定模式也擋寫入方法", s_ok)
+envf = Path(tempfile.mkdtemp()) / ".env"
+envf.write_bytes(b"A=1\r\nTELEGRAM_TARGET_CHAT_ID=-1\r\nB=2\r\n")
+T.write_env_key("TELEGRAM_TARGET_CHAT_ID", "-100777", path=envf)
+eb = envf.read_bytes()
+check(".env 寫入：取代舊值、保留其他行與 CRLF", eb == b"A=1\r\nB=2\r\nTELEGRAM_TARGET_CHAT_ID=-100777\r\n")
 
 # 6 登入檔與輸出路徑都在 repo 外
 check("登入檔路徑不在 repo 內", ROOT.resolve() not in Path(str(T.SESSION_BASE) + ".session").resolve().parents)

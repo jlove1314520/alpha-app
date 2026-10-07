@@ -18395,8 +18395,8 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十六-補）。
 
-- [ ] **先.四十六補-一 顯示名稱解析（iter_dialogs 僅 setup 模式、只印同名數量、多個列成員數選序號）→ TELEGRAM_TARGET_CHAT_ID；排程只認 ID＋自測兩案**
-- [ ] **先.四十六補-二 提示文字改為三種輸入方式**
-- [ ] **先.四十六補-三 已有 api_id／api_hash 時沿用（可選覆蓋）**
-- [ ] **先.四十六補-四 Shioaji 1.7.5～1.7.7 release notes 查證（只回報、不升級）**
+- [x] **先.四十六補-一 顯示名稱解析（iter_dialogs 僅 setup 模式、只印同名數量、多個列成員數選序號）→ TELEGRAM_TARGET_CHAT_ID；排程只認 ID＋自測兩案**〔research/telegram_reader.py：SetupClient（僅 --login，多開放 iter_dialogs、仍擋寫入）＋resolve_target（只比對群組／頻道標題、只印「找到 N 個同名群組」、多個列成員數選序號、零個報錯）→ write_env_key 寫 TELEGRAM_TARGET_CHAT_ID；排程只認數字 ID。自測 28 PASS（含排程 iter_dialogs 拋錯、ID 以外拒讀、不輸出他聊標題）；順帶修 .env 寫入保留 CRLF 的 bug。〕
+- [x] **先.四十六補-二 提示文字改為三種輸入方式**〔setup_telegram.ps1 提示改為「群組顯示名稱（例：Shioaji），或 @帳號名稱，或邀請連結」。〕
+- [x] **先.四十六補-三 已有 api_id／api_hash 時沿用（可選覆蓋）**〔.env 已有 api_id／api_hash 時預設沿用（Enter），輸入 y 才重新輸入覆蓋；已登入時 start() 不再要求手機／驗證碼。〕
+- [x] **先.四十六補-四 Shioaji 1.7.5～1.7.7 release notes 查證（只回報、不升級）**〔查證完成（官方 release 頁、PyPI、GitHub 三來源）：1.7.6 已撤回（快取登入兩缺陷），1.7.7 修正；1.7.6 起回報自動更新 Trade 快取＋event_id（下單行為改變）；帳務、CA 無變更；#237 Windows 登入卡死跨版本未解。寫入 docs 第十節；未升級，升級列入 AWAITING_REVIEW 待裁示。〕
 - [ ] **先.四十六補-五 推播通知重跑設定工具**
