@@ -107,6 +107,12 @@ from queue_depth_config import MIN_QUEUE_DEPTH, TARGET_QUEUE_DEPTH  # noqa: E402
 #      不再視為碰撞訊號——這正是舊版永遠卡死的根因：從來沒有「多舊算陳舊」
 #      這個概念，任何一個字元的差異都無限期擋住整條自走線。
 COLLISION_RECENCY_MINUTES = 20  # 略大於devqueue自己15分鐘的排程間隔，留一點餘裕
+# 2026-10-07（先.四十三-二）：殘留檔判定。實測 DevQueue 停擺 15.8 小時的根因：三個殘留檔「內容」從 04:31
+# 起就沒變，但其他 wrapper 每次 git pull --autostash 都會把它們收起再放回、刷新修改時間，於是每輪都像
+# 「剛被改過」。改為記錄每個髒檔的內容雜湊：同一內容持續 ≥ RESIDUAL_MINUTES 分鐘、且沒有執行中程序的
+# 命令列提到它 → 視為殘留，記警告後照常執行（不刪、不還原、不 commit，留給人或原寫手處理）。
+RESIDUAL_MINUTES = 60
+DIRTY_SEEN = ROOT / "research" / ".devqueue_dirty_seen.json"
 OTHER_TRACKS = ("marathon", "hypothesis_queue")  # devqueue自己的鎖由wrapper另外處理，不在這裡查
 MACHINE_WRITTEN = [
     re.compile(r"^data/"),                    # 全部是排程產生的資料檔
@@ -132,6 +138,57 @@ def _other_track_lock_reason() -> str | None:
     return None
 
 
+def _file_hash(path: Path) -> str | None:
+    try:
+        import hashlib
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def _running_cmdlines() -> list[str] | None:
+    """目前所有 python／powershell／node 程序的命令列（小寫）。查詢失敗回 None（呼叫端視為「不確定」）。"""
+    try:
+        r = subprocess.run(
+            ["powershell", "-NoProfile", "-Command",
+             "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python|powershell|node|pwsh' } "
+             "| ForEach-Object { $_.CommandLine }"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        return [ln.strip().lower() for ln in r.stdout.splitlines() if ln.strip()]
+    except Exception as e:  # noqa: BLE001 — 守門員自己失敗只降級（CLAUDE.md 十二）
+        print(f"WARN: 查詢執行中程序失敗（{type(e).__name__}），殘留判定本輪保守視為仍在寫", flush=True)
+        return None
+
+
+def _residual_ok(path: str, now: float, seen: dict, cmdlines: list[str] | None) -> bool:
+    """同一內容已持續 ≥RESIDUAL_MINUTES 且沒有程序命令列提到它（檔名主幹）→ True。會更新 seen。"""
+    h = _file_hash(ROOT / path)
+    rec = seen.get(path)
+    if h is None:
+        return False
+    if not rec or rec.get("hash") != h:
+        seen[path] = {"hash": h, "first_seen": now}
+        return False
+    if (now - float(rec.get("first_seen", now))) / 60.0 < RESIDUAL_MINUTES:
+        return False
+    if cmdlines is None:
+        return False
+    names = {Path(path).stem.lower()} | _writers_of(path)
+    return not any(n in c for n in names for c in cmdlines)
+
+
+def _writers_of(path: str) -> set[str]:
+    """repo 裡提到這個檔名的程式（.py／.ps1／.vbs）＝可能的寫手，回傳其檔名主幹（小寫）。失敗回空集合。"""
+    base = Path(path).name
+    try:
+        r = subprocess.run(["git", "-C", str(ROOT), "grep", "-l", "-F", base, "--", "*.py", "*.ps1", "*.vbs"],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
+        return {Path(f).stem.lower() for f in r.stdout.splitlines() if f.strip() and Path(f).name != base}
+    except Exception as e:  # noqa: BLE001
+        print(f"WARN: 查寫手失敗（{type(e).__name__}）", flush=True)
+        return set()
+
+
 def _recent_real_dirty_reason() -> str | None:
     """排除機器寫檔後，剩下的未提交變更裡有沒有『最近』被改過的檔案。"""
     try:
@@ -143,18 +200,38 @@ def _recent_real_dirty_reason() -> str | None:
         return f"git status 執行失敗（{e}），保守起見本輪讓路"
     now = time.time()
     hits = []
+    try:
+        seen = json.loads(DIRTY_SEEN.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        seen = {}
+    dirty_now = set()
+    cmdlines = "unset"
     for line in out.splitlines():
         if not line or line.startswith("??"):  # untracked 不算，跟白名單邏輯一致
             continue
         path = line[3:]  # porcelain 是「2碼狀態+1空格+路徑」
         if any(p.match(path) for p in MACHINE_WRITTEN):
             continue
+        dirty_now.add(path)
         try:
             age_min = (now - (ROOT / path).stat().st_mtime) / 60.0
         except OSError:
             continue  # 檔案已被刪除等邊界情況，不當成碰撞訊號
         if age_min < COLLISION_RECENCY_MINUTES:
+            if cmdlines == "unset":
+                cmdlines = _running_cmdlines()
+            if _residual_ok(path, now, seen, cmdlines):
+                print(f"WARN: {path} 內容已 ≥{RESIDUAL_MINUTES} 分鐘未變、無執行中程序提到它（修改時間 {age_min:.1f} 分鐘前"
+                      f"多半是其他排程 autostash 刷新），視為殘留、照常執行；請人工確認後 commit 或還原", flush=True)
+                continue
             hits.append(f"{path}（{age_min:.1f}分鐘前）")
+        else:
+            _residual_ok(path, now, seen, None)  # 只更新內容紀錄
+    try:
+        DIRTY_SEEN.write_text(json.dumps({k: v for k, v in seen.items() if k in dirty_now}, ensure_ascii=False, indent=1),
+                              encoding="utf-8")
+    except OSError as e:
+        print(f"WARN: 殘留紀錄寫入失敗（{type(e).__name__}），不影響本輪", flush=True)
     if hits:
         return f"有非機器寫入的檔案在最近{COLLISION_RECENCY_MINUTES}分鐘內被改動：{'、'.join(hits)}，判定有人正在中途，本輪讓路"
     return None
