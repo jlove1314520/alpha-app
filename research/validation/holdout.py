@@ -51,6 +51,10 @@ VAL_END = "2024-12-31"     # inclusive. VAL = (TRAIN_END, VAL_END]
 # 腳本讀到VAL_END之後的資料一律照舊raise，行為等同holdout從未解鎖過。
 ALLOWED_HOLDOUT_READERS = frozenset({
     "holdout_2025_dividend_account_test.py",  # #400，唯一經總司令核准的holdout解鎖對象
+    # #423：Bb-90 樣本外單發。總司令 2026-10-07【先.四十五】一原文同意「動用 2025-01-01～2026-09-30
+    # 保留資料，只此一次」，僅限 #418 原參數；預登記 docs/PREREG_bb90_oos_2025.md
+    # （SHA256 ce89180b…），程式在結果檔已存在時拒絕重跑。由互動視窗加入（CLAUDE.md 十三）。
+    "bb90_oos_2025.py",
 })
 
 
