@@ -18465,7 +18465,7 @@ push 後停下等 Cowork 核對。
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十一）。
 
 - [x] **先.五十一 全條（試撮分流、事件缺口補 kbars、處置／注意股、排行榜、預估成交金額、faulthandler 自動重啟）**〔時間閘：2026-10-08 13:40 結算完成後；不得碰自動交易引擎與交易模式〕〔DevQueue 20261008-174601：時間閘已過（10/8 13:40 settle 已跑，NOTHING_TO_SETTLE），本條未標互動視窗專屬，[自行裁量] 解除並拆成下列子項逐項做、各自 commit〕
-- [ ] **先.五十一-1 試撮 tick（simtrade）不寫 last／change_pct、不進走勢與量，改寫 sim_price／sim_at；App 08:30–09:00、13:25–13:30 灰字「試撮 xxx」；selftest 試撮不得改 last**
+- [x] **先.五十一-1 試撮 tick（simtrade）不寫 last／change_pct、不進走勢與量，改寫 sim_price／sim_at；App 08:30–09:00、13:25–13:30 灰字「試撮 xxx」；selftest 試撮不得改 last**〔a63b2a803：股票 handler 試撮只寫 sim_price／sim_at，不改 last／change_pct、不進 1 分K、不落地（[自行裁量] 落地也排除，避免試撮價混進研究用 tick 檔；期貨 handler 不動，原文只指股票）；App simTradeText()／sh-sim，時窗內外以替身時鐘實測：08:45、13:27 顯示「試撮 1,010」，09:00 與時窗外不顯示。selftest_shioaji_simtrade 10 PASS，對舊版 5 FAIL。冒煙 exit=0。重啟：盤後 shioaji_quotes 每 2 分鐘啟動即退出、無常駐行程，明日 08:30 首次啟動即載入新版（待明早 build sha 核對）。〕
 - [ ] **先.五十一-2 set_event_callback 只記 event_code 與時間（嚴禁印原始訊息）；1 記缺口起點、13 記終點，重連後在 kbars 預算內補缺口；App 缺口期間顯示「行情中斷，補資料中」**
 - [ ] **先.五十一-3 處置／注意股：每日 18:30 api.punish()／api.notice() 寫 data/disposal_flags.json；上櫃落後 >1 交易日以 TPEx 公開資料交叉補；個股頁紅標、AI 選股候選排除處置股**
 - [ ] **先.五十一-4 排行榜頁：api.scanners 漲跌幅／成交量／成交值前 50，盤中每 60 秒刷新，計入 5 秒 50 次預算**
