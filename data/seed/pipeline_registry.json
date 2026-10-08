@@ -547,6 +547,14 @@
       "shift_profile": "audit_yml",
       "missed_shift_threshold": 2,
       "note": "2026-09-16新增，2026-09-17（總司令裁示【停擺】查核）補上shift_profile：原本沒被納入前一天的班次數轉換，停留在interval×3=3天門檻，導致data_audit.py因TWSE_COMPANY ImportError連續兩個交易日（09-16/09-17）沒有產出時舊判準沒亮燈（要等第3天）——這正是總司令這次抓到的落差，已修復ImportError（見同日commit）並補上shift_profile=audit_yml，交易日連續錯過2班（2天）即亮燈。**注意**：本條監控的是`audit_report.json`頂層的`generated_at`（data_audit.py每晚稽核寫入），跟`local_task_health`區塊自己的`checked_at`（check_external_connectivity.py每5分鐘更新）是同一份檔案裡的兩個不同欄位，不要混淆。"
+    },
+    {
+      "task": "AlphaDisposalFlags",
+      "purpose": "處置／注意股旗標（先.五十一-3，scripts/run_disposal_flags.ps1 每日 18:30 → data/disposal_flags.json，App 個股頁紅標、AI 選股排除處置股）",
+      "interval_min": 1440,
+      "artifact": "research/data/disposal_flags_cycle.log",
+      "freshness": "mtime",
+      "note": "2026-10-08 新增（DevQueue 20261008-183102）。看 launcher 日誌 mtime 而非 disposal_flags.json 的 generated_at：資料內容沒變時 build_disposal_flags.py 刻意不覆蓋檔案（避免每日空 commit），generated_at 不會前進，用它判停擺會誤報；launcher 每次執行都 append 日誌。"
     }
   ],
   "github_pat_expiry": {
