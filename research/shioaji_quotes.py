@@ -103,6 +103,11 @@ TW_TZ = timezone(timedelta(hours=8))
 # 有一個常駐行程在跑」，不要重複登入（Shioaji帳戶對同時多個session的行為
 # 未知，保守起見一次只允許一個常駐行程）。
 PID_PATH = Path(__file__).parent / ".shioaji_stream.pid"
+# 2026-10-08 先.五十一-6：原生層崩潰（Shioaji 核心是編譯模組，segfault 不會跑 finally）時，
+# faulthandler 把各執行緒堆疊寫進這個 log；排程 AlphaShioajiQuotes 每 2 分鐘檢查 PID，
+# 行程不在就重新拉起。重啟次數記在 RESTART_STATE_PATH（皆 gitignored）。
+FAULT_LOG_PATH = Path(__file__).parent / "shioaji_faulthandler.log"
+RESTART_STATE_PATH = Path(__file__).parent / ".shioaji_restart_state.json"
 
 # index.html的WL預設值同一份清單，見模組docstring「已知限制」
 # 2026-09-06（實測.一.3）這份清單的角色改了：**不再是唯一來源**，只是「App 還沒
@@ -1052,6 +1057,8 @@ class TickState:
                 # 2026-09-15（實測.十）畸形棒防護的可見度：每檔累計被判定為壞
                 # 資料而排除的tick數，空dict代表今天完全沒有觸發過。
                 "kbars_rejected_ticks": self.rejected_ticks_snapshot(),
+                # 2026-10-08 先.五十一-6：當日啟動／異常重啟次數（心跳）
+                "restart_state": _read_restart_state(),
             }
             tmp = self.live_state_path.with_suffix(".json.tmp")
             tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
@@ -1442,6 +1449,60 @@ def _compact_stale_on_startup() -> None:
         print(f"  [tick落地] 啟動補壓縮失敗（不影響本日落地）：{type(e).__name__}: {e}", flush=True)
 
 
+def _read_restart_state() -> dict | None:
+    try:
+        st = json.loads(RESTART_STATE_PATH.read_text(encoding="utf-8"))
+        return {k: st.get(k) for k in ("date", "starts_today", "abnormal_restarts_today", "last_abnormal_restart_at")}
+    except Exception:  # noqa: BLE001 — 心跳附加資訊，讀不到就不附
+        return None
+
+
+def _enable_faulthandler():
+    """開 faulthandler 寫到 FAULT_LOG_PATH。失敗只警告（不能因為診斷工具起不來就不串流）。"""
+    try:
+        import faulthandler
+        f = open(FAULT_LOG_PATH, "a", encoding="utf-8")
+        f.write(f"\n===== 啟動 {datetime.now(TW_TZ).isoformat()} pid={os.getpid()} =====\n")
+        f.flush()
+        faulthandler.enable(file=f, all_threads=True)
+        return f
+    except Exception as e:  # noqa: BLE001
+        print(f"[faulthandler] 啟用失敗（不影響串流）：{type(e).__name__}: {e}", flush=True)
+        return None
+
+
+def _mark_restart_state(running: bool, now: datetime | None = None, path: Path | None = None) -> dict:
+    """記錄當日啟動／異常重啟次數。running=True 於啟動時呼叫：若同一天上一個行程沒有
+    正常收尾（running 仍為 True），算一次異常重啟。running=False 於 finally 收尾時呼叫。
+    讀寫失敗 fail open，回傳目前狀態（可能為空 dict）。"""
+    path = path or RESTART_STATE_PATH
+    now = now or datetime.now(TW_TZ)
+    day = now.date().isoformat()
+    try:
+        try:
+            st = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(st, dict):
+                st = {}
+        except (OSError, ValueError):
+            st = {}
+        if st.get("date") != day:
+            st = {"date": day, "starts_today": 0, "abnormal_restarts_today": 0, "running": False}
+        if running:
+            if st.get("running"):
+                st["abnormal_restarts_today"] = int(st.get("abnormal_restarts_today", 0)) + 1
+                st["last_abnormal_restart_at"] = now.isoformat()
+            st["starts_today"] = int(st.get("starts_today", 0)) + 1
+            st["last_start_at"] = now.isoformat()
+        else:
+            st["last_clean_exit_at"] = now.isoformat()
+        st["running"] = running
+        path.write_text(json.dumps(st, ensure_ascii=False), encoding="utf-8")
+        return st
+    except Exception as e:  # noqa: BLE001
+        print(f"[重啟次數] 記錄失敗（不影響串流）：{type(e).__name__}", flush=True)
+        return {}
+
+
 def _cleanup_pid() -> None:
     try:
         PID_PATH.unlink(missing_ok=True)
@@ -1453,12 +1514,18 @@ def run_stream_daemon() -> None:
     """常駐主迴圈：登入一次、訂閱全部標的、進入flush迴圈直到收盤或被中斷。"""
     import os
     PID_PATH.write_text(str(os.getpid()), encoding="utf-8")
+    _fault_f = _enable_faulthandler()
+    _restart = _mark_restart_state(True)
+    if _restart.get("abnormal_restarts_today"):
+        print(f"[重啟次數] 今日第 {_restart.get('starts_today')} 次啟動，其中異常重啟 "
+              f"{_restart.get('abnormal_restarts_today')} 次（上一個行程未正常收尾）", flush=True)
 
     env = _load_env(ENV_PATH)
     required = ["SINOPAC_API_KEY", "SINOPAC_SECRET_KEY"]
     missing = [k for k in required if not env.get(k)]
     if missing:
         _write_failure(f".env缺少必要欄位：{missing}")
+        _mark_restart_state(False)
         _cleanup_pid()
         return
 
@@ -1689,6 +1756,7 @@ def run_stream_daemon() -> None:
             api.logout()
         except Exception:
             pass
+        _mark_restart_state(False)  # 2026-10-08 先.五十一-6：正常收尾（含 Python 例外）；原生崩潰跑不到這裡
         _cleanup_pid()
 
 
