@@ -609,8 +609,8 @@
       }
     ],
     "status": "stale",
-    "status_checked_at": "2026-10-08T00:16:26.721810+00:00",
-    "status_age_hours": 540.6
+    "status_checked_at": "2026-10-08T06:20:28.011274+00:00",
+    "status_age_hours": 546.7
   },
   "local_pipeline_health": {
     "checked_at": "2026-09-15T19:40:21.880603+08:00",
@@ -765,8 +765,8 @@
     ],
     "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
     "status": "stale",
-    "status_checked_at": "2026-10-08T00:16:26.721810+00:00",
-    "status_age_hours": 540.6
+    "status_checked_at": "2026-10-08T06:20:28.011274+00:00",
+    "status_age_hours": 546.7
   },
   "app_data_sources": [
     {
@@ -1146,26 +1146,26 @@
     "earnings_calendar.json：yfinance get_calendar()（下一次財報日期）穩定可用，但get_earnings_dates()（用來推估盤前/盤後公布時段）在這台機器持續遇到curl_cffi對guce.yahoo.com的DNS解析失敗（socket.gethostbyname()本身正常，是curl_cffi內部的環境特定問題，不是程式bug）——estimated_session因此誠實降級為'unknown'，不影響next_earnings_date本身的可靠性；GitHub Actions runner環境不一定有同樣的DNS問題，之後排程實跑可能就會恢復正常。"
   ],
   "local_schedule_heartbeat": {
-    "checked_at": "2026-10-08T00:16:26.662187+00:00",
+    "checked_at": "2026-10-08T06:20:27.919497+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "259d37123d8035e21f69ff932fb8d146bfbc0a29",
-        "last_commit_at": "2026-10-08T00:07:38+00:00",
-        "minutes_since": 8.8,
+        "last_commit_sha": "c2772aaeed6c205532d5cd5d2e444c6b7c2da9cd",
+        "last_commit_at": "2026-10-08T06:16:04+00:00",
+        "minutes_since": 4.4,
         "track_stalled": false
       },
       "marathon": {
-        "last_commit_sha": "9cd90e1b7d0a9bfcfa09762745faceea5f8559ae",
-        "last_commit_at": "2026-10-07T22:06:13+00:00",
-        "minutes_since": 130.2,
+        "last_commit_sha": "372e209da6316e5f5cd4f1b52142b284d35cb2eb",
+        "last_commit_at": "2026-10-08T04:05:56+00:00",
+        "minutes_since": 134.5,
         "track_stalled": false
       },
       "hypothesis_queue": {
-        "last_commit_sha": "a698c4fbfc20801d9c65beeaf71687a494acc69c",
-        "last_commit_at": "2026-10-07T22:06:29+00:00",
-        "minutes_since": 130.0,
+        "last_commit_sha": "ea6b363ec74597fcc4b9e72b10f0277f63cdbf26",
+        "last_commit_at": "2026-10-08T04:05:49+00:00",
+        "minutes_since": 134.6,
         "track_stalled": false
       }
     },
@@ -1175,40 +1175,40 @@
       "launchers": {
         "devqueue": {
           "status": "OK",
-          "last_reason": "OK",
-          "last_detail": "OK/0",
-          "last_cycle_id": "20261008-080102",
+          "last_reason": "GATED",
+          "last_detail": "GATED/",
+          "last_cycle_id": "20261008-141602",
           "last_attempt_at": "2026-10-08T08:07:37+08:00",
           "last_ok_at": "2026-10-08T08:07:37+08:00",
-          "hours_since_last_attempt": 0.15
+          "hours_since_last_attempt": 6.21
         },
         "marathon": {
           "status": "OK",
           "last_reason": "OK",
           "last_detail": "PENDING_STATS/0",
-          "last_cycle_id": "20261008-060503",
-          "last_attempt_at": "2026-10-08T06:06:13+08:00",
-          "last_ok_at": "2026-10-08T06:06:13+08:00",
-          "hours_since_last_attempt": 2.17
+          "last_cycle_id": "20261008-120502",
+          "last_attempt_at": "2026-10-08T12:05:55+08:00",
+          "last_ok_at": "2026-10-08T12:05:55+08:00",
+          "hours_since_last_attempt": 2.24
         },
         "hypothesis_queue": {
           "status": "OK",
           "last_reason": "OK",
           "last_detail": "exit=0",
-          "last_cycle_id": "2026-10-08 06:06:28",
-          "last_attempt_at": "2026-10-08T06:06:28+08:00",
-          "last_ok_at": "2026-10-08T06:06:28+08:00",
-          "hours_since_last_attempt": 2.17
+          "last_cycle_id": "2026-10-08 12:05:48",
+          "last_attempt_at": "2026-10-08T12:05:49+08:00",
+          "last_ok_at": "2026-10-08T12:05:49+08:00",
+          "hours_since_last_attempt": 2.24
         }
       },
-      "checked_at": "2026-10-08T00:16:26.662187+00:00"
+      "checked_at": "2026-10-08T06:20:27.919497+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": "3c4ee16311d6e3ee1d1d1ec7b34e8637b894ea91",
       "last_commit_at": "2026-10-07T23:56:38+00:00",
-      "minutes_since": 19.8,
+      "minutes_since": 383.8,
       "file_fetched_at": "2026-10-08T07:56:37.131627+08:00",
-      "file_minutes_since": 19.8,
+      "file_minutes_since": 383.8,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": false,
