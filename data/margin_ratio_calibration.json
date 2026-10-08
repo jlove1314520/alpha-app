@@ -1,17 +1,51 @@
 {
- "k": 0.8815,
+ "k": 0.88,
  "ratio_mean": 0.8815,
- "mode": "global",
- "segments": [],
- "generated_at": "2026-10-08T07:49:36+08:00",
- "n_points": 8,
- "max_err_pp": 0.14,
- "warn": false,
+ "mode": "segmented",
+ "segments": [
+  {
+   "site_lo": null,
+   "site_hi": 180.0,
+   "k": 0.8595,
+   "n": 11,
+   "max_err_pp": 2.22,
+   "level_range": [
+    156.7,
+    179.8
+   ]
+  },
+  {
+   "site_lo": 180.0,
+   "site_hi": 195.0,
+   "k": 0.8808,
+   "n": 43,
+   "max_err_pp": 3.05,
+   "level_range": [
+    180.2,
+    194.9
+   ]
+  },
+  {
+   "site_lo": 195.0,
+   "site_hi": null,
+   "k": 0.8816,
+   "n": 4,
+   "max_err_pp": 0.14,
+   "level_range": [
+    195.1,
+    200.7
+   ]
+  }
+ ],
+ "generated_at": "2026-10-08T17:55:42+08:00",
+ "n_points": 58,
+ "max_err_pp": 3.05,
+ "warn": true,
  "date_from": "2026-09-23",
  "date_to": "2026-10-06",
- "n_days": 8,
- "ratio_min": 0.88088,
- "ratio_max": 0.8822,
+ "n_days": 58,
+ "ratio_min": 0.84535,
+ "ratio_max": 0.88597,
  "external_points": [
   {
    "date": "2026-09-23",
@@ -94,6 +128,46 @@
  },
  "warn_pp": 0.5,
  "segment_pp": 1.0,
- "meaning": "對齊籌碼K ≈ 本站算法 × k（由總司令提供的籌碼K讀數與同日本站原值重算；誤差 >0.5pp 標校準待更新）",
- "source": "external_points 只存總司令提供的籌碼K讀數，未抓取籌碼K網站；本站原值見 MARGIN_RATIO_RECONCILE.md／margin_maintenance.json／margin_backfill.json"
+ "meaning": "對齊籌碼K ≈ 本站算法 × k（依本站水位分段；段界與各段 k 見 segments）",
+ "source": "external_points 只存總司令提供的籌碼K讀數，未抓取籌碼K網站；本站原值見 MARGIN_RATIO_RECONCILE.md／margin_maintenance.json／margin_backfill.json",
+ "tier_scheme": "cm_2026_10_08",
+ "cm_calibration": {
+  "source": "CMoney 估算（經籌碼K顯示）；53 日讀數由總司令提供，只存本機、不入 repo；另併入先前 8 日籌碼K讀數（同日去重）",
+  "n_provided_cm": 53,
+  "n_used_cm": 52,
+  "excluded_dates": [
+   "2026-07-15"
+  ],
+  "n_combined": 58,
+  "decision_rule": "全段 k 最大−最小 ≤0.01 → 單一 k；否則依本站水位 [(None, 180.0), (180.0, 195.0), (195.0, None)] 分段取中位數（事前固定）",
+  "decision": "segmented",
+  "k_all": {
+   "n": 58,
+   "median": 0.88005,
+   "min": 0.84535,
+   "max": 0.88597,
+   "span": 0.04062,
+   "stdev": 0.01031
+  },
+  "k_crash_0727_0804": {
+   "n": 7,
+   "median": 0.85868,
+   "min": 0.84535,
+   "max": 0.86591,
+   "span": 0.02056,
+   "stdev": 0.00883
+  },
+  "k_other": {
+   "n": 51,
+   "median": 0.88083,
+   "min": 0.85672,
+   "max": 0.88597,
+   "span": 0.02926,
+   "stdev": 0.00715
+  },
+  "level_range_measured": [
+   156.7,
+   200.7
+  ]
+ }
 }

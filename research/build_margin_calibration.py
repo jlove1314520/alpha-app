@@ -9,6 +9,12 @@
   否則股災段的換算值標「校準未驗證」。
 - `python research/build_margin_calibration.py --apply`：同時把 ratio_pct_ck（＝round(ratio_pct×k, 1)）寫回
   data/margin_maintenance.json 與 research/data/margin_backfill.json（資料不完整的紀錄不算）。
+- 先.五十五（2026-10-08）：若本機有 CM 估 53 日對帳明細（research/data/margin_reconcile/cm_reconcile_detail.json，
+  gitignore，外部逐日數值只在本機），依事前判定規則重建：全段 k 最大−最小 ≤0.01 → 單一 k（中位數）；
+  否則依本站水位分段（<180、180–195、≥195）各取中位數（mode=segmented，段界寫在 segments 的 site_lo／site_hi）。
+  repo 的校準檔只存 k、統計、段界、天數與來源說明，不存外部逐日數值。
+  沒有本機明細時（例如雲端排程）不重建、沿用現有校準檔，避免把分段結果蓋回舊值。
+  ratio_mean 刻意保留八日單一比值（已上線 App 以它顯示「八日對帳比值」），分段只影響 ratio_pct_ck。
 """
 from __future__ import annotations
 
@@ -29,6 +35,10 @@ WARN_PP = 0.5            # 任一點誤差超過→校準待更新
 SEGMENT_PP = 1.0         # 股災段誤差超過→依水位分段校準
 CRASH_RANGES = [("2024-07-15", "2024-08-15"), ("2025-03-01", "2025-05-31")]
 LEVEL_BINS = [(0.0, 150.0), (150.0, 175.0), (175.0, 200.0), (200.0, 1e9)]   # 本站原值水位（%）
+CM_DETAIL = REPO / "research" / "data" / "margin_reconcile" / "cm_reconcile_detail.json"   # 本機 gitignore
+CM_SPAN_LIMIT = 0.01                                        # 先.五十五 A4 事前判定門檻
+CM_TIERS = [(None, 180.0), (180.0, 195.0), (195.0, None)]   # 先.五十五 A4 事前分段（本站水位 %）
+CM_CRASH = ("2026-07-27", "2026-08-04")
 
 
 def _md_row(txt: str, label: str) -> dict[str, float]:
@@ -87,6 +97,13 @@ def _bin(v: float) -> int:
 def k_for(site_pct: float, cal: dict) -> float | None:
     if not cal or cal.get("k") is None:
         return None
+    if cal.get("mode") == "segmented" and cal.get("segments") and "site_lo" in cal["segments"][0] \
+            and cal.get("tier_scheme") == "cm_2026_10_08":
+        for seg in cal["segments"]:
+            lo, hi = seg.get("site_lo"), seg.get("site_hi")
+            if (lo is None or site_pct >= lo) and (hi is None or site_pct < hi):
+                return float(seg["k"])
+        return float(cal["k"])
     if cal.get("mode") == "segmented" and cal.get("segments"):
         b = _bin(site_pct)
         seg = next((s for s in cal["segments"] if s["bin"] == b), None)
@@ -103,11 +120,74 @@ def ck_value(site_pct, cal: dict) -> float | None:
     return None if k is None else round(float(site_pct) * k, 1)
 
 
-def ck_status(date: str, cal: dict) -> str:
+def ck_status(date: str, cal: dict, site_pct: float | None = None) -> str:
     i = in_crash(date)
+    cm = cal.get("cm_calibration") or {}
+    lo = (cm.get("level_range_measured") or [None])[0]
+    if i is not None and lo is not None and site_pct is not None:
+        # 先.五十五：股災段依實測水位範圍更新——落在實測水位內＝分段校準可用；低於實測最低水位＝仍未驗證
+        return "分段校準（實測水位內）" if site_pct >= lo else f"校準未驗證（低於實測最低水位 {lo}%）"
     if i is not None and not (cal.get("crash_verified") or {}).get(str(i)):
         return "校準未驗證"
     return "校準待更新" if cal.get("warn") else "已校準"
+
+
+def _st(xs: list[float]) -> dict:
+    import statistics as st
+    if not xs:
+        return {"n": 0}
+    return {"n": len(xs), "median": round(st.median(xs), 5), "min": round(min(xs), 5), "max": round(max(xs), 5),
+            "span": round(max(xs) - min(xs), 5), "stdev": round(st.stdev(xs), 5) if len(xs) > 1 else 0.0}
+
+
+def build_cm(existing: dict) -> dict:
+    """先.五十五：用本機 CM 估對帳明細＋既有 8 筆讀數（同日去重）依事前規則重建。不寫入任何外部逐日數值。"""
+    import statistics as st
+    det = json.loads(CM_DETAIL.read_text(encoding="utf-8"))
+    rows = [r for r in det["rows"] if "k" in r]
+    new_dates = {r["date"] for r in rows}
+    comb = [(r["date"], float(r["ours_pct"]), float(r["k"])) for r in rows]
+    prev = [p for p in (existing.get("external_points") or []) if p.get("site_pct") and p.get("chipk_pct")]
+    comb += [(p["date"], float(p["site_pct"]), p["chipk_pct"] / p["site_pct"]) for p in prev if p["date"] not in new_dates]
+    ks = [c[2] for c in comb]
+    span = max(ks) - min(ks)
+    cal = dict(existing)
+    overall = round(st.median(ks), 4)
+    if span <= CM_SPAN_LIMIT:
+        cal.update(mode="global", k=overall, segments=[], tier_scheme=None)
+        errs = [abs(c[1] * overall - c[1] * c[2]) for c in comb]
+    else:
+        segs, errs = [], []
+        for lo, hi in CM_TIERS:
+            g = [c for c in comb if (lo is None or c[1] >= lo) and (hi is None or c[1] < hi)]
+            if not g:
+                continue
+            k = round(st.median(c[2] for c in g), 4)
+            e = [abs(c[1] * k - c[1] * c[2]) for c in g]
+            errs += e
+            segs.append({"site_lo": lo, "site_hi": hi, "k": k, "n": len(g), "max_err_pp": round(max(e), 2),
+                         "level_range": [round(min(c[1] for c in g), 1), round(max(c[1] for c in g), 1)]})
+        cal.update(mode="segmented", k=overall, segments=segs, tier_scheme="cm_2026_10_08")
+    crash = [c[2] for c in comb if CM_CRASH[0] <= c[0] <= CM_CRASH[1]]
+    other = [c[2] for c in comb if not (CM_CRASH[0] <= c[0] <= CM_CRASH[1])]
+    max_err = round(max(errs), 2)
+    lvl = [c[1] for c in comb]
+    cal.update({
+        "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
+        "n_points": len(comb), "n_days": len(comb), "max_err_pp": max_err, "warn": max_err > WARN_PP,
+        "ratio_min": round(min(ks), 5), "ratio_max": round(max(ks), 5),
+        "cm_calibration": {
+            "source": "CMoney 估算（經籌碼K顯示）；53 日讀數由總司令提供，只存本機、不入 repo；另併入先前 8 日籌碼K讀數（同日去重）",
+            "n_provided_cm": len(det["rows"]) + len(det.get("missing") or []), "n_used_cm": len(rows),
+            "excluded_dates": [x["date"] for x in det.get("excluded") or []],
+            "n_combined": len(comb), "decision_rule": f"全段 k 最大−最小 ≤{CM_SPAN_LIMIT} → 單一 k；否則依本站水位 {CM_TIERS} 分段取中位數（事前固定）",
+            "decision": cal["mode"], "k_all": _st(ks), "k_crash_0727_0804": _st(crash), "k_other": _st(other),
+            "level_range_measured": [round(min(lvl), 1), round(max(lvl), 1)],
+        },
+        "meaning": "對齊籌碼K ≈ 本站算法 × k（依本站水位分段；段界與各段 k 見 segments）" if cal["mode"] == "segmented"
+                   else "對齊籌碼K ≈ 本站算法 × k",
+    })
+    return cal
 
 
 def build(existing: dict | None = None, sites: dict | None = None) -> dict:
@@ -183,13 +263,13 @@ def apply(cal: dict) -> tuple[int, int]:
                 r.pop("ck_status", None)
                 continue
             r["ratio_pct_ck"] = ck_value(r["ratio_pct"], cal)
-            r["ck_status"] = ck_status(r["date"], cal)
+            r["ck_status"] = ck_status(r["date"], cal, r["ratio_pct"])
             n2 += 1
         for key in ("low_2025_04", "low_2024_08", "low_2024_07_08"):
             lo = bf.get(key)
             if isinstance(lo, dict) and lo.get("ratio_pct") is not None:
                 lo["ratio_pct_ck"] = ck_value(lo["ratio_pct"], cal)
-                lo["ck_status"] = ck_status(lo["date"], cal)
+                lo["ck_status"] = ck_status(lo["date"], cal, lo["ratio_pct"])
         BACKFILL.write_text(json.dumps(bf, ensure_ascii=False, indent=1), encoding="utf-8")
     return n1, n2
 
@@ -199,7 +279,14 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
-    cal = build()
+    existing = _load(OUT, {}) or {}
+    if CM_DETAIL.exists():
+        cal = build_cm(existing)
+    elif existing.get("cm_calibration"):
+        print("本機沒有 CM 估對帳明細（research/data/margin_reconcile/），沿用現有校準檔、不重建（避免蓋回舊值）")
+        cal = existing
+    else:
+        cal = build()
     OUT.write_text(json.dumps(cal, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"寫入 {OUT.name}：k={cal['k']} 模式={cal['mode']} 點數={cal['n_points']} 最大誤差={cal['max_err_pp']}pp warn={cal['warn']}")
     for p in cal["external_points"]:
