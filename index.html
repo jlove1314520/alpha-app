@@ -165,6 +165,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      重新整理按鈕統一套用同一份規則，跟`.press`（已有的:active{scale(.97)}
      既有class）搭配使用，不用每頁各寫一份。 */
   .refresh-btn{color:var(--accent);font-weight:500;font-size:11px;cursor:pointer}
+  /* 先.五十一-3 處置／注意股紅標 */
+  .disp-tag{display:inline-block;font-size:10.5px;font-weight:600;color:#fff;background:#c9524a;border-radius:6px;padding:1px 7px;margin-top:4px}
+  .disp-tag.notice{background:none;color:#c9524a;border:1px solid rgba(201,82,74,.6)}
   .sec-title{font-size:12px;color:var(--ink-3);letter-spacing:.5px;margin:16px 2px 8px;font-weight:600}
 
   /* ===== KPI ===== */
@@ -940,7 +943,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <section class="screen" id="scr-stock">
     <button class="back" onclick="go('home')">‹ 返回</button>
     <div class="stock-head">
-      <div class="l"><b id="sh-name">—</b><span id="sh-sub">—</span></div>
+      <div class="l"><b id="sh-name">—</b><span id="sh-sub">—</span><div id="sh-flag"></div></div>
       <div class="r"><b id="sh-price">—</b><div id="sh-chg">—</div><div id="sh-sim" class="note" style="color:var(--ink-3)" hidden></div></div>
     </div>
 
@@ -2112,6 +2115,55 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 名冊沒載到（size 0）時一律回 true＝「當作在市」，不能因為名冊沒讀到就把
   // 每一檔股票都標成已下市。
   function isListedNow(code){return !LISTED_UNIVERSE||LISTED_UNIVERSE.size===0||LISTED_UNIVERSE.has(code)}
+  // ── 2026-10-08（先.五十一-3）處置／注意股旗標：data/disposal_flags.json（每日 18:30
+  // scripts/build_disposal_flags.py，Shioaji punish/notice＋TPEx 交叉補）。載不到就當作
+  // 「沒有旗標」，不擋任何畫面；失敗記進診斷 log。
+  let DISPOSAL_FLAGS=null,DISPOSAL_FLAGS_AT=0;
+  async function ensureDisposalFlags(){
+    if(DISPOSAL_FLAGS&&Date.now()-DISPOSAL_FLAGS_AT<30*60e3)return DISPOSAL_FLAGS;
+    try{
+      const r=await fetch('data/disposal_flags.json?t='+Math.floor(Date.now()/1800000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      DISPOSAL_FLAGS=await r.json();DISPOSAL_FLAGS_AT=Date.now();
+    }catch(e){
+      console.warn('[ensureDisposalFlags]',e);recordGlobalError('ensureDisposalFlags',e);
+      if(!DISPOSAL_FLAGS)DISPOSAL_FLAGS={disposal:{},notice:{}};
+    }
+    return DISPOSAL_FLAGS;
+  }
+  function _twTodayIso(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}
+  // 回 {kind:'disposal'|'disposal_upcoming'|'notice', ...}；沒有旗標回 null。
+  // 處置：今天落在起訖期間內＝處置中；公告了但還沒開始＝即將處置。迄日已過不算。
+  // 注意：公布日在 5 個日曆天內才算（注意股是逐日公布，舊的不再有意義）。
+  function disposalFlagOf(code,todayIso){
+    try{
+      const f=DISPOSAL_FLAGS;if(!f||!code)return null;
+      const t=todayIso||_twTodayIso();
+      const d=(f.disposal||{})[code];
+      if(d&&d.end&&d.end>=t)return {...d,kind:(d.start&&d.start>t)?'disposal_upcoming':'disposal'};
+      const n=(f.notice||{})[code];
+      if(n&&n.announced&&(Date.parse(t)-Date.parse(n.announced))/864e5<=5)return {...n,kind:'notice'};
+      return null;
+    }catch(e){console.warn('[disposalFlagOf]',e);recordGlobalError('disposalFlagOf',e);return null}
+  }
+  function isDisposalNow(code,todayIso){const f=disposalFlagOf(code,todayIso);return !!f&&f.kind==='disposal'}
+  function disposalTagHtml(code){
+    const f=disposalFlagOf(code);if(!f)return '';
+    const md=s=>s?s.slice(5).replace('-','/'):'?';
+    const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const tip=esc(f.reason||'');
+    if(f.kind==='notice')return `<span class="disp-tag notice" title="${tip}">注意股 ${md(f.announced)}公布</span>`;
+    const lbl=f.kind==='disposal'?'處置股':'即將處置';
+    return `<span class="disp-tag" title="${tip}">${lbl} ${md(f.start)}–${md(f.end)}${f.interval?' · 每'+esc(f.interval.replace(/分鐘$/,''))+'分鐘撮合':''}</span>`;
+  }
+  async function updateStockDisposalTag(code){
+    const el=document.getElementById('sh-flag');if(!el)return;
+    el.innerHTML='';
+    if(!code||isUS(code))return;
+    await ensureDisposalFlags();
+    if(currentCode!==code)return;
+    el.innerHTML=disposalTagHtml(code);
+  }
   let INTRADAY_TW_AT=0,INTRADAY_US_AT=0;
   // 2026-08-26 新增（P2）：「無報價」要說明原因，不能只丟一個沒有解釋的空狀態——
   // 依可取得的訊號盡量誠實分類成「休市」／「資料源失敗」／「未涵蓋」三種之一。
@@ -4790,7 +4842,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.querySelectorAll('#stock-tabs button').forEach((x,i)=>x.classList.toggle('on',i===0));
     document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
     document.getElementById('sub-ov').classList.add('active');
-    setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');updateStockSimTag(code);
+    setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');updateStockSimTag(code);_safeAsync('updateStockDisposalTag',()=>updateStockDisposalTag(code));
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
     document.getElementById('rev-chart-amt').innerHTML=skeletonBlockHtml(120);
     document.getElementById('rev-chart-yoy').innerHTML='';document.getElementById('rev-chart-labels').innerHTML='';
@@ -5675,6 +5727,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(SUPPLY_VIEW){_safeAsync('hydrateSupply',()=>hydrateSupply(forceReload));return}
     _safeAsync('loadMainstreamIndustries',loadMainstreamIndustries);
     const cfg=_picksBoardConfig();
+    await ensureDisposalFlags().catch(e=>{console.warn('[ensureDisposalFlags]',e);recordGlobalError('ensureDisposalFlags',e)});  // 先.五十一-3：排除處置股前先載旗標
     if(cfg.cacheGet()&&!forceReload){renderPicks(cfg.cacheGet());stampUpdated('picks');return}
     const listEl=document.getElementById('picks-list');
     listEl.innerHTML=skeletonRowsHtml(6);  // 2026-09-15 P0產品.四：骨架屏取代純文字「載入中」
@@ -5921,9 +5974,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!allRows.length){listEl.innerHTML='<div class="note">無資料</div>';return}
     // rank 為 null 的股票是流動性不足、已被排除於排行榜之外（仍留在 allRows 供搜尋），
     // 這裡的排行榜清單只顯示有 rank 的。
-    const ranked=allRows.filter(r=>r.rank!=null);
-    const filtered=(PICKS_INDUSTRY?ranked.filter(r=>r.industry===PICKS_INDUSTRY):ranked).slice(0,PICKS_TOP_N);
-    listEl.innerHTML=filtered.map(r=>pickRowHtml(r,allRows)).join('');
+    // 2026-10-08（先.五十一-3）AI 選股候選排除處置期間內個股（分盤撮合＋預收款券，實際難以進出）。
+    // 旗標檔沒載到時 isDisposalNow 一律回 false＝不排除，只在清單上方說明。
+    const ranked0=allRows.filter(r=>r.rank!=null);
+    const base=PICKS_INDUSTRY?ranked0.filter(r=>r.industry===PICKS_INDUSTRY):ranked0;
+    const excluded=base.filter(r=>isDisposalNow(r.code));
+    const filtered=(excluded.length?base.filter(r=>!isDisposalNow(r.code)):base).slice(0,PICKS_TOP_N);
+    const topEx=base.slice(0,PICKS_TOP_N).filter(r=>isDisposalNow(r.code));
+    const dispNote=excluded.length
+      ?`<div class="note" id="picks-disposal-note" style="color:#c9524a;margin-bottom:6px">已排除處置股 ${excluded.length} 檔${topEx.length?`（原本在前 ${PICKS_TOP_N} 名：${topEx.map(r=>r.code+(r.name?' '+r.name:'')).join('、')}）`:''}（資料：${(DISPOSAL_FLAGS&&DISPOSAL_FLAGS.meta&&DISPOSAL_FLAGS.meta.generated_at||'').slice(0,16).replace('T',' ')||'—'}）</div>`
+      :(DISPOSAL_FLAGS&&DISPOSAL_FLAGS.meta?'':'<div class="note" id="picks-disposal-note" style="margin-bottom:6px">處置股旗標未載入，本清單未排除處置股</div>');
+    listEl.innerHTML=dispNote+filtered.map(r=>pickRowHtml(r,allRows)).join('');
   }
   function onPicksToggleChange(){
     const mkt=MKT_STATE.picks;
@@ -8134,7 +8195,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-08.1811';
+  const APP_VERSION='2026-10-08.1840';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

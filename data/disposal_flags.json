@@ -1,0 +1,789 @@
+{
+ "meta": {
+  "generated_at": "2026-10-08T18:34:46+08:00",
+  "errors": [],
+  "supplemented": {},
+  "primary": "shioaji",
+  "disposal_latest_announced": {
+   "TSE": "2026-10-07",
+   "OTC": "2026-10-07",
+   "otc_lag_trading_days": 0
+  },
+  "notice_latest_announced": {
+   "TSE": "2026-10-08",
+   "OTC": "2026-10-08",
+   "otc_lag_trading_days": 0
+  },
+  "expired_dropped": 0,
+  "counts": {
+   "disposal": 38,
+   "notice": 49
+  },
+  "note": "處置股＝交易所公告分盤撮合（每 N 分鐘撮合一次）與預收款券；注意股＝當日公布注意交易資訊。App 個股頁紅標、AI 選股候選排除處置期間內個股。非投資建議。"
+ },
+ "disposal": {
+  "1709": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，最近十個營業日內已有六個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "2030": {
+   "start": "2026-10-02",
+   "end": "2026-10-08",
+   "announced": "2026-10-01",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "2033": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "2221": {
+   "start": "2026-10-01",
+   "end": "2026-10-12",
+   "announced": "2026-09-30",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "大甲永和機械工業股份有限公司股票(代號：2221)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "22211": {
+   "start": "2026-10-01",
+   "end": "2026-10-12",
+   "announced": "2026-09-30",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "大甲永和機械工業股份有限公司股票(代號：2221)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "2466": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "3016": {
+   "start": "2026-10-01",
+   "end": "2026-10-12",
+   "announced": "2026-09-30",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日及當日沖銷量百分比達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "30165": {
+   "start": "2026-10-05",
+   "end": "2026-10-12",
+   "announced": "2026-10-02",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "嘉晶電子股份有限公司國內第五次無擔保轉換公司債(代號：30165)最近30個營業日內曾發布處置，又因連續3個營業日達本中",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "30166": {
+   "start": "2026-10-01",
+   "end": "2026-10-12",
+   "announced": "2026-09-30",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "上市公司嘉晶電子股份有限公司股票(代號：3016)經臺灣證券交易所股份有限公司發布處置，依本中心「櫃檯買賣公布或通知注意",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "3055": {
+   "start": "2026-10-01",
+   "end": "2026-10-12",
+   "announced": "2026-09-30",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "該有價證券之交易，連續五個營業日及當日沖銷量百分比達本公司「公布注意交易資訊」標準，且該股票於最近三十個營業日內曾發布處置交易資訊。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "3094": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，最近十個營業日內已有六個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "3167": {
+   "start": "2026-10-05",
+   "end": "2026-10-12",
+   "announced": "2026-10-02",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，最近十個營業日內已有六個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "3441": {
+   "start": "2026-10-08",
+   "end": "2026-10-19",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "聯一光電股份有限公司股票(代號：3441)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一項第",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "3455": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "由田新技股份有限公司股票(代號：3455)因連續5個營業日經本中心公布注意交易資訊，爰自115年10月6日起5個營業日(",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "3518": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "35181": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "上市公司柏騰科技股份有限公司股票(代號：3518)經臺灣證券交易所股份有限公司發布處置，依本中心「櫃檯買賣公布或通知注意",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "3701": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "4174": {
+   "start": "2026-10-05",
+   "end": "2026-10-12",
+   "announced": "2026-10-02",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "台灣浩鼎生技股份有限公司股票(代號：4174)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "4556": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "旭然國際股份有限公司股票(代號：4556)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "4760": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "勤凱科技股份有限公司股票(代號：4760)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "47602": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "勤凱科技股份有限公司股票(代號：4760)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "5013": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "強新工業股份有限公司股票(代號：5013)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "5205": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "中茂能資系統整合科技(股)公司股票(代號：5205)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "62075": {
+   "start": "2026-10-05",
+   "end": "2026-10-12",
+   "announced": "2026-10-02",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "雷科股份有限公司國內第五次無擔保轉換公司債(代號：62075)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "6213": {
+   "start": "2026-10-08",
+   "end": "2026-10-19",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日及當日沖銷量百分比達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "6533": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "65331": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "上市公司晶心科技股份有限公司股票(代號：6533)經臺灣證券交易所股份有限公司發布處置，依本中心「櫃檯買賣公布或通知注意",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "6672": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "6708": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "天擎積體電路股份有限公司股票(代號：6708)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "6957": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "69571": {
+   "start": "2026-10-05",
+   "end": "2026-10-12",
+   "announced": "2026-10-02",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "裕慶金屬股份有限公司中華民國境內第一次無擔保轉換公司債(代號：69571)因連續3個營業日達本中心作業要點第四條第一項第",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "705235": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "力旺凱基5B購01權證(代號：705235)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，",
+   "exchange": "unknown",
+   "source": "shioaji_punish"
+  },
+  "712876": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "世紀*群益63購03權證(代號：712876)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊",
+   "exchange": "unknown",
+   "source": "shioaji_punish"
+  },
+  "8084": {
+   "start": "2026-10-07",
+   "end": "2026-10-14",
+   "announced": "2026-10-06",
+   "interval": "25分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "巨虹電子股份有限公司股票(代號：8084)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一項第",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "8201": {
+   "start": "2026-10-06",
+   "end": "2026-10-13",
+   "announced": "2026-10-05",
+   "interval": "2分鐘",
+   "unit_limit": 10.0,
+   "total_limit": 30.0,
+   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  },
+  "8227": {
+   "start": "2026-10-02",
+   "end": "2026-10-08",
+   "announced": "2026-10-01",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "巨有科技股份有限公司股票(代號：8227)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一項第",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "8358": {
+   "start": "2026-10-08",
+   "end": "2026-10-15",
+   "announced": "2026-10-07",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "金居開發股份有限公司股票(代號：8358)最近30個營業日內曾發布處置，又因連續5個營業日經本中心公布注意交易資訊，爰自",
+   "exchange": "OTC",
+   "source": "shioaji_punish"
+  },
+  "8996": {
+   "start": "2026-10-05",
+   "end": "2026-10-12",
+   "announced": "2026-10-02",
+   "interval": "2分鐘",
+   "unit_limit": null,
+   "total_limit": null,
+   "reason": "該有價證券之交易，最近十個營業日內已有六個營業日達本公司「公布注意交易資訊」標準，且該股票於最近三十個營業日內曾發布處置交易資訊。",
+   "exchange": "TSE",
+   "source": "shioaji_punish"
+  }
+ },
+ "notice": {
+  "037060": {
+   "announced": "2026-10-08",
+   "close": 0.59,
+   "reason": "最近六個營業日累積收盤價跌幅達26.07%。且10月08日統一自營證券商賣出之比率為100.00% ﹝第五款﹞。",
+   "exchange": "unknown",
+   "source": "shioaji_notice"
+  },
+  "052775": {
+   "announced": "2026-10-08",
+   "close": 3.69,
+   "reason": "最近六個營業日累積收盤價漲幅達37.52%﹝第一款﹞。",
+   "exchange": "unknown",
+   "source": "shioaji_notice"
+  },
+  "071804": {
+   "announced": "2026-10-08",
+   "close": 1.53,
+   "reason": "最近六個營業日累積收盤價漲幅達45.41%﹝第一款﹞。",
+   "exchange": "unknown",
+   "source": "shioaji_notice"
+  },
+  "2340": {
+   "announced": "2026-10-08",
+   "close": 52.9,
+   "reason": "最近六個營業日累積收盤價漲幅達27.43%。且10月08日之成交量為最近六十個營業日日平均成交量之8.01倍﹝第三款﹞。且10月08日之週轉率為17.18%﹝第四款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "2466": {
+   "announced": "2026-10-08",
+   "close": 198.5,
+   "reason": "最近六個營業日累積收盤價漲幅達48.68%。且六個營業日起迄兩個營業日收盤價價差達70.00 元﹝第一款﹞。最近九十個營業日起迄兩個營業日之收盤價漲幅達322.34% ﹝第二款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "2484": {
+   "announced": "2026-10-08",
+   "close": 90.6,
+   "reason": "最近六個營業日之累積週轉率為128.18% 。且10月08日之週轉率為25.63%﹝第十款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "2492": {
+   "announced": "2026-10-08",
+   "close": 420.0,
+   "reason": "最近六個營業日累積收盤價漲幅達35.35%。且六個營業日起迄兩個營業日收盤價價差達91.00 元﹝第一款﹞。且10月08日之週轉率為13.33%﹝第四款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "2603": {
+   "announced": "2026-10-08",
+   "close": 232.5,
+   "reason": "10月07日之最近六個營業日之借券賣出成交量占最近六個營業日總成交量比率14.12%，且10月07日借券賣出成交量較最近六十個營業日之日平均借券賣出成交量放大為7.99倍﹝第十二款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "3147": {
+   "announced": "2026-10-08",
+   "close": 308.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達24.29%且最近六個營業日(含當日)起迄兩個營業日之最後成交價價差達新臺幣40.5元(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3224": {
+   "announced": "2026-10-08",
+   "close": 32.3,
+   "reason": "最近六個營業日(含當日)之日平均成交量較最近六十個營業日日平均成交量放大為6.31倍，當日成交量較最近六十個營業日之日平均成交量放大為35.62倍(第九款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3236": {
+   "announced": "2026-10-08",
+   "close": 58.9,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達30.08%(第一款)當日週轉率達18.4%(第四款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3260": {
+   "announced": "2026-10-08",
+   "close": 362.5,
+   "reason": "最近六個營業日(自當日之前一個營業日起)之借券賣出成交量占總成交量比率達26.58%，當日之前一個營業日借券賣出成交量較最近六十個營業日(自當日之前一個營業日起)之日平均借券賣出成交量放大為5倍(第十二款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3265": {
+   "announced": "2026-10-08",
+   "close": 238.5,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達25.91%且最近六個營業日(含當日)起迄兩個營業日之最後成交價價差達新臺幣53.5元(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3441": {
+   "announced": "2026-10-08",
+   "close": 249.5,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達31.65%(第一款)最近六十個營業日(含當日)起迄兩個營業日之最後成交價漲幅達285.62%(第二款)最近九十個營業日(含當日)起迄兩個營業日之最後成交價漲幅達361.9%(第二款)最近六個營業日(自當日之前一個營業日起)之當日沖銷成交量占總成交量比率達68.75%，當日",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3564": {
+   "announced": "2026-10-08",
+   "close": 66.9,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達29.34%，當日之成交量較最近六十個營業日日平均成交量放大7.03倍(第三款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3585": {
+   "announced": "2026-10-08",
+   "close": 78.58,
+   "reason": "最近五個營業日（含當日）累積之最後加權平均成交價漲幅達51.7%(第二款)。",
+   "exchange": "OES",
+   "source": "shioaji_notice"
+  },
+  "3597": {
+   "announced": "2026-10-08",
+   "close": 40.4,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達38.14%(第一款)當日之成交量較最近六十個營業日日平均成交量放大9.11倍(第三款)台新證券公司當日受託買進該有價證券之成交量占當日該有價證券總成交量之比率為41.32%(第五款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "3701": {
+   "announced": "2026-10-08",
+   "close": 63.0,
+   "reason": "最近六個營業日累積收盤價漲幅達33.15%﹝第一款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "4174": {
+   "announced": "2026-10-08",
+   "close": 53.7,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達32.96%(第一款)最近三十個營業日(含當日)起迄兩個營業日之最後成交價漲幅達101.12%(第二款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "4556": {
+   "announced": "2026-10-08",
+   "close": 145.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達37.15%(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "4711": {
+   "announced": "2026-10-08",
+   "close": 17.2,
+   "reason": "最近六個營業日(含當日)之日平均成交量較最近六十個營業日日平均成交量放大為6倍，當日成交量較最近六十個營業日之日平均成交量放大為8.92倍(第九款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "4720": {
+   "announced": "2026-10-08",
+   "close": 25.55,
+   "reason": "最近六個營業日累積收盤價漲幅達30.25%。且10月08日之成交量為最近六十個營業日日平均成交量之8.13倍﹝第三款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "4760": {
+   "announced": "2026-10-08",
+   "close": 367.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達35.42%(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "4908": {
+   "announced": "2026-10-08",
+   "close": 243.5,
+   "reason": "當日本益比為97.01、股價淨值比為10.79且為其所屬產業類別股價淨值比之1.39倍、當日週轉率達9%、單一投資人當日賣出該有價證券之成交金額達1.92億元，且占當日該有價證券之總成交金額11.02%(第六款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "4989": {
+   "announced": "2026-10-08",
+   "close": 73.2,
+   "reason": "最近六個營業日之累積週轉率為62.02%。且10月08日之週轉率為13.76%﹝第十款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "5013": {
+   "announced": "2026-10-08",
+   "close": 53.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達33.39%(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "5205": {
+   "announced": "2026-10-08",
+   "close": 33.3,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達59.37%(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "5228": {
+   "announced": "2026-10-08",
+   "close": 61.3,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達45.33%(第一款)當日之成交量較最近六十個營業日日平均成交量放大8.52倍(第三款)當日週轉率達12.6%(第四款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "5475": {
+   "announced": "2026-10-08",
+   "close": 203.0,
+   "reason": "當日本益比為157.36、股價淨值比為23.69且為其所屬產業類別股價淨值比之5.62倍、當日週轉率達13.55%(第六款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "6127": {
+   "announced": "2026-10-08",
+   "close": 64.1,
+   "reason": "最近六個營業日(含當日)之累積週轉率為92.05%，當日週轉率達23.52%(第十款)最近六個營業日(自當日之前一個營業日起)之當日沖銷成交量占總成交量比率達60.66%，當日之前一個營業日當日沖銷成交量占總成交量達63.87%（第十三款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "6152": {
+   "announced": "2026-10-08",
+   "close": 21.0,
+   "reason": "最近六個營業日累積收盤價漲幅達32.85%﹝第一款﹞。且10月08日之成交量為最近六十個營業日日平均成交量之7.42倍﹝第三款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "6174": {
+   "announced": "2026-10-08",
+   "close": 64.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達36.72%(第一款)當日之成交量較最近六十個營業日日平均成交量放大7.15倍(第三款)當日週轉率達20.56%(第四款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "6182": {
+   "announced": "2026-10-08",
+   "close": 129.0,
+   "reason": "最近六個營業日(含當日)之累積週轉率為96.66%，當日週轉率達9.57%(第十款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "6213": {
+   "announced": "2026-10-08",
+   "close": 806.0,
+   "reason": "最近六個營業日累積收盤價漲幅達26.55%。且六個營業日起迄兩個營業日收盤價價差達164.00元﹝第一款﹞。最近六十個營業日起迄兩個營業日之收盤價漲幅達140.59% 。最近九十個營業日起迄兩個營業日之收盤價漲幅達174.23% ﹝第二款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "6449": {
+   "announced": "2026-10-08",
+   "close": 271.0,
+   "reason": "最近六個營業日累積收盤價漲幅達26.84%。且10月08日之成交量為最近六十個營業日日平均成交量之5.93倍﹝第三款﹞。且10月08日之週轉率為10.47%﹝第四款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "6584": {
+   "announced": "2026-10-08",
+   "close": 531.0,
+   "reason": "最近六個營業日(自當日之前一個營業日起)之借券賣出成交量占總成交量比率達11.48%，當日之前一個營業日借券賣出成交量較最近六十個營業日(自當日之前一個營業日起)之日平均借券賣出成交量放大為5倍(第十二款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "6672": {
+   "announced": "2026-10-08",
+   "close": 555.0,
+   "reason": "最近六個營業日累積收盤價漲幅達42.56%。且六個營業日起迄兩個營業日收盤價價差達149.50元﹝第一款﹞。最近三十個營業日起迄兩個營業日之收盤價漲幅達100.72% ﹝第二款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "6708": {
+   "announced": "2026-10-08",
+   "close": 69.2,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達30.89%(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "707746": {
+   "announced": "2026-10-08",
+   "close": 2.87,
+   "reason": "最近六個營業日(含當日)累積之最後成交價跌幅達30.18%(第一款)",
+   "exchange": "unknown",
+   "source": "shioaji_notice"
+  },
+  "7772": {
+   "announced": "2026-10-08",
+   "close": 135.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價跌幅達25.04%且最近六個營業日(含當日)起迄兩個營業日之最後成交價價差達新臺幣49元(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "7892": {
+   "announced": "2026-10-08",
+   "close": 601.16,
+   "reason": "當日交易時間內加權平均成交價振幅達20.06%(第一款)。",
+   "exchange": "OES",
+   "source": "shioaji_notice"
+  },
+  "8021": {
+   "announced": "2026-10-08",
+   "close": 557.0,
+   "reason": "10月08日之本益比為 112.30，且股價淨值比為12.99 。另當日週轉率為 5.94%，且其股價淨值比較該類股股價淨值比四倍以上﹝第六款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "8054": {
+   "announced": "2026-10-08",
+   "close": 81.0,
+   "reason": "最近六個營業日(自當日之前一個營業日起)之借券賣出成交量占總成交量比率達9.66%，當日之前一個營業日借券賣出成交量較最近六十個營業日(自當日之前一個營業日起)之日平均借券賣出成交量放大為4倍(第十二款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "8084": {
+   "announced": "2026-10-08",
+   "close": 14.4,
+   "reason": "最近六個營業日(含當日)累積之最後成交價跌幅達59.14%(第一款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "8086": {
+   "announced": "2026-10-08",
+   "close": 154.0,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達30.91%(第一款)當日之成交量較最近六十個營業日日平均成交量放大6.8倍(第三款)當日週轉率達15.56%(第四款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "8111": {
+   "announced": "2026-10-08",
+   "close": 93.7,
+   "reason": "當日本益比為82.19、股價淨值比為7.4且為其所屬產業類別股價淨值比之2.99倍、當日週轉率達15.65%、元大證券公司當日買進該有價證券之成交金額達4.23億元，且占當日該有價證券之總成交金額26.09%(第六款)最近六個營業日(自當日之前一個營業日起)之當日沖銷成交量占總成交量比率達60.86%，當日之前一個營業",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "8289": {
+   "announced": "2026-10-08",
+   "close": 60.9,
+   "reason": "最近六個營業日(含當日)累積之最後成交價漲幅達28.75%，當日之成交量較最近六十個營業日日平均成交量放大5.24倍(第三款)當日週轉率達7.05%(第四款)",
+   "exchange": "OTC",
+   "source": "shioaji_notice"
+  },
+  "9103": {
+   "announced": "2026-10-08",
+   "close": 5.88,
+   "reason": "公開資訊觀測站公告當日之前一個營業日臺灣存託憑證兩地收盤價溢價82.59 % ﹝第八款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  },
+  "9110": {
+   "announced": "2026-10-08",
+   "close": 3.45,
+   "reason": "公開資訊觀測站公告當日之前一個營業日臺灣存託憑證兩地收盤價溢價55.05 % 且當日收盤價為最近六個營業日收盤價最高者﹝第八款﹞。",
+   "exchange": "TSE",
+   "source": "shioaji_notice"
+  }
+ }
+}
