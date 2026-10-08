@@ -18418,7 +18418,7 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.四十九）。
 
-- [!] **先.四十九-一 前提：10/8 第 1 批真錢結算對帳完成且無 ERROR**〔時間閘：2026-10-08 13:40 結算後〕　〔互動視窗 10/8 00:4x：模式已由總司令切為 LIVE_WITH_VETO；開盤前唯讀自檢 PASS 17／FAIL 0，09:05 should_run＝first_tranche。**本條（升級＋重啟常駐服務＋失敗退回）由互動視窗執行，自走軌道不得代做**；解除條件：10/8 13:40 settle 心跳 OK 且 status 無 last_error。〕
+- [!] **先.四十九-一 前提：10/8 第 1 批真錢結算對帳完成且無 ERROR**〔時間閘：2026-10-08 13:40 結算後〕　〔互動視窗 10/8 00:4x：模式已由總司令切為 LIVE_WITH_VETO；開盤前唯讀自檢 PASS 17／FAIL 0，09:05 should_run＝first_tranche。**本條（升級＋重啟常駐服務＋失敗退回）由互動視窗執行，自走軌道不得代做**；解除條件：10/8 13:40 settle 心跳 OK 且 status 無 last_error。〕　〔2026-10-08 17:2x 核對：前提不成立——10/8 09:05／09:40 兩次 run 皆 ERROR（INSUFFICIENT_CASH，查得可用餘額 0），整批拒單、未送任何委託、13:40 NOTHING_TO_SETTLE；status 紅橫幅。依本條一「否則延後並回報」，升級延後。〕
 - [!] **先.四十九-二 記錄 1.7.4 版本鎖與來源（可一鍵退回）**〔依一〕
 - [!] **先.四十九-三 升級 1.7.7＋模擬環境驗證清單＋--preflight 全 PASS**〔依一〕
 - [!] **先.四十九-四 失敗即退回 1.7.4 並重跑 --preflight**〔依三〕
@@ -18509,5 +18509,5 @@ C. 連線預算補漏（時間閘：10/8 13:40 結算完成後才可動工）
 - [x] **先.五十三-A3 external_points（只存總司令提供讀數）＋重算 k＋誤差 >0.5pp 警告**（互動視窗執行：分身處理中，DevQueue 勿派）〔margin_ratio_calibration.json 新增 external_points（8 點，來源標總司令提供；10/5 為週一交易日照常納入）；k＝0.8815（外部÷同日本站重建值平均），每點誤差 0.00～0.14pp、最大 0.14pp，warn=false（未觸發校準待更新）。〕
 - [x] **先.五十三-A4 股災段標「校準未驗證」＋分段校準預案**（互動視窗執行：分身處理中，DevQueue 勿派）〔股災段 82 筆 ck_status＝「校準未驗證」（crash_verified 皆 false）；external_points 一旦含股災期讀數且誤差 >1pp，build 自動改 mode=segmented 依本站水位（<150／150–175／175–200／≥200）分段 k。App 註記待 A2。〕
 - [x] **先.五十三-B5 DevQueue 只剩時間閘／BLOCKED 時記 GATED、不觸發 STALLED_3H＋selftest**〔dev_queue_runner：無 - [ ] 但有 - [!] → exit 6；wrapper（C:\alpha\run-dev-queue-cycle.ps1，repo 外）6→GATED；update_claude_launcher_heartbeat NO_ATTEMPT 加 GATED；check_local_schedule_heartbeat：GATED／QUEUE_EMPTY／BLOCKED_BY_RULE 且 last_checked_at 新鮮→不判 STALLED_3H（真停擺 last_checked_at 也過期照報）。selftest_claude_auth_detection 新增 5 案全 PASS。〕
-- [!] **先.五十三-C6 SHIOAJI_LOGIN_SCRIPTS 查證 alpha_live_server 是否登入＋preflight**〔時間閘：2026-10-08 13:40 結算完成後〕
+- [x] **先.五十三-C6 SHIOAJI_LOGIN_SCRIPTS 查證 alpha_live_server 是否登入＋preflight**〔時間閘：2026-10-08 13:40 結算完成後〕〔查證：alpha_live_server.py 不自行登入 Shioaji（帳戶查詢經 UDP 交給 shioaji_quotes.py 代查；import auto_rebalance_bb90 只用 cancel_pending／live_account_summary），依「有登入才計入」不加入清單，程式註解記錄查證結果。preflight（唯讀）PASS 18／FAIL 0；selftest 220 PASS；冒煙全部通過。〕
 - [!] **先.五十三-7 smoke＋selftest＋commit 回報**〔時間閘：A2 解除＋C6（10/8 13:40 後）完成後做最終一次〕　〔DevQueue 20261008-080102 期中跑一次 [自行裁量]：冒煙 node scripts/smoke_test.mjs 兩次皆 exit=0、全部通過（第 42 項這次抽驗 25 檔未抽到 4804；4804 在 quotes_tw／quotes_all_tw 仍無資料，A2 阻塞未解除，維持互動視窗持有）；scripts/selftest_*.py 12 支，修補前 selftest_claude_auth_launchers「10/3事故重演：持續節流但39小時無實際執行→仍告警」FAIL——根因是 B5 把 BLOCKED_BY_RULE（節流跳過）列進 check_local_schedule_heartbeat.QUIET_REASONS，等於讓 10/3 事故不再告警；純 bug 修復：QUIET_REASONS 只留 GATED／QUEUE_EMPTY（[自行裁量] 保留 QUEUE_EMPTY：佇列真空屬白名單第 7 條正常停止，且 B5 新增案不受影響），修後 12 支全 exit=0（detection 25 項、launchers 22 項全 PASS）。不標 [x] 的理由：本項是先.五十三全批的收尾，A2／C6 尚未完成，最終 smoke＋selftest＋回報要等兩者做完再跑。〕

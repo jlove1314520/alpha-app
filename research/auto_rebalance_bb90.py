@@ -1515,6 +1515,8 @@ def _task_states(names) -> dict:
 
 
 SHIOAJI_LOGIN_SCRIPTS = ("shioaji_quotes.py", "shioaji_order_server.py", "auto_rebalance_bb90.py")
+# 先.五十三-C6（2026-10-08 查證）：alpha_live_server.py 不自行登入 Shioaji——帳戶查詢經 UDP 交給 shioaji_quotes.py
+# 常駐行程代查，import 本模組只用 cancel_pending／live_account_summary（不登入），所以不列入；若日後改成自行登入須加回。
 
 
 def _shioaji_procs() -> list[str]:
