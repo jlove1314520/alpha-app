@@ -493,16 +493,17 @@
     "date": "2026-10-09",
     "margin_money_date": "2026-10-08",
     "numerator_margin_date": "2026-10-08",
-    "numerator_close_date": "2026-10-07",
-    "numerator_close_source": "STOCK_DAY_ALL",
+    "numerator_close_date": "2026-10-08",
+    "numerator_close_source": "price_history.json",
     "definition_note": "本站算法：上市（TWSE）全部可融資證券（含 ETF）融資餘額×當日收盤÷信用交易統計融資金額；與籌碼K等外部數值約差 0.88 倍、原因未查明，見 research/MARGIN_RATIO_RECONCILE.md",
-    "collateral_value": 1280507757450,
+    "collateral_value": 1273793616310,
     "margin_money": 646405767000,
-    "matched_stocks": 1226,
-    "ratio_pct": null,
-    "data_incomplete": true,
-    "incomplete_reason": "分子收盤價日期（2026-10-07）與分母融資日期（2026-10-08）不同，不相除",
-    "generated_at": "2026-10-09T00:29:05.334854+08:00",
-    "source": "分子=TWSE官方www.twse.com.tw/rwd MI_MARGN 融資融券彙總(逐股融資今日餘額，與分母同一天同一回應)×同日收盤價（STOCK_DAY_ALL；日期不同改用price_history.json同日收盤）加總；分母=同一回應信用交易統計「融資金額(仟元)」今日餘額×1000（2026-10-07 先.四十三-三 起分子分母強制同一天）"
+    "matched_stocks": 1225,
+    "ratio_pct": 197.06,
+    "data_incomplete": false,
+    "incomplete_reason": null,
+    "generated_at": "2026-10-09T01:38:49.622950+08:00",
+    "source": "分子=TWSE官方www.twse.com.tw/rwd MI_MARGN 融資融券彙總(逐股融資今日餘額，與分母同一天同一回應)×同日收盤價（STOCK_DAY_ALL；日期不同改用price_history.json同日收盤）加總；分母=同一回應信用交易統計「融資金額(仟元)」今日餘額×1000（2026-10-07 先.四十三-三 起分子分母強制同一天）",
+    "ratio_pct_ck": 173.7
   }
 ]
