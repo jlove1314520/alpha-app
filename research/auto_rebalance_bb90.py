@@ -702,8 +702,9 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
         cash -= payable
         _cash_crosscheck(paths, broker, cash, now)
         if cash < need:
-            reason = (f"INSUFFICIENT_CASH:可用餘額{cash:.0f}（已扣未交割款{payable:.0f}）不足整批所需{need:.0f}"
-                      f"（含{(CASH_BUFFER - 1) * 100:.1f}%手續費緩衝）")
+            # 先.五十四-6 更正 2：紅條與推播文字（可用＝餘額−未交割應付，所需含 0.3% 緩衝；擋單規則不變）
+            reason = (f"INSUFFICIENT_CASH:永豐交割戶可用餘額 {cash:,.0f} 元，不足本批所需 {need:,.0f} 元（尚未入金或餘額不足）。"
+                      f"入金永豐交割戶後，下一個交易日 09:05 自動重跑本批，不需任何操作")
     except Exception as e:
         reason = f"INSUFFICIENT_CASH:餘額查詢失敗（{type(e).__name__}），整批不送單"
     if reason:
@@ -1584,6 +1585,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
         add("env", "本機 .env 金鑰齊全（只檢查有無）", "FAIL", f"讀取失敗（{type(e).__name__}）")
     # 2–3 永豐正式環境唯讀
     api = None
+    q_vals = {}
     try:
         if broker_factory:
             api = broker_factory()
@@ -1627,6 +1629,8 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
                 try:
                     v = _timed(fn)
                     bad = v is None or bool(getattr(v, "errmsg", ""))
+                    if not bad:
+                        q_vals[iid] = v
                     add(iid, name, "FAIL" if bad else "PASS", "查詢失敗（回傳空或帶錯誤訊息）" if bad else "查詢成功（金額不顯示）")
                 except Exception as e:
                     add(iid, name, "FAIL", f"查詢失敗（{type(e).__name__}）")
@@ -1648,6 +1652,27 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
                 api.logout()
             except Exception as e:
                 print(f"[warn] 自檢登出失敗：{type(e).__name__}", flush=True)
+    # 先.五十四-6 更正 3：第 19 項「可用餘額足夠下一批」——可用＝acc_balance − 未交割應付，所需＝下一批預算×1.003。
+    # 只顯示結果文字，不顯示金額；不足即 FAIL，不得改用其他數字放行。
+    try:
+        bal = q_vals.get("q_balance")
+        if bal is None or q_vals.get("q_settlements") is None:
+            add("cash_ready", "可用餘額足夠下一批（金額不顯示）", "FAIL", "餘額或未交割款查詢未成功，無法判斷")
+        else:
+            acc = _num(getattr(bal, "acc_balance", None))
+            pay = sum((abs(_num(getattr(r, "amount", 0))) for r in q_vals["q_settlements"]), 0.0)
+            lst = _read_json(paths.scoped("LIVE").state) or {}
+            tt = max(1, int(cfg.get("tranche_total") or 4))
+            n = int(lst.get("next_tranche") or cfg.get("tranche") or 1)
+            budget = (_num(cfg.get("total_capital_twd")) / tt) if n <= tt else _num(cfg.get("monthly_contribution_twd"))
+            ok = budget > 0 and (acc - pay) >= budget * CASH_BUFFER
+            det = "足夠" if ok else "尚未入金或餘額不足"
+            if not ok and acc == 0 and not getattr(bal, "errmsg", ""):
+                # 原文：同日推播紀錄顯示已入金卻仍為 0 才改寫警告；入金登記方案已撤回、目前無「已入金」訊號，僅附註
+                det += "（餘額查詢回 0；若確定已入金仍為 0，疑似資金管理帳戶不在 account_balance 支援範圍，永豐群組 #83761 #83848，請通知 Cowork）"
+            add("cash_ready", "可用餘額足夠下一批（金額不顯示）", "PASS" if ok else "FAIL", det)
+    except Exception as e:
+        add("cash_ready", "可用餘額足夠下一批（金額不顯示）", "FAIL", f"判斷失敗（{type(e).__name__}）")
     # 4 推播訂閱
     try:
         import web_push

@@ -784,6 +784,8 @@ check("公開心跳：安裝時間檔格式錯就不寫該欄位", "installed_at
 class _ApiCA(_Api):
     def __init__(self, exp="2027-06-30", ok=True):
         super().__init__(); self.stock_account.signed = True; self._exp = exp; self._ok = ok; self.ca_calls = 0
+    def account_balance(self):
+        return type("B", (), {"errmsg": "", "acc_balance": 10_000_000.0})()
     def activate_ca(self, ca_path, ca_passwd, person_id=None):
         self.ca_calls += 1; return self._ok
     def get_ca_expiretime(self, person_id): return self._exp
@@ -932,6 +934,30 @@ check("推播節流：隔一個交易日同原因會再推播一次", len([c for
 _hb = (p.base / "heartbeat.jsonl").read_text(encoding="utf-8")
 check("心跳檔（repo 追蹤檔）不含金額：數字一律遮蔽", "INSUFFICIENT_CASH" in _hb and not any(ch.isdigit() for l in _hb.splitlines() for ch in json.loads(l)["item"]))
 check("_redact_numbers：股數、金額、小數一律遮蔽", A._redact_numbers("對帳不符：預期{'0050': 3000}≠券商 1,449.5") == "對帳不符：預期{'#': #}≠券商 #")
+
+# ---- 先.五十四-6 更正：現金不足文字、自檢第 19 項 ----
+p = setup({"mode": "LIVE", "total_capital_twd": 4_000_000})
+r = run(p, Fake(cash=0))
+_le = json.loads(p.status.read_text(encoding="utf-8")).get("last_error", "")
+check("現金不足文字：永豐交割戶可用餘額 X 元，不足本批所需 Y 元（尚未入金或餘額不足）…不需任何操作",
+      _le.startswith("INSUFFICIENT_CASH:永豐交割戶可用餘額 0 元，不足本批所需") and "尚未入金或餘額不足" in _le and "09:05 自動重跑本批，不需任何操作" in _le and "中國信託" not in _le)
+class _ApiCash(_ApiCA):
+    def __init__(self, bal, pay=0.0):
+        super().__init__(); self._bal = bal; self._pay = pay
+    def account_balance(self):
+        return type("B", (), {"errmsg": "", "acc_balance": self._bal})()
+    def settlements(self, a):
+        return [type("S", (), {"amount": -self._pay})()] if self._pay else []
+_cfg19 = {"mode": "LIVE_WITH_VETO", "total_capital_twd": 4_000_000, "tranche_total": 4}
+def _cr(bal, pay=0.0):
+    p = setup(_cfg19)
+    return {i["id"]: i for i in A.preflight(p, NOW, broker_factory=lambda: _ApiCash(bal, pay), task_states=_tasks, env=_env)["items"]}["cash_ready"]
+check("自檢第 19 項：可用（餘額−未交割）≥ 下一批×1.003 → PASS", _cr(1_010_000)["result"] == "PASS")
+c = _cr(1_010_000, pay=20_000)
+check("自檢第 19 項：扣掉未交割應付後不足 → FAIL「尚未入金或餘額不足」", c["result"] == "FAIL" and c["detail"].startswith("尚未入金或餘額不足"))
+c = _cr(0)
+check("自檢第 19 項：餘額 0 → FAIL 並附註可能不在 account_balance 支援範圍、不顯示金額",
+      c["result"] == "FAIL" and "#83761" in c["detail"] and "1,010,000" not in c["detail"] and "元" not in c["detail"])
 
 if SKIPS:
     print("SKIP：", SKIPS)
