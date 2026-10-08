@@ -635,3 +635,6 @@
 {"ts": "2026-10-08T06:10:00+08:00", "track": "marathon", "round": "20261008-060500-marathon", "item": "盤點：PENDING_QUEUE 無 `- [ ]`，26 項 `- [!]` 皆為時間閘(10/8 13:40)/需總司令/資料累積；凍結.二仍有效不補 alpha 試驗，本輪無新工作單位", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl"], "note": "工作目錄有 data/audit_report.json 合併衝突(UU)，非本輪造成，未碰"}
 {"ts": "2026-10-08T07:51:57+08:00", "track": "interactive", "round": "先.五十三", "item": "先.五十三-B5", "status": "DONE"}
 {"ts": "2026-10-08T07:53:35+08:00", "track": "interactive", "round": "先.五十三", "item": "先.五十三-A1/A3/A4（A2 BLOCKED）", "status": "DONE"}
+{"ts": "2026-10-08T09:05:12+08:00", "track": "auto_trading", "round": "auto_rebalance", "item": "INSUFFICIENT_CASH:可用餘額0（已扣未交割款0）不足整批所需2394（含0.3%手續費緩衝）", "status": "ERROR"}
+{"ts": "2026-10-08T09:40:07+08:00", "track": "auto_trading", "round": "auto_rebalance", "item": "INSUFFICIENT_CASH:可用餘額0（已扣未交割款0）不足整批所需2394（含0.3%手續費緩衝）", "status": "ERROR"}
+{"ts": "2026-10-08T12:06:00+08:00", "track": "hypothesis_queue", "round": "heartbeat", "item": "hypothesis_queue 心跳模式，#82 暫停，未開新軸（無- [ ]交辦項；[!]時間閘項目13:40前未到期）", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl", "research/MARATHON_LOG.md"]}
