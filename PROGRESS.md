@@ -1,3 +1,18 @@
+## 2026-10-08 18:31～19:1x（DevQueue 自走 cycle 20261008-183102，開發帽）
+
+等待總司令審閱：16 件（本輪 +1：先.五十一-4 的 4804 停止交易裁示；清單見 `research/AWAITING_REVIEW.md`）。
+
+- **先.五十一-3 處置／注意股** ✅（40dbac39e）：新增 `scripts/build_disposal_flags.py`，每日 18:30 排程 `AlphaDisposalFlags`（已註冊，下次 10/9 18:30）寫 `data/disposal_flags.json`。主來源 Shioaji `api.punish()`／`api.notice()` 各 1 次；登入前先掛事件回呼，只印 event_code（預設處理器會印出含身分證的原始訊息，已實測確認日誌 0 筆）。上櫃最新公布日比上市落後超過 1 個交易日（或上櫃沒資料）時，用櫃買 OpenAPI 補 Shioaji 缺的代號；Shioaji 失敗時改用 TWSE／TPEx 官方端點備援。App：個股頁標題下紅標（處置股／即將處置／注意股），AI 選股三榜排行排除處置期間內個股並寫明排除幾檔、前 30 名被排除的是誰。
+  - 證據：實跑 18:34 寫入處置 38／注意 49；launcher 端到端再跑一次「內容不變不覆蓋、不 commit」；四個備援端點實打皆正常；`selftest_disposal_flags` 21 PASS；Playwright：1709 顯示「處置股 10/08–10/15 · 每2分鐘撮合」、3147「注意股 10/08公布」、2330 無標，價值成長榜第 22 名 3167 被排除並註明，0 page error；冒煙 exit=0 全過。
+  - `[自行裁量]`：注意股標示只限公布後 5 天內；「即將處置」只標不排除；TPEx 交叉補只補缺、不覆蓋 Shioaji 已有的。
+  - ⚠ 觀察：18:31 時 Shioaji punish 還沒有 10/08 當天的公告（上市上櫃都停在 10/07），18:30 排程多半抓到前一天的公告；處置通常隔一兩個交易日才開始，所以還來得及標示。
+- **停擺自檢登記**（29737a4fb）：`AlphaDisposalFlags` 加進 `data/seed/pipeline_registry.json`，看 launcher 日誌 mtime（資料檔內容不變時刻意不重寫，不能看 generated_at）。
+  - **事故如實記錄**：第一次寫入時，我的修補腳本先開檔（截斷）才做格式檢查，檢查失敗導致工作目錄的 `pipeline_registry.json`（含排程未 commit 的 fault_history）被清空約 5 分鐘。已還原：從 git 物件庫找回 18:21 被暫存過的版本（blob 84626fb，故障帳 264 筆），再依 `research/external_connectivity.jsonl` 補回 18:32 那一輪四個節點（Sparklines／MarketTW／Fundamentals／PriceHistory）轉為 stalled 的邊緣事件（同一套計數邏輯、同一個時間戳），還原後 268 筆，`git diff` 規模與事故前相同（51+／42−）。commit 只含新條目，不夾帶機器的故障帳變動。殘餘風險：18:21～18:32 之間若有其他欄位變動無從找回（jsonl 顯示該區間沒有新的故障轉換）。
+- **先.五十一-4 阻塞根因更新**（ae6ea978c）：4804 大略-KY 不是「報價還沒到」——櫃買 `tpex_cmode` 10/08 標它**停止交易**，Shioaji 也沒有它的合約。原解除條件「4804 有報價」在停止交易期間不會自然成立，需總司令裁示（已列入 AWAITING_REVIEW，方案 a／b 見該表）。先.五十三-A2 同一原因。
+- **先.五十一-7 期中跑**（改標 `- [!]`）：冒煙 exit=0 全過；selftest simtrade 10／feed_gap 12／est_amount 7／restart 7／disposal_flags 21／tick_stream 18，全部 PASS。最終一次要等 -4 解除。
+- **`- [!]` 檢查**：先.四十九-一 前提不成立（10/8 兩次 run 皆 INSUFFICIENT_CASH，互動視窗持有）；先.五十-5 當日 NOTHING_TO_SETTLE、無零股成交可驗證；其餘仍需總司令／資料累積／互動視窗持有。
+- **佇列深度**：收工時 `- [ ]`=0，未補件：凍結.二仍有效、常備 backlog 為空、本輪找到的工具類工作（停擺自檢登記）已直接做完。
+
 ## 2026-10-08 17:46～18:3x（DevQueue 自走 cycle 20261008-174601，開發帽）
 
 等待總司令審閱：15 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
