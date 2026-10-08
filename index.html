@@ -7002,6 +7002,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function renderLiveStatus(){
     let txt,color;
     if(!LIVE.configured){txt='離線（未設定即時伺服器），顯示最後收盤 '+lastCloseLabel();color='var(--ink-3)'}
+    // 2026-10-08 先.五十一-2：Shioaji 行情連線中斷（event_code 1）到重連補完 1 分K 之前
+    else if(LIVE.connected&&LIVE.feedGap){
+      const gs=LIVE.feedGap.gap_start?String(LIVE.feedGap.gap_start).slice(11,16):'';
+      txt='⚠ 行情中斷，補資料中'+(gs?'（自 '+gs+'）':'');color='var(--warn)';
+    }
     else if(LIVE.connected){txt='● 即時連線中（本機伺服器・'+(LIVE.sourceMode==='tick-push-memory'?'逐筆推送':(LIVE.sourceMode==='hot-file'?'熱檔秒級':'冷檔'))+(LIVE.streamMode?'・'+LIVE.streamMode:'')+'）';color='#1aa876'}
     // 2026-09-08（自動連線二.1）重連過程不得靜默：正在重試就明講第幾次。
     else if(LIVE.retryCount>0){
@@ -7126,6 +7131,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(ev.sinopac&&ev.sinopac.quotes){INTRADAY_SINOPAC=ev.sinopac;LIVE.sinopacAt=Date.now();LIVE.sourceMode=ev.sinopac.source_mode||null}
     if(ev.ibkr&&ev.ibkr.quotes){INTRADAY_IBKR=ev.ibkr;LIVE.ibkrAt=Date.now()}
     LIVE.kbarsLast=ev.kbars_last||{};LIVE.lastEventAt=Date.now();LIVE.streamMode=ev.mode||null;
+    LIVE.feedGap=(ev.feed_gap&&ev.feed_gap.in_gap)?ev.feed_gap:null;  // 2026-10-08 先.五十一-2
   }
   async function rerenderAfterLive(){
     try{
@@ -8109,7 +8115,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-08.1757';
+  const APP_VERSION='2026-10-08.1807';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -118,6 +118,25 @@ TOKEN_PATH = Path(__file__).parent / ".alpha_live_token"  # gitignored，見.git
 # 熱檔（shioaji_quotes.py常駐行程每秒最多寫一次，gitignored）。環境變數可覆寫，
 # 給測試指到暫存檔用，避免測試把假資料寫進正式熱檔。
 LIVE_STATE_PATH = Path(os.environ.get("ALPHA_LIVE_STATE_PATH") or (Path(__file__).parent / ".live_state_sinopac.json"))
+# 2026-10-08 先.五十一-2：shioaji_quotes.py 寫的行情事件缺口狀態（gitignored），併進快照給 App 顯示
+FEED_GAP_PATH = Path(os.environ.get("ALPHA_FEED_GAP_PATH") or (Path(__file__).parent / ".live_feed_gap_sinopac.json"))
+
+
+def _feed_gap_state() -> dict | None:
+    """讀缺口狀態檔。只回報「今天（台北）」且 in_gap 的狀態；讀不到、格式不對、
+    不是今天一律回 None（fail open：寧可不顯示中斷，也不讓壞檔卡住整個快照）。"""
+    try:
+        doc = _read_json_safe(FEED_GAP_PATH)
+        if not isinstance(doc, dict) or not doc.get("in_gap"):
+            return None
+        mtime = datetime.fromtimestamp(FEED_GAP_PATH.stat().st_mtime, TW_TZ)
+        if mtime.date() != datetime.now(TW_TZ).date():
+            return None
+        return {"in_gap": True, "gap_start": doc.get("gap_start"), "gap_end": doc.get("gap_end"),
+                "filling": bool(doc.get("filling"))}
+    except Exception as e:  # noqa: BLE001
+        print(f"[feed_gap] 讀取失敗（fail open）：{type(e).__name__}", flush=True)
+        return None
 HOT_STATE_MAX_AGE_SEC = 120  # 熱檔超過這麼久沒更新就視為「常駐行程沒在跑」，退回冷檔
 
 SERVER_PORT = 8001
@@ -686,6 +705,7 @@ def _combined_snapshot() -> dict:
         "kbars_mode": KBARS_MODE,
         "hot_file_status": hot_status,
         "mem_fresh": MEM.fresh(),
+        "feed_gap": _feed_gap_state(),  # 2026-10-08 先.五十一-2：None＝無中斷
     }
 
 

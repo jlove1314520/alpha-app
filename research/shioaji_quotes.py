@@ -522,6 +522,75 @@ def _seed_all_baselines(codes: list[str], reason: str) -> None:
           + (f"；未補到：{'; '.join(msgs[:4])}" if msgs else ""), flush=True)
 
 
+def _write_feed_gap(doc: dict) -> None:
+    """寫缺口狀態檔（原子替換）。失敗只記 log，不影響串流。"""
+    try:
+        tmp = FEED_GAP_PATH.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+        # Windows 上讀取方（alpha_live_server.py）剛好開著檔案時 rename 會被拒，比照熱檔重試
+        for i in range(10):
+            try:
+                tmp.replace(FEED_GAP_PATH)
+                return
+            except PermissionError:
+                time.sleep(0.05)
+        print("  [行情缺口] 狀態檔寫入重試 10 次仍被占用（不影響串流）", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"  [行情缺口] 狀態檔寫入失敗（不影響串流）：{type(e).__name__}", flush=True)
+
+
+def _make_event_handler(codes_fn, fill_fn=None, now_fn=None):
+    """Shioaji 連線事件回呼（簽章 resp_code, event_code, info, event）。
+
+    只用 event_code 與當下時間：1＝連線中斷（缺口起點），13＝重連完成（缺口終點），
+    13 之後在背景執行緒以 kbars 預算內逐檔補當日 1 分K（seed_kbars 只補缺的分鐘，
+    不覆蓋 tick 聚合出來的棒）。**info／event 原始字串一律不印、不存**——
+    Shioaji 事件訊息可能含身分證字號（2026-10-07 身分證外洩事件同一來源）。
+    回呼內任何例外只記一行警告，不得讓 Shioaji 事件執行緒中斷（CLAUDE.md 第十二節）。"""
+    now_fn = now_fn or (lambda: datetime.now(TW_TZ))
+    fill_fn = fill_fn or _seed_all_baselines
+    gap = {"start": None}
+
+    def _fill(start_iso, end_iso):
+        try:
+            codes = list(codes_fn())
+            _seed_all_baselines_paced(codes, f"重連補缺口 {start_iso or '起點不明'}～{end_iso}", fill_fn)
+            _write_feed_gap({"in_gap": False, "gap_start": start_iso, "gap_end": end_iso,
+                             "filled_at": now_fn().isoformat(), "filled_codes": len(codes)})
+        except Exception as e:  # noqa: BLE001
+            print(f"  [行情缺口] 補資料失敗：{type(e).__name__}", flush=True)
+            _write_feed_gap({"in_gap": False, "gap_start": start_iso, "gap_end": end_iso,
+                             "filled_at": None, "fill_error": type(e).__name__})
+
+    def handler(resp_code, event_code, info=None, event=None):
+        try:
+            code = int(event_code)
+            now_iso = now_fn().isoformat(timespec="seconds")
+            print(f"  [行情事件] event_code={code} 時間={now_iso}", flush=True)
+            if code == 1:
+                gap["start"] = now_iso
+                _write_feed_gap({"in_gap": True, "gap_start": now_iso, "gap_end": None})
+            elif code == 13:
+                start = gap["start"]
+                gap["start"] = None
+                _write_feed_gap({"in_gap": True, "gap_start": start, "gap_end": now_iso, "filling": True})
+                threading.Thread(target=_fill, args=(start, now_iso), daemon=True).start()
+        except Exception as e:  # noqa: BLE001
+            print(f"  [行情事件] 處理失敗（fail open）：{type(e).__name__}", flush=True)
+
+    return handler
+
+
+def _seed_all_baselines_paced(codes: list[str], reason: str, fill_fn=None) -> None:
+    """補缺口用：逐檔呼叫並間隔 FEED_GAP_FILL_PACE_SEC，避免一次衝撞 10 秒 40 次上限。
+    額度用完由 _kbars_budget_take() 硬性拒絕（不排隊、不重試）。"""
+    fill_fn = fill_fn or _seed_all_baselines
+    for i, code in enumerate(codes):
+        if i:
+            time.sleep(FEED_GAP_FILL_PACE_SEC)
+        fill_fn([code], reason)
+
+
 def _read_dynamic_watchlist() -> list[str]:
     """讀 App 推過來的自選股清單。讀不到就回空清單（代表只用預設），不拋例外——
     這支是常駐行程，任何一次讀檔失敗都不能讓串流整個停掉。"""
@@ -611,6 +680,12 @@ TRADING_WINDOW_POLL_SEC = 30  # 常駐迴圈裡多久檢查一次「是否還在
 # （真正把兩個行程合併成一個、tick回呼直接餵SSE，使用者已裁示排進佇列稍後做）。
 LIVE_STATE_PATH = Path(__file__).parent / ".live_state_sinopac.json"
 LIVE_STATE_MIN_INTERVAL_SEC = 1.0  # 熱檔最多每秒寫一次：tick一秒可能好幾筆，寫檔不必跟著每筆寫
+
+# 2026-10-08 先.五十一-2：行情連線事件缺口狀態（gitignored 本機檔，alpha_live_server.py 讀它
+# 併進快照給 App 顯示「行情中斷，補資料中」）。只存 event_code／時間／補資料結果，
+# **不存、不印 Shioaji 事件原始訊息**（info／event 字串可能含身分證字號）。
+FEED_GAP_PATH = Path(__file__).parent / ".live_feed_gap_sinopac.json"
+FEED_GAP_FILL_PACE_SEC = 0.3  # 補缺口逐檔間隔：約 33 次/10 秒，低於自訂 40 次/10 秒（官方 50）
 
 # 2026-09-04（總司令裁示零.2「真逐筆推送」）：每收到一筆tick，除了更新記憶體/熱檔，
 # 立刻把該檔最新報價＋當前1分K用一個UDP datagram送到本機loopback的
@@ -1480,6 +1555,12 @@ def run_stream_daemon() -> None:
         api.set_on_bidask_fop_v1_callback(on_bidask_fop)
         api.set_on_quote_idx_v1_callback(on_quote_idx)
 
+        # 2026-10-08 先.五十一-2：連線事件缺口偵測與補 kbars（啟動先清掉上一個行程殘留的缺口狀態，
+        # 避免行程中途死掉時「中斷中」永遠解除不了）
+        _write_feed_gap({"in_gap": False, "gap_start": None, "gap_end": None, "reset_at": datetime.now(TW_TZ).isoformat()})
+        _gap_codes = {"dyn": set()}
+        api.set_event_callback(_make_event_handler(lambda: list(DEFAULT_TW_WATCHLIST) + sorted(_gap_codes["dyn"])))
+
         _start_query_service(api, state)  # 2026-09-06（實測.二.1）+2026-09-15（週六.五）同一條連線上的 kbars/positions/balance 查詢服務
 
         # 2026-09-06（實測.二.補.2）啟動時先把當日已經走過的 1 分K 補成基底。
@@ -1494,6 +1575,7 @@ def run_stream_daemon() -> None:
         # 預設清單，它們不會被動態邏輯退訂（那是保底，App 沒連線時也要有東西看）。
         fixed_stock_codes = set(DEFAULT_TW_WATCHLIST)
         dynamic_subscribed: set[str] = set()
+        _gap_codes["dyn"] = dynamic_subscribed  # 缺口補資料也涵蓋動態訂閱的自選股
         elapsed_since_dynamic_check = 0.0
 
         elapsed_since_window_check = 0.0
@@ -1563,6 +1645,7 @@ def run_stream_daemon() -> None:
         # 2026-09-07（資料一.1）不論是正常收盤、例外中斷還是Ctrl+C，都把緩衝裡剩下的
         # tick寫進jsonl再走。緩衝只在記憶體，行程一沒就永久消失，而tick是不可重來的。
         _flush_ticks()
+        _write_feed_gap({"in_gap": False, "gap_start": None, "gap_end": None, "reset_at": datetime.now(TW_TZ).isoformat()})
         try:
             api.logout()
         except Exception:

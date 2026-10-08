@@ -46,6 +46,8 @@ research/.devqueue_dirty_seen.json
 # 2026-09-03深夜：shioaji_quotes.py常駐行程寫的本機熱檔（秒級快照+當日1分K），只給alpha_live_server.py讀，永遠不commit
 research/.live_state_sinopac.json
 research/.live_state_sinopac.json.tmp
+research/.live_feed_gap_sinopac.json
+research/.live_feed_gap_sinopac.json.tmp
 *.parquet
 *.db
 fred_key.txt
