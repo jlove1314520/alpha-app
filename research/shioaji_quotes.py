@@ -1040,6 +1040,16 @@ def _make_tick_stk_handler(state: TickState, key: str, label: str | None):
             pct_chg = _to_float(getattr(tick, "pct_chg", None))
             price_chg = _to_float(getattr(tick, "price_chg", None))
             prev_close = (last - price_chg) if (last is not None and price_chg is not None) else None
+            if getattr(tick, "simtrade", False):
+                # 2026-10-08 先.五十一-1：試撮（08:30–09:00、13:25–13:30）不是真成交，
+                # 不寫 last／change_pct、不進 1 分K 走勢與量、不落地，只寫獨立欄位給 App 灰字顯示。
+                state.update(key, {
+                    "sim_price": last,
+                    "sim_at": tick.datetime.isoformat() if getattr(tick, "datetime", None) else None,
+                })
+                state.push_tick(key)
+                state.maybe_write_live_state()
+                return
             patch = {
                 "last": last,
                 "close": prev_close,

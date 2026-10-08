@@ -941,7 +941,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <button class="back" onclick="go('home')">‹ 返回</button>
     <div class="stock-head">
       <div class="l"><b id="sh-name">—</b><span id="sh-sub">—</span></div>
-      <div class="r"><b id="sh-price">—</b><div id="sh-chg">—</div></div>
+      <div class="r"><b id="sh-price">—</b><div id="sh-chg">—</div><div id="sh-sim" class="note" style="color:var(--ink-3)" hidden></div></div>
     </div>
 
     <div class="tabbar2" id="stock-tabs">
@@ -1943,6 +1943,23 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       ageMin:age, source:'sinopac', dataType:q.data_type,
       isTodayClose:!live&&dataIsToday,
     };
+  }
+  // 2026-10-08 先.五十一-1：試撮價（shioaji_quotes.py 把 tick.simtrade 寫進 sim_price／sim_at，
+  // 不動 last）。只在 08:30–09:00、13:25–13:30（台北）且 sim_at 是今天時回傳「試撮 xxx」，其餘回空字串。
+  function simTradeText(code){
+    try{
+      const q=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes[code];
+      if(!q||q.sim_price==null||!q.sim_at)return '';
+      const z=zonedNow('Asia/Taipei');const m=z.h*60+z.mi;
+      const inWin=z.wd>=1&&z.wd<=5&&((m>=8*60+30&&m<9*60)||(m>=13*60+25&&m<13*60+30));
+      if(!inWin||!_isSameLocalDate(q.sim_at,'Asia/Taipei'))return '';
+      return '試撮 '+nf(q.sim_price);
+    }catch(e){console.warn('[simTradeText]',e);recordGlobalError('simTradeText',e);return ''}
+  }
+  function updateStockSimTag(code){
+    const el=document.getElementById('sh-sim');if(!el)return;
+    const t=(code&&!isUS(code))?simTradeText(code):'';
+    el.textContent=t;el.hidden=!t;
   }
   // ── 2026-09-06（P0 稽核.一）全 App 唯一的「現價」真值來源 ──────────────────
   // 背景：總司令實測「光聖 6442 現價 1755、建議進場價 32」。根因是 renderReport()
@@ -3062,7 +3079,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       // data-flash-code/data-flash-value：給盤中快速輪詢(fastPollTick())用來判斷
       // 「這次重繪後的價格」跟「上次輪詢看到的價格」是否不同，不同才閃爍，見
       // flashPriceEls()。這裡只是標記資料，平常渲染不受影響。
-      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}"${priceIsStale?' style="font-size:.85em"':''}>${priceLabel}</b>${pctTagHtml}</div>`;
+      rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${meta}</span>${limitBadge(limSt)}</div>${sp}<div class="px${limSt?' at-limit '+(limSt==='up'?'lu':'ld'):''}"><b data-flash-code="${code}" data-flash-value="${price}"${priceIsStale?' style="font-size:.85em"':''}>${priceLabel}</b>${pctTagHtml}${(!us&&simTradeText(code))?`<div class="note" style="color:var(--ink-3)">${simTradeText(code)}</div>`:''}</div>`;
       if(extHtml)rowEl.insertAdjacentHTML('beforeend',extHtml);
       if(earningsHtml)rowEl.insertAdjacentHTML('beforeend',earningsHtml);
       // 2026-09-04 P0產品.一：可展開的來源說明（預設收合；smoke test仍能在DOM裡讀到「今日收盤」「即時(tick)」等字樣）
@@ -4754,7 +4771,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.querySelectorAll('#stock-tabs button').forEach((x,i)=>x.classList.toggle('on',i===0));
     document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
     document.getElementById('sub-ov').classList.add('active');
-    setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');
+    setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');updateStockSimTag(code);
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
     document.getElementById('rev-chart-amt').innerHTML=skeletonBlockHtml(120);
     document.getElementById('rev-chart-yoy').innerHTML='';document.getElementById('rev-chart-labels').innerHTML='';
@@ -7374,6 +7391,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const pe=document.getElementById('sh-price');if(pe){pe.textContent=(us?'$':'')+nf(iq.price);pe.className=cls}
       const ce=document.getElementById('sh-chg');if(ce){ce.textContent=`${(iq.change||0)>=0?'+':''}${(+(iq.change||0)).toFixed(us?2:1)}（${(iq.change_pct||0)>=0?'+':''}${(iq.change_pct||0).toFixed(2)}%）`;ce.className=cls}
     }
+    updateStockSimTag(code);
     const bar=LIVE.kbarsLast[code];
     if(!bar||STOCK_CHART.code!==code)return;
     const tg=document.getElementById('trend-mode-toggle');
@@ -8091,7 +8109,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-08.1753';
+  const APP_VERSION='2026-10-08.1757';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
