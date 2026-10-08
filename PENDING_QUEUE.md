@@ -18464,7 +18464,14 @@ push 後停下等 Cowork 核對。
 
 心跳位置：每項做完於本檔標 `- [x]`；互動視窗往 research/PROGRESS_HEARTBEAT.jsonl append（track=interactive, round=先.五十一）。
 
-- [!] **先.五十一 全條（試撮分流、事件缺口補 kbars、處置／注意股、排行榜、預估成交金額、faulthandler 自動重啟）**〔時間閘：2026-10-08 13:40 結算完成後；不得碰自動交易引擎與交易模式〕
+- [x] **先.五十一 全條（試撮分流、事件缺口補 kbars、處置／注意股、排行榜、預估成交金額、faulthandler 自動重啟）**〔時間閘：2026-10-08 13:40 結算完成後；不得碰自動交易引擎與交易模式〕〔DevQueue 20261008-174601：時間閘已過（10/8 13:40 settle 已跑，NOTHING_TO_SETTLE），本條未標互動視窗專屬，[自行裁量] 解除並拆成下列子項逐項做、各自 commit〕
+- [ ] **先.五十一-1 試撮 tick（simtrade）不寫 last／change_pct、不進走勢與量，改寫 sim_price／sim_at；App 08:30–09:00、13:25–13:30 灰字「試撮 xxx」；selftest 試撮不得改 last**
+- [ ] **先.五十一-2 set_event_callback 只記 event_code 與時間（嚴禁印原始訊息）；1 記缺口起點、13 記終點，重連後在 kbars 預算內補缺口；App 缺口期間顯示「行情中斷，補資料中」**
+- [ ] **先.五十一-3 處置／注意股：每日 18:30 api.punish()／api.notice() 寫 data/disposal_flags.json；上櫃落後 >1 交易日以 TPEx 公開資料交叉補；個股頁紅標、AI 選股候選排除處置股**
+- [ ] **先.五十一-4 排行榜頁：api.scanners 漲跌幅／成交量／成交值前 50，盤中每 60 秒刷新，計入 5 秒 50 次預算**
+- [ ] **先.五十一-5 IX0001 estimate_amount_sum → 首頁「今日預估成交金額」＋每日落地 research/data/est_amount/**
+- [ ] **先.五十一-6 長駐行情程式 faulthandler＋崩潰後 2 分鐘內自動重啟＋heartbeat 記重啟次數**
+- [ ] **先.五十一-7 smoke 全套＋相關 selftest＋commit 回報**
 
 # 2026-10-08【先.五十二：大盤融資維持率口徑揭露與歷史校準（不碰自動交易）】（總司令裁示原文，動工前先寫入）
 
