@@ -18511,3 +18511,27 @@ C. 連線預算補漏（時間閘：10/8 13:40 結算完成後才可動工）
 - [x] **先.五十三-B5 DevQueue 只剩時間閘／BLOCKED 時記 GATED、不觸發 STALLED_3H＋selftest**〔dev_queue_runner：無 - [ ] 但有 - [!] → exit 6；wrapper（C:\alpha\run-dev-queue-cycle.ps1，repo 外）6→GATED；update_claude_launcher_heartbeat NO_ATTEMPT 加 GATED；check_local_schedule_heartbeat：GATED／QUEUE_EMPTY／BLOCKED_BY_RULE 且 last_checked_at 新鮮→不判 STALLED_3H（真停擺 last_checked_at 也過期照報）。selftest_claude_auth_detection 新增 5 案全 PASS。〕
 - [x] **先.五十三-C6 SHIOAJI_LOGIN_SCRIPTS 查證 alpha_live_server 是否登入＋preflight**〔時間閘：2026-10-08 13:40 結算完成後〕〔查證：alpha_live_server.py 不自行登入 Shioaji（帳戶查詢經 UDP 交給 shioaji_quotes.py 代查；import auto_rebalance_bb90 只用 cancel_pending／live_account_summary），依「有登入才計入」不加入清單，程式註解記錄查證結果。preflight（唯讀）PASS 18／FAIL 0；selftest 220 PASS；冒煙全部通過。〕
 - [!] **先.五十三-7 smoke＋selftest＋commit 回報**〔時間閘：A2 解除＋C6（10/8 13:40 後）完成後做最終一次〕　〔DevQueue 20261008-080102 期中跑一次 [自行裁量]：冒煙 node scripts/smoke_test.mjs 兩次皆 exit=0、全部通過（第 42 項這次抽驗 25 檔未抽到 4804；4804 在 quotes_tw／quotes_all_tw 仍無資料，A2 阻塞未解除，維持互動視窗持有）；scripts/selftest_*.py 12 支，修補前 selftest_claude_auth_launchers「10/3事故重演：持續節流但39小時無實際執行→仍告警」FAIL——根因是 B5 把 BLOCKED_BY_RULE（節流跳過）列進 check_local_schedule_heartbeat.QUIET_REASONS，等於讓 10/3 事故不再告警；純 bug 修復：QUIET_REASONS 只留 GATED／QUEUE_EMPTY（[自行裁量] 保留 QUEUE_EMPTY：佇列真空屬白名單第 7 條正常停止，且 B5 新增案不受影響），修後 12 支全 exit=0（detection 25 項、launchers 22 項全 PASS）。不標 [x] 的理由：本項是先.五十三全批的收尾，A2／C6 尚未完成，最終 smoke＋selftest＋回報要等兩者做完再跑。〕
+
+# 2026-10-08【先.五十五：CM估維持率校準（53日含7月底急跌段）＋現金不足推播節流】（總司令裁示原文，動工前先寫入；A1 讀數依原文規定不入 repo）
+
+先寫進 PENDING_QUEUE 再動工
+【先.五十五】CM估維持率校準（53日含7月底急跌段）＋現金不足推播節流（不得切換模式、不得觸發真錢委託）
+A. 校準（可立即動工）
+1. 外部讀數（總司令提供，籌碼K「融資維持率(CM估)」，格式 日期:融資餘額億:維持率%）只存本機 gitignore 的 research/data/margin_reconcile/external_cm.json，不得 commit；repo 只存推導出的 k、誤差統計與「來源＝CMoney 估算（經籌碼K顯示）」說明：
+   〔互動視窗註：原文此處列出 2026-07-14～2026-09-24 共 53 筆讀數，依本條規定不寫入 repo，已原樣存到本機 research/data/margin_reconcile/external_cm.json（gitignore）。〕
+2. 用 backfill_margin_history.py（TWSE 官方 rwd MI_MARGN 指定日期，每次間隔 ≥4 秒，加上官方收盤價）重算這 53 日的本站原值，分子分母必須同日。先核對每日分母＝外部融資餘額（±0.1 億），不符的日期列出並排除。
+3. 逐日算 k＝外部/本站，報告：全段中位數、最小、最大、標準差；7/27～8/04 急跌段與其他日期分開統計；k 與本站水位的相關係數。
+4. 判定（不得事後改門檻）：若全段 k 的最大−最小 ≤0.01，維持單一 k（改用 61 日中位數）；否則改為依本站水位分段（例如 <180、180–195、>195）各自取中位數，App 註明「分段校準」，股災段的「校準未驗證」標記改為依實測結果更新。
+5. 另做一次假說測試，只記錄結果、不改 App：CM 估是否以「融資成本」估算而非收盤市值（例如 k 與近 20 日漲跌幅相關）。結果寫進 MARGIN_RATIO_RECONCILE.md。
+B. 現金不足推播節流（時間閘：今日 13:40 後）
+6. INSUFFICIENT_CASH 同一期同一原因，每個交易日最多推播一次；App 紅條改寫為「交割戶餘額查詢為 0：中國信託不在永豐 API 餘額查詢支援範圍（僅永豐銀行／LINE Bank），且尚未入金。換成永豐交割戶並入金後，下一個交易日 09:05 自動重跑本批」。
+7. 先.五十四 第 6 點維持暫緩，等總司令選定交割戶方案。
+8. smoke 全套＋selftest，commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]，PROGRESS_HEARTBEAT.jsonl append 一行。
+
+註（互動視窗）：【先.五十四】原文不在 repo 與本對話，第 7 點無從對應，照「維持暫緩」記錄，待補原文。先前【先.五十三】A3 已把 8 筆籌碼K讀數寫進 repo 的 data/margin_ratio_calibration.json external_points，與本條「讀數不入 repo」的新規則不一致，待總司令裁示是否移出。
+
+- [ ] **先.五十五-A1～A5 CM估 53 日校準（本機讀數、同日重算、分母核對、k 統計、預定判定、成本假說）**（互動視窗執行：分身處理，DevQueue 勿派）
+- [ ] **先.五十五-B6 INSUFFICIENT_CASH 每交易日同原因最多推播一次＋App 紅條改寫**
+- [!] **先.五十五-B7 先.五十四 第 6 點維持暫緩**〔待總司令選定交割戶方案；先.五十四 原文缺〕
+- [ ] **先.五十五-8 smoke＋selftest＋commit 回報**
