@@ -1211,6 +1211,41 @@ def _make_bidask_fop_handler(state: TickState, key: str):
     return handler
 
 
+# 2026-10-08 先.五十一-5：IX0001 預估成交金額。1.7.4 的 QuoteIdxV1 型別存根沒有公開
+# estimate_amount_sum（核心二進位裡有這個欄位名），所以先讀屬性、再讀 to_dict()，兩者都沒有就
+# 誠實回 None，不拿 amount_sum 冒充預估值。單位依 Shioaji amount_sum 慣例假設為新台幣元（待實盤核對）。
+EST_AMOUNT_DIR = Path(__file__).parent / "data" / "est_amount"  # research/data/ 已 gitignore
+_est_land = {"minute": None}
+
+
+def _estimate_amount_fields(quote) -> dict:
+    est = getattr(quote, "estimate_amount_sum", None)
+    if est is None:
+        try:
+            d = quote.to_dict() if hasattr(quote, "to_dict") else {}
+            est = d.get("estimate_amount_sum") if isinstance(d, dict) else None
+        except Exception:  # noqa: BLE001
+            est = None
+    return {"estimate_amount_sum": _to_float(est), "amount_sum": _to_float(getattr(quote, "amount_sum", None))}
+
+
+def _land_est_amount(patch: dict) -> None:
+    """每分鐘最多落地一筆（時間、累計成交金額、預估成交金額）。失敗只警告，不影響推送。"""
+    try:
+        t = patch.get("tick_at") or datetime.now(TW_TZ).replace(tzinfo=None).isoformat()
+        minute = str(t)[:16]
+        if _est_land["minute"] == minute:
+            return
+        _est_land["minute"] = minute
+        EST_AMOUNT_DIR.mkdir(parents=True, exist_ok=True)
+        row = {"t": minute, "amount_sum": patch.get("amount_sum"),
+               "estimate_amount_sum": patch.get("estimate_amount_sum")}
+        with open(EST_AMOUNT_DIR / f"{minute[:10]}.jsonl", "a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"  [預估成交金額落地] 失敗（不影響推送）：{type(e).__name__}", flush=True)
+
+
 def _make_quote_idx_handler(state: TickState, key: str, label: str | None):
     def handler(quote) -> None:
         try:
@@ -1227,7 +1262,11 @@ def _make_quote_idx_handler(state: TickState, key: str, label: str | None):
             }
             if label:
                 patch["label"] = label
+            if key == "TAIEX":
+                patch.update(_estimate_amount_fields(quote))
             state.update(key, patch)
+            if key == "TAIEX":
+                _land_est_amount(patch)
             # 2026-09-15（實測.十）刻意不傳prev_close：指數不是實際成交的股票，
             # 沒有交易所規則保證的±10%法定漲跌幅上限（指數是成分股加權計算出來的
             # 值，理論上可以有更大的變動），套用同一個確定性門檻風險是誤殺真實

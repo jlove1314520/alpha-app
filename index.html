@@ -1847,6 +1847,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 「今天」——用來讓收盤後的sinopacQuote()/ibkrQuote()知道「這筆資料雖然
   // 已經超過20分鐘沒更新，但確實是今天收盤時記錄的，不是隔夜留下的舊值」，
   // 用en-CA locale（輸出YYYY-MM-DD）方便直接字串比較，不用手動組日期。
+  // 2026-10-08 先.五十一：Shioaji 的 tick_at／sim_at 是不帶時區的台北時間字串，new Date() 會照裝置時區解析，
+  // 這裡直接比日期字串；帶時區的字串退回 _isSameLocalDate。
+  function _isTaipeiToday(iso){
+    if(!iso)return false;const t=String(iso);
+    if(/[zZ]|[+-]\d\d:?\d\d$/.test(t))return _isSameLocalDate(t,'Asia/Taipei');
+    return t.slice(0,10)===new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  }
   function _isSameLocalDate(iso,tz){
     if(!iso)return false;
     const d=new Date(iso);
@@ -1952,7 +1959,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       if(!q||q.sim_price==null||!q.sim_at)return '';
       const z=zonedNow('Asia/Taipei');const m=z.h*60+z.mi;
       const inWin=z.wd>=1&&z.wd<=5&&((m>=8*60+30&&m<9*60)||(m>=13*60+25&&m<13*60+30));
-      if(!inWin||!_isSameLocalDate(q.sim_at,'Asia/Taipei'))return '';
+      if(!inWin||!_isTaipeiToday(q.sim_at))return '';
       return '試撮 '+nf(q.sim_price);
     }catch(e){console.warn('[simTradeText]',e);recordGlobalError('simTradeText',e);return ''}
   }
@@ -3650,6 +3657,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('home-idx-datatime').textContent=liveTw
       ?`台股 Shioaji 即時（${INTRADAY_SINOPAC&&INTRADAY_SINOPAC.fetched_at?fmtTzHHMM(new Date(INTRADAY_SINOPAC.fetched_at),'Asia/Taipei'):'—'}）· 美股指數為每日收盤快照`
       :`${twCloseDateLabel(tw)}｜${fmtMarketDataTime(tw)}`;
+    _safeSync('estAmountNote',()=>{const t=estAmountText();if(t)document.getElementById('home-idx-datatime').textContent+=' · '+t});
+  }
+  // 2026-10-08 先.五十一-5：IX0001 預估成交金額（shioaji_quotes.py 寫進 TAIEX quote 的 estimate_amount_sum）。
+  // 只顯示「今天」的值；單位假設新台幣元（待實盤核對），超出 100 億～5 兆的數量級一律不顯示並記警告，
+  // 不讓單位錯置的數字安靜出現在首頁。
+  function estAmountText(){
+    const q=INTRADAY_SINOPAC&&INTRADAY_SINOPAC.quotes&&INTRADAY_SINOPAC.quotes.TAIEX;
+    if(!q||q.estimate_amount_sum==null)return '';
+    if(!_isTaipeiToday(q.tick_at||INTRADAY_SINOPAC.fetched_at))return '';
+    const v=+q.estimate_amount_sum;
+    if(!(v>=1e10&&v<=5e12)){console.warn('[estAmountText] 預估成交金額數量級異常，不顯示',v);return ''}
+    return '今日預估成交金額 '+(v/1e8).toLocaleString('zh-TW',{maximumFractionDigits:0})+' 億';
   }
   function hexMix(c1,c2,t){
     const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -8115,7 +8134,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-08.1807';
+  const APP_VERSION='2026-10-08.1811';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
