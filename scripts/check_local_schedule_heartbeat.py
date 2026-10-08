@@ -116,7 +116,9 @@ CLAUDE_AUTH_STALL_HOURS = 3.0
 # devqueue 維持每 15 分鐘，門檻仍 3 小時。狀態字串沿用 STALLED_3H 以免動到 App 與既有消費端。
 CLAUDE_AUTH_STALL_HOURS_BY_LAUNCHER = {"devqueue": 3.0, "marathon": 7.0, "hypothesis_queue": 7.0}
 CLAUDE_AUTH_LAUNCHERS = ("devqueue", "marathon", "hypothesis_queue")
-QUIET_REASONS = ("GATED", "QUEUE_EMPTY", "BLOCKED_BY_RULE")  # 先.五十三-B5：正常無為
+# 先.五十三-B5：正常無為。刻意不含 BLOCKED_BY_RULE（節流跳過）——10/3 事故就是節流持續 39 小時
+# 無任何實際執行，那種情況必須照報 STALLED_3H（selftest_claude_auth_launchers「10/3事故重演」守著）。
+QUIET_REASONS = ("GATED", "QUEUE_EMPTY")
 
 
 def _evaluate_claude_auth(now: datetime) -> dict:

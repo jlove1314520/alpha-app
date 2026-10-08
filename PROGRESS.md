@@ -1,3 +1,15 @@
+## 2026-10-08 08:01～08:2x（DevQueue 自走 cycle 20261008-080102，維運帽）
+
+等待總司令審閱：15 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
+
+- **先.五十三-7 smoke＋selftest（期中跑）**：冒煙 `node scripts/smoke_test.mjs` 兩次都 exit=0、全部通過。`scripts/selftest_*.py` 共 12 支，修補前有 1 項 FAIL：`selftest_claude_auth_launchers`「10/3事故重演：持續節流但39小時無實際執行→仍告警」。
+  - **根因**：B5（commit b91dc06cc）把 `BLOCKED_BY_RULE`（節流跳過）也列進 `check_local_schedule_heartbeat.py` 的 `QUIET_REASONS`，結果節流連續好幾天、完全沒有實際執行時，也不會亮 STALLED_3H 紅條。10/3 那次事故就是這種情況，等於把當時補上的防線拆掉了。
+  - **修法（純 bug 修復）**：`QUIET_REASONS` 只保留 `GATED`、`QUEUE_EMPTY`。`[自行裁量]` 保留 `QUEUE_EMPTY` 的理由：佇列真的空了，本來就是白名單第 7 條允許的正常停止。修好後 12 支 selftest 全部 exit=0（detection 25 項、launchers 22 項全 PASS），B5 新增的 5 個情境不受影響。
+  - **改標 `- [!]`，不標完成**：這一項是先.五十三整批的收尾，A2 和 C6 都還沒做完（C6 有 10/8 13:40 時間閘），最終的 smoke＋selftest＋回報要等兩者完成後再跑一次。
+- **先.五十三-A2 阻塞仍未解除**：這次冒煙第 42 項有通過，但只是隨機抽驗 25 檔剛好沒抽到 4804；4804 在 quotes_tw／quotes_all_tw 仍然沒有資料。這一項由互動視窗負責，DevQueue 沒有碰。
+- **`- [!]` 檢查**：沒有到期的項目（先.四十九／五十／五十一／五十三-C6 都是 10/8 13:40 時間閘）。
+- **佇列深度**：收工時 `- [ ]`=0，沒有補件（凍結.二仍有效、常備 backlog 是空的、備援來源沿用前幾輪盤點結論）。
+
 ## 2026-10-08 01:16～01:2x（DevQueue 自走 cycle 20261008-011602，維運帽）
 
 等待總司令審閱：15 件（本輪無增減；清單見 `research/AWAITING_REVIEW.md`）。
