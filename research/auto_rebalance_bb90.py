@@ -167,17 +167,38 @@ def push_notify(paths: Paths, title: str, body: str, kind: str) -> bool:
         return False
 
 
-def report_error(paths: Paths, msg: str, rnd: str = "auto_rebalance") -> None:
-    """對帳不符等失敗：last_error＋紅色橫幅旗標＋心跳 ERROR。本身失敗只降級成警告。"""
-    push_notify(paths, "自動排程漏跑" if rnd == "auto_trading_watchdog" else "自動交易異常或整批拒單",
-                msg[:160], "watchdog" if rnd == "auto_trading_watchdog" else "error")
+def _redact_numbers(msg: str) -> str:
+    """先.五十五：寫進 repo 追蹤檔（PROGRESS_HEARTBEAT.jsonl）前遮蔽所有數字（金額、股數、持股），只留錯誤類別與文字。"""
+    return re.sub(r"\d[\d,\.]*", "#", str(msg))[:120]
+
+
+def report_error(paths: Paths, msg: str, rnd: str = "auto_rebalance", push_key: str | None = None) -> None:
+    """對帳不符等失敗：last_error＋紅色橫幅旗標＋心跳 ERROR。本身失敗只降級成警告。
+    先.五十五：push_key 有值時，同一 key 每個交易日最多推播一次（紅條與 last_error 照常更新）。
+    心跳檔是 repo 追蹤檔，只寫遮蔽數字後的訊息；完整訊息只在本機 status。"""
+    send = True
+    if push_key:
+        try:
+            today = datetime.now(TW).date().isoformat()
+            thr = (_read_json(paths.status) or {}).get("push_throttle") or {}
+            if thr.get(push_key) == today:
+                send = False
+            else:
+                thr = {k: v for k, v in thr.items() if v == today}
+                thr[push_key] = today
+                write_status(paths, push_throttle=thr)
+        except Exception as e:
+            print(f"[warn] 推播節流判斷失敗（照常推播）：{type(e).__name__}", flush=True)
+    if send:
+        push_notify(paths, "自動排程漏跑" if rnd == "auto_trading_watchdog" else "自動交易異常或整批拒單",
+                    msg[:160], "watchdog" if rnd == "auto_trading_watchdog" else "error")
     try:
         write_status(paths, last_error=msg, banner="red")
     except Exception as e:
         print(f"[warn] 寫 status 失敗：{e}", flush=True)
     try:
         _append(paths.heartbeat, {"ts": datetime.now(TW).isoformat(timespec="seconds"), "track": "auto_trading",
-                                  "round": rnd, "item": msg, "status": "ERROR"})
+                                  "round": rnd, "item": _redact_numbers(msg), "status": "ERROR"})
     except Exception as e:
         print(f"[warn] 寫心跳失敗：{e}", flush=True)
 
@@ -688,7 +709,7 @@ def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: date
     if reason:
         _log(paths, now, mode, "REJECT", {"key": f"{batch_id}-ALL", "symbol": "ALL"}, reasons=[reason])
         res["rejected"].append({"symbol": "ALL", "reasons": [reason]})
-        report_error(paths, reason)
+        report_error(paths, reason, push_key=f"INSUFFICIENT_CASH:{batch_id}")
         res["state"] = "ERROR"
         return False
     return True

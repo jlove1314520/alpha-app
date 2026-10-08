@@ -6707,7 +6707,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       try{renderAutoPreflight(st.preflight)}catch(e){console.warn('[renderAutoPreflight]',e);recordGlobalError('renderAutoPreflight',e)}
       try{renderLiveAccount(d.live_account)}catch(e){console.warn('[renderLiveAccount]',e);recordGlobalError('renderLiveAccount',e)}
       const red=st.banner==='red'||!!st.last_error;
-      AUTO_BAN.local=red?('自動交易異常：'+(st.last_error||'請檢查')):(d.stopped?'自動交易已緊急停止（一律拒單）':'');
+      // 先.五十五-B6：交割戶餘額查詢為 0 的現金不足，改寫成可行動的說明
+      const zeroCash=/^INSUFFICIENT_CASH:可用餘額0（/.test(String(st.last_error||''));
+      AUTO_BAN.local=red?(zeroCash?'交割戶餘額查詢為 0：中國信託不在永豐 API 餘額查詢支援範圍（僅永豐銀行／LINE Bank），且尚未入金。換成永豐交割戶並入金後，下一個交易日 09:05 自動重跑本批':('自動交易異常：'+(st.last_error||'請檢查'))):(d.stopped?'自動交易已緊急停止（一律拒單）':'');
       renderAutoBanner();
     }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）';AUTO_BAN.offline='本機離線：讀不到本機自動交易狀態（/auto/status）';renderAutoBanner()}
   }
@@ -8088,7 +8090,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-08.0122';
+  const APP_VERSION='2026-10-08.1732';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

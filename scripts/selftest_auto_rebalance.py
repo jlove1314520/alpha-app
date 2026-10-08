@@ -909,6 +909,30 @@ p = setup({"mode": "LIVE"}); b = _FakeTA(1, cash=10**9)
 r = run(p, b)
 check("可用額度交叉核對：不改變擋單規則（差距極大仍照常送單）", r["state"] == "OK" and len(b.placed) >= 1)
 
+# ---- 先.五十五-B6：現金不足推播節流＋心跳遮蔽金額 ----
+p = setup({"mode": "LIVE", "total_capital_twd": 4_000_000})
+PUSH_CALLS.clear(); PUSH_RESULT.update({"ok": 1, "errors": []})
+b0 = Fake(cash=0)
+r1 = run(p, b0, now=NOW)
+r2 = run(p, b0, now=NOW + timedelta(minutes=35))
+_cash_push = [c for c in PUSH_CALLS if c["kind"] == "error" and "INSUFFICIENT_CASH" in c["body"]]
+check("推播節流：同一期同原因同一交易日兩次拒單只推播一次", r1["state"] == r2["state"] == "ERROR" and len(_cash_push) == 1)
+_st = json.loads(p.status.read_text(encoding="utf-8"))
+check("推播節流：紅條與 last_error 照常更新", _st.get("banner") == "red" and str(_st.get("last_error", "")).startswith("INSUFFICIENT_CASH"))
+_orig_now = A.datetime
+class _DT(A.datetime):
+    @classmethod
+    def now(cls, tz=None): return _orig_now(2026, 10, 31, 9, 5, tzinfo=tz)
+A.datetime = _DT
+try:
+    run(p, b0, now=NOW + timedelta(days=1))
+finally:
+    A.datetime = _orig_now
+check("推播節流：隔一個交易日同原因會再推播一次", len([c for c in PUSH_CALLS if c["kind"] == "error" and "INSUFFICIENT_CASH" in c["body"]]) == 2)
+_hb = (p.base / "heartbeat.jsonl").read_text(encoding="utf-8")
+check("心跳檔（repo 追蹤檔）不含金額：數字一律遮蔽", "INSUFFICIENT_CASH" in _hb and not any(ch.isdigit() for l in _hb.splitlines() for ch in json.loads(l)["item"]))
+check("_redact_numbers：股數、金額、小數一律遮蔽", A._redact_numbers("對帳不符：預期{'0050': 3000}≠券商 1,449.5") == "對帳不符：預期{'#': #}≠券商 #")
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")

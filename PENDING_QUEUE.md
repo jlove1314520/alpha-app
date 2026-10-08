@@ -18532,6 +18532,6 @@ B. 現金不足推播節流（時間閘：今日 13:40 後）
 註（互動視窗）：【先.五十四】原文不在 repo 與本對話，第 7 點無從對應，照「維持暫緩」記錄，待補原文。先前【先.五十三】A3 已把 8 筆籌碼K讀數寫進 repo 的 data/margin_ratio_calibration.json external_points，與本條「讀數不入 repo」的新規則不一致，待總司令裁示是否移出。
 
 - [ ] **先.五十五-A1～A5 CM估 53 日校準（本機讀數、同日重算、分母核對、k 統計、預定判定、成本假說）**（互動視窗執行：分身處理，DevQueue 勿派）
-- [ ] **先.五十五-B6 INSUFFICIENT_CASH 每交易日同原因最多推播一次＋App 紅條改寫**
+- [x] **先.五十五-B6 INSUFFICIENT_CASH 每交易日同原因最多推播一次＋App 紅條改寫**〔report_error 新增 push_key：同一 key（INSUFFICIENT_CASH＋批次編號）每交易日最多推播一次，紅條與 last_error 照常；App 紅條在「可用餘額0」時改為指定文字。另修外洩：report_error 原本把含金額的完整訊息寫進 repo 追蹤的 research/PROGRESS_HEARTBEAT.jsonl（10/8 兩筆已被 e891fbbb4 推上公開 repo）——改為只寫遮蔽數字版本，既有兩行已遮蔽，git 歷史未改寫。自測 225 PASS（+5）；冒煙全部通過。〕
 - [!] **先.五十五-B7 先.五十四 第 6 點維持暫緩**〔待總司令選定交割戶方案；先.五十四 原文缺〕
 - [ ] **先.五十五-8 smoke＋selftest＋commit 回報**
