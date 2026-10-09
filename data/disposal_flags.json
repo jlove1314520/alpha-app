@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generated_at": "2026-10-08T18:34:46+08:00",
+  "generated_at": "2026-10-09T18:30:02+08:00",
   "errors": [],
   "supplemented": {},
   "primary": "shioaji",
@@ -16,7 +16,7 @@
   },
   "expired_dropped": 0,
   "counts": {
-   "disposal": 38,
+   "disposal": 36,
    "notice": 49
   },
   "note": "處置股＝交易所公告分盤撮合（每 N 分鐘撮合一次）與預收款券；注意股＝當日公布注意交易資訊。App 個股頁紅標、AI 選股候選排除處置期間內個股。非投資建議。"
@@ -30,17 +30,6 @@
    "unit_limit": 10.0,
    "total_limit": 30.0,
    "reason": "該有價證券之交易，最近十個營業日內已有六個營業日達本公司「公布注意交易資訊」標準。",
-   "exchange": "TSE",
-   "source": "shioaji_punish"
-  },
-  "2030": {
-   "start": "2026-10-02",
-   "end": "2026-10-08",
-   "announced": "2026-10-01",
-   "interval": "2分鐘",
-   "unit_limit": 10.0,
-   "total_limit": 30.0,
-   "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
    "exchange": "TSE",
    "source": "shioaji_punish"
   },
@@ -405,17 +394,6 @@
    "total_limit": 30.0,
    "reason": "該有價證券之交易，連續三個營業日達本公司「公布注意交易資訊」標準。",
    "exchange": "TSE",
-   "source": "shioaji_punish"
-  },
-  "8227": {
-   "start": "2026-10-02",
-   "end": "2026-10-08",
-   "announced": "2026-10-01",
-   "interval": "2分鐘",
-   "unit_limit": null,
-   "total_limit": null,
-   "reason": "巨有科技股份有限公司股票(代號：8227)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一項第",
-   "exchange": "OTC",
    "source": "shioaji_punish"
   },
   "8358": {
