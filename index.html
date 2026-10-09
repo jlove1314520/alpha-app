@@ -3924,7 +3924,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 先.五十三-A2／A3：k、N、最大誤差都從校準檔讀（不寫死）；warn 時只降級成「校準待更新」警告，不隱藏數字
     const k=calib&&typeof calib.k==='number'?calib.k:(calib&&typeof calib.ratio_mean==='number'?calib.ratio_mean:null);
     const calHead=calib&&k!=null
-      ?`<div class="note" id="margin-calib" style="margin-top:2px">對齊籌碼K（係數 ${k}${calib.mode==='segmented'?'，依水位分段校準':''}，近 ${calib.n_points!=null?calib.n_points:calib.n_days} 日最大誤差 ${calib.max_err_pp!=null?calib.max_err_pp:'?'} pp）</div>`
+      ?`<div class="note" id="margin-calib" style="margin-top:2px">對齊籌碼K（${calib.mode==='linear'&&typeof calib.alpha==='number'&&typeof calib.beta==='number'
+          ?`線性換算＝本站 × ${calib.beta} ${calib.alpha<0?'−':'＋'} ${Math.abs(calib.alpha)}`
+          :`係數 ${k}${calib.mode==='segmented'?'，依水位分段校準':''}`}，近 ${calib.n_points!=null?calib.n_points:calib.n_days} 日最大誤差 ${calib.max_err_pp!=null?calib.max_err_pp:'?'} pp）</div>`
         +(calib.warn?`<div class="note" id="margin-calib-warn" style="color:var(--warn);margin-top:2px">⚠ 校準待更新：有讀數誤差超過 ${calib.warn_pp!=null?calib.warn_pp:0.5} pp，數字僅供參考</div>`:'')
       :'<div class="note" style="color:var(--warn)">校準檔讀取失敗，以下為本站算法原值</div>';
     const raw=h=>h&&h.ratio_pct_ck!=null&&h.ratio_pct!=null?`<div class="note" id="margin-raw" style="color:var(--ink-4);margin-top:2px">本站原值 ${h.ratio_pct.toFixed(1)}%</div>`:'';
@@ -8217,7 +8219,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-09.2135';
+  const APP_VERSION='2026-10-09.2141';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

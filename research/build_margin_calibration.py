@@ -39,6 +39,9 @@ CM_DETAIL = REPO / "research" / "data" / "margin_reconcile" / "cm_reconcile_deta
 CM_SPAN_LIMIT = 0.01                                        # 先.五十五 A4 事前判定門檻
 CM_TIERS = [(None, 180.0), (180.0, 195.0), (195.0, None)]   # 先.五十五 A4 事前分段（本站水位 %）
 CM_CRASH = ("2026-07-27", "2026-08-04")
+# 先.五十六-B5 事前判定規則：比較 (i) 三段水位 k 與 (ii) 線性 CM＝α＋β×本站 的 leave-one-out 最大誤差，
+# 取較小者；兩者差 <0.3pp 時取參數較少的 (ii)。
+LOO_TIE_PP = 0.3
 
 
 def _md_row(txt: str, label: str) -> dict[str, float]:
@@ -116,6 +119,8 @@ def ck_value(site_pct, cal: dict) -> float | None:
     """本站原值 → 對齊籌碼K的值（四捨五入 1 位）；沒有校準或沒有原值回 None。"""
     if site_pct is None:
         return None
+    if cal and cal.get("mode") == "linear" and cal.get("alpha") is not None and cal.get("beta") is not None:
+        return round(float(cal["alpha"]) + float(cal["beta"]) * float(site_pct), 1)
     k = k_for(float(site_pct), cal)
     return None if k is None else round(float(site_pct) * k, 1)
 
@@ -126,7 +131,8 @@ def ck_status(date: str, cal: dict, site_pct: float | None = None) -> str:
     lo = (cm.get("level_range_measured") or [None])[0]
     if i is not None and lo is not None and site_pct is not None:
         # 先.五十五：股災段依實測水位範圍更新——落在實測水位內＝分段校準可用；低於實測最低水位＝仍未驗證
-        return "分段校準（實測水位內）" if site_pct >= lo else f"校準未驗證（低於實測最低水位 {lo}%）"
+        tag = "線性校準（實測水位內）" if cal.get("mode") == "linear" else "分段校準（實測水位內）"
+        return tag if site_pct >= lo else f"校準未驗證（低於實測最低水位 {lo}%）"
     if i is not None and not (cal.get("crash_verified") or {}).get(str(i)):
         return "校準未驗證"
     return "校準待更新" if cal.get("warn") else "已校準"
@@ -138,6 +144,39 @@ def _st(xs: list[float]) -> dict:
         return {"n": 0}
     return {"n": len(xs), "median": round(st.median(xs), 5), "min": round(min(xs), 5), "max": round(max(xs), 5),
             "span": round(max(xs) - min(xs), 5), "stdev": round(st.stdev(xs), 5) if len(xs) > 1 else 0.0}
+
+
+def _tier_of(v: float) -> int | None:
+    for i, (lo, hi) in enumerate(CM_TIERS):
+        if (lo is None or v >= lo) and (hi is None or v < hi):
+            return i
+    return None
+
+
+def _ols(pts: list[tuple[float, float]]) -> tuple[float, float]:
+    import statistics as st
+    mx, my = st.mean(p[0] for p in pts), st.mean(p[1] for p in pts)
+    b = sum((x - mx) * (y - my) for x, y in pts) / sum((x - mx) ** 2 for x, _ in pts)
+    return my - b * mx, b
+
+
+def loo_compare(comb: list[tuple[str, float, float]]) -> dict:
+    """先.五十六-B4：(i) 三段水位 k、(ii) 線性 α＋β×本站，各做 leave-one-out；回傳最大／中位絕對誤差與急跌段最大誤差（pp）。"""
+    import statistics as st
+    e1, e2, c1, c2 = [], [], [], []
+    for j, (d, s, k) in enumerate(comb):
+        y = s * k
+        rest = [c for i, c in enumerate(comb) if i != j]
+        g = [c[2] for c in rest if _tier_of(c[1]) == _tier_of(s)]
+        kt = st.median(g) if g else st.median(c[2] for c in rest)
+        a, b = _ols([(c[1], c[1] * c[2]) for c in rest])
+        e1.append(abs(s * kt - y)); e2.append(abs(a + b * s - y))
+        if CM_CRASH[0] <= d <= CM_CRASH[1]:
+            c1.append(e1[-1]); c2.append(e2[-1])
+    r = lambda x: round(x, 2)
+    return {"segmented": {"loo_max_pp": r(max(e1)), "loo_median_pp": r(st.median(e1)), "crash_max_pp": r(max(c1)) if c1 else None, "n_params": len(CM_TIERS)},
+            "linear": {"loo_max_pp": r(max(e2)), "loo_median_pp": r(st.median(e2)), "crash_max_pp": r(max(c2)) if c2 else None, "n_params": 2},
+            "n": len(comb), "n_crash": len(c1)}
 
 
 def build_cm(existing: dict) -> dict:
@@ -171,6 +210,18 @@ def build_cm(existing: dict) -> dict:
     crash = [c[2] for c in comb if CM_CRASH[0] <= c[0] <= CM_CRASH[1]]
     other = [c[2] for c in comb if not (CM_CRASH[0] <= c[0] <= CM_CRASH[1])]
     max_err = round(max(errs), 2)
+    # 先.五十六-B5：依事前規則在 (i)／(ii) 之間選定；「最大誤差」改報選定方法的 leave-one-out 最大誤差（樣本外口徑）
+    loo = loo_compare(comb)
+    seg_mx, lin_mx = loo["segmented"]["loo_max_pp"], loo["linear"]["loo_max_pp"]
+    choose_linear = lin_mx < seg_mx or abs(lin_mx - seg_mx) < LOO_TIE_PP
+    seg_ref = {"mode": cal.get("mode"), "segments": cal.get("segments")}
+    if choose_linear:
+        a, b = _ols([(c[1], c[1] * c[2]) for c in comb])
+        cal.update(mode="linear", alpha=round(a, 4), beta=round(b, 5), segments=[], tier_scheme=None)
+        max_err = lin_mx
+    else:
+        cal.pop("alpha", None); cal.pop("beta", None)
+        max_err = seg_mx
     lvl = [c[1] for c in comb]
     cal.update({
         "generated_at": datetime.now(TW).isoformat(timespec="seconds"),
@@ -183,9 +234,15 @@ def build_cm(existing: dict) -> dict:
             "n_combined": len(comb), "decision_rule": f"全段 k 最大−最小 ≤{CM_SPAN_LIMIT} → 單一 k；否則依本站水位 {CM_TIERS} 分段取中位數（事前固定）",
             "decision": cal["mode"], "k_all": _st(ks), "k_crash_0727_0804": _st(crash), "k_other": _st(other),
             "level_range_measured": [round(min(lvl), 1), round(max(lvl), 1)],
+            "loo_compare_xian56": loo,
+            "decision_rule_xian56": f"取 leave-one-out 最大誤差較小者；兩者差 <{LOO_TIE_PP}pp 取參數較少的線性（事前固定）",
+            "decision_xian56": "linear" if choose_linear else "segmented",
+            "segmented_reference": seg_ref,
+            "max_err_basis": "選定方法的 leave-one-out 最大絕對誤差（pp）",
         },
-        "meaning": "對齊籌碼K ≈ 本站算法 × k（依本站水位分段；段界與各段 k 見 segments）" if cal["mode"] == "segmented"
-                   else "對齊籌碼K ≈ 本站算法 × k",
+        "meaning": ("對齊籌碼K ≈ α ＋ β × 本站算法（線性換算；α、β 見同檔）" if cal["mode"] == "linear" else
+                    "對齊籌碼K ≈ 本站算法 × k（依本站水位分段；段界與各段 k 見 segments）" if cal["mode"] == "segmented"
+                    else "對齊籌碼K ≈ 本站算法 × k"),
     })
     return cal
 

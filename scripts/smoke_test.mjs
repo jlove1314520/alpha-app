@@ -1843,7 +1843,10 @@ async function runSmokeTest(baseUrl, headless = true) {
       const sum = (document.getElementById("margin-summary") || {}).innerText || "";
       const conv = (document.getElementById("margin-calib") || {}).innerText || "";
       const cal = await (await fetch("data/margin_ratio_calibration.json", { cache: "no-store" })).json();
-      return { hard: /0\.881|0\.8815/.test(src), sum, conv, ratio: cal.k != null ? cal.k : cal.ratio_mean, crash: ((document.getElementById("margin-crash-low") || {}).innerText || "") };
+      // 先.五十六-B5：線性模式時說明顯示的是 β（本站 × β ± |α|），以 β 比對；其餘模式比對 k
+      return { hard: /0\.881|0\.8815/.test(src), sum, conv,
+               ratio: cal.mode === "linear" && cal.beta != null ? cal.beta : (cal.k != null ? cal.k : cal.ratio_mean),
+               crash: ((document.getElementById("margin-crash-low") || {}).innerText || "") };
     });
     if (r.hard) mgErrors.push("index.html 寫死了 0.881 比值");
     if (!/資料日/.test(r.sum)) mgErrors.push("卡片沒有顯示資料日：" + r.sum.slice(0, 80));
@@ -1899,7 +1902,8 @@ async function runSmokeTest(baseUrl, headless = true) {
       const warnShown = !!document.getElementById("margin-calib-warn");
       const sumW = (document.getElementById("margin-summary") || {}).innerText || "";
       await loadMarginMaintenance();
-      return { ck: ref && ref.ratio_pct_ck, raw: ref && ref.ratio_pct, sum, calib, k: cal.k, n: cal.n_points, mx: cal.max_err_pp, unv, entry, warnShown, sumW };
+      return { ck: ref && ref.ratio_pct_ck, raw: ref && ref.ratio_pct, sum, calib, k: cal.k, n: cal.n_points, mx: cal.max_err_pp, unv, entry, warnShown, sumW,
+               mode: cal.mode, alpha: cal.alpha, beta: cal.beta };
     });
     if (r.ck == null) ckErrors.push("資料檔最新有效紀錄沒有 ratio_pct_ck");
     else {
@@ -1907,7 +1911,10 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (!r.sum.includes("本站原值 " + r.raw.toFixed(1) + "%")) ckErrors.push("灰字沒附本站原值");
       if (!r.entry.includes(r.ck.toFixed(1) + "%")) ckErrors.push("市場頁入口卡沒用 ratio_pct_ck");
     }
-    if (!(r.calib.includes(String(r.k)) && r.calib.includes(String(r.n)) && r.calib.includes(String(r.mx)))) ckErrors.push("「對齊籌碼K」說明的係數／日數／最大誤差與校準檔不一致：" + r.calib);
+    // 先.五十六-B5：線性模式改驗 α、β（本站 × β ± |α|），其餘模式驗係數 k
+    const coefOk = r.mode === "linear" ? (r.calib.includes(String(r.beta)) && r.calib.includes(String(Math.abs(r.alpha))))
+                                       : r.calib.includes(String(r.k));
+    if (!(coefOk && r.calib.includes(String(r.n)) && r.calib.includes(String(r.mx)))) ckErrors.push("「對齊籌碼K」說明的係數／日數／最大誤差與校準檔不一致：" + r.calib);
     if (!r.warnShown) ckErrors.push("校準檔 warn=true 時沒有顯示「校準待更新」");
     if (r.ck != null && !r.sumW.includes(r.ck.toFixed(1) + "%")) ckErrors.push("warn=true 時數字被隱藏（只應降級成警告）");
     if (!r.unv) ckErrors.push("股災段沒有標「校準未驗證」");

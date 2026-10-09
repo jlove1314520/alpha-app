@@ -1,45 +1,11 @@
 {
  "k": 0.88,
  "ratio_mean": 0.8815,
- "mode": "segmented",
- "segments": [
-  {
-   "site_lo": null,
-   "site_hi": 180.0,
-   "k": 0.8595,
-   "n": 11,
-   "max_err_pp": 2.22,
-   "level_range": [
-    156.7,
-    179.8
-   ]
-  },
-  {
-   "site_lo": 180.0,
-   "site_hi": 195.0,
-   "k": 0.8808,
-   "n": 43,
-   "max_err_pp": 3.05,
-   "level_range": [
-    180.2,
-    194.9
-   ]
-  },
-  {
-   "site_lo": 195.0,
-   "site_hi": null,
-   "k": 0.8816,
-   "n": 4,
-   "max_err_pp": 0.14,
-   "level_range": [
-    195.1,
-    200.7
-   ]
-  }
- ],
- "generated_at": "2026-10-08T17:55:42+08:00",
+ "mode": "linear",
+ "segments": [],
+ "generated_at": "2026-10-09T21:37:55+08:00",
  "n_points": 58,
- "max_err_pp": 3.05,
+ "max_err_pp": 2.06,
  "warn": true,
  "date_from": "2026-09-23",
  "date_to": "2026-10-06",
@@ -128,9 +94,9 @@
  },
  "warn_pp": 0.5,
  "segment_pp": 1.0,
- "meaning": "對齊籌碼K ≈ 本站算法 × k（依本站水位分段；段界與各段 k 見 segments）",
+ "meaning": "對齊籌碼K ≈ α ＋ β × 本站算法（線性換算；α、β 見同檔）",
  "source": "external_points 只存總司令提供的籌碼K讀數，未抓取籌碼K網站；本站原值見 MARGIN_RATIO_RECONCILE.md／margin_maintenance.json／margin_backfill.json",
- "tier_scheme": "cm_2026_10_08",
+ "tier_scheme": null,
  "cm_calibration": {
   "source": "CMoney 估算（經籌碼K顯示）；53 日讀數由總司令提供，只存本機、不入 repo；另併入先前 8 日籌碼K讀數（同日去重）",
   "n_provided_cm": 53,
@@ -140,7 +106,7 @@
   ],
   "n_combined": 58,
   "decision_rule": "全段 k 最大−最小 ≤0.01 → 單一 k；否則依本站水位 [(None, 180.0), (180.0, 195.0), (195.0, None)] 分段取中位數（事前固定）",
-  "decision": "segmented",
+  "decision": "linear",
   "k_all": {
    "n": 58,
    "median": 0.88005,
@@ -168,6 +134,65 @@
   "level_range_measured": [
    156.7,
    200.7
-  ]
- }
+  ],
+  "loo_compare_xian56": {
+   "segmented": {
+    "loo_max_pp": 3.06,
+    "loo_median_pp": 0.37,
+    "crash_max_pp": 2.74,
+    "n_params": 3
+   },
+   "linear": {
+    "loo_max_pp": 2.06,
+    "loo_median_pp": 0.57,
+    "crash_max_pp": 2.06,
+    "n_params": 2
+   },
+   "n": 58,
+   "n_crash": 7
+  },
+  "decision_rule_xian56": "取 leave-one-out 最大誤差較小者；兩者差 <0.3pp 取參數較少的線性（事前固定）",
+  "decision_xian56": "linear",
+  "segmented_reference": {
+   "mode": "segmented",
+   "segments": [
+    {
+     "site_lo": null,
+     "site_hi": 180.0,
+     "k": 0.8595,
+     "n": 11,
+     "max_err_pp": 2.22,
+     "level_range": [
+      156.7,
+      179.8
+     ]
+    },
+    {
+     "site_lo": 180.0,
+     "site_hi": 195.0,
+     "k": 0.8808,
+     "n": 43,
+     "max_err_pp": 3.05,
+     "level_range": [
+      180.2,
+      194.9
+     ]
+    },
+    {
+     "site_lo": 195.0,
+     "site_hi": null,
+     "k": 0.8816,
+     "n": 4,
+     "max_err_pp": 0.14,
+     "level_range": [
+      195.1,
+      200.7
+     ]
+    }
+   ]
+  },
+  "max_err_basis": "選定方法的 leave-one-out 最大絕對誤差（pp）"
+ },
+ "alpha": -30.6605,
+ "beta": 1.04105
 }
