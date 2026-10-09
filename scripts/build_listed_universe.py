@@ -40,6 +40,10 @@ from data_audit import (  # noqa: E402  共用同一套 TLS 設定與逗號安�
 # 上櫃公司掛牌名冊。只靠「今天有成交」會漏掉當天完全沒成交的上櫃股，
 # 名冊補上這一塊，跟上市的 t187ap03_L 是對稱的。
 TPEX_ROSTER = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O"
+# 2026-10-09（先.五十六-A1）：官方停止交易清單。TPEx「上櫃股票變更交易、分盤交易、管理股票與停止交易資訊」
+# （SuspensionOfTrading=Ｙ）；TWSE「集中市場暫停交易證券」（TradingHaltDate／TradingResumptionDate）。
+TPEX_CMODE = "https://www.tpex.org.tw/openapi/v1/tpex_cmode"
+TWSE_TWTAWU = "https://openapi.twse.com.tw/v1/exchangeReport/TWTAWU"
 
 OUT = ROOT / "data" / "listed_universe.json"
 TZ = timezone(timedelta(hours=8))
@@ -88,6 +92,47 @@ def collect_today(sess) -> tuple[set[str], dict]:
     return seen, meta
 
 
+def _roc(d) -> str | None:
+    """民國日期字串（1151008）→ 2026-10-08；轉不出來回 None，不猜。"""
+    t = str(d or "").strip()
+    if len(t) == 7 and t.isdigit():
+        return f"{int(t[:3]) + 1911:04d}-{t[3:5]}-{t[5:]}"
+    return None
+
+
+def collect_suspended(sess, today: str) -> tuple[dict, dict]:
+    """官方停止交易中的代號 → {trading_status, source, since}；以及各來源 meta。"""
+    out: dict = {}
+    meta: dict = {}
+    try:
+        rows = sess.get(TPEX_CMODE, timeout=90).json()
+        n = 0
+        for r in rows:
+            code = str(r.get("SecuritiesCompanyCode", "")).strip()
+            flag = str(r.get("SuspensionOfTrading", "")).strip()
+            if is_stock_code(code) and flag in ("Ｙ", "Y"):
+                # tpex_cmode 的 Date 是資料日期，不是停止交易起日，存成 as_of
+                out[code] = {"trading_status": "SUSPENDED_OFFICIAL", "source": "TPEx tpex_cmode",
+                             "as_of": _roc(r.get("Date"))}
+                n += 1
+        meta["tpex_cmode"] = {"ok": True, "rows": len(rows), "suspended": n}
+    except Exception as e:
+        meta["tpex_cmode"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    try:
+        rows = sess.get(TWSE_TWTAWU, timeout=90).json()
+        n = 0
+        for r in rows:
+            code = str(r.get("Code", "")).strip()
+            halt, resume = _roc(r.get("TradingHaltDate")), _roc(r.get("TradingResumptionDate"))
+            if is_stock_code(code) and halt and halt <= today and (not resume or resume > today):
+                out[code] = {"trading_status": "SUSPENDED_OFFICIAL", "source": "TWSE TWTAWU", "since": halt}
+                n += 1
+        meta["twse_twtawu"] = {"ok": True, "rows": len(rows), "suspended": n}
+    except Exception as e:
+        meta["twse_twtawu"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
+    return out, meta
+
+
 def main() -> int:
     today = datetime.now(TZ).date().isoformat()
     sess = make_session()
@@ -102,11 +147,22 @@ def main() -> int:
         return 2
 
     prev = {}
+    prev_susp = {}
     if OUT.exists():
         try:
-            prev = json.loads(OUT.read_text(encoding="utf-8")).get("last_seen", {})
+            _old = json.loads(OUT.read_text(encoding="utf-8"))
+            prev = _old.get("last_seen", {})
+            prev_susp = _old.get("suspended", {}) or {}
         except Exception as e:
             print(f"  ! 舊檔讀不到，重新開始累積：{type(e).__name__} {e}")
+    suspended, susp_meta = collect_suspended(sess, today)
+    # 某個來源抓不到時沿用該來源上一份標記（標 stale），不把停止交易股誤判成「恢復」
+    for src_key, src_name in (("tpex_cmode", "TPEx tpex_cmode"), ("twse_twtawu", "TWSE TWTAWU")):
+        if not susp_meta.get(src_key, {}).get("ok"):
+            for c, v in prev_susp.items():
+                if v.get("source") == src_name and c not in suspended:
+                    suspended[c] = {**v, "stale": True}
+    meta.update(susp_meta)
 
     last_seen = dict(prev)
     for c in seen:
@@ -127,10 +183,11 @@ def main() -> int:
         "active": active,
         "inactive": inactive,
         "last_seen": last_seen,
+        "suspended": dict(sorted(suspended.items())),
     }, ensure_ascii=False, indent=1), encoding="utf-8")
 
     print(f"今日官方可見代號 {len(seen)} 檔（來源：{'、'.join(ok_sources)}）")
-    print(f"active {len(active)} 檔、inactive {len(inactive)} 檔 → {OUT.relative_to(ROOT)}")
+    print(f"active {len(active)} 檔、inactive {len(inactive)} 檔、官方停止交易 {len(suspended)} 檔 → {OUT.relative_to(ROOT)}")
     return 0
 
 

@@ -1,10 +1,10 @@
 {
  "meta": {
-  "generated_at": "2026-10-09T04:43:34.845551+08:00",
+  "generated_at": "2026-10-09T21:28:22.385875+08:00",
   "sources": {
    "twse_quotes": {
     "ok": true,
-    "usable": 1226,
+    "usable": 1228,
     "rows": 1380
    },
    "tpex_quotes": {
@@ -21,6 +21,16 @@
     "ok": true,
     "usable": 893,
     "rows": 893
+   },
+   "tpex_cmode": {
+    "ok": true,
+    "rows": 23,
+    "suspended": 7
+   },
+   "twse_twtawu": {
+    "ok": true,
+    "rows": 1,
+    "suspended": 0
    }
   },
   "inactive_after_days": 30,
@@ -4316,5 +4326,42 @@
   "7856": "2026-10-09",
   "7812": "2026-10-09",
   "6604": "2026-10-09"
+ },
+ "suspended": {
+  "2067": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  },
+  "3085": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  },
+  "3625": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  },
+  "3632": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  },
+  "4804": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  },
+  "6167": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  },
+  "6173": {
+   "trading_status": "SUSPENDED_OFFICIAL",
+   "source": "TPEx tpex_cmode",
+   "as_of": "2026-10-08"
+  }
  }
 }

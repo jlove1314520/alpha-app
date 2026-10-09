@@ -1290,22 +1290,35 @@ async function runSmokeTest(baseUrl, headless = true) {
       const rnd = [];
       while (rnd.length < 18 && pool.length) rnd.push(pool[Math.floor(Math.random() * pool.length)]);
       const codes = [...new Set([...must, ...rnd])].slice(0, 25);
+      // 名冊裡有官方停止交易股時，固定加驗一檔，確保新判準每輪都被測到（不靠隨機抽中）
+      const suspAll = Object.keys((typeof LISTED_SUSPENDED !== "undefined" && LISTED_SUSPENDED) || {});
+      if (suspAll.length && !codes.some(c => suspAll.includes(c))) codes.push(suspAll[0]);
       const bad = [];
+      const susp = [];
       for (const c of codes) {
+        // 2026-10-09 冒煙第 42 項判準修改（經總司令【先.五十六】A2 核准）：官方停止交易（SUSPENDED_OFFICIAL）者
+        // 改驗「有沒有正確顯示停止交易說明」，不再要求有報價；其餘照舊必須有價。
+        if (typeof suspendedInfo === "function" && suspendedInfo(c)) {
+          susp.push(c);
+          const lbl = typeof noQuoteLabel === "function" ? noQuoteLabel(c, false) : "";
+          if (!String(lbl).includes("停止交易（官方")) bad.push(c + "(停止交易說明缺)");
+          continue;
+        }
         const q = resolveQuote(c, false);
         if (!q || q.price == null || !isFinite(q.price)) bad.push(c);
       }
-      return { checked: codes.length, bad };
+      return { checked: codes.length, bad, susp };
     });
     if (r.error) quoteChainErrors.push(r.error);
     else if (r.bad.length) quoteChainErrors.push(`${r.bad.length}/${r.checked} 檔在市股票查不到報價：${r.bad.slice(0, 8).join(",")}`);
     else quoteChainErrors.length = 0;
     results.quote_chain_checked = r.checked || 0;
+    results.quote_chain_suspended = (r.susp || []).join(",");
   } catch (e) {
     quoteChainErrors.push(`測試本身出錯：${e.message || e}`);
   }
   record("42. 官方在市名冊內的股票不得無報價（四層回退鏈：live→quotes_tw→quotes_all_tw→歷史收盤）",
-    quoteChainErrors.length === 0, quoteChainErrors.join("; ") || `抽驗 ${results.quote_chain_checked} 檔全部有價`);
+    quoteChainErrors.length === 0, quoteChainErrors.join("; ") || `抽驗 ${results.quote_chain_checked} 檔全部有價或正確標示官方停止交易${results.quote_chain_suspended ? "（停止交易：" + results.quote_chain_suspended + "）" : ""}`);
 
   // 43.【2026-09-06新增，總司令健檢.一】診斷橫幅的「資料過舊」要看交易日曆，不是 rolling 24 小時。
   // 原本每逢週末與國定假日都會誤報「大盤/類股/三大法人 資料過舊」，但那些資料本來就只在

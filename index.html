@@ -2099,6 +2099,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 「這一檔在市、只是我們沒接好」。總司令實測新增自選股顯示「無報價」，資料其實
   // 三個檔案裡都有，就是後者。
   let LISTED_UNIVERSE=null;
+  // 2026-10-09（先.五十六-A1）：官方停止交易清單（TPEx tpex_cmode／TWSE TWTAWU），來自 listed_universe.json 的 suspended
+  let LISTED_SUSPENDED={};
+  function suspendedInfo(code){return (LISTED_SUSPENDED&&LISTED_SUSPENDED[code]&&LISTED_SUSPENDED[code].trading_status==='SUSPENDED_OFFICIAL')?LISTED_SUSPENDED[code]:null}
+  // 沒有報價時要顯示的文字：官方停止交易者顯示「停止交易（官方）」，取代「無報價」
+  function noQuoteLabel(code,us){
+    const s=!us&&suspendedInfo(code);
+    if(s)return '停止交易（官方'+(s.since?'，'+s.since+' 起':(s.as_of?'，資料日 '+s.as_of:''))+'）';
+    return '無報價（'+noQuoteReason(code,us)+'）';
+  }
   async function ensureListedUniverse(){
     if(LISTED_UNIVERSE)return LISTED_UNIVERSE;
     try{
@@ -2106,6 +2115,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       if(!r.ok)throw new Error('HTTP '+r.status);
       const d=await r.json();
       LISTED_UNIVERSE=new Set(d.active||[]);
+      LISTED_SUSPENDED=(d.suspended&&typeof d.suspended==='object')?d.suspended:{};
     }catch(e){
       console.warn('[ensureListedUniverse]',e);recordGlobalError('ensureListedUniverse',e);
       if(!LISTED_UNIVERSE)LISTED_UNIVERSE=new Set();
@@ -3072,7 +3082,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const q=resolveQuote(code,us);
       const iq=(q&&q.tier==='live')?q:null;
       const rawQ=q;
-      if(!q){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · 無報價（${noQuoteReason(code,us)}）</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b></div>`;continue}
+      if(!q){rowEl.innerHTML=`<div class="nm"><b>${nm}</b><span>${code}${us?' · 美股':''} · ${noQuoteLabel(code,us)}</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b></div>`;continue}
       const price=q.price;
       const chg=q.change??0;
       const pct=q.change_pct??0;
@@ -4958,8 +4968,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         if(sp&&sp.length>=2)renderStockChart(code,sp.map(c=>({close:c})),false);
         setTxt('trend-note',`來源：${QUOTE_TIER_LABEL[fb.tier]||fb.tier}${fb.asof?'（'+fb.asof+'）':''}${fb.is_stale?'　⚠ 落後大盤當日最新日期，非現價':''}　FinMind 本次無資料`);
       }else{
-        setTxt('sh-price','—');setTxt('sh-chg','無報價（'+noQuoteReason(code,false)+'）');
-        document.getElementById('trend-chart').innerHTML='<div class="note">無報價（'+noQuoteReason(code,false)+'）</div>';
+        setTxt('sh-price','—');setTxt('sh-chg',noQuoteLabel(code,false));
+        document.getElementById('trend-chart').innerHTML='<div class="note">'+noQuoteLabel(code,false)+'</div>';
       }
     }
     loadMarginChip(code,px);
@@ -8195,7 +8205,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-08.1840';
+  const APP_VERSION='2026-10-09.2130';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
