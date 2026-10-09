@@ -1,5 +1,6 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+- 2026-10-09 18:07 hypothesis_queue 心跳模式，#82 暫停，未開新軸；交辦佇列未開始 `- [ ]` 0條，無交辦可做；工作目錄有他來源未commit變更（含 UU data/audit_report.json、本地/遠端已分歧），不觸碰、未 pull、不納入本輪 commit；未探測投信/指數公司網站；is_holdout_consumed 未動
 - 2026-10-09 12:05 hypothesis_queue 心跳模式，#82 暫停，未開新軸；交辦佇列未開始 `- [ ]` 0條；git pull 因他來源遺留的 data/audit_report.json 未解衝突（UU）且本地/遠端已分歧（43 vs 7）而失敗，未觸碰、未納入本輪 commit
 - 2026-10-09 06:10 hypothesis_queue 心跳模式，#82 暫停，未開新軸；交辦佇列未開始 `- [ ]` 0條，`- [!]` 32條無可自行解除；git pull 被他來源遺留的 UU data/audit_report.json 衝突擋下，不觸碰、不納入本次 commit
 - 2026-10-08 18:06 hypothesis_queue 心跳模式，#82 暫停，未開新軸；交辦佇列未開始 `- [ ]` 6條（先.五十一-2～7），皆需改 shioaji_quotes.py／alpha_live_server.py／index.html 且 DevQueue 正進行 -2，[自行裁量] 讓行不並發寫入；工作目錄有他來源未commit變更，不納入；is_holdout_consumed()=False 未動
