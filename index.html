@@ -3880,10 +3880,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(pct<160)return{l:'注意',c:'var(--warn)'};
     return{l:'正常',c:'var(--good)'};
   }
+  // 先.五十三-A2：主數字、三條線、圖表、入口卡一律用對齊籌碼K的 ratio_pct_ck；沒有 ck（校準檔缺失）才退回本站原值
+  function marginVal(h){return h&&h.ratio_pct_ck!=null?h.ratio_pct_ck:(h?h.ratio_pct:null)}
   function marginChart(history){
-    const pts=history.filter(h=>h.ratio_pct!=null);
+    const pts=history.filter(h=>marginVal(h)!=null);
     if(!pts.length)return '<div class="note">查無可畫的維持率數字</div>';
-    const vals=pts.map(h=>h.ratio_pct);
+    const vals=pts.map(h=>marginVal(h));
     const ymin=Math.min(100,Math.floor(Math.min(...vals)/10)*10-10);
     const ymax=Math.max(220,Math.ceil(Math.max(...vals)/10)*10+10);
     const W=320,H=110,pad=4,n=pts.length;
@@ -3891,9 +3893,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const x=i=>n<=1?W/2:(i/(n-1))*(W-2*pad)+pad;
     const band=(v,color)=>v<ymin||v>ymax?'':`<line x1="0" y1="${y(v).toFixed(1)}" x2="${W}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="1" stroke-dasharray="3,3" opacity=".65"/>`;
     const lineEls=n>=2
-      ?`<polyline points="${pts.map((h,i)=>`${x(i).toFixed(1)},${y(h.ratio_pct).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2"/>`
-      :`<circle cx="${W/2}" cy="${y(pts[0].ratio_pct).toFixed(1)}" r="4" fill="var(--accent)"/>`;
-    const lastX=x(n-1).toFixed(1),lastY=y(pts[n-1].ratio_pct).toFixed(1);
+      ?`<polyline points="${pts.map((h,i)=>`${x(i).toFixed(1)},${y(marginVal(h)).toFixed(1)}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2"/>`
+      :`<circle cx="${W/2}" cy="${y(marginVal(pts[0])).toFixed(1)}" r="4" fill="var(--accent)"/>`;
+    const lastX=x(n-1).toFixed(1),lastY=y(marginVal(pts[n-1])).toFixed(1);
     return `<svg viewBox="0 0 ${W} ${H}" style="width:100%">
       ${band(160,'var(--warn)')}${band(150,'var(--serious)')}${band(130,'var(--critical)')}
       ${lineEls}<circle cx="${lastX}" cy="${lastY}" r="3.5" fill="var(--accent)"/>
@@ -3919,30 +3921,40 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     const valid=history.filter(h=>!h.data_incomplete&&h.ratio_pct!=null);
     const last=history[history.length-1],prev=valid[valid.length-1];
-    const ratio=calib&&typeof calib.ratio_mean==='number'?calib.ratio_mean:null;
-    const conv=v=>ratio&&v!=null?`<div class="note" id="margin-conv" style="color:var(--ink-4);margin-top:2px">換算籌碼K口徑 ≈ ${(v*ratio).toFixed(1)}%（本站 × ${ratio}，八日對帳比值，估算）</div>`:'';
+    // 先.五十三-A2／A3：k、N、最大誤差都從校準檔讀（不寫死）；warn 時只降級成「校準待更新」警告，不隱藏數字
+    const k=calib&&typeof calib.k==='number'?calib.k:(calib&&typeof calib.ratio_mean==='number'?calib.ratio_mean:null);
+    const calHead=calib&&k!=null
+      ?`<div class="note" id="margin-calib" style="margin-top:2px">對齊籌碼K（係數 ${k}${calib.mode==='segmented'?'，依水位分段校準':''}，近 ${calib.n_points!=null?calib.n_points:calib.n_days} 日最大誤差 ${calib.max_err_pp!=null?calib.max_err_pp:'?'} pp）</div>`
+        +(calib.warn?`<div class="note" id="margin-calib-warn" style="color:var(--warn);margin-top:2px">⚠ 校準待更新：有讀數誤差超過 ${calib.warn_pp!=null?calib.warn_pp:0.5} pp，數字僅供參考</div>`:'')
+      :'<div class="note" style="color:var(--warn)">校準檔讀取失敗，以下為本站算法原值</div>';
+    const raw=h=>h&&h.ratio_pct_ck!=null&&h.ratio_pct!=null?`<div class="note" id="margin-raw" style="color:var(--ink-4);margin-top:2px">本站原值 ${h.ratio_pct.toFixed(1)}%</div>`:'';
+    const fmt=h=>{const v=marginVal(h);return v!=null?v.toFixed(1)+'%':'—'};
     if(last.data_incomplete){
       sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:20px;font-weight:700;color:var(--warn)">資料不完整</div><div class="note">資料日 ${marginDataDay(last)}：${last.incomplete_reason||'分子分母不同天或取得失敗，不相除'}</div>`
-        +(prev?`<div class="note" style="margin-top:4px">上一筆有效：資料日 ${marginDataDay(prev)}　${prev.ratio_pct.toFixed(1)}%（本站算法）</div>${conv(prev.ratio_pct)}`:'<div class="note">尚無有效的上一筆</div>')+`</div>`;
+        +(prev?`<div class="note" style="margin-top:4px">上一筆有效：資料日 ${marginDataDay(prev)}　${fmt(prev)}</div>${raw(prev)}`:'<div class="note">尚無有效的上一筆</div>')+calHead+`</div>`;
     }else{
-      const lv=marginLevel(last.ratio_pct);
-      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—'}</div><div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}（本站算法）</div>${conv(last.ratio_pct)}</div>`;
+      const lv=marginLevel(marginVal(last));
+      sumEl.innerHTML=`<div style="padding:6px 0 10px"><div id="margin-main" style="font-size:28px;font-weight:700;color:${lv?lv.c:'var(--ink)'}">${fmt(last)}</div><div class="note">${lv?lv.l+' · ':''}資料日 ${marginDataDay(last)}</div>${calHead}${raw(last)}</div>`;
     }
     let chartHtml=marginChart(valid);
     try{
-      const bv=bf&&Array.isArray(bf.records)?bf.records.filter(r=>!r.data_incomplete&&r.ratio_pct!=null):[];
+      const bv=bf&&Array.isArray(bf.records)?bf.records.filter(r=>!r.data_incomplete&&marginVal(r)!=null):[];
       if(bv.length){
-        const lo=(bf.low_2025_04&&bf.low_2025_04.ratio_pct!=null)?`2025-04 股災最低 ${bf.low_2025_04.ratio_pct.toFixed(1)}%（${bf.low_2025_04.date}）`:'';
-        const lo24=(bf.low_2024_08&&bf.low_2024_08.ratio_pct!=null)?`；2024-08 最低 ${bf.low_2024_08.ratio_pct.toFixed(1)}%（${bf.low_2024_08.date}）`:'';
-        chartHtml+=`<div class="note" style="margin-top:8px">歷史校準（本站算法回補 ${bv.length} 天，2024-07～08、2025-03～05）</div>${marginChart(bv)}<div class="note" id="margin-crash-low" style="color:var(--serious)">${lo}${lo24}</div>`;
+        const lv_=o=>o&&marginVal(o)!=null?marginVal(o).toFixed(1)+'%':null;
+        const lo=lv_(bf.low_2025_04)?`2025-04 股災最低 ${lv_(bf.low_2025_04)}（${bf.low_2025_04.date}）`:'';
+        const lo24=lv_(bf.low_2024_08)?`；2024-08 最低 ${lv_(bf.low_2024_08)}（${bf.low_2024_08.date}）`:'';
+        // 先.五十五 分段校準後狀態字串帶原因（例：校準未驗證（低於實測最低水位 156.7%））→ 用 startsWith
+        const unvN=bv.filter(r=>String(r.ck_status||'').startsWith('校準未驗證')).length,unv=unvN>0;
+        chartHtml+=`<div class="note" style="margin-top:8px">歷史回補（對齊籌碼K換算，2024-07～08、2025-03～05，${bv.length} 天）</div>${marginChart(bv)}<div class="note" id="margin-crash-low" style="color:var(--serious)">${lo}${lo24}</div>`
+          +(unv?'<div class="note" id="margin-crash-unverified" style="color:var(--warn)">⚠ 股災段換算「校準未驗證」（'+unvN+' 天）：分段係數只用 2026-07～10 的籌碼K讀數校準，實測最低水位約 156.7%，更低的股災水位尚無讀數可驗證</div>':'');
       }
     }catch(e){console.warn('[loadMarginMaintenance:backfill-chart]',e);recordGlobalError('loadMarginMaintenance:backfill-chart',e)}
     if(chartEl)chartEl.innerHTML=chartHtml;
-    if(noteEl)noteEl.textContent=`本站算法：上市（TWSE）全部可融資證券（含 ETF）同一天的「逐股融資餘額 × 收盤 × 1000 ÷ 融資金額」（皆 TWSE 官方，累積 ${history.length} 天）。此公式與愛玩股、FinLab 公開的標準公式相同；FinLab 的分母另外加計上櫃。與籌碼K的口徑換算比值見上方灰字（八日對帳估算，差異原因尚未查明），僅供趨勢參考。分子分母不同天時一律標「資料不完整」、不相除；日期一律為資料日。`;
+    if(noteEl)noteEl.textContent=`本站算法：上市（TWSE）全部可融資證券（含 ETF）同一天的「逐股融資餘額 × 收盤 × 1000 ÷ 融資金額」（皆 TWSE 官方，累積 ${history.length} 天）。此公式與愛玩股、FinLab 公開的標準公式相同；FinLab 的分母另外加計上櫃。主數字已換算成對齊籌碼K的口徑（本站原值 × 係數 k，k 由總司令提供的籌碼K讀數與同日本站原值重算，差異原因尚未查明），灰字附本站原值；160／150／130 三條線與圖表都用換算後數字。分子分母不同天時一律標「資料不完整」、不相除；日期一律為資料日。`;
     const ee=document.getElementById('chips-entry-margin');
     if(ee){
-      if(last.data_incomplete){ee.textContent='資料不完整'+(prev?'（上一筆 '+prev.ratio_pct.toFixed(1)+'%）':'');ee.style.color='var(--warn)'}
-      else{const lv=marginLevel(last.ratio_pct);ee.textContent=(last.ratio_pct!=null?last.ratio_pct.toFixed(1)+'%':'—')+(lv?'·'+lv.l:'');ee.style.color=lv?lv.c:'var(--ink)'}
+      if(last.data_incomplete){ee.textContent='資料不完整'+(prev&&marginVal(prev)!=null?'（上一筆 '+marginVal(prev).toFixed(1)+'%）':'');ee.style.color='var(--warn)'}
+      else{const lv=marginLevel(marginVal(last));ee.textContent=(marginVal(last)!=null?marginVal(last).toFixed(1)+'%':'—')+(lv?'·'+lv.l:'');ee.style.color=lv?lv.c:'var(--ink)'}
     }
   }
 
@@ -8205,7 +8217,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-09.2130';
+  const APP_VERSION='2026-10-09.2135';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

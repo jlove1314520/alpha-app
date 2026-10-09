@@ -1841,14 +1841,14 @@ async function runSmokeTest(baseUrl, headless = true) {
       const src = await (await fetch("index.html", { cache: "no-store" })).text();
       await loadMarginMaintenance();
       const sum = (document.getElementById("margin-summary") || {}).innerText || "";
-      const conv = (document.getElementById("margin-conv") || {}).innerText || "";
+      const conv = (document.getElementById("margin-calib") || {}).innerText || "";
       const cal = await (await fetch("data/margin_ratio_calibration.json", { cache: "no-store" })).json();
-      return { hard: /0\.881|0\.8815/.test(src), sum, conv, ratio: cal.ratio_mean, crash: ((document.getElementById("margin-crash-low") || {}).innerText || "") };
+      return { hard: /0\.881|0\.8815/.test(src), sum, conv, ratio: cal.k != null ? cal.k : cal.ratio_mean, crash: ((document.getElementById("margin-crash-low") || {}).innerText || "") };
     });
     if (r.hard) mgErrors.push("index.html 寫死了 0.881 比值");
     if (!/資料日/.test(r.sum)) mgErrors.push("卡片沒有顯示資料日：" + r.sum.slice(0, 80));
     if (/資料不完整/.test(r.sum) && !/上一筆有效/.test(r.sum)) mgErrors.push("資料不完整時沒有顯示上一筆有效日期");
-    if (r.conv && !r.conv.includes(String(r.ratio))) mgErrors.push("換算灰字的比值與 calibration 檔不一致");
+    if (r.conv && !r.conv.includes(String(r.ratio))) mgErrors.push("對齊籌碼K說明的係數與 calibration 檔不一致");
     mgInfo = `摘要：${r.sum.replace(/\s+/g, " ").slice(0, 60)}｜換算：${r.conv.slice(0, 40) || "（無有效值）"}｜${r.crash.slice(0, 40)}`;
   } catch (e) { mgErrors.push(`測試本身出錯：${e.message || e}`); }
   record("56. 融資維持率卡：資料日、資料不完整顯示上一筆有效、口徑換算比值讀檔不寫死", mgErrors.length === 0, mgErrors.join("; ") || mgInfo);
@@ -1874,10 +1874,51 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { nvErrors.push(`測試本身出錯：${e.message || e}`); }
   record("57. 新版提示：版本相同不顯示、sw.js 較新時頂端顯示「有新版，點此更新」", nvErrors.length === 0, nvErrors.join("; "));
 
+
+  // 58.【2026-10-08 先.五十三-A】維持率主數字改用對齊籌碼K（ratio_pct_ck）；係數 k、N、最大誤差讀校準檔；
+  // 校準檔 warn=true 時顯示「校準待更新」但不隱藏數字；股災段標「校準未驗證」
+  const ckErrors = [];
+  let ckInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const hist = await (await fetch("data/margin_maintenance.json", { cache: "no-store" })).json();
+      const cal = await (await fetch("data/margin_ratio_calibration.json", { cache: "no-store" })).json();
+      await loadMarginMaintenance();
+      const valid = hist.filter((h) => !h.data_incomplete && h.ratio_pct != null);
+      const last = hist[hist.length - 1], prev = valid[valid.length - 1];
+      const ref = last.data_incomplete ? prev : last;
+      const sum = (document.getElementById("margin-summary") || {}).innerText || "";
+      const calib = (document.getElementById("margin-calib") || {}).innerText || "";
+      const unv = !!document.getElementById("margin-crash-unverified");
+      const entry = (document.getElementById("chips-entry-margin") || {}).textContent || "";
+      // 模擬 warn=true：攔截一次 fetch，確認只降級成警告、數字仍在
+      const of = window.fetch;
+      window.fetch = (u, o) => String(u).includes("margin_ratio_calibration")
+        ? Promise.resolve(new Response(JSON.stringify({ ...cal, warn: true }), { status: 200 })) : of(u, o);
+      try { await loadMarginMaintenance(); } finally { window.fetch = of; }
+      const warnShown = !!document.getElementById("margin-calib-warn");
+      const sumW = (document.getElementById("margin-summary") || {}).innerText || "";
+      await loadMarginMaintenance();
+      return { ck: ref && ref.ratio_pct_ck, raw: ref && ref.ratio_pct, sum, calib, k: cal.k, n: cal.n_points, mx: cal.max_err_pp, unv, entry, warnShown, sumW };
+    });
+    if (r.ck == null) ckErrors.push("資料檔最新有效紀錄沒有 ratio_pct_ck");
+    else {
+      if (!r.sum.includes(r.ck.toFixed(1) + "%")) ckErrors.push(`主數字不是 ratio_pct_ck（${r.ck}）`);
+      if (!r.sum.includes("本站原值 " + r.raw.toFixed(1) + "%")) ckErrors.push("灰字沒附本站原值");
+      if (!r.entry.includes(r.ck.toFixed(1) + "%")) ckErrors.push("市場頁入口卡沒用 ratio_pct_ck");
+    }
+    if (!(r.calib.includes(String(r.k)) && r.calib.includes(String(r.n)) && r.calib.includes(String(r.mx)))) ckErrors.push("「對齊籌碼K」說明的係數／日數／最大誤差與校準檔不一致：" + r.calib);
+    if (!r.warnShown) ckErrors.push("校準檔 warn=true 時沒有顯示「校準待更新」");
+    if (r.ck != null && !r.sumW.includes(r.ck.toFixed(1) + "%")) ckErrors.push("warn=true 時數字被隱藏（只應降級成警告）");
+    if (!r.unv) ckErrors.push("股災段沒有標「校準未驗證」");
+    ckInfo = `主數字 ${r.ck}%（本站 ${r.raw}%）｜${r.calib.slice(0, 50)}｜warn 測試：${r.warnShown ? "顯示警告、數字保留" : "未顯示"}`;
+  } catch (e) { ckErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("58. 維持率主數字對齊籌碼K（ratio_pct_ck）、係數讀檔、warn 只降級警告、股災段標校準未驗證", ckErrors.length === 0, ckErrors.join("; ") || ckInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
