@@ -18594,3 +18594,29 @@ D. 待審清單清理（總司令裁示）
 - [x] **先.五十六-C8 先.四十九 清單加註棄用寫法**（互動視窗執行）〔docs 升級清單第 11 項＋先.四十九-三 行加註；目前棄用寫法共 17 處（auto_rebalance_bb90 3、shioaji_order_server 1、shioaji_quotes 11、build_disposal_flags 2）。〕
 - [x] **先.五十六-D 待審清單清理（結案 8、駁回 2 寫 GRAVEYARD、保留 5）＋件數更新**（互動視窗執行）〔AWAITING_REVIEW：結案 8 項＋先.五十一-4（已裁示方案 b）、駁回先.四十五-四與先.十七（寫入 research/STRATEGY_GRAVEYARD.md）、結案.一保留、先.二十二／二十三／二十四／二十九-二 標 Cowork 核對中；等待中 15→5。〕
 - [x] **先.五十六-12 smoke＋selftest＋preflight（唯讀）＋commit 回報**（互動視窗執行）〔selftest 240 PASS（+11）；冒煙全部通過；preflight（唯讀）PASS 18／FAIL 1（第 19 項：尚未入金，符合預期）。A、B 段由分身另行回報。〕
+
+# 2026-10-10【先.五十七：週一首批前收尾＋Cowork 核對四件的結論】（總司令裁示原文，動工前先寫入）
+
+先寫進 PENDING_QUEUE 再動工
+【先.五十七】週一首批前收尾＋Cowork 核對四件的結論（不得切換模式、不得觸發真錢委託）
+A. 首批前（10/12 09:05 前必須完成）
+1. 排行榜 patch（a54e69aa）改到 alpha_live_server.py 與 shioaji_quotes.py：立即重啟 alpha_live_server，完成七之二節四步驗證（build sha＝HEAD、OPTIONS 預檢、/health stale_process=false），貼出實際輸出。shioaji_quotes 下個交易日 08:30 啟動時確認 build sha。
+2. price_history.json 補齊 00646、00697B 的歷史缺口（官方來源優先，FinMind 只作補充並標 source）。補 selftest：三檔最近 60 個交易日不得有缺日（休市日除外）。
+3. 週日 20:00 跑一次 preflight（唯讀），結果寫進本機 status。第 19 項若仍 FAIL（尚未入金），推播一則「明天 09:05 首批將因未入金而擋單」提醒總司令。
+B. Cowork 核對結論（寫入 AWAITING_REVIEW 結案紀錄）
+4. 先.二十二：①ABANDONED 可接受，另加 reason=DATA_UNAVAILABLE 註記欄，不改核心檔值域；②T-B 作廢重跑認可，前提是首次執行的中止 log 存在且證明未印出績效，請附路徑；③adjust.py yfinance 路徑的 0050 瑕疵由互動視窗修復（核心檔單一寫入者）。
+5. 先.二十三：三點皆認可；趨勢槓桿路線（1.25～1.75× 趨勢規則）收斂結案寫入 GRAVEYARD，註明 S3-C6（信用利差危機閘門）為不同機制、不受影響。
+6. 先.二十四：認可分級與「只重檢仍被引用或未結案的 TW 價格型試驗」。優先查證 #418、#423、#424～#428 的價格資料路徑是否經過 adjust.py 的 yfinance 路徑；若有，在回測期（2025 年以前）用乾淨來源重跑並對照，2025 年之後的樣本外不得重跑。結果回報給 Cowork。
+7. 先.二十九-二：①由 A2 處理；②③接受，首批真錢的對帳報告即為券商對帳回放的實測，結案。
+8. 更新 AWAITING_REVIEW 件數；smoke 全套＋selftest＋preflight（唯讀），commit 後回報。
+心跳：PENDING_QUEUE 各子項標 - [x]，PROGRESS_HEARTBEAT.jsonl append 一行。
+
+- [ ] **先.五十七-A1 alpha_live_server 七之二重啟並貼實際輸出**（互動視窗執行）
+- [!] **先.五十七-A1b shioaji_quotes 下個交易日 08:30 啟動時確認 build sha**〔時間閘：2026-10-12 08:30 後〕（互動視窗執行）
+- [ ] **先.五十七-A2 price_history 補齊 00646、00697B 缺口（官方優先、FinMind 補充標 source）＋60 交易日無缺日自測**（互動視窗執行）
+- [ ] **先.五十七-A3 週日 20:00 唯讀 preflight 排程＋第 19 項 FAIL 時推播提醒**（互動視窗執行）
+- [ ] **先.五十七-B4 先.二十二 結論（DATA_UNAVAILABLE 註記、T-B 中止 log 路徑、adjust.py yfinance 0050 瑕疵修復）**（互動視窗執行）
+- [ ] **先.五十七-B5 先.二十三 結案＋趨勢槓桿路線寫入 GRAVEYARD（註明 S3-C6 不受影響）**（互動視窗執行）
+- [ ] **先.五十七-B6 先.二十四 價格路徑查證 #418、#423、#424～#428（2025 前可重跑對照，樣本外不得重跑）**（互動視窗執行：分身處理）
+- [ ] **先.五十七-B7 先.二十九-二 結案**（互動視窗執行）
+- [ ] **先.五十七-8 件數更新＋smoke＋selftest＋preflight＋commit 回報**（互動視窗執行）
