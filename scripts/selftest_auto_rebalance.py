@@ -959,6 +959,49 @@ c = _cr(0)
 check("自檢第 19 項：餘額 0 → FAIL 並附註可能不在 account_balance 支援範圍、不顯示金額",
       c["result"] == "FAIL" and "#83761" in c["detail"] and "1,010,000" not in c["detail"] and "元" not in c["detail"])
 
+# ---- 先.五十六-C6：現金不足 ERROR 後，下一個交易日自動重跑同一期、不跳過、不重複送 ----
+_calC6 = {"year": 2026, "closed": ["2026-10-09"]}
+p = setup({"mode": "LIVE_WITH_VETO", "total_capital_twd": 4_000_000})
+D8 = datetime(2026, 10, 8, 9, 5, tzinfo=TW)
+PC8 = {c: (v[0], "2026-10-07") for c, v in PC.items()}
+r = run(p, Fake(cash=0), now=D8, pc=PC8)
+_stL = json.loads(p.scoped("LIVE").state.read_text(encoding="utf-8"))
+check("C6：第 1 批現金不足→ERROR、記待重跑期別 T1／202610、未送單", r["state"] == "ERROR" and (_stL.get("retry") or {}).get("label") == "T1")
+check("C6：10/9 休市→不觸發", A.should_run(p, datetime(2026, 10, 9, 9, 5, tzinfo=TW), A.load_config(p), _calC6) is None)
+check("C6：下一個交易日（10/12）09:05 觸發重跑", A.should_run(p, datetime(2026, 10, 12, 9, 5, tzinfo=TW), A.load_config(p), _calC6) == "retry_after_error")
+D12 = datetime(2026, 10, 12, 9, 5, tzinfo=TW); PC12 = {c: (v[0], "2026-10-08") for c, v in PC.items()}
+bC = Fake()
+r1 = run(p, bC, now=D12, pc=PC12)
+r2 = run(p, bC, now=D12 + timedelta(minutes=35), pc=PC12)
+r3 = run(p, bC, now=D12 + timedelta(minutes=40), pc=PC12)
+_keys = [o.get("key") for o in bC.placed]
+check("C6：重跑同一期 T1（冪等鍵 LIVE-202610-T1-R1-…）並送出", r1["state"] == "WAITING_VETO" and len(bC.placed) >= 1 and all("-202610-T1-R1-" in k for k in _keys))
+check("C6：再跑不重複送", len(_keys) == len(set(_keys)) and not r3["submitted"])
+_stL = json.loads(p.scoped("LIVE").state.read_text(encoding="utf-8"))
+check("C6：送出後清除待重跑紀錄", "retry" not in _stL)
+# 月底批次（T2）現金不足，下一個交易日已是下個月，也要重跑原本那一期
+p = setup({"mode": "LIVE", "total_capital_twd": 4_000_000, "tranche": 2})
+A._write_json(p.scoped("LIVE").state, {"positions": {}, "applied": [], "next_tranche": 2, "last_done": "202609"})
+_calM = {"year": 2026, "closed": []}
+r = run(p, Fake(cash=0), now=NOW)                      # 10/30 月底
+check("C6：月底第 2 批現金不足→記 retry T2／202610", (json.loads(p.scoped("LIVE").state.read_text(encoding="utf-8")).get("retry") or {}).get("label") == "T2")
+NOV2 = datetime(2026, 11, 2, 9, 5, tzinfo=TW)
+check("C6：下個月第一個交易日仍觸發重跑（不跳過上一期）", A.should_run(p, NOV2, A.load_config(p), _calM) == "retry_after_error")
+bM = Fake(); r = run(p, bM, now=NOV2, pc={c: (v[0], "2026-10-30") for c, v in PC.items()})
+check("C6：跨月重跑仍用原期別與月份（-202610-T2-）", bM.placed and all("-202610-T2-" in o["key"] for o in bM.placed))
+
+# ---- 先.五十六-C7：status 依模式族分開 ----
+p = setup({"mode": "LIVE_WITH_VETO"})
+A.report_error(p, "真錢族錯誤測試")
+_lv = p.base / "LIVE" / "status.json"
+_cfg = json.loads(p.config.read_text(encoding="utf-8")); _cfg["mode"] = "SIMULATION"; p.config.write_text(json.dumps(_cfg), encoding="utf-8")
+A.write_status(p, note="sim")
+_sv = p.base / "SIMULATION" / "status.json"
+check("C7：LIVE 與 SIMULATION 的 status 各自一份、互不覆蓋",
+      _lv.exists() and _sv.exists() and json.loads(_lv.read_text(encoding="utf-8")).get("last_error") == "真錢族錯誤測試"
+      and "last_error" not in json.loads(_sv.read_text(encoding="utf-8")))
+check("C7：共用路徑的 status 跟著目前模式族走", p.status == _sv and p.scoped("LIVE").status == _lv)
+
 if SKIPS:
     print("SKIP：", SKIPS)
 print("失敗：", fails if fails else "無")

@@ -18421,7 +18421,7 @@ push 後停下等 Cowork 核對。
 
 - [!] **先.四十九-一 前提：10/8 第 1 批真錢結算對帳完成且無 ERROR**〔時間閘：2026-10-08 13:40 結算後〕　〔互動視窗 10/8 00:4x：模式已由總司令切為 LIVE_WITH_VETO；開盤前唯讀自檢 PASS 17／FAIL 0，09:05 should_run＝first_tranche。**本條（升級＋重啟常駐服務＋失敗退回）由互動視窗執行，自走軌道不得代做**；解除條件：10/8 13:40 settle 心跳 OK 且 status 無 last_error。〕　〔2026-10-08 17:2x 核對：前提不成立——10/8 09:05／09:40 兩次 run 皆 ERROR（INSUFFICIENT_CASH，查得可用餘額 0），整批拒單、未送任何委託、13:40 NOTHING_TO_SETTLE；status 紅橫幅。依本條一「否則延後並回報」，升級延後。〕
 - [!] **先.四十九-二 記錄 1.7.4 版本鎖與來源（可一鍵退回）**〔依一〕
-- [!] **先.四十九-三 升級 1.7.7＋模擬環境驗證清單＋--preflight 全 PASS**〔依一〕
+- [!] **先.四十九-三 升級 1.7.7＋模擬環境驗證清單＋--preflight 全 PASS**〔依一〕　〔先.五十六-C8 加註：升級時一併改棄用寫法 sj.constant.Unit→sj.Unit、api.Contracts→api.contracts（見 docs/AUTO_TRADING_SETUP.md 升級清單第 11 項）〕
 - [!] **先.四十九-四 失敗即退回 1.7.4 並重跑 --preflight**〔依三〕
 - [!] **先.四十九-五 釘 1.7.7、AWAITING_REVIEW 結案**〔依三〕
 
@@ -18589,8 +18589,8 @@ D. 待審清單清理（總司令裁示）
 
 - [ ] **先.五十六-A 4804 停止交易標記＋冒煙第42項判準修改（總司令核准）＋套用兩個 patch＋七之二重啟**（互動視窗執行：分身處理，DevQueue 勿派）
 - [ ] **先.五十六-B CM估兩種擬合 leave-one-out 比較＋依事前規則選定＋App 主數字**（互動視窗執行：分身處理，DevQueue 勿派）
-- [ ] **先.五十六-C6 ERROR（現金不足）後次一交易日 09:05 自動重跑同一期 T1 的查證與自測**（互動視窗執行）
-- [ ] **先.五十六-C7 status.json 依模式族分開、App 只顯示生效族**（互動視窗執行）
-- [ ] **先.五十六-C8 先.四十九 清單加註棄用寫法**（互動視窗執行）
-- [ ] **先.五十六-D 待審清單清理（結案 8、駁回 2 寫 GRAVEYARD、保留 5）＋件數更新**（互動視窗執行）
-- [ ] **先.五十六-12 smoke＋selftest＋preflight（唯讀）＋commit 回報**（互動視窗執行）
+- [x] **先.五十六-C6 ERROR（現金不足）後次一交易日 09:05 自動重跑同一期 T1 的查證與自測**（互動視窗執行）〔查證：10/9 為官方休市日，09:05／09:40 NOT_TRIGGERED 屬正確；10/12 should_run＝first_tranche，第 1 批本就會重跑。但發現漏洞：第 2 批起只在月底觸發，月底現金不足會跳過該期。已修：整批現金不足→state 記 retry（期別＋月份），should_run 優先回 retry_after_error，重跑沿用原期別與月份（冪等鍵相同不重複送），送出後清除。自測 9 案（T1 跨休市日重跑、不重複送、清除 retry、月底 T2 跨月仍重跑原期）全 PASS。〕
+- [x] **先.五十六-C7 status.json 依模式族分開、App 只顯示生效族**（互動視窗執行）〔Paths.status 改依模式族（<族>/status.json；未 scoped 依設定檔模式），alpha_live_server /auto/status 只讀生效族；舊共用 status 搬入 LIVE 族並移除 10/7 模擬來源欄位。自測 2 案 PASS；App 無需改（只顯示伺服器回傳的生效族 status）。〕
+- [x] **先.五十六-C8 先.四十九 清單加註棄用寫法**（互動視窗執行）〔docs 升級清單第 11 項＋先.四十九-三 行加註；目前棄用寫法共 17 處（auto_rebalance_bb90 3、shioaji_order_server 1、shioaji_quotes 11、build_disposal_flags 2）。〕
+- [x] **先.五十六-D 待審清單清理（結案 8、駁回 2 寫 GRAVEYARD、保留 5）＋件數更新**（互動視窗執行）〔AWAITING_REVIEW：結案 8 項＋先.五十一-4（已裁示方案 b）、駁回先.四十五-四與先.十七（寫入 research/STRATEGY_GRAVEYARD.md）、結案.一保留、先.二十二／二十三／二十四／二十九-二 標 Cowork 核對中；等待中 15→5。〕
+- [x] **先.五十六-12 smoke＋selftest＋preflight（唯讀）＋commit 回報**（互動視窗執行）〔selftest 240 PASS（+11）；冒煙全部通過；preflight（唯讀）PASS 18／FAIL 1（第 19 項：尚未入金，符合預期）。A、B 段由分身另行回報。〕

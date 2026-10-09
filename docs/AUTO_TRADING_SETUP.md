@@ -251,3 +251,4 @@
 8. **OrderEventDict 唯讀**：1.7 起委託回報是唯讀的 OrderEventDict，程式不得以 `isinstance(msg, dict)` 判斷、不得寫入 msg、不得用 `msg.dict`（群組 #84781 #80952）。本專案已關閉回呼、改主動查詢，升級後仍需 grep 確認。
 9. **login 參數**：1.7 已移除 `contracts_cb`／`contracts_timeout`／`fetch_contract`，所有 `login()` 呼叫不得帶這三個參數（群組 #81680）。
 10. **長駐行情程式**：加 `faulthandler`（原生崩潰時留下堆疊），崩潰後由排程自動重啟（1.7.6／1.7.7 有長時間執行崩潰回報，群組 #84933 #84934）。
+11. **棄用寫法（先.五十六-C8 加註，升級 1.7.7 時一併處理）**：`sj.constant.Unit` → `sj.Unit`；`api.Contracts` → `api.contracts`（1.7 起小寫為正式寫法，舊寫法仍可用但已標淘汰，永豐群組 #84715）。升級時 grep 全 repo 替換並重跑自測與模擬掛撤單。

@@ -72,7 +72,6 @@ class Paths:
         self.base = Path(base) if base else DEFAULT_DIR
         self.config = self.base / "config.local.json"
         self.stop_flag = self.base / "STOP.flag"
-        self.status = self.base / "status.json"
         self.public_hb = self.base / "auto_heartbeat.json"
         self.heartbeat = Path(heartbeat) if heartbeat else (self.base / "heartbeat.jsonl" if base else HEARTBEAT)
         self.family = family
@@ -81,6 +80,19 @@ class Paths:
             self.pending = d / "pending_orders.json"
             self.state = d / "state.json"
             self.ledger = d / "orders.jsonl"
+
+    @property
+    def status(self) -> Path:
+        """先.五十六-C7：status 依模式族分開（<族>/status.json）。未 scoped 的共用路徑依本機設定檔的目前模式決定族，
+        App（經 /auto/status）只看得到目前生效族的狀態，LIVE 與 SIMULATION 不再互相覆蓋。"""
+        fam = self.family
+        if not fam:
+            try:
+                cfg = json.loads(self.config.read_text(encoding="utf-8"))
+                fam = mode_family(cfg.get("mode") if cfg.get("mode") in MODES else "SIMULATION")
+            except Exception:
+                fam = "SIMULATION"
+        return self.base / fam / "status.json"
 
     def scoped(self, mode: str) -> "Paths":
         return Paths(self.base, self.heartbeat, mode_family(mode))
@@ -687,6 +699,17 @@ def _cash_crosscheck(paths: Paths, broker, avail: float, now: datetime) -> None:
         print(f"[warn] 可用額度交叉核對失敗：{type(e).__name__}（只記警告）", flush=True)
 
 
+def _mark_retry(paths: Paths, label: str, ym: str, today) -> None:
+    """先.五十六-C6：整批因現金不足被拒→記下期別，下一個交易日 09:05 should_run 會觸發重跑同一期（不跳過）。"""
+    try:
+        st = _read_json(paths.state) or {}
+        if not st.get("retry"):
+            st["retry"] = {"label": label, "ym": ym, "since": today.isoformat(), "reason": "INSUFFICIENT_CASH"}
+            _write_json(paths.state, st)
+    except Exception as e:
+        print(f"[warn] 記錄待重跑期別失敗：{type(e).__name__}", flush=True)
+
+
 def _cash_ok(paths: Paths, broker, cfg: dict, mode: str, orders: list, now: datetime, batch_id: str, res: dict) -> bool:
     """INSUFFICIENT_CASH：整批金額×1.003（手續費緩衝）不得超過可用餘額；查不到一律拒（fail closed）。"""
     need = sum(o["qty"] * o["limit_price"] for o in orders) * CASH_BUFFER
@@ -836,12 +859,17 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
             budget = max(0.0, budget - sum(_filled_amount(r) for k, r in latest.items()
                                            if k.startswith(f"{fam}-{bym}-{label}-")))
     else:
-        if state.get("last_done") == ym:
+        retry = state.get("retry") if isinstance(state.get("retry"), dict) else None
+        if not retry and state.get("last_done") == ym:
             res["skipped"] = list(state.get("last_keys", []))
             return res
-        n = int(state.get("next_tranche") or cfg.get("tranche", 1))
-        label = f"T{n}" if n <= tranche_total else "M"
-        bym, rnd = ym, 1
+        if retry:
+            # 先.五十六-C6：同一期（期別與月份照舊）重跑，冪等鍵相同→不會重複送
+            label, bym, rnd = str(retry.get("label")), str(retry.get("ym")), 1
+        else:
+            n = int(state.get("next_tranche") or cfg.get("tranche", 1))
+            label = f"T{n}" if n <= tranche_total else "M"
+            bym, rnd = ym, 1
         budget = ((cfg.get("total_capital_twd") or 0) / tranche_total if label != "M"
                   else _num(cfg.get("monthly_contribution_twd")))
     res.update(tranche=label, round=rnd)
@@ -932,7 +960,11 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         return res
 
     if sim_veto_on(cfg, mode) and not same_pend:
-        if ok_orders and _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+        if ok_orders and not _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+            if not drill_label:
+                _mark_retry(paths, label, bym, today)
+            return res
+        if ok_orders:
             exec_after = now + timedelta(minutes=VETO_MINUTES if veto_minutes is None else veto_minutes)
             lines = "；".join(f"{o['symbol']} {'賣' if o.get('action') == 'Sell' else '買'}{o['qty']}股 限價{o['limit_price']}" for o in ok_orders)
             total = sum(_num(o.get("amount")) for o in ok_orders)
@@ -963,11 +995,15 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
         res["state"] = "ERROR"
         return res
 
-    if not ok_orders or not _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+    if not ok_orders:
+        return res
+    if not _cash_ok(paths, broker, cfg, mode, ok_orders, now, batch_id, res):
+        _mark_retry(paths, label, bym, today)
         return res
 
     state["batch"] = {"label": label, "ym": bym, "round": rnd, "budget": float(batch["budget"]) if batch else budget,
                       "round_date": today.isoformat()}
+    state.pop("retry", None)                         # 先.五十六-C6：已送出，重跑完成
     state["pre_batch_positions"] = dict(positions)   # 先.五十-5：本批送單前券商持股（unit=Share），供零股驗證比對
     state["pre_batch_date"] = today.isoformat()
     _write_json(paths.state, state)
@@ -1109,6 +1145,8 @@ def should_run(paths: Paths, now: datetime, cfg: dict, cal: dict | None) -> str 
     state = _read_json(sp.state) or {}
     if state.get("batch"):
         return "open_batch"
+    if state.get("retry"):
+        return "retry_after_error"   # 先.五十六-C6：前一交易日整批現金不足被拒，下一個交易日重跑同一期
     ym = d.strftime("%Y%m")
     if state.get("last_done") == ym:
         return None
