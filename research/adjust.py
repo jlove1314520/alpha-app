@@ -323,6 +323,21 @@ def adjustment_events(stock_id: str, start_date: str = "1990-01-01") -> pd.DataF
 # 2003-06-30～2024-12-31、日報酬 −9.13%～+7.95%，合於漲跌幅限制）。
 # 只對四位數台股代號生效；美股等非台股標的無此限制，不受影響。
 _TW_DAILY_LIMIT_IMPOSSIBLE = 0.11
+# 2026-10-10（先.五十七-B4）：守衛原本只認四位數代號，ETF（00646、00631L、00647L…）不在保護範圍。
+# 擴大到台股代號樣式（4 碼數字＋最多 2 碼數字或大寫字母）。槓桿／反向 ETF（代號以 L／R 結尾）
+# 漲跌幅上限是 ±20%（2 倍），所以門檻放寬到 ±21%。
+# 註：追蹤國外指數的 ETF（如 00646、00697B）實際無漲跌幅限制，真實大波動也可能觸發；觸發後果只是改走
+# FinMind 乾淨路徑（保守方向），不會丟資料。
+_TW_DAILY_LIMIT_IMPOSSIBLE_LEVERAGED = 0.21
+
+
+def _tw_code_limit(stock_id: str):
+    """台股代號回傳「物理上不可能」的單日報酬門檻；非台股代號回 None（不檢查）。"""
+    import re as _re
+    sid = str(stock_id).strip().upper()
+    if not _re.fullmatch(r"\d{4}[0-9A-Z]{0,2}", sid):
+        return None
+    return _TW_DAILY_LIMIT_IMPOSSIBLE_LEVERAGED if sid[-1] in ("L", "R") and len(sid) > 4 else _TW_DAILY_LIMIT_IMPOSSIBLE
 
 
 def _yf_series_physically_impossible(df: pd.DataFrame, stock_id: str) -> bool:
@@ -333,18 +348,19 @@ def _yf_series_physically_impossible(df: pd.DataFrame, stock_id: str) -> bool:
     """
     try:
         sid = str(stock_id)
-        if not (len(sid) == 4 and sid.isdigit()):
+        limit = _tw_code_limit(sid)
+        if limit is None:
             return False
         a = pd.to_numeric(df["close"], errors="coerce").dropna()
         a = a[a > 0].to_numpy(dtype=float)
         if len(a) < 3:
             return False
         r = a[1:] / a[:-1] - 1.0
-        bad = int((abs(r) > _TW_DAILY_LIMIT_IMPOSSIBLE).sum())
+        bad = int((abs(r) > limit).sum())
         if bad:
             worst = float(max(r.min(), r.max(), key=abs))
             print(f"::warning::adjust: {sid} 的 yfinance 還原序列有 {bad} 筆物理上不可能的日報酬"
-                  f"（最極端 {worst * 100:.2f}%，台股漲跌幅上限 ±10%），改走 FinMind 路徑")
+                  f"（最極端 {worst * 100:.2f}%，門檻 ±{limit * 100:.0f}%），改走 FinMind 路徑")
         return bad > 0
     except Exception as e:  # noqa: BLE001
         print(f"::warning::adjust: 物理合理性檢查失敗（降級為不切換）：{type(e).__name__}: {e}")
@@ -425,6 +441,12 @@ def _finmind_adjusted_frame(stock_id: str, start_date: str) -> pd.DataFrame:
         raw["source"] = None  # keep column-shape consistent even in the empty case
         return raw
     raw = raw.sort_values("date").reset_index(drop=True)
+    # 2026-10-10（先.五十七-B4）：FinMind 偶有「沒成交的日子收盤記成 0」（00647L 自 2016-12 起 28 天），
+    # 直接算報酬會出現無限大；收盤 <=0 一律視為無成交、排除並記警告（不補值、不猜價）。
+    _zero = pd.to_numeric(raw["close"], errors="coerce").fillna(0) <= 0
+    if bool(_zero.any()):
+        print(f"::warning::adjust: {stock_id} 的 FinMind 原始價有 {int(_zero.sum())} 天收盤 <=0（無成交），已排除")
+        raw = raw[~_zero].reset_index(drop=True)
     events = adjustment_events(stock_id, start_date)
 
     factor_cum = pd.Series(1.0, index=raw.index)

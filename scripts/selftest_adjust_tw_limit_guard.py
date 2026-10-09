@@ -46,8 +46,15 @@ check("平盤序列不誤判", not adjust._yf_series_physically_impossible(frame
 
 # ③ 只對台股四位數代號生效
 check("美股代號(SPY)不受影響", not adjust._yf_series_physically_impossible(frame([100.0, 25.0]), "SPY"))
-check("非四位數台股代號(00631L)不受影響",
-      not adjust._yf_series_physically_impossible(frame([100.0, 25.0]), "00631L"))
+# 2026-10-10（先.五十七-B4）：守衛擴大到台股 ETF 代號；槓桿／反向（L／R 結尾）門檻 ±21%
+check("槓桿 ETF(00631L) 單日 +18% 在 ±20% 範圍內不誤判",
+      not adjust._yf_series_physically_impossible(frame([100.0, 118.0, 120.0]), "00631L"))
+check("槓桿 ETF(00631L) 單日 −75% 判不可能（舊版只認四位數，這裡會漏）",
+      adjust._yf_series_physically_impossible(frame([100.0, 25.0, 26.0]), "00631L"))
+check("一般 ETF(00646) 單日 −50% 判不可能",
+      adjust._yf_series_physically_impossible(frame([100.0, 50.0, 51.0]), "00646"))
+check("一般 ETF(0050) 單日 +9% 不誤判",
+      not adjust._yf_series_physically_impossible(frame([100.0, 109.0, 110.0]), "0050"))
 check("四位數代號的 −50% 仍判不可能",
       adjust._yf_series_physically_impossible(frame([100.0, 50.0, 51.0]), "2454"))
 

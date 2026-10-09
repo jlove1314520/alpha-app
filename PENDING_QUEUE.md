@@ -18611,12 +18611,12 @@ B. Cowork 核對結論（寫入 AWAITING_REVIEW 結案紀錄）
 8. 更新 AWAITING_REVIEW 件數；smoke 全套＋selftest＋preflight（唯讀），commit 後回報。
 心跳：PENDING_QUEUE 各子項標 - [x]，PROGRESS_HEARTBEAT.jsonl append 一行。
 
-- [ ] **先.五十七-A1 alpha_live_server 七之二重啟並貼實際輸出**（互動視窗執行）
+- [x] **先.五十七-A1 alpha_live_server 七之二重啟並貼實際輸出**（互動視窗執行）〔10/10 00:23 重啟：HEAD 518631fde、啟動 log [build] git sha=518631f、OPTIONS 200 含精確來源＋allow-credentials:true、/health stale_process=False。〕
 - [!] **先.五十七-A1b shioaji_quotes 下個交易日 08:30 啟動時確認 build sha**〔時間閘：2026-10-12 08:30 後〕（互動視窗執行）
-- [ ] **先.五十七-A2 price_history 補齊 00646、00697B 缺口（官方優先、FinMind 補充標 source）＋60 交易日無缺日自測**（互動視窗執行）
-- [ ] **先.五十七-A3 週日 20:00 唯讀 preflight 排程＋第 19 項 FAIL 時推播提醒**（互動視窗執行）
-- [ ] **先.五十七-B4 先.二十二 結論（DATA_UNAVAILABLE 註記、T-B 中止 log 路徑、adjust.py yfinance 0050 瑕疵修復）**（互動視窗執行）
-- [ ] **先.五十七-B5 先.二十三 結案＋趨勢槓桿路線寫入 GRAVEYARD（註明 S3-C6 不受影響）**（互動視窗執行）
+- [x] **先.五十七-A2 price_history 補齊 00646、00697B 缺口（官方優先、FinMind 補充標 source）＋60 交易日無缺日自測**（互動視窗執行）〔新增 scripts/backfill_etf_price_gaps.py：TWSE STOCK_DAY（0050、00646）、TPEx tradingStock（00697B，仟股／仟元換算）官方單股月資料，只補缺不覆蓋、逐筆標 source；00646 補 42 天、00697B 補 41 天、0050 不缺；FinMind 未用到。新增 scripts/selftest_price_history_gaps.py（三檔近 60 交易日無缺日）PASS。根因（每日全市場端點常漏這兩檔）未處理，自測會持續偵測。〕
+- [x] **先.五十七-A3 週日 20:00 唯讀 preflight 排程＋第 19 項 FAIL 時推播提醒**（互動視窗執行）〔scripts/scheduler/preflight_reminder.py＋一次性排程 AlphaPreflightReminder1011_2000（10/11 20:00）：唯讀自檢寫本機 status，第 19 項 FAIL 即推播「明天首批將被擋單」。推播替身試跑確認邏輯。〕
+- [x] **先.五十七-B4 先.二十二 結論（DATA_UNAVAILABLE 註記、T-B 中止 log 路徑、adjust.py yfinance 0050 瑕疵修復）**（互動視窗執行）〔①#410 registry／LEDGER 加 reason=DATA_UNAVAILABLE（值域不變）；③adjust.py：守衛擴大到台股 ETF 代號（L／R 結尾門檻 ±21%）、FinMind 收盤 <=0 排除（00647L 28 天），selftest_adjust_tw_limit_guard 14 項 PASS；②**前提不成立**：無獨立中止 log，只有 trend_leverage_tw_result.json 的 first_run_voided 欄位與 LEDGER #414 自述，待裁示。〕
+- [x] **先.五十七-B5 先.二十三 結案＋趨勢槓桿路線寫入 GRAVEYARD（註明 S3-C6 不受影響）**（互動視窗執行）〔STRATEGY_GRAVEYARD 新增趨勢槓桿路線收斂結案，註明 S3-C6 為不同機制不受影響；AWAITING_REVIEW 先.二十三 結案。〕
 - [x] **先.五十七-B6 先.二十四 價格路徑查證 #418、#423、#424～#428（2025 前可重跑對照，樣本外不得重跑）**（互動視窗執行：分身處理）〔分身完成，報告 research/PRICE_PATH_AUDIT_2026-10-10.md：#418（0050 經守衛改走 FinMind，07:46 執行晚於守衛）、#423/#425、#424/#426、#427/#428 的判定依據皆未走 adjust.py yfinance 台股路徑。間接：#421 追蹤驗證的 00647L 用 yfinance，回測期改 FinMind 重跑年化差 1.84pp（原 1.61pp），仍 ≤2pp 通過，#422/#424/#426 前提不變。另發現 FinMind 00647L 有 28 天收盤價為 0（_finmind_adjusted_frame 未過濾），未改核心檔、交互動視窗。樣本外未重跑。〕
-- [ ] **先.五十七-B7 先.二十九-二 結案**（互動視窗執行）
-- [ ] **先.五十七-8 件數更新＋smoke＋selftest＋preflight＋commit 回報**（互動視窗執行）
+- [x] **先.五十七-B7 先.二十九-二 結案**（互動視窗執行）〔AWAITING_REVIEW 先.二十九-二 結案。〕
+- [x] **先.五十七-8 件數更新＋smoke＋selftest＋preflight＋commit 回報**（互動視窗執行）〔AWAITING_REVIEW 等待中 5→3（結案.一、先.二十二〔②待裁示〕、先.二十四〔報告待 Cowork 讀〕）；selftest_auto_rebalance 240 PASS、price gap 自測 PASS、guard 自測 14 PASS、trial_registry --check PASS；冒煙全部通過；preflight（唯讀）PASS 18／FAIL 1（第 19 項尚未入金）。〕
