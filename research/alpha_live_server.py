@@ -727,6 +727,21 @@ def _strip_index_keys(quotes: dict) -> dict:
     return {k: v for k, v in (quotes or {}).items() if not _is_index_key(k)}
 
 
+SCANNERS_PATH = Path(os.environ.get("ALPHA_SCANNERS_PATH") or (Path(__file__).parent / ".live_scanners_sinopac.json"))
+
+
+@app.get("/live/scanners")
+def live_scanners(x_alpha_local_token: str | None = Header(default=None)):
+    """2026-10-08 先.五十一-4：排行榜（shioaji_quotes.py 盤中每 60 秒 api.scanners 寫的本機檔）。
+    只回今天的資料；沒有就 available=false 並說明原因。**token 一律必檢。**"""
+    _check_token(x_alpha_local_token)
+    doc = _read_json_safe(SCANNERS_PATH)
+    if not isinstance(doc, dict) or not str(doc.get("generated_at") or "").startswith(datetime.now(TW_TZ).date().isoformat()):
+        return {"available": False, "reason": "今日尚無排行榜（09:00–13:30 盤中才查，或 shioaji_quotes.py 未在跑）"}
+    return {"available": True, "generated_at": doc.get("generated_at"), "lists": doc.get("lists") or {},
+            "errors": doc.get("errors") or {}}
+
+
 @app.get("/live/indices")
 def live_indices(x_alpha_local_token: str | None = Header(default=None)):
     """櫃買指數＋37類股指數（2026-09-04四修.二）：來源優先記憶體（tick-push），其次熱檔；

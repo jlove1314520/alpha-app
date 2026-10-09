@@ -629,6 +629,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：TWSE 官方28類產業分類指數，GitHub Actions 排程抓取</div>
       </div>
 
+      <div class="card" id="scanners-card">
+        <h3>排行榜（盤中前 50）</h3>
+        <div class="mkt-toggle" id="scanners-tabs"><span class="press mtg-opt" data-sk="change_pct_up" onclick="setScannerTab('change_pct_up')">漲幅</span><span class="press mtg-opt" data-sk="change_pct_down" onclick="setScannerTab('change_pct_down')">跌幅</span><span class="press mtg-opt" data-sk="volume" onclick="setScannerTab('volume')">成交量</span><span class="press mtg-opt" data-sk="amount" onclick="setScannerTab('amount')">成交值</span></div>
+        <div id="scanners-list" style="max-height:360px;overflow:auto"><div class="note">載入中…</div></div>
+        <div class="note" id="scanners-note"></div>
+        <div class="note">來源：永豐 Shioaji api.scanners（本機即時伺服器，盤中 09:00–13:30 每 60 秒更新）。非投資建議。</div>
+      </div>
+
       <!-- 2026-09-08（金流一.3）產業金流。
            **刻意不畫規格裡的 SVG 象限散點圖**：那張圖的 Y 軸是「近5日日均 vs
            近20日日均的加速度」、半徑是「20日累計」，但 20 日視窗現在還沒長出來
@@ -4193,6 +4201,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('basis-note').textContent='資料不足，無法計算。';
     }
   }
+  // 2026-10-08 先.五十一-4：排行榜卡。資料來自本機即時伺服器 /live/scanners（shioaji_quotes.py 每 60 秒查一次），
+  // App 端同樣最多 60 秒打一次；沒連線／非盤中誠實顯示原因，不放假資料。
+  const SCANNERS={tab:'change_pct_up',data:null,at:0};
+  async function loadScanners(){
+    const el=document.getElementById('scanners-list'),note=document.getElementById('scanners-note');if(!el)return;
+    try{
+      if(!LIVE.connected){SCANNERS.data=null;el.innerHTML='<div class="note">未連上本機即時伺服器，排行榜只在盤中由 Shioaji 提供</div>';if(note)note.textContent='';return}
+      if(!SCANNERS.data||Date.now()-SCANNERS.at>=60000){
+        const r=await liveFetch('/live/scanners',5000);if(!r.ok)throw new Error('HTTP '+r.status);
+        SCANNERS.data=await r.json();SCANNERS.at=Date.now();
+      }
+      renderScanners();
+    }catch(e){console.warn('[loadScanners]',e);recordGlobalError('loadScanners',e);el.innerHTML='<div class="note">排行榜讀取失敗：'+(e.message||String(e))+'</div>'}
+  }
+  function setScannerTab(k){SCANNERS.tab=k;_safeSync('renderScanners',renderScanners)}
+  function renderScanners(){
+    const el=document.getElementById('scanners-list'),note=document.getElementById('scanners-note');if(!el)return;
+    document.querySelectorAll('#scanners-tabs [data-sk]').forEach(b=>b.classList.toggle('on',b.dataset.sk===SCANNERS.tab));
+    const d=SCANNERS.data;
+    if(!d||!d.available){el.innerHTML='<div class="note">'+((d&&d.reason)||'今日尚無排行榜')+'</div>';if(note)note.textContent='';return}
+    const rows=(d.lists&&d.lists[SCANNERS.tab])||[];
+    const err=d.errors&&d.errors[SCANNERS.tab];
+    if(!rows.length){el.innerHTML='<div class="note">此類別本輪未取得'+(err?'：'+err:'')+'</div>'}
+    else el.innerHTML=rows.map((r,i)=>{
+      const cls=(r.change_pct||0)>=0?'u':'d';
+      const pct=r.change_pct==null?'—':((r.change_pct>=0?'+':'')+r.change_pct.toFixed(2)+'%');
+      const ext=SCANNERS.tab==='volume'?(' · '+(r.total_volume!=null?Number(r.total_volume).toLocaleString('zh-TW')+' 張':'—'))
+        :(SCANNERS.tab==='amount'?(' · '+(r.total_amount!=null?(Number(r.total_amount)/1e8).toFixed(1)+' 億':'—')):'');
+      return `<div class="row" style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--hairline)" onclick="openStock('${String(r.code||'').replace(/[^0-9A-Za-z]/g,'')}')"><span>${i+1}. ${r.name||''} <span class="note">${r.code||''}</span></span><span class="num ${cls}">${r.close!=null?nf(r.close):'—'} ${pct}<span class="note">${ext}</span></span></div>`;
+    }).join('');
+    if(note)note.textContent='更新時間 '+(d.generated_at?fmtTzHHMM(new Date(d.generated_at),'Asia/Taipei'):'—')+(err?'（本輪：'+err+'）':'');
+  }
   async function hydrateMarket(){
     renderMktToggle('market');
     // 2026-08-27修正：改用Promise.allSettled——Promise.all只要其中一個
@@ -4200,8 +4240,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 這些後續程式碼整批不執行，變成「一個面板壞掉、其他面板的收尾也跟著壞」。
     // 2026-09-08（金流一.3）產業金流併入同一批 allSettled——它自己有 try/catch，
     // 掛了只影響自己那張卡，不會拖垮其他面板（錯誤隔離原則）。
-    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction()]);
-    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction'];
+    const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction(),loadScanners()]);
+    const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction','loadScanners'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
     if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
     if(MKT_STATE.market==='FUT')_safeAsync('loadMarketFUT',loadMarketFUT);
@@ -7241,7 +7281,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     try{
       if(CURRENT_TAB==='home'){await hydrateHome();flashPriceEls('#wl-list');flashPriceEls('#home-idx-rows')}
       else if(CURRENT_TAB==='market'){
-        if(MKT_STATE.market==='TW'){await loadMarketIndex();flashPriceEls('#idx-rows');await loadHeatmap()}
+        if(MKT_STATE.market==='TW'){await loadMarketIndex();flashPriceEls('#idx-rows');await loadHeatmap();_safeAsync('loadScanners',loadScanners)}
         else if(MKT_STATE.market==='US'){await loadMarketUS();flashPriceEls('#us-idx-rows')}
         else if(MKT_STATE.market==='FUT'){await loadMarketFUT()}
       }else if(CURRENT_TAB==='stock'){liveUpdateStockPage()}
@@ -8219,7 +8259,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-09.2141';
+  const APP_VERSION='2026-10-09.2144';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

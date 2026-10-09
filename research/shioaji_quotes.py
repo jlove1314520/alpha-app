@@ -188,6 +188,21 @@ _seed_baseline_ref: dict = {"fn": None}
 _kbars_budget_lock = threading.Lock()
 
 
+def _rate_window_take() -> tuple[bool, str]:
+    """2026-10-08 先.五十一-4：只扣「10 秒共用窗」（與 kbars 同一個窗，上限 KBARS_RATE_MAX），
+    不扣 kbars 每日額度。官方文件 10 秒 50 次合計只列 ticks/kbars/snapshots/credit_enquires/
+    short_stock_sources，未列 scanners；原文要求排行榜計入查詢預算，這裡採較嚴做法併入共用窗。"""
+    now = time.time()
+    with _kbars_budget_lock:
+        win = [t for t in _kbars_budget["window"] if now - t < KBARS_RATE_WINDOW_SEC]
+        if len(win) >= KBARS_RATE_MAX:
+            _kbars_budget["window"] = win
+            return False, f"10 秒內已查 {len(win)} 次，達自訂上限 {KBARS_RATE_MAX}，本次不查"
+        win.append(now)
+        _kbars_budget["window"] = win
+        return True, ""
+
+
 def kbars_calls_today() -> int:
     with _kbars_budget_lock:
         return int(_kbars_budget["count"])
@@ -525,6 +540,65 @@ def _seed_all_baselines(codes: list[str], reason: str) -> None:
     print(f"  [當日基底] {reason}：{ok_n}/{len(codes)} 檔補到資料"
           f"（今日 api.kbars 已用 {kbars_calls_today()}/{KBARS_DAILY_BUDGET} 次）"
           + (f"；未補到：{'; '.join(msgs[:4])}" if msgs else ""), flush=True)
+
+
+# 2026-10-08 先.五十一-4：排行榜（api.scanners）。盤中 09:00–13:30 每 60 秒一輪 4 次查詢，
+# 結果寫 gitignored 本機檔給 alpha_live_server.py 的 /live/scanners 讀。
+SCANNERS_PATH = Path(__file__).parent / ".live_scanners_sinopac.json"
+SCANNERS_POLL_SEC = 60
+SCANNERS_COUNT = 50
+SCANNERS_SPECS = (  # (輸出鍵, ScannerType 名稱, ascending)
+    ("change_pct_up", "ChangePercentRank", False),
+    ("change_pct_down", "ChangePercentRank", True),
+    ("volume", "VolumeRank", False),
+    ("amount", "AmountRank", False),
+)
+
+
+def _scanner_row(it) -> dict:
+    g = (lambda k: it.get(k) if isinstance(it, dict) else getattr(it, k, None))
+    close, chg = _to_float(g("close")), _to_float(g("change_price"))
+    ref = (close - chg) if (close is not None and chg is not None) else None
+    pct = round(chg / ref * 100.0, 2) if (ref and chg is not None) else None
+    return {"code": g("code"), "name": g("name"), "close": close, "change_price": chg, "change_pct": pct,
+            "total_volume": g("total_volume"), "total_amount": g("total_amount")}
+
+
+def _is_scanner_window(now: datetime) -> bool:
+    m = now.hour * 60 + now.minute
+    return now.weekday() < 5 and 9 * 60 <= m < 13 * 60 + 30
+
+
+def _poll_scanners(api, sj, take=None, now_fn=None, path: Path | None = None) -> dict:
+    """查一輪排行榜並寫檔。每次查詢前扣共用 10 秒窗，被拒就該類別記原因、不重試。
+    任何失敗只影響該類別，不拋例外（不能讓常駐迴圈掛掉）。"""
+    take = take or _rate_window_take
+    now_fn = now_fn or (lambda: datetime.now(TW_TZ))
+    out = {"generated_at": now_fn().isoformat(), "count": SCANNERS_COUNT, "lists": {}, "errors": {}}
+    for key, stype, asc in SCANNERS_SPECS:
+        ok, why = take()
+        if not ok:
+            out["errors"][key] = why
+            continue
+        try:
+            items = api.scanners(scanner_type=getattr(sj.ScannerType, stype),
+                                 ascending=asc, count=SCANNERS_COUNT)
+            out["lists"][key] = [_scanner_row(it) for it in (items or [])]
+        except Exception as e:  # noqa: BLE001
+            out["errors"][key] = f"{type(e).__name__}"
+    try:
+        p = path or SCANNERS_PATH
+        tmp = p.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(out, ensure_ascii=False, default=str), encoding="utf-8")
+        for _ in range(10):
+            try:
+                tmp.replace(p)
+                break
+            except PermissionError:
+                time.sleep(0.05)
+    except Exception as e:  # noqa: BLE001
+        print(f"  [排行榜] 寫檔失敗（不影響串流）：{type(e).__name__}", flush=True)
+    return out
 
 
 def _write_feed_gap(doc: dict) -> None:
@@ -1685,6 +1759,7 @@ def run_stream_daemon() -> None:
         elapsed_since_dynamic_check = 0.0
 
         elapsed_since_window_check = 0.0
+        elapsed_since_scanners = 0.0  # 2026-10-08 先.五十一-4
         while True:
             time.sleep(FLUSH_INTERVAL_SEC)
             _flush_and_push(state)
@@ -1727,6 +1802,17 @@ def run_stream_daemon() -> None:
                               f"（固定 {len(fixed_stock_codes)} 檔不受影響）", flush=True)
                 except Exception as e:
                     print(f"  [動態訂閱] 這輪整批失敗，維持現狀：{type(e).__name__}: {e}", flush=True)
+
+            elapsed_since_scanners += FLUSH_INTERVAL_SEC
+            if elapsed_since_scanners >= SCANNERS_POLL_SEC:
+                elapsed_since_scanners = 0.0
+                if _is_scanner_window(datetime.now(TW_TZ).replace(tzinfo=None)):
+                    try:
+                        _sc = _poll_scanners(api, sj)
+                        if _sc.get("errors"):
+                            print(f"  [排行榜] 部分類別未取得：{_sc['errors']}", flush=True)
+                    except Exception as e:  # noqa: BLE001
+                        print(f"  [排行榜] 這輪失敗：{type(e).__name__}", flush=True)
 
             elapsed_since_window_check += FLUSH_INTERVAL_SEC
             if elapsed_since_window_check >= TRADING_WINDOW_POLL_SEC:
