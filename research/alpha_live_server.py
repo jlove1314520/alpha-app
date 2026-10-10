@@ -1194,7 +1194,7 @@ async def get_subscribe(x_alpha_local_token: str | None = Header(default=None)):
 # 虧損上限金額等）比自選股更能反映使用者的財務資訊，不應該進 git 歷史。
 USER_SETTINGS_PATH = Path(os.environ.get("ALPHA_USER_SETTINGS_PATH")
                           or (Path(__file__).parent / "data" / "user_settings.json"))
-ALLOWED_SETTINGS_KEYS = {"watchlist", "currency", "risk_control", "breakthrough_path"}
+ALLOWED_SETTINGS_KEYS = {"watchlist", "watchlists", "currency", "risk_control", "breakthrough_path"}  # watchlists：常備.開發-8 多自選清單（2026-10-11）
 
 
 @app.get("/settings")

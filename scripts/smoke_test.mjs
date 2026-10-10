@@ -2192,10 +2192,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { fcfErrors.push(`測試本身出錯：${e.message || e}`); }
   record("68. 台股財報分頁 FCF（近四季，標 FinMind 來源；無資料說明原因）", fcfErrors.length === 0, fcfErrors.join("; "));
 
+  // 69.【2026-10-11 常備.開發-8】多自選清單：舊單一清單格式自動遷移進「我的自選」、建立／切換／下架清單，
+  // 切換後 WL 與 localStorage alpha_wl 跟著換；只剩一個清單時不得下架；首頁顯示清單分頁。
+  const wlErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { wl: localStorage.getItem("alpha_wl"), lists: localStorage.getItem("alpha_wl_lists"), WL: WL.slice() };
+      const o = {};
+      try {
+        localStorage.removeItem("alpha_wl_lists"); WL = ["2330", "2317"]; localStorage.setItem("alpha_wl", JSON.stringify(WL));
+        const m = wlListsRead(); o.migrated = m.active === "我的自選" && JSON.stringify(m.lists["我的自選"]) === '["2330","2317"]';
+        o.create = wlCreate("測試清單"); o.afterCreate = JSON.stringify(WL);
+        WL.push("2454"); localStorage.setItem("alpha_wl", JSON.stringify(WL));
+        wlSwitch("我的自選"); o.back = JSON.stringify(WL) + "|" + localStorage.getItem("alpha_wl");
+        wlSwitch("測試清單"); o.again = JSON.stringify(WL);
+        o.tabs = document.getElementById("wl-tabs")?.innerText || "";
+        o.remove = wlRemove("測試清單"); o.afterRemove = JSON.parse(localStorage.getItem("alpha_wl_lists")).active + "|" + JSON.stringify(WL);
+        o.lastGuard = wlRemove("我的自選");
+        o.payload = Object.keys(_collectLocalSettings()).join(",");
+      } finally {
+        if (saved.lists == null) localStorage.removeItem("alpha_wl_lists"); else localStorage.setItem("alpha_wl_lists", saved.lists);
+        if (saved.wl == null) localStorage.removeItem("alpha_wl"); else localStorage.setItem("alpha_wl", saved.wl);
+        WL = saved.WL; renderWLTabs();
+      }
+      return o;
+    });
+    if (!r.migrated) wlErrors.push("舊單一清單未自動遷移進「我的自選」");
+    if (!r.create || r.afterCreate !== "[]") wlErrors.push(`建立新清單後應切到空清單：${r.create} ${r.afterCreate}`);
+    if (r.back !== '["2330","2317"]|["2330","2317"]') wlErrors.push(`切回我的自選後 WL／alpha_wl 不符：${r.back}`);
+    if (r.again !== '["2454"]') wlErrors.push(`切回測試清單應保留 2454：${r.again}`);
+    if (!/測試清單/.test(r.tabs) || !/我的自選/.test(r.tabs)) wlErrors.push(`首頁清單分頁未顯示兩個清單：${r.tabs}`);
+    if (!r.remove || r.afterRemove !== '我的自選|["2330","2317"]') wlErrors.push(`下架後應回到我的自選：${r.afterRemove}`);
+    if (r.lastGuard !== false) wlErrors.push("只剩一個清單時不得下架");
+    if (!/watchlists/.test(r.payload)) wlErrors.push(`/settings 同步內容缺 watchlists：${r.payload}`);
+  } catch (e) { wlErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("69. 多自選清單（舊格式遷移、建立／切換／下架、至少保留一個、/settings 同步含 watchlists）", wlErrors.length === 0, wlErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

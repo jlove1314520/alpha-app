@@ -535,6 +535,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <div class="card">
       <h3>自選股 <span class="more" onclick="editWL()">管理 →</span></h3>
+      <!-- 常備.開發-8（2026-10-11）：多自選清單。點清單名稱切換；「＋」新增；「下架」移除目前清單（至少保留一個）。 -->
+      <div id="wl-tabs" style="display:flex;gap:6px;overflow-x:auto;margin:-2px 0 8px"></div>
       <div id="wl-list"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
       <!-- 2026-08-27新增（P2-新，盤前盤後）：只在畫面上真的顯示了盤前/盤後價格時
            才出現，不是固定貼一段沒人看的警語。 -->
@@ -2600,7 +2602,47 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
   // ══════ 真實資料層（FinMind，瀏覽器直抓，免後端）══════
   const FM="https://api.finmindtrade.com/api/v4/data";
+  // 常備.開發-8（2026-10-11）：多自選清單。alpha_wl 仍是「目前清單」（既有程式全部照舊讀寫 WL），
+  // alpha_wl_lists＝{active, lists:{名稱:[代號]}} 存全部清單；切換時才把 WL 寫回 lists。舊格式第一次載入自動搬進「我的自選」。
+  const WL_DEFAULT_NAME='我的自選';
+  function wlListsRead(){
+    let o=null;try{o=JSON.parse(localStorage.getItem('alpha_wl_lists'))}catch(e){console.warn('[wlListsRead]',e);recordGlobalError('wlListsRead',e)}
+    if(!o||typeof o!=='object'||!o.lists||typeof o.lists!=='object'||!Object.keys(o.lists).length){
+      o={active:WL_DEFAULT_NAME,lists:{[WL_DEFAULT_NAME]:Array.isArray(WL)?WL.slice():[]}};
+    }
+    if(!o.lists[o.active])o.active=Object.keys(o.lists)[0];
+    o.lists[o.active]=Array.isArray(WL)?WL.slice():o.lists[o.active];  // 目前清單以 WL 為準
+    return o;
+  }
+  function wlListsWrite(o){localStorage.setItem('alpha_wl_lists',JSON.stringify(o))}
+  function _wlActivate(o,name){
+    o.active=name;wlListsWrite(o);WL=o.lists[name].slice();localStorage.setItem('alpha_wl',JSON.stringify(WL));
+    pushWatchlistSoon();pushSettingsSoon();renderWLTabs();hydrateHome();
+  }
+  function wlSwitch(name){const o=wlListsRead();if(!o.lists[name]||o.active===name)return false;wlListsWrite(o);_wlActivate(o,name);return true}
+  function wlCreate(name){
+    name=String(name||'').trim().slice(0,20);const o=wlListsRead();
+    if(!name||o.lists[name]){toast(name?'已有同名清單':'清單名稱不可空白');return false}
+    o.lists[name]=[];_wlActivate(o,name);return true;
+  }
+  function wlRemove(name){
+    const o=wlListsRead();if(!o.lists[name])return false;
+    if(Object.keys(o.lists).length<=1){toast('至少要保留一個清單');return false}
+    delete o.lists[name];_wlActivate(o,o.active===name?Object.keys(o.lists)[0]:o.active);return true;
+  }
+  function wlCreatePrompt(){const n=prompt('新清單名稱（最多 20 字）');if(n!=null)wlCreate(n)}
+  function wlRemovePrompt(){const o=wlListsRead();if(confirm('下架清單「'+o.active+'」？清單內代號一併移除（其他清單不受影響）'))wlRemove(o.active)}
+  function renderWLTabs(){
+    const el=document.getElementById('wl-tabs');if(!el)return;
+    const o=wlListsRead(),esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const chip=(on)=>'font-size:11.5px;padding:3px 10px;border-radius:12px;white-space:nowrap;cursor:pointer;border:1px solid var(--hairline);'+(on?'background:var(--accent);color:#fff;border-color:var(--accent)':'');
+    el.innerHTML=Object.keys(o.lists).map(n=>`<span class="press wl-tab" data-name="${esc(n)}" style="${chip(n===o.active)}">${esc(n)}（${o.lists[n].length}）</span>`).join('')
+      +`<span class="press" style="${chip(false)}" onclick="wlCreatePrompt()">＋</span>`
+      +(Object.keys(o.lists).length>1?`<span class="press" style="${chip(false)}" onclick="wlRemovePrompt()">下架</span>`:'');
+    el.querySelectorAll('.wl-tab').forEach(t=>t.addEventListener('click',()=>wlSwitch(t.dataset.name)));
+  }
   let WL=(()=>{try{return JSON.parse(localStorage.getItem('alpha_wl'))||["2330","2454","2317","1513","3231"]}catch(e){console.warn('[WL]',e);recordGlobalError('WL',e);return ["2330","2454","2317","1513","3231"]}})();
+  try{wlListsWrite(wlListsRead())}catch(e){console.warn('[wl migrate]',e);recordGlobalError('wl migrate',e)}  // 常備.開發-8：舊單一清單自動搬進「我的自選」
   let currentCode="2330";
   const _cache={};
   const FM_TTL=3*60*1000; // localStorage 快取有效期：3 分鐘，過期後才重新打 FinMind
@@ -3027,6 +3069,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   function toggleWlDetail(code){const d=document.querySelector(`[data-wl-detail="${code}"]`);if(!d)return;const open=d.hidden;d.hidden=!open;if(open)WL_DETAIL_OPEN.add(code);else WL_DETAIL_OPEN.delete(code)}
   let HYDRATE_HOME_SEQ=0;
   async function hydrateHome(){
+    _safeSync('renderWLTabs',renderWLTabs);  // 常備.開發-8
     const el=document.getElementById('wl-list');if(!el)return;
     // 2026-09-04 P0產品.一修正：初次載入與即時重繪可能同時執行，兩個迴圈會把列塞進同一個容器
     // 造成自選股重複出現。改成每次執行拿一個序號、列先組進fragment，最後只有「最新那次」才整批替換。
@@ -7361,11 +7404,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 「伺服器沒開是常態」處理），不影響 localStorage-only 的既有行為。
   let SETTINGS_PUSH_TIMER=null,SETTINGS_PULLED_ONCE=false;
   function _collectLocalSettings(){
-    return {watchlist:WL,currency:CCY,breakthrough_path:btRead()};  // 先.六十-A5：risk_control 已移除（引擎不讀）
+    return {watchlist:WL,watchlists:wlListsRead(),currency:CCY,breakthrough_path:btRead()};  // 先.六十-A5：risk_control 已移除（引擎不讀）
   }
   function _applyServerSettings(s){
     if(!s||typeof s!=='object')return;
     if(Array.isArray(s.watchlist)){WL=s.watchlist;localStorage.setItem('alpha_wl',JSON.stringify(WL))}
+    if(s.watchlists&&typeof s.watchlists==='object'&&s.watchlists.lists&&typeof s.watchlists.lists==='object'){
+      const o=s.watchlists;if(!o.lists[o.active])o.active=Object.keys(o.lists)[0];
+      if(o.active&&Array.isArray(s.watchlist))o.lists[o.active]=s.watchlist.slice();
+      if(o.active){wlListsWrite(o);try{renderWLTabs()}catch(e){console.warn('[applyServerSettings:wl]',e);recordGlobalError('applyWL',e)}}
+    }
     if(typeof s.currency==='string'){CCY=s.currency;localStorage.setItem('alpha_ccy',CCY)}
     if(s.breakthrough_path&&typeof s.breakthrough_path==='object'){localStorage.setItem('alpha_bt_path',JSON.stringify(s.breakthrough_path));try{renderBtPath()}catch(e){console.warn('[applyServerSettings:bt]',e);recordGlobalError('applyBt',e)}}
   }
@@ -8586,7 +8634,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0032';
+  const APP_VERSION='2026-10-11.0035';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
