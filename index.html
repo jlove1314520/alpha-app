@@ -7737,6 +7737,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   async function loadIntradayBars(code){
     try{
       const r=await liveFetch('/live/kbars?code='+encodeURIComponent(code),5000);
+      // 常備.開發-10（2026-10-11）：美股伺服器刻意回 501（IBKR 連線衝突未確認，伺服器不改），App 改顯示誠實說明，不當成錯誤
+      if(r.status===501){const e=new Error('美股 1 分 K 尚未提供（IBKR 連線衝突未確認），請看日線');e.honest501=true;throw e}
       if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||('HTTP '+r.status))}
       const d=await r.json();
       STOCK_CHART.intraday=(d.bars||[]).map(_minuteBarToLwc);
@@ -7746,11 +7748,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       }
       setTxt('trend-note',`1分K：本機 Shioaji tick 聚合（${d.mode}，${(d.bars||[]).length} 根，${d.hot_file_status==='hot-file'?'即時更新中':'非即時：常駐行程未在跑或已收盤'}）`);
     }catch(e){
-      console.warn('[loadIntradayBars]',e);recordGlobalError('loadIntradayBars',e);
+      if(!e.honest501){console.warn('[loadIntradayBars]',e);recordGlobalError('loadIntradayBars',e)}  // 501 是已知的設計狀態，不記成錯誤
       STOCK_CHART.mode='daily';STOCK_CHART.userPickedMode=false;
       if(STOCK_CHART.series){STOCK_CHART.chart.applyOptions({timeScale:{timeVisible:false}});STOCK_CHART.series.setData(STOCK_CHART.daily);STOCK_CHART.chart.timeScale().fitContent()}
       renderTrendModeToggle(false);
-      setTxt('trend-note','1分K取得失敗（'+(e.message||e)+'），改顯示日線');
+      setTxt('trend-note',e.honest501?e.message:'1分K取得失敗（'+(e.message||e)+'），改顯示日線');
     }
   }
   function renderTrendModeToggle(hasIntraday){
@@ -8634,7 +8636,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0035';
+  const APP_VERSION='2026-10-11.0040';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

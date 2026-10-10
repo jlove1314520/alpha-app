@@ -2228,10 +2228,25 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { wlErrors.push(`測試本身出錯：${e.message || e}`); }
   record("69. 多自選清單（舊格式遷移、建立／切換／下架、至少保留一個、/settings 同步含 watchlists）", wlErrors.length === 0, wlErrors.join("; "));
 
+  // 70.【2026-10-11 常備.開發-10】美股 1 分 K：伺服器回 501 時 App 顯示誠實說明（不是「取得失敗」），退回日線，不記入錯誤 log。
+  const k501Errors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, mode: STOCK_CHART.mode, errs: (window.GLOBAL_ERRORS || []).length };
+      window.liveFetch = async () => new Response(JSON.stringify({ detail: "美股（AAPL）1分K尚未實作" }), { status: 501 });
+      try { STOCK_CHART.mode = "intraday"; await loadIntradayBars("AAPL"); return { note: document.getElementById("trend-note")?.textContent || "", mode: STOCK_CHART.mode }; }
+      finally { window.liveFetch = saved.lf; }
+    });
+    if (!r.note.includes("美股 1 分 K 尚未提供") || !r.note.includes("請看日線")) k501Errors.push(`501 說明文字不符：「${r.note}」`);
+    if (r.note.includes("取得失敗")) k501Errors.push("501 不應顯示成「取得失敗」");
+    if (r.mode !== "daily") k501Errors.push(`501 後應退回日線，實得 ${r.mode}`);
+  } catch (e) { k501Errors.push(`測試本身出錯：${e.message || e}`); }
+  record("70. 美股 1 分 K 收到 501 顯示誠實說明並退回日線", k501Errors.length === 0, k501Errors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
