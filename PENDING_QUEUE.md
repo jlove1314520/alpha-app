@@ -18707,7 +18707,7 @@ C. 資料新鮮度
 - [x] **先.六十-B7 BACKLOG 開發項寫入「常備.開發」區（附心跳位置與驗收條件；因子類標凍結.二 不得登記新試驗）**（互動視窗執行）〔2026-10-10 完成：本檔末尾新增「常備.開發」區 10 項（第 1 項已隨 C9 完成），每項附心跳位置與驗收條件；因子類 B18～B22、B30～B32 標 - [!] 凍結.二，不得登記新試驗〕
 - [x] **先.六十-B8 誤標阻塞結案（先.三十七-三／四／五、先.二十九-四、先.五十四-6更正-4、先.五十五-B7／-8、紙.一 改運行中）；.gitattributes renormalize 改 - [ ]**（互動視窗執行）〔2026-10-10 完成：先.三十七-三／四／五、先.二十九-四、先.五十四-6更正-4、先.五十五-B7／-8 改 - [x]（註明依本裁示結案）；紙.一 改 - [~] 運行中；維運.先.六-二後續一 改做並結案（renormalize 暫存區 0 變更，index 內 .md 已全為 LF）〕
 - [x] **先.六十-C9 STATUS.json 頂層 updated_at／any_overdue 每次排程更新；新鮮度卡讀各檔 generated_at；coverage／signal_status／company_info 排程或標資料日；us_financials 標固定快照**（互動視窗執行）〔2026-10-10 完成：check_local_schedule_heartbeat.py 每 30 分鐘寫 STATUS.json 時重算 schedule_health 並更新頂層 updated_at／any_overdue；market.yml 新增「更新 STATUS.json（先.六十-C9）」步驟（data/STATUS.json 已在 git add 清單）；設定頁新鮮度卡三個大檔改串流讀檔案自身 generated_at；coverage／signal_status／company_info 在 App 標「資料日（N 天前）＋更新方式」（signal_status 是人工彙整，排程重跑只會把時間改新、內容不變，故不排程）；us_financials 標「固定快照，不更新」（檔案 update_policy 欄位＋個股頁說明）〕
-- [ ] **先.六十-10 smoke 全套＋selftest＋commit 回報；A 段後本機常駐服務照七之二節重啟並驗證**（互動視窗執行）
+- [x] **先.六十-10 smoke 全套＋selftest＋commit 回報；A 段後本機常駐服務照七之二節重啟並驗證**（互動視窗執行）〔2026-10-10 完成：冒煙全綠 63 PASS；selftest auto_ledger_view 17／auto_rebalance 240／web_push 20／claude_auth_launchers 22／paper_4 10／whitelist_price_fill 12 全過；commit 16c54898a。七之二：alpha_live_server 重啟（23:05:06）、/health build=16c5489＝HEAD、stale_process=false、OPTIONS 預檢 /auto/ledger 與 /push/prefs 皆回精確來源＋allow-credentials:true；新端點實測：/auto/ledger 無 token 401、有 token 只回 8 個去識別化欄位；shioaji_quotes.py 本輪未改動，不需重啟〕
 
 ---
 
