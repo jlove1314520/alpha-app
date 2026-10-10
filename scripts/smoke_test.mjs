@@ -1922,10 +1922,63 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { ckErrors.push(`測試本身出錯：${e.message || e}`); }
   record("58. 維持率主數字對齊籌碼K（ratio_pct_ck）、係數讀檔、warn 只降級警告、股災段標校準未驗證", ckErrors.length === 0, ckErrors.join("; ") || ckInfo);
 
+  // 59.【2026-10-10 先.五十九-B6】破億卡達標機率：固定種子下結果可重現；示例參數與 R2（Python，10,000 次）對照在 4pp 內
+  const probErrors = [];
+  let probInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const d = await (await fetch("data/strategy_monthly_returns.json", { cache: "no-store" })).json();
+      const o = { nw: 6e6, pmt: 3e5, nmon: 135, B: 5000, block: 12, seed: 20261010 };
+      const a = btProbCalc(d.returns, o), b = btProbCalc(d.returns, o), c = btProbCalc(d.returns, Object.assign({}, o, { seed: 7 }));
+      return { a, b, c, label: d.label, n: d.months.length };
+    });
+    if (JSON.stringify(r.a) !== JSON.stringify(r.b)) probErrors.push("同一種子兩次結果不同（不可重現）");
+    if (JSON.stringify(r.a) === JSON.stringify(r.c)) probErrors.push("換種子結果完全相同（種子沒有作用）");
+    if (r.label !== "回測，非保證") probErrors.push(`月報酬檔缺「回測，非保證」標示：${r.label}`);
+    if (r.n !== 258) probErrors.push(`月報酬檔月數 ${r.n} ≠ 258（2003-07～2024-12）`);
+    const ref = { "0050": 0.460, "Bb-90": 0.334, "S3-C6": 0.460, "R1-A": 0.559, "R1-C": 0.621 };
+    for (const [k, v] of Object.entries(ref)) {
+      if (!r.a[k]) { probErrors.push(`缺策略 ${k}`); continue; }
+      if (Math.abs(r.a[k].p - v) > 0.04) probErrors.push(`${k} 機率 ${(r.a[k].p * 100).toFixed(1)}% 與 R2 ${(v * 100).toFixed(1)}% 差超過 4pp`);
+      if (!(r.a[k].p5 <= r.a[k].p50 && r.a[k].p50 <= r.a[k].p95)) probErrors.push(`${k} 百分位順序錯`);
+    }
+    probInfo = Object.entries(r.a).map(([k, v]) => `${k} ${(v.p * 100).toFixed(1)}%`).join("、");
+  } catch (e) { probErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("59. 破億卡達標機率：固定種子可重現、換種子會變；月報酬檔 258 個月且標「回測，非保證」；示例參數與 R2 差 ≤4pp", probErrors.length === 0, probErrors.join("; ") || probInfo);
+
+  // 60.【2026-10-10 先.五十九-B6】未輸入參數時只顯示說明、不顯示機率；輸入後才顯示
+  const probUiErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      localStorage.removeItem("alpha_bt_path"); renderBtPath();
+      const empty = document.getElementById("bt-prob").textContent;
+      localStorage.setItem("alpha_bt_path", JSON.stringify({ nw: "6000000", pmt: "300000", birth: "1998-01-13", age: "40" })); renderBtPath();
+      for (let i = 0; i < 80 && !/達標機率（/.test(document.getElementById("bt-prob").textContent); i++) await new Promise(f => setTimeout(f, 100));
+      const filled = document.getElementById("bt-prob").textContent;
+      localStorage.removeItem("alpha_bt_path"); renderBtPath();
+      return { empty, filled };
+    });
+    if (/\d+(\.\d+)?%/.test(r.empty)) probUiErrors.push(`未輸入參數卻顯示了百分比：${r.empty.slice(0, 80)}`);
+    if (!r.empty.includes("請先填入")) probUiErrors.push(`未輸入參數時缺說明文字：${r.empty.slice(0, 80)}`);
+    if (!/R1-C[\s\S]*%/.test(r.filled)) probUiErrors.push(`輸入後未顯示機率表：${r.filled.slice(0, 120)}`);
+    if (!r.filled.includes("回測，非保證")) probUiErrors.push("機率表缺「回測，非保證」");
+  } catch (e) { probUiErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("60. 破億卡未輸入參數只顯示說明、不顯示機率；輸入後顯示各策略機率表並標回測非保證", probUiErrors.length === 0, probUiErrors.join("; "));
+
+  // 61.【2026-10-10 先.五十九-A1／A2】紙.四 卡存在且固定揭露文字一字不差
+  const p4Errors = [];
+  try {
+    const r = await page.evaluate(async () => { await loadPaper7030(); const el = document.getElementById("paper4-disclosure"); return { has: !!document.getElementById("paper4-card"), txt: el ? el.textContent : "" }; });
+    if (!r.has) p4Errors.push("找不到紙.四 卡");
+    const want = "回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤";
+    if (!r.txt.includes(want)) p4Errors.push(`揭露文字不符：${r.txt.slice(0, 100)}`);
+  } catch (e) { p4Errors.push(`測試本身出錯：${e.message || e}`); }
+  record("61. 紙.四 卡存在且固定揭露文字（回測 15.1%／−36.2%、樣本外 13／21 月關閉、無樣本外驗證）", p4Errors.length === 0, p4Errors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

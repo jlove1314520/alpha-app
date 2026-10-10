@@ -1464,6 +1464,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="setting-row" style="margin-top:8px"><span>出生日期</span><div class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></div></div>
       <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
       <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
+      <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">達標機率：請先填入淨資產與出生日期（每月投入、目標年齡可留預設），填好後在你的瀏覽器內計算，不會送出。</div>
       <div class="note" style="margin-top:6px">四個數字只存在你的裝置與本機伺服器設定檔（經 /settings 同步），不會進公開 repo。10.19% 為 Bb-90 回測年化（回測，非保證），目標金額 1 億元。</div>
       <div class="note" style="margin-top:6px">勝算估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
     </div>
@@ -5213,11 +5214,38 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
     }
   }
+  // 2026-10-10（先.五十九-A1／A2）：紙.四 R1（0050＋信用利差閘門×00631L），R1-C 為主、R1-A 並列。
+  // 只讀 data/paper_4.json（兩本帳）與 data/paper_3.json（對照紙.三累積報酬）；揭露文字固定顯示。
+  const PAPER4_DISCLOSURE='回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤';
+  async function _renderPaper4(){
+    const title='紙.四 R1 信用利差閘門',sub='主：R1-C 0050 50%＋00631L 50%｜並列：R1-A 70%／30%（閘門關時 00631L 改現金）';
+    const disc='<div class="note" id="paper4-disclosure" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ '+_paperEsc(PAPER4_DISCLOSURE)+'。槓桿真錢提案最早 2027-04（紙.四 滿 6 個月）且須符合安全方案其餘前提。</div>';
+    try{
+      const [j,p3]=await Promise.all([_fetchPaperJson('data/paper_4.json'),_fetchPaperJson('data/paper_3.json').catch(e=>{console.warn('[_renderPaper4] paper_3',e);return {started:false}})]);
+      const err=j.last_error?'<div class="note" style="margin-top:6px;font-size:11px;color:var(--down,#e5534b)">最近一次未記帳：'+_paperEsc(j.last_error.reason||j.last_error.status)+'</div>':'';
+      if(!j.started||!j.books)return _paperCardHtml(title,sub,_paperRow('閘門目前',_paperGateHtml(j.gate_now,null))+'<div style="margin-top:8px;font-size:14px;font-weight:700;color:var(--warn)">2026-10 月底建倉（與紙.三 同日）</div><div class="note" style="margin-top:4px;font-size:11px">建倉前不顯示淨值</div>'+err+disc);
+      const sg=v=>v==null?'—':(v>=0?'+':'')+Number(v).toFixed(2)+'%';
+      const pri=j.books[j.primary||'R1-C']||Object.values(j.books)[0];
+      const a=j.books['R1-A'];
+      const wp=pri.weights_post||{};
+      const w=Object.keys(wp).map(k=>_paperEsc(k==='CASH'?'現金':k)+' '+(wp[k]*100).toFixed(0)+'%').join('<br>');
+      return _paperCardHtml(title,sub,
+        _paperRow('閘門目前',_paperGateHtml(j.gate_now,pri.pending_switch))
+        +_paperCommonRows(Object.assign({},pri,{history_months:pri.rows}),w||'—')
+        +(a?_paperRow('並列 R1-A（70/30）',sg(a.total_return_pct)):'')
+        +_paperRow('對照 0050 全持有',sg(pri.bench_0050_return_pct))
+        +_paperRow('對照 Bb-90（同日起算）',sg(pri.bench_bb90_return_pct))
+        +_paperRow('對照 紙.三 S3-C6',p3&&p3.started?sg(p3.total_return_pct):'—')+err+disc);
+    }catch(e){
+      console.warn('[_renderPaper4]',e);recordGlobalError('_renderPaper4',e);
+      return _paperCardHtml(title,sub,'<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>'+disc);
+    }
+  }
   async function loadPaper7030(){
     const el=document.getElementById('paper-7030-card');if(!el)return;
     try{
-      const [a,b,c]=await Promise.all([_renderPaper7030(),_renderPaper1b(),_renderPaper3()]);
-      el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">'+a+b+'<div style="grid-column:1 / -1">'+c+'</div></div>'
+      const [a,b,c,d]=await Promise.all([_renderPaper7030(),_renderPaper1b(),_renderPaper3(),_renderPaper4()]);
+      el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">'+a+b+'<div style="grid-column:1 / -1">'+c+'</div><div style="grid-column:1 / -1" id="paper4-card">'+d+'</div></div>'
         +'<div class="note" style="margin:-4px 0 10px;text-align:center;color:var(--warn)">⚠ 紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。</div>';
     }catch(e){
       console.warn('[loadPaper7030]',e);recordGlobalError('loadPaper7030',e);
@@ -6760,17 +6788,64 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const set=(id,v)=>{const el=document.getElementById(id);if(el&&document.activeElement!==el&&v!=null)el.value=v};
     set('bt-nw',s.nw);set('bt-pmt',s.pmt);set('bt-birth',s.birth);set('bt-age',s.age==null?40:s.age);
     const nw=Number(s.nw),pmt=Number(s.pmt||0),age=Number(s.age==null||s.age===''?40:s.age);
-    if(s.nw===''||s.nw==null||!(nw>=0)||!s.birth){out.textContent='請填入淨資產與出生日期';return}
-    const b=new Date(s.birth+'T00:00:00');if(isNaN(b)){out.textContent='出生日期格式不正確';return}
+    if(s.nw===''||s.nw==null||!(nw>=0)||!s.birth){out.textContent='請填入淨資產與出生日期';renderBtProb(null);return}
+    const b=new Date(s.birth+'T00:00:00');if(isNaN(b)){out.textContent='出生日期格式不正確';renderBtProb(null);return}
     const target=new Date(b.getFullYear()+age,b.getMonth(),b.getDate());
     const c=btCalc({nw,pmt,target:target.getTime(),now:Date.now(),rate:BT_RATE});
-    if(!c){out.textContent='目標日期已過或輸入不合理，請調整目標年齡';return}
+    if(!c){out.textContent='目標日期已過或輸入不合理，請調整目標年齡';renderBtProb(null);return}
+    try{renderBtProb({nw,pmt,nmon:Math.round(c.n*12)})}catch(e){console.warn('[renderBtProb]',e);recordGlobalError('renderBtProb',e)}
     const d=target.getFullYear()+'-'+String(target.getMonth()+1).padStart(2,'0')+'-'+String(target.getDate()).padStart(2,'0');
     out.innerHTML=['目標日期：'+d+'（剩 '+c.n.toFixed(1)+' 年）',
       '需要年化報酬（不再投入）：'+btPct(c.reqNo),
       '需要年化報酬（含每月投入）：'+btPct(c.reqWith),
       '以 '+btPct(BT_RATE)+'（回測，非保證）推算到目標日：不投入 '+btFmt(c.fvNo)+'；含每月投入 '+btFmt(c.fvWith),
       '要達 1 億，每月需投入：'+btFmt(c.needPmt)].join('<br>');
+  }
+  // 先.五十九-B5：達標機率。只抓公開檔 data/strategy_monthly_returns.json（回測月報酬，不含個資），
+  // 在瀏覽器內用本機四欄參數以 12 個月區塊自助法抽樣 5,000 次；參數不送出、不寫入任何公開檔。
+  const BT_PROB={B:5000,block:12,seed:20261010,data:null,loading:null,timer:null};
+  function btRng(seed){let a=seed>>>0;return function(){a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+  // 純函式（冒煙用）：R＝{策略:[月報酬...]}，所有策略共用同一組區塊（配對比較，同 R2 做法）
+  function btProbCalc(R,o){
+    const names=Object.keys(R),T=R[names[0]].length,blk=o.block||12,B=o.B||5000,nmon=o.nmon,goal=o.goal||BT_GOAL;
+    if(!(nmon>0)||!(T>blk))return null;
+    const rnd=btRng(o.seed==null?20261010:o.seed),nb=Math.ceil(nmon/blk),fin=names.map(()=>new Float64Array(B));
+    const st=new Int32Array(nb);
+    for(let b=0;b<B;b++){
+      for(let k=0;k<nb;k++)st[k]=Math.floor(rnd()*(T-blk+1));
+      for(let j=0;j<names.length;j++){
+        const r=R[names[j]];let w=o.nw,t=0;
+        for(let k=0;k<nb&&t<nmon;k++)for(let i=0;i<blk&&t<nmon;i++,t++)w=w*(1+r[st[k]+i])+(o.pmt||0);
+        fin[j][b]=w;
+      }
+    }
+    const q=(a,p)=>{const x=Array.from(a).sort((m,n)=>m-n),h=(x.length-1)*p,l=Math.floor(h);return x[l]+(x[Math.min(l+1,x.length-1)]-x[l])*(h-l)};
+    const out={};
+    names.forEach((k,j)=>{let c=0;for(let b=0;b<B;b++)if(fin[j][b]>=goal)c++;out[k]={p:c/B,p5:q(fin[j],.05),p50:q(fin[j],.5),p95:q(fin[j],.95)}});
+    return out;
+  }
+  async function btProbData(){
+    if(BT_PROB.data)return BT_PROB.data;
+    if(!BT_PROB.loading)BT_PROB.loading=fetch('data/strategy_monthly_returns.json?t='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(d=>{BT_PROB.data=d;return d}).finally(()=>{BT_PROB.loading=null});
+    return BT_PROB.loading;
+  }
+  function renderBtProb(params){
+    const el=document.getElementById('bt-prob');if(!el)return;
+    const bias='<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">偏誤說明（WIN_PROBABILITY_2026-10）</a>';
+    if(!params){el.innerHTML='達標機率：請先填入淨資產與出生日期（每月投入、目標年齡可留預設），填好後在你的瀏覽器內計算，不會送出。';return}
+    clearTimeout(BT_PROB.timer);
+    el.textContent='達標機率計算中…';
+    BT_PROB.timer=setTimeout(()=>{
+      btProbData().then(d=>{
+        const res=btProbCalc(d.returns,{nw:params.nw,pmt:params.pmt,nmon:params.nmon,goal:BT_GOAL,B:BT_PROB.B,block:BT_PROB.block,seed:BT_PROB.seed});
+        if(!res){el.textContent='達標機率：期間太短或資料不足，無法計算';return}
+        const lab={'0050':'0050 全持有','Bb-90':'Bb-90','S3-C6':'S3-C6（紙.三）','R1-A':'R1-A（紙.四 並列）','R1-C':'R1-C（紙.四 主）'};
+        const rows=(d.strategies||Object.keys(res)).filter(k=>res[k]).map(k=>'<tr><td>'+_autoEsc(lab[k]||k)+'</td><td style="text-align:right"><b>'+(res[k].p*100).toFixed(1)+'%</b></td><td style="text-align:right">'+btFmt(res[k].p5)+'</td><td style="text-align:right">'+btFmt(res[k].p50)+'</td><td style="text-align:right">'+btFmt(res[k].p95)+'</td></tr>').join('');
+        el.innerHTML='<b>達標機率（'+params.nmon+' 個月後 ≥ 1 億）</b>'
+          +'<table style="width:100%;font-size:11px;margin:4px 0"><tr><th style="text-align:left">策略</th><th style="text-align:right">機率</th><th style="text-align:right">期末 5%</th><th style="text-align:right">中位</th><th style="text-align:right">95%</th></tr>'+rows+'</table>'
+          +'<div style="color:var(--warn)">⚠ '+_autoEsc(d.label||'回測，非保證')+'：用 '+_autoEsc((d.months||[])[0]||'')+'～'+_autoEsc((d.months||[]).slice(-1)[0]||'')+' 回測月報酬，12 個月區塊自助法抽樣 '+BT_PROB.B.toLocaleString()+' 次（固定種子）；R1 無樣本外驗證。參數只在你的瀏覽器內計算。'+bias+'</div>';
+      }).catch(e=>{console.warn('[renderBtProb]',e);recordGlobalError('renderBtProb',e);el.textContent='達標機率：讀取回測月報酬失敗（'+e.message+'）'});
+    },50);
   }
   function btSave(){
     try{
@@ -8271,7 +8346,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-10.1209';
+  const APP_VERSION='2026-10-10.2131';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
