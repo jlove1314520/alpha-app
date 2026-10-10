@@ -4891,8 +4891,18 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(roe!=null){const re=document.getElementById('fin-roe');re.textContent=(roe>=0?'+':'')+roe.toFixed(1)+'%';re.className=roe>=0?'pos':'neg'}
     else{setTxt('fin-roe','—')}
     setTxt('fin-fcf','TWSE無此資料源');
-    if(last)setTxt('fin-note',`來源：TWSE官方t187ap06_L_ci/t187ap07_L_ci（一般業）· ${last.year}Q${last.quarter}（僅台股上市一般業，上櫃/金融股暫無）；FCF：TWSE無現金流量表開放資料，非暫時缺漏`);
-    else setTxt('fin-note','查無財報資料（僅涵蓋TWSE上市「一般業」，上櫃/金融股暫無）');
+    // 常備.開發-4（2026-10-11）：上市金融業＋上櫃財報。來源標記讀 financials.source；
+    // 官方只給最新一季「累計數」，單季序列有 2025Q1~2026Q1 斷層的公司，另外顯示最新累計（latest_cum）。
+    const F=detail.financials||{},lc=F.latest_cum,src=F.source||(last?'t187ap06_L_ci':'');
+    const srcTxt=src?((/_O_|mopsfin/.test(src)?'TPEx官方 ':'TWSE官方 ')+src+'（'+(F.industry_format||'上市一般業')+'）'):'';
+    const lcNewer=lc&&(!last||lc.year*4+lc.quarter>last.year*4+last.quarter);
+    if(lcNewer&&!last){
+      setTxt('fin-gross',lc.gross_cum!=null&&lc.revenue_cum?(lc.gross_cum/lc.revenue_cum*100).toFixed(1)+'%（累計）':'—');
+      setTxt('fin-op',lc.op_cum!=null&&lc.revenue_cum?(lc.op_cum/lc.revenue_cum*100).toFixed(1)+'%（累計）':'—');
+    }
+    const lcTxt=lcNewer?` · 最新官方累計 ${lc.year} 前${lc.quarter}季：${lc.revenue_cum!=null?'營收 '+(lc.revenue_cum/1e8).toFixed(1)+' 億、':''}EPS ${lc.eps_cum!=null?lc.eps_cum.toFixed(2):'—'}（累計數，非單季）${last?`；單季序列停在 ${last.year}Q${last.quarter}，下一季起以累計差分補上`:''}`:'';
+    if(last||lc)setTxt('fin-note',`來源：${srcTxt}${last?` · 單季 ${last.year}Q${last.quarter}`:''}${lcTxt}；FCF：TWSE無現金流量表開放資料，非暫時缺漏`);
+    else setTxt('fin-note','查無財報資料（TWSE／TPEx 官方開放資料皆無此代號，可能為興櫃、ETF 或新上市）');
   }
 
   // 2026-08-25 新增：月營收雙圖（上金額/下YoY雙向）+ 觸控玻璃小卡。REV_ROWS 是目前這檔股票
@@ -8533,7 +8543,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0013';
+  const APP_VERSION='2026-10-11.0024';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

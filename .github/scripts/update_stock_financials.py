@@ -34,6 +34,19 @@
    資料源不存在。個股頁財報分頁的FCF目前維持FinMind。
 3. 跟月營收/PER一樣，這兩個端點只給「最新一期」全市場快照，用累積式寫回
    （每季只會新增一筆，讀repo裡已commit的stock_detail.json當底merge）。
+
+2026-10-11 常備.開發-4 追加（不改動上面一般業流程的抓取與還原邏輯，只新增一段）：
+上市金融業（金控 _fh／銀行 _basi／證券期貨 _bd／保險 _ins／異業 _mim）與
+上櫃六類（TPEx `mopsfin_t187ap06_O_*`／`mopsfin_t187ap07_O_*`）由
+`update_extra()` 處理，上面「已知限制 1」的金融業缺口自此補上。三來源查證
+紀錄見 docs/DATA_SOURCE_MAP.md「上櫃／金融業財報」一節。這些端點同樣是累計數、
+單位仟元；openapi 只給最新一季、歷史回補只到 2024Q4，2025Q1~2026Q1 的同年
+較早季度不存在，所以另存 `latest_cum`（最新累計數），下一季起用「本季累計 −
+上一季累計」還原單季，不再依賴 quarters 陣列有同年較早季度。
+同日順手修正 ROE 單位 bug：權益是仟元、淨利已換算成元，原本直接相除讓 ROE
+放大 1000 倍（2330 顯示 34777.78%）；`equity_parent_latest` 欄位本身維持仟元
+不變（`shares_outstanding_approx` 刻意是仟股，供 generate_scores_future 與張數
+對齊，不動）。
 """
 from __future__ import annotations
 
@@ -289,6 +302,212 @@ def fetch_balance() -> dict[str, dict]:
     return out
 
 
+# ── 2026-10-11 常備.開發-4：上市金融業＋上櫃財報 ─────────────────────────────
+_TWSE = "https://openapi.twse.com.tw/v1/opendata/"
+_TPEX = "https://www.tpex.org.tw/openapi/v1/"
+# (端點名稱, 損益表URL, 資產負債表URL, 速率來源鍵, 產業格式)
+EXTRA_SOURCES = [
+    ("t187ap06_L_fh", _TWSE + "t187ap06_L_fh", _TWSE + "t187ap07_L_fh", "twse_openapi", "上市金控"),
+    ("t187ap06_L_basi", _TWSE + "t187ap06_L_basi", _TWSE + "t187ap07_L_basi", "twse_openapi", "上市銀行"),
+    ("t187ap06_L_bd", _TWSE + "t187ap06_L_bd", _TWSE + "t187ap07_L_bd", "twse_openapi", "上市證券期貨"),
+    ("t187ap06_L_ins", _TWSE + "t187ap06_L_ins", _TWSE + "t187ap07_L_ins", "twse_openapi", "上市保險"),
+    ("t187ap06_L_mim", _TWSE + "t187ap06_L_mim", _TWSE + "t187ap07_L_mim", "twse_openapi", "上市異業"),
+    ("mopsfin_t187ap06_O_ci", _TPEX + "mopsfin_t187ap06_O_ci", _TPEX + "mopsfin_t187ap07_O_ci", "tpex_openapi", "上櫃一般業"),
+    ("mopsfin_t187ap06_O_fh", _TPEX + "mopsfin_t187ap06_O_fh", _TPEX + "mopsfin_t187ap07_O_fh", "tpex_openapi", "上櫃金控"),
+    ("mopsfin_t187ap06_O_basi", _TPEX + "mopsfin_t187ap06_O_basi", _TPEX + "mopsfin_t187ap07_O_basi", "tpex_openapi", "上櫃銀行"),
+    ("mopsfin_t187ap06_O_bd", _TPEX + "mopsfin_t187ap06_O_bd", _TPEX + "mopsfin_t187ap07_O_bd", "tpex_openapi", "上櫃證券期貨"),
+    ("mopsfin_t187ap06_O_ins", _TPEX + "mopsfin_t187ap06_O_ins", _TPEX + "mopsfin_t187ap07_O_ins", "tpex_openapi", "上櫃保險"),
+    ("mopsfin_t187ap06_O_mim", _TPEX + "mopsfin_t187ap06_O_mim", _TPEX + "mopsfin_t187ap07_O_mim", "tpex_openapi", "上櫃異業"),
+]
+_PARENT_NI_KEYS = ("淨利（淨損）歸屬於母公司業主", "淨利（損）歸屬於母公司業主")
+_EQUITY_KEYS = ("歸屬於母公司業主之權益合計", "歸屬於母公司業主之權益")
+
+
+def _first(row: dict, keys) -> float | None:
+    for k in keys:
+        v = _num(row.get(k))
+        if v is not None:
+            return v
+    return None
+
+
+def _get_rows(url: str, source: str) -> list:
+    r = _get_retry(url, source, timeout=40)
+    r.raise_for_status()
+    try:
+        rows = r.json()
+    except ValueError:
+        raise RuntimeError(f"{url} 回傳非 JSON（可能是無效路徑回傳的HTML，已知地雷）")
+    if not isinstance(rows, list):
+        raise RuntimeError(f"{url} 回傳非預期格式")
+    return rows
+
+
+def _code_of(row: dict):
+    return row.get("公司代號") or row.get("SecuritiesCompanyCode")
+
+
+def _yq_of(row: dict):
+    try:
+        return int(row.get("年度") or row.get("Year")) + 1911, int(row.get("季別") or row.get("Season"))
+    except (TypeError, ValueError):
+        return None
+
+
+def _close(a, b, tol=0.002) -> bool:
+    return a is not None and b is not None and abs(a - b) <= max(1.0, abs(b) * tol)
+
+
+def _checked_revenue_op(row: dict, label: str):
+    """以會計恆等式驗證營收／營業利益欄位，兜不起來就回 (None, None)，不猜欄位。
+
+    2026-10-11 實測地雷：TWSE t187ap06_L_fh（金控）表頭多一個「其他收益及費損淨額」、
+    少一個所得稅欄，數值整段錯位一格（2880 的「淨收益」欄實際是呆帳費用）；
+    保險業（_ins）營業收入−營業成本−營業費用≠營業利益。所以每一類都先驗再用。"""
+    n = lambda k: _num(row.get(k))
+    if label.endswith("金控"):
+        a, b, net = n("利息淨收益"), n("利息以外淨收益"), n("淨收益")
+        if _close((a or 0) + (b or 0), net) and a is not None:
+            return net, None
+        # 錯位版：「利息以外淨收益」欄裝的是淨收益（＝利息淨收益＋下一欄）
+        c = n("其他收益及費損淨額")
+        if a is not None and c is not None and _close(a + c, b):
+            return b, None
+        return None, None
+    if label.endswith("銀行"):
+        a, b, bad, opx, pre = (n("利息淨收益"), n("利息以外淨損益"), n("呆帳費用、承諾及保證責任準備提存"),
+                               n("營業費用"), n("繼續營業單位稅前淨利（淨損）"))
+        if None not in (a, b, bad, opx) and _close(a + b - bad - opx, pre):
+            return a + b, None
+        return None, None
+    if label.endswith("證券期貨"):
+        rev, exp, op = n("收益"), n("支出及費用"), n("營業利益")
+        if None not in (rev, exp) and _close(rev - exp, op):
+            return rev, op
+        return None, None
+    if label.endswith("異業"):
+        rev, exp, pre = n("收入"), n("支出"), n("繼續營業單位稅前淨利（淨損）")
+        if None not in (rev, exp) and _close(rev - exp, pre):
+            return rev, None
+        return None, None
+    rev, op = n("營業收入"), n("營業利益（損失）")
+    if label.endswith("保險"):
+        cost, opx = n("營業成本"), n("營業費用")
+        if None not in (rev, cost, opx) and _close(rev - cost - opx, op):
+            return rev, op
+        return None, None
+    return rev, op  # 一般業：與上市一般業同欄位格式
+
+
+def parse_extra_income(row: dict, label: str = "") -> dict | None:
+    """把各產業損益表列轉成跟一般業相同的累計數 dict（仟元→元）。
+    營收／營業利益須通過 _checked_revenue_op 恆等式驗證，否則留 None；EPS 與歸屬母公司淨利照收。"""
+    yq = _yq_of(row)
+    revenue, op = _checked_revenue_op(row, label)
+    eps0 = _num(row.get("基本每股盈餘（元）"))
+    if not yq or (revenue is None and eps0 is None):
+        return None
+    gross = _num(row.get("營業毛利（毛損）淨額")) if label.endswith("一般業") else None
+    net = _first(row, _PARENT_NI_KEYS)
+    if net is None:
+        # 無子公司的公司（例如部分保險業）歸屬母公司欄位留空；此時無非控制權益，本期淨利即歸屬母公司
+        net = _num(row.get("本期淨利（淨損）"))
+    eps = _num(row.get("基本每股盈餘（元）"))
+
+    def k(v):
+        return v * 1000 if v is not None else None
+    return {"year": yq[0], "quarter": yq[1], "revenue_cum": k(revenue), "gross_cum": k(gross),
+            "op_cum": k(op), "net_income_parent_cum": k(net), "eps_cum": eps}
+
+
+def discretize_from_cum(prev_cum: dict | None, cum: dict) -> dict | None:
+    """用「上一季累計」還原單季：同年 q-1 的累計數存在時，單季＝本季累計−上一季累計。"""
+    if not prev_cum or prev_cum.get("year") != cum["year"] or prev_cum.get("quarter") != cum["quarter"] - 1:
+        return None
+
+    def d(a, b):
+        return (a - b) if a is not None and b is not None else None
+    revenue = d(cum["revenue_cum"], prev_cum.get("revenue_cum"))
+    gross, op = d(cum["gross_cum"], prev_cum.get("gross_cum")), d(cum["op_cum"], prev_cum.get("op_cum"))
+    eps = d(cum["eps_cum"], prev_cum.get("eps_cum"))
+    return {
+        "year": cum["year"], "quarter": cum["quarter"], "revenue": revenue,
+        "gross_margin_pct": round(gross / revenue * 100, 2) if gross is not None and revenue else None,
+        "op_margin_pct": round(op / revenue * 100, 2) if op is not None and revenue else None,
+        "net_income_parent": d(cum["net_income_parent_cum"], prev_cum.get("net_income_parent_cum")),
+        "eps": round(eps, 2) if eps is not None else None,
+    }
+
+
+def apply_cum(fin: dict, cum: dict, source: str, label: str) -> bool:
+    """寫入 latest_cum 並盡量還原單季併入 quarters；回傳是否有新增／更新單季。"""
+    prev = fin.get("latest_cum")
+    same_q = prev and (prev.get("year"), prev.get("quarter")) == (cum["year"], cum["quarter"])
+    prev_for_diff = fin.get("prev_cum") if same_q else prev  # 同一季重跑：沿用上次用來差分的那份
+    discrete = None
+    if cum["quarter"] == 1:
+        r, g, o = cum["revenue_cum"], cum["gross_cum"], cum["op_cum"]
+        discrete = {"year": cum["year"], "quarter": 1, "revenue": r,
+                    "gross_margin_pct": round(g / r * 100, 2) if g is not None and r else None,
+                    "op_margin_pct": round(o / r * 100, 2) if o is not None and r else None,
+                    "net_income_parent": cum["net_income_parent_cum"], "eps": cum["eps_cum"]}
+    if discrete is None:
+        discrete = discretize_from_cum(prev_for_diff, cum)
+    if discrete is None and cum["revenue_cum"] is not None:
+        try:
+            discrete = discretize_quarter(fin.get("quarters", []), cum)
+        except (TypeError, KeyError):  # 舊季度缺營收欄位時無法安全相減，寧可不還原
+            discrete = None
+    fin["prev_cum"] = prev_for_diff
+    fin["latest_cum"] = dict(cum, source=source, industry=label)
+    fin["source"] = source
+    fin["industry_format"] = label
+    if discrete is None:
+        return False
+    fin["quarters"] = merge_quarters(fin.get("quarters", []), discrete)
+    return True
+
+
+def update_extra(stocks: dict) -> tuple[dict, list]:
+    """逐一處理 EXTRA_SOURCES；單一端點失敗只記錯誤、不影響其他端點（十二）。"""
+    stats, errors = {}, []
+    for name, inc_url, bal_url, rl_src, label in EXTRA_SOURCES:
+        try:
+            inc_rows = _get_rows(inc_url, rl_src)
+            bal_rows = _get_rows(bal_url, rl_src)
+            bal = {}
+            for row in bal_rows:
+                c = _code_of(row)
+                if c:
+                    bal[c] = {"equity": _first(row, _EQUITY_KEYS), "common_stock_capital": _num(row.get("股本")),
+                              "non_current_assets": _num(row.get("非流動資產"))}
+            n_cum = n_q = 0
+            for row in inc_rows:
+                c, cum = _code_of(row), parse_extra_income(row, label)
+                if not c or not cum:
+                    continue
+                fin = stocks.setdefault(c, {}).setdefault("financials", {})
+                n_cum += 1
+                if apply_cum(fin, cum, name, label):
+                    n_q += 1
+                b = bal.get(c) or {}
+                if b.get("equity") is not None:
+                    fin["equity_parent_latest"] = b["equity"]  # 仟元，與一般業欄位同單位
+                    qs = fin.get("quarters", [])
+                    fresh = bool(qs) and (qs[-1].get("year"), qs[-1].get("quarter")) == (cum["year"], cum["quarter"])
+                    # 單季資料沒跟上最新一季時（2025Q1~2026Q1 斷層），不拿舊四季配新權益硬算 ROE
+                    fin["roe_ttm_pct"] = compute_roe_ttm(qs, b["equity"] * 1000) if fresh else None
+                if b.get("common_stock_capital"):
+                    fin["shares_outstanding_approx"] = round(b["common_stock_capital"] / 10, 0)  # 仟股，同一般業
+                if b.get("non_current_assets") is not None:
+                    fin["non_current_assets_latest"] = b["non_current_assets"]
+            stats[name] = {"rows": len(inc_rows), "cum": n_cum, "quarters_updated": n_q}
+        except Exception as e:
+            print(f"[warn] {name} 失敗：{e}")
+            errors.append(f"{name}: {_redact_secrets(str(e))[:200]}")
+    return stats, errors
+
+
 def merge_quarters(existing: list[dict] | None, latest: dict) -> list[dict]:
     rows = list(existing or [])
     rows = [r for r in rows if not (r.get("year") == latest["year"] and r.get("quarter") == latest["quarter"])]
@@ -327,7 +546,10 @@ def main():
             bal = equity.get(code) or {}
             eq = bal.get("equity")
             fin["equity_parent_latest"] = eq
-            fin["roe_ttm_pct"] = compute_roe_ttm(fin["quarters"], eq)
+            fin["roe_ttm_pct"] = compute_roe_ttm(fin["quarters"], eq * 1000 if eq else None)  # 權益仟元→元（2026-10-11 修正）
+            fin["source"] = "t187ap06_L_ci"
+            fin["industry_format"] = "上市一般業"
+            fin["latest_cum"] = dict(cum, source="t187ap06_L_ci", industry="上市一般業")
             capital = bal.get("common_stock_capital")
             fin["shares_outstanding_approx"] = round(capital / 10, 0) if capital else None
             fin["non_current_assets_latest"] = bal.get("non_current_assets")
@@ -336,7 +558,18 @@ def main():
         print(f"財報(income/balance) 更新失敗：{e}")
         errors.append(f"financials: {e}")
 
+    # 2026-10-11 常備.開發-4：上市金融業＋上櫃財報（獨立 try，失敗不影響上面一般業結果）
+    extra_stats = {}
+    try:
+        extra_stats, extra_errors = update_extra(stocks)
+        errors.extend(extra_errors)
+    except Exception as e:
+        print(f"[warn] 上櫃／金融業財報更新失敗：{e}")
+        errors.append(f"financials_extra: {e}")
+
     payload.setdefault("meta", {})
+    payload["meta"]["financials_extra_source"] = "TWSE openapi t187ap06/07_L_{fh,basi,bd,ins,mim}（上市金融業）＋TPEx openapi mopsfin_t187ap06/07_O_{ci,fh,basi,bd,ins,mim}（上櫃）"
+    payload["meta"]["financials_extra_stats"] = extra_stats
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
     payload["meta"]["source"] = "TWSE openapi t187ap06_L_ci/t187ap07_L_ci（財報）+ TWSE T86/TPEx tpex_3insti_daily_trading（三大法人）+ TWSE MI_MARGN/TPEx tpex_mainboard_margin_balance（融資融券），各由market.yml不同步驟合併寫入"  # 2026-09-03（P0三-三.3）
     payload["meta"]["financials_source"] = "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)"
