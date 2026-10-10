@@ -1753,7 +1753,7 @@
         return `<div style="display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--hairline);cursor:pointer" onclick="openStock('${it.code}')">
           <span class="num" style="font-size:10px;color:var(--ink-4);min-width:32px;padding-top:2px">${it.dateTxt}</span>
           <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${it.kind}</span>
-          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${it.code}</b> ${nameOf(it.code)||''}・${t}</span>
+          <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${it.code}</b> ${nameOf(it.code)||''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
         </div>`;
       }).join('')
         +`<div class="note" style="margin-top:8px">涵蓋自選股與紙上持倉（策略監控台各策略目前holdings）共 ${codes.size} 檔代號，共 ${items.length} 筆事件/新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
@@ -7091,6 +7091,21 @@
     return (d.events||[]).filter(e=>e.code===code&&String(e.date)>=cutoff)
       .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   }
+  // 常備.開發-22（2026-10-11）：法說會事件附 MOPS「法人說明會簡報內容」官方公開查詢頁連結
+  // （公開資訊觀測站舊版站 mopsov.twse.com.tw 的單一公司查詢，GET 直接開即可看到該公司
+  // 近期法說會日期、擇要訊息與中英文簡報 PDF 連結；上市與上櫃皆適用）。
+  // 只放連結：App 不抓、不下載、不轉存簡報內容。新版 mops.twse.com.tw 為單頁應用，
+  // 無法用網址直接帶公司代號，故用舊版站的查詢網址。
+  function mopsIrUrl(code){
+    code=String(code||'').trim();
+    if(!/^[0-9A-Z]{4,6}$/.test(code))return '';
+    return 'https://mopsov.twse.com.tw/mops/web/ajax_t100sb07_1?encodeURIComponent=1&step=1&firstin=1&off=1&queryName=co_id&inpuType=co_id&TYPEK=all&co_id='+encodeURIComponent(code);
+  }
+  function mopsIrLinkHtml(e,stop){
+    if(!e||e.type!=='法說會')return '';
+    const u=mopsIrUrl(e.code);if(!u)return '';
+    return ` <a class="mops-ir-link" href="${u}" target="_blank" rel="noopener"${stop?' onclick="event.stopPropagation()"':''} style="font-size:10.5px;color:var(--gold);white-space:nowrap">MOPS簡報↗</a>`;
+  }
   function eventsRowsHtml(mine,limit){
     return mine.slice(0,limit).map(e=>{
       const c=EVENT_TYPE_COLOR[e.type]||'var(--ink-3)';
@@ -7098,7 +7113,7 @@
       return `<div style="display:flex;gap:9px;align-items:flex-start">
         <span class="num" style="font-size:10px;color:var(--ink-4);min-width:38px;padding-top:2px">${String(e.date).slice(5)}</span>
         <span style="font-size:9.5px;font-weight:700;color:${c};border:1px solid ${c};border-radius:5px;padding:1px 5px;flex-shrink:0;margin-top:1px">${e.type}</span>
-        <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5">${e.url?`<a href="${e.url}" target="_blank" rel="noopener" style="color:inherit">${t}</a>`:t}</span>
+        <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5">${e.url?`<a href="${e.url}" target="_blank" rel="noopener" style="color:inherit">${t}</a>`:t}${mopsIrLinkHtml(e,false)}</span>
       </div>`;
     }).join('');
   }
@@ -7577,7 +7592,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0310';
+  const APP_VERSION='2026-10-11.0315';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

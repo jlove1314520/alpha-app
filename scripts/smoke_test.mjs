@@ -2622,10 +2622,45 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { offErrors.push(`測試本身出錯：${e.message || e}`); }
   record("80. PWA 離線仍可開啟（SW 快取含 index.html／app.js／app.css；斷網重新整理後樣式與主程式都在）", offErrors.length === 0, offErrors.join("; ") || offInfo);
 
+  // 81.【2026-10-11 常備.開發-22】法說會事件附 MOPS 簡報官方連結：①合成資料——法說會列有
+  // mopsov.twse.com.tw 法說會簡報查詢頁連結（co_id 為該代號、新分頁開啟），非法說會列與不合法代號沒有；
+  // ②真實 data/events_by_code 取一筆法說會事件，事件列 HTML 含該代號的 MOPS 連結。只驗連結字串，不連 MOPS。
+  const irErrors = [];
+  let irInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const box = document.createElement("div");
+      box.innerHTML = eventsRowsHtml([
+        { code: "2330", date: "2026-10-08", type: "法說會", title: "召開法人說明會", url: "https://mops.twse.com.tw/mops/web/t05st01" },
+        { code: "2330", date: "2026-10-07", type: "月營收", title: "9月營收", url: "" },
+        { code: "<x>", date: "2026-10-06", type: "法說會", title: "壞代號", url: "" },
+      ], 10);
+      const links = [...box.querySelectorAll("a.mops-ir-link")].map(a => ({ href: a.href, target: a.target, text: a.textContent }));
+      const ev = await fetch("data/events.json").then(x => x.json());
+      const one = (ev.events || []).find(e => e.type === "法說會");
+      let real = null;
+      if (one) {
+        const b2 = document.createElement("div");
+        b2.innerHTML = eventsRowsHtml([one], 1);
+        const a = b2.querySelector("a.mops-ir-link");
+        real = { code: one.code, href: a ? a.href : null };
+      }
+      return { links, real };
+    });
+    if (r.links.length !== 1) irErrors.push(`合成資料應只有 1 個 MOPS 連結（法說會且代號合法），實得 ${r.links.length}`);
+    const l = r.links[0];
+    if (l && !(l.href.startsWith("https://mopsov.twse.com.tw/mops/web/ajax_t100sb07_1?") && l.href.endsWith("co_id=2330"))) irErrors.push(`連結網址不對：${l.href}`);
+    if (l && l.target !== "_blank") irErrors.push("連結應另開分頁");
+    if (!r.real) irErrors.push("真實 events.json 找不到任何法說會事件（無法驗證真實資料）");
+    else if (!r.real.href || !r.real.href.endsWith("co_id=" + encodeURIComponent(r.real.code))) irErrors.push(`真實法說會事件 ${r.real.code} 沒有對應 MOPS 連結：${r.real.href}`);
+    if (r.real) irInfo = `真實法說會事件 ${r.real.code} → ${r.real.href}`;
+  } catch (e) { irErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("81. 法說會事件附 MOPS 法說會簡報官方連結（只有法說會列有、代號正確、另開分頁）", irErrors.length === 0, irErrors.join("; ") || irInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
