@@ -18742,6 +18742,18 @@ App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「�
 - [ ] **常備.開發-8 多自選清單**〔做法：自選股從單一清單改為多清單（預設「我的自選」），沿用 localStorage＋/settings 同步，舊資料自動搬進預設清單；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙新增建立／切換／下架清單、舊格式自動遷移〕
 - [ ] **常備.開發-9 ibkr_quotes 排程化**〔現況：ibkr_quotes.py 需手動啟動；做法：比照 AlphaShioajiQuotes 建 Windows 工作排程器任務（開機連線後啟動、失敗自動重試），每週日 ET 01:00 權杖失效仍需人工重新連線 Gateway（CLAUDE.md IBKR 節），App 已有逾期標示；建排程屬本機設定變更，先寫提案，總司令同意後再建（提案先於執行）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：開機後 quotes_ibkr.json 在美股盤中 30 分鐘內有更新〕
 - [ ] **常備.開發-10 /live 美股 1 分 K 501 改為誠實說明**〔現況：個股頁切「1分K(即時)」查美股時伺服器回 501，App 顯示不清楚；做法：App 收到 501 時改顯示「美股 1 分 K 尚未提供（IBKR 連線衝突未確認），請看日線」，伺服器不改；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙用假 501 回應驗文字〕
+- [ ] **常備.開發-11 真錢執行總覽卡（首頁）**：讀 /auto/status＋/auto/ledger，顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期日期；未入金或被擋時用白話顯示原因。驗收：冒煙新增項、selftest 覆蓋「無紀錄／部分成交／全部成交」三態。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-11）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-12 真錢績效對照**：以 ledger 成交均價與 price_history 估值，畫累計淨值 vs 同期 0050 全持有；標「含手續費、未含稅」。驗收：首批成交後自動出現；無成交顯示「尚無部位」。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-12）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-13 AI 個股簡報（規則版）**：用 fundamentals、stock_detail、institutional、disposal_flags、events 產生 5 條要點（營收年增、法人連買賣天數、融資變化、處置／注意、近期事件），標「規則摘要，非 AI 判斷」；取代「功能建置中」，刪 placeholder_allowlist 對應登記。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-13）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-14 AI 營收解讀與盤勢解讀（規則版）**：營收用月增／年增／累計年增三段文字；盤勢用大盤漲跌、類股強弱前三、法人合計、融資維持率水位。同上標示與驗收。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-14）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-15 券商報告雷達**：改為「目標價與評等（公開來源）」，若無合法免費來源，卡片改為誠實說明並移除「建置中」；查證紀錄寫 docs/FIRST_HAND_SOURCES.md（三來源規則）。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-15）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-16 美股財報排程化**：用 research/sec_edgar_client.py 的 XBRL companyfacts，對 us_universe 內有報價的標的每週更新 us_financials.json（營收、EPS、FCF、負債比），取代 6 檔固定快照。驗收：檔案 generated_at 每週更新、涵蓋檔數 ≥ 200。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-16）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-17 美股評分 v0**：以 -16 資料算價值／成長／品質三分項（公式沿用台股 score_v2 的同名因子，只改資料源），選股頁美股分頁顯示，標「v0，未經回測驗證」。受凍結.二 限制：不登記為試驗、不做回測。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-17）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-18 到價與事件推播**：設定頁可對自選股設「漲跌幅 ±X%」「到價」「事件前一日」；本機 alpha_live_server 盤中每分鐘檢查，走既有 Web Push，每檔每日最多一則。驗收：selftest 三種觸發、未連本機時顯示 CTA。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-18）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-19 全域搜尋**：搜尋框同時查代號／名稱、新聞標題、事件、策略名稱，結果分組顯示。驗收：冒煙輸入「台積電」「除息」各有結果。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-19）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-20 效能**：index.html 拆出 CSS 與大段 JS 為獨立檔（sw.js 外殼清單同步更新）；stock_detail.json 拆成每檔獨立檔案並延遲載入。驗收：首頁首次載入傳輸量 <300 KB，冒煙全綠，PWA 離線仍可開啟。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-20）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-21 工業生產指數卡接外銷訂單**：來源經濟部統計處開放資料（官方），若端點不可得，三來源查證後把「尚未接入」改成誠實說明。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-21）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
+- [ ] **常備.開發-22 法說會列表加 MOPS 簡報連結**：只放官方 MOPS 公開連結，不下載、不轉存。〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-22）；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十三 寫入〕
 - [!] **常備.開發-因子類 B18～B22、B30～B32**〔BLOCKED：凍結.二（CLAUDE.md 十四節）——轉向.一 結果出來前不得登記為新試驗、不得開新搜尋輪次；解除：PENDING_QUEUE「轉向.一」條目寫明「凍結.二解除」後，逐項改回 - [ ] 並各自補心跳位置與驗收條件〕
 
 
@@ -18779,3 +18791,28 @@ App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「�
 - [x] **先.六十二-2 解除誤標：常備.開發-2 改回 - [ ]；-8、-9 改寫避開保留字；檔頭保留字表新增替代寫法**（互動視窗執行）〔2026-10-11 完成：常備.開發-2 改回 - [ ]（保留原中止紀錄）；-8「刪除清單」改「下架清單」；-9「登入後啟動」改「開機連線後啟動」、「人工登入」改「人工重新連線 Gateway」、「總司令核准」改「總司令同意」；檔頭新增第 6 點保留字表（付費／刪除／登入／核准的替代寫法）〕
 - [x] **先.六十二-3 守門員自檢：每輪自走開始時預跑兩組偵測、只印會被擋清單，不改標記**（互動視窗執行）〔2026-10-11 完成：guard_precheck() 在每輪 build_prompt 開頭對所有 - [ ] 預跑兩組偵測，印 GUARD_PRECHECK_WARN 清單，只警告不改標記；自身失敗只印 WARN_DETECTOR_CRASHED。目前實測：所有 - [ ] 都不會被擋〕
 - [x] **先.六十二-4 smoke＋selftest＋commit 回報**（互動視窗執行）〔2026-10-11 完成：冒煙全綠 64 PASS；selftest_dev_queue_guard 22/22、interactive_yield 18/18、claude_auth_detection 全過〕
+
+---
+
+# 2026-10-11【先.六十三：常備.開發 第二批（-11～-22）】（總司令裁示原文，動工前先寫入）
+
+各項已插入上方「常備.開發」區、緊接 -10 之後（依序執行），每項附心跳；驗收條件照原文。
+
+```
+【先.六十三】常備.開發 第二批（-11～-22），接在 -10 之後依序執行；每項附驗收條件與心跳；不得切換模式、不得觸發真錢委託；App 改動冒煙全綠才 commit
+- [ ] 常備.開發-11 真錢執行總覽卡（首頁）：讀 /auto/status＋/auto/ledger，顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期日期；未入金或被擋時用白話顯示原因。驗收：冒煙新增項、selftest 覆蓋「無紀錄／部分成交／全部成交」三態。
+- [ ] 常備.開發-12 真錢績效對照：以 ledger 成交均價與 price_history 估值，畫累計淨值 vs 同期 0050 全持有；標「含手續費、未含稅」。驗收：首批成交後自動出現；無成交顯示「尚無部位」。
+- [ ] 常備.開發-13 AI 個股簡報（規則版）：用 fundamentals、stock_detail、institutional、disposal_flags、events 產生 5 條要點（營收年增、法人連買賣天數、融資變化、處置／注意、近期事件），標「規則摘要，非 AI 判斷」；取代「功能建置中」，刪 placeholder_allowlist 對應登記。
+- [ ] 常備.開發-14 AI 營收解讀與盤勢解讀（規則版）：營收用月增／年增／累計年增三段文字；盤勢用大盤漲跌、類股強弱前三、法人合計、融資維持率水位。同上標示與驗收。
+- [ ] 常備.開發-15 券商報告雷達：改為「目標價與評等（公開來源）」，若無合法免費來源，卡片改為誠實說明並移除「建置中」；查證紀錄寫 docs/FIRST_HAND_SOURCES.md（三來源規則）。
+- [ ] 常備.開發-16 美股財報排程化：用 research/sec_edgar_client.py 的 XBRL companyfacts，對 us_universe 內有報價的標的每週更新 us_financials.json（營收、EPS、FCF、負債比），取代 6 檔固定快照。驗收：檔案 generated_at 每週更新、涵蓋檔數 ≥ 200。
+- [ ] 常備.開發-17 美股評分 v0：以 -16 資料算價值／成長／品質三分項（公式沿用台股 score_v2 的同名因子，只改資料源），選股頁美股分頁顯示，標「v0，未經回測驗證」。受凍結.二 限制：不登記為試驗、不做回測。
+- [ ] 常備.開發-18 到價與事件推播：設定頁可對自選股設「漲跌幅 ±X%」「到價」「事件前一日」；本機 alpha_live_server 盤中每分鐘檢查，走既有 Web Push，每檔每日最多一則。驗收：selftest 三種觸發、未連本機時顯示 CTA。
+- [ ] 常備.開發-19 全域搜尋：搜尋框同時查代號／名稱、新聞標題、事件、策略名稱，結果分組顯示。驗收：冒煙輸入「台積電」「除息」各有結果。
+- [ ] 常備.開發-20 效能：index.html 拆出 CSS 與大段 JS 為獨立檔（sw.js 外殼清單同步更新）；stock_detail.json 拆成每檔獨立檔案並延遲載入。驗收：首頁首次載入傳輸量 <300 KB，冒煙全綠，PWA 離線仍可開啟。
+- [ ] 常備.開發-21 工業生產指數卡接外銷訂單：來源經濟部統計處開放資料（官方），若端點不可得，三來源查證後把「尚未接入」改成誠實說明。
+- [ ] 常備.開發-22 法說會列表加 MOPS 簡報連結：只放官方 MOPS 公開連結，不下載、不轉存。
+心跳：各項 `- [x]`＋PROGRESS_HEARTBEAT.jsonl（track=devqueue）。Cowork 規則：每次「讀」確認 `- [ ]` 開發項 ≥ 12，不足即補。
+```
+
+- [x] **先.六十三-寫入 常備.開發-11～-22 插入常備.開發區（-10 之後）並附心跳；守門員預檢**（互動視窗執行）
