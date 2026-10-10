@@ -1801,7 +1801,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   let handlerInfo = "";
   try {
     const res = await page.evaluate(async () => {
-      const src = await (await fetch("index.html", { cache: "no-store" })).text();
+      const src = (await Promise.all(["index.html", "app.js", "app.css"].map(async u => (await fetch(u, { cache: "no-store" })).text()))).join("\n");  // 常備.開發-20：CSS/JS 已拆出，三檔合併掃描
       const KW = new Set(["if", "for", "while", "switch", "return", "typeof", "function", "new", "catch", "void", "await", "async", "delete", "in", "of", "do"]);
       const vals = [];
       const re = /\son(?:click|input|change)\s*=\s*"([^"]*)"/gi;
@@ -1868,7 +1868,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   let mgInfo = "";
   try {
     const r = await page.evaluate(async () => {
-      const src = await (await fetch("index.html", { cache: "no-store" })).text();
+      const src = (await Promise.all(["index.html", "app.js", "app.css"].map(async u => (await fetch(u, { cache: "no-store" })).text()))).join("\n");  // 常備.開發-20：CSS/JS 已拆出，三檔合併掃描
       await loadMarginMaintenance();
       const sum = (document.getElementById("margin-summary") || {}).innerText || "";
       const conv = (document.getElementById("margin-calib") || {}).innerText || "";
@@ -2010,7 +2010,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const fakeOrderErrors = [];
   try {
     const fs = await import("node:fs");
-    const src = fs.readFileSync("index.html", "utf8");
+    const src = ["index.html", "app.js", "app.css"].map(f => fs.readFileSync(f, "utf8")).join("\n");  // 常備.開發-20：CSS/JS 已拆出，三檔合併掃描
     if (/function\s+confirmOrder\b/.test(src)) fakeOrderErrors.push("index.html 仍有 function confirmOrder");
     if (/委託已送出\s*·\s*\d{2}:\d{2}/.test(src)) fakeOrderErrors.push("index.html 仍有寫死時間的「委託已送出」假成功字樣");  // IBKR Paper 真送單後的回報 toast 不算
     if (/id="sheet"/.test(src)) fakeOrderErrors.push("index.html 仍有 #sheet 假下單抽屜");
@@ -2541,10 +2541,91 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { gsErrors.push(`測試本身出錯：${e.message || e}`); }
   record("77. 全域搜尋（股票／新聞／事件／策略分組；「台積電」「除息」各有結果；單一來源失敗只影響該組）", gsErrors.length === 0, gsErrors.join("; "));
 
+  // 78.【2026-10-11 常備.開發-20】首頁首次載入不得下載大檔：全新環境（無快取、無 SW）開首頁 8 秒內，
+  // 不得請求整份 stock_detail.json／events.json／fundamentals.json，也不得載入 lightweight-charts；
+  // sparklines.json 不得重複下載。另印出實測傳輸量（gzip 模擬 GitHub Pages），供對照 <300KB 目標。
+  const flErrors = [];
+  let flInfo = "";
+  try {
+    const { measureFirstLoad } = await import("./measure_first_load.mjs");
+    const m = await measureFirstLoad(browser, baseUrl, 8000);
+    const urls = m.rows.map(x => x.url);
+    for (const bad of ["/data/stock_detail.json", "/data/events.json", "/data/fundamentals.json", "lightweight-charts"]) {
+      if (urls.some(u => u.endsWith(bad) || (bad === "lightweight-charts" && u.includes(bad)))) flErrors.push(`首頁載入時下載了 ${bad}`);
+    }
+    const sp = urls.filter(u => u.endsWith("/data/sparklines.json")).length;
+    if (sp > 1) flErrors.push(`sparklines.json 下載了 ${sp} 次`);
+    flInfo = `首頁首次載入實測 ${(m.total / 1024).toFixed(1)} KB（${m.rows.length} 個請求；目標 <300KB）`;
+  } catch (e) { flErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("78. 首頁首次載入不下載整份 stock_detail／events／fundamentals、不預載圖表函式庫、sparklines 不重複下載", flErrors.length === 0, flErrors.join("; ") || flInfo);
+
+  // 79.【2026-10-11 常備.開發-20】個股明細改每檔獨立檔延遲載入：loadStockDetail('2330') 與整份檔同一檔內容相同；
+  // 估值卡用的 EPS 精簡檔最後四季與整份檔一致；不存在的代號回 {} 不拋錯。
+  const sdErrors = [];
+  let sdInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const one = await loadStockDetail("2330");
+      const full = await (await fetch("data/stock_detail.json", { cache: "no-store" })).json();
+      const eps = await loadStockDetailEps();
+      const miss = await loadStockDetail("ZZZZ99");
+      const fq = ((full.stocks["2330"] || {}).financials || {}).quarters || [];
+      const eq = ((eps["2330"] || {}).financials || {}).quarters || [];
+      const last4 = fq.slice(-4).map(q => [q.year, q.quarter, q.eps]);
+      return { same: JSON.stringify(one) === JSON.stringify(full.stocks["2330"]), epsSame: JSON.stringify(eq.map(q => [q.year, q.quarter, q.eps])) === JSON.stringify(last4),
+               epsN: Object.keys(eps).length, missEmpty: miss && typeof miss === "object" && !Object.keys(miss).length, hasFin: !!(one.financials && one.financials.quarters && one.financials.quarters.length) };
+    });
+    if (!r.same) sdErrors.push("data/stock_detail/2330.json 與整份檔 stocks['2330'] 不一致");
+    if (!r.hasFin) sdErrors.push("2330 拆檔沒有財報季資料");
+    if (!r.epsSame) sdErrors.push("EPS 精簡檔 2330 最後四季與整份檔不一致");
+    if (r.epsN < 1000) sdErrors.push(`EPS 精簡檔只有 ${r.epsN} 檔`);
+    if (!r.missEmpty) sdErrors.push("不存在的代號沒有回傳 {}");
+    sdInfo = `2330 內容一致；EPS 精簡檔 ${r.epsN} 檔`;
+  } catch (e) { sdErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("79. 個股明細每檔獨立檔（data/stock_detail/{代號}.json）內容與整份檔一致；估值卡 EPS 精簡檔一致；查無代號回 {}", sdErrors.length === 0, sdErrors.join("; ") || sdInfo);
+
+  // 80.【2026-10-11 常備.開發-20】PWA 離線仍可開啟：另開環境讓 SW 安裝並接管，確認快取含 app.js／app.css，
+  // 斷網後重新整理，頁面仍套用樣式、主程式函式存在、分頁列可見（資料抓不到是預期，不算錯）。
+  const offErrors = [];
+  let offInfo = "";
+  try {
+    const octx = await browser.newContext({ viewport: { width: 393, height: 852 } });
+    const op = await octx.newPage();
+    const opErrors = [];
+    op.on("pageerror", e => opErrors.push(String(e)));
+    await op.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+    await op.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await op.reload({ waitUntil: "load" });
+    await op.waitForTimeout(2000);
+    const cached = await op.evaluate(async () => {
+      const out = [];
+      for (const k of await caches.keys()) { const c = await caches.open(k); for (const req of await c.keys()) out.push(new URL(req.url).pathname); }
+      return { list: out, controlled: !!navigator.serviceWorker.controller };
+    });
+    for (const f of ["/app.js", "/app.css", "/index.html"]) if (!cached.list.includes(f)) offErrors.push(`SW 快取缺 ${f}`);
+    if (!cached.controlled) offErrors.push("SW 沒有接管頁面");
+    await octx.setOffline(true);
+    await op.reload({ waitUntil: "load", timeout: 30000 });
+    await op.waitForTimeout(1500);
+    const st = await op.evaluate(() => ({
+      fn: typeof openStock === "function" && typeof hydrateHome === "function",
+      css: getComputedStyle(document.body).backgroundColor,
+      nav: !!document.querySelector("nav, .tabbar, #tabbar, .nav"),
+      ver: typeof APP_VERSION !== "undefined" ? APP_VERSION : null,
+    }));
+    if (!st.fn) offErrors.push("離線重新整理後 app.js 主程式沒有載入");
+    if (!st.css || st.css === "rgba(0, 0, 0, 0)" || st.css === "rgb(255, 255, 255)") offErrors.push(`離線重新整理後樣式沒有套用（body 背景 ${st.css}）`);
+    const syntaxErr = opErrors.filter(e => /SyntaxError|Unexpected token/.test(e));
+    if (syntaxErr.length) offErrors.push("離線時腳本解析錯誤：" + syntaxErr.join(" | ").slice(0, 200));
+    offInfo = `快取 ${cached.list.length} 個外殼項目；離線版本 ${st.ver}；body 背景 ${st.css}`;
+    await octx.close();
+  } catch (e) { offErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("80. PWA 離線仍可開啟（SW 快取含 index.html／app.js／app.css；斷網重新整理後樣式與主程式都在）", offErrors.length === 0, offErrors.join("; ") || offInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

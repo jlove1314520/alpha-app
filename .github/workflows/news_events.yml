@@ -57,11 +57,16 @@ jobs:
       - name: 重建題材庫
         run: python scripts/build_themes.py
         continue-on-error: true
+      # 常備.開發-20（2026-10-11）：events.json 依代號拆成 data/events_by_code/（首頁持股事件卡只抓用得到的代號）。
+      # 零外部請求；輸出已加進下方 git add（十節）。自身失敗只警告（十二）。
+      - name: 依代號拆分事件檔（零額外請求，常備.開發-20）
+        run: python scripts/split_events_by_code.py
+        continue-on-error: true
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/news.json data/events.json data/news_urls.json data/news_evidence.json data/themes.json
+          git add data/news.json data/events.json data/events_by_code/ data/news_urls.json data/news_evidence.json data/themes.json
           if git diff --cached --quiet; then
             echo "沒有新的新聞或事件，不產生 commit"
           else
