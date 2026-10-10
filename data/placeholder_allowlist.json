@@ -13,6 +13,7 @@
     {"path": "generate_status_json.py", "match": "尚未串接真實資料源", "reason": "程式註解，說明 INTENTIONALLY_EMPTY 清單的設計理由"},
     {"path": "data/STATUS.json", "match": "誠實佔位「功能建置中」", "reason": "generate_status_json.py 的輸出，同上"},
     {"path": "index.html", "match": "不誤導成「尚未串接」", "reason": "程式註解（首頁總資產卡三態設計說明），使用者看不到"},
-    {"path": "index.html", "match": "不能繼續講「尚未串接」", "reason": "程式註解（同上），使用者看不到"}
+    {"path": "index.html", "match": "不能繼續講「尚未串接」", "reason": "程式註解（同上），使用者看不到"},
+    {"path": "docs/FIRST_HAND_SOURCES.md", "match": "原「券商報告雷達」是「功能建置中」佔位", "reason": "查證紀錄引述改版前的舊狀態（常備.開發-15 已移除該佔位），內部文件，App 使用者看不到"}
   ]
 }

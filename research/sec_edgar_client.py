@@ -12,7 +12,10 @@ extended item 10 in round 61): this module covers the
 `submissions/CIK{cik}.json` endpoint's `filings.recent` block, plus optional
 pagination into its `filings.files[]` archive pointers (`full_history=True`
 on `get_filing_dates()`) for filers whose recent window doesn't reach back
-far enough. It does NOT wrap the XBRL company-facts endpoint (`sec_edgar_xbrl_facts_probe.py` /
+far enough. (2026-10-11: `get_company_facts()` now wraps the raw XBRL
+companyfacts payload for the App's weekly us_financials.json job; tag
+selection/dedup logic still lives in callers.) It does NOT wrap the XBRL
+concept-level probes (`sec_edgar_xbrl_facts_probe.py` /
 `sec_edgar_xbrl_facts_dedup_probe.py`) or the delisting/Form-25 probes
 (`sec_edgar_delisting_probe.py`, `sec_edgar_frc_cik_probe.py`) -- those are
 separate, still-probe-only concerns with their own open questions (see
@@ -99,6 +102,35 @@ def get_submissions(cik: int) -> dict:
     cik_padded = str(cik).zfill(10)
     url = _SUBMISSIONS_URL.format(cik=cik_padded)
     return _cached_get(url, f"submissions_{cik_padded}")
+
+
+_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
+
+
+def get_company_facts(cik: int, use_cache: bool = True, headers: dict | None = None) -> dict:
+    """Raw XBRL companyfacts/CIK{cik}.json payload (2026-10-11 常備.開發-16 新增).
+
+    Returns `{}` on HTTP 404 (filer with no XBRL facts at all -- a legitimate
+    "absent" outcome, same convention as us_fundamentals.get_companyfacts()).
+    `use_cache=False` skips the on-disk cache: the weekly App job
+    (.github/scripts/fetch_us_financials_sec.py) pulls a few hundred of these
+    multi-MB payloads and has no reason to keep them on the CI disk.
+    Rate limiting is the caller's job (SEC: 10 req/s ceiling).
+    """
+    cik_padded = str(cik).zfill(10)
+    url = _COMPANYFACTS_URL.format(cik=cik_padded)
+    if use_cache:
+        path = _cache_path(f"companyfacts_{cik_padded}")
+        if path.exists() and (time.time() - path.stat().st_mtime) < _CACHE_MAX_AGE_SECONDS:
+            return json.loads(path.read_text(encoding="utf-8"))
+    r = requests.get(url, headers=headers or HEADERS, timeout=60)
+    if r.status_code == 404:
+        return {}
+    r.raise_for_status()
+    data = r.json()
+    if use_cache:
+        _cache_path(f"companyfacts_{cik_padded}").write_text(json.dumps(data), encoding="utf-8")
+    return data
 
 
 def _filings_to_records(
