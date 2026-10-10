@@ -573,3 +573,41 @@ robots.txt合規爭議中的候選與已查證不可行的🔴項目）。
 robots.txt合規問題中止待裁示、二.3前10名已處理（2項待總司令裁示/後續研究）、
 二.4完成、二.5（本項）完成。`node scripts/smoke_test.mjs` 45/46 PASS
 （僅#39既有已知紅燈，本項純文件彙整未動任何`data/`或`index.html`）。
+
+---
+
+## 常備.開發-15：券商目標價與評等（公開來源）三來源查證（2026-10-11，DevQueue cycle 20261011-010102）
+
+背景：個股頁 AI 分頁原「券商報告雷達」是「功能建置中」佔位。交辦要求改成
+「目標價與評等（公開來源）」，若無合法免費來源就改成誠實說明。以下為本輪
+實際查證紀錄（2026-10-11 實測，不是引用舊結論）。
+
+### 台股：無合法免費來源 → App 顯示誠實說明
+
+| # | 來源類別 | 查了什麼 | 實際看到 |
+|---|---|---|---|
+| 1 | 官方開放資料 | `https://openapi.twse.com.tw/v1/swagger.json`（143 個端點）、`https://www.tpex.org.tw/openapi/swagger.json`（225 個端點），程式掃描全部端點描述找「目標價／評等／研究報告／券商報告」 | 兩份都 0 命中 |
+| 2 | 資料商 API 文件 | FinMind 官方資料集清單 <https://finmind.github.io/>（台股技術面／基本面／籌碼面／衍生品／可轉債／即時） | 無分析師目標價或券商評等資料集 |
+| 3 | 其他供應商（反推是否為商品） | 券商研究報告本身是各券商付費客戶資料；彙整版本見於 TEJ、CMoney 等付費資料庫；Goodinfo 等網站有轉載但屬爬網頁 | 只有付費或需爬網頁的管道 → 依「取得方式鐵律」不採用，標**待採購** |
+
+另：MOPS 法說會簡報是公司自己的資料，不含券商評等；且 `mopsov.twse.com.tw`
+robots.txt 全站 Disallow（見本檔開頭）。既有設計小抄
+`docs/Alpha_新聞與供應鏈連動_設計小抄.md` 第三層也早已判「台股暫難免費取得」，本輪結論一致。
+
+### 美股：評等分佈有免費來源（已接）；目標價為付費（待採購）
+
+| # | 來源類別 | 查了什麼 | 實際看到 |
+|---|---|---|---|
+| 1 | 官方 API 文件 | Finnhub 官方 swagger `https://finnhub.io/static/swagger.json`：`/stock/recommendation`（Recommendation Trends） | `premium` 欄為 null → 免費層可用 |
+| 2 | 同一份官方文件 | `/stock/price-target`、`/stock/upgrade-downgrade` | 分別標 `"Premium required."`、`"Premium Access Required"` → **待採購**，不打 |
+| 3 | GitHub／社群 | Finnhub 官方 Python client README（`recommendation_trends()`／`price_target()`）；第三方整合文件描述免費層約 60 次/分鐘、個人非商業使用 | 與官方文件一致；本 App 為個人使用 |
+
+**已接入**：`.github/scripts/fetch_us_analyst_reco.py` → `data/us_analyst_reco.json`，
+掛在 `quotes.yml`（輸出在 `data/`，被 `git add -A data/` 結構性涵蓋）。腳本自己節流：
+檔案未滿 20 小時不打 API → 約每日 1 次 × 9 檔（`US_TICKERS`）= 9 次/日，每次請求間隔 1.1 秒。
+沿用既有 `FINNHUB_API_KEY` secret，不需要總司令另外申請。
+
+**限制（誠實揭露）**：只涵蓋 `fetch_quotes_us.py` 的 9 檔；顯示的是多家券商評等
+「家數」彙整，不是單一券商報告、不含目標價；Finnhub 是資料商彙整，非券商官方發布。
+**驗證狀態**：本機沒有 key，無法本機實跑；首次真實資料以 quotes.yml 在 GitHub Actions
+跑出 `data/us_analyst_reco.json` 為準，在那之前 App 美股會顯示「查無評等：評等檔尚未產生」。

@@ -10,11 +10,9 @@
     {"path": "docs/EXTERNAL_STRATEGY_SOURCES.md", "match": "UI 顯示尚未串接", "reason": "外部策略匯入文件描述 signal_status 衰減欄位尚未上 UI 的事實，非 App 文案"},
     {"path": "scripts/smoke_test.mjs", "match": "*", "reason": "冒煙測試本身要寫出被檢查的字樣"},
     {"path": "data/placeholder_allowlist.json", "match": "*", "reason": "本檔自身"},
-    {"path": "generate_status_json.py", "match": "誠實佔位「功能建置中」", "reason": "STATUS.json 面板來源說明：如實描述 App 上仍是誠實空狀態的面板（券商報告雷達）；AI 盤前日報已於常備.開發-2、AI 個股簡報已於常備.開發-13、AI 營收解讀已於常備.開發-14 改為規則摘要"},
     {"path": "generate_status_json.py", "match": "尚未串接真實資料源", "reason": "程式註解，說明 INTENTIONALLY_EMPTY 清單的設計理由"},
     {"path": "data/STATUS.json", "match": "誠實佔位「功能建置中」", "reason": "generate_status_json.py 的輸出，同上"},
     {"path": "index.html", "match": "不誤導成「尚未串接」", "reason": "程式註解（首頁總資產卡三態設計說明），使用者看不到"},
-    {"path": "index.html", "match": "不能繼續講「尚未串接」", "reason": "程式註解（同上），使用者看不到"},
-    {"path": "index.html", "match": "功能建置中 · 尚未接上真實券商研究報告資料源", "reason": "券商研究報告屬付費資料，依取得方式鐵律標待採購，未核准預算前維持空狀態"}
+    {"path": "index.html", "match": "不能繼續講「尚未串接」", "reason": "程式註解（同上），使用者看不到"}
   ]
 }

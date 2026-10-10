@@ -1190,9 +1190,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="ai-tag">✦ 個股簡報 · 規則摘要</div>
         <div id="ai-brief-body"><div class="note">載入中…</div></div>
       </div>
-      <div class="card" style="opacity:.7">
-        <h3>券商報告雷達</h3>
-        <div class="note">功能建置中 · 尚未接上真實券商研究報告資料源</div>
+      <!-- 常備.開發-15（2026-10-11）：原「券商報告雷達」佔位改為「目標價與評等（公開來源）」。
+           美股：Finnhub 免費層評等分佈（data/us_analyst_reco.json，quotes.yml 約每日一次）；目標價為付費端點，待採購。
+           台股：官方 OpenAPI／FinMind 皆無此資料，只顯示誠實說明。三來源查證見 docs/FIRST_HAND_SOURCES.md。 -->
+      <div class="card">
+        <h3>目標價與評等（公開來源）</h3>
+        <div id="analyst-radar-body"><div class="note">載入中…</div></div>
       </div>
     </div>
 
@@ -5311,6 +5314,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       loadFinancialsUS(code);
       _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
       _safeAsync('renderStockBrief',()=>renderStockBrief(code));  // 常備.開發-13
+      _safeAsync('renderAnalystRadar',()=>renderAnalystRadar(code));  // 常備.開發-15
       _safeAsync('renderRevenueRead',()=>renderRevenueRead(code));  // 常備.開發-14
       return;
     }
@@ -5382,6 +5386,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadMarginChip(code,px);
     _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
       _safeAsync('renderStockBrief',()=>renderStockBrief(code));  // 常備.開發-13
+      _safeAsync('renderAnalystRadar',()=>renderAnalystRadar(code));  // 常備.開發-15
     _safeAsync('renderRevenueRead',()=>renderRevenueRead(code));  // 常備.開發-14
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
@@ -8267,6 +8272,43 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     el.innerHTML='<ol style="margin:4px 0 0 18px;padding:0;line-height:1.7">'+pts.map(p=>`<li><b>${esc(p.k)}</b>　${esc(p.t)}</li>`).join('')+'</ol>'
       +'<div class="note" style="margin-top:8px">規則摘要，非 AI 判斷、非投資建議：只把 fundamentals／stock_detail／institutional_history／disposal_flags／events 五份檔案的數字轉成文字，不推論漲跌。</div>';
   }
+  // ── 2026-10-11（常備.開發-15）目標價與評等（公開來源）────────────────────────────
+  // 只顯示 data/us_analyst_reco.json 裡 Finnhub 免費層的「評等家數分佈」，不自行計分、不推論漲跌。
+  let US_RECO_CACHE=null;
+  const ANALYST_TW_NOTE='台股目前沒有合法的免費來源：證交所／櫃買 OpenAPI 與 FinMind 都沒有券商目標價或評等資料，券商研究報告屬付費商品（待採購），依資料取得鐵律不爬新聞或付費報告。查證紀錄：docs/FIRST_HAND_SOURCES.md。';
+  function buildAnalystRadarHtml(code,data){
+    const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    if(!isUS(code))return `<div class="note">${esc(ANALYST_TW_NOTE)}</div>`;
+    const tail='<div class="note" style="margin-top:8px">目標價：Finnhub 目標價端點為付費方案，待採購，目前不顯示。評等為多家券商家數彙整，非投資建議。</div>';
+    const rows=data&&data.tickers&&data.tickers[code];
+    if(!rows||!rows.length){
+      const cov=(data&&data.coverage)||[];
+      const why=!data?'評等檔（data/us_analyst_reco.json）尚未產生或讀取失敗'
+        :cov.includes(code)?'Finnhub 這檔沒有回傳評等資料':`目前只涵蓋 ${cov.join('、')||'—'}，這檔不在清單內`;
+      return `<div class="note">查無評等：${esc(why)}。</div>`+tail;
+    }
+    const L=rows[0],K=[['strongBuy','強力買進'],['buy','買進'],['hold','持有'],['sell','賣出'],['strongSell','強力賣出']];
+    const n=x=>Number(x)||0,tot=K.reduce((a,[k])=>a+n(L[k]),0);
+    if(!tot)return `<div class="note">查無評等：${esc(L.period)} 期家數皆為 0。</div>`+tail;
+    const bars=K.map(([k,lb])=>`<div style="display:flex;align-items:center;gap:8px;margin:3px 0"><span style="width:64px;font-size:12px">${lb}</span><div style="flex:1;height:8px;background:var(--hairline);border-radius:4px;overflow:hidden"><div style="width:${(n(L[k])/tot*100).toFixed(1)}%;height:100%;background:var(--ink-2)"></div></div><span style="width:28px;text-align:right;font-size:12px">${n(L[k])}</span></div>`).join('');
+    let trend='';
+    const P=rows[1];
+    if(P){const pos=r=>n(r.strongBuy)+n(r.buy),pt=K.reduce((a,[k])=>a+n(P[k]),0);
+      if(pt){const d=pos(L)/tot*100-pos(P)/pt*100;trend=`買進類占比 ${(pos(L)/tot*100).toFixed(0)}%，較 ${esc(P.period)} 期${Math.abs(d)<0.5?'持平':(d>0?'上升 ':'下降 ')+Math.abs(d).toFixed(0)+' 個百分點'}。`}}
+    return `<div class="note" style="margin-bottom:4px">${esc(L.period)} 期，共 ${tot} 家券商評等（來源：Finnhub 免費層，抓取時間 ${esc((data.generated_at||'').slice(0,10))}）</div>${bars}`
+      +(trend?`<div class="note" style="margin-top:6px">${trend}</div>`:'')+tail;
+  }
+  async function renderAnalystRadar(code){
+    const el=document.getElementById('analyst-radar-body');if(!el)return;
+    if(!isUS(code)){el.innerHTML=buildAnalystRadarHtml(code,null);return}
+    el.innerHTML='<div class="note">載入中…</div>';
+    if(!US_RECO_CACHE){
+      try{const r=await fetch('data/us_analyst_reco.json?t='+Date.now());if(r.ok)US_RECO_CACHE=await r.json()}
+      catch(e){console.warn('[renderAnalystRadar]',e);recordGlobalError('renderAnalystRadar',e)}
+    }
+    if(currentCode!==code)return;
+    el.innerHTML=buildAnalystRadarHtml(code,US_RECO_CACHE);
+  }
   // ── 2026-10-11（常備.開發-14）營收解讀（規則版）────────────────────────────────
   // 三段文字：①月增（最新月 vs 上一月）②年增（官方 yoy，缺時用去年同月金額自算）
   // ③累計年增（今年 1 月～最新月合計 vs 去年同期合計；去年某月缺金額時用「今年該月÷(1+官方年增)」回推，
@@ -8955,7 +8997,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0126';
+  const APP_VERSION='2026-10-11.0133';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

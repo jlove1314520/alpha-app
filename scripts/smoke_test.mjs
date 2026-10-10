@@ -2419,10 +2419,47 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { readErrors.push(`測試本身出錯：${e.message || e}`); }
   record("74. 營收解讀（月增／年增／累計年增三段）與市場頁盤勢解讀（大盤／類股強弱前三／法人合計／融資維持率水位）規則版；標「規則摘要，非 AI 判斷」；全空寫查無；美股誠實說明", readErrors.length === 0, readErrors.join("; "));
 
+  // 75.【2026-10-11 常備.開發-15】目標價與評等（公開來源）：①合成資料驗評等家數長條與買進類占比趨勢
+  // ②美股不在涵蓋清單／檔案缺 → 寫「查無評等」＋原因 ③台股顯示「沒有合法的免費來源」誠實說明
+  // ④目標價一律標「待採購」⑤AI 分頁不得殘留「券商報告雷達／功能建置中」。
+  const analystErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const o = {};
+      const div = document.createElement("div");
+      const txt = (h) => { div.innerHTML = h; return div.textContent; };
+      const data = { generated_at: "2026-10-11T00:00:00+00:00", coverage: ["ZZZZ", "YYYY"],
+        tickers: { ZZZZ: [{ period: "2026-10-01", strongBuy: 10, buy: 20, hold: 8, sell: 2, strongSell: 0 },
+          { period: "2026-09-01", strongBuy: 8, buy: 16, hold: 12, sell: 4, strongSell: 0 }] } };
+      o.syn = txt(buildAnalystRadarHtml("AAPL", { ...data, tickers: { AAPL: data.tickers.ZZZZ } }));
+      o.notCovered = txt(buildAnalystRadarHtml("AAPL", data));
+      o.noFile = txt(buildAnalystRadarHtml("AAPL", null));
+      o.tw = txt(buildAnalystRadarHtml("2330", data));
+      const saved = currentCode;
+      try {
+        currentCode = "2330"; await renderAnalystRadar("2330");
+        o.twLive = document.getElementById("analyst-radar-body").textContent;
+        currentCode = "AAPL"; await renderAnalystRadar("AAPL");
+        o.usLive = document.getElementById("analyst-radar-body").textContent;
+      } finally { currentCode = saved; }
+      o.sub = document.getElementById("sub-ai").textContent;
+      return o;
+    });
+    for (const k of ["2026-10-01 期，共 40 家券商評等", "強力買進", "買進類占比 75%，較 2026-09-01 期上升 15 個百分點", "待採購", "非投資建議"])
+      if (!r.syn.includes(k)) analystErrors.push(`合成資料缺「${k}」：${r.syn.slice(0, 200)}`);
+    if (!r.notCovered.includes("查無評等") || !r.notCovered.includes("不在清單內")) analystErrors.push(`不在涵蓋清單應寫原因：${r.notCovered.slice(0, 120)}`);
+    if (!r.noFile.includes("查無評等") || !r.noFile.includes("尚未產生或讀取失敗")) analystErrors.push(`檔案缺應寫原因：${r.noFile.slice(0, 120)}`);
+    if (!r.tw.includes("沒有合法的免費來源")) analystErrors.push(`台股應誠實說明：${r.tw.slice(0, 120)}`);
+    if (!r.twLive.includes("沒有合法的免費來源")) analystErrors.push(`台股實際畫面應誠實說明：${r.twLive.slice(0, 120)}`);
+    if (!(r.usLive.includes("券商評等") || r.usLive.includes("查無評等")) || !r.usLive.includes("待採購")) analystErrors.push(`AAPL 實際畫面異常：${r.usLive.slice(0, 160)}`);
+    if (r.sub.includes("券商報告雷達") || r.sub.includes("功能建置中")) analystErrors.push("AI 分頁仍殘留「券商報告雷達／功能建置中」");
+  } catch (e) { analystErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("75. 個股頁目標價與評等（公開來源）：美股評等家數長條＋買進類占比趨勢；查無時寫原因；台股誠實說明無合法免費來源；目標價標待採購；無「功能建置中」", analystErrors.length === 0, analystErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

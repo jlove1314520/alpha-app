@@ -1181,8 +1181,8 @@
       "source": "規則摘要（常備.開發-13）：data/fundamentals.json＋stock_detail.json＋institutional_history.json＋disposal_flags.json＋events.json，前端組成 5 條要點，非 AI 判斷"
     },
     {
-      "panel": "個股頁·AI·券商報告雷達",
-      "source": "無（誠實佔位「功能建置中」）"
+      "panel": "個股頁·AI·目標價與評等（公開來源）",
+      "source": "美股：data/us_analyst_reco.json（Finnhub 免費層 /stock/recommendation 評等家數，quotes.yml 約每日一次，僅 US_TICKERS 9 檔；目標價為付費端點待採購）；台股：無合法免費來源，顯示誠實說明（常備.開發-15）"
     },
     {
       "panel": "交易頁·機器人（Bb-90 自動再平衡）",

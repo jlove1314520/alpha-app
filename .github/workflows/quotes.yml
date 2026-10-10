@@ -73,6 +73,12 @@ jobs:
         run: python .github/scripts/fetch_quotes_us.py
         continue-on-error: true  # 美股這步沒設金鑰時會失敗，不要讓它擋住台股那份已經抓到的資料被 commit
 
+      - name: 抓美股分析師評等分佈（Finnhub 免費層 /stock/recommendation，腳本自己節流約每日一次）
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+        run: python .github/scripts/fetch_us_analyst_reco.py
+        continue-on-error: true  # 常備.開發-15：輸出 data/us_analyst_reco.json，被下方 git add -A data/ 結構性涵蓋
+
       - name: 計算ADR溢價（quotes_us×fx÷ADR比率 對 quotes_tw，純計算零額外請求，建置一.3）
         run: python .github/scripts/compute_adr_premium.py
         continue-on-error: true  # 上面任一份報價還沒抓到時這步會誠實記缺漏，不擋其他步驟
