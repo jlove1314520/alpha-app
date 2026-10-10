@@ -1678,9 +1678,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="sheet-mask" id="search-mask" onclick="closeSearch()"></div>
   <div class="sheet" id="search-sheet">
     <div class="grab"></div>
-    <h2>搜尋股票</h2>
-    <input id="search-input" placeholder="輸入代號或公司名，例 2454 或 聯發科" oninput="doSearch()" autocomplete="off" inputmode="text">
-    <div id="search-results"><div class="note" style="padding:16px">輸入代號或公司名開始搜尋</div></div>
+    <h2>全域搜尋</h2>
+    <input id="search-input" placeholder="代號／公司名／新聞／事件／策略，例 台積電、除息" oninput="doSearch()" autocomplete="off" inputmode="text">
+    <div id="search-results"><div class="note" style="padding:16px">輸入關鍵字開始搜尋</div></div>
   </div>
 
   <!-- 產業全選單（選股頁「更多」開，2026-08-25 新增，避免橫向捲動列塞不下25+個產業）-->
@@ -4677,7 +4677,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     let finmindErr=null;
     try{
       const c=localStorage.getItem('alpha_info'),cu=localStorage.getItem('alpha_info_us');
-      if(c&&cu){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
+      // 2026-10-11（常備.開發-19 順修）：空清單快取視同沒有快取——FinMind 額度用盡時舊版會把空清單寫進快取，
+      // 之後每次開 App 都讀到空清單、永遠不走 company_info.json 退路，搜尋查不到任何股票。
+      if(c&&cu&&((JSON.parse(c).list)||[]).length){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
     }catch(e){console.warn('[loadStockInfo:cacheRead]',e);recordGlobalError('loadStockInfo:cacheRead',e)}
     try{
       // 2026-09-08 兩個真缺陷一起修（實測抓到，不是預防性重構）：
@@ -4710,6 +4712,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const nm=(s.stock_name||'').replace(/\s*Common Stock\s*$/i,'');
         STOCKNAME_US[id]=nm;seenUS[id]={id,name:nm,ind:s.Subsector||'',mkt:'US'}}
       STOCKLIST_US=Object.values(seenUS);
+      // 2026-10-11（常備.開發-19 順修）：台股清單空（FinMind 402 額度用盡／逾時）不得標成已載入，
+      // 否則下面 company_info.json 退路不會執行、空清單還會被寫進快取。
+      if(!STOCKLIST.length)throw new Error('FinMind TaiwanStockInfo 清單為空（'+(sTW.status==='rejected'?String(sTW.reason&&sTW.reason.message||sTW.reason):'回應無 data')+'）');
       infoLoaded=true;
       try{
         localStorage.setItem('alpha_info',JSON.stringify({map:STOCKNAME,list:STOCKLIST}));
@@ -4735,27 +4740,99 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     infoLoading=false;
   }
+  // 2026-10-11（常備.開發-19）全域搜尋：同一個搜尋框同時查①股票代號／名稱（原有，點列加入自選）
+  // ②新聞標題（data/news.json）③事件（data/events.json：標題／類型／公司名，含除權息、重大訊息、月營收）
+  // ④策略名稱（data/strategies.json），結果分四組顯示。新聞／事件沿用既有 ensureNews()／ensureEvents()
+  // 快取，不額外打外部 API；三份檔案各自 allSettled 載入，任一失敗只讓該組顯示「載入失敗」，不影響
+  // 股票組。輸入公司名（如「台積電」）時，名稱對到的台股代號（≤5 檔）也會帶出該代號的新聞與事件。
+  let GS_STRATS=null,GS_STATE={news:'idle',events:'idle',strategies:'idle'};
+  async function ensureStrategiesForSearch(){
+    if(GS_STRATS)return GS_STRATS;
+    const r=await fetch('data/strategies.json?t='+Math.floor(Date.now()/60000));
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();GS_STRATS=(d&&d.strategies)||[];return GS_STRATS;
+  }
+  function loadGlobalSearchSources(){
+    const jobs=[['news',ensureNews],['events',ensureEvents],['strategies',ensureStrategiesForSearch]];
+    jobs.forEach(([k])=>{if(GS_STATE[k]!=='ok')GS_STATE[k]='loading'});
+    return Promise.allSettled(jobs.map(([k,fn])=>Promise.resolve().then(fn).then(
+      ()=>{GS_STATE[k]='ok'},
+      e=>{GS_STATE[k]='err';console.warn('[globalSearch:'+k+']',e);recordGlobalError('globalSearch:'+k,e)})))
+      .then(()=>{try{if(document.getElementById('search-sheet').classList.contains('open'))doSearch()}catch(e){console.warn('[globalSearch:rerender]',e);recordGlobalError('globalSearch:rerender',e)}});
+  }
   async function openSearch(){
     document.getElementById('search-mask').classList.add('open');
     document.getElementById('search-sheet').classList.add('open');
     document.getElementById('search-input').value='';
     document.getElementById('search-results').innerHTML='<div class="note" style="padding:16px">載入股票清單…</div>';
+    const src=loadGlobalSearchSources();
     await loadStockInfo();
     doSearch();
     setTimeout(()=>document.getElementById('search-input').focus(),200);
+    return src;
   }
   function closeSearch(){document.getElementById('search-mask').classList.remove('open');document.getElementById('search-sheet').classList.remove('open')}
+  function _gsEsc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+  function _gsHead(title,n,more){return `<div class="gs-head" style="font-size:11px;font-weight:700;color:var(--ink-3);padding:12px 4px 4px;border-bottom:1px solid var(--hairline)">${title}　${n} 筆${more?`<span style="font-weight:400">（只顯示前 ${more} 筆）</span>`:''}</div>`}
+  function _gsStateNote(k,label){
+    const st=GS_STATE[k];
+    if(st==='loading'||st==='idle')return `<div class="gs-head" style="font-size:11px;font-weight:700;color:var(--ink-3);padding:12px 4px 4px">${label}</div><div class="note" style="padding:8px 4px">${label}載入中…</div>`;
+    if(st==='err')return `<div class="gs-head" style="font-size:11px;font-weight:700;color:var(--ink-3);padding:12px 4px 4px">${label}</div><div class="note" style="padding:8px 4px">${label}載入失敗（詳見診斷錯誤 log）</div>`;
+    return null;
+  }
   function doSearch(){
     const q=document.getElementById('search-input').value.trim();
     const box=document.getElementById('search-results');
-    if(!q){box.innerHTML='<div class="note" style="padding:16px">輸入代號或公司名開始搜尋（台股用代號，美股用代號如 AAPL）</div>';return}
+    if(!q){box.innerHTML='<div class="note" style="padding:16px">輸入關鍵字開始搜尋：股票代號或公司名（美股用代號如 AAPL）、新聞標題、事件（例：除息、重大訊息）、策略名稱</div>';return}
     const qU=q.toUpperCase();
+    const out=[];
+    // ① 股票
     const resTW=STOCKLIST.filter(s=>s.id.startsWith(q)||s.name.includes(q));
     const resUS=STOCKLIST_US.filter(s=>s.id.startsWith(qU)||s.name.toUpperCase().includes(qU));
+    const nStock=resTW.length+resUS.length;
     const res=[...resTW,...resUS].slice(0,30);
-    if(!res.length){box.innerHTML='<div class="note" style="padding:16px">查無「'+q+'」</div>';return}
-    box.innerHTML=res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${s.name}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${s.ind}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('');
+    out.push(`<div class="gs-group" data-group="stocks">`+_gsHead('股票',nStock,nStock>30?30:0)
+      +(res.length?res.map(s=>`<div class="sr" onclick="pickStock('${s.id}')"><div><b>${_gsEsc(s.name)}</b> <span class="sub">${s.id} · ${s.mkt==='US'?'美股':'台股'}</span><div class="sub">${_gsEsc(s.ind)}</div></div><span class="act">${WL.includes(s.id)?'✓ 已加入':'＋ 加入'}</span></div>`).join('')
+        :`<div class="note" style="padding:8px 4px">查無股票</div>`)+`</div>`);
+    // 名稱／代號對到的台股（只在 ≤5 檔時用，避免輸入「2」這種短字串把整個市場的新聞事件都帶出來）
+    const codeSet=new Set(resTW.length&&resTW.length<=5?resTW.map(s=>s.id):[]);
+    // ② 新聞（新到舊）
+    let html=_gsStateNote('news','新聞');
+    if(!html){
+      const pool=(NEWS_CACHE&&NEWS_CACHE.news)||[];
+      const all=pool.filter(n=>(n.title||'').toUpperCase().includes(qU)||(n.codes||[]).some(c=>codeSet.has(c)));
+      all.sort((a,b)=>(Date.parse(b.published)||0)-(Date.parse(a.published)||0));
+      html=_gsHead('新聞',all.length,all.length>10?10:0)+(all.length?all.slice(0,10).map(n=>{
+        const ts=Date.parse(n.published);const d=isNaN(ts)?'':new Date(ts+8*3600e3).toISOString().slice(5,10);
+        return `<div class="sr" data-url="${_gsEsc(n.url)}" onclick="gsOpenUrl(this.dataset.url)"><div><b style="font-size:13px">${_gsEsc(n.title)}</b><div class="sub">${d} · ${_gsEsc(n.source||'')}${(n.codes||[]).length?' · '+_gsEsc(n.codes.join('、')):''}</div></div><span class="act">原文 ↗</span></div>`}).join('')
+        :`<div class="note" style="padding:8px 4px">查無新聞（新聞索引只保留近期 ${pool.length} 篇標題）</div>`);
+    }
+    out.push(`<div class="gs-group" data-group="news">${html}</div>`);
+    // ③ 事件（未來的排前面、由近到遠，之後才是過去的由新到舊）
+    html=_gsStateNote('events','事件');
+    if(!html){
+      const all=((EVENTS_CACHE&&EVENTS_CACHE.events)||[]).filter(e=>(e.title||'').toUpperCase().includes(qU)||(e.type||'').includes(q)||(e.name&&e.name.includes(q))||codeSet.has(e.code));
+      const today=new Date(Date.now()+8*3600e3).toISOString().slice(0,10);
+      all.sort((a,b)=>{const fa=(a.date||'')>=today,fb=(b.date||'')>=today;if(fa!==fb)return fa?-1:1;return fa?String(a.date).localeCompare(String(b.date)):String(b.date).localeCompare(String(a.date))});
+      html=_gsHead('事件',all.length,all.length>10?10:0)+(all.length?all.slice(0,10).map(e=>{
+        const nm=e.name||nameOf(e.code)||'';
+        return `<div class="sr" data-code="${_gsEsc(e.code||'')}" data-url="${_gsEsc(e.url||'')}" onclick="gsOpenEvent(this.dataset.code,this.dataset.url)"><div><b style="font-size:13px">${e.code?_gsEsc(e.code)+' '+_gsEsc(nm)+'・':''}${_gsEsc(e.title)}</b><div class="sub">${_gsEsc(e.date||'')} · ${_gsEsc(e.type||'事件')} · ${_gsEsc(e.source||'')}</div></div><span class="act">${e.code?'個股 →':'原文 ↗'}</span></div>`}).join('')
+        :`<div class="note" style="padding:8px 4px">查無事件</div>`);
+    }
+    out.push(`<div class="gs-group" data-group="events">${html}</div>`);
+    // ④ 策略
+    html=_gsStateNote('strategies','策略');
+    if(!html){
+      const all=(GS_STRATS||[]).filter(s=>[s.name,s.id,s.type,s.status].some(v=>v&&String(v).toUpperCase().includes(qU)));
+      html=_gsHead('策略',all.length,0)+(all.length?all.map(s=>`<div class="sr" data-sid="${_gsEsc(String(s.id||'').replace(/[^\w.-]/g,''))}" onclick="gsOpenStrategy(this.dataset.sid)"><div><b style="font-size:13px">${_gsEsc(s.name||s.id)}</b><div class="sub">${_gsEsc(s.type||'')} · ${_gsEsc(s.status||'')}</div></div><span class="act">報告 →</span></div>`).join('')
+        :`<div class="note" style="padding:8px 4px">查無策略</div>`);
+    }
+    out.push(`<div class="gs-group" data-group="strategies">${html}</div>`);
+    box.innerHTML=out.join('')+'<div class="note" style="padding:10px 4px">新聞／事件只存標題與連結索引（data/news.json、data/events.json）：點新聞開原文、點事件跳個股頁、點股票加入自選、點策略看報告。非投資建議。</div>';
   }
+  function gsOpenUrl(u){try{if(u&&/^https?:\/\//.test(u))window.open(u,'_blank','noopener')}catch(e){console.warn('[gsOpenUrl]',e);recordGlobalError('gsOpenUrl',e)}}
+  function gsOpenEvent(code,url){if(code){closeSearch();openStock(code)}else gsOpenUrl(url)}
+  function gsOpenStrategy(id){closeSearch();try{go('trade')}catch(e){console.warn('[gsOpenStrategy:go]',e);recordGlobalError('gsOpenStrategy:go',e)}openStrategyReport(id)}
   function pickStock(code){
     if(!WL.includes(code)){WL.push(code);localStorage.setItem('alpha_wl',JSON.stringify(WL));pushWatchlistSoon();pushSettingsSoon();toast('已加入 '+nameOf(code))}
     else{toast('已在自選股中')}
@@ -9122,7 +9199,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0228';
+  const APP_VERSION='2026-10-11.0237';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

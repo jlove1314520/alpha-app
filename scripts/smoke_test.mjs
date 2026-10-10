@@ -2502,10 +2502,49 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { alertErrors.push(`測試本身出錯：${e.message || e}`); }
   record("76. 設定頁到價與事件推播（未連本機顯示 CTA；台股自選股可設漲跌幅±X%／漲到／跌到／事件前一日；美股誠實寫暫不支援；儲存整份 POST /alerts/rules）", alertErrors.length === 0, alertErrors.join("; "));
 
+  // 77.【2026-10-11 常備.開發-19】全域搜尋：用 repo 內真實 data/news.json／events.json／strategies.json，
+  // 輸入「台積電」「除息」各有結果（分組顯示：股票／新聞／事件／策略）；單一來源失敗只影響該組。
+  const gsErrors = [];
+  try {
+    await page.evaluate(() => window.go("home"));
+    const r = await page.evaluate(async () => {
+      const o = {};
+      await openSearch();
+      const inp = document.getElementById("search-input");
+      const grab = (q) => {
+        inp.value = q; doSearch();
+        const g = {};
+        document.querySelectorAll("#search-results .gs-group").forEach((x) => { g[x.dataset.group] = { rows: x.querySelectorAll(".sr").length, text: x.textContent }; });
+        return g;
+      };
+      o.tsmc = grab("台積電");
+      o.exdiv = grab("除息");
+      o.strat = grab("動能");
+      const saved = GS_STATE.strategies;
+      GS_STATE.strategies = "err";
+      o.isolated = grab("台積電");
+      GS_STATE.strategies = saved;
+      o.title = document.querySelector("#search-sheet h2").textContent;
+      closeSearch();
+      return o;
+    });
+    if (r.title !== "全域搜尋") gsErrors.push(`標題應為「全域搜尋」：${r.title}`);
+    for (const k of ["stocks", "news", "events", "strategies"]) if (!r.tsmc[k]) gsErrors.push(`「台積電」缺 ${k} 分組`);
+    if (!r.tsmc.stocks || !r.tsmc.stocks.text.includes("2330")) gsErrors.push("「台積電」股票組應含 2330");
+    const tsmcOther = (r.tsmc.news ? r.tsmc.news.rows : 0) + (r.tsmc.events ? r.tsmc.events.rows : 0);
+    if (tsmcOther < 1) gsErrors.push(`「台積電」新聞＋事件應至少 1 筆：${JSON.stringify(r.tsmc).slice(0, 200)}`);
+    if (!r.exdiv.events || r.exdiv.events.rows < 1 || !r.exdiv.events.text.includes("除")) gsErrors.push(`「除息」事件組應有結果：${JSON.stringify(r.exdiv.events || {}).slice(0, 200)}`);
+    if (!r.strat.strategies || r.strat.strategies.rows < 1 || !r.strat.strategies.text.includes("題材動能榜")) gsErrors.push(`「動能」策略組應含題材動能榜：${JSON.stringify(r.strat.strategies || {}).slice(0, 200)}`);
+    if (!r.isolated.strategies || !r.isolated.strategies.text.includes("載入失敗")) gsErrors.push("策略來源失敗時應只在策略組顯示載入失敗");
+    if (!r.isolated.stocks || !r.isolated.stocks.text.includes("2330")) gsErrors.push("策略來源失敗不應影響股票組");
+    console.log(`  77 細節：台積電 股票${r.tsmc.stocks && r.tsmc.stocks.rows}／新聞${r.tsmc.news && r.tsmc.news.rows}／事件${r.tsmc.events && r.tsmc.events.rows}；除息 事件${r.exdiv.events && r.exdiv.events.rows}；動能 策略${r.strat.strategies && r.strat.strategies.rows}`);
+  } catch (e) { gsErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("77. 全域搜尋（股票／新聞／事件／策略分組；「台積電」「除息」各有結果；單一來源失敗只影響該組）", gsErrors.length === 0, gsErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
