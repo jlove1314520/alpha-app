@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-10T22:55:42.661513+08:00",
+  "updated_at": "2026-10-10T23:28:27.829207+08:00",
   "latest_commit": "169463208",
   "data_files": [
     {
@@ -646,7 +646,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-10-10T22:55:42+08:00",
+    "checked_at": "2026-10-10T23:28:27+08:00",
     "any_overdue": false,
     "overdue_names": [],
     "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
@@ -686,7 +686,7 @@
         "file": "data/quotes_ibkr.json",
         "owner": "本機排程",
         "status": "ok",
-        "last_data_at": "2026-10-10T22:51+08:00",
+        "last_data_at": "2026-10-10T08:11+08:00",
         "expected_at_or_after": "2026-10-10T03:30+08:00",
         "rule": "盤後/假日：需有最近一個交易日的收盤資料",
         "note": "只有使用者這台機器開著IB Gateway才會更新"
@@ -1034,8 +1034,8 @@
     ],
     "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
     "status": "ok",
-    "status_checked_at": "2026-10-10T14:55:42.661513+00:00",
-    "status_age_hours": 0.0
+    "status_checked_at": "2026-10-10T15:28:27.829207+00:00",
+    "status_age_hours": 0.5
   },
   "adjustment_anomaly_warnings": {
     "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，不影響任何回測/排程執行；本欄位本身依賴有人手動執行generate_status_json.py才會更新，非即時。",
@@ -15106,41 +15106,41 @@
   "any_overdue": false,
   "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
   "local_schedule_heartbeat": {
-    "checked_at": "2026-10-10T14:55:42.327341+00:00",
+    "checked_at": "2026-10-10T15:28:27.754482+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "07b8961f0b2067762d3dadb75312d6c70dfd2b70",
-        "last_commit_at": "2026-10-10T14:31:03+00:00",
-        "minutes_since": 24.7,
+        "last_commit_sha": "dafb3c0d70ef1b5b9e9b74aa500fef76bdc2ca59",
+        "last_commit_at": "2026-10-10T15:16:04+00:00",
+        "minutes_since": 12.4,
         "track_stalled": false
       },
       "marathon": {
         "last_commit_sha": "57284eff02dc94c8270e2daaf891580c3f713f67",
         "last_commit_at": "2026-10-10T10:05:30+00:00",
-        "minutes_since": 290.2,
+        "minutes_since": 323.0,
         "track_stalled": false
       },
       "hypothesis_queue": {
         "last_commit_sha": "968f846740f8541595de5b7a062d8c7db5afa5ac",
         "last_commit_at": "2026-10-10T10:05:52+00:00",
-        "minutes_since": 289.8,
+        "minutes_since": 322.6,
         "track_stalled": false
       }
     },
     "claude_auth": {
-      "overall_status": "OK",
-      "detail": "三支launcher皆正常",
+      "overall_status": "STALLED_3H",
+      "detail": "devqueue:STALLED_3H(52.63h)",
       "launchers": {
         "devqueue": {
-          "status": "OK",
-          "last_reason": "GATED",
-          "last_detail": "GATED/",
-          "last_cycle_id": "20261010-223102",
+          "status": "STALLED_3H",
+          "last_reason": "BLOCKED_BY_RULE",
+          "last_detail": "BLOCKED_BY_RULE/",
+          "last_cycle_id": "20261010-231602",
           "last_attempt_at": "2026-10-08T18:50:23+08:00",
           "last_ok_at": "2026-10-08T18:50:23+08:00",
-          "hours_since_last_attempt": 52.09
+          "hours_since_last_attempt": 52.63
         },
         "marathon": {
           "status": "OK",
@@ -15149,7 +15149,7 @@
           "last_cycle_id": "20261010-180502",
           "last_attempt_at": "2026-10-10T18:05:29+08:00",
           "last_ok_at": "2026-10-10T18:05:29+08:00",
-          "hours_since_last_attempt": 4.84
+          "hours_since_last_attempt": 5.38
         },
         "hypothesis_queue": {
           "status": "OK",
@@ -15158,17 +15158,17 @@
           "last_cycle_id": "2026-10-10 18:05:49",
           "last_attempt_at": "2026-10-10T18:05:50+08:00",
           "last_ok_at": "2026-10-10T18:05:50+08:00",
-          "hours_since_last_attempt": 4.83
+          "hours_since_last_attempt": 5.38
         }
       },
-      "checked_at": "2026-10-10T14:55:42.327341+00:00"
+      "checked_at": "2026-10-10T15:28:27.754482+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": "41778a10b09b2b098cfc6579b8ad8dbe9f3c189b",
       "last_commit_at": "2026-10-10T00:11:37+00:00",
-      "minutes_since": 884.1,
-      "file_fetched_at": "2026-10-10T22:51:36.955758+08:00",
-      "file_minutes_since": 4.1,
+      "minutes_since": 916.8,
+      "file_fetched_at": "2026-10-10T08:11:36.466727+08:00",
+      "file_minutes_since": 916.9,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": false,
