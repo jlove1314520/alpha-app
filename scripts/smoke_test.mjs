@@ -2320,10 +2320,52 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { perfErrors.push(`測試本身出錯：${e.message || e}`); }
   record("72. 日誌頁真錢績效對照（無成交「尚無部位」；有成交兩條折線＋報酬差距＋「含手續費、未含稅」；perf 錯誤顯示原因；未連線說明）", perfErrors.length === 0, perfErrors.join("; "));
 
+  // 73.【2026-10-11 常備.開發-13】個股簡報（規則版）：①合成資料驗五條要點的算法（連買賣天數、融資增減、
+  // 處置／注意、事件 30 日窗）②真實檔案 2330 畫出 5 條＋「規則摘要，非 AI 判斷」③美股顯示誠實說明
+  // ④五份來源全空時每條都寫「查無」不崩潰。
+  const briefErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const o = {};
+      const hist = { series: { "9999": { "20261001": [10, 1, 0], "20261002": [-5, 2, 0], "20261005": [-3, 3, 1], "20261006": [-1, 4, -2] } } };
+      const pts = buildStockBriefPoints("9999", {
+        fund: { month_revenue: [{ year: 2026, month: 9, revenue: 2.5e9, yoy: 0.123 }] },
+        detail: { margin: { margin_balance_today: 1200, margin_balance_prev: 1000 } },
+        hist,
+        flag: { kind: "disposal", start: "2026-10-08", end: "2026-10-15", interval: "5分鐘" },
+        events: [{ code: "9999", date: "2026-10-01", title: "甲事件" }, { code: "9999", date: "2026-08-01", title: "太舊事件" },
+          { code: "9999", date: "2026-10-20", title: "乙除息" }, { code: "8888", date: "2026-10-05", title: "別檔" }],
+        todayIso: "2026-10-11" });
+      o.syn = pts.map((p) => p.k + "|" + p.t);
+      o.empty = buildStockBriefPoints("0000", { fund: {}, detail: {}, hist: null, flag: null, events: [], todayIso: "2026-10-11" }).map((p) => p.t);
+      const saved = currentCode;
+      try {
+        currentCode = "2330"; await renderStockBrief("2330");
+        const el = document.getElementById("ai-brief-body");
+        o.realLi = el.querySelectorAll("li").length; o.real = el.textContent;
+        currentCode = "AAPL"; await renderStockBrief("AAPL"); o.us = el.textContent;
+      } finally { currentCode = saved; }
+      o.placeholder = document.getElementById("sub-ai").textContent.includes("籌碼綜合分析資料");
+      return o;
+    });
+    const syn = r.syn.join(" / ");
+    if (r.syn.length !== 5) briefErrors.push(`合成資料應 5 條，實際 ${r.syn.length}`);
+    for (const k of ["營收|2026 年 9 月營收 25.0 億元，年增 +12.3%", "三大法人合計連買 2 日", "外資連賣 3 日", "投信連買 4 日",
+      "融資餘額 1,200 張，較前一日增加 200 張（+20.0%）", "處置中：2026-10-08～2026-10-15，每 5分鐘撮合一次", "10-01 甲事件", "即將 10-20 乙除息"])
+      if (!syn.includes(k)) briefErrors.push(`合成資料缺「${k}」：${syn.slice(0, 200)}`);
+    if (syn.includes("太舊事件") || syn.includes("別檔")) briefErrors.push(`事件窗或代號過濾錯誤：${syn}`);
+    if (r.empty.length !== 5 || !r.empty.every((t) => t.includes("查無") || t.includes("不是處置股"))) briefErrors.push(`全空應每條寫查無：${JSON.stringify(r.empty)}`);
+    if (r.realLi !== 5) briefErrors.push(`2330 真實資料應 5 條，實際 ${r.realLi}：${r.real.slice(0, 120)}`);
+    if (!r.real.includes("規則摘要，非 AI 判斷")) briefErrors.push("缺「規則摘要，非 AI 判斷」標示");
+    if (!r.us.includes("美股暫不提供")) briefErrors.push(`美股應顯示誠實說明：${r.us.slice(0, 80)}`);
+    if (r.placeholder) briefErrors.push("AI 分頁仍殘留個股簡報「功能建置中」佔位");
+  } catch (e) { briefErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("73. 個股頁 AI 分頁個股簡報（規則版 5 條：營收年增／法人連買賣／融資變化／處置注意／近期事件；標「規則摘要，非 AI 判斷」；全空寫查無；美股誠實說明）", briefErrors.length === 0, briefErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -1182,9 +1182,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </div>
 
     <div class="subscreen" id="sub-ai">
-      <div class="card ai-card" style="opacity:.7">
-        <div class="ai-tag">✦ AI 個股簡報</div>
-        <div class="note">功能建置中 · 尚未接上真實法說會/新聞/籌碼綜合分析資料，暫不顯示具體判斷內容</div>
+      <!-- 常備.開發-13（2026-10-11）：個股簡報改為規則摘要——只把 fundamentals／stock_detail／
+           institutional_history／disposal_flags／events 五份既有檔案的數字翻成白話，不做判斷、不呼叫模型。 -->
+      <div class="card ai-card">
+        <div class="ai-tag">✦ 個股簡報 · 規則摘要</div>
+        <div id="ai-brief-body"><div class="note">載入中…</div></div>
       </div>
       <div class="card" style="opacity:.7">
         <h3>券商報告雷達</h3>
@@ -5255,6 +5257,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       _safeAsync('loadUs8kChip',()=>loadUs8kChip(code));
       loadFinancialsUS(code);
       _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
+      _safeAsync('renderStockBrief',()=>renderStockBrief(code));  // 常備.開發-13
       return;
     }
     setTxt('eps-bars-title','季度獲利（EPS · 元）');
@@ -5324,6 +5327,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     loadMarginChip(code,px);
     _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
+      _safeAsync('renderStockBrief',()=>renderStockBrief(code));  // 常備.開發-13
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
     setUs13fNA('台股無此資料（僅適用美股，機構持倉為SEC Form 13F申報）');  // 2026-09-15 源頭二.3第6名
@@ -8106,6 +8110,108 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
     return EVENTS_CACHE;
   }
+  // ── 2026-10-11（常備.開發-13）個股簡報（規則版）──────────────────────────────
+  // 五條要點，每條只是把既有檔案的數字翻成白話：①營收年增（fundamentals.json）
+  // ②法人連買賣天數（institutional_history.json，查不到退回 stock_detail.json 的近 5 日）
+  // ③融資增減（stock_detail.json margin）④處置／注意（disposal_flags.json）
+  // ⑤近期事件（events.json）。沒有資料的條目照實寫「查無」與查了哪個檔，不留白、不推論。
+  // 這裡刻意不下任何「偏多／偏空」結論——那是判斷，規則版不做。
+  let INST_HIST_CACHE=null;
+  async function ensureInstHistory(){
+    if(INST_HIST_CACHE)return INST_HIST_CACHE;
+    try{
+      const r=await fetch('data/institutional_history.json?t='+Math.floor(Date.now()/1800000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      INST_HIST_CACHE=await r.json();
+    }catch(e){console.warn('[ensureInstHistory]',e);recordGlobalError('ensureInstHistory',e);INST_HIST_CACHE={dates:[],series:{}}}
+    return INST_HIST_CACHE;
+  }
+  // rows：由舊到新；從最新一日往回數，同方向（買超>0／賣超<0）連續幾天，遇到 0 或反向就停。
+  function _instStreak(rows,pick){
+    let dir=null,days=0;
+    for(let i=rows.length-1;i>=0;i--){
+      const v=pick(rows[i]);
+      const s=v>0?'買':v<0?'賣':null;
+      if(!s)break;
+      if(dir===null)dir=s;else if(s!==dir)break;
+      days++;
+    }
+    return {dir,days};
+  }
+  function buildStockBriefPoints(code,{fund,detail,hist,flag,events,todayIso}){
+    const pts=[];
+    const pct=x=>(x>=0?'+':'')+x.toFixed(1)+'%';
+    // ① 營收年增
+    try{
+      const mr=(fund&&fund.month_revenue)||[];
+      const last=mr[mr.length-1];
+      if(!last)pts.push({k:'營收',t:'查無月營收（data/fundamentals.json 沒有這檔）'});
+      else{
+        let yoy=last.yoy;
+        if(yoy==null){const alt=(fund.revenue_history_scoring||[]).find(r=>r.year===last.year&&r.month===last.month);if(alt&&alt.yoy!=null)yoy=alt.yoy}
+        const amt=last.revenue!=null?`${(last.revenue/1e8).toFixed(last.revenue>=1e10?0:1)} 億元`:'金額缺';
+        pts.push({k:'營收',t:`${last.year} 年 ${last.month} 月營收 ${amt}，`+(yoy!=null?`年增 ${pct(yoy*100)}`:'年增率官方未提供')});
+      }
+    }catch(e){console.warn('[brief:rev]',e);recordGlobalError('brief:rev',e);pts.push({k:'營收',t:'計算失敗（已記入診斷 log）'})}
+    // ② 法人連買賣
+    try{
+      let rows=[],src='';
+      const ser=hist&&hist.series&&hist.series[code];
+      if(ser&&Object.keys(ser).length){
+        rows=Object.keys(ser).sort().map(d=>({date:d,f:+ser[d][0]||0,t:+ser[d][1]||0,d:+ser[d][2]||0}));src='近 '+rows.length+' 個交易日';
+      }else{
+        const h=(detail&&detail.institutional&&detail.institutional.history)||[];
+        rows=h.map(x=>({date:x.date,f:+x.foreign_lots||0,t:+x.trust_lots||0,d:+x.dealer_lots||0}));src='近 '+rows.length+' 個交易日，僅 stock_detail 短歷史';
+      }
+      if(!rows.length)pts.push({k:'法人',t:'查無三大法人紀錄（institutional_history.json／stock_detail.json 都沒有這檔）'});
+      else{
+        const tot=_instStreak(rows,r=>r.f+r.t+r.d),fo=_instStreak(rows,r=>r.f),tr=_instStreak(rows,r=>r.t);
+        const ds=String(rows[rows.length-1].date);const md=ds.length===8?ds.slice(4,6)+'/'+ds.slice(6):ds;
+        const fmt=(n,s)=>s.dir?`${n}連${s.dir} ${s.days} 日`:`${n}最新一日持平`;
+        pts.push({k:'法人',t:`截至 ${md}：${fmt('三大法人合計',tot)}；${fmt('外資',fo)}；${fmt('投信',tr)}（資料涵蓋${src}）`});
+      }
+    }catch(e){console.warn('[brief:inst]',e);recordGlobalError('brief:inst',e);pts.push({k:'法人',t:'計算失敗（已記入診斷 log）'})}
+    // ③ 融資變化
+    try{
+      const m=detail&&detail.margin;
+      if(!m||m.margin_balance_today==null)pts.push({k:'融資',t:'查無融資餘額（data/stock_detail.json 沒有這檔，上櫃或未涵蓋）'});
+      else if(m.margin_balance_prev==null)pts.push({k:'融資',t:`融資餘額 ${nf(m.margin_balance_today)} 張，前一日資料缺，無法算增減`});
+      else{
+        const dlt=m.margin_balance_today-m.margin_balance_prev;
+        const p=m.margin_balance_prev?dlt/m.margin_balance_prev*100:null;
+        pts.push({k:'融資',t:`融資餘額 ${nf(m.margin_balance_today)} 張，較前一日${dlt>0?'增加':dlt<0?'減少':'持平'}${dlt?' '+nf(Math.abs(dlt))+' 張':''}${p!=null&&dlt?'（'+pct(p)+'）':''}`});
+      }
+    }catch(e){console.warn('[brief:margin]',e);recordGlobalError('brief:margin',e);pts.push({k:'融資',t:'計算失敗（已記入診斷 log）'})}
+    // ④ 處置／注意（判定沿用 disposalFlagOf，跟個股頁紅標同一套規則）
+    try{
+      if(!flag)pts.push({k:'處置',t:'目前不是處置股，近 5 日也未列注意股（data/disposal_flags.json）'});
+      else if(flag.kind==='notice')pts.push({k:'處置',t:`注意股：${flag.announced||'?'} 公布，原因：${flag.reason||'未提供'}`});
+      else pts.push({k:'處置',t:`${flag.kind==='disposal'?'處置中':'即將處置'}：${flag.start||'?'}～${flag.end||'?'}${flag.interval?'，每 '+flag.interval+'撮合一次':''}`});
+    }catch(e){console.warn('[brief:disposal]',e);recordGlobalError('brief:disposal',e);pts.push({k:'處置',t:'計算失敗（已記入診斷 log）'})}
+    // ⑤ 近期事件（過去 30 日最新兩筆＋未來 30 日最近一筆）
+    try{
+      const t=Date.parse(todayIso);
+      const mine=(events||[]).filter(e=>e&&e.code===code&&e.date);
+      const past=mine.filter(e=>{const d=(t-Date.parse(e.date))/864e5;return d>=0&&d<=30}).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,2);
+      const fut=mine.filter(e=>{const d=(Date.parse(e.date)-t)/864e5;return d>0&&d<=30}).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,1);
+      if(!past.length&&!fut.length)pts.push({k:'事件',t:'近 30 日與未來 30 日查無事件（data/events.json：重大訊息／月營收／除權息）'});
+      else pts.push({k:'事件',t:[...past.map(e=>`${e.date.slice(5)} ${e.title}`),...fut.map(e=>`即將 ${e.date.slice(5)} ${e.title}`)].join('；')});
+    }catch(e){console.warn('[brief:events]',e);recordGlobalError('brief:events',e);pts.push({k:'事件',t:'計算失敗（已記入診斷 log）'})}
+    return pts;
+  }
+  async function renderStockBrief(code){
+    const el=document.getElementById('ai-brief-body');if(!el)return;
+    if(isUS(code)){el.innerHTML='<div class="note">美股暫不提供規則簡報（五個來源檔都是台股官方資料）。</div>';return}
+    el.innerHTML='<div class="note">載入中…</div>';
+    const [fund,detail,hist,,ev]=await Promise.allSettled([loadFundamentals(code),loadStockDetail(code),ensureInstHistory(),ensureDisposalFlags(),ensureEvents()]);
+    if(currentCode!==code)return;
+    const v=r=>r.status==='fulfilled'?r.value:null;
+    const todayIso=_twTodayIso();
+    const pts=buildStockBriefPoints(code,{fund:v(fund)||{},detail:v(detail)||{},hist:v(hist),flag:disposalFlagOf(code,todayIso),events:(v(ev)||{}).events||[],todayIso});
+    const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    el.innerHTML='<ol style="margin:4px 0 0 18px;padding:0;line-height:1.7">'+pts.map(p=>`<li><b>${esc(p.k)}</b>　${esc(p.t)}</li>`).join('')+'</ol>'
+      +'<div class="note" style="margin-top:8px">規則摘要，非 AI 判斷、非投資建議：只把 fundamentals／stock_detail／institutional_history／disposal_flags／events 五份檔案的數字轉成文字，不推論漲跌。</div>';
+  }
   const EVENT_TYPE_COLOR={
     '月營收':'var(--gold)','除權息':'#7aa2f7','法說會':'var(--up)','併購':'#e0af68',
     '增減資':'#bb9af7','重大訂單':'var(--up)','人事':'var(--ink-3)','財務':'#7dcfff',
@@ -8742,7 +8848,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0113';
+  const APP_VERSION='2026-10-11.0119';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

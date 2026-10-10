@@ -1173,7 +1173,11 @@
       "source": "data/industrial_production.json（經濟部官方開放資料data.gov.tw#6607，2026-09-15新增，源頭二.3第10名，免金鑰；僅生產指數，外銷訂單未接入，見已知缺口說明；YoY/MoM為本管線自行計算）"
     },
     {
-      "panel": "個股頁·AI·個股簡報/券商報告雷達",
+      "panel": "個股頁·AI·個股簡報",
+      "source": "規則摘要（常備.開發-13）：data/fundamentals.json＋stock_detail.json＋institutional_history.json＋disposal_flags.json＋events.json，前端組成 5 條要點，非 AI 判斷"
+    },
+    {
+      "panel": "個股頁·AI·券商報告雷達",
       "source": "無（誠實佔位「功能建置中」）"
     },
     {
