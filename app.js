@@ -2931,7 +2931,8 @@
     ].join('');
     document.getElementById('customs-trade-datatime').textContent=`資料月 ${d.latest.date}（財政部關務署官方每月更新）`;
   }
-  // 2026-09-15（源頭二.3第10名）工業生產指數，market-tw-panel卡片。僅生產指數，外銷訂單未接入。
+  // 2026-09-15（源頭二.3第10名）工業生產指數，market-tw-panel卡片。
+  // 2026-10-11 常備.開發-21：同檔 export_orders 欄位接外銷訂單總金額（data.gov.tw#101580 地區別總計），缺就誠實顯示未取得。
   let IP_INDEX_CACHE=null;
   async function loadIndustrialProduction(){
     const el=document.getElementById('ip-index-rows');if(!el)return;
@@ -2946,12 +2947,25 @@
       return;
     }
     const mom=d.latest.change_mom_pct,yoy=d.yoy_pct;
-    el.innerHTML=[
+    const rows=[
       `<div class="f"><span>生產指數（${d.latest.base_period}）</span><b>${d.latest.value.toFixed(2)}</b></div>`,
       `<div class="f"><span>月增(MoM)</span><b class="${mom==null?'':(mom>=0?'pos':'neg')}">${mom!=null?(mom>=0?'+':'')+mom.toFixed(1)+'%':'資料不足'}</b></div>`,
       `<div class="f"><span>年增(YoY)</span><b class="${yoy==null?'':(yoy>=0?'pos':'neg')}">${yoy!=null?(yoy>=0?'+':'')+yoy.toFixed(1)+'%':'資料不足'}</b></div>`,
-    ].join('');
-    document.getElementById('ip-index-datatime').textContent=`資料月 ${d.latest.date}（經濟部官方每月更新，僅生產指數未含外銷訂單）`;
+    ];
+    const eo=d.export_orders;
+    const pct=v=>v!=null?(v>=0?'+':'')+v.toFixed(1)+'%':'資料不足';
+    const cls=v=>v==null?'':(v>=0?'pos':'neg');
+    if(eo&&eo.value!=null){
+      rows.push(
+        `<div class="f"><span>外銷訂單（${eo.date}）</span><b>${(eo.value/100).toFixed(1)}億美元</b></div>`,
+        `<div class="f"><span>外銷訂單月增(MoM)</span><b class="${cls(eo.change_mom_pct)}">${pct(eo.change_mom_pct)}</b></div>`,
+        `<div class="f"><span>外銷訂單年增(YoY)</span><b class="${cls(eo.yoy_pct)}">${pct(eo.yoy_pct)}</b></div>`,
+      );
+    }else{
+      rows.push(`<div class="f"><span>外銷訂單</span><b>本次未取得</b></div>`);
+    }
+    el.innerHTML=rows.join('');
+    document.getElementById('ip-index-datatime').textContent=`生產指數資料月 ${d.latest.date}${eo&&eo.date?`、外銷訂單資料月 ${eo.date}`:''}（經濟部官方每月更新）`;
   }
 
   // ── 左滑刪除 ──
@@ -7563,7 +7577,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0255';
+  const APP_VERSION='2026-10-11.0310';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

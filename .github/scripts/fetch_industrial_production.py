@@ -22,6 +22,18 @@ Python`requests`皆確認200、內容為合法CSV（`utf-8-sig`編碼），行�
 塑橡膠製品等），沒有找到單一「總金額」聚合資料集，需要另一輪查證+加總
 邏輯，工作量超出本輪範圍，誠實記錄為已知缺口，非遺漏。
 
+**2026-10-11 更正（常備.開發-21，DevQueue 20261011-010102）——外銷訂單已接入**：
+上面「沒有找到單一總金額聚合資料集」的結論**不成立**。三來源查證：
+①`data.gov.tw/dataset/101580`「統計處外銷訂單_按地區分」（data.gov.tw
+API `api/v2/rest/dataset/101580` 確認提供機關檔案在 `service.moea.gov.tw`）
+②實測下載 `經濟部統計處_外銷訂單_按地區分.csv`（200、`utf-8-sig`、約233KB），
+地區代碼`00`＝「地區別總計」，單位百萬美元，逐月回溯至民國73年1月（1984-01），
+最新期與工業生產指數同為 2026-07 ③同目錄其他產品別資料集（#62442化學品、
+#162492電機產品、#62445海外生產比按月——後者含貨品代碼`00`「貨品類別總計」）
+欄位結構一致，確認是同一官方發布系統。先前查證只搜了「按產品別」那幾份，
+漏看「按地區分」這份，它的地區別總計就是外銷訂單總金額。
+外銷訂單抓取與生產指數**各自 try/except 隔離**，一邊失敗不影響另一邊。
+
 **行業代碼`Z`＝全體工業加總的判斷依據**：CSV裡236組（行業代碼,行業別）
 只有`Z`的行業別欄位是不加修飾的「工業」，其餘235組都是具體行業名稱
 （例如「食品及飼品製造業」「乳品製造業」），且`Z`在代碼排序上明顯是
@@ -49,6 +61,10 @@ OUT_PATH = REPO_ROOT / "data" / "industrial_production.json"
 SOURCE_URL = "https://service.moea.gov.tw/EE520/opendata/d.csv"
 SOURCE_LABEL = "經濟部官方開放資料（data.gov.tw #6607，工業生產統計），免金鑰"
 TOTAL_INDUSTRY_CODE = "Z"
+
+EXPORT_ORDERS_URL = "https://service.moea.gov.tw/EE520/opendata/經濟部統計處_外銷訂單_按地區分.csv"
+EXPORT_ORDERS_SOURCE_LABEL = "經濟部官方開放資料（data.gov.tw #101580，外銷訂單按地區分，取地區別總計），免金鑰"
+EXPORT_ORDERS_TOTAL_CODE = "00"
 
 
 def _fetch_rows() -> list[dict]:
@@ -79,12 +95,66 @@ def _fetch_rows() -> list[dict]:
     return rows
 
 
+def _fetch_export_order_rows() -> list[dict]:
+    resp = requests.get(EXPORT_ORDERS_URL, timeout=60)
+    resp.raise_for_status()
+    text = resp.content.decode("utf-8-sig")
+    rows = []
+    for raw in csv.DictReader(io.StringIO(text)):
+        if raw.get("地區代碼", "").strip() != EXPORT_ORDERS_TOTAL_CODE:
+            continue
+        period = raw.get("資料期(民國年)", "").strip()
+        if len(period) != 5:
+            continue
+        try:
+            roc_year = int(period[:3])
+            month = int(period[3:])
+            value = float(raw["統計值(金額)"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        rows.append({"year": roc_year + 1911, "month": month, "value": value, "unit": raw.get("計量單位", "")})
+    rows.sort(key=lambda r: (r["year"], r["month"]))
+    return rows
+
+
+def _export_orders_payload(errors: list) -> dict | None:
+    """外銷訂單總金額（地區別總計）最新月＋MoM/YoY；失敗回 None 並記 errors，不影響生產指數。"""
+    try:
+        rows = _fetch_export_order_rows()
+        if not rows:
+            raise RuntimeError(f"找不到地區代碼={EXPORT_ORDERS_TOTAL_CODE}的任何列，官方代碼配置可能已變更")
+        latest = rows[-1]
+        out = {
+            "source": EXPORT_ORDERS_SOURCE_LABEL,
+            "date": f"{latest['year']}-{latest['month']:02d}",
+            "value": latest["value"],
+            "unit": latest["unit"],
+            "history_months": len(rows),
+        }
+        if len(rows) >= 2 and rows[-2]["value"]:
+            prev = rows[-2]
+            out["prev_date"] = f"{prev['year']}-{prev['month']:02d}"
+            out["change_mom_pct"] = round((latest["value"] / prev["value"] - 1) * 100, 2)
+        yoy_row = next((r for r in rows if r["year"] == latest["year"] - 1 and r["month"] == latest["month"]), None)
+        if yoy_row and yoy_row["value"]:
+            out["yoy_pct"] = round((latest["value"] / yoy_row["value"] - 1) * 100, 2)
+            out["yoy_base_date"] = f"{yoy_row['year']}-{yoy_row['month']:02d}"
+        else:
+            out["yoy_pct"] = None
+            errors.append(f"外銷訂單回傳資料不含{latest['year'] - 1}-{latest['month']:02d}，無法計算YoY")
+        print(f"外銷訂單最新 {out['date']}：{latest['value']}{latest['unit']} YoY={out.get('yoy_pct')}")
+        return out
+    except Exception as e:
+        print(f"外銷訂單抓取失敗：{e}")
+        errors.append(f"export_orders: {e}")
+        return None
+
+
 def main() -> int:
     payload = {
         "fetched_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": SOURCE_LABEL,
-        "note": "官方每月更新，資料通常落後1~2個月；僅涵蓋工業生產指數（行業代碼Z=全體工業加總），外銷訂單未接入（已知缺口，見本檔案docstring）",
-        "known_gap": "外銷訂單金額統計未接入：官方資料按產品別拆成多個獨立資料集，未找到單一總金額聚合資料集",
+        "note": "官方每月更新，資料通常落後1~2個月；工業生產指數取行業代碼Z=全體工業加總，外銷訂單取地區代碼00=地區別總計（2026-10-11 接入）",
         "errors": [],
     }
     try:
@@ -117,6 +187,8 @@ def main() -> int:
         payload["errors"].append(f"industrial_production: {e}")
         payload["latest"] = None
         payload["yoy_pct"] = None
+
+    payload["export_orders"] = _export_orders_payload(payload["errors"])
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

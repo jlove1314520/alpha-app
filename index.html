@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-11.0255">
+<link rel="stylesheet" href="app.css?v=2026-10-11.0310">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -258,12 +258,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：財政部關務署官方開放資料（data.gov.tw#6053），GitHub Actions 排程；官方每月更新，資料通常落後1個月，YoY為本App自算，僅供參考非投資建議</div>
       </div>
 
-      <!-- 2026-09-15（源頭二.3第10名）工業生產指數，經濟部官方開放資料免金鑰。僅生產指數，外銷訂單未接入。 -->
+      <!-- 2026-09-15（源頭二.3第10名）工業生產指數，經濟部官方開放資料免金鑰。2026-10-11 常備.開發-21 接外銷訂單總金額（#101580）。 -->
       <div class="card">
-        <h3>工業生產指數</h3>
+        <h3>工業生產指數／外銷訂單</h3>
         <div class="facts" id="ip-index-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
         <div class="note" id="ip-index-datatime"></div>
-        <div class="note">來源：經濟部官方開放資料（data.gov.tw#6607），GitHub Actions 排程；官方每月更新，資料通常落後1~2個月，MoM/YoY為本App自算；僅涵蓋工業生產指數，外銷訂單金額尚未接入，僅供參考非投資建議</div>
+        <div class="note">來源：經濟部官方開放資料（工業生產指數 data.gov.tw#6607；外銷訂單 data.gov.tw#101580 地區別總計，1億美元=100百萬美元），GitHub Actions 排程；官方每月更新，資料通常落後1~2個月，MoM/YoY為本App自算，僅供參考非投資建議</div>
       </div>
 
       <!-- 常備.開發-2：與今日頁盤前日報同源（data/daily_brief.json 規則摘要），不做市場判斷。
@@ -1274,6 +1274,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-11.0255"></script>
+<script src="app.js?v=2026-10-11.0310"></script>
 </body>
 </html>

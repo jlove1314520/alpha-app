@@ -491,14 +491,14 @@ def describe_industrial_production(path: Path) -> dict:
     """data/industrial_production.json（2026-09-15新增，源頭二.3第10名）——
     經濟部官方開放資料（data.gov.tw #6607，免金鑰），全體工業生產指數，
     `.github/scripts/fetch_industrial_production.py`每日排程產生（資料本身
-    月頻）。刻意縮小範圍：僅生產指數，外銷訂單未接入（見腳本docstring）。"""
+    月頻）。2026-10-11 常備.開發-21：同檔 export_orders 接外銷訂單總金額（#101580 地區別總計）。"""
     d = json.loads(path.read_text(encoding="utf-8"))
     latest = d.get("latest") or {}
     return {
         "generated_at": d.get("fetched_at"),
         "records": 1 if latest else 0,
         "source": d.get("source"),
-        "detail": f"latest_date={latest.get('date')} value={latest.get('value')} yoy_pct={d.get('yoy_pct')} known_gap={d.get('known_gap')} errors={d.get('errors')}",
+        "detail": f"latest_date={latest.get('date')} value={latest.get('value')} yoy_pct={d.get('yoy_pct')} export_orders_date={(d.get('export_orders') or {}).get('date')} export_orders_musd={(d.get('export_orders') or {}).get('value')} errors={d.get('errors')}",
     }
 
 
@@ -894,7 +894,7 @@ APP_DATA_SOURCES = [
     {"panel": "個股頁·籌碼·機構持倉（僅美股，僅波克夏海瑟威）", "source": "data/us_13f_holdings.json（SEC EDGAR官方Form 13F-HR，2026-09-15新增，源頭二.3第6名，免金鑰；僅追蹤波克夏一家申報人，未做CUSIP對映或全市場13F整合）"},
     {"panel": "市場頁·美股·美國總經指標（失業率/CPI年增率/非農就業）", "source": "data/bls_macro.json（BLS官方Public Data API v2，2026-09-15新增，源頭二.3第8名，未註冊金鑰即可用；CPI年增率為本管線自行計算，非BLS原始欄位）"},
     {"panel": "市場頁·台股·全國進出口貿易統計", "source": "data/customs_trade.json（財政部關務署官方開放資料data.gov.tw#6053，2026-09-15新增，源頭二.3第9名，免金鑰；YoY為本管線自行計算，非官方原始欄位）"},
-    {"panel": "市場頁·台股·工業生產指數", "source": "data/industrial_production.json（經濟部官方開放資料data.gov.tw#6607，2026-09-15新增，源頭二.3第10名，免金鑰；僅生產指數，外銷訂單未接入，見已知缺口說明；YoY/MoM為本管線自行計算）"},
+    {"panel": "市場頁·台股·工業生產指數／外銷訂單", "source": "data/industrial_production.json（經濟部官方開放資料data.gov.tw#6607，2026-09-15新增，源頭二.3第10名，免金鑰；2026-10-11起同檔含外銷訂單總金額 data.gov.tw#101580 地區別總計；YoY/MoM為本管線自行計算）"},
     {"panel": "個股頁·AI·個股簡報", "source": "規則摘要（常備.開發-13）：data/fundamentals.json＋stock_detail.json＋institutional_history.json＋disposal_flags.json＋events.json，前端組成 5 條要點，非 AI 判斷"},
     {"panel": "個股頁·AI·目標價與評等（公開來源）", "source": "美股：data/us_analyst_reco.json（Finnhub 免費層 /stock/recommendation 評等家數，quotes.yml 約每日一次，僅 US_TICKERS 9 檔；目標價為付費端點待採購）；台股：無合法免費來源，顯示誠實說明（常備.開發-15）"},
     {"panel": "交易頁·機器人（Bb-90 自動再平衡）", "source": "本機 alpha_live_server /auto/status＋/auto/ledger（真錢引擎 auto_rebalance_bb90.py 的狀態與去識別化帳本，需 token，不進 repo；先.六十-A2）"},
