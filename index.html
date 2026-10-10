@@ -7935,6 +7935,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     '月營收':'var(--gold)','除權息':'#7aa2f7','法說會':'var(--up)','併購':'#e0af68',
     '增減資':'#bb9af7','重大訂單':'var(--up)','人事':'var(--ink-3)','財務':'#7dcfff',
     '訴訟':'var(--down)','處分資產':'#9ece6a','停復牌':'var(--down)','其他':'var(--ink-3)',
+    '財報日':'var(--gold)','8-K':'#7dcfff','8-K/A':'#7dcfff',  // 常備.開發-5 美股
   };
   // 近 30 日事件流。無事件時要**講清楚查了什麼**，不能只寫「無資料」——
   // 「沒查」跟「查了沒有」對使用者是完全不同的資訊。
@@ -8098,6 +8099,32 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>`;
     }).join('');
   }
+  // 常備.開發-5（2026-10-11）：美股事件時間軸＝下一次財報日（data/earnings_calendar.json，yfinance 推估）
+  // ＋近 90 天 SEC Form 8-K（data/us_events.json，fetch_us_8k.py 排程，只存索引）。無資料時說明原因。
+  const US_6K_ISSUERS=['TSM','UMC','ASX','CHT'];  // 外國私人發行人申報 6-K 不申報 8-K（見 fetch_us_8k.py 檔頭）
+  async function renderUsEventsTab(code,host){
+    host.innerHTML=skeletonRowsHtml(3);
+    try{
+      if(!US_8K_CACHE){const r=await fetch('data/us_events.json?t='+Date.now());if(r.ok)US_8K_CACHE=await r.json()}
+      const cal=await loadEarningsCalendar();
+      if(currentCode!==code)return;
+      const d=US_8K_CACHE||{},t=d.tickers&&d.tickers[code],ec=cal[code];
+      const cutoff=new Date(Date.now()-90*86400000).toISOString().slice(0,10),today=new Date().toISOString().slice(0,10);
+      const rows=[];
+      if(ec&&ec.next_earnings_date&&ec.next_earnings_date>=today){
+        const sess={pre:'盤前',post:'盤後'}[ec.estimated_session]||'';
+        rows.push({date:ec.next_earnings_date,type:'財報日',title:'下一次財報公布（預估'+(sess?'，通常'+sess:'')+(ec.eps_estimate!=null?'；EPS 預估 '+Number(ec.eps_estimate).toFixed(2):'')+'）'});
+      }
+      ((t&&t.filings)||[]).filter(f=>String(f.filed_at||'')>=cutoff).forEach(f=>rows.push({date:f.filed_at,type:f.filing_type||'8-K',title:(f.items&&f.items.length?f.items.join('；'):'（無 Item 條號說明）'),url:f.url}));
+      const why=[];
+      if(!t)why.push(US_6K_ISSUERS.includes(code)?'外國私人發行人改申報 Form 6-K，不適用 8-K（6-K 尚未接入）':'此代號不在 8-K 追蹤清單（data/us_sic.json）內，未抓取');
+      else if(!rows.some(r=>r.type!=='財報日'))why.push(US_6K_ISSUERS.includes(code)?'外國私人發行人改申報 Form 6-K，近 90 天無 8-K 屬正常':'近 90 天無 8-K 申報');
+      if(!ec)why.push('財報日：此代號不在財報行事曆追蹤清單（fetch_earnings_calendar.py）');
+      else if(!rows.some(r=>r.type==='財報日'))why.push('財報日：行事曆尚無下一次日期');
+      const foot='<div class="note" style="margin-top:8px">來源：SEC EDGAR Form 8-K（只存索引，點標題看原文）'+(d.fetched_at?'，'+fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei'):'')+'；財報日為 yfinance 推估，公司可能改期。非投資建議。'+(why.length?'<br>'+why.map(_autoEsc).join('；'):'')+'</div>';
+      host.innerHTML=(rows.length?'<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(rows,15)+'</div>':'<div class="note">近 90 天無可顯示的美股事件</div>')+foot;
+    }catch(e){console.warn('[renderUsEventsTab]',e);recordGlobalError('renderUsEventsTab',e);host.innerHTML='<div class="note">美股事件載入失敗（'+_autoEsc(e&&e.message||e)+'）</div>'}
+  }
   async function renderReportEvents(row){
     const host=document.getElementById('report-events');if(!host)return;
     const d=await ensureEvents();
@@ -8133,10 +8160,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 而且空狀態要用總司令裁示的「尚未 X｜原因｜下一步」一行格式。
   async function renderStockEventsTab(code){
     const host=document.getElementById('stock-events-list');if(!host)return;
-    if(isUS(code)){
-      host.innerHTML='<div class="note">尚未串接美股除權息／財報日／月營收事件｜此框架目前僅接了台股資料源（MOPS重大訊息／TWSE月營收／除權息）｜美股重大訊息可看「籌碼」分頁的「重大訊息（8-K）」卡</div>';
-      return;
-    }
+    if(isUS(code)){await renderUsEventsTab(code,host);return}
     host.innerHTML=skeletonRowsHtml(3);  // 2026-09-15 P0產品.四：骨架屏
     const d=await ensureEvents();
     if(currentCode!==code)return;  // await期間已切到別檔，作廢
@@ -8543,7 +8567,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0024';
+  const APP_VERSION='2026-10-11.0027';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

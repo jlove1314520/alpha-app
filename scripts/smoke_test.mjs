@@ -2148,10 +2148,33 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { posCardErrors.push(`測試本身出錯：${e.message || e}`); }
   record("66. 首頁持倉損益卡（張數／市值／未實現損益／合計；總資產持股市值以張×1000 計；未連線顯示說明）", posCardErrors.length === 0, posCardErrors.join("; "));
 
+  // 67.【2026-10-11 常備.開發-5】美股事件分頁時間軸：用假的 us_events／earnings_calendar 快取（不連網）驗——
+  // 有 8-K 與下一次財報日時列出時間軸；不在追蹤清單的代號顯示原因；外國發行人顯示 6-K 說明；不得再出現「尚未串接美股」。
+  const usEvErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { k: US_8K_CACHE, e: EARNINGS_CALENDAR_CACHE, cc: currentCode };
+      const day = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
+      US_8K_CACHE = { fetched_at: new Date().toISOString(), tickers: { AAPL: { filings: [{ filed_at: day(-5), filing_type: "8-K", items: ["Item 2.02: Results of Operations"], url: "https://www.sec.gov/x" }, { filed_at: day(-200), filing_type: "8-K", items: ["Item 8.01: Old"], url: "https://www.sec.gov/y" }] }, TSM: { filings: [] } } };
+      EARNINGS_CALENDAR_CACHE = { earnings: { AAPL: { next_earnings_date: day(20), estimated_session: "post", eps_estimate: 1.5 } } };
+      const host = document.getElementById("stock-events-list"), o = {};
+      try {
+        for (const c of ["AAPL", "TSM", "ZZZZ"]) { currentCode = c; await renderStockEventsTab(c); o[c] = host.innerText; }
+      } finally { US_8K_CACHE = saved.k; EARNINGS_CALENDAR_CACHE = saved.e; currentCode = saved.cc; }
+      return o;
+    });
+    if (!r.AAPL.includes("財報日") || !r.AAPL.includes("Item 2.02")) usEvErrors.push(`AAPL 應列財報日與 8-K：${r.AAPL.slice(0, 100)}`);
+    if (r.AAPL.includes("Item 8.01: Old")) usEvErrors.push("超過 90 天的 8-K 不應出現");
+    if (!r.TSM.includes("6-K")) usEvErrors.push(`TSM 應說明外國發行人 6-K：${r.TSM.slice(0, 100)}`);
+    if (!r.ZZZZ.includes("不在") ) usEvErrors.push(`不在清單代號應說明原因：${r.ZZZZ.slice(0, 100)}`);
+    if (/尚未串接美股/.test(r.AAPL + r.TSM + r.ZZZZ)) usEvErrors.push("仍出現「尚未串接美股」舊佔位");
+  } catch (e) { usEvErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("67. 美股事件分頁時間軸（8-K 近 90 天＋下一次財報日；無資料說明原因；外國發行人 6-K 說明）", usEvErrors.length === 0, usEvErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
