@@ -2092,10 +2092,30 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { ledgerUiErrors.push(`測試本身出錯：${e.message || e}`); }
   record("64. 機器人卡（模式／下一期／上次結果）、日誌頁（首批尚未執行／本週與累計損益）、風控唯讀實際值、推播偏好（否決窗固定開）", ledgerUiErrors.length === 0, ledgerUiErrors.join("; "));
 
+  // 65.【2026-10-10 先.六十一】STATUS.json 瘦身：檔案 < 100 KB；還原價異常明細只在 data/adjustment_anomalies.json，
+  // STATUS.json 只留 n_warnings＋檔案連結；設定頁資料健康卡讀新檔顯示筆數。
+  const statusSizeErrors = [];
+  try {
+    const fs = await import("node:fs");
+    const size = fs.statSync("data/STATUS.json").size;
+    if (size >= 100 * 1024) statusSizeErrors.push(`data/STATUS.json ${(size / 1024).toFixed(1)} KB ≥ 100 KB 上限`);
+    const st = JSON.parse(fs.readFileSync("data/STATUS.json", "utf8"));
+    const aw = st.adjustment_anomaly_warnings || {};
+    if ("warnings" in aw) statusSizeErrors.push("STATUS.json 仍內嵌 adjustment_anomaly_warnings.warnings 明細");
+    if (aw.file !== "data/adjustment_anomalies.json" || typeof aw.n_warnings !== "number") statusSizeErrors.push(`STATUS.json 摘要欄位不符：${JSON.stringify(aw).slice(0, 80)}`);
+    const an = JSON.parse(fs.readFileSync("data/adjustment_anomalies.json", "utf8"));
+    if (an.n_warnings !== aw.n_warnings) statusSizeErrors.push(`兩檔 n_warnings 不一致（${an.n_warnings} vs ${aw.n_warnings}）`);
+    if (!an.generated_at) statusSizeErrors.push("adjustment_anomalies.json 缺 generated_at");
+    const txt = await page.evaluate(async () => { await loadAdjAnomalies(); return document.getElementById("adj-anomaly-note").textContent; });
+    if (!/還原價異常警告.*\d.*筆/.test(txt)) statusSizeErrors.push(`設定頁未顯示異常筆數：${txt.slice(0, 60)}`);
+    if (!statusSizeErrors.length) statusSizeErrors.info = `STATUS.json ${(size / 1024).toFixed(1)} KB；異常 ${an.n_warnings} 筆`;
+  } catch (e) { statusSizeErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("65. STATUS.json < 100 KB；還原價異常明細移到 data/adjustment_anomalies.json，STATUS 只留摘要＋連結；設定頁讀新檔", statusSizeErrors.length === 0, statusSizeErrors.join("; ") || statusSizeErrors.info || "");
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

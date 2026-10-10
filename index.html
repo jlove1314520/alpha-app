@@ -1506,6 +1506,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>資料健康 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'audit-tm',async()=>{await loadDataAudit(true)})">重新整理</span></h3>
       <div class="note" id="audit-summary">檢查中…</div>
       <div id="audit-list" style="margin-top:6px"></div>
+      <!-- 先.六十一（2026-10-10）：還原價異常警告明細已從 STATUS.json 移到 data/adjustment_anomalies.json，這裡只讀摘要（n_warnings／更新時間），不整份攤開 -->
+      <div class="note" id="adj-anomaly-note" style="margin-top:6px">還原價異常警告：讀取中…</div>
       <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
     </div>
 
@@ -6514,6 +6516,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
+    _safeAsync('loadAdjAnomalies',loadAdjAnomalies);  // 先.六十一
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
     _safeAsync('loadSignalStatus',()=>loadSignalStatus(false));  // 2026-09-15 開發佇列源頭一.4
@@ -8136,6 +8139,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         +`已排除 ETF／ETN／存託憑證等 ${m.non_industry_excluded||0} 檔非產業證券。${missTxt}`;
     }
   }
+  // 先.六十一：還原價單日|報酬|>11% 異常警告摘要（research/adjust.py 偵測、generate_status_json.py 彙整，只降級為警告）
+  async function loadAdjAnomalies(){
+    const el=document.getElementById('adj-anomaly-note');if(!el)return;
+    try{
+      const r=await fetch('data/adjustment_anomalies.json?t='+Date.now(),{cache:'no-store'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      el.textContent='還原價異常警告（單日漲跌超過 11%，只警告、不影響排程）：'+(d.n_warnings!=null?Number(d.n_warnings).toLocaleString('zh-TW'):'?')+' 筆'+(d.generated_at?'；彙整時間 '+fmtTzMMDDHHMM(new Date(d.generated_at),'Asia/Taipei'):'');
+    }catch(e){console.warn('[loadAdjAnomalies]',e);recordGlobalError('loadAdjAnomalies',e);el.textContent='還原價異常警告：讀取 data/adjustment_anomalies.json 失敗（'+(e&&e.message||e)+'）'}
+  }
   async function loadDataAudit(force){
     const sum=document.getElementById('audit-summary'),list=document.getElementById('audit-list');
     if(!sum||!list)return;
@@ -8430,7 +8443,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-10.2303';
+  const APP_VERSION='2026-10-10.2347';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

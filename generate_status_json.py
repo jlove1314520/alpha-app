@@ -1066,13 +1066,29 @@ def build_adjustment_anomaly_warnings() -> dict:
         return {
             "note": "research/adjust.py::adjusted_price_series()偵測到的單日|報酬|>11%"
                     "還原價異常（新上市5日內除外），修.六第三點新增。只降級為警告，"
-                    "不影響任何回測/排程執行；本欄位本身依賴有人手動執行"
-                    "generate_status_json.py才會更新，非即時。",
+                    "不影響任何回測/排程執行；由 market.yml 每次排程執行"
+                    "generate_status_json.py 時更新（先.六十-C9 起），非即時。",
             "n_warnings": len(warnings_list),
             "warnings": warnings_list,
         }
     except Exception as e:  # noqa: BLE001 -- 讀取失敗只降級警告
         return {"note": f"讀取adjustment_anomaly_warnings.jsonl失敗：{e}", "n_warnings": 0, "warnings": []}
+
+
+ANOMALIES_PATH = REPO_ROOT / "data" / "adjustment_anomalies.json"
+
+
+def write_adjustment_anomalies(full: dict) -> dict:
+    """先.六十一（2026-10-10）：明細（約 250KB，佔 STATUS.json 一半以上）改寫到 data/adjustment_anomalies.json，
+    STATUS.json 只留 n_warnings 與檔案連結。寫檔失敗只降級（十二節）：STATUS 照樣只留摘要，並在 note 註明。"""
+    now = datetime.now(TW_TZ).isoformat()
+    summary = {"n_warnings": full.get("n_warnings", 0), "file": "data/adjustment_anomalies.json",
+               "generated_at": now, "note": full.get("note", "")}
+    try:
+        ANOMALIES_PATH.write_text(json.dumps({"generated_at": now, **full}, ensure_ascii=False, indent=1), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        summary["note"] = f"寫入 data/adjustment_anomalies.json 失敗（{type(e).__name__}），明細未更新；" + summary["note"]
+    return summary
 
 
 def build_local_pipeline_health() -> dict:
@@ -1124,7 +1140,7 @@ def main():
         "workflows": build_workflows(),
         "schedule_health": build_schedule_health(),  # 2026-09-03（P0三-三.1）排程錯過時窗判定
         "local_pipeline_health": build_local_pipeline_health(),  # 2026-09-10（停擺四）本機管線
-        "adjustment_anomaly_warnings": build_adjustment_anomaly_warnings(),  # 2026-09-27修.六第三點
+        "adjustment_anomaly_warnings": write_adjustment_anomalies(build_adjustment_anomaly_warnings()),  # 2026-09-27修.六第三點；先.六十一 明細移到獨立檔
         "app_data_sources": APP_DATA_SOURCES,
         "field_fallback_chains": FIELD_FALLBACK_CHAINS,
         "rate_limit_status": build_rate_limit_status(),

@@ -18741,6 +18741,6 @@ App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「�
 心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
 ```
 
-- [ ] **先.六十一-1 adjustment_anomaly_warnings 移到 data/adjustment_anomalies.json；STATUS.json 只留 n_warnings＋連結；STATUS.json <100 KB＋冒煙上限檢查**（互動視窗執行）
-- [ ] **先.六十一-2 data/adjustment_anomalies.json 列入 market.yml git add 清單（十節，commit 訊息註明）**（互動視窗執行）
-- [ ] **先.六十一-3 App 異常警告改讀新檔；smoke 全套＋commit 回報**（互動視窗執行）
+- [x] **先.六十一-1 adjustment_anomaly_warnings 移到 data/adjustment_anomalies.json；STATUS.json 只留 n_warnings＋連結；STATUS.json <100 KB＋冒煙上限檢查**（互動視窗執行）〔2026-10-10 完成：generate_status_json.py::write_adjustment_anomalies 把明細（1,953 筆）寫到 data/adjustment_anomalies.json（含 generated_at、n_warnings）；STATUS.json 只留 n_warnings／file／generated_at／note；STATUS.json 446 KB→72 KB；冒煙 65 檢查 <100 KB〕
+- [x] **先.六十一-2 data/adjustment_anomalies.json 列入 market.yml git add 清單（十節，commit 訊息註明）**（互動視窗執行）〔2026-10-10 完成：market.yml git add 清單已加 data/adjustment_anomalies.json（緊接 data/STATUS.json），commit 訊息註明〕
+- [x] **先.六十一-3 App 異常警告改讀新檔；smoke 全套＋commit 回報**（互動視窗執行）〔2026-10-10 完成：原本 App 沒有任何地方讀異常警告（STATUS.json 這欄只給人看）；[自行裁量] 在設定頁「資料健康」卡新增一行讀新檔，顯示筆數與彙整時間；冒煙全綠 64 PASS〕

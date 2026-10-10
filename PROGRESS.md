@@ -1,3 +1,13 @@
+## 2026-10-10 23:5x（互動視窗，維運帽）先.六十一 STATUS.json 瘦身
+
+等待總司令審閱：1 件（結案.一）。
+
+- **改了什麼**：`generate_status_json.py` 把還原價異常警告明細（1,953 筆，約 250 KB）改寫到新檔 `data/adjustment_anomalies.json`，檔內含 generated_at 和 n_warnings。STATUS.json 只留筆數和檔案連結。STATUS.json 從 446 KB 降到 72 KB。寫新檔如果失敗只降級：STATUS 照樣只留摘要，並在 note 註明。
+- **十節**：market.yml 的 git add 清單已加入 `data/adjustment_anomalies.json`。
+- **App**：原本 App 沒有任何地方讀這個欄位。設定頁「資料健康」卡新增一行，讀新檔顯示筆數和彙整時間。
+- **證據**：冒煙全部通過，共 64 項 PASS。新增第 65 項，檢查 STATUS.json < 100 KB、明細不在 STATUS、兩檔筆數一致、設定頁有顯示。
+- **`[自行裁量]`**：第 3 點的「App 讀取處」原本不存在，所以改成新增一個讀取處，而不是改寫既有的。順手把 note 裡「依賴手動執行」的過時說法，更正為 market.yml 每次排程都會更新。
+
 ## 2026-10-10 23:xx（互動視窗，開發帽）先.六十 App 全檢修補：假功能與矛盾、日誌接真錢帳本、常備 backlog
 
 等待總司令審閱：1 件（結案.一）。
