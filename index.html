@@ -589,6 +589,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="home-pos-body" class="note">尚未連線本機伺服器</div>
     </div>
 
+    <!-- 常備.開發-11（2026-10-11）：真錢執行總覽卡。只讀本機 /auto/status＋/auto/ledger（token 必檢、去識別化），
+         不具任何下單或切換模式能力。顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期；
+         未入金／緊急停止／拒單時用白話說明原因。計算邏輯在 autoPeriodSummary()（純函式，selftest 抽出驗三態）。 -->
+    <div class="card" id="home-exec-card">
+      <h3>真錢執行總覽（唯讀） <span class="more" onclick="go('trade')">交易頁 →</span></h3>
+      <div id="home-exec-body" class="note">尚未連線本機伺服器</div>
+    </div>
+
     <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
          不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
     <div class="card ai-card" id="home-ai-card" hidden>
@@ -3083,6 +3091,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
     _safeAsync('loadAutoTrading',loadAutoTrading);
     _safeAsync('renderBtPath',async()=>{renderBtPath()});
+    _safeAsync('loadHomeExecCard',loadHomeExecCard);  // 常備.開發-11 真錢執行總覽卡（唯讀）
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
     _safeAsync('loadBenchmarkComparison',async()=>{await loadBenchmarkComparison();renderBenchmarkComparison()});  // 2026-09-15 我們vs0050主圖
     await loadIntradayQuotes();
@@ -4152,6 +4161,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   const TRADE_UNIT_NOTE={TW:'單位：張數（台股現股/當沖以張為單位）',US:'單位：股數（美股以股為單位，無「張」概念）',FUT:'單位：口數；另顯示保證金水位與轉倉提醒'};
   function onTradeInit(){renderMktToggle('trade');onTradeToggleChange();_safeAsync('loadTradeBots',loadTradeBots)}
+  // <auto-period-selftest>（常備.開發-11：scripts/selftest_home_exec_card.mjs 依這組標記抽出本段純函式驗三態，勿刪標記；段內不得碰 DOM／網路）
   // 先.六十-A2／A4：交易頁機器人卡與日誌頁共用的顯示對照
   const AUTO_MODE_LABEL={SIMULATION:'模擬',LIVE_WITH_VETO:'真錢（附否決窗）',LIVE:'真錢（無否決窗）'};
   const AUTO_REASON_LABEL={first_tranche:'首批',month_end:'月底再平衡',retry_after_error:'重跑上一期',open_batch:'續跑進行中批次',sim_drill:'模擬演練'};
@@ -4171,6 +4181,40 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!n)return tr+'（讀不到交易日曆）';
     return tr+String(n.date).slice(5).replace('-','/')+' '+n.time+'（'+(AUTO_REASON_LABEL[n.reason]||n.reason)+'）';
   }
+  // 常備.開發-11：本期執行摘要（純函式）。st＝/auto/status 回應、lg＝/auto/ledger 回應（任一可為 null）。
+  // 本期＝帳本最近一個批次（排除撤單測試）；送出＝非拒單／略過的委託；成交比例＝已成交股數÷送出股數。
+  // state：none（無紀錄）／blocked（整批被擋、沒送出）／pending（已送出未成交）／partial（部分成交）／full（全部成交）
+  function autoPeriodBatchLabel(b){
+    const m=/^(\d{4})(\d{2})-(T(\d+)|M)$/.exec(String(b||''));
+    if(!m)return String(b||'—');
+    return m[1]+'/'+m[2]+' '+(m[3]==='M'?'月底再平衡':'第 '+m[4]+' 期');
+  }
+  function autoPeriodReasons(st,codes){
+    const out=[],s=(st&&st.status)||{},err=String(s.last_error||'');
+    if(st&&st.stopped)out.push('緊急停止開關開著，引擎一律拒單（到設定頁關閉後才會恢復）');
+    if(err.startsWith('INSUFFICIENT_CASH:'))out.push('交割戶錢不夠（尚未入金或餘額不足）：'+err.slice('INSUFFICIENT_CASH:'.length));
+    else if(err)out.push('最近一次執行出錯：'+err);
+    const cs=(codes||[]).filter(c=>!(c==='INSUFFICIENT_CASH'&&err.startsWith('INSUFFICIENT_CASH:')));
+    if(cs.length)out.push('被擋原因：'+_autoCodesTxt(cs));
+    return out;
+  }
+  function autoPeriodSummary(st,lg){
+    const rows=((lg&&lg.rows)||[]).filter(r=>r&&r.batch&&r.batch!=='撤單測試');
+    const b=rows.length?rows.reduce((x,r)=>String(r.date||'')>String(x.date||'')?r:x).batch:null;
+    const sub=b?rows.filter(r=>r.batch===b):[];
+    const sent=sub.filter(r=>r.status!=='REJECT'&&r.status!=='SKIP');
+    const qty=sent.reduce((t,r)=>t+(Number(r.qty)||0),0),fq=sent.reduce((t,r)=>t+(Number(r.filled_qty)||0),0);
+    const state=!b?'none':!sent.length?'blocked':(qty>0&&fq>=qty?'full':(fq>0?'partial':'pending'));
+    const la=st&&st.live_account;
+    const dev=la&&!la.empty&&!la.error&&Array.isArray(la.holdings)?la.holdings.map(h=>({symbol:h.symbol,pct:h.pct,target:h.target_pct,dev:h.dev_pp})):[];
+    const codes=[...new Set(sub.flatMap(r=>r.reason_codes||[]))].sort();
+    return {state,batch:b,period:b?autoPeriodBatchLabel(b):null,
+      send_date:sub.length?sub.map(r=>String(r.date||'')).sort().pop():null,
+      n_orders:sub.length,n_sent:sent.length,qty,filled_qty:fq,fill_pct:qty?Math.round(fq/qty*1000)/10:null,
+      deviation:dev,deviation_note:dev.length?'':(la&&la.error?'無法計算權重：'+la.error:'尚無成交，沒有實際權重可比'),
+      next:st?autoNextText(st):null,reasons:autoPeriodReasons(st,codes)};
+  }
+  // </auto-period-selftest>
   async function loadTradeBots(){
     const note=document.getElementById('bot-bb90-note'),rec=document.getElementById('bot-recent-orders');
     if(!note)return;
@@ -4191,6 +4235,35 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       const rows=(lg&&lg.rows||[]).slice(0,5);
       rec.innerHTML=rows.length?rows.map(autoLedgerRowHtml).join(''):'首批尚未執行';
     }catch(e){console.warn('[loadTradeBots ledger]',e);recordGlobalError('loadTradeBots ledger',e);rec.textContent='讀取帳本失敗（本機伺服器離線或舊版）'}
+  }
+  // 常備.開發-11：首頁真錢執行總覽卡（唯讀；兩個端點各自隔離，一個失敗另一個照畫）
+  function renderHomeExec(st,lg,errs){
+    const el=document.getElementById('home-exec-body');if(!el)return;
+    const esc=_autoEsc,v=autoPeriodSummary(st,lg),L=[];
+    const STATE_TXT={none:'本期尚無送單紀錄',blocked:'本期整批被擋，沒有送出委託',pending:'已送出，尚未成交',partial:'部分成交',full:'全部成交'};
+    if(st)L.push('模式：'+esc((st.drill?'演練 · ':'')+(AUTO_MODE_LABEL[st.mode]||st.mode||'—')));
+    if(v.batch){
+      L.push('本期：<b>'+esc(v.period)+'</b>　送單日 '+esc(String(v.send_date||'—').replace(/-/g,'/'))+'　<b>'+esc(STATE_TXT[v.state])+'</b>');
+      L.push('送出 '+v.n_sent+' 筆（本期紀錄共 '+v.n_orders+' 筆）　成交比例 '+(v.fill_pct==null?'—':v.fill_pct+'%')+(v.qty?'（'+v.filled_qty.toLocaleString('zh-TW')+'／'+v.qty.toLocaleString('zh-TW')+' 股）':''));
+    }else L.push('<b>'+STATE_TXT.none+'</b>'+(lg?'（帳本是空的，首批尚未執行）':''));
+    if(v.deviation.length)L.push('權重（實際／目標，偏離）：'+v.deviation.map(d=>esc(d.symbol)+' '+d.pct+'%／'+d.target+'%（'+(d.dev>0?'+':'')+d.dev+'pp）').join('、'));
+    else if(st)L.push('權重：'+esc(v.deviation_note));
+    if(st)L.push('下一期：'+esc(v.next));
+    v.reasons.forEach(r=>L.push('<span style="color:var(--warn)">⚠ '+esc(r)+'</span>'));
+    (errs||[]).forEach(e=>L.push('<span style="color:var(--ink-4)">'+esc(e)+'</span>'));
+    el.innerHTML=L.map(x=>'<div style="padding:2px 0">'+x+'</div>').join('')+'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">唯讀；資料只在本機伺服器，不進 repo；非投資建議</div>';
+  }
+  async function loadHomeExecCard(){
+    const el=document.getElementById('home-exec-body');if(!el)return;
+    if(!LIVE.configured||!LIVE.url){el.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢執行紀錄只在本機。';return}
+    const [a,b]=await Promise.allSettled([
+      (async()=>{const r=await liveFetch('/auto/status',6000);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})(),
+      loadAutoLedger()]);
+    const errs=[];
+    if(a.status==='rejected'){console.warn('[loadHomeExecCard status]',a.reason);recordGlobalError('loadHomeExecCard status',a.reason);errs.push('讀不到 /auto/status（本機伺服器離線或舊版）')}
+    if(b.status==='rejected'){console.warn('[loadHomeExecCard ledger]',b.reason);recordGlobalError('loadHomeExecCard ledger',b.reason);errs.push('讀不到 /auto/ledger（本機伺服器離線或舊版）')}
+    if(a.status==='rejected'&&b.status==='rejected'){el.textContent='讀取真錢執行紀錄失敗（本機伺服器離線或舊版）';return}
+    renderHomeExec(a.status==='fulfilled'?a.value:null,b.status==='fulfilled'?b.value:null,errs);
   }
   function onTradeToggleChange(){
     const mkt=MKT_STATE.trade;
@@ -8636,7 +8709,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0040';
+  const APP_VERSION='2026-10-11.0107';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

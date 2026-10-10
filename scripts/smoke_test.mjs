@@ -2243,10 +2243,51 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { k501Errors.push(`測試本身出錯：${e.message || e}`); }
   record("70. 美股 1 分 K 收到 501 顯示誠實說明並退回日線", k501Errors.length === 0, k501Errors.join("; "));
 
+  // 71.【2026-10-11 常備.開發-11】首頁真錢執行總覽卡：用假的 /auto/status、/auto/ledger（替換 liveFetch，不連網、不下單）驗——
+  // 部分成交時顯示期別／送出筆數／成交比例／權重偏離／下一期；未入金時白話原因；未連線時顯示說明而非空白；
+  // 只有 ledger 失敗時 status 部分照畫（錯誤隔離）。三態純函式另見 scripts/selftest_home_exec_card.mjs。
+  const execErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured, errs: GLOBAL_ERRORS.length };
+      const st = { ok: true, mode: "LIVE_WITH_VETO", drill: false, stopped: false, status: {}, next_tranche: 2, tranche_total: 4,
+        next_run: { date: "2026-10-15", time: "09:05", reason: "first_tranche" },
+        live_account: { empty: false, holdings: [{ symbol: "0050", pct: 72.5, target_pct: 70, dev_pp: 2.5 }] } };
+      const lg = { ok: true, rows: [
+        { date: "2026-10-12", symbol: "0050", qty: 1000, filled_qty: 1000, status: "FILLED", reason_codes: [], batch: "202610-T2" },
+        { date: "2026-10-12", symbol: "00646", qty: 500, filled_qty: 200, status: "PARTIAL", reason_codes: [], batch: "202610-T2" }] };
+      const body = () => document.getElementById("home-exec-body").textContent;
+      const o = {};
+      try {
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+        window.liveFetch = async (p) => new Response(JSON.stringify(p === "/auto/status" ? st : p === "/auto/ledger" ? lg : {}), { status: 200 });
+        await loadHomeExecCard(); o.partial = body();
+        const cash = { ...st, live_account: { empty: true }, status: { last_error: "INSUFFICIENT_CASH:交割戶可用餘額 0 元" } };
+        const rej = { ok: true, rows: [{ date: "2026-10-08", symbol: "全部", qty: 0, filled_qty: 0, status: "REJECT", reason_codes: ["INSUFFICIENT_CASH"], batch: "202610-T1" }] };
+        window.liveFetch = async (p) => new Response(JSON.stringify(p === "/auto/status" ? cash : p === "/auto/ledger" ? rej : {}), { status: 200 });
+        await loadHomeExecCard(); o.cash = body();
+        window.liveFetch = async (p) => p === "/auto/status" ? new Response(JSON.stringify(st), { status: 200 }) : new Response("{}", { status: 500 });
+        await loadHomeExecCard(); o.half = body();
+        LIVE.configured = false;
+        await loadHomeExecCard(); o.off = body();
+      } finally {
+        window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf;
+        GLOBAL_ERRORS.length = Math.min(GLOBAL_ERRORS.length, saved.errs);  // 「ledger 500」是刻意製造的失敗，不留在全域錯誤 log
+      }
+      return o;
+    });
+    for (const k of ["2026/10 第 2 期", "部分成交", "送出 2 筆", "80%", "0050 72.5%／70%", "+2.5pp", "10/15"])
+      if (!r.partial.includes(k)) execErrors.push(`部分成交畫面缺「${k}」：${r.partial.slice(0, 160)}`);
+    if (!r.cash.includes("尚未入金") || !r.cash.includes("整批被擋")) execErrors.push(`未入金應白話說明：${r.cash.slice(0, 160)}`);
+    if (!r.half.includes("讀不到 /auto/ledger") || !r.half.includes("10/15")) execErrors.push(`ledger 失敗時 status 部分應照畫：${r.half.slice(0, 160)}`);
+    if (!r.off.includes("尚未連線")) execErrors.push(`未連線應顯示說明：「${r.off}」`);
+  } catch (e) { execErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("71. 首頁真錢執行總覽卡（期別／送出筆數／成交比例／權重偏離／下一期；未入金白話原因；單端點失敗隔離；未連線說明）", execErrors.length === 0, execErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
