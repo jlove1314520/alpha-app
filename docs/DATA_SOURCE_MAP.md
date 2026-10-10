@@ -193,6 +193,19 @@ robots.txt 是目前能取得的最明確意思表示。
 實作：`.github/scripts/update_stock_financials.py::update_extra()`；頻率見 `C:\alpha\CLAUDE.md`
 「TWSE / TPEx OpenAPI」節。
 
+### 🟡 現金流量表／FCF（常備.開發-7，2026-10-11 查證）
+
+1. **TWSE OpenAPI swagger**（143 路徑，2026-10-11 重新下載）：全文搜「現金」「cash」「t164」，
+   只命中股利、融資、資產負債表等，**無現金流量表端點**。
+2. **TPEx OpenAPI swagger**（225 路徑，同日）：同樣搜尋 0 命中。
+3. **MOPS t164sb04**（現金流量表網頁查詢）：2026-08-27 實測回「FOR SECURITY REASONS」反爬阻擋，
+   需模擬表單 session，依取得方式鐵律不走（見 `update_stock_financials.py` 檔頭）。
+4. **其他供應商**：FinMind `TaiwanStockCashFlowsStatement`（研究端已有本機快取，1,930 檔到 2026Q2）。
+
+結論：官方開放資料無現金流量表；改用 FinMind（非官方，屬「FinMind 僅作歷史補充」的例外，App 上標明來源）。
+`scripts/build_cash_flow_json.py` 只讀本機快取、零網路請求，每季手動跑一次 → `data/cash_flow.json`（TTM）。
+金融業（例：2880）FinMind 現金流量表格式不同，目前不在輸出內，App 顯示原因。
+
 ## 🔴 走不通：Stooq（已下市美股價格）
 
 **查證日：2026-09-08。詳見 `docs/US_PRICE_SOURCES.md`。**

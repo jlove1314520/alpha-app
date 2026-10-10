@@ -2171,10 +2171,31 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { usEvErrors.push(`測試本身出錯：${e.message || e}`); }
   record("67. 美股事件分頁時間軸（8-K 近 90 天＋下一次財報日；無資料說明原因；外國發行人 6-K 說明）", usEvErrors.length === 0, usEvErrors.join("; "));
 
+  // 68.【2026-10-11 常備.開發-7】台股財報分頁 FCF：data/cash_flow.json 有的代號顯示「億」與來源（FinMind 現金流量表，非官方），
+  // 沒有的代號（例如金控）說明原因而非只有「—」。
+  const fcfErrors = [];
+  try {
+    const fs = await import("node:fs");
+    const cf = JSON.parse(fs.readFileSync("data/cash_flow.json", "utf8"));
+    if (!(cf.count > 1000)) fcfErrors.push(`cash_flow.json 檔數過少：${cf.count}`);
+    const r = await page.evaluate(async () => {
+      const o = {};
+      for (const c of ["2330", "2880"]) {
+        currentCode = c; await loadFinancials(c);
+        o[c] = { fcf: document.getElementById("fin-fcf").textContent, note: document.getElementById("fin-note").textContent };
+      }
+      return o;
+    });
+    if (cf.stocks["2330"] && !/億/.test(r["2330"].fcf)) fcfErrors.push(`2330 FCF 應顯示億：${r["2330"].fcf}`);
+    if (!/FinMind/.test(r["2330"].note)) fcfErrors.push(`2330 備註應標 FinMind 來源：${r["2330"].note.slice(-80)}`);
+    if (!cf.stocks["2880"] && !/不在 FinMind 現金流量表快取/.test(r["2880"].note)) fcfErrors.push(`2880 無資料應說明原因：${r["2880"].note.slice(-80)}`);
+  } catch (e) { fcfErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("68. 台股財報分頁 FCF（近四季，標 FinMind 來源；無資料說明原因）", fcfErrors.length === 0, fcfErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

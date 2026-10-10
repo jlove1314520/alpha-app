@@ -682,3 +682,4 @@
 {"ts": "2026-10-11T00:24:28+08:00", "track": "dev_queue", "round": "常備.開發-4", "note": "上市金融業5類＋上櫃6類財報接 TWSE/TPEx openapi（恆等式驗證防錯位）、latest_cum 累計差分、ROE 單位修正；App 財報來源標記；冒煙全過", "cycle_id": "20261011-000102"}
 {"ts": "2026-10-11T00:27:44+08:00", "track": "dev_queue", "round": "常備.開發-5", "note": "美股事件分頁時間軸（8-K 近90天＋財報日，無資料說明原因）；allowlist 刪一條；冒煙67", "cycle_id": "20261011-000102"}
 {"ts": "2026-10-11T00:28:31+08:00", "track": "dev_queue", "round": "常備.開發-6", "note": "BLOCKED：兩榜首次回測與凍結.二互斥，登記 AWAITING_REVIEW 等裁示", "cycle_id": "20261011-000102"}
+{"ts": "2026-10-11T00:32:08+08:00", "track": "dev_queue", "round": "常備.開發-7", "note": "FCF：build_cash_flow_json.py 讀本機 FinMind 快取→data/cash_flow.json（1797 檔 TTM）；財報分頁 FCF 顯示＋來源；冒煙68", "cycle_id": "20261011-000102"}
