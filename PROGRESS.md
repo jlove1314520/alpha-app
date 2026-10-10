@@ -16,7 +16,7 @@
   - 證據：冒煙 66（假回應：市值 2,000,000、+199,000、總資產 2,050,000、未連線說明）。
   - 未驗證：真實 /live/positions（週日常駐行程未跑）；零股不在此列（要列需改 shioaji_quotes 加查 Unit.Share）。
 - **常備.開發-4 上櫃／金融股財報** `bf206eff9`＋補修 `5ab747bb1`
-  - 做了什麼：`update_stock_financials.py` 新增 `update_extra()`，接 TWSE 上市金融五類與 TPEx 上櫃六類官方 openapi；另存 `latest_cum`，下一季起用累計差分還原單季。App 財報分頁顯示來源端點與「最新官方累計（非單季）」。查證紀錄寫進 `docs/DATA_SOURCE_MAP.md`，頻率寫進 `C:lpha\CLAUDE.md`。
+  - 做了什麼：`update_stock_financials.py` 新增 `update_extra()`，接 TWSE 上市金融五類與 TPEx 上櫃六類官方 openapi；另存 `latest_cum`，下一季起用累計差分還原單季。App 財報分頁顯示來源端點與「最新官方累計（非單季）」。查證紀錄寫進 `docs/DATA_SOURCE_MAP.md`，頻率寫進 `C:\alpha\CLAUDE.md`。
   - 官方資料地雷：`t187ap06_L_fh`（金控）表頭錯位一格，保險業營收恆等式不成立。現在每列先用會計恆等式驗證，對不上就把營收留空。
   - 純 bug 修復：ROE 單位錯（2330 原本顯示 34777.78%，修正為 34.78%）。
   - 證據：抽樣上櫃 5483／6488／8299、金融 2880／2801／2855 都有數字，來源標記正確。
