@@ -580,8 +580,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，非交易確認、非投資建議；永豐為模擬環境、IBKR為paper帳戶，皆無真實資金</div>
     </div>
 
+    <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
+         不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
     <div class="card ai-card" id="home-ai-card" hidden>
-      <div class="ai-tag">✦ AI 盤前日報</div>
+      <div class="ai-tag">✦ AI 盤前日報 · 規則摘要</div>
       <div class="note" id="home-ai-body"></div>
     </div>
 
@@ -683,9 +685,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：經濟部官方開放資料（data.gov.tw#6607），GitHub Actions 排程；官方每月更新，資料通常落後1~2個月，MoM/YoY為本App自算；僅涵蓋工業生產指數，外銷訂單金額尚未接入，僅供參考非投資建議</div>
       </div>
 
-      <div class="card ai-card" style="opacity:.7">
-        <div class="ai-tag">✦ AI 盤勢解讀</div>
-        <div class="note">功能建置中 · 尚未接上真實新聞與訊號分析，暫不顯示具體市場判斷內容</div>
+      <!-- 常備.開發-2：與今日頁盤前日報同源（data/daily_brief.json 規則摘要），不做市場判斷。 -->
+      <div class="card ai-card">
+        <div class="ai-tag">✦ 盤勢摘要 · 規則摘要</div>
+        <div class="note" id="market-brief-body">載入中…</div>
       </div>
     </div>
 
@@ -1270,9 +1273,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">讀取時間：<b id="journal-tm">--:--</b>。以 price_history 最新收盤估值；只算自動交易買進的股數；未計手續費與稅。本週＝本週一以來的變動。</div>
     </div>
 
-    <div class="card ai-card" style="opacity:.7">
-      <div class="ai-tag">✦ AI 週覆盤 · 行為分析</div>
-      <div class="note">功能建置中 · 需要累積真實交易紀錄後才能分析，目前無資料可分析</div>
+    <!-- 常備.開發-2：週覆盤＝data/daily_brief.json 的 weekly 區塊（加權指數當週漲跌、紙上追蹤狀態）
+         ＋本機 /auto/ledger 當週委託筆數（真錢帳本只在本機，不進 repo）。固定規則，不做行為判斷。 -->
+    <div class="card ai-card">
+      <div class="ai-tag">✦ AI 週覆盤 · 規則摘要</div>
+      <div class="note" id="journal-weekly-body">載入中…</div>
     </div>
 
     <div class="card">
@@ -1769,7 +1774,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(name==='chips-market')_safeAsync('loadChipsMarketDetail',loadChipsMarketDetail);
     if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
     if(name==='trade')_safeSync('onTradeInit',onTradeInit);
-    if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadJournalLedger',loadJournalLedger)}
+    if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadWeeklyBrief',loadWeeklyBrief);_safeAsync('loadJournalLedger',loadJournalLedger)}
     if(name==='report')_safeSync('renderReport',renderReport);
     if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
   }
@@ -3024,6 +3029,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(runId!==HYDRATE_HOME_SEQ)return;
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
+    _safeAsync('loadHomeBrief',loadHomeBrief);  // 常備.開發-2 盤前日報（規則摘要）
     _safeAsync('loadMyHoldingsEvents',loadMyHoldingsEvents);  // 2026-09-15 開發佇列自走，承接自競品一
     _safeAsync('loadAutoTrading',loadAutoTrading);
     _safeAsync('renderBtPath',async()=>{renderBtPath()});
@@ -4013,6 +4019,51 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
   function setJournalFilter(k){JOURNAL_FILTER=k;renderJournalChips()}
   // 先.六十-A4：真錢帳本（本機伺服器 /auto/ledger，token 必檢；只回去識別化欄位）
+  // 常備.開發-2（2026-10-11）：盤前日報／盤勢摘要／週覆盤共用 data/daily_brief.json（固定規則產生，非 AI 判斷）
+  let DAILY_BRIEF_CACHE=null,JOURNAL_LEDGER_CACHE=null;
+  async function loadDailyBrief(){
+    if(DAILY_BRIEF_CACHE)return DAILY_BRIEF_CACHE;
+    const r=await fetch('data/daily_brief.json?t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return DAILY_BRIEF_CACHE=await r.json();
+  }
+  const _briefLines=ls=>(ls||[]).map(l=>'<div style="padding:2px 0">· '+_autoEsc(l)+'</div>').join('');
+  const _briefFoot=d=>'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">'+_autoEsc(d.disclaimer||'規則摘要，非 AI 判斷、非投資建議')+'；產生於 '+_autoEsc(String(d.generated_at||'').slice(0,16).replace('T',' '))+'</div>';
+  function _briefWatchLine(d){
+    const ev=d.premarket&&d.premarket.events||{},nw=d.premarket&&d.premarket.news||{};
+    const m=ev.material_by_code||{},n=nw.by_code||{};
+    const hit=WL.map(c=>({c,m:m[c]||0,n:n[c]||0})).filter(x=>x.m||x.n);
+    if(!hit.length)return '自選股 '+WL.length+' 檔：'+(ev.material_date?ev.material_date+' ':'')+'無重大訊息、新聞索引無點名';
+    return '自選股：'+hit.map(x=>(nameOf(x.c)||x.c)+'（'+[x.m?'重訊 '+x.m:'',x.n?'新聞 '+x.n:''].filter(Boolean).join('、')+'）').join('、');
+  }
+  async function loadHomeBrief(){
+    const card=document.getElementById('home-ai-card'),el=document.getElementById('home-ai-body');
+    if(!card||!el)return;
+    try{
+      const d=await loadDailyBrief();
+      el.innerHTML=_briefLines((d.premarket&&d.premarket.lines||[]).concat([_briefWatchLine(d)]))+_briefFoot(d);
+      card.hidden=false;
+    }catch(e){console.warn('[loadHomeBrief]',e);recordGlobalError('loadHomeBrief',e);card.hidden=true}
+  }
+  async function loadMarketBrief(){
+    const el=document.getElementById('market-brief-body');if(!el)return;
+    try{const d=await loadDailyBrief();el.innerHTML=_briefLines(d.premarket&&d.premarket.lines)+_briefFoot(d)}
+    catch(e){console.warn('[loadMarketBrief]',e);recordGlobalError('loadMarketBrief',e);el.textContent='讀取盤勢摘要失敗（'+(e&&e.message||e)+'）'}
+  }
+  async function loadWeeklyBrief(){
+    const el=document.getElementById('journal-weekly-body');if(!el)return;
+    try{
+      const d=await loadDailyBrief();
+      const w=d.weekly||{},ls=(w.lines||[]).slice();
+      const rows=JOURNAL_LEDGER_CACHE&&JOURNAL_LEDGER_CACHE.rows;
+      if(Array.isArray(rows)){
+        const wk=rows.filter(x=>String(x.date||'')>=String(w.week_start||'9'));
+        const c={};wk.forEach(x=>{const k=_autoStatusTxt(x.status);c[k]=(c[k]||0)+1});
+        ls.push('真錢 Bb-90 '+(w.week_start||'')+' 起委託 '+wk.length+' 筆'+(wk.length?'（'+Object.keys(c).map(k=>k+' '+c[k]).join('、')+'）':''));
+      }else ls.push('真錢帳本：未連線本機伺服器，本週委託筆數不列入');
+      el.innerHTML=_briefLines(ls)+_briefFoot(d);
+    }catch(e){console.warn('[loadWeeklyBrief]',e);recordGlobalError('loadWeeklyBrief',e);el.textContent='讀取週覆盤摘要失敗（'+(e&&e.message||e)+'）'}
+  }
   async function loadAutoLedger(){
     if(!LIVE.configured||!LIVE.url)return null;
     const r=await liveFetch('/auto/ledger',15000);
@@ -4033,6 +4084,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(!LIVE.configured||!LIVE.url){pe.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢帳本只在本機。';te.innerHTML='<div class="note" style="padding:14px 2px">尚未連線本機伺服器</div>';return}
     try{
       const d=await loadAutoLedger();
+      JOURNAL_LEDGER_CACHE=d;_safeAsync('loadWeeklyBrief',loadWeeklyBrief);
       setTxt('journal-tm',fmtTzHHMM(new Date(),'Asia/Taipei'));
       const rows=d&&d.rows||[];
       te.innerHTML=rows.length?rows.map(autoLedgerRowHtml).join(''):'<div class="note" style="padding:14px 2px">首批尚未執行</div>';
@@ -4300,6 +4352,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const results=await Promise.allSettled([loadMarketIndex(),loadHeatmap(),loadInstTotal(),loadFutInst(),loadMarginMaintenance(),renderSectorFlow(),loadCustomsTrade(),loadIndustrialProduction(),loadScanners()]);
     const labels=['loadMarketIndex','loadHeatmap','loadInstTotal','loadFutInst','loadMarginMaintenance','renderSectorFlow','loadCustomsTrade','loadIndustrialProduction','loadScanners'];
     results.forEach((r,i)=>{if(r.status==='rejected'){console.warn('['+labels[i]+']',r.reason);recordGlobalError(labels[i],r.reason)}});
+    _safeAsync('loadMarketBrief',loadMarketBrief);  // 常備.開發-2
     if(MKT_STATE.market==='US')_safeAsync('loadMarketUS',loadMarketUS);
     if(MKT_STATE.market==='FUT')_safeAsync('loadMarketFUT',loadMarketFUT);
     stampUpdated('market');
@@ -8443,7 +8496,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-10.2347';
+  const APP_VERSION='2026-10-11.0007';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

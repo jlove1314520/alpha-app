@@ -218,6 +218,11 @@ jobs:
       - name: 紙上追蹤看守（逾期未記帳→ERROR＋App紅橫幅）
         run: python research/paper_tracking_watchdog.py
         continue-on-error: true
+      # 常備.開發-2（2026-10-11）：盤前日報／週覆盤規則摘要。只讀上面各步驟已寫好的 data/*.json，
+      # 不打任何外部 API；輸出 data/daily_brief.json，已加進下方 git add 清單（十節）。自身失敗只警告（十二）。
+      - name: 產生盤前日報／週覆盤規則摘要（data/daily_brief.json）
+        run: python .github/scripts/build_daily_brief.py
+        continue-on-error: true
       # 先.六十-C9：STATUS.json 頂層 updated_at／any_overdue／schedule_health 每次排程都重產（原本只靠手動跑，從 09-15 起停在原地）。
       # data/STATUS.json 已在下方 git add 清單；GitHub API 查 workflow 狀態失敗時該欄位自己降級，不影響其他步驟（十二）。
       - name: 更新 STATUS.json（先.六十-C9）
@@ -261,7 +266,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/whitelist_price_status.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json data/adjustment_anomalies.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/short_lending_available_history.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/securities_lending_sell_history.json data/margin_by_stock_history.json data/paper_7030.json data/paper_1b.json data/paper_3.json data/paper_4.json data/paper_tracking_watch.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
+          git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/price_history.json data/whitelist_price_status.json data/sparklines.json data/quotes_all_tw.json data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/benchmark_comparison.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json data/adjustment_anomalies.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/short_lending_available_history.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/securities_lending_sell_history.json data/margin_by_stock_history.json data/paper_7030.json data/paper_1b.json data/paper_3.json data/paper_4.json data/paper_tracking_watch.json data/daily_brief.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
           git add -f research/data/paper_7030_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_1b_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_3_log.jsonl 2>/dev/null || true

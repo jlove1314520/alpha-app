@@ -1031,13 +1031,17 @@ async function runSmokeTest(baseUrl, headless = true) {
     const info = await page.evaluate(() => {
       const codes = [...document.querySelectorAll("#wl-list .swipe-row [data-flash-code]")].map(e => e.dataset.flashCode);
       const wraps = [...document.querySelectorAll("#wl-list .sparkwrap")].map(w => w.getBoundingClientRect().width);
-      return { summary: document.getElementById("home-status-summary")?.textContent || "", dots: document.querySelectorAll("#wl-list .wl-src-dot").length, rows: codes.length, dup: codes.length !== new Set(codes).size, caps: document.querySelectorAll("#home-idx-rows .idx-cap").length, aiHidden: !!document.getElementById("home-ai-card")?.hidden, maxWrap: wraps.length ? Math.max(...wraps) : 0 };
+      return { summary: document.getElementById("home-status-summary")?.textContent || "", dots: document.querySelectorAll("#wl-list .wl-src-dot").length, rows: codes.length, dup: codes.length !== new Set(codes).size, caps: document.querySelectorAll("#home-idx-rows .idx-cap").length, aiHidden: !!document.getElementById("home-ai-card")?.hidden, aiBody: document.getElementById("home-ai-body")?.textContent || "", maxWrap: wraps.length ? Math.max(...wraps) : 0 };
     });
     if (!info.summary || /載入中/.test(info.summary)) homeErrors.push(`細狀態列摘要未完成：「${info.summary}」`);
     if (info.rows > 0 && info.dots < info.rows) homeErrors.push(`自選股列${info.rows}列但來源小點只有${info.dots}顆`);
     if (info.dup) homeErrors.push("自選股列重複出現（hydrateHome競態）");
     if (info.caps < 3) homeErrors.push(`大盤速覽膠囊只有${info.caps}顆`);
-    if (!info.aiHidden) homeErrors.push("AI盤前日報無內容卻沒有隱藏整張卡");
+    // 常備.開發-2（2026-10-11）：盤前日報改讀 data/daily_brief.json（規則摘要），有內容時才顯示——
+    // 斷言改成「無內容必須隱藏；顯示時必須有內容且標明規則摘要／非 AI 判斷／非投資建議」。
+    if (!info.aiHidden && !info.aiBody.trim()) homeErrors.push("AI盤前日報無內容卻沒有隱藏整張卡");
+    if (!info.aiHidden && info.aiBody.trim() && !(/規則摘要/.test(info.aiBody) && /非 AI 判斷/.test(info.aiBody) && /非投資建議/.test(info.aiBody)))
+      homeErrors.push(`AI盤前日報顯示中卻沒標「規則摘要，非 AI 判斷、非投資建議」：「${info.aiBody.slice(0, 60)}」`);
     if (info.maxWrap > 72) homeErrors.push(`走勢線包裝層被撐到${info.maxWrap.toFixed(0)}px寬`);
   } catch (e) {
     homeErrors.push(`測試本身出錯：${e.message || e}`);

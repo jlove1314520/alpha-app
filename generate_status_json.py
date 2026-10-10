@@ -869,7 +869,7 @@ APP_DATA_SOURCES = [
     {"panel": "今日頁·自選股sparkline走勢", "source": "data/quotes_tw.json（TWSE STOCK_DAY，僅上市股票；上櫃約24檔查不到，見known_limitations）+ data/quotes_us.json（yfinance），2026-08-27起不再打FinMind"},
     {"panel": "選股頁·價值成長榜/題材動能榜/未來性濾網（2026-08-27新增三榜切換）", "source": "scores.json（generate_scores_live.py，財報導向）+ scores_momentum.json（generate_scores_momentum.py，題材動能導向）+ scores_future.json（generate_scores_future.py，未來性(a)類因子：法人籌碼行為+毛利率品質+產能利用率代理）——三榜物理分離、因子/權重各自版本控管，回測前都固定顯示「本榜為資料排序，尚未經過組合策略回測驗證」"},
     {"panel": "今日頁·匯率", "source": "data/fx.json（2026-09-15起主來源改為央行外匯局官方牌告匯率FTDOpenData015，yfinance TWD=X降為備援；2026-08-27起不再打FinMind）"},
-    {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},
+    {"panel": "今日頁·AI盤前日報", "source": "data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則摘要，非 AI 判斷，market.yml 排程）"},
     {"panel": "今日頁·總資產/已實現損益", "source": "本機 alpha_live_server /live/positions＋/live/balance（Shioaji 唯讀＋IBKR，需 token；本機離線時顯示 CTA，不進 repo）"},
     {"panel": "市場頁·大盤指數（含sparkline）", "source": "data/market_tw.json + data/market_us.json"},
     {"panel": "市場頁·類股表現(熱力圖)", "source": "data/market_tw.json（sectors，TWSE MI_INDEX 27類）"},
@@ -900,7 +900,7 @@ APP_DATA_SOURCES = [
     {"panel": "日誌頁·損益／交易紀錄", "source": "本機 alpha_live_server /auto/ledger（真錢帳本去識別化欄位＋price_history 收盤估值，需 token，不進 repo；先.六十-A4）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},
     {"panel": "交易頁·大盤融資維持率", "source": "data/margin_maintenance.json（2026-08-27起改排程：分子TWSE官方MI_MARGN/STOCK_DAY_ALL；分母2026-09-15起也改TWSE官方www.twse.com.tw/rwd信用交易統計，零FinMind依賴）"},
-    {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "無（尚無交易紀錄，誠實佔位）"},
+    {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "本機 /auto/ledger（真錢帳本）＋data/daily_brief.json weekly 區塊（規則摘要）"},
     {"panel": "設定頁·訊號誠實度（三態徽章：已驗證/未驗證/實測無效）", "source": "data/signal_status.json（research/build_signal_status.py人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，2026-09-15開發佇列源頭一.4接上個股頁外的App UI）"},
 ]
 
