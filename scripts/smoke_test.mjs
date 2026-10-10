@@ -2456,10 +2456,56 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { analystErrors.push(`測試本身出錯：${e.message || e}`); }
   record("75. 個股頁目標價與評等（公開來源）：美股評等家數長條＋買進類占比趨勢；查無時寫原因；台股誠實說明無合法免費來源；目標價標待採購；無「功能建置中」", analystErrors.length === 0, analystErrors.join("; "));
 
+  // 76.【2026-10-11 常備.開發-18】設定頁到價與事件推播：未連本機顯示 CTA；連線後台股自選股列出漲跌幅／到價／事件三種設定，
+  // 美股誠實寫暫不支援；儲存時整份規則 POST /alerts/rules。（伺服器端三種觸發由 research/price_alerts_selftest.py 驗）
+  const alertErrors = [];
+  try {
+    await page.evaluate(() => window.go("settings"));
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, f: window.fetch, url: LIVE.url, conf: LIVE.configured, wl: WL };
+      const o = {};
+      try {
+        LIVE.configured = false; LIVE.url = "";
+        await loadAlerts();
+        o.ctaOff = getComputedStyle(document.getElementById("alert-cta")).display;
+        o.bodyOff = document.getElementById("alert-body").textContent;
+        WL = ["2330", "AAPL", "0050"];
+        const data = { ok: true, rules: { "2330": { pct: 3, above: 1200, below: null, event: true } }, fired: { "2330": { kind: "pct", at: "2026-10-12T09:31:00+08:00", delivered: 1 } },
+          last_check: "2026-10-12T09:31:00+08:00", live_quotes: true, in_market_hours: true };
+        window.liveFetch = async (p) => new Response(JSON.stringify(p === "/alerts/rules" ? data : {}), { status: 200 });
+        let posted = null;
+        window.fetch = async (u, opt) => { if (String(u).startsWith("https://smoke.invalid/alerts/rules")) { posted = opt && opt.body; return new Response(JSON.stringify({ ok: true, rules: {} }), { status: 200 }); } return saved.f.call(window, u, opt); };
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+        await loadAlerts();
+        o.ctaOn = getComputedStyle(document.getElementById("alert-cta")).display;
+        o.rows = [...document.querySelectorAll("#alert-body .alert-row")].map((x) => x.dataset.code);
+        o.body = document.getElementById("alert-body").textContent;
+        o.note = document.getElementById("alert-note").textContent;
+        o.pctVal = document.querySelector('#alert-body .alert-row[data-code="2330"] input[data-k="pct"]').value;
+        document.querySelector('#alert-body .alert-row[data-code="0050"] input[data-k="below"]').value = "180";
+        await saveAlerts();
+        o.posted = posted;
+      } finally { window.liveFetch = saved.lf; window.fetch = saved.f; LIVE.url = saved.url; LIVE.configured = saved.conf; WL = saved.wl; }
+      return o;
+    });
+    if (r.ctaOff === "none") alertErrors.push("未連本機時應顯示 CTA");
+    if (r.bodyOff.trim()) alertErrors.push(`未連本機時不應顯示設定列：${r.bodyOff.slice(0, 60)}`);
+    if (r.ctaOn !== "none") alertErrors.push("已連線時 CTA 應隱藏");
+    if (JSON.stringify(r.rows) !== '["2330","0050"]') alertErrors.push(`只應列台股自選股：${JSON.stringify(r.rows)}`);
+    for (const k of ["漲跌幅", "漲到", "跌到", "事件前一日", "今日已推"]) if (!r.body.includes(k)) alertErrors.push(`設定列缺「${k}」`);
+    if (r.pctVal !== "3") alertErrors.push(`既有規則未回填：pct=${r.pctVal}`);
+    if (!r.note.includes("AAPL") || !r.note.includes("暫不支援")) alertErrors.push(`美股應誠實說明暫不支援：${r.note.slice(0, 120)}`);
+    if (!r.note.includes("每檔每日最多一則") || !r.note.includes("非投資建議")) alertErrors.push(`說明缺每日上限或非投資建議：${r.note.slice(0, 120)}`);
+    let pj = null; try { pj = JSON.parse(r.posted || "null"); } catch (e) { /* 下面會判失敗 */ }
+    if (!pj || !pj.rules || !pj.rules["2330"] || pj.rules["2330"].above !== 1200 || !pj.rules["2330"].event || !pj.rules["0050"] || pj.rules["0050"].below !== 180)
+      alertErrors.push(`儲存的規則內容不符：${r.posted}`);
+  } catch (e) { alertErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("76. 設定頁到價與事件推播（未連本機顯示 CTA；台股自選股可設漲跌幅±X%／漲到／跌到／事件前一日；美股誠實寫暫不支援；儲存整份 POST /alerts/rules）", alertErrors.length === 0, alertErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

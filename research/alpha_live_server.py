@@ -1393,6 +1393,70 @@ async def post_push_test(x_alpha_local_token: str | None = Header(default=None))
             "subscriptions": r.get("subscriptions", 0), "errors": r.get("errors", [])[:5]}
 
 
+# 常備.開發-18：自選股到價與事件推播。規則由 App 設定頁 POST 進來（存 AUTO_TRADING_DIR），
+# 背景迴圈盤中每 60 秒檢查一次（research/price_alerts.py），走既有 Web Push，每檔每日最多一則。
+# 只讀報價、只送推播，沒有任何下單能力。迴圈自身任何失敗只印警告（CLAUDE.md 第十二節）。
+PRICE_ALERT_INTERVAL_SEC = 60
+_price_alert_last: dict = {}
+
+
+def _price_alerts():
+    import price_alerts  # research/ 同目錄；延後載入，壞掉只影響推播提醒
+    return price_alerts
+
+
+def _live_quotes_for_alerts() -> dict | None:
+    """只回「常駐行程即時」台股報價（記憶體或新鮮熱檔）；只有冷檔時回 None——不拿昨收判斷今天漲跌。"""
+    snap = _combined_snapshot().get("sinopac") or {}
+    if snap.get("source_mode") in ("tick-push-memory", "hot-file"):
+        return snap.get("quotes") or {}
+    return None
+
+
+async def _price_alert_loop() -> None:
+    global _price_alert_last
+    while True:
+        try:
+            pa = _price_alerts()
+            if pa.in_market_hours(datetime.now(TW_TZ)):
+                quotes = _live_quotes_for_alerts()
+                _price_alert_last = await asyncio.to_thread(pa.run_once, AUTO_TRADING_DIR, quotes)
+                if _price_alert_last.get("sent"):
+                    print(f"  [到價推播] {len(_price_alert_last['sent'])} 則："
+                          + "、".join(f"{s['code']}/{s['kind']}" for s in _price_alert_last["sent"]), flush=True)
+                if not _price_alert_last.get("ok"):
+                    print(f"[warn] 到價推播檢查失敗：{_price_alert_last.get('errors')}", flush=True)
+        except Exception as e:  # noqa: BLE001 — 守門員失敗只降級，不得拖垮常駐服務
+            print(f"[warn] 到價推播迴圈例外：{type(e).__name__}: {e}", flush=True)
+        await asyncio.sleep(PRICE_ALERT_INTERVAL_SEC)
+
+
+@app.on_event("startup")
+async def _start_price_alert_loop() -> None:
+    asyncio.get_event_loop().create_task(_price_alert_loop())
+
+
+@app.get("/alerts/rules")
+async def get_alert_rules(x_alpha_local_token: str | None = Header(default=None)):
+    _check_token(x_alpha_local_token)
+    st = _price_alerts().status(AUTO_TRADING_DIR)
+    return {"ok": True, **st, "live_quotes": _live_quotes_for_alerts() is not None,
+            "last_result": {k: _price_alert_last.get(k) for k in ("checked", "sent", "errors")} if _price_alert_last else None}
+
+
+@app.post("/alerts/rules")
+async def post_alert_rules(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    """payload: {"rules": {"2330": {"pct": 3, "above": 1200, "below": null, "event": true}}}。整份覆蓋。"""
+    _check_token(x_alpha_local_token)
+    try:
+        rules = _price_alerts().save_rules(AUTO_TRADING_DIR, payload)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"寫入提醒規則失敗：{type(e).__name__}") from e
+    return {"ok": True, "rules": rules}
+
+
 async def _kbars_via_daemon(code: str) -> dict | None:
     """向常駐行程查當日 1 分K。查得到回結果 dict，查不到回 None（讓呼叫端走既有的 404）。
 

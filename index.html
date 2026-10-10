@@ -1375,6 +1375,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="notif-note" style="margin-top:8px">需連線本機伺服器才能讀取／修改（設定存在本機伺服器，所有已訂閱裝置共用）。</div>
     </div>
 
+    <!-- 常備.開發-18（2026-10-11）：自選股到價與事件推播。規則存本機伺服器（/alerts/rules），
+         alpha_live_server 盤中每分鐘檢查、走既有 Web Push，每檔每日最多一則。未連線本機時只顯示 CTA。 -->
+    <div class="card" id="alert-card">
+      <h3>到價與事件推播（自選股）</h3>
+      <div class="cta-line" id="alert-cta" onclick="alertGoLive()">連線本機伺服器才能設定 →<span>提醒由你電腦上的本機伺服器盤中每分鐘檢查</span></div>
+      <div id="alert-body"></div>
+      <div class="note" id="alert-note" style="margin-top:8px">每檔每日最多一則；只在台股盤中（週一～週五 09:00–13:30）檢查。非投資建議。</div>
+    </div>
+
     <div class="card">
       <h3>自選股</h3>
       <div class="note" style="margin-bottom:10px">目前 <b id="set-wl-count" style="color:var(--ink)">—</b> 檔（可混台股／美股）</div>
@@ -6105,6 +6114,83 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){console.warn('[toggleNotif]',e);recordGlobalError('toggleNotif',e);if(note)note.textContent='修改失敗：'+(e&&e.message||e)}
   }
 
+  // 常備.開發-18：到價與事件推播。只支援台股（本機盤中即時報價只有 Shioaji 台股）；美股自選股列在說明裡、不假裝支援。
+  // 規則整份 POST 給本機伺服器（research/price_alerts.py 驗證），App 不自己判斷觸發。
+  const ALERT_TW_RE=/^\d{4,6}[A-Z]?$/;
+  let ALERT_RULES={};
+  function alertGoLive(){
+    const el=document.getElementById('live-discovery');const card=el&&el.closest('.card');
+    if(card)card.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function renderAlerts(d){
+    const body=document.getElementById('alert-body'),cta=document.getElementById('alert-cta'),note=document.getElementById('alert-note');
+    if(!body)return;
+    if(!d){if(cta)cta.style.display='';body.innerHTML='';return}
+    if(cta)cta.style.display='none';
+    const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const tw=WL.filter(c=>ALERT_TW_RE.test(c)),us=WL.filter(c=>!ALERT_TW_RE.test(c));
+    ALERT_RULES=d.rules||{};
+    const fired=d.fired||{};
+    const KIND={pct:'漲跌幅',above:'漲到價',below:'跌到價',event:'事件前一日'};
+    const inp='style="width:62px;background:var(--surface);border:1px solid var(--hairline);border-radius:6px;padding:4px 6px;color:var(--ink);font-family:inherit;font-size:12px"';
+    const v=x=>x==null?'':esc(x);
+    let h='';
+    if(!tw.length)h+='<div class="note">自選股裡沒有台股，無可設定的標的。</div>';
+    tw.forEach(c=>{
+      const r=ALERT_RULES[c]||{};const f=fired[c];
+      h+='<div class="alert-row" data-code="'+esc(c)+'" style="padding:8px 0;border-bottom:1px solid var(--hairline)">'
+        +'<div style="display:flex;justify-content:space-between;font-size:13px"><b>'+esc(c)+'</b>'
+        +(f?'<span style="font-size:11px;color:var(--ink-3)">今日已推（'+esc(KIND[f.kind]||f.kind)+'）</span>':'')+'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:11.5px;color:var(--ink-2)">'
+        +'<label>漲跌幅 ±<input type="number" step="0.1" min="0" data-k="pct" value="'+v(r.pct)+'" '+inp+'>%</label>'
+        +'<label>漲到 <input type="number" step="0.01" min="0" data-k="above" value="'+v(r.above)+'" '+inp+'></label>'
+        +'<label>跌到 <input type="number" step="0.01" min="0" data-k="below" value="'+v(r.below)+'" '+inp+'></label>'
+        +'<label><input type="checkbox" data-k="event"'+(r.event?' checked':'')+'> 事件前一日</label>'
+        +'</div></div>';
+    });
+    if(tw.length)h+='<button class="btn" style="width:100%;margin-top:10px" onclick="saveAlertsClick()">儲存提醒設定</button>';
+    body.innerHTML=h;
+    if(note){
+      const parts=['每檔每日最多一則；只在台股盤中（週一～週五 09:00–13:30）每分鐘檢查。非投資建議。'];
+      if(us.length)parts.push('美股（'+us.join('、')+'）暫不支援：本機盤中即時報價只有台股。');
+      parts.push(d.live_quotes?'本機即時報價：有。':'本機即時報價：目前沒有（盤後或常駐行程未啟動），盤中只會發事件類提醒。');
+      if(d.last_check)parts.push('上次檢查 '+String(d.last_check).slice(11,16)+'。');
+      note.textContent=parts.join(' ');
+    }
+  }
+  async function loadAlerts(){
+    const note=document.getElementById('alert-note');
+    if(!LIVE.configured||!LIVE.url){renderAlerts(null);return}
+    try{
+      const r=await liveFetch('/alerts/rules',6000);
+      if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器是舊版，需重啟）':''));
+      renderAlerts(await r.json());
+    }catch(e){console.warn('[loadAlerts]',e);recordGlobalError('loadAlerts',e);renderAlerts(null);if(note)note.textContent='讀取提醒設定失敗：'+(e&&e.message||e)}
+  }
+  function collectAlertRules(){
+    const rules={};
+    document.querySelectorAll('#alert-body .alert-row').forEach(row=>{
+      const c=row.dataset.code,r={pct:null,above:null,below:null,event:false};
+      row.querySelectorAll('input').forEach(i=>{
+        if(i.dataset.k==='event')r.event=i.checked;
+        else if(i.value.trim()!=='')r[i.dataset.k]=Number(i.value);
+      });
+      if(r.pct||r.above||r.below||r.event)rules[c]=r;
+    });
+    return rules;
+  }
+  function saveAlertsClick(){_safeAsync('saveAlerts',saveAlerts)}
+  async function saveAlerts(){
+    const note=document.getElementById('alert-note');
+    try{
+      if(!LIVE.configured||!LIVE.url)throw new Error('尚未連線本機伺服器');
+      const r=await fetch(LIVE.url+'/alerts/rules',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({rules:collectAlertRules()}),credentials:'include'});
+      if(!r.ok){let m='HTTP '+r.status;try{const j=await r.json();if(j&&j.detail)m=j.detail}catch(e2){console.warn('[saveAlerts:detail]',e2)}throw new Error(m)}
+      toast('已儲存提醒設定');
+      await loadAlerts();
+    }catch(e){console.warn('[saveAlerts]',e);recordGlobalError('saveAlerts',e);if(note)note.textContent='儲存失敗：'+(e&&e.message||e)}
+  }
+
   function readBroker(){try{const s=localStorage.getItem('alpha_broker');return s?JSON.parse(s):{tw:'',us:''}}catch(e){console.warn('[readBroker]',e);recordGlobalError('readBroker',e);return{tw:'',us:''}}}
   function loadBroker(){
     const b=readBroker();
@@ -6849,7 +6935,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   }
 
   function hydrateSettings(){
-    _safeAsync('loadRiskLimits',loadRiskLimits);_safeAsync('loadNotif',loadNotif);loadBroker();
+    _safeAsync('loadRiskLimits',loadRiskLimits);_safeAsync('loadNotif',loadNotif);_safeAsync('loadAlerts',loadAlerts);loadBroker();
     setTxt('set-wl-count',WL.length);
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
     setTxt('set-cache-count',cacheCount+' 筆快取');
@@ -9036,7 +9122,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0220';
+  const APP_VERSION='2026-10-11.0228';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
