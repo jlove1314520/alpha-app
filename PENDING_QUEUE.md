@@ -18744,3 +18744,22 @@ App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「�
 - [x] **先.六十一-1 adjustment_anomaly_warnings 移到 data/adjustment_anomalies.json；STATUS.json 只留 n_warnings＋連結；STATUS.json <100 KB＋冒煙上限檢查**（互動視窗執行）〔2026-10-10 完成：generate_status_json.py::write_adjustment_anomalies 把明細（1,953 筆）寫到 data/adjustment_anomalies.json（含 generated_at、n_warnings）；STATUS.json 只留 n_warnings／file／generated_at／note；STATUS.json 446 KB→72 KB；冒煙 65 檢查 <100 KB〕
 - [x] **先.六十一-2 data/adjustment_anomalies.json 列入 market.yml git add 清單（十節，commit 訊息註明）**（互動視窗執行）〔2026-10-10 完成：market.yml git add 清單已加 data/adjustment_anomalies.json（緊接 data/STATUS.json），commit 訊息註明〕
 - [x] **先.六十一-3 App 異常警告改讀新檔；smoke 全套＋commit 回報**（互動視窗執行）〔2026-10-10 完成：原本 App 沒有任何地方讀異常警告（STATUS.json 這欄只給人看）；[自行裁量] 在設定頁「資料健康」卡新增一行讀新檔，顯示筆數與彙整時間；冒煙全綠 64 PASS〕
+
+
+---
+
+# 2026-10-11【先.六十二：DevQueue 守門員誤判修正（十二節：守門員失敗只能降級）】（總司令裁示原文，動工前先寫入）
+
+```
+【先.六十二】DevQueue 守門員誤判修正（十二節：守門員失敗只能降級）
+1. dev_queue_runner.py NEEDS_USER／IRREVERSIBLE：改為只比對條目的「標題與做法」句，排除「不接／不用／不得／不做／無需／非」後面 8 個字內的命中，並排除〔來源：…〕〔現況：…〕這類描述性括號。補 selftest：「不接付費模型」「刪除舊清單的本機 localStorage 鍵」「Gateway 需登入時只顯示 CTA」三句都不得觸發；「請總司令登入」「採購資料」仍須觸發。
+2. 解除三項誤標：常備.開發-2 改回 `- [ ]`；-8、-9 的說明改寫避開保留字（例如「移除」改「下架」、「登入」改「連線」），並在 PENDING_QUEUE 檔頭保留字表新增「付費／刪除／登入／核准」的替代寫法。
+3. 新增守門員自檢：每輪自走開始時，對所有 `- [ ]` 項目預跑兩組偵測並印出會被擋的清單；命中者只印警告，不改標記，由互動視窗下一輪處理。
+4. smoke＋selftest，commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.六十二-1 NEEDS_USER／IRREVERSIBLE 只比對標題與做法句；排除否定詞後 8 字內命中與〔來源／現況〕描述括號；補 selftest 五句**（互動視窗執行）
+- [ ] **先.六十二-2 解除誤標：常備.開發-2 改回 - [ ]；-8、-9 改寫避開保留字；檔頭保留字表新增替代寫法**（互動視窗執行）
+- [ ] **先.六十二-3 守門員自檢：每輪自走開始時預跑兩組偵測、只印會被擋清單，不改標記**（互動視窗執行）
+- [ ] **先.六十二-4 smoke＋selftest＋commit 回報**（互動視窗執行）
