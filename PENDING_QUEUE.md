@@ -18641,6 +18641,6 @@ C. R2：勝算估計（描述性，不登記為試驗）
 - [x] **先.五十八-A1 先.二十二②接受結案＋#414 註記＋先.二十四 結案＋AWAITING_REVIEW**（互動視窗執行）〔2026-10-10 完成，commit fbff2ab79，等待審閱 3→1〕
 - [x] **先.五十八-A2 每日價格更新：白名單缺漏自動改單股端點補當日、補不到則 App＋推播警告＋selftest**（互動視窗執行）〔2026-10-10 完成：update_price_history.py 新增 fill_whitelist_gaps（當日＋最近 5 個交易日，只補不覆蓋，逐筆標 source=twse_stock_day／tpex_trading_stock）→ data/whitelist_price_status.json（已加入 market.yml git add 清單）→ App 紅條（AUTO_BAN.px）＋每晚 20:00 preflight_reminder 推播；selftest_whitelist_price_fill 12/12 PASS；兩端點實測 10/8 資料正常；smoke 全綠〕
 - [!] **先.五十八-A3 shioaji_quotes build sha 確認**〔時間閘：2026-10-12 08:30 後；同先.五十七-A1b〕（互動視窗執行）
-- [ ] **先.五十八-B R1 預登記→單發→控制組→8 市場複製→判定（凍結.二 對本項解除）**（互動視窗執行：分身處理，DevQueue 勿派）
-- [ ] **先.五十八-C R2 勝算估計（描述性）＋破億路徑卡連結**（互動視窗執行：分身處理，DevQueue 勿派）
+- [x] **先.五十八-B R1 預登記→單發→控制組→8 市場複製→判定（凍結.二 對本項解除）**（互動視窗執行：分身處理，DevQueue 勿派）　→ 2026-10-10 完成：預登記 #429（docs/PREREG_R1_0050_credit_gate.md，SHA256 7654ec95…7609b，commit 536a7505a）；結果 #430：R1-A（70/30→現金）PASS 年化13.82%／MDD−43.5%、R1-C（50/50→現金）PASS 15.13%／−36.2%，控制組百分位 99.9／100.0、複製 8/8；R1-B、R1-D VIOLATES_SURVIVAL；0050 11.61%／−55.75%；無樣本外。紙.四 草案 docs/PAPER_4_R1_DRAFT.md（不建程式、不加排程、不接下單）；已推播。
+- [x] **先.五十八-C R2 勝算估計（描述性）＋破億路徑卡連結**（互動視窗執行：分身處理，DevQueue 勿派）　→ 2026-10-10 完成：research/WIN_PROBABILITY_2026-10.md（區塊 12 個月×10,000 次）；任意 10 年勝 0050：R1-A 85.4%、R1-C 84.1%、S3-C6 55.6%、Bb-90 34.5%；破億參數 repo 無真實值→用 App 卡預設示例；破億卡連結已上線（smoke 56 PASS／0 FAIL）；已推播。
 - [ ] **先.五十八-8 推播＋smoke＋selftest＋commit 回報**（互動視窗執行）
