@@ -18717,7 +18717,7 @@ C. 資料新鮮度
 App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「完成」定義）。不得切換自動交易模式、不得觸發真錢委託。
 
 - [x] **常備.開發-1 STATUS.json 頂層 updated_at／any_overdue 每次排程寫入時更新**〔心跳：PENDING_QUEUE 本行＋PROGRESS_HEARTBEAT；驗收：local_schedule_watchdog 每 30 分鐘、market.yml 每次排程後 data/STATUS.json 的 updated_at 在 1 小時內、頂層有 any_overdue〕〔2026-10-10 已隨先.六十-C9 完成：check_local_schedule_heartbeat.py::_refresh_top_level＋market.yml「更新 STATUS.json（先.六十-C9）」步驟〕
-- [ ] **常備.開發-2 AI 盤前日報與週覆盤（本地規則生成，不接付費模型）**〔來源：既有 data/news.json＋data/events.json（＋週覆盤用 /auto/ledger 與 data/paper_*.json）；做法：新增 .github/scripts/build_daily_brief.py 以固定規則（事件日曆、昨夜美股與台指期變動、自選股重大訊息計數）產出 data/daily_brief.json，掛 market.yml 並加進 git add 清單（十節）；App 今日頁「AI 盤前日報」與日誌頁「AI 週覆盤」改讀它，標「規則摘要，非 AI 判斷、非投資建議」；完成後刪掉 data/placeholder_allowlist.json 對應兩條登記。心跳：本行＋PROGRESS_HEARTBEAT；驗收：daily_brief.json 每交易日更新、App 兩張卡不再顯示「功能建置中」、冒煙 45b 全綠〕
+- [!] **常備.開發-2 AI 盤前日報與週覆盤（本地規則生成，不接付費模型）**〔來源：既有 data/news.json＋data/events.json（＋週覆盤用 /auto/ledger 與 data/paper_*.json）；做法：新增 .github/scripts/build_daily_brief.py 以固定規則（事件日曆、昨夜美股與台指期變動、自選股重大訊息計數）產出 data/daily_brief.json，掛 market.yml 並加進 git add 清單（十節）；App 今日頁「AI 盤前日報」與日誌頁「AI 週覆盤」改讀它，標「規則摘要，非 AI 判斷、非投資建議」；完成後刪掉 data/placeholder_allowlist.json 對應兩條登記。心跳：本行＋PROGRESS_HEARTBEAT；驗收：daily_brief.json 每交易日更新、App 兩張卡不再顯示「功能建置中」、冒煙 45b 全綠〕　**⛔ 自走中止（2026-10-10 23:16）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
 - [ ] **常備.開發-3 持倉損益卡（首頁）**〔來源：本機 /live/positions（Shioaji 唯讀）＋data/price_history.json；做法：首頁總資產卡下方列各持股股數、成本、市值、未實現損益（只在本機伺服器連線時顯示，不進 repo、不印帳號）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙新增一項用假回應驗顯示、無連線時顯示說明而非空白〕
 - [ ] **常備.開發-4 上櫃／金融股財報接 TPEx／MOPS**〔現況：個股頁財報只涵蓋 TWSE 上市一般業（t187ap06_L_ci／07_L_ci）；做法：先照七節「三來源查證」查 TPEx openapi 與 MOPS 官方開放資料是否有上櫃一般業與金融業綜合損益表／資產負債表端點，查證紀錄寫進 docs/DATA_SOURCE_MAP.md，再擴充 .github/scripts/update_stock_financials.py；頻率上限先寫進 C:\alpha\CLAUDE.md 清單；心跳：本行＋PROGRESS_HEARTBEAT；驗收：抽 3 檔上櫃、3 檔金融股個股頁財報有數字且 source 標記正確〕
 - [ ] **常備.開發-5 美股事件時間軸（SEC 8-K／財報日）**〔來源：SEC EDGAR（10 req/秒上限，沿用 0.2 秒間隔）＋data/earnings_calendar.json；做法：個股頁事件分頁美股改顯示近 90 天 8-K 項目與下一次財報日；完成後刪掉 placeholder_allowlist 對應登記；心跳：本行＋PROGRESS_HEARTBEAT；驗收：AAPL／NVDA 事件分頁有時間軸、無資料代號顯示原因〕
@@ -18727,3 +18727,20 @@ App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「�
 - [ ] **常備.開發-9 ibkr_quotes 排程化**〔現況：ibkr_quotes.py 需手動啟動；做法：比照 AlphaShioajiQuotes 建 Windows 工作排程器任務（登入後啟動、失敗自動重試），每週日 ET 01:00 權杖失效仍需人工登入（CLAUDE.md IBKR 節），App 已有逾期標示；建排程屬本機設定變更，先寫提案給總司令核准再建（提案先於執行）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：開機後 quotes_ibkr.json 在美股盤中 30 分鐘內有更新〕
 - [ ] **常備.開發-10 /live 美股 1 分 K 501 改為誠實說明**〔現況：個股頁切「1分K(即時)」查美股時伺服器回 501，App 顯示不清楚；做法：App 收到 501 時改顯示「美股 1 分 K 尚未提供（IBKR 連線衝突未確認），請看日線」，伺服器不改；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙用假 501 回應驗文字〕
 - [!] **常備.開發-因子類 B18～B22、B30～B32**〔BLOCKED：凍結.二（CLAUDE.md 十四節）——轉向.一 結果出來前不得登記為新試驗、不得開新搜尋輪次；解除：PENDING_QUEUE「轉向.一」條目寫明「凍結.二解除」後，逐項改回 - [ ] 並各自補心跳位置與驗收條件〕
+
+
+---
+
+# 2026-10-10【先.六十一：STATUS.json 瘦身（不碰自動交易）】（總司令裁示原文，動工前先寫入）
+
+```
+【先.六十一】STATUS.json 瘦身（不碰自動交易）
+1. generate_status_json.py：adjustment_anomaly_warnings 改寫到 data/adjustment_anomalies.json（含 n_warnings 與最後更新時間），STATUS.json 只保留 n_warnings 與檔案連結。目標 STATUS.json <100 KB，補冒煙檢查上限。
+2. 確認 data/adjustment_anomalies.json 在 market.yml 的 git add 清單內（十節），commit 訊息註明。
+3. App 讀取異常警告的地方改讀新檔；smoke 全套，commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.六十一-1 adjustment_anomaly_warnings 移到 data/adjustment_anomalies.json；STATUS.json 只留 n_warnings＋連結；STATUS.json <100 KB＋冒煙上限檢查**（互動視窗執行）
+- [ ] **先.六十一-2 data/adjustment_anomalies.json 列入 market.yml git add 清單（十節，commit 訊息註明）**（互動視窗執行）
+- [ ] **先.六十一-3 App 異常警告改讀新檔；smoke 全套＋commit 回報**（互動視窗執行）
