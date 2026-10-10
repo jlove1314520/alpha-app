@@ -674,3 +674,4 @@
 {"ts": "2026-10-10T23:47:30+08:00", "track": "interactive", "round": "先.六十一", "note": "STATUS.json 446KB→72KB：還原價異常明細移到 data/adjustment_anomalies.json；market.yml git add；設定頁讀新檔；冒煙65"}
 {"ts": "2026-10-10T23:56:38+08:00", "track": "interactive", "round": "先.六十二", "note": "DevQueue 守門員只比對標題＋做法句、排除否定詞／條件句／可重建刪除；guard_precheck 每輪預檢只警告；常備.開發-2 解除誤標、-8/-9 改寫；檔頭保留字表；selftest 22/22"}
 {"ts": "2026-10-11T00:02:27+08:00", "track": "interactive", "round": "先.六十三", "note": "常備.開發-11～-22 插入常備.開發區（-10 之後）並附心跳；守門員預檢全部不擋；常備.開發 - [ ] 共 21 項"}
+{"ts": "2026-10-11T00:05:27+08:00", "track": "marathon", "round": "marathon-yield-0005", "item": "讓行：交辦佇列 - [ ] 皆為 DevQueue（常備.開發-2～-22，-2 進行中）與互動視窗（先.六十四）項目；凍結.二 期間不開新 alpha 試驗", "artifacts_changed": ["research/PROGRESS_HEARTBEAT.jsonl"], "note": "交辦佇列未開始 - [ ] 約 30 行(含重複列)；本軌不碰以免與 DevQueue 撞檔"}
