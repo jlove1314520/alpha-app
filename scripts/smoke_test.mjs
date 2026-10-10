@@ -627,12 +627,10 @@ async function runSmokeTest(baseUrl, headless = true) {
   try {
     await page.evaluate((code) => window.openStock(code), "AAPL");
     await page.waitForTimeout(300);
-    await page.evaluate(() => document.querySelector(".buy-cta .btn.buy").click());
+    await page.evaluate(() => document.getElementById("buy-cta-us-buy").click());
     await page.waitForTimeout(2500);
     const usSheetOpen = await page.evaluate(() => document.getElementById("ibkr-sheet")?.classList.contains("open"));
-    const twSheetOpenWrong = await page.evaluate(() => document.getElementById("sheet")?.classList.contains("open"));
     if (!usSheetOpen) ibkrUiErrors.push("美股按買進後，#ibkr-sheet沒有打開");
-    if (twSheetOpenWrong) ibkrUiErrors.push("美股按買進後，台股示範版#sheet竟然也開了（分工鐵律破功）");
     const healthText = await page.evaluate(() => document.getElementById("ibkr-health")?.textContent || "");
     if (!healthText || (!healthText.includes("未啟動") && !healthText.includes("失敗"))) {
       ibkrUiErrors.push(`測試環境沒有真的啟動ibkr_order_server.py，連線狀態應顯示未啟動/失敗訊息，實際："${healthText}"`);
@@ -644,15 +642,11 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!resultText.includes("token")) ibkrUiErrors.push(`沒填token應該被前端擋下並提示，實際訊息："${resultText}"`);
     await page.evaluate(() => window.closeIbkrSheet());
 
+    // 先.六十-A1：台股假下單抽屜已移除；台股個股頁不得出現 IBKR 下單鈕（分工鐵律：IBKR 下單卡只給美股）
     await page.evaluate(() => window.openStock("2330"));
     await page.waitForTimeout(300);
-    await page.evaluate(() => document.querySelector(".buy-cta .btn.buy").click());
-    await page.waitForTimeout(300);
-    const twSheetOpen = await page.evaluate(() => document.getElementById("sheet")?.classList.contains("open"));
-    const ibkrSheetOpenWrong = await page.evaluate(() => document.getElementById("ibkr-sheet")?.classList.contains("open"));
-    if (!twSheetOpen) ibkrUiErrors.push("台股按買進後，原本的示範版#sheet沒有打開（回歸壞掉）");
-    if (ibkrSheetOpenWrong) ibkrUiErrors.push("台股按買進後，IBKR下單卡片#ibkr-sheet竟然也開了（分工鐵律破功）");
-    await page.evaluate(() => window.closeSheet());
+    const twIbkrBtnShown = await page.evaluate(() => { const b = document.getElementById("buy-cta-us-buy"); return !!b && getComputedStyle(b).display !== "none"; });
+    if (twIbkrBtnShown) ibkrUiErrors.push("台股個股頁竟然顯示 IBKR 下單鈕（分工鐵律破功）");
   } catch (e) {
     ibkrUiErrors.push(`測試本身出錯：${e.message || e}`);
   }
@@ -1462,6 +1456,38 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("45. 個股頁（總覽/營收/財報/籌碼/AI五分頁）不得殘留「尚未實作/下一輪/本輪」佔位字",
     stockPagePlaceholderErrors.length === 0, stockPagePlaceholderErrors.join("; "));
 
+  // 45b.【2026-10-10 先.六十-A6】全 repo 掃描「功能建置中／尚未串接／原型階段」：用 git grep 掃所有追蹤檔，
+  // 每一行命中都必須在 data/placeholder_allowlist.json 登記（path 相同，match 為 "*" 或該行包含 match），否則 FAIL。
+  // 目的：假功能（例如先.六十 移除的台股假下單抽屜、規劃中機器人卡）不能再用「誠實佔位」字樣躲過檢查。
+  const repoPlaceholderErrors = [];
+  let repoPlaceholderInfo = "";
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const fs = await import("node:fs");
+    const allow = JSON.parse(fs.readFileSync("data/placeholder_allowlist.json", "utf8"));
+    const pats = allow.patterns || [];
+    let out = "";
+    try {
+      out = execFileSync("git", ["grep", "-n", "-I", "-E", pats.join("|")], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    } catch (e) {
+      if (e.status !== 1) throw e;  // git grep 沒有任何命中時 exit 1，不是錯誤
+    }
+    const hits = out.split(/\r?\n/).filter(Boolean).map((l) => {
+      const m = l.match(/^(.*?):(\d+):(.*)$/);
+      return m ? { path: m[1], line: +m[2], text: m[3] } : null;
+    }).filter(Boolean);
+    const used = new Set();
+    for (const h of hits) {
+      const idx = (allow.entries || []).findIndex((e) => e.path === h.path && (e.match === "*" || h.text.includes(e.match)));
+      if (idx < 0) repoPlaceholderErrors.push(`${h.path}:${h.line} 未登記：${h.text.trim().slice(0, 70)}`);
+      else used.add(idx);
+    }
+    const unused = (allow.entries || []).filter((e, i) => !used.has(i) && e.match !== "*").map((e) => `${e.path}「${e.match}」`);
+    repoPlaceholderInfo = `命中 ${hits.length} 行、登記 ${(allow.entries || []).length} 條` + (unused.length ? `；已無命中可刪的登記：${unused.join("、")}` : "");
+    if ((allow.entries || []).some((e) => !e.reason)) repoPlaceholderErrors.push("allowlist 有條目缺 reason");
+  } catch (e) { repoPlaceholderErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("45b. 全 repo「功能建置中／尚未串接／原型階段」每一處都已在 data/placeholder_allowlist.json 登記理由", repoPlaceholderErrors.length === 0, repoPlaceholderErrors.slice(0, 8).join("; ") || repoPlaceholderInfo);
+
   // 46.【2026-09-10新增，健檢.四驗收】三份選股榜單（scores/scores_momentum/
   // scores_future）裡，官方在市名冊內的股票，row.industry 覆蓋率必須≥95%——
   // 個股頁「所屬產業」欄位（index.html「所屬產業」/report-industry）本來就有
@@ -1975,10 +2001,101 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { p4Errors.push(`測試本身出錯：${e.message || e}`); }
   record("61. 紙.四 卡存在且固定揭露文字（回測 15.1%／−36.2%、樣本外 13／21 月關閉、無樣本外驗證）", p4Errors.length === 0, p4Errors.join("; "));
 
+  // 62.【2026-10-10 先.六十-A1／A6】不得存在台股假下單：confirmOrder 函式、#sheet 假抽屜、「委託已送出」假成功字樣都不得存在；
+  // 台股個股頁只顯示唯讀說明（沒有買進／賣出鈕），美股個股頁仍是 IBKR 模擬帳戶下單卡。
+  const fakeOrderErrors = [];
+  try {
+    const fs = await import("node:fs");
+    const src = fs.readFileSync("index.html", "utf8");
+    if (/function\s+confirmOrder\b/.test(src)) fakeOrderErrors.push("index.html 仍有 function confirmOrder");
+    if (/委託已送出\s*·\s*\d{2}:\d{2}/.test(src)) fakeOrderErrors.push("index.html 仍有寫死時間的「委託已送出」假成功字樣");  // IBKR Paper 真送單後的回報 toast 不算
+    if (/id="sheet"/.test(src)) fakeOrderErrors.push("index.html 仍有 #sheet 假下單抽屜");
+    const r = await page.evaluate(async () => {
+      const o = { cf: typeof window.confirmOrder, ots: typeof window.openTradeSheet };
+      window.openStock("2330"); await new Promise((f) => setTimeout(f, 400));
+      const vis = (id) => { const el = document.getElementById(id); return !!el && getComputedStyle(el).display !== "none"; };
+      o.twNote = vis("buy-cta-tw"); o.twBuy = vis("buy-cta-us-buy");
+      o.twTxt = (document.getElementById("buy-cta-tw") || {}).textContent || "";
+      window.openStock("AAPL"); await new Promise((f) => setTimeout(f, 400));
+      o.usNote = vis("buy-cta-tw"); o.usBuy = vis("buy-cta-us-buy");
+      return o;
+    });
+    if (r.cf !== "undefined") fakeOrderErrors.push("window.confirmOrder 仍存在");
+    if (r.ots !== "undefined") fakeOrderErrors.push("window.openTradeSheet 仍存在");
+    if (!r.twNote || r.twBuy) fakeOrderErrors.push(`台股個股頁應只顯示唯讀說明（說明=${r.twNote}，買進鈕=${r.twBuy}）`);
+    if (!r.twTxt.includes("自動交易由 Bb-90 引擎執行")) fakeOrderErrors.push(`台股唯讀說明文字不符：${r.twTxt.slice(0, 60)}`);
+    if (r.usNote || !r.usBuy) fakeOrderErrors.push(`美股個股頁應顯示 IBKR 模擬下單鈕（說明=${r.usNote}，買進鈕=${r.usBuy}）`);
+  } catch (e) { fakeOrderErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("62. 不得存在台股假下單（confirmOrder／#sheet／「委託已送出」）；台股個股頁唯讀說明、美股維持 IBKR 模擬卡", fakeOrderErrors.length === 0, fakeOrderErrors.join("; "));
+
+  // 63.【2026-10-10 先.六十-A2／A3／A6】交易頁文案不得含「尚未串接任何真實券商」；不得再有策略 A/B/C 開關與 Kill Switch 按鈕；
+  // 關於／免責聲明要寫明「台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單」。
+  const tradeCopyErrors = [];
+  try {
+    const r = await page.evaluate(() => ({
+      trade: (document.getElementById("scr-trade") || {}).textContent || "",
+      killer: !!document.querySelector("#scr-trade .killer"),
+      switches: document.querySelectorAll("#trade-sub-bots .switch").length,
+      settings: (document.getElementById("scr-settings") || {}).textContent || "",
+      rc: !!document.getElementById("rc-daily-loss"),
+    }));
+    if (r.trade.includes("尚未串接任何真實券商")) tradeCopyErrors.push("交易頁仍含「尚未串接任何真實券商」");
+    if (r.killer) tradeCopyErrors.push("交易頁仍有 Kill Switch 按鈕（應統一由設定頁緊急停止負責）");
+    if (r.switches) tradeCopyErrors.push(`交易頁機器人分頁仍有 ${r.switches} 個開關`);
+    const want = "台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單";
+    const n = r.settings.split(want).length - 1;
+    if (n < 2) tradeCopyErrors.push(`設定頁（關於＋免責聲明）應至少出現 2 次「${want}」，實際 ${n} 次`);
+    if (r.settings.includes("原型階段")) tradeCopyErrors.push("設定頁仍寫「原型階段」");
+    if (r.rc) tradeCopyErrors.push("設定頁仍有引擎不讀的可編輯風控參數（rc-daily-loss）");
+  } catch (e) { tradeCopyErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("63. 交易頁無「尚未串接任何真實券商」、無 Kill Switch／策略開關；關於與免責聲明寫明 Bb-90 真錢自動執行、美股未串接下單", tradeCopyErrors.length === 0, tradeCopyErrors.join("; "));
+
+  // 64.【2026-10-10 先.六十-A2／A4／A5】機器人卡、日誌頁、風控唯讀、推播偏好：用假的本機伺服器回應（替換 liveFetch，不連網）驗顯示；
+  // 帳本無成交時顯示「首批尚未執行」；有成交時顯示本週／累計損益；畫面不得出現帳號樣式字串。
+  const ledgerUiErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured };
+      const status = { ok: true, mode: "LIVE_WITH_VETO", drill: false, stopped: false, status: {}, next_tranche: 1, tranche_total: 4,
+        next_run: { date: "2026-10-12", time: "09:05", reason: "first_tranche" },
+        last_result: { date: "2026-10-08", batch: "202610-T1", counts: { REJECT: 1 }, reason_codes: ["INSUFFICIENT_CASH"] },
+        limits: { whitelist: ["0050", "00646", "00697B"], per_order_cap_twd: 123456, max_price_dev_pct: 1.0, max_data_age_days: 4, veto_minutes: 30 } };
+      let ledger = { ok: true, rows: [{ date: "2026-10-08", symbol: "全部", qty: 0, filled_qty: 0, avg_price: null, status: "REJECT", reason_codes: ["INSUFFICIENT_CASH"], batch: "202610-T1" }], first_batch_done: false, pnl: null };
+      const prefs = { ok: true, prefs: { veto: true, reject: true, complete: false, missed: true } };
+      window.liveFetch = async (p) => new Response(JSON.stringify(p === "/auto/status" ? status : p === "/auto/ledger" ? ledger : p === "/push/prefs" ? prefs : {}), { status: 200 });
+      LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+      const o = {};
+      try {
+        await loadTradeBots();
+        o.mode = document.getElementById("bot-mode").textContent; o.next = document.getElementById("bot-next").textContent; o.last = document.getElementById("bot-last").textContent;
+        await loadJournalLedger();
+        o.pnl0 = document.getElementById("journal-pnl").textContent; o.tr0 = document.getElementById("journal-trades").textContent;
+        ledger = { ok: true, rows: [{ date: "2026-10-12", symbol: "0050", qty: 1000, filled_qty: 1000, avg_price: 190.5, status: "FILLED", reason_codes: [], batch: "202610-T1" }], first_batch_done: true, pnl: { as_of: "2026-10-12", week_start: "2026-10-12", total: 1500, total_pct: 0.79, week: 1500 } };
+        await loadJournalLedger();
+        o.pnl1 = document.getElementById("journal-pnl").textContent; o.tr1 = document.getElementById("journal-trades").textContent;
+        await loadRiskLimits(); o.cap = document.getElementById("rl-cap").textContent;
+        await loadNotif(); o.notif = ["reject", "complete", "missed"].map((k) => document.getElementById("notif-" + k).classList.contains("on"));
+        o.veto = document.getElementById("notif-veto").classList.contains("on");
+      } finally { window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf; }
+      return o;
+    });
+    if (!r.mode.includes("真錢")) ledgerUiErrors.push(`機器人卡模式顯示不符：${r.mode}`);
+    if (!r.next.includes("10/12") || !r.next.includes("第 1")) ledgerUiErrors.push(`機器人卡下一期不符：${r.next}`);
+    if (!r.last.includes("拒單") || !r.last.includes("現金不足")) ledgerUiErrors.push(`機器人卡上次結果不符：${r.last}`);
+    if (!r.pnl0.includes("首批尚未執行")) ledgerUiErrors.push(`無成交時應顯示「首批尚未執行」：${r.pnl0.slice(0, 60)}`);
+    if (!r.tr0.includes("拒單")) ledgerUiErrors.push(`無成交時應列出拒單紀錄：${r.tr0.slice(0, 60)}`);
+    if (!r.pnl1.includes("本週") || !r.pnl1.includes("累計") || !r.pnl1.includes("+1,500")) ledgerUiErrors.push(`有成交時損益顯示不符：${r.pnl1.slice(0, 80)}`);
+    if (!r.tr1.includes("0050") || !r.tr1.includes("190.5")) ledgerUiErrors.push(`有成交時交易紀錄不符：${r.tr1.slice(0, 80)}`);
+    if (/\d{7,}/.test(r.tr0 + r.tr1)) ledgerUiErrors.push("交易紀錄出現 7 位以上連續數字（疑似帳號）");
+    if (!r.cap.includes("123,456")) ledgerUiErrors.push(`風控單次上限未顯示引擎實際值：${r.cap}`);
+    if (JSON.stringify(r.notif) !== "[true,false,true]" || !r.veto) ledgerUiErrors.push(`推播偏好顯示不符：${JSON.stringify(r.notif)} veto=${r.veto}`);
+  } catch (e) { ledgerUiErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("64. 機器人卡（模式／下一期／上次結果）、日誌頁（首批尚未執行／本週與累計損益）、風控唯讀實際值、推播偏好（否決窗固定開）", ledgerUiErrors.length === 0, ledgerUiErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

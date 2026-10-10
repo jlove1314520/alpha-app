@@ -35,6 +35,12 @@ TW = timezone(timedelta(hours=8))
 # 拒絕 .example 佔位信箱；改用本網址後 Apple 回 BadWebPushToken(400，假 token 的預期結果)，代表 JWT 已被接受。
 DEFAULT_SUBJECT = "https://jlove1314520.github.io"
 MAX_SUBS = 10
+# 先.六十-A5：App 設定頁「通知偏好」可關閉的推播類別（kind → 偏好鍵）。
+# 否決窗（veto_start）刻意不在表內：推播送不到時該批不執行，若允許關閉等於讓 App 開關間接擋掉交易，
+# 所以永遠送出、無法關閉。測試推播（test）與其他 info 類也不受偏好影響。
+PREFS_NAME = "push_prefs.json"
+PREF_KINDS = {"error": "reject", "complete": "complete", "watchdog": "missed"}
+PREF_DEFAULT = {"veto": True, "reject": True, "complete": True, "missed": True}
 
 
 def _b64u(b: bytes) -> str:
@@ -97,6 +103,44 @@ def load_subs(base: Path = DEFAULT_DIR) -> list:
         return [s for s in d.get("subscriptions", []) if isinstance(s, dict) and s.get("endpoint")]
     except Exception:
         return []
+
+
+def load_prefs(base: Path = DEFAULT_DIR) -> dict:
+    """讀推播類別偏好；讀不到或格式壞一律回預設（全開）——守門員失敗只降級，不得讓推播靜默消失。"""
+    out = dict(PREF_DEFAULT)
+    try:
+        d = json.loads((Path(base) / PREFS_NAME).read_text(encoding="utf-8"))
+        for k in ("reject", "complete", "missed"):
+            if isinstance(d.get(k), bool):
+                out[k] = d[k]
+    except Exception:
+        pass
+    out["veto"] = True
+    return out
+
+
+def save_prefs(base: Path, prefs: dict) -> dict:
+    cur = load_prefs(base)
+    for k in ("reject", "complete", "missed"):
+        if isinstance(prefs.get(k), bool):
+            cur[k] = prefs[k]
+    cur["veto"] = True
+    p = Path(base) / PREFS_NAME
+    p.parent.mkdir(parents=True, exist_ok=True)
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps({**cur, "updated_at": datetime.now(TW).isoformat(timespec="seconds")},
+                              ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(tmp, p)
+    return cur
+
+
+def muted(kind: str, base: Path = DEFAULT_DIR) -> bool:
+    """這個類別是否被使用者在 App 關閉。否決窗與不在表內的類別永遠 False。判斷失敗 → False（照常送）。"""
+    try:
+        key = PREF_KINDS.get(kind)
+        return bool(key) and load_prefs(base).get(key) is False
+    except Exception:
+        return False
 
 
 def _save_subs(base: Path, subs: list) -> None:
@@ -180,6 +224,10 @@ def send(title: str, body: str, kind: str = "info", base: Path = DEFAULT_DIR, ur
     """送給所有已訂閱裝置。永遠不拋例外。404／410（訂閱已失效）自動移除。"""
     res = {"ok": 0, "failed": 0, "errors": [], "subscriptions": 0}
     try:
+        if muted(kind, base):
+            res["muted"] = True
+            res["errors"].append("PREF_OFF:使用者已在 App 關閉此類推播")
+            return res
         vapid = load_vapid(env_path)
         if not vapid:
             res["errors"].append("NO_VAPID_KEY:本機 .env 沒有 VAPID 金鑰")

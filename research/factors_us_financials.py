@@ -230,6 +230,7 @@ def main() -> int:
 
     out = {
         "generated_at": datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds"),
+        "update_policy": "固定快照，不更新（非排程；先.六十-C9 標註，要更新需手動重跑本腳本）",
         "source": (
             "yfinance Ticker.financials（年度損益表）+ Ticker.cashflow（年度現金流量表），"
             "免金鑰。指標定義見本檔案docstring。"

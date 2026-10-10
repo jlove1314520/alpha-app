@@ -1,3 +1,19 @@
+## 2026-10-10 23:xx（互動視窗，開發帽）先.六十 App 全檢修補：假功能與矛盾、日誌接真錢帳本、常備 backlog
+
+等待總司令審閱：1 件（結案.一）。
+
+- **A1 假下單移除**：台股個股頁的假下單抽屜（寫死帳號／價格／風控、按下就顯示「已送出」）整段刪除。台股改成唯讀說明「自動交易由 Bb-90 引擎執行，見設定頁」。美股保留 IBKR 模擬帳戶下單鈕。「＋策略」按鈕直接移除，因為它原本只跳提示、沒寫任何清單。
+- **A2 交易頁**：三張「規劃中」機器人卡、策略 A/B/C 開關、停用的 Kill Switch 都拿掉了。改成一張 Bb-90 卡，讀 `/auto/status`，顯示目前模式、下一期、上次結果。「下一期」用引擎自己的 `should_run` 推算，所以和實際排程一致。策略卡點下去，會跳到策略監控台裡同一個策略的報告段落。
+- **A3 文案**：關於、免責聲明、券商帳戶、報告頁都改成「台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單」。
+- **A4 日誌接真錢帳本**：新增 `research/auto_ledger_view.py`，只讀、不寫檔，也不改引擎。`alpha_live_server.py` 新增 `GET /auto/ledger`，一定要帶 token。回傳欄位只有日期、代號、數量、均價、狀態、原因代碼、批次，不含委託書號、帳號、餘額。日誌頁顯示交易紀錄和本週、累計損益；還沒成交時顯示「首批尚未執行」。
+- **A5 設定頁**：原本的風控參數引擎根本不讀，已移除，改成唯讀顯示引擎實際限制。通知偏好改為真的控制推播類別（`/push/prefs`、`web_push.PREF_KINDS`）。否決窗推播固定開、不能關，因為推播送不到時該批就不執行。偏好檔如果壞掉，一律照常推播。
+- **A6 冒煙**：新增 45b，用 `git grep` 掃全 repo，凡出現「功能建置中／尚未串接／原型階段」，都要在 `data/placeholder_allowlist.json` 登記理由。另新增 62～64 三項。第 18 項配合 A1 調整。
+- **B7／B8**：PENDING_QUEUE 末尾新增「常備.開發」10 項，因子類標凍結.二。誤標阻塞的項目照裁示結案。紙.一 改成運行中。renormalize 實際執行後暫存區沒有任何變更，因為 index 裡的 .md 早已都是 LF。
+- **C9 新鮮度**：STATUS.json 頂層從 09-15 起就沒更新。現在每 30 分鐘排程（`check_local_schedule_heartbeat.py`）和 market.yml 每次排程，都會一起更新 updated_at／any_overdue。**這個 commit 在 market.yml 新增了會改寫 data/STATUS.json 的步驟，已確認 data/STATUS.json 在該 job 的 git add 清單裡（十節）。** 新鮮度卡上的三個大檔，改成只讀檔案開頭，取它自己的 generated_at。coverage／signal_status／company_info 在 App 上標資料日。us_financials 標「固定快照，不更新」。
+- **證據**：冒煙全部通過，共 63 項 PASS。自測：auto_ledger_view 17/17、auto_rebalance 240/240、web_push 20/20、claude_auth_launchers 22/22、paper_4 10/10、whitelist_price_fill 12/12。
+- **`[自行裁量]`**：①否決窗推播不開放關閉，原因是關掉等於讓 App 開關間接擋掉交易。②signal_status 不排程，原因是它是人工彙整，排程只會把時間改新、內容不變。③策略卡的「報告頁」解讀成策略監控台裡同一策略的報告段落（回測、前向、局限說明）。
+- **下一步**：依七之二節重啟 alpha_live_server 並驗證 build sha／CORS 預檢／stale_process。C7 等 10/12。
+
 ## 2026-10-10 21:xx（互動視窗，開發帽）先.五十九 A／B：紙.四 前進式紙上追蹤＋破億卡達標機率
 
 等待總司令審閱：1 件（結案.一）。紙.四 已由先.五十九 核准，移出待審。

@@ -935,13 +935,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </div>
 
     <div class="card" style="background:linear-gradient(155deg, rgba(216,176,112,.12), rgba(20,19,15,.6));border-color:rgba(216,176,112,.25)">
-      <h3>自動交易策略</h3>
+      <h3>分批進場試算（不下單）</h3>
       <div id="report-strategy" class="note"></div>
       <button class="press" style="width:100%;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold-grad);color:#1a1005;font-size:14px;font-weight:700;padding:14px;border-radius:14px;border:0" onclick="generateOrderPlan()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1a1005" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         產生下單計畫
       </button>
-      <div class="note" style="margin-top:8px;text-align:center">⚠️ 本按鈕只會產生並顯示下單計畫，<b>不會實際下單</b>；未串接任何真實券商 API；非投資建議。</div>
+      <div class="note" style="margin-top:8px;text-align:center">⚠️ 本按鈕只會產生並顯示下單計畫，<b>不會實際下單</b>；非投資建議。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單，本按鈕與之無關。</div>
       <div id="report-order-plan"></div>
     </div>
     <div style="text-align:center;font-size:10px;color:#5f5a52;padding:6px 0 4px">分數與報告僅為資料整理，非投資建議。投資有風險。</div>
@@ -1172,10 +1172,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
     </div>
 
+    <!-- 先.六十-A1（2026-10-10）：台股不提供手動下單（唯讀說明）；「＋策略」按鈕移除（原本只跳 toast、沒寫任何清單，屬假功能）。
+         美股維持既有 IBKR 模擬（Paper）帳戶下單卡，按鈕文字標明「模擬」。 -->
     <div class="buy-cta">
-      <button class="btn ghost" onclick="toast('已加入策略觀察清單')">＋策略</button>
-      <button class="btn sell" onclick="openTradeSheet('sell')">賣出</button>
-      <button class="btn buy" onclick="openTradeSheet('buy')">買進</button>
+      <div class="note" id="buy-cta-tw" style="flex:1;padding:10px 12px;border:1px solid var(--hairline);border-radius:12px;line-height:1.6">台股自動交易由 Bb-90 引擎執行（真錢，附否決窗），本頁不提供手動下單。<span class="press" style="color:var(--gold,#d8b070);cursor:pointer;white-space:nowrap" onclick="go('settings')">見設定頁 →</span></div>
+      <button class="btn sell" id="buy-cta-us-sell" style="display:none" onclick="openIbkrSheet('sell')">模擬賣出</button>
+      <button class="btn buy" id="buy-cta-us-buy" style="display:none" onclick="openIbkrSheet('buy')">IBKR 模擬買進</button>
     </div>
   </section>
 
@@ -1198,56 +1200,35 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <button data-sub="picks">選股成績單</button>
     </div>
 
+    <!-- 先.六十-A2（2026-10-10）交易頁重寫：原本三張「規劃中」機器人卡（策略 A/B/C 開關）與停用的 Kill Switch 已移除。
+         台股真錢只有一個引擎：本機 Bb-90 自動再平衡（auto_rebalance_bb90.py），此卡唯讀 /auto/status；
+         緊急停止與否決窗取消統一在設定頁「自動交易（Bb-90）」卡，這裡不放第二個開關。 -->
     <div class="subscreen active" id="trade-sub-bots">
-    <div class="note" style="background:rgba(250,178,25,.08);border:1px solid rgba(250,178,25,.25);border-radius:10px;padding:10px;margin-bottom:12px;color:var(--warn)">
-      ⚠ 尚未串接任何真實券商 API（規劃：台股 Shioaji、美股 IBKR，見「設定」頁）。
-      以下沒有任何機器人真的在運行、沒有真實委託/成交、Kill Switch 不會有實際效果——
-      這個分頁目前是 Phase 2 自動下單功能的介面規劃，不是即時交易面板。
-    </div>
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="lbl">今日自動交易損益</div>
-        <div class="val" style="color:var(--ink-3);font-size:15px">尚未串接券商</div>
-        <div class="sub">無自動交易在運行</div>
-      </div>
-      <div class="kpi">
-        <div class="lbl">今日虧損上限使用</div>
-        <div class="val" style="color:var(--ink-3);font-size:15px">—</div>
-        <div class="sub">尚未設定/尚無交易可計算</div>
-      </div>
-    </div>
-
-    <div class="card bot paused" data-mkt="TW">
+    <div class="card bot" id="bot-bb90-card" data-mkt="TW">
       <div class="bot-top">
-        <div class="nm"><b>當沖策略 A · 開盤動能</b><span>台股 · Shioaji（規劃中，尚未串接）</span></div>
-        <div class="switch" onclick="toast('尚未串接券商，無法啟用')"></div>
+        <div class="nm"><b>Bb-90 自動再平衡</b><span>台股 · 永豐 Shioaji（真錢，附 30 分鐘否決窗）</span></div>
       </div>
-      <div class="bot-stats"><div class="s"><span>狀態</span><b style="color:var(--ink-3)">未串接</b></div></div>
-    </div>
-
-    <div class="card bot paused" data-mkt="FUT">
-      <div class="bot-top">
-        <div class="nm"><b>期貨策略 B · 台指期波段</b><span>TAIFEX（規劃中，尚未串接）</span></div>
-        <div class="switch" onclick="toast('尚未串接券商，無法啟用')"></div>
+      <div class="bot-stats">
+        <div class="s"><span>目前模式</span><b id="bot-mode">—</b></div>
+        <div class="s"><span>下一期</span><b id="bot-next">—</b></div>
+        <div class="s"><span>上次結果</span><b id="bot-last">—</b></div>
       </div>
-      <div class="bot-stats"><div class="s"><span>狀態</span><b style="color:var(--ink-3)">未串接</b></div></div>
+      <div class="note" id="bot-bb90-note" style="margin-top:8px">尚未連線本機伺服器</div>
+      <div class="note" style="margin-top:6px">標的：0050 45%／00646 45%／00697B 10%。緊急停止、取消本批在設定頁 <span class="press" style="color:var(--gold,#d8b070);cursor:pointer" onclick="go('settings')">前往 →</span></div>
     </div>
-
-    <div class="card bot paused" data-mkt="US">
-      <div class="bot-top">
-        <div class="nm"><b>美股策略 C · 財報動能</b><span>IBKR（規劃中，尚未串接）</span></div>
-        <div class="switch" onclick="toast('尚未串接券商，無法啟用')"></div>
-      </div>
-      <div class="bot-stats"><div class="s"><span>狀態</span><b style="color:var(--ink-3)">未串接</b></div></div>
+    <div class="card" data-mkt="TW">
+      <h3>近期委託／成交（真錢）</h3>
+      <div id="bot-recent-orders" class="note" style="padding:6px 2px">尚未連線本機伺服器</div>
+      <div class="note" style="margin-top:6px">完整紀錄與損益在「日誌」頁。</div>
     </div>
-
-    <div class="card">
-      <h3>今日委託 / 成交</h3>
-      <div class="note" style="padding:14px 2px">尚無委託/成交紀錄，串接券商後顯示</div>
+    <div class="card" data-mkt="US">
+      <h3>美股</h3>
+      <div class="note">美股未串接下單；IBKR 只讀報價與帳戶。個股頁的「IBKR 模擬買進」是 IBKR 模擬（Paper）帳戶，不涉及真錢。</div>
     </div>
-
-    <button class="killer" disabled style="opacity:.4;cursor:not-allowed" onclick="toast('尚未串接券商，沒有真實部位可平倉')">⛔ 緊急全平倉（Kill Switch）</button>
-    <div class="note" style="text-align:center;margin-top:6px">尚未串接券商，此按鈕暫無實際效果</div>
+    <div class="card" data-mkt="FUT">
+      <h3>期貨</h3>
+      <div class="note">期貨未串接下單，沒有任何期貨自動交易在運行。</div>
+    </div>
     </div>
 
     <div class="subscreen" id="trade-sub-strategy">
@@ -1281,9 +1262,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
   <!-- ════════ 5. 日誌 ════════ -->
   <section class="screen" id="scr-journal">
+    <!-- 先.六十-A4（2026-10-10）：日誌頁接真錢帳本。資料只從本機伺服器 /auto/ledger 讀（token 必檢、去識別化欄位），
+         不存進 GitHub、不進公開心跳。損益以 price_history 收盤估值，只算自動交易買進的股數，未計手續費與稅。 -->
     <div class="card">
-      <h3>本週損益（已實現）</h3>
-      <div class="note">尚無交易紀錄 · 串接券商或手動新增交易後顯示本週損益統計</div>
+      <h3>損益（真錢 · Bb-90 自動交易）<span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'journal-tm',async()=>{await loadJournalLedger()})">重新整理</span></h3>
+      <div id="journal-pnl" class="note">尚未連線本機伺服器</div>
+      <div class="note" style="margin-top:6px">讀取時間：<b id="journal-tm">--:--</b>。以 price_history 最新收盤估值；只算自動交易買進的股數；未計手續費與稅。本週＝本週一以來的變動。</div>
     </div>
 
     <div class="card ai-card" style="opacity:.7">
@@ -1295,8 +1279,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>交易紀錄</h3>
       <div id="journal-chips" style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto"></div>
       <div id="journal-trades">
-        <div class="note" style="padding:14px 2px">尚無交易紀錄，串接券商或手動新增後顯示</div>
+        <div class="note" style="padding:14px 2px">尚未連線本機伺服器</div>
       </div>
+      <div class="note" style="margin-top:6px">只列台股真錢自動交易（Bb-90）的委託紀錄；美股、期貨未串接下單。欄位：日期、代號、狀態、數量、均價、批次（不含帳號與餘額）。</div>
     </div>
   </section>
 
@@ -1312,43 +1297,44 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <span>美股</span>
         <div class="setting-input"><input id="set-broker-us" type="text" placeholder="尚未填寫" style="width:150px;text-align:right" onblur="saveBroker()"></div>
       </div>
-      <div class="note">目前僅供顯示備註，尚未串接真實券商 API（規劃：台股 Shioaji、美股 IBKR，見 research/CONSTITUTION.md）</div>
+      <div class="note">這兩欄只是你自己的備註，不會被任何程式讀取。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（IBKR 只讀報價與帳戶）。</div>
     </div>
 
-    <div class="card">
-      <h3>風控參數</h3>
-      <div class="setting-row">
-        <span>每日虧損上限</span>
-        <div class="setting-input"><span>NT$</span><input id="rc-daily-loss" type="number" inputmode="numeric"></div>
+    <!-- 先.六十-A5（2026-10-10）：原本可編輯的「風控參數」（每日虧損上限／單筆部位上限／最大持倉檔數）引擎根本不讀，
+         屬假設定，已移除；改為唯讀顯示引擎實際硬限制（auto_rebalance_bb90.gate_order＋本機設定檔，經 /auto/status 的 limits）。
+         「通知偏好」原本兩個開關沒有接任何推播，改為實際控制本機推播類別（/push/prefs）。 -->
+    <div class="card" id="risk-limits-card">
+      <h3>風控硬限制（引擎實際值，唯讀）</h3>
+      <div id="risk-limits-body" class="facts">
+        <div class="f"><span>白名單標的</span><b id="rl-whitelist">0050、00646、00697B</b></div>
+        <div class="f"><span>交易類型</span><b>僅買進 · 僅現股</b></div>
+        <div class="f"><span>單次金額上限</span><b id="rl-cap">需連線本機伺服器</b></div>
+        <div class="f"><span>限價偏離前收</span><b id="rl-dev">≤ ±1%</b></div>
+        <div class="f"><span>資料新鮮度</span><b id="rl-age">≤ 4 天</b></div>
+        <div class="f"><span>否決窗</span><b id="rl-veto">30 分鐘</b></div>
       </div>
-      <div class="setting-row">
-        <span>單筆部位上限</span>
-        <div class="setting-input"><input id="rc-max-position" type="number" inputmode="numeric"><span>%</span></div>
-      </div>
-      <div class="setting-row">
-        <span>最大持倉檔數</span>
-        <div class="setting-input"><input id="rc-max-holdings" type="number" inputmode="numeric"></div>
-      </div>
-      <button class="btn" style="width:100%;margin-top:12px;background:var(--gold-grad);color:#1a1005" onclick="saveRiskControl()">儲存</button>
-      <div class="note" id="rc-saved-note" style="text-align:center;margin-top:6px">尚未儲存過</div>
+      <div class="note" id="risk-limits-note" style="margin-top:6px">未連線時顯示程式內建預設值；連線後改顯示本機設定檔實際值。任一不符即拒單並推播。這些值只能由你本人修改本機設定檔，App 不能改。</div>
     </div>
 
-    <div class="card">
-      <h3>通知偏好</h3>
-      <!-- 2026-09-15（週六.六後半／稽核二.五）「盤前AI日報」功能本身仍是示範資料
-           （見CLAUDE.md「尚為示範資料」清單），功能未上線前不該先給一個看起來
-           能開關的推播選項讓使用者誤以為已經在運作，移除本行；功能真的做出來
-           時再加回。重大事件/自選股價格警示底層資料（events.json／即時報價）
-           已是真實資料，開關保留（雖然推播機制本身三者都還沒做，見下方note）。 -->
+    <div class="card" id="notif-card">
+      <h3>通知偏好（推播類別）</h3>
       <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>重大事件提醒</b><span>財報／CPI 等日曆事件</span></div>
-        <div class="switch" id="notif-event" onclick="toggleNotif(this,'event')"></div>
+        <div class="nm"><b>否決窗開始</b><span>必送，無法關閉——推播送不到時該批不執行</span></div>
+        <div class="switch on" id="notif-veto" style="opacity:.5;cursor:not-allowed" title="無法關閉"></div>
       </div>
       <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>自選股價格警示</b><span>大幅漲跌通知</span></div>
-        <div class="switch" id="notif-price" onclick="toggleNotif(this,'price')"></div>
+        <div class="nm"><b>拒單／自動交易異常</b><span>整批拒單、對帳不符等</span></div>
+        <div class="switch" id="notif-reject" onclick="toggleNotif(this,'reject')"></div>
       </div>
-      <div class="note" style="margin-top:8px">原型階段，尚未實作真實推播，開關狀態會存起來</div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>批次完成</b><span>一個批次全部結束時</span></div>
+        <div class="switch" id="notif-complete" onclick="toggleNotif(this,'complete')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>排程漏跑</b><span>交易日排程沒有心跳時</span></div>
+        <div class="switch" id="notif-missed" onclick="toggleNotif(this,'missed')"></div>
+      </div>
+      <div class="note" id="notif-note" style="margin-top:8px">需連線本機伺服器才能讀取／修改（設定存在本機伺服器，所有已訂閱裝置共用）。</div>
     </div>
 
     <div class="card">
@@ -1495,7 +1481,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card">
       <h3>免責聲明</h3>
       <div class="note" style="line-height:1.7">
-        Alpha 是研究/教育用途的原型 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。App 內「產生下單計畫」按鈕僅顯示計畫內容，<b style="color:var(--ink-2)">不會串接任何真實資金帳戶的下單 API</b>。<b style="color:var(--ink-2)">例外（2026-09-02起）</b>：美股個股頁的「IBKR Paper 下單」卡片會在你本機另外啟動下單伺服器、並且親自按下送出時，向 IBKR **模擬（Paper）帳戶**送出真實委託——這不涉及真實資金，且一律需要你手動觸發，App 不會自動送單，也不會對真實帳戶下單。投資有風險，盈虧請自負。
+        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
       </div>
     </div>
 
@@ -1560,12 +1546,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card">
       <h3>關於</h3>
       <div class="facts">
-        <div class="f"><span>App 版本</span><b id="about-app-ver" onclick="tapVersionForDebug()" style="cursor:pointer">Prototype 0.1</b></div>
+        <div class="f"><span>App 版本</span><b id="about-app-ver" onclick="tapVersionForDebug()" style="cursor:pointer">—</b></div>
         <div class="f"><span>Service Worker 版本</span><b id="about-sw-ver">查詢中…</b></div>
         <div class="f"><span>資料源</span><b>FinMind / SEC EDGAR</b></div>
         <div class="f"><span>SW 狀態</span><b id="about-sw-status">查詢中…</b></div>
       </div>
-      <div class="note">Alpha 台美股 AI 交易 · 原型階段，尚未串接真實下單</div>
+      <div class="note">Alpha 台美股 AI 交易 · 台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</div>
       <button class="btn ghost" style="width:100%;margin-top:12px" onclick="forceUpdateApp()">強制更新（清除快取＋重新整理）</button>
       <div class="note" style="text-align:center;margin-top:6px">手機上資料一直沒更新、卡在舊日期時，點這顆</div>
     </div>
@@ -1600,25 +1586,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     </button>
   </nav>
 
-  <!-- ════════ 下單抽屜 ════════ -->
-  <div class="sheet-mask" id="mask" onclick="closeSheet()"></div>
-  <div class="sheet" id="sheet">
-    <div class="grab"></div>
-    <h2 id="sheet-title">買進 台積電 2330</h2>
-    <div class="frow"><span>券商 / 帳戶</span><b>永豐金 Shioaji · ****3417</b></div>
-    <div class="frow"><span>類別</span><b>現股當沖</b></div>
-    <div class="frow"><span>價格</span><b>1,485（限價）</b></div>
-    <div class="frow"><span>數量</span><b>1,000 股</b></div>
-    <div class="frow"><span>預估金額</span><b>NT$ 1,485,000</b></div>
-    <div class="gate">
-      <div class="g"><span class="ok">✓</span>單筆部位 ≤ 上限（20%）</div>
-      <div class="g"><span class="ok">✓</span>今日虧損額度剩餘 100%</div>
-      <div class="g"><span class="ok">✓</span>同時持倉 3/5 檔</div>
-      <div class="g"><span class="no">⚠</span>今晚 21:30 有重大事件（CPI）— 建議留意隔日沖風險</div>
-    </div>
-    <button class="btn buy" id="sheet-cta" style="width:100%" onclick="confirmOrder()">滑動確認 → 送出委託（原型：點擊）</button>
-    <div class="note" style="text-align:center">風控閘門全數通過才可送單 · 委託後可即時撤單</div>
-  </div>
+  <!-- 先.六十-A1（2026-10-10）：台股假下單抽屜（#sheet 與按下即顯示假成功訊息的確認函式，寫死帳號／價格／風控）已移除。
+       台股真錢只由本機 Bb-90 引擎（auto_rebalance_bb90.py）執行，App 沒有台股手動下單。 -->
 
   <!-- 2026-09-02新增：IBKR Paper下單卡片（僅美股，接research/ibkr_order_server.py
        本機伺服器，見PROGRESS.md/BACKLOG.md）。跟上面#sheet（台股，全示範資料）
@@ -1798,7 +1767,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(name==='chips-market')_safeAsync('loadChipsMarketDetail',loadChipsMarketDetail);
     if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
     if(name==='trade')_safeSync('onTradeInit',onTradeInit);
-    if(name==='journal')_safeSync('renderJournalChips',renderJournalChips);
+    if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadJournalLedger',loadJournalLedger)}
     if(name==='report')_safeSync('renderReport',renderReport);
     if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
   }
@@ -3242,7 +3211,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     else setTxt('fin-roe','—');
     setTxt('fin-fcf',f.fcf_margin!=null?(f.fcf_margin*100).toFixed(1)+'%':'—');
     const warn=(f.missing_fields&&f.missing_fields.length)?` · 缺漏欄位：${f.missing_fields.join('/')}`:'';
-    setTxt('fin-note',`來源：yfinance 年報快照（非排程自動更新，僅6檔固定清單）· 期末 ${f.period_end}${warn}`);
+    const usAt=US_FINANCIALS_CACHE&&US_FINANCIALS_CACHE.generated_at?String(US_FINANCIALS_CACHE.generated_at).slice(0,10):'不明';
+    setTxt('fin-note',`來源：yfinance 年報快照（固定快照，不更新；快照日 ${usAt}；僅6檔固定清單）· 期末 ${f.period_end}${warn}`);
   }
   // 2026-08-27新增（B4：類股卡點擊→成分股清單）：data/company_info.json
   // （見 research/build_company_info.py，讀FinMind TaiwanStockInfo全市場快取）
@@ -3256,6 +3226,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       try{const r=await fetch('data/company_info.json?t='+Date.now());if(r.ok)COMPANY_INFO_CACHE=await r.json()}catch(e){console.warn('[loadCompanyInfo]',e);recordGlobalError('loadCompanyInfo',e);COMPANY_INFO_CACHE={companies:{}}}
     }
     return (COMPANY_INFO_CACHE&&COMPANY_INFO_CACHE.companies)||{};
+  }
+  // 先.六十-C9：非每日排程的資料檔，在 App 上標「資料日 YYYY-MM-DD（N 天前）＋更新方式」，不讓舊快照看起來像當天資料
+  function _dataDateLabel(iso,how){
+    const t=new Date(iso);if(isNaN(t))return '—';
+    const days=Math.floor((Date.now()-t.getTime())/86400000);
+    return '資料日 '+fmtTzMMDDHHMM(t,'Asia/Taipei').slice(0,5).replace(/^(\d+)\/(\d+)$/,'$1/$2')+'（'+(days<=0?'今天':days+' 天前')+'）'+(how?'；'+how:'');
   }
   let QUOTES_ALL_TW_CACHE=null;
   async function loadQuotesAllTw(){
@@ -3427,7 +3403,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         const q=quotes[code]||{};
         return{code,name:companies[code].name||code,change_pct:q.change_pct,turnover:q.turnover,score:scoreMap[code]};
       }).sort((a,b)=>(b.change_pct??-999)-(a.change_pct??-999));
-      listEl.innerHTML='<div class="note" style="margin-bottom:8px">依股票產業分類分組，非TWSE官方指數完整成分股清單；共 '+rows.length+' 檔。</div>'
+      const ciAt=COMPANY_INFO_CACHE&&COMPANY_INFO_CACHE.meta&&COMPANY_INFO_CACHE.meta.generated_at;
+      listEl.innerHTML='<div class="note" style="margin-bottom:8px">依股票產業分類分組，非TWSE官方指數完整成分股清單；共 '+rows.length+' 檔。產業分類'+(ciAt?_dataDateLabel(ciAt,'公司名冊非每日排程'):'資料日不明')+'。</div>'
         +rows.map(r=>{
           const chgCls=r.change_pct==null?'':(r.change_pct>=0?'pos':'neg');
           const chgTxt=r.change_pct==null?'—':(r.change_pct>=0?'+':'')+r.change_pct.toFixed(2)+'%';
@@ -4033,8 +4010,84 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     });
   }
   function setJournalFilter(k){JOURNAL_FILTER=k;renderJournalChips()}
+  // 先.六十-A4：真錢帳本（本機伺服器 /auto/ledger，token 必檢；只回去識別化欄位）
+  async function loadAutoLedger(){
+    if(!LIVE.configured||!LIVE.url)return null;
+    const r=await liveFetch('/auto/ledger',15000);
+    if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器可能是舊版，需重啟）':''));
+    return await r.json();
+  }
+  function autoLedgerRowHtml(x){
+    const esc=_autoEsc;
+    const q=x.filled_qty&&x.filled_qty!==x.qty?(x.filled_qty+'／'+x.qty):String(x.qty||0);
+    const why=x.reason_codes&&x.reason_codes.length?'（'+esc(_autoCodesTxt(x.reason_codes))+'）':'';
+    return '<div data-mkt="TW" style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--hairline);font-size:12.5px">'+
+      '<span>'+esc(String(x.date||'').slice(5).replace('-','/'))+' <b>'+esc(x.symbol||'—')+'</b> '+esc(_autoStatusTxt(x.status))+why+'</span>'+
+      '<span class="num" style="text-align:right;white-space:nowrap">'+esc(q)+' 股'+(x.avg_price!=null?' @'+esc(x.avg_price):'')+' <span class="note">'+esc(x.batch||'')+'</span></span></div>';
+  }
+  async function loadJournalLedger(){
+    const pe=document.getElementById('journal-pnl'),te=document.getElementById('journal-trades');
+    if(!pe||!te)return;
+    if(!LIVE.configured||!LIVE.url){pe.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢帳本只在本機。';te.innerHTML='<div class="note" style="padding:14px 2px">尚未連線本機伺服器</div>';return}
+    try{
+      const d=await loadAutoLedger();
+      setTxt('journal-tm',fmtTzHHMM(new Date(),'Asia/Taipei'));
+      const rows=d&&d.rows||[];
+      te.innerHTML=rows.length?rows.map(autoLedgerRowHtml).join(''):'<div class="note" style="padding:14px 2px">首批尚未執行</div>';
+      const p=d&&d.pnl;
+      const sg=v=>v==null?'—':(v>0?'+':'')+Number(v).toLocaleString('zh-TW');
+      if(!d||!d.first_batch_done)pe.innerHTML='首批尚未執行'+(rows.length?'（目前只有未成交的委託紀錄，見下方）':'');
+      else if(!p||p.error)pe.textContent='無法估值：'+(p&&p.error||'伺服器未回傳損益');
+      else pe.innerHTML='本週：<b class="'+(p.week>=0?'pos':'neg')+'">'+sg(p.week)+' 元</b>　累計：<b class="'+(p.total>=0?'pos':'neg')+'">'+sg(p.total)+' 元'+(p.total_pct!=null?'（'+(p.total_pct>0?'+':'')+p.total_pct+'%）':'')+'</b><br><span class="note">估值基準日 '+_autoEsc(p.as_of)+'；本週自 '+_autoEsc(p.week_start)+' 起</span>';
+      renderJournalChips();
+    }catch(e){
+      console.warn('[loadJournalLedger]',e);recordGlobalError('loadJournalLedger',e);
+      pe.textContent='讀取真錢帳本失敗（'+(e&&e.message||e)+'）';
+      te.innerHTML='<div class="note" style="padding:14px 2px">讀取失敗，請確認本機伺服器在線</div>';
+    }
+  }
   const TRADE_UNIT_NOTE={TW:'單位：張數（台股現股/當沖以張為單位）',US:'單位：股數（美股以股為單位，無「張」概念）',FUT:'單位：口數；另顯示保證金水位與轉倉提醒'};
-  function onTradeInit(){renderMktToggle('trade');onTradeToggleChange()}
+  function onTradeInit(){renderMktToggle('trade');onTradeToggleChange();_safeAsync('loadTradeBots',loadTradeBots)}
+  // 先.六十-A2／A4：交易頁機器人卡與日誌頁共用的顯示對照
+  const AUTO_MODE_LABEL={SIMULATION:'模擬',LIVE_WITH_VETO:'真錢（附否決窗）',LIVE:'真錢（無否決窗）'};
+  const AUTO_REASON_LABEL={first_tranche:'首批',month_end:'月底再平衡',retry_after_error:'重跑上一期',open_batch:'續跑進行中批次',sim_drill:'模擬演練'};
+  const AUTO_STATUS_LABEL={FILLED:'成交',PARTIAL:'部分成交',SUBMITTED:'已送出',OPEN:'掛單中',CANCELLED:'已取消',REJECT:'拒單',SKIP:'略過'};
+  const AUTO_CODE_LABEL={INSUFFICIENT_CASH:'現金不足',CAP:'超過單次上限',LIMIT_DEV:'限價偏離前收',LIMIT:'缺限價',STALE:'資料過期',WHITELIST:'非白名單',RECONCILE:'對帳未過',STOP_FLAG:'緊急停止',PRICE_MISSING:'缺前收價',ACTION:'僅允許買進',CASH_ONLY:'僅限現股',LOT:'數量不合'};
+  const _autoStatusTxt=s=>AUTO_STATUS_LABEL[s]||String(s||'—');
+  const _autoCodesTxt=cs=>(cs||[]).map(c=>AUTO_CODE_LABEL[c]||c).join('、');
+  function autoLastResultText(lr){
+    if(!lr)return '尚無紀錄';
+    const c=lr.counts||{};
+    const parts=Object.keys(c).map(k=>_autoStatusTxt(k)+' '+c[k]);
+    return String(lr.date||'').slice(5).replace('-','/')+' '+(lr.batch||'')+'：'+parts.join('、')+(lr.reason_codes&&lr.reason_codes.length?'（'+_autoCodesTxt(lr.reason_codes)+'）':'');
+  }
+  function autoNextText(d){
+    const n=d&&d.next_run;
+    const tr=d&&d.next_tranche!=null?('第 '+d.next_tranche+(d.tranche_total?'／'+d.tranche_total:'')+' 期 · '):'';
+    if(!n)return tr+'（讀不到交易日曆）';
+    return tr+String(n.date).slice(5).replace('-','/')+' '+n.time+'（'+(AUTO_REASON_LABEL[n.reason]||n.reason)+'）';
+  }
+  async function loadTradeBots(){
+    const note=document.getElementById('bot-bb90-note'),rec=document.getElementById('bot-recent-orders');
+    if(!note)return;
+    if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器（設定頁「即時伺服器」）';if(rec)rec.textContent='尚未連線本機伺服器';return}
+    try{
+      const r=await liveFetch('/auto/status',6000);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      setTxt('bot-mode',(d.drill?'演練 · ':'')+(AUTO_MODE_LABEL[d.mode]||d.mode||'—'));
+      setTxt('bot-next',autoNextText(d));
+      setTxt('bot-last',autoLastResultText(d.last_result));
+      const st=d.status||{};
+      note.textContent=(d.stopped?'⛔ 緊急停止中（一律拒單）　':'')+(st.last_error?'最近錯誤：'+st.last_error:'目前無錯誤')+(st.updated_at?'　狀態更新：'+st.updated_at:'');
+    }catch(e){console.warn('[loadTradeBots]',e);recordGlobalError('loadTradeBots',e);note.textContent='讀取自動交易狀態失敗（本機伺服器離線或舊版）'}
+    if(!rec)return;
+    try{
+      const lg=await loadAutoLedger();
+      const rows=(lg&&lg.rows||[]).slice(0,5);
+      rec.innerHTML=rows.length?rows.map(autoLedgerRowHtml).join(''):'首批尚未執行';
+    }catch(e){console.warn('[loadTradeBots ledger]',e);recordGlobalError('loadTradeBots ledger',e);rec.textContent='讀取帳本失敗（本機伺服器離線或舊版）'}
+  }
   function onTradeToggleChange(){
     const mkt=MKT_STATE.trade;
     setTxt('trade-unit-note',TRADE_UNIT_NOTE[mkt]);
@@ -4908,6 +4961,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.querySelectorAll('#stock-tabs button').forEach((x,i)=>x.classList.toggle('on',i===0));
     document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
     document.getElementById('sub-ov').classList.add('active');
+    try{renderBuyCta(code)}catch(e){console.warn('[renderBuyCta]',e);recordGlobalError('renderBuyCta',e)}
     setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');updateStockSimTag(code);_safeAsync('updateStockDisposalTag',()=>updateStockDisposalTag(code));
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
     document.getElementById('rev-chart-amt').innerHTML=skeletonBlockHtml(120);
@@ -5099,6 +5153,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       document.getElementById('trade-sub-'+b.dataset.sub).classList.add('active');
       if(b.dataset.sub==='strategy'){loadStrategies();loadPaper7030();}
       if(b.dataset.sub==='monitor')loadStrategyMonitor();
+      if(b.dataset.sub==='bots')_safeAsync('loadTradeBots',loadTradeBots);
       if(b.dataset.sub==='picks')loadPicksReportCard();
     });
   });
@@ -5108,7 +5163,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // （JSON格式、事前產生訊號不可回填的鐵律、每日排程流程）。
   function strategyCardHtml(s){
     const m=s.metrics||{};
-    return `<div class="card press" style="cursor:pointer" onclick="toast('策略詳情頁尚未實作')">
+    return `<div class="card press" style="cursor:pointer" onclick="openStrategyReport('${String(s.id||'').replace(/[^\w.-]/g,'')}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
         <div><b style="font-size:15px">${s.name||s.id}</b><div class="note" style="margin-top:2px">${s.market||'—'} · 上架 ${s.listed_date||'—'} · 前測起始 ${s.paper_start_date||'—'}</div></div>
       </div>
@@ -5376,7 +5431,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const sampleTag=(fp&&!fp.sample_sufficient)
       ?`<div class="note" style="color:var(--warn);font-size:10px;margin-top:2px">樣本不足(&lt;20交易日，目前${fp.trading_days_count}天)，排名僅供參考</div>`:'';
     const cardId=`sm-detail-${idx}`;
-    return `<div class="card press" style="cursor:pointer" onclick="toggleStrategyDetail('${cardId}')">
+    return `<div class="card press" data-sid="${String(s.id||'').replace(/[^\w.-]/g,'')}" style="cursor:pointer" onclick="toggleStrategyDetail('${cardId}')">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
         <div style="flex:1;min-width:0">
           <b style="font-size:15px">${s.name||s.id}</b>
@@ -5392,6 +5447,17 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         ${strategyDetailHtml(s)}
       </div>
     </div>`;
+  }
+  // 先.六十-A2：策略卡點下去 → 切到「策略監控台」並展開同一策略的報告段落（回測／前向／局限說明）
+  async function openStrategyReport(id){
+    try{
+      const btn=document.querySelector('#trade-tabs button[data-sub="monitor"]');if(btn)btn.click();
+      await loadStrategyMonitor();
+      const card=document.querySelector('#strategy-monitor-list [data-sid="'+id+'"]');
+      if(!card){toast('策略監控台查無此策略的報告段落');return}
+      const det=card.querySelector('[id^="sm-detail-"]');if(det)det.style.display='';
+      card.scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(e){console.warn('[openStrategyReport]',e);recordGlobalError('openStrategyReport',e)}
   }
   function toggleStrategyDetail(id){
     const el=document.getElementById(id);if(!el)return;
@@ -5491,27 +5557,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }
   }
 
-  // ── 下單抽屜 ──
-  // 2026-09-02新增：分工鐵律「台股一律Shioaji、美股一律IBKR」延伸到下單——
-  // 美股導去真正會打research/ibkr_order_server.py的IBKR Paper下單卡片，
-  // 台股維持原本的全示範版（Shioaji下單後端這輪不在範圍內，見PENDING_QUEUE）。
-  function openTradeSheet(side){
-    if(isUS(currentCode))openIbkrSheet(side);
-    else openSheet(side);
+  // ── 個股頁底部列（先.六十-A1，2026-10-10）──
+  // 台股：唯讀說明（真錢只由本機 Bb-90 引擎執行，App 不提供手動下單）；
+  // 美股：既有 IBKR 模擬（Paper）帳戶下單卡（research/ibkr_order_server.py）。
+  function renderBuyCta(code){
+    const us=isUS(code);
+    const tw=document.getElementById('buy-cta-tw');if(tw)tw.style.display=us?'none':'';
+    ['buy-cta-us-sell','buy-cta-us-buy'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display=us?'':'none'});
   }
-  function openSheet(side){
-    const t=document.getElementById('sheet-title'), c=document.getElementById('sheet-cta');
-    if(side==='buy'){t.textContent='買進 '+currentCode;c.className='btn buy';c.textContent='滑動確認 → 送出買進（示範）'}
-    else{t.textContent='賣出 '+currentCode;c.className='btn sell';c.textContent='滑動確認 → 送出賣出（示範）'}
-    c.style.width='100%';
-    document.getElementById('mask').classList.add('open');
-    document.getElementById('sheet').classList.add('open');
-  }
-  function closeSheet(){
-    document.getElementById('mask').classList.remove('open');
-    document.getElementById('sheet').classList.remove('open');
-  }
-  function confirmOrder(){ closeSheet(); toast('✓ 委託已送出 · 09:31:07 · 可於「交易」頁追蹤'); }
 
   // ── IBKR Paper 下單卡片（2026-09-02新增，真的會打本機research/ibkr_order_server.py） ──
   const IBKR_ORDER_SERVER='http://127.0.0.1:8793';
@@ -5699,36 +5752,48 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     clearTimeout(tmr); tmr=setTimeout(()=>t.classList.remove('show'),2400);
   }
 
-  // ══════ 設定頁：券商備註／風控參數／通知偏好都存 localStorage ══════
-  const RC_DEFAULT={dailyLoss:35000,maxPosition:20,maxHoldings:5};
-  function readRC(){try{const s=localStorage.getItem('alpha_rc');return s?{...RC_DEFAULT,...JSON.parse(s)}:{...RC_DEFAULT}}catch(e){console.warn('[readRC]',e);recordGlobalError('readRC',e);return{...RC_DEFAULT}}}
-  function loadRiskControl(){
-    const rc=readRC();
-    const dl=document.getElementById('rc-daily-loss'),mp=document.getElementById('rc-max-position'),mh=document.getElementById('rc-max-holdings');
-    if(dl)dl.value=rc.dailyLoss;if(mp)mp.value=rc.maxPosition;if(mh)mh.value=rc.maxHoldings;
+  // ══════ 設定頁：券商備註存 localStorage；風控硬限制唯讀（/auto/status limits）；推播類別偏好在本機伺服器（/push/prefs）══════
+  // 先.六十-A5：舊的 alpha_rc／alpha_notif 本機鍵已無作用（引擎不讀、也沒有推播），不再讀寫。
+  function renderRiskLimits(l){
+    if(!l)return;
+    const nf0=v=>Number(v).toLocaleString('zh-TW');
+    if(Array.isArray(l.whitelist))setTxt('rl-whitelist',l.whitelist.join('、'));
+    setTxt('rl-cap',l.per_order_cap_twd?('NT$ '+nf0(l.per_order_cap_twd)):'未設定（引擎會全部拒單）');
+    if(l.max_price_dev_pct!=null)setTxt('rl-dev','≤ ±'+l.max_price_dev_pct+'%');
+    if(l.max_data_age_days!=null)setTxt('rl-age','≤ '+l.max_data_age_days+' 天');
+    if(l.veto_minutes!=null)setTxt('rl-veto',l.veto_minutes+' 分鐘');
+    setTxt('risk-limits-note','以上為本機引擎目前實際值（讀取自本機伺服器）。任一不符即拒單並推播。這些值只能由你本人修改本機設定檔，App 不能改。');
   }
-  function saveRiskControl(){
-    const rc={
-      dailyLoss:Number(document.getElementById('rc-daily-loss').value)||0,
-      maxPosition:Number(document.getElementById('rc-max-position').value)||0,
-      maxHoldings:Number(document.getElementById('rc-max-holdings').value)||0,
-    };
-    localStorage.setItem('alpha_rc',JSON.stringify(rc));pushSettingsSoon();
-    // 2026-08-28修正（P0-a）：同上，改用fmtTzHHMM()明確指定Asia/Taipei。
-    setTxt('rc-saved-note','已儲存 · '+fmtTzHHMM(new Date(),'Asia/Taipei'));
-    toast('風控參數已儲存');
+  async function loadRiskLimits(){
+    if(!LIVE.configured||!LIVE.url)return;
+    try{
+      const r=await liveFetch('/auto/status',6000);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      renderRiskLimits((await r.json()).limits);
+    }catch(e){console.warn('[loadRiskLimits]',e);recordGlobalError('loadRiskLimits',e);setTxt('risk-limits-note','讀取引擎實際值失敗（本機伺服器離線或舊版），目前顯示程式內建預設值。')}
   }
-
-  const NOTIF_DEFAULT={event:true,price:false};
-  function readNotif(){try{const s=localStorage.getItem('alpha_notif');return s?{...NOTIF_DEFAULT,...JSON.parse(s)}:{...NOTIF_DEFAULT}}catch(e){console.warn('[readNotif]',e);recordGlobalError('readNotif',e);return{...NOTIF_DEFAULT}}}
-  function loadNotif(){
-    const n=readNotif();
-    Object.keys(n).forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!n[k])});
+  function _renderNotif(p){
+    ['reject','complete','missed'].forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!(p&&p[k]))});
   }
-  function toggleNotif(el,key){
-    el.classList.toggle('on');
-    const n=readNotif();n[key]=el.classList.contains('on');
-    localStorage.setItem('alpha_notif',JSON.stringify(n));
+  async function loadNotif(){
+    const note=document.getElementById('notif-note');
+    if(!LIVE.configured||!LIVE.url){if(note)note.textContent='需連線本機伺服器才能讀取／修改（設定存在本機伺服器，所有已訂閱裝置共用）。';return}
+    try{
+      const r=await liveFetch('/push/prefs',6000);
+      if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器是舊版，需重啟）':''));
+      _renderNotif((await r.json()).prefs);
+      if(note)note.textContent='設定存在本機伺服器，所有已訂閱裝置共用。關閉的類別不會推播（仍會寫進本機紀錄與紅色橫幅）。';
+    }catch(e){console.warn('[loadNotif]',e);recordGlobalError('loadNotif',e);if(note)note.textContent='讀取推播偏好失敗：'+(e&&e.message||e)}
+  }
+  async function toggleNotif(el,key){
+    const note=document.getElementById('notif-note');
+    try{
+      if(!LIVE.configured||!LIVE.url)throw new Error('尚未連線本機伺服器');
+      const want=!el.classList.contains('on');
+      const r=await fetch(LIVE.url+'/push/prefs',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({[key]:want}),credentials:'include'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      _renderNotif((await r.json()).prefs);
+    }catch(e){console.warn('[toggleNotif]',e);recordGlobalError('toggleNotif',e);if(note)note.textContent='修改失敗：'+(e&&e.message||e)}
   }
 
   function readBroker(){try{const s=localStorage.getItem('alpha_broker');return s?JSON.parse(s):{tw:'',us:''}}catch(e){console.warn('[readBroker]',e);recordGlobalError('readBroker',e);return{tw:'',us:''}}}
@@ -6313,7 +6378,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('report-industry-tech').innerHTML=itHtml;
     });
 
-    document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，尚未串接特定進出場策略引擎；下方按鈕只依分批進場計畫產生下單計畫，不代表任何策略訊號。';
+    document.getElementById('report-strategy').textContent='目前為「AI 綜合評分排行」清單性質，不是自動交易策略；下方按鈕只依分批進場計畫產生試算，不代表任何策略訊號。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單（只交易白名單 ETF，與本頁個股無關）。';
 
     // 分批進場計畫：機械式資金分配規則（現價/-4%/-8%），不是估值預測，不是投資建議
     const planEl=document.getElementById('report-entry-plan');
@@ -6435,13 +6500,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('report-order-plan').innerHTML=`<div class="gate" style="margin-top:10px">
       <div style="font-weight:700;margin-bottom:8px">📋 下單計畫（僅顯示，不會送出）</div>
       ${tranches.map((t,i)=>`<div class="g">批次 ${i+1}：${nf(t.price.toFixed(2))} 元 · 資金配置 ${t.pct}% · 張數請自行決定</div>`).join('')}
-      <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本計畫非投資建議、不構成買賣訊號；未串接任何真實券商 API，不會實際下單。</div>
+      <div class="g" style="color:var(--warn);margin-top:8px">⚠️ 本計畫非投資建議、不構成買賣訊號；只顯示、不會實際下單。台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單，只交易白名單 ETF，與本計畫無關。</div>
     </div>`;
     toast('已產生下單計畫（僅顯示，未送出）');
   }
 
   function hydrateSettings(){
-    loadRiskControl();loadNotif();loadBroker();
+    _safeAsync('loadRiskLimits',loadRiskLimits);_safeAsync('loadNotif',loadNotif);loadBroker();
     setTxt('set-wl-count',WL.length);
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
     setTxt('set-cache-count',cacheCount+' 筆快取');
@@ -7174,13 +7239,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // 「伺服器沒開是常態」處理），不影響 localStorage-only 的既有行為。
   let SETTINGS_PUSH_TIMER=null,SETTINGS_PULLED_ONCE=false;
   function _collectLocalSettings(){
-    return {watchlist:WL,currency:CCY,risk_control:readRC(),breakthrough_path:btRead()};
+    return {watchlist:WL,currency:CCY,breakthrough_path:btRead()};  // 先.六十-A5：risk_control 已移除（引擎不讀）
   }
   function _applyServerSettings(s){
     if(!s||typeof s!=='object')return;
     if(Array.isArray(s.watchlist)){WL=s.watchlist;localStorage.setItem('alpha_wl',JSON.stringify(WL))}
     if(typeof s.currency==='string'){CCY=s.currency;localStorage.setItem('alpha_ccy',CCY)}
-    if(s.risk_control&&typeof s.risk_control==='object')localStorage.setItem('alpha_rc',JSON.stringify(s.risk_control));
     if(s.breakthrough_path&&typeof s.breakthrough_path==='object'){localStorage.setItem('alpha_bt_path',JSON.stringify(s.breakthrough_path));try{renderBtPath()}catch(e){console.warn('[applyServerSettings:bt]',e);recordGlobalError('applyBt',e)}}
   }
   async function pullSettingsOnce(){
@@ -7661,10 +7725,27 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     {label:'大盤融資維持率',file:'data/margin_maintenance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
     {label:'前瞻選股台帳',file:'data/picks_ledger.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
     {label:'策略前向紙上績效',file:'data/strategy_performance.json',kind:'daily',tz:'UTC',run:[6,10],grace:3},
-    {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,viaStatus:true},
-    {label:'個股財報/法人/融資',file:'data/stock_detail.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,viaStatus:true},
-    {label:'個股價量歷史',file:'data/price_history.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,viaStatus:true},
+    // 先.六十-C9（2026-10-10）：這三個大檔原本經 STATUS.json 間接判斷（viaStatus），但 STATUS.json 頂層從 09-15 起沒人更新，
+    // 判斷跟著失真。改成只串流讀檔案開頭幾 KB 抓它自己的 generated_at（三檔的 meta.generated_at 都在前 1KB 內），讀到就中止下載。
+    {label:'個股基本面 PER/月營收',file:'data/fundamentals.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
+    {label:'個股財報/法人/融資',file:'data/stock_detail.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
+    {label:'個股價量歷史',file:'data/price_history.json',kind:'daily',tz:'UTC',run:[6,10],grace:3,head:true},
   ];
+  // 只讀檔案開頭 maxBytes（Range＋串流，伺服器不支援 Range 也會在讀夠後中止），回傳第一個 "generated_at" 的時間
+  async function _headGeneratedAt(url,maxBytes){
+    maxBytes=maxBytes||16384;
+    const ac=new AbortController();
+    const r=await fetch(url+'?t='+Date.now(),{headers:{Range:'bytes=0-'+(maxBytes-1)},cache:'no-store',signal:ac.signal});
+    if(!r.ok&&r.status!==206)throw new Error('HTTP '+r.status);
+    let txt='';
+    if(r.body&&r.body.getReader){
+      const rd=r.body.getReader(),dec=new TextDecoder();let n=0;
+      try{while(n<maxBytes){const {done,value}=await rd.read();if(done)break;n+=value.length;txt+=dec.decode(value,{stream:true});if(/"generated_at"\s*:\s*"[^"]+"/.test(txt))break}}
+      finally{try{ac.abort()}catch(e){console.warn('[_headGeneratedAt] abort',e)}}
+    }else{txt=(await r.text()).slice(0,maxBytes)}
+    const m=txt.match(/"generated_at"\s*:\s*"([^"]+)"/);
+    if(!m)return null;const t=new Date(m[1]);return isNaN(t)?null:t;
+  }
   const FRESH_OK_COLOR='#1aa876',FRESH_BAD_COLOR='#e6383f';
   function _zonedParts(d,tz){
     const parts=new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',weekday:'short'}).formatToParts(d);
@@ -8122,7 +8203,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       }).join('');
       list.innerHTML=`<div class="facts">${rows}</div>`;
       const tm=document.getElementById('coverage-tm');
-      if(tm&&d.meta&&d.meta.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.meta.generated_at),'Asia/Taipei');
+      if(tm&&d.meta&&d.meta.generated_at)tm.textContent=_dataDateLabel(d.meta.generated_at,'手動重跑 research/build_coverage_dashboard.py 才會更新');
     }catch(e){
       console.warn('[loadCoverage]',e);recordGlobalError('loadCoverage',e);
       sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到覆蓋率儀表板</b>（'+e.message+'）。代表 research/build_coverage_dashboard.py 尚未產生 data/coverage.json，或排程沒有落地。';
@@ -8211,7 +8292,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         +'</div></div>').join('');
       list.innerHTML=`<details><summary style="font-size:11.5px;color:var(--ink-3);cursor:pointer">展開全部 ${all.length} 條</summary>${rows}</details>`;
       const tm=document.getElementById('signal-status-tm');
-      if(tm&&d.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.generated_at),'Asia/Taipei');
+      if(tm&&d.generated_at)tm.textContent=_dataDateLabel(d.generated_at,'人工彙整快照，有新結案才重產');
     }catch(e){
       console.warn('[loadSignalStatus]',e);recordGlobalError('loadSignalStatus',e);
       sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到訊號成績單</b>（'+e.message+'）。代表 research/build_signal_status.py 尚未產生 data/signal_status.json，或排程沒有落地——這本身就是需要處理的狀況，不是「沒有結果」。';
@@ -8227,7 +8308,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     // 各檔獨立抓、獨立判定，用allSettled：一個檔壞了只有那一列顯示「讀取失敗」，其他列照常。
     const settled=await Promise.allSettled(FRESHNESS_ITEMS.map(async item=>{
       let ts=null,via='';
-      if(item.viaStatus){
+      if(item.head){
+        ts=await _headGeneratedAt(item.file);
+        via='讀檔案自身 generated_at（只讀開頭，不整份下載）';
+      }else if(item.viaStatus){
         const checks=statusDoc&&statusDoc.schedule_health&&Array.isArray(statusDoc.schedule_health.checks)?statusDoc.schedule_health.checks:[];
         const c=checks.find(x=>x.file===item.file);
         if(c&&c.last_data_at){ts=new Date(c.last_data_at);if(isNaN(ts))ts=null;}
@@ -8346,7 +8430,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-10.2131';
+  const APP_VERSION='2026-10-10.2303';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

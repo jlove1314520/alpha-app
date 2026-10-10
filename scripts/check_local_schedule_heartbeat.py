@@ -38,7 +38,7 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # 2026-09-19【最優先·三個都是總司令自己造成的故障】三同一套修法：Windows主控台
@@ -329,7 +329,25 @@ def _write_into_status_json(result: dict) -> None:
     now = datetime.now(timezone.utc)
     for key in STALENESS_WATCHED_KEYS:
         _mark_block_staleness(doc, key, now)
+    _refresh_top_level(doc, now)
     STATUS_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _refresh_top_level(doc: dict, now: datetime) -> None:
+    """先.六十-C9：每次（每 30 分鐘）寫 STATUS.json 時，順便重算 schedule_health 並更新頂層 updated_at／any_overdue。
+    原本頂層只有手動跑 generate_status_json.py 才更新（從 09-15 起停在原地），App 與人看到的是假的「最後更新」。
+    重算失敗只降級成警告、保留舊值（十二節），updated_at 仍照寫——它代表「這個檔最後一次被排程寫入」，不是「每個欄位都新」。"""
+    try:
+        if str(REPO_ROOT) not in sys.path:
+            sys.path.insert(0, str(REPO_ROOT))
+        import generate_status_json as _g  # 只用它的 build_schedule_health（只讀 repo 內資料檔，不連網）
+        sh = _g.build_schedule_health()
+        doc["schedule_health"] = sh
+        doc["any_overdue"] = bool(sh.get("any_overdue"))
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::schedule_health 重算失敗，保留舊值：{type(e).__name__}: {e}")
+    doc["updated_at"] = now.astimezone(timezone(timedelta(hours=8))).isoformat()
+    doc["updated_by"] = "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）"
 
 
 def main() -> int:

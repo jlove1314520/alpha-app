@@ -255,7 +255,7 @@ def describe_paper_trades(path: Path) -> dict:
     return {
         "generated_at": d.get("generated_at"),
         "records": len(d.get("strategies", [])),
-        "source": "無（尚未串接任何真實券商API，App誠實顯示空狀態，不是資料源故障）",
+        "source": "無（選股策略紙上前測尚無上架策略，App誠實顯示空狀態，不是資料源故障；台股真錢自動交易另由本機 Bb-90 引擎執行，不經此檔）",
         "detail": "schema_version=%s，strategies為空陣列是刻意設計，不是bug" % d.get("schema_version"),
     }
 
@@ -870,7 +870,7 @@ APP_DATA_SOURCES = [
     {"panel": "選股頁·價值成長榜/題材動能榜/未來性濾網（2026-08-27新增三榜切換）", "source": "scores.json（generate_scores_live.py，財報導向）+ scores_momentum.json（generate_scores_momentum.py，題材動能導向）+ scores_future.json（generate_scores_future.py，未來性(a)類因子：法人籌碼行為+毛利率品質+產能利用率代理）——三榜物理分離、因子/權重各自版本控管，回測前都固定顯示「本榜為資料排序，尚未經過組合策略回測驗證」"},
     {"panel": "今日頁·匯率", "source": "data/fx.json（2026-09-15起主來源改為央行外匯局官方牌告匯率FTDOpenData015，yfinance TWD=X降為備援；2026-08-27起不再打FinMind）"},
     {"panel": "今日頁·AI盤前日報", "source": "無（誠實佔位「功能建置中」，非資料源故障）"},
-    {"panel": "今日頁·總資產/已實現損益", "source": "無（尚未串接券商，誠實佔位）"},
+    {"panel": "今日頁·總資產/已實現損益", "source": "本機 alpha_live_server /live/positions＋/live/balance（Shioaji 唯讀＋IBKR，需 token；本機離線時顯示 CTA，不進 repo）"},
     {"panel": "市場頁·大盤指數（含sparkline）", "source": "data/market_tw.json + data/market_us.json"},
     {"panel": "市場頁·類股表現(熱力圖)", "source": "data/market_tw.json（sectors，TWSE MI_INDEX 27類）"},
     {"panel": "市場頁·三大法人買賣超(全市場)", "source": "data/market_tw.json（institutional_history，TWSE T86加總）"},
@@ -895,7 +895,9 @@ APP_DATA_SOURCES = [
     {"panel": "市場頁·台股·全國進出口貿易統計", "source": "data/customs_trade.json（財政部關務署官方開放資料data.gov.tw#6053，2026-09-15新增，源頭二.3第9名，免金鑰；YoY為本管線自行計算，非官方原始欄位）"},
     {"panel": "市場頁·台股·工業生產指數", "source": "data/industrial_production.json（經濟部官方開放資料data.gov.tw#6607，2026-09-15新增，源頭二.3第10名，免金鑰；僅生產指數，外銷訂單未接入，見已知缺口說明；YoY/MoM為本管線自行計算）"},
     {"panel": "個股頁·AI·個股簡報/券商報告雷達", "source": "無（誠實佔位「功能建置中」）"},
-    {"panel": "交易頁·策略/機器人列表", "source": "data/paper_trades.json（空陣列，誠實佔位，未串接任何真實券商API）"},
+    {"panel": "交易頁·機器人（Bb-90 自動再平衡）", "source": "本機 alpha_live_server /auto/status＋/auto/ledger（真錢引擎 auto_rebalance_bb90.py 的狀態與去識別化帳本，需 token，不進 repo；先.六十-A2）"},
+    {"panel": "交易頁·策略（選股策略紙上前測）", "source": "data/paper_trades.json（空陣列，誠實顯示目前無上架策略）"},
+    {"panel": "日誌頁·損益／交易紀錄", "source": "本機 alpha_live_server /auto/ledger（真錢帳本去識別化欄位＋price_history 收盤估值，需 token，不進 repo；先.六十-A4）"},
     {"panel": "交易頁·策略監控台（2026-08-29升級：前向績效曲線+排行+明細）", "source": "data/strategies.json（research/generate_strategies_json.py從scores*.json/picks_ledger.json/TRIALS_LEDGER.md/B24_RESULTS.md/data/strategy_performance.json推導）；forward_paper欄位來自data/strategy_performance.json（research/update_strategy_performance.py每個台股開盤日排程，逐日mark-to-market，掛market.yml）"},
     {"panel": "交易頁·大盤融資維持率", "source": "data/margin_maintenance.json（2026-08-27起改排程：分子TWSE官方MI_MARGN/STOCK_DAY_ALL；分母2026-09-15起也改TWSE官方www.twse.com.tw/rwd信用交易統計，零FinMind依賴）"},
     {"panel": "日誌頁·本週損益/AI週覆盤/交易紀錄", "source": "無（尚無交易紀錄，誠實佔位）"},
@@ -1129,6 +1131,9 @@ def main():
         "todo": TODO,
         "known_limitations": KNOWN_LIMITATIONS,
     }
+    # 先.六十-C9：頂層 any_overdue（＝schedule_health.any_overdue）與寫入者，讓 App／人一眼看得到 STATUS.json 本身新不新、有沒有逾期項
+    payload["any_overdue"] = bool((payload.get("schedule_health") or {}).get("any_overdue"))
+    payload["updated_by"] = "generate_status_json.py（market.yml 每次排程＋手動）"
     # 2026-09-26（警.一）：local_schedule_heartbeat 這個key是
     # .github/workflows/local_schedule_watchdog.yml（雲端，每30分鐘）
     # 呼叫 scripts/check_local_schedule_heartbeat.py 寫入的，這支腳本本身

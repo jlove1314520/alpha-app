@@ -1,5 +1,6 @@
 {
   "generated_at": "2026-09-02T00:23:24+08:00",
+  "update_policy": "固定快照，不更新（非排程；先.六十-C9 標註，要更新需手動重跑 research/factors_us_financials.py）",
   "source": "yfinance Ticker.financials（年度損益表）+ Ticker.cashflow（年度現金流量表），免金鑰。指標定義見本檔案docstring。",
   "coverage": "6/6 檔成功",
   "errors": {},

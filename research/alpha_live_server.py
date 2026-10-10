@@ -1262,9 +1262,35 @@ async def get_auto_status(x_alpha_local_token: str | None = Header(default=None)
     except Exception as e:
         print(f"[warn] 真錢帳戶摘要計算失敗：{type(e).__name__}", flush=True)
         live_account = {"empty": False, "error": f"計算失敗（{type(e).__name__}）"}
+    # 先.六十-A2／A5：交易頁機器人卡（下一期、上次結果）與設定頁唯讀硬限制。只讀，失敗各自降級成 None。
+    extra = {"limits": None, "next_run": None, "last_result": None, "next_tranche": None}
+    try:
+        import auto_ledger_view as _lv
+        extra["limits"] = _lv.limits(cfg)
+        if not drill:
+            extra["next_run"] = _lv.next_run(AUTO_TRADING_DIR)
+            extra["last_result"] = _lv.last_result(AUTO_TRADING_DIR)
+        st_ = _read_json_safe(adir / family / "state.json") or {}
+        extra["next_tranche"] = st_.get("next_tranche")
+        extra["tranche_total"] = cfg.get("tranche_total")
+    except Exception as e:
+        print(f"[warn] 機器人卡附加資訊計算失敗：{type(e).__name__}", flush=True)
     return {"ok": True, "mode": cfg.get("mode", "SIMULATION"), "family": family, "drill": drill,
             "stopped": (adir / "STOP.flag").exists(),
-            "status": status, "pending": pending_view, "live_account": live_account}
+            "status": status, "pending": pending_view, "live_account": live_account, **extra}
+
+
+@app.get("/auto/ledger")
+async def get_auto_ledger(x_alpha_local_token: str | None = Header(default=None)):
+    """先.六十-A4：真錢（LIVE 族）帳本唯讀檢視，token 必檢。只回去識別化欄位（日期、代號、數量、均價、狀態、批次）
+    ＋本週／累計損益（price_history 收盤估值）。不回帳號、委託書號、餘額。本端點沒有任何下單能力。"""
+    _check_token(x_alpha_local_token)
+    try:
+        import auto_ledger_view as _lv
+        return await asyncio.to_thread(_lv.ledger_view, AUTO_TRADING_DIR)
+    except Exception as e:
+        print(f"[warn] 真錢帳本檢視失敗：{type(e).__name__}", flush=True)
+        raise HTTPException(status_code=500, detail=f"讀取帳本失敗：{type(e).__name__}") from e
 
 
 @app.post("/auto/cancel_pending")
@@ -1335,6 +1361,25 @@ async def post_push_unsubscribe(payload: dict, x_alpha_local_token: str | None =
     if not isinstance(ep, str):
         raise HTTPException(status_code=400, detail="需要 {\"endpoint\": \"...\"}")
     return {"ok": True, "subscriptions": _web_push().remove_sub(AUTO_TRADING_DIR, ep)}
+
+
+@app.get("/push/prefs")
+async def get_push_prefs(x_alpha_local_token: str | None = Header(default=None)):
+    """先.六十-A5：推播類別偏好（否決窗永遠開，無法關閉）。"""
+    _check_token(x_alpha_local_token)
+    return {"ok": True, "prefs": _web_push().load_prefs(AUTO_TRADING_DIR)}
+
+
+@app.post("/push/prefs")
+async def post_push_prefs(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    """payload: {"reject": bool, "complete": bool, "missed": bool}（部分欄位也可）。veto 一律忽略、永遠為 true。"""
+    _check_token(x_alpha_local_token)
+    if not isinstance(payload, dict) or not any(isinstance(payload.get(k), bool) for k in ("reject", "complete", "missed")):
+        raise HTTPException(status_code=400, detail="需要 {\"reject\"|\"complete\"|\"missed\": true|false}")
+    try:
+        return {"ok": True, "prefs": _web_push().save_prefs(AUTO_TRADING_DIR, payload)}
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"寫入推播偏好失敗：{type(e).__name__}") from e
 
 
 @app.post("/push/test")

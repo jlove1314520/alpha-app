@@ -218,6 +218,11 @@ jobs:
       - name: 紙上追蹤看守（逾期未記帳→ERROR＋App紅橫幅）
         run: python research/paper_tracking_watchdog.py
         continue-on-error: true
+      # 先.六十-C9：STATUS.json 頂層 updated_at／any_overdue／schedule_health 每次排程都重產（原本只靠手動跑，從 09-15 起停在原地）。
+      # data/STATUS.json 已在下方 git add 清單；GitHub API 查 workflow 狀態失敗時該欄位自己降級，不影響其他步驟（十二）。
+      - name: 更新 STATUS.json（先.六十-C9）
+        run: python generate_status_json.py
+        continue-on-error: true
       - name: Commit 市場資料 JSON（有變動才 commit）
         if: always()
         # 2026-08-28新增（資料源禮儀補洞item 1）：跟quotes.yml同一根因——這支
