@@ -263,6 +263,84 @@ IRREVERSIBLE = re.compile(
     r"調鬆.*門檻|放寬.*門檻|改.*GATE\d|修改.*通過門檻|violation_rate門檻|"
     r"ToS|robots\.txt|服務條款|繞過驗證碼|付費資料|爬蟲.*繞")
 
+# 2026-10-11（先.六十二-1）守門員誤判修正。實測誤判：「不接付費模型」被當成要花錢、
+# 「刪除舊清單的本機 localStorage 鍵」被當成不可逆、「Gateway 需登入時只顯示 CTA」被當成要總司令登入。
+# 改為：①只比對「標題（第一組 **…**）＋做法句（「做法：」開頭的分句）」；條目沒寫「做法：」時，比對標題＋
+# 括號外本文；〔來源：…〕〔現況：…〕〔心跳／驗收…〕這類描述性分句一律不看。②否定詞（不接／不用／不得／
+# 不做／無需／非）後面 8 個字內的命中不算。③「X 時」條件句（命中後 3 字內接「時」）是描述狀態，不算要人動手。
+# ④刪除／清空的對象若是 App 內可重建的東西（localStorage、快取、登記、allowlist、暫存）不算不可逆。
+# 十二節：這些判斷自己出錯時一律降級回舊版（整句比對），寧可多擋一次，不可讓守門員崩潰。
+GUARD_NEGATIONS = ("不接", "不用", "不得", "不做", "無需", "非")
+GUARD_NEG_WINDOW = 8
+_GUARD_DESC_PREFIX = ("來源：", "現況：", "心跳：", "驗收：", "心跳位置：", "驗收條件：")
+_GUARD_SAFE_DELETE = re.compile(r"localStorage|快取|cache|登記|allowlist|暫存|本機.{0,6}鍵")
+
+
+def guard_scope(clean: str) -> str:
+    """回傳守門員要比對的文字：標題＋做法句；沒有做法句時用標題＋括號外本文。"""
+    m = re.search(r"\*\*(.+?)\*\*", clean)
+    title = m.group(1) if m else ""
+    segs = re.split(r"[；;〔〕]", clean)
+    how = [s for s in segs if s.strip().startswith("做法：")]
+    if how:
+        return title + "\n" + "\n".join(how)
+    body = re.sub(r"〔[^〕]*〕", " ", clean)
+    if m:
+        body = body.replace(m.group(0), " ")
+    body_segs = [s for s in re.split(r"[；;]", body) if not s.strip().startswith(_GUARD_DESC_PREFIX)]
+    return title + "\n" + "；".join(body_segs)
+
+
+def _guard_hit_ignored(text: str, mt: "re.Match", irreversible: bool) -> bool:
+    p = mt.start()
+    pre = text[max(0, p - GUARD_NEG_WINDOW - 2):p]
+    for neg in GUARD_NEGATIONS:
+        i = pre.rfind(neg)
+        if i >= 0 and (len(pre) - (i + len(neg))) <= GUARD_NEG_WINDOW:
+            return True
+    if not irreversible and "時" in text[mt.end():mt.end() + 3]:
+        return True
+    if irreversible and mt.group(0) in ("刪除", "清空"):
+        clause = re.split(r"[，。；;、\n]", text[mt.end():])[0][:30]
+        if _GUARD_SAFE_DELETE.search(clause):
+            return True
+    return False
+
+
+def guard_hits(clean: str) -> dict:
+    """{'needs_user': [命中字…], 'irreversible': [命中字…]}；空清單＝不擋。自身出錯→退回整句比對（fail safe：寧可多擋）。"""
+    out = {"needs_user": [], "irreversible": []}
+    try:
+        scope = guard_scope(clean)
+        for key, rx, irr in (("needs_user", NEEDS_USER, False), ("irreversible", IRREVERSIBLE, True)):
+            out[key] = [mt.group(0) for mt in rx.finditer(scope) if not _guard_hit_ignored(scope, mt, irr)]
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: guard_hits failed ({type(e).__name__})，退回整句比對")
+        out = {"needs_user": [m.group(0) for m in NEEDS_USER.finditer(clean)],
+               "irreversible": [m.group(0) for m in IRREVERSIBLE.finditer(clean)]}
+    return out
+
+
+def guard_precheck() -> list:
+    """先.六十二-3：每輪開始時對所有 - [ ] 預跑兩組偵測，只印「會被擋」清單；不改任何標記。自身失敗只印警告。"""
+    found = []
+    try:
+        for ln in _lines():
+            if not ln.lstrip().startswith("- [ ]"):
+                continue
+            clean = re.sub(r"^\s*- \[ \]\s*", "", ln).strip()
+            h = guard_hits(clean)
+            if h["needs_user"] or h["irreversible"]:
+                found.append((clean[:60], h))
+        for title, h in found:
+            _safe_print(f"GUARD_PRECHECK_WARN：{title}… 會被擋（需總司令：{'、'.join(h['needs_user']) or '—'}；"
+                        f"不可逆：{'、'.join(h['irreversible']) or '—'}）。只警告、不改標記，由互動視窗處理")
+        if not found:
+            _safe_print("GUARD_PRECHECK：所有 - [ ] 項目都不會被守門員擋下")
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: guard_precheck failed ({type(e).__name__})，本輪略過自檢")
+    return found
+
 
 def _load_state() -> dict:
     try:
@@ -686,6 +764,7 @@ def build_prompt() -> int:
     # 問題），不是「偵測到真的矛盾」這種設計內的return 4/5——那些是正常
     # 工作結果，不是本規則要防的對象。偵測失敗一律fail open（當成沒偵測到
     # 問題），因為「這輪漏抓一次矛盾」永遠比「DevQueue整支崩潰3小時」代價低。
+    guard_precheck()  # 先.六十二-3：只印警告，自身失敗已在函式內降級
     ambiguity = None
     try:
         ambiguity = _order_marker_ambiguity()
@@ -768,11 +847,13 @@ def build_prompt() -> int:
     clean = re.sub(r"^- \[ \]\s*", "", text).strip()
 
     # 停下條件 1、2 在產生提示詞之前就先判斷——不要讓無人值守的行程「開始做了才發現不能做」
-    if NEEDS_USER.search(clean):
+    # 先.六十二-1：只看標題＋做法句、排除否定詞與條件句（guard_hits）
+    _gh = guard_hits(clean)
+    if _gh["needs_user"]:
         mark_blocked("需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事")
         print("BLOCKED_NEEDS_USER")
         return 2
-    if IRREVERSIBLE.search(clean):
+    if _gh["irreversible"]:
         mark_blocked("涉及不可逆動作，依 CLAUDE.md 必須先問過總司令")
         print("BLOCKED_IRREVERSIBLE")
         return 2

@@ -42,6 +42,22 @@
    `research/queue_depth_config.py::FROZEN_MECHANISM_FAMILIES`，目前
    凍結：regime/擇時降曝險家族（含`常備.6`／`常備.7`）。解凍需總司令
    另行裁示，執行者不得自行判斷「這次不一樣」補入。
+6. **守門員保留字與替代寫法（2026-10-11總司令裁示【先.六十二】二新增）**：
+   `scripts/dev_queue_runner.py`的`NEEDS_USER`／`IRREVERSIBLE`會比對條目的
+   **標題與「做法：」句**（〔來源：…〕〔現況：…〕〔心跳／驗收…〕不看；否定詞
+   「不接／不用／不得／不做／無需／非」後 8 字內的命中不算）。命中就標`- [!]`
+   交還總司令。**真的需要總司令動手時就照寫保留字**；只是描述、不需要總司令
+   動手時，改用右欄寫法，避免自走被誤擋：
+
+   | 保留字 | 何時照寫（真的要擋） | 不需要總司令時的替代寫法 |
+   |---|---|---|
+   | 付費／購買／採購 | 要花錢、要採購資料 | 「收費方案（不採用）」「免費端點」「不接收費模型」 |
+   | 刪除／清空／移除 | 刪檔、刪資料、清資料庫 | UI 或清單項目用「下架」「撤下」；App 本機鍵用「重設本機設定」 |
+   | 登入 | 要總司令本人登入帳號 | 「連線」「開機後」「啟動時」「Gateway 需重新連線」 |
+   | 核准／裁示 | 要總司令拍板才能動 | 「提案後待同意」「交總司令審閱」 |
+
+   每輪自走開始時`guard_precheck()`會把「會被擋」的`- [ ]`項目印在 cycle 輸出
+   （`GUARD_PRECHECK_WARN`），只警告、不改標記，由互動視窗下一輪改寫。
 
 ---
 
@@ -18717,14 +18733,14 @@ C. 資料新鮮度
 App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「完成」定義）。不得切換自動交易模式、不得觸發真錢委託。
 
 - [x] **常備.開發-1 STATUS.json 頂層 updated_at／any_overdue 每次排程寫入時更新**〔心跳：PENDING_QUEUE 本行＋PROGRESS_HEARTBEAT；驗收：local_schedule_watchdog 每 30 分鐘、market.yml 每次排程後 data/STATUS.json 的 updated_at 在 1 小時內、頂層有 any_overdue〕〔2026-10-10 已隨先.六十-C9 完成：check_local_schedule_heartbeat.py::_refresh_top_level＋market.yml「更新 STATUS.json（先.六十-C9）」步驟〕
-- [!] **常備.開發-2 AI 盤前日報與週覆盤（本地規則生成，不接付費模型）**〔來源：既有 data/news.json＋data/events.json（＋週覆盤用 /auto/ledger 與 data/paper_*.json）；做法：新增 .github/scripts/build_daily_brief.py 以固定規則（事件日曆、昨夜美股與台指期變動、自選股重大訊息計數）產出 data/daily_brief.json，掛 market.yml 並加進 git add 清單（十節）；App 今日頁「AI 盤前日報」與日誌頁「AI 週覆盤」改讀它，標「規則摘要，非 AI 判斷、非投資建議」；完成後刪掉 data/placeholder_allowlist.json 對應兩條登記。心跳：本行＋PROGRESS_HEARTBEAT；驗收：daily_brief.json 每交易日更新、App 兩張卡不再顯示「功能建置中」、冒煙 45b 全綠〕　**⛔ 自走中止（2026-10-10 23:16）**：需要總司令親自操作（登入／實機／花錢／核准），自走行程不做這類事
+- [ ] **常備.開發-2 AI 盤前日報與週覆盤（本地規則生成，不接付費模型）**〔來源：既有 data/news.json＋data/events.json（＋週覆盤用 /auto/ledger 與 data/paper_*.json）；做法：新增 .github/scripts/build_daily_brief.py 以固定規則（事件日曆、昨夜美股與台指期變動、自選股重大訊息計數）產出 data/daily_brief.json，掛 market.yml 並加進 git add 清單（十節）；App 今日頁「AI 盤前日報」與日誌頁「AI 週覆盤」改讀它，標「規則摘要，非 AI 判斷、非投資建議」；完成後刪掉 data/placeholder_allowlist.json 對應兩條登記。心跳：本行＋PROGRESS_HEARTBEAT；驗收：daily_brief.json 每交易日更新、App 兩張卡不再顯示「功能建置中」、冒煙 45b 全綠〕〔2026-10-11 先.六十二-2：解除誤標——原本標題的否定句被守門員當成要花錢而擋下，守門員已改為排除否定句；原中止紀錄：2026-10-10 23:16 BLOCKED_NEEDS_USER〕
 - [ ] **常備.開發-3 持倉損益卡（首頁）**〔來源：本機 /live/positions（Shioaji 唯讀）＋data/price_history.json；做法：首頁總資產卡下方列各持股股數、成本、市值、未實現損益（只在本機伺服器連線時顯示，不進 repo、不印帳號）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙新增一項用假回應驗顯示、無連線時顯示說明而非空白〕
 - [ ] **常備.開發-4 上櫃／金融股財報接 TPEx／MOPS**〔現況：個股頁財報只涵蓋 TWSE 上市一般業（t187ap06_L_ci／07_L_ci）；做法：先照七節「三來源查證」查 TPEx openapi 與 MOPS 官方開放資料是否有上櫃一般業與金融業綜合損益表／資產負債表端點，查證紀錄寫進 docs/DATA_SOURCE_MAP.md，再擴充 .github/scripts/update_stock_financials.py；頻率上限先寫進 C:\alpha\CLAUDE.md 清單；心跳：本行＋PROGRESS_HEARTBEAT；驗收：抽 3 檔上櫃、3 檔金融股個股頁財報有數字且 source 標記正確〕
 - [ ] **常備.開發-5 美股事件時間軸（SEC 8-K／財報日）**〔來源：SEC EDGAR（10 req/秒上限，沿用 0.2 秒間隔）＋data/earnings_calendar.json；做法：個股頁事件分頁美股改顯示近 90 天 8-K 項目與下一次財報日；完成後刪掉 placeholder_allowlist 對應登記；心跳：本行＋PROGRESS_HEARTBEAT；驗收：AAPL／NVDA 事件分頁有時間軸、無資料代號顯示原因〕
 - [ ] **常備.開發-6 B16 三榜回測驗證（價值成長／題材動能／未來性）**〔⚠️ 凍結.二 期間只准「重新驗證既有榜單」，不得登記新 alpha 試驗、不得因結果調因子權重；做法：照 BACKLOG B16／B24 既有規格與 research/backtest 引擎（十三節：只有互動視窗能改引擎，DevQueue 只呼叫）；心跳：本行＋PROGRESS_HEARTBEAT（不寫 TRIALS_REGISTRY）；驗收：三榜各一份回測報告含天條一 MDD、0050 對照、全成本〕
 - [ ] **常備.開發-7 B27 台股現金流量表／FCF**〔來源：BACKLOG B27（FinMind TaiwanStockCashFlowsStatement，季資料、一季抓一次、硬快取、走 Actions→JSON，不 client-side 直抓）；先查 TWSE／TPEx 官方是否已有現金流量表端點（三來源查證）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：個股頁財報 FCF 欄有數字並標 source、上櫃查不到時說明原因〕
-- [ ] **常備.開發-8 多自選清單**〔做法：自選股從單一清單改為多清單（預設「我的自選」），沿用 localStorage＋/settings 同步，舊資料自動搬進預設清單；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙新增建立／切換／刪除清單、舊格式自動遷移〕
-- [ ] **常備.開發-9 ibkr_quotes 排程化**〔現況：ibkr_quotes.py 需手動啟動；做法：比照 AlphaShioajiQuotes 建 Windows 工作排程器任務（登入後啟動、失敗自動重試），每週日 ET 01:00 權杖失效仍需人工登入（CLAUDE.md IBKR 節），App 已有逾期標示；建排程屬本機設定變更，先寫提案給總司令核准再建（提案先於執行）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：開機後 quotes_ibkr.json 在美股盤中 30 分鐘內有更新〕
+- [ ] **常備.開發-8 多自選清單**〔做法：自選股從單一清單改為多清單（預設「我的自選」），沿用 localStorage＋/settings 同步，舊資料自動搬進預設清單；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙新增建立／切換／下架清單、舊格式自動遷移〕
+- [ ] **常備.開發-9 ibkr_quotes 排程化**〔現況：ibkr_quotes.py 需手動啟動；做法：比照 AlphaShioajiQuotes 建 Windows 工作排程器任務（開機連線後啟動、失敗自動重試），每週日 ET 01:00 權杖失效仍需人工重新連線 Gateway（CLAUDE.md IBKR 節），App 已有逾期標示；建排程屬本機設定變更，先寫提案，總司令同意後再建（提案先於執行）；心跳：本行＋PROGRESS_HEARTBEAT；驗收：開機後 quotes_ibkr.json 在美股盤中 30 分鐘內有更新〕
 - [ ] **常備.開發-10 /live 美股 1 分 K 501 改為誠實說明**〔現況：個股頁切「1分K(即時)」查美股時伺服器回 501，App 顯示不清楚；做法：App 收到 501 時改顯示「美股 1 分 K 尚未提供（IBKR 連線衝突未確認），請看日線」，伺服器不改；心跳：本行＋PROGRESS_HEARTBEAT；驗收：冒煙用假 501 回應驗文字〕
 - [!] **常備.開發-因子類 B18～B22、B30～B32**〔BLOCKED：凍結.二（CLAUDE.md 十四節）——轉向.一 結果出來前不得登記為新試驗、不得開新搜尋輪次；解除：PENDING_QUEUE「轉向.一」條目寫明「凍結.二解除」後，逐項改回 - [ ] 並各自補心跳位置與驗收條件〕
 
@@ -18759,7 +18775,7 @@ App 改動一律跑 `node scripts/smoke_test.mjs` 全綠才 commit（四節「�
 心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
 ```
 
-- [ ] **先.六十二-1 NEEDS_USER／IRREVERSIBLE 只比對標題與做法句；排除否定詞後 8 字內命中與〔來源／現況〕描述括號；補 selftest 五句**（互動視窗執行）
-- [ ] **先.六十二-2 解除誤標：常備.開發-2 改回 - [ ]；-8、-9 改寫避開保留字；檔頭保留字表新增替代寫法**（互動視窗執行）
-- [ ] **先.六十二-3 守門員自檢：每輪自走開始時預跑兩組偵測、只印會被擋清單，不改標記**（互動視窗執行）
-- [ ] **先.六十二-4 smoke＋selftest＋commit 回報**（互動視窗執行）
+- [x] **先.六十二-1 NEEDS_USER／IRREVERSIBLE 只比對標題與做法句；排除否定詞後 8 字內命中與〔來源／現況〕描述括號；補 selftest 五句**（互動視窗執行）〔2026-10-11 完成：dev_queue_runner.py 新增 guard_scope／guard_hits——只比對標題＋「做法：」句（無做法句時用標題＋括號外本文），〔來源／現況／心跳／驗收〕分句不看；否定詞（不接／不用／不得／不做／無需／非）後 8 字內命中不算；「X 時」條件句不算要人動手；刪除對象是 localStorage／快取／登記／allowlist／暫存不算不可逆；自身出錯退回整句比對（寧可多擋）。scripts/selftest_dev_queue_guard.py 22/22：指定三句不觸發、兩句仍觸發〕
+- [x] **先.六十二-2 解除誤標：常備.開發-2 改回 - [ ]；-8、-9 改寫避開保留字；檔頭保留字表新增替代寫法**（互動視窗執行）〔2026-10-11 完成：常備.開發-2 改回 - [ ]（保留原中止紀錄）；-8「刪除清單」改「下架清單」；-9「登入後啟動」改「開機連線後啟動」、「人工登入」改「人工重新連線 Gateway」、「總司令核准」改「總司令同意」；檔頭新增第 6 點保留字表（付費／刪除／登入／核准的替代寫法）〕
+- [x] **先.六十二-3 守門員自檢：每輪自走開始時預跑兩組偵測、只印會被擋清單，不改標記**（互動視窗執行）〔2026-10-11 完成：guard_precheck() 在每輪 build_prompt 開頭對所有 - [ ] 預跑兩組偵測，印 GUARD_PRECHECK_WARN 清單，只警告不改標記；自身失敗只印 WARN_DETECTOR_CRASHED。目前實測：所有 - [ ] 都不會被擋〕
+- [x] **先.六十二-4 smoke＋selftest＋commit 回報**（互動視窗執行）〔2026-10-11 完成：冒煙全綠 64 PASS；selftest_dev_queue_guard 22/22、interactive_yield 18/18、claude_auth_detection 全過〕
