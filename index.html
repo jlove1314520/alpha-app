@@ -1465,6 +1465,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
       <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
       <div class="note" style="margin-top:6px">四個數字只存在你的裝置與本機伺服器設定檔（經 /settings 同步），不會進公開 repo。10.19% 為 Bb-90 回測年化（回測，非保證），目標金額 1 億元。</div>
+      <div class="note" style="margin-top:6px">勝算估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
     </div>
 
     <div class="card">
@@ -6780,10 +6781,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     renderBtPath();
   }
   // 先.三十一-二：橫幅由三個來源合成——本機狀態/緊急停止、本機離線、Pages 上的去識別化排程心跳
-  const AUTO_BAN={local:'',offline:'',hb:''};
+  const AUTO_BAN={local:'',offline:'',hb:'',px:''};
   function renderAutoBanner(){
     const ban=document.getElementById('auto-banner');if(!ban)return;
-    const msgs=[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.local].filter(Boolean);
+    const msgs=[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.px,AUTO_BAN.local].filter(Boolean);
     ban.style.display=msgs.length?'':'none';
     ban.textContent=msgs.join('　｜　');
   }
@@ -6802,6 +6803,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     if(mins>=13*60+50&&!has('settle'))return '自動交易排程未執行（電腦可能關機或離線）：今日盤後結算沒有心跳';
     if(mins>=9*60+50&&!has('run')&&!(instMins>9*60+50))return '自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳';
     return '';
+  }
+  // 先.五十八-A2：白名單三檔（0050／00646／00697B）價格補不到時，雲端每日更新會寫 data/whitelist_price_status.json，這裡顯示紅條（不得靜默）
+  async function loadWhitelistPriceStatus(){
+    try{
+      const r=await fetch('data/whitelist_price_status.json?t='+Date.now(),{cache:'no-store'});
+      if(!r.ok){console.warn('[loadWhitelistPriceStatus] HTTP',r.status);AUTO_BAN.px='';return}
+      const d=await r.json();
+      AUTO_BAN.px=(d&&d.all_ok===false)?String(d.warning||'白名單 ETF 價格缺漏（詳見 data/whitelist_price_status.json）'):'';
+    }catch(e){console.warn('[loadWhitelistPriceStatus]',e);recordGlobalError('loadWhitelistPriceStatus',e);AUTO_BAN.px=''}
+    renderAutoBanner();
   }
   async function loadAutoHeartbeat(){
     try{
@@ -6842,6 +6853,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     const note=document.getElementById('auto-status-note');
     if(!note)return;
     _safeAsync('loadAutoHeartbeat',loadAutoHeartbeat);
+    _safeAsync('loadWhitelistPriceStatus',loadWhitelistPriceStatus);
     try{
       if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器';AUTO_BAN.offline='';AUTO_BAN.local='';renderAutoBanner();return}
       const r=await liveFetch('/auto/status',5000);
@@ -8259,7 +8271,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-09.2144';
+  const APP_VERSION='2026-10-10.1209';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

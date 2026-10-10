@@ -64,6 +64,15 @@ MI_INDEX_SOURCE = "twse_mi_index"  # 獨立節流名稱，不跟其他腳本的t
 MI_INDEX_MAX_DATES_PER_RUN = 8
 MI_INDEX_MIN_ROWS = 800  # 少於此筆數判定為異常回應（正常約1380）
 PRICE_HISTORY_DAYS = 90
+# 2026-10-10（先.五十八-A2）：Bb-90 自動交易白名單。全市場端點（STOCK_DAY_ALL／tpex_mainboard_quotes）
+# 實測會漏掉個別 ETF 的當日列（00646 缺 42 天、00697B 缺 41 天，先.五十七-A2 才回補），
+# 這裡在全市場端點缺漏時改用官方單股月資料端點補當日收盤，補不到就寫狀態檔讓 App／推播警告。
+WHITELIST_CODES = {"0050": "twse", "00646": "twse", "00697B": "tpex"}
+WHITELIST_STATUS_PATH = REPO_ROOT / "data" / "whitelist_price_status.json"
+TWSE_STOCK_DAY_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY"
+TPEX_TRADING_STOCK_URL = "https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock"
+WHITELIST_RECENT_DAYS = 5      # 除了當日，也檢查最近幾個交易日有沒有缺
+WHITELIST_SLEEP_SEC = 4.2      # 單股端點每次請求間隔（C:\alpha\CLAUDE.md 頻率上限：TWSE rwd 未公布上限，保守值）
 
 # 2026-08-28新增（使用者裁示「428是我們自己打出來的」，「資料源禮儀」規則，
 # 跟research/finmind_client.py同一套schema/同一份共用狀態檔，各自複製一份
@@ -351,6 +360,109 @@ def backfill_twse_gap(prices: dict, twse_codes: set, openapi_date: str | None, t
     print(f"[補洞] 已存上市最後日={stored_last}，OpenAPI日={openapi_date}，今天(台北)={today_tw}；"
           f"MI_INDEX有資料={sorted(fetched)}，無資料(休市或未發布)={no_data}")
     return fetched, sorted(fetched), no_data
+
+
+def fetch_twse_stock_day_month(code: str, ym: str) -> list[dict]:
+    """TWSE 單一個股月資料（ym='YYYY-MM'）。stat 非 OK 回空清單；回傳非 JSON 會拋例外由呼叫端記錄。"""
+    url = f"{TWSE_STOCK_DAY_URL}?date={ym.replace('-', '')}01&stockNo={code}&response=json"
+    r = _get_retry(url, "twse_rwd_stock_day", timeout=20)
+    r.raise_for_status()
+    j = r.json()
+    if j.get("stat") != "OK":
+        return []
+    out = []
+    for row in j.get("data") or []:   # 日期(民國 y/m/d), 成交股數, 成交金額, 開, 高, 低, 收, 漲跌, 筆數
+        y, m, d = str(row[0]).strip().split("/")
+        o, h, lo, c = (_num(x) for x in row[3:7])
+        if c is None:
+            continue
+        out.append({"date": f"{int(y) + 1911:04d}-{int(m):02d}-{int(d):02d}", "open": o, "high": h, "low": lo,
+                    "close": c, "adj_close": c, "volume": _num(row[1]), "turnover": _num(row[2]),
+                    "source": "twse_stock_day"})
+    return out
+
+
+def fetch_tpex_trading_stock_month(code: str, ym: str) -> list[dict]:
+    """TPEx 單一個股月資料（量額單位為仟股／仟元，這裡換算成股／元，與 tpex_mainboard_quotes 同單位）。"""
+    url = f"{TPEX_TRADING_STOCK_URL}?code={code}&date={ym.replace('-', '/')}/01&response=json"
+    r = _get_retry(url, "tpex_www_trading_stock", timeout=20)
+    r.raise_for_status()
+    t = (r.json().get("tables") or [{}])[0]
+    out = []
+    for row in t.get("data") or []:
+        y, m, d = str(row[0]).strip().split("/")
+        o, h, lo, c = (_num(x) for x in row[3:7])
+        if c is None:
+            continue
+        vol, amt = _num(row[1]), _num(row[2])
+        out.append({"date": f"{int(y) + 1911:04d}-{int(m):02d}-{int(d):02d}", "open": o, "high": h, "low": lo,
+                    "close": c, "adj_close": c,
+                    "volume": vol * 1000 if vol is not None else None,
+                    "turnover": amt * 1000 if amt is not None else None,
+                    "source": "tpex_trading_stock"})
+    return out
+
+
+def fill_whitelist_gaps(prices: dict, target_dates: dict, recent_dates: list[str],
+                        fetchers: dict | None = None, sleep_sec: float = WHITELIST_SLEEP_SEC) -> dict:
+    """先.五十八-A2：白名單三檔在全市場端點缺漏時，用官方單股月資料補「當日＋最近幾個交易日」的收盤。
+
+    target_dates：{"twse": 上市本輪最新交易日, "tpex": 上櫃本輪最新交易日}（None＝本輪查不到，不檢查當日）。
+    recent_dates：最近幾個已確認有開市的交易日（取自大盤代表股的既有歷史），只補缺、不覆蓋既有列。
+    回傳狀態 dict（寫進 data/whitelist_price_status.json）。本函式任何例外都只記進狀態，不往外拋
+    （CLAUDE.md 十二節：守門員自身失敗只降級成警告）。"""
+    fetchers = fetchers or {"twse": fetch_twse_stock_day_month, "tpex": fetch_tpex_trading_stock_month}
+    status = {"generated_at": datetime.now(TW_TZ).isoformat(), "target_dates": target_dates,
+              "codes": {}, "all_ok": True}
+    first_request = True
+    for code, mkt in WHITELIST_CODES.items():
+        info = {"market": mkt, "filled": [], "missing": [], "errors": []}
+        try:
+            have = {r.get("date") for r in prices.get(code) or []}
+            want = set(recent_dates)
+            if target_dates.get(mkt):
+                want.add(target_dates[mkt])
+            last_have = max(have) if have else None
+            # 只檢查「這檔已有資料之後」與「要求範圍內」的日子，避免把上市前的日子當缺漏
+            need = sorted(d for d in want if d not in have and (last_have is None or d > min(have)))
+            if need:
+                months = sorted({d[:7] for d in need})
+                got: dict[str, dict] = {}
+                for ym in months:
+                    if not first_request:
+                        time.sleep(sleep_sec)
+                    first_request = False
+                    try:
+                        for row in fetchers[mkt](code, ym):
+                            got[row["date"]] = row
+                    except Exception as e:  # noqa: BLE001
+                        info["errors"].append(f"{ym}: {type(e).__name__}: {_redact_secrets(str(e))[:160]}")
+                for d in need:
+                    row = got.get(d)
+                    if row is None:
+                        info["missing"].append(d)
+                        continue
+                    row = dict(row, fill_note="先.五十八-A2：全市場端點缺漏，改用官方單股端點補")
+                    prices[code] = merge_rows(prices.get(code), row)
+                    info["filled"].append(d)
+            rows = prices.get(code) or []
+            info["last_date"] = rows[-1]["date"] if rows else None
+            info["last_source"] = (rows[-1].get("source") or "all_market_endpoint") if rows else None
+        except Exception as e:  # noqa: BLE001
+            info["errors"].append(f"internal: {type(e).__name__}: {e}")
+            info.setdefault("last_date", None)
+        target = target_dates.get(mkt)
+        info["ok"] = (not info["missing"]) and not (target and (info.get("last_date") or "") < target) \
+            and not any(x.startswith("internal") for x in info["errors"])
+        if not info["ok"]:
+            status["all_ok"] = False
+        status["codes"][code] = info
+        print(f"[白名單補缺] {code}：補 {len(info['filled'])} 天{info['filled'] or ''}，"
+              f"仍缺 {info['missing'] or '無'}，最新 {info.get('last_date')}，{'OK' if info['ok'] else '⚠ 警告'}")
+    bad = [c for c, i in status["codes"].items() if not i["ok"]]
+    status["warning"] = (f"白名單 ETF 價格缺漏：{'、'.join(bad)}（官方單股端點也補不到），"
+                         "自動交易的價格新鮮度檢查可能擋單") if bad else None
+    return status
 
 
 def merge_rows(existing: list[dict] | None, latest: dict) -> list[dict]:
@@ -745,6 +857,22 @@ def main():
     else:
         mixed_date_warning = None
 
+    # 2026-10-10（先.五十八-A2）：白名單三檔補缺。整段 fail open，失敗只記警告（十二節）。
+    whitelist_status = None
+    try:
+        ref = [r["date"] for r in (prices.get("2330") or [])[-WHITELIST_RECENT_DAYS:]]
+        whitelist_status = fill_whitelist_gaps(
+            prices, {"twse": twse_latest_date, "tpex": tpex_payload_date or twse_latest_date}, ref)
+    except Exception as e:  # noqa: BLE001
+        print(f"⚠ 白名單補缺整體失敗（不中止）：{e}")
+        errors.append(f"whitelist_fill: {e}")
+        whitelist_status = {"generated_at": datetime.now(TW_TZ).isoformat(), "all_ok": False, "codes": {},
+                            "warning": f"白名單 ETF 價格檢查本身失敗：{type(e).__name__}（無法確認三檔是否最新）"}
+    try:
+        WHITELIST_STATUS_PATH.write_text(json.dumps(whitelist_status, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        print(f"⚠ 寫 whitelist_price_status.json 失敗（不中止）：{e}")
+
     payload.setdefault("meta", {})
     payload["meta"]["generated_at"] = datetime.now(TW_TZ).isoformat()
     payload["meta"]["source"] = "TWSE STOCK_DAY_ALL（上市）+ TPEx tpex_mainboard_quotes（上櫃）每日累積式寫回；adj_close由TWSE TWT48U除權息事件回溯調整；起始種子=research/build_price_history.py（FinMind快取）"  # 2026-09-03（P0三-三.3）
@@ -759,6 +887,7 @@ def main():
     payload["meta"]["twse_openapi_date"] = openapi_date
     payload["meta"]["twse_gap_filled_dates"] = twse_gap_dates
     payload["meta"]["twse_no_data_dates"] = twse_no_data_dates
+    payload["meta"]["whitelist_fill"] = whitelist_status
     # 自我測試（修.八）：0050最新日期必須等於本輪查得到資料的最近一個上市交易日。
     # 只記錄結果、不中止（守門員自身失敗不得拖垮主流程，十二節）；同時印出讓CI log可見。
     row_0050 = prices.get("0050") or []

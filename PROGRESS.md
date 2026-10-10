@@ -1,3 +1,14 @@
+## 2026-10-10 12:1x（互動視窗，維運帽）先.五十八-A2 白名單 ETF 價格補缺根因修補
+
+等待總司令審閱：1 件（結案.一；清單見 `research/AWAITING_REVIEW.md`）。
+
+- **改了什麼**：`.github/scripts/update_price_history.py` 新增 `fill_whitelist_gaps()`。全市場端點（STOCK_DAY_ALL／tpex_mainboard_quotes）處理完後，檢查 0050、00646、00697B 的「本輪最新交易日＋最近 5 個交易日」（參考 2330 的既有日期）。缺漏時改打官方單股月資料端點（TWSE rwd STOCK_DAY；TPEx tradingStock，仟股與仟元乘 1000）補上，只補不覆蓋，每筆標 `source`＋`fill_note`，請求間隔 4.2 秒。
+- **補不到不靜默**：結果寫進 `data/whitelist_price_status.json`（也寫進 price_history meta.whitelist_fill），已加入 `market.yml` 的 git add 清單（CLAUDE.md 第十節：這個 commit 新增會寫 data/whitelist_price_status.json 的排程步驟，已確認在 market.yml allowlist）。App 自動交易紅條新增來源 `AUTO_BAN.px`；每晚 20:00 `preflight_reminder.py` 會先 git fetch 讀遠端狀態檔，缺漏就推播「白名單 ETF 價格缺漏」。
+- **整段 fail open**：補缺本身出錯只記 errors 與警告，不中斷價格更新（十二節）。
+- **證據**：`scripts/selftest_whitelist_price_fill.py` 12/12 PASS（不連網）；兩個官方端點實測，00646／00697B 都抓到 10/8 收盤；`selftest_price_history_gaps` PASS；`selftest_auto_rebalance` 失敗無；冒煙全部通過。
+- **`[自行裁量]`**：檢查範圍是「當日＋最近 5 個交易日」，不是只看當日，這樣也能接住前幾天漏掉的；參考交易日取 2330 的歷史。
+- **下一步**：A3 時間閘（10/12 08:30 後）；B／C 由分身進行中。
+
 ## 2026-10-08 18:31～19:1x（DevQueue 自走 cycle 20261008-183102，開發帽）
 
 等待總司令審閱：16 件（本輪 +1：先.五十一-4 的 4804 停止交易裁示；清單見 `research/AWAITING_REVIEW.md`）。
