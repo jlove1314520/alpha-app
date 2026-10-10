@@ -580,6 +580,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，非交易確認、非投資建議；永豐為模擬環境、IBKR為paper帳戶，皆無真實資金</div>
     </div>
 
+    <!-- 常備.開發-3（2026-10-11）：持倉損益卡。只讀本機 /live/positions（Shioaji 唯讀查詢，不進 repo、不顯示帳號）；
+         未連線本機伺服器時顯示說明，不留空白。 -->
+    <div class="card" id="home-pos-card">
+      <h3>持倉損益（唯讀）</h3>
+      <div id="home-pos-body" class="note">尚未連線本機伺服器</div>
+    </div>
+
     <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
          不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
     <div class="card ai-card" id="home-ai-card" hidden>
@@ -7195,18 +7202,47 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     }catch(e){console.warn('[autoSetStop]',why,e);recordGlobalError('autoSetStop',e);alert('操作失敗：'+(e&&e.message||e))}
     await loadAutoTrading();
   }
+  // 常備.開發-3（2026-10-11）：持倉損益卡。posR＝/live/positions 回應；msg＝無資料時要顯示的說明。
+  // Shioaji 預設 Unit.Common：quantity 單位「張」、price＝成本均價、last_price＝現價、pnl＝券商算的未實現損益（已含預估費用）。
+  // 現價缺時退回 resolveQuote（即時→quotes→全市場→sparklines 最後收盤＝price_history 最後收盤的輕量版）。
+  function renderHomePositions(posR,msg){
+    const el=document.getElementById('home-pos-body');if(!el)return;
+    const esc=_autoEsc;
+    const sp=posR&&posR.sinopac;
+    if(!sp||!sp.available){el.textContent=msg||('永豐持倉暫時無法取得（'+((sp&&sp.reason)||'常駐行程未啟動或非交易時段')+'）');return}
+    const ps=(sp.positions||[]).filter(p=>Number(p.quantity)>0);
+    if(!ps.length){el.textContent='永豐目前沒有整股持倉（以「張」為單位查詢，零股部位不在此列）';return}
+    let tCost=0,tVal=0,tPnl=0;
+    const rows=ps.map(p=>{
+      const code=String(p.code||''),lots=Number(p.quantity)||0,sh=lots*1000,cost=Number(p.price)||0;
+      let lp=Number(p.last_price)||0,src='券商';
+      if(!lp){const q=resolveQuote(code,false);if(q&&q.price!=null){lp=Number(q.price);src=q.tier==='history'?'收盤':'報價'}}
+      const bp=p.pnl==null||p.pnl===''?NaN:Number(p.pnl);
+      const val=lp?sh*lp:null,pnl=src==='券商'&&Number.isFinite(bp)?bp:(val!=null&&cost?val-sh*cost:null);
+      tCost+=sh*cost;if(val!=null)tVal+=val;if(pnl!=null)tPnl+=pnl;
+      const pct=pnl!=null&&cost?pnl/(sh*cost)*100:null;
+      const cls=pnl==null?'':(pnl>=0?'pos':'neg');
+      return '<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--hairline);font-size:12.5px">'+
+        '<span><b>'+esc(nameOf(code))+'</b> <span class="note">'+esc(code)+' · '+lots+' 張 · 成本 '+(cost?cost.toFixed(2):'—')+'</span></span>'+
+        '<span class="num" style="text-align:right;white-space:nowrap">市值 '+(val!=null?Math.round(val).toLocaleString('zh-TW'):'—')+(src!=='券商'?'<span class="note">（'+src+'）</span>':'')+
+        '<br><b class="'+cls+'">'+(pnl==null?'—':(pnl>0?'+':'')+Math.round(pnl).toLocaleString('zh-TW'))+(pct!=null?'（'+(pct>0?'+':'')+pct.toFixed(2)+'%）':'')+'</b></span></div>';
+    });
+    el.innerHTML=rows.join('')+'<div style="margin-top:6px">合計成本 '+Math.round(tCost).toLocaleString('zh-TW')+'　市值 '+Math.round(tVal).toLocaleString('zh-TW')+'　未實現 <b class="'+(tPnl>=0?'pos':'neg')+'">'+(tPnl>0?'+':'')+Math.round(tPnl).toLocaleString('zh-TW')+'</b></div>'+
+      '<div style="margin-top:4px;font-size:10px;color:var(--ink-4)">來源：本機 /live/positions（永豐唯讀查詢，'+esc(String(posR.generated_at||'').slice(11,16))+'）；單位張＝1000股，零股不在此列；未實現損益優先用券商回傳值（含預估費用），否則以市值−成本概算；非投資建議</div>';
+  }
   async function loadHomeBrokerCard(){
     const cta=document.getElementById('home-broker-cta');
     const card=document.getElementById('home-asset-card');
     if(!cta||!card)return;
     const CTA_DEFAULT_HTML='串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span>';
-    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;return}
+    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;_safeSync('renderHomePositions',()=>renderHomePositions(null,'未連線本機伺服器（設定頁「即時伺服器」）；持倉只從本機唯讀查詢，不存進 GitHub'));return}
     let posR=null,balR=null;
     try{
       const [rp,rb]=await Promise.all([liveFetch('/live/positions',9000),liveFetch('/live/balance',9000)]);
       if(rp&&rp.ok)posR=await rp.json();
       if(rb&&rb.ok)balR=await rb.json();
     }catch(e){console.warn('[loadHomeBrokerCard]',e);recordGlobalError('loadHomeBrokerCard',e)}
+    _safeSync('renderHomePositions',()=>renderHomePositions(posR));
     const sinoBal=balR&&balR.sinopac&&balR.sinopac.available?balR.sinopac.balance:null;
     const sinoPos=posR&&posR.sinopac&&posR.sinopac.available?(posR.sinopac.positions||[]):null;
     const ibkrBal=balR&&balR.ibkr&&balR.ibkr.connected?balR.ibkr.balance:null;
@@ -7223,8 +7259,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       let posVal=0,posN=0;
       if(sinoPos&&sinoPos.length){
         for(const p of sinoPos){
+          // 常備.開發-3 修正：Shioaji list_positions 預設 Unit.Common，quantity 單位是「張」，市值要 ×1000 股
           const qty=Number(p.quantity)||0,lp=Number(p.last_price)||0;
-          if(qty&&lp){posVal+=qty*lp;posN++}
+          if(qty&&lp){posVal+=qty*1000*lp;posN++}
         }
       }
       totalNtd+=cash+posVal;
@@ -8496,7 +8533,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0007';
+  const APP_VERSION='2026-10-11.0013';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

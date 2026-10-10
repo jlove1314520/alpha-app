@@ -2116,10 +2116,42 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { statusSizeErrors.push(`測試本身出錯：${e.message || e}`); }
   record("65. STATUS.json < 100 KB；還原價異常明細移到 data/adjustment_anomalies.json，STATUS 只留摘要＋連結；設定頁讀新檔", statusSizeErrors.length === 0, statusSizeErrors.join("; ") || statusSizeErrors.info || "");
 
+  // 66.【2026-10-11 常備.開發-3】首頁持倉損益卡：用假的 /live/positions、/live/balance（替換 liveFetch，不連網）驗顯示——
+  // 張數、市值（張×1000×現價）、未實現損益（券商回傳值）、合計；總資產卡持股市值同樣以張×1000 計；
+  // 未連線本機伺服器時卡片顯示說明文字而非空白；畫面不得出現帳號樣式字串。
+  const posCardErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured };
+      const pos = { sinopac: { available: true, positions: [{ code: "2330", direction: "Buy", quantity: 2, price: 900, last_price: 1000, pnl: 199000 }] }, ibkr: null, generated_at: "2026-10-12T10:00:00+08:00" };
+      const bal = { sinopac: { available: true, balance: { acc_balance: 50000 } }, ibkr: { connected: false } };
+      window.liveFetch = async (p) => new Response(JSON.stringify(p === "/live/positions" ? pos : p === "/live/balance" ? bal : {}), { status: 200 });
+      const o = {};
+      try {
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+        await loadHomeBrokerCard();
+        o.body = document.getElementById("home-pos-body").textContent;
+        o.total = Number(document.getElementById("home-asset-total").dataset.ntd);
+        LIVE.configured = false;
+        await loadHomeBrokerCard();
+        o.off = document.getElementById("home-pos-body").textContent;
+        o.offVisible = !document.getElementById("home-pos-card").hidden;
+      } finally { window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf; }
+      return o;
+    });
+    if (!r.body.includes("2330") || !r.body.includes("2 張")) posCardErrors.push(`持倉列缺代號或張數：${r.body.slice(0, 80)}`);
+    if (!r.body.includes("2,000,000")) posCardErrors.push(`市值應為 2,000,000（2 張×1000×1000）：${r.body.slice(0, 120)}`);
+    if (!r.body.includes("+199,000")) posCardErrors.push(`未實現損益應顯示券商回傳 +199,000：${r.body.slice(0, 120)}`);
+    if (r.total !== 2050000) posCardErrors.push(`總資產應為 2,050,000（現金 5 萬＋持股 200 萬），實得 ${r.total}`);
+    if (!r.off.trim() || !r.off.includes("未連線") || !r.offVisible) posCardErrors.push(`未連線時應顯示說明而非空白：「${r.off}」 visible=${r.offVisible}`);
+    if (/\d{7,}/.test(r.body)) posCardErrors.push("持倉卡出現 7 位以上連續數字（疑似帳號）");
+  } catch (e) { posCardErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("66. 首頁持倉損益卡（張數／市值／未實現損益／合計；總資產持股市值以張×1000 計；未連線顯示說明）", posCardErrors.length === 0, posCardErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
