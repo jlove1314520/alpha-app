@@ -678,3 +678,4 @@
 {"ts": "2026-10-11T00:05:36", "track": "hypothesis_queue", "round": "heartbeat-mode", "item": "心跳模式，#82 暫停，未開新軸；未開始 - [ ] 項皆屬 DevQueue(常備.開發-2~22)或互動視窗(先.六十四)，讓行", "artifacts_changed": ["research/MARATHON_LOG.md"]}
 {"ts": "2026-10-11T00:07:49+08:00", "track": "dev_queue", "round": "常備.開發-2", "note": "build_daily_brief.py→data/daily_brief.json（規則摘要）；market.yml 步驟＋git add；今日/市場/日誌三卡改讀；allowlist 刪兩條；冒煙全過含45b", "cycle_id": "20261011-000102"}
 {"ts": "2026-10-11T00:13:14+08:00", "track": "dev_queue", "round": "常備.開發-3", "note": "首頁持倉損益卡（/live/positions 唯讀，張×1000 市值、券商 pnl）；總資產卡持股市值少乘1000修正；冒煙66", "cycle_id": "20261011-000102"}
+{"ts": "2026-10-11T00:13:48+08:00", "track": "interactive", "round": "先.六十四", "note": "DevQueue 趕工模式：dev_queue_crunch.py 連續派工＋逐項結算（推播／心跳／連敗兩次標[!]）＋gate 10/20 分鐘＋排程每30分鐘上限12小時；selftest 22/22 全過後已切換"}

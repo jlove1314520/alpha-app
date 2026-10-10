@@ -863,6 +863,25 @@ def build_prompt() -> int:
     prev = f"\n注意：這一項已經連續失敗 {fails} 次。再失敗一次就會被標成阻塞交給總司令，" \
            f"所以這一輪先把「為什麼失敗」查清楚再動手。\n" if fails else ""
     cycle_id = os.environ.get("ALPHA_CYCLE_ID", "unknown")
+    # 先.六十四：趕工模式（scripts/dev_queue_crunch.py 迴圈）——每次 claude -p 只做這一項，做完由迴圈立刻派下一項，
+    # 這樣每一項才能各自結算（完成推播／心跳／連敗兩次標 [!]）。非趕工時維持原本「一輪做多項」的提示詞。
+    crunch = os.environ.get("ALPHA_DEVQUEUE_CRUNCH") == "1"
+    if crunch:
+        multi = ("**趕工模式（先.六十四）：這一次只做上面這一項。** 做完、冒煙全綠、commit＋push、把那一行改成 `- [x]`、"
+                 "照條目指示 append PROGRESS_HEARTBEAT 之後就**結束**——趕工迴圈會立刻派下一項給新的工作階段，"
+                 "不要自己接著做下一項（否則迴圈無法逐項結算）。")
+        progress_rule = ("5. 趕工模式：`PROGRESS.md` 由趕工迴圈在收工時統一寫一段（完成清單／BLOCKED／剩餘項數），"
+                         "這一項**不用**寫 PROGRESS.md；條目要求的 `research/PROGRESS_HEARTBEAT.jsonl` 心跳照寫。")
+        block_rule = "它會把這一項標成阻塞並寫進 PENDING_QUEUE，然後**結束這一次**——趕工迴圈會自動派下一項。"
+    else:
+        multi = ("做完這一項就接著做權威清單裡的下一項，**一輪之內連續做多項，做到不能再做為止**\n"
+                 "（額度節流／所有項目都BLOCKED／碰到下面的停下條件才結束這一輪），不是做完一項\n"
+                 "就結束。**一次做一項，每一項各自commit**，不要把好幾項混在同一個 commit 裡。")
+        progress_rule = ("5. 更新 `PROGRESS.md`（最新的寫最上面），然後 commit + push——**收工時寫一份，\n"
+                         "   不要每做完一項就想回報**，一輪做到不能再做為止再一次寫齊每一項的段落\n"
+                         "   （做了什麼／證據／`[自行裁量]`的地方／BLOCKED的原因與解除條件）。")
+        block_rule = ("它會把那一項標成阻塞並寫進 PENDING_QUEUE，然後**換下一項繼續做，不是結束整輪**\n"
+                      "（除非所有項目都變成BLOCKED或已無`- [ ]`項目可做）。")
 
     prompt = f"""全程繁體中文。你是 Alpha 專案的開發佇列自走輪次（無人值守，沒有人在旁邊看）。
 這一輪的 cycle_id 是 `{cycle_id}`（這是實際值，不是佔位符，直接照抄）。
@@ -872,9 +891,7 @@ def build_prompt() -> int:
 
     {clean}
 {prev}
-做完這一項就接著做權威清單裡的下一項，**一輪之內連續做多項，做到不能再做為止**
-（額度節流／所有項目都BLOCKED／碰到下面的停下條件才結束這一輪），不是做完一項
-就結束。**一次做一項，每一項各自commit**，不要把好幾項混在同一個 commit 裡。
+{multi}
 
 ## 開工前先做兩件事（2026-09-18總司令裁示【改為連續自走】新增）
 1. **檢查已標`- [!]`的阻塞項有沒有解除**：逐項看阻塞原因與預計解除時間，
@@ -900,9 +917,7 @@ def build_prompt() -> int:
 3. 動到 `research/alpha_live_server.py` 或 `research/shioaji_quotes.py` 的 commit，
    最後一步必須重啟服務並跑四步驗證（重啟→比對 build sha→OPTIONS 預檢→stale_process=false）。
 4. 做完一項就把 PENDING_QUEUE 那一行從 `- [ ]` 改成 `- [x]` 並補上做了什麼、證據是什麼。
-5. 更新 `PROGRESS.md`（最新的寫最上面），然後 commit + push——**收工時寫一份，
-   不要每做完一項就想回報**，一輪做到不能再做為止再一次寫齊每一項的段落
-   （做了什麼／證據／`[自行裁量]`的地方／BLOCKED的原因與解除條件）。
+{progress_rule}
 6. **每個 commit 訊息最後一行加 `DevQueue-Cycle: {cycle_id}`**（2026-09-15 總司令
    交辦：這樣他從 `dev_queue_cycle.log` 看到 cycle_id 就能直接對回是哪個 commit
    做的，不用去猜時間戳）——本輪做好幾項、好幾個 commit 的話，每個都要加這行，
@@ -922,8 +937,7 @@ def build_prompt() -> int:
 
 停下時執行：
     python scripts/dev_queue_runner.py block "具體原因"
-它會把那一項標成阻塞並寫進 PENDING_QUEUE，然後**換下一項繼續做，不是結束整輪**
-（除非所有項目都變成BLOCKED或已無`- [ ]`項目可做）。
+{block_rule}
 
 ## 誠實要求
 - 沒驗過的不要說「已完成」，寫「已實作但未驗證」。
@@ -931,6 +945,12 @@ def build_prompt() -> int:
 - 不准為了讓測試過而放寬測試。
 """
     PROMPT_OUT.write_text(prompt, encoding="utf-8", newline="\n")
+    try:  # 先.六十四：記下這次派出去的是哪一項，趕工迴圈據此逐項結算（不再用 find_next 猜）
+        _st = _load_state()
+        _st["_current"] = key
+        _save_state(_st)
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: 記錄 _current 失敗（{type(e).__name__}）")
     _note_dispatch(text)
     print(f"PROMPT_READY: {key}（{item_class(text)}類）")
     return 0
