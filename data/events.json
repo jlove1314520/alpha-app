@@ -1,12 +1,12 @@
 {
- "fetched_at": "2026-10-11T03:33:43.556251+08:00",
+ "fetched_at": "2026-10-11T06:58:37.488339+08:00",
  "source": "TWSE/TPEx 重大訊息＋TWSE 月營收＋既有除權息檔（全部官方端點）",
  "keep_days": 90,
  "meta": {
   "twse_mops": {
    "ok": true,
-   "rows": 6,
-   "kept": 6
+   "rows": 4,
+   "kept": 4
   },
   "tpex_mops": {
    "ok": true,
@@ -24,7 +24,7 @@
    "note": "沿用既有排程產物，未額外請求"
   }
  },
- "count": 11936,
+ "count": 11940,
  "events": [
   {
    "code": "5522",
@@ -108,6 +108,78 @@
    "url": "https://www.twse.com.tw/zh/exchangeReport/twt48u"
   },
   {
+   "code": "2072",
+   "name": "世紀風電",
+   "date": "2026-10-10",
+   "type": "其他",
+   "title": "公告本公司名稱由「世紀離岸風電設備股份有限公司」更名 為「世紀能源設備股份有限公司」，公告期間：115年8月26日至 115年11月25日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "6949",
+   "name": "沛爾生醫*-創",
+   "date": "2026-10-10",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣0.5元」， 公告期間：115年08月06日至115年11月05日。",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "2328",
+   "name": "廣宇",
+   "date": "2026-10-10",
+   "type": "人事",
+   "title": "(補充115/01/20公告) 公告董事會通過投資取得Magnax BV之股份",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "3432",
+   "name": "台端",
+   "date": "2026-10-10",
+   "type": "其他",
+   "title": "依臺灣證券交易所股份有限公司臺證上一字第1121801204 號函辦理",
+   "source": "TWSE 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4747",
+   "name": "強生*",
+   "date": "2026-10-09",
+   "type": "其他",
+   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣5元」 公告期間：115年7月22日至115年10月21日",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "4953",
+   "name": "緯致",
+   "date": "2026-10-09",
+   "type": "其他",
+   "title": "本公司發生網路資安事件",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1264",
+   "name": "德麥",
+   "date": "2026-10-09",
+   "type": "其他",
+   "title": "代重要子公司芝蘭雅烘焙原料(無錫)有限公司公告 取得結構性存款",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
+   "code": "1264",
+   "name": "德麥",
+   "date": "2026-10-09",
+   "type": "其他",
+   "title": "代重要子公司芝蘭雅烘焙原料(無錫)有限公司公告 取得結構性存款(更正)",
+   "source": "TPEx 重大訊息",
+   "url": "https://mops.twse.com.tw/mops/web/t05st01"
+  },
+  {
    "code": "7786",
    "name": "東方風能",
    "date": "2026-10-09",
@@ -159,42 +231,6 @@
    "type": "人事",
    "title": "代本公司之子公司Global-Thaixon Precision Industry Company Limited公告董事會決議股利分派事宜",
    "source": "TWSE 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4747",
-   "name": "強生*",
-   "date": "2026-10-09",
-   "type": "其他",
-   "title": "公告本公司股票面額由「新台幣10元」變更為「新台幣5元」 公告期間：115年7月22日至115年10月21日",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "4953",
-   "name": "緯致",
-   "date": "2026-10-09",
-   "type": "其他",
-   "title": "本公司發生網路資安事件",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "1264",
-   "name": "德麥",
-   "date": "2026-10-09",
-   "type": "其他",
-   "title": "代重要子公司芝蘭雅烘焙原料(無錫)有限公司公告 取得結構性存款",
-   "source": "TPEx 重大訊息",
-   "url": "https://mops.twse.com.tw/mops/web/t05st01"
-  },
-  {
-   "code": "1264",
-   "name": "德麥",
-   "date": "2026-10-09",
-   "type": "其他",
-   "title": "代重要子公司芝蘭雅烘焙原料(無錫)有限公司公告 取得結構性存款(更正)",
-   "source": "TPEx 重大訊息",
    "url": "https://mops.twse.com.tw/mops/web/t05st01"
   },
   {
