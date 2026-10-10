@@ -877,12 +877,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
     <!-- 美股/期貨：見 PROGRESS.md -->
     <div class="card picks-lb-only" id="picks-us-panel" style="display:none">
-      <h3>美股評分</h3>
-      <!-- 2026-08-28更正（P0併入）：先前這裡暗示美股「沒有來源」是誤判，
-      已查證yfinance提供.financials/.balance_sheet/.cashflow（損益表/資產
-      負債表/現金流量表），美股評分可做，已登錄BACKLOG B29，排在P0跟台股
-      回測工作之後——不是無來源，是還沒排到，措辭要如實反映這個差異。 -->
-      <div class="note"><b style="color:var(--ink-2)">建置中，尚無評分。</b>台股評分引擎（research/score_v2.py）的8大因子有一半以上依賴台股專屬資料源（月營收/三大法人籌碼等FinMind台股資料集），美股需要另外設計一套因子管線——資料源已查證可行（yfinance提供美股損益表/資產負債表/現金流量表），已排入研究待辦（BACKLOG B29），會接在P0修復跟台股回測工作之後。目前沒有時程承諾，請不要預期短期內上線。</div>
+      <h3>美股評分 <span style="font-size:11px;color:#c9524a;font-weight:600">v0，未經回測驗證</span></h3>
+      <!-- 2026-10-11 常備.開發-17：取代「建置中，尚無評分」。資料：data/us_scores_v0.json
+      （.github/scripts/build_us_scores_v0.py，SEC XBRL 年度財報＋yfinance 收盤）。受凍結.二
+      限制，不登記試驗、不回測；只是資料排序。 -->
+      <div class="note" style="color:#c9524a;font-weight:600;margin-bottom:6px">⚠ v0，未經回測驗證：三分項為資料排序，未登記為試驗、未做回測，不代表能贏大盤。非投資建議。</div>
+      <div class="note" id="picks-us-meta" style="margin-bottom:6px">載入中…</div>
+      <div id="picks-us-list"></div></div>
     </div>
     <div class="card picks-lb-only" id="picks-fut-panel" style="display:none">
       <h3>期貨策略訊號</h3>
@@ -6458,6 +6459,40 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     document.getElementById('picks-chips').style.display=mkt==='TW'?'':'none';
     document.getElementById('picks-us-panel').style.display=mkt==='US'?'':'none';
     document.getElementById('picks-fut-panel').style.display=mkt==='FUT'?'':'none';
+    if(mkt==='US')loadUsScoresV0().catch(e=>{console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e)});
+  }
+  // 2026-10-11 常備.開發-17：美股評分 v0（價值/成長/品質三分項）。失敗只影響本面板。
+  let US_SCORES_V0=null;
+  const US_PILLAR_KEYS=['value','growth','quality'];
+  function _usEsc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function _usPct(v){return v==null?'—':(v*100).toFixed(1)+'%'}
+  function usPillarDetail(k,p){
+    const r=p.raw||{};
+    if(k==='value')return `本益比 ${r.pe==null?'—':r.pe} · PEG ${r.peg==null?'—':r.peg} · PBR 缺`;
+    if(k==='growth')return `EPS年增 ${_usPct(r.eps_yoy)} · 營收年增 ${_usPct(r.revenue_yoy)} · 毛利率 ${r.gross_margin_yoy_pp==null?'—':(r.gross_margin_yoy_pp>0?'+':'')+r.gross_margin_yoy_pp+'pp'} · 營益率 ${r.op_margin_yoy_pp==null?'—':(r.op_margin_yoy_pp>0?'+':'')+r.op_margin_yoy_pp+'pp'}`;
+    return `毛利率 ${_usPct(r.gross_margin)} · 營益率 ${_usPct(r.operating_margin)} · FCF利潤率 ${_usPct(r.fcf_margin)} · 負債比 ${_usPct(r.debt_ratio)}`;
+  }
+  function usScoreRowHtml(s,labels){
+    const pills=US_PILLAR_KEYS.map(k=>{const p=s.pillars&&s.pillars[k];return `<span style="margin-right:8px">${_usEsc(labels[k]||k)} <b class="num">${p?p.score.toFixed(1):'—'}</b></span>`}).join('');
+    const detail=US_PILLAR_KEYS.map(k=>{const p=s.pillars&&s.pillars[k];return `<div class="sub">${_usEsc(labels[k]||k)}：${p?_usEsc(usPillarDetail(k,p)):'缺資料'}</div>`}).join('');
+    const warn=(s.warnings&&s.warnings.length)?`<div class="sub" style="color:#c9a35a">${_usEsc(s.warnings.join('；'))}</div>`:'';
+    return `<details class="us-score-row" style="padding:7px 0;border-bottom:1px solid var(--hairline)"><summary style="display:flex;justify-content:space-between;gap:8px;cursor:pointer;list-style:none"><span><b>${s.rank==null?'':'#'+s.rank+' '}${_usEsc(s.code)}</b> <span class="sub">${_usEsc(s.name||s.exchange||'')}</span><div class="sub">${pills}</div></span><span style="text-align:right"><b class="num" style="font-size:16px">${s.total_score==null?'—':s.total_score.toFixed(1)}</b><div class="sub">完整度 ${Math.round((s.coverage||0)*100)}%</div></span></summary><div style="padding:4px 0 2px">${detail}<div class="sub">財報期末 ${_usEsc(s.period_end||'—')}（申報 ${_usEsc(s.filed||'—')}）</div>${warn}<div class="sub"><span class="press" style="color:var(--accent,#d8b070)" onclick="openStock('${_usEsc(s.code)}')">開個股頁 ›</span></div></div></details>`;
+  }
+  async function loadUsScoresV0(){
+    const metaEl=document.getElementById('picks-us-meta'),listEl=document.getElementById('picks-us-list');
+    if(!metaEl||!listEl)return;
+    try{
+      if(!US_SCORES_V0){const r=await fetch('data/us_scores_v0.json?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);US_SCORES_V0=await r.json()}
+      const m=US_SCORES_V0.meta||{},rows=US_SCORES_V0.stocks||[];
+      const labels={};US_PILLAR_KEYS.forEach(k=>labels[k]=(m.pillars&&m.pillars[k]&&m.pillars[k].label)||k);
+      const ranked=rows.filter(s=>s.rank!=null).slice(0,30);
+      const pc=m.pillar_coverage||{};
+      metaEl.innerHTML=`評分時間 ${_usEsc((m.generated_at||'').slice(0,16).replace('T',' '))} ｜ 財報 ${_usEsc((m.financials_generated_at||'').slice(0,10))} ｜ 股價 ${_usEsc((m.price_source&&m.price_source.as_of)||'—')}<br>樣本 ${rows.length} 檔、排名 ${m.ranked_count||0} 檔（完整度≥50%）；分項涵蓋：${US_PILLAR_KEYS.map(k=>_usEsc(labels[k])+' '+(pc[k]||0)).join('、')}。三分項等權；價值＝本益比/PEG（越低越便宜，PBR 缺）、成長＝EPS/營收年增＋毛利率/營益率年變化（年度）、品質＝v0 自訂（毛利率/營益率/FCF利潤率/低負債）。宇宙為 SEC 當下名冊前段＋自選股，非全市場。`;
+      listEl.innerHTML=ranked.length?ranked.map(s=>usScoreRowHtml(s,labels)).join(''):'<div class="note">目前沒有完整度≥50%的美股可排名。</div>';
+    }catch(e){
+      console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e);
+      metaEl.textContent='美股評分 v0 載入失敗（'+(e&&e.message||e)+'）';listEl.innerHTML='';
+    }
   }
   // 搜尋任一檔（樣本內即使不在排行榜前段也查得到，樣本外誠實顯示查無資料——見
   // generate_scores_v2.py 的說明：目前架構沒有後端可以現算一支新股票的橫斷面百分位）。
@@ -9001,7 +9036,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0204';
+  const APP_VERSION='2026-10-11.0220';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

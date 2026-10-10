@@ -3,7 +3,8 @@ name: 美股財報每週更新（SEC XBRL companyfacts）
 # 2026-10-11 常備.開發-16 新增：取代 data/us_financials.json 的 6 檔 yfinance 固定快照。
 # 財報每季才變，每週一次足夠；SEC 官方上限 10 req/秒，腳本每次請求後 sleep 0.2 秒，
 # 一次約 263 個 companyfacts 請求（約 7 分鐘），見 C:\alpha\CLAUDE.md「SEC EDGAR」一節。
-# 十節稽核：本 workflow 只寫 data/us_financials.json，已列在下方 git add 清單。
+# 十節稽核：本 workflow 寫 data/us_financials.json 與 data/us_scores_v0.json
+# （2026-10-11 常備.開發-17 新增美股評分 v0 步驟），兩檔都已列在下方 git add 清單。
 on:
   schedule:
     - cron: '17 2 * * 6'   # 台北週六 10:17（避開整點/半點負載尖峰，見 market.yml 先.九 三）
@@ -26,14 +27,16 @@ jobs:
         with:
           python-version: '3.12'
       - name: 安裝相依套件
-        run: pip install requests
+        run: pip install requests yfinance pandas
       - name: 抓美股財報（SEC XBRL companyfacts，免金鑰）
         run: python .github/scripts/fetch_us_financials_sec.py
+      - name: 美股評分 v0（價值/成長/品質，未經回測驗證；股價 yfinance 一次批次）
+        run: python .github/scripts/build_us_scores_v0.py
       - name: Commit 並 push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A data/us_financials.json
+          git add -A data/us_financials.json data/us_scores_v0.json
           git diff --cached --quiet && { echo "無變動，略過 commit"; exit 0; } || git commit -m "自動更新美股財報（SEC XBRL companyfacts）$(date -u +'%Y-%m-%d %H:%M UTC')"
 
           for i in 1 2 3 4 5; do

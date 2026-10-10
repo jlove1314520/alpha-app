@@ -29,6 +29,8 @@
 - free_cash_flow / fcf_margin：營業現金流 − 資本支出
 - debt_ratio：負債比＝總負債／總資產，取最近一份 10-K/10-Q/20-F/40-F 的期末值
   （缺 Liabilities 時用 LiabilitiesAndStockholdersEquity − 股東權益推導，標 warnings）
+- eps_prior / gross_margin_prior / operating_margin_prior：前一年度同口徑值
+  （2026-10-11 常備.開發-17 新增，供美股評分 v0 算年增/年變化，缺則 None）
 - 每檔帶 filed（最新年度數字的申報日）與 currency（20-F 公司可能是 TWD 等外幣）
 
 失敗分類寫進 errors（不靜默記 None）；整體失敗（名冊抓不到、成功 < 50 檔）
@@ -215,6 +217,23 @@ def compute(facts_payload: dict) -> dict:
     out["gross_margin"] = _ratio(gp, out.get("revenue"))
     out["operating_margin"] = _ratio(same_period("operating_income"), out.get("revenue"))
 
+    # 2026-10-11 常備.開發-17：去年同期毛利率/營益率，供美股評分 v0 照台股
+    # live_factors.earnings_growth() 算「年變化(百分點)」，缺就留 None。
+    def prior_period(key: str):
+        s, _, _ = _annual_series(facts, key, currency=cur)
+        pe_ = out.get("prior_period_end")
+        return s.get(pe_, (None,))[0] if pe_ else None
+
+    if out.get("prior_period_end"):
+        prev_rev = rev[out["prior_period_end"]][0]
+        gp_prev = prior_period("gross_profit")
+        if gp_prev is None:
+            cogs_prev = prior_period("cost_of_revenue")
+            if cogs_prev is not None:
+                gp_prev = prev_rev - cogs_prev
+        out["gross_margin_prior"] = _ratio(gp_prev, prev_rev)
+        out["operating_margin_prior"] = _ratio(prior_period("operating_income"), prev_rev)
+
     eps_s, _, _ = _annual_series(facts, "eps_diluted", per_share=True, currency=cur)
     eps_kind = "diluted"
     if not eps_s:
@@ -225,6 +244,9 @@ def compute(facts_payload: dict) -> dict:
         out["eps"] = eps_s[eend][0]
         out["eps_kind"] = eps_kind
         out["eps_period_end"] = eend
+        # 2026-10-11 常備.開發-17：去年同期 EPS（期末差約一年±20天），供 EPS 年增／PEG。
+        epe = _prior_end(eps_s, eend)
+        out["eps_prior"] = eps_s[epe][0] if epe else None
         if rev_tag and rev_tag.startswith("ifrs-full"):
             out["warnings"].append("IFRS申報（20-F）：EPS為每普通股，非每ADR")
         if eps_kind == "basic":
