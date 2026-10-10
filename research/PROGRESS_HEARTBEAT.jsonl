@@ -681,3 +681,4 @@
 {"ts": "2026-10-11T00:13:48+08:00", "track": "interactive", "round": "先.六十四", "note": "DevQueue 趕工模式：dev_queue_crunch.py 連續派工＋逐項結算（推播／心跳／連敗兩次標[!]）＋gate 10/20 分鐘＋排程每30分鐘上限12小時；selftest 22/22 全過後已切換"}
 {"ts": "2026-10-11T00:24:28+08:00", "track": "dev_queue", "round": "常備.開發-4", "note": "上市金融業5類＋上櫃6類財報接 TWSE/TPEx openapi（恆等式驗證防錯位）、latest_cum 累計差分、ROE 單位修正；App 財報來源標記；冒煙全過", "cycle_id": "20261011-000102"}
 {"ts": "2026-10-11T00:27:44+08:00", "track": "dev_queue", "round": "常備.開發-5", "note": "美股事件分頁時間軸（8-K 近90天＋財報日，無資料說明原因）；allowlist 刪一條；冒煙67", "cycle_id": "20261011-000102"}
+{"ts": "2026-10-11T00:28:31+08:00", "track": "dev_queue", "round": "常備.開發-6", "note": "BLOCKED：兩榜首次回測與凍結.二互斥，登記 AWAITING_REVIEW 等裁示", "cycle_id": "20261011-000102"}
