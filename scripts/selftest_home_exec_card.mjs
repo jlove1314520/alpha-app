@@ -1,5 +1,5 @@
 // 常備.開發-11 自測：首頁「真錢執行總覽卡」的 autoPeriodSummary() 純函式。
-// 從 index.html 依 <auto-period-selftest> 標記抽出整段（含顯示對照表與 autoNextText），不連網、不開瀏覽器、
+// 從 app.js（常備.開發-20 拆檔後；找不到再退回 index.html）依 <auto-period-selftest> 標記抽出整段（含顯示對照表與 autoNextText），不連網、不開瀏覽器、
 // 不碰任何真錢帳本。覆蓋「無紀錄／部分成交／全部成交」三態，另加「整批被擋（未入金）」與「緊急停止」的白話原因。
 // 用法：node scripts/selftest_home_exec_card.mjs
 import fs from "node:fs";
@@ -7,7 +7,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+// 常備.開發-20 把內嵌腳本拆到 app.js：先讀 app.js，再接 index.html，兩處都找得到標記段
+const html = ["app.js", "index.html"].filter(f => fs.existsSync(path.join(root, f))).map(f => fs.readFileSync(path.join(root, f), "utf8")).join(String.fromCharCode(10));
 const m = /\/\/ <auto-period-selftest>[^\n]*\n([\s\S]*?)\/\/ <\/auto-period-selftest>/.exec(html);
 if (!m) { console.log("FAIL 找不到 <auto-period-selftest> 標記段"); process.exit(1); }
 const api = new Function(m[1] + "\nreturn {autoPeriodSummary,autoPeriodBatchLabel};")();

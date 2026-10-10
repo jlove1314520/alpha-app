@@ -358,6 +358,33 @@ def _lines() -> list[str]:
     return QUEUE.read_text(encoding="utf-8").splitlines()
 
 
+def _fenced_line_indices(lines: list[str]) -> set[int]:
+    """回傳落在 ``` 程式碼區塊內的行號集合。
+
+    2026-10-11（DevQueue 20261011-010102 發現）：三之二節要求裁示原文先抄進
+    PENDING_QUEUE，原文常放在 ``` 區塊裡且本身含「- [ ] 常備.開發-11…」這種行；
+    舊版只看行首，把引文當待辦，已完成的 -11～-22 會被一項項重派。引文不是待辦。
+    自身失敗（第十二節）→ 回空集合，退回舊行為（寧可重派，不可癱瘓）。"""
+    try:
+        out, inside = set(), False
+        for i, ln in enumerate(lines):
+            if ln.lstrip().startswith("```"):
+                inside = not inside
+                continue
+            if inside:
+                out.add(i)
+        return out
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"⚠️ _fenced_line_indices 失敗，退回不排除引文：{e}")
+        return set()
+
+
+def _pending_lines(lines: list[str]) -> list[tuple[int, str]]:
+    """真正的待辦：`- [ ]` 開頭且不在 ``` 引文區塊內。"""
+    fenced = _fenced_line_indices(lines)
+    return [(i, ln) for i, ln in enumerate(lines) if ln.startswith("- [ ]") and i not in fenced]
+
+
 # 2026-09-18（Cowork【重構.B收成前必修】順手修）：舊標記是裸字
 # "ORDER-BEGIN"/"ORDER-END"，會被裁示原文引用/執行記錄裡的同一串文字
 # 撞到——實測當時檔案裡已經有4次"ORDER-BEGIN"、1次"ORDER-END"，
@@ -441,7 +468,7 @@ def find_next() -> tuple[int, str] | None:
             _safe_print(_m)
     except Exception:  # noqa: BLE001
         pass
-    pending = [(i, ln) for i, ln in enumerate(lines) if ln.startswith("- [ ]")]
+    pending = _pending_lines(lines)
     if not pending:
         return None
     order_entries = _explicit_order()
@@ -624,7 +651,7 @@ STALE_STATUS_MARKERS = re.compile(r"🔲|進行中|未開始")
 
 def _has_any_pending_line() -> bool:
     """檔案裡是否還有任何「- [ ]」開頭的行，不分產品/債務/研究。"""
-    return any(ln.startswith("- [ ]") for ln in _lines())
+    return bool(_pending_lines(_lines()))
 
 
 def _stale_status_markers_present() -> bool:
