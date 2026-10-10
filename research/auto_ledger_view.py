@@ -15,6 +15,12 @@ import auto_rebalance_bb90 as AB
 
 _PX_CACHE: dict = {"mtime": None, "doc": None}
 
+# 常備.開發-12：績效對照的手續費假設。帳本沒有實際手續費欄位，用公告牌告費率 0.1425%（不打折，偏保守）、
+# 每筆最低 1 元（零股常見下限）；只有買進、還沒有賣出，所以沒有證交稅（App 標「含手續費、未含稅」）。
+PERF_FEE_RATE = 0.001425
+PERF_FEE_MIN = 1.0
+PERF_BENCH = "0050"
+
 
 def _prices(price_doc: dict | None = None) -> dict:
     """price_history.json 很大（約 55MB），依檔案修改時間快取，只在檔案更新時重讀。"""
@@ -73,11 +79,13 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
            "note": "損益只算自動交易買進的股數；以 price_history 收盤估值；未計手續費與稅。"}
     if not fills:
         out["pnl"] = None
+        out["perf"] = None
         return out
     px = _prices(price_doc)
     series = {c: sorted(px.get(c) or [], key=lambda r: r["date"]) for c in AB.WHITELIST}
     if any(not series[c] for c in AB.WHITELIST):
         out["pnl"] = {"error": "price_history 缺白名單標的收盤價，無法估值"}
+        out["perf"] = {"error": "price_history 缺白名單標的收盤價，無法畫績效對照"}
         return out
     as_of = min(series[c][-1]["date"] for c in AB.WHITELIST)
     asof_d = date.fromisoformat(as_of)
@@ -99,7 +107,66 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
     out["pnl"] = {"as_of": as_of, "week_start": wk0,
                   "total": round(val - cost), "total_pct": round((val / cost - 1) * 100, 2) if cost else None,
                   "week": round(val - val_wk_prev - cost_wk)}
+    try:  # 績效對照失敗只影響自己那一塊，不拖累損益與帳本列
+        out["perf"] = perf_series(fills, series, as_of)
+    except Exception as e:
+        out["perf"] = {"error": f"績效對照計算失敗（{type(e).__name__}）"}
     return out
+
+
+def _fee(amount: float) -> float:
+    return max(PERF_FEE_MIN, round(amount * PERF_FEE_RATE)) if amount > 0 else 0.0
+
+
+def perf_series(fills: list, series: dict, as_of: str) -> dict:
+    """常備.開發-12：累計淨值 vs 同期 0050 全持有（逐交易日，以 0050 的交易日為日曆）。
+
+    淨值＝當日持股市值 ÷ 截至當日投入總額（成交金額＋手續費）。
+    0050 全持有＝每一筆成交當天，把同樣的投入總額（含手續費）改在當天以 0050 收盤價全數買進 0050（同樣扣手續費）。
+    兩邊都只有買進，所以都「含手續費、未含稅」；不算未投入的現金。
+    """
+    bench = series.get(PERF_BENCH) or []
+    ev = []
+    for r in fills:
+        sym = r.get("symbol")
+        if sym not in AB.WHITELIST:
+            continue
+        amt = AB._filled_amount(r)
+        ev.append((str(r.get("ts", ""))[:10], sym, AB._filled(r), amt + _fee(amt)))
+    if not ev:
+        return {"error": "成交紀錄沒有白名單標的"}
+    ev.sort()
+    d0 = ev[0][0]
+    days = [b["date"] for b in bench if d0 <= b["date"] <= as_of]
+    if not days or days[0] != d0:
+        days = [d0] + [d for d in days if d != d0]
+    units_b = []  # 每筆成交對應的 0050 股數
+    for d, _s, _q, c in ev:
+        p = _close_on_or_before(bench, d)
+        if not p:
+            return {"error": f"price_history 缺 {PERF_BENCH} 在 {d} 以前的收盤價"}
+        units_b.append((d, (c - _fee(c / (1 + PERF_FEE_RATE))) / p))
+    pts = []
+    for d in days:
+        cost = sum(c for e, _s, _q, c in ev if e <= d)
+        val = 0.0
+        for e, s_, q, _c in ev:
+            if e <= d:
+                px_ = _close_on_or_before(series[s_], d)
+                if px_ is None:
+                    break
+                val += q * px_
+        else:
+            pb = _close_on_or_before(bench, d)
+            vb = sum(u for e, u in units_b if e <= d) * (pb or 0)
+            pts.append({"date": d, "nav": round(val / cost, 4), "bench": round(vb / cost, 4), "cost": round(cost)})
+    if not pts:
+        return {"error": "成交日以後沒有收盤價可估值"}
+    last = pts[-1]
+    return {"bench": PERF_BENCH, "start": pts[0]["date"], "as_of": last["date"], "points": pts[-500:],
+            "nav_pct": round((last["nav"] - 1) * 100, 2), "bench_pct": round((last["bench"] - 1) * 100, 2),
+            "fee_rate": PERF_FEE_RATE, "fee_min": PERF_FEE_MIN,
+            "note": "含手續費（牌告 0.1425% 不打折、每筆最低 1 元）、未含稅；0050 全持有＝同樣的錢在同一天以收盤價全買 0050"}
 
 
 def limits(cfg: dict) -> dict:

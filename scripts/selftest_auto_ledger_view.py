@@ -44,7 +44,7 @@ try:
            "symbol": "ALL", "qty": 0, "limit_price": None, "reasons": ["INSUFFICIENT_CASH:可用 123456 元，不足 999999 元"]}
     w([rej])
     v = LV.ledger_view(base, price_doc={"prices": {}})
-    check("無成交 → first_batch_done=False、pnl=None", v["first_batch_done"] is False and v["pnl"] is None and v["n_rows"] == 1)
+    check("無成交 → first_batch_done=False、pnl=None、perf=None", v["first_batch_done"] is False and v["pnl"] is None and v.get("perf", 0) is None and v["n_rows"] == 1)
     r0 = v["rows"][0]
     check("拒單原因只留代碼（不含金額）", r0["reason_codes"] == ["INSUFFICIENT_CASH"] and "123456" not in json.dumps(v, ensure_ascii=False))
     check("代號 ALL 顯示為「全部」、批次 202610-T1", r0["symbol"] == "全部" and r0["batch"] == "202610-T1")
@@ -70,6 +70,18 @@ try:
     # 本週（10-05 起）：0050 上週末 102 → 105 = +3000；00646 本週買 25000 → 26000 = +1000；合計 4000
     check(f"累計損益 6000（{p['total']}）、本週 4000（{p['week']}）、週一 2026-10-05", p["total"] == 6000 and p["week"] == 4000 and p["week_start"] == "2026-10-05")
     check("first_batch_done=True、n_fills=2", v["first_batch_done"] and v["n_fills"] == 2)
+    # 常備.開發-12：績效對照。手續費 0.1425%（最低 1 元）：0050 100000→142、00646 25000→36；投入 100142＋25036＝125178
+    # 10-08：持股 1000×105＋500×52＝131000 → 淨值 131000/125178＝1.0465；0050 全持有：第一筆 1000 股、
+    # 第二筆在 10-07 以 ≤10-07 收盤 102 買 (25036−36)/102＝245.098 股 → 1245.098×105/125178＝1.0444
+    pf = v["perf"]
+    check(f"perf 有序列、起點＝首筆成交日 10-02、終點＝估值日 10-08（{pf.get('start')}～{pf.get('as_of')}）",
+          pf.get("points") and pf["start"] == "2026-10-02" and pf["as_of"] == "2026-10-08" and [x["date"] for x in pf["points"]] == ["2026-10-02", "2026-10-03", "2026-10-08"])
+    last = pf["points"][-1]
+    check(f"perf 末點淨值 1.0465、0050 全持有 1.0444、投入 125178（{last}）", last["nav"] == 1.0465 and last["bench"] == 1.0444 and last["cost"] == 125178)
+    check(f"perf 首日含手續費（淨值＜1：{pf['points'][0]['nav']}）、與 0050 首日相同", pf["points"][0]["nav"] == 0.9986 and pf["points"][0]["bench"] == 0.9986)
+    check("perf note 標「含手續費」「未含稅」", "含手續費" in pf["note"] and "未含稅" in pf["note"])
+    v0 = LV.ledger_view(base, price_doc={"prices": {"0050": px["prices"]["0050"], "00646": px["prices"]["00646"], "00697B": []}})
+    check("缺白名單收盤價 → perf 回 error、不丟例外", "error" in (v0.get("perf") or {}))
     lr = LV.last_result(base)
     check(f"last_result 取最近日期的批次（10-08 的 202610-T1，含該批全部紀錄）（{lr}）", lr and lr["batch"] == "202610-T1" and lr["counts"] == {"REJECT": 1, "FILLED": 1} and lr["date"] == "2026-10-08")
 

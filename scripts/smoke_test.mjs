@@ -2284,10 +2284,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { execErrors.push(`測試本身出錯：${e.message || e}`); }
   record("71. 首頁真錢執行總覽卡（期別／送出筆數／成交比例／權重偏離／下一期；未入金白話原因；單端點失敗隔離；未連線說明）", execErrors.length === 0, execErrors.join("; "));
 
+  // 72.【2026-10-11 常備.開發-12】日誌頁真錢績效對照：用假的 /auto/ledger（替換 liveFetch，不連網、不下單）驗——
+  // 無成交顯示「尚無部位」；有 perf 序列時畫出兩條折線（自動交易／0050 全持有）、報酬與差距、標「含手續費、未含稅」；
+  // perf 回 error 時顯示原因不空白；未連線顯示說明。伺服器端算法見 scripts/selftest_auto_ledger_view.py。
+  const perfErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured };
+      const el = () => document.getElementById("journal-perf");
+      const o = {};
+      let lg = { ok: true, rows: [], first_batch_done: false, pnl: null, perf: null };
+      try {
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+        window.liveFetch = async (p) => new Response(JSON.stringify(p === "/auto/ledger" ? lg : {}), { status: 200 });
+        await loadJournalLedger(); o.none = el().textContent;
+        lg = { ok: true, rows: [{ date: "2026-10-12", symbol: "0050", qty: 1000, filled_qty: 1000, avg_price: 100, status: "FILLED", reason_codes: [], batch: "202610-T1" }],
+          first_batch_done: true, pnl: { as_of: "2026-10-14", week_start: "2026-10-12", total: 500, total_pct: 0.5, week: 500 },
+          perf: { bench: "0050", start: "2026-10-12", as_of: "2026-10-14", nav_pct: 2.1, bench_pct: 1.4, note: "含手續費（牌告 0.1425% 不打折、每筆最低 1 元）、未含稅",
+            points: [{ date: "2026-10-12", nav: 0.9986, bench: 0.9986, cost: 100142 }, { date: "2026-10-13", nav: 1.01, bench: 1.005, cost: 100142 }, { date: "2026-10-14", nav: 1.021, bench: 1.014, cost: 100142 }] } };
+        await loadJournalLedger(); o.has = el().textContent; o.lines = el().querySelectorAll("svg polyline").length;
+        o.pts = [...el().querySelectorAll("svg polyline")].map((p) => p.getAttribute("points").split(" ").length);
+        lg = { ...lg, perf: { error: "price_history 缺白名單標的收盤價，無法畫績效對照" } };
+        await loadJournalLedger(); o.err = el().textContent;
+        LIVE.configured = false;
+        await loadJournalLedger(); o.off = el().textContent;
+      } finally { window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf; }
+      return o;
+    });
+    if (!r.none.includes("尚無部位")) perfErrors.push(`無成交應顯示「尚無部位」：${r.none.slice(0, 80)}`);
+    if (r.lines !== 2 || r.pts.some((n) => n !== 3)) perfErrors.push(`有成交應畫 2 條各 3 點的折線，實際 ${r.lines} 條 ${JSON.stringify(r.pts)}`);
+    for (const k of ["+2.1%", "+1.4%", "+0.7 個百分點", "0050 全持有", "含手續費、未含稅", "3 個交易日"])
+      if (!r.has.includes(k)) perfErrors.push(`有成交畫面缺「${k}」：${r.has.slice(0, 160)}`);
+    if (!r.err.includes("缺白名單")) perfErrors.push(`perf error 應顯示原因：${r.err.slice(0, 80)}`);
+    if (!r.off.includes("尚未連線")) perfErrors.push(`未連線應顯示說明：${r.off.slice(0, 80)}`);
+  } catch (e) { perfErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("72. 日誌頁真錢績效對照（無成交「尚無部位」；有成交兩條折線＋報酬差距＋「含手續費、未含稅」；perf 錯誤顯示原因；未連線說明）", perfErrors.length === 0, perfErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
