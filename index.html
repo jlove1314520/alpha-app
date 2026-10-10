@@ -702,7 +702,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：經濟部官方開放資料（data.gov.tw#6607），GitHub Actions 排程；官方每月更新，資料通常落後1~2個月，MoM/YoY為本App自算；僅涵蓋工業生產指數，外銷訂單金額尚未接入，僅供參考非投資建議</div>
       </div>
 
-      <!-- 常備.開發-2：與今日頁盤前日報同源（data/daily_brief.json 規則摘要），不做市場判斷。 -->
+      <!-- 常備.開發-2：與今日頁盤前日報同源（data/daily_brief.json 規則摘要），不做市場判斷。
+           常備.開發-14：上方加「盤勢解讀」四行（大盤漲跌／類股強弱前三／法人合計／融資維持率水位），讀 market_tw.json＋margin_maintenance.json。 -->
       <div class="card ai-card">
         <div class="ai-tag">✦ 盤勢摘要 · 規則摘要</div>
         <div class="note" id="market-brief-body">載入中…</div>
@@ -1030,9 +1031,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" style="margin-top:2px">上：營收金額（從0起跳）；下：年增率YoY（以0為中心，紅漲綠跌隨顯示偏好）。觸控/按住任一根柱可看細節</div>
         <div class="note" id="rev-note">來源：research 快照（data/fundamentals.json）</div>
       </div>
-      <div class="card ai-card" style="opacity:.7">
-        <div class="ai-tag">✦ AI 營收解讀</div>
-        <div class="note">功能建置中 · 尚未接上真實法說會/新聞資料，暫不顯示具體解讀內容</div>
+      <!-- 常備.開發-14（2026-10-11）：營收解讀改為規則摘要——只用 fundamentals.json 的月營收算月增／年增／累計年增，不呼叫模型、不做判斷。 -->
+      <div class="card ai-card">
+        <div class="ai-tag">✦ 營收解讀 · 規則摘要</div>
+        <div id="ai-rev-body"><div class="note">載入中…</div></div>
       </div>
     </div>
 
@@ -4114,10 +4116,61 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       card.hidden=false;
     }catch(e){console.warn('[loadHomeBrief]',e);recordGlobalError('loadHomeBrief',e);card.hidden=true}
   }
+  // 常備.開發-14（2026-10-11）盤勢解讀（規則版）：四行只把既有檔案的數字翻成白話——
+  // ①大盤漲跌（market_tw.json taiex）②類股強弱前三（market_tw.json sectors 依漲跌幅排序，最強／最弱各三）
+  // ③法人合計（market_tw.json institutional_history 最新一日，單位張，同籌碼頁）
+  // ④融資維持率水位（margin_maintenance.json，與籌碼頁同一套 marginVal／marginLevel 對齊籌碼K口徑與分級）。
+  // 不下「偏多／偏空」結論；查不到的寫「查無」與查了哪個檔。
+  function buildMarketReadLines({mkt,margin}){
+    const out=[];
+    const pct=x=>(x>=0?'+':'')+(+x).toFixed(2)+'%';
+    const lots=x=>(x>=0?'買超 ':'賣超 ')+nf(Math.round(Math.abs(x)))+' 張';
+    try{
+      const t=mkt&&mkt.taiex;
+      if(!t||t.close==null||t.change_pct==null)out.push('大盤：查無加權指數收盤（data/market_tw.json）');
+      else{const dt=(t.sparkline_dates||[]).slice(-1)[0];out.push(`大盤：加權指數${dt?'（'+dt+' 收盤）':''} ${nf(t.close)}，${t.change_pct>0?'上漲':t.change_pct<0?'下跌':'平盤'} ${pct(t.change_pct)}`)}
+    }catch(e){console.warn('[marketRead:taiex]',e);recordGlobalError('marketRead:taiex',e);out.push('大盤：計算失敗（已記入診斷 log）')}
+    try{
+      const ss=((mkt&&mkt.sectors)||[]).filter(x=>x&&x.name&&typeof x.change_pct==='number');
+      if(ss.length<3)out.push('類股：查無足夠類股指數（data/market_tw.json sectors 不足 3 類）');
+      else{
+        const srt=ss.slice().sort((a,b)=>b.change_pct-a.change_pct);
+        const nm=x=>String(x.name).replace(/類指數$/,'');
+        const f=a=>a.map(x=>nm(x)+' '+pct(x.change_pct)).join('、');
+        out.push(`類股（${ss.length} 類指數）：最強 ${f(srt.slice(0,3))}；最弱 ${f(srt.slice(-3).reverse())}`);
+      }
+    }catch(e){console.warn('[marketRead:sector]',e);recordGlobalError('marketRead:sector',e);out.push('類股：計算失敗（已記入診斷 log）')}
+    try{
+      const h=((mkt&&mkt.institutional_history)||[]).slice(-1)[0];
+      if(!h||h.total_net_lots==null)out.push('法人：查無三大法人全市場合計（data/market_tw.json institutional_history）');
+      else{const d=String(h.date||'');const md=d.length===8?d.slice(4,6)+'/'+d.slice(6):d;
+        out.push(`法人（${md}）：三大法人合計${lots(h.total_net_lots)}（外資${lots(h.foreign_net_lots||0)}、投信${lots(h.trust_net_lots||0)}、自營商${lots(h.dealer_net_lots||0)}）`)}
+    }catch(e){console.warn('[marketRead:inst]',e);recordGlobalError('marketRead:inst',e);out.push('法人：計算失敗（已記入診斷 log）')}
+    try{
+      const hs=Array.isArray(margin)?margin:[];
+      const last=hs[hs.length-1];
+      const valid=hs.filter(h=>!h.data_incomplete&&marginVal(h)!=null);
+      const use=last&&!last.data_incomplete&&marginVal(last)!=null?last:valid[valid.length-1];
+      if(!use)out.push('融資維持率：查無有效數字（data/margin_maintenance.json）');
+      else{
+        const v=marginVal(use),lv=marginLevel(v);
+        const prev=valid[valid.indexOf(use)-1];
+        const dlt=prev&&marginVal(prev)!=null?v-marginVal(prev):null;
+        out.push(`融資維持率：${v.toFixed(1)}%（${lv?lv.l:''}，160／150／130 為注意／危險／斷頭線；資料日 ${marginDataDay(use)}${dlt!=null?'，較前一筆'+(dlt>=0?'+':'')+dlt.toFixed(1)+' 個百分點':''}）`+(use!==last?'；最新一筆資料不完整，改列上一筆有效值':''));
+      }
+    }catch(e){console.warn('[marketRead:margin]',e);recordGlobalError('marketRead:margin',e);out.push('融資維持率：計算失敗（已記入診斷 log）')}
+    return out;
+  }
   async function loadMarketBrief(){
     const el=document.getElementById('market-brief-body');if(!el)return;
-    try{const d=await loadDailyBrief();el.innerHTML=_briefLines(d.premarket&&d.premarket.lines)+_briefFoot(d)}
-    catch(e){console.warn('[loadMarketBrief]',e);recordGlobalError('loadMarketBrief',e);el.textContent='讀取盤勢摘要失敗（'+(e&&e.message||e)+'）'}
+    const [dR,,mR]=await Promise.allSettled([loadDailyBrief(),loadMarketDataFiles(),_marginJson('data/margin_maintenance.json')]);
+    if(mR.status==='rejected'){console.warn('[loadMarketBrief:margin]',mR.reason);recordGlobalError('loadMarketBrief:margin',mR.reason)}
+    let html='';
+    try{html+='<div style="font-weight:600;margin-bottom:2px">盤勢解讀</div>'+_briefLines(buildMarketReadLines({mkt:MARKET_TW_CACHE,margin:mR.status==='fulfilled'?mR.value:null}))}
+    catch(e){console.warn('[loadMarketBrief:read]',e);recordGlobalError('loadMarketBrief:read',e);html+='<div>盤勢解讀計算失敗（'+_autoEsc(e&&e.message||e)+'）</div>'}
+    if(dR.status==='fulfilled'){const d=dR.value;html+='<div style="font-weight:600;margin:6px 0 2px">盤前資訊</div>'+_briefLines(d.premarket&&d.premarket.lines)+_briefFoot(d)}
+    else{console.warn('[loadMarketBrief]',dR.reason);recordGlobalError('loadMarketBrief',dR.reason);html+='<div>讀取盤前資訊失敗（'+_autoEsc(dR.reason&&dR.reason.message||dR.reason)+'）</div><div style="margin-top:6px;font-size:10px;color:var(--ink-4)">規則摘要，非 AI 判斷、非投資建議</div>'}
+    el.innerHTML=html;
   }
   async function loadWeeklyBrief(){
     const el=document.getElementById('journal-weekly-body');if(!el)return;
@@ -5258,6 +5311,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       loadFinancialsUS(code);
       _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
       _safeAsync('renderStockBrief',()=>renderStockBrief(code));  // 常備.開發-13
+      _safeAsync('renderRevenueRead',()=>renderRevenueRead(code));  // 常備.開發-14
       return;
     }
     setTxt('eps-bars-title','季度獲利（EPS · 元）');
@@ -5328,6 +5382,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     loadMarginChip(code,px);
     _safeAsync('renderStockReasonCard',()=>renderStockReasonCard(code));  // 2026-09-15 P0產品.二
       _safeAsync('renderStockBrief',()=>renderStockBrief(code));  // 常備.開發-13
+    _safeAsync('renderRevenueRead',()=>renderRevenueRead(code));  // 常備.開發-14
     _safeAsync('loadForeignHoldingChip',()=>loadForeignHoldingChip(code));  // 2026-09-15 源頭二.3第1名
     setInsiderTradingNA('台股無此資料（僅適用美股，內部人交易為SEC Form 4申報）');  // 2026-09-15 源頭二.3第2名
     setUs13fNA('台股無此資料（僅適用美股，機構持倉為SEC Form 13F申報）');  // 2026-09-15 源頭二.3第6名
@@ -8212,6 +8267,58 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     el.innerHTML='<ol style="margin:4px 0 0 18px;padding:0;line-height:1.7">'+pts.map(p=>`<li><b>${esc(p.k)}</b>　${esc(p.t)}</li>`).join('')+'</ol>'
       +'<div class="note" style="margin-top:8px">規則摘要，非 AI 判斷、非投資建議：只把 fundamentals／stock_detail／institutional_history／disposal_flags／events 五份檔案的數字轉成文字，不推論漲跌。</div>';
   }
+  // ── 2026-10-11（常備.開發-14）營收解讀（規則版）────────────────────────────────
+  // 三段文字：①月增（最新月 vs 上一月）②年增（官方 yoy，缺時用去年同月金額自算）
+  // ③累計年增（今年 1 月～最新月合計 vs 去年同期合計；去年某月缺金額時用「今年該月÷(1+官方年增)」回推，
+  // 仍缺就照實寫缺哪幾個月、不硬算）。資料只來自 fundamentals.json 的 month_revenue＋revenue_history_scoring。
+  function buildRevenueReadPoints(fund){
+    const pts=[];
+    const pct=x=>(x>=0?'+':'')+x.toFixed(1)+'%';
+    const amt=v=>(v/1e8).toFixed(v>=1e10?0:1)+' 億元';
+    const M={};
+    [...((fund&&fund.revenue_history_scoring)||[]),...((fund&&fund.month_revenue)||[])].forEach(r=>{
+      if(!r||r.year==null||r.month==null)return;
+      const k=r.year*100+r.month,o=M[k]||{};
+      M[k]={year:r.year,month:r.month,revenue:r.revenue!=null?r.revenue:o.revenue,yoy:r.yoy!=null?r.yoy:o.yoy};
+    });
+    const keys=Object.keys(M).map(Number).filter(k=>M[k].revenue!=null).sort((a,b)=>a-b);
+    if(!keys.length)return [{k:'月增',t:'查無月營收（data/fundamentals.json 沒有這檔）'},{k:'年增',t:'查無月營收，無法計算'},{k:'累計年增',t:'查無月營收，無法計算'}];
+    const L=M[keys[keys.length-1]],ym=`${L.year} 年 ${L.month} 月`;
+    const prevKey=L.month===1?(L.year-1)*100+12:L.year*100+L.month-1;
+    const lastYr=(y,m)=>{const r=M[(y-1)*100+m];if(r&&r.revenue!=null)return r.revenue;const c=M[y*100+m];return c&&c.revenue!=null&&c.yoy!=null&&c.yoy>-1?c.revenue/(1+c.yoy):null};
+    try{
+      const p=M[prevKey];
+      if(!p||!p.revenue)pts.push({k:'月增',t:`${ym}營收 ${amt(L.revenue)}；上一月營收缺，無法算月增`});
+      else{const v=(L.revenue-p.revenue)/p.revenue*100;pts.push({k:'月增',t:`${ym}營收 ${amt(L.revenue)}，較上月 ${amt(p.revenue)}${v>0?'增加':v<0?'減少':'持平'} ${pct(v)}`})}
+    }catch(e){console.warn('[revRead:mom]',e);recordGlobalError('revRead:mom',e);pts.push({k:'月增',t:'計算失敗（已記入診斷 log）'})}
+    try{
+      let yoy=L.yoy!=null?L.yoy*100:null,src='官方年增率';
+      if(yoy==null){const ly=M[(L.year-1)*100+L.month];if(ly&&ly.revenue){yoy=(L.revenue-ly.revenue)/ly.revenue*100;src='以去年同月金額自算'}}
+      pts.push({k:'年增',t:yoy!=null?`${ym}較去年同月${yoy>0?'成長':yoy<0?'衰退':'持平'} ${pct(yoy)}（${src}）`:`${ym}年增率官方未提供，去年同月金額也缺，無法計算`});
+    }catch(e){console.warn('[revRead:yoy]',e);recordGlobalError('revRead:yoy',e);pts.push({k:'年增',t:'計算失敗（已記入診斷 log）'})}
+    try{
+      let cur=0,prv=0;const miss=[];
+      for(let m=1;m<=L.month;m++){
+        const c=M[L.year*100+m];const ly=lastYr(L.year,m);
+        if(!c||c.revenue==null||ly==null){miss.push(m);continue}
+        cur+=c.revenue;prv+=ly;
+      }
+      if(miss.length)pts.push({k:'累計年增',t:`${L.year} 年 1～${L.month} 月累計年增無法計算：缺 ${miss.join('、')} 月的今年或去年同月金額（快照只保留部分月份）`});
+      else{const v=(cur-prv)/prv*100;pts.push({k:'累計年增',t:`${L.year} 年 1～${L.month} 月累計營收 ${amt(cur)}，較去年同期 ${amt(prv)}${v>0?'成長':v<0?'衰退':'持平'} ${pct(v)}`})}
+    }catch(e){console.warn('[revRead:ytd]',e);recordGlobalError('revRead:ytd',e);pts.push({k:'累計年增',t:'計算失敗（已記入診斷 log）'})}
+    return pts;
+  }
+  async function renderRevenueRead(code){
+    const el=document.getElementById('ai-rev-body');if(!el)return;
+    if(isUS(code)){el.innerHTML='<div class="note">美股暫不提供營收解讀（月營收為台股官方申報資料）。</div>';return}
+    el.innerHTML='<div class="note">載入中…</div>';
+    const fund=await loadFundamentals(code);
+    if(currentCode!==code)return;
+    const pts=buildRevenueReadPoints(fund||{});
+    const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    el.innerHTML='<ol style="margin:4px 0 0 18px;padding:0;line-height:1.7">'+pts.map(p=>`<li><b>${esc(p.k)}</b>　${esc(p.t)}</li>`).join('')+'</ol>'
+      +'<div class="note" style="margin-top:8px">規則摘要，非 AI 判斷、非投資建議：只用 data/fundamentals.json 的月營收數字計算，不推論漲跌。</div>';
+  }
   const EVENT_TYPE_COLOR={
     '月營收':'var(--gold)','除權息':'#7aa2f7','法說會':'var(--up)','併購':'#e0af68',
     '增減資':'#bb9af7','重大訂單':'var(--up)','人事':'var(--ink-3)','財務':'#7dcfff',
@@ -8848,7 +8955,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.0119';
+  const APP_VERSION='2026-10-11.0126';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

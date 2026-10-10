@@ -2362,10 +2362,67 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { briefErrors.push(`測試本身出錯：${e.message || e}`); }
   record("73. 個股頁 AI 分頁個股簡報（規則版 5 條：營收年增／法人連買賣／融資變化／處置注意／近期事件；標「規則摘要，非 AI 判斷」；全空寫查無；美股誠實說明）", briefErrors.length === 0, briefErrors.join("; "));
 
+  // 74.【2026-10-11 常備.開發-14】營收解讀與盤勢解讀（規則版）：①合成資料驗營收三段（月增／年增／累計年增，
+  // 含「去年同月缺金額時用官方年增回推」與「缺月照實寫」）②合成資料驗盤勢四行（大盤漲跌、類股最強／最弱前三、
+  // 法人合計、融資維持率水位與「最新一筆不完整改列上一筆」）③真實檔案 2330 營收三段＋市場頁盤勢解讀四行＋盤前資訊
+  // ④美股營收解讀誠實說明 ⑤營收分頁不再殘留「功能建置中」。
+  const readErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const o = {};
+      const hist = [{ year: 2025, month: 2, revenue: 100e8, yoy: null }, { year: 2025, month: 3, revenue: 100e8, yoy: null }];
+      const mr = [{ year: 2026, month: 1, revenue: 110e8, yoy: 0.1 }, { year: 2026, month: 2, revenue: 120e8, yoy: null }, { year: 2026, month: 3, revenue: 90e8, yoy: -0.1 }];
+      o.rev = buildRevenueReadPoints({ month_revenue: mr, revenue_history_scoring: hist }).map((p) => p.k + "|" + p.t);
+      o.revMiss = buildRevenueReadPoints({ month_revenue: mr.slice(1) }).map((p) => p.t);
+      o.revEmpty = buildRevenueReadPoints({}).map((p) => p.t);
+      const mkt = { taiex: { close: 20000, change_pct: -1.234, sparkline_dates: ["2026-10-07", "2026-10-08"] },
+        sectors: [{ name: "甲類指數", change_pct: 3 }, { name: "乙類指數", change_pct: 2 }, { name: "丙類指數", change_pct: 1 },
+          { name: "丁類指數", change_pct: 0 }, { name: "戊類指數", change_pct: -1 }, { name: "己類指數", change_pct: -2 }, { name: "庚類指數", change_pct: -3 }],
+        institutional_history: [{ date: "20261007", total_net_lots: 9 }, { date: "20261008", total_net_lots: -1500, foreign_net_lots: -2000, trust_net_lots: 300, dealer_net_lots: 200 }] };
+      const margin = [{ date: "2026-10-08", margin_money_date: "2026-10-07", ratio_pct: 180, ratio_pct_ck: 165 },
+        { date: "2026-10-09", margin_money_date: "2026-10-08", ratio_pct: 172, ratio_pct_ck: 158.4 },
+        { date: "2026-10-10", data_incomplete: true, ratio_pct: null }];
+      o.mk = buildMarketReadLines({ mkt, margin });
+      o.mkEmpty = buildMarketReadLines({ mkt: null, margin: null });
+      const saved = currentCode;
+      try {
+        currentCode = "2330"; await renderRevenueRead("2330");
+        const el = document.getElementById("ai-rev-body");
+        o.realLi = el.querySelectorAll("li").length; o.real = el.textContent;
+        currentCode = "AAPL"; await renderRevenueRead("AAPL"); o.us = el.textContent;
+      } finally { currentCode = saved; }
+      o.placeholder = document.getElementById("sub-rev").textContent.includes("功能建置中");
+      await loadMarketBrief();
+      const mb = document.getElementById("market-brief-body");
+      o.mbText = mb.textContent; o.mbLines = mb.querySelectorAll("div").length;
+      return o;
+    });
+    const rev = r.rev.join(" / ");
+    for (const k of ["月增|2026 年 3 月營收 90.0 億元，較上月 120 億元減少 -25.0%", "年增|2026 年 3 月較去年同月衰退 -10.0%（官方年增率）",
+      "累計年增|2026 年 1～3 月累計營收 320 億元，較去年同期 300 億元成長 +6.7%"])
+      if (!rev.includes(k)) readErrors.push(`營收合成資料缺「${k}」：${rev.slice(0, 240)}`);
+    if (!r.revMiss[2].includes("缺 1、2 月")) readErrors.push(`缺月應照實寫：${r.revMiss[2]}`);
+    if (r.revEmpty.length !== 3 || !r.revEmpty.every((t) => t.includes("查無"))) readErrors.push(`全空應三段查無：${JSON.stringify(r.revEmpty)}`);
+    const mk = r.mk.join(" / ");
+    for (const k of ["大盤：加權指數（2026-10-08 收盤） 20,000，下跌 -1.23%", "最強 甲 +3.00%、乙 +2.00%、丙 +1.00%", "最弱 庚 -3.00%、己 -2.00%、戊 -1.00%",
+      "法人（10/08）：三大法人合計賣超 1,500 張（外資賣超 2,000 張、投信買超 300 張、自營商買超 200 張）",
+      "融資維持率：158.4%（注意", "資料日 2026-10-08", "較前一筆-6.6 個百分點", "最新一筆資料不完整，改列上一筆有效值"])
+      if (!mk.includes(k)) readErrors.push(`盤勢合成資料缺「${k}」：${mk.slice(0, 300)}`);
+    if (r.mk.length !== 4) readErrors.push(`盤勢應 4 行，實際 ${r.mk.length}`);
+    if (r.mkEmpty.length !== 4 || !r.mkEmpty.every((t) => t.includes("查無"))) readErrors.push(`盤勢全空應四行查無：${JSON.stringify(r.mkEmpty)}`);
+    if (r.realLi !== 3) readErrors.push(`2330 營收解讀應 3 段，實際 ${r.realLi}：${r.real.slice(0, 120)}`);
+    if (!r.real.includes("規則摘要，非 AI 判斷")) readErrors.push("營收解讀缺「規則摘要，非 AI 判斷」標示");
+    if (!r.us.includes("美股暫不提供")) readErrors.push(`美股應顯示誠實說明：${r.us.slice(0, 80)}`);
+    if (r.placeholder) readErrors.push("營收分頁仍殘留「功能建置中」佔位");
+    for (const k of ["盤勢解讀", "大盤：", "類股（", "法人（", "融資維持率：", "盤前資訊", "規則摘要，非 AI 判斷"])
+      if (!r.mbText.includes(k)) readErrors.push(`市場頁盤勢卡（真實檔）缺「${k}」：${r.mbText.slice(0, 200)}`);
+  } catch (e) { readErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("74. 營收解讀（月增／年增／累計年增三段）與市場頁盤勢解讀（大盤／類股強弱前三／法人合計／融資維持率水位）規則版；標「規則摘要，非 AI 判斷」；全空寫查無；美股誠實說明", readErrors.length === 0, readErrors.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

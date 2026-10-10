@@ -1113,8 +1113,12 @@
       "source": "data/fundamentals.json"
     },
     {
-      "panel": "個股頁·營收·AI營收解讀",
-      "source": "無（誠實佔位「功能建置中」）"
+      "panel": "個股頁·營收·營收解讀",
+      "source": "規則摘要（常備.開發-14）：data/fundamentals.json month_revenue＋revenue_history_scoring，前端算月增／年增／累計年增三段文字，非 AI 判斷"
+    },
+    {
+      "panel": "市場頁·台股·盤勢解讀",
+      "source": "規則摘要（常備.開發-14）：data/market_tw.json（加權指數、類股指數漲跌前三／後三、三大法人全市場合計）＋data/margin_maintenance.json（融資維持率水位，對齊籌碼K口徑），前端組成四行，非 AI 判斷"
     },
     {
       "panel": "個股頁·財報·EPS/毛利率/營益率/ROE",
