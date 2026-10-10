@@ -200,8 +200,12 @@ def _quota_reset_hint(jsonl_path: Path) -> str:
 
 # ---------- 結算一項 ----------
 def _find_line(key: str) -> tuple[int, str] | None:
-    for i, ln in enumerate(R._lines()):
-        if ln.startswith("- [") and R.item_key(ln) == key:
+    # 2026-10-11（DevQueue 20261011-010102）：排除 ``` 裁示引文區塊內的行，否則結算會比對到
+    # 引文裡永遠是 - [ ] 的那一行、把已完成項判失敗（與 runner 的 find_next() 同一套排除）
+    lines = R._lines()
+    fenced = R._fenced_line_indices(lines)
+    for i, ln in enumerate(lines):
+        if i not in fenced and ln.startswith("- [") and R.item_key(ln) == key:
             return i, ln
     return None
 
