@@ -3399,6 +3399,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { trErrs.push(`測試本身出錯：${e.message || e}`); }
   record("103. 試驗帳本索引：loadTrials 有執行、列數＝帳本試驗列（＝總 N）、無 FDR 排名列混入、共用編號有標示（先.八十-3）", trErrs.length === 0, trErrs.join("; "));
 
+  // 104.【2026-10-12 先.八十-4】選股頁產業篩選籤：切美股再切回台股、搜尋後清空，籤列仍是 flex 單列不重疊；顯示／隱藏只切 class。
+  const chErrs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      await window.go("picks");
+      for (let i = 0; i < 40 && !document.querySelector("#picks-chips > *"); i++) await new Promise(res => setTimeout(res, 200));
+      const el = document.getElementById("picks-chips");
+      if (!el) return { err: "找不到 #picks-chips" };
+      const st = () => getComputedStyle(el).display;
+      const oneRow = () => { const k = [...el.children].filter(c => c.offsetParent); return k.length < 2 || new Set(k.map(c => c.offsetTop)).size === 1; };
+      const out = { n: el.children.length, inline: el.style.display };
+      MKT_STATE.picks = "US"; onPicksToggleChange(); out.us = st();
+      MKT_STATE.picks = "TW"; onPicksToggleChange(); out.tw = st(); out.twRow = oneRow();
+      if (typeof onPicksSearchInput === "function") { onPicksSearchInput("2330"); out.search = st(); onPicksSearchInput(""); out.after = st(); out.afterRow = oneRow(); }
+      return out;
+    });
+    if (r.err) chErrs.push(r.err);
+    else {
+      if (r.n < 2) chErrs.push(`篩選籤沒產生（${r.n}）`);
+      if (r.inline) chErrs.push(`仍有 inline style.display＝${r.inline}`);
+      if (r.us !== "none") chErrs.push(`美股時籤列應隱藏（${r.us}）`);
+      if (r.tw !== "flex" || !r.twRow) chErrs.push(`切回台股應為 flex 單列（${r.tw}，單列=${r.twRow}）`);
+      if (r.search !== "none") chErrs.push(`搜尋中籤列應隱藏（${r.search}）`);
+      if (r.after !== "flex" || !r.afterRow) chErrs.push(`清空搜尋後應為 flex 單列（${r.after}，單列=${r.afterRow}）`);
+    }
+  } catch (e) { chErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("104. 選股頁篩選籤：切市場／搜尋後仍為 flex 單列不重疊、只切 class 不設 style.display（先.八十-4）", chErrs.length === 0, chErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3427,7 +3455,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

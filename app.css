@@ -121,6 +121,10 @@
   /* 2026-08-25 新增：三個橫向捲動 chips 列（選股頁主流題材/產業篩選、日誌頁篩選）
      隱藏捲軸，跟其他橫向捲動區塊(main)一致，不然部分瀏覽器會一直顯示一條橫捲軸。 */
   #mainstream-chips,#picks-chips,#journal-chips{scrollbar-width:none}
+  /* 先.八十-4：篩選籤排版放 CSS，顯示／隱藏只切 class（off-mkt＝非台股、off-search＝搜尋中），不再直接設 style.display——
+     舊版 style.display='' 會把 inline 的 display:flex 一起清掉，籤退成 block 疊在一起 */
+  #picks-chips{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px}
+  #picks-chips.off-mkt,#picks-chips.off-search{display:none}
   #mainstream-chips::-webkit-scrollbar,#picks-chips::-webkit-scrollbar,#journal-chips::-webkit-scrollbar{display:none}
   .screen{display:none}
   .screen.active{display:block;animation:fade .18s ease}

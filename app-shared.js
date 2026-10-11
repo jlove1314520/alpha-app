@@ -225,7 +225,7 @@
   function onPicksToggleChange(){
     const mkt=MKT_STATE.picks;
     document.getElementById('picks-list-card').style.display=mkt==='TW'?'':'none';
-    document.getElementById('picks-chips').style.display=mkt==='TW'?'':'none';
+    document.getElementById('picks-chips').classList.toggle('off-mkt',mkt!=='TW');  // 先.八十-4：切 class，不設 style.display
     document.getElementById('picks-us-panel').style.display=mkt==='US'?'':'none';
     document.getElementById('picks-fut-panel').style.display=mkt==='FUT'?'':'none';
     if(mkt==='US')loadUsScoresV0().catch(e=>{console.warn('[loadUsScoresV0]',e);recordGlobalError('loadUsScoresV0',e)});

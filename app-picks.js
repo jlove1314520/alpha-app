@@ -412,8 +412,8 @@
     const listCard=document.getElementById('picks-list-card');
     const chipsEl=document.getElementById('picks-chips');
     q=q.trim();
-    if(!q){resEl.innerHTML='';listCard.style.display='';chipsEl.style.display='';return}
-    listCard.style.display='none';chipsEl.style.display='none';
+    if(!q){resEl.innerHTML='';listCard.style.display='';chipsEl.classList.remove('off-search');return}
+    listCard.style.display='none';chipsEl.classList.add('off-search');  // 先.八十-4：切 class，不設 style.display
     const rows=(currentPicksCache()&&currentPicksCache().stocks)||[];
     const ql=q.toLowerCase();
     const hits=rows.filter(r=>r.code.toLowerCase().includes(ql)||(r.name&&r.name.includes(q)));
