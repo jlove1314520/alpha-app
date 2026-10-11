@@ -165,6 +165,35 @@ def preflight(min_bytes: int = START_MIN_AVAILABLE_BYTES) -> tuple[bool, float, 
     return True, gb, f"可用記憶體 {gb:.2f}GB ≥ 開跑門檻 {need:.1f}GB"
 
 
+def find_orphan_python_workers() -> list[dict]:
+    """先.七十一-2：列出「父行程已不存在」的 python multiprocessing 工作行程（只列出，不結束）。
+
+    判定：程序名 python*.exe、命令列含 multiprocessing 的 spawn_main(parent_pid=N)／--multiprocessing-fork，
+    且 N 這個父行程已不存在（mp_guard._pid_alive）。2026-10-05 事故的 6 支孤兒正是這個形狀。
+    只支援 Windows（PowerShell Get-CimInstance）；其他平台回空清單。量測失敗拋例外，由呼叫端降級。"""
+    if platform.system() != "Windows":
+        return []
+    import json as _json
+    import re as _re
+    import subprocess as _sp
+    ps = ("Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'python*' -and $_.CommandLine -match 'spawn_main|multiprocessing-fork' } | "
+          "Select-Object ProcessId,ParentProcessId,CommandLine,PrivatePageCount,@{n='Start';e={$_.CreationDate.ToString('yyyy-MM-ddTHH:mm:ss')}} | ConvertTo-Json -Compress")
+    out = _sp.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60).stdout.strip()
+    rows = _json.loads(out) if out else []
+    if isinstance(rows, dict):
+        rows = [rows]
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import mp_guard
+    found = []
+    for r in rows:
+        m = _re.search(r"parent_pid=(\d+)", r.get("CommandLine") or "")
+        ppid = int(m.group(1)) if m else int(r.get("ParentProcessId") or 0)
+        if not mp_guard._pid_alive(ppid):
+            found.append({"pid": r["ProcessId"], "parent_pid": ppid, "started": r.get("Start"),
+                          "private_mb": round((r.get("PrivatePageCount") or 0) / 1024 ** 2)})
+    return found
+
+
 def uninstall() -> None:
     """停止背景監控（主要給測試用）。"""
     global _installed

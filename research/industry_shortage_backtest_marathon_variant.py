@@ -46,6 +46,8 @@ _VALID_BUCKETS: np.ndarray | None = None
 
 def _init_worker():
     global _P, _BD, _CACHE, _VALID_BUCKETS
+    import mp_guard  # 先.七十一-2：父行程被硬砍時 worker 自我結束（2026-10-05 孤兒事故）
+    mp_guard.start_parent_watchdog()
     _P = C.Panel(IC.PANEL_PATH)
     _BD = IC.BucketData(_P)
     rows = IC.rebalance_rows(_P)

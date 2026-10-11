@@ -346,6 +346,13 @@ def _refresh_top_level(doc: dict, now: datetime) -> None:
         doc["any_overdue"] = bool(sh.get("any_overdue"))
     except Exception as e:  # noqa: BLE001
         print(f"::warning::schedule_health 重算失敗，保留舊值：{type(e).__name__}: {e}")
+    # 先.七十一-2：本機孤兒程序巡檢（scripts/orphan_process_scan.py 寫 data/orphan_scan.json）併進頂層；讀不到只降級
+    try:
+        o = json.loads((REPO_ROOT / "data" / "orphan_scan.json").read_text(encoding="utf-8"))
+        doc["orphan_processes"] = {"count": o.get("count", 0), "total_private_mb": o.get("total_private_mb", 0),
+                                   "checked_at": o.get("checked_at"), "warning": bool(o.get("count"))}
+    except Exception as e:  # noqa: BLE001
+        print(f"::warning::orphan_scan.json 讀取失敗，STATUS 不更新孤兒欄位：{type(e).__name__}")
     doc["updated_at"] = now.astimezone(timezone(timedelta(hours=8))).isoformat()
     doc["updated_by"] = "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）"
 

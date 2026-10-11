@@ -19051,11 +19051,11 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
 ```
 
-- [ ] **先.七十一-1 結束 6 支 10-05 孤兒 worker＋pythonw 132880（先確認非常駐服務），記錄前後 Available／commit**（互動視窗執行）
-- [ ] **先.七十一-2 找出 10-05 孤兒來源腳本並修 Pool 終止＋父程序死亡偵測；mem_guard 加孤兒偵測（寫 STATUS＋推播，不自動結束）**（互動視窗執行）
-- [ ] **先.七十一-3 清完後重跑常備.開發-6（兩榜回測 reverification=true），出判定即推播**（互動視窗執行）
-- [ ] **先.七十一-4 本機排程每日 03:00 孤兒程序巡檢（只列出與告警）**（互動視窗執行）
-- [ ] **先.七十一-5 冒煙全綠 commit 後回報**（互動視窗執行）
+- [~] **先.七十一-1 結束 6 支 10-05 孤兒 worker＋pythonw 132880（先確認非常駐服務），記錄前後 Available／commit**（互動視窗執行）〔2026-10-11 部分完成：①6 支 10-05 孤兒 worker 再確認（命令列皆為 multiprocessing spawn_main(parent_pid=241976)、父行程不存在、非任何常駐服務）後 taskkill /T /F 全數結束；前 Available 2.25GB／commit 55.07/60.31GB → 後 Available 2.27GB／commit 44.05/55.34GB（認可記憶體降 11GB；Available 幾乎不變，因這些分頁早已被換出到磁碟）。②**pythonw 132880 未結束**：再確認發現其父程序是 nssm.exe，屬 Windows 服務 CybexBot（自動啟動，執行 Claude 桌面版工作階段資料夾裡的 cybex_bot.py——Cybex 專案的 Telegram 機器人，內含即時委託監看與每日 live 執行），與裁示前提「命令列不可讀的不明程序」不符；且 NSSM 會在 5 秒後自動重啟，結束也釋放不了記憶體。待總司令決定（停用服務或保留）〕
+- [x] **先.七十一-2 找出 10-05 孤兒來源腳本並修 Pool 終止＋父程序死亡偵測；mem_guard 加孤兒偵測（寫 STATUS＋推播，不自動結束）**（互動視窗執行）〔2026-10-11 完成：根因＝industry_shortage_backtest（含 marathon_variant）／supply_tightness_backtest 的 ProcessPoolExecutor（6 worker、各載入約 1.9GB 面板），10-05 01:16 馬拉松輪次跑這支時父行程被硬砍，worker 卡在等工作的管線上永不結束。新增 research/mp_guard.py（worker 每 10 秒檢查父行程，不在就 os._exit(3)），三支腳本的 worker initializer 第一行啟用；mem_guard.find_orphan_python_workers() 只列出不結束；scripts/orphan_process_scan.py 寫 data/orphan_scan.json＋推播（同一組一天一則），雲端 STATUS 刷新併入頂層 orphan_processes。research/test_mp_guard.py 實測：裝 watchdog 父行程被 taskkill /F 後 3 worker 全部自我結束；對照組 3/3 成孤兒且偵測全數抓到〕
+- [~] **先.七十一-3 清完後重跑常備.開發-6（兩榜回測 reverification=true），出判定即推播**（互動視窗執行）〔2026-10-11 未能重跑：清完後 mem_guard.preflight() 可用記憶體 3.00GB＜4.5GB（執行中 3GB 安全閥也會立即終止）。實體記憶體 31.4GB 主要由一般應用程式佔用（Chrome 39 支 5.4GB、Claude 2.7GB、Edge WebView 1.8GB、WSL 1.5GB、Steam／Riot／Dropbox 約 1.9GB、非分頁集區 2.3GB）；要開跑需總司令關閉部分應用程式，-6 維持 [!]〕
+- [x] **先.七十一-4 本機排程每日 03:00 孤兒程序巡檢（只列出與告警）**（互動視窗執行）〔2026-10-11 完成：工作排程器 AlphaOrphanScan（wscript→C:\alpha\run-orphan-scan-hidden.vbs，每日 03:00、StartWhenAvailable、上限 10 分鐘），手動試跑 LastTaskResult=0，下次 10/12 03:00；只列出與告警〕
+- [x] **先.七十一-5 冒煙全綠 commit 後回報**（互動視窗執行）〔2026-10-11 完成：冒煙 89 項全部通過後 commit〕
 
 ---
 

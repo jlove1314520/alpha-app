@@ -259,6 +259,8 @@ def task_boot(args):
 
 
 def _pinit():
+    import mp_guard  # 先.七十一-2：父行程被硬砍時 worker 自我結束（2026-10-05 孤兒事故）
+    mp_guard.start_parent_watchdog()
     init_globals()
 
 

@@ -1,3 +1,14 @@
+## 2026-10-11 14:27（互動視窗）先.七十一 清除孤兒程序＋根因修補
+
+- **結束了 10/05 的 6 支孤兒 worker**：認可記憶體從 55.1GB 降到 44.1GB。可用記憶體幾乎沒變（2.25→2.27GB），因為這些程序的分頁早就換出到磁碟了。
+- **pythonw 132880 沒有結束**：它是 Windows 服務 CybexBot，由 NSSM 管理、會自動重啟，執行的是 Cybex 專案的 Telegram 機器人，裡面有即時委託監看。這跟裁示的前提不符，要等總司令決定。
+- **根因**：三支供需類回測用 ProcessPoolExecutor 開 6 個 worker，每個佔約 1.9GB。父程序被硬砍後，worker 就卡住、永遠不會結束。
+  - 新增 `research/mp_guard.py`：worker 每 10 秒檢查一次父程序，父程序不在就自己結束。
+  - 實測：父程序被硬砍後，3 個 worker 都會自己結束；沒裝這個保護的對照組 3 個全部變成孤兒。
+- **巡檢**：`mem_guard.find_orphan_python_workers()` 加上 `scripts/orphan_process_scan.py`，排程 AlphaOrphanScan 每天 03:00 執行，只列出並推播，不結束程序；結果會併進 STATUS。
+- **-6 還是跑不了**：可用記憶體 3.0GB，不到門檻 4.5GB。實體記憶體主要被 Chrome、Claude、WebView、WSL 這些一般應用程式佔用。
+- 冒煙 89 項全部通過。
+
 ## 2026-10-11 13:41（互動視窗）先.六十九 App 載入速度與部署節奏＋先.七十 記憶體洩漏查修與策略卡定位
 
 - **快取優先**：
