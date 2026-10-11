@@ -31,7 +31,10 @@
   async function loadJournalLedger(){
     const pe=document.getElementById('journal-pnl'),te=document.getElementById('journal-trades');
     if(!pe||!te)return;
-    if(!LIVE.configured||!LIVE.url){pe.textContent='連上電腦才看得到';te.innerHTML='<div class="note" style="padding:14px 2px">連上電腦才看得到</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');setTxt('journal-review','尚未連線本機伺服器，盤後復盤只在本機產生。');return}
+    // 先.七十二-B5／C8：離線時三張自動投資卡收起、只留一行
+    const off=!LIVE.configured||!LIVE.url;
+    try{const ln=document.getElementById('journal-offline-line');if(ln)ln.hidden=!off;document.querySelectorAll('#scr-journal [data-ui-live]').forEach(c=>{c.hidden=off})}catch(e){console.warn('[journal offline]',e);recordGlobalError('journal offline',e)}
+    if(off){pe.textContent='連上電腦才看得到';te.innerHTML='<div class="note" style="padding:14px 2px">連上電腦才看得到</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');setTxt('journal-review','尚未連線本機伺服器，盤後復盤只在本機產生。');return}
     try{
       const d=await loadAutoLedger();
       JOURNAL_LEDGER_CACHE=d;_safeAsync('loadWeeklyBrief',loadWeeklyBrief);

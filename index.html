@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-11.1447">
+<link rel="stylesheet" href="app.css?v=2026-10-11.1458">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -97,6 +97,30 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       </div>
     </div>
 
+    <!-- 先.七十二-B5（2026-10-11）：「我的資產與今日損益」合成一張卡（原總資產卡 home-asset-card、持股損益卡 home-pos-card
+         改成卡內區塊，id 保留）。電腦沒連線時整張卡與「自動投資這一期」都收起，只顯示一行 #home-offline-line。 -->
+    <div class="cta-line" id="home-offline-line" hidden onclick="go('settings')">我的資產、自動投資：連上電腦才看得到 →</div>
+    <div class="card" id="home-money-card">
+      <h3>我的資產 <span class="more" onclick="go('settings')">設定 →</span></h3>
+      <div class="cta-line" id="home-broker-cta" onclick="go('settings')" style="margin:0 0 6px">連上電腦才看得到 →</div>
+      <div id="home-asset-card" hidden>
+        <div class="num" id="home-asset-total" data-ntd="0" style="font-size:22px;font-weight:700"></div>
+      <div class="note" id="home-asset-detail" style="margin-top:6px;line-height:1.7"></div>
+      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，以券商回報為準</div>
+      </div>
+      <div id="home-pos-card" style="margin-top:6px">
+        <div id="home-pos-body" class="note">連上電腦才看得到</div>
+      </div>
+    </div>
+
+    <!-- 常備.開發-11（2026-10-11）：真錢執行總覽卡。只讀本機 /auto/status＋/auto/ledger（token 必檢、去識別化），
+         不具任何下單或切換模式能力。顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期；
+         未入金／緊急停止／拒單時用白話說明原因。計算邏輯在 autoPeriodSummary()（純函式，selftest 抽出驗三態）。 -->
+    <div class="card" id="home-exec-card">
+      <h3>自動投資這一期 <span class="more" onclick="go('trade')">交易頁 →</span></h3>
+      <div id="home-exec-body" class="note">連上電腦才看得到</div>
+    </div>
+
     <div class="card">
       <h3>自選股 <span class="more" onclick="editWL()">管理 →</span></h3>
       <!-- 常備.開發-8（2026-10-11）：多自選清單。點清單名稱切換；「＋」新增；「下架」移除目前清單（至少保留一個）。 -->
@@ -106,6 +130,12 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            才出現，不是固定貼一段沒人看的警語。 -->
       <div class="note" id="wl-extended-hours-note" style="display:none;color:var(--warn);margin-top:6px">⚠ 延長交易時段（盤前/盤後）流動性低、價差大，僅接受限價單，價格僅供參考</div>
       <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
+    </div>
+
+    <div class="card">
+      <h3>大盤一眼</h3>
+      <div class="idx-strip" id="home-idx-rows"><div class="skel-block" style="height:52px;width:100%"></div></div>
+      <div class="note" id="home-idx-datatime"></div>
     </div>
 
     <!-- 2026-10-11 先.六十八：「策略 vs 0050」（取代「我們 vs 0050」）。資料 data/strategy_curves.json
@@ -119,6 +149,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
     </div>
 
+    <div class="card" id="home-events-card" hidden>
+      <h3>今日事件</h3>
+      <div id="today-events"></div>
+    </div>
+
     <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與紙上
     持倉（策略監控台各策略目前holdings）的events.json/news.json依時間排一條流，
     點開跳個股頁。跟上面「今日事件」卡不同——那張只顯示21天內美股財報日期，
@@ -129,48 +164,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="my-holdings-events"></div>
     </div>
 
-    <div class="card">
-      <h3>大盤速覽</h3>
-      <div class="idx-strip" id="home-idx-rows"><div class="skel-block" style="height:52px;width:100%"></div></div>
-      <div class="note" id="home-idx-datatime"></div>
-    </div>
-
-    <!-- 2026-09-15（開發佇列自走，週六.五）總資產卡：/live/positions＋/live/balance
-         有真數字才顯示；沒設定即時伺服器維持原本CTA；設定了但查無資料（非交易
-         時段/常駐行程沒在跑）顯示第三種過渡文案，不誤導成「尚未串接」。 -->
-    <div class="cta-line" id="home-broker-cta" onclick="go('settings')">串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span></div>
-    <div class="card" id="home-asset-card" hidden>
-      <h3>我的資產 <span class="more" onclick="go('settings')">設定 →</span></h3>
-      <div class="num" id="home-asset-total" data-ntd="0" style="font-size:22px;font-weight:700"></div>
-      <div class="note" id="home-asset-detail" style="margin-top:6px;line-height:1.7"></div>
-      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-4)">概算，以券商回報為準</div>
-    </div>
-
-    <!-- 常備.開發-3（2026-10-11）：持倉損益卡。只讀本機 /live/positions（Shioaji 唯讀查詢，不進 repo、不顯示帳號）；
-         未連線本機伺服器時顯示說明，不留空白。 -->
-    <div class="card" id="home-pos-card">
-      <h3>持股損益</h3>
-      <div id="home-pos-body" class="note">連上電腦才看得到</div>
-    </div>
-
-    <!-- 常備.開發-11（2026-10-11）：真錢執行總覽卡。只讀本機 /auto/status＋/auto/ledger（token 必檢、去識別化），
-         不具任何下單或切換模式能力。顯示本期（T1～T4／月底）送單日、送出筆數、成交比例、目標與實際權重偏離、下一期；
-         未入金／緊急停止／拒單時用白話說明原因。計算邏輯在 autoPeriodSummary()（純函式，selftest 抽出驗三態）。 -->
-    <div class="card" id="home-exec-card">
-      <h3>自動投資這一期 <span class="more" onclick="go('trade')">交易頁 →</span></h3>
-      <div id="home-exec-body" class="note">連上電腦才看得到</div>
-    </div>
-
     <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
          不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
     <div class="card ai-card" id="home-ai-card" hidden>
       <div class="ai-tag">✦ AI 盤前日報 · 規則摘要</div>
       <div class="note" id="home-ai-body"></div>
-    </div>
-
-    <div class="card" id="home-events-card" hidden>
-      <h3>今日事件</h3>
-      <div id="today-events"></div>
     </div>
 
     <!-- 2026-08-28新增（使用者要求：手機第五次回報時鐘/資料卡舊，最大嫌疑是SW快取
@@ -250,21 +248,9 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note">來源：證交所法人與融資統計</div>
       </div>
 
-      <!-- 2026-09-15（源頭二.3第9名）全國進出口貿易統計，財政部關務署官方開放資料免金鑰。 -->
-      <div class="card">
-        <h3>進出口統計</h3>
-        <div class="facts" id="customs-trade-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
-        <div class="note" id="customs-trade-datatime"></div>
-        <div class="note">來源：關務署，每月更新、約落後一個月</div>
-      </div>
+      
 
-      <!-- 2026-09-15（源頭二.3第10名）工業生產指數，經濟部官方開放資料免金鑰。2026-10-11 常備.開發-21 接外銷訂單總金額（#101580）。 -->
-      <div class="card">
-        <h3>工業生產</h3>
-        <div class="facts" id="ip-index-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
-        <div class="note" id="ip-index-datatime"></div>
-        <div class="note">來源：經濟部，每月更新、約落後一到兩個月</div>
-      </div>
+      
 
       <!-- 常備.開發-2：與今日頁盤前日報同源（data/daily_brief.json 規則摘要），不做市場判斷。
            常備.開發-14：上方加「盤勢解讀」四行（大盤漲跌／類股強弱前三／法人合計／融資維持率水位），讀 market_tw.json＋margin_maintenance.json。 -->
@@ -272,6 +258,26 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="ai-tag">✦ 盤勢摘要 · 規則摘要</div>
         <div class="note" id="market-brief-body">載入中…</div>
       </div>
+
+      <!-- 先.七十二-B7（2026-10-11）：比較少看的卡收進「更多」（卡片 id 與載入函式不變，只是預設收合） -->
+      <details class="ui-more" data-ui-more>
+        <summary>更多</summary>
+        <!-- 2026-09-15（源頭二.3第9名）全國進出口貿易統計，財政部關務署官方開放資料免金鑰。 -->
+              <div class="card">
+                <h3>進出口統計</h3>
+                <div class="facts" id="customs-trade-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
+                <div class="note" id="customs-trade-datatime"></div>
+                <div class="note">來源：關務署，每月更新、約落後一個月</div>
+              </div>
+        <!-- 2026-09-15（源頭二.3第10名）工業生產指數，經濟部官方開放資料免金鑰。2026-10-11 常備.開發-21 接外銷訂單總金額（#101580）。 -->
+              <div class="card">
+                <h3>工業生產</h3>
+                <div class="facts" id="ip-index-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
+                <div class="note" id="ip-index-datatime"></div>
+                <div class="note">來源：經濟部，每月更新、約落後一到兩個月</div>
+              </div>
+
+      </details>
     </div>
 
     <!-- 美股 -->
@@ -288,26 +294,32 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <div class="note" id="us-sector-datatime"></div>
         <div class="note">類股來源：SEC EDGAR company_tickers.json + submissions（官方SIC產業分類，免金鑰），GitHub Actions 排程抓取；股價同美股即時報價（Finnhub）</div>
       </div>
-      <div class="card">
-        <h3>ADR 溢價</h3>
-        <div class="facts" id="adr-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
-        <div class="note" id="adr-datatime"></div>
-        <div class="note">溢價 ％ ＝（美股ADR價 × 美元/台幣匯率 ÷ ADR比率）相對台股現價的差幅；ADR比率為固定值（換股結構才會變），各檔來源見卡片內個股說明</div>
-      </div>
-      <!-- 2026-09-15（源頭二.3第3名）CFTC COT投機客淨部位，美股大盤情緒指標。 -->
-      <div class="card">
-        <h3>投機客部位</h3>
-        <div class="facts" id="cftc-cot-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
-        <div class="note" id="cftc-cot-datatime"></div>
-        <div class="note">正值偏多、負值偏空；每週五公布前一週二資料</div>
-      </div>
-      <!-- 2026-09-15（源頭二.3第8名）美國總經指標，BLS官方Public Data API v2免金鑰。 -->
-      <div class="card">
-        <h3>美國總經</h3>
-        <div class="facts" id="bls-macro-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
-        <div class="note" id="bls-macro-datatime"></div>
-        <div class="note">來源：美國勞工統計局，約落後一個月</div>
-      </div>
+
+      <!-- 先.七十二-B7（2026-10-11）：比較少看的卡收進「更多」（卡片 id 與載入函式不變，只是預設收合） -->
+      <details class="ui-more" data-ui-more>
+        <summary>更多</summary>
+        <div class="card">
+                <h3>ADR 溢價</h3>
+                <div class="facts" id="adr-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w30"></div></div>
+                <div class="note" id="adr-datatime"></div>
+                <div class="note">溢價 ％ ＝（美股ADR價 × 美元/台幣匯率 ÷ ADR比率）相對台股現價的差幅；ADR比率為固定值（換股結構才會變），各檔來源見卡片內個股說明</div>
+              </div>
+        <!-- 2026-09-15（源頭二.3第3名）CFTC COT投機客淨部位，美股大盤情緒指標。 -->
+              <div class="card">
+                <h3>投機客部位</h3>
+                <div class="facts" id="cftc-cot-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
+                <div class="note" id="cftc-cot-datatime"></div>
+                <div class="note">正值偏多、負值偏空；每週五公布前一週二資料</div>
+              </div>
+        <!-- 2026-09-15（源頭二.3第8名）美國總經指標，BLS官方Public Data API v2免金鑰。 -->
+              <div class="card">
+                <h3>美國總經</h3>
+                <div class="facts" id="bls-macro-rows"><div class="skel-line w80"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
+                <div class="note" id="bls-macro-datatime"></div>
+                <div class="note">來源：美國勞工統計局，約落後一個月</div>
+              </div>
+
+      </details>
     </div>
 
     <!-- 期貨 -->
@@ -540,14 +552,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="r"><b id="sh-price">—</b><div id="sh-chg">—</div><div id="sh-sim" class="note" style="color:var(--ink-3)" hidden></div></div>
     </div>
 
+    <!-- 先.七十二-B7（2026-10-11）：個股頁改 4 分頁。每個分頁顯示一組既有子頁（data-subs），子頁 id 與載入函式不變：
+         總覽＝走勢與關鍵數字（ov）＋K線（tech）＋目標價與研判（ai）；財務＝營收（rev）＋財報（fin）。 -->
     <div class="tabbar2" id="stock-tabs">
-      <button class="on" data-sub="ov">總覽</button>
-      <button data-sub="rev">營收</button>
-      <button data-sub="fin">財報</button>
-      <button data-sub="chip">籌碼</button>
-      <button data-sub="events">事件</button>
-      <button data-sub="tech">技術型態</button>
-      <button data-sub="ai">AI</button>
+      <button class="on" data-sub="ov" data-subs="ov,tech,ai">總覽</button>
+      <button data-sub="chip" data-subs="chip">籌碼</button>
+      <button data-sub="fin" data-subs="rev,fin">財務</button>
+      <button data-sub="events" data-subs="events">事件</button>
     </div>
 
     <div class="subscreen active" id="sub-ov">
@@ -853,9 +864,11 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
   <!-- ════════ 5. 日誌 ════════ -->
   <section class="screen" id="scr-journal">
+    <!-- 先.七十二-B5／C8：電腦沒設定連線時，三張自動投資卡（[data-ui-live]）收起，只顯示這一行 -->
+    <div class="cta-line" id="journal-offline-line" hidden onclick="go('settings')">自動投資帳本：連上電腦才看得到 →</div>
     <!-- 先.六十-A4（2026-10-10）：日誌頁接真錢帳本。資料只從本機伺服器 /auto/ledger 讀（token 必檢、去識別化欄位），
          不存進 GitHub、不進公開心跳。損益以 price_history 收盤估值，只算自動交易買進的股數，未計手續費與稅。 -->
-    <div class="card">
+    <div class="card" data-ui-live>
       <h3>自動投資損益<span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'journal-tm',async()=>{await loadJournalLedger()})">重新整理</span></h3>
       <div id="journal-pnl" class="note">尚未連線本機伺服器</div>
       <div class="note" style="margin-top:6px">讀取時間：<b id="journal-tm">--:--</b>。以 price_history 最新收盤估值；只算自動交易買進的股數；未計手續費與稅。本週＝本週一以來的變動。</div>
@@ -864,14 +877,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 常備.開發-12（2026-10-11）：真錢績效對照。/auto/ledger 的 perf 欄位（伺服器以帳本成交均價＋price_history 收盤逐日估值）：
          累計淨值＝持股市值÷累計投入（含手續費），對照組＝同樣的錢同一天以收盤價全買 0050。含手續費、未含稅。
          無成交顯示「尚無部位」；首批成交後自動出現曲線。 -->
-    <div class="card" id="journal-perf-card">
+    <div class="card" id="journal-perf-card" data-ui-live>
       <h3>績效對照</h3>
       <div id="journal-perf" class="note">尚未連線本機伺服器</div>
     </div>
 
     <!-- 常備.開發-23（2026-10-11）：盤後復盤。13:40 結算後本機產出 research/data/auto_trading/LIVE/review_YYYYMMDD.json，
          經 /auto/ledger 的 review 欄位讀取（token 必檢、去識別化、不進 repo）：送單、成交、均價 vs 參考價滑價、零股驗證、偏離、下期日期。 -->
-    <div class="card" id="journal-review-card">
+    <div class="card" id="journal-review-card" data-ui-live>
       <h3>盤後復盤</h3>
       <div id="journal-review" class="note">尚未連線本機伺服器</div>
     </div>
@@ -895,6 +908,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
   <!-- ════════ 6. 設定 ════════ -->
   <section class="screen" id="scr-settings">
+    <!-- 先.七十二-B6（2026-10-11）：設定頁分「常用」與「進階」兩層。常用＝帳戶、自動投資、通知、自選股、顯示、破億試算；
+         進階（[data-ui-advanced]）＝資料來源、新鮮度、資料健康、覆蓋率、安全、訊號狀態、試驗帳本、API 金鑰、關於與免責。
+         切換只改 #scr-settings 的 class（CSS 決定顯示哪一層），卡片 id 與載入函式都不變。 -->
+    <div class="mkt-toggle" id="settings-layer-toggle" style="margin:0 0 10px">
+      <button class="on" data-layer="common" onclick="uiSettingsLayer('common')">常用</button>
+      <button data-layer="adv" onclick="uiSettingsLayer('adv')">進階</button>
+    </div>
+
     <div class="card">
       <h3>券商帳戶</h3>
       <div class="setting-row">
@@ -908,79 +929,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note">只是你自己的備註，程式不會讀</div>
     </div>
 
-    <!-- 先.六十-A5（2026-10-10）：原本可編輯的「風控參數」（每日虧損上限／單筆部位上限／最大持倉檔數）引擎根本不讀，
-         屬假設定，已移除；改為唯讀顯示引擎實際硬限制（auto_rebalance_bb90.gate_order＋本機設定檔，經 /auto/status 的 limits）。
-         「通知偏好」原本兩個開關沒有接任何推播，改為實際控制本機推播類別（/push/prefs）。 -->
-    <div class="card" id="risk-limits-card">
-      <h3>下單限制</h3>
-      <div id="risk-limits-body" class="facts">
-        <div class="f"><span>白名單標的</span><b id="rl-whitelist">0050、00646、00697B</b></div>
-        <div class="f"><span>交易類型</span><b>僅買進 · 僅現股</b></div>
-        <div class="f"><span>單次金額上限</span><b id="rl-cap">需連線本機伺服器</b></div>
-        <div class="f"><span>限價偏離前收</span><b id="rl-dev">≤ ±1%</b></div>
-        <div class="f"><span>資料新鮮度</span><b id="rl-age">≤ 4 天</b></div>
-        <div class="f"><span>否決窗</span><b id="rl-veto">30 分鐘</b></div>
-      </div>
-      <div class="note" id="risk-limits-note" style="margin-top:6px">未連線時顯示程式內建預設值；連線後改顯示本機設定檔實際值。任一不符即拒單並推播。這些值只能由你本人修改本機設定檔，App 不能改。</div>
-    </div>
 
-    <div class="card" id="notif-card">
-      <h3>通知</h3>
-      <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>可取消時間開始</b><span>一定會送；送不到這批就不下單</span></div>
-        <div class="switch on" id="notif-veto" style="opacity:.5;cursor:not-allowed" title="無法關閉"></div>
-      </div>
-      <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>拒單／自動交易異常</b><span>整批拒單、對帳不符等</span></div>
-        <div class="switch" id="notif-reject" onclick="toggleNotif(this,'reject')"></div>
-      </div>
-      <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>批次完成</b><span>一個批次全部結束時</span></div>
-        <div class="switch" id="notif-complete" onclick="toggleNotif(this,'complete')"></div>
-      </div>
-      <div class="bot-top" style="padding:6px 0">
-        <div class="nm"><b>排程漏跑</b><span>交易日排程沒有心跳時</span></div>
-        <div class="switch" id="notif-missed" onclick="toggleNotif(this,'missed')"></div>
-      </div>
-      <div class="note" id="notif-note" style="margin-top:8px">連上電腦才能改，所有裝置共用</div>
-    </div>
-
-    <!-- 常備.開發-18（2026-10-11）：自選股到價與事件推播。規則存本機伺服器（/alerts/rules），
-         alpha_live_server 盤中每分鐘檢查、走既有 Web Push，每檔每日最多一則。未連線本機時只顯示 CTA。 -->
-    <div class="card" id="alert-card">
-      <h3>到價提醒</h3>
-      <div class="cta-line" id="alert-cta" onclick="alertGoLive()">連上電腦才能設定 →<span>盤中每分鐘由家裡的電腦檢查</span></div>
-      <div id="alert-body"></div>
-      <div class="note" id="alert-note" style="margin-top:8px">每檔每天最多一則，只在台股盤中檢查</div>
-    </div>
-
-    <div class="card">
-      <h3>自選股</h3>
-      <div class="note" style="margin-bottom:10px">目前 <b id="set-wl-count" style="color:var(--ink)">—</b> 檔（可混台股／美股）</div>
-      <button class="btn ghost" style="width:100%" onclick="editWL()">管理自選</button>
-    </div>
-
-    <div class="card" id="trials-card" data-ui-advanced>
-      <h3>試驗帳本</h3>
-      <div class="note" style="margin-bottom:10px">列出測過的每一個想法與結果（含失敗的）</div>
-      <div class="note" id="trials-meta">載入中…</div>
-      <input id="trials-filter" type="text" placeholder="搜尋名稱／判定／軌道" oninput="renderTrials()" style="width:100%;margin:8px 0">
-      <div id="trials-list" style="max-height:320px;overflow:auto;font-size:12px;line-height:1.6"></div>
-    </div>
-
-    <div class="card" data-ui-advanced>
-      <h3>資料來源</h3>
-      <div class="facts">
-        <div class="f"><span>台美股報價/財務</span><b>FinMind API v4</b></div>
-        <div class="f"><span>美股財報原始文件</span><b>SEC EDGAR</b></div>
-        <div class="f"><span>期貨報價/籌碼</span><b>TAIFEX（經 FinMind）</b></div>
-        <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
-      </div>
-      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗會誠實顯示查無資料，不會偷用過期的舊快取頂替。所有資料為盤後/延遲資料，非即時報價。</div>
-    </div>
 
     <!-- 2026-09-03深夜（乙.4）：Phase 1冷熱分離的「熱」資料入口。網址/token只存本機localStorage。 -->
-    <div class="card" data-ui-advanced>
+    <div class="card">
       <h3>電腦連線</h3>
       <!-- 2026-09-08（自動連線一）自動發現結果。使用者永不手填，這裡只是讓他
            看得到「系統選了哪一個、花了多久」，不是要他操作。 -->
@@ -1013,7 +965,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
            所以這裡不是再加一種錯誤訊息，是在**設定當下**就把舊值認出來。 -->
       <div id="live-url-legacy-warn" style="display:none;margin-top:8px"></div>
       <div class="setting-row" style="margin-top:8px">
-        <span>X-Alpha-Local-Token</span>
+        <span>連線密碼</span>
         <div class="setting-input"><input id="set-live-token" type="password" placeholder="伺服器啟動時印在終端機" style="width:170px;text-align:right" onchange="saveLiveConfig()"></div>
       </div>
       <!-- 2026-09-08（連線四.2）現行架構說明。使用者不需要懂 Tailscale，
@@ -1042,6 +994,16 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">連得上時：首頁/市場頁/個股頁的數字改由本機 alpha_live_server.py 的串流更新（伺服器端目前是每2秒比對一次再送，不是真逐筆推送，回應會標 mode=poll-diff-2s），個股頁可切「1分K(即時)」（本機 tick 聚合，非 api.kbars）。連不上時自動退回 GitHub 冷資料並標「離線，顯示最後收盤」。三個端點一律驗 token，即使已經過 Cloudflare Access／私有網路。網址與 token 只存在你的裝置本機，不會上傳。</div>
     </div>
 
+
+
+    <div class="card" id="live-account-card">
+      <h3>真錢帳戶</h3>
+      <div id="live-account-body" class="note">連上電腦才看得到</div>
+      <div class="note" style="margin-top:6px">資料只從本機伺服器讀取（需 token），不存進 GitHub、不進公開心跳。損益只算自動交易買進的部分，未計手續費與稅，市值以最新收盤估算；對照組＝每筆成交改成同金額、同日收盤買 0050。</div>
+    </div>
+
+
+
     <div class="card" id="auto-trading-card">
       <h3>自動投資</h3>
       <div class="note" id="auto-status-note">連上電腦才看得到</div>
@@ -1062,32 +1024,67 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="auto-preflight" class="note">尚未執行（本機跑 <code>python research/auto_rebalance_bb90.py --preflight</code>，只查詢、不送單）</div>
     </div>
 
-    <div class="card" id="live-account-card">
-      <h3>真錢帳戶</h3>
-      <div id="live-account-body" class="note">連上電腦才看得到</div>
-      <div class="note" style="margin-top:6px">資料只從本機伺服器讀取（需 token），不存進 GitHub、不進公開心跳。損益只算自動交易買進的部分，未計手續費與稅，市值以最新收盤估算；對照組＝每筆成交改成同金額、同日收盤買 0050。</div>
-    </div>
 
-    <div class="card" id="bt-path-card">
-      <h3>破億試算</h3>
-      <div class="setting-row"><span>目前淨資產（元）</span><div class="setting-input"><input id="bt-nw" type="number" inputmode="numeric" placeholder="例如 6000000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
-      <div class="setting-row" style="margin-top:8px"><span>每月投入（元）</span><div class="setting-input"><input id="bt-pmt" type="number" inputmode="numeric" placeholder="例如 300000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
-      <div class="setting-row" style="margin-top:8px"><span>出生日期</span><div class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></div></div>
-      <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
-      <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
-      <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">達標機率：先填淨資產與出生日期</div>
-      <div class="note" style="margin-top:6px">數字只存在你的裝置與電腦；年化 10.19% 是過去回測，不是保證</div>
-      <div class="note" style="margin-top:6px">勝算估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
-    </div>
 
-    <div class="card" data-ui-advanced>
-      <h3>API 金鑰</h3>
-      <div class="setting-row">
-        <span>FinMind Token</span>
-        <div class="setting-input"><input id="set-finmind-token" type="password" placeholder="免費層無需填寫" style="width:150px;text-align:right" onblur="toast('已記在本機，未串接付費額度')"></div>
+    <!-- 先.六十-A5（2026-10-10）：原本可編輯的「風控參數」（每日虧損上限／單筆部位上限／最大持倉檔數）引擎根本不讀，
+         屬假設定，已移除；改為唯讀顯示引擎實際硬限制（auto_rebalance_bb90.gate_order＋本機設定檔，經 /auto/status 的 limits）。
+         「通知偏好」原本兩個開關沒有接任何推播，改為實際控制本機推播類別（/push/prefs）。 -->
+    <div class="card" id="risk-limits-card">
+      <h3>下單限制</h3>
+      <div id="risk-limits-body" class="facts">
+        <div class="f"><span>白名單標的</span><b id="rl-whitelist">0050、00646、00697B</b></div>
+        <div class="f"><span>交易類型</span><b>僅買進 · 僅現股</b></div>
+        <div class="f"><span>單次金額上限</span><b id="rl-cap">需連線本機伺服器</b></div>
+        <div class="f"><span>限價偏離前收</span><b id="rl-dev">≤ ±1%</b></div>
+        <div class="f"><span>資料新鮮度</span><b id="rl-age">≤ 4 天</b></div>
+        <div class="f"><span>否決窗</span><b id="rl-veto">30 分鐘</b></div>
       </div>
-      <div class="note">目前免費層不需要金鑰即可使用；若之後升級 FinMind 付費方案，可在這裡填入 Token（僅存在你的裝置本機，不會上傳）。</div>
+      <div class="note" id="risk-limits-note" style="margin-top:6px">未連線時顯示程式內建預設值；連線後改顯示本機設定檔實際值。任一不符即拒單並推播。這些值只能由你本人修改本機設定檔，App 不能改。</div>
     </div>
+
+
+
+    <div class="card" id="notif-card">
+      <h3>通知</h3>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>可取消時間開始</b><span>一定會送；送不到這批就不下單</span></div>
+        <div class="switch on" id="notif-veto" style="opacity:.5;cursor:not-allowed" title="無法關閉"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>拒單／自動交易異常</b><span>整批拒單、對帳不符等</span></div>
+        <div class="switch" id="notif-reject" onclick="toggleNotif(this,'reject')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>批次完成</b><span>一個批次全部結束時</span></div>
+        <div class="switch" id="notif-complete" onclick="toggleNotif(this,'complete')"></div>
+      </div>
+      <div class="bot-top" style="padding:6px 0">
+        <div class="nm"><b>排程漏跑</b><span>交易日排程沒有心跳時</span></div>
+        <div class="switch" id="notif-missed" onclick="toggleNotif(this,'missed')"></div>
+      </div>
+      <div class="note" id="notif-note" style="margin-top:8px">連上電腦才能改，所有裝置共用</div>
+    </div>
+
+
+
+    <!-- 常備.開發-18（2026-10-11）：自選股到價與事件推播。規則存本機伺服器（/alerts/rules），
+         alpha_live_server 盤中每分鐘檢查、走既有 Web Push，每檔每日最多一則。未連線本機時只顯示 CTA。 -->
+    <div class="card" id="alert-card">
+      <h3>到價提醒</h3>
+      <div class="cta-line" id="alert-cta" onclick="alertGoLive()">連上電腦才能設定 →<span>盤中每分鐘由家裡的電腦檢查</span></div>
+      <div id="alert-body"></div>
+      <div class="note" id="alert-note" style="margin-top:8px">每檔每天最多一則，只在台股盤中檢查</div>
+    </div>
+
+
+
+    <div class="card">
+      <h3>自選股</h3>
+      <div class="note" style="margin-bottom:10px">目前 <b id="set-wl-count" style="color:var(--ink)">—</b> 檔（可混台股／美股）</div>
+      <button class="btn ghost" style="width:100%" onclick="editWL()">管理自選</button>
+    </div>
+
+
 
     <div class="card">
       <h3>顯示偏好</h3>
@@ -1103,12 +1100,34 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="settings-fx-note">匯率載入中…</div>
     </div>
 
-    <div class="card" data-ui-advanced>
-      <h3>免責聲明</h3>
-      <div class="note" style="line-height:1.7">
-        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
-      </div>
+
+
+    <div class="card" id="bt-path-card">
+      <h3>破億試算</h3>
+      <div class="setting-row"><span>目前淨資產（元）</span><div class="setting-input"><input id="bt-nw" type="number" inputmode="numeric" placeholder="例如 6000000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div class="setting-row" style="margin-top:8px"><span>每月投入（元）</span><div class="setting-input"><input id="bt-pmt" type="number" inputmode="numeric" placeholder="例如 300000" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div class="setting-row" style="margin-top:8px"><span>出生日期</span><div class="setting-input"><input id="bt-birth" type="date" style="width:140px" onchange="btSave()"></div></div>
+      <div class="setting-row" style="margin-top:8px"><span>目標年齡</span><div class="setting-input"><input id="bt-age" type="number" inputmode="numeric" placeholder="40" style="width:140px;text-align:right" onchange="btSave()"></div></div>
+      <div id="bt-out" class="note" style="margin-top:10px;line-height:1.8">請填入上方四欄</div>
+      <div id="bt-prob" class="note" style="margin-top:10px;line-height:1.7">達標機率：先填淨資產與出生日期</div>
+      <div class="note" style="margin-top:6px">數字只存在你的裝置與電腦；年化 10.19% 是過去回測，不是保證</div>
+      <div class="note" style="margin-top:6px">勝算估計（區塊自助法，描述性、樣本內、非保證）：<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">WIN_PROBABILITY_2026-10</a></div>
     </div>
+
+
+
+    <div class="card" data-ui-advanced>
+      <h3>資料來源</h3>
+      <div class="facts">
+        <div class="f"><span>台美股報價/財務</span><b>FinMind API v4</b></div>
+        <div class="f"><span>美股財報原始文件</span><b>SEC EDGAR</b></div>
+        <div class="f"><span>期貨報價/籌碼</span><b>TAIFEX（經 FinMind）</b></div>
+        <div class="f"><span>本機快取</span><b id="set-cache-count">—</b></div>
+      </div>
+      <div class="note">FinMind 免費方案有流量上限，App 已加上 3 分鐘本機快取降低用量，抓取失敗會誠實顯示查無資料，不會偷用過期的舊快取頂替。所有資料為盤後/延遲資料，非即時報價。</div>
+    </div>
+
+
 
     <!-- 2026-09-03（P0三-三.2，使用者原話「App設定頁顯示各資料檔的最後更新時間+是否逾期，
     逾期標紅」）：規則跟generate_status_json.py::build_schedule_health()同一套，但在手機端
@@ -1124,6 +1143,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="local-schedule-heartbeat-note" style="margin-top:6px">本機排程心跳：檢查中…</div>
     </div>
 
+
+
     <!-- 2026-09-06（P0 稽核.一）資料健康：把 scripts/data_audit.py 每晚跑出來的
     全市場一致性稽核結果直接攤在使用者面前。總司令實測「光聖 6442 現價 1755、
     建議進場價 32」之後的結構性防線之一——資料對不對，不能只有開發者知道。 -->
@@ -1135,6 +1156,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="adj-anomaly-note" style="margin-top:6px">還原價異常警告：讀取中…</div>
       <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
     </div>
+
+
 
     <!-- 2026-09-15（稽核二.二）八因子覆蓋率儀表板：資料健康卡看的是「全市場恆等式
     對不對」，這裡看的是另一個維度——「八個評分因子，每一個在全市場算得出來的比例
@@ -1148,6 +1171,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">資料時間：<b id="coverage-tm">--:--</b>。缺漏原因固定四類：個股完全無此類原始資料／個股有資料但數量或期數不足／全市場此因子系統性缺資料源／其他（資料足夠但計算仍失敗）。跟上方「資料健康」卡的完整度缺口是同一個資料缺口在不同因子上的體現，可互相對照，不是兩套獨立數字。</div>
     </div>
 
+
+
     <!-- 2026-09-06（連線三.5）安全小卡：服務已經公開到網際網路，最怕的不是被攻擊，
     是被攻擊了自己不知道。這裡把過去 24 小時的外部流量、驗證失敗、被限速擋掉的次數
     攤出來，讓總司令一眼看得到。 -->
@@ -1157,6 +1182,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="sec-list" style="margin-top:6px"></div>
       <div class="note" style="margin-top:6px">資料時間：<b id="sec-tm">--:--</b>。統計視窗 24 小時，來源 IP 只顯示到 /24 網段。需要即時伺服器連線才讀得到。</div>
     </div>
+
+
 
     <!-- 2026-09-15（開發佇列源頭一.4）訊號誠實三態徽章：把研究帽的成績單（含FAIL）
     攤給使用者看，資料來自 research/build_signal_status.py 人工整理
@@ -1169,6 +1196,29 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div id="signal-status-list" style="margin-top:6px"></div>
       <div class="note" style="margin-top:6px">資料時間：<b id="signal-status-tm">--:--</b>。三態：<b style="color:var(--up)">已驗證</b>＝通過完整驗證關卡（PASS）；<b style="color:var(--ink-3)">未驗證</b>＝尚在排隊或測試中；<b style="color:var(--warn)">實測無效</b>＝測過但FAIL結案。涵蓋自走研究的每一條方向與匯入的外部（名家）已發表策略，非投資建議。</div>
     </div>
+
+
+
+    <div class="card" id="trials-card" data-ui-advanced>
+      <h3>試驗帳本</h3>
+      <div class="note" style="margin-bottom:10px">列出測過的每一個想法與結果（含失敗的）</div>
+      <div class="note" id="trials-meta">載入中…</div>
+      <input id="trials-filter" type="text" placeholder="搜尋名稱／判定／軌道" oninput="renderTrials()" style="width:100%;margin:8px 0">
+      <div id="trials-list" style="max-height:320px;overflow:auto;font-size:12px;line-height:1.6"></div>
+    </div>
+
+
+
+    <div class="card" data-ui-advanced>
+      <h3>API 金鑰</h3>
+      <div class="setting-row">
+        <span>FinMind Token</span>
+        <div class="setting-input"><input id="set-finmind-token" type="password" placeholder="免費層無需填寫" style="width:150px;text-align:right" onblur="toast('已記在本機，未串接付費額度')"></div>
+      </div>
+      <div class="note">目前免費層不需要金鑰即可使用；若之後升級 FinMind 付費方案，可在這裡填入 Token（僅存在你的裝置本機，不會上傳）。</div>
+    </div>
+
+
 
     <div class="card" data-ui-advanced>
       <h3>關於</h3>
@@ -1183,10 +1233,22 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="text-align:center;margin-top:6px">手機上資料一直沒更新、卡在舊日期時，點這顆</div>
     </div>
 
+
+
+    <div class="card" data-ui-advanced>
+      <h3>免責聲明</h3>
+      <div class="note" style="line-height:1.7">
+        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
+      </div>
+    </div>
+
+
+
     <!-- 2026-08-28新增：實機縮放/貼底問題診斷讀數（灰色小字，不影響版面）。
     headless測試環境沒有真實的視窗高度/工具列/安全區域行為，測不出縮放跑版
     問題，這裡直接把relevant的即時數值印出來，讓使用者截圖回報用。 -->
-    <div class="note" id="viewport-diag" style="text-align:center;margin-top:10px;color:var(--ink-3);font-size:10px;line-height:1.7;word-break:break-all"></div>
+    <div class="note" id="viewport-diag" data-ui-advanced style="text-align:center;margin-top:10px;color:var(--ink-3);font-size:10px;line-height:1.7;word-break:break-all"></div>
+
   </section>
 
     <!-- 先.七十二-A2：前台唯一一處免責聲明（各卡不再重複；完整條文在設定頁「進階 → 免責聲明」） -->
@@ -1290,6 +1352,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-11.1447"></script>
+<script src="app.js?v=2026-10-11.1458"></script>
 </body>
 </html>

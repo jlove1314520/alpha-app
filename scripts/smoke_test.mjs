@@ -2941,10 +2941,69 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { banErrs.push(`測試本身出錯：${e.message || e}`); }
   record("92. 紅色橫幅「狀況＋下一步」兩段式、細節收合、原始訊息經白話轉換（先.七十二-A3）", banErrs.length === 0, banErrs.join("; "));
 
+  // 93.【2026-10-11 先.七十二-B】資訊架構：首頁順序（狀態列→我的資產→自動投資這一期→自選股→大盤一眼→跟 0050 比→今日事件）、
+  // 電腦沒連線時兩張錢的卡收成一行；設定頁常用／進階兩層；個股頁 4 分頁（總覽／籌碼／財務／事件）；市場頁冷門卡收進「更多」。
+  const iaErrs = [];
+  try {
+    await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
+    await page.waitForTimeout(500);
+    const ia = await page.evaluate(() => {
+      const pos = (sel) => { const el = typeof sel === "string" ? document.querySelector(sel) : sel; if (!el) return -1;
+        return [...document.querySelectorAll("#scr-home *")].indexOf(el); };
+      const h3 = (t) => [...document.querySelectorAll("#scr-home .card h3")].find(h => h.textContent.trim().startsWith(t));
+      const order = [pos("#home-status-strip"), pos("#home-offline-line"), pos("#home-money-card"), pos("#home-exec-card"),
+        pos(h3("自選股") && h3("自選股").closest(".card")), pos(h3("大盤一眼") && h3("大盤一眼").closest(".card")),
+        pos("#strategy-curves-card"), pos("#home-events-card")];
+      const vis = (id) => { const e = document.getElementById(id); return !!(e && !e.hidden && getComputedStyle(e).display !== "none" && e.getBoundingClientRect().height > 0); };
+      const out = { order, offlineLine: vis("home-offline-line"), money: vis("home-money-card"), exec: vis("home-exec-card"),
+        liveConfigured: !!(window.LIVE && LIVE.configured && LIVE.url) };
+      // 設定頁兩層
+      document.querySelector('nav#nav button[data-scr="settings"]').click();
+      const advCards = [...document.querySelectorAll("#scr-settings [data-ui-advanced]")];
+      const commonCards = [...document.querySelectorAll("#scr-settings > .card:not([data-ui-advanced])")];
+      const shown = (els) => els.filter(e => getComputedStyle(e).display !== "none").length;
+      out.set0 = { adv: shown(advCards), common: shown(commonCards), nAdv: advCards.length, nCommon: commonCards.length };
+      uiSettingsLayer("adv");
+      out.set1 = { adv: shown(advCards), common: shown(commonCards) };
+      uiSettingsLayer("common");
+      out.commonTitles = commonCards.map(c => (c.querySelector("h3") || {}).textContent.trim().split(/\s/)[0]);
+      // 個股頁 4 分頁
+      out.stockTabs = [...document.querySelectorAll("#stock-tabs button")].map(b => b.textContent.trim());
+      // 市場頁「更多」
+      out.more = ["market-tw-panel", "market-us-panel"].map(id => { const d = document.querySelector(`#${id} details.ui-more`); return d ? { open: d.open, n: d.querySelectorAll(".card").length } : null; });
+      return out;
+    });
+    const o = ia.order;
+    if (o.some(x => x < 0)) iaErrs.push(`首頁區塊缺漏：${JSON.stringify(o)}`);
+    else for (let i = 1; i < o.length; i++) if (o[i] < o[i - 1]) { iaErrs.push(`首頁順序不對：${JSON.stringify(o)}`); break; }
+    if (!ia.liveConfigured && !(ia.offlineLine && !ia.money && !ia.exec)) iaErrs.push(`離線時應只顯示一行（offline=${ia.offlineLine}, money=${ia.money}, exec=${ia.exec}）`);
+    if (ia.set0.adv !== 0 || ia.set0.common !== ia.set0.nCommon) iaErrs.push(`設定頁預設應只顯示常用（${JSON.stringify(ia.set0)}）`);
+    if (ia.set1.common !== 0 || ia.set1.adv < ia.set0.nAdv - 1) iaErrs.push(`切到進階應只顯示進階（${JSON.stringify(ia.set1)}）`);
+    for (const t of ["券商帳戶", "自動投資", "通知", "自選股", "顯示偏好", "破億試算"]) if (!ia.commonTitles.includes(t)) iaErrs.push(`常用缺「${t}」`);
+    if (JSON.stringify(ia.stockTabs) !== JSON.stringify(["總覽", "籌碼", "財務", "事件"])) iaErrs.push(`個股頁分頁應為總覽／籌碼／財務／事件：${ia.stockTabs}`);
+    if (ia.more.some(m => !m || m.open || m.n < 1)) iaErrs.push(`市場頁「更多」應存在、預設收合且有卡：${JSON.stringify(ia.more)}`);
+    // 個股頁「財務」分頁同時顯示營收與財報
+    await page.evaluate(() => openStock("2330"));
+    await page.waitForTimeout(800);
+    const fin = await page.evaluate(() => {
+      document.querySelector('#stock-tabs button[data-sub="fin"]').click();
+      const a = (id) => document.getElementById(id).classList.contains("active");
+      const r = { rev: a("sub-rev"), fin: a("sub-fin"), ov: a("sub-ov") };
+      document.querySelector('#stock-tabs button[data-sub="ov"]').click();
+      r.ovGroup = a("sub-ov") && a("sub-tech") && a("sub-ai");
+      return r;
+    });
+    if (!(fin.rev && fin.fin && !fin.ov)) iaErrs.push(`「財務」應同時顯示營收＋財報：${JSON.stringify(fin)}`);
+    if (!fin.ovGroup) iaErrs.push("「總覽」應包含走勢、K 線、研判三組");
+    await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
+    await page.waitForTimeout(300);
+  } catch (e) { iaErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("93. 資訊架構：首頁順序＋離線一行、設定常用／進階、個股 4 分頁、市場「更多」（先.七十二-B）", iaErrs.length === 0, iaErrs.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

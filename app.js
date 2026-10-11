@@ -1980,9 +1980,26 @@
     (errs||[]).forEach(e=>L.push('<span style="color:var(--ink-4)">'+esc(e)+'</span>'));
     el.innerHTML=L.map(x=>'<div style="padding:2px 0">'+x+'</div>').join('')+'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">只能看，不能下單</div>';
   }
+  // 先.七十二-B6：設定頁「常用／進階」兩層（CSS 依 #scr-settings.ui-adv 決定顯示哪一層；卡片與載入函式不變）
+  function uiSettingsLayer(layer){
+    try{
+      const scr=document.getElementById('scr-settings');if(!scr)return;
+      scr.classList.toggle('ui-adv',layer==='adv');
+      document.querySelectorAll('#settings-layer-toggle button').forEach(b=>b.classList.toggle('on',b.dataset.layer===layer));
+      window.scrollTo(0,0);
+    }catch(e){console.warn('[uiSettingsLayer]',e);recordGlobalError('uiSettingsLayer',e)}
+  }
+  // 先.七十二-B5：電腦沒設定連線時，「我的資產」與「自動投資這一期」兩張卡收起，只留一行 #home-offline-line
+  function uiHomeOffline(off){
+    try{
+      const line=document.getElementById('home-offline-line');if(line)line.hidden=!off;
+      ['home-money-card','home-exec-card'].forEach(id=>{const c=document.getElementById(id);if(c)c.hidden=!!off});
+    }catch(e){console.warn('[uiHomeOffline]',e);recordGlobalError('uiHomeOffline',e)}
+  }
   async function loadHomeExecCard(){
     const el=document.getElementById('home-exec-body');if(!el)return;
-    if(!LIVE.configured||!LIVE.url){el.textContent='連上電腦才看得到';return}
+    if(!LIVE.configured||!LIVE.url){el.textContent='連上電腦才看得到';uiHomeOffline(true);return}
+    uiHomeOffline(false);
     const [a,b]=await Promise.allSettled([
       (async()=>{const r=await liveFetch('/auto/status',6000);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})(),
       loadAutoLedger()]);
@@ -2979,8 +2996,9 @@
     const cta=document.getElementById('home-broker-cta');
     const card=document.getElementById('home-asset-card');
     if(!cta||!card)return;
-    const CTA_DEFAULT_HTML='串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span>';
-    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;_safeSync('renderHomePositions',()=>renderHomePositions(null,'連上電腦才看得到'));return}
+    const CTA_DEFAULT_HTML='連上電腦才看得到 →';
+    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;_safeSync('renderHomePositions',()=>renderHomePositions(null,'連上電腦才看得到'));uiHomeOffline(true);return}
+    uiHomeOffline(false);cta.style.display='none';
     let posR=null,balR=null;
     try{
       const [rp,rb]=await Promise.all([liveFetch('/live/positions',9000),liveFetch('/live/balance',9000)]);
@@ -2997,7 +3015,7 @@
       // 已設定即時伺服器，但這次兩邊都查無帳戶資料——跟「完全沒串接」是不同狀態，
       // 文案要誠實反映，不能沿用原本「串接券商帳戶→」（使用者其實已經填過設定）。
       cta.style.display='';card.hidden=true;
-      cta.innerHTML='帳戶資料暫時無法取得 →<span>永豐（非交易時段常駐行程未啟動）／IBKR（Gateway未連線），設定頁可查詳情</span>';
+      cta.innerHTML='帳戶資料暫時拿不到 →';
       return;
     }
     let totalNtd=0;const lines=[];
@@ -3361,7 +3379,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1447';
+  const APP_VERSION='2026-10-11.1458';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

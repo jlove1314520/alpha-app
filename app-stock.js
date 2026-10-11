@@ -569,8 +569,10 @@
     const us=isUS(code);
     go('stock');
     document.querySelectorAll('#stock-tabs button').forEach((x,i)=>x.classList.toggle('on',i===0));
-    document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
-    document.getElementById('sub-ov').classList.add('active');
+    // 先.七十二-B7：總覽＝ov＋tech＋ai 三個既有子頁（只動個股頁的子頁，不再誤清交易頁的子頁狀態）
+    const ovSubs=((document.querySelector('#stock-tabs button')||{}).dataset||{}).subs||'ov';
+    document.querySelectorAll('#scr-stock .subscreen').forEach(s=>s.classList.toggle('active',ovSubs.split(',').includes(s.id.replace(/^sub-/,''))));
+    if(ovSubs.split(',').includes('tech'))setTimeout(()=>_safeAsync('renderTechChartTab',()=>renderTechChartTab(code)),0);
     try{renderBuyCta(code)}catch(e){console.warn('[renderBuyCta]',e);recordGlobalError('renderBuyCta',e)}
     setTxt('sh-name',nameOf(code));setTxt('sh-sub',code+(us?' · 美股':' · 台股'));setTxt('sh-price','…');setTxt('sh-chg','載入中');updateStockSimTag(code);_safeAsync('updateStockDisposalTag',()=>updateStockDisposalTag(code));
     ['kn-per','kn-yield','kn-yoy','kn-pbr','chip-foreign','chip-trust','chip-dealer','chip-total'].forEach(id=>setTxt(id,'…'));
@@ -747,13 +749,14 @@
     b.addEventListener('click',()=>{
       document.querySelectorAll('#stock-tabs button').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
-      document.querySelectorAll('.subscreen').forEach(s=>s.classList.remove('active'));
-      document.getElementById('sub-'+b.dataset.sub).classList.add('active');
+      // 先.七十二-B7：一個分頁可顯示多個既有子頁（data-subs）
+      const subs=(b.dataset.subs||b.dataset.sub).split(',');
+      document.querySelectorAll('#scr-stock .subscreen').forEach(s=>s.classList.toggle('active',subs.includes(s.id.replace(/^sub-/,''))));
       // 2026-09-15（P0產品.三）事件/技術型態兩個分頁改成點到才載入：事件分頁隱藏時
       // 容器是display:none，技術型態分頁的lightweight-charts在寬度0的容器建圖表會
       // 尺寸算錯，兩者都不適合跟其他分頁一樣在openStock()就直接畫。
-      if(b.dataset.sub==='events')_safeAsync('renderStockEventsTab',()=>renderStockEventsTab(currentCode));
-      if(b.dataset.sub==='tech')_safeAsync('renderTechChartTab',()=>renderTechChartTab(currentCode));
+      if(subs.includes('events'))_safeAsync('renderStockEventsTab',()=>renderStockEventsTab(currentCode));
+      if(subs.includes('tech'))_safeAsync('renderTechChartTab',()=>renderTechChartTab(currentCode));
     });
   });
 

@@ -440,3 +440,14 @@
 .ui-info>summary::-webkit-details-marker{display:none}
 .ui-info[open]>summary{color:var(--ink-3)}
 .ui-info-body{margin-top:4px}
+
+/* 先.七十二-B6：設定頁常用／進階兩層 */
+#scr-settings:not(.ui-adv) [data-ui-advanced]{display:none!important}
+#scr-settings.ui-adv > .card:not([data-ui-advanced]){display:none!important}
+#settings-layer-toggle{display:flex;gap:4px}
+#settings-layer-toggle button{flex:1;padding:6px 0;border-radius:10px;border:1px solid var(--hairline);background:transparent;color:var(--ink-3);font-size:13px}
+#settings-layer-toggle button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+/* 先.七十二-B7：市場頁冷門卡收進「更多」 */
+details.ui-more>summary{list-style:none;cursor:pointer;color:var(--ink-3);font-size:13px;text-align:center;padding:8px 0;border:1px dashed var(--hairline);border-radius:12px;margin:4px 0 10px}
+details.ui-more>summary::-webkit-details-marker{display:none}
+details.ui-more[open]>summary{color:var(--ink-2)}
