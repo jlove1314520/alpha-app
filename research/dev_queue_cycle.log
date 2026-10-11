@@ -16173,3 +16173,50 @@ mode: CRUNCH（先.六十四 趕工模式）
 [crunch 17:32:47] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 1 項；常備.開發剩 13 項
 finally: released .devqueue.lock (cycle_id=20261011-163102)
 ===== DevQueue cycle end: 2026-10-11 17:32:49 cycle_id=20261011-163102 reason=CRUNCH_YIELD exit=12 duration_min=61.8 =====
+
+===== DevQueue cycle start: 2026-10-11 18:01:02 cycle_id=20261011-180102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：.github/scripts/build_strategy_history.py（1.5分鐘前）、app.js（1.1分鐘前）、scripts/smoke_test.mjs（0.7分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-11 18:31:02 cycle_id=20261011-183102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：app.js（12.4分鐘前）、index.html（12.4分鐘前）、sw.js（12.4分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-11 19:01:02 cycle_id=20261011-190102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+[crunch 19:01:03] gate：NO_LOCK：沒有輪次在跑
+crunch gate: [crunch 19:01:03] gate：NO_LOCK：沒有輪次在跑
+lock: LOCK_ACQUIRED (cycle 20261011-190102)
+mode: CRUNCH（先.六十四 趕工模式）
+[crunch 19:01:06] 排程切換為 crunch（每 PT30M、上限 PT12H）：成功
+[crunch 19:01:07] 派工 #1：常備.開發-25 設定頁「為什麼沒下單」
+[crunch 19:11:52] 結算：常備.開發-25 設定頁「為什麼沒下單」 → done（4d2a5a21b）
+[crunch 19:11:52] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 19:11:53] 派工 #2：常備.開發-26 週報
+[crunch 19:21:49] 結算：常備.開發-26 週報 → done（cc2edc779）
+[crunch 19:21:50] 派工 #3：常備.開發-27 雲端夜間冒煙
+[crunch 19:34:47] 結算：常備.開發-27 雲端夜間冒煙 → done（da34734aa）
+[crunch 19:34:47] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 19:34:48] 派工 #4：常備.開發-28 資料檔 schema 驗證
+[crunch 19:52:04] 結算：常備.開發-28 資料檔 schema 驗證 → done（857a7d40d）
+[crunch 19:52:04] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 19:52:05] 派工 #5：常備.開發-29 App 錯誤回報
+[crunch 20:02:38] 結算：常備.開發-29 App 錯誤回報 → done（5989d45ff）
+[crunch 20:02:38] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 20:02:39] 派工 #6：常備.開發-30 永豐 API 公告卡（本機）
+[crunch 20:19:39] 結算：常備.開發-30 永豐 API 公告卡（本機） → done（44bfffa14）
+[crunch 20:19:39] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 20:19:40] 派工 #7：常備.開發-31 自選股匯入匯出
+[crunch 20:30:39] 結算：常備.開發-31 自選股匯入匯出 → done（9a926297c）
+[crunch 20:30:39] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 20:30:40] 派工 #8：常備.開發-32 Bb-90 分批進度圖
+[crunch 20:48:08] 結算：常備.開發-32 Bb-90 分批進度圖 → done（bd597a846）
+[crunch 20:48:09] 派工 #9：常備.開發-34 iOS 安裝與推播狀態卡
+[crunch 21:02:30] 結算：常備.開發-34 iOS 安裝與推播狀態卡 → done（85f543c16）
+[crunch 21:02:30] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 21:02:31] 派工 #10：常備.開發-35 訊號誠實度排程化
+[crunch 21:07:36] 結算：常備.開發-35 訊號誠實度排程化 → fail
+[crunch 21:07:36] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 21:07:40] shell_release：距上次發布不滿 60 分鐘，稍後再發布
+[crunch 21:07:40] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 10 項；常備.開發剩 2 項
+pw_cleanup: 結束本輪殘留 chrome 1 支、node 1 支（owner=devqueue-20261011-190102）
+finally: released .devqueue.lock (cycle_id=20261011-190102)
+===== DevQueue cycle end: 2026-10-11 21:07:46 cycle_id=20261011-190102 reason=CRUNCH_YIELD exit=12 duration_min=126.7 =====
