@@ -51,7 +51,10 @@
       setTxt('bot-next',autoNextText(d));
       setTxt('bot-last',autoLastResultText(d.last_result));
       const st=d.status||{};
-      note.textContent=(d.stopped?'⛔ 緊急停止中（一律拒單）　':'')+(st.last_error?'最近錯誤：'+st.last_error:'目前無錯誤')+(st.updated_at?'　狀態更新：'+st.updated_at:'');
+      const fz=autoFreezeText(d),fp=autoFlowPlanText(d);
+      const card=document.getElementById('bot-freeze');
+      if(card){card.hidden=!(fz||fp);card.textContent=fz?('⏸ '+fz):fp;card.dataset.state=fz?'frozen':(fp?'plan':'')}
+      note.textContent=(fz?'':(d.stopped?'⛔ 緊急停止中（一律拒單）　':''))+(st.last_error?'最近錯誤：'+st.last_error:'目前無錯誤')+(st.updated_at?'　狀態更新：'+st.updated_at:'');
       _safeSync('renderPlanPreview',()=>renderPlanPreview(st.t1_plan_preview));
     }catch(e){console.warn('[loadTradeBots]',e);recordGlobalError('loadTradeBots',e);note.textContent='讀取自動交易狀態失敗（本機伺服器離線或舊版）'}
     if(!rec)return;

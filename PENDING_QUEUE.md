@@ -19230,9 +19230,9 @@ C. 驗收
 
 心跳：每完成一項把下列對應行標 - [x]，並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.七十九-N）。
 
-- [ ] **先.七十九-1 備份 config.local.json，只改 total_capital_twd 10000→2400；mode 維持 LIVE_WITH_VETO**（互動視窗執行）
-- [ ] **先.七十九-2 重跑唯讀 --preflight，貼結果；config、cash_ready 須 PASS（金額不顯示）**（互動視窗執行）
-- [ ] **先.七十九-3 T1 預覽：預期 0050 2 股／00646 3 股／00697B 1 股、合計約 504；不符即停下回報**（互動視窗執行）
-- [ ] **先.七十九-4 10/12 13:40 結算後對帳＋odd_lot_verification 三檔 match → 開 STOP 旗標並推播「流程驗證完成，自動投資已暫停」；不符也開 STOP 並回報差異**（互動視窗／排程執行，時間閘 2026-10-12 13:40）
-- [ ] **先.七十九-5 App 自動投資頁顯示「已暫停：等紙上策略打贏 0050」**（互動視窗執行）
+- [x] **先.七十九-1 備份 config.local.json，只改 total_capital_twd 10000→2400；mode 維持 LIVE_WITH_VETO**（互動視窗執行）〔已備份（同資料夾 config.local.json.bak-before79-時間戳，不進 repo）；只有 total_capital_twd 一欄改動，mode 仍 LIVE_WITH_VETO、tranche_total 仍 4〕
+- [x] **先.七十九-2 重跑唯讀 --preflight，貼結果；config、cash_ready 須 PASS（金額不顯示）**（互動視窗執行）〔2026-10-11 19:36 唯讀 --preflight：PASS 19／FAIL 0（另 monthly_ok WARN、mode INFO，共 21 列）；config PASS、cash_ready PASS「足夠」，金額不顯示；go_live_ready=True〕
+- [x] **先.七十九-3 T1 預覽：預期 0050 2 股／00646 3 股／00697B 1 股、合計約 504；不符即停下回報**（互動視窗執行）〔load_prev_closes（10/08 昨收）＋plan_orders(dev 0.5)：0050 零股 2 股、00646 零股 3 股、00697B 零股 1 股，股數與預期完全相符；合計與預期差距在 1% 內（限價偏離設定 0.5% 與估算差異），[自行裁量] 判定相符（金額只在對話回報）；status 預覽與獨立重算一致〕
+- [~] **先.七十九-4 10/12 13:40 結算後對帳＋odd_lot_verification 三檔 match → 開 STOP 旗標並推播「流程驗證完成，自動投資已暫停」；不符也開 STOP 並回報差異**（互動視窗／排程執行，時間閘 2026-10-12 13:40）〔程式完成待 10/12 執行：auto_rebalance_bb90 --flow-verify-close（只讀本機、一律開 STOP、寫 strategy_frozen、推播；結算未完成且未到 14:30 先等）＋排程 AlphaFlowVerifyClose1012（10/12 14:00、14:30）；selftest_flow_verify_close 9/9；10/12 執行後由互動視窗補結果並改 [x]〕
+- [x] **先.七十九-5 App 自動投資頁顯示「已暫停：等紙上策略打贏 0050」**（互動視窗執行）〔交易頁自動投資卡 bot-freeze、下一期、本期原因、紅色橫幅：STOP＋strategy_frozen → 「已暫停：等紙上策略打贏 0050」；單純緊急停止不混用；暫停前顯示 status.flow_verification_plan 說明；smoke #99〕
 - [ ] **先.七十九-6 commit＋push（config.local.json 不進 repo）回報證據；禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）

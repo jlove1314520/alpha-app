@@ -2094,7 +2094,22 @@
   const AUTO_REASON_LABEL={first_tranche:'首批',month_end:'月底再平衡',retry_after_error:'重跑上一期',open_batch:'續跑進行中批次',sim_drill:'模擬演練'};
   const AUTO_CODE_LABEL={INSUFFICIENT_CASH:'現金不足',CAP:'超過單次上限',LIMIT_DEV:'限價偏離前收',LIMIT:'缺限價',STALE:'資料過期',WHITELIST:'非白名單',RECONCILE:'對帳未過',STOP_FLAG:'緊急停止',PRICE_MISSING:'缺前收價',ACTION:'僅允許買進',CASH_ONLY:'僅限現股',LOT:'數量不合'};
   const _autoCodesTxt=cs=>(cs||[]).map(c=>AUTO_CODE_LABEL[c]||c).join('、');
+  // 先.七十九-5：真錢改為「流程驗證單」——T1 結算後引擎開 STOP 並在 status 寫 strategy_frozen，前台一律顯示「已暫停：等紙上策略打贏 0050」。
+  // 只有 STOP 開著且有 strategy_frozen 才算「暫停」；單純 STOP（緊急停止）維持原本的緊急停止文字。
+  function autoFreezeText(d){
+    const fz=d&&d.status&&d.status.strategy_frozen;
+    if(!(d&&d.stopped&&fz))return '';
+    return '已暫停：'+(fz.reason||'等紙上策略打贏 0050');
+  }
+  // 流程驗證單尚未結束（還沒暫停）時的一行說明；沒有 flow_verification_plan 就回空字串
+  function autoFlowPlanText(d){
+    const fp=d&&d.status&&d.status.flow_verification_plan;
+    if(!fp||autoFreezeText(d))return '';
+    return fp.note||'流程驗證單：只跑第 1 期，結算後自動暫停';
+  }
   function autoNextText(d){
+    const fz=autoFreezeText(d);
+    if(fz)return fz;
     const n=d&&d.next_run;
     const tr=d&&d.next_tranche!=null?('第 '+d.next_tranche+(d.tranche_total?'／'+d.tranche_total:'')+' 期 · '):'';
     if(!n)return tr+'（讀不到交易日曆）';
@@ -2110,7 +2125,8 @@
   }
   function autoPeriodReasons(st,codes){
     const out=[],s=(st&&st.status)||{},err=String(s.last_error||'');
-    if(st&&st.stopped)out.push('緊急停止開關開著，引擎一律拒單（到設定頁關閉後才會恢復）');
+    if(autoFreezeText(st))out.push(autoFreezeText(st)+'（流程驗證單完成後停止第 2 期以後的批次）');
+    else if(st&&st.stopped)out.push('緊急停止開關開著，引擎一律拒單（到設定頁關閉後才會恢復）');
     if(err.startsWith('INSUFFICIENT_CASH:'))out.push('交割戶錢不夠（尚未入金或餘額不足）：'+err.slice('INSUFFICIENT_CASH:'.length));
     else if(err)out.push('最近一次執行出錯：'+err);
     const cs=(codes||[]).filter(c=>!(c==='INSUFFICIENT_CASH'&&err.startsWith('INSUFFICIENT_CASH:')));
@@ -3168,7 +3184,7 @@
       // 先.五十五-B6：交割戶餘額查詢為 0 的現金不足，改寫成可行動的說明
       // 先.五十四-6 更正 2：現金不足直接顯示引擎寫好的說明文字（可用餘額、本批所需、入金後次一交易日 09:05 自動重跑）
       const cashMsg=String(st.last_error||'').startsWith('INSUFFICIENT_CASH:')?String(st.last_error).slice('INSUFFICIENT_CASH:'.length):'';
-      AUTO_BAN.local=red?(cashMsg||('自動交易異常：'+(st.last_error||'請檢查'))):(d.stopped?'自動交易已緊急停止（一律拒單）':'');
+      AUTO_BAN.local=red?(cashMsg||('自動交易異常：'+(st.last_error||'請檢查'))):(autoFreezeText(d)?('自動投資'+autoFreezeText(d)):(d.stopped?'自動交易已緊急停止（一律拒單）':''));
       renderAutoBanner();
     }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）';AUTO_BAN.offline='本機離線：讀不到本機自動交易狀態（/auto/status）';renderAutoBanner()}
   }
@@ -3600,7 +3616,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1921';
+  const APP_VERSION='2026-10-11.1945';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

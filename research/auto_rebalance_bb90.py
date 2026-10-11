@@ -1102,6 +1102,71 @@ def settle(paths: Paths, broker, now: datetime, mode_override: str | None = None
     return res
 
 
+FREEZE_REASON = "等紙上策略打贏 0050"
+FLOW_VERIFY_LAST_CALL = (14, 30)
+
+
+def flow_verify_close(paths: Paths, now: datetime, notify=None) -> dict:
+    """先.七十九-4（2026-10-11 總司令裁示）：真錢改為「流程驗證單」——T1 盤後結算（13:40）之後，
+    確認①持股對帳通過（結算寫了 last_settle、沒有 last_error、今日已終結委託全部併入對帳基準）
+    ②odd_lot_verification 三檔都 match；然後**不論結果**都開 STOP 旗標（停止 T2 以後所有批次），
+    status 寫 strategy_frozen，推播。只讀本機檔案、不連券商、不送單、不撤單、不印金額。
+    結算還沒做完而且還沒到 14:30 → 回 WAIT 不動作（排程 14:30 再跑一次，那次一定開 STOP）。
+    同一天已做過 → 回 DONE_ALREADY，不重複推播。"""
+    notify = notify or push_notify
+    shared = Paths(paths.base, paths.heartbeat)
+    live = shared.scoped("LIVE")
+    day = now.astimezone(TW).date().isoformat()
+    st = _read_json(live.status) or {}
+    fz = st.get("strategy_frozen") or {}
+    if str(fz.get("since", ""))[:10] == day and shared.stop_flag.exists():
+        return {"state": "DONE_ALREADY", "strategy_frozen": fz}
+    settle_done = str(st.get("last_settle") or "")[:10] == day
+    hm = (now.astimezone(TW).hour, now.astimezone(TW).minute)
+    if not settle_done and hm < FLOW_VERIFY_LAST_CALL:
+        return {"state": "WAIT", "why": "盤後結算尚未完成，14:30 再檢查"}
+    diffs = []
+    lat = _ledger_latest(live)
+    today = {k: r for k, r in lat.items() if str(r.get("ts", ""))[:10] == day and r.get("symbol") in WEIGHTS}
+    applied = set((_read_json(live.state) or {}).get("applied", []))
+    if not settle_done:
+        diffs.append("今天的盤後結算沒有完成")
+    if st.get("last_error"):
+        diffs.append("結算或對帳有錯誤：" + str(st.get("last_error"))[:80])
+    if not today:
+        diffs.append("今天沒有任何委託紀錄")
+    nonfinal = sorted(k for k, r in today.items() if r.get("event") in NONFINAL)
+    if nonfinal:
+        diffs.append(f"仍有 {len(nonfinal)} 筆委託未終結")
+    not_applied = sorted(k for k, r in today.items() if r.get("event") in ("FILLED", "EXPIRED", "CANCELLED") and k not in applied)
+    if not_applied:
+        diffs.append(f"{len(not_applied)} 筆成交尚未併入對帳基準（對帳未通過）")
+    recon_ok = not diffs
+    odd = _read_json(live.ledger.parent / f"odd_lot_verification_{day.replace('-', '')}.json")
+    odd_rows = {}
+    if not odd:
+        diffs.append("找不到今天的零股驗證檔（odd_lot_verification）")
+    else:
+        per = odd.get("per_symbol") or {}
+        for c in WEIGHTS:
+            v = per.get(c) or {}
+            odd_rows[c] = {"filled": v.get("filled_common_plus_odd"), "position_diff": v.get("position_diff_shares"), "match": bool(v.get("match"))}
+            if not v.get("match"):
+                diffs.append(f"{c} 零股驗證不符（成交 {v.get('filled_common_plus_odd')} 股／持股增 {v.get('position_diff_shares')} 股）")
+    odd_ok = bool(odd) and len(odd_rows) == len(WEIGHTS) and all(v["match"] for v in odd_rows.values())
+    all_ok = recon_ok and odd_ok
+    shared.stop_flag.parent.mkdir(parents=True, exist_ok=True)
+    shared.stop_flag.write_text(now.isoformat(timespec="seconds") + " 先.七十九-4 流程驗證單完成，策略資金凍結", encoding="utf-8")
+    frozen = {"since": now.isoformat(timespec="seconds"), "reason": FREEZE_REASON, "by": "先.七十九-4",
+              "flow_verification": {"recon_ok": recon_ok, "odd_lot_ok": odd_ok, "all_ok": all_ok, "odd_lot": odd_rows, "diffs": diffs}}
+    write_status(live, strategy_frozen=frozen)
+    if all_ok:
+        notify(shared, "流程驗證完成，自動投資已暫停", "對帳與零股驗證三檔都相符；已開停止旗標，第 2 期以後不再下單（" + FREEZE_REASON + "）", "info")
+    else:
+        notify(shared, "流程驗證：有不符，自動投資已暫停", "已開停止旗標，第 2 期以後不再下單。差異：" + "；".join(diffs)[:300], "error")
+    return {"state": "OK" if all_ok else "MISMATCH", "strategy_frozen": frozen}
+
+
 def odd_lot_verification(paths: Paths, broker, now: datetime) -> dict | None:
     """先.五十-5：「零股首次真實驗證」——只針對 LIVE 族當日的盤中零股委託，逐筆列委託量、成交量、均價，
     並以 unit=Share 持股前後差（券商現有持股 − 本批前對帳基準）對照本日整股＋零股成交量合計。只寫本機，不進 repo。"""
@@ -1927,6 +1992,8 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="--settle 略過 13:35 時間限制")
     ap.add_argument("--drill-label", help="先.三十二 演練 B：以獨立批次名走否決窗（僅 SIMULATION＋sim_veto，心跳記 drill 不發布）")
     ap.add_argument("--stop", action="store_true")
+    ap.add_argument("--flow-verify-close", action="store_true",
+                    help="先.七十九-4 流程驗證單收尾：結算後確認對帳＋零股驗證，一律開 STOP 並推播（只讀本機檔、不連券商）")
     ap.add_argument("--night-drill", choices=NIGHT_PHASES, help="先.三十七 今晚無券商演練（假券商、獨立目錄、僅 SIMULATION）")
     ap.add_argument("--sim-cancel-test", action="store_true", help="先.三十八 模擬環境掛單＋撤單驗證（不動正式帳本）")
     ap.add_argument("--live-cancel-test", action="store_true",
@@ -1939,6 +2006,12 @@ def main() -> int:
         paths.stop_flag.parent.mkdir(parents=True, exist_ok=True)
         paths.stop_flag.write_text(now.isoformat(), encoding="utf-8")
         print("已寫入停止旗標")
+        return 0
+    if a.flow_verify_close:
+        out = flow_verify_close(paths, now)
+        fv = (out.get("strategy_frozen") or {}).get("flow_verification") or {}
+        print(json.dumps({"state": out["state"], "stop_flag": paths.stop_flag.exists(), "recon_ok": fv.get("recon_ok"),
+                          "odd_lot_ok": fv.get("odd_lot_ok"), "diffs": fv.get("diffs"), "why": out.get("why")}, ensure_ascii=False))
         return 0
     if a.sim_cancel_test:
         out = sim_cancel_test()

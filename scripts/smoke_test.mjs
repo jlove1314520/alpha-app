@@ -3271,10 +3271,66 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { scfcErrs.push(`測試本身出錯：${e.message || e}`); }
   record("98. 設定頁「雲端夜間冒煙」卡：失敗項列出、逾 36 小時標沒更新（常備.開發-27）", scfcErrs.length === 0, scfcErrs.join("; "));
 
+  // 100.【2026-10-11 常備.開發-28】設定頁「資料檔 schema 守門」卡：route 餵 data/schema_guard/*.json——
+  // (a) market 攔下 1 檔、其餘 404 → 要顯示「1 個資料檔被攔下」與檔名；(b) 全部 404 → 顯示尚未產生，不得拋錯。
+  const sgErrs = [];
+  try {
+    let fixtures = {};
+    await page.route("**/data/schema_guard/**", (route) => {
+      const name = new URL(route.request().url()).pathname.split("/").pop().replace(/\.json$/, "");
+      const body = fixtures[name];
+      return body ? route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) })
+        : route.fulfill({ status: 404, body: "not found" });
+    });
+    fixtures = { market: { generated_at: new Date().toISOString(), label: "market", checked: ["data/fx.json"], guard_error: null,
+      rejected: [{ file: "data/fx.json", errors: ["缺必要欄位 usd_twd"], action: "已還原成上一版（HEAD），本次不發布" }] } };
+    const a = await page.evaluate(async () => {
+      if (typeof loadSchemaGuard !== "function") return { err: "loadSchemaGuard 未載入" };
+      await loadSchemaGuard();
+      return { sum: document.getElementById("schema-guard-summary").innerText, list: document.getElementById("schema-guard-list").innerText };
+    });
+    if (a.err) sgErrs.push(a.err);
+    else {
+      if (!/1 個資料檔被攔下/.test(a.sum)) sgErrs.push(`(a) 摘要應含「1 個資料檔被攔下」：${a.sum}`);
+      if (!/data\/fx\.json/.test(a.list) || !/usd_twd/.test(a.list)) sgErrs.push(`(a) 未列出被攔下的檔與原因：${a.list}`);
+      if (/讀不到/.test(a.sum)) sgErrs.push("(a) 404 不應算讀不到");
+    }
+    fixtures = {};
+    const b = await page.evaluate(async () => { await loadSchemaGuard(); return document.getElementById("schema-guard-summary").innerText; });
+    if (!/尚未產生/.test(b)) sgErrs.push(`(b) 全部 404 應顯示尚未產生：${b}`);
+    await page.unroute("**/data/schema_guard/**");
+  } catch (e) { sgErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("100. 設定頁「資料檔 schema 守門」卡：被攔下的檔與原因列出、尚未產生不拋錯（常備.開發-28）", sgErrs.length === 0, sgErrs.join("; "));
+
+  // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
+  // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
+  const fzErrs = [];
+  try {
+    const r = await page.evaluate(() => {
+      if (typeof autoFreezeText !== "function" || typeof autoNextText !== "function" || typeof autoFlowPlanText !== "function") return { err: "autoFreezeText／autoFlowPlanText 未載入" };
+      const frozen = { stopped: true, status: { strategy_frozen: { since: "2026-10-12T14:00:00+08:00", reason: "等紙上策略打贏 0050" } }, next_run: { date: "2026-11-02", time: "09:05", reason: "first_tranche" } };
+      const estop = { stopped: true, status: {}, next_run: { date: "2026-11-02", time: "09:05", reason: "first_tranche" } };
+      const plan = { stopped: false, status: { flow_verification_plan: { note: "流程驗證單：10/12 只跑第 1 期" } } };
+      return { f: autoFreezeText(frozen), fn: autoNextText(frozen), e: autoFreezeText(estop), en: autoNextText(estop),
+               fr: autoPeriodReasons(frozen, []).join("|"), p: autoFlowPlanText(plan), pf: autoFlowPlanText({ ...frozen, status: { ...frozen.status, flow_verification_plan: { note: "x" } } }) };
+    });
+    if (r.err) fzErrs.push(r.err);
+    else {
+      if (r.f !== "已暫停：等紙上策略打贏 0050") fzErrs.push(`暫停文字不對：${r.f}`);
+      if (r.fn !== r.f) fzErrs.push(`下一期應改顯示暫停：${r.fn}`);
+      if (r.e) fzErrs.push("單純緊急停止不應顯示「已暫停：等紙上策略…」");
+      if (!/11\/02/.test(r.en)) fzErrs.push(`緊急停止時下一期應照常顯示日期：${r.en}`);
+      if (!/已暫停：等紙上策略打贏 0050/.test(r.fr) || /緊急停止開關開著/.test(r.fr)) fzErrs.push(`本期原因應寫暫停、不寫緊急停止：${r.fr}`);
+      if (!/流程驗證單/.test(r.p)) fzErrs.push("暫停前應顯示流程驗證單說明");
+      if (r.pf) fzErrs.push("已暫停後不應再顯示流程驗證單說明");
+    }
+  } catch (e) { fzErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("99. 自動投資「已暫停：等紙上策略打贏 0050」：STOP＋strategy_frozen 才顯示、緊急停止不混用、暫停前顯示流程驗證單（先.七十九-5）", fzErrs.length === 0, fzErrs.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
