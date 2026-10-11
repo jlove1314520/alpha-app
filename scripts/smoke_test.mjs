@@ -2657,10 +2657,42 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { irErrors.push(`測試本身出錯：${e.message || e}`); }
   record("81. 法說會事件附 MOPS 法說會簡報官方連結（只有法說會列有、代號正確、另開分頁）", irErrors.length === 0, irErrors.join("; ") || irInfo);
 
+  // 82～84.【2026-10-11 先.六十六】版面結構永久檢查。根因：dec42448（常備.開發-17）多寫一個 </div>，
+  // HTML 解析器提早關閉 #app／<main>，後面的分頁、<nav> 全部變成 body 直接子元素，手機版面整個散掉；
+  // 既有冒煙只看「有沒有內容、能不能切換」，結構錯了照樣全綠，所以補三道結構檢查。
+  const layout = await page.evaluate(() => {
+    const kids = [...document.body.children].map(e => e.tagName === "SCRIPT" ? "script" : (e.id ? `#${e.id}` : e.tagName.toLowerCase()));
+    const screens = [...document.querySelectorAll(".screen")].map(e => ({ id: e.id, inMain: !!e.closest("main#main") }));
+    const nav = document.querySelector("nav#nav");
+    return { kids, screens, navInApp: !!(nav && nav.closest("#app")),
+             domSection: document.querySelectorAll("section").length, domNav: document.querySelectorAll("nav").length };
+  });
+  const badKids = layout.kids.filter(k => !["#new-version-banner", "#app", "script"].includes(k));
+  record("82. body 直接子元素白名單（只能是 #new-version-banner、#app、script）", badKids.length === 0,
+    badKids.length ? `不允許的直接子元素：${badKids.join("、")}` : `${layout.kids.length} 個子元素`);
+  const outMain = layout.screens.filter(s => !s.inMain).map(s => s.id);
+  record("83. 每個 .screen 都在 main#main 內、nav 在 #app 內", outMain.length === 0 && layout.navInApp && layout.screens.length > 0,
+    `${layout.screens.length} 個 .screen${outMain.length ? `；脫離 main：${outMain.join("、")}` : ""}；nav 在 #app 內=${layout.navInApp}`);
+  // 原始碼去掉註解、<script>／<style> 內容後，比對 <section>／<nav> 數量與 DOM 一致，並檢查 <div> 開關數平衡
+  // （多一個 </div> 時解析器會吞掉，DOM 數量仍一樣，所以 div 用原始碼開關數直接比）
+  const srcInfo = await page.evaluate(async () => {
+    const raw = await (await fetch(location.href.split("#")[0], { cache: "no-store" })).text();
+    const body = raw.replace(/<!--[\s\S]*?-->/g, "").replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<style\b[\s\S]*?<\/style>/gi, "");
+    const n = (re) => (body.match(re) || []).length;
+    return { section: n(/<section\b/gi), sectionClose: n(/<\/section>/gi), nav: n(/<nav\b/gi), navClose: n(/<\/nav>/gi),
+             divOpen: n(/<div\b/gi), divClose: n(/<\/div>/gi) };
+  });
+  const balErr = [];
+  if (srcInfo.section !== layout.domSection || srcInfo.section !== srcInfo.sectionClose) balErr.push(`section 原始碼開 ${srcInfo.section}／關 ${srcInfo.sectionClose}／DOM ${layout.domSection}`);
+  if (srcInfo.nav !== layout.domNav || srcInfo.nav !== srcInfo.navClose) balErr.push(`nav 原始碼開 ${srcInfo.nav}／關 ${srcInfo.navClose}／DOM ${layout.domNav}`);
+  if (srcInfo.divOpen !== srcInfo.divClose) balErr.push(`div 原始碼開 ${srcInfo.divOpen}／關 ${srcInfo.divClose}`);
+  record("84. 靜態標記標籤數量平衡（section／nav 原始碼＝DOM、div 開關數相等）", balErr.length === 0,
+    balErr.join("；") || `section ${srcInfo.section}、nav ${srcInfo.nav}、div ${srcInfo.divOpen}`);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
