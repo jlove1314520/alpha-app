@@ -19209,9 +19209,30 @@ C. 驗收
 6. 全部完成後 commit＋push，回報證據。禁止切換 LIVE 類模式、禁止 --live-cancel-test、禁止印出任何帳號或金額。
 ```
 
-- [ ] **先.七十八-1 10/11 20:00 唯讀 preflight 19 項結果；cash_ready 只回報 ≥2,399／不足（仍為 0 則回報疑似資金管理帳戶不在支援範圍，等 Cowork）**（互動視窗執行）
+- [x] **先.七十八-1 10/11 20:00 唯讀 preflight 19 項結果；cash_ready 只回報 ≥2,399／不足（仍為 0 則回報疑似資金管理帳戶不在支援範圍，等 Cowork）**（互動視窗執行）〔⚠️ 已被先.七十九-2 取代：改資金後重跑唯讀預檢，結果記在先.七十九-2〕
 - [x] **先.七十八-2 status.json 新增 t1_plan_preview（load_prev_closes＋plan_orders，同 --run 的 dev_pct），App 自動投資頁顯示「明天會買」**（互動視窗執行）〔auto_rebalance_bb90.plan_preview()：期別取 LIVE state next_tranche、預算＝總資金÷期數、plan_orders(dev_pct=min(0.5,max_price_dev_pct/2)) 與 --run 同、逐筆 cap_ok、合計×1.003 vs 可用只輸出布林；preflight 寫入 LIVE status.json t1_plan_preview；交易頁「明天會買（T1）」；smoke #97〕
 - [x] **先.七十八-3 確認 10/12 --run 以 T1 重試（applied=[]、next_tranche=1）、不重複建單、不沿用 10/8 REJECT，附程式碼證據**（互動視窗執行）〔LIVE state：applied=[]、next_tranche=1、無 batch/retry/last_done、無 pending 檔；orders.jsonl 只有 10/8 09:05、09:40 兩筆 REJECT LIVE-202610-T1-R1-ALL（INSUFFICIENT_CASH）。should_run：LIVE 族 n==1 且無 last_done → first_tranche；run_month_end：無 batch、無 retry → 標籤 T1、rnd=1、batch_id LIVE-202610-T1-R1；委託 key＝batch_id-代號-C/O，跳過條件只認 SUBMITTED/OPEN/PARTIAL/FILLED/EXPIRED，-ALL 的 REJECT 不會撞到任何單號 → 不沿用、不重複建單；10/8 未留 retry 是因 _mark_retry 晚於當日的 commit 2bf589ab3 才加入〕
 - [x] **先.七十八-4 預檢第 20 項 monthly_ok（每月投入>總資金 → WARN，只警告不改值）**（互動視窗執行）〔preflight 第 20 項 monthly_ok：每月投入>總資金 → WARN「每月投入大於總資金，第 5 個月起會被擋單，請確認」，不算 FAIL、不改設定值，明細不含數字〕
 - [x] **先.七十八-5 單元測試：債券 ETF 不用 limit_up、零股 qty<1000、單筆>上限拒單、可用<整批×1.003 整批不送**（互動視窗執行）〔scripts/selftest_bb90_t1_guards.py 22/22：①00697B 限價＝前收×1.005 取跳動單位、原始碼無 limit_up ②零股 999 放行／1000 拒 ③單筆>上限 CAP 拒單 ④可用<整批×1.003 整批不送（記 -ALL REJECT）、剛好等於放行、扣未交割應付 ⑤預覽 ⑥monthly_ok〕
-- [ ] **先.七十八-6 commit＋push 回報證據；禁止切 LIVE、禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）
+- [x] **先.七十八-6 commit＋push 回報證據；禁止切 LIVE、禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）〔commit 31e5d4bea 已 push；未切模式、未跑 --live-cancel-test、未印帳號金額〕
+
+# 2026-10-11【先.七十九：真錢改為「流程驗證單」，策略資金凍結】（總司令裁示原文，動工前先寫入；不切模式、禁止 --live-cancel-test、禁止印帳號或金額）
+
+```
+先.七十九　真錢改為「流程驗證單」，策略資金凍結（總司令裁示）
+1. 備份 research/data/auto_trading/config.local.json，只改 total_capital_twd：10000 → 2400（tranche_total 4 不動，單批 600）。mode 維持 LIVE_WITH_VETO，不切換任何模式。
+2. 重跑唯讀 --preflight，貼 19 項結果。config 須 PASS；cash_ready 須 PASS（金額不顯示）。
+3. 用 load_prev_closes＋plan_orders 印出 T1 預覽，預期 0050 2 股／00646 3 股／00697B 1 股，合計約 504。不符就停下回報。
+4. 10/12 13:40 結算後確認對帳＋odd_lot_verification 三檔都 match，然後立刻開 STOP 旗標（停止 T2 以後所有批次），並推播「流程驗證完成，自動投資已暫停」。對帳不符也要開 STOP，回報差異。
+5. App 自動投資頁顯示「已暫停：等紙上策略打贏 0050」。
+6. commit＋push 程式與文件改動（config.local.json 不進 repo），回報證據。禁止 --live-cancel-test、禁止印出帳號或金額。
+```
+
+心跳：每完成一項把下列對應行標 - [x]，並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.七十九-N）。
+
+- [ ] **先.七十九-1 備份 config.local.json，只改 total_capital_twd 10000→2400；mode 維持 LIVE_WITH_VETO**（互動視窗執行）
+- [ ] **先.七十九-2 重跑唯讀 --preflight，貼結果；config、cash_ready 須 PASS（金額不顯示）**（互動視窗執行）
+- [ ] **先.七十九-3 T1 預覽：預期 0050 2 股／00646 3 股／00697B 1 股、合計約 504；不符即停下回報**（互動視窗執行）
+- [ ] **先.七十九-4 10/12 13:40 結算後對帳＋odd_lot_verification 三檔 match → 開 STOP 旗標並推播「流程驗證完成，自動投資已暫停」；不符也開 STOP 並回報差異**（互動視窗／排程執行，時間閘 2026-10-12 13:40）
+- [ ] **先.七十九-5 App 自動投資頁顯示「已暫停：等紙上策略打贏 0050」**（互動視窗執行）
+- [ ] **先.七十九-6 commit＋push（config.local.json 不進 repo）回報證據；禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）
