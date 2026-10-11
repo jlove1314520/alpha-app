@@ -18774,7 +18774,7 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 - [ ] **常備.開發-因子類-B31 財報／filing 研判區塊**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B31 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B31）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕
 - [ ] **常備.開發-因子類-B32 擁擠度／情緒反指標監測**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B32 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B32）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕
 - [x] **常備.開發-23 週一首批復盤頁**〔做法：13:40 結算後自動產出 research/data/auto_trading/LIVE/review_YYYYMMDD.json（送單、成交、均價 vs 參考價滑價、零股驗證結果、偏離、下期日期），App 日誌頁顯示並推播摘要（只寫百分比）〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-23）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕〔2026-10-11 DevQueue 20261011-113101 完成：新增 research/auto_trading_review.py（write_review／build_review／latest_review），auto_rebalance_bb90.py 只加兩處——SUBMITTED 紀錄多記 ref_price（平盤參考價，不影響送單）、--settle 收尾（含「沒有待結算」分支）在 LIVE 族呼叫 _settle_review()，失敗只記警告；產出 LIVE/review_YYYYMMDD.json：送單逐筆（成交/委託、均價、參考價、滑價%、對限價%、最終狀態）、當日拒單代碼、零股驗證（MATCH／MISMATCH／MISSING／NO_ODD）、偏離（status.deviation 最大 pp）、下期（auto_ledger_view.next_run）；推播只寫成交率／滑價／零股驗證／最大偏離（百分比）＋下期日期，首次產生才推、重產不重推。auto_ledger_view.ledger_view 加 review 欄位（去掉冪等鍵）；App 日誌頁新增「盤後復盤」卡。證據：scripts/selftest_auto_trading_review.py 19/19；selftest_auto_rebalance 全過（順手修既有破損：-20 拆檔後休市表在 app.js，測試改讀 index.html＋app.js，比對規則不變）；selftest_auto_ledger_view 22/22；冒煙 85 項全過（新增第 86 項）；真帳本 10/08 乾跑：0 筆送單、拒單 INSUFFICIENT_CASH、下期 2026-10-12 首批。[自行裁量] ①只有拒單、沒有送單的日子仍產檔但不推播（避免現金不足期間每天推同一則）②推播 kind=complete（可在通知偏好關閉）③舊帳本無 ref_price 時以前一交易日收盤當後備並標 *。待真實首批成交後才算實證（目前帳本 0 筆成交）。〕
-- [ ] **常備.開發-24 紙上追蹤總表**〔做法：紙.一／一b／二／三／四 一張表（起始日、目前淨值、對 0050、閘門狀態、下次動作日），月底結算後自動推播一則〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-24）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕
+- [ ] **常備.開發-24 紙上追蹤總表**〔互動視窗執行中：先.六十八 併入〕〔做法：紙.一／一b／二／三／四 一張表（起始日、目前淨值、對 0050、閘門狀態、下次動作日），月底結算後自動推播一則〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-24）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕
 - [ ] **常備.開發-25 設定頁「為什麼沒下單」**〔做法：讀本機 status 的 preflight 19 項，紅綠燈逐項顯示與白話原因，取代目前「尚未執行」文字〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-25）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕
 - [ ] **常備.開發-26 週報**〔做法：每週日 20:00 本機產出 data/weekly_report.json（系統健康、資料新鮮度、研究進度、紙上追蹤、真錢執行），App 報告頁顯示並推播〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-26）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕
 - [ ] **常備.開發-27 雲端夜間冒煙**〔做法：GitHub Action 每晚對 Pages 正式網址跑 smoke_test.mjs（Playwright），失敗寫 data/smoke_cloud.json 並在 App 設定頁顯示〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-27）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕
@@ -18943,3 +18943,27 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 - [x] **先.六十七-4 新增常備.開發-36（美股評分 v0 既有榜單重新驗證，-6 完成後）**（互動視窗執行）〔2026-10-11 完成：常備.開發-36 已寫入（-35 之後，-6 未完成前標 [!] 等待）〕
 - [x] **先.六十七-5 dev_queue_runner 預檢：含「總司令裁示解凍／核准」字樣仍標 [!] 的項目只印警告**（互動視窗執行）〔2026-10-11 完成：dev_queue_runner.approval_precheck()，每輪 build_prompt 在 guard_precheck 後呼叫，只印 APPROVAL_PRECHECK_WARN、不改標記；排除「待／需／經 總司令核准」「核准後」與引文；selftest_dev_queue_guard 25/25（新增 3 項）；實際佇列改前命中 -6 一筆、改後 0 筆〕
 - [x] **先.六十七-6 -6／-36 每出判定即推播；commit 後回報**（互動視窗執行）〔2026-10-11 完成：-6／-36 條目明寫出判定即推播；趕工迴圈每完成一項亦推播；本次 commit 後回報〕
+
+---
+
+# 2026-10-11【先.六十八：「我們 vs 0050」卡重做為「策略 vs 0050」】（總司令裁示原文，動工前先寫入；優先於常備.開發所有未完成項）
+
+```
+【先.六十八】「我們 vs 0050」卡重做為「策略 vs 0050」（優先於常備.開發所有未完成項；不碰自動交易）
+1. 三榜曲線算法更正：改用重疊組合法——每天新批次佔 1/5 資金、同時持有 5 個批次、日報酬＝各批次當日報酬平均；成本只在批次進出時各扣一次。0050 用同期實際日收盤報酬，同一條時間軸。刪除「依序串接複利」，卡上註明「2026-10-11 更正：舊算法把重疊的 5 日報酬串接，誤放大約 5 倍」。
+2. 卡改名「策略 vs 0050」，分頁：真錢 Bb-90｜紙.一 70/30｜紙.一b｜紙.二（11/16 起）｜紙.三 S3-C6（10/31 起）｜紙.四 R1-C（10/31 起）｜選股榜單（估值／動能／未來，標「回測未通過」或「未回測」）。每條線從各自起始日歸一為 100，灰線為同期 0050；可一次疊加全部線。資料由新增的 .github/scripts/build_strategy_curves.py 每日產生 data/strategy_curves.json（納入 market.yml git add 清單，十節）。
+3. 每條線的指標列：累計差距 pp、年化差距（樣本 <60 交易日只顯示累計）、MDD、樣本天數、狀態（真錢／紙上追蹤中／回測通過／回測未通過／未回測）。
+4. 「金礦判讀」固定規則：<60 交易日顯示「尚不足以判斷」；≥60 日顯示累計差距與區塊自助法 90% 區間；≥250 日另顯示年化。不做任何推論文字。
+5. 估值榜 8/27～9/4 的 t5 ≤ −15% 紀錄（3081、3450、2491、7711、3661、2464、6446、1815）逐筆核對 picks_ledger 的買進價與出場價 vs TWSE 官方收盤；壞價則修回填並重算；結果寫 research/PICKS_LEDGER_AUDIT_2026-10-11.md。
+6. 冒煙新增：任一策略曲線單日變動不得超過其成分當日最大漲跌幅；0050 線累計報酬必須等於 price_history 同期實際報酬（±0.1pp）。
+7. 常備.開發-24 紙上追蹤總表併入本條，結案。smoke 全綠 commit，重啟服務後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.六十八-1 三榜曲線改重疊組合法（5 批次各 1/5、進出各扣一次成本），0050 同期實際日收盤同一時間軸，卡上註明更正**（互動視窗執行）
+- [ ] **先.六十八-2 卡改名「策略 vs 0050」＋七分頁＋歸一 100＋0050 灰線＋可疊加；build_strategy_curves.py → data/strategy_curves.json 進 market.yml**（互動視窗執行）
+- [ ] **先.六十八-3 每條線指標列：累計差距 pp、年化差距（<60 日不顯示）、MDD、樣本天數、狀態**（互動視窗執行）
+- [ ] **先.六十八-4 金礦判讀固定規則：<60 日尚不足以判斷；≥60 日累計差距＋區塊自助法 90% 區間；≥250 日加年化**（互動視窗執行）
+- [ ] **先.六十八-5 估值榜 8/27～9/4 t5≤−15% 八筆核對 TWSE 官方收盤，壞價修回填重算，寫 PICKS_LEDGER_AUDIT_2026-10-11.md**（互動視窗執行）
+- [ ] **先.六十八-6 冒煙新增：曲線單日變動上限、0050 線累計＝price_history 同期（±0.1pp）**（互動視窗執行）
+- [ ] **先.六十八-7 常備.開發-24 併入結案；冒煙全綠 commit；重啟服務後回報**（互動視窗執行）
