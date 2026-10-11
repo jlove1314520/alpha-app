@@ -1,6 +1,6 @@
 {
   "version": "2026-10-11",
-  "source": "先.七十二-A1 總司令裁示（「人因改版_用詞表」專案文件本機與 repo 皆查無；本表依裁示原文列出的詞建立，標「暫定」者待總司令確認後改）",
+  "source": "先.七十二-A1 建立；先.七十七 定案，完整用詞與寫作規則見 docs/UI_GLOSSARY.md",
   "rules": {
     "title_max": 8,
     "button_max": 6,
@@ -11,12 +11,16 @@
   },
   "terms": [
     {"internal": "Bb-90", "front": "自動投資", "where": "策略、交易、日誌、首頁"},
+    {"internal": "觀察清單／追蹤清單", "front": "自選股"},
+    {"internal": "紙.一～紙.四（紙上追蹤）", "front": "模擬帳戶 A～E"},
+    {"internal": "本機伺服器／即時伺服器（連線狀態）", "front": "電腦連線中／離線"},
+    {"internal": "PASS／FAIL", "front": "通過驗證／沒通過／還沒驗證"},
     {"internal": "Bb-90 真錢", "front": "自動投資"},
     {"internal": "紙.一 70/30", "front": "模擬 A 穩健", "goal": "守住回檔"},
     {"internal": "紙.三 S3-C6", "front": "模擬 B 景氣閘門", "goal": "守住回檔"},
     {"internal": "紙.四 R1-C", "front": "模擬 C 加速", "goal": "贏大盤也守回檔"},
-    {"internal": "紙.一b", "front": "模擬 D 三檔分散", "status": "暫定（先.七十三 依開始日排序改為 D）"},
-    {"internal": "紙.二", "front": "模擬 E 供給緊縮", "status": "暫定（先.七十三 依開始日排序改為 E）"},
+    {"internal": "紙.一b", "front": "模擬 D 三檔分散", "status": "定案（先.七十七）"},
+    {"internal": "紙.二", "front": "模擬 E 供給緊縮", "status": "定案（先.七十七）"},
     {"internal": "三榜（估值／動能／未來）", "front": "選股榜單", "goal": "選股研究"},
     {"internal": "守回撤（天條一）", "front": "守住回檔"},
     {"internal": "贏大盤＋守回撤", "front": "贏大盤也守回檔"},

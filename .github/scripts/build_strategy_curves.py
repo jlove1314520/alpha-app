@@ -43,7 +43,7 @@ MIN_DAYS = 60
 ANN_DAYS = 250
 BOOT_N = 2000
 BOARDS = [("value", "估值榜", "value_board_v2"), ("momentum", "動能榜", "momentum_board"), ("future", "未來榜", "future_board")]
-CORRECTION = "10/11 更正：舊算法重複計算，數字放大約 5 倍"
+CORRECTION = "10/11 更正：舊算法重複計算，數字放大約 5 倍；10/11 更正進場點（改為快照後第一個收盤進場）"
 # 先.七十-5（2026-10-11 總司令裁示）：每條線的「設計目標」。裁示沒有指定的線（紙.一b、紙.二）標「未標示」，不自行推定。
 # 先.七十二-A4：前台改白話（守回撤（天條一）→守住回檔；贏大盤＋守回撤→贏大盤也守回檔）；內部代號只留在 id。
 GOALS = {"live_bb90": "守住回檔", "paper_1": "守住回檔", "paper_3": "守住回檔",
@@ -170,18 +170,20 @@ def _placeholder(id_, label, group, status, start, note, extra=None) -> dict:
 def board_line(board: str, ledger: dict, px: Px) -> dict:
     batches = []
     seen = set()
+    # 先.七十七-4：進場點更正——每批在快照 taken_at 之後第一個收盤進場（picks_ledger 回填時寫入的 entry_date／entry_price），
+    # 不再用快照前的 price_date／close_price（未來函數）；進場日當天沒有收盤的個股不進該批
     for s in sorted((x for x in ledger.get("snapshots", []) if x.get("board") == board), key=lambda x: (x["snapshot_date"], x.get("taken_at", ""))):
-        picks = [p for p in s.get("picks", []) if not p.get("price_stale") and p.get("close_price") and p.get("price_date")]
+        picks = [p for p in s.get("picks", []) if p.get("entry_date") and p.get("entry_price")]
         if not picks:
             continue
-        pd_ = max(set(p["price_date"] for p in picks), key=lambda d: sum(1 for p in picks if p["price_date"] == d))
-        if pd_ in seen:
+        ed_ = picks[0]["entry_date"]
+        if ed_ in seen:
             continue
-        i0 = px.idx(pd_)
+        i0 = px.idx(ed_)
         if i0 is None:
             continue
-        seen.add(pd_)
-        batches.append({"i0": i0, "picks": [(p["code"], float(p["close_price"])) for p in picks if p["price_date"] == pd_]})
+        seen.add(ed_)
+        batches.append({"i0": i0, "picks": [(p["code"], float(p["entry_price"])) for p in picks if p["entry_date"] == ed_]})
     if not batches:
         return None
     start_i = min(b["i0"] for b in batches)
@@ -349,7 +351,7 @@ def build() -> dict:
             lines.append(_placeholder(f"board_{b}", label, "board", st, None, "還沒有資料"))
             continue
         lines.append(_line(f"board_{b}", label, "board", st, r["dates"], r["nav"], r["comp"], px=px,
-                           note=f"每天買進當天前 20 名、各放 {HOLD} 個交易日，同時 {HOLD} 批各佔五分之一；已扣手續費與證交稅",
+                           note=f"每天快照後第一個收盤買進前 20 名、各放 {HOLD} 個交易日，同時 {HOLD} 批各佔五分之一；已扣手續費與證交稅",
                            extra={"n_batches": r["n_batches"]}))
     return {"meta": {"generated_at": datetime.now(TZ).isoformat(timespec="seconds"), "source": ".github/scripts/build_strategy_curves.py",
                      "bench": BENCH, "bench_note": "灰線是同期 0050",

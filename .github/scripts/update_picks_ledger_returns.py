@@ -63,6 +63,16 @@ TW_TZ = timezone(timedelta(hours=8))
 
 # T+N交易日視窗名稱 → 交易日數（不是日曆天數）
 RETURN_WINDOWS = {"t5": 5, "t20": 20, "t60": 60, "t120": 120}
+# 2026-10-11 總司令【先.七十七】第 4 點：進場點更正。
+#   舊規則：進場價＝快照當下記錄的 close_price（price_date 常早於 taken_at——用的是「快照前就已知」的價格，
+#   但出場日卻從 snapshot_date 往後數，實際持有 5～8 個交易日；更嚴重的是 price_date 早於 taken_at 的價格
+#   在快照當下並不是「之後才買得到」的價格，屬未來函數）。
+#   新規則：進場＝taken_at 之後第一個收盤（交易日 13:30 收盤時間晚於 taken_at 的第一天）的收盤價，
+#   出場＝其後第 N 個交易日收盤，持有恰為 N 個交易日；大盤超額報酬用同一個進出場日。
+#   首次以新規則執行時（meta.returns_anchor_rule 不是本規則）清空並重算所有已回填欄位（本裁示即授權，一次性）；
+#   之後恢復「已回填欄位永遠不再更動」的鐵律。
+ANCHOR_RULE = "taken_at_next_close_v2"
+TW_CLOSE_HHMM = (13, 30)
 STALE_DAYS_THRESHOLD = 10  # 跟build_picks_ledger.py同一套「價格過期」判斷門檻
 CALENDAR_PROXY_CODE = "2330"  # 台積電：全市場流動性最高，幾乎不會停牌，拿來近似交易日曆
 
@@ -115,6 +125,23 @@ def _trading_days_after(anchor_date: str, n: int, trading_calendar: list[str]) -
     if target_idx >= len(trading_calendar):
         return None  # 還沒到那個交易日，之後資料累積夠了再回填（正常情況，不印警告）
     return trading_calendar[target_idx]
+
+
+def _entry_day_after(taken_at: str | None, trading_calendar: list[str]) -> str | None:
+    """先.七十七-4：taken_at（含時區的 ISO 時間）之後第一個收盤的交易日（台北 13:30 收盤時間 > taken_at）。"""
+    if not taken_at:
+        return None
+    try:
+        t = datetime.fromisoformat(taken_at)
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=TW_TZ)
+    except ValueError:
+        return None
+    for d in trading_calendar:
+        close_at = datetime.strptime(d, "%Y-%m-%d").replace(hour=TW_CLOSE_HHMM[0], minute=TW_CLOSE_HHMM[1], tzinfo=TW_TZ)
+        if close_at > t:
+            return d
+    return None
 
 
 def _lookup_price_on(code: str, date: str, price_history: dict[str, list[dict]]) -> tuple[float | None, str | None, bool]:
@@ -173,38 +200,49 @@ def main():
     earliest_snapshot_date = min(s["snapshot_date"] for s in ledger["snapshots"])
     taiex_history = _fetch_taiex_history(earliest_snapshot_date)
 
+    meta = ledger.setdefault("meta", {})
+    recompute_all = meta.get("returns_anchor_rule") != ANCHOR_RULE
+    wiped = 0
+    if recompute_all:
+        # 先.七十七-4 一次性重算：清空所有已回填欄位，下面依新規則重填
+        for snap in ledger["snapshots"]:
+            for pick in snap["picks"]:
+                for k in RETURN_WINDOWS:
+                    if (pick.get("returns") or {}).get(k) is not None:
+                        wiped += 1
+                    pick.setdefault("returns", {})[k] = None
+                pick.pop("entry_date", None)
+                pick.pop("entry_price", None)
+        print(f"先.七十七-4：進場點規則改為 {ANCHOR_RULE}，清空 {wiped} 個已回填欄位後依新規則重算")
+
     filled = 0
     skipped_stale_or_missing = 0
-    skipped_entry_stale = 0
+    skipped_no_entry = 0
     for snap in ledger["snapshots"]:
-        anchor = snap["snapshot_date"]
+        entry_day = _entry_day_after(snap.get("taken_at"), trading_calendar)
+        if entry_day is None:
+            continue  # 快照之後還沒有收盤（或 taken_at 缺漏）：還不能進場，之後再回填
+        taiex_entry = _lookup_taiex_on(entry_day, taiex_history)
         for pick in snap["picks"]:
-            entry_price = pick.get("close_price")
-            if entry_price is None:
-                continue  # 進場價本身缺失（price_stale快照時就記過），任何期別都算不出報酬率，不硬猜
-            if pick.get("price_stale"):
-                # 2026-09-15（總司令裁示，補上docstring早就講但程式碼沒做到的缺口）：
-                # build_picks_ledger.py 記錄的 price_stale=true 代表進場價本身在快照
-                # 當下就已經是舊資料（不是回填端找不到出場價那種「stale」，是進場價
-                # 這一端就不可靠）——用這種進場價算出來的報酬率，分子分母有一邊是
-                # 錯的，不能默默當成有效值繼續往下算。整批跳過，不進 filled 也不進
-                # skipped_stale_or_missing（那個計數器語意是「出場價缺失」，混在一起
-                # 會讓兩種不同原因的資料缺口分不清楚）。
-                skipped_entry_stale += 1
+            # 進場價＝taken_at 之後第一個收盤；快照記錄的 close_price／price_date 早於 taken_at，一律不用（未來函數）
+            entry_price, entry_actual, entry_stale = _lookup_price_on(pick["code"], entry_day, price_history)
+            if entry_stale or entry_price is None or entry_actual != entry_day:
+                skipped_no_entry += 1  # 進場日當天沒有收盤（停牌／資料缺）：不拿別天的價格頂替
                 continue
+            pick["entry_date"], pick["entry_price"] = entry_day, entry_price
             for window_key, n in RETURN_WINDOWS.items():
                 if pick["returns"].get(window_key) is not None:
                     continue  # 已經回填過，鐵律：永遠不再更動
-                target_date = _trading_days_after(anchor, n, trading_calendar)
+                target_date = _trading_days_after(entry_day, n, trading_calendar)
                 if target_date is None:
-                    continue  # 還沒到那個交易日（或anchor本身是髒資料），之後再回填
+                    continue  # 還沒到那個交易日，之後再回填
                 exit_price, actual_date, stale = _lookup_price_on(pick["code"], target_date, price_history)
-                if stale or exit_price is None:
+                # 先.七十七-4：持有必須恰為 N 個交易日——出場日當天沒有收盤（停牌／資料缺）就留 null，不拿前一天頂替
+                if stale or exit_price is None or actual_date != target_date:
                     skipped_stale_or_missing += 1
                     continue  # 資料還沒到位/過期，寧可留null也不塞錯價
                 return_pct = _compute_return_pct(entry_price, exit_price)
                 excess_pct = None
-                taiex_entry = snap.get("taiex_close_at_snapshot")
                 taiex_exit = _lookup_taiex_on(target_date, taiex_history)
                 if taiex_entry and taiex_exit is not None:
                     taiex_return_pct = _compute_return_pct(taiex_entry, taiex_exit)
@@ -212,22 +250,30 @@ def main():
                 pick["returns"][window_key] = {
                     "return_pct": round(return_pct, 4),
                     "excess_vs_taiex_pct": round(excess_pct, 4) if excess_pct is not None else None,
+                    "entry_date": entry_day,
                     "exit_date": actual_date,
+                    "holding_trading_days": n,
+                    "anchor_rule": ANCHOR_RULE,
                     "filled_at": datetime.now(TW_TZ).isoformat(),
                 }
                 filled += 1
 
-    if filled:
+    if recompute_all:
+        meta["returns_anchor_rule"] = ANCHOR_RULE
+        meta["returns_anchor_note"] = ("2026-10-11 先.七十七-4 更正進場點：進場＝快照 taken_at 之後第一個交易日收盤，"
+                                       "出場＝其後第 N 個交易日收盤（持有恰 N 日）；舊規則用快照前的 price_date 收盤進場，已全部重算")
+        meta["returns_recomputed_at"] = datetime.now(TW_TZ).isoformat()
+    if filled or recompute_all:
         ledger.setdefault("meta", {})["last_returns_backfill_at"] = datetime.now(TW_TZ).isoformat()
         ledger["meta"]["generated_at"] = ledger["meta"]["last_returns_backfill_at"]  # 2026-09-03（P0三-三.3）回填也算一次寫入
         LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
         print(f"回填完成：本輪新填 {filled} 個(snapshot, code, tN)欄位"
               f"（另有{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
-              f"{skipped_entry_stale}個因進場價本身price_stale=true跳過，留null等下次）")
+              f"{skipped_no_entry}個因進場日當天沒有收盤跳過，留null等下次）")
     else:
         print(f"本輪沒有任何欄位可回填（還沒到任何交易日門檻，或資料尚未到位；"
               f"{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
-              f"{skipped_entry_stale}個因進場價本身price_stale=true跳過）")
+              f"{skipped_no_entry}個因進場日當天沒有收盤跳過）")
 
 
 if __name__ == "__main__":

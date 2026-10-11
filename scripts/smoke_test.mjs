@@ -3117,6 +3117,21 @@ async function runSmokeTest(baseUrl, headless = true) {
           else out.cmp++;
         }
         if (kind === "oos" && JSON.stringify(seg.monthly) !== JSON.stringify(node.monthly)) out.errs.push(`${id} 樣本外逐月報酬與原檔不一致`);
+        // 先.七十七-5：回測月序列——畫曲線的那幾條，月序列算出的年化必須＝原結果檔 ±0.05pp；對不上必須標 IRREPRODUCIBLE 且不附序列
+        if (kind === "backtest" && seg.repro && seg.repro.status !== "NO_SERIES") {
+          const rp = seg.repro;
+          if (seg.monthly) {
+            const rs = Object.keys(seg.monthly).sort().map(k => seg.monthly[k]);
+            let v = 1; for (const x of rs) v *= 1 + x;
+            const c = Math.pow(v, 12 / rs.length) - 1;
+            if (Math.abs((c - node.cagr) * 100) > 0.05) out.errs.push(`${id} 回測月序列年化 ${(c * 100).toFixed(2)}% ≠ 原檔 ${(node.cagr * 100).toFixed(2)}% 卻仍畫曲線`);
+            else out.cmp++;
+            if (!rp.draw_curve) out.errs.push(`${id} 有附月序列但 draw_curve=false`);
+          } else if (rp.draw_curve) out.errs.push(`${id} draw_curve=true 卻沒附月序列`);
+          const mism = !(rp.cagr_ok && rp.mdd_ok);
+          if (mism !== (rp.status === "IRREPRODUCIBLE")) out.errs.push(`${id} 年化／最大跌幅不一致卻沒標 IRREPRODUCIBLE（或反之）`);
+          out.repro = (out.repro || []).concat(`${id}:${rp.status}${rp.draw_curve ? "(曲線)" : ""}`);
+        }
         // ① 期間不重疊
         const end = (seg.period || [])[1];
         if (kind === "backtest" && !(end < "2025-01-01")) out.errs.push(`${id} 回測段迄日 ${end} 與樣本外重疊`);
@@ -3135,9 +3150,17 @@ async function runSmokeTest(baseUrl, headless = true) {
         const oos = svg ? [...svg.querySelectorAll('[data-seg="oos"]')] : [], pap = svg ? [...svg.querySelectorAll('[data-seg="paper"]')] : [];
         const xs = (el) => el.tagName === "circle" ? [+el.getAttribute("cx")] : el.getAttribute("points").trim().split(/\s+/).map(p => +p.split(",")[0]);
         const oosMax = oos.length ? Math.max(...oos.flatMap(xs)) : null, papMin = pap.length ? Math.min(...pap.flatMap(xs)) : null;
+        SC_RANGE = "all"; renderStrategyCurves();
+        const svgAll = document.querySelector("#sc-body .sc-hist-block svg.sc-hist");
+        const bt = svgAll ? [...svgAll.querySelectorAll('[data-seg="backtest"]')].filter(e => e.tagName === "polyline") : [];
+        const oosA = svgAll ? [...svgAll.querySelectorAll('[data-seg="oos"]')] : [];
+        const btMax = bt.length ? Math.max(...bt.flatMap(xs)) : null, oosMinA = oosA.length ? Math.min(...oosA.flatMap(xs)) : null;
+        const drawCurve = !!(((h.lines[id] || {}).backtest || {}).repro || {}).draw_curve;
+        SC_RANGE = "3y"; renderStrategyCurves();
         out.ui.push({ id, blk: !!blk, labels: blk ? [...blk.querySelectorAll(".sc-seg-label")].map(e => e.textContent.trim()) : [],
           ranges: blk ? [...blk.querySelectorAll(".sc-range")].map(e => e.dataset.range) : [], rangeOn: SC_RANGE,
-          overlap: oosMax != null && papMin != null && !(oosMax < papMin), hasOos: oos.length > 0 });
+          overlap: oosMax != null && papMin != null && !(oosMax < papMin), hasOos: oos.length > 0,
+          btOverlap: btMax != null && oosMinA != null && btMax > oosMinA + 0.5, btDrawn: bt.length > 0, drawCurve });
       }
       SC_TAB = "all"; SC_RANGE = "3y"; renderStrategyCurves();
       return out;
@@ -3148,15 +3171,47 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (JSON.stringify(u.labels) !== JSON.stringify(["回測＝用來挑策略的資料", "樣本外＝只考過一次", "紙上＝今天起才算數"])) hsErrs.push(`${u.id} 三個固定標籤不符：${u.labels}`);
       if (JSON.stringify(u.ranges) !== JSON.stringify(["1y", "3y", "all"])) hsErrs.push(`${u.id} 範圍切換應為 1 年／3 年／全部`);
       if (u.overlap) hsErrs.push(`${u.id} 圖上樣本外點線與紙上實線重疊`);
+      if (u.btOverlap) hsErrs.push(`${u.id} 圖上回測虛線與樣本外點線重疊`);
+      if (u.btDrawn !== u.drawCurve) hsErrs.push(`${u.id} 回測曲線畫了／沒畫與 draw_curve 不符（畫=${u.btDrawn}）`);
     }
-    hsInfo = `${r.n} 段、${r.cmp} 個數字與原檔一致；${r.ui.length} 個分頁有歷史段`;
+    hsInfo = `${r.n} 段、${r.cmp} 個數字與原檔一致；${r.ui.length} 個分頁有歷史段；回測可重現性 ${(r.repro || []).join("、")}`;
   } catch (e) { hsErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("96. 歷史段：回測／樣本外／紙上不重疊、年化與最大跌幅＝原結果檔 ±0.05pp、三標籤與範圍切換（先.七十六）", hsErrs.length === 0, hsErrs.join("; ") || hsInfo);
+  record("96. 歷史段：回測／樣本外／紙上不重疊、年化與最大跌幅＝原結果檔 ±0.05pp、回測月序列可重現性標記、三標籤與範圍切換（先.七十六／七十七-5）", hsErrs.length === 0, hsErrs.join("; ") || hsInfo);
+
+  // 97.【2026-10-11 先.七十八-2】交易頁「明天會買」：讀 status.t1_plan_preview（晚間唯讀預檢的純計算預覽）。
+  // 每筆列出；超過單筆上限要標警告；可用餘額只顯示夠／不足（不得出現餘額數字）；沒有預覽就整塊隱藏。
+  const ppErrs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      await window.go("trade");
+      await new Promise(res => setTimeout(res, 400));
+      if (typeof renderPlanPreview !== "function") return { err: "renderPlanPreview 未載入" };
+      const el = document.getElementById("bot-plan-preview");
+      renderPlanPreview({ label: "T1", orders: [
+        { symbol: "0050", lot: "Common", qty: 1000, limit_price: 115.5, amount: 115500, cap_ok: true },
+        { symbol: "00646", lot: "IntradayOdd", qty: 300, limit_price: 78.7, amount: 23610, cap_ok: false }],
+        total: 139110, need_with_buffer: 139527.33, available_ok: false });
+      const o = { shown: !el.hidden, rows: el.querySelectorAll(".plan-row").length, text: el.innerText };
+      renderPlanPreview(null);
+      o.hiddenAfter = el.hidden;
+      return o;
+    });
+    if (r.err) ppErrs.push(r.err);
+    else {
+      if (!r.shown || r.rows !== 2) ppErrs.push(`應顯示 2 筆（shown=${r.shown} rows=${r.rows}）`);
+      if (!/明天會買/.test(r.text)) ppErrs.push("缺「明天會買」標題");
+      if (!/超過單筆上限/.test(r.text)) ppErrs.push("超過上限的那筆沒有警告");
+      if (!/可用餘額：不足/.test(r.text)) ppErrs.push("可用餘額應只顯示夠／不足");
+      if (!/預覽，非委託/.test(r.text)) ppErrs.push("缺「預覽，非委託」");
+      if (!r.hiddenAfter) ppErrs.push("沒有預覽時應隱藏");
+    }
+  } catch (e) { ppErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("97. 交易頁「明天會買」預覽：逐筆、超上限警告、可用只顯示夠／不足、無預覽隱藏（先.七十八-2）", ppErrs.length === 0, ppErrs.join("; "));
 
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

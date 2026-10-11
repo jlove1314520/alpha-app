@@ -1,8 +1,8 @@
 """先.七十六（2026-10-11）：「跟 0050 比」卡的歷史段 → data/strategy_history.json（只讀既有結果檔，不重算、不重跑、不新開試驗）。
 
 每條策略線分三段：
-  回測段（2003-07～2024-12）：用來挑策略的資料。來源結果檔**只存年化／最大跌幅等摘要數字，沒有逐月序列**，
-      所以本檔只搬摘要數字；App 不畫回測曲線（沒有資料就不畫，也不拿年化去畫一條假的直線）。
+  回測段（2003-07～2024-12）：用來挑策略的資料。摘要數字（年化、最大跌幅）一律以原結果檔為準；
+      逐月序列取自 data/strategy_monthly_returns.json（先.七十七-5），年化與原結果檔一致才附上序列、App 才畫虛線曲線。
   樣本外段（2025-01～2026-09-30）：只考過一次。#423／#425（Bb-90、70/30、0050）、#427／#428（S3-C6）的逐月報酬原樣搬過來。
   紙上段（2026-10-08 起）：今天起才算數——由 data/strategy_curves.json 提供（本檔不碰）。
 0050 全程灰線：回測段摘要（R1 結果檔的 0050 buy-hold）＋樣本外逐月（#425 的 0050_hold）。
@@ -22,6 +22,13 @@ OUT = ROOT / "data" / "strategy_history.json"
 TZ = timezone(timedelta(hours=8))
 
 LABELS = {"backtest": "回測＝用來挑策略的資料", "oos": "樣本外＝只考過一次", "paper": "紙上＝今天起才算數"}
+# 先.七十七-5：回測段逐月序列改讀既有 data/strategy_monthly_returns.json（先.五十九-B4 產出，2003-07～2024-12），不重跑回測。
+# 年化／最大跌幅都要跟原結果檔一致（±0.05pp）才算可重現；不一致標 IRREPRODUCIBLE。年化一致才畫曲線
+# （年化不一致＝序列不是同一個策略版本，例如閘門延後一日的變體）；最大跌幅月資料一定比日資料淺，所以另外註明。
+MONTHLY = ROOT / "data" / "strategy_monthly_returns.json"
+BT_SERIES = {"live_bb90": "Bb-90", "paper_1b": "Bb-90", "paper_3": "S3-C6", "paper_4": "R1-C"}
+BENCH_SERIES = "0050"
+TOL_PP = 0.05
 PAPER_START = "2026-10-08"
 
 # 線 id → 各段來源（檔名、JSON 路徑、事前登記／結果試驗編號、附註）
@@ -79,13 +86,49 @@ def _seg(kind, spec):
     return seg
 
 
+def _series_stats(rs):
+    v, peak, mdd = 1.0, 1.0, 0.0
+    for r in rs:
+        v *= 1 + r
+        peak = max(peak, v)
+        mdd = min(mdd, v / peak - 1)
+    return v ** (12 / len(rs)) - 1, mdd
+
+
+def _attach_monthly(seg, key, mdoc):
+    if not mdoc or key not in (mdoc.get("returns") or {}):
+        seg["repro"] = {"status": "NO_SERIES", "why": "strategy_monthly_returns.json 沒有這條策略的逐月序列"}
+        return
+    months, rs = mdoc["months"], mdoc["returns"][key]
+    c, m = _series_stats(rs)
+    cagr_ok = seg.get("cagr") is not None and abs(c - seg["cagr"]) * 100 <= TOL_PP
+    mdd_ok = seg.get("mdd") is not None and abs(m - seg["mdd"]) * 100 <= TOL_PP
+    why = []
+    if not cagr_ok:
+        why.append(f"年化：月序列 {c * 100:.2f}% ≠ 原結果檔 {seg['cagr'] * 100:.2f}%（{(mdoc.get('sources') or {}).get(key, '')}）")
+    if not mdd_ok:
+        why.append(f"最大跌幅：月序列 {m * 100:.2f}% ≠ 原結果檔（日資料）{seg['mdd'] * 100:.2f}%；月底資料看不到月中跌幅，必然較淺")
+    seg["repro"] = {"status": "OK" if (cagr_ok and mdd_ok) else "IRREPRODUCIBLE", "series_key": key,
+                    "cagr_series": round(c, 6), "mdd_series": round(m, 6), "cagr_ok": cagr_ok, "mdd_ok": mdd_ok,
+                    "draw_curve": cagr_ok, "why": "；".join(why), "source": "data/strategy_monthly_returns.json"}
+    if cagr_ok:
+        seg["monthly"] = dict(zip(months, rs))
+
+
 def build() -> dict:
+    try:
+        mdoc = json.loads(MONTHLY.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] 讀不到 strategy_monthly_returns.json：{type(e).__name__}")
+        mdoc = None
     lines = {}
     for lid, spec in SPEC.items():
         segs = {}
         for kind, sp in spec.items():
             try:
                 segs[kind] = _seg(kind, sp)
+                if kind == "backtest":
+                    _attach_monthly(segs[kind], BT_SERIES.get(lid, ""), mdoc)
             except Exception as e:  # noqa: BLE001 -- 單一來源壞掉只少那一段（十二節）
                 print(f"[warn] {lid}/{kind} 讀取失敗：{type(e).__name__}: {e}")
         lines[lid] = segs
@@ -93,6 +136,8 @@ def build() -> dict:
     for kind, sp in BENCH.items():
         try:
             bench[kind] = _seg(kind, sp)
+            if kind == "backtest":
+                _attach_monthly(bench[kind], BENCH_SERIES, mdoc)
         except Exception as e:  # noqa: BLE001
             print(f"[warn] 0050/{kind} 讀取失敗：{type(e).__name__}: {e}")
     return {"meta": {"generated_at": datetime.now(TZ).isoformat(timespec="seconds"), "source": ".github/scripts/build_strategy_history.py",
@@ -113,8 +158,9 @@ def main() -> int:
         return 0
     OUT.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8")
-    for lid, segs in doc["lines"].items():
-        print(lid, {k: (round(v["cagr"] * 100, 2) if v.get("cagr") is not None else None, len(v.get("monthly") or {})) for k, v in segs.items()})
+    for lid, segs in list(doc["lines"].items()) + [("0050", doc["bench_0050"])]:
+        print(lid, {k: (round(v["cagr"] * 100, 2) if v.get("cagr") is not None else None, len(v.get("monthly") or {}),
+                        (v.get("repro") or {}).get("status")) for k, v in segs.items()})
     return 0
 
 

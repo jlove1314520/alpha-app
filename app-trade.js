@@ -25,6 +25,20 @@
     const parts=Object.keys(c).map(k=>_autoStatusTxt(k)+' '+c[k]);
     return String(lr.date||'').slice(5).replace('-','/')+' '+(lr.batch||'')+'：'+parts.join('、')+(lr.reason_codes&&lr.reason_codes.length?'（'+_autoCodesTxt(lr.reason_codes)+'）':'');
   }
+  // 先.七十八-2：「明天會買」——晚間唯讀預檢算出的下一期計畫（純計算，非委託）。可用餘額只顯示夠／不足。
+  function renderPlanPreview(pv){
+    const el=document.getElementById('bot-plan-preview');if(!el)return;
+    if(!pv||!(pv.orders||pv.error)){el.hidden=true;el.innerHTML='';return}
+    const esc=_autoEsc,n=v=>Number(v).toLocaleString('zh-TW',{maximumFractionDigits:2});
+    if(pv.error){el.hidden=false;el.innerHTML=`<div class="note">明天會買：算不出來（${esc(pv.error)}）</div>`;return}
+    const rows=(pv.orders||[]).map(o=>`<div class="plan-row" style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--hairline)">`+
+      `<span>${esc(o.symbol)} ${o.lot==='IntradayOdd'?'零股':'整股'} ${n(o.qty)} 股</span><span>限價 ${n(o.limit_price)}　${n(o.amount)} 元 ${o.cap_ok?'✓':'⚠ 超過單筆上限'}</span></div>`).join('');
+    const cash=pv.available_ok===true?'夠':pv.available_ok===false?'不足':'未知';
+    el.hidden=false;
+    el.innerHTML=`<div style="font-weight:600;font-size:13px;margin-bottom:4px">明天會買（${esc(pv.label||'')}）</div>${rows}`+
+      `<div class="note" data-ui-keep style="margin-top:4px">合計含緩衝 ${n(pv.need_with_buffer)} 元；可用餘額：${cash}</div>`+
+      `<div class="note" data-ui-keep style="margin-top:2px;color:var(--ink-3)">預覽，非委託；明早依平盤價重算</div>`;
+  }
   async function loadTradeBots(){
     const note=document.getElementById('bot-bb90-note'),rec=document.getElementById('bot-recent-orders');
     if(!note)return;
@@ -38,6 +52,7 @@
       setTxt('bot-last',autoLastResultText(d.last_result));
       const st=d.status||{};
       note.textContent=(d.stopped?'⛔ 緊急停止中（一律拒單）　':'')+(st.last_error?'最近錯誤：'+st.last_error:'目前無錯誤')+(st.updated_at?'　狀態更新：'+st.updated_at:'');
+      _safeSync('renderPlanPreview',()=>renderPlanPreview(st.t1_plan_preview));
     }catch(e){console.warn('[loadTradeBots]',e);recordGlobalError('loadTradeBots',e);note.textContent='讀取自動交易狀態失敗（本機伺服器離線或舊版）'}
     if(!rec)return;
     try{

@@ -1600,6 +1600,49 @@ def _shioaji_procs() -> list[str]:
     return out
 
 
+def plan_preview(paths: Paths, cfg: dict, prev_close: dict, avail_twd: float | None, positions_raw, now: datetime) -> dict:
+    """先.七十八-2：下一期計畫預覽（App「明天會買」）。只做計算，不連券商、不建單、不寫帳本。
+    與 run_month_end 同一套：期別＝LIVE state 的 next_tranche（>tranche_total 改月底 M）、預算＝總資金÷期數（M＝每月投入）、
+    plan_orders(dev_pct=min(0.5, max_price_dev_pct/2))、零股可下（真錢族）、單筆上限檢查同 gate_order、整批×1.003 與可用比較。
+    差異（如實標示）：限價基準用 price_history 昨收；--run 用明早永豐平盤參考價，除息日或昨收有誤時會不同。
+    可用餘額只輸出「足夠／不足」，不輸出金額。"""
+    tt = max(1, int(cfg.get("tranche_total") or 4))
+    lst = _read_json(paths.scoped("LIVE").state) or {}
+    n = int(lst.get("next_tranche") or cfg.get("tranche") or 1)
+    label = f"T{n}" if n <= tt else "M"
+    budget = (_num(cfg.get("total_capital_twd")) / tt) if label != "M" else _num(cfg.get("monthly_contribution_twd"))
+    hold = {}
+    if positions_raw is not None:
+        for r in positions_raw:  # list_positions 預設單位為「張」（同 ShioajiBroker.positions 的退路換算）
+            code = getattr(r, "code", None)
+            if code:
+                hold[code] = hold.get(code, 0) + int(_num(getattr(r, "quantity", 0))) * LOT
+    else:
+        hold = {k: int(v) for k, v in (lst.get("positions") or {}).items()}
+    missing = [c for c in WEIGHTS if c not in prev_close]
+    out = {"generated_at": now.isoformat(timespec="seconds"), "label": label, "batch_hint": f"LIVE-{now.astimezone(TW).strftime('%Y%m')}-{label}",
+           "basis": "限價基準＝price_history 昨收（" + "／".join(sorted({prev_close[c][1] for c in prev_close if c in WEIGHTS})) + "）",
+           "note": "預覽，非委託；實際下單以明早永豐平盤參考價重算，送出前仍有 30 分鐘可取消",
+           "positions_source": "永豐持股（唯讀查詢）" if positions_raw is not None else "對帳基準（state）"}
+    if missing or budget <= 0:
+        out["error"] = f"缺昨收：{missing}" if missing else "未設定資金"
+        return out
+    dev = min(0.5, cfg.get("max_price_dev_pct", 1.0) / 2)
+    orders = plan_orders({c: prev_close[c][0] for c in WEIGHTS}, hold, budget, True, dev_pct=dev)
+    cap = _num(cfg.get("per_order_cap_twd"))
+    rows = []
+    for o in orders:
+        amt = o["qty"] * o["limit_price"]
+        rows.append({"symbol": o["symbol"], "lot": o["lot"], "qty": o["qty"], "limit_price": o["limit_price"],
+                     "amount": round(amt, 2), "cap_ok": bool(cap > 0 and amt <= cap)})
+    total = sum(r["amount"] for r in rows)
+    need = total * CASH_BUFFER
+    out.update(dev_pct=dev, orders=rows, total=round(total, 2), need_with_buffer=round(need, 2),
+               all_cap_ok=all(r["cap_ok"] for r in rows) if rows else False,
+               available_ok=(None if avail_twd is None else bool(avail_twd >= need)))
+    return out
+
+
 def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None, env=None,
               exdiv_doc: dict | None = None, sched_python: str | None = None, proc_lister=None) -> dict:
     """逐項 PASS／FAIL／WARN＋缺什麼。detail 只寫有無／成功與否／日期，不含任何金額、持股數、帳號、金鑰值。
@@ -1694,6 +1737,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
                 print(f"[warn] 自檢登出失敗：{type(e).__name__}", flush=True)
     # 先.五十四-6 更正 3：第 19 項「可用餘額足夠下一批」——可用＝acc_balance − 未交割應付，所需＝下一批預算×1.003。
     # 只顯示結果文字，不顯示金額；不足即 FAIL，不得改用其他數字放行。
+    avail_twd = None  # 先.七十八-2：只給明日計畫預覽比較用，不寫進任何輸出
     try:
         bal = q_vals.get("q_balance")
         if bal is None or q_vals.get("q_settlements") is None:
@@ -1705,6 +1749,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
             tt = max(1, int(cfg.get("tranche_total") or 4))
             n = int(lst.get("next_tranche") or cfg.get("tranche") or 1)
             budget = (_num(cfg.get("total_capital_twd")) / tt) if n <= tt else _num(cfg.get("monthly_contribution_twd"))
+            avail_twd = acc - pay
             ok = budget > 0 and (acc - pay) >= budget * CASH_BUFFER
             det = "足夠" if ok else "尚未入金或餘額不足"
             if not ok and acc == 0 and not getattr(bal, "errmsg", ""):
@@ -1801,6 +1846,16 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
             probs.append("per_order_cap_twd 小於單批最大一筆委託（該筆會被拒單）")
     add("config", "config.local.json 資金／上限／期數合理", "PASS" if not probs else "FAIL",
         "合理（數字不顯示）" if not probs else "；".join(probs))
+    # 先.七十八-4（2026-10-11）：每月投入大於總資金 → 只警告（WARN 不算 FAIL、不擋上線、不改任何設定值）
+    mon = _num(cfg.get("monthly_contribution_twd"))
+    add("monthly_ok", "每月投入不大於總資金", "WARN" if (tot > 0 and mon > tot) else "PASS",
+        "每月投入大於總資金，第 5 個月起會被擋單，請確認" if (tot > 0 and mon > tot) else "合理（數字不顯示）")
+    # 先.七十八-2：明日（下一期）計畫預覽——純計算、不連券商下單；用 load_prev_closes＋plan_orders，dev_pct 與 --run 相同
+    t1_preview = None
+    try:
+        t1_preview = plan_preview(paths, cfg, pc, avail_twd, q_vals.get("q_positions"), now)
+    except Exception as e:
+        t1_preview = {"error": f"預覽計算失敗（{type(e).__name__}）", "generated_at": now.isoformat(timespec="seconds")}
     # 先.四十四：模擬演練結果與演練設定清理（讀 SIMULATION 族帳本／狀態，不連券商）
     try:
         sp = paths.scoped("SIMULATION")
@@ -1835,7 +1890,7 @@ def preflight(paths: Paths, now: datetime, broker_factory=None, task_states=None
     ok_live = any(i["id"] == "live_login" and i["result"] == "PASS" for i in items)
     perm = {"effective": ok_live, "checked_at": out["ran_at"],
             "since": (prev.get("since") if prev.get("effective") else out["ran_at"]) if ok_live else None}
-    write_status(paths, preflight=out, live_permission=perm)
+    write_status(paths, preflight=out, live_permission=perm, t1_plan_preview=t1_preview)
     if ok_live and not prev.get("effective"):
         try:
             if not push_notify(paths, "正式環境權限已生效", "永豐正式環境唯讀登入成功（自檢只查詢、未啟用 CA，未送任何委託）。", "info"):

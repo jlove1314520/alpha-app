@@ -1154,9 +1154,10 @@
     return SC_HIST;
   }
   const _scMs=d=>Date.parse(d+'T00:00:00Z');
-  function _scOosPoints(monthly){
+  function _scOosPoints(monthly,base,startD){
     const ks=Object.keys(monthly||{}).sort();if(!ks.length)return [];
-    const pts=[{d:'2024-12-31',v:100}];let v=100;
+    base=base||100;
+    const pts=[{d:startD||'2024-12-31',v:base}];let v=base;
     for(const k of ks){v*=1+Number(monthly[k]);const [y,m]=k.split('-').map(Number);const last=new Date(Date.UTC(y,m,0)).toISOString().slice(0,10);pts.push({d:last,v})}
     return pts;
   }
@@ -1165,7 +1166,13 @@
     const H=SC_HIST&&SC_HIST.lines&&SC_HIST.lines[l.id];if(!H)return null;
     const B=(SC_HIST.bench_0050)||{};
     const segs=[];
-    const oos=H.oos&&_scOosPoints(H.oos.monthly),boos=B.oos&&_scOosPoints(B.oos.monthly);
+    // 先.七十七-5：回測段月序列（年化與原結果檔一致才有 monthly）→ 虛線；樣本外、紙上依序接在前一段終點後面
+    const bt0=H.backtest&&H.backtest.monthly&&_scOosPoints(H.backtest.monthly,100,'2003-06-30');
+    const bb0=B.backtest&&B.backtest.monthly&&_scOosPoints(B.backtest.monthly,100,'2003-06-30');
+    if(bt0&&bt0.length)segs.push({kind:'backtest',color:scColor(l.id),pts:bt0});
+    if(bt0&&bt0.length&&bb0&&bb0.length)segs.push({kind:'backtest',color:SC_BENCH_COLOR,pts:bb0,bench:true});
+    const oos=H.oos&&_scOosPoints(H.oos.monthly,bt0&&bt0.length?bt0[bt0.length-1].v:100),
+          boos=B.oos&&_scOosPoints(B.oos.monthly,bt0&&bt0.length&&bb0&&bb0.length?bb0[bb0.length-1].v:100);
     if(oos&&oos.length)segs.push({kind:'oos',color:scColor(l.id),pts:oos});
     if(oos&&oos.length&&boos&&boos.length)segs.push({kind:'oos',color:SC_BENCH_COLOR,pts:boos,bench:true});
     if(scHasData(l)){
@@ -1175,7 +1182,7 @@
     }
     const bt=H.backtest&&H.backtest.cagr!=null?H.backtest:null;
     const all=segs.flatMap(s=>s.pts.map(p=>p.d));
-    return {segs,bt,lastDate:all.length?all.sort().slice(-1)[0]:'2026-10-08'};
+    return {segs,bt,btCurve:!!(bt0&&bt0.length),lastDate:all.length?all.sort().slice(-1)[0]:'2026-10-08'};
   }
   function scHistSvg(model){
     const W=320,H=160,pad=8;
@@ -1184,14 +1191,17 @@
     const vis=model.segs.map(s=>({...s,pts:s.pts.filter(p=>_scMs(p.d)>=from)})).filter(s=>s.pts.length);
     const vals=vis.flatMap(s=>s.pts.map(p=>p.v));
     if(!vals.length&&!(model.bt&&from<_scMs('2025-01-01')))return '';
-    const mn=Math.min(100,...vals),mx=Math.max(100,...vals),rg=(mx-mn)||1;
-    const X=ms=>pad+(ms-from)/((last-from)||1)*(W-2*pad),Y=v=>pad+14+(1-(v-mn)/rg)*(H-2*pad-14);
-    const dash={oos:'1.5,3',paper:''};
+    // 「全部」橫跨 20 年、數值差十倍以上，改用對數刻度，近年的線才看得出起伏
+    const lg=SC_RANGE==='all',T=v=>lg?Math.log(Math.max(v,1e-6)):v;
+    const firstVis=vis.length?Math.min(...vis.map(s=>T(s.pts[0].v))):T(100);
+    const tv=vals.map(T),mn=Math.min(firstVis,...tv),mx=Math.max(firstVis,...tv),rg=(mx-mn)||1;
+    const X=ms=>pad+(ms-from)/((last-from)||1)*(W-2*pad),Y=v=>pad+14+(1-(T(v)-mn)/rg)*(H-2*pad-14);
+    const dash={backtest:'5,4',oos:'1.5,3',paper:''};
     const lines=vis.map(s=>s.pts.length>1
       ?`<polyline data-seg="${s.kind}${s.bench?'-0050':''}" points="${s.pts.map(p=>X(_scMs(p.d)).toFixed(1)+','+Y(p.v).toFixed(1)).join(' ')}" fill="none" stroke="${s.color}" stroke-width="${s.bench?1.8:2.2}" stroke-dasharray="${dash[s.kind]}" opacity="${s.bench?.85:1}"/>`
       :`<circle data-seg="${s.kind}${s.bench?'-0050':''}" cx="${X(_scMs(s.pts[0].d)).toFixed(1)}" cy="${Y(s.pts[0].v).toFixed(1)}" r="3" fill="${s.color}"/>`).join('');
     let box='';
-    if(model.bt&&from<_scMs('2025-01-01')){
+    if(model.bt&&!model.btCurve&&from<_scMs('2025-01-01')){
       const x0=X(Math.max(from,_scMs('2003-07-01'))),x1=X(_scMs('2024-12-31'));
       // 框太窄（例如 3 年範圍只露出 2023-10～2024-12）時框內只寫「回測」，數字看上方指標列
       if(x1-x0>12)box=`<rect data-seg="backtest" x="${x0.toFixed(1)}" y="${pad+14}" width="${(x1-x0).toFixed(1)}" height="${H-2*pad-14}" fill="none" stroke="var(--ink-3)" stroke-dasharray="5,4" rx="6"/>`+
@@ -1200,7 +1210,7 @@
     const yr=new Date(from).getUTCFullYear(),ticks=[];
     for(let y=yr+1;_scMs(y+'-01-01')<=last;y+=(SC_RANGE==='all'?4:1))ticks.push(`<text x="${X(_scMs(y+'-01-01')).toFixed(1)}" y="${pad+6}" text-anchor="middle" fill="var(--ink-4)" font-size="8">${y}</text>`);
     return `<svg class="sc-hist" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-      <line x1="${pad}" y1="${Y(100).toFixed(1)}" x2="${W-pad}" y2="${Y(100).toFixed(1)}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>${ticks.join('')}${box}${lines}</svg>`;
+      ${lg?'':`<line x1="${pad}" y1="${Y(100).toFixed(1)}" x2="${W-pad}" y2="${Y(100).toFixed(1)}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>`}${ticks.join('')}${box}${lines}</svg>`;
   }
   // 先.七十六-3：指標列分段——回測年化與最大跌幅／樣本外累計差距／紙上累計差距（<60 交易日：尚不足以判斷）
   function scHistMetricsHtml(l){
@@ -1213,6 +1223,13 @@
     cells.push(`<div class="s" data-seg="paper"><span>紙上</span><b>${scHasData(l)&&m.days>=60?_scPp(m.cum_gap_pp):'尚不足以判斷'}</b><span style="font-size:10px">${scHasData(l)?(m.days||0)+' 個交易日':'還沒開始'}</span></div>`);
     return `<div class="bot-stats sc-hist-metrics" style="margin:6px 0">${cells.join('')}</div>`;
   }
+  // 先.七十七-5：回測段可重現性。年化對得上才畫曲線；最大跌幅月資料必然比日資料淺，數字一律以原結果檔為準
+  function scReproNoteHtml(l){
+    const bt=SC_HIST&&SC_HIST.lines&&SC_HIST.lines[l.id]&&SC_HIST.lines[l.id].backtest,r=bt&&bt.repro;
+    if(!r||r.status==='OK')return '';
+    const head=r.status==='NO_SERIES'?'回測段沒有逐月資料，只標數字':r.draw_curve?'回測曲線用月資料畫，最大跌幅以上方數字為準':'回測月資料與原結果對不上，不畫曲線';
+    return `<div class="note sc-repro" data-repro="${_uiEsc(r.status)}" style="margin-top:4px;font-size:10.5px;color:var(--ink-3)">${head}${r.why?`<details data-ui-detail style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--ink-4)"> ⓘ</summary><div style="font-size:10px">${_uiEsc(uiPlain(r.why))}</div></details>`:''}</div>`;
+  }
   function scHistBlockHtml(l){
     const model=scHistModel(l);if(!model)return '';
     const svg=scHistSvg(model);
@@ -1221,7 +1238,7 @@
     const L=(SC_HIST.meta&&SC_HIST.meta.labels)||{};
     return `<div class="sc-hist-block" style="margin-top:10px">
       <div style="display:flex;gap:6px;justify-content:flex-end;margin-bottom:4px">${SC_RANGES.map(([k,lb])=>chip(k===SC_RANGE,lb,k)).join('')}</div>
-      ${scHistMetricsHtml(l)}${svg}
+      ${scHistMetricsHtml(l)}${svg}${scReproNoteHtml(l)}
       <div class="sc-seg-labels" style="display:flex;flex-wrap:wrap;font-size:10.5px;color:var(--ink-3);margin-top:4px">${lab('5,4',L.backtest||'回測＝用來挑策略的資料','backtest')}${lab('1.5,3',L.oos||'樣本外＝只考過一次','oos')}${lab('',L.paper||'紙上＝今天起才算數','paper')}</div>
     </div>`;
   }
@@ -3542,7 +3559,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1748';
+  const APP_VERSION='2026-10-11.1818';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
