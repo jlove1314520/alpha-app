@@ -166,7 +166,30 @@
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
     _safeAsync('loadSignalStatus',()=>loadSignalStatus(false));  // 2026-09-15 開發佇列源頭一.4
-    _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4    _safeAsync('loadTrials',loadTrials);  // 常備.開發-33 研究透明度，獨立包起來
+    _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
+    _safeAsync('loadTrials',loadTrials);  // 常備.開發-33 研究透明度，獨立包起來（常備.開發-29 順手修：原本被併進上一行註解裡，從未執行）
+    _safeAsync('loadErrSummary',()=>loadErrSummary(false));  // 常備.開發-29 App 錯誤回報，同樣獨立
+  }
+  // 常備.開發-29：近 7 日 App 錯誤數（本機 /errors/summary，token 必檢；只有筆數與函式名稱）
+  async function loadErrSummary(flush){
+    setTxt('errsum-pending',_errQRead().length);
+    if(!LIVE.configured||!LIVE.url){setTxt('errsum-total','需連線本機伺服器才看得到（錯誤先存在這支手機，連上後自動送出）');return}
+    try{
+      if(flush)await flushErrorReports();
+      const r=await liveFetch('/errors/summary',6000);
+      if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器是舊版，需重啟）':''));
+      const d=await r.json();
+      const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      setTxt('errsum-total','近 7 日共 '+(d.total_7d||0)+' 筆'+((d.total_7d||0)===0?'，沒有錯誤':''));
+      const days=Array.isArray(d.days)?d.days:[];
+      const box=document.getElementById('errsum-days');
+      if(box)box.innerHTML=days.slice().reverse().map(x=>{
+        const top=Object.entries(x.labels||{}).slice(0,3).map(([k,v])=>esc(k)+'×'+v).join('、');
+        return `<div class="f"><span>${esc(String(x.date).slice(5))}</span><b>${x.count} 筆${top?'<span style="font-weight:400;color:var(--ink-3)">　'+top+'</span>':''}</b></div>`;
+      }).join('');
+      setTxt('errsum-tm',String(d.generated_at||'').slice(11,16)||'--:--');
+      setTxt('errsum-pending',_errQRead().length);
+    }catch(e){console.warn('[loadErrSummary]',e);recordGlobalError('loadErrSummary',e);setTxt('errsum-total','讀取失敗：'+(e&&e.message||e))}
   }
   // 常備.開發-33：試驗帳本檢視（讀 data/trials_index.json，唯讀）
   let _trialsData=null;

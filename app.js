@@ -119,8 +119,40 @@
     const msg=(err&&err.message)?err.message:String(err);
     GLOBAL_ERRORS.push({label,msg,time:fmtTzHHMM(new Date(),'Asia/Taipei')});
     if(GLOBAL_ERRORS.length>20)GLOBAL_ERRORS.shift();
+    try{_errReportEnqueue(label,msg)}catch(e2){console.warn('[recordGlobalError] 錯誤回報排隊失敗',e2)}
     renderErrorLog();
   }
+  // 常備.開發-29（2026-10-11）：App 錯誤回報。每筆錯誤先去識別化、排進 localStorage（上限 100 筆，離線也不遺失），
+  // 每 60 秒／切到背景時 POST 到本機伺服器 /errors（token 必檢，伺服器端會再去識別化一次並做每日彙總）。
+  // 只送 label／msg／ts／ver，不送網址、UA、自選股。送出失敗刻意不呼叫 recordGlobalError——
+  // 否則「回報失敗」本身又會排進回報佇列，離線時無限自我餵食；只 console.warn，佇列留著下次再送。
+  const ERR_Q_KEY='alpha_err_report_q',ERR_Q_MAX=100;
+  function _errScrub(t,n){
+    return String(t==null?'':t).replace(/https?:\/\/\S+/gi,'<url>').replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g,'<email>')
+      .replace(/\b[A-Za-z0-9_\-]{24,}\b/g,'<token>').replace(/\d{7,}/g,'<num>').replace(/\s+/g,' ').trim().slice(0,n);
+  }
+  function _errQRead(){try{const q=JSON.parse(localStorage.getItem(ERR_Q_KEY)||'[]');return Array.isArray(q)?q:[]}catch(e){console.warn('[errQRead]',e);return[]}}
+  function _errQWrite(q){try{localStorage.setItem(ERR_Q_KEY,JSON.stringify(q.slice(-ERR_Q_MAX)))}catch(e){console.warn('[errQWrite]',e)}}
+  function _errReportEnqueue(label,msg){
+    const q=_errQRead();q.push({label:_errScrub(label,80),msg:_errScrub(msg,200),ts:new Date().toISOString()});_errQWrite(q);
+  }
+  let _errFlushing=false;
+  async function flushErrorReports(){
+    if(_errFlushing||typeof LIVE==='undefined'||!LIVE.configured||!LIVE.url||!LIVE.token)return;
+    const q=_errQRead();if(!q.length)return;
+    _errFlushing=true;
+    const batch=q.slice(0,50);
+    try{
+      const ver=((document.getElementById('about-app-ver')||{}).textContent||'').trim();
+      const r=await fetch(LIVE.url+'/errors',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),
+        body:JSON.stringify({errors:batch,ver}),credentials:'include',cache:'no-store'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      _errQWrite(_errQRead().slice(batch.length));  // 只移除已送出的那批，送出期間新進的保留
+    }catch(e){console.warn('[flushErrorReports] 送出失敗，下次再送（刻意不記 recordGlobalError，見上方註解）',e)}
+    finally{_errFlushing=false}
+  }
+  setInterval(()=>{flushErrorReports().catch(e=>console.warn('[flushErrorReports]',e))},60*1000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushErrorReports().catch(e=>console.warn('[flushErrorReports]',e))});
   // 2026-09-06（實測.五）一行摘要：幾筆、幾種、最近一筆是什麼。
   // 同一個錯誤常常連續發生好幾十次（例如某個渲染每次進頁面都拋），只講「有錯誤」
   // 沒有資訊量，講「12 筆、2 種、最近：renderReport 讀取 null 的 toFixed」才有。

@@ -1076,6 +1076,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" id="notif-note" style="margin-top:8px">連上電腦才能改，所有裝置共用</div>
     </div>
 
+    <!-- 常備.開發-29（2026-10-11）：App 錯誤回報。recordGlobalError 排隊送本機 /errors（token 必檢、去識別化），
+         這裡讀 /errors/summary 顯示近 7 日每日錯誤數。只有筆數與函式名稱，不顯示錯誤原文。 -->
+    <div class="card" id="errsum-card">
+      <h3>錯誤回報 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'errsum-tm',async()=>{await loadErrSummary(true)})">重新整理</span></h3>
+      <div class="note" id="errsum-total">近 7 日 App 錯誤數，連上電腦才看得到</div>
+      <div id="errsum-days" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">更新：<b id="errsum-tm">--:--</b>。App 發生的程式錯誤會自動去識別化後送到你的電腦累積（每分鐘一次，離線時先存在手機上），每天彙總一次；這支手機尚未送出：<b id="errsum-pending">0</b> 筆。</div>
+    </div>
+
 
 
     <!-- 常備.開發-18（2026-10-11）：自選股到價與事件推播。規則存本機伺服器（/alerts/rules），

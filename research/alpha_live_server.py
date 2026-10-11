@@ -1226,6 +1226,38 @@ async def post_settings(payload: dict, x_alpha_local_token: str | None = Header(
     return {"ok": True, "updated_at": doc["updated_at"], "settings": settings}
 
 
+# 常備.開發-29（2026-10-11）：App 錯誤回報。App 的 recordGlobalError 排隊後 POST 到這裡（token 必檢），
+# 伺服器端再去識別化一次（網址/email/長數字/長 token/使用者路徑），存 research/data/app_errors.jsonl（不進 repo）；
+# 每日第一次收到或讀取時重建 data/app_errors_summary.json（.gitignore 排除）。邏輯在 research/app_errors.py。
+@app.post("/errors")
+async def post_errors(payload: dict, x_alpha_local_token: str | None = Header(default=None)):
+    _check_token(x_alpha_local_token)
+    import app_errors as _ae
+    try:
+        res = await asyncio.to_thread(_ae.ingest, payload)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    try:
+        await asyncio.to_thread(_ae.summary_if_stale)
+    except Exception as e:  # 彙總失敗不影響收件（守門員失敗只降級成警告）
+        print(f"[warn] App 錯誤每日彙總失敗：{type(e).__name__}", flush=True)
+    return {"ok": True, **res}
+
+
+@app.get("/errors/summary")
+async def get_errors_summary(x_alpha_local_token: str | None = Header(default=None)):
+    """近 7 日每日錯誤數＋最常見標籤（即時重算，不修剪原始紀錄）。只回筆數與函式標籤，不回錯誤原文。"""
+    _check_token(x_alpha_local_token)
+    import app_errors as _ae
+    try:
+        await asyncio.to_thread(_ae.summary_if_stale)
+        doc = await asyncio.to_thread(_ae.build_summary, _ae.LOG_PATH, None, False)
+    except Exception as e:
+        print(f"[warn] App 錯誤彙總讀取失敗：{type(e).__name__}", flush=True)
+        raise HTTPException(status_code=500, detail=f"彙總失敗：{type(e).__name__}") from e
+    return {"ok": True, **doc}
+
+
 AUTO_TRADING_DIR = Path(os.environ.get("ALPHA_AUTO_TRADING_DIR")
                         or (Path(__file__).parent / "data" / "auto_trading"))
 
