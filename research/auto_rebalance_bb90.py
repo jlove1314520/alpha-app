@@ -1016,7 +1016,9 @@ def run_month_end(paths: Paths, broker, now: datetime, prev_close: dict | None =
             report_error(paths, f"送單失敗 {o['symbol']}：{e}")
             res["state"] = "ERROR"
             continue
-        log("SUBMITTED", o, order_id=r["order_id"], amount=o["amount"])
+        # 常備.開發-23：記下限價基準（平盤參考價），供盤後復盤算「均價 vs 參考價」滑價；只是紀錄欄位，不影響送單
+        log("SUBMITTED", o, order_id=r["order_id"], amount=o["amount"],
+            ref_price=(gate_px.get(o["symbol"]) or (None,))[0] if isinstance(gate_px, dict) else None)
         placed.append((o, r["order_id"]))
         res["submitted"].append(o["key"])
         time.sleep(1.0 if mode == "SIMULATION" and poll_sec else 0)
@@ -1850,6 +1852,17 @@ def _mask_secrets(text: str, env: dict | None) -> str:
     return re.sub(r"\b[A-Z][12]\d{8}\b", "<已遮蔽>", text)  # 台灣身分證字號樣式
 
 
+def _settle_review(paths: Paths, task: str, mode: str, now: datetime) -> None:
+    """常備.開發-23：真錢盤後結算收尾產出 LIVE/review_YYYYMMDD.json（＋首次推播百分比摘要）。只讀帳本，失敗只記警告。"""
+    if task != "settle" or mode_family(mode) != "LIVE":
+        return
+    try:
+        import auto_trading_review
+        auto_trading_review.write_review(paths.base, now)
+    except Exception as e:
+        print(f"[warn] 復盤檔產生失敗：{type(e).__name__}（只記警告，不影響結算）", flush=True)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="store_true", help="排程入口：交易日且符合觸發條件才執行月底流程")
@@ -1946,6 +1959,7 @@ def main() -> int:
                     finally:
                         _close_broker(vb)
                 sched_heartbeat(paths, task, "NOTHING_TO_SETTLE")
+                _settle_review(paths, task, mode, now)
                 print("沒有待結算的委託")
                 return 0
             broker = ShioajiBroker(simulation=(mode == "SIMULATION"))
@@ -1954,6 +1968,7 @@ def main() -> int:
             finally:
                 _close_broker(broker)
         sched_heartbeat(paths, task, res["state"], reason=(reason if a.run else None))
+        _settle_review(paths, task, mode, now)
         print(json.dumps(res, ensure_ascii=False))
         return 0 if res["state"] in ("OK", "WAITING_VETO") else 1
     except Exception as e:

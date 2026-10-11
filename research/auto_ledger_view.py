@@ -76,7 +76,8 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
     fills = [r for r in latest.values() if AB._filled(r) > 0]
     out = {"ok": True, "rows": rows[:200], "n_rows": len(rows), "n_fills": len(fills),
            "first_batch_done": bool(fills),
-           "note": "損益只算自動交易買進的股數；以 price_history 收盤估值；未計手續費與稅。"}
+           "note": "損益只算自動交易買進的股數；以 price_history 收盤估值；未計手續費與稅。",
+           "review": latest_review_view(base)}
     if not fills:
         out["pnl"] = None
         out["perf"] = None
@@ -112,6 +113,23 @@ def ledger_view(base: Path | None = None, price_doc: dict | None = None, today: 
     except Exception as e:
         out["perf"] = {"error": f"績效對照計算失敗（{type(e).__name__}）"}
     return out
+
+
+def latest_review_view(base: Path | None = None) -> dict | None:
+    """常備.開發-23：最新一份盤後復盤（LIVE/review_YYYYMMDD.json，由 auto_trading_review.write_review 產生）。
+    只讀；去掉冪等鍵（含批次以外的內部編號），讀取失敗回 {"error": ...}，不拖累帳本其他欄位。"""
+    try:
+        import auto_trading_review as RV
+        rv = RV.latest_review(base)
+        if not rv:
+            return None
+        rv = dict(rv)
+        rv["orders"] = [{k: v for k, v in o.items() if k != "key"} for o in rv.get("orders") or []]
+        rv["rejects"] = [{k: v for k, v in o.items() if k != "key"} for o in rv.get("rejects") or []]
+        return rv
+    except Exception as e:
+        print(f"[warn] 讀取復盤檔失敗：{type(e).__name__}", flush=True)
+        return {"error": f"讀取復盤檔失敗（{type(e).__name__}）"}
 
 
 def _fee(amount: float) -> float:

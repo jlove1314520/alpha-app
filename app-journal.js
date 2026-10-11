@@ -31,7 +31,7 @@
   async function loadJournalLedger(){
     const pe=document.getElementById('journal-pnl'),te=document.getElementById('journal-trades');
     if(!pe||!te)return;
-    if(!LIVE.configured||!LIVE.url){pe.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢帳本只在本機。';te.innerHTML='<div class="note" style="padding:14px 2px">尚未連線本機伺服器</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');return}
+    if(!LIVE.configured||!LIVE.url){pe.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢帳本只在本機。';te.innerHTML='<div class="note" style="padding:14px 2px">尚未連線本機伺服器</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');setTxt('journal-review','尚未連線本機伺服器，盤後復盤只在本機產生。');return}
     try{
       const d=await loadAutoLedger();
       JOURNAL_LEDGER_CACHE=d;_safeAsync('loadWeeklyBrief',loadWeeklyBrief);
@@ -44,12 +44,14 @@
       else if(!p||p.error)pe.textContent='無法估值：'+(p&&p.error||'伺服器未回傳損益');
       else pe.innerHTML='本週：<b class="'+(p.week>=0?'pos':'neg')+'">'+sg(p.week)+' 元</b>　累計：<b class="'+(p.total>=0?'pos':'neg')+'">'+sg(p.total)+' 元'+(p.total_pct!=null?'（'+(p.total_pct>0?'+':'')+p.total_pct+'%）':'')+'</b><br><span class="note">估值基準日 '+_autoEsc(p.as_of)+'；本週自 '+_autoEsc(p.week_start)+' 起</span>';
       _safeSync('renderJournalPerf',()=>renderJournalPerf(d));
+      _safeSync('renderJournalReview',()=>renderJournalReview(d));
       renderJournalChips();
     }catch(e){
       console.warn('[loadJournalLedger]',e);recordGlobalError('loadJournalLedger',e);
       pe.textContent='讀取真錢帳本失敗（'+(e&&e.message||e)+'）';
       te.innerHTML='<div class="note" style="padding:14px 2px">讀取失敗，請確認本機伺服器在線</div>';
       setTxt('journal-perf','讀取真錢帳本失敗，無法畫績效對照');
+      setTxt('journal-review','讀取真錢帳本失敗，無法顯示盤後復盤');
     }
   }
   // 常備.開發-12：真錢績效對照（累計淨值 vs 同期 0050 全持有）。資料由伺服器 auto_ledger_view.perf_series() 算好，這裡只畫。
@@ -74,4 +76,26 @@
       '<span><span style="color:var(--ink-3)">━</span> 同期 0050 全持有 <b class="'+cls(pf.bench_pct)+'">'+pc(pf.bench_pct)+'</b></span></div>'+
       '<div style="margin-top:4px;font-size:12px">差距：<b class="'+cls(diff)+'">'+(diff>0?'+':'')+diff+' 個百分點</b>（'+esc(pf.start)+' 起至 '+esc(pf.as_of)+'，'+pf.points.length+' 個交易日）</div>'+
       '<div style="margin-top:6px;font-size:10px;color:var(--ink-4)"><b>含手續費、未含稅</b>。'+esc(pf.note||'')+'；累計淨值＝持股市值÷累計投入。唯讀；非投資建議</div>';
+  }
+  // 常備.開發-23：盤後復盤（/auto/ledger 的 review＝伺服器讀 LIVE/review_YYYYMMDD.json，13:40 結算後自動產出）。這裡只畫。
+  const JOURNAL_ODD_LABEL={MATCH:'相符',MISMATCH:'不符',MISSING:'驗證檔未產生',NO_ODD:'當日無零股委託'};
+  function renderJournalReview(d){
+    const el=document.getElementById('journal-review');if(!el)return;
+    const esc=_autoEsc,rv=d&&d.review;
+    if(rv===undefined){el.textContent='伺服器未回傳復盤欄位（可能是舊版，需重啟）';return}
+    if(!rv){el.innerHTML='<b>尚無復盤</b>（首批送單當天 13:40 結算後自動產生）';return}
+    if(rv.error){el.textContent='無法顯示盤後復盤：'+rv.error;return}
+    const s=rv.summary||{},pc=v=>v==null?'—':(v>0?'+':'')+v+'%';
+    const slipCls=v=>v==null?'':(v>0?'neg':'pos');
+    const odd=rv.odd_lot||{},dv=rv.deviation,nx=rv.next_run;
+    const rows=(rv.orders||[]).map(o=>'<tr><td>'+esc(o.symbol)+' '+esc(o.lot)+'</td><td style="text-align:right">'+(o.filled_qty||0)+'/'+(o.qty||0)+'</td><td style="text-align:right">'+(o.avg_price!=null?esc(o.avg_price):'—')+'</td><td style="text-align:right">'+(o.ref_price!=null?esc(o.ref_price):'—')+(o.ref_source==='prev_close'?'*':'')+'</td><td style="text-align:right" class="'+slipCls(o.slippage_pct)+'">'+pc(o.slippage_pct)+'</td><td>'+esc(_autoStatusTxt(o.status))+'</td></tr>').join('');
+    const rej=(rv.rejects||[]).map(r=>(r.symbol?esc(r.symbol)+'：':'')+esc(_autoCodesTxt(r.codes))).join('；');
+    el.innerHTML='<div style="font-size:12px">日期 <b>'+esc(rv.date)+'</b>　批次 '+esc((rv.batches||[]).join('、')||'—')+'</div>'+
+      '<div style="margin-top:4px">送單 <b>'+(s.n_orders||0)+'</b> 筆　全數成交 <b>'+(s.n_filled||0)+'</b> 筆　成交率 <b>'+(s.fill_rate_pct!=null?s.fill_rate_pct+'%':'—')+'</b>　加權滑價 <b class="'+slipCls(s.slippage_pct_weighted)+'">'+pc(s.slippage_pct_weighted)+'</b>'+(s.all_final===false?'　<span style="color:var(--warn)">尚有未終結委託</span>':'')+'</div>'+
+      (rows?'<table style="width:100%;font-size:11px;margin-top:6px;border-collapse:collapse"><tr style="color:var(--ink-3)"><td>標的</td><td style="text-align:right">成交/委託</td><td style="text-align:right">均價</td><td style="text-align:right">參考價</td><td style="text-align:right">滑價</td><td>狀態</td></tr>'+rows+'</table>':'')+
+      (rej?'<div style="margin-top:4px">拒單：'+rej+'</div>':'')+
+      '<div style="margin-top:4px">零股驗證：<b>'+esc(JOURNAL_ODD_LABEL[odd.status]||odd.status||'—')+'</b></div>'+
+      '<div>偏離目標權重：'+(dv?'最大 <b'+(dv.max_abs_pp>dv.threshold_pp?' style="color:var(--warn)"':'')+'>'+esc(dv.max_abs_pp)+' 個百分點</b>（告警門檻 '+esc(dv.threshold_pp)+'）':'尚未計算')+'</div>'+
+      '<div>下期：<b>'+(nx?esc(nx.date)+' '+esc(nx.time||'')+'（'+esc(AUTO_REASON_LABEL[nx.reason]||nx.reason)+'）':'讀不到交易日曆')+'</b></div>'+
+      '<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">滑價＝成交均價÷參考價−1（買進，正值＝買貴）；參考價＝永豐平盤參考價，標 * 者為前一交易日收盤後備。產生於 '+esc(String(rv.generated_at||'').slice(0,16).replace('T',' '))+'。唯讀；非投資建議</div>';
   }

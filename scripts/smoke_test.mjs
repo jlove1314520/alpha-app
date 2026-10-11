@@ -2323,6 +2323,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { perfErrors.push(`測試本身出錯：${e.message || e}`); }
   record("72. 日誌頁真錢績效對照（無成交「尚無部位」；有成交兩條折線＋報酬差距＋「含手續費、未含稅」；perf 錯誤顯示原因；未連線說明）", perfErrors.length === 0, perfErrors.join("; "));
 
+  // 86.【2026-10-11 常備.開發-23】日誌頁盤後復盤：用假的 /auto/ledger（替換 liveFetch，不連網、不下單）驗——
+  // review=null 顯示「尚無復盤」；有復盤時列出成交率／加權滑價／逐筆滑價／零股驗證／偏離／下期；review.error 顯示原因；
+  // 舊版伺服器（沒有 review 欄位）提示重啟；未連線顯示說明。產生端算法見 scripts/selftest_auto_trading_review.py。
+  const reviewErrors = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const saved = { lf: window.liveFetch, url: LIVE.url, conf: LIVE.configured };
+      const el = () => document.getElementById("journal-review");
+      const o = {};
+      let lg = { ok: true, rows: [], first_batch_done: false, pnl: null, perf: null, review: null };
+      try {
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+        window.liveFetch = async (p) => new Response(JSON.stringify(p === "/auto/ledger" ? lg : {}), { status: 200 });
+        await loadJournalLedger(); o.none = el().textContent;
+        lg = { ...lg, review: { date: "2026-10-12", generated_at: "2026-10-12T13:40:30+08:00", batches: ["202610-T1"],
+          summary: { n_orders: 2, n_filled: 1, n_rejects: 1, fill_rate_pct: 91.7, slippage_pct_weighted: 0.164, all_final: true },
+          orders: [{ symbol: "0050", lot: "整股", qty: 1000, filled_qty: 1000, avg_price: 100.2, ref_price: 100, ref_source: "shioaji_reference", slippage_pct: 0.2, status: "FILLED" },
+            { symbol: "0050", lot: "零股", qty: 200, filled_qty: 100, avg_price: 99.8, ref_price: 100, ref_source: "prev_close", slippage_pct: -0.2, status: "EXPIRED" }],
+          rejects: [{ symbol: "00697B", codes: ["CAP"] }], odd_lot: { status: "MATCH" },
+          deviation: { max_abs_pp: 6.2, threshold_pp: 5 }, next_run: { date: "2026-10-13", time: "09:05", reason: "open_batch" } } };
+        await loadJournalLedger(); o.has = el().textContent; o.trs = el().querySelectorAll("tr").length;
+        lg = { ...lg, review: { error: "讀取復盤檔失敗（JSONDecodeError）" } };
+        await loadJournalLedger(); o.err = el().textContent;
+        const { review, ...old } = lg; lg = old;
+        await loadJournalLedger(); o.old = el().textContent;
+        LIVE.configured = false;
+        await loadJournalLedger(); o.off = el().textContent;
+      } finally { window.liveFetch = saved.lf; LIVE.url = saved.url; LIVE.configured = saved.conf; }
+      return o;
+    });
+    if (!r.none.includes("尚無復盤")) reviewErrors.push(`review=null 應顯示「尚無復盤」：${r.none.slice(0, 80)}`);
+    if (r.trs !== 3) reviewErrors.push(`逐筆表應有表頭＋2 列，實際 ${r.trs} 列`);
+    for (const k of ["2026-10-12", "成交率 91.7%", "+0.164%", "+0.2%", "-0.2%", "100*", "相符", "6.2 個百分點", "2026-10-13", "續跑進行中批次", "超過單次上限", "非投資建議"])
+      if (!r.has.includes(k)) reviewErrors.push(`有復盤畫面缺「${k}」：${r.has.slice(0, 200)}`);
+    if (!r.err.includes("JSONDecodeError")) reviewErrors.push(`review.error 應顯示原因：${r.err.slice(0, 80)}`);
+    if (!r.old.includes("需重啟")) reviewErrors.push(`舊版伺服器應提示重啟：${r.old.slice(0, 80)}`);
+    if (!r.off.includes("尚未連線")) reviewErrors.push(`未連線應顯示說明：${r.off.slice(0, 80)}`);
+  } catch (e) { reviewErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("86. 日誌頁盤後復盤（無復盤「尚無復盤」；有復盤列成交率／加權與逐筆滑價／零股驗證／偏離／下期；錯誤顯示原因；舊版伺服器提示重啟；未連線說明）", reviewErrors.length === 0, reviewErrors.join("; "));
+
   // 73.【2026-10-11 常備.開發-13】個股簡報（規則版）：①合成資料驗五條要點的算法（連買賣天數、融資增減、
   // 處置／注意、事件 30 日窗）②真實檔案 2330 畫出 5 條＋「規則摘要，非 AI 判斷」③美股顯示誠實說明
   // ④五份來源全空時每條都寫「查無」不崩潰。
@@ -2743,7 +2783,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

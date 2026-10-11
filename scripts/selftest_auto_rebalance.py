@@ -345,7 +345,8 @@ if _off is None:
     print("SKIP 休市表比對：取得官方日曆（網路與本機快取皆無）——[警告] 本項未驗證，有網路或快取時須重跑", flush=True)
 else:
     _offw = {d for d in _off["closed"] if datetime.fromisoformat(d).weekday() < 5}
-    _html = (_root / "index.html").read_text(encoding="utf-8")
+    # 常備.開發-20 丙案後休市表從 index.html 搬到 app.js：兩檔都讀（比對規則不變）
+    _html = "".join((_root / f).read_text(encoding="utf-8") for f in ("index.html", "app.js") if (_root / f).exists())
     _m = _re.search(r"const TW_HOLIDAYS_2026=new Set\(\[(.*?)\]\)", _html, _re.S)
     _app = set(_re.findall(r"\d{4}-\d{2}-\d{2}", _m.group(1))) if _m else set()
     _appw = {d for d in _app if datetime.fromisoformat(d).weekday() < 5}
