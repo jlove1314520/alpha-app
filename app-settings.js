@@ -697,15 +697,17 @@
       const pass=d.gate_pass===true;
       const rate=(d.violation_rate!=null)?(d.violation_rate*100).toFixed(2)+'%':'—';
       const gap=(d.completeness_gap_rate!=null)?(d.completeness_gap_rate*100).toFixed(1)+'%':'—';
+      const nChecked=Object.values(d.by_check||{}).reduce((t,v)=>t+((v&&v.checked)||0),0);
+      if(!(d.universe>0)||nChecked===0){sum.innerHTML='<b style="color:var(--warn)">未檢查</b>（稽核報告裡沒有任何一項實際檢查到資料，不能當作正常）';list.innerHTML='';return}
       sum.innerHTML=`<b style="color:${pass?'var(--up)':'var(--warn)'}">${pass?'✓ 通過':'✗ 未通過'}</b>`
         +` ｜ 稽核 ${nf(d.universe)} 檔 ｜ 一致性違規率 <b class="num">${rate}</b>（門檻 1%，${nf(d.stocks_with_violation||0)} 檔）`
         +` ｜ 資料完整度缺口 <b class="num">${gap}</b>（${nf(d.completeness_gap_stocks||0)} 檔，季報斷層/過期）`;
       const by=d.by_check||{};
       const rows=Object.keys(by).sort().map(k=>{
         const v=by[k]||{};
-        const bad=(v.violations||0)>0;
-        return `<div class="f"><span>${AUDIT_CHECK_LABELS[k]||k}</span>`
-          +`<b class="num" style="color:${bad?'var(--warn)':'var(--ink-2)'}">${bad?nf(v.violations)+' 筆違規':'0'}`
+        const bad=(v.violations||0)>0,none=!bad&&!(v.checked>0);  // 先.八十-10：檢查 0 筆＝未檢查，不能顯示成正常
+        return `<div class="f" data-audit-check="${k}" data-audit-state="${bad?'bad':(none?'unchecked':'ok')}"><span>${AUDIT_CHECK_LABELS[k]||k}</span>`
+          +`<b class="num" style="color:${bad||none?'var(--warn)':'var(--ink-2)'}">${bad?nf(v.violations)+' 筆違規':(none?'未檢查':'0')}`
           +`<span style="color:var(--ink-4);font-weight:400"> / 檢查 ${nf(v.checked||0)}${v.unverifiable?'、無法查核 '+nf(v.unverifiable):''}</span></b></div>`;
       }).join('');
       const top=(d.top_20||[]).slice(0,20).map(v=>

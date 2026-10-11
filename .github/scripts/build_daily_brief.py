@@ -185,6 +185,8 @@ def main():
     out = {
         "generated_at": now.isoformat(timespec="seconds"),
         "date": today.isoformat(),
+        # 先.八十-10：前台顯示「資料日＝最後交易日」，不顯示產生時間（取加權指數走勢最後一個交易日）
+        "data_asof": ((_load("market_tw.json").get("taiex") or {}).get("sparkline_dates") or [None])[-1],
         "method": "固定規則摘要（不呼叫語言模型、不做市場判斷）；只讀 repo 內既有排程產物，不額外請求外部 API",
         "disclaimer": DISCLAIMER,
         "premarket": {"lines": lines, "us": us, "tw": tw, "events": evs, "news": news},

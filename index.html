@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-12.0139">
+<link rel="stylesheet" href="app.css?v=2026-10-12.0156">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -167,7 +167,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 常備.開發-2（2026-10-11）：讀 data/daily_brief.json（.github/scripts/build_daily_brief.py 固定規則產生，
          不呼叫語言模型、不做市場判斷）。讀到才顯示，讀不到維持隱藏。 -->
     <div class="card ai-card" id="home-ai-card" hidden>
-      <div class="ai-tag">✦ AI 盤前日報 · 規則摘要</div>
+      <div class="ai-tag">✦ 盤前日報 · 規則摘要</div>
       <div class="note" id="home-ai-body"></div>
     </div>
 
@@ -896,7 +896,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <!-- 常備.開發-2：週覆盤＝data/daily_brief.json 的 weekly 區塊（加權指數當週漲跌、紙上追蹤狀態）
          ＋本機 /auto/ledger 當週委託筆數（真錢帳本只在本機，不進 repo）。固定規則，不做行為判斷。 -->
     <div class="card ai-card">
-      <div class="ai-tag">✦ AI 週覆盤 · 規則摘要</div>
+      <div class="ai-tag">✦ 週覆盤 · 規則摘要</div>
       <div class="note" id="journal-weekly-body">載入中…</div>
     </div>
 
@@ -1273,14 +1273,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
 
 
-    <div class="card" data-ui-advanced>
-      <h3>API 金鑰</h3>
-      <div class="setting-row">
-        <span>FinMind Token</span>
-        <div class="setting-input"><input id="set-finmind-token" type="password" placeholder="免費層無需填寫" style="width:150px;text-align:right" onblur="toast('已記在本機，未串接付費額度')"></div>
-      </div>
-      <div class="note">目前免費層不需要金鑰即可使用；若之後升級 FinMind 付費方案，可在這裡填入 Token（僅存在你的裝置本機，不會上傳）。</div>
-    </div>
+    <!-- 先.八十-10（2026-10-12）：原「API 金鑰／FinMind Token」欄位沒有任何程式讀取（假欄位），已移除 -->
 
 
 
@@ -1302,7 +1295,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="card" data-ui-advanced>
       <h3>免責聲明</h3>
       <div class="note" style="line-height:1.7">
-        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、AI 日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
+        Alpha 是個人研究與自動交易用 App，<b style="color:var(--ink-2)">所有評分、排行、盤前日報、分批進場計畫皆非投資建議</b>，不構成任何買賣訊號。歷史資料與回測結果不代表未來績效。資料來源可能延遲或有誤，使用前請自行查證。<b style="color:var(--ink-2)">台股由 Shioaji 自動執行 Bb-90（真錢，附否決窗）；美股未串接下單</b>：台股真錢下單只由本機 Bb-90 引擎依硬限制（白名單 ETF、僅買進現股、單次金額上限、限價偏離前收 ≤1%、資料新鮮度、下單前對帳、緊急停止）執行，每批送單前有 30 分鐘否決窗；App 本身沒有台股下單按鈕。個股頁「產生下單計畫」只顯示試算、不會下單。美股個股頁的「IBKR 模擬買進／賣出」只對 IBKR <b>模擬（Paper）帳戶</b>送單，不涉及真實資金，一律由你手動按下。投資有風險，盈虧請自負。
       </div>
     </div>
 
@@ -1416,6 +1409,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-12.0139"></script>
+<script src="app.js?v=2026-10-12.0156"></script>
 </body>
 </html>

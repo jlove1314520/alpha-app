@@ -1426,7 +1426,7 @@
       html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
     }
     const meta=SC_DATA.meta||{};
-    html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">${meta.generated_at?'更新於 '+String(meta.generated_at).slice(5,16).replace('T',' ').replace('-','/'):''}</div>`;
+    html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">${meta.price_asof?'資料到 '+String(meta.price_asof).slice(5).replace('-','/')+'（最後交易日）':''}</div>`;
     bodyEl.innerHTML=html;
     scBindTip();
   }
@@ -2221,7 +2221,7 @@
     return DAILY_BRIEF_CACHE=await r.json();
   }
   const _briefLines=ls=>(ls||[]).map(l=>'<div style="padding:2px 0">· '+_autoEsc(uiPlain(l))+'</div>').join('');
-  const _briefFoot=d=>'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">'+_autoEsc(String(d.disclaimer||'規則摘要，非 AI 判斷').replace(/、?非投資建議/g,''))+'；產生於 '+_autoEsc(String(d.generated_at||'').slice(0,16).replace('T',' '))+'</div>';
+  const _briefFoot=d=>'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">'+_autoEsc(String(d.disclaimer||'規則摘要，非 AI 判斷').replace(/、?非投資建議/g,''))+(d.data_asof?'；資料日 '+_autoEsc(d.data_asof)+'（最後交易日）':'')+'</div>';
   function _briefWatchLine(d){
     const ev=d.premarket&&d.premarket.events||{},nw=d.premarket&&d.premarket.news||{};
     const m=ev.material_by_code||{},n=nw.by_code||{};
@@ -3857,7 +3857,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-12.0139';
+  const APP_VERSION='2026-10-12.0156';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

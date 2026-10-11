@@ -43,7 +43,8 @@
   // 「光聖現價 1755、建議進場價 32」。同一段還有 (null*100).toFixed(1) 會安靜地
   // 印出「0.0%」，那是把「沒有資料」顯示成「成長 0%」，屬於假資料，一併根治。
   // 規則：任何可能為 null 的數值一律走這兩支，缺值就是「—」，不是 0、不是崩潰。
-  const fmtN=(v,d=2,suffix='')=>(v==null||typeof v!=='number'||!isFinite(v))?'—':v.toFixed(d)+suffix;
+  // 先.八十-10：加千分位（法人張數等大數字）
+  const fmtN=(v,d=2,suffix='')=>(v==null||typeof v!=='number'||!isFinite(v))?'—':v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})+suffix;
   const fmtPct=(v,d=1)=>(v==null||typeof v!=='number'||!isFinite(v))?'—':(v*100).toFixed(d)+'%';
   // 2026-09-08（健檢.三）撞到評分引擎上限的年增率不得當真值顯示。
   // REVENUE_YOY_CAP=2.0（+200%）是引擎的裁切值，不是公司真的成長兩倍——
