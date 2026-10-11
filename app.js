@@ -3066,16 +3066,56 @@
     renderAutoBanner();
   }
   const _autoEsc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // 常備.開發-25（2026-10-11）：設定頁「為什麼沒下單」——preflight 各項紅綠燈＋白話原因（原本只列 PASS/FAIL 技術字）。
+  // 白話對照只是說明文字，判定一律照引擎寫的 result，App 不自行改判。detail 照原文附在下方小字。
+  const PF_PLAIN={
+    env:['電腦上的永豐金鑰檔齊全','電腦上的永豐金鑰檔缺東西，程式登不進券商'],
+    live_login:['能登入永豐正式環境（只查詢）','登不進永豐正式環境，無法查帳也無法下單'],
+    signed:['證券帳戶已完成 API 簽署','證券帳戶還沒完成 API 簽署，券商不收程式委託'],
+    ca:['電子憑證可用，且距到期超過 30 天','電子憑證不能用或快到期，沒有憑證送不出委託'],
+    q_balance:['查得到交割戶餘額','查不到交割戶餘額，無法確認錢夠不夠'],
+    q_settlements:['查得到未交割款','查不到未交割款，無法確認可用的錢'],
+    q_positions:['查得到持股','查不到持股，下單前無法對帳'],
+    cash_ready:['交割戶的錢夠買下一批','交割戶的錢不夠下一批（或還沒入金），這批不會送單'],
+    push:['手機已開推播','沒有手機開推播，否決窗通知送不到，這批不會送單'],
+    push_deps:['電腦的推播套件正常','電腦缺推播套件，通知送不出去'],
+    conn_budget:['券商連線數還有餘裕','券商連線數已滿，新登入會被拒'],
+    tasks:['電腦的自動排程都開著','有自動排程沒註冊或被停用，時間到不會自己跑'],
+    calendar:['今年的開休市日曆已備好','缺今年的開休市日曆，程式不知道哪天開盤'],
+    prices:['三檔的前收盤價夠新','前收盤價太舊，限價算不準，一律拒單'],
+    exdiv:['除息資料夠新','除息資料太舊或不完整，可能在除息日下錯價'],
+    config:['本機設定的資金／上限／期數合理','本機設定的資金／上限／期數有問題，會被擋單'],
+    monthly_ok:['每月投入不大於總資金','每月投入大於總資金，第 5 個月起會被擋單（只提醒）'],
+    drill_a:['模擬演練（下單到結算）做過且成功','模擬演練還沒完整跑過'],
+    drill_b:['模擬演練（取消整批）做過且成功','取消演練還沒做完或結果不對'],
+    drill_cfg:['演練用的暫時設定已清掉','還留著演練用的設定，要先清掉'],
+    mode:['目前模式','目前模式']
+  };
+  // 純函式：把 preflight 轉成 {lights:[{dot,color,label,plain,detail,result}],blockers:[白話],stale:bool}
+  function preflightLights(pf,nowMs){
+    const dotOf={PASS:['●','#2da44e'],FAIL:['●','#e5534b'],WARN:['●','#d4a72c'],INFO:['○','var(--ink-3,#888)']};  // 固定色：不用 --up/--down（台股慣例漲紅跌綠會讓 PASS 變紅）
+    const lights=pf.items.map(i=>{
+      const p=PF_PLAIN[i.id],r=String(i.result||'');
+      const [dot,color]=dotOf[r]||['●','var(--ink-3,#888)'];
+      const plain=p?(r==='FAIL'||r==='WARN'?p[1]:p[0]):String(i.name||i.id||'');
+      return {dot,color,result:r,label:String(i.name||''),plain,detail:String(i.detail||'')};
+    });
+    const t=Date.parse(pf.ran_at||'');
+    return {lights,blockers:lights.filter(l=>l.result==='FAIL').map(l=>l.plain),stale:isFinite(t)&&(nowMs-t)>36*3600e3};
+  }
   function renderAutoPreflight(pf){
     const el=document.getElementById('auto-preflight');if(!el)return;
-    if(!pf||!Array.isArray(pf.items)){el.textContent='尚未執行（本機跑 python research/auto_rebalance_bb90.py --preflight，只查詢、不送單）';return}
-    const col={PASS:'#2da44e',FAIL:'#e5534b',INFO:'var(--ink-3,#888)'};  // 固定色：不用 --up/--down（台股慣例漲紅跌綠，會讓 PASS 顯示成紅色）
+    if(!pf||!Array.isArray(pf.items)){el.textContent='電腦還沒做上線前自檢，說不出原因。在電腦執行 python research/auto_rebalance_bb90.py --preflight（只查詢、不送單）後重新整理。';return}
+    const v=preflightLights(pf,Date.now());
+    const box=(bg,fg,html)=>'<div style="margin:4px 0 6px;padding:6px 8px;border-radius:8px;background:'+bg+';color:'+fg+'">'+html+'</div>';
     // 先.四十四-五：全部 PASS（含 CA）才顯示「可切換真錢模式」；否則寫明原因
-    const gl=pf.go_live_ready===true
-      ?'<div style="margin:4px 0 6px;padding:6px 8px;border-radius:8px;background:rgba(45,164,78,.15);color:#2da44e"><b>可切換真錢模式</b>：上線前自檢全部通過。切換方式見 docs/AUTO_TRADING_SETUP.md 第九節（由你本人修改本機設定檔）。</div>'
-      :'<div style="margin:4px 0 6px;padding:6px 8px;border-radius:8px;background:rgba(229,83,75,.12);color:#e5534b"><b>尚不可切換真錢模式</b>'+(Array.isArray(pf.go_live_blockers)&&pf.go_live_blockers.length?'：'+pf.go_live_blockers.map(_autoEsc).join('；'):'：自檢結果未含完整判定，請重跑 --preflight')+'</div>';
-    el.innerHTML=gl+'<div style="margin-bottom:4px">執行時間：'+_autoEsc(pf.ran_at)+'　PASS '+_autoEsc(pf.pass)+'／FAIL '+_autoEsc(pf.fail)+'</div>'+
-      pf.items.map(i=>'<div style="margin:2px 0"><b style="color:'+(col[i.result]||'inherit')+'">'+_autoEsc(i.result)+'</b> '+_autoEsc(i.name)+'<br><span style="color:var(--ink-4)">'+_autoEsc(i.detail)+'</span></div>').join('');
+    const head=pf.go_live_ready===true
+      ?box('rgba(45,164,78,.15)','#2da44e','<b>可切換真錢模式</b>：上線前自檢全部通過。切換方式見 docs/AUTO_TRADING_SETUP.md 第九節（由你本人修改本機設定檔）。')
+      :box('rgba(229,83,75,.12)','#e5534b','<b>沒下單的原因</b>'+(v.blockers.length?'（'+v.blockers.length+' 項紅燈）：'+v.blockers.map(_autoEsc).join('；')
+        :(Array.isArray(pf.go_live_blockers)&&pf.go_live_blockers.length?'：'+pf.go_live_blockers.map(_autoEsc).join('；'):'：自檢結果未含完整判定，請重跑 --preflight')));
+    const stale=v.stale?box('rgba(212,167,44,.15)','#d4a72c','這份自檢是 '+_autoEsc(String(pf.ran_at).slice(0,16).replace('T',' '))+' 做的，已超過 36 小時，紅綠燈可能不是現在的狀況；重跑 --preflight 可更新。'):'';
+    el.innerHTML=head+stale+'<div style="margin-bottom:4px">自檢時間：'+_autoEsc(String(pf.ran_at||'').slice(0,16).replace('T',' '))+'　綠燈 '+_autoEsc(pf.pass)+'／紅燈 '+_autoEsc(pf.fail)+'（共 '+v.lights.length+' 項）</div>'+
+      v.lights.map(l=>'<div style="margin:3px 0;display:flex;gap:6px;align-items:flex-start"><span style="color:'+l.color+';font-size:14px;line-height:1.2" aria-label="'+_autoEsc(l.result)+'">'+l.dot+'</span><span><b>'+_autoEsc(l.plain)+'</b>'+(l.result==='INFO'?'：'+_autoEsc(l.detail):'<br><span style="color:var(--ink-4);font-size:11px">'+_autoEsc(l.label)+'｜'+_autoEsc(l.detail)+'</span>')+'</span></div>').join('');
   }
   function renderLiveAccount(a){
     const el=document.getElementById('live-account-body');if(!el)return;
