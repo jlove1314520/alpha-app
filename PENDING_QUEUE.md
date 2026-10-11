@@ -18890,3 +18890,23 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 ```
 
 - [x] **先.六十五-寫入 -6／-20 改回待做並換新做法、-23～-34 插入常備.開發區；排程恢復趕工**（互動視窗執行）
+
+---
+
+# 2026-10-11【先.六十六：緊急修復 App 版面壞掉】（總司令裁示原文，動工前先寫入；優先於常備.開發所有項目）
+
+```
+【先.六十六】緊急修復：App 版面壞掉（優先於常備.開發所有項目；不碰自動交易）
+1. index.html 第 450 行 `<div id="picks-us-list"></div></div>` 改為 `<div id="picks-us-list"></div>`（刪掉多出的一個 </div>；根因：02:20 常備.開發-17 commit dec42448 多寫一個關閉標籤，使 #picks-fut-panel、#scr-report／stock／trade／journal／settings 與 <nav> 全部脫離 #app／<main>）。
+2. 修完用 Playwright 以 390×844 手機視窗實測並貼結果：document.body 的直接子元素只能是 #new-version-banner、#app、script；nav 的 getBoundingClientRect().top 必須 > 700；逐一切換六個分頁，每頁 .screen 高度 > 0 且在 <main> 內。
+3. 冒煙新增三項永久檢查：(a) body 直接子元素白名單；(b) 每個 .screen 的祖先必須含 main#main，nav 的祖先必須含 #app；(c) html5 解析後標籤數量平衡（用 node 的 parse5 或 Playwright 的 DOM 比對原始碼中 <section>／<nav> 數量）。任一失敗整體 FAIL。
+4. sw.js 版本號更新並確認 GitHub Pages 已部署（curl 正式網址 index.html 不含 `</div></div>` 該行）；完成後推播「版面修復完成，請完全關閉 App 再開啟」。
+5. 冒煙全綠後 commit，然後再恢復常備.開發 佇列。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.六十六-1 index.html 刪掉 #picks-us-list 後多出的 </div>（dec42448 常備.開發-17 引入）**（互動視窗執行）
+- [ ] **先.六十六-2 Playwright 390×844 實測：body 直接子元素白名單、nav top>700、六分頁 .screen 高度>0 且在 main 內**（互動視窗執行）
+- [ ] **先.六十六-3 冒煙新增三項永久檢查：body 子元素白名單、.screen／nav 祖先、section／nav 標籤數量平衡**（互動視窗執行）
+- [ ] **先.六十六-4 sw.js 版本號更新＋確認 Pages 已部署＋推播「版面修復完成，請完全關閉 App 再開啟」**（互動視窗執行）
+- [ ] **先.六十六-5 冒煙全綠 commit，恢復常備.開發佇列**（互動視窗執行）
