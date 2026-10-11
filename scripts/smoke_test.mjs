@@ -1987,17 +1987,18 @@ async function runSmokeTest(baseUrl, headless = true) {
       localStorage.removeItem("alpha_bt_path"); renderBtPath();
       const empty = document.getElementById("bt-prob").textContent;
       localStorage.setItem("alpha_bt_path", JSON.stringify({ nw: "6000000", pmt: "300000", birth: "1998-01-13", age: "40" })); renderBtPath();
-      for (let i = 0; i < 80 && !/達標機率（/.test(document.getElementById("bt-prob").textContent); i++) await new Promise(f => setTimeout(f, 100));
+      for (let i = 0; i < 80 && !/已下架/.test(document.getElementById("bt-prob").textContent); i++) await new Promise(f => setTimeout(f, 100));
       const filled = document.getElementById("bt-prob").textContent;
       localStorage.removeItem("alpha_bt_path"); renderBtPath();
       return { empty, filled };
     });
     if (/\d+(\.\d+)?%/.test(r.empty)) probUiErrors.push(`未輸入參數卻顯示了百分比：${r.empty.slice(0, 80)}`);
     if (!r.empty.includes("請先填入")) probUiErrors.push(`未輸入參數時缺說明文字：${r.empty.slice(0, 80)}`);
-    if (!/(R1-C|模擬 C)[\s\S]*%/.test(r.filled))  // 先.八十-6：前台內部代號已轉白話 probUiErrors.push(`輸入後未顯示機率表：${r.filled.slice(0, 120)}`);
-    if (!r.filled.includes("回測，非保證")) probUiErrors.push("機率表缺「回測，非保證」");
+    // 先.八十-7（2026-10-12）：樣本內重抽的機率數字已下架——輸入後也不得出現任何百分比，必須寫明下架原因
+    if (/\d+(\.\d+)?%/.test(r.filled)) probUiErrors.push(`輸入後仍顯示機率數字（應已下架）：${r.filled.slice(0, 120)}`);
+    if (!r.filled.includes("樣本內重抽，偏樂觀，不能當依據")) probUiErrors.push(`缺下架說明：${r.filled.slice(0, 120)}`);
   } catch (e) { probUiErrors.push(`測試本身出錯：${e.message || e}`); }
-  record("60. 破億卡未輸入參數只顯示說明、不顯示機率；輸入後顯示各策略機率表並標回測非保證", probUiErrors.length === 0, probUiErrors.join("; "));
+  record("60. 破億卡：樣本內重抽機率已下架，輸入前後都不顯示機率數字、寫明「樣本內重抽，偏樂觀，不能當依據」（先.八十-7）", probUiErrors.length === 0, probUiErrors.join("; "));
 
   // 61.【2026-10-10 先.五十九-A1／A2】紙.四 卡存在且固定揭露文字一字不差
   const p4Errors = [];
@@ -3162,8 +3163,10 @@ async function runSmokeTest(baseUrl, headless = true) {
             else out.cmp++;
             if (!rp.draw_curve) out.errs.push(`${id} 有附月序列但 draw_curve=false`);
           } else if (rp.draw_curve) out.errs.push(`${id} draw_curve=true 卻沒附月序列`);
-          const mism = !(rp.cagr_ok && rp.mdd_ok);
-          if (mism !== (rp.status === "IRREPRODUCIBLE")) out.errs.push(`${id} 年化／最大跌幅不一致卻沒標 IRREPRODUCIBLE（或反之）`);
+          // 先.八十-7：只差最大跌幅（月資料看不到月中跌幅）標 MONTHLY_APPROX（前台「月頻近似」）；年化也不一致才標 IRREPRODUCIBLE
+          const want = rp.cagr_ok && rp.mdd_ok ? "OK" : (rp.cagr_ok ? "MONTHLY_APPROX" : "IRREPRODUCIBLE");
+          if (rp.status !== want) out.errs.push(`${id} 可重現性應標 ${want}，實為 ${rp.status}`);
+          if (rp.status === "MONTHLY_APPROX" && rp.label !== "月頻近似") out.errs.push(`${id} 月頻近似標籤文字不對：${rp.label}`);
           out.repro = (out.repro || []).concat(`${id}:${rp.status}${rp.draw_curve ? "(曲線)" : ""}`);
         }
         // ① 期間不重疊

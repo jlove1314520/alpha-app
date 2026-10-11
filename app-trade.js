@@ -192,7 +192,7 @@
   }
   // 2026-10-10（先.五十九-A1／A2）：紙.四 R1（0050＋信用利差閘門×00631L），R1-C 為主、R1-A 並列。
   // 只讀 data/paper_4.json（兩本帳）與 data/paper_3.json（對照紙.三累積報酬）；揭露文字固定顯示。
-  const PAPER4_DISCLOSURE='回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤';
+  const PAPER4_DISCLOSURE='看過 2025–26 結果後才設計；回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤';
   async function _renderPaper4(){
     const title='紙.四 R1 信用利差閘門',sub='主：R1-C 0050 50%＋00631L 50%｜並列：R1-A 70%／30%（閘門關時 00631L 改現金）';
     const disc='<div class="note" id="paper4-disclosure" style="margin-top:6px;font-size:11px;color:var(--warn)">⚠ '+_paperEsc(PAPER4_DISCLOSURE)+'。槓桿真錢提案最早 2027-04（紙.四 滿 6 個月）且須符合安全方案其餘前提。</div>';

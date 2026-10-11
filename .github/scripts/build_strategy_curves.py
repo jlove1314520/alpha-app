@@ -294,6 +294,8 @@ def paper_lines(px: Px) -> list:
         ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-08"),
         ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-08"),
     ]
+    # 先.八十-7（2026-10-12）：模擬 C（R1 信用利差閘門）是看過 2025–26 樣本外結果之後才設計的，前台必須標明
+    design_note = {"paper_4": "看過 2025–26 結果後才設計"}
     for id_, label, path, vk, book, planned in specs:
         evs = _jsonl(path)
         if book:
@@ -313,7 +315,12 @@ def paper_lines(px: Px) -> list:
         first = next((e for e in sorted(evs, key=lambda e: e.get("date", "")) if e.get("event") == "inception"), None)
         if first and first.get("partial_first_period"):
             note = f"第一期 {first['date'][5:].replace('-', '/')}～10/31 為部分期；" + note
-        out.append(_line(id_, label, "paper", "模擬中", built["dates"], built["nav"], built["comp"], note=note, px=px))
+        if design_note.get(id_):
+            note = design_note[id_] + "；" + note
+        ln = _line(id_, label, "paper", "模擬中", built["dates"], built["nav"], built["comp"], note=note, px=px)
+        if design_note.get(id_):
+            ln["design_note"] = design_note[id_]
+        out.append(ln)
     return out
 
 

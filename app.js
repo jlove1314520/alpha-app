@@ -1381,7 +1381,7 @@
   function scReproNoteHtml(l){
     const bt=SC_HIST&&SC_HIST.lines&&SC_HIST.lines[l.id]&&SC_HIST.lines[l.id].backtest,r=bt&&bt.repro;
     if(!r||r.status==='OK')return '';
-    const head=r.status==='NO_SERIES'?'回測段沒有逐月資料，只標數字':r.draw_curve?'回測曲線用月資料畫，最大跌幅以上方數字為準':'回測月資料與原結果對不上，不畫曲線';
+    const head=r.status==='NO_SERIES'?'回測段沒有逐月資料，只標數字':r.status==='MONTHLY_APPROX'?'月頻近似：曲線用月資料畫，最大跌幅以上方數字為準':r.draw_curve?'回測曲線用月資料畫，最大跌幅以上方數字為準':'回測月資料與原結果對不上，不畫曲線';
     return `<div class="note sc-repro" data-repro="${_uiEsc(r.status)}" style="margin-top:4px;font-size:10.5px;color:var(--ink-3)">${head}${r.why?`<details data-ui-detail style="display:inline"><summary style="display:inline;cursor:pointer;color:var(--ink-4)"> ⓘ</summary><div style="font-size:10px">${_uiEsc(uiPlain(r.why))}</div></details>`:''}</div>`;
   }
   function scHistBlockHtml(l){
@@ -3126,7 +3126,16 @@
   // NTD總額，匯率沒有時該部分誠實跳過並在detail說明，不用舊匯率硬湊。
   // 先.二十九：自動交易狀態／否決窗／緊急停止（只經 /auto/*，不具下單能力）
   // 先.三十-四：破億路徑（輸入只存本機設定，不進 repo）
-  const BT_RATE=0.1019,BT_GOAL=1e8;  // Bb-90 回測年化（回測，非保證）
+  // 先.八十-7（2026-10-12）：破億推算用的年化不再寫死 10.19%，改讀 data/strategy_history.json 的自動投資（Bb-90）回測年化。
+  let BT_RATE=null,BT_RATE_LOADING=null;const BT_GOAL=1e8;
+  function btEnsureRate(){
+    if(BT_RATE!=null)return Promise.resolve(BT_RATE);
+    if(!BT_RATE_LOADING)BT_RATE_LOADING=(SC_HIST?Promise.resolve():loadStrategyHistory()).then(()=>{
+      const c=SC_HIST&&SC_HIST.lines&&SC_HIST.lines.live_bb90&&SC_HIST.lines.live_bb90.backtest&&SC_HIST.lines.live_bb90.backtest.cagr;
+      BT_RATE=(typeof c==='number'&&isFinite(c))?c:null;return BT_RATE;
+    }).catch(e=>{console.warn('[btEnsureRate]',e);recordGlobalError('btEnsureRate',e);return null}).finally(()=>{BT_RATE_LOADING=null});
+    return BT_RATE_LOADING;
+  }
   function btRead(){try{const s=localStorage.getItem('alpha_bt_path');return s?JSON.parse(s):{}}catch(e){console.warn('[btRead]',e);recordGlobalError('btRead',e);return{}}}
   function btCalc(o){
     const goal=o.goal||BT_GOAL,pmt=o.pmt||0;
@@ -3151,6 +3160,12 @@
     if(s.nw===''||s.nw==null||!(nw>=0)||!s.birth){out.textContent='請填入淨資產與出生日期';renderBtProb(null);return}
     const b=new Date(s.birth+'T00:00:00');if(isNaN(b)){out.textContent='出生日期格式不正確';renderBtProb(null);return}
     const target=new Date(b.getFullYear()+age,b.getMonth(),b.getDate());
+    if(BT_RATE==null){
+      const t0=target.getFullYear()+'-'+String(target.getMonth()+1).padStart(2,'0')+'-'+String(target.getDate()).padStart(2,'0');
+      out.innerHTML='目標日期：'+t0+'<br>回測年化讀取中…';
+      btEnsureRate().then(r=>{if(r!=null)renderBtPath();else out.innerHTML='目標日期：'+t0+'<br>讀不到回測年化（data/strategy_history.json），暫不推算'});
+      renderBtProb({});return;
+    }
     const c=btCalc({nw,pmt,target:target.getTime(),now:Date.now(),rate:BT_RATE});
     if(!c){out.textContent='目標日期已過或輸入不合理，請調整目標年齡';renderBtProb(null);return}
     try{renderBtProb({nw,pmt,nmon:Math.round(c.n*12)})}catch(e){console.warn('[renderBtProb]',e);recordGlobalError('renderBtProb',e)}
@@ -3189,8 +3204,13 @@
     if(!BT_PROB.loading)BT_PROB.loading=fetch('data/strategy_monthly_returns.json?t='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(d=>{BT_PROB.data=d;return d}).finally(()=>{BT_PROB.loading=null});
     return BT_PROB.loading;
   }
+  // 先.八十-7（2026-10-12）：下架「勝 0050／破億」等樣本內重抽機率（用 2003–2024 回測月報酬自己重抽自己，必然偏樂觀）。
+  // 前台不再顯示任何機率數字；btProbCalc 保留給研究與冒煙 #59 驗算，不出現在畫面上。
+  const BT_PROB_OFF='樣本內重抽，偏樂觀，不能當依據';
   function renderBtProb(params){
     const el=document.getElementById('bt-prob');if(!el)return;
+    if(params){el.innerHTML='<b>達標機率</b>：已下架——'+BT_PROB_OFF+'。';return}
+    el.innerHTML='達標機率：請先填入淨資產與出生日期。已下架數字：'+BT_PROB_OFF+'。';return;
     const bias='<a href="https://github.com/jlove1314520/alpha-app/blob/main/research/WIN_PROBABILITY_2026-10.md" target="_blank" rel="noopener">偏誤說明（WIN_PROBABILITY_2026-10）</a>';
     if(!params){el.innerHTML='達標機率：請先填入淨資產與出生日期（每月投入、目標年齡可留預設），填好後在你的瀏覽器內計算，不會送出。';return}
     clearTimeout(BT_PROB.timer);
@@ -3827,7 +3847,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-12.0122';
+  const APP_VERSION='2026-10-12.0133';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

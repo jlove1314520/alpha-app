@@ -42,11 +42,14 @@ SPEC = {
         "oos": ("bb90_oos_2025_result.json", ["results", "paper1_70_30"], "#423／#425", ""),
     },
     "paper_3": {
-        "backtest": ("crisis_gate_leveraged_bb90_result.json", ["trials", "S3-C6", "stats"], "#424／#426", ""),
+        # 先.八十-7（2026-10-12）：改用「訊號延後一個交易日」版（與紙.三實際執行一致；12.13%／−25.85%），
+        # 舊的同日訊號版（12.30%／−24.66%）在紙上追蹤裡做不到，不再當作模擬 B 的回測數字。
+        "backtest": ("crisis_gate_timing_sensitivity.json", ["trials", "S3-C6"], "#424／#426", "訊號延後一個交易日（與紙上追蹤實際執行一致）",
+                     "crisis_gate_leveraged_bb90_result.json"),
         "oos": ("s3c6_oos_2025_result.json", ["results", "S3-C6_real"], "#427／#428", "槓桿腿用 00631L／00647L 真實價"),
     },
     "paper_4": {
-        "backtest": ("r1_0050_credit_gate_result.json", ["trials", "R1-C", "stats"], "#429／#430", "R1 沒有做樣本外單發，只有回測段"),
+        "backtest": ("r1_0050_credit_gate_result.json", ["trials", "R1-C", "stats"], "#429／#430", "看過 2025–26 結果後才設計；R1 沒有做樣本外單發，只有回測段"),
     },
     "paper_1b": {
         "backtest": ("core_allocation_result.json", ["grid", "Bb-90"], "#417／#418", "同族 Bb-90（回測美股腿用 VTI／IEF）"),
@@ -75,11 +78,15 @@ def _period(doc):
 
 
 def _seg(kind, spec):
-    fname, path, trials, note = spec
+    # spec＝(檔名, JSON 路徑, 試驗編號, 附註[, 期間來源檔])；第 5 欄給「本檔沒記期間、沿用原單發結果檔期間」的重跑變體用
+    fname, path, trials, note = spec[:4]
     doc = json.loads((RD / fname).read_text(encoding="utf-8"))
     node = _get(doc, path)
+    period = _period(doc)
+    if period == [None, None] and len(spec) > 4:
+        period = _period(json.loads((RD / spec[4]).read_text(encoding="utf-8")))
     seg = {"kind": kind, "label": LABELS[kind], "source": f"research/data/{fname}", "path": path, "trials": trials, "note": note,
-           "period": _period(doc), "cagr": node.get("cagr"), "mdd": node.get("mdd")}
+           "period": period, "cagr": node.get("cagr"), "mdd": node.get("mdd")}
     if kind == "oos":
         seg["monthly"] = node.get("monthly") or {}
         seg["cum_return"] = node.get("cum_return")
@@ -108,7 +115,10 @@ def _attach_monthly(seg, key, mdoc):
         why.append(f"年化：月序列 {c * 100:.2f}% ≠ 原結果檔 {seg['cagr'] * 100:.2f}%（{(mdoc.get('sources') or {}).get(key, '')}）")
     if not mdd_ok:
         why.append(f"最大跌幅：月序列 {m * 100:.2f}% ≠ 原結果檔（日資料）{seg['mdd'] * 100:.2f}%；月底資料看不到月中跌幅，必然較淺")
-    seg["repro"] = {"status": "OK" if (cagr_ok and mdd_ok) else "IRREPRODUCIBLE", "series_key": key,
+    # 先.八十-7：年化一致、只有最大跌幅對不上（月資料看不到月中跌幅，必然較淺）→ 標「月頻近似」（MONTHLY_APPROX），
+    # 不再標 IRREPRODUCIBLE；年化也對不上才是 IRREPRODUCIBLE（序列不是同一個策略版本）。
+    status = "OK" if (cagr_ok and mdd_ok) else ("MONTHLY_APPROX" if cagr_ok else "IRREPRODUCIBLE")
+    seg["repro"] = {"status": status, "label": {"OK": "可重現", "MONTHLY_APPROX": "月頻近似", "IRREPRODUCIBLE": "無法重現"}[status], "series_key": key,
                     "cagr_series": round(c, 6), "mdd_series": round(m, 6), "cagr_ok": cagr_ok, "mdd_ok": mdd_ok,
                     "draw_curve": cagr_ok, "why": "；".join(why), "source": "data/strategy_monthly_returns.json"}
     if cagr_ok:
