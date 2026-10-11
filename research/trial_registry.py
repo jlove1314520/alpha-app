@@ -202,6 +202,7 @@ def register_trial(
     kurtosis: float | None = None,
     periods_per_year: int | None = None,
     failed_gates: list[str] | None = None,
+    reverification: bool = False,
     dry_run: bool = False,
 ) -> tuple[int, str]:
     """登記一筆試驗。回傳 (編號, 寫進帳本的那一列)。
@@ -326,6 +327,8 @@ def register_trial(
         "round": round_no, "round_note": round_note or None,
         "dsr_inputs": dsr_inputs,
         "failed_gates": failed_gates,
+        # 2026-10-11 先.六十七：既有榜單重新驗證（常備.開發-6／-36）結構化標記；只在 True 時寫，舊列格式不變
+        **({"reverification": True} if reverification else {}),
         "registered_at": datetime.now(TZ).isoformat(timespec="seconds"),
         "row_sha256": hashlib.sha256(row.encode("utf-8")).hexdigest()[:16],
     }

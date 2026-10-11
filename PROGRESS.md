@@ -1,3 +1,14 @@
+## 2026-10-11 12:22（互動視窗）先.六十七 解除凍結.二＋修派工標記＋未驗證項目排程
+
+- **凍結.二解除**：依據是 #398／#399 已在 2026-09-25 判 FAIL；之前沒有寫進文件，是流程漏失。這句已寫進 PENDING_QUEUE「凍結.二」和「轉向.一」條目、CLAUDE.md 十四節。hypothesis_queue 的續跑提示詞和 PROTOCOL 也加註：只寫心跳的模式解除，恢復正常挑題。robots.txt／服務條款限制仍然有效。既有紀律全部不變。
+- **佇列**：
+  - -6、-20 改回 `- [ ]`。
+  - -因子類照原阻塞條文拆成 B18～B22、B30～B32 八項，排在 -23 之前。
+  - 新增 -35（訊號誠實度排程化）、-36（美股評分 v0 重新驗證）。
+- **派工標記自檢**：新增 `dev_queue_runner.approval_precheck()`，只印警告。guard selftest 25/25，crunch selftest 22/22。
+- **trial_registry**：`register_trial()` 新增 `reverification=True` 參數，在沙盒驗證過。既有 `--self-test` 在修改前就會 exit 1，不是這次造成的。
+- **卡點**：-6 上次因為可用記憶體不足（約 2～3GB，安全閥門檻 3GB）停下。2026-10-05 留下的 6 個孤兒 python worker 是否結束，要等總司令決定。
+
 ## 2026-10-11 12:15（hypothesis_queue 軌道）常備.開發-33 研究透明度頁
 
 - 新增 `.github/scripts/build_trials_index.py`（唯讀解析 TRIALS_LEDGER.md → `data/trials_index.json`，465 列）；`market.yml` 加一步；`index.html`／`app-settings.js` 設定頁新增「研究透明度：試驗帳本」卡（可搜尋，標「研究紀錄，非投資建議」）。

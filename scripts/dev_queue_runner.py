@@ -342,6 +342,32 @@ def guard_precheck() -> list:
     return found
 
 
+# 先.六十七-5：條目寫著總司令已裁示解凍／核准，卻仍標 [!] → 標記與裁示不一致（例：-6 先.六十五 已解凍仍標 [!]）。
+# 排除「待／需／經／須／等／請 總司令核准」與「核准後／前」這類解除條件寫法，只抓已發生的裁示。
+APPROVAL_STALE_PAT = re.compile(r"(?<![待需經須等請])總司令(?:已|於[^。；，]{0,12})?(?:裁示)?(?:解凍|核准|同意)(?![後前？?])"
+                                r"|裁示解凍|總司令貼上即(?:同意|生效)")
+
+
+def approval_precheck() -> list:
+    """先.六十七-5：每輪預檢列出「含總司令裁示解凍／核准字樣但仍標 [!]」的條目；只印警告、不改標記，由互動視窗處理。
+    ``` 裁示引文內的行不看。自身失敗只印警告。"""
+    found = []
+    try:
+        lines = _lines()
+        fenced = _fenced_line_indices(lines)
+        for i, ln in enumerate(lines):
+            if i in fenced or not ln.startswith("- [!]"):
+                continue
+            m = APPROVAL_STALE_PAT.search(ln)
+            if m:
+                found.append((item_key(ln)[:40], ln[max(0, m.start() - 6):m.end() + 6]))
+        for key, ctx in found:
+            _safe_print(f"APPROVAL_PRECHECK_WARN：{key} 仍標 [!]，但條目內有「{ctx}」。只警告、不改標記，由互動視窗開工時處理")
+    except Exception as e:  # noqa: BLE001
+        _safe_print(f"WARN_DETECTOR_CRASHED: approval_precheck failed ({type(e).__name__})，本輪略過自檢")
+    return found
+
+
 def _load_state() -> dict:
     try:
         return json.loads(STATE.read_text(encoding="utf-8"))
@@ -792,6 +818,7 @@ def build_prompt() -> int:
     # 工作結果，不是本規則要防的對象。偵測失敗一律fail open（當成沒偵測到
     # 問題），因為「這輪漏抓一次矛盾」永遠比「DevQueue整支崩潰3小時」代價低。
     guard_precheck()  # 先.六十二-3：只印警告，自身失敗已在函式內降級
+    approval_precheck()  # 先.六十七-5：同上，只印警告
     ambiguity = None
     try:
         ambiguity = _order_marker_ambiguity()

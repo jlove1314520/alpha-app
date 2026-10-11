@@ -69,6 +69,27 @@ with tempfile.TemporaryDirectory() as td:
         D.QUEUE = orig_q
     check("guard_precheck 只列出 A（B 被否定詞排除、C 已完成不看）", [f[0][:3] for f in found] == ["**A"])
     check("guard_precheck 不改佇列檔", q.read_text(encoding="utf-8") == body)
+# ⑦ 先.六十七-5 approval_precheck：已裁示解凍／核准卻仍 [!] → 警告；解除條件寫法、引文、[ ] 都不算；不改檔
+with tempfile.TemporaryDirectory() as td:
+    q = Path(td) / "PENDING_QUEUE.md"
+    body = ("# 測試\n- [!] **A 兩榜回測**〔先.六十五 總司令裁示解凍：登記為重新驗證〕\n"
+            "- [!] **B 建排程**〔先寫提案，總司令核准後再建〕\n- [!] **C 待總司令核准預算**\n"
+            "- [ ] **D 已解**〔總司令已核准〕\n```\n- [!] **E 引文** 總司令已核准\n```\n"
+            "- [!] **F 某項**〔2026-10-11 總司令已同意改採丙案〕\n")
+    q.write_text(body, encoding="utf-8")
+    orig_q = D.QUEUE
+    D.QUEUE = q
+    try:
+        found = D.approval_precheck()
+    finally:
+        D.QUEUE = orig_q
+    check(f"approval_precheck 只列出 A、F（{[f[0][:3] for f in found]}）", [f[0][:3] for f in found] == ["A 兩", "F 某"])
+    check("approval_precheck 不改佇列檔", q.read_text(encoding="utf-8") == body)
+D.QUEUE, _oq = Path("不存在的佇列.md"), D.QUEUE
+try:
+    check("approval_precheck 讀不到佇列 → 不拋例外、回空", D.approval_precheck() == [])
+finally:
+    D.QUEUE = _oq
 # 實際佇列：常備.開發-2／-8／-9 不會被擋
 real = [ln for ln in (ROOT / "PENDING_QUEUE.md").read_text(encoding="utf-8").splitlines() if "常備.開發-" in ln and ln.startswith("- [")]
 for n in ("2", "8", "9"):
