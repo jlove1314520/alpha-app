@@ -50,6 +50,8 @@ SYMBOLS = ("00631L", "0050", "00646", "00697B")
 TAXED = {"0050", "00631L", "00646", "00697B"}   # 台股 ETF 減碼一律計賣出稅
 INITIAL_VIRTUAL_CAPITAL = 1_000_000.0
 START_MONTH = "2026-10"
+# 先.七十五（2026-10-11）：R1-C／R1-A 兩本帳改為 2026-10-08 立即建倉（閘門用 09-30 狀態；第一期為部分期）
+INCEPTION_DATE = "2026-10-08"
 MAX_STALE_WEEKDAYS = 5
 DISCLOSURE = ("回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉"
               "並大幅落後 0050；無樣本外驗證，僅紙上追蹤")
@@ -166,8 +168,11 @@ def _run_book(book: str, blog: list[dict], series: dict, common: list[str], mont
     tgt_of = lambda is_open: dict(spec["open"] if is_open else spec["closed"])  # noqa: E731
     processed = 0
     if not blog:
-        d0 = month_ends[0]
-        if not P3.baa_month_complete(baa, P3._calendar_month_ends(d0, 1)[-1]):
+        d0 = next((d for d in common if d >= INCEPTION_DATE), None)
+        if d0 is None:
+            print(f"[紙.四 {book}] 尚未有 {INCEPTION_DATE} 之後的共同交易日")
+            return 0
+        if d0 in month_ends and not P3.baa_month_complete(baa, P3._calendar_month_ends(d0, 1)[-1]):
             print(f"[紙.四 {book}] {d0} 建倉延後：當月 BAA10Y 尚未公布完整")
             return 0
         prev_me = P3._calendar_month_ends(
@@ -181,12 +186,13 @@ def _run_book(book: str, blog: list[dict], series: dict, common: list[str], mont
                  "values_post": {s: nav * w for s, w in tgt.items()}, "nav": nav, "rebalance_cost": 0.0,
                  "bench": {"prices": px, "bb90_nav": nav, "bb90_values": {s: nav * w for s, w in BB90.items()},
                            "hold_0050_nav": nav},
-                 "note": "建倉：以目標權重買入，成本不計（虛擬建倉）"}
-        cal0 = P3._calendar_month_ends(d0, 14)
-        gn = P3.gate_decision(baa, cal0[-1], cal0)
-        entry["gate_decision_for_next"] = gn
-        if gn["gate_open"] != g0["gate_open"]:
-            entry["pending_switch"] = {"decided_on": d0, "to_open": gn["gate_open"], "basis": gn}
+                 "note": "建倉（先.七十五，總司令 2026-10-11 裁示「現在立刻馬上跑」）：以 2026-10-08 收盤價、目標權重買入，成本不計（虛擬建倉）；閘門用 2026-09-30 月底狀態；第一期 10/08～10/31 為部分期，10/31 起照原規則每月底更新閘門並再平衡", "partial_first_period": d0 not in month_ends}
+        if d0 in month_ends:
+            cal0 = P3._calendar_month_ends(d0, 14)
+            gn = P3.gate_decision(baa, cal0[-1], cal0)
+            entry["gate_decision_for_next"] = gn
+            if gn["gate_open"] != g0["gate_open"]:
+                entry["pending_switch"] = {"decided_on": d0, "to_open": gn["gate_open"], "basis": gn}
         _append_log(entry)
         blog.append(entry)
         processed += 1
@@ -282,10 +288,10 @@ def run() -> dict:
         return {"aborted": True}
 
     month_ends = [d for d in P3._month_ends(common) if d[:7] >= START_MONTH]
-    if not month_ends and not log:
-        _write_summary({"started": False, "note": f"{START_MONTH} 月底建倉（與紙.三 同日），尚未到啟動日",
+    if not log and not any(d >= INCEPTION_DATE for d in common):
+        _write_summary({"started": False, "note": f"{INCEPTION_DATE} 建倉（與紙.三 同日），價格資料尚未到該日",
                         "gate_now": cur_gate})
-        print(f"[紙.四] 尚未到 {START_MONTH} 月底（最新 {common[-1]}），目前閘門 {'開' if cur_gate['gate_open'] else '關'}")
+        print(f"[紙.四] 尚未有 {INCEPTION_DATE} 之後的共同交易日（最新 {common[-1]}）")
         return {"processed": 0, "started": False, "gate_now": cur_gate}
 
     processed, books = 0, {}

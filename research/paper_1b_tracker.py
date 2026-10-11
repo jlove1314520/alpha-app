@@ -57,7 +57,8 @@ HEARTBEAT_PATH = REPO_ROOT / "research" / "PROGRESS_HEARTBEAT.jsonl"
 SAFE_LEG: str | None = "00697B"   # 先.二十六-二 定案：與 IEF 追蹤同一指數（ICE US Treasury 7-10 Year Bond Index）
 LEGS = {"0050": 0.45, "00646": 0.45}      # 安全腿於 _targets() 併入
 INITIAL_VIRTUAL_CAPITAL = 1_000_000.0
-START_ANCHOR = "2026-11-01"
+# 先.七十五（2026-10-11）：原訂 2026-11-01 之後第一個交易日啟動，改為 2026-10-08 立即建倉（第一期 10/08～10/30 為部分期）
+START_ANCHOR = "2026-10-08"
 TZ = timezone(timedelta(hours=8))
 MAX_STALE_WEEKDAYS = 5
 _TODAY_OVERRIDE: str | None = None   # 僅 dry-run 沙盒使用（--today）
@@ -246,7 +247,8 @@ def run() -> dict:
                  "values_post": {s: INITIAL_VIRTUAL_CAPITAL * w for s, w in tgt.items()},
                  "nav": INITIAL_VIRTUAL_CAPITAL, "weights_post": dict(tgt),
                  "rebalance_cost": 0.0,
-                 "note": "建倉：以目標權重買入，成本於此筆不計（虛擬建倉）"}
+                 "note": "建倉（先.七十五，總司令 2026-10-11 裁示「現在立刻馬上跑」）：以 2026-10-08 收盤價、目標權重買入，成本於此筆不計（虛擬建倉）；第一期 10/08～10/30 為部分期，之後照原規則每月底再平衡",
+                 "partial_first_period": True}
         _append_log(entry)
         log.append(entry)
         print(f"[紙.一b] 帳戶啟動：{first}，虛擬淨值={entry['nav']:.2f}")

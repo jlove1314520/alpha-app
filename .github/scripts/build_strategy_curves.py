@@ -48,6 +48,8 @@ CORRECTION = "10/11 更正：舊算法重複計算，數字放大約 5 倍"
 # 先.七十二-A4：前台改白話（守回撤（天條一）→守住回檔；贏大盤＋守回撤→贏大盤也守回檔）；內部代號只留在 id。
 GOALS = {"live_bb90": "守住回檔", "paper_1": "守住回檔", "paper_3": "守住回檔",
          "paper_4": "贏大盤也守回檔", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
+# 先.七十五-5：尚未開始的模擬寫明原因（卡片「X 月 X 日開始」下方顯示）
+PLANNED_WHY = {"paper_2": "選股資料還在預熱"}
 POSITIONING = "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅"
 
 
@@ -155,10 +157,13 @@ def _line(id_, label, group, status, dates, nav, comp_max, note="", start=None, 
     return ln
 
 
-def _placeholder(id_, label, group, status, start, note) -> dict:
-    return {"id": id_, "label": label, "group": group, "status": status, "started": False, "start_date": start,
-            "as_of": None, "dates": [], "nav": [], "bench": [], "comp_max_abs_pct": [], "metrics": metrics([], []), "note": note,
-            "goal": GOALS.get(id_, "未標示")}
+def _placeholder(id_, label, group, status, start, note, extra=None) -> dict:
+    d = {"id": id_, "label": label, "group": group, "status": status, "started": False, "start_date": start,
+         "as_of": None, "dates": [], "nav": [], "bench": [], "comp_max_abs_pct": [], "metrics": metrics([], []), "note": note,
+         "goal": GOALS.get(id_, "未標示")}
+    if extra:
+        d.update(extra)
+    return d
 
 
 # ---------- 一、選股三榜：重疊組合法 ----------
@@ -282,10 +287,10 @@ def paper_lines(px: Px) -> list:
     out = []
     specs = [
         ("paper_1", "模擬 A 穩健", RDATA / "paper_7030_log.jsonl", "legacy_7030", None, "2026-10-01"),
-        ("paper_1b", "模擬 D 三檔分散", RDATA / "paper_1b_log.jsonl", "values_post", None, "2026-11-02"),
+        ("paper_1b", "模擬 D 三檔分散", RDATA / "paper_1b_log.jsonl", "values_post", None, "2026-10-08"),  # 先.七十五：10/08 建倉
         ("paper_2", "模擬 E 供給緊縮", RDATA / "paper_supply_v2_log.jsonl", "values_post", None, "2026-11-16"),
-        ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-30"),
-        ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-30"),
+        ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-08"),
+        ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-08"),
     ]
     for id_, label, path, vk, book, planned in specs:
         evs = _jsonl(path)
@@ -297,9 +302,15 @@ def paper_lines(px: Px) -> list:
         except Exception as e:  # noqa: BLE001 -- 單一紙上追蹤壞掉只影響自己那條線（十二節）
             print(f"[warn] {label} 曲線失敗：{type(e).__name__}: {e}")
         if not built or len(built["dates"]) < 1:
-            out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始"))
+            why = PLANNED_WHY.get(id_, "")
+            out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始" + (f"（{why}）" if why else ""),
+                                    extra={"why": why} if why else None))
             continue
         note = "依每天收盤價估算" + ("；定存部分按一個月定存利率計息" if vk == "legacy_7030" else "；現金不計息")
+        # 先.七十五-3：月中建倉的第一期是部分期（到第一個月底為止），報表標明
+        first = next((e for e in sorted(evs, key=lambda e: e.get("date", "")) if e.get("event") == "inception"), None)
+        if first and first.get("partial_first_period"):
+            note = f"第一期 {first['date'][5:].replace('-', '/')}～10/31 為部分期；" + note
         out.append(_line(id_, label, "paper", "模擬中", built["dates"], built["nav"], built["comp"], note=note, px=px))
     return out
 

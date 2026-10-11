@@ -1,6 +1,11 @@
 {
-  "started": false,
-  "note": "2026-10 月底建倉，尚未到啟動日",
+  "started": true,
+  "as_of_date": "2026-10-08",
+  "nav": 1000000.0,
+  "initial_virtual_capital": 1000000.0,
+  "total_return_pct": 0.0,
+  "gate_open": true,
+  "pending_switch": null,
   "gate_now": {
     "month_end": "2026-09-30",
     "baa10y": 1.47,
@@ -8,19 +13,18 @@
     "gate_open": true,
     "baa_data_date": "2026-09-30"
   },
-  "targets_open": {
+  "weights_post": {
     "00631L": 0.25,
     "00647L": 0.25,
     "0050": 0.15,
     "00646": 0.15,
     "00697B": 0.2
   },
-  "targets_closed": {
-    "CASH": 0.5,
-    "0050": 0.15,
-    "00646": 0.15,
-    "00697B": 0.2
-  },
-  "generated_at": "2026-10-10T09:19:48.162483+08:00",
+  "bench_bb90_return_pct": 0.0,
+  "bench_0050_return_pct": 0.0,
+  "history_rows": 1,
+  "history_months": 1,
+  "note": "紙.三＝S3-C6（#424／#426）台灣可執行版；槓桿腿用 00631L／00647L 真實價；閘門延後一個交易日切換；與紙.一／紙.一b 並行",
+  "generated_at": "2026-10-11T17:31:09.013231+08:00",
   "disclaimer": "紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。"
 }

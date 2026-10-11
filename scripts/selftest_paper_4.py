@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """先.五十九-A1 自測：紙.四 前進式紙上追蹤（research/paper_4_tracker.py）。
 
-全程沙盒、不連網（BAA10Y 用假資料），檢查：①10 月底兩本帳同日建倉、權重照事前登記
+全程沙盒、不連網（BAA10Y 用假資料），檢查：①（先.七十五）10-08 兩本帳同日月中建倉、閘門依據 09-30、權重照事前登記
 ②月底照舊狀態再平衡、閘門判關後「下一個交易日」才切換 ③成本＝只對減碼計 0.1% 賣出稅（#430 口徑）
 ④重跑不重複記帳 ⑤BAA10Y 當月未到齊不記帳 ⑥帳本重複列 → 中止寫 last_error ⑦摘要含固定揭露文字。
 """
@@ -56,14 +56,16 @@ try:
         p = tmp / "sb" / "paper_4_log.jsonl"
         return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()] if p.exists() else []
 
-    # ⑤ BAA 10 月未到齊（只到 10-29）→ 不建倉
-    r = go("2026-10-30", {k: v for k, v in baa.items() if k <= "2026-10-29"})
-    check("BAA10Y 當月未到齊不建倉", not log())
-    # ① 建倉
-    r = go("2026-11-02")
+    # ⑤／① 先.七十五（2026-10-11）：改為 2026-10-08 月中立即建倉，閘門用 09-30 月底狀態；
+    # 月中建倉不用當月 BAA10Y，所以 10 月資料未到齊（只到 10-07）也照建
+    r = go("2026-10-09", {k: v for k, v in baa.items() if k <= "2026-10-07"})
     L = log()
     inc = [e for e in L if e["event"] == "inception"]
-    check("10 月底兩本帳同日建倉（2026-10-30）", sorted(e["book"] for e in inc) == ["R1-A", "R1-C"] and all(e["date"] == "2026-10-30" for e in inc))
+    check("10-08 兩本帳同日月中建倉（10 月 BAA10Y 未到齊也照建，先.七十五）", sorted(e["book"] for e in inc) == ["R1-A", "R1-C"] and all(e["date"] == "2026-10-08" for e in inc))
+    check("建倉閘門依據＝2026-09-30 月底、標部分期", all(e["gate_basis"]["month_end"] == "2026-09-30" and e.get("partial_first_period") for e in inc))
+    r = go("2026-11-02")
+    me10 = next((e for e in log() if e["book"] == "R1-C" and e["date"] == "2026-10-30"), None)
+    check("第一個月底 10-30 照原規則再平衡並判定下月閘門", me10 and me10["event"] == "month_end" and "gate_decision_for_next" in me10)
     check("R1-C 建倉權重 0050 50%／00631L 50%", next(e for e in inc if e["book"] == "R1-C")["targets"] == {"0050": 0.5, "00631L": 0.5})
     # ② 跑到 12 月：11-30 月底照舊（開）、12-01 切換到關
     go("2026-12-04")

@@ -3043,12 +3043,12 @@ async function runSmokeTest(baseUrl, headless = true) {
       out.firstTab = tabs[0] && tabs[0].dataset.tab;
       out.firstOn = tabs[0] && /var\(--accent\)/.test(tabs[0].getAttribute("style") || "");
       const lines = scLines();
-      const started = lines.filter(l => l.started && l.dates && l.dates.length > 1);
+      const started = lines.filter(l => scHasData(l));  // 與 App 同一個定義（先.七十五：剛建倉只有一天也算）
       out.nStarted = started.length;
       out.legend = [...document.querySelectorAll("#sc-body .sc-legend-item")].map(e => e.textContent.trim());
       out.allSvg = !!document.querySelector("#sc-body svg polyline");
       out.soon = (document.querySelector("#sc-body .sc-soon") || {}).textContent || "";
-      out.notStartedLabels = lines.filter(l => !(l.started && l.dates && l.dates.length > 1)).map(l => l.label);
+      out.notStartedLabels = lines.filter(l => !scHasData(l)).map(l => l.label);
       // 按住圖
       const svg = document.getElementById("sc-svg");
       if (svg) {
@@ -3066,7 +3066,8 @@ async function runSmokeTest(baseUrl, headless = true) {
         const body = document.getElementById("sc-body");
         const chipNow = document.querySelector(`#sc-tabs .sc-tab[data-tab="${t.dataset.tab}"]`);
         out.tabs.push({ t: t.dataset.tab, has: chipNow.dataset.hasData === "1", dim: /opacity:\s*\.45/.test(chipNow.getAttribute("style") || ""),
-          svg: !!body.querySelector("svg"), emptySvg: [...body.querySelectorAll("svg")].some(s => !s.querySelector("polyline")),
+          // 先.七十六：沒有紙上資料的分頁可以有歷史段圖（.sc-hist），但不得有紙上段的圖；任何圖都不得空白
+          svg: [...body.querySelectorAll("svg")].some(s => !s.classList.contains("sc-hist") && !s.closest(".sc-seg-label")), emptySvg: [...body.querySelectorAll("svg")].filter(s => !s.closest(".sc-seg-label")).some(s => !s.querySelector("polyline, circle, rect")),
           notyet: (body.querySelector(".sc-notyet") || {}).textContent || "" });
       }
       SC_TAB = "all"; renderStrategyCurves();
@@ -3090,10 +3091,72 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { scfErrs.push(`測試本身出錯：${e.message || e}`); }
   record("95. 「跟 0050 比」卡：預設疊圖、未開始分頁變灰無空白圖、圖例＝有資料線數＋1、即將加入、按住看數值（先.七十三）", scfErrs.length === 0, scfErrs.join("; ") || scfInfo);
 
+  // 96.【2026-10-11 先.七十六】歷史段：①回測／樣本外／紙上三段不得重疊（回測迄 < 樣本外起；樣本外最後一個月 < 紙上起日；
+  // 畫面上樣本外點線最後一點 < 紙上實線第一點）②歷史段年化與最大跌幅＝原結果檔（±0.05pp），樣本外逐月報酬原樣搬運
+  // ③有歷史段的分頁畫出三個固定標籤與 1 年／3 年／全部切換（預設 3 年）。
+  const hsErrs = [];
+  let hsInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const j = async (u) => (await fetch(u, { cache: "no-store" })).json();
+      const h = await j("data/strategy_history.json");
+      const out = { errs: [], n: 0, cmp: 0 };
+      const get = (d, p) => p.reduce((a, k) => (a == null ? a : a[k]), d);
+      const srcCache = {};
+      const segs = [];
+      for (const [id, s] of Object.entries(h.lines || {})) for (const [kind, seg] of Object.entries(s)) segs.push({ id, kind, seg });
+      for (const [kind, seg] of Object.entries(h.bench_0050 || {})) segs.push({ id: "0050", kind, seg });
+      for (const { id, kind, seg } of segs) {
+        out.n++;
+        const src = srcCache[seg.source] || (srcCache[seg.source] = await j(seg.source));
+        const node = get(src, seg.path);
+        if (!node) { out.errs.push(`${id}/${kind} 原檔路徑不存在：${seg.path.join("/")}`); continue; }
+        for (const k of ["cagr", "mdd"]) {
+          if (seg[k] == null && node[k] == null) continue;
+          if (Math.abs((seg[k] - node[k]) * 100) > 0.05) out.errs.push(`${id}/${kind} ${k} ${(seg[k] * 100).toFixed(2)}% ≠ 原檔 ${(node[k] * 100).toFixed(2)}%`);
+          else out.cmp++;
+        }
+        if (kind === "oos" && JSON.stringify(seg.monthly) !== JSON.stringify(node.monthly)) out.errs.push(`${id} 樣本外逐月報酬與原檔不一致`);
+        // ① 期間不重疊
+        const end = (seg.period || [])[1];
+        if (kind === "backtest" && !(end < "2025-01-01")) out.errs.push(`${id} 回測段迄日 ${end} 與樣本外重疊`);
+        if (kind === "oos") {
+          const lastM = Object.keys(seg.monthly || {}).sort().slice(-1)[0];
+          if (!(lastM + "-31" < h.meta.paper_start)) out.errs.push(`${id} 樣本外最後一月 ${lastM} 與紙上段（${h.meta.paper_start} 起）重疊`);
+        }
+      }
+      // 畫面：每個有歷史段的分頁
+      out.ui = [];
+      for (const id of Object.keys(h.lines || {})) {
+        const tab = id === "live_bb90" ? "live" : id;
+        SC_TAB = tab; SC_RANGE = "3y"; renderStrategyCurves();
+        const blk = document.querySelector("#sc-body .sc-hist-block");
+        const svg = blk && blk.querySelector("svg.sc-hist");
+        const oos = svg ? [...svg.querySelectorAll('[data-seg="oos"]')] : [], pap = svg ? [...svg.querySelectorAll('[data-seg="paper"]')] : [];
+        const xs = (el) => el.tagName === "circle" ? [+el.getAttribute("cx")] : el.getAttribute("points").trim().split(/\s+/).map(p => +p.split(",")[0]);
+        const oosMax = oos.length ? Math.max(...oos.flatMap(xs)) : null, papMin = pap.length ? Math.min(...pap.flatMap(xs)) : null;
+        out.ui.push({ id, blk: !!blk, labels: blk ? [...blk.querySelectorAll(".sc-seg-label")].map(e => e.textContent.trim()) : [],
+          ranges: blk ? [...blk.querySelectorAll(".sc-range")].map(e => e.dataset.range) : [], rangeOn: SC_RANGE,
+          overlap: oosMax != null && papMin != null && !(oosMax < papMin), hasOos: oos.length > 0 });
+      }
+      SC_TAB = "all"; SC_RANGE = "3y"; renderStrategyCurves();
+      return out;
+    });
+    hsErrs.push(...r.errs);
+    for (const u of r.ui) {
+      if (!u.blk) { hsErrs.push(`${u.id} 分頁沒有歷史段`); continue; }
+      if (JSON.stringify(u.labels) !== JSON.stringify(["回測＝用來挑策略的資料", "樣本外＝只考過一次", "紙上＝今天起才算數"])) hsErrs.push(`${u.id} 三個固定標籤不符：${u.labels}`);
+      if (JSON.stringify(u.ranges) !== JSON.stringify(["1y", "3y", "all"])) hsErrs.push(`${u.id} 範圍切換應為 1 年／3 年／全部`);
+      if (u.overlap) hsErrs.push(`${u.id} 圖上樣本外點線與紙上實線重疊`);
+    }
+    hsInfo = `${r.n} 段、${r.cmp} 個數字與原檔一致；${r.ui.length} 個分頁有歷史段`;
+  } catch (e) { hsErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("96. 歷史段：回測／樣本外／紙上不重疊、年化與最大跌幅＝原結果檔 ±0.05pp、三標籤與範圍切換（先.七十六）", hsErrs.length === 0, hsErrs.join("; ") || hsInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

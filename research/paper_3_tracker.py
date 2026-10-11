@@ -57,7 +57,9 @@ TARGETS_CLOSED = {CASH: 0.50, "0050": 0.15, "00646": 0.15, "00697B": 0.20}
 BB90 = {"0050": 0.45, "00646": 0.45, "00697B": 0.10}
 SYMBOLS = ("00631L", "00647L", "0050", "00646", "00697B")
 INITIAL_VIRTUAL_CAPITAL = 1_000_000.0
-START_MONTH = "2026-10"          # 2026-10 月底建倉
+START_MONTH = "2026-10"          # 月底事件從 2026-10 起算
+# 先.七十五（2026-10-11）：取代原「2026-10 月底建倉」，改為 2026-10-08 立即建倉（閘門用 09-30 狀態；第一期為部分期）
+INCEPTION_DATE = "2026-10-08"
 GATE_LOOKBACK = 12
 TZ = timezone(timedelta(hours=8))
 MAX_STALE_WEEKDAYS = 5
@@ -321,13 +323,14 @@ def run() -> dict:
     processed = 0
 
     if not log:
-        if not month_ends:
-            _write_summary({"started": False, "note": f"{START_MONTH} 月底建倉，尚未到啟動日",
+        d0 = next((d for d in common if d >= INCEPTION_DATE), None)
+        if d0 is None:
+            _write_summary({"started": False, "note": f"{INCEPTION_DATE} 建倉，價格資料尚未到該日",
                             "gate_now": cur_gate, "targets_open": TARGETS_OPEN, "targets_closed": TARGETS_CLOSED})
-            print(f"[紙.三] 尚未到 {START_MONTH} 月底（最新 {common[-1]}），目前閘門 {'開' if cur_gate['gate_open'] else '關'}")
+            print(f"[紙.三] 尚未有 {INCEPTION_DATE} 之後的共同交易日（最新 {common[-1]}）")
             return {"processed": 0, "started": False, "gate_now": cur_gate}
-        d0 = month_ends[0]
-        if not baa_month_complete(baa, _calendar_month_ends(d0, 1)[-1]):
+        # 月中建倉只用「建倉日前已知的最近月底」（09-30）判閘門，不需要當月 BAA10Y 完整；月底建倉才檢查
+        if d0 in month_ends and not baa_month_complete(baa, _calendar_month_ends(d0, 1)[-1]):
             _write_summary({"started": False, "note": f"{d0} 建倉日：當月 BAA10Y 尚未公布完整，下次排程建倉",
                             "gate_now": cur_gate, "targets_open": TARGETS_OPEN, "targets_closed": TARGETS_CLOSED})
             print(f"[紙.三] {d0} 建倉延後：當月 BAA10Y 尚未公布完整")
@@ -342,12 +345,13 @@ def run() -> dict:
                  "values_post": {s: nav * w for s, w in tgt.items()}, "nav": nav, "rebalance_cost": 0.0,
                  "bench": {"prices": px, "bb90_nav": nav, "bb90_values": {s: nav * w for s, w in BB90.items()},
                            "hold_0050_nav": nav},
-                 "note": "建倉：以目標權重買入，成本不計（虛擬建倉）"}
-        cal0 = _calendar_month_ends(d0, 14)
-        gn = gate_decision(baa, cal0[-1], cal0)                 # 建倉日本身也是月底：判定下月狀態
-        entry["gate_decision_for_next"] = gn
-        if gn["gate_open"] != g0["gate_open"]:
-            entry["pending_switch"] = {"decided_on": d0, "to_open": gn["gate_open"], "basis": gn}
+                 "note": "建倉（先.七十五，總司令 2026-10-11 裁示「現在立刻馬上跑」）：以 2026-10-08 收盤價、目標權重買入，成本不計（虛擬建倉）；閘門用 2026-09-30 月底狀態；第一期 10/08～10/31 為部分期，10/31 起照原規則每月底更新閘門並再平衡", "partial_first_period": d0 not in month_ends}
+        if d0 in month_ends:                                    # 建倉日本身是月底才當場判定下月狀態；月中建倉由第一個月底判定
+            cal0 = _calendar_month_ends(d0, 14)
+            gn = gate_decision(baa, cal0[-1], cal0)
+            entry["gate_decision_for_next"] = gn
+            if gn["gate_open"] != g0["gate_open"]:
+                entry["pending_switch"] = {"decided_on": d0, "to_open": gn["gate_open"], "basis": gn}
         _append_log(entry)
         log.append(entry)
         processed += 1

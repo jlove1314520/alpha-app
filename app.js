@@ -1037,7 +1037,8 @@
     return ls;
   }
   function scById(id){return scLines().find(l=>l.id===id)||null}
-  const scHasData=l=>!!(l&&l.started&&l.dates&&l.dates.length>1);
+  // 先.七十五：剛建倉的線只有一天（起點 100）也算有資料——疊圖畫成一個點，下一個交易日收盤後開始連成線
+  const scHasData=l=>!!(l&&l.started&&l.dates&&l.dates.length>=1);
   function scTabHasData(k){
     if(k==='all')return true;
     if(k==='boards')return SC_BOARDS.some(([b])=>scHasData(scById('board_'+b)));
@@ -1064,7 +1065,9 @@
     const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
     const X=d=>pad+(dates.length>1?xi[d]/(dates.length-1):0)*(W-2*pad),Y=v=>pad+(1-(v-mn)/rg)*(H-2*pad);
     const pl=(ds,vs)=>ds.map((d,i)=>`${X(d).toFixed(1)},${Y(vs[i]).toFixed(1)}`).join(' ');
-    const lines_=started.map(l=>`<polyline data-line="${l.id}" points="${pl(l.dates,l.nav)}" fill="none" stroke="${scColor(l.id)}" stroke-width="2.2"/>`).join('');
+    const lines_=started.map(l=>l.dates.length>1
+      ?`<polyline data-line="${l.id}" points="${pl(l.dates,l.nav)}" fill="none" stroke="${scColor(l.id)}" stroke-width="2.2"/>`
+      :`<circle data-line="${l.id}" cx="${X(l.dates[0]).toFixed(1)}" cy="${Y(l.nav[0]).toFixed(1)}" r="3.5" fill="${scColor(l.id)}"/>`).join('');
     const toMap=(ds,vs)=>Object.fromEntries(ds.map((d,i)=>[d,vs[i]]));
     SC_PLOT={dates,pad,W,series:[{label:'0050',color:SC_BENCH_COLOR,map:toMap(bl.dates,bl.bench)}]
       .concat(started.map(l=>({label:l.label,color:scColor(l.id),map:toMap(l.dates,l.nav)})))};
@@ -1118,12 +1121,15 @@
   }
   // 先.七十三-2：還沒開始的線只顯示一行，不畫空圖
   function scNotYetHtml(l){
-    return `<div class="note sc-notyet" style="margin:10px 0;color:var(--ink-3)">${_uiEsc(scStartText(l))}，現在還沒有資料</div>`;
+    return `<div class="note sc-notyet" style="margin:10px 0 2px;color:var(--ink-3)">${_uiEsc(scStartText(l))}，現在還沒有資料</div>`+
+      (l&&l.why?`<div class="note sc-notyet-why" style="margin:0 0 10px;color:var(--ink-4)">原因：${_uiEsc(l.why)}</div>`:'');
   }
   function scLineBlock(l){
     if(!l)return '<div class="note sc-notyet" style="color:var(--ink-3)">現在還沒有資料</div>';
-    if(!scHasData(l))return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>`+scNotYetHtml(l);
-    return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l])}</div>
+    if(!scHasData(l))return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>`+scNotYetHtml(l)+scHistBlockHtml(l);
+    // 先.七十五：剛建倉只有一天時不畫只有一個點的大空圖，改一行說明（歷史段圖裡會畫出起點）
+    if(l.dates.length<2)return scMetricsHtml(l)+`<div class="note sc-oneday" style="margin-top:8px;color:var(--ink-3)">${+l.start_date.slice(5,7)}/${+l.start_date.slice(8,10)} 建倉，起點 100；下一個交易日收盤後開始畫線</div>`+scHistBlockHtml(l);
+    return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l])}</div>`+scHistBlockHtml(l)+`
       <div class="note" style="margin-top:4px;font-size:10px">${l.start_date} 起算為 100；<span style="color:${SC_BENCH_COLOR}">━</span> 灰線＝同期 0050；按住圖看每天數字</div>
       <div class="note" style="margin-top:4px;font-size:10px;color:var(--ink-3)">${l.note||''}</div>`;
   }
@@ -1132,6 +1138,92 @@
     const item=(color,label,val)=>`<span class="sc-legend-item" style="display:inline-flex;align-items:center;gap:4px;margin:0 10px 4px 0;white-space:nowrap"><span style="display:inline-block;width:12px;height:3px;border-radius:2px;background:${color}"></span>${_uiEsc(label)}${val!=null?` <b style="font-weight:600">${val}</b>`:''}</span>`;
     return `<div class="sc-legend" style="display:flex;flex-wrap:wrap;font-size:11px;margin-top:6px">`+
       item(SC_BENCH_COLOR,'0050',null)+started.map(l=>item(scColor(l.id),l.label,_scGap(l.metrics&&l.metrics.cum_gap_pp))).join('')+`</div>`;
+  }
+  // ══════ 先.七十六（2026-10-11）：歷史段——回測（虛線框，只有摘要）／樣本外（點線）／紙上（實線），0050 全程灰線 ══════
+  // 資料：data/strategy_history.json（build_strategy_history.py 只讀既有結果檔）。回測結果檔沒有逐月序列，
+  // 所以回測段只畫一個虛線框標年化與最大跌幅，不畫曲線（不拿年化去畫一條假的直線）。
+  // 樣本外從 2024-12-31＝100 起逐月累積；紙上段接在樣本外終點後面（同一條時間軸、兩段不重疊）。
+  let SC_HIST=null,SC_RANGE='3y';
+  const SC_RANGES=[['1y','1 年'],['3y','3 年'],['all','全部']];
+  async function loadStrategyHistory(){
+    try{
+      const r=await fetch('data/strategy_history.json?t='+Math.floor(Date.now()/60000));
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      SC_HIST=await r.json();
+    }catch(e){console.warn('[loadStrategyHistory]',e);recordGlobalError('loadStrategyHistory',e);SC_HIST=null}
+    return SC_HIST;
+  }
+  const _scMs=d=>Date.parse(d+'T00:00:00Z');
+  function _scOosPoints(monthly){
+    const ks=Object.keys(monthly||{}).sort();if(!ks.length)return [];
+    const pts=[{d:'2024-12-31',v:100}];let v=100;
+    for(const k of ks){v*=1+Number(monthly[k]);const [y,m]=k.split('-').map(Number);const last=new Date(Date.UTC(y,m,0)).toISOString().slice(0,10);pts.push({d:last,v})}
+    return pts;
+  }
+  // 回傳 {segments:[{kind,id,color,pts}], box:{from,to,text}|null, firstDate,lastDate}
+  function scHistModel(l){
+    const H=SC_HIST&&SC_HIST.lines&&SC_HIST.lines[l.id];if(!H)return null;
+    const B=(SC_HIST.bench_0050)||{};
+    const segs=[];
+    const oos=H.oos&&_scOosPoints(H.oos.monthly),boos=B.oos&&_scOosPoints(B.oos.monthly);
+    if(oos&&oos.length)segs.push({kind:'oos',color:scColor(l.id),pts:oos});
+    if(oos&&oos.length&&boos&&boos.length)segs.push({kind:'oos',color:SC_BENCH_COLOR,pts:boos,bench:true});
+    if(scHasData(l)){
+      const base=oos&&oos.length?oos[oos.length-1].v:100,bbase=boos&&boos.length?boos[boos.length-1].v:100;
+      segs.push({kind:'paper',color:scColor(l.id),pts:l.dates.map((d,i)=>({d,v:base*l.nav[i]/100}))});
+      segs.push({kind:'paper',color:SC_BENCH_COLOR,bench:true,pts:l.dates.map((d,i)=>({d,v:bbase*l.bench[i]/100}))});
+    }
+    const bt=H.backtest&&H.backtest.cagr!=null?H.backtest:null;
+    const all=segs.flatMap(s=>s.pts.map(p=>p.d));
+    return {segs,bt,lastDate:all.length?all.sort().slice(-1)[0]:'2026-10-08'};
+  }
+  function scHistSvg(model){
+    const W=320,H=160,pad=8;
+    const last=_scMs(model.lastDate);
+    const from=SC_RANGE==='1y'?last-365*864e5:SC_RANGE==='3y'?last-3*365*864e5:_scMs('2003-07-01');
+    const vis=model.segs.map(s=>({...s,pts:s.pts.filter(p=>_scMs(p.d)>=from)})).filter(s=>s.pts.length);
+    const vals=vis.flatMap(s=>s.pts.map(p=>p.v));
+    if(!vals.length&&!(model.bt&&from<_scMs('2025-01-01')))return '';
+    const mn=Math.min(100,...vals),mx=Math.max(100,...vals),rg=(mx-mn)||1;
+    const X=ms=>pad+(ms-from)/((last-from)||1)*(W-2*pad),Y=v=>pad+14+(1-(v-mn)/rg)*(H-2*pad-14);
+    const dash={oos:'1.5,3',paper:''};
+    const lines=vis.map(s=>s.pts.length>1
+      ?`<polyline data-seg="${s.kind}${s.bench?'-0050':''}" points="${s.pts.map(p=>X(_scMs(p.d)).toFixed(1)+','+Y(p.v).toFixed(1)).join(' ')}" fill="none" stroke="${s.color}" stroke-width="${s.bench?1.8:2.2}" stroke-dasharray="${dash[s.kind]}" opacity="${s.bench?.85:1}"/>`
+      :`<circle data-seg="${s.kind}${s.bench?'-0050':''}" cx="${X(_scMs(s.pts[0].d)).toFixed(1)}" cy="${Y(s.pts[0].v).toFixed(1)}" r="3" fill="${s.color}"/>`).join('');
+    let box='';
+    if(model.bt&&from<_scMs('2025-01-01')){
+      const x0=X(Math.max(from,_scMs('2003-07-01'))),x1=X(_scMs('2024-12-31'));
+      // 框太窄（例如 3 年範圍只露出 2023-10～2024-12）時框內只寫「回測」，數字看上方指標列
+      if(x1-x0>12)box=`<rect data-seg="backtest" x="${x0.toFixed(1)}" y="${pad+14}" width="${(x1-x0).toFixed(1)}" height="${H-2*pad-14}" fill="none" stroke="var(--ink-3)" stroke-dasharray="5,4" rx="6"/>`+
+        `<text x="${((x0+x1)/2).toFixed(1)}" y="${(H/2+4).toFixed(1)}" text-anchor="middle" fill="var(--ink-3)" font-size="9">${x1-x0>170?`回測 年化 ${(model.bt.cagr*100).toFixed(1)}%｜最大跌幅 ${(model.bt.mdd*100).toFixed(1)}%`:'回測'}</text>`;
+    }
+    const yr=new Date(from).getUTCFullYear(),ticks=[];
+    for(let y=yr+1;_scMs(y+'-01-01')<=last;y+=(SC_RANGE==='all'?4:1))ticks.push(`<text x="${X(_scMs(y+'-01-01')).toFixed(1)}" y="${pad+6}" text-anchor="middle" fill="var(--ink-4)" font-size="8">${y}</text>`);
+    return `<svg class="sc-hist" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <line x1="${pad}" y1="${Y(100).toFixed(1)}" x2="${W-pad}" y2="${Y(100).toFixed(1)}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>${ticks.join('')}${box}${lines}</svg>`;
+  }
+  // 先.七十六-3：指標列分段——回測年化與最大跌幅／樣本外累計差距／紙上累計差距（<60 交易日：尚不足以判斷）
+  function scHistMetricsHtml(l){
+    const H=SC_HIST&&SC_HIST.lines&&SC_HIST.lines[l.id];if(!H)return '';
+    const B=(SC_HIST.bench_0050||{}).oos;
+    const cells=[];
+    if(H.backtest&&H.backtest.cagr!=null)cells.push(`<div class="s" data-seg="backtest"><span>回測</span><b>年化 ${(H.backtest.cagr*100).toFixed(1)}%</b><span style="font-size:10px">最大跌幅 ${(H.backtest.mdd*100).toFixed(1)}%</span></div>`);
+    if(H.oos&&H.oos.cum_return!=null&&B&&B.cum_return!=null){const g=(H.oos.cum_return-B.cum_return)*100;cells.push(`<div class="s" data-seg="oos"><span>樣本外</span><b class="${g>=0?'pos':'neg'}">${_scPp(g)}</b><span style="font-size:10px">跟 0050 差</span></div>`)}
+    const m=l.metrics||{};
+    cells.push(`<div class="s" data-seg="paper"><span>紙上</span><b>${scHasData(l)&&m.days>=60?_scPp(m.cum_gap_pp):'尚不足以判斷'}</b><span style="font-size:10px">${scHasData(l)?(m.days||0)+' 個交易日':'還沒開始'}</span></div>`);
+    return `<div class="bot-stats sc-hist-metrics" style="margin:6px 0">${cells.join('')}</div>`;
+  }
+  function scHistBlockHtml(l){
+    const model=scHistModel(l);if(!model)return '';
+    const svg=scHistSvg(model);
+    const chip=(on,label,k)=>`<span class="press sc-range" data-range="${k}" style="padding:2px 8px;border-radius:12px;font-size:10.5px;border:1px solid ${on?'var(--accent)':'var(--hairline)'};color:${on?'var(--accent)':'var(--ink-3)'};cursor:pointer" onclick="SC_RANGE='${k}';renderStrategyCurves()">${label}</span>`;
+    const lab=(dash,text,seg)=>`<span class="sc-seg-label" data-seg="${seg}" style="display:inline-flex;align-items:center;gap:4px;margin:0 10px 3px 0;white-space:nowrap"><svg width="18" height="6"><line x1="0" y1="3" x2="18" y2="3" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="${dash}"/></svg>${text}</span>`;
+    const L=(SC_HIST.meta&&SC_HIST.meta.labels)||{};
+    return `<div class="sc-hist-block" style="margin-top:10px">
+      <div style="display:flex;gap:6px;justify-content:flex-end;margin-bottom:4px">${SC_RANGES.map(([k,lb])=>chip(k===SC_RANGE,lb,k)).join('')}</div>
+      ${scHistMetricsHtml(l)}${svg}
+      <div class="sc-seg-labels" style="display:flex;flex-wrap:wrap;font-size:10.5px;color:var(--ink-3);margin-top:4px">${lab('5,4',L.backtest||'回測＝用來挑策略的資料','backtest')}${lab('1.5,3',L.oos||'樣本外＝只考過一次','oos')}${lab('',L.paper||'紙上＝今天起才算數','paper')}</div>
+    </div>`;
   }
   function renderStrategyCurves(){
     const tabsEl=document.getElementById('sc-tabs'),bodyEl=document.getElementById('sc-body');
@@ -1416,7 +1508,7 @@
     _safeAsync('renderBtPath',async()=>{renderBtPath()});
     _safeAsync('loadHomeExecCard',loadHomeExecCard);  // 常備.開發-11 真錢執行總覽卡（唯讀）
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
-    _safeAsync('loadStrategyCurves',async()=>{await loadStrategyCurves();renderStrategyCurves()});  // 2026-10-11 先.六十八 策略vs0050
+    _safeAsync('loadStrategyCurves',async()=>{await Promise.allSettled([loadStrategyCurves(),loadStrategyHistory()]);renderStrategyCurves()});  // 2026-10-11 先.六十八 策略vs0050
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -3450,7 +3542,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1716';
+  const APP_VERSION='2026-10-11.1748';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
