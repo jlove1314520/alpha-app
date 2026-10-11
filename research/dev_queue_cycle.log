@@ -16083,3 +16083,16 @@ mode: CRUNCH（先.六十四 趕工模式）
 [crunch 12:46:31] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 5 項；常備.開發剩 20 項
 finally: released .devqueue.lock (cycle_id=20261011-113101)
 ===== DevQueue cycle end: 2026-10-11 12:46:31 cycle_id=20261011-113101 reason=CRUNCH_YIELD exit=12 duration_min=75.5 =====
+
+===== DevQueue cycle start: 2026-10-11 13:01:03 cycle_id=20261011-130103 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+[crunch 13:01:04] gate：NO_LOCK：沒有輪次在跑
+crunch gate: [crunch 13:01:04] gate：NO_LOCK：沒有輪次在跑
+lock: LOCK_ACQUIRED (cycle 20261011-130103)
+mode: CRUNCH（先.六十四 趕工模式）
+[crunch 13:01:07] 排程切換為 crunch（每 PT30M、上限 PT12H）：成功
+[crunch 13:01:08] 派工 #1：常備.開發-因子類-B18 未來性濾網 (b) 類因子（事件資料，SEC 8-K 優先）
+[crunch 13:15:07] 結算：常備.開發-因子類-B18 未來性濾網 (b) 類因子（事件資料，SEC 8-K → fail
+[crunch 13:15:10] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 1 項；常備.開發剩 19 項
+finally: released .devqueue.lock (cycle_id=20261011-130103)
+===== DevQueue cycle end: 2026-10-11 13:15:10 cycle_id=20261011-130103 reason=CRUNCH_YIELD exit=12 duration_min=14.1 =====
