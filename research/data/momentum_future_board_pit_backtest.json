@@ -1,0 +1,240 @@
+{
+  "generated_at": "2026-10-12T02:00:36.943063+08:00",
+  "reverification": true,
+  "random_draws": 20,
+  "universe": "#390 同一份流動性前500檔快取（486檔可用）",
+  "boards": {
+    "momentum": {
+      "weights_sha256": "0ea99f55d5a41bd7a28b556cba5bd74c3f2c5baa7e9a10e55860e01ae2db8d0f",
+      "train": {
+        "label": "TRAIN",
+        "start": "2015-01-01",
+        "end": "2020-12-31",
+        "return_pct": 45.08765725772199,
+        "mdd_pct": -21.441611851596974,
+        "sortino": 0.5049077770808769,
+        "n_trades": 1390,
+        "sharpe_raw": 0.5392143154788377,
+        "cvar_95_daily_pct": -2.077059670668525,
+        "buy_and_hold_0050_tr_pct": 121.49774484605418,
+        "bh_mdd_pct": -28.72351867557868,
+        "alpha_ann_pct": -0.2042035526074848,
+        "beta": 0.5033649372162866,
+        "alpha_pvalue": 0.9625620492156172,
+        "alpha_significant": false,
+        "random_control_percentile": 95.0,
+        "random_draws": 20,
+        "moonshot_rate": 14.5,
+        "big_win_rate": 33.5,
+        "mine_rate": 26.4
+      },
+      "val": {
+        "label": "VALIDATION",
+        "start": "2021-01-01",
+        "end": "2024-12-31",
+        "return_pct": 53.51329640398812,
+        "mdd_pct": -19.654929769653464,
+        "sortino": 0.7921193287595905,
+        "n_trades": 915,
+        "sharpe_raw": 0.8517831540222475,
+        "cvar_95_daily_pct": -2.0703566954604504,
+        "buy_and_hold_0050_tr_pct": 78.63290119207649,
+        "bh_mdd_pct": -31.631864884340406,
+        "alpha_ann_pct": 4.7571295409321035,
+        "beta": 0.4335533802311177,
+        "alpha_pvalue": 0.4445437229150585,
+        "alpha_significant": false,
+        "random_control_percentile": 90.0,
+        "random_draws": 20,
+        "moonshot_rate": 16.6,
+        "big_win_rate": 33.5,
+        "mine_rate": 15.1
+      },
+      "dsr": {
+        "val_ir": {
+          "label": "momentum_board_VAL",
+          "ok": true,
+          "n_obs": 970,
+          "beta_dimson": 0.4335533802311177,
+          "ir_daily": 0.02343920902006739,
+          "ir_annualized": 0.3720859079709617
+        },
+        "comparable_v": 0.00170500067324374,
+        "n_comparable": 4,
+        "skew": -0.44515398167674247,
+        "kurtosis": 4.531564037986001,
+        "n_trials": 436,
+        "n_trials_source": "取兩口徑較大者（較保守）：trial_registry 436 列（排除 FDR 對照表）／selection_bias_ledger 436 列（含對照表）；口徑分歧待總司令裁示",
+        "dsr": {
+          "dsr": 0.0008929147862425935,
+          "sr_observed": 0.02343920902006739,
+          "sr0_threshold": 0.1243337820262357,
+          "n_trials": 436,
+          "var_sr_trials": 0.00170500067324374,
+          "n_obs": 970,
+          "z": -3.1237156331901943,
+          "freq_label": "每期"
+        },
+        "sensitivity_table": [
+          {
+            "ann_sd": 0.2,
+            "v_daily": 0.00015873015873015876,
+            "sr0_daily": 0.037936441613179855,
+            "sr0_annualized": 0.6022223408111754,
+            "dsr_at_this_v": 0.3267745705023827
+          },
+          {
+            "ann_sd": 0.3,
+            "v_daily": 0.00035714285714285714,
+            "sr0_daily": 0.05690466241976977,
+            "sr0_annualized": 0.9033335112167629,
+            "dsr_at_this_v": 0.15007845612567167
+          },
+          {
+            "ann_sd": 0.4,
+            "v_daily": 0.000634920634920635,
+            "sr0_daily": 0.07587288322635971,
+            "sr0_annualized": 1.2044446816223509,
+            "dsr_at_this_v": 0.05225658049980331
+          },
+          {
+            "ann_sd": 0.5,
+            "v_daily": 0.000992063492063492,
+            "sr0_daily": 0.09484110403294962,
+            "sr0_annualized": 1.5055558520279382,
+            "dsr_at_this_v": 0.01353119989210888
+          },
+          {
+            "ann_sd": 0.75,
+            "v_daily": 0.002232142857142857,
+            "sr0_daily": 0.14226165604942442,
+            "sr0_annualized": 2.2583337780419073,
+            "dsr_at_this_v": 0.00011718253816733748
+          }
+        ]
+      },
+      "gates": {
+        "天條一_MDD不超過-50%": true,
+        "天條二_VAL贏0050含息買進持有": false,
+        "DSR_VAL_IR_可比試驗V點估計>=0.95": false
+      },
+      "verdict": "回測未通過"
+    },
+    "future": {
+      "weights_sha256": "2909ad72626dc2c1ff565775318bba94717c9d4ccaa0200bdf64a845d594915a",
+      "train": {
+        "label": "TRAIN",
+        "start": "2015-01-01",
+        "end": "2020-12-31",
+        "return_pct": 0.7462495387295487,
+        "mdd_pct": -19.75854076469305,
+        "sortino": 0.058409708469196804,
+        "n_trades": 1197,
+        "sharpe_raw": 0.06518997146473314,
+        "cvar_95_daily_pct": -1.75116851542589,
+        "buy_and_hold_0050_tr_pct": 121.49774484605418,
+        "bh_mdd_pct": -28.72351867557868,
+        "alpha_ann_pct": -6.088085735704496,
+        "beta": 0.46607137380351354,
+        "alpha_pvalue": 0.0551499613728323,
+        "alpha_significant": false,
+        "random_control_percentile": 10.0,
+        "random_draws": 20,
+        "moonshot_rate": 8.1,
+        "big_win_rate": 26.9,
+        "mine_rate": 19.2
+      },
+      "val": {
+        "label": "VALIDATION",
+        "start": "2021-01-01",
+        "end": "2024-12-31",
+        "return_pct": 22.627550975944022,
+        "mdd_pct": -24.699654372307194,
+        "sortino": 0.49183262372864994,
+        "n_trades": 793,
+        "sharpe_raw": 0.5310477187069276,
+        "cvar_95_daily_pct": -1.713508080705029,
+        "buy_and_hold_0050_tr_pct": 78.63290119207649,
+        "bh_mdd_pct": -31.631864884340406,
+        "alpha_ann_pct": -1.3653808125795752,
+        "beta": 0.42211611532053334,
+        "alpha_pvalue": 0.7461025142312784,
+        "alpha_significant": false,
+        "random_control_percentile": 35.0,
+        "random_draws": 20,
+        "moonshot_rate": 10.4,
+        "big_win_rate": 24.3,
+        "mine_rate": 13.9
+      },
+      "dsr": {
+        "val_ir": {
+          "label": "future_board_VAL",
+          "ok": true,
+          "n_obs": 970,
+          "beta_dimson": 0.42211611532053334,
+          "ir_daily": -0.009374668857201647,
+          "ir_annualized": -0.14881825451842587
+        },
+        "comparable_v": 0.00170500067324374,
+        "n_comparable": 4,
+        "skew": -0.18192993851624703,
+        "kurtosis": 4.523845199021389,
+        "n_trials": 436,
+        "n_trials_source": "取兩口徑較大者（較保守）：trial_registry 436 列（排除 FDR 對照表）／selection_bias_ledger 436 列（含對照表）；口徑分歧待總司令裁示",
+        "dsr": {
+          "dsr": 1.5528691203137157e-05,
+          "sr_observed": -0.009374668857201647,
+          "sr0_threshold": 0.1243337820262357,
+          "n_trials": 436,
+          "var_sr_trials": 0.00170500067324374,
+          "n_obs": 970,
+          "z": -4.165571309515733,
+          "freq_label": "每期"
+        },
+        "sensitivity_table": [
+          {
+            "ann_sd": 0.2,
+            "v_daily": 0.00015873015873015876,
+            "sr0_daily": 0.037936441613179855,
+            "sr0_annualized": 0.6022223408111754,
+            "dsr_at_this_v": 0.07024930600105694
+          },
+          {
+            "ann_sd": 0.3,
+            "v_daily": 0.00035714285714285714,
+            "sr0_daily": 0.05690466241976977,
+            "sr0_annualized": 0.9033335112167629,
+            "dsr_at_this_v": 0.01946739924576618
+          },
+          {
+            "ann_sd": 0.4,
+            "v_daily": 0.000634920634920635,
+            "sr0_daily": 0.07587288322635971,
+            "sr0_annualized": 1.2044446816223509,
+            "dsr_at_this_v": 0.003955863577901397
+          },
+          {
+            "ann_sd": 0.5,
+            "v_daily": 0.000992063492063492,
+            "sr0_daily": 0.09484110403294962,
+            "sr0_annualized": 1.5055558520279382,
+            "dsr_at_this_v": 0.0005836494690716898
+          },
+          {
+            "ann_sd": 0.75,
+            "v_daily": 0.002232142857142857,
+            "sr0_daily": 0.14226165604942442,
+            "sr0_annualized": 2.2583337780419073,
+            "dsr_at_this_v": 1.1556904983556215e-06
+          }
+        ]
+      },
+      "gates": {
+        "天條一_MDD不超過-50%": true,
+        "天條二_VAL贏0050含息買進持有": false,
+        "DSR_VAL_IR_可比試驗V點估計>=0.95": false
+      },
+      "verdict": "回測未通過"
+    }
+  }
+}
