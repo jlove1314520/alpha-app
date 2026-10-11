@@ -154,6 +154,7 @@
   function hydrateSettings(){
     _safeAsync('loadRiskLimits',loadRiskLimits);_safeAsync('loadNotif',loadNotif);_safeAsync('loadAlerts',loadAlerts);loadBroker();
     setTxt('set-wl-count',WL.length);
+    try{renderWLSettings()}catch(e){console.warn('[renderWLSettings]',e);recordGlobalError('renderWLSettings',e)}  // 常備.開發-31
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
     setTxt('set-cache-count',cacheCount+' 筆快取');
     renderColorSchemeToggle();

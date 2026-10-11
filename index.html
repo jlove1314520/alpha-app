@@ -1111,6 +1111,14 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <h3>自選股</h3>
       <div class="note" style="margin-bottom:10px">目前 <b id="set-wl-count" style="color:var(--ink)">—</b> 檔（可混台股／美股）</div>
       <button class="btn ghost" style="width:100%" onclick="editWL()">管理自選</button>
+      <!-- 常備.開發-31（2026-10-11）：自選股匯入匯出（CSV／JSON，含多清單）。匯入只合併、不刪除既有清單。 -->
+      <div class="note" id="set-wl-lists" style="margin-top:10px">—</div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn ghost" style="flex:1" onclick="wlExport('json')">匯出JSON</button>
+        <button class="btn ghost" style="flex:1" onclick="wlExport('csv')">匯出CSV</button>
+        <button class="btn ghost" style="flex:1" onclick="wlImportPick()">匯入</button>
+      </div>
+      <details data-ui-detail class="note" style="margin-top:6px"><summary style="cursor:pointer">ⓘ 說明</summary>匯出包含全部清單；匯入可讀本 App 匯出的 JSON／CSV（「清單,代號」兩欄），或只有一欄代號的 CSV（併入「匯入清單」）。同名清單會合併、只增不減，不會刪除既有清單。</details>
     </div>
 
 

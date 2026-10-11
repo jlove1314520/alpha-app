@@ -984,6 +984,100 @@
       +(Object.keys(o.lists).length>1?`<span class="press" style="${chip(false)}" onclick="wlRemovePrompt()">下架</span>`:'');
     el.querySelectorAll('.wl-tab').forEach(t=>t.addEventListener('click',()=>wlSwitch(t.dataset.name)));
   }
+  // 常備.開發-31（2026-10-11）：自選股匯入匯出（CSV／JSON，含多清單）。
+  // JSON＝{format:'alpha-watchlists',version:1,exported_at,active,lists:{名稱:[代號]}}；CSV＝「清單,代號」兩欄。
+  // 匯入一律「合併」：同名清單取聯集、新名稱新建，不刪除任何既有清單或代號；也接受純代號陣列／單欄 CSV（併入「匯入清單」）。
+  const WL_IO_MAX_LISTS=50,WL_IO_MAX_CODES=300,WL_IO_FALLBACK='匯入清單';
+  function _wlNormCode(c){
+    c=String(c==null?'':c).trim().replace(/^["']|["']$/g,'').trim();
+    if(!/^[0-9A-Za-z][0-9A-Za-z.\-]{0,9}$/.test(c))return null;
+    return /^[A-Za-z]/.test(c)?c.toUpperCase():c;
+  }
+  function _wlNormName(n){n=String(n==null?'':n).replace(/[\r\n\t]/g,' ').trim().slice(0,20);return n||WL_IO_FALLBACK}
+  function _wlCsvCell(s){s=String(s);return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+  function _wlCsvSplit(line){
+    const out=[];let cur='',q=false;
+    for(let i=0;i<line.length;i++){const ch=line[i];
+      if(q){if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+      else if(ch==='"')q=true;else if(ch===','||ch===';'||ch==='\t'){out.push(cur);cur=''}else cur+=ch}
+    out.push(cur);return out.map(x=>x.trim());
+  }
+  // 純解析，不碰 localStorage：回傳 {lists:{名稱:[代號]}, skipped:[無效值]}；格式整個認不得時丟例外
+  function wlParseImport(text,filename){
+    text=String(text||'').replace(/^﻿/,'');
+    const lists={},skipped=[];
+    const add=(name,code)=>{const c=_wlNormCode(code);if(!c){if(String(code||'').trim())skipped.push(String(code).trim().slice(0,20));return}
+      name=_wlNormName(name);if(!lists[name]){if(Object.keys(lists).length>=WL_IO_MAX_LISTS)return;lists[name]=[]}
+      if(!lists[name].includes(c)&&lists[name].length<WL_IO_MAX_CODES)lists[name].push(c)};
+    const t=text.trim();
+    if(/\.json$/i.test(filename||'')||t.startsWith('{')||t.startsWith('[')){
+      const d=JSON.parse(t);
+      if(Array.isArray(d))d.forEach(c=>add(WL_IO_FALLBACK,c));
+      else if(d&&typeof d==='object'&&d.lists&&typeof d.lists==='object')Object.keys(d.lists).forEach(n=>{const a=d.lists[n];if(Array.isArray(a))a.forEach(c=>add(n,c))});
+      else if(d&&Array.isArray(d.watchlist))d.watchlist.forEach(c=>add(WL_IO_FALLBACK,c));
+      else throw new Error('JSON 格式認不得（需要 lists 物件或代號陣列）');
+    }else{
+      const rows=t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(_wlCsvSplit);
+      if(!rows.length)throw new Error('檔案是空的');
+      let ci=-1,li=-1;const h=rows[0].map(x=>x.toLowerCase());
+      ci=h.findIndex(x=>['code','代號','symbol','ticker','stock_id'].includes(x));
+      li=h.findIndex(x=>['list','清單','group','name_of_list'].includes(x));
+      const hasHeader=ci>=0;
+      if(!hasHeader){const two=rows[0].length>=2&&_wlNormCode(rows[0][1]);ci=two?1:0;li=two?0:-1}  // 無表頭：第二欄像代號才當「清單,代號」，否則視為「代號,名稱…」
+      rows.slice(hasHeader?1:0).forEach(r=>add(li>=0?r[li]:WL_IO_FALLBACK,r[ci]));
+    }
+    if(!Object.keys(lists).length)throw new Error('檔案裡沒有任何有效代號'+(skipped.length?'（略過 '+skipped.length+' 個無效值）':''));
+    return {lists,skipped};
+  }
+  // 純合併：把 imp.lists 併進 o（同名聯集、新名新建），回傳 {added,newLists}
+  function wlMergeImport(o,impLists){
+    let added=0;const newLists=[];
+    Object.keys(impLists).forEach(n=>{
+      if(!o.lists[n]){if(Object.keys(o.lists).length>=WL_IO_MAX_LISTS)return;o.lists[n]=[];newLists.push(n)}
+      impLists[n].forEach(c=>{if(!o.lists[n].includes(c)&&o.lists[n].length<WL_IO_MAX_CODES){o.lists[n].push(c);added++}});
+    });
+    return {added,newLists};
+  }
+  function wlExportText(fmt){
+    const o=wlListsRead();
+    if(fmt==='csv'){const rows=['list,code'];Object.keys(o.lists).forEach(n=>o.lists[n].forEach(c=>rows.push(_wlCsvCell(n)+','+_wlCsvCell(c))));return '﻿'+rows.join('\r\n')+'\r\n'}
+    return JSON.stringify({format:'alpha-watchlists',version:1,exported_at:new Date().toISOString(),active:o.active,lists:o.lists},null,2);
+  }
+  function wlExport(fmt){
+    try{
+      const txt=wlExportText(fmt),ext=fmt==='csv'?'csv':'json';
+      const blob=new Blob([txt],{type:fmt==='csv'?'text/csv;charset=utf-8':'application/json'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='alpha-watchlists-'+new Date().toISOString().slice(0,10)+'.'+ext;
+      document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+      const o=wlListsRead();toast('已匯出 '+Object.keys(o.lists).length+' 個清單（'+ext.toUpperCase()+'）');
+    }catch(e){console.warn('[wlExport]',e);recordGlobalError('wlExport',e);toast('匯出失敗：'+(e&&e.message||e))}
+  }
+  function wlImportPick(){
+    try{
+      const inp=document.createElement('input');inp.type='file';inp.accept='.json,.csv,.txt,application/json,text/csv,text/plain';
+      inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;
+        if(f.size>512*1024){toast('檔案太大（上限 512KB）');return}
+        f.text().then(txt=>wlImportText(txt,f.name)).catch(e=>{console.warn('[wlImport:read]',e);recordGlobalError('wlImport:read',e);toast('讀檔失敗：'+(e&&e.message||e))})};
+      inp.click();
+    }catch(e){console.warn('[wlImportPick]',e);recordGlobalError('wlImportPick',e);toast('無法開啟檔案選擇')}
+  }
+  function wlImportText(txt,filename){
+    let p;try{p=wlParseImport(txt,filename)}catch(e){console.warn('[wlImport:parse]',e);toast('匯入失敗：'+(e&&e.message||e));return false}
+    const names=Object.keys(p.lists),total=names.reduce((s,n)=>s+p.lists[n].length,0);
+    if(!confirm('匯入 '+names.length+' 個清單、共 '+total+' 個代號（'+names.slice(0,5).join('、')+(names.length>5?'…':'')+'）？\n同名清單會合併（只增不減），不會刪除你現有的任何清單或代號。'+(p.skipped.length?'\n略過無效值 '+p.skipped.length+' 個。':'')))return false;
+    try{
+      const o=wlListsRead(),r=wlMergeImport(o,p.lists);
+      _wlActivate(o,o.active);  // 寫回 lists、同步 WL（目前清單若被併入也會即時更新）＋推送多裝置同步
+      renderWLSettings();
+      toast('已匯入：新增 '+r.added+' 個代號'+(r.newLists.length?'、新建 '+r.newLists.length+' 個清單':''));
+      return true;
+    }catch(e){console.warn('[wlImport:merge]',e);recordGlobalError('wlImport:merge',e);toast('匯入失敗：'+(e&&e.message||e));return false}
+  }
+  function renderWLSettings(){
+    const el=document.getElementById('set-wl-lists');if(!el)return;
+    const o=wlListsRead(),n=Object.keys(o.lists);
+    el.textContent=n.length+' 個清單、共 '+n.reduce((t,k)=>t+o.lists[k].length,0)+' 檔';  // 文案規則：說明 ≤40 字，清單明細看首頁分頁籤
+  }
   let WL=(()=>{try{return JSON.parse(localStorage.getItem('alpha_wl'))||["2330","2454","2317","1513","3231"]}catch(e){console.warn('[WL]',e);recordGlobalError('WL',e);return ["2330","2454","2317","1513","3231"]}})();
   try{wlListsWrite(wlListsRead())}catch(e){console.warn('[wl migrate]',e);recordGlobalError('wl migrate',e)}  // 常備.開發-8：舊單一清單自動搬進「我的自選」
   let currentCode="2330";
