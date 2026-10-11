@@ -102,6 +102,7 @@
   function renderJournalChips(...a){return _lazyCall('journal','renderJournalChips',a)}
   function loadWeeklyBrief(...a){return _lazyCall('journal','loadWeeklyBrief',a)}
   function loadJournalLedger(...a){return _lazyCall('journal','loadJournalLedger',a)}
+  function loadSysWeekly(...a){return _lazyCall('journal','loadSysWeekly',a)}
   function onTradeInit(...a){return _lazyCall('trade','onTradeInit',a)}
   function loadMarketUS(...a){return _lazyCall('market','loadMarketUS',a)}
   function loadMarketFUT(...a){return _lazyCall('market','loadMarketFUT',a)}
@@ -113,7 +114,7 @@
   function renderReport(...a){return _lazyCall('picks','renderReport',a)}
   function hydrateSettings(...a){return _lazyCall('settings','hydrateSettings',a)}
   function liveUpdateStockPage(...a){return _lazyCall('stock','liveUpdateStockPage',a)}
-  [openSectorList,loadMarketIndex,loadHeatmap,loadChipsMarketDetail,renderJournalChips,loadWeeklyBrief,loadJournalLedger,onTradeInit,loadMarketUS,loadMarketFUT,loadScanners,hydrateMarket,openStock,openStrategyReport,hydratePicks,renderReport,hydrateSettings,liveUpdateStockPage].forEach(f=>{f._lazyStub=true});
+  [openSectorList,loadMarketIndex,loadHeatmap,loadChipsMarketDetail,renderJournalChips,loadWeeklyBrief,loadJournalLedger,loadSysWeekly,onTradeInit,loadMarketUS,loadMarketFUT,loadScanners,hydrateMarket,openStock,openStrategyReport,hydratePicks,renderReport,hydrateSettings,liveUpdateStockPage].forEach(f=>{f._lazyStub=true});
   function recordGlobalError(label,err){
     const msg=(err&&err.message)?err.message:String(err);
     GLOBAL_ERRORS.push({label,msg,time:fmtTzHHMM(new Date(),'Asia/Taipei')});
@@ -215,7 +216,7 @@
     if(name==='chips-market')_safeAsync('loadChipsMarketDetail',loadChipsMarketDetail);
     if(name==='picks')_safeAsync('hydratePicks',hydratePicks);
     if(name==='trade')_safeSync('onTradeInit',onTradeInit);
-    if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadWeeklyBrief',loadWeeklyBrief);_safeAsync('loadJournalLedger',loadJournalLedger)}
+    if(name==='journal'){_safeSync('renderJournalChips',renderJournalChips);_safeAsync('loadWeeklyBrief',loadWeeklyBrief);_safeAsync('loadSysWeekly',loadSysWeekly);_safeAsync('loadJournalLedger',loadJournalLedger)}
     if(name==='report')_safeSync('renderReport',renderReport);
     if(name==='settings')_safeSync('hydrateSettings',hydrateSettings);
   }
@@ -3599,7 +3600,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1818';
+  const APP_VERSION='2026-10-11.1921';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

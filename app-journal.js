@@ -28,6 +28,32 @@
       el.innerHTML=_briefLines(ls)+_briefFoot(d);
     }catch(e){console.warn('[loadWeeklyBrief]',e);recordGlobalError('loadWeeklyBrief',e);el.textContent='讀取週覆盤摘要失敗（'+(e&&e.message||e)+'）'}
   }
+  // 常備.開發-26：系統週報（data/weekly_report.json，本機每週日 20:00 產出）。各區塊 level：ok／warn／bad／unknown。
+  const _SYSWK_SEC=[['system_health','系統健康'],['freshness','資料新鮮度'],['research','研究進度'],['paper','紙上追蹤'],['live_execution','真錢執行']];
+  const _SYSWK_DOT={ok:'#3fb37f',warn:'#d8b070',bad:'#e5534b',unknown:'#888'};
+  function sysWeeklyHtml(d){
+    const esc=_autoEsc,sm=d.summary||[];
+    const rows=_SYSWK_SEC.map(([k,lab],i)=>{
+      const s=d[k]||{},lv=s.level||'unknown';
+      const txt=s.error?'讀取失敗（'+s.error+'）':(sm.find(x=>String(x).startsWith(lab))||'').replace(lab+'：','');
+      return '<div style="padding:3px 0;display:flex;gap:8px;align-items:flex-start"><span style="flex-shrink:0;width:9px;height:9px;border-radius:50%;margin-top:5px;background:'+_SYSWK_DOT[lv]+'"></span><span><b>'+esc(lab)+'</b>　'+esc(txt||'—')+'</span></div>';
+    }).join('');
+    const det=[];
+    const f=d.freshness||{};(f.stalled||[]).forEach(x=>det.push('停擺：'+x.task+(x.age_min!=null?'（'+Math.round(x.age_min/60)+' 小時沒新產出）':'')));
+    const lv=d.live_execution||{};if(lv.codes_week)det.push('真錢排程事件：'+Object.keys(lv.codes_week).map(k=>k+' '+lv.codes_week[k]).join('、'));
+    ((d.paper||{}).books||[]).forEach(b=>{if(b.total_return_pct!=null)det.push(b.label+'：累計 '+(b.total_return_pct>0?'+':'')+b.total_return_pct+'%（'+(b.as_of||'—')+'）')});
+    return '<div class="note" style="margin-bottom:4px">'+esc(d.week_start||'')+' ～ '+esc(d.week_end||'')+'</div>'+rows+
+      (det.length?'<div style="margin-top:6px;font-size:11px;color:var(--ink-3)">'+det.map(x=>'· '+esc(x)).join('<br>')+'</div>':'')+_briefFoot(d);
+  }
+  async function loadSysWeekly(){
+    const el=document.getElementById('journal-sysweekly');if(!el)return;
+    try{
+      const r=await fetch('data/weekly_report.json?t='+Date.now());
+      if(r.status===404){el.textContent='尚未產生第一份週報（每週日 20:00 由電腦自動產生）';return}
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      el.innerHTML=sysWeeklyHtml(await r.json());
+    }catch(e){console.warn('[loadSysWeekly]',e);recordGlobalError('loadSysWeekly',e);el.textContent='讀取系統週報失敗（'+(e&&e.message||e)+'）'}
+  }
   async function loadJournalLedger(){
     const pe=document.getElementById('journal-pnl'),te=document.getElementById('journal-trades');
     if(!pe||!te)return;

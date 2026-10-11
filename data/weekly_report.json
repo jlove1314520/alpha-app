@@ -1,0 +1,154 @@
+{
+ "schema": 1,
+ "generated_at": "2026-10-11T19:14:35+08:00",
+ "week_start": "2026-10-04",
+ "week_end": "2026-10-11",
+ "disclaimer": "研究與紀錄用途，非投資建議",
+ "system_health": {
+  "audit_generated_at": "2026-10-10T23:00:02.870446+08:00",
+  "audit_gate_pass": true,
+  "violation_rate": 0.00095,
+  "violation_rate_gate": 0.01,
+  "self_check_ok": true,
+  "self_check_failed": [],
+  "audit_age_hours": 20.2,
+  "alerts": [
+   "AlphaData：C:/alpha/alpha-data/alpha.db 已 5472 分鐘沒有新產出（預期每 1440 分鐘，門檻 4320 分鐘；各表 max(date)：daily_price=2026-10-08、inst_trades=2026-10-08、valuation=2026-10-08、tai",
+   "AlphaNewsEvents：data/news.json 已連續錯過 4 個應跑班次（門檻 3 班，最近應跑 2026-10-11 19:00；JSON 欄位 fetched_at）",
+   "【使用者可見】阻塞已18個交易日未處理：⛔（2026-09-15）【使用者可見】sparklines.json過期直接影響使用者在App",
+   "合規.三：research/backfill_stock_financials_gap_2025.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
+   "合規.三：research/irb130_pledge_probe.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
+   "合規.三：scripts/extract_company_products.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）",
+   "合規.三：scripts/probe_news_sources.py 硬寫黑名單網域字串但未import net_guard（見audit_preflight.py）"
+  ],
+  "alerts_total": 7,
+  "level": "warn"
+ },
+ "freshness": {
+  "total": 20,
+  "counts": {
+   "ok": 18,
+   "stalled": 2
+  },
+  "stalled": [
+   {
+    "task": "AlphaData",
+    "artifact": "C:/alpha/alpha-data/alpha.db",
+    "age_min": 5474.6,
+    "missed_shifts": null
+   },
+   {
+    "task": "AlphaNewsEvents",
+    "artifact": "data/news.json",
+    "age_min": 133.5,
+    "missed_shifts": 4
+   }
+  ],
+  "level": "warn"
+ },
+ "research": {
+  "trials_total": 248,
+  "trials_week": 27,
+  "verdicts_week": {
+   "未結案": 13,
+   "FAIL": 4,
+   "VIOLATES_SURVIVAL": 3,
+   "PASS": 3,
+   "ABANDONED": 2,
+   "EXPERIMENTAL": 2
+  },
+  "trials_week_names": [
+   "bb90_oos_2025_result",
+   "crisis_gate_leveraged_bb90_result",
+   "s3c6_oos_2025_prereg",
+   "s3c6_oos_2025_result",
+   "r1_0050_credit_gate_prereg",
+   "r1_0050_credit_gate_result",
+   "b18_8k_commercial_item101_drift_v1",
+   "b19_signal_ledger_forward_v1",
+   "b20_qualitative_ai_forward_v1",
+   "b30_us_customer_concentration_v1"
+  ],
+  "heartbeats_week": 271,
+  "heartbeats_by_track": {
+   "hypothesis_queue": 43,
+   "interactive": 146,
+   "marathon": 43,
+   "dev_queue": 11,
+   "其他": 4,
+   "auto_trading": 2,
+   "devqueue": 22
+  },
+  "level": "ok"
+ },
+ "paper": {
+  "books": [
+   {
+    "id": "paper_1b",
+    "label": "紙上 1b",
+    "as_of": "2026-10-08",
+    "total_return_pct": 0.0
+   },
+   {
+    "id": "paper_3",
+    "label": "紙上 3",
+    "as_of": "2026-10-08",
+    "total_return_pct": 0.0
+   },
+   {
+    "id": "paper_7030",
+    "label": "紙上 70/30",
+    "as_of": "2026-10-01",
+    "total_return_pct": 0.0
+   },
+   {
+    "id": "paper_4:R1-C",
+    "label": "紙上 4 R1-C",
+    "as_of": "2026-10-08",
+    "total_return_pct": 0.0,
+    "bench_0050_return_pct": 0.0
+   },
+   {
+    "id": "paper_4:R1-A",
+    "label": "紙上 4 R1-A",
+    "as_of": "2026-10-08",
+    "total_return_pct": 0.0,
+    "bench_0050_return_pct": 0.0
+   }
+  ],
+  "watch": {
+   "status": "OK",
+   "items": 0,
+   "generated_at": "2026-10-11T17:31:30.708506+08:00"
+  },
+  "level": "ok"
+ },
+ "live_execution": {
+  "events_week": 10,
+  "codes_week": {
+   "run:NOT_TRIGGERED": 3,
+   "run:WAITING_VETO": 1,
+   "run:OK": 1,
+   "settle:OK": 1,
+   "run:ERROR": 2,
+   "settle:NOTHING_TO_SETTLE": 2
+  },
+  "errors_week": 2,
+  "last_event": {
+   "ts": "2026-10-09T13:40:01+08:00",
+   "task": "settle",
+   "code": "NOTHING_TO_SETTLE"
+  },
+  "heartbeat_updated_at": "2026-10-09T13:40:01+08:00",
+  "heartbeat_age_hours": 53.6,
+  "note": "只列已公開的排程事件代碼；成交數量、金額、損益只在本機日誌頁（連上電腦）顯示。",
+  "level": "bad"
+ },
+ "summary": [
+  "系統健康：稽核閘門通過、自檢正常、告警 7 條",
+  "資料新鮮度：20 條管線，2 條停擺或缺檔",
+  "研究進度：本週登記試驗 27 筆（登記檔累計 248 列），心跳 271 次",
+  "紙上追蹤：5 本帳，追蹤看門狗 OK",
+  "真錢執行：本週排程事件 10 次，錯誤 2 次"
+ ]
+}
