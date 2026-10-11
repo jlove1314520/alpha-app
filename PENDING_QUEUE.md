@@ -19265,7 +19265,7 @@ C. 驗收
 
 - [x] **先.八十-1 fetch_market_tw 漲跌正負號修正＋重抓 market_tw／daily_brief＋smoke 正負號檢查**（互動視窗執行）〔根因：MI_INDEX 漲跌百分比已帶號又乘 -1；改取漲跌欄正負號＋百分比絕對值；market_tw.json 加權 -0.99%、類股 19/37 為負；daily_brief 重產；smoke #101；100 PASS／0 FAIL〕
 - [x] **先.八十-2 電腦離線統一一行狀態；Failed to fetch 不計程式錯誤、不顯示英文**（互動視窗執行）〔liveFetch 標記離線＋記最後連線；recordGlobalError 不計離線；交易頁／首頁收成一行「電腦離線（最後連線 MM/DD HH:MM）」；smoke #102；101 PASS／0 FAIL〕
-- [ ] **先.八十-3 loadTrials 被註解吃掉修正＋trials_index.json 解析修正（465 列對齊帳本 435 筆）**（互動視窗執行）
+- [x] **先.八十-3 loadTrials 被註解吃掉修正＋trials_index.json 解析修正（465 列對齊帳本 435 筆）**（互動視窗執行）〔loadTrials 已獨立一行（開發-29 已修）＋smoke #103 證實執行；trials_index 列認定同 selection_bias_ledger、未跳脫 | 切欄、判定欄不取備註；436 列＝總 N（帳本開頭 435 為 10/11 舊值，-13 統一）；#94/#149 共用編號標 dup_id；102 PASS／0 FAIL〕
 - [ ] **先.八十-4 app-shared.js 篩選籤改切換 class，修重疊**（互動視窗執行）
 - [ ] **先.八十-5 40 字自動收合只收說明類；時鐘更新不觸發重掃**（互動視窗執行）
 - [ ] **先.八十-6 策略監控台改讀 strategy_curves.json、停用 strategy_performance.json；ux_copy_audit 擴大＋補詞**（互動視窗執行）
