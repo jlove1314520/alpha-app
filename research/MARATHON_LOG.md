@@ -1,5 +1,6 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+- 2026-10-12 00:10 hypothesis_queue（凍結.二已解除）交辦行首 `- [ ]` 真實0條；回第1節挑#82（唯一未結案）寫事前綁定SPEC（8筆主分析、窗口1個、參數3、G0檢定力前置關卡 MDE>3%CAR→EXPERIMENTAL收尾）；未跑回測、未登記TRIALS_REGISTRY、未對投信/指數公司網站發請求；is_holdout_consumed=True（既定）；工作目錄他來源未commit變更不納入
 - 2026-10-11 18:08 hypothesis_queue（凍結.二已解除）本輪做交辦 B31/B32：B31 為質性不計分產品功能、B32 依賴 B21 社群樣本（signal_ledger 零筆社群訊號、禁事後補建），皆不登記試驗、標 [!]；交辦 `- [ ]` 剩約 20 條，其餘為常備.開發-25～36（DevQueue）或互動視窗執行；holdout 未動
 - 2026-10-11 12:15 hypothesis_queue 心跳模式，#82 暫停，未開新軸；本輪做交辦 `- [ ]` 常備.開發-33 研究透明度頁（trials_index.json＋設定頁卡，冒煙全綠）；其餘 11 條未開始（-23～-32、-34）[自行裁量]；工作目錄他來源 data 變更不納入
 - 2026-10-11 06:20 hypothesis_queue 心跳模式，#82 暫停，未開新軸；交辦佇列未開始 `- [ ]` 真實 0 條（grep 到的 12 條位於 PENDING_QUEUE.md 18811-18826 行「先.六十三」引文 code fence 內，原文引用且 -11～-22 屬 DevQueue 專屬並已由其處理）[自行裁量]；is_holdout_consumed()=True（HOLDOUT_LOCK 檔已存在，非本輪造成、未觸碰，請總司令知悉）；工作目錄有他來源未commit變更，不納入
