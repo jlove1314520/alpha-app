@@ -2814,10 +2814,80 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { lzErrors.push(`測試本身出錯：${e.message || e}`); }
   record("85. 分頁程式點到該頁才載入（首頁不載 app-<頁>.js；五個分頁＋個股頁各自載入、真函式取代轉接殼、無錯誤）", lzErrors.length === 0, lzErrors.join("; ") || lzInfo);
 
+  // 【2026-10-11 先.六十八】「策略 vs 0050」卡。資料 data/strategy_curves.json（build_strategy_curves.py，選股三榜重疊組合法）。
+  // (a) 任一策略曲線單日變動不得超過其成分當日最大漲跌幅（＋0.5pp 進出場成本容許）——舊卡「依序串接複利」這種放大錯誤會在這裡爆；
+  // (b) 0050 灰線累計報酬＝price_history 同期實際收盤報酬（±0.1pp）；(c) 卡片 UI：改名、八個分頁可切換、<60 日判讀固定文字。
+  const scErrs = [], scInfo = [];
+  try {
+    const sc = await page.evaluate(async () => {
+      const a = await (await fetch("data/strategy_curves.json", { cache: "no-store" })).json();
+      const p = await (await fetch("data/price_history.json", { cache: "no-store" })).json();
+      const px = {};
+      for (const r of (p.prices && p.prices["0050"]) || []) px[r.date] = r.close;
+      return { lines: a.lines || [], px };
+    });
+    let nChecked = 0;
+    for (const l of sc.lines) {
+      if (!l.started || !l.nav || l.nav.length < 2) continue;
+      const cm = l.comp_max_abs_pct || [];
+      if (cm.length === l.nav.length) {
+        for (let i = 1; i < l.nav.length; i++) {
+          const mv = Math.abs(l.nav[i] / l.nav[i - 1] - 1) * 100;
+          if (mv > cm[i] + 0.5) { scErrs.push(`${l.label} ${l.dates[i]} 單日 ${mv.toFixed(2)}% > 成分最大 ${cm[i]}%+0.5`); break; }
+        }
+      }
+      const p0 = sc.px[l.dates[0]], p1 = sc.px[l.dates[l.dates.length - 1]];
+      if (p0 && p1) {
+        const want = (p1 / p0 - 1) * 100, got = (l.bench[l.bench.length - 1] / l.bench[0] - 1) * 100;
+        if (Math.abs(want - got) > 0.1) scErrs.push(`${l.label} 0050 線 ${got.toFixed(2)}% ≠ price_history ${want.toFixed(2)}%`);
+        nChecked++;
+      } else if (l.id !== "live_bb90") scErrs.push(`${l.label} 起訖日在 price_history 找不到 0050 收盤`);
+    }
+    scInfo.push(`${nChecked} 條已啟動曲線`);
+  } catch (e) { scErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("88. 策略曲線單日變動 ≤ 成分當日最大漲跌幅、0050 線累計＝price_history 同期（±0.1pp）", scErrs.length === 0, scErrs.join("; ") || scInfo.join("；"));
+
+  const uiErrs = [], uiInfo = [];
+  try {
+    await page.click('nav#nav button[data-scr="home"]');
+    await page.waitForTimeout(400);
+    const ui = await page.evaluate(async () => {
+      const card = document.getElementById("strategy-curves-card");
+      if (!card) return { err: "找不到 #strategy-curves-card" };
+      const out = { title: card.querySelector("h3").textContent.trim(), old: !!document.getElementById("benchmark-comparison-card"), tabs: [], verdicts: [] };
+      const tabs = [...card.querySelectorAll("#sc-tabs .sc-tab")].map(t => t.dataset.tab);
+      for (const t of tabs) {
+        SC_TAB = t; renderStrategyCurves();
+        const body = document.getElementById("sc-body");
+        out.tabs.push({ t, len: body.textContent.length, svg: !!body.querySelector("svg") });
+        const v = body.querySelector(".sc-verdict");
+        if (v) out.verdicts.push(v.textContent);
+        if (t === "boards") out.correction = body.textContent.includes("誤放大約 5 倍");
+      }
+      SC_TAB = "live"; renderStrategyCurves();
+      return out;
+    });
+    if (ui.err) uiErrs.push(ui.err);
+    else {
+      if (ui.title !== "策略 vs 0050") uiErrs.push(`標題是「${ui.title}」`);
+      if (ui.old) uiErrs.push("舊「我們 vs 0050」卡仍在");
+      if (ui.tabs.length !== 8) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 8）`);
+      for (const t of ui.tabs) if (t.len < 10) uiErrs.push(`分頁 ${t.t} 內容空白`);
+      if (!ui.correction) uiErrs.push("選股榜單分頁沒有更正註記");
+      for (const v of ui.verdicts) {
+        const m = v.match(/樣本 (\d+) 個交易日/);
+        if (m && Number(m[1]) < 60 && !v.includes("尚不足以判斷")) uiErrs.push(`<60 日判讀不是固定文字：${v}`);
+        if (/領先|落後|優於|勝過|表現/.test(v)) uiErrs.push(`判讀含推論文字：${v}`);
+      }
+      uiInfo.push(`${ui.tabs.length} 分頁、判讀 ${ui.verdicts.length} 則`);
+    }
+  } catch (e) { uiErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("89. 「策略 vs 0050」卡：改名、八分頁可切換、選股榜單附更正註記、判讀為固定規則文字", uiErrs.length === 0, uiErrs.join("; ") || uiInfo.join("；"));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -942,100 +942,106 @@
     const pts=cl.map((c,i)=>`${(i/(cl.length-1)*64).toFixed(1)},${(24-(c-mn)/rg*20+1).toFixed(1)}`).join(' ');
     return `<svg class="spark" width="64" height="26" viewBox="0 0 64 26" preserveAspectRatio="none"><polyline points="${pts}" fill="none" stroke="var(--${up?'up':'down'})" stroke-width="2"/></svg>`}
 
-  // ══════ 我們 vs 0050（2026-09-15 總司令三階段裁示【產品·基準對比】）══════
-  // 資料只讀 data/benchmark_comparison.json（build_benchmark_comparison.py用
-  // picks_ledger.json實際回填紀錄算出，不在前端重算回測）。三榜各自獨立，
-  // 用tab切換而不是四條線疊在同一張圖——三榜邏輯不同（估值/動能/未來），
-  // 疊在一起會互相掩蓋，且各榜可比對的snapshot數量不同（x軸對不齊），tab
-  // 切換比硬擠在同一張圖誠實。
-  let BENCHMARK_COMPARISON=null,BC_BOARD='value',BC_RANGE='all';
-  const BC_BOARD_LABEL={value:'估值榜',momentum:'動能榜',future:'未來榜'};
-  const BC_RANGE_LABEL={'1m':'近一月','3m':'近三月',all:'全部歷史'};
-  async function loadBenchmarkComparison(){
-    if(BENCHMARK_COMPARISON)return BENCHMARK_COMPARISON;
+  // ══════ 策略 vs 0050（2026-10-11 先.六十八，取代 2026-09-15「我們 vs 0050」）══════
+  // 資料：data/strategy_curves.json（.github/scripts/build_strategy_curves.py 每日產生；選股三榜改用重疊組合法，
+  // 舊卡「依序串接複利」把重疊的 5 日報酬串接、誤放大約 5 倍，已刪除）＋本機 /auto/strategy_line（真錢 Bb-90，
+  // 帳本只在本機）。每條線從自己的起始日歸一為 100，灰線為同期 0050；指標與「金礦判讀」都由 Python 端同一支
+  // metrics() 算好，這裡只畫——判讀文字是固定規則（<60 日「尚不足以判斷」），前端不自行產生任何推論文字。
+  let SC_DATA=null,SC_LIVE=null,SC_LIVE_ERR='',SC_TAB='live',SC_BOARD='value';
+  const SC_TABS=[['live','真錢 Bb-90'],['paper_1','紙.一 70/30'],['paper_1b','紙.一b'],['paper_2','紙.二（11/16 起）'],
+    ['paper_3','紙.三 S3-C6（10/31 起）'],['paper_4','紙.四 R1-C（10/31 起）'],['boards','選股榜單'],['all','全部疊加']];
+  const SC_BOARDS=[['value','估值'],['momentum','動能'],['future','未來']];
+  const SC_COLORS=['#2f81f7','#d4a017','#3fb950','#db61a2','#f0883e','#a371f7','#56d4dd','#e5534b','#9e6a03'];
+  async function loadStrategyCurves(){
     try{
-      const r=await fetch('data/benchmark_comparison.json?t='+Math.floor(Date.now()/60000));
+      const r=await fetch('data/strategy_curves.json?t='+Math.floor(Date.now()/60000));
       if(!r.ok)throw new Error('HTTP '+r.status);
-      BENCHMARK_COMPARISON=await r.json();
-    }catch(e){console.warn('[loadBenchmarkComparison]',e);recordGlobalError('loadBenchmarkComparison',e);BENCHMARK_COMPARISON=null}
-    return BENCHMARK_COMPARISON;
-  }
-  // 依時間切換範圍過濾曲線（近一月/近三月用「最後N筆」近似，因為curve的x軸
-  // 是snapshot序列不是嚴格日曆天，樣本本來就少，近似對這個資料量級足夠）。
-  function bcFilterRange(curve,rangeKey){
-    if(!curve||!curve.length)return curve||[];
-    if(rangeKey==='all')return curve;
-    const n=rangeKey==='1m'?Math.min(curve.length,22):Math.min(curve.length,66);
-    return curve.slice(-n);
-  }
-  function bcDualLineSvg(oursCurve,benchCurve){
-    const W=320,H=140,pad=4;
-    if(!oursCurve.length||!benchCurve.length)
-      return `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--ink-3)" font-size="11">尚無可比對資料</text></svg>`;
-    const allVals=[...oursCurve.map(p=>p.cum_return_pct),...benchCurve.map(p=>p.cum_return_pct),0];
-    const mn=Math.min(...allVals),mx=Math.max(...allVals),rg=(mx-mn)||1;
-    const toPts=(curve)=>curve.map((p,i)=>{
-      const x=pad+(curve.length>1?i/(curve.length-1):0)*(W-2*pad);
-      const y=pad+(1-(p.cum_return_pct-mn)/rg)*(H-2*pad);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-    const zeroY=(pad+(1-(0-mn)/rg)*(H-2*pad)).toFixed(1);
-    return `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-      <line x1="${pad}" y1="${zeroY}" x2="${W-pad}" y2="${zeroY}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>
-      <polyline points="${toPts(benchCurve)}" fill="none" stroke="var(--ink-3)" stroke-width="2"/>
-      <polyline points="${toPts(oursCurve)}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
-    </svg>`;
-  }
-  function renderBenchmarkComparison(){
-    const tabsEl=document.getElementById('bc-board-tabs');
-    const bodyEl=document.getElementById('bc-body');
-    const rangeEl=document.getElementById('bc-range-toggle');
-    if(!tabsEl||!bodyEl)return;
-    const data=BENCHMARK_COMPARISON;
-    if(!data||!data.boards){
-      bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">基準對比資料尚未產生</div>';
-      return;
+      SC_DATA=await r.json();
+    }catch(e){console.warn('[loadStrategyCurves]',e);recordGlobalError('loadStrategyCurves',e);SC_DATA=null}
+    SC_LIVE=null;SC_LIVE_ERR='';
+    if(!LIVE.configured||!LIVE.url){SC_LIVE_ERR='真錢帳本只在本機，連上本機伺服器才顯示';return SC_DATA}
+    try{
+      const r=await liveFetch('/auto/strategy_line',15000);
+      if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器可能是舊版，需重啟）':''));
+      SC_LIVE=await r.json();
+    }catch(e){
+      // 本機伺服器離線／手機不在家用網路是常態，不是程式錯誤：只記 console、卡上誠實顯示原因，
+      // 刻意不呼叫 recordGlobalError（否則每次出門都會在診斷橫幅堆一條假錯誤）。
+      console.warn('[loadStrategyCurves live]',e);SC_LIVE_ERR='讀不到本機伺服器（'+(e&&e.message||e)+'）';
     }
-    tabsEl.innerHTML=Object.keys(BC_BOARD_LABEL).map(b=>
-      `<span class="press" style="padding:4px 10px;border-radius:14px;font-size:11px;border:1px solid ${b===BC_BOARD?'var(--accent)':'var(--hairline)'};color:${b===BC_BOARD?'var(--accent)':'var(--ink-2)'};cursor:pointer" onclick="BC_BOARD='${b}';renderBenchmarkComparison()">${BC_BOARD_LABEL[b]}</span>`
-    ).join('');
-    rangeEl.innerHTML=Object.keys(BC_RANGE_LABEL).map(r=>
-      `<span class="press" style="padding:2px 6px;font-size:10px;color:${r===BC_RANGE?'var(--accent)':'var(--ink-3)'};cursor:pointer" onclick="BC_RANGE='${r}';renderBenchmarkComparison()">${BC_RANGE_LABEL[r]}</span>`
-    ).join(' · ');
-
-    const b=data.boards[BC_BOARD];
-    if(!b){bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">此榜尚無資料</div>';return}
-    const oursCurve=bcFilterRange(b.ours_curve,BC_RANGE);
-    const benchCurve=bcFilterRange(b.benchmark_curve,BC_RANGE);
-    // 2026-09-15 總司令原話：有效樣本<60個交易日時，結論欄位一律「資料累積中」，
-    // 不得顯示任何結論性文字（不准寫「領先大盤」「表現優異」這類）——這裡用旗標
-    // 硬擋，不靠自律。曲線仍然照畫（讓使用者看得到在累積）。
-    const insufficient=b.sample_insufficient;
-    const gapTxt=b.gap_pp!=null?`${b.gap_pp>=0?'+':''}${b.gap_pp.toFixed(2)}pp`:'—';
-    const mddTxt=b.mdd_pct_ours!=null?`${b.mdd_pct_ours.toFixed(2)}%`:'—';
-    const calmarTxt=b.calmar_ours!=null?b.calmar_ours.toFixed(2):'—';
-    const conclusion=insufficient
-      ?`<div class="note" style="color:var(--warn);font-weight:600">樣本僅 ${b.n_comparable_snapshots} 個交易日，不足以判斷優劣——資料累積中</div>`
-      :`<div class="note" style="color:${(b.gap_pp||0)>=0?'var(--good)':'var(--critical)'};font-weight:600">累積報酬${(b.gap_pp||0)>=0?'領先':'落後'}0050 ${Math.abs(b.gap_pp||0).toFixed(2)}個百分點</div>`;
-    bodyEl.innerHTML=`
-      <div class="bot-stats" style="margin-bottom:8px">
-        <div class="s"><span>vs 0050 差距</span><b class="${(b.gap_pp||0)>=0?'pos':'neg'}">${gapTxt}</b></div>
-        <div class="s"><span>最大回撤</span><b>${mddTxt}</b></div>
-        <div class="s"><span>Calmar Ratio</span><b>${calmarTxt}</b></div>
-      </div>
-      ${conclusion}
-      <div style="margin-top:8px">${bcDualLineSvg(oursCurve,benchCurve)}</div>
-      <div class="note" style="margin-top:4px;font-size:10px">
-        <span style="color:var(--accent)">━</span> 我們（${BC_BOARD_LABEL[BC_BOARD]}Top20）
-        <span style="color:var(--ink-3)">━</span> 0050
-        樣本：${b.n_comparable_snapshots}個可比對交易日
-      </div>
-      <div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">
-        資料來源：picks_ledger.json 實際回填紀錄（非重算回測）。持有假設：等權重買進Top20，
-        持有5個交易日（t5，t20/t60/t120尚未到期），依序串接複利（非同時持有多批重疊部位的
-        完整投資組合模型）。已扣成本：我方手續費0.1425%×2+證交稅0.3%；0050手續費0.1425%×2+
-        ETF證交稅0.1%。${data.meta&&data.meta.generated_at?'計算時間：'+String(data.meta.generated_at).slice(0,16).replace('T',' '):''}
-      </div>`;
+    return SC_DATA;
+  }
+  function scLines(){
+    const ls=(SC_DATA&&SC_DATA.lines||[]).slice();
+    const i=ls.findIndex(l=>l.id==='live_bb90');
+    if(SC_LIVE&&SC_LIVE.id==='live_bb90'){if(i>=0)ls[i]=SC_LIVE;else ls.unshift(SC_LIVE)}
+    else if(i>=0&&SC_LIVE_ERR)ls[i]=Object.assign({},ls[i],{note:SC_LIVE_ERR});
+    return ls;
+  }
+  function scById(id){return scLines().find(l=>l.id===id)||null}
+  // 多條線畫在同一條日期軸上（聯集日期）；每條線各自歸一 100，灰線＝主線（或最早起始那條）的同期 0050。
+  function scSvg(lines,benchLine){
+    const W=320,H=150,pad=6;
+    const started=lines.filter(l=>l&&l.started&&l.dates&&l.dates.length>1);
+    if(!started.length)return `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--ink-3)" font-size="11">尚無可畫的曲線</text></svg>`;
+    const dates=[...new Set(started.flatMap(l=>l.dates))].sort();
+    const xi=Object.fromEntries(dates.map((d,i)=>[d,i]));
+    const bl=benchLine&&benchLine.started?benchLine:started.slice().sort((a,b)=>a.dates[0]<b.dates[0]?-1:1)[0];
+    const vals=[100,...started.flatMap(l=>l.nav),...bl.bench];
+    const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
+    const X=d=>pad+(dates.length>1?xi[d]/(dates.length-1):0)*(W-2*pad),Y=v=>pad+(1-(v-mn)/rg)*(H-2*pad);
+    const pl=(ds,vs)=>ds.map((d,i)=>`${X(d).toFixed(1)},${Y(vs[i]).toFixed(1)}`).join(' ');
+    const lines_=started.map(l=>{const c=SC_COLORS[scLines().findIndex(x=>x.id===l.id)%SC_COLORS.length];
+      return `<polyline data-line="${l.id}" points="${pl(l.dates,l.nav)}" fill="none" stroke="${c}" stroke-width="2.2"/>`}).join('');
+    return `<svg id="sc-svg" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <line x1="${pad}" y1="${Y(100).toFixed(1)}" x2="${W-pad}" y2="${Y(100).toFixed(1)}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>
+      <polyline data-line="bench_0050" points="${pl(bl.dates,bl.bench)}" fill="none" stroke="var(--ink-3)" stroke-width="2" opacity=".75"/>
+      ${lines_}</svg>`;
+  }
+  const _scPp=v=>v==null?'—':`${v>=0?'+':''}${Number(v).toFixed(2)}pp`;
+  const _scPct=v=>v==null?'—':`${Number(v).toFixed(2)}%`;
+  const SC_STATUS_COLOR={'真錢':'var(--accent)','紙上追蹤中':'var(--ink-2)','回測通過':'var(--good)','回測未通過':'var(--critical)','未回測':'var(--warn)'};
+  function scStatusTag(s){return `<span class="sc-status" style="font-size:10px;padding:1px 6px;border-radius:8px;border:1px solid ${SC_STATUS_COLOR[s]||'var(--hairline)'};color:${SC_STATUS_COLOR[s]||'var(--ink-2)'}">${s||'—'}</span>`}
+  function scMetricsHtml(l){
+    const m=l.metrics||{};
+    return `<div class="bot-stats sc-metrics" style="margin:6px 0">
+      <div class="s"><span>累計差距</span><b class="${(m.cum_gap_pp||0)>=0?'pos':'neg'}">${_scPp(m.cum_gap_pp)}</b></div>
+      <div class="s"><span>年化差距</span><b>${m.days>=60?_scPp(m.ann_gap_pp):'—'}</b></div>
+      <div class="s"><span>MDD</span><b>${_scPct(m.mdd_pct)}</b></div>
+      <div class="s"><span>樣本天數</span><b>${m.days||0}</b></div>
+    </div>
+    <div class="note" style="margin-bottom:4px">狀態：${scStatusTag(l.status)}　累計 ${_scPct(m.cum_pct)}　同期 0050 ${_scPct(m.bench_cum_pct)}（MDD ${_scPct(m.bench_mdd_pct)}）${m.days<60?'　樣本 <60 交易日只顯示累計':''}</div>
+    <div class="note sc-verdict" style="font-weight:600;color:var(--ink-2)">金礦判讀：${m.days>=60?m.verdict:`尚不足以判斷（樣本 ${m.days||0} 個交易日，需 ≥60）`}</div>`;
+  }
+  function scLineBlock(l){
+    if(!l)return '<div class="note" style="color:var(--ink-3)">此線尚無資料</div>';
+    if(!l.started)return `<div class="note" style="margin:6px 0">${scStatusTag(l.status)}　${l.note||'尚未啟動'}${l.start_date?'（起始日 '+l.start_date+'）':''}</div>`;
+    return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l],l)}</div>
+      <div class="note" style="margin-top:4px;font-size:10px">起始日 ${l.start_date}（歸一 100）至 ${l.as_of}；<span style="color:var(--ink-3)">━</span> 灰線＝同期 0050 實際收盤</div>
+      <div class="note" style="margin-top:4px;font-size:10px;color:var(--ink-3)">${l.note||''}</div>`;
+  }
+  function renderStrategyCurves(){
+    const tabsEl=document.getElementById('sc-tabs'),bodyEl=document.getElementById('sc-body');
+    if(!tabsEl||!bodyEl)return;
+    if(!SC_DATA||!SC_DATA.lines){bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">策略曲線資料尚未產生</div>';tabsEl.innerHTML='';return}
+    const chip=(on,label,js,attr)=>`<span class="press sc-tab" ${attr} style="padding:3px 9px;border-radius:14px;font-size:11px;white-space:nowrap;border:1px solid ${on?'var(--accent)':'var(--hairline)'};color:${on?'var(--accent)':'var(--ink-2)'};cursor:pointer" onclick="${js}">${label}</span>`;
+    tabsEl.innerHTML=SC_TABS.map(([k,lb])=>chip(k===SC_TAB,lb,`SC_TAB='${k}';renderStrategyCurves()`,`data-tab="${k}"`)).join('');
+    let html='';
+    if(SC_TAB==='boards'){
+      html+=`<div style="display:flex;gap:6px;margin-bottom:6px">${SC_BOARDS.map(([k,lb])=>chip(k===SC_BOARD,lb,`SC_BOARD='${k}';renderStrategyCurves()`,`data-board="${k}"`)).join('')}</div>`;
+      html+=scLineBlock(scById('board_'+SC_BOARD));
+      html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--warn)">${(SC_DATA.meta&&SC_DATA.meta.correction)||''}</div>`;
+    }else if(SC_TAB==='all'){
+      const ls=scLines().filter(l=>l.started&&l.dates&&l.dates.length>1);
+      html+=`<div style="margin-top:4px">${scSvg(ls)}</div><div class="note" style="margin-top:4px;font-size:10px;line-height:1.7">`+
+        scLines().map((l,i)=>`<span style="color:${SC_COLORS[i%SC_COLORS.length]}">━</span> ${l.label}${l.started?`（${_scPp(l.metrics&&l.metrics.cum_gap_pp)}）`:'（未啟動）'}`).join('　')+
+        `　<span style="color:var(--ink-3)">━</span> 0050（最早起始線同期）</div><div class="note" style="font-size:10px;color:var(--ink-3)">各線從各自起始日歸一為 100；括號內為對同期 0050 的累計差距。</div>`;
+    }else{
+      html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
+    }
+    const meta=SC_DATA.meta||{};
+    html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">${meta.disclaimer||''}。${meta.bench_note||''}。${meta.generated_at?'計算時間：'+String(meta.generated_at).slice(0,16).replace('T',' '):''}</div>`;
+    bodyEl.innerHTML=html;
   }
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
   // 否則退回既有近20日日線並標「20日」。標籤永遠顯示，使用者一眼分得出是今日還是20日。
@@ -1290,7 +1296,7 @@
     _safeAsync('renderBtPath',async()=>{renderBtPath()});
     _safeAsync('loadHomeExecCard',loadHomeExecCard);  // 常備.開發-11 真錢執行總覽卡（唯讀）
     _safeAsync('loadHomeBrokerCard',loadHomeBrokerCard);  // 2026-09-15 開發佇列自走，週六.五：總資產卡吃/live/positions+/live/balance真數字
-    _safeAsync('loadBenchmarkComparison',async()=>{await loadBenchmarkComparison();renderBenchmarkComparison()});  // 2026-09-15 我們vs0050主圖
+    _safeAsync('loadStrategyCurves',async()=>{await loadStrategyCurves();renderStrategyCurves()});  // 2026-10-11 先.六十八 策略vs0050
     await loadIntradayQuotes();
     if(!WL.length){el.innerHTML='<div class="note" style="padding:14px 2px">尚無自選股，點右上「管理」搜尋加入</div>';return}
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
@@ -3271,7 +3277,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1246';
+  const APP_VERSION='2026-10-11.1251';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

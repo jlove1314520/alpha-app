@@ -1293,6 +1293,24 @@ async def get_auto_ledger(x_alpha_local_token: str | None = Header(default=None)
         raise HTTPException(status_code=500, detail=f"讀取帳本失敗：{type(e).__name__}") from e
 
 
+@app.get("/auto/strategy_line")
+async def get_auto_strategy_line(x_alpha_local_token: str | None = Header(default=None)):
+    """先.六十八：「策略 vs 0050」卡的真錢 Bb-90 線（token 必檢）。只回從首筆成交日歸一為 100 的百分比曲線與指標，
+    不回金額、股數、帳號；與雲端 data/strategy_curves.json 用同一支 build_strategy_curves.metrics() 算。本端點沒有任何下單能力。"""
+    _check_token(x_alpha_local_token)
+    try:
+        import auto_ledger_view as _lv
+        sp = str(REPO_ROOT / ".github" / "scripts")
+        if sp not in sys.path:
+            sys.path.insert(0, sp)
+        import build_strategy_curves as _sc
+        lv = await asyncio.to_thread(_lv.ledger_view, AUTO_TRADING_DIR)
+        return _sc.live_line((lv or {}).get("perf"))
+    except Exception as e:
+        print(f"[warn] 真錢策略線失敗：{type(e).__name__}", flush=True)
+        raise HTTPException(status_code=500, detail=f"讀取真錢策略線失敗：{type(e).__name__}") from e
+
+
 @app.post("/auto/cancel_pending")
 async def post_auto_cancel_pending(x_alpha_local_token: str | None = Header(default=None)):
     """先.三十九：只取消目前這一批待執行訂單（不寫 STOP.flag，之後批次照常）。不具下單能力。"""

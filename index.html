@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-11.1246">
+<link rel="stylesheet" href="app.css?v=2026-10-11.1251">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -108,15 +108,13 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px;font-size:10px">來源小點：<span class="sdot g" style="width:6px;height:6px"></span> 即時 · <span class="sdot y" style="width:6px;height:6px"></span> 延遲 · <span class="sdot gr" style="width:6px;height:6px"></span> 盤後／收盤，點小點看說明</div>
     </div>
 
-    <!-- 2026-09-15（總司令三階段裁示【產品·基準對比】）我們Top20 vs 0050——資料嚴格取自
-    data/benchmark_comparison.json（.github/scripts/build_benchmark_comparison.py只讀
-    picks_ledger.json實際回填紀錄計算，不重算回測）。三榜（估值/動能/未來）各自分開，
-    不合成總分；樣本<60個交易日時結論欄位強制顯示「資料累積中」，不顯示任何結論性文字
-    ——這條規則在renderBenchmarkComparison()裡用JS硬性判斷，不是靠自律不亂寫。 -->
-    <div class="card" id="benchmark-comparison-card">
-      <h3>我們 vs 0050 <span class="more" id="bc-range-toggle"></span></h3>
-      <div id="bc-board-tabs" style="display:flex;gap:6px;margin-bottom:8px"></div>
-      <div id="bc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
+    <!-- 2026-10-11 先.六十八：「策略 vs 0050」（取代「我們 vs 0050」）。資料 data/strategy_curves.json
+    （build_strategy_curves.py，選股三榜改重疊組合法）＋本機 /auto/strategy_line（真錢 Bb-90）。
+    判讀文字為固定規則（<60 交易日「尚不足以判斷」），由 Python 端 metrics() 產生，前端不自行推論。 -->
+    <div class="card" id="strategy-curves-card">
+      <h3>策略 vs 0050</h3>
+      <div id="sc-tabs" style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px"></div>
+      <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
     </div>
 
     <!-- 2026-09-15（開發佇列自走，承接自競品一）「我的持股事件」卡：自選股與紙上
@@ -1289,6 +1287,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-11.1246"></script>
+<script src="app.js?v=2026-10-11.1251"></script>
 </body>
 </html>
