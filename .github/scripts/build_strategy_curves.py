@@ -282,8 +282,8 @@ def paper_lines(px: Px) -> list:
     out = []
     specs = [
         ("paper_1", "模擬 A 穩健", RDATA / "paper_7030_log.jsonl", "legacy_7030", None, "2026-10-01"),
-        ("paper_1b", "模擬 A2 三檔分散", RDATA / "paper_1b_log.jsonl", "values_post", None, "2026-11-02"),
-        ("paper_2", "模擬 D 供給緊縮", RDATA / "paper_supply_v2_log.jsonl", "values_post", None, "2026-11-16"),
+        ("paper_1b", "模擬 D 三檔分散", RDATA / "paper_1b_log.jsonl", "values_post", None, "2026-11-02"),
+        ("paper_2", "模擬 E 供給緊縮", RDATA / "paper_supply_v2_log.jsonl", "values_post", None, "2026-11-16"),
         ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-30"),
         ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-30"),
     ]

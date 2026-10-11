@@ -2848,7 +2848,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         if (v) out.verdicts.push(v.textContent);
         if (t === "boards") out.correction = body.textContent.includes("放大約 5 倍");
       }
-      SC_TAB = "live"; renderStrategyCurves();
+      SC_TAB = "all"; renderStrategyCurves();  // 先.七十三：還原成預設分頁（全部疊加）
       return out;
     });
     if (ui.err) uiErrs.push(ui.err);
@@ -2922,7 +2922,7 @@ async function runSmokeTest(baseUrl, headless = true) {
         AUTO_BAN.offline = ""; AUTO_BAN.hb = ""; AUTO_BAN.px = ""; AUTO_BAN.local = raw;
         renderAutoBanner();
         const sit = el.querySelector(".ui-ban-sit"), nx = el.querySelector(".ui-ban-next"), det = el.querySelector("details.ui-ban-detail");
-        out.push({ raw, shown: getComputedStyle(el).display !== "none", sit: sit && sit.textContent, next: nx && nx.textContent,
+        out.push({ raw, summary: (el.querySelector("details.ui-ban-detail > summary") || {}).textContent, shown: getComputedStyle(el).display !== "none", sit: sit && sit.textContent, next: nx && nx.textContent,
           detOpen: det && det.open, detRaw: det && (det.querySelector("[data-ui-raw]") || {}).textContent, visible: el.innerText });
       }
       Object.assign(AUTO_BAN, save); renderAutoBanner();
@@ -2934,8 +2934,10 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (!x.sit || [...x.sit].length > 20) banErrs.push(`狀況過長或缺：${x.sit}`);
       if (!x.next || !x.next.includes("›")) banErrs.push(`缺下一步：${x.next}`);
       if (x.detOpen) banErrs.push("細節預設不該展開");
+      if (x.summary !== "看細節") banErrs.push(`細節按鈕應為「看細節」，實為「${x.summary}」`);
       if (!x.detRaw || !x.detRaw.includes(x.raw.slice(0, 10))) banErrs.push("原始訊息沒保留在細節裡");
       if (want[i] && x.sit !== want[i]) banErrs.push(`第 ${i + 1} 則狀況應為「${want[i]}」，實為「${x.sit}」`);
+      if (/\d/.test(x.sit || "")) banErrs.push(`第一行不得有技術數字：${x.sit}`);
       if (/Bb-?90|\bLIVE\b/.test(x.visible)) banErrs.push(`看得到的橫幅文字仍有內部代號：${x.visible.slice(0, 40)}`);
     });
   } catch (e) { banErrs.push(`測試本身出錯：${e.message || e}`); }
@@ -2947,7 +2949,8 @@ async function runSmokeTest(baseUrl, headless = true) {
   try {
     await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
     await page.waitForTimeout(500);
-    const ia = await page.evaluate(() => {
+    // 偶發「Resulting promise was garbage collected／Execution context was destroyed」（頁面執行環境被重建）只重試一次；其他錯誤照常 FAIL
+    const iaRun = () => page.evaluate(() => {
       const pos = (sel) => { const el = typeof sel === "string" ? document.querySelector(sel) : sel; if (!el) return -1;
         return [...document.querySelectorAll("#scr-home *")].indexOf(el); };
       const h3 = (t) => [...document.querySelectorAll("#scr-home .card h3")].find(h => h.textContent.trim().startsWith(t));
@@ -2973,6 +2976,11 @@ async function runSmokeTest(baseUrl, headless = true) {
       out.more = ["market-tw-panel", "market-us-panel"].map(id => { const d = document.querySelector(`#${id} details.ui-more`); return d ? { open: d.open, n: d.querySelectorAll(".card").length } : null; });
       return out;
     });
+    let ia;
+    try { ia = await iaRun(); } catch (e) {
+      if (!/garbage collected|context was destroyed/i.test(String(e && e.message))) throw e;
+      await page.waitForTimeout(800); ia = await iaRun();
+    }
     const o = ia.order;
     if (o.some(x => x < 0)) iaErrs.push(`首頁區塊缺漏：${JSON.stringify(o)}`);
     else for (let i = 1; i < o.length; i++) if (o[i] < o[i - 1]) { iaErrs.push(`首頁順序不對：${JSON.stringify(o)}`); break; }
@@ -3019,10 +3027,73 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { fsErrs.push(`測試本身出錯：${e.message || e}`); }
   record("94. 390×844 逐頁首屏 ≤3 張卡、首屏說明 ≤2 行（先.七十二-C8）", fsErrs.length === 0, fsErrs.join("; ") || "首屏卡數：" + fsInfo);
 
+  // 95.【2026-10-11 先.七十三】「跟 0050 比」卡：預設分頁＝全部疊加且排第一；還沒開始的策略分頁變灰、只顯示一行、不得有空白 svg；
+  // 疊圖圖例數＝有資料的線數＋1（0050 灰色排第一）；未開始的線列在「即將加入」；按住圖顯示該日各線數值。
+  const scfErrs = [];
+  let scfInfo = "";
+  try {
+    await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
+    await page.waitForTimeout(300);
+    const r = await page.evaluate(() => {
+      const out = {};
+      // 冷啟動預設值（卡片第一次畫出時的分頁）
+      out.defaultTab = SC_TAB;
+      SC_TAB = "all"; renderStrategyCurves();
+      const tabs = [...document.querySelectorAll("#sc-tabs .sc-tab")];
+      out.firstTab = tabs[0] && tabs[0].dataset.tab;
+      out.firstOn = tabs[0] && /var\(--accent\)/.test(tabs[0].getAttribute("style") || "");
+      const lines = scLines();
+      const started = lines.filter(l => l.started && l.dates && l.dates.length > 1);
+      out.nStarted = started.length;
+      out.legend = [...document.querySelectorAll("#sc-body .sc-legend-item")].map(e => e.textContent.trim());
+      out.allSvg = !!document.querySelector("#sc-body svg polyline");
+      out.soon = (document.querySelector("#sc-body .sc-soon") || {}).textContent || "";
+      out.notStartedLabels = lines.filter(l => !(l.started && l.dates && l.dates.length > 1)).map(l => l.label);
+      // 按住圖
+      const svg = document.getElementById("sc-svg");
+      if (svg) {
+        const rc = svg.getBoundingClientRect();
+        svg.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: rc.left + rc.width * 0.99, clientY: rc.top + rc.height / 2, pointerType: "touch" }));
+        const tip = document.getElementById("sc-tip");
+        out.tipShown = !!tip && !tip.hidden; out.tipRows = tip ? tip.querySelectorAll("div").length - 1 : 0;
+        svg.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+        out.tipHidden = !!tip && tip.hidden;
+      }
+      // 每個分頁
+      out.tabs = [];
+      for (const t of tabs) {
+        SC_TAB = t.dataset.tab; renderStrategyCurves();
+        const body = document.getElementById("sc-body");
+        const chipNow = document.querySelector(`#sc-tabs .sc-tab[data-tab="${t.dataset.tab}"]`);
+        out.tabs.push({ t: t.dataset.tab, has: chipNow.dataset.hasData === "1", dim: /opacity:\s*\.45/.test(chipNow.getAttribute("style") || ""),
+          svg: !!body.querySelector("svg"), emptySvg: [...body.querySelectorAll("svg")].some(s => !s.querySelector("polyline")),
+          notyet: (body.querySelector(".sc-notyet") || {}).textContent || "" });
+      }
+      SC_TAB = "all"; renderStrategyCurves();
+      return out;
+    });
+    if (r.defaultTab !== "all" && r.defaultTab !== undefined) scfErrs.push(`預設分頁應為全部疊加，實為 ${r.defaultTab}`);
+    if (r.firstTab !== "all" || !r.firstOn) scfErrs.push(`第一個分頁應為全部疊加且選中（${r.firstTab}）`);
+    if (r.nStarted && r.legend.length !== r.nStarted + 1) scfErrs.push(`圖例 ${r.legend.length} 項 ≠ 有資料的線 ${r.nStarted}＋1`);
+    if (r.legend[0] !== "0050") scfErrs.push(`圖例第一個應為 0050，實為「${r.legend[0]}」`);
+    for (const lb of r.notStartedLabels) { const short = lb.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健)$/, ""); if (!r.soon.includes(short)) scfErrs.push(`「即將加入」缺 ${short}`); }
+    if (r.nStarted && !(r.tipShown && r.tipRows === r.nStarted + 1 && r.tipHidden)) scfErrs.push(`按住圖應顯示 ${r.nStarted + 1} 列數值、放開收起（shown=${r.tipShown} rows=${r.tipRows} hidden=${r.tipHidden}）`);
+    for (const t of r.tabs) {
+      if (t.emptySvg) scfErrs.push(`分頁 ${t.t} 出現空白 svg`);
+      if (!t.has && t.t !== "all") {
+        if (!t.dim) scfErrs.push(`分頁 ${t.t} 沒資料卻沒變灰`);
+        if (t.svg) scfErrs.push(`分頁 ${t.t} 沒資料卻畫了圖`);
+        if (!/開始，現在還沒有資料$/.test(t.notyet.trim())) scfErrs.push(`分頁 ${t.t} 應只顯示「X 月 X 日開始，現在還沒有資料」：${t.notyet}`);
+      }
+    }
+    scfInfo = `有資料 ${r.nStarted} 條、圖例 ${r.legend.length} 項（${r.legend.join("／")}）；即將加入：${r.soon.replace(/^即將加入：/, "")}`;
+  } catch (e) { scfErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("95. 「跟 0050 比」卡：預設疊圖、未開始分頁變灰無空白圖、圖例＝有資料線數＋1、即將加入、按住看數值（先.七十三）", scfErrs.length === 0, scfErrs.join("; ") || scfInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -16,7 +16,7 @@
     [/\bTWSE\b/g,'證交所'],[/\bTPEx\b/g,'櫃買中心'],[/\bTAIFEX\b/g,'期交所'],
     [/FinMind/gi,'公開資料'],[/Shioaji/gi,'永豐'],
     [/真錢\s*Bb-?90/g,'自動投資'],[/Bb-?90/g,'自動投資'],
-    [/紙\.一b/g,'模擬 A2'],[/紙\.一(\s*70\/30)?/g,'模擬 A'],[/紙\.二/g,'模擬 D'],[/紙\.三(\s*S3-C6)?/g,'模擬 B'],[/紙\.四(\s*R1-C)?/g,'模擬 C'],
+    [/紙\.一b/g,'模擬 D'],[/紙\.一(\s*70\/30)?/g,'模擬 A'],[/紙\.二/g,'模擬 E'],[/紙\.三(\s*S3-C6)?/g,'模擬 B'],[/紙\.四(\s*R1-C)?/g,'模擬 C'],
     [/\bS3-C6\b/g,'模擬 B'],[/\bR1-C\b/g,'模擬 C'],
     [/\bLIVE_WITH_VETO\b/g,'真錢（可取消）'],[/\bLIVE\b/g,'真錢'],[/\bSIMULATION\b/g,'模擬'],
     [/\bMDD\b/g,'最大跌幅'],[/唯讀/g,'只能看'],[/否決窗/g,'取消時間'],
@@ -999,12 +999,17 @@
   // 舊卡「依序串接複利」把重疊的 5 日報酬串接、誤放大約 5 倍，已刪除）＋本機 /auto/strategy_line（真錢 Bb-90，
   // 帳本只在本機）。每條線從自己的起始日歸一為 100，灰線為同期 0050；指標與「金礦判讀」都由 Python 端同一支
   // metrics() 算好，這裡只畫——判讀文字是固定規則（<60 日「尚不足以判斷」），前端不自行產生任何推論文字。
-  let SC_DATA=null,SC_LIVE=null,SC_LIVE_ERR='',SC_TAB='live',SC_BOARD='value';
-  // 先.七十二-A4：前台白話名稱（對照表 data/ui_glossary.json）；內部 id 不變
-  const SC_TABS=[['live','自動投資'],['paper_1','模擬 A 穩健'],['paper_3','模擬 B 景氣閘門'],['paper_4','模擬 C 加速'],
-    ['paper_1b','模擬 A2'],['paper_2','模擬 D'],['boards','選股榜單'],['all','全部疊加']];
+  // 先.七十三（2026-10-11）：「全部疊加」排第一且為預設；其後 自動投資、模擬 A～E、選股榜單。內部 id 不變。
+  let SC_DATA=null,SC_LIVE=null,SC_LIVE_ERR='',SC_TAB='all',SC_BOARD='value';
+  const SC_TABS=[['all','全部疊加'],['live','自動投資'],['paper_1','模擬 A'],['paper_3','模擬 B'],['paper_4','模擬 C'],
+    ['paper_1b','模擬 D'],['paper_2','模擬 E'],['boards','選股榜單']];
   const SC_BOARDS=[['value','估值'],['momentum','動能'],['future','未來']];
-  const SC_COLORS=['#2f81f7','#d4a017','#3fb950','#db61a2','#f0883e','#a371f7','#56d4dd','#e5534b','#9e6a03'];
+  // 每條線固定顏色（疊圖與單線圖一致）；0050 固定灰色
+  const SC_COLOR_BY={live_bb90:'#2f81f7',paper_1:'#d4a017',paper_3:'#3fb950',paper_4:'#db61a2',paper_1b:'#f0883e',paper_2:'#a371f7',
+    board_value:'#56d4dd',board_momentum:'#e5534b',board_future:'#b5d334'};
+  const SC_BENCH_COLOR='#8b8b8b';
+  const scColor=id=>SC_COLOR_BY[id]||'#9e9e9e';
+  let SC_PLOT=null;  // 目前畫面上那張圖的資料（按住圖顯示當日數值用）
   async function loadStrategyCurves(){
     try{
       const r=await fetch('data/strategy_curves.json?t='+Math.floor(Date.now()/60000));
@@ -1032,26 +1037,70 @@
     return ls;
   }
   function scById(id){return scLines().find(l=>l.id===id)||null}
-  // 多條線畫在同一條日期軸上（聯集日期）；每條線各自歸一 100，灰線＝主線（或最早起始那條）的同期 0050。
-  function scSvg(lines,benchLine){
+  const scHasData=l=>!!(l&&l.started&&l.dates&&l.dates.length>1);
+  function scTabHasData(k){
+    if(k==='all')return true;
+    if(k==='boards')return SC_BOARDS.some(([b])=>scHasData(scById('board_'+b)));
+    return scHasData(scById(k==='live'?'live_bb90':k));
+  }
+  // 「X 月 X 日開始」；自動投資沒有預定日（第一批成交日才算起點）
+  function scStartText(l){
+    const d=l&&l.start_date;
+    if(d&&/^\d{4}-\d{2}-\d{2}/.test(d))return `${+d.slice(5,7)} 月 ${+d.slice(8,10)} 日開始`;
+    return l&&l.id==='live_bb90'?'第一批成交後開始':'開始日未定';
+  }
+  const scShortDate=l=>(l&&l.start_date&&/^\d{4}-\d{2}-\d{2}/.test(l.start_date))?`${+l.start_date.slice(5,7)}/${+l.start_date.slice(8,10)}`:(l&&l.id==='live_bb90'?'第一批成交後':'未定');
+  // 多條線畫在同一條日期軸上（聯集日期）；每條線各自歸一 100，灰線＝最早起始那條的同期 0050。
+  // 只畫有資料的線（先.七十三-2：未開始的不畫空線）。
+  function scSvg(lines){
     const W=320,H=150,pad=6;
-    const started=lines.filter(l=>l&&l.started&&l.dates&&l.dates.length>1);
-    if(!started.length)return `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--ink-3)" font-size="11">尚無可畫的曲線</text></svg>`;
+    const started=lines.filter(scHasData);
+    SC_PLOT=null;
+    if(!started.length)return '';
     const dates=[...new Set(started.flatMap(l=>l.dates))].sort();
     const xi=Object.fromEntries(dates.map((d,i)=>[d,i]));
-    const bl=benchLine&&benchLine.started?benchLine:started.slice().sort((a,b)=>a.dates[0]<b.dates[0]?-1:1)[0];
+    const bl=started.slice().sort((a,b)=>a.dates[0]<b.dates[0]?-1:1)[0];
     const vals=[100,...started.flatMap(l=>l.nav),...bl.bench];
     const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
     const X=d=>pad+(dates.length>1?xi[d]/(dates.length-1):0)*(W-2*pad),Y=v=>pad+(1-(v-mn)/rg)*(H-2*pad);
     const pl=(ds,vs)=>ds.map((d,i)=>`${X(d).toFixed(1)},${Y(vs[i]).toFixed(1)}`).join(' ');
-    const lines_=started.map(l=>{const c=SC_COLORS[scLines().findIndex(x=>x.id===l.id)%SC_COLORS.length];
-      return `<polyline data-line="${l.id}" points="${pl(l.dates,l.nav)}" fill="none" stroke="${c}" stroke-width="2.2"/>`}).join('');
-    return `<svg id="sc-svg" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    const lines_=started.map(l=>`<polyline data-line="${l.id}" points="${pl(l.dates,l.nav)}" fill="none" stroke="${scColor(l.id)}" stroke-width="2.2"/>`).join('');
+    const toMap=(ds,vs)=>Object.fromEntries(ds.map((d,i)=>[d,vs[i]]));
+    SC_PLOT={dates,pad,W,series:[{label:'0050',color:SC_BENCH_COLOR,map:toMap(bl.dates,bl.bench)}]
+      .concat(started.map(l=>({label:l.label,color:scColor(l.id),map:toMap(l.dates,l.nav)})))};
+    return `<div class="sc-plot" style="position:relative;touch-action:pan-y">
+      <svg id="sc-svg" width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
       <line x1="${pad}" y1="${Y(100).toFixed(1)}" x2="${W-pad}" y2="${Y(100).toFixed(1)}" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="3,2"/>
-      <polyline data-line="bench_0050" points="${pl(bl.dates,bl.bench)}" fill="none" stroke="var(--ink-3)" stroke-width="2" opacity=".75"/>
-      ${lines_}</svg>`;
+      <polyline data-line="bench_0050" points="${pl(bl.dates,bl.bench)}" fill="none" stroke="${SC_BENCH_COLOR}" stroke-width="2" opacity=".8"/>
+      ${lines_}<line id="sc-guide" x1="0" y1="0" x2="0" y2="${H}" stroke="var(--ink-3)" stroke-width="1" visibility="hidden"/></svg>
+      <div id="sc-tip" hidden style="position:absolute;top:4px;pointer-events:none;background:var(--surface,#1c1b19);border:1px solid var(--hairline);border-radius:8px;padding:5px 8px;font-size:11px;line-height:1.55;white-space:nowrap;z-index:2"></div>
+    </div>`;
+  }
+  // 先.七十三-3：手指按住圖（或滑鼠移到圖上）顯示該日各線數值；放開就收起
+  function scBindTip(){
+    const wrap=document.querySelector('#sc-body .sc-plot'),svg=document.getElementById('sc-svg'),tip=document.getElementById('sc-tip'),guide=document.getElementById('sc-guide');
+    if(!wrap||!svg||!tip||!SC_PLOT)return;
+    let down=false;
+    const show=ev=>{
+      try{
+        const P=SC_PLOT,r=svg.getBoundingClientRect();
+        const fx=Math.min(1,Math.max(0,((ev.clientX-r.left)/r.width*P.W-P.pad)/(P.W-2*P.pad)));
+        const i=Math.round(fx*(P.dates.length-1)),d=P.dates[i];
+        const gx=P.pad+(P.dates.length>1?i/(P.dates.length-1):0)*(P.W-2*P.pad);
+        guide.setAttribute('x1',gx);guide.setAttribute('x2',gx);guide.setAttribute('visibility','visible');
+        const rows=P.series.filter(s=>s.map[d]!=null).map(s=>{const v=s.map[d]-100;return `<div><span style="color:${s.color}">●</span> ${_uiEsc(s.label)} ${v>=0?'+':''}${v.toFixed(1)}%</div>`});
+        tip.innerHTML=`<div style="color:var(--ink-3)">${d.slice(5).replace('-','/')}</div>`+rows.join('');
+        tip.hidden=false;
+        const left=ev.clientX-r.left;tip.style.left=(left>r.width/2?Math.max(0,left-tip.offsetWidth-10):left+10)+'px';
+      }catch(e){console.warn('[scTip]',e);recordGlobalError('scTip',e)}
+    };
+    const hide=()=>{tip.hidden=true;guide.setAttribute('visibility','hidden')};
+    svg.addEventListener('pointerdown',ev=>{down=true;show(ev)});
+    svg.addEventListener('pointermove',ev=>{if(down||ev.pointerType==='mouse')show(ev)});
+    ['pointerup','pointercancel','pointerleave'].forEach(t=>svg.addEventListener(t,()=>{down=false;hide()}));
   }
   const _scPp=v=>v==null?'—':`${v>=0?'+':''}${Number(v).toFixed(1)} 點`;
+  const _scGap=v=>v==null?'—':(v>0?'+':v<0?'−':'')+Math.abs(Number(v)).toFixed(1);
   const _scPct=v=>v==null?'—':`${Number(v).toFixed(2)}%`;
   const SC_STATUS_COLOR={'真錢':'var(--accent)','模擬中':'var(--ink-2)','紙上追蹤中':'var(--ink-2)','回測通過':'var(--good)','回測未通過':'var(--critical)','未回測':'var(--warn)'};
   function scStatusTag(s){return `<span class="sc-status" style="font-size:10px;padding:1px 6px;border-radius:8px;border:1px solid ${SC_STATUS_COLOR[s]||'var(--hairline)'};color:${SC_STATUS_COLOR[s]||'var(--ink-2)'}">${s||'—'}</span>`}
@@ -1067,35 +1116,47 @@
     <div class="note" style="margin-bottom:4px">${m.days||0} 個交易日；同期 0050 ${_scPct(m.bench_cum_pct)}${m.days>=60&&m.ann_gap_pp!=null?'；每年約差 '+_scPp(m.ann_gap_pp):''}</div>
     <div class="note sc-verdict" style="font-weight:600;color:var(--ink-2)">判讀：${m.days>=60?m.verdict:`尚不足以判斷（才 ${m.days||0} 天，要滿 60 天）`}</div>`;
   }
+  // 先.七十三-2：還沒開始的線只顯示一行，不畫空圖
+  function scNotYetHtml(l){
+    return `<div class="note sc-notyet" style="margin:10px 0;color:var(--ink-3)">${_uiEsc(scStartText(l))}，現在還沒有資料</div>`;
+  }
   function scLineBlock(l){
-    if(!l)return '<div class="note" style="color:var(--ink-3)">此線尚無資料</div>';
-    if(!l.started)return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div><div class="note" style="margin:0 0 6px">${scStatusTag(l.status)}　${l.note||'尚未啟動'}${l.start_date?'（起始日 '+l.start_date+'）':''}</div>`;
-    return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l],l)}</div>
-      <div class="note" style="margin-top:4px;font-size:10px">${l.start_date} 起算為 100；<span style="color:var(--ink-3)">━</span> 灰線＝同期 0050</div>
+    if(!l)return '<div class="note sc-notyet" style="color:var(--ink-3)">現在還沒有資料</div>';
+    if(!scHasData(l))return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>`+scNotYetHtml(l);
+    return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l])}</div>
+      <div class="note" style="margin-top:4px;font-size:10px">${l.start_date} 起算為 100；<span style="color:${SC_BENCH_COLOR}">━</span> 灰線＝同期 0050；按住圖看每天數字</div>
       <div class="note" style="margin-top:4px;font-size:10px;color:var(--ink-3)">${l.note||''}</div>`;
+  }
+  // 先.七十三-3：疊圖圖例——0050 灰色排第一，其後每條有資料的線：顏色＋名稱＋目前跟 0050 差幾點
+  function scLegendHtml(started){
+    const item=(color,label,val)=>`<span class="sc-legend-item" style="display:inline-flex;align-items:center;gap:4px;margin:0 10px 4px 0;white-space:nowrap"><span style="display:inline-block;width:12px;height:3px;border-radius:2px;background:${color}"></span>${_uiEsc(label)}${val!=null?` <b style="font-weight:600">${val}</b>`:''}</span>`;
+    return `<div class="sc-legend" style="display:flex;flex-wrap:wrap;font-size:11px;margin-top:6px">`+
+      item(SC_BENCH_COLOR,'0050',null)+started.map(l=>item(scColor(l.id),l.label,_scGap(l.metrics&&l.metrics.cum_gap_pp))).join('')+`</div>`;
   }
   function renderStrategyCurves(){
     const tabsEl=document.getElementById('sc-tabs'),bodyEl=document.getElementById('sc-body');
     if(!tabsEl||!bodyEl)return;
     if(!SC_DATA||!SC_DATA.lines){bodyEl.innerHTML='<div class="note" style="color:var(--ink-3)">策略曲線資料尚未產生</div>';tabsEl.innerHTML='';return}
-    const chip=(on,label,js,attr)=>`<span class="press sc-tab" ${attr} style="padding:3px 9px;border-radius:14px;font-size:11px;white-space:nowrap;border:1px solid ${on?'var(--accent)':'var(--hairline)'};color:${on?'var(--accent)':'var(--ink-2)'};cursor:pointer" onclick="${js}">${label}</span>`;
-    tabsEl.innerHTML=SC_TABS.map(([k,lb])=>chip(k===SC_TAB,lb,`SC_TAB='${k}';renderStrategyCurves()`,`data-tab="${k}"`)).join('');
+    const chip=(on,label,js,attr,dim)=>`<span class="press sc-tab" ${attr} style="padding:3px 9px;border-radius:14px;font-size:11px;white-space:nowrap;border:1px solid ${on?'var(--accent)':'var(--hairline)'};color:${on?'var(--accent)':'var(--ink-2)'};cursor:pointer;opacity:${dim?'.45':'1'}" onclick="${js}">${label}</span>`;
+    tabsEl.innerHTML=SC_TABS.map(([k,lb])=>{const has=scTabHasData(k);return chip(k===SC_TAB,lb,`SC_TAB='${k}';renderStrategyCurves()`,`data-tab="${k}" data-has-data="${has?1:0}"`,!has)}).join('');
     let html='';
     if(SC_TAB==='boards'){
-      html+=`<div style="display:flex;gap:6px;margin-bottom:6px">${SC_BOARDS.map(([k,lb])=>chip(k===SC_BOARD,lb,`SC_BOARD='${k}';renderStrategyCurves()`,`data-board="${k}"`)).join('')}</div>`;
+      html+=`<div style="display:flex;gap:6px;margin-bottom:6px">${SC_BOARDS.map(([k,lb])=>{const has=scHasData(scById('board_'+k));return chip(k===SC_BOARD,lb,`SC_BOARD='${k}';renderStrategyCurves()`,`data-board="${k}"`,!has)}).join('')}</div>`;
       html+=scLineBlock(scById('board_'+SC_BOARD));
       html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--warn)">${(SC_DATA.meta&&SC_DATA.meta.correction)||''}</div>`;
     }else if(SC_TAB==='all'){
-      const ls=scLines().filter(l=>l.started&&l.dates&&l.dates.length>1);
-      html+=`<div style="margin-top:4px">${scSvg(ls)}</div><div class="note" style="margin-top:4px;font-size:10px;line-height:1.7">`+
-        scLines().map((l,i)=>`<span style="color:${SC_COLORS[i%SC_COLORS.length]}">━</span> ${l.label}〔${l.goal||'未標示'}〕${l.started?`（${_scPp(l.metrics&&l.metrics.cum_gap_pp)}）`:'（未啟動）'}`).join('　')+
-        `　<span style="color:var(--ink-3)">━</span> 0050</div><div class="note" style="font-size:10px;color:var(--ink-3)">各線起算為 100；括號內是跟 0050 差幾點</div>`;
+      const all=scLines(),started=all.filter(scHasData),soon=all.filter(l=>!scHasData(l));
+      html+=started.length?`<div style="margin-top:4px">${scSvg(started)}</div>`+scLegendHtml(started):scNotYetHtml(null);
+      // 「即將加入」是資料清單不是說明文字，不用 .note（不會被收成「ⓘ 說明」）
+      if(soon.length)html+=`<div class="sc-soon" style="margin-top:4px;font-size:11.5px;line-height:1.6;color:var(--ink-3)">即將加入：${soon.map(l=>`${_uiEsc(l.label.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健)$/,''))}（${scShortDate(l)}）`).join('、')}</div>`;
+      html+=`<div class="note" style="font-size:10px;color:var(--ink-3)">各線起算為 100；數字是跟 0050 差幾點；按住圖看每天數字</div>`;
     }else{
       html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
     }
     const meta=SC_DATA.meta||{};
     html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">${meta.generated_at?'更新於 '+String(meta.generated_at).slice(5,16).replace('T',' ').replace('-','/'):''}</div>`;
     bodyEl.innerHTML=html;
+    scBindTip();
   }
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
   // 否則退回既有近20日日線並標「20日」。標籤永遠顯示，使用者一眼分得出是今日還是20日。
@@ -2817,7 +2878,9 @@
   // 原始訊息（含 report_error 寫出的錯誤）先比對 UI_BANNER_RULES 轉成白話兩段，比不到就用 uiPlain() 轉白話後截短。
   // 原始全文放在收合的「細節」裡（不刪，方便回報問題）。
   const UI_BANNER_RULES=[
-    {re:/資金不足|現金不足|餘額不足|INSUFFICIENT_CASH|未入金|入金/,sit:'還沒入金，這一期不會下單',next:'入金後自動重跑',go:'settings'},
+    // 先.七十三-4：入金不足——第一行只寫白話結論（含下次排程是星期幾），金額等數字一律收進「看細節」
+    {re:/餘額查詢失敗/,sit:()=>'查不到帳戶餘額，'+_uiNextWhen()+'先不下單',next:'下次排程自動重試',go:'settings'},
+    {re:/資金不足|現金不足|餘額不足|INSUFFICIENT_CASH|未入金|入金/,sit:()=>'還沒入金，'+_uiNextWhen()+'不會下單',next:'入金後自動重跑',go:'settings'},
     {re:/緊急停止|STOP\.flag|STOP_FLAG/,sit:'已按緊急停止，暫不下單',next:'到設定頁解除',go:'settings'},
     {re:/心跳|排程未執行|電腦可能關機|漏跑/,sit:'電腦沒在跑，自動投資暫停',next:'打開電腦就會恢復',go:'settings'},
     {re:/價格缺漏|價格補不到|whitelist_price|白名單.*價格/,sit:'缺 ETF 價格，先不下單',next:'資料補齊後自動重跑',go:'settings'},
@@ -2829,9 +2892,16 @@
     {re:/看守檔.*未更新|看守員可能停擺/,sit:'模擬追蹤的檢查停了',next:'等下次排程補上',go:'settings'},
     {re:/月底.*未寫入|未寫入|逾期未/,sit:'模擬追蹤漏記一期',next:'等下次排程補記',go:'settings'},
   ];
+  // 下次自動投資排程是星期幾（/auto/status 的 next_run.date；讀不到就說「這一期」）
+  let AUTO_NEXT_RUN_DATE='';
+  function _uiNextWhen(){
+    const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(AUTO_NEXT_RUN_DATE||'');
+    if(!m)return '這一期';
+    return '週'+'日一二三四五六'[new Date(Date.UTC(+m[1],+m[2]-1,+m[3])).getUTCDay()];
+  }
   function uiBannerParts(raw){
     const t=String(raw||'');
-    for(const r of UI_BANNER_RULES)if(r.re.test(t))return {sit:r.sit,next:r.next,go:r.go};
+    for(const r of UI_BANNER_RULES)if(r.re.test(t))return {sit:typeof r.sit==='function'?r.sit():r.sit,next:r.next,go:r.go};
     const p=uiPlain(t).replace(/^[⚠️\s]+/,'');
     return {sit:[...p].length>18?[...p].slice(0,18).join('')+'…':p,next:'看細節',go:null};
   }
@@ -2845,7 +2915,7 @@
     el.style.display='block';
     el.innerHTML=`<div class="ui-ban-sit" data-ui-keep>${_uiEsc(first.sit)}${more}</div>`+
       `<div class="ui-ban-next"><span class="press" style="text-decoration:underline;cursor:pointer" onclick="${first.go?`go('${first.go}')`:`this.closest('[id]').querySelector('details').open=true`}">${_uiEsc(first.next)} ›</span></div>`+
-      `<details class="ui-ban-detail" data-ui-detail><summary style="cursor:pointer;font-weight:400;font-size:11px;opacity:.8">細節</summary>`+
+      `<details class="ui-ban-detail" data-ui-detail><summary style="cursor:pointer;font-weight:400;font-size:11px;opacity:.8">看細節</summary>`+
       `<div style="font-weight:400;font-size:11px;margin-top:4px">${list.map(m=>_uiEsc(uiPlain(m))).join('<br>')}</div>`+
       `<div style="display:none" data-ui-raw>${list.map(_uiEsc).join('<br>')}</div></details>`;
   }
@@ -2924,6 +2994,7 @@
       if(!r.ok)throw new Error('HTTP '+r.status);
       const d=await r.json();
       AUTO_BAN.offline='';
+      AUTO_NEXT_RUN_DATE=String((d.next_run&&d.next_run.date)||'');
       const st=d.status||{};
       const bits=[(d.drill?'【演練（假券商）】':'')+'模式：'+(d.mode||'SIMULATION')];
       if(st.updated_at)bits.push('更新：'+st.updated_at);
@@ -3379,7 +3450,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1458';
+  const APP_VERSION='2026-10-11.1716';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
