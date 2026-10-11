@@ -164,8 +164,28 @@
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
     _safeAsync('loadSignalStatus',()=>loadSignalStatus(false));  // 2026-09-15 開發佇列源頭一.4
-    _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
+    _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4    _safeAsync('loadTrials',loadTrials);  // 常備.開發-33 研究透明度，獨立包起來
   }
+  // 常備.開發-33：試驗帳本檢視（讀 data/trials_index.json，唯讀）
+  let _trialsData=null;
+  async function loadTrials(){
+    try{
+      const r=await fetch('data/trials_index.json',{cache:'no-cache'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      _trialsData=await r.json();
+      setTxt('trials-meta','共 '+_trialsData.count+' 筆｜更新 '+String(_trialsData.generated_at||'').slice(0,10));
+      renderTrials();
+    }catch(e){console.warn('[loadTrials]',e);recordGlobalError('loadTrials',e);setTxt('trials-meta','試驗帳本暫時讀不到')}
+  }
+  function renderTrials(){
+    const box=document.getElementById('trials-list');if(!box||!_trialsData)return;
+    const q=((document.getElementById('trials-filter')||{}).value||'').trim().toLowerCase();
+    const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const rows=_trialsData.rows.filter(r=>!q||(r.name+r.verdict+r.track+r.date).toLowerCase().includes(q)).slice(0,150);
+    box.innerHTML=rows.length?rows.map(r=>'<div style="border-bottom:1px solid rgba(255,255,255,.06);padding:4px 0"><b>#'+r.id+'</b> '+esc(r.date)+' · '+esc(r.track)+'<br>'+esc(r.name)+' <span style="color:var(--ink-3)">→ '+esc(r.verdict)+'</span></div>').join(''):'<div class="note">沒有符合的紀錄</div>';
+  }
+  window.renderTrials=renderTrials;
+
   // 2026-09-06（CF.4）伺服器網址正規化。網域上線後總司令會在手機上打字輸入
   // 「live.example.com」這種形式，很容易少打 https://、多打結尾斜線、或不小心
   // 把 /health 一起貼進來。這裡統一整理成 `https://主機[:port]` 的乾淨形式：

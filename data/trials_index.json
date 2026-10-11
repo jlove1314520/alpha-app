@@ -1,0 +1,3263 @@
+{
+ "generated_at": "2026-10-11T04:05:52+00:00",
+ "source": "research/TRIALS_LEDGER.md",
+ "disclaimer": "研究紀錄，非投資建議",
+ "count": 465,
+ "rows": [
+  {
+   "id": 430,
+   "date": "2026-10-10",
+   "track": "跨市場",
+   "name": "r1_0050_credit_gate_result",
+   "verdict": "PASS"
+  },
+  {
+   "id": 429,
+   "date": "2026-10-10",
+   "track": "跨市場",
+   "name": "r1_0050_credit_gate_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 428,
+   "date": "2026-10-07",
+   "track": "跨市場",
+   "name": "s3c6_oos_2025_result",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 427,
+   "date": "2026-10-07",
+   "track": "跨市場",
+   "name": "s3c6_oos_2025_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 426,
+   "date": "2026-10-07",
+   "track": "跨市場",
+   "name": "crisis_gate_leveraged_bb90_result",
+   "verdict": "PASS"
+  },
+  {
+   "id": 425,
+   "date": "2026-10-07",
+   "track": "TW",
+   "name": "bb90_oos_2025_result",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 424,
+   "date": "2026-10-07",
+   "track": "跨市場",
+   "name": "crisis_gate_leveraged_bb90_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 423,
+   "date": "2026-10-07",
+   "track": "TW",
+   "name": "bb90_oos_2025_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 422,
+   "date": "2026-10-06",
+   "track": "跨市場",
+   "name": "leveraged_bb90_6grid_421_result",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 421,
+   "date": "2026-10-06",
+   "track": "跨市場",
+   "name": "leveraged_bb90_6grid_421_prereg",
+   "verdict": ">2pp判無效）、網格C1~C6、通過條件、成本、期間2003-07-01~20"
+  },
+  {
+   "id": 420,
+   "date": "2026-10-06",
+   "track": "跨市場",
+   "name": "leveraged_bb90_6grid_result",
+   "verdict": ">2pp即判無效不跑網格。程式 research/leveraged_bb90_"
+  },
+  {
+   "id": 419,
+   "date": "2026-10-06",
+   "track": "跨市場",
+   "name": "leveraged_bb90_6grid_prereg",
+   "verdict": "任一>2pp判無效不跑網格。通過條件：MDD>−45%、最差12個月>−40%、"
+  },
+  {
+   "id": 418,
+   "date": "2026-10-06",
+   "track": "TW",
+   "name": "core_allocation_24grid_result",
+   "verdict": "PASS"
+  },
+  {
+   "id": 417,
+   "date": "2026-10-06",
+   "track": "TW",
+   "name": "core_allocation_24grid_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 416,
+   "date": "2026-10-06",
+   "track": "跨市場",
+   "name": "trend_scale_1_5x_0_5x_xmkt_result",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 415,
+   "date": "2026-10-06",
+   "track": "跨市場",
+   "name": "trend_scale_1_5x_0_5x_xmkt_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 414,
+   "date": "2026-10-05",
+   "track": "TW",
+   "name": "trend_leverage_tw_0050_result",
+   "verdict": "VIOLATES_SURVIVAL"
+  },
+  {
+   "id": 413,
+   "date": "2026-10-05",
+   "track": "US",
+   "name": "trend_leverage_us_spy_result",
+   "verdict": "VIOLATES_SURVIVAL"
+  },
+  {
+   "id": 412,
+   "date": "2026-10-05",
+   "track": "TW",
+   "name": "trend_leverage_tw_0050_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 411,
+   "date": "2026-10-05",
+   "track": "US",
+   "name": "trend_leverage_us_spy_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 410,
+   "date": "2026-10-05",
+   "track": "US",
+   "name": "us_supply_tightness_data_unavailable",
+   "verdict": "ABANDONED"
+  },
+  {
+   "id": 409,
+   "date": "2026-10-05",
+   "track": "TW",
+   "name": "industry_shortage_v1_result",
+   "verdict": "VIOLATES_SURVIVAL"
+  },
+  {
+   "id": 408,
+   "date": "2026-10-05",
+   "track": "TW",
+   "name": "industry_shortage_v1_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 407,
+   "date": "2026-10-01",
+   "track": "TW",
+   "name": "supply_tightness_v2_forward_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 406,
+   "date": "2026-10-01",
+   "track": "TW",
+   "name": "supply_tightness_satellite_v1_result",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 405,
+   "date": "2026-09-30",
+   "track": "TW",
+   "name": "supply_tightness_satellite_v1_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 404,
+   "date": "2026-09-29",
+   "track": "TW",
+   "name": "f_revenue_surprise_revalidation_v7",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 403,
+   "date": "2026-09-29",
+   "track": "TW",
+   "name": "f_eps_surprise_revalidation_v7",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 402,
+   "date": "2026-09-29",
+   "track": "TW",
+   "name": "f_revenue_surprise_revalidation_v7_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 401,
+   "date": "2026-09-29",
+   "track": "TW",
+   "name": "f_eps_surprise_revalidation_v7_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 400,
+   "date": "2026-09-26",
+   "track": "TW",
+   "name": "dividend_yield_v1_common_x_account_70_30_prereg",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 399,
+   "date": "2026-09-25",
+   "track": "TW",
+   "name": "dividend_yield_portfolio_v1_2007_2014_single_shot",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 398,
+   "date": "2026-09-25",
+   "track": "TW",
+   "name": "f52w_high_portfolio_v1_2007_2014_single_shot",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 397,
+   "date": "2026-09-24",
+   "track": "TW",
+   "name": "dividend_yield_portfolio_v1_2007_2014_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 396,
+   "date": "2026-09-24",
+   "track": "TW",
+   "name": "f52w_high_portfolio_v1_2007_2014_prereg",
+   "verdict": "未結案"
+  },
+  {
+   "id": 395,
+   "date": "2026-09-24",
+   "track": "TW",
+   "name": "value_board_v2_ir_dsr_cheap_review",
+   "verdict": "未結案"
+  },
+  {
+   "id": 394,
+   "date": "2026-09-24",
+   "track": "TW",
+   "name": "spillover_overlay_v1_o2c",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 393,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "weinstein_v2_alpha_gate_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 392,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "weinstein_alpha_gate_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 391,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "piotroski_fscore_gate_v1_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 390,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "value_board_v2_pit_backtest_liquidity500_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 389,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "short_sale_utilization_portfolio_v1_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 388,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "odd_lot_imbalance_portfolio_v1_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 387,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "margin_utilization_regime_portfolio_v1_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 386,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "spillover_overnight_gate_o2c",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 385,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "f52w_high_portfolio_v1_information_ratio_review_final",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 384,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "short_sale_utilization_portfolio_v1_new_engine_scale_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 383,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "odd_lot_imbalance_portfolio_v1_new_engine_scale_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 382,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "margin_utilization_regime_portfolio_v1_new_engine_scale_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 381,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "run_score_backtest_new_scale_recheck",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 380,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "portfolio_v2_pead_new_scale_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 379,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "f52w_high_portfolio_v1_dsr_bonferroni_final",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 378,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "f52w_high_gates_356_engine_fix_recheck",
+   "verdict": "未結案"
+  },
+  {
+   "id": 377,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "f52w_high_portfolio_v1_new_scale_recheck",
+   "verdict": "未結案"
+  },
+  {
+   "id": 376,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "dividend_yield_portfolio_v1_new_scale_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 375,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "score_topn_v1_engine_fix_recheck",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 374,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "regime_gate_nonoverlap_block_reverify_batch",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 373,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "pead_portfolio_v1_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 372,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "insider_event_level_shortwindow",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 371,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "dividend_yield_portfolio_v1_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 370,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "f52w_high_portfolio_v1_engine_fix_recheck",
+   "verdict": "未結案"
+  },
+  {
+   "id": 369,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "monthly_revenue_sue_continuous_bucket_v1_volcheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 368,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "monthly_revenue_sue_continuous_bucket_v1",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 367,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "portfolio_backtest_v2_A_4pass_engine_fix_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 366,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "PENDING_QUEUE.md 常備.5 HYG/IEF比值水位版其他窗口(M=5/10/60日) 當TAIEX regime降曝險訊號 第1關cheap g",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 365,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "PENDING_QUEUE.md 常備.4 HYG/IEF比值N日變動率版代理信用利差 當TAIEX regime降曝險訊號 第1關cheap gate（#78",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 364,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "PENDING_QUEUE.md 常備.3 VIX絕對水位（不取VIX9D/VIX比值）當TAIEX regime降曝險訊號 第1關cheap gate（#76",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 363,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "PENDING_QUEUE.md 常備.2 VIX9D/VIX期限結構比值N日變動率版 當TAIEX regime降曝險訊號 第1關cheap gate（#76",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 362,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "台灣失業率YoY當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md #80，第1關cheap gate重判，同PENDING_QUEU",
+   "verdict": "r\\"
+  },
+  {
+   "id": 361,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "景氣對策信號綜合分數當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md #81，第1關cheap gate重判，撤銷#357原CHEA",
+   "verdict": "r\\"
+  },
+  {
+   "id": 360,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_regime_gate_E-d_ma200_regime",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 359,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_regime_gate_E-c_trailing10",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 358,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "concentrated_backtest_framework_check",
+   "verdict": "FRAMEWORK_CHECK_FAILED"
+  },
+  {
+   "id": 357,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "景氣對策信號綜合分數當TAIEX regime降曝險訊號（HYPOTHESIS_QUEUE.md #81，第1關cheap gate）",
+   "verdict": "r\\"
+  },
+  {
+   "id": 356,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-d_ma200_regime",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 355,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-c_trailing20",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 354,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-c_trailing10",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 353,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-b_stop25",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 352,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-b_stop15",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 351,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-b_stop8",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 350,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-a_buy_and_hold",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 349,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "regime_alt_a_etf_tax_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 348,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "option_pcr_overlay_v1_etf_tax_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 347,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "copper_gold_ratio_overlay_v1_etf_tax_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 346,
+   "date": "2026-09-23",
+   "track": "跨市場",
+   "name": "spillover_overlay_v1_etf_tax_recheck",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 345,
+   "date": "2026-09-23",
+   "track": "hypothesis_queue",
+   "name": "dgbas_unemployment_yoy_gate1",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 344,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-d_ma200_regime",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 343,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-c_trailing20",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 342,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-c_trailing10",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 341,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-b_stop25",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 340,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-b_stop15",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 339,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-b_stop8",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 338,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "exit_rule_lab_E-a_buy_and_hold",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 337,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_e1_rejudge_volatility_matched_control",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 336,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_e1_rejudge_c_right_tail",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 335,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_e1_rejudge_b_p90",
+   "verdict": "PASS"
+  },
+  {
+   "id": 334,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_volatility_matched_control",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 333,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_random_control_right_tail_share_diff",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 332,
+   "date": "2026-09-23",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_random_control_p90_diff",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 331,
+   "date": "2026-09-22",
+   "track": "TW",
+   "name": "原子.六 籌碼depth-1原子IC地圖 Tier B（借券賣出餘額族）——規格第7節輔助判定",
+   "verdict": ">0.02)通過數須超過樸素期望且>=2獨立族。規格第7節第3款明文：Tier "
+  },
+  {
+   "id": 330,
+   "date": "2026-09-22",
+   "track": "hypothesis_queue",
+   "name": "HYPOTHESIS_QUEUE.md #78 HYG/IEF比值代理信用利差當TAIEX regime降曝險訊號 第1關cheap gate（接續#77資料不",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 329,
+   "date": "2026-09-22",
+   "track": "hypothesis_queue",
+   "name": "HYPOTHESIS_QUEUE.md #77 美國高收益債利差(BAMLH0A0HYM2)資料可行性查證",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 328,
+   "date": "2026-09-22",
+   "track": "TW",
+   "name": "原子.六 籌碼depth-1原子IC地圖 Tier A（併入上櫃三大法人重測）——規格第7節判定",
+   "verdict": ">0.02)通過數須超過樸素期望且>=2獨立族。"
+  },
+  {
+   "id": 327,
+   "date": "2026-09-22",
+   "track": "hypothesis_queue",
+   "name": "#76 VIX9D/VIX期限結構比值 當TAIEX regime降曝險訊號 第1關cheap gate",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 326,
+   "date": "2026-09-22",
+   "track": "TW",
+   "name": "event_driven_sue_revenue_gate_sequence",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 325,
+   "date": "2026-09-22",
+   "track": "TW",
+   "name": "event_driven_sue_earnings_gate_sequence",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 324,
+   "date": "2026-09-22",
+   "track": "hypothesis_queue",
+   "name": "#75 2018+子樣本 第1關cheap IC gate (net_usd/n_buyers vs fwd20)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 323,
+   "date": "2026-09-22",
+   "track": "TW",
+   "name": "事件驅動原型(方法.三)：E1財報公布(SUE)/E2月營收公布(SUE)分組依事件當下意外程度",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 322,
+   "date": "2026-09-22",
+   "track": "TW",
+   "name": "tail_test.py 自我校準（PEAD財報公布後3日累積報酬前10%個股 vs 同時間窗/同產業/同市值分位未觸發訊號個股）",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 321,
+   "date": "2026-09-22",
+   "track": "hypothesis_queue",
+   "name": "原子.六 出借總量(TWSE TWT72U)depth-1 IC地圖（14表達式×2horizon=28測試）",
+   "verdict": "VAL IC\\"
+  },
+  {
+   "id": 320,
+   "date": "2026-09-21",
+   "track": "TW",
+   "name": "原子.五B 財報通道B(結構型算子)IC地圖——族層級最終判定",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 319,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A/B_ic_weighted/quarterly 2026-08-26原始p=0.053結果",
+   "verdict": "IRREPRODUCIBLE"
+  },
+  {
+   "id": 318,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 p=0.053不可重現的根因調查（財報PIT.四後續）",
+   "verdict": "未結案"
+  },
+  {
+   "id": 317,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "原子.六 籌碼depth-1原子IC地圖 Tier A——規格第7節判定",
+   "verdict": ">0.02)通過數須超過樸素期望且>=2獨立族。描述性地圖類，比照#285/#2"
+  },
+  {
+   "id": 316,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "原子.五 財報depth-1素材IC地圖——族層級最終判定",
+   "verdict": ">0.7連通)算1次試驗，成功=該族全部K滿窗成員五窗全同號，對2x0.5^K做"
+  },
+  {
+   "id": 315,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：B_plus_value_pe/regime_weighted/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 314,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：B_plus_value_pe/regime_weighted/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 313,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：B_plus_value_pe/ic_weighted/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 312,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：B_plus_value_pe/ic_weighted/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 311,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：B_plus_value_pe/equal/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 310,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：B_plus_value_pe/equal/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 309,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/regime_weighted/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 308,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/regime_weighted/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 307,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/ic_weighted/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 306,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/ic_weighted/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 305,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/equal/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 304,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 80檔PIT修正重跑：A_4pass/equal/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 303,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：ic_weighted_train_only/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 302,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：ic_weighted_train_only/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 301,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：regime_weighted_valIC/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 300,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：regime_weighted_valIC/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 299,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：ic_weighted_valIC/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 298,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：ic_weighted_valIC/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 297,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：regime_weighted_hardcoded/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 296,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：regime_weighted_hardcoded/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 295,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：ic_weighted_hardcoded/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 294,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：ic_weighted_hardcoded/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 293,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：equal/quarterly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 292,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 A_4pass PIT修正重跑：equal/monthly",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 291,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "#23 Piotroski F-score gate_v1 重現驗證（修好dangling import+Q4 PIT修正後重跑）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 290,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "#23 Piotroski F-score sanity 重現驗證（修好dangling import後重跑）",
+   "verdict": "未結案"
+  },
+  {
+   "id": 289,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "f_revenue_surprise（PIT修正後重跑，原TRIALS_LEDGER#8的重大更正）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 288,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "f_eps_surprise（PIT修正後重跑，原TRIALS_LEDGER#7的重大更正）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 287,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "f_eps_growth（PIT修正後重跑，原TRIALS_LEDGER#2的重大更正）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 286,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "原子.二 分年份/分牛熊段穩定度拆解——最終判定",
+   "verdict": "VAL IC\\"
+  },
+  {
+   "id": 285,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "原子.二 depth-1原子表達式IC地圖（描述性掃描）",
+   "verdict": "未結案"
+  },
+  {
+   "id": 284,
+   "date": "2026-09-20",
+   "track": "TW",
+   "name": "#72 重大訂單/得標公告效應",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 283,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "core_tilt_backtest 決定性驗證：重建組合(純市值前50大) vs 0050真實日報酬",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 282,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "HYPOTHESIS_QUEUE.md #73 產業金流加速度輪動（月頻、accel前20%產業）第2關配對式隨機控制組",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 281,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "core_tilt_backtest TE可行性重測(選股邏輯改為市值前50大保留全部,取代因子分數排序版)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 280,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "core_tilt SPEC TE可行性驗證(反推所需TE vs 實測市值加權+主動權重帶構造TE)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 279,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "f_lending_fee_spike v2長持有期降曝險版 6格安全邊際重新錨定重跑(取代1x/2x/3x)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 278,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "#63借券費率異常飆升 第4關安全邊際重新錨定(取代1x/2x/3x)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 277,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "#63借券費率異常飆升 第4關成本敏感度 成本.二重跑(1.8折)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 276,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "#59最小變異數投資組合建構 第4關成本敏感度 成本.二重跑(1.8折)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 275,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime.候選5 自身淨值回撤斷路器regime overlay 成本.二重跑",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 274,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime.候選4 融資餘額成長率regime overlay 成本.二重跑",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 273,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime.候選1 市場廣度水位regime overlay 成本.二重跑",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 272,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime.候選3 已實現波動度regime overlay 成本.二重跑",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 271,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime.候選2/#243 200MA趨勢濾網(TAIEX現貨) 成本.二重跑",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 270,
+   "date": "2026-09-19",
+   "track": "FUT",
+   "name": "fut_basis_mean_reversion_60d（#19）天條一生存門檻檢驗（MDD<=50%硬約束）",
+   "verdict": "PASS"
+  },
+  {
+   "id": 269,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "借券費率異常飆升·長持有期降曝險版 Z4.0_N60(f_lending_fee_spike v2)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 268,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "借券費率異常飆升·長持有期降曝險版 Z3.0_N60(f_lending_fee_spike v2)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 267,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "借券費率異常飆升·長持有期降曝險版 Z2.0_N60(f_lending_fee_spike v2)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 266,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "借券費率異常飆升·長持有期降曝險版 Z4.0_N40(f_lending_fee_spike v2)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 265,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "借券費率異常飆升·長持有期降曝險版 Z3.0_N40(f_lending_fee_spike v2)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 264,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "借券費率異常飆升·長持有期降曝險版 Z2.0_N40(f_lending_fee_spike v2)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 263,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "減資事件CAR·彌補虧損減資組(#71)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 262,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "減資事件CAR·現金減資組(#71)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 261,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=260 k=0.65",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 260,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=260 k=0.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 259,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=260 k=0.35",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 258,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=200 k=0.65",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 257,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=200 k=0.5（主規格）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 256,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=200 k=0.35",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 255,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=140 k=0.65",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 254,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=140 k=0.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 253,
+   "date": "2026-09-19",
+   "track": "hypothesis_queue",
+   "name": "regime.替代A 網格 MA=140 k=0.35",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 252,
+   "date": "2026-09-19",
+   "track": "FUT",
+   "name": "regime擇時overlay事前網格：TX連續合約200MA趨勢濾網 bear_exposure=0.45（延續#244換曝險水位）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 251,
+   "date": "2026-09-19",
+   "track": "FUT",
+   "name": "regime擇時overlay事前網格：TX連續合約200MA趨勢濾網 bear_exposure=0.35（延續#244換曝險水位）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 250,
+   "date": "2026-09-19",
+   "track": "FUT",
+   "name": "regime擇時overlay事前網格：TX連續合約200MA趨勢濾網 bear_exposure=0.25（延續#244換曝險水位）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 249,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime擇時overlay候選4：全市場融資餘額12週成長率下檔regime(>expanding第80百分位=過熱→曝險0.50,方向事前綁定)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 248,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime擇時overlay候選1：全市場廣度水位regime(4位數代號個股%站上200MA<0.50→曝險0.50,否則1.00)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 247,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime擇時overlay候選3：TAIEX已實現波動度regime單獨測試(vol20>expanding中位數→曝險0.50,否則1.00)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 246,
+   "date": "2026-09-19",
+   "track": "TW",
+   "name": "regime擇時overlay候選5：TAIEX回撤斷路器(自身淨值回撤>=15%降曝險至0.50,回到-7.5%解除)+absorbing state檢查",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 245,
+   "date": "2026-09-19",
+   "track": "US",
+   "name": "f_us_low_vol（中型股tier，N=90重跑後1b策略構造深挖，#206 CHEAP_PASS的完整驗證，round446下一步遺漏補做）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 244,
+   "date": "2026-09-15",
+   "track": "FUT",
+   "name": "regime擇時overlay協定FUT軌配合：TX連續合約200MA趨勢濾網(binary曝險1.00/0.50)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 243,
+   "date": "2026-09-15",
+   "track": "hypothesis_queue",
+   "name": "regime擇時overlay#10協定第一個訊號：TAIEX 200MA趨勢濾網(binary曝險1.00/0.50)",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 242,
+   "date": "2026-09-15",
+   "track": "hypothesis_queue",
+   "name": "Cybex.引擎：進場/出場延遲確認+總開關重開冷卻期 套用於#53全市場報酬離散度速度",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 241,
+   "date": "2026-09-10",
+   "track": "hypothesis_queue",
+   "name": "option_skew_cheap_gate #70",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 240,
+   "date": "2026-09-10",
+   "track": "TW",
+   "name": "passive_benchmark_tw_v1（0050固定小倉位被動基準，深讀二.1）",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 239,
+   "date": "2026-09-10",
+   "track": "hypothesis_queue",
+   "name": "option_oi_pcr_gate69",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 238,
+   "date": "2026-09-10",
+   "track": "FUT",
+   "name": "fut_cta_multi_tf_voltarget",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 237,
+   "date": "2026-09-10",
+   "track": "FUT",
+   "name": "fut_vol_breakout_0p5atr",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 236,
+   "date": "2026-09-10",
+   "track": "FUT",
+   "name": "fut_keltner_breakout_20_2atr",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 235,
+   "date": "2026-09-10",
+   "track": "FUT",
+   "name": "fut_donchian_full_55_20",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 234,
+   "date": "2026-09-10",
+   "track": "FUT",
+   "name": "fut_turtle_system1_20_10",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 233,
+   "date": "2026-09-10",
+   "track": "hypothesis_queue",
+   "name": "short_margin_ratio_gate68 第1關cheap IC gate（HYPOTHESIS_QUEUE.md #68券資比 Short-to-M",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 232,
+   "date": "2026-09-10",
+   "track": "hypothesis_queue",
+   "name": "#67盤中零股交易比重(Odd-Lot Imbalance) portfolio層構造 gate2",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 231,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "f_odd_lot_imbalance (#67 盤中零股委託簿失衡度，第1關cheap gate)",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 230,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "us_tax_loss_selling_gate66",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 229,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "#65 產業龍頭股跨期領先-落後動能 factor_ic_leader_follower_lag gate1",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 228,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "fut_basis_regime_gate64",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 227,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "#63 gate4成本敏感度",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 226,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "#63 借券費率異常飆升 gate2 參數高原檢定(Z_THRESH)",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 225,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "f_lending_fee_spike（HYPOTHESIS_QUEUE.md#63，第1關cheap gate：借券費率異常飆升作為知情放空訊號）",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 224,
+   "date": "2026-09-09",
+   "track": "TW",
+   "name": "#62 block_trade_gate62 鉅額逐筆交易(配對交易)跟隨訊號 gate1",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 223,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "material_news_car_gate2_continuation",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 222,
+   "date": "2026-09-09",
+   "track": "US",
+   "name": "sp500_addition_runup_gate51us",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 221,
+   "date": "2026-09-09",
+   "track": "hypothesis_queue",
+   "name": "HYPOTHESIS_QUEUE.md #52事件反應速度 正式N=200全量CAR事件研究gate1（8大類×2控制組變體×200次=400次抽樣，銜接Alp",
+   "verdict": ")嚴格大於全部400次控制組抽樣最大值（非贏平均/90百分位）；零新增API呼叫"
+  },
+  {
+   "id": 220,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "us_8k_item101_gate52",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 219,
+   "date": "2026-09-08",
+   "track": "TW",
+   "name": "cbc_decision_event_gate61_subtest1",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 218,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "#52-US SEC EDGAR 8-K Item 5.02 事件反應速度（管理層異動）cheap gate 小樣本先導",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 217,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "#52-US SEC EDGAR 8-K Item 5.02 事件反應速度（管理層異動）cheap gate 小樣本先導",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 216,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "#52-US SEC EDGAR 8-K Item 2.02 事件反應速度（PEAD）cheap gate 小樣本先導（VAL期）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 215,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "#52-US SEC EDGAR 8-K Item 2.02 事件反應速度（PEAD）cheap gate 小樣本先導",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 214,
+   "date": "2026-09-08",
+   "track": "FUT",
+   "name": "fut_settlement_event_gate60_post",
+   "verdict": "mean\\"
+  },
+  {
+   "id": 213,
+   "date": "2026-09-08",
+   "track": "FUT",
+   "name": "fut_settlement_event_gate60_pre",
+   "verdict": "mean\\"
+  },
+  {
+   "id": 212,
+   "date": "2026-09-08",
+   "track": "hypothesis_queue",
+   "name": "#59 最小變異數投資組合建構 GATE4 成本敏感度",
+   "verdict": ")，round_trip成本1x/2x/3x(commission+稅0.3%+"
+  },
+  {
+   "id": 211,
+   "date": "2026-09-08",
+   "track": "hypothesis_queue",
+   "name": "#59 最小變異數投資組合建構 GATE_SEQUENCE第3關 參數密集高原",
+   "verdict": "未結案"
+  },
+  {
+   "id": 210,
+   "date": "2026-09-08",
+   "track": "hypothesis_queue",
+   "name": "#59 最小變異數投資組合建構 GATE2隨機控制組",
+   "verdict": "未結案"
+  },
+  {
+   "id": 209,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "us_portfolio_gross_profitability_v1（正式N=100版，單因子Top-N=15長多季頻組合）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 208,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_reversal_1m（中型股tier，N=90重跑，同批次附帶產出，非CALIBRATION_PROBE.md明列項目但依登記紀律入帳）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 207,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_momentum_12m（中型股tier，N=90重跑，同批次附帶產出，非CALIBRATION_PROBE.md明列項目但依登記紀律入帳）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 206,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_low_vol（中型股tier，N=90重跑，依CALIBRATION_PROBE.md裁示對#52的最終複驗，非新假說）",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 205,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_reversal_1m（大型股tier，N=90重跑，同批次附帶產出，對應原#49，非新假說）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 204,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_momentum_12m（大型股tier，N=90重跑，同批次附帶產出，對應原#48，非新假說）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 203,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_low_vol（大型股tier，N=90重跑，依CALIBRATION_PROBE.md裁示對#47的最終複驗，非新假說）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 202,
+   "date": "2026-09-08",
+   "track": "TW",
+   "name": "#58 反向波動度加權投資組合建構 GATE_SEQUENCE第2關 隨機控制組",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 201,
+   "date": "2026-09-08",
+   "track": "hypothesis_queue",
+   "name": "day_trading_ratio_dispersion_gate57_control",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 200,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_low_vol(#21) named-blacklist contamination re-check, 25-ticker expanded bla",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 199,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_value_bm(#20) named-blacklist contamination re-check, 25-ticker expanded bl",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 198,
+   "date": "2026-09-08",
+   "track": "hypothesis_queue",
+   "name": "#55 三大法人買賣超截面離散度速度 Institutional Flow Dispersion Velocity",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 197,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_low_vol(#21) named-blacklist contamination re-check (round431 universe-leve",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 196,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_value_bm(#20) named-blacklist contamination re-check (round431 universe-lev",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 195,
+   "date": "2026-09-08",
+   "track": "TW",
+   "name": "#54 成交值集中度速度（Turnover Concentration Velocity）第1關sanity",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 194,
+   "date": "2026-09-08",
+   "track": "hypothesis_queue",
+   "name": "#53 全市場報酬離散度速度 GATE_SEQUENCE第2關隨機控制組",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 193,
+   "date": "2026-09-08",
+   "track": "US",
+   "name": "f_us_gross_profitability contamination check (deep_dive job 20260907-054341-a450",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 192,
+   "date": "2026-09-07",
+   "track": "hypothesis_queue",
+   "name": "#53全市場報酬離散度速度(Cross-Sectional Return Dispersion Velocity) 第1關sanity",
+   "verdict": "未結案"
+  },
+  {
+   "id": 191,
+   "date": "2026-09-07",
+   "track": "US",
+   "name": "f_us_gross_profitability（Novy-Marx GrossProfit/Assets，US軌第二個PIT基本面因子，非value_bm/l",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 190,
+   "date": "2026-09-07",
+   "track": "hypothesis_queue",
+   "name": "cb_conversion_price_reset_gate1",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 189,
+   "date": "2026-09-07",
+   "track": "TW",
+   "name": "HYPOTHESIS_QUEUE.md #51子事件1（融券強制回補）二元規格對照（有無融券部位 vs 連續比例）第1關cheap gate",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 188,
+   "date": "2026-09-07",
+   "track": "US",
+   "name": "round418下一步：查證FinMind以外免費來源能否取得#20/#21常駐短腿ticker真實未還原收盤價",
+   "verdict": "REFUTED"
+  },
+  {
+   "id": 187,
+   "date": "2026-09-07",
+   "track": "hypothesis_queue",
+   "name": "HYPOTHESIS_QUEUE.md #51子事件2（現金增資折價）事件條件式CAR第1關cheap gate",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 186,
+   "date": "2026-09-07",
+   "track": "TW",
+   "name": "HYPOTHESIS_QUEUE.md #51子事件1（融券強制回補）事件條件式短天期IC 第1關cheap gate（round420/421確認反推公式可行",
+   "verdict": "FAIL（第1關）"
+  },
+  {
+   "id": 185,
+   "date": "2026-09-07",
+   "track": "US",
+   "name": "f_us_value_bm(#20)/f_us_low_vol(#21) 常駐短腿ticker FINRA/Nasdaq Reg SHO threshold l",
+   "verdict": "REFUTED（round418假說：「長期掛在threshold list代表"
+  },
+  {
+   "id": 184,
+   "date": "2026-09-07",
+   "track": "hypothesis_queue",
+   "name": "日內／隔夜報酬結構分解（HYPOTHESIS_QUEUE.md #49，第6關逐年一致性檢驗，依上一輪round182建議改道跳過gate2直接測gate6，非",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 183,
+   "date": "2026-09-07",
+   "track": "US",
+   "name": "f_us_value_bm(#20)/f_us_low_vol(#21) VAL期短腿異常量級的成本模型修正檢定（接續round412「下一步(ii)：成本模型",
+   "verdict": "REFUTED（成本模型機制不解釋這個異常）"
+  },
+  {
+   "id": 182,
+   "date": "2026-09-07",
+   "track": "hypothesis_queue",
+   "name": "日內／隔夜報酬結構分解（HYPOTHESIS_QUEUE.md #49，接續round180第1關CHEAP_PASS後的第2關placebo設計，非新假設）",
+   "verdict": "未結案（gate2仍未解決，非PASS/FAIL）"
+  },
+  {
+   "id": 181,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_low_vol(#21) VAL期異常量級的換手率混淆窄版本null檢定（persistent-random legs，接續round392「誠實限制",
+   "verdict": "REFUTED（換手率不解釋這個異常）"
+  },
+  {
+   "id": 180,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "日內／隔夜報酬結構分解 Overnight vs Intraday Return Decomposition（HYPOTHESIS_QUEUE.md #49新假",
+   "verdict": "CHEAP_PASS（overnight段，第1關，非最終判定）"
+  },
+  {
+   "id": 179,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "US軌第一個Top-N長多多因子組合回測（us_portfolio_multifactor_v1.py，US_LEADS.md#22，round414投遞、ro",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 178,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "董監事及大股東股權質押比例 Controlling Shareholder / Insider Share Pledge Ratio（HYPOTHESIS_QU",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 177,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm(#20)/f_us_low_vol(#21)VAL期短腿價格下限篩選驗證（接續US_MARATHON_STATE.mdround41",
+   "verdict": "REFUTES round410選項(i)（用back-adjusted adj"
+  },
+  {
+   "id": 176,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "處置股解除後價格反轉 Post-Disposition-Stock Price Reversion（HYPOTHESIS_QUEUE.md#47資料可行性查證，",
+   "verdict": "FAIL（資料不可及，依#47事前綁定的快殺標準判定）"
+  },
+  {
+   "id": 175,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "新股上市長期弱勢 IPO Long-Run Underperformance（HYPOTHESIS_QUEUE.md#46新假設，f_listing_age_d",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 174,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm(#20)/f_us_low_vol(#21)VAL期空頭腿實際持股/價格查證（接續US_MARATHON_STATE.mdround",
+   "verdict": "(a)(b)兩個候選機制皆獲支持證據，且相互印證收斂"
+  },
+  {
+   "id": 173,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "f_value_pe（#2，CRITERIA_V2_LOCK.md待複驗候選）成本敏感度測試（第39行三關中的第二關，接續TRIALS_LEDGER.md#16",
+   "verdict": "EXPERIMENTAL（比照#42(f_value_pb)同款判準：兩期相對隨"
+  },
+  {
+   "id": 172,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm(#20)/f_us_low_vol(#21)VAL期異常量級的long/short腿拆解歸因（接續US_MARATHON_STATE",
+   "verdict": "兩因子VAL期異常量級皆由空頭腿主導，多頭腿VAL報酬完全落在合理範圍（甚至低於"
+  },
+  {
+   "id": 171,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "「宇宙離散度」假說直接檢驗——比較乾淨分層抽樣宇宙（#20/#21用）與舊熱門股偏誤宇宙（#17/#128用）在TRAIN/VAL兩期的橫斷面報酬離散度（US_",
+   "verdict": "REFUTES「宇宙離散度」假說最寬版本（兩個宇宙的VAL/TRAIN離散度倍數"
+  },
+  {
+   "id": 170,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm(#20) x f_us_low_vol(#21) 1/N等權z-score組合測試（MARATHON_PROTOCOL.md2026",
+   "verdict": "PRESERVED（不支持獨立可分散假說；與round404「宇宙離散度」假說一"
+  },
+  {
+   "id": 169,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "存託憑證（ADR）溢價/折價收斂——排除TSM對照重跑最終判定（HYPOTHESIS_QUEUE.md #45，接續#168第1關CHEAP_PASS後「下一輪",
+   "verdict": "FAIL（#45整體最終判定）"
+  },
+  {
+   "id": 168,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "存託憑證（ADR）溢價/折價收斂第1關cheap gate（HYPOTHESIS_QUEUE.md #45，接續adr_premium_assembly.py地",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 167,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm(#20)VAL期逐年分解＋leave-2022-out（US_MARATHON_STATE.mdround402「下一輪接手」明列的",
+   "verdict": "REFUTED（不是單一2022年份驅動）"
+  },
+  {
+   "id": 166,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "f_value_pe（#2，CRITERIA_V2_LOCK.md待複驗候選）補做情境分群檢驗（CRITERIA_V2_LOCK.md第39行要求的進深挖清單前",
+   "verdict": "通過情境分群關卡（仍是CANDIDATE，非PASS）"
+  },
+  {
+   "id": 165,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm(#20)與f_us_low_vol(#21)VAL期十分位long/short名單重疊度診斷（接續US_LEADS.md#20「下一",
+   "verdict": "PARTIAL——懷疑(a)只在空頭端成立，多頭端不成立，不能籠統判「兩因子在挑"
+  },
+  {
+   "id": 164,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "景氣對策信號NDC Business Cycle Composite Signal（HYPOTHESIS_QUEUE.md #44，資料可行性查證）",
+   "verdict": "FAIL（第1關之前，資料不可及）"
+  },
+  {
+   "id": 163,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm乾淨宇宙1b深挖（round397投遞、本輪[round400]收成的脫離session背景工作20260906-110113-735",
+   "verdict": "EXPERIMENTAL（不判定PASS——跟#151f_us_low_vol同"
+  },
+  {
+   "id": 162,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_low_vol乾淨宇宙#151異常量級「池子假影」懷疑②的再分析（重讀既有job20260906-060311-6a01已產出的log，非新回測，接續",
+   "verdict": "REFUTED（「池子/期間本身讓任何多空都暴賺」這個最寬版本的假影假說被否證；"
+  },
+  {
+   "id": 161,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "三大法人買賣超集中度 Institutional Buying Concentration（HYPOTHESIS_QUEUE.md#43，第1關cheap ga",
+   "verdict": "FAIL（依「事前綁定方向，不因結果換方向」鐵律判定——兩個候選指標的訊號本身統"
+  },
+  {
+   "id": 160,
+   "date": "2026-09-06",
+   "track": "FUT",
+   "name": "fut_daily_continuation_1d（同#159反方向，順勢交易前一日報酬方向，同一輪測相反方向非調參數硬救）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 159,
+   "date": "2026-09-06",
+   "track": "FUT",
+   "name": "fut_daily_reversal_1d（前一日close-to-close完整報酬取反，1日短期反轉，非隔夜跳空類構造，全新機制家族）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 158,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "f_quality_roe_stabilityVAL期逐年分解＋leave-one-year-out（接續round396TRIALS_LEDGER.md#15",
+   "verdict": "CONFIRMED（單一年份驅動、非全期廣泛存在）——round396的PASS"
+  },
+  {
+   "id": 157,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "個股間平均成對相關係數 Average Pairwise Correlation（HYPOTHESIS_QUEUE.md#42，第1關cheap gate：橫斷",
+   "verdict": "corr\\"
+  },
+  {
+   "id": 156,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "f_quality_roe_stability300檔乾淨樣本完整重跑（round383/384投遞、round392/393/394/395等輪heavy-j",
+   "verdict": "PASS（1b深挖關卡——#16/#17記錄的train/val正負號不一致這個"
+  },
+  {
+   "id": 155,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "內部人（董監事/大股東/經理人）持股轉讓（HYPOTHESIS_QUEUE.md #41，informed trading信號，上一輪完成pilot樣本35檔地",
+   "verdict": "FAIL（觀測層級就無訊號，快殺標準，非正式cheap gate）"
+  },
+  {
+   "id": 154,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_low_vol乾淨宇宙leave-top-N-out集中度檢查（#151/#152「下一步」，接續round393對VAL期四年全部超量級的疑慮，非新",
+   "verdict": "REFUTED（集中在少數極端贏家不是主要機制——排除後報酬完全沒有下降，甚至略"
+  },
+  {
+   "id": 153,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "f_inst_streak_days（#79）300檔重跑，依CALIBRATION_PROBE.md「甲.3」裁示對「未定（待300檔重跑）」候選逐一複驗（注",
+   "verdict": "FAIL（300檔重跑後percentile小幅回升但仍未過門檻，且train/"
+  },
+  {
+   "id": 152,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_low_vol乾淨宇宙VAL期逐年分解（#151「下一步」，接續round391/392對VAL期年化90%+/beta-0.82異常量級的regim",
+   "verdict": "REFUTED（不是2022單一年份驅動——但發現比原疑慮更值得關注的新問題，見"
+  },
+  {
+   "id": 151,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_low_vol乾淨宇宙1b深挖（round386投遞、round387改150分鐘重投、本輪[round392]收成的脫離session背景工作202",
+   "verdict": "EXPERIMENTAL（不判定PASS——關卡数字全過但量級與beta異常需要"
+  },
+  {
+   "id": 150,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "庫藏股買回公告效應（HYPOTHESIS_QUEUE.md #40，管理層信心信號事件研究，上一輪完成MOPS資料回補地基，本輪起跑第1關）",
+   "verdict": "FAIL（第1關）"
+  },
+  {
+   "id": 149,
+   "date": "2026-09-06",
+   "track": "FUT",
+   "name": "fut_oi_price_confirm_graded_5d（FUT_MARATHON_STATE.md round372「下一步(b)」：把hyp_oi_pr",
+   "verdict": "FAIL（比binary版本(62.0)跟隨機中位數都明顯更差，非邊緣案例）"
+  },
+  {
+   "id": 149,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "#39 0050/台灣50指數成分股調整事件效應",
+   "verdict": "FAIL（第1關之前，資料不可及）"
+  },
+  {
+   "id": 148,
+   "date": "2026-09-06",
+   "track": "hypothesis_queue",
+   "name": "大戶籌碼集中度/股東持股分級表（HYPOTHESIS_QUEUE.md #38，資料可行性查證）",
+   "verdict": "FAIL（第1關之前，資料不可及）"
+  },
+  {
+   "id": 147,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "copper_gold_ratio_gate第1關cheap gate（#125）自相關保留版控制組回頭查核，接續TW_MARATHON_STATE.mdrou",
+   "verdict": "確認：第1關CHEAP_PASS判定本身在自相關保留版控制組下不成立（VAL期原"
+  },
+  {
+   "id": 146,
+   "date": "2026-09-06",
+   "track": "TW",
+   "name": "全市場現股當沖比重（HYPOTHESIS_QUEUE.md #37，市場過熱regime訊號，hypothesis_queue獨立排程軌，前一輪完成TWTASU",
+   "verdict": "corr\\"
+  },
+  {
+   "id": 145,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_low_vol乾淨宇宙重測（本輪[round383]新增，接續round376「下一步」明列「同樣手法重跑f_us_low_vol（#115 FAIL",
+   "verdict": "CHEAP_PASS（第1關，翻轉#41/#104/#115舊池子FAIL判定，"
+  },
+  {
+   "id": 144,
+   "date": "2026-09-06",
+   "track": "US",
+   "name": "f_us_value_bm乾淨宇宙重測（round382投遞、本輪[round383]收成的脫離session背景工作，接續#128/#139 universe",
+   "verdict": "CHEAP_PASS（第1關，翻轉#128舊池子FAIL判定，非最終結案）"
+  },
+  {
+   "id": 143,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "margin_debt_level_v1第2關深挖：circular-shift自相關保留版隨機控制組（接續round379「下一步(b)」「隨機控制組≥100",
+   "verdict": "疑慮①升級：TRAIN期在自相關保留版控制組下已無法區分於雜訊（percenti"
+  },
+  {
+   "id": 142,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "margin_debt_level_v1疑慮①TRAIN/VAL異質性查證（#140/#141保留疑慮①，接續round377「下一步(a)」，非新假說）",
+   "verdict": "部分釐清（VAL非單一事件驅動已排除，TRAIN偏弱根因改精確定位為年度異質而非"
+  },
+  {
+   "id": 141,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "margin_debt_level_v1 trailing窗口參數穩健性檢查（#140 60d(12w)結果的第2關深挖之一，接續round375「下一步」明確",
+   "verdict": "穩健（事前綁定判準：兩個替代窗口皆CHEAP_PASS，156週不是孤立巧合視窗"
+  },
+  {
+   "id": 140,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "margin_debt_level_v1（全市場融資餘額「水位」regime訊號，HYPOTHESIS_QUEUE.md#26的「水位」構造版，補齊#97自己標",
+   "verdict": "CHEAP_PASS（60d窗口，第1關，非最終判定；20d窗口FAIL）"
+  },
+  {
+   "id": 139,
+   "date": "2026-09-05",
+   "track": "US",
+   "name": "f_us_value_bm leave-top10-out集中度檢查（round366投遞、本輪[round374]收成的脫離session背景工作，接續#12",
+   "verdict": "REFUTED（集中度假說被否證，非CONFIRMED）"
+  },
+  {
+   "id": 138,
+   "date": "2026-09-05",
+   "track": "FUT",
+   "name": "fut_combo_trend_oi_weighted_v1（FUT_MARATHON_STATE.mdround364「下一步(a)」IC/百分位加權版，接續",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 137,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "short_sale_utilization整體最終alpha顯著性判定（HYPOTHESIS_QUEUE.md#36結案，統整#129/#133/#134/#",
+   "verdict": "依既有「alpha顯著性+beta拆解才是最終判準」同一把尺（#17/#29/#"
+  },
+  {
+   "id": 136,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "short_sale_utilization_gate9_regime_overlay第9關下檔保護（HYPOTHESIS_QUEUE.md#36接續#135，",
+   "verdict": "PASS（第9關機械判準：兩期MDD跟地雷率皆改善），但代價需誠實揭露"
+  },
+  {
+   "id": 135,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "short_sale_utilization_gate5_loo第5/6關leave-one-out+逐年一致性（HYPOTHESIS_QUEUE.md#36接",
+   "verdict": "PASS（第5/6關，非最終結案）"
+  },
+  {
+   "id": 134,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "short_sale_utilization_gates第3關參數密集高原（HYPOTHESIS_QUEUE.md#36接續#133，融券使用率最低分位多頭鏡像",
+   "verdict": "PASS（第3關，非最終結案）"
+  },
+  {
+   "id": 133,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "short_sale_utilization_portfolio_v1第2關隨機控制組（HYPOTHESIS_QUEUE.md#36接續#129，融券使用率最低",
+   "verdict": "PASS（第2關，非最終結案，跨多輪checkpoint接續完成）"
+  },
+  {
+   "id": 132,
+   "date": "2026-09-05",
+   "track": "FUT",
+   "name": "fut_combo_trend_oi_v1（round361「下一步(b)」：拿掉高相關的ma_crossover_20_60分量，只留trend_multi_",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 131,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 loo_no_low_vol（eps_family+revenue_surprise兩因子子版本，train-",
+   "verdict": "FAIL（選擇偏誤假說得到支持，非升格候選）"
+  },
+  {
+   "id": 130,
+   "date": "2026-09-05",
+   "track": "FUT",
+   "name": "fut_combo_trend_ma_oi_v1（等權多數決組合fut_trend_multi_tf+fut_ma_crossover_20_60+fut_oi",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 129,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "f_short_sale_utilization個股融券使用率（HYPOTHESIS_QUEUE.md #36，知情放空者訊號，新假設，接續#35VRP結案）",
+   "verdict": "CHEAP_PASS（第1關，非最終PASS/FAIL）"
+  },
+  {
+   "id": 128,
+   "date": "2026-09-05",
+   "track": "US",
+   "name": "f_us_value_bm（book-to-market，#119 CHEAP_PASS的1b深挖/完整驗證，非新假說）",
+   "verdict": "FAIL（VAL期報酬量級經濟上不可信，且與同一批cached universe"
+  },
+  {
+   "id": 127,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "賣出台指選擇權波動度風險溢酬 VRP（HYPOTHESIS_QUEUE.md#35，第1關cheap gate：IV-RV價差是否系統性為正）",
+   "verdict": "mean\\"
+  },
+  {
+   "id": 126,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "銅金比 Copper/Gold Ratio overlay具體規則（HYPOTHESIS_QUEUE.md#34接續#125，GATE_SEQUENCE第2關以",
+   "verdict": "FAIL（第5關leave-one-out未過，快殺，未進第6關以後）"
+  },
+  {
+   "id": 125,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "銅金比 Copper/Gold Ratio 當全球成長/風險偏好regime訊號（HYPOTHESIS_QUEUE.md#34，資訊來源首次為商品期貨/實體經濟",
+   "verdict": "CHEAP_PASS（但方向與事前綁定預期相反，見備註，尚未結案）"
+  },
+  {
+   "id": 124,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "fred_yield_curve_gate（HYPOTHESIS_QUEUE.md#33美國公債殖利率曲線10Y-2Y利差當全球風險regime訊號，第1關ch",
+   "verdict": "r\\"
+  },
+  {
+   "id": 123,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "fx_twd_gate（HYPOTHESIS_QUEUE.md#32美元兌台幣匯率當資金外流/市場壓力regime訊號，第1關cheap gate）",
+   "verdict": "r\\"
+  },
+  {
+   "id": 122,
+   "date": "2026-09-05",
+   "track": "hypothesis_queue",
+   "name": "option_pcr_overlay_v1（HYPOTHESIS_QUEUE.md#31接續#121，PCR訊號轉具體台股曝險擇時規則，第2/3關）",
+   "verdict": "FAIL（第3關參數高原未過，快殺結案，未進第5關以後）"
+  },
+  {
+   "id": 121,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "option_pcr_gate（HYPOTHESIS_QUEUE.md#31台指選擇權Put/Call成交量比率當市場regime/擇時訊號，第1關cheap ",
+   "verdict": "r\\"
+  },
+  {
+   "id": 120,
+   "date": "2026-09-05",
+   "track": "TW",
+   "name": "margin_utilization_regime_portfolio_v1（HYPOTHESIS_QUEUE.md#30 portfolio層構造，regim",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 119,
+   "date": "2026-09-04",
+   "track": "US",
+   "name": "f_us_value_bm（book-to-market，US軌第一個基本面/PIT因子，非price-only家族，新假說）",
+   "verdict": "CHEAP_PASS（待深挖）"
+  },
+  {
+   "id": 118,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 leave-one-factor-out重跑（train-only IC加權版，獨立確認#113孤兒紀錄）",
+   "verdict": "FAIL（維持#113原判定，未升格）——拿掉low_vol的monthly版本"
+  },
+  {
+   "id": 117,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "f_margin_utilization個股融資使用率（HYPOTHESIS_QUEUE.md #30接續#116，deep_dive第一步：下跌段vs上漲段分",
+   "verdict": "IC\\"
+  },
+  {
+   "id": 116,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "f_margin_utilization個股融資使用率（HYPOTHESIS_QUEUE.md #30，強制平倉/流動性螺旋風險訊號，新假設，hypothesi",
+   "verdict": "CHEAP_PASS（第1關，非最終PASS/FAIL）"
+  },
+  {
+   "id": 115,
+   "date": "2026-09-04",
+   "track": "US",
+   "name": "f_us_low_vol（不分層版，225檔cached universe/201檔可用的1b深挖重跑，接續round336/339未完成的process；回答",
+   "verdict": "FAIL（確認，非小樣本雜訊，f_us_low_vol不分層版1b深挖結論在9倍"
+  },
+  {
+   "id": 114,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "equal_weight_rebalance_gate6_yearly（HYPOTHESIS_QUEUE.md#29「等權重再平衡溢酬」接續#112，第6關逐年",
+   "verdict": "FAIL（第6關逐年一致性未過，快殺結案，佇列#29最終判定FAIL）：4/6="
+  },
+  {
+   "id": 113,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 leave-one-factor-out（回答round340遺留問題：三成分因子是否有拖累整體表現者）",
+   "verdict": "FAIL（三者VALIDATION alpha皆未過0.05），「拿掉low_v"
+  },
+  {
+   "id": 112,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "equal_weight_rebalance_leave_one_out_v1（HYPOTHESIS_QUEUE.md#29「等權重再平衡溢酬」接續#111，第",
+   "verdict": "PASS（第5關通過，非最終判定）：拿掉單一貢獻最大年份後溢酬仍為正（+8.72"
+  },
+  {
+   "id": 111,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "equal_weight_rebalance_costs_v1（HYPOTHESIS_QUEUE.md#29「等權重再平衡溢酬」接續#110，第4關成本/稅/滑",
+   "verdict": "三情境皆維持正溢酬（非最終PASS，僅第4關）：依協定「任一情境轉負就要誠實記錄"
+  },
+  {
+   "id": 110,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "equal_weight_rebalance_plateau_v1（HYPOTHESIS_QUEUE.md#29「等權重再平衡溢酬」接續#107/#108，第3",
+   "verdict": "PASS（第3關通過，非最終判定）：本佇列29條假設中第3關通過方式最乾淨的案例"
+  },
+  {
+   "id": 109,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "portfolio_multifactor_v2 train-only嚴格樣本外權重迭代（MARATHON_PROTOCOL.md第0節允許的組合策略層級迭代類",
+   "verdict": "IC\\"
+  },
+  {
+   "id": 108,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "equal_weight_rebalance_control_v1（HYPOTHESIS_QUEUE.md#29「等權重再平衡溢酬」接續#107 sanity，",
+   "verdict": "CHEAP_PASS（第2關通過，非最終判定）：效果在100次隨機抽取不同80檔"
+  },
+  {
+   "id": 107,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "equal_weight_rebalance_sanity（HYPOTHESIS_QUEUE.md#29「等權重再平衡溢酬Diversification Ret",
+   "verdict": "SANITY PASS（非最終判定，僅第1關）：兩期方向一致（rebalance"
+  },
+  {
+   "id": 106,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "revenue_trend_surprise_low_attention（HYPOTHESIS_QUEUE.md#21，#91原始100檔測試的300檔樣本重跑",
+   "verdict": "維持整體FAIL（低關注度組——原假說預期的機制方向——仍未過關），但高關注度組"
+  },
+  {
+   "id": 105,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "#28 市場廣度背離Breadth Divergence（第1關sanity PASS後，把divergence_flag轉成具體曝險overlay規則，走GA",
+   "verdict": "FAIL（第2關未過，依快殺標準「已被控制組拆穿之偽影家族換皮」直接結案，未進第"
+  },
+  {
+   "id": 104,
+   "date": "2026-09-04",
+   "track": "US",
+   "name": "f_us_low_vol（不分層版，依CALIBRATION_PROBE.md結論(乙)「US軌#47/#52同理各自重跑」操作指令，用全部已快取ticker重",
+   "verdict": "CHEAP_PASS，且是清楚過關（100.0），確認#39/#41原始不分層版"
+  },
+  {
+   "id": 103,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "#28 市場廣度背離Breadth Divergence（TAIEX 20日動量為正但300檔樣本breadth_pct對60日前下降時判定「背離警戒」，作為r",
+   "verdict": "SANITY PASS（非最終PASS/FAIL，僅確認機制非結構性no-op且"
+  },
+  {
+   "id": 102,
+   "date": "2026-09-04",
+   "track": "hypothesis_queue",
+   "name": "#27 多因子複合評分z-score blend baseline（GP+value_pb+revenue_surprise等權，接續composite_zsc",
+   "verdict": "IC\\"
+  },
+  {
+   "id": 101,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "f_rel_strength產業中性版（HYPOTHESIS_QUEUE.md#11，#77原始100檔測試的300檔樣本重跑，依CALIBRATION_PRO",
+   "verdict": "FAIL（維持，300檔重跑後結論不變，且不是邊緣案例——訊號幅度隨樣本擴大反而"
+  },
+  {
+   "id": 100,
+   "date": "2026-09-04",
+   "track": "TW",
+   "name": "f_inst_streak_days（HYPOTHESIS_QUEUE.md#13，#79原始100檔測試的300檔樣本重跑，依CALIBRATION_PROB",
+   "verdict": "FAIL（維持，300檔重跑後結論不變，train/val方向仍相反+仍未贏過洗"
+  },
+  {
+   "id": 99,
+   "date": "2026-09-04",
+   "track": "FUT",
+   "name": "查證CALIBRATION_PROBE.md結論(乙)「#34同理各自重跑」對FUT軌是否可行（非新假說，是對#98指令的可行性複查）",
+   "verdict": "維持FAIL（非重跑後仍FAIL，是查證後確認FUT無holdout安全的擴大樣"
+  },
+  {
+   "id": 98,
+   "date": "2026-09-04",
+   "track": "calibration",
+   "name": "calibration_probe_momentum_12_1（管線校準探針：橫截面12-1動能當已知訊號benchmark，總司令裁示甲.3）",
+   "verdict": "IC\\"
+  },
+  {
+   "id": 97,
+   "date": "2026-09-03",
+   "track": "hypothesis_queue",
+   "name": "#26 全市場融資餘額成長率 Margin Debt Growth（TWSE官方全市場歷史數字，槓桿/擁擠度regime訊號，非選股）",
+   "verdict": "corr"
+  },
+  {
+   "id": 96,
+   "date": "2026-09-03",
+   "track": "hypothesis_queue",
+   "name": "#25 月轉效應Turn-of-Month Effect（TAIEX指數層級，非選股）",
+   "verdict": "FAIL（兩種窗口定義皆train/val方向相反，未進第2關以後）"
+  },
+  {
+   "id": 95,
+   "date": "2026-09-03",
+   "track": "hypothesis_queue",
+   "name": "#24 除權息季節行為效應（台股7-9月旺季填息/棄息行為，稅制驅動）",
+   "verdict": "FAIL（第1關cheap gate，三項獨立測試皆未過事前綁定的90.0門檻，"
+  },
+  {
+   "id": 94,
+   "date": "2026-09-03",
+   "track": "TW",
+   "name": "piotroski_fscore_gate_v1（HYPOTHESIS_QUEUE.md#23「Piotroski F-score當價值榜排雷閘門」GATE_S",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 94,
+   "date": "2026-09-03",
+   "track": "hypothesis_queue",
+   "name": "#23 Piotroski F-score當價值榜排雷閘門（核心比較，接續#93地基）",
+   "verdict": "FAIL（依#23事前訂的「兩期alpha從不顯著轉顯著+地雷率下降才算證明」判"
+  },
+  {
+   "id": 93,
+   "date": "2026-09-03",
+   "track": "hypothesis_queue",
+   "name": "#23 Piotroski F-score當價值榜排雷閘門",
+   "verdict": "SANITY_PASS（地基就緒，F-score可算且非退化；但F>=7/8標準"
+  },
+  {
+   "id": 92,
+   "date": "2026-09-03",
+   "track": "hypothesis_queue",
+   "name": "#22 品質×營收加速×法人吸籌×低波動複合訊號（合取AND）",
+   "verdict": "FAIL（第1關sanity未過，未進第2關以後）"
+  },
+  {
+   "id": 91,
+   "date": "2026-09-03",
+   "track": "TW",
+   "name": "revenue_trend_surprise_low_attention（HYPOTHESIS_QUEUE.md#21「月營收『意外』漂移×低關注度」，改造已F",
+   "verdict": "FAIL（兩組判定皆FAIL，沒有分組差異，依HYPOTHESIS_QUEUE."
+  },
+  {
+   "id": 90,
+   "date": "2026-09-03",
+   "track": "TW",
+   "name": "f_gross_profitability（HYPOTHESIS_QUEUE.md#20「純毛利率因子Gross Profitability」Novy-Marx",
+   "verdict": "FAIL（第1關cheap IC gate，幅度過小+贏過洗牌null分布這一項"
+  },
+  {
+   "id": 89,
+   "date": "2026-09-03",
+   "track": "跨市場",
+   "name": "spillover_overlay_v1（HYPOTHESIS_QUEUE.md#19「跨市場美股隔夜報酬外溢效應」GATE_SEQUENCE第2關以後：把#8",
+   "verdict": "FAIL（第6關逐年一致性未過，快殺結案）"
+  },
+  {
+   "id": 88,
+   "date": "2026-09-03",
+   "track": "跨市場",
+   "name": "spillover_overnight_gate.py（HYPOTHESIS_QUEUE.md#19「跨市場美股隔夜報酬外溢效應」第1關cheap gate：美",
+   "verdict": "CHEAP_PASS（三項判準：幅度非零/train-val同號/贏過洗牌nul"
+  },
+  {
+   "id": 87,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_short_term_reversal_1w（HYPOTHESIS_QUEUE.md#18「短期反轉（1週）」Jegadeesh 1990流動性溢酬：-(當",
+   "verdict": "FAIL（same_sign過，但val_mean_ic過小接近雜訊+perce"
+  },
+  {
+   "id": 86,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_52w_high_prox策略層第3/5/6關補完（HYPOTHESIS_QUEUE.md#17後續，f52w_high_portfolio_v1.py只做",
+   "verdict": "第3/5關PASS，第6關FAIL（6個年度中僅4個正報酬，未達>=5/6門檻）"
+  },
+  {
+   "id": 85,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_52w_high_prox策略層構造（HYPOTHESIS_QUEUE.md#17「52週高點接近度」，因子層#84已CHEAP_PASS，這裡測portf",
+   "verdict": "FAIL（腳本內建判準印出表面PASS，但套用本專案既有alpha顯著性+bet"
+  },
+  {
+   "id": 84,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_52w_high_prox（HYPOTHESIS_QUEUE.md#17「52週高點接近度」George & Hwang 2004錨定不足：當前收盤價/過去",
+   "verdict": "CHEAP_PASS（因子層第1關，三項判準皆過：幅度非零/同號/贏過洗牌nul"
+  },
+  {
+   "id": 83,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "pair_trading_v1（HYPOTHESIS_QUEUE.md#16「同產業配對交易/統計套利」：universe.py::industry_categ",
+   "verdict": "z"
+  },
+  {
+   "id": 82,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_low_vol十分位多空策略層（HYPOTHESIS_QUEUE.md#7「低波動（TW策略層）」：因子層#9已PASS，這裡測十分位多空portfolio",
+   "verdict": "FAIL（VAL期隨機控制組percentile未過90.0門檻+alpha兩期"
+  },
+  {
+   "id": 81,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "vol_targeting_v1（HYPOTHESIS_QUEUE.md#15「波動度目標化部位配置Vol-Targeting」：TAIEX 60日滾動已實現波",
+   "verdict": "FAIL（第2關隨機控制組Sharpe/CAGR percentile遠低於門檻"
+  },
+  {
+   "id": 80,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "monthly_revenue_event_study（HYPOTHESIS_QUEUE.md#14「台股月營收公布事件效應」：事件錨定窗口設計，逐股用自身pi",
+   "verdict": "IC"
+  },
+  {
+   "id": 79,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_inst_streak_days（HYPOTHESIS_QUEUE.md#13「台股三大法人連續買超持續性」：三大法人合計淨買超連續同方向天數，新增fact",
+   "verdict": "FAIL（train/val正負號不一致+未贏過洗牌null分布，evaluat"
+  },
+  {
+   "id": 78,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_bab（HYPOTHESIS_QUEUE.md#12「Betting-Against-Beta/低beta」——查核佇列#12「已知相關背景」時發現遺漏，此",
+   "verdict": "FAIL（佇列#12依此既有證據判定，不重新起跑第1關）"
+  },
+  {
+   "id": 77,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_rel_strength產業內去均值版（HYPOTHESIS_QUEUE.md#11「產業內相對強度Sector-Neutral Relative Stre",
+   "verdict": "FAIL（贏過洗牌null分布這一項未過，evaluate_factor()三項"
+  },
+  {
+   "id": 76,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "f_residual_momentum（HYPOTHESIS_QUEUE.md#9「殘差動量Residual Momentum」，Blitz/Huij/Mart",
+   "verdict": "FAIL（train/val正負號不一致，evaluate_factor()三項"
+  },
+  {
+   "id": 75,
+   "date": "2026-09-02",
+   "track": "TW",
+   "name": "dividend_yield_portfolio_v1（HYPOTHESIS_QUEUE.md#4「股票股利率carry」：#74 CHEAP_PASS因子的p",
+   "verdict": "FAIL（alpha顯著性未過，同portfolio_multifactor_v"
+  },
+  {
+   "id": 74,
+   "date": "2026-09-01",
+   "track": "TW",
+   "name": "f_dividend_yield_ttm（HYPOTHESIS_QUEUE.md#4「股票股利率carry」：trailing 12個月現金股利/股價，高殖利率",
+   "verdict": "CHEAP_PASS（因子層第1關），尚未進portfolio層構造，不是最終P"
+  },
+  {
+   "id": 73,
+   "date": "2026-09-01",
+   "track": "TW",
+   "name": "pead_portfolio_v1（HYPOTHESIS_QUEUE.md#3「PEAD策略層構造」：已PASS的f_eps_surprise/f_revenu",
+   "verdict": "FAIL（alpha顯著性未過，同portfolio_multifactor_v"
+  },
+  {
+   "id": 72,
+   "date": "2026-09-01",
+   "track": "FUT",
+   "name": "fut_cta_momentum_12m（HYPOTHESIS_QUEUE.md#2「CTA趨勢跟隨」：單一12個月/252交易日回顧報酬正負號，月頻重平衡，跟",
+   "verdict": "FAIL（第2關隨機控制組，percentile遠低於90.0門檻，且低於50—"
+  },
+  {
+   "id": 71,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_day_gap_continuation（夜盤收盤(T)→日盤開盤(T)跳空，順勢交易同一date T日盤自身open→close報酬）",
+   "verdict": "CHEAP_PASS（單測+本批校正皆過），但累積FDR校正未過（差距在解析度雜"
+  },
+  {
+   "id": 70,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_day_gap_reversal（夜盤收盤(T)→日盤開盤(T)跳空取反，反向交易同一date T日盤自身open→close報酬——round98/1",
+   "verdict": "FAIL（方向嚴重不對，199/200隨機排列贏過真實策略）"
+  },
+  {
+   "id": 69,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_quality_roe_stability TRAIN期絕對報酬拆解（延續#3/#17開放問題，round 2/3深挖記錄的train/val正負號不一致）",
+   "verdict": "意外發現：20日對照組重跑不再重現round2/3的train負值，改為+3.3"
+  },
+  {
+   "id": 68,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（中型股tier深挖，#7 CHEAP_PASS的完整1b驗證，#7/#8同批seed=20260826_2 mid tier）",
+   "verdict": "deep_dive_f_us_low_vol_mid_tier.py（新增，同d"
+  },
+  {
+   "id": 67,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_gross_margin_stability（毛利率穩定度，Novy-Marx精神品質異常變體：GrossProfit/Revenue，負的近8季滾動標準差",
+   "verdict": "FAIL（train/val同號，但強度不足，val期percentile遠低於"
+  },
+  {
+   "id": 66,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_night_gap_continuation（日盤收盤(T-1)→夜盤開盤(T)跳空，順勢交易同一date T夜盤自身open→close報酬）",
+   "verdict": "FAIL（方向正確、贏過隨機中位數，但強度不夠跨過90.0門檻）"
+  },
+  {
+   "id": 65,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_night_gap_reversal（日盤收盤(T-1)→夜盤開盤(T)跳空取反，反向交易同一date T夜盤自身open→close報酬）",
+   "verdict": "FAIL（方向不對，真實策略跑輸隨機打散中位數）"
+  },
+  {
+   "id": 64,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（小型股tier深挖，round 99 CHEAP_PASS f_us_low_vol小型股的完整1b驗證，同一組26/30檔小型股樣本",
+   "verdict": "FAIL（train/val正負號翻轉+beta正負號也翻轉，同款round 8"
+  },
+  {
+   "id": 63,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_accruals（盈餘品質應計項目，Sloan 1996資產負債表法，「品質」家族accruals變體，新假說）",
+   "verdict": "FAIL（train/val同號但都接近零、val期percentile遠低於門"
+  },
+  {
+   "id": 62,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_asset_growth（資產成長異常，Cooper/Gulen/Schill 2008，TotalAssets同比成長取負號，「資產成長/保守投資」家族第",
+   "verdict": "FAIL（train/val方向不一致，same_sign未過）"
+  },
+  {
+   "id": 61,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_bab（betting-against-beta, Frazzini&Pedersen 2014，60日滾動beta取負號，「低風險」家族第三個測試，新假說",
+   "verdict": "CHEAP_PASS（單測），但批次/累積校正未過，降級為不確定，不進深挖清單"
+  },
+  {
+   "id": 60,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "weinstein_stage2_unbiased alpha/beta顯著性關卡（#11的深挖/WEINSTEIN_ALPHA_GATE_TASK.md，非新",
+   "verdict": "FAIL（否決）——VAL期alpha顯著性關卡未過（且方向上輸給隨機控制組），"
+  },
+  {
+   "id": 59,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_reversal_1m（小型股分層重測，#45/#49/#54的規模分層版，四個樣本版本全測完）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 58,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_momentum_12m（小型股分層重測，#44/#48/#53的規模分層版，四個樣本版本全測完）",
+   "verdict": "FAIL（train為負、val為正，same_sign檢查未過）"
+  },
+  {
+   "id": 57,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（小型股分層重測，#1/#47/#52的規模分層版，四個樣本版本全測完）",
+   "verdict": "CHEAP_PASS（待深挖，同#7規則：先做train/val切分＋beta對"
+  },
+  {
+   "id": 56,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_night_session_reversal（夜盤自身open→close報酬方向取反，反向交易同一date T的日盤open→close報酬）",
+   "verdict": "FAIL（單測門檻90.0未過，percentile=81.0，方向正確但強度不"
+  },
+  {
+   "id": 55,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_night_session_momentum（夜盤自身open→close報酬方向，順勢交易同一date T的日盤open→close報酬）",
+   "verdict": "FAIL（單測門檻90.0未過，且方向不對——81%隨機排列贏過真實策略）"
+  },
+  {
+   "id": 54,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_reversal_1m（中型股分層重測，#3/#45/#49的規模分層版，非新假說）",
+   "verdict": "FAIL（same_sign未過：train正/val負，percentile未"
+  },
+  {
+   "id": 53,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_momentum_12m（中型股分層重測，#2/#44/#48的規模分層版，非新假說）",
+   "verdict": "CHEAP_PASS（待深挖，跟不分層#44、大型股tier#48都不同：這是三"
+  },
+  {
+   "id": 52,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（中型股分層重測，#1/#39/#41/#47的規模分層版，非新假說）",
+   "verdict": "CHEAP_PASS（待深挖，跟大型股tier#47的FAIL明顯不同）"
+  },
+  {
+   "id": 51,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_idio_vol（特異波動率，Ang et al. 2006異常，60日市場模型變異數分解取負號，「低風險」家族第二個測試）",
+   "verdict": "CHEAP_PASS（待深挖，排入「已通過便宜關卡，待深挖」清單）"
+  },
+  {
+   "id": 50,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_amihud_illiq（Amihud 2002流動性因子，20日\\",
+   "verdict": "因子（1a便宜關卡）"
+  },
+  {
+   "id": 49,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_reversal_1m（大型股分層重測，#3/#45的規模分層版，非新假說）",
+   "verdict": "FAIL（same_sign過，但val_mean_ic過小、percentil"
+  },
+  {
+   "id": 48,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_momentum_12m（大型股分層重測，#2/#44的規模分層版，非新假說）",
+   "verdict": "FAIL（same_sign未過：train為正、val為負，跟原始#44不分層"
+  },
+  {
+   "id": 47,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（大型股分層重測，#1/#39/#41的規模分層版，非新假說）",
+   "verdict": "FAIL（same_sign過但percentile 83.4未達3因子共測門檻"
+  },
+  {
+   "id": 46,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_short_reversal_1m（短期反轉，21交易日自身累積報酬取負號，新假說）",
+   "verdict": "FAIL（train為正、val接近零轉負，same_sign檢查未過；perc"
+  },
+  {
+   "id": 45,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_reversal_1m（短期反轉，近1個月累積報酬取負號，US軌第三個因子，新假說）",
+   "verdict": "FAIL（train為正、val為負，same_sign檢查未過；percent"
+  },
+  {
+   "id": 44,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_momentum_12m（12-1動能，US軌第二個因子，新假說）",
+   "verdict": "FAIL（train/val方向不一致：train為負、val為正，evalua"
+  },
+  {
+   "id": 43,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_basis_mean_reversion_60d（#38的深挖/1b，非新假說）",
+   "verdict": "EXPERIMENTAL（VAL期贏隨機控制組中位數但未達單測門檻、train/"
+  },
+  {
+   "id": 42,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_value_pb（#1的深挖/1b，非新假說）",
+   "verdict": "EXPERIMENTAL（相對隨機控制組VAL期穩健勝出、TRAIN期較弱但仍偏"
+  },
+  {
+   "id": 41,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（#39的深挖/1b，非新假說）",
+   "verdict": "深挖FAIL，#39的CHEAP_PASS判定降級為FAIL，不進入候選清單"
+  },
+  {
+   "id": 40,
+   "date": "2026-08-26",
+   "track": "TW",
+   "name": "f_rel_strength_regime_switch（大盤位階開關+相對強度十分位多空，regime_switch_f_rel_strength.py）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 39,
+   "date": "2026-08-26",
+   "track": "US",
+   "name": "f_us_low_vol（60日日報酬std取負號，跟TW版f_low_vol定義/窗口對齊）",
+   "verdict": "CHEAP_PASS（待深挖，US軌第一個通過便宜關卡的因子）"
+  },
+  {
+   "id": 38,
+   "date": "2026-08-26",
+   "track": "FUT",
+   "name": "fut_basis_mean_reversion_60d（basis偏離自身trailing 60日均值後的回歸傾向：更貼水於近期常態則做多，更升水於近期常態則",
+   "verdict": "CHEAP_PASS（單測percentile=100.0，遠超單測門檻90.0"
+  },
+  {
+   "id": 37,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_basis_carry（#35的深挖/1b，非新假說——對已通過便宜關卡的候選做完整驗證）",
+   "verdict": "深挖FAIL（樣本外未通過），#35的CHEAP_PASS判定降級為FAIL，不"
+  },
+  {
+   "id": 36,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_basis_change_momentum_5d（期現價差5日變化動能：basis變化方向做多/放空，非水位本身）",
+   "verdict": "FAIL（單測門檻90.0未過，方向嚴重不對——全部200次隨機排列都贏過真實策"
+  },
+  {
+   "id": 35,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_basis_carry（期現價差水位：貼水做多、升水放空，經典roll yield/收斂carry假說）",
+   "verdict": "CHEAP_PASS，通過全部層級（單測/批次/累積校正），排入待深挖清單"
+  },
+  {
+   "id": 34,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_intraday_gap_continuation（隔夜跳空後日內順勢，高解析度重測，非新假說，對#33的解析度加密，fut_recheck_intra",
+   "verdict": "已高解析度確認不通過，且高解析度下連單測門檻都未過（比#33的粗解析度結果更差，"
+  },
+  {
+   "id": 33,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_intraday_gap_continuation（隔夜跳空後日內順勢：gap up做多、gap down放空，日內open→close報酬）",
+   "verdict": "CHEAP_PASS（單測），但未過本批次2測試的Bonferroni校正門檻，"
+  },
+  {
+   "id": 32,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_intraday_gap_reversal（隔夜跳空後日內做反向：gap up放空、gap down做多，日內open→close報酬）",
+   "verdict": "FAIL（單測門檻90.0未過，且方向嚴重不對——92%隨機排列贏過真實策略）"
+  },
+  {
+   "id": 31,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_inst_trust_net_position_change_5d（投信期貨淨部位5日變化方向，高解析度重測，fut_recheck_inst_mome",
+   "verdict": "已高解析度確認不通過累積校正（不再是解析度不足造成的模糊地帶）"
+  },
+  {
+   "id": 30,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_inst_foreign_net_position_change_5d（外資期貨淨部位5日變化方向，高解析度重測，fut_recheck_inst_mo",
+   "verdict": "已高解析度確認不通過累積校正（不再是解析度不足造成的模糊地帶）"
+  },
+  {
+   "id": 29,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_inst_dealer_net_position_change_5d（自營商期貨淨部位5日變化方向，部位動能非水位本身）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 28,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_inst_dealer_net_position_sign（自營商期貨淨部位水位方向：淨多做多、淨空做空）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 27,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_inst_trust_net_position_change_5d（投信期貨淨部位5日變化方向，部位動能非水位本身）",
+   "verdict": "CHEAP_PASS（批次），累積校正後降級為不確定，不排入深挖清單"
+  },
+  {
+   "id": 26,
+   "date": "2026-08-25",
+   "track": "FUT",
+   "name": "fut_inst_trust_net_position_sign（投信期貨淨部位水位方向：淨多做多、淨空做空）",
+   "verdict": "FAIL（單測門檻90.0未過，方向不對——真實策略終值-49.7% vs 隨機"
+  },
+  {
+   "id": 25,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_inst_foreign_net_position_change_5d（外資期貨淨部位5日變化方向，部位動能非水位本身）",
+   "verdict": "CHEAP_PASS（批次），累積校正後降級為不確定，不排入深挖清單"
+  },
+  {
+   "id": 24,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_inst_foreign_net_position_sign（外資期貨淨部位方向：淨多做多、淨空做空）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 23,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_weekday_effect（週一放空、週二～週五做多，固定規則，來源French 1980週末效應文獻）",
+   "verdict": "FAIL（單測門檻90.0未過，且方向不對）"
+  },
+  {
+   "id": 22,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_oi_price_confirm_5d（1日價格方向經5日未平倉量變化過濾，OI上升才進場）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 21,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_vol_regime_trend（fut_trend_multi_tf訊號經20日已實現波動度regime過濾，只在波動度低於自身展開中位數時進場）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 20,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_ma_crossover_20_60（20/60日SMA均線交叉）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 19,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_donchian_breakout_20（20日Donchian channel突破，有狀態持有直到反向突破）",
+   "verdict": "FAIL（單測門檻90.0未過）"
+  },
+  {
+   "id": 18,
+   "date": "2026-08-24",
+   "track": "FUT",
+   "name": "fut_trend_multi_tf（10/20/60日動能訊號多數決，多時間框架趨勢）",
+   "verdict": "FAIL（單測門檻90.0未過，累積校正只會更嚴，未計算）"
+  },
+  {
+   "id": 17,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_quality_roe_stability 深挖再檢定（隨機控制組抽樣數20→100，deep_dive_f_quality_roe_stability.p",
+   "verdict": "全部6組真實策略終值仍贏過全部100次隨機抽樣（percentile=100.0"
+  },
+  {
+   "id": 17,
+   "date": "#36",
+   "track": "`fut_basis_change_momentum_5d`",
+   "name": "0.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 16,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_quality_roe_stability 深挖（十分位多空組合，deep_dive_f_quality_roe_stability.py）",
+   "verdict": "EXPERIMENTAL（相對隨機控制組穩健勝出，但淨成本後絕對價差報酬TRAI"
+  },
+  {
+   "id": 16,
+   "date": "#6",
+   "track": "`f_ma_breakout`",
+   "name": "15.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 16,
+   "date": "#32",
+   "track": "`fut_intraday_gap_reversal`",
+   "name": "8.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 15,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_quality_roe_stability（ROE季度變異度穩定性）",
+   "verdict": "CHEAP_PASS（待深挖）"
+  },
+  {
+   "id": 15,
+   "date": "#10",
+   "track": "`weinstein_stage2_pilot_v1`",
+   "name": "24.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 15,
+   "date": "#23",
+   "track": "`fut_weekday_effect`",
+   "name": "13.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 14,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_value_pe（負PER，估值因子）",
+   "verdict": "CHEAP_PASS（批次），累積校正後降級為不確定"
+  },
+  {
+   "id": 14,
+   "date": "#5",
+   "track": "`f_rel_strength`",
+   "name": "38.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 14,
+   "date": "#29",
+   "track": "`fut_inst_dealer_..._change_5d`",
+   "name": "25.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 13,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_value_pb（負PBR，估值因子）",
+   "verdict": "CHEAP_PASS（待深挖）"
+  },
+  {
+   "id": 13,
+   "date": "#3",
+   "track": "`f_foreign_streak`",
+   "name": "76.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 13,
+   "date": "#26",
+   "track": "`fut_inst_trust_net_position_sign`",
+   "name": "41.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 12,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "score_topn_v1（綜合分前10名）",
+   "verdict": "EXPERIMENTAL（train/val全過，未碰holdout）"
+  },
+  {
+   "id": 12,
+   "date": "#4",
+   "track": "`f_inst_flow`",
+   "name": "76.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 12,
+   "date": "#28",
+   "track": "`fut_inst_dealer_net_position_sign`",
+   "name": "42.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 11,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "weinstein_stage2_unbiased（無偏宇宙+配對式對照組）",
+   "verdict": "EXPERIMENTAL（train/val全過，未碰holdout）"
+  },
+  {
+   "id": 11,
+   "date": "#1",
+   "track": "`f_rev_accel`",
+   "name": "84.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 11,
+   "date": "#37",
+   "track": "`fut_basis_carry`深挖(1b) val期",
+   "name": "46.0",
+   "verdict": "深挖FAIL"
+  },
+  {
+   "id": 10,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "weinstein_stage2_pilot_v1（手選30檔試點）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 10,
+   "date": "#24",
+   "track": "`fut_inst_foreign_net_position_sign`",
+   "name": "57.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 9,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_low_vol（低波動）",
+   "verdict": "PASS"
+  },
+  {
+   "id": 9,
+   "date": "#8",
+   "track": "`f_revenue_surprise`",
+   "name": "99.0",
+   "verdict": "PASS"
+  },
+  {
+   "id": 9,
+   "date": "#19",
+   "track": "`fut_donchian_breakout_20`",
+   "name": "61.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 8,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_revenue_surprise（營收意外，SUE方法論）",
+   "verdict": "PASS"
+  },
+  {
+   "id": 8,
+   "date": "#11",
+   "track": "`weinstein_stage2_unbiased`",
+   "name": "99.5",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 8,
+   "date": "#22",
+   "track": "`fut_oi_price_confirm_5d`",
+   "name": "62.0",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 7,
+   "date": "2026-08-23",
+   "track": "TW",
+   "name": "f_eps_surprise（EPS意外，SUE方法論）",
+   "verdict": "PASS"
+  },
+  {
+   "id": 7,
+   "date": "#17",
+   "track": "`f_quality_roe_stability`深挖最終版（取代#16）",
+   "name": "100.0",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 7,
+   "date": "#20",
+   "track": "`fut_ma_crossover_20_60`",
+   "name": "75.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 6,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "f_ma_breakout（站上季線+量能）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 6,
+   "date": "#15",
+   "track": "`f_quality_roe_stability`（便宜關卡）",
+   "name": "99.9",
+   "verdict": "CHEAP_PASS(待深挖)"
+  },
+  {
+   "id": 6,
+   "date": "#21",
+   "track": "`fut_vol_regime_trend`",
+   "name": "82.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 5,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "f_rel_strength（相對強度）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 5,
+   "date": "#13",
+   "track": "`f_value_pb`",
+   "name": "99.9",
+   "verdict": "CHEAP_PASS(待深挖)"
+  },
+  {
+   "id": 5,
+   "date": "#18",
+   "track": "`fut_trend_multi_tf`",
+   "name": "82.5",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 4,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "f_inst_flow（三大法人淨買/流動性）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 4,
+   "date": "#12",
+   "track": "`score_topn_v1`",
+   "name": "100.0",
+   "verdict": "EXPERIMENTAL"
+  },
+  {
+   "id": 4,
+   "date": "#34",
+   "track": "`fut_intraday_gap_continuation`高解析度版（取代#33）",
+   "name": "89.6",
+   "verdict": "CHEAP_PASS(單測)未過批次"
+  },
+  {
+   "id": 3,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "f_foreign_streak（外資連續買超強度）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 3,
+   "date": "#9",
+   "track": "`f_low_vol`",
+   "name": "100.0",
+   "verdict": "PASS"
+  },
+  {
+   "id": 3,
+   "date": "#30",
+   "track": "`fut_inst_foreign_..._change_5d`高解析度版（取代#25）",
+   "name": "97.4",
+   "verdict": "CHEAP_PASS(批次)降級不確定"
+  },
+  {
+   "id": 2,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "f_eps_growth（EPS成長）",
+   "verdict": "PASS（校正後確認）"
+  },
+  {
+   "id": 2,
+   "date": "#7",
+   "track": "`f_eps_surprise`",
+   "name": "100.0",
+   "verdict": "PASS"
+  },
+  {
+   "id": 2,
+   "date": "#31",
+   "track": "`fut_inst_trust_..._change_5d`高解析度版（取代#27）",
+   "name": "97.8",
+   "verdict": "CHEAP_PASS(批次)降級不確定"
+  },
+  {
+   "id": 1,
+   "date": "2026-08-22",
+   "track": "TW",
+   "name": "f_rev_accel（月營收YoY加速度）",
+   "verdict": "FAIL"
+  },
+  {
+   "id": 1,
+   "date": "#2",
+   "track": "`f_eps_growth`",
+   "name": "100.0",
+   "verdict": "PASS"
+  },
+  {
+   "id": 1,
+   "date": "#35",
+   "track": "`fut_basis_carry`（便宜關卡）",
+   "name": "100.0",
+   "verdict": "CHEAP_PASS"
+  },
+  {
+   "id": 1,
+   "date": "#39",
+   "track": "`f_us_low_vol`（便宜關卡）",
+   "name": "100.0",
+   "verdict": "CHEAP_PASS"
+  }
+ ]
+}

@@ -1,3 +1,8 @@
+## 2026-10-11 12:15（hypothesis_queue 軌道）常備.開發-33 研究透明度頁
+
+- 新增 `.github/scripts/build_trials_index.py`（唯讀解析 TRIALS_LEDGER.md → `data/trials_index.json`，465 列）；`market.yml` 加一步；`index.html`／`app-settings.js` 設定頁新增「研究透明度：試驗帳本」卡（可搜尋，標「研究紀錄，非投資建議」）。
+- 冒煙測試 85 項全綠。下一步：其餘常備.開發-23～-32、-34 仍待做。
+
 ## 2026-10-11 11:44（互動視窗）先.六十六 緊急修復 App 版面
 
 - **症狀**：手機上分頁內容和底部導覽列整個散掉，導覽列跑到最上面。

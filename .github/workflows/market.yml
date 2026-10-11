@@ -223,6 +223,10 @@ jobs:
       - name: 產生盤前日報／週覆盤規則摘要（data/daily_brief.json）
         run: python .github/scripts/build_daily_brief.py
         continue-on-error: true
+      # 常備.開發-33：試驗帳本索引（唯讀解析 research/TRIALS_LEDGER.md），設定頁研究透明度卡讀取。
+      - name: 產生試驗帳本索引（data/trials_index.json）
+        run: python .github/scripts/build_trials_index.py
+        continue-on-error: true
       # 先.六十-C9：STATUS.json 頂層 updated_at／any_overdue／schedule_health 每次排程都重產（原本只靠手動跑，從 09-15 起停在原地）。
       # data/STATUS.json 已在下方 git add 清單；GitHub API 查 workflow 狀態失敗時該欄位自己降級，不影響其他步驟（十二）。
       # 常備.開發-20（2026-10-11）：stock_detail.json 拆成每檔獨立檔（App 個股頁延遲載入）＋估值卡用的 EPS 精簡檔。
