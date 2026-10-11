@@ -357,9 +357,12 @@ def build() -> dict:
         if not r:
             lines.append(_placeholder(f"board_{b}", label, "board", st, None, "還沒有資料"))
             continue
+        # 先.八十-9：picks_ledger 標了 data_status.complete=false 的批次（進出場日缺收盤或全市場缺日）在曲線檔照實註明
+        inc = sum(1 for x in ledger.get("snapshots", []) if x.get("board") == b and (x.get("data_status") or {}).get("complete") is False)
         lines.append(_line(f"board_{b}", label, "board", st, r["dates"], r["nav"], r["comp"], px=px,
-                           note=f"每天快照後第一個收盤買進前 20 名、各放 {HOLD} 個交易日，同時 {HOLD} 批各佔五分之一；已扣手續費與證交稅",
-                           extra={"n_batches": r["n_batches"]}))
+                           note=f"每天快照後第一個收盤買進前 20 名、各放 {HOLD} 個交易日，同時 {HOLD} 批各佔五分之一；已扣手續費與證交稅"
+                                + (f"；{inc} 批有個股缺進出場收盤（停牌或資料缺），該批只算有價的個股" if inc else ""),
+                           extra={"n_batches": r["n_batches"], "incomplete_batches": inc}))
     return {"meta": {"generated_at": datetime.now(TZ).isoformat(timespec="seconds"), "source": ".github/scripts/build_strategy_curves.py",
                      "bench": BENCH, "bench_note": "灰線是同期 0050",
                      "price_asof": px.cal[-1], "correction": CORRECTION,

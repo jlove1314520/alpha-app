@@ -129,6 +129,13 @@ jobs:
       # 2026-09-15（sparklines凍結事件解封）：從price_history.json切出全市場走勢線，
       # 零額外網路請求。這一步2026-09-05功能剛做出來那天本來就該掛在這裡，
       # 卡了十天沒推上去是因為當時的PAT沒有workflow scope，見PENDING_QUEUE.md稽核.六。
+      # 先.八十-9（2026-10-12）：全市場缺日補齊（只在偵測到缺日時才打 TWSE MI_INDEX／TPEx otc，每輪最多 10 天）＋缺日自測。
+      # 寫入 data/price_history.json（已在下方 git add 清單）。自身失敗只警告，不擋後續步驟（十二節）。
+      - name: 全市場缺日補齊與自測（data/price_history.json）
+        run: |
+          python scripts/backfill_price_history_gaps.py || echo "::warning::price_history 缺日補齊未完成"
+          python scripts/selftest_price_history_gaps.py || echo "::warning::price_history 仍有全市場缺日"
+        continue-on-error: true
       - name: 產生全市場走勢線sparklines.json（從price_history切出，零額外請求）
         run: python .github/scripts/build_sparklines.py
         continue-on-error: true

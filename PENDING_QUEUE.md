@@ -19271,7 +19271,7 @@ C. 驗收
 - [x] **先.八十-6 策略監控台改讀 strategy_curves.json、停用 strategy_performance.json；ux_copy_audit 擴大＋補詞**（互動視窗執行）〔監控台改讀 strategy_curves.json、停用 strategy_performance.json；名稱照檔內定案 label；詞彙表補 7 詞＋顯示層守門自動白話（418→0）；ux_copy_audit 擴大到子分頁／美股／離線（11 種頁面狀態）；smoke #106；105 PASS／0 FAIL〕
 - [x] **先.八十-7 下架樣本內重抽數字、破億讀資料檔、S3-C6 改延後一日版、MDD 標籤改「月頻近似」、模擬 C 標註**（互動視窗執行）〔達標機率下架改寫「樣本內重抽，偏樂觀，不能當依據」；BT_RATE 改讀 strategy_history（Bb-90 回測年化）；S3-C6 改延後一日版 12.13%／−25.85%（crisis_gate_timing_sensitivity.json）；MDD 只差者標 MONTHLY_APPROX「月頻近似」；模擬 C 標「看過 2025–26 結果後才設計」；smoke #60/#96 更新（修正先.八十-6 被註解吞掉的斷言）；105 PASS／0 FAIL〕
 - [x] **先.八十-8 跟 0050 比：樣本外格雙數字、疊圖各線起始日對齊 0050、台指期小卡走勢線**（互動視窗執行）〔樣本外格「策略 +X%／0050 +Y%」；疊圖各線起點接當天 0050（SC_ALIGN）；台指期近月日線累積到 data/tx_futures_history.json（openapi 只給當日、官方歷史下載需表單工作階段不模擬；近月連續未轉倉調整；目前 1 點，下一交易日起成線），market.yml allowlist 已加；smoke #107；106 PASS／0 FAIL〕
-- [ ] **先.八十-9 price_history 補齊 8/1 後全市場缺日＋缺日自測；picks_ledger 不完整批次標註並重算**（互動視窗執行）
+- [x] **先.八十-9 price_history 補齊 8/1 後全市場缺日＋缺日自測；picks_ledger 不完整批次標註並重算**（互動視窗執行）〔官方 TWSE MI_INDEX＋TPEx otc 逐日補 22 個缺日 35,966 列（不覆蓋）；selftest_price_history_gaps 3/3＋market.yml 每輪自動補缺日（≤10天）；picks_ledger data_status 標註 20 批不完整、回填 1,742→2,247；三榜重算 估值-3.48/動能+5.95/未來+1.12；smoke #108；107 PASS／0 FAIL〕
 - [ ] **先.八十-10 日期顯示最後交易日、法人千分位、拿掉 FinMind Token 假欄位、非 AI 卡片去「AI」、audit 0 筆顯示未檢查**（互動視窗執行）
 - [ ] **先.八十-11 本機排程：連線自檢／證交所發布時間探測／新聞排程查因修好附心跳證據**（互動視窗執行）
 - [ ] **先.八十-12 研究口徑：還原價曲線、0050 含息、現金計息、美股腿聯集日曆、紙上帳戶扣手續費、00631L 1:22 分割還原**（互動視窗執行）

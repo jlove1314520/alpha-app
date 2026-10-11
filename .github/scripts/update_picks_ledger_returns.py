@@ -258,22 +258,54 @@ def main():
                 }
                 filled += 1
 
+    # 先.八十-9（2026-10-12）：資料不完整的批次要標註。每個快照算一次 data_status：
+    #   missing_entry＝進場日已到、卻沒有進場日收盤的檔數；missing_exit＝出場日已到、卻沒有出場日收盤的(檔,期別)數；
+    #   market_gap_days＝進場／出場日當天全市場檔數 < 中位數 90% 的日子（price_history 全市場缺日）。
+    # 只標註、不改任何已回填欄位；資料補齊後下一輪自動回填 null 欄位並改標 complete=true。
+    day_count: dict[str, int] = {}
+    for rows in price_history.values():
+        for r in rows:
+            if r.get("date", "") >= earliest_snapshot_date:
+                day_count[r["date"]] = day_count.get(r["date"], 0) + 1
+    med = sorted(day_count.values())[len(day_count) // 2] if day_count else 0
+    gap_days = {d for d, n in day_count.items() if n < med * 0.9}
+    last_day = trading_calendar[-1] if trading_calendar else None
+    n_incomplete = 0
+    for snap in ledger["snapshots"]:
+        entry_day = _entry_day_after(snap.get("taken_at"), trading_calendar)
+        if entry_day is None:
+            snap.pop("data_status", None)
+            continue
+        miss_entry = sum(1 for pk in snap["picks"] if pk.get("entry_price") is None)
+        miss_exit, used_days = 0, {entry_day}
+        for pk in snap["picks"]:
+            for window_key, n in RETURN_WINDOWS.items():
+                t = _trading_days_after(entry_day, n, trading_calendar)
+                if t is None or (last_day and t > last_day):
+                    continue
+                used_days.add(t)
+                if pk.get("entry_price") is not None and (pk.get("returns") or {}).get(window_key) is None:
+                    miss_exit += 1
+        gd = sorted(used_days & gap_days)
+        complete = miss_entry == 0 and miss_exit == 0 and not gd
+        snap["data_status"] = {"complete": complete, "missing_entry": miss_entry, "missing_exit": miss_exit,
+                               "market_gap_days": gd, "checked_at": datetime.now(TW_TZ).isoformat(timespec="seconds")}
+        n_incomplete += 0 if complete else 1
+    meta["incomplete_batches"] = n_incomplete
+    meta["incomplete_rule"] = "data_status.complete=false：進場或已到期出場缺收盤（停牌／資料缺），或該日全市場檔數 < 中位數 90%"
+
     if recompute_all:
         meta["returns_anchor_rule"] = ANCHOR_RULE
         meta["returns_anchor_note"] = ("2026-10-11 先.七十七-4 更正進場點：進場＝快照 taken_at 之後第一個交易日收盤，"
                                        "出場＝其後第 N 個交易日收盤（持有恰 N 日）；舊規則用快照前的 price_date 收盤進場，已全部重算")
         meta["returns_recomputed_at"] = datetime.now(TW_TZ).isoformat()
+    # 先.八十-9：data_status 每輪都會更新，所以每輪都寫檔；last_returns_backfill_at 只在真的有回填／重算時更新
     if filled or recompute_all:
-        ledger.setdefault("meta", {})["last_returns_backfill_at"] = datetime.now(TW_TZ).isoformat()
-        ledger["meta"]["generated_at"] = ledger["meta"]["last_returns_backfill_at"]  # 2026-09-03（P0三-三.3）回填也算一次寫入
-        LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-        print(f"回填完成：本輪新填 {filled} 個(snapshot, code, tN)欄位"
-              f"（另有{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
-              f"{skipped_no_entry}個因進場日當天沒有收盤跳過，留null等下次）")
-    else:
-        print(f"本輪沒有任何欄位可回填（還沒到任何交易日門檻，或資料尚未到位；"
-              f"{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
-              f"{skipped_no_entry}個因進場日當天沒有收盤跳過）")
+        meta["last_returns_backfill_at"] = datetime.now(TW_TZ).isoformat()
+    meta["generated_at"] = datetime.now(TW_TZ).isoformat()  # 2026-09-03（P0三-三.3）回填／標註也算一次寫入
+    LEDGER_PATH.write_text(json.dumps(ledger, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+    print(f"本輪新填 {filled} 個(snapshot, code, tN)欄位（{skipped_stale_or_missing}個因出場價過期/缺失跳過、"
+          f"{skipped_no_entry}個因進場日當天沒有收盤跳過，留null等下次）；資料不完整批次 {n_incomplete} 個")
 
 
 if __name__ == "__main__":
