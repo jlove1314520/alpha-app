@@ -711,3 +711,4 @@
 {"ts": "2026-10-11T12:45:38+08:00", "track": "devqueue", "round": "常備.開發-20", "item": "先.六十七 首頁資料延後載入：data/quote_lite 每檔小檔＋名稱清單延到搜尋/切頁；首頁首次載入 497KB→273.7KB（<350KB 達標）", "artifacts_changed": ["scripts/split_quote_lite.py", "data/quote_lite/", ".github/workflows/market.yml", "app.js", "app-picks.js", "app-stock.js", "scripts/smoke_test.mjs", "PENDING_QUEUE.md"], "note": "冒煙全部通過（含 #78 加嚴、新增 #87）；cycle 20261011-113101"}
 {"ts": "2026-10-11T12:54:22+08:00", "track": "interactive", "round": "先.六十八", "item": "策略 vs 0050：重疊組合法更正、八分頁、固定判讀；picks_ledger 16 筆官方價核對無壞價；-24 併入結案；live server 重啟驗證", "commit": "7321085f9"}
 {"ts": "2026-10-11T13:41:20+08:00", "track": "interactive", "round": "先.六十九＋先.七十", "item": "外殼快取優先＋發布節奏、quote_lite 兩層、Playwright 必關瀏覽器、mem_guard 開跑門檻、策略卡設計目標；推播已送", "commit": "b94f3a937"}
+{"ts": "2026-10-11T14:30:00+08:00", "track": "devqueue", "round": "常備.開發-因子類-B18", "item": "SEC 8-K 純商業協議事件漂移 #431 FAIL（gate2 隨機控制組，百分位43.5）", "cycle_id": "20261011-140102"}

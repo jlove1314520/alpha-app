@@ -1,0 +1,74 @@
+價格快取宇宙 ok 且對得到 CIK：4130 檔；抽 400 檔 seed=2026101118
+SPY 5032 列 2005-01-03~2024-12-30
+  進度 50/400，累計事件 423
+  進度 100/400，累計事件 891
+  進度 150/400，累計事件 1266
+  進度 200/400，累計事件 1638
+  進度 250/400，累計事件 1981
+  進度 300/400，累計事件 2344
+  進度 350/400，累計事件 2583
+  進度 400/400，累計事件 2991
+TRAIN: 2307 事件
+VAL: 684 事件
+1_sanity PASS
+2_random_control_TRAIN FAIL
+3_plateau_TRAIN FAIL
+4_cost FAIL
+5_leave_one_out FAIL
+6_yearly_consistency FAIL
+7_oos_VAL FAIL
+判定： FAIL 首個 FAIL： 2_random_control_TRAIN
+{
+ "1_sanity": {
+  "pass": true,
+  "n_train": 2307,
+  "n_val": 684,
+  "nan": 0
+ },
+ "2_random_control_TRAIN": {
+  "pass": false,
+  "signal_mean_excess": 0.0034891120462721653,
+  "control_max": 48.11563012469493,
+  "control_mean": 0.5542443563348827,
+  "percentile": 43.5,
+  "reason": "未過：訊號 0.0035 沒有超過控制組最大值 48.1156（控制組平均 0.5542，訊號百分位 43.5）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）"
+ },
+ "3_plateau_TRAIN": {
+  "pass": false
+ },
+ "4_cost": {
+  "pass": false,
+  "net_mean": {
+   "1x": {
+    "TRAIN": 0.002428628467447267,
+    "VAL": -0.01598735800761676
+   },
+   "2x": {
+    "TRAIN": 0.001368144888622366,
+    "VAL": -0.01707146349561697
+   },
+   "3x": {
+    "TRAIN": 0.00030766130979746766,
+    "VAL": -0.01815556898361718
+   }
+  }
+ },
+ "5_leave_one_out": {
+  "pass": false,
+  "dropped_year": "2005",
+  "mean_after_drop": 0.0003013526025707907,
+  "train_control_p95": 0.024956815063925553
+ },
+ "6_yearly_consistency": {
+  "pass": false,
+  "positive_year_ratio": 0.4375
+ },
+ "7_oos_VAL": {
+  "pass": false,
+  "signal_mean_excess": -0.01490325251961655,
+  "control_max": 0.4000845428697625,
+  "control_mean": 0.003353393915137477,
+  "percentile": 10.5,
+  "reason": "未過：訊號 -0.0149 沒有超過控制組最大值 0.4001（控制組平均 0.0034，訊號百分位 10.5）；贏過平均或落在高百分位都不算通過（2026-09-07 標準升級）"
+ }
+}
