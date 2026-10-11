@@ -16096,3 +16096,21 @@ mode: CRUNCH（先.六十四 趕工模式）
 [crunch 13:15:10] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 1 項；常備.開發剩 19 項
 finally: released .devqueue.lock (cycle_id=20261011-130103)
 ===== DevQueue cycle end: 2026-10-11 13:15:10 cycle_id=20261011-130103 reason=CRUNCH_YIELD exit=12 duration_min=14.1 =====
+
+===== DevQueue cycle start: 2026-10-11 13:31:02 cycle_id=20261011-133102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：.github/scripts/build_strategy_curves.py（8.3分鐘前）、.gitignore（3.8分鐘前）、app.js（8.1分鐘前）、index.html（8.1分鐘前）、research/mem_guard.py（12.4分鐘前）、research/run_momentum_future_board_pit_backtest.py（12.4分鐘前）、research/test_mem_guard.py（12.3分鐘前）、scripts/dev_queue_crunch.py（3.6分鐘前）、scripts/layout_check.mjs（11.0分鐘前）、scripts/measure_first_load.mjs（11.1分鐘前）、scripts/selftest_dev_queue_crunch.py（3.5分鐘前）、scripts/smoke_test.mjs（0.3分鐘前）、scripts/split_quote_lite.py（15.8分鐘前）、sw.js（15.8分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-11 14:01:02 cycle_id=20261011-140102 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+[crunch 14:01:03] gate：NO_LOCK：沒有輪次在跑
+crunch gate: [crunch 14:01:03] gate：NO_LOCK：沒有輪次在跑
+lock: LOCK_ACQUIRED (cycle 20261011-140102)
+mode: CRUNCH（先.六十四 趕工模式）
+[crunch 14:01:06] 排程切換為 crunch（每 PT30M、上限 PT12H）：成功
+[crunch 14:01:07] 派工 #1：常備.開發-因子類-B18 未來性濾網 (b) 類因子（事件資料，SEC 8-K 優先）
+[crunch 14:14:29] 結算：常備.開發-因子類-B18 未來性濾網 (b) 類因子（事件資料，SEC 8-K → done（65a24d181）
+[crunch 14:14:32] 派工 #2：常備.開發-因子類-B19 訊號管線骨架（market-signal-vetting 方法）
+[crunch 14:21:49] 結算：常備.開發-因子類-B19 訊號管線骨架（market-signal-vetti → done（1d3f74281）
+[crunch 14:21:52] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 2 項；常備.開發剩 17 項
+finally: released .devqueue.lock (cycle_id=20261011-140102)
+===== DevQueue cycle end: 2026-10-11 14:21:54 cycle_id=20261011-140102 reason=CRUNCH_YIELD exit=12 duration_min=20.9 =====
