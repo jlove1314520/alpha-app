@@ -11,6 +11,7 @@
 - **文件**：`docs/AUTO_TRADING_SETUP.md` 新增第十二節。
 - **冒煙**：98 PASS、0 FAIL。
 - **事件**：index.html 有 DevQueue 進行中的常備.開發-28 修改，這次只 commit 先.七十九 那一段，沒有把它的變更帶進來。
+- **事件（如實記錄）**：877f5ad38 commit 時誤帶入 DevQueue 剛寫進 smoke_test.mjs 的 #100 檢查（對應的 index.html 卡片尚未 commit），已用 58aff3dcb 只在 commit 內容撤回；工作目錄裡 DevQueue 的修改原封不動。
 - **安全**：沒有切換模式，沒有跑 --live-cancel-test，沒有送單，也沒有印出帳號或金額。
 
 ## 2026-10-11 18:30（互動視窗）先.七十七 六題完成＋先.七十八 真錢首批上線前驗證（2～5）
