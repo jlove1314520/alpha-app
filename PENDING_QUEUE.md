@@ -19240,3 +19240,40 @@ C. 驗收
 - [~] **先.七十九-4 10/12 13:40 結算後對帳＋odd_lot_verification 三檔 match → 開 STOP 旗標並推播「流程驗證完成，自動投資已暫停」；不符也開 STOP 並回報差異**（互動視窗／排程執行，時間閘 2026-10-12 13:40）〔程式完成待 10/12 執行：auto_rebalance_bb90 --flow-verify-close（只讀本機、一律開 STOP、寫 strategy_frozen、推播；結算未完成且未到 14:30 先等）＋排程 AlphaFlowVerifyClose1012（10/12 14:00、14:30）；selftest_flow_verify_close 9/9；10/12 執行後由互動視窗補結果並改 [x]〕
 - [x] **先.七十九-5 App 自動投資頁顯示「已暫停：等紙上策略打贏 0050」**（互動視窗執行）〔交易頁自動投資卡 bot-freeze、下一期、本期原因、紅色橫幅：STOP＋strategy_frozen → 「已暫停：等紙上策略打贏 0050」；單純緊急停止不混用；暫停前顯示 status.flow_verification_plan 說明；smoke #99〕
 - [x] **先.七十九-6 commit＋push（config.local.json 不進 repo）回報證據；禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）〔commit 877f5ad38＋58aff3dcb 已 push（後者撤回 877f5ad38 誤帶入的 DevQueue 冒煙 #100，工作目錄保留）；config.local.json 未進 repo（research/data/ 已 gitignore）；未跑 --live-cancel-test、未印帳號金額〕
+
+# 2026-10-12【先.八十：全檢修正】（總司令裁示原文，動工前先寫入；不碰真錢設定、不切模式）
+
+```
+先.八十　全檢修正（Cowork 2026-10-11 全檢報告，依序做；不碰真錢設定、不切模式）
+1. 【最優先】修 .github/scripts/fetch_market_tw.py:204 漲跌正負號：改用前一日收盤推算，或改讀漲跌點數的正負號。重抓 market_tw.json，daily_brief 也重產。smoke 新增：加權／類股 change_pct 的正負號必須等於走勢線最後兩點的方向，且類股不得全為非負。
+2. 電腦離線統一狀態：本機 127.0.0.1:8001 連不上時，相關卡片收成一行「電腦離線（最後連線 MM/DD HH:MM）」。Failed to fetch 不計入「程式錯誤」、不顯示英文原始錯誤。
+3. app-settings.js:168 把被 // 註解吃掉的 _safeAsync('loadTrials',loadTrials) 移到獨立一行；同時修 trials_index.json 的解析（跳脫斜線截斷、編號重複，465 列要對齊帳本 435 筆）。
+4. app-shared.js:228 篩選籤改用切換 class，不要直接設 style.display，修重疊。
+5. 40 字自動收合只收「說明」類文字，不收卡片主內容；時鐘更新不得觸發重掃（加節流或縮小監看範圍）。
+6. 交易頁策略監控台改讀 strategy_curves.json，停用 strategy_performance.json；前台名稱一律照 UI_GLOSSARY。ux_copy_audit 擴大到所有子分頁、美股模式、離線狀態，並把這次漏抓的詞補進去（#287/#403、pp、桶內、MI_MARGN、Cloudflare Access、yfinance、NAV、BAA10Y）。
+7. 下架「勝 0050 84%／破億 62%」等樣本內重抽數字，改顯示「樣本內重抽，偏樂觀，不能當依據」。破億 10.19% 改讀資料檔。S3-C6 回測改用延後一日版 12.13%／−25.8%。回測 MDD 的 IRREPRODUCIBLE 標籤改成「月頻近似」。模擬 C 標註「看過 2025–26 結果後才設計」。
+8. 跟 0050 比：樣本外格同時顯示「策略 +X%／0050 +Y%」；疊圖改成各線從自己的起始日對齊 0050 當日的值，不再一律從 100 起；台指期小卡補走勢線。
+9. price_history 補齊 8/1 以後全市場缺日；新增全市場缺日自測；picks_ledger 遇到資料不完整的批次要標註，並重算成績。
+10. 日期一律顯示最後交易日，不顯示抓檔時間；法人數字加千分位。拿掉 FinMind Token 假欄位；不是 AI 產生的卡片名稱拿掉「AI」；audit 檢查 0 筆時要顯示「未檢查」，不能顯示正常。
+11. 本機排程：連線自檢（46 小時沒心跳）、證交所發布時間探測（47.7 小時）、新聞排程（錯過 5 班）查原因並修好，附心跳證據。
+12. 研究口徑：曲線改用還原價，0050 對照線含息、現金計息，跟紙上追蹤同口徑；core_allocation_backtest 的美股腿改用聯集日曆，不再用台股日曆左合併；紙上帳戶補扣手續費；price_history 的 00631L 補還原 2026-03-31 的 1:22 分割。
+13. 登記研究試驗（先寫死判準再跑，只跑一次）：用 1990–2003 台股加權指數＋FRED BAA/GS10 對 R1／S3 閘門做殺測，判準為 MDD > −50% 且年化 ≥ 買進持有。DSR 改用「相對 0050 的超額報酬」計算，試驗總數統一用同一個數字。
+14. 每項完成都要 commit＋push 並在 PROGRESS 附證據；smoke 全綠才算完成。
+```
+
+心跳：每完成一項把對應行標 - [x]（部分完成 [~]），並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.八十-N）；每項 commit＋push、PROGRESS 附證據、smoke 全綠。
+
+- [ ] **先.八十-1 fetch_market_tw 漲跌正負號修正＋重抓 market_tw／daily_brief＋smoke 正負號檢查**（互動視窗執行）
+- [ ] **先.八十-2 電腦離線統一一行狀態；Failed to fetch 不計程式錯誤、不顯示英文**（互動視窗執行）
+- [ ] **先.八十-3 loadTrials 被註解吃掉修正＋trials_index.json 解析修正（465 列對齊帳本 435 筆）**（互動視窗執行）
+- [ ] **先.八十-4 app-shared.js 篩選籤改切換 class，修重疊**（互動視窗執行）
+- [ ] **先.八十-5 40 字自動收合只收說明類；時鐘更新不觸發重掃**（互動視窗執行）
+- [ ] **先.八十-6 策略監控台改讀 strategy_curves.json、停用 strategy_performance.json；ux_copy_audit 擴大＋補詞**（互動視窗執行）
+- [ ] **先.八十-7 下架樣本內重抽數字、破億讀資料檔、S3-C6 改延後一日版、MDD 標籤改「月頻近似」、模擬 C 標註**（互動視窗執行）
+- [ ] **先.八十-8 跟 0050 比：樣本外格雙數字、疊圖各線起始日對齊 0050、台指期小卡走勢線**（互動視窗執行）
+- [ ] **先.八十-9 price_history 補齊 8/1 後全市場缺日＋缺日自測；picks_ledger 不完整批次標註並重算**（互動視窗執行）
+- [ ] **先.八十-10 日期顯示最後交易日、法人千分位、拿掉 FinMind Token 假欄位、非 AI 卡片去「AI」、audit 0 筆顯示未檢查**（互動視窗執行）
+- [ ] **先.八十-11 本機排程：連線自檢／證交所發布時間探測／新聞排程查因修好附心跳證據**（互動視窗執行）
+- [ ] **先.八十-12 研究口徑：還原價曲線、0050 含息、現金計息、美股腿聯集日曆、紙上帳戶扣手續費、00631L 1:22 分割還原**（互動視窗執行）
+- [ ] **先.八十-13 登記研究試驗：1990–2003 加權＋FRED BAA/GS10 對 R1／S3 閘門殺測（判準先寫死、只跑一次）；DSR 改相對 0050 超額、試驗總數統一**（互動視窗執行）
+- [ ] **先.八十-14 每項 commit＋push＋PROGRESS 證據；smoke 全綠**（互動視窗執行）
