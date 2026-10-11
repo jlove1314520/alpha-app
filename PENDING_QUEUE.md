@@ -18905,8 +18905,8 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
 ```
 
-- [ ] **先.六十六-1 index.html 刪掉 #picks-us-list 後多出的 </div>（dec42448 常備.開發-17 引入）**（互動視窗執行）
-- [ ] **先.六十六-2 Playwright 390×844 實測：body 直接子元素白名單、nav top>700、六分頁 .screen 高度>0 且在 main 內**（互動視窗執行）
-- [ ] **先.六十六-3 冒煙新增三項永久檢查：body 子元素白名單、.screen／nav 祖先、section／nav 標籤數量平衡**（互動視窗執行）
-- [ ] **先.六十六-4 sw.js 版本號更新＋確認 Pages 已部署＋推播「版面修復完成，請完全關閉 App 再開啟」**（互動視窗執行）
-- [ ] **先.六十六-5 冒煙全綠 commit，恢復常備.開發佇列**（互動視窗執行）
+- [x] **先.六十六-1 index.html 刪掉 #picks-us-list 後多出的 </div>（dec42448 常備.開發-17 引入）**（互動視窗執行）〔2026-10-11 完成：f9f6b252a；index.html 原始碼 div 開 708／關 709 → 708／708〕
+- [x] **先.六十六-2 Playwright 390×844 實測：body 直接子元素白名單、nav top>700、六分頁 .screen 高度>0 且在 main 內**（互動視窗執行）〔2026-10-11 完成：scripts/layout_check.mjs 390×844 本機與正式網址皆全過——body 子元素只剩 #new-version-banner、#app、script；nav top=772px；六分頁 .screen 高度皆>0 且在 main 內。修復前版本重現 8 項 FAIL（nav top=0、19 個元素脫離 #app）〕
+- [x] **先.六十六-3 冒煙新增三項永久檢查：body 子元素白名單、.screen／nav 祖先、section／nav 標籤數量平衡**（互動視窗執行）〔2026-10-11 完成：冒煙新增 82 body 子元素白名單、83 .screen 在 main#main／nav 在 #app、84 section／nav 原始碼＝DOM＋div 開關數相等；84 項全部通過〕
+- [x] **先.六十六-4 sw.js 版本號更新＋確認 Pages 已部署＋推播「版面修復完成，請完全關閉 App 再開啟」**（互動視窗執行）〔2026-10-11 完成：sw.js CACHE alpha-v2026-10-11.1139；curl 正式網址確認新版已部署、不含 picks-us-list 那行 </div></div>；推播 ok=1 failed=0〕
+- [x] **先.六十六-5 冒煙全綠 commit，恢復常備.開發佇列**（互動視窗執行）〔2026-10-11 完成：冒煙全綠後 commit f9f6b252a 並推送；常備.開發佇列續行（DevQueue 趕工中）〕
