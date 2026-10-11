@@ -19194,3 +19194,24 @@ C. 驗收
 - [ ] **先.七十七-5 回測段改讀 data/strategy_monthly_returns.json 畫虛線曲線，不重跑；年化與 MDD 對不上即標 IRREPRODUCIBLE**（互動視窗執行）
 - [ ] **先.七十七-6 結案.一 依近 14 天 git_op_lock 與三支 wrapper 日誌實證結案，寫入 AWAITING_REVIEW**（互動視窗執行）
 - [ ] **先.七十七-7 冒煙全綠 commit 後回報**（互動視窗執行）
+
+---
+
+# 2026-10-11【先.七十八：真錢首批 10/12 上線前驗證】（總司令裁示原文，動工前先寫入；只讀、不切模式、不送單、不讀金鑰）
+
+```
+先.七十八　真錢首批 10/12 上線前驗證（只讀、不切模式、不送單、不讀金鑰）
+1. 10/11 20:00 唯讀 preflight 跑完後，貼 19 項結果。cash_ready 必須 PASS（金額不顯示，只回報「≥2,399／不足」）。若仍回 0：不改任何設定，回報「疑似資金管理帳戶不在 account_balance 支援範圍」，等 Cowork 裁示。
+2. 在 status.json 新增 t1_plan_preview（純計算，不連券商下單）：用 load_prev_closes＋plan_orders（實際 dev_pct 與 --run 相同）列出每筆標的、股數、限價、金額、單筆上限檢查、合計×1.003 與可用餘額比較。App 自動投資頁顯示「明天會買」。
+3. 確認 10/12 的 --run 會以 T1 標籤重試（state.applied=[]、next_tranche=1），不重複建單、不沿用 10/8 的 REJECT 紀錄。附程式碼路徑證據。
+4. 預檢新增第 20 項 monthly_ok：monthly_contribution_twd > total_capital_twd 時列 WARN（只警告、不改值），文字「每月投入大於總資金，第 5 個月起會被擋單，請確認」。
+5. 補單元測試，鎖住以下行為：債券 ETF 不用 limit_up 計價；零股 qty<1000；單筆>上限拒單；可用餘額<整批×1.003 整批不送。
+6. 全部完成後 commit＋push，回報證據。禁止切換 LIVE 類模式、禁止 --live-cancel-test、禁止印出任何帳號或金額。
+```
+
+- [ ] **先.七十八-1 10/11 20:00 唯讀 preflight 19 項結果；cash_ready 只回報 ≥2,399／不足（仍為 0 則回報疑似資金管理帳戶不在支援範圍，等 Cowork）**（互動視窗執行）
+- [ ] **先.七十八-2 status.json 新增 t1_plan_preview（load_prev_closes＋plan_orders，同 --run 的 dev_pct），App 自動投資頁顯示「明天會買」**（互動視窗執行）
+- [ ] **先.七十八-3 確認 10/12 --run 以 T1 重試（applied=[]、next_tranche=1）、不重複建單、不沿用 10/8 REJECT，附程式碼證據**（互動視窗執行）
+- [ ] **先.七十八-4 預檢第 20 項 monthly_ok（每月投入>總資金 → WARN，只警告不改值）**（互動視窗執行）
+- [ ] **先.七十八-5 單元測試：債券 ETF 不用 limit_up、零股 qty<1000、單筆>上限拒單、可用<整批×1.003 整批不送**（互動視窗執行）
+- [ ] **先.七十八-6 commit＋push 回報證據；禁止切 LIVE、禁止 --live-cancel-test、禁止印帳號金額**（互動視窗執行）
