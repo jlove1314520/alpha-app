@@ -36,7 +36,7 @@
       const r=await liveFetch('/auto/status',6000);
       if(!r.ok)throw new Error('HTTP '+r.status);
       renderRiskLimits((await r.json()).limits);
-    }catch(e){console.warn('[loadRiskLimits]',e);recordGlobalError('loadRiskLimits',e);setTxt('risk-limits-note','讀取引擎實際值失敗（本機伺服器離線或舊版），目前顯示程式內建預設值。')}
+    }catch(e){console.warn('[loadRiskLimits]',e);recordGlobalError('loadRiskLimits',e);setTxt('risk-limits-note',_isOfflineErr(e)?liveOfflineText():'讀取引擎實際值失敗（本機伺服器是舊版或回應錯誤），目前顯示程式內建預設值。')}
   }
   function _renderNotif(p){
     ['reject','complete','missed'].forEach(k=>{const el=document.getElementById('notif-'+k);if(el)el.classList.toggle('on',!!(p&&p[k]))});

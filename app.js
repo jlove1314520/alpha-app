@@ -115,7 +115,28 @@
   function hydrateSettings(...a){return _lazyCall('settings','hydrateSettings',a)}
   function liveUpdateStockPage(...a){return _lazyCall('stock','liveUpdateStockPage',a)}
   [openSectorList,loadMarketIndex,loadHeatmap,loadChipsMarketDetail,renderJournalChips,loadWeeklyBrief,loadJournalLedger,loadSysWeekly,onTradeInit,loadMarketUS,loadMarketFUT,loadScanners,hydrateMarket,openStock,openStrategyReport,hydratePicks,renderReport,hydrateSettings,liveUpdateStockPage].forEach(f=>{f._lazyStub=true});
+  // 先.八十-2（2026-10-12）：電腦離線統一狀態。本機伺服器連不上（Failed to fetch／Load failed／逾時中止）是常態，
+  // 不是程式錯誤：不進錯誤 log、不顯示英文原始訊息，相關卡片只留一行「電腦離線（最後連線 MM/DD HH:MM）」。
+  // 最後連線時間＝liveFetch／串流最後一次拿到回應的時間（存本機 localStorage，只是時間戳）。
+  const LIVE_LASTOK_KEY='alpha_live_last_ok';
+  function _isOfflineErr(e){
+    if(!e)return false;
+    if(e.offline)return true;
+    const t=String((e.name||'')+' '+(e.message||e));
+    return /Failed to fetch|Load failed|NetworkError|network connection was lost|AbortError|signal is aborted|The user aborted|電腦離線/i.test(t);
+  }
+  function _liveMarkOk(){try{localStorage.setItem(LIVE_LASTOK_KEY,new Date().toISOString())}catch(e){console.warn('[liveMarkOk]',e)}}
+  function liveOfflineText(){
+    let at=null;try{at=localStorage.getItem(LIVE_LASTOK_KEY)}catch(e){console.warn('[liveOfflineText]',e)}
+    const d=at?new Date(at):null;
+    if(!d||isNaN(d))return '電腦離線（還沒連上過）';
+    const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Taipei',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d);
+    const g=k=>(p.find(x=>x.type===k)||{}).value||'';
+    return '電腦離線（最後連線 '+g('month')+'/'+g('day')+' '+g('hour')+':'+g('minute')+'）';
+  }
+  function _offlineErr(cause){const x=new Error('電腦離線');x.offline=true;x.cause=cause;return x}
   function recordGlobalError(label,err){
+    if(_isOfflineErr(err)){console.info('[離線，不計程式錯誤]',label);return}
     const msg=(err&&err.message)?err.message:String(err);
     GLOBAL_ERRORS.push({label,msg,time:fmtTzHHMM(new Date(),'Asia/Taipei')});
     if(GLOBAL_ERRORS.length>20)GLOBAL_ERRORS.shift();
@@ -1152,7 +1173,7 @@
     }catch(e){
       // 本機伺服器離線／手機不在家用網路是常態，不是程式錯誤：只記 console、卡上誠實顯示原因，
       // 刻意不呼叫 recordGlobalError（否則每次出門都會在診斷橫幅堆一條假錯誤）。
-      console.warn('[loadStrategyCurves live]',e);SC_LIVE_ERR='讀不到本機伺服器（'+(e&&e.message||e)+'）';
+      console.warn('[loadStrategyCurves live]',e);SC_LIVE_ERR=_isOfflineErr(e)?liveOfflineText():('讀不到本機伺服器（'+(e&&e.message||e)+'）');
     }
     return SC_DATA;
   }
@@ -2360,9 +2381,10 @@
     }catch(e){console.warn('[uiSettingsLayer]',e);recordGlobalError('uiSettingsLayer',e)}
   }
   // 先.七十二-B5：電腦沒設定連線時，「我的資產」與「自動投資這一期」兩張卡收起，只留一行 #home-offline-line
-  function uiHomeOffline(off){
+  // 先.八十-2：text＝已設定但連不上時的一行（電腦離線（最後連線…））；不給就是「連上電腦才看得到」
+  function uiHomeOffline(off,text){
     try{
-      const line=document.getElementById('home-offline-line');if(line)line.hidden=!off;
+      const line=document.getElementById('home-offline-line');if(line){line.hidden=!off;if(off)line.textContent=text?(text+' →'):'我的資產、自動投資：連上電腦才看得到 →'}
       ['home-money-card','home-exec-card'].forEach(id=>{const c=document.getElementById(id);if(c)c.hidden=!!off});
     }catch(e){console.warn('[uiHomeOffline]',e);recordGlobalError('uiHomeOffline',e)}
   }
@@ -2376,7 +2398,9 @@
     const errs=[];
     if(a.status==='rejected'){console.warn('[loadHomeExecCard status]',a.reason);recordGlobalError('loadHomeExecCard status',a.reason);errs.push('讀不到 /auto/status（本機伺服器離線或舊版）')}
     if(b.status==='rejected'){console.warn('[loadHomeExecCard ledger]',b.reason);recordGlobalError('loadHomeExecCard ledger',b.reason);errs.push('讀不到 /auto/ledger（本機伺服器離線或舊版）')}
-    if(a.status==='rejected'&&b.status==='rejected'){el.textContent='讀取真錢執行紀錄失敗（本機伺服器離線或舊版）';return}
+    if(a.status==='rejected'&&b.status==='rejected'){
+      if(_isOfflineErr(a.reason)&&_isOfflineErr(b.reason)){el.textContent=liveOfflineText();uiHomeOffline(true,liveOfflineText());return}
+      el.textContent='讀取真錢執行紀錄失敗（本機伺服器是舊版或回應錯誤）';return}
     renderHomeExec(a.status==='fulfilled'?a.value:null,b.status==='fulfilled'?b.value:null,errs);
   }
 
@@ -2739,7 +2763,7 @@
         toast('✓ IBKR Paper 委託已送出，狀態：'+j.status);
       }
     }catch(e){
-      resEl.textContent='送出失敗（連線中斷或伺服器未啟動）：'+(e.message||e);
+      resEl.textContent=_isOfflineErr(e)?('送出失敗：'+liveOfflineText()):('送出失敗（伺服器回應錯誤）：'+(e.message||e));
       resEl.className='note neg';
       console.warn('[submitIbkrOrderUI]',e);recordGlobalError('submitIbkrOrderUI',e);
     }finally{
@@ -3080,7 +3104,11 @@
   // 區網直連（http://192.168.x.x:8001）沒有 cookie 也不受影響，這個選項是安全的。
   async function liveFetch(path,timeoutMs){
     const ac=new AbortController();const t=setTimeout(()=>ac.abort(),timeoutMs||4000);
-    try{return await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal})}finally{clearTimeout(t)}
+    try{
+      const r=await fetch(LIVE.url+path,{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal});
+      _liveMarkOk();LIVE.offline=false;return r;
+    }catch(e){if(_isOfflineErr(e)){LIVE.offline=true;throw _offlineErr(e)}throw e}
+    finally{clearTimeout(t)}
   }
   // ── 2026-09-15（開發佇列自走，週六.五）首頁總資產卡 ──────────────────────────
   // 券商唯讀資料經live server：/live/positions（Shioaji list_positions+IBKR部位）、
@@ -3369,7 +3397,7 @@
       const cashMsg=String(st.last_error||'').startsWith('INSUFFICIENT_CASH:')?String(st.last_error).slice('INSUFFICIENT_CASH:'.length):'';
       AUTO_BAN.local=red?(cashMsg||('自動交易異常：'+(st.last_error||'請檢查'))):(autoFreezeText(d)?('自動投資'+autoFreezeText(d)):(d.stopped?'自動交易已緊急停止（一律拒單）':''));
       renderAutoBanner();
-    }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent='讀取自動交易狀態失敗（伺服器未更新或未啟動）';AUTO_BAN.offline='本機離線：讀不到本機自動交易狀態（/auto/status）';renderAutoBanner()}
+    }catch(e){console.warn('[loadAutoTrading]',e);recordGlobalError('loadAutoTrading',e);note.textContent=_isOfflineErr(e)?liveOfflineText():'讀取自動交易狀態失敗（伺服器未更新）';AUTO_BAN.offline=_isOfflineErr(e)?liveOfflineText():'讀不到本機自動交易狀態（伺服器未更新）';renderAutoBanner()}
   }
   // 先.三十九：否決窗倒數（每秒更新文字裡的「剩 X 分 Y 秒」）
   function autoCountdownText(){
@@ -3424,7 +3452,8 @@
       const [rp,rb]=await Promise.all([liveFetch('/live/positions',9000),liveFetch('/live/balance',9000)]);
       if(rp&&rp.ok)posR=await rp.json();
       if(rb&&rb.ok)balR=await rb.json();
-    }catch(e){console.warn('[loadHomeBrokerCard]',e);recordGlobalError('loadHomeBrokerCard',e)}
+    }catch(e){console.warn('[loadHomeBrokerCard]',e);recordGlobalError('loadHomeBrokerCard',e);
+      if(_isOfflineErr(e)){card.hidden=true;cta.style.display='none';uiHomeOffline(true,liveOfflineText());return}}
     // 常備.開發-20（先.六十七）：持倉不一定在自選股裡，現價退路要的小檔先備妥
     try{const pc=((posR&&posR.sinopac&&posR.sinopac.positions)||[]).map(p=>String(p.code||''));if(pc.length)await ensureQuoteLite(pc)}catch(e){console.warn('[loadHomeBrokerCard:ensureQuoteLite]',e);recordGlobalError('loadHomeBrokerCard:ensureQuoteLite',e)}
     _safeSync('renderHomePositions',()=>renderHomePositions(posR));
@@ -3593,7 +3622,7 @@
         +'，暫時顯示最後收盤 '+lastCloseLabel();
       color='var(--warn)';
     }
-    else{txt='離線（連不上即時伺服器'+(LIVE.lastError?'：'+LIVE.lastError:'')+'），顯示最後收盤 '+lastCloseLabel();color='#e6383f'}
+    else{txt=(!LIVE.lastError||_isOfflineErr({message:LIVE.lastError})?liveOfflineText():'離線（連不上即時伺服器：'+LIVE.lastError+'）')+'，顯示最後收盤 '+lastCloseLabel();color='#e6383f'}
     const el=document.getElementById('home-live-status');if(el){el.textContent=txt;el.style.color=color}
     const note=document.getElementById('live-status-note');if(note){note.textContent=txt;note.style.color=color}
     try{updatePollNote()}catch(e){console.warn('[renderLiveStatus:updatePollNote]',e)}  // 2026-09-04四修.四：輪詢文案跟著連線狀態走
@@ -3641,7 +3670,7 @@
     try{
       const r=await fetch(LIVE.url+'/live/stream',{headers:liveHeaders(),cache:'no-store',credentials:'include',signal:ac.signal});
       if(!r.ok){LIVE.lastError=r.status===401?'token不正確':'HTTP '+r.status;throw new Error(LIVE.lastError)}
-      LIVE.connected=true;LIVE.lastError=null;LIVE.retryMs=3000;renderLiveStatus();
+      LIVE.connected=true;LIVE.lastError=null;LIVE.retryMs=3000;_liveMarkOk();renderLiveStatus();
       _safeAsync('pushWatchlist:onconnect',pushWatchlist);  // 2026-09-06：連上就對齊一次訂閱清單
       const reader=r.body.getReader();const dec=new TextDecoder();let buf='';
       while(true){
@@ -3799,7 +3828,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.2138';
+  const APP_VERSION='2026-10-12.0019';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

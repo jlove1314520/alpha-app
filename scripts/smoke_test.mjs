@@ -3328,6 +3328,48 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { sgnErrs.push(`測試本身出錯：${e.message || e}`); }
   record("101. 大盤／類股漲跌正負號：加權與櫃買 change_pct 正負＝走勢線方向、類股不得全為非負（先.八十-1）", sgnErrs.length === 0, sgnErrs.join("; "));
 
+  // 102.【2026-10-12 先.八十-2】電腦離線統一狀態：本機伺服器連不上（Failed to fetch）時，交易頁自動投資卡、首頁兩張卡收成一行
+  // 「電腦離線（最後連線 MM/DD HH:MM）」；不得計入 GLOBAL_ERRORS、畫面不得出現英文原始錯誤（Failed to fetch／Load failed）。
+  const offErrs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      if (typeof liveOfflineText !== "function" || typeof _isOfflineErr !== "function") return { err: "liveOfflineText／_isOfflineErr 未載入" };
+      const saved = { url: LIVE.url, conf: LIVE.configured, fetch: window.fetch, ls: localStorage.getItem("alpha_live_last_ok") };
+      const n0 = GLOBAL_ERRORS.length;
+      try {
+        localStorage.setItem("alpha_live_last_ok", "2026-10-11T06:05:00Z");
+        LIVE.url = "https://smoke.invalid"; LIVE.configured = true;
+        window.fetch = (u, o) => (String(u).startsWith("https://smoke.invalid") ? Promise.reject(new TypeError("Failed to fetch")) : saved.fetch(u, o));
+        await window.go("trade");
+        await new Promise(res => setTimeout(res, 300));
+        if (typeof loadTradeBots === "function") await loadTradeBots();
+        const tradeNote = (document.getElementById("bot-bb90-note") || {}).textContent || "";
+        const recHidden = !!(document.getElementById("bot-recent-orders") || {}).hidden;
+        await loadHomeExecCard();
+        const line = document.getElementById("home-offline-line");
+        const homeLine = line && !line.hidden ? line.textContent : "";
+        const body = document.body.innerText;
+        return { text: liveOfflineText(), tradeNote, recHidden, homeLine, added: GLOBAL_ERRORS.length - n0,
+                 english: /Failed to fetch|Load failed/.test(body), never: (localStorage.removeItem("alpha_live_last_ok"), liveOfflineText()) };
+      } finally {
+        window.fetch = saved.fetch; LIVE.url = saved.url; LIVE.configured = saved.conf;
+        if (saved.ls) localStorage.setItem("alpha_live_last_ok", saved.ls); else localStorage.removeItem("alpha_live_last_ok");
+        try { await loadHomeExecCard(); } catch (e) { console.warn("[smoke 102 restore]", e); }
+      }
+    });
+    if (r.err) offErrs.push(r.err);
+    else {
+      if (r.text !== "電腦離線（最後連線 10/11 14:05）") offErrs.push(`離線文字不對：${r.text}`);
+      if (r.tradeNote !== r.text) offErrs.push(`交易頁自動投資卡應只顯示一行離線：${r.tradeNote}`);
+      if (!r.recHidden) offErrs.push("離線時帳本區應收起");
+      if (!/^電腦離線（最後連線 10\/11 14:05）/.test(r.homeLine)) offErrs.push(`首頁應收成一行離線：${r.homeLine}`);
+      if (r.added !== 0) offErrs.push(`離線被計入程式錯誤 ${r.added} 筆`);
+      if (r.english) offErrs.push("畫面出現英文原始錯誤");
+      if (r.never !== "電腦離線（還沒連上過）") offErrs.push(`沒連上過時文字不對：${r.never}`);
+    }
+  } catch (e) { offErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("102. 電腦離線統一一行：交易頁／首頁收成「電腦離線（最後連線 MM/DD HH:MM）」、不計程式錯誤、不顯示英文（先.八十-2）", offErrs.length === 0, offErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3356,7 +3398,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

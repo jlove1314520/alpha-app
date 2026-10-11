@@ -56,13 +56,17 @@
       if(card){card.hidden=!(fz||fp);card.textContent=fz?('⏸ '+fz):fp;card.dataset.state=fz?'frozen':(fp?'plan':'')}
       note.textContent=(fz?'':(d.stopped?'⛔ 緊急停止中（一律拒單）　':''))+(st.last_error?'最近錯誤：'+st.last_error:'目前無錯誤')+(st.updated_at?'　狀態更新：'+st.updated_at:'');
       _safeSync('renderPlanPreview',()=>renderPlanPreview(st.t1_plan_preview));
-    }catch(e){console.warn('[loadTradeBots]',e);recordGlobalError('loadTradeBots',e);note.textContent='讀取自動交易狀態失敗（本機伺服器離線或舊版）'}
+    }catch(e){console.warn('[loadTradeBots]',e);recordGlobalError('loadTradeBots',e);
+      // 先.八十-2：電腦離線時整張卡收成一行，帳本與預覽都不再各自報錯
+      if(_isOfflineErr(e)){note.textContent=liveOfflineText();if(rec)rec.hidden=true;_safeSync('renderPlanPreview',()=>renderPlanPreview(null));return}
+      note.textContent='讀取自動交易狀態失敗（本機伺服器是舊版或回應錯誤）'}
+    if(rec)rec.hidden=false;
     if(!rec)return;
     try{
       const lg=await loadAutoLedger();
       const rows=(lg&&lg.rows||[]).slice(0,5);
       rec.innerHTML=rows.length?rows.map(autoLedgerRowHtml).join(''):'首批尚未執行';
-    }catch(e){console.warn('[loadTradeBots ledger]',e);recordGlobalError('loadTradeBots ledger',e);rec.textContent='讀取帳本失敗（本機伺服器離線或舊版）'}
+    }catch(e){console.warn('[loadTradeBots ledger]',e);recordGlobalError('loadTradeBots ledger',e);rec.textContent=_isOfflineErr(e)?liveOfflineText():'讀取帳本失敗（本機伺服器是舊版或回應錯誤）'}
   }
 
   // ── 交易頁子分頁（機器人／策略，2026-08-25 新增，不佔用底部導覽）──
