@@ -1801,7 +1801,10 @@ async function runSmokeTest(baseUrl, headless = true) {
   let handlerInfo = "";
   try {
     const res = await page.evaluate(async () => {
-      const src = (await Promise.all(["index.html", "app.js", "app.css"].map(async u => (await fetch(u, { cache: "no-store" })).text()))).join("\n");  // 常備.開發-20：CSS/JS 已拆出，三檔合併掃描
+      // 常備.開發-20 丙案：分頁程式點到該頁才載入；先把全部分頁檔載入，再檢查「整個 App 的程式」裡處理器函式都存在
+      //（未載入的分頁其處理器所在畫面根本還看不到；載入失敗本身會讓 loadAppModule reject → 本項 FAIL）。
+      if (typeof loadAppModule === "function") for (const m of ["shared", "market", "picks", "stock", "trade", "journal", "settings"]) await loadAppModule(m);
+      const src = (await Promise.all(["index.html", "app.js", "app.css", "app-shared.js", "app-market.js", "app-picks.js", "app-stock.js", "app-trade.js", "app-journal.js", "app-settings.js"].map(async u => (await fetch(u, { cache: "no-store" })).text()))).join("\n");  // 常備.開發-20：CSS/JS 已拆出，全部合併掃描（丙案再拆分頁檔）
       const KW = new Set(["if", "for", "while", "switch", "return", "typeof", "function", "new", "catch", "void", "await", "async", "delete", "in", "of", "do"]);
       const vals = [];
       const re = /\son(?:click|input|change)\s*=\s*"([^"]*)"/gi;
@@ -1868,7 +1871,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   let mgInfo = "";
   try {
     const r = await page.evaluate(async () => {
-      const src = (await Promise.all(["index.html", "app.js", "app.css"].map(async u => (await fetch(u, { cache: "no-store" })).text()))).join("\n");  // 常備.開發-20：CSS/JS 已拆出，三檔合併掃描
+      const src = (await Promise.all(["index.html", "app.js", "app.css", "app-shared.js", "app-market.js", "app-picks.js", "app-stock.js", "app-trade.js", "app-journal.js", "app-settings.js"].map(async u => (await fetch(u, { cache: "no-store" })).text()))).join("\n");  // 常備.開發-20：CSS/JS 已拆出，全部合併掃描（丙案再拆分頁檔）
       await loadMarginMaintenance();
       const sum = (document.getElementById("margin-summary") || {}).innerText || "";
       const conv = (document.getElementById("margin-calib") || {}).innerText || "";
@@ -2010,7 +2013,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const fakeOrderErrors = [];
   try {
     const fs = await import("node:fs");
-    const src = ["index.html", "app.js", "app.css"].map(f => fs.readFileSync(f, "utf8")).join("\n");  // 常備.開發-20：CSS/JS 已拆出，三檔合併掃描
+    const src = ["index.html", "app.js", "app.css", "app-shared.js", "app-market.js", "app-picks.js", "app-stock.js", "app-trade.js", "app-journal.js", "app-settings.js"].map(f => fs.readFileSync(f, "utf8")).join("\n");  // 常備.開發-20：CSS/JS 已拆出，全部合併掃描（丙案再拆分頁檔）
     if (/function\s+confirmOrder\b/.test(src)) fakeOrderErrors.push("index.html 仍有 function confirmOrder");
     if (/委託已送出\s*·\s*\d{2}:\d{2}/.test(src)) fakeOrderErrors.push("index.html 仍有寫死時間的「委託已送出」假成功字樣");  // IBKR Paper 真送單後的回報 toast 不算
     if (/id="sheet"/.test(src)) fakeOrderErrors.push("index.html 仍有 #sheet 假下單抽屜");
@@ -2553,9 +2556,12 @@ async function runSmokeTest(baseUrl, headless = true) {
     for (const bad of ["/data/stock_detail.json", "/data/events.json", "/data/fundamentals.json", "lightweight-charts"]) {
       if (urls.some(u => u.endsWith(bad) || (bad === "lightweight-charts" && u.includes(bad)))) flErrors.push(`首頁載入時下載了 ${bad}`);
     }
+    // 常備.開發-20 丙案：首頁不得載入任何分頁程式檔（app-<頁>.js 要點到該頁才載）
+    const modUrls = urls.filter(u => /\/app-[a-z]+\.js$/.test(u));
+    if (modUrls.length) flErrors.push(`首頁載入時就下載了分頁程式：${modUrls.map(u => u.replace(/.*\//, "")).join("、")}`);
     const sp = urls.filter(u => u.endsWith("/data/sparklines.json")).length;
     if (sp > 1) flErrors.push(`sparklines.json 下載了 ${sp} 次`);
-    flInfo = `首頁首次載入實測 ${(m.total / 1024).toFixed(1)} KB（${m.rows.length} 個請求；目標 <300KB）`;
+    flInfo = `首頁首次載入實測 ${(m.total / 1024).toFixed(1)} KB（${m.rows.length} 個請求；目標 <350KB，先.六十五丙案）`;
   } catch (e) { flErrors.push(`測試本身出錯：${e.message || e}`); }
   record("78. 首頁首次載入不下載整份 stock_detail／events／fundamentals、不預載圖表函式庫、sparklines 不重複下載", flErrors.length === 0, flErrors.join("; ") || flInfo);
 
@@ -2602,7 +2608,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       for (const k of await caches.keys()) { const c = await caches.open(k); for (const req of await c.keys()) out.push(new URL(req.url).pathname); }
       return { list: out, controlled: !!navigator.serviceWorker.controller };
     });
-    for (const f of ["/app.js", "/app.css", "/index.html"]) if (!cached.list.includes(f)) offErrors.push(`SW 快取缺 ${f}`);
+    for (const f of ["/app.js", "/app.css", "/index.html", "/app-shared.js", "/app-market.js", "/app-picks.js", "/app-stock.js", "/app-trade.js", "/app-journal.js", "/app-settings.js"]) if (!cached.list.includes(f)) offErrors.push(`SW 快取缺 ${f}`);
     if (!cached.controlled) offErrors.push("SW 沒有接管頁面");
     await octx.setOffline(true);
     await op.reload({ waitUntil: "load", timeout: 30000 });
@@ -2614,13 +2620,22 @@ async function runSmokeTest(baseUrl, headless = true) {
       ver: typeof APP_VERSION !== "undefined" ? APP_VERSION : null,
     }));
     if (!st.fn) offErrors.push("離線重新整理後 app.js 主程式沒有載入");
+    // 常備.開發-20 丙案：離線時點到分頁仍要能從 SW 快取載入該頁程式（真函式取代轉接殼）
+    const offMod = await op.evaluate(async () => {
+      const bad = [];
+      for (const [m, fn] of [["stock", "openStock"], ["market", "hydrateMarket"], ["settings", "hydrateSettings"]]) {
+        try { await loadAppModule(m); if (window[fn]._lazyStub) bad.push(`${m}：${fn} 仍是轉接殼`); } catch (e) { bad.push(`${m}：${e.message || e}`); }
+      }
+      return bad;
+    });
+    if (offMod.length) offErrors.push("離線載入分頁程式失敗：" + offMod.join("；"));
     if (!st.css || st.css === "rgba(0, 0, 0, 0)" || st.css === "rgb(255, 255, 255)") offErrors.push(`離線重新整理後樣式沒有套用（body 背景 ${st.css}）`);
     const syntaxErr = opErrors.filter(e => /SyntaxError|Unexpected token/.test(e));
     if (syntaxErr.length) offErrors.push("離線時腳本解析錯誤：" + syntaxErr.join(" | ").slice(0, 200));
     offInfo = `快取 ${cached.list.length} 個外殼項目；離線版本 ${st.ver}；body 背景 ${st.css}`;
     await octx.close();
   } catch (e) { offErrors.push(`測試本身出錯：${e.message || e}`); }
-  record("80. PWA 離線仍可開啟（SW 快取含 index.html／app.js／app.css；斷網重新整理後樣式與主程式都在）", offErrors.length === 0, offErrors.join("; ") || offInfo);
+  record("80. PWA 離線仍可開啟（SW 快取含 index.html／app.js／app.css／app-<頁>.js；斷網重新整理後樣式與主程式都在、分頁程式可從快取載入）", offErrors.length === 0, offErrors.join("; ") || offInfo);
 
   // 81.【2026-10-11 常備.開發-22】法說會事件附 MOPS 簡報官方連結：①合成資料——法說會列有
   // mopsov.twse.com.tw 法說會簡報查詢頁連結（co_id 為該代號、新分頁開啟），非法說會列與不合法代號沒有；
@@ -2689,10 +2704,46 @@ async function runSmokeTest(baseUrl, headless = true) {
   record("84. 靜態標記標籤數量平衡（section／nav 原始碼＝DOM、div 開關數相等）", balErr.length === 0,
     balErr.join("；") || `section ${srcInfo.section}、nav ${srcInfo.nav}、div ${srcInfo.divOpen}`);
 
+  // 85.【2026-10-11 常備.開發-20 丙案】分頁程式點到該頁才載入：全新環境開首頁，不得請求任何 app-<頁>.js；
+  // 依序點導覽列五個分頁＋開個股頁，每次都要載到對應的分頁檔、該頁真函式取代轉接殼、畫面切換成功、無 pageerror。
+  const lzErrors = [];
+  let lzInfo = "";
+  try {
+    const lctx = await browser.newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    const lp = await lctx.newPage();
+    const lpErrors = [];
+    lp.on("pageerror", e => lpErrors.push(String(e)));
+    const loaded = [];
+    lp.on("request", r => { const mm = r.url().match(/\/app-([a-z]+)\.js/); if (mm) loaded.push(mm[1]); });
+    await lp.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+    await lp.waitForTimeout(3000);
+    if (loaded.length) lzErrors.push(`首頁就載入了分頁程式：${loaded.join("、")}`);
+    const steps = [["market", "scr-market", "hydrateMarket"], ["picks", "scr-picks", "hydratePicks"], ["trade", "scr-trade", "onTradeInit"], ["journal", "scr-journal", "renderJournalChips"], ["settings", "scr-settings", "hydrateSettings"]];
+    for (const [scr, id, fn] of steps) {
+      await lp.click(`#nav button[data-scr="${scr}"]`);
+      await lp.waitForTimeout(1500);
+      const st = await lp.evaluate(([id, fn]) => ({ active: document.getElementById(id).classList.contains("active"), real: typeof window[fn] === "function" && !window[fn]._lazyStub }), [id, fn]);
+      if (!loaded.includes(scr)) lzErrors.push(`點「${scr}」沒有載入 app-${scr}.js`);
+      if (!st.active) lzErrors.push(`點「${scr}」畫面沒切過去`);
+      if (!st.real) lzErrors.push(`點「${scr}」後 ${fn} 仍是轉接殼`);
+    }
+    await lp.evaluate(() => openStock("2330"));
+    await lp.waitForTimeout(2000);
+    const sk = await lp.evaluate(() => ({ active: document.getElementById("scr-stock").classList.contains("active"), real: !openStock._lazyStub, name: (document.getElementById("sh-name") || {}).textContent || "" }));
+    if (!loaded.includes("stock")) lzErrors.push("開個股頁沒有載入 app-stock.js");
+    if (!sk.active || !sk.real) lzErrors.push(`個股頁未正常開啟（active=${sk.active} real=${sk.real}）`);
+    const ge = await lp.evaluate(() => (typeof GLOBAL_ERRORS !== "undefined" ? GLOBAL_ERRORS : []).filter(x => /loadAppModule|分頁程式|is not defined/.test(x.label + " " + x.msg)));
+    if (ge.length) lzErrors.push("錯誤 log：" + JSON.stringify(ge).slice(0, 300));
+    if (lpErrors.length) lzErrors.push("pageerror：" + lpErrors.join(" | ").slice(0, 300));
+    lzInfo = `依序載入：${[...new Set(loaded)].join("→")}；個股頁標題「${sk.name}」`;
+    await lctx.close();
+  } catch (e) { lzErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("85. 分頁程式點到該頁才載入（首頁不載 app-<頁>.js；五個分頁＋個股頁各自載入、真函式取代轉接殼、無錯誤）", lzErrors.length === 0, lzErrors.join("; ") || lzInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // 常備.開發-20 把內嵌腳本拆到 app.js：先讀 app.js，再接 index.html，兩處都找得到標記段
-const html = ["app.js", "index.html"].filter(f => fs.existsSync(path.join(root, f))).map(f => fs.readFileSync(path.join(root, f), "utf8")).join(String.fromCharCode(10));
+const html = ["app.js", "app-shared.js", "app-market.js", "app-picks.js", "app-stock.js", "app-trade.js", "app-journal.js", "app-settings.js", "index.html"].filter(f => fs.existsSync(path.join(root, f))).map(f => fs.readFileSync(path.join(root, f), "utf8")).join(String.fromCharCode(10));
 const m = /\/\/ <auto-period-selftest>[^\n]*\n([\s\S]*?)\/\/ <\/auto-period-selftest>/.exec(html);
 if (!m) { console.log("FAIL 找不到 <auto-period-selftest> 標記段"); process.exit(1); }
 const api = new Function(m[1] + "\nreturn {autoPeriodSummary,autoPeriodBatchLabel};")();
