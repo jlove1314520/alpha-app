@@ -1,3 +1,25 @@
+## 2026-10-12 02:13（互動視窗）先.八十-11 本機排程：監測產出檔心跳提交、新聞排程本機補班（附心跳證據）
+
+- **連線自檢、證交所發布時間探測**：兩支工作在本機其實都正常在跑。
+  - 證據：工作排程器 `AlphaConnectivity` 01:52 結束碼 0；`AlphaTwsePublishProbe` 10/11 20:00 結束碼 0；本機檔案也一直有寫入。
+  - **根因**：沒有任何排程負責把這兩個產出檔 commit 進 repo，過去只是偶爾被別的 commit 順手帶上。repo 裡的版本停在 10/09 21:25，雲端停擺自檢讀的是 repo 版本，所以回報「46 小時、47.7 小時沒心跳」。
+  - **修法**：新增 `scripts/commit_local_heartbeats.py`。
+    - 只提交該工作自己的產出檔，每小時最多一次。
+    - 走 `scripts/local_git_commit.py`：和三支 wrapper 同一套結案.一 方案甲＋丙，也就是 git_op_lock、衝突標記偵測、鎖被占就跳過。
+  - 掛載：`C:\alpha\run-connectivity-check.ps1` 與 `run-twse-probe.ps1` 在最後呼叫它；這兩支在 repo 外，已先備份。
+  - **心跳證據**：f1e514a6c（01:59 連通性）、6c89797ec（01:59 探測）都已 push。再跑一次會顯示「未到 60 分鐘，本輪不提交」，節流有效。
+- **新聞排程錯過 5 班**：
+  - **根因**：`gh run list` 實測 10/06～10/11 每次執行都 success，不是工作壞掉。GitHub 對 `news_events.yml` 每 30 分鐘一次的排程是 best-effort，實際每 4～7 小時才觸發一次。
+  - 本機 token 沒有 Actions 寫入權限，`gh workflow run` 回 403，所以無法從本機叫雲端補跑。
+  - **修法**：新增 `scripts/news_local_fallback.py` 與排程 `AlphaNewsFallback`（每 30 分鐘一次）。
+    - 雲端 news.json 超過 60 分鐘沒更新時，本機照 workflow 相同順序跑同一套腳本、做 schema 守門，只提交 workflow 原本就提交的檔。
+    - 雲端有準時更新時，本機什麼都不做。
+    - 不需要任何金鑰。
+  - **心跳證據**：02:05 判定雲端已 138 分鐘沒更新，五步全部 exit=0（內文萃取 402 秒），commit dd223fd63 已 push，origin 的 news.json fetched_at＝02:05。
+- **自測**：`scripts/selftest_local_heartbeats.py` 7/7 通過，涵蓋節流、只收自己的產出檔、雲端新鮮時不跑、第一步失敗不提交。
+- **冒煙**：最近一次全套冒煙為 109 PASS／0 FAIL（先.八十-12 那輪，已包含本項程式）。
+- **可選的改進（需要總司令本人操作）**：如果之後要讓本機直接叫雲端補跑，需在 GitHub 的 fine-grained PAT 加上「Actions：Read and write」。不加也沒關係，目前的本機補班已經能運作。
+
 ## 2026-10-12 02:12（互動視窗）先.八十-12 研究口徑：還原價曲線、0050 含息、現金計息、建倉扣費、00631L 分割還原、#418 美股腿聯集日曆
 
 - **曲線改用還原價**：`build_strategy_curves.py` 的價格改讀 `adj_close`（已還原權息與分割）。
