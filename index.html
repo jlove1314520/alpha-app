@@ -1177,6 +1177,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">執行時間：<b id="smoke-cloud-tm">--:--</b>。每晚台北 02:30 由 GitHub 對正式網址跑一次完整冒煙測試。</div>
     </div>
 
+    <!-- 常備.開發-28（2026-10-11）：資料檔 schema 守門＝每條排程 commit 前跑 scripts/data_schema_guard.py，
+         App 會讀的 JSON 不符 schema（缺欄位／型別錯／時間戳壞／NaN）就還原上一版、不發布，結果寫 data/schema_guard/*.json。 -->
+    <div class="card" data-ui-advanced>
+      <h3>資料檔 schema 守門 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'schema-guard-tm',async()=>{await loadSchemaGuard()})">重新整理</span></h3>
+      <div class="note" id="schema-guard-summary">檢查中…</div>
+      <div id="schema-guard-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">最近一次結果變動：<b id="schema-guard-tm">--:--</b>。排程寫好的資料檔在發布前先驗格式，壞檔不覆蓋舊檔（畫面會繼續顯示上一版）。</div>
+    </div>
+
 
 
     <!-- 2026-09-15（稽核二.二）八因子覆蓋率儀表板：資料健康卡看的是「全市場恆等式

@@ -296,6 +296,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 常備.開發-28：commit 前驗證 App 會讀的 JSON（schema），不過者還原上一版、不發布；
+          # 守門員自身失敗只降級成警告（十二節）。報告 data/schema_guard/market.json 單獨一行 git add（十節；
+          # 寫報告失敗時檔案不存在，2>/dev/null || true 讓它不拖垮後面的 commit）。
+          python scripts/data_schema_guard.py guard --report data/schema_guard/market.json --label market || true
+          git add -- data/schema_guard/market.json 2>/dev/null || true
           git add -A data/market_tw.json data/market_us.json data/us_sic.json data/fundamentals.json data/fx.json data/margin_maintenance.json data/stock_detail.json data/stock_detail/ data/stock_detail_eps.json data/price_history.json data/whitelist_price_status.json data/sparklines.json data/quotes_all_tw.json data/quote_lite/ data/earnings_calendar.json data/ex_dividend_events.json data/picks_ledger.json data/signal_ledger.json data/strategy_curves.json data/strategy_history.json data/strategy_performance.json data/strategies.json data/rate_limit_state.json data/STATUS.json data/adjustment_anomalies.json scores.json scores_momentum.json scores_future.json data/foreign_holding.json data/foreign_holding_history.json data/us_insider_trading.json data/us_events.json data/cftc_cot.json data/short_lending_available.json data/short_lending_available_history.json data/us_13f_holdings.json data/bls_macro.json data/customs_trade.json data/industrial_production.json data/sector_flow.json data/institutional_history.json data/securities_lending_sell.json data/securities_lending_sell_history.json data/margin_by_stock_history.json data/paper_7030.json data/paper_1b.json data/paper_3.json data/paper_4.json data/paper_tracking_watch.json data/daily_brief.json PENDING_QUEUE.md research/shadow_ledgers/ research/PROGRESS_HEARTBEAT.jsonl
           git add -f research/data/paper_7030_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_1b_log.jsonl 2>/dev/null || true

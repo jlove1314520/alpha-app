@@ -161,6 +161,7 @@
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
     _safeAsync('loadSmokeCloud',loadSmokeCloud);  // 常備.開發-27 雲端夜間冒煙，同樣獨立
+    _safeAsync('loadSchemaGuard',loadSchemaGuard);  // 常備.開發-28 資料檔 schema 守門，同樣獨立
     _safeAsync('loadAdjAnomalies',loadAdjAnomalies);  // 先.六十一
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
@@ -614,6 +615,46 @@
     }catch(e){
       console.warn('[loadSmokeCloud]',e);recordGlobalError('loadSmokeCloud',e);
       sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到雲端冒煙結果</b>（'+(e&&e.message||e)+'）';list.innerHTML='';
+    }
+  }
+  // 常備.開發-28：資料檔 schema 守門（data/schema_guard/<workflow>.json，各排程 commit 前由 scripts/data_schema_guard.py 寫）。
+  // 每條排程各一份報告（避免多條排程搶寫同一檔造成 rebase 衝突）；404＝該排程尚未跑過新版，不算錯。
+  const SCHEMA_GUARD_LABELS={market:'盤後市場',quotes:'盤中報價',news_events:'新聞事件',audit:'夜間稽核',
+    us_financials:'美股財報',smoke_cloud:'雲端冒煙',local_schedule_watchdog:'本機排程看門狗'};
+  async function loadSchemaGuard(){
+    const sum=document.getElementById('schema-guard-summary'),list=document.getElementById('schema-guard-list');
+    if(!sum||!list)return;
+    try{
+      const names=Object.keys(SCHEMA_GUARD_LABELS);
+      const res=await Promise.allSettled(names.map(async n=>{
+        const r=await fetch('data/schema_guard/'+n+'.json?t='+Date.now());
+        if(r.status===404)return null;
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        return r.json();
+      }));
+      const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      let seen=0,latest=null;const rejected=[],guardErr=[],readErr=[];
+      res.forEach((x,i)=>{
+        const lab=SCHEMA_GUARD_LABELS[names[i]];
+        if(x.status==='rejected'){readErr.push(lab);console.warn('[loadSchemaGuard]',names[i],x.reason);return}
+        const d=x.value;if(!d)return;seen++;
+        if(d.generated_at&&(!latest||d.generated_at>latest))latest=d.generated_at;
+        if(d.guard_error)guardErr.push(lab);
+        (d.rejected||[]).forEach(r=>rejected.push({lab,...r}));
+      });
+      if(readErr.length)recordGlobalError('loadSchemaGuard',new Error('讀不到：'+readErr.join('、')));
+      if(!seen&&!readErr.length){sum.textContent='尚未產生第一份結果（下一次排程 commit 時自動產生）';list.innerHTML='';return}
+      sum.innerHTML=(rejected.length?`<b style="color:var(--warn)">✗ ${nf(rejected.length)} 個資料檔被攔下（畫面顯示的是上一版）</b>`
+        :'<b style="color:var(--up)">✓ 最近一次全部通過</b>')+` ｜ ${nf(seen)}/${nf(names.length)} 條排程有回報`
+        +(guardErr.length?` ｜ <b style="color:var(--warn)">守門員自身出錯（未擋發布）：${esc(guardErr.join('、'))}</b>`:'')
+        +(readErr.length?` ｜ <b style="color:var(--warn)">讀不到：${esc(readErr.join('、'))}</b>`:'');
+      list.innerHTML=rejected.length?'<div class="facts">'+rejected.slice(0,20).map(r=>
+        `<div style="font-size:11px;color:var(--ink-3);padding:3px 0;border-top:1px solid var(--hairline)"><b>${esc(r.lab)}｜${esc(r.file)}</b>：${esc((r.errors||[]).slice(0,3).join('；'))}</div>`).join('')+'</div>':'';
+      const tm=document.getElementById('schema-guard-tm');
+      if(tm&&latest)tm.textContent=fmtTzMMDDHHMM(new Date(latest),'Asia/Taipei');
+    }catch(e){
+      console.warn('[loadSchemaGuard]',e);recordGlobalError('loadSchemaGuard',e);
+      sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到 schema 守門結果</b>（'+(e&&e.message||e)+'）';list.innerHTML='';
     }
   }
   // 2026-09-15（稽核二.二）讀 data/coverage.json：八因子×全市場覆蓋率儀表板。

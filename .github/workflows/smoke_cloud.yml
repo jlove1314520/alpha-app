@@ -58,6 +58,11 @@ jobs:
             echo "::warning::冒煙沒有產出 data/smoke_cloud.json（安裝步驟可能失敗），本次不 commit"
             exit 0
           fi
+          # 常備.開發-28：commit 前驗證 App 會讀的 JSON（schema），不過者還原上一版、不發布；
+          # 守門員自身失敗只降級成警告（十二節）。報告 data/schema_guard/smoke_cloud.json 單獨一行 git add（十節；
+          # 寫報告失敗時檔案不存在，2>/dev/null || true 讓它不拖垮後面的 commit）。
+          python3 scripts/data_schema_guard.py guard --report data/schema_guard/smoke_cloud.json --label smoke_cloud || true
+          git add -- data/schema_guard/smoke_cloud.json 2>/dev/null || true
           git add data/smoke_cloud.json
           if git diff --cached --quiet; then
             echo "無變動，略過 commit"

@@ -102,6 +102,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # -A 限定在 data/ 目錄下加，quotes_us.json 沒抓成功（美股那步失敗）時
           # 檔案不存在也不會讓這行報錯，不像明確列檔名那樣一個缺席就整行失敗。
+          # 常備.開發-28：commit 前驗證 App 會讀的 JSON（schema），不過者還原上一版、不發布；
+          # 守門員自身失敗只降級成警告（十二節）。報告 data/schema_guard/quotes.json 單獨一行 git add（十節；
+          # 寫報告失敗時檔案不存在，2>/dev/null || true 讓它不拖垮後面的 commit）。
+          python scripts/data_schema_guard.py guard --report data/schema_guard/quotes.json --label quotes || true
           git add -A data/
           git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新盤中報價 $(date -u +'%Y-%m-%d %H:%M UTC')"
 

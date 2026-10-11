@@ -25,6 +25,11 @@ Add-Content -Path $logPath -Value "`n===== supply_watchlist launcher: $ts ====="
 $out = & $pythonExe scripts\build_supply_watchlist.py 2>&1
 Add-Content -Path $logPath -Value ($out -join "`n") -Encoding utf8
 
+# chang-bei dev-28: schema guard before publish. A file that fails its schema is restored to the
+# HEAD version (old copy stays published) and a Web Push alert is sent; guard self-failure is fail-open.
+$g = & $pythonExe scripts\data_schema_guard.py guard --label run_supply_watchlist --push $outFile 2>&1
+Add-Content -Path $logPath -Value ($g -join "`n") -Encoding utf8
+
 git add -- $outFile 2>&1 | Out-Null
 git diff --cached --quiet -- $outFile
 if ($LASTEXITCODE -ne 1) {
