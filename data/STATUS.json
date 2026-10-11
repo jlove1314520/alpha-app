@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-11T06:59:05.955856+08:00",
+  "updated_at": "2026-10-11T10:00:17.380172+08:00",
   "latest_commit": "17551a482",
   "data_files": [
     {
@@ -684,7 +684,7 @@
     }
   ],
   "schedule_health": {
-    "checked_at": "2026-10-11T06:59:06+08:00",
+    "checked_at": "2026-10-11T10:00:17+08:00",
     "any_overdue": false,
     "overdue_names": [],
     "known_simplification": "不扣台美股國定假日：假日當天的盤中規則會誤判overdue（跟fetch_quotes_tw.py同一個既有簡化）",
@@ -1073,8 +1073,8 @@
     ],
     "note": "本機排程管線的新鮮度。判定看的是**產出檔內部的資料時間戳**（能取得的話），不是檔案修改時間——mtime 新鮮不代表資料新鮮，alpha.db 就是 mtime 天天更新但資料停在 2026-08-21。這份與 data/audit_report.json 的 local_task_health、scripts/pipeline_inventory.py 讀同一份登錄檔。",
     "status": "ok",
-    "status_checked_at": "2026-10-10T22:59:05.955856+00:00",
-    "status_age_hours": 3.9
+    "status_checked_at": "2026-10-11T02:00:17.380172+00:00",
+    "status_age_hours": 6.9
   },
   "adjustment_anomaly_warnings": {
     "n_warnings": 1953,
@@ -1484,26 +1484,26 @@
   "any_overdue": false,
   "updated_by": "scripts/check_local_schedule_heartbeat.py（local_schedule_watchdog.yml 每 30 分鐘）",
   "local_schedule_heartbeat": {
-    "checked_at": "2026-10-10T22:59:05.855425+00:00",
+    "checked_at": "2026-10-11T02:00:17.309339+00:00",
     "stall_threshold_minutes": 60,
     "track_stall_threshold_minutes": 360,
     "tracks": {
       "devqueue": {
-        "last_commit_sha": "d1c4c1d061748acbec308a45533f74f6b804b895",
-        "last_commit_at": "2026-10-10T22:46:03+00:00",
-        "minutes_since": 13.0,
+        "last_commit_sha": "356da4ecf1b4705f9f663698a1acf1a758e79611",
+        "last_commit_at": "2026-10-11T01:46:04+00:00",
+        "minutes_since": 14.2,
         "track_stalled": false
       },
       "marathon": {
         "last_commit_sha": "a4ebaeda9d3515b91cdce0fecd654ff639755eb7",
         "last_commit_at": "2026-10-10T22:05:33+00:00",
-        "minutes_since": 53.5,
+        "minutes_since": 234.7,
         "track_stalled": false
       },
       "hypothesis_queue": {
         "last_commit_sha": "ed54984867b7b9a52c8a6c3426821fbe52f1c882",
         "last_commit_at": "2026-10-10T22:06:09+00:00",
-        "minutes_since": 52.9,
+        "minutes_since": 234.1,
         "track_stalled": false
       }
     },
@@ -1515,10 +1515,10 @@
           "status": "OK",
           "last_reason": "GATED",
           "last_detail": "GATED/",
-          "last_cycle_id": "20261011-064602",
+          "last_cycle_id": "20261011-094602",
           "last_attempt_at": "2026-10-11T03:27:40+08:00",
           "last_ok_at": "2026-10-11T00:41:16+08:00",
-          "hours_since_last_attempt": 3.52
+          "hours_since_last_attempt": 6.54
         },
         "marathon": {
           "status": "OK",
@@ -1527,7 +1527,7 @@
           "last_cycle_id": "20261011-060502",
           "last_attempt_at": "2026-10-11T06:05:32+08:00",
           "last_ok_at": "2026-10-11T06:05:32+08:00",
-          "hours_since_last_attempt": 0.89
+          "hours_since_last_attempt": 3.91
         },
         "hypothesis_queue": {
           "status": "OK",
@@ -1536,17 +1536,17 @@
           "last_cycle_id": "2026-10-11 06:06:07",
           "last_attempt_at": "2026-10-11T06:06:08+08:00",
           "last_ok_at": "2026-10-11T06:06:08+08:00",
-          "hours_since_last_attempt": 0.88
+          "hours_since_last_attempt": 3.9
         }
       },
-      "checked_at": "2026-10-10T22:59:05.855425+00:00"
+      "checked_at": "2026-10-11T02:00:17.309339+00:00"
     },
     "ibkr_quotes": {
       "last_commit_sha": "41778a10b09b2b098cfc6579b8ad8dbe9f3c189b",
       "last_commit_at": "2026-10-10T00:11:37+00:00",
-      "minutes_since": 1367.5,
+      "minutes_since": 1548.7,
       "file_fetched_at": "2026-10-10T08:11:36.466727+08:00",
-      "file_minutes_since": 1367.5,
+      "file_minutes_since": 1548.7,
       "note": "只記錄不判定停擺——盤外時段與IBKR Gateway每週人工登入空窗都會讓這個數字變大，那是預期行為不是故障，見本檔案docstring。2026-10-01【先.六-三】起IBKR排程盤中最多每30分鐘才commit一次（commit洪水修法），所以minutes_since在盤中落在30分鐘內是正常；file_fetched_at是已commit的quotes_ibkr.json內的抓取時間，同樣只記錄、不得拿來當停擺判定（停擺判定只看三軌）"
     },
     "stalled": false,
