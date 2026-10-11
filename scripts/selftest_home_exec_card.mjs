@@ -11,7 +11,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const html = ["app.js", "app-shared.js", "app-market.js", "app-picks.js", "app-stock.js", "app-trade.js", "app-journal.js", "app-settings.js", "index.html"].filter(f => fs.existsSync(path.join(root, f))).map(f => fs.readFileSync(path.join(root, f), "utf8")).join(String.fromCharCode(10));
 const m = /\/\/ <auto-period-selftest>[^\n]*\n([\s\S]*?)\/\/ <\/auto-period-selftest>/.exec(html);
 if (!m) { console.log("FAIL 找不到 <auto-period-selftest> 標記段"); process.exit(1); }
-const api = new Function(m[1] + "\nreturn {autoPeriodSummary,autoPeriodBatchLabel};")();
+const api = new Function(m[1] + "\nreturn {autoPeriodSummary,autoPeriodBatchLabel,autoTrancheTimeline};")();
 
 const results = [];
 const check = (name, ok, detail = "") => { results.push(!!ok); console.log((ok ? "PASS " : "FAIL ") + name + (ok || !detail ? "" : "：" + detail)); };
@@ -54,6 +54,21 @@ check("未入金 → state=blocked、送出 0、原因白話含「尚未入金�
 // ⑤ 緊急停止＋拒單代碼
 v = api.autoPeriodSummary(st({ stopped: true }), { rows: [{ date: "2026-10-12", symbol: "0050", qty: 1000, filled_qty: 0, status: "REJECT", reason_codes: ["STOP_FLAG"], batch: "202610-T2" }] });
 check("緊急停止 → 原因含「緊急停止」與代碼白話", v.reasons.some(r => /緊急停止開關/.test(r)) && v.reasons.some(r => /被擋原因：緊急停止/.test(r)), JSON.stringify(v.reasons));
+
+// ⑥ 常備.開發-32 分批進度圖：next_tranche=2、T1 已有帳本 → T1 已完成、T2 下一期（日期取 next_run）、T3/T4 推估月底、M 之後
+let tl = api.autoTrancheTimeline(st({ next_run: { date: "2026-10-30", time: "09:05", reason: "month_end" } }), { rows: partialRows.filter(r => r.batch !== "202610-T2") });
+const S = tl.steps.map(x => x.key + ":" + x.state).join(",");
+check("進度圖 → T1 done／T2 next／T3,T4 later／M later", S === "T1:done,T2:next,T3:later,T4:later,M:later", S);
+check("進度圖 → T1 日期取帳本、T2 預計 10/30、T3 推估 2026/11 月底、T4 2026/12", tl.steps[0].when === "2026/10/08" && tl.steps[1].when === "預計 2026/10/30" && tl.steps[2].when === "預計 2026/11 月底" && tl.steps[3].when === "預計 2026/12 月底", tl.steps.map(x => x.when).join(" | "));
+// ⑦ 帳本已有 T2 批次 → T2 進行中；緊急停止 → 進行中標暫停
+tl = api.autoTrancheTimeline(st({ stopped: true }), { rows: partialRows });
+check("進度圖 → 帳本有 T2 批次時 T2=active，且停止中標 paused", tl.steps[1].state === "active" && tl.steps[1].paused && /緊急停止/.test(tl.pause), JSON.stringify(tl.steps[1]));
+// ⑧ T 期跑完（next_tranche=5）→ T1～T4 全 done、M 下一期且顯示已做次數；跨年推估不出錯；null 不拋錯
+tl = api.autoTrancheTimeline(st({ next_tranche: 5, next_run: { date: "2026-12-31", time: "09:05", reason: "month_end" } }), { rows: [{ date: "2026-11-30", batch: "202611-M", status: "FILLED" }] });
+check("進度圖 → T 期全 done、M=next、已做 1 次", tl.steps.slice(0, 4).every(x => x.state === "done") && tl.steps[4].state === "next" && /已做 1 次/.test(tl.steps[4].when), JSON.stringify(tl.steps[4]));
+tl = api.autoTrancheTimeline(st({ next_tranche: 1, next_run: { date: "2026-11-20", time: "09:05", reason: "first_tranche" } }), { rows: [] });
+check("進度圖 → 跨年推估 T4＝2027/02 月底、T1=next", tl.steps[0].state === "next" && tl.steps[3].when === "預計 2027/02 月底", tl.steps[3].when);
+check("進度圖 → 兩端點皆 null 不拋錯（預設 4 期＋M）", api.autoTrancheTimeline(null, null).steps.length === 5);
 
 const ok = results.every(Boolean);
 console.log(`\n${ok ? "全部通過" : "有 FAIL"}（${results.filter(Boolean).length}/${results.length}）`);

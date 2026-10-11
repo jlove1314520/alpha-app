@@ -2275,6 +2275,39 @@
       deviation:dev,deviation_note:dev.length?'':(la&&la.error?'無法計算權重：'+la.error:'尚無成交，沒有實際權重可比'),
       next:st?autoNextText(st):null,reasons:autoPeriodReasons(st,codes)};
   }
+  // 常備.開發-32：Bb-90 分批進度圖（純函式）。T1～T{tranche_total} 依引擎 state 的 next_tranche 判定（＜n 已完成、＝n 進行中或下一期、＞n 之後）；
+  // 進行中＝帳本已有該期批次，或下一次觸發原因是續跑／重跑；之後各期日期為推估（引擎每月只動一次：T1 首個交易日、其後每月最後一個交易日）。
+  // 月底模式（M）在 T 期跑完後每月一次，顯示已做幾次。緊急停止／流程驗證暫停時，進行中／下一期標「已暫停」。
+  function autoTrancheTimeline(st,lg){
+    const tt=Math.max(1,Math.min(24,Number(st&&st.tranche_total)||4));
+    const n=Math.max(1,Number(st&&st.next_tranche)||1);
+    const nr=st&&st.next_run,busy=!!(nr&&(nr.reason==='open_batch'||nr.reason==='retry_after_error'));
+    const pause=autoFreezeText(st)||(st&&st.stopped?'緊急停止中':'');
+    const by={},mYm=new Set();
+    ((lg&&lg.rows)||[]).forEach(r=>{
+      const m=/^(\d{4})(\d{2})-(T\d+|M)$/.exec(String(r&&r.batch||''));if(!m)return;
+      if(m[3]==='M')mYm.add(m[1]+m[2]);
+      const d=String(r.date||'');if(!by[m[3]]||d>by[m[3]])by[m[3]]=d;
+    });
+    const fmt=d=>String(d).replace(/-/g,'/');
+    const ymAdd=(iso,k)=>{const y=Number(String(iso).slice(0,4)),mo=Number(String(iso).slice(5,7))-1+k;return (y+Math.floor(mo/12))+'/'+String(mo%12+1).padStart(2,'0')};
+    const steps=[];
+    for(let k=1;k<=tt;k++){
+      const L='T'+k,d=by[L]||null;
+      const state=k<n?'done':k>n?'later':(d||busy?'active':'next');
+      let when;
+      if(d)when=(state==='done'?'':'送單 ')+fmt(d);
+      else if(state==='done')when='已完成';
+      else if(nr&&nr.date)when=k===n?'預計 '+fmt(nr.date):'預計 '+ymAdd(nr.date,k-n)+' 月底';
+      else when='日期待定';
+      steps.push({key:L,label:'第 '+k+' 期',state,when,paused:!!pause&&(state==='active'||state==='next')});
+    }
+    let ms='later',mw='第 '+tt+' 期後每月月底';
+    if(n>tt){ms=busy?'active':'next';mw=nr&&nr.date?'預計 '+fmt(nr.date):'日期待定'}
+    if(mYm.size)mw='已做 '+mYm.size+' 次 · '+mw;
+    steps.push({key:'M',label:'月底再平衡',state:ms,when:mw,paused:!!pause&&(ms==='active'||ms==='next')});
+    return {steps,tranche_total:tt,next_tranche:n,pause};
+  }
   // </auto-period-selftest>
   // 常備.開發-11：首頁真錢執行總覽卡（唯讀；兩個端點各自隔離，一個失敗另一個照畫）
   function renderHomeExec(st,lg,errs){
@@ -2291,7 +2324,31 @@
     if(st)L.push('下一期：'+esc(v.next));
     v.reasons.forEach(r=>L.push('<span style="color:var(--warn)">⚠ '+esc(r)+'</span>'));
     (errs||[]).forEach(e=>L.push('<span style="color:var(--ink-4)">'+esc(e)+'</span>'));
-    el.innerHTML=L.map(x=>'<div style="padding:2px 0">'+x+'</div>').join('')+'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">只能看，不能下單</div>';
+    el.innerHTML=L.map(x=>'<div style="padding:2px 0">'+x+'</div>').join('')+(st?renderTrancheTimeline(st,lg):'')+'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">只能看，不能下單</div>';
+  }
+  // 常備.開發-32：分批進度圖（橫向時間軸；失敗只降級成一行說明，不影響上面的本期摘要）
+  function renderTrancheTimeline(st,lg){
+    try{
+      const esc=_autoEsc,t=autoTrancheTimeline(st,lg);
+      const TAG={done:'已完成',active:'進行中',next:'下一期',later:'之後'};
+      const DOT={done:'background:var(--good);border-color:var(--good);color:#fff',active:'background:var(--accent);border-color:var(--accent);color:#fff',
+        next:'background:var(--surface);border-color:var(--accent);color:var(--accent)',later:'background:var(--surface);border-color:var(--hairline);color:var(--ink-4)'};
+      const cells=t.steps.map(s=>{
+        const tag=s.paused?'已暫停':TAG[s.state];
+        return '<div class="tranche-step" data-state="'+s.state+'" style="flex:1;min-width:58px;text-align:center;position:relative;z-index:1">'
+          +'<div style="width:20px;height:20px;margin:0 auto;border-radius:50%;border:2px solid;box-sizing:border-box;font-size:11px;line-height:16px;font-weight:700;'+DOT[s.state]+'">'+(s.state==='done'?'✓':s.key==='M'?'M':esc(s.key.slice(1)))+'</div>'
+          +'<div style="font-size:11px;margin-top:3px;color:var(--ink-2)">'+esc(s.label)+'</div>'
+          +'<div style="font-size:10px;font-weight:600;color:'+(s.paused?'var(--warn)':s.state==='later'?'var(--ink-4)':s.state==='done'?'var(--good)':'var(--accent)')+'">'+esc(tag)+'</div>'
+          +'<div style="font-size:10px;color:var(--ink-4)">'+esc(s.when)+'</div></div>';
+      }).join('');
+      return '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)">'
+        +'<div style="font-size:11px;color:var(--ink-3);margin-bottom:6px">分批進度（共 '+t.tranche_total+' 期，之後每月月底再平衡）</div>'
+        +'<div id="home-tranche-timeline" style="position:relative;display:flex;gap:4px;overflow-x:auto">'
+        +'<div style="position:absolute;left:29px;right:29px;top:10px;height:2px;background:var(--hairline);z-index:0"></div>'
+        +cells+'</div>'
+        +(t.pause?'<div style="font-size:10px;color:var(--warn);margin-top:4px">⚠ '+esc(t.pause)+'：時間軸只顯示排程位置，引擎目前不會送單</div>':'')
+        +'<div style="font-size:10px;color:var(--ink-4);margin-top:2px">「之後」各期日期為推估，以引擎實際觸發為準</div></div>';
+    }catch(e){console.warn('[renderTrancheTimeline]',e);recordGlobalError('renderTrancheTimeline',e);return '<div class="note" style="margin-top:6px">分批進度圖暫時畫不出來</div>'}
   }
   // 先.七十二-B6：設定頁「常用／進階」兩層（CSS 依 #scr-settings.ui-adv 決定顯示哪一層；卡片與載入函式不變）
   function uiSettingsLayer(layer){
@@ -3742,7 +3799,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1945';
+  const APP_VERSION='2026-10-11.2047';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
