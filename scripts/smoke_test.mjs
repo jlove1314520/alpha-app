@@ -3000,10 +3000,29 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { iaErrs.push(`測試本身出錯：${e.message || e}`); }
   record("93. 資訊架構：首頁順序＋離線一行、設定常用／進階、個股 4 分頁、市場「更多」（先.七十二-B）", iaErrs.length === 0, iaErrs.join("; "));
 
+  // 94.【2026-10-11 先.七十二-C8】390×844 逐頁首屏（捲到最上、底部導覽列以上）：.card 不得超過 3 張、說明文字（.note）不得超過 2 行。
+  // 與 scripts/ux_screens.mjs 同一套量法（該腳本另存截圖到 research/ux_shots/，不進 repo）。
+  const fsErrs = [];
+  let fsInfo = "";
+  try {
+    const { checkFirstScreens, MAX_CARDS } = await import("./ux_screens.mjs");
+    await page.setViewportSize({ width: 390, height: 844 });
+    const fsr = await checkFirstScreens(page, { settle: 1200 });
+    for (const [k, r] of Object.entries(fsr)) {
+      if (r.cards.length > MAX_CARDS) fsErrs.push(`${k} 首屏 ${r.cards.length} 張卡（${r.cards.join("／")}）`);
+      for (const n of r.longNotes) fsErrs.push(`${k} 說明超過 2 行：${n}`);
+    }
+    fsInfo = Object.entries(fsr).map(([k, r]) => `${k} ${r.cards.length}`).join("、");
+    await page.setViewportSize({ width: 393, height: 852 });
+    await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
+    await page.waitForTimeout(300);
+  } catch (e) { fsErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("94. 390×844 逐頁首屏 ≤3 張卡、首屏說明 ≤2 行（先.七十二-C8）", fsErrs.length === 0, fsErrs.join("; ") || "首屏卡數：" + fsInfo);
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
