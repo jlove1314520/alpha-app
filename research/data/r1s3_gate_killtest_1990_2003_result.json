@@ -1,0 +1,308 @@
+{
+ "generated_at": "2026-10-12T02:24:40+08:00",
+ "prereg": "docs/PREREG_R1S3_gate_killtest_1990_2003.md",
+ "prereg_sha256": "02cc8b96d7bc6cbc8d3f306787771c0ccfdbfeddcb7503ff1e272c13d75cadcf",
+ "prereg_trial_id": 435,
+ "period": {
+  "start": "1990-01-04",
+  "end": "2003-06-30",
+  "n_days": 3706
+ },
+ "data": {
+  "taiex": "TWSE FMTQIK 發行量加權股價指數（價格指數，不含息）",
+  "spread": "FRED BAA − GS10 月資料（m 月底只用到 m−1 月）",
+  "spread_months": 174
+ },
+ "assumptions": {
+  "cash_return": 0.0,
+  "financing_primary": 0.08,
+  "financing_sensitivity": 0.04,
+  "mgmt_2x": 0.01,
+  "sell_tax": 0.001,
+  "fee_each_side": 0.001425
+ },
+ "gate": {
+  "months": 162,
+  "months_open": 74,
+  "months_closed": 88
+ },
+ "buy_hold": {
+  "cagr": -0.04677166211848793,
+  "mdd": -0.7950860080638064,
+  "bear_segments": {
+   "1990": {
+    "ret": -0.5402323114942942,
+    "mdd": -0.7950860080638064
+   },
+   "1997-1998": {
+    "ret": -0.28923244904919887,
+    "mdd": -0.38208175675408484
+   },
+   "2000-2001": {
+    "ret": -0.43034349284599394,
+    "mdd": -0.6622042304600968
+   }
+  }
+ },
+ "dsr_V": {
+  "V_daily": 0.0011122440863922253,
+  "n_sharpes": 9,
+  "note": "V 取自 TRIALS_REGISTRY.jsonl dsr_inputs（僅有 Sharpe 記錄者，非全體；多為絕對報酬 Sharpe，非超額）"
+ },
+ "N_total": 437,
+ "trials": {
+  "R1-C@fin8%": {
+   "group": "R1-C",
+   "financing": 0.08,
+   "cagr": -0.09393700955748119,
+   "mdd": -0.9173471959304146,
+   "info": {
+    "switches": 20,
+    "months_open_at_month_end": 74,
+    "months": 162
+   },
+   "bear_segments": {
+    "1990": {
+     "ret": -0.7841614788402592,
+     "mdd": -0.9028703554763017
+    },
+    "1997-1998": {
+     "ret": -0.2175504228052052,
+     "mdd": -0.3414592786277266
+    },
+    "2000-2001": {
+     "ret": -0.32645315375013806,
+     "mdd": -0.5077750369247844
+    }
+   },
+   "criteria": {
+    "mdd_gt_-50%": false,
+    "cagr_ge_buy_hold": false
+   },
+   "pass": false,
+   "dsr_excess_vs_buy_hold": {
+    "V": {
+     "dsr": 2.508548924140541e-13,
+     "sr_observed": -0.01803932411652491,
+     "sr0_threshold": 0.10044478662402063,
+     "n_trials": 437,
+     "var_sr_trials": 0.0011122440863922253,
+     "n_obs": 3705,
+     "z": -7.224843618464948,
+     "freq_label": "每期"
+    },
+    "V×0.5": {
+     "dsr": 2.8032851151493787e-08,
+     "sr_observed": -0.01803932411652491,
+     "sr0_threshold": 0.0710251897566808,
+     "n_trials": 437,
+     "var_sr_trials": 0.0005561220431961126,
+     "n_obs": 3705,
+     "z": -5.430915425424328,
+     "freq_label": "每期"
+    },
+    "V×2": {
+     "dsr": 0.0,
+     "sr_observed": -0.01803932411652491,
+     "sr0_threshold": 0.1420503795133616,
+     "n_trials": 437,
+     "var_sr_trials": 0.0022244881727844505,
+     "n_obs": 3705,
+     "z": -9.761841198986449,
+     "freq_label": "每期"
+    }
+   },
+   "primary": true
+  },
+  "R1-C@fin4%": {
+   "group": "R1-C",
+   "financing": 0.04,
+   "cagr": -0.08553867280665373,
+   "mdd": -0.9144095070810778,
+   "info": {
+    "switches": 20,
+    "months_open_at_month_end": 74,
+    "months": 162
+   },
+   "bear_segments": {
+    "1990": {
+     "ret": -0.7812338434518882,
+     "mdd": -0.901854805491913
+    },
+    "1997-1998": {
+     "ret": -0.21307935577155324,
+     "mdd": -0.3391146515179224
+    },
+    "2000-2001": {
+     "ret": -0.3231404809389966,
+     "mdd": -0.5056713385896285
+    }
+   },
+   "criteria": {
+    "mdd_gt_-50%": false,
+    "cagr_ge_buy_hold": false
+   },
+   "pass": false,
+   "dsr_excess_vs_buy_hold": {
+    "V": {
+     "dsr": 1.4278578319704138e-12,
+     "sr_observed": -0.014144292628476609,
+     "sr0_threshold": 0.10044478662402063,
+     "n_trials": 437,
+     "var_sr_trials": 0.0011122440863922253,
+     "n_obs": 3705,
+     "z": -6.984647411281928,
+     "freq_label": "每期"
+    },
+    "V×0.5": {
+     "dsr": 1.043541604239806e-07,
+     "sr_observed": -0.014144292628476609,
+     "sr0_threshold": 0.0710251897566808,
+     "n_trials": 437,
+     "var_sr_trials": 0.0005561220431961126,
+     "n_obs": 3705,
+     "z": -5.191409238492047,
+     "freq_label": "每期"
+    },
+    "V×2": {
+     "dsr": 0.0,
+     "sr_observed": -0.014144292628476609,
+     "sr0_threshold": 0.1420503795133616,
+     "n_trials": 437,
+     "var_sr_trials": 0.0022244881727844505,
+     "n_obs": 3705,
+     "z": -9.520669155806525,
+     "freq_label": "每期"
+    }
+   },
+   "primary": false
+  },
+  "R1-A@fin8%": {
+   "group": "R1-A",
+   "financing": 0.08,
+   "cagr": -0.07177573142385629,
+   "mdd": -0.8676652641394779,
+   "info": {
+    "switches": 20,
+    "months_open_at_month_end": 74,
+    "months": 162
+   },
+   "bear_segments": {
+    "1990": {
+     "ret": -0.7015763255070147,
+     "mdd": -0.8668221912917673
+    },
+    "1997-1998": {
+     "ret": -0.24395883591662149,
+     "mdd": -0.35451836954738436
+    },
+    "2000-2001": {
+     "ret": -0.36479178066628937,
+     "mdd": -0.5737998646049773
+    }
+   },
+   "criteria": {
+    "mdd_gt_-50%": false,
+    "cagr_ge_buy_hold": false
+   },
+   "pass": false,
+   "dsr_excess_vs_buy_hold": {
+    "V": {
+     "dsr": 3.300137940698278e-13,
+     "sr_observed": -0.017435820062556815,
+     "sr0_threshold": 0.10044478662402063,
+     "n_trials": 437,
+     "var_sr_trials": 0.0011122440863922253,
+     "n_obs": 3705,
+     "z": -7.187469975849792,
+     "freq_label": "每期"
+    },
+    "V×0.5": {
+     "dsr": 3.4513605695618566e-08,
+     "sr_observed": -0.017435820062556815,
+     "sr0_threshold": 0.0710251897566808,
+     "n_trials": 437,
+     "var_sr_trials": 0.0005561220431961126,
+     "n_obs": 3705,
+     "z": -5.3936849324132385,
+     "freq_label": "每期"
+    },
+    "V×2": {
+     "dsr": 0.0,
+     "sr_observed": -0.017435820062556815,
+     "sr0_threshold": 0.1420503795133616,
+     "n_trials": 437,
+     "var_sr_trials": 0.0022244881727844505,
+     "n_obs": 3705,
+     "z": -9.724265112259776,
+     "freq_label": "每期"
+    }
+   },
+   "primary": false
+  },
+  "R1-A@fin4%": {
+   "group": "R1-A",
+   "financing": 0.04,
+   "cagr": -0.06663660150054573,
+   "mdd": -0.8660517971405687,
+   "info": {
+    "switches": 20,
+    "months_open_at_month_end": 74,
+    "months": 162
+   },
+   "bear_segments": {
+    "1990": {
+     "ret": -0.6992212023643221,
+     "mdd": -0.8660517971405687
+    },
+    "1997-1998": {
+     "ret": -0.24137052569053263,
+     "mdd": -0.3531571265053062
+    },
+    "2000-2001": {
+     "ret": -0.3629360543811976,
+     "mdd": -0.5727206384997838
+    }
+   },
+   "criteria": {
+    "mdd_gt_-50%": false,
+    "cagr_ge_buy_hold": false
+   },
+   "pass": false,
+   "dsr_excess_vs_buy_hold": {
+    "V": {
+     "dsr": 1.8672841051170508e-12,
+     "sr_observed": -0.01353349108847726,
+     "sr0_threshold": 0.10044478662402063,
+     "n_trials": 437,
+     "var_sr_trials": 0.0011122440863922253,
+     "n_obs": 3705,
+     "z": -6.946879762305549,
+     "freq_label": "每期"
+    },
+    "V×0.5": {
+     "dsr": 1.2764358880978932e-07,
+     "sr_observed": -0.01353349108847726,
+     "sr0_threshold": 0.0710251897566808,
+     "n_trials": 437,
+     "var_sr_trials": 0.0005561220431961126,
+     "n_obs": 3705,
+     "z": -5.1537801805726975,
+     "freq_label": "每期"
+    },
+    "V×2": {
+     "dsr": 0.0,
+     "sr_observed": -0.01353349108847726,
+     "sr0_threshold": 0.1420503795133616,
+     "n_trials": 437,
+     "var_sr_trials": 0.0022244881727844505,
+     "n_obs": 3705,
+     "z": -9.48270550947767,
+     "freq_label": "每期"
+    }
+   },
+   "primary": false
+  }
+ },
+ "verdict": "VIOLATES_SURVIVAL"
+}

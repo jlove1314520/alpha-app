@@ -125,8 +125,9 @@ export async function auditApp(page, baseUrl, glossary, { stockCode = "2330", us
   }
   for (const [key, code] of [["stock", stockCode], ["stock/us", usCode]]) {
     try {
-      await page.evaluate((c) => openStock(c), code);
-      await page.waitForTimeout(2500);
+      // 不等 openStock 的 promise（稽核只看畫面；冒煙實測偶發「promise was garbage collected」），啟動後固定等畫面穩定
+      await page.evaluate((c) => { Promise.resolve(openStock(c)).catch(e => console.warn("[audit openStock]", e)); }, code);
+      await page.waitForTimeout(3000);
       res[key] = await auditStates(page, glossary, "stock");
     } catch (e) { res[key] = { ...blank(), error: String(e) }; }
   }

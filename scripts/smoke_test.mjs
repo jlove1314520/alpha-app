@@ -3386,7 +3386,11 @@ async function runSmokeTest(baseUrl, headless = true) {
       const c = l.trim().replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map(x => x.trim());
       if (c.length >= 6 && /^\d+$/.test(c[0]) && /^\d{4}-\d{2}-\d{2}$/.test(c[1])) n++;
     }
-    if (ti.count !== ti.rows.length) trErrs.push(`count ${ti.count} ≠ rows ${ti.rows.length}`);
+    // 先.八十-13：count＝總 N（框架驗證列列出但不計入），必須等於 TRIALS_LEDGER.md 開頭「目前累積總數」
+    const counted = ti.rows.filter(r => r.counted !== false).length;
+    if (ti.count !== counted) trErrs.push(`count ${ti.count} ≠ 計入列數 ${counted}`);
+    const head = (led.join("\n").match(/目前累積總數（可統計檢定的試驗）：(\d+)/) || [])[1];
+    if (Number(head) !== ti.count) trErrs.push(`帳本開頭總數 ${head} ≠ 索引 count ${ti.count}（試驗總數不一致）`);
     if (ti.rows.length !== n) trErrs.push(`索引 ${ti.rows.length} 列 ≠ 帳本試驗列 ${n}`);
     if (ti.rows.some(r => !/^\d{4}-\d{2}-\d{2}$/.test(r.date))) trErrs.push("有非日期列混入（FDR 對照表排名列）");
     const keys = new Set(ti.rows.map(r => r.id + "|" + r.date + "|" + r.name));

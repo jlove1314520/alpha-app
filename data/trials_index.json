@@ -1,14 +1,29 @@
 {
- "generated_at": "2026-10-11T16:20:48+00:00",
+ "generated_at": "2026-10-11T18:26:24+00:00",
  "source": "research/TRIALS_LEDGER.md",
  "disclaimer": "研究紀錄，非投資建議",
- "count": 436,
- "count_rule": "與 research/selection_bias_ledger.py 總 N 同一套列認定（第一欄編號、第二欄日期）",
+ "count": 437,
+ "rows_listed": 438,
+ "count_rule": "count＝總 N（與 TRIALS_LEDGER.md 開頭「目前累積總數」、SELECTION_BIAS_LEDGER.md 同一個數字；框架驗證列列出但不計入）",
  "dup_ids": [
   94,
   149
  ],
  "rows": [
+  {
+   "id": 436,
+   "date": "2026-10-12",
+   "track": "TW",
+   "name": "r1s3_gate_killtest_1990_2003_result",
+   "verdict": "VIOLATES_SURVIVAL"
+  },
+  {
+   "id": 435,
+   "date": "2026-10-12",
+   "track": "TW",
+   "name": "r1s3_gate_killtest_1990_2003_prereg",
+   "verdict": "未結案"
+  },
   {
    "id": 434,
    "date": "2026-10-11",
@@ -546,7 +561,8 @@
    "date": "2026-09-23",
    "track": "TW",
    "name": "concentrated_backtest_framework_check",
-   "verdict": "FRAMEWORK_CHECK_FAILED"
+   "verdict": "FRAMEWORK_CHECK_FAILED",
+   "counted": false
   },
   {
    "id": 357,

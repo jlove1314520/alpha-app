@@ -42,18 +42,27 @@ def parse_rows():
     return rows
 
 
+NOT_COUNTED = ("FRAMEWORK_CHECK", "FRAMEWORK_CHECK_FAILED")  # 與 selection_bias_ledger.main() 同：框架驗證列不計入總 N
+
+
 def ledger_total():
+    """回傳 (帳本試驗列數, 總 N)。總 N 與 selection_bias_ledger.main() 同一條規則（排除框架驗證列），
+    也就是 TRIALS_LEDGER.md 開頭「目前累積總數」那個數字（先.八十-13：試驗總數統一用同一個數字）。"""
     sys.path.insert(0, str(ROOT / "research"))
     import selection_bias_ledger as S
-    return len(S.parse())
+    rows = S.parse()
+    return len(rows), sum(1 for r in rows if r["verdict"] not in NOT_COUNTED)
 
 
 def main():
     rows = parse_rows()
-    n_ref = ledger_total()
-    if len(rows) != n_ref:
-        print(f"[ERROR] trials_index 列數 {len(rows)} ≠ selection_bias_ledger 總 N {n_ref}，不寫檔")
+    n_rows, n_ref = ledger_total()
+    if len(rows) != n_rows:
+        print(f"[ERROR] trials_index 列數 {len(rows)} ≠ 帳本試驗列數 {n_rows}，不寫檔")
         return 1
+    for r in rows:
+        if any(k in r["verdict"] for k in NOT_COUNTED):
+            r["counted"] = False
     dup = {k for k, v in Counter(r["id"] for r in rows).items() if v > 1}
     for r in rows:
         if r["id"] in dup:
@@ -63,13 +72,14 @@ def main():
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "source": "research/TRIALS_LEDGER.md",
         "disclaimer": "研究紀錄，非投資建議",
-        "count": len(rows),
-        "count_rule": "與 research/selection_bias_ledger.py 總 N 同一套列認定（第一欄編號、第二欄日期）",
+        "count": n_ref,
+        "rows_listed": len(rows),
+        "count_rule": "count＝總 N（與 TRIALS_LEDGER.md 開頭「目前累積總數」、SELECTION_BIAS_LEDGER.md 同一個數字；框架驗證列列出但不計入）",
         "dup_ids": sorted(dup),
         "rows": rows,
     }
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"trials_index: {len(rows)} rows（＝總 N {n_ref}；共用編號 {sorted(dup)}）")
+    print(f"trials_index: 列出 {len(rows)} 列、總 N {n_ref}（框架驗證列 {len(rows) - n_ref} 列不計入；共用編號 {sorted(dup)}）")
     return 0
 
 
