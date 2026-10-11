@@ -3302,6 +3302,32 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { sgErrs.push(`測試本身出錯：${e.message || e}`); }
   record("100. 設定頁「資料檔 schema 守門」卡：被攔下的檔與原因列出、尚未產生不拋錯（常備.開發-28）", sgErrs.length === 0, sgErrs.join("; "));
 
+  // 101.【2026-10-12 先.八十-1】漲跌正負號：MI_INDEX「漲跌百分比」本身帶號，舊程式再乘一次「漲跌」欄的 -1，跌變漲。
+  // 加權（與櫃買）change_pct 的正負號必須等於走勢線方向（收盤＝走勢線最後一點時比最後兩點，否則比收盤與最後一點）；類股不得全為非負。
+  const sgnErrs = [];
+  try {
+    const mt = JSON.parse((await import("node:fs")).readFileSync("data/market_tw.json", "utf8"));
+    const sg = v => (v > 0 ? 1 : v < 0 ? -1 : 0);
+    const dirOf = (close, sp) => {
+      if (!Array.isArray(sp) || sp.length < 2 || close == null) return null;
+      const last = sp[sp.length - 1];
+      return Math.abs(close - last) < 1 ? sg(last - sp[sp.length - 2]) : sg(close - last);
+    };
+    const tx = mt.taiex || {};
+    const d1 = dirOf(tx.close, tx.sparkline);
+    if (tx.change_pct == null || d1 == null) sgnErrs.push("加權缺 change_pct 或走勢線");
+    else if (sg(tx.change_pct) !== d1) sgnErrs.push(`加權 change_pct ${tx.change_pct} 與走勢線方向 ${d1} 不一致`);
+    const tp = mt.tpex;
+    if (tp && tp.change_pct != null && Array.isArray(tp.sparkline)) {
+      const d2 = dirOf(tp.close, tp.sparkline);
+      if (d2 != null && sg(tp.change_pct) !== d2) sgnErrs.push(`櫃買 change_pct ${tp.change_pct} 與走勢線方向 ${d2} 不一致`);
+    }
+    const secs = (mt.sectors || []).filter(x => x.change_pct != null);
+    if (secs.length < 10) sgnErrs.push(`類股筆數過少：${secs.length}`);
+    else if (secs.every(x => x.change_pct >= 0)) sgnErrs.push(`類股 ${secs.length} 筆全部非負（正負號疑似又被吃掉）`);
+  } catch (e) { sgnErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("101. 大盤／類股漲跌正負號：加權與櫃買 change_pct 正負＝走勢線方向、類股不得全為非負（先.八十-1）", sgnErrs.length === 0, sgnErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3330,7 +3356,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

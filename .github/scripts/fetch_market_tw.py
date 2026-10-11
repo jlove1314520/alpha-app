@@ -202,10 +202,21 @@ def fetch_mi_index() -> tuple[dict | None, list[dict]]:
         name = row.get("指數")
         close = _num(row.get("收盤指數"))
         chg_pct = _num(row.get("漲跌百分比"))
-        sign = -1 if row.get("漲跌") == "-" else 1
+        # 2026-10-12 先.八十-1 修正：MI_INDEX 的「漲跌百分比」本身已帶正負號（實測 -0.99），舊寫法再乘一次
+        # 「漲跌」欄的 -1，跌變漲（加權 -0.99% 顯示成 +0.99%、類股全部變非負）。改為：正負號只取「漲跌」欄
+        # （'+'／'-'），幅度取百分比絕對值；漲跌欄缺漏時才退回百分比本身的正負號。
+        mark = (row.get("漲跌") or "").strip()
+        if chg_pct is None:
+            signed = None
+        elif mark == "-":
+            signed = -abs(chg_pct)
+        elif mark == "+":
+            signed = abs(chg_pct)
+        else:
+            signed = chg_pct
         if close is None or not name:
             continue
-        item = {"name": name, "close": close, "change_pct": (chg_pct * sign) if chg_pct is not None else None}
+        item = {"name": name, "close": close, "change_pct": signed}
         if name in HEADLINE_NAMES:
             headline = item
         elif name.endswith("類指數"):

@@ -19263,7 +19263,7 @@ C. 驗收
 
 心跳：每完成一項把對應行標 - [x]（部分完成 [~]），並在 research/PROGRESS_HEARTBEAT.jsonl append 一行（source=interactive, item=先.八十-N）；每項 commit＋push、PROGRESS 附證據、smoke 全綠。
 
-- [ ] **先.八十-1 fetch_market_tw 漲跌正負號修正＋重抓 market_tw／daily_brief＋smoke 正負號檢查**（互動視窗執行）
+- [x] **先.八十-1 fetch_market_tw 漲跌正負號修正＋重抓 market_tw／daily_brief＋smoke 正負號檢查**（互動視窗執行）〔根因：MI_INDEX 漲跌百分比已帶號又乘 -1；改取漲跌欄正負號＋百分比絕對值；market_tw.json 加權 -0.99%、類股 19/37 為負；daily_brief 重產；smoke #101；100 PASS／0 FAIL〕
 - [ ] **先.八十-2 電腦離線統一一行狀態；Failed to fetch 不計程式錯誤、不顯示英文**（互動視窗執行）
 - [ ] **先.八十-3 loadTrials 被註解吃掉修正＋trials_index.json 解析修正（465 列對齊帳本 435 筆）**（互動視窗執行）
 - [ ] **先.八十-4 app-shared.js 篩選籤改切換 class，修重疊**（互動視窗執行）
