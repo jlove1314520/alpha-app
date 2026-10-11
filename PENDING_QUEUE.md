@@ -18770,7 +18770,7 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 - [!] **常備.開發-因子類-B20 未來性濾網 (c) 類因子（質性研判）**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B20 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B20）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕　**[!] BLOCKED 2026-10-11 DevQueue 20261011-143102（規格＋登記已完成，研判執行管道待總司令選案）**：事前登記規格 `research/B20_QUALITATIVE_AI_SPEC.md`（d8701638b，任何研判樣本前 commit）；TRIALS_LEDGER #433 `b20_qualitative_ai_forward_v1` 未結案，逐關：第10關＝只能前向觀察（語言模型權重內含知識截止日前的結果＝前視污染，無法用切分擋掉；素材亦無歷史版本）；GATE_SEQUENCE 1~9＝未能執行（n=0）；天條一＝不適用（標的層研判紀錄）；跨市場＝暫不開跑（B18 #431 已 FAIL）；第11關自由參數 2 個通過。selection_bias_ledger 重算 N=434。素材查證七來源：年報/法說 PDF（doc.twse robots Disallow）、MOPS 查詢頁（Disallow）、openapi 368 端點（無營業比重）→不可用；news_evidence.json（2,459 篇有題材引句＋URL）、events.json/signal_ledger.json→可用；官網產品頁→需逐站查 robots 的子專案，本版不用；supply_chain.json→不存在。**阻塞原因**：全 repo 無任何排程呼叫語言模型 API（grep .github/ scripts/ research/*.py）；雲端 API 要金鑰＋付費＝停下白名單 1、2；本機 DevQueue 每週研判＝新增排程＝需提案核准。**解除條件**：總司令在規格第 3 節選 A（本機 DevQueue 每週，不新增費用，建議）／B（Actions＋API 付費）／C（只留誠實空狀態）。選 A/B 後下一步：實作 `data/qualitative_ledger.json` 寫入器＋T+60/T+120 只回填，判準照規格 4.2 不得改。[自行裁量]：①依條目通則「依賴項未完成→標 [!]」而非 [x]②主組門檻「≥2 題答是」、持有期 T+60（質性論點週期較長，B19 用 T+20）③「證據不足」列為合法答案且理由須對得上 inputs 出處，對不上整筆作廢，防模型用背景知識補（即前視污染）。冒煙見 commit 訊息。
 - [!] **常備.開發-因子類-B21 Reddit 社群訊號抓取（合規，依賴 B19）**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B21 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B21）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕　**⛔ 自走中止（2026-10-11 15:31）**：趕工迴圈：連續 2 次沒有完成，換下一項；需要看一眼再決定怎麼走
 - [!] **常備.開發-因子類-B22 校準迴圈（依賴 B19＋B21 樣本）**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B22 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B22）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕　**⛔ 自走中止（2026-10-11 16:01）**：趕工迴圈：連續 2 次沒有完成，換下一項；需要看一眼再決定怎麼走
-- [ ] **常備.開發-因子類-B30 客戶集中度／供應鏈**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B30 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B30）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕
+- [x] **常備.開發-因子類-B30 客戶集中度／供應鏈**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B30 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B30）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕　**✅ 2026-10-11 DevQueue 20261011-163102 完成**：試驗 #434 `b30_us_customer_concentration_v1` FAIL（首個 FAIL＝GATE_SEQUENCE 第 2 關隨機控制組：TRAIN 高集中組 n=866 平均超額 +0.99%，低於揭露者全體 +2.93%，百分位 19.5；VAL n=908 −6.32%）。資料源查證：台股量化「前五大客戶%」仍無免費結構化來源（年報/MOPS robots Disallow、TWSE openapi 143 端點無、ic.tpex.org.tw 只有質性且無歷史→依 BACKLOG 原文併入 B19）；美股找到 SEC DERA Notes Data Sets 帶維度 ConcentrationRiskPercentage(1)（companyfacts/frames 會剝掉維度，不可用）。事前登記規格 `research/B30_CUSTOMER_CONCENTRATION_SPEC.md`（cf1ede586，執行前 commit）→ `research/b30_sec_concentration_extract.py` 回填 2009q1～2025 共 68+ 期（每期約 0.5GB、抽完即刪，CSV 在 gitignore 的 research/data/）→ `research/b30_customer_concentration_gate.py` → `research/b30_customer_concentration_gate_result.json`；TRIALS_LEDGER #434 含逐關數字；STRATEGY_GRAVEYARD 已記；selection_bias_ledger 重算 N=435。天條一＝前關未過不執行；跨市場複製＝台股無資料無法執行；第11關自由參數 2 個通過。[自行裁量]：①BACKLOG 原文寫台股量化無來源，改以美股為主市場（條目做法未限市場）②舊版 us-gaap 用 ConcentrationRiskPercentage（無 1），抽取時兩個 tag 全留、分類規則寫死在規格③failed_gates 只填首個 FAIL 的 gate2，其後各關列為診斷（同 B18）。
 - [ ] **常備.開發-因子類-B31 財報／filing 研判區塊**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B31 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B31）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕
 - [ ] **常備.開發-因子類-B32 擁擠度／情緒反指標監測**〔先.六十七 凍結.二解除後依序登記為新試驗；做法：照 BACKLOG B32 規格，事前登記（trial_registry）→ 照 GATE_SEQUENCE 逐關走（N 累計、控制組、跨市場複製、天條一緩衝、參數上限閘門全部照舊）；資料源未接或依賴項未完成時，只做資料源查證與規格，寫明缺口後標 [!]；驗收：TRIALS_LEDGER 有登記列與每關判定〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-因子類-B32）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十七 寫入〕
 - [x] **常備.開發-23 週一首批復盤頁**〔做法：13:40 結算後自動產出 research/data/auto_trading/LIVE/review_YYYYMMDD.json（送單、成交、均價 vs 參考價滑價、零股驗證結果、偏離、下期日期），App 日誌頁顯示並推播摘要（只寫百分比）〕〔心跳：本行標 - [x]＋research/PROGRESS_HEARTBEAT.jsonl append 一行（track=devqueue, round=常備.開發-23）；每完成一項推播；通則：不得切換模式、不得觸發真錢委託；App 改動 node scripts/smoke_test.mjs 全綠才 commit；2026-10-11 先.六十五 寫入〕〔2026-10-11 DevQueue 20261011-113101 完成：新增 research/auto_trading_review.py（write_review／build_review／latest_review），auto_rebalance_bb90.py 只加兩處——SUBMITTED 紀錄多記 ref_price（平盤參考價，不影響送單）、--settle 收尾（含「沒有待結算」分支）在 LIVE 族呼叫 _settle_review()，失敗只記警告；產出 LIVE/review_YYYYMMDD.json：送單逐筆（成交/委託、均價、參考價、滑價%、對限價%、最終狀態）、當日拒單代碼、零股驗證（MATCH／MISMATCH／MISSING／NO_ODD）、偏離（status.deviation 最大 pp）、下期（auto_ledger_view.next_run）；推播只寫成交率／滑價／零股驗證／最大偏離（百分比）＋下期日期，首次產生才推、重產不重推。auto_ledger_view.ledger_view 加 review 欄位（去掉冪等鍵）；App 日誌頁新增「盤後復盤」卡。證據：scripts/selftest_auto_trading_review.py 19/19；selftest_auto_rebalance 全過（順手修既有破損：-20 拆檔後休市表在 app.js，測試改讀 index.html＋app.js，比對規則不變）；selftest_auto_ledger_view 22/22；冒煙 85 項全過（新增第 86 項）；真帳本 10/08 乾跑：0 筆送單、拒單 INSUFFICIENT_CASH、下期 2026-10-12 首批。[自行裁量] ①只有拒單、沒有送單的日子仍產檔但不推播（避免現金不足期間每天推同一則）②推播 kind=complete（可在通知偏好關閉）③舊帳本無 ref_price 時以前一交易日收盤當後備並標 *。待真實首批成交後才算實證（目前帳本 0 筆成交）。〕
@@ -19103,9 +19103,70 @@ C. 驗收
 心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
 ```
 
-- [ ] **先.七十三-1 分頁順序：全部疊加第一且預設，其後自動投資、模擬 A～E、選股榜單**（互動視窗執行）
-- [ ] **先.七十三-2 未開始策略分頁變灰、只顯示一行開始日；疊圖不畫、圖下列「即將加入」**（互動視窗執行）
-- [ ] **先.七十三-3 疊圖圖例（名稱＋顏色＋跟 0050 差幾點，0050 灰色第一）＋按住顯示該日各線數值**（互動視窗執行）
-- [ ] **先.七十三-4 紅色橫幅第一行白話結論（含下次日期），技術數字收進「看細節」；白話轉換表補入金這條**（互動視窗執行）
-- [ ] **先.七十三-5 冒煙：預設疊圖、未開始分頁無空白 svg、圖例數＝有資料線數＋1**（互動視窗執行）
-- [ ] **先.七十三-6 冒煙全綠 commit、推播「圖已更新，請重開 App」**（互動視窗執行）
+- [x] **先.七十三-1 分頁順序：全部疊加第一且預設，其後自動投資、模擬 A～E、選股榜單**（互動視窗執行）〔2026-10-11 完成（d46e3dffd）：分頁 全部疊加（預設、第一）→自動投資→模擬 A→B→C→D→E→選股榜單；紙.一b→模擬 D、紙.二→模擬 E（依開始日，名稱暫定）〕
+- [x] **先.七十三-2 未開始策略分頁變灰、只顯示一行開始日；疊圖不畫、圖下列「即將加入」**（互動視窗執行）〔2026-10-11 完成（d46e3dffd）：未開始分頁變灰，點進去只顯示「X 月 X 日開始，現在還沒有資料」不畫圖；疊圖只畫有資料的線，圖下「即將加入」清單〕
+- [x] **先.七十三-3 疊圖圖例（名稱＋顏色＋跟 0050 差幾點，0050 灰色第一）＋按住顯示該日各線數值**（互動視窗執行）〔2026-10-11 完成（d46e3dffd）：圖例 0050 灰色第一＋各線顏色／名稱／跟 0050 差幾點；按住（或滑鼠移入）顯示該日各線數值與參考線〕
+- [x] **先.七十三-4 紅色橫幅第一行白話結論（含下次日期），技術數字收進「看細節」；白話轉換表補入金這條**（互動視窗執行）〔2026-10-11 完成（d46e3dffd）：入金不足第一行「還沒入金，週X不會下單」（週X＝下次排程日），補「餘額查詢失敗」規則；數字只在「看細節」〕
+- [x] **先.七十三-5 冒煙：預設疊圖、未開始分頁無空白 svg、圖例數＝有資料線數＋1**（互動視窗執行）〔2026-10-11 完成（d46e3dffd）：冒煙 95＋92 擴充；冒煙 94 項全部通過〕
+- [x] **先.七十三-6 冒煙全綠 commit、推播「圖已更新，請重開 App」**（互動視窗執行）〔2026-10-11 完成：Pages 已部署 alpha-v2026-10-11.1716 後推播「圖已更新，請重開 App」ok=1 failed=0；附註：冒煙期間發現 data/margin_maintenance.json 有一筆本機 16:01 不明來源寫入的 10-11 紀錄（缺 ratio_pct_ck，造成冒煙 58 失敗），未提交的機器寫檔，已還原為 HEAD 版本〕
+
+---
+
+# 2026-10-11【先.七十四：紙.三／紙.四／紙.一b 提前於 10/12 開始】（總司令裁示原文，動工前先寫入）
+
+```
+【先.七十四】紙.三、紙.四、紙.一b 提前於 10/12 開始（總司令裁示；不碰真錢自動交易）
+1. 紙.三（S3-C6）、紙.四（R1-C 主、R1-A 並列）、紙.一b 的起始日改為 2026-10-12，以當日收盤價建倉；閘門用 2026-09-30 的狀態（目前 open），10/31 起照原規則每月底更新並再平衡。第一期為 10/12～10/31 的部分期，報表標明。
+2. 不回填 10/12 以前的任何數字；strategy_curves.json 各線 start_date 同步改為 2026-10-12，App 「跟 0050 比」卡週一收盤後即有這三條線。
+3. docs/LEVERAGE_SAFETY_PLAN.md 的 6 個月時鐘改為自 2026-10-12 起算（最早 2027-04-12 可提真錢提案），其餘前提不變。
+4. 紙.二 維持 11/16（資料預熱未完成，理由寫在卡片上）。
+5. 相關推播：週一 14:00 建倉完成一則，列各線建倉價與權重（只寫百分比）。
+6. selftest：部分期的再平衡與月底閘門更新；smoke 全綠 commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [x] **先.七十四-1～6 提前於 10/12 開始**〔2026-10-11 由【先.七十五】取代（同日稍後裁示改為 10/08 立即建倉），本條不執行〕
+
+---
+
+# 2026-10-11【先.七十五：紙.三、紙.四、紙.一b 立即建倉（取代先.七十四）】（總司令裁示原文，動工前先寫入）
+
+```
+【先.七十五】紙.三、紙.四、紙.一b 立即建倉（總司令 10/11 裁示原文：「我要現在立刻馬上跑」；取代先.七十四；不碰真錢自動交易）
+1. 立即執行：紙.三（S3-C6）、紙.四（R1-C 主、R1-A 並列）、紙.一b 全部以 2026-10-08 收盤價建倉，起始日 2026-10-08，虛擬資金照各自原設定；閘門用 2026-09-30 狀態（open）。不回填 10/8 以前任何數字。
+2. 立刻重算 data/strategy_curves.json 並 commit，App「跟 0050 比」卡今晚就要看到這三條線（起點 100，週一收盤後開始變動）；先.七十三 的分頁順序與圖例一併完成。
+3. 月底再平衡與閘門更新照原規則（10/31 第一次），第一期為 10/8～10/31 的部分期，報表標明。
+4. docs/LEVERAGE_SAFETY_PLAN.md 的 6 個月時鐘自 2026-10-08 起算（最早 2027-04-08 可提真錢提案）。
+5. 紙.二 維持 11/16，卡片寫明原因「選股資料還在預熱」。
+6. 建倉完成立刻推播一則，列三條線的建倉權重與起始日；smoke 全綠 commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.七十五-1 三條紙上追蹤以 2026-10-08 收盤價建倉（R1-C 主、R1-A 並列），閘門用 09-30 狀態**（互動視窗執行）
+- [ ] **先.七十五-2 重算 strategy_curves.json 並 commit，App 今晚看到三條線（起點 100）**（互動視窗執行）
+- [ ] **先.七十五-3 月底再平衡與閘門更新照原規則（10/31 第一次），第一期部分期標明**（互動視窗執行）
+- [ ] **先.七十五-4 LEVERAGE_SAFETY_PLAN 6 個月時鐘自 2026-10-08 起算**（互動視窗執行）
+- [ ] **先.七十五-5 紙.二 維持 11/16，卡片寫明「選股資料還在預熱」**（互動視窗執行）
+- [ ] **先.七十五-6 建倉完成立刻推播（權重與起始日）；冒煙全綠 commit 後回報**（互動視窗執行）
+
+---
+
+# 2026-10-11【先.七十六：「跟 0050 比」加入歷史段】（總司令裁示原文，動工前先寫入）
+
+```
+【先.七十六】「跟 0050 比」加入歷史段（總司令裁示；不碰真錢自動交易；不新開任何試驗、不重跑樣本外）
+1. 每條策略線拆三段同圖顯示：回測段（2003-07～2024-12，虛線，讀既有結果檔，不重算）、樣本外段（2025-01～2026-09-30，點線，讀 #423／#425、#427／#428 既有結果，不重跑）、紙上段（2026-10-08 起，實線）。0050 全程灰線。沒有某段的策略（例如三榜、紙.一）只畫有的段。
+2. 圖上固定三個標籤：「回測＝用來挑策略的資料」「樣本外＝只考過一次」「紙上＝今天起才算數」。預設顯示近 3 年，可切換 1 年／3 年／全部。
+3. 指標列分段顯示：回測年化與最大跌幅、樣本外累計差距、紙上累計差距；紙上段 <60 交易日維持「尚不足以判斷」。
+4. 資料來源：research/data 既有的 r1_0050_credit_gate_result.json、crisis_gate_leveraged_bb90_result.json、bb90_oos_2025_result.json、s3c6_oos_2025_result.json、核心配置 #418 結果；只讀、不改、不重算。產生 data/strategy_history.json（納入 git add 清單，十節）。
+5. 冒煙新增：歷史段與紙上段不得重疊；歷史段年化數字必須等於原結果檔（±0.05pp）。
+6. 與先.七十五 一起 commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.七十六-1 回測段（虛線）／樣本外段（點線）／紙上段（實線）同圖，0050 全程灰線，沒有的段不畫**（互動視窗執行）
+- [ ] **先.七十六-2 三個固定標籤＋預設近 3 年、可切換 1 年／3 年／全部**（互動視窗執行）
+- [ ] **先.七十六-3 指標列分段：回測年化與最大跌幅、樣本外累計差距、紙上累計差距**（互動視窗執行）
+- [ ] **先.七十六-4 只讀既有結果檔產生 data/strategy_history.json（進 git add 清單）**（互動視窗執行）
+- [ ] **先.七十六-5 冒煙：歷史段與紙上段不重疊、歷史年化＝原結果檔 ±0.05pp**（互動視窗執行）
+- [ ] **先.七十六-6 與先.七十五 一起 commit 後回報**（互動視窗執行）
