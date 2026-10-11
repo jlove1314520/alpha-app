@@ -1085,6 +1085,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">更新：<b id="errsum-tm">--:--</b>。App 發生的程式錯誤會自動去識別化後送到你的電腦累積（每分鐘一次，離線時先存在手機上），每天彙總一次；這支手機尚未送出：<b id="errsum-pending">0</b> 筆。</div>
     </div>
 
+    <!-- 常備.開發-30（2026-10-11）：永豐 API 公告卡（本機）。讀本機 /sinopac/notices（token 必檢），
+         來源是 telegram_reader 每日摘要裡「維護／版本／停機」關鍵句，只顯示截斷的一句，不轉載整則原文、不進 repo。 -->
+    <div class="card" id="sjnote-card">
+      <h3>永豐公告 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'sjnote-tm',async()=>{await loadSinopacNotices()})">重新整理</span></h3>
+      <div class="note" id="sjnote-status">最近 5 則維護／版本／停機訊息，連上電腦才看得到</div>
+      <div id="sjnote-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">更新：<b id="sjnote-tm">--:--</b>。來源：永豐 API 官方 Telegram 群組的每日摘要（只讀擷取，資料只在你的電腦）。標「一般」的是群組成員發言、不是官方公告，僅供留意。</div>
+    </div>
+
 
 
     <!-- 常備.開發-18（2026-10-11）：自選股到價與事件推播。規則存本機伺服器（/alerts/rules），

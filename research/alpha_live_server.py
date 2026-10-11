@@ -1258,6 +1258,20 @@ async def get_errors_summary(x_alpha_local_token: str | None = Header(default=No
     return {"ok": True, **doc}
 
 
+# 常備.開發-30（2026-10-11）：永豐 API 公告卡。唯讀，token 必檢；即時讀 repo 外的 telegram_reader 每日 digest，
+# 只回「維護／版本／停機」關鍵句（截斷，不轉載整則原文），最近 5 則。邏輯在 research/sinopac_notices.py。
+@app.get("/sinopac/notices")
+async def get_sinopac_notices(x_alpha_local_token: str | None = Header(default=None)):
+    _check_token(x_alpha_local_token)
+    import sinopac_notices as _sn
+    try:
+        doc = await asyncio.to_thread(_sn.recent_notices, 5)
+    except Exception as e:  # 讀 digest 失敗只降級成空清單＋原因，不影響其他端點
+        print(f"[warn] 永豐公告讀取失敗：{type(e).__name__}", flush=True)
+        return {"ok": True, "items": [], "available": False, "reason": f"讀取失敗：{type(e).__name__}"}
+    return {"ok": True, **doc}
+
+
 AUTO_TRADING_DIR = Path(os.environ.get("ALPHA_AUTO_TRADING_DIR")
                         or (Path(__file__).parent / "data" / "auto_trading"))
 

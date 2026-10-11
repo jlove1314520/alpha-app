@@ -169,6 +169,22 @@
     _safeSync('renderLiveStatus',renderLiveStatus);  // 2026-09-03深夜 乙.4
     _safeAsync('loadTrials',loadTrials);  // 常備.開發-33 研究透明度，獨立包起來（常備.開發-29 順手修：原本被併進上一行註解裡，從未執行）
     _safeAsync('loadErrSummary',()=>loadErrSummary(false));  // 常備.開發-29 App 錯誤回報，同樣獨立
+    _safeAsync('loadSinopacNotices',loadSinopacNotices);  // 常備.開發-30 永豐 API 公告卡，同樣獨立
+  }
+  // 常備.開發-30：永豐 API 公告（本機 /sinopac/notices，token 必檢；只有截斷的關鍵句）
+  async function loadSinopacNotices(){
+    if(!LIVE.configured||!LIVE.url){setTxt('sjnote-status','需連線本機伺服器才看得到');return}
+    try{
+      const r=await liveFetch('/sinopac/notices',6000);
+      if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器是舊版，需重啟）':''));
+      const d=await r.json();
+      const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const items=Array.isArray(d.items)?d.items:[];
+      setTxt('sjnote-status',!d.available?(d.reason||'沒有資料'):(items.length?'最近 '+items.length+' 則（摘要最新：'+(d.latest_digest||'--')+'）':'近 '+(d.scanned_days||0)+' 天沒有維護／版本／停機相關訊息'));
+      const box=document.getElementById('sjnote-list');
+      if(box)box.innerHTML=items.map(x=>`<div class="f" style="align-items:flex-start"><span style="white-space:nowrap">${esc(String(x.date).slice(5))} ${esc(x.time)}</span><b style="font-weight:400;text-align:right">${esc(x.sentence)}<span style="color:var(--ink-3)">　${esc(x.category)}·${esc(x.role)}</span></b></div>`).join('');
+      setTxt('sjnote-tm',new Date().toTimeString().slice(0,5));
+    }catch(e){console.warn('[loadSinopacNotices]',e);recordGlobalError('loadSinopacNotices',e);setTxt('sjnote-status','讀取失敗：'+(e&&e.message||e))}
   }
   // 常備.開發-29：近 7 日 App 錯誤數（本機 /errors/summary，token 必檢；只有筆數與函式名稱）
   async function loadErrSummary(flush){
