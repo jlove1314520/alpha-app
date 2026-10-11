@@ -19036,3 +19036,23 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 - [x] **先.七十-4 mem_guard.py 改讀可用記憶體（Available），門檻 4.5GB；清完後重跑常備.開發-6**（互動視窗執行）〔2026-10-11 完成（b94f3a937）：查證 mem_guard 本來就讀 Available（GlobalMemoryStatusEx.ullAvailPhys），新增 preflight() 開跑門檻 4.5GB（執行中 3GB 終止門檻依事件001裁示不變），-6 腳本開跑前先檢查、不足 exit 3；test_mem_guard 3/3。重跑 -6：preflight＝可用 3.15GB＜4.5GB，不開跑，-6 維持 [!]〕
 - [x] **先.七十-5 策略卡每條線加「設計目標」欄＋卡頂固定一句**（互動視窗執行）〔2026-10-11 完成（b94f3a937）：strategy_curves.json 每條線加 goal（Bb-90／紙.一／紙.三 守回撤（天條一）、紙.四 R1-C 贏大盤＋守回撤、三榜 選股研究；紙.一b、紙.二 裁示未指定→「未標示」），卡頂固定定位句（在分頁列上方）；本機伺服器重啟後 Bb-90 線也帶 goal〕
 - [x] **先.七十-6 冒煙全綠 commit 後回報**（互動視窗執行）〔2026-10-11 完成：冒煙 89 項全部通過後 commit b94f3a937；alpha_live_server 依七之二重啟（build b94f3a9＝HEAD、OPTIONS 200、stale_process=false）〕
+
+---
+
+# 2026-10-11【先.七十一：清除孤兒程序＋重跑兩榜回測】（總司令裁示原文，動工前先寫入；本條即核准結束第 1 點所列程序）
+
+```
+【先.七十一】清除孤兒程序＋重跑兩榜回測（總司令貼上即核准結束程序；不碰自動交易、常駐服務不得動）
+1. 結束 10-05 01:16 起的 6 支 multiprocessing 孤兒 python worker（父 PID 241976 已不存在）與 pythonw PID 132880（10-08 18:09，命令列不可讀、私有記憶體 2.6GB）。結束前再次確認這 7 支的命令列與父程序都不屬於 alpha_live_server、shioaji_quotes、auto_rebalance、telegram_reader、ibkr 任何常駐服務；確認後 taskkill /PID /T /F，記錄結束前後的 Available 與 commit 數字。
+2. 根因修補：找出 10-05 產生孤兒的腳本（依工作目錄與啟動時間比對 research/ 的 multiprocessing 用法），加上 Pool 的 with／終止處理與父程序死亡偵測（worker 定時檢查父 PID，不存在就自我結束）；mem_guard 新增「孤兒 python worker 偵測」，發現即寫警告到 STATUS 與推播，不自動結束。
+3. 清完後立即重跑常備.開發-6（兩榜回測，reverification=true），出判定即推播。
+4. 本機排程新增每日 03:00 孤兒程序巡檢（只列出與告警，不結束）。
+5. smoke 全綠 commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+- [ ] **先.七十一-1 結束 6 支 10-05 孤兒 worker＋pythonw 132880（先確認非常駐服務），記錄前後 Available／commit**（互動視窗執行）
+- [ ] **先.七十一-2 找出 10-05 孤兒來源腳本並修 Pool 終止＋父程序死亡偵測；mem_guard 加孤兒偵測（寫 STATUS＋推播，不自動結束）**（互動視窗執行）
+- [ ] **先.七十一-3 清完後重跑常備.開發-6（兩榜回測 reverification=true），出判定即推播**（互動視窗執行）
+- [ ] **先.七十一-4 本機排程每日 03:00 孤兒程序巡檢（只列出與告警）**（互動視窗執行）
+- [ ] **先.七十一-5 冒煙全綠 commit 後回報**（互動視窗執行）
