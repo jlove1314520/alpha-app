@@ -26,7 +26,7 @@ async function measure(page, scr) {
     const cards = [...root.querySelectorAll(".card")].filter(c => !c.parentElement.closest(".card") && vis(c) && inFirst(c))
       .map(c => ((c.querySelector("h3") || {}).textContent || c.id || "(無標題)").replace(/\s+/g, " ").trim().slice(0, 14));
     const longNotes = [];
-    for (const n of root.querySelectorAll(".note")) {
+    for (const n of root.querySelectorAll(".note[data-ui-explain]")) {  // 先.八十-5：只量說明類，卡片主內容不受 2 行限制
       if (!vis(n) || !inFirst(n)) continue;
       const st = getComputedStyle(n);
       let lh = parseFloat(st.lineHeight); if (!lh) lh = parseFloat(st.fontSize) * 1.45;

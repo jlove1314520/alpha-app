@@ -1047,8 +1047,10 @@ async function runSmokeTest(baseUrl, headless = true) {
     // 常備.開發-2（2026-10-11）：盤前日報改讀 data/daily_brief.json（規則摘要），有內容時才顯示——
     // 斷言改成「無內容必須隱藏；顯示時必須有內容且標明規則摘要／非 AI 判斷／非投資建議」。
     if (!info.aiHidden && !info.aiBody.trim()) homeErrors.push("AI盤前日報無內容卻沒有隱藏整張卡");
-    if (!info.aiHidden && info.aiBody.trim() && !(/規則摘要/.test(info.aiBody) && /非 AI 判斷/.test(info.aiBody) && /非投資建議/.test(info.aiBody)))
-      homeErrors.push(`AI盤前日報顯示中卻沒標「規則摘要，非 AI 判斷、非投資建議」：「${info.aiBody.slice(0, 60)}」`);
+    // 先.八十-5／10（2026-10-12）：「非投資建議」前台統一只在頁尾一處（#91），卡片內只標「規則摘要，非 AI 判斷」，且卡片內不得再出現「非投資建議」
+    if (!info.aiHidden && info.aiBody.trim() && !(/規則摘要/.test(info.aiBody) && /非 AI 判斷/.test(info.aiBody)))
+      homeErrors.push(`盤前日報顯示中卻沒標「規則摘要，非 AI 判斷」：「${info.aiBody.slice(0, 60)}」`);
+    if (!info.aiHidden && /非投資建議/.test(info.aiBody)) homeErrors.push("盤前日報卡片內又出現「非投資建議」（應只在頁尾）");
     if (info.maxWrap > 72) homeErrors.push(`走勢線包裝層被撐到${info.maxWrap.toFixed(0)}px寬`);
   } catch (e) {
     homeErrors.push(`測試本身出錯：${e.message || e}`);
@@ -2545,7 +2547,9 @@ async function runSmokeTest(baseUrl, headless = true) {
     for (const k of ["漲跌幅", "漲到", "跌到", "事件前一日", "今日已推"]) if (!r.body.includes(k)) alertErrors.push(`設定列缺「${k}」`);
     if (r.pctVal !== "3") alertErrors.push(`既有規則未回填：pct=${r.pctVal}`);
     if (!r.note.includes("AAPL") || !r.note.includes("暫不支援")) alertErrors.push(`美股應誠實說明暫不支援：${r.note.slice(0, 120)}`);
-    if (!r.note.includes("每檔每日最多一則") || !r.note.includes("非投資建議")) alertErrors.push(`說明缺每日上限或非投資建議：${r.note.slice(0, 120)}`);
+    // 先.八十-5：「非投資建議」前台統一只在頁尾一處，卡片說明不再重複
+    if (!r.note.includes("每檔每日最多一則")) alertErrors.push(`說明缺每日上限：${r.note.slice(0, 120)}`);
+    if (r.note.includes("非投資建議")) alertErrors.push("卡片說明又出現「非投資建議」（應只在頁尾）");
     let pj = null; try { pj = JSON.parse(r.posted || "null"); } catch (e) { /* 下面會判失敗 */ }
     if (!pj || !pj.rules || !pj.rules["2330"] || pj.rules["2330"].above !== 1200 || !pj.rules["2330"].event || !pj.rules["0050"] || pj.rules["0050"].below !== 180)
       alertErrors.push(`儲存的規則內容不符：${r.posted}`);
@@ -3427,6 +3431,40 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { chErrs.push(`測試本身出錯：${e.message || e}`); }
   record("104. 選股頁篩選籤：切市場／搜尋後仍為 flex 單列不重疊、只切 class 不設 style.display（先.八十-4）", chErrs.length === 0, chErrs.join("; "));
 
+  // 105.【2026-10-12 先.八十-5】40 字自動收合只收說明類（data-ui-explain），卡片主內容（程式填的狀態／內容）不收；
+  // 時鐘每秒改字不得觸發收合重掃（觀察器只處理落在說明類元素裡的變動）。
+  const cpErrs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      if (typeof uiCompactNote !== "function") return { err: "uiCompactNote 未載入" };
+      const host = document.querySelector("#scr-home") || document.getElementById("app");
+      const content = document.createElement("div"); content.className = "note"; content.id = "smoke105-content";
+      const explain = document.createElement("div"); explain.className = "note"; explain.setAttribute("data-ui-explain", "");
+      host.appendChild(content); host.appendChild(explain);
+      const long = "這是一段超過四十個字的測試文字，用來確認自動收合只會收說明類的附註，而不會把卡片主內容也收起來，造成使用者看不到重點。";
+      content.textContent = long; explain.textContent = long;
+      await new Promise(res => setTimeout(res, 400));
+      const out = { contentCollapsed: !!content.querySelector("details[data-ui-detail]"), explainCollapsed: !!explain.querySelector("details[data-ui-detail]"),
+                    summary: (explain.querySelector("summary") || {}).textContent };
+      content.remove(); explain.remove();
+      await new Promise(res => setTimeout(res, 300));
+      const s0 = window.__uiCompactScans;
+      await new Promise(res => setTimeout(res, 3200));  // 期間時鐘至少改字 3 次
+      out.scansDuringClock = window.__uiCompactScans - s0;
+      out.marked = document.querySelectorAll("#app .note[data-ui-explain]").length;
+      out.idMarked = [...document.querySelectorAll("#app .note[id][data-ui-explain]")].map(n => n.id);
+      return out;
+    });
+    if (r.err) cpErrs.push(r.err);
+    else {
+      if (r.contentCollapsed) cpErrs.push("卡片主內容（有 id、未標說明）被收合了");
+      if (!r.explainCollapsed || r.summary !== "ⓘ 說明") cpErrs.push(`說明類超過 40 字應收成「ⓘ 說明」（${r.explainCollapsed}，${r.summary}）`);
+      if (r.scansDuringClock !== 0) cpErrs.push(`時鐘改字期間觸發收合重掃 ${r.scansDuringClock} 次`);
+      if (r.marked < 5) cpErrs.push(`說明類標記過少（${r.marked}）`);
+    }
+  } catch (e) { cpErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("105. 自動收合只收說明類、不收卡片主內容；時鐘每秒改字不觸發重掃（先.八十-5）", cpErrs.length === 0, cpErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3455,7 +3493,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

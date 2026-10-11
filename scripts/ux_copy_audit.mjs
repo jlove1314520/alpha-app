@@ -51,7 +51,8 @@ export async function auditVisible(page, glossary, scope) {
       const t = txt(b.textContent);
       if (t && len(t) > g.rules.button_max) out.buttons.push(t);
     }
-    for (const n of root.querySelectorAll(".note")) {
+    // 先.八十-5：只檢查說明類（data-ui-explain）；卡片主內容的 .note 不收合、也不受 40 字限制
+    for (const n of root.querySelectorAll(".note[data-ui-explain]")) {
       if (!vis(n) || inAdv(n) || n.closest("[data-ui-detail]")) continue;
       const t = txt(n.innerText);  // innerText＝實際畫出來的字：收合的「ⓘ 說明」內容不算
       if (len(t) > g.rules.note_max) out.notes.push(t.slice(0, 60));

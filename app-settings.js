@@ -99,7 +99,7 @@
     if(tw.length)h+='<button class="btn" style="width:100%;margin-top:10px" onclick="saveAlertsClick()">儲存提醒設定</button>';
     body.innerHTML=h;
     if(note){
-      const parts=['每檔每日最多一則；只在台股盤中（週一～週五 09:00–13:30）每分鐘檢查。非投資建議。'];
+      const parts=['每檔每日最多一則；只在台股盤中（週一～週五 09:00–13:30）每分鐘檢查。'];  // 先.八十-5：「非投資建議」只在頁尾一處
       if(us.length)parts.push('美股（'+us.join('、')+'）暫不支援：本機盤中即時報價只有台股。');
       parts.push(d.live_quotes?'本機即時報價：有。':'本機即時報價：目前沒有（盤後或常駐行程未啟動），盤中只會發事件類提醒。');
       if(d.last_check)parts.push('上次檢查 '+String(d.last_check).slice(11,16)+'。');

@@ -36,14 +36,14 @@
     const rows=_SYSWK_SEC.map(([k,lab],i)=>{
       const s=d[k]||{},lv=s.level||'unknown';
       const txt=s.error?'讀取失敗（'+s.error+'）':(sm.find(x=>String(x).startsWith(lab))||'').replace(lab+'：','');
-      return '<div style="padding:3px 0;display:flex;gap:8px;align-items:flex-start"><span style="flex-shrink:0;width:9px;height:9px;border-radius:50%;margin-top:5px;background:'+_SYSWK_DOT[lv]+'"></span><span><b>'+esc(lab)+'</b>　'+esc(txt||'—')+'</span></div>';
+      return '<div style="padding:3px 0;display:flex;gap:8px;align-items:flex-start"><span style="flex-shrink:0;width:9px;height:9px;border-radius:50%;margin-top:5px;background:'+_SYSWK_DOT[lv]+'"></span><span><b>'+esc(lab)+'</b>　'+esc(uiPlain(txt||'—'))+'</span></div>';
     }).join('');
     const det=[];
     const f=d.freshness||{};(f.stalled||[]).forEach(x=>det.push('停擺：'+x.task+(x.age_min!=null?'（'+Math.round(x.age_min/60)+' 小時沒新產出）':'')));
     const lv=d.live_execution||{};if(lv.codes_week)det.push('真錢排程事件：'+Object.keys(lv.codes_week).map(k=>k+' '+lv.codes_week[k]).join('、'));
     ((d.paper||{}).books||[]).forEach(b=>{if(b.total_return_pct!=null)det.push(b.label+'：累計 '+(b.total_return_pct>0?'+':'')+b.total_return_pct+'%（'+(b.as_of||'—')+'）')});
     return '<div class="note" style="margin-bottom:4px">'+esc(d.week_start||'')+' ～ '+esc(d.week_end||'')+'</div>'+rows+
-      (det.length?'<div style="margin-top:6px;font-size:11px;color:var(--ink-3)">'+det.map(x=>'· '+esc(x)).join('<br>')+'</div>':'')+_briefFoot(d);
+      (det.length?'<div style="margin-top:6px;font-size:11px;color:var(--ink-3)">'+det.map(x=>'· '+esc(uiPlain(x))).join('<br>')+'</div>':'')+_briefFoot(d);
   }
   async function loadSysWeekly(){
     const el=document.getElementById('journal-sysweekly');if(!el)return;

@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-12.0027">
+<link rel="stylesheet" href="app.css?v=2026-10-12.0042">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -232,7 +232,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
         <h3>產業金流</h3>
         <div class="mkt-toggle" id="flow-toggle" style="margin-bottom:10px"></div>
         <div id="sector-flow-body"><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div><div style="padding:10px 0;border-bottom:1px solid var(--hairline)"><div class="skel-line w40"></div><div class="skel-line w80" style="height:9px"></div></div></div>
-        <div class="note" id="sector-flow-note"></div>
+        <div class="note" id="sector-flow-note" data-ui-explain></div>
       </div>
 
       <!-- 2026-09-02重新配置（使用者裁示「籌碼頁重新配置，不加底部按鈕、不擁擠」）：
@@ -389,7 +389,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div>
         <div style="font-size:22px;font-weight:700;letter-spacing:-.01em">AI 選股</div>
         <div class="note num picks-lb-only" id="picks-asof-line" style="margin:3px 0 0">載入中…</div>
-        <div class="note picks-lb-only" id="picks-weight-note" style="margin-top:2px"></div>
+        <div class="note picks-lb-only" id="picks-weight-note" data-ui-explain style="margin-top:2px"></div>
         <div class="note picks-lb-only" id="picks-backtest-note" style="margin-top:4px;display:none"></div>
       </div>
       <div class="mkt-toggle" id="picks-toggle"></div>
@@ -403,7 +403,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     <div class="note picks-lb-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
-    <div class="note picks-lb-only" id="picks-coverage-note" style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
+    <div class="note picks-lb-only" id="picks-coverage-note" data-ui-explain style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
       高分但資料完整度低的股票分數僅供參考、不代表可信——卡片變淡、加註「資料稀疏」的就是這種情況。</div>
 
     <!-- 搜尋框：任查任一檔（樣本內即使不在排行榜前段也查得到分數，樣本外誠實顯示查無資料）-->
@@ -565,7 +565,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="card">
         <h3 style="display:flex;justify-content:space-between;align-items:center"><span>走勢</span><span class="mkt-toggle" id="trend-mode-toggle" style="padding:2px"></span></h3>
         <div id="trend-chart"><div class="skel-block" style="height:220px"></div></div>
-        <div class="note" id="trend-note">來源：日收盤價</div>
+        <div class="note" id="trend-note" data-ui-explain>來源：日收盤價</div>
       </div>
       <div class="card">
         <h3>關鍵數字</h3>
@@ -1416,6 +1416,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-12.0027"></script>
+<script src="app.js?v=2026-10-12.0042"></script>
 </body>
 </html>

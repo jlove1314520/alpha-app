@@ -19267,7 +19267,7 @@ C. 驗收
 - [x] **先.八十-2 電腦離線統一一行狀態；Failed to fetch 不計程式錯誤、不顯示英文**（互動視窗執行）〔liveFetch 標記離線＋記最後連線；recordGlobalError 不計離線；交易頁／首頁收成一行「電腦離線（最後連線 MM/DD HH:MM）」；smoke #102；101 PASS／0 FAIL〕
 - [x] **先.八十-3 loadTrials 被註解吃掉修正＋trials_index.json 解析修正（465 列對齊帳本 435 筆）**（互動視窗執行）〔loadTrials 已獨立一行（開發-29 已修）＋smoke #103 證實執行；trials_index 列認定同 selection_bias_ledger、未跳脫 | 切欄、判定欄不取備註；436 列＝總 N（帳本開頭 435 為 10/11 舊值，-13 統一）；#94/#149 共用編號標 dup_id；102 PASS／0 FAIL〕
 - [x] **先.八十-4 app-shared.js 篩選籤改切換 class，修重疊**（互動視窗執行）〔篩選籤 display:flex 移到 CSS，隱藏改切 off-mkt／off-search class（舊 style.display='' 清掉 flex 致重疊）；smoke #104；103 PASS／0 FAIL〕
-- [ ] **先.八十-5 40 字自動收合只收說明類；時鐘更新不觸發重掃**（互動視窗執行）
+- [x] **先.八十-5 40 字自動收合只收說明類；時鐘更新不觸發重掃**（互動視窗執行）〔只收 data-ui-explain 說明類（原始標記無 id 的 .note＋明確標記者），主內容不收；觀察器只處理說明類元素內的變動，時鐘 3 次改字重掃 0 次；稽核工具同步只量說明類；內部代號改走 uiPlain；非投資建議只在頁尾；smoke #105、#30/#76 斷言更新；104 PASS／0 FAIL〕
 - [ ] **先.八十-6 策略監控台改讀 strategy_curves.json、停用 strategy_performance.json；ux_copy_audit 擴大＋補詞**（互動視窗執行）
 - [ ] **先.八十-7 下架樣本內重抽數字、破億讀資料檔、S3-C6 改延後一日版、MDD 標籤改「月頻近似」、模擬 C 標註**（互動視窗執行）
 - [ ] **先.八十-8 跟 0050 比：樣本外格雙數字、疊圖各線起始日對齊 0050、台指期小卡走勢線**（互動視窗執行）

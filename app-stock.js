@@ -1127,7 +1127,7 @@
     const pts=buildStockBriefPoints(code,{fund:v(fund)||{},detail:v(detail)||{},hist:v(hist),flag:disposalFlagOf(code,todayIso),events:(v(ev)||{}).events||[],todayIso});
     const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     el.innerHTML='<ol style="margin:4px 0 0 18px;padding:0;line-height:1.7">'+pts.map(p=>`<li><b>${esc(p.k)}</b>　${esc(p.t)}</li>`).join('')+'</ol>'
-      +'<div class="note" style="margin-top:8px">規則摘要，非 AI 判斷、非投資建議：只把 fundamentals／stock_detail／institutional_history／disposal_flags／events 五份檔案的數字轉成文字，不推論漲跌。</div>';
+      +'<div class="note" data-ui-explain style="margin-top:8px">規則摘要，非 AI 判斷：只把 fundamentals／stock_detail／institutional_history／disposal_flags／events 五份檔案的數字轉成文字，不推論漲跌。</div>';
   }
   // ── 2026-10-11（常備.開發-15）目標價與評等（公開來源）────────────────────────────
   // 只顯示 data/us_analyst_reco.json 裡 Finnhub 免費層的「評等家數分佈」，不自行計分、不推論漲跌。
@@ -1135,7 +1135,7 @@
   const ANALYST_TW_NOTE='台股目前沒有合法的免費來源：證交所／櫃買 OpenAPI 與 FinMind 都沒有券商目標價或評等資料，券商研究報告屬付費商品（待採購），依資料取得鐵律不爬新聞或付費報告。查證紀錄：docs/FIRST_HAND_SOURCES.md。';
   function buildAnalystRadarHtml(code,data){
     const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    if(!isUS(code))return `<div class="note">${esc(ANALYST_TW_NOTE)}</div>`;
+    if(!isUS(code))return `<div class="note" data-ui-explain>${esc(ANALYST_TW_NOTE)}</div>`;
     const tail='<div class="note" style="margin-top:8px">目標價：Finnhub 目標價端點為付費方案，待採購，目前不顯示。評等為多家券商家數彙整，非投資建議。</div>';
     const rows=data&&data.tickers&&data.tickers[code];
     if(!rows||!rows.length){
@@ -1216,7 +1216,7 @@
     const pts=buildRevenueReadPoints(fund||{});
     const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     el.innerHTML='<ol style="margin:4px 0 0 18px;padding:0;line-height:1.7">'+pts.map(p=>`<li><b>${esc(p.k)}</b>　${esc(p.t)}</li>`).join('')+'</ol>'
-      +'<div class="note" style="margin-top:8px">規則摘要，非 AI 判斷、非投資建議：只用 data/fundamentals.json 的月營收數字計算，不推論漲跌。</div>';
+      +'<div class="note" data-ui-explain style="margin-top:8px">規則摘要，非 AI 判斷：只用 data/fundamentals.json 的月營收數字計算，不推論漲跌。</div>';
   }
   // 常備.開發-5（2026-10-11）：美股事件時間軸＝下一次財報日（data/earnings_calendar.json，yfinance 推估）
   // ＋近 90 天 SEC Form 8-K（data/us_events.json，fetch_us_8k.py 排程，只存索引）。無資料時說明原因。

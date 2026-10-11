@@ -16,7 +16,7 @@
     [/\bTWSE\b/g,'證交所'],[/\bTPEx\b/g,'櫃買中心'],[/\bTAIFEX\b/g,'期交所'],
     [/FinMind/gi,'公開資料'],[/Shioaji/gi,'永豐'],
     [/真錢\s*Bb-?90/g,'自動投資'],[/Bb-?90/g,'自動投資'],
-    [/紙\.一b/g,'模擬 D'],[/紙\.一(\s*70\/30)?/g,'模擬 A'],[/紙\.二/g,'模擬 E'],[/紙\.三(\s*S3-C6)?/g,'模擬 B'],[/紙\.四(\s*R1-C)?/g,'模擬 C'],
+    [/紙\.一b(\s*Bb-?90)?/g,'模擬 D'],[/紙上\s*4\s*R1-A/g,'模擬 C（並列版）'],[/紙上\s*4(\s*R1-C)?/g,'模擬 C'],[/紙上\s*3(\s*S3-C6)?/g,'模擬 B'],[/\bR1-A\b/g,'模擬 C（並列版）'],[/紙\.一(\s*70\/30)?/g,'模擬 A'],[/紙\.二/g,'模擬 E'],[/紙\.三(\s*S3-C6)?/g,'模擬 B'],[/紙\.四(\s*R1-C)?/g,'模擬 C'],
     [/\bS3-C6\b/g,'模擬 B'],[/\bR1-C\b/g,'模擬 C'],
     [/\bLIVE_WITH_VETO\b/g,'真錢（可取消）'],[/\bLIVE\b/g,'真錢'],[/\bSIMULATION\b/g,'模擬'],
     [/\bMDD\b/g,'最大跌幅'],[/唯讀/g,'只能看'],[/否決窗/g,'取消時間'],
@@ -1935,7 +1935,7 @@
           <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${it.code}</b> ${nameOf(it.code)||''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
         </div>`;
       }).join('')
-        +`<div class="note" style="margin-top:8px">自選股與模擬持股共 ${codes.size} 檔、${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
+        +`<div class="note" data-ui-explain style="margin-top:8px">自選股與模擬持股共 ${codes.size} 檔、${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
@@ -2211,8 +2211,8 @@
     if(!r.ok)throw new Error('HTTP '+r.status);
     return DAILY_BRIEF_CACHE=await r.json();
   }
-  const _briefLines=ls=>(ls||[]).map(l=>'<div style="padding:2px 0">· '+_autoEsc(l)+'</div>').join('');
-  const _briefFoot=d=>'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">'+_autoEsc(d.disclaimer||'規則摘要，非 AI 判斷、非投資建議')+'；產生於 '+_autoEsc(String(d.generated_at||'').slice(0,16).replace('T',' '))+'</div>';
+  const _briefLines=ls=>(ls||[]).map(l=>'<div style="padding:2px 0">· '+_autoEsc(uiPlain(l))+'</div>').join('');
+  const _briefFoot=d=>'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">'+_autoEsc(String(d.disclaimer||'規則摘要，非 AI 判斷').replace(/、?非投資建議/g,''))+'；產生於 '+_autoEsc(String(d.generated_at||'').slice(0,16).replace('T',' '))+'</div>';
   function _briefWatchLine(d){
     const ev=d.premarket&&d.premarket.events||{},nw=d.premarket&&d.premarket.news||{};
     const m=ev.material_by_code||{},n=nw.by_code||{};
@@ -3828,7 +3828,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-12.0027';
+  const APP_VERSION='2026-10-12.0042';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4013,25 +4013,46 @@
 // 先.七十二-A2（2026-10-11）：說明文字（.note）超過 40 字自動收成「ⓘ 說明」點開。
 // 進階頁（[data-ui-advanced]）、已收過的、頁尾免責、或標了 data-ui-keep 的狀態行不收。內容原封不動搬進 <details>，
 // 讀 textContent 的既有程式不受影響；之後被重繪（innerHTML／textContent 改寫）時由 MutationObserver 再收一次。
+// 先.八十-5（2026-10-12）更正：
+//  ① 只收「說明」類：頁面原始標記裡、沒有 id 的 .note（有 id 的多半是程式填的狀態／卡片主內容）；⚠ 附註也算，按鈕寫「⚠ 注意」；
+//    啟動時標 data-ui-explain，之後只處理有這個標記的元素。程式動態產生的說明要收，就在 HTML 字串裡自己加 data-ui-explain。
+//  ② 時鐘每秒改字不得觸發重掃：觀察器只看「變動落在 data-ui-explain 元素裡、或新增節點本身帶 data-ui-explain」的那幾筆，
+//    其餘（時鐘、報價、列表重繪）直接略過，不再整頁 querySelectorAll。
 const UI_NOTE_MAX=40;
 function uiCompactNote(n){
   try{
-    if(!n||n.hasAttribute('data-ui-keep')||n.closest('[data-ui-advanced],[data-ui-detail],[data-ui-footer-disclaimer]'))return;
+    if(!n||!n.hasAttribute('data-ui-explain')||n.hasAttribute('data-ui-keep')||n.closest('[data-ui-advanced],[data-ui-footer-disclaimer]'))return;
     if(n.firstElementChild&&n.firstElementChild.matches('details[data-ui-detail]')&&n.childNodes.length===1)return;
     const t=(n.textContent||'').replace(/\s+/g,' ').trim();
     if([...t].length<=UI_NOTE_MAX)return;
     const d=document.createElement('details');d.setAttribute('data-ui-detail','');d.className='ui-info';
-    const sm=document.createElement('summary');sm.textContent='ⓘ 說明';d.appendChild(sm);
+    const sm=document.createElement('summary');sm.textContent=/^⚠/.test(t)?'⚠ 注意':'ⓘ 說明';d.appendChild(sm);
     const body=document.createElement('div');body.className='ui-info-body';
     while(n.firstChild)body.appendChild(n.firstChild);
     d.appendChild(body);n.appendChild(d);
   }catch(e){console.warn('[uiCompactNote]',e);recordGlobalError('uiCompactNote',e)}
 }
-function uiCompactAll(root){(root||document).querySelectorAll('#app .note').forEach(uiCompactNote)}
-let _uiCompactPending=false;
+function uiMarkExplainNotes(root){
+  (root||document).querySelectorAll('#app .note:not([id]):not([data-ui-keep])').forEach(n=>{
+    if(n.closest('[data-ui-advanced],[data-ui-detail],[data-ui-footer-disclaimer]'))return;
+    n.setAttribute('data-ui-explain','');
+  });
+}
+function uiCompactAll(root){(root||document).querySelectorAll('#app .note[data-ui-explain]').forEach(uiCompactNote)}
+window.__uiCompactScans=0;  // 冒煙 #105 用：觀察器實際處理（掃描）次數
+let _uiCompactQ=new Set(),_uiCompactPending=false;
+function _uiCompactFlush(){_uiCompactPending=false;const q=[..._uiCompactQ];_uiCompactQ.clear();if(!q.length)return;window.__uiCompactScans++;q.forEach(uiCompactNote)}
 try{
-  new MutationObserver(()=>{if(_uiCompactPending)return;_uiCompactPending=true;
-    setTimeout(()=>{_uiCompactPending=false;uiCompactAll()},120)}).observe(document.getElementById('app'),{childList:true,subtree:true,characterData:true});
+  uiMarkExplainNotes();
+  new MutationObserver(ms=>{
+    for(const m of ms){
+      const t=m.target&&m.target.nodeType===1?m.target:m.target&&m.target.parentElement;
+      const host=t&&t.closest?t.closest('[data-ui-explain]'):null;
+      if(host)_uiCompactQ.add(host);
+      m.addedNodes&&m.addedNodes.forEach(a=>{if(a.nodeType!==1)return;if(a.matches('[data-ui-explain]'))_uiCompactQ.add(a);a.querySelectorAll&&a.querySelectorAll('[data-ui-explain]').forEach(x=>_uiCompactQ.add(x))});
+    }
+    if(_uiCompactQ.size&&!_uiCompactPending){_uiCompactPending=true;setTimeout(_uiCompactFlush,120)}
+  }).observe(document.getElementById('app'),{childList:true,subtree:true,characterData:true});
   uiCompactAll();
 }catch(e){console.warn('[uiCompact:init]',e);recordGlobalError('uiCompact:init',e)}
 // 先.六十九-1：核心程式執行完畢（導覽、各面板載入函式都已註冊）＝可互動時間點；scripts/measure_second_open.mjs 讀這個值。
