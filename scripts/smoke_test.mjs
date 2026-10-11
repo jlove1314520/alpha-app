@@ -519,27 +519,19 @@ async function runSmokeTest(baseUrl, headless = true) {
     else if (!wlPolyline.points || !wlPolyline.points.trim()) chartBlankErrors.push(`自選股sparkline：polyline存在但points屬性是空字串`);
     await page.unroute("**/data/quotes_tw.json**");
 
-    // 16b. 策略監控台權益曲線（spark()，讀strategies.json::forward_paper.equity_curve）
-    const fakeStrategies = {
-      strategies: [{
-        id: "smoke_test_fake", name: "冒煙測試假策略", type: "test", status: "紙上交易中",
-        spec: "smoke_test注入，非真實策略",
-        forward_paper: {
-          inception_date: "2026-01-01", forward_return_todate_pct: 3.5,
-          trading_days_count: 5, sample_sufficient: false,
-          equity_curve: [
-            { date: "2026-01-01", cum_return_pct: 0 },
-            { date: "2026-01-02", cum_return_pct: 1.2 },
-            { date: "2026-01-03", cum_return_pct: -0.5 },
-            { date: "2026-01-04", cum_return_pct: 3.5 },
-          ],
-          ledger: [], source: "smoke_test",
-        },
-        limitations: [], last_updated: new Date().toISOString(),
+    // 16b. 策略監控台權益曲線（spark()）。先.八十-6 起監控台改讀 data/strategy_curves.json 的 nav（原 strategies.json::forward_paper 已停用）
+    const fakeCurves = {
+      meta: { generated_at: new Date().toISOString(), bench: "0050" },
+      lines: [{
+        id: "smoke_test_fake", label: "冒煙測試假線", group: "paper", status: "模擬中", started: true,
+        start_date: "2026-01-01", as_of: "2026-01-04", dates: ["2026-01-01", "2026-01-02", "2026-01-03", "2026-01-04"],
+        nav: [100, 101.2, 99.5, 103.5], bench: [100, 100.5, 100.1, 101], comp_max_abs_pct: [],
+        metrics: { days: 4, cum_pct: 3.5, bench_cum_pct: 1.0, mdd_pct: -1.7, bench_mdd_pct: -0.4, verdict: "尚不足以判斷" },
+        note: "冒煙測試注入，非真實策略",
       }],
     };
-    await page.route("**/data/strategies.json**", (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeStrategies) })
+    await page.route("**/data/strategy_curves.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fakeCurves) })
     );
     await page.evaluate(() => window.go("trade"));
     await page.waitForTimeout(300);
@@ -557,7 +549,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     });
     if (!monitorPolyline.found) chartBlankErrors.push(`策略監控台權益曲線：${monitorPolyline.reason}`);
     else if (!monitorPolyline.points || !monitorPolyline.points.trim()) chartBlankErrors.push(`策略監控台權益曲線：polyline存在但points屬性是空字串`);
-    await page.unroute("**/data/strategies.json**");
+    await page.unroute("**/data/strategy_curves.json**");
   } catch (e) {
     chartBlankErrors.push(`測試本身出錯：${e.message || e}`);
   }
@@ -2002,7 +1994,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     });
     if (/\d+(\.\d+)?%/.test(r.empty)) probUiErrors.push(`未輸入參數卻顯示了百分比：${r.empty.slice(0, 80)}`);
     if (!r.empty.includes("請先填入")) probUiErrors.push(`未輸入參數時缺說明文字：${r.empty.slice(0, 80)}`);
-    if (!/R1-C[\s\S]*%/.test(r.filled)) probUiErrors.push(`輸入後未顯示機率表：${r.filled.slice(0, 120)}`);
+    if (!/(R1-C|模擬 C)[\s\S]*%/.test(r.filled))  // 先.八十-6：前台內部代號已轉白話 probUiErrors.push(`輸入後未顯示機率表：${r.filled.slice(0, 120)}`);
     if (!r.filled.includes("回測，非保證")) probUiErrors.push("機率表缺「回測，非保證」");
   } catch (e) { probUiErrors.push(`測試本身出錯：${e.message || e}`); }
   record("60. 破億卡未輸入參數只顯示說明、不顯示機率；輸入後顯示各策略機率表並標回測非保證", probUiErrors.length === 0, probUiErrors.join("; "));
@@ -2012,7 +2004,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   try {
     const r = await page.evaluate(async () => { await loadPaper7030(); const el = document.getElementById("paper4-disclosure"); return { has: !!document.getElementById("paper4-card"), txt: el ? el.textContent : "" }; });
     if (!r.has) p4Errors.push("找不到紙.四 卡");
-    const want = "回測 2003–2024 年化 15.1%／MDD −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤";
+    const want = "回測 2003–2024 年化 15.1%／最大跌幅 −36.2%；同一閘門在 2025–26 樣本外 21 個月中有 13 個月關閉並大幅落後 0050；無樣本外驗證，僅紙上追蹤";
     if (!r.txt.includes(want)) p4Errors.push(`揭露文字不符：${r.txt.slice(0, 100)}`);
   } catch (e) { p4Errors.push(`測試本身出錯：${e.message || e}`); }
   record("61. 紙.四 卡存在且固定揭露文字（回測 15.1%／−36.2%、樣本外 13／21 月關閉、無樣本外驗證）", p4Errors.length === 0, p4Errors.join("; "));
@@ -2199,8 +2191,8 @@ async function runSmokeTest(baseUrl, headless = true) {
       return o;
     });
     if (cf.stocks["2330"] && !/億/.test(r["2330"].fcf)) fcfErrors.push(`2330 FCF 應顯示億：${r["2330"].fcf}`);
-    if (!/FinMind/.test(r["2330"].note)) fcfErrors.push(`2330 備註應標 FinMind 來源：${r["2330"].note.slice(-80)}`);
-    if (!cf.stocks["2880"] && !/不在 FinMind 現金流量表快取/.test(r["2880"].note)) fcfErrors.push(`2880 無資料應說明原因：${r["2880"].note.slice(-80)}`);
+    if (!/FinMind|公開資料/.test(r["2330"].note)) fcfErrors.push(`2330 備註應標 FinMind 來源：${r["2330"].note.slice(-80)}`);
+    if (!cf.stocks["2880"] && !/不在 (FinMind|公開資料) 現金流量表快取/.test(r["2880"].note)) fcfErrors.push(`2880 無資料應說明原因：${r["2880"].note.slice(-80)}`);
   } catch (e) { fcfErrors.push(`測試本身出錯：${e.message || e}`); }
   record("68. 台股財報分頁 FCF（近四季，標 FinMind 來源；無資料說明原因）", fcfErrors.length === 0, fcfErrors.join("; "));
 
@@ -2288,7 +2280,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       }
       return o;
     });
-    for (const k of ["2026/10 第 2 期", "部分成交", "送出 2 筆", "80%", "0050 72.5%／70%", "+2.5pp", "10/15"])
+    for (const k of ["2026/10 第 2 期", "部分成交", "送出 2 筆", "80%", "0050 72.5%／70%", "+2.5 個百分點", "10/15"])
       if (!r.partial.includes(k)) execErrors.push(`部分成交畫面缺「${k}」：${r.partial.slice(0, 160)}`);
     if (!r.cash.includes("尚未入金") || !r.cash.includes("整批被擋")) execErrors.push(`未入金應白話說明：${r.cash.slice(0, 160)}`);
     if (!r.half.includes("讀不到 /auto/ledger") || !r.half.includes("10/15")) execErrors.push(`ledger 失敗時 status 部分應照畫：${r.half.slice(0, 160)}`);
@@ -2497,8 +2489,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       o.sub = document.getElementById("sub-ai").textContent;
       return o;
     });
-    for (const k of ["2026-10-01 期，共 40 家券商評等", "強力買進", "買進類占比 75%，較 2026-09-01 期上升 15 個百分點", "待採購", "非投資建議"])
+    for (const k of ["2026-10-01 期，共 40 家券商評等", "強力買進", "買進類占比 75%，較 2026-09-01 期上升 15 個百分點", "待採購"])
       if (!r.syn.includes(k)) analystErrors.push(`合成資料缺「${k}」：${r.syn.slice(0, 200)}`);
+    if (r.syn.includes("非投資建議")) analystErrors.push("卡片內又出現「非投資建議」（先.八十-5：只在頁尾）");
     if (!r.notCovered.includes("查無評等") || !r.notCovered.includes("不在清單內")) analystErrors.push(`不在涵蓋清單應寫原因：${r.notCovered.slice(0, 120)}`);
     if (!r.noFile.includes("查無評等") || !r.noFile.includes("尚未產生或讀取失敗")) analystErrors.push(`檔案缺應寫原因：${r.noFile.slice(0, 120)}`);
     if (!r.tw.includes("沒有合法的免費來源")) analystErrors.push(`台股應誠實說明：${r.tw.slice(0, 120)}`);
@@ -3015,9 +3008,12 @@ async function runSmokeTest(baseUrl, headless = true) {
       return out;
     });
     let ia;
-    try { ia = await iaRun(); } catch (e) {
-      if (!/garbage collected|context was destroyed/i.test(String(e && e.message))) throw e;
-      await page.waitForTimeout(800); ia = await iaRun();
+    // 先.八十-6：同一偶發錯誤最多重試 3 次（每次間隔遞增）；其他錯誤照常 FAIL
+    for (let t = 0; ; t++) {
+      try { ia = await iaRun(); break; } catch (e) {
+        if (t >= 3 || !/garbage collected|context was destroyed/i.test(String(e && e.message))) throw e;
+        await page.waitForTimeout(800 * (t + 1));
+      }
     }
     const o = ia.order;
     if (o.some(x => x < 0)) iaErrs.push(`首頁區塊缺漏：${JSON.stringify(o)}`);
@@ -3465,6 +3461,34 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { cpErrs.push(`測試本身出錯：${e.message || e}`); }
   record("105. 自動收合只收說明類、不收卡片主內容；時鐘每秒改字不觸發重掃（先.八十-5）", cpErrs.length === 0, cpErrs.join("; "));
 
+  // 106.【2026-10-12 先.八十-6】交易頁策略監控台改讀 strategy_curves.json（名稱＝檔內 label，照 UI_GLOSSARY），
+  // 整個 App 不得再請求 strategy_performance.json；監控台卡片數＝曲線檔線數、每張名稱與檔內 label 相同；有資料的線同時列 0050。
+  const monErrs = [];
+  try {
+    const perfReqs = [];
+    const onReq = (req) => { if (/strategy_performance\.json/.test(req.url())) perfReqs.push(req.url()); };
+    page.on("request", onReq);
+    const curves = JSON.parse((await import("node:fs")).readFileSync("data/strategy_curves.json", "utf8"));
+    const r = await page.evaluate(async () => {
+      await window.go("trade");
+      const b = [...document.querySelectorAll("#trade-tabs button")].find(x => x.dataset.sub === "monitor"); if (b) b.click();
+      for (let i = 0; i < 30 && !document.querySelector("#strategy-monitor-list [data-sid]"); i++) await new Promise(res => setTimeout(res, 200));
+      if (typeof loadMyHoldingsEvents === "function") { try { await loadMyHoldingsEvents(); } catch (e) { console.warn("[smoke106]", e); } }
+      const cards = [...document.querySelectorAll("#strategy-monitor-list [data-sid]")];
+      return cards.map(c => ({ id: c.dataset.sid, name: (c.querySelector("b") || {}).textContent, text: c.innerText }));
+    });
+    page.off("request", onReq);
+    if (r.length !== curves.lines.length) monErrs.push(`監控台 ${r.length} 張卡 ≠ 曲線檔 ${curves.lines.length} 條線`);
+    for (const l of curves.lines) {
+      const c = r.find(x => x.id === l.id);
+      if (!c) { monErrs.push(`缺 ${l.id}`); continue; }
+      if (c.name !== l.label) monErrs.push(`${l.id} 名稱「${c.name}」≠ 檔內「${l.label}」`);
+      if (l.started && (l.nav || []).length && !/0050/.test(c.text)) monErrs.push(`${l.id} 有資料但沒列 0050 對照`);
+    }
+    if (perfReqs.length) monErrs.push(`仍在請求 strategy_performance.json（${perfReqs.length} 次）`);
+  } catch (e) { monErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("106. 策略監控台讀 strategy_curves.json、名稱照定案、列 0050 對照，App 不再請求 strategy_performance.json（先.八十-6）", monErrs.length === 0, monErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3493,7 +3517,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

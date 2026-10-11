@@ -15,11 +15,17 @@
     [/\bT86\b/g,'法人統計'],[/\bMI_MARGN\b/g,'融資統計'],[/\bMI_QFIIS\b/g,'外資持股'],[/\bTWT\d+U\b/g,''],
     [/\bTWSE\b/g,'證交所'],[/\bTPEx\b/g,'櫃買中心'],[/\bTAIFEX\b/g,'期交所'],
     [/FinMind/gi,'公開資料'],[/Shioaji/gi,'永豐'],
-    [/真錢\s*Bb-?90/g,'自動投資'],[/Bb-?90/g,'自動投資'],
     [/紙\.一b(\s*Bb-?90)?/g,'模擬 D'],[/紙上\s*4\s*R1-A/g,'模擬 C（並列版）'],[/紙上\s*4(\s*R1-C)?/g,'模擬 C'],[/紙上\s*3(\s*S3-C6)?/g,'模擬 B'],[/\bR1-A\b/g,'模擬 C（並列版）'],[/紙\.一(\s*70\/30)?/g,'模擬 A'],[/紙\.二/g,'模擬 E'],[/紙\.三(\s*S3-C6)?/g,'模擬 B'],[/紙\.四(\s*R1-C)?/g,'模擬 C'],
+    [/真錢\s*Bb-?90/g,'自動投資'],[/Bb-?90/g,'自動投資'],
     [/\bS3-C6\b/g,'模擬 B'],[/\bR1-C\b/g,'模擬 C'],
     [/\bLIVE_WITH_VETO\b/g,'真錢（可取消）'],[/\bLIVE\b/g,'真錢'],[/\bSIMULATION\b/g,'模擬'],
     [/\bMDD\b/g,'最大跌幅'],[/唯讀/g,'只能看'],[/否決窗/g,'取消時間'],
+    // 先.八十-6（2026-10-12）補：這次全檢漏抓的詞
+    [/([+\-−]?\d+(?:\.\d+)?)\s*pp\b/g,'$1 個百分點'],[/\bpp\b/g,'個百分點'],[/同產業桶內|同桶內|桶內/g,'同產業中'],
+    [/yfinance/gi,'Yahoo 財經'],[/\bNAV\b/g,'淨值'],[/BAA10Y/g,'信用利差'],[/Cloudflare\s*Access/g,'存取閘道'],
+    [/\bXBRL\b/g,'結構化財報'],[/\bMI_INDEX\b/g,'大盤統計'],[/\bSTOCK_DAY\b/g,'日成交'],[/\bopenapi\b/gi,'開放資料'],[/SBL\//g,''],
+    [/GitHub Actions\s*排程/g,'每日排程'],
+    [/[（(]\s*#\d{3}(?:\s*[／/、,，]\s*#\d{3})*\s*[）)]/g,''],[/[，,、]?\s*#\d{3}\b/g,''],
     [/data\/[\w./-]+\.json/g,'資料檔'],[/research\/[\w./-]+\.py/g,'程式'],
     [/（\s*[／/、，]*\s*）/g,''],[/\(\s*\)/g,'']
   ];
@@ -1898,14 +1904,7 @@
     const card=document.getElementById('home-my-events-card'),el=document.getElementById('my-holdings-events');
     if(!el)return;
     try{
-      const codes=new Set(WL);
-      try{
-        const r=await fetch('data/strategy_performance.json?t='+Date.now());
-        if(r.ok){
-          const perf=await r.json();
-          Object.values(perf.strategies||{}).forEach(s=>(s.holdings||[]).forEach(c=>codes.add(c)));
-        }
-      }catch(e){console.warn('[loadMyHoldingsEvents:perf]',e);recordGlobalError('loadMyHoldingsEvents:perf',e)}
+      const codes=new Set(WL);  // 先.八十-6：停用 strategy_performance.json（舊前向紙上持倉），只用自選股
       if(!codes.size){card.hidden=true;return}
       const [evDoc,newsDoc]=await Promise.all([loadEventsForCodes([...codes]),ensureNews()]);
       const items=[];
@@ -3828,7 +3827,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-12.0042';
+  const APP_VERSION='2026-10-12.0122';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -4018,6 +4017,33 @@
 //    啟動時標 data-ui-explain，之後只處理有這個標記的元素。程式動態產生的說明要收，就在 HTML 字串裡自己加 data-ui-explain。
 //  ② 時鐘每秒改字不得觸發重掃：觀察器只看「變動落在 data-ui-explain 元素裡、或新增節點本身帶 data-ui-explain」的那幾筆，
 //    其餘（時鐘、報價、列表重繪）直接略過，不再整頁 querySelectorAll。
+// 先.八十-6（2026-10-12）：前台內部代號守門。各面板組字串的地方很多（innerHTML／textContent／setTxt），逐一包 uiPlain
+// 容易漏；這裡在顯示層統一處理：#app 內的文字節點（[data-ui-advanced]、[data-ui-raw]、script/style 除外）只要命中
+// UI_PLAIN_MAP 任一規則就改寫。先用一條合併 regex 快速判斷，沒命中就不動（時鐘每秒改字只多一次短字串比對）。
+// 改寫後的文字不再命中，不會自我觸發迴圈。
+const UI_TERM_TEST=new RegExp(UI_PLAIN_MAP.map(([re])=>re.source).join('|'));
+function uiPlainRaw(t){let s=String(t);for(const [re,to] of UI_PLAIN_MAP)s=s.replace(re,to);return s}
+function uiTermFixNode(n){
+  try{
+    if(!n||n.nodeType!==3)return;
+    const v=n.nodeValue;if(!v||!UI_TERM_TEST.test(v))return;
+    const el=n.parentElement;if(!el||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA)$/.test(el.tagName)||el.closest('[data-ui-advanced],[data-ui-raw]'))return;
+    const nv=uiPlainRaw(v);if(nv!==v)n.nodeValue=nv;
+  }catch(e){console.warn('[uiTermFixNode]',e)}
+}
+function uiTermFixTree(root){
+  try{
+    if(!root)return;if(root.nodeType===3)return uiTermFixNode(root);
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);for(let n=w.nextNode();n;n=w.nextNode())uiTermFixNode(n);
+  }catch(e){console.warn('[uiTermFixTree]',e)}
+}
+try{
+  uiTermFixTree(document.getElementById('app'));
+  new MutationObserver(ms=>{for(const m of ms){
+    if(m.type==='characterData')uiTermFixNode(m.target);
+    else m.addedNodes&&m.addedNodes.forEach(uiTermFixTree);
+  }}).observe(document.getElementById('app'),{childList:true,subtree:true,characterData:true});
+}catch(e){console.warn('[uiTermGuard:init]',e);recordGlobalError('uiTermGuard:init',e)}
 const UI_NOTE_MAX=40;
 function uiCompactNote(n){
   try{

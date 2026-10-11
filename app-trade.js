@@ -222,7 +222,7 @@
     try{
       const [a,b,c,d]=await Promise.all([_renderPaper7030(),_renderPaper1b(),_renderPaper3(),_renderPaper4()]);
       el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px">'+a+b+'<div style="grid-column:1 / -1">'+c+'</div><div style="grid-column:1 / -1" id="paper4-card">'+d+'</div></div>'
-        +'<div class="note" style="margin:-4px 0 10px;text-align:center;color:var(--warn)">⚠ 紙上追蹤，非投資建議。虛擬帳戶，未使用真實資金。</div>';
+        +'<div class="note" style="margin:-4px 0 10px;text-align:center;color:var(--warn)">⚠ 紙上追蹤：虛擬帳戶，未使用真實資金。</div>';
     }catch(e){
       console.warn('[loadPaper7030]',e);recordGlobalError('loadPaper7030',e);
       el.innerHTML='<div class="note">載入失敗：'+_paperEsc(e.message)+'</div>';
@@ -350,7 +350,7 @@
       const btn=document.querySelector('#trade-tabs button[data-sub="monitor"]');if(btn)btn.click();
       await loadStrategyMonitor();
       const card=document.querySelector('#strategy-monitor-list [data-sid="'+id+'"]');
-      if(!card){toast('策略監控台查無此策略的報告段落');return}
+      if(!card){const el=document.getElementById('strategy-monitor-list');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return}  // 先.八十-6：監控台改用曲線檔的線編號，對不到就停在清單頂端
       const det=card.querySelector('[id^="sm-detail-"]');if(det)det.style.display='';
       card.scrollIntoView({behavior:'smooth',block:'start'});
     }catch(e){console.warn('[openStrategyReport]',e);recordGlobalError('openStrategyReport',e)}
@@ -359,18 +359,55 @@
     const el=document.getElementById(id);if(!el)return;
     el.style.display=el.style.display==='none'?'':'none';
   }
+  // 先.八十-6（2026-10-12）：策略監控台改讀 data/strategy_curves.json（與首頁「跟 0050 比」同一份、同一套名稱與口徑），
+  // 停用 data/strategy_performance.json（舊前向紙上績效，與紙上追蹤口徑不一致）。名稱照檔內 label（UI_GLOSSARY 定案名），
+  // 不在前台再自己命名；主數字＝累積報酬，旁邊同時列同期 0050；未開始的線只寫一行原因，不畫空白圖。
+  function smPct(v){return v==null?'—':(v>0?'+':'')+Number(v).toFixed(2)+'%'}
+  function strategyCurveMonitorCardHtml(l,idx){
+    const m=l.metrics||{},started=l.started&&(l.nav||[]).length>0;
+    const color=STRATEGY_STATUS_COLOR[l.status]||'var(--ink-3)';
+    const nav=(l.nav||[]).map(Number).filter(v=>isFinite(v));
+    const sparkHtml=nav.length>=2?spark(nav,nav[nav.length-1]>=nav[0]):'';
+    const main=started
+      ?`<b class="${(m.cum_pct||0)>=0?'pos':'neg'}" style="font-size:22px">${smPct(m.cum_pct)}</b><span class="note" style="margin-left:6px">0050 ${smPct(m.bench_cum_pct)}</span>`
+      :`<b style="font-size:14px;color:var(--ink-3)">${_autoEsc(l.note||'尚未開始')}</b>`;
+    const cardId=`sm-detail-${idx}`;
+    const det=started?`<div class="bot-stats" style="margin-bottom:8px">
+        <div class="s"><span>起始日</span><b>${_autoEsc(l.start_date||'—')}</b></div>
+        <div class="s"><span>交易日</span><b>${m.days??'—'}</b></div>
+        <div class="s"><span>最大跌幅</span><b>${m.mdd_pct!=null?Number(m.mdd_pct).toFixed(1)+'%':'—'}</b></div>
+        <div class="s"><span>0050 最大跌幅</span><b>${m.bench_mdd_pct!=null?Number(m.bench_mdd_pct).toFixed(1)+'%':'—'}</b></div>
+      </div>
+      <div class="note">判定：${_autoEsc(m.verdict||'—')}（資料到 ${_autoEsc(l.as_of||'—')}）</div>
+      <div class="note" data-ui-explain style="margin-top:4px">${_autoEsc(l.note||'')}</div>`
+      :`<div class="note">${_autoEsc(l.why||l.note||'尚未開始')}</div>`;
+    return `<div class="card press" data-sid="${String(l.id||'').replace(/[^\w.-]/g,'')}" style="cursor:pointer" onclick="toggleStrategyDetail('${cardId}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="flex:1;min-width:0">
+          <b style="font-size:15px">${_autoEsc(l.label||l.id)}</b>
+          <div style="margin-top:4px">${main}</div>
+        </div>
+        <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${color};border:1px solid ${color}">${_autoEsc(l.status||'')}</span>
+          ${sparkHtml}
+        </div>
+      </div>
+      <div id="${cardId}" style="display:none;margin-top:12px;border-top:1px solid var(--hairline);padding-top:12px">${det}</div>
+    </div>`;
+  }
   async function loadStrategyMonitor(){
     const el=document.getElementById('strategy-monitor-list');if(!el)return;
     try{
-      const r=await fetch('data/strategies.json?t='+Date.now());
-      if(!r.ok){el.innerHTML='<div class="note">查無資料（data/strategies.json尚未產生）</div>';return}
+      const r=await fetch('data/strategy_curves.json?t='+Date.now());
+      if(!r.ok){el.innerHTML='<div class="note">策略曲線資料暫時讀不到</div>';return}
       const json=await r.json();
-      const list=json.strategies||[];
+      const list=json.lines||[];
       if(!list.length){el.innerHTML='<div class="note">查無策略資料</div>';return}
-      el.innerHTML=list.map((s,i)=>strategyMonitorCardHtml(s,i)).join('');
+      el.innerHTML=(json.meta&&json.meta.correction?'<div class="note" data-ui-explain style="margin-bottom:8px">'+_autoEsc(json.meta.correction)+'</div>':'')
+        +list.map((l,i)=>strategyCurveMonitorCardHtml(l,i)).join('');
     }catch(e){
       console.warn('[loadStrategyMonitor]',e);recordGlobalError('loadStrategyMonitor',e);
-      el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
+      el.innerHTML='<div class="note">策略曲線資料暫時讀不到</div>';
     }
   }
 

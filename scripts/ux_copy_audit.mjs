@@ -74,18 +74,87 @@ export async function auditVisible(page, glossary, scope) {
   }, { g: glossary, scope });
 }
 
-export async function auditApp(page, baseUrl, glossary, { stockCode = "2330" } = {}) {
+// 先.八十-6（2026-10-12）：稽核範圍擴大——每個分頁的預設畫面之外，逐一點開該頁所有子分頁（*-tabs 的 data-sub 按鈕）、
+// 市場／選股切換（.mkt-toggle 的選項，含美股、期貨）、個股頁四個子分頁；最後模擬「電腦離線」（本機伺服器連不上）
+// 再看首頁／交易／設定一次。同一頁多個狀態的違規合併去重，key 名稱帶狀態（例：trade、trade/sub:monitor、market/opt:US、offline/home）。
+function mergeInto(dst, src) {
+  if (src.error) { dst.error = (dst.error ? dst.error + "；" : "") + src.error; return; }
+  for (const k of ["titles", "buttons", "notes", "terms"]) for (const x of src[k]) if (!dst[k].includes(x)) dst[k].push(x);
+  for (const w of src.disclaimerWhere) if (!dst.disclaimerWhere.includes(w)) { dst.disclaimerWhere.push(w); dst.disclaimers++; }
+}
+const blank = () => ({ titles: [], buttons: [], notes: [], terms: [], disclaimers: 0, disclaimerWhere: [] });
+
+async function clickAll(page, scope, sel) {
+  return page.evaluate(({ scope, sel }) => [...document.querySelectorAll(`${scope} ${sel}`)].map((el, i) => i), { scope, sel });
+}
+
+async function auditStates(page, glossary, scr) {
+  const scope = `#scr-${scr}`;
+  const out = blank();
+  mergeInto(out, await auditVisible(page, glossary, scope));
+  // 子分頁
+  const subs = await page.evaluate((scope) => [...document.querySelectorAll(`${scope} [id$="-tabs"] button[data-sub]`)].map(b => b.closest('[id$="-tabs"]').id + "|" + b.dataset.sub), scope);
+  for (const k of subs) {
+    const [tid, sub] = k.split("|");
+    await page.evaluate(({ tid, sub }) => { const b = document.querySelector(`#${tid} button[data-sub="${sub}"]`); if (b) b.click(); }, { tid, sub });
+    await page.waitForTimeout(700);
+    mergeInto(out, await auditVisible(page, glossary, scope));
+  }
+  // 市場／榜單切換選項（.mkt-toggle .mtg-opt）
+  const opts = await page.evaluate((scope) => [...document.querySelectorAll(`${scope} .mkt-toggle .mtg-opt`)].map((o, i) => i), scope);
+  for (const i of opts) {
+    await page.evaluate(({ scope, i }) => { const o = document.querySelectorAll(`${scope} .mkt-toggle .mtg-opt`)[i]; if (o && o.offsetParent) o.click(); }, { scope, i });
+    await page.waitForTimeout(700);
+    mergeInto(out, await auditVisible(page, glossary, scope));
+  }
+  // 復原：每個切換群組點回第一個選項、子分頁點回第一個
+  await page.evaluate((scope) => {
+    document.querySelectorAll(`${scope} .mkt-toggle`).forEach(t => { const o = t.querySelector(".mtg-opt"); if (o && o.offsetParent) o.click(); });
+    document.querySelectorAll(`${scope} [id$="-tabs"]`).forEach(t => { const b = t.querySelector("button[data-sub]"); if (b) b.click(); });
+  }, scope);
+  await page.waitForTimeout(400);
+  return out;
+}
+
+export async function auditApp(page, baseUrl, glossary, { stockCode = "2330", usCode = "AAPL", offline = true } = {}) {
   const res = {};
   for (const s of SCREENS) {
     await page.evaluate((s) => { const b = document.querySelector(`nav#nav button[data-scr="${s}"]`); if (b) b.click(); }, s);
     await page.waitForTimeout(1200);
-    res[s] = await auditVisible(page, glossary, `#scr-${s}`);
+    try { res[s] = await auditStates(page, glossary, s); } catch (e) { res[s] = { ...blank(), error: String(e) }; }
   }
-  try {
-    await page.evaluate((c) => openStock(c), stockCode);
-    await page.waitForTimeout(2500);
-    res.stock = await auditVisible(page, glossary, "#scr-stock");
-  } catch (e) { res.stock = { error: String(e) }; }
+  for (const [key, code] of [["stock", stockCode], ["stock/us", usCode]]) {
+    try {
+      await page.evaluate((c) => openStock(c), code);
+      await page.waitForTimeout(2500);
+      res[key] = await auditStates(page, glossary, "stock");
+    } catch (e) { res[key] = { ...blank(), error: String(e) }; }
+  }
+  if (offline) {
+    // 電腦離線：另開一個獨立的瀏覽器環境（新 context）模擬本機伺服器連不上，稽核完就關掉，不污染呼叫端的分頁狀態
+    // （冒煙實測：在同一分頁裡改 LIVE／window.fetch 再還原，後續 openStock 的 promise 會永遠不 resolve）。
+    const ctx2 = await page.context().browser().newContext({ viewport: page.viewportSize() || { width: 390, height: 844 } });
+    const p2 = await ctx2.newPage();
+    try {
+      await p2.goto(page.url(), { waitUntil: "domcontentloaded" });
+      await p2.waitForTimeout(1500);
+      await p2.evaluate(() => {
+        LIVE.url = "https://audit-offline.invalid"; LIVE.configured = true;
+        const f = window.fetch;
+        window.fetch = (u, o) => (String(u).startsWith("https://audit-offline.invalid") ? Promise.reject(new TypeError("Failed to fetch")) : f(u, o));
+      });
+      for (const s of ["home", "trade", "settings"]) {
+        await p2.evaluate((s) => { const b = document.querySelector(`nav#nav button[data-scr="${s}"]`); if (b) b.click(); }, s);
+        await p2.evaluate(async (s) => {
+          const fns = { home: ["loadHomeExecCard", "loadHomeBrokerCard"], trade: ["loadTradeBots"], settings: ["loadAutoTrading", "loadRiskLimits"] }[s] || [];
+          for (const n of fns) { try { const fn = typeof window[n] === "function" ? window[n] : eval(n); if (typeof fn === "function") await fn(); } catch (e) { console.warn("[audit offline]", n, e); } }
+        }, s);
+        await p2.waitForTimeout(800);
+        res["offline/" + s] = await auditVisible(p2, glossary, `#scr-${s}`);
+      }
+    } catch (e) { res.offline = { ...blank(), error: String(e) }; }
+    finally { await ctx2.close(); }
+  }
   return res;
 }
 

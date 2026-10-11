@@ -52,6 +52,13 @@
     {"term": "XBRL", "regex": "XBRL"},
     {"term": "FinMind", "regex": "FinMind", "flags": "i"},
     {"term": "Shioaji", "regex": "Shioaji", "flags": "i"},
-    {"term": "TWSE 端點", "regex": "\\bTWSE\\b|openapi|t187ap|STOCK_DAY|\\bT86\\b|\\bMI_INDEX\\b"}
+    {"term": "TWSE 端點", "regex": "\\bTWSE\\b|openapi|t187ap|STOCK_DAY|\\bT86\\b|\\bMI_INDEX\\b"},
+    {"term": "#試驗編號", "regex": "#\\d{3}\\b"},
+    {"term": "桶內", "regex": "桶內"},
+    {"term": "MI_MARGN", "regex": "MI_MARGN"},
+    {"term": "Cloudflare Access", "regex": "Cloudflare\\s*Access"},
+    {"term": "yfinance", "regex": "yfinance", "flags": "i"},
+    {"term": "NAV", "regex": "\\bNAV\\b"},
+    {"term": "BAA10Y", "regex": "BAA10Y"}
   ]
 }

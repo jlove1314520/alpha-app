@@ -95,7 +95,7 @@
   async function loadFinancialsUS(code){
     const f=await loadUsFinancials(code);
     if(currentCode!==code)return; // 使用者已切到別檔股票，這份資料作廢
-    setTxt('eps-bars-title','年度利潤率（美股，非逐季）');
+    setTxt('eps-bars-title','年度利潤率');
     setTxt('fin-roe-lbl','營收年增（年度）');
     setTxt('fin-fcf-lbl','FCF 利潤率（年度）');
     if(!f){
@@ -632,7 +632,7 @@
       _safeAsync('renderRevenueRead',()=>renderRevenueRead(code));  // 常備.開發-14
       return;
     }
-    setTxt('eps-bars-title','季度獲利（EPS · 元）');
+    setTxt('eps-bars-title','季度獲利');
     setTxt('fin-roe-lbl','ROE（近四季）');
     setTxt('fin-fcf-lbl','自由現金流（最新季）');
     document.getElementById('eps-bars').innerHTML=skeletonHtml(3);  // 2026-09-15 P0產品.四：骨架屏
@@ -1136,7 +1136,7 @@
   function buildAnalystRadarHtml(code,data){
     const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     if(!isUS(code))return `<div class="note" data-ui-explain>${esc(ANALYST_TW_NOTE)}</div>`;
-    const tail='<div class="note" style="margin-top:8px">目標價：Finnhub 目標價端點為付費方案，待採購，目前不顯示。評等為多家券商家數彙整，非投資建議。</div>';
+    const tail='<div class="note" style="margin-top:8px">目標價：Finnhub 目標價端點為付費方案，待採購，目前不顯示。評等為多家券商家數彙整。</div>';
     const rows=data&&data.tickers&&data.tickers[code];
     if(!rows||!rows.length){
       const cov=(data&&data.coverage)||[];
@@ -1240,7 +1240,7 @@
       else if(!rows.some(r=>r.type!=='財報日'))why.push(US_6K_ISSUERS.includes(code)?'外國私人發行人改申報 Form 6-K，近 90 天無 8-K 屬正常':'近 90 天無 8-K 申報');
       if(!ec)why.push('財報日：此代號不在財報行事曆追蹤清單（fetch_earnings_calendar.py）');
       else if(!rows.some(r=>r.type==='財報日'))why.push('財報日：行事曆尚無下一次日期');
-      const foot='<div class="note" style="margin-top:8px">來源：SEC EDGAR Form 8-K（只存索引，點標題看原文）'+(d.fetched_at?'，'+fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei'):'')+'；財報日為 yfinance 推估，公司可能改期。非投資建議。'+(why.length?'<br>'+why.map(_autoEsc).join('；'):'')+'</div>';
+      const foot='<div class="note" style="margin-top:8px">來源：SEC EDGAR Form 8-K（只存索引，點標題看原文）'+(d.fetched_at?'，'+fmtTzMMDDHHMM(new Date(d.fetched_at),'Asia/Taipei'):'')+'；財報日為 yfinance 推估，公司可能改期。'+(why.length?'<br>'+why.map(_autoEsc).join('；'):'')+'</div>';
       host.innerHTML=(rows.length?'<div style="display:flex;flex-direction:column;gap:9px">'+eventsRowsHtml(rows,15)+'</div>':'<div class="note">近 90 天無可顯示的美股事件</div>')+foot;
     }catch(e){console.warn('[renderUsEventsTab]',e);recordGlobalError('renderUsEventsTab',e);host.innerHTML='<div class="note">美股事件載入失敗（'+_autoEsc(e&&e.message||e)+'）</div>'}
   }
