@@ -16127,3 +16127,21 @@ mode: CRUNCH（先.六十四 趕工模式）
 [crunch 14:40:37] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 1 項；常備.開發剩 16 項
 finally: released .devqueue.lock (cycle_id=20261011-143102)
 ===== DevQueue cycle end: 2026-10-11 14:40:39 cycle_id=20261011-143102 reason=CRUNCH_YIELD exit=12 duration_min=9.6 =====
+
+===== DevQueue cycle start: 2026-10-11 15:01:01 cycle_id=20261011-150101 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：.gitignore（6.8分鐘前）、scripts/smoke_test.mjs（2.3分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-11 15:31:01 cycle_id=20261011-153101 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+[crunch 15:31:02] gate：NO_LOCK：沒有輪次在跑
+crunch gate: [crunch 15:31:02] gate：NO_LOCK：沒有輪次在跑
+lock: LOCK_ACQUIRED (cycle 20261011-153101)
+mode: CRUNCH（先.六十四 趕工模式）
+[crunch 15:31:04] 排程切換為 crunch（每 PT30M、上限 PT12H）：成功
+[crunch 15:31:05] 派工 #1：常備.開發-因子類-B21 Reddit 社群訊號抓取（合規，依賴 B19）
+[crunch 15:31:08] 結算：常備.開發-因子類-B21 Reddit 社群訊號抓取（合規，依賴 B19） → fail
+[crunch 15:31:10] 派工 #2：常備.開發-因子類-B21 Reddit 社群訊號抓取（合規，依賴 B19）
+[crunch 15:31:13] 結算：常備.開發-因子類-B21 Reddit 社群訊號抓取（合規，依賴 B19） → fail_blocked
+[crunch 15:31:15] 本輪收工：讓路：其他軌道持鎖或有人正在改檔（check_collision）；處理 2 項；常備.開發剩 15 項
+finally: released .devqueue.lock (cycle_id=20261011-153101)
+===== DevQueue cycle end: 2026-10-11 15:31:17 cycle_id=20261011-153101 reason=CRUNCH_YIELD exit=12 duration_min=0.3 =====
