@@ -23,15 +23,15 @@
       if(Array.isArray(rows)){
         const wk=rows.filter(x=>String(x.date||'')>=String(w.week_start||'9'));
         const c={};wk.forEach(x=>{const k=_autoStatusTxt(x.status);c[k]=(c[k]||0)+1});
-        ls.push('真錢 Bb-90 '+(w.week_start||'')+' 起委託 '+wk.length+' 筆'+(wk.length?'（'+Object.keys(c).map(k=>k+' '+c[k]).join('、')+'）':''));
-      }else ls.push('真錢帳本：未連線本機伺服器，本週委託筆數不列入');
+        ls.push('自動投資 '+(w.week_start||'')+' 起委託 '+wk.length+' 筆'+(wk.length?'（'+Object.keys(c).map(k=>k+' '+c[k]).join('、')+'）':''));
+      }else ls.push('自動投資：連上電腦才看得到本週委託');
       el.innerHTML=_briefLines(ls)+_briefFoot(d);
     }catch(e){console.warn('[loadWeeklyBrief]',e);recordGlobalError('loadWeeklyBrief',e);el.textContent='讀取週覆盤摘要失敗（'+(e&&e.message||e)+'）'}
   }
   async function loadJournalLedger(){
     const pe=document.getElementById('journal-pnl'),te=document.getElementById('journal-trades');
     if(!pe||!te)return;
-    if(!LIVE.configured||!LIVE.url){pe.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢帳本只在本機。';te.innerHTML='<div class="note" style="padding:14px 2px">尚未連線本機伺服器</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');setTxt('journal-review','尚未連線本機伺服器，盤後復盤只在本機產生。');return}
+    if(!LIVE.configured||!LIVE.url){pe.textContent='連上電腦才看得到';te.innerHTML='<div class="note" style="padding:14px 2px">連上電腦才看得到</div>';setTxt('journal-perf','尚未連線本機伺服器，真錢績效對照只在本機計算。');setTxt('journal-review','尚未連線本機伺服器，盤後復盤只在本機產生。');return}
     try{
       const d=await loadAutoLedger();
       JOURNAL_LEDGER_CACHE=d;_safeAsync('loadWeeklyBrief',loadWeeklyBrief);

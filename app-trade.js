@@ -28,7 +28,7 @@
   async function loadTradeBots(){
     const note=document.getElementById('bot-bb90-note'),rec=document.getElementById('bot-recent-orders');
     if(!note)return;
-    if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器（設定頁「即時伺服器」）';if(rec)rec.textContent='尚未連線本機伺服器';return}
+    if(!LIVE.configured||!LIVE.url){note.textContent='連上電腦才看得到';if(rec)rec.textContent='連上電腦才看得到';return}
     try{
       const r=await liveFetch('/auto/status',6000);
       if(!r.ok)throw new Error('HTTP '+r.status);
@@ -118,12 +118,12 @@
   async function _renderPaper7030(){
     try{
       const j=await _fetchPaperJson('data/paper_7030.json');
-      if(!j.started)return _paperCardHtml('紙.一 70/30','0050＋定存','<div class="note" style="margin-top:8px">'+_paperEsc(j.note||'尚未啟動：預定2026-10第一個交易日起')+'</div>');
+      if(!j.started)return _paperCardHtml('模擬 A 穩健','0050＋定存','<div class="note" style="margin-top:8px">'+_paperEsc(j.note||'尚未啟動：預定2026-10第一個交易日起')+'</div>');
       const w=(j.stock_weight!=null?'0050 '+(j.stock_weight*100).toFixed(0)+'%':'—')+' / 定存 '+(j.bond_weight!=null?(j.bond_weight*100).toFixed(0)+'%':'—');
-      return _paperCardHtml('紙.一 70/30','0050 70% · 定存 30%',_paperCommonRows(j,w));
+      return _paperCardHtml('模擬 A 穩健','0050 70% · 定存 30%',_paperCommonRows(j,w));
     }catch(e){
       console.warn('[_renderPaper7030]',e);recordGlobalError('_renderPaper7030',e);
-      return _paperCardHtml('紙.一 70/30','0050＋定存','<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
+      return _paperCardHtml('模擬 A 穩健','0050＋定存','<div class="note" style="margin-top:8px">載入失敗：'+_paperEsc(e.message)+'</div>');
     }
   }
   async function _renderPaper1b(){

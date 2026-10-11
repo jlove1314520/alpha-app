@@ -906,7 +906,8 @@ async function runSmokeTest(baseUrl, headless = true) {
       cost: document.getElementById("chip-cost-note")?.textContent || "",
     }));
     if (info.rows === 0 && !/查無/.test(info.text)) chipErrors.push(`三大法人逐日表既無資料列也不是誠實空狀態：「${info.text}」`);
-    if (!/非投資建議/.test(info.disclaimer) || !/不等於獲利/.test(info.disclaimer)) chipErrors.push("缺少籌碼免責文字");
+    // 先.七十二-A2：「非投資建議」改只放頁尾一處；籌碼卡保留「跟著大戶不等於會賺」的白話提醒
+    if (!/不等於/.test(info.disclaimer) || /非投資建議/.test(info.disclaimer)) chipErrors.push("籌碼提醒缺「不等於」或卡內又重複免責");
     if (!/估算/.test(info.cost)) chipErrors.push(`估算成本欄位沒有標「估算」：「${info.cost}」`);
     results.chip_trend_rows = info.rows;
   } catch (e) {
@@ -2004,7 +2005,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (r.cf !== "undefined") fakeOrderErrors.push("window.confirmOrder 仍存在");
     if (r.ots !== "undefined") fakeOrderErrors.push("window.openTradeSheet 仍存在");
     if (!r.twNote || r.twBuy) fakeOrderErrors.push(`台股個股頁應只顯示唯讀說明（說明=${r.twNote}，買進鈕=${r.twBuy}）`);
-    if (!r.twTxt.includes("自動交易由 Bb-90 引擎執行")) fakeOrderErrors.push(`台股唯讀說明文字不符：${r.twTxt.slice(0, 60)}`);
+    if (!r.twTxt.includes("這裡不下單")) fakeOrderErrors.push(`台股唯讀說明文字不符：${r.twTxt.slice(0, 60)}`);
     if (r.usNote || !r.usBuy) fakeOrderErrors.push(`美股個股頁應顯示 IBKR 模擬下單鈕（說明=${r.usNote}，買進鈕=${r.usBuy}）`);
   } catch (e) { fakeOrderErrors.push(`測試本身出錯：${e.message || e}`); }
   record("62. 不得存在台股假下單（confirmOrder／#sheet／「委託已送出」）；台股個股頁唯讀說明、美股維持 IBKR 模擬卡", fakeOrderErrors.length === 0, fakeOrderErrors.join("; "));
@@ -2120,7 +2121,7 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (!r.body.includes("2,000,000")) posCardErrors.push(`市值應為 2,000,000（2 張×1000×1000）：${r.body.slice(0, 120)}`);
     if (!r.body.includes("+199,000")) posCardErrors.push(`未實現損益應顯示券商回傳 +199,000：${r.body.slice(0, 120)}`);
     if (r.total !== 2050000) posCardErrors.push(`總資產應為 2,050,000（現金 5 萬＋持股 200 萬），實得 ${r.total}`);
-    if (!r.off.trim() || !r.off.includes("未連線") || !r.offVisible) posCardErrors.push(`未連線時應顯示說明而非空白：「${r.off}」 visible=${r.offVisible}`);
+    if (!r.off.trim() || !/未連線|連上電腦/.test(r.off) || !r.offVisible) posCardErrors.push(`未連線時應顯示說明而非空白：「${r.off}」 visible=${r.offVisible}`);
     if (/\d{7,}/.test(r.body)) posCardErrors.push("持倉卡出現 7 位以上連續數字（疑似帳號）");
   } catch (e) { posCardErrors.push(`測試本身出錯：${e.message || e}`); }
   record("66. 首頁持倉損益卡（張數／市值／未實現損益／合計；總資產持股市值以張×1000 計；未連線顯示說明）", posCardErrors.length === 0, posCardErrors.join("; "));
@@ -2257,7 +2258,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (!r.partial.includes(k)) execErrors.push(`部分成交畫面缺「${k}」：${r.partial.slice(0, 160)}`);
     if (!r.cash.includes("尚未入金") || !r.cash.includes("整批被擋")) execErrors.push(`未入金應白話說明：${r.cash.slice(0, 160)}`);
     if (!r.half.includes("讀不到 /auto/ledger") || !r.half.includes("10/15")) execErrors.push(`ledger 失敗時 status 部分應照畫：${r.half.slice(0, 160)}`);
-    if (!r.off.includes("尚未連線")) execErrors.push(`未連線應顯示說明：「${r.off}」`);
+    if (!/尚未連線|連上電腦/.test(r.off)) execErrors.push(`未連線應顯示說明：「${r.off}」`);
   } catch (e) { execErrors.push(`測試本身出錯：${e.message || e}`); }
   record("71. 首頁真錢執行總覽卡（期別／送出筆數／成交比例／權重偏離／下一期；未入金白話原因；單端點失敗隔離；未連線說明）", execErrors.length === 0, execErrors.join("; "));
 
@@ -2845,21 +2846,21 @@ async function runSmokeTest(baseUrl, headless = true) {
         if (t !== "all") out.goals.push({ t, g: (body.querySelector(".sc-goal") || {}).textContent || "" });
         const v = body.querySelector(".sc-verdict");
         if (v) out.verdicts.push(v.textContent);
-        if (t === "boards") out.correction = body.textContent.includes("誤放大約 5 倍");
+        if (t === "boards") out.correction = body.textContent.includes("放大約 5 倍");
       }
       SC_TAB = "live"; renderStrategyCurves();
       return out;
     });
     if (ui.err) uiErrs.push(ui.err);
     else {
-      if (ui.title !== "策略 vs 0050") uiErrs.push(`標題是「${ui.title}」`);
+      if (ui.title !== "跟 0050 比") uiErrs.push(`標題是「${ui.title}」`);
       if (ui.old) uiErrs.push("舊「我們 vs 0050」卡仍在");
       if (ui.tabs.length !== 8) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 8）`);
       for (const t of ui.tabs) if (t.len < 10) uiErrs.push(`分頁 ${t.t} 內容空白`);
       if (!ui.correction) uiErrs.push("選股榜單分頁沒有更正註記");
-      if (ui.positioning !== "守回撤的策略在多頭月會落後 0050，這是設計結果；判斷用 ≥60 交易日與回撤，不用單月報酬") uiErrs.push(`卡頂定位句不符：「${ui.positioning}」`);
+      if (ui.positioning !== "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅") uiErrs.push(`卡頂定位句不符：「${ui.positioning}」`);
       if (!ui.posAbove) uiErrs.push("卡頂定位句不在分頁列上方");
-      const wantGoal = { live: "守回撤（天條一）", paper_1: "守回撤（天條一）", paper_3: "守回撤（天條一）", paper_4: "贏大盤＋守回撤", boards: "選股研究" };
+      const wantGoal = { live: "守住回檔", paper_1: "守住回檔", paper_3: "守住回檔", paper_4: "贏大盤也守回檔", boards: "選股研究" };
       for (const g of ui.goals) {
         if (!g.g.startsWith("設計目標：")) uiErrs.push(`分頁 ${g.t} 沒有設計目標欄`);
         else if (wantGoal[g.t] && !g.g.includes(wantGoal[g.t])) uiErrs.push(`分頁 ${g.t} 設計目標應為「${wantGoal[g.t]}」，實為「${g.g}」`);
@@ -2872,7 +2873,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       uiInfo.push(`${ui.tabs.length} 分頁、判讀 ${ui.verdicts.length} 則`);
     }
   } catch (e) { uiErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("89. 「策略 vs 0050」卡：改名、八分頁可切換、選股榜單附更正註記、判讀為固定規則文字、卡頂定位句＋各線設計目標（先.七十-5）", uiErrs.length === 0, uiErrs.join("; ") || uiInfo.join("；"));
+  record("89. 「跟 0050 比」卡（原策略 vs 0050）：改名、八分頁可切換、選股榜單附更正註記、判讀為固定規則文字、卡頂定位句＋各線設計目標（先.七十-5）", uiErrs.length === 0, uiErrs.join("; ") || uiInfo.join("；"));
 
   // 90.【2026-10-11 先.六十九-1】外殼快取優先＋資料 60 秒記憶體快取：模擬 4G（1.6Mbps／RTT 150ms）第二次開啟首頁
   // 「可互動」（核心 app.js 執行完畢，window.__ALPHA_BOOT_MS）<1.5 秒、SW 已接管，且 10 秒內同一個 data/*.json 不重複打網路。
@@ -2888,10 +2889,62 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { soErrs.push(`測試本身出錯：${e.message || e}`); }
   record("90. 4G 模擬第二次開啟可互動 <1.5 秒、SW 接管、資料檔不重複抓取（先.六十九-1）", soErrs.length === 0, soErrs.join("; ") || soInfo);
 
+  // 91.【2026-10-11 先.七十二-A1／A2】前台文案規則（data/ui_glossary.json）：卡片標題 ≤8 字且無括號、按鈕 ≤6 字、
+  // 看得到的說明 ≤40 字（超過要收成「ⓘ 說明」）、內部代號不得出現在前台（只准設定頁「進階」）、「非投資建議」前台只在頁尾一處。
+  // 用 scripts/ux_copy_audit.mjs 同一套規則逐頁（五個分頁＋設定＋個股頁）檢查看得到的文字，任一命中即 FAIL。
+  const uxErrs = [];
+  let uxInfo = "";
+  try {
+    const { auditApp, loadGlossary } = await import("./ux_copy_audit.mjs");
+    const ux = await auditApp(page, baseUrl, loadGlossary());
+    let n = 0;
+    for (const [pg, r] of Object.entries(ux)) {
+      if (r.error) { uxErrs.push(`${pg}：${r.error}`); continue; }
+      for (const k of ["titles", "buttons", "notes", "terms"]) for (const x of r[k]) { n++; uxErrs.push(`${pg}/${k}：${x}`); }
+      if (r.disclaimers > 0) { n++; uxErrs.push(`${pg}：卡片裡又出現「非投資建議」（${r.disclaimerWhere.join("、")}）`); }
+    }
+    const footer = await page.evaluate(() => [...document.querySelectorAll("[data-ui-footer-disclaimer]")].map(e => e.textContent.trim()));
+    if (footer.length !== 1 || !/非投資建議/.test(footer[0] || "")) uxErrs.push(`頁尾免責應恰好一處含「非投資建議」，實際 ${footer.length} 處`);
+    uxInfo = `${Object.keys(ux).length} 頁 0 處違規；頁尾免責 1 處`;
+    await page.evaluate(() => { const b = document.querySelector('nav#nav button[data-scr="home"]'); if (b) b.click(); });
+    await page.waitForTimeout(400);
+  } catch (e) { uxErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("91. 前台文案規則：標題 ≤8 字無括號、按鈕 ≤6 字、說明 ≤40 字、內部代號只在進階、免責只在頁尾（先.七十二-A1／A2）", uxErrs.length === 0, uxErrs.slice(0, 12).join("; ") || uxInfo);
+
+  // 92.【先.七十二-A3】紅色橫幅兩段式：狀況（≤20 字）＋下一步（›），原始訊息收在「細節」；比不到規則的訊息也要先轉白話
+  const banErrs = [];
+  try {
+    const b = await page.evaluate(() => {
+      const el = document.getElementById("auto-banner");
+      const save = Object.assign({}, AUTO_BAN);
+      const out = [];
+      for (const raw of ["現金不足：INSUFFICIENT_CASH 需 12,345 元", "自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳", "未知錯誤 Bb-90 LIVE preflight XYZ_42"]) {
+        AUTO_BAN.offline = ""; AUTO_BAN.hb = ""; AUTO_BAN.px = ""; AUTO_BAN.local = raw;
+        renderAutoBanner();
+        const sit = el.querySelector(".ui-ban-sit"), nx = el.querySelector(".ui-ban-next"), det = el.querySelector("details.ui-ban-detail");
+        out.push({ raw, shown: getComputedStyle(el).display !== "none", sit: sit && sit.textContent, next: nx && nx.textContent,
+          detOpen: det && det.open, detRaw: det && (det.querySelector("[data-ui-raw]") || {}).textContent, visible: el.innerText });
+      }
+      Object.assign(AUTO_BAN, save); renderAutoBanner();
+      return out;
+    });
+    const want = ["還沒入金，這一期不會下單", "電腦沒在跑，自動投資暫停"];
+    b.forEach((x, i) => {
+      if (!x.shown) banErrs.push(`第 ${i + 1} 則沒顯示`);
+      if (!x.sit || [...x.sit].length > 20) banErrs.push(`狀況過長或缺：${x.sit}`);
+      if (!x.next || !x.next.includes("›")) banErrs.push(`缺下一步：${x.next}`);
+      if (x.detOpen) banErrs.push("細節預設不該展開");
+      if (!x.detRaw || !x.detRaw.includes(x.raw.slice(0, 10))) banErrs.push("原始訊息沒保留在細節裡");
+      if (want[i] && x.sit !== want[i]) banErrs.push(`第 ${i + 1} 則狀況應為「${want[i]}」，實為「${x.sit}」`);
+      if (/Bb-?90|\bLIVE\b/.test(x.visible)) banErrs.push(`看得到的橫幅文字仍有內部代號：${x.visible.slice(0, 40)}`);
+    });
+  } catch (e) { banErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("92. 紅色橫幅「狀況＋下一步」兩段式、細節收合、原始訊息經白話轉換（先.七十二-A3）", banErrs.length === 0, banErrs.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

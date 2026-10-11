@@ -266,14 +266,14 @@
   // 2026-09-05（新一.6）每個因子「為什麼這檔沒有」的真實原因。八因子現在全部有資料源
   // （見 research/live_factors.py），缺的都是「這一檔在那個官方資料檔裡沒有資料」。
   const FACTOR_MISSING_REASON={
-    earnings_growth:'這檔沒有官方季度財報：data/stock_detail.json 來自 TWSE t187ap06_L_ci/07_L_ci，只涵蓋上市「一般業」，上櫃與金融/證券/保險等特殊業別未涵蓋（需要「最新一季 vs 去年同季」才能算年增）。',
-    revenue_momentum:'這檔在 data/fundamentals.json 沒有月營收（來源：TWSE t187ap05_L／TPEx mopsfin_t187ap05_OB 每日累積）。',
+    earnings_growth:'這檔沒有官方季度財報（目前只涵蓋上市一般業；上櫃與金融/證券/保險等特殊業別未涵蓋（需要「最新一季 vs 去年同季」才能算年增）。',
+    revenue_momentum:'這檔沒有月營收資料（公開的每月營收公告還沒涵蓋到這檔）。',
     growth_quality:'這檔的月營收年增資料不足 6 個月（月營收歷史是「一次性種子快照＋每日累積」，新納入的股票要等累積）。',
-    chips:'這檔沒有三大法人／融資融券資料（來源：TWSE T86＋MI_MARGN／TPEx 對應端點）。',
-    technical:'這檔在 data/price_history.json 的價量歷史不足（至少要 6 個交易日才能算最短的均線與 RSI）。',
-    valuation_adj:'這檔在 data/fundamentals.json 沒有本益比／股價淨值比（來源：TWSE BWIBBU_ALL／TPEx tpex_mainboard_peratio_analysis）。',
+    chips:'這檔沒有三大法人／融資融券資料。',
+    technical:'這檔的價量歷史不足（至少要 6 個交易日）。',
+    valuation_adj:'這檔沒有本益比／股價淨值比資料。',
     analyst:'這檔沒有三大法人買賣紀錄可推算機構行為（本因子是法人實際買賣行為，不是分析師目標價——台股沒有免費的目標價／評等資料源）。',
-    catalyst:'這檔近期在 data/events.json 沒有事件紀錄（來源：MOPS重大訊息／TWSE月營收公布／除權息，每30分鐘排程更新，見PENDING_QUEUE「三」）。',
+    catalyst:'這檔近期沒有事件紀錄。',
   };
   // ══════ 2026-09-15（P0產品.二）選股理由：因子貢獻＋百分位＋同產業比較 ══════
   // 三個進入點（個股頁總覽分頁選股理由卡／選股榜每列展開／個股研究報告頁既有因子清單）
@@ -331,7 +331,7 @@
         <div class="bar-fill" style="position:absolute;top:0;bottom:0;${dirUp?`left:50%;width:${mag}%`:`right:50%;width:${mag}%`};background:${dirUp?'var(--gold-grad)':'rgba(138,133,123,.55)'};border-radius:999px"></div>
       </div>
       <div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:4px">${dirTag}${pctBadge}${indBadge}</div>
-      <div class="fr-reason">${f.reason||''}</div>
+      <div class="fr-reason">${uiPlain(f.reason||'')}</div>
     </div>`;
   }
   // 規則式一句話摘要：取百分位最高的1~2個因子＋（若明顯偏弱）百分位最低的因子，

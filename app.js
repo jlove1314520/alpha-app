@@ -6,6 +6,28 @@
   // console裡沒人看到。只留最近20筆，避免無限累積吃記憶體。
   let GLOBAL_ERRORS=[];
 
+  // ══════ 先.七十二-A1／A3（2026-10-11）：白話轉換表（前台唯一一份；對照 data/ui_glossary.json）══════
+  // 資料檔裡帶來的文字（評分理由、錯誤訊息、伺服器回傳的原因）在顯示前一律經過 uiPlain()，把內部代號換成白話、
+  // 拿掉端點名與檔案路徑。新增內部代號時同步改這裡與 data/ui_glossary.json。
+  const UI_PLAIN_MAP=[
+    [/來源\s*TWSE\s*官方財報\s*t187ap\S*/g,'來源：證交所財報'],
+    [/\bt187ap\w*(\/\w+)*/g,''],[/\bmopsfin_\w+/g,''],[/\bBWIBBU_ALL\b/g,''],[/\btpex_\w+/g,''],
+    [/\bT86\b/g,'法人統計'],[/\bMI_MARGN\b/g,'融資統計'],[/\bMI_QFIIS\b/g,'外資持股'],[/\bTWT\d+U\b/g,''],
+    [/\bTWSE\b/g,'證交所'],[/\bTPEx\b/g,'櫃買中心'],[/\bTAIFEX\b/g,'期交所'],
+    [/FinMind/gi,'公開資料'],[/Shioaji/gi,'永豐'],
+    [/真錢\s*Bb-?90/g,'自動投資'],[/Bb-?90/g,'自動投資'],
+    [/紙\.一b/g,'模擬 A2'],[/紙\.一(\s*70\/30)?/g,'模擬 A'],[/紙\.二/g,'模擬 D'],[/紙\.三(\s*S3-C6)?/g,'模擬 B'],[/紙\.四(\s*R1-C)?/g,'模擬 C'],
+    [/\bS3-C6\b/g,'模擬 B'],[/\bR1-C\b/g,'模擬 C'],
+    [/\bLIVE_WITH_VETO\b/g,'真錢（可取消）'],[/\bLIVE\b/g,'真錢'],[/\bSIMULATION\b/g,'模擬'],
+    [/\bMDD\b/g,'最大跌幅'],[/唯讀/g,'只能看'],[/否決窗/g,'取消時間'],
+    [/data\/[\w./-]+\.json/g,'資料檔'],[/research\/[\w./-]+\.py/g,'程式'],
+    [/（\s*[／/、，]*\s*）/g,''],[/\(\s*\)/g,'']
+  ];
+  function uiPlain(s){
+    try{let t=String(s==null?'':s);for(const [re,to] of UI_PLAIN_MAP)t=t.replace(re,to);return t.replace(/\s{2,}/g,' ').trim()}
+    catch(e){console.warn('[uiPlain]',e);return String(s==null?'':s)}
+  }
+
   // 先.六十九-1（2026-10-11）：同網域資料檔（data/*.json、scores*.json）60 秒記憶體快取。
   // 實測同一次開啟首頁 quotes_tw、margin_maintenance 各被不同面板抓了 2 次；這裡把同一路徑（忽略 ?t= 這類
   // 查詢字串）60 秒內的 GET 併成一次網路請求，各呼叫端拿到各自的 clone()。仍是網路優先：60 秒一到就重抓；
@@ -978,8 +1000,9 @@
   // 帳本只在本機）。每條線從自己的起始日歸一為 100，灰線為同期 0050；指標與「金礦判讀」都由 Python 端同一支
   // metrics() 算好，這裡只畫——判讀文字是固定規則（<60 日「尚不足以判斷」），前端不自行產生任何推論文字。
   let SC_DATA=null,SC_LIVE=null,SC_LIVE_ERR='',SC_TAB='live',SC_BOARD='value';
-  const SC_TABS=[['live','真錢 Bb-90'],['paper_1','紙.一 70/30'],['paper_1b','紙.一b'],['paper_2','紙.二（11/16 起）'],
-    ['paper_3','紙.三 S3-C6（10/31 起）'],['paper_4','紙.四 R1-C（10/31 起）'],['boards','選股榜單'],['all','全部疊加']];
+  // 先.七十二-A4：前台白話名稱（對照表 data/ui_glossary.json）；內部 id 不變
+  const SC_TABS=[['live','自動投資'],['paper_1','模擬 A 穩健'],['paper_3','模擬 B 景氣閘門'],['paper_4','模擬 C 加速'],
+    ['paper_1b','模擬 A2'],['paper_2','模擬 D'],['boards','選股榜單'],['all','全部疊加']];
   const SC_BOARDS=[['value','估值'],['momentum','動能'],['future','未來']];
   const SC_COLORS=['#2f81f7','#d4a017','#3fb950','#db61a2','#f0883e','#a371f7','#56d4dd','#e5534b','#9e6a03'];
   async function loadStrategyCurves(){
@@ -989,7 +1012,7 @@
       SC_DATA=await r.json();
     }catch(e){console.warn('[loadStrategyCurves]',e);recordGlobalError('loadStrategyCurves',e);SC_DATA=null}
     SC_LIVE=null;SC_LIVE_ERR='';
-    if(!LIVE.configured||!LIVE.url){SC_LIVE_ERR='真錢帳本只在本機，連上本機伺服器才顯示';return SC_DATA}
+    if(!LIVE.configured||!LIVE.url){SC_LIVE_ERR='連上電腦才看得到';return SC_DATA}
     try{
       const r=await liveFetch('/auto/strategy_line',15000);
       if(!r.ok)throw new Error('HTTP '+r.status+(r.status===404?'（伺服器可能是舊版，需重啟）':''));
@@ -1028,27 +1051,27 @@
       <polyline data-line="bench_0050" points="${pl(bl.dates,bl.bench)}" fill="none" stroke="var(--ink-3)" stroke-width="2" opacity=".75"/>
       ${lines_}</svg>`;
   }
-  const _scPp=v=>v==null?'—':`${v>=0?'+':''}${Number(v).toFixed(2)}pp`;
+  const _scPp=v=>v==null?'—':`${v>=0?'+':''}${Number(v).toFixed(1)} 點`;
   const _scPct=v=>v==null?'—':`${Number(v).toFixed(2)}%`;
-  const SC_STATUS_COLOR={'真錢':'var(--accent)','紙上追蹤中':'var(--ink-2)','回測通過':'var(--good)','回測未通過':'var(--critical)','未回測':'var(--warn)'};
+  const SC_STATUS_COLOR={'真錢':'var(--accent)','模擬中':'var(--ink-2)','紙上追蹤中':'var(--ink-2)','回測通過':'var(--good)','回測未通過':'var(--critical)','未回測':'var(--warn)'};
   function scStatusTag(s){return `<span class="sc-status" style="font-size:10px;padding:1px 6px;border-radius:8px;border:1px solid ${SC_STATUS_COLOR[s]||'var(--hairline)'};color:${SC_STATUS_COLOR[s]||'var(--ink-2)'}">${s||'—'}</span>`}
   function scMetricsHtml(l){
     const m=l.metrics||{};
-    return `<div class="bot-stats sc-metrics" style="margin:6px 0">
-      <div class="s"><span>累計差距</span><b class="${(m.cum_gap_pp||0)>=0?'pos':'neg'}">${_scPp(m.cum_gap_pp)}</b></div>
-      <div class="s"><span>年化差距</span><b>${m.days>=60?_scPp(m.ann_gap_pp):'—'}</b></div>
-      <div class="s"><span>MDD</span><b>${_scPct(m.mdd_pct)}</b></div>
-      <div class="s"><span>樣本天數</span><b>${m.days||0}</b></div>
+    // 先.七十二-A4：指標改白話——賺賠％／跟 0050 差多少／最大跌幅；樣本 <60 交易日不顯示年化（先.六十八-3 規則不變）
+    return `<div class="note sc-goal" style="margin:0 0 4px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b>　${scStatusTag(l.status)}</div>
+    <div class="bot-stats sc-metrics" style="margin:6px 0">
+      <div class="s"><span>賺賠％</span><b class="${(m.cum_pct||0)>=0?'pos':'neg'}">${m.cum_pct==null?'—':(m.cum_pct>=0?'+':'')+Number(m.cum_pct).toFixed(1)+'%'}</b></div>
+      <div class="s"><span>跟 0050 差多少</span><b class="${(m.cum_gap_pp||0)>=0?'pos':'neg'}">${_scPp(m.cum_gap_pp)}</b></div>
+      <div class="s"><span>最大跌幅</span><b>${_scPct(m.mdd_pct)}</b></div>
     </div>
-    <div class="note sc-goal" style="margin-bottom:2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>
-    <div class="note" style="margin-bottom:4px">狀態：${scStatusTag(l.status)}　累計 ${_scPct(m.cum_pct)}　同期 0050 ${_scPct(m.bench_cum_pct)}（MDD ${_scPct(m.bench_mdd_pct)}）${m.days<60?'　樣本 <60 交易日只顯示累計':''}</div>
-    <div class="note sc-verdict" style="font-weight:600;color:var(--ink-2)">金礦判讀：${m.days>=60?m.verdict:`尚不足以判斷（樣本 ${m.days||0} 個交易日，需 ≥60）`}</div>`;
+    <div class="note" style="margin-bottom:4px">${m.days||0} 個交易日；同期 0050 ${_scPct(m.bench_cum_pct)}${m.days>=60&&m.ann_gap_pp!=null?'；每年約差 '+_scPp(m.ann_gap_pp):''}</div>
+    <div class="note sc-verdict" style="font-weight:600;color:var(--ink-2)">判讀：${m.days>=60?m.verdict:`尚不足以判斷（才 ${m.days||0} 天，要滿 60 天）`}</div>`;
   }
   function scLineBlock(l){
     if(!l)return '<div class="note" style="color:var(--ink-3)">此線尚無資料</div>';
     if(!l.started)return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div><div class="note" style="margin:0 0 6px">${scStatusTag(l.status)}　${l.note||'尚未啟動'}${l.start_date?'（起始日 '+l.start_date+'）':''}</div>`;
     return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l],l)}</div>
-      <div class="note" style="margin-top:4px;font-size:10px">起始日 ${l.start_date}（歸一 100）至 ${l.as_of}；<span style="color:var(--ink-3)">━</span> 灰線＝同期 0050 實際收盤</div>
+      <div class="note" style="margin-top:4px;font-size:10px">${l.start_date} 起算為 100；<span style="color:var(--ink-3)">━</span> 灰線＝同期 0050</div>
       <div class="note" style="margin-top:4px;font-size:10px;color:var(--ink-3)">${l.note||''}</div>`;
   }
   function renderStrategyCurves(){
@@ -1066,12 +1089,12 @@
       const ls=scLines().filter(l=>l.started&&l.dates&&l.dates.length>1);
       html+=`<div style="margin-top:4px">${scSvg(ls)}</div><div class="note" style="margin-top:4px;font-size:10px;line-height:1.7">`+
         scLines().map((l,i)=>`<span style="color:${SC_COLORS[i%SC_COLORS.length]}">━</span> ${l.label}〔${l.goal||'未標示'}〕${l.started?`（${_scPp(l.metrics&&l.metrics.cum_gap_pp)}）`:'（未啟動）'}`).join('　')+
-        `　<span style="color:var(--ink-3)">━</span> 0050（最早起始線同期）</div><div class="note" style="font-size:10px;color:var(--ink-3)">各線從各自起始日歸一為 100；括號內為對同期 0050 的累計差距。</div>`;
+        `　<span style="color:var(--ink-3)">━</span> 0050</div><div class="note" style="font-size:10px;color:var(--ink-3)">各線起算為 100；括號內是跟 0050 差幾點</div>`;
     }else{
       html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
     }
     const meta=SC_DATA.meta||{};
-    html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">${meta.disclaimer||''}。${meta.bench_note||''}。${meta.generated_at?'計算時間：'+String(meta.generated_at).slice(0,16).replace('T',' '):''}</div>`;
+    html+=`<div class="note" style="margin-top:6px;font-size:10px;color:var(--ink-3)">${meta.generated_at?'更新於 '+String(meta.generated_at).slice(5,16).replace('T',' ').replace('-','/'):''}</div>`;
     bodyEl.innerHTML=html;
   }
   // ── 2026-09-04（四修.三）走勢線二選一：連上即時且該檔有當日1分K→畫「今日走勢」（隨盤中變動）；
@@ -1454,7 +1477,7 @@
   // 2026-08-25 新增：統一的「資料時間」格式，跟「最後更新」（瀏覽器實際刷新畫面的時間）
   // 是不同概念——這個是資料本身屬於哪個交易日，明確標「FinMind 盤後」提醒不是即時報價。
   function fmtDataTime(dateStr){
-    return dateStr?`資料時間 ${dateStr.replaceAll('-','/')}（FinMind 盤後）`:'';
+    return dateStr?`資料時間 ${dateStr.replaceAll('-','/')}（盤後）`:'';
   }
   function setDataTime(elId,dateStr){const el=document.getElementById(elId);if(el)el.textContent=fmtDataTime(dateStr)}
   // 2026-08-26 架構修正（P0-1）：大盤指數/類股/三大法人/台指期/美股指數全部改成讀
@@ -1594,7 +1617,7 @@
           <span style="flex:1;font-size:12px;color:var(--ink-2);line-height:1.5"><b style="color:var(--ink)">${it.code}</b> ${nameOf(it.code)||''}・${t}${it.kind==='法說會'?mopsIrLinkHtml({type:it.kind,code:it.code},true):''}</span>
         </div>`;
       }).join('')
-        +`<div class="note" style="margin-top:8px">涵蓋自選股與紙上持倉（策略監控台各策略目前holdings）共 ${codes.size} 檔代號，共 ${items.length} 筆事件/新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
+        +`<div class="note" style="margin-top:8px">自選股與模擬持股共 ${codes.size} 檔、${items.length} 則事件新聞${items.length>20?'，只顯示最近20筆':''}。來源：data/events.json（MOPS重大訊息／TWSE月營收／除權息）＋data/news.json（僅已命中股票代號者，本輪查證300篇裡僅34篇有命中代號，覆蓋率有限）。點一列跳個股頁。</div>`;
     }catch(e){
       console.warn('[loadMyHoldingsEvents]',e);recordGlobalError('loadMyHoldingsEvents',e);
       el.innerHTML='<div class="note">載入失敗：'+e.message+'</div>';
@@ -1723,7 +1746,7 @@
     // 2026-08-28修正（P0-a）：原本toLocaleString('zh-TW',...)沒指定
     // timeZone，依賴裝置本地時區——這是台股大盤/三大法人資料時間戳，
     // 改用fmtTzMMDDHHMM()明確指定Asia/Taipei。
-    return `資料時間 ${fmtTzMMDDHHMM(d,'Asia/Taipei')}（GitHub Actions 排程，約${Math.max(0,Math.round(age))}分鐘前）`;
+    return `資料 ${fmtTzMMDDHHMM(d,'Asia/Taipei')}`;
   }
   function idxRowHtml(label,srcLabel,item,changePctOverride){
     if(!item||item.close==null)return `<div class="row idx-row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcLabel}</span></div>${SPARK_PLACEHOLDER}<div class="px"><b>—</b><span>查無資料</span></div></div>`;
@@ -1809,7 +1832,7 @@
       const srcLabel=isTodayClose?'Shioaji 今日收盤':'Shioaji 即時';
       return {srcLabel,item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.taiex&&twCache.taiex.sparkline,liveKey:'TAIEX'}};
     }
-    return {srcLabel:'TWSE',item:twCache.taiex};
+    return {srcLabel:'證交所',item:twCache.taiex};
   }
   // 2026-09-01新增，同日補齊四檔：期貨近月優先用Shioaji即時報價（App
   // 「期貨」頁FUT_CONTRACTS的id → shioaji_quotes.py寫進quotes_sinopac.json
@@ -1955,11 +1978,11 @@
     if(st)L.push('下一期：'+esc(v.next));
     v.reasons.forEach(r=>L.push('<span style="color:var(--warn)">⚠ '+esc(r)+'</span>'));
     (errs||[]).forEach(e=>L.push('<span style="color:var(--ink-4)">'+esc(e)+'</span>'));
-    el.innerHTML=L.map(x=>'<div style="padding:2px 0">'+x+'</div>').join('')+'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">唯讀；資料只在本機伺服器，不進 repo；非投資建議</div>';
+    el.innerHTML=L.map(x=>'<div style="padding:2px 0">'+x+'</div>').join('')+'<div style="margin-top:6px;font-size:10px;color:var(--ink-4)">只能看，不能下單</div>';
   }
   async function loadHomeExecCard(){
     const el=document.getElementById('home-exec-body');if(!el)return;
-    if(!LIVE.configured||!LIVE.url){el.textContent='尚未連線本機伺服器（設定頁「即時伺服器」），真錢執行紀錄只在本機。';return}
+    if(!LIVE.configured||!LIVE.url){el.textContent='連上電腦才看得到';return}
     const [a,b]=await Promise.allSettled([
       (async()=>{const r=await liveFetch('/auto/status',6000);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})(),
       loadAutoLedger()]);
@@ -2263,8 +2286,7 @@
         (doc.items||[]).forEach(i=>lines.push('⚠️ '+_paperEsc(i.msg)));
       }
       if(ageH!=null&&ageH>96)lines.push('⚠️ 紙上追蹤看守檔已超過96小時未更新（看守員可能停擺）');
-      if(lines.length){el.style.display='block';el.innerHTML=lines.join('<br>');}
-      else{el.style.display='none';el.innerHTML='';}
+      uiRedBanner(el,lines.map(x=>x.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"')));  // 先.七十二-A3 兩段式
     }catch(e){console.warn('[renderPaperTrackingBanner]',e);recordGlobalError('renderPaperTrackingBanner',e);}
   }
   async function loadPaperTrackingBanner(){
@@ -2773,11 +2795,45 @@
   }
   // 先.三十一-二：橫幅由三個來源合成——本機狀態/緊急停止、本機離線、Pages 上的去識別化排程心跳
   const AUTO_BAN={local:'',offline:'',hb:'',px:''};
+  // ══════ 先.七十二-A3（2026-10-11）：紅色橫幅一律「狀況＋下一步」兩段式，細節點開才顯示 ══════
+  // 所有紅色橫幅（自動投資異常／本機排程心跳／白名單價格缺漏／本機 Claude 登入／模擬追蹤看守）都走 uiRedBanner()；
+  // 原始訊息（含 report_error 寫出的錯誤）先比對 UI_BANNER_RULES 轉成白話兩段，比不到就用 uiPlain() 轉白話後截短。
+  // 原始全文放在收合的「細節」裡（不刪，方便回報問題）。
+  const UI_BANNER_RULES=[
+    {re:/資金不足|現金不足|餘額不足|INSUFFICIENT_CASH|未入金|入金/,sit:'還沒入金，這一期不會下單',next:'入金後自動重跑',go:'settings'},
+    {re:/緊急停止|STOP\.flag|STOP_FLAG/,sit:'已按緊急停止，暫不下單',next:'到設定頁解除',go:'settings'},
+    {re:/心跳|排程未執行|電腦可能關機|漏跑/,sit:'電腦沒在跑，自動投資暫停',next:'打開電腦就會恢復',go:'settings'},
+    {re:/價格缺漏|價格補不到|whitelist_price|白名單.*價格/,sit:'缺 ETF 價格，先不下單',next:'資料補齊後自動重跑',go:'settings'},
+    {re:/對帳|RECONCILE/,sit:'帳戶對不起來，先不下單',next:'確認後自動重跑',go:'settings'},
+    {re:/登入過期|AUTH_EXPIRED|需要重新登入/,sit:'電腦上的助理要重新登入',next:'在電腦上重新登入',go:'settings'},
+    {re:/額度已用盡|QUOTA_EXCEEDED/,sit:'電腦上的助理額度用完',next:'額度恢復後自動續跑',go:'settings'},
+    {re:/沒有實際執行|STALLED/,sit:'電腦上的自動工作停了',next:'打開電腦檢查',go:'settings'},
+    {re:/拒單|REJECT/i,sit:'這一批被拒單',next:'看拒單原因',go:'settings'},
+    {re:/看守檔.*未更新|看守員可能停擺/,sit:'模擬追蹤的檢查停了',next:'等下次排程補上',go:'settings'},
+    {re:/月底.*未寫入|未寫入|逾期未/,sit:'模擬追蹤漏記一期',next:'等下次排程補記',go:'settings'},
+  ];
+  function uiBannerParts(raw){
+    const t=String(raw||'');
+    for(const r of UI_BANNER_RULES)if(r.re.test(t))return {sit:r.sit,next:r.next,go:r.go};
+    const p=uiPlain(t).replace(/^[⚠️\s]+/,'');
+    return {sit:[...p].length>18?[...p].slice(0,18).join('')+'…':p,next:'看細節',go:null};
+  }
+  function _uiEsc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+  function uiRedBanner(el,msgs){
+    if(!el)return;
+    const list=(msgs||[]).filter(Boolean);
+    if(!list.length){el.style.display='none';el.innerHTML='';return}
+    const first=uiBannerParts(list[0]);
+    const more=list.length>1?`（另有 ${list.length-1} 項）`:'';
+    el.style.display='block';
+    el.innerHTML=`<div class="ui-ban-sit" data-ui-keep>${_uiEsc(first.sit)}${more}</div>`+
+      `<div class="ui-ban-next"><span class="press" style="text-decoration:underline;cursor:pointer" onclick="${first.go?`go('${first.go}')`:`this.closest('[id]').querySelector('details').open=true`}">${_uiEsc(first.next)} ›</span></div>`+
+      `<details class="ui-ban-detail" data-ui-detail><summary style="cursor:pointer;font-weight:400;font-size:11px;opacity:.8">細節</summary>`+
+      `<div style="font-weight:400;font-size:11px;margin-top:4px">${list.map(m=>_uiEsc(uiPlain(m))).join('<br>')}</div>`+
+      `<div style="display:none" data-ui-raw>${list.map(_uiEsc).join('<br>')}</div></details>`;
+  }
   function renderAutoBanner(){
-    const ban=document.getElementById('auto-banner');if(!ban)return;
-    const msgs=[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.px,AUTO_BAN.local].filter(Boolean);
-    ban.style.display=msgs.length?'':'none';
-    ban.textContent=msgs.join('　｜　');
+    uiRedBanner(document.getElementById('auto-banner'),[AUTO_BAN.offline,AUTO_BAN.hb,AUTO_BAN.px,AUTO_BAN.local]);
   }
   // 規則：台股交易日，台北 09:50 後當日沒有 run 心跳，或 13:50 後沒有 settle 心跳→紅色橫幅。
   // 讀不到心跳檔（網路錯誤、404）時不亂報，只 console.warn（無法判斷≠未執行）。
@@ -2846,7 +2902,7 @@
     _safeAsync('loadAutoHeartbeat',loadAutoHeartbeat);
     _safeAsync('loadWhitelistPriceStatus',loadWhitelistPriceStatus);
     try{
-      if(!LIVE.configured||!LIVE.url){note.textContent='尚未連線本機伺服器';AUTO_BAN.offline='';AUTO_BAN.local='';renderAutoBanner();return}
+      if(!LIVE.configured||!LIVE.url){note.textContent='連上電腦才看得到';AUTO_BAN.offline='';AUTO_BAN.local='';renderAutoBanner();return}
       const r=await liveFetch('/auto/status',5000);
       if(!r.ok)throw new Error('HTTP '+r.status);
       const d=await r.json();
@@ -2924,7 +2980,7 @@
     const card=document.getElementById('home-asset-card');
     if(!cta||!card)return;
     const CTA_DEFAULT_HTML='串接券商帳戶 →<span>連結後這裡顯示總資產與今日損益</span>';
-    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;_safeSync('renderHomePositions',()=>renderHomePositions(null,'未連線本機伺服器（設定頁「即時伺服器」）；持倉只從本機唯讀查詢，不存進 GitHub'));return}
+    if(!LIVE.configured||!LIVE.url){cta.innerHTML=CTA_DEFAULT_HTML;cta.style.display='';card.hidden=true;_safeSync('renderHomePositions',()=>renderHomePositions(null,'連上電腦才看得到'));return}
     let posR=null,balR=null;
     try{
       const [rp,rb]=await Promise.all([liveFetch('/live/positions',9000),liveFetch('/live/balance',9000)]);
@@ -3275,19 +3331,11 @@
       if(!banner)return;
       const ca=statusDoc&&statusDoc.local_schedule_heartbeat&&statusDoc.local_schedule_heartbeat.claude_auth;
       const st=ca&&ca.overall_status;
-      if(st==='AUTH_EXPIRED'){
-        banner.style.display='block';
-        banner.innerHTML='⚠️ 本機 Claude 需要重新登入（偵測到登入過期）：'+(ca.detail||'');
-      }else if(st==='QUOTA_EXCEEDED'){
-        banner.style.display='block';
-        banner.innerHTML='⚠️ 本機 Claude 額度已用盡：'+(ca.detail||'');
-      }else if(st==='STALLED_3H'){
-        banner.style.display='block';
-        banner.innerHTML='⚠️ 本機自走系統超過門檻時間（開發線 3 小時／研究線 7 小時）沒有實際執行：'+(ca.detail||'');
-      }else{
-        banner.style.display='none';
-        banner.innerHTML='';
-      }
+      // 先.七十二-A3：兩段式；原始字樣（含「需要重新登入」「額度已用盡」「沒有實際執行」）保留在收合細節
+      if(st==='AUTH_EXPIRED')uiRedBanner(banner,['⚠️ 本機 Claude 需要重新登入（偵測到登入過期）：'+(ca.detail||'')]);
+      else if(st==='QUOTA_EXCEEDED')uiRedBanner(banner,['⚠️ 本機 Claude 額度已用盡：'+(ca.detail||'')]);
+      else if(st==='STALLED_3H')uiRedBanner(banner,['⚠️ 本機自走系統超過門檻時間（開發線 3 小時／研究線 7 小時）沒有實際執行：'+(ca.detail||'')]);
+      else uiRedBanner(banner,[]);
     }catch(e){
       console.warn('[renderClaudeAuthBanner]',e);recordGlobalError('renderClaudeAuthBanner',e);
     }
@@ -3313,7 +3361,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1335';
+  const APP_VERSION='2026-10-11.1447';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -3495,5 +3543,29 @@
     // 只有使用者點了「有新版」才因換版重載；第一次安裝時的 clients.claim() 也會觸發 controllerchange，不能重載
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(SW_APPLY_CLICKED){SW_APPLY_CLICKED=false;location.reload()}});
   }
+// 先.七十二-A2（2026-10-11）：說明文字（.note）超過 40 字自動收成「ⓘ 說明」點開。
+// 進階頁（[data-ui-advanced]）、已收過的、頁尾免責、或標了 data-ui-keep 的狀態行不收。內容原封不動搬進 <details>，
+// 讀 textContent 的既有程式不受影響；之後被重繪（innerHTML／textContent 改寫）時由 MutationObserver 再收一次。
+const UI_NOTE_MAX=40;
+function uiCompactNote(n){
+  try{
+    if(!n||n.hasAttribute('data-ui-keep')||n.closest('[data-ui-advanced],[data-ui-detail],[data-ui-footer-disclaimer]'))return;
+    if(n.firstElementChild&&n.firstElementChild.matches('details[data-ui-detail]')&&n.childNodes.length===1)return;
+    const t=(n.textContent||'').replace(/\s+/g,' ').trim();
+    if([...t].length<=UI_NOTE_MAX)return;
+    const d=document.createElement('details');d.setAttribute('data-ui-detail','');d.className='ui-info';
+    const sm=document.createElement('summary');sm.textContent='ⓘ 說明';d.appendChild(sm);
+    const body=document.createElement('div');body.className='ui-info-body';
+    while(n.firstChild)body.appendChild(n.firstChild);
+    d.appendChild(body);n.appendChild(d);
+  }catch(e){console.warn('[uiCompactNote]',e);recordGlobalError('uiCompactNote',e)}
+}
+function uiCompactAll(root){(root||document).querySelectorAll('#app .note').forEach(uiCompactNote)}
+let _uiCompactPending=false;
+try{
+  new MutationObserver(()=>{if(_uiCompactPending)return;_uiCompactPending=true;
+    setTimeout(()=>{_uiCompactPending=false;uiCompactAll()},120)}).observe(document.getElementById('app'),{childList:true,subtree:true,characterData:true});
+  uiCompactAll();
+}catch(e){console.warn('[uiCompact:init]',e);recordGlobalError('uiCompact:init',e)}
 // 先.六十九-1：核心程式執行完畢（導覽、各面板載入函式都已註冊）＝可互動時間點；scripts/measure_second_open.mjs 讀這個值。
 window.__ALPHA_BOOT_MS=performance.now();

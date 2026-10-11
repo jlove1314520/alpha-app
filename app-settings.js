@@ -54,7 +54,7 @@
   async function toggleNotif(el,key){
     const note=document.getElementById('notif-note');
     try{
-      if(!LIVE.configured||!LIVE.url)throw new Error('尚未連線本機伺服器');
+      if(!LIVE.configured||!LIVE.url)throw new Error('連上電腦才看得到');
       const want=!el.classList.contains('on');
       const r=await fetch(LIVE.url+'/push/prefs',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({[key]:want}),credentials:'include'});
       if(!r.ok)throw new Error('HTTP '+r.status);
@@ -131,7 +131,7 @@
   async function saveAlerts(){
     const note=document.getElementById('alert-note');
     try{
-      if(!LIVE.configured||!LIVE.url)throw new Error('尚未連線本機伺服器');
+      if(!LIVE.configured||!LIVE.url)throw new Error('連上電腦才看得到');
       const r=await fetch(LIVE.url+'/alerts/rules',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({rules:collectAlertRules()}),credentials:'include'});
       if(!r.ok){let m='HTTP '+r.status;try{const j=await r.json();if(j&&j.detail)m=j.detail}catch(e2){console.warn('[saveAlerts:detail]',e2)}throw new Error(m)}
       toast('已儲存提醒設定');
@@ -271,7 +271,7 @@
     if(!('PushManager' in window)||typeof Notification==='undefined'){
       _pushFail(0,_pushStandalone()?'這個系統版本不支援網頁推播（iOS 需 16.4 以上）':'請從主畫面的 Alpha 圖示開啟 App 再按（Safari 分頁裡不能開推播；iOS 需 16.4 以上）');return}
     if(!_pushStandalone()){_pushFail(0,'請從主畫面的 Alpha 圖示開啟 App 再按（目前是在瀏覽器分頁裡）');return}
-    if(!LIVE.configured||!LIVE.url){_pushFail(0,'尚未連線本機伺服器（先在上方設定網址與 token 並按「測試連線」）');return}
+    if(!LIVE.configured||!LIVE.url){_pushFail(0,'連上電腦才能用（到設定頁連線）');return}
     let permP;
     try{permP=Notification.requestPermission()}catch(e){_pushFail(1,'無法要求通知權限（'+(e&&e.message||e)+'）',e);return}
     _pushNote('第1步：要求通知權限中…');
@@ -309,7 +309,7 @@
   }
   async function pushTest(){
     try{
-      if(!LIVE.configured||!LIVE.url){_pushFail(0,'尚未連線本機伺服器');return}
+      if(!LIVE.configured||!LIVE.url){_pushFail(0,'連上電腦才看得到');return}
       _pushNote('送出測試推播中…');
       const r=await fetch(LIVE.url+'/push/test',{method:'POST',headers:liveHeaders(),credentials:'include'});
       if(!r.ok){_pushFail(1,'測試推播請求失敗：'+await _pushHttpErr(r));return}
@@ -323,7 +323,7 @@
   async function autoCancelPending(){
     const pe=document.getElementById('auto-pending');
     try{
-      if(!LIVE.configured||!LIVE.url)throw new Error('未連線本機伺服器');
+      if(!LIVE.configured||!LIVE.url)throw new Error('連上電腦才看得到');
       const r=await fetch(LIVE.url+'/auto/cancel_pending',{method:'POST',headers:liveHeaders(),credentials:'include'});
       if(!r.ok)throw new Error('HTTP '+r.status);
       const j=await r.json();
@@ -336,7 +336,7 @@
   }
   async function autoSetStop(stop,why){
     try{
-      if(!LIVE.configured||!LIVE.url)throw new Error('未連線本機伺服器');
+      if(!LIVE.configured||!LIVE.url)throw new Error('連上電腦才看得到');
       const r=await fetch(LIVE.url+'/auto/stop',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},liveHeaders()),body:JSON.stringify({stop:!!stop}),credentials:'include'});
       if(!r.ok)throw new Error('HTTP '+r.status);
     }catch(e){console.warn('[autoSetStop]',why,e);recordGlobalError('autoSetStop',e);alert('操作失敗：'+(e&&e.message||e))}

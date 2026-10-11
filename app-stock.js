@@ -22,7 +22,7 @@
     const f=disposalFlagOf(code);if(!f)return '';
     const md=s=>s?s.slice(5).replace('-','/'):'?';
     const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    const tip=esc(f.reason||'');
+    const tip=esc(uiPlain(f.reason||''));
     if(f.kind==='notice')return `<span class="disp-tag notice" title="${tip}">注意股 ${md(f.announced)}公布</span>`;
     const lbl=f.kind==='disposal'?'處置股':'即將處置';
     return `<span class="disp-tag" title="${tip}">${lbl} ${md(f.start)}–${md(f.end)}${f.interval?' · 每'+esc(f.interval.replace(/分鐘$/,''))+'分鐘撮合':''}</span>`;

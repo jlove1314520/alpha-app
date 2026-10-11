@@ -564,7 +564,7 @@ def _reason(key: str, row: pd.Series) -> str:
         if c.get("op_margin_yoy_pp") is not None:
             bits.append(f"營益率年變化 {c['op_margin_yoy_pp']:+.1f}個百分點")
         return (f"{c.get('as_of', '最新季')} 對去年同季：" + "、".join(bits)
-                + f"（{c.get('n_signals', 0)}項可得指標平均，來源 TWSE 官方財報 t187ap06_L_ci/07_L_ci），居全市場前 {front}%。")
+                + f"（{c.get('n_signals', 0)}項可得指標平均，來源：證交所財報），居全市場前 {front}%。")
     if key == "revenue_momentum":
         return f"最新月營收年增 {row['raw_rev_yoy']*100:+.1f}%（已排除基期<3000萬元樣本、±200%硬上限，未做規模分層），居全市場前 {front}%。"
     if key == "growth_quality":

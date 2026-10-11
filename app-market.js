@@ -90,9 +90,9 @@
   function tpexRowSource(twCache,liveIdx){
     const q=liveIdx&&liveIdx.tpex;
     if(q&&q.last!=null){
-      return {srcLabel:liveIdx.market_status==='closed'?'Shioaji 今日收盤':'Shioaji 即時',item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.tpex&&twCache.tpex.sparkline}};
+      return {srcLabel:liveIdx.market_status==='closed'?'永豐 今日收盤':'永豐 即時',item:{close:q.last,change_pct:q.change_pct,sparkline:twCache.tpex&&twCache.tpex.sparkline}};
     }
-    return {srcLabel:'TPEx '+twCloseDateLabel(twCache),item:twCache.tpex&&{close:twCache.tpex.close,change_pct:twCache.tpex.change_pct,sparkline:twCache.tpex.sparkline}};
+    return {srcLabel:'櫃買 '+twCloseDateLabel(twCache),item:twCache.tpex&&{close:twCache.tpex.close,change_pct:twCache.tpex.change_pct,sparkline:twCache.tpex.sparkline}};
   }
   async function loadMarketIndex(){
     const el=document.getElementById('idx-rows');if(!el)return;
@@ -116,7 +116,7 @@
     if(!fut||fut.last==null)return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>TAIFEX</span></div><div class="px"><b>—</b><span>查無資料</span></div></div>`;
     const cls=fut.change_pct>=0?'pos':'neg';
     const cm=fut.contract_month?`${fut.contract_month.slice(0,4)}/${fut.contract_month.slice(4,6)}`:'';
-    const srcHtml=srcLabel||`TAIFEX${cm?` · ${cm} 近月合約`:''}`;
+    const srcHtml=srcLabel||`期交所${cm?` · ${cm} 近月`:''}`;
     const sp=rowSparkline('TXF_NEAR',null,(fut.change_pct||0)>=0).html;  // 2026-09-04四修.三：即時時畫台指期當日1分K
     return `<div class="row" style="cursor:default"><div class="nm"><b>${label}</b><span>${srcHtml}</span></div>${sp}<div class="px"><b class="num">${nf(fut.last)}</b><span class="num ${cls}">${fut.change_pct>=0?'+':''}${(fut.change_pct||0).toFixed(2)}%</span></div></div>`;
   }
@@ -450,7 +450,7 @@
       });
     el.innerHTML=rows.map(r=>usSectorRowHtml(r.tk,r.sic,r.q)).join('');
     const sicTime=US_SIC_CACHE&&US_SIC_CACHE.fetched_at?fmtTzMMDDHHMM(new Date(US_SIC_CACHE.fetched_at),'Asia/Taipei'):'查無資料';
-    document.getElementById('us-sector-datatime').textContent=`SIC資料時間 ${sicTime}（GitHub Actions 排程）；股價 ${fmtMarketDataTime(INTRADAY_US)}`;
+    document.getElementById('us-sector-datatime').textContent=`分類資料 ${sicTime}；股價 ${fmtMarketDataTime(INTRADAY_US)}`;
   }
   function adrRowHtml(ticker,row,errReason){
     const nm=row?nameOf(row.tw_code):'';
@@ -509,7 +509,7 @@
   async function loadScanners(){
     const el=document.getElementById('scanners-list'),note=document.getElementById('scanners-note');if(!el)return;
     try{
-      if(!LIVE.connected){SCANNERS.data=null;el.innerHTML='<div class="note">未連上本機即時伺服器，排行榜只在盤中由 Shioaji 提供</div>';if(note)note.textContent='';return}
+      if(!LIVE.connected){SCANNERS.data=null;el.innerHTML='<div class="note">連上電腦才看得到（只在盤中更新）</div>';if(note)note.textContent='';return}
       if(!SCANNERS.data||Date.now()-SCANNERS.at>=60000){
         const r=await liveFetch('/live/scanners',5000);if(!r.ok)throw new Error('HTTP '+r.status);
         SCANNERS.data=await r.json();SCANNERS.at=Date.now();

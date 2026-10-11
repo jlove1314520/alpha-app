@@ -745,7 +745,7 @@
       +'台股沒有免費的分析師目標價／評等資料源，本卡只做機械換算——同產業本益比百分位 × 本檔近四季 EPS，'
       +'不含任何對未來獲利的預測。本益比偏低本身也可能反映風險或衰退。</div>';
     if(!/^\d{4,6}[A-Z]?$/.test(String(code))){
-      host.innerHTML='<div class="note">估值區間目前只涵蓋台股（同產業本益比來自 TWSE 每日本益比 BWIBBU）。此代號非台股，無同產業本益比樣本可比。</div>';
+      host.innerHTML='<div class="note" data-ui-keep><b>只涵蓋台股</b></div><div class="note">估值區間目前只涵蓋台股（同產業本益比來自證交所每日本益比）。此代號非台股，無同產業本益比樣本可比。</div>';
       return;
     }
     const [,companies,quotes]=await Promise.all([loadFundamentals(code),loadCompanyInfo(),loadQuotesAllTw()]);
@@ -753,11 +753,11 @@
     const funds=(FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.fundamentals)||{};
     const industry=(companies[code]&&companies[code].industry)||row.industry||null;
     if(!industry){
-      host.innerHTML='<div class="note">查不到這檔的產業分類（data/company_info.json 無此代號），無法取同產業本益比樣本，因此不估算估值區間。</div>'+disclaimer;
+      host.innerHTML='<div class="note" data-ui-keep><b>查不到這檔的產業分類</b></div><div class="note">查不到這檔的產業分類（data/company_info.json 無此代號），無法取同產業本益比樣本，因此不估算估值區間。</div>'+disclaimer;
       return;
     }
     if(VALUATION_EXCLUDED_INDUSTRY.test(industry)){
-      host.innerHTML='<div class="note">「'+industry+'」屬 ETF／受益證券／存託憑證類，沒有同產業本益比可比，本益比法不適用，因此不估算。</div>'+disclaimer;
+      host.innerHTML='<div class="note" data-ui-keep><b>本益比法不適用</b></div><div class="note">「'+industry+'」屬 ETF／受益證券／存託憑證類，沒有同產業本益比可比，本益比法不適用，因此不估算。</div>'+disclaimer;
       return;
     }
     // 同產業樣本
@@ -776,12 +776,12 @@
     const px=(quotes[code]&&quotes[code].close)!=null?quotes[code].close:null;
     const t=epsTtmFromDetail(detailStocks[code],null);
     let eps=null,epsSrc='',epsNote='';
-    if(t){eps=t.eps;epsSrc='TWSE 季報加總（t187ap06_L_ci）';epsNote=t.label}
+    if(t){eps=t.eps;epsSrc='證交所季報加總';epsNote=t.label}
     else if(own&&own.src==='twse'&&px!=null&&px>0&&own.pe>0){
       eps=px/own.pe;epsSrc='由 TWSE 每日本益比與收盤價回推';epsNote='本益比 '+_vbNum(own.pe,2)+'、收盤 '+_vbNum(px,2);
     }
     const sampleLine='同產業「'+industry+'」有效樣本 <b>'+n+'</b> 檔'
-      +(n?'（TWSE 每日本益比 '+srcCnt.twse+' 檔＋收盤價÷近四季EPS 推導 '+srcCnt.derived+' 檔）':'')
+      +(n?'（證交所每日本益比 '+srcCnt.twse+' 檔＋收盤價÷近四季EPS 推導 '+srcCnt.derived+' 檔）':'')
       +(perDate?'，本益比資料日 '+perDate:'')
       +'。同產業成分共 '+peers.length+' 檔，其餘因本益比為負或缺值而未納入。';
     // 不足以估算的三種情況：樣本不足、EPS 拿不到、EPS ≤ 0
@@ -790,7 +790,8 @@
       if(eps==null)why='拿不到本檔近四季 EPS（季報四季不連續或已過期，且無官方本益比可回推）';
       else if(eps<=0)why='本檔近四季 EPS 為 '+_vbNum(eps,2)+' 元（≤0），本益比法不適用';
       else why='同產業有效樣本只有 '+n+' 檔，未達 '+VALUATION_MIN_SAMPLE+' 檔門檻';
-      host.innerHTML='<div class="note"><b>同產業樣本不足無法估算</b>：'+why+'。<br>'+sampleLine+'</div>'+disclaimer;
+      // 先.七十二-A2：結論短句常駐顯示，原因與樣本說明另一行（過長會收成「ⓘ 說明」）
+      host.innerHTML='<div class="note" data-ui-keep><b>同產業樣本不足無法估算</b></div><div class="note">'+why+'。<br>'+sampleLine+'</div>'+disclaimer;
       return;
     }
     const p25=percentileLinear(vals,0.25),p50=percentileLinear(vals,0.5),p75=percentileLinear(vals,0.75);
@@ -806,9 +807,11 @@
     }).join('');
     host.innerHTML='<div style="display:flex;gap:7px;margin-bottom:8px">'+cells+'</div>'
       +'<div class="note">現價 <b class="num">'+(px!=null?_vbNum(px,2):'—')+'</b>'
-      +(own?'，本檔本益比 <b class="num">'+_vbNum(own.pe,2)+'</b>（'+(own.src==='twse'?'TWSE 每日本益比':'收盤價÷近四季EPS 推導')+'）'
+      +(own?'，本檔本益比 <b class="num">'+_vbNum(own.pe,2)+'</b>（'+(own.src==='twse'?'證交所每日本益比':'收盤價÷近四季EPS 推導')+'）'
             +(rankPct!=null?'，位於同業第 '+rankPct+' 百分位':''):'，本檔查無本益比')
       +'。<br>近四季 EPS <b class="num">'+_vbNum(eps,2)+'</b> 元（'+epsSrc+(epsNote?'，'+epsNote:'')+'）。<br>'+sampleLine+'</div>'
+      // 先.七十二-A2：長說明會收成「ⓘ 說明」，產業樣本數另放一行短字常駐顯示
+      +'<div class="note" data-ui-keep style="margin-top:4px">同產業樣本 <b>'+n+'</b> 檔</div>'
       +disclaimer;
   }
   async function renderReportEvents(row){

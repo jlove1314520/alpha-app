@@ -1,0 +1,53 @@
+{
+  "version": "2026-10-11",
+  "source": "先.七十二-A1 總司令裁示（「人因改版_用詞表」專案文件本機與 repo 皆查無；本表依裁示原文列出的詞建立，標「暫定」者待總司令確認後改）",
+  "rules": {
+    "title_max": 8,
+    "button_max": 6,
+    "note_max": 40,
+    "note_overflow": "超過 40 字的說明改成「ⓘ 說明」點開（details[data-ui-detail]）",
+    "disclaimer": "「非投資建議」前台只放頁尾一處（[data-ui-footer-disclaimer]），各卡不重複",
+    "advanced_scope": "內部代號只准出現在設定頁「進階」（[data-ui-advanced]）"
+  },
+  "terms": [
+    {"internal": "Bb-90", "front": "自動投資", "where": "策略、交易、日誌、首頁"},
+    {"internal": "Bb-90 真錢", "front": "自動投資"},
+    {"internal": "紙.一 70/30", "front": "模擬 A 穩健", "goal": "守住回檔"},
+    {"internal": "紙.三 S3-C6", "front": "模擬 B 景氣閘門", "goal": "守住回檔"},
+    {"internal": "紙.四 R1-C", "front": "模擬 C 加速", "goal": "贏大盤也守回檔"},
+    {"internal": "紙.一b", "front": "模擬 A2 三檔分散", "status": "暫定"},
+    {"internal": "紙.二", "front": "模擬 D 供給緊縮", "status": "暫定"},
+    {"internal": "三榜（估值／動能／未來）", "front": "選股榜單", "goal": "選股研究"},
+    {"internal": "守回撤（天條一）", "front": "守住回檔"},
+    {"internal": "贏大盤＋守回撤", "front": "贏大盤也守回檔"},
+    {"internal": "累計差距 pp", "front": "跟 0050 差多少"},
+    {"internal": "累計報酬％", "front": "賺賠％"},
+    {"internal": "MDD", "front": "最大跌幅"},
+    {"internal": "pp（百分點）", "front": "個百分點"},
+    {"internal": "LIVE／LIVE_WITH_VETO", "front": "真錢"},
+    {"internal": "SIMULATION", "front": "模擬"},
+    {"internal": "唯讀", "front": "只能看"},
+    {"internal": "否決窗", "front": "取消時間"},
+    {"internal": "本機伺服器／alpha_live_server", "front": "家裡的電腦"},
+    {"internal": "Shioaji", "front": "永豐"},
+    {"internal": "FinMind", "front": "公開資料"},
+    {"internal": "TWSE／TPEx", "front": "證交所／櫃買中心"},
+    {"internal": "XBRL", "front": "財報"},
+    {"internal": "token", "front": "連線密碼"}
+  ],
+  "forbidden_front": [
+    {"term": "Bb-90", "regex": "Bb-?90"},
+    {"term": "紙.N", "regex": "紙\\.[一二三四]"},
+    {"term": "S3-C6", "regex": "S3-C6"},
+    {"term": "R1-C", "regex": "R1-[AC]\\b"},
+    {"term": "LIVE", "regex": "\\bLIVE(_WITH_VETO)?\\b"},
+    {"term": "pp", "regex": "\\dpp\\b|\\d\\s+pp\\b|\\bpp\\b"},
+    {"term": "MDD", "regex": "\\bMDD\\b"},
+    {"term": "唯讀", "regex": "唯讀"},
+    {"term": "Phase", "regex": "\\bPhase\\b", "flags": "i"},
+    {"term": "XBRL", "regex": "XBRL"},
+    {"term": "FinMind", "regex": "FinMind", "flags": "i"},
+    {"term": "Shioaji", "regex": "Shioaji", "flags": "i"},
+    {"term": "TWSE 端點", "regex": "\\bTWSE\\b|openapi|t187ap|STOCK_DAY|\\bT86\\b|\\bMI_INDEX\\b"}
+  ]
+}

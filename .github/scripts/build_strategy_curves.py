@@ -43,11 +43,12 @@ MIN_DAYS = 60
 ANN_DAYS = 250
 BOOT_N = 2000
 BOARDS = [("value", "估值榜", "value_board_v2"), ("momentum", "動能榜", "momentum_board"), ("future", "未來榜", "future_board")]
-CORRECTION = "2026-10-11 更正：舊算法把重疊的 5 日報酬串接，誤放大約 5 倍"
+CORRECTION = "10/11 更正：舊算法重複計算，數字放大約 5 倍"
 # 先.七十-5（2026-10-11 總司令裁示）：每條線的「設計目標」。裁示沒有指定的線（紙.一b、紙.二）標「未標示」，不自行推定。
-GOALS = {"live_bb90": "守回撤（天條一）", "paper_1": "守回撤（天條一）", "paper_3": "守回撤（天條一）",
-         "paper_4": "贏大盤＋守回撤", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
-POSITIONING = "守回撤的策略在多頭月會落後 0050，這是設計結果；判斷用 ≥60 交易日與回撤，不用單月報酬"
+# 先.七十二-A4：前台改白話（守回撤（天條一）→守住回檔；贏大盤＋守回撤→贏大盤也守回檔）；內部代號只留在 id。
+GOALS = {"live_bb90": "守住回檔", "paper_1": "守住回檔", "paper_3": "守住回檔",
+         "paper_4": "贏大盤也守回檔", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
+POSITIONING = "守回檔的策略大漲時會落後 0050，這是設計；看滿 60 個交易日與最大跌幅"
 
 
 def _load(p: Path, default=None):
@@ -132,9 +133,9 @@ def metrics(nav: list, bench: list) -> dict:
             gaps.append((ps - pb) * 100)
         gaps.sort()
         out["ci90_pp"] = [round(gaps[int(0.05 * BOOT_N)], 2), round(gaps[int(0.95 * BOOT_N) - 1], 2)]
-        out["verdict"] = f"累計差距 {out['cum_gap_pp']:+.2f} pp（區塊自助法 90% 區間 {out['ci90_pp'][0]:+.2f}～{out['ci90_pp'][1]:+.2f} pp）"
+        out["verdict"] = f"跟 0050 差 {out['cum_gap_pp']:+.1f} 個百分點（九成機率落在 {out['ci90_pp'][0]:+.1f}～{out['ci90_pp'][1]:+.1f}）"
         if n >= ANN_DAYS:
-            out["verdict"] += f"；年化差距 {out['ann_gap_pp']:+.2f} pp"
+            out["verdict"] += f"；每年約差 {out['ann_gap_pp']:+.1f} 個百分點"
     return out
 
 
@@ -280,11 +281,11 @@ def paper_lines(px: Px) -> list:
     rf = _load(DATA / "rf_monthly.json", {})
     out = []
     specs = [
-        ("paper_1", "紙.一 70/30", RDATA / "paper_7030_log.jsonl", "legacy_7030", None, "2026-10-01"),
-        ("paper_1b", "紙.一b", RDATA / "paper_1b_log.jsonl", "values_post", None, "2026-11-02"),
-        ("paper_2", "紙.二", RDATA / "paper_supply_v2_log.jsonl", "values_post", None, "2026-11-16"),
-        ("paper_3", "紙.三 S3-C6", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-30"),
-        ("paper_4", "紙.四 R1-C", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-30"),
+        ("paper_1", "模擬 A 穩健", RDATA / "paper_7030_log.jsonl", "legacy_7030", None, "2026-10-01"),
+        ("paper_1b", "模擬 A2 三檔分散", RDATA / "paper_1b_log.jsonl", "values_post", None, "2026-11-02"),
+        ("paper_2", "模擬 D 供給緊縮", RDATA / "paper_supply_v2_log.jsonl", "values_post", None, "2026-11-16"),
+        ("paper_3", "模擬 B 景氣閘門", RDATA / "paper_3_log.jsonl", "values_post", None, "2026-10-30"),
+        ("paper_4", "模擬 C 加速", RDATA / "paper_4_log.jsonl", "values_post", "R1-C", "2026-10-30"),
     ]
     for id_, label, path, vk, book, planned in specs:
         evs = _jsonl(path)
@@ -296,10 +297,10 @@ def paper_lines(px: Px) -> list:
         except Exception as e:  # noqa: BLE001 -- 單一紙上追蹤壞掉只影響自己那條線（十二節）
             print(f"[warn] {label} 曲線失敗：{type(e).__name__}: {e}")
         if not built or len(built["dates"]) < 1:
-            out.append(_placeholder(id_, label, "paper", "紙上追蹤中", planned, f"尚未啟動（預定 {planned} 起）"))
+            out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始"))
             continue
-        note = "紙上追蹤，非投資建議；事件間依實際收盤逐日估值" + ("；債券腿以一個月定存利率逐日計息" if vk == "legacy_7030" else "；現金不計息")
-        out.append(_line(id_, label, "paper", "紙上追蹤中", built["dates"], built["nav"], built["comp"], note=note, px=px))
+        note = "依每天收盤價估算" + ("；定存部分按一個月定存利率計息" if vk == "legacy_7030" else "；現金不計息")
+        out.append(_line(id_, label, "paper", "模擬中", built["dates"], built["nav"], built["comp"], note=note, px=px))
     return out
 
 
@@ -307,14 +308,14 @@ def paper_lines(px: Px) -> list:
 def live_line(perf: dict | None) -> dict:
     """perf＝auto_ledger_view.perf_series() 的輸出（nav/bench 皆為「市值÷投入」比值）。只回百分比曲線，不回金額。"""
     if not perf or perf.get("error") or not perf.get("points"):
-        return _placeholder("live_bb90", "真錢 Bb-90", "live", "真錢", None,
-                            (perf or {}).get("error") or "首批尚未成交")
+        return _placeholder("live_bb90", "自動投資", "live", "真錢", None,
+                            (perf or {}).get("error") or "第一批還沒成交")
     pts = perf["points"]
     dates = [p["date"] for p in pts]
     nav = [p["nav"] for p in pts]
     bench = [round(100 * p["bench"] / pts[0]["bench"], 4) for p in pts]
-    ln = _line("live_bb90", "真錢 Bb-90", "live", "真錢", dates, nav, [], bench_vals=bench,
-               note="真錢帳本（本機）；淨值＝市值÷累計投入（含手續費、未含稅）；灰線＝同一天同樣的錢改買 0050")
+    ln = _line("live_bb90", "自動投資", "live", "真錢", dates, nav, [], bench_vals=bench,
+               note="含手續費、未含稅；灰線＝同一天同樣的錢改買 0050")
     return ln
 
 
@@ -324,7 +325,7 @@ def build() -> dict:
         raise SystemExit("price_history.json 讀不到 0050 日線")
     ledger = _load(DATA / "picks_ledger.json", {}) or {}
     strategies = _load(DATA / "strategies.json", {}) or {}
-    lines = [_placeholder("live_bb90", "真錢 Bb-90", "live", "真錢", None, "真錢帳本只在本機，連上本機伺服器才顯示")]
+    lines = [_placeholder("live_bb90", "自動投資", "live", "真錢", None, "連上電腦才看得到")]
     lines += paper_lines(px)
     for b, label, sid in BOARDS:
         st = board_status(strategies, sid)
@@ -334,18 +335,17 @@ def build() -> dict:
             print(f"[warn] {label} 曲線失敗：{type(e).__name__}: {e}")
             r = None
         if not r:
-            lines.append(_placeholder(f"board_{b}", label, "board", st, None, "尚無快照"))
+            lines.append(_placeholder(f"board_{b}", label, "board", st, None, "還沒有資料"))
             continue
         lines.append(_line(f"board_{b}", label, "board", st, r["dates"], r["nav"], r["comp"], px=px,
-                           note=f"重疊組合法：每日新批次 Top20 等權、持有 {HOLD} 個交易日、同時 {HOLD} 批各 1/{HOLD} 資金（缺快照日該份為現金）；"
-                                f"進場扣手續費 0.1425%、出場扣手續費 0.1425%＋證交稅 0.3%。",
+                           note=f"每天買進當天前 20 名、各放 {HOLD} 個交易日，同時 {HOLD} 批各佔五分之一；已扣手續費與證交稅",
                            extra={"n_batches": r["n_batches"]}))
     return {"meta": {"generated_at": datetime.now(TZ).isoformat(timespec="seconds"), "source": ".github/scripts/build_strategy_curves.py",
-                     "bench": BENCH, "bench_note": "0050 實際日收盤（未還原除息），與各線同一條時間軸",
+                     "bench": BENCH, "bench_note": "灰線是同期 0050",
                      "price_asof": px.cal[-1], "correction": CORRECTION,
                      "rules": {"min_days": MIN_DAYS, "ann_days": ANN_DAYS, "bootstrap": f"區塊自助法、{BOOT_N} 次、90% 區間"},
                      "positioning": POSITIONING,
-                     "disclaimer": "研究與紙上追蹤紀錄，非投資建議"},
+                     "disclaimer": ""},
             "lines": lines}
 
 
