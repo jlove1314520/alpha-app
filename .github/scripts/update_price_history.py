@@ -677,6 +677,38 @@ def merge_reductions(ledger: dict, items: list[dict], today_iso: str) -> int:
     return added
 
 
+# 先.八十-12（2026-10-12）：股票分割（拆股）還原。TWT48U／TWTAUU 都不涵蓋 ETF 分割，官方沒有可程式讀取的分割表，
+# 這裡逐筆登記、逐筆查證後才寫入（不得憑轉述數字）。
+# 00631L 元大台灣50正2：2026-03-25～03-30 暫停交易，03-31 以 1:22 分割後恢復。查證（2026-10-12）：
+#   TWSE STOCK_DAY 官方日成交 03-24 收盤 443.15、03-31 收盤 19.26；Yahoo 已還原序列 03-24 收盤 20.143181；
+#   443.15 ÷ 20.143181 ＝ 22.000。分割前各列 adj_close 一律 ÷22（close 保留原始成交價）。
+SPLITS = [
+    {"code": "00631L", "effective": "2026-03-31", "ratio": 22.0,
+     "evidence": "TWSE STOCK_DAY 2026-03-24 收 443.15／2026-03-31 收 19.26；Yahoo 已還原 03-24＝20.143181；443.15÷20.143181＝22.000"},
+]
+
+
+def apply_splits(prices: dict, meta: dict) -> int:
+    """股票分割還原（冪等）：已套用者記在 meta["splits_applied"]，不重複除。回傳這輪新套用的分割數。"""
+    done = set(meta.get("splits_applied") or [])
+    n = 0
+    for sp in SPLITS:
+        key = f"{sp['code']}@{sp['effective']}x{sp['ratio']}"
+        if key in done or not prices.get(sp["code"]):
+            continue
+        for r in prices[sp["code"]]:
+            if r.get("date", "") < sp["effective"]:
+                base = r.get("adj_close") if r.get("adj_close") is not None else r.get("close")
+                if base is not None:
+                    r["adj_close"] = round(base / sp["ratio"], 6)
+                r["split_adjusted"] = sp["ratio"]
+        done.add(key)
+        n += 1
+    meta["splits_applied"] = sorted(done)
+    meta["splits_note"] = "股票分割還原（先.八十-12）：分割前 adj_close ÷ 分割比例；close 為原始成交價"
+    return n
+
+
 def apply_reduction_adjustments(prices: dict, ledger: dict, today_iso: str) -> int:
     """對 resume_date<=today_iso 且未處理的減資事件，把date<resume_date的列的
     adj_close乘上factor=ref_price/pre_close。三道守門（任一不過就不套用並記
@@ -827,6 +859,14 @@ def main():
     except Exception as e:
         print(f"減資參考價表(TWTAUU) 更新失敗（不影響價量本身，減資調整略過）：{e}")
         errors.append(f"capital_reduction: {e}")
+
+    try:
+        n_split = apply_splits(prices, payload.setdefault("meta", {}))
+        if n_split:
+            print(f"股票分割還原：本輪新套用 {n_split} 筆")
+    except Exception as e:  # noqa: BLE001 -- 分割還原失敗不影響價量本身（十二節）
+        print(f"股票分割還原失敗（略過）：{e}")
+        errors.append(f"splits: {e}")
 
     tpex_payload_date = None
     try:

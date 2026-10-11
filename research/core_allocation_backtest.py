@@ -26,7 +26,9 @@ import trend_leverage_backtest as TL  # noqa: E402  （沿用已登記的 mdd/so
 
 START, END = "2003-07-01", "2024-12-31"
 PREREG = "docs/PREREG_core_allocation_FINAL.md"
-OUT = HERE / "data" / "core_allocation_result.json"
+OUT = HERE / "data" / "core_allocation_result.json"  # #418 原始單發結果（台股日曆左合併版），保留不覆蓋
+# 先.八十-12（2026-10-12）：美股腿改用聯集日曆後的重跑結果另存，不覆蓋已登記的 #418 結果檔
+OUT_UNION = HERE / "data" / "core_allocation_result_unioncal.json"
 CACHE = HERE / "data" / "raw" / "core_alloc"
 CACHE.mkdir(parents=True, exist_ok=True)
 
@@ -74,7 +76,10 @@ def yf_total_return_twd(sym: str, fx: pd.Series) -> pd.DataFrame:
     return out[["date", "r_twd"]]
 
 
-def load_all() -> dict:
+def load_all(calendar: str = "union") -> dict:
+    """calendar="union"（先.八十-12 起預設）：台股與美股日期取聯集——美股有交易、台股休市的日子（例如農曆年）
+    美股腿報酬照算、台股腿與現金當天為 0；舊版 calendar="tw" 以台股日曆左合併，美股在台股休市日的報酬會被丟掉
+    （fillna(0) 等於那幾天美股漲跌消失）。"tw" 只為重現 #418 原始結果保留。"""
     from fred_yield_curve_gate import fetch_fred_series
     import adjust
     fxd = fetch_fred_series("DEXTAUS", "2002-01-01")
@@ -92,8 +97,9 @@ def load_all() -> dict:
     tw["r_cash"] = [rfm.get(str(d)[:7], 0.0) / 100.0 / 252.0 for d in tw["date"].dt.strftime("%Y-%m")]
     vti = yf_total_return_twd("VTI", fx).rename(columns={"r_twd": "r_vti"})
     ief = yf_total_return_twd("IEF", fx).rename(columns={"r_twd": "r_ief"})
-    df = tw.merge(vti, on="date", how="left").merge(ief, on="date", how="left")
-    df[["r_vti", "r_ief"]] = df[["r_vti", "r_ief"]].fillna(0.0)
+    how = "outer" if calendar == "union" else "left"
+    df = tw.merge(vti, on="date", how=how).merge(ief, on="date", how=how).sort_values("date").reset_index(drop=True)
+    df[["r_0050", "r_cash", "r_vti", "r_ief"]] = df[["r_0050", "r_cash", "r_vti", "r_ief"]].fillna(0.0)
     df = df[(df["date"] >= START) & (df["date"] <= END)].reset_index(drop=True)
     return {"df": df}
 
@@ -280,8 +286,10 @@ def main() -> int:
             return bool(o)
         return str(o)
 
-    OUT.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=conv), encoding="utf-8")
-    print(f"已寫入 {OUT}", flush=True)
+    # 先.八十-12：聯集日曆版另存 OUT_UNION，#418 原始結果檔（台股日曆左合併）不覆蓋
+    res["calendar"] = "union（台股∪美股日期；先.八十-12 更正）"
+    OUT_UNION.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=conv), encoding="utf-8")
+    print(f"已寫入 {OUT_UNION}", flush=True)
     return 0
 
 

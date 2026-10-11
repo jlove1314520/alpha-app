@@ -3602,6 +3602,32 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { i10Errs.push(`測試本身出錯：${e.message || e}`); }
   record("109. 日期顯示最後交易日、法人千分位、FinMind Token 假欄位移除、規則摘要卡不標 AI、稽核 0 筆顯示未檢查（先.八十-10）", i10Errs.length === 0, i10Errs.join("; "));
 
+  // 110.【2026-10-12 先.八十-12】研究口徑：①00631L 2026-03-31 以前的 adj_close＝close÷22（分割還原）②曲線檔紙上線註明還原權息／現金計息／
+  // 建倉已扣手續費，模擬 A 建倉後第一天起反映手續費 ③#418 聯集日曆重跑結果另存、原結果檔不被覆蓋、天數變多且純台股配置不受影響。
+  const rsErrs = [];
+  try {
+    const fsx = await import("node:fs");
+    const ph = JSON.parse(fsx.readFileSync("data/price_history.json", "utf8"));
+    const l = ph.prices["00631L"] || [];
+    const pre = l.filter(r => r.date < "2026-03-31"), post = l.filter(r => r.date >= "2026-03-31");
+    if (!pre.length || pre.some(r => Math.abs(r.adj_close * 22 - r.close) > 0.01 * r.close)) rsErrs.push("00631L 分割前 adj_close 不等於 close÷22");
+    if (post.some(r => r.adj_close != null && Math.abs(r.adj_close - r.close) > 0.01 * r.close)) rsErrs.push("00631L 分割後不該再除");
+    if (!(ph.meta.splits_applied || []).includes("00631L@2026-03-31x22.0")) rsErrs.push("meta.splits_applied 缺 00631L 紀錄");
+    const cv = JSON.parse(fsx.readFileSync("data/strategy_curves.json", "utf8"));
+    for (const x of cv.lines.filter(x => x.group === "paper" && x.started)) {
+      if (!/還原權息/.test(x.note) || !/現金與定存按一個月定存利率計息/.test(x.note) || !/建倉已扣手續費/.test(x.note)) rsErrs.push(`${x.id} note 缺口徑說明：${x.note}`);
+    }
+    const p1 = cv.lines.find(x => x.id === "paper_1");
+    if (p1 && p1.nav.length >= 2 && !(p1.nav[0] === 100)) rsErrs.push("模擬 A 起點應為 100（扣費前）");
+    const a = JSON.parse(fsx.readFileSync("research/data/core_allocation_result.json", "utf8"));
+    const b = JSON.parse(fsx.readFileSync("research/data/core_allocation_result_unioncal.json", "utf8"));
+    if (a.calendar) rsErrs.push("#418 原結果檔被覆蓋了（出現 calendar 欄位）");
+    if (!(b.period.n_days > a.period.n_days)) rsErrs.push(`聯集日曆天數應多於台股日曆（${a.period.n_days}→${b.period.n_days}）`);
+    // 純台股配置只會因月底再平衡日落在美股交易日而有極小差異（≤0.05 個百分點）
+    if (Math.abs(a.grid["Aa-70"].cagr - b.grid["Aa-70"].cagr) > 0.0005) rsErrs.push(`純台股配置 Aa-70 不應受美股日曆影響（差 ${((b.grid["Aa-70"].cagr - a.grid["Aa-70"].cagr) * 100).toFixed(3)} 個百分點）`);
+  } catch (e) { rsErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("110. 研究口徑：00631L 1:22 分割還原、紙上曲線還原權息／現金計息／建倉扣費、#418 聯集日曆重跑另存且純台股不受影響（先.八十-12）", rsErrs.length === 0, rsErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3630,7 +3656,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

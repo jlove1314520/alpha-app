@@ -1,6 +1,6 @@
 """先.六十八：「策略 vs 0050」卡資料 → data/strategy_curves.json（每日 market.yml 排程，零外部請求）。
 
-每條線從各自起始日歸一為 100，並附同一條時間軸上的 0050（實際日收盤，不還原）灰線。
+每條線從各自起始日歸一為 100，並附同一條時間軸上的 0050 灰線（先.八十-12 起一律用還原權息收盤＝含息）。
 
 一、選股三榜（估值／動能／未來）：重疊組合法（2026-10-11 總司令裁示更正）。
     - 每個交易日一個新批次（picks_ledger 該榜該日 Top20 等權買進，進場價＝快照的 close_price／price_date 收盤），
@@ -72,10 +72,22 @@ def _jsonl(p: Path) -> list:
 
 
 class Px:
-    """price_history 的收盤價查詢（不還原；與 0050 交易日曆對齊）。"""
+    """price_history 的還原權息收盤查詢（與 0050 交易日曆對齊）。
+
+    先.八十-12（2026-10-12）研究口徑統一：曲線一律用還原收盤（adj_close，含息、含分割還原），0050 灰線因此含息，
+    與紙上追蹤同口徑。少數列缺 adj_close（每日排程剛寫入、尚未回溯）時，用該檔「之後最近一筆有 adj 的列」的
+    adj/close 係數補（之後沒有就用 1），避免同一檔還原與未還原混用造成假跳動。"""
 
     def __init__(self, doc: dict):
-        self.rows = {c: {r["date"]: r.get("close") for r in rs if r.get("close") is not None} for c, rs in (doc.get("prices") or {}).items()}
+        self.rows = {}
+        for c, rs in (doc.get("prices") or {}).items():
+            rs = sorted((r for r in rs if r.get("close") is not None), key=lambda r: r["date"])
+            m, f = {}, 1.0
+            for r in reversed(rs):
+                if r.get("adj_close") is not None and r["close"]:
+                    f = r["adj_close"] / r["close"]
+                m[r["date"]] = r["adj_close"] if r.get("adj_close") is not None else r["close"] * f
+            self.rows[c] = m
         self.cal = sorted(self.rows.get(BENCH, {}))
 
     def close(self, code: str, d: str):
@@ -183,7 +195,9 @@ def board_line(board: str, ledger: dict, px: Px) -> dict:
         if i0 is None:
             continue
         seen.add(ed_)
-        batches.append({"i0": i0, "picks": [(p["code"], float(p["entry_price"])) for p in picks if p["entry_date"] == ed_]})
+        # 先.八十-12：進場價改取同一條還原序列在進場日的值（帳本 entry_price 是原始收盤，不能跟還原後的後續價格混用）
+        batches.append({"i0": i0, "picks": [(p["code"], px.close(p["code"], ed_) or float(p["entry_price"]))
+                                            for p in picks if p["entry_date"] == ed_]})
     if not batches:
         return None
     start_i = min(b["i0"] for b in batches)
@@ -253,6 +267,7 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
     k = 0
     hold: dict = {}
     base_px: dict = {}
+    pending_fee = False
     for j in range(i_start, len(px.cal)):
         d = px.cal[j]
         while k < len(ev) and ev[k]["date"] <= d:
@@ -263,12 +278,17 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
                 vp = e.get(value_key) or {s: e["nav"] * w for s, w in (e.get("weights_post") or {}).items()}
                 hold = dict(vp)
             base_px = {s: px.close_le(s, e["date"]) for s in hold if s not in ("CASH", "BOND")}
+            # 先.八十-12：紙上帳戶補扣手續費——建倉事件記為「成本不計（虛擬建倉）」者，在這裡依買進金額扣一次手續費
+            # （0.1425%，現金與債券腿不算；之後的月底再平衡由 tracker 記在 rebalance_cost／values_post，不重複扣）
+            # （建倉當天的淨值記為扣費前金額，費用從下一個交易日起反映，否則歸一化會把它抵銷掉）
+            if e.get("event") == "inception" and not (e.get("rebalance_cost") or 0) and not (e.get("rebalance_trade") or {}).get("cost"):
+                pending_fee = True
             k += 1
         if j > i_start:
             dp = px.cal[j - 1]
             mx = 0.0
             for s in list(hold):
-                if s == "BOND":
+                if s in ("BOND", "CASH"):  # 先.八十-12：現金也按一個月定存利率逐日計息（與紙.一債券腿同一資料源）
                     days = (date.fromisoformat(d) - date.fromisoformat(dp)).days
                     hold[s] *= (1 + _rf_daily(rf_doc, d)) ** days
                 elif s != "CASH":
@@ -281,6 +301,11 @@ def paper_line_from_log(events: list, px: Px, value_key: str = "values_post", bo
             comp.append(0.0)
         dates.append(d)
         nav.append(sum(hold.values()))
+        if pending_fee:
+            for s_ in list(hold):
+                if s_ not in ("CASH", "BOND"):
+                    hold[s_] *= 1 - FEE
+            pending_fee = False
     return {"dates": dates, "nav": nav, "comp": comp}
 
 
@@ -310,7 +335,7 @@ def paper_lines(px: Px) -> list:
             out.append(_placeholder(id_, label, "paper", "模擬中", planned, f"{planned[5:].replace('-', '/')} 開始" + (f"（{why}）" if why else ""),
                                     extra={"why": why} if why else None))
             continue
-        note = "依每天收盤價估算" + ("；定存部分按一個月定存利率計息" if vk == "legacy_7030" else "；現金不計息")
+        note = "依每天還原權息收盤估算；現金與定存按一個月定存利率計息；建倉已扣手續費"
         # 先.七十五-3：月中建倉的第一期是部分期（到第一個月底為止），報表標明
         first = next((e for e in sorted(evs, key=lambda e: e.get("date", "")) if e.get("event") == "inception"), None)
         if first and first.get("partial_first_period"):
