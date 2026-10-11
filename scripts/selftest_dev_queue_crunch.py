@@ -149,6 +149,12 @@ try:
     jq.write_text('{"type":"result","error":"Claude usage limit reached, resets 3pm"}', encoding="utf-8")
     check("單項預算用完（max budget）→ ITEM_BUDGET（算該項失敗、不停輪）；帳號額度 → QUOTA_EXCEEDED",
           C.classify(jb)["status"] == "ITEM_BUDGET" and C.classify(jq)["status"] == "QUOTA_EXCEEDED" and "3pm" in C._quota_reset_hint(jq))
+    # 先.六十九-2：每結算一項就呼叫一次外殼發布檢查
+    queue([12, 13])
+    lock("CYC5b")
+    rel = []
+    C.run_round("CYC5b", executor=make_exec(), classifier=ok_cls, notify=notify, collision=no_col, release=lambda: rel.append(1))
+    check(f"每結算一項呼叫一次外殼發布檢查（{len(rel)} 次）", len(rel) == 2)
     # 撞車讓路
     lock("CYC6")
     code, s = C.run_round("CYC6", executor=make_exec(), classifier=ok_cls, notify=notify, collision=lambda: 1)

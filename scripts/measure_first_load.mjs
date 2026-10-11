@@ -4,6 +4,7 @@
 // 用法：node scripts/measure_first_load.mjs [--url http://localhost:8792] [--wait 8000]
 // 也被 smoke_test.mjs 匯入（measureFirstLoad）。
 import { chromium } from "@playwright/test";
+import { launchGuarded } from "./pw_guard.mjs";
 import fs from "node:fs";
 import zlib from "node:zlib";
 import path from "node:path";
@@ -49,9 +50,10 @@ if (process.argv[1] && process.argv[1].endsWith("measure_first_load.mjs")) {
   const a = process.argv.slice(2);
   const url = a.includes("--url") ? a[a.indexOf("--url") + 1] : "http://localhost:8792";
   const wait = a.includes("--wait") ? +a[a.indexOf("--wait") + 1] : 8000;
-  const browser = await chromium.launch({ headless: true });
-  const r = await measureFirstLoad(browser, url, wait);
-  await browser.close();
+  // 先.七十-3：try/finally 必關瀏覽器（close 超過 30 秒強制結束、整體 5 分鐘硬上限）
+  const { browser, close } = await launchGuarded(chromium, { headless: true }, { label: "measure_first_load", hardTimeoutMs: 5 * 60 * 1000 });
+  let r;
+  try { r = await measureFirstLoad(browser, url, wait); } finally { await close(); }
   for (const x of r.rows) console.log(`${String(x.bytes ?? "?").padStart(9)}  ${x.how.padEnd(7)} ${x.url}`);
   console.log(`合計 ${(r.total / 1024).toFixed(1)} KB（${r.rows.length} 個請求，未知大小 ${r.unknown} 個）`);
 }

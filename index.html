@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-11.1251">
+<link rel="stylesheet" href="app.css?v=2026-10-11.1335">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -113,6 +113,8 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
     判讀文字為固定規則（<60 交易日「尚不足以判斷」），由 Python 端 metrics() 產生，前端不自行推論。 -->
     <div class="card" id="strategy-curves-card">
       <h3>策略 vs 0050</h3>
+      <!-- 先.七十-5：卡頂固定一句（總司令裁示原文，靜態文字，不隨資料變動） -->
+      <div class="note" id="sc-positioning" style="margin:0 0 8px;padding:6px 8px;border-radius:8px;background:rgba(127,127,127,.08);color:var(--ink-2)">守回撤的策略在多頭月會落後 0050，這是設計結果；判斷用 ≥60 交易日與回撤，不用單月報酬</div>
       <div id="sc-tabs" style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;padding-bottom:2px"></div>
       <div id="sc-body"><div class="note" style="color:var(--ink-3)">載入中…</div></div>
     </div>
@@ -1287,6 +1289,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-11.1251"></script>
+<script src="app.js?v=2026-10-11.1335"></script>
 </body>
 </html>

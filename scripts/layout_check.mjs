@@ -3,14 +3,16 @@
 // 檢查：body 直接子元素只能是 #new-version-banner、#app、script；nav 底部固定（top > 700）；
 // 六個分頁逐一切換，該頁 .screen 高度 > 0 且位於 <main id="main"> 內。任一失敗 exit 1。
 import { chromium } from "@playwright/test";
+import { launchGuarded } from "./pw_guard.mjs";
 
 const url = process.argv[2] || "http://localhost:8792/index.html";
-const browser = await chromium.launch();
+const { browser, close } = await launchGuarded(chromium, {}, { label: "layout_check", hardTimeoutMs: 5 * 60 * 1000 });  // 先.七十-3
+let ok = true;
+try {
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
 await page.waitForTimeout(1500);
 
-let ok = true;
 const out = (pass, msg) => { if (!pass) ok = false; console.log(`${pass ? "PASS" : "FAIL"} - ${msg}`); };
 
 const kids = await page.evaluate(() => [...document.body.children].map(e =>
@@ -37,6 +39,6 @@ for (const scr of ["home", "market", "picks", "trade", "journal", "settings"]) {
   out(r.h > 0 && r.inMain && r.active && r.navTop > 700,
     `#scr-${scr}：高 ${r.h}px、在 main 內=${r.inMain}、active=${r.active}、nav top=${r.navTop}px`);
 }
-await browser.close();
+} finally { await close(); }
 console.log(ok ? "=== 版面結構全部通過 ===" : "=== 版面結構有 FAIL ===");
 process.exit(ok ? 0 : 1);

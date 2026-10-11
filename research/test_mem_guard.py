@@ -92,6 +92,32 @@ def test_normal_threshold_does_not_kill_healthy_process() -> None:
     print("test_mem_guard: 正常門檻（3GB）下，記憶體用量正常的行程沒有被誤殺。")
 
 
+def test_preflight_uses_available_and_blocks_below_start_threshold() -> None:
+    """先.七十-4：開跑前檢查讀 get_available_bytes()（Available），低於 4.5GB 回 False、不拋例外；量測失敗降級為 True。"""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import mem_guard
+    orig = mem_guard.get_available_bytes
+    try:
+        mem_guard.get_available_bytes = lambda: int(4.4 * 1024 ** 3)
+        ok, gb, msg = mem_guard.preflight()
+        assert ok is False and abs(gb - 4.4) < 0.01 and "不開跑" in msg, msg
+        mem_guard.get_available_bytes = lambda: int(4.6 * 1024 ** 3)
+        ok, gb, msg = mem_guard.preflight()
+        assert ok is True, msg
+
+        def boom():
+            raise OSError("x")
+        mem_guard.get_available_bytes = boom
+        ok, gb, msg = mem_guard.preflight()
+        assert ok is True and "量測失敗" in msg, msg
+        assert mem_guard.START_MIN_AVAILABLE_BYTES == int(4.5 * 1024 ** 3)
+        assert mem_guard.MIN_FREE_BYTES == 3 * 1024 ** 3
+    finally:
+        mem_guard.get_available_bytes = orig
+    print("PASS test_preflight_uses_available_and_blocks_below_start_threshold")
+
+
 if __name__ == "__main__":
     test_mem_guard_actually_terminates_process()
     test_normal_threshold_does_not_kill_healthy_process()
+    test_preflight_uses_available_and_blocks_below_start_threshold()

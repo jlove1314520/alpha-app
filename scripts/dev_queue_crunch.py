@@ -290,8 +290,22 @@ def settle(key: str, started: float, notify=push) -> dict:
 
 
 # ---------- 一輪 ----------
+def shell_release() -> None:
+    """先.六十九-2：每結算一項就問一次「外殼待發布是否滿 60 分鐘」，滿了才蓋版本戳單獨 commit＋push（失敗只記 log）。"""
+    try:
+        r = subprocess.run([sys.executable, str(ROOT / "scripts" / "shell_version.py"), "release", "--push"],
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120,
+                           env=dict(os.environ, PYTHONIOENCODING="utf-8"))
+        msg = (r.stdout or r.stderr or "").strip().splitlines()
+        if msg and "沒有待發布" not in msg[-1]:
+            log(msg[-1][:160])
+    except Exception as e:  # noqa: BLE001
+        log(f"WARN 外殼發布檢查失敗（{type(e).__name__}）")
+
+
 def run_round(cycle_id: str, executor=claude_executor, classifier=classify, notify=push,
-              collision=None, max_items: int = MAX_ITEMS, round_max_hours: float = ROUND_MAX_HOURS) -> tuple[int, dict]:
+              collision=None, max_items: int = MAX_ITEMS, round_max_hours: float = ROUND_MAX_HOURS,
+              release=None) -> tuple[int, dict]:
     collision = collision or R.check_collision
     os.environ["ALPHA_DEVQUEUE_CRUNCH"] = "1"
     os.environ["ALPHA_CYCLE_ID"] = cycle_id
@@ -345,6 +359,8 @@ def run_round(cycle_id: str, executor=claude_executor, classifier=classify, noti
         res["rc"] = rc
         summary["items"].append(res)
         log(f"結算：{key[:40]} → {res['result']}{('（' + res.get('commit', '') + '）') if res.get('commit') else ''}")
+        if release:
+            release()
     else:
         summary["stop"] = f"本輪派工次數上限 {max_items}"
     summary["ended_at"] = now_iso()
@@ -421,7 +437,8 @@ def main() -> int:
         # → 開輪前若在趕工就切回趕工排程（冪等；切換失敗只記 log，不擋本輪）
         if crunch_active():
             set_schedule("crunch")
-        code, s = run_round(cyc)
+        code, s = run_round(cyc, release=shell_release)
+        shell_release()  # 收工時再問一次（趕工剛結束＝不再受 60 分鐘限制，待發布的外殼立刻發布）
         log(f"本輪收工：{s.get('stop')}；處理 {len(s['items'])} 項；常備.開發剩 {s.get('remaining_crunch_items')} 項")
         if not crunch_active():
             log("趕工結束條件成立（常備.開發 - [ ]＝0）→ 排程恢復原本模式")

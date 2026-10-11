@@ -78,3 +78,8 @@ research/alpha_live_server_stderr.log
 # 2026-09-05 基礎設施維修：脫離session工作登記簿/log、每輪cycle的stream-json（都在research/data/，已被上面的規則涵蓋，這裡只註明用途）
 .security_events.jsonl
 research/multibagger_raw/
+
+# 先.七十-3：Playwright 守門 PID 檔（本機暫存，不進版控）
+research/.pw_pids/
+# 先.六十九-2：外殼發布節奏狀態（本機）
+research/.shell_release.json

@@ -39,6 +39,15 @@ PIT 組合回測——常備.開發-6（2026-10-11 先.六十五 總司令裁示
 from __future__ import annotations
 
 import mem_guard  # 同 #390：多檔全歷史載入的記憶體安全閥
+import sys as _sys
+
+# 先.七十-4：開跑前先看可用記憶體（Available）≥4.5GB，不足就不載入任何快取、直接以 exit 3 結束並寫明原因
+# （避免載入 500MB 快取途中才被 3GB 安全閥砍掉）。--skip-preflight 只給小樣本邏輯測試用。
+if "--skip-preflight" not in _sys.argv:
+    _ok, _gb, _msg = mem_guard.preflight()
+    print(f"mem_guard.preflight：{_msg}", flush=True)
+    if not _ok:
+        _sys.exit(3)
 mem_guard.install()
 
 import argparse

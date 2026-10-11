@@ -287,7 +287,9 @@ jobs:
           git add -f research/data/paper_1b_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_3_log.jsonl 2>/dev/null || true
           git add -f research/data/paper_4_log.jsonl 2>/dev/null || true
-          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')"
+          # 先.六十九-3：commit 訊息註明 quote_lite（兩層：熱門單檔＋分片）本次變動檔數
+          QL=$(git diff --cached --name-only -- data/quote_lite | wc -l | tr -d ' ')
+          git diff --cached --quiet && echo "無變動，略過 commit" || git commit -m "自動更新大盤/類股/三大法人/期貨/美股指數/個股基本面/匯率/融資維持率/個股財報籌碼/選股分數(價值成長+題材動能+未來性)/前瞻選股台帳 $(date -u +'%Y-%m-%d %H:%M UTC')（quote_lite 變動 ${QL} 檔）"
 
           for i in 1 2 3 4 5; do
             if git push; then

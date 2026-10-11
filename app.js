@@ -6,6 +6,36 @@
   // console裡沒人看到。只留最近20筆，避免無限累積吃記憶體。
   let GLOBAL_ERRORS=[];
 
+  // 先.六十九-1（2026-10-11）：同網域資料檔（data/*.json、scores*.json）60 秒記憶體快取。
+  // 實測同一次開啟首頁 quotes_tw、margin_maintenance 各被不同面板抓了 2 次；這裡把同一路徑（忽略 ?t= 這類
+  // 查詢字串）60 秒內的 GET 併成一次網路請求，各呼叫端拿到各自的 clone()。仍是網路優先：60 秒一到就重抓；
+  // 指定 cache:'no-store'／'reload' 的呼叫（例如檢查新版、測試）照舊直通網路；失敗的回應不留。
+  // 包裝本身出錯時直接退回原生 fetch（只 console.warn：這時 recordGlobalError 可能還沒定義，而且退回原生
+  // fetch 後功能完全正常，不是使用者需要看到的錯誤）。
+  (function(){
+    const nativeFetch=window.fetch.bind(window),MEM=new Map(),TTL=60*1000;
+    window.fetch=function(input,init){
+      try{
+        const req=typeof input==='string'||input instanceof URL?null:input;
+        const method=String((init&&init.method)||(req&&req.method)||'GET').toUpperCase();
+        const cacheMode=(init&&init.cache)||(req&&req.cache)||'';
+        const u=new URL(req?req.url:String(input),location.href);
+        // window.__ALPHA_FETCH_MEMCACHE_OFF：只給冒煙主頁面用（它會在同一頁內換假資料再重抓）；正式使用者不會有這個值
+        if(!window.__ALPHA_FETCH_MEMCACHE_OFF&&method==='GET'&&cacheMode!=='no-store'&&cacheMode!=='reload'&&u.origin===location.origin&&
+           /\.json$/.test(u.pathname)&&(/\/data\//.test(u.pathname)||/\/scores[^/]*\.json$/.test(u.pathname))){
+          const key=u.pathname,hit=MEM.get(key);
+          if(hit&&Date.now()-hit.at<TTL)return hit.p.then(r=>r.clone());
+          const p=nativeFetch(input,init).then(r=>{if(!r.ok)MEM.delete(key);return r});
+          p.catch(()=>MEM.delete(key));
+          MEM.set(key,{at:Date.now(),p});
+          setTimeout(()=>{const h=MEM.get(key);if(h&&h.p===p)MEM.delete(key)},TTL+1000);
+          return p.then(r=>r.clone());
+        }
+      }catch(e){console.warn('[fetchMemCache] 包裝失敗，改用原生 fetch',e)}
+      return nativeFetch(input,init);
+    };
+  })();
+
   // ══════ 常備.開發-20 丙案（2026-10-11 先.六十五）：分頁程式延遲載入 ══════
   // app.js 只留首頁＋導覽＋共用；其餘分頁程式拆到 app-<頁>.js，點到該頁才載入（不引入建置步驟，
   // 檔案內容是由原 app.js 依頂層宣告原封不動搬出，未改寫任何函式本體）。
@@ -1010,12 +1040,13 @@
       <div class="s"><span>MDD</span><b>${_scPct(m.mdd_pct)}</b></div>
       <div class="s"><span>樣本天數</span><b>${m.days||0}</b></div>
     </div>
+    <div class="note sc-goal" style="margin-bottom:2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div>
     <div class="note" style="margin-bottom:4px">狀態：${scStatusTag(l.status)}　累計 ${_scPct(m.cum_pct)}　同期 0050 ${_scPct(m.bench_cum_pct)}（MDD ${_scPct(m.bench_mdd_pct)}）${m.days<60?'　樣本 <60 交易日只顯示累計':''}</div>
     <div class="note sc-verdict" style="font-weight:600;color:var(--ink-2)">金礦判讀：${m.days>=60?m.verdict:`尚不足以判斷（樣本 ${m.days||0} 個交易日，需 ≥60）`}</div>`;
   }
   function scLineBlock(l){
     if(!l)return '<div class="note" style="color:var(--ink-3)">此線尚無資料</div>';
-    if(!l.started)return `<div class="note" style="margin:6px 0">${scStatusTag(l.status)}　${l.note||'尚未啟動'}${l.start_date?'（起始日 '+l.start_date+'）':''}</div>`;
+    if(!l.started)return `<div class="note sc-goal" style="margin:6px 0 2px">設計目標：<b style="color:var(--ink-2)">${l.goal||'未標示'}</b></div><div class="note" style="margin:0 0 6px">${scStatusTag(l.status)}　${l.note||'尚未啟動'}${l.start_date?'（起始日 '+l.start_date+'）':''}</div>`;
     return scMetricsHtml(l)+`<div style="margin-top:8px">${scSvg([l],l)}</div>
       <div class="note" style="margin-top:4px;font-size:10px">起始日 ${l.start_date}（歸一 100）至 ${l.as_of}；<span style="color:var(--ink-3)">━</span> 灰線＝同期 0050 實際收盤</div>
       <div class="note" style="margin-top:4px;font-size:10px;color:var(--ink-3)">${l.note||''}</div>`;
@@ -1034,7 +1065,7 @@
     }else if(SC_TAB==='all'){
       const ls=scLines().filter(l=>l.started&&l.dates&&l.dates.length>1);
       html+=`<div style="margin-top:4px">${scSvg(ls)}</div><div class="note" style="margin-top:4px;font-size:10px;line-height:1.7">`+
-        scLines().map((l,i)=>`<span style="color:${SC_COLORS[i%SC_COLORS.length]}">━</span> ${l.label}${l.started?`（${_scPp(l.metrics&&l.metrics.cum_gap_pp)}）`:'（未啟動）'}`).join('　')+
+        scLines().map((l,i)=>`<span style="color:${SC_COLORS[i%SC_COLORS.length]}">━</span> ${l.label}〔${l.goal||'未標示'}〕${l.started?`（${_scPp(l.metrics&&l.metrics.cum_gap_pp)}）`:'（未啟動）'}`).join('　')+
         `　<span style="color:var(--ink-3)">━</span> 0050（最早起始線同期）</div><div class="note" style="font-size:10px;color:var(--ink-3)">各線從各自起始日歸一為 100；括號內為對同期 0050 的累計差距。</div>`;
     }else{
       html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
@@ -1088,7 +1119,7 @@
   // 小檔由 scripts/split_quote_lite.py 從那三份檔原樣切出（同一步驟產生，日期一致），
   // 合併進 SPARKLINES／QUOTES_ALL_TW_CACHE／LITE_NAME，resolveQuote() 四層回退鏈完全不用改。
   // 退路：小檔整批抓不到（非 404 的錯誤，或要的代號全部 404＝小檔目錄不存在）→ 改抓整份檔，行為同改版前。
-  // 某一檔 404＝三份來源都沒有這一檔，整份檔裡也不會有，照原本「無報價」處理。
+  // 某一檔單檔與分片都沒有＝三份來源都沒有這一檔，整份檔裡也不會有，照原本「無報價」處理。
   const QUOTE_LITE_INDEX=new Set(['TAIEX','TPEx']);  // 英文字母開頭但屬台股指數、在 sparklines 裡有線的代號
   const QUOTE_LITE_AT={};  // code -> 抓取時間（10 分鐘內不重抓，與 ensureSparklines 一致）
   async function ensureQuoteLite(codes){
@@ -1096,8 +1127,13 @@
       .filter(c=>!(QUOTE_LITE_AT[c]&&Date.now()-QUOTE_LITE_AT[c]<10*60*1000));
     if(!want.length)return;
     if(SPARKLINES_FULL&&QUOTES_ALL_TW_FULL&&Date.now()-SPARKLINES_AT<10*60*1000)return;
-    const res=await Promise.allSettled(want.map(c=>fetch('data/quote_lite/'+encodeURIComponent(c)+'.json?t='+Math.floor(Date.now()/60000))
-      .then(r=>{if(r.status===404)return {code:c,miss:true};if(!r.ok)throw new Error(c+' HTTP '+r.status);return r.json().then(d=>({code:c,d}))})));
+    // 先.六十九-3：兩層。熱門代號（自選股／Bb-90 白名單／指數／近 30 日進榜）有單檔；其餘合併在
+    // data/quote_lite/p/{前兩碼}.json（00 開頭用前三碼）。單檔 404 → 改抓所屬分片（同一次呼叫內同一分片只抓一次）。
+    const tb=Math.floor(Date.now()/60000),shardP={};
+    const shardOf=c=>{const k=/^00/.test(c)?c.slice(0,3):c.slice(0,2);
+      return shardP[k]||(shardP[k]=fetch('data/quote_lite/p/'+encodeURIComponent(k)+'.json?t='+tb).then(r=>{if(r.status===404)return {};if(!r.ok)throw new Error('分片 '+k+' HTTP '+r.status);return r.json()}))};
+    const res=await Promise.allSettled(want.map(c=>fetch('data/quote_lite/'+encodeURIComponent(c)+'.json?t='+tb)
+      .then(r=>{if(r.status===404)return shardOf(c).then(sh=>sh&&sh[c]?{code:c,d:sh[c]}:{code:c,miss:true});if(!r.ok)throw new Error(c+' HTTP '+r.status);return r.json().then(d=>({code:c,d}))})));
     let hardFail=0,miss=0;
     for(const x of res){
       if(x.status==='rejected'){hardFail++;console.warn('[ensureQuoteLite]',x.reason);continue}
@@ -3277,7 +3313,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1251';
+  const APP_VERSION='2026-10-11.1335';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
@@ -3324,9 +3360,28 @@
       window._latestSwVersion=swVer;
     }catch(e){console.warn('[checkNewVersion]',e);recordGlobalError('checkNewVersion',e)}
   }
+  // 先.六十九-1：外殼改快取優先後，新版由背景安裝的 SW「等待中」帶著。點提示條＝叫等待中的 SW 接手並重載
+  // （整批換版）；沒有等待中的 SW（例如新版還沒裝完）才退回原本的清快取＋重載。
+  let SW_APPLY_CLICKED=false;
   async function applyNewVersion(){
-    try{const el=document.getElementById('new-version-banner');if(el)el.textContent='更新中…';await forceUpdateApp()}
-    catch(e){console.warn('[applyNewVersion]',e);recordGlobalError('applyNewVersion',e)}
+    try{
+      const el=document.getElementById('new-version-banner');if(el)el.textContent='更新中…';
+      const reg='serviceWorker' in navigator?await navigator.serviceWorker.getRegistration().catch(()=>null):null;
+      if(reg&&reg.waiting){
+        SW_APPLY_CLICKED=true;reg.waiting.postMessage({type:'SKIP_WAITING'});
+        setTimeout(()=>{if(SW_APPLY_CLICKED)forceUpdateApp()},5000);  // 5 秒沒換上就退回清快取
+        return;
+      }
+      await forceUpdateApp();
+    }catch(e){console.warn('[applyNewVersion]',e);recordGlobalError('applyNewVersion',e)}
+  }
+  function watchSwUpdate(reg){
+    const show=()=>{const el=document.getElementById('new-version-banner');if(el&&navigator.serviceWorker.controller)el.style.display='block'};
+    if(reg.waiting)show();
+    reg.addEventListener('updatefound',()=>{
+      const w=reg.installing;if(!w)return;
+      w.addEventListener('statechange',()=>{if(w.state==='installed')show()});
+    });
   }
 
   // ── 漲跌顏色偏好（2026-08-24 新增）：預設台股慣例紅漲綠跌，可切成國際慣例綠漲紅跌。
@@ -3415,6 +3470,7 @@
   _safeAsync('checkNewVersion',checkNewVersion);
   try{
     setInterval(()=>{checkNewVersion().catch(e=>{console.warn('[checkNewVersion:interval]',e);recordGlobalError('checkNewVersion:interval',e)})},30*60*1000);
+    setInterval(()=>{if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(e=>console.warn('[serviceWorker.update:interval] 離線時正常，不記錄',e))},30*60*1000);
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkNewVersion().catch(e=>{console.warn('[checkNewVersion:visible]',e);recordGlobalError('checkNewVersion:visible',e)})});
   }catch(e){console.warn('[checkNewVersion:setup]',e);recordGlobalError('checkNewVersion:setup',e)}
   // 2026-10-05（先.十四-一）：本機 Claude 登入過期／額度／停擺的紅色橫幅要在首頁
@@ -3431,4 +3487,13 @@
   _safeAsync('discoverLiveEndpoint',()=>discoverLiveEndpoint()
     .then(()=>{loadLiveConfig();renderLiveStatus();return startLiveStream()})
     .then(()=>pullSettingsOnce()));  // 2026-09-15（CF.6／稽核.四）連上即時伺服器後拉一次跨裝置設定
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)})}
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      watchSwUpdate(reg);
+      reg.update().catch(e=>console.warn('[serviceWorker.update] 離線時正常，不記錄',e));
+    }).catch(e=>{console.warn('[serviceWorker]',e);recordGlobalError('serviceWorker',e)});
+    // 只有使用者點了「有新版」才因換版重載；第一次安裝時的 clients.claim() 也會觸發 controllerchange，不能重載
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(SW_APPLY_CLICKED){SW_APPLY_CLICKED=false;location.reload()}});
+  }
+// 先.六十九-1：核心程式執行完畢（導覽、各面板載入函式都已註冊）＝可互動時間點；scripts/measure_second_open.mjs 讀這個值。
+window.__ALPHA_BOOT_MS=performance.now();

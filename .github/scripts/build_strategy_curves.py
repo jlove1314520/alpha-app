@@ -44,6 +44,10 @@ ANN_DAYS = 250
 BOOT_N = 2000
 BOARDS = [("value", "估值榜", "value_board_v2"), ("momentum", "動能榜", "momentum_board"), ("future", "未來榜", "future_board")]
 CORRECTION = "2026-10-11 更正：舊算法把重疊的 5 日報酬串接，誤放大約 5 倍"
+# 先.七十-5（2026-10-11 總司令裁示）：每條線的「設計目標」。裁示沒有指定的線（紙.一b、紙.二）標「未標示」，不自行推定。
+GOALS = {"live_bb90": "守回撤（天條一）", "paper_1": "守回撤（天條一）", "paper_3": "守回撤（天條一）",
+         "paper_4": "贏大盤＋守回撤", "board_value": "選股研究", "board_momentum": "選股研究", "board_future": "選股研究"}
+POSITIONING = "守回撤的策略在多頭月會落後 0050，這是設計結果；判斷用 ≥60 交易日與回撤，不用單月報酬"
 
 
 def _load(p: Path, default=None):
@@ -146,12 +150,14 @@ def _line(id_, label, group, status, dates, nav, comp_max, note="", start=None, 
           "metrics": metrics(navn, bench_vals) if len(navn) >= 2 and len(bench_vals) == len(navn) else metrics([], []), "note": note}
     if extra:
         ln.update(extra)
+    ln["goal"] = GOALS.get(id_, "未標示")
     return ln
 
 
 def _placeholder(id_, label, group, status, start, note) -> dict:
     return {"id": id_, "label": label, "group": group, "status": status, "started": False, "start_date": start,
-            "as_of": None, "dates": [], "nav": [], "bench": [], "comp_max_abs_pct": [], "metrics": metrics([], []), "note": note}
+            "as_of": None, "dates": [], "nav": [], "bench": [], "comp_max_abs_pct": [], "metrics": metrics([], []), "note": note,
+            "goal": GOALS.get(id_, "未標示")}
 
 
 # ---------- 一、選股三榜：重疊組合法 ----------
@@ -338,6 +344,7 @@ def build() -> dict:
                      "bench": BENCH, "bench_note": "0050 實際日收盤（未還原除息），與各線同一條時間軸",
                      "price_asof": px.cal[-1], "correction": CORRECTION,
                      "rules": {"min_days": MIN_DAYS, "ann_days": ANN_DAYS, "bootstrap": f"區塊自助法、{BOOT_N} 次、90% 區間"},
+                     "positioning": POSITIONING,
                      "disclaimer": "研究與紙上追蹤紀錄，非投資建議"},
             "lines": lines}
 

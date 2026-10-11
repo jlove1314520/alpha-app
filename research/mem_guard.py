@@ -46,6 +46,10 @@ import time
 # 加上一般背景服務通常需要2~3GB才能維持系統穩定運作，留3GB緩衝區）。
 MIN_FREE_BYTES = 3 * 1024 ** 3
 CHECK_INTERVAL_SECONDS = 10
+# 2026-10-11 先.七十-4：開跑前門檻（大型回測啟動前的「可用記憶體」下限）。量的是 Windows 的 Available
+# （GlobalMemoryStatusEx.ullAvailPhys＝工作管理員「可用」，含可回收的待命快取），不是 Free（純空閒頁）。
+# 執行中終止門檻 MIN_FREE_BYTES 仍為 3GB 不變（事件001 裁示寫死，不得執行期間調整）。
+START_MIN_AVAILABLE_BYTES = int(4.5 * 1024 ** 3)
 
 _installed = False
 _thread: threading.Thread | None = None
@@ -147,6 +151,20 @@ def install() -> bool:
     return True
 
 
+def preflight(min_bytes: int = START_MIN_AVAILABLE_BYTES) -> tuple[bool, float, str]:
+    """先.七十-4：大型回測開跑前檢查可用記憶體（Available）。回傳 (是否足夠, 目前 GB, 說明)。
+    量測失敗或平台不支援 → 回 (True, nan, 說明)：開跑前檢查本身失敗只降級，執行中仍有 install() 的安全閥兜底。"""
+    try:
+        avail = get_available_bytes()
+    except Exception as e:  # noqa: BLE001
+        return True, float("nan"), f"可用記憶體量測失敗（{type(e).__name__}），略過開跑前檢查，執行中仍受 3GB 安全閥保護"
+    gb = avail / 1024 ** 3
+    need = min_bytes / 1024 ** 3
+    if avail < min_bytes:
+        return False, gb, f"可用記憶體 {gb:.2f}GB 低於開跑門檻 {need:.1f}GB，不開跑"
+    return True, gb, f"可用記憶體 {gb:.2f}GB ≥ 開跑門檻 {need:.1f}GB"
+
+
 def uninstall() -> None:
     """停止背景監控（主要給測試用）。"""
     global _installed
@@ -160,6 +178,7 @@ if __name__ == "__main__":
     print(f"平台：{platform.system()}，支援：{is_supported_platform()}")
     if is_supported_platform():
         avail = get_available_bytes()
-        print(f"目前系統可用記憶體：{avail / 1024**3:.2f}GB"
-              f"（門檻 {MIN_FREE_BYTES / 1024**3:.0f}GB，"
-              f"{'低於門檻，會被終止' if avail < MIN_FREE_BYTES else '正常'}）")
+        print(f"目前系統可用記憶體（Available）：{avail / 1024**3:.2f}GB"
+              f"（執行中終止門檻 {MIN_FREE_BYTES / 1024**3:.0f}GB，"
+              f"{'低於門檻，會被終止' if avail < MIN_FREE_BYTES else '正常'}；"
+              f"大型回測開跑門檻 {START_MIN_AVAILABLE_BYTES / 1024**3:.1f}GB）")

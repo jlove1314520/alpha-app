@@ -60,6 +60,7 @@
 //     data/institutional_history.json（T86來源）的最新日期。
 
 import { chromium } from "@playwright/test";
+import { launchGuarded } from "./pw_guard.mjs";
 
 const TABS = ["home", "market", "picks", "trade", "journal", "settings"];
 
@@ -90,7 +91,9 @@ async function runSmokeTest(baseUrl, headless = true) {
     console.log(`${passed ? "PASS" : "FAIL"} - ${name}${detail ? "：" + detail : ""}`);
   };
 
-  const browser = await chromium.launch({ headless });
+  // 先.七十-3：launchGuarded＝try/finally 必關瀏覽器、close 超過 30 秒強制結束、整體 25 分鐘硬上限、被砍也會先關。
+  const { browser, close: closeBrowser } = await launchGuarded(chromium, { headless }, { label: "smoke_test", hardTimeoutMs: 25 * 60 * 1000 });
+  try {
   // 2026-09-04（HTTPS方案A第二階段，先寫好不切換）：自簽憑證正式啟用後，這支測試若要
   // 連alpha_live_server.py的https端點，Playwright預設會因為不認得自簽CA而擋掉——加
   // ignoreHTTPSErrors讓瀏覽器層面忽略憑證信任錯誤（跟手機端「安裝CA後瀏覽器自然信任」
@@ -100,6 +103,9 @@ async function runSmokeTest(baseUrl, headless = true) {
 
   const pageErrors = [];
   page.on("pageerror", (exc) => pageErrors.push(String(exc)));
+  // 先.六十九-1：主頁面的多項檢查會在同一頁內換假資料再重抓，關掉 App 的 60 秒資料記憶體快取；
+  // 記憶體快取本身由 #90 在獨立 context（不關）實測。
+  await page.addInitScript(() => { window.__ALPHA_FETCH_MEMCACHE_OFF = true; });
 
   await page.goto(`${baseUrl}/index.html`, { waitUntil: "networkidle", timeout: 20000 });
   await page.waitForTimeout(1500);
@@ -284,54 +290,22 @@ async function runSmokeTest(baseUrl, headless = true) {
   }
   record("8. 重新整理按鈕點擊後都會觸發實際網路請求", refreshErrors.length === 0, refreshErrors.join("; "));
 
-  // 9.【2026-08-28新增，使用者回報「時鐘/資料手機端卡在舊版」第五次】模擬
-  // 「手機已經裝了舊版SW＋舊快取」的情境：先讓真正的SW註冊完成，然後直接對
-  // 目前的CacheStorage寫入一份「假的、內容被竄改過的index.html」（塞進跟
-  // sw.js當下CACHE常數同名的cache裡，模擬舊安裝殘留的快取條目），重新整理
-  // 頁面後確認畫面渲染出來的還是「真正、最新」的內容（用APP_VERSION是否為
-  // 真實常數值、不是竄改過的假值來判斷）——驗證sw.js的network-first邏輯
-  // 真的會無視快取裡的舊內容、以網路上最新版本為準，不是只在理論上正確。
-  let staleCacheResult = "跳過（瀏覽器context不支援cache API或SW未啟用）";
-  let staleCachePassed = true;
+  // 9.【2026-08-28 新增（使用者回報「時鐘/資料手機端卡在舊版」第五次）；2026-10-11 先.六十九-1 改寫】
+  // 外殼改「快取優先、背景更新、點提示條才換版」後，防「卡在舊版」的保證改成版本切換：舊版快取裡就算塞了竄改內容，
+  // 發布新版（sw.js 版本號變）→ 新 SW 背景裝好並等待 → 顯示「有新版」提示條 → 點下去 → 新 SW 接手、舊版快取刪除、
+  // 畫面是真內容。用暫存目錄＋內建靜態伺服器跑完整流程（scripts/sw_update_check.mjs），不動工作目錄、不影響主頁面。
+  let staleCachePassed = false, staleCacheResult = "";
   try {
-    const swReady = await page.evaluate(async () => {
-      if (!("serviceWorker" in navigator)) return false;
-      const reg = await navigator.serviceWorker.ready.catch(() => null);
-      return !!(reg && reg.active);
-    });
-    if (swReady) {
-      const cacheName = await page.evaluate(async () => {
-        const keys = await caches.keys();
-        return keys.find((k) => k.startsWith("alpha-v")) || null;
-      });
-      if (cacheName) {
-        await page.evaluate(async (name) => {
-          const c = await caches.open(name);
-          const fakeHtml = "<html><body>STALE_FAKE_CONTENT_MARKER</body></html>";
-          await c.put(
-            new Request(location.origin + "/index.html"),
-            new Response(fakeHtml, { headers: { "Content-Type": "text/html" } })
-          );
-        }, cacheName);
-        await page.reload({ waitUntil: "networkidle", timeout: 20000 });
-        await page.waitForTimeout(500);
-        const bodyText = await page.evaluate(() => document.body.innerHTML);
-        const realVersion = await page.evaluate(() =>
-          typeof APP_VERSION !== "undefined" ? APP_VERSION : null
-        );
-        staleCachePassed = !bodyText.includes("STALE_FAKE_CONTENT_MARKER") && !!realVersion;
-        staleCacheResult = staleCachePassed
-          ? `通過：即使快取裡塞了竄改過的假內容，重新整理後仍顯示真實版本(APP_VERSION=${realVersion})，未被舊快取覆蓋`
-          : "失敗：重新整理後畫面顯示的是快取裡塞進去的假內容，代表network-first失效、舊快取會蓋過新版本";
-      } else {
-        staleCacheResult = "跳過（找不到alpha-v開頭的cache，可能SW還沒完成第一次install快取）";
-      }
-    }
+    const { checkSwUpdateFlow } = await import("./sw_update_check.mjs");
+    const r = await checkSwUpdateFlow(browser);
+    staleCachePassed = !!r.ok;
+    staleCacheResult = staleCachePassed
+      ? `通過：舊版快取（${r.oldCache}，含竄改內容）→ 發布新版後 SW 等待中、提示條顯示 → 點擊換版 → 只剩 ${r.newCache}、畫面為真內容（APP_VERSION=${r.ver}）`
+      : `失敗：${JSON.stringify({ waiting: r.waiting, banner: r.banner, keys: r.keys, fake: r.body, controlled: r.controlled })}`;
   } catch (e) {
-    staleCachePassed = false;
     staleCacheResult = `執行時發生例外：${e.message || e}`;
   }
-  record("9. 模擬手機已裝舊版SW快取，驗證network-first不會被舊內容覆蓋", staleCachePassed, staleCacheResult);
+  record("9. 舊版快取殘留竄改內容時，發布新版→背景安裝→提示條→點擊換版→舊快取刪除、顯示真內容（先.六十九-1 快取優先）", staleCachePassed, staleCacheResult);
 
   // 11.【2026-08-28新增】pull-to-refresh手勢——用合成的touch事件模擬「在#main
   // 頂端往下拉超過門檻再放開」，確認會觸發實際網路請求（跟check 8驗證按鈕
@@ -2620,9 +2594,14 @@ async function runSmokeTest(baseUrl, headless = true) {
       const j = async (u) => { const x = await fetch(u + "?t=" + Date.now()); return x.ok ? x.json() : null; };
       const [sp, qa, ci] = await Promise.all([j("data/sparklines.json"), j("data/quotes_all_tw.json"), j("data/company_info.json")]);
       const out = { bad: [], n: 0 };
-      for (const code of ["2330", "2454", "TAIEX", "0050", "8299"]) {
-        const lite = await j("data/quote_lite/" + code + ".json");
-        if (!lite) { out.bad.push(code + " 小檔不存在"); continue; }
+      // 先.六十九-3：兩層——熱門代號有單檔，其餘在 data/quote_lite/p/{前兩碼（00 開頭前三碼）}.json 分片
+      const shardOf = async (c) => { const sh = await j("data/quote_lite/p/" + (/^00/.test(c) ? c.slice(0, 3) : c.slice(0, 2)) + ".json"); return sh && sh[c]; };
+      out.tiers = {};
+      for (const code of ["2330", "2454", "TAIEX", "0050", "8299", "1101", "00878", "9958"]) {
+        let lite = await j("data/quote_lite/" + code + ".json");
+        out.tiers[code] = lite ? "單檔" : "分片";
+        if (!lite) lite = await shardOf(code);
+        if (!lite) { out.bad.push(code + " 單檔與分片都不存在"); continue; }
         out.n++;
         if (JSON.stringify(lite.s || null) !== JSON.stringify(sp.sparklines[code] || null)) out.bad.push(code + " 走勢線不一致");
         if (JSON.stringify(lite.a || null) !== JSON.stringify(qa.quotes[code] || null)) out.bad.push(code + " 全市場收盤不一致");
@@ -2635,9 +2614,9 @@ async function runSmokeTest(baseUrl, headless = true) {
       return out;
     });
     qlErrors.push(...r.bad);
-    qlInfo = `抽驗 ${r.n} 檔小檔與整份檔一致；查無代號回 404`;
+    qlInfo = `抽驗 ${r.n} 檔（${Object.entries(r.tiers).map(([c, t]) => c + t).join("、")}）與整份檔一致；查無代號回 404`;
   } catch (e) { qlErrors.push(`測試本身出錯：${e.message || e}`); }
-  record("87. 首頁小檔 data/quote_lite/{代號}.json 與 sparklines／quotes_all_tw／company_info 原樣一致", qlErrors.length === 0, qlErrors.join("; ") || qlInfo);
+  record("87. 首頁小檔 data/quote_lite/{代號}.json（含先.六十九 分片）與 sparklines／quotes_all_tw／company_info 原樣一致", qlErrors.length === 0, qlErrors.join("; ") || qlInfo);
 
   // 79.【2026-10-11 常備.開發-20】個股明細改每檔獨立檔延遲載入：loadStockDetail('2330') 與整份檔同一檔內容相同；
   // 估值卡用的 EPS 精簡檔最後四季與整份檔一致；不存在的代號回 {} 不拋錯。
@@ -2854,12 +2833,16 @@ async function runSmokeTest(baseUrl, headless = true) {
     const ui = await page.evaluate(async () => {
       const card = document.getElementById("strategy-curves-card");
       if (!card) return { err: "找不到 #strategy-curves-card" };
-      const out = { title: card.querySelector("h3").textContent.trim(), old: !!document.getElementById("benchmark-comparison-card"), tabs: [], verdicts: [] };
+      const pos = document.getElementById("sc-positioning"), tabsEl = document.getElementById("sc-tabs");
+      const out = { title: card.querySelector("h3").textContent.trim(), old: !!document.getElementById("benchmark-comparison-card"), tabs: [], verdicts: [], goals: [],
+        // 先.七十-5：卡頂固定一句，且位置在分頁列之上
+        positioning: pos ? pos.textContent.trim() : "", posAbove: !!(pos && tabsEl && (pos.compareDocumentPosition(tabsEl) & Node.DOCUMENT_POSITION_FOLLOWING)) };
       const tabs = [...card.querySelectorAll("#sc-tabs .sc-tab")].map(t => t.dataset.tab);
       for (const t of tabs) {
         SC_TAB = t; renderStrategyCurves();
         const body = document.getElementById("sc-body");
         out.tabs.push({ t, len: body.textContent.length, svg: !!body.querySelector("svg") });
+        if (t !== "all") out.goals.push({ t, g: (body.querySelector(".sc-goal") || {}).textContent || "" });
         const v = body.querySelector(".sc-verdict");
         if (v) out.verdicts.push(v.textContent);
         if (t === "boards") out.correction = body.textContent.includes("誤放大約 5 倍");
@@ -2874,6 +2857,13 @@ async function runSmokeTest(baseUrl, headless = true) {
       if (ui.tabs.length !== 8) uiErrs.push(`分頁數 ${ui.tabs.length}（應為 8）`);
       for (const t of ui.tabs) if (t.len < 10) uiErrs.push(`分頁 ${t.t} 內容空白`);
       if (!ui.correction) uiErrs.push("選股榜單分頁沒有更正註記");
+      if (ui.positioning !== "守回撤的策略在多頭月會落後 0050，這是設計結果；判斷用 ≥60 交易日與回撤，不用單月報酬") uiErrs.push(`卡頂定位句不符：「${ui.positioning}」`);
+      if (!ui.posAbove) uiErrs.push("卡頂定位句不在分頁列上方");
+      const wantGoal = { live: "守回撤（天條一）", paper_1: "守回撤（天條一）", paper_3: "守回撤（天條一）", paper_4: "贏大盤＋守回撤", boards: "選股研究" };
+      for (const g of ui.goals) {
+        if (!g.g.startsWith("設計目標：")) uiErrs.push(`分頁 ${g.t} 沒有設計目標欄`);
+        else if (wantGoal[g.t] && !g.g.includes(wantGoal[g.t])) uiErrs.push(`分頁 ${g.t} 設計目標應為「${wantGoal[g.t]}」，實為「${g.g}」`);
+      }
       for (const v of ui.verdicts) {
         const m = v.match(/樣本 (\d+) 個交易日/);
         if (m && Number(m[1]) < 60 && !v.includes("尚不足以判斷")) uiErrs.push(`<60 日判讀不是固定文字：${v}`);
@@ -2882,18 +2872,34 @@ async function runSmokeTest(baseUrl, headless = true) {
       uiInfo.push(`${ui.tabs.length} 分頁、判讀 ${ui.verdicts.length} 則`);
     }
   } catch (e) { uiErrs.push(`測試本身出錯：${e.message || e}`); }
-  record("89. 「策略 vs 0050」卡：改名、八分頁可切換、選股榜單附更正註記、判讀為固定規則文字", uiErrs.length === 0, uiErrs.join("; ") || uiInfo.join("；"));
+  record("89. 「策略 vs 0050」卡：改名、八分頁可切換、選股榜單附更正註記、判讀為固定規則文字、卡頂定位句＋各線設計目標（先.七十-5）", uiErrs.length === 0, uiErrs.join("; ") || uiInfo.join("；"));
+
+  // 90.【2026-10-11 先.六十九-1】外殼快取優先＋資料 60 秒記憶體快取：模擬 4G（1.6Mbps／RTT 150ms）第二次開啟首頁
+  // 「可互動」（核心 app.js 執行完畢，window.__ALPHA_BOOT_MS）<1.5 秒、SW 已接管，且 10 秒內同一個 data/*.json 不重複打網路。
+  const soErrs = [];
+  let soInfo = "";
+  try {
+    const { measureSecondOpen } = await import("./measure_second_open.mjs");
+    const so = await measureSecondOpen(browser, baseUrl);
+    if (!(so.secondBootMs < 1500)) soErrs.push(`第二次開啟可互動 ${so.secondBootMs}ms ≥ 1500ms`);
+    if (!so.controlled) soErrs.push("第二次開啟時 SW 沒有接管（外殼沒走快取）");
+    if (so.dups.length) soErrs.push("重複抓取：" + so.dups.map(([p, n]) => p + "×" + n).join("、"));
+    soInfo = `第一次 ${so.firstBootMs}ms、第二次 ${so.secondBootMs}ms（DCL ${so.secondDclMs}ms），外殼快取 ${so.shellCached} 檔，資料請求 ${so.dataRequests} 次無重複`;
+  } catch (e) { soErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("90. 4G 模擬第二次開啟可互動 <1.5 秒、SW 接管、資料檔不重複抓取（先.六十九-1）", soErrs.length === 0, soErrs.join("; ") || soInfo);
 
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
 
-  await browser.close();
   return results;
+  } finally {
+    await closeBrowser();
+  }
 }
 
 async function main() {
