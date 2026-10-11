@@ -8,7 +8,7 @@
     "avg_coverage": 0.847,
     "liquidity_floor_20d_value": 20000000,
     "weights_hash": "0ea99f55d5a41bd7a28b556cba5bd74c3f2c5baa7e9a10e55860e01ae2db8d0f",
-    "backtest_status": "尚未回測驗證",
+    "backtest_status": "回測未通過", "backtest_note": "2015-2024 回測（#437）：驗證期報酬 +53.5% 輸 0050 含息 +78.6%，多重比較校正（DSR）未過；僅供參考",
     "relative_strength_align_stats": {
       "aligned_20d": 1954,
       "misaligned_last_date_20d": 490,
@@ -19,7 +19,7 @@
     },
     "relative_strength_align_note": "2026-09-17【稽核.四.3】：relative_strength因子改用日期交集對齊個股與大盤（取代舊版位置索引對齊）。aligned_20d/60d=該視窗對齊成功的檔數；misaligned_last_date_*=個股在大盤最後交易日沒有價格（常見於個股資料落後大盤，即混日期bug）；misaligned_start_date_*=個股在大盤起始日沒有價格（常見於新上市或該區間停牌）。查不到同一天的價格一律回None，不用位置硬湊。",
     "source": "只讀repo內data/fundamentals.json+data/stock_detail.json+data/price_history.json+data/company_info.json+data/quotes_all_tw.json+data/market_tw.json（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用。",
-    "disclaimer": "⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。因子設計聚焦股價領先財報的題材動能（相對強度/量能突破/籌碼集中/族群齊漲度/產業資金流入），財報只當地雷排除用（financial_risk_flag），不計入加權總分；完全不計算PE/PEG估值，題材股本來就貴，用估值扣分等於自相矛盾。權重是初始設計值，不是回測最佳化結果，見weights_frozen_momentum.json的note欄位。"
+    "disclaimer": "⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。因子設計聚焦股價領先財報的題材動能（相對強度/量能突破/籌碼集中/族群齊漲度/產業資金流入），財報只當地雷排除用（financial_risk_flag），不計入加權總分；完全不計算PE/PEG估值，題材股本來就貴，用估值扣分等於自相矛盾。權重是初始設計值，不是回測最佳化結果，見weights_frozen_momentum.json的note欄位。"
   },
   "weights": {
     "relative_strength": 0.16,

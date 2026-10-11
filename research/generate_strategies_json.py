@@ -54,10 +54,35 @@ RANK_DEMOTED_STATUSES = {"草稿", "回測未通過"}
 # 留空代表「這個板目前不可能處於回測中狀態，因為連回測腳本都不存在」。
 BACKTEST_LOG_PATHS = {
     "value": RESEARCH_DIR / "pit_run_liquidity500_full.log",
-    "momentum": None,
+    "momentum": None,  # 2026-10-12 已有結果檔（BOARD_PIT_BACKTEST_PATH），不需偵測回測中
     "future": None,
 }
 BACKTEST_IN_PROGRESS_STALE_HOURS = 12  # log超過這個時數沒更新，不算「回測中」，避免誤報陳年log
+
+# 2026-10-12 常備.開發-6：題材動能／未來性兩榜首次 PIT 組合回測（既有榜單重新驗證，
+# TRIALS_LEDGER #437/#438）結果檔。B24_RESULTS.md 只有價值成長榜區塊，這兩榜改從這份
+# JSON 的 boards[board].verdict 推導狀態——同樣是「從真實檔案推導，不手寫」。
+BOARD_PIT_BACKTEST_PATH = RESEARCH_DIR / "data" / "momentum_future_board_pit_backtest.json"
+
+
+def backtest_field_from_board_pit(board_key: str) -> tuple[dict | None, bool | None]:
+    """回傳 (backtest 欄位, 是否通過)；檔案或該榜區塊不存在回 (None, None)。"""
+    d = _load_json(BOARD_PIT_BACKTEST_PATH)
+    b = (d or {}).get("boards", {}).get(board_key)
+    if not b or "verdict" not in b:
+        return None, None
+    tr, va = b.get("train", {}), b.get("val", {})
+    dsr = ((b.get("dsr") or {}).get("dsr") or {}).get("dsr")
+    return {
+        "報酬_train_pct": tr.get("return_pct"), "報酬_validation_pct": va.get("return_pct"),
+        "0050含息_validation_pct": va.get("buy_and_hold_0050_tr_pct"),
+        "mdd_pct": min(x for x in (tr.get("mdd_pct"), va.get("mdd_pct")) if x is not None) if (tr.get("mdd_pct") is not None or va.get("mdd_pct") is not None) else None,
+        "sortino": va.get("sortino"), "alpha_p值": va.get("alpha_pvalue"), "alpha顯著": va.get("alpha_significant"),
+        "隨機對照百分位": va.get("random_control_percentile"), "隨機對照draws次數": va.get("random_draws"),
+        "DSR": dsr, "關卡": b.get("gates"),
+        "期間": f"{tr.get('start')}~{va.get('end')}（TRAIN {tr.get('start')}~{tr.get('end')}，VALIDATION {va.get('start')}~{va.get('end')}）",
+        "來源檔": "research/data/momentum_future_board_pit_backtest.json",
+    }, b["verdict"] == "回測通過"
 
 
 def _now_iso() -> str:
@@ -233,12 +258,16 @@ def build_strategy(
     meta = scores_meta(scores_filename) if scores_filename else None
     b24 = parse_b24_results(board_key) if board_key else None
     backtest = backtest_field_from_b24(b24)
+    pit_pass = None
+    if backtest is None and board_key:
+        backtest, pit_pass = backtest_field_from_board_pit(board_key)
     paper = paper_field(board_key) if board_key else None
     forward_paper = forward_paper_field(strategy_id)
     in_progress = backtest_in_progress(board_key) if board_key else False
 
     if backtest is not None:
-        status = "回測通過" if b24.get("pass") else "回測未通過"
+        passed = b24.get("pass") if b24 is not None else pit_pass
+        status = "回測通過" if passed else "回測未通過"
     elif in_progress:
         status = "回測中"
     elif paper is not None:
@@ -250,7 +279,8 @@ def build_strategy(
 
     last_updated_candidates = [
         _mtime_iso(REPO_ROOT / scores_filename) if scores_filename else None,
-        _mtime_iso(B24_RESULTS_PATH) if backtest is not None else None,
+        (_mtime_iso(B24_RESULTS_PATH) if b24 is not None else _mtime_iso(BOARD_PIT_BACKTEST_PATH))
+        if backtest is not None else None,
         _mtime_iso(PICKS_LEDGER_PATH) if paper is not None else None,
         _mtime_iso(STRATEGY_PERFORMANCE_PATH) if forward_paper is not None else None,
     ]
@@ -363,12 +393,11 @@ def main():
                  "App選股頁正式上線引擎",
             scores_filename="scores_momentum.json", board_key="momentum",
             limitations=[
-                "尚無PIT回測引擎——generate_scores_momentum.py是JSON-only上線評分路徑，讀"
-                "「即時累積快照」（data/price_history.json目前僅90天），不是TRIALS_LEDGER.md"
-                "既有框架用的load_dev()歷史parquet資料（2010-2024train/val切分）",
-                "要做歷史回測，第一步得先建一套「用歷史FinMind快取重算這10個新因子」的管線"
-                "（比照factors.py::prepare_factors()模式），工作量不小於這支JSON-only腳本本身"
-                "（見TRIALS_LEDGER.md「待測」章節2026-08-27條目）",
+                "2026-10-12首次PIT組合回測（既有榜單重新驗證，TRIALS_LEDGER #437，"
+                "research/run_momentum_future_board_pit_backtest.py）：判回測未通過——"
+                "VAL期報酬輸0050含息買進持有、DSR未過0.95；依裁示不調因子權重",
+                "回測宇宙為2026年流動性前500檔（486檔可用）固定用於2015-2024，含前視／"
+                "存活者偏誤（績效系統性高估）；隨機對照僅20次draws",
             ],
         ),
         build_strategy(
@@ -377,8 +406,9 @@ def main():
                  "App選股頁正式上線引擎",
             scores_filename="scores_future.json", board_key="future",
             limitations=[
-                "尚無PIT回測引擎，跟題材動能榜同一個缺口（見上方momentum_board的limitations，"
-                "同一份TRIALS_LEDGER.md記錄涵蓋兩榜）",
+                "2026-10-12首次PIT組合回測（既有榜單重新驗證，TRIALS_LEDGER #438，"
+                "與題材動能榜同一支腳本同一套框架）：判回測未通過——VAL期報酬輸0050含息"
+                "買進持有、DSR未過0.95；依裁示不調因子權重",
                 "customer_concentration（營收客戶集中度）因子未實作，沒有現成免費資料源，誠實留白",
             ],
         ),

@@ -37,7 +37,7 @@
   （使用者原話）。
 
 **【最重要，使用者原話，逐字照抄】**：「在回測完成前，兩個榜單頁面都要
-標明：本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。」
+標明：本榜為資料排序，組合策略回測未通過，不代表能贏大盤。」
 `index.html`的題材動能榜UI必須顯示這段話（跟價值成長榜共用同一段警語）。
 BACKLOG.md的B16（兩榜回測驗證）已提升為P0，回測完成、使用者同意前，
 這支腳本產生的分數不得被宣稱「有效」。
@@ -74,6 +74,11 @@ QUOTES_ALL_TW_PATH = REPO_ROOT / "data" / "quotes_all_tw.json"
 MARKET_TW_PATH = REPO_ROOT / "data" / "market_tw.json"
 OUT_PATH = REPO_ROOT / "scores_momentum.json"
 TW_TZ = timezone(timedelta(hours=8))
+# 2026-10-12 常備.開發-6：首次 PIT 組合回測（既有榜單重新驗證，TRIALS_LEDGER #437）判「回測未通過」——
+# VAL 報酬 +53.5% 輸 0050 含息 +78.6%、DSR 0.0009＜0.95；結果檔 research/data/momentum_future_board_pit_backtest.json。
+# 依裁示只改 App 標籤，不調因子權重。
+BACKTEST_STATUS = "回測未通過"
+BACKTEST_NOTE = "2015-2024 回測（#437）：驗證期報酬 +53.5% 輸 0050 含息 +78.6%，多重比較校正（DSR）未過；僅供參考"
 
 FACTOR_LABELS = {
     "relative_strength": "相對強度/價格動能",
@@ -632,7 +637,7 @@ def main():
     weights = frozen["weights"]
     print(f"已套用題材動能榜初始設計權重 weights_frozen_momentum.json"
           f"（frozen_at={frozen['frozen_at']}，sha256={frozen['weights_sha256'][:12]}...，"
-          f"**尚未回測驗證**）")
+          f"**回測未通過（#437），權重不調整**）")
 
     company_info = _load_json(COMPANY_INFO_PATH).get("companies", {}) if COMPANY_INFO_PATH.exists() else {}
     cs = compute_scores_momentum(weights)
@@ -643,8 +648,8 @@ def main():
             "meta": {
                 "engine_version": "scoring-momentum-v1", "generated_at": datetime.now(TW_TZ).isoformat(),
                 "data_asof": as_of, "market": "TW", "weights_hash": frozen["weights_sha256"],
-                "backtest_status": "尚未回測驗證",
-                "disclaimer": "本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。這次沒有任何股票算出分數。",
+                "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,
+                "disclaimer": "本榜為資料排序，組合策略回測未通過，不代表能贏大盤。這次沒有任何股票算出分數。",
             },
             "weights": weights, "stocks": [],
         }
@@ -751,7 +756,7 @@ def main():
                 "avg_coverage": round(float(cs["coverage"].mean()), 3),
                 "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE,
                 "weights_hash": frozen["weights_sha256"],
-                "backtest_status": "尚未回測驗證",
+                "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,
                 "relative_strength_align_stats": dict(RELATIVE_STRENGTH_ALIGN_STATS),
                 "relative_strength_align_note": (
                     "2026-09-17【稽核.四.3】：relative_strength因子改用日期交集對齊"
@@ -765,7 +770,7 @@ def main():
                            "+data/company_info.json+data/quotes_all_tw.json+data/market_tw.json"
                            "（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用。",
                 "disclaimer": (
-                    "⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。"
+                    "⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。"
                     "因子設計聚焦股價領先財報的題材動能（相對強度/量能突破/籌碼集中/"
                     "族群齊漲度/產業資金流入），財報只當地雷排除用（financial_risk_flag），"
                     "不計入加權總分；完全不計算PE/PEG估值，題材股本來就貴，用估值扣分"

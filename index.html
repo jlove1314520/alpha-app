@@ -24,7 +24,7 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
      載不到時index.html::renderStockChart()自動退回既有SVG折線，不會讓個股頁空白。 -->
 <!-- 常備.開發-20（2026-10-11）：函式庫改為第一次畫K線時才載入（見 app.js ensureLwc()），不再佔首頁首次載入傳輸量。 -->
 <title>Alpha 台美股 AI 交易</title>
-<link rel="stylesheet" href="app.css?v=2026-10-12.0156">
+<link rel="stylesheet" href="app.css?v=2026-10-12.0259">
 </head>
 <body>
 <div id="new-version-banner" role="button" onclick="applyNewVersion()" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;background:var(--accent,#2f81f7);color:#fff;text-align:center;font-weight:700;cursor:pointer">有新版，點此更新</div>
@@ -399,8 +399,10 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
          題材股）。兩榜共用同一份資料與流動性門檻，因子/權重各自獨立版本控管。 -->
     <div class="mkt-toggle" id="picks-board-toggle" style="margin-top:8px;width:100%"></div>
     <!-- 2026-08-27新增（策略層面重要決定，使用者要求「最重要」，兩榜都要固定
-         顯示，回測完成前不得移除）：本榜是資料排序，不是驗證過的策略。 -->
-    <div class="note picks-lb-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。</div>
+         顯示，回測完成前不得移除）：本榜是資料排序，不是驗證過的策略。
+         2026-10-12 常備.開發-6：三榜皆已回測且未通過（價值成長 #390/#395、題材動能 #437、
+         未來性 #438），字樣改為「回測未通過」，仍固定顯示。 -->
+    <div class="note picks-lb-only" style="margin-top:6px;color:#c9524a;font-weight:600">⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。</div>
     <!-- 2026-08-27新增（P1-新，使用者裁示）：總分跟資料完整度是兩件事，
          固定顯示在排行榜正上方，不是藏在角落的小字。 -->
     <div class="note picks-lb-only" id="picks-coverage-note" data-ui-explain style="margin-top:6px;color:#c9a35a">⚠ 總分與「資料完整度」（coverage）是兩件事：全市場股票都會進榜，
@@ -1409,6 +1411,6 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
   <div class="glass-tip" id="rev-tip"></div>
 </div>
 
-<script src="app.js?v=2026-10-12.0156"></script>
+<script src="app.js?v=2026-10-12.0259"></script>
 </body>
 </html>

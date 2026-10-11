@@ -63,6 +63,11 @@ PRICE_HISTORY_PATH = REPO_ROOT / "data" / "price_history.json"
 COMPANY_INFO_PATH = REPO_ROOT / "data" / "company_info.json"
 OUT_PATH = REPO_ROOT / "scores_future.json"
 TW_TZ = timezone(timedelta(hours=8))
+# 2026-10-12 常備.開發-6：首次 PIT 組合回測（既有榜單重新驗證，TRIALS_LEDGER #438）判「回測未通過」——
+# VAL 報酬 +22.6% 輸 0050 含息 +78.6%、DSR≈0＜0.95；結果檔 research/data/momentum_future_board_pit_backtest.json。
+# 依裁示只改 App 標籤，不調因子權重。
+BACKTEST_STATUS = "回測未通過"
+BACKTEST_NOTE = "2015-2024 回測（#438）：驗證期報酬 +22.6% 輸 0050 含息 +78.6%，多重比較校正（DSR）未過；僅供參考"
 
 FACTOR_LABELS = {
     "institutional_buying_streak": "法人連續買超天數",
@@ -259,7 +264,7 @@ def main():
     weights = frozen["weights"]
     print(f"已套用未來性濾網初始設計權重 weights_frozen_future.json"
           f"（frozen_at={frozen['frozen_at']}，sha256={frozen['weights_sha256'][:12]}...，"
-          f"**尚未回測驗證**）")
+          f"**回測未通過（#438），權重不調整**）")
 
     company_info = _load_json(COMPANY_INFO_PATH).get("companies", {}) if COMPANY_INFO_PATH.exists() else {}
     cs = compute_scores_future(weights)
@@ -270,8 +275,8 @@ def main():
             "meta": {
                 "engine_version": "scoring-future-v1", "generated_at": datetime.now(TW_TZ).isoformat(),
                 "data_asof": as_of, "market": "TW", "weights_hash": frozen["weights_sha256"],
-                "backtest_status": "尚未回測驗證",
-                "disclaimer": "本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。這次沒有任何股票算出分數。",
+                "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,
+                "disclaimer": "本榜為資料排序，組合策略回測未通過，不代表能贏大盤。這次沒有任何股票算出分數。",
             },
             "weights": weights, "stocks": [],
         }
@@ -364,11 +369,11 @@ def main():
                 "avg_coverage": round(float(cs["coverage"].mean()), 3),
                 "liquidity_floor_20d_value": LIQUIDITY_FLOOR_20D_VALUE,
                 "weights_hash": frozen["weights_sha256"],
-                "backtest_status": "尚未回測驗證",
+                "backtest_status": BACKTEST_STATUS, "backtest_note": BACKTEST_NOTE,
                 "source": "只讀repo內data/stock_detail.json+data/company_info.json+data/price_history.json"
                            "（不讀parquet、不呼叫FinMind），供GitHub Actions每日排程使用。",
                 "disclaimer": (
-                    "⚠ 本榜為資料排序，尚未經過組合策略回測驗證，不代表能贏大盤。"
+                    "⚠ 本榜為資料排序，組合策略回測未通過，不代表能贏大盤。"
                     "這是「未來性濾網」(a)類因子（現在就能算的部分：法人籌碼行為+"
                     "毛利率品質+產能利用率代理），(b)類（事件資料）/(c)類（AI質性"
                     "研判）尚未實作，見BACKLOG.md B18/B20。customer_concentration"
