@@ -2601,9 +2601,43 @@ async function runSmokeTest(baseUrl, headless = true) {
     if (modUrls.length) flErrors.push(`首頁載入時就下載了分頁程式：${modUrls.map(u => u.replace(/.*\//, "")).join("、")}`);
     const sp = urls.filter(u => u.endsWith("/data/sparklines.json")).length;
     if (sp > 1) flErrors.push(`sparklines.json 下載了 ${sp} 次`);
+    // 常備.開發-20（先.六十七）：首頁自選股改讀 data/quote_lite/{代號}.json，不得再下載整份這三檔
+    for (const bad of ["/data/sparklines.json", "/data/quotes_all_tw.json", "/data/company_info.json"]) {
+      if (urls.some(u => u.endsWith(bad))) flErrors.push(`首頁載入時下載了整份 ${bad}`);
+    }
+    if (!urls.some(u => /\/data\/quote_lite\/[^/]+\.json$/.test(u))) flErrors.push("首頁沒有抓任何 data/quote_lite 小檔（自選股走勢線／收盤來源斷了？）");
+    if (m.total >= 350 * 1024) flErrors.push(`首頁首次載入 ${(m.total / 1024).toFixed(1)} KB ≥ 350KB（先.六十五／六十七驗收門檻）`);
     flInfo = `首頁首次載入實測 ${(m.total / 1024).toFixed(1)} KB（${m.rows.length} 個請求；目標 <350KB，先.六十五丙案）`;
   } catch (e) { flErrors.push(`測試本身出錯：${e.message || e}`); }
-  record("78. 首頁首次載入不下載整份 stock_detail／events／fundamentals、不預載圖表函式庫、sparklines 不重複下載", flErrors.length === 0, flErrors.join("; ") || flInfo);
+  record("78. 首頁首次載入 <350KB，不下載整份 stock_detail／events／fundamentals／sparklines／quotes_all_tw／company_info、不預載圖表函式庫", flErrors.length === 0, flErrors.join("; ") || flInfo);
+
+  // 87.【2026-10-11 常備.開發-20 先.六十七】首頁小檔 data/quote_lite/{代號}.json 必須與整份檔原樣一致
+  // （走勢線＝sparklines.json、收盤＝quotes_all_tw.json、名稱＝company_info.json），且查無代號回 404。
+  const qlErrors = [];
+  let qlInfo = "";
+  try {
+    const r = await page.evaluate(async () => {
+      const j = async (u) => { const x = await fetch(u + "?t=" + Date.now()); return x.ok ? x.json() : null; };
+      const [sp, qa, ci] = await Promise.all([j("data/sparklines.json"), j("data/quotes_all_tw.json"), j("data/company_info.json")]);
+      const out = { bad: [], n: 0 };
+      for (const code of ["2330", "2454", "TAIEX", "0050", "8299"]) {
+        const lite = await j("data/quote_lite/" + code + ".json");
+        if (!lite) { out.bad.push(code + " 小檔不存在"); continue; }
+        out.n++;
+        if (JSON.stringify(lite.s || null) !== JSON.stringify(sp.sparklines[code] || null)) out.bad.push(code + " 走勢線不一致");
+        if (JSON.stringify(lite.a || null) !== JSON.stringify(qa.quotes[code] || null)) out.bad.push(code + " 全市場收盤不一致");
+        if ((lite.sd || null) !== ((sp.stale_dates || {})[code] || null)) out.bad.push(code + " stale_dates 不一致");
+        if ((lite.n || null) !== ((ci.companies[code] || {}).name || null)) out.bad.push(code + " 名稱不一致");
+        if (lite.asof !== (sp.meta || {}).data_asof) out.bad.push(code + " asof 不一致");
+      }
+      const miss = await fetch("data/quote_lite/ZZZZ9.json?t=" + Date.now());
+      if (miss.status !== 404) out.bad.push("查無代號應回 404，實得 " + miss.status);
+      return out;
+    });
+    qlErrors.push(...r.bad);
+    qlInfo = `抽驗 ${r.n} 檔小檔與整份檔一致；查無代號回 404`;
+  } catch (e) { qlErrors.push(`測試本身出錯：${e.message || e}`); }
+  record("87. 首頁小檔 data/quote_lite/{代號}.json 與 sparklines／quotes_all_tw／company_info 原樣一致", qlErrors.length === 0, qlErrors.join("; ") || qlInfo);
 
   // 79.【2026-10-11 常備.開發-20】個股明細改每檔獨立檔延遲載入：loadStockDetail('2330') 與整份檔同一檔內容相同；
   // 估值卡用的 EPS 精簡檔最後四季與整份檔一致；不存在的代號回 {} 不拋錯。
@@ -2783,7 +2817,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

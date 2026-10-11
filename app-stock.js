@@ -642,7 +642,8 @@
     // 維持原樣（會誠實顯示連線失敗，不是假資料）。
     // 2026-09-06（實測.一）個股頁也走同一條回退鏈：先把後面幾層要用的檔案備妥，
     // FinMind 抓不到（額度用盡/冷門股）時才有東西可退。
-    await Promise.allSettled([ensureSparklines(),loadQuotesAllTw(),ensureListedUniverse()]);
+    // 常備.開發-20（先.六十七）：只抓這一檔的小檔（data/quote_lite），不再為一檔下載整份 sparklines／quotes_all_tw
+    await Promise.allSettled([ensureQuoteLite([code]),ensureListedUniverse()]);
     if(currentCode!==code)return;
     const [px,fund,inst]=await Promise.all([
       fm('TaiwanStockPrice',code,_d(35)),loadFundamentals(code),instNet(code),ensureSinopacQuotes()]);

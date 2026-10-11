@@ -29,8 +29,15 @@
     p.catch(e=>{delete LAZY_MOD_PROMISES[mod];console.warn('[loadAppModule:'+mod+']',e);recordGlobalError('loadAppModule:'+mod,e)});  // 失敗清掉，下次可重試
     return p;
   }
+  // 常備.開發-20（先.六十七）：首頁不再抓完整股票名稱清單（見 loadStockInfo 註解），改在第一次切到其他分頁時抓；
+  // 最多等 2.5 秒就先畫（逾時或失敗不擋分頁，名稱清單載好後下一次重繪就會補上）。
+  function _namesForPage(){
+    if(infoLoaded)return Promise.resolve();
+    const p=Promise.resolve().then(()=>loadStockInfo()).catch(e=>{console.warn('[_namesForPage]',e);recordGlobalError('_namesForPage',e)});
+    return Promise.race([p,new Promise(r=>setTimeout(r,2500))]);
+  }
   function _lazyCall(mod,name,args){
-    return loadAppModule(mod).then(()=>{
+    return Promise.all([loadAppModule(mod),_namesForPage()]).then(()=>{
       const f=window[name];
       if(typeof f!=='function'||f._lazyStub)throw new Error('分頁程式 app-'+mod+'.js 已載入但找不到 '+name);
       return f.apply(window,args);
@@ -899,7 +906,10 @@
   const nf=n=>n==null||isNaN(n)?'—':Number(n).toLocaleString();
   function setTxt(id,t){const el=document.getElementById(id);if(el)el.textContent=t}
   const isUS=code=>/^[A-Za-z]/.test(code);
-  const nameOf=code=>STOCKNAME[code]||STOCKNAME_US[code]||code;
+  // 常備.開發-20（先.六十七）：FinMind 名稱清單失敗時，首頁先用 data/quote_lite/{代號}.json 的名稱（見 ensureQuoteLite），
+  // 整份 company_info.json 延後到搜尋／其他頁真的要用時才抓。
+  const LITE_NAME={};
+  const nameOf=code=>STOCKNAME[code]||STOCKNAME_US[code]||LITE_NAME[code]||code;
   // 2026-08-24 新增：手動「重新整理」按鈕用——清掉全部 FinMind 快取（記憶體＋localStorage），
   // 讓接下來的 hydrateXxx() 重新真的打一次 API，不要停在 3 分鐘內的舊快取。
   function fmClearCache(){
@@ -1038,8 +1048,11 @@
   // 常備.開發-20（2026-10-11）：首頁 loadHomeIndex 與 hydrateHome 同時呼叫，原本會下載兩次
   // （gzip 約 112KB×2）；改成進行中的呼叫共用同一個 Promise。
   let SPARKLINES_INFLIGHT=null;
+  // 常備.開發-20（先.六十七）：SPARKLINES 可能只裝了首頁小檔（ensureQuoteLite）合併進來的幾檔，
+  // 所以「整份已載入」另用旗標判斷，不能只看 SPARKLINES 有沒有值。
+  let SPARKLINES_FULL=false;
   function ensureSparklines(){
-    if(SPARKLINES&&Date.now()-SPARKLINES_AT<10*60*1000)return Promise.resolve(SPARKLINES);
+    if(SPARKLINES_FULL&&SPARKLINES&&Date.now()-SPARKLINES_AT<10*60*1000)return Promise.resolve(SPARKLINES);
     if(!SPARKLINES_INFLIGHT)SPARKLINES_INFLIGHT=_ensureSparklinesImpl().finally(()=>{SPARKLINES_INFLIGHT=null});
     return SPARKLINES_INFLIGHT;
   }
@@ -1058,11 +1071,53 @@
       // 不再整批排除落後大盤最大日期的股票，改逐檔記在這裡（code→實際最後一天
       // 日期），沒出現代表跟data_asof同一天。
       SPARKLINES=d.sparklines||{};SPARKLINES_ASOF=(d.meta&&d.meta.data_asof)||null;
-      SPARKLINES_STALE_DATES=d.stale_dates||{};SPARKLINES_AT=Date.now();
+      SPARKLINES_STALE_DATES=d.stale_dates||{};SPARKLINES_AT=Date.now();SPARKLINES_FULL=true;
     }catch(e){console.warn('[ensureSparklines]',e);recordGlobalError('ensureSparklines',e);if(!SPARKLINES)SPARKLINES={}}
     return SPARKLINES;
   }
   function sparkFor(code){return (SPARKLINES&&SPARKLINES[code])||null}
+  // ── 常備.開發-20（2026-10-11 先.六十七）首頁小檔 data/quote_lite/{代號}.json ──────────
+  // 首頁自選股列與加權指數膠囊只需要十幾檔的走勢線＋全市場收盤＋名稱，不再為此下載整份
+  // sparklines.json（gzip 約 112KB）、quotes_all_tw.json（約 51KB）、company_info.json（約 73KB）。
+  // 小檔由 scripts/split_quote_lite.py 從那三份檔原樣切出（同一步驟產生，日期一致），
+  // 合併進 SPARKLINES／QUOTES_ALL_TW_CACHE／LITE_NAME，resolveQuote() 四層回退鏈完全不用改。
+  // 退路：小檔整批抓不到（非 404 的錯誤，或要的代號全部 404＝小檔目錄不存在）→ 改抓整份檔，行為同改版前。
+  // 某一檔 404＝三份來源都沒有這一檔，整份檔裡也不會有，照原本「無報價」處理。
+  const QUOTE_LITE_INDEX=new Set(['TAIEX','TPEx']);  // 英文字母開頭但屬台股指數、在 sparklines 裡有線的代號
+  const QUOTE_LITE_AT={};  // code -> 抓取時間（10 分鐘內不重抓，與 ensureSparklines 一致）
+  async function ensureQuoteLite(codes){
+    const want=[...new Set((codes||[]).filter(c=>c&&(!isUS(c)||QUOTE_LITE_INDEX.has(c))))]
+      .filter(c=>!(QUOTE_LITE_AT[c]&&Date.now()-QUOTE_LITE_AT[c]<10*60*1000));
+    if(!want.length)return;
+    if(SPARKLINES_FULL&&QUOTES_ALL_TW_FULL&&Date.now()-SPARKLINES_AT<10*60*1000)return;
+    const res=await Promise.allSettled(want.map(c=>fetch('data/quote_lite/'+encodeURIComponent(c)+'.json?t='+Math.floor(Date.now()/60000))
+      .then(r=>{if(r.status===404)return {code:c,miss:true};if(!r.ok)throw new Error(c+' HTTP '+r.status);return r.json().then(d=>({code:c,d}))})));
+    let hardFail=0,miss=0;
+    for(const x of res){
+      if(x.status==='rejected'){hardFail++;console.warn('[ensureQuoteLite]',x.reason);continue}
+      const {code,d}=x.value;QUOTE_LITE_AT[code]=Date.now();
+      if(x.value.miss){miss++;continue}
+      try{
+        if(!SPARKLINES_FULL){
+          SPARKLINES=SPARKLINES||{};
+          if(Array.isArray(d.s))SPARKLINES[code]=d.s;
+          if(d.sd)SPARKLINES_STALE_DATES[code]=d.sd;else delete SPARKLINES_STALE_DATES[code];
+          if(d.asof)SPARKLINES_ASOF=d.asof;
+        }
+        if(!QUOTES_ALL_TW_FULL){
+          QUOTES_ALL_TW_CACHE=QUOTES_ALL_TW_CACHE||{quotes:{}};
+          if(d.a)QUOTES_ALL_TW_CACHE.quotes[code]=d.a;
+        }
+        if(d.n)LITE_NAME[code]=d.n;
+      }catch(e){hardFail++;console.warn('[ensureQuoteLite:merge]',code,e)}
+    }
+    if(hardFail||(miss&&miss===want.length)){
+      const why=hardFail?`${hardFail} 檔抓取失敗`:`要的 ${want.length} 檔全部 404（小檔目錄可能不存在）`;
+      console.warn('[ensureQuoteLite] 小檔不可用，改抓整份 sparklines／quotes_all_tw：'+why);
+      recordGlobalError('ensureQuoteLite',new Error(why+'，已改抓整份檔'));
+      await Promise.allSettled([ensureSparklines(),loadQuotesAllTw()]);
+    }
+  }
   // ── 2026-09-06（實測.二）當日 1 分K ────────────────────────────────────────
   // 兩點改動：
   //  1. 不再要求 SSE 已連線。`/live/kbars` 現在對未訂閱的代號會在常駐行程的同一條
@@ -1222,7 +1277,10 @@
     // 造成自選股重複出現。改成每次執行拿一個序號、列先組進fragment，最後只有「最新那次」才整批替換。
     const runId=++HYDRATE_HOME_SEQ;
     const frag=document.createDocumentFragment();
-    try{await loadStockInfo()}catch(e){console.warn('[hydrateHome:loadStockInfo]',e);recordGlobalError('hydrateHome:loadStockInfo',e)}
+    // 常備.開發-20（先.六十七）：自選股小檔（走勢線＋全市場收盤＋名稱）與名稱清單同時抓
+    const liteP=ensureQuoteLite(WL).catch(e=>{console.warn('[hydrateHome:ensureQuoteLite]',e);recordGlobalError('hydrateHome:ensureQuoteLite',e)});
+    try{await loadStockInfo({lite:true})}catch(e){console.warn('[hydrateHome:loadStockInfo]',e);recordGlobalError('hydrateHome:loadStockInfo',e)}
+    await liteP;
     if(runId!==HYDRATE_HOME_SEQ)return;
     _safeAsync('loadHomeIndex',loadHomeIndex);
     _safeAsync('loadTodayEvents',loadTodayEvents);
@@ -1238,7 +1296,8 @@
     // 2026-09-06（實測.一）三份檔案一起備妥再畫：sparklines（走勢線＋回退鏈最後一層）、
     // quotes_all_tw（全市場 2,837 檔收盤，回退鏈第三層）、listed_universe（分辨真的
     // 下市還是我們沒接好）。用 allSettled，任一份失敗只是少一層，不能讓整個首頁不畫。
-    await Promise.allSettled([ensureSparklines(),loadQuotesAllTw(),ensureListedUniverse()]);
+    // 常備.開發-20（先.六十七）：sparklines／quotes_all_tw 改由上面 ensureQuoteLite 只抓自選股各自的小檔（已在名稱前備妥）
+    await Promise.allSettled([ensureQuoteLite(WL),ensureListedUniverse()]);
     // 2026-09-06（實測.二）改成 LIVE.configured：當日曲線現在不需要 SSE 已連線，
     // /live/kbars 對未訂閱代號會走 api.kbars() 查詢，只要 live server 連得上就有線。
     if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(WL.filter(c=>!isUS(c)).map(getLiveCloses))}  // 2026-09-04四修.三
@@ -1374,9 +1433,17 @@
     return (FUNDAMENTALS_CACHE&&FUNDAMENTALS_CACHE.fundamentals&&FUNDAMENTALS_CACHE.fundamentals[code])||{};
   }
   let QUOTES_ALL_TW_CACHE=null;
+  // 常備.開發-20（先.六十七）：QUOTES_ALL_TW_CACHE 可能只裝了首頁小檔合併的幾檔，整份是否已載入另用旗標判斷。
+  let QUOTES_ALL_TW_FULL=false,QUOTES_ALL_TW_P=null;
   async function loadQuotesAllTw(){
-    if(!QUOTES_ALL_TW_CACHE){
-      try{const r=await fetch('data/quotes_all_tw.json?t='+Date.now());if(r.ok)QUOTES_ALL_TW_CACHE=await r.json()}catch(e){console.warn('[loadQuotesAllTw]',e);recordGlobalError('loadQuotesAllTw',e);QUOTES_ALL_TW_CACHE={quotes:{}}}
+    if(!QUOTES_ALL_TW_FULL){
+      // 同改版前：只試一次，失敗不重抓；同時呼叫共用同一個下載
+      if(!QUOTES_ALL_TW_P)QUOTES_ALL_TW_P=(async()=>{
+        try{const r=await fetch('data/quotes_all_tw.json?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);QUOTES_ALL_TW_CACHE=await r.json()}
+        catch(e){console.warn('[loadQuotesAllTw]',e);recordGlobalError('loadQuotesAllTw',e);QUOTES_ALL_TW_CACHE=QUOTES_ALL_TW_CACHE||{quotes:{}}}
+        QUOTES_ALL_TW_FULL=true;
+      })();
+      await QUOTES_ALL_TW_P;
     }
     return (QUOTES_ALL_TW_CACHE&&QUOTES_ALL_TW_CACHE.quotes)||{};
   }
@@ -1722,7 +1789,7 @@
     await loadMarketDataFiles();
     await ensureSinopacQuotes();
     const tw=MARKET_TW_CACHE||{},usIdx=await loadUsIndexes();
-    await ensureSparklines();
+    await ensureQuoteLite(['TAIEX']);  // 常備.開發-20：加權指數膠囊走勢線只抓 TAIEX 小檔，不下載整份 sparklines.json
     if(LIVE.configured){mergeLiveKbarsLast();await Promise.allSettled(['TAIEX','TXF_NEAR'].map(getLiveCloses))}  // 2026-09-06實測.二
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
@@ -1894,22 +1961,34 @@
   // 2026-09-04：改成「共用同一個進行中的promise」——之前第二個呼叫者遇到infoLoading=true會直接
   // return，hydrateHome() await完根本沒等到名稱載好，自選股列就渲染成只有代號。
   let INFO_PROMISE=null;
-  function loadStockInfo(){
+  // 常備.開發-20（先.六十七）：opts.lite＝首頁用，只讀 localStorage 快取、不發任何網路請求——
+  // 實測 FinMind TaiwanStockInfo 名稱清單本身就約 490KB（加 USStockInfo 約 58KB），失敗時的退路
+  // company_info.json 約 73KB，都比首頁其餘資料加起來還大。首頁自選股台股名稱改由 ensureQuoteLite
+  // 小檔補（nameOf 退到 LITE_NAME），美股沒有本地名稱來源，快取沒有時暫顯示代號。
+  // 完整清單在打開搜尋（openSearch）或第一次切到其他分頁（_lazyCall）時才抓。
+  // 本次工作階段 FinMind 已失敗過就 10 分鐘內不重打（避免每次切頁再等一次 12 秒逾時），直接走退路。
+  let FINMIND_INFO_FAILED_AT=0;
+  function loadStockInfo(opts){
+    const lite=!!(opts&&opts.lite);
     if(infoLoaded)return Promise.resolve();
-    if(INFO_PROMISE)return INFO_PROMISE;
-    INFO_PROMISE=_loadStockInfoImpl().finally(()=>{INFO_PROMISE=null});
+    // 進行中的是 lite 呼叫、這次要完整清單：等它結束，沒載到再自己走一次（含 company_info 退路）
+    if(INFO_PROMISE)return lite?INFO_PROMISE:INFO_PROMISE.then(()=>infoLoaded?undefined:loadStockInfo());
+    INFO_PROMISE=_loadStockInfoImpl(lite).finally(()=>{INFO_PROMISE=null});
     return INFO_PROMISE;
   }
-  async function _loadStockInfoImpl(){
+  async function _loadStockInfoImpl(lite){
     if(infoLoaded)return;infoLoading=true;
     let finmindErr=null;
+    const skipFinmind=FINMIND_INFO_FAILED_AT&&Date.now()-FINMIND_INFO_FAILED_AT<10*60*1000;
     try{
       const c=localStorage.getItem('alpha_info'),cu=localStorage.getItem('alpha_info_us');
       // 2026-10-11（常備.開發-19 順修）：空清單快取視同沒有快取——FinMind 額度用盡時舊版會把空清單寫進快取，
       // 之後每次開 App 都讀到空清單、永遠不走 company_info.json 退路，搜尋查不到任何股票。
       if(c&&cu&&((JSON.parse(c).list)||[]).length){const o=JSON.parse(c),ou=JSON.parse(cu);STOCKNAME=o.map;STOCKLIST=o.list;STOCKNAME_US=ou.map;STOCKLIST_US=ou.list;infoLoaded=true;infoLoading=false;return}
     }catch(e){console.warn('[loadStockInfo:cacheRead]',e);recordGlobalError('loadStockInfo:cacheRead',e)}
-    try{
+    if(lite){infoLoading=false;return}  // 首頁：沒有快取就不抓，見 loadStockInfo 註解
+    if(skipFinmind)finmindErr=new Error('FinMind 名稱清單本次工作階段已失敗，10 分鐘內不重打');
+    else try{
       // 2026-09-08 兩個真缺陷一起修（實測抓到，不是預防性重構）：
       // (1) **原本沒有逾時中止**。實測 FinMind 的 USStockInfo 端點掛住超過 45 秒
       //     不回應（同一時間 TaiwanStockInfo 正常、curl 打同一個端點 0.49 秒就回），
@@ -1948,7 +2027,7 @@
         localStorage.setItem('alpha_info',JSON.stringify({map:STOCKNAME,list:STOCKLIST}));
         localStorage.setItem('alpha_info_us',JSON.stringify({map:STOCKNAME_US,list:STOCKLIST_US}));
       }catch(e){console.warn('[loadStockInfo:cacheWrite]',e);recordGlobalError('loadStockInfo:cacheWrite',e)}
-    }catch(e){console.warn('[loadStockInfo:fetch]',e);finmindErr=e}
+    }catch(e){console.warn('[loadStockInfo:fetch]',e);finmindErr=e;FINMIND_INFO_FAILED_AT=Date.now()}
     // 2026-09-04：FinMind打不到（額度/IP封鎖/離線）時，退回repo內data/company_info.json補台股名稱與搜尋清單
     // （零外部資料，3137檔），不讓自選股列變成只有代號。美股名稱沒有本地備援，維持代號。
     // 錯誤記錄政策：退路成功→FinMind失敗只留console.warn（功能沒壞，不該亮診斷紅字）；
@@ -2810,6 +2889,8 @@
       if(rp&&rp.ok)posR=await rp.json();
       if(rb&&rb.ok)balR=await rb.json();
     }catch(e){console.warn('[loadHomeBrokerCard]',e);recordGlobalError('loadHomeBrokerCard',e)}
+    // 常備.開發-20（先.六十七）：持倉不一定在自選股裡，現價退路要的小檔先備妥
+    try{const pc=((posR&&posR.sinopac&&posR.sinopac.positions)||[]).map(p=>String(p.code||''));if(pc.length)await ensureQuoteLite(pc)}catch(e){console.warn('[loadHomeBrokerCard:ensureQuoteLite]',e);recordGlobalError('loadHomeBrokerCard:ensureQuoteLite',e)}
     _safeSync('renderHomePositions',()=>renderHomePositions(posR));
     const sinoBal=balR&&balR.sinopac&&balR.sinopac.available?balR.sinopac.balance:null;
     const sinoPos=posR&&posR.sinopac&&posR.sinopac.available?(posR.sinopac.positions||[]):null;
@@ -3190,7 +3271,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-11.1229';
+  const APP_VERSION='2026-10-11.1246';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

@@ -552,7 +552,10 @@
     planEl.innerHTML=skeletonHtml(3);  // 2026-09-15 P0產品.四：骨架屏
     try{
       const usCode=isUS(row.code);
-      const px=await fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70));
+      // 常備.開發-20（先.六十七）：首頁不再整份載入 sparklines／quotes_all_tw，防線二的真值要自己備妥這一檔的小檔
+      const [pxS]=await Promise.allSettled([fm(usCode?'USStockPrice':'TaiwanStockPrice',row.code,_d(70)),ensureQuoteLite([row.code])]);
+      if(pxS.status==='rejected')throw pxS.reason;
+      const px=pxS.value;
       // 防線一：await 期間使用者已經切到別檔，這批結果作廢（不作廢就會把這一檔的
       // 價格寫進另一檔的頁面——光聖 6442 顯示 6808 的 32 就是這樣來的）。
       if(runId!==REPORT_SEQ)return;
