@@ -1015,6 +1015,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
 
 
 
+    <!-- 常備.開發-34（2026-10-11）：iOS 安裝與推播狀態卡。只讀本機瀏覽器狀態＋本機伺服器 /push/vapid_public_key（唯讀），不改訂閱。 -->
+    <div class="card" id="install-push-card">
+      <h3>安裝與推播狀態</h3>
+      <!-- 狀態列是資料清單不是說明文字，不用 .note（不會被收成「ⓘ 說明」）；安裝步驟用 details，未安裝時預設展開 -->
+      <div id="install-push-body" style="font-size:12px;color:var(--ink-3)">尚未檢查</div>
+      <details id="install-push-guide" data-ui-detail class="note" style="margin-top:8px;display:none"></details>
+      <button class="btn ghost" style="width:100%;margin-top:8px" onclick="_safeAsync('loadInstallPush',loadInstallPush)">重新檢查</button>
+    </div>
+
     <div class="card" id="auto-trading-card">
       <h3>自動投資</h3>
       <div class="note" id="auto-status-note">連上電腦才看得到</div>

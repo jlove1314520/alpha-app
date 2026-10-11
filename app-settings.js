@@ -153,6 +153,7 @@
 
   function hydrateSettings(){
     _safeAsync('loadRiskLimits',loadRiskLimits);_safeAsync('loadNotif',loadNotif);_safeAsync('loadAlerts',loadAlerts);loadBroker();
+    _safeAsync('loadInstallPush',loadInstallPush);  // 常備.開發-34
     setTxt('set-wl-count',WL.length);
     try{renderWLSettings()}catch(e){console.warn('[renderWLSettings]',e);recordGlobalError('renderWLSettings',e)}  // 常備.開發-31
     const cacheCount=Object.keys(localStorage).filter(k=>k.startsWith('fmc_')).length;
@@ -347,8 +348,101 @@
       if(!r.ok){_pushFail(5,'登記訂閱失敗：'+await _pushHttpErr(r));return}
       const j=await r.json();
       _pushNote('已訂閱，共 '+(j.subscriptions!=null?j.subscriptions:'?')+' 支裝置。可按「測試推播」確認收得到。');
+      _safeAsync('loadInstallPush',loadInstallPush);  // 常備.開發-34：訂閱成功後刷新狀態卡
     }catch(e){_pushFail(5,'連不到本機伺服器（'+(e&&e.message||e)+'）',e)}
   }
+  // 常備.開發-34（2026-10-11）：iOS 安裝與推播狀態卡。只「讀」狀態：開啟方式、iOS 版本、通知權限、
+  // 本裝置訂閱、電腦端登記數；不呼叫 requestPermission／subscribe（那必須由使用者按「開啟推播」）。
+  // 每一項各自 try/catch，任一項讀不到只標「讀取失敗」，不影響其他項與設定頁其他面板。
+  function _iosVersion(){
+    try{
+      const ua=navigator.userAgent||'';
+      const m=ua.match(/OS (\d+)[_.](\d+)/);
+      const isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+      if(!isIOS)return null;
+      return m?{major:+m[1],minor:+m[2]}:{major:null,minor:null};
+    }catch(e){console.warn('[installPush:ios]',e);return null}
+  }
+  async function loadInstallPush(){
+    const body=document.getElementById('install-push-body'),guide=document.getElementById('install-push-guide');
+    if(!body)return;
+    const OK='#1aa876',BAD='#e6383f',WARN='#d08a00';
+    const rows=[];const row=(label,txt,color)=>rows.push('<div class="f" style="display:flex;justify-content:space-between;gap:8px;padding:2px 0"><span>'+label+'</span><b style="color:'+color+';text-align:right">'+txt+'</b></div>');
+    const ios=_iosVersion();
+    const standalone=_pushStandalone();
+    // 1. 開啟方式
+    row('開啟方式',standalone?'主畫面 App':'瀏覽器分頁',standalone?OK:(ios?BAD:WARN));
+    // 2. 系統版本（iOS 16.4 起才支援網頁推播）
+    let iosTooOld=false;
+    if(ios){
+      if(ios.major==null)row('系統','iPhone／iPad（讀不到版本）',WARN);
+      else{iosTooOld=ios.major<16||(ios.major===16&&ios.minor<4);row('系統','iOS '+ios.major+'.'+ios.minor+(iosTooOld?'（需 16.4 以上）':''),iosTooOld?BAD:OK)}
+    }else row('系統','非 iPhone／iPad',OK);
+    // 3. 瀏覽器支援
+    let supported=false;
+    try{supported=('serviceWorker' in navigator)&&('PushManager' in window)&&typeof Notification!=='undefined'}catch(e){console.warn('[installPush:support]',e)}
+    row('推播功能',supported?'支援':(ios&&!standalone?'分頁裡不提供（需從主畫面開）':'不支援'),supported?OK:BAD);
+    // 4. 通知權限
+    let perm='unknown';
+    try{if(typeof Notification!=='undefined')perm=Notification.permission}catch(e){console.warn('[installPush:perm]',e)}
+    const permTxt={granted:'已允許',denied:ios?'已拒絕（到 iPhone 設定→通知→Alpha 開啟）':'已拒絕（到瀏覽器的網站設定允許通知）','default':'尚未詢問'}[perm]||'讀不到';
+    row('通知權限',permTxt,perm==='granted'?OK:(perm==='denied'?BAD:WARN));
+    // 5. 本裝置訂閱（瀏覽器端）
+    let sub=null,subErr=null;
+    if(supported){
+      try{
+        const reg=await Promise.race([navigator.serviceWorker.getRegistration(),new Promise(r=>setTimeout(()=>r(undefined),3000))]);
+        if(reg&&reg.pushManager)sub=await reg.pushManager.getSubscription();
+        else subErr='Service Worker 尚未註冊';
+      }catch(e){subErr=(e&&e.message)||String(e);console.warn('[installPush:sub]',e);recordGlobalError('loadInstallPush:sub',e)}
+    }else subErr='此環境不支援';
+    // 6. 電腦端：公鑰是否一致＋登記數（唯讀端點）
+    let srvTxt='連上電腦才看得到',srvColor=WARN,keyMatch=null;
+    if(typeof LIVE!=='undefined'&&LIVE.configured&&LIVE.url){
+      try{
+        const r=await liveFetch('/push/vapid_public_key',6000);
+        if(!r.ok){srvTxt='讀取失敗（HTTP '+r.status+'）';srvColor=BAD}
+        else{
+          const j=await r.json();
+          const n=j.subscriptions;
+          srvTxt=(n!=null?n:'?')+' 支裝置已登記';srvColor=n?OK:WARN;
+          if(sub&&j.public_key&&sub.options&&sub.options.applicationServerKey){
+            const a=new Uint8Array(sub.options.applicationServerKey),b=_b64urlToBytes(j.public_key);
+            keyMatch=a.length===b.length&&a.every((v,i)=>v===b[i]);
+          }
+        }
+      }catch(e){srvTxt='連不到本機伺服器';srvColor=BAD;console.warn('[installPush:server]',e);recordGlobalError('loadInstallPush:server',e)}
+    }
+    if(sub){
+      if(keyMatch===false)row('本裝置訂閱','有，但金鑰與電腦不符（請按「開啟推播」重新訂閱）',BAD);
+      else row('本裝置訂閱','有效'+(keyMatch?'（金鑰與電腦一致）':''),OK);
+    }else row('本裝置訂閱',subErr?('無（'+subErr+'）'):'尚未訂閱',supported?WARN:BAD);
+    row('電腦端',srvTxt,srvColor);
+    // 總結一句
+    let verdict;
+    if(sub&&perm==='granted'&&keyMatch!==false&&srvColor===OK)verdict='<b style="color:'+OK+'">推播就緒</b>：可按「自動投資」卡的「測試推播」確認手機收得到（電腦端登記數含所有裝置，不保證包含這一支）。';
+    else if(ios&&!standalone)verdict='<b style="color:'+BAD+'">尚未從主畫面開啟</b>：iPhone 只有「加到主畫面」後從圖示開啟才能收推播，見下方說明。';
+    else if(iosTooOld)verdict='<b style="color:'+BAD+'">系統版本太舊</b>：請先把 iPhone 更新到 iOS 16.4 以上。';
+    else if(perm==='denied')verdict='<b style="color:'+BAD+'">通知被拒</b>：'+(ios?'到 iPhone「設定 → 通知 → Alpha」':'到瀏覽器的網站設定')+'開啟允許通知，再回來按「開啟推播」。';
+    else verdict='<b style="color:'+WARN+'">尚未完成</b>：到「自動投資」卡按「開啟推播」，跟著畫面一步步允許。';
+    body.innerHTML=rows.join('')+'<div style="margin-top:6px">'+verdict+'</div>';
+    if(guide){
+      if(ios&&!standalone){
+        guide.style.display='';guide.open=true;
+        guide.innerHTML='<summary style="cursor:pointer"><b>怎麼加到主畫面</b></summary>'
+          +'<div>以下依 Apple 官方說明整理，未在你的手機上親自看過，<b>按鈕位置以你看到的為準</b>：</div>'
+          +'<ol style="margin:4px 0 0 18px;padding:0">'
+          +'<li>用 <b>Safari</b> 開本頁（其他瀏覽器的選單可能沒有這個選項）。</li>'
+          +'<li>點「分享」按鈕（方框加向上箭頭；新版 iOS 可能要先點網址列旁的「⋯」才看得到）。</li>'
+          +'<li>往下找「加入主畫面」，點下去，再按右上角「加入」。</li>'
+          +'<li>回到 iPhone 主畫面，點新出現的 <b>Alpha</b> 圖示開啟（不要再從 Safari 開）。</li>'
+          +'<li>在 App 裡到「設定」頁，按「自動投資」卡的「開啟推播」，跳出詢問時選「允許」。</li>'
+          +'</ol>'
+          +'<div style="margin-top:4px">主畫面的 App 跟 Safari 分頁是兩個獨立環境，本機連線網址與 token 要在主畫面 App 裡再設定一次。</div>';
+      }else{guide.style.display='none';guide.innerHTML=''}
+    }
+  }
+  window.loadInstallPush=loadInstallPush;
   async function pushTest(){
     try{
       if(!LIVE.configured||!LIVE.url){_pushFail(0,'連上電腦才看得到');return}
