@@ -2071,7 +2071,11 @@ FinMind的明確`retry_after`倒數更不透明，沒有官方公告的解除時
   2. 量化「前五大客戶占營收%」**仍無結構化免費來源**——這部分維持
      `未來性濾網customer_concentration因子未實作`（見上方TODO既有條目）
      現狀不變，如實標示，不因為B30有其他進展就順便美化這一項。
-  尚未開始。
+  3. **2026-10-11 DevQueue 20261011-163102**：台股量化來源再查證仍無（年報/MOPS robots
+     Disallow、TWSE openapi 143 端點無客戶揭露）；`ic.tpex.org.tw`質性部分依第1點併入B19。
+     美股找到官方結構化來源 SEC DERA Notes Data Sets（帶維度`ConcentrationRiskPercentage(1)`，
+     2009起PIT），事前登記`research/B30_CUSTOMER_CONCENTRATION_SPEC.md`後測「高集中組」
+     → 試驗 #434 **FAIL**（GATE_SEQUENCE第2關隨機控制組，百分位19.5）。台股第2點現狀不變。
 
 **仍標「難/顆粒度不同」，如實揭露（2026-08-28登錄）**：
 - 美股「每日」三大法人/融資融券無免費對應；替代方案=SEC 13F（季度

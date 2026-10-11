@@ -4315,3 +4315,18 @@ MDD -47.6% vs 基準 -61.2%、Sortino 0.462 vs 0.596（**低於基準**）。
 - **不泛化**：這不代表「8-K 事件沒用」——解析全文、只取大額訂單／指名大廠客戶的變體仍可另立 SPEC 獨立測試（N+1）。
 - 規格 `research/B18_8K_COMMERCIAL_SPEC.md`（commit 67122095c，執行前 commit）；程式 `research/b18_8k_commercial_gate.py`；
   結果 `research/b18_8k_commercial_gate_result.json`；登記 `TRIALS_LEDGER.md` #431。
+
+## #434 b30_us_customer_concentration_v1（美股客戶集中度：10-K 單一客戶營收占比高集中組，2026-10-11 結案，常備.開發-因子類-B30）
+
+- **死在哪一關**：`GATE_SEQUENCE` 第 2 關隨機控制組。TRAIN 高集中組 866 事件（s ≥ 前一年第 67 百分位），申報日次一交易日
+  收盤進場持有 60 日相對 SPY 平均超額 +0.99%，**低於揭露者全體平均 +2.93%**，在同年度／同年度同 SIC 兩碼隨機控制組
+  （2 變體×200 抽）只排第 19.5 百分位——方向跟事前寫死的 H1（Patatoukas 2012 正向）相反，不是「差一點」。
+- 診斷數字（不構成任何主張）：高原 H40～90 五格全低於控制組 p95；VAL 908 事件 −6.32%（百分位 7.0）；
+  1 倍成本後 VAL −6.43%；拿掉 2020 後 TRAIN −1.85%；正報酬年比例 0.375。
+- **死因分類：流程對、這條假設在此設計下無 edge**。設計限制照實寫：只有揭露 ≥10% 客戶的公司才進樣本（ASC 280），
+  所以比的是「揭露者之間誰更集中」，不是「集中 vs 分散」；價格快取只對得上 5,290／10,961 份申報（no_ticker 4,777），
+  宇宙偏向存活者。VAL 控制組最大值 131% 是少數小型股暴漲撞進抽樣，不影響判定（訊號連控制組平均都沒贏）。
+- **不泛化**：反方向（高集中＝高風險、做空或避開）是另一條假設，若要測必須另立 SPEC 登記 N+1，不得拿本次 VAL 負值當證據。
+- 台股：量化客戶集中度仍無免費結構化來源（年報/MOPS robots Disallow、openapi 無），無法跨市場複製；質性供應鏈併入 B19。
+- 規格 `research/B30_CUSTOMER_CONCENTRATION_SPEC.md`（commit cf1ede586，執行前 commit）；資料 `research/b30_sec_concentration_extract.py`；
+  程式 `research/b30_customer_concentration_gate.py`；結果 `research/b30_customer_concentration_gate_result.json`；登記 `TRIALS_LEDGER.md` #434。
