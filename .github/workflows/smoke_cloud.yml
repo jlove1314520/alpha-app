@@ -1,0 +1,85 @@
+# 雲端夜間冒煙（2026-10-11 常備.開發-27，先.六十五 寫入）
+#
+# 為什麼要有這支：本機冒煙（node scripts/smoke_test.mjs）打的是 localhost 的工作目錄，
+# 證明的是「程式碼是好的」；但總司令手機打開的是 GitHub Pages 正式網址——Pages 部署
+# 失敗、部署到一半、或 repo 裡某份 data/*.json 被排程寫壞，本機冒煙都看不到。
+# 這支每晚直接對正式網址跑同一支冒煙，結果寫進 data/smoke_cloud.json，設定頁
+# 「雲端夜間冒煙」卡讀它；失敗時 job 顯示紅燈。
+#
+# 本機手動試跑：node scripts/smoke_test.mjs --url https://jlove1314520.github.io/alpha-app --json-out data/smoke_cloud.json
+#
+# 刻意不加入 concurrency group "repo-push-main"：冒煙要跑數分鐘，佔住那個佇列會讓
+# quotes.yml／market.yml 排隊延遲；commit 只動 data/smoke_cloud.json 一個檔，
+# 用 push 重試迴圈處理撞車即可（同 quotes.yml 的雙保險寫法）。
+# CLAUDE.md 第十節：這支只會改寫 data/smoke_cloud.json，已明確列在下方 git add。
+name: 雲端夜間冒煙
+
+on:
+  schedule:
+    # 台北時間每晚 02:30（= UTC 18:30），避開 audit.yml（UTC 15:20）與盤中報價高峰。
+    - cron: "30 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # package-lock.json 在 .gitignore 裡（可重新產生），所以用 npm install 不用 npm ci。
+      - name: 安裝 Playwright
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      # 冒煙失敗不中斷流程：結果檔一定要 commit 進去，App 才看得到「昨晚出事了」。
+      # 紅燈由最後一步負責。
+      - name: 對正式網址跑冒煙
+        id: smoke
+        continue-on-error: true
+        env:
+          ALPHA_PW_OWNER: smoke-cloud
+        run: node scripts/smoke_test.mjs --url https://jlove1314520.github.io/alpha-app --json-out data/smoke_cloud.json
+
+      - name: Commit 冒煙結果
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ ! -f data/smoke_cloud.json ]; then
+            echo "::warning::冒煙沒有產出 data/smoke_cloud.json（安裝步驟可能失敗），本次不 commit"
+            exit 0
+          fi
+          git add data/smoke_cloud.json
+          if git diff --cached --quiet; then
+            echo "無變動，略過 commit"
+            exit 0
+          fi
+          git commit -m "雲端夜間冒煙：更新 data/smoke_cloud.json $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "push成功（第${i}次嘗試）"
+              exit 0
+            fi
+            echo "push失敗，fetch+rebase後重試（第${i}次）"
+            git stash push --include-untracked -m ci-leftovers || true
+            git fetch origin main
+            git rebase origin/main || { echo "rebase衝突，放棄自動解決"; git rebase --abort; exit 1; }
+            sleep $((RANDOM % 6 + 3))
+          done
+          echo "重試5次後仍push失敗"
+          exit 1
+
+      - name: 冒煙未通過就讓這個 job 顯示紅燈
+        if: steps.smoke.outcome == 'failure'
+        run: |
+          echo "::error::雲端夜間冒煙未通過，詳見 data/smoke_cloud.json"
+          exit 1

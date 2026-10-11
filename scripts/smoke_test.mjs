@@ -76,11 +76,43 @@ function parseArgs() {
   const args = process.argv.slice(2);
   let url = "http://localhost:8792";
   let headed = false;
+  let jsonOut = null;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--url") url = args[++i];
     if (args[i] === "--headed") headed = true;
+    if (args[i] === "--json-out") jsonOut = args[++i];
   }
-  return { url, headed };
+  return { url, headed, jsonOut };
+}
+
+// 常備.開發-27（2026-10-11）：雲端夜間冒煙（.github/workflows/smoke_cloud.yml）用 --json-out 把結果寫成
+// data/smoke_cloud.json 給設定頁讀。只存結論與失敗項（不存全部 PASS 明細，檔案保持小）；
+// 測試本身崩潰也要寫一份 crashed=true 的檔，不能讓「沒檔案更新」被誤讀成「沒出事」。
+async function writeJsonOut(jsonOut, url, results, crashError = null) {
+  if (!jsonOut) return;
+  try {
+    const fsw = await import("node:fs");
+    const checks = (results && results.checks) || [];
+    const env = process.env;
+    const out = {
+      generated_at: new Date().toISOString(),
+      url,
+      all_passed: !crashError && !!(results && results.all_passed),
+      crashed: !!crashError,
+      crash_error: crashError ? String(crashError.stack || crashError).slice(0, 2000) : null,
+      total: checks.length,
+      passed: checks.filter(c => c.passed).length,
+      failed: checks.filter(c => !c.passed).length,
+      failures: checks.filter(c => !c.passed).map(c => ({ name: c.name, detail: String(c.detail || "").slice(0, 600) })),
+      global_errors_final: (results && results.global_errors_final) || [],
+      run_url: env.GITHUB_RUN_ID ? `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}` : null,
+      commit: env.GITHUB_SHA ? env.GITHUB_SHA.slice(0, 9) : null,
+    };
+    fsw.writeFileSync(jsonOut, JSON.stringify(out, null, 1) + "\n", "utf8");
+    console.log(`已寫入 ${jsonOut}（${out.passed}/${out.total} 通過${out.crashed ? "，測試本身崩潰" : ""}）`);
+  } catch (e) {
+    console.error(`寫入 ${jsonOut} 失敗：`, e);
+  }
 }
 
 async function runSmokeTest(baseUrl, headless = true) {
@@ -2648,6 +2680,8 @@ async function runSmokeTest(baseUrl, headless = true) {
   // 斷網後重新整理，頁面仍套用樣式、主程式函式存在、分頁列可見（資料抓不到是預期，不算錯）。
   const offErrors = [];
   let offInfo = "";
+  // 常備.開發-27：雲端冒煙打 Pages 正式網址時站台在 /alpha-app/ 底下，快取路徑要帶前綴（本機 localhost 前綴為空字串，檢查內容不變）。
+  const basePath = new URL(baseUrl).pathname.replace(/\/+$/, "");
   try {
     const octx = await browser.newContext({ viewport: { width: 393, height: 852 } });
     const op = await octx.newPage();
@@ -2662,7 +2696,7 @@ async function runSmokeTest(baseUrl, headless = true) {
       for (const k of await caches.keys()) { const c = await caches.open(k); for (const req of await c.keys()) out.push(new URL(req.url).pathname); }
       return { list: out, controlled: !!navigator.serviceWorker.controller };
     });
-    for (const f of ["/app.js", "/app.css", "/index.html", "/app-shared.js", "/app-market.js", "/app-picks.js", "/app-stock.js", "/app-trade.js", "/app-journal.js", "/app-settings.js"]) if (!cached.list.includes(f)) offErrors.push(`SW 快取缺 ${f}`);
+    for (const f of ["/app.js", "/app.css", "/index.html", "/app-shared.js", "/app-market.js", "/app-picks.js", "/app-stock.js", "/app-trade.js", "/app-journal.js", "/app-settings.js"]) if (!cached.list.includes(basePath + f)) offErrors.push(`SW 快取缺 ${basePath + f}`);
     if (!cached.controlled) offErrors.push("SW 沒有接管頁面");
     await octx.setOffline(true);
     await op.reload({ waitUntil: "load", timeout: 30000 });
@@ -3208,10 +3242,39 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { ppErrs.push(`測試本身出錯：${e.message || e}`); }
   record("97. 交易頁「明天會買」預覽：逐筆、超上限警告、可用只顯示夠／不足、無預覽隱藏（先.七十八-2）", ppErrs.length === 0, ppErrs.join("; "));
 
+  // 98.【2026-10-11 常備.開發-27】設定頁「雲端夜間冒煙」卡：route 餵兩份 data/smoke_cloud.json——
+  // (a) 剛跑完、1 項失敗 → 要顯示「1 項失敗」與失敗項名稱；(b) 全過但 48 小時前 → 要標「沒更新」，不能顯示成沒問題。
+  const scfcErrs = [];
+  try {
+    let fixture = null;
+    await page.route("**/data/smoke_cloud.json**", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(fixture) }));
+    const nowIso = new Date().toISOString();
+    fixture = { generated_at: nowIso, all_passed: false, crashed: false, total: 98, passed: 97, failed: 1,
+      failures: [{ name: "假失敗項-雲端冒煙測試用", detail: "fixture" }] };
+    const a = await page.evaluate(async () => {
+      if (typeof loadSmokeCloud !== "function") return { err: "loadSmokeCloud 未載入" };
+      await loadSmokeCloud();
+      return { sum: document.getElementById("smoke-cloud-summary").innerText, list: document.getElementById("smoke-cloud-list").innerText };
+    });
+    if (a.err) scfcErrs.push(a.err);
+    else {
+      if (!/1 項失敗/.test(a.sum)) scfcErrs.push(`(a) 摘要應含「1 項失敗」：${a.sum}`);
+      if (/沒更新/.test(a.sum)) scfcErrs.push("(a) 剛跑完不應標沒更新");
+      if (!/假失敗項-雲端冒煙測試用/.test(a.list)) scfcErrs.push("(a) 未列出失敗項名稱");
+    }
+    fixture = { generated_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(), all_passed: true, crashed: false, total: 98, passed: 98, failed: 0, failures: [] };
+    const b = await page.evaluate(async () => { await loadSmokeCloud(); return document.getElementById("smoke-cloud-summary").innerText; });
+    if (!/全部通過/.test(b)) scfcErrs.push(`(b) 應顯示全部通過：${b}`);
+    if (!/沒更新/.test(b)) scfcErrs.push(`(b) 48 小時前的結果應標沒更新：${b}`);
+    await page.unroute("**/data/smoke_cloud.json**");
+  } catch (e) { scfcErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("98. 設定頁「雲端夜間冒煙」卡：失敗項列出、逾 36 小時標沒更新（常備.開發-27）", scfcErrs.length === 0, scfcErrs.join("; "));
+
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
@@ -3223,8 +3286,15 @@ async function runSmokeTest(baseUrl, headless = true) {
 }
 
 async function main() {
-  const { url, headed } = parseArgs();
-  const results = await runSmokeTest(url, !headed);
+  const { url, headed, jsonOut } = parseArgs();
+  let results;
+  try {
+    results = await runSmokeTest(url, !headed);
+  } catch (e) {
+    await writeJsonOut(jsonOut, url, null, e);
+    throw e;
+  }
+  await writeJsonOut(jsonOut, url, results);
 
   console.log();
   console.log(`=== 冒煙測試結果：${results.all_passed ? "全部通過" : "有項目FAIL，不要commit，先修好"} ===`);

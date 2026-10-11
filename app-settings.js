@@ -160,6 +160,7 @@
     loadAboutVersions();
     _safeAsync('loadDataFreshness',loadDataFreshness);  // 2026-09-03 P0三-三.2，獨立包起來，失敗不影響設定頁其他區塊
     _safeAsync('loadDataAudit',()=>loadDataAudit(false));  // 2026-09-06 稽核.一，同樣獨立
+    _safeAsync('loadSmokeCloud',loadSmokeCloud);  // 常備.開發-27 雲端夜間冒煙，同樣獨立
     _safeAsync('loadAdjAnomalies',loadAdjAnomalies);  // 先.六十一
     _safeAsync('loadCoverage',()=>loadCoverage(false));    // 2026-09-15 稽核二.二，同樣獨立
     _safeAsync('loadSecurity',()=>loadSecurity(false));    // 2026-09-06 連線三.5
@@ -585,6 +586,34 @@
       console.warn('[loadDataAudit]',e);recordGlobalError('loadDataAudit',e);
       sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到稽核報告</b>（'+e.message+'）。代表 scripts/data_audit.py 尚未產生 data/audit_report.json，或排程沒有落地——這本身就是需要處理的狀況，不是「沒問題」。';
       list.innerHTML='';
+    }
+  }
+  // 常備.開發-27：雲端夜間冒煙（data/smoke_cloud.json，.github/workflows/smoke_cloud.yml 每晚產出）。
+  // 超過 36 小時沒更新也標警示——排程沒跑跟冒煙失敗一樣需要處理，不能顯示成「沒問題」。
+  async function loadSmokeCloud(){
+    const sum=document.getElementById('smoke-cloud-summary'),list=document.getElementById('smoke-cloud-list');
+    if(!sum||!list)return;
+    try{
+      const r=await fetch('data/smoke_cloud.json?t='+Date.now());
+      if(r.status===404){sum.textContent='尚未產生第一份結果（每晚台北 02:30 自動跑）';list.innerHTML='';return}
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const d=await r.json();
+      const ageH=d.generated_at?(Date.now()-new Date(d.generated_at).getTime())/3600000:null;
+      const stale=ageH==null||ageH>36;
+      const ok=d.all_passed===true;
+      const head=d.crashed?'<b style="color:var(--warn)">✗ 測試本身崩潰</b>'
+        :`<b style="color:${ok?'var(--up)':'var(--warn)'}">${ok?'✓ 全部通過':'✗ '+nf(d.failed||0)+' 項失敗'}</b> ｜ ${nf(d.passed||0)}/${nf(d.total||0)} 通過`;
+      sum.innerHTML=head+(stale?` ｜ <b style="color:var(--warn)">已 ${ageH==null?'?':Math.round(ageH)} 小時沒更新，排程可能沒跑</b>`:'');
+      const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      const rows=(d.failures||[]).slice(0,20).map(f=>
+        `<div style="font-size:11px;color:var(--ink-3);padding:3px 0;border-top:1px solid var(--hairline)"><b>${esc(f.name)}</b>${f.detail?'：'+esc(f.detail):''}</div>`).join('');
+      list.innerHTML=(d.crashed&&d.crash_error?`<div style="font-size:11px;color:var(--ink-3)">${esc(String(d.crash_error).split('\n')[0])}</div>`:'')
+        +(rows?`<details style="margin-top:4px"${ok?'':' open'}><summary style="font-size:11.5px;color:var(--ink-3);cursor:pointer">失敗項目</summary>${rows}</details>`:'');
+      const tm=document.getElementById('smoke-cloud-tm');
+      if(tm&&d.generated_at)tm.textContent=fmtTzMMDDHHMM(new Date(d.generated_at),'Asia/Taipei');
+    }catch(e){
+      console.warn('[loadSmokeCloud]',e);recordGlobalError('loadSmokeCloud',e);
+      sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到雲端冒煙結果</b>（'+(e&&e.message||e)+'）';list.innerHTML='';
     }
   }
   // 2026-09-15（稽核二.二）讀 data/coverage.json：八因子×全市場覆蓋率儀表板。

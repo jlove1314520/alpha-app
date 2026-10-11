@@ -1166,6 +1166,15 @@ black-translucent會讓iOS獨立App模式的layout viewport高度只回報793
       <div class="note" style="margin-top:6px">稽核時間：<b id="audit-tm">--:--</b>。每晚自動跑全市場恆等式檢查（現價來源一致、進場價在現價±30%內、20日高低點、市值、本益比、空值、千分位解析）。一致性違規率超過 1% 會讓冒煙測試 FAIL、禁止上線。</div>
     </div>
 
+    <!-- 常備.開發-27（2026-10-11）：雲端夜間冒煙＝.github/workflows/smoke_cloud.yml 每晚台北 02:30 對 Pages 正式網址跑
+         scripts/smoke_test.mjs，結果寫 data/smoke_cloud.json。本機冒煙驗「程式碼」，這張卡驗「手機實際打開的那個網址」。 -->
+    <div class="card" data-ui-advanced>
+      <h3>雲端夜間冒煙 <span class="press refresh-btn" style="float:right" onclick="refreshTap(this,'smoke-cloud-tm',async()=>{await loadSmokeCloud()})">重新整理</span></h3>
+      <div class="note" id="smoke-cloud-summary">檢查中…</div>
+      <div id="smoke-cloud-list" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">執行時間：<b id="smoke-cloud-tm">--:--</b>。每晚台北 02:30 由 GitHub 對正式網址跑一次完整冒煙測試。</div>
+    </div>
+
 
 
     <!-- 2026-09-15（稽核二.二）八因子覆蓋率儀表板：資料健康卡看的是「全市場恆等式
