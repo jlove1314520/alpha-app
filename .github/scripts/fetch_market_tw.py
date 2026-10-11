@@ -310,8 +310,39 @@ def fetch_taifex_contracts() -> dict[str, dict]:
             "change": _num(chosen.get("Change")), "change_pct": _num(chosen.get("%")),
             "settlement_price": _num(chosen.get("SettlementPrice")),
             "trading_session": chosen.get("TradingSession"),
+            "date": chosen.get("Date"),
         }
     return out
+
+
+TX_HISTORY_PATH = REPO_ROOT / "data" / "tx_futures_history.json"
+TX_HISTORY_KEEP = 60
+
+
+def update_tx_history(tx: dict | None) -> dict | None:
+    """2026-10-12 先.八十-8：台指期近月日線歷史（首頁「台指期近月」膠囊走勢線用）。
+    TAIFEX openapi DailyMarketReportFut 只給最新一天；官方歷史下載頁需要表單工作階段，依取得方式鐵律不模擬，
+    改成每次排程把當天近月日盤收盤併進 data/tx_futures_history.json（去重、只留最近 60 個交易日），跨日自然累積。
+    近月連續序列、未做轉倉調整（換月那天會有價差跳動），檔內與 App 都照實標示。自身失敗只回 None（十二節）。"""
+    try:
+        if not tx or tx.get("last") is None or not tx.get("date"):
+            return None
+        try:
+            doc = json.loads(TX_HISTORY_PATH.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            doc = {}
+        rows = {r["date"]: r for r in (doc.get("rows") or []) if r.get("date")}
+        d = str(tx["date"])
+        d = f"{d[:4]}-{d[4:6]}-{d[6:8]}" if len(d) == 8 and d.isdigit() else d
+        rows[d] = {"date": d, "contract_month": tx.get("contract_month"), "close": tx["last"]}
+        keep = [rows[k] for k in sorted(rows)][-TX_HISTORY_KEEP:]
+        doc = {"source": "TAIFEX openapi DailyMarketReportFut（每次排程累積當日近月日盤收盤）",
+               "note": "近月連續序列，未做轉倉調整", "rows": keep}
+        TX_HISTORY_PATH.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+        return doc
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] 台指期歷史累積失敗：{type(e).__name__}: {e}")
+        return None
 
 
 def fetch_institutional_aggregate(date_str: str) -> tuple[dict, dict | None]:
@@ -467,6 +498,12 @@ def main():
         contracts = fetch_taifex_contracts()
         out["tx_futures"] = contracts.get("TX")  # 保留舊欄位名給既有呼叫端相容
         out["futures"] = contracts  # 新欄位：TX/MTX/TE/TF 全部
+        hist = update_tx_history(out["tx_futures"])  # 先.八十-8：近月日線累積，給首頁膠囊畫走勢線
+        if hist and out["tx_futures"] is not None:
+            tail = hist["rows"][-20:]
+            out["tx_futures"]["sparkline"] = [r["close"] for r in tail]
+            out["tx_futures"]["sparkline_dates"] = [r["date"] for r in tail]
+            out["tx_futures"]["sparkline_note"] = hist["note"]
     except Exception as e:
         print(f"TAIFEX 失敗：{e}")
         out["errors"].append(f"futures: {e}")

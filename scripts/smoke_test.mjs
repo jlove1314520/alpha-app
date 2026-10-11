@@ -3492,6 +3492,45 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { monErrs.push(`測試本身出錯：${e.message || e}`); }
   record("106. 策略監控台讀 strategy_curves.json、名稱照定案、列 0050 對照，App 不再請求 strategy_performance.json（先.八十-6）", monErrs.length === 0, monErrs.join("; "));
 
+  // 107.【2026-10-12 先.八十-8】跟 0050 比：①樣本外格同時寫「策略 +X%／0050 +Y%」②疊圖各線從自己的起始日接在當天 0050 的值
+  // （不是一律從 100 起）③台指期膠囊有近月日線時畫走勢線（餵 2 點以上的 tx_futures.sparkline）。
+  const sc8Errs = [];
+  try {
+    const r = await page.evaluate(async () => {
+      const out = {};
+      await window.go("home");
+      // ① 樣本外格
+      SC_TAB = "paper_3"; renderStrategyCurves();
+      const oos = document.querySelector('#sc-body .sc-hist-metrics [data-seg="oos"] .sc-oos-pair');
+      out.oos = oos ? oos.textContent : null;
+      // ② 疊圖對齊：假資料兩條線，A 從 d1 起、B 從 d3 起；灰線（A 的同期 0050）在 d3 為 110
+      const fake = { meta: {}, lines: [
+        { id: "fa", label: "A", group: "paper", status: "模擬中", started: true, dates: ["2026-01-01", "2026-01-02", "2026-01-03", "2026-01-04"], nav: [100, 102, 104, 106], bench: [100, 105, 110, 111], metrics: {} },
+        { id: "fb", label: "B", group: "paper", status: "模擬中", started: true, dates: ["2026-01-03", "2026-01-04"], nav: [100, 103], bench: [100, 101], metrics: {} }] };
+      const saveD = SC_DATA, saveL = SC_LIVE, saveT = SC_TAB;
+      try {
+        SC_DATA = fake; SC_LIVE = null; SC_TAB = "all"; renderStrategyCurves();
+        out.align = Object.assign({}, SC_ALIGN);
+        const pb = document.querySelector('#sc-body polyline[data-line="fb"]'), pg = document.querySelector('#sc-body polyline[data-line="bench_0050"]');
+        const pts = el => el ? el.getAttribute("points").trim().split(/\s+/).map(p => p.split(",").map(Number)) : [];
+        const b = pts(pb), g = pts(pg);
+        out.bStartY = b[0] && b[0][1]; out.gAtD3Y = g[2] && g[2][1];
+        out.note = (document.querySelector("#sc-body .note") || {}).textContent || "";
+      } finally { SC_DATA = saveD; SC_LIVE = saveL; SC_TAB = saveT; renderStrategyCurves(); }
+      // ③ 台指期膠囊走勢線
+      const cap = idxCapsuleHtml("台指期近月", "期交所", { close: 49349, change_pct: -1.24, liveKey: "", sparkline: [49100, 49968, 49349] });
+      const div = document.createElement("div"); div.innerHTML = cap;
+      out.capSvg = !!div.querySelector("svg polyline");
+      return out;
+    });
+    if (!r.oos || !/^策略 [+-]\d+\.\d%／0050 [+-]\d+\.\d%$/.test(r.oos.trim())) sc8Errs.push(`樣本外格應為「策略 +X%／0050 +Y%」：${r.oos}`);
+    if (Math.abs((r.align.fb || 0) - 1.1) > 1e-9) sc8Errs.push(`B 線對齊係數應為 1.10（起始日 0050＝110），實為 ${r.align.fb}`);
+    if (Math.abs((r.align.fa || 0) - 1) > 1e-9) sc8Errs.push(`A 線（最早起始）對齊係數應為 1，實為 ${r.align.fa}`);
+    if (r.bStartY == null || r.gAtD3Y == null || Math.abs(r.bStartY - r.gAtD3Y) > 0.6) sc8Errs.push(`B 線起點應與當天灰線同高（${r.bStartY} vs ${r.gAtD3Y}）`);
+    if (!r.capSvg) sc8Errs.push("台指期膠囊有 3 點日線卻沒畫走勢線");
+  } catch (e) { sc8Errs.push(`測試本身出錯：${e.message || e}`); }
+  record("107. 跟 0050 比：樣本外格雙數字、疊圖各線起點接在當天 0050、台指期膠囊有日線就畫走勢線（先.八十-8）", sc8Errs.length === 0, sc8Errs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3520,7 +3559,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

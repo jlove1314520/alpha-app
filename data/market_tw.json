@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-10-11T16:10:26+00:00",
+  "fetched_at": "2026-10-11T17:35:04+00:00",
   "errors": [],
   "taiex": {
     "name": "發行量加權股價指數",
@@ -381,7 +381,15 @@
     "change": -619.0,
     "change_pct": -1.24,
     "settlement_price": 49357.0,
-    "trading_session": "一般"
+    "trading_session": "一般",
+    "date": "20261008",
+    "sparkline": [
+      49349.0
+    ],
+    "sparkline_dates": [
+      "2026-10-08"
+    ],
+    "sparkline_note": "近月連續序列，未做轉倉調整"
   },
   "futures": {
     "TX": {
@@ -390,7 +398,15 @@
       "change": -619.0,
       "change_pct": -1.24,
       "settlement_price": 49357.0,
-      "trading_session": "一般"
+      "trading_session": "一般",
+      "date": "20261008",
+      "sparkline": [
+        49349.0
+      ],
+      "sparkline_dates": [
+        "2026-10-08"
+      ],
+      "sparkline_note": "近月連續序列，未做轉倉調整"
     },
     "MTX": {
       "contract_month": "202610",
@@ -398,7 +414,8 @@
       "change": -624.0,
       "change_pct": -1.25,
       "settlement_price": 49357.0,
-      "trading_session": "一般"
+      "trading_session": "一般",
+      "date": "20261008"
     },
     "TE": {
       "contract_month": "202610",
@@ -406,7 +423,8 @@
       "change": -48.15,
       "change_pct": -1.51,
       "settlement_price": 3136.9,
-      "trading_session": "一般"
+      "trading_session": "一般",
+      "date": "20261008"
     },
     "TF": {
       "contract_month": "202610",
@@ -414,7 +432,8 @@
       "change": -56.2,
       "change_pct": -1.56,
       "settlement_price": 3551.6,
-      "trading_session": "一般"
+      "trading_session": "一般",
+      "date": "20261008"
     }
   },
   "institutional": null,

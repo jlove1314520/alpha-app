@@ -1205,8 +1205,11 @@
     return l&&l.id==='live_bb90'?'第一批成交後開始':'開始日未定';
   }
   const scShortDate=l=>(l&&l.start_date&&/^\d{4}-\d{2}-\d{2}/.test(l.start_date))?`${+l.start_date.slice(5,7)}/${+l.start_date.slice(8,10)}`:(l&&l.id==='live_bb90'?'第一批成交後':'未定');
-  // 多條線畫在同一條日期軸上（聯集日期）；每條線各自歸一 100，灰線＝最早起始那條的同期 0050。
+  // 多條線畫在同一條日期軸上（聯集日期）；灰線＝最早起始那條的同期 0050（起點 100）。
+  // 先.八十-8（2026-10-12）：其餘各線不再一律從 100 起，而是從自己的起始日接在「當天 0050 的值」上
+  // （nav×當日 0050 值÷100），線與灰線的距離＝同期跟 0050 的差。按住圖仍顯示各線自己的累積報酬。
   // 只畫有資料的線（先.七十三-2：未開始的不畫空線）。
+  let SC_ALIGN={};  // 先.八十-8：疊圖各線的對齊係數（起始日 0050 值÷100），冒煙 #107 驗證用
   function scSvg(lines){
     const W=320,H=150,pad=6;
     const started=lines.filter(scHasData);
@@ -1215,13 +1218,18 @@
     const dates=[...new Set(started.flatMap(l=>l.dates))].sort();
     const xi=Object.fromEntries(dates.map((d,i)=>[d,i]));
     const bl=started.slice().sort((a,b)=>a.dates[0]<b.dates[0]?-1:1)[0];
-    const vals=[100,...started.flatMap(l=>l.nav),...bl.bench];
+    const bm=Object.fromEntries(bl.dates.map((d,i)=>[d,bl.bench[i]]));
+    const benchAt=d=>{if(bm[d]!=null)return bm[d];let v=null;for(const x of bl.dates){if(x<=d)v=bm[x];else break}return v};
+    const kOf=l=>{const v=benchAt(l.dates[0]);return (v!=null&&isFinite(v))?v/100:1};
+    const aligned=Object.fromEntries(started.map(l=>[l.id,l.nav.map(v=>v*kOf(l))]));
+    SC_ALIGN=Object.fromEntries(started.map(l=>[l.id,kOf(l)]));
+    const vals=[100,...started.flatMap(l=>aligned[l.id]),...bl.bench];
     const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
     const X=d=>pad+(dates.length>1?xi[d]/(dates.length-1):0)*(W-2*pad),Y=v=>pad+(1-(v-mn)/rg)*(H-2*pad);
     const pl=(ds,vs)=>ds.map((d,i)=>`${X(d).toFixed(1)},${Y(vs[i]).toFixed(1)}`).join(' ');
     const lines_=started.map(l=>l.dates.length>1
-      ?`<polyline data-line="${l.id}" points="${pl(l.dates,l.nav)}" fill="none" stroke="${scColor(l.id)}" stroke-width="2.2"/>`
-      :`<circle data-line="${l.id}" cx="${X(l.dates[0]).toFixed(1)}" cy="${Y(l.nav[0]).toFixed(1)}" r="3.5" fill="${scColor(l.id)}"/>`).join('');
+      ?`<polyline data-line="${l.id}" points="${pl(l.dates,aligned[l.id])}" fill="none" stroke="${scColor(l.id)}" stroke-width="2.2"/>`
+      :`<circle data-line="${l.id}" cx="${X(l.dates[0]).toFixed(1)}" cy="${Y(aligned[l.id][0]).toFixed(1)}" r="3.5" fill="${scColor(l.id)}"/>`).join('');
     const toMap=(ds,vs)=>Object.fromEntries(ds.map((d,i)=>[d,vs[i]]));
     SC_PLOT={dates,pad,W,series:[{label:'0050',color:SC_BENCH_COLOR,map:toMap(bl.dates,bl.bench)}]
       .concat(started.map(l=>({label:l.label,color:scColor(l.id),map:toMap(l.dates,l.nav)})))};
@@ -1372,7 +1380,8 @@
     const B=(SC_HIST.bench_0050||{}).oos;
     const cells=[];
     if(H.backtest&&H.backtest.cagr!=null)cells.push(`<div class="s" data-seg="backtest"><span>回測</span><b>年化 ${(H.backtest.cagr*100).toFixed(1)}%</b><span style="font-size:10px">最大跌幅 ${(H.backtest.mdd*100).toFixed(1)}%</span></div>`);
-    if(H.oos&&H.oos.cum_return!=null&&B&&B.cum_return!=null){const g=(H.oos.cum_return-B.cum_return)*100;cells.push(`<div class="s" data-seg="oos"><span>樣本外</span><b class="${g>=0?'pos':'neg'}">${_scPp(g)}</b><span style="font-size:10px">跟 0050 差</span></div>`)}
+    // 先.八十-8：樣本外格同時寫「策略 +X%／0050 +Y%」，再附差幾點
+    if(H.oos&&H.oos.cum_return!=null&&B&&B.cum_return!=null){const g=(H.oos.cum_return-B.cum_return)*100,sp=v=>(v>=0?'+':'')+(v*100).toFixed(1)+'%';cells.push(`<div class="s" data-seg="oos"><span>樣本外</span><b class="sc-oos-pair">策略 ${sp(H.oos.cum_return)}／0050 ${sp(B.cum_return)}</b><span style="font-size:10px" class="${g>=0?'pos':'neg'}">差 ${_scPp(g)}</span></div>`)}
     const m=l.metrics||{};
     cells.push(`<div class="s" data-seg="paper"><span>紙上</span><b>${scHasData(l)&&m.days>=60?_scPp(m.cum_gap_pp):'尚不足以判斷'}</b><span style="font-size:10px">${scHasData(l)?(m.days||0)+' 個交易日':'還沒開始'}</span></div>`);
     return `<div class="bot-stats sc-hist-metrics" style="margin:6px 0">${cells.join('')}</div>`;
@@ -1412,7 +1421,7 @@
       html+=started.length?`<div style="margin-top:4px">${scSvg(started)}</div>`+scLegendHtml(started):scNotYetHtml(null);
       // 「即將加入」是資料清單不是說明文字，不用 .note（不會被收成「ⓘ 說明」）
       if(soon.length)html+=`<div class="sc-soon" style="margin-top:4px;font-size:11.5px;line-height:1.6;color:var(--ink-3)">即將加入：${soon.map(l=>`${_uiEsc(l.label.replace(/\s*(三檔分散|供給緊縮|景氣閘門|加速|穩健)$/,''))}（${scShortDate(l)}）`).join('、')}</div>`;
-      html+=`<div class="note" style="font-size:10px;color:var(--ink-3)">各線起算為 100；數字是跟 0050 差幾點；按住圖看每天數字</div>`;
+      html+=`<div class="note" style="font-size:10px;color:var(--ink-3)">各線從自己的起始日接在當天 0050 的位置；按住圖看各線自己的報酬</div>`;
     }else{
       html+=scLineBlock(scById(SC_TAB==='live'?'live_bb90':SC_TAB));
     }
@@ -2176,7 +2185,8 @@
     const taiexSrc=taiexRowSource(tw),txfSrc=shioajiFutRowSource('TX',tw.tx_futures);
     // 2026-09-04 P0產品.一：首頁改橫向膠囊帶（名稱、點數、%、迷你走勢），一屏約三顆
     const capsules=[idxCapsuleHtml('加權指數',taiexSrc.srcLabel,taiexSrc.item)];
-    if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR'}));
+    // 先.八十-8：台指期膠囊補近月日線走勢（data/market_tw.json tx_futures.sparkline，近月連續、未做轉倉調整）；連上即時則照舊畫當日 1 分K
+    if(txfSrc.fut&&txfSrc.fut.last!=null)capsules.push(idxCapsuleHtml('台指期近月',txfSrc.srcLabel||'TAIFEX',{close:txfSrc.fut.last,change_pct:txfSrc.fut.change_pct,liveKey:'TXF_NEAR',sparkline:((tw.tx_futures||{}).sparkline||[]).filter(v=>v!=null)}));
     usIdx.forEach(r=>{if(r.item)capsules.push(idxCapsuleHtml(r.label,r.srcLabel,r.item))});
     el.innerHTML=capsules.join('')||'<div class="note">查無資料</div>';
     // 2026-09-04（四修.四）：加權/台指期走Shioaji即時時，時間戳寫即時時間；否則明標收盤日
@@ -3847,7 +3857,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-12.0133';
+  const APP_VERSION='2026-10-12.0139';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);
