@@ -417,6 +417,10 @@ def main() -> int:
         return c
     if cmd == "run":
         cyc = os.environ.get("ALPHA_CYCLE_ID") or datetime.now(TZ).strftime("%Y%m%d-%H%M%S")
+        # 先.六十五：Cowork／總司令補件後，排程可能仍是恢復後的每 15 分鐘（單輪上限 1 小時 10 分會砍掉長輪）
+        # → 開輪前若在趕工就切回趕工排程（冪等；切換失敗只記 log，不擋本輪）
+        if crunch_active():
+            set_schedule("crunch")
         code, s = run_round(cyc)
         log(f"本輪收工：{s.get('stop')}；處理 {len(s['items'])} 項；常備.開發剩 {s.get('remaining_crunch_items')} 項")
         if not crunch_active():
