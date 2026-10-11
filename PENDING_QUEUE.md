@@ -18987,3 +18987,52 @@ un-ibkr-quotes-hidden.vbs；LastRunTime 2026-10-11 00:36:01、LastTaskResult 0�
 - [ ] **先.六十九-3 quote_lite 兩層（熱門單檔 <300＋前兩碼分片約 50）；只在內容變動時寫檔；移除舊 3,229 檔**（互動視窗執行）
 - [ ] **先.六十九-4 常備.開發-20 以 274 KB 達標結案；冒煙 #78 門檻維持 350 KB**（互動視窗執行）
 - [ ] **先.六十九-5 推播「App 已加速，請完全關閉後重開一次」；冒煙全綠 commit 後回報**（互動視窗執行）
+
+---
+
+# 2026-10-11【先.七十：記憶體洩漏查修＋策略卡定位標示】（總司令裁示原文，動工前先寫入）
+
+```
+【先.七十】記憶體洩漏查修＋策略卡定位標示（不碰自動交易）
+1. 立即用 PowerShell 列出目前記憶體前 15 名程序（名稱、PID、WorkingSet、啟動時間、命令列前 80 字），以及 chrome／chromium／node／python 程序總數；結果去識別化後貼進 PENDING_QUEUE 本條。
+2. 凡是啟動時間超過 2 小時、命令列含 smoke_test／playwright／measure_first_load 的 chrome／node 程序一律結束；本機常駐服務（alpha_live_server、shioaji_quotes、auto 相關）不得動。
+3. 修根因：smoke_test.mjs 與 measure_first_load.mjs 改為 try/finally 必定 browser.close()，並加 30 秒 watchdog 強制關閉；run-dev-queue-cycle.ps1 每輪結束清理孤兒 chrome／node（只清自己啟動的 PID）。
+4. research/mem_guard.py 改讀「可用記憶體」（Available，非 Free），門檻維持 4.5GB；清完後重跑常備.開發-6。
+5. 「策略 vs 0050」卡每條線加一欄「設計目標」：紙.一／Bb-90／紙.三 標「守回撤（天條一）」；紙.四 R1-C 標「贏大盤＋守回撤」；三榜標「選股研究」。卡頂固定一句：「守回撤的策略在多頭月會落後 0050，這是設計結果；判斷用 ≥60 交易日與回撤，不用單月報酬」。
+6. smoke 全綠 commit 後回報。
+心跳：PENDING_QUEUE 標 - [x]；PROGRESS_HEARTBEAT.jsonl append 一行。
+```
+
+**第 1 點快照（2026-10-11 13:2x，PowerShell；使用者目錄已遮成 `<user>`，帳號／路徑細節去識別化）**
+
+記憶體前 15 名（WorkingSet）：
+
+| 名稱 | PID | WorkingSet MB | 啟動 | 命令列前 80 字 |
+|---|---|---|---|---|
+| vmmem | 366072 | 1546 | 10-10 04:20 | （系統，WSL／虛擬機） |
+| Memory Compression | 3476 | 991 | 09-24 08:33 | （系統） |
+| pythonw.exe | 132880 | 851 | 10-08 18:09 | （命令列讀不到；私有記憶體 2593MB） |
+| WindowsTerminal.exe | 38548 | 711 | 09-24 22:38 | Windows Terminal |
+| chrome.exe | 31984 | 611 | 09-24 22:36 | 使用者 Chrome（renderer，非 Playwright） |
+| claude.exe | 184280 | 601 | 10-06 19:08 | `C:\Users\<user>\.local\bin\claude.exe --model …` |
+| claude.exe | 312396 | 534 | 10-10 04:20 | Claude 桌面版 |
+| ibgateway.exe | 434848 | 531 | 10-11 11:00 | IBKR Gateway |
+| chrome.exe | 29544 | 501 | 09-24 22:36 | 使用者 Chrome（gpu-process） |
+| chrome.exe | 29096 | 472 | 09-24 22:36 | 使用者 Chrome（主程序） |
+| explorer.exe | 302836 | 453 | 10-08 17:43 | 檔案總管 |
+| dwm.exe | 2220 | 428 | 09-24 08:33 | （系統） |
+| msedgewebview2.exe | 88560 | 423 | 10-07 00:46 | Edge WebView2 |
+| MsMpEng.exe | 5960 | 420 | 09-24 08:33 | Defender |
+| chrome.exe | 141904 | 414 | 09-29 22:47 | 使用者 Chrome（renderer） |
+
+程序總數：chrome 37（全部是使用者自己的 Chrome，含 ms-playwright／--headless／smoke_test／measure_first_load 字樣者 **0**）、chromium 0、headless_shell 0、node **0**、python 13（另 python3.13＝alpha_live_server 1）。
+- python 13 支：①**10-05 01:16 起的 6 支 multiprocessing 孤兒 worker**（父 PID 241976 已不存在，各私有記憶體約 1895MB，合計約 11.4GB，已被換出所以不在 WorkingSet 前 15）②pythonw 132880（10-08 起，私有 2593MB，命令列讀不到）③5 支殘留的 `python -m http.server 8792`（冒煙用，各約 13MB）④alpha_live_server（常駐，不動）。
+- 系統：實體 31.4GB；Free 2.57GB、**Available 2.55GB**（此刻兩者幾乎相同）；**認可記憶體（commit）已用 54.2GB／上限 60.3GB**——真正吃緊的是 commit，主因是上面 ①②。
+- 判讀：第 2 點條件（>2 小時且命令列含 smoke_test／playwright／measure_first_load 的 chrome／node）目前命中 **0 支**；第 2 點範圍不含 python，①② 是否結束仍待總司令決定（不可逆）。
+
+- [ ] **先.七十-1 記憶體前 15 名＋各類程序總數快照，去識別化貼進本條**（互動視窗執行）
+- [ ] **先.七十-2 結束 >2 小時且命令列含 smoke_test／playwright／measure_first_load 的 chrome／node（常駐服務不動）**（互動視窗執行）
+- [ ] **先.七十-3 smoke_test.mjs／measure_first_load.mjs try/finally 必關 browser＋30 秒 watchdog；run-dev-queue-cycle.ps1 每輪收尾清自己啟動的孤兒 chrome／node**（互動視窗執行）
+- [ ] **先.七十-4 mem_guard.py 改讀可用記憶體（Available），門檻 4.5GB；清完後重跑常備.開發-6**（互動視窗執行）
+- [ ] **先.七十-5 策略卡每條線加「設計目標」欄＋卡頂固定一句**（互動視窗執行）
+- [ ] **先.七十-6 冒煙全綠 commit 後回報**（互動視窗執行）
