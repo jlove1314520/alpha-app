@@ -10,6 +10,7 @@ DIRECTIONS 手動新增/更新一筆，再重跑本腳本。refs 欄位可回頭
 """
 import json
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 TAIPEI = timezone(timedelta(hours=8))
 
@@ -622,10 +623,25 @@ EXTERNAL_STRATEGIES = [
 ]
 
 
+def _latest_concluded_at():
+    """常備.開發-35：資料日＝人工彙整內容裡最新的結案日（含子事件）。
+    generated_at 只代表排程哪天重產這個檔，內容本身是人工維護，兩者分開標示。"""
+    dates = []
+    for d in DIRECTIONS:
+        if d.get("concluded_at"):
+            dates.append(d["concluded_at"])
+        for s in d.get("sub_events") or []:
+            if s.get("concluded_at"):
+                dates.append(s["concluded_at"])
+    return max(dates) if dates else None
+
+
 def build():
     doc = {
         "schema_version": 1,
         "generated_at": datetime.now(TAIPEI).isoformat(),
+        "data_as_of": _latest_concluded_at(),
+        "data_as_of_note": "最新一筆結案日（人工彙整內容的資料日）；generated_at 是 market.yml 每日排程重產時間。",
         "note": (
             "0a節（2026-09-07總司令裁示）四條新研究方向的公開成績，含FAIL——"
             "這是Alpha相對於一般籌碼工具的差異化：我們也告訴使用者「測過、沒用」。"
@@ -643,7 +659,9 @@ def build():
         ),
         "external_strategies": EXTERNAL_STRATEGIES,
     }
-    out_path = "../data/signal_status.json"
+    # 常備.開發-35：改用相對本檔的絕對路徑，market.yml 從 repo 根目錄呼叫也寫對位置
+    # （舊版寫死 "../data/..."，只能 cd research 後執行）。
+    out_path = Path(__file__).resolve().parent.parent / "data" / "signal_status.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=False, indent=2)
     print(f"寫入 {out_path}，共 {len(DIRECTIONS)} 條方向、{len(EXTERNAL_STRATEGIES)} 條外部策略")

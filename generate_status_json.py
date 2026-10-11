@@ -513,8 +513,8 @@ def describe_signal_status(path: Path) -> dict:
     return {
         "generated_at": d.get("generated_at"),
         "records": len(dirs) + len(exts),
-        "source": "research/build_signal_status.py（人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，非自動剖析，非排程）",
-        "detail": f"研究方向={len(dirs)}條 外部策略={len(exts)}條",
+        "source": "research/build_signal_status.py（人工彙整TRIALS_LEDGER.md/STRATEGY_GRAVEYARD.md，非自動剖析；2026-10-11常備.開發-35起market.yml每日重產）",
+        "detail": f"研究方向={len(dirs)}條 外部策略={len(exts)}條 資料日(最新結案)={d.get('data_as_of')}",
     }
 
 

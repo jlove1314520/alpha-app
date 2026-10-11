@@ -819,7 +819,7 @@
       }).join('');
       list.innerHTML=`<div class="facts">${rows}</div>`;
       const tm=document.getElementById('coverage-tm');
-      if(tm&&d.meta&&d.meta.generated_at)tm.textContent=_dataDateLabel(d.meta.generated_at,'手動重跑 research/build_coverage_dashboard.py 才會更新');
+      if(tm&&d.meta&&d.meta.generated_at)tm.textContent=_dataDateLabel(d.meta.generated_at,'market.yml 每日排程重產（常備.開發-35）');
     }catch(e){
       console.warn('[loadCoverage]',e);recordGlobalError('loadCoverage',e);
       sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到覆蓋率儀表板</b>（'+e.message+'）。代表 research/build_coverage_dashboard.py 尚未產生 data/coverage.json，或排程沒有落地。';
@@ -908,7 +908,15 @@
         +'</div></div>').join('');
       list.innerHTML=`<details><summary style="font-size:11.5px;color:var(--ink-3);cursor:pointer">展開全部 ${all.length} 條</summary>${rows}</details>`;
       const tm=document.getElementById('signal-status-tm');
-      if(tm&&d.generated_at)tm.textContent=_dataDateLabel(d.generated_at,'人工彙整快照，有新結案才重產');
+      // 常備.開發-35：資料日＝最新一筆結案日（data_as_of，人工彙整內容本身的日期）；
+      // generated_at 只是 market.yml 每日排程重產時間，分開標示，不讓「今天重產」被誤讀成「今天有新結果」。
+      if(tm){
+        const asOf=d.data_as_of?String(d.data_as_of).slice(0,10):null;
+        const gen=d.generated_at?new Date(d.generated_at):null;
+        const genTxt=gen&&!isNaN(gen)?'；每日排程重產 '+fmtTzMMDDHHMM(gen,'Asia/Taipei'):'';
+        tm.textContent=asOf?('資料日 '+asOf+'（最新一筆結案）'+genTxt+'；內容為人工彙整，有新結案才變動')
+          :(d.generated_at?_dataDateLabel(d.generated_at,'人工彙整快照，有新結案才重產'):'--:--');
+      }
     }catch(e){
       console.warn('[loadSignalStatus]',e);recordGlobalError('loadSignalStatus',e);
       sum.innerHTML='<b style="color:var(--warn)">✗ 讀不到訊號成績單</b>（'+e.message+'）。代表 research/build_signal_status.py 尚未產生 data/signal_status.json，或排程沒有落地——這本身就是需要處理的狀況，不是「沒有結果」。';
