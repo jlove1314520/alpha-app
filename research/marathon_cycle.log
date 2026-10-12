@@ -6587,3 +6587,9 @@ quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）�
 quota_throttle: RECORDED marathon: made_progress=False consecutive_no_progress=2 seven_day_utilization=1
 auth_classify: {"status": "OK", "matched": null}
 ===== Marathon cycle end: 2026-10-13 00:05:08 cycle_id=20261013-000502 reason=ERROR cost_usd=0 read_kb=0.0 turns=1 duration_min=0.02 =====
+
+quota_throttle: RUN（節流狀態，但已達120分鐘門檻，本輪照跑）：帳號週用量已達100%（門檻90%），節流保留額度給交辦與資料管線
+
+===== Marathon cycle start: 2026-10-13 06:05:02 cycle_id=20261013-060502 =====
+quota_throttle: RECORDED marathon: made_progress=True consecutive_no_progress=0 seven_day_utilization=0
+===== Marathon cycle end: 2026-10-13 06:06:24 cycle_id=20261013-060502 reason=OK cost_usd=0.6234248 read_kb=60.1 turns=15 duration_min=1.32 =====
