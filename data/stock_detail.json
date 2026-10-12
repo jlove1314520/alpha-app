@@ -1,9 +1,11 @@
 {
   "meta": {
-    "generated_at": "2026-10-13T03:01:13.247463+08:00",
+    "generated_at": "2026-10-13T04:03:26.266472+08:00",
     "financials_source": "TWSE openapi t187ap06_L_ci(綜合損益表-一般業) + t187ap07_L_ci(資產負債表-一般業)",
     "financials_updated_count": 844,
-    "errors": [],
+    "errors": [
+      "t187ap06_L_mim: HTTPSConnectionPool(host='openapi.twse.com.tw', port=443): Max retries exceeded with url: /v1/opendata/t187ap07_L_mim (Caused by ConnectTimeoutError(<HTTPSConnection(host='openapi.twse.com.tw', port=4"
+    ],
     "institutional_source": "TWSE T86（同一次呼叫，跟market_tw.json共用，不額外打；只保留官方上市公司清單(t187ap03_L)內的代碼，濾掉ETF/權證等非股票證券)+TPEx tpex_3insti_daily_trading（2026-08-27新增，上櫃股票，此端點未做ETF/權證過濾，是已知限制）",
     "margin_source": "TWSE MI_MARGN（同一次呼叫，跟大盤融資維持率共用，不額外打；只保留官方上市公司清單(t187ap03_L)內的代碼)+TPEx tpex_mainboard_margin_balance（2026-08-27新增，上櫃股票）",
     "financials_history_backfill_note": "2026-08-27一次性回補：讀research端FinMind歷史parquet快取（TaiwanStockFinancialStatements+TaiwanStockBalanceSheet）補上季度歷史（原本daily排程只有最新一期，YoY EPS比較需要至少5季）。merge-safe：既有較新的季度資料不會被覆蓋，只補缺漏。",
@@ -29,11 +31,6 @@
       "t187ap06_L_ins": {
         "rows": 5,
         "cum": 5,
-        "quarters_updated": 0
-      },
-      "t187ap06_L_mim": {
-        "rows": 4,
-        "cum": 4,
         "quarters_updated": 0
       },
       "mopsfin_t187ap06_O_ci": {
