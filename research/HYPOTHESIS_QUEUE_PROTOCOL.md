@@ -110,13 +110,13 @@ percentile 遠低於門檻）、已被控制組拆穿之偽影家族換皮——
 （借用 `determinism_self_test.py` 的精神），不要在不穩定的地基上判定 PASS/FAIL。
 
 **絕對不碰 holdout**：任何資料抓取都必須經過既有框架的 `VAL_END` 截斷路徑。
-每一輪收工前確認 `is_holdout_consumed()` 仍是 `False`。
+每一輪收工前確認沒有**新增**任何 VAL_END 之後資料的讀取。（2026-10-13 更正：原寫「`is_holdout_consumed()` 仍是 `False`」已過時——該函式自 2026-09-26 總司令授權單次解鎖後恆為 `True`〔HOLDOUT_LOCK.json〕，保留資料已於 2026-10-07 先.四十八用盡；現在要檢查的是自己的腳本不得讀 TRAIN_END/VAL_END 之後資料，且不得新增 ALLOWED_HOLDOUT_READERS。）
 
 ---
 
 ## 3. 每輪結束前的檢查清單
 
-1. `is_holdout_consumed()` 是 `False`。
+1. 本輪未新增任何 VAL_END 之後資料的讀取（`is_holdout_consumed()` 自 2026-09-26 起為 `True`，見上方 2026-10-13 更正，不再以它為檢查項）。
 2. **心跳（硬性步驟，不能省略）**：在 `research/MARATHON_LOG.md` **最上面**
    （header 說明文字之後、第一筆既有條目的正上方——插進去，不是接在其他條目
    下面，這份檔案宣稱「最新的寫最上面」就要真的做到）插入一筆新的

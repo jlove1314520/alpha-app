@@ -1,5 +1,6 @@
 # MARATHON_LOG.md — 自主研究馬拉松可見心跳（2026-08-29啟動）
 
+- 2026-10-13 06:08 hypothesis_queue（凍結.二已解除）交辦 `- [ ]` 0條、`- [!]` 27條逐項核對無一真正解除（B20/B22/B31/B32 阻塞為憑證/規格問題，與凍結無關；10/12 時間閘項屬互動視窗）；#1~82 全數結案、無未結案假設；第1節要求設計新軸，但手挑兩個候選（處置股、董監質押=#48）核對後皆為既有重複，未編造#83以免墊高N，新軸設計留待有預算的輪次；holdout 為 True 是 9/26 總司令授權解鎖後的既有事實（HOLDOUT_LOCK.json，保留資料已於先.四十八用盡），本輪 r82 僅讀≤TRAIN_END，未新增讀取；鎖檔為陳舊回收(LOCK_STALE 720min)；倉庫卡在他軌互動式 rebase(edit 停點 38127fabf，04:42起)，未 continue/abort、未 push
 - 2026-10-12 06:40 hypothesis_queue（凍結.二已解除）交辦 `- [ ]` 0條；做#82 G0檢定力(MDE)：9檔納入/8事件，σ_CAR=5.83%，MDE=4.83%>3% → G0_FAIL_UNDERPOWERED(EXPERIMENTAL，不進第1關)；#1~82全數結案；holdout未動
 - 2026-10-12 00:10 hypothesis_queue（凍結.二已解除）交辦行首 `- [ ]` 真實0條；回第1節挑#82（唯一未結案）寫事前綁定SPEC（8筆主分析、窗口1個、參數3、G0檢定力前置關卡 MDE>3%CAR→EXPERIMENTAL收尾）；未跑回測、未登記TRIALS_REGISTRY、未對投信/指數公司網站發請求；is_holdout_consumed=True（既定）；工作目錄他來源未commit變更不納入
 - 2026-10-11 18:08 hypothesis_queue（凍結.二已解除）本輪做交辦 B31/B32：B31 為質性不計分產品功能、B32 依賴 B21 社群樣本（signal_ledger 零筆社群訊號、禁事後補建），皆不登記試驗、標 [!]；交辦 `- [ ]` 剩約 20 條，其餘為常備.開發-25～36（DevQueue）或互動視窗執行；holdout 未動
