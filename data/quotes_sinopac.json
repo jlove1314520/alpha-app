@@ -1,8 +1,492 @@
 {
-  "fetched_at": "2026-10-09T13:45:07.742881+08:00",
-  "checked_at": "2026-10-09T13:47:02.538566+08:00",
-  "connected": false,
-  "market_status": "closed",
+  "fetched_at": "2026-10-12T13:45:50.247014+08:00",
+  "connected": true,
+  "market_status": "open",
   "error": null,
-  "quotes": {}
+  "quotes": {
+    "2454": {
+      "sim_price": 4625.0,
+      "sim_at": "2026-10-12T13:29:58.709510",
+      "bid": 4625.0,
+      "ask": 4630.0,
+      "last": 4625.0,
+      "close": 4690.0,
+      "change_pct": -1.38,
+      "volume_this_tick": 468,
+      "total_volume": 6345,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:30:00",
+      "_raw_chg_type": 4,
+      "exchange": "TSE"
+    },
+    "1513": {
+      "sim_price": 169.0,
+      "sim_at": "2026-10-12T13:29:59.110947",
+      "bid": 168.5,
+      "ask": 169.0,
+      "last": 169.0,
+      "close": 167.0,
+      "change_pct": 1.19,
+      "volume_this_tick": 165,
+      "total_volume": 4947,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:30:00",
+      "_raw_chg_type": 2,
+      "exchange": "TSE"
+    },
+    "3231": {
+      "sim_price": 189.5,
+      "sim_at": "2026-10-12T13:29:55.020122",
+      "bid": 189.5,
+      "ask": 190.0,
+      "last": 189.5,
+      "close": 188.5,
+      "change_pct": 0.53,
+      "volume_this_tick": 2579,
+      "total_volume": 30441,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:30:00",
+      "_raw_chg_type": 2,
+      "exchange": "TSE"
+    },
+    "MXF_NEAR": {
+      "bid": 49434.0,
+      "ask": 49437.0,
+      "last": 49314.0,
+      "close": 49357.0,
+      "change_pct": -0.08712,
+      "volume_this_tick": 1,
+      "total_volume": 92557,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:45:00.033000",
+      "_raw_chg_type": 4,
+      "exchange": "TAIFEX",
+      "label": "小型台指期近月"
+    },
+    "TXF_NEAR": {
+      "bid": 49434.0,
+      "ask": 49439.0,
+      "last": 49309.0,
+      "close": 49357.0,
+      "change_pct": -0.097251,
+      "volume_this_tick": 1,
+      "total_volume": 42307,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:44:59.812000",
+      "_raw_chg_type": 4,
+      "exchange": "TAIFEX",
+      "label": "台指期近月"
+    },
+    "FXF_NEAR": {
+      "bid": 3638.8,
+      "ask": 3648.8,
+      "last": 3637.2,
+      "close": 3551.6,
+      "change_pct": 2.410181,
+      "volume_this_tick": 1,
+      "total_volume": 183,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:25.541000",
+      "_raw_chg_type": 2,
+      "exchange": "TAIFEX",
+      "label": "金融期近月"
+    },
+    "EXF_NEAR": {
+      "bid": 3130.8,
+      "ask": 3134.55,
+      "last": 3130.5,
+      "close": 3136.9,
+      "change_pct": -0.204023,
+      "volume_this_tick": 1,
+      "total_volume": 58,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:44:35.286000",
+      "_raw_chg_type": 4,
+      "exchange": "TAIFEX",
+      "label": "電子期近月"
+    },
+    "2330": {
+      "sim_price": 2535.0,
+      "sim_at": "2026-10-12T13:29:57.225102",
+      "bid": 2535.0,
+      "ask": 2540.0,
+      "last": 2540.0,
+      "close": 2550.0,
+      "change_pct": -0.39,
+      "volume_this_tick": 3444,
+      "total_volume": 20360,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:30:00",
+      "_raw_chg_type": 4,
+      "exchange": "TSE"
+    },
+    "2317": {
+      "sim_price": 244.5,
+      "sim_at": "2026-10-12T13:29:57.706673",
+      "bid": 244.5,
+      "ask": 245.0,
+      "last": 244.5,
+      "close": 249.0,
+      "change_pct": -1.8,
+      "volume_this_tick": 4608,
+      "total_volume": 49850,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:30:00",
+      "_raw_chg_type": 4,
+      "exchange": "TSE"
+    },
+    "TPEX": {
+      "last": 427.9,
+      "close": 426.71,
+      "change_pct": 0.2789,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "櫃買指數"
+    },
+    "TAIEX": {
+      "last": 49301.96,
+      "close": 49313.44,
+      "change_pct": -0.0233,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "加權指數",
+      "estimate_amount_sum": 834394311436.0,
+      "amount_sum": 843931821850.0
+    },
+    "IDX_IX0027": {
+      "last": 3122.93,
+      "close": 3134.58,
+      "change_pct": -0.3717,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "電子工業類指數"
+    },
+    "IDX_IX0019": {
+      "last": 165.6,
+      "close": 166.36,
+      "change_pct": -0.4568,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "化學生技醫療類指數"
+    },
+    "IDX_IX0013": {
+      "last": 669.15,
+      "close": 658.11,
+      "change_pct": 1.6775,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "水泥窯製類指數"
+    },
+    "IDX_IX0011": {
+      "last": 1902.27,
+      "close": 1896.11,
+      "change_pct": 0.3249,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "食品類指數"
+    },
+    "IDX_IX0014": {
+      "last": 1318.12,
+      "close": 1334.85,
+      "change_pct": -1.2533,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "塑膠化工類指數"
+    },
+    "IDX_IX0016": {
+      "last": 484.05,
+      "close": 482.28,
+      "change_pct": 0.367,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "紡織纖維類指數"
+    },
+    "IDX_IX0015": {
+      "last": 17175.59,
+      "close": 17235.31,
+      "change_pct": -0.3465,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "機電類指數"
+    },
+    "IDX_IX0023": {
+      "last": 274.37,
+      "close": 273.63,
+      "change_pct": 0.2704,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "造紙類指數"
+    },
+    "IDX_IX0036": {
+      "last": 447.17,
+      "close": 442.62,
+      "change_pct": 1.028,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "建材營造類指數"
+    },
+    "IDX_IX0039": {
+      "last": 3636.61,
+      "close": 3535.27,
+      "change_pct": 2.8665,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "金融保險類指數"
+    },
+    "IDX_IX0010": {
+      "last": 130.57,
+      "close": 126.75,
+      "change_pct": 3.0138,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "水泥類指數"
+    },
+    "IDX_IX0012": {
+      "last": 484.27,
+      "close": 492.89,
+      "change_pct": -1.7489,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "塑膠類指數"
+    },
+    "IDX_IX0017": {
+      "last": 562.78,
+      "close": 557.3,
+      "change_pct": 0.9833,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "電機機械類指數"
+    },
+    "IDX_IX0018": {
+      "last": 113.37,
+      "close": 110.76,
+      "change_pct": 2.3564,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "電器電纜類指數"
+    },
+    "IDX_IX0022": {
+      "last": 149.59,
+      "close": 150.65,
+      "change_pct": -0.7036,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "玻璃陶瓷類指數"
+    },
+    "IDX_IX0024": {
+      "last": 122.73,
+      "close": 121.97,
+      "change_pct": 0.6231,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "鋼鐵類指數"
+    },
+    "IDX_IX0025": {
+      "last": 194.05,
+      "close": 193.39,
+      "change_pct": 0.3413,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "橡膠類指數"
+    },
+    "IDX_IX0026": {
+      "last": 295.38,
+      "close": 292.82,
+      "change_pct": 0.8743,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "汽車類指數"
+    },
+    "IDX_IX0037": {
+      "last": 218.48,
+      "close": 207.83,
+      "change_pct": 5.1244,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "航運類指數"
+    },
+    "IDX_IX0038": {
+      "last": 103.19,
+      "close": 102.23,
+      "change_pct": 0.9391,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "觀光餐旅類指數"
+    },
+    "IDX_IX0040": {
+      "last": 236.84,
+      "close": 234.99,
+      "change_pct": 0.7873,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "貿易百貨類指數"
+    },
+    "IDX_IX0042": {
+      "last": 275.29,
+      "close": 275.26,
+      "change_pct": 0.0109,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "其他類指數"
+    },
+    "IDX_IX0020": {
+      "last": 204.4,
+      "close": 205.36,
+      "change_pct": -0.4675,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "化學類指數"
+    },
+    "IDX_IX0021": {
+      "last": 91.25,
+      "close": 91.66,
+      "change_pct": -0.4473,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "生技醫療類指數"
+    },
+    "IDX_IX0041": {
+      "last": 141.58,
+      "close": 144.1,
+      "change_pct": -1.7488,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "油電燃氣類指數"
+    },
+    "IDX_IX0028": {
+      "last": 1652.27,
+      "close": 1658.1,
+      "change_pct": -0.3516,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "半導體類指數"
+    },
+    "IDX_IX0029": {
+      "last": 468.21,
+      "close": 469.59,
+      "change_pct": -0.2939,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "電腦及週邊設備類指數"
+    },
+    "IDX_IX0030": {
+      "last": 82.43,
+      "close": 79.65,
+      "change_pct": 3.4903,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "光電類指數"
+    },
+    "IDX_IX0031": {
+      "last": 246.04,
+      "close": 244.5,
+      "change_pct": 0.6299,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "通信網路類指數"
+    },
+    "IDX_IX0032": {
+      "last": 1024.33,
+      "close": 1035.1,
+      "change_pct": -1.0405,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "電子零組件類指數"
+    },
+    "IDX_IX0033": {
+      "last": 384.78,
+      "close": 384.41,
+      "change_pct": 0.0963,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "電子通路類指數"
+    },
+    "IDX_IX0034": {
+      "last": 242.36,
+      "close": 237.45,
+      "change_pct": 2.0678,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "資訊服務類指數"
+    },
+    "IDX_IX0035": {
+      "last": 282.07,
+      "close": 285.26,
+      "change_pct": -1.1183,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "其他電子類指數"
+    },
+    "IDX_IX0185": {
+      "last": 131.63,
+      "close": 133.71,
+      "change_pct": -1.5556,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "綠能環保類指數"
+    },
+    "IDX_IX0186": {
+      "last": 39.51,
+      "close": 39.28,
+      "change_pct": 0.5855,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "數位雲端類指數"
+    },
+    "IDX_IX0187": {
+      "last": 56.14,
+      "close": 55.83,
+      "change_pct": 0.5553,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "運動休閒類指數"
+    },
+    "IDX_IX0188": {
+      "last": 100.08,
+      "close": 98.9,
+      "change_pct": 1.1931,
+      "data_type": "REALTIME_TICK",
+      "tick_at": "2026-10-12T13:33:00",
+      "exchange": "TSE",
+      "label": "居家生活類指數"
+    }
+  }
 }
