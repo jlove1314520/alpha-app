@@ -59,7 +59,42 @@ def origin_age_min() -> float | None:
         return None
 
 
+ACCUM = {"data/events.json": "events", "data/news_urls.json": "urls", "data/news_evidence.json": "evidence"}
+SHRINK_MAX = 0.05  # 累積檔筆數比 HEAD 少超過 5% → 判定為「從空白重建」，本輪作廢
+
+
+def _count(path: str, key: str, rev: str | None = None) -> int | None:
+    try:
+        txt = G._g("show", f"{rev}:{path}").stdout if rev else (ROOT / path).read_text(encoding="utf-8")
+        return len(json.loads(txt).get(key) or [])
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def preflight_ok() -> str | None:
+    """2026-10-13 事故防線①：repo 在 rebase 中、或累積檔讀不出 JSON → 不跑（腳本會把讀不出的檔當成沒有歷史而洗掉）。"""
+    if G.rebase_in_progress():
+        return "repo 正在 rebase 中"
+    for p, k in ACCUM.items():
+        if (ROOT / p).exists() and _count(p, k) is None:
+            return f"{p} 不是合法 JSON"
+    return None
+
+
+def shrink_check() -> str | None:
+    """事故防線②：跑完後累積檔筆數不得比 HEAD 少超過 5%。"""
+    for p, k in ACCUM.items():
+        old, new = _count(p, k, "HEAD"), _count(p, k)
+        if old and (new is None or new < old * (1 - SHRINK_MAX)):
+            return f"{p} 筆數 {old}→{new}"
+    return None
+
+
 def main() -> int:
+    why = preflight_ok()
+    if why:
+        log(f"不跑：{why}")
+        return 0
     age = origin_age_min()
     if age is not None and age < STALE_MIN:
         log(f"雲端 news.json {age:.0f} 分鐘前更新，不需補班")
@@ -75,6 +110,11 @@ def main() -> int:
             return 0
     subprocess.run([sys.executable, "scripts/data_schema_guard.py", "guard", "--report", "data/schema_guard/news_events.json", "--label", "news_events"],
                    cwd=ROOT, capture_output=True, env=env, timeout=600)
+    bad = shrink_check()
+    if bad:
+        G._g("checkout", "-q", "HEAD", "--", *[p for p in OUTPUTS if G._g("ls-files", "--error-unmatch", p).returncode == 0])
+        log(f"  累積檔筆數異常縮水（{bad}），本機這輪作廢（產出檔還原）")
+        return 0
     # 2026-10-13：提交前再看一次雲端；跑步驟的 7 分鐘內雲端已更新就作廢本機這輪（產出檔還原 HEAD），避免兩邊同時寫同一批檔而衝突
     age2 = origin_age_min()
     if age2 is not None and age2 < STALE_MIN:

@@ -125,10 +125,13 @@ def main() -> int:
 
     prior = {}
     if OUT.exists():
+        # 2026-10-13 修：既有檔存在卻讀不出（例如 rebase 衝突標記）時，不得當成「沒有歷史」從空白重建再覆蓋——那會把累積的歷史整個洗掉（10-13 05:12 實際發生：events 12,819→1,055、news_urls 40,918→2,636）。改為中止、不寫檔。
         try:
             prior = {e["url"]: e for e in
                      json.loads(OUT.read_text(encoding="utf-8")).get("urls", [])}
-        except (OSError, json.JSONDecodeError):
+        except json.JSONDecodeError as e:
+            raise SystemExit(f"{OUT.name} 存在但不是合法 JSON（{e}），拒絕從空白重建覆蓋累積歷史；本輪不寫檔")
+        except OSError:
             prior = {}
     # 新聞一.2 回頭補：已收錄但缺 published 的，用當前 sitemap 補上。
     # **掉出窗口的標 published_unknown，不瞎猜**——寧可標「不知道」，

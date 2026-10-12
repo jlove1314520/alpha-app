@@ -284,9 +284,12 @@ def merge_keep(path: Path, key: str, new_rows: list[dict], id_fn, keep_days=None
     """跟既有檔案合併去重。事件是累積的——每次只抓得到當下快照，不累積就沒有歷史。"""
     old = []
     if path.exists():
+        # 2026-10-13 修：既有檔存在卻讀不出（例如 rebase 衝突標記）時，不得當成「沒有歷史」從空白重建再覆蓋——那會把累積的歷史整個洗掉（10-13 05:12 實際發生：events 12,819→1,055、news_urls 40,918→2,636）。改為中止、不寫檔。
         try:
             old = json.loads(path.read_text(encoding="utf-8")).get(key) or []
-        except (OSError, json.JSONDecodeError):
+        except json.JSONDecodeError as e:
+            raise SystemExit(f"{path.name} 存在但不是合法 JSON（{e}），拒絕從空白重建覆蓋累積歷史；本輪不寫檔")
+        except OSError:
             old = []
     seen, out = set(), []
     for r in new_rows + old:          # 新的優先

@@ -1,3 +1,22 @@
+## 2026-10-13 08:2x（互動視窗）事故續：本機新聞補班把累積的新聞歷史洗掉，已還原並加兩道防線
+
+- **現象**：
+  - 05:12 起的本機新聞補班，把累積檔大幅縮小：events.json 12,819→1,055、news_urls 40,918→2,636、news_evidence 38,340→1,200、題材成員 169→31。
+  - 縮水後的檔案已 push 到 origin（05:12～07:42 共 6 個 commit）。
+- **根因**：
+  - 04:42 卡住的 rebase 在工作目錄留下衝突標記。
+  - `fetch_news_events.merge_keep`、`fetch_news_sitemap`、`news_body_extract` 讀不出既有檔時，都把它當成「沒有歷史」（`old=[]`／`prior={}`），從空白重建後直接覆蓋。
+  - 雲端也是同一套腳本，等於同一個地雷。
+- **還原**：
+  - 先停用 AlphaNewsFallback。
+  - 取 git_op_lock 後，從最後一個雲端正常版本 ec95472d8（10/12 19:31）還原 news／events／news_urls／news_evidence／themes／events_by_code。
+  - 在還原後的檔案上重跑一次五個步驟，補上之後的新資料。
+  - 結果：events 13,788、news_urls 40,945、news_evidence 38,540、題材成員 169，全部不少於事故前。
+- **防線**：
+  - ①三支腳本：既有檔存在卻不是合法 JSON 時，一律中止、不寫檔；檔案不存在時才從頭開始。
+  - ②`news_local_fallback`：開跑前，repo 在 rebase 中或累積檔讀不出就不跑；跑完後，累積檔比 HEAD 少超過 5% 就作廢本輪、不提交。
+- **自測**：`selftest_local_heartbeats.py` 12/12，新增⑤兩項。這支自測現在一律用假 git，絕不碰真 repo。
+
 ## 2026-10-13 07:5x（互動視窗）事故：本機新聞補班留下卡住的 rebase（04:42～07:39），已修復並補回歸測試
 
 - **現象**：10/13 07:38 開工時，repo 停在 interactive rebase 進行中（detached HEAD）。從 04:42 起，所有本機排程都提交到 detached HEAD 上，push 一直失敗。

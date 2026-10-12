@@ -26,8 +26,10 @@ def check(name, ok):
 
 
 calls = []
-saved = (G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv)
+saved = (G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv, G._g)
 try:
+    # ①～③、⑤ 一律用假 git，絕不碰真的 repo（2026-10-13：⑤的作廢路徑會呼叫 git checkout，不能落到真工作目錄）
+    G._g = lambda *a, **k: type("R", (), {"returncode": 0, "stdout": "", "stderr": ""})()
     G.commit_paths = lambda paths, msg, **kw: (calls.append(("commit", tuple(paths))), "已 commit 並 push")[1]
     N.log = lambda m: None
     # ① 心跳節流
@@ -61,8 +63,18 @@ try:
     N.subprocess.run = fail_first
     calls.clear(); ran.clear(); N.main()
     check("③抓新聞失敗 → 不提交", not calls and ran == [N.STEPS[0][0][0]])
+    # ⑤（2026-10-13 事故回歸）累積檔讀不出 → 不跑；跑完縮水 → 不提交
+    N.subprocess.run = fake_run
+    saved_count = N._count
+    N._count = lambda p, k, rev=None: None if (rev is None and p == "data/events.json") else 100
+    calls.clear(); ran.clear(); N.origin_age_min = lambda: 90.0; N.main()
+    check("⑤events.json 讀不出 JSON → 不跑任何步驟", not ran and not calls)
+    N._count = lambda p, k, rev=None: (12819 if rev else 1055) if p == "data/events.json" else 100
+    calls.clear(); ran.clear(); N.main()
+    check("⑤跑完 events 12,819→1,055 縮水 → 不提交", ran and not calls)
+    N._count = saved_count
 finally:
-    G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv = saved
+    G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv, G._g = saved
 
 # ④ 真 git 衝突回歸（暫存目錄的 bare origin＋兩個 clone）
 import shutil, subprocess, tempfile, importlib
