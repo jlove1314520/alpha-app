@@ -4,6 +4,7 @@
 ①心跳：上次提交 <60 分鐘 → 不提交；≥60 分鐘或從沒提交 → 只提交該工作自己的產出檔
 ②新聞：雲端 news.json 20 分鐘前更新 → 不跑任何步驟；90 分鐘沒更新 → 依 workflow 順序跑 5 步、只提交 workflow 的產出檔
 ③新聞：第一步（抓新聞）失敗 → 不提交
+④（2026-10-13 事故回歸）真的 git：兩個 clone 同時改同一檔 → commit_paths(drop_on_conflict=True) 不得留下 rebase 進行中、本輪 commit 作廢、檔案還原
 """
 import sys
 from pathlib import Path
@@ -27,7 +28,7 @@ def check(name, ok):
 calls = []
 saved = (G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv)
 try:
-    G.commit_paths = lambda paths, msg: (calls.append(("commit", tuple(paths))), "已 commit 並 push")[1]
+    G.commit_paths = lambda paths, msg, **kw: (calls.append(("commit", tuple(paths))), "已 commit 並 push")[1]
     N.log = lambda m: None
     # ① 心跳節流
     G.last_commit_age_min = lambda p: 15.0
@@ -62,6 +63,34 @@ try:
     check("③抓新聞失敗 → 不提交", not calls and ran == [N.STEPS[0][0][0]])
 finally:
     G.last_commit_age_min, G.commit_paths, N.origin_age_min, N.subprocess.run, N.log, sys.argv = saved
+
+# ④ 真 git 衝突回歸（暫存目錄的 bare origin＋兩個 clone）
+import shutil, subprocess, tempfile, importlib
+tmp = Path(tempfile.mkdtemp())
+try:
+    run = lambda cwd, *a: subprocess.run(["git", *a], cwd=cwd, capture_output=True, text=True)
+    run(tmp, "init", "-q", "--bare", "origin.git")
+    for name in ("a", "b"):
+        run(tmp, "clone", "-q", str(tmp / "origin.git"), name)
+        run(tmp / name, "config", "user.email", "t@t"); run(tmp / name, "config", "user.name", "t")
+    (tmp / "a" / "f.json").write_text("1\n"); run(tmp / "a", "add", "f.json"); run(tmp / "a", "commit", "-qm", "init"); run(tmp / "a", "push", "-q", "origin", "HEAD")
+    run(tmp / "b", "pull", "-q", "origin", "HEAD")
+    br = run(tmp / "a", "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+    run(tmp / "b", "checkout", "-q", br) ; run(tmp / "b", "branch", "-q", "--set-upstream-to", f"origin/{br}")
+    (tmp / "a" / "f.json").write_text("2-cloud\n"); run(tmp / "a", "commit", "-qam", "cloud"); run(tmp / "a", "push", "-q", "origin", "HEAD")
+    (tmp / "b" / "research").mkdir()
+    (tmp / "b" / "research" / "git_op_lock.py").write_text("import sys\nprint('LOCK_ACQUIRED')\n")
+    (tmp / "b" / "f.json").write_text("2-local\n")
+    G2 = importlib.reload(G)
+    G2.ROOT, G2.GITDIR, G2.LOCK = tmp / "b", tmp / "b" / ".git", tmp / "b" / "research" / "git_op_lock.py"
+    head0 = run(tmp / "b", "rev-parse", "HEAD").stdout.strip()
+    msg = G2.commit_paths(["f.json"], "local", drop_on_conflict=True)
+    check(f"④衝突時不留下 rebase 進行中（{msg}）", not G2.rebase_in_progress())
+    check("④本輪 commit 作廢、HEAD 回到原點、檔案還原 HEAD 版本",
+          run(tmp / "b", "rev-parse", "HEAD").stdout.strip() == head0 and (tmp / "b" / "f.json").read_text() == "1\n")
+    check("④仍在分支上（不是 detached HEAD）", run(tmp / "b", "symbolic-ref", "-q", "HEAD").returncode == 0)
+finally:
+    shutil.rmtree(tmp, ignore_errors=True)
 
 print(f"合計 {len(results)} 項，失敗 {results.count(False)}")
 sys.exit(0 if all(results) else 1)

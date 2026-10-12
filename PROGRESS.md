@@ -1,3 +1,22 @@
+## 2026-10-13 07:5x（互動視窗）事故：本機新聞補班留下卡住的 rebase（04:42～07:39），已修復並補回歸測試
+
+- **現象**：10/13 07:38 開工時，repo 停在 interactive rebase 進行中（detached HEAD）。從 04:42 起，所有本機排程都提交到 detached HEAD 上，push 一直失敗。
+  - 期間 origin 只靠別的路徑前進到 06:06。
+- **根因（我在先.八十-11 寫的程式）**：`scripts/local_git_commit.py` 在 04:42 新聞補班時做 `pull --rebase`，撞到雲端同時更新的 `data/events.json` 等檔而停在 rebase 中。
+  - 舊版只偵測到衝突標記就返回，**沒有 abort**，於是把 repo 留在 rebase 狀態。
+- **復原**（取 git_op_lock 後進行）：
+  - 先備份 `.git/rebase-merge`。
+  - `git rebase --quit`：不移動 HEAD，autostash 保存在 stash 清單，沒有丟東西。
+  - 把 main 指回目前的 HEAD 並切回 main；舊 main 的 commit 都已有 rebase 後的副本。
+  - `pull --rebase` 合併 origin 的 1 個 commit，然後 push 出 17 個 commit。
+  - autostash 還原時 `data/audit_report.json` 衝突，只存在工作目錄，已取 HEAD 版本並確認是合法 JSON。
+  - 核對：本機與 origin 的 commit 內容都**沒有任何衝突標記**；`events.json` 是合法 JSON。
+- **修法**：
+  - `local_git_commit.commit_paths`：開始前若已在 rebase 中就什麼都不做；pull 失敗或之後仍在 rebase 中，一律 `rebase --abort`。
+  - 新增 `drop_on_conflict` 參數（新聞補班使用）：衝突時作廢本輪自己的 commit、只還原產出檔。
+  - `news_local_fallback` 提交前再看一次雲端；雲端已更新就作廢本機這輪。
+- **自測**：`selftest_local_heartbeats.py` 10/10。新增④用真的 git（bare origin＋兩個 clone）重現衝突，確認不留下 rebase、不在 detached HEAD、本輪 commit 作廢。
+
 ## 2026-10-12 02:34（互動視窗）先.八十-14 全檢修正收尾：逐項 commit 清單、冒煙全綠、事件記錄
 
 - **commit 一覽**：

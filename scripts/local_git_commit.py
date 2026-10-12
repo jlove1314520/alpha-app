@@ -4,6 +4,12 @@
 與三支 wrapper（run-*-cycle.ps1）同一套結案.一 方案甲＋丙：搶 research/git_op_lock.py → commit（pathspec，只收指定檔）
 → pull --rebase --autostash → push 前偵測字面衝突標記（有就跳過 push 並回報）→ push → 放鎖。
 鎖被別人持有就整輪跳過、留給下一輪（不排隊）。自身任何失敗只回傳原因字串，不拋例外（十二節）。
+
+2026-10-13 修正（事故）：10-13 04:42 新聞補班的 pull --rebase 撞到雲端同時更新的 events.json 而停在 rebase 中，
+舊版只偵測到衝突標記就返回，**把 repo 留在 rebase 進行中（detached HEAD）**，之後 3 小時所有排程都提交到
+detached HEAD、push 全失敗。現在：①開始前若 repo 已在 rebase 中就什麼都不做；②pull 失敗或之後仍在 rebase 中
+一律 `git rebase --abort` 還原；③drop_on_conflict=True（新聞補班用）時，衝突就撤銷本輪自己剛做的那個 commit
+（只在 HEAD 確實是本輪 commit 時）並把產出檔還原成 HEAD 版本——雲端已有較新的同一份資料，本機這輪作廢。
 """
 from __future__ import annotations
 
@@ -13,13 +19,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LOCK = ROOT / "research" / "git_op_lock.py"
+GITDIR = ROOT / ".git"
 
 
 def _g(*a, timeout=180):
     return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
 
 
-def commit_paths(paths: list[str], msg: str) -> str:
+def rebase_in_progress() -> bool:
+    return (GITDIR / "rebase-merge").exists() or (GITDIR / "rebase-apply").exists()
+
+
+def commit_paths(paths: list[str], msg: str, drop_on_conflict: bool = False) -> str:
+    if rebase_in_progress():
+        return "repo 正在 rebase 中（別的程序留下的），本輪不動，留給人工或下一輪"
     try:
         if subprocess.run([sys.executable, str(LOCK), "acquire"], cwd=ROOT, capture_output=True, timeout=60).returncode != 0:
             return "鎖被其他排程持有，本輪跳過"
@@ -35,13 +48,27 @@ def commit_paths(paths: list[str], msg: str) -> str:
         c = _g("commit", "-q", "-m", msg, "--", *existing)
         if c.returncode != 0:
             return "commit 失敗：" + (c.stderr or c.stdout)[-200:]
-        _g("pull", "-q", "--rebase", "--autostash")
+        mine = _g("rev-parse", "HEAD").stdout.strip()
+        pl = _g("pull", "-q", "--rebase", "--autostash")
+        if pl.returncode != 0 or rebase_in_progress():
+            _g("rebase", "--abort")
+            if drop_on_conflict and _g("rev-parse", "HEAD").stdout.strip() == mine:
+                _g("reset", "-q", "--soft", "HEAD~1")
+                _g("reset", "-q", "--", *existing)
+                _g("checkout", "-q", "HEAD", "--", *[p for p in existing if _g("ls-files", "--error-unmatch", p).returncode == 0])
+                return "pull 與遠端衝突：已 abort，並作廢本機這輪（產出檔還原成 HEAD 版本）"
+            return "pull 與遠端衝突：已 abort（commit 留在本機，下一輪再試）"
         marks = _g("grep", "-l", "^<<<<<<< ")
         if marks.returncode == 0 and marks.stdout.strip():
             return "已 commit，但偵測到衝突標記，跳過 push：" + marks.stdout.strip().replace("\n", ", ")[:200]
         p = _g("push", "-q")
         return "已 commit 並 push" if p.returncode == 0 else "已 commit，push 失敗（留給下一輪）"
     except Exception as e:  # noqa: BLE001
+        try:
+            if rebase_in_progress():
+                _g("rebase", "--abort")
+        except Exception:  # noqa: BLE001
+            pass
         return f"提交流程失敗（{type(e).__name__}: {e}）"
     finally:
         try:

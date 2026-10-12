@@ -75,7 +75,14 @@ def main() -> int:
             return 0
     subprocess.run([sys.executable, "scripts/data_schema_guard.py", "guard", "--report", "data/schema_guard/news_events.json", "--label", "news_events"],
                    cwd=ROOT, capture_output=True, env=env, timeout=600)
-    res = G.commit_paths(OUTPUTS, f"新聞與事件：本機補班更新（雲端排程 {'未知' if age is None else f'{age:.0f} 分鐘'}未觸發，先.八十-11）")
+    # 2026-10-13：提交前再看一次雲端；跑步驟的 7 分鐘內雲端已更新就作廢本機這輪（產出檔還原 HEAD），避免兩邊同時寫同一批檔而衝突
+    age2 = origin_age_min()
+    if age2 is not None and age2 < STALE_MIN:
+        G._g("checkout", "-q", "HEAD", "--", *[p for p in OUTPUTS if G._g("ls-files", "--error-unmatch", p).returncode == 0])
+        log(f"  雲端已在 {age2:.0f} 分鐘前更新，本機這輪作廢（產出檔還原）")
+        return 0
+    res = G.commit_paths(OUTPUTS, f"新聞與事件：本機補班更新（雲端排程 {'未知' if age is None else f'{age:.0f} 分鐘'}未觸發，先.八十-11）",
+                         drop_on_conflict=True)
     log("  提交：" + res)
     return 0
 
