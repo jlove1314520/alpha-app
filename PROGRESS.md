@@ -1,3 +1,18 @@
+## 2026-10-13 15:20（互動視窗）先.八十二-8 裁示⑦馬拉松／假設佇列改每週日、池空只記心跳、DevQueue 補件來源限縮
+
+- **裁示**：總司令【先.八十二】8 裁示⑦。
+- **排程改動**（本機 Windows 工作排程器）：
+  - AlphaMarathon、AlphaHypothesisQueue：原本「每 6 小時＋每次登入」→ 改為**每週日 00:05 一次**，錯過時開機補跑（StartWhenAvailable）；登入觸發已拿掉。下次執行 2026-10-18 00:05。
+  - AlphaDevQueue：實際設定原本是**每 15 分鐘**（裁示寫「維持每 30 分鐘」），已照裁示的數字改成每 30 分鐘；下次 15:31。
+- **假設池空只記一行心跳**：
+  - `research/quota_throttle.py` 新增 `pool_empty`。池子指試驗登記（TRIALS_REGISTRY）、假設佇列、各 LEADS 和 IDEA_INTAKE。上一輪實跑沒動這些檔、而且之後內容也沒變，就判定池空。PENDING_QUEUE 和心跳檔每天都會變，所以不算進池子，否則永遠判不成空。
+  - 每輪實跑結束時，`record` 會記下「這輪有沒有動到池子」和池子的雜湊。
+  - 新增 `research/pool_empty_heartbeat.py`：判定池空時，在 PROGRESS_HEARTBEAT.jsonl 寫一行 `item=pool_empty` 就結束，不啟動 claude。
+  - `C:\alpha\run-marathon-cycle.ps1`、`run-hypothesis-queue-cycle.ps1`（在 repo 外）在節流判斷之後接上這一步。判定失敗時照常跑；PowerShell 語法剖析 0 錯誤。
+- **DevQueue 補件來源**：`scripts/dev_queue_runner.py` 的提示詞改了。補件只能來自兩處：先.八十二第 9～14 項拆出的實質子項，以及使用者回報。不得用換行統一、自查術語、格式整理湊數，也不得用新試驗湊數。兩處都沒東西就不補，照實記錄。
+- **自測**：`scripts/selftest_pool_empty.py` 5/5 PASS（尚無紀錄／上一輪有進度／池空／池檔變了／另一軌不受影響）。
+- 冒煙：全套 135 PASS／0 FAIL。
+
 ## 2026-10-13 15:19（互動視窗）先.八十二-7 裁示⑥刪除 5 支過期一次性排程（前後清單）
 
 - **裁示**：總司令【先.八十二】7 裁示⑥——刪除 5 支過期一次性排程。

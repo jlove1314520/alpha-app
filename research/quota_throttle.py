@@ -325,6 +325,55 @@ def _made_progress(start_s: str, end_s: str) -> bool:
     return False
 
 
+# 2026-10-13 總司令【先.八十二】8 裁示⑦：馬拉松／假設佇列降為每週日一次，
+# 「假設池空時只記一行心跳就結束」。池子＝試驗登記、假設佇列與各 LEADS／
+# IDEA_INTAKE；上一輪實跑「沒有新增試驗登記也沒動假設佇列」，且之後這些檔案
+# 內容完全沒變，就判定池空（PENDING_QUEUE／PROGRESS_HEARTBEAT 每天都在變，
+# 不納入，否則永遠判不成空）。
+POOL_SOURCES: list[Path] = [
+    TRIALS_REGISTRY,
+    RESEARCH / "HYPOTHESIS_QUEUE.md",
+    RESEARCH / "LEADS.md",
+    RESEARCH / "TW_LEADS.md",
+    RESEARCH / "US_LEADS.md",
+    RESEARCH / "FUT_LEADS.md",
+    RESEARCH / "IDEA_INTAKE.md",
+]
+
+
+def _pool_hash() -> str:
+    h = hashlib.sha256()
+    for p in POOL_SOURCES:
+        try:
+            if p.exists():
+                h.update(p.read_bytes())
+        except OSError:
+            continue
+    return h.hexdigest()
+
+
+def _pool_progress(start_s: str, end_s: str) -> bool:
+    for p in POOL_SOURCES:
+        log = _git(["log", f"--since={start_s}", f"--until={end_s}", "--oneline", "--", str(p.relative_to(ROOT))])
+        if log.strip():
+            return True
+    return False
+
+
+def pool_empty(track: str) -> int:
+    """回傳 0＝池空（呼叫端只記一行心跳就結束）；1＝池裡有東西或無法判斷（照常跑）。"""
+    ts = _load_state().get(track, {})
+    last_hash = ts.get("pool_hash_after_run")
+    if ts.get("last_run_pool_progress", True) or last_hash is None:
+        print("NOT_EMPTY: 上一輪實跑有新增試驗或動過假設池（或尚無紀錄），照常跑")
+        return 1
+    if _pool_hash() != last_hash:
+        print("NOT_EMPTY: 上一輪之後試驗登記／假設佇列／LEADS 有變動，照常跑")
+        return 1
+    print("POOL_EMPTY: 上一輪實跑沒有新增試驗也沒動假設池，之後池子內容完全沒變")
+    return 0
+
+
 def record_cycle(track: str, window: str, jsonl_path: str | None) -> int:
     start_s, end_s = window.split(",", 1)
     made_progress = _made_progress(start_s, end_s)
@@ -332,6 +381,8 @@ def record_cycle(track: str, window: str, jsonl_path: str | None) -> int:
     track_state = state.setdefault(track, {"consecutive_no_progress": 0})
     track_state["consecutive_no_progress"] = 0 if made_progress else track_state.get("consecutive_no_progress", 0) + 1
     track_state["last_actual_run_at"] = _now().isoformat()
+    track_state["last_run_pool_progress"] = _pool_progress(start_s, end_s)
+    track_state["pool_hash_after_run"] = _pool_hash()
 
     util_note = ""
     if jsonl_path:
@@ -376,6 +427,11 @@ def main() -> int:
             print("usage: quota_throttle.py record --track <marathon|hypothesis_queue> --window START,END [--jsonl <path>]")
             return 2
         return record_cycle(track, window, _opt("--jsonl"))
+    if cmd == "pool_empty":
+        if not track:
+            print("usage: quota_throttle.py pool_empty --track <marathon|hypothesis_queue>")
+            return 2
+        return pool_empty(track)
     if cmd == "summary":
         # 給人手動查「一天一行」摘要用，2026-09-18新增，見daily_summary()
         for line in daily_summary(track):
