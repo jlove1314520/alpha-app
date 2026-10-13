@@ -1,3 +1,10 @@
+## 2026-10-13 23:56（互動視窗）先.八十五-1 DevQueue 恢復接件（驗收通過）
+
+- **驗收通過**：DevQueue cycle 20261013-233102（23:31）`check_collision: PROCEED`、`DEVQUEUE_ELIGIBLE` 21 項、`PROMPT_READY`，reason 不是 QUEUE_EMPTY；實際提交 ba3573bbe（先.八十一-29 IBKR 1 分K 可行性查證）與 870c2ebf6（重產試驗索引，補我 #441／#442 登記後漏做的一步，冒煙 #103）。
+- 中間 23:01 那輪因 `research/data/adjustment_anomaly_warnings.jsonl` 讓路，已把 `research/data/*.jsonl` 加進機器寫檔白名單（922f34fc3）。
+- 1d：互動視窗 /loop 每 30 分鐘續跑已設（session 內排程）；互動視窗項目現在只剩時間閘與待審閱，續跑停止。
+- 順手修正 PROGRESS 先.八十九 段落裡 5 處被寫成字面「\n」的換行。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-補-3 Telegram 視窗亂碼修正
 
 - 亂碼原因：Python 輸出 UTF-8，PowerShell 視窗用 Big5（cp950）解碼。\n- 修法：`research/telegram_reader.py` 啟動時 stdout 與 stderr 都改 UTF-8（errors=replace）；`setup_telegram.ps1` 加 `chcp 65001`＋`[Console]::OutputEncoding`＋`$OutputEncoding` 為 UTF-8；排程用的 `run-telegram-reader.ps1` 補 `$OutputEncoding`（該檔維持純英文註解，因為沒有 BOM）。\n- 重跑 --login：視窗與紀錄都正常顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。
