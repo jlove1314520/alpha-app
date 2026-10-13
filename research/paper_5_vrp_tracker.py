@@ -118,8 +118,8 @@ def taiex_close(day: str):
     t = (json.loads(MARKET.read_text(encoding="utf-8")).get("taiex") or {})
     for d, c in zip(t.get("sparkline_dates") or [], t.get("sparkline") or []):
         if d == day:
-            return float(c)
-    return float(t["close"]) if t.get("data_date") == day and t.get("close") else None
+            return _num(c)
+    return _num(t["close"]) if t.get("data_date") == day and t.get("close") else None
 
 
 def final_settlement(cm: str):
