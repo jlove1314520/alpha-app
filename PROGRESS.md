@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-1 Telegram 目標改用邀請連結
+
+- 第 3 題誤填 @Shioaji 是公開帳號名稱，不是群組，resolve_target 因此報 ValueError。正確目標改用私人群組邀請連結。冒煙沿用本輪 142/142（未動 App）。
+
 ## 2026-10-13 23:03（互動視窗）先.八十七-5 空佇列不叫模型（查證已成立）＋DevQueue 白名單補 research/data/*.jsonl
 
 - 查證 `C:\alpha\run-dev-queue-cycle.ps1`：`dev_queue_runner.py prompt` 回 exit 3（QUEUE_EMPTY）時，wrapper 只寫 cycle log、**不呼叫 `claude -p`**；只有 exit 0 才進到「交給 claude -p」分支。
