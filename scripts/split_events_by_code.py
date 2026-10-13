@@ -46,6 +46,22 @@ def _write_if_changed(path: Path, text: str) -> bool:
     return True
 
 
+BASE_KEYS = ("code", "name", "date", "type", "title", "source", "url")
+
+
+def _srow(e: dict, names: dict, ti: dict, ui: dict, si: dict) -> list:
+    """精簡列：[code, date, 類型索引, title, 網址索引, 來源索引, 名稱(0＝用預設), 其他欄位{}]，後兩欄沒必要就省略。"""
+    r = [e.get("code"), e.get("date"), ti[str(e.get("type") or "")], e.get("title"), ui[str(e.get("url") or "")], si[str(e.get("source") or "")]]
+    # 其他欄位的浮點數取到小數 4 位（目前只有月營收的 yoy_pct，App 沒有讀這個欄位；標題裡的年增率是原字串，不受影響）
+    extra = {k: (round(v, 4) if isinstance(v, float) else v) for k, v in e.items() if k not in BASE_KEYS}
+    nm = e.get("name")
+    if extra or nm != names.get(str(e.get("code"))):
+        r.append(0 if nm == names.get(str(e.get("code"))) else nm)
+    if extra:
+        r.append(extra)
+    return r
+
+
 def main() -> int:
     doc = json.loads(SRC.read_text(encoding="utf-8"))
     events = doc.get("events")
@@ -80,6 +96,25 @@ def main() -> int:
         "fetched_at": doc.get("fetched_at"), "source": "data/events.json（TWSE／TPEx 重大訊息）type＝法說會、近 60 天；scripts/split_events_by_code.py",
         "note": "日期是重大訊息公告日，不一定是法說會舉行日；簡報 PDF 請點 MOPS 連結自行開啟（MOPS 不開放程式抓取）",
         "count": len(ir), "events": [{k: e.get(k) for k in ("code", "name", "date", "title", "source", "url")} for e in ir]}))
+    # 先.八十一-30：全域搜尋等「要整份事件」的地方改讀精簡版 data/events_search.json（gzip 約 156KB，整份約 382KB）：
+    # 網址／類型／來源只有少數幾種，改存索引；公司名另存一份對照。App 讀進來還原成與 events.json 完全相同的物件。
+    U = sorted({str(e.get("url") or "") for e in events})
+    T = sorted({str(e.get("type") or "") for e in events})
+    S = sorted({str(e.get("source") or "") for e in events})
+    ui, ti, si = {v: i for i, v in enumerate(U)}, {v: i for i, v in enumerate(T)}, {v: i for i, v in enumerate(S)}
+    # 公司名：每檔取最常見的寫法當預設；個別事件的名稱與預設不同（例如除權息列名稱是空字串）就在該列第 7 欄另存
+    from collections import Counter
+    cnt = {}
+    for e in events:
+        cnt.setdefault(str(e.get("code")), Counter())[e.get("name")] += 1
+    names = {c: k.most_common(1)[0][0] for c, k in cnt.items()}
+    has_name = all("name" in e for e in events)
+    top = {k: v for k, v in doc.items() if k != "events"}
+    _write_if_changed(ROOT / "data" / "events_search.json", _dump({
+        "top": top, "u": U, "t": T, "s": S, "names": names,
+        "cols": ["code", "date", "type", "title", "url", "source"],
+        "has_name": has_name,
+        "rows": [_srow(e, names, ti, ui, si) for e in events]}))
     _write_if_changed(OUT_DIR / "_index.json", _dump({"fetched_at": doc.get("fetched_at"), "source": source,
                                                       "note": "目前有事件的代號（不在清單內＝沒有事件，App 不發請求）",
                                                       "codes": sorted(by_code)}))

@@ -4068,12 +4068,30 @@
     });
     return {events};
   }
+  // 先.八十一-30：整份事件改讀精簡版 data/events_search.json（split_events_by_code.py 同班產生，gzip 約 156KB，
+  // 整份 events.json 約 382KB），還原成與 events.json 完全相同的物件（同欄位、同順序、同頂層欄位）；
+  // 精簡版讀不到或格式不對才讀整份檔。
+  function _expandEventsSearch(d){
+    if(!d||!Array.isArray(d.rows)||!Array.isArray(d.u)||!Array.isArray(d.t)||!Array.isArray(d.s))throw new Error('events_search.json 格式不符');
+    const names=d.names||{};
+    // 列格式見 split_events_by_code.py _srow：第 7 欄名稱（0＝用預設），第 8 欄是其他欄位（例如 yoy_pct），照原順序接在 url 後面
+    const events=d.rows.map(r=>{const [code,date,ti,title,ui,si]=r;const o={code};if(d.has_name!==false)o.name=(r.length>6&&r[6]!==0)?r[6]:names[code];o.date=date;o.type=d.t[ti];o.title=title;o.source=d.s[si];o.url=d.u[ui];if(r.length>7&&r[7])Object.assign(o,r[7]);return o});
+    return Object.assign({},d.top||{},{events});
+  }
   async function ensureEvents(){
     if(EVENTS_CACHE&&Date.now()-EVENTS_AT<10*60*1000)return EVENTS_CACHE;
     try{
-      const r=await fetch('data/events.json?t='+Math.floor(Date.now()/60000));
-      if(!r.ok)throw new Error('HTTP '+r.status);
-      const d=await r.json();
+      let d=null;
+      try{
+        const rs=await fetch('data/events_search.json?t='+Math.floor(Date.now()/60000));
+        if(!rs.ok)throw new Error('HTTP '+rs.status);
+        d=_expandEventsSearch(await rs.json());
+      }catch(e1){
+        console.warn('[ensureEvents:search→full]',e1);
+        const r=await fetch('data/events.json?t='+Math.floor(Date.now()/60000));
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        d=await r.json();
+      }
       EVENTS_CACHE=d;EVENTS_AT=Date.now();
     }catch(e){
       console.warn('[ensureEvents]',e);recordGlobalError('ensureEvents',e);
@@ -4146,7 +4164,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1152';
+  const APP_VERSION='2026-10-13.1200';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

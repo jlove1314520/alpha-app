@@ -33,7 +33,7 @@ STEPS = [  # 與 .github/workflows/news_events.yml 相同順序；第一步失�
     (["scripts/build_themes.py"], False),
     (["scripts/split_events_by_code.py"], False),
 ]
-OUTPUTS = ["data/news.json", "data/events.json", "data/events_by_code", "data/ir_events.json", "data/news_urls.json", "data/news_evidence.json",
+OUTPUTS = ["data/news.json", "data/events.json", "data/events_by_code", "data/ir_events.json", "data/events_search.json", "data/news_urls.json", "data/news_evidence.json",
            "data/themes.json", "data/schema_guard/news_events.json"]
 
 

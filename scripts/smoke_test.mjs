@@ -4266,6 +4266,39 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { bcConsErrs.push(`測試本身出錯：${e.message || e}`); }
   record("131. by_code 小檔與整份檔一致性自測 0 不一致；標示不一致時個股頁退回整份檔並記 log（先.八十一-28）", bcConsErrs.length === 0, bcConsErrs.join("; "));
 
+  // 132.【2026-10-13 先.八十一-30】整份事件改讀精簡版 data/events_search.json：打開搜尋不再下載 events.json；
+  // 還原後筆數與整份檔相同、搜「除權息」仍有結果；精簡版讀不到時退回整份 events.json。
+  const esErrs = [];
+  try {
+    const full = JSON.parse((await import("node:fs")).readFileSync("data/events.json", "utf8"));
+    for (const broken of [false, true]) {
+      const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+      try {
+        const p = await ctx.newPage();
+        if (broken) await p.route(/data\/events_search\.json/, (r) => r.fulfill({ status: 404, body: "" }));
+        const urls = [];
+        p.on("request", (r) => urls.push(r.url()));
+        await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+        await p.waitForTimeout(1200);
+        await p.evaluate(() => openSearch());
+        await p.waitForFunction(() => typeof EVENTS_CACHE !== "undefined" && EVENTS_CACHE && EVENTS_CACHE.events, null, { timeout: 20000 }).catch(() => null);
+        const r = await p.evaluate(() => {
+          const inp = document.getElementById("search-input"); inp.value = "除權息"; doSearch();
+          const g = (document.querySelector('#search-results [data-group="events"]') || {}).textContent || "";
+          return { n: (EVENTS_CACHE.events || []).length, g, fetched: EVENTS_CACHE.fetched_at };
+        });
+        const tag = broken ? "[精簡版壞掉] " : "";
+        if (r.n !== full.events.length) esErrs.push(`${tag}還原筆數 ${r.n} ≠ 整份 ${full.events.length}`);
+        if (r.fetched !== full.fetched_at) esErrs.push(`${tag}頂層 fetched_at 不同`);
+        if (!/事件\s*[1-9]\d* 筆/.test(r.g)) esErrs.push(`${tag}搜「除權息」沒有事件結果：${r.g.slice(0, 60)}`);
+        const gotFull = urls.some(u => /data\/events\.json/.test(u));
+        if (!broken && gotFull) esErrs.push("精簡版正常時仍下載整份 events.json");
+        if (broken && !gotFull) esErrs.push("精簡版讀不到時沒有退回整份 events.json");
+      } finally { await ctx.close(); }
+    }
+  } catch (e) { esErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("132. 整份事件改讀精簡版 events_search.json（筆數相同、搜尋結果不少），讀不到退回整份（先.八十一-30）", esErrs.length === 0, esErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4294,7 +4327,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131/132新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

@@ -1,3 +1,38 @@
+## 2026-10-13 12:00（互動視窗）先.八十一-30 整份事件改讀精簡版（打開搜尋 455→278KB），還原內容相同
+
+### 2026-10-13 12:03 先.八十一-30 整份事件改讀精簡版 events_search.json（CC）
+
+**做了什麼**
+- `scripts/split_events_by_code.py` 同班多寫 `data/events_search.json`：
+  - 網址／類型／來源各只有 3～12 種，改存索引。
+  - 公司名每檔存一次預設值，個別事件名稱不同（例如除權息列的空字串）才在該列另存。
+  - 其他欄位接在列尾。月營收事件的 `yoy_pct` 取到小數 4 位；App 沒有讀這個欄位，標題裡的年增率是原字串，不受影響。
+  - news_events.yml 與本機新聞備援的提交清單已加入。
+- `ensureEvents()` 改讀精簡版，還原成與 events.json 相同結構的物件（同欄位順序、同頂層欄位 fetched_at／source／keep_days／meta／count）。精簡版讀不到或格式不對才讀整份檔。全域搜尋、今日事件、研究報告頁等所有讀整份事件的地方一起受惠。
+
+**一致性**：還原結果與 events.json 逐欄比對——code／name／date／type／title／source／url 13,788 筆完全相同；含 yoy_pct（取 4 位）整體亦相同。
+
+**前後量測**（打開搜尋那一刻起的下載）
+
+| | 改前（先.八十一-19 後） | 改後 |
+|---|---|---|
+| 事件 | events.json 399.7KB | events_search.json 217.9KB |
+| 打開搜尋合計 | 455.2KB | **277.8KB** |
+| 對照先.八十一-19 之前 | 約 982KB | 277.8KB |
+
+**驗證**：冒煙新增 #132。分兩種情況測：
+- 精簡版正常：
+  - 還原筆數與 fetched_at 等於整份檔
+  - 搜「除權息」有事件結果
+  - 不再下載 events.json
+- 精簡版 404：
+  - 自動退回整份 events.json
+  - 結果相同
+
+全套冒煙 2026/10/13 12:00:03 全部通過。
+
+**影響檔案**：scripts/split_events_by_code.py、data/events_search.json、app.js、.github/workflows/news_events.yml、scripts/news_local_fallback.py、scripts/smoke_test.mjs
+
 ## 2026-10-13 11:52（互動視窗）先.八十一-28 by_code 小檔一致性自測，不一致時 App 退回整份檔
 
 ### 2026-10-13 11:56 先.八十一-28 by_code 小檔與整份檔一致性自測（CC）
