@@ -1971,8 +1971,20 @@
     if(BY_CODE_P.size>40)BY_CODE_P.delete(BY_CODE_P.keys().next().value);
     return p;
   }
+  // 先.八十一-28：排程自測（scripts/selftest_by_code.py）發現小檔與整份檔不一致時，_meta.consistency.mismatch>0，
+  // 這時一律不用小檔、退回整份檔，並在診斷 log 記一次（只記一次，不洗版）。
+  let BY_CODE_BAD_LOGGED=false;
+  function _byCodeOk(m){
+    const c=m&&m.consistency;
+    if(c&&c.mismatch>0){
+      if(!BY_CODE_BAD_LOGGED){BY_CODE_BAD_LOGGED=true;const e=new Error(`個股小檔與整份檔不一致 ${c.mismatch} 處（${c.checked_at||''}），已改讀整份檔`);console.warn('[byCode:inconsistent]',e,c.examples);recordGlobalError('byCode:inconsistent',e)}
+      return false;
+    }
+    return true;
+  }
   async function byCodeSection(code,name){
     const [m,d]=await Promise.all([_byCodeMeta(),byCode(code)]);
+    if(!_byCodeOk(m))return null;
     const sec=m&&m.sections&&m.sections[name];
     if(!sec||!d)return null;
     const part=d[name]||{},out=Object.assign({},sec.common||{});
@@ -4134,7 +4146,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.1142';
+  const APP_VERSION='2026-10-13.1152';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

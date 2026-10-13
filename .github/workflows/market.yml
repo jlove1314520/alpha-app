@@ -281,6 +281,10 @@ jobs:
       - name: 個股頁每檔小檔（零額外請求，先.八十一-9）
         run: python scripts/build_by_code.py
         continue-on-error: true
+      # 先.八十一-28：小檔與整份檔一致性抽樣自測，結果寫進 data/by_code/_meta.json consistency（App 看到不一致就退回整份檔）
+      - name: 個股小檔一致性自測（先.八十一-28）
+        run: python scripts/selftest_by_code.py
+        continue-on-error: true
       - name: 選股頁精簡清單 scores*_list.json（零額外請求，先.八十一-9）
         run: python scripts/build_scores_list.py
         continue-on-error: true

@@ -1,3 +1,26 @@
+## 2026-10-13 11:52（互動視窗）先.八十一-28 by_code 小檔一致性自測，不一致時 App 退回整份檔
+
+### 2026-10-13 11:56 先.八十一-28 by_code 小檔與整份檔一致性自測（CC）
+
+**做了什麼**
+- 新增 `scripts/selftest_by_code.py`，抽樣比對 64 檔：固定 2330／0050／00631L／8069，加上 60 檔亂數，種子用當天日期。
+  - 小檔裡這一檔的各節（fundamentals／holders／institutional_history／foreign_holding／借券／可借額度／cash_flow／sector_flow）與整份檔完全相同。
+  - `_meta.json` 的共用欄位與整份檔相同。整份檔更新了、小檔沒重產時會抓到。
+  - scores 列與 scores.json 相同。
+  - 結果寫進 `data/by_code/_meta.json` 的 `consistency`（檢查時間、抽樣數、不一致數、前 5 例），不一致時 exit 1。
+- market.yml 在 build_by_code 之後跑這支自測。
+- App：`_meta.consistency.mismatch>0` 時，`byCodeSection()` 與選股理由卡一律不用小檔、退回整份檔，並在診斷 log 記一次「個股小檔與整份檔不一致 N 處，已改讀整份檔」。
+
+**驗證**
+- 現況：抽樣 64 檔、不一致 0 處。
+- 故意改壞 2330 小檔的千大持股比 → 抓到「2330：holders.stocks 不一致」、exit 1；還原後 0 處。
+- 冒煙新增 #131：
+  - 自測須 0 不一致。
+  - 模擬 `_meta` 標示不一致時，個股頁確實改讀整份 holders.json，且診斷 log 有 `byCode:inconsistent`。
+- 全套冒煙 2026/10/13 11:52:33 全部通過。
+
+**影響檔案**：scripts/selftest_by_code.py、data/by_code/_meta.json、app.js、app-stock.js、.github/workflows/market.yml、scripts/smoke_test.mjs
+
 ## 2026-10-13 11:46（互動視窗）先.八十一-40 財報公布時段推估查證：雲端正常，BACKLOG 結案
 
 ### 2026-10-13 12:08 先.八十一-40 財報公布時段推估查證——雲端正常，BACKLOG 結案（CC）

@@ -566,7 +566,7 @@
     let cache=PICKS_CACHE&&!PICKS_CACHE._lite?PICKS_CACHE:null;
     if(!cache){
       const [m,bc]=await Promise.all([_byCodeMeta(),byCode(code)]);
-      const sc=m&&m.sections&&m.sections.scores;
+      const sc=_byCodeOk(m)&&m&&m.sections&&m.sections.scores;  // 先.八十一-28：不一致就改讀整份 scores.json
       if(sc&&bc)cache={meta:(sc.common||{}).meta,weights:(sc.common||{}).weights,stocks:bc.scores?[bc.scores]:[],_byCodeTotal:sc.total_rows};
     }
     if(!cache)cache=await ensureValueScores();

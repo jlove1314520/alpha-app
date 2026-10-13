@@ -4235,6 +4235,37 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { depErrs.push(`測試本身出錯：${e.message || e}`); }
   record("130. 設定頁相依套件卡：有新版數、檢查日、逐套件版本（先.八十一-26）", depErrs.length === 0, depErrs.join("; "));
 
+  // 131.【2026-10-13 先.八十一-28】by_code 小檔一致性：scripts/selftest_by_code.py 抽樣比對須 0 不一致；
+  // 模擬 _meta.consistency.mismatch>0 時，個股頁改讀整份檔（不用小檔）並記診斷 log。
+  const bcConsErrs = [];
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const fsb = await import("node:fs");
+    const py = fsb.existsSync("C:/Program Files/Python313/python.exe") ? "C:/Program Files/Python313/python.exe" : "python";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/selftest_by_code.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 240000 }); }
+    catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); bcConsErrs.push("一致性自測不通過：" + out.trim().slice(-160)); }
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      await p.route(/data\/by_code\/_meta\.json/, async (r) => {
+        const real = JSON.parse(fsb.readFileSync("data/by_code/_meta.json", "utf8"));
+        real.consistency = { checked_at: "test", sample: 64, mismatch: 3, examples: ["測試用"] };
+        await r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(real) });
+      });
+      const urls = [];
+      p.on("request", (r) => urls.push(r.url()));
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForTimeout(1500);
+      await p.evaluate(() => { Promise.resolve(openStock("2330")).catch(() => {}); });
+      await p.waitForFunction(() => /%/.test((document.getElementById("tdcc-big-ratio") || {}).textContent || ""), null, { timeout: 25000 }).catch(() => null);
+      const errs = await p.evaluate(() => (typeof GLOBAL_ERRORS !== "undefined" ? GLOBAL_ERRORS : []).map(e => e.label));
+      if (!urls.some(u => /data\/holders\.json/.test(u))) bcConsErrs.push("小檔標示不一致時，個股頁沒有改讀整份 holders.json");
+      if (!errs.includes("byCode:inconsistent")) bcConsErrs.push("不一致沒有記進診斷 log");
+    } finally { await ctx.close(); }
+  } catch (e) { bcConsErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("131. by_code 小檔與整份檔一致性自測 0 不一致；標示不一致時個股頁退回整份檔並記 log（先.八十一-28）", bcConsErrs.length === 0, bcConsErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4263,7 +4294,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127/128/129/130/131新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;
