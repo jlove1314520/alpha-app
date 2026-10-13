@@ -304,7 +304,8 @@
   }
   // percentile 0.99 → 全市場前 1%，跟既有 reason 文字（research/generate_scores_live.py
   // 產生的「居全市場前 X%」）用同一套換算，避免同一頁出現兩種不同口徑的百分位說法。
-  function pctLabel(p){return Math.max(1,Math.round((1-p)*100))+'%'}
+  // 先.八十一-13：前段超過 50% 改說「最差 N%」（p=0.01 原本顯示「前99%」，看起來像很好，其實是倒數 1%）
+  function pctLabel(p){const front=Math.max(1,Math.round((1-p)*100));return front>50?'最差'+Math.max(1,Math.round(p*100))+'%':'前'+front+'%'}
   function factorContribRowHtml(key,row,labels,weights,allRows){
     const weightPct=Math.round((weights[key]||0)*100);
     const refOnly=weights.low_vol===1&&!(weights[key]>0);  // 方案B：非計分成分，明細仍顯示
@@ -333,10 +334,10 @@
       :f.score<4.8?'<span style="color:var(--ink-3)">▼ 拉低總分</span>'
       :'<span style="color:var(--ink-4)">· 中性</span>';
     const pctBadge=typeof f.percentile==='number'
-      ?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">全市場前${pctLabel(f.percentile)}</span>`:'';
+      ?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">全市場${pctLabel(f.percentile)}</span>`:'';
     // 先.八十一-9：個股頁讀 by_code 小檔時沒有同產業整批列，用 build_by_code.py 先算好的 row._industry_pct（同一套算法）
     const ip=row._industry_pct?(row._industry_pct[key]||null):industryPercentileFor(allRows,row.industry,key,f.score);
-    const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)前${pctLabel(ip.pct)}</span>`:'';
+    const indBadge=ip?`<span style="font-size:9px;color:var(--ink-2);background:rgba(255,255,255,.06);padding:2px 6px;border-radius:5px">同產業(${ip.n}檔)${pctLabel(ip.pct)}</span>`:'';
     return `<div class="factor-row">
       <div class="fr-top"><span class="fr-name">${labels[key]} <span style="font-size:9.5px;color:var(--ink-4)">${wTxt}</span></span><span class="fr-score" style="color:${scoreColor(f.score)}">${f.score.toFixed(1)}</span></div>
       <div style="position:relative;height:8px;border-radius:999px;background:var(--surface-3);margin-top:6px;overflow:hidden">

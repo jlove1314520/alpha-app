@@ -488,7 +488,7 @@
     const errByTk={};(data.errors||[]).forEach(e=>{if(e&&e.ticker)errByTk[e.ticker]=e.reason});
     el.innerHTML=order.map(tk=>adrRowHtml(tk,data.rows&&data.rows[tk],errByTk[tk])).join('');
     document.getElementById('adr-datatime').textContent=data.computed_at
-      ?`計算時間 ${fmtTzMMDDHHMM(new Date(data.computed_at),'Asia/Taipei')}（依當下quotes_us/quotes_tw/fx計算，ADR比率為固定值）`
+      ?`計算時間 ${fmtTzMMDDHHMM(new Date(data.computed_at),'Asia/Taipei')}（美股 ADR 現價×匯率÷比率，對台股${(()=>{const d=Object.values(data.rows||{}).map(r=>r.tw_quote_date).filter(Boolean).sort().pop();return d?' '+String(d).slice(5).replace('-','/')+' ':''})()}收盤；ADR比率為固定值）`
       :'查無計算時間';
   }
   const FUT_CONTRACTS=[{id:'TX',label:'台指期近月'},{id:'MTX',label:'小型台指期近月'},{id:'TE',label:'電子期近月'},{id:'TF',label:'金融期近月'}];

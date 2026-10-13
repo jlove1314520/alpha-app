@@ -1,6 +1,6 @@
 {
-  "computed_at": "2026-10-12T23:46:07+00:00",
-  "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
+  "computed_at": "2026-10-13T01:57:42+00:00",
+  "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_all_tw.json（台股盤後收盤）計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
   "rows": {
     "TSM": {
       "tw_code": "2330",
@@ -9,12 +9,40 @@
       "us_price": 444.35,
       "us_quote_time": 1791835200,
       "tw_price": 2540.0,
-      "tw_quote_time": "07:50:00",
-      "tw_quote_date": "20261013",
+      "tw_quote_date": "2026-10-12",
+      "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 31.895,
       "fx_date": "2026-10-12",
       "implied_tw_price": 2834.509,
       "premium_pct": 11.595
+    },
+    "UMC": {
+      "tw_code": "2303",
+      "ratio": 5,
+      "source": "UMC官方FAQ（umc.com/en/Html/faqs）+ SEC EDGAR 20-F CIK 1033767；1 ADS＝5股普通股",
+      "us_price": 22.55,
+      "us_quote_time": 1791835200,
+      "tw_price": 145.5,
+      "tw_quote_date": "2026-10-12",
+      "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
+      "fx_rate": 31.895,
+      "fx_date": "2026-10-12",
+      "implied_tw_price": 143.846,
+      "premium_pct": -1.136
+    },
+    "ASX": {
+      "tw_code": "3711",
+      "ratio": 2,
+      "source": "Nasdaq官方上市名稱 + SEC EDGAR CIK 1122411；1 ADS＝2股普通股",
+      "us_price": 47.53,
+      "us_quote_time": 1791835200,
+      "tw_price": 762.0,
+      "tw_quote_date": "2026-10-12",
+      "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
+      "fx_rate": 31.895,
+      "fx_date": "2026-10-12",
+      "implied_tw_price": 757.985,
+      "premium_pct": -0.527
     },
     "CHT": {
       "tw_code": "2412",
@@ -23,22 +51,13 @@
       "us_price": 46.21,
       "us_quote_time": 1791835200,
       "tw_price": 146.5,
-      "tw_quote_time": "07:50:00",
-      "tw_quote_date": "20261013",
+      "tw_quote_date": "2026-10-12",
+      "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
       "fx_rate": 31.895,
       "fx_date": "2026-10-12",
       "implied_tw_price": 147.387,
       "premium_pct": 0.605
     }
   },
-  "errors": [
-    {
-      "ticker": "UMC",
-      "reason": "台股 2303 報價缺失"
-    },
-    {
-      "ticker": "ASX",
-      "reason": "台股 3711 報價缺失"
-    }
-  ]
+  "errors": []
 }

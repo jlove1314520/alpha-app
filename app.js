@@ -22,6 +22,8 @@
     [/\bMDD\b/g,'最大跌幅'],[/唯讀/g,'只能看'],[/否決窗/g,'取消時間'],
     // 先.八十-6（2026-10-12）補：這次全檢漏抓的詞
     [/([+\-−]?\d+(?:\.\d+)?)\s*pp\b/g,'$1 個百分點'],[/\bpp\b/g,'個百分點'],[/同產業桶內|同桶內|桶內/g,'同產業中'],
+    // 先.八十一-13：「全市場前 99%」反直覺（其實是倒數 1%），前段超過 50% 一律改說「最差 N%」
+    [/(全市場|同產業中|同產業\(\d+檔\))\s*前\s*(\d+)\s*%/g,(m,a,x)=>(+x>50?`${a}最差 ${Math.max(1,100-(+x))}%`:m)],
     [/yfinance/gi,'Yahoo 財經'],[/\bNAV\b/g,'淨值'],[/BAA10Y/g,'信用利差'],[/Cloudflare\s*Access/g,'存取閘道'],
     [/\bXBRL\b/g,'結構化財報'],[/\bMI_INDEX\b/g,'大盤統計'],[/\bSTOCK_DAY\b/g,'日成交'],[/\bopenapi\b/gi,'開放資料'],[/SBL\//g,''],
     [/GitHub Actions\s*排程/g,'每日排程'],
@@ -787,6 +789,48 @@
     // 2026-08-28 P0-a 根治：.tm=美東現在時間(每秒更新)，非 fetched_at。
     tmEl.textContent=z.hhmmss.slice(0,5);
   }
+  // ── 2026-09-06（健檢.一）交易日曆 ───────────────────────────────────────────
+  // 問題：診斷橫幅原本用「rolling 24 小時」判斷資料過舊，所以每逢週末與國定假日
+  // 都會亂叫「大盤/類股/三大法人 資料過舊」——但那些資料本來就只在交易日產生，
+  // 週日看到的星期五收盤資料是**完全正常**的，不是故障。誤報比不報更糟：叫久了
+  // 使用者就不看橫幅，真的壞掉時也不會注意。
+  //
+  // 改成跟「最近一個應有交易日的收盤時間」比：資料日期只要不早於那一天，就不算過舊。
+  //
+  // 假日表資料來源：
+  //   台股 2026 年休市日 — 臺灣證券交易所「113 年度～115 年度交易日曆表」公告
+  //     （https://www.twse.com.tw/zh/holidaySchedule/holidaySchedule）
+  //   美股 2026 年休市日 — NYSE 官方 Holidays & Trading Hours
+  //     （https://www.nyse.com/markets/hours-calendars）
+  // 只寫死 2026 年（總司令指示「寫死一份 2026 年的即可」）。跨年前要更新，
+  // 沒更新時的行為是「把該假日當成交易日」——結果只是那天可能誤報一次，
+  // 不會反過來把真的過舊藏起來，這個方向的失敗比較安全。
+  const TW_HOLIDAYS_2026=new Set([
+    '2026-01-01','2026-02-12','2026-02-13','2026-02-16','2026-02-17','2026-02-18','2026-02-19','2026-02-20',
+    '2026-02-27','2026-02-28','2026-04-03','2026-04-06','2026-05-01','2026-06-19',
+    '2026-09-25','2026-09-28','2026-10-09','2026-10-26','2026-12-25',
+  ]);
+  const US_HOLIDAYS_2026=new Set([
+    '2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19',
+    '2026-07-03','2026-09-07','2026-11-26','2026-12-25',
+  ]);
+  // 先.八十一-13（2026-10-13）：多年度假日表，App 內一律用 TW_HOLIDAYS／US_HOLIDAYS。內建＝上方 2026 兩份（selftest 比對用，
+  // 名稱與格式勿改）＋NYSE 官方頁已公布的 2027；台股 2027 官方尚未公布（TWSE 通常年底公告）。開 App 時再讀
+  // data/trading_calendar.json（.github/scripts/fetch_trading_calendar.py，台股問 TWSE 官方日曆端點、美股抄 NYSE 官方頁），
+  // 讀到就併入；尚未公布的年份照舊只排除週末（失敗方向較安全，見上方說明）。
+  // 這段刻意放在時鐘（updateClocks）首次執行之前：原本假日表宣告在時鐘之後，第一次 updateClocks() 讀到
+  // 尚未宣告的 const（暫時死區）而拋錯，首頁狀態列第一秒畫不出來（先.八十一-13 雜項）。
+  const US_HOLIDAYS_2027=['2027-01-01','2027-01-18','2027-02-15','2027-03-26','2027-05-31','2027-06-18','2027-07-05','2027-09-06','2027-11-25','2027-12-24'];
+  const TW_HOLIDAYS=new Set(TW_HOLIDAYS_2026),US_HOLIDAYS=new Set([...US_HOLIDAYS_2026,...US_HOLIDAYS_2027]);
+  let TRADING_CAL=null;
+  fetch('data/trading_calendar.json?t='+Math.floor(Date.now()/3600000))
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+    .then(d=>{
+      for(const [mkt,set] of [['tw',TW_HOLIDAYS],['us',US_HOLIDAYS]])
+        for(const y of Object.values((d&&d[mkt])||{}))((y&&y.closed)||[]).forEach(x=>set.add(x));
+      TRADING_CAL=d;
+    })
+    .catch(e=>{console.warn('[tradingCalendar]',e);recordGlobalError('tradingCalendar',e)});
   function updateClocks(){
     try{renderHomeStatusSummary()}catch(e){console.warn('[updateClocks:summary]',e)}  // 2026-09-04 P0產品.一
     mktPill('mkt-tw','Asia/Taipei',9*60,13*60+30,()=>INTRADAY_TW);
@@ -819,31 +863,6 @@
   // 「近即時輪詢」而非「即時」，避免使用者誤解成逐筆tick。
   const FAST_POLL_INTERVAL_MS=15000;
   let PREV_QUOTE_PRICES={}; // code/指數label -> 上一次輪詢看到的價格，判斷要不要閃爍用，非權威資料
-  // ── 2026-09-06（健檢.一）交易日曆 ───────────────────────────────────────────
-  // 問題：診斷橫幅原本用「rolling 24 小時」判斷資料過舊，所以每逢週末與國定假日
-  // 都會亂叫「大盤/類股/三大法人 資料過舊」——但那些資料本來就只在交易日產生，
-  // 週日看到的星期五收盤資料是**完全正常**的，不是故障。誤報比不報更糟：叫久了
-  // 使用者就不看橫幅，真的壞掉時也不會注意。
-  //
-  // 改成跟「最近一個應有交易日的收盤時間」比：資料日期只要不早於那一天，就不算過舊。
-  //
-  // 假日表資料來源：
-  //   台股 2026 年休市日 — 臺灣證券交易所「113 年度～115 年度交易日曆表」公告
-  //     （https://www.twse.com.tw/zh/holidaySchedule/holidaySchedule）
-  //   美股 2026 年休市日 — NYSE 官方 Holidays & Trading Hours
-  //     （https://www.nyse.com/markets/hours-calendars）
-  // 只寫死 2026 年（總司令指示「寫死一份 2026 年的即可」）。跨年前要更新，
-  // 沒更新時的行為是「把該假日當成交易日」——結果只是那天可能誤報一次，
-  // 不會反過來把真的過舊藏起來，這個方向的失敗比較安全。
-  const TW_HOLIDAYS_2026=new Set([
-    '2026-01-01','2026-02-12','2026-02-13','2026-02-16','2026-02-17','2026-02-18','2026-02-19','2026-02-20',
-    '2026-02-27','2026-02-28','2026-04-03','2026-04-06','2026-05-01','2026-06-19',
-    '2026-09-25','2026-09-28','2026-10-09','2026-10-26','2026-12-25',
-  ]);
-  const US_HOLIDAYS_2026=new Set([
-    '2026-01-01','2026-01-19','2026-02-16','2026-04-03','2026-05-25','2026-06-19',
-    '2026-07-03','2026-09-07','2026-11-26','2026-12-25',
-  ]);
   function _ymd(z){return `${z.y}-${String(z.m).padStart(2,'0')}-${String(z.d).padStart(2,'0')}`}
   function isTradingDay(dateObj,tz,holidays){
     const z=_zonedParts(dateObj,tz);
@@ -1818,7 +1837,7 @@
       // sparklines）自己標的「落後大盤當日最大日期」旗標，即使只差1天也算（不是
       // 上面那個3個交易日的寬鬆門檻），總司令原話「不准把落後一天的收盤當現價顯示」，
       // 兩個條件任一成立就視為過期，不得只用「即時/現價」字樣呈現。
-      const histStaleDays=(q.tier==='history')?tradingDaysSince(q.asof,'Asia/Taipei',TW_HOLIDAYS_2026):null;
+      const histStaleDays=(q.tier==='history')?tradingDaysSince(q.asof,'Asia/Taipei',TW_HOLIDAYS):null;
       const priceIsStale=(histStaleDays!=null&&histStaleDays>3)||q.is_stale===true;
       const priceLabel=priceIsStale
         ?`${q.asof?String(q.asof).slice(5).replace('-','/'):'?'}收盤 ${us?'$':''}${nf(price)}`
@@ -2173,7 +2192,7 @@
     // 台股 13:30 收盤，排程通常在收盤後陸續產出，給 4 小時寬限。
     const twFresh=isFreshForCalendar(
       MARKET_TW_CACHE&&MARKET_TW_CACHE.fetched_at?new Date(MARKET_TW_CACHE.fetched_at).getTime():null,
-      'Asia/Taipei',TW_HOLIDAYS_2026,13,30,4*60);
+      'Asia/Taipei',TW_HOLIDAYS,13,30,4*60);
     // 2026-09-08（排程一.3）**「來源尚未發布」與「我們抓不到」是兩件事。**
     // 實測 2026-09-08 15:05 打 TWSE T86 與 MI_MARGN 都回
     // `stat='很抱歉，沒有符合條件的資料'`、total=0——**證交所根本還沒發布**，
@@ -2191,7 +2210,7 @@
     // 美股 16:00 ET 收盤，同樣給 4 小時寬限
     const usFresh=isFreshForCalendar(
       MARKET_US_CACHE&&MARKET_US_CACHE.fetched_at?new Date(MARKET_US_CACHE.fetched_at).getTime():null,
-      'America/New_York',US_HOLIDAYS_2026,16,0,4*60);
+      'America/New_York',US_HOLIDAYS,16,0,4*60);
     if(usMAge==null||!usFresh)problems.push({name:'美股四大指數',reason:usMAge==null?'無資料（尚未排程抓取或抓取失敗）':'資料過舊（比最近一個交易日的收盤還舊）',schedule:'美股收盤後 21:30 UTC'});
     // 2026-08-27 新增：個股基本面快照（月營收/PER/PBR）改排程累積更新後，超過3天沒更新
     // 就代表 update_fundamentals_daily.py 那步連續失敗，提醒使用者可能看到過期的基本面數字。
@@ -3055,7 +3074,7 @@
     // 2026-09-15（週六.六／稽核二.五）週末/國定假日跟「交易日已收盤」是兩種不同狀態，
     // 不該共用「已收盤」這個字——已收盤暗示「今天有開、現在收了」，週末/假日根本沒開盤。
     // 沿用既有交易日曆isTradingDay()/TW_HOLIDAYS_2026（健檢.一同一份），不新增假日表。
-    const twTradingDay=isTradingDay(new Date(),'Asia/Taipei',TW_HOLIDAYS_2026);
+    const twTradingDay=isTradingDay(new Date(),'Asia/Taipei',TW_HOLIDAYS);
     const twTxt='台股'+(twOpen?'盤中':(twTradingDay?'已收盤':'休市')),usTxt='美股'+({pre:'盤前',regular:'盤中',post:'盤後',closed:'休市'}[usSess]||'休市');
     let liveTxt,cls;
     if(LIVE.connected){liveTxt=LIVE.streamMode==='tick-push'?'即時逐筆':'即時連線';cls='g'}
@@ -3463,7 +3482,7 @@
   // 讀不到心跳檔（網路錯誤、404）時不亂報，只 console.warn（無法判斷≠未執行）。
   function evalAutoHeartbeat(doc,now){
     const z=_zonedParts(now||new Date(),'Asia/Taipei');
-    if(!isTradingDay(now||new Date(),'Asia/Taipei',TW_HOLIDAYS_2026))return '';
+    if(!isTradingDay(now||new Date(),'Asia/Taipei',TW_HOLIDAYS))return '';
     const today=_ymd(z),mins=z.h*60+z.mi;
     const ev=(doc&&Array.isArray(doc.events))?doc.events:[];
     const has=t=>ev.some(e=>e&&e.task===t&&typeof e.ts==='string'&&e.ts.slice(0,10)===today);
@@ -3475,10 +3494,16 @@
     if(mins>=9*60+50&&!has('run')&&!(instMins>9*60+50))return '自動交易排程未執行（電腦可能關機或離線）：今日盤前任務沒有心跳';
     return '';
   }
+  // 先.八十一-13：選用資料檔（排程還沒產生過就不存在，例如 whitelist_price_status／us_analyst_reco 首次上線前）
+  // 404 過一次就記在本次工作階段，一小時內不再請求，避免每次切頁都打出 404。
+  function dataMissingSkip(f){try{const t=+sessionStorage.getItem('alpha_miss:'+f);return !!t&&Date.now()-t<3600000}catch(e){console.warn('[dataMissingSkip]',e);return false}}
+  function dataMissingMark(f){try{sessionStorage.setItem('alpha_miss:'+f,String(Date.now()))}catch(e){console.warn('[dataMissingMark]',e)}}
   // 先.五十八-A2：白名單三檔（0050／00646／00697B）價格補不到時，雲端每日更新會寫 data/whitelist_price_status.json，這裡顯示紅條（不得靜默）
   async function loadWhitelistPriceStatus(){
     try{
+      if(dataMissingSkip('whitelist_price_status')){AUTO_BAN.px='';return}
       const r=await fetch('data/whitelist_price_status.json?t='+Date.now(),{cache:'no-store'});
+      if(r.status===404){dataMissingMark('whitelist_price_status');AUTO_BAN.px='';return}
       if(!r.ok){console.warn('[loadWhitelistPriceStatus] HTTP',r.status);AUTO_BAN.px='';return}
       const d=await r.json();
       AUTO_BAN.px=(d&&d.all_ok===false)?String(d.warning||'白名單 ETF 價格缺漏（詳見 data/whitelist_price_status.json）'):'';
@@ -4042,7 +4067,7 @@
   // commit時自動改寫成當下時間戳**（見該hook腳本說明），不用手動記得改——
   // 這是使用者2026-08-28明確要求「每次commit自動更新」的做法：沒有建置流程
   // 可以注入版本號，改用git hook在commit前用sed改這一行。
-  const APP_VERSION='2026-10-13.0954';
+  const APP_VERSION='2026-10-13.1005';
   async function loadAboutVersions(){
     setTxt('about-app-ver',APP_VERSION);
     setTxt('home-footer-version','Alpha v'+APP_VERSION);

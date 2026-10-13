@@ -2,7 +2,7 @@
 """ADR 溢價卡：quotes_us × fx.json ÷ ADR 比率，對 quotes_tw，算溢價 %（建置一.3）。
 
 寫成 data/adr_premium.json。純計算腳本，不打任何外部 API——三個輸入檔
-（data/quotes_us.json／data/quotes_tw.json／data/fx.json）都已經由
+（data/quotes_us.json／data/quotes_all_tw.json／data/fx.json）都已經由
 quotes.yml 的其他步驟抓好，這裡只做除法，零額外請求，可以安心放進10分鐘
 一次的高頻迴圈。
 
@@ -81,7 +81,9 @@ def load_json(path: Path) -> dict:
 
 def main():
     quotes_us = load_json(DATA_DIR / "quotes_us.json")
-    quotes_tw = load_json(DATA_DIR / "quotes_tw.json")
+    # 先.八十一-13：台股價改讀 quotes_all_tw.json（全市場盤後收盤，四檔都涵蓋）。原本讀 quotes_tw.json 只涵蓋
+    # 少數自選代號，2303／3711 長期顯示「台股報價缺失」；且盤中小檔與美股收盤時點不一致。
+    quotes_tw = load_json(DATA_DIR / "quotes_all_tw.json")
     fx = load_json(DATA_DIR / "fx.json")
 
     us_quotes = quotes_us.get("quotes", {})
@@ -101,7 +103,7 @@ def main():
             errors.append({"ticker": us_ticker, "reason": "美股報價缺失（data/quotes_us.json 未涵蓋此檔或尚未抓到）"})
             print(f"  ・{us_ticker}: 美股報價缺失")
             continue
-        if not tw_q or tw_q.get("price") is None:
+        if not tw_q or tw_q.get("close") is None:
             errors.append({"ticker": us_ticker, "reason": f"台股 {tw_code} 報價缺失"})
             print(f"  ・{us_ticker}: 台股 {tw_code} 報價缺失")
             continue
@@ -110,7 +112,7 @@ def main():
             print(f"  ・{us_ticker}: 匯率缺失")
             continue
         us_price = us_q["price"]
-        tw_price = tw_q["price"]
+        tw_price = tw_q["close"]
         implied_tw_price = us_price * fx_rate / ratio
         premium_pct = (implied_tw_price - tw_price) / tw_price * 100
         rows[us_ticker] = {
@@ -120,8 +122,8 @@ def main():
             "us_price": us_price,
             "us_quote_time": us_q.get("quote_time"),
             "tw_price": tw_price,
-            "tw_quote_time": tw_q.get("time"),
-            "tw_quote_date": tw_q.get("date"),
+            "tw_quote_date": tw_q.get("as_of") or tw_q.get("date"),
+            "tw_price_kind": "台股盤後收盤（quotes_all_tw.json）",
             "fx_rate": fx_rate,
             "fx_date": fx_date,
             "implied_tw_price": round(implied_tw_price, 3),
@@ -131,7 +133,7 @@ def main():
 
     out = {
         "computed_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_tw.json 計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
+        "source": "quotes_us.json × fx.json ÷ ADR比率，對 quotes_all_tw.json（台股盤後收盤）計算溢價（比率來源見各檔ADR_RATIOS/rows.source，三來源查證紀錄見本檔檔頭docstring）",
         "rows": rows,
         "errors": errors,
     }

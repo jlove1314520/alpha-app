@@ -1172,8 +1172,8 @@
     const el=document.getElementById('analyst-radar-body');if(!el)return;
     if(!isUS(code)){el.innerHTML=buildAnalystRadarHtml(code,null);return}
     el.innerHTML='<div class="note">載入中…</div>';
-    if(!US_RECO_CACHE){
-      try{const r=await fetch('data/us_analyst_reco.json?t='+Date.now());if(r.ok)US_RECO_CACHE=await r.json()}
+    if(!US_RECO_CACHE&&!dataMissingSkip('us_analyst_reco')){  // 先.八十一-13：檔案不存在時一小時內不再請求
+      try{const r=await fetch('data/us_analyst_reco.json?t='+Date.now());if(r.status===404)dataMissingMark('us_analyst_reco');else if(r.ok)US_RECO_CACHE=await r.json()}
       catch(e){console.warn('[renderAnalystRadar]',e);recordGlobalError('renderAnalystRadar',e)}
     }
     if(currentCode!==code)return;

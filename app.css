@@ -420,6 +420,11 @@
   .swipe-wrap:last-child{border-bottom:none}
   .swipe-del{position:absolute;top:0;right:0;bottom:0;width:76px;background:var(--up-deep);color:#fff;border:0;font-weight:700;font-size:14px;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
   .swipe-del span{font-size:18px}
+  /* 先.八十一-13：自選股卡右側紅色細線＝底下的紅色刪除鈕在小數點像素寬度下從列的右緣漏出 1px。
+     沒有在左滑時一律隱藏；列被左滑（transform: translateX(負值)）才顯示。不支援 :has 的舊瀏覽器維持原行為。 */
+  .swipe-del{visibility:hidden}
+  .swipe-wrap:has(> .swipe-row[style*="translateX(-"]) > .swipe-del{visibility:visible}
+  @supports not selector(:has(*)){.swipe-del{visibility:visible}}
   .swipe-row{position:relative;background:var(--surface);z-index:1;padding:11px 2px;display:flex;align-items:center;gap:10px;cursor:pointer;touch-action:pan-y}
   .swipe-row .nm{flex:1;min-width:0}.swipe-row .nm b{font-size:14px;display:block}.swipe-row .nm span{font-size:11px;color:var(--ink-3)}
   .swipe-row .px{text-align:right;min-width:78px}.swipe-row .px b{font-size:14px;display:block;font-variant-numeric:tabular-nums}

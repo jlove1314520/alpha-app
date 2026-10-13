@@ -3947,6 +3947,49 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { usModeErrs.push(`測試本身出錯：${e.message || e}`); }
   record("119. 選股頁美股模式隱藏台股專屬元件、美股排行顯示公司名稱、切回台股恢復（先.八十一-12）", usModeErrs.length === 0, usModeErrs.join("; "));
 
+  // 120.【2026-10-13 先.八十一-13】雜項：假日表含 2027（美股 NYSE）並讀官方日曆檔；時鐘首次執行不再踩到假日表暫時死區；
+  // 「全市場前 99%」改「最差 1%」；ADR 溢價四檔都算得出（台股價改 quotes_all_tw）；自選股卡紅色刪除層未左滑時隱藏；
+  // 選用資料檔 404 後本工作階段不再重打。
+  const miscErrs = [];
+  try {
+    const ctx = await page.context().browser().newContext({ viewport: { width: 393, height: 852 }, serviceWorkers: "block" });
+    try {
+      const p = await ctx.newPage();
+      const warns = [];
+      p.on("console", (m) => { const t = m.text(); if (/before initialization|updateClocks:summary/.test(t)) warns.push(t.slice(0, 120)); });
+      let wlHits = 0;
+      await p.route(/whitelist_price_status\.json/, (r) => { wlHits++; r.fulfill({ status: 404, body: "" }); });
+      await p.goto(`${baseUrl}/index.html`, { waitUntil: "load", timeout: 30000 });
+      await p.waitForFunction(() => typeof TRADING_CAL !== "undefined" && TRADING_CAL, null, { timeout: 15000 }).catch(() => null);
+      await p.waitForTimeout(1500);
+      if (warns.length) miscErrs.push("時鐘首次執行仍拋錯：" + warns[0]);
+      const r = await p.evaluate(async () => {
+        const out = {};
+        out.us27 = US_HOLIDAYS.has("2027-07-05") && US_HOLIDAYS.has("2027-12-24");
+        out.tw26 = TW_HOLIDAYS.has("2026-10-26");
+        out.cal = !!(TRADING_CAL && TRADING_CAL.tw && TRADING_CAL.us && TRADING_CAL.us["2027"]);
+        if (typeof pctLabel !== "function" && typeof loadAppModule === "function") await loadAppModule("shared").catch(() => null);
+        out.p1 = typeof pctLabel === "function" ? [pctLabel(0.01), pctLabel(0.9)] : null;
+        out.plain = uiPlain("綜合估值居全市場前 99%。");
+        const a = await (await fetch("data/adr_premium.json?t=" + Date.now())).json();
+        out.adr = Object.keys(a.rows || {}).length;
+        const d = document.querySelector(".swipe-del");
+        out.del = d ? getComputedStyle(d).visibility : "none";
+        await loadWhitelistPriceStatus(); await loadWhitelistPriceStatus();
+        return out;
+      });
+      if (!r.us27) miscErrs.push("美股 2027 休市日不在假日表");
+      if (!r.tw26) miscErrs.push("台股 2026 休市日不在假日表");
+      if (!r.cal) miscErrs.push("沒讀到 data/trading_calendar.json");
+      if (!r.p1 || r.p1[0] !== "最差1%" || r.p1[1] !== "前10%") miscErrs.push(`百分位說法不對：${JSON.stringify(r.p1)}`);
+      if (!/全市場最差 1%/.test(r.plain)) miscErrs.push(`評分理由「前 99%」沒改寫：${r.plain}`);
+      if (r.adr !== 4) miscErrs.push(`ADR 溢價只算出 ${r.adr}／4 檔`);
+      if (r.del !== "hidden" && r.del !== "none") miscErrs.push(`自選股卡紅色刪除層未左滑時仍可見（${r.del}）`);
+      if (wlHits > 1) miscErrs.push(`whitelist_price_status 404 後仍重打（${wlHits} 次）`);
+    } finally { await ctx.close(); }
+  } catch (e) { miscErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("120. 雜項：2027 假日表＋官方日曆檔、時鐘初始化順序、「最差 N%」說法、ADR 四檔、紅線、選用檔 404 不重打（先.八十一-13）", miscErrs.length === 0, miscErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -3975,7 +4018,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

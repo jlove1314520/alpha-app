@@ -1,3 +1,43 @@
+## 2026-10-13 10:05（互動視窗）先.八十一-13 雜項六件：假日表 2027＋官方日曆、時鐘初始化、最差 N%、ADR 改全市場收盤、紅線、404
+
+### 2026-10-13 10:08 先.八十一-13 雜項六件（CC）
+
+**做了什麼**
+1. **假日表 2027＋官方日曆檔**
+   - 新增 `.github/scripts/fetch_trading_calendar.py` → `data/trading_calendar.json`，掛進 market.yml。
+   - 台股：問 TWSE 官方「市場開休市日期」端點，同年度 7 天內抓過就不再問。
+     - **踩到的地雷**：查尚未公布的 2027 時，官方不報錯，直接回 2026（「115 年」）的表。腳本會核對 title 的民國年，不符就記「尚未公布」，公布後自動補上。CLAUDE.md 已知地雷照此補記。
+   - 美股：NYSE 沒有 API，依官方頁抄錄 2026／2027 全日休市日（2027 共 10 天，含 7/5 獨立紀念日補假；2026-10-13 查證）。
+   - App 內新增 `TW_HOLIDAYS`／`US_HOLIDAYS`，內容為內建 2026＋美股 2027，開 App 時再讀日曆檔併入。所有交易日判斷都改用這兩組。原 `TW_HOLIDAYS_2026` 宣告不改，因為 selftest 會比對。
+2. **時鐘初始化順序**：假日表原本宣告在時鐘首次執行 `updateClocks()` 之後。第一次執行時首頁狀態摘要讀到尚未宣告的 const（暫時死區）而拋錯，第一秒畫不出來。假日表已移到時鐘之前。
+3. **「全市場前 99%」改直覺說法**
+   - 前段超過 50% 一律改說「最差 N%」，例如 percentile 0.01 顯示「全市場最差1%」。
+   - 因子徽章（`pctLabel`）直接改。
+   - 評分引擎寫好的理由文字（「居全市場前 99%」）由顯示層 UI_PLAIN_MAP 規則改寫，同產業徽章同理。
+4. **ADR 溢價改用 quotes_all_tw.json**
+   - `compute_adr_premium.py` 的台股價改讀全市場盤後收盤。原本 quotes_tw.json 只涵蓋少數代號，UMC（2303）、ASX（3711）長期「台股報價缺失」。
+   - 現在 4／4 檔都算得出。說明列改寫成「對台股 MM/DD 收盤」。
+5. **自選股卡右側紅色細線**
+   - 根因：底下的紅色刪除鈕只靠列的背景遮住，在小數點像素寬度下會從列右緣漏出 1px。
+   - 改成沒有左滑時隱藏，列被左滑才顯示。實測：未滑 hidden → 左滑 visible → 回位 hidden。不支援 :has 的舊瀏覽器維持原行為。
+6. **whitelist_price_status／us_analyst_reco 404**
+   - 查證：兩檔都在 10/12 才首次進 repo，全檢報告（10/11）當時確實不存在，現在線上都回 200。
+   - 另加「選用資料檔 404 過一次就本工作階段一小時內不再請求」的保護（`dataMissingSkip`／`dataMissingMark`）。
+
+**驗證**：
+- 冒煙新增 #120：
+  - 美股 2027 假日在表內、讀到日曆檔
+  - 時鐘首次執行無暫時死區錯誤
+  - `pctLabel(0.01)`＝最差1%、`pctLabel(0.9)`＝前10%，理由文字改寫
+  - ADR 4 檔
+  - 刪除層未滑時隱藏
+  - whitelist 404 後不重打
+- 全套冒煙 2026/10/13 10:03:39 全部通過；`selftest_auto_rebalance.py` 全 PASS（台股假日表前後端一致檢查仍通過）。
+
+**影響檔案**：app.js、app-shared.js、app-stock.js、app-market.js、app.css、.github/scripts/fetch_trading_calendar.py、.github/scripts/compute_adr_premium.py、data/trading_calendar.json、data/adr_premium.json、.github/workflows/market.yml、scripts/smoke_test.mjs
+
+**另發現（未在本項處理）**：上午盤中截圖時，自選股每列都顯示「+0.00%」，接著查。
+
 ## 2026-10-13 09:54（互動視窗）先.八十一-12 美股模式隱藏台股專屬元件、美股排行加公司名稱
 
 ### 2026-10-13 09:58 先.八十一-12 美股模式隱藏台股專屬元件、美股排行加公司名稱（CC）
