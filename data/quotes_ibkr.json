@@ -1,51 +1,51 @@
 {
-  "fetched_at": "2026-10-13T16:01:37.764657+08:00",
+  "fetched_at": "2026-10-13T16:31:39.465660+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": null,
-      "bid": null,
-      "ask": null,
+      "last": 342.4,
+      "bid": 342.12,
+      "ask": 342.4,
       "close": 340.97,
-      "change_pct": null,
+      "change_pct": 0.4194,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": null,
-      "bid": null,
-      "ask": null,
+      "last": 542.36,
+      "bid": 541.81,
+      "ask": 542.59,
       "close": 541.15,
-      "change_pct": null,
+      "change_pct": 0.2236,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": null,
-      "bid": null,
-      "ask": null,
+      "last": 224.85,
+      "bid": 224.79,
+      "ask": 225.07,
       "close": 226.32,
-      "change_pct": null,
+      "change_pct": -0.6495,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": null,
-      "bid": null,
-      "ask": null,
+      "last": 374.79,
+      "bid": 374.6,
+      "ask": 374.8,
       "close": 378.03,
-      "change_pct": null,
+      "change_pct": -0.8571,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": null,
-      "bid": null,
-      "ask": null,
+      "last": 353.04,
+      "bid": 352.76,
+      "ask": 353.07,
       "close": 352.72,
-      "change_pct": null,
+      "change_pct": 0.0907,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -61,24 +61,26 @@
       "source": "yahoo_fallback"
     },
     "^GSPC": {
-      "last": 7807.79,
+      "last": 7807.24,
       "bid": null,
       "ask": null,
-      "close": 7807.24,
-      "change_pct": 0.007,
-      "data_type": "DELAYED",
+      "close": 7811.54,
+      "change_pct": -0.055,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "CBOE",
-      "label": "S&P 500"
+      "label": "S&P 500",
+      "source": "yahoo_fallback"
     },
     "^IXIC": {
-      "last": 27245.9,
+      "last": 27245.902,
       "bid": null,
       "ask": null,
-      "close": 27245.9,
-      "change_pct": 0.0,
-      "data_type": "DELAYED",
+      "close": 27366.17,
+      "change_pct": -0.4395,
+      "data_type": "YAHOO_DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數"
+      "label": "那斯達克綜合指數",
+      "source": "yahoo_fallback"
     },
     "^SOX": {
       "last": 12236.788,
