@@ -19564,3 +19564,15 @@ C. 驗收
 - [ ] **先.八十九-3 在總司令看得到的視窗重跑登入流程解析邀請連結、寫入 TELEGRAM_TARGET_CHAT_ID；若又問手機或驗證碼就停下回報、不代填**（互動視窗執行；動憑證設定）
 - [ ] **先.八十九-4 成功後手動跑一次只讀擷取：心跳寫入、新訊息落地本機 telegram_export（不進 repo）、ReadOnlyClient 沒有任何寫入**（互動視窗執行；動憑證設定）
 - [ ] **先.八十九-5 設定工具加「只改目標群組」選項：已連線時不再問 api_id／api_hash，只問群組**（互動視窗執行；動憑證設定）
+
+# 2026-10-13【先.八十九-補：確認 Telegram 群組設定成功＋修視窗亂碼】（總司令裁示原文，動工前先寫入）
+
+先.八十九-補　確認 Telegram 群組設定成功＋修視窗亂碼
+1. 確認本機 .env 已有 TELEGRAM_TARGET_CHAT_ID：只檢查「有沒有、是不是數字」，不得印出值。
+2. 手動跑一次只讀擷取（不加 --login），確認心跳是 OK、本機 telegram_export 有新訊息落地（不進 repo）、ReadOnlyClient 沒有觸發任何寫入。失敗就回報錯誤類型。
+3. 修亂碼：設定工具與 telegram_reader.py 啟動時加 sys.stdout／stderr.reconfigure(encoding="utf-8", errors="replace")（照 CLAUDE.md 第十二節第 3 點的既有修法），PowerShell 啟動腳本加 chcp 65001 或 $OutputEncoding。修完重跑一次 --login，確認中文正常顯示。
+4. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.八十九-補-N。
+
+- [ ] **先.八十九-補-1 確認本機 .env 有 TELEGRAM_TARGET_CHAT_ID 且是數字（不印出值）**（互動視窗執行；動憑證設定）
+- [ ] **先.八十九-補-2 手動跑一次只讀擷取（不加 --login）：心跳 OK、telegram_export 有新訊息落地（不進 repo）、ReadOnlyClient 沒有任何寫入；失敗回報錯誤類型**（互動視窗執行；動憑證設定）
+- [ ] **先.八十九-補-3 修亂碼：設定工具與 telegram_reader.py 啟動時 stdout／stderr 改 UTF-8（errors=replace），PowerShell 啟動腳本加 chcp 65001／$OutputEncoding；修完重跑 --login 確認中文正常**（互動視窗執行；動憑證設定）
