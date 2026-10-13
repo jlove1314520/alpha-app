@@ -19524,3 +19524,24 @@ C. 驗收
 - [ ] **先.八十七-3 Kenneth French Data Library 動能因子 UMD 月報酬 1927 起存本機參考序列（不是新試驗、不計 N；與 先.八十六-2b 同一件，做完兩條一起標）**（DevQueue 可執行）
 - [ ] **先.八十七-4 輸出 research/DATA_SOURCE_COVERAGE_TEST.md：每家覆蓋率、正確率、免費額度限制；免費管道補不到的研究案標「暫停：等 App 有收入再評估收費資料」，不自行採購**（互動視窗執行；時間閘：先.八十七-2 之後）
 - [x] **先.八十七-5 省額度：DevQueue 連續 2 輪 QUEUE_EMPTY 時，第 3 輪起只寫心跳不叫模型，佇列有 DevQueue 可執行項目再恢復**（DevQueue 可執行）〔已成立：QUEUE_EMPTY 時 wrapper 不叫模型（每輪 0～0.1 分鐘）；另把 research/data/*.jsonl 加進機器寫檔白名單〕
+
+# 2026-10-13【先.八十八：Tiingo 免費版下市股覆蓋率實測】（總司令裁示原文，動工前先寫入）
+
+先.八十八　Tiingo 免費版下市股覆蓋率實測（接續先.八十七；Alpha Vantage 免費版只給最近 100 筆，不測）
+1. 確認本機 .env 有 TIINGO_API_TOKEN：只檢查「有沒有、是不是空的」，不得印出、記錄或 commit 值。沒有就停下回報。
+2. 照官方文件確認 token 的傳法與免費額度（每小時 50 次、每天 1,000 次、每月 500 檔），程式內建硬限速，不得超額，也不得用換帳號或換 IP 規避。
+3. 用先.八十七-1 固定的 60 檔已下市美股清單，逐檔查 Tiingo 的 metadata（startDate／endDate）與日線價格。每檔記錄：
+   - 拿不拿得到
+   - 起訖日
+   - 起訖日是否涵蓋 SEC 記錄的真正交易期間（照 CLAUDE.md「下市股：取得不等於正確」核對 delisted_at；下市後還有大量資料的判污染）
+4. 另抽 10 檔目前在市的大型股（AAPL、MSFT 等）當對照組，確認不是 key 或程式本身的問題。
+5. 結果寫進 research/DATA_SOURCE_COVERAGE_TEST.md，列出覆蓋率與正確率：
+   - 覆蓋率 ≥80% 且正確：寫提案說明怎麼用在美股動能（B1），等總司令裁示，不得自行登記試驗。
+   - 覆蓋率低：美股動能標「暫停：免費管道補不到，等 App 有收入再評估」。
+6. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.八十八-N。這項可由 DevQueue 執行。
+
+- [ ] **先.八十八-1 檢查本機 .env 有沒有 TIINGO_API_TOKEN、是不是空的（不印出、不記錄、不提交值）；沒有就標阻塞回報**（DevQueue 可執行）
+- [ ] **先.八十八-2 照 Tiingo 官方文件確認 token 傳法與免費額度（每小時 50 次、每天 1,000 次、每月 500 檔），程式內建硬限速；不換帳號、不換 IP**（DevQueue 可執行）
+- [ ] **先.八十八-3 用 先.八十七-1 固定的 60 檔已下市美股清單逐檔查 Tiingo metadata（startDate／endDate）與日線：拿不拿得到、起訖日、是否涵蓋 SEC 真正交易期間（核對 delisted_at；下市後還有大量資料判污染）；先.八十七-1 完成後才做**（DevQueue 可執行）
+- [ ] **先.八十八-4 另抽 10 檔在市大型股（AAPL、MSFT 等）當對照組，確認不是 key 或程式問題**（DevQueue 可執行）
+- [ ] **先.八十八-5 結果寫進 research/DATA_SOURCE_COVERAGE_TEST.md 列覆蓋率與正確率；≥80% 且正確 → 寫 B1 美股動能用法提案、交總司令審閱（不自行登記試驗）；偏低 → 美股動能標「暫停：免費管道補不到，等 App 有收入再評估」**（DevQueue 可執行）
