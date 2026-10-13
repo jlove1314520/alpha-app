@@ -4155,6 +4155,23 @@ async function runSmokeTest(baseUrl, headless = true) {
   } catch (e) { irErrs.push(`測試本身出錯：${e.message || e}`); }
   record("126. 市場頁近期法說會列表（重大訊息公告＋MOPS 簡報連結，標明公告日、不爬取）（先.八十一-20）", irErrs.length === 0, irErrs.join("; "));
 
+  // 127.【2026-10-13 先.八十一-21】冒煙自身的等待條件不得被 index.html 預設文字／骨架即滿足（#117 踩過的競態）：
+  // 跑 scripts/scan_smoke_waits.py，列出「預設文字已符合等待正則」的條件，有任何一筆即 FAIL。
+  const swErrs = [];
+  try {
+    const { execFileSync } = await import("node:child_process");
+    const fsw2 = await import("node:fs");
+    const py = fsw2.existsSync("C:/Program Files/Python313/python.exe") ? "C:/Program Files/Python313/python.exe" : "python";
+    let out = "";
+    try { out = execFileSync(py, ["scripts/scan_smoke_waits.py"], { encoding: "utf8", env: { ...process.env, PYTHONIOENCODING: "utf-8" }, timeout: 60000 }); }
+    catch (e) { out = String(e.stdout || "") + String(e.stderr || ""); swErrs.push("掃描回報可疑等待條件"); }
+    const m = out.match(/檢查了 (\d+) 組/);
+    if (!m || +m[1] < 5) swErrs.push(`掃描檢查的組數太少（${m ? m[1] : "?"}），掃描器可能失效`);
+    const sus = out.split("\n").filter(l => /^可疑/.test(l));
+    if (sus.length) swErrs.push(sus.slice(0, 3).join(" | "));
+  } catch (e) { swErrs.push(`測試本身出錯：${e.message || e}`); }
+  record("127. 冒煙等待條件不得被頁面預設文字即滿足（scan_smoke_waits.py）（先.八十一-21）", swErrs.length === 0, swErrs.join("; "));
+
   // 99.【2026-10-11 先.七十九-5】自動投資「已暫停：等紙上策略打贏 0050」：STOP 開著＋status.strategy_frozen → 下一期與橫幅都顯示暫停；
   // 只有 STOP（緊急停止、無 strategy_frozen）→ 不得顯示暫停文字；暫停前有 flow_verification_plan → 顯示流程驗證單說明。純函式，不打本機伺服器。
   const fzErrs = [];
@@ -4183,7 +4200,7 @@ async function runSmokeTest(baseUrl, headless = true) {
   const finalErrors = await page.evaluate(
     "typeof GLOBAL_ERRORS !== 'undefined' ? GLOBAL_ERRORS : []"
   );
-  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126新增檢查）結束後仍無累積的uncaught error",
+  record("12. 整個測試過程（含所有互動操作，含8/9/11/13/14/15/16/17/18/19/20/21/22/23/24/25/26/27/28/29/30/31/32/33/34/35/36/37/38/39/40/41/42/43/44/45/45b/46/47/48/49/50/51/52/53/54/55/56/57/58/59/60/61/62/63/64/65/66/67/68/69/70/71/72/73/74/75/76/77/78/79/80/81/82/83/84/85/86/87/88/89/90/91/92/93/94/95/96/97/98/99/100/101/102/103/104/105/106/107/108/109/110/111/112/113/114/115/116/117/118/119/120/121/122/123/124/125/126/127新增檢查）結束後仍無累積的uncaught error",
     finalErrors.length === 0,
     finalErrors.length ? `GLOBAL_ERRORS=${JSON.stringify(finalErrors)}` : "");
   results.global_errors_final = finalErrors;

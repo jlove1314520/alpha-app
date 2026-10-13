@@ -1,3 +1,26 @@
+## 2026-10-13 11:12（互動視窗）先.八十一-21 冒煙等待條件競態全面掃描（0 筆可疑）＋掃描器常駐冒煙
+
+### 2026-10-13 11:15 先.八十一-21 冒煙等待條件競態全面掃描（CC）
+
+**做了什麼**
+- 新增 `scripts/scan_smoke_waits.py`：抓出 smoke_test.mjs 裡所有 `waitForFunction(() => /正則/.test(...))` 等待，對照 index.html 中被等待元素的預設內容（去標籤文字）。預設文字已符合等待正則的列為「可疑」。
+- 驗證掃描器有效：用 #117 修正前的條件 `/來源：/` 對 `#trend-note` 的預設文字「來源：日收盤價」，會被判為滿足（就是當時踩到的競態）；修正後的條件不會。
+
+**掃描清單**（smoke_test.mjs 共 24 個 waitForFunction）
+- 正則型 9 組：#trend-note、#mainstream-src、#fut-note（兩處）、#supply-list、#supply-meta-line、#my-holdings-events、#search-results .gs-nohit、#ir-events-rows。掃描結果**0 筆可疑**。
+  - 其中 #fut-note 預設「來源：期交所三大法人」，等待條件是 /最新/、/無法取得/，不會被預設滿足。
+  - #supply-meta-line 預設「載入中…」，等待條件是 /內容自/，也不會。
+- 非正則型 15 組，人工逐一檢視（元素數量、class 狀態、全域變數、`!includes("載入中")`）：
+  - 等待的元素或 class 都是 JS 渲染後才出現，骨架裡沒有：.fresh-row、canvas／svg polyline、.ir-row、.us-score-row、[id^=pick-detail-]、.fr-reason、.sc-method、.mtg-opt。
+  - #chip-trend-table 預設為空字串，`t && !includes("載入中")` 不成立。
+  - 全域變數型（SW controller、TRADING_CAL、infoLoaded、SC_DATA、typeof 函式）不涉及預設文字。
+  - 結論：沒有同類競態。
+- 冒煙新增 #127：每次跑掃描器，有任何可疑即 FAIL；檢查組數少於 5 也 FAIL，防掃描器自己失效。
+
+**驗證**：全套冒煙 2026/10/13 11:11:48 全部通過（#127 PASS）。
+
+**影響檔案**：scripts/scan_smoke_waits.py、scripts/smoke_test.mjs
+
 ## 2026-10-13 11:06（互動視窗）先.八十一-18 market.yml 實跑驗證（部分）：新產出落地、期貨端點改接 JSON、by_code 增量量測
 
 ### 2026-10-13 11:10 先.八十一-18 market.yml 實跑驗證新產出落地（部分完成）（CC）
