@@ -1,51 +1,51 @@
 {
-  "fetched_at": "2026-10-13T20:31:38.546714+08:00",
+  "fetched_at": "2026-10-13T21:06:37.448867+08:00",
   "connected": true,
   "account_type": "paper",
   "error": null,
   "quotes": {
     "AAPL": {
-      "last": 343.5,
-      "bid": 343.34,
-      "ask": 343.54,
+      "last": 343.79,
+      "bid": 343.71,
+      "ask": 343.85,
       "close": 340.97,
-      "change_pct": 0.742,
+      "change_pct": 0.8271,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "MSFT": {
-      "last": 542.3,
-      "bid": 542.13,
-      "ask": 542.36,
+      "last": 543.6,
+      "bid": 543.5,
+      "ask": 543.68,
       "close": 541.15,
-      "change_pct": 0.2125,
+      "change_pct": 0.4527,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "NVDA": {
-      "last": 225.0,
-      "bid": 225.0,
-      "ask": 225.07,
+      "last": 224.27,
+      "bid": 224.27,
+      "ask": 224.36,
       "close": 226.32,
-      "change_pct": -0.5832,
+      "change_pct": -0.9058,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "TSLA": {
-      "last": 375.39,
-      "bid": 375.04,
-      "ask": 375.39,
+      "last": 374.4,
+      "bid": 374.25,
+      "ask": 374.5,
       "close": 378.03,
-      "change_pct": -0.6984,
+      "change_pct": -0.9602,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
     "GOOGL": {
-      "last": 353.75,
-      "bid": 353.72,
-      "ask": 353.81,
+      "last": 354.73,
+      "bid": 354.57,
+      "ask": 354.83,
       "close": 352.72,
-      "change_pct": 0.292,
+      "change_pct": 0.5699,
       "data_type": "DELAYED",
       "exchange": "SMART"
     },
@@ -71,26 +71,24 @@
       "label": "S&P 500"
     },
     "^IXIC": {
-      "last": 27245.902,
+      "last": 27245.9,
       "bid": null,
       "ask": null,
-      "close": 27366.17,
-      "change_pct": -0.4395,
-      "data_type": "YAHOO_DELAYED",
+      "close": 27245.9,
+      "change_pct": 0.0,
+      "data_type": "DELAYED",
       "exchange": "NASDAQ",
-      "label": "那斯達克綜合指數",
-      "source": "yahoo_fallback"
+      "label": "那斯達克綜合指數"
     },
     "^SOX": {
-      "last": 12236.788,
+      "last": 12236.79,
       "bid": null,
       "ask": null,
-      "close": 12572.42,
-      "change_pct": -2.6696,
-      "data_type": "YAHOO_DELAYED",
+      "close": 12236.79,
+      "change_pct": 0.0,
+      "data_type": "DELAYED",
       "exchange": "PHLX",
-      "label": "費城半導體指數",
-      "source": "yahoo_fallback"
+      "label": "費城半導體指數"
     }
   }
 }
