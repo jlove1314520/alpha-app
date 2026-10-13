@@ -1,3 +1,13 @@
+## 2026-10-13 18:01（互動視窗）先.八十二-11a 提案：本機 AlphaData 不再改寫 App 的融資維持率檔
+
+- **來源**：先.八十二-1 冒煙 #58 失敗的查證。本機 AlphaData（15:30，`alpha-data/run_daily.py` → `compute_margin_maintenance.py`）用舊算法改寫 alpha-app 的 `data/margin_maintenance.json` 當日紀錄，蓋掉雲端版的 ratio_pct_ck、來源與 generated_at。
+- **做了什麼**：
+  - 寫提案 `docs/PROPOSAL_ALPHADATA_MARGIN_WRITE.md`，含證據、三個選項、建議與不裁示的後果。
+  - 建議甲：本機改寫到 alpha-data 自己的檔，只改一個路徑常數。
+- **沒做**：alpha-data 屬「動之前先確認」的區域，沒有改任何程式。
+- AWAITING_REVIEW 新增一列，等待中 1→2。
+- 冒煙：本項只新增文件；最近一次全套 142 PASS／0 FAIL。
+
 ## 2026-10-13 18:00（互動視窗）先.八十三-4 墓園 C 類：不得調參重測、修改版只能跨市場單發（寫進規則）
 
 - **裁示**：總司令【先.八十三】4。C 類一律不得調參重測；要測修改版，必須用沒碰過的市場資料（韓、日、美長歷史）做跨市場單發，事前登記、計入試驗總數 N。
