@@ -209,6 +209,8 @@ def _growth_quality(rev_rows: list[dict]) -> float | None:
 def _ma_breakout(price_rows: list[dict]) -> float | None:
     """跟 factors.py::prepare_factors() 的 f_ma_breakout 同一個公式：
     (close/MA60 - 1) * (vol20/vol60)。用原始收盤價，未還原權息（見檔頭說明）。
+    先.八十四-4（2026-10-13）：這是只供顯示的舊指標（ma60_breakout_x_volume_index），不進 technical 分數；
+    technical 分數自 先.八十一-37 起由 live_factors.technical() 以還原權息收盤計算。
     需要至少 MA_WINDOW(60) 筆資料才算，不足時誠實回傳None。"""
     if len(price_rows) < MA_WINDOW:
         return None
@@ -605,7 +607,7 @@ def _reason(key: str, row: pd.Series) -> str:
             bits.append(f"RSI14={c['rsi14_value']:.0f}")
         if c.get("volume_change") is not None:
             bits.append(f"近5日均量較20日 {c['volume_change']*100:+.0f}%")
-        return ("、".join(bits) + f"（{c.get('n_signals', 0)}項可得指標平均，原始收盤價未還原權息），居全市場前 {front}%。")
+        return ("、".join(bits) + f"（{c.get('n_signals', 0)}項可得指標平均，還原權息收盤），居全市場前 {front}%。")
     if key == "analyst":
         c = row.get("inst_components") or {}
         bits = []
@@ -796,8 +798,8 @@ def main():
                     "2026-08-27改版：不再用coverage<0.5排除股票，全市場都進榜——"
                     "總分跟「資料完整度」(coverage)是兩件事，高分低完整度不代表可信，"
                     "請一併參考每檔的coverage數值跟missing_factors清單。"
-                    "analyst/catalyst兩項全市場沒有資料源、technical用未還原權息的收盤價"
-                    "（除權息前後會失真）、revenue_momentum未做規模分層——已依coverage"
+                    "analyst/catalyst兩項全市場沒有資料源、"
+                    "revenue_momentum未做規模分層——已依coverage"
                     "規則重新分配權重，不會把沒資料當成0分，細節見"
                     "generate_scores_live.py檔頭的已知限制說明。"
                 ),
