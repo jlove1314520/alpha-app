@@ -124,6 +124,26 @@ def earnings_growth(quarters: list[dict] | None) -> tuple[float | None, dict]:
 
 
 # ─────────────────────────────── 技術型態 ───────────────────────────────
+def _recent_contiguous(price_rows: list[dict] | None, max_gap_days: int = 14) -> list[dict]:
+    """先.八十一-48（2026-10-13）：只取最近一段「連續」的列——相鄰兩筆日期相差超過 max_gap_days 天就截斷。
+    price_history 有的代號夾著很久以前的零星舊列（停牌、下市後復牌、或早期資料不完整），「最近 N 筆」會跨越長空窗，
+    技術面／60 日漲幅混到不同時期。14 天是為了不把農曆春節長假（約 12 天）當成空窗。"""
+    if not price_rows:
+        return []
+    from datetime import date as _date
+    out, prev = [], None
+    for r in reversed(price_rows):
+        try:
+            d = _date.fromisoformat(str(r.get("date"))[:10])
+        except ValueError:
+            continue
+        if prev is not None and (prev - d).days > max_gap_days:
+            break
+        out.append(r)
+        prev = d
+    return list(reversed(out))
+
+
 def _closes_adj(price_rows: list[dict] | None) -> list[float]:
     """先.八十一-37（2026-10-13）：技術面與 60 日漲幅改用還原權息收盤（adj_close），該列沒有還原價才用原始收盤。
     原本用未還原收盤，除權息／分割（例：00631L 1:22 分割）會在 MA60、區間位置、RSI 上造成假的大跌；
@@ -176,6 +196,7 @@ def technical(price_rows: list[dict] | None) -> tuple[float | None, dict]:
     有幾個算幾個（例如只有 20 天資料時 MA60 那項不算），全部算不出來才回 None。
     """
     comp: dict[str, Any] = {"ma_alignment": None, "range_position_60d": None, "rsi14": None, "volume_change": None}
+    price_rows = _recent_contiguous(price_rows)  # 先.八十一-48：只用最近一段連續日期
     closes = _closes_adj(price_rows)  # 先.八十一-37：還原權息收盤
     if len(closes) < 6:
         return None, comp
@@ -213,6 +234,7 @@ def technical(price_rows: list[dict] | None) -> tuple[float | None, dict]:
 
 def gain_60d(price_rows: list[dict] | None) -> float | None:
     """近 60 個交易日漲幅（極端走勢防呆用，見 index.html renderExtremeMoveWarning）。"""
+    price_rows = _recent_contiguous(price_rows)  # 先.八十一-48：只用最近一段連續日期
     closes = _closes_adj(price_rows)  # 先.八十一-37：還原權息收盤
     if len(closes) < 60:
         return None

@@ -33,7 +33,7 @@ import update_price_history as U  # noqa: E402
 
 PH = ROOT / "data" / "price_history.json"
 EXDIV = ROOT / "data" / "ex_dividend_events.json"
-START = "2026-08-03"
+START = "2026-06-01"  # 先.八十一-48：由 08-03 往前延到 06-01，涵蓋 90 筆視窗（技術面 60 日計算要連續）
 RATIO = 0.9
 TPEX_OTC_URL = "https://www.tpex.org.tw/www/zh-tw/afterTrading/otc"
 BLOCK = (402, 403, 428, 429)
@@ -59,6 +59,12 @@ def closed_days(year: int) -> set:
         if doc.get("stat") != "ok" or not doc.get("data"):
             raise RuntimeError("TWSE holidaySchedule 回傳異常")
         out = {row[0] for row in doc["data"] if not ("開始交易日" in row[1] or "最後交易日" in row[1])}
+    # 先.八十一-48：併入 data/trading_calendar.json 的臨時停市日（颱風等，事前休市表沒列；例 2026-07-10）
+    try:
+        tc = json.loads((ROOT / "data" / "trading_calendar.json").read_text(encoding="utf-8"))
+        out = set(out) | set(((tc.get("tw") or {}).get(str(year)) or {}).get("unscheduled_closed") or [])
+    except (OSError, ValueError):
+        pass
     _CAL_MEMO[year] = out
     return out
 

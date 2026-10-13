@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-13T10:49:43+08:00",
+ "generated_at": "2026-10-13T12:22:41+08:00",
  "note": "休市日（全日不交易）；週末不列。台股來自 TWSE 官方日曆端點；美股依 NYSE 官方頁抄錄。",
  "tw": {
   "2026": {
@@ -30,8 +30,12 @@
     "2026-12-25"
    ],
    "published": true,
-   "checked_at": "2026-10-13T09:56:25+08:00",
-   "source": "https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json&queryYear=2026"
+   "checked_at": "2026-10-13T12:22:41+08:00",
+   "source": "https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json&queryYear=2026",
+   "unscheduled_closed": [
+    "2026-07-10"
+   ],
+   "unscheduled_source": "TWSE FMTQIK 市場成交資訊（已過去月份的實際交易日）"
   },
   "2027": {
    "closed": [],

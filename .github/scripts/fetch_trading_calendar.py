@@ -21,6 +21,9 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUT = REPO_ROOT / "data" / "trading_calendar.json"
 TW_URL = "https://www.twse.com.tw/rwd/zh/holidaySchedule/holidaySchedule?response=json&queryYear={y}"
+# 先.八十一-48：事前公布的休市表不含颱風等臨時停市（實例：2026-07-10 全天沒有交易，休市表沒列）。
+# 對「已過去的月份」用 FMTQIK（市場成交資訊，每月一次請求）取實際交易日，平日卻沒有交易、又不在休市表的日子，記為 unscheduled_closed。
+FMTQIK_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/FMTQIK"
 NYSE_URL = "https://www.nyse.com/markets/hours-calendars"
 US_CLOSED = {  # NYSE 官方頁抄錄（2026-10-13 查證）
     "2026": ["2026-01-01", "2026-01-19", "2026-02-16", "2026-04-03", "2026-05-25", "2026-06-19",
@@ -49,6 +52,38 @@ def fetch_tw(year: int) -> list | None:
     return sorted({row[0] for row in doc["data"] if not ("開始交易日" in row[1] or "最後交易日" in row[1])})
 
 
+def fetch_unscheduled(year: int, closed: set, today) -> list | None:
+    """已過去的每個月各一次 FMTQIK，回傳該年「平日、不在休市表、但 FMTQIK 沒有交易」的日期。任一月失敗回 None（保留既有）。"""
+    import time as _t
+    from datetime import date as _d, timedelta as _td
+    out, last = [], 0.0
+    for m in range(1, 13):
+        if (year, m) > (today.year, today.month):
+            break
+        w = 3.0 - (_t.time() - last)
+        if w > 0:
+            _t.sleep(w)
+        last = _t.time()
+        r = requests.get(FMTQIK_URL, params={"date": f"{year}{m:02d}01", "response": "json"}, timeout=20,
+                         headers={"User-Agent": "Mozilla/5.0 (compatible; AlphaAppMarketFetcher/1.0)"})
+        if r.status_code in (402, 403, 428, 429):
+            raise RuntimeError(f"FMTQIK HTTP {r.status_code}（不重試）")
+        j = r.json()
+        if j.get("stat") != "OK":
+            return None
+        traded = set()
+        for row in j.get("data") or []:
+            ry, rm, rd = [int(x) for x in str(row[0]).strip().split("/")]
+            traded.add(f"{ry + 1911}-{rm:02d}-{rd:02d}")
+        d = _d(year, m, 1)
+        while d.month == m and d < today:
+            iso = d.isoformat()
+            if d.weekday() < 5 and iso not in closed and iso not in traded:
+                out.append(iso)
+            d += _td(days=1)
+    return out
+
+
 def main() -> int:
     now = datetime.now(TW)
     try:
@@ -75,6 +110,15 @@ def main() -> int:
         else:
             tw[str(y)] = {"closed": closed, "published": True, "checked_at": now.isoformat(timespec="seconds"),
                           "source": TW_URL.format(y=y)}
+            try:
+                un = fetch_unscheduled(y, set(closed), now.date()) if y <= now.year else []
+                if un is not None:
+                    tw[str(y)]["unscheduled_closed"] = un
+                    tw[str(y)]["unscheduled_source"] = "TWSE FMTQIK 市場成交資訊（已過去月份的實際交易日）"
+            except Exception as e:  # noqa: BLE001
+                print(f"[warn] {y} 臨時停市查證失敗，保留既有：{type(e).__name__}: {e}")
+                if cur.get("unscheduled_closed") is not None:
+                    tw[str(y)]["unscheduled_closed"] = cur["unscheduled_closed"]
     out = {"generated_at": now.isoformat(timespec="seconds"),
            "note": "休市日（全日不交易）；週末不列。台股來自 TWSE 官方日曆端點；美股依 NYSE 官方頁抄錄。",
            "tw": tw,
