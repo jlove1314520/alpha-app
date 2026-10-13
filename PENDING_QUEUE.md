@@ -19544,7 +19544,7 @@ C. 驗收
    - 覆蓋率低：美股動能標「暫停：免費管道補不到，等 App 有收入再評估」。
 6. 每項完成標 - [x]，在 research/PROGRESS_HEARTBEAT.jsonl append item=先.八十八-N。這項可由 DevQueue 執行。
 
-- [ ] **先.八十八-1 檢查本機 .env 有沒有 TIINGO_API_TOKEN、是不是空的（不印出、不記錄、不提交值）；沒有就標阻塞回報**（DevQueue 可執行）
+- [x] **先.八十八-1 檢查本機 .env 有沒有 TIINGO_API_TOKEN、是不是空的（不印出、不記錄、不提交值）；沒有就標阻塞回報**（DevQueue 可執行）〔DevQueue 20261014-020101：C:lphalpha-app\.env 有 1 行 TIINGO_API_TOKEN=、值非空（只用 grep 計數與長度判斷，值未讀出、未印出、未記錄；.env 不在 repo）〕
 - [ ] **先.八十八-2 照 Tiingo 官方文件確認 token 傳法與免費額度（每小時 50 次、每天 1,000 次、每月 500 檔），程式內建硬限速；不換帳號、不換 IP**（DevQueue 可執行）
 - [ ] **先.八十八-3 用 先.八十七-1 固定的 60 檔已下市美股清單逐檔查 Tiingo metadata（startDate／endDate）與日線：拿不拿得到、起訖日、是否涵蓋 SEC 真正交易期間（核對 delisted_at；下市後還有大量資料判污染）；先.八十七-1 完成後才做**（DevQueue 可執行）
 - [ ] **先.八十八-4 另抽 10 檔在市大型股（AAPL、MSFT 等）當對照組，確認不是 key 或程式問題**（DevQueue 可執行）
