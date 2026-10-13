@@ -19401,7 +19401,7 @@ C. 驗收
 - [x] **先.八十二-8 裁示⑦：AlphaMarathon／AlphaHypothesisQueue 改每週日一次（池空只記一行心跳）；DevQueue 補件來源改第 9～14 項與使用者回報**（互動視窗執行）〔Marathon／HypothesisQueue 改每週日 00:05（拿掉登入觸發）；池空只記一行心跳（quota_throttle pool_empty＋pool_empty_heartbeat，自測 5/5）；DevQueue 15→30 分鐘、補件來源限第 9～14 項與使用者回報〕
 - [x] **先.八十二-9 App「研究成績單」頁（試驗帳本＋墓園白話整理、沒有策略贏 0050、0050 樣本外對照）**（互動視窗執行）〔data/research_scorecard.json（試驗 441、墓園 A4／B20／C105、樣本外對 0050；結論由資料算出：樣本外 ≥60 天才判、目前沒有策略贏 0050）＋日誌頁研究成績單卡＋market.yml 每日重產；冒煙 #140〕
 - [x] **先.八十二-10 真錢持股卡（0050 2 股、00697B 1 股：成本、市值、損益、交割狀態；離線顯示最後同步時間）**（互動視窗執行）〔auto_ledger_view.holdings_view（股數／成本／均價／收盤／市值／損益／T+2 交割，依官方日曆推算）→ /auto/ledger holdings；日誌頁真錢持股卡（連線存手機、離線顯示最後同步時間）；自測 6/6、冒煙 #139〕
-- [ ] **先.八十二-11 融資維持率（CM 估）每日與籌碼K 校準（每週人工讀數存本機檔、誤差 >2pp 推播並重估係數；不爬籌碼K）**（互動視窗執行）
+- [x] **先.八十二-11 融資維持率（CM 估）每日與籌碼K 校準（每週人工讀數存本機檔、誤差 >2pp 推播並重估係數；不爬籌碼K）**（互動視窗執行）〔scripts/ck_reading.py 登錄（本機檔）＋scripts/margin_ck_check.py 每日比對（只比 10/07 起同日方法；>2pp 推播＋reconcile／build_margin_calibration 重估、只提交校準檔；>8 天提醒）；排程 AlphaMarginCkCheck 平日 19:30；自測 6/6〕
 - [ ] **先.八十二-11a （補件，來源：先.八十二-1 冒煙 #58 失敗查證；屬第 11 項融資維持率）本機 AlphaData 排程 15:30（alpha-data/run_daily.py → compute_margin_maintenance.py）用舊格式改寫 alpha-app/data/margin_maintenance.json 當日紀錄，蓋掉雲端版 ratio_pct_ck／來源／generated_at 等欄位，且之後本機 git pull 會跟雲端同檔衝突。alpha-data 屬「動前先確認」區：先寫提案（停寫、改寫到 alpha-data 自己的檔、或只補缺不覆蓋），等裁示再改**（互動視窗執行）
 - [ ] **先.八十二-12 手機實機回歸：390×844 逐頁截圖比對前一版，每晚自動跑，差異大於門檻推播**（互動視窗執行）
 - [x] **先.八十二-13 處置股／注意股提醒：自選股或真錢持股被列入時推播（照現有 disposal_flags）**（互動視窗執行）〔scripts/disposal_alert.py（自選＋多清單＋live 自選、真錢白名單；同筆只推一次、未送達下輪重試）接在 run_disposal_flags.ps1 18:30 後；自測 5/5；目前 0 檔命中〕
