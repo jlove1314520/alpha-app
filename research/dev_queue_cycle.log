@@ -17194,3 +17194,16 @@ lock: LOCK_ACQUIRED (cycle 20261013-103102)
 prompt: GUARD_PRECHECK_WARN：**先.八十一-25 （補件，來源：先.八十一-24 根因一）GitHub 高頻 cron 不可靠（10/13 上午 q… 會被擋（需總司令：等總司令、裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 PROMPT_READY: - [ ] **先.八十一-18 （補件，來源：先.八十一-9／10 自身驗收缺口）market.yml 下一班實跑驗證（債務類） (exit=0)
 finally: released .devqueue.lock (cycle_id=20261013-103102)
 ===== DevQueue cycle end: 2026-10-13 10:44:38 cycle_id=20261013-103102 reason=OK exit=0 duration_min=13.6 =====
+
+===== DevQueue cycle start: 2026-10-13 10:46:02 cycle_id=20261013-104602 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：.github/workflows/market.yml（1.4分鐘前）、app-shared.js（1.4分鐘前）、app.js（1.4分鐘前）、scripts/smoke_test.mjs（1.4分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-13 11:01:02 cycle_id=20261013-110102 =====
+check_collision: YIELD: 有非機器寫入的檔案在最近20分鐘內被改動：.github/scripts/fetch_futures_institutional.py（1.5分鐘前）、research/auto_ledger_view.py（0.4分鐘前）、research/auto_rebalance_bb90.py（0.4分鐘前）、scripts/selftest_price_history_gaps.py（0.2分鐘前），判定有人正在中途，本輪讓路
+
+===== DevQueue cycle start: 2026-10-13 11:16:02 cycle_id=20261013-111602 =====
+check_collision: PROCEED: 沒有其他軌道持鎖中，也沒有最近被改動的非機器寫入檔案
+lock: LOCK_ACQUIRED (cycle 20261013-111602)
+prompt: GUARD_PRECHECK_WARN：**先.八十一-25 （補件，來源：先.八十一-24 根因一）GitHub 高頻 cron 不可靠（10/13 上午 q… 會被擋（需總司令：等總司令、裁示；不可逆：—）。只警告、不改標記，由互動視窗處理 NO_PENDING_ITEM_FOR_DEVQUEUE：剩餘待辦皆為[研究]類或「（互動視窗執行」類，留給marathon／hypothesis_queue軌或互動視窗session (exit=3)
+finally: released .devqueue.lock (cycle_id=20261013-111602)
+===== DevQueue cycle end: 2026-10-13 11:16:04 cycle_id=20261013-111602 reason=QUEUE_EMPTY exit= duration_min=0 =====
