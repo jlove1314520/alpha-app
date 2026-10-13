@@ -1,3 +1,7 @@
+## 2026-10-13 23:30（互動視窗）先.八十九-補-3 Telegram 視窗亂碼修正
+
+- 亂碼原因：Python 輸出 UTF-8，PowerShell 視窗用 Big5（cp950）解碼。\n- 修法：`research/telegram_reader.py` 啟動時 stdout 與 stderr 都改 UTF-8（errors=replace）；`setup_telegram.ps1` 加 `chcp 65001`＋`[Console]::OutputEncoding`＋`$OutputEncoding` 為 UTF-8；排程用的 `run-telegram-reader.ps1` 補 `$OutputEncoding`（該檔維持純英文註解，因為沒有 BOM）。\n- 重跑 --login：視窗與紀錄都正常顯示「登入成功，目標群組可讀取：Shioaji（ID 已寫入 .env）」。
+
 ## 2026-10-13 23:30（互動視窗）先.八十九-補-2 只讀擷取確認 OK
 
 - 手動只讀擷取（不加 --login，排程同一個 Python）：`{"state": "OK", "new": 11}`；心跳 23:29 OK；新訊息落地本機 telegram_export（repo 外，git status 無 telegram 相關變更）；沒有任何 ReadOnlyViolation，自測全過。

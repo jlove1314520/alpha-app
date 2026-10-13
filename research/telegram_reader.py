@@ -349,10 +349,11 @@ async def login(env: dict) -> int:
 
 
 def main() -> int:
-    try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:
-        pass
+    for _s in (sys.stdout, sys.stderr):        # 先.八十九-補-3：stdout／stderr 都改 UTF-8（CLAUDE.md 十二節第 3 點）
+        try:
+            _s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--login", action="store_true")
     ap.add_argument("--jitter-max-sec", type=int, default=0, help="排程用：開始前隨機延遲 0～N 秒")

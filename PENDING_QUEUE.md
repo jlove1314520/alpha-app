@@ -19575,4 +19575,4 @@ C. 驗收
 
 - [x] **先.八十九-補-1 確認本機 .env 有 TELEGRAM_TARGET_CHAT_ID 且是數字（不印出值）**（互動視窗執行；動憑證設定）〔有、是數字（值未印出）〕
 - [x] **先.八十九-補-2 手動跑一次只讀擷取（不加 --login）：心跳 OK、telegram_export 有新訊息落地（不進 repo）、ReadOnlyClient 沒有任何寫入；失敗回報錯誤類型**（互動視窗執行；動憑證設定）〔心跳 OK、新 11 則落地本機、無寫入〕
-- [ ] **先.八十九-補-3 修亂碼：設定工具與 telegram_reader.py 啟動時 stdout／stderr 改 UTF-8（errors=replace），PowerShell 啟動腳本加 chcp 65001／$OutputEncoding；修完重跑 --login 確認中文正常**（互動視窗執行；動憑證設定）
+- [x] **先.八十九-補-3 修亂碼：設定工具與 telegram_reader.py 啟動時 stdout／stderr 改 UTF-8（errors=replace），PowerShell 啟動腳本加 chcp 65001／$OutputEncoding；修完重跑 --login 確認中文正常**（互動視窗執行；動憑證設定）〔stdout/stderr UTF-8＋chcp 65001／OutputEncoding；重跑 --login 中文正常〕
